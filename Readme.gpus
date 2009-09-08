@@ -1,0 +1,52 @@
+1. GeForce 8600 GT, 1404.0 MHz clock, 511.3 MB memory
+   (had to compile magmablas on the machine)
+
+   Evan Lezar
+   Computational Electromagnetics Group
+   Department of Electrical and Electronic Engineering
+   University of Stellenbosch
+   Stellenbosch
+   South Africa
+   (sys admin cluster)
+
+2. GeForce 9500 GT, 1350.0 MHz clock, 1023.3 MB memory
+   (had to compile magmablas on the machine)
+
+   Evan Lezar
+   Computational Electromagnetics Group
+   Department of Electrical and Electronic Engineering
+   University of Stellenbosch
+   Stellenbosch
+   South Africa
+
+3. GT200, 1404.0 MHz clock, 895.3 MB memory
+   GeForce GTX 275, 1404.0 MHz clock, 895.3 MB memory  
+
+   cudaMallocHost - gives me segmentation fault when trying to initialize
+   pinned memory
+ 
+   combination of cudaMemcpy2DAsync and cudaStreamSynchronize(stream[1]);
+   did not work, e.g. in spotrf.cpp. sgetrf does not use it and we get
+   correct results.
+
+   cat /proc/driver/nvidia/version
+   >> NVRM version: NVIDIA UNIX x86_64 Kernel Module  180.22  Tue Jan  6
+   >> 09:15:58 PST 2009
+   >> GCC version:  gcc version 4.1.2 20070115 (SUSE Linux)
+
+   They are using the wrong version of the driver.
+   2.3 requires 190.xx
+   2.2 requires 185.xx
+   2.1 requires 180.xx
+
+   You can run an older cuda on a new driver ( for example 2.1 on 190)
+   but not viceversa (UPDATING THE DRIVER FIXED IT).
+
+   Shuxia Zhang, Ph.D
+   email: szhang@msi.umn.edu
+   Minnesota Supercomputing Institute
+   (sys admin cluster)
+
+4. GTX 260 
+   Allan Menezes, Canada
+

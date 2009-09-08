@@ -1,0 +1,22 @@
+\contentsline {chapter}{\numberline {1}The MAGMA Library}{4}
+\contentsline {section}{\numberline {1.1}Function {\tt {\bf magma\_sgetrf}}}{5}
+\contentsline {section}{\numberline {1.2}Function {\tt {\bf magma\_sgeqrf}}}{7}
+\contentsline {section}{\numberline {1.3}Function {\tt {\bf magma\_spotrf}}}{9}
+\contentsline {section}{\numberline {1.4}Function {\tt {\bf magma\_sgetrf\_gpu}}}{11}
+\contentsline {section}{\numberline {1.5}Function {\tt {\bf magma\_sgeqrf\_gpu}}}{13}
+\contentsline {section}{\numberline {1.6}Function {\tt {\bf magma\_spotrf\_gpu}}}{15}
+\contentsline {section}{\numberline {1.7}Function {\tt {\bf magma\_dgetrf}}}{17}
+\contentsline {section}{\numberline {1.8}Function {\tt {\bf magma\_dgeqrf}}}{19}
+\contentsline {section}{\numberline {1.9}Function {\tt {\bf magma\_dpotrf}}}{21}
+\contentsline {section}{\numberline {1.10}Function {\tt {\bf magma\_dgetrf\_gpu}}}{23}
+\contentsline {section}{\numberline {1.11}Function {\tt {\bf magma\_dgeqrf\_gpu}}}{25}
+\contentsline {section}{\numberline {1.12}Function {\tt {\bf magma\_dpotrf\_gpu}}}{27}
+\contentsline {chapter}{\numberline {2}Use}{29}
+\contentsline {section}{\numberline {2.1}Hardware specifications}{29}
+\contentsline {section}{\numberline {2.2}Software specifications}{29}
+\contentsline {section}{\numberline {2.3}Testing}{30}
+\contentsline {chapter}{\numberline {3}Performance}{31}
+\contentsline {section}{\numberline {3.1}Single precision}{32}
+\contentsline {section}{\numberline {3.2}Double precision}{33}
+\contentsline {chapter}{Acknowledgments}{33}
+\contentsline {chapter}{Bibliography}{34}

@@ -1,0 +1,6 @@
+cd ../magmablas
+make clean; make
+cd ../src
+make clean; make
+cd ../testing
+make clean; make

@@ -1,0 +1,33 @@
+#//////////////////////////////////////////////////////////////////////////////
+#   -- MAGMA (version 0.1) --
+#      Univ. of Tennessee, Knoxville
+#      Univ. of California, Berkeley
+#      Univ. of Colorado, Denver
+#      June 2009
+#//////////////////////////////////////////////////////////////////////////////
+
+	CC        = gcc
+	NVCC      = nvcc
+	FORT      = gfortran
+
+	ARCH      = ar
+	ARCHFLAGS = cr
+	RANLIB    = ranlib
+
+	OPTS      = -O3 -DADD_
+	NVOPT     = --compiler-options -fno-strict-aliasing  -arch sm_13 \
+                    -DUNIX -O3
+	LDOPTS    = -fPIC
+
+	LIB       = /home/tomov/LIBS/lapack-lite-3.1.1/lapack_LINUX64.a \
+                    -lf77blas -latlas -lf2c -lcublas -lm
+
+	CUDADIR   = /usr/local/cuda
+
+	LIBDIR    = -L/home/tomov/LIBS/ATLAS/lib/Linux_HAMMER64SSE2 \
+                    -L/home/tomov/LIBS/CLAPACK-3.1.1/F2CLIBS/ \
+                    -L$(CUDADIR)/lib
+	INC       = -I../include -I$(CUDADIR)/include
+	
+	LIBMAGMA     = ../lib/libmagma.a
+	LIBMAGMABLAS = ../lib/libmagmablas.a

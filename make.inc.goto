@@ -1,0 +1,32 @@
+#//////////////////////////////////////////////////////////////////////////////
+#   -- MAGMA (version 0.1) --
+#      Univ. of Tennessee, Knoxville
+#      Univ. of California, Berkeley
+#      Univ. of	Colorado, Denver
+#      June 2009
+#
+#      Contributed by: Allan Menezes (Ontario, Canada)
+#//////////////////////////////////////////////////////////////////////////////
+
+	CC        = gcc
+	NVCC      = nvcc
+	FORT      = gfortran
+
+	ARCH      = ar
+	ARCHFLAGS = cr
+	RANLIB    = ranlib
+
+	OPTS      = -O3 -DADD_
+	NVOPTS    = --compiler-options -fno-strict-aliasing  -arch sm_13 \
+                    -DUNIX -O3
+	LDOPTS    = -fPIC
+
+	LIB       = -lgoto  -lpthread -lcublas -lcudart -llapack -lm 
+
+	CUDADIR   = /usr/local/cuda
+
+	LIBDIR    = -L/bummer/GotoBLAS -L/usr/local/cuda/lib64 -L/usr/lib64
+	INC       = -I../include -I$(CUDADIR)/include
+	
+	LIBMAGMA     = ../lib/libmagma.a
+	LIBMAGMABLAS = ../lib/libmagmablas.a

@@ -1,0 +1,31 @@
+#//////////////////////////////////////////////////////////////////////////////
+#   -- MAGMA (version 0.1) --
+#      Univ. of Tennessee, Knoxville
+#      Univ. of California, Berkeley
+#      Univ. of	Colorado, Denver
+#      June 2009
+#//////////////////////////////////////////////////////////////////////////////
+
+	CC        = gcc
+	NVCC      = nvcc
+	FORT      = ifort
+
+	ARCH      = ar
+	ARCHFLAGS = cr
+	RANLIB    = ranlib
+
+	OPTS      = -O3 -DADD_
+	NVOPTS    = --compiler-options -fno-strict-aliasing  -arch sm_13 \
+                    -DUNIX -O3
+	LDOPTS    = -fPIC
+
+	LIB       = -lmkl_em64t -lguide -lpthread -lcublas -lm 
+
+	CUDADIR   = /usr/local/cuda
+
+	LIBDIR    = -L$(HOME)/intel/mkl/10.0.1.014/lib/em64t \
+                    -L$(CUDADIR)/lib64
+	INC       = -I../include -I$(CUDADIR)/include
+	
+	LIBMAGMA     = ../lib/libmagma.a
+	LIBMAGMABLAS = ../lib/libmagmablas.a
