@@ -12,7 +12,8 @@
 #include <stdio.h>
 
 int 
-magma_slarfb(char direct, int m, int n, int *k, float *dv, int *ldv, float *dt,
+magma_slarfb(char direct, char storev,
+	     int m, int n, int *k, float *dv, int *ldv, float *dt,
 	     int *ldt, float *dc, int *ldc, float *dwork, int *ldwork)
 {
 /*  -- MAGMA (version 0.1) --
@@ -33,6 +34,12 @@ magma_slarfb(char direct, int m, int n, int *k, float *dv, int *ldv, float *dt,
             reflectors
             = 'F': H = H(1) H(2) . . . H(k) (Forward)
             = 'B': H = H(k) . . . H(2) H(1) (Backward)
+
+    STOREV  (input) CHARACTER
+            Indicates how the vectors which define the elementary
+            reflectors are stored:
+            = 'C': Columnwise
+            = 'R': Rowwise
 
     M       (input) INTEGER
             The number of rows of the matrix C.
@@ -71,28 +78,54 @@ magma_slarfb(char direct, int m, int n, int *k, float *dv, int *ldv, float *dt,
 
     ===================================================================      */
 
-#define dwork_ref(a_1,a_2) (dwork+(a_2)*(*ldwork) + a_1)
-#define dc_ref(a_1,a_2)    (dc+(a_2)*(*ldc) + a_1)
-#define dv_ref(a_1,a_2)    (dv+(a_2)*(*ldv) + a_1)
+  #define dwork_ref(a_1,a_2) (dwork+(a_2)*(*ldwork) + a_1)
+  #define dc_ref(a_1,a_2)    (dc+(a_2)*(*ldc) + a_1)
+  #define dv_ref(a_1,a_2)    (dv+(a_2)*(*ldv) + a_1)
 
   /* Function Body */
   if (m <= 0 || n <= 0) {
     return 0;
   }
 
-  cublasSgemm('t', 'n', n, *k, m, 1.f, dc_ref(0, 0), *ldc,
-	      dv_ref(0,0), *ldv, 0.f, dwork, *ldwork);
+  if (storev == 'c' || storev == 'C'){
+    cublasSgemm('t', 'n', n, *k, m, 1.f, dc_ref(0, 0), *ldc,
+		dv_ref(0,0), *ldv, 0.f, dwork, *ldwork);
+    
+    if (direct == 'F' || direct =='f')
+      cublasStrmm('r', 'u', 'n', 'n',
+		  n, *k, 1.f, dt, *ldt, dwork, *ldwork);
+    else
+      cublasStrmm('r', 'l', 'n', 'n',
+		  n, *k, 1.f, dt, *ldt, dwork, *ldwork);
 
-  if (direct == 'F' || direct =='f')
+    cublasSgemm('n', 't', m, n, *k, -1.f, dv_ref(0, 0), *ldv,
+		dwork, *ldwork, 1.f, dc_ref(0,0), *ldc);
+  }
+  else {
+    cublasSgemm('n', 't', m, *k, n, 1.f, dc_ref(0, 0), *ldc,
+                dv_ref(0,0), *ldv, 0.f, dwork, *ldwork);
+    
     cublasStrmm('r', 'u', 'n', 'n',
-		n, *k, 1.f, dt, *ldt, dwork, *ldwork);
-  else
-    cublasStrmm('r', 'l', 'n', 'n',
-		n, *k, 1.f, dt, *ldt, dwork, *ldwork);
+		m, *k, 1.f, dt, *ldt, dwork, *ldwork);
+    
+    cublasSgemm('n', 'n', m, n, *k, -1.f, 
+		dwork, *ldwork,
+		dv_ref(0, 0), *ldv, 
+		1.f, dc_ref(0,0), *ldc);
+    /*
+    float one = 1.f, zero = 0.f, mone = -1.f;
+    sgemm_("n", "t", &m, k, &n, &one, dc_ref(0, 0), ldc,
+	  dv_ref(0,0), ldv, &zero, dwork, ldwork);
 
-  cublasSgemm('n', 't', m, n, *k, -1.f, dv_ref(0, 0), *ldv,
-	      dwork, *ldwork, 1.f, dc_ref(0,0), *ldc);
+    strmm_("r", "u", "n", "n",
+	   &m, k, &one, dt, ldt, dwork, ldwork);
 
+    sgemm_("n", "n", &m, &n, k, &mone,
+                dwork, ldwork,
+                dv_ref(0, 0), ldv,
+      		&one, dc_ref(0,0), ldc);
+    */
+  }
   return 0;
 
 } /* magma_slarfb */

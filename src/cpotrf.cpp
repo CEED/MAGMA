@@ -121,7 +121,7 @@ magma_cpotrf(char *uplo, int *n, float2 *a, int *lda, float2 *work, int *info)
     a    -= a_offset;
     work -= (1 + (*n));
 
-    int nb = magma_get_spotrf_nb(*n);
+    int nb = magma_get_cpotrf_nb(*n);
 
     if (nb <= 1 || nb >= *n) {
 	cpotrf_(uplo, n, a_ref(1, 1), lda, info);

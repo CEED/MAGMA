@@ -127,87 +127,6 @@ void sq_to_panel(char uplo, int ib, float *a, int lda, float *work){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- LAPACK auxiliary function sqrt02
-*/
-int sqrt02(int *m, int *n, int *k, float *a, float *af, float *q,
-           float *r__, int *lda, float *tau, float *work,
-           int *lwork, float *rwork, float *result){
-  int a_dim1, a_offset, af_dim1, af_offset, q_dim1, q_offset, r_dim1, 
-    r_offset, i__1;
-
-#define max(a,b)       (((a)>(b))?(a):(b))
-
-  static float c_b4 = -1e10f;
-  static float c_b9 = 0.f;
-  static float c_b14 = -1.f;
-  static float c_b15 = 1.f;
-
-  static float eps;
-  static int info;
-  static float resid;
-
-  r_dim1 = *lda;
-  r_offset = 1 + r_dim1;
-  r__ -= r_offset;
-  q_dim1 = *lda;
-  q_offset = 1 + q_dim1;
-  q -= q_offset;
-  af_dim1 = *lda;
-  af_offset = 1 + af_dim1;
-  af -= af_offset;
-  a_dim1 = *lda;
-  a_offset = 1 + a_dim1;
-  a -= a_offset;
-  --tau;
-  --work;
-  --rwork;
-  --result;
-
-  /* Function Body */
-  eps = slamch_("Epsilon");
-  
-  /*     Copy the first k columns of the factorization to the array Q */
-  slaset_("Full", m, n, &c_b4, &c_b4, &q[q_offset], lda);
-  i__1 = *m - 1;
-  slacpy_("Lower", &i__1, k, &af[af_dim1 + 2], lda, &q[q_dim1 + 2], lda);
-
-  /*     Generate the first n columns of the matrix Q */
-  sorgqr_(m, n, k, &q[q_offset], lda, &tau[1], &work[1], lwork, &info);
-
-  /*     Copy R(1:n,1:k) */
-  slaset_("Full", n, k, &c_b9, &c_b9, &r__[r_offset], lda);
-  slacpy_("Upper", n, k, &af[af_offset], lda, &r__[r_offset], lda);
-
-  /*     Compute R(1:n,1:k) - Q(1:m,1:n)' * A(1:m,1:k) */
-  sgemm_("Transpose", "No transpose", n, k, m, &c_b14, &q[q_offset], lda, &
-	 a[a_offset], lda, &c_b15, &r__[r_offset], lda);
-
-  /*     Compute norm( R - Q'*A ) / ( M * norm(A) * EPS ) . */
-  double anorm = slange_("1", m, k, &a[a_offset], lda, &rwork[1]);
-  printf("norm of a = %f\n",anorm);
-  resid = slange_("1", n, k, &r__[r_offset], lda, &rwork[1]);
-  printf("norm of r = %f\n",resid);
-  if (anorm > 0.f) {
-    result[1] = resid / (float) max(1,*m) / anorm / eps;
-  } else {
-    result[1] = 0.f;
-  }
-
-  /*     Compute I - Q'*Q */
-  slaset_("Full", n, n, &c_b9, &c_b15, &r__[r_offset], lda);
-  ssyrk_("Upper", "Transpose", n, m, &c_b14, &q[q_offset], lda, &c_b15, &
-	 r__[r_offset], lda);
-
-  /*     Compute norm( I - Q'*Q ) / ( M * EPS ) . */
-  resid = slansy_("1", "Upper", n, &r__[r_offset], lda, &rwork[1]);
-  result[2] = resid / (float) max(1,*m) / eps;
-
-  return 0;
-
-#undef max
-}
-
-/* ////////////////////////////////////////////////////////////////////////////
    -- Put 0s in the upper triangular part of a panel (and 1s on the diagonal)
 */
 void cpanel_to_q(int ib, float2 *a, int lda, float2 *work){
@@ -273,82 +192,50 @@ void dq_to_panel(int ib, double *a, int lda, double *work){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- LAPACK auxiliary function dqrt02
+   -- Auxiliary function: ipiv(i) indicates that row i has been swapped with 
+      ipiv(i) from top to bottom. This function rearranges ipiv into newipiv
+      where row i has to be moved to newipiv(i). The new pivoting allows for
+      parallel processing vs the original one assumes a specific ordering and
+      has to be done sequentially.
 */
-int dqrt02(int *m, int *n, int *k, double *a, double *af, double *q,
-           double *r__, int *lda, double *tau, double *work,
-           int *lwork, double *rwork, double *result){
-  int a_dim1, a_offset, af_dim1, af_offset, q_dim1, q_offset, r_dim1, 
-    r_offset, i__1;
-
-#define max(a,b)       (((a)>(b))?(a):(b))
-
-  static double c_b4 = -1e10f;
-  static double c_b9 = 0.f;
-  static double c_b14 = -1.f;
-  static double c_b15 = 1.f;
-
-  static double eps;
-  static int info;
-  static double resid;
-
-  r_dim1 = *lda;
-  r_offset = 1 + r_dim1;
-  r__ -= r_offset;
-  q_dim1 = *lda;
-  q_offset = 1 + q_dim1;
-  q -= q_offset;
-  af_dim1 = *lda;
-  af_offset = 1 + af_dim1;
-  af -= af_offset;
-  a_dim1 = *lda;
-  a_offset = 1 + a_dim1;
-  a -= a_offset;
-  --tau;
-  --work;
-  --rwork;
-  --result;
-
-  /* Function Body */
-  eps = dlamch_("Epsilon");
+void swp2pswp(int n, int *ipiv, int *newipiv){
+  int i, newind, ind;
   
-  /*     Copy the first k columns of the factorization to the array Q */
-  dlaset_("Full", m, n, &c_b4, &c_b4, &q[q_offset], lda);
-  i__1 = *m - 1;
-  dlacpy_("Lower", &i__1, k, &af[af_dim1 + 2], lda, &q[q_dim1 + 2], lda);
-
-  /*     Generate the first n columns of the matrix Q */
-  dorgqr_(m, n, k, &q[q_offset], lda, &tau[1], &work[1], lwork, &info);
-
-  /*     Copy R(1:n,1:k) */
-  dlaset_("Full", n, k, &c_b9, &c_b9, &r__[r_offset], lda);
-  dlacpy_("Upper", n, k, &af[af_offset], lda, &r__[r_offset], lda);
-
-  /*     Compute R(1:n,1:k) - Q(1:m,1:n)' * A(1:m,1:k) */
-  dgemm_("Transpose", "No transpose", n, k, m, &c_b14, &q[q_offset], lda, &
-	 a[a_offset], lda, &c_b15, &r__[r_offset], lda);
-
-  /*     Compute norm( R - Q'*A ) / ( M * norm(A) * EPS ) . */
-  double anorm = dlange_("1", m, k, &a[a_offset], lda, &rwork[1]);
-  printf("norm of a = %f\n",anorm);
-  resid = dlange_("1", n, k, &r__[r_offset], lda, &rwork[1]);
-  printf("norm of r = %f\n",resid);
-  if (anorm > 0.f) {
-    result[1] = resid / (double) max(1,*m) / anorm / eps;
-  } else {
-    result[1] = 0.f;
+  for(i=0; i<n; i++)
+    newipiv[i] = -1;
+  
+  for(i=0; i<n; i++){
+    newind = ipiv[i] - 1;
+    if (newipiv[newind] == -1) {
+      if (newipiv[i]==-1){
+        newipiv[i] = newind;
+        if (newind>i)
+          newipiv[newind]= i;
+      }
+      else
+        {
+          ind = newipiv[i];
+          newipiv[i] = newind;
+          if (newind>i)
+            newipiv[newind]= ind;
+        }
+    }
+    else {
+      if (newipiv[i]==-1){
+        if (newind>i){
+          ind = newipiv[newind];
+          newipiv[newind] = i;
+          newipiv[i] = ind;
+        }
+        else
+          newipiv[i] = newipiv[newind];
+      }
+      else{
+	ind = newipiv[i];
+	newipiv[i] = newipiv[newind];
+        if (newind > i)
+          newipiv[newind] = ind;
+      }
+    }
   }
-
-  /*     Compute I - Q'*Q */
-  dlaset_("Full", n, n, &c_b9, &c_b15, &r__[r_offset], lda);
-  dsyrk_("Upper", "Transpose", n, m, &c_b14, &q[q_offset], lda, &c_b15, &
-	 r__[r_offset], lda);
-
-  /*     Compute norm( I - Q'*Q ) / ( M * EPS ) . */
-  resid = dlansy_("1", "Upper", n, &r__[r_offset], lda, &rwork[1]);
-  result[2] = resid / (double) max(1,*m) / eps;
-
-  return 0;
-
-#undef max
 }

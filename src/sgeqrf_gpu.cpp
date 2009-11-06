@@ -151,7 +151,7 @@ magma_sgeqrf_gpu(int *m, int *n, float *a, int  *lda,  float  *tau,
 			    cudaMemcpyDeviceToHost,stream[1]);
 	if (i>0){
 	  /* Apply H' to A(i:m,i+2*ib:n) from the left */
-	  magma_slarfb('F', *m-old_i, *n-old_i-2*old_ib, &old_ib, 
+	  magma_slarfb('F', 'C', *m-old_i, *n-old_i-2*old_ib, &old_ib, 
 		       a_ref(old_i, old_i), lda, dwork, &lddwork, 
 		       a_ref(old_i, old_i+2*old_ib), lda, 
 		       dwork+old_ib, &lddwork);
@@ -176,10 +176,10 @@ magma_sgeqrf_gpu(int *m, int *n, float *a, int  *lda,  float  *tau,
 
 	  if (i+nb < k-nx)
 	    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
-	    magma_slarfb('F', rows, ib, &ib, a_ref(i,i), lda, dwork,
+	    magma_slarfb('F', 'C', rows, ib, &ib, a_ref(i,i), lda, dwork,
 			 &lddwork, a_ref(i,i+ib), lda, dwork+ib, &lddwork);
 	  else {
-	    magma_slarfb('F', rows, *n-i-ib, &ib, a_ref(i,i), lda, dwork,
+	    magma_slarfb('F', 'C', rows, *n-i-ib, &ib, a_ref(i,i), lda, dwork,
 			 &lddwork, a_ref(i,i+ib), lda, dwork+ib, &lddwork);
 	    cublasSetMatrix(ib, ib, sizeof(float),
 			    work_ref(i), ldwork, a_ref(i,i), *lda);

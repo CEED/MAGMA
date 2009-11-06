@@ -11,6 +11,7 @@
 #include "magma.h"
 #include "magmablas.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 int 
 magma_dgehrd(int *n, int *ilo, int *ihi, double *a, int *lda, 
@@ -136,7 +137,8 @@ magma_dgehrd(int *n, int *ilo, int *ihi, double *a, int *lda,
     static int i__, j;
 
     double *t;
-    cudaMallocHost( (void**)&t, nb*nb*sizeof(double) );
+    //cudaMallocHost( (void**)&t, nb*nb*sizeof(double) );
+    t = (double *)malloc(nb*nb*sizeof(double));
 
     static int ib;
     static int nh, iws;
@@ -251,14 +253,16 @@ magma_dgehrd(int *n, int *ilo, int *ihi, double *a, int *lda,
     }
 
     /* Use unblocked code to reduce the rest of the matrix */
-    cublasGetMatrix(*n, *n-i__+1, sizeof(double), 
-                    d_A+ (i__-1)*ldda, ldda, 
-                    a  + (i__-1)*(*lda), *lda);
-    // dgehd2_(n, &i__, ihi, a, lda, &tau[1], work, &iinfo);
-    dgehrd_(n, &i__, ihi, a, lda, &tau[1], work, lwork, &iinfo);
+    if (!(nb < nbmin || nb >= nh))
+      cublasGetMatrix(*n, *n-i__+1, sizeof(double), 
+		      d_A+ (i__-1)*ldda, ldda, 
+		      a  + (i__-1)*(*lda), *lda);
+    
+    dgehd2_(n, &i__, ihi, a, lda, &tau[1], work, &iinfo);
     work[0] = (double) iws;
     
-    cublasFree(t); 
+    //cublasFree(t); 
+    free(t);
  
     return 0;
 

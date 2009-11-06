@@ -9,6 +9,7 @@
 #include "cuda_runtime_api.h"
 #include "cublas.h"
 #include "magma.h"
+#include "magmablas.h"
 #include <stdio.h>
 
 int 
@@ -107,9 +108,10 @@ magma_spotrf(char *uplo, int *n, float *a, int *lda, float *work, int *info)
 
     static int jb;
 
-    static cudaStream_t stream[2];
+    static cudaStream_t stream[3];
     cudaStreamCreate(&stream[0]);
     cudaStreamCreate(&stream[1]);
+    cudaStreamCreate(&stream[2]);
 
     cublasStatus status;
 
@@ -180,11 +182,23 @@ magma_spotrf(char *uplo, int *n, float *a, int *lda, float *work, int *info)
 				a_ref(j,j), *lda, da_ref(j,j), ldda);
                 cublasSsyrk('l', 'n', jb, i__3, c_b13, da_ref(j,1), ldda, 
                             c_b14, da_ref(j, j), ldda);
+		/*
 		cudaMemcpy2DAsync( a_ref(j,1), (*lda)*sizeof(float), 
 				   da_ref(j,1),  ldda *sizeof(float), 
 				   sizeof(float)*jb, j+jb-1, 
 				   cudaMemcpyDeviceToHost,stream[1]);
-	     
+		*/
+		cudaMemcpy2DAsync( a_ref(j,j), (*lda)*sizeof(float),
+                                   da_ref(j,j),  ldda *sizeof(float),
+                                   sizeof(float)*jb, jb,
+                                   cudaMemcpyDeviceToHost,stream[1]);
+		cudaMemcpy2DAsync( a_ref(j,1), (*lda)*sizeof(float),
+                                   da_ref(j,1),  ldda *sizeof(float),
+                                   sizeof(float)*jb, j-1,
+                                   cudaMemcpyDeviceToHost,stream[2]);
+
+
+
                 if (j + jb <= *n) {
                     i__3 = *n - j - jb + 1;
                     i__4 = j - 1;
@@ -205,8 +219,12 @@ magma_spotrf(char *uplo, int *n, float *a, int *lda, float *work, int *info)
 				  cudaMemcpyHostToDevice,stream[0]);
 	        
 		if (j + jb <= *n)
+		  magmablas_strsm('R', 'L', 'T', 'N', i__3, jb,
+				   da_ref(j, j), ldda, da_ref(j + jb, j), ldda);
+		  /*
 		  cublasStrsm('R', 'L', 'T', 'N', i__3, jb, c_b14, 
 			      da_ref(j, j), ldda, da_ref(j + jb, j), ldda);
+		  */
 	    }
 	}
     }

@@ -186,7 +186,7 @@ magma_sgeqlf(int *m, int *n, float *a, int *lda,
 		 This is the main update from the lookahead techniques. */
 	      rows = *m - k + old_i + old_ib;
               cols = *n - k + old_i - old_ib;
-              magma_slarfb('B', rows, cols, &old_ib,
+              magma_slarfb('B', 'C', rows, cols, &old_ib,
                            da_ref(0,cols+old_ib), &ldda, dwork, &lddwork,
                            da_ref(0, 0), &ldda, dwork+old_ib, &lddwork);
 	    }
@@ -216,11 +216,11 @@ magma_sgeqlf(int *m, int *n, float *a, int *lda,
 		   two steps - implementing the lookahead techniques.
 		   This is the update of first ib columns.                 */
 		if (i-ib >= k -kk)
-		  magma_slarfb('B', rows, ib, &ib,
+		  magma_slarfb('B', 'C', rows, ib, &ib,
 			       da_ref(0,cols), &ldda, dwork, &lddwork,
 			       da_ref(0,cols-ib), &ldda, dwork+ib, &lddwork);
 		else{
-		  magma_slarfb('B', rows, cols, &ib,
+		  magma_slarfb('B', 'C', rows, cols, &ib,
                                da_ref(0,cols), &ldda, dwork, &lddwork,
                                da_ref(0,0), &ldda, dwork+ib, &lddwork);
 		}
