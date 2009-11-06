@@ -24,6 +24,16 @@
              \
              sgemv.cu \
              dgemv.cu \
+             \
+             magma_dlacpy.cu \
+             magma_dgemv_MLU.cu \
+             magma_dlag2s.cu \
+             magma_dlange.cu \
+             magma_dlansy.cu \
+             magma_dlat2s.cu \
+             magma_dsymv.cu \
+             magma_sdaxpycp.cu \
+             magma_slag2d.cu \
 
     ALLOBJ = $(ALLSRC:.cu=.cu_o) 
 
