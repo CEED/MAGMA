@@ -58,7 +58,7 @@ extern "C" void magmablas_dlacpy_64_64_16_4_v2(int M, int N, double *SA, int LDS
 	else	
   	      dlacpy_generic<<< grid, threads >>> (  M, N,SA, LDSA ,A,LDA,INFO) ;
 }
-extern "C" void magma_dlacpy(int M, int N, double *SA, int LDSA , double *A , int LDA, int *INFO){
+extern "C" void magma_dlacpy(int M, int N, double *SA, int LDSA , double *A , int LDA){
 /*
   Note
   ====
@@ -102,5 +102,7 @@ extern "C" void magma_dlacpy(int M, int N, double *SA, int LDSA , double *A , in
 
   =====================================================================
 */
-	magmablas_dlacpy_64_64_16_4_v2(M,N,SA,LDSA,A,LDA,INFO);
+        int INFO ;
+        INFO = 0 ;  
+	magmablas_dlacpy_64_64_16_4_v2(M,N,SA,LDSA,A,LDA, &INFO);
 }

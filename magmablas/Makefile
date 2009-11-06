@@ -34,6 +34,7 @@
              \
              sgemv.cu \
              strsm.cu \
+             dtrsm.cu \
              dgemv.cu \
              gemv32.cu \
              \
