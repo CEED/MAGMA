@@ -20,10 +20,12 @@ libmagmablas:
 	( cd magmablas; $(MAKE) )
 
 test:
+	( cd testing/lin; $(MAKE) )
 	( cd testing; $(MAKE) )
 
 cleanall:
 	( cd src; $(MAKE) clean )
 	( cd magmablas; $(MAKE) clean ) 
 	( cd testing; $(MAKE) clean )
+	( cd testing/lin; $(MAKE) clean )
 	( cd lib; rm -f *.a )

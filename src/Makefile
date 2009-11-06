@@ -9,16 +9,23 @@
 include ../make.inc
 
     ALLOBJ = spotrf.o \
+             spotrf-v2.o \
              spotrf_gpu.o \
              sgeqrf.o \
              sgeqrf_gpu.o \
+             sgeqrf_gpu-v2.o \
+             sormqr_gpu-v2.o \
              slarfb.o \
              sgetrf.o \
+             sgetrf_gpu-v2.o \
              sgetrf_gpu.o \
              sgehrd.o \
              slahru.o \
              slahr2.o \
              sgeqlf.o \
+             sgelqf-v2.o \
+             sgelqf.o \
+             sdgetrs_gpu.o \
              \
              dpotrf.o \
              dpotrf_gpu.o \
@@ -34,6 +41,8 @@ include ../make.inc
              cpotrf.o \
              cgeqrf.o \
              clarfb.o \
+             cgetrf.o \
+             zgetrf.o \
              \
              auxiliary.o \
 
