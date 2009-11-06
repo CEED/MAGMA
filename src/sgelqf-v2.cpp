@@ -9,11 +9,12 @@
 #include "cuda_runtime_api.h"
 #include "cublas.h"
 #include "magma.h"
+#include "magmablas.h"
 #include <stdio.h>
 
 int
-magma_sgelqf(int *m, int *n, float *a, int *lda, float *tau, 
-	     float *work, int *lwork, float *da, int *info)
+magma_sgelqf2(int *m, int *n, float *a, int *lda, float *tau, 
+	      float *work, int *lwork, float *da, int *info)
 {
 /*  -- MAGMA (version 0.1) --
        Univ. of Tennessee, Knoxville
@@ -143,102 +144,14 @@ magma_sgelqf(int *m, int *n, float *a, int *lda, float *tau,
     nx = 192;
     lddwork = *n;
 
-    if (nb >= nbmin && nb < k && nx < k) {
-        /*  Use blocked code initially */
-        cudaMemcpy2DAsync(da_ref(nb,0),  ldda *sizeof(float),
-			  a_ref(nb,0), (*lda)*sizeof(float),
-			  sizeof(float)*(*m-nb), *n,
-			  cudaMemcpyHostToDevice,stream[0]);
+    if (*m == *n){
+      cublasSetMatrix( *m, *n, sizeof(float), a, *lda, da, ldda);
+      magmablas_sinplace_transpose( da, ldda, ldda );
       
-	for (i = 0; i < k-nx; i += nb) {
-	    ib = min(k-i, nb);
+      magma_sgeqrf_gpu(m, n, da, m, tau, work, lwork, dwork, &iinfo);
 
-	    if ( i>0 ) {
-	      cudaMemcpy2DAsync(  a_ref(i,i), (*lda)*sizeof(float),
-				  da_ref(i,i), ldda *sizeof(float),
-				  sizeof(float)*ib, *n-i,
-				  cudaMemcpyDeviceToHost,stream[1]);
-
-	      cudaMemcpy2DAsync(  a_ref(i,0), (*lda)*sizeof(float),
-				  da_ref(i,0), ldda *sizeof(float),
-				  sizeof(float)*ib, i,
-				  cudaMemcpyDeviceToHost,stream[0]);
-	      
-	      /* Apply H to A(i+ib:m,i:n) from the right */
-              rows = *m - old_i - 2*old_ib;
-              cols = *n - old_i;
-	      magma_slarfb( 'F', 'R', rows, cols, &old_ib, 
-			    da_ref(old_i, old_i), &ldda, dwork, &lddwork, 
-			    da_ref(old_i + 2*old_ib, old_i), &ldda, 
-			    dwork+old_ib, &lddwork);
-	    }
-
-	    cudaStreamSynchronize(stream[1]);
-	    /* Compute the LQ factorization of the current block   
-	       A(i:i+ib-1,i:n) */
-	    rows = *m - i - ib;
-	    cols = *n - i;
-	    sgelqf_(&ib, &cols, a_ref(i, i), lda, tau+i, work, lwork, &iinfo);
-	    /*
-	    {
-#define  b_ref(a_1,a_2) ( aa+(a_2)*(cols) + (a_1))
-
-	      float *aa = new float[ib*cols];
-	      int l, s;
-	      for(l=0; l<ib; l++)
-		for(s=0; s<cols; s++)
-		  *b_ref(s,l) = *a_ref(i+l,i+s);
-	      
-	      sgeqrf_(&cols, &ib, b_ref(0, 0), &cols, tau+i, work, 
-		      lwork, &iinfo);
-	      
-	      for(l=0; l<ib; l++)
-		for(s=0; s<cols; s++)
-		*a_ref(i+l,i+s) =*b_ref(s,l);
-	      
-#undef aa_ref
-	      delete [] aa;
-	    }
-	    */
-	    if (rows > 0) {
-	      /* Form the triangular factor of the block reflector   
-		 H = H(i) H(i+1) . . . H(i+ib-1) */
-	      slarft_("F", "R", &cols, &ib, a_ref(i,i), lda, tau+i, work, &ib);
-	      spanel_to_q('L', ib, a_ref(i,i), *lda, work+ib*ib);
-	      cublasSetMatrix(ib, cols, sizeof(float),
-		 	      a_ref(i,i), *lda, da_ref(i,i), ldda);
-	      sq_to_panel('L', ib, a_ref(i,i), *lda, work+ib*ib);
-	      
-	      // Send the triangular part on the GPU
-	      cublasSetMatrix(ib,ib,sizeof(float), work, ib, dwork, lddwork);
-	      
-	      if (i+ib < k-nx)
-		/* Apply H to A(i+ib:m,i:n) from the right */
-		magma_slarfb('F', 'R', ib, cols, &ib,
-			     da_ref(i, i), &ldda, dwork, &lddwork,
-			     da_ref(i + ib, i), &ldda, dwork+ib, &lddwork);
-	      else
-		magma_slarfb('F', 'R', rows, cols, &ib, 
-			     da_ref(i, i), &ldda, dwork, &lddwork,
-			     da_ref(i + ib, i), &ldda, dwork+ib, &lddwork);
-
-	      old_i = i;
-	      old_ib = ib;
-	    }
-	}
-    } else {
-      i = 0;
-    }
-    
-    /* Use unblocked code to factor the last or only block. */
-    if (i < k) {
-       rows = *m - i;
-       cols = *n - i;
-       if (i!=0)
-	 cublasGetMatrix(rows, *n, sizeof(float),
-			 da_ref(i,0), ldda, a_ref(i,0), *lda);
-
-       sgelqf_(&rows, &cols, a_ref(i, i), lda, tau+i, work, lwork, &iinfo);
+      magmablas_sinplace_transpose( da, ldda, ldda );
+      cublasGetMatrix( *m, *n, sizeof(float), da, ldda, a, *lda); 
     }
 
     work[0] = (float) *m * nb;
