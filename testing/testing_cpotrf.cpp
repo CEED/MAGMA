@@ -19,7 +19,7 @@
 #include "magma.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing spotrf
+   -- Testing cpotrf
 */
 int main( int argc, char** argv) 
 {
@@ -50,7 +50,7 @@ int main( int argc, char** argv)
     }
     else {
       printf("\nUsage: \n");
-      printf("  testing_spotrf -N %d\n\n", 1024);
+      printf("  testing_cpotrf -N %d\n\n", 1024);
     }
 
     /* Initialize CUBLAS */
@@ -90,7 +90,7 @@ int main( int argc, char** argv)
 	h_A[j].y = rand() / (float)RAND_MAX;
       }
       for(j=0; j<n2; j+=(lda+1)){
-      	h_R[j].x = (h_A[j].x += 2000);
+      	h_R[j].x = (h_A[j].x += N);
 	h_R[j].y = h_A[j].y = 0.;
       }
       magma_cpotrf("L", &N, h_R, &lda, d_A, info);
@@ -120,7 +120,7 @@ int main( int argc, char** argv)
       end = get_current_time();
 
       if (info[0] < 0)  
-	printf("Argument %d of spotrf had an illegal value.\n", -info[0]);     
+	printf("Argument %d of cpotrf had an illegal value.\n", -info[0]);     
   
       cpu_perf = 4.*N*N*N/(3.*1000000*GetTimerValue(start,end));
       // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));

@@ -18,6 +18,11 @@
 #include "cublas.h"
 #include "magma.h"
 
+extern "C" void sqrt02_(int *, int *, int *, float *, float *, float *,
+			float *, int *, float *, float *,
+			int *, float *, float *);
+
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing sgeqrf
 */
@@ -90,7 +95,7 @@ int main( int argc, char** argv)
     }
 
     printf("\n\n");
-    printf("  N    CPU GFlop/s    GPU GFlop/s    ||R||_F / ||A||_F\n");
+    printf("  N    CPU GFlop/s    GPU GFlop/s    ||R - Q'A|| / ||A||\n");
     printf("========================================================\n");
     for(i=0; i<10; i++){
       N = lda = size[i];
@@ -115,6 +120,23 @@ int main( int argc, char** argv)
       // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
 
       /* =====================================================================
+         Check the factorization
+         =================================================================== */
+      float result[2];
+      float *hwork_Q = (float*)malloc( N * N * sizeof(float));
+      float *hwork_R = (float*)malloc( N * N * sizeof(float));
+      float *rwork   = (float*)malloc( N * sizeof(float));
+
+      sqrt02_(&N, &N, &N, h_A, h_R, hwork_Q, hwork_R, &N, tau,
+	      h_work, &lwork, rwork, result);
+
+      //printf("norm( R - Q'*A ) / ( M * norm(A) * EPS ) = %f\n", result[0]);
+      //printf("norm( I - Q'*Q ) / ( M * EPS )           = %f\n", result[1]);
+      free(hwork_Q);
+      free(hwork_R);
+      free(rwork);
+
+      /* =====================================================================
          Performs operation using LAPACK 
 	 =================================================================== */
       start = get_current_time();
@@ -127,35 +149,12 @@ int main( int argc, char** argv)
       // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
       
       /* =====================================================================
-         Check the result compared to LAPACK
+         Print performance and error.
          =================================================================== */
-      float work[1], matnorm, mone = -1.;
-      int one = 1;
-      matnorm = slange_("f", &N, &N, h_A, &N, work);
-      saxpy_(&n2, &mone, h_A, &one, h_R, &one);
       printf("%5d    %6.2f         %6.2f        %e\n", 
 	     size[i], cpu_perf, gpu_perf,
-	     slange_("f", &N, &N, h_R, &N, work) / matnorm);
+	     N*result[0]*5.96e-08);
       
-      /* =====================================================================
-	 Check the factorization
-	 =================================================================== */
-      /* // block sgeqrf and saxpy
-      float result[2];
-      float *hwork_Q = (float*)malloc( N * N * sizeof(float));
-      float *hwork_R = (float*)malloc( N * N * sizeof(float));
-      float *rwork   = (float*)malloc( N * sizeof(float));
-
-      sqrt02(&N, &N, &N, h_A, h_R, hwork_Q, hwork_R, &N, tau, 
-	      h_work, &lwork, rwork, result); 
-
-      printf("norm( R - Q'*A ) / ( M * norm(A) * EPS ) = %f\n", result[0]);
-      printf("norm( I - Q'*Q ) / ( M * EPS )           = %f\n", result[1]); 
-      free(hwork_Q);
-      free(hwork_R);
-      free(rwork);
-      */
-
       if (argc != 1)
 	break;
     }

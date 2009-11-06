@@ -136,7 +136,6 @@ int main( int argc, char** argv)
       int one = 1;
       matnorm = slange_("f", &N, &N, h_A, &N, work);
       saxpy_(&n2, &mone, h_A, &one, h_R, &one);
-
       printf("%5d    %6.2f         %6.2f        %e\n", 
 	     size[i], cpu_perf, gpu_perf,
 	     slange_("f", &N, &N, h_R, &N, work) / matnorm);

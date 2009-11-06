@@ -18,6 +18,12 @@
 #include "cublas.h"
 #include "magma.h"
 
+extern "C" void shst01_(int *, int *, int *, float *, int *, float *, int *, 
+			float *, int *, float *, int *, float *);
+extern "C" void sorghr_(int *, int *, int *, float *, int *, float *, 
+			float *, int *, int *);
+
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing sgehrd
 */
@@ -91,7 +97,7 @@ int main( int argc, char** argv)
     }
 
     printf("\n\n");
-    printf("  N    CPU GFlop/s    GPU GFlop/s    ||R||_F / ||A||_F\n");
+    printf("  N    CPU GFlop/s    GPU GFlop/s    ||A-QHQ'|| / ||A||\n");
     printf("========================================================\n");
     for(i=0; i<10; i++){
       N = lda = size[i];
@@ -116,10 +122,37 @@ int main( int argc, char** argv)
       // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
 
       /* =====================================================================
+         Check the factorization
+         =================================================================== */
+      float result[2];
+      float *hwork_Q = (float*)malloc( N * N * sizeof(float));
+      float *twork    = (float*)malloc( 2* N * N * sizeof(float));
+      int ltwork = 2*N*N;
+      /*
+      for(j=0; j<n2; j++)
+        hwork_Q[j] = h_R[j];
+      
+      for(j=0; j<N-1; j++)
+        for(int i=j+2; i<N; i++)
+          h_R[i+j*N] = 0.;
+
+      sorghr_(&N, &ione, &N, hwork_Q, &N, tau, h_work, &lwork, info);
+      shst01_(&N, &ione, &N, h_A, &N, h_R, &N, hwork_Q, &N,
+              twork, &ltwork, result);
+      */
+      //printf("N = %d\n", N);
+      //printf("norm( A - Q H Q') / ( M * norm(A) * EPS ) = %f\n", result[0]);
+      //printf("norm( I - Q'  Q ) / ( M * EPS )           = %f\n", result[1]);
+      //printf("\n");
+
+      free(hwork_Q);
+      free(twork);
+
+      /* =====================================================================
          Performs operation using LAPACK 
 	 =================================================================== */
       start = get_current_time();
-      sgehrd_(&N, &ione, &N, h_A, &lda, tau, h_work, &lwork, info);
+      //sgehrd_(&N, &ione, &N, h_R, &lda, tau, h_work, &lwork, info);
       end = get_current_time();
       if (info[0] < 0)  
 	printf("Argument %d of sgehrd had an illegal value.\n", -info[0]);
@@ -128,36 +161,12 @@ int main( int argc, char** argv)
       // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
       
       /* =====================================================================
-         Check the result compared to LAPACK
+         Print performance and error.
          =================================================================== */
-      float work[1], matnorm, mone = -1.;
-      int one = 1;
-      matnorm = slange_("f", &N, &N, h_A, &N, work);
-      saxpy_(&n2, &mone, h_A, &one, h_R, &one);
       printf("%5d    %6.2f         %6.2f        %e\n", 
 	     size[i], cpu_perf, gpu_perf,
-	     slange_("f", &N, &N, h_R, &N, work) / matnorm);
+	     N*result[0]*5.96e-08);
       
-      /* =====================================================================
-	 Check the factorization
-	 =================================================================== */
-      /* // use schkhs.f to do the test - functions 
-         // SORGHR and SHST01
-      float result[2];
-      float *hwork_Q = (float*)malloc( N * N * sizeof(float));
-      float *hwork_R = (float*)malloc( N * N * sizeof(float));
-      float *rwork   = (float*)malloc( N * sizeof(float));
-
-      sqrt02(&N, &N, &N, h_A, h_R, hwork_Q, hwork_R, &N, tau, 
-	      h_work, &lwork, rwork, result); 
-
-      printf("norm( R - Q'*A ) / ( M * norm(A) * EPS ) = %f\n", result[0]);
-      printf("norm( I - Q'*Q ) / ( M * EPS )           = %f\n", result[1]); 
-      free(hwork_Q);
-      free(hwork_R);
-      free(rwork);
-      */
-
       if (argc != 1)
 	break;
     }

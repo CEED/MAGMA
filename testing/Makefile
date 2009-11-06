@@ -12,10 +12,13 @@ include ../make.inc
           testing_spotrf_gpu.cpp \
           testing_sgeqrf.cpp \
           testing_sgeqrf_gpu.cpp \
+          testing_sgeqrf_gpu-v2.cpp \
           testing_sgetrf.cpp \
+          testing_sgetrf_gpu-v2.cpp \
           testing_sgetrf_gpu.cpp \
           testing_sgehrd.cpp \
           testing_sgeqlf.cpp \
+          testing_sgelqf.cpp \
           \
           testing_dpotrf.cpp \
           testing_dpotrf_gpu.cpp \
@@ -26,6 +29,8 @@ include ../make.inc
           testing_dgehrd.cpp \
           \
           testing_cpotrf.cpp \
+          testing_cgetrf.cpp \
+          testing_zgetrf.cpp \
 
     OBJ = $(SRC:.cpp=.o)
     EXE = $(OBJ:.o=)
@@ -41,5 +46,5 @@ clean:
 	$(CC) $(OPTS) $(INC) -c $< -o $@
 
 .o:
-	$(CC) $(LDOPTS) $< -o $@ -L../lib \
+	$(FORT) $(LDOPTS) $< -o $@ lin/liblapacktest.a -L../lib \
           -lcuda -lmagma -lmagmablas $(LIBDIR) $(LIB) get_nb.cpp

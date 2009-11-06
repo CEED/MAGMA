@@ -31,7 +31,8 @@ int magma_get_sgeqrf_nb(int m){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for sgetrf based on m
+   -- Return nb for sgetrf based on m;
+      the return value should be multiple of 64
 */
 int magma_get_sgetrf_nb(int m){
   if (m <= 2048)
@@ -75,8 +76,20 @@ int magma_get_sgeqlf_nb(int m){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for sgeqlf based on m
+*/
+int magma_get_sgelqf_nb(int m){
+  if (m <= 2048)
+    return 32;
+  else if (m<=4032)
+    return 64;
+  else
+    return 128;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
    -- Return nb for dgetrf based on m; 
-      the return value should be >= 64
+      the return value should be multiple of 64
 */
 int magma_get_dgetrf_nb(int m){
   if (m <= 2048)
@@ -105,4 +118,29 @@ int magma_get_sgehrd_nb(int m){
     return 32;
   else
     return 64;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for cgetrf based on m;
+      the return value should be multiple of 64
+*/
+int magma_get_cgetrf_nb(int m){
+  if (m <= 2048)
+    return 64;
+  else
+    return 128;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for cpotrf based on n
+*/
+int magma_get_cpotrf_nb(int n){
+  return 64;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for spotrf based on n
+*/
+int magma_get_zgetrf_nb(int n){
+  return 128;
 }
