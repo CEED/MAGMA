@@ -45,6 +45,9 @@ include ../make.inc
              zgetrf.o \
              \
              auxiliary.o \
+             \
+             magma_dsgesv.o \
+             \
 
 all: $(LIBMAGMA)
 
