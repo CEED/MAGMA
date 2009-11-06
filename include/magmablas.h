@@ -8,6 +8,7 @@
 
 #ifndef _MAGMABLAS_
 #define _MAGMABLAS_
+
 #include "cublas.h"
 #include "cuda.h"
 

@@ -6,8 +6,8 @@
        June 2009
 */
 
-#ifndef _PLASMA_
-#define _PLASMA_
+#ifndef _MAGMA_
+#define _MAGMA_
 
 #include "auxiliary.h"
 
