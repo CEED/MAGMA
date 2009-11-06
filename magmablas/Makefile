@@ -10,6 +10,7 @@
     ALLSRC = sinplace_transpose.cu \
              stranspose.cu \
              spermute.cu \
+             sdlaswp.cu \
              \
              sauxiliary.cu \
              dauxiliary.cu \
@@ -18,12 +19,23 @@
              dtranspose.cu \
              dpermute.cu \
              \
+             cinplace_transpose.cu \
+             ctranspose.cu \
+             cpermute.cu \
+             \
+             zinplace_transpose.cu \
+             ztranspose.cu \
+             zpermute.cu \
+             ztrsm.cu \
+             \
              ctrsm.cu \
              csyrk.cu \
              cherk.cu \
              \
              sgemv.cu \
+             strsm.cu \
              dgemv.cu \
+             gemv32.cu \
              \
              magma_dlacpy.cu \
              magma_dgemv_MLU.cu \
