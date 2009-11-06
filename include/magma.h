@@ -69,6 +69,9 @@ int magma_cgeqrf(int *, int *, float2 *, int  *,  float2  *,
 int magma_zgetrf(int *, int *, double2 *, int *, int *,
                  double2 *, double2 *, int *);
 
+int magma_sdgetrs_gpu(int *n, int *nrhs, float *a, int *lda,
+                  int *ipiv, float *x, double *b, int *ldb, int *info);
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- LAPACK Externs used in MAGMA
 */

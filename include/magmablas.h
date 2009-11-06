@@ -8,6 +8,8 @@
 
 #ifndef _MAGMABLAS_
 #define _MAGMABLAS_
+#include "cublas.h"
+#include "cuda.h"
 
 extern "C" void magmablas_sinplace_transpose(float *, int, int);
 extern "C" void magmablas_spermute_long(float *, int, int *, int, int);
@@ -41,6 +43,7 @@ extern "C" void magmablas_dgemv(int, int, double *, int, double *, double *);
 
 extern "C" void magmablas_sdlaswp(int, double *, int, float *, int, int *);
 
+extern "C" void magmablas_dtrsm (char side, char uplo, char tran, char diag, int M, int N,  double* A, int lda, double* b, int ldb);
 /* ////////////////////////////////////////////////////////////////////////////
    -- Auxiliary CUDA routines
 */
@@ -50,4 +53,14 @@ void dzero_nbxnb_block(int, double *, int);
 void szero_32x32_block(float *, int);
 void szero_nbxnb_block(int, float *, int);
 
+/*
+All the Iterative Refinement Stuffs Here
+*/
+
+extern "C" double  magma_dlange( char NORM, int M, int N , double *A, int LDA , double * WORK );
+extern "C" void magma_dlag2s(int M, int N , const double *A, int lda, float *SA , int LDSA, float RMAX );
+extern "C" void magmablas_sdaxpycp(float *R, double *X, int M, int ldr,int lda, double *B, double *W);
+extern "C" void magmablas_magma_dgemv_MLU(int n, int m, double *A, int lda, double *x, double *z);
+extern "C" void magmablas_slag2d(int M, int N, float *SA, int LDSA , double *A , int LDA, int *INFO);
+extern "C" void magma_dlacpy(int M, int N, double *SA, int LDSA , double *A , int LDA);
 #endif
