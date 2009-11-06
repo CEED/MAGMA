@@ -8,7 +8,7 @@
 
 	CC        = gcc
 	NVCC      = nvcc
-	FORT      = ifort
+	FORT      = gfortran
 
 	ARCH      = ar
 	ARCHFLAGS = cr
