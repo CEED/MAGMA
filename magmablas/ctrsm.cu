@@ -135,6 +135,7 @@ magmablas_ctrsm(char side, char uplo, char transa, char diag,
     cublasGetMatrix(k, k, sizeof(float2), A, lda, a, k);
     cublasGetMatrix(m, n, sizeof(float2), B, ldb, b, m);
 
+    if (m>0)
     ctrsm_(&side, &uplo, &transa, &diag,
            &m, &n, &alpha, a, &k, b, &m);     
 
