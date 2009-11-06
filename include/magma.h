@@ -15,17 +15,25 @@
    -- MAGMA function definitions
 */
 int magma_spotrf(char *, int *, float *, int *, float *, int *);
+int magma_spotrf2(char *, int *, float *, int *, float *, int *);
 int magma_spotrf_gpu(char *, int *, float *, int *, float *, int *);
-int magma_slarfb(char, int, int, int *, float *, int *, float *,
+int magma_slarfb(char, char, int, int, int *, float *, int *, float *,
                  int *, float *, int *, float *, int *);
 int magma_sgeqrf(int *, int *, float *, int  *,  float  *,
 		 float *, int *, float *, int *);
 int magma_sgeqrf_gpu(int *, int *, float *, int  *,  float  *,
 		     float *, int *, float *, int *);
+int magma_sgeqrf_gpu2(int *, int *, float *, int  *,  float  *,
+		      float *, int *, float *, int *);
 int magma_sgeqlf(int *, int *, float *, int  *,  float  *,
                  float *, int *, float *, int *);
+int magma_sgelqf(int *, int *, float *, int  *,  float  *,
+                 float *, int *, float *, int *);
+int magma_sgelqf2(int *, int *, float *, int  *,  float  *,
+		  float *, int *, float *, int *);
 int magma_sgetrf(int *, int *, float *, int *, int *, float *, float *, int *);
 int magma_sgetrf_gpu(int *, int *, float *, int *, int *, float *, int *);
+int magma_sgetrf_gpu2(int *, int *, float *, int *, int *,int *,float*,int*);
 int magma_sgehrd(int *, int *, int *, float *, int *, float *, float *,
                  int *, float *, int *);
 int magma_slahr2(int *, int *, int *, float *, float *, float *, int *,
@@ -51,14 +59,20 @@ int magma_dlahru(int, int, int,  double *, int,
 		 double *, double *, double *, double *, double *);
 
 int magma_cpotrf(char *, int *, float2 *, int *, float2 *, int *);
+int magma_cgetrf(int *, int *, float2 *, int *, int *, 
+		 float2 *, float2 *, int *);
 int magma_clarfb(int, int, int *, float2 *, int *, float2 *,
                  int *, float2 *, int *, float2 *, int *);
 int magma_cgeqrf(int *, int *, float2 *, int  *,  float2  *,
                  float2 *, int *, float2 *, int *);
 
+int magma_zgetrf(int *, int *, double2 *, int *, int *,
+                 double2 *, double2 *, int *);
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- LAPACK Externs used in MAGMA
 */
+extern "C" void strtri_(char *, char *, int *, float *, int *, int *);
 extern "C" void strsm_(char *, char *, char *, char *,
 		       int *, int *, float *, float *, int *, float *, int*);
 extern "C" void sgemm_(char *, char *, int *, int *, int *, float *,
@@ -80,14 +94,20 @@ extern "C" int slaswp_(int *, float *, int *, int *, int *, int *, int *);
 extern "C" float snrm2_(const int, const float *, const int);
 extern "C" float slange_(char *norm, int *, int *, float *, int *, float *);
 
+extern "C" int sgehd2_(int*, int*, int*, float*, int*, float*, float*, int*);
 extern "C" int spotrf_(char *uplo, int *n, float *a, int *lda, int *info);
 extern "C" int spotf2_(char *, int *, float *, int *, int *);
 extern "C" int sgeqrf_(int*,int*,float *,int*,float *,float *,int *,int *);
 extern "C" int sgeqlf_(int*,int*,float *,int*,float *,float *,int *,int *);
+extern "C" int sgelqf_(int*,int*,float *,int*,float *,float *,int *,int *);
+extern "C" int sgelq2_(int*,int*,float *,int*,float *,float *,int *);
 extern "C" int sgeql2_(int*,int*,float *,int*,float *,float *,int *);
 extern "C" int sgehrd_(int *, int *, int *, float *, int *,
                        float *, float *, int *, int *);
 extern "C" int slarft_(char *, char *, int *, int *, float *, int *, float *,
+		       float *, int *);
+extern "C" int slarfb_(char *, char *, char *, char *, int *, int *, int *, 
+		       float *, int *, float *, int *, float *, int *, 
 		       float *, int *);
 extern "C" int sgetrf_(int *, int *, float *, int *, int *, int *);
 
@@ -100,6 +120,8 @@ extern "C" int sorgqr_(int *, int *, int *, float *, int *, float *,
 
 extern "C" void ctrsm_(char *, char *, char *, char *,
                        int *, int *, float2 *, float2 *, int *, float2 *,int*);
+extern "C" int ctrmm_(char *, char *, char *, char *,
+                      int *, int *, float2 *, float2 *, int *, float2 *,int *);
 extern "C" void caxpy_(int *, float2 *, float2 *, int *, float2 *, int *);
 extern "C" void csyrk_(char *, char *, int *, int *, float2 *,
 		       float2 *, int *, float2 *, float2 *, int *);
@@ -110,7 +132,7 @@ extern "C" int cgeqrf_(int*,int*,float2 *,int*,float2 *,float2 *,int *,int *);
 extern "C" int clarft_(char *, char *, int *, int *, float2 *, int *, float2 *,
                        float2 *, int *);
 extern "C" int cgetrf_(int *, int *, float2 *, int *, int *, int *);
-
+extern "C" int claswp_(int *, float2 *, int *, int *, int *, int *, int *);
 extern "C" float clange_(char *norm, int *, int *, float2 *, int *, float *);
 
 
@@ -153,4 +175,11 @@ extern "C" int dorgqr_(int *, int *, int *, double *, int *, double *,
 
 extern "C" long int lsame_(char *, char *);
 
+extern "C" int zgetrf_(int *, int *, double2 *, int *, int *, int *);
+extern "C" int zlaswp_(int *, double2 *, int *, int *, int *, int *, int *);
+extern "C" double zlange_(char *, int *, int *, double2 *, int *, double *);
+extern "C" int ztrmm_(char *, char *, char *, char *, int *, int *, 
+		      double2 *, double2 *, int *, double2 *,int *);
+extern "C" void ztrsm_(char *, char *, char *, char *, int *, int *, 
+		       double2 *, double2 *, int *, double2 *,int*);
 #endif

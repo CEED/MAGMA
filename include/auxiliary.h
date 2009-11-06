@@ -14,11 +14,16 @@ int magma_get_sgeqrf_nb(int m);
 int magma_get_sgeqlf_nb(int m);
 int magma_get_sgetrf_nb(int m);
 int magma_get_sgehrd_nb(int m);
+int magma_get_sgelqf_nb(int m);
 
 int magma_get_dpotrf_nb(int m);
 int magma_get_dgeqrf_nb(int m);
 int magma_get_dgetrf_nb(int m);
 int magma_get_dgehrd_nb(int m);
+
+int magma_get_cpotrf_nb(int m);
+int magma_get_cgetrf_nb(int m);
+int magma_get_zgetrf_nb(int m);
 
 #include <sys/time.h>
 typedef struct timestruct
@@ -34,10 +39,6 @@ void printout_devices();
 
 void spanel_to_q(char uplo, int ib, float *a, int lda, float *work);
 void sq_to_panel(char uplo, int ib, float *a, int lda, float *work);
-
-int sqrt02(int *m, int *n, int *k, float *a, float *af, float *q,
-	   float *r__, int *lda, float *tau, float *work,
-	   int *lwork, float *rwork, float *result);
 
 void cpanel_to_q(int ib, float2 *a, int lda, float2 *work);
 void cq_to_panel(int ib, float2 *a, int lda, float2 *work);
