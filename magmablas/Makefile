@@ -47,6 +47,15 @@
              magma_dsymv.cu \
              magma_sdaxpycp.cu \
              magma_slag2d.cu \
+             \
+             dgemm_kernel_a_0.cu \
+             dgemm_kernel_N_N_64_16_16_16_4_special.cu \
+             dgemm_kernel_T_N_32_32_8_8_8.cu \
+             dgemm_kernel_T_T_64_16_16_16_4_v2.cu \
+             dgemm_kernel_ab_0.cu \
+             dgemm_kernel_N_N_64_16_16_16_4.cu \
+             dgemm_kernel_N_T_64_16_4_16_4.cu \
+             dgemm_kernel_T_T_64_16_16_16_4.cu \
 
     ALLOBJ = $(ALLSRC:.cu=.cu_o) 
 
