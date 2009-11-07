@@ -160,9 +160,10 @@ diag_strtri_kernel (char uplo, char diag, float *A, float *d_dinvA, int lda)
 
 
 extern "C" void
-magmablas_strsm(char side, char uplo, char tran, char diag, 
+magmablas_strsm1(char side, char uplo, char tran, char diag, 
                 int M, int N, float* A, int lda, float* b, int ldb)
 {
+    int status ;
     int i, nblocks;
     dim3 dimBlock;
     float *d_dinvA;
@@ -178,7 +179,12 @@ magmablas_strsm(char side, char uplo, char tran, char diag,
           /* inverse the diagonals
 	   * Allocate device memory for the inversed diagonal blocks, size=m*BLOCK_SIZE 
 	   */
-	  cudaMalloc((void**)&d_dinvA, BLOCK_SIZE*M*sizeof(float));
+	  status  = cudaMalloc((void**)&d_dinvA, BLOCK_SIZE*M*sizeof(float));
+          if( status != CUBLAS_STATUS_SUCCESS) {
+	    fprintf (stderr, "!!!! device memory allocation error (dipiv)\n");
+   	    return ;
+          }
+ 
 	  nblocks = M/BLOCK_SIZE;
 	  diag_strtri_kernel<<<nblocks, BLOCK_SIZE>>>(uplo, diag, A, d_dinvA, lda);
 
@@ -255,7 +261,11 @@ magmablas_strsm(char side, char uplo, char tran, char diag,
 	/* inverse the diagonals
 	 * Allocate device memory for the inversed diagonal blocks, size=m*BLOCK_SIZE 
 	 */
-	cudaMalloc((void**)&d_dinvA, BLOCK_SIZE*N*sizeof(float));
+	status = cudaMalloc((void**)&d_dinvA, BLOCK_SIZE*N*sizeof(float));
+          if( status != CUBLAS_STATUS_SUCCESS) {
+	    fprintf (stderr, "!!!! device memory allocation error (dipiv)\n");
+   	    return ;
+          }
 	nblocks = N/BLOCK_SIZE;
 	diag_strtri_kernel<<<nblocks, BLOCK_SIZE>>>(uplo, diag, A, d_dinvA, lda);
 

@@ -33,8 +33,8 @@
              cherk.cu \
              \
              sgemv.cu \
-             strsm.cu \
-             dtrsm.cu \
+             ourdtrsm.cu \
+             ourstrsm.cu \
              dgemv.cu \
              gemv32.cu \
              \
