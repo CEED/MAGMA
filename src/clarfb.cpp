@@ -10,10 +10,11 @@
 #include "cublas.h"
 #include "magma.h"
 #include <stdio.h>
-
+#include "magmablas.h"
 int 
-magma_clarfb(int m, int n, int *k, float2 *dv, int *ldv, float2 *dt,
-	    int *ldt, float2 *dc, int *ldc, float2 *dwork, int *ldwork)
+magma_clarfb(char direct, char storev,
+	     int m, int n, int *k, float2 *dv, int *ldv, float2 *dt,
+	     int *ldt, float2 *dc, int *ldc, float2 *dwork, int *ldwork)
 {
 /*  -- MAGMA (version 0.1) --
        Univ. of Tennessee, Univ. of California Berkeley
@@ -22,7 +23,7 @@ magma_clarfb(int m, int n, int *k, float2 *dv, int *ldv, float2 *dt,
     Purpose
     =======
 
-    SLARFB applies a real block reflector H or its transpose H' to a
+    CLARFB applies a real block reflector H or its transpose H' to a
     real m by n matrix C, from the left.
 
     Arguments
@@ -75,18 +76,37 @@ magma_clarfb(int m, int n, int *k, float2 *dv, int *ldv, float2 *dt,
   }
   float2 cone = {1.f,0.f}, czero = {0.f, 0.f}, cmone = {-1.f, 0.f};
   
-  cublasCgemm('t', 'n', n, *k, m, cone, dc_ref(0, 0), *ldc,
-	      dv_ref(0,0), *ldv, czero, dwork, *ldwork);
+  if (storev == 'c' || storev == 'C'){
+    cublasCgemm('c', 'n', n, *k, m, cone, dc_ref(0, 0), *ldc,
+		dv_ref(0,0), *ldv, czero, dwork, *ldwork);
+    
+    if (direct == 'F' || direct =='f')
+      magmablas_ctrmm('r', 'u', 'n', 'n',
+		      n, *k, cone, dt, *ldt, dwork, *ldwork);
+    else
+      magmablas_ctrmm('r', 'l', 'n', 'n',
+		      n, *k, cone, dt, *ldt, dwork, *ldwork);
+    
+    cublasCgemm('n', 'c', m, n, *k, cmone, dv_ref(0, 0), *ldv,
+		dwork, *ldwork, cone, dc_ref(0,0), *ldc);
+  }
+  else {
+    cublasCgemm('n', 'c', m, *k, n, cone, dc_ref(0, 0), *ldc,
+                dv_ref(0,0), *ldv, czero, dwork, *ldwork);
+    
+    magmablas_ctrmm('r', 'u', 'n', 'n',
+		    m, *k, cone, dt, *ldt, dwork, *ldwork);
+    
+    cublasCgemm('n', 'n', m, n, *k, cmone, 
+		dwork, *ldwork,
+		dv_ref(0, 0), *ldv, 
+		cone, dc_ref(0,0), *ldc);
 
-  cublasCtrmm('r', 'u', 'n', 'n',
-	      n, *k, cone, dt, *ldt, dwork, *ldwork);
-
-  cublasCgemm('n', 't', m, n, *k, cmone , dv_ref(0, 0), *ldv,
-	      dwork, *ldwork, cone, dc_ref(0,0), *ldc);
+  }
 
   return 0;
 
-} /* magma_slarfb */
+} /* magma_clarfb */
 
 #undef dv_ref
 #undef dc_ref
