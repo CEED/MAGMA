@@ -68,4 +68,25 @@ extern "C" void magma_dlacpy(int M, int N, double *SA, int LDSA , double *A , in
 extern "C" double magma_dlansy (char norm , char uplo , int n ,  double *A , int lda ,  double *WORK );
 extern "C" void magma_dlat2s ( char uplo , int n ,  double *A , int lda ,  float *SA , int LDSA ,  int *INFO );
 extern "C" void magma_dsymv (char side , char uplo , int m , double alpha ,  double *A , int lda ,  double *X , int incx , double beta , double *Y , int incy );
+/*
+Gemm Kernel
+*/
+extern "C" void magmablas_dgemm_kernel_a_0( double *C, const double *A, const double *B, int m,int n, int k, int lda, int ldb, int ldc, double alpha, double beta);
+extern "C" void magmablas_dgemm_kernel_ab_0( double *C, const double *A, const double *B, int m,int n, int k, int lda, int ldb, int ldc, double alpha, double beta);
+extern "C" void magmablas_dgemm_kernel_N_N_64_16_16_16_4_special( double *C, const double *A, const double *B, int m,int n, int k, int lda, int ldb, int ldc, double alpha, double beta);
+extern "C" void magmablas_dgemm_kernel_N_N_64_16_16_16_4( double *C, const double *A, const double *B, int m,int n, int k, int lda, int ldb, int ldc, double alpha, double beta);
+extern "C" void magmablas_dgemm_kernel_N_T_64_16_4_16_4( double *C, const double *A, const double *B, int m,int n, int k, int lda, int ldb, int ldc, double alpha, double beta);
+extern "C" void magmablas_dgemm_kernel_T_N_32_32_8_8_8( double *C, const double *A, const double *B, int m,int n, int k, int lda, int ldb, int ldc, double alpha, double beta);
+extern "C" void magmablas_dgemm_kernel_T_T_64_16_16_16_4_v2( double *C, const double *A, const double *B, int m,int n, int k, int lda, int ldb, int ldc, double alpha, double beta);
+extern "C" void magmablas_dgemm_kernel_T_T_64_16_16_16_4( double *C, const double *A, const double *B, int m,int n, int k, int lda, int ldb, int ldc, double alpha, double beta);
+
+
+extern "C" void magmablas_sgemm_kernel_a_0( float *C, const float *A, const float *B, int m,int n, int k, int lda, int ldb, int ldc, float alpha, float beta);
+extern "C" void magmablas_sgemm_kernel_ab_0( float *C, const float *A, const float *B, int m,int n, int k, int lda, int ldb, int ldc, float alpha, float beta);
+extern "C" void magmablas_sgemm_kernel_N_N_64_16_16_16_4_special( float *C, const float *A, const float *B, int m,int n, int k, int lda, int ldb, int ldc, float alpha, float beta);
+extern "C" void magmablas_sgemm_kernel_N_N_64_16_16_16_4( float *C, const float *A, const float *B, int m,int n, int k, int lda, int ldb, int ldc, float alpha, float beta);
+extern "C" void magmablas_sgemm_kernel_N_T_64_16_4_16_4( float *C, const float *A, const float *B, int m,int n, int k, int lda, int ldb, int ldc, float alpha, float beta);
+extern "C" void magmablas_sgemm_kernel_T_N_32_32_8_8_8( float *C, const float *A, const float *B, int m,int n, int k, int lda, int ldb, int ldc, float alpha, float beta);
+extern "C" void magmablas_sgemm_kernel_T_T_64_16_16_16_4_v2( float *C, const float *A, const float *B, int m,int n, int k, int lda, int ldb, int ldc, float alpha, float beta);
+extern "C" void magmablas_sgemm_kernel_T_T_64_16_16_16_4( float *C, const float *A, const float *B, int m,int n, int k, int lda, int ldb, int ldc, float alpha, float beta);
 #endif
