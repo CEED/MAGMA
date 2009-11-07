@@ -74,17 +74,17 @@ int main(int argc , char **argv){
  if( fp == NULL ) return 1;
  
     fprintf(fp, "\nUsage:\n\t\t ./testing_dsgesv N");
-  printf("Iterative Refinement\n");
-  fprintf(fp,"Iterative Refinement\n");
-
- printf("DP-Eps: %10.20lf \nSP-Eps: %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
- fprintf(fp, "DP-Eps: %10.20lf \nSP-Eps: %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
+  //printf("Iterative Refinement\n");
+  //fprintf(fp,"Iterative Refinement\n");
+  
+// printf("DP-Eps: %10.20lf \nSP-Eps: %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
+// fprintf(fp, "DP-Eps: %10.20lf \nSP-Eps: %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
   TimeStruct start, end;
-  printf("==============================================================================================================================\n"); 
-  fprintf(fp,"==============================================================================================================================\n"); 
  int LEVEL=1;
-  printf("\tN\tDouble-Factor\tDouble-Solve\t\tSingle-Factor\tSigle-Solve\t   Mixed Precision Solver \t||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps)\n");
-  fprintf(fp, "\tN\tDouble-Factor\tDouble-Solve\t\tSingle-Factor\tSigle-Solve\t   Mixed Precision Solver \t||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps)\n");
+  printf("\n\n\tN\tDouble-Factor\tDouble-Solve\t\tSingle-Factor\tSigle-Solve\t   Mixed Precision Solver \t||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps)\n");
+  fprintf(fp, "\n\n\tN\tDouble-Factor\tDouble-Solve\t\tSingle-Factor\tSigle-Solve\t   Mixed Precision Solver \t||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps)\n");
+      printf("===================================================================================================================================================================\n"); 
+      fprintf(fp,"===================================================================================================================================================================\n"); 
   int i ;
   int startN=64 ;
   int count = 16;
