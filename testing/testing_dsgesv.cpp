@@ -80,8 +80,9 @@ int main(int argc , char **argv){
   //printf("Iterative Refinement\n");
   //fprintf(fp,"Iterative Refinement\n");
   
-// printf("DP-Eps: %10.20lf \nSP-Eps: %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
-// fprintf(fp, "DP-Eps: %10.20lf \nSP-Eps: %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
+ printf("\n\nEpsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
+ fprintf(fp, "\nEpsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
+
   TimeStruct start, end;
  int LEVEL=1;
   printf("\n\n\tN\tDouble-Factor\tDouble-Solve\t\tSingle-Factor\tSigle-Solve\t   Mixed Precision Solver \t||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps)\t NumIter\n");

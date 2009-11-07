@@ -133,6 +133,8 @@ int main(int argc , char **argv){
 
  //printf("Epsilon DP: %10.20lf \nEpsilon SP: %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
  //fprintf(fp,"Epsilon DP: %10.20lf \nEpsilon SP: %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
+ printf("\n\nEpsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
+ fprintf(fp, "Epsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
 
   TimeStruct start, end;
 
