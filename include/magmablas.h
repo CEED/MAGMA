@@ -65,5 +65,7 @@ extern "C" void magmablas_sdaxpycp(float *R, double *X, int M, int ldr,int lda, 
 extern "C" void magmablas_magma_dgemv_MLU(int n, int m, double *A, int lda, double *x, double *z);
 extern "C" void magmablas_slag2d(int M, int N, float *SA, int LDSA , double *A , int LDA, int *INFO);
 extern "C" void magma_dlacpy(int M, int N, double *SA, int LDSA , double *A , int LDA);
-
+extern "C" double magma_dlansy (char norm , char uplo , int n ,  double *A , int lda ,  double *WORK );
+extern "C" void magma_dlat2s ( char uplo , int n ,  double *A , int lda ,  float *SA , int LDSA ,  int *INFO );
+extern "C" void magma_dsymv (char side , char uplo , int m , double alpha ,  double *A , int lda ,  double *X , int incx , double beta , double *Y , int incy );
 #endif
