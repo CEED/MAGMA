@@ -62,17 +62,20 @@ void cache_flush( double * CACHE , int length ) {
 int main(int argc , char **argv){
     cuInit( 0 );
     cublasInit( );
-    printf("\n");
-    printout_devices( );
 
 
-    printf("\nUsage:\n\t\t ./testing_dsgesv N");
+
 
  int printall = 0 ;
  FILE *fp ;
  fp = fopen("results_dsgesv.txt","w");
  if( fp == NULL ) return 1;
+ printf("Iterative Refinement- LU \n");
+ fprintf(fp, "Iterative Refinement- LU \n");
+    printf("\n");
+    printout_devices( );
  
+    printf("\nUsage:\n\t\t ./testing_dsgesv N");
     fprintf(fp, "\nUsage:\n\t\t ./testing_dsgesv N");
   //printf("Iterative Refinement\n");
   //fprintf(fp,"Iterative Refinement\n");
@@ -88,7 +91,7 @@ int main(int argc , char **argv){
 
   int i ;
   int startN=64 ;
-  int count = 16;
+  int count = 18;
   int step = 512 ;  
   int N = count * step ;
   int NRHS=1 ;

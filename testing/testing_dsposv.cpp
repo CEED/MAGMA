@@ -121,6 +121,15 @@ int main(int argc , char **argv){
   
  printf("Iterative Refinement- Cholesky \n");
  fprintf(fp, "Iterative Refinement- Cholesky \n");
+    printf("\n");
+    cuInit( 0 );
+    cublasInit( );
+
+    printout_devices( );
+
+
+    printf("\nUsage:\n\t\t ./testing_dsgesv N");
+    fprintf(fp, "\nUsage:\n\t\t ./testing_dsgesv N");
 
  //printf("Epsilon DP: %10.20lf \nEpsilon SP: %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
  //fprintf(fp,"Epsilon DP: %10.20lf \nEpsilon SP: %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
