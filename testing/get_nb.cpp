@@ -121,6 +121,18 @@ int magma_get_sgehrd_nb(int m){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for cgeqrf based on m
+*/
+int magma_get_cgeqrf_nb(int m){
+  if (m <= 2048)
+    return 32;
+  else if (m<=4032)
+    return 64;
+  else
+    return 128;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
    -- Return nb for cgetrf based on m;
       the return value should be multiple of 64
 */

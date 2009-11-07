@@ -23,6 +23,7 @@ int magma_get_dgehrd_nb(int m);
 
 int magma_get_cpotrf_nb(int m);
 int magma_get_cgetrf_nb(int m);
+int magma_get_cgeqrf_nb(int m);
 int magma_get_zgetrf_nb(int m);
 
 #include <sys/time.h>
@@ -42,8 +43,8 @@ void sq_to_panel(char uplo, int ib, float *a, int lda, float *work);
 
 void swp2pswp(int n, int *ipiv, int *newipiv);
 
-void cpanel_to_q(int ib, float2 *a, int lda, float2 *work);
-void cq_to_panel(int ib, float2 *a, int lda, float2 *work);
+void cpanel_to_q(char uplo, int ib, float2 *a, int lda, float2 *work);
+void cq_to_panel(char uplo, int ib, float2 *a, int lda, float2 *work);
 
 void dpanel_to_q(int ib, double *a, int lda, double *work);
 void dq_to_panel(int ib, double *a, int lda, double *work);

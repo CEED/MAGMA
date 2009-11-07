@@ -129,7 +129,7 @@ void sq_to_panel(char uplo, int ib, float *a, int lda, float *work){
 /* ////////////////////////////////////////////////////////////////////////////
    -- Put 0s in the upper triangular part of a panel (and 1s on the diagonal)
 */
-void cpanel_to_q(int ib, float2 *a, int lda, float2 *work){
+void cpanel_to_q(char uplo, int ib, float2 *a, int lda, float2 *work){
   int i, j, k = 0;
   float2 *col;
   for(i=0; i<ib; i++){
@@ -149,7 +149,7 @@ void cpanel_to_q(int ib, float2 *a, int lda, float2 *work){
 /* ////////////////////////////////////////////////////////////////////////////
    -- Restores a panel (after call to "panel_to_q")
 */
-void cq_to_panel(int ib, float2 *a, int lda, float2 *work){
+void cq_to_panel(char uplo, int ib, float2 *a, int lda, float2 *work){
   int i, j, k = 0;
   float2 *col;
   for(i=0; i<ib; i++){

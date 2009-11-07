@@ -29,6 +29,7 @@
              ztrsm.cu \
              \
              ctrsm.cu \
+             ctrmm.cu \
              csyrk.cu \
              cherk.cu \
              \

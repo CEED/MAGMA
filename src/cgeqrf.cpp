@@ -12,7 +12,7 @@
 #include <stdio.h>
 
 int 
-magma_cgeqrf(int *m, int *n, float2 *a, int  *lda,  float2  *tau,
+magma_cgeqrf(int *m, int *n, float2 *a, int  *lda,  float2 *tau,
              float2 *work, int *lwork, float2 *da, int *info )
 {
 /*  -- MAGMA (version 0.1) --
@@ -24,7 +24,7 @@ magma_cgeqrf(int *m, int *n, float2 *a, int  *lda,  float2  *tau,
     Purpose   
     =======   
 
-    SGEQRF computes a QR factorization of a real M-by-N matrix A:   
+    CGEQRF computes a QR factorization of a real M-by-N matrix A:   
     A = Q * R.   
 
     Arguments   
@@ -63,7 +63,7 @@ magma_cgeqrf(int *m, int *n, float2 *a, int  *lda,  float2  *tau,
 
     LWORK   (input) INTEGER   
             The dimension of the array WORK.  LWORK >= N*NB, 
-            where NB can be obtained through magma_get_sgeqrf_nb(M).   
+            where NB can be obtained through magma_get_cgeqrf_nb(M).   
 
             If LWORK = -1, then a workspace query is assumed; the routine   
             only calculates the optimal size of the WORK array, returns   
@@ -71,7 +71,7 @@ magma_cgeqrf(int *m, int *n, float2 *a, int  *lda,  float2  *tau,
             message related to LWORK is issued.
 
     DA      (workspace)  REAL array on the GPU, dimension N*(M + NB), 
-            where NB can be obtained through magma_get_sgeqrf_nb(M).
+            where NB can be obtained through magma_get_cgeqrf_nb(M).
             (size to be reduced in upcoming versions).
 
     INFO    (output) INTEGER   
@@ -105,10 +105,10 @@ magma_cgeqrf(int *m, int *n, float2 *a, int  *lda,  float2  *tau,
 
    /* Function Body */
    *info = 0;
-   int nb = magma_get_sgeqrf_nb(*m);
+   int nb = magma_get_cgeqrf_nb(*m);
    
    int lwkopt = *n * nb;
-   work[0].x = (float) lwkopt;
+   work[0].x = lwkopt;
    long int lquery = *lwork == -1;
    if (*m < 0) {
      *info = -1;
@@ -155,13 +155,14 @@ magma_cgeqrf(int *m, int *n, float2 *a, int  *lda,  float2  *tau,
 			      da_ref(i,i), ldda *sizeof(float2),
 			      sizeof(float2)*(*m-i), ib,
 			      cudaMemcpyDeviceToHost,stream[1]);
+	  
 	  cudaMemcpy2DAsync(  a_ref(0,i), (*lda)*sizeof(float2),
 			      da_ref(0,i), ldda *sizeof(float2),
 			      sizeof(float2)*i, ib,
 			      cudaMemcpyDeviceToHost,stream[0]);
-
+	  
 	  /* Apply H' to A(i:m,i+2*ib:n) from the left */
-	  magma_clarfb(*m-old_i, *n-old_i-2*old_ib, &old_ib, 
+	  magma_clarfb('F','C', *m-old_i, *n-old_i-2*old_ib, &old_ib,
 		       da_ref(old_i, old_i), &ldda, dwork, &lddwork, 
 		       da_ref(old_i, old_i+2*old_ib), &ldda, 
 		       dwork+old_ib, &lddwork);
@@ -174,20 +175,20 @@ magma_cgeqrf(int *m, int *n, float2 *a, int  *lda,  float2  *tau,
 	   H = H(i) H(i+1) . . . H(i+ib-1) */
 	clarft_("F", "C", &rows, &ib, a_ref(i,i), lda, tau+i,
 		work, &ib);
-	cpanel_to_q(ib, a_ref(i,i), *lda, work+ib*ib); 
+	cpanel_to_q('U', ib, a_ref(i,i), *lda, work+ib*ib); 
 	cublasSetMatrix(rows, ib, sizeof(float2), 
 			a_ref(i,i), *lda, da_ref(i,i), ldda);
-	cq_to_panel(ib, a_ref(i,i), *lda, work+ib*ib);
+	cq_to_panel('U', ib, a_ref(i,i), *lda, work+ib*ib);
 
 	if (i + ib < *n) {
 	  cublasSetMatrix(ib, ib, sizeof(float2), work, ib, dwork, lddwork);
 
 	  if (i+ib < k-nx)
 	    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
-	    magma_clarfb(rows, ib, &ib, da_ref(i,i), &ldda, dwork,
+	    magma_clarfb('F','C', rows, ib, &ib, da_ref(i,i), &ldda, dwork,
 			 &lddwork, da_ref(i,i+ib), &ldda, dwork+ib, &lddwork);
 	  else 
-	    magma_clarfb(rows, *n-i-ib, &ib, da_ref(i,i), &ldda, dwork,
+	    magma_clarfb('F','C',rows, *n-i-ib, &ib, da_ref(i,i), &ldda, dwork,
 			 &lddwork, da_ref(i,i+ib), &ldda, dwork+ib, &lddwork);
        
 	  old_i = i;
@@ -209,9 +210,9 @@ magma_cgeqrf(int *m, int *n, float2 *a, int  *lda,  float2  *tau,
    }
    return 0; 
   
-/*     End of MAGMA_SGEQRF */
+/*     End of MAGMA_CGEQRF */
 
-} /* magma_sgeqrf */
+} /* magma_cgeqrf */
 
 #undef  a_ref
 #undef da_ref

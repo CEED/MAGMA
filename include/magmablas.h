@@ -38,6 +38,8 @@ extern "C" void magmablas_cherk(char, char, int, int, float,
 				float2 *, int, float, float2 *, int);
 extern "C" void magmablas_ctrsm(char, char, char, char, int, int, float2,
 				float2 *, int, float2 *, int);
+extern "C" void magmablas_ctrmm(char, char, char, char, int, int, float2,
+                                float2 *, int, float2 *, int);
 
 extern "C" void magmablas_sgemv(int, int, float *, int, float *, float *);
 extern "C" void magmablas_dgemv(int, int, double *, int, double *, double *);

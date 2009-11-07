@@ -61,7 +61,7 @@ int magma_dlahru(int, int, int,  double *, int,
 int magma_cpotrf(char *, int *, float2 *, int *, float2 *, int *);
 int magma_cgetrf(int *, int *, float2 *, int *, int *, 
 		 float2 *, float2 *, int *);
-int magma_clarfb(int, int, int *, float2 *, int *, float2 *,
+int magma_clarfb(char, char, int, int, int *, float2 *, int *, float2 *,
                  int *, float2 *, int *, float2 *, int *);
 int magma_cgeqrf(int *, int *, float2 *, int  *,  float2  *,
                  float2 *, int *, float2 *, int *);
