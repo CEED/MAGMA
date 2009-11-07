@@ -89,4 +89,7 @@ extern "C" void magmablas_sgemm_kernel_N_T_64_16_4_16_4( float *C, const float *
 extern "C" void magmablas_sgemm_kernel_T_N_32_32_8_8_8( float *C, const float *A, const float *B, int m,int n, int k, int lda, int ldb, int ldc, float alpha, float beta);
 extern "C" void magmablas_sgemm_kernel_T_T_64_16_16_16_4_v2( float *C, const float *A, const float *B, int m,int n, int k, int lda, int ldb, int ldc, float alpha, float beta);
 extern "C" void magmablas_sgemm_kernel_T_T_64_16_16_16_4( float *C, const float *A, const float *B, int m,int n, int k, int lda, int ldb, int ldc, float alpha, float beta);
+
+extern "C" int magmablasDgemm(char TRANSA, char TRANSB, int m , int n , int k , double alpha, const double *A, int lda, const double *B, int ldb, double beta, double *C, int ldc);
+extern "C" int magmablasSgemm(char TRANSA, char TRANSB, int m , int n , int k , float alpha, const float *A, int lda, const float *B, int ldb, float beta, float *C, int ldc);
 #endif
