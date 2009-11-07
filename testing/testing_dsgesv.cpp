@@ -66,26 +66,28 @@ int main(int argc , char **argv){
     printout_devices( );
 
 
-    printf("\nUsage:\n\t\t ./testing_iterative_LU N");
+    printf("\nUsage:\n\t\t ./testing_desgesv N");
 
  int printall = 0 ;
  FILE *fp ;
- fp = fopen("results-LU-Solve-MP.txt","w");
+ fp = fopen("results_desgesv.txt","w");
  if( fp == NULL ) return 1;
  
+    fprintf(fp, "\nUsage:\n\t\t ./testing_dsgesv N");
   printf("Iterative Refinement\n");
   fprintf(fp,"Iterative Refinement\n");
 
  printf("DP-Eps: %10.20lf \nSP-Eps: %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
  fprintf(fp, "DP-Eps: %10.20lf \nSP-Eps: %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
   TimeStruct start, end;
-
-  int LEVEL=1;
-  printf("Dimension\tMixed Precision\t\tDouble-Factor\tDouble-Solve\t\tSingle-Factor\tSigle-Solve\n");
-  fprintf(fp, "Dimension\tMixed Precision\t\tDouble-Factor\tDouble-Solve\t\tSingle-Factor\tSigle-Solve\n");
+  printf("==============================================================================================================================\n"); 
+  fprintf(fp,"==============================================================================================================================\n"); 
+ int LEVEL=1;
+  printf("\tN\tDouble-Factor\tDouble-Solve\t\tSingle-Factor\tSigle-Solve\t   Mixed Precision Solver \t||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps)\n");
+  fprintf(fp, "\tN\tDouble-Factor\tDouble-Solve\t\tSingle-Factor\tSigle-Solve\t   Mixed Precision Solver \t||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps)\n");
   int i ;
   int startN=64 ;
-  int count = 18;
+  int count = 16;
   int step = 512 ;  
   int N = count * step ;
   int NRHS=1 ;
@@ -299,8 +301,8 @@ int main(int argc , char **argv){
     int PTSX = 0 , PTSA = maxnb*N*NRHS ;
 
     //magma_sgetrs("N",N ,NRHS, M_SWORK+PTSA ,N,IPIV, M_SWORK+PTSX, N,INFO );
-    printf("%4d\t",N); 
-    fprintf(fp,"%4d\t",N); 
+    printf("%10d",N); 
+    fprintf(fp,"%10d",N); 
 
 
     cublasSetMatrix( N, N, sizeof( double ), A, N, d_A, N ) ;
@@ -326,9 +328,23 @@ int main(int argc , char **argv){
     //printf("\t\t%d",ITER);
     int iter_GPU = ITER ;
     perf = (2.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
-    printf("\t%6.2f", perf);
-    fprintf(fp,"\t%6.2f", perf);
+    double lperf = perf ; 
     cublasGetMatrix( N, NRHS, sizeof( double ), d_X, N, X, N ) ;
+
+
+    double Rnorm, Anorm, Xnorm, Bnorm;
+    char norm='I';      
+    double *worke = (double *)malloc(N*sizeof(double));
+    Xnorm = dlange_(&norm, &N, &NRHS, X, &LDB, worke);
+    Anorm = dlange_(&norm, &N, &N, A, &LDA, worke);
+    Bnorm = dlange_(&norm, &N, &NRHS, B, &LDB, worke);
+    double ONE = -1.0 , NEGONE = 1.0 ;
+    dgemm_( "No Transpose", "No Transpose", &N, &NRHS, &N, &NEGONE, A, &LDA, X, &LDX, &ONE, B, &N);
+    Rnorm=dlange_(&norm, &N, &NRHS, B, &LDB, worke);
+    double eps1 = dlamch_("Epsilon"); 
+  // printf("-- ||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps) = %e\t",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1));
+    free(worke);
+
 
 
     //=====================================================================
@@ -340,8 +356,8 @@ int main(int argc , char **argv){
     magma_dgetrf_gpu(&N, &N, d_A, &N, IPIV, h_work_M_D, INFO);
     end = get_current_time();
     perf = (2.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
-    printf("\t\t\t%6.2f", perf);
-    fprintf(fp,"\t\t%6.2f", perf);
+    printf("\t%6.2f", perf);
+    fprintf(fp,"\t%6.2f", perf);
     cublasGetMatrix( N, NRHS, sizeof( double ), d_B, N, res_, N ) ;
 
 
@@ -376,6 +392,10 @@ int main(int argc , char **argv){
     printf("\t\t%6.2f", perf);
     fprintf(fp,"\t\t%6.2f", perf);
 
+    printf("\t\t\t%6.2f", lperf);
+    fprintf(fp,"\t\t\t%6.2f", lperf);
+    printf("\t\t\t\t%e",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1));
+    fprintf(fp, "\t\t\t\t%e",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1));
 
     //=====================================================================
     //              ERROR DP vs MIXED  - GPU 
@@ -385,9 +405,6 @@ if( printall == 0 )  printf("\n");
 
 
     LEVEL = 1 ; 
-if( printall == 1 ) 
-    printf(" %4d , %2d , %2d\n",NRHS,iter_CPU, iter_GPU); 
-    fprintf(fp, " %4d , %2d , %2d\n",NRHS,iter_CPU, iter_GPU); 
   }
 
 

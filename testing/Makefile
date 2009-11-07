@@ -32,7 +32,7 @@ include ../make.inc
           testing_cgetrf.cpp \
           testing_zgetrf.cpp \
           \
-          testing_iterative_LU.cpp \
+          testing_dsgesv.cpp \
 
     OBJ = $(SRC:.cpp=.o)
     EXE = $(OBJ:.o=)
