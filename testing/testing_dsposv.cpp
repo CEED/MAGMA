@@ -128,8 +128,8 @@ int main(int argc , char **argv){
     printout_devices( );
 
 
-    printf("\nUsage:\n\t\t ./testing_dsgesv N");
-    fprintf(fp, "\nUsage:\n\t\t ./testing_dsgesv N");
+    printf("\nUsage:\n\t\t ./testing_dsposv N");
+    fprintf(fp, "\nUsage:\n\t\t ./testing_dsposv N");
 
  //printf("Epsilon DP: %10.20lf \nEpsilon SP: %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
  //fprintf(fp,"Epsilon DP: %10.20lf \nEpsilon SP: %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
@@ -157,8 +157,8 @@ int main(int argc , char **argv){
 
  printf("\n\n\tN\tDouble-Factor\tDouble-Solve\t\tSingle-Factor\tSigle-Solve\t   Mixed Precision Solver \t||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps)\tNumIter\n");
   fprintf(fp, "\n\n\tN\tDouble-Factor\tDouble-Solve\t\tSingle-Factor\tSigle-Solve\t   Mixed Precision Solver \t||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps)\tNumIter\n");
-      printf("========================================================================================================================================================================\n");
-      fprintf(fp,"========================================================================================================================================================================\n");
+      printf("===============================================================================================================================================================================\n");
+      fprintf(fp,"==============================================================================================================================================================================\n");
 
 
   int size ; 
