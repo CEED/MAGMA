@@ -48,6 +48,8 @@ include ../make.inc
              \
              magma_dsgesv.o \
              magma_dsposv.o \
+             magma_dgemm.o \
+             magma_sgemm.o \
 
 all: $(LIBMAGMA)
 
