@@ -59,7 +59,6 @@ void magma_dsposv(
 
   double ANRM , CTE , EPS;
   EPS  = dlamch_("Epsilon");
-
   ANRM = magma_dlansy(  'I',  UPLO , N ,A, LDA ,WORK);
   CTE = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;  
 
@@ -179,7 +178,27 @@ void magma_dsposv(
   magma_dpotrs_gpu(&UPLO,N ,NRHS, A  , LDA ,X,LDB,INFO);
   return ;
 }
-
+void magma_spotrs_gpu( char *UPLO , int N , int NRHS, float *A , int LDA ,float *B, int LDB, int *INFO){
+                if( *UPLO =='U'){
+                         magmablas_strsm('L','U','T','N', N , NRHS,   A , LDA , B , LDB );
+                         magmablas_strsm('L','U','N','N', N , NRHS,   A , LDA , B , LDB );
+                }
+                else{
+                         magmablas_strsm('L','L','N','N', N , NRHS,  A , LDA , B , LDB );
+                         magmablas_strsm('L','L','T','N', N , NRHS,  A , LDA , B , LDB );
+                }
+}
+void magma_dpotrs_gpu( char *UPLO , int N , int NRHS, double *A , int LDA ,double *B, int LDB, int *INFO){
+                if( *UPLO =='U'){
+                         magmablas_dtrsm('L','U','T','N', N , NRHS,   A , LDA , B , LDB );
+                         magmablas_dtrsm('L','U','N','N', N , NRHS,   A , LDA , B , LDB );
+                }
+                else{
+                         magmablas_dtrsm('L','L','N','N', N , NRHS,  A , LDA , B , LDB );
+                         magmablas_dtrsm('L','L','T','N', N , NRHS,  A , LDA , B , LDB );
+                }
+}
+/*
 
 void magma_spotrs_gpu( char *UPLO , int N , int NRHS, float *A , int LDA ,float *B, int LDB, int *INFO){
                 if( *UPLO =='U'){
@@ -201,5 +220,5 @@ void magma_dpotrs_gpu( char *UPLO , int N , int NRHS, double *A , int LDA ,doubl
                          magmablas_dtrsm('L','L','T','N', N , NRHS,  A , LDA , B , LDB );
                 }
 }
-
+*/
 

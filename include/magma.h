@@ -201,6 +201,8 @@ extern "C" int slag2d_( int *, int *, float *, int *,  double *, int *,  int *);
 extern "C" int sgetrs_(char *, int *, int *, float *, int *, int *, float * ,int * ,  int *);
 extern "C" int idamax_(int *, double *, int *);
 extern "C" int dgetrs_(char *, int *, int *, double *, int *, int *, double * ,int * ,  int *);
+extern "C" double dsymm_     (char *,char*,int *,int *,double *,double *,int *,double *,int *,double *,double *,int *);
+//001:       SUBROUTINE DSYMM(SIDE,  UPLO, M,    N,    ALPHA,     A,      LDA,     B,     LDB,   BETA,   C,        LDC)
 
 
 #endif
