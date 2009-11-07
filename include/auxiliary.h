@@ -24,6 +24,8 @@ int magma_get_dgehrd_nb(int m);
 int magma_get_cpotrf_nb(int m);
 int magma_get_cgetrf_nb(int m);
 int magma_get_cgeqrf_nb(int m);
+
+int magma_get_zpotrf_nb(int m);
 int magma_get_zgetrf_nb(int m);
 
 #include <sys/time.h>

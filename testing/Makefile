@@ -31,6 +31,7 @@ include ../make.inc
           testing_cpotrf.cpp \
           testing_cgetrf.cpp \
           testing_cgeqrf.cpp \
+          testing_zpotrf.cpp \
           testing_zgetrf.cpp \
           \
           testing_dsgesv.cpp \

@@ -1,0 +1,16 @@
+[tomov@cumin testing]$ ./testing_zpotrf
+device 0: GeForce GTX 280, 1296.0 MHz clock, 1023.8 MB memory
+device 1: Quadro NVS 290, 918.0 MHz clock, 255.3 MB memory
+
+Usage: 
+  testing_zpotrf -N 1024
+
+  N    CPU GFlop/s    GPU GFlop/s    ||R||_F / ||A||_F
+========================================================
+ 1024     26.53          23.79        2.894185e-18
+ 2048     24.59          35.29        3.060688e-18
+ 3072     25.10          41.87        3.099768e-18
+ 4032     26.51          44.26        3.103290e-18
+ 5184     27.19          47.26        3.131029e-18
+ 6048     30.35          50.00        3.143652e-18
+ 7200     30.84          51.32        3.153010e-18

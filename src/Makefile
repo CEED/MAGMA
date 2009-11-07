@@ -42,6 +42,8 @@ include ../make.inc
              cgeqrf.o \
              clarfb.o \
              cgetrf.o \
+             \
+             zpotrf.o \
              zgetrf.o \
              \
              auxiliary.o \

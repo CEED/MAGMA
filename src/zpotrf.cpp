@@ -13,7 +13,8 @@
 #include <stdio.h>
 
 int 
-magma_cpotrf(char *uplo, int *n, float2 *a, int *lda, float2 *work, int *info)
+magma_zpotrf(char *uplo, int *n, double2 *a, int *lda, double2 *work, 
+	     int *info)
 {
 /*  -- MAGMA (version 0.1) --
        Univ. of Tennessee, Knoxville
@@ -24,7 +25,7 @@ magma_cpotrf(char *uplo, int *n, float2 *a, int *lda, float2 *work, int *info)
     Purpose   
     =======   
 
-    CPOTRF computes the Cholesky factorization of a Hermitian   
+    ZPOTRF computes the Cholesky factorization of a complex Hermitian   
     positive definite matrix A.   
 
     The factorization has the form   
@@ -44,7 +45,7 @@ magma_cpotrf(char *uplo, int *n, float2 *a, int *lda, float2 *work, int *info)
     N       (input) INTEGER   
             The order of the matrix A.  N >= 0.   
 
-    A       (input/output) COMPLEX array, dimension (LDA,N)   
+    A       (input/output) DOUBLE COMPLEX array, dimension (LDA,N)   
             On entry, the Hermitian matrix A.  If UPLO = 'U', the leading   
             N-by-N upper triangular part of A contains the upper   
             triangular part of the matrix A, and the strictly lower   
@@ -62,7 +63,7 @@ magma_cpotrf(char *uplo, int *n, float2 *a, int *lda, float2 *work, int *info)
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,N).   
 
-    WORK    (workspace) COMPLEX array on the GPU, dimension (N, N)
+    WORK    (workspace) DOUBLE COMPLEX array on the GPU, dimension (N, N)
             (size to be reduced in upcoming versions).
 
     INFO    (output) INTEGER   
@@ -86,8 +87,8 @@ magma_cpotrf(char *uplo, int *n, float2 *a, int *lda, float2 *work, int *info)
     /* Table of constant values */
     static int c__1 = 1;
     static int c_n1 = -1;
-    static float2 c_b13 = {-1.f,0.f};
-    static float2 c_b14 = {1.f,0.f};
+    static double2 c_b13 = {-1.f,0.f};
+    static double2 c_b14 = {1.f,0.f};
     
     /* System generated locals */
     int a_dim1, a_offset, i__3, i__4, ldda;
@@ -121,10 +122,10 @@ magma_cpotrf(char *uplo, int *n, float2 *a, int *lda, float2 *work, int *info)
     a    -= a_offset;
     work -= (1 + (*n));
 
-    int nb = magma_get_cpotrf_nb(*n);
+    int nb = magma_get_zpotrf_nb(*n);
 
     if (nb <= 1 || nb >= *n) {
-	cpotrf_(uplo, n, a_ref(1, 1), lda, info);
+	zpotrf_(uplo, n, a_ref(1, 1), lda, info);
     } else {
 
         /* Use hybrid blocked code. */
@@ -136,36 +137,36 @@ magma_cpotrf(char *uplo, int *n, float2 *a, int *lda, float2 *work, int *info)
 		i__4 = *n - j + 1;
 		jb = min(nb,i__4);
 		i__3 = j - 1;
-		cublasSetMatrix(jb, i__4, sizeof(float2),
+		cublasSetMatrix(jb, i__4, sizeof(double2),
                                 a_ref(j,j), *lda, da_ref(j,j), ldda);
-                magmablas_cherk('u', 'c', jb, i__3, -1.f, da_ref(1,j),
+                magmablas_zherk('u', 'c', jb, i__3, -1.f, da_ref(1,j),
                              ldda, 1.f, da_ref(j, j), ldda);
-                cudaMemcpy2DAsync(  a_ref(1,j), (*lda)*sizeof(float2), 
-				   da_ref(1,j), ldda *sizeof(float2), 
-				    sizeof(float2)*(j+jb-1), jb,
+                cudaMemcpy2DAsync(  a_ref(1,j), (*lda)*sizeof(double2), 
+				   da_ref(1,j), ldda *sizeof(double2), 
+				    sizeof(double2)*(j+jb-1), jb,
 				    cudaMemcpyDeviceToHost,stream[1]);
 		
 		if (j + jb <= *n) {
 		  i__3 = *n - j - jb + 1;
 		  i__4 = j - 1;
-		  cublasCgemm('C', 'N', jb, i__3, i__4,
+		  cublasZgemm('C', 'N', jb, i__3, i__4,
 			  c_b13, da_ref(1, j), ldda, da_ref(1, j + jb), ldda,
 			  c_b14, da_ref(j, j + jb), ldda);
 		}
              
 		cudaStreamSynchronize(stream[1]);
-		cpotrf_("Upper", &jb, a_ref(j,j), lda, info);
+		zpotrf_("Upper", &jb, a_ref(j,j), lda, info);
 		if (*info != 0) {
 		  *info = *info + j - 1;
 		  break;
 		}
-		cudaMemcpy2DAsync(da_ref(j,j),  ldda * sizeof(float2), 
-				  a_ref( j,j), (*lda)* sizeof(float2), 
-				  sizeof(float2)*jb, jb, 
+		cudaMemcpy2DAsync(da_ref(j,j),  ldda * sizeof(double2), 
+				  a_ref( j,j), (*lda)* sizeof(double2), 
+				  sizeof(double2)*jb, jb, 
 				  cudaMemcpyHostToDevice,stream[0]);
 		
 		if (j + jb <= *n)
-		  magmablas_ctrsm('L', 'U', 'C', 'N', jb, i__3,
+		  magmablas_ztrsm('L', 'U', 'C', 'N', jb, i__3,
 			      c_b14, da_ref(j,j), ldda, da_ref(j, j+jb), ldda);
 	    }
 	} else {
@@ -177,36 +178,36 @@ magma_cpotrf(char *uplo, int *n, float2 *a, int *lda, float2 *work, int *info)
 		i__4 = *n - j + 1;
 		jb = min(nb,i__4);
 		i__3 = j - 1;
-                cublasSetMatrix(i__4, jb, sizeof(float2), 
+                cublasSetMatrix(i__4, jb, sizeof(double2), 
 				a_ref(j,j), *lda, da_ref(j,j), ldda);
-                magmablas_cherk('l', 'n', jb, i__3, -1.f, da_ref(j,1), ldda, 
+                magmablas_zherk('l', 'n', jb, i__3, -1.f, da_ref(j,1), ldda, 
                             1.f, da_ref(j, j), ldda);
-		cudaMemcpy2DAsync( a_ref(j,1), (*lda)*sizeof(float2), 
-				   da_ref(j,1),  ldda *sizeof(float2), 
-				   sizeof(float2)*jb, j+jb-1, 
+		cudaMemcpy2DAsync( a_ref(j,1), (*lda)*sizeof(double2), 
+				   da_ref(j,1),  ldda *sizeof(double2), 
+				   sizeof(double2)*jb, j+jb-1, 
 				   cudaMemcpyDeviceToHost,stream[1]);
 	     
                 if (j + jb <= *n) {
                     i__3 = *n - j - jb + 1;
                     i__4 = j - 1;
-                    cublasCgemm('N', 'C', i__3, jb, i__4,
+                    cublasZgemm('N', 'C', i__3, jb, i__4,
                             c_b13, da_ref(j + jb, 1), ldda, da_ref(j, 1), ldda,
                             c_b14, da_ref(j + jb, j), ldda);
                 }
 		
                 cudaStreamSynchronize(stream[1]);
-	        cpotrf_("Lower", &jb, a_ref(j, j), lda, info);
+	        zpotrf_("Lower", &jb, a_ref(j, j), lda, info);
 		if (*info != 0){
                   *info = *info + j - 1;
 		  break;
 		}
-	        cudaMemcpy2DAsync(da_ref(j,j),  ldda * sizeof(float2), 
-				  a_ref( j,j), (*lda)* sizeof(float2), 
-				  sizeof(float2)*jb, jb, 
+	        cudaMemcpy2DAsync(da_ref(j,j),  ldda * sizeof(double2), 
+				  a_ref( j,j), (*lda)* sizeof(double2), 
+				  sizeof(double2)*jb, jb, 
 				  cudaMemcpyHostToDevice,stream[0]);
 	        
 		if (j + jb <= *n)
-		  magmablas_ctrsm('R', 'L', 'C', 'N', i__3, jb, c_b14, 
+		  magmablas_ztrsm('R', 'L', 'C', 'N', i__3, jb, c_b14, 
 			      da_ref(j, j), ldda, da_ref(j + jb, j), ldda);
 	    }
 	}
@@ -214,9 +215,9 @@ magma_cpotrf(char *uplo, int *n, float2 *a, int *lda, float2 *work, int *info)
     
     return 0;
 
-/*     End of MAGMA_CPOTRF */
+/*     End of MAGMA_ZPOTRF */
 
-} /* magma_cpotrf */
+} /* magma_zpotrf */
 
 #undef a_ref
 #undef da_ref

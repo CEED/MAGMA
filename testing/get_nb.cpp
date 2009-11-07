@@ -151,6 +151,13 @@ int magma_get_cpotrf_nb(int n){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for cpotrf based on n
+*/
+int magma_get_zpotrf_nb(int n){
+  return 64;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
    -- Return nb for spotrf based on n
 */
 int magma_get_zgetrf_nb(int n){

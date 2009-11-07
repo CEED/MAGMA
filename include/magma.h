@@ -66,6 +66,7 @@ int magma_clarfb(char, char, int, int, int *, float2 *, int *, float2 *,
 int magma_cgeqrf(int *, int *, float2 *, int  *,  float2  *,
                  float2 *, int *, float2 *, int *);
 
+int magma_zpotrf(char *, int *, double2 *, int *, double2 *, int *);
 int magma_zgetrf(int *, int *, double2 *, int *, int *,
                  double2 *, double2 *, int *);
 
@@ -182,6 +183,7 @@ extern "C" int dorgqr_(int *, int *, int *, double *, int *, double *,
 
 extern "C" long int lsame_(char *, char *);
 
+extern "C" int zpotrf_(char *uplo, int *n, double2 *a, int *lda, int *info);
 extern "C" int zgetrf_(int *, int *, double2 *, int *, int *, int *);
 extern "C" int zlaswp_(int *, double2 *, int *, int *, int *, int *, int *);
 extern "C" double zlange_(char *, int *, int *, double2 *, int *, double *);
@@ -190,7 +192,9 @@ extern "C" int ztrmm_(char *, char *, char *, char *, int *, int *,
 extern "C" void ztrsm_(char *, char *, char *, char *, int *, int *, 
 		       double2 *, double2 *, int *, double2 *,int*);
 extern "C" int dsgesv_( int *, int *, double *, int *, int *, double *, int *, double *, int *, double *, float *, int *, int *);
-
+extern "C" void zaxpy_(int *, double2 *, double2 *, int *, double2 *, int *);
+extern "C" void zherk_(char *, char *, int *, int *, double *,
+                       double2 *, int *, double *, double2 *, int *);
 
 // Remove these stuff -- rajib 
 extern "C" int dsgesv_( int *, int *, double *, int *, int *, double *, int *, double *, int *, double *, float *, int *, int *);
