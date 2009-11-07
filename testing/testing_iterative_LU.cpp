@@ -60,6 +60,14 @@ void cache_flush( double * CACHE , int length ) {
 
 
 int main(int argc , char **argv){
+    cuInit( 0 );
+    cublasInit( );
+    printf("\n");
+    printout_devices( );
+
+
+    printf("\nUsage:\n\t\t ./testing_iterative_LU N");
+
  int printall = 0 ;
  FILE *fp ;
  fp = fopen("results-LU-Solve-MP.txt","w");
@@ -73,10 +81,8 @@ int main(int argc , char **argv){
   TimeStruct start, end;
 
   int LEVEL=1;
-    printf("\n____________________________________________________________________\n"); 
-    fprintf(fp,"\n____________________________________________________________________\n"); 
-  printf("DIM\tMP-CPU\tDP-CPU\tSP-CPU\tMP-GPU\tDP-GPU\tSP-CPU\tERROR\tRES\tRation\tNRHS\tIt-CPU\tIt-GPU\n");
-  fprintf(fp,"DIM\tMP-CPU\tDP-CPU\tSP-CPU\tMP-GPU\tDP-GPU\tSP-CPU\tERROR\tRES\tRation\tNRHS\tIt-CPU\tIt-GPU\n");
+  printf("Dimension\tMixed Precision\t\tDouble-Factor\tDouble-Solve\t\tSingle-Factor\tSigle-Solve\n");
+  fprintf(fp, "Dimension\tMixed Precision\t\tDouble-Factor\tDouble-Solve\t\tSingle-Factor\tSigle-Solve\n");
   int i ;
   int startN=64 ;
   int count = 18;
@@ -293,105 +299,35 @@ int main(int argc , char **argv){
     int PTSX = 0 , PTSA = maxnb*N*NRHS ;
 
     //magma_sgetrs("N",N ,NRHS, M_SWORK+PTSA ,N,IPIV, M_SWORK+PTSX, N,INFO );
-    printf("%4d ,",N); 
-    fprintf(fp,"%4d ,",N); 
-/*
-    //double alpha = 1 , beta=1; 
-    float alpha = 1 , beta=1; 
-    cache_flush( CACHE, CACHE_L*CACHE_L);
-    start = get_current_time();
-    sgemm_("N","N", &N, &N,&N,&alpha, As, &LDA,As+N*N, &N,&beta, As+N*N*2,&N);
-    end = get_current_time();
-    perf = (2.*N*N*N)/(1000000*GetTimerValue(start,end));
-    printf("%6.2f \n", perf);
-    fflush( stdout);
-    continue ;
-  */  
-   //=====================================================================
-    //              SP - CPU 
-    //=====================================================================
-    //cache_flush( CACHE, CACHE_L*CACHE_L);
-    start = get_current_time();
-    sgetrf_( &N, &N, As, &LDA, IPIV,  INFO);
-    end = get_current_time();
-    perf = (2.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
-if( printall == 1 ) 
-    printf("%6.2f ,", perf);
-    fprintf(fp,"%6.2f ,", perf);
-//    continue ;
-    //=====================================================================
-    //              MIXED - CPU 
-    //=====================================================================
+    printf("%4d\t",N); 
+    fprintf(fp,"%4d\t",N); 
+
+
     cublasSetMatrix( N, N, sizeof( double ), A, N, d_A, N ) ;
     cublasSetMatrix( N, NRHS, sizeof( double ), X, N, d_X, N ) ;
     cublasSetMatrix( N, NRHS, sizeof( double ), B, N, d_B, N ) ;
 
     dlacpy_("All", &N, &NRHS, B , &LDB, X, &N);
 
-    cache_flush( CACHE, CACHE_L*CACHE_L);
-    start = get_current_time();
-    dsgesv_( &N, &NRHS, A, &LDA, IPIV, B,&LDB, X, &LDX, L_WORK,L_SWORK, &ITER, INFO);
-    //dgesv_( &N, &NRHS, A, &LDA, IPIV, X, &LDB, INFO);
-    end = get_current_time();
-
-    //printf("%d ",INFO[0]);
-    //printf("%d ",ITER);
     int iter_CPU = ITER ;
-    perf = (2.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
-if( printall == 1 ) 
-    printf("%6.2f ,", perf);
-    fprintf(fp, "%6.2f ,", perf);
-    //dsgesv_l( N, NRHS, A, LDA, IPIV, B,LDB, X, LDX, L_WORK,L_SWORK, &ITER, INFO);
     dlacpy_("All", &N, &NRHS, X , &LDB, res_, &N);
 
-/*
-    //=====================================================================
-    //              DP - CPU 
-    //=====================================================================
 
-    cublasGetMatrix( N, N, sizeof( double ), d_A, N, A, N ) ;
-    cublasGetMatrix( N, NRHS, sizeof( double ), d_X, N, X, N ) ;
-    cublasGetMatrix( N, NRHS, sizeof( double ), d_B, N, B, N ) ;
-    dlag2s_(&N,&N,A, &LDA, As, &LDA , INFO);
-    dlag2s_(&N,&NRHS,B, &LDA, Bs, &LDA , INFO);
-    dlag2s_(&N,&NRHS,X, &LDA, Xs, &LDA , INFO);
-    cache_flush( CACHE, CACHE_L*CACHE_L);
-    start = get_current_time();
-    dgesv_( &N, &NRHS, A, &LDA, IPIV, B, &LDB, INFO);
-    end = get_current_time();
-    perf = (2.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
-if( printall == 1 ) 
-    printf("%6.2f ,", perf);
-    fprintf(fp, "%6.2f ,", perf);
- 
-   //=====================================================================
-    //              SP - CPU 
-    //=====================================================================
-    cache_flush( CACHE, CACHE_L*CACHE_L);
-    start = get_current_time();
-    sgesv_( &N, &NRHS, As, &LDA, IPIV, Bs, &LDB, INFO);
-    end = get_current_time();
-    perf = (2.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
-if( printall == 1 ) 
-    printf("%6.2f ,", perf);
-    fprintf(fp, "%6.2f ,", perf);
-*/
     //=====================================================================
     //              MIXED - GPU 
     //=====================================================================
+
+    *INFO = 0 ; 
     cublasGetMatrix( N, N, sizeof( double ), d_A, N, A, N ) ;
     perf = 0.0;
-    cache_flush( CACHE, CACHE_L*CACHE_L);
     start = get_current_time();
-    //cublasDgemm( 'N', 'N', N, N, NRHS, -1.0, d_A, LDA, d_B, LDX, 1.0, d_X, N);
     magma_dsgesv(  N , NRHS,d_A,LDA,IPIV,d_B,LDB,d_X,LDX,M_WORK,M_SWORK,&ITER,INFO, h_work_M_S, h_work_M_D, DIPIV);
     end = get_current_time();
-    //printf("%d ",INFO[0]);
-    printf("%d ",ITER);
+    //printf("\t\t%d",ITER);
     int iter_GPU = ITER ;
     perf = (2.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
-    printf("%6.2f ", perf);
-    fprintf(fp,"%6.2f ,", perf);
+    printf("\t%6.2f", perf);
+    fprintf(fp,"\t%6.2f", perf);
     cublasGetMatrix( N, NRHS, sizeof( double ), d_X, N, X, N ) ;
 
 
@@ -400,93 +336,50 @@ if( printall == 1 )
     //=====================================================================
     cublasSetMatrix( N, N, sizeof( double ), A, N, d_A, N ) ;
     float RMAX = slamch_("O");
-   // magmablas_dlag2s_64_64_16_4_v2(N , N , d_A , LDA , M_SWORK+PTSA, N, RMAX); // Merge with DLANGE /
-   // magmablas_dlag2s_64_64_16_4_v2(N , NRHS , d_B , LDA , M_SWORK+PTSX, N ,RMAX); // Merge with DLANGE /
-    cache_flush( CACHE, CACHE_L*CACHE_L);
     start = get_current_time();
     magma_dgetrf_gpu(&N, &N, d_A, &N, IPIV, h_work_M_D, INFO);
-    //magma_dgetrs_v2("N",N ,NRHS, d_A ,N,IPIV, d_B, N,INFO, h_work_M_D );
     end = get_current_time();
     perf = (2.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
-    printf("%6.2f ", perf);
-    fprintf(fp, "%6.2f ,", perf);
+    printf("\t\t\t%6.2f", perf);
+    fprintf(fp,"\t\t%6.2f", perf);
     cublasGetMatrix( N, NRHS, sizeof( double ), d_B, N, res_, N ) ;
 
 
 
     cublasSetMatrix( N, N, sizeof( double ), A, N, d_A, N ) ;
     RMAX = slamch_("O");
-   // magmablas_dlag2s_64_64_16_4_v2(N , N , d_A , LDA , M_SWORK+PTSA, N, RMAX); // Merge with DLANGE /
-   // magmablas_dlag2s_64_64_16_4_v2(N , NRHS , d_B , LDA , M_SWORK+PTSX, N ,RMAX); // Merge with DLANGE /
-    cache_flush( CACHE, CACHE_L*CACHE_L);
     start = get_current_time();
     magma_dgetrf_gpu(&N, &N, d_A, &N, IPIV, h_work_M_D, INFO);
     magma_dgetrs_v2("N",N ,NRHS, d_A ,N,IPIV, d_B, N,INFO, h_work_M_D );
     end = get_current_time();
     perf = (2.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
-    printf("%6.2f ", perf);
-    fprintf(fp, "%6.2f ,", perf);
+    printf("\t\t%6.2f", perf);
+    fprintf(fp,"\t\t%6.2f", perf);
     cublasGetMatrix( N, NRHS, sizeof( double ), d_B, N, res_, N ) ;
 
     //=====================================================================
     //              SP - GPU 
     //=====================================================================
-    cache_flush( CACHE, CACHE_L*CACHE_L);
-    start = get_current_time();
-    magma_sgetrf_gpu2(&N, &N,M_SWORK+PTSA, &N,IPIV, DIPIV, h_work_M_S, INFO);
-    magma_sdgetrs_gpu(&N,&NRHS,M_SWORK+PTSA,&LDA,DIPIV,M_SWORK,d_B ,&LDB, INFO);
-    //magma_sgetrf_gpu(&N, &N, M_SWORK+PTSA, &N, IPIV, h_work_M_S, INFO);
-    //magma_sgetrs_v2("N",N ,NRHS, M_SWORK+PTSA ,N,IPIV, M_SWORK+PTSX, N,INFO, h_work_M_S );
-    end = get_current_time();
-    perf = (2.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
-    printf("%6.2f ", perf);
-    fprintf(fp, "%6.2f ,", perf);
 
-    cache_flush( CACHE, CACHE_L*CACHE_L);
     start = get_current_time();
     magma_sgetrf_gpu(&N, &N, M_SWORK+PTSA, &N, IPIV, h_work_M_S, INFO);
     end = get_current_time();
     perf = (2.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
-    printf("%6.2f ", perf);
-    fprintf(fp, "%6.2f ,", perf);
+    printf("\t\t\t%6.2f", perf);
+    fprintf(fp,"\t\t\t%6.2f", perf);
+
+    start = get_current_time();
+    magma_sgetrf_gpu2(&N, &N,M_SWORK+PTSA, &N,IPIV, DIPIV, h_work_M_S, INFO);
+    magma_sdgetrs_gpu(&N,&NRHS,M_SWORK+PTSA,&LDA,DIPIV,M_SWORK,d_B ,&LDB, INFO);
+    end = get_current_time();
+    perf = (2.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
+    printf("\t\t%6.2f", perf);
+    fprintf(fp,"\t\t%6.2f", perf);
+
+
     //=====================================================================
     //              ERROR DP vs MIXED  - GPU 
     //=====================================================================
-
-   double res ;
-   double exact_res = 0.;
-   double max_norm_x = 0.0 , max_norm_res = 0.0;
-   int it =0,jt=0;
-   for(it=0; it<N; it++) {
-   for(jt=0; jt<NRHS; jt++) {
-       res = res_[it+jt*N] - X[it+jt*N];
-       exact_res += res*res;
-       if (max_norm_res < fabs(res)) max_norm_res = fabs(res);
-       if (max_norm_x < fabs(X[it+jt*N])) max_norm_x = fabs(X[it+jt*N]);
-   }
-   }
-if( printall == 1 ) 
-   printf("   %10.20lf ,",exact_res);
-   fprintf(fp, "   %10.20lf ,",exact_res);
-
-   exact_res = sqrt(exact_res);
-
-   double matnorm = dlange_("I", &N, &NRHS,  X, &N, res_);
- /*
-    printf("Final residual = %e\n\n", exact_res);
-    printf("                 %e / (%e * %e) = %e\n",
-            max_norm_res, matnorm, max_norm_x,
-            max_norm_res/(matnorm*max_norm_x));
-
-*/
-if( printall == 1 ) 
-    printf("%e ,", exact_res);
-    fprintf(fp, "%e ,", exact_res);
-if( printall == 1 ) 
-    printf("%e ,",
-            max_norm_res/(matnorm*max_norm_x));
-    fprintf(fp, "%e ,",
-            max_norm_res/(matnorm*max_norm_x));
 
 if( printall == 0 )  printf("\n");
 
@@ -496,6 +389,11 @@ if( printall == 1 )
     printf(" %4d , %2d , %2d\n",NRHS,iter_CPU, iter_GPU); 
     fprintf(fp, " %4d , %2d , %2d\n",NRHS,iter_CPU, iter_GPU); 
   }
+
+
+
+
+
 
     free(CACHE);
 FREE19:
