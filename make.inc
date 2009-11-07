@@ -23,7 +23,7 @@
 
 	CUDADIR   = /usr/local/cuda
 
-	LIBDIR    = -L$(HOME)/intel/mkl/10.0.1.014/lib/em64t \
+	LIBDIR    = -L/home/tomov/intel/mkl/10.0.1.014/lib/em64t \
                     -L$(CUDADIR)/lib64
 	INC       = -I../include -I$(CUDADIR)/include
 	

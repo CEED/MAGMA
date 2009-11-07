@@ -31,6 +31,8 @@ include ../make.inc
           testing_cpotrf.cpp \
           testing_cgetrf.cpp \
           testing_zgetrf.cpp \
+          \
+          testing_iterative_LU.cpp \
 
     OBJ = $(SRC:.cpp=.o)
     EXE = $(OBJ:.o=)

@@ -209,8 +209,8 @@ magma_sgetrf_gpu2(int *m, int *n, float *a, int *lda,
       for(int k=0;k<min(*m, *n); k++)
         newipiv[k] = 0;;
       cudaMemcpy(newipiv,dipiv,min(*m,*n)*sizeof(int),cudaMemcpyDeviceToHost);
-      for(int k=0;k<min(*m, *n); k++)
-        printf("%d\n",newipiv[k]);
+      //for(int k=0;k<min(*m, *n); k++)
+      //  printf("%d\n",newipiv[k]);
 
       free(newipiv);
     }

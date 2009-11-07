@@ -71,6 +71,8 @@ int magma_zgetrf(int *, int *, double2 *, int *, int *,
 
 int magma_sdgetrs_gpu(int *n, int *nrhs, float *a, int *lda,
                   int *ipiv, float *x, double *b, int *ldb, int *info);
+void magma_dgetrs_v2( char *TRANS , int N , int NRHS, double *A , int LDA , int *IPIV , double *B, int LDB, int *INFO, double *BB1 );
+void magma_dsgesv(int N , int NRHS,double *A,int LDA ,int *IPIV,double *B,int LDB,double *X,int LDX,double *WORK, float *SWORK,int *ITER,int *INFO,float *h_work,double *h_work2,int *DIPIV );
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- LAPACK Externs used in MAGMA
@@ -185,4 +187,18 @@ extern "C" int ztrmm_(char *, char *, char *, char *, int *, int *,
 		      double2 *, double2 *, int *, double2 *,int *);
 extern "C" void ztrsm_(char *, char *, char *, char *, int *, int *, 
 		       double2 *, double2 *, int *, double2 *,int*);
+extern "C" int dsgesv_( int *, int *, double *, int *, int *, double *, int *, double *, int *, double *, float *, int *, int *);
+
+
+// Remove these stuff -- rajib 
+extern "C" int dsgesv_( int *, int *, double *, int *, int *, double *, int *, double *, int *, double *, float *, int *, int *);
+extern "C" int dgesv_( int *, int *, double *, int *, int *, double *, int *,  int *);
+extern "C" int sgesv_( int *, int *, float *, int *, int *, float *, int *,  int *);
+extern "C" int dlag2s_( int *, int *, double *, int *,  float *, int *,  int *);
+extern "C" int slag2d_( int *, int *, float *, int *,  double *, int *,  int *);
+extern "C" int sgetrs_(char *, int *, int *, float *, int *, int *, float * ,int * ,  int *);
+extern "C" int idamax_(int *, double *, int *);
+extern "C" int dgetrs_(char *, int *, int *, double *, int *, int *, double * ,int * ,  int *);
+
+
 #endif

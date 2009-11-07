@@ -56,6 +56,7 @@ void szero_nbxnb_block(int, float *, int);
 
 /*
 All the Iterative Refinement Stuffs Here
+Kernels 
 */
 
 extern "C" double  magma_dlange( char NORM, int M, int N , double *A, int LDA , double * WORK );
@@ -64,4 +65,5 @@ extern "C" void magmablas_sdaxpycp(float *R, double *X, int M, int ldr,int lda, 
 extern "C" void magmablas_magma_dgemv_MLU(int n, int m, double *A, int lda, double *x, double *z);
 extern "C" void magmablas_slag2d(int M, int N, float *SA, int LDSA , double *A , int LDA, int *INFO);
 extern "C" void magma_dlacpy(int M, int N, double *SA, int LDSA , double *A , int LDA);
+
 #endif

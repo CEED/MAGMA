@@ -26,7 +26,7 @@ magma_sdgetrs_gpu(int *n, int *nrhs, float *a, int *lda,
     =======   
 
     SDGETRS solves a system of linear equations   
-       A * X = B
+       A * X = B  or  A' * X = B   
     with a general N-by-N matrix A using the LU factorization computed   
     by MAGMA_SGETRF_GPU. B is in double, A and X in single precision. This 
     routine is used in the mixed precision iterative solver magma_dsgesv.
@@ -85,15 +85,14 @@ magma_sdgetrs_gpu(int *n, int *nrhs, float *a, int *lda,
   if (*n == 0 || *nrhs == 0) {
     return 0;
   }
-
   /* Get X by row applying interchanges to B and cast to single */
   magmablas_sdlaswp(*nrhs, b, *ldb, x, *n, ipiv);
 
   /* Solve L*X = B, overwriting B with X. */
-  cublasStrsm('L', 'L', 'N', 'U', *n, *nrhs, 1.f, a, *lda, x, *ldb);
-  
+  magmablas_strsm('L','L','N','U', *n , *nrhs,  a , *lda , x , *ldb );
+
   /* Solve U*X = B, overwriting B with X. */
-  cublasStrsm('L', 'U', 'N', 'N', *n, *nrhs, 1.f, a, *lda, x, *ldb);
+  magmablas_strsm('L', 'U', 'N', 'N', *n, *nrhs,   a, *lda, x, *ldb);
 
   return 0;
   /*     End of MAGMA_SDGETRS */
