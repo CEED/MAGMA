@@ -192,6 +192,41 @@ void dq_to_panel(int ib, double *a, int lda, double *work){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
+   -- Put 0s in the upper triangular part of a panel (and 1s on the diagonal)
+*/
+void zpanel_to_q(char uplo, int ib, double2 *a, int lda, double2 *work){
+  int i, j, k = 0;
+  double2 *col;
+  for(i=0; i<ib; i++){
+    col = a + i*lda;
+    for(j=0; j<i; j++){
+      work[k  ].x = col[j].x;
+      work[k++].y = col[j].y;
+      col[j].x = col[j].y = 0.;
+    }
+    work[k  ].x = col[i].x;
+    work[k++].y = col[i].y;
+    col[j].x = 1.;
+    col[j].y = 0.;
+  }
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Restores a panel (after call to "panel_to_q")
+*/
+void zq_to_panel(char uplo, int ib, double2 *a, int lda, double2 *work){
+  int i, j, k = 0;
+  double2 *col;
+  for(i=0; i<ib; i++){
+    col = a + i*lda;
+    for(j=0; j<=i; j++){
+      col[j].x = work[k  ].x;
+      col[j].y = work[k++].y;
+    }
+  }
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
    -- Auxiliary function: ipiv(i) indicates that row i has been swapped with 
       ipiv(i) from top to bottom. This function rearranges ipiv into newipiv
       where row i has to be moved to newipiv(i). The new pivoting allows for

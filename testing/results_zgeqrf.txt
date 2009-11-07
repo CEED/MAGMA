@@ -1,0 +1,16 @@
+[tomov@cumin testing]$ ./testing_zgeqrf
+device 0: GeForce GTX 280, 1296.0 MHz clock, 1023.8 MB memory
+device 1: Quadro NVS 290, 918.0 MHz clock, 255.3 MB memory
+
+Usage: 
+  testing_zgeqrf -N 1024
+
+  N    CPU GFlop/s    GPU GFlop/s    ||R - Q'A|| / ||A||
+========================================================
+ 1024     30.16          36.38        4.083015e-15
+ 2048     40.72          44.75        4.966354e-15
+ 3072     48.11          53.16        5.943240e-15
+ 4032     50.95          55.14        8.178609e-15
+ 5184     52.32          57.42        9.053620e-15
+ 6016     52.97          57.95        9.415210e-15
+ 7040     53.62          58.49        8.615187e-15

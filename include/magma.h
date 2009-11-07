@@ -69,6 +69,10 @@ int magma_cgeqrf(int *, int *, float2 *, int  *,  float2  *,
 int magma_zpotrf(char *, int *, double2 *, int *, double2 *, int *);
 int magma_zgetrf(int *, int *, double2 *, int *, int *,
                  double2 *, double2 *, int *);
+int magma_zlarfb(char, char, int, int, int *, double2 *, int *, double2 *,
+                 int *, double2 *, int *, double2 *, int *);
+int magma_zgeqrf(int *, int *, double2 *, int  *,  double2  *,
+                 double2 *, int *, double2 *, int *);
 
 int magma_sdgetrs_gpu(int *n, int *nrhs, float *a, int *lda,
                   int *ipiv, float *x, double *b, int *ldb, int *info);
@@ -184,6 +188,10 @@ extern "C" int dorgqr_(int *, int *, int *, double *, int *, double *,
 extern "C" long int lsame_(char *, char *);
 
 extern "C" int zpotrf_(char *uplo, int *n, double2 *a, int *lda, int *info);
+extern "C" int zgeqrf_(int*, int*, double2 *, int*, double2 *, double2 *,
+		       int *, int *);
+extern "C" int zlarft_(char *, char *, int *, int *, double2 *, int *, 
+		       double2 *, double2 *, int *);
 extern "C" int zgetrf_(int *, int *, double2 *, int *, int *, int *);
 extern "C" int zlaswp_(int *, double2 *, int *, int *, int *, int *, int *);
 extern "C" double zlange_(char *, int *, int *, double2 *, int *, double *);

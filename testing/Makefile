@@ -33,6 +33,7 @@ include ../make.inc
           testing_cgeqrf.cpp \
           testing_zpotrf.cpp \
           testing_zgetrf.cpp \
+          testing_zgeqrf.cpp \
           \
           testing_dsgesv.cpp \
           testing_dsposv.cpp \

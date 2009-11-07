@@ -9,6 +9,7 @@
 include ../../make.inc
 
     SRC = cqrt02.f  \
+          zqrt02.f  \
           shst01.f  \
           sorghr.f  \
           sqrt02.f  \

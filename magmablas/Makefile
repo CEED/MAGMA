@@ -27,6 +27,7 @@
              ztranspose.cu \
              zpermute.cu \
              ztrsm.cu \
+             ztrmm.cu \
              zherk.cu \
              \
              ctrsm.cu \

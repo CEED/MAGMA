@@ -27,6 +27,7 @@ int magma_get_cgeqrf_nb(int m);
 
 int magma_get_zpotrf_nb(int m);
 int magma_get_zgetrf_nb(int m);
+int magma_get_zgeqrf_nb(int m);
 
 #include <sys/time.h>
 typedef struct timestruct
@@ -50,5 +51,8 @@ void cq_to_panel(char uplo, int ib, float2 *a, int lda, float2 *work);
 
 void dpanel_to_q(int ib, double *a, int lda, double *work);
 void dq_to_panel(int ib, double *a, int lda, double *work);
+
+void zpanel_to_q(char uplo, int ib, double2 *a, int lda, double2 *work);
+void zq_to_panel(char uplo, int ib, double2 *a, int lda, double2 *work);
 
 #endif

@@ -31,6 +31,8 @@ extern "C" void magmablas_zherk(char, char, int, int, double,
                                 double2 *, int, double, double2 *, int);
 extern "C" void magmablas_ztrsm(char, char, char, char, int, int, double2,
                                 double2 *, int, double2 *, int);
+extern "C" void magmablas_ztrmm(char, char, char, char, int, int, double2,
+                                double2 *, int, double2 *, int);
 
 extern "C" void magmablas_strsm(char, char, char, char,
 				int, int, float*, int, float*, int);
