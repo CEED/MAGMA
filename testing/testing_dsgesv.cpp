@@ -401,7 +401,8 @@ int main(int argc , char **argv){
     //              ERROR DP vs MIXED  - GPU 
     //=====================================================================
 
-if( printall == 0 )  printf("\n");
+ printf("\n");
+ fprintf(fp,"\n");
 
 
     LEVEL = 1 ; 

@@ -33,6 +33,7 @@ include ../make.inc
           testing_zgetrf.cpp \
           \
           testing_dsgesv.cpp \
+          testing_dsposv.cpp \
 
     OBJ = $(SRC:.cpp=.o)
     EXE = $(OBJ:.o=)
