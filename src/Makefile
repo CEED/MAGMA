@@ -47,6 +47,7 @@ include ../make.inc
              auxiliary.o \
              \
              magma_dsgesv.o \
+             magma_dsposv.o \
 
 all: $(LIBMAGMA)
 
