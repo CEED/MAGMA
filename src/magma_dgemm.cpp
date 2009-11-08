@@ -1,11 +1,3 @@
-/*
-    -- MAGMA (version 0.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       June 2009
-*/
-
 #include "cuda.h"
 #include "cublas.h"
 #include "magma.h"
@@ -228,5 +220,4 @@ magmablasDgemm(char TRANSA, char TRANSB, int m , int n , int k , double alpha, c
 	   }
         }
         
-/*     End of MAGMA_DGETRF_GPU */
-} /* magma_dgetrf_gpu */
+}

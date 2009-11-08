@@ -1,11 +1,3 @@
-/*
-    -- MAGMA (version 0.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       June 2009
-*/
-
 #include "cuda.h"
 #include "cublas.h"
 #include "magma.h"
@@ -24,7 +16,7 @@
    Purpose
    =======
  
-   DGEMM  performs one of the matrix-matrix operations
+   SGEMM  performs one of the matrix-matrix operations
  
       C := alpha*op( A )*op( B ) + beta*C,
  
@@ -134,8 +126,7 @@
  
    Level 3 Blas routine.
     =====================================================================    */
-int 
-magmablasSgemm(char TRANSA, char TRANSB, int m , int n , int k , float alpha, const float *A, int lda, const float *B, int ldb, float beta, float *C, int ldc)
+int magmablasSgemm(char TRANSA, char TRANSB, int m , int n , int k , float alpha, const float *A, int lda, const float *B, int ldb, float beta, float *C, int ldc)
 {
 	if(m==0 || n==0  || ( ( alpha==0 || k==0 ) && beta ==1 ) ){
 		return 0;
@@ -228,5 +219,4 @@ magmablasSgemm(char TRANSA, char TRANSB, int m , int n , int k , float alpha, co
 	   }
         }
         
-/*     End of MAGMA_DGETRF_GPU */
-} /* magma_dgetrf_gpu */
+} 
