@@ -1,4 +1,3 @@
-#include <stdio.h>
 /*
    -- MAGMA (version 0.1) --
        Univ. of Tennessee, Knoxville
@@ -28,7 +27,9 @@
 
 =====================================================================
 */
+#include <stdlib.h>
+#include <stdio.h>
 void magma_xerbla(char *srname , int *info){
-printf("MAGMA Error: On Routine %s argument number %d had an illegal value\n",srname , *info);
-exit(1);
+	printf("MAGMA Error: On Routine %s argument number %d had an illegal value\n",srname , *info);
+	exit(1);
 }

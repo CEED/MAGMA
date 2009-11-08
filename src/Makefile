@@ -56,6 +56,7 @@ include ../make.inc
              magma_sgemm.o \
              magma_spotrs_gpu.o \
              magma_dpotrs_gpu.o \
+             magma_xerbla.o \
 
 all: $(LIBMAGMA)
 
