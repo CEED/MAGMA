@@ -68,8 +68,10 @@ void magma_spotrs_gpu( char *UPLO , int N , int NRHS, float *A , int LDA ,float 
 			*INFO = -5; 
 		if ( LDB < MAX(1,N))
 			*INFO = -7;
-                if( *INFO != 0 ) 
+                if( *INFO != 0 ){ 
 		    magma_xerbla("magma_spotrs_gpu", INFO); 
+		    return;
+		}
 		if( N==0 || NRHS ==0) 
 			return;	
                 if( *UPLO =='U' || *UPLO=='u'){

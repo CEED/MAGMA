@@ -70,8 +70,10 @@ void magma_dpotrs_gpu( char *UPLO , int N , int NRHS, double *A , int LDA ,doubl
                         *INFO = -5;
                 if ( LDB < MAX(1,N))
                         *INFO = -7;
-                if( *INFO != 0 )
+                if( *INFO != 0 ){
                     magma_xerbla("magma_dpotrs_gpu", INFO);
+		    return;
+		}
                 if( N==0 || NRHS ==0)
                         return;
                 if( *UPLO =='U' || *UPLO=='u'){
