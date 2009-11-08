@@ -52,9 +52,7 @@
 
   =====================================================================
 */
-int MAX( int a, int b){
- return a>b ? a: b ;
-}
+#define MAX(a,b)       (((a)>(b))?(a):(b))
 
 void magma_spotrs_gpu( char *UPLO , int N , int NRHS, float *A , int LDA ,float *B, int LDB, int *INFO){
 		*INFO = 0 ; 
@@ -83,3 +81,4 @@ void magma_spotrs_gpu( char *UPLO , int N , int NRHS, float *A , int LDA ,float 
                          magmablas_strsm('L','L','T','N', N , NRHS,  A , LDA , B , LDB );
                 }
 }
+#undef MAX

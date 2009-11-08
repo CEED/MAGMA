@@ -7,33 +7,132 @@
 #define ITERMAX 30
 #define BWDMAX 1.0
 
-void magma_spotrs_gpu( char *UPLO , int N , int NRHS, float *A , int LDA ,float *B, int LDB, int *INFO);
-void magma_dpotrs_gpu( char *UPLO , int N , int NRHS, double *A , int LDA ,double *B, int LDB, int *INFO);
-
 int MAX( int a, int b){
  return a>b ? a: b ;
 }
 
+void magma_dsposv(char UPLO, int N ,int NRHS, double *A, int LDA ,double *B, int LDB,double *X,int LDX,double *WORK,float *SWORK,int *ITER,int *INFO,float *h_work,double *h_work2 ){
+
+/*
+  Purpose
+  =======
+
+  DSPOSV computes the solution to a real system of linear equations
+     A * X = B,
+  where A is an N-by-N symmetric positive definite matrix and X and B
+  are N-by-NRHS matrices.
+
+  DSPOSV first attempts to factorize the matrix in SINGLE PRECISION
+  and use this factorization within an iterative refinement procedure
+  to produce a solution with DOUBLE PRECISION normwise backward error
+  quality (see below). If the approach fails the method switches to a
+  DOUBLE PRECISION factorization and solve.
+
+  The iterative refinement is not going to be a winning strategy if
+  the ratio SINGLE PRECISION performance over DOUBLE PRECISION
+  performance is too small. A reasonable strategy should take the
+  number of right-hand sides and the size of the matrix into account.
+  This might be done with a call to ILAENV in the future. Up to now, we
+  always try iterative refinement.
+
+  The iterative refinement process is stopped if
+      ITER > ITERMAX
+  or for all the RHS we have:
+      RNRM < SQRT(N)*XNRM*ANRM*EPS*BWDMAX
+  where
+      o ITER is the number of the current iteration in the iterative
+        refinement process
+      o RNRM is the infinity-norm of the residual
+      o XNRM is the infinity-norm of the solution
+      o ANRM is the infinity-operator-norm of the matrix A
+      o EPS is the machine epsilon returned by DLAMCH('Epsilon')
+  The value ITERMAX and BWDMAX are fixed to 30 and 1.0D+00
+  respectively.
+
+  Arguments
+  =========
+
+  UPLO    (input) CHARACTER
+          = 'U':  Upper triangle of A is stored;
+          = 'L':  Lower triangle of A is stored.
+
+  N       (input) INTEGER
+          The number of linear equations, i.e., the order of the
+          matrix A.  N >= 0.
+
+  NRHS    (input) INTEGER
+          The number of right hand sides, i.e., the number of columns
+          of the matrix B.  NRHS >= 0.
+
+  A       (input or input/ouptut) DOUBLE PRECISION array,
+          dimension (LDA,N)
+          On entry, the symmetric matrix A.  If UPLO = 'U', the leading
+          N-by-N upper triangular part of A contains the upper
+          triangular part of the matrix A, and the strictly lower
+          triangular part of A is not referenced.  If UPLO = 'L', the
+          leading N-by-N lower triangular part of A contains the lower
+          triangular part of the matrix A, and the strictly upper
+          triangular part of A is not referenced.
+          On exit, if iterative refinement has been successfully used
+          (INFO.EQ.0 and ITER.GE.0, see description below), then A is
+          unchanged, if double precision factorization has been used
+          (INFO.EQ.0 and ITER.LT.0, see description below), then the
+          array A contains the factor U or L from the Cholesky
+          factorization A = U**T*U or A = L*L**T.
 
 
-void magma_dsposv(
-               char UPLO, 
-	       int N ,
-	       int NRHS, 
-	       double *A, 
-	       int LDA ,
-	       double *B, 
-	       int LDB,
-	       double *X,
-	       int LDX,
-	       double *WORK,
-	       float *SWORK,
-	       int *ITER,
-	       int *INFO
-	       ,
-	       float *h_work,
-	       double *h_work2 
-		){
+  LDA     (input) INTEGER
+          The leading dimension of the array A.  LDA >= max(1,N).
+
+  B       (input) DOUBLE PRECISION array, dimension (LDB,NRHS)
+          The N-by-NRHS right hand side matrix B.
+
+  LDB     (input) INTEGER
+          The leading dimension of the array B.  LDB >= max(1,N).
+
+  X       (output) DOUBLE PRECISION array, dimension (LDX,NRHS)
+          If INFO = 0, the N-by-NRHS solution matrix X.
+
+  LDX     (input) INTEGER
+          The leading dimension of the array X.  LDX >= max(1,N).
+
+  WORK    (workspace) DOUBLE PRECISION array, dimension (N*NRHS)
+          This array is used to hold the residual vectors.
+
+  SWORK   (workspace) REAL array, dimension (N*(N+NRHS))
+          This array is used to use the single precision matrix and the
+          right-hand sides or solutions in single precision.
+
+  ITER    (output) INTEGER
+          < 0: iterative refinement has failed, double precision
+               factorization has been performed
+               -1 : the routine fell back to full precision for
+                    implementation- or machine-specific reasons
+               -2 : narrowing the precision induced an overflow,
+                    the routine fell back to full precision
+               -3 : failure of SPOTRF
+               -31: stop the iterative refinement after the 30th
+                    iterations
+          > 0: iterative refinement has been sucessfully used.
+               Returns the number of iterations
+
+  INFO    (output) INTEGER
+          = 0:  successful exit
+          < 0:  if INFO = -i, the i-th argument had an illegal value
+          > 0:  if INFO = i, the leading minor of order i of (DOUBLE
+                PRECISION) A is not positive definite, so the
+                factorization could not be completed, and the solution
+                has not been computed.
+
+  hwork    (workspace) REAL array, dimension at least (nb, nb)
+          where nb can be obtained through magma_get_spotrf_nb(*n)
+          Work array allocated with cudaMallocHost.
+
+  hwork2   (workspace) DOUBLE array, dimension at least (nb, nb)
+           where nb can be obtained through magma_get_dpotrf_nb(*n)
+           Work array allocated with cudaMallocHost.
+  =========
+*/
 
   *ITER = 0 ;
   *INFO = 0 ; 
@@ -50,9 +149,8 @@ void magma_dsposv(
     *INFO =-9;
    
   if(*INFO!=0){
-    printf("ERROR in PARAMETER NUMBER %d\n",*INFO);
+    magma_xerbla("magma_dsposv",INFO);
   }
-
 
   if( N == 0 || NRHS == 0 ) 
     return;
@@ -75,14 +173,12 @@ void magma_dsposv(
   magma_dlag2s(N , NRHS , B , LDB , SWORK+PTSX, N , RMAX );
   if(*INFO !=0){
     *ITER = -2 ;
-    printf("magmablas_dlag2s\n");
     goto L40;
   } 
   
   magma_dlat2s(UPLO ,  N ,  A , LDA , SWORK+PTSA, N , INFO ); 
   if(*INFO !=0){
     *ITER = -2 ;
-    printf("magmablas_dlag2s\n");
     goto L40;
   }   
   magma_spotrf_gpu(&UPLO, &N, SWORK+ PTSA, &LDA, h_work, INFO);
@@ -94,16 +190,11 @@ void magma_dsposv(
   magmablas_slag2d(N , NRHS , SWORK+PTSX, N , X , LDX , INFO );
 
   magma_dlacpy(N, NRHS, B , LDB, WORK, N);
-  /*
+
   if( NRHS == 1 )
-   magmablas_magma_dgemv_MLU(N,N,A,LDA,X,WORK);
-  else 
-   cublasDgemm( 'N', 'N', N, NRHS, N, -1.0, A, LDA, X, LDX, 1.0, WORK, N);
-  */
-  //cublasDsymm('L', UPLO , N , NRHS , -1.0,  A , LDA , X , LDX , 1 , WORK , N );
   magma_dsymv('L', UPLO , N ,  -1.0,  A , LDA , X ,  1 , 1.0 ,  WORK , 1 );
-//extern "C" void mdsymv (char side , char uplo , int m , double alpha ,  double *A , int lda ,
-// double *X , int incx , double beta , double *Y , int incy )
+  else
+  cublasDsymm('L', UPLO , N , NRHS , -1.0,  A , LDA , X , LDX , 1 , WORK , N );
 
   int i,j ;
   for(i=0;i<NRHS;i++){
@@ -132,23 +223,14 @@ void magma_dsposv(
     } 
     magma_spotrs_gpu( &UPLO,N ,NRHS, SWORK+PTSA , LDA ,SWORK+PTSX,LDB,INFO);
 
-    //magmablas_slag2d_64_64_16_4_v2(N , NRHS , SWORK+PTSX, N ,WORK , N , INFO );
-    //magmablas_sdaxpycp(SWORK,X,N,N,LDA,B,WORK) ;
     for(i=0;i<NRHS;i++){
-        //cublasDaxpy(N, 1.0, WORK+i*N, 1 , X+i*N, 1);
-        //magmablas_sdaxpy(SWORK+i*N,X+i*N,N,N,LDA) ;
         magmablas_sdaxpycp(SWORK+i*N, X+i*N, N, N, LDA, B+i*N,WORK+i*N) ;
     }
-    //magmablas_dlacpy_64_64_16_4_v2(N, NRHS, B , LDB, WORK, N);
-/*
-    if( NRHS == 1 )
-        magmablas_magma_dgemv_MLU(N,N, A,LDA,X,WORK);
-    else 
-        cublasDgemm( 'N', 'N', N, NRHS, N, alpha, A, LDA, X, LDX, beta, WORK, N);
-*/    
 
+    if( NRHS == 1 )
       magma_dsymv('L', UPLO , N , alpha,  A , LDA , X ,  1 , beta ,  WORK , 1 );
-//    cublasDsymm('L', UPLO , N , NRHS , alpha,  A , LDA , X , LDX , beta , WORK , N );
+    else 
+     cublasDsymm('L', UPLO , N , NRHS , alpha,  A , LDA , X , LDX , beta , WORK , N );
 
     for(i=0;i<NRHS;i++){
       int j,inc=1 ;

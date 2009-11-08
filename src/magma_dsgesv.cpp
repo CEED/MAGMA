@@ -5,9 +5,8 @@
 #include "cublas.h"
 #include "cuda.h"
 
-int MAX( int a, int b){
- return a>b ? a: b ; 
-}
+#define MAX(a,b)       (((a)>(b))?(a):(b))
+
 #define BWDMAX 1.0
 #define ITERMAX 30
 
@@ -140,10 +139,17 @@ void magma_dsgesv(
                 but the factor U is exactly singular, so the solution
                 could not be computed.
 
+  hwork    (workspace) REAL array, dimension at least (nb, nb)
+          where nb can be obtained through magma_get_spotrf_nb(*n)
+          Work array allocated with cudaMallocHost.
 
-  hwork
-  hwork2
-  dpiv 
+  hwork2   (workspace) DOUBLE array, dimension at least (nb, nb)
+           where nb can be obtained through magma_get_dpotrf_nb(*n)
+           Work array allocated with cudaMallocHost.
+
+  DIPIV   (output) INTEGER array on the GPU, dimension (min(M,N))
+            The pivot indices; for 1 <= i <= min(M,N), row i of the
+            matrix was moved to row IPIV(i).
 
   =========
 */
@@ -165,8 +171,7 @@ void magma_dsgesv(
     *INFO =-9;
 
   if(*INFO!=0){
-    printf("ERROR in PARAMETER NUMBER %d\n",(*INFO) * ( -1));
-    return;
+    magma_xerbla("magma_dsgesv",INFO) ;
   }
 
   if( N == 0 || NRHS == 0 )
@@ -248,7 +253,8 @@ void magma_dsgesv(
     for(i=0;i<NRHS;i++){
        magmablas_sdaxpycp(SWORK+i*N,X+i*N,N,N,LDA,B+i*N,WORK+i*N) ;
     }
-
+/*
+unnecessary may be*/
     magma_dlacpy(N, NRHS, B , LDB, WORK, N);
     if( NRHS == 1 )
         magmablas_magma_dgemv_MLU(N,N, A,LDA,X,WORK);
@@ -313,3 +319,5 @@ void magma_dgetrs_v2( char *TRANS , int N , int NRHS, double *A , int LDA , int 
                 magmablas_dtrsm('L','L','N','U', N , NRHS,  A , LDA , B , LDB );
                 magmablas_dtrsm('L','U','N','N', N , NRHS,  A , LDA , B , LDB );
 }
+
+#undef MAX
