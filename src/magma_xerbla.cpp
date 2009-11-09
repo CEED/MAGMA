@@ -30,6 +30,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 void magma_xerbla(char *srname , int *info){
-	printf("MAGMA Error: On Routine %s argument number %d had an illegal value\n",srname , *info);
+	printf("MAGMA Error: On Routine %s argument number %d had an illegal value\n",srname , (-1)*(*info));
 	exit(1);
 }
