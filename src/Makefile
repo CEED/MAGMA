@@ -50,13 +50,13 @@ include ../make.inc
              \
              auxiliary.o \
              \
-             magma_dsgesv.o \
-             magma_dsposv.o \
+             dsgesv_gpu.o \
+             dsposv_gpu.o \
              dgemm_gpu.o \
              sgemm_gpu.o \
-             magma_spotrs_gpu.o \
-             magma_dpotrs_gpu.o \
-             magma_xerbla.o \
+             spotrs_gpu.o \
+             dpotrs_gpu.o \
+             xerbla.o \
 
 all: $(LIBMAGMA)
 
