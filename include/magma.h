@@ -74,6 +74,7 @@ int magma_zlarfb(char, char, int, int, int *, double2 *, int *, double2 *,
 int magma_zgeqrf(int *, int *, double2 *, int  *,  double2  *,
                  double2 *, int *, double2 *, int *);
 
+
 int magma_sdgetrs_gpu(int *n, int *nrhs, float *a, int *lda,
                   int *ipiv, float *x, double *b, int *ldb, int *info);
 void magma_dgetrs_v2( char *TRANS , int N , int NRHS, double *A , int LDA , int *IPIV , double *B, int LDB, int *INFO, double *BB1 );
@@ -81,6 +82,10 @@ void magma_dsgesv(int N , int NRHS,double *A,int LDA ,int *IPIV,double *B,int LD
 void magma_spotrs_gpu( char *UPLO , int N , int NRHS, float *A , int LDA ,float *B, int LDB, int *INFO);
 void magma_dpotrs_gpu( char *UPLO , int N , int NRHS, double *A , int LDA ,double *B, int LDB, int *INFO);
 void magma_dsposv(char UPLO,int N ,int NRHS,double *A,int LDA ,double *B,int LDB,double *X,int LDX,double *WORK,float *SWORK,int *ITER,int *INFO,float *h_work,double *h_work2 );
+
+void magma_xerbla(char *name , int *info);
+
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- LAPACK Externs used in MAGMA
 */
@@ -214,7 +219,5 @@ extern "C" int sgetrs_(char *, int *, int *, float *, int *, int *, float * ,int
 extern "C" int idamax_(int *, double *, int *);
 extern "C" int dgetrs_(char *, int *, int *, double *, int *, int *, double * ,int * ,  int *);
 extern "C" double dsymm_     (char *,char*,int *,int *,double *,double *,int *,double *,int *,double *,double *,int *);
-//001:       SUBROUTINE DSYMM(SIDE,  UPLO, M,    N,    ALPHA,     A,      LDA,     B,     LDB,   BETA,   C,        LDC)
-
 
 #endif
