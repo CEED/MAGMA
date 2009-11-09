@@ -1,3 +1,12 @@
+/*
+    -- MAGMA (version 0.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       June 2009
+*/
+
+
 #include <stdio.h>
 #include<stdlib.h>
 #include<math.h>
@@ -105,13 +114,6 @@ void die(char *message){
   exit(-1);	
 }
 
-void cache_flush( double * CACHE , int length ) {
-     int i = 0 ; 
-     for( i=0;i<length ;i++){
-          CACHE[i]=CACHE[i]+0.1;
-     }
-}
-
 
 int main(int argc , char **argv){
  int  printall =0 ; 
@@ -131,8 +133,6 @@ int main(int argc , char **argv){
     printf("\nUsage:\n\t\t ./testing_dsposv N");
     fprintf(fp, "\nUsage:\n\t\t ./testing_dsposv N");
 
- //printf("Epsilon DP: %10.20lf \nEpsilon SP: %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
- //fprintf(fp,"Epsilon DP: %10.20lf \nEpsilon SP: %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
  printf("\n\nEpsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
  fprintf(fp, "Epsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
 
@@ -303,7 +303,7 @@ int main(int argc , char **argv){
     int iter_CPU = 0 ;
 
     //=====================================================================
-    //              MP - GPU 
+    //              Mixed Precision Iterative Refinement - GPU 
     //=====================================================================
 
     start = get_current_time();
@@ -313,6 +313,9 @@ int main(int argc , char **argv){
     cublasGetMatrix( N, NRHS, sizeof( double), d_X, N,res_, N ) ;
     double lperf = perf ; 
 
+    //=====================================================================
+    //                 Error Computation 
+    //=====================================================================
     double Rnorm, Anorm, Xnorm, Bnorm;
     char norm='I';
     double *worke = (double *)malloc(N*sizeof(double));
@@ -321,22 +324,26 @@ int main(int argc , char **argv){
     Bnorm = dlange_(&norm, &N, &NRHS, Bs, &LDB, worke);
     double ONE = -1.0 , NEGONE = 1.0 ;
     char side ='L';
- //          1       2      3   4   
-//001:    (SIDE,    UPLO,  M,   N,     ALPHA,  A, LDA,   B,    LDB, BETA, C, LDC);
     dsymm_( &side, &uplo, &N, &NRHS, &NEGONE, As, &LDA, res_, &LDX, &ONE, Bs, &N);
     Rnorm=dlange_(&norm, &N, &NRHS, Bs, &LDB, worke);
     double eps1 = dlamch_("Epsilon");
-  // printf("-- ||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps) = %e\t",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1));
     free(worke);
 
 
 
+    //=====================================================================
+    //                 Double Precision Factor 
+    //=====================================================================
     start = get_current_time();
     magma_dpotrf_gpu(&uplo, &N,d_A, &LDA, h_work_M_D, INFO);
     end = get_current_time();
     perf = (1.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
     printf("\t%6.2f", perf);
     fprintf(fp,"\t%6.2f", perf);
+    fflush(stdout);
+    //=====================================================================
+    //                 Double Precision Solve 
+    //=====================================================================
 
     start = get_current_time();
     magma_dpotrf_gpu(&uplo, &N,d_A, &LDA, h_work_M_D, INFO);
@@ -345,8 +352,12 @@ int main(int argc , char **argv){
     perf = (1.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
     printf("\t\t%6.2f", perf);
     fprintf(fp,"\t\t%6.2f", perf);
+    fflush(stdout);
 
 
+    //=====================================================================
+    //                 Single Precision Factor 
+    //=====================================================================
 
     start = get_current_time();
     magma_spotrf_gpu(&uplo, &N, M_SWORK+N*NRHS, &LDA, h_work_M_S, INFO);
@@ -354,7 +365,11 @@ int main(int argc , char **argv){
     perf = (1.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
     printf("\t\t\t%6.2f ", perf);
     fprintf(fp,"\t\t\t%6.2f", perf);
+    fflush(stdout);
 
+    //=====================================================================
+    //                 Single Precision Solve 
+    //=====================================================================
 
     start = get_current_time();
     magma_spotrf_gpu(&uplo, &N, M_SWORK+N*NRHS, &LDA, h_work_M_S, INFO);
@@ -363,12 +378,16 @@ int main(int argc , char **argv){
     perf = (1.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
     printf("\t\t%6.2f", perf);
     fprintf(fp,"\t\t%6.2f", perf);
+    fflush(stdout);
+
+
+
 
     printf("\t\t\t%6.2f", lperf);
     fprintf(fp,"\t\t\t%6.2f", lperf);
     printf("\t\t\t\t%e\t%27d",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1), ITER);
     fprintf(fp, "\t\t\t\t%e\t%27d",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1), ITER);
-
+    fflush(stdout);
 
     printf("\n");
     fprintf(fp,"\n");
