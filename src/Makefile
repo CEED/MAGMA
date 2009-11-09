@@ -52,8 +52,8 @@ include ../make.inc
              \
              magma_dsgesv.o \
              magma_dsposv.o \
-             magma_dgemm.o \
-             magma_sgemm.o \
+             dgemm_gpu.o \
+             sgemm_gpu.o \
              magma_spotrs_gpu.o \
              magma_dpotrs_gpu.o \
              magma_xerbla.o \

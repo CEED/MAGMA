@@ -12,26 +12,10 @@
 
 extern "C" double dlamch_(char *);
 extern "C" float slamch_(char *);
+
 void magma_dgetrs_v2( char *TRANS , int N , int NRHS, double *A , int LDA , int *IPIV , double *B, int LDB, int *INFO, double *BB1 );
 
-void magma_dsgesv(
-               int N ,
-               int NRHS,
-               double *A,
-               int LDA ,
-               int *IPIV,
-               double *B,
-               int LDB,
-               double *X,
-               int LDX,
-               double *WORK,
-               float *SWORK,
-               int *ITER,
-               int *INFO,
-               float *h_work,
-               double *h_work2,
-               int *DIPIV
-                ){
+void magma_dsgesv(int N ,int NRHS,double *A,int LDA ,int *IPIV,double *B,int LDB,double *X,int LDX,double *WORK,float *SWORK,int *ITER,int *INFO,float *H_SWORK,double *H_WORK,int *DIPIV){
 
 /*
   Purpose
@@ -139,11 +123,11 @@ void magma_dsgesv(
                 but the factor U is exactly singular, so the solution
                 could not be computed.
 
-  hwork    (workspace) REAL array, dimension at least (nb, nb)
+  H_SWORK    (workspace) REAL array, dimension at least (nb, nb)
           where nb can be obtained through magma_get_spotrf_nb(*n)
           Work array allocated with cudaMallocHost.
 
-  hwork2   (workspace) DOUBLE array, dimension at least (nb, nb)
+  H_WORK   (workspace) DOUBLE array, dimension at least (nb, nb)
            where nb can be obtained through magma_get_dpotrf_nb(*n)
            Work array allocated with cudaMallocHost.
 
@@ -201,7 +185,7 @@ void magma_dsgesv(
     goto L40;
   }
   double XNRM[1] , RNRM[1] ;
-  magma_sgetrf_gpu2(&N, &N,SWORK+PTSA, &N,IPIV, DIPIV, h_work, INFO);
+  magma_sgetrf_gpu2(&N, &N,SWORK+PTSA, &N,IPIV, DIPIV, H_SWORK, INFO);
   if(INFO[0] !=0){
     *ITER = -3 ;
     goto L40;
@@ -300,12 +284,12 @@ unnecessary may be*/
      Single-precision iterative refinement failed to converge to a
      satisfactory solution, so we resort to double precision.  
   */
-  magma_dgetrf_gpu(&N, &N, A, &N, IPIV, h_work2, INFO);
+  magma_dgetrf_gpu(&N, &N, A, &N, IPIV, H_WORK, INFO);
   if( *INFO != 0 ){
     return ;
   }
   magma_dlacpy(N, NRHS, B , LDB, X, N);
-  magma_dgetrs_v2("N",N ,NRHS, A ,N,IPIV, X,N,INFO,h_work2);
+  magma_dgetrs_v2("N",N ,NRHS, A ,N,IPIV, X,N,INFO,H_WORK);
   return ;
 }
 

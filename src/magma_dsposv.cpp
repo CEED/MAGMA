@@ -11,7 +11,7 @@ int MAX( int a, int b){
  return a>b ? a: b ;
 }
 
-void magma_dsposv(char UPLO, int N ,int NRHS, double *A, int LDA ,double *B, int LDB,double *X,int LDX,double *WORK,float *SWORK,int *ITER,int *INFO,float *h_work,double *h_work2 ){
+void magma_dsposv(char UPLO, int N ,int NRHS, double *A, int LDA ,double *B, int LDB,double *X,int LDX,double *WORK,float *SWORK,int *ITER,int *INFO,float *H_SWORK,double *H_WORK ){
 
 /*
   Purpose
@@ -124,11 +124,11 @@ void magma_dsposv(char UPLO, int N ,int NRHS, double *A, int LDA ,double *B, int
                 factorization could not be completed, and the solution
                 has not been computed.
 
-  hwork    (workspace) REAL array, dimension at least (nb, nb)
+  H_SWORK    (workspace) REAL array, dimension at least (nb, nb)
           where nb can be obtained through magma_get_spotrf_nb(*n)
           Work array allocated with cudaMallocHost.
 
-  hwork2   (workspace) DOUBLE array, dimension at least (nb, nb)
+  H_WORK   (workspace) DOUBLE array, dimension at least (nb, nb)
            where nb can be obtained through magma_get_dpotrf_nb(*n)
            Work array allocated with cudaMallocHost.
   =========
@@ -181,7 +181,7 @@ void magma_dsposv(char UPLO, int N ,int NRHS, double *A, int LDA ,double *B, int
     *ITER = -2 ;
     goto L40;
   }   
-  magma_spotrf_gpu(&UPLO, &N, SWORK+ PTSA, &LDA, h_work, INFO);
+  magma_spotrf_gpu(&UPLO, &N, SWORK+ PTSA, &LDA, H_SWORK, INFO);
   if(INFO[0] !=0){
     *ITER = -3 ;
     goto L40;
@@ -252,7 +252,7 @@ void magma_dsposv(char UPLO, int N ,int NRHS, double *A, int LDA ,double *B, int
   *ITER = -ITERMAX - 1 ; 
 
   L40:
-  magma_dpotrf_gpu(&UPLO, &N, A, &LDA, h_work2, INFO);
+  magma_dpotrf_gpu(&UPLO, &N, A, &LDA, H_WORK, INFO);
   if( *INFO != 0 ){
     return ;
   }
