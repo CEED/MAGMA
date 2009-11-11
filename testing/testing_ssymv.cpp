@@ -22,20 +22,20 @@ inline void Q( cudaError_t status ) { assert( status == cudaSuccess, "CUDA Runti
 inline void Q( cublasStatus status ){ assert( status == CUBLAS_STATUS_SUCCESS, "CUBLAS fails" ); }
 inline void Q( CUresult status ) { assert( status == CUDA_SUCCESS, "CUDA Driver fails" ); }
 int fone = 0 ; 
-void fill( double *A, int n, int maxi )
+void fill( float *A, int n, int maxi )
 {	
 	for( int j = 0; j < n; j++ ){
-		A[j] =    double( (rand()%(maxi*2+1)) - maxi ) / ( maxi + 1.f );
+		A[j] =    float( (rand()%(maxi*2+1)) - maxi ) / ( maxi + 1.f );
         }
 }	
 
-double diff( int m, int n, double *A, int lda, double *B, int ldb )
+float diff( int m, int n, float *A, int lda, float *B, int ldb )
 {
-	double err = 0;
+	float err = 0;
 	for( int j = 0; j < m; j++ )
 		for( int i = 0; i < n; i++ )
 		{
-			double e =fabs ( A[i+j*lda] - B[i+j*ldb] );
+			float e =fabs ( A[i+j*lda] - B[i+j*ldb] );
 			if( e > err ){
 				err = e;
 			}
@@ -43,23 +43,23 @@ double diff( int m, int n, double *A, int lda, double *B, int ldb )
 	return err;
 }
 
-extern "C" void mdsymv (char side , char uplo , int m , double alpha ,  double *A , int lda ,
- double *B , int ldb , double beta , double *C , int ldc );
+extern "C" void mdsymv (char side , char uplo , int m , float alpha ,  float *A , int lda ,
+ float *B , int ldb , float beta , float *C , int ldc );
 
 
 int main(int argc, char **argv)
 {	
         FILE *fp ; 
-        fp = fopen ("results_dsymv.txt", "w") ;
+        fp = fopen ("results_ssymv.txt", "w") ;
         if( fp == NULL ){ printf("Couldn't open output file\n"); exit(1);}
 
-        printf("SYMV Double Precision\n");
-        fprintf(fp, "SYMV Double Precision\n");
+        printf("SYMV Sinlge Precision\n");
+        fprintf(fp, "SYMV Single Precision\n");
 	printf( "\n");
 	fprintf(fp,  "\n");
 
-        printf("Usage\n\t\t testing_dsymv N\n");
-        fprintf(fp, "Usage\n\t\t testing_dsymv N\n");
+        printf("Usage\n\t\t testing_ssymv N\n");
+        fprintf(fp, "Usage\n\t\t testing_ssymv N\n");
 	printf( "\n");
 	fprintf(fp,  "\n");
 	CUdevice dev;
@@ -75,8 +75,8 @@ int main(int argc, char **argv)
         TimeStruct start, end;
 	const int N =8*1024+64;
 	
-	double *A = (double*)malloc( N*N*sizeof( double ) );
-	double *C = (double*)malloc( N*N*sizeof( double ) );
+	float *A = (float*)malloc( N*N*sizeof( float ) );
+	float *C = (float*)malloc( N*N*sizeof( float ) );
 	
 	assert( A != NULL && C != NULL, "memory allocation error" );
 	
@@ -85,8 +85,8 @@ int main(int argc, char **argv)
 	fone = 0 ; 
 	fill( C, N*N, 31 );
 	
-	double *cublas_result = (double*)malloc( N*N*sizeof( double ) );
-	double *our_result = (double*)malloc( N*N*sizeof( double ) );
+	float *cublas_result = (float*)malloc( N*N*sizeof( float ) );
+	float *our_result = (float*)malloc( N*N*sizeof( float ) );
 	
 	assert( cublas_result != NULL && our_result != NULL, "memory allocation error" );
 	
@@ -110,8 +110,8 @@ int main(int argc, char **argv)
 		const int k = dim;
 		const int lda = m;
 		const int ldc = m;
-		const double alpha = 1;
-		const double beta = 1;
+		const float alpha = 1;
+		const float beta = 1;
 		
 		printf( "%5d ", n  );
 		fprintf( fp, "%5d ", n  );
@@ -120,34 +120,34 @@ int main(int argc, char **argv)
          =================================================================== */
 
 		{
-			double *dA, *dC, *dB;
-			Q( cublasAlloc( m*m, sizeof(double), (void**)&dA ) );
-			Q( cublasAlloc( m*1, sizeof(double), (void**)&dC ) );
-			Q( cublasAlloc( m*1, sizeof(double), (void**)&dB ) );
+			float *dA, *dC, *dB;
+			Q( cublasAlloc( m*m, sizeof(float), (void**)&dA ) );
+			Q( cublasAlloc( m*1, sizeof(float), (void**)&dC ) );
+			Q( cublasAlloc( m*1, sizeof(float), (void**)&dB ) );
 			
-			Q( cublasSetMatrix( m, m, sizeof( double ), A, lda, dA, lda ) );
+			Q( cublasSetMatrix( m, m, sizeof( float ), A, lda, dA, lda ) );
 			Q( cublasGetError( ) );
-			Q( cublasSetMatrix( m, 1, sizeof( double ), C, ldc, dC, ldc ) );
+			Q( cublasSetMatrix( m, 1, sizeof( float ), C, ldc, dC, ldc ) );
 			Q( cublasGetError( ) );
-			Q( cublasSetMatrix( m, 1, sizeof( double ), C+m, ldc, dB, ldc ) );
+			Q( cublasSetMatrix( m, 1, sizeof( float ), C+m, ldc, dB, ldc ) );
 			Q( cublasGetError( ) );
-                        cublasDsymm('L', 'L' , m , 1 , 1.0,  dA , lda , dB , ldc , 1.0 , dC , ldc );
+                        cublasSsymv('L' , m , 1.0,  dA , lda , dB , 1 ,1.0,  dC , 1 );
  
 			Q( cublasGetError( ) );
-			Q( cublasGetMatrix( m, 1, sizeof( double ), dC, ldc, cublas_result, ldc ) );
+			Q( cublasGetMatrix( m, 1, sizeof( float ), dC, ldc, cublas_result, ldc ) );
 			Q( cublasGetError( ) );
 		     
 	
-			double cublas_time;
+			float cublas_time;
                         start = get_current_time();
-                        cublasDsymm('L', 'L' , m , 1 , 1.0,  dA , lda , dB , ldc  , 1 , dC , ldc );
+                        cublasSsymv('L' , m , 1.0,  dA , lda , dB , 1 ,1.0,  dC , 1 );
 			end = get_current_time();
 		        cublas_time = GetTimerValue(start,end) ; 
 			
 			cublasFree( dA );
 			cublasFree( dC );
 			cublasFree( dB ) ; 
-			double cublas_gflops = double(2.*dim*dim)/cublas_time/1e6;
+			float cublas_gflops = float(2.*dim*dim)/cublas_time/1e6;
 			printf( "%11.2f", cublas_gflops );
 			fprintf(fp,  "%11.2f", cublas_gflops );
 		}
@@ -156,26 +156,26 @@ int main(int argc, char **argv)
          =================================================================== */
 
 		{
-			double *dA, *dC, *dB;
-			Q( cublasAlloc( m*m, sizeof(double), (void**)&dA ) );
-			Q( cublasAlloc( m*1, sizeof(double), (void**)&dC ) );
-			Q( cublasAlloc( m*1, sizeof(double), (void**)&dB ) );
+			float *dA, *dC, *dB;
+			Q( cublasAlloc( m*m, sizeof(float), (void**)&dA ) );
+			Q( cublasAlloc( m*1, sizeof(float), (void**)&dC ) );
+			Q( cublasAlloc( m*1, sizeof(float), (void**)&dB ) );
 			
-			Q( cublasSetMatrix( m, m, sizeof( double ), A, lda, dA, lda ) );
+			Q( cublasSetMatrix( m, m, sizeof( float ), A, lda, dA, lda ) );
 			Q( cublasGetError( ) );
-			Q( cublasSetMatrix( m, 1, sizeof( double ), C, ldc, dC, ldc ) );
+			Q( cublasSetMatrix( m, 1, sizeof( float ), C, ldc, dC, ldc ) );
 			Q( cublasGetError( ) );
-			Q( cublasSetMatrix( m, 1, sizeof( double ), C+m, ldc, dB, ldc ) );
+			Q( cublasSetMatrix( m, 1, sizeof( float ), C+m, ldc, dB, ldc ) );
 			Q( cublasGetError( ) );
 
-                        magma_dsymv('L', 'L' , m , 1.0,  dA , lda , dB , 1 ,1.0,  dC , 1 );
+                        magma_ssymv('L', 'L' , m , 1.0,  dA , lda , dB , 1 ,1.0,  dC , 1 );
 			Q( cublasGetError( ) );
-			Q( cublasGetMatrix( m, 1, sizeof( double ), dC, ldc, our_result, ldc ) );
+			Q( cublasGetMatrix( m, 1, sizeof( float ), dC, ldc, our_result, ldc ) );
 		
 	
-			double cublas_time;
+			float cublas_time;
                         start = get_current_time();
-                        magma_dsymv('L', 'L' , m , 1.0,  dA , lda , dB , 1 ,1.0,  dC , 1 );
+                        magma_ssymv('L', 'L' , m , 1.0,  dA , lda , dB , 1 ,1.0,  dC , 1 );
 			end = get_current_time();
 		        cublas_time = GetTimerValue(start,end) ; 
 			
@@ -183,7 +183,7 @@ int main(int argc, char **argv)
 			cublasFree( dC );
 			cublasFree( dB ) ; 
 		        	
-			double cublas_gflops = double(2.*dim*dim)/cublas_time/1e6;
+			float cublas_gflops = float(2.*dim*dim)/cublas_time/1e6;
 			printf( "\t%11.2f", cublas_gflops );
 			fprintf(fp,  "\t%11.2f", cublas_gflops );
 		}
@@ -192,7 +192,7 @@ int main(int argc, char **argv)
          =================================================================== */
 
 		{ 
-		double difference = diff( 1, m, cublas_result, ldc, our_result, ldc );
+		float difference = diff( 1, m, cublas_result, ldc, our_result, ldc );
 		printf( "\t\t %8g\n", difference );
 		fprintf( fp, "\t\t %8g\n", difference );
 		}

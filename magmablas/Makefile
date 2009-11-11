@@ -48,6 +48,7 @@
              magma_dlansy.cu \
              magma_dlat2s.cu \
              magma_dsymv.cu \
+             magma_ssymv.cu \
              magma_sdaxpycp.cu \
              magma_slag2d.cu \
              \

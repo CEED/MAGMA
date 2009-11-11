@@ -74,6 +74,7 @@ extern "C" void magma_dlacpy(int M, int N, double *SA, int LDSA , double *A , in
 extern "C" double magma_dlansy (char norm , char uplo , int n ,  double *A , int lda ,  double *WORK );
 extern "C" void magma_dlat2s ( char uplo , int n ,  double *A , int lda ,  float *SA , int LDSA ,  int *INFO );
 extern "C" void magma_dsymv (char side , char uplo , int m , double alpha ,  double *A , int lda ,  double *X , int incx , double beta , double *Y , int incy );
+extern "C" void magma_ssymv (char side , char uplo , int m , float alpha ,  float *A , int lda ,  float *X , int incx , float beta , float *Y , int incy );
 /*
 Gemm Kernel
 */
