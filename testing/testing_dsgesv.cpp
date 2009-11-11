@@ -85,10 +85,10 @@ int main(int argc , char **argv){
 
   TimeStruct start, end;
  int LEVEL=1;
-  printf("\n\n\tN\tDouble-Factor\tDouble-Solve\t\tSingle-Factor\tSigle-Solve\t   Mixed Precision Solver \t||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps)\t NumIter\n");
-  fprintf(fp, "\n\n\tN\tDouble-Factor\tDouble-Solve\t\tSingle-Factor\tSigle-Solve\t   Mixed Precision Solver \t||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps)\t NumIter\n");
-  printf("==================================================================================================================================================================================\n"); 
-  fprintf(fp,"==================================================================================================================================================================================\n"); 
+  printf("\n\nN\tDouble-Factor\tDouble-Solve\tSingle-Factor\tSigle-Solve\tMixed Precision Solver\t||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps)\t NumIter\n");
+  fprintf(fp, "\n\nN\tDouble-Factor\tDouble-Solve\tSingle-Factor\tSigle-Solve\tMixed Precision Solver\t||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps)\t NumIter\n");
+  printf("===========================================================================================================================================================\n"); 
+  fprintf(fp,"===========================================================================================================================================================\n"); 
 
   int i ;
   int startN=64 ;
@@ -306,8 +306,8 @@ int main(int argc , char **argv){
     int PTSX = 0 , PTSA = maxnb*N*NRHS ;
 
     //magma_sgetrs("N",N ,NRHS, M_SWORK+PTSA ,N,IPIV, M_SWORK+PTSX, N,INFO );
-    printf("%10d",N); 
-    fprintf(fp,"%10d",N); 
+    printf("%5d",N); 
+    fprintf(fp,"%5d",N); 
 
 
     cublasSetMatrix( N, N, sizeof( double ), A, N, d_A, N ) ;
@@ -385,8 +385,8 @@ int main(int argc , char **argv){
     magma_sgetrf_gpu(&N, &N, M_SWORK+PTSA, &N, IPIV, h_work_M_S, INFO);
     end = get_current_time();
     perf = (2.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
-    printf("\t\t\t%6.2f", perf);
-    fprintf(fp,"\t\t\t%6.2f", perf);
+    printf("\t\t%6.2f", perf);
+    fprintf(fp,"\t\t%6.2f", perf);
 
     start = get_current_time();
     magma_sgetrf_gpu2(&N, &N,M_SWORK+PTSA, &N,IPIV, DIPIV, h_work_M_S, INFO);
@@ -398,8 +398,8 @@ int main(int argc , char **argv){
 
     printf("\t\t\t%6.2f", lperf);
     fprintf(fp,"\t\t\t%6.2f", lperf);
-    printf("\t\t\t\t%e\t%29d",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1), iter_GPU);
-    fprintf(fp, "\t\t\t\t%e\t%29d",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1), iter_GPU);
+    printf("\t\t%e\t%29d",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1), iter_GPU);
+    fprintf(fp, "\t\t%e\t%29d",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1), iter_GPU);
 
 
     //=====================================================================

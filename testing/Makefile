@@ -37,6 +37,8 @@ include ../make.inc
           \
           testing_dsgesv.cpp \
           testing_dsposv.cpp \
+          testing_dgemm.cpp \
+          testing_sgemm.cpp \
 
     OBJ = $(SRC:.cpp=.o)
     EXE = $(OBJ:.o=)
