@@ -9,6 +9,7 @@
 #include "cuda_runtime_api.h"
 #include "cublas.h"
 #include "magma.h"
+#include "magmablas.h"
 #include <stdio.h>
 
 int 
@@ -88,8 +89,11 @@ magma_slarfb(char direct, char storev,
   }
 
   if (storev == 'c' || storev == 'C'){
-    cublasSgemm('t', 'n', n, *k, m, 1.f, dc_ref(0, 0), *ldc,
-		dv_ref(0,0), *ldv, 0.f, dwork, *ldwork);
+    if (n==1)
+      magmablas_sgemvt(m, *k, 1., dv_ref(0,0), *ldv, dc_ref(0, 0), dwork);
+    else
+      cublasSgemm('t', 'n', n, *k, m, 1.f, dc_ref(0, 0), *ldc,
+		  dv_ref(0,0), *ldv, 0.f, dwork, *ldwork);
     
     if (direct == 'F' || direct =='f')
       cublasStrmm('r', 'u', 'n', 'n',

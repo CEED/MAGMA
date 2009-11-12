@@ -25,6 +25,8 @@ int magma_sgeqrf_gpu(int *, int *, float *, int  *,  float  *,
 		     float *, int *, float *, int *);
 int magma_sgeqrf_gpu2(int *, int *, float *, int  *,  float  *,
 		      float *, int *, float *, int *);
+int magma_sgeqrs_gpu(int *, int *, int *, float *, int *, float *, float *,
+                     int *, float *, int *, float *, int *);
 int magma_sgeqlf(int *, int *, float *, int  *,  float  *,
                  float *, int *, float *, int *);
 int magma_sgelqf(int *, int *, float *, int  *,  float  *,
@@ -134,6 +136,8 @@ extern "C" float slansy_(char *, char *, int *, float *, int *, float *);
 extern "C" int slacpy_(char *, int *, int *, float *, int *, float *, int *);
 extern "C" int sorgqr_(int *, int *, int *, float *, int *, float *, 
 		       float *, int *, int *);
+extern "C" int sormqr_(char *, char *, int *, int *, int *, float *, int *,
+                       float *, float *, int *, float *, int *, int *);
 
 extern "C" void ctrsm_(char *, char *, char *, char *,
                        int *, int *, float2 *, float2 *, int *, float2 *,int*);

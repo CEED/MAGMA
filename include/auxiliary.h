@@ -55,4 +55,6 @@ void dq_to_panel(int ib, double *a, int lda, double *work);
 void zpanel_to_q(char uplo, int ib, double2 *a, int lda, double2 *work);
 void zq_to_panel(char uplo, int ib, double2 *a, int lda, double2 *work);
 
+float getv(float *da);
+
 #endif

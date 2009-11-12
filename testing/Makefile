@@ -13,6 +13,7 @@ include ../make.inc
           testing_sgeqrf.cpp \
           testing_sgeqrf_gpu.cpp \
           testing_sgeqrf_gpu-v2.cpp \
+          testing_sgeqrs_gpu.cpp \
           testing_sgetrf.cpp \
           testing_sgetrf_gpu-v2.cpp \
           testing_sgetrf_gpu.cpp \

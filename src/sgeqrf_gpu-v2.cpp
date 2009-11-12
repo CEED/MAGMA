@@ -77,7 +77,7 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
             allocated using cudaMallocHost.
 
     LWORK   (input) INTEGER   
-            The dimension of the array WORK.  LWORK >= (M+N)*NB,   
+            The dimension of the array WORK.  LWORK >= (M+N+NB)*NB,   
             where NB can be obtained through magma_get_sgeqrf_nb(M).
 
             If LWORK = -1, then a workspace query is assumed; the routine   
@@ -113,20 +113,21 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
     =====================================================================    */
 
    #define a_ref(a_1,a_2) ( a+(a_2)*(*lda) + (a_1))
-   #define t_ref(a_1) (dwork+(a_1))
-   #define d_ref(a_1) (dwork+(lddwork)*nb+(a_1))
+   #define t_ref(a_1)     (dwork+(a_1))
+   #define d_ref(a_1)     (dwork+(lddwork+(a_1))*nb)
+   #define dd_ref(a_1)    (dwork+(2*lddwork+(a_1))*nb)
    #define work_ref(a_1)  ( work + (a_1)) 
    #define hwork          ( work + (nb)*(*m))
    #define min(a,b)       (((a)<(b))?(a):(b))
    #define max(a,b)       (((a)>(b))?(a):(b))
 
-  int i, k, ldwork, lddwork, old_i, old_ib, rows, cols;
+   int i, k, ldwork, lddwork, old_i, old_ib, rows, cols;
    int nbmin, nx, ib, ldda;
 
    /* Function Body */
    *info = 0;
    int nb = magma_get_sgeqrf_nb(*m);
-   
+
    int lwkopt = (*n+*m) * nb;
    work[0] = (float) lwkopt;
    long int lquery = *lwork == -1;
@@ -156,16 +157,15 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
    cudaStreamCreate(&stream[0]);
    cudaStreamCreate(&stream[1]);
 
-   float *ut = (float*)malloc(nb*nb*sizeof(float));
+   float *ut = hwork+nb*(*n);
    for(i=0; i<nb*nb; i++)
      ut[i] = 0.;
 
    ldda = *m;
    nbmin = 2;
-   // (TTT) nx = 192;
    nx = nb;
    ldwork = *m;
-   lddwork= *n;
+   lddwork= k;
 
    if (nb >= nbmin && nb < k && nx < k) {
       /* Use blocked code initially */
@@ -182,11 +182,13 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
 	  magma_slarfb('F', 'C', *m-old_i, cols, &old_ib, 
 		       a_ref(old_i, old_i), lda, t_ref(old_i), &lddwork, 
 		       a_ref(old_i, old_i+2*old_ib), lda, 
-		       t_ref(i), &lddwork);
-	  cudaMemcpy2DAsync(a_ref(old_i, old_i), (*lda) * sizeof(float), 
-			    work_ref(old_i), ldwork * sizeof(float),
-			    sizeof(float)*old_ib, old_ib,
-			    cudaMemcpyHostToDevice,stream[0]);
+		       dd_ref(0), &lddwork);
+	  
+	  /* store the diagonal */
+	  cudaMemcpy2DAsync(d_ref(old_i), old_ib * sizeof(float),
+                            ut, old_ib * sizeof(float),
+                            sizeof(float)*old_ib, old_ib,
+                            cudaMemcpyHostToDevice,stream[0]);
 	}
 
 	cudaStreamSynchronize(stream[1]);
@@ -197,28 +199,26 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
 	
 	/* Put 0s in the upper triangular part of a panel (and 1s on the 
 	   diagonal); copy the upper triangular in ut and invert it     */
+	cudaStreamSynchronize(stream[0]);
 	split_diag_block(ib, work_ref(i), ldwork, ut); 
-	//spanel_to_q('U', ib, work_ref(i), ldwork, hwork+ib*ib); 
 	cublasSetMatrix(rows, ib, sizeof(float), 
 			work_ref(i), ldwork, a_ref(i,i), *lda);
-        //sq_to_panel('U', ib, work_ref(i), ldwork, hwork+ib*ib);
 
 	if (i + ib < *n) {
 	  /* Send the triangular factor T to the GPU */
 	  cublasSetMatrix(ib, ib, sizeof(float), hwork, ib, t_ref(i), lddwork);
 
-	  if (i+nb < k-nx)
+	  if (i+nb < k-nx){
 	    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
 	    magma_slarfb('F', 'C', rows, ib, &ib, a_ref(i,i), lda, t_ref(i),
-			 &lddwork, a_ref(i,i+ib), lda, t_ref(i+ib), &lddwork);
+			 &lddwork, a_ref(i,i+ib), lda, dd_ref(0), &lddwork);
+	  }
 	  else {
 	    cols = *n-i-ib;
 	    magma_slarfb('F','C',rows, cols, &ib, a_ref(i,i), lda, t_ref(i),
-			 &lddwork, a_ref(i,i+ib), lda, t_ref(i+ib), &lddwork);
+			 &lddwork, a_ref(i,i+ib), lda, dd_ref(0), &lddwork);
 	    /* Fix the diagonal block */
-	    // cublasSetMatrix(ib, ib, sizeof(float),
-	    // 		       work_ref(i), ldwork, a_ref(i,i), *lda);
-	    cublasSetMatrix(ib, ib, sizeof(float), ut, ib, d_ref(i), lddwork);
+	    cublasSetMatrix(ib, ib, sizeof(float), ut, ib, d_ref(i), ib);
 	  }
 	  old_i = i;
 	  old_ib = ib;
@@ -227,20 +227,17 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
    } else {
      i = 0;
    }
-   
+
    /* Use unblocked code to factor the last or only block. */
    if (i < k) {
       ib   = *n-i;
       rows = *m-i;
-      printf("%d %d %d\n", ib, rows, nb);
       cublasGetMatrix(rows, ib, sizeof(float),
 		      a_ref(i,i), *lda, work_ref(i), ldwork);
       sgeqrf_(&rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &lhwork, info);
       cublasSetMatrix(rows, ib, sizeof(float),
 		      work_ref(i), ldwork, a_ref(i,i), *lda);
    }
-   
-   free(ut);
    
    return 0; 
   

@@ -274,3 +274,14 @@ void swp2pswp(int n, int *ipiv, int *newipiv){
     }
   }
 }
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Auxiliary function: used for debugging. Given a pointer to floating
+      point number on the GPU memory, the function returns the value
+      at that location.
+*/
+float getv(float *da){
+  float res[1];
+  cublasGetVector(1, sizeof(float), da, 1, res, 1);
+  return res[0];
+}
