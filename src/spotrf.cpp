@@ -219,12 +219,12 @@ magma_spotrf(char *uplo, int *n, float *a, int *lda, float *work, int *info)
 				  cudaMemcpyHostToDevice,stream[0]);
 	        
 		if (j + jb <= *n)
-		  magmablas_strsm('R', 'L', 'T', 'N', i__3, jb,
-				   da_ref(j, j), ldda, da_ref(j + jb, j), ldda);
 		  /*
+		  magmablas_strsm('R', 'L', 'T', 'N', i__3, jb,
+				   da_ref(j, j), ldda, da_ref(j+jb, j), ldda);
+		  */
 		  cublasStrsm('R', 'L', 'T', 'N', i__3, jb, c_b14, 
 			      da_ref(j, j), ldda, da_ref(j + jb, j), ldda);
-		  */
 	    }
 	}
     }
