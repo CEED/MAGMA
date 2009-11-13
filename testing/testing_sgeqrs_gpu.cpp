@@ -88,7 +88,7 @@ int main( int argc, char** argv)
     }
 
     int nb = magma_get_sgeqrf_nb(size[9]);
-    int lwork = (2*size[9]+nb)*nb;
+    int lwork = (3*size[9]+nb)*nb;
     status = cublasAlloc(n2, sizeof(float), (void**)&d_A);
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
