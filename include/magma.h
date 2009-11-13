@@ -45,12 +45,16 @@ int magma_slahru(int, int, int,  float *, int,
 
 int magma_dpotrf(char *, int *, double *, int *, double *, int *);
 int magma_dpotrf_gpu(char *, int *, double *, int *, double *, int *);
-int magma_dlarfb(int, int, int *, double *, int *, double *,
+int magma_dlarfb(char, char, int, int, int *, double *, int *, double *,
                  int *, double *, int *, double *, int *);
 int magma_dgeqrf(int *, int *, double *, int  *,  double  *,
 		 double *, int *, double *, int *);
 int magma_dgeqrf_gpu(int *, int *, double *, int  *, double  *,
 		     double *, int *, double *, int *);
+int magma_dgeqrf_gpu2(int *, int *, double *, int  *, double  *,
+                      double *, int *, double *, int *);
+int magma_dgeqrs_gpu(int *, int *, int *, double *, int *, double *, double *,
+                     int *, double *, int *, double *, int *);
 int magma_dgetrf(int *, int *, double *, int *, int *, double*, double*, int*);
 int magma_dgetrf_gpu(int *, int *, double *, int *, int *, double *, int *);
 int magma_dgehrd(int *, int *, int *, double *, int *, double *, double *,
@@ -156,7 +160,7 @@ extern "C" int cgetrf_(int *, int *, float2 *, int *, int *, int *);
 extern "C" int claswp_(int *, float2 *, int *, int *, int *, int *, int *);
 extern "C" float clange_(char *norm, int *, int *, float2 *, int *, float *);
 
-
+extern "C" void dtrtri_(char *, char *, int *, double *, int *, int *);
 extern "C" void dtrsm_(char *, char *, char *, char *,
 		       int *, int *, double *, double *, int *, double *,int*);
 extern "C" void dgemm_(char *, char *, int *, int *, int *, double *,
@@ -193,6 +197,8 @@ extern "C" double dlansy_(char *, char *, int *, double *, int *, double *);
 extern "C" int dlacpy_(char *, int *, int *, double *, int *, double *, int *);
 extern "C" int dorgqr_(int *, int *, int *, double *, int *, double *, 
 		       double *, int *, int *);
+extern "C" int dormqr_(char *, char *, int *, int *, int *, double *, int *,
+                       double *, double *, int *, double *, int *, int *);
 
 extern "C" long int lsame_(char *, char *);
 

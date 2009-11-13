@@ -161,7 +161,7 @@ magma_dgeqrf(int *m, int *n, double *a, int  *lda,  double  *tau,
 			      cudaMemcpyDeviceToHost,stream[0]);
 
 	  /* Apply H' to A(i:m,i+2*ib:n) from the left */
-	  magma_dlarfb(*m-old_i, *n-old_i-2*old_ib, &old_ib, 
+	  magma_dlarfb('F','C',*m-old_i, *n-old_i-2*old_ib, &old_ib, 
 		       da_ref(old_i, old_i), &ldda, dwork, &lddwork, 
 		       da_ref(old_i, old_i+2*old_ib), &ldda, 
 		       dwork+old_ib, &lddwork);
@@ -184,10 +184,10 @@ magma_dgeqrf(int *m, int *n, double *a, int  *lda,  double  *tau,
 
 	  if (i+nb < k-nx)
 	    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
-	    magma_dlarfb(rows, ib, &ib, da_ref(i,i), &ldda, dwork,
+	    magma_dlarfb('F','C',rows, ib, &ib, da_ref(i,i), &ldda, dwork,
 			 &lddwork, da_ref(i,i+ib), &ldda, dwork+ib, &lddwork);
 	  else 
-	    magma_dlarfb(rows, *n-i-ib, &ib, da_ref(i,i), &ldda, dwork,
+	    magma_dlarfb('F','C',rows, *n-i-ib, &ib, da_ref(i,i), &ldda, dwork,
 			 &lddwork, da_ref(i,i+ib), &ldda, dwork+ib, &lddwork);
        
 	  old_i = i;

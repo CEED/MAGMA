@@ -31,6 +31,8 @@ include ../make.inc
              dpotrf_gpu.o \
              dgeqrf.o \
              dgeqrf_gpu.o \
+             dgeqrf_gpu-v2.o \
+             dgeqrs_gpu.o \
              dlarfb.o \
              dgetrf.o \
              dgetrf_gpu.o \

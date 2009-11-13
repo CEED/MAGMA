@@ -14,9 +14,9 @@
 
 
 int 
-magma_sgeqrs_gpu(int *m, int *n, int *nrhs, 
-		 float *a, int *lda, float *tau, float *c, int *ldc, 
-		 float *work, int *lwork, float *td, int *info)
+magma_dgeqrs_gpu(int *m, int *n, int *nrhs, 
+		 double *a, int *lda, double *tau, double *c, int *ldc, 
+		 double *work, int *lwork, double *td, int *info)
 {
 /*  -- MAGMA (version 0.1) --
        Univ. of Tennessee, Knoxville
@@ -44,7 +44,7 @@ magma_sgeqrs_gpu(int *m, int *n, int *nrhs,
     NRHS    (input) INTEGER   
             The number of columns of the matrix C. NRHS >= 0.   
 
-    A       (input) REAL array on the GPU, dimension (LDA,N)   
+    A       (input) DOUBLE REAL array on the GPU, dimension (LDA,N)   
             The i-th column must contain the vector which defines the   
             elementary reflector H(i), for i = 1,2,...,n, as returned by   
             SGEQRF_GPU2 in the first n columns of its array argument A.
@@ -52,31 +52,31 @@ magma_sgeqrs_gpu(int *m, int *n, int *nrhs,
     LDA     (input) INTEGER   
             The leading dimension of the array A, LDA >= M.
 
-    TAU     (input) REAL array, dimension (N)
+    TAU     (input) DOUBLE REAL array, dimension (N)
             TAU(i) must contain the scalar factor of the elementary
-            reflector H(i), as returned by MAGMA_SGEQRF_GPU2.
+            reflector H(i), as returned by MAGMA_DGEQRF_GPU2.
 
-    C       (input/output) REAL array on the GPU, dimension (LDC,NRHS)   
+    C       (input/output) DOUBLE REAL array on the GPU, dimension (LDC,NRHS)   
             On entry, the M-by-NRHS matrix C.
             On exit, the N-by-NRHS solution matrix X.
 
     LDC     (input) INTEGER   
             The leading dimension of the array C. LDC >= M.   
 
-    WORK    (workspace/output) REAL array, dimension (LWORK)   
+    WORK    (workspace/output) DOUBLE REAL array, dimension (LWORK)   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
             The dimension of the array WORK, LWORK >= max(1,NRHS).   
             For optimum performance LWORK >= (M-N+NB+2*NRHS)*NB, where NB is 
-            the blocksize given by magma_get_sgeqrf_nb( M ).
+            the blocksize given by magma_get_dgeqrf_nb( M ).
 
             If LWORK = -1, then a workspace query is assumed; the routine   
             only calculates the optimal size of the WORK array, returns   
             this value as the first entry of the WORK array.   
 
-    TD      (input) REAL array that is the output (the 9th argument)
-            of magma_sgeqrf_gpu2.
+    TD      (input) DOUBLE REAL array that is the output (the 9th argument)
+            of magma_dgeqrf_gpu2.
 
     INFO    (output) INTEGER   
             = 0:  successful exit   
@@ -90,15 +90,15 @@ magma_sgeqrs_gpu(int *m, int *n, int *nrhs,
    #define min(a,b)       (((a)<(b))?(a):(b))
    #define max(a,b)       (((a)>(b))?(a):(b))
 
-   float *dwork;
+   double *dwork;
    int i, k, lddwork, rows, ib;
 
    /* Function Body */
    *info = 0;
-   int nb = magma_get_sgeqrf_nb(*m);
+   int nb = magma_get_dgeqrf_nb(*m);
    
    int lwkopt = (*m-*n+nb+2*(*nrhs)) * nb;
-   work[0] = (float) lwkopt;
+   work[0] = (double) lwkopt;
    long int lquery = *lwork == -1;
    if (*m < 0)
      *info = -1;
@@ -134,7 +134,7 @@ magma_sgeqrs_gpu(int *m, int *n, int *nrhs,
 	rows = *m -i;
 
 	if (i + ib < *n)
-	  magma_slarfb('F','C',rows, *nrhs, &ib, a_ref(i,i), lda, t_ref(i),
+	  magma_dlarfb('F','C',rows, *nrhs, &ib, a_ref(i,i), lda, t_ref(i),
 		       &lddwork, c + i, ldc, dwork, nrhs);
       }
    } else {
@@ -146,26 +146,26 @@ magma_sgeqrs_gpu(int *m, int *n, int *nrhs,
       ib   = *n-i;
       rows = *m-i;
 
-      cublasGetMatrix(rows, ib, sizeof(float), a_ref(i,i), *lda, work, rows);
-      cublasGetMatrix(rows, *nrhs, sizeof(float), c+i, *ldc, 
+      cublasGetMatrix(rows, ib, sizeof(double), a_ref(i,i), *lda, work, rows);
+      cublasGetMatrix(rows, *nrhs, sizeof(double), c+i, *ldc, 
 		      work+rows*ib, rows);
       int lhwork = *lwork - rows*(ib+*nrhs);
-      sormqr_("l", "t", &rows, nrhs, &ib, work, &rows,
+      dormqr_("l", "t", &rows, nrhs, &ib, work, &rows,
 	      tau+i, work+rows*ib, &rows, work+rows*(ib+*nrhs), &lhwork, info);
     
-      cublasSetMatrix(rows, *nrhs, sizeof(float),
+      cublasSetMatrix(rows, *nrhs, sizeof(double),
                       work+rows*ib, rows, c+i, *ldc);
 
-      float one = 1.;
-      strsm_("l", "u", "n", "n", &rows, nrhs, &one, work, &rows,
+      double one = 1.;
+      dtrsm_("l", "u", "n", "n", &rows, nrhs, &one, work, &rows,
 	     work+rows*ib, &rows);
 
       // update the solution vector
-      cublasSetMatrix(rows, *nrhs, sizeof(float),
+      cublasSetMatrix(rows, *nrhs, sizeof(double),
 		      work+rows*ib, rows, dwork+i, *ldc);
 
       // update c
-      cublasSgemv('n', i, ib, -1.f, a_ref(0, i), *lda,
+      cublasDgemv('n', i, ib, -1.f, a_ref(0, i), *lda,
 		  dwork + i, 1, 1.f, c, 1);
    }
    
@@ -176,15 +176,15 @@ magma_sgeqrs_gpu(int *m, int *n, int *nrhs,
        rows = *m -i;
 
        if (i + ib < *n) {
-	 cublasSgemv('n', ib, ib, 1.f, d_ref(i), ib,
+	 cublasDgemv('n', ib, ib, 1.f, d_ref(i), ib,
 		     c+i, 1, 0.f, dwork + i, 1);
-	 cublasSgemv('n', i, ib, -1.f, a_ref(0, i), *lda,
+	 cublasDgemv('n', i, ib, -1.f, a_ref(0, i), *lda,
 		     dwork + i, 1, 1.f, c, 1);
        }
      }
    }
 
-   cublasScopy(*n, dwork, 1, c, 1);
+   cublasDcopy(*n, dwork, 1, c, 1);
 
    return 0; 
 }
