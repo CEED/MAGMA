@@ -335,6 +335,7 @@ inplace_dgemm (char tran, int M, double alpha, double *A, int lda, double *B, in
  * magmablas_dtrsmx
  * the expert interface
  */
+
 void magmablas_dtrsmx (char side, char uplo, char tran, char diag, int M, int N, double alpha, double* A, int lda, double* b, int ldb, double * d_dinvA)
 {
 /*  -- MAGMA (version 0.1) --
@@ -736,6 +737,8 @@ void magmablas_dtrsmx (char side, char uplo, char tran, char diag, int M, int N,
 /*
  * magmablas_dtrsm
  */
+
+extern "C"
 void magmablas_dtrsm (char side, char uplo, char tran, char diag, int M, int N, double alpha, double* A, int lda, double* b, int ldb)
 {
 /*  -- MAGMA (version 0.1) --

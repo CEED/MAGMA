@@ -17,6 +17,7 @@
 #include "cuda_runtime_api.h"
 #include "cublas.h"
 #include "magma.h"
+#include "magmablas.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing spotrf

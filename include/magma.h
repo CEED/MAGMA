@@ -90,6 +90,14 @@ void magma_dpotrs_gpu( char *UPLO , int N , int NRHS, double *A , int LDA ,doubl
 void magma_dsposv(char UPLO,int N ,int NRHS,double *A,int LDA ,double *B,int LDB,double *X,int LDX,double *WORK,float *SWORK,int *ITER,int *INFO,float *h_work,double *h_work2 );
 
 void magma_xerbla(char *name , int *info);
+/*
+void magma_dsgeqrsv(
+int M , int N ,int NRHS,
+double *A,int LDA ,double *B,int LDB,double *X,int LDX, double *WORK,
+float *SWORK,int *ITER,int *INFO,
+float *tau , int lwork , float *h_work , float *d_work ,
+double *tau_d , int lwork_d , double *h_work_d , double *d_work_d);
+*/
 
 
 /* ////////////////////////////////////////////////////////////////////////////

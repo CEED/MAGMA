@@ -719,6 +719,7 @@ void magmablas_strsmx ( char side, char uplo, char tran, char diag, int M, int N
 /*
  * magmablas_strsm
  */
+extern "C" 
 void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N, float alpha, float* A, int lda, float* b, int ldb)
 {
 /*  -- MAGMA (version 0.1) --
