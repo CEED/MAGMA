@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 0.1) --
+    -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2009
+       November 2009
 */
 
 #include "cublas.h"
@@ -69,11 +69,11 @@ magma_dgemv_MLU(int n, int m, int n1, double* A, int lda, double *x, double *y)
 extern "C" void
 magmablas_magma_dgemv_MLU(int n, int m, double *A, int lda, double *x, double *z)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2009
+       November 2009
 
     Purpose
     =======

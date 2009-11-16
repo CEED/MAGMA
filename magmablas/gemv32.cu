@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 0.1) --
+    -- MAGMA (version 0.2) --
 	Univ. of Tennessee, Knoxville
 	Univ. of California, Berkeley
 	Univ. of Colorado, Denver
-	June 2009
+	November 2009
 */
 
 #include "cublas.h"
@@ -13,7 +13,7 @@
 __global__ void 
 sgemvT32_kernel(int m, float alpha, float* A, int lda, float *x, float *y)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
 
     Purpose
     =======
@@ -64,7 +64,7 @@ sgemvT32_kernel(int m, float alpha, float* A, int lda, float *x, float *y)
 __global__ void 
 dgemvT32_kernel(int m, double alpha, double* A, int lda, double *x, double *y)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
 
     Purpose
     =======
@@ -113,7 +113,7 @@ dgemvT32_kernel(int m, double alpha, double* A, int lda, double *x, double *y)
 __global__ void 
 sgemv32_kernel(int n, float alpha, float* A, int lda, float *x, float *y)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
 
     Purpose
     =======
@@ -147,7 +147,7 @@ sgemv32_kernel(int n, float alpha, float* A, int lda, float *x, float *y)
 __global__ void
 dgemv32_kernel(int n, double alpha, double* A, int lda, double *x, double *y)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
 
     Purpose
     =======
@@ -181,7 +181,7 @@ dgemv32_kernel(int n, double alpha, double* A, int lda, double *x, double *y)
 void magmablas_sgemv32(char tran, int n, float alpha, 
                        float *A, int lda, float *x, float *y)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
 
     Purpose
     =======
@@ -215,7 +215,7 @@ void magmablas_sgemv32(char tran, int n, float alpha,
 void magmablas_dgemv32(char tran, int n, double alpha, double *A, int lda,
 		       double *x, double *y)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
 
     Purpose
     =======

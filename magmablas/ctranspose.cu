@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 0.1) --
+    -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2009
+       November 2009
 */
 
 __global__ void ctranspose_32( float2 *B, int ldb, float2 *A, int lda )

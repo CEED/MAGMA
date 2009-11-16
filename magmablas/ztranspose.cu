@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 0.1) --
+    -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2009
+       November 2009
 */
 
 __global__ void ztranspose_32( double2 *B, int ldb, double2 *A, int lda )

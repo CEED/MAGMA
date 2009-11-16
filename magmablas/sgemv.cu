@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 0.1) --
+    -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2009
+       November 2009
 */
 
 #include "cublas.h"
@@ -53,11 +53,11 @@ sgemv_kernel(int n, int m, int n1, float* A, int lda, float *x, float *y)
 extern "C" void
 magmablas_sgemv(int n, int m, float *A, int lda, float *x, float *z)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2009
+       November 2009
 
     Purpose
     =======
@@ -282,11 +282,11 @@ extern "C" void
 magmablas_sgemvt(int n, int m, float alpha, float *A, int lda, 
                  float *x, float *z)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2009
+       November 2009
 
     Purpose
     =======

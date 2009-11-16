@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 0.1) --
+    -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2009
+       November 2009
 */
 
 #include "cuda_runtime_api.h"
@@ -16,9 +16,9 @@ magma_clarfb(char direct, char storev,
 	     int m, int n, int *k, float2 *dv, int *ldv, float2 *dt,
 	     int *ldt, float2 *dc, int *ldc, float2 *dwork, int *ldwork)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Univ. of California Berkeley
-       June 2009
+       November 2009
 
     Purpose
     =======

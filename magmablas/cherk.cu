@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 0.1) --
+    -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
 	   Univ. of Colorado, Denver
-       June 2009
+       November 2009
 */
 
 #include "cublas.h"
@@ -12,11 +12,11 @@
 extern "C" void
 magmablas_cherk(char uplo, char trans, int n, int k, float alpha, 
             	float2 *A, int lda, float beta, float2 *C, int ldc){
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2009
+       November 2009
 
     Purpose   
     =======   

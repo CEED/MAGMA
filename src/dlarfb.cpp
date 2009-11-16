@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 0.1) --
+    -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2009
+       November 2009
 */
 
 #include "cuda_runtime_api.h"
@@ -17,9 +17,9 @@ magma_dlarfb(char direct, char storev,
 	     int m, int n, int *k, double *dv, int *ldv, double *dt,
 	     int *ldt, double *dc, int *ldc, double *dwork, int *ldwork)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Univ. of California Berkeley
-       June 2009
+       November 2009
 
     Purpose
     =======

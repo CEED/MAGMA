@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 0.1) --
+    -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -20,7 +20,7 @@ void CUDA_SAFE_CALL_US( cudaError_t err ) {
 __global__ void
 dgemv32_kernel(int n, double alpha, double* A, int lda, double *x, double *y)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
 
     Purpose
     =======
@@ -53,7 +53,7 @@ dgemv32_kernel(int n, double alpha, double* A, int lda, double *x, double *y)
 __global__ void 
 dgemvT32_kernel(int m, double alpha, double* A, int lda, double *x, double *y)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
 
     Purpose
     =======
@@ -102,7 +102,7 @@ dgemvT32_kernel(int m, double alpha, double* A, int lda, double *x, double *y)
 void magmablas_dgemv32(char tran, int n, double alpha, double *A, int lda,
 		       double *x, double *y)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
 
     Purpose
     =======
@@ -343,7 +343,7 @@ inplace_dgemm (char tran, int M, double alpha, double *A, int lda, double *B, in
  */
 void magmablas_dtrsmx (char side, char uplo, char tran, char diag, int M, int N, double alpha, double* A, int lda, double* b, int ldb, double * d_dinvA)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -736,7 +736,7 @@ extern "C"
 void magmablas_dtrsm (char side, char uplo, char tran, char diag, int M, int N,  double* A, int lda, double* b, int ldb)
 {
 double alpha = 1.f ; 
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver

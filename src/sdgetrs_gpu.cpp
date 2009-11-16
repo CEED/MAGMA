@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 0.1) --
+    -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2009
+       November 2009
 */
 
 #include "cuda.h"
@@ -16,11 +16,11 @@ int
 magma_sdgetrs_gpu(int *n, int *nrhs, float *a, int *lda, 
 		  int *ipiv, float *x, double *b, int *ldb, int *info)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2009
+       November 2009
 
     Purpose   
     =======   
@@ -89,10 +89,11 @@ magma_sdgetrs_gpu(int *n, int *nrhs, float *a, int *lda,
   magmablas_sdlaswp(*nrhs, b, *ldb, x, *n, ipiv);
 
   /* Solve L*X = B, overwriting B with X. */
-  magmablas_strsm('L','L','N','U', *n , *nrhs,  a , *lda , x , *ldb );
+  float fone = 1.;
+  magmablas_strsm('L','L','N','U', *n, *nrhs, fone, a, *lda, x, *ldb);
 
   /* Solve U*X = B, overwriting B with X. */
-  magmablas_strsm('L', 'U', 'N', 'N', *n, *nrhs,   a, *lda, x, *ldb);
+  magmablas_strsm('L','U','N','N', *n, *nrhs, fone, a, *lda, x, *ldb);
 
   return 0;
   /*     End of MAGMA_SDGETRS */

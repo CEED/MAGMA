@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 0.1) --
+    -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2009
+       November 2009
 */
 
 #include "cuda_runtime_api.h"
@@ -15,11 +15,11 @@ int
 magma_dlahru(int n, int k, int nb, double *a, int lda,
 	     double *d_a, double *y, double *v, double *t, double *d_work)
 {
-/*  -- MAGMA auxiliary routine (version 0.1) --
+/*  -- MAGMA auxiliary routine (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2009
+       November 2009
 
     Purpose
     =======

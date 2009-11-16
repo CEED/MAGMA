@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 0.1) --
+    -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2009
+       November 2009
 */
 extern "C" __global__ void  sgemm_kernel_ab_0
 	(float *C, const float *A, const float *B, int m,int n, int k, int lda, int ldb, int ldc, float alpha, float beta){

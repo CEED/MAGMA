@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 0.1) --
+    -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2009
+       November 2009
 */
 
 #include "cuda_runtime_api.h"
@@ -15,11 +15,11 @@ int
 magma_spotrf_gpu(char *uplo, int *n, float *a, int *lda, float *work, 
 		 int *info)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2009
+       November 2009
 
     Purpose   
     =======   
@@ -205,8 +205,8 @@ magma_spotrf_gpu(char *uplo, int *n, float *a, int *lda, float *work,
 				  jb, cudaMemcpyHostToDevice,stream[0]);
 	        
 		if (j + jb <= *n)
-		   cublasStrsm('R', 'L', 'T', 'N', i__3, jb, c_b14, 
-		  //magmablas_strsm('R', 'L', 'T', 'N', i__3, jb, 
+		  //cublasStrsm('R', 'L', 'T', 'N', i__3, jb, c_b14, 
+		  magmablas_strsm('R', 'L', 'T', 'N', i__3, jb, c_b14,
 				  a_ref(j, j), *lda, a_ref(j + jb, j),*lda);
 	    }
 

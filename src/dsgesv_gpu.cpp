@@ -293,15 +293,16 @@ unnecessary may be*/
   return ;
 }
 
-void magma_dgetrs_v2( char *TRANS , int N , int NRHS, double *A , int LDA , int *IPIV , double *B, int LDB, int *INFO, double *BB1 ){
-                cublasGetMatrix( N, NRHS, sizeof(double), B,N , BB1 , N ) ;
-                int k1 = 1 ;
-                int k2 = N;
-                int k3 = 1 ;
-                dlaswp_(&NRHS,BB1,&LDB , &k1, &k2, IPIV ,&k3) ;
-                cublasSetMatrix( N, NRHS, sizeof(double), BB1, N , B , N ) ;
-                magmablas_dtrsm('L','L','N','U', N , NRHS,  A , LDA , B , LDB );
-                magmablas_dtrsm('L','U','N','N', N , NRHS,  A , LDA , B , LDB );
+void magma_dgetrs_v2(char *TRANS , int N , int NRHS, double *A , int LDA , 
+		     int *IPIV , double *B, int LDB, int *INFO, double *BB1 ){
+  cublasGetMatrix( N, NRHS, sizeof(double), B,N , BB1 , N ) ;
+  int k1 = 1 ;
+  int k2 = N;
+  int k3 = 1 ;
+  dlaswp_(&NRHS,BB1,&LDB , &k1, &k2, IPIV ,&k3) ;
+  cublasSetMatrix( N, NRHS, sizeof(double), BB1, N , B , N ) ;
+  magmablas_dtrsm('L','L','N','U', N , NRHS, 1.0, A , LDA , B , LDB );
+  magmablas_dtrsm('L','U','N','N', N , NRHS, 1.0, A , LDA , B , LDB );
 }
 
 #undef MAX

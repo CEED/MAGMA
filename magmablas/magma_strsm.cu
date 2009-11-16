@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 0.1) --
+    -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -14,7 +14,7 @@
 __global__ void 
 sgemvT32_kernel(int m, float alpha, float* A, int lda, float *x, float *y)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
 
     Purpose
     =======
@@ -65,7 +65,7 @@ sgemvT32_kernel(int m, float alpha, float* A, int lda, float *x, float *y)
 __global__ void 
 sgemv32_kernel(int n, float alpha, float* A, int lda, float *x, float *y)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
 
     Purpose
     =======
@@ -98,7 +98,7 @@ sgemv32_kernel(int n, float alpha, float* A, int lda, float *x, float *y)
 void magmablas_sgemv32(char tran, int n, float alpha, 
                        float *A, int lda, float *x, float *y)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
 
     Purpose
     =======
@@ -322,7 +322,7 @@ inplace_sgemm (char tran, int M, float alpha, float *A, int lda, float *B, int l
  */
 void magmablas_strsmx ( char side, char uplo, char tran, char diag, int M, int N, float alpha, float* A, int lda, float* b, int ldb, float *d_dinvA)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -722,7 +722,7 @@ void magmablas_strsmx ( char side, char uplo, char tran, char diag, int M, int N
 extern "C"
 void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N, float alpha, float* A, int lda, float* b, int ldb)
 {
-/*  -- MAGMA (version 0.1) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
