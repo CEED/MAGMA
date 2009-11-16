@@ -28,4 +28,4 @@ cleanall:
 	( cd testing; $(MAKE) clean )
 	( cd testing/lin; $(MAKE) clean )
 	( cd lib; rm -f *.a )
-#	( cd magmablas; $(MAKE) clean ) 
+	( cd magmablas; $(MAKE) clean ) 
