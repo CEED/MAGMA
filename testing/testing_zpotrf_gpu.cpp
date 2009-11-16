@@ -35,7 +35,7 @@ int main( int argc, char** argv)
 
     /* Matrix size */
     int N=0, n2, lda;
-    int size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10080};
+    int size[7] = {1024,2048,3072,4032,5184,6048,7200};
     
     cublasStatus status;
     int i, j, info[1];
@@ -45,7 +45,7 @@ int main( int argc, char** argv)
 	if (strcmp("-N", argv[i])==0)
 	  N = atoi(argv[++i]);
       }
-      if (N>0) size[0] = size[9] = N;
+      if (N>0) size[0] = size[6] = N;
       else exit(1);
     }
     else {
@@ -60,9 +60,9 @@ int main( int argc, char** argv)
     }
 
     lda = N;
-    n2 = size[9] * size[9];
+    n2 = size[6] * size[6];
 
-    int maxNB = magma_get_zpotrf_nb(size[9]);
+    int maxNB = magma_get_zpotrf_nb(size[6]);
     cudaMallocHost( (void**)&h_work,  maxNB*maxNB*sizeof(double2) );
 
     /* Allocate host memory for the matrix */
@@ -84,7 +84,7 @@ int main( int argc, char** argv)
     printf("\n\n");
     printf("  N    CPU GFlop/s    GPU GFlop/s    ||R||_F / ||A||_F\n");
     printf("========================================================\n");
-    for(i=0; i<10; i++){
+    for(i=0; i<7; i++){
       N = lda = size[i];
       n2 = N*N;
 

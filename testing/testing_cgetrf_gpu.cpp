@@ -41,34 +41,11 @@ float get_LU_error(float2 *A, float2 *LU, int *IPIV, int N){
 
   ctrmm_("L", "L", "N", "N", &N, &N, &alpha, L, &N, LU, &N);
 
-  for( j = 0; j < N*N; j++ )
-    { LU[j].x = LU[j].x - A[j].x; LU[j].y = LU[j].y - A[j].y; }
+  for( j = 0; j < N*N; j++ ){
+    LU[j].x = LU[j].x - A[j].x;
+    LU[j].y = LU[j].y - A[j].y;
+  }
   
-  /*
-  //int n1 = 898, n2 = 1025;
-  int n1 = N, n2 = 1024;
-  float residual = clange_("f", &n1, &n2, LU, &N, work);
-  printf("%e\n", residual/(matnorm * N));
-
-  n1 = 1024; n2 = N;
-  residual = clange_("f", &n1, &n2, LU, &N, work);
-  printf("%e\n", residual/(matnorm * N));
-
-  n1 = 800, n2 = 800;
-  residual = clange_("f", &n1, &n2, LU, &N, work);
-  printf("%e\n", residual/(matnorm * N));
-
-  n1 = 962, n2 = N;
-  residual = clange_("f", &n1, &n2, LU, &N, work);
-  printf("%e\n", residual/(matnorm * N));
-
-  n1 = N, n2 = 800;
-  residual = clange_("f", &n1, &n2, LU, &N, work);
-  printf("%e\n", residual/(matnorm * N));
-
-
-  residual = clange_("f", &N, &N, LU, &N, work);
-  */
   float residual = clange_("f", &N, &N, LU, &N, work);
 
   free(L);
@@ -143,7 +120,7 @@ int main( int argc, char** argv)
     int lwork = size[9]*maxnb;
     int k, n3;
     n3 = (size[9]+32)*(size[9]+32)+32*maxnb+lwork+2*maxnb*maxnb;
-    status = cublasAlloc(n3,sizeof(float), (void**)&d_A);
+    status = cublasAlloc(n3,sizeof(float2), (void**)&d_A);
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
     }
@@ -160,9 +137,10 @@ int main( int argc, char** argv)
       N = lda = size[i];
       n2 = N*N;
 
-      for(k = 0; k < n2; k++)
-	h_R[k].x = h_A[k].x = rand() / (float)RAND_MAX; h_R[k].y = h_A[k].y = rand() / (float)RAND_MAX;
-
+      for(k = 0; k < n2; k++){
+	h_R[k].x = h_A[k].x = rand() / (float)RAND_MAX; 
+	h_R[k].y = h_A[k].y = rand() / (float)RAND_MAX;
+      }
       lda = (N/32)*32;
       if (lda<N) lda+=32;
 
@@ -182,9 +160,10 @@ int main( int argc, char** argv)
       cpu_perf_cgetrf = 4.*2.*N*N*N/(3.*1000000*GetTimerValue(start,end));
       // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
       
-      for(j=0; j<n2; j++)
-        h_A[j].x = h_R[j].x; h_A[j].y = h_R[j].y;
-
+      for(j=0; j<n2; j++){
+        h_A[j].x = h_R[j].x;
+	h_A[j].y = h_R[j].y;
+      }
       /* ====================================================================
          Performs operation using MAGMA
 	 =================================================================== */

@@ -96,7 +96,7 @@ int main( int argc, char** argv)
 
     /* Matrix size */
     int N=0, n2, lda;
-    int size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
+    int size[7] = {1024,2048,3072,4032,5184,6016,7040};
     
     cublasStatus status;
     int i, j, info[1];
@@ -106,7 +106,7 @@ int main( int argc, char** argv)
 	if (strcmp("-N", argv[i])==0)
 	  N = atoi(argv[++i]);
       }
-      if (N>0) size[0] = size[9] = N;
+      if (N>0) size[0] = size[6] = N;
       else exit(1);
     }
     else {
@@ -121,7 +121,7 @@ int main( int argc, char** argv)
     }
 
     lda = N;
-    n2 = size[9] * size[9];
+    n2 = size[6] * size[6];
 
     /* Allocate host memory for the matrix */
     h_A = (double2*)malloc(n2 * sizeof(h_A[0]));
@@ -129,7 +129,7 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! host memory allocation error (A)\n");
     }
 
-    ipiv = (int*)malloc(size[9] * sizeof(int));
+    ipiv = (int*)malloc(size[6] * sizeof(int));
     if (ipiv == 0) {
       fprintf (stderr, "!!!! host memory allocation error (ipiv)\n");
     }
@@ -139,11 +139,11 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! host memory allocation error (R)\n");
     }
 
-    int maxnb = magma_get_zgetrf_nb(size[9]);
-    int lwork = size[9]*maxnb;
+    int maxnb = magma_get_zgetrf_nb(size[6]);
+    int lwork = size[6]*maxnb;
     int k, n3;
-    n3 = (size[9]+32)*(size[9]+32)+32*maxnb+lwork+2*maxnb*maxnb;
-    status = cublasAlloc(n3,sizeof(float), (void**)&d_A);
+    n3 = (size[6]+32)*(size[6]+32)+32*maxnb+lwork+2*maxnb*maxnb;
+    status = cublasAlloc(n3,sizeof(double2), (void**)&d_A);
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
     }
@@ -156,12 +156,14 @@ int main( int argc, char** argv)
     printf("\n\n");
     printf("  N    CPU GFlop/s    GPU GFlop/s    ||PA-LU|| / (||A||*N)\n");
     printf("==========================================================\n");
-    for(i=0; i<10; i++){
+    for(i=0; i<7; i++){
       N = lda = size[i];
       n2 = N*N;
 
-      for(k = 0; k < n2; k++)
-	h_R[k].x = h_A[k].x = rand() / (double)RAND_MAX; h_R[k].y = h_A[k].y = rand() / (double)RAND_MAX;
+      for(k = 0; k < n2; k++){
+	h_R[k].x = h_A[k].x = rand() / (double)RAND_MAX; 
+	h_R[k].y = h_A[k].y = rand() / (double)RAND_MAX;
+      }
 
       lda = (N/32)*32;
       if (lda<N) lda+=32;

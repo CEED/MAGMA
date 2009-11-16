@@ -115,7 +115,7 @@ int main( int argc, char** argv)
       magma_cgeqrf_gpu(&N, &N, d_A,&N, tau, h_work, &lwork, d_work, info);
       end = get_current_time();
     
-      gpu_perf = 4.*N*N*N/(3.*1000000*GetTimerValue(start,end));
+      gpu_perf = 4.*4.*N*N*N/(3.*1000000*GetTimerValue(start,end));
       // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
 
       /* =====================================================================
@@ -127,7 +127,7 @@ int main( int argc, char** argv)
       if (info[0] < 0)  
 	printf("Argument %d of cgeqrf had an illegal value.\n", -info[0]);
   
-      cpu_perf = 4.*N*N*N/(3.*1000000*GetTimerValue(start,end));
+      cpu_perf = 4.*4.*N*N*N/(3.*1000000*GetTimerValue(start,end));
       // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
       
       /* =====================================================================
