@@ -44,11 +44,17 @@ include ../make.inc
              cgeqrf.o \
              clarfb.o \
              cgetrf.o \
+             cpotrf_gpu.o \
+             cgeqrf_gpu.o \
+             cgetrf_gpu.o \
              \
              zpotrf.o \
              zgeqrf.o \
              zlarfb.o \
              zgetrf.o \
+             zpotrf_gpu.o \
+             zgeqrf_gpu.o \
+             zgetrf_gpu.o \
              \
              auxiliary.o \
              \

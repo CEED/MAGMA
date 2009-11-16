@@ -33,9 +33,16 @@ include ../make.inc
           testing_cpotrf.cpp \
           testing_cgetrf.cpp \
           testing_cgeqrf.cpp \
+          testing_cpotrf_gpu.cpp \
+          testing_cgetrf_gpu.cpp \
+          testing_cgeqrf_gpu.cpp \
+          \
           testing_zpotrf.cpp \
           testing_zgetrf.cpp \
           testing_zgeqrf.cpp \
+          testing_zpotrf_gpu.cpp \
+          testing_zgetrf_gpu.cpp \
+          testing_zgeqrf_gpu.cpp \
           \
           testing_dsgesv.cpp \
           testing_dsposv.cpp \

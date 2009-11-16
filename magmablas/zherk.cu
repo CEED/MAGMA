@@ -126,6 +126,7 @@ magmablas_zherk(char uplo, char trans, int n, int k, double alpha,
     cublasGetMatrix(ldamin, ka, sizeof(double2), A, lda, a, ldamin);
     cublasGetMatrix(n, n, sizeof(double2), C, ldc, c, n);
 
+    if (ldamin>0)
     zherk_(&uplo, &trans, &n, &k, &alpha, a, &ldamin, &beta, c, &n);
 
     cublasSetMatrix(n, n, sizeof(double2), c, n, C, ldc);

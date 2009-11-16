@@ -205,8 +205,8 @@ magma_spotrf_gpu(char *uplo, int *n, float *a, int *lda, float *work,
 				  jb, cudaMemcpyHostToDevice,stream[0]);
 	        
 		if (j + jb <= *n)
-		  // cublasStrsm('R', 'L', 'T', 'N', i__3, jb, c_b14, 
-		  magmablas_strsm('R', 'L', 'T', 'N', i__3, jb, 
+		   cublasStrsm('R', 'L', 'T', 'N', i__3, jb, c_b14, 
+		  //magmablas_strsm('R', 'L', 'T', 'N', i__3, jb, 
 				  a_ref(j, j), *lda, a_ref(j + jb, j),*lda);
 	    }
 

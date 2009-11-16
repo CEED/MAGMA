@@ -126,6 +126,7 @@ magmablas_cherk(char uplo, char trans, int n, int k, float alpha,
     cublasGetMatrix(ldamin, ka, sizeof(float2), A, lda, a, ldamin);
     cublasGetMatrix(n, n, sizeof(float2), C, ldc, c, n);
 
+    if (ldamin>0)
     cherk_(&uplo, &trans, &n, &k, &alpha, a, &ldamin, &beta, c, &n);
 
     cublasSetMatrix(n, n, sizeof(float2), c, n, C, ldc);
