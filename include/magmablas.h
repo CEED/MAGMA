@@ -35,7 +35,7 @@ extern "C" void magmablas_ztrmm(char, char, char, char, int, int, double2,
                                 double2 *, int, double2 *, int);
 
 extern "C" void magmablas_strsm(char, char, char, char,
-				int, int, float*, int, float*, int);
+				int, int, float, float*, int, float*, int);
 extern "C" void magmablas_csyrk(char, char, int, int, float2,
 				float2 *, int, float2, float2 *, int);
 extern "C" void magmablas_cherk(char, char, int, int, float,
@@ -52,7 +52,7 @@ extern "C" void magmablas_dgemvt(int,int,double,double *,int,double *,double *);
 
 extern "C" void magmablas_sdlaswp(int, double *, int, float *, int, int *);
 
-extern "C" void magmablas_dtrsm (char side, char uplo, char tran, char diag, int M, int N,  double* A, int lda, double* b, int ldb);
+extern "C" void magmablas_dtrsm (char side, char uplo, char tran, char diag, int M, int N,  double alpha, double* A, int lda, double* b, int ldb);
 /* ////////////////////////////////////////////////////////////////////////////
    -- Auxiliary CUDA routines
 */

@@ -463,14 +463,12 @@ void magmablas_dtrsmx (char side, char uplo, char tran, char diag, int M, int N,
 				 of size BLOCKSIZE x BLOCKSIZE, and the leading dimension of
 				 d_dinvA is BLOCKSIZE;
 	   
+	   
 	    Level 3 Blas routine.
 		*
     ===================================================================== */
 
 	int i, nblocks;
-
-	if (d_dinvA == NULL)
-		return;
 
 	/* 
 	 * call cublasDtrsm when size of the problem is not a multiple of blocksize which is 32
@@ -481,6 +479,9 @@ void magmablas_dtrsmx (char side, char uplo, char tran, char diag, int M, int N,
 		cublasDtrsm (side, uplo, tran, diag, M, N, alpha, A, lda, b, ldb);
 		return;
 	}
+
+	if (d_dinvA == NULL)
+		return;
 
 	if (side == 'l' || side == 'L')
 	{
@@ -730,9 +731,7 @@ void magmablas_dtrsmx (char side, char uplo, char tran, char diag, int M, int N,
 			}
 		}
 	}
-
 }
-
 
 /*
  * magmablas_dtrsm
