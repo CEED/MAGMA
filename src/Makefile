@@ -19,6 +19,7 @@ include ../make.inc
              sgetrf.o \
              sgetrf_gpu-v2.o \
              sgetrf_gpu.o \
+             sgetrs_gpu.o \
              sgehrd.o \
              slahru.o \
              slahr2.o \
@@ -36,6 +37,7 @@ include ../make.inc
              dlarfb.o \
              dgetrf.o \
              dgetrf_gpu.o \
+             dgetrs_gpu.o \
              dgehrd.o \
              dlahru.o \
              dlahr2.o \

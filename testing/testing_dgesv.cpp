@@ -130,8 +130,7 @@ int main(int argc , char **argv)
       //=====================================================================
       start = get_current_time();
       magma_dgetrf_gpu(&N, &N, d_A, &dlda, IPIV, h_work_M_S, INFO);
-
-      magma_dgetrs_v2("N", N, NRHS, d_A, dlda, IPIV, d_B, LDB, INFO, h_work_M_S);
+      magma_dgetrs_gpu("N", N, NRHS, d_A, dlda, IPIV, d_B, LDB, INFO, h_work_M_S);
       end = get_current_time();
       perf = (2.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
       printf("             %6.2f", perf);
