@@ -90,6 +90,7 @@ magma_slarfb(char direct, char storev,
 
   if (storev == 'c' || storev == 'C'){
     if (n==1)
+      /* This is used when we have to apply H on only one vector */
       magmablas_sgemvt(m, *k, 1., dv_ref(0,0), *ldv, dc_ref(0, 0), dwork);
     else
       cublasSgemm('t', 'n', n, *k, m, 1.f, dc_ref(0, 0), *ldc,
