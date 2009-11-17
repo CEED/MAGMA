@@ -454,7 +454,7 @@ void magmablas_strsmx ( char side, char uplo, char tran, char diag, int M, int N
 	int i, nblocks;
 	
 	/* quick return on wrong size */
-	if (M<=0 || N<=0)
+	if (M<=0 || N<=0 || d_dinvA == NULL)
 		return;
 
 	/* 
@@ -467,9 +467,6 @@ void magmablas_strsmx ( char side, char uplo, char tran, char diag, int M, int N
 		cublasStrsm (side, uplo, tran, diag, M, N, alpha, A, lda, b, ldb);
 		return;
 	}
-
-	if (d_dinvA == NULL)
-		return;
 
 	if (side == 'l' || side == 'L')
 	{

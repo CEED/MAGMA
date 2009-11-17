@@ -469,10 +469,7 @@ void magmablas_dtrsmx (char side, char uplo, char tran, char diag, int M, int N,
 	int i, nblocks;
 
 	/* quick return on wrong size */
-	if (M<=0 || N<=0)
-		return;
-
-	if (d_dinvA == NULL)
+	if (M<=0 || N<=0 || d_dinvA == NULL)
 		return;
 
 	/* 
