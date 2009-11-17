@@ -140,8 +140,8 @@ int main(int argc , char **argv){
 
   int LEVEL=1;
   int i ;
-  int startN=64 ;
-  int count = 18;
+  int startN=64 + rand()%32 ;
+  int count = 8;
   int step = 512;  
   int N = count * step ;
   int NRHS=1 ;
