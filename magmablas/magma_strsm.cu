@@ -452,12 +452,17 @@ void magmablas_strsmx ( char side, char uplo, char tran, char diag, int M, int N
     ===================================================================== */
 
 	int i, nblocks;
+	
+	/* quick return on wrong size */
+	if (M<=0 || N<=0)
+		return;
 
 	/* 
 	 * call cublasStrsm when size of the problem is not a multiple of blocksize which is 32
 	 * subject to change soon
 	 */
-	if ((M%BLOCK_SIZE) != 0 || (N%BLOCK_SIZE) != 0 )
+
+	if ((M%BLOCK_SIZE)!=0 || (N>1 && (N%BLOCK_SIZE)!=0))
 	{
 		cublasStrsm (side, uplo, tran, diag, M, N, alpha, A, lda, b, ldb);
 		return;
@@ -849,11 +854,15 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 	int i, nblocks;
 	float *d_dinvA;
 
+	/* quick return on wrong size */
+	if (M<=0 || N<=0)
+		return;
+
 	/* 
 	 * call cublasStrsm when size of the problem is not a multiple of blocksize which is 32
 	 * subject to change soon
 	 */
-	if ((M%BLOCK_SIZE) != 0 || (N%BLOCK_SIZE) != 0 )
+	if ((M%BLOCK_SIZE)!=0 || (N>1 && (N%BLOCK_SIZE)!=0))
 	{
 		cublasStrsm (side, uplo, tran, diag, M, N, alpha, A, lda, b, ldb);
 		return;

@@ -335,7 +335,6 @@ inplace_dgemm (char tran, int M, double alpha, double *A, int lda, double *B, in
  * magmablas_dtrsmx
  * the expert interface
  */
-
 void magmablas_dtrsmx (char side, char uplo, char tran, char diag, int M, int N, double alpha, double* A, int lda, double* b, int ldb, double * d_dinvA)
 {
 /*  -- MAGMA (version 0.2) --
@@ -463,25 +462,28 @@ void magmablas_dtrsmx (char side, char uplo, char tran, char diag, int M, int N,
 				 of size BLOCKSIZE x BLOCKSIZE, and the leading dimension of
 				 d_dinvA is BLOCKSIZE;
 	   
-	   
 	    Level 3 Blas routine.
 		*
     ===================================================================== */
 
 	int i, nblocks;
 
+	/* quick return on wrong size */
+	if (M<=0 || N<=0)
+		return;
+
+	if (d_dinvA == NULL)
+		return;
+
 	/* 
 	 * call cublasDtrsm when size of the problem is not a multiple of blocksize which is 32
 	 * subject to change soon
 	 */
-	if ((M%BLOCK_SIZE) != 0 || (N%BLOCK_SIZE) != 0 )
+	if ((M%BLOCK_SIZE)!=0 || (N>1 && (N%BLOCK_SIZE)!=0))
 	{
 		cublasDtrsm (side, uplo, tran, diag, M, N, alpha, A, lda, b, ldb);
 		return;
 	}
-
-	if (d_dinvA == NULL)
-		return;
 
 	if (side == 'l' || side == 'L')
 	{
@@ -866,11 +868,15 @@ void magmablas_dtrsm (char side, char uplo, char tran, char diag, int M, int N, 
 	int i, nblocks;
 	double *d_dinvA;
 	
+	/* quick return on wrong size */
+	if (M<=0 || N<=0)
+		return;
+	
 	/* 
 	 * call cublasDtrsm when size of the problem is not a multiple of blocksize which is 32
 	 * subject to change soon
 	 */
-	if ((M%BLOCK_SIZE) != 0 || (N%BLOCK_SIZE) != 0 )
+	if ((M%BLOCK_SIZE)!=0 || (N>1 && (N%BLOCK_SIZE)!=0))
 	{
 		cublasDtrsm (side, uplo, tran, diag, M, N, alpha, A, lda, b, ldb);
 		return;
