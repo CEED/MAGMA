@@ -166,6 +166,18 @@ void magma_dsgesv(int N ,int NRHS,double *A,int LDA ,int *IPIV,double *B,int LDB
   EPS  = dlamch_("Epsilon");
   ANRM = magma_dlange('I', N, N , A, LDA , WORK );
   CTE = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;
+
+  /*
+  printf("\n %lf ", ANRM ); 
+  printf("%lf  %d\n", ANRM,N ); 
+  ANRM = dlange_("I", &N, &N, V, &LDA, worke);
+  free(V) ; free( worke ) ; 
+  double *V , *worke; 
+  V  = ( double * ) malloc ( sizeof ( double ) * N * N ) ; 
+  worke  = ( double * ) malloc ( sizeof ( double ) * N  ) ; 
+  if ( V == NULL ) exit(1) ; 
+  */
+
   int PTSA  = N*NRHS;
   int status ;
   float RMAX = slamch_("O");
@@ -191,15 +203,22 @@ void magma_dsgesv(int N ,int NRHS,double *A,int LDA ,int *IPIV,double *B,int LDB
     goto L40;
   }
   magma_sdgetrs_gpu(&N,&NRHS,SWORK+PTSA,&LDA,DIPIV,SWORK, B,&LDB, INFO);
+  int i,j ;
+/*
+  cublasGetMatrix( N, NRHS, sizeof( float ), SWORK , LDA, V, LDA ) ;
+  for ( i = 0 ; i < N ; i ++ ) {
+  printf("%d %lf \n", i, V[i]); 
+  } 
+exit(1);
+*/
+
   magmablas_slag2d(N , NRHS , SWORK, N , X , LDX , INFO );
   magma_dlacpy(N, NRHS, B , LDB, WORK, N);
-
   if( NRHS == 1 )
    magmablas_magma_dgemv_MLU(N,N,A,LDA,X,WORK);
   else
    cublasDgemm( 'N', 'N', N, NRHS, N, -1.0, A, LDA, X, LDX, 1.0, WORK, N);
 
-  int i,j ;
 
   for(i=0;i<NRHS;i++){
     j = cublasIdamax( N ,X+i*N, 1) ;
@@ -208,11 +227,12 @@ void magma_dsgesv(int N ,int NRHS,double *A,int LDA ,int *IPIV,double *B,int LDB
     j = cublasIdamax ( N , WORK+i*N  , 1 ) ;
     cublasGetMatrix( 1, 1, sizeof(double), WORK+i*N+j-1, 1, RNRM, 1 ) ;
     RNRM[0] =fabs( RNRM[0]);
+    // printf("\n\t\t--   %lf  %lf --\n", RNRM[0] , XNRM[0]*CTE ); 
     if( RNRM[0] > XNRM[0]*CTE ){
       goto L10;
     }
   }
-
+ 
   *ITER =0;
   return ;
 

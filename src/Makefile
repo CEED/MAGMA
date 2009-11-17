@@ -59,6 +59,7 @@ include ../make.inc
              auxiliary.o \
              \
              dsgesv_gpu.o \
+             dsgeqrsv_gpu.o \
              dsposv_gpu.o \
              dgemm_gpu.o \
              sgemm_gpu.o \

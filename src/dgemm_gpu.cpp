@@ -126,13 +126,15 @@
  
    Level 3 Blas routine.
     =====================================================================    */
+#include <ctype.h>
 int 
 magmablasDgemm(char TRANSA, char TRANSB, int m , int n , int k , double alpha, const double *A, int lda, const double *B, int ldb, double beta, double *C, int ldc)
 {
 	if(m==0 || n==0  || ( ( alpha==0 || k==0 ) && beta ==1 ) ){
 		return 0;
 	}
-	
+        TRANSA = toupper( TRANSA ) ; 	
+        TRANSB = toupper( TRANSB ) ; 	
 	if( alpha == 0.0){
 	    if( beta == 0.0){
 		magmablas_dgemm_kernel_ab_0( C,A,B, m, n,k,lda,ldb, ldc, alpha, beta);
