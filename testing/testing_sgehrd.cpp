@@ -128,7 +128,7 @@ int main( int argc, char** argv)
       float *hwork_Q = (float*)malloc( N * N * sizeof(float));
       float *twork    = (float*)malloc( 2* N * N * sizeof(float));
       int ltwork = 2*N*N;
-      /*
+      
       for(j=0; j<n2; j++)
         hwork_Q[j] = h_R[j];
       
@@ -139,7 +139,7 @@ int main( int argc, char** argv)
       sorghr_(&N, &ione, &N, hwork_Q, &N, tau, h_work, &lwork, info);
       shst01_(&N, &ione, &N, h_A, &N, h_R, &N, hwork_Q, &N,
               twork, &ltwork, result);
-      */
+      
       //printf("N = %d\n", N);
       //printf("norm( A - Q H Q') / ( M * norm(A) * EPS ) = %f\n", result[0]);
       //printf("norm( I - Q'  Q ) / ( M * EPS )           = %f\n", result[1]);
@@ -152,7 +152,7 @@ int main( int argc, char** argv)
          Performs operation using LAPACK 
 	 =================================================================== */
       start = get_current_time();
-      //sgehrd_(&N, &ione, &N, h_R, &lda, tau, h_work, &lwork, info);
+      sgehrd_(&N, &ione, &N, h_R, &lda, tau, h_work, &lwork, info);
       end = get_current_time();
       if (info[0] < 0)  
 	printf("Argument %d of sgehrd had an illegal value.\n", -info[0]);

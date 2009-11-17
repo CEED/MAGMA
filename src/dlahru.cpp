@@ -11,6 +11,12 @@
 #include "magma.h"
 #include <stdio.h>
 
+#define cublasStrsm magmablas_strsm
+#define cublasSgemm magmablasSgemm
+
+//#define cublasDtrsm magmablas_dtrsm
+//#define cublasDgemm magmablasDgemm
+
 int
 magma_dlahru(int n, int k, int nb, double *a, int lda,
 	     double *d_a, double *y, double *v, double *t, double *d_work)

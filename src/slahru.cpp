@@ -11,6 +11,9 @@
 #include "magma.h"
 #include <stdio.h>
 
+//#define cublasStrsm magmablas_strsm
+//#define cublasSgemm magmablasSgemm
+
 int
 magma_slahru(int n, int k, int nb, float *a, int lda,
 	     float *d_a, float *y, float *v, float *t, float *d_work)
@@ -106,8 +109,8 @@ magma_slahru(int n, int k, int nb, float *a, int lda,
     /* Update matrix M -= V0 T V' through
        1. d_work = T V'
        2. M -= V0 d_work                  */
-    cublasSgemm('n','t', nb, n-k, nb, 1., d_t,nb, v, ldda, 0., d_work,nb);
-    cublasSgemm('n','n', k, n-k, nb, -1., v0, ldda, d_work, nb, 1., d_a, ldda);
+    cublasSgemm('N','T', nb, n-k, nb, 1., d_t,nb, v, ldda, 0., d_work,nb);
+    cublasSgemm('N','N', k, n-k, nb, -1., v0, ldda, d_work, nb, 1., d_a, ldda);
     cublasGetMatrix(k, nb, sizeof(float), d_a, ldda, a, lda);
     /*
     cudaMemcpy2DAsync(a, lda * sizeof(float), d_a, ldda * sizeof(float),
@@ -115,15 +118,15 @@ magma_slahru(int n, int k, int nb, float *a, int lda,
     */
 
     /* Update G -= Y T -= Y d_work */
-    cublasSgemm('n','n', n-k, n-k-nb, nb, -1.0, y, ldda,
+    cublasSgemm('N','N', n-k, n-k-nb, nb, -1.0, y, ldda,
 		d_work+nb*nb, nb, 1.0, d_a + nb*ldda + k, ldda);
     
     /* Update G = (I - V T V') G = (I - work' V') G through
        1. Y = V' G
        2. G -= work' Y                                      */
-    cublasSgemm('t','n', nb, n-k-nb, n-k,
+    cublasSgemm('T','N', nb, n-k-nb, n-k,
 		1., v, ldda, d_a + nb*ldda+k, ldda, 0., y, nb);
-    cublasSgemm('t','n', n-k, n-k-nb, nb,
+    cublasSgemm('T','N', n-k, n-k-nb, nb,
 		-1.0, d_work, nb, y, nb, 1.0, d_a+nb*ldda+k, ldda);
     
     return 0;

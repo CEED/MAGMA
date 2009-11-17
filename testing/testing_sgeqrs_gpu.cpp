@@ -153,6 +153,7 @@ int main( int argc, char** argv)
       // get the solution in x
       cublasGetVector(N, sizeof(float), d_b, 1, x, 1);
 
+      // compute the residual
       sgemv_("n", &N, &N, &mone, h_A, &N, x, &one, &fone, r, &one);
       matnorm = slange_("f", &N, &N, h_A, &N, work);
 

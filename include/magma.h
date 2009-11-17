@@ -10,6 +10,7 @@
 #define _MAGMA_
 
 #include "auxiliary.h"
+#include "magmablas.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA function definitions
@@ -246,3 +247,4 @@ extern "C" int dgetrs_(char *, int *, int *, double *, int *, int *, double * ,i
 extern "C" double dsymm_     (char *,char*,int *,int *,double *,double *,int *,double *,int *,double *,double *,int *);
 
 #endif
+

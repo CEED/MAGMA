@@ -273,7 +273,7 @@ int main(int argc , char **argv){
 
   for(i=0;i<count;i++){
 
-    N = step*(i)+startN - 32   ;
+    N = step*(i)+startN - 32;
     int N1 = N ;
     
     int INFO[1];
