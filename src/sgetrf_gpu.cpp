@@ -12,6 +12,9 @@
 #include "magmablas.h"
 #include <stdio.h>
 
+#define cublasStrsm magmablas_strsm
+#define cublasSgemm magmablasSgemm
+
 int 
 magma_sgetrf_gpu(int *m, int *n, float *a, int *lda, 
 		 int *ipiv, float *work, int *info)
@@ -113,6 +116,7 @@ magma_sgetrf_gpu(int *m, int *n, float *a, int *lda,
 
       if ((maxdim % 32) != 0)
 	maxdim = (maxdim/32)*32+32;
+
       if ((*m % 32) != 0)
 	maxm = (*m/32)*32 + 32;
       else

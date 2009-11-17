@@ -12,6 +12,9 @@
 #include "magmablas.h"
 #include <stdio.h>
 
+#define cublasDtrsm magmablas_dtrsm
+#define cublasDgemm magmablasDgemm
+
 int 
 magma_dgetrf_gpu(int *m, int *n, double *a, int *lda, 
 		 int *ipiv, double *work, int *info)

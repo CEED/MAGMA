@@ -5,6 +5,13 @@
 #include "cublas.h"
 #include "cuda.h"
 
+#define cublasDtrsm magmablas_dtrsm
+#define cublasDgemm magmablasDgemm
+
+#define cublasStrsm magmablas_strsm
+#define cublasSgemm magmablasSgemm
+
+
 #define MAX(a,b)       (((a)>(b))?(a):(b))
 
 #define BWDMAX 1.0
@@ -303,13 +310,14 @@ void magma_dgetrs_v2(char *TRANS , int N , int NRHS, double *A , int LDA ,
   cublasDtrsm('L','L','N','U', N , NRHS, 1.0, A , LDA , B , LDB );
   cublasDtrsm('L','U','N','N', N , NRHS, 1.0, A , LDA , B , LDB );
 }
+
 void magma_sgetrs_v2(char *TRANS , int N , int NRHS, float *A , int LDA , 
 		     int *IPIV , float *B, int LDB, int *INFO, float *BB1 ){
   cublasGetMatrix( N, NRHS, sizeof(float), B,N , BB1 , N ) ;
   int k1 = 1 ;
   int k2 = N;
   int k3 = 1 ;
-  slaswp_(&NRHS,BB1,&LDB , &k1, &k2, IPIV ,&k3) ;
+  slaswp_(&NRHS,BB1,&LDB , &k1, &k2, IPIV ,&k3);
   cublasSetMatrix( N, NRHS, sizeof(float), BB1, N , B , N ) ;
   cublasStrsm('L','L','N','U', N , NRHS, 1.0, A , LDA , B , LDB );
   cublasStrsm('L','U','N','N', N , NRHS, 1.0, A , LDA , B , LDB );

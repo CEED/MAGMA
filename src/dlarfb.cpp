@@ -12,6 +12,9 @@
 #include "magmablas.h"
 #include <stdio.h>
 
+#define cublasDtrsm magmablas_dtrsm
+#define cublasDgemm magmablasDgemm
+
 int 
 magma_dlarfb(char direct, char storev,
 	     int m, int n, int *k, double *dv, int *ldv, double *dt,

@@ -12,6 +12,9 @@
 #include "magmablas.h"
 #include <stdio.h>
 
+#define cublasStrsm magmablas_strsm
+#define cublasSgemm magmablasSgemm
+
 int 
 magma_spotrf(char *uplo, int *n, float *a, int *lda, float *work, int *info)
 {
