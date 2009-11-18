@@ -31,7 +31,7 @@ magma_dsgesv_gpu(int N, int NRHS, double *A, int LDA, int *IPIV, double *B,
 
     DSGESV first attempts to factorize the matrix in SINGLE PRECISION
     and use this factorization within an iterative refinement procedure
-    to produce a solution with DOUBLE PRECISION normwise backward error
+    to produce a solution with DOUBLE PRECISION norm-wise backward error
     quality (see below). If the approach fails the method switches to a
     DOUBLE PRECISION factorization and solve.
 
@@ -113,7 +113,7 @@ magma_dsgesv_gpu(int N, int NRHS, double *A, int LDA, int *IPIV, double *B,
                  -3 : failure of SGETRF
                  -31: stop the iterative refinement after the 30th
                       iterations
-            > 0: iterative refinement has been sucessfully used.
+            > 0: iterative refinement has been successfully used.
                  Returns the number of iterations
  
     INFO    (output) INTEGER
@@ -125,11 +125,11 @@ magma_dsgesv_gpu(int N, int NRHS, double *A, int LDA, int *IPIV, double *B,
                   could not be computed.
 
     H_SWORK (workspace) REAL array, dimension at least (nb, nb)
-            where nb can be obtained through magma_get_spotrf_nb(*n)
+            where nb can be obtained through magma_get_sgetrf_nb(*n)
             Work array allocated with cudaMallocHost.
 
     H_WORK  (workspace) DOUBLE array, dimension at least (nb, nb)
-            where nb can be obtained through magma_get_dpotrf_nb(*n)
+            where nb can be obtained through magma_get_dgetrf_nb(*n)
             Work array allocated with cudaMallocHost.
 
     DIPIV   (output) INTEGER array on the GPU, dimension (min(M,N))

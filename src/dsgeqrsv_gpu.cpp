@@ -34,7 +34,7 @@ magma_dsgeqrsv_gpu(int M, int N, int NRHS, double *A, int LDA, double *B,
 
     DSGEQRSV first attempts to factorize the matrix in SINGLE PRECISION
     and use this factorization within an iterative refinement procedure
-    to produce a solution with DOUBLE PRECISION normwise backward error
+    to produce a solution with DOUBLE PRECISION norm-wise backward error
     quality (see below). If the approach fails the method switches to a
     DOUBLE PRECISION factorization and solve.
 
@@ -111,7 +111,7 @@ magma_dsgeqrsv_gpu(int M, int N, int NRHS, double *A, int LDA, double *B,
                  -3 : failure of SGETRF
                  -31: stop the iterative refinement after the 30th
                       iterations
-            > 0: iterative refinement has been sucessfully used.
+            > 0: iterative refinement has been successfully used.
                  Returns the number of iterations
  
     INFO    (output) INTEGER
@@ -146,14 +146,14 @@ magma_dsgeqrsv_gpu(int M, int N, int NRHS, double *A, int LDA, double *B,
             where NB can be obtained through magma_get_dgeqrf_nb(M).
 
     H_WORK_D (workspace/output) DOUBLE REAL array, dimension (MAX(1,LWORK_D))
-            This memory is untached if the iterative refinement worked, 
+            This memory is unattached if the iterative refinement worked, 
             otherwise it is used as workspace to factor the matrix in
             double precision. Higher performance is achieved if H_WORK_D is 
             in pinned memory, e.g. allocated using cudaMallocHost. 
 
     D_WORK_D (workspace/output) DOUBLE REAL array on the GPU, dimension 2*N*NB,
             where NB can be obtained through magma_get_dgeqrf_nb(M).
-            This memory is untached if the iterative refinement worked, 
+            This memory is unattached if the iterative refinement worked, 
             otherwise it is used as workspace to factor the matrix in
             double precision. It starts with NB*NB blocks that store the 
             triangular T matrices, followed by the NB*NB blocks of the 
