@@ -230,6 +230,7 @@ sgemvt_kernel2(int n, int m, float alpha,
      A += 16;
   }
 
+  __syncthreads(); // 1
   if (n>n1){
      if (ind2>=(n-n1))
 	buff[ind2]=0.;
@@ -239,30 +240,41 @@ sgemvt_kernel2(int n, int m, float alpha,
      __syncthreads();
      #pragma unroll
      for(int j=0; j<4; j++)
-         la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
+         if (inx>=(n-n1))
+            la[iny+__mul24(j,4)][inx] =  0.f;
+         else
+            la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
 
      __syncthreads();
      if (n-n1>4){
         #pragma unroll
-        for(int j=0; j < 4; j++)
-           res += la[inx][iny*4+j]*buff[j+iny*4];
-
+        for(int j=0; j < 4; j++){
+           ind =  j+iny*4;
+           res += la[inx][ind]*buff[ind];
+        }
 	A += 16;
         __syncthreads();
 	#pragma unroll
-	  for(int j=0; j<4; j++)
-            la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
+	for(int j=0; j<4; j++)
+          if (inx+16>=(n-n1))
+             la[iny+__mul24(j,4)][inx] = 0.f;
+          else
+             la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
 
         __syncthreads();
 
         #pragma unroll
-	for(int j=0; j < 4; j++)
-           res += la[inx][iny*4+j]*buff[j+16+iny*4];
+	for(int j=0; j < 4; j++){
+           ind = j+4*iny;
+           res += la[inx][ind]*buff[16+ind];
+        }
      }
      else {
 	#pragma unroll
-        for(int j=0; j < 4; j++)
-          res += la[inx][iny*4+j]*buff[j+iny*4];
+        for(int j=0; j < 4; j++){
+          ind = j+iny*4;
+          res += la[inx][ind]*buff[ind];
+        }
      }
   }
 
@@ -270,7 +282,7 @@ sgemvt_kernel2(int n, int m, float alpha,
   ind = inx + __mul24(blockIdx.x,16);
   la[inx][iny]= res;
   __syncthreads();
-  if (ind<n){
+  if (ind<n && iny==0){
      res = la[inx][0] + la[inx][1] + la[inx][2] + la[inx][3];
      y[ind] = alpha*res;
   }

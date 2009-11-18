@@ -92,7 +92,7 @@ magma_dlarfb(char direct, char storev,
   }
 
   if (storev == 'c' || storev == 'C'){
-    if (n==1)
+    if (n==1 && m%32==0)
       magmablas_dgemvt(m, *k, 1., dv_ref(0,0), *ldv, dc_ref(0, 0), dwork);
     else
       cublasDgemm('t', 'n', n, *k, m, 1.f, dc_ref(0, 0), *ldc,

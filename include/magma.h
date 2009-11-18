@@ -98,7 +98,7 @@ int magma_sdgetrs_gpu(int *n, int *nrhs, float *a, int *lda,
 void magma_dgetrs_v2( char *TRANS , int N , int NRHS, double *A , int LDA , int *IPIV , double *B, int LDB, int *INFO, double *BB1 );
 void magma_sgetrs_v2( char *TRANS , int N , int NRHS, float *A , int LDA , int *IPIV , float *B, int LDB, int *INFO, float *BB1 );
 void magma_dsgesv(int N , int NRHS,double *A,int LDA ,int *IPIV,double *B,int LDB,double *X,int LDX,double *WORK, float *SWORK,int *ITER,int *INFO,float *h_work,double *h_work2,int *DIPIV );
-void magma_spotrs_gpu( char *UPLO , int N , int NRHS, float *A , int LDA ,float *B, int LDB, int *INFO);
+int magma_spotrs_gpu( char *UPLO , int N , int NRHS, float *A , int LDA ,float *B, int LDB, int *INFO);
 void magma_dpotrs_gpu( char *UPLO , int N , int NRHS, double *A , int LDA ,double *B, int LDB, int *INFO);
 void magma_dsposv(char UPLO,int N ,int NRHS,double *A,int LDA ,double *B,int LDB,double *X,int LDX,double *WORK,float *SWORK,int *ITER,int *INFO,float *h_work,double *h_work2 );
 

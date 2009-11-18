@@ -27,7 +27,7 @@ magma_sgeqrs_gpu(int *m, int *n, int *nrhs,
     Purpose   
     =======   
 
-    Solve the least squares problem
+    Solves the least squares problem
            min || A*X - C ||
     using the QR factorization A = Q*R computed by SGEQRF_GPU2.
 
