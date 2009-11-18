@@ -75,8 +75,14 @@ int main( int argc, char** argv)
     int size5 = size[7];
     lda = N;
     n2 = size5 * size5;
-
+    float *  h_AA ;
     /* Allocate host memory for the matrix */
+    h_AA = (float*)malloc(n2 * sizeof(h_AA[0]));
+    if (h_AA == 0) {
+        fprintf (stderr, "!!!! host memory allocation error (A)\n");
+	exit(1);;
+    }
+      
     h_A = (double*)malloc(n2 * sizeof(h_A[0]));
     if (h_A == 0) {
         fprintf (stderr, "!!!! host memory allocation error (A)\n");
@@ -178,7 +184,7 @@ int main( int argc, char** argv)
     fprintf(fp,"  N          Doule           Double\tSingle\t Mixed    || b-Ax || / ||A||\n");
     fprintf(fp,"=========================================================================================\n");
     for(i=0; i<8; i++){
-      M = N = lda = size[i] - 1 ;
+      M = N = lda = size[i]  ;
       n2 = N*N;
 
       for(j = 0; j < n2; j++)
@@ -186,16 +192,15 @@ int main( int argc, char** argv)
 
       for(j=0; j<N; j++)
 	rr[j] = b[j] = rand() / (double)RAND_MAX;
-
-      cublasSetVector(n2, sizeof(double), h_A, 1, d_A, 1);
-      magma_dgeqrf_gpu(&N, &N, d_A, &N, tau_d, h_work_d, &lwork_d, d_work_d, info);
+//      dlag2s_( &N , &N , h_A , &N, h_AA, &N , info ) ; 
+//`      cublasSetVector(n2, sizeof(float), h_AA, 1, SWORK, 1);
       cublasSetVector(n2, sizeof(double), h_A, 1, d_A, 1);
       cublasSetVector(N, sizeof(double), b, 1, d_b, 1);
     //=====================================================================
     //              Mixed Precision Iterative Refinement - GPU 
     //=====================================================================
-
       int nrhs = 1; 
+      //printf("%d %d %d \n", M , N , nrhs);
       start = get_current_time();
       magma_dsgeqrsv (M, N, nrhs ,d_A,N, d_b,N,X, N ,WORK,SWORK,ITER,info,tau,lwork, h_work,d_work,tau_d , lwork_d , h_work_d ,d_work_d);
       end = get_current_time();
@@ -207,25 +212,9 @@ int main( int argc, char** argv)
       cublasGetVector(N, sizeof(double), X, 1, x, 1);
       double work[1], fone = 1.0, mone = -1., matnorm;
       int one = 1;
-   //   dgemv_("n", &N, &N, &mone, h_A, &N, x, &one, &fone, rr, &one);
-   //   matnorm = dlange_("f", &N, &N, h_A, &N, work);
+      dgemv_("n", &N, &N, &mone, h_A, &N, x, &one, &fone, rr, &one);
+      matnorm = dlange_("f", &N, &N, h_A, &N, work);
    
-    
-    int NRHS = nrhs  ; 
-    int LDX , LDA , LDB ; 
-    LDX = LDB = LDA = N ; 
-    double Rnorm, Anorm, Xnorm, Bnorm;
-    char norm='I';
-    double *worke = (double *)malloc(N*sizeof(double));
-    Xnorm = dlange_(&norm, &N, &NRHS, x, &LDB, worke);
-    Anorm = dlange_(&norm, &N, &N, h_A, &LDA, worke);
-    Bnorm = dlange_(&norm, &N, &NRHS,rr, &LDB, worke);
-    double ONE = -1.0 , NEGONE = 1.0 ;
-    dgemm_( "No Transpose", "No Transpose", &N, &NRHS, &N, &NEGONE, h_A, &LDA, x, &LDX, &ONE, rr, &N);
-    Rnorm=dlange_(&norm, &N, &NRHS, rr, &LDB, worke);
-    double eps1 = dlamch_("Epsilon");
-    free(worke);
-    
     //=====================================================================
     //                 Double Precision Solve 
     //=====================================================================
@@ -240,6 +229,8 @@ int main( int argc, char** argv)
     //=====================================================================
     //                 Single Precision Solve 
     //=====================================================================
+
+     
       start = get_current_time();
       magma_sgeqrf_gpu2(&M, &N, SWORK, &N, tau, h_work, &lwork, d_work, info);
       magma_sgeqrs_gpu(&M, &N, &nrhs, SWORK, &N, tau, 
@@ -261,21 +252,18 @@ int main( int argc, char** argv)
       // Solve the least-squares problem: min || A * X - B ||
       dormqr_("l", "t", &M, &nrhs, &M, h_A, &lda,
 	      tau_d, b, &M, h_work_d, &lwork_d, info);
-
       // B(1:N,1:NRHS) := inv(R) * B(1:N,1:NRHS)
       dtrsm_("l", "u", "n", "n", &M, &nrhs, &fone, h_A, &lda, b, &M);
-
       end = get_current_time();
       cpu_perf = (4.*N*N*N/3.+2.*N*N)/(1000000.*GetTimerValue(start,end));
-      printf("%5d \t%8.2f\t%9.2f\t%6.2f\t%6.2f  \t* %e",
+      printf("%5d \t%8.2f\t%9.2f\t%6.2f\t%6.2f  \t %e",
              size[i], cpu_perf, dperf, sperf, mperf , 
              dlange_("f", &N, &nrhs, rr, &N, work)/matnorm );
       printf(" %2d \n", ITER[0]);
-      printf("\t%lf\n", Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1));
       fprintf(fp,"%5d \t%8.2f\t%9.2f\t%6.2f\t%6.2f  \t%e",
              size[i], cpu_perf, dperf, sperf, mperf , 
              dlange_("f", &N, &nrhs, rr, &N, work)/matnorm );
-      fprintf(fp,"\n");
+      fprintf(fp, " %2d \n", ITER[0]);
 
       if (argc != 1)
 	break;
@@ -284,6 +272,7 @@ int main( int argc, char** argv)
     fclose(fp);
     /* Memory clean up */
     free(h_A);
+    free(h_AA);
     free(tau_d);
     free(tau);
     free(x);
