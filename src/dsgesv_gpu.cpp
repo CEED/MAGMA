@@ -65,12 +65,11 @@ magma_dsgesv_gpu(int N, int NRHS, double *A, int LDA, int *IPIV, double *B,
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    A       (input or input/ouptut) DOUBLE PRECISION array,
-            dimension (LDA,N)
+    A       (input or input/output) DOUBLE PRECISION array, dimension (LDA,N)
             On entry, the N-by-N coefficient matrix A.
             On exit, if iterative refinement has been successfully used
-            (INFO.EQ.0 and ITER.GE.0, see description below), then A is
-            unchanged, if double precision factorization has been used
+            (INFO.EQ.0 and ITER.GE.0, see description below), A is
+            unchanged. If double precision factorization has been used
             (INFO.EQ.0 and ITER.LT.0, see description below), then the
             array A contains the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
@@ -101,7 +100,7 @@ magma_dsgesv_gpu(int N, int NRHS, double *A, int LDA, int *IPIV, double *B,
             This array is used to hold the residual vectors.
 
     SWORK   (workspace) REAL array, dimension (N*(N+NRHS))
-            This array is used to use the single precision matrix and the
+            This array is used to store the single precision matrix and the
             right-hand sides or solutions in single precision.
 
     ITER    (output) INTEGER

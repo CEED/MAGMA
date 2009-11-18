@@ -55,7 +55,7 @@ magma_cgeqrf_gpu(int *m, int *n, float2 *a, int *lda,  float2 *tau,
     WORK    (workspace/output) COMPLEX array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
-            Higher performance is achieved if A is in pinned memory, e.g.
+            Higher performance is achieved if WORK is in pinned memory, e.g.
             allocated using cudaMallocHost.
 
     LWORK   (input) INTEGER   

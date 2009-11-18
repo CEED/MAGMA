@@ -73,7 +73,7 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
     WORK    (workspace/output) REAL array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
-            Higher performance is achieved if A is in pinned memory, e.g.
+            Higher performance is achieved if WORK is in pinned memory, e.g.
             allocated using cudaMallocHost.
 
     LWORK   (input) INTEGER   
