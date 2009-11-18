@@ -22,7 +22,6 @@ magma_dsgesv_gpu(int N, int NRHS, double *A, int LDA, int *IPIV, double *B,
        Univ. of Colorado, Denver
        November 2009
 
-
     Purpose
     =======
 

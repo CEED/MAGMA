@@ -381,7 +381,7 @@ int main(int argc , char **argv){
     RMAX = slamch_("O");
     start = get_current_time();
     magma_dgetrf_gpu(&N, &N, d_A, &N, IPIV, h_work_M_D, INFO);
-    magma_dgetrs_v2("N",N ,NRHS, d_A ,N,IPIV, d_B, N,INFO, h_work_M_D );
+    magma_dgetrs_gpu("N",N ,NRHS, d_A ,N,IPIV, d_B, N,INFO, h_work_M_D );
     end = get_current_time();
     perf = (2.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
     printf("\t\t%6.2f", perf);

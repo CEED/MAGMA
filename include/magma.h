@@ -106,11 +106,9 @@ void magma_dsposv(char UPLO,int N ,int NRHS,double *A,int LDA ,double *B,int LDB
 
 void magma_xerbla(char *name , int *info);
 
-void magma_dsgeqrsv(int M , int N ,int NRHS,double *A,int LDA ,double *B,int LDB,double *X,int LDX, double *WORK,
-float *SWORK,int *ITER,int *INFO,
-float *tau , int lwork , float *h_work , float *d_work ,
-double *tau_d , int lwork_d , double *h_work_d , double *d_work_d);
-
+int magma_dsgeqrsv_gpu(int, int, int, double *, int, double *, int, double *,
+		       int, double *, float *, int *, int *, float *, int, 
+		       float *, float *, double *, int, double *, double *);
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- LAPACK Externs used in MAGMA

@@ -202,9 +202,12 @@ int main( int argc, char** argv)
       int nrhs = 1; 
       //printf("%d %d %d \n", M , N , nrhs);
       start = get_current_time();
-      magma_dsgeqrsv (M, N, nrhs ,d_A,N, d_b,N,X, N ,WORK,SWORK,ITER,info,tau,lwork, h_work,d_work,tau_d , lwork_d , h_work_d ,d_work_d);
+      magma_dsgeqrsv_gpu(M, N, nrhs, d_A,N, d_b,N, X,N, WORK, SWORK, ITER,
+			 info, tau, lwork, h_work, d_work, tau_d, lwork_d, 
+			 h_work_d, d_work_d);
       end = get_current_time();
-      double mperf = gpu_perf = (4.*N*N*N/3.+2.*N*N)/(1000000.*GetTimerValue(start,end));
+      double mperf = gpu_perf = 
+	(4.*N*N*N/3.+2.*N*N)/(1000000.*GetTimerValue(start,end));
 
     //=====================================================================
     //                 Error Computation 
