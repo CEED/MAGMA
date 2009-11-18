@@ -310,7 +310,8 @@ int main(int argc , char **argv){
     //              Mixed Precision Iterative Refinement - GPU 
     //=====================================================================
     start = get_current_time();
-    magma_dsposv(uplo, N , NRHS , d_A , LDA , d_B , LDA , d_X , LDA , M_WORK , M_SWORK , &ITER , INFO , h_work_M_S , h_work_M_D ) ;
+    magma_dsposv_gpu(uplo, N, NRHS, d_A, LDA, d_B, LDA, d_X, LDA, M_WORK, 
+		     M_SWORK, &ITER, INFO, h_work_M_S, h_work_M_D);
     //magma_dpotrf_gpu(&uplo, &N,d_A, &LDA, h_work_M_D, INFO);
     //magma_dpotrs_gpu( "L",N ,NRHS, d_A  , LDA ,d_B,LDB,INFO);
     end = get_current_time();

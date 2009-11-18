@@ -100,9 +100,10 @@ void magma_sgetrs_v2( char *TRANS , int N , int NRHS, float *A , int LDA , int *
 int magma_dsgesv_gpu(int, int, double *, int, int *, double *, int, double *,
 		     int, double *, float *, int *, int *, float *, double *,
 		     int *);
-int magma_spotrs_gpu( char *UPLO , int N , int NRHS, float *A , int LDA ,float *B, int LDB, int *INFO);
-void magma_dpotrs_gpu( char *UPLO , int N , int NRHS, double *A , int LDA ,double *B, int LDB, int *INFO);
-void magma_dsposv(char UPLO,int N ,int NRHS,double *A,int LDA ,double *B,int LDB,double *X,int LDX,double *WORK,float *SWORK,int *ITER,int *INFO,float *h_work,double *h_work2 );
+int magma_spotrs_gpu(char *, int, int, float *, int, float *, int, int *);
+int magma_dpotrs_gpu(char *, int, int, double *, int, double *, int, int *);
+int magma_dsposv_gpu(char, int, int, double *, int, double *, int, double *,
+		     int, double *, float *, int *, int *, float *, double *);
 
 void magma_xerbla(char *name , int *info);
 
