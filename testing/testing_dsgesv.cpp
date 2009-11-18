@@ -344,7 +344,8 @@ int main(int argc , char **argv){
     *INFO = 0 ; 
     perf = 0.0;
     start = get_current_time();
-    magma_dsgesv(  N , NRHS,d_A,LDA,IPIV,d_B,LDB,d_X,LDX,M_WORK,M_SWORK,&ITER,INFO, h_work_M_S, h_work_M_D, DIPIV);
+    magma_dsgesv_gpu(N, NRHS, d_A,LDA, IPIV, d_B,LDB, d_X, LDX, M_WORK,
+		     M_SWORK, &ITER, INFO, h_work_M_S, h_work_M_D, DIPIV);
     end = get_current_time();
     int iter_GPU = ITER ;
     perf = (2.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));

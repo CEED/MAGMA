@@ -23,8 +23,12 @@ extern "C" float slamch_(char *);
 void magma_dgetrs_v2( char *TRANS , int N , int NRHS, double *A , int LDA , int *IPIV , double *B, int LDB, int *INFO, double *BB1 );
 void magma_sgetrs_v2( char *TRANS , int N , int NRHS, float *A , int LDA , int *IPIV , float *B, int LDB, int *INFO, float *BB1 );
 
-void magma_dsgesv(int N ,int NRHS,double *A,int LDA ,int *IPIV,double *B,int LDB,double *X,int LDX,double *WORK,float *SWORK,int *ITER,int *INFO,float *H_SWORK,double *H_WORK,int *DIPIV){
-
+int
+magma_dsgesv_gpu(int N, int NRHS, double *A, int LDA, int *IPIV, double *B, 
+		 int LDB, double *X, int LDX, double *WORK, float *SWORK,
+		 int *ITER, int *INFO, float *H_SWORK, double *H_WORK,
+		 int *DIPIV)
+{
 /*
   Purpose
   =======
@@ -167,7 +171,7 @@ void magma_dsgesv(int N ,int NRHS,double *A,int LDA ,int *IPIV,double *B,int LDB
   }
 
   if( N == 0 || NRHS == 0 )
-    return;
+    return 0;
 
   double ANRM , CTE , EPS;
   EPS  = dlamch_("Epsilon");
@@ -225,7 +229,7 @@ void magma_dsgesv(int N ,int NRHS,double *A,int LDA ,int *IPIV,double *B,int LDB
   }
  
   *ITER =0;
-  return ;
+  return 0;
  L10:
   ;
 
@@ -275,7 +279,7 @@ unnecessary may be*/
 */
 
     *ITER = IITER ;
-    return ;
+    return 0;
     L20:
     IITER++ ;
   }
@@ -293,13 +297,13 @@ unnecessary may be*/
      satisfactory solution, so we resort to double precision.  
   */
   if( *INFO != 0 ){
-    return ;
+    return 0;
   }
 
   magma_dgetrf_gpu(&N, &N, A, &LDA, IPIV, H_WORK, INFO);
   magma_dlacpy(N, NRHS, B , LDB, X, N);
   magma_dgetrs_v2("N",N ,NRHS, A ,LDA,IPIV, X,N,INFO,H_WORK);
-  return ;
+  return 0;
 }
 
 void magma_dgetrs_v2(char *TRANS , int N , int NRHS, double *A , int LDA , 
