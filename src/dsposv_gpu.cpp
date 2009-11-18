@@ -53,8 +53,7 @@ magma_dsposv_gpu(char UPLO, int N, int NRHS, double *A,int LDA, double *B,
         o XNRM is the infinity-norm of the solution
         o ANRM is the infinity-operator-norm of the matrix A
         o EPS is the machine epsilon returned by DLAMCH('Epsilon')
-    The value ITERMAX and BWDMAX are fixed to 30 and 1.0D+00
-    respectively.
+    The value ITERMAX and BWDMAX are fixed to 30 and 1.0D+00 respectively.
 
     Arguments
     =========

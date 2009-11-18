@@ -468,7 +468,7 @@ int magma_sgeqrf_gpu(int *m, int *n, float *a, int  *lda,  float  *tau,
 
     WORK    (workspace/output) REAL array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
-            Higher performance is achieved if A is in pinned memory, 
+            Higher performance is achieved if WORK is in pinned memory, 
             e.g. allocated using cudaMallocHost.
 
     LWORK   (input) INTEGER   
@@ -809,7 +809,7 @@ int magma_dgeqrf_gpu(int *m, int *n, double *a, int  *lda,  double  *tau,
 
     WORK    (workspace/output) DOUBLE array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
-            Higher performance is achieved if A is in pinned memory, 
+            Higher performance is achieved if WORK is in pinned memory, 
             e.g. allocated using cudaMallocHost.
 
     LWORK   (input) INTEGER   
@@ -1154,7 +1154,7 @@ int magma_cgeqrf_gpu(int *m, int *n, float2 *a, int  *lda,  float2  *tau,
 
     WORK    (workspace/output) COMPLEX array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
-            Higher performance is achieved if A is in pinned memory, 
+            Higher performance is achieved if WORK is in pinned memory, 
             e.g. allocated using cudaMallocHost.
 
     LWORK   (input) INTEGER   
@@ -1495,7 +1495,7 @@ int magma_zgeqrf_gpu(int *m, int *n, double2 *a, int  *lda,  double2  *tau,
 
     WORK    (workspace/output) DOUBLE COMPLEX array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
-            Higher performance is achieved if A is in pinned memory, 
+            Higher performance is achieved if WORK is in pinned memory, 
             e.g. allocated using cudaMallocHost.
 
     LWORK   (input) INTEGER   
@@ -1893,6 +1893,118 @@ int magma_dpotrs_gpu(char *UPLO, int N , int NRHS, double *A , int LDA,
 \subsection{Function {\tt {\bf magma\_dsgesv\_gpu}}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
+int magma_dsgesv_gpu(int N, int NRHS, double *A, int LDA, int *IPIV, double *B, 
+                     int LDB, double *X, int LDX, double *WORK, float *SWORK,
+                     int *ITER, int *INFO, float *H_SWORK, double *H_WORK,
+                     int *DIPIV)
+
+    Computes the solution to a real system of linear equations
+       A * X = B,
+    where A is an N-by-N matrix and X and B are N-by-NRHS matrices.
+
+    DSGESV first attempts to factorize the matrix in SINGLE PRECISION
+    and use this factorization within an iterative refinement procedure
+    to produce a solution with DOUBLE PRECISION normwise backward error
+    quality (see below). If the approach fails the method switches to a
+    DOUBLE PRECISION factorization and solve.
+
+    The iterative refinement is not going to be a winning strategy if
+    the ratio SINGLE PRECISION performance over DOUBLE PRECISION
+    performance is too small. A reasonable strategy should take the
+    number of right-hand sides and the size of the matrix into account.
+    This might be done with a call to ILAENV in the future. Up to now, we
+    always try iterative refinement.
+    The iterative refinement process is stopped if
+        ITER > ITERMAX
+    or for all the RHS we have:
+        RNRM < SQRT(N)*XNRM*ANRM*EPS*BWDMAX
+    where
+        o ITER is the number of the current iteration in the iterative
+          refinement process
+        o RNRM is the infinity-norm of the residual
+        o XNRM is the infinity-norm of the solution
+        o ANRM is the infinity-operator-norm of the matrix A
+        o EPS is the machine epsilon returned by DLAMCH('Epsilon')
+    The value ITERMAX and BWDMAX are fixed to 30 and 1.0D+00 respectively.
+
+    N       (input) INTEGER
+            The number of linear equations, i.e., the order of the
+            matrix A.  N >= 0.
+
+    NRHS    (input) INTEGER
+            The number of right hand sides, i.e., the number of columns
+            of the matrix B.  NRHS >= 0.
+
+    A       (input or input/output) DOUBLE PRECISION array, dimension (LDA,N)
+            On entry, the N-by-N coefficient matrix A.
+            On exit, if iterative refinement has been successfully used
+            (INFO.EQ.0 and ITER.GE.0, see description below), A is
+            unchanged. If double precision factorization has been used
+            (INFO.EQ.0 and ITER.LT.0, see description below), then the
+            array A contains the factors L and U from the factorization
+            A = P*L*U; the unit diagonal elements of L are not stored.
+
+    LDA     (input) INTEGER
+            The leading dimension of the array A.  LDA >= max(1,N).
+
+    IPIV    (output) INTEGER array, dimension (N)
+            The pivot indices that define the permutation matrix P;
+            row i of the matrix was interchanged with row IPIV(i).
+            Corresponds either to the single precision factorization
+            (if INFO.EQ.0 and ITER.GE.0) or the double precision
+            factorization (if INFO.EQ.0 and ITER.LT.0).
+
+    B       (input) DOUBLE PRECISION array, dimension (LDB,NRHS)
+            The N-by-NRHS right hand side matrix B.
+
+    LDB     (input) INTEGER
+            The leading dimension of the array B.  LDB >= max(1,N).
+
+    X       (output) DOUBLE PRECISION array, dimension (LDX,NRHS)
+            If INFO = 0, the N-by-NRHS solution matrix X.
+
+    LDX     (input) INTEGER
+            The leading dimension of the array X.  LDX >= max(1,N).
+
+    WORK    (workspace) DOUBLE PRECISION array, dimension (N*NRHS)
+            This array is used to hold the residual vectors.
+
+    SWORK   (workspace) REAL array, dimension (N*(N+NRHS))
+            This array is used to store the single precision matrix and the
+            right-hand sides or solutions in single precision.
+
+    ITER    (output) INTEGER
+            < 0: iterative refinement has failed, double precision
+                 factorization has been performed
+                 -1 : the routine fell back to full precision for
+                      implementation- or machine-specific reasons
+                 -2 : narrowing the precision induced an overflow,
+                      the routine fell back to full precision
+                 -3 : failure of SGETRF
+                 -31: stop the iterative refinement after the 30th
+                      iterations
+            > 0: iterative refinement has been successfully used.
+                 Returns the number of iterations
+ 
+    INFO    (output) INTEGER
+            = 0:  successful exit
+            < 0:  if INFO = -i, the i-th argument had an illegal value
+            > 0:  if INFO = i, U(i,i) computed in DOUBLE PRECISION is
+                  exactly zero.  The factorization has been completed,
+                  but the factor U is exactly singular, so the solution
+                  could not be computed.
+
+    H_SWORK (workspace) REAL array, dimension at least (nb, nb)
+            where nb can be obtained through magma_get_sgetrf_nb(*n)
+            Work array allocated with cudaMallocHost.
+
+    H_WORK  (workspace) DOUBLE array, dimension at least (nb, nb)
+            where nb can be obtained through magma_get_dgetrf_nb(*n)
+            Work array allocated with cudaMallocHost.
+
+    DIPIV   (output) INTEGER array on the GPU, dimension (min(M,N))
+            The pivot indices; for 1 <= i <= min(M,N), row i of the
+            matrix was moved to row IPIV(i).
 \end{verbatim}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1900,6 +2012,140 @@ int magma_dpotrs_gpu(char *UPLO, int N , int NRHS, double *A , int LDA,
 \subsection{Function {\tt {\bf magma\_dsgeqrsv\_gpu}}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
+int magma_dsgeqrsv_gpu(int M, int N, int NRHS, double *A, int LDA, double *B, 
+                       int LDB, double *X,int LDX, double *WORK, float *SWORK, 
+                       int *ITER, int *INFO, float *tau, int lwork, float *h_work,
+                       float *d_work, double *tau_d, int lwork_d, double *h_work_d,
+                       double *d_work_d)
+
+    DSGEQRSV solves the least squares problem 
+       min || A*X - B ||,
+    where A is an M-by-N matrix and X and B are M-by-NRHS matrices.
+
+    DSGEQRSV first attempts to factorize the matrix in SINGLE PRECISION
+    and use this factorization within an iterative refinement procedure
+    to produce a solution with DOUBLE PRECISION norm-wise backward error
+    quality (see below). If the approach fails the method switches to a
+    DOUBLE PRECISION factorization and solve.
+
+    The iterative refinement is not going to be a winning strategy if
+    the ratio SINGLE PRECISION performance over DOUBLE PRECISION
+    performance is too small. A reasonable strategy should take the
+    number of right-hand sides and the size of the matrix into account.
+    This might be done with a call to ILAENV in the future. Up to now, we
+    always try iterative refinement.
+    The iterative refinement process is stopped if
+        ITER > ITERMAX
+    or for all the RHS we have:
+        RNRM < SQRT(N)*XNRM*ANRM*EPS*BWDMAX
+    where
+        o ITER is the number of the current iteration in the iterative
+          refinement process
+        o RNRM is the infinity-norm of the residual
+        o XNRM is the infinity-norm of the solution
+        o ANRM is the infinity-operator-norm of the matrix A
+        o EPS is the machine epsilon returned by DLAMCH('Epsilon')
+    The value ITERMAX and BWDMAX are fixed to 30 and 1.0D+00 respectively.
+
+
+    M       (input) INTEGER   
+            The number of rows of the matrix A. M >= 0.
+
+    N       (input) INTEGER
+            The number of columns of the matrix A. M >= N >= 0.
+
+    NRHS    (input) INTEGER
+            The number of right hand sides, i.e., the number of columns
+            of the matrix B.  NRHS >= 0.
+
+    A       (input or input/output) DOUBLE PRECISION array, dimension (LDA,N)
+            On entry, the M-by-N coefficient matrix A.
+            On exit, if iterative refinement has been successfully used
+            (INFO.EQ.0 and ITER.GE.0, see description below), A is
+            unchanged. If double precision factorization has been used
+            (INFO.EQ.0 and ITER.LT.0, see description below), then the
+            array A contains the QR factorization of A as returned by
+            function DGEQRF_GPU2.
+
+    LDA     (input) INTEGER
+            The leading dimension of the array A.  LDA >= max(1,M).
+
+    B       (input) DOUBLE PRECISION array, dimension (LDB,NRHS)
+            The M-by-NRHS right hand side matrix B.
+
+    LDB     (input) INTEGER
+            The leading dimension of the array B.  LDB >= max(1,M).
+
+    X       (output) DOUBLE PRECISION array, dimension (LDX,NRHS)
+            If INFO = 0, the N-by-NRHS solution matrix X.
+
+    LDX     (input) INTEGER
+            The leading dimension of the array X.  LDX >= max(1,N).
+
+    WORK    (workspace) DOUBLE PRECISION array, dimension (N*NRHS)
+            This array is used to hold the residual vectors.
+
+    SWORK   (workspace) REAL array, dimension (M*(N+NRHS))
+            This array is used to store the single precision matrix and the
+            right-hand sides or solutions in single precision.
+
+    ITER    (output) INTEGER
+            < 0: iterative refinement has failed, double precision
+                 factorization has been performed
+                 -1 : the routine fell back to full precision for
+                      implementation- or machine-specific reasons
+                 -2 : narrowing the precision induced an overflow,
+                      the routine fell back to full precision
+                 -3 : failure of SGETRF
+                 -31: stop the iterative refinement after the 30th
+                      iterations
+            > 0: iterative refinement has been successfully used.
+                 Returns the number of iterations
+ 
+    INFO    (output) INTEGER
+            = 0:  successful exit
+            < 0:  if INFO = -i, the i-th argument had an illegal value
+
+    TAU     (output) REAL array, dimension (N)
+            On exit, TAU(i) contains the scalar factor of the elementary
+            reflector H(i), as returned by magma_sgeqrf_gpu2.
+
+    LWORK   (input) INTEGER   
+            The dimension of the array H_WORK.  LWORK >= (M+N+NB)*NB,   
+            where NB can be obtained through magma_get_sgeqrf_nb(M).
+
+    H_WORK  (workspace/output) REAL array, dimension (MAX(1,LWORK))   
+            Higher performance is achieved if H_WORK is in pinned memory, e.g.
+            allocated using cudaMallocHost.
+
+    D_WORK  (workspace/output)  REAL array on the GPU, dimension 2*N*NB,
+            where NB can be obtained through magma_get_sgeqrf_nb(M).
+            It starts with NB*NB blocks that store the triangular T 
+            matrices, followed by the NB*NB blocks of the diagonal 
+            inverses for the R matrix.
+
+    TAU_D   (output) DOUBLE REAL array, dimension (N)
+            On exit, if the matrix had to be factored in double precision,
+            TAU(i) contains the scalar factor of the elementary
+            reflector H(i), as returned by magma_dgeqrf_gpu2.
+
+    LWORK_D (input) INTEGER   
+            The dimension of the array H_WORK_D. LWORK_D >= (M+N+NB)*NB,   
+            where NB can be obtained through magma_get_dgeqrf_nb(M).
+
+    H_WORK_D (workspace/output) DOUBLE REAL array, dimension (MAX(1,LWORK_D))
+            This memory is unattached if the iterative refinement worked, 
+            otherwise it is used as workspace to factor the matrix in
+            double precision. Higher performance is achieved if H_WORK_D is 
+            in pinned memory, e.g. allocated using cudaMallocHost. 
+
+    D_WORK_D (workspace/output) DOUBLE REAL array on the GPU, dimension 2*N*NB,
+            where NB can be obtained through magma_get_dgeqrf_nb(M).
+            This memory is unattached if the iterative refinement worked, 
+            otherwise it is used as workspace to factor the matrix in
+            double precision. It starts with NB*NB blocks that store the 
+            triangular T matrices, followed by the NB*NB blocks of the 
+            diagonal inverses for the R matrix.
 \end{verbatim}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1907,6 +2153,119 @@ int magma_dpotrs_gpu(char *UPLO, int N , int NRHS, double *A , int LDA,
 \subsection{Function {\tt {\bf magma\_dsposv\_gpu}}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
+int magma_dsposv_gpu(char UPLO, int N, int NRHS, double *A,int LDA, double *B, 
+                     int LDB, double *X, int LDX, double *WORK, float *SWORK,
+                     int *ITER, int *INFO, float *H_SWORK, double *H_WORK)
+
+    DSPOSV computes the solution to a real system of linear equations
+       A * X = B,
+    where A is an N-by-N symmetric positive definite matrix and X and B
+    are N-by-NRHS matrices.
+
+    DSPOSV first attempts to factorize the matrix in SINGLE PRECISION
+    and use this factorization within an iterative refinement procedure
+    to produce a solution with DOUBLE PRECISION norm-wise backward error
+    quality (see below). If the approach fails the method switches to a
+    DOUBLE PRECISION factorization and solve.
+
+    The iterative refinement is not going to be a winning strategy if
+    the ratio SINGLE PRECISION performance over DOUBLE PRECISION
+    performance is too small. A reasonable strategy should take the
+    number of right-hand sides and the size of the matrix into account.
+    This might be done with a call to ILAENV in the future. Up to now, we
+    always try iterative refinement.
+
+    The iterative refinement process is stopped if
+        ITER > ITERMAX
+    or for all the RHS we have:
+        RNRM < SQRT(N)*XNRM*ANRM*EPS*BWDMAX
+    where
+        o ITER is the number of the current iteration in the iterative
+          refinement process
+        o RNRM is the infinity-norm of the residual
+        o XNRM is the infinity-norm of the solution
+        o ANRM is the infinity-operator-norm of the matrix A
+        o EPS is the machine epsilon returned by DLAMCH('Epsilon')
+    The value ITERMAX and BWDMAX are fixed to 30 and 1.0D+00 respectively.
+
+    UPLO    (input) CHARACTER
+            = 'U':  Upper triangle of A is stored;
+            = 'L':  Lower triangle of A is stored.
+
+    N       (input) INTEGER
+            The number of linear equations, i.e., the order of the
+            matrix A.  N >= 0.
+
+    NRHS    (input) INTEGER
+            The number of right hand sides, i.e., the number of columns
+            of the matrix B.  NRHS >= 0.
+
+    A       (input or input/output) DOUBLE PRECISION array,
+            dimension (LDA,N)
+            On entry, the symmetric matrix A.  If UPLO = 'U', the leading
+            N-by-N upper triangular part of A contains the upper
+            triangular part of the matrix A, and the strictly lower
+            triangular part of A is not referenced.  If UPLO = 'L', the
+            leading N-by-N lower triangular part of A contains the lower
+            triangular part of the matrix A, and the strictly upper
+            triangular part of A is not referenced.
+            On exit, if iterative refinement has been successfully used
+            (INFO.EQ.0 and ITER.GE.0, see description below), then A is
+            unchanged, if double precision factorization has been used
+            (INFO.EQ.0 and ITER.LT.0, see description below), then the
+            array A contains the factor U or L from the Cholesky
+            factorization A = U**T*U or A = L*L**T.
+
+    LDA     (input) INTEGER
+            The leading dimension of the array A.  LDA >= max(1,N).
+
+    B       (input) DOUBLE PRECISION array, dimension (LDB,NRHS)
+            The N-by-NRHS right hand side matrix B.
+
+    LDB     (input) INTEGER
+            The leading dimension of the array B.  LDB >= max(1,N).
+
+    X       (output) DOUBLE PRECISION array, dimension (LDX,NRHS)
+            If INFO = 0, the N-by-NRHS solution matrix X.
+
+    LDX     (input) INTEGER
+            The leading dimension of the array X.  LDX >= max(1,N).
+
+    WORK    (workspace) DOUBLE PRECISION array, dimension (N*NRHS)
+            This array is used to hold the residual vectors.
+
+    SWORK   (workspace) REAL array, dimension (N*(N+NRHS))
+            This array is used to use the single precision matrix and the
+            right-hand sides or solutions in single precision.
+
+    ITER    (output) INTEGER
+            < 0: iterative refinement has failed, double precision
+                 factorization has been performed
+                 -1 : the routine fell back to full precision for
+                      implementation- or machine-specific reasons
+                 -2 : narrowing the precision induced an overflow,
+                      the routine fell back to full precision
+                 -3 : failure of SPOTRF
+                 -31: stop the iterative refinement after the 30th
+                      iterations
+            > 0: iterative refinement has been successfully used.
+                 Returns the number of iterations
+
+    INFO    (output) INTEGER
+            = 0:  successful exit
+            < 0:  if INFO = -i, the i-th argument had an illegal value
+            > 0:  if INFO = i, the leading minor of order i of (DOUBLE
+                  PRECISION) A is not positive definite, so the
+                  factorization could not be completed, and the solution
+                  has not been computed.
+
+    H_SWORK    (workspace) REAL array, dimension at least (nb, nb)
+            where nb can be obtained through magma_get_spotrf_nb(*n)
+            Work array allocated with cudaMallocHost.
+
+    H_WORK   (workspace) DOUBLE array, dimension at least (nb, nb)
+             where nb can be obtained through magma_get_dpotrf_nb(*n)
+             Work array allocated with cudaMallocHost.
 \end{verbatim}
 
 
@@ -2182,7 +2541,7 @@ added (shown in the examples).
 \newpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Examplex and testing}\label{testing}
+\section{Examples and testing}\label{testing}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Directory {\tt magma/testing} has drivers that test and show how
 to use every function of this distribution. Below is an example
