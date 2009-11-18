@@ -85,24 +85,27 @@ int main(int argc , char **argv){
 
   TimeStruct start, end;
  int LEVEL=1;
-  printf("\n\nN\tDouble-Factor\tDouble-Solve\tSingle-Factor\tSigle-Solve\tMixed Precision Solver\t||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps)\t NumIter\n");
-  fprintf(fp, "\n\nN\tDouble-Factor\tDouble-Solve\tSingle-Factor\tSigle-Solve\tMixed Precision Solver\t||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps)\t NumIter\n");
+  printf("\n\nN\tDouble-Factor\tDouble-Solve\tSingle-Factor\tSigle-Solve\tMixed Precision Solver\t || b-Ax || / ||A||  \t NumIter\n");
+  fprintf(fp, "\n\nN\tDouble-Factor\tDouble-Solve\tSingle-Factor\tSigle-Solve\tMixed Precision Solver\t || b-Ax || / ||A||\t NumIter\n");
   printf("===========================================================================================================================================================\n"); 
   fprintf(fp,"===========================================================================================================================================================\n"); 
 
   int i ;
-  int startN=64 ;
-  int count = 18;
-  int step = 512 ;  
+   int sizetest[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
+
+
+  int startN=1024    ;
+  int count = 8;
+  int step = 1024 ;  
   int N = count * step ;
   int NRHS=1 ;
-  if( argc == 5) { 
-      step  = atoi ( argv[1]);
-      NRHS  = atoi( argv[2]);
-      count  = atoi ( argv[3]);
-      startN = atoi( argv[4]); 
+  N =startN+(count-1) * step + 32 ;
+  int once = 0 ; 
+  if( argc == 3) { 
+      N  = atoi( argv[2]) + 32 ;
+      once = N ; 
+     startN = N ; 
   }
-  N =startN+(count-1) * step ;
 
   int size ; 
   int LDA ;
@@ -115,8 +118,14 @@ int main(int argc , char **argv){
   int lwork = N*maxnb;
   int lwork_d = N*maxnb_d;
 
-
+  /*
+     This is crucial for generic matrix size
+     Keep in mind to give some bigger amount of memory. 
+  */
   LDB = LDX = LDA = N ;
+  LDA = ( N / 32 ) * 32 ; 
+  if ( LDA < N ) LDA += 32 ; 
+
   int status ;
   double *d_A , * d_B , *d_X ; 
   float *h_work_M_S;
@@ -273,7 +282,12 @@ int main(int argc , char **argv){
 
   for(i=0;i<count;i++){
 
-    N = step*(i)+startN - 32;
+//    N = step*(i)+startN - 32;
+
+    if( once == 0 ) 
+    N = sizetest[i];
+    else N =  once ; 
+
     int N1 = N ;
     
     int INFO[1];
@@ -285,7 +299,12 @@ int main(int argc , char **argv){
 
     LDB = LDX = LDA = N ;
 
-
+   /*
+      This is crucial for LU factorization
+      the LDA should be divisible by 32. 
+   */
+    LDA = ( N / 32 ) * 32 ; 
+    if ( LDA < N ) LDA += 32 ; 
 
     maxnb = magma_get_sgetrf_nb(N) ;
     maxnb_d = magma_get_dgetrf_nb(N) ;
@@ -294,7 +313,6 @@ int main(int argc , char **argv){
     lwork = N1*maxnb;
     lwork_d = N1*maxnb_d;
  
-
     size = LDA * N ;
     init_matrix(A, size, sizeof(double));
     size = LDB * NRHS ;
@@ -305,12 +323,11 @@ int main(int argc , char **argv){
     int maxnb = magma_get_sgetrf_nb(N) ;
     int PTSX = 0 , PTSA = maxnb*N*NRHS ;
 
-    //magma_sgetrs("N",N ,NRHS, M_SWORK+PTSA ,N,IPIV, M_SWORK+PTSX, N,INFO );
     printf("%5d",N); 
     fprintf(fp,"%5d",N); 
 
 
-    cublasSetMatrix( N, N, sizeof( double ), A, N, d_A, N ) ;
+    cublasSetMatrix( N, N, sizeof( double ), A, N, d_A, LDA ) ;
     cublasSetMatrix( N, NRHS, sizeof( double ), X, N, d_X, N ) ;
     cublasSetMatrix( N, NRHS, sizeof( double ), B, N, d_B, N ) ;
 
@@ -325,7 +342,6 @@ int main(int argc , char **argv){
     //=====================================================================
 
     *INFO = 0 ; 
-    cublasGetMatrix( N, N, sizeof( double ), d_A, N, A, N ) ;
     perf = 0.0;
     start = get_current_time();
     magma_dsgesv(  N , NRHS,d_A,LDA,IPIV,d_B,LDB,d_X,LDX,M_WORK,M_SWORK,&ITER,INFO, h_work_M_S, h_work_M_D, DIPIV);
@@ -335,22 +351,16 @@ int main(int argc , char **argv){
     double lperf = perf ; 
     cublasGetMatrix( N, NRHS, sizeof( double ), d_X, N, X, N ) ;
 
-
-    double Rnorm, Anorm, Xnorm, Bnorm;
-    char norm='I';      
-    double *worke = (double *)malloc(N*sizeof(double));
-    Xnorm = dlange_(&norm, &N, &NRHS, X, &LDB, worke);
-    Anorm = dlange_(&norm, &N, &N, A, &LDA, worke);
-    Bnorm = dlange_(&norm, &N, &NRHS, B, &LDB, worke);
-    double ONE = -1.0 , NEGONE = 1.0 ;
-    dgemm_( "No Transpose", "No Transpose", &N, &NRHS, &N, &NEGONE, A, &LDA, X, &LDX, &ONE, B, &N);
-    Rnorm=dlange_(&norm, &N, &NRHS, B, &LDB, worke);
-    double eps1 = dlamch_("Epsilon"); 
-  // printf("-- ||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps) = %e\t",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1));
-    free(worke);
-
-
-
+      //=====================================================================
+      //              ERROR DP vs MIXED  - GPU 
+      //=====================================================================
+      double Rnorm, Anorm;
+      double *worke = (double *)malloc(N*sizeof(double));
+      Anorm = dlange_("I", &N, &N, A, &N, worke);
+      double ONE = -1.0 , NEGONE = 1.0 ;
+      dgemm_( "No Transpose", "No Transpose", &N, &NRHS, &N, &NEGONE, A, &N, X, &LDX, &ONE, B, &N);
+      Rnorm=dlange_("I", &N, &NRHS, B, &LDB, worke);
+      free(worke);
     //=====================================================================
     //              DP - GPU 
     //=====================================================================
@@ -382,35 +392,33 @@ int main(int argc , char **argv){
     //=====================================================================
 
     start = get_current_time();
-    magma_sgetrf_gpu(&N, &N, M_SWORK+PTSA, &N, IPIV, h_work_M_S, INFO);
+    magma_sgetrf_gpu2(&N, &N,M_SWORK+PTSA, &LDA,IPIV, DIPIV, h_work_M_S, INFO);
+    //magma_sgetrf_gpu(&N, &N, M_SWORK+PTSA, &N, IPIV, h_work_M_S, INFO);
     end = get_current_time();
     perf = (2.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
     printf("\t\t%6.2f", perf);
     fprintf(fp,"\t\t%6.2f", perf);
 
     start = get_current_time();
-    magma_sgetrf_gpu2(&N, &N,M_SWORK+PTSA, &N,IPIV, DIPIV, h_work_M_S, INFO);
+    magma_sgetrf_gpu2(&N, &N,M_SWORK+PTSA, &LDA,IPIV, DIPIV, h_work_M_S, INFO);
     magma_sdgetrs_gpu(&N,&NRHS,M_SWORK+PTSA,&LDA,DIPIV,M_SWORK,d_B ,&LDB, INFO);
     end = get_current_time();
     perf = (2.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
     printf("\t\t%6.2f", perf);
     fprintf(fp,"\t\t%6.2f", perf);
 
+    
     printf("\t\t\t%6.2f", lperf);
     fprintf(fp,"\t\t\t%6.2f", lperf);
-    printf("\t\t%e\t%29d",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1), iter_GPU);
-    fprintf(fp, "\t\t%e\t%29d",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1), iter_GPU);
 
+    printf("\t\t\t%e\t%3d", Rnorm/Anorm, iter_GPU);
+    fprintf(fp, "\t\t\t%e\t%3d", Rnorm/Anorm, iter_GPU);
 
-    //=====================================================================
-    //              ERROR DP vs MIXED  - GPU 
-    //=====================================================================
+    printf("\n");
+    fprintf(fp,"\n");
 
- printf("\n");
- fprintf(fp,"\n");
+    if( once != 0 ) break ; 
 
-
-    LEVEL = 1 ; 
   }
 
 

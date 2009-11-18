@@ -130,8 +130,8 @@ int main(int argc , char **argv){
     printout_devices( );
 
 
-    printf("\nUsage:\n\t\t ./testing_dsposv N");
-    fprintf(fp, "\nUsage:\n\t\t ./testing_dsposv N");
+    printf("\nUsage:\n\t\t ./testing_dsposv -N 1024");
+    fprintf(fp, "\nUsage:\n\t\t ./testing_dsposv -N 1024");
 
  printf("\n\nEpsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
  fprintf(fp, "Epsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
@@ -140,25 +140,27 @@ int main(int argc , char **argv){
 
   int LEVEL=1;
   int i ;
-  int startN=64 + rand()%32 ;
+  int startN= 1024 ;
   int count = 8;
-  int step = 512;  
+  int step = 1024;  
   int N = count * step ;
   int NRHS=1 ;
-//512 1 16 64 1
-  int error = 0 ; 
-  if( argc == 6) { 
-      step  = atoi ( argv[1]);
-      NRHS  = atoi( argv[2]);
-      count  = atoi ( argv[3]);
-      startN = atoi( argv[4]); 
-      error = atoi(argv[5]);
-  }
+  int error = 0 ;
+  int once  = 0 ; 
+
+ 
 
   N =startN+(count-1) * step ;
 
- printf("\n\n\tN\tDouble-Factor\tDouble-Solve\t\tSingle-Factor\tSigle-Solve\t   Mixed Precision Solver \t||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps)\tNumIter\n");
-  fprintf(fp, "\n\n\tN\tDouble-Factor\tDouble-Solve\t\tSingle-Factor\tSigle-Solve\t   Mixed Precision Solver \t||Ax-B||_oo/((||A||_oo||x||_oo+||B||_oo).N.eps)\tNumIter\n");
+  if( argc == 3) { 
+      N  = atoi( argv[2]);
+      once = N ; 
+  }
+  int sizetest[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
+
+  printf("\n\nN\tDouble-Factor\tDouble-Solve\tSingle-Factor\tSigle-Solve\tMixed Precision Solver\t || b-Ax || / ||A||  \t NumIter\n");
+  fprintf(fp, "\n\nN\tDouble-Factor\tDouble-Solve\tSingle-Factor\tSigle-Solve\tMixed Precision Solver\t || b-Ax || / ||A||\t NumIter\n");
+
       printf("===============================================================================================================================================================================\n");
       fprintf(fp,"==============================================================================================================================================================================\n");
 
@@ -183,8 +185,8 @@ int main(int argc , char **argv){
     double *CACHE ;  
     int CACHE_L  = 10000 ;
     double *d_A , * d_B , *d_X;
-
-    maxNB = magma_get_spotrf_nb(N);
+//printf("%d %d %d %d\n", magma_get_spotrf_nb(N) ,  magma_get_spotrf_nb(1024) ,  magma_get_spotrf_nb(4032) ,  magma_get_dpotrf_nb(1024) ,  magma_get_dpotrf_nb(4032) ); exit(1);
+    maxNB =  magma_get_spotrf_nb(N);
     size = maxNB * maxNB ;     
     status = cudaMallocHost( (void**)&h_work_M_S,  size*sizeof(float) );
     if (status != CUBLAS_STATUS_SUCCESS) {
@@ -275,6 +277,10 @@ int main(int argc , char **argv){
   for(i=0;i<count;i++){
     NRHS =  1 ; 
     N = step*(i)+startN;
+    if( once == 0 ) 
+         N = sizetest[i] ;
+    else N  = once ;
+  
     int N1 = N;
     
     int INFO[1];
@@ -291,10 +297,8 @@ int main(int argc , char **argv){
     cublasSetMatrix( N, NRHS, sizeof( double ), Bs, N,d_B, N ) ;
 
     double perf ;  
-    int maxnb = magma_get_sgetrf_nb(N) ;
-    int PTSX = 0 , PTSA = maxnb*N*NRHS ;
 
-    printf("%10d ",N); 
+    printf("%5d ",N); 
     fprintf(fp, "%10d ",N); 
     fflush(stdout);
 
@@ -305,9 +309,10 @@ int main(int argc , char **argv){
     //=====================================================================
     //              Mixed Precision Iterative Refinement - GPU 
     //=====================================================================
-
     start = get_current_time();
     magma_dsposv(uplo, N , NRHS , d_A , LDA , d_B , LDA , d_X , LDA , M_WORK , M_SWORK , &ITER , INFO , h_work_M_S , h_work_M_D ) ;
+    //magma_dpotrf_gpu(&uplo, &N,d_A, &LDA, h_work_M_D, INFO);
+    //magma_dpotrs_gpu( "L",N ,NRHS, d_A  , LDA ,d_B,LDB,INFO);
     end = get_current_time();
     perf = (1.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
     cublasGetMatrix( N, NRHS, sizeof( double), d_X, N,res_, N ) ;
@@ -316,20 +321,31 @@ int main(int argc , char **argv){
     //=====================================================================
     //                 Error Computation 
     //=====================================================================
+
+      char norm='I';
+      char side ='L';
+      double ONE = -1.0 , NEGONE = 1.0 ;
+/*
     double Rnorm, Anorm, Xnorm, Bnorm;
-    char norm='I';
+
     double *worke = (double *)malloc(N*sizeof(double));
+    Anorm = dlansy_(&norm, &uplo,  &N, As, &N, worke);
+ //   Anorm = dlange_("I", &N, &N, As, &N, worke);
+
     Xnorm = dlange_(&norm, &N, &NRHS, res_, &LDB, worke);
-    Anorm = dlansy_(&uplo, &norm,  &N, As, &LDA, worke);
     Bnorm = dlange_(&norm, &N, &NRHS, Bs, &LDB, worke);
-    double ONE = -1.0 , NEGONE = 1.0 ;
-    char side ='L';
     dsymm_( &side, &uplo, &N, &NRHS, &NEGONE, As, &LDA, res_, &LDX, &ONE, Bs, &N);
     Rnorm=dlange_(&norm, &N, &NRHS, Bs, &LDB, worke);
     double eps1 = dlamch_("Epsilon");
+    printf("\t--   %e %e --\t", Rnorm ,  Anorm);
     free(worke);
-
-
+*/
+      double Rnorm, Anorm;
+      double *worke = (double *)malloc(N*sizeof(double));
+      Anorm = dlansy_( &norm, &uplo,  &N, As, &N, worke);
+      dsymm_( &side, &uplo, &N, &NRHS, &NEGONE, As, &LDA, res_, &LDX, &ONE, Bs, &N);
+      Rnorm=dlange_("I", &N, &NRHS, Bs, &LDB, worke);
+      free(worke);
 
     //=====================================================================
     //                 Double Precision Factor 
@@ -363,8 +379,8 @@ int main(int argc , char **argv){
     magma_spotrf_gpu(&uplo, &N, M_SWORK+N*NRHS, &LDA, h_work_M_S, INFO);
     end = get_current_time();
     perf = (1.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
-    printf("\t\t\t%6.2f ", perf);
-    fprintf(fp,"\t\t\t%6.2f", perf);
+    printf("\t\t%6.2f ", perf);
+    fprintf(fp,"\t\t%6.2f", perf);
     fflush(stdout);
 
     //=====================================================================
@@ -381,17 +397,22 @@ int main(int argc , char **argv){
     fflush(stdout);
 
 
+    printf("\t\t%6.2f", lperf);
+    fprintf(fp,"\t\t%6.2f", lperf);
+//    printf("\t\t\t%e\t%17d",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1), ITER);
+ //   fprintf(fp, "\t\t\t%e\t%17d",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1), ITER);
+    printf("\t\t\t%e\t%3d", Rnorm/Anorm, ITER);
+    fprintf(fp, "\t\t\t%e\t%3d", Rnorm/Anorm, ITER);
 
 
-    printf("\t\t\t%6.2f", lperf);
-    fprintf(fp,"\t\t\t%6.2f", lperf);
-    printf("\t\t\t\t%e\t%27d",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1), ITER);
-    fprintf(fp, "\t\t\t\t%e\t%27d",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1), ITER);
     fflush(stdout);
 
     printf("\n");
     fprintf(fp,"\n");
-    LEVEL = 1 ; 
+
+    if( once != 0 ){
+	break;
+    } 
   }
 
    cublasFree(d_X);

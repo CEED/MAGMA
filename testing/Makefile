@@ -44,6 +44,7 @@ include ../make.inc
           testing_zgetrf_gpu.cpp \
           testing_zgeqrf_gpu.cpp \
           \
+          testing_dsgeqrsv_gpu.cpp \
           testing_dsgesv.cpp \
           testing_dgesv.cpp \
           testing_sgesv.cpp \
