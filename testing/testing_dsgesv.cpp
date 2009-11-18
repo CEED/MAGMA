@@ -102,7 +102,7 @@ int main(int argc , char **argv){
   N =startN+(count-1) * step + 32 ;
   int once = 0 ; 
   if( argc == 3) { 
-      N  = atoi( argv[2]) + 32 ;
+      N  = atoi( argv[2]) ;
       once = N ; 
      startN = N ; 
   }
