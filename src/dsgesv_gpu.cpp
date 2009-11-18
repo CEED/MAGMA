@@ -180,20 +180,23 @@ void magma_dsgesv(int N ,int NRHS,double *A,int LDA ,int *IPIV,double *B,int LDB
   int IITER ;
   double alpha = -1.0;
   double beta = 1 ;
+  int DLDA =  ( N / 32 ) * 32 ; 
+  if ( DLDA < N ) 
+	DLDA += 32 ;  
   magma_dlag2s(N , NRHS , B , LDB , SWORK, N , RMAX );
   if(*INFO !=0){
     *ITER = -2 ;
     printf("magmablas_dlag2s\n");
     goto L40;
   }
-  magma_dlag2s(N , N , A , LDA , SWORK+PTSA, N , RMAX); // Merge with DLANGE /
+  magma_dlag2s(N , N , A , LDA , SWORK+PTSA, LDA , RMAX); // Merge with DLANGE /
   if(*INFO !=0){
     *ITER = -2 ;
     printf("magmablas_dlag2s\n");
     goto L40;
   }
   double XNRM[1] , RNRM[1] ;
-  magma_sgetrf_gpu2(&N, &N,SWORK+PTSA, &N,IPIV, DIPIV, H_SWORK, INFO);
+  magma_sgetrf_gpu2(&N, &N,SWORK+PTSA, &LDA,IPIV, DIPIV, H_SWORK, INFO);
   if(INFO[0] !=0){
     *ITER = -3 ;
     goto L40;
@@ -293,9 +296,9 @@ unnecessary may be*/
     return ;
   }
 
-  magma_dgetrf_gpu(&N, &N, A, &N, IPIV, H_WORK, INFO);
+  magma_dgetrf_gpu(&N, &N, A, &LDA, IPIV, H_WORK, INFO);
   magma_dlacpy(N, NRHS, B , LDB, X, N);
-  magma_dgetrs_v2("N",N ,NRHS, A ,N,IPIV, X,N,INFO,H_WORK);
+  magma_dgetrs_v2("N",N ,NRHS, A ,LDA,IPIV, X,N,INFO,H_WORK);
   return ;
 }
 
@@ -307,8 +310,8 @@ void magma_dgetrs_v2(char *TRANS , int N , int NRHS, double *A , int LDA ,
   int k3 = 1 ;
   dlaswp_(&NRHS,BB1,&LDB , &k1, &k2, IPIV ,&k3) ;
   cublasSetMatrix( N, NRHS, sizeof(double), BB1, N , B , N ) ;
-  cublasDtrsm('L','L','N','U', N , NRHS, 1.0, A , LDA , B , LDB );
-  cublasDtrsm('L','U','N','N', N , NRHS, 1.0, A , LDA , B , LDB );
+  magmablas_dtrsm('L','L','N','U', N , NRHS, 1.0, A , LDA , B , LDB );
+  magmablas_dtrsm('L','U','N','N', N , NRHS, 1.0, A , LDA , B , LDB );
 }
 
 void magma_sgetrs_v2(char *TRANS , int N , int NRHS, float *A , int LDA , 
