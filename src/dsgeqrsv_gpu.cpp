@@ -25,25 +25,26 @@ double *A,int LDA ,double *B,int LDB,double *X,int LDX, double *WORK,
 float *SWORK,int *ITER,int *INFO, 
 float *tau , int lwork , float *h_work , float *d_work ,
 double *tau_d , int lwork_d , double *h_work_d , double *d_work_d 
-
 ){
   /*
     Check The Parameters. 
   */
   *ITER = 0 ;
+  *INFO = 0 ;
   if ( N <0)
     *INFO = -1;
   else if(NRHS<0)
-    *INFO =-2;
+    *INFO =-3;
   else if(LDA < MAX(1,N))
-    *INFO =-4;
+    *INFO =-5;
   else if( LDB < MAX(1,N))
     *INFO =-7;
   else if( LDX < MAX(1,N))
     *INFO =-9;
 
   if(*INFO!=0){
-    magma_xerbla("magma_dsgesv",INFO) ;
+    printf("%d %d %d\n", M , N , NRHS);
+    magma_xerbla("magma_dsgeqrsv_gpu",INFO) ;
   }
 
   if( N == 0 || NRHS == 0 )
