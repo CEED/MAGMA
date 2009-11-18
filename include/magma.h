@@ -95,8 +95,6 @@ int magma_zgeqrf_gpu(int *, int *, double2 *, int  *, double2  *,
 
 int magma_sdgetrs_gpu(int *n, int *nrhs, float *a, int *lda,
                   int *ipiv, float *x, double *b, int *ldb, int *info);
-void magma_dgetrs_v2( char *TRANS , int N , int NRHS, double *A , int LDA , int *IPIV , double *B, int LDB, int *INFO, double *BB1 );
-void magma_sgetrs_v2( char *TRANS , int N , int NRHS, float *A , int LDA , int *IPIV , float *B, int LDB, int *INFO, float *BB1 );
 int magma_dsgesv_gpu(int, int, double *, int, int *, double *, int, double *,
 		     int, double *, float *, int *, int *, float *, double *,
 		     int *);
@@ -233,21 +231,13 @@ extern "C" int ztrmm_(char *, char *, char *, char *, int *, int *,
 		      double2 *, double2 *, int *, double2 *,int *);
 extern "C" void ztrsm_(char *, char *, char *, char *, int *, int *, 
 		       double2 *, double2 *, int *, double2 *,int*);
-extern "C" int dsgesv_( int *, int *, double *, int *, int *, double *, int *, double *, int *, double *, float *, int *, int *);
+extern "C" int dsgesv_( int *, int *, double *, int *, int *, double *, int *, 
+			double *, int *, double *, float *, int *, int *);
 extern "C" void zaxpy_(int *, double2 *, double2 *, int *, double2 *, int *);
 extern "C" void zherk_(char *, char *, int *, int *, double *,
                        double2 *, int *, double *, double2 *, int *);
-
-// Remove these stuff -- rajib 
-extern "C" int dsgesv_( int *, int *, double *, int *, int *, double *, int *, double *, int *, double *, float *, int *, int *);
-extern "C" int dgesv_( int *, int *, double *, int *, int *, double *, int *,  int *);
-extern "C" int sgesv_( int *, int *, float *, int *, int *, float *, int *,  int *);
-extern "C" int dlag2s_( int *, int *, double *, int *,  float *, int *,  int *);
-extern "C" int slag2d_( int *, int *, float *, int *,  double *, int *,  int *);
-extern "C" int sgetrs_(char *, int *, int *, float *, int *, int *, float * ,int * ,  int *);
-extern "C" int idamax_(int *, double *, int *);
-extern "C" int dgetrs_(char *, int *, int *, double *, int *, int *, double * ,int * ,  int *);
-extern "C" double dsymm_     (char *,char*,int *,int *,double *,double *,int *,double *,int *,double *,double *,int *);
+extern "C" double dsymm_(char *,char*,int *,int *,double *,double *,int *,
+			 double *,int *,double *,double *,int *);
 
 #endif
 
