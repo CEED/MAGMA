@@ -1734,11 +1734,67 @@ int magma_sgelqf(int *m, int *n, float *a, int *lda, float *tau,
     and tau in TAU(i).
 \end{verbatim}
 
+\normalsize
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \section{Linear solvers}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace{0.1in}
+Provided are solvers in real arithmetic, both single and double precision,
+based on the LU, QR, and Cholesky factorizations. To solve
+\[
+   A x = b
+\]
+the matrix $A$ is first factored, and second, the resulting factors are used
+in solving the original problem. A general recommendation is to use
+LU for general $n \times n$ matrices, Cholesky for symmetric and positive
+definite $n \times n$ matrices, and QR for solving least squares problems
+\[
+   min ~|| A x - b ||
+\]
+for general $m \times n$, $m \ge n$ matrices.
 
+\vspace{0.1in}
+The solvers are provided in the more critical GPU interface.
+Indeed, if a user has used the CPU interface for the matrix
+factorization, it would be often faster to do the solving step 
+directly on the CPU using LAPACK with optimized CPU BLAS -- 
+the solving step is a bandwidth limited (Level 2 BLAS) operation and 
+currently CPU's bus is of higher bandwidth than the bandwidth of the 
+CPU-GPU connection (i.e. the time to solve on the CPU
+would be faster than just transferring the entire matrix to the GPU). 
+ 
+\vspace{0.1in}
+Although the solution step has $O(n) \times$ less floating point operations 
+than the factorization, it is still very important to optimize it.
+Solving a triangular system of equations can be very slow because 
+the computation is bandwidth limited and naturally not parallel.
+Various approaches have been proposed in the past. We use an approach 
+where diagonal blocks of A are explicitly inverted and used in a block
+algorithm. This results in a numerically stable algorithm, especially when 
+used with triangular matrices coming from numerically stable factorization
+algorithms (e.g. as in LAPACK and as implemented here in MAGMA), of high 
+performance, e.g. often exceeding $100 \times$ the performance of the 
+corresponding CUBLAS implementations.
+
+\vspace{0.1in}
+To take advantage of the fact that GPU's single precision is currently 
+of much higher performance than the double precision (theoretically
+$\approx 10 \times$), MAGMA version 0.2 provides a second set of solvers,
+based on the mixed precision iterative refinement technique.
+The solvers are based again on correspondingly the LU, QR, and Cholesky
+factorizations, and are designed to solve linear problems in double 
+precision accuracy but at a speed that is characteristic for the much 
+faster single precision computations. 
+The idea is to use single precision for the bulk of the computation, 
+namely the factorization step, and than use that factorization 
+as a preconditioner in a simple iterative refinement process in double 
+precision arithmetic. This often results in the desired high performance
+and high accuracy solvers.
+
+
+
+\footnotesize
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \subsection{Function {\tt {\bf magma\_sgetrs\_gpu}}}
@@ -1798,7 +1854,7 @@ int magma_sgeqrs_gpu(int *m, int *n, int *nrhs,
                      float *a, int *lda, float *tau, float *c, int *ldc,
                      float *work, int *lwork, float *td, int *info)
 
-    Solves the least squares problem
+    Solves the least squares problem 
            min || A*X - C ||
     using the QR factorization A = Q*R computed by SGEQRF_GPU2.
 
