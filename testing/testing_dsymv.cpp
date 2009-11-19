@@ -168,14 +168,14 @@ int main(int argc, char **argv)
 			Q( cublasSetMatrix( m, 1, sizeof( double ), C+m, ldc, dB, ldc ) );
 			Q( cublasGetError( ) );
 
-                        magma_dsymv('L', 'L' , m , 1.0,  dA , lda , dB , 1 ,1.0,  dC , 1 );
+                        magma_dsymv( 'L' , m , 1.0,  dA , lda , dB , 1 ,1.0,  dC , 1 );
 			Q( cublasGetError( ) );
 			Q( cublasGetMatrix( m, 1, sizeof( double ), dC, ldc, our_result, ldc ) );
 		
 	
 			double cublas_time;
                         start = get_current_time();
-                        magma_dsymv('L', 'L' , m , 1.0,  dA , lda , dB , 1 ,1.0,  dC , 1 );
+                        magma_dsymv( 'L' , m , 1.0,  dA , lda , dB , 1 ,1.0,  dC , 1 );
 			end = get_current_time();
 		        cublas_time = GetTimerValue(start,end) ; 
 			
