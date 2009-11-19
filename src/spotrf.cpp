@@ -15,7 +15,7 @@
 #define cublasStrsm magmablas_strsm
 #define cublasSgemm magmablasSgemm
 
-int 
+extern "C" int 
 magma_spotrf(char *uplo, int *n, float *a, int *lda, float *work, int *info)
 {
 /*  -- MAGMA (version 0.2) --

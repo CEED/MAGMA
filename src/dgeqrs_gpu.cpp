@@ -12,8 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-int 
+extern "C" int 
 magma_dgeqrs_gpu(int *m, int *n, int *nrhs, 
 		 double *a, int *lda, double *tau, double *c, int *ldc, 
 		 double *work, int *lwork, double *td, int *info)

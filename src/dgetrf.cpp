@@ -15,7 +15,7 @@
 #define cublasDtrsm magmablas_dtrsm
 #define cublasDgemm magmablasDgemm
 
-int 
+extern "C" int 
 magma_dgetrf(int *m, int *n, double *a, int *lda, 
 	     int *ipiv, double *work, double *da, int *info)
 {

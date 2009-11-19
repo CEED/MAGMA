@@ -12,7 +12,7 @@
 #include "magmablas.h"
 #include <stdio.h>
 
-int
+extern "C" int
 magma_sgelqf2(int *m, int *n, float *a, int *lda, float *tau, 
 	      float *work, int *lwork, float *da, int *info)
 {

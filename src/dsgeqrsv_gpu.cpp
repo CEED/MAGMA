@@ -12,7 +12,7 @@
 #define BWDMAX 1.0
 #define ITERMAX 30
 
-int
+extern "C" int
 magma_dsgeqrsv_gpu(int M, int N, int NRHS, double *A, int LDA, double *B, 
 		   int LDB, double *X,int LDX, double *WORK, float *SWORK, 
 		   int *ITER, int *INFO, float *tau, int lwork, float *h_work,

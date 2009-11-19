@@ -15,6 +15,7 @@
 /* ////////////////////////////////////////////////////////////////////////////
    -- Get current time
 */ 
+extern "C"
 TimeStruct get_current_time(void)
 {
   static struct timeval  time_val;
@@ -34,6 +35,7 @@ TimeStruct get_current_time(void)
 /* ////////////////////////////////////////////////////////////////////////////
    -- End elapsed time
 */ 
+extern "C"
 double GetTimerValue(TimeStruct time_1, TimeStruct time_2)
 {
   int sec, usec;
@@ -47,6 +49,7 @@ double GetTimerValue(TimeStruct time_1, TimeStruct time_2)
 /* ////////////////////////////////////////////////////////////////////////////
    -- Print the available GPU devices
 */
+extern "C"
 void printout_devices( )
 {
   int ndevices;
@@ -74,6 +77,7 @@ void printout_devices( )
       1s on the diagonal) if uplo is 'L'/'l'.
       This is auxiliary function used in geqrf and geqlf.  
 */
+extern "C"
 void spanel_to_q(char uplo, int ib, float *a, int lda, float *work){
   int i, j, k = 0;
   float *col;
@@ -106,6 +110,7 @@ void spanel_to_q(char uplo, int ib, float *a, int lda, float *work){
    -- Restores a panel (after call to "panel_to_q").
       This isauxiliary function usedin geqrf and geqlf.
 */
+extern "C"
 void sq_to_panel(char uplo, int ib, float *a, int lda, float *work){
   int i, j, k = 0;
   float *col;
@@ -129,6 +134,7 @@ void sq_to_panel(char uplo, int ib, float *a, int lda, float *work){
 /* ////////////////////////////////////////////////////////////////////////////
    -- Put 0s in the upper triangular part of a panel (and 1s on the diagonal)
 */
+extern "C"
 void cpanel_to_q(char uplo, int ib, float2 *a, int lda, float2 *work){
   int i, j, k = 0;
   float2 *col;
@@ -149,6 +155,7 @@ void cpanel_to_q(char uplo, int ib, float2 *a, int lda, float2 *work){
 /* ////////////////////////////////////////////////////////////////////////////
    -- Restores a panel (after call to "panel_to_q")
 */
+extern "C"
 void cq_to_panel(char uplo, int ib, float2 *a, int lda, float2 *work){
   int i, j, k = 0;
   float2 *col;
@@ -164,6 +171,7 @@ void cq_to_panel(char uplo, int ib, float2 *a, int lda, float2 *work){
 /* ////////////////////////////////////////////////////////////////////////////
    -- Put 0s in the upper triangular part of a panel (and 1s on the diagonal)
 */
+extern "C"
 void dpanel_to_q(int ib, double *a, int lda, double *work){
   int i, j, k = 0;
   double *col;
@@ -181,6 +189,7 @@ void dpanel_to_q(int ib, double *a, int lda, double *work){
 /* ////////////////////////////////////////////////////////////////////////////
    -- Restores a panel (after call to "panel_to_q")
 */
+extern "C"
 void dq_to_panel(int ib, double *a, int lda, double *work){
   int i, j, k = 0;
   double *col;
@@ -194,6 +203,7 @@ void dq_to_panel(int ib, double *a, int lda, double *work){
 /* ////////////////////////////////////////////////////////////////////////////
    -- Put 0s in the upper triangular part of a panel (and 1s on the diagonal)
 */
+extern "C"
 void zpanel_to_q(char uplo, int ib, double2 *a, int lda, double2 *work){
   int i, j, k = 0;
   double2 *col;
@@ -214,6 +224,7 @@ void zpanel_to_q(char uplo, int ib, double2 *a, int lda, double2 *work){
 /* ////////////////////////////////////////////////////////////////////////////
    -- Restores a panel (after call to "panel_to_q")
 */
+extern "C"
 void zq_to_panel(char uplo, int ib, double2 *a, int lda, double2 *work){
   int i, j, k = 0;
   double2 *col;
@@ -233,6 +244,7 @@ void zq_to_panel(char uplo, int ib, double2 *a, int lda, double2 *work){
       parallel processing vs the original one assumes a specific ordering and
       has to be done sequentially.
 */
+extern "C"
 void swp2pswp(int n, int *ipiv, int *newipiv){
   int i, newind, ind;
   
@@ -280,6 +292,7 @@ void swp2pswp(int n, int *ipiv, int *newipiv){
       point number on the GPU memory, the function returns the value
       at that location.
 */
+extern "C"
 float getv(float *da){
   float res[1];
   cublasGetVector(1, sizeof(float), da, 1, res, 1);

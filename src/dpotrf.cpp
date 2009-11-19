@@ -11,7 +11,7 @@
 #include "magma.h"
 #include <stdio.h>
 
-int 
+extern "C" int 
 magma_dpotrf(char *uplo, int *n, double *a, int *lda, double *work, int *info)
 {
 /*  -- MAGMA (version 0.2) --

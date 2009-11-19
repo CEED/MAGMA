@@ -11,7 +11,7 @@
 #include "magma.h"
 #include <stdio.h>
 
-int 
+extern "C" int 
 magma_cgeqrf_gpu(int *m, int *n, float2 *a, int *lda,  float2 *tau,
 		 float2 *work, int *lwork, float2 *dwork, int *info )
 {

@@ -29,7 +29,7 @@ void ssplit_diag_block(int ib, float *a, int lda, float *work){
   strtri_("u", "n", &ib, work, &ib, &info);
 }
 
-int 
+extern "C" int 
 magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
 		  float *work, int *lwork, float *dwork, int *info )
 {

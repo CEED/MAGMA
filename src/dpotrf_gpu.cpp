@@ -10,7 +10,7 @@
 #include "cublas.h"
 #include "magma.h"
 
-int 
+extern "C" int 
 magma_dpotrf_gpu(char *uplo, int *n, double *a, int *lda, double *work, 
 		 int *info)
 {

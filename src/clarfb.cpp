@@ -11,7 +11,8 @@
 #include "magma.h"
 #include <stdio.h>
 #include "magmablas.h"
-int 
+
+extern "C" int 
 magma_clarfb(char direct, char storev,
 	     int m, int n, int *k, float2 *dv, int *ldv, float2 *dt,
 	     int *ldt, float2 *dc, int *ldc, float2 *dwork, int *ldwork)

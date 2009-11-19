@@ -12,7 +12,7 @@
 #include "magmablas.h"
 #include <stdio.h>
 
-int 
+extern "C" int 
 magma_spotrf2(char *uplo, int *n, float *a, int *lda, float *work, int *info)
 {
 /*  -- MAGMA (version 0.2) --

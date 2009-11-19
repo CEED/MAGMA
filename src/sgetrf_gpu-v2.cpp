@@ -13,7 +13,7 @@
 #include "magmablas.h"
 #include <stdio.h>
 
-int 
+extern "C" int 
 magma_sgetrf_gpu2(int *m, int *n, float *a, int *lda, 
 		  int *ipiv, int *dipiv, float *work, int *info)
 {

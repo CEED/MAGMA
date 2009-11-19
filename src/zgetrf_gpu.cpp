@@ -12,7 +12,7 @@
 #include "magmablas.h"
 #include <stdio.h>
 
-int 
+extern "C" int 
 magma_zgetrf_gpu(int *m, int *n, double2 *a, int *lda, 
 		 int *ipiv, double2 *work, int *info)
 {

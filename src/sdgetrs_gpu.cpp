@@ -12,7 +12,7 @@
 #include "magmablas.h"
 #include <stdio.h>
 
-int 
+extern "C" int 
 magma_sdgetrs_gpu(int *n, int *nrhs, float *a, int *lda, 
 		  int *ipiv, float *x, double *b, int *ldb, int *info)
 {

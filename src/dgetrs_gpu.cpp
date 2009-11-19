@@ -15,7 +15,7 @@
 #define cublasDtrsm magmablas_dtrsm
 #define cublasDgemm magmablasDgemm
 
-int
+extern "C" int
 magma_dgetrs_gpu(char *trans , int n, int nrhs, double *a , int lda,
 		 int *ipiv, double *b, int ldb, int *info, double *hwork)
 {

@@ -5,7 +5,7 @@
 #include "cublas.h"
 #include "cuda.h"
 
-int 
+extern "C" int 
 magma_dpotrs_gpu(char *UPLO , int N , int NRHS, double *A , int LDA ,
 		 double *B, int LDB, int *INFO)
 {

@@ -12,7 +12,7 @@
 #include "magmablas.h"
 #include <stdio.h>
 
-int 
+extern "C" int 
 magma_dlahr2(int *n, int *k, int *nb, 
 	     double *d_a, double *d_v, double *a, int *lda, 
 	     double *tau, double *t, int *ldt, double *y, int *ldy)

@@ -15,7 +15,7 @@
 #define cublasDtrsm magmablas_dtrsm
 #define cublasDgemm magmablasDgemm
 
-int 
+extern "C" int 
 magma_dlarfb(char direct, char storev,
 	     int m, int n, int *k, double *dv, int *ldv, double *dt,
 	     int *ldt, double *dc, int *ldc, double *dwork, int *ldwork)

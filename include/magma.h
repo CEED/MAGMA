@@ -12,6 +12,10 @@
 #include "auxiliary.h"
 #include "magmablas.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA function definitions
 */
@@ -109,135 +113,144 @@ int magma_dsgeqrsv_gpu(int, int, int, double *, int, double *, int, double *,
 		       int, double *, float *, int *, int *, float *, int, 
 		       float *, float *, double *, int, double *, double *);
 
+#ifdef __cplusplus
+}
+#endif
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* ////////////////////////////////////////////////////////////////////////////
    -- LAPACK Externs used in MAGMA
 */
-extern "C" void strtri_(char *, char *, int *, float *, int *, int *);
-extern "C" void strsm_(char *, char *, char *, char *,
-		       int *, int *, float *, float *, int *, float *, int*);
-extern "C" void sgemm_(char *, char *, int *, int *, int *, float *,
-		       float *, int *, float *, int *, float *,
-		       float *, int *);
-extern "C" int sgemv_(char *, int *, int *, float *, float *, int *,
-                      float *, int *, float *, float *, int *);
-extern "C" void saxpy_(int *, float *, float *, int *, float *, int *);
-extern "C" int scopy_(int *, float *, int *, float *, int *);
-extern "C" int strmv_(char*,char*,char*,int *,float *, int *, float *, int *);
-extern "C" int slarfg_(int *, float *, float *x, int *, float *);
-extern "C" int sscal_(int *, float *, float *, int *);
-extern "C" void ssyrk_(char *, char *, int *, int *, float *, float *,
-		       int *, float *, float *, int *);
-extern "C" int strmm_(char *, char *, char *, char *,
-                      int *, int *, float *, float *, int *, float *, int *);
-extern "C" int slaswp_(int *, float *, int *, int *, int *, int *, int *);
+void strtri_(char *, char *, int *, float *, int *, int *);
+void strsm_(char *, char *, char *, char *,
+	    int *, int *, float *, float *, int *, float *, int*);
+void sgemm_(char *, char *, int *, int *, int *, float *,
+	    float *, int *, float *, int *, float *, float *, int *);
+int sgemv_(char *, int *, int *, float *, float *, int *,
+	   float *, int *, float *, float *, int *);
+void saxpy_(int *, float *, float *, int *, float *, int *);
+int scopy_(int *, float *, int *, float *, int *);
+int strmv_(char*,char*,char*,int *,float *, int *, float *, int *);
+int slarfg_(int *, float *, float *x, int *, float *);
+int sscal_(int *, float *, float *, int *);
+void ssyrk_(char *, char *, int *, int *, float *, float *,
+	    int *, float *, float *, int *);
+int strmm_(char *, char *, char *, char *,
+	   int *, int *, float *, float *, int *, float *, int *);
+int slaswp_(int *, float *, int *, int *, int *, int *, int *);
 
-extern "C" float snrm2_(const int, const float *, const int);
-extern "C" float slange_(char *norm, int *, int *, float *, int *, float *);
+float snrm2_(const int, const float *, const int);
+float slange_(char *norm, int *, int *, float *, int *, float *);
 
-extern "C" int sgehd2_(int*, int*, int*, float*, int*, float*, float*, int*);
-extern "C" int spotrf_(char *uplo, int *n, float *a, int *lda, int *info);
-extern "C" int spotf2_(char *, int *, float *, int *, int *);
-extern "C" int sgeqrf_(int*,int*,float *,int*,float *,float *,int *,int *);
-extern "C" int sgeqlf_(int*,int*,float *,int*,float *,float *,int *,int *);
-extern "C" int sgelqf_(int*,int*,float *,int*,float *,float *,int *,int *);
-extern "C" int sgelq2_(int*,int*,float *,int*,float *,float *,int *);
-extern "C" int sgeql2_(int*,int*,float *,int*,float *,float *,int *);
-extern "C" int sgehrd_(int *, int *, int *, float *, int *,
-                       float *, float *, int *, int *);
-extern "C" int slarft_(char *, char *, int *, int *, float *, int *, float *,
-		       float *, int *);
-extern "C" int slarfb_(char *, char *, char *, char *, int *, int *, int *, 
-		       float *, int *, float *, int *, float *, int *, 
-		       float *, int *);
-extern "C" int sgetrf_(int *, int *, float *, int *, int *, int *);
+int sgehd2_(int*, int*, int*, float*, int*, float*, float*, int*);
+int spotrf_(char *uplo, int *n, float *a, int *lda, int *info);
+int spotf2_(char *, int *, float *, int *, int *);
+int sgeqrf_(int*,int*,float *,int*,float *,float *,int *,int *);
+int sgeqlf_(int*,int*,float *,int*,float *,float *,int *,int *);
+int sgelqf_(int*,int*,float *,int*,float *,float *,int *,int *);
+int sgelq2_(int*,int*,float *,int*,float *,float *,int *);
+int sgeql2_(int*,int*,float *,int*,float *,float *,int *);
+int sgehrd_(int *, int *, int *, float *, int *,
+	    float *, float *, int *, int *);
+int slarft_(char *, char *, int *, int *, float *, int *, float *,
+	    float *, int *);
+int slarfb_(char *, char *, char *, char *, int *, int *, int *, float *, 
+	    int *, float *, int *, float *, int *, float *, int *);
+int sgetrf_(int *, int *, float *, int *, int *, int *);
 
-extern "C" int slaset_(char *,int *,int *,float *,float *,float *a,int *);
-extern "C" float slamch_(char *);
-extern "C" float slansy_(char *, char *, int *, float *, int *, float *);
-extern "C" int slacpy_(char *, int *, int *, float *, int *, float *, int *);
-extern "C" int sorgqr_(int *, int *, int *, float *, int *, float *, 
-		       float *, int *, int *);
-extern "C" int sormqr_(char *, char *, int *, int *, int *, float *, int *,
-                       float *, float *, int *, float *, int *, int *);
+int slaset_(char *,int *,int *,float *,float *,float *a,int *);
+float slamch_(char *);
+float slansy_(char *, char *, int *, float *, int *, float *);
+int slacpy_(char *, int *, int *, float *, int *, float *, int *);
+int sorgqr_(int *, int *, int *, float *, int *, float *, 
+	    float *, int *, int *);
+int sormqr_(char *, char *, int *, int *, int *, float *, int *,
+	    float *, float *, int *, float *, int *, int *);
 
-extern "C" void ctrsm_(char *, char *, char *, char *,
-                       int *, int *, float2 *, float2 *, int *, float2 *,int*);
-extern "C" int ctrmm_(char *, char *, char *, char *,
-                      int *, int *, float2 *, float2 *, int *, float2 *,int *);
-extern "C" void caxpy_(int *, float2 *, float2 *, int *, float2 *, int *);
-extern "C" void csyrk_(char *, char *, int *, int *, float2 *,
-		       float2 *, int *, float2 *, float2 *, int *);
-extern "C" void cherk_(char *, char *, int *, int *, float *,
-		       float2 *, int *, float *, float2 *, int *);
-extern "C" int cpotrf_(char *uplo, int *n, float2 *a, int *lda, int *info);
-extern "C" int cgeqrf_(int*,int*,float2 *,int*,float2 *,float2 *,int *,int *);
-extern "C" int clarft_(char *, char *, int *, int *, float2 *, int *, float2 *,
-                       float2 *, int *);
-extern "C" int cgetrf_(int *, int *, float2 *, int *, int *, int *);
-extern "C" int claswp_(int *, float2 *, int *, int *, int *, int *, int *);
-extern "C" float clange_(char *norm, int *, int *, float2 *, int *, float *);
+void ctrsm_(char *, char *, char *, char *,
+	    int *, int *, float2 *, float2 *, int *, float2 *,int*);
+int ctrmm_(char *, char *, char *, char *,
+	   int *, int *, float2 *, float2 *, int *, float2 *,int *);
+void caxpy_(int *, float2 *, float2 *, int *, float2 *, int *);
+void csyrk_(char *, char *, int *, int *, float2 *,
+	    float2 *, int *, float2 *, float2 *, int *);
+void cherk_(char *, char *, int *, int *, float *,
+	    float2 *, int *, float *, float2 *, int *);
+int cpotrf_(char *uplo, int *n, float2 *a, int *lda, int *info);
+int cgeqrf_(int*,int*,float2 *,int*,float2 *,float2 *,int *,int *);
+int clarft_(char *, char *, int *, int *, float2 *, int *, float2 *,
+	    float2 *, int *);
+int cgetrf_(int *, int *, float2 *, int *, int *, int *);
+int claswp_(int *, float2 *, int *, int *, int *, int *, int *);
+float clange_(char *norm, int *, int *, float2 *, int *, float *);
 
-extern "C" void dtrtri_(char *, char *, int *, double *, int *, int *);
-extern "C" void dtrsm_(char *, char *, char *, char *,
-		       int *, int *, double *, double *, int *, double *,int*);
-extern "C" void dgemm_(char *, char *, int *, int *, int *, double *,
-		       double *, int *, double *, int *, double *,
-		       double *, int *);
-extern "C" int dgemv_(char *, int *, int *, double *, double *, int *,
-                      double *, int *, double *, double *, int *);
-extern "C" void daxpy_(int *, double *, double *, int *, double *, int *);
-extern "C" int dcopy_(int *, double *, int *, double *, int *);
-extern "C" int dtrmv_(char*,char*,char*,int *,double*,int*,double*,int*);
-extern "C" int dlarfg_(int *, double *, double *x, int *, double *);
-extern "C" int dscal_(int *, double *, double *, int *);
-extern "C" void dsyrk_(char *, char *, int *, int *, double *, double *,
-		       int *, double *, double *, int *);
-extern "C" int dtrmm_(char *, char *, char *, char *, int *, int *, 
-		      double *, double *, int *, double *, int *);
-extern "C" int dlaswp_(int *, double *, int *, int *, int *, int *, int *);
+void dtrtri_(char *, char *, int *, double *, int *, int *);
+void dtrsm_(char *, char *, char *, char *,
+	    int *, int *, double *, double *, int *, double *,int*);
+void dgemm_(char *, char *, int *, int *, int *, double *,
+	    double *, int *, double *, int *, double *,double *, int *);
+int dgemv_(char *, int *, int *, double *, double *, int *,
+	   double *, int *, double *, double *, int *);
+void daxpy_(int *, double *, double *, int *, double *, int *);
+int dcopy_(int *, double *, int *, double *, int *);
+int dtrmv_(char*,char*,char*,int *,double*,int*,double*,int*);
+int dlarfg_(int *, double *, double *x, int *, double *);
+int dscal_(int *, double *, double *, int *);
+void dsyrk_(char *, char *, int *, int *, double *, double *,
+	    int *, double *, double *, int *);
+int dtrmm_(char *, char *, char *, char *, int *, int *, 
+	   double *, double *, int *, double *, int *);
+int dlaswp_(int *, double *, int *, int *, int *, int *, int *);
 
-extern "C" double dnrm2_(int *, double *, int *);
-extern "C" double dlange_(char *norm, int *, int *, double *, int *, double *);
+double dnrm2_(int *, double *, int *);
+double dlange_(char *norm, int *, int *, double *, int *, double *);
 
-extern "C" int dgehd2_(int*,int*,int*,double*,int*,double*,double*,int*);
-extern "C" int dpotrf_(char *uplo, int *n, double *a, int *lda, int *info);
-extern "C" int dpotf2_(char *, int *, double *, int *, int *);
-extern "C" int dgeqrf_(int*,int*,double *,int*,double *,double *,int *,int *);
-extern "C" int dgetrf_(int *, int *, double *, int *, int *, int *);
-extern "C" int dgehrd_(int *, int *, int *, double *, int *, 
-		       double *, double *, int *, int *);
-extern "C" int dlarft_(char *, char *, int *, int *, double *, int *, double *,
-		       double *, int *);
-extern "C" int dlaset_(char *,int *,int *,double *,double *,double *a,int *);
-extern "C" double dlamch_(char *);
-extern "C" double dlansy_(char *, char *, int *, double *, int *, double *);
-extern "C" int dlacpy_(char *, int *, int *, double *, int *, double *, int *);
-extern "C" int dorgqr_(int *, int *, int *, double *, int *, double *, 
-		       double *, int *, int *);
-extern "C" int dormqr_(char *, char *, int *, int *, int *, double *, int *,
-                       double *, double *, int *, double *, int *, int *);
+int dgehd2_(int*,int*,int*,double*,int*,double*,double*,int*);
+int dpotrf_(char *uplo, int *n, double *a, int *lda, int *info);
+int dpotf2_(char *, int *, double *, int *, int *);
+int dgeqrf_(int*,int*,double *,int*,double *,double *,int *,int *);
+int dgetrf_(int *, int *, double *, int *, int *, int *);
+int dgehrd_(int *, int *, int *, double *, int *, 
+	    double *, double *, int *, int *);
+int dlarft_(char *, char *, int *, int *, double *, int *, double *,
+	    double *, int *);
+int dlaset_(char *,int *,int *,double *,double *,double *a,int *);
+double dlamch_(char *);
+double dlansy_(char *, char *, int *, double *, int *, double *);
+int dlacpy_(char *, int *, int *, double *, int *, double *, int *);
+int dorgqr_(int *, int *, int *, double *, int *, double *, 
+	    double *, int *, int *);
+int dormqr_(char *, char *, int *, int *, int *, double *, int *,
+	    double *, double *, int *, double *, int *, int *);
 
-extern "C" long int lsame_(char *, char *);
+long int lsame_(char *, char *);
 
-extern "C" int zpotrf_(char *uplo, int *n, double2 *a, int *lda, int *info);
-extern "C" int zgeqrf_(int*, int*, double2 *, int*, double2 *, double2 *,
-		       int *, int *);
-extern "C" int zlarft_(char *, char *, int *, int *, double2 *, int *, 
-		       double2 *, double2 *, int *);
-extern "C" int zgetrf_(int *, int *, double2 *, int *, int *, int *);
-extern "C" int zlaswp_(int *, double2 *, int *, int *, int *, int *, int *);
-extern "C" double zlange_(char *, int *, int *, double2 *, int *, double *);
-extern "C" int ztrmm_(char *, char *, char *, char *, int *, int *, 
-		      double2 *, double2 *, int *, double2 *,int *);
-extern "C" void ztrsm_(char *, char *, char *, char *, int *, int *, 
-		       double2 *, double2 *, int *, double2 *,int*);
-extern "C" int dsgesv_( int *, int *, double *, int *, int *, double *, int *, 
-			double *, int *, double *, float *, int *, int *);
-extern "C" void zaxpy_(int *, double2 *, double2 *, int *, double2 *, int *);
-extern "C" void zherk_(char *, char *, int *, int *, double *,
-                       double2 *, int *, double *, double2 *, int *);
-extern "C" double dsymm_(char *,char*,int *,int *,double *,double *,int *,
-			 double *,int *,double *,double *,int *);
+int zpotrf_(char *uplo, int *n, double2 *a, int *lda, int *info);
+int zgeqrf_(int*, int*, double2 *, int*, double2 *, double2 *,
+	    int *, int *);
+int zlarft_(char *, char *, int *, int *, double2 *, int *, 
+	    double2 *, double2 *, int *);
+int zgetrf_(int *, int *, double2 *, int *, int *, int *);
+int zlaswp_(int *, double2 *, int *, int *, int *, int *, int *);
+double zlange_(char *, int *, int *, double2 *, int *, double *);
+int ztrmm_(char *, char *, char *, char *, int *, int *, 
+	   double2 *, double2 *, int *, double2 *,int *);
+void ztrsm_(char *, char *, char *, char *, int *, int *, 
+	    double2 *, double2 *, int *, double2 *,int*);
+int dsgesv_( int *, int *, double *, int *, int *, double *, int *, 
+	     double *, int *, double *, float *, int *, int *);
+void zaxpy_(int *, double2 *, double2 *, int *, double2 *, int *);
+void zherk_(char *, char *, int *, int *, double *,
+	    double2 *, int *, double *, double2 *, int *);
+double dsymm_(char *,char*,int *,int *,double *,double *,int *,
+	      double *,int *,double *,double *,int *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

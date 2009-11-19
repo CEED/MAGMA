@@ -12,7 +12,7 @@
 #include "magmablas.h"
 #include <stdio.h>
 
-int 
+extern "C" int 
 magma_cgetrf(int *m, int *n, float2 *a, int *lda, 
 	     int *ipiv, float2 *work, float2 *da, int *info)
 {

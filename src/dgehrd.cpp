@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int 
+extern "C" int 
 magma_dgehrd(int *n, int *ilo, int *ihi, double *a, int *lda, 
 	     double *tau, double *work, int *lwork, double *da, int *info)
 {

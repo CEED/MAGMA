@@ -15,7 +15,7 @@
 #define cublasStrsm magmablas_strsm
 #define cublasSgemm magmablasSgemm
 
-int
+extern "C" int
 magma_sgetrs_gpu(char *trans , int n, int nrhs, float *a , int lda,
 		 int *ipiv, float *b, int ldb, int *info, float *hwork)
 {

@@ -12,7 +12,7 @@
 #include "magmablas.h"
 #include <stdio.h>
 
-int 
+extern "C" int 
 magma_slarfb(char direct, char storev,
 	     int m, int n, int *k, float *dv, int *ldv, float *dt,
 	     int *ldt, float *dc, int *ldc, float *dwork, int *ldwork)

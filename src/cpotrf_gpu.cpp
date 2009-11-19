@@ -12,7 +12,7 @@
 #include "magmablas.h"
 #include <stdio.h>
 
-int 
+extern "C" int 
 magma_cpotrf_gpu(char *uplo, int *n, float2 *a, int *lda, float2 *work, 
 		 int *info)
 {

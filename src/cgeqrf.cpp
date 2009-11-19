@@ -11,7 +11,7 @@
 #include "magma.h"
 #include <stdio.h>
 
-int 
+extern "C" int 
 magma_cgeqrf(int *m, int *n, float2 *a, int  *lda,  float2 *tau,
              float2 *work, int *lwork, float2 *da, int *info )
 {

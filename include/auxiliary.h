@@ -9,6 +9,17 @@
 #ifndef _MAGMA_AUXILIARY_
 #define _MAGMA_AUXILIARY_
 
+#include <sys/time.h>
+typedef struct timestruct
+{
+  unsigned int sec;
+  unsigned int usec;
+} TimeStruct;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int magma_get_spotrf_nb(int m);
 int magma_get_sgeqrf_nb(int m);
 int magma_get_sgeqlf_nb(int m);
@@ -28,13 +39,6 @@ int magma_get_cgeqrf_nb(int m);
 int magma_get_zpotrf_nb(int m);
 int magma_get_zgetrf_nb(int m);
 int magma_get_zgeqrf_nb(int m);
-
-#include <sys/time.h>
-typedef struct timestruct
-{
-  unsigned int sec;
-  unsigned int usec;
-} TimeStruct;
 
 TimeStruct get_current_time(void);
 double GetTimerValue(TimeStruct time_1, TimeStruct time_2);
@@ -56,5 +60,9 @@ void zpanel_to_q(char uplo, int ib, double2 *a, int lda, double2 *work);
 void zq_to_panel(char uplo, int ib, double2 *a, int lda, double2 *work);
 
 float getv(float *da);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
