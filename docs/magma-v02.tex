@@ -174,7 +174,8 @@ suffixed by {\tt \_gpu}.
 
 \vspace{0.1in}
 MAGMA version 0.1 included the LU, QR, and Cholesky factorizations
-in real arithmetic (single and double) for both CPU and GPU interfaces.  
+in real arithmetic (single and double) for both CPU and GPU 
+interfaces \cite{magma01}.  
 The following list gives the additions that are now
 available in MAGMA version 0.2:
 \begin{itemize}
@@ -196,13 +197,48 @@ A reference performance is given in Chapter \ref{ch:performance}.
 
 
 %\scriptsize
-\footnotesize
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \section{One-sided matrix factorizations}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\vspace{0.1in}
+We use hybrid algorithms where the computation is split between the GPU
+and and the CPU. In general for the one-sided factorizations,
+the panels are factored on the CPU and the trailing sub-matrix updates
+on the GPU. Look-ahead techniques are used to overlap the CPU and GPU
+work (and some communications). Figure \ref{time-break-QR} illustrates this
+by quantifying the CPU-GPU overlap for the case of QR in single precision 
+arithmetic.
+
+\vspace{0.1in}
+\begin{figure}[!ht]
+   \centering
+   \includegraphics[scale=0.3]{hybridQR.ps}
+   \caption{Time breakdown for the hybrid QR from MAGMA in single precision 
+            arithmetic on GTX280 GPU and Intel Xeon 2.33GHz CPU.}
+   \label{time-break-QR}
+\end{figure}
+
+\vspace{0.1in}
+In both the CPU and GPU interfaces the matrix to be factored resides on the
+GPU memory, and CPU-GPU transfers are associated only with the panels.
+The resulting matrix is accumulated (on the CPU or GPU according to the 
+interface) along the computation, as a byproduct of the algorithm, {\it vs}
+sending the the entire matrix when needed. In the CPU interface, the original
+transfer of the matrix to the GPU is overlapped with the factorization of the
+first panel. In this sense the CPU and GPU interfaces, although similar,
+are not derivatives of each other as they have different communication patterns.
+
+\vspace{0.1in}
+Besides this common approach, the different algorithms have specific 
+optimizations motivated by the GPU architecture 
+\cite{lawn210,VolkovSC}.
+
+
+\footnotesize
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \subsection{Function {\tt {\bf magma\_sgetrf}}}
