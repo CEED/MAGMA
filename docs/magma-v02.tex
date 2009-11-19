@@ -2512,6 +2512,120 @@ int magma_dgehrd(int *n, int *ilo, int *ihi, double *a, int *lda,
 
 \newpage
 \subsection{Function {\tt {\bf magma\_strsm}}}
+\begin{verbatim}
+void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N, float alpha, float* A, int lda, float* b, int ldb)
+   
+   STRSM  solves one of the matrix equations on GPU
+   
+      op( A )*X = alpha*B,   or   X*op( A ) = alpha*B,
+   
+   where alpha is a scalar, X and B are m by n matrices, A is a unit, or
+   non-unit,  upper or lower triangular matrix  and  op( A )  is one  of
+   
+     op( A ) = A   or   op( A ) = A'.
+  
+   The matrix X is overwritten on B.
+   
+   When M or N is not a multiple of blocking size, which is 32 for now, cublasStrsm will
+   be called instead. There soon will not be this limitation both for arbitrary problem 
+   size and blocking size.
+   
+   
+   Arguments
+   ==========
+   
+   side   - CHARACTER*1.
+            On entry, side specifies whether op( A ) appears on the left
+            or right of X as follows:
+   
+               side = 'L' or 'l'   op( A )*X = alpha*B.
+   
+               side = 'R' or 'r'   X*op( A ) = alpha*B.
+   
+            Unchanged on exit.
+   
+   uplo   - CHARACTER*1.
+            On entry, uplo specifies whether the matrix A is an upper or
+            lower triangular matrix as follows:
+   
+               uplo = 'U' or 'u'   A is an upper triangular matrix.
+   
+               uplo = 'L' or 'l'   A is a lower triangular matrix.
+   
+            Unchanged on exit.
+   
+   tran - CHARACTER*1.
+            On entry, tran specifies the form of op( A ) to be used in
+            the matrix multiplication as follows:
+   
+               tran = 'N' or 'n'   op( A ) = A.
+   
+               tran = 'T' or 't'   op( A ) = A'.
+   
+               tran = 'C' or 'c'   op( A ) = A'.
+   
+            Unchanged on exit.
+   
+   diag   - CHARACTER*1.
+            On entry, diag specifies whether or not A is unit triangular
+            as follows:
+   
+              diag = 'U' or 'u'   A is assumed to be unit triangular.
+   
+              diag = 'N' or 'n'   A is not assumed to be unit
+                                   triangular.
+   
+            Unchanged on exit.
+	   
+   m      - INTEGER.
+            On entry, m specifies the number of rows of B. m must be at
+            least zero.
+            Unchanged on exit.
+   
+    n      - INTEGER.
+             On entry, n specifies the number of columns of B.  n must be
+             at least zero.
+             Unchanged on exit.
+   
+    alpha  - REAL.
+             On entry,  alpha specifies the scalar  alpha. When  alpha is
+             zero then  A is not referenced and  B need not be set before
+             entry.
+             Unchanged on exit.
+   
+    A      - REAL             array of DIMENSION ( lda, k ), where k is m
+             when  side = 'L' or 'l'  and is  n  when  side = 'R' or 'r'.
+             Before entry  with  uplo = 'U' or 'u',  the  leading  k by k
+             upper triangular part of the array  A must contain the upper
+             triangular matrix  and the strictly lower triangular part of
+             A is not referenced.
+             Before entry  with  uplo = 'L' or 'l',  the  leading  k by k
+             lower triangular part of the array  A must contain the lower
+             triangular matrix  and the strictly upper triangular part of
+             A is not referenced.
+             Note that when  diag = 'U' or 'u',  the diagonal elements of
+             A  are not referenced either,  but are assumed to be  unity.
+             Unchanged on exit.
+   
+    lda    - INTEGER.
+             On entry, lda specifies the first dimension of A as declared
+             in the calling (sub) program.  When  side = 'L' or 'l'  then
+             lda  must be at least  max( 1, m ),  when  side = 'R' or 'r'
+             then lda must be at least max( 1, n ).
+             Unchanged on exit.
+   
+    b      - REAL             array of DIMENSION ( ldb, n ).
+             Before entry,  the leading  m by n part of the array  B must
+             contain  the  right-hand  side  matrix  B,  and  on exit  is
+             overwritten by the solution matrix  X.
+	   
+    ldb    - INTEGER.
+             On entry, ldb specifies the first dimension of B as declared
+             in  the  calling  (sub)  program.   ldb  must  be  at  least
+             max( 1, m ).
+             Unchanged on exit.
+
+\end{verbatim}
 \newpage
 \subsection{Function {\tt {\bf magma\_dtrsm}}}
 
