@@ -2997,6 +2997,8 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
              max( 1, m ).
              Unchanged on exit.
 
+Note: When matrix dimension is multiple of STRSM's internal block size 32, you will get
+higher performance. 
 \end{verbatim}
 
 \newpage
@@ -3111,6 +3113,9 @@ void magmablas_dtrsm (char side, char uplo, char tran, char diag, int M, int N, 
              in  the  calling  (sub)  program.   ldb  must  be  at  least
              max( 1, m ).
              Unchanged on exit.
+
+Note: When matrix dimension is multiple of STRSM's internal block size 32, you will get
+higher performance. 
 \end{verbatim}
 \normalsize
 
