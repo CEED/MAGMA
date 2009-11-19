@@ -38,8 +38,7 @@ magma_sgeqlf(int *m, int *n, float *a, int *lda,
 
     A       (input/output) REAL array, dimension (LDA,N)   
             On entry, the M-by-N matrix A.   
-            On exit,   
-            if m >= n, the lower triangle of the subarray   
+            On exit, if m >= n, the lower triangle of the subarray   
             A(m-n+1:m,1:n) contains the N-by-N lower triangular matrix L;   
             if m <= n, the elements on and below the (n-m)-th   
             superdiagonal contain the M-by-N lower trapezoidal matrix L;   
