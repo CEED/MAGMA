@@ -164,7 +164,7 @@ int magma_get_cpotrf_nb(int n){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for cpotrf based on n
+   -- Return nb for zpotrf based on n
 */
 extern "C"
 int magma_get_zpotrf_nb(int n){

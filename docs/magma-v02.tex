@@ -2482,74 +2482,63 @@ int magma_dgehrd(int *n, int *ilo, int *ihi, double *a, int *lda,
 \newpage
 \section{Matrix-Matrix Multiplication}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \subsection{Function {\tt {\bf magmablasSgemm}}}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
-int magmablasSgemm(char TRANSA, char TRANSB, int m , int n , int k , float alpha, const float *A, int lda, const float *B, int ldb, float beta, float *C, int ldc)
+int magmablasSgemm(char TRANSA, char TRANSB, int m , int n, int k, float alpha,
+                   const float *A, int lda, const float *B, int ldb, float beta,
+                   float *C, int ldc)
 
    SGEMM  performs one of the matrix-matrix operations
- 
       C := alpha*op( A )*op( B ) + beta*C,
- 
    where  op( X ) is one of
- 
       op( X ) = X   or   op( X ) = X',
- 
    alpha and beta are scalars, and A, B and C are matrices, with op( A )
    an m by k matrix,  op( B )  a  k by n matrix and  C an m by n matrix.
  
    TRANSA - CHARACTER*1.
             On entry, TRANSA specifies the form of op( A ) to be used in
             the matrix multiplication as follows:
- 
                TRANSA = 'N' or 'n',  op( A ) = A.
- 
                TRANSA = 'T' or 't',  op( A ) = A'.
- 
                TRANSA = 'C' or 'c',  op( A ) = A'.
- 
             Unchanged on exit.
  
    TRANSB - CHARACTER*1.
             On entry, TRANSB specifies the form of op( B ) to be used in
             the matrix multiplication as follows:
- 
                TRANSB = 'N' or 'n',  op( B ) = B.
- 
                TRANSB = 'T' or 't',  op( B ) = B'.
- 
                TRANSB = 'C' or 'c',  op( B ) = B'.
- 
             Unchanged on exit.
  
    M      - INTEGER.
-            On entry,  M  specifies  the number  of rows  of the  matrix
-            op( A )  and of the  matrix  C.  M  must  be at least  zero.
+            On entry, M specifies the number of rows of the matrix op(A) and of
+            the matrix C. M must be at least zero.
             Unchanged on exit.
  
    N      - INTEGER.
-            On entry,  N  specifies the number  of columns of the matrix
-            op( B ) and the number of columns of the matrix C. N must be
-            at least zero.
+            On entry, N specifies the number of columns of the matrix op(B) and
+            the number of columns of the matrix C. N must be at least zero.
             Unchanged on exit.
  
    K      - INTEGER.
-            On entry,  K  specifies  the number of columns of the matrix
-            op( A ) and the number of rows of the matrix op( B ). K must
-            be at least  zero.
+            On entry, K specifies the number of columns of the matrix op(A) and
+            the number of rows of the matrix op( B ). K must be at least zero.
             Unchanged on exit.
  
    ALPHA  - SINGLE PRECISION.
             On entry, ALPHA specifies the scalar alpha.
             Unchanged on exit.
  
-   A      - SINGLE PRECISION array of DIMENSION ( LDA, ka ), where ka is
-            k  when  TRANSA = 'N' or 'n',  and is  m  otherwise.
-            Before entry with  TRANSA = 'N' or 'n',  the leading  m by k
-            part of the array  A  must contain the matrix  A,  otherwise
-            the leading  k by m  part of the array  A  must contain  the
-            matrix A.
+   A      - SINGLE PRECISION array of DIMENSION (LDA, ka), where ka is k when
+            TRANSA = 'N' or 'n', and is m otherwise. Before entry with TRANSA 
+            = 'N' or 'n', the leading m by k part of the array A must contain 
+            the matrix A, otherwise the leading k by m part of the array A  
+            must contain the matrix A.
             Unchanged on exit.
  
    LDA    - INTEGER.
@@ -2593,118 +2582,107 @@ int magmablasSgemm(char TRANSA, char TRANSB, int m , int n , int k , float alpha
             Unchanged on exit.
 
 \end{verbatim}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \subsection{Function {\tt {\bf magmablasDgemm}}}
-int 
-magmablasDgemm(char TRANSA, char TRANSB, int m , int n , int k , double alpha, const double *A, int lda, const double *B, int ldb, double beta, double *C, int ldc)
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
-   DGEMM  performs one of the matrix-matrix operations
+int magmablasDgemm(char TRANSA, char TRANSB, int m, int n, int k, double alpha,
+                   const double *A, int lda, const double *B, int ldb, 
+                   double beta, double *C, int ldc)
  
+    DGEMM  performs one of the matrix-matrix operations
       C := alpha*op( A )*op( B ) + beta*C,
- 
-   where  op( X ) is one of
- 
+    where  op( X ) is one of
       op( X ) = X   or   op( X ) = X',
+    alpha and beta are scalars, and A, B and C are matrices, with op( A )
+    an m by k matrix,  op( B )  a  k by n matrix and  C an m by n matrix.
+   
+    TRANSA - CHARACTER*1.
+             On entry, TRANSA specifies the form of op( A ) to be used in
+             the matrix multiplication as follows:
+                TRANSA = 'N' or 'n',  op( A ) = A.
+                TRANSA = 'T' or 't',  op( A ) = A'.
+                TRANSA = 'C' or 'c',  op( A ) = A'.
+             Unchanged on exit.
  
-   alpha and beta are scalars, and A, B and C are matrices, with op( A )
-   an m by k matrix,  op( B )  a  k by n matrix and  C an m by n matrix.
+    TRANSB - CHARACTER*1.
+             On entry, TRANSB specifies the form of op( B ) to be used in
+             the matrix multiplication as follows:
+                TRANSB = 'N' or 'n',  op( B ) = B.
+                TRANSB = 'T' or 't',  op( B ) = B'.
+                TRANSB = 'C' or 'c',  op( B ) = B'.
+             Unchanged on exit.
  
-   Parameters
-   ==========
+    M      - INTEGER.
+             On entry,  M  specifies  the number  of rows  of the  matrix
+             op( A )  and of the  matrix  C.  M  must  be at least  zero.
+             Unchanged on exit.
  
-   TRANSA - CHARACTER*1.
-            On entry, TRANSA specifies the form of op( A ) to be used in
-            the matrix multiplication as follows:
+    N      - INTEGER.
+             On entry,  N  specifies the number  of columns of the matrix
+             op( B ) and the number of columns of the matrix C. N must be
+             at least zero.
+             Unchanged on exit.
  
-               TRANSA = 'N' or 'n',  op( A ) = A.
+    K      - INTEGER.
+             On entry,  K  specifies  the number of columns of the matrix
+             op( A ) and the number of rows of the matrix op( B ). K must
+             be at least  zero.
+             Unchanged on exit.
  
-               TRANSA = 'T' or 't',  op( A ) = A'.
+    ALPHA  - DOUBLE PRECISION.
+             On entry, ALPHA specifies the scalar alpha.
+             Unchanged on exit.
  
-               TRANSA = 'C' or 'c',  op( A ) = A'.
+    A      - DOUBLE PRECISION array of DIMENSION ( LDA, ka ), where ka is
+             k  when  TRANSA = 'N' or 'n',  and is  m  otherwise.
+             Before entry with  TRANSA = 'N' or 'n',  the leading  m by k
+             part of the array  A  must contain the matrix  A,  otherwise
+             the leading  k by m  part of the array  A  must contain  the
+             matrix A.
+             Unchanged on exit.
  
-            Unchanged on exit.
+    LDA    - INTEGER.
+             On entry, LDA specifies the first dimension of A as declared
+             in the calling (sub) program. When  TRANSA = 'N' or 'n' then
+             LDA must be at least  max( 1, m ), otherwise  LDA must be at
+             least  max( 1, k ).
+             Unchanged on exit.
  
-   TRANSB - CHARACTER*1.
-            On entry, TRANSB specifies the form of op( B ) to be used in
-            the matrix multiplication as follows:
+    B      - DOUBLE PRECISION array of DIMENSION ( LDB, kb ), where kb is
+             n  when  TRANSB = 'N' or 'n',  and is  k  otherwise.
+             Before entry with  TRANSB = 'N' or 'n',  the leading  k by n
+             part of the array  B  must contain the matrix  B,  otherwise
+             the leading  n by k  part of the array  B  must contain  the
+             matrix B.
+             Unchanged on exit.
  
-               TRANSB = 'N' or 'n',  op( B ) = B.
+    LDB    - INTEGER.
+             On entry, LDB specifies the first dimension of B as declared
+             in the calling (sub) program. When  TRANSB = 'N' or 'n' then
+             LDB must be at least  max( 1, k ), otherwise  LDB must be at
+             least  max( 1, n ).
+             Unchanged on exit.
  
-               TRANSB = 'T' or 't',  op( B ) = B'.
+    BETA   - DOUBLE PRECISION.
+             On entry,  BETA  specifies the scalar  beta.  When  BETA  is
+             supplied as zero then C need not be set on input.
+             Unchanged on exit.
  
-               TRANSB = 'C' or 'c',  op( B ) = B'.
+    C      - DOUBLE PRECISION array of DIMENSION ( LDC, n ).
+             Before entry, the leading  m by n  part of the array  C must
+             contain the matrix  C,  except when  beta  is zero, in which
+             case C need not be set on entry.
+             On exit, the array  C  is overwritten by the  m by n  matrix
+             ( alpha*op( A )*op( B ) + beta*C ).
  
-            Unchanged on exit.
- 
-   M      - INTEGER.
-            On entry,  M  specifies  the number  of rows  of the  matrix
-            op( A )  and of the  matrix  C.  M  must  be at least  zero.
-            Unchanged on exit.
- 
-   N      - INTEGER.
-            On entry,  N  specifies the number  of columns of the matrix
-            op( B ) and the number of columns of the matrix C. N must be
-            at least zero.
-            Unchanged on exit.
- 
-   K      - INTEGER.
-            On entry,  K  specifies  the number of columns of the matrix
-            op( A ) and the number of rows of the matrix op( B ). K must
-            be at least  zero.
-            Unchanged on exit.
- 
-   ALPHA  - DOUBLE PRECISION.
-            On entry, ALPHA specifies the scalar alpha.
-            Unchanged on exit.
- 
-   A      - DOUBLE PRECISION array of DIMENSION ( LDA, ka ), where ka is
-            k  when  TRANSA = 'N' or 'n',  and is  m  otherwise.
-            Before entry with  TRANSA = 'N' or 'n',  the leading  m by k
-            part of the array  A  must contain the matrix  A,  otherwise
-            the leading  k by m  part of the array  A  must contain  the
-            matrix A.
-            Unchanged on exit.
- 
-   LDA    - INTEGER.
-            On entry, LDA specifies the first dimension of A as declared
-            in the calling (sub) program. When  TRANSA = 'N' or 'n' then
-            LDA must be at least  max( 1, m ), otherwise  LDA must be at
-            least  max( 1, k ).
-            Unchanged on exit.
- 
-   B      - DOUBLE PRECISION array of DIMENSION ( LDB, kb ), where kb is
-            n  when  TRANSB = 'N' or 'n',  and is  k  otherwise.
-            Before entry with  TRANSB = 'N' or 'n',  the leading  k by n
-            part of the array  B  must contain the matrix  B,  otherwise
-            the leading  n by k  part of the array  B  must contain  the
-            matrix B.
-            Unchanged on exit.
- 
-   LDB    - INTEGER.
-            On entry, LDB specifies the first dimension of B as declared
-            in the calling (sub) program. When  TRANSB = 'N' or 'n' then
-            LDB must be at least  max( 1, k ), otherwise  LDB must be at
-            least  max( 1, n ).
-            Unchanged on exit.
- 
-   BETA   - DOUBLE PRECISION.
-            On entry,  BETA  specifies the scalar  beta.  When  BETA  is
-            supplied as zero then C need not be set on input.
-            Unchanged on exit.
- 
-   C      - DOUBLE PRECISION array of DIMENSION ( LDC, n ).
-            Before entry, the leading  m by n  part of the array  C must
-            contain the matrix  C,  except when  beta  is zero, in which
-            case C need not be set on entry.
-            On exit, the array  C  is overwritten by the  m by n  matrix
-            ( alpha*op( A )*op( B ) + beta*C ).
- 
-   LDC    - INTEGER.
-            On entry, LDC specifies the first dimension of C as declared
-            in  the  calling  (sub)  program.   LDC  must  be  at  least
-            max( 1, m ).
-            Unchanged on exit.
+    LDC    - INTEGER.
+             On entry, LDC specifies the first dimension of C as declared
+             in  the  calling  (sub)  program.   LDC  must  be  at  least
+             max( 1, m ).
+             Unchanged on exit.
 \end{verbatim}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
@@ -2719,166 +2697,160 @@ magmablasDgemm(char TRANSA, char TRANSB, int m , int n , int k , double alpha, c
 \newpage
 \section{Symmetric Matrix-Vector multiplication}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \subsection{Function {\tt {\bf magma\_ssymv}}}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
-void magma_ssymv (char uplo , int m , float alpha ,  float *A , int lda ,  float *X , int incx , float beta , float *Y , int incy )
+int magma_ssymv(char uplo, int m, float alpha, float *A, int lda, float *X, 
+                 int incx, float beta, float *Y, int incy)
 
-   SSYMV  performs the matrix-vector  operation
-
-      y := alpha*A*x + beta*y,
-
+    SSYMV  performs the matrix-vector  operation
+       y := alpha*A*x + beta*y,
     where alpha and beta are scalars, x and y are n element vectors and
     A is an n by n symmetric matrix.
 
+ 
+    UPLO     CHARACTER*1.
+             On entry, UPLO specifies whether the upper or lower triangular 
+             part of the array A is to be referenced as follows:
+                UPLO = 'U' or 'u'   Only the upper triangular part of A
+                                    is to be referenced.
+                UPLO = 'L' or 'l'   Only the lower triangular part of A
+                                    is to be referenced.
+             Unchanged on exit.
 
-  UPLO   - CHARACTER*1.
-           On entry, UPLO specifies whether the upper or lower
-           triangular part of the array A is to be referenced as
-           follows:
+    N        INTEGER.
+             On entry, N specifies the order of the matrix A.
+             N must be at least zero.
+             Unchanged on exit.
 
-              UPLO = 'U' or 'u'   Only the upper triangular part of A
-                                  is to be referenced.
+    ALPHA    REAL.
+             On entry, ALPHA specifies the scalar alpha.
+             Unchanged on exit.
 
-              UPLO = 'L' or 'l'   Only the lower triangular part of A
-                                  is to be referenced.
+    A        REAL array of DIMENSION ( LDA, n ).
+             Before entry with  UPLO = 'U' or 'u', the leading n by n
+             upper triangular part of the array A must contain the upper
+             triangular part of the symmetric matrix and the strictly
+             lower triangular part of A is not referenced.
+             Before entry with UPLO = 'L' or 'l', the leading n by n
+             lower triangular part of the array A must contain the lower
+             triangular part of the symmetric matrix and the strictly
+             upper triangular part of A is not referenced.
+             Unchanged on exit.
 
-           Unchanged on exit.
+    LDA      INTEGER.
+             On entry, LDA specifies the first dimension of A as declared
+             in the calling (sub) program. LDA must be at least
+             max( 1, n ).
+             Unchanged on exit.
 
-  N      - INTEGER.
-           On entry, N specifies the order of the matrix A.
-           N must be at least zero.
-           Unchanged on exit.
+    X        REAL array of dimension at least
+             ( 1 + ( n - 1 )*abs( INCX ) ).
+             Before entry, the incremented array X must contain the n
+             element vector x.
+             Unchanged on exit.
 
-  ALPHA  - REAL            .
-           On entry, ALPHA specifies the scalar alpha.
-           Unchanged on exit.
+    INCX     INTEGER.
+             On entry, INCX specifies the increment for the elements of
+             X. INCX must not be zero.
+             Unchanged on exit.
 
-  A      - REAL             array of DIMENSION ( LDA, n ).
-           Before entry with  UPLO = 'U' or 'u', the leading n by n
-           upper triangular part of the array A must contain the upper
-           triangular part of the symmetric matrix and the strictly
-           lower triangular part of A is not referenced.
-           Before entry with UPLO = 'L' or 'l', the leading n by n
-           lower triangular part of the array A must contain the lower
-           triangular part of the symmetric matrix and the strictly
-           upper triangular part of A is not referenced.
-           Unchanged on exit.
+    BETA     REAL.
+             On entry, BETA specifies the scalar beta. When BETA is
+             supplied as zero then Y need not be set on input.
+             Unchanged on exit.
 
-  LDA    - INTEGER.
-           On entry, LDA specifies the first dimension of A as declared
-           in the calling (sub) program. LDA must be at least
-           max( 1, n ).
-           Unchanged on exit.
+    Y        REAL array of dimension at least
+             ( 1 + ( n - 1 )*abs( INCY ) ).
+             Before entry, the incremented array Y must contain the n
+             element vector y. On exit, Y is overwritten by the updated
+             vector y.
 
-  X      - REAL             array of dimension at least
-           ( 1 + ( n - 1 )*abs( INCX ) ).
-           Before entry, the incremented array X must contain the n
-           element vector x.
-           Unchanged on exit.
-
-  INCX   - INTEGER.
-           On entry, INCX specifies the increment for the elements of
-           X. INCX must not be zero.
-           Unchanged on exit.
-
-  BETA   - REAL            .
-           On entry, BETA specifies the scalar beta. When BETA is
-           supplied as zero then Y need not be set on input.
-           Unchanged on exit.
-
-  Y      - REAL             array of dimension at least
-           ( 1 + ( n - 1 )*abs( INCY ) ).
-           Before entry, the incremented array Y must contain the n
-           element vector y. On exit, Y is overwritten by the updated
-           vector y.
-
-  INCY   - INTEGER.
-           On entry, INCY specifies the increment for the elements of
-           Y. INCY must not be zero.
-           Unchanged on exit.
+    INCY     INTEGER.
+             On entry, INCY specifies the increment for the elements of
+             Y. INCY must not be zero.
+             Unchanged on exit.
 \end{verbatim}
 
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \subsection{Function {\tt {\bf magma\_dsymv}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
-void magma_dsymv (char uplo , int m , double alpha ,  double *A , int lda ,  double *X , int incx , double beta , double *Y , int incy )
-  DSYMV  performs the matrix-vector  operation
+int magma_dsymv(char uplo, int m, double alpha, double *A, int lda, double *X,
+                int incx, double beta, double *Y, int incy)
 
-     y := alpha*A*x + beta*y,
+    DSYMV  performs the matrix-vector  operation
+       y := alpha*A*x + beta*y,
+    where alpha and beta are scalars, x and y are n element vectors and
+    A is an n by n symmetric matrix.
 
-  where alpha and beta are scalars, x and y are n element vectors and
-  A is an n by n symmetric matrix.
+ 
+    UPLO     CHARACTER*1.
+             On entry, UPLO specifies whether the upper or lower
+             triangular part of the array A is to be referenced as
+             follows:
+                UPLO = 'U' or 'u'   Only the upper triangular part of A
+                                    is to be referenced.
+                UPLO = 'L' or 'l'   Only the lower triangular part of A
+                                    is to be referenced.
+             Unchanged on exit.
 
+    N        INTEGER.
+             On entry, N specifies the order of the matrix A.
+             N must be at least zero.
+             Unchanged on exit.
 
-  UPLO   - CHARACTER*1.
-           On entry, UPLO specifies whether the upper or lower
-           triangular part of the array A is to be referenced as
-           follows:
+    ALPHA    DOUBLE PRECISION.
+             On entry, ALPHA specifies the scalar alpha.
+             Unchanged on exit.
 
-              UPLO = 'U' or 'u'   Only the upper triangular part of A
-                                  is to be referenced.
+    A        DOUBLE PRECISION array of DIMENSION ( LDA, n ).
+             Before entry with  UPLO = 'U' or 'u', the leading n by n
+             upper triangular part of the array A must contain the upper
+             triangular part of the symmetric matrix and the strictly
+             lower triangular part of A is not referenced.
+             Before entry with UPLO = 'L' or 'l', the leading n by n
+             lower triangular part of the array A must contain the lower
+             triangular part of the symmetric matrix and the strictly
+             upper triangular part of A is not referenced.
+             Unchanged on exit.
 
-              UPLO = 'L' or 'l'   Only the lower triangular part of A
-                                  is to be referenced.
+    LDA      INTEGER.
+             On entry, LDA specifies the first dimension of A as declared
+             in the calling (sub) program. LDA must be at least
+             max( 1, n ).
+             Unchanged on exit.
 
-           Unchanged on exit.
+    X        DOUBLE PRECISION array of dimension at least
+             ( 1 + ( n - 1 )*abs( INCX ) ).
+             Before entry, the incremented array X must contain the n
+             element vector x.
+             Unchanged on exit.
 
-  N      - INTEGER.
-           On entry, N specifies the order of the matrix A.
-           N must be at least zero.
-           Unchanged on exit.
+    INCX     INTEGER.
+             On entry, INCX specifies the increment for the elements of
+             X. INCX must not be zero.
+             Unchanged on exit.
 
-  ALPHA  - DOUBLE PRECISION.
-           On entry, ALPHA specifies the scalar alpha.
-           Unchanged on exit.
+    BETA     DOUBLE PRECISION.
+             On entry, BETA specifies the scalar beta. When BETA is
+             supplied as zero then Y need not be set on input.
+             Unchanged on exit.
 
-  A      - DOUBLE PRECISION array of DIMENSION ( LDA, n ).
-           Before entry with  UPLO = 'U' or 'u', the leading n by n
-           upper triangular part of the array A must contain the upper
-           triangular part of the symmetric matrix and the strictly
-           lower triangular part of A is not referenced.
-           Before entry with UPLO = 'L' or 'l', the leading n by n
-           lower triangular part of the array A must contain the lower
-           triangular part of the symmetric matrix and the strictly
-           upper triangular part of A is not referenced.
-           Unchanged on exit.
+    Y        DOUBLE PRECISION array of dimension at least
+             ( 1 + ( n - 1 )*abs( INCY ) ).
+             Before entry, the incremented array Y must contain the n
+             element vector y. On exit, Y is overwritten by the updated
+             vector y.
 
-  LDA    - INTEGER.
-           On entry, LDA specifies the first dimension of A as declared
-           in the calling (sub) program. LDA must be at least
-           max( 1, n ).
-           Unchanged on exit.
-
-  X      - DOUBLE PRECISION array of dimension at least
-           ( 1 + ( n - 1 )*abs( INCX ) ).
-           Before entry, the incremented array X must contain the n
-           element vector x.
-           Unchanged on exit.
-
-  INCX   - INTEGER.
-           On entry, INCX specifies the increment for the elements of
-           X. INCX must not be zero.
-           Unchanged on exit.
-
-  BETA   - DOUBLE PRECISION.
-           On entry, BETA specifies the scalar beta. When BETA is
-           supplied as zero then Y need not be set on input.
-           Unchanged on exit.
-
-  Y      - DOUBLE PRECISION array of dimension at least
-           ( 1 + ( n - 1 )*abs( INCY ) ).
-           Before entry, the incremented array Y must contain the n
-           element vector y. On exit, Y is overwritten by the updated
-           vector y.
-
-  INCY   - INTEGER.
-           On entry, INCY specifies the increment for the elements of
-           Y. INCY must not be zero.
-           Unchanged on exit.
+    INCY     INTEGER.
+             On entry, INCY specifies the increment for the elements of
+             Y. INCY must not be zero.
+             Unchanged on exit.
 \end{verbatim}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2889,83 +2861,67 @@ void magma_dsymv (char uplo , int m , double alpha ,  double *A , int lda ,  dou
 \newpage
 \subsection{Function {\tt {\bf magma\_strsm}}}
 \begin{verbatim}
-void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N, float alpha, float* A, int lda, float* b, int ldb)
+int magmablas_strsm(char side, char uplo, char tran, char diag, int M, int N,
+                    float alpha, float* A, int lda, float* b, int ldb)
    
-   STRSM  solves one of the matrix equations on GPU
+    STRSM  solves one of the matrix equations on GPU
+       op( A )*X = alpha*B,   or   X*op( A ) = alpha*B,   
+    where alpha is a scalar, X and B are m by n matrices, A is a unit, or
+    non-unit,  upper or lower triangular matrix  and  op( A )  is one  of 
+       op( A ) = A   or   op( A ) = A'.
+
+    The solution matrix X overwrites B.
+
+    To extract more parallelism and performance, the diagonal blocks of A 
+    of size 32x32 are explicitly inverted. When M or N is not a multiple of 
+    the current blocking size (32 for now), cublasStrsm is called instead. 
    
-      op( A )*X = alpha*B,   or   X*op( A ) = alpha*B,
-   
-   where alpha is a scalar, X and B are m by n matrices, A is a unit, or
-   non-unit,  upper or lower triangular matrix  and  op( A )  is one  of
-   
-     op( A ) = A   or   op( A ) = A'.
+    side     CHARACTER*1.
+             On entry, side specifies whether op( A ) appears on the left
+             or right of X as follows:
+                side = 'L' or 'l'   op( A )*X = alpha*B.
+                side = 'R' or 'r'   X*op( A ) = alpha*B.  
+             Unchanged on exit.
   
-   The matrix X is overwritten on B.
+    uplo     CHARACTER*1.
+             On entry, uplo specifies whether the matrix A is an upper or
+             lower triangular matrix as follows:
+                uplo = 'U' or 'u'   A is an upper triangular matrix.
+                uplo = 'L' or 'l'   A is a lower triangular matrix.
+             Unchanged on exit.
    
-   When M or N is not a multiple of blocking size, which is 32 for now, cublasStrsm will
-   be called instead. There soon will not be this limitation both for arbitrary problem 
-   size and blocking size.
+    tran     CHARACTER*1.
+             On entry, tran specifies the form of op( A ) to be used in
+             the matrix multiplication as follows:
+                tran = 'N' or 'n'   op( A ) = A.   
+                tran = 'T' or 't'   op( A ) = A'.  
+                tran = 'C' or 'c'   op( A ) = A'.
+             Unchanged on exit.
    
-   side   - CHARACTER*1.
-            On entry, side specifies whether op( A ) appears on the left
-            or right of X as follows:
+    diag     CHARACTER*1.
+             On entry, diag specifies whether or not A is unit triangular
+             as follows:
+               diag = 'U' or 'u'   A is assumed to be unit triangular.   
+               diag = 'N' or 'n'   A is not assumed to be unit triangular.
+             Unchanged on exit.
+
+    m        INTEGER.
+             On entry, m specifies the number of rows of B. m must be at
+             least zero.
+             Unchanged on exit.
    
-               side = 'L' or 'l'   op( A )*X = alpha*B.
-   
-               side = 'R' or 'r'   X*op( A ) = alpha*B.
-   
-            Unchanged on exit.
-   
-   uplo   - CHARACTER*1.
-            On entry, uplo specifies whether the matrix A is an upper or
-            lower triangular matrix as follows:
-   
-               uplo = 'U' or 'u'   A is an upper triangular matrix.
-   
-               uplo = 'L' or 'l'   A is a lower triangular matrix.
-   
-            Unchanged on exit.
-   
-   tran - CHARACTER*1.
-            On entry, tran specifies the form of op( A ) to be used in
-            the matrix multiplication as follows:
-   
-               tran = 'N' or 'n'   op( A ) = A.
-   
-               tran = 'T' or 't'   op( A ) = A'.
-   
-               tran = 'C' or 'c'   op( A ) = A'.
-   
-            Unchanged on exit.
-   
-   diag   - CHARACTER*1.
-            On entry, diag specifies whether or not A is unit triangular
-            as follows:
-   
-              diag = 'U' or 'u'   A is assumed to be unit triangular.
-   
-              diag = 'N' or 'n'   A is not assumed to be unit
-                                   triangular.
-   
-            Unchanged on exit.
-	   
-   m      - INTEGER.
-            On entry, m specifies the number of rows of B. m must be at
-            least zero.
-            Unchanged on exit.
-   
-    n      - INTEGER.
+    n        INTEGER.
              On entry, n specifies the number of columns of B.  n must be
              at least zero.
              Unchanged on exit.
    
-    alpha  - REAL.
+    alpha    REAL.
              On entry,  alpha specifies the scalar  alpha. When  alpha is
              zero then  A is not referenced and  B need not be set before
              entry.
              Unchanged on exit.
    
-    A      - REAL             array of DIMENSION ( lda, k ), where k is m
+    A        REAL array of DIMENSION ( lda, k ), where k is m
              when  side = 'L' or 'l'  and is  n  when  side = 'R' or 'r'.
              Before entry  with  uplo = 'U' or 'u',  the  leading  k by k
              upper triangular part of the array  A must contain the upper
@@ -2979,110 +2935,91 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
              A  are not referenced either,  but are assumed to be  unity.
              Unchanged on exit.
    
-    lda    - INTEGER.
+    lda      INTEGER.
              On entry, lda specifies the first dimension of A as declared
              in the calling (sub) program.  When  side = 'L' or 'l'  then
              lda  must be at least  max( 1, m ),  when  side = 'R' or 'r'
              then lda must be at least max( 1, n ).
              Unchanged on exit.
    
-    b      - REAL             array of DIMENSION ( ldb, n ).
+    b        REAL array of DIMENSION ( ldb, n ).
              Before entry,  the leading  m by n part of the array  B must
              contain  the  right-hand  side  matrix  B,  and  on exit  is
              overwritten by the solution matrix  X.
 	   
-    ldb    - INTEGER.
+    ldb      INTEGER.
              On entry, ldb specifies the first dimension of B as declared
              in  the  calling  (sub)  program.   ldb  must  be  at  least
              max( 1, m ).
-             Unchanged on exit.
-
-Note: When matrix dimension is multiple of STRSM's internal block size 32, you will get
-higher performance. 
+             Unchanged on exit. 
 \end{verbatim}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \subsection{Function {\tt {\bf magma\_dtrsm}}}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
+int magmablas_dtrsm(char side, char uplo, char tran, char diag, int M, int N, 
+                    double alpha, double* A, int lda, double* b, int ldb)
 
-void magmablas_dtrsm (char side, char uplo, char tran, char diag, int M, int N, double alpha, double* A, int lda, double* b, int ldb)
+    DTRSM solves one of the matrix equations on GPU  
+       op( A )*X = alpha*B,   or   X*op( A ) = alpha*B,
+    where alpha is a scalar, X and B are m by n matrices, A is a unit, or
+    non-unit,  upper or lower triangular matrix  and  op( A )  is one  of 
+       op( A ) = A   or   op( A ) = A'.  
+    The matrix X is overwritten on B.
 
-   DTRSM  solves one of the matrix equations on GPU
+    To extract more parallelism and performance, the diagonal blocks of A 
+    of size 32x32 are explicitly inverted. When M or N is not a multiple of 
+    the current blocking size (32 for now), cublasStrsm is called instead. 
+
+    side     CHARACTER*1.
+             On entry, side specifies whether op( A ) appears on the left
+             or right of X as follows:
+                side = 'L' or 'l'   op( A )*X = alpha*B.  
+                side = 'R' or 'r'   X*op( A ) = alpha*B.  
+             Unchanged on exit.
    
-      op( A )*X = alpha*B,   or   X*op( A ) = alpha*B,
+    uplo     CHARACTER*1.
+             On entry, uplo specifies whether the matrix A is an upper or
+             lower triangular matrix as follows:
+                uplo = 'U' or 'u'   A is an upper triangular matrix.  
+                uplo = 'L' or 'l'   A is a lower triangular matrix.  
+             Unchanged on exit.
    
-   where alpha is a scalar, X and B are m by n matrices, A is a unit, or
-   non-unit,  upper or lower triangular matrix  and  op( A )  is one  of
-   
-      op( A ) = A   or   op( A ) = A'.
-   
-   The matrix X is overwritten on B.
-   
-   When M or N is not a multiple of blocking size, which is 32 for now, cublasDtrsm will
-   be called instead. There soon will not be this limitation both for arbitrary problem 
-   size and blocking size.
-   
-   side   - CHARACTER*1.
-            On entry, side specifies whether op( A ) appears on the left
-            or right of X as follows:
-   
-               side = 'L' or 'l'   op( A )*X = alpha*B.
-   
-               side = 'R' or 'r'   X*op( A ) = alpha*B.
-   
-            Unchanged on exit.
-   
-   uplo   - CHARACTER*1.
-            On entry, uplo specifies whether the matrix A is an upper or
-            lower triangular matrix as follows:
-   
-               uplo = 'U' or 'u'   A is an upper triangular matrix.
-   
-               uplo = 'L' or 'l'   A is a lower triangular matrix.
-   
-            Unchanged on exit.
-   
-   tran - CHARACTER*1.
-            On entry, tran specifies the form of op( A ) to be used in
-            the matrix multiplication as follows:
-   
-               tran = 'N' or 'n'   op( A ) = A.
-   
-               tran = 'T' or 't'   op( A ) = A'.
-   
-               tran = 'C' or 'c'   op( A ) = A'.
-   
-            Unchanged on exit.
+    tran     CHARACTER*1.
+             On entry, tran specifies the form of op( A ) to be used in
+             the matrix multiplication as follows:
+                tran = 'N' or 'n'   op( A ) = A.
+                tran = 'T' or 't'   op( A ) = A'.
+                tran = 'C' or 'c'   op( A ) = A'.
+             Unchanged on exit.
   
-   diag   - CHARACTER*1.
-            On entry, diag specifies whether or not A is unit triangular
-            as follows:
-   
-               diag = 'U' or 'u'   A is assumed to be unit triangular.
-   
-               diag = 'N' or 'n'   A is not assumed to be unit
-                                   triangular.
-   
-            Unchanged on exit.
+    diag     CHARACTER*1.
+             On entry, diag specifies whether or not A is unit triangular
+             as follows:
+                diag = 'U' or 'u'   A is assumed to be unit triangular.  
+                diag = 'N' or 'n'   A is not assumed to be unit
+                                    triangular.  
+             Unchanged on exit.
 	   
-   m      - INTEGER.
-            On entry, m specifies the number of rows of B. m must be at
-            least zero.
-            Unchanged on exit.
+    m        INTEGER.
+             On entry, m specifies the number of rows of B. m must be at
+             least zero.
+             Unchanged on exit.
    
-    n      - INTEGER.
+    n        INTEGER.
              On entry, n specifies the number of columns of B.  n must be
              at least zero.
              Unchanged on exit.
    
-    alpha  - DOUBLE PRECISION.
+    alpha    DOUBLE PRECISION.
              On entry,  alpha specifies the scalar  alpha. When  alpha is
              zero then  A is not referenced and  B need not be set before
              entry.
              Unchanged on exit.
    
-    A      - DOUBLE PRECISION             array of DIMENSION ( lda, k ), where k is m
+    A        DOUBLE PRECISION array of DIMENSION ( lda, k ), where k is m
              when  side = 'L' or 'l'  and is  n  when  side = 'R' or 'r'.
              Before entry  with  uplo = 'U' or 'u',  the  leading  k by k
              upper triangular part of the array  A must contain the upper
@@ -3096,27 +3033,25 @@ void magmablas_dtrsm (char side, char uplo, char tran, char diag, int M, int N, 
              A  are not referenced either,  but are assumed to be  unity.
              Unchanged on exit.
    
-    lda    - INTEGER.
+    lda      INTEGER.
              On entry, lda specifies the first dimension of A as declared
              in the calling (sub) program.  When  side = 'L' or 'l'  then
              lda  must be at least  max( 1, m ),  when  side = 'R' or 'r'
              then lda must be at least max( 1, n ).
              Unchanged on exit.
    
-    b      - DOUBLE PRECISION             array of DIMENSION ( ldb, n ).
+    b        DOUBLE PRECISION array of DIMENSION ( ldb, n ).
              Before entry,  the leading  m by n part of the array  B must
              contain  the  right-hand  side  matrix  B,  and  on exit  is
              overwritten by the solution matrix  X.
    
-    ldb    - INTEGER.
+    ldb      INTEGER.
              On entry, ldb specifies the first dimension of B as declared
              in  the  calling  (sub)  program.   ldb  must  be  at  least
              max( 1, m ).
              Unchanged on exit.
-
-Note: When matrix dimension is multiple of STRSM's internal block size 32, you will get
-higher performance. 
 \end{verbatim}
+
 \normalsize
 
 
@@ -3218,7 +3153,7 @@ in the following hardware and software configuration:
 \begin{description}
 \item[GPU:]  NVIDIA GeForce GTX 280;
 \item[CPU:] Intel Xeon dual socket quad-core @ 2.33 GHz;
-\item[GPU BLAS:] CUBLAS 2.1;
+\item[GPU BLAS:] CUBLAS 2.3;
 \item[CPU BLAS:] MKL 10.0;
 \item[Compiler:] gcc 4.1.2;
 \item[Tuning:] Hand tuned (and hard coded).
@@ -3240,12 +3175,12 @@ would be a multiple of 32.
 
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Single precision}
-
+\section{Single precision one-sided factorizations}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
        \begin{figure}[!ht]
           \centering
           \hspace{-5mm}
-          \includegraphics[angle=-90,scale=0.7]{sp-cpu.ps}
+          \includegraphics[angle=-90,scale=0.7]{sp-cpu-v0.2.ps}
           %\includegraphics[width=7in]{sp-cpu.pdf}
           \caption{Performance of the {\bf CPU interface} 
                    one-sided factorizations.}
@@ -3255,19 +3190,20 @@ would be a multiple of 32.
        \begin{figure}[!ht]
           \centering
           \hspace{-5mm}
-          \includegraphics[angle=-90,scale=0.7]{sp-gpu.ps}
+          \includegraphics[angle=-90,scale=0.7]{sp-gpu-v0.2.ps}
           %\includegraphics[width=5in]{sp-gpu.jpg}
           \caption{Performance of the {\bf GPU interface}
                    one-sided factorizations.}
        \label{sp-gpu-performance}
        \end{figure}
 \newpage
-\section{Double precision}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Double precision one-sided factorizations}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
        \begin{figure}[!ht]
           \centering
           \hspace{-5mm}
-          \includegraphics[angle=-90,scale=0.7]{dp-cpu.ps}
+          \includegraphics[angle=-90,scale=0.7]{dp-cpu-v0.2.ps}
           %\includegraphics[width=5in]{dp-cpu.jpg}
           \caption{Performance of the {\bf CPU interface} 
                    one-sided factorizations.}
@@ -3277,7 +3213,7 @@ would be a multiple of 32.
        \begin{figure}[!ht]
           \centering
           \hspace{-5mm}
-          \includegraphics[angle=-90,scale=0.7]{dp-gpu.ps}
+          \includegraphics[angle=-90,scale=0.7]{dp-gpu-v0.2.ps}
           %\includegraphics[width=5in]{dp-gpu.jpg}
           \caption{Performance of the {\bf GPU interface} 
                    one-sided factorizations.}
@@ -3286,15 +3222,90 @@ would be a multiple of 32.
 
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Single complex}
+\section{Single complex one-sided factorizations}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+       \begin{figure}[!ht]
+          \centering
+          \hspace{-5mm}
+          \includegraphics[angle=-90,scale=0.7]{sc-cpu-v0.2.ps}
+          %\includegraphics[width=7in]{sp-cpu.pdf}
+          \caption{Performance of the {\bf CPU interface} 
+                   one-sided factorizations.}
+       \label{sp-cpu-performance}
+       \end{figure}
+
+       \begin{figure}[!ht]
+          \centering
+          \hspace{-5mm}
+          \includegraphics[angle=-90,scale=0.7]{sc-gpu-v0.2.ps}
+          %\includegraphics[width=5in]{sp-gpu.jpg}
+          \caption{Performance of the {\bf GPU interface}
+                   one-sided factorizations.}
+       \label{sp-gpu-performance}
+       \end{figure}
 
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Double complex}
+\section{Double complex one-sided factorizations}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+       \begin{figure}[!ht]
+          \centering
+          \hspace{-5mm}
+          \includegraphics[angle=-90,scale=0.7]{dc-cpu-v0.2.ps}
+          %\includegraphics[width=5in]{dp-cpu.jpg}
+          \caption{Performance of the {\bf CPU interface} 
+                   one-sided factorizations.}
+       \label{dp-cpu-performance}
+       \end{figure}
 
+       \begin{figure}[!ht]
+          \centering
+          \hspace{-5mm}
+          \includegraphics[angle=-90,scale=0.7]{dc-gpu-v0.2.ps}
+          %\includegraphics[width=5in]{dp-gpu.jpg}
+          \caption{Performance of the {\bf GPU interface} 
+                   one-sided factorizations.}
+       \label{dp-gpu-performance}
+       \end{figure}
 
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{LU-based linear solvers}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+       \begin{figure}[!ht]
+          \centering
+          \hspace{-5mm}
+          \includegraphics[angle=-90,scale=0.7]{lu-solve-v0.2.ps}
+          %\includegraphics[width=5in]{dp-cpu.jpg}
+          \caption{Performance of LU-based linear solvers.}
+       \label{lu-solvers}
+       \end{figure}
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{QR-based least squares solvers}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+       \begin{figure}[!ht]
+          \centering
+          \hspace{-5mm}
+          \includegraphics[angle=-90,scale=0.7]{qr-solve-v0.2.ps}
+          %\includegraphics[width=5in]{dp-gpu.jpg}
+          \caption{Performance of QR-based least squares solvers.}
+       \label{qr-solvers}
+       \end{figure}
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Cholesky-based linear solvers}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+       \begin{figure}[!ht]
+          \centering
+          \hspace{-5mm}
+          \includegraphics[angle=-90,scale=0.7]{cholesky-solve-v0.2.ps}
+          %\includegraphics[width=5in]{dp-gpu.jpg}
+          \caption{Performance of Cholesky-based linear solvers.}
+       \label{cholesky-solvers}
+       \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\addcontentsline{toc}{chapter}{Contributors}
@@ -3325,3 +3336,4 @@ xfig -specialtext -latexfont -startlatexFont default $fichier.fig
 fig2dev -L pstex $fichier.fig > $fichier.ps ; fig2dev -L pstex_t -p $fichier.ps $fichier.fig > $fichier.tex
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+

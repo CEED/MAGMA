@@ -48,7 +48,7 @@ int main( int argc, char** argv)
 
     /* Matrix size */
     int M, N=0, n2, lda;
-    int size[10] = {1024,2048,3072,4032,5184,6016,7040,8064, 9088,10112};
+    int size[10] = {1024,2048,3072,4032,5184,6016,7040,8000, 9088,10112};
     
     cublasStatus status;
     int i, j, info[1];

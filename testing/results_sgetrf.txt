@@ -32,7 +32,7 @@ testing_sgetrf_gpu
  9088    101.38         295.04         1.549758e-09
 10112    104.27         301.65         1.661756e-09
 
-
+MAGMA version 0.2
 [tomov@cumin testing]$ ./testing_sgetrf
 device 0: GeForce GTX 280, 1296.0 MHz clock, 1023.8 MB memory
 device 1: Quadro NVS 290, 918.0 MHz clock, 255.3 MB memory

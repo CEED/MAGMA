@@ -15,7 +15,7 @@ Usage:
  7040    102.78         274.26        2.507260e-06
  8064    104.38         278.93        2.699405e-06
  9088    104.45         282.68        2.771890e-06
-10112    104.10         285.81        2.877923e-06
+ 10112    104.10         285.81        2.877923e-06
 
 
 testing_sgeqrf_gpu
@@ -31,7 +31,7 @@ testing_sgeqrf_gpu
  7040    104.02         278.01        2.507260e-06
  8064    104.91         282.80        2.699405e-06
  9088    104.24         286.26        2.771890e-06
-10112    103.78         289.29        2.877923e-06
+ 10112    103.78         289.29        2.877923e-06
 
 The current distribution is not optimized for matrix sizes not divisible 
 by nb. This will be fixed in the next distribution, e.g. currently
