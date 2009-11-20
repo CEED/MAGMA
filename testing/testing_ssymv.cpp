@@ -75,8 +75,8 @@ int main(int argc, char **argv)
         TimeStruct start, end;
 	const int N =8*1024+64;
 	
-	float *A = (float*)malloc( N*N*sizeof( float ) );
-	float *C = (float*)malloc( N*N*sizeof( float ) );
+	float *A = (float*)malloc( 2 * N*N*sizeof( float ) );
+	float *C = (float*)malloc( 2 * N*N*sizeof( float ) );
 	
 	assert( A != NULL && C != NULL, "memory allocation error" );
 	
@@ -85,8 +85,8 @@ int main(int argc, char **argv)
 	fone = 0 ; 
 	fill( C, N*N, 31 );
 	
-	float *cublas_result = (float*)malloc( N*N*sizeof( float ) );
-	float *our_result = (float*)malloc( N*N*sizeof( float ) );
+	float *cublas_result = (float*)malloc(2 *  N*N*sizeof( float ) );
+	float *our_result = (float*)malloc(2*  N*N*sizeof( float ) );
 	
 	assert( cublas_result != NULL && our_result != NULL, "memory allocation error" );
 	
@@ -112,7 +112,8 @@ int main(int argc, char **argv)
 		const int ldc = m;
 		const float alpha = 1;
 		const float beta = 1;
-		
+	        int stride = 1 ; 
+		int stridec = 1; 	
 		printf( "%5d ", n  );
 		fprintf( fp, "%5d ", n  );
       /* =====================================================================
@@ -122,28 +123,26 @@ int main(int argc, char **argv)
 		{
 			float *dA, *dC, *dB;
 			Q( cublasAlloc( m*m, sizeof(float), (void**)&dA ) );
-			Q( cublasAlloc( m*1, sizeof(float), (void**)&dC ) );
-			Q( cublasAlloc( m*1, sizeof(float), (void**)&dB ) );
-			
+			Q( cublasAlloc( stridec*m*1, sizeof(float), (void**)&dC ) );
+			Q( cublasAlloc( stride*m*1, sizeof(float), (void**)&dB ) );
+			float cublas_time;
 			Q( cublasSetMatrix( m, m, sizeof( float ), A, lda, dA, lda ) );
 			Q( cublasGetError( ) );
-			Q( cublasSetMatrix( m, 1, sizeof( float ), C, ldc, dC, ldc ) );
+			Q( cublasSetMatrix( m*stridec, 1, sizeof( float ), C, ldc*stridec, dC, stridec*ldc ) );
 			Q( cublasGetError( ) );
-			Q( cublasSetMatrix( m, 1, sizeof( float ), C+m, ldc, dB, ldc ) );
+			Q( cublasSetMatrix( m*stride, 1, sizeof( float ), C+m*stride, stride* ldc, dB,stride* ldc ) );
 			Q( cublasGetError( ) );
-                        cublasSsymv('L' , m , 1.0,  dA , lda , dB , 1 ,1.0,  dC , 1 );
+                        cublasSsymv('L' , m , 1.0,  dA , lda , dB , stride ,1.0,  dC , stridec );
  
 			Q( cublasGetError( ) );
-			Q( cublasGetMatrix( m, 1, sizeof( float ), dC, ldc, cublas_result, ldc ) );
+			Q( cublasGetMatrix( m*stridec, 1, sizeof( float ), dC, stridec*ldc, cublas_result, stridec*ldc ) );
 			Q( cublasGetError( ) );
 		     
 	
-			float cublas_time;
                         start = get_current_time();
-                        cublasSsymv('L' , m , 1.0,  dA , lda , dB , 1 ,1.0,  dC , 1 );
+                        cublasSsymv('L' , m , 1.0,  dA , lda , dB , stride ,1.0,  dC , stridec );
 			end = get_current_time();
 		        cublas_time = GetTimerValue(start,end) ; 
-			
 			cublasFree( dA );
 			cublasFree( dC );
 			cublasFree( dB ) ; 
@@ -154,45 +153,44 @@ int main(int argc, char **argv)
       /* =====================================================================
          Performs operation using MAGMA-BLAS
          =================================================================== */
-
+		int pp = 1 ; 
+		if( pp == 1 ) 
 		{
 			float *dA, *dC, *dB;
 			Q( cublasAlloc( m*m, sizeof(float), (void**)&dA ) );
-			Q( cublasAlloc( m*1, sizeof(float), (void**)&dC ) );
-			Q( cublasAlloc( m*1, sizeof(float), (void**)&dB ) );
-			
+			Q( cublasAlloc( stridec*m*1, sizeof(float), (void**)&dC ) );
+			Q( cublasAlloc( stride*m*1, sizeof(float), (void**)&dB ) );
+			float cublas_time;
 			Q( cublasSetMatrix( m, m, sizeof( float ), A, lda, dA, lda ) );
 			Q( cublasGetError( ) );
-			Q( cublasSetMatrix( m, 1, sizeof( float ), C, ldc, dC, ldc ) );
+			Q( cublasSetMatrix( m*stridec, 1, sizeof( float ), C, ldc*stridec, dC, stridec*ldc ) );
 			Q( cublasGetError( ) );
-			Q( cublasSetMatrix( m, 1, sizeof( float ), C+m, ldc, dB, ldc ) );
+			Q( cublasSetMatrix( m*stride, 1, sizeof( float ), C+m*stride, stride* ldc, dB,stride* ldc ) );
 			Q( cublasGetError( ) );
-
-                        magmablas_ssymv( 'L' , m , 1.0,  dA , lda , dB , 1 ,1.0,  dC , 1 );
+                        magmablas_ssymv( 'L' , m , 1.0,  dA , lda , dB , stride ,1.0,  dC , stridec );
+ 
 			Q( cublasGetError( ) );
-			Q( cublasGetMatrix( m, 1, sizeof( float ), dC, ldc, our_result, ldc ) );
-		
+			Q( cublasGetMatrix( m*stridec, 1, sizeof( float ), dC,stridec* ldc, our_result,stridec* ldc ) );
+			Q( cublasGetError( ) );
+		     
 	
-			float cublas_time;
                         start = get_current_time();
-                        magmablas_ssymv( 'L' , m , 1.0,  dA , lda , dB , 1 ,1.0,  dC , 1 );
+                        magmablas_ssymv( 'L' , m , 1.0,  dA , lda , dB , stride ,1.0,  dC , stridec );
 			end = get_current_time();
 		        cublas_time = GetTimerValue(start,end) ; 
-			
 			cublasFree( dA );
 			cublasFree( dC );
 			cublasFree( dB ) ; 
-		        	
 			float cublas_gflops = float(2.*dim*dim)/cublas_time/1e6;
-			printf( "\t%11.2f", cublas_gflops );
-			fprintf(fp,  "\t%11.2f", cublas_gflops );
+			printf( "%11.2f", cublas_gflops );
+			fprintf(fp,  "%11.2f", cublas_gflops );
 		}
       /* =====================================================================
          Computing the Difference 
          =================================================================== */
 
 		{ 
-		float difference = diff( 1, m, cublas_result, ldc, our_result, ldc );
+		float difference = diff( 1, m*stridec, cublas_result, ldc*stridec, our_result, ldc*stridec );
 		printf( "\t\t %8g\n", difference );
 		fprintf( fp, "\t\t %8g\n", difference );
 		}
