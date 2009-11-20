@@ -132,7 +132,8 @@ int main(int argc, char **argv)
 			Q( cublasSetMatrix( m, 1, sizeof( double ), C+m, ldc, dB, ldc ) );
 			Q( cublasGetError( ) );
                         //cublasDsymm('L', 'L' , m , 1 , 1.0,  dA , lda , dB , ldc , 1.0 , dC , ldc );
-			cublasDgemv('t', m, m, 1.0, dA, lda, dB, 1, 0., dC, 1);
+			//cublasDgemv('t', m, m, 1.0, dA, lda, dB, 1, 0., dC, 1);
+			cublasDgemv('n', m, m, 1.0, dA, lda, dB, 1, 0., dC, 1);
 
 			Q( cublasGetError( ) );
 			Q( cublasGetMatrix( m, 1, sizeof( double ), dC, ldc, cublas_result, ldc ) );
@@ -142,7 +143,9 @@ int main(int argc, char **argv)
 			double cublas_time;
                         start = get_current_time();
                         //cublasDsymm('L', 'L' , m , 1 , 1.0,  dA , lda , dB , ldc  , 1 , dC , ldc );
-			cublasDgemv('t', m, m, 1.0, dA, lda, dB, 1, 0., dC, 1);
+			//cublasDgemv('t', m, m, 1.0, dA, lda, dB, 1, 0., dC, 1);
+			cublasDgemv('n', m, m, 1.0, dA, lda, dB, 1, 0., dC, 1);
+
 			end = get_current_time();
 		        cublas_time = GetTimerValue(start,end) ; 
 			
@@ -171,7 +174,8 @@ int main(int argc, char **argv)
 			Q( cublasGetError( ) );
 
                         //magmablas_dsymv( 'L' , m , 1.0,  dA , lda , dB , 1 ,1.0,  dC , 1 );
-			magmablas_dgemvt(m, m, 1., dA, lda, dB, dC);
+			//magmablas_dgemvt(m, m, 1., dA, lda, dB, dC);
+			magmablas_dgemv(m, m, dA, lda, dB, dC);
 
 			Q( cublasGetError( ) );
 			Q( cublasGetMatrix( m, 1, sizeof( double ), dC, ldc, our_result, ldc ) );
@@ -180,7 +184,8 @@ int main(int argc, char **argv)
 			double cublas_time;
                         start = get_current_time();
                         // magmablas_dsymv( 'L' , m , 1.0,  dA , lda , dB , 1 ,1.0,  dC , 1 );
-			magmablas_dgemvt(m, m, 1., dA, lda, dB, dC);
+			//magmablas_dgemvt(m, m, 1., dA, lda, dB, dC);
+			magmablas_dgemv(m, m, dA, lda, dB, dC);
 
 			end = get_current_time();
 		        cublas_time = GetTimerValue(start,end) ; 

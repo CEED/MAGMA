@@ -133,7 +133,8 @@ int main(int argc, char **argv)
 			Q( cublasSetMatrix( m*stride, 1, sizeof( float ), C+m*stride, stride* ldc, dB,stride* ldc ) );
 			Q( cublasGetError( ) );
                         //cublasSsymv('L' , m , 1.0,  dA , lda , dB , stride ,1.0,  dC , stridec );
-			cublasSgemv('t', m, m, 1.0, dA, lda, dB, 1, 0., dC, 1);
+			//cublasSgemv('t', m, m, 1.0, dA, lda, dB, 1, 0., dC, 1);
+			cublasSgemv('n', m, m, 1.0, dA, lda, dB, 1, 0., dC, 1);
 			Q( cublasGetError( ) );
 			Q( cublasGetMatrix( m*stridec, 1, sizeof( float ), dC, stridec*ldc, cublas_result, stridec*ldc ) );
 			Q( cublasGetError( ) );
@@ -141,7 +142,8 @@ int main(int argc, char **argv)
 	
                         start = get_current_time();
                         //cublasSsymv('L' , m , 1.0,  dA , lda , dB , stride ,1.0,  dC , stridec );
-			cublasSgemv('t', m, m, 1.0, dA, lda, dB, 1, 0., dC, 1);
+			//cublasSgemv('t', m, m, 1.0, dA, lda, dB, 1, 0., dC, 1);
+			cublasSgemv('n', m, m, 1.0, dA, lda, dB, 1, 0., dC, 1);
 			end = get_current_time();
 		        cublas_time = GetTimerValue(start,end) ; 
 			cublasFree( dA );
@@ -169,7 +171,8 @@ int main(int argc, char **argv)
 			Q( cublasSetMatrix( m*stride, 1, sizeof( float ), C+m*stride, stride* ldc, dB,stride* ldc ) );
 			Q( cublasGetError( ) );
                         //magmablas_ssymv( 'L' , m , 1.0,  dA , lda , dB , stride ,1.0,  dC , stridec );
-			magmablas_sgemvt(m, m, 1., dA, lda, dB, dC);
+			//magmablas_sgemvt(m, m, 1., dA, lda, dB, dC);
+                        magmablas_sgemv(m, m, dA, lda, dB, dC);
 
 			Q( cublasGetError( ) );
 			Q( cublasGetMatrix( m*stridec, 1, sizeof( float ), dC,stridec* ldc, our_result,stridec* ldc ) );
@@ -178,7 +181,8 @@ int main(int argc, char **argv)
 	
                         start = get_current_time();
                         //magmablas_ssymv( 'L' , m , 1.0,  dA , lda , dB , stride ,1.0,  dC , stridec );
-                        magmablas_sgemvt(m, m, 1., dA, lda, dB, dC);
+                        //magmablas_sgemvt(m, m, 1., dA, lda, dB, dC);
+			magmablas_sgemv(m, m, dA, lda, dB, dC);
 			end = get_current_time();
 		        cublas_time = GetTimerValue(start,end) ; 
 			cublasFree( dA );

@@ -12,8 +12,9 @@ all: test
 clean: cleanall
 
 test:
+	( cd testing/lin; $(MAKE) )
 	( cd testing; $(MAKE) )
 
 cleanall:
 	( cd testing; $(MAKE) clean )
-
+	( cd testing/lin; $(MAKE) clean )

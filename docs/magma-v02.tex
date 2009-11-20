@@ -2898,10 +2898,10 @@ See \cite{lawn212,Rajib-SC09-poster} for further detail.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-
+\vspace{0.2in}
 \footnotesize
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 \subsection{Function {\tt {\bf magmablas\_sgemm}}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
@@ -3101,12 +3101,17 @@ void magmablas_dgemm(char TRANSA, char TRANSB, int m, int n, int k, double alpha
              max( 1, m ).
              Unchanged on exit.
 \end{verbatim}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \section{Matrix-Vector Multiplication}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+
+\vspace{0.2in}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\newpage
 \subsection{Function {\tt {\bf magma\_sgemv}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \vspace{0.1in}
 \begin{verbatim}
@@ -3210,8 +3215,9 @@ void magmablas_dgemvt(int m, int n, double alpha, double *A, int lda,
 \section{Symmetric Matrix-Vector multiplication}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\vspace{0.2in}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 \subsection{Function {\tt {\bf magmablas\_ssymv}}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
@@ -3370,8 +3376,11 @@ int magmablas_dsymv(char uplo, int m, double alpha, double *A, int lda,
 \section{Triangular Matrix Solvers}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newpage
+\vspace{0.2in}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\newpage
 \subsection{Function {\tt {\bf magma\_strsm}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
 int magmablas_strsm(char side, char uplo, char tran, char diag, int M, int N,
                     float alpha, float* A, int lda, float* b, int ldb)
@@ -3841,6 +3850,58 @@ would be a multiple of 32.
           \caption{Double precision MAGMA {\it vs} MKL}
        \label{cholesky-solvers}
        \end{figure}
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{MAGMA BLAS}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{verbatim}
+
+Some MAGMA BLAS vs CUBLAS Performance Results in GFlop/s 
+
+           N       cudablas-2.3    MAGMA BLAS v0.2
+          ========================================
+sgemm     1025       180.23           308.12
+          2049       191.32           340.89
+          3073       190.47           350.15
+          4097       190.92           354.62
+          . . .
+sgemv     1088         5.60            18.64
+          2240        11.79            38.60
+          3136        16.40            50.56
+          4352        22.64            60.61
+          . . .
+ssymv     1088         2.29            24.66
+          2240         2.70            38.30
+          3136         2.77            30.49
+          4352         2.61            40.82
+          . . .
+strsm     1088         0.17             1.10
+(1 rhs)   2240         0.21             2.30
+          3136         0.22             2.97
+          4352         0.23             3.78
+          . . .
+
+dgemm     1025        51.04            68.35
+          2049        51.93            72.15
+          3073        52.21            72.95
+          4097        52.34            73.74
+          . . .
+dgemv     1088         5.26            11.11
+          2240        10.84            20.19 
+          3136        14.77            23.78
+          4352        19.11            23.96	
+          . . .
+dsymv     1088         4.77             8.22
+          2240         4.06            11.78
+          3136         3.82            12.48
+          4352         2.27            13.53
+          . . .
+dtrsm     1088         0.07             0.86
+(1 rhs)   2240         0.08             1.85
+          3136         0.09             2.42
+          4352         0.09             3.06
+\end{verbatim}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\addcontentsline{toc}{chapter}{Contributors}
