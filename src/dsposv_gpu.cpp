@@ -199,7 +199,7 @@ magma_dsposv_gpu(char UPLO, int N, int NRHS, double *A,int LDA, double *B,
   magma_dlacpy(N, NRHS, B , LDB, WORK, N);
 
   if( NRHS == 1 )
-  magma_dsymv( UPLO , N ,  -1.0,  A , LDA , X ,  1 , 1.0 ,  WORK , 1 );
+  magmablas_dsymv( UPLO , N ,  -1.0,  A , LDA , X ,  1 , 1.0 ,  WORK , 1 );
   else
   cublasDsymm('L', UPLO , N , NRHS , -1.0,  A , LDA , X , LDX , 1 , WORK , N );
 
@@ -235,7 +235,7 @@ magma_dsposv_gpu(char UPLO, int N, int NRHS, double *A,int LDA, double *B,
     }
 
     if( NRHS == 1 )
-      magma_dsymv( UPLO , N , alpha,  A , LDA , X ,  1 , beta ,  WORK , 1 );
+      magmablas_dsymv( UPLO , N , alpha,  A , LDA , X ,  1 , beta ,  WORK , 1 );
     else 
      cublasDsymm('L', UPLO , N , NRHS , alpha,  A , LDA , X , LDX , beta , WORK , N );
 

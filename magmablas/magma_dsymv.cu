@@ -710,7 +710,7 @@ Interface ..................................
 */
 
 extern "C" void 
-magma_dsymv (char uplo , int m , double alpha ,  double *A , int lda ,  double *X , int incx , double beta , double *Y , int incy )
+magmablas_dsymv (char uplo , int m , double alpha ,  double *A , int lda ,  double *X , int incx , double beta , double *Y , int incy )
 {
 /*
   DSYMV  performs the matrix-vector  operation

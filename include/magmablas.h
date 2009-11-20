@@ -78,9 +78,9 @@ void magmablas_slag2d(int, int, float *, int, double *, int, int *);
 void magma_dlacpy(int, int, double *, int, double *, int);
 double magma_dlansy(char, char , int, double *, int,  double *);
 void magma_dlat2s(char, int, double *, int, float *, int, int *);
-void magma_dsymv(char, int, double, double *, int, double *, int, 
+void magmablas_dsymv(char, int, double, double *, int, double *, int, 
 		 double, double *, int);
-void magma_ssymv(char, int, float, float *, int, float *, int, 
+void magmablas_ssymv(char, int, float, float *, int, float *, int, 
 		 float, float *, int);
 /*
 Gemm Kernels
