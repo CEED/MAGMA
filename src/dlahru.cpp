@@ -12,7 +12,7 @@
 #include <stdio.h>
 
 #define cublasStrsm magmablas_strsm
-#define cublasSgemm magmablasSgemm
+#define cublasSgemm magmablas_sgemm
 
 extern "C" int
 magma_dlahru(int n, int k, int nb, double *a, int lda,

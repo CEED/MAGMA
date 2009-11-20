@@ -6,7 +6,7 @@
 #include "cuda.h"
 
 #define cublasStrsm magmablas_strsm
-#define cublasSgemm magmablasSgemm
+#define cublasSgemm magmablas_sgemm
 
 extern "C" int
 magma_spotrs_gpu(char *UPLO, int N , int NRHS, float *A , int LDA,

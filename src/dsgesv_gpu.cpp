@@ -6,7 +6,7 @@
 #include "cuda.h"
 
 #define cublasDtrsm magmablas_dtrsm
-#define cublasDgemm magmablasDgemm
+#define cublasDgemm magmablas_dgemm
 #define BWDMAX 1.0
 #define ITERMAX 30
 

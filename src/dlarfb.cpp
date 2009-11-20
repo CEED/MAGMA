@@ -13,7 +13,7 @@
 #include <stdio.h>
 
 #define cublasDtrsm magmablas_dtrsm
-#define cublasDgemm magmablasDgemm
+#define cublasDgemm magmablas_dgemm
 
 extern "C" int 
 magma_dlarfb(char direct, char storev,

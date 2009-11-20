@@ -13,7 +13,7 @@
 #include <stdio.h>
 
 #define cublasStrsm magmablas_strsm
-#define cublasSgemm magmablasSgemm
+#define cublasSgemm magmablas_sgemm
 
 extern "C" int 
 magma_spotrf(char *uplo, int *n, float *a, int *lda, float *work, int *info)

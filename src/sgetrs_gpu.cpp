@@ -13,7 +13,7 @@
 #include <stdlib.h>
 
 #define cublasStrsm magmablas_strsm
-#define cublasSgemm magmablasSgemm
+#define cublasSgemm magmablas_sgemm
 
 extern "C" int
 magma_sgetrs_gpu(char *trans , int n, int nrhs, float *a , int lda,

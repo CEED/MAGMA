@@ -132,9 +132,9 @@ fprintf(fp, "Usage:\n\t\t./testing_dgemm N\n");
 
 
     start = get_current_time();
-    magmablasDgemm( TRANSA, TRANSB, M, N, K, ALPHA, d_A_m, LDA, d_B_m, LDB, BETA, d_C_m, LDC );
+    magmablas_dgemm( TRANSA, TRANSB, M, N, K, ALPHA, d_A_m, LDA, d_B_m, LDB, BETA, d_C_m, LDC );
     end = get_current_time();
-   // magmablasDgemm( TRANSA, TRANSB, M, N, K, ALPHA, d_A_m, LDA, d_B_m, LDB, BETA, d_C_m, LDC );
+   // magmablas_dgemm( TRANSA, TRANSB, M, N, K, ALPHA, d_A_m, LDA, d_B_m, LDB, BETA, d_C_m, LDC );
     cublasGetMatrix( M, N, sizeof( double ), d_C_m, LDC, h_C_m, LDC ) ;
     magma_perf = 2.*M*N*K/(GetTimerValue(start,end))/1e6 ;
     cublasFree(d_A_m);

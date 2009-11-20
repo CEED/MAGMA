@@ -119,9 +119,9 @@ void magmablas_sgemm_kernel_T_T_64_16_16_16_4_v2(float *, const float *,
 void magmablas_sgemm_kernel_T_T_64_16_16_16_4(float *, const float *, const float *, 
                   int, int, int, int, int, int, float, float);
 
-int magmablasDgemm(char, char, int, int, int, double, const double *, int, 
+int magmablas_dgemm(char, char, int, int, int, double, const double *, int, 
 		   const double *, int, double, double *, int);
-int magmablasSgemm(char, char, int, int, int, float, const float *, int, 
+int magmablas_sgemm(char, char, int, int, int, float, const float *, int, 
 		   const float *, int, float, float *, int);
 
 #ifdef __cplusplus
