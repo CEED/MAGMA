@@ -174,10 +174,10 @@ magma_dgeqrf(int *m, int *n, double *a, int  *lda,  double  *tau,
 	   H = H(i) H(i+1) . . . H(i+ib-1) */
 	dlarft_("F", "C", &rows, &ib, a_ref(i,i), lda, tau+i,
 		work, &ib);
-	dpanel_to_q(ib, a_ref(i,i), *lda, work+ib*ib); 
+	dpanel_to_q('U', ib, a_ref(i,i), *lda, work+ib*ib); 
 	cublasSetMatrix(rows, ib, sizeof(double), 
 			a_ref(i,i), *lda, da_ref(i,i), ldda);
-	dq_to_panel(ib, a_ref(i,i), *lda, work+ib*ib);
+	dq_to_panel('U', ib, a_ref(i,i), *lda, work+ib*ib);
 
 	if (i + ib < *n) {
 	  cublasSetMatrix(ib, ib, sizeof(double), work, ib, dwork, lddwork);

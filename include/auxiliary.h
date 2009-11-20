@@ -29,8 +29,10 @@ int magma_get_sgelqf_nb(int m);
 
 int magma_get_dpotrf_nb(int m);
 int magma_get_dgeqrf_nb(int m);
+int magma_get_dgeqlf_nb(int m);
 int magma_get_dgetrf_nb(int m);
 int magma_get_dgehrd_nb(int m);
+int magma_get_dgelqf_nb(int m);
 
 int magma_get_cpotrf_nb(int m);
 int magma_get_cgetrf_nb(int m);
@@ -53,8 +55,8 @@ void swp2pswp(int n, int *ipiv, int *newipiv);
 void cpanel_to_q(char uplo, int ib, float2 *a, int lda, float2 *work);
 void cq_to_panel(char uplo, int ib, float2 *a, int lda, float2 *work);
 
-void dpanel_to_q(int ib, double *a, int lda, double *work);
-void dq_to_panel(int ib, double *a, int lda, double *work);
+void dpanel_to_q(char uplo, int ib, double *a, int lda, double *work);
+void dq_to_panel(char uplo, int ib, double *a, int lda, double *work);
 
 void zpanel_to_q(char uplo, int ib, double2 *a, int lda, double2 *work);
 void zq_to_panel(char uplo, int ib, double2 *a, int lda, double2 *work);

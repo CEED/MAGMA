@@ -107,6 +107,32 @@ int magma_get_dgetrf_nb(int m){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for sgeqlf based on m
+*/
+extern "C"
+int magma_get_dgeqlf_nb(int m){
+  if (m <= 1024)
+    return 32;
+  else if (m<=4032)
+    return 64;
+  else
+    return 128;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for sgeqlf based on m
+*/
+extern "C"
+int magma_get_dgelqf_nb(int m){
+  if (m <= 2048)
+    return 32;
+  else if (m<=4032)
+    return 64;
+  else
+    return 128;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
    -- Return nb for dgehrd based on m;
       the return value should be a multiple of 32
 */

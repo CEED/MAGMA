@@ -41,6 +41,9 @@ include ../make.inc
              dgehrd.o \
              dlahru.o \
              dlahr2.o \
+             dgeqlf.o \
+             dgelqf-v2.o \
+             dgelqf.o \
              \
              cpotrf.o \
              cgeqrf.o \

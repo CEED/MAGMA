@@ -62,6 +62,12 @@ int magma_dgeqrf_gpu2(int *, int *, double *, int  *, double  *,
                       double *, int *, double *, int *);
 int magma_dgeqrs_gpu(int *, int *, int *, double *, int *, double *, double *,
                      int *, double *, int *, double *, int *);
+int magma_dgeqlf(int *, int *, double *, int  *, double  *,
+		 double *, int *, double *, int *);
+int magma_dgelqf(int *, int *, double *, int  *, double *,
+		 double *, int *, double *, int *);
+int magma_dgelqf2(int *, int *, double *, int  *, double *,
+		  double *, int *, double *, int *);
 int magma_dgetrf(int *, int *, double *, int *, int *, double*, double*, int*);
 int magma_dgetrf_gpu(int *, int *, double *, int *, int *, double *, int *);
 int magma_dgetrs_gpu(char *, int, int, double *, int,
@@ -212,6 +218,10 @@ int dgehd2_(int*,int*,int*,double*,int*,double*,double*,int*);
 int dpotrf_(char *uplo, int *n, double *a, int *lda, int *info);
 int dpotf2_(char *, int *, double *, int *, int *);
 int dgeqrf_(int*,int*,double *,int*,double *,double *,int *,int *);
+int dgeqlf_(int*,int*,double *,int*,double *,double *,int *,int *);
+int dgelqf_(int*,int*,double *,int*,double *,double *,int *,int *);
+int dgelq2_(int*,int*,double *,int*,double *,double *,int *);
+int dgeql2_(int*,int*,double *,int*,double *,double *,int *);
 int dgetrf_(int *, int *, double *, int *, int *, int *);
 int dgehrd_(int *, int *, int *, double *, int *, 
 	    double *, double *, int *, int *);

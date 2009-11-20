@@ -29,6 +29,8 @@ include ../make.inc
           testing_dgetrf.cpp \
           testing_dgetrf_gpu.cpp \
           testing_dgehrd.cpp \
+          testing_dgeqlf.cpp \
+          testing_dgelqf.cpp \
           \
           testing_cpotrf.cpp \
           testing_cgetrf.cpp \

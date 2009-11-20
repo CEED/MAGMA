@@ -172,31 +172,55 @@ void cq_to_panel(char uplo, int ib, float2 *a, int lda, float2 *work){
    -- Put 0s in the upper triangular part of a panel (and 1s on the diagonal)
 */
 extern "C"
-void dpanel_to_q(int ib, double *a, int lda, double *work){
+void dpanel_to_q(char uplo, int ib, double *a, int lda, double *work){
   int i, j, k = 0;
   double *col;
-  for(i=0; i<ib; i++){
-    col = a + i*lda;
-    for(j=0; j<i; j++){
-      work[k++] = col[j];
-      col[j] = 0.;
+
+  if (uplo == 'U' || uplo == 'u'){
+    for(i=0; i<ib; i++){
+      col = a + i*lda;
+      for(j=0; j<i; j++){
+	work[k++] = col[j];
+	col[j] = 0.;
+      }
+      work[k++] = col[i];
+      col[j] = 1.;
     }
-    work[k++] = col[i];
-    col[j] = 1.;
   }
+  else {
+    for(i=0; i<ib; i++){
+      col = a + i*lda;
+      work[k++] = col[i];
+      col[i] = 1.;
+      for(j=i+1; j<ib; j++){
+        work[k++] = col[j];
+	col[j] = 0.;
+      }
+    }
+  } 
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Restores a panel (after call to "panel_to_q")
 */
 extern "C"
-void dq_to_panel(int ib, double *a, int lda, double *work){
+void dq_to_panel(char uplo, int ib, double *a, int lda, double *work){
   int i, j, k = 0;
   double *col;
-  for(i=0; i<ib; i++){
-    col = a + i*lda;
-    for(j=0; j<=i; j++)
-      col[j] = work[k++];
+
+  if (uplo == 'U' || uplo == 'u'){
+    for(i=0; i<ib; i++){
+      col = a + i*lda;
+      for(j=0; j<=i; j++)
+	col[j] = work[k++];
+    }
+  }
+  else {
+    for(i=0; i<ib; i++){
+      col = a + i*lda;
+      for(j=i; j<ib; j++)
+        col[j] = work[k++];
+    }
   }
 }
 

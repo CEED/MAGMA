@@ -166,10 +166,10 @@ magma_dgeqrf_gpu(int *m, int *n, double *a, int  *lda,  double  *tau,
 	/* Form the triangular factor of the block reflector
 	   H = H(i) H(i+1) . . . H(i+ib-1) */
 	dlarft_("F", "C", &rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &ib);
-	dpanel_to_q(ib, work_ref(i), ldwork, hwork+ib*ib); 
+	dpanel_to_q('U', ib, work_ref(i), ldwork, hwork+ib*ib); 
 	cublasSetMatrix(rows, ib, sizeof(double), 
 			work_ref(i), ldwork, a_ref(i,i), *lda);
-        dq_to_panel(ib, work_ref(i), ldwork, hwork+ib*ib);
+        dq_to_panel('U', ib, work_ref(i), ldwork, hwork+ib*ib);
 
 	if (i + ib < *n) {
 	  cublasSetMatrix(ib, ib, sizeof(double), hwork, ib, dwork, lddwork);
