@@ -2629,7 +2629,7 @@ handle/accelerate on current architectures. The reason is that the two-sided
 factorizations involve large matrix-vector products which are memory bound,
 and as the gap between compute and communication power increases exponentially,
 these memory bound operations become an increasingly more difficult to handle
-bottleneck. GPUs though offer an attractive possibility way to accelerate them.
+bottleneck. GPUs though offer an attractive possibility to accelerate them.
 Indeed, having a high bandwidth (e.g. $10 \times$ larger than current CPU
 bus bandwidths), GPUs can accelerate matrix-vector products significantly 
 ($10$ to $30 \times$). Having this important component, it's just a matter 
@@ -2858,24 +2858,56 @@ int magma_dgehrd(int *n, int *ilo, int *ihi, double *a, int *lda,
 \end{verbatim}
 
 
-
+\normalsize
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{The MAGMA BLAS Library}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\vspace{0.1in}
+The MAGMA BLAS Library is a subset of CUDA BLAS. It is meant as a 
+complementary to the the CUBLAS Library provided by NVIDIA. 
+Included are only certain kernels that are crucial for the performance 
+of MAGMA routines. Although originally meant as an internal to MAGMA 
+library, some of its routines are general enough and are given a user
+interface to be used externally.
+
+\vspace{0.1in}
+Provided are the matrix-matrix multiplication routines (gemm), 
+matrix-vector multiplication routines, and triangular matrix solvers
+in real arithmetic (both single and double).
+
+\vspace{0.1in}
+Two main techniques distinguishing the MAGMA BLAS Library are:
+\begin{enumerate}
+  \item {\bf Auto-tuners} ~--~ both the {\bf {\it Beauty and the Beast}} 
+  behind  MAGMA -- an elegant and very practical solution for easy maintenance 
+  and performance portability, while often being a brute force, empirically-based
+  exhaustive search that would find and set automatically the best performing 
+  algorithms/kernels for a specific hardware configuration.
+  \item {\bf Pointer redirecting} ~--~ a set of GPU specific optimization
+  techniques that allow to easily remove performance oscillations associated
+  with problem sizes not divisible by certain block sizes.
+\end{enumerate}
+
+\vspace{0.1in}
+See \cite{lawn212,Rajib-SC09-poster} for further detail.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \section{Matrix-Matrix Multiplication}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+
+\footnotesize
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
-\subsection{Function {\tt {\bf magmablas_sgemm}}}
+\subsection{Function {\tt {\bf magmablas\_sgemm}}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
 void  magmablas_sgemm(char TRANSA, char TRANSB, int m , int n, int k, float alpha,
-                   const float *A, int lda, const float *B, int ldb, float beta,
-                   float *C, int ldc)
+                    const float *A, int lda, const float *B, int ldb, float beta,
+                    float *C, int ldc)
 
    SGEMM  performs one of the matrix-matrix operations
       C := alpha*op( A )*op( B ) + beta*C,
@@ -2970,12 +3002,12 @@ void  magmablas_sgemm(char TRANSA, char TRANSB, int m , int n, int k, float alph
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
-\subsection{Function {\tt {\bf magmablas_dgemm}}}
+\subsection{Function {\tt {\bf magmablas\_dgemm}}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
 void magmablas_dgemm(char TRANSA, char TRANSB, int m, int n, int k, double alpha,
-                   const double *A, int lda, const double *B, int ldb, 
-                   double beta, double *C, int ldc)
+                    const double *A, int lda, const double *B, int ldb, 
+                    double beta, double *C, int ldc)
  
     DGEMM  performs one of the matrix-matrix operations
       C := alpha*op( A )*op( B ) + beta*C,
@@ -3089,7 +3121,7 @@ void magmablas_dgemm(char TRANSA, char TRANSB, int m, int n, int k, double alpha
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
 int magmablas_ssymv(char uplo, int m, float alpha, float *A, int lda, float *X, 
-                 int incx, float beta, float *Y, int incy)
+                    int incx, float beta, float *Y, int incy)
 
     SSYMV  performs the matrix-vector  operation
        y := alpha*A*x + beta*y,
@@ -3165,8 +3197,8 @@ int magmablas_ssymv(char uplo, int m, float alpha, float *A, int lda, float *X,
 \subsection{Function {\tt {\bf magmablas\_dsymv}}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
-int magmablas_dsymv(char uplo, int m, double alpha, double *A, int lda, double *X,
-                int incx, double beta, double *Y, int incy)
+int magmablas_dsymv(char uplo, int m, double alpha, double *A, int lda, 
+                    double *X, int incx, double beta, double *Y, int incy)
 
     DSYMV  performs the matrix-vector  operation
        y := alpha*A*x + beta*y,
