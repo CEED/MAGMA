@@ -2873,7 +2873,7 @@ int magma_dgehrd(int *n, int *ilo, int *ihi, double *a, int *lda,
 \subsection{Function {\tt {\bf magmablas_sgemm}}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
-int magmablas_sgemm(char TRANSA, char TRANSB, int m , int n, int k, float alpha,
+void  magmablas_sgemm(char TRANSA, char TRANSB, int m , int n, int k, float alpha,
                    const float *A, int lda, const float *B, int ldb, float beta,
                    float *C, int ldc)
 
@@ -2973,7 +2973,7 @@ int magmablas_sgemm(char TRANSA, char TRANSB, int m , int n, int k, float alpha,
 \subsection{Function {\tt {\bf magmablas_dgemm}}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
-int magmablas_dgemm(char TRANSA, char TRANSB, int m, int n, int k, double alpha,
+void magmablas_dgemm(char TRANSA, char TRANSB, int m, int n, int k, double alpha,
                    const double *A, int lda, const double *B, int ldb, 
                    double beta, double *C, int ldc)
  

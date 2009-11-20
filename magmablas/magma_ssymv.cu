@@ -709,8 +709,7 @@ Note:
 Interface ..................................
 */
 
-extern "C" void 
-magmablas_ssymv (char uplo , int m , float alpha ,  float *A , int lda ,  float *X , int incx , float beta , float *Y , int incy )
+extern "C" void magmablas_ssymv (char uplo , int m , float alpha ,  float *A , int lda ,  float *X , int incx , float beta , float *Y , int incy )
 {
 /*
   Purpose

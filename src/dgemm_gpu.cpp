@@ -128,32 +128,31 @@
     =====================================================================    */
 #include <ctype.h>
 
-extern "C" int 
-magmablas_dgemm(char TRANSA, char TRANSB, int m , int n , int k , double alpha, const double *A, int lda, const double *B, int ldb, double beta, double *C, int ldc)
+extern "C" void magmablas_dgemm(char TRANSA, char TRANSB, int m , int n , int k , double alpha, const double *A, int lda, const double *B, int ldb, double beta, double *C, int ldc)
 {
 	if(m==0 || n==0  || ( ( alpha==0 || k==0 ) && beta ==1 ) ){
-		return 0;
+		return ;
 	}
         TRANSA = toupper( TRANSA ) ; 	
         TRANSB = toupper( TRANSB ) ; 	
 	if( alpha == 0.0){
 	    if( beta == 0.0){
 		magmablas_dgemm_kernel_ab_0( C,A,B, m, n,k,lda,ldb, ldc, alpha, beta);
-		return 1;
+		return ;
 	    }	
 	    else{
 		magmablas_dgemm_kernel_a_0( C,A,B, m, n,k,lda,ldb, ldc, alpha, beta);
-		return 1;
+		return ;
 	    }		
 	}
  
-	if(ldc < m ) return 0;
+	if(ldc < m ) return ;
 	if(TRANSA=='N'){
 	   if(TRANSB=='N')
 	   { 
 
-		if(lda < m ) return 0;
-		if(ldb < k ) return 0;
+		if(lda < m ) return ;
+		if(ldb < k ) return ;
 		/*=======================================================================
 		  ===================C = alpha * A * B + beta * C =======================
 		  =======================================================================*/
@@ -170,8 +169,8 @@ magmablas_dgemm(char TRANSA, char TRANSB, int m , int n , int k , double alpha, 
 	   }
 
 	   else{ 
-		if(lda < m ) return 0;
-		if(ldb < n ) return 0;
+		if(lda < m ) return ;
+		if(ldb < n ) return ;
 		/*=======================================================================
 		  ===================C = alpha * A * B^T + beta * C======================
 		  =======================================================================*/
@@ -188,8 +187,8 @@ magmablas_dgemm(char TRANSA, char TRANSB, int m , int n , int k , double alpha, 
 	}
         else{
 	    if(TRANSB=='N'){
-		if(lda < k ) return 0;
-		if(ldb < k ) return 0;
+		if(lda < k ) return ;
+		if(ldb < k ) return ;
 		/*=======================================================================
 		  ===================C = alpha * A^T * B + beta * C======================
 		  =======================================================================*/
@@ -205,8 +204,8 @@ magmablas_dgemm(char TRANSA, char TRANSB, int m , int n , int k , double alpha, 
 		}	
             }
             else{
-		if(lda < k) return 0;
-		if(ldb < n ) return 0;
+		if(lda < k) return ;
+		if(ldb < n ) return ;
 		/*=======================================================================
 		  ===================C = alpha * A^T* B^T + beta * C=====================
 		  =======================================================================*/
