@@ -117,12 +117,12 @@ void die(char *message){
 
 int main(int argc , char **argv){
  int  printall =0 ; 
- FILE *fp ;
- fp = fopen("results_dsposv.txt","w");
- if( fp == NULL ) return 1;
+// FILE *fp ;
+// fp = fopen("results_dsposv.txt","w");
+// if( fp == NULL ) return 1;
   
  printf("Iterative Refinement- Cholesky \n");
- fprintf(fp, "Iterative Refinement- Cholesky \n");
+// fprintf(fp, "Iterative Refinement- Cholesky \n");
     printf("\n");
     cuInit( 0 );
     cublasInit( );
@@ -131,10 +131,10 @@ int main(int argc , char **argv){
 
 
     printf("\nUsage:\n\t\t ./testing_dsposv -N 1024");
-    fprintf(fp, "\nUsage:\n\t\t ./testing_dsposv -N 1024");
+  //  fprintf(fp, "\nUsage:\n\t\t ./testing_dsposv -N 1024");
 
  printf("\n\nEpsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
- fprintf(fp, "Epsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
+ //fprintf(fp, "Epsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
 
   TimeStruct start, end;
 
@@ -159,10 +159,10 @@ int main(int argc , char **argv){
   int sizetest[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
 
   printf("\n\nN\tDouble-Factor\tDouble-Solve\tSingle-Factor\tSigle-Solve\tMixed Precision Solver\t || b-Ax || / ||A||  \t NumIter\n");
-  fprintf(fp, "\n\nN\tDouble-Factor\tDouble-Solve\tSingle-Factor\tSigle-Solve\tMixed Precision Solver\t || b-Ax || / ||A||\t NumIter\n");
+  //fprintf(fp, "\n\nN\tDouble-Factor\tDouble-Solve\tSingle-Factor\tSigle-Solve\tMixed Precision Solver\t || b-Ax || / ||A||\t NumIter\n");
 
       printf("===============================================================================================================================================================================\n");
-      fprintf(fp,"==============================================================================================================================================================================\n");
+      //fprintf(fp,"==============================================================================================================================================================================\n");
 
 
   int size ; 
@@ -299,7 +299,7 @@ int main(int argc , char **argv){
     double perf ;  
 
     printf("%5d ",N); 
-    fprintf(fp, "%10d ",N); 
+    //fprintf(fp, "%10d ",N); 
     fflush(stdout);
 
     char uplo = 'L';
@@ -356,7 +356,7 @@ int main(int argc , char **argv){
     end = get_current_time();
     perf = (1.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
     printf("\t%6.2f", perf);
-    fprintf(fp,"\t%6.2f", perf);
+    //fprintf(fp,"\t%6.2f", perf);
     fflush(stdout);
     //=====================================================================
     //                 Double Precision Solve 
@@ -368,7 +368,7 @@ int main(int argc , char **argv){
     end = get_current_time();
     perf = (1.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
     printf("\t\t%6.2f", perf);
-    fprintf(fp,"\t\t%6.2f", perf);
+    //fprintf(fp,"\t\t%6.2f", perf);
     fflush(stdout);
 
 
@@ -381,7 +381,7 @@ int main(int argc , char **argv){
     end = get_current_time();
     perf = (1.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
     printf("\t\t%6.2f ", perf);
-    fprintf(fp,"\t\t%6.2f", perf);
+    //fprintf(fp,"\t\t%6.2f", perf);
     fflush(stdout);
 
     //=====================================================================
@@ -394,22 +394,22 @@ int main(int argc , char **argv){
     end = get_current_time();
     perf = (1.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
     printf("\t\t%6.2f", perf);
-    fprintf(fp,"\t\t%6.2f", perf);
+    //fprintf(fp,"\t\t%6.2f", perf);
     fflush(stdout);
 
 
     printf("\t\t%6.2f", lperf);
-    fprintf(fp,"\t\t%6.2f", lperf);
+    //fprintf(fp,"\t\t%6.2f", lperf);
 //    printf("\t\t\t%e\t%17d",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1), ITER);
  //   fprintf(fp, "\t\t\t%e\t%17d",Rnorm/((Anorm*Xnorm+Bnorm)*N*eps1), ITER);
     printf("\t\t\t%e\t%3d", Rnorm/Anorm, ITER);
-    fprintf(fp, "\t\t\t%e\t%3d", Rnorm/Anorm, ITER);
+    //fprintf(fp, "\t\t\t%e\t%3d", Rnorm/Anorm, ITER);
 
 
     fflush(stdout);
 
     printf("\n");
-    fprintf(fp,"\n");
+    //fprintf(fp,"\n");
 
     if( once != 0 ){
 	break;
@@ -440,6 +440,6 @@ FREE2:
 FREE1_1:
     cublasFree(h_work_M_S);
 FREE1:
-    fclose(fp);
+   // fclose(fp);
     cublasShutdown();
 }

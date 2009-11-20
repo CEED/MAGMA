@@ -47,10 +47,10 @@ include ../make.inc
           testing_zgeqrf_gpu.cpp \
           \
           testing_dsgeqrsv_gpu.cpp \
-          testing_dsgesv.cpp \
-          testing_dgesv.cpp \
-          testing_sgesv.cpp \
-          testing_dsposv.cpp \
+          testing_dsgesv_gpu.cpp \
+          testing_dgesv_gpu.cpp \
+          testing_sgesv_gpu.cpp \
+          testing_dsposv_gpu.cpp \
           testing_dgemm.cpp \
           testing_sgemm.cpp \
           testing_dsymv.cpp \
