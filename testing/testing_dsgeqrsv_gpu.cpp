@@ -25,12 +25,12 @@
 int main( int argc, char** argv) 
 {
 
- FILE *fp ;
- fp = fopen("results_dsgeqrsv_gpu.txt","w");
- if( fp == NULL ) return 1;
+// FILE *fp ;
+// fp = fopen("results_dsgeqrsv_gpu.txt","w");
+// if( fp == NULL ) return 1;
  printf("Iterative Refinement- QR \n");
- fprintf(fp, "Iterative Refinement- QR \n");
-    printf("\n");
+// fprintf(fp, "Iterative Refinement- QR \n");
+ printf("\n");
 
 
     cuInit( 0 );
@@ -179,10 +179,10 @@ int main( int argc, char** argv)
     printf("           CPU GFlop/s                 GPU GFlop/s   \n");
     printf("  N          Doule           Double\tSingle\t Mixed    || b-Ax || / ||A||\n");
     printf("=========================================================================================\n");
-    fprintf(fp,"\n\n");
-    fprintf(fp,"           CPU GFlop/s                 GPU GFlop/s   \n");
-    fprintf(fp,"  N          Doule           Double\tSingle\t Mixed    || b-Ax || / ||A||\n");
-    fprintf(fp,"=========================================================================================\n");
+    //fprintf(fp,"\n\n");
+    //fprintf(fp,"           CPU GFlop/s                 GPU GFlop/s   \n");
+    //fprintf(fp,"  N          Doule           Double\tSingle\t Mixed    || b-Ax || / ||A||\n");
+    //fprintf(fp,"=========================================================================================\n");
     for(i=0; i<8; i++){
       M = N = lda = size[i]  ;
       n2 = N*N;
@@ -263,16 +263,16 @@ int main( int argc, char** argv)
              size[i], cpu_perf, dperf, sperf, mperf , 
              dlange_("f", &N, &nrhs, rr, &N, work)/matnorm );
       printf(" %2d \n", ITER[0]);
-      fprintf(fp,"%5d \t%8.2f\t%9.2f\t%6.2f\t%6.2f  \t%e",
-             size[i], cpu_perf, dperf, sperf, mperf , 
-             dlange_("f", &N, &nrhs, rr, &N, work)/matnorm );
-      fprintf(fp, " %2d \n", ITER[0]);
+      //fprintf(fp,"%5d \t%8.2f\t%9.2f\t%6.2f\t%6.2f  \t%e",
+      //       size[i], cpu_perf, dperf, sperf, mperf , 
+      //       dlange_("f", &N, &nrhs, rr, &N, work)/matnorm );
+      //fprintf(fp, " %2d \n", ITER[0]);
 
       if (argc != 1)
 	break;
     }
 
-    fclose(fp);
+    //fclose(fp);
     /* Memory clean up */
     free(h_A);
     free(h_AA);
