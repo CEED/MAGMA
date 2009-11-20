@@ -55,6 +55,7 @@ include ../make.inc
           testing_sgemm.cpp \
           testing_dsymv.cpp \
           testing_ssymv.cpp \
+          testing_sgemv.cpp \
           \
 
     OBJ = $(SRC:.cpp=.o)
