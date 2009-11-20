@@ -9,7 +9,7 @@
 
 
 __global__ void
-l_ssymv_special (int n, float alpha ,  float* A, int lda, float *x, int ldx , float beta ,  float *y , int ldy ){
+l_ssymv_special (int n, float alpha ,  float* A, int lda, float *x, int inx , float beta ,  float *y , int iny ){
   int tx = threadIdx.x ; 
   int ty = threadIdx.y ; 
   int ind = blockIdx.x*  dgemv_bs + tx ;
@@ -21,7 +21,7 @@ l_ssymv_special (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
 
 
   A += ind;
-  x += tx ;
+  x += tx  * inx ;
   A+= ty * lda  ;  
   int break_d  =   blockIdx.x* dgemv_bs ;
 
@@ -30,7 +30,7 @@ l_ssymv_special (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
     for(int j=0; j < dgemv_bs ; j+=4){
         la[tx][ty+j] = A[j*lda] ;
     }
-    buff[tx]  = x[i];
+    buff[tx]  = x[i*inx];
     __syncthreads();
 
     #pragma unroll 8 
@@ -49,10 +49,10 @@ l_ssymv_special (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
 
 
   A+= dgemv_bs ;
-  x+= break_d ; 
+  x+= break_d *inx  ; 
   __syncthreads();
-  //buff[tx]  = x[break_d];
-  buff[tx]  = x[0];
+  //buff[tx]  = x[break_d*inx];
+  buff[tx]  = x[0*inx];
   #pragma unroll 8
   for(int  i=ty*8; i<(1+ty)* dgemv_bs/4 ; i++){
          if ( i < tx )   {
@@ -67,7 +67,7 @@ l_ssymv_special (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
     for(int j=0; j < dgemv_bs/4 ; j++){
      res+=la[tx][j+ty*8]*buff[j+ty*8];
     }
-  x-= break_d ; 
+  x-= break_d *inx ; 
   break_d  += dgemv_bs ; 
   __syncthreads();
 
@@ -75,7 +75,7 @@ l_ssymv_special (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
 
 
   for(int i=break_d; i<n; i += dgemv_bs ){
-    buff[tx]  = x[i];
+    buff[tx]  = x[i*inx];
    #pragma unroll 8
     for(int j=0; j<dgemv_bs; j+=4)
        la[ty+j][tx] = A[ j * lda];
@@ -93,13 +93,13 @@ l_ssymv_special (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
    __syncthreads();
    if( ty == 0 ) {
      res = res + la[tx][1]+ la[tx][2]+ la[tx][3] ;
-     y[ind] = beta * y[ind]  + alpha * res;
+     y[ind * iny ] = beta * y[ind * iny  ]  + alpha * res;
    }
 
 }
 
 __global__ void
-l_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , float beta ,  float *y , int ldy , int m_full_block , int m_mod_32){
+l_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int inx , float beta ,  float *y , int iny , int m_full_block , int m_mod_32){
 
   
   int tx = threadIdx.x ; 
@@ -126,7 +126,7 @@ l_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
 		A+= ( blockIdx.x * dgemv_bs + m_mod_32 -1) ; 
 		//A+= ( blockIdx.x * dgemv_bs + 0) ; 
        }
-       x+=tx;
+       x+=tx *inx;
        A+= ty * lda  ;  
        int break_d  =   blockIdx.x* dgemv_bs ;
 
@@ -139,7 +139,7 @@ l_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
 	    for(int j=0; j < dgemv_bs ; j+=4){
 	        la[tx][ty+j] = A[j*lda] ;
 	    }
-	    buff[tx]  = x[i];
+	    buff[tx]  = x[i * inx];
 	    __syncthreads();
 
 	    #pragma unroll 8 
@@ -154,7 +154,7 @@ l_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
           */
           if( ty==0  ) {
 		x+= ( break_d -tx ) ; 
-	        //buff[tx]  = x[i];
+	        //buff[tx]  = x[i*inx];
 		/*--------------------------------------------
 			he will compute the triangular parts
 			others will be waiting with values. 
@@ -166,12 +166,12 @@ l_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
 		else
 			count = m_mod_32 ;
 		for(j =0;j<=count;j++){
-			res+= A[j*lda] * x[j];
+			res+= A[j*lda] * x[j*inx];
                 }
 		A+=(tx)*lda;
 		count = 1 ; 
 		for(;j<m_mod_32;j++){
-			res+= A[count] * x[j];
+			res+= A[count] * x[j*inx];
 			count++;
 		}
           }
@@ -186,7 +186,7 @@ l_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
          if( ty == 0 ) {
              res = res + la[tx][1]+ la[tx][2]+ la[tx][3] ;
 	     if( tx < m_mod_32)
-                 y[ind] = beta * y[ind]  + alpha * res;
+                 y[ind * iny ] = beta * y[ind * iny ]  + alpha * res;
          }
 	 
   }
@@ -198,7 +198,7 @@ l_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
   ****************************************
   -------------------------------------*/
   A += ind;
-  x += tx ;
+  x += tx*inx ;
   A+= ty * lda  ;  
   int break_d  =   blockIdx.x* dgemv_bs ;
 
@@ -210,7 +210,7 @@ l_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
     for(int j=0; j < dgemv_bs ; j+=4){
         la[tx][ty+j] = A[j*lda] ;
     }
-    buff[tx]  = x[i];
+    buff[tx]  = x[i*inx];
     __syncthreads();
 
     #pragma unroll 8 
@@ -232,10 +232,10 @@ l_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
 
 
   A+= dgemv_bs ;
-  x+= break_d ; 
+  x+= break_d * inx  ; 
   __syncthreads();
-  //buff[tx]  = x[break_d];
-  buff[tx]  = x[0];
+  //buff[tx]  = x[break_d*inx];
+  buff[tx]  = x[0*inx];
   /*--------------------------------------------
 	Mirror Upper Triangle to Lower triangle
   ---------------------------------------------*/
@@ -256,7 +256,7 @@ l_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
     for(int j=0; j < dgemv_bs/4 ; j++){
      res+=la[tx][j+ty*8]*buff[j+ty*8];
     }
-  x-= break_d ; 
+  x-= break_d  * inx ; 
   break_d  += dgemv_bs ; 
   __syncthreads();
 
@@ -266,7 +266,7 @@ l_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
 	Go Down 
   -------------------------------*/
   for(int i=break_d; i<n; i += dgemv_bs ){
-    buff[tx]  = x[i];
+    buff[tx]  = x[i*inx];
    #pragma unroll 8
     for(int j=0; j<dgemv_bs; j+=4)
        la[ty+j][tx] = A[ j * lda];
@@ -284,11 +284,11 @@ l_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
 	doing m_mod_32 stuffs here.
 	Symmetric is giving us benefit .. true
   -----------------------------------------------*/
-    x-=tx;
-    x+=n;
+    x-=tx * inx;
+    x+=n*inx;
     A-=tx;
     if( tx < m_mod_32){
-        buff[tx]  = x[tx];
+        buff[tx]  = x[tx*inx];
 	A+=tx;
     }
     else{
@@ -325,7 +325,7 @@ l_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
    ----------------------------------------------------------*/
    if( ty == 0 ) {
      res = res + la[tx][1]+ la[tx][2]+ la[tx][3] ;
-     y[ind] = beta * y[ind]  + alpha * res;
+     y[ind * iny] = beta * y[ind * iny]  + alpha * res;
    }
 
   }
@@ -333,7 +333,7 @@ l_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
 }
 
 __global__ void
-u_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , float beta ,  float *y , int ldy , int m_full_block , int m_mod_32){
+u_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int inx , float beta ,  float *y , int iny , int m_full_block , int m_mod_32){
 
   
   int tx = threadIdx.x ; 
@@ -358,7 +358,7 @@ u_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
 
   ind =  tx ;
   A+= lda*(n-1) ; 
-  x+= (n-1);
+  x+= (n-1)*inx;
 
 
        if  ( tx < m_mod_32 ){
@@ -367,7 +367,7 @@ u_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
        else{
 		A+= (  m_mod_32 -1) ; 
        }
-       x-=tx;
+       x-=tx*inx;
        A-= ty * lda  ;  
        int break_d  =   (blockIdx.x)* dgemv_bs ;
 
@@ -380,7 +380,7 @@ u_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
 	    for(int j=0; j < dgemv_bs ; j+=4){
 	        la[tx][ty+j] = A[-j*lda] ;
 	    }
-	    buff[tx]  = x[-i];
+	    buff[tx]  = x[-i*inx];
 	    __syncthreads();
 
 	    #pragma unroll 8 
@@ -395,7 +395,7 @@ u_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
           */
           if( ty==0  ) {
 		x-= ( break_d -tx ) ; 
-	        //buff[tx]  = x[i];
+	        //buff[tx]  = x[i*inx];
 		/*--------------------------------------------
 			he will compute the triangular parts
 			others will be waiting with values. 
@@ -407,12 +407,12 @@ u_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
 		else
 			count = m_mod_32 ;
 		for(j =0;j<count;j++){
-			res+= A[-j*lda] * x[-j];
+			res+= A[-j*lda] * x[-j*inx];
                 }
 		A-=(count-1)*lda;
 		count = 1 ; 
 		for(;j<m_mod_32;j++){
-			res+= A[-count] * x[-j];
+			res+= A[-count] * x[-j*inx];
 			count++;
 		}
           }
@@ -427,7 +427,7 @@ u_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
          if( ty == 0 ) {
              res = res + la[tx][1]+ la[tx][2]+ la[tx][3] ;
 	     if( tx < m_mod_32)
-                 y[ind] = beta * y[ind]  + alpha * res;
+                 y[ind *iny] = beta * y[ind *iny]  + alpha * res;
          }
 	 
   }
@@ -443,10 +443,10 @@ u_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
   float *A1 = A ; 
   float *x1 = x ; 
   A+= lda*(n-1)  ; 
-  x+= (n-1);
+  x+= (n-1)*inx;
 
   A += ind;
-  x -= tx ;
+  x -= tx * inx ;
   A-= ty * lda  ;  
 
   int break_d  = (n / dgemv_bs -   blockIdxx-1 )* dgemv_bs ;
@@ -458,7 +458,7 @@ u_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
     for(int j=0; j < dgemv_bs ; j+=4){
         la[tx][ty+j] = A[-j*lda] ;
     }
-    buff[tx]  = x[-i];
+    buff[tx]  = x[-i*inx];
     __syncthreads();
 
     #pragma unroll 8 
@@ -480,9 +480,9 @@ u_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
   }
 
   A-= dgemv_bs ;
-  x-= break_d ; 
+  x-= break_d *  inx ; 
   __syncthreads();
-  buff[31-tx]  = x[0];
+  buff[31-tx]  = x[0*inx];
   /*--------------------------------------------
 	Mirror Upper Triangle to Lower triangle
   ---------------------------------------------*/
@@ -503,7 +503,7 @@ u_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
     for(int j=0; j < dgemv_bs/4 ; j++){
      res+=la[tx][j+ty*8]*buff[j+ty*8];
     }
-  x+=break_d  ; 
+  x+=break_d * inx ; 
   break_d  += dgemv_bs ; 
   __syncthreads();
 
@@ -514,7 +514,7 @@ u_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
   -------------------------------*/
   int i ;
   for( i=break_d; i<n; i+= dgemv_bs ){
-    buff[31-tx]  = x[-i] ;
+    buff[31-tx]  = x[-i*inx] ;
    #pragma unroll 8
     for(int j=0; j<dgemv_bs; j+=4){
        la[ty+j][tx] = A[- j * lda];
@@ -535,7 +535,7 @@ u_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
    A1 = A1 + m_mod_32 * lda + tx *lda ;  
    if( ty == 0  ) {
 	for( int j = 0 ;  j < m_mod_32 ; j++){
-		res+= x1[j] * A1[ j + lda * (blockIdx.x) * 32 ];
+		res+= x1[j*inx] * A1[ j + lda * (blockIdx.x) * 32 ];
 	}
    }
     __syncthreads();
@@ -547,7 +547,7 @@ u_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
    ----------------------------------------------------------*/
    if( ty == 0 ) {
      res = res + la[tx][1]+ la[tx][2]+ la[tx][3] ;
-     y[ind] = beta * y[ind]  + alpha * res;
+     y[ind *iny] = beta * y[ind * iny]  + alpha * res;
    }
 
   }
@@ -560,7 +560,7 @@ u_ssymv_generic (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
 
 
 __global__ void
-u_ssymv_special (int n, float alpha ,  float* A, int lda, float *x, int ldx , float beta ,  float *y , int ldy ){
+u_ssymv_special (int n, float alpha ,  float* A, int lda, float *x, int inx , float beta ,  float *y , int iny ){
   int tx = threadIdx.x ; 
   int ty = threadIdx.y ; 
   int ind = blockIdx.x*  dgemv_bs + tx ;
@@ -574,13 +574,13 @@ u_ssymv_special (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
   */
 
   A+= lda*(n-1) ; 
-  x+= (n-1);
+  x+= (n-1) * inx ;
   __shared__ float buff [dgemv_bs];
   __shared__ float la   [dgemv_bs][dgemv_bs+1];
 
 
   A += ind;
-  x -= tx ;
+  x -= tx * inx ;
   A-= ty * lda  ;  
   int break_d  = (n / dgemv_bs -   blockIdx.x-1 )* dgemv_bs ;
 
@@ -589,7 +589,7 @@ u_ssymv_special (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
     for(int j=0; j < dgemv_bs ; j+=4){
         la[tx][ty+j] = A[-j*lda] ;
     }
-    buff[tx]  = x[-i];
+    buff[tx]  = x[-i*inx];
     __syncthreads();
 
     #pragma unroll 8 
@@ -611,9 +611,9 @@ u_ssymv_special (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
   */
 
   A-= dgemv_bs ;
-  x-= break_d ; 
+  x-= break_d * inx ; 
   __syncthreads();
-  buff[31-tx]  = x[0];
+  buff[31-tx]  = x[0*inx];
   #pragma unroll 8
   for(int  i=ty*8; i<(1+ty)* dgemv_bs/4 ; i++){
          if ( i <tx ){
@@ -630,14 +630,14 @@ u_ssymv_special (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
      res+=la[tx][j+ty*8]*buff[j+ty*8];
     }
 
- x+=break_d  ; 
+ x+=break_d *inx ; 
   break_d  += dgemv_bs ; 
   __syncthreads();
 
 
 
   for(int i=break_d; i<n; i+= dgemv_bs ){
-    buff[31-tx]  = x[-i] ;
+    buff[31-tx]  = x[-i*inx] ;
    #pragma unroll 8
     for(int j=0; j<dgemv_bs; j+=4)
        la[ty+j][tx] = A[ -j * lda];
@@ -657,7 +657,7 @@ u_ssymv_special (int n, float alpha ,  float* A, int lda, float *x, int ldx , fl
    __syncthreads();
    if( ty == 0 ) {
      res = res + la[tx][1]+ la[tx][2]+ la[tx][3] ;
-     y[ind] =  beta * y[ind]  + alpha * res;
+     y[ind *iny] =  beta * y[ind *iny]  + alpha * res;
    }
 
 }
@@ -709,13 +709,10 @@ Note:
 Interface ..................................
 */
 
-extern "C" void magmablas_ssymv (char uplo , int m , float alpha ,  float *A , int lda ,  float *X , int incx , float beta , float *Y , int incy )
+extern "C" void  magmablas_ssymv (char uplo , int m , float alpha ,  float *A , int lda ,  float *X , int incx , float beta , float *Y , int incy )
 {
 /*
-  Purpose
-  =======
-
-  SSYMV  performs the matrix-vector  operation
+  DSYMV  performs the matrix-vector  operation
 
      y := alpha*A*x + beta*y,
 
@@ -743,11 +740,11 @@ extern "C" void magmablas_ssymv (char uplo , int m , float alpha ,  float *A , i
            N must be at least zero.
            Unchanged on exit.
 
-  ALPHA  - REAL            .
+  ALPHA  - SINGLE PRECISION.
            On entry, ALPHA specifies the scalar alpha.
            Unchanged on exit.
 
-  A      - REAL             array of DIMENSION ( LDA, n ).
+  A      - SINGLE PRECISION array of DIMENSION ( LDA, n ).
            Before entry with  UPLO = 'U' or 'u', the leading n by n
            upper triangular part of the array A must contain the upper
            triangular part of the symmetric matrix and the strictly
@@ -764,7 +761,7 @@ extern "C" void magmablas_ssymv (char uplo , int m , float alpha ,  float *A , i
            max( 1, n ).
            Unchanged on exit.
 
-  X      - REAL             array of dimension at least
+  X      - SINGLE PRECISION array of dimension at least
            ( 1 + ( n - 1 )*abs( INCX ) ).
            Before entry, the incremented array X must contain the n
            element vector x.
@@ -775,12 +772,12 @@ extern "C" void magmablas_ssymv (char uplo , int m , float alpha ,  float *A , i
            X. INCX must not be zero.
            Unchanged on exit.
 
-  BETA   - REAL            .
+  BETA   - SINGLE PRECISION.
            On entry, BETA specifies the scalar beta. When BETA is
            supplied as zero then Y need not be set on input.
            Unchanged on exit.
 
-  Y      - REAL             array of dimension at least
+  Y      - SINGLE PRECISION array of dimension at least
            ( 1 + ( n - 1 )*abs( INCY ) ).
            Before entry, the incremented array Y must contain the n
            element vector y. On exit, Y is overwritten by the updated
@@ -794,4 +791,5 @@ extern "C" void magmablas_ssymv (char uplo , int m , float alpha ,  float *A , i
 */
         char side = 'a' ;
 	mssymv (side, uplo , m , alpha , A , lda , X , incx , beta , Y , incy );
+
 }
