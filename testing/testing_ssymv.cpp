@@ -141,6 +141,7 @@ int main(int argc, char **argv)
 	
                         start = get_current_time();
                         cublasSsymv('L' , m , 1.0,  dA , lda , dB , stride ,1.0,  dC , stridec );
+			//cublasSgemv('t', m, m, 1.0, dA, lda, dB, 1, 0., dC, 1);
 			end = get_current_time();
 		        cublas_time = GetTimerValue(start,end) ; 
 			cublasFree( dA );
@@ -176,6 +177,7 @@ int main(int argc, char **argv)
 	
                         start = get_current_time();
                         magmablas_ssymv( 'L' , m , 1.0,  dA , lda , dB , stride ,1.0,  dC , stridec );
+                        //magmablas_sgemvt(m, m, 1., dA, lda, dB, dC);
 			end = get_current_time();
 		        cublas_time = GetTimerValue(start,end) ; 
 			cublasFree( dA );

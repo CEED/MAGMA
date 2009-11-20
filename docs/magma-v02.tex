@@ -3106,9 +3106,104 @@ void magmablas_dgemm(char TRANSA, char TRANSB, int m, int n, int k, double alpha
 \section{Matrix-Vector Multiplication}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
-\subsection{Function {\tt {\bf magma\_smemv}}}
+\subsection{Function {\tt {\bf magma\_sgemv}}}
+
+\vspace{0.1in}
+\begin{verbatim}
+void magmablas_sgemv(int n, int m, float *A, int lda, float *x, float *z)
+
+    This routine computes z = A x on the GPU.
+
+    N      - (input) INTEGER.
+             On entry, N specifies the number of rows of the matrix A.
+
+    M      - (input) INTEGER.
+             On entry, M specifies the number of columns of the matrix A
+
+    A      - (input) SINGLE PRECISION array of dimension ( LDA, m ) on the GPU.
+
+    LDA    - (input) INTEGER.
+             LDA specifies the leading dimension of A.
+
+    X      - (input) SINGLE PRECISION array of dimension m.
+
+    Z      - (output) SINGLE PRECISION array of dimension m.
+             On exit Z = A X.
+
+
+
+
+void magmablas_sgemvt(int m, int n, float alpha, float *A, int lda,
+                      float *x, float *z)
+
+    This routine computes z = alpha A^t x on the GPU.
+
+    M      - (input) INTEGER.
+             On entry, N specifies the number of rows of the matrix A.
+
+    N      - (input) INTEGER.
+             On entry, M specifies the number of columns of the matrix A
+
+    A      - (input) SINGLE PRECISION array of dimension ( LDA, n ) on the GPU.
+
+    LDA    - (input) INTEGER.
+             LDA specifies the leading dimension of A.
+
+    X      - (input) SINGLE PRECISION array of dimension n.
+
+    Z      - (output) SINGLE PRECISION array of dimension n.
+             On exit Z = alpha A^t X.
+\end{verbatim}
+
 \newpage
 \subsection{Function {\tt {\bf magma\_dgemv}}}
+\vspace{0.1in}
+\begin{verbatim}
+void magmablas_dgemv(int n, int m, double *A, int lda, double *x, double *z)
+
+    This routine computes z = A x on the GPU.
+
+    N      - (input) INTEGER.
+             On entry, N specifies the number of rows of the matrix A.
+
+    M      - (input) INTEGER.
+             On entry, M specifies the number of columns of the matrix A
+
+    A      - (input) DOUBLE PRECISION array of dimension ( LDA, m ) on the GPU.
+
+    LDA    - (input) INTEGER.
+             LDA specifies the leading dimension of A.
+
+    X      - (input) DOUBLE PRECISION array of dimension m.
+
+    Z      - (output) DOUBLE PRECISION array of dimension m.
+             On exit Z = A X.
+
+
+
+
+void magmablas_dgemvt(int m, int n, double alpha, double *A, int lda,
+                      double *x, double *z)
+
+    This routine computes z = alpha A^t x on the GPU.
+
+    M      - (input) INTEGER.
+             On entry, N specifies the number of rows of the matrix A.
+
+    N      - (input) INTEGER.
+             On entry, M specifies the number of columns of the matrix A
+
+    A      - (input) SINGLE PRECISION array of dimension ( LDA, n ) on the GPU.
+
+    LDA    - (input) INTEGER.
+             LDA specifies the leading dimension of A.
+
+    X      - (input) DOUBLE PRECISION array of dimension n.
+
+    Z      - (output) DOUBLE PRECISION array of dimension n.
+             On exit Z = alpha A^t X.
+\end{verbatim}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
@@ -3722,6 +3817,28 @@ would be a multiple of 32.
           \includegraphics[angle=-90,scale=0.7]{cholesky-solve-v0.2.ps}
           %\includegraphics[width=5in]{dp-gpu.jpg}
           \caption{Performance of Cholesky-based linear solvers.}
+       \label{cholesky-solvers}
+       \end{figure}
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Hessenberg reduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+       \begin{figure}[!ht]
+          \centering
+          \hspace{-5mm}
+          \includegraphics[angle=-90,scale=0.7]{sp-hess.ps}
+          %\includegraphics[width=5in]{dp-gpu.jpg}
+          \caption{Single precision MAGMA {\it vs} MKL}
+       \label{cholesky-solvers}
+       \end{figure}
+
+       \begin{figure}[!ht]
+          \centering
+          \hspace{-5mm}
+          \includegraphics[angle=-90,scale=0.7]{dp-hess.ps}
+          %\includegraphics[width=5in]{dp-gpu.jpg}
+          \caption{Double precision MAGMA {\it vs} MKL}
        \label{cholesky-solvers}
        \end{figure}
 

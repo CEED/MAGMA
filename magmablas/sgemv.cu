@@ -290,10 +290,103 @@ sgemvt_kernel2(int n, int m, float alpha,
   }
 }
 
+extern "C" void
+magmablas_sgemvt1(int m, int n, float alpha, float *A, int lda,
+                  float *x, float *z)
+{
+/*  -- MAGMA (version 0.2) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2009
 
+    Purpose
+    =======
+
+    This routine computes z = alpha A^t x on the GPU. 
+    Recommended for large M and N.
+
+    M      - (input) INTEGER.
+             On entry, N specifies the number of rows of the matrix A.
+
+    N      - (input) INTEGER.
+             On entry, M specifies the number of columns of the matrix A
+
+    A      - (input) SINGLE PRECISION array of dimension ( LDA, n ) on the GPU.
+
+    LDA    - (input) INTEGER.
+             LDA specifies the leading dimension of A.
+
+    X      - (input) SINGLE PRECISION array of dimension n.
+
+    Z      - (output) SINGLE PRECISION array of dimension n.
+             On exit Z = alpha A^t X.
+
+    ===================================================================== */
+    int blocks;
+
+    if (n % 32==0)
+        blocks = n/32;
+    else
+        blocks = n/32 + 1;
+
+    dim3 grid(blocks, 1, 1);
+    dim3 threads(32, 2, 1);
+
+    sgemvt_kernel1<<<grid, threads>>>(m, n, alpha, (m / sgemv_bs)*sgemv_bs,
+                                      A, lda, x, z);
+}
 
 extern "C" void
-magmablas_sgemvt(int n, int m, float alpha, float *A, int lda, 
+magmablas_sgemvt2(int m, int n, float alpha, float *A, int lda,
+                  float *x, float *z)
+{
+/*  -- MAGMA (version 0.2) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2009
+
+    Purpose
+    =======
+
+    This routine computes z = alpha A^t x on the GPU. Used in least squares 
+    solver for N small (e.g. = BS, a block size of order 64, 128, etc).
+
+    M      - (input) INTEGER.
+             On entry, N specifies the number of rows of the matrix A.
+
+    N      - (input) INTEGER.
+             On entry, M specifies the number of columns of the matrix A
+
+    A      - (input) SINGLE PRECISION array of dimension ( LDA, n ) on the GPU.
+
+    LDA    - (input) INTEGER.
+             LDA specifies the leading dimension of A.
+
+    X      - (input) SINGLE PRECISION array of dimension n.
+
+    Z      - (output) SINGLE PRECISION array of dimension n.
+             On exit Z = alpha A^t X.
+
+    ===================================================================== */
+
+    int blocks;
+
+    if (n % 16==0)
+        blocks = n/16;
+    else
+        blocks = n/16 + 1;
+
+    dim3 grid(blocks, 1, 1);
+    dim3 threads(16, 4, 1);
+
+    sgemvt_kernel2<<<grid, threads>>>(m, n, alpha, (m / 32)*32,
+                                      A, lda, x, z);
+}
+
+extern "C" void
+magmablas_sgemvt(int m, int n, float alpha, float *A, int lda, 
                  float *x, float *z)
 {
 /*  -- MAGMA (version 0.2) --
@@ -307,13 +400,13 @@ magmablas_sgemvt(int n, int m, float alpha, float *A, int lda,
 
     This routine computes z = alpha A^t x on the GPU.
 
-    N      - (input) INTEGER.
+    M      - (input) INTEGER.
              On entry, N specifies the number of rows of the matrix A.
 
-    M      - (input) INTEGER.
+    N      - (input) INTEGER.
              On entry, M specifies the number of columns of the matrix A
 
-    A      - (input) SINGLE PRECISION array of dimension ( LDA, m ) on the GPU.
+    A      - (input) SINGLE PRECISION array of dimension ( LDA, n ) on the GPU.
 
     LDA    - (input) INTEGER.
              LDA specifies the leading dimension of A.
@@ -325,29 +418,10 @@ magmablas_sgemvt(int n, int m, float alpha, float *A, int lda,
 
     ===================================================================== */
 
-    int blocks;
-/*
-    if (m % 32==0)
-        blocks = m/32;
+    if (n<=128)
+      magmablas_sgemvt2(m, n, alpha, A, lda, x, z);
     else
-        blocks = m/32 + 1;
-
-    dim3 grid(blocks, 1, 1);
-    dim3 threads(32, 2, 1);
-
-    sgemvt_kernel1<<<grid, threads>>>(n, m, alpha, (n / sgemv_bs)*sgemv_bs,
-                                     A, lda, x, z);
-*/
-    if (m % 16==0)
-        blocks = m/16;
-    else
-        blocks = m/16 + 1;
-
-    dim3 grid(blocks, 1, 1);
-    dim3 threads(16, 4, 1);
-
-    sgemvt_kernel2<<<grid, threads>>>(n, m, alpha, (n / 32)*32,
-                                      A, lda, x, z);
+      magmablas_sgemvt1(m, n, alpha, A, lda, x, z);
 }
 
 #undef num_threads

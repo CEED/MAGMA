@@ -51,6 +51,8 @@ void magmablas_ctrmm(char, char, char, char, int, int, float2,
 
 void magmablas_sgemv(int, int, float *, int, float *, float *);
 void magmablas_sgemvt(int,int,float,float *,int,float *,float *);
+void magmablas_sgemvt1(int,int,float,float *,int,float *,float *);
+void magmablas_sgemvt2(int,int,float,float *,int,float *,float *);
 void magmablas_dgemv(int, int, double *, int, double *, double *);
 void magmablas_dgemvt(int,int,double,double *,int,double *,double *);
 

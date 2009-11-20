@@ -198,6 +198,8 @@ dgemvt_kernel2(int n, int m, double alpha,
 
   A += ind;
   x += ind2;
+  if (ind2>31)
+     ind2-=32;
 
   double res = 0.f;
 
@@ -277,7 +279,101 @@ dgemvt_kernel2(int n, int m, double alpha,
 }
 
 extern "C" void
-magmablas_dgemvt(int n, int m, double alpha, double *A, int lda,
+magmablas_dgemvt1(int m, int n, double alpha, double *A, int lda,
+                  double *x, double *z)
+{
+/*  -- MAGMA (version 0.2) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2009
+
+    Purpose
+    =======
+
+    This routine computes z = alpha A^t x on the GPU.
+    Recommended for large M and N.
+
+    M      - (input) INTEGER.
+             On entry, N specifies the number of rows of the matrix A.
+
+    N      - (input) INTEGER.
+             On entry, M specifies the number of columns of the matrix A
+
+    A      - (input) DOUBLE PRECISION array of dimension ( LDA, n ) on the GPU.
+
+    LDA    - (input) INTEGER.
+             LDA specifies the leading dimension of A.
+
+    X      - (input) DOUBLE PRECISION array of dimension n.
+
+    Z      - (output) DOUBLE PRECISION array of dimension n.
+             On exit Z = alpha A^t X.
+
+    ===================================================================== */
+    int blocks;
+
+    if (n % 32==0)
+        blocks = n/32;
+    else
+        blocks = n/32 + 1;
+
+    dim3 grid(blocks, 1, 1);
+    dim3 threads(32, 2, 1);
+    dgemvt_kernel1<<<grid, threads>>>(m, n, alpha, (m / dgemv_bs)*dgemv_bs,
+                                      A, lda, x, z);
+}
+
+extern "C" void
+magmablas_dgemvt2(int m, int n, double alpha, double *A, int lda,
+                  double *x, double *z)
+{
+/*  -- MAGMA (version 0.2) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2009
+
+    Purpose
+    =======
+
+    This routine computes z = alpha A^t x on the GPU. Used in least squares
+    solver for N small (e.g. = BS, a block size of order 64, 128, etc).
+
+    M      - (input) INTEGER.
+             On entry, N specifies the number of rows of the matrix A.
+
+    N      - (input) INTEGER.
+             On entry, M specifies the number of columns of the matrix A
+
+    A      - (input) DOUBLE PRECISION array of dimension ( LDA, n ) on the GPU.
+
+    LDA    - (input) INTEGER.
+             LDA specifies the leading dimension of A.
+
+    X      - (input) DOUBLE PRECISION array of dimension n.
+
+    Z      - (output) DOUBLE PRECISION array of dimension n.
+             On exit Z = alpha A^t X.
+
+    ===================================================================== */
+
+    int blocks;
+
+    if (n % 16==0)
+        blocks = n/16;
+    else
+        blocks = n/16 + 1;
+
+    dim3 grid(blocks, 1, 1);
+    dim3 threads(16, 4, 1);
+
+    dgemvt_kernel2<<<grid, threads>>>(m, n, alpha, (m / 32)*32,
+                                      A, lda, x, z);
+}
+
+extern "C" void
+magmablas_dgemvt(int m, int n, double alpha, double *A, int lda,
                  double *x, double *z)
 {
 /*  -- MAGMA (version 0.2) --
@@ -286,18 +382,18 @@ magmablas_dgemvt(int n, int m, double alpha, double *A, int lda,
        Univ. of Colorado, Denver
        November 2009
 
-	Purpose
+    Purpose
     =======
 
     This routine computes z = alpha A^t x on the GPU.
 
-    N      - (input) INTEGER.
+    M      - (input) INTEGER.
              On entry, N specifies the number of rows of the matrix A.
 
-    M      - (input) INTEGER.
+    N      - (input) INTEGER.
              On entry, M specifies the number of columns of the matrix A
 
-    A      - (input) SINGLE PRECISION array of dimension ( LDA, m ) on the GPU.
+    A      - (input) SINGLE PRECISION array of dimension ( LDA, n ) on the GPU.
 
     LDA    - (input) INTEGER.
              LDA specifies the leading dimension of A.
@@ -309,29 +405,10 @@ magmablas_dgemvt(int n, int m, double alpha, double *A, int lda,
 
     ===================================================================== */
 
-    int blocks;
-/*
-    if (m % 32==0)
-        blocks = m/32;
+    if (n<=128)
+      magmablas_dgemvt2(m, n, alpha, A, lda, x, z);
     else
-        blocks = m/32 + 1;
-
-    dim3 grid(blocks, 1, 1);
-    dim3 threads(32, 2, 1);
-
-    dgemvt_kernel1<<<grid, threads>>>(n, m, alpha, (n / dgemv_bs)*dgemv_bs,
-                                     A, lda, x, z);
-*/
-    if (m % 16==0)
-        blocks = m/16;
-    else
-        blocks = m/16 + 1;
-
-    dim3 grid(blocks, 1, 1);
-    dim3 threads(16, 4, 1);
-
-    dgemvt_kernel2<<<grid, threads>>>(n, m, alpha, (n / 32)*32,
-                                      A, lda, x, z);
+      magmablas_dgemvt1(m, n, alpha, A, lda, x, z);
 }
 
 #undef num_threads
