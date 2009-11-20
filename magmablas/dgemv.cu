@@ -193,6 +193,8 @@ dgemvt_kernel2(int n, int m, double alpha,
   int ind  = iny + __mul24(blockIdx.x,16);
   ind = inx + __mul24(ind,lda);
   int ind2 = inx + __mul24(iny,16);
+  if (ind2>31)
+     ind2-=32;
 
   A += ind;
   x += ind2;

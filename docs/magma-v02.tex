@@ -3515,27 +3515,28 @@ added (shown in the examples).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Directory {\tt magma/testing} has drivers that test and show how
 to use every function of this distribution. Below is an example
-showing the output of the {\tt sgetrf} driver.
+showing the output of the {\tt sgetrf\_gpu} driver.
 
 \begin{verbatim}
-> ./testing_sgetrf
+> ./testing_sgetrf_gpu
 Using device 0: GeForce GTX 280
 
 Usage: 
-  testing_sgetrf -N 1024
+  testing_sgetrf_gpu -N 1024
 
   N    CPU GFlop/s    GPU GFlop/s    ||PA-LU|| / (||A||*N)
 ==========================================================
- 1024     33.26          42.77         1.861593e-09
- 2048     52.29          96.06         1.722339e-09
- 3072     64.03         146.33         1.411851e-09
- 4032     80.60         195.44         1.371482e-09
- 5184     86.65         224.92         1.332554e-09
- 6016     91.66         240.33         1.331916e-09
- 7040     96.02         255.51         1.306940e-09
- 8064     99.88         267.17         1.391934e-09
- 9088    101.18         276.59         1.549758e-09
-10112    104.38         284.30         1.661756e-09
+ 1024     34.36          45.92         1.861593e-09
+ 2048     52.85         105.63         1.722339e-09
+ 3072     64.19         162.94         1.411851e-09
+ 4032     80.45         225.07         1.384447e-09
+ 5184     86.43         260.74         1.346531e-09
+ 6016     91.01         277.32         1.341646e-09
+ 7040     95.62         292.25         1.322844e-09
+ 8064     99.71         302.55         1.388576e-09
+ 9088    101.09         310.33         1.554564e-09
+10112    103.65         316.23         1.660534e-09
+
 
 \end{verbatim}
 
@@ -3546,18 +3547,18 @@ corresponding algorithm. The block sizes will be auto-tuned
 in future releases. Currently, the user can change them through
 file {\tt get\_nb.cpp} to manually tune the performance for 
 specific hardware and software settings. 
-The issue for matrix sizes not divisible by the block size 
-will be addressed in future MAGMA releases (currently due
-to CUBLAS being slower for those cases).
+Some of the performance issues related to matrix sizes not 
+divisible by the block size are addressed on BLAS level
+(thorough MAGMA BLAS). It still needs improvements though:
 
 \begin{verbatim}
-> ./testing_sgetrf -N 1026
+> ./testing_sgetrf_gpu -N 5000
 Using device 0: GeForce GTX 280
 
 
   N    CPU GFlop/s    GPU GFlop/s    ||PA-LU|| / (||A||*N)
 ==========================================================
- 1026     32.93          41.09         1.834303e-09
+ 5000     86.58         230.94         1.340746e-09
 \end{verbatim}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
