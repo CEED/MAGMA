@@ -2484,12 +2484,51 @@ int magma_dsposv_gpu(char UPLO, int N, int NRHS, double *A,int LDA, double *B,
              Work array allocated with cudaMallocHost.
 \end{verbatim}
 
-
+\normalsize
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \section{Two-sided matrix factorizations}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\vspace{0.1in}
+As the one-sided matrix factorizations are the bases for various linear 
+solvers, the two-sided matrix factorizations are the bases for eigen-solvers,
+and therefore form an important class of dense linear algebra routines.
+The two-sided factorizations have been traditionally more difficult to 
+handle/accelerate on current architectures. The reason is that the two-sided
+factorizations involve large matrix-vector products which are memory bound,
+and as the gap between compute and communication power increases exponentially,
+these memory bound operations become an increasingly more difficult to handle
+bottleneck. GPUs though offer an attractive possibility way to accelerate them.
+Indeed, having a high bandwidth (e.g. $10 \times$ larger than current CPU
+bus bandwidths), GPUs can accelerate matrix-vector products significantly 
+($10$ to $30 \times$). Having this important component, it's just a matter 
+on how to organize the computation into a hybrid fashion. An approach
+similar to the one for one-sided factorizations is used (see Figure
+\ref{PerformanceHR} for an illustration of the performance to be expected 
+and \cite{lawn219} for further detail).
+
+\vspace{0.1in}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=3in]{HR-DP-v0.2.ps}
+\caption{Performance (in double precision) for the hybrid reduction to 
+             upper Hessenberg form}
+\label{PerformanceHR}
+\end{figure}
+
+\vspace{0.1in}
+This release provides implementations for the reduction to upper Hessenberg
+form in single and double precision real arithmetic. Various highly optimized
+matrix-vector multiplications have been developed as needed for the other
+two-sided factorizations. Combining these kernels with the hybrid approach 
+from the Hessenberg reduction, indicates the rest of the two-sided 
+factorizations can be similarly developed to yield large performance
+improvements ({\it vs} algorithms for just homogeneous multicore architectures).
+
+
+
+\footnotesize
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \subsection{Function {\tt {\bf magma\_sgehrd}}}
