@@ -67,28 +67,28 @@ int main(int argc , char **argv){
 
 
  int printall = 0 ;
- FILE *fp ;
- fp = fopen("results_dsgesv.txt","w");
- if( fp == NULL ) return 1;
+ //FILE *fp ;
+ //fp = fopen("results_dsgesv.txt","w");
+ //if( fp == NULL ) return 1;
  printf("Iterative Refinement- LU \n");
- fprintf(fp, "Iterative Refinement- LU \n");
+ //fprintf(fp, "Iterative Refinement- LU \n");
     printf("\n");
     printout_devices( );
  
     printf("\nUsage:\n\t\t ./testing_dsgesv N");
-    fprintf(fp, "\nUsage:\n\t\t ./testing_dsgesv N");
+    //fprintf(fp, "\nUsage:\n\t\t ./testing_dsgesv N");
   //printf("Iterative Refinement\n");
   //fprintf(fp,"Iterative Refinement\n");
   
  printf("\n\nEpsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
- fprintf(fp, "\nEpsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
+ //fprintf(fp, "\nEpsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
 
   TimeStruct start, end;
  int LEVEL=1;
   printf("\n\nN\tDouble-Factor\tDouble-Solve\tSingle-Factor\tSigle-Solve\tMixed Precision Solver\t || b-Ax || / ||A||  \t NumIter\n");
-  fprintf(fp, "\n\nN\tDouble-Factor\tDouble-Solve\tSingle-Factor\tSigle-Solve\tMixed Precision Solver\t || b-Ax || / ||A||\t NumIter\n");
+  //fprintf(fp, "\n\nN\tDouble-Factor\tDouble-Solve\tSingle-Factor\tSigle-Solve\tMixed Precision Solver\t || b-Ax || / ||A||\t NumIter\n");
   printf("===========================================================================================================================================================\n"); 
-  fprintf(fp,"===========================================================================================================================================================\n"); 
+  //fprintf(fp,"===========================================================================================================================================================\n"); 
 
   int i ;
    int sizetest[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
@@ -324,7 +324,7 @@ int main(int argc , char **argv){
     int PTSX = 0 , PTSA = maxnb*N*NRHS ;
 
     printf("%5d",N); 
-    fprintf(fp,"%5d",N); 
+    //fprintf(fp,"%5d",N); 
 
 
     cublasSetMatrix( N, N, sizeof( double ), A, N, d_A, LDA ) ;
@@ -372,7 +372,7 @@ int main(int argc , char **argv){
     end = get_current_time();
     perf = (2.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
     printf("\t%6.2f", perf);
-    fprintf(fp,"\t%6.2f", perf);
+    //fprintf(fp,"\t%6.2f", perf);
     cublasGetMatrix( N, NRHS, sizeof( double ), d_B, N, res_, N ) ;
 
 
@@ -385,7 +385,7 @@ int main(int argc , char **argv){
     end = get_current_time();
     perf = (2.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
     printf("\t\t%6.2f", perf);
-    fprintf(fp,"\t\t%6.2f", perf);
+    //fprintf(fp,"\t\t%6.2f", perf);
     cublasGetMatrix( N, NRHS, sizeof( double ), d_B, N, res_, N ) ;
 
     //=====================================================================
@@ -398,7 +398,7 @@ int main(int argc , char **argv){
     end = get_current_time();
     perf = (2.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
     printf("\t\t%6.2f", perf);
-    fprintf(fp,"\t\t%6.2f", perf);
+    //fprintf(fp,"\t\t%6.2f", perf);
 
     start = get_current_time();
     magma_sgetrf_gpu2(&N, &N,M_SWORK+PTSA, &LDA,IPIV, DIPIV, h_work_M_S, INFO);
@@ -406,17 +406,17 @@ int main(int argc , char **argv){
     end = get_current_time();
     perf = (2.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
     printf("\t\t%6.2f", perf);
-    fprintf(fp,"\t\t%6.2f", perf);
+    //fprintf(fp,"\t\t%6.2f", perf);
 
     
     printf("\t\t\t%6.2f", lperf);
-    fprintf(fp,"\t\t\t%6.2f", lperf);
+    //fprintf(fp,"\t\t\t%6.2f", lperf);
 
     printf("\t\t\t%e\t%3d", Rnorm/Anorm, iter_GPU);
-    fprintf(fp, "\t\t\t%e\t%3d", Rnorm/Anorm, iter_GPU);
+    //fprintf(fp, "\t\t\t%e\t%3d", Rnorm/Anorm, iter_GPU);
 
     printf("\n");
-    fprintf(fp,"\n");
+    //fprintf(fp,"\n");
 
     if( once != 0 ) break ; 
 
@@ -465,6 +465,6 @@ FREE3:
 FREE2:
     cublasFree(d_A);
 FREE1:
-    fclose(fp);
+    //fclose(fp);
     cublasShutdown();
 }
