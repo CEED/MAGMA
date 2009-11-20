@@ -2740,10 +2740,10 @@ int magma_dgehrd(int *n, int *ilo, int *ihi, double *a, int *lda,
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
-\subsection{Function {\tt {\bf magmablasSgemm}}}
+\subsection{Function {\tt {\bf magmablas_sgemm}}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
-int magmablasSgemm(char TRANSA, char TRANSB, int m , int n, int k, float alpha,
+int magmablas_sgemm(char TRANSA, char TRANSB, int m , int n, int k, float alpha,
                    const float *A, int lda, const float *B, int ldb, float beta,
                    float *C, int ldc)
 
@@ -2840,10 +2840,10 @@ int magmablasSgemm(char TRANSA, char TRANSB, int m , int n, int k, float alpha,
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
-\subsection{Function {\tt {\bf magmablasDgemm}}}
+\subsection{Function {\tt {\bf magmablas_dgemm}}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
-int magmablasDgemm(char TRANSA, char TRANSB, int m, int n, int k, double alpha,
+int magmablas_dgemm(char TRANSA, char TRANSB, int m, int n, int k, double alpha,
                    const double *A, int lda, const double *B, int ldb, 
                    double beta, double *C, int ldc)
  
@@ -2955,10 +2955,10 @@ int magmablasDgemm(char TRANSA, char TRANSB, int m, int n, int k, double alpha,
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
-\subsection{Function {\tt {\bf magma\_ssymv}}}
+\subsection{Function {\tt {\bf magmablas\_ssymv}}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
-int magma_ssymv(char uplo, int m, float alpha, float *A, int lda, float *X, 
+int magmablas_ssymv(char uplo, int m, float alpha, float *A, int lda, float *X, 
                  int incx, float beta, float *Y, int incy)
 
     SSYMV  performs the matrix-vector  operation
@@ -3032,10 +3032,10 @@ int magma_ssymv(char uplo, int m, float alpha, float *A, int lda, float *X,
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
-\subsection{Function {\tt {\bf magma\_dsymv}}}
+\subsection{Function {\tt {\bf magmablas\_dsymv}}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{verbatim}
-int magma_dsymv(char uplo, int m, double alpha, double *A, int lda, double *X,
+int magmablas_dsymv(char uplo, int m, double alpha, double *A, int lda, double *X,
                 int incx, double beta, double *Y, int incy)
 
     DSYMV  performs the matrix-vector  operation
