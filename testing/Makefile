@@ -67,7 +67,7 @@ all: $(EXE)
 $(EXE): $(OBJ)
 
 clean:
-	rm -f $(OBJ) $(EXE) *~
+	rm -f $(OBJ) $(EXE) *.o *~
 
 .cpp.o:
 	$(CC) $(OPTS) $(INC) -c $< -o $@

@@ -7,6 +7,7 @@ make clean
 cd ../
 cp -r testing magma_0.2s/
 rm magma_0.2s/testing/compile
+rm magma_0.2s/testing/*.bak
 cd src
 make clean
 cd ..
@@ -15,15 +16,22 @@ rm magma_0.2s/src/spotrf.cpp.nonnb
 rm magma_0.2s/src/spotrf_cpu.cpp.asyn
 rm magma_0.2s/src/sgeqrf.cpp.nonnb
 rm magma_0.2s/src/sgeqrf_gpu.cpp.bak
+rm magma_0.2s/src/*.bak
 cd magmablas
 make clean
 cd ..
 cp -r magmablas	magma_0.2s/
 cp -r include magma_0.2s/
 mkdir magma_0.2s/docs
-cp docs/magma.pdf magma_0.2s/docs/
+cp docs/magma-v02.pdf magma_0.2s/docs/
 cp make.inc make.inc.atlas make.inc.mkl make.inc.goto make.inc.acml magma_0.2s/
 cp Makefile magma_0.2s/Makefile
 cp COPYRIGHT magma_0.2/
+rm -rf magma_0.2s/lib/.svn
+rm -rf magma_0.2s/include/gnu/.svn
+rm -rf magma_0.2s/include/.svn
+rm -rf magma_0.2s/magmablas/.svn
+rm -rf magma_0.2s/testing/.svn
+rm -rf magma_0.2s/testing/lin/.svn
 tar cvf magma_0.2s.tar magma_0.2s
 gzip magma_0.2s.tar
