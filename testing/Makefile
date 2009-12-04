@@ -52,11 +52,13 @@ include ../make.inc
           testing_sgesv_gpu.cpp \
           testing_dsposv_gpu.cpp \
           testing_dgemm.cpp \
+          testing_dtrsm.cpp \
           testing_sgemm.cpp \
           testing_dsymv.cpp \
           testing_dgemv.cpp \
           testing_ssymv.cpp \
           testing_sgemv.cpp \
+          testing_strsm.cpp \
           \
 
     OBJ = $(SRC:.cpp=.o)
