@@ -65,9 +65,9 @@ int main(int argc, char** argv)
 	int lda, ldb;
 	TimeStruct start, end;
 
-	from = 512;
-	step = 256;
-	to = 4096;
+	from = 500;
+	step = 233;
+	to = 5000;
 	
 	side = 'L';
 	uplo = 'L';
@@ -132,11 +132,11 @@ int main(int argc, char** argv)
 #ifdef tallskinny
 		for (n=from; n<=to; n+=step)
 		{
-			m = BLOCK_SIZE;
+			m = 2*BLOCK_SIZE+13;
 #else		
 		for (m=from; m<=to; m+=step)
 		{
-			n = BLOCK_SIZE;
+			n = 2*BLOCK_SIZE+13;
 #endif
 			n2 = n*n;
 			srand (n);
@@ -199,11 +199,11 @@ int main(int argc, char** argv)
 #ifndef tallskinny
 		for (m=from; m<=to; m+=step)
 		{
-			n = BLOCK_SIZE; 
+			n = 2*BLOCK_SIZE+13; 
 #else		
 		for (n=from; n<=to; n+=step)
 		{
-			m = BLOCK_SIZE;
+			m = 2*BLOCK_SIZE+13;
 #endif
 			m2 = m*m;
 			srand (m*m);
