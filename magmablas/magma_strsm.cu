@@ -693,7 +693,7 @@ inplace_sgemm (char tran, int M, int N, float alpha, float *A, int lda, float *B
 			if (tran == 'n' || tran == 'N')
 				inplace_sgemm_kernel2_N<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb); 
 			else
-				inplace_sgemm_kernel2_T<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb);	// wrong for now, should be _T
+				inplace_sgemm_kernel2_T<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb);
 		}
 	}
 	else
@@ -706,7 +706,7 @@ inplace_sgemm (char tran, int M, int N, float alpha, float *A, int lda, float *B
 				inplace_sgemm_kernel3_N<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb); 
 			}
 			else
-				inplace_sgemm_kernel3_T<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb);	// wrong for now, should be _T
+				inplace_sgemm_kernel3_T<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb);
 		}
 		else
 		{
