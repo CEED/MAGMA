@@ -225,7 +225,7 @@ magma_slahr2(int *n, int *k, int *nb,
 			d_a -1 + *k + i__ *ldda, ldda, 
 			d_v+(i__-1)*(ldda+1), 
 			d_a -1 + *k + (i__-1)*ldda);
-	
+	 
 	i__2 = *n - *k - i__ + 1;
 	i__3 = i__ - 1;
 	sgemv_("T", &i__2, &i__3, &c_b5, &a[*k + i__ + a_dim1], lda,

@@ -11,6 +11,8 @@
 #include "magma.h"
 #include <stdio.h>
 
+#define cublasSgemm magmablas_sgemm
+
 extern "C" int
 magma_slahru(int n, int k, int nb, float *a, int lda,
 	     float *d_a, float *y, float *v, float *t, float *d_work)
