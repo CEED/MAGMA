@@ -178,7 +178,6 @@ magma_sgeqrf_gpu3(int *m, int *n, float *a, int  *lda,  float  *tau,
         sq_to_panel('U', ib, work_ref(i), ldwork, hwork+ib*ib);
 
 	nb = magma_get_sgeqrf_nb(k-i);
-	//printf("%4d %4d\n", i, nb);
 	if (i + ib < *n) {
 	  // send T to the GPU
 	  cublasSetMatrix(ib, ib, sizeof(float), hwork, ib, dwork, lddwork);
@@ -187,10 +186,6 @@ magma_sgeqrf_gpu3(int *m, int *n, float *a, int  *lda,  float  *tau,
 	  if (i+ib < k-nx)
 	    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
 	    // if we can do one more step, first update T1
-	    /*
-	    magma_slarfb('F', 'C', rows, ib, &ib, a_ref(i,i), lda, dwork,
-			 &lddwork, a_ref(i,i+ib), lda, dwork+ib, &lddwork);
-	    */
 	    magma_slarfb('F', 'C', rows, nb, &ib, a_ref(i,i), lda, dwork,
                          &lddwork, a_ref(i,i+ib), lda, dwork+ib, &lddwork);
 	  else {
@@ -203,8 +198,6 @@ magma_sgeqrf_gpu3(int *m, int *n, float *a, int  *lda,  float  *tau,
 	  old_i = i;
 	  old_ib = ib;
 	}
-	// TTT
-	//nb = magma_get_sgeqrf_nb(k-i);
       }  
    } else {
      i = 0;
