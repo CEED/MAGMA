@@ -101,7 +101,7 @@ magma_sssrfb(int m, int n, int *k, float *dv, int *ldv, float *dt, int *ldt,
 
   /* 3. (dwork+k) = T dwork 
         T is triangular, assumed to have 0s in the unused part */
-  cublasSgemm('n', 'n', *k, n, *k, 1.f, dt, *ldt, dwork, *ldwork,
+  cublasSgemm('t', 'n', *k, n, *k, 1.f, dt, *ldt, dwork, *ldwork,
 	      0.f, dwork+(*k), *ldwork);
 
   /* 4. A1 = A1 - (dwork+k)
