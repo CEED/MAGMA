@@ -3,8 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       Dec 2009
-	   Peng Du
+       October 2009
 */
 
 #include "cublas.h"
@@ -29,7 +28,7 @@ inplace_sgemm_kernel2_N(int M, int N, float alpha, float *A, int lda, float *B, 
         int tx = threadIdx.x;
         int ty = threadIdx.y;
         const int bx = blockIdx.x;
-        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
+        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE+1];
         __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
 	
 
@@ -89,7 +88,7 @@ inplace_sgemm_kernel2_T(int M, int N, float alpha, float *A, int lda, float *B, 
         int tx = threadIdx.x;
         int ty = threadIdx.y;
         const int bx = blockIdx.x;
-        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
+        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE+1];
         __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
 
         A+= bx*32 + __mul24(lda,ty) + tx ;
@@ -146,7 +145,7 @@ inplace_sgemm_kernel3_T(int M, int N, float alpha, float *A, int lda, float *B, 
         int tx = threadIdx.x;
         int ty = threadIdx.y;
         const int bx = blockIdx.x;
-        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
+        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE+1];
         __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
 
         A+= bx*32 + __mul24(lda,ty) + tx ;
@@ -217,7 +216,7 @@ inplace_sgemm_kernel1_T(int M, int N, float alpha, float *A, int lda, float *B, 
         int tx = threadIdx.x;
         int ty = threadIdx.y;
         const int bx = blockIdx.x;
-        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
+        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE+1];
         __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
 		int swm = (M%BLOCK_SIZE==0);
 
@@ -321,7 +320,7 @@ inplace_sgemm_kernel0_T(int M, float alpha, float *A, int lda, float *B, int ldb
         int tx = threadIdx.x;
         int ty = threadIdx.y;
         const int bx = blockIdx.x;
-        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
+        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE+1];
         __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
 
         A+= bx*32 + __mul24(lda,ty) + tx ;
@@ -364,7 +363,7 @@ inplace_sgemm_kernel3_N(int M, int N, float alpha, float *A, int lda, float *B, 
         int tx = threadIdx.x;
         int ty = threadIdx.y;
         const int bx = blockIdx.x;
-        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
+        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE+1];
         __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
 	
         A+= bx*32 + __mul24(lda,ty) + tx ;
@@ -439,7 +438,7 @@ inplace_sgemm_kernel1_N(int M, int N, float alpha, float *A, int lda, float *B, 
         int tx = threadIdx.x;
         int ty = threadIdx.y;
         const int bx = blockIdx.x;
-        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
+        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE+1];
         __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
 		int swm = (M%BLOCK_SIZE==0);
 	
@@ -544,7 +543,7 @@ inplace_sgemm_kernel0_N(int M, float alpha, float *A, int lda, float *B, int ldb
         int tx = threadIdx.x;
         int ty = threadIdx.y;
         const int bx = blockIdx.x;
-        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
+        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE+1];
         __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
 
         A+= bx*32 + __mul24(lda,ty) + tx ;
@@ -575,7 +574,69 @@ inplace_sgemm_kernel0_N(int M, float alpha, float *A, int lda, float *B, int ldb
 }
 
 __global__ void
-diag_strtri_kernel (char uplo, char diag, float *A, float *d_dinvA, int lda)
+diag_strtri_kernel_upper (char diag, float *A, float *d_dinvA, int lda)
+{
+	int i,j;
+	float Ystx=0;
+	float *y=NULL, *Aoff=NULL;
+	float *my_d_dinvA;
+	int switcher=0;
+
+	// Thread index
+	int tx = threadIdx.x;
+
+	// Block index
+	int bx = blockIdx.x;
+		
+	Aoff = A+bx*lda*BLOCK_SIZE+bx*BLOCK_SIZE;
+	my_d_dinvA = d_dinvA+bx*BLOCK_SIZE*BLOCK_SIZE;
+
+	__shared__ float Bs[BLOCK_SIZE*BLOCK_SIZE];
+	__shared__ float workspace[BLOCK_SIZE]; // workspace used to store the current working column
+
+	// load A
+	#pragma unroll
+	for (i=0; i<BLOCK_SIZE; i++)
+		Bs[i*BLOCK_SIZE+tx] = ((float)(tx<=i))*(*(Aoff+i*lda+tx));	// read in the whole square block of my A and zero out the non data triangular
+		//Bs[i*BLOCK_SIZE+tx] = *(Aoff+i*lda+tx);	// read in the whole square block of my A
+												// not the upper or lower diagonal
+
+	// Synchronize to make sure the matrices are loaded
+	__syncthreads();
+
+	switcher = (diag=='u' || diag=='U');
+	Bs[tx*BLOCK_SIZE+tx] = switcher+!switcher*(1/Bs[tx*BLOCK_SIZE+tx]);	// solve the diagonals
+
+	/* the upper case */
+	for (i=0; i<BLOCK_SIZE; i++)
+	{
+		Ystx = 0;
+		switcher = (float)(tx<i);
+
+		//strmv
+		workspace[tx] = *(Bs+i*BLOCK_SIZE+tx);
+		y = Bs+i*BLOCK_SIZE;
+
+		#pragma unroll
+		//for (j=tx; j<i; j++)
+		for (j=0; j<i; j++)
+			Ystx += switcher*(*(Bs+j*BLOCK_SIZE+tx)*workspace[j]);
+
+		//sscal
+		switcher = (tx != i); // if (tx !=i ) y[tx]=switcher*Ystx*(-Bs[i*BLOCK_SIZE+i]);
+		y[tx] = switcher*Ystx*(-Bs[i*BLOCK_SIZE+i])+!switcher*y[tx];
+
+		__syncthreads();
+	}
+
+	// write back A
+	#pragma unroll
+	for (i=0; i<BLOCK_SIZE; i++)
+		*(my_d_dinvA+i*BLOCK_SIZE+tx) = Bs[i*BLOCK_SIZE+tx];
+
+}
+__global__ void
+diag_strtri_kernel_lower (char diag, float *A, float *d_dinvA, int lda)
 {
 	int i,j;
 	float Ystx=0;
@@ -599,74 +660,53 @@ diag_strtri_kernel (char uplo, char diag, float *A, float *d_dinvA, int lda)
 	// load A
 	#pragma unroll
 	for (i=0; i<BLOCK_SIZE; i++)
-		Bs[i*BLOCK_SIZE+tx] = *(Aoff+i*lda+tx);	// read in the whole square block of my A
+		Bs[i*BLOCK_SIZE+tx] = ((float)(tx>=i))*(*(Aoff+i*lda+tx));	// read in the whole square block of my A and zero out the non data triangular
+		//Bs[i*BLOCK_SIZE+tx] = (*(Aoff+i*lda+tx));	// read in the whole square block of my A and zero out the non data triangular
+		//Bs[i*BLOCK_SIZE+tx] = (*(Aoff+i*lda+tx));	// read in the whole square block of my A (the old way)
 												// not the upper or lower diagonal
-
 	// Synchronize to make sure the matrices are loaded
 	__syncthreads();
 
-	Bs[tx*BLOCK_SIZE+tx] = ((diag=='u' || diag=='U')?1:(1/Bs[tx*BLOCK_SIZE+tx]));	// solve the diagonals
+	switcher = (diag=='u' || diag=='U');
+	int diagsw = (Bs[tx*BLOCK_SIZE+tx]==0);
+	Bs[tx*BLOCK_SIZE+tx] = switcher+!switcher*(1/(diagsw+(!diagsw)*Bs[tx*BLOCK_SIZE+tx]));	// solve the diagonals
+//	Bs[tx*BLOCK_SIZE+tx] = switcher+!switcher*(1/Bs[tx*BLOCK_SIZE+tx]);	// solve the diagonals
+	// in the case where M%BLOCK_SIZE!=0, the amended extra block in d_dinvA might have zeros on the diagonal, and
+	// that could cause problem. diagsw is to always make the blocks in d_dinvA invertable 
 
-	if (uplo == 'l' || uplo == 'L')
+	/*
+	 * the lower case
+	 */
+
+	switcher = !(tx<BLOCK_SIZE-1);
+	Bs[(BLOCK_SIZE-1)*BLOCK_SIZE+tx] = (float)switcher*Bs[(BLOCK_SIZE-1)*BLOCK_SIZE+tx];	//zero out the last column, except the diagonal element
+
+	for (i=BLOCK_SIZE-2; i>=0; i--)
 	{
-		/*
-		 * the lower case
-		 */
-		if (tx < BLOCK_SIZE-1)
-			Bs[(BLOCK_SIZE-1)*BLOCK_SIZE+tx] = 0;	//zero out the last column, except the diagonal element
+		Ystx = 0;
+		switcher = (tx>i);
 
-		for (i=BLOCK_SIZE-2; i>=0; i--)
-		{
-			Ystx = 0;
-			switcher = (tx>i);
-			
-			//strmv
-			Bw = Bs+(i+1)*BLOCK_SIZE+i+1;
-			workspace[tx] = *(Bs+i*BLOCK_SIZE+tx);
-			x = workspace+i+1;
-			y = Bs+i*BLOCK_SIZE;
+		//strmv
+		Bw = Bs+(i+1)*BLOCK_SIZE+i+1;
+		workspace[tx] = *(Bs+i*BLOCK_SIZE+tx);
+		x = workspace+i+1;
+		y = Bs+i*BLOCK_SIZE;
 
-			txw = (tx-i-1);
+		txw = (tx-i-1);
 
-			#pragma unroll
-			for (j=0; j<txw+1; j++)
-				Ystx += (float)switcher*(*(Bw+j*BLOCK_SIZE+txw)*x[j]);
+		#pragma unroll
+		for (j=0; j<BLOCK_SIZE-i-1; j++)
+		//for (j=0; j<txw+1; j++) // the old way with lots of branch divergence
+			Ystx += (float)switcher*(*(Bw+j*BLOCK_SIZE+txw)*x[j]);
 
-			//sscal
-			switcher = (tx != i); 
-			//if (tx !=i ) y[tx]=switcher*Ystx*(-Bs[i*BLOCK_SIZE+i]);
-			y[tx] = (float)switcher*Ystx*(-Bs[i*BLOCK_SIZE+i])+(float)(!switcher)*y[tx];
+		//sscal
+		switcher = (tx != i); 
+		//if (tx !=i ) y[tx]=switcher*Ystx*(-Bs[i*BLOCK_SIZE+i]);
+		y[tx] = (float)switcher*Ystx*(-Bs[i*BLOCK_SIZE+i])+(float)(!switcher)*y[tx];
 
-			__syncthreads();
-		}
-
+		__syncthreads();
 	}
-	else
-	{
-		 /* the upper case */
-		for (i=0; i<BLOCK_SIZE; i++)
-		{
-			Ystx = 0;
-			switcher = (float)(tx<i);
-			
-			//strmv
-			workspace[tx] = *(Bs+i*BLOCK_SIZE+tx);
-			y = Bs+i*BLOCK_SIZE;
 
-			#pragma unroll
-			for (j=tx; j<i; j++)
-				Ystx += switcher*(*(Bs+j*BLOCK_SIZE+tx)*workspace[j]);
-
-			//sscal
-			switcher = (tx != i); // if (tx !=i ) y[tx]=switcher*Ystx*(-Bs[i*BLOCK_SIZE+i]);
-			y[tx] = switcher*Ystx*(-Bs[i*BLOCK_SIZE+i])+!switcher*y[tx];
-
-			__syncthreads();
-		}
-
-
-	}
-		
 	// write back A
 	#pragma unroll
 	for (i=0; i<BLOCK_SIZE; i++)
@@ -693,7 +733,7 @@ inplace_sgemm (char tran, int M, int N, float alpha, float *A, int lda, float *B
 			if (tran == 'n' || tran == 'N')
 				inplace_sgemm_kernel2_N<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb); 
 			else
-				inplace_sgemm_kernel2_T<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb);
+				inplace_sgemm_kernel2_T<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb);	// wrong for now, should be _T
 		}
 	}
 	else
@@ -706,7 +746,7 @@ inplace_sgemm (char tran, int M, int N, float alpha, float *A, int lda, float *B
 				inplace_sgemm_kernel3_N<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb); 
 			}
 			else
-				inplace_sgemm_kernel3_T<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb);
+				inplace_sgemm_kernel3_T<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb);	// wrong for now, should be _T
 		}
 		else
 		{
@@ -719,27 +759,38 @@ inplace_sgemm (char tran, int M, int N, float alpha, float *A, int lda, float *B
 }
 
 
+extern "C"
+void diag_strtri (int M, char uplo, char diag, float *A, float *d_dinvA, int lda)
+{
+	int nblocks = M/BLOCK_SIZE+(M%BLOCK_SIZE!=0);
+
+	if (uplo == 'l' || uplo == 'L')
+		diag_strtri_kernel_lower<<<nblocks, BLOCK_SIZE>>>(diag, A, d_dinvA, lda);
+	else
+		diag_strtri_kernel_upper<<<nblocks, BLOCK_SIZE>>>(diag, A, d_dinvA, lda);
+}
+
 /*
  * magmablas_strsm
  */
 extern "C"
 void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N, float alpha, float* A, int lda, float* b, int ldb)
 {
-/*  -- MAGMA (version 0.1) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       October 2009
+/*  -- magma (version 0.1) --
+       univ. of tennessee, knoxville
+       univ. of california, berkeley
+       univ. of colorado, denver
+       october 2009
 
-	   Purpose
+	   purpose
 	   =======
 	   
-	   STRSM  solves one of the matrix equations on GPU
+	   strsm  solves one of the matrix equations on gpu
 	   
-	      op( A )*X = alpha*B,   or   X*op( A ) = alpha*B,
+	      op( a )*x = alpha*b,   or   x*op( a ) = alpha*b,
 	   
-	   where alpha is a scalar, X and B are m by n matrices, A is a unit, or
-	   non-unit,  upper or lower triangular matrix  and  op( A )  is one  of
+	   where alpha is a scalar, x and b are m by n matrices, a is a unit, or
+	   non-unit,  upper or lower triangular matrix  and  op( a )  is one  of
 	   
 	      op( A ) = A   or   op( A ) = A'.
 	   
@@ -849,8 +900,12 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 		*
     ===================================================================== */
 
-	int i, nblocks;
-	float *d_dinvA;
+	int i;
+	   float *d_dinvA;
+
+	/* quick return on wrong size */
+	if (M<=0 || N<=0)
+		return;
 
 	if (side == 'l' || side == 'L')
 	{
@@ -858,9 +913,7 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 		 * Allocate device memory for the inversed diagonal blocks, size=m*BLOCK_SIZE 
 		 */
 		cudaMalloc((void**)&d_dinvA, BLOCK_SIZE*((M/BLOCK_SIZE)+(M%BLOCK_SIZE!=0))*BLOCK_SIZE*sizeof(float));
-		nblocks = M/BLOCK_SIZE+(M%BLOCK_SIZE!=0);
-
-		diag_strtri_kernel<<<nblocks, BLOCK_SIZE>>>(uplo, diag, A, d_dinvA, lda);
+		diag_strtri (M, uplo, diag, A, d_dinvA, lda);
 
 		if (tran == 'N' || tran == 'n')
 		/* the non-transpose case */
@@ -945,10 +998,12 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 				/* handle the first block seperately with alpha */
 				int MM = (M%BLOCK_SIZE==0)?BLOCK_SIZE:(M%BLOCK_SIZE); 
 				i=M-MM; 
+				/*
 				if (N == 1)
 					magmablas_sgemv32 ('T', BLOCK_SIZE, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
 				else
-					cublasSgemm ('T', 'N', MM, N, MM, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
+				*/
+				cublasSgemm ('T', 'N', MM, N, MM, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
 
 				if (i-BLOCK_SIZE<0)
 				{
@@ -961,9 +1016,11 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 				/* the rest blocks */
 				for (i=M-MM-BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
 				{
+					/*
 					if (N == 1)
 						magmablas_sgemv32 ('T', BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
 					else
+					*/
 						cublasSgemm ('T', 'N', BLOCK_SIZE, N, BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
 
 					if (i-BLOCK_SIZE<0)
@@ -1015,8 +1072,7 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 		 * Allocate device memory for the inversed diagonal blocks, size=N*BLOCK_SIZE 
 		 */
 		cudaMalloc((void**)&d_dinvA, BLOCK_SIZE*((N/BLOCK_SIZE)+(N%BLOCK_SIZE!=0))*BLOCK_SIZE*sizeof(float));
-		nblocks = N/BLOCK_SIZE+(N%BLOCK_SIZE!=0);
-		diag_strtri_kernel<<<nblocks, BLOCK_SIZE>>>(uplo, diag, A, d_dinvA, lda);
+		diag_strtri (N, uplo, diag, A, d_dinvA, lda);
 		
 		if (tran == 'N' || tran == 'n')
 		/* the non-transpose case */
