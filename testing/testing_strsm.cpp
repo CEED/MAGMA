@@ -199,7 +199,7 @@ int main(int argc, char** argv)
 #ifndef tallskinny
 		for (m=from; m<=to; m+=step)
 		{
-			n = 2*BLOCK_SIZE+13; 
+			n = 1; 
 #else		
 		for (n=from; n<=to; n+=step)
 		{

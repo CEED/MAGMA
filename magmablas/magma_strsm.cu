@@ -605,7 +605,8 @@ diag_strtri_kernel_upper (char diag, float *A, float *d_dinvA, int lda)
 	__syncthreads();
 
 	switcher = (diag=='u' || diag=='U');
-	Bs[tx*BLOCK_SIZE+tx] = switcher+!switcher*(1/Bs[tx*BLOCK_SIZE+tx]);	// solve the diagonals
+	int diagsw = (Bs[tx*BLOCK_SIZE+tx]==0);
+	Bs[tx*BLOCK_SIZE+tx] = switcher+!switcher*(1/(diagsw+(!diagsw)*Bs[tx*BLOCK_SIZE+tx]));	// solve the diagonals
 
 	/* the upper case */
 	for (i=0; i<BLOCK_SIZE; i++)
@@ -925,7 +926,7 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 				/* handle the first block seperately with alpha */
 				int MM = min (BLOCK_SIZE, M); 
 				if (N == 1)
-					magmablas_sgemv32 ('N', BLOCK_SIZE, alpha, d_dinvA, BLOCK_SIZE, b, b);
+					magmablas_sgemv32 ('N', MM, alpha, d_dinvA, BLOCK_SIZE, b, b);
 				else
 					cublasSgemm ('N', 'N', MM, N, MM, alpha, d_dinvA, BLOCK_SIZE, b, ldb, 0, b, ldb);  
 
@@ -942,7 +943,7 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 				{
 					MM = min (M-i, BLOCK_SIZE);
 					if (N == 1)
-						magmablas_sgemv32 ('N', BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+						magmablas_sgemv32 ('N', MM, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
 					else
 						cublasSgemm ('N', 'N', MM, N, MM, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
 
@@ -960,7 +961,7 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 				int MM = (M%BLOCK_SIZE==0)?BLOCK_SIZE:(M%BLOCK_SIZE); 
 				i = M-MM;
 				if (N == 1)
-					magmablas_sgemv32 ('N', BLOCK_SIZE, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+					magmablas_sgemv32 ('N', MM, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
 				else
 					cublasSgemm ('N', 'N', MM, N, MM, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0.0, b+i, ldb); 
 					

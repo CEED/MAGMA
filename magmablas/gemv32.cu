@@ -134,7 +134,7 @@ sgemv32_kernel(int n, float alpha, float* A, int lda, float *x, float *y)
 
     __syncthreads();
     #pragma unroll
-    for(int j=0; j < 32; j++){
+    for(int j=0; j < n; j++){
        res+=A[0]*buff[j];
        A+=lda;
     }
@@ -168,7 +168,7 @@ dgemv32_kernel(int n, double alpha, double* A, int lda, double *x, double *y)
 
     __syncthreads();
     #pragma unroll
-    for(int j=0; j < 32; j++){
+    for(int j=0; j < n; j++){
        res+=A[0]*buff[j];
        A+=lda;
     }
