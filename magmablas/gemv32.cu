@@ -9,6 +9,57 @@
 #include "cublas.h"
 #include "magma.h"
 
+__global__ void 
+sgemvT32_kernel_tail(int m, int n, float alpha, float* A, int lda, float *x, float *y)
+{
+/*  -- MAGMA (version 0.2) --
+
+    Purpose
+    =======
+
+    This routine computes y = alpha A^T x where A is single precision 
+    array of dimension (32, M).
+*/
+
+    const int inx = threadIdx.x;
+    const int iny = threadIdx.y;
+
+    int ind  = iny + __mul24(blockIdx.x,32);
+    ind = inx + __mul24(ind,lda);
+    int ind2 = inx + __mul24(iny,32);
+
+    A += ind;
+    x += inx;
+
+    float res = 0.f;
+
+    __shared__ float buff[64];
+    __shared__ float la[32][33];
+
+	float sw = (float)(inx<n);
+    buff[ind2]  = sw*x[0];
+
+    #pragma unroll
+    for(int j=0; j<16; j++)
+      la[iny+__mul24(2,j)][inx] = A[j*__mul24(2,lda)];
+
+    __syncthreads();
+
+    // multiply with the sub-matrix
+    #pragma unroll
+    for(int j=0; j <16; j++)
+      res += la[inx][j+iny*16]*buff[j+iny*16];
+
+    ind = inx + __mul24(blockIdx.x,32);
+    la[inx][iny]= res;
+
+    __syncthreads();
+
+    if (ind<m){
+       res = la[inx][0] + la[inx][1];
+       y[ind] = alpha*res;
+    }
+}
 
 __global__ void 
 sgemvT32_kernel(int m, float alpha, float* A, int lda, float *x, float *y)
@@ -237,7 +288,11 @@ void magmablas_sgemv32(char tran, int m, int n, float alpha,
 	if (tran == 'T' || tran == 't')
 	{
 		dim3 threads(32, 2, 1);
-		sgemvT32_kernel<<<grid, threads>>>(m, alpha, A, lda, x, y);
+		if (n%32==0)
+			sgemvT32_kernel<<<grid, threads>>>(m, alpha, A, lda, x, y);
+		else
+			sgemvT32_kernel_tail<<<grid, threads>>>(m, n, alpha, A, lda, x, y);
+
 	}
 	else 
 	{
