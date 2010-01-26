@@ -926,7 +926,7 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 				/* handle the first block seperately with alpha */
 				int MM = min (BLOCK_SIZE, M); 
 				if (N == 1)
-					magmablas_sgemv32 ('N', MM, alpha, d_dinvA, BLOCK_SIZE, b, b);
+					magmablas_sgemv32 ('N', MM, MM, alpha, d_dinvA, BLOCK_SIZE, b, b);
 				else
 					cublasSgemm ('N', 'N', MM, N, MM, alpha, d_dinvA, BLOCK_SIZE, b, ldb, 0, b, ldb);  
 
@@ -943,7 +943,7 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 				{
 					MM = min (M-i, BLOCK_SIZE);
 					if (N == 1)
-						magmablas_sgemv32 ('N', MM, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+						magmablas_sgemv32 ('N', MM, MM, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
 					else
 						cublasSgemm ('N', 'N', MM, N, MM, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
 
@@ -961,7 +961,7 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 				int MM = (M%BLOCK_SIZE==0)?BLOCK_SIZE:(M%BLOCK_SIZE); 
 				i = M-MM;
 				if (N == 1)
-					magmablas_sgemv32 ('N', MM, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+					magmablas_sgemv32 ('N', MM, MM, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
 				else
 					cublasSgemm ('N', 'N', MM, N, MM, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0.0, b+i, ldb); 
 					
@@ -977,7 +977,7 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 				for (i=M-MM-BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
 				{
 					if (N == 1) 
-						magmablas_sgemv32 ('N', BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+						magmablas_sgemv32 ('N', BLOCK_SIZE, BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
 					else
 						cublasSgemm ('N', 'N', BLOCK_SIZE, N, BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0.0, b+i, ldb);
 
@@ -999,12 +999,10 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 				/* handle the first block seperately with alpha */
 				int MM = (M%BLOCK_SIZE==0)?BLOCK_SIZE:(M%BLOCK_SIZE); 
 				i=M-MM; 
-				/*
 				if (N == 1)
-					magmablas_sgemv32 ('T', BLOCK_SIZE, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+					magmablas_sgemv32 ('T', MM, MM, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
 				else
-				*/
-				cublasSgemm ('T', 'N', MM, N, MM, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
+					cublasSgemm ('T', 'N', MM, N, MM, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
 
 				if (i-BLOCK_SIZE<0)
 				{
@@ -1017,11 +1015,9 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 				/* the rest blocks */
 				for (i=M-MM-BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
 				{
-					/*
 					if (N == 1)
-						magmablas_sgemv32 ('T', BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+						magmablas_sgemv32 ('T', BLOCK_SIZE, BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
 					else
-					*/
 						cublasSgemm ('T', 'N', BLOCK_SIZE, N, BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
 
 					if (i-BLOCK_SIZE<0)
@@ -1037,7 +1033,7 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 				/* handle the first block seperately with alpha */
 				int MM = min (BLOCK_SIZE, M); 
 				if (N == 1)
-					magmablas_sgemv32 ('T', BLOCK_SIZE, alpha, d_dinvA, BLOCK_SIZE, b, b);
+					magmablas_sgemv32 ('T', MM, MM, alpha, d_dinvA, BLOCK_SIZE, b, b);
 				else
 					cublasSgemm ('T', 'N', MM, N, MM, alpha, d_dinvA, BLOCK_SIZE, b, ldb, 0, b, ldb);  
 
@@ -1054,7 +1050,7 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 				{
 					MM = min (M-i, BLOCK_SIZE);
 					if (N == 1)
-						magmablas_sgemv32 ('T', BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+						magmablas_sgemv32 ('T', MM, MM, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
 					else
 						cublasSgemm ('T', 'N', MM, N, MM, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
 					

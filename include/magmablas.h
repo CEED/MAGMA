@@ -53,7 +53,7 @@ void magmablas_sgemv(int, int, float *, int, float *, float *);
 void magmablas_sgemvt(int,int,float,float *,int,float *,float *);
 void magmablas_sgemvt1(int,int,float,float *,int,float *,float *);
 void magmablas_sgemvt2(int,int,float,float *,int,float *,float *);
-void magmablas_sgemv32(char, int, float, float *, int, float *, float *);
+void magmablas_sgemv32(char, int, int, float, float *, int, float *, float *);
 void magmablas_dgemv(int, int, double *, int, double *, double *);
 void magmablas_dgemvt(int,int,double,double *,int,double *,double *);
 void magmablas_dgemv32(char, int, double, double *, int, double *, double *);

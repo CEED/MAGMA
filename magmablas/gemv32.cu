@@ -111,7 +111,7 @@ dgemvT32_kernel(int m, double alpha, double* A, int lda, double *x, double *y)
 }
 
 __global__ void 
-sgemv32_kernel(int n, float alpha, float* A, int lda, float *x, float *y)
+sgemv32_kernel_tail(int m, int n, float alpha, float* A, int lda, float *x, float *y)
 {
 /*  -- MAGMA (version 0.2) --
 
@@ -119,7 +119,41 @@ sgemv32_kernel(int n, float alpha, float* A, int lda, float *x, float *y)
     =======
 
     This routine computes y = alpha A x where A is single precision
-    array of dimension (N, 32).
+    array of dimension (M, N), N<=32. This routine is used as the cleanup
+	for sgemv32_kernel.
+*/
+
+    int ind = blockIdx.x*32 + threadIdx.x;
+
+    A += ind;
+    x += threadIdx.x;
+
+    float res = 0.f;
+
+    __shared__ float buff[32];
+    buff[threadIdx.x]  = x[0];
+
+    __syncthreads();
+    #pragma unroll	//yeah~right~
+    for(int j=0; j < n; j++){
+       res+=A[0]*buff[j];
+       A+=lda;
+    }
+
+    if (ind<m)
+      y[ind] = alpha*res;
+}
+
+__global__ void 
+sgemv32_kernel(int m, float alpha, float* A, int lda, float *x, float *y)
+{
+/*  -- MAGMA (version 0.2) --
+
+    Purpose
+    =======
+
+    This routine computes y = alpha A x where A is single precision
+    array of dimension (M, 32).
 */
 
     int ind = blockIdx.x*32 + threadIdx.x;
@@ -134,12 +168,12 @@ sgemv32_kernel(int n, float alpha, float* A, int lda, float *x, float *y)
 
     __syncthreads();
     #pragma unroll
-    for(int j=0; j < n; j++){
+    for(int j=0; j < 32; j++){
        res+=A[0]*buff[j];
        A+=lda;
     }
 
-    if (ind<n)
+    if (ind<m)
       y[ind] = alpha*res;
 }
 
@@ -178,7 +212,7 @@ dgemv32_kernel(int n, double alpha, double* A, int lda, double *x, double *y)
 }
 
 
-void magmablas_sgemv32(char tran, int n, float alpha, 
+void magmablas_sgemv32(char tran, int m, int n, float alpha, 
                        float *A, int lda, float *x, float *y)
 {
 /*  -- MAGMA (version 0.2) --
@@ -189,26 +223,30 @@ void magmablas_sgemv32(char tran, int n, float alpha,
     This routine computes 
        y = alpha A^T x           for tran = 'T' / 't' or
        y = alpha A x 
-    where A is single precision array of dimension (32, N) for 
-    tran = 'T' / 't', or of dimension (N, 32) otherwise.
+    where A is single precision array of dimension (n, m) for 
+    tran = 'T' / 't', or of dimension (m, n) otherwise. n<=32.
 */
 
-    int blocks;
-    if (n % 32 == 0)
-      blocks = n/32;
-    else
-      blocks = n/32 + 1;
-    dim3 grid(blocks, 1, 1);
+	int blocks;
+	if (m % 32 == 0)
+		blocks = m/32;
+	else
+		blocks = m/32 + 1;
+	dim3 grid(blocks, 1, 1);
 
-    if (tran == 'T' || tran == 't'){
-      dim3 threads(32, 2, 1);
-      sgemvT32_kernel<<<grid, threads>>>(n, alpha, A, lda, x, y);
-    }
-    else 
-    {
-      dim3 threads(32, 1, 1);
-      sgemv32_kernel<<<grid, threads>>>(n, alpha, A, lda, x, y);
-    }
+	if (tran == 'T' || tran == 't')
+	{
+		dim3 threads(32, 2, 1);
+		sgemvT32_kernel<<<grid, threads>>>(m, alpha, A, lda, x, y);
+	}
+	else 
+	{
+		dim3 threads(32, 1, 1);
+		if (n%32==0)
+			sgemv32_kernel<<<grid, threads>>>(m, alpha, A, lda, x, y);
+		else
+			sgemv32_kernel_tail<<<grid, threads>>>(m, n, alpha, A, lda, x, y);
+	}
 }
 
 
@@ -227,20 +265,20 @@ void magmablas_dgemv32(char tran, int n, double alpha, double *A, int lda,
     tran = 'T' / 't', or of dimension (N, 32) otherwise.
 */
 
-    int blocks;
-    if (n % 32==0)
-      blocks = n/32;
-    else
-      blocks = n/32 + 1;
-    dim3 grid(blocks, 1, 1);
+	int blocks;
+	if (n % 32==0)
+		blocks = n/32;
+	else
+		blocks = n/32 + 1;
+	dim3 grid(blocks, 1, 1);
 
-    if (tran == 'T' || tran == 't'){
-      dim3 threads(32, 2, 1);
-      dgemvT32_kernel<<<grid, threads>>>(n, alpha, A, lda, x, y);
-    }
-    else
-    {
-      dim3 threads(32, 1, 1);
-      dgemv32_kernel<<<grid, threads>>>(n, alpha, A, lda, x, y);
-    }
+	if (tran == 'T' || tran == 't'){
+		dim3 threads(32, 2, 1);
+		dgemvT32_kernel<<<grid, threads>>>(n, alpha, A, lda, x, y);
+	}
+	else
+	{
+		dim3 threads(32, 1, 1);
+		dgemv32_kernel<<<grid, threads>>>(n, alpha, A, lda, x, y);
+	}
 }
