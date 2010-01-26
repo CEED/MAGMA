@@ -18,7 +18,8 @@ sgemvT32_kernel_tail(int m, int n, float alpha, float* A, int lda, float *x, flo
     =======
 
     This routine computes y = alpha A^T x where A is single precision 
-    array of dimension (32, M).
+    array of dimension (N, M), N<=32. This routine serves as the cleanup
+	for sgemvT32_kernel.
 */
 
     const int inx = threadIdx.x;
