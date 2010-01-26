@@ -49,8 +49,8 @@
              magma_ssymv.cu \
              magma_sdaxpycp.cu \
              magma_slag2d.cu \
-             magma_strsm.cu \
-             magma_dtrsm.cu \
+             strsm.cu \
+             dtrsm.cu \
              \
              dgemm_kernel_a_0.cu \
              dgemm_kernel_N_N_64_16_16_16_4_special.cu \

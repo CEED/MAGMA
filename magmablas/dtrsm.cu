@@ -1,75 +1,120 @@
 /*
     -- MAGMA (version 0.2) --
-	Univ. of Tennessee, Knoxville
-	Univ. of California, Berkeley
-	Univ. of Colorado, Denver
-	November 2009
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       October 2009
 */
 
 #include "cublas.h"
-#include "magma.h"
-#include <stdio.h>
+#include "cuda.h"
+#include "magmablas.h"
 
-#define BLOCK_SIZE 16
+#define BLOCK_SIZE 32 
 
 __global__ void
-strmm_kernel (int M, int N, double *A, int lda, double *x, int ldx)
+inplace_dgemm_kernel_T(int M, double alpha, double *A, int lda, double *B, int ldb)
 {
-	int i, k;
-	int inb;
-	int tyb;
-	double Ystx=0;
-	double *Ast, *At, *Xst;
+        int i;
+        double myvalue1=0, myvalue2= 0 ;
+        double med;
+        int tx = threadIdx.x;
+        int ty = threadIdx.y;
+        const int bx = blockIdx.x;
+        __shared__ double As[BLOCK_SIZE][BLOCK_SIZE+1];
+        __shared__ double Bs[BLOCK_SIZE/2][BLOCK_SIZE];
 
-	// Thread index
-	int tx = threadIdx.x;
-	int ty = threadIdx.y;
-	int bx = blockIdx.x;
-	int bmx = blockDim.y;
+        A+= bx*32 + __mul24(lda,ty) + tx ;
+        B+=      __mul24(ldb,tx) + ty ;
 
-	__shared__ double As[BLOCK_SIZE*BLOCK_SIZE];
-	__shared__ double Xs[BLOCK_SIZE*512/BLOCK_SIZE];
+        As[tx][ty]=A[0];
+        As[tx][ty+16]= A[16*lda];
+        Bs[ty][tx]= B[0];
+        __syncthreads();
 
+        med  = As[tx][0];
+        double py1 = Bs[ty][0] ;
+        #pragma unroll
+        for (i=0; i<31; i++){
+                myvalue1 +=  med*py1;
+                py1 = Bs[ty][i+1] ;
+                med = As[tx][i+1];
+        }
+        myvalue1 += med*py1;
 
-	tyb = ty*BLOCK_SIZE;
-	Xst = Xs+tyb;
-	Ast = As+tyb+tx;
-	At = A+ty*lda+tx;
+        Bs[ty][tx]= B[16];
+        __syncthreads();
 
-	inb = bmx;
-
-	// load A
-	#pragma unroll
-	for (i=0; i<(M/inb); i++)
-		Ast[i*BLOCK_SIZE*inb] = At[i*inb*lda];
-	
-	for (k=0; k<N; k+=bmx)
-	{
-		// load b and x
-		Xst[tx] = x[bx*ldx*N+(k+ty)*ldx+tx];
-
-		// Synchronize to make sure the matrices are loaded
-		__syncthreads();
-
-		for (i=0; i<=BLOCK_SIZE; i++)
-			if (tx >=i)
-				Ystx += As[i*BLOCK_SIZE+tx]*Xs[tyb+i];
-
-		// write back y
-		x[bx*ldx*N+(k+ty)*ldx+tx] = Ystx;
-		Ystx = 0;
-	}
+        med  = As[tx][0];
+        double py2 = Bs[ty][0] ;
+        #pragma unroll
+        for (i=0; i<31; i++){
+                myvalue2 +=  med*py2;
+                py2 = Bs[ty][i+1] ;
+                med = As[tx][i+1];
+        }
+        myvalue2 += med*py2;
+        
+		A[0] = alpha*myvalue1 ;
+        A[lda*16] = alpha*myvalue2;
 }
 
+__global__ void
+inplace_dgemm_kernel_N(int M, double alpha, double *A, int lda, double *B, int ldb)
+{
+        int i;
+        double myvalue1=0, myvalue2= 0 ;
+        double med;
+        int tx = threadIdx.x;
+        int ty = threadIdx.y;
+        const int bx = blockIdx.x;
+        __shared__ double As[BLOCK_SIZE][BLOCK_SIZE+1];
+        __shared__ double Bs[BLOCK_SIZE/2][BLOCK_SIZE];
 
+        A+= bx*32 + __mul24(lda,ty) + tx ;
+        B+=      __mul24(ldb,ty) + tx ;
+
+        As[tx][ ty]=A[0];
+        As[tx][ty+16]= A[16*lda];
+        Bs[ty][tx]= B[0];
+
+        __syncthreads();
+        med  = As[tx][0];
+        double py1 = Bs[ty][0] ;
+
+        #pragma unroll
+        for (i=0; i<31; i++){
+                myvalue1 +=  med*py1;
+                py1 = Bs[ty][i+1] ;
+                med  = As[tx][i+1];
+        }
+        myvalue1 +=  med*py1;
+
+        Bs[ty][tx]= B[16*ldb];
+        __syncthreads();
+
+        med  = As[tx][0];
+        double py2 = Bs[ty][0] ;
+        #pragma unroll
+        for (i=0; i<31; i++){
+                myvalue2 +=  med*py2;
+                py2 = Bs[ty][i+1] ;
+                med  = As[tx][i+1];
+        }
+        myvalue2 +=  med*py2;
+
+        A[0] = alpha*myvalue1 ;
+        A[lda*16] = alpha*myvalue2;
+}
 
 __global__ void
-diag_strtri_kernel (char uplo, char diag, double *A, double *d_dinvA, int lda)
+diag_dtrtri_kernel (char uplo, char diag, double *A, double *d_dinvA, int lda)
 {
 	int i,j;
 	double Ystx=0;
 	double *Bw=NULL, *x=NULL, *y=NULL, *Aoff=NULL;
 	double *my_d_dinvA;
+	int switcher=0;
 
 	// Thread index
 	int tx = threadIdx.x;
@@ -81,69 +126,74 @@ diag_strtri_kernel (char uplo, char diag, double *A, double *d_dinvA, int lda)
 	Aoff = A+bx*lda*BLOCK_SIZE+bx*BLOCK_SIZE;
 	my_d_dinvA = d_dinvA+bx*BLOCK_SIZE*BLOCK_SIZE;
 
-	__shared__ double As[BLOCK_SIZE*BLOCK_SIZE];
 	__shared__ double Bs[BLOCK_SIZE*BLOCK_SIZE];
+	__shared__ double workspace[BLOCK_SIZE]; // workspace used to store the current working column
 
 	// load A
 	#pragma unroll
 	for (i=0; i<BLOCK_SIZE; i++)
-           // read in the whole square block of my A
-	   Bs[i*BLOCK_SIZE+tx] = As[i*BLOCK_SIZE+tx] = *(Aoff+i*lda+tx);
-	
-        // not the upper or lower diagonal	
+		Bs[i*BLOCK_SIZE+tx] = *(Aoff+i*lda+tx);	// read in the whole square block of my A
+												// not the upper or lower diagonal
+
 	// Synchronize to make sure the matrices are loaded
 	__syncthreads();
 
-	Bs[tx*BLOCK_SIZE+tx] = ((diag=='u' || diag=='U')?1:(1/As[tx*BLOCK_SIZE+tx]));
+	Bs[tx*BLOCK_SIZE+tx] = ((diag=='u' || diag=='U')?1:(1/Bs[tx*BLOCK_SIZE+tx]));	// solve the diagonals
 
 	if (uplo == 'l' || uplo == 'L')
 	{
 		/*
 		 * the lower case
 		 */
+		if (tx < BLOCK_SIZE-1)
+			Bs[(BLOCK_SIZE-1)*BLOCK_SIZE+tx] = 0;	//zero out the last column, except the diagonal element
+
 		for (i=BLOCK_SIZE-2; i>=0; i--)
 		{
 			Ystx = 0;
-			if (tx>i)
-			{
-				//strmv
-				Bw = Bs+(i+1)*BLOCK_SIZE+i+1;
-				x = As+i*BLOCK_SIZE+i+1;
-				y = Bs+i*BLOCK_SIZE+i+1;
+			switcher = (tx>i);
+			
+			//dtrmv
+			Bw = Bs+(i+1)*BLOCK_SIZE+i+1;
+			workspace[tx] = *(Bs+i*BLOCK_SIZE+tx);
+			x = workspace+i+1;
+			y = Bs+i*BLOCK_SIZE;
 
-				txw = tx-i-1;
-				#pragma unroll
-				for (j=0; j<txw+1; j++)
-					Ystx += *(Bw+j*BLOCK_SIZE+txw)*x[j];
+			txw = (tx-i-1);
 
-				//sscal
-				y[txw] = Ystx*(-Bs[i*BLOCK_SIZE+i]);
-			}
+			#pragma unroll
+			for (j=0; j<txw+1; j++)
+				Ystx += (double)switcher*(*(Bw+j*BLOCK_SIZE+txw)*x[j]);
+
+			//sscal
+			switcher = (tx != i); 
+			//if (tx !=i ) y[tx]=switcher*Ystx*(-Bs[i*BLOCK_SIZE+i]);
+			y[tx] = (double)switcher*Ystx*(-Bs[i*BLOCK_SIZE+i])+(double)(!switcher)*y[tx];
+
 			__syncthreads();
 		}
 
 	}
 	else
 	{
-		/*
-		 * the upper case
-		 */
+		 /* the upper case */
 		for (i=0; i<BLOCK_SIZE; i++)
 		{
 			Ystx = 0;
-			if (tx<i)
-			{
-				//strmv
-				x = As+i*BLOCK_SIZE;
-				y = Bs+i*BLOCK_SIZE;
+			switcher = (double)(tx<i);
+			
+			//dtrmv
+			workspace[tx] = *(Bs+i*BLOCK_SIZE+tx);
+			y = Bs+i*BLOCK_SIZE;
 
-				#pragma unroll
-				for (j=tx; j<i; j++)
-					Ystx += *(Bs+j*BLOCK_SIZE+tx)*x[j];
+			#pragma unroll
+			for (j=tx; j<i; j++)
+				Ystx += switcher*(*(Bs+j*BLOCK_SIZE+tx)*workspace[j]);
 
-				//sscal
-				y[tx] = Ystx*(-Bs[i*BLOCK_SIZE+i]);
-			}
+			//sscal
+			switcher = (tx != i); // if (tx !=i ) y[tx]=switcher*Ystx*(-Bs[i*BLOCK_SIZE+i]);
+			y[tx] = switcher*Ystx*(-Bs[i*BLOCK_SIZE+i])+!switcher*y[tx];
+
 			__syncthreads();
 		}
 
@@ -156,179 +206,841 @@ diag_strtri_kernel (char uplo, char diag, double *A, double *d_dinvA, int lda)
 		*(my_d_dinvA+i*BLOCK_SIZE+tx) = Bs[i*BLOCK_SIZE+tx];
 }
 
-#define NUM_OF_SM 30 
-
-
 extern "C" void
-magmablas_dtrsm1(char side, char uplo, char tran, char diag, 
-                int M, int N, double* A, int lda, double* b, int ldb)
+inplace_dgemm (char tran, int M, double alpha, double *A, int lda, double *B, int ldb)
 {
-    int i, nblocks;
-    dim3 dimBlock;
-    double *d_dinvA;
+	dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE/2);
 
-    if ((M%BLOCK_SIZE) != 0)
+	if (tran == 'n' || tran == 'N')
+		inplace_dgemm_kernel_N<<<M/BLOCK_SIZE,dimBlock>>>(M, alpha, A, lda, B, ldb); 
+	else
+		inplace_dgemm_kernel_T<<<M/BLOCK_SIZE,dimBlock>>>(M, alpha, A, lda, B, ldb); 
+}
+
+/*
+ * magmablas_dtrsmx
+ * the expert interface
+ */
+void magmablas_dtrsmx (char side, char uplo, char tran, char diag, int M, int N, double alpha, double* A, int lda, double* b, int ldb, double * d_dinvA)
+{
+/*  -- MAGMA (version 0.2) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       October 2009
+
+	   Purpose
+	   =======
+	   
+	   DTRSM  solves one of the matrix equations on GPU
+	   
+	      op( A )*X = alpha*B,   or   X*op( A ) = alpha*B,
+	   
+	   where alpha is a scalar, X and B are m by n matrices, A is a unit, or
+	   non-unit,  upper or lower triangular matrix  and  op( A )  is one  of
+	   
+	      op( A ) = A   or   op( A ) = A'.
+	   
+	   The matrix X is overwritten on B.
+	   
+	   When M or N is not a multiple of blocking size, which is 32 for now, cublasDtrsm will
+	   be called instead. There soon will not be this limitation both for arbitrary problem 
+	   size and blocking size.
+	   
+	   
+	   Arguments
+	   ==========
+	   
+	   side   - CHARACTER*1.
+	            On entry, side specifies whether op( A ) appears on the left
+	            or right of X as follows:
+	   
+	               side = 'L' or 'l'   op( A )*X = alpha*B.
+	   
+	               side = 'R' or 'r'   X*op( A ) = alpha*B.
+	   
+	            Unchanged on exit.
+	   
+	   uplo   - CHARACTER*1.
+	            On entry, uplo specifies whether the matrix A is an upper or
+	            lower triangular matrix as follows:
+	   
+	               uplo = 'U' or 'u'   A is an upper triangular matrix.
+	   
+	               uplo = 'L' or 'l'   A is a lower triangular matrix.
+	   
+	            Unchanged on exit.
+	   
+	   tran - CHARACTER*1.
+	            On entry, tran specifies the form of op( A ) to be used in
+	            the matrix multiplication as follows:
+	   
+	               tran = 'N' or 'n'   op( A ) = A.
+	   
+	               tran = 'T' or 't'   op( A ) = A'.
+	   
+	               tran = 'C' or 'c'   op( A ) = A'.
+	   
+	            Unchanged on exit.
+	   
+	   diag   - CHARACTER*1.
+	            On entry, diag specifies whether or not A is unit triangular
+	            as follows:
+	   
+	               diag = 'U' or 'u'   A is assumed to be unit triangular.
+	   
+	               diag = 'N' or 'n'   A is not assumed to be unit
+	                                   triangular.
+	   
+	            Unchanged on exit.
+	   
+	   m      - INTEGER.
+	            On entry, m specifies the number of rows of B. m must be at
+	            least zero.
+	            Unchanged on exit.
+	   
+	    n      - INTEGER.
+	             On entry, n specifies the number of columns of B.  n must be
+	             at least zero.
+	             Unchanged on exit.
+	   
+	    alpha  - DOUBLE PRECISION.
+	             On entry,  alpha specifies the scalar  alpha. When  alpha is
+	             zero then  A is not referenced and  B need not be set before
+	             entry.
+	             Unchanged on exit.
+	   
+	    A      - DOUBLE PRECISION             array of DIMENSION ( lda, k ), where k is m
+	             when  side = 'L' or 'l'  and is  n  when  side = 'R' or 'r'.
+	             Before entry  with  uplo = 'U' or 'u',  the  leading  k by k
+	             upper triangular part of the array  A must contain the upper
+	             triangular matrix  and the dtrictly lower triangular part of
+	             A is not referenced.
+	             Before entry  with  uplo = 'L' or 'l',  the  leading  k by k
+	             lower triangular part of the array  A must contain the lower
+	             triangular matrix  and the dtrictly upper triangular part of
+	             A is not referenced.
+	             Note that when  diag = 'U' or 'u',  the diagonal elements of
+	             A  are not referenced either,  but are assumed to be  unity.
+	             Unchanged on exit.
+	   
+	    lda    - INTEGER.
+	             On entry, lda specifies the first dimension of A as declared
+	             in the calling (sub) program.  When  side = 'L' or 'l'  then
+	             lda  must be at least  max( 1, m ),  when  side = 'R' or 'r'
+	             then lda must be at least max( 1, n ).
+	             Unchanged on exit.
+	   
+	    b      - DOUBLE PRECISION array of DIMENSION ( ldb, n ).
+	             Before entry,  the leading  m by n part of the array  B must
+	             contain  the  right-hand  side  matrix  B,  and  on exit  is
+	             overwritten by the solution matrix  X.
+	   
+	    ldb    - INTEGER.
+	             On entry, ldb specifies the first dimension of B as declared
+	             in  the  calling  (sub)  program.   ldb  must  be  at  least
+	             max( 1, m ).
+	             Unchanged on exit.
+
+		d_dinvA -DOUBLE PRECISION array of DIMENSION (BLOCKSIZE, M) when side='L', 
+				 (BLOCKSIZE, N) when side='R'. On exit this space is filled
+			     with the inverse of blocks on the diagonal, each inverse is
+				 of size BLOCKSIZE x BLOCKSIZE, and the leading dimension of
+				 d_dinvA is BLOCKSIZE;
+	   
+	    Level 3 Blas routine.
+		*
+    ===================================================================== */
+
+	int i, nblocks;
+
+	/* quick return on wrong size */
+	if (M<=0 || N<=0 || d_dinvA == NULL)
+		return;
+
+	/* 
+	 * call cublasDtrsm when size of the problem is not a multiple of blocksize which is 32
+	 * subject to change soon
+	 */
+	if ((M%BLOCK_SIZE)!=0 || (N>1 && (N%BLOCK_SIZE)!=0))
 	{
-	  printf ("warning: M=%d not divisable by BLOCK_SIZE=%d\n", M, BLOCK_SIZE);
-	  exit(0);
+		cublasDtrsm (side, uplo, tran, diag, M, N, alpha, A, lda, b, ldb);
+		return;
 	}
 
-    if (side == 'l' || side == 'L')
+	if (side == 'l' || side == 'L')
 	{
-          /* inverse the diagonals
-	   * Allocate device memory for the inversed diagonal blocks, size=m*BLOCK_SIZE 
-	   */
-	  cudaMalloc((void**)&d_dinvA, BLOCK_SIZE*M*sizeof(double));
-	  nblocks = M/BLOCK_SIZE;
-	  diag_strtri_kernel<<<nblocks, BLOCK_SIZE>>>(uplo, diag, A, d_dinvA, lda);
+		/* inverse the diagonals
+		 * Allocate device memory for the inversed diagonal blocks, size=m*BLOCK_SIZE 
+		 */
+		nblocks = M/BLOCK_SIZE;
+		diag_dtrtri_kernel<<<nblocks, BLOCK_SIZE>>>(uplo, diag, A, d_dinvA, lda);
 
-	  if (tran == 'N' || tran == 'n')
-	  /* the non-transpose case */
-	  {
-		if (uplo == 'L' || uplo == 'l')
+		if (tran == 'N' || tran == 'n')
+		/* the non-transpose case */
 		{
-		/* the lower case */
-  		   for (i=0; i<M; i+=BLOCK_SIZE)
+			if (uplo == 'L' || uplo == 'l')
 			{
-			  cublasDtrmm ('L', 'L', 'N', diag, BLOCK_SIZE, N, 1.0, 
-                                        d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb);
-			  if (i+BLOCK_SIZE>=M)
-			     break;
+			/* the lower case */
+				
+				/* handle the first block seperately with alpha */
+				if (N == 1)
+					magmablas_dgemv32 ('N', BLOCK_SIZE, alpha, d_dinvA, BLOCK_SIZE, b, b);
+				else
+					cublasDgemm ('N', 'N', BLOCK_SIZE, N, BLOCK_SIZE, alpha, d_dinvA, BLOCK_SIZE, b, ldb, 0, b, ldb);  
 
-			  cublasDgemm ('N', 'N', M-i-BLOCK_SIZE, N, BLOCK_SIZE, -1.0, 
-                                    A+i*lda+i+BLOCK_SIZE, lda, b+i, ldb, 1.0, b+i+BLOCK_SIZE, ldb);
+				if (BLOCK_SIZE>=M)
+					return;
+
+				cublasDgemm ('N', 'N', M-BLOCK_SIZE, N, BLOCK_SIZE, -1.0, A+BLOCK_SIZE, lda, b, ldb, alpha, b+BLOCK_SIZE, ldb);
+
+				/* the rest blocks */
+				for (i=BLOCK_SIZE; i<M; i+=BLOCK_SIZE)
+				{
+					if (N == 1)
+						magmablas_dgemv32 ('N', BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+					else
+						cublasDgemm ('N', 'N', BLOCK_SIZE, N, BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
+
+					if (i+BLOCK_SIZE>=M)
+						break;
+
+					cublasDgemm ('N', 'N', M-i-BLOCK_SIZE, N, BLOCK_SIZE, -1.0, A+i*lda+i+BLOCK_SIZE, lda, b+i, ldb, 1.0, b+i+BLOCK_SIZE, ldb);
+				}
 			}
-		}
-		else
-		{
-		   /* the upper case */
-		   for (i=M-BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
+			else
 			{
-			  cublasDtrmm ('L', 'U', 'N', diag, BLOCK_SIZE, N, 1.0, 
-                                       d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb);
+			/* the upper case */
 
-			  if (i-BLOCK_SIZE<0)
-			    break;
+				/* handle the first block seperately with alpha */
+				i = M-BLOCK_SIZE;
+				if (N == 1)
+					magmablas_dgemv32 ('N', BLOCK_SIZE, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+				else
+					cublasDgemm ('N', 'N', BLOCK_SIZE, N, BLOCK_SIZE, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0.0, b+i, ldb); 
+					
+				if (i-BLOCK_SIZE<0)
+					return;
 
-		 	  cublasDgemm ('N', 'N', i, N, BLOCK_SIZE, -1.0, A+i*lda, 
-                                       lda, b+i, ldb, 1.0, b, ldb);
+				cublasDgemm ('N', 'N', i, N, BLOCK_SIZE, -1.0, A+i*lda, lda, b+i, ldb, alpha, b, ldb);
+
+				/* the rest blocks */
+				for (i=M-2*BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
+				{
+					if (N == 1)
+						magmablas_dgemv32 ('N', BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+					else
+						cublasDgemm ('N', 'N', BLOCK_SIZE, N, BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0.0, b+i, ldb); 
+
+					if (i-BLOCK_SIZE<0)
+						break;
+
+					cublasDgemm ('N', 'N', i, N, BLOCK_SIZE, -1.0, A+i*lda, lda, b+i, ldb, 1.0, b, ldb);
+				}
 			}
-		}
 		}
 		else
 		/* the transpose case */
 		{
-		  if (uplo == 'L' || uplo == 'l')
+			if (uplo == 'L' || uplo == 'l')
 			{
 			/* the lower case */
-			for (i=M-BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
-			{
-			  cublasDtrmm (side, uplo, tran, diag, BLOCK_SIZE, N, 1.0, 
-                                       d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb);
+				
+				/* handle the first block seperately with alpha */
+				i=M-BLOCK_SIZE; 
+				if (N == 1)
+					magmablas_dgemv32 ('T', BLOCK_SIZE, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+				else
+					cublasDgemm ('T', 'N', BLOCK_SIZE, N, BLOCK_SIZE, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
 
-			  if (i-BLOCK_SIZE<0)
-				break;
+				if (i-BLOCK_SIZE<0)
+					return;
 
-			  cublasDgemm ('T', 'N', i, N, BLOCK_SIZE, -1.0, A+i, lda, b+i, 
-                                       ldb, 1.0, b, ldb);
+				cublasDgemm ('T', 'N', i, N, BLOCK_SIZE, -1.0, A+i, lda, b+i, ldb, alpha, b, ldb);
+
+				/* the rest blocks */
+				for (i=M-2*BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
+				{
+					if (N == 1)
+						magmablas_dgemv32 ('T', BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+					else
+						cublasDgemm ('T', 'N', BLOCK_SIZE, N, BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
+
+					if (i-BLOCK_SIZE<0)
+						break;
+
+					cublasDgemm ('T', 'N', i, N, BLOCK_SIZE, -1.0, A+i, lda, b+i, ldb, 1.0, b, ldb);
+				}
 			}
-		}
-		else
-		{
-		/* the upper case */
-		for (i=0; i<M; i+=BLOCK_SIZE)
-		  {
-		     cublasDtrmm (side, uplo, tran, diag, BLOCK_SIZE, N, 1.0, 
-                                  d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb);
-
-		     if (i+BLOCK_SIZE>=M)
-			break;
-
-		     cublasDgemm ('T', 'N', M-i-BLOCK_SIZE, N, BLOCK_SIZE, 
-                            -1.0, A+(i+BLOCK_SIZE)*lda+i, lda, b+i, ldb, 1.0, b+i+BLOCK_SIZE, ldb);
-		   }
-		}
-	}
-      }
-      else
-      {
-	/* inverse the diagonals
-	 * Allocate device memory for the inversed diagonal blocks, size=m*BLOCK_SIZE 
-	 */
-	cudaMalloc((void**)&d_dinvA, BLOCK_SIZE*N*sizeof(double));
-	nblocks = N/BLOCK_SIZE;
-	diag_strtri_kernel<<<nblocks, BLOCK_SIZE>>>(uplo, diag, A, d_dinvA, lda);
-
-	if (tran == 'N' || tran == 'n')
-	/* the non-transpose case */
-	{
-	   if (uplo == 'L' || uplo == 'l')
-		{
-		/* the lower case */
-		for (i=N-BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
-		   {
-			cublasDtrmm ('R', 'L', 'N', diag, M, BLOCK_SIZE, 1.0, 
-                                     d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+ldb*i, ldb);
-
-			if (i-BLOCK_SIZE<0)
- 		 	   break;
-
-			cublasDgemm ('N', 'N', M, i, BLOCK_SIZE, -1.0, b+ldb*i, ldb, 
-                                     A+i, lda, 1.0, b, ldb);
-		   }
-		}
-		else
-		{
-		  /* the upper case */
-		  for (i=0; i<N; i+=BLOCK_SIZE)
+			else
 			{
-			   cublasDtrmm ('R', 'U', 'N', diag, M, BLOCK_SIZE, 1.0, 
-                                         d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+ldb*i, ldb);
+			/* the upper case */
+					
+				/* handle the first block seperately with alpha */
+				if (N == 1)
+					magmablas_dgemv32 ('T', BLOCK_SIZE, alpha, d_dinvA, BLOCK_SIZE, b, b);
+				else
+					cublasDgemm ('T', 'N', BLOCK_SIZE, N, BLOCK_SIZE, alpha, d_dinvA, BLOCK_SIZE, b, ldb, 0, b, ldb);  
 
-			   if (i+BLOCK_SIZE>=N)
-				break;
+				if (BLOCK_SIZE>=M)
+					return;
 
-			   cublasDgemm ('N', 'N', M, N-i-BLOCK_SIZE, BLOCK_SIZE, -1.0, b+i*ldb, 
-                                 ldb, A+(i+BLOCK_SIZE)*lda+i, lda, 1.0, b+(i+BLOCK_SIZE)*ldb, ldb);
+				cublasDgemm ('T', 'N', M-BLOCK_SIZE, N, BLOCK_SIZE, -1.0, A+(BLOCK_SIZE)*lda, lda, b, ldb, alpha, b+BLOCK_SIZE, ldb);
+
+				/* the rest blocks */
+				for (i=BLOCK_SIZE; i<M; i+=BLOCK_SIZE)
+				{
+					if (N == 1)
+						magmablas_dgemv32 ('T', BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+					else
+						cublasDgemm ('T', 'N', BLOCK_SIZE, N, BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
+					
+					if (i+BLOCK_SIZE>=M)
+						break;
+
+					cublasDgemm ('T', 'N', M-i-BLOCK_SIZE, N, BLOCK_SIZE, -1.0, A+(i+BLOCK_SIZE)*lda+i, lda, b+i, ldb, 1.0, b+i+BLOCK_SIZE, ldb);
+				}
 			}
 		}
 	}
 	else
-	/* the transpose case */
-	{
-	   if (uplo == 'L' || uplo == 'l')
-	   {
-		  /* the lower case */
-		  for (i=0; i<N; i+=BLOCK_SIZE)
-		     {
-			cublasDtrmm ('R', 'L', 'T', diag, M, BLOCK_SIZE, 1.0, 
-                                     d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+ldb*i, ldb);
+	{	// side=R
 
-			if (i+BLOCK_SIZE>=N)
-			  break;
-
-			cublasDgemm ('N', 'T', M, N-i-BLOCK_SIZE, BLOCK_SIZE, -1.0, b+ldb*i, 
-                                   ldb, A+i*lda+BLOCK_SIZE+i, lda, 1.0, b+(i+BLOCK_SIZE)*ldb, ldb);
-		      }
-	   }
-	   else
-	   {
-		/* the upper case */
-		for (i=N-BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
+		/* inverse the diagonals
+		 * Allocate device memory for the inversed diagonal blocks, size=N*BLOCK_SIZE 
+		 */
+		nblocks = N/BLOCK_SIZE;
+		diag_dtrtri_kernel<<<nblocks, BLOCK_SIZE>>>(uplo, diag, A, d_dinvA, lda);
+		
+		if (tran == 'N' || tran == 'n')
+		/* the non-transpose case */
 		{
-		   cublasDtrmm ('R', 'U', 'T', diag, M, BLOCK_SIZE, 1.0, 
-                                d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+ldb*i, ldb);
+			if (uplo == 'L' || uplo == 'l')
+			{
+			/* the lower case */
+				
+				/* handle the first block seperately with alpha */
+				i=N-BLOCK_SIZE;
+				inplace_dgemm ('N', M, alpha, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
 
-		   if (i-BLOCK_SIZE<0)
-			break;
+				if (i-BLOCK_SIZE<0)
+					return;
 
-       		   cublasDgemm ('N', 'T', M, i, BLOCK_SIZE, -1.0, b+i*ldb, ldb, 
-                                A+i*lda, lda, 1.0, b, ldb);
+				cublasDgemm ('N', 'N', M, i, BLOCK_SIZE, -1.0, b+ldb*i, ldb, A+i, lda, alpha, b, ldb);
+
+				/* the rest blocks */
+				for (i=N-2*BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
+				{
+					inplace_dgemm ('N', M, 1.0, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
+					
+					if (i-BLOCK_SIZE<0)
+						break;
+
+					cublasDgemm ('N', 'N', M, i, BLOCK_SIZE, -1.0, b+ldb*i, ldb, A+i, lda, 1.0, b, ldb);
+				}
+			}
+			else
+			{
+			/* the upper case */
+				
+				/* handle the first block seperately with alpha */
+				inplace_dgemm ('N', M, alpha, b, ldb, d_dinvA, BLOCK_SIZE);
+
+				if (BLOCK_SIZE>=N)
+					return;
+
+				cublasDgemm ('N', 'N', M, N-BLOCK_SIZE, BLOCK_SIZE, -1.0, b, ldb, A+(BLOCK_SIZE)*lda, lda, alpha, b+(BLOCK_SIZE)*ldb, ldb);
+				
+				
+				/* the rest blocks */
+				for (i=BLOCK_SIZE; i<N; i+=BLOCK_SIZE)
+				{
+					inplace_dgemm ('N', M, 1.0, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
+
+					if (i+BLOCK_SIZE>=N)
+						break;
+
+					cublasDgemm ('N', 'N', M, N-i-BLOCK_SIZE, BLOCK_SIZE, -1.0, b+i*ldb, ldb, A+(i+BLOCK_SIZE)*lda+i, lda, 1.0, b+(i+BLOCK_SIZE)*ldb, ldb);
+				}
+			}
 		}
-	   }
+		else
+		/* the transpose case */
+		{
+			if (uplo == 'L' || uplo == 'l')
+			{
+			/* the lower case */
+				
+				/* handle the first block seperately with alpha */
+				inplace_dgemm ('T', M, alpha, b, ldb, d_dinvA, BLOCK_SIZE);
+
+				if (BLOCK_SIZE>=N)
+					return;
+
+				cublasDgemm ('N', 'T', M, N-BLOCK_SIZE, BLOCK_SIZE, -1.0, b, ldb, A+BLOCK_SIZE, lda, alpha, b+(BLOCK_SIZE)*ldb, ldb);
+
+				/* the rest blocks */
+				for (i=BLOCK_SIZE; i<N; i+=BLOCK_SIZE)
+				{
+					inplace_dgemm ('T', M, 1.0, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
+
+					if (i+BLOCK_SIZE>=N)
+						break;
+
+					cublasDgemm ('N', 'T', M, N-i-BLOCK_SIZE, BLOCK_SIZE, -1.0, b+ldb*i, ldb, A+i*lda+BLOCK_SIZE+i, lda, 1.0, b+(i+BLOCK_SIZE)*ldb, ldb);
+				}
+			}
+			else
+			{
+			/* the upper case */
+				
+				/* handle the first block seperately with alpha */
+				i=N-BLOCK_SIZE;
+				inplace_dgemm ('T', M, alpha, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
+
+				if (i-BLOCK_SIZE<0)
+					return;
+
+				cublasDgemm ('N', 'T', M, i, BLOCK_SIZE, -1.0, b+i*ldb, ldb, A+i*lda, lda, alpha, b, ldb);
+				
+				/* the rest blocks */
+				for (i=N-2*BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
+				{
+					inplace_dgemm ('T', M, 1.0, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
+
+					if (i-BLOCK_SIZE<0)
+						break;
+
+					cublasDgemm ('N', 'T', M, i, BLOCK_SIZE, -1.0, b+i*ldb, ldb, A+i*lda, lda, 1.0, b, ldb);
+				}
+			}
+		}
 	}
-   }
-   cudaFree(d_dinvA);
 }
 
-#undef BLOCK_SIZE
+/*
+ * magmablas_dtrsm
+ */
+
+extern "C"
+void magmablas_dtrsm (char side, char uplo, char tran, char diag, int M, int N, double alpha, double* A, int lda, double* b, int ldb)
+{
+/*  -- MAGMA (version 0.2) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       October 2009
+
+	   Purpose
+	   =======
+	   
+	   DTRSM  solves one of the matrix equations on GPU
+	   
+	      op( A )*X = alpha*B,   or   X*op( A ) = alpha*B,
+	   
+	   where alpha is a scalar, X and B are m by n matrices, A is a unit, or
+	   non-unit,  upper or lower triangular matrix  and  op( A )  is one  of
+	   
+	      op( A ) = A   or   op( A ) = A'.
+	   
+	   The matrix X is overwritten on B.
+	   
+	   When M or N is not a multiple of blocking size, which is 32 for now, cublasDtrsm will
+	   be called instead. There soon will not be this limitation both for arbitrary problem 
+	   size and blocking size.
+	   
+	   Arguments
+	   ==========
+	   
+	   side   - CHARACTER*1.
+	            On entry, side specifies whether op( A ) appears on the left
+	            or right of X as follows:
+	   
+	               side = 'L' or 'l'   op( A )*X = alpha*B.
+	   
+	               side = 'R' or 'r'   X*op( A ) = alpha*B.
+	   
+	            Unchanged on exit.
+	   
+	   uplo   - CHARACTER*1.
+	            On entry, uplo specifies whether the matrix A is an upper or
+	            lower triangular matrix as follows:
+	   
+	               uplo = 'U' or 'u'   A is an upper triangular matrix.
+	   
+	               uplo = 'L' or 'l'   A is a lower triangular matrix.
+	   
+	            Unchanged on exit.
+	   
+	   tran - CHARACTER*1.
+	            On entry, tran specifies the form of op( A ) to be used in
+	            the matrix multiplication as follows:
+	   
+	               tran = 'N' or 'n'   op( A ) = A.
+	   
+	               tran = 'T' or 't'   op( A ) = A'.
+	   
+	               tran = 'C' or 'c'   op( A ) = A'.
+	   
+	            Unchanged on exit.
+	   
+	   diag   - CHARACTER*1.
+	            On entry, diag specifies whether or not A is unit triangular
+	            as follows:
+	   
+	               diag = 'U' or 'u'   A is assumed to be unit triangular.
+	   
+	               diag = 'N' or 'n'   A is not assumed to be unit
+	                                   triangular.
+	   
+	            Unchanged on exit.
+	   
+	   m      - INTEGER.
+	            On entry, m specifies the number of rows of B. m must be at
+	            least zero.
+	            Unchanged on exit.
+	   
+	    n      - INTEGER.
+	             On entry, n specifies the number of columns of B.  n must be
+	             at least zero.
+	             Unchanged on exit.
+	   
+	    alpha  - DOUBLE PRECISION.
+	             On entry,  alpha specifies the scalar  alpha. When  alpha is
+	             zero then  A is not referenced and  B need not be set before
+	             entry.
+	             Unchanged on exit.
+	   
+	    A      - DOUBLE PRECISION             array of DIMENSION ( lda, k ), where k is m
+	             when  side = 'L' or 'l'  and is  n  when  side = 'R' or 'r'.
+	             Before entry  with  uplo = 'U' or 'u',  the  leading  k by k
+	             upper triangular part of the array  A must contain the upper
+	             triangular matrix  and the dtrictly lower triangular part of
+	             A is not referenced.
+	             Before entry  with  uplo = 'L' or 'l',  the  leading  k by k
+	             lower triangular part of the array  A must contain the lower
+	             triangular matrix  and the dtrictly upper triangular part of
+	             A is not referenced.
+	             Note that when  diag = 'U' or 'u',  the diagonal elements of
+	             A  are not referenced either,  but are assumed to be  unity.
+	             Unchanged on exit.
+	   
+	    lda    - INTEGER.
+	             On entry, lda specifies the first dimension of A as declared
+	             in the calling (sub) program.  When  side = 'L' or 'l'  then
+	             lda  must be at least  max( 1, m ),  when  side = 'R' or 'r'
+	             then lda must be at least max( 1, n ).
+	             Unchanged on exit.
+	   
+	    b      - DOUBLE PRECISION             array of DIMENSION ( ldb, n ).
+	             Before entry,  the leading  m by n part of the array  B must
+	             contain  the  right-hand  side  matrix  B,  and  on exit  is
+	             overwritten by the solution matrix  X.
+	   
+	    ldb    - INTEGER.
+	             On entry, ldb specifies the first dimension of B as declared
+	             in  the  calling  (sub)  program.   ldb  must  be  at  least
+	             max( 1, m ).
+	             Unchanged on exit.
+	   
+	   
+	    Level 3 Blas routine.
+		*
+    ===================================================================== */
+
+	int i, nblocks;
+	double *d_dinvA;
+	
+	/* quick return on wrong size */
+	if (M<=0 || N<=0)
+		return;
+	
+	/* 
+	 * call cublasDtrsm when size of the problem is not a multiple of blocksize which is 32
+	 * subject to change soon
+	 */
+	if ((M%BLOCK_SIZE)!=0 || (N>1 && (N%BLOCK_SIZE)!=0))
+	{
+		cublasDtrsm (side, uplo, tran, diag, M, N, alpha, A, lda, b, ldb);
+		return;
+	}
+
+	if (side == 'l' || side == 'L')
+	{
+		/* inverse the diagonals
+		 * Allocate device memory for the inversed diagonal blocks, size=m*BLOCK_SIZE 
+		 */
+		cudaMalloc((void**)&d_dinvA, BLOCK_SIZE*M*sizeof(double));
+		nblocks = M/BLOCK_SIZE;
+
+		diag_dtrtri_kernel<<<nblocks, BLOCK_SIZE>>>(uplo, diag, A, d_dinvA, lda);
+
+		if (tran == 'N' || tran == 'n')
+		/* the non-transpose case */
+		{
+			if (uplo == 'L' || uplo == 'l')
+			{
+			/* the lower case */
+				
+				/* handle the first block seperately with alpha */
+				if (N == 1)
+					magmablas_dgemv32 ('N', BLOCK_SIZE, alpha, d_dinvA, BLOCK_SIZE, b, b);
+				else
+					cublasDgemm ('N', 'N', BLOCK_SIZE, N, BLOCK_SIZE, alpha, d_dinvA, BLOCK_SIZE, b, ldb, 0, b, ldb);  
+
+				if (BLOCK_SIZE>=M)
+				{
+					cudaFree(d_dinvA);
+					return;
+				}
+
+				cublasDgemm ('N', 'N', M-BLOCK_SIZE, N, BLOCK_SIZE, -1.0, A+BLOCK_SIZE, lda, b, ldb, alpha, b+BLOCK_SIZE, ldb);
+
+				/* the rest blocks */
+				for (i=BLOCK_SIZE; i<M; i+=BLOCK_SIZE)
+				{
+					if (N == 1)
+						magmablas_dgemv32 ('N', BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+					else
+						cublasDgemm ('N', 'N', BLOCK_SIZE, N, BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
+
+					if (i+BLOCK_SIZE>=M)
+						break;
+
+					cublasDgemm ('N', 'N', M-i-BLOCK_SIZE, N, BLOCK_SIZE, -1.0, A+i*lda+i+BLOCK_SIZE, lda, b+i, ldb, 1.0, b+i+BLOCK_SIZE, ldb);
+				}
+			}
+			else
+			{
+			/* the upper case */
+
+				/* handle the first block seperately with alpha */
+				i = M-BLOCK_SIZE;
+				if (N == 1)
+					magmablas_dgemv32 ('N', BLOCK_SIZE, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+				else
+					cublasDgemm ('N', 'N', BLOCK_SIZE, N, BLOCK_SIZE, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0.0, b+i, ldb); 
+					
+				if (i-BLOCK_SIZE<0)
+				{
+					cudaFree(d_dinvA);
+					return;
+				}
+
+				cublasDgemm ('N', 'N', i, N, BLOCK_SIZE, -1.0, A+i*lda, lda, b+i, ldb, alpha, b, ldb);
+
+				/* the rest blocks */
+				for (i=M-2*BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
+				{
+					if (N == 1)
+						magmablas_dgemv32 ('N', BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+					else
+						cublasDgemm ('N', 'N', BLOCK_SIZE, N, BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0.0, b+i, ldb); 
+
+					if (i-BLOCK_SIZE<0)
+						break;
+
+					cublasDgemm ('N', 'N', i, N, BLOCK_SIZE, -1.0, A+i*lda, lda, b+i, ldb, 1.0, b, ldb);
+				}
+			}
+		}
+		else
+		/* the transpose case */
+		{
+			if (uplo == 'L' || uplo == 'l')
+			{
+			/* the lower case */
+				
+				/* handle the first block seperately with alpha */
+				i=M-BLOCK_SIZE; 
+				if (N == 1)
+					magmablas_dgemv32 ('T', BLOCK_SIZE, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+				else
+					cublasDgemm ('T', 'N', BLOCK_SIZE, N, BLOCK_SIZE, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
+
+				if (i-BLOCK_SIZE<0)
+				{
+					cudaFree(d_dinvA);
+					return;
+				}
+
+				cublasDgemm ('T', 'N', i, N, BLOCK_SIZE, -1.0, A+i, lda, b+i, ldb, alpha, b, ldb);
+
+				/* the rest blocks */
+				for (i=M-2*BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
+				{
+					if (N == 1)
+						magmablas_dgemv32 ('T', BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+					else
+						cublasDgemm ('T', 'N', BLOCK_SIZE, N, BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
+
+					if (i-BLOCK_SIZE<0)
+						break;
+
+					cublasDgemm ('T', 'N', i, N, BLOCK_SIZE, -1.0, A+i, lda, b+i, ldb, 1.0, b, ldb);
+				}
+			}
+			else
+			{
+			/* the upper case */
+					
+				/* handle the first block seperately with alpha */
+				if (N == 1)
+					magmablas_dgemv32 ('T', BLOCK_SIZE, alpha, d_dinvA, BLOCK_SIZE, b, b);
+				else
+					cublasDgemm ('T', 'N', BLOCK_SIZE, N, BLOCK_SIZE, alpha, d_dinvA, BLOCK_SIZE, b, ldb, 0, b, ldb);  
+
+				if (BLOCK_SIZE>=M)
+				{
+					cudaFree(d_dinvA);
+					return;
+				}
+
+				cublasDgemm ('T', 'N', M-BLOCK_SIZE, N, BLOCK_SIZE, -1.0, A+(BLOCK_SIZE)*lda, lda, b, ldb, alpha, b+BLOCK_SIZE, ldb);
+
+				/* the rest blocks */
+				for (i=BLOCK_SIZE; i<M; i+=BLOCK_SIZE)
+				{
+					if (N == 1)
+						magmablas_dgemv32 ('T', BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
+					else
+						cublasDgemm ('T', 'N', BLOCK_SIZE, N, BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
+					
+					if (i+BLOCK_SIZE>=M)
+						break;
+
+					cublasDgemm ('T', 'N', M-i-BLOCK_SIZE, N, BLOCK_SIZE, -1.0, A+(i+BLOCK_SIZE)*lda+i, lda, b+i, ldb, 1.0, b+i+BLOCK_SIZE, ldb);
+				}
+			}
+		}
+	}
+	else
+	{	// side=R
+
+		/* inverse the diagonals
+		 * Allocate device memory for the inversed diagonal blocks, size=N*BLOCK_SIZE 
+		 */
+		cudaMalloc((void**)&d_dinvA, BLOCK_SIZE*N*sizeof(double));
+		nblocks = N/BLOCK_SIZE;
+		diag_dtrtri_kernel<<<nblocks, BLOCK_SIZE>>>(uplo, diag, A, d_dinvA, lda);
+		
+		if (tran == 'N' || tran == 'n')
+		/* the non-transpose case */
+		{
+			if (uplo == 'L' || uplo == 'l')
+			{
+			/* the lower case */
+				
+				/* handle the first block seperately with alpha */
+				i=N-BLOCK_SIZE;
+				inplace_dgemm ('N', M, alpha, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
+
+				if (i-BLOCK_SIZE<0)
+				{
+					cudaFree(d_dinvA);
+					return;
+				}
+
+				cublasDgemm ('N', 'N', M, i, BLOCK_SIZE, -1.0, b+ldb*i, ldb, A+i, lda, alpha, b, ldb);
+
+				/* the rest blocks */
+				for (i=N-2*BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
+				{
+					inplace_dgemm ('N', M, 1.0, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
+					
+					if (i-BLOCK_SIZE<0)
+						break;
+
+					cublasDgemm ('N', 'N', M, i, BLOCK_SIZE, -1.0, b+ldb*i, ldb, A+i, lda, 1.0, b, ldb);
+				}
+			}
+			else
+			{
+			/* the upper case */
+				
+				/* handle the first block seperately with alpha */
+				inplace_dgemm ('N', M, alpha, b, ldb, d_dinvA, BLOCK_SIZE);
+
+				if (BLOCK_SIZE>=N)
+				{
+					cudaFree(d_dinvA);
+					return;
+				}
+
+				cublasDgemm ('N', 'N', M, N-BLOCK_SIZE, BLOCK_SIZE, -1.0, b, ldb, A+(BLOCK_SIZE)*lda, lda, alpha, b+(BLOCK_SIZE)*ldb, ldb);
+				
+				
+				/* the rest blocks */
+				for (i=BLOCK_SIZE; i<N; i+=BLOCK_SIZE)
+				{
+					inplace_dgemm ('N', M, 1.0, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
+
+					if (i+BLOCK_SIZE>=N)
+						break;
+
+					cublasDgemm ('N', 'N', M, N-i-BLOCK_SIZE, BLOCK_SIZE, -1.0, b+i*ldb, ldb, A+(i+BLOCK_SIZE)*lda+i, lda, 1.0, b+(i+BLOCK_SIZE)*ldb, ldb);
+				}
+			}
+		}
+		else
+		/* the transpose case */
+		{
+			if (uplo == 'L' || uplo == 'l')
+			{
+			/* the lower case */
+				
+				/* handle the first block seperately with alpha */
+				inplace_dgemm ('T', M, alpha, b, ldb, d_dinvA, BLOCK_SIZE);
+
+				if (BLOCK_SIZE>=N)
+				{
+					cudaFree(d_dinvA);
+					return;
+				}
+
+				cublasDgemm ('N', 'T', M, N-BLOCK_SIZE, BLOCK_SIZE, -1.0, b, ldb, A+BLOCK_SIZE, lda, alpha, b+(BLOCK_SIZE)*ldb, ldb);
+
+				/* the rest blocks */
+				for (i=BLOCK_SIZE; i<N; i+=BLOCK_SIZE)
+				{
+					inplace_dgemm ('T', M, 1.0, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
+
+					if (i+BLOCK_SIZE>=N)
+						break;
+
+					cublasDgemm ('N', 'T', M, N-i-BLOCK_SIZE, BLOCK_SIZE, -1.0, b+ldb*i, ldb, A+i*lda+BLOCK_SIZE+i, lda, 1.0, b+(i+BLOCK_SIZE)*ldb, ldb);
+				}
+			}
+			else
+			{
+			/* the upper case */
+				
+				/* handle the first block seperately with alpha */
+				i=N-BLOCK_SIZE;
+				inplace_dgemm ('T', M, alpha, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
+
+				if (i-BLOCK_SIZE<0)
+				{
+					cudaFree(d_dinvA);
+					return;
+				}
+
+				cublasDgemm ('N', 'T', M, i, BLOCK_SIZE, -1.0, b+i*ldb, ldb, A+i*lda, lda, alpha, b, ldb);
+				
+				/* the rest blocks */
+				for (i=N-2*BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
+				{
+					inplace_dgemm ('T', M, 1.0, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
+
+					if (i-BLOCK_SIZE<0)
+						break;
+
+					cublasDgemm ('N', 'T', M, i, BLOCK_SIZE, -1.0, b+i*ldb, ldb, A+i*lda, lda, 1.0, b, ldb);
+				}
+			}
+		}
+	}
+
+	cudaFree(d_dinvA);
+}
+
