@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       October 2009
+       April 2010
 */
 
 #include "cublas.h"
@@ -11,567 +11,21 @@
 #include "magmablas.h"
 
 
-#define BLOCK_SIZE 32 
 #define min(a,b) (a<=b)?a:b
 #define max(a,b) (a>=b)?a:b
+#define qmod(a,b) ((a)-(__mul24((b),(a)/(b))))
+//define cublasSgemm magmablas_sgemm
 
-/* inplace sgemm for A=A*B 
- *
- * this version works 
- * with M%BLOCK_SIZE==0	&& N%BLOCK_SIZE!=0*/
-__global__ void
-inplace_sgemm_kernel2_N(int M, int N, float alpha, float *A, int lda, float *B, int ldb)
-{
-        int i;
-        float myvalue1=0, myvalue2= 0 ;
-        float med;
-        int tx = threadIdx.x;
-        int ty = threadIdx.y;
-        const int bx = blockIdx.x;
-        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE+1];
-        __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
-	
+#define b_copy();	dim3 dimBlock((M>=MAX_THREAD_PER_BLOCK)?MAX_THREAD_PER_BLOCK:(WARP_SIZE*((M/WARP_SIZE)+(M%WARP_SIZE!=0))), 1);\
+					dim3 dimGrid(M/dimBlock.x+(M%dimBlock.x!=0), N);\
+					b_copy_kernel<<<dimGrid, dimBlock>>>(M, N, b, ldb, d_x, M);\
+					cudaThreadSynchronize();
 
-        A+= bx*32 + __mul24(lda,ty) + tx ;
-        B+=      __mul24(ldb,ty) + tx ;
-        __syncthreads();
+#define MAX_THREAD_PER_BLOCK 512
+#define WARP_SIZE 32
 
-		As[tx][ty] = As[tx][ty+16] = Bs[tx][ty] = Bs[tx][ty+16] = 0;
-
-		// read A (can't touch things that aren't yours)
-		if (ty<N)
-			As[tx][ty]= A[0];
-		if (ty+16<N)
-			As[tx][ty+16] = A[BLOCK_SIZE/2*lda];
-		
-		// read B
-		if (tx<N)
-		{
-			Bs[ty][tx]= B[0];
-			Bs[ty+16][tx]= B[16*ldb];
-		}
-
-        __syncthreads();
-
-        med  = As[tx][0];
-        float py1 = Bs[ty][0] ;
-        float py2 = Bs[ty+16][0] ;
-        #pragma unroll
-        for (i=0; i<31; i++){
-                myvalue1 +=  med*py1;
-                py1 = Bs[ty][i+1] ;
-                myvalue2 +=  med*py2;
-                py2 = Bs[ty+16][i+1] ;
-                med  = As[tx][i+1];
-        }
-        myvalue1 +=  med*py1;
-        myvalue2 +=  med*py2;
-		
-		// read A (can't touch things that aren't yours)
-		if (ty<N)
-			A[0] = alpha*myvalue1 ;
-		if (ty+16<N)
-			A[lda*16] = alpha*myvalue2;
-}
-
-/* inplace sgemm for A=A*B^T 
- *
- * this version only works 
- * with M%BLOCK_SIZE==0 && N%BLOCK_SIZE!=0
- * */
-__global__ void
-inplace_sgemm_kernel2_T(int M, int N, float alpha, float *A, int lda, float *B, int ldb)
-{
-        int i;
-        float myvalue1=0, myvalue2= 0 ;
-        float med;
-        int tx = threadIdx.x;
-        int ty = threadIdx.y;
-        const int bx = blockIdx.x;
-        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE+1];
-        __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
-
-        A+= bx*32 + __mul24(lda,ty) + tx ;
-        B+=      __mul24(ldb,ty) + tx ;
-
-		As[tx][ty] = As[tx][ty+16] = Bs[tx][ty] = Bs[tx][ty+16] = 0;
-
-		// read A (can't touch things that aren't yours)
-		if (ty<N)
-			As[tx][ty]= A[0];
-		if (ty+16<N)
-			As[tx][ty+16] = A[BLOCK_SIZE/2*lda];
-		
-		// read B
-		if (tx<N)
-		{
-			Bs[tx][ty]= B[0];
-			Bs[tx][ty+16]= B[16*ldb];
-		}
-
-        __syncthreads();
-        med  = As[tx][0];
-        float py1 = Bs[ty][0] ;
-        float py2 = Bs[ty+16][0] ;
-        #pragma unroll
-        for (i=0; i<31; i++){
-                myvalue1 +=  med*py1;
-                py1 = Bs[ty][i+1] ;
-                myvalue2 +=  med*py2;
-                py2 = Bs[ty+16][i+1] ;
-                med  = As[tx][i+1];
-        }
-        myvalue1 +=  med*py1;
-        myvalue2 +=  med*py2;
-		
-		// write A (can't touch things that aren't yours)
-		if (ty<N)
-			A[0] = alpha*myvalue1 ;
-		if (ty+16<N)
-			A[lda*16] = alpha*myvalue2;
-}
-
-/* inplace sgemm for A=A*B^T 
- *
- * this version only works 
- * with M%BLOCK_SIZE!=0 && N%BLOCK_SIZE==0
- * */
-__global__ void
-inplace_sgemm_kernel3_T(int M, int N, float alpha, float *A, int lda, float *B, int ldb)
-{
-        int i;
-        float myvalue1=0, myvalue2= 0 ;
-        float med;
-        int tx = threadIdx.x;
-        int ty = threadIdx.y;
-        const int bx = blockIdx.x;
-        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE+1];
-        __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
-
-        A+= bx*32 + __mul24(lda,ty) + tx ;
-        B+=      __mul24(ldb,ty) + tx ;
-
-		As[tx][ty] = As[tx][ty+16] = Bs[tx][ty] = Bs[tx][ty+16] = 0;
-
-		// read A (can't touch things that aren't yours)
-		if (bx == M/BLOCK_SIZE)
-		{
-			if (tx<(M%BLOCK_SIZE))
-			{
-				As[tx][ty]= A[0];
-				As[tx][ty+16] = A[BLOCK_SIZE/2*lda];
-			}
-		}
-		else
-		{
-			As[tx][ty]= A[0];
-			As[tx][ty+16] = A[BLOCK_SIZE/2*lda];
-		}
-		
-		// read B
-		Bs[tx][ty]= B[0];
-		Bs[tx][ty+16]= B[16*ldb];
-
-        __syncthreads();
-        med  = As[tx][0];
-        float py1 = Bs[ty][0] ;
-        float py2 = Bs[ty+16][0] ;
-        #pragma unroll
-        for (i=0; i<31; i++){
-                myvalue1 +=  med*py1;
-                py1 = Bs[ty][i+1] ;
-                myvalue2 +=  med*py2;
-                py2 = Bs[ty+16][i+1] ;
-                med  = As[tx][i+1];
-        }
-        myvalue1 +=  med*py1;
-        myvalue2 +=  med*py2;
-		
-		// write A (can't touch things that aren't yours)
-		if (bx == M/BLOCK_SIZE)
-		{
-			if (tx<(M%BLOCK_SIZE))
-			{
-				A[0] = alpha*myvalue1 ;
-				A[lda*16] = alpha*myvalue2;
-			}
-		}
-		else
-		{
-			A[0] = alpha*myvalue1 ;
-			A[lda*16] = alpha*myvalue2;
-		}
-}
-/* inplace sgemm for A=A*B^T 
- *
- * this version only works 
- * with M%BLOCK_SIZE!=0 && N%BLOCK_SIZE!=0
- * */
-__global__ void
-inplace_sgemm_kernel1_T(int M, int N, float alpha, float *A, int lda, float *B, int ldb)
-{
-        int i;
-        float myvalue1=0, myvalue2= 0 ;
-        float med;
-        int tx = threadIdx.x;
-        int ty = threadIdx.y;
-        const int bx = blockIdx.x;
-        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE+1];
-        __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
-		int swm = (M%BLOCK_SIZE==0);
-
-        A+= bx*32 + __mul24(lda,ty) + tx ;
-        B+=      __mul24(ldb,ty) + tx ;
-
-		As[tx][ty] = As[tx][ty+16] = Bs[tx][ty] = Bs[tx][ty+16] = 0;
-
-		// read A (can't touch things that aren't yours)
-		if (swm)
-		{
-			if (ty<N)
-				As[tx][ty]= A[0];
-			if (ty+16<N)
-				As[tx][ty+16] = A[BLOCK_SIZE/2*lda];
-		}
-		else
-		{
-			if (bx == M/BLOCK_SIZE)
-			{
-				if (tx<(M%BLOCK_SIZE))
-				{
-					if (ty<N)
-						As[tx][ty]= A[0];
-					if (ty+16<N)
-						As[tx][ty+16] = A[BLOCK_SIZE/2*lda];
-				}
-			}
-			else
-			{
-				if (ty<N)
-					As[tx][ty]= A[0];
-				if (ty+16<N)
-					As[tx][ty+16] = A[BLOCK_SIZE/2*lda];
-			}
-		}
-		
-		// read B
-		if (tx<N)
-		{
-			Bs[tx][ty]= B[0];
-			Bs[tx][ty+16]= B[16*ldb];
-		}
-
-        __syncthreads();
-        med  = As[tx][0];
-        float py1 = Bs[ty][0] ;
-        float py2 = Bs[ty+16][0] ;
-        #pragma unroll
-        for (i=0; i<31; i++){
-                myvalue1 +=  med*py1;
-                py1 = Bs[ty][i+1] ;
-                myvalue2 +=  med*py2;
-                py2 = Bs[ty+16][i+1] ;
-                med  = As[tx][i+1];
-        }
-        myvalue1 +=  med*py1;
-        myvalue2 +=  med*py2;
-		
-		// write A (can't touch things that aren't yours)
-		if (swm)
-		{
-			if (ty<N)
-				A[0] = alpha*myvalue1 ;
-			if (ty+16<N)
-				A[lda*16] = alpha*myvalue2;
-		}
-		else
-		{
-			if (bx == M/BLOCK_SIZE)
-			{
-				if (tx<(M%BLOCK_SIZE))
-				{
-					if (ty<N)
-						A[0] = alpha*myvalue1 ;
-					if (ty+16<N)
-						A[lda*16] = alpha*myvalue2;
-				}
-			}
-			else
-			{
-				if (ty<N)
-					A[0] = alpha*myvalue1 ;
-				if (ty+16<N)
-					A[lda*16] = alpha*myvalue2;
-			}
-		}
-}
-
-/* inplace sgemm for A=A*B^T 
- *
- * this version only works 
- * with M%BLOCK_SIZE==0 && N%BLOCK_SIZE==0
- * */
-__global__ void
-inplace_sgemm_kernel0_T(int M, float alpha, float *A, int lda, float *B, int ldb)
-{
-        int i;
-        float myvalue1=0, myvalue2= 0 ;
-        float med;
-        int tx = threadIdx.x;
-        int ty = threadIdx.y;
-        const int bx = blockIdx.x;
-        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE+1];
-        __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
-
-        A+= bx*32 + __mul24(lda,ty) + tx ;
-        B+=      __mul24(ldb,ty) + tx ;
-
-
-        As[tx][ ty]=A[0];
-        As[tx][ty+16]= A[16*lda];
-        Bs[tx][ty]= B[0];
-        Bs[tx][ty+16]= B[16*ldb];
-
-        __syncthreads();
-        med  = As[tx][0];
-        float py1 = Bs[ty][0] ;
-        float py2 = Bs[ty+16][0] ;
-        #pragma unroll
-        for (i=0; i<31; i++){
-                myvalue1 +=  med*py1;
-                py1 = Bs[ty][i+1] ;
-                myvalue2 +=  med*py2;
-                py2 = Bs[ty+16][i+1] ;
-                med  = As[tx][i+1];
-        }
-        myvalue1 +=  med*py1;
-        myvalue2 +=  med*py2;
-        A[0] = alpha*myvalue1 ;
-        A[lda*16] = alpha*myvalue2;
-}
-
-/* inplace sgemm for A=A*B 
- *
- * this version works 
- * with M%BLOCK_SIZE!=0	&& N%BLOCK_SIZE==0*/
-__global__ void
-inplace_sgemm_kernel3_N(int M, int N, float alpha, float *A, int lda, float *B, int ldb)
-{
-        int i;
-        float myvalue1=0, myvalue2= 0 ;
-        float med;
-        int tx = threadIdx.x;
-        int ty = threadIdx.y;
-        const int bx = blockIdx.x;
-        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE+1];
-        __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
-	
-        A+= bx*32 + __mul24(lda,ty) + tx ;
-        B+=      __mul24(ldb,ty) + tx ;
-        __syncthreads();
-
-		As[tx][ty] = As[tx][ty+16] = Bs[tx][ty] = Bs[tx][ty+16] = 0;
-
-		// read A (can't touch things that aren't yours)
-		if (bx == M/BLOCK_SIZE)
-		{
-			if (tx<(M%BLOCK_SIZE))
-			{
-				As[tx][ty]= A[0];
-				As[tx][ty+16] = A[BLOCK_SIZE/2*lda];
-			}
-		}
-		else
-		{
-			As[tx][ty]= A[0];
-			As[tx][ty+16] = A[BLOCK_SIZE/2*lda];
-		}
-		
-		// read B
-		if (tx<N)
-		{
-			Bs[ty][tx]= B[0];
-			Bs[ty+16][tx]= B[16*ldb];
-		}
-
-        __syncthreads();
-
-        med  = As[tx][0];
-        float py1 = Bs[ty][0] ;
-        float py2 = Bs[ty+16][0] ;
-        #pragma unroll
-        for (i=0; i<31; i++){
-                myvalue1 +=  med*py1;
-                py1 = Bs[ty][i+1] ;
-                myvalue2 +=  med*py2;
-                py2 = Bs[ty+16][i+1] ;
-                med  = As[tx][i+1];
-        }
-        myvalue1 +=  med*py1;
-        myvalue2 +=  med*py2;
-		
-		// write A (can't touch things that aren't yours)
-		if (bx == M/BLOCK_SIZE)
-		{
-			if (tx<(M%BLOCK_SIZE))
-			{
-				A[0] = alpha*myvalue1 ;
-				A[lda*16] = alpha*myvalue2;
-			}
-		}
-		else
-		{
-			A[0] = alpha*myvalue1 ;
-			A[lda*16] = alpha*myvalue2;
-		}
-}
-/* inplace sgemm for A=A*B 
- *
- * this version works 
- * with M%BLOCK_SIZE!=0	&& N%BLOCK_SIZE!=0*/
-__global__ void
-inplace_sgemm_kernel1_N(int M, int N, float alpha, float *A, int lda, float *B, int ldb)
-{
-        int i;
-        float myvalue1=0, myvalue2= 0 ;
-        float med;
-        int tx = threadIdx.x;
-        int ty = threadIdx.y;
-        const int bx = blockIdx.x;
-        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE+1];
-        __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
-		int swm = (M%BLOCK_SIZE==0);
-	
-        A+= bx*32 + __mul24(lda,ty) + tx ;
-        B+=      __mul24(ldb,ty) + tx ;
-
-		As[tx][ty] = As[tx][ty+16] = Bs[ty][tx] = Bs[ty+16][tx] = 0;
-
-		// read A (can't touch things that aren't yours)
-		if (swm)
-		{
-			if (ty<N)
-				As[tx][ty]= A[0];
-			if (ty+16<N)
-				As[tx][ty+16] = A[BLOCK_SIZE/2*lda];
-		}
-		else
-		{
-			if (bx == M/BLOCK_SIZE)
-			{
-				if (tx<(M%BLOCK_SIZE))
-				{
-					if (ty<N)
-						As[tx][ty]= A[0];
-					if (ty+16<N)
-						As[tx][ty+16] = A[BLOCK_SIZE/2*lda];
-				}
-			}
-			else
-			{
-				if (ty<N)
-					As[tx][ty]= A[0];
-				if (ty+16<N)
-					As[tx][ty+16] = A[BLOCK_SIZE/2*lda];
-			}
-		}
-		
-		// read B
-		if (tx<N)
-		{
-			Bs[ty][tx]= B[0];
-			Bs[ty+16][tx]= B[16*ldb];
-		}
-
-        __syncthreads();
-
-        med  = As[tx][0];
-        float py1 = Bs[ty][0] ;
-        float py2 = Bs[ty+16][0] ;
-        #pragma unroll
-        for (i=0; i<31; i++){
-                myvalue1 +=  med*py1;
-                py1 = Bs[ty][i+1] ;
-                myvalue2 +=  med*py2;
-                py2 = Bs[ty+16][i+1] ;
-                med  = As[tx][i+1];
-        }
-        myvalue1 +=  med*py1;
-        myvalue2 +=  med*py2;
-		
-		// write A (can't touch things that aren't yours)
-		if (swm)
-		{
-			if (ty<N)
-				A[0] = alpha*myvalue1 ;
-			if (ty+16<N)
-				A[lda*16] = alpha*myvalue2;
-		}
-		else
-		{
-			if (bx == M/BLOCK_SIZE)
-			{
-				if (tx<(M%BLOCK_SIZE))
-				{
-					if (ty<N)
-						A[0] = alpha*myvalue1 ;
-					if (ty+16<N)
-						A[lda*16] = alpha*myvalue2;
-				}
-			}
-			else
-			{
-				if (ty<N)
-					A[0] = alpha*myvalue1 ;
-				if (ty+16<N)
-					A[lda*16] = alpha*myvalue2;
-			}
-		}
-}
-
-/* inplace sgemm for A=A*B 
- *
- * this version only works 
- * with M%BLOCK_SIZE==0
- * */
-__global__ void
-inplace_sgemm_kernel0_N(int M, float alpha, float *A, int lda, float *B, int ldb)
-{
-        int i;
-        float myvalue1=0, myvalue2= 0 ;
-        float med;
-        int tx = threadIdx.x;
-        int ty = threadIdx.y;
-        const int bx = blockIdx.x;
-        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE+1];
-        __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
-
-        A+= bx*32 + __mul24(lda,ty) + tx ;
-        B+=      __mul24(ldb,ty) + tx ;
-
-
-        As[tx][ ty]=A[0];
-        As[tx][ty+16]= A[16*lda];
-        Bs[ty][tx]= B[0];
-        Bs[ty+16][tx]= B[16*ldb];
-
-        __syncthreads();
-        med  = As[tx][0];
-        float py1 = Bs[ty][0] ;
-        float py2 = Bs[ty+16][0] ;
-        #pragma unroll
-        for (i=0; i<31; i++){
-                myvalue1 +=  med*py1;
-                py1 = Bs[ty][i+1] ;
-                myvalue2 +=  med*py2;
-                py2 = Bs[ty+16][i+1] ;
-                med  = As[tx][i+1];
-        }
-        myvalue1 +=  med*py1;
-        myvalue2 +=  med*py2;
-        A[0] = alpha*myvalue1 ;
-        A[lda*16] = alpha*myvalue2;
-}
+#define BLOCK_SIZE 16 // inner blocking size, <=32
+#define NB 128// outer blocking size, >BLOCK_SIZE 
 
 __global__ void
 diag_strtri_kernel_upper (char diag, float *A, float *d_dinvA, int lda)
@@ -579,7 +33,6 @@ diag_strtri_kernel_upper (char diag, float *A, float *d_dinvA, int lda)
 	int i,j;
 	float Ystx=0;
 	float *y=NULL, *Aoff=NULL;
-	float *my_d_dinvA;
 	int switcher=0;
 
 	// Thread index
@@ -589,7 +42,8 @@ diag_strtri_kernel_upper (char diag, float *A, float *d_dinvA, int lda)
 	int bx = blockIdx.x;
 		
 	Aoff = A+bx*lda*BLOCK_SIZE+bx*BLOCK_SIZE;
-	my_d_dinvA = d_dinvA+bx*BLOCK_SIZE*BLOCK_SIZE;
+	int NumBLperNB = NB/BLOCK_SIZE;
+	d_dinvA += bx/NumBLperNB*NB*NB+(bx%NumBLperNB)*(NB*BLOCK_SIZE+BLOCK_SIZE);
 
 	__shared__ float Bs[BLOCK_SIZE*BLOCK_SIZE];
 	__shared__ float workspace[BLOCK_SIZE]; // workspace used to store the current working column
@@ -633,7 +87,7 @@ diag_strtri_kernel_upper (char diag, float *A, float *d_dinvA, int lda)
 	// write back A
 	#pragma unroll
 	for (i=0; i<BLOCK_SIZE; i++)
-		*(my_d_dinvA+i*BLOCK_SIZE+tx) = Bs[i*BLOCK_SIZE+tx];
+		*(d_dinvA+i*NB+tx) = Bs[i*BLOCK_SIZE+tx];
 
 }
 __global__ void
@@ -642,7 +96,6 @@ diag_strtri_kernel_lower (char diag, float *A, float *d_dinvA, int lda)
 	int i,j;
 	float Ystx=0;
 	float *Bw=NULL, *x=NULL, *y=NULL, *Aoff=NULL;
-	float *my_d_dinvA;
 	int switcher=0;
 
 	// Thread index
@@ -653,7 +106,8 @@ diag_strtri_kernel_lower (char diag, float *A, float *d_dinvA, int lda)
 	int bx = blockIdx.x;
 		
 	Aoff = A+bx*lda*BLOCK_SIZE+bx*BLOCK_SIZE;
-	my_d_dinvA = d_dinvA+bx*BLOCK_SIZE*BLOCK_SIZE;
+	int NumBLperNB = NB/BLOCK_SIZE;
+	d_dinvA += bx/NumBLperNB*NB*NB+(bx%NumBLperNB)*(NB*BLOCK_SIZE+BLOCK_SIZE);
 
 	__shared__ float Bs[BLOCK_SIZE*BLOCK_SIZE];
 	__shared__ float workspace[BLOCK_SIZE]; // workspace used to store the current working column
@@ -662,8 +116,6 @@ diag_strtri_kernel_lower (char diag, float *A, float *d_dinvA, int lda)
 	#pragma unroll
 	for (i=0; i<BLOCK_SIZE; i++)
 		Bs[i*BLOCK_SIZE+tx] = ((float)(tx>=i))*(*(Aoff+i*lda+tx));	// read in the whole square block of my A and zero out the non data triangular
-		//Bs[i*BLOCK_SIZE+tx] = (*(Aoff+i*lda+tx));	// read in the whole square block of my A and zero out the non data triangular
-		//Bs[i*BLOCK_SIZE+tx] = (*(Aoff+i*lda+tx));	// read in the whole square block of my A (the old way)
 												// not the upper or lower diagonal
 	// Synchronize to make sure the matrices are loaded
 	__syncthreads();
@@ -671,9 +123,6 @@ diag_strtri_kernel_lower (char diag, float *A, float *d_dinvA, int lda)
 	switcher = (diag=='u' || diag=='U');
 	int diagsw = (Bs[tx*BLOCK_SIZE+tx]==0);
 	Bs[tx*BLOCK_SIZE+tx] = switcher+!switcher*(1/(diagsw+(!diagsw)*Bs[tx*BLOCK_SIZE+tx]));	// solve the diagonals
-//	Bs[tx*BLOCK_SIZE+tx] = switcher+!switcher*(1/Bs[tx*BLOCK_SIZE+tx]);	// solve the diagonals
-	// in the case where M%BLOCK_SIZE!=0, the amended extra block in d_dinvA might have zeros on the diagonal, and
-	// that could cause problem. diagsw is to always make the blocks in d_dinvA invertable 
 
 	/*
 	 * the lower case
@@ -697,12 +146,10 @@ diag_strtri_kernel_lower (char diag, float *A, float *d_dinvA, int lda)
 
 		#pragma unroll
 		for (j=0; j<BLOCK_SIZE-i-1; j++)
-		//for (j=0; j<txw+1; j++) // the old way with lots of branch divergence
 			Ystx += (float)switcher*(*(Bw+j*BLOCK_SIZE+txw)*x[j]);
 
 		//sscal
 		switcher = (tx != i); 
-		//if (tx !=i ) y[tx]=switcher*Ystx*(-Bs[i*BLOCK_SIZE+i]);
 		y[tx] = (float)switcher*Ystx*(-Bs[i*BLOCK_SIZE+i])+(float)(!switcher)*y[tx];
 
 		__syncthreads();
@@ -711,52 +158,1591 @@ diag_strtri_kernel_lower (char diag, float *A, float *d_dinvA, int lda)
 	// write back A
 	#pragma unroll
 	for (i=0; i<BLOCK_SIZE; i++)
-		*(my_d_dinvA+i*BLOCK_SIZE+tx) = Bs[i*BLOCK_SIZE+tx];
+		*(d_dinvA+i*NB+tx) = Bs[i*BLOCK_SIZE+tx];
 }
 
-extern "C" void
-inplace_sgemm (char tran, int M, int N, float alpha, float *A, int lda, float *B, int ldb)
+__device__ void saxpy( float a, float *b, float *c )
 {
-	dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE/2);
+	c[0] += a*b[0];
+	c[1] += a*b[1];
+	c[2] += a*b[2];
+	c[3] += a*b[3];
+	c[4] += a*b[4];
+	c[5] += a*b[5];
+	c[6] += a*b[6];
+	c[7] += a*b[7];
+	c[8] += a*b[8];
+	c[9] += a*b[9];
+	c[10] += a*b[10];
+	c[11] += a*b[11];
+	c[12] += a*b[12];
+	c[13] += a*b[13];
+	c[14] += a*b[14];
+	c[15] += a*b[15];
+}
 
-	if (M%BLOCK_SIZE==0)	
+__device__ void sgemm_kernel_16 (float *A, int lda, float *B, int ldb, float * C, int ldc, float alpha, int blk, int inx, int iny, float *c)
+{
+
+	const float *Blast = B + blk;
+	__shared__ float bs[16][17];
+
+
+	do
 	{
-		if (N%BLOCK_SIZE==0)
+		float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+
+		bs[inx][iny]    = B[0*ldb];
+		bs[inx][iny+4]  = B[4*ldb];
+		bs[inx][iny+8]  = B[8*ldb];
+		bs[inx][iny+12] = B[12*ldb];
+		bs[inx+4][iny]    = B[4+0*ldb];
+		bs[inx+4][iny+4]  = B[4+4*ldb];
+		bs[inx+4][iny+8]  = B[4+8*ldb];
+		bs[inx+4][iny+12] = B[4+12*ldb];
+		bs[inx+8][iny]    = B[8+0*ldb];
+		bs[inx+8][iny+4]  = B[8+4*ldb];
+		bs[inx+8][iny+8]  = B[8+8*ldb];
+		bs[inx+8][iny+12] = B[8+12*ldb];
+		bs[inx+12][iny]    = B[12+0*ldb];
+		bs[inx+12][iny+4]  = B[12+4*ldb];
+		bs[inx+12][iny+8]  = B[12+8*ldb];
+		bs[inx+12][iny+12] = B[12+12*ldb];
+		__syncthreads();
+
+		A += 4*lda;
+		saxpy( a[0], &bs[0][0], c );		a[0] = A[0*lda];
+		saxpy( a[1], &bs[1][0], c );		a[1] = A[1*lda];
+		saxpy( a[2], &bs[2][0], c );		a[2] = A[2*lda];
+		saxpy( a[3], &bs[3][0], c );		a[3] = A[3*lda];
+
+		A += 4*lda;
+		saxpy( a[0], &bs[4][0], c );		a[0] = A[0*lda];
+		saxpy( a[1], &bs[5][0], c );		a[1] = A[1*lda];
+		saxpy( a[2], &bs[6][0], c );		a[2] = A[2*lda];
+		saxpy( a[3], &bs[7][0], c );		a[3] = A[3*lda];
+
+		A += 4*lda;
+		saxpy( a[0], &bs[8][0], c );		a[0] = A[0*lda];
+		saxpy( a[1], &bs[9][0], c );		a[1] = A[1*lda];
+		saxpy( a[2], &bs[10][0], c );		a[2] = A[2*lda];
+		saxpy( a[3], &bs[11][0], c );		a[3] = A[3*lda];
+
+		A += 4*lda;
+		saxpy( a[0], &bs[12][0], c );
+		saxpy( a[1], &bs[13][0], c );
+		saxpy( a[2], &bs[14][0], c );
+		saxpy( a[3], &bs[15][0], c );
+
+		B += 16;
+		__syncthreads();
+	} while( B < Blast );
+
+	for( int i = 0; i < 16; i++, C += ldc )
+		C[0] = alpha*c[i];
+}
+
+/*
+ * B21 = -inv(A11)*A12*inv(A22)
+ */
+#define qmod(a,b) ((a)-(__mul24((b),(a)/(b))))
+__global__ void
+triple_sgemm_update_16_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+{
+	const int bIdy = blockIdx.y/npages;
+//	const int page = (blockIdx.y)%(npages);
+	const int page = qmod(blockIdx.y, npages);
+	const int inx = threadIdx.x;
+	const int iny = threadIdx.y;
+	const int ibx = blockIdx.x * (blockDim.x*blockDim.y);
+	const int iby = bIdy * 16;
+	const int id = inx + iny*blockDim.x;
+	__shared__ float bs[16][17];
+
+	int PagesPerNB = NB/(blk*2);
+	//--------------------------part one---------------------------//
+	{
+		// A12*inv(A22) -> A12
+		// A=A12, B=inv(A22), C=A12(d_dinvA)
+		float *A, *B, *C;
+		int ldb = NB;
+		int ldc = NB;
+
+		d_dinvA += NB*NB*(page/PagesPerNB) + 
+				   (qmod(page,PagesPerNB))*(blk*2)*NB +
+				   (qmod(page,PagesPerNB))*(blk*2);
+
+		A = Ain + page*lda*blk*2 + blk*lda + page*blk*2;  
+		B = d_dinvA + blk*NB + blk;
+		C = d_dinvA + blk*NB;
+
+		A += ibx + id;
+		B += inx + __mul24( iby + iny, ldb );
+		C += ibx + id  + __mul24( iby, ldc );
+
+		const float *Blast = B + blk;
+
+		float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+		do
 		{
-			if (tran == 'n' || tran == 'N')
-				inplace_sgemm_kernel0_N<<<M/BLOCK_SIZE,dimBlock>>>(M, alpha, A, lda, B, ldb); 
-			else
-				inplace_sgemm_kernel0_T<<<M/BLOCK_SIZE,dimBlock>>>(M, alpha, A, lda, B, ldb); 
+			float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+
+			bs[inx][iny]    = B[0*ldb];
+			bs[inx][iny+4]  = B[4*ldb];
+			bs[inx][iny+8]  = B[8*ldb];
+			bs[inx][iny+12] = B[12*ldb];
+			bs[inx+4][iny]    = B[4+0*ldb];
+			bs[inx+4][iny+4]  = B[4+4*ldb];
+			bs[inx+4][iny+8]  = B[4+8*ldb];
+			bs[inx+4][iny+12] = B[4+12*ldb];
+			bs[inx+8][iny]    = B[8+0*ldb];
+			bs[inx+8][iny+4]  = B[8+4*ldb];
+			bs[inx+8][iny+8]  = B[8+8*ldb];
+			bs[inx+8][iny+12] = B[8+12*ldb];
+			bs[inx+12][iny]    = B[12+0*ldb];
+			bs[inx+12][iny+4]  = B[12+4*ldb];
+			bs[inx+12][iny+8]  = B[12+8*ldb];
+			bs[inx+12][iny+12] = B[12+12*ldb];
+			__syncthreads();
+
+			A += 4*lda;
+			saxpy( a[0], &bs[0][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[1][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[2][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[3][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[4][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[5][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[6][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[7][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[8][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[9][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[10][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[11][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[12][0], c );
+			saxpy( a[1], &bs[13][0], c );
+			saxpy( a[2], &bs[14][0], c );
+			saxpy( a[3], &bs[15][0], c );
+
+			B += 16;
+			__syncthreads();
+		} while( B < Blast );
+
+		for( int i = 0; i < 16; i++, C += ldc )
+			C[0] = c[i];
+	}
+			
+	__syncthreads();
+	
+	//--------------------------part two---------------------------//
+	{
+		// -inv(A11)*A12 -> A12
+		// A=inv(A11), B=A12, C=A12
+		float *A, *B, *C;
+		int lda = NB;
+		int ldb = NB;
+		int ldc = NB;
+
+		A = d_dinvA;
+		B = C = d_dinvA + blk*NB;
+
+		A += ibx + id;
+		B += inx + __mul24( iby + iny, ldb );
+		C += ibx + id  + __mul24( iby, ldc );
+
+		const float *Blast = B + blk;
+
+		float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+		do
+		{
+			float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+
+			bs[inx][iny]    = B[0*ldb];
+			bs[inx][iny+4]  = B[4*ldb];
+			bs[inx][iny+8]  = B[8*ldb];
+			bs[inx][iny+12] = B[12*ldb];
+			bs[inx+4][iny]    = B[4+0*ldb];
+			bs[inx+4][iny+4]  = B[4+4*ldb];
+			bs[inx+4][iny+8]  = B[4+8*ldb];
+			bs[inx+4][iny+12] = B[4+12*ldb];
+			bs[inx+8][iny]    = B[8+0*ldb];
+			bs[inx+8][iny+4]  = B[8+4*ldb];
+			bs[inx+8][iny+8]  = B[8+8*ldb];
+			bs[inx+8][iny+12] = B[8+12*ldb];
+			bs[inx+12][iny]    = B[12+0*ldb];
+			bs[inx+12][iny+4]  = B[12+4*ldb];
+			bs[inx+12][iny+8]  = B[12+8*ldb];
+			bs[inx+12][iny+12] = B[12+12*ldb];
+			__syncthreads();
+
+			A += 4*lda;
+			saxpy( a[0], &bs[0][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[1][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[2][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[3][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[4][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[5][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[6][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[7][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[8][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[9][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[10][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[11][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[12][0], c );
+			saxpy( a[1], &bs[13][0], c );
+			saxpy( a[2], &bs[14][0], c );
+			saxpy( a[3], &bs[15][0], c );
+
+			B += 16;
+			__syncthreads();
+		} while( B < Blast );
+
+		for( int i = 0; i < 16; i++, C += ldc )
+			C[0] = (-1)*c[i];
+	}
+}
+
+/*
+ * B21 = -inv(A22)*A21*inv(A11)
+ */
+#define qmod(a,b) ((a)-(__mul24((b),(a)/(b))))
+__global__ void
+triple_sgemm_update_16_part1_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+{
+	const int bIdy = blockIdx.y/npages;
+//	const int page = (blockIdx.y)%(npages);
+	const int page = qmod(blockIdx.y, npages);
+	const int inx = threadIdx.x;
+	const int iny = threadIdx.y;
+	const int ibx = blockIdx.x * (blockDim.x*blockDim.y);
+	const int iby = bIdy * 16;
+	const int id = inx + iny*blockDim.x;
+	__shared__ float bs[16][17];
+
+	//--------------------------part one---------------------------//
+	{
+		// A21*inv(A11) -> A21
+		// A=A21, B=inv(A11), C=A21
+		float *A, *B, *C;
+		int ldb = NB;
+		int ldc = NB;
+
+		int PagesPerNB = NB/(blk*2);
+
+		d_dinvA += NB*NB*(page/PagesPerNB) + 
+					(qmod(page,PagesPerNB))*(blk*2)*NB +
+					(qmod(page,PagesPerNB))*(blk*2);
+
+		A = Ain + page*lda*blk*2 + page*blk*2 + blk;  
+		B = d_dinvA; 
+		C = d_dinvA + blk;
+
+		A += ibx + id;
+		B += inx + __mul24( iby + iny, ldb );
+		C += ibx + id  + __mul24( iby, ldc );
+
+		const float *Blast = B + blk;
+
+		float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+		do
+		{
+			float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+
+			bs[inx][iny]    = B[0*ldb];
+			bs[inx][iny+4]  = B[4*ldb];
+			bs[inx][iny+8]  = B[8*ldb];
+			bs[inx][iny+12] = B[12*ldb];
+			bs[inx+4][iny]    = B[4+0*ldb];
+			bs[inx+4][iny+4]  = B[4+4*ldb];
+			bs[inx+4][iny+8]  = B[4+8*ldb];
+			bs[inx+4][iny+12] = B[4+12*ldb];
+			bs[inx+8][iny]    = B[8+0*ldb];
+			bs[inx+8][iny+4]  = B[8+4*ldb];
+			bs[inx+8][iny+8]  = B[8+8*ldb];
+			bs[inx+8][iny+12] = B[8+12*ldb];
+			bs[inx+12][iny]    = B[12+0*ldb];
+			bs[inx+12][iny+4]  = B[12+4*ldb];
+			bs[inx+12][iny+8]  = B[12+8*ldb];
+			bs[inx+12][iny+12] = B[12+12*ldb];
+			__syncthreads();
+
+			A += 4*lda;
+			saxpy( a[0], &bs[0][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[1][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[2][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[3][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[4][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[5][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[6][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[7][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[8][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[9][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[10][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[11][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[12][0], c );
+			saxpy( a[1], &bs[13][0], c );
+			saxpy( a[2], &bs[14][0], c );
+			saxpy( a[3], &bs[15][0], c );
+
+			B += 16;
+			__syncthreads();
+		} while( B < Blast );
+
+		for( int i = 0; i < 16; i++, C += ldc )
+			C[0] = c[i];
+	}
+			
+	__syncthreads();
+	
+}
+
+/*
+ * B21 = -inv(A22)*A21*inv(A11)
+ */
+#define qmod(a,b) ((a)-(__mul24((b),(a)/(b))))
+__global__ void
+triple_sgemm_update_16_part2_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+{
+	const int bIdy = blockIdx.y/npages;
+//	const int page = (blockIdx.y)%(npages);
+	const int page = qmod(blockIdx.y, npages);
+	const int inx = threadIdx.x;
+	const int iny = threadIdx.y;
+	const int ibx = blockIdx.x * (blockDim.x*blockDim.y);
+	const int iby = bIdy * 16;
+	const int id = inx + iny*blockDim.x;
+	__shared__ float bs[16][17];
+	
+	//--------------------------part two---------------------------//
+	{
+		// -inv(A22)*A21 -> A21
+		// A=inv(A22), B=A21, C=A21
+		float *A, *B, *C;
+		int lda = NB;
+		int ldb = NB;
+		int ldc = NB;
+
+		int PagesPerNB = NB/(blk*2);
+		d_dinvA += NB*NB*(page/PagesPerNB) + 
+					(qmod(page,PagesPerNB))*(blk*2)*NB +
+					(qmod(page,PagesPerNB))*(blk*2);
+
+		A = d_dinvA + blk*NB + blk;
+		B = C = d_dinvA + blk;
+
+		A += ibx + id;
+		B += inx + __mul24( iby + iny, ldb );
+		C += ibx + id  + __mul24( iby, ldc );
+
+		const float *Blast = B + blk;
+
+		float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+		do
+		{
+			float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+
+			bs[inx][iny]    = B[0*ldb];
+			bs[inx][iny+4]  = B[4*ldb];
+			bs[inx][iny+8]  = B[8*ldb];
+			bs[inx][iny+12] = B[12*ldb];
+			bs[inx+4][iny]    = B[4+0*ldb];
+			bs[inx+4][iny+4]  = B[4+4*ldb];
+			bs[inx+4][iny+8]  = B[4+8*ldb];
+			bs[inx+4][iny+12] = B[4+12*ldb];
+			bs[inx+8][iny]    = B[8+0*ldb];
+			bs[inx+8][iny+4]  = B[8+4*ldb];
+			bs[inx+8][iny+8]  = B[8+8*ldb];
+			bs[inx+8][iny+12] = B[8+12*ldb];
+			bs[inx+12][iny]    = B[12+0*ldb];
+			bs[inx+12][iny+4]  = B[12+4*ldb];
+			bs[inx+12][iny+8]  = B[12+8*ldb];
+			bs[inx+12][iny+12] = B[12+12*ldb];
+			__syncthreads();
+
+			A += 4*lda;
+			saxpy( a[0], &bs[0][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[1][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[2][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[3][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[4][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[5][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[6][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[7][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[8][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[9][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[10][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[11][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[12][0], c );
+			saxpy( a[1], &bs[13][0], c );
+			saxpy( a[2], &bs[14][0], c );
+			saxpy( a[3], &bs[15][0], c );
+
+			B += 16;
+			__syncthreads();
+		} while( B < Blast );
+
+		for( int i = 0; i < 16; i++, C += ldc )
+			C[0] = (-1)*c[i];
+	}
+	__syncthreads();
+}
+
+/*
+ * B21 = -inv(A11)*A12*inv(A22)
+ */
+__global__ void
+triple_sgemm_update_32_part1_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+{
+	const int bIdy = blockIdx.y/npages;
+//	const int page = (blockIdx.y)%(npages);
+	const int page = qmod(blockIdx.y, npages);
+	const int inx = threadIdx.x;
+	const int iny = threadIdx.y;
+	const int ibx = blockIdx.x * (blockDim.x*blockDim.y);
+	const int iby = bIdy * 16;
+	const int id = inx + iny*blockDim.x;
+	__shared__ float bs[16][17];
+
+	int PagesPerNB = NB/(blk*2);
+	//--------------------------part one---------------------------//
+	{
+		// A12*inv(A22) -> A21
+		// A=A12, B=inv(A22), C=A12(d_dinvA)
+		float *A, *B, *C;
+		int ldb = NB;
+		int ldc = NB;
+
+		d_dinvA += NB*NB*(page/PagesPerNB) + 
+				   (qmod(page,PagesPerNB))*(blk*2)*NB +
+				   (qmod(page,PagesPerNB))*(blk*2);
+
+		A = Ain + page*lda*blk*2 + blk*lda + page*blk*2;  
+		B = d_dinvA + blk*NB + blk;
+		C = d_dinvA + blk*NB;
+
+		A += ibx + id;
+		B += inx + __mul24( iby + iny, ldb );
+		C += ibx + id  + __mul24( iby, ldc );
+
+		const float *Blast = B + blk;
+
+		float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+		do
+		{
+			float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+
+			bs[inx][iny]    = B[0*ldb];
+			bs[inx][iny+4]  = B[4*ldb];
+			bs[inx][iny+8]  = B[8*ldb];
+			bs[inx][iny+12] = B[12*ldb];
+			bs[inx+8][iny]    = B[8+0*ldb];
+			bs[inx+8][iny+4]  = B[8+4*ldb];
+			bs[inx+8][iny+8]  = B[8+8*ldb];
+			bs[inx+8][iny+12] = B[8+12*ldb];
+			__syncthreads();
+
+			A += 4*lda;
+			saxpy( a[0], &bs[0][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[1][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[2][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[3][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[4][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[5][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[6][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[7][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[8][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[9][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[10][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[11][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[12][0], c );
+			saxpy( a[1], &bs[13][0], c );
+			saxpy( a[2], &bs[14][0], c );
+			saxpy( a[3], &bs[15][0], c );
+
+			B += 16;
+			__syncthreads();
+		} while( B < Blast );
+
+		for( int i = 0; i < 16; i++, C += ldc )
+			C[0] = c[i];
+	}
+			
+	__syncthreads();
+}
+/*
+ * B21 = -inv(A11)*A12*inv(A22)
+ */
+__global__ void
+triple_sgemm_update_32_part2_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+{
+	const int bIdy = blockIdx.y/npages;
+//	const int page = (blockIdx.y)%(npages);
+	const int page = qmod(blockIdx.y, npages);
+	const int inx = threadIdx.x;
+	const int iny = threadIdx.y;
+	const int ibx = blockIdx.x * (blockDim.x*blockDim.y);
+	const int iby = bIdy * 16;
+	const int id = inx + iny*blockDim.x;
+	__shared__ float bs[16][17];
+
+	int PagesPerNB = NB/(blk*2);
+	
+	//--------------------------part two---------------------------//
+	{
+		// -inv(A11)*A12 -> A12
+		// A=inv(A11), B=A12, C=A12
+		float *A, *B, *C;
+		int lda = NB;
+		int ldb = NB;
+		int ldc = NB;
+
+		d_dinvA += NB*NB*(page/PagesPerNB) + 
+				   (qmod(page,PagesPerNB))*(blk*2)*NB +
+				   (qmod(page,PagesPerNB))*(blk*2);
+
+		A = d_dinvA;
+		B = C = d_dinvA + blk*NB;
+
+		A += ibx + id;
+		B += inx + __mul24( iby + iny, ldb );
+		C += ibx + id  + __mul24( iby, ldc );
+
+		const float *Blast = B + blk;
+
+		float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+		do
+		{
+			float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+
+			bs[inx][iny]    = B[0*ldb];
+			bs[inx][iny+4]  = B[4*ldb];
+			bs[inx][iny+8]  = B[8*ldb];
+			bs[inx][iny+12] = B[12*ldb];
+			bs[inx+8][iny]    = B[8+0*ldb];
+			bs[inx+8][iny+4]  = B[8+4*ldb];
+			bs[inx+8][iny+8]  = B[8+8*ldb];
+			bs[inx+8][iny+12] = B[8+12*ldb];
+			__syncthreads();
+
+			A += 4*lda;
+			saxpy( a[0], &bs[0][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[1][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[2][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[3][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[4][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[5][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[6][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[7][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[8][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[9][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[10][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[11][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[12][0], c );
+			saxpy( a[1], &bs[13][0], c );
+			saxpy( a[2], &bs[14][0], c );
+			saxpy( a[3], &bs[15][0], c );
+
+			B += 16;
+			__syncthreads();
+		} while( B < Blast );
+
+		for( int i = 0; i < 16; i++, C += ldc )
+			C[0] = (-1)*c[i];
+	}
+}
+/*
+ * B21 = -inv(A22)*A21*inv(A11)
+ */
+__global__ void
+triple_sgemm_update_32_part1_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+{
+	const int bIdy = blockIdx.y/npages;
+//	const int page = (blockIdx.y)%(npages);
+	const int page = qmod(blockIdx.y, npages);
+	const int inx = threadIdx.x;
+	const int iny = threadIdx.y;
+	const int ibx = blockIdx.x * (blockDim.x*blockDim.y);
+	const int iby = bIdy * 16;
+	const int id = inx + iny*blockDim.x;
+	__shared__ float bs[16][17];
+
+	int PagesPerNB = NB/(blk*2);
+	//--------------------------part one---------------------------//
+	{
+		// A21*inv(A11) -> A21
+		// A=A21, B=inv(A11), C=A21
+		float *A, *B, *C;
+		int ldb = NB;
+		int ldc = NB;
+
+		d_dinvA += NB*NB*(page/PagesPerNB) + 
+					(qmod(page,PagesPerNB))*(blk*2)*NB +
+					(qmod(page,PagesPerNB))*(blk*2);
+
+		A = Ain + page*lda*blk*2 + page*blk*2 + blk;  
+		B = d_dinvA;
+		C = d_dinvA + blk;
+
+		A += ibx + id;
+		B += inx + __mul24( iby + iny, ldb );
+		C += ibx + id  + __mul24( iby, ldc );
+
+		const float *Blast = B + blk;
+
+		float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+		do
+		{
+			float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+
+			bs[inx][iny]    = B[0*ldb];
+			bs[inx][iny+4]  = B[4*ldb];
+			bs[inx][iny+8]  = B[8*ldb];
+			bs[inx][iny+12] = B[12*ldb];
+			bs[inx+8][iny]    = B[8+0*ldb];
+			bs[inx+8][iny+4]  = B[8+4*ldb];
+			bs[inx+8][iny+8]  = B[8+8*ldb];
+			bs[inx+8][iny+12] = B[8+12*ldb];
+			__syncthreads();
+
+			A += 4*lda;
+			saxpy( a[0], &bs[0][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[1][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[2][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[3][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[4][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[5][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[6][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[7][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[8][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[9][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[10][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[11][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[12][0], c );
+			saxpy( a[1], &bs[13][0], c );
+			saxpy( a[2], &bs[14][0], c );
+			saxpy( a[3], &bs[15][0], c );
+
+			B += 16;
+			__syncthreads();
+		} while( B < Blast );
+
+		for( int i = 0; i < 16; i++, C += ldc )
+			C[0] = c[i];
+	}
+			
+	__syncthreads();
+}
+/*
+ * B21 = -inv(A22)*A21*inv(A11)
+ */
+__global__ void
+triple_sgemm_update_32_part2_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+{
+	const int bIdy = blockIdx.y/npages;
+//	const int page = (blockIdx.y)%(npages);
+	const int page = qmod(blockIdx.y, npages);
+	const int inx = threadIdx.x;
+	const int iny = threadIdx.y;
+	const int ibx = blockIdx.x * (blockDim.x*blockDim.y);
+	const int iby = bIdy * 16;
+	const int id = inx + iny*blockDim.x;
+	__shared__ float bs[16][17];
+
+	int PagesPerNB = NB/(blk*2);
+	//--------------------------part two---------------------------//
+	{
+		// -inv(A22)*A21 -> A21
+		// A=inv(A22), B=A21, C=A21
+		float *A, *B, *C;
+		int lda = NB;
+		int ldb = NB;
+		int ldc = NB;
+
+		d_dinvA += NB*NB*(page/PagesPerNB) + 
+					(qmod(page,PagesPerNB))*(blk*2)*NB +
+					(qmod(page,PagesPerNB))*(blk*2);
+
+		A = d_dinvA + blk*NB + blk;
+		B = C = d_dinvA + blk;
+
+		A += ibx + id;
+		B += inx + __mul24( iby + iny, ldb );
+		C += ibx + id  + __mul24( iby, ldc );
+
+		const float *Blast = B + blk;
+
+		float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+		do
+		{
+			float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+
+			bs[inx][iny]    = B[0*ldb];
+			bs[inx][iny+4]  = B[4*ldb];
+			bs[inx][iny+8]  = B[8*ldb];
+			bs[inx][iny+12] = B[12*ldb];
+			bs[inx+8][iny]    = B[8+0*ldb];
+			bs[inx+8][iny+4]  = B[8+4*ldb];
+			bs[inx+8][iny+8]  = B[8+8*ldb];
+			bs[inx+8][iny+12] = B[8+12*ldb];
+			__syncthreads();
+
+			A += 4*lda;
+			saxpy( a[0], &bs[0][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[1][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[2][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[3][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[4][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[5][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[6][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[7][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[8][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[9][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[10][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[11][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[12][0], c );
+			saxpy( a[1], &bs[13][0], c );
+			saxpy( a[2], &bs[14][0], c );
+			saxpy( a[3], &bs[15][0], c );
+
+			B += 16;
+			__syncthreads();
+		} while( B < Blast );
+
+		for( int i = 0; i < 16; i++, C += ldc )
+			C[0] = (-1)*c[i];
+	}
+}
+
+/*
+ * B21 = -inv(A11)*A12*inv(A22)
+ */
+__global__ void
+triple_sgemm_update_64_part1_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+{
+	const int bIdy = blockIdx.y/npages;
+//	const int page = (blockIdx.y)%(npages);
+	const int page = qmod(blockIdx.y, npages);
+	const int inx = threadIdx.x;
+	const int iny = threadIdx.y;
+	const int ibx = blockIdx.x*64;
+	const int iby = bIdy*16;
+	const int id = inx + iny*16;
+	__shared__ float bs[16][17];
+
+	int PagesPerNB = NB/(blk*2);
+	//--------------------------part one---------------------------//
+	{
+		// A12*inv(A22) -> A12(d_dinvA)
+		// A=A12, B=inv(A22), C=A12
+		float *A, *B, *C;
+		int ldb = NB;
+		int ldc = NB;
+
+		d_dinvA += NB*NB*(page/PagesPerNB) + 
+				   (qmod(page,PagesPerNB))*(blk*2)*NB +
+				   (qmod(page,PagesPerNB))*(blk*2);
+
+		A = Ain + page*lda*blk*2 + blk*lda + page*blk*2;  
+		B = d_dinvA + blk*NB + blk;
+		C = d_dinvA + blk*NB;
+
+		A += ibx + id;
+		B += inx + __mul24( iby + iny, ldb );
+		C += ibx + id  + __mul24( iby, ldc );
+
+		const float *Blast = B + blk;
+
+		float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+		do
+		{
+			float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+
+			bs[inx][iny]    = B[0*ldb];
+			bs[inx][iny+4]  = B[4*ldb];
+			bs[inx][iny+8]  = B[8*ldb];
+			bs[inx][iny+12] = B[12*ldb];
+			__syncthreads();
+
+			A += 4*lda;
+			saxpy( a[0], &bs[0][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[1][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[2][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[3][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[4][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[5][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[6][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[7][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[8][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[9][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[10][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[11][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[12][0], c );
+			saxpy( a[1], &bs[13][0], c );
+			saxpy( a[2], &bs[14][0], c );
+			saxpy( a[3], &bs[15][0], c );
+
+			B += 16;
+			__syncthreads();
+		} while( B < Blast );
+
+		for( int i = 0; i < 16; i++, C += ldc )
+			C[0] = c[i];
+	}
+			
+}
+/*
+ * B21 = -inv(A11)*A12*inv(A22)
+ */
+__global__ void
+triple_sgemm_update_64_part2_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+{
+	const int bIdy = blockIdx.y/npages;
+//	const int page = (blockIdx.y)%(npages);
+	const int page = qmod(blockIdx.y, npages);
+	const int inx = threadIdx.x;
+	const int iny = threadIdx.y;
+	const int ibx = blockIdx.x*64;
+	const int iby = bIdy*16;
+	const int id = inx + iny*16;
+	__shared__ float bs[16][17];
+
+	int PagesPerNB = NB/(blk*2);
+			
+	//--------------------------part two---------------------------//
+	{
+		// -inv(A11)*A12 -> A12
+		// A=inv(A11), B=A12, C=A12
+		float *A, *B, *C;
+		int lda = NB;
+		int ldb = NB;
+		int ldc = NB;
+
+		d_dinvA += NB*NB*(page/PagesPerNB) + 
+				   (qmod(page,PagesPerNB))*(blk*2)*NB +
+				   (qmod(page,PagesPerNB))*(blk*2);
+
+		A = d_dinvA;
+		B = C = d_dinvA + blk*NB;
+
+		A += ibx + id;
+		B += inx + __mul24( iby + iny, ldb );
+		C += ibx + id  + __mul24( iby, ldc );
+
+		const float *Blast = B + blk;
+
+		float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+		do
+		{
+			float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+
+			bs[inx][iny]    = B[0*ldb];
+			bs[inx][iny+4]  = B[4*ldb];
+			bs[inx][iny+8]  = B[8*ldb];
+			bs[inx][iny+12] = B[12*ldb];
+			__syncthreads();
+
+			A += 4*lda;
+			saxpy( a[0], &bs[0][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[1][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[2][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[3][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[4][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[5][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[6][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[7][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[8][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[9][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[10][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[11][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[12][0], c );
+			saxpy( a[1], &bs[13][0], c );
+			saxpy( a[2], &bs[14][0], c );
+			saxpy( a[3], &bs[15][0], c );
+
+			B += 16;
+			__syncthreads();
+		} while( B < Blast );
+
+		for( int i = 0; i < 16; i++, C += ldc )
+			C[0] = (-1)*c[i];
+	}
+}
+/*
+ * B21 = -inv(A22)*A21*inv(A11)
+ */
+__global__ void
+triple_sgemm_update_64_part1_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+{
+	const int bIdy = blockIdx.y/npages;
+//	const int page = (blockIdx.y)%(npages);
+	const int page = qmod(blockIdx.y, npages);
+	const int inx = threadIdx.x;
+	const int iny = threadIdx.y;
+	const int ibx = blockIdx.x*64;
+	const int iby = bIdy*16;
+	const int id = inx + iny*16;
+	__shared__ float bs[16][17];
+
+	int PagesPerNB = NB/(blk*2);
+	//--------------------------part one---------------------------//
+	{
+		// A21*inv(A11) -> A21
+		// A=A21, B=inv(A11), C=A21
+		float *A, *B, *C;
+		int ldb = NB;
+		int ldc = NB;
+
+		d_dinvA += NB*NB*(page/PagesPerNB) + 
+					(qmod(page,PagesPerNB))*(blk*2)*NB +
+					(qmod(page,PagesPerNB))*(blk*2);
+
+		A = Ain + page*lda*blk*2 + page*blk*2 + blk;  
+		B = d_dinvA;
+		C = d_dinvA + blk;
+
+		A += ibx + id;
+		B += inx + __mul24( iby + iny, ldb );
+		C += ibx + id  + __mul24( iby, ldc );
+
+		const float *Blast = B + blk;
+
+		float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+		do
+		{
+			float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+
+			bs[inx][iny]    = B[0*ldb];
+			bs[inx][iny+4]  = B[4*ldb];
+			bs[inx][iny+8]  = B[8*ldb];
+			bs[inx][iny+12] = B[12*ldb];
+			__syncthreads();
+
+			A += 4*lda;
+			saxpy( a[0], &bs[0][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[1][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[2][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[3][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[4][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[5][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[6][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[7][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[8][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[9][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[10][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[11][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[12][0], c );
+			saxpy( a[1], &bs[13][0], c );
+			saxpy( a[2], &bs[14][0], c );
+			saxpy( a[3], &bs[15][0], c );
+
+			B += 16;
+			__syncthreads();
+		} while( B < Blast );
+
+		for( int i = 0; i < 16; i++, C += ldc )
+			C[0] = c[i];
+	}
+}
+/*
+ * B21 = -inv(A22)*A21*inv(A11)
+ */
+__global__ void
+triple_sgemm_update_64_part2_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+{
+	const int bIdy = blockIdx.y/npages;
+//	const int page = (blockIdx.y)%(npages);
+	const int page = qmod(blockIdx.y, npages);
+	const int inx = threadIdx.x;
+	const int iny = threadIdx.y;
+	const int ibx = blockIdx.x*64;
+	const int iby = bIdy*16;
+	const int id = inx + iny*16;
+	__shared__ float bs[16][17];
+
+	int PagesPerNB = NB/(blk*2);
+			
+	//--------------------------part two---------------------------//
+	{
+		// -inv(A22)*A21 -> A21
+		// A=inv(A22), B=A21, C=A21
+		float *A, *B, *C;
+		int lda = NB;
+		int ldb = NB;
+		int ldc = NB;
+
+		d_dinvA += NB*NB*(page/PagesPerNB) + 
+					(qmod(page,PagesPerNB))*(blk*2)*NB +
+					(qmod(page,PagesPerNB))*(blk*2);
+
+		A = d_dinvA + blk*NB + blk;
+		B = C = d_dinvA + blk;
+
+		A += ibx + id;
+		B += inx + __mul24( iby + iny, ldb );
+		C += ibx + id  + __mul24( iby, ldc );
+
+		const float *Blast = B + blk;
+
+		float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+		do
+		{
+			float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+
+			bs[inx][iny]    = B[0*ldb];
+			bs[inx][iny+4]  = B[4*ldb];
+			bs[inx][iny+8]  = B[8*ldb];
+			bs[inx][iny+12] = B[12*ldb];
+			__syncthreads();
+
+			A += 4*lda;
+			saxpy( a[0], &bs[0][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[1][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[2][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[3][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[4][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[5][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[6][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[7][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[8][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[9][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[10][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[11][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[12][0], c );
+			saxpy( a[1], &bs[13][0], c );
+			saxpy( a[2], &bs[14][0], c );
+			saxpy( a[3], &bs[15][0], c );
+
+			B += 16;
+			__syncthreads();
+		} while( B < Blast );
+
+		for( int i = 0; i < 16; i++, C += ldc )
+			C[0] = (-1)*c[i];
+	}
+}
+
+/*
+ * B21 = -inv(A11)*A12*inv(A22)
+ */
+__global__ void
+triple_sgemm_update_above64_part1_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+{
+	const int bIdy = blockIdx.y/npages;
+//	const int page = (blockIdx.y)%(npages);
+	const int page = qmod(blockIdx.y, npages);
+	const int inx = threadIdx.x;
+	const int iny = threadIdx.y;
+	const int ibx = blockIdx.x*64;
+	const int iby = bIdy*16;
+	const int id = inx + iny*16;
+	__shared__ float bs[16][17];
+
+	int PagesPerNB = NB/(blk*2);
+	//--------------------------part one---------------------------//
+	{
+		// A12*inv(A22) -> A12(d_dinvA)
+		// A=A12, B=inv(A22), C=A12
+		float *A, *B, *C;
+		int ldb = NB;
+		int ldc = NB;
+
+		d_dinvA += NB*NB*(page/PagesPerNB) + 
+				   (qmod(page,PagesPerNB))*(blk*2)*NB +
+				   (qmod(page,PagesPerNB))*(blk*2);
+
+		A = Ain + page*lda*blk*2 + blk*lda + page*blk*2;  
+		B = d_dinvA + blk*NB + blk;
+		C = d_dinvA + blk*NB;
+
+		A += ibx + id;
+		B += inx + __mul24( iby + iny, ldb );
+		C += ibx + id  + __mul24( iby, ldc );
+
+		const float *Blast = B + blk;
+
+		float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+		do
+		{
+			float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+
+			bs[inx][iny]    = B[0*ldb];
+			bs[inx][iny+4]  = B[4*ldb];
+			bs[inx][iny+8]  = B[8*ldb];
+			bs[inx][iny+12] = B[12*ldb];
+			__syncthreads();
+
+			A += 4*lda;
+			saxpy( a[0], &bs[0][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[1][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[2][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[3][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[4][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[5][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[6][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[7][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[8][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[9][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[10][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[11][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[12][0], c );
+			saxpy( a[1], &bs[13][0], c );
+			saxpy( a[2], &bs[14][0], c );
+			saxpy( a[3], &bs[15][0], c );
+
+			B += 16;
+			__syncthreads();
+		} while( B < Blast );
+
+		for( int i = 0; i < 16; i++, C += ldc )
+			C[0] = c[i];
+	}
+			
+}
+/*
+ * B21 = -inv(A22)*A21*inv(A11)
+ */
+__global__ void
+triple_sgemm_update_above64_part1_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+{
+	const int bIdy = blockIdx.y/npages;
+//	const int page = (blockIdx.y)%(npages);
+	const int page = qmod(blockIdx.y, npages);
+	const int inx = threadIdx.x;
+	const int iny = threadIdx.y;
+	const int ibx = blockIdx.x*64;
+	const int iby = bIdy*16;
+	const int id = inx + iny*16;
+	__shared__ float bs[16][17];
+
+	int PagesPerNB = NB/(blk*2);
+	//--------------------------part one---------------------------//
+	{
+		// A21*inv(A11) -> A21
+		// A=A21, B=inv(A11), C=A21
+		float *A, *B, *C;
+		int ldb = NB;
+		int ldc = NB;
+
+		d_dinvA += NB*NB*(page/PagesPerNB) + 
+					(qmod(page,PagesPerNB))*(blk*2)*NB +
+					(qmod(page,PagesPerNB))*(blk*2);
+
+		A = Ain + page*lda*blk*2 + page*blk*2 + blk;  
+		B = d_dinvA;
+		C = d_dinvA + blk;
+
+		A += ibx + id;
+		B += inx + __mul24( iby + iny, ldb );
+		C += ibx + id  + __mul24( iby, ldc );
+
+		const float *Blast = B + blk;
+
+		float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+		do
+		{
+			float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+
+			bs[inx][iny]    = B[0*ldb];
+			bs[inx][iny+4]  = B[4*ldb];
+			bs[inx][iny+8]  = B[8*ldb];
+			bs[inx][iny+12] = B[12*ldb];
+			__syncthreads();
+
+			A += 4*lda;
+			saxpy( a[0], &bs[0][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[1][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[2][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[3][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[4][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[5][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[6][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[7][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[8][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[9][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[10][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[11][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[12][0], c );
+			saxpy( a[1], &bs[13][0], c );
+			saxpy( a[2], &bs[14][0], c );
+			saxpy( a[3], &bs[15][0], c );
+
+			B += 16;
+			__syncthreads();
+		} while( B < Blast );
+
+		for( int i = 0; i < 16; i++, C += ldc )
+			C[0] = c[i];
+	}
+			
+}
+
+/*
+ * B21 = -inv(A11)*A12*inv(A22)
+ */
+__global__ void
+triple_sgemm_update_above64_part2_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+{
+	const int bIdy = blockIdx.y/npages;
+//	const int page = (blockIdx.y)%(npages);
+	const int page = qmod(blockIdx.y, npages);
+	const int inx = threadIdx.x;
+	const int iny = threadIdx.y;
+	const int ibx = blockIdx.x*64;
+	const int iby = bIdy*16;
+	const int id = inx + iny*16;
+	__shared__ float bs[16][17];
+
+	int PagesPerNB = NB/(blk*2);
+	
+	//--------------------------part two---------------------------//
+	{
+		// -inv(A11)*A12 -> A12
+		// A=inv(A11), B=A12, C=A12
+		float *A, *B, *C;
+		int lda = NB;
+		int ldb = NB;
+		int ldc = NB;
+
+		d_dinvA += NB*NB*(page/PagesPerNB) + 
+				   (qmod(page,PagesPerNB))*(blk*2)*NB +
+				   (qmod(page,PagesPerNB))*(blk*2);
+
+		A = d_dinvA;
+		B = d_dinvA + blk*NB;
+		C = d_dinvA + blk;
+
+		A += ibx + id;
+		B += inx + __mul24( iby + iny, ldb );
+		C += ibx + id  + __mul24( iby, ldc );
+
+		const float *Blast = B + blk;
+
+		float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+		do
+		{
+			float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+
+			bs[inx][iny]    = B[0*ldb];
+			bs[inx][iny+4]  = B[4*ldb];
+			bs[inx][iny+8]  = B[8*ldb];
+			bs[inx][iny+12] = B[12*ldb];
+			__syncthreads();
+
+			A += 4*lda;
+			saxpy( a[0], &bs[0][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[1][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[2][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[3][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[4][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[5][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[6][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[7][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[8][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[9][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[10][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[11][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[12][0], c );
+			saxpy( a[1], &bs[13][0], c );
+			saxpy( a[2], &bs[14][0], c );
+			saxpy( a[3], &bs[15][0], c );
+
+			B += 16;
+			__syncthreads();
+		} while( B < Blast );
+
+		for( int i = 0; i < 16; i++, C += ldc )
+			C[0] = (-1)*c[i];
+	}
+}
+/*
+ * part 3, copy data into position 
+ */
+__global__ void
+triple_sgemm_update_above64_part3_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+{
+	const int bIdy = blockIdx.y/npages;
+//	const int page = (blockIdx.y)%(npages);
+	const int page = qmod(blockIdx.y, npages);
+	const int inx = threadIdx.x;
+	const int iny = threadIdx.y;
+	const int ibx = blockIdx.x*64;
+	const int iby = bIdy*16;
+	const int id = inx + iny*16;
+
+	int PagesPerNB = NB/(blk*2);
+	
+	//--------------------------part two---------------------------//
+	{
+		// -inv(A11)*A12 -> A12
+		// A=inv(A11), B=A12, C=A12
+		float *C_temp, *C_real;
+		int ldc = NB;
+
+		C_temp = d_dinvA + NB*NB*(page/PagesPerNB) + 
+					  (qmod(page,PagesPerNB))*(blk*2)*NB +
+					  (qmod(page,PagesPerNB))*(blk*2) +
+					  blk;
+		C_real = d_dinvA + NB*NB*(page/PagesPerNB) + 
+					  (qmod(page,PagesPerNB))*(blk*2)*NB +
+					  blk*NB +
+					  (qmod(page,PagesPerNB))*(blk*2);
+
+		C_temp += ibx + id  + __mul24( iby, ldc );
+		C_real += ibx + id  + __mul24( iby, ldc );
+
+
+		for( int i = 0; i < 16; i++, C_temp+=ldc, C_real+=ldc )
+		{
+			C_real[0] = C_temp[0];
+			C_temp[0] = 0;
 		}
-		else
+
+	}
+}
+
+/*
+ * part 3: copy data back to position 
+ */
+__global__ void
+triple_sgemm_update_above64_part3_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+{
+	const int bIdy = blockIdx.y/npages;
+//	const int page = (blockIdx.y)%(npages);
+	const int page = qmod(blockIdx.y, npages);
+	const int inx = threadIdx.x;
+	const int iny = threadIdx.y;
+	const int ibx = blockIdx.x*64;
+	const int iby = bIdy*16;
+	const int id = inx + iny*16;
+
+	int PagesPerNB = NB/(blk*2);
+	
+	//--------------------------part three---------------------------//
+	{
+		// -inv(A22)*A21 -> A21
+		// A=inv(A22), B=A21, C=A21
+		float *C_temp, *C_real;
+		int ldc = NB;
+
+		d_dinvA += NB*NB*(page/PagesPerNB) + 
+					(qmod(page,PagesPerNB))*(blk*2)*NB +
+					(qmod(page,PagesPerNB))*(blk*2);
+
+		C_real = d_dinvA + blk;
+		
+		C_temp = d_dinvA + blk*NB;
+
+		C_temp += ibx + id  + __mul24( iby, ldc );
+		C_real += ibx + id  + __mul24( iby, ldc );
+
+		for( int i = 0; i < 16; i++, C_real+=ldc, C_temp+=ldc )
 		{
-			dim3 dimGrid(M/BLOCK_SIZE, 1);
-			if (tran == 'n' || tran == 'N')
-				inplace_sgemm_kernel2_N<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb); 
-			else
-				inplace_sgemm_kernel2_T<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb);	// wrong for now, should be _T
+			C_real[0] = C_temp[0];
+			C_temp[0] = 0;
 		}
 	}
-	else
+	__syncthreads();
+}
+/*
+ * B21 = -inv(A22)*A21*inv(A11)
+ */
+__global__ void
+triple_sgemm_update_above64_part2_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+{
+	const int bIdy = blockIdx.y/npages;
+//	const int page = (blockIdx.y)%(npages);
+	const int page = qmod(blockIdx.y, npages);
+	const int inx = threadIdx.x;
+	const int iny = threadIdx.y;
+	const int ibx = blockIdx.x*64;
+	const int iby = bIdy*16;
+	const int id = inx + iny*16;
+	__shared__ float bs[16][17];
+
+	int PagesPerNB = NB/(blk*2);
+	
+	//--------------------------part two---------------------------//
 	{
-		dim3 dimGrid(M/BLOCK_SIZE+(M%BLOCK_SIZE!=0), 1);
-		if (N%BLOCK_SIZE==0)
+		// -inv(A22)*A21 -> A21
+		// A=inv(A22), B=A21, C=A21
+		float *A, *B, *C;
+		int lda = NB;
+		int ldb = NB;
+		int ldc = NB;
+
+		d_dinvA += NB*NB*(page/PagesPerNB) + 
+					(qmod(page,PagesPerNB))*(blk*2)*NB +
+					(qmod(page,PagesPerNB))*(blk*2);
+
+		A = d_dinvA + blk*NB + blk;
+		B = d_dinvA + blk;
+		
+		C = d_dinvA + blk*NB;
+
+		A += ibx + id;
+		B += inx + __mul24( iby + iny, ldb );
+		C += ibx + id  + __mul24( iby, ldc );
+
+		const float *Blast = B + blk;
+
+		float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+		do
 		{
-			if (tran == 'n' || tran == 'N')
-			{
-				inplace_sgemm_kernel3_N<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb); 
-			}
-			else
-				inplace_sgemm_kernel3_T<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb);	// wrong for now, should be _T
-		}
-		else
-		{
-			if (tran == 'n' || tran == 'N')
-				inplace_sgemm_kernel1_N<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb); 
-			else
-				inplace_sgemm_kernel1_T<<<dimGrid,dimBlock>>>(M, N, alpha, A, lda, B, ldb);	
-		}
+			float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+
+			bs[inx][iny]    = B[0*ldb];
+			bs[inx][iny+4]  = B[4*ldb];
+			bs[inx][iny+8]  = B[8*ldb];
+			bs[inx][iny+12] = B[12*ldb];
+			__syncthreads();
+
+			A += 4*lda;
+			saxpy( a[0], &bs[0][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[1][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[2][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[3][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[4][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[5][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[6][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[7][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[8][0], c );		a[0] = A[0*lda];
+			saxpy( a[1], &bs[9][0], c );		a[1] = A[1*lda];
+			saxpy( a[2], &bs[10][0], c );		a[2] = A[2*lda];
+			saxpy( a[3], &bs[11][0], c );		a[3] = A[3*lda];
+
+			A += 4*lda;
+			saxpy( a[0], &bs[12][0], c );
+			saxpy( a[1], &bs[13][0], c );
+			saxpy( a[2], &bs[14][0], c );
+			saxpy( a[3], &bs[15][0], c );
+
+			B += 16;
+			__syncthreads();
+		} while( B < Blast );
+
+		for( int i = 0; i < 16; i++, C += ldc )
+			C[0] = (-1)*c[i];
 	}
+}
+
+__global__ void
+b_copy_kernel (int M, int N, float *b, int ldb, float *d_x, int ldx)
+{
+	int by = blockIdx.y;
+
+	int gx = blockIdx.x*blockDim.x+threadIdx.x;
+
+	if (gx < M)
+		b[by*ldb+gx] = d_x[by*ldx+gx];
 }
 
 
@@ -766,9 +1752,75 @@ void diag_strtri (int M, char uplo, char diag, float *A, float *d_dinvA, int lda
 	int nblocks = M/BLOCK_SIZE+(M%BLOCK_SIZE!=0);
 
 	if (uplo == 'l' || uplo == 'L')
+	{
+		// solve the diagonal blocks
+		//printf ("nblocks = %d\n", nblocks);
 		diag_strtri_kernel_lower<<<nblocks, BLOCK_SIZE>>>(diag, A, d_dinvA, lda);
+
+		// update the inverse up to the size of BLOCK_SIZE
+		for (int i=BLOCK_SIZE; i<NB; i*=2)
+		{
+			int npages = M/(i*2)+(M%(i*2)!=0);
+			dim3 dimBlock((i<=32)?(i/4):16, 4);
+			dim3 dimGrid(i/(dimBlock.x*dimBlock.y), npages*(i/16));	//emulated 3D grid, see 3d_grid.txt 
+			
+//			printf ("(%d): dimBlock(%d,%d), dimGrid(%d,%d), npages=%d\n", i, dimBlock.x, dimBlock.y, dimGrid.x, dimGrid.y, npages); 
+
+			switch (i)
+			{
+				case 16:
+					triple_sgemm_update_16_part1_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					triple_sgemm_update_16_part2_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					break;
+				case 32:
+					triple_sgemm_update_32_part1_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					triple_sgemm_update_32_part2_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					break;
+				case 64:
+					triple_sgemm_update_64_part1_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					triple_sgemm_update_64_part2_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+				default:
+					triple_sgemm_update_above64_part1_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					triple_sgemm_update_above64_part2_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					triple_sgemm_update_above64_part3_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					break;
+			}
+		}
+	}
 	else
+	{
 		diag_strtri_kernel_upper<<<nblocks, BLOCK_SIZE>>>(diag, A, d_dinvA, lda);
+
+		// update the inverse up to the size of BLOCK_SIZE
+		for (int i=BLOCK_SIZE; i<NB; i*=2)
+		{
+			int npages = M/(i*2)+(M%(i*2)!=0);
+			dim3 dimBlock((i<=32)?(i/4):16, 4);
+			dim3 dimGrid(i/(dimBlock.x*dimBlock.y), npages*(i/16));	//emulated 3D grid, see 3d_grid.txt 
+			
+//			printf ("R(%d): dimBlock(%d,%d), dimGrid(%d,%d), npages=%d\n", i, dimBlock.x, dimBlock.y, dimGrid.x, dimGrid.y, npages); 
+
+			switch (i)
+			{
+				case 16:
+					triple_sgemm_update_16_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					break;
+				case 32:
+					triple_sgemm_update_32_part1_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					triple_sgemm_update_32_part2_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					break;
+				case 64:
+					triple_sgemm_update_64_part1_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					triple_sgemm_update_64_part2_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+				default:
+					triple_sgemm_update_above64_part1_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					triple_sgemm_update_above64_part2_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					triple_sgemm_update_above64_part3_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					break;
+			}
+		}
+
+	}
 }
 
 /*
@@ -777,29 +1829,29 @@ void diag_strtri (int M, char uplo, char diag, float *A, float *d_dinvA, int lda
 extern "C"
 void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N, float alpha, float* A, int lda, float* b, int ldb)
 {
-/*  -- magma (version 0.1) --
-       univ. of tennessee, knoxville
-       univ. of california, berkeley
-       univ. of colorado, denver
-       october 2009
+	/*  -- magma (version 0.1) --
+		univ. of tennessee, knoxville
+		univ. of california, berkeley
+		univ. of colorado, denver
+		october 2009
 
-	   purpose
-	   =======
-	   
-	   strsm  solves one of the matrix equations on gpu
-	   
-	      op( a )*x = alpha*b,   or   x*op( a ) = alpha*b,
-	   
-	   where alpha is a scalar, x and b are m by n matrices, a is a unit, or
-	   non-unit,  upper or lower triangular matrix  and  op( a )  is one  of
-	   
-	      op( A ) = A   or   op( A ) = A'.
-	   
-	   The matrix X is overwritten on B.
-	   
-	   When M or N is not a multiple of blocking size, which is 32 for now, cublasStrsm will
-	   be called instead. There soon will not be this limitation both for arbitrary problem 
-	   size and blocking size.
+		purpose
+		=======
+
+		strsm  solves one of the matrix equations on gpu
+
+		op( a )*x = alpha*b,   or   x*op( a ) = alpha*b,
+
+		where alpha is a scalar, x and b are m by n matrices, a is a unit, or
+		non-unit,  upper or lower triangular matrix  and  op( a )  is one  of
+
+		op( A ) = A   or   op( A ) = A'.
+
+		The matrix X is overwritten on B.
+
+		When M or N is not a multiple of blocking size, which is 32 for now, cublasStrsm will
+		be called instead. There soon will not be this limitation both for arbitrary problem 
+		size and blocking size.
 	   
 	   
 	   Arguments
@@ -853,7 +1905,7 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 	            least zero.
 	            Unchanged on exit.
 	   
-	    n      - INTEGER.
+				n      - INTEGER.
 	             On entry, n specifies the number of columns of B.  n must be
 	             at least zero.
 	             Unchanged on exit.
@@ -902,7 +1954,7 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
     ===================================================================== */
 
 	int i;
-	   float *d_dinvA;
+	float *d_dinvA, *d_x;
 
 	/* quick return on wrong size */
 	if (M<=0 || N<=0)
@@ -911,9 +1963,11 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 	if (side == 'l' || side == 'L')
 	{
 		/* inverse the diagonals
-		 * Allocate device memory for the inversed diagonal blocks, size=m*BLOCK_SIZE 
+		 * Allocate device memory for the inversed diagonal blocks, size=m*NB
 		 */
-		cudaMalloc((void**)&d_dinvA, BLOCK_SIZE*((M/BLOCK_SIZE)+(M%BLOCK_SIZE!=0))*BLOCK_SIZE*sizeof(float));
+		cudaMalloc((void**)&d_dinvA, NB*((M/NB)+(M%NB!=0))*NB*sizeof(float));
+		cudaMalloc((void**)&d_x, N*M*sizeof(float));
+		cudaMemset (d_dinvA, 0, NB*((M/NB)+(M%NB!=0))*NB*sizeof(float));
 		diag_strtri (M, uplo, diag, A, d_dinvA, lda);
 
 		if (tran == 'N' || tran == 'n')
@@ -924,33 +1978,30 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 			/* the lower case */
 				
 				/* handle the first block seperately with alpha */
-				int MM = min (BLOCK_SIZE, M); 
-				if (N == 1)
-					magmablas_sgemv32 ('N', MM, MM, alpha, d_dinvA, BLOCK_SIZE, b, b);
-				else
-					cublasSgemm ('N', 'N', MM, N, MM, alpha, d_dinvA, BLOCK_SIZE, b, ldb, 0, b, ldb);  
 
-				if (BLOCK_SIZE>=M)
+				int MM = min (NB, M); 
+				cublasSgemm ('N', 'N', MM, N, MM, alpha, d_dinvA, NB, b, ldb, 0, d_x, M);  
+
+				if (NB>=M)
 				{
+					b_copy();
 					cudaFree(d_dinvA);
+					cudaFree(d_x);
 					return;
 				}
 
-				cublasSgemm ('N', 'N', M-BLOCK_SIZE, N, BLOCK_SIZE, -1.0, A+BLOCK_SIZE, lda, b, ldb, alpha, b+BLOCK_SIZE, ldb);
+				cublasSgemm ('N', 'N', M-NB, N, NB, -1.0, A+NB, lda, d_x, M, alpha, b+NB, ldb);
 
 				/* the rest blocks */
-				for (i=BLOCK_SIZE; i<M; i+=BLOCK_SIZE)
+				for (i=NB; i<M; i+=NB)
 				{
-					MM = min (M-i, BLOCK_SIZE);
-					if (N == 1)
-						magmablas_sgemv32 ('N', MM, MM, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
-					else
-						cublasSgemm ('N', 'N', MM, N, MM, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
-
-					if (i+BLOCK_SIZE>=M)
+					MM = min (M-i, NB);
+					cublasSgemm ('N', 'N', MM, N, MM, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);  
+					
+					if (i+NB>=M)
 						break;
 
-					cublasSgemm ('N', 'N', M-i-BLOCK_SIZE, N, BLOCK_SIZE, -1.0, A+i*lda+i+BLOCK_SIZE, lda, b+i, ldb, 1.0, b+i+BLOCK_SIZE, ldb);
+					cublasSgemm ('N', 'N', M-i-NB, N, NB, -1.0, A+i*lda+i+NB, lda, d_x+i, M, 1.0, b+i+NB, ldb);
 				}
 			}
 			else
@@ -958,33 +2009,29 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 			/* the upper case */
 
 				/* handle the first block seperately with alpha */
-				int MM = (M%BLOCK_SIZE==0)?BLOCK_SIZE:(M%BLOCK_SIZE); 
+				int MM = (M%NB==0)?NB:(M%NB); 
 				i = M-MM;
-				if (N == 1)
-					magmablas_sgemv32 ('N', MM, MM, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
-				else
-					cublasSgemm ('N', 'N', MM, N, MM, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0.0, b+i, ldb); 
+				cublasSgemm ('N', 'N', MM, N, MM, alpha, d_dinvA+i*NB, NB, b+i, ldb, 0.0, d_x+i, M); 
 					
-				if (i-BLOCK_SIZE<0)
+				if (i-NB<0)
 				{
+					b_copy();
 					cudaFree(d_dinvA);
+					cudaFree(d_x);
 					return;
 				}
 
-				cublasSgemm ('N', 'N', i, N, MM, -1.0, A+i*lda, lda, b+i, ldb, alpha, b, ldb);
+				cublasSgemm ('N', 'N', i, N, MM, -1.0, A+i*lda, lda, d_x+i, M, alpha, b, ldb);
 
 				/* the rest blocks */
-				for (i=M-MM-BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
+				for (i=M-MM-NB; i>=0; i-=NB)
 				{
-					if (N == 1) 
-						magmablas_sgemv32 ('N', BLOCK_SIZE, BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
-					else
-						cublasSgemm ('N', 'N', BLOCK_SIZE, N, BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0.0, b+i, ldb);
+					cublasSgemm ('N', 'N', NB, N, NB, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0.0, d_x+i, M);
 
-					if (i-BLOCK_SIZE<0)
+					if (i-NB<0)
 						break;
 
-					cublasSgemm ('N', 'N', i, N, BLOCK_SIZE, -1.0, A+i*lda, lda, b+i, ldb, 1.0, b, ldb);
+					cublasSgemm ('N', 'N', i, N, NB, -1.0, A+i*lda, lda, d_x+i, M, 1.0, b, ldb);
 				}
 
 			}
@@ -997,33 +2044,29 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 			/* the lower case */
 				
 				/* handle the first block seperately with alpha */
-				int MM = (M%BLOCK_SIZE==0)?BLOCK_SIZE:(M%BLOCK_SIZE); 
+				int MM = (M%NB==0)?NB:(M%NB); 
 				i=M-MM; 
-				if (N == 1)
-					magmablas_sgemv32 ('T', MM, MM, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
-				else
-					cublasSgemm ('T', 'N', MM, N, MM, alpha, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
+				cublasSgemm ('T', 'N', MM, N, MM, alpha, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);  
 
-				if (i-BLOCK_SIZE<0)
+				if (i-NB<0)
 				{
+					b_copy();
 					cudaFree(d_dinvA);
+					cudaFree(d_x);
 					return;
 				}
 
-				cublasSgemm ('T', 'N', i, N, MM, -1.0, A+i, lda, b+i, ldb, alpha, b, ldb);
+				cublasSgemm ('T', 'N', i, N, MM, -1.0, A+i, lda, d_x+i, M, alpha, b, ldb);
 
 				/* the rest blocks */
-				for (i=M-MM-BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
+				for (i=M-MM-NB; i>=0; i-=NB)
 				{
-					if (N == 1)
-						magmablas_sgemv32 ('T', BLOCK_SIZE, BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
-					else
-						cublasSgemm ('T', 'N', BLOCK_SIZE, N, BLOCK_SIZE, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
+					cublasSgemm ('T', 'N', NB, N, NB, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);  
 
-					if (i-BLOCK_SIZE<0)
+					if (i-NB<0)
 						break;
 
-					cublasSgemm ('T', 'N', i, N, BLOCK_SIZE, -1.0, A+i, lda, b+i, ldb, 1.0, b, ldb);
+					cublasSgemm ('T', 'N', i, N, NB, -1.0, A+i, lda, d_x+i, M, 1.0, b, ldb);
 				}
 			}
 			else
@@ -1031,33 +2074,29 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 			/* the upper case */
 					
 				/* handle the first block seperately with alpha */
-				int MM = min (BLOCK_SIZE, M); 
-				if (N == 1)
-					magmablas_sgemv32 ('T', MM, MM, alpha, d_dinvA, BLOCK_SIZE, b, b);
-				else
-					cublasSgemm ('T', 'N', MM, N, MM, alpha, d_dinvA, BLOCK_SIZE, b, ldb, 0, b, ldb);  
+				int MM = min (NB, M); 
+				cublasSgemm ('T', 'N', MM, N, MM, alpha, d_dinvA, NB, b, ldb, 0, d_x, M);  
 
-				if (BLOCK_SIZE>=M)
+				if (NB>=M)
 				{
+					b_copy();
 					cudaFree(d_dinvA);
+					cudaFree(d_x);
 					return;
 				}
 
-				cublasSgemm ('T', 'N', M-BLOCK_SIZE, N, BLOCK_SIZE, -1.0, A+(BLOCK_SIZE)*lda, lda, b, ldb, alpha, b+BLOCK_SIZE, ldb);
+				cublasSgemm ('T', 'N', M-NB, N, NB, -1.0, A+(NB)*lda, lda, d_x, M, alpha, b+NB, ldb);
 
 				/* the rest blocks */
-				for (i=BLOCK_SIZE; i<M; i+=BLOCK_SIZE)
+				for (i=NB; i<M; i+=NB)
 				{
-					MM = min (M-i, BLOCK_SIZE);
-					if (N == 1)
-						magmablas_sgemv32 ('T', MM, MM, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, b+i);
-					else
-						cublasSgemm ('T', 'N', MM, N, MM, 1.0, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE, b+i, ldb, 0, b+i, ldb);  
+					MM = min (M-i, NB);
+					cublasSgemm ('T', 'N', MM, N, MM, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);  
 					
-					if (i+BLOCK_SIZE>=M)
+					if (i+NB>=M)
 						break;
 
-					cublasSgemm ('T', 'N', M-i-BLOCK_SIZE, N, BLOCK_SIZE, -1.0, A+(i+BLOCK_SIZE)*lda+i, lda, b+i, ldb, 1.0, b+i+BLOCK_SIZE, ldb);
+					cublasSgemm ('T', 'N', M-i-NB, N, NB, -1.0, A+(i+NB)*lda+i, lda, d_x+i, M, 1.0, b+i+NB, ldb);
 				}
 			}
 		}
@@ -1068,9 +2107,22 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 		/* inverse the diagonals
 		 * Allocate device memory for the inversed diagonal blocks, size=N*BLOCK_SIZE 
 		 */
-		cudaMalloc((void**)&d_dinvA, BLOCK_SIZE*((N/BLOCK_SIZE)+(N%BLOCK_SIZE!=0))*BLOCK_SIZE*sizeof(float));
+		cudaMalloc((void**)&d_dinvA, NB*((N/NB)+(N%NB!=0))*NB*sizeof(float));
+		cudaMalloc((void**)&d_x, N*M*sizeof(float));
+		cudaMemset (d_dinvA, 0, NB*((N/NB)+(N%NB!=0))*NB*sizeof(float));
 		diag_strtri (N, uplo, diag, A, d_dinvA, lda);
-		
+
+		/*
+		FILE * pfile;
+		pfile = fopen ("A.mat","w");
+		gpu_ship_to_matlab (pfile, A, N, N); 
+		fclose (pfile);
+
+		pfile = fopen ("Av.mat","w");
+		gpu_ship_to_matlab (pfile, d_dinvA, NB, NB*((N/NB)+(N%NB!=0))); 
+		fclose (pfile);
+		*/
+
 		if (tran == 'N' || tran == 'n')
 		/* the non-transpose case */
 		{
@@ -1079,27 +2131,29 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 			/* the lower case */
 				
 				/* handle the first block seperately with alpha */
-				int NN = (N%BLOCK_SIZE==0)?BLOCK_SIZE:(N%BLOCK_SIZE);
+				int NN = (N%NB==0)?NB:(N%NB);
 				i=N-NN;
-				inplace_sgemm ('N', M, NN, alpha, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
+				cublasSgemm ('N', 'N', M, NN, NN, alpha, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M); 
 
-				if (i-BLOCK_SIZE<0)
+				if (i-NB<0)
 				{
+					b_copy();
+					cudaFree(d_x);
 					cudaFree(d_dinvA);
 					return;
 				}
 
-				cublasSgemm ('N', 'N', M, i, NN, -1.0, b+ldb*i, ldb, A+i, lda, alpha, b, ldb);
+				cublasSgemm ('N', 'N', M, i, NN, -1.0, d_x+i*M, M, A+i, lda, alpha, b, ldb);
 
 				/* the rest blocks */
-				for (i=N-NN-BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
+				for (i=N-NN-NB; i>=0; i-=NB)
 				{
-					inplace_sgemm ('N', M, BLOCK_SIZE, 1.0, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
+					cublasSgemm ('N', 'N', M, NB, NB, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M); 
 					
-					if (i-BLOCK_SIZE<0)
+					if (i-NB<0)
 						break;
 
-					cublasSgemm ('N', 'N', M, i, BLOCK_SIZE, -1.0, b+ldb*i, ldb, A+i, lda, 1.0, b, ldb);
+					cublasSgemm ('N', 'N', M, i, NB, -1.0, d_x+i*M, M, A+i, lda, 1.0, b, ldb);
 				}
 			}
 			else
@@ -1107,27 +2161,29 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 			/* the upper case */
 				
 				/* handle the first block seperately with alpha */
-				int NN = min(BLOCK_SIZE, N); 
-				inplace_sgemm ('N', M, NN, alpha, b, ldb, d_dinvA, BLOCK_SIZE);
+				int NN = min(NB, N); 
+				cublasSgemm ('N', 'N', M, NN, NN, alpha, b, ldb, d_dinvA, NB, 0, d_x, M);  
 
-				if (BLOCK_SIZE>=N)
+				if (NB>=N)
 				{
+					b_copy();
+					cudaFree(d_x);
 					cudaFree(d_dinvA);
 					return;
 				}
 
-				cublasSgemm ('N', 'N', M, N-BLOCK_SIZE, BLOCK_SIZE, -1.0, b, ldb, A+BLOCK_SIZE*lda, lda, alpha, b+BLOCK_SIZE*ldb, ldb);
+				cublasSgemm ('N', 'N', M, N-NB, NB, -1.0, d_x, M, A+NB*lda, lda, alpha, b+NB*ldb, ldb);
 				
 				/* the rest blocks */
-				for (i=BLOCK_SIZE; i<N; i+=BLOCK_SIZE)
+				for (i=NB; i<N; i+=NB)
 				{
-					NN = min(BLOCK_SIZE, N-i); 
-					inplace_sgemm ('N', M, NN, 1.0, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
+					NN = min(NB, N-i); 
+					cublasSgemm ('N', 'N', M, NN, NN, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0, d_x+i*M, M);  
 
-					if (i+BLOCK_SIZE>=N)
+					if (i+NB>=N)
 						break;
 
-					cublasSgemm ('N', 'N', M, N-i-BLOCK_SIZE, BLOCK_SIZE, -1.0, b+i*ldb, ldb, A+(i+BLOCK_SIZE)*lda+i, lda, 1.0, b+(i+BLOCK_SIZE)*ldb, ldb);
+					cublasSgemm ('N', 'N', M, N-i-NB, NB, -1.0, d_x+i*M, M,   A+(i+NB)*lda+i, lda, 1.0, b+(i+NB)*ldb, ldb);
 				}
 			}
 		}
@@ -1139,27 +2195,29 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 			/* the lower case */
 				
 				/* handle the first block seperately with alpha */
-				int NN = min(BLOCK_SIZE, N); 
-				inplace_sgemm ('T', M, NN, alpha, b, ldb, d_dinvA, BLOCK_SIZE);
+				int NN = min(NB, N); 
+				cublasSgemm ('N', 'T', M, NN, NN, alpha, b, ldb, d_dinvA, NB, 0, d_x, M);  
 
-				if (BLOCK_SIZE>=N)
+				if (NB>=N)
 				{
+					b_copy();
+					cudaFree(d_x);
 					cudaFree(d_dinvA);
 					return;
 				}
 
-				cublasSgemm ('N', 'T', M, N-BLOCK_SIZE, BLOCK_SIZE, -1.0, b, ldb, A+BLOCK_SIZE, lda, alpha, b+(BLOCK_SIZE)*ldb, ldb);
+				cublasSgemm ('N', 'T', M, N-NB, NB, -1.0, d_x, M, A+NB, lda, alpha, b+NB*ldb, ldb);
 
 				/* the rest blocks */
-				for (i=BLOCK_SIZE; i<N; i+=BLOCK_SIZE)
+				for (i=NB; i<N; i+=NB)
 				{
-					NN = min(BLOCK_SIZE, N-i); 
-					inplace_sgemm ('T', M, NN, 1.0, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
+					NN = min(NB, N-i); 
+					cublasSgemm ('N', 'T', M, NN, NN, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0, d_x+i*M, M);  
 
-					if (i+BLOCK_SIZE>=N)
+					if (i+NB>=N)
 						break;
 
-					cublasSgemm ('N', 'T', M, N-i-BLOCK_SIZE, BLOCK_SIZE, -1.0, b+ldb*i, ldb, A+i*lda+BLOCK_SIZE+i, lda, 1.0, b+(i+BLOCK_SIZE)*ldb, ldb);
+					cublasSgemm ('N', 'T', M, N-i-NB, NB, -1.0, d_x+i*M, M,   A+i*lda+NB+i, lda, 1.0, b+(i+NB)*ldb, ldb);
 				}
 			}
 			else
@@ -1167,32 +2225,36 @@ void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N,
 			/* the upper case */
 				
 				/* handle the first block seperately with alpha */
-				int NN = (N%BLOCK_SIZE==0)?BLOCK_SIZE:(N%BLOCK_SIZE);
+				int NN = (N%NB==0)?NB:(N%NB);
 				i=N-NN;
-				inplace_sgemm ('T', M, NN, alpha, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
+				cublasSgemm ('N', 'T', M, NN, NN, alpha, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M); 
 
-				if (i-BLOCK_SIZE<0)
+				if (i-NB<0)
 				{
+					b_copy();
+					cudaFree(d_x);
 					cudaFree(d_dinvA);
 					return;
 				}
 
-				cublasSgemm ('N', 'T', M, i, NN, -1.0, b+i*ldb, ldb, A+i*lda, lda, alpha, b, ldb);
+				cublasSgemm ('N', 'T', M, i, NN, -1.0, d_x+i*M, M, A+i*lda, lda, alpha, b, ldb);
 				
 				/* the rest blocks */
-				for (i=N-NN-BLOCK_SIZE; i>=0; i-=BLOCK_SIZE)
+				for (i=N-NN-NB; i>=0; i-=NB)
 				{
-					inplace_sgemm ('T', M, N, 1.0, b+ldb*i, ldb, d_dinvA+i*BLOCK_SIZE, BLOCK_SIZE);
+					cublasSgemm ('N', 'T', M, NB, NB, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M); 
 
-					if (i-BLOCK_SIZE<0)
+					if (i-NB<0)
 						break;
 
-					cublasSgemm ('N', 'T', M, i, BLOCK_SIZE, -1.0, b+i*ldb, ldb, A+i*lda, lda, 1.0, b, ldb);
+					cublasSgemm ('N', 'T', M, i, NB, -1.0, d_x+i*M, M, A+i*lda, lda, 1.0, b, ldb);
 				}
 			}
 		}
 	}
 		
+	b_copy();
 	cudaFree(d_dinvA);
+	cudaFree(d_x);
 }
 

@@ -199,7 +199,7 @@ int main(int argc, char** argv)
 #ifndef tallskinny
 		for (m=from; m<=to; m+=step)
 		{
-			n = 1; 
+			n = 73; 
 #else		
 		for (n=from; n<=to; n+=step)
 		{
@@ -216,13 +216,13 @@ int main(int argc, char** argv)
 			{	printf ("!!!! host memory allocation error in GetData\n"); exit(0);	}
 
 			for (j = 0; j < m2; j++) 
-				h_A[j] = rand() / (float)RAND_MAX / 10;
+				h_A[j] = rand() / (float)RAND_MAX / 50;
 
 			for (i=0; i<m; i++)
 				h_A[i*m+i] += 10;
 
 			for (i=0; i<n*m; i++)
-				h_b[i] = rand() / (float)RAND_MAX / 10;
+				h_b[i] = rand() / (float)RAND_MAX / 50;
 
 			cudaMalloc((void**)&d_A, m2*sizeof(float));
 			cudaMalloc((void**)&d_b1, m*n*sizeof(float));
