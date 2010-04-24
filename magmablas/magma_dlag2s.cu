@@ -27,7 +27,7 @@ extern "C" __global__ void dlag2s_generic(const double *A, float *SA, int M, int
 		A+= ibx+idt;
    		SA+=ibx+idt;
 	}
-	const double *Aend = A+lda*N;
+	const double *Aend = A+lda*N - lda ;
 	double RMAX_ = -1.0*RMAX ; 
 	double Ap[1]={A[0]};
 	do{
@@ -39,7 +39,7 @@ extern "C" __global__ void dlag2s_generic(const double *A, float *SA, int M, int
 		SA+=LDSA;
 		
         }while( A < Aend  ) ; 
-
+        
 	if( Ap[0] < RMAX_ || Ap[0] > RMAX ) 
 		flag = 0 ; 
 	SA[0] =(float) Ap[0];
