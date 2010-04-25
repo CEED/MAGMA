@@ -1812,6 +1812,7 @@ void diag_strtri (int M, char uplo, char diag, float *A, float *d_dinvA, int lda
 				case 64:
 					triple_sgemm_update_64_part1_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
 					triple_sgemm_update_64_part2_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					break;
 				default:
 					triple_sgemm_update_above64_part1_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
 					triple_sgemm_update_above64_part2_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
