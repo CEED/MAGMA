@@ -164,8 +164,12 @@ magma_sgeqrs_gpu(int *m, int *n, int *nrhs,
 		      work+rows*ib, rows, dwork+i, *ldc);
 
       // update c
-      cublasSgemv('n', i, ib, -1.f, a_ref(0, i), *lda,
-		  dwork + i, 1, 1.f, c, 1);
+      if (*nrhs == 1)
+	cublasSgemv('n', i, ib, -1.f, a_ref(0, i), *lda,
+		    dwork + i, 1, 1.f, c, 1);
+      else
+	cublasSgemm('n', 'n', i, *nrhs, ib, -1.f, a_ref(0, i), *lda,
+                    dwork + i, *ldc, 1.f, c, *ldc);
    }
    
    int start = i-nb;
@@ -175,16 +179,31 @@ magma_sgeqrs_gpu(int *m, int *n, int *nrhs,
        rows = *m -i;
 
        if (i + ib < *n) {
-	 cublasSgemv('n', ib, ib, 1.f, d_ref(i), ib,
-		     c+i, 1, 0.f, dwork + i, 1);
-	 cublasSgemv('n', i, ib, -1.f, a_ref(0, i), *lda,
-		     dwork + i, 1, 1.f, c, 1);
+	 if (*nrhs == 1)
+	   {
+	     cublasSgemv('n', ib, ib, 1.f, d_ref(i), ib,
+			 c+i, 1, 0.f, dwork + i, 1);
+	     cublasSgemv('n', i, ib, -1.f, a_ref(0, i), *lda,
+			 dwork + i, 1, 1.f, c, 1);
+	   }
+	 else
+	   {
+	     cublasSgemm('n', 'n', ib, *nrhs, ib, 1.f, d_ref(i), ib,
+                         c+i, *ldc, 0.f, dwork + i, *ldc);
+             cublasSgemm('n', 'n', i, *nrhs, ib, -1.f, a_ref(0, i), *lda,
+                         dwork + i, *ldc, 1.f, c, *ldc);
+	   }
        }
      }
    }
 
-   cublasScopy(*n, dwork, 1, c, 1);
-
+   if (*nrhs==1)
+     cublasScopy(*n, dwork, 1, c, 1);
+   else
+     cudaMemcpy2D(c, (*ldc)*sizeof(float),
+		  dwork, (*ldc)*sizeof(float),
+		  (*n)*sizeof(float), *nrhs, cudaMemcpyDeviceToDevice);
+		  
    return 0; 
 }
 
