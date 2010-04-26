@@ -35,6 +35,8 @@ int main( int argc, char** argv)
     float *x, *b, *r;
     float *d_b;
 
+    int nrhs = 1;
+
     TimeStruct start, end;
 
     /* Matrix size */
@@ -77,9 +79,9 @@ int main( int argc, char** argv)
       fprintf (stderr, "!!!! host memory allocation error (tau)\n");
     }
   
-    x = (float*)malloc(size[9] * sizeof(float));
-    b = (float*)malloc(size[9] * sizeof(float));
-    r = (float*)malloc(size[9] * sizeof(float));
+    x = (float*)malloc(nrhs*size[9] * sizeof(float));
+    b = (float*)malloc(nrhs*size[9] * sizeof(float));
+    r = (float*)malloc(nrhs*size[9] * sizeof(float));
 
     cudaMallocHost( (void**)&h_R,  n2*sizeof(float) );
     if (h_R == 0) {
@@ -93,7 +95,7 @@ int main( int argc, char** argv)
       fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
     }
 
-    status = cublasAlloc(size[9], sizeof(float), (void**)&d_b);
+    status = cublasAlloc(nrhs*size[9], sizeof(float), (void**)&d_b);
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (d_b)\n");
     }
@@ -104,7 +106,7 @@ int main( int argc, char** argv)
     }
 
     //status = cublasAlloc(nb, sizeof(float), (void**)&d_x);
-    status = cublasAlloc(size[9], sizeof(float), (void**)&d_x);
+    status = cublasAlloc(nrhs*size[9], sizeof(float), (void**)&d_x);
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (d_x)\n");
     }
@@ -124,13 +126,14 @@ int main( int argc, char** argv)
       for(j = 0; j < n2; j++)
 	h_A[j] = rand() / (float)RAND_MAX;
 
-      for(j=0; j<N; j++)
-	r[j] = b[j] = rand() / (float)RAND_MAX;
+      for(int k=0; k<nrhs; k++)
+	for(j=0; j<N; j++)
+	  r[j+k*N] = b[j+k*N] = rand() / (float)RAND_MAX;
 
       cublasSetVector(n2, sizeof(float), h_A, 1, d_A, 1);
       magma_sgeqrf_gpu(&N, &N, d_A, &N, tau, h_work, &lwork, d_work, info);
       cublasSetVector(n2, sizeof(float), h_A, 1, d_A, 1);
-      cublasSetVector(N, sizeof(float), b, 1, d_b, 1);
+      cublasSetVector(N*nrhs, sizeof(float), b, 1, d_b, 1);
 
       /* ====================================================================
          Performs operation using MAGMA
@@ -139,22 +142,24 @@ int main( int argc, char** argv)
       magma_sgeqrf_gpu2(&M, &N, d_A, &N, tau, h_work, &lwork, d_work, info);
 
 
-      // Solve the least-squares problem min || A * X - B ||
-      int nrhs = 1; 
+      // Solve the least-squares problem min || A * X - B || 
       magma_sgeqrs_gpu(&M, &N, &nrhs, d_A, &N, tau, 
 		       d_b, &M, h_work, &lwork, d_work, info);
       end = get_current_time();
 
-      gpu_perf = (4.*N*N*N/3.+2.*N*N)/(1000000.*GetTimerValue(start,end));
+      gpu_perf = (4.*N*N*N/3.+3.*nrhs*N*N)/(1000000.*GetTimerValue(start,end));
 
       float work[1], fone = 1.0, mone = -1., matnorm;
       int one = 1;
       
       // get the solution in x
-      cublasGetVector(N, sizeof(float), d_b, 1, x, 1);
+      cublasGetVector(N*nrhs, sizeof(float), d_b, 1, x, 1);
 
       // compute the residual
-      sgemv_("n", &N, &N, &mone, h_A, &N, x, &one, &fone, r, &one);
+      if (nrhs == 1)
+	sgemv_("n", &N, &N, &mone, h_A, &N, x, &one, &fone, r, &one);
+      else
+	sgemm_("n","n", &N, &nrhs, &N, &mone, h_A, &N, x, &N, &fone, r, &N);
       matnorm = slange_("f", &N, &N, h_A, &N, work);
 
       /* =====================================================================
@@ -173,7 +178,7 @@ int main( int argc, char** argv)
       strsm_("l", "u", "n", "n", &M, &nrhs, &fone, h_A, &lda, b, &M);
 
       end = get_current_time();
-      cpu_perf = (4.*N*N*N/3.+2.*N*N)/(1000000.*GetTimerValue(start,end));
+      cpu_perf = (4.*N*N*N/3.+3.*nrhs*N*N)/(1000000.*GetTimerValue(start,end));
 
       printf("%5d    %6.2f         %6.2f        %e\n",
              size[i], cpu_perf, gpu_perf,
