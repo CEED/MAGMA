@@ -197,10 +197,11 @@ magma_dgeqrf_gpu(int *m, int *n, double *a, int  *lda,  double  *tau,
       ib   = *n-i;
       rows = *m-i;
       cublasGetMatrix(rows, ib, sizeof(double),
-		      a_ref(i,i), *lda, work_ref(i), ldwork);
-      dgeqrf_(&rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &lhwork, info);
+                      a_ref(i,i), *lda, work, rows);
+      lhwork = *lwork - rows*ib;
+      dgeqrf_(&rows, &ib, work, &rows, tau+i, work+ib*rows, &lhwork, info);
       cublasSetMatrix(rows, ib, sizeof(double),
-		      work_ref(i), ldwork, a_ref(i,i), *lda);
+                      work, rows, a_ref(i,i), *lda);
    }
    return 0; 
   
