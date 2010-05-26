@@ -43,7 +43,10 @@ magma_dgeqrf_gpu2(int *m, int *n, double *a, int  *lda,  double  *tau,
     =======   
 
     DGEQRF computes a QR factorization of a real M-by-N matrix A:   
-    A = Q * R.   
+    A = Q * R. This version stores the triangular matrices used in 
+    the factorization so that they can be applied directly (i.e.,
+    without being recomputed) later. As a result the application 
+    of Q is much faster.
 
     Arguments   
     =========   

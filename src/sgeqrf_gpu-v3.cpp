@@ -25,7 +25,7 @@ magma_sgeqrf_gpu3(int *m, int *n, float *a, int  *lda,  float  *tau,
     =======   
 
     SGEQRF computes a QR factorization of a real M-by-N matrix A:   
-    A = Q * R.   
+    A = Q * R. This version supports variable blocking size.
 
     Arguments   
     =========   

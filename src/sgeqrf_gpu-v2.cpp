@@ -43,7 +43,10 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
     =======   
 
     SGEQRF computes a QR factorization of a real M-by-N matrix A:   
-    A = Q * R.   
+    A = Q * R. This version stores the triangular matrices used in 
+    the factorization so that they can be applied directly (i.e.,
+    without being recomputed) later. As a result the application 
+    of Q is much faster.
 
     Arguments   
     =========   
@@ -243,7 +246,7 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
   
 /*     End of MAGMA_SGEQRF */
 
-} /* magma_sgeqrf_ */
+} /* magma_sgeqrf */
 
 #undef a_ref
 #undef t_ref
