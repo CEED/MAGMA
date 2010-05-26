@@ -12,11 +12,8 @@
 #include "magmablas.h"
 #include <stdio.h>
 
-#define cublasStrsm magmablas_strsm
-#define cublasSgemm magmablas_sgemm
-
 extern "C" int 
-magma_spotrf(char *uplo, int *n, float *a, int *lda, float *work, int *info)
+magma_spotrf3(char *uplo, int *n, float *a, int *lda, float *work, int *info)
 {
 /*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
@@ -28,11 +25,13 @@ magma_spotrf(char *uplo, int *n, float *a, int *lda, float *work, int *info)
     =======   
 
     SPOTRF computes the Cholesky factorization of a real symmetric   
-    positive definite matrix A.   
+    positive definite matrix A. This version uses a large block size and
+    calls magma_spotrf on the resulting large diagonal blocks. It can
+    be potentially faster on systems with slow CPU host.
 
     The factorization has the form   
        A = U**T * U,  if UPLO = 'U', or   
-       A = L  * L**T, if UPLO = 'L',   
+       A = L  * L**T,  if UPLO = 'L',   
     where U is an upper triangular matrix and L is lower triangular.   
 
     This is the block version of the algorithm, calling Level 3 BLAS.   
@@ -81,7 +80,7 @@ magma_spotrf(char *uplo, int *n, float *a, int *lda, float *work, int *info)
     #define da_ref(a_1,a_2) (work+(a_2)*ldda + a_1)
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
-
+    
     /* System generated locals */
     int a_dim1, a_offset, i__3, i__4, ldda;
     /* Local variables */
@@ -115,7 +114,8 @@ magma_spotrf(char *uplo, int *n, float *a, int *lda, float *work, int *info)
     a    -= a_offset;
     work -= (1 + (*n));
 
-    int nb = magma_get_spotrf_nb(*n);
+    //    int nb = magma_get_spotrf_nb(*n);
+    int nb = 640;
 
     if (nb <= 1 || nb >= *n) {
 	spotrf_(uplo, n, a_ref(1, 1), lda, info);
@@ -201,7 +201,8 @@ magma_spotrf(char *uplo, int *n, float *a, int *lda, float *work, int *info)
                 }
 		
                 cudaStreamSynchronize(stream[1]);
-	        spotrf_("Lower", &jb, a_ref(j, j), lda, info);
+	        //spotrf_("Lower", &jb, a_ref(j, j), lda, info);
+		magma_spotrf("L", &jb, a_ref(j,j), lda, da_ref(j,j),info);
 		if (*info != 0){
                   *info = *info + j - 1;
 		  break;
@@ -212,8 +213,12 @@ magma_spotrf(char *uplo, int *n, float *a, int *lda, float *work, int *info)
 				  cudaMemcpyHostToDevice,stream[0]);
 	        
 		if (j + jb <= *n)
+		  magmablas_strsm('R', 'L', 'T', 'N', i__3, jb, 1.f,
+				   da_ref(j, j), ldda, da_ref(j + jb, j), ldda);
+		  /*
 		  cublasStrsm('R', 'L', 'T', 'N', i__3, jb, 1.f, 
 			      da_ref(j, j), ldda, da_ref(j + jb, j), ldda);
+		  */
 	    }
 	}
     }

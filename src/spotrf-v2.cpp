@@ -12,8 +12,11 @@
 #include "magmablas.h"
 #include <stdio.h>
 
+#define cublasStrsm magmablas_strsm
+#define cublasSgemm magmablas_sgemm
+
 extern "C" int 
-magma_spotrf2(char *uplo, int *n, float *a, int *lda, float *work, int *info)
+magma_spotrf2(char *uplo, int *n, float *a, int *lda, int *info)
 {
 /*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
@@ -25,7 +28,9 @@ magma_spotrf2(char *uplo, int *n, float *a, int *lda, float *work, int *info)
     =======   
 
     SPOTRF computes the Cholesky factorization of a real symmetric   
-    positive definite matrix A.   
+    positive definite matrix A. This version does not require work
+    space on the GPU passed as input. GPU memory is allocated in the
+    routine.
 
     The factorization has the form   
        A = U**T * U,  if UPLO = 'U', or   
@@ -67,27 +72,18 @@ magma_spotrf2(char *uplo, int *n, float *a, int *lda, float *work, int *info)
 
     INFO    (output) INTEGER   
             = 0:  successful exit   
-            < 0:  if INFO = -i, the i-th argument had an illegal value   
+            < 0:  if INFO = -i, the i-th argument had an illegal value 
+                  if INFO = -5, the GPU memory allocation failed 
             > 0:  if INFO = i, the leading minor of order i is not   
                   positive definite, and the factorization could not be   
                   completed.   
 
-    =====================================================================   
-
-       Test the input parameters.   
-
-       Parameter adjustments */
+    =====================================================================    */
 
     #define  a_ref(a_1,a_2) (a+(a_2)*a_dim1 + a_1)
     #define da_ref(a_1,a_2) (work+(a_2)*ldda + a_1)
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
-
-    /* Table of constant values */
-    static int c__1 = 1;
-    static int c_n1 = -1;
-    static float c_b13 = -1.f;
-    static float c_b14 = 1.f;
     
     /* System generated locals */
     int a_dim1, a_offset, i__3, i__4, ldda;
@@ -117,13 +113,22 @@ magma_spotrf2(char *uplo, int *n, float *a, int *lda, float *work, int *info)
 
     a_dim1 = *lda;
     ldda   = *n;
+    
+    if (ldda %32 != 0)
+      ldda = (ldda/32)*32 + 32;
+
+    float *work;
+    status = cublasAlloc((*n)*ldda, sizeof(float), (void**)&work);
+    if (status != CUBLAS_STATUS_SUCCESS) {
+      *info = -5;
+      return 0;
+    }
 
     a_offset = 1 + a_dim1 * 1;
     a    -= a_offset;
     work -= (1 + (*n));
 
-    //    int nb = magma_get_spotrf_nb(*n);
-    int nb = 640;
+    int nb = magma_get_spotrf_nb(*n);
 
     if (nb <= 1 || nb >= *n) {
 	spotrf_(uplo, n, a_ref(1, 1), lda, info);
@@ -140,8 +145,8 @@ magma_spotrf2(char *uplo, int *n, float *a, int *lda, float *work, int *info)
 		i__3 = j - 1;
 		cublasSetMatrix(jb, i__4, sizeof(float),
                                 a_ref(j,j), *lda, da_ref(j,j), ldda);
-                cublasSsyrk('u', 't', jb, i__3, c_b13, da_ref(1,j),
-                             ldda, c_b14, da_ref(j, j), ldda);
+                cublasSsyrk('u', 't', jb, i__3, -1.f, da_ref(1,j),
+                             ldda, 1.f, da_ref(j, j), ldda);
                 cudaMemcpy2DAsync(  a_ref(1,j), (*lda)*sizeof(float), 
 				   da_ref(1,j), ldda *sizeof(float), 
 				    sizeof(float)*(j+jb-1), jb,
@@ -151,8 +156,8 @@ magma_spotrf2(char *uplo, int *n, float *a, int *lda, float *work, int *info)
 		  i__3 = *n - j - jb + 1;
 		  i__4 = j - 1;
 		  cublasSgemm('T', 'N', jb, i__3, i__4,
-			  c_b13, da_ref(1, j), ldda, da_ref(1, j + jb), ldda,
-			  c_b14, da_ref(j, j + jb), ldda);
+			  -1.f, da_ref(1, j), ldda, da_ref(1, j + jb), ldda,
+			  1.f, da_ref(j, j + jb), ldda);
 		}
              
 		cudaStreamSynchronize(stream[1]);
@@ -168,7 +173,7 @@ magma_spotrf2(char *uplo, int *n, float *a, int *lda, float *work, int *info)
 		
 		if (j + jb <= *n)
 		  cublasStrsm('L', 'U', 'T', 'N', jb, i__3,
-			      c_b14, da_ref(j,j), ldda, da_ref(j, j+jb), ldda);
+			      1.f, da_ref(j,j), ldda, da_ref(j, j+jb), ldda);
 	    }
 	} else {
             //=========================================================
@@ -181,8 +186,8 @@ magma_spotrf2(char *uplo, int *n, float *a, int *lda, float *work, int *info)
 		i__3 = j - 1;
                 cublasSetMatrix(i__4, jb, sizeof(float), 
 				a_ref(j,j), *lda, da_ref(j,j), ldda);
-                cublasSsyrk('l', 'n', jb, i__3, c_b13, da_ref(j,1), ldda, 
-                            c_b14, da_ref(j, j), ldda);
+                cublasSsyrk('l', 'n', jb, i__3, -1.f, da_ref(j,1), ldda, 
+                            1.f, da_ref(j, j), ldda);
 		/*
 		cudaMemcpy2DAsync( a_ref(j,1), (*lda)*sizeof(float), 
 				   da_ref(j,1),  ldda *sizeof(float), 
@@ -198,19 +203,16 @@ magma_spotrf2(char *uplo, int *n, float *a, int *lda, float *work, int *info)
                                    sizeof(float)*jb, j-1,
                                    cudaMemcpyDeviceToHost,stream[2]);
 
-
-
                 if (j + jb <= *n) {
                     i__3 = *n - j - jb + 1;
                     i__4 = j - 1;
                     cublasSgemm('N', 'T', i__3, jb, i__4,
-                            c_b13, da_ref(j + jb, 1), ldda, da_ref(j, 1), ldda,
-                            c_b14, da_ref(j + jb, j), ldda);
+                            -1.f, da_ref(j + jb, 1), ldda, da_ref(j, 1), ldda,
+                            1.f, da_ref(j + jb, j), ldda);
                 }
 		
                 cudaStreamSynchronize(stream[1]);
-	        //spotrf_("Lower", &jb, a_ref(j, j), lda, info);
-		magma_spotrf("L", &jb, a_ref(j,j), lda, da_ref(j,j),info);
+	        spotrf_("Lower", &jb, a_ref(j, j), lda, info);
 		if (*info != 0){
                   *info = *info + j - 1;
 		  break;
@@ -221,15 +223,14 @@ magma_spotrf2(char *uplo, int *n, float *a, int *lda, float *work, int *info)
 				  cudaMemcpyHostToDevice,stream[0]);
 	        
 		if (j + jb <= *n)
-		  magmablas_strsm('R', 'L', 'T', 'N', i__3, jb, c_b14,
-				   da_ref(j, j), ldda, da_ref(j + jb, j), ldda);
-		  /*
-		  cublasStrsm('R', 'L', 'T', 'N', i__3, jb, c_b14, 
+		  cublasStrsm('R', 'L', 'T', 'N', i__3, jb, 1.f, 
 			      da_ref(j, j), ldda, da_ref(j + jb, j), ldda);
-		  */
 	    }
 	}
     }
+    
+    work += 1 + (*n);
+    cublasFree(work);
     
     return 0;
 

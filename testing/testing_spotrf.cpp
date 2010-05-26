@@ -101,6 +101,7 @@ int main( int argc, char** argv)
 	 =================================================================== */
       start = get_current_time();
       magma_spotrf("L", &N, h_R, &lda, d_A, info);
+      //magma_spotrf2("L", &N, h_R, &lda, info);
       //magma_spotrf("U", &N, h_R, &lda, d_A, info);
       end = get_current_time();
     

@@ -20,7 +20,8 @@ extern "C" {
    -- MAGMA function definitions
 */
 int magma_spotrf(char *, int *, float *, int *, float *, int *);
-int magma_spotrf2(char *, int *, float *, int *, float *, int *);
+int magma_spotrf2(char *, int *, float *, int *, int *);
+int magma_spotrf3(char *, int *, float *, int *, float *, int *);
 int magma_spotrf_gpu(char *, int *, float *, int *, float *, int *);
 int magma_slarfb(char, char, int, int, int *, float *, int *, float *,
                  int *, float *, int *, float *, int *);
@@ -29,6 +30,8 @@ int magma_sgeqrf(int *, int *, float *, int  *,  float  *,
 int magma_sgeqrf_gpu(int *, int *, float *, int  *,  float  *,
 		     float *, int *, float *, int *);
 int magma_sgeqrf_gpu2(int *, int *, float *, int  *,  float  *,
+		      float *, int *, float *, int *);
+int magma_sgeqrf_gpu3(int *, int *, float *, int  *,  float  *,
 		      float *, int *, float *, int *);
 int magma_sgeqrs_gpu(int *, int *, int *, float *, int *, float *, float *,
                      int *, float *, int *, float *, int *);
@@ -49,6 +52,13 @@ int magma_slahr2(int *, int *, int *, float *, float *, float *, int *,
                  float *, float *, int *, float *, int *);
 int magma_slahru(int, int, int,  float *, int,
                  float *, float *, float *, float *, float *);
+int magma_ssytrd(char *, int *, float *, int *, float *, float *, 
+		 float *, float *, int *, float *, int *);
+int magma_sgebrd(int *, int *, float *, int *, float *, float *, float *, 
+		 float *, float *, int *, float *, int *);
+int magma_slabrd(int *, int *, int *, float *, int *, float *, float *, 
+		 float *, float *, float *, int *, float *, int *,
+		 float *, int *, float *, int *, float *, int *);
 
 int magma_dpotrf(char *, int *, double *, int *, double *, int *);
 int magma_dpotrf_gpu(char *, int *, double *, int *, double *, int *);
@@ -78,6 +88,8 @@ int magma_dlahr2(int *, int *, int *, double *, double *, double *, int *,
                  double *, double *, int *, double *, int *);
 int magma_dlahru(int, int, int,  double *, int,
 		 double *, double *, double *, double *, double *);
+int magma_dsytrd(char *, int *, double *, int *, double *, double *,
+		 double *, double *, int *, double *, int *);
 
 int magma_cpotrf(char *, int *, float2 *, int *, float2 *, int *);
 int magma_cgetrf(int *, int *, float2 *, int *, int *, 
@@ -119,14 +131,6 @@ int magma_dsgeqrsv_gpu(int, int, int, double *, int, double *, int, double *,
 		       int, double *, float *, int *, int *, float *, int, 
 		       float *, float *, double *, int, double *, double *);
 
-#ifdef __cplusplus
-}
-#endif
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 /* ////////////////////////////////////////////////////////////////////////////
    -- LAPACK Externs used in MAGMA
 */
@@ -147,9 +151,12 @@ void ssyrk_(char *, char *, int *, int *, float *, float *,
 int strmm_(char *, char *, char *, char *,
 	   int *, int *, float *, float *, int *, float *, int *);
 int slaswp_(int *, float *, int *, int *, int *, int *, int *);
+int ssymv_(char *, int *, float *, float *, int *, 
+	   float *, int *, float *, float *, int *);
 
-float snrm2_(const int, const float *, const int);
+float snrm2_(int *, float *, int *);
 float slange_(char *norm, int *, int *, float *, int *, float *);
+float sdot_(int *, float *, int *, float *, int *);
 
 int sgehd2_(int*, int*, int*, float*, int*, float*, float*, int*);
 int spotrf_(char *uplo, int *n, float *a, int *lda, int *info);
@@ -161,6 +168,11 @@ int sgelq2_(int*,int*,float *,int*,float *,float *,int *);
 int sgeql2_(int*,int*,float *,int*,float *,float *,int *);
 int sgehrd_(int *, int *, int *, float *, int *,
 	    float *, float *, int *, int *);
+int ssytrd_(char *, int *, float *, int *, float *, float *, 
+	    float *, float *, int *, int *);
+int sgebrd_(int *, int *, float *, int *, float *, float *, float *, 
+	    float *, float *, int *, int *);
+
 int slarft_(char *, char *, int *, int *, float *, int *, float *,
 	    float *, int *);
 int slarfb_(char *, char *, char *, char *, int *, int *, int *, float *, 
@@ -210,9 +222,12 @@ void dsyrk_(char *, char *, int *, int *, double *, double *,
 int dtrmm_(char *, char *, char *, char *, int *, int *, 
 	   double *, double *, int *, double *, int *);
 int dlaswp_(int *, double *, int *, int *, int *, int *, int *);
+int dsymv_(char *, int *, double *, double *, int *,
+	   double *, int *, double *, double *, int *);
 
 double dnrm2_(int *, double *, int *);
 double dlange_(char *norm, int *, int *, double *, int *, double *);
+double ddot_(int *, double *, int *, double *, int *);
 
 int dgehd2_(int*,int*,int*,double*,int*,double*,double*,int*);
 int dpotrf_(char *uplo, int *n, double *a, int *lda, int *info);
@@ -225,6 +240,9 @@ int dgeql2_(int*,int*,double *,int*,double *,double *,int *);
 int dgetrf_(int *, int *, double *, int *, int *, int *);
 int dgehrd_(int *, int *, int *, double *, int *, 
 	    double *, double *, int *, int *);
+int dsytrd_(char *, int *, double *, int *, double *, double *,
+	    double *, double *, int *, int *);
+
 int dlarft_(char *, char *, int *, int *, double *, int *, double *,
 	    double *, int *);
 int dlaset_(char *,int *,int *,double *,double *,double *a,int *);
