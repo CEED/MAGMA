@@ -125,7 +125,8 @@ int main( int argc, char** argv)
       fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
     }
 
-    cudaMallocHost( (void**)&h_work, lwork*sizeof(float) );
+    //cudaMallocHost( (void**)&h_work, lwork*sizeof(float) );
+    h_work = (float*)malloc(lwork * sizeof(float));
     if (h_work == 0) {
       fprintf (stderr, "!!!! host memory allocation error (work)\n");
     }
@@ -141,6 +142,7 @@ int main( int argc, char** argv)
 	h_R[j] = h_A[j] = rand() / (float)RAND_MAX;
 
       magma_sgetrf(&N, &N, h_R, &N, ipiv, h_work, d_A, info);
+      //magma_sgetrf2(&N, &N, h_R, &N, ipiv, h_work, info);
 
       for(j=0; j<n2; j++)
         h_R[j] = h_A[j];    
@@ -165,6 +167,7 @@ int main( int argc, char** argv)
 	 =================================================================== */
       start = get_current_time();
       magma_sgetrf(&N, &N, h_R, &N, ipiv, h_work, d_A, info);
+      //magma_sgetrf2(&N, &N, h_R, &N, ipiv, h_work, info);
       end = get_current_time();
     
       gpu_perf = 2.*N*N*N/(3.*1000000*GetTimerValue(start,end));
