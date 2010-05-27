@@ -27,6 +27,8 @@ int magma_slarfb(char, char, int, int, int *, float *, int *, float *,
                  int *, float *, int *, float *, int *);
 int magma_sgeqrf(int *, int *, float *, int  *,  float  *,
 		 float *, int *, float *, int *);
+int magma_sgeqrf2(int *, int *, float *, int  *,  float  *,
+		  float *, int *, int *);
 int magma_sgeqrf_gpu(int *, int *, float *, int  *,  float  *,
 		     float *, int *, float *, int *);
 int magma_sgeqrf_gpu2(int *, int *, float *, int  *,  float  *,
