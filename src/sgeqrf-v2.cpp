@@ -71,10 +71,6 @@ magma_sgeqrf2(int *m, int *n, float *a, int  *lda,  float  *tau,
             this value as the first entry of the WORK array, and no error   
             message related to LWORK is issued.
 
-    DA      (workspace)  REAL array on the GPU, dimension N*(M + NB), 
-            where NB can be obtained through magma_get_sgeqrf_nb(M).
-            (size to be reduced in upcoming versions).
-
     INFO    (output) INTEGER   
             = 0:  successful exit   
             < 0:  if INFO = -i, the i-th argument had an illegal value   
