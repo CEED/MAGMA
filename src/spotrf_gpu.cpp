@@ -12,7 +12,7 @@
 #include "magmablas.h"
 
 #define cublasStrsm magmablas_strsm
-#define cublasSgemm magmablas_sgemm
+//#define cublasSgemm magmablas_sgemm
 
 extern "C" int 
 magma_spotrf_gpu(char *uplo, int *n, float *a, int *lda, float *work, 
@@ -60,7 +60,9 @@ magma_spotrf_gpu(char *uplo, int *n, float *a, int *lda, float *work,
             factorization A = U**T*U or A = L*L**T.   
 
     LDA     (input) INTEGER   
-            The leading dimension of the array A.  LDA >= max(1,N).   
+            The leading dimension of the array A.  LDA >= max(1,N).
+            To benefit from coalescent memory accesses LDA must be
+            dividable by 16.
 
     WORK    (workspace) REAL array, dimension at least (nb, nb)
             where nb can be obtained through magma_get_spotrf_nb(*n)
@@ -126,7 +128,7 @@ magma_spotrf_gpu(char *uplo, int *n, float *a, int *lda, float *work,
       /*  Use unblocked code. */
       cublasGetMatrix(*n, *n, sizeof(float), a + a_offset, *lda, work, *n);
       spotrf_(uplo, n, work, n, info);
-      cublasSetMatrix(*n, *n, sizeof(float), work, *n, a + a_offset, *n);
+      cublasSetMatrix(*n, *n, sizeof(float), work, *n, a + a_offset, *lda);
     } else {
 
         /* Use blocked code. */

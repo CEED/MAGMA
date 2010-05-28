@@ -77,7 +77,7 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! host memory allocation error (R)\n");
     }
 
-    status = cublasAlloc(n2, sizeof(float), (void**)&d_A);
+    status = cublasAlloc(n2+32*size[9], sizeof(float), (void**)&d_A);
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
     }
@@ -89,14 +89,17 @@ int main( int argc, char** argv)
       N = lda = size[i];
       n2 = N*N;
 
+      lda = (N/32)*32;
+      if (lda<N) lda+=32;
+
       for(j = 0; j < n2; j++)
 	h_A[j] = rand() / (float)RAND_MAX;
-      for(j=0; j<n2; j+=(lda+1))
+      for(j=0; j<n2; j+=(N+1))
 	h_R[j] = (h_A[j]+=2000);
 
-      cublasSetVector(n2, sizeof(float), h_A, 1, d_A, 1);
+      cublasSetMatrix( N, N, sizeof(float), h_A, N, d_A, lda);
       magma_spotrf_gpu("U", &N, d_A, &lda, h_work, info);
-      cublasSetVector(n2, sizeof(float), h_A, 1, d_A, 1);
+      cublasSetMatrix( N, N, sizeof(float), h_A, N, d_A, lda);
       
       /* ====================================================================
          Performs operation using MAGMA 
@@ -114,8 +117,8 @@ int main( int argc, char** argv)
          Performs operation using LAPACK 
 	 =================================================================== */
       start = get_current_time();
-      spotrf_("L", &N, h_A, &lda, info);
-      //spotrf_("U", &N, h_A, &lda, info);
+      spotrf_("L", &N, h_A, &N, info);
+      //spotrf_("U", &N, h_A, &N, info);
       end = get_current_time();
       if (info[0] < 0)  
 	printf("Argument %d of spotrf had an illegal value.\n", -info[0]);     
@@ -127,7 +130,7 @@ int main( int argc, char** argv)
       /* =====================================================================
          Check the result compared to LAPACK
          =================================================================== */
-      cublasGetVector(n2, sizeof(float), d_A, 1, h_R, 1);
+      cublasGetMatrix( N, N, sizeof(float), d_A, lda, h_R, N);
       float work[1], matnorm, mone = -1.0;
       int one = 1;
       matnorm = slange_("f", &N, &N, h_A, &N, work);
