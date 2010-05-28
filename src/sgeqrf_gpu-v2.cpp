@@ -88,7 +88,7 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
             this value as the first entry of the WORK array, and no error   
             message related to LWORK is issued.   
 
-    DWORK   (workspace/output)  REAL array on the GPU, dimension 2*N*NB,
+    DWORK   (workspace/output)  REAL array on the GPU, dimension 3*N*NB,
             where NB can be obtained through magma_get_sgeqrf_nb(M).
             It starts with NB*NB blocks that store the triangular T 
             matrices, followed by the NB*NB blocks of the diagonal 
@@ -125,7 +125,7 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
    #define max(a,b)       (((a)>(b))?(a):(b))
 
    int i, k, ldwork, lddwork, old_i, old_ib, rows, cols;
-   int nbmin, nx, ib, ldda;
+   int nbmin, ib, ldda;
 
    /* Function Body */
    *info = 0;
@@ -166,13 +166,12 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
 
    ldda = *m;
    nbmin = 2;
-   nx = nb;
    ldwork = *m;
    lddwork= k;
 
-   if (nb >= nbmin && nb < k && nx < k) {
+   if (nb >= nbmin && nb < k) {
       /* Use blocked code initially */
-      for (i = 0; i < k-nx; i += nb) {
+      for (i = 0; i < k-nb; i += nb) {
 	ib = min(k-i, nb);
 	rows = *m -i;
 	cudaMemcpy2DAsync(  work_ref(i), ldwork*sizeof(float),
@@ -211,7 +210,7 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
 	  /* Send the triangular factor T to the GPU */
 	  cublasSetMatrix(ib, ib, sizeof(float), hwork, ib, t_ref(i), lddwork);
 
-	  if (i+nb < k-nx){
+	  if (i+nb < k-nb){
 	    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
 	    magma_slarfb('F', 'C', rows, ib, &ib, a_ref(i,i), lda, t_ref(i),
 			 &lddwork, a_ref(i,i+ib), lda, dd_ref(0), &lddwork);
@@ -236,10 +235,11 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
       ib   = *n-i;
       rows = *m-i;
       cublasGetMatrix(rows, ib, sizeof(float),
-		      a_ref(i,i), *lda, work_ref(i), ldwork);
-      sgeqrf_(&rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &lhwork, info);
+		      a_ref(i,i), *lda, work, rows);
+      lhwork = *lwork - rows*ib;
+      sgeqrf_(&rows, &ib, work, &rows, tau+i, work+ib*rows, &lhwork, info);
       cublasSetMatrix(rows, ib, sizeof(float),
-		      work_ref(i), ldwork, a_ref(i,i), *lda);
+		      work, rows, a_ref(i,i), *lda);
    }
    
    return 0; 

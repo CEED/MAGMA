@@ -152,11 +152,12 @@ magma_sgeqrs_gpu(int *m, int *n, int *nrhs,
       sormqr_("l", "t", &rows, nrhs, &ib, work, &rows,
 	      tau+i, work+rows*ib, &rows, work+rows*(ib+*nrhs), &lhwork, info);
     
+      // send the updated part of c back to the GPU
       cublasSetMatrix(rows, *nrhs, sizeof(float),
                       work+rows*ib, rows, c+i, *ldc);
 
       float one = 1.;
-      strsm_("l", "u", "n", "n", &rows, nrhs, &one, work, &rows,
+      strsm_("l", "u", "n", "n", &ib, nrhs, &one, work, &rows,
 	     work+rows*ib, &rows);
 
       // update the solution vector
@@ -171,7 +172,7 @@ magma_sgeqrs_gpu(int *m, int *n, int *nrhs,
 	cublasSgemm('n', 'n', i, *nrhs, ib, -1.f, a_ref(0, i), *lda,
                     dwork + i, *ldc, 1.f, c, *ldc);
    }
-   
+
    int start = i-nb;
    if (nb < k) {
      for (i = start; i >=0; i -= nb) {
@@ -203,7 +204,7 @@ magma_sgeqrs_gpu(int *m, int *n, int *nrhs,
      cudaMemcpy2D(c, (*ldc)*sizeof(float),
 		  dwork, (*ldc)*sizeof(float),
 		  (*n)*sizeof(float), *nrhs, cudaMemcpyDeviceToDevice);
-		  
+
    return 0; 
 }
 
