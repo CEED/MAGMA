@@ -76,7 +76,8 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! CUBLAS initialization error\n");
     }
 
-    lda = M;
+    lda = (M/32)*32;
+    if (lda<M) lda+=32;
     n2  = M * N;
 
     int min_mn = min(M, N);
@@ -105,7 +106,7 @@ int main( int argc, char** argv)
     // int lwork = (3*size[9]+nb)*nb;
     int lwork = (M+2*N+nb)*nb;
 
-    status = cublasAlloc(n2, sizeof(float), (void**)&d_A);
+    status = cublasAlloc(lda*N, sizeof(float), (void**)&d_A);
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
     }
@@ -136,8 +137,11 @@ int main( int argc, char** argv)
     printf("============================================================\n");
     for(i=0; i<10; i++){
       if (argc == 1){
-	M = N = lda = min_mn = size[i];
+	M = N = min_mn = size[i];
         n2 = M*N;
+
+        lda = (M/32)*32;
+	if (lda<M) lda+=32;
       }
 
       for(j = 0; j < n2; j++)

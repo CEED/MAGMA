@@ -45,7 +45,7 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
     SGEQRF computes a QR factorization of a real M-by-N matrix A:   
     A = Q * R. This version stores the triangular matrices used in 
     the factorization so that they can be applied directly (i.e.,
-    without being recomputed) later. As a result the application 
+    without being recomputed) later. As a result, the application 
     of Q is much faster.
 
     Arguments   
@@ -68,6 +68,8 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
 
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,M).   
+            To benefit from coalescent memory accesses LDA must be
+            dividable by 16.
 
     TAU     (output) REAL array, dimension (min(M,N))   
             The scalar factors of the elementary reflectors (see Further   

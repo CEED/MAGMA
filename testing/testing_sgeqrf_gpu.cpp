@@ -120,7 +120,7 @@ int main( int argc, char** argv)
     printf("==========================================================\n");
     for(i=0; i<10; i++){
       if (argc==1){
-	M = N = lda = min_mn = size[i];
+	M = N = min_mn = size[i];
         n2 = M*N;
 	
 	lda = (M/32)*32;

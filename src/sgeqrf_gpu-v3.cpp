@@ -46,7 +46,9 @@ magma_sgeqrf_gpu3(int *m, int *n, float *a, int  *lda,  float  *tau,
             Details).
 
     LDA     (input) INTEGER   
-            The leading dimension of the array A.  LDA >= max(1,M).   
+            The leading dimension of the array A.  LDA >= max(1,M).
+            To benefit from coalescent memory accesses LDA must be
+            dividable by 16.
 
     TAU     (output) REAL array, dimension (min(M,N))   
             The scalar factors of the elementary reflectors (see Further   
