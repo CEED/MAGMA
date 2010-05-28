@@ -74,7 +74,9 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! CUBLAS initialization error\n");
     }
 
-    lda = M;
+    lda = (M/32)*32;
+    if (lda<M) lda+=32;
+
     n2  = M * N;
 
     int min_mn = min(M, N);
@@ -98,7 +100,7 @@ int main( int argc, char** argv)
     int nb = magma_get_sgeqrf_nb(min_mn);
     int lwork = (M+N)*nb;
 
-    status = cublasAlloc(n2, sizeof(float), (void**)&d_A);
+    status = cublasAlloc(lda*N, sizeof(float), (void**)&d_A);
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
     }
@@ -114,12 +116,15 @@ int main( int argc, char** argv)
     }
 
     printf("\n\n");
-    printf("  N    CPU GFlop/s    GPU GFlop/s    ||R||_F / ||A||_F\n");
-    printf("========================================================\n");
+    printf("  M     N   CPU GFlop/s   GPU GFlop/s    ||R||_F / ||A||_F\n");
+    printf("==========================================================\n");
     for(i=0; i<10; i++){
       if (argc==1){
 	M = N = lda = min_mn = size[i];
         n2 = M*N;
+	
+	lda = (M/32)*32;
+	if (lda<M) lda+=32;
       }
 
       for(j = 0; j < n2; j++)
@@ -160,8 +165,8 @@ int main( int argc, char** argv)
       int one = 1;
       matnorm = slange_("f", &M, &N, h_A, &M, work);
       saxpy_(&n2, &mone, h_A, &one, h_R, &one);
-      printf("%5d    %6.2f         %6.2f        %e\n", 
-	     size[i], cpu_perf, gpu_perf,
+      printf("%5d %5d  %6.2f         %6.2f        %e\n", 
+	     M, N, cpu_perf, gpu_perf,
 	     slange_("f", &M, &N, h_R, &M, work) / matnorm);
       
       /* =====================================================================
