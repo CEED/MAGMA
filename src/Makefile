@@ -12,6 +12,7 @@ include ../make.inc
              spotrf-v2.o \
              spotrf_gpu.o \
              sgeqrf.o \
+             sgeqrf-v2.o \
              sgeqrf_gpu.o \
              sgeqrf_gpu-v2.o \
              sgeqrf_gpu-v3.o \
@@ -73,6 +74,10 @@ include ../make.inc
              spotrs_gpu.o \
              dpotrs_gpu.o \
              xerbla.o \
+             sgetrf_mine.o \
+             sgetf2_mine.o \
+             dgetrf_mine.o \
+             dgetf2_mine.o \
 
 all: $(LIBMAGMA)
 
@@ -85,3 +90,5 @@ clean:
 
 .cpp.o:
 	$(CC) $(OPTS) $(INC) -c $< -o $@
+.f.o:
+	$(FORT) $(OPTS) $(INC) -c $< -o $@
