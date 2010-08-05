@@ -75,7 +75,7 @@ magmablas_dgemv(int n, int m, double *A, int lda, double *x, double *z)
     LDA    - (input) INTEGER.
              LDA specifies the leading dimension of A.
 
-    X      - (input) DOUBLE PRECISION array of dimension m.
+    X      - (input) DOUBLE PRECISION array of dimension n.
      
     Z      - (output) DOUBLE PRECISION array of	dimension m. 
              On exit Z = A X.
@@ -305,7 +305,7 @@ magmablas_dgemvt1(int m, int n, double alpha, double *A, int lda,
     LDA    - (input) INTEGER.
              LDA specifies the leading dimension of A.
 
-    X      - (input) DOUBLE PRECISION array of dimension n.
+    X      - (input) DOUBLE PRECISION array of dimension m.
 
     Z      - (output) DOUBLE PRECISION array of dimension n.
              On exit Z = alpha A^t X.
@@ -351,7 +351,7 @@ magmablas_dgemvt2(int m, int n, double alpha, double *A, int lda,
     LDA    - (input) INTEGER.
              LDA specifies the leading dimension of A.
 
-    X      - (input) DOUBLE PRECISION array of dimension n.
+    X      - (input) DOUBLE PRECISION array of dimension m.
 
     Z      - (output) DOUBLE PRECISION array of dimension n.
              On exit Z = alpha A^t X.
@@ -398,7 +398,7 @@ magmablas_dgemvt(int m, int n, double alpha, double *A, int lda,
     LDA    - (input) INTEGER.
              LDA specifies the leading dimension of A.
 
-    X      - (input) SINGLE PRECISION array of dimension n.
+    X      - (input) SINGLE PRECISION array of dimension m.
 
     Z      - (output) SINGLE PRECISION array of dimension n.
              On exit Z = alpha A^t X.

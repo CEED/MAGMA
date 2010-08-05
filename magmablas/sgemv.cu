@@ -50,6 +50,45 @@ sgemv_kernel(int n, int m, int n1, float* A, int lda, float *x, float *y)
      y[ind] = res;
 }
 
+__global__ void
+sgemv_kernel2(int n, int m, int n1, float* A, int lda, 
+              float *x, int incx, float *y)
+{
+  int ind = blockIdx.x*num_threads + threadIdx.x;
+
+  A += ind;
+  x += threadIdx.x * incx;
+
+  float res = 0.f;
+
+  __shared__ float buff[sgemv_bs];
+  for(int i=0; i<n1; i += sgemv_bs ){
+    __syncthreads();
+    buff[threadIdx.x]  = x[i*incx];
+
+    __syncthreads();
+    #pragma unroll
+    for(int j=0; j < sgemv_bs ; j++){
+       res+=A[0]*buff[j];
+       A+=lda;
+    }
+  }
+  __syncthreads();
+
+  if (m>n1){
+     buff[threadIdx.x]  = x[n1*incx];
+
+     __syncthreads();
+     for(int j=0; j<(m-n1); j++){
+         res += A[0]*buff[j];
+         A+=lda;
+     }
+  }
+
+  if (ind<n)
+     y[ind] = res;
+}
+
 extern "C" void
 magmablas_sgemv(int n, int m, float *A, int lda, float *x, float *z)
 {
@@ -75,7 +114,7 @@ magmablas_sgemv(int n, int m, float *A, int lda, float *x, float *z)
     LDA    - (input) INTEGER.
              LDA specifies the leading dimension of A.
 
-    X      - (input) SINGLE PRECISION array of dimension m.
+    X      - (input) SINGLE PRECISION array of dimension n.
      
     Z      - (output) SINGLE PRECISION array of	dimension m. 
              On exit Z = A X.
@@ -95,6 +134,50 @@ magmablas_sgemv(int n, int m, float *A, int lda, float *x, float *z)
                                     A, lda, x, z);
 }
 
+extern "C" void
+magmablas_sgemv2(int n, int m, float *A, int lda, float *x, int incx, float *z)
+{
+/*  -- MAGMA (version 0.2) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2009
+
+    Purpose
+    =======
+
+    This routine computes z = A x on the GPU.
+
+    N      - (input) INTEGER.
+             On entry, N specifies the number of rows of the matrix A.
+
+    M      - (input) INTEGER.
+             On entry, M specifies the number of columns of the matrix A
+
+    A      - (input) SINGLE PRECISION array of dimension ( LDA, m ) on the GPU.
+
+    LDA    - (input) INTEGER.
+             LDA specifies the leading dimension of A.
+
+    X      - (input) SINGLE PRECISION array of dimension n.
+
+    Z      - (output) SINGLE PRECISION array of dimension m.
+             On exit Z = A X.
+
+    ===================================================================== */
+
+    int blocks;
+    if (n % num_threads==0)
+        blocks = n/num_threads;
+    else
+        blocks = n/num_threads + 1;
+
+    dim3 grid(blocks, 1, 1);
+    dim3 threads(num_threads, 1, 1);
+
+    sgemv_kernel2<<<grid, threads>>>(n, m, (m / sgemv_bs)*sgemv_bs,
+                                     A, lda, x, incx, z);
+}
 
 __global__ void 
 sgemvt_kernel1(int n, int m, float alpha, int n1, float* A, int lda,
@@ -317,7 +400,7 @@ magmablas_sgemvt1(int m, int n, float alpha, float *A, int lda,
     LDA    - (input) INTEGER.
              LDA specifies the leading dimension of A.
 
-    X      - (input) SINGLE PRECISION array of dimension n.
+    X      - (input) SINGLE PRECISION array of dimension m.
 
     Z      - (output) SINGLE PRECISION array of dimension n.
              On exit Z = alpha A^t X.
@@ -364,7 +447,7 @@ magmablas_sgemvt2(int m, int n, float alpha, float *A, int lda,
     LDA    - (input) INTEGER.
              LDA specifies the leading dimension of A.
 
-    X      - (input) SINGLE PRECISION array of dimension n.
+    X      - (input) SINGLE PRECISION array of dimension m.
 
     Z      - (output) SINGLE PRECISION array of dimension n.
              On exit Z = alpha A^t X.
@@ -411,7 +494,7 @@ magmablas_sgemvt(int m, int n, float alpha, float *A, int lda,
     LDA    - (input) INTEGER.
              LDA specifies the leading dimension of A.
 
-    X      - (input) SINGLE PRECISION array of dimension n.
+    X      - (input) SINGLE PRECISION array of dimension m.
 
     Z      - (output) SINGLE PRECISION array of dimension n.
              On exit Z = alpha A^t X.
