@@ -177,7 +177,7 @@ dgemvt_kernel1(int n, int m, double alpha, int n1, double* A, int lda,
   ind = inx + __mul24(blockIdx.x,32);
 
   la[inx][iny]= res;
-  if (ind<n){
+  if (ind<m){
      res = la[inx][0] + la[inx][1];
      y[ind] = alpha*res;
   }
@@ -272,7 +272,7 @@ dgemvt_kernel2(int n, int m, double alpha,
   ind = inx + __mul24(blockIdx.x,16);
   la[inx][iny]= res;
   __syncthreads();
-  if (ind<n){
+  if (ind<m){
      res = la[inx][0] + la[inx][1] + la[inx][2] + la[inx][3];
      y[ind] = alpha*res;
   }
