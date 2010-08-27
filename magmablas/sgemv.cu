@@ -261,7 +261,7 @@ sgemvt_kernel1(int n, int m, float alpha, int n1, float* A, int lda,
   ind = inx + __mul24(blockIdx.x,32);
 
   la[inx][iny]= res;
-  if (ind<n){
+  if (ind<m){
      res = la[inx][0] + la[inx][1];
      y[ind] = alpha*res;
   }
@@ -367,7 +367,7 @@ sgemvt_kernel2(int n, int m, float alpha,
   ind = inx + __mul24(blockIdx.x,16);
   la[inx][iny]= res;
   __syncthreads();
-  if (ind<n && iny==0){
+  if (ind<m && iny==0){
      res = la[inx][0] + la[inx][1] + la[inx][2] + la[inx][3];
      y[ind] = alpha*res;
   }
