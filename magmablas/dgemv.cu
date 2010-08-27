@@ -295,10 +295,10 @@ magmablas_dgemvt1(int m, int n, double alpha, double *A, int lda,
     Recommended for large M and N.
 
     M      - (input) INTEGER.
-             On entry, N specifies the number of rows of the matrix A.
+             On entry, M specifies the number of rows of the matrix A.
 
     N      - (input) INTEGER.
-             On entry, M specifies the number of columns of the matrix A
+             On entry, N specifies the number of columns of the matrix A
 
     A      - (input) DOUBLE PRECISION array of dimension ( LDA, n ) on the GPU.
 
@@ -341,10 +341,10 @@ magmablas_dgemvt2(int m, int n, double alpha, double *A, int lda,
     solver for N small (e.g. = BS, a block size of order 64, 128, etc).
 
     M      - (input) INTEGER.
-             On entry, N specifies the number of rows of the matrix A.
+             On entry, M specifies the number of rows of the matrix A.
 
     N      - (input) INTEGER.
-             On entry, M specifies the number of columns of the matrix A
+             On entry, N specifies the number of columns of the matrix A
 
     A      - (input) DOUBLE PRECISION array of dimension ( LDA, n ) on the GPU.
 
@@ -388,10 +388,10 @@ magmablas_dgemvt(int m, int n, double alpha, double *A, int lda,
     This routine computes z = alpha A^t x on the GPU.
 
     M      - (input) INTEGER.
-             On entry, N specifies the number of rows of the matrix A.
+             On entry, M specifies the number of rows of the matrix A.
 
     N      - (input) INTEGER.
-             On entry, M specifies the number of columns of the matrix A
+             On entry, N specifies the number of columns of the matrix A
 
     A      - (input) SINGLE PRECISION array of dimension ( LDA, n ) on the GPU.
 
