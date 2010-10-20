@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 0.2) --
+    -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2009
+       November 2010
 */
 
 #ifndef _MAGMA_
@@ -165,6 +165,7 @@ int sgehd2_(int*, int*, int*, float*, int*, float*, float*, int*);
 int spotrf_(char *uplo, int *n, float *a, int *lda, int *info);
 int spotf2_(char *, int *, float *, int *, int *);
 int sgeqrf_(int*,int*,float *,int*,float *,float *,int *,int *);
+int sgeqr2_(int*,int*,float *,int*,float *,float *,int *);
 int sgeqlf_(int*,int*,float *,int*,float *,float *,int *,int *);
 int sgelqf_(int*,int*,float *,int*,float *,float *,int *,int *);
 int sgelq2_(int*,int*,float *,int*,float *,float *,int *);

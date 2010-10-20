@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 0.2) --
+    -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2009
+       November 2010
 */
 
 #ifndef _MAGMA_AUXILIARY_
@@ -25,13 +25,16 @@ int magma_get_sgeqrf_nb(int m);
 int magma_get_sgeqlf_nb(int m);
 int magma_get_sgetrf_nb(int m);
 int magma_get_sgehrd_nb(int m);
+int magma_get_ssytrd_nb(int m);
 int magma_get_sgelqf_nb(int m);
+int magma_get_sgebrd_nb(int m);
 
 int magma_get_dpotrf_nb(int m);
 int magma_get_dgeqrf_nb(int m);
 int magma_get_dgeqlf_nb(int m);
 int magma_get_dgetrf_nb(int m);
 int magma_get_dgehrd_nb(int m);
+int magma_get_dsytrd_nb(int m);
 int magma_get_dgelqf_nb(int m);
 
 int magma_get_cpotrf_nb(int m);

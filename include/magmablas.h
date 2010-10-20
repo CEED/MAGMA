@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 0.2) --
+    -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2009
+       November 2010
 */
 
 #ifndef _MAGMABLAS_
@@ -86,6 +86,13 @@ void magmablas_dsymv(char, int, double, double *, int, double *, int,
 		 double, double *, int);
 void magmablas_ssymv(char, int, float, float *, int, float *, int, 
 		 float, float *, int);
+void magmablas_ssymv6(char, int, float, float *, int, float *, int,
+		      float, float *, int, float *, int);
+void magmablas_ssyr2k(char, char, int, int, float, const float *, int, 
+                      const float *, int, float, float *, int);
+void magmablas_dsyr2k(char, char, int, int, double, const double *, int,
+			const double *, int, double, double *, int);
+
 /*
 Gemm Kernels
 */
