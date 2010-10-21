@@ -1,0 +1,38 @@
+#//////////////////////////////////////////////////////////////////////////////
+#   -- MAGMA (version 1.0) --
+#      Univ. of Tennessee, Knoxville
+#      Univ. of California, Berkeley
+#      Univ. of Colorado, Denver
+#      November 2010
+#//////////////////////////////////////////////////////////////////////////////
+
+# Generation script for 4 precisions
+PYTHON  ?= python
+CODEGEN  = ./tools/codegen.py
+
+.Makefile.gen: $(CODEGEN)
+	$(PYTHON) $(CODEGEN) --make > $@
+.DEFAULT_GOAL :=
+include ./.Makefile.gen
+.DEFAULT_GOAL := all
+
+libmagma : inc
+libmagmablas : inc
+cleanall: cleangen cleanmkgen
+cleanmkgen:
+	(find . -name .Makefile.gen -exec rm -f {} \;)
+
+inc : 	./include/magma_z.h		\
+	./include/magma_c.h		\
+	./include/magma_d.h		\
+	./include/magma_s.h		\
+	./include/magma_zc.h		\
+	./include/magma_ds.h		\
+	./include/magmablas_z.h		\
+	./include/magmablas_c.h		\
+	./include/magmablas_d.h		\
+	./include/magmablas_s.h		\
+	./include/magmablas_zc.h	\
+	./include/magmablas_ds.h
+
+

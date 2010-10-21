@@ -14,18 +14,21 @@ lib: libmagma libmagmablas
 clean: cleanall
 
 libmagma:
-	( cd src; $(MAKE) )
+	( cd src && $(MAKE) )
 
 libmagmablas:
-	( cd magmablas; $(MAKE) )
+	( cd magmablas && $(MAKE) )
 
 test:
-	( cd testing/lin; $(MAKE) )
-	( cd testing; $(MAKE) )
+	( cd testing/lin && $(MAKE) )
+	( cd testing     && $(MAKE) )
 
 cleanall:
-	( cd src; $(MAKE) clean )
-	( cd testing; $(MAKE) clean )
-	( cd testing/lin; $(MAKE) clean )
-	( cd lib; rm -f *.a )
-#	( cd magmablas; $(MAKE) clean ) 
+	( cd src         && $(MAKE) clean )
+	( cd testing     && $(MAKE) clean )
+	( cd testing/lin && $(MAKE) clean )
+#	( cd magmablas   && $(MAKE) clean ) 
+	( cd lib && rm -f *.a )
+
+include ./Makefile.gen
+

@@ -1,10 +1,12 @@
 /*
-    -- MAGMA (version 1.0) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       November 2010
-*/
+ *   -- MAGMA (version 1.0) --
+ *      Univ. of Tennessee, Knoxville
+ *      Univ. of California, Berkeley
+ *      Univ. of Colorado, Denver
+ *      November 2010
+ *
+ * @precisions normal z -> s d c
+ */
 
 #ifndef _MAGMA_Z_H_
 #define _MAGMA_Z_H_
@@ -12,6 +14,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+  /*
+   * TODO: 
+   *    - remove the info to return the value as output of the fnction and not as parameter
+   *    - makes consistent the order to pass host and device pointers
+   *    - Correct the names of mixed precision functions sd => ds 
+   */
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA function definitions / Data on CPU
@@ -57,9 +66,6 @@ magma_int_t magma_zgetrf_gpu2(magma_int_t m, magma_int_t n, double2 *A, magma_in
 magma_int_t magma_zgetrs_gpu( char trans, magma_int_t n, magma_int_t nrhs, double2 *A, magma_int_t lda, magma_int_t *ipiv, double2 *b, magma_int_t ldb, magma_int_t *info, double2 *hwork);
 magma_int_t magma_zpotrf_gpu( char uplo,  magma_int_t n, double2 *A, magma_int_t lda, double2 *work, magma_int_t *info);
 magma_int_t magma_zpotrs_gpu( char uplo,  magma_int_t n, magma_int_t nrhs, double2 *A, magma_int_t lda, double2 *b, magma_int_t ldb, magma_int_t *info);
-
-  /* Mixed precision */
-magma_int_t magma_czgetrs_gpu(magma_int_t *n, magma_int_t *nrhs, float2 *a, magma_int_t lda, magma_int_t *ipiv, float2 *x, double2 *b, magma_int_t ldb, magma_int_t *info);
 
 #ifdef __cplusplus
 }
