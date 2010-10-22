@@ -44,8 +44,6 @@ include ../make.inc
              sormtr.o \
              sormqr.o \
              sormqr_gpu.o \
-             sgessm.o \
-             ststrf.o \
 
 all: $(LIBMAGMA)
 
