@@ -32,8 +32,7 @@ magma_int_t magma_zgelqf2(magma_int_t m, magma_int_t n, double2 *A, magma_int_t 
 magma_int_t magma_zgeqlf( magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda, double2 *tau, double2 *work, magma_int_t lwork, double2 *da, magma_int_t *info);
 magma_int_t magma_zgeqrf( magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda, double2 *tau, double2 *work, magma_int_t lwork, double2 *da, magma_int_t *info);
 magma_int_t magma_zgeqrf2(magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda, double2 *tau, double2 *work, magma_int_t lwork,              magma_int_t *info);
-magma_int_t magma_zgetrf( magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda, magma_int_t *ipiv, double2 *work, double2 *da, magma_int_t *info);
-magma_int_t magma_zgetrf2(magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda, magma_int_t *ipiv, double2 *work,              magma_int_t *info);
+magma_int_t magma_zgetrf( magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda, magma_int_t *ipiv, magma_int_t *info);
 magma_int_t magma_zlabrd( magma_int_t m, magma_int_t n, magma_int_t nb, 
 			  double2 *a,  magma_int_t lda,  double2 *d,  double2 * e, 
 			  double2 *tauq, double2 *taup,  double2 *x,  magma_int_t ldx,  
