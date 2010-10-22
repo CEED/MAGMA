@@ -8,7 +8,7 @@ import shlex;
 import os;
 from os import path;
 from optparse import OptionParser;
-from subs import subs;
+from magmasubs import subs;
 
 KEYWORD = '@precisions';
 REGEX = '^.*'+KEYWORD+'\s+((\w+,?)+)\s+(\w+)\s+->\s*((\s\w+)+).*$';

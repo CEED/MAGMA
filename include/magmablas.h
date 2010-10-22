@@ -16,6 +16,8 @@
 extern "C" {
 #endif
 
+int lsame_c(char ch, char *s);
+
 void magmablas_sinplace_transpose(float *, int, int);
 void magmablas_spermute_long(float *, int, int *, int, int);
 void magmablas_stranspose(float *, int, float *, int, int, int);
@@ -49,6 +51,7 @@ void magmablas_ctrsm(char, char, char, char, int, int, float2,
 void magmablas_ctrmm(char, char, char, char, int, int, float2,
                                 float2 *, int, float2 *, int);
 
+/*
 void magmablas_sgemv(int, int, float *, int, float *, float *);
 void magmablas_sgemvt(int,int,float,float *,int,float *,float *);
 void magmablas_sgemvt1(int,int,float,float *,int,float *,float *);
@@ -57,6 +60,7 @@ void magmablas_sgemv32(char, int, int, float, float *, int, float *, float *);
 void magmablas_dgemv(int, int, double *, int, double *, double *);
 void magmablas_dgemvt(int,int,double,double *,int,double *,double *);
 void magmablas_dgemv32(char, int, double, double *, int, double *, double *);
+*/
 
 void magmablas_sdlaswp(int, double *, int, float *, int, int *);
 

@@ -12,7 +12,7 @@
 #include "magmablas.h"
 
 extern "C" int 
-magma_spotrf_gpu(char *uplo, int *n, float *a, int *lda, float *work, 
+magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *work, 
 		 int *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -81,6 +81,10 @@ magma_spotrf_gpu(char *uplo, int *n, float *a, int *lda, float *work,
     #define a_ref(a_1,a_2) (a+(a_2)*a_dim1 + a_1)
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
+
+    int *n = &n_;
+    int *lda = &lda_;
+    char uplo[2] = {uplo_, 0};
 
     /* Table of constant values */
     static int c__1 = 1;

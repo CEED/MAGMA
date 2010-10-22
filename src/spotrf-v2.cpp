@@ -13,7 +13,7 @@
 #include <stdio.h>
 
 extern "C" int 
-magma_spotrf2(char *uplo, int *n, float *a, int *lda, int *info)
+magma_spotrf2(char uplo_, int n_, float *a, int lda_, int *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -82,6 +82,10 @@ magma_spotrf2(char *uplo, int *n, float *a, int *lda, int *info)
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
     
+    int *n = &n_;
+    int *lda = &lda_;
+    char uplo[2] = {uplo_, 0};
+
     /* System generated locals */
     int a_dim1, a_offset, i__3, i__4, ldda;
     /* Local variables */

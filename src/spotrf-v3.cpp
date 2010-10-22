@@ -13,7 +13,7 @@
 #include <stdio.h>
 
 extern "C" int 
-magma_spotrf3(char *uplo, int *n, float *a, int *lda, float *work, int *info)
+magma_spotrf3(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *work, int *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -81,6 +81,10 @@ magma_spotrf3(char *uplo, int *n, float *a, int *lda, float *work, int *info)
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
     
+    int *n = &n_;
+    int *lda = &lda_;
+    char uplo[2] = {uplo_, 0};
+
     /* System generated locals */
     int a_dim1, a_offset, i__3, i__4, ldda;
     /* Local variables */
@@ -202,7 +206,7 @@ magma_spotrf3(char *uplo, int *n, float *a, int *lda, float *work, int *info)
 		
                 cudaStreamSynchronize(stream[1]);
 	        //spotrf_("Lower", &jb, a_ref(j, j), lda, info);
-		magma_spotrf("L", &jb, a_ref(j,j), lda, da_ref(j,j),info);
+		magma_spotrf('L', jb, a_ref(j,j), *lda, da_ref(j,j),info);
 		if (*info != 0){
                   *info = *info + j - 1;
 		  break;

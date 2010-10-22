@@ -173,6 +173,7 @@ subs = {
     ('syrk','syrk','herk','herk'),
     ('lansy','lansy','lanhe','lanhe'),
     ('stile','dtile','ctile','ztile'),
+    ('szero','dzero','czero','zzero'),
   ],
   'tracing' : [
     ['plain','tau'],
