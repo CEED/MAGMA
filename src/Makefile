@@ -19,8 +19,6 @@ include ../make.inc
              sgeqrs_gpu.o \
              slarfb.o \
              sgetrf.o \
-             sgetrf-v2.o \
-             sgetrf-v3.o \
              sgetrf_gpu-v3-bak.o \
              sgetrf_gpu-v2.o \
              sgetrf_gpu.o \
@@ -47,7 +45,6 @@ include ../make.inc
              sormtr.o \
              sormqr.o \
              sormqr_gpu.o \
-             sssssm.o \
              sgessm.o \
              ststrf.o \
 

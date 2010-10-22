@@ -18,9 +18,6 @@
 #include "cublas.h"
 #include "magma.h"
 
-extern "C" int magma_sgetrf3(int *, int *, float *, int *,
-			     int *, float *, int *);
-
 #define min(a,b)  (((a)<(b))?(a):(b))
 #define max(a,b)  (((a)<(b))?(b):(a))
 
@@ -69,7 +66,7 @@ int main( int argc, char** argv)
     cublasInit( );
     printout_devices( );
 
-    float *h_A, *h_R, *h_work;
+    float *h_A, *h_R;
     float *d_A;
     int *ipiv;
     float gpu_perf, cpu_perf;
@@ -140,12 +137,6 @@ int main( int argc, char** argv)
       fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
     }
 
-    //cudaMallocHost( (void**)&h_work, lwork*sizeof(float) );
-    h_work = (float*)malloc(lwork * sizeof(float));
-    if (h_work == 0) {
-      fprintf (stderr, "!!!! host memory allocation error (work)\n");
-    }
-
     printf("\n\n");
     printf("  M     N   CPU GFlop/s    GPU GFlop/s   ||PA-LU||/(||A||*N)\n");
     printf("============================================================\n");
@@ -160,9 +151,8 @@ int main( int argc, char** argv)
       for(j = 0; j < n2; j++)
 	h_R[j] = h_A[j] = rand() / (float)RAND_MAX;
 
-      //magma_sgetrf(&M, &N, h_R, &lda, ipiv, h_work, d_A, info);
-      //magma_sgetrf2(&M, &N, h_R, &lda, ipiv, h_work, info);
-      magma_sgetrf3(&M, &N, h_R, &lda, ipiv, h_work, info);
+      //magma_sgetrf2(&M, &N, h_R, &lda, ipiv, d_A, info);
+      magma_sgetrf(&M, &N, h_R, &lda, ipiv, info);
 
       for(j=0; j<n2; j++)
         h_R[j] = h_A[j];    
@@ -186,9 +176,8 @@ int main( int argc, char** argv)
          Performs operation using MAGMA
 	 =================================================================== */
       start = get_current_time();
-      //magma_sgetrf(&M, &N, h_R, &lda, ipiv, h_work, d_A, info);
-      //magma_sgetrf2(&M, &N, h_R, &lda, ipiv, h_work, info);
-      magma_sgetrf3(&M, &N, h_R, &lda, ipiv, h_work, info);
+      //magma_sgetrf2(&M, &N, h_R, &lda, ipiv, d_A, info);
+      magma_sgetrf(&M, &N, h_R, &lda, ipiv, info);
       end = get_current_time();
     
       gpu_perf = 2.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
@@ -209,7 +198,6 @@ int main( int argc, char** argv)
     /* Memory clean up */
     free(h_A);
     free(ipiv);
-    cublasFree(h_work);
     cublasFree(h_R);
     cublasFree(d_A);
 
