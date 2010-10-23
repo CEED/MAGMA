@@ -13,7 +13,7 @@
 
 extern "C" magma_int_t
 magma_sgeqrf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  float  *tau,
-             float *work, magma_int_t lwork_, float *da, magma_int_t *info )
+             float *work, magma_int_t *lwork, float *da, magma_int_t *info )
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -103,7 +103,6 @@ magma_sgeqrf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  float
    int *m = &m_;
    int *n = &n_;
    int *lda = &lda_;
-   int *lwork = &lwork_;
 
    int i, k, lddwork, old_i, old_ib;
    int nbmin, nx, ib, ldda;

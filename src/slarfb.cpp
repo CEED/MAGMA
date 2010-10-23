@@ -12,10 +12,10 @@
 #include "magmablas.h"
 #include <stdio.h>
  
-extern "C" int 
+extern "C" magma_int_t 
 magma_slarfb(char direct, char storev,
-	     int m, int n, int *k, float *dv, int *ldv, float *dt,
-	     int *ldt, float *dc, int *ldc, float *dwork, int *ldwork)
+	     magma_int_t m, magma_int_t n, magma_int_t k_, float *dv, magma_int_t ldv_, float *dt,
+	     magma_int_t ldt_, float *dc, magma_int_t ldc_, float *dwork, magma_int_t ldwork_)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Univ. of California Berkeley
@@ -82,6 +82,12 @@ magma_slarfb(char direct, char storev,
   #define dwork_ref(a_1,a_2) (dwork+(a_2)*(*ldwork) + a_1)
   #define dc_ref(a_1,a_2)    (dc+(a_2)*(*ldc) + a_1)
   #define dv_ref(a_1,a_2)    (dv+(a_2)*(*ldv) + a_1)
+
+  int *k = &k_;
+  int *ldv = &ldv_;
+  int *ldt = &ldt_;
+  int *ldc = &ldc_;
+  int *ldwork = &ldwork_;
 
   /* Function Body */
   if (m <= 0 || n <= 0) {

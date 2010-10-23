@@ -11,9 +11,9 @@
 #include "magma.h"
 #include <stdio.h>
 
-extern "C" int 
-magma_sgeqrf2(int *m, int *n, float *a, int  *lda,  float  *tau,
-              float *work, int *lwork, int *info )
+extern "C" magma_int_t
+magma_sgeqrf2(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,  float  *tau,
+              float *work, magma_int_t *lwork, magma_int_t *info )
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -98,6 +98,10 @@ magma_sgeqrf2(int *m, int *n, float *a, int  *lda,  float  *tau,
    #define min(a,b)  (((a)<(b))?(a):(b))
    #define max(a,b)  (((a)>(b))?(a):(b))
 
+   int *m = &m_;
+   int *n = &n_;
+   int *lda = &lda_;
+
    int i, k, lddwork, old_i, old_ib;
    int nbmin, nx, ib, ldda;
 
@@ -174,10 +178,10 @@ magma_sgeqrf2(int *m, int *n, float *a, int  *lda,  float  *tau,
 			      cudaMemcpyDeviceToHost,stream[0]);
 	  
 	  /* Apply H' to A(i:m,i+2*ib:n) from the left */
-	  magma_slarfb('F','C', *m-old_i, *n-old_i-2*old_ib, &old_ib,
-		       da_ref(old_i, old_i), &ldda, dwork, &lddwork, 
-		       da_ref(old_i, old_i+2*old_ib), &ldda, 
-		       dwork+old_ib, &lddwork);
+	  magma_slarfb('F','C', *m-old_i, *n-old_i-2*old_ib, old_ib,
+		       da_ref(old_i, old_i), ldda, dwork, lddwork, 
+		       da_ref(old_i, old_i+2*old_ib), ldda, 
+		       dwork+old_ib, lddwork);
 	}
 
 	cudaStreamSynchronize(stream[1]);
@@ -197,11 +201,11 @@ magma_sgeqrf2(int *m, int *n, float *a, int  *lda,  float  *tau,
 
 	  if (i+ib < k-nx)
 	    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */   
-	    magma_slarfb('F','C', rows, ib, &ib, da_ref(i,i), &ldda, dwork,
-			 &lddwork, da_ref(i,i+ib), &ldda, dwork+ib, &lddwork);
+	    magma_slarfb('F','C', rows, ib, ib, da_ref(i,i), ldda, dwork,
+			 lddwork, da_ref(i,i+ib), ldda, dwork+ib, lddwork);
 	  else 
-	    magma_slarfb('F','C',rows, *n-i-ib, &ib, da_ref(i,i), &ldda, dwork,
-			 &lddwork, da_ref(i,i+ib), &ldda, dwork+ib, &lddwork);
+	    magma_slarfb('F','C',rows, *n-i-ib, ib, da_ref(i,i), ldda, dwork,
+			 lddwork, da_ref(i,i+ib), ldda, dwork+ib, lddwork);
        
 	  old_i = i;
 	  old_ib = ib;

@@ -11,9 +11,9 @@
 #include "magma.h"
 #include <stdio.h>
 
-extern "C" int 
-magma_sgeqrf_gpu(int *m, int *n, float *a, int  *lda,  float  *tau,
-		 float *work, int *lwork, float *dwork, int *info )
+extern "C" magma_int_t
+magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  float  *tau,
+		 float *work, magma_int_t *lwork, float *dwork, magma_int_t *info )
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -99,6 +99,10 @@ magma_sgeqrf_gpu(int *m, int *n, float *a, int  *lda,  float  *tau,
    #define min(a,b)       (((a)<(b))?(a):(b))
    #define max(a,b)       (((a)>(b))?(a):(b))
 
+   int *m = &m_;
+   int *n = &n_;
+   int *lda = &lda_;
+
    int i, k, ldwork, lddwork, old_i, old_ib, rows;
    int nbmin, nx, ib, ldda;
 
@@ -153,10 +157,10 @@ magma_sgeqrf_gpu(int *m, int *n, float *a, int  *lda,  float  *tau,
 			    cudaMemcpyDeviceToHost,stream[1]);
 	if (i>0){
 	  /* Apply H' to A(i:m,i+2*ib:n) from the left */
-	  magma_slarfb('F', 'C', *m-old_i, *n-old_i-2*old_ib, &old_ib, 
-		       a_ref(old_i, old_i), lda, dwork, &lddwork, 
-		       a_ref(old_i, old_i+2*old_ib), lda, 
-		       dwork+old_ib, &lddwork);
+	  magma_slarfb('F', 'C', *m-old_i, *n-old_i-2*old_ib, old_ib,
+		       a_ref(old_i, old_i), *lda, dwork, lddwork, 
+		       a_ref(old_i, old_i+2*old_ib), *lda, 
+		       dwork+old_ib, lddwork);
 	  cudaMemcpy2DAsync(a_ref(old_i, old_i), (*lda) * sizeof(float), 
 			    work_ref(old_i), ldwork * sizeof(float),
 			    sizeof(float)*old_ib, old_ib,
@@ -178,11 +182,11 @@ magma_sgeqrf_gpu(int *m, int *n, float *a, int  *lda,  float  *tau,
 
 	  if (i+nb < k-nx)
 	    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
-	    magma_slarfb('F', 'C', rows, ib, &ib, a_ref(i,i), lda, dwork,
-			 &lddwork, a_ref(i,i+ib), lda, dwork+ib, &lddwork);
+	    magma_slarfb('F', 'C', rows, ib, ib, a_ref(i,i), *lda, dwork,
+			 lddwork, a_ref(i,i+ib), *lda, dwork+ib, lddwork);
 	  else {
-	    magma_slarfb('F', 'C', rows, *n-i-ib, &ib, a_ref(i,i), lda, dwork,
-			 &lddwork, a_ref(i,i+ib), lda, dwork+ib, &lddwork);
+	    magma_slarfb('F', 'C', rows, *n-i-ib, ib, a_ref(i,i), *lda, dwork,
+			 lddwork, a_ref(i,i+ib), *lda, dwork+ib, lddwork);
 	    cublasSetMatrix(ib, ib, sizeof(float),
 			    work_ref(i), ldwork, a_ref(i,i), *lda);
 	  }

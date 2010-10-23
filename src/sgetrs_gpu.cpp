@@ -12,9 +12,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern "C" int
-magma_sgetrs_gpu(char *trans , int n, int nrhs, float *a , int lda,
-		 int *ipiv, float *b, int ldb, int *info, float *hwork)
+extern "C" magma_int_t
+magma_sgetrs_gpu(char trans_, magma_int_t n, magma_int_t nrhs, float *a , magma_int_t lda,
+		 magma_int_t *ipiv, float *b, magma_int_t ldb, magma_int_t *info, float *hwork)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -71,6 +71,8 @@ magma_sgetrs_gpu(char *trans , int n, int nrhs, float *a , int lda,
     =====================================================================    */
 
     #define max(a,b)  (((a)>(b))?(a):(b))
+
+    char trans[2] = {trans_, 0};
 
     long int notran = lsame_(trans, "N");
     *info = 0;

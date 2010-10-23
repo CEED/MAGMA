@@ -29,9 +29,9 @@ void ssplit_diag_block(int ib, float *a, int lda, float *work){
   strtri_("u", "n", &ib, work, &ib, &info);
 }
 
-extern "C" int 
-magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
-		  float *work, int *lwork, float *dwork, int *info )
+extern "C" magma_int_t 
+magma_sgeqrf_gpu2(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  float  *tau,
+		  float *work, magma_int_t *lwork, float *dwork, magma_int_t *info )
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -126,6 +126,10 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
    #define min(a,b)       (((a)<(b))?(a):(b))
    #define max(a,b)       (((a)>(b))?(a):(b))
 
+   int *m = &m_;
+   int *n = &n_;
+   int *lda = &lda_;
+
    int i, k, ldwork, lddwork, old_i, old_ib, rows, cols;
    int nbmin, ib, ldda;
 
@@ -183,10 +187,10 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
 	if (i>0){
 	  /* Apply H' to A(i:m,i+2*ib:n) from the left */
 	  cols = *n-old_i-2*old_ib;
-	  magma_slarfb('F', 'C', *m-old_i, cols, &old_ib, 
-		       a_ref(old_i, old_i), lda, t_ref(old_i), &lddwork, 
-		       a_ref(old_i, old_i+2*old_ib), lda, 
-		       dd_ref(0), &lddwork);
+	  magma_slarfb('F', 'C', *m-old_i, cols, old_ib, 
+		       a_ref(old_i, old_i), *lda, t_ref(old_i), lddwork, 
+		       a_ref(old_i, old_i+2*old_ib), *lda, 
+		       dd_ref(0), lddwork);
 	  
 	  /* store the diagonal */
 	  cudaMemcpy2DAsync(d_ref(old_i), old_ib * sizeof(float),
@@ -214,13 +218,13 @@ magma_sgeqrf_gpu2(int *m, int *n, float *a, int  *lda,  float  *tau,
 
 	  if (i+nb < k-nb){
 	    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
-	    magma_slarfb('F', 'C', rows, ib, &ib, a_ref(i,i), lda, t_ref(i),
-			 &lddwork, a_ref(i,i+ib), lda, dd_ref(0), &lddwork);
+	    magma_slarfb('F', 'C', rows, ib, ib, a_ref(i,i), *lda, t_ref(i),
+			 lddwork, a_ref(i,i+ib), *lda, dd_ref(0), lddwork);
 	  }
 	  else {
 	    cols = *n-i-ib;
-	    magma_slarfb('F','C',rows, cols, &ib, a_ref(i,i), lda, t_ref(i),
-			 &lddwork, a_ref(i,i+ib), lda, dd_ref(0), &lddwork);
+	    magma_slarfb('F','C',rows, cols, ib, a_ref(i,i), *lda, t_ref(i),
+			 lddwork, a_ref(i,i+ib), *lda, dd_ref(0), lddwork);
 	    /* Fix the diagonal block */
 	    cublasSetMatrix(ib, ib, sizeof(float), ut, ib, d_ref(i), ib);
 	  }

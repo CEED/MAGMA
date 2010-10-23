@@ -18,10 +18,10 @@ magma_sormqr_gpu(char *side, char *trans, int *m, int *n, int *k,
                  float *work, int *lwork, float *td, int nb, int *info);
 
 
-extern "C" int 
-magma_sgeqrs_gpu(int *m, int *n, int *nrhs, 
-		 float *a, int *lda, float *tau, float *c, int *ldc, 
-		 float *work, int *lwork, float *td, int *info)
+extern "C" magma_int_t 
+magma_sgeqrs_gpu(magma_int_t m_, magma_int_t n_, magma_int_t nrhs_, 
+		 float *a, magma_int_t lda_, float *tau, float *c, magma_int_t ldc_, 
+		 float *work, magma_int_t *lwork, float *td, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -94,6 +94,12 @@ magma_sgeqrs_gpu(int *m, int *n, int *nrhs,
    #define d_ref(a_1)     (td+(lddwork+(a_1))*nb)
    #define min(a,b)       (((a)<(b))?(a):(b))
    #define max(a,b)       (((a)>(b))?(a):(b))
+
+   int *m = &m_;
+   int *n = &n_;
+   int *nrhs = &nrhs_;
+   int *lda = &lda_;
+   int *ldc = &ldc_;
 
    float *dwork;
    int i, k, lddwork, rows, ib;

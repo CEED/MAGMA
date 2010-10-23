@@ -13,9 +13,9 @@
 #include "magmablas.h"
 #include <stdio.h>
 
-extern "C" int 
-magma_sgetrf_gpu2(int *m, int *n, float *a, int *lda, 
-		  int *ipiv, int *dipiv, float *work, int *info)
+extern "C" magma_int_t 
+magma_sgetrf_gpu2(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, 
+		  magma_int_t *ipiv, magma_int_t *dipiv, float *work, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -87,6 +87,10 @@ magma_sgetrf_gpu2(int *m, int *n, float *a, int *lda,
 #define inAT(i,j) (dAT + (i)*nb*ldda + (j)*nb)
 #define max(a,b)  (((a)>(b))?(a):(b))
 #define min(a,b)  (((a)<(b))?(a):(b))
+
+    int *m = &m_;
+    int *n = &n_;
+    int *lda = &lda_;
 
     /* Function Body */
     *info = 0;

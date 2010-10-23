@@ -19,8 +19,8 @@ extern "C" void
 magmablas_spermute_long2(float *, int, int *, int, int);
 
 
-extern "C" int 
-magma_sgetrf(int *m, int *n, float *a, int *lda, int *ipiv, int *info)
+extern "C" magma_int_t 
+magma_sgetrf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, magma_int_t *ipiv, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -82,6 +82,10 @@ magma_sgetrf(int *m, int *n, float *a, int *lda, int *ipiv, int *info)
 #define inAT(i,j) (dAT + (i)*nb*ldda + (j)*nb)
 #define max(a,b)  (((a)>(b))?(a):(b))
 #define min(a,b)  (((a)<(b))?(a):(b))
+
+    int *m = &m_;
+    int *n = &n_;
+    int *lda = &lda_;
 
     /* Function Body */
     *info = 0;
