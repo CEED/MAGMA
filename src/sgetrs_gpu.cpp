@@ -98,12 +98,12 @@ magma_sgetrs_gpu(char trans_, magma_int_t n, magma_int_t nrhs, float *a , magma_
 
     if (notran) {
       /* Solve A * X = B. */
-      cublasGetMatrix( n, nrhs, sizeof(float), b,n ,hwork, n);
+      cublasGetMatrix( n, nrhs, sizeof(float), b,ldb ,hwork, n);
       int k1 = 1 ;
       int k2 = n;
       int k3 = 1 ;
-      slaswp_(&nrhs, hwork, &ldb, &k1, &k2, ipiv, &k3);
-      cublasSetMatrix( n, nrhs, sizeof(float), hwork, n, b, n);
+      slaswp_(&nrhs, hwork, &n, &k1, &k2, ipiv, &k3);
+      cublasSetMatrix( n, nrhs, sizeof(float), hwork, n, b, ldb);
       
       cublasStrsm('L','L','N','U', n , nrhs, 1.0, a , lda , b , ldb );
       cublasStrsm('L','U','N','N', n , nrhs, 1.0, a , lda , b , ldb );
@@ -112,12 +112,12 @@ magma_sgetrs_gpu(char trans_, magma_int_t n, magma_int_t nrhs, float *a , magma_
       cublasStrsm('L','U','T','N', n , nrhs, 1.0, a , lda , b , ldb );
       cublasStrsm('L','L','T','U', n , nrhs, 1.0, a , lda , b , ldb );
 
-      cublasGetMatrix( n, nrhs, sizeof(float), b,n , hwork , n );
+      cublasGetMatrix( n, nrhs, sizeof(float), b,ldb , hwork , n );
       int k1 = 1 ;
       int k2 = n;
       int k3 = -1;
-      slaswp_(&nrhs, hwork, &ldb, &k1, &k2, ipiv , &k3);
-      cublasSetMatrix( n, nrhs, sizeof(float), hwork, n , b , n);
+      slaswp_(&nrhs, hwork, &n, &k1, &k2, ipiv , &k3);
+      cublasSetMatrix( n, nrhs, sizeof(float), hwork,n, b,ldb);
     }
 }
 
