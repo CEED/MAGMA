@@ -133,10 +133,10 @@ int main(int argc , char **argv)
       cublasSetMatrix( N, NRHS, sizeof( float ), B, N, d_B, N ) ;
 
       //=====================================================================
-      //              SP - GPU 
+      // Solve Ax = b through an LU factorization
       //=====================================================================
       start = get_current_time();
-      magma_sgetrf_gpu(&N, &N, d_A, &dlda, IPIV, h_work_M_S, INFO);
+      magma_sgetrf_gpu(&N, &N, d_A, &dlda, IPIV, INFO);
       magma_sgetrs_gpu("N", N, NRHS, d_A, dlda, IPIV, d_B, LDB, INFO, h_work_M_S);
       end = get_current_time();
       perf = (2.*N*N*N/3.+2.*NRHS*N*N)/(1000000*GetTimerValue(start,end));
@@ -144,7 +144,7 @@ int main(int argc , char **argv)
       cublasGetMatrix( N, NRHS, sizeof( float ), d_B , LDB, X ,LDX) ;
       
       //=====================================================================
-      //              ERROR DP vs MIXED  - GPU 
+      // ERROR
       //=====================================================================
       float Rnorm, Anorm, Bnorm;   
       float *worke = (float *)malloc(N*sizeof(float));
