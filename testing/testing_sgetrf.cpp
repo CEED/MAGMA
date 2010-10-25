@@ -151,8 +151,8 @@ int main( int argc, char** argv)
       for(j = 0; j < n2; j++)
 	h_R[j] = h_A[j] = rand() / (float)RAND_MAX;
 
-      //magma_sgetrf2(&M, &N, h_R, &lda, ipiv, d_A, info);
-      magma_sgetrf(&M, &N, h_R, &lda, ipiv, info);
+      //magma_sgetrf2( M, N, h_R, lda, ipiv, d_A, info);
+      magma_sgetrf( M, N, h_R, lda, ipiv, info);
 
       for(j=0; j<n2; j++)
         h_R[j] = h_A[j];    
@@ -176,8 +176,8 @@ int main( int argc, char** argv)
          Performs operation using MAGMA
 	 =================================================================== */
       start = get_current_time();
-      //magma_sgetrf2(&M, &N, h_R, &lda, ipiv, d_A, info);
-      magma_sgetrf(&M, &N, h_R, &lda, ipiv, info);
+      //magma_sgetrf2( M, N, h_R, lda, ipiv, d_A, info);
+      magma_sgetrf( M, N, h_R, lda, ipiv, info);
       end = get_current_time();
     
       gpu_perf = 2.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));

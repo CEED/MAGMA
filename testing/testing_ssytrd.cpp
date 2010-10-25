@@ -143,7 +143,7 @@ int main( int argc, char** argv)
          Performs operation using MAGMA
 	 =================================================================== */
       start = get_current_time();      
-      magma_ssytrd("L", &N, h_R, &lda, diag, offdiag, 
+      magma_ssytrd('L', N, h_R, lda, diag, offdiag, 
 		   tau, h_work, &lwork, d_A, info);
       end = get_current_time();
     

@@ -99,15 +99,15 @@ int main( int argc, char** argv)
 	h_R[j] = (h_A[j]+=2000);
 
       cublasSetMatrix( N, N, sizeof(float), h_A, N, d_A, lda);
-      magma_spotrf_gpu("U", &N, d_A, &lda, h_work, info);
+      magma_spotrf_gpu('U', N, d_A, lda, h_work, info);
       cublasSetMatrix( N, N, sizeof(float), h_A, N, d_A, lda);
       
       /* ====================================================================
          Performs operation using MAGMA 
 	 =================================================================== */
       start = get_current_time();
-      magma_spotrf_gpu("L", &N, d_A, &lda, h_work, info);
-      //magma_spotrf_gpu("U", &N, d_A, &lda, h_work, info);
+      magma_spotrf_gpu('L', N, d_A, lda, h_work, info);
+      //magma_spotrf_gpu('U', N, d_A, lda, h_work, info);
       end = get_current_time();
     
       gpu_perf = 1.*N*N*N/(3.*1000000*GetTimerValue(start,end));

@@ -18,8 +18,6 @@
 #include "cublas.h"
 #include "magma.h"
 
-extern "C" int magma_sgetrf_gpu3(int *, int *, float *, int *, int *, int *);
-
 #define min(a,b)  (((a)<(b))?(a):(b))
 #define max(a,b)  (((a)<(b))?(b):(a))
 
@@ -160,7 +158,7 @@ int main( int argc, char** argv)
 	h_R[j] = h_A[j] = rand() / (float)RAND_MAX;
 
       cublasSetMatrix( M, N, sizeof(float), h_A, M, d_A, lda);
-      magma_sgetrf_gpu3(&M, &N, d_A, &lda, ipiv, info);
+      magma_sgetrf_gpu( M, N, d_A, lda, ipiv, info);
       cublasSetMatrix( M, N, sizeof(float), h_A, M, d_A, lda);
 
       /* =====================================================================
@@ -182,9 +180,7 @@ int main( int argc, char** argv)
          Performs operation using MAGMA
 	 =================================================================== */
       start = get_current_time();
-      //magma_sgetrf_gpu(&N, &N, d_A, &lda, ipiv, h_work, info);
-      magma_sgetrf_gpu3(&M, &N, d_A, &lda, ipiv, info);
-      //sgetrf_(&M, &N, h_R, &M, ipiv, info);
+      magma_sgetrf_gpu( M, N, d_A, lda, ipiv, info);
       end = get_current_time();
       cublasGetMatrix( M, N, sizeof(float), d_A, lda, h_R, M);
 

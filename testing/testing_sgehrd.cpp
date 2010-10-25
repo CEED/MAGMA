@@ -115,7 +115,7 @@ int main( int argc, char** argv)
          Performs operation using MAGMA
 	 =================================================================== */
       start = get_current_time();
-      magma_sgehrd(&N, &ione, &N, h_R, &N, tau, h_work, &lwork, d_A, info);
+      magma_sgehrd( N, ione, N, h_R, N, tau, h_work, &lwork, d_A, info);
       end = get_current_time();
     
       gpu_perf = 10.*N*N*N/(3.*1000000*GetTimerValue(start,end));

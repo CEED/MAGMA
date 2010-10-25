@@ -100,8 +100,8 @@ int main( int argc, char** argv)
       for(j = 0; j < n2; j++)
 	h_A[j] = rand() / (float)RAND_MAX;
 
-      // magma_sgelqf(&N, &N, h_R, &N, tau, h_work, &lwork, d_A, info);
-      magma_sgelqf2(&N, &N, h_R, &N, tau, h_work, &lwork, d_A, info);
+      // magma_sgelqf( N, N, h_R, N, tau, h_work, &lwork, d_A, info);
+      magma_sgelqf2( N, N, h_R, N, tau, h_work, &lwork, d_A, info);
 
       for(j=0; j<n2; j++)
         h_R[j] = h_A[j];    
@@ -110,8 +110,8 @@ int main( int argc, char** argv)
          Performs operation using MAGMA
 	 =================================================================== */
       start = get_current_time();
-      // magma_sgelqf(&N, &N, h_R, &N, tau, h_work, &lwork, d_A, info);
-      magma_sgelqf2(&N, &N, h_R, &N, tau, h_work, &lwork, d_A, info);
+      // magma_sgelqf( N, N, h_R, N, tau, h_work, &lwork, d_A, info);
+      magma_sgelqf2( N, N, h_R, N, tau, h_work, &lwork, d_A, info);
       end = get_current_time();
     
       gpu_perf = 4.*N*N*N/(3.*1000000*GetTimerValue(start,end));

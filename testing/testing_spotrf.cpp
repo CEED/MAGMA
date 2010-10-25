@@ -90,8 +90,8 @@ int main( int argc, char** argv)
             for(j=0; j<n2; j+=(lda+1))
       	h_R[j] = (h_A[j]+=2000);
 
-      magma_spotrf("L", &N, h_R, &lda, d_A, info);
-      //magma_spotrf("U", &N, h_R, &lda, d_A, info);
+      magma_spotrf('L', N, h_R, lda, d_A, info);
+      //magma_spotrf('U', N, h_R, lda, d_A, info);
 
       for(j=0; j<n2; j++)
         h_R[j] = h_A[j];    
@@ -100,9 +100,9 @@ int main( int argc, char** argv)
          Performs operation using MAGMA 
 	 =================================================================== */
       start = get_current_time();
-      magma_spotrf("L", &N, h_R, &lda, d_A, info);
-      //magma_spotrf2("L", &N, h_R, &lda, info);
-      //magma_spotrf("U", &N, h_R, &lda, d_A, info);
+      magma_spotrf('L', N, h_R, lda, d_A, info);
+      //magma_spotrf2('L', N, h_R, lda, info);
+      //magma_spotrf('U', N, h_R, lda, d_A, info);
       end = get_current_time();
     
       gpu_perf = 1.*N*N*N/(3.*1000000*GetTimerValue(start,end));

@@ -136,8 +136,8 @@ int main(int argc , char **argv)
       // Solve Ax = b through an LU factorization
       //=====================================================================
       start = get_current_time();
-      magma_sgetrf_gpu(&N, &N, d_A, &dlda, IPIV, INFO);
-      magma_sgetrs_gpu("N", N, NRHS, d_A, dlda, IPIV, d_B, LDB, INFO, h_work_M_S);
+      magma_sgetrf_gpu( N, N, d_A, dlda, IPIV, INFO);
+      magma_sgetrs_gpu('N', N, NRHS, d_A, dlda, IPIV, d_B, LDB, INFO, h_work_M_S);
       end = get_current_time();
       perf = (2.*N*N*N/3.+2.*NRHS*N*N)/(1000000*GetTimerValue(start,end));
       printf("             %6.2f", perf);
