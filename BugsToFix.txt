@@ -1,0 +1,44 @@
+- Mordor8 / Cuda 3.1 / MKL : Problem in result precision with testing_zgeqrs_gpu 
+
+  % ./testing_sgeqrs_gpu 
+device 0: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
+device 1: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
+device 2: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
+device 3: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
+
+Usage: 
+  testing_sgeqrs_gpu -nrhs 3  -M 1024  -N 1024
+
+
+                                         || b-Ax || / ||A||
+  M     N    CPU GFlop/s   GPU GFlop/s      GPU      CPU    
+============================================================
+ 1024  1024      8.9         20.0       7.08e-02   6.55e-07
+ 2048  2048     10.0         88.8       5.31e-02   1.67e-06
+ 3072  3072     11.6        138.1       4.24e-02   4.98e-07
+ 4032  4032     12.8        189.6       3.80e-02   1.06e-05
+
+
+- Mordor8 / Cuda 3.1 / MKL : Problem in result precision with testing_zgeqrf_gpu 
+
+% ./testing_sgeqrf_gpu 
+device 0: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
+device 1: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
+device 2: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
+device 3: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
+
+Usage: 
+  testing_sgeqrf_gpu -M 1024 -N 1024
+
+
+
+  M     N   CPU GFlop/s   GPU GFlop/s    ||R||_F / ||A||_F
+==========================================================
+  480   480    9.36          15.13        9.586813e-07
+  576   576    9.46          19.99        1.297000e-06
+  672   672    9.91          23.70        1.177226e-06
+  768   768    8.10          29.30        4.734992e-06
+  864   864    9.72          34.37        1.372392e-04
+  960   960    9.85          38.99        1.074982e-06
+ 1056  1056    9.77          44.19        1.099405e-06
+
