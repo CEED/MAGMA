@@ -19,7 +19,6 @@ include ../make.inc
              sgeqrs_gpu.o \
              slarfb.o \
              sgetrf.o \
-             sgetrf_gpu-v2.o \
              sgetrf_gpu.o \
              sgetrs_gpu.o \
              sgehrd.o \

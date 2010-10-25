@@ -15,7 +15,6 @@ include ../make.inc
           testing_sgeqrs_gpu.cpp \
           testing_sgesv_gpu.cpp \
           testing_sgetrf.cpp \
-          testing_sgetrf_gpu-v2.cpp \
           testing_sgetrf_gpu.cpp \
           testing_sgeqlf.cpp \
           testing_sgelqf.cpp \
