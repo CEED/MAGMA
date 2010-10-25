@@ -14,11 +14,11 @@
 #include <stdlib.h>
 
 
-extern "C" int 
-magma_slabrd(int *m, int *n, int *nb, float *a, int *lda, float *d__, float *e,
-	     float *tauq, float *taup, float *x, int *ldx, float *y, int *ldy,
-	     float *da, int *ldda, 
-	     float *dx, int *lddx, float *dy, int *lddy)
+extern "C" magma_int_t 
+magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_int_t lda_, float *d__, float *e,
+	     float *tauq, float *taup, float *x, magma_int_t ldx_, float *y, magma_int_t ldy_,
+	     float *da, magma_int_t ldda_, 
+	     float *dx, magma_int_t lddx_, float *dy, magma_int_t lddy_)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -147,6 +147,16 @@ magma_slabrd(int *m, int *n, int *nb, float *a, int *lda, float *d__, float *e,
 
     #define max(a,b) ((a) >= (b) ? (a) : (b))
     #define min(a,b) (((a)<(b))?(a):(b))
+
+    int *m = &m_;
+    int *n = &n_;
+    int *nb = &nb_;
+    int *lda = &lda_;
+    int *ldx = &ldx_;
+    int *ldy = &ldy_;
+    int *ldda = &ldda_;
+    int *lddx = &lddx_;
+    int *lddy = &lddy_;
 
     /* Table of constant values */
     static float c_b4 = -1.f;

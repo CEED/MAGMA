@@ -13,9 +13,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern "C" int 
-magma_sgehrd(int *n, int *ilo, int *ihi, float *a, int *lda, 
-	     float *tau, float *work, int *lwork, float *da, int *info)
+extern "C" magma_int_t 
+magma_sgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, float *a, magma_int_t lda_, 
+	     float *tau, float *work, magma_int_t *lwork, float *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -124,6 +124,11 @@ magma_sgehrd(int *n, int *ilo, int *ihi, float *a, int *lda,
 
     #define min(a,b) ((a) <= (b) ? (a) : (b))
     #define max(a,b) ((a) >= (b) ? (a) : (b))
+
+    int *n = &n_;
+    int *ilo = &ilo_;
+    int *ihi = &ihi_;
+    int *lda = &lda_;
 
     int nb = magma_get_sgehrd_nb(*n);
     
@@ -238,11 +243,11 @@ magma_sgehrd(int *n, int *ilo, int *ihi, float *a, int *lda,
 			d_A + (i__ - *ilo)*ldda  + i__ - *ilo, ldda,
 			a   + (i__ -   1 )*(*lda)+ i__ - 1   , *lda);
 	
-	magma_slahr2(ihi, &i__, &ib, 
+	magma_slahr2(*ihi, i__, ib, 
 		     d_A + (i__ - *ilo)*ldda, 
 		     d_A + N*ldda + 1,
-		     a   + (i__ -   1 )*(*lda) , lda, 
-		     &tau[i__], t, &nb, work, &ldwork);
+		     a   + (i__ -   1 )*(*lda) , *lda, 
+		     &tau[i__], t, nb, work, ldwork);
 
 	magma_slahru(*ihi, i__ - *ilo, ib, 
 		     a   + (i__ -   1 )*(*lda), *lda,

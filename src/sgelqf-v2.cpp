@@ -12,9 +12,9 @@
 #include "magmablas.h"
 #include <stdio.h>
 
-extern "C" int
-magma_sgelqf2(int *m, int *n, float *a, int *lda, float *tau, 
-	      float *work, int *lwork, float *da, int *info)
+extern "C" magma_int_t
+magma_sgelqf2(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, float *tau, 
+	      float *work, magma_int_t *lwork, float *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -101,6 +101,10 @@ magma_sgelqf2(int *m, int *n, float *a, int *lda, float *tau,
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
     
+    int *m = &m_;
+    int *n = &n_;
+    int *lda = &lda_;
+
     int rows, cols, i, k, ib, nx, nbmin, iinfo;
     int ldda, lddwork, old_i, old_ib;
     long int lquery;
@@ -148,7 +152,7 @@ magma_sgelqf2(int *m, int *n, float *a, int *lda, float *tau,
       cublasSetMatrix( *m, *n, sizeof(float), a, *lda, da, ldda);
       magmablas_sinplace_transpose( da, ldda, ldda );
       
-      magma_sgeqrf_gpu(m, n, da, m, tau, work, lwork, dwork, &iinfo);
+      magma_sgeqrf_gpu(*m, *n, da, *m, tau, work, lwork, dwork, &iinfo);
 
       magmablas_sinplace_transpose( da, ldda, ldda );
       cublasGetMatrix( *m, *n, sizeof(float), da, ldda, a, *lda); 

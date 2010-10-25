@@ -17,10 +17,10 @@ extern "C" int sgebd2_(int *, int *, float *, int *, float *, float *, float *,
 		       float *, float *, int *);
 float cpu_gpu_sdiff(int M, int N, float * a, int lda, float *da, int ldda);
 
-extern "C" int
-magma_sgebrd(int *m, int *n, float *a, int *lda, 
+extern "C" magma_int_t
+magma_sgebrd(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, 
 	     float *d__, float *e, float *tauq, float *taup, float *work, 
-	     int *lwork, float *da, int *info)
+	     magma_int_t *lwork, float *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -142,6 +142,10 @@ magma_sgebrd(int *m, int *n, float *a, int *lda,
     #define max(a,b) ((a) >= (b) ? (a) : (b)) 
     #define min(a,b)  (((a)<(b))?(a):(b))
 
+    int *m = &m_;
+    int *n = &n_;
+    int *lda = &lda_;
+
     static int c__1 = 1;
     static int c_n1 = -1;
     static int c__3 = 3;
@@ -247,14 +251,14 @@ magma_sgebrd(int *m, int *n, float *a, int *lda,
 			   a  + (i__  +nb)*a_dim1+  i__   , *lda,
 			   da + (i__-1+nb)*ldda  + (i__-1), ldda));
       */
-      magma_slabrd(&i__3, &i__4, &nb, 
-		   &a[i__ + i__ * a_dim1], lda, &d__[i__],
+      magma_slabrd(i__3, i__4, nb, 
+		   &a[i__ + i__ * a_dim1], *lda, &d__[i__],
 		   &e[i__], &tauq[i__], &taup[i__], 
-		   &work[1], &ldwrkx,                   //  x
-		   &work[ldwrkx * nb + 1], &ldwrky,     //  y
-		   da + (i__-1)+(i__-1) * ldda, &ldda,
-		   &dwork[1], &ldwrkx,                  // dx
-		   &dwork[ldwrkx * nb+1], &ldwrky);     // dy
+		   &work[1], ldwrkx,                   //  x
+		   &work[ldwrkx * nb + 1], ldwrky,     //  y
+		   da + (i__-1)+(i__-1) * ldda, ldda,
+		   &dwork[1], ldwrkx,                  // dx
+		   &dwork[ldwrkx * nb+1], ldwrky);     // dy
 
       /*  Update the trailing submatrix A(i+nb:m,i+nb:n), using an update   
           of the form  A := A - V*Y' - X*U' */

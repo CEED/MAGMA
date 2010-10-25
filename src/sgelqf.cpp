@@ -11,9 +11,9 @@
 #include "magma.h"
 #include <stdio.h>
 
-extern "C" int
-magma_sgelqf(int *m, int *n, float *a, int *lda, float *tau, 
-	     float *work, int *lwork, float *da, int *info)
+extern "C" magma_int_t
+magma_sgelqf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, float *tau, 
+	     float *work, magma_int_t *lwork, float *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -100,6 +100,10 @@ magma_sgelqf(int *m, int *n, float *a, int *lda, float *tau,
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
     
+    int *m = &m_;
+    int *n = &n_;
+    int *lda = &lda_;
+
     int rows, cols, i, k, ib, nx, nbmin, iinfo;
     int ldda, lddwork, old_i, old_ib;
     long int lquery;
@@ -167,10 +171,10 @@ magma_sgelqf(int *m, int *n, float *a, int *lda, float *tau,
 	      /* Apply H to A(i+ib:m,i:n) from the right */
               rows = *m - old_i - 2*old_ib;
               cols = *n - old_i;
-	      magma_slarfb( 'F', 'R', rows, cols, &old_ib, 
-			    da_ref(old_i, old_i), &ldda, dwork, &lddwork, 
-			    da_ref(old_i + 2*old_ib, old_i), &ldda, 
-			    dwork+old_ib, &lddwork);
+	      magma_slarfb( 'F', 'R', rows, cols, old_ib, 
+			    da_ref(old_i, old_i), ldda, dwork, lddwork, 
+			    da_ref(old_i + 2*old_ib, old_i), ldda, 
+			    dwork+old_ib, lddwork);
 	    }
 
 	    cudaStreamSynchronize(stream[1]);
@@ -214,13 +218,13 @@ magma_sgelqf(int *m, int *n, float *a, int *lda, float *tau,
 	      
 	      if (i+ib < k-nx)
 		/* Apply H to A(i+ib:m,i:n) from the right */
-		magma_slarfb('F', 'R', ib, cols, &ib,
-			     da_ref(i, i), &ldda, dwork, &lddwork,
-			     da_ref(i + ib, i), &ldda, dwork+ib, &lddwork);
+		magma_slarfb('F', 'R', ib, cols, ib,
+			     da_ref(i, i), ldda, dwork, lddwork,
+			     da_ref(i + ib, i), ldda, dwork+ib, lddwork);
 	      else
-		magma_slarfb('F', 'R', rows, cols, &ib, 
-			     da_ref(i, i), &ldda, dwork, &lddwork,
-			     da_ref(i + ib, i), &ldda, dwork+ib, &lddwork);
+		magma_slarfb('F', 'R', rows, cols, ib, 
+			     da_ref(i, i), ldda, dwork, lddwork,
+			     da_ref(i + ib, i), ldda, dwork+ib, lddwork);
 
 	      old_i = i;
 	      old_ib = ib;

@@ -6,9 +6,9 @@
 #include "cuda.h"
 
 
-extern "C" int
-magma_spotrs_gpu(char *UPLO, int N , int NRHS, float *A , int LDA,
-		 float *B, int LDB, int *INFO)
+extern "C" magma_int_t
+magma_spotrs_gpu(char UPLO_, magma_int_t N , magma_int_t NRHS, float *A , magma_int_t LDA,
+		 float *B, magma_int_t LDB, magma_int_t *INFO)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -56,6 +56,8 @@ magma_spotrs_gpu(char *UPLO, int N , int NRHS, float *A , int LDA,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================   */
     #define MAX(a,b)       (((a)>(b))?(a):(b))
+
+    char UPLO[2] = {UPLO_, 0};
 
     *INFO = 0 ; 
     if( *UPLO !='U' && *UPLO !='u' && *UPLO !='L' && *UPLO!='l')

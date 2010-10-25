@@ -11,9 +11,9 @@
 #include "magma.h"
 #include <stdio.h>
 
-extern "C" int
-magma_sgeqlf(int *m, int *n, float *a, int *lda, 
-	     float *tau, float *work, int *lwork, float *da, int *info)
+extern "C" magma_int_t
+magma_sgeqlf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, 
+	     float *tau, float *work, magma_int_t *lwork, float *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -102,6 +102,10 @@ magma_sgeqlf(int *m, int *n, float *a, int *lda,
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
     
+    int *m = &m_;
+    int *n = &n_;
+    int *lda = &lda_;
+
     int i, k, lddwork, old_i, old_ib;  
 
     int rows, cols;
@@ -185,9 +189,9 @@ magma_sgeqlf(int *m, int *n, float *a, int *lda,
 		 This is the main update from the lookahead techniques. */
 	      rows = *m - k + old_i + old_ib;
               cols = *n - k + old_i - old_ib;
-              magma_slarfb('B', 'C', rows, cols, &old_ib,
-                           da_ref(0,cols+old_ib), &ldda, dwork, &lddwork,
-                           da_ref(0, 0), &ldda, dwork+old_ib, &lddwork);
+              magma_slarfb('B', 'C', rows, cols, old_ib,
+                           da_ref(0,cols+old_ib), ldda, dwork, lddwork,
+                           da_ref(0, 0), ldda, dwork+old_ib, lddwork);
 	    }
 
 	    cudaStreamSynchronize(stream[1]);
@@ -215,13 +219,13 @@ magma_sgeqlf(int *m, int *n, float *a, int *lda,
 		   two steps - implementing the lookahead techniques.
 		   This is the update of first ib columns.                 */
 		if (i-ib >= k -kk)
-		  magma_slarfb('B', 'C', rows, ib, &ib,
-			       da_ref(0,cols), &ldda, dwork, &lddwork,
-			       da_ref(0,cols-ib), &ldda, dwork+ib, &lddwork);
+		  magma_slarfb('B', 'C', rows, ib, ib,
+			       da_ref(0,cols), ldda, dwork, lddwork,
+			       da_ref(0,cols-ib), ldda, dwork+ib, lddwork);
 		else{
-		  magma_slarfb('B', 'C', rows, cols, &ib,
-                               da_ref(0,cols), &ldda, dwork, &lddwork,
-                               da_ref(0,0), &ldda, dwork+ib, &lddwork);
+		  magma_slarfb('B', 'C', rows, cols, ib,
+                               da_ref(0,cols), ldda, dwork, lddwork,
+                               da_ref(0,0), ldda, dwork+ib, lddwork);
 		}
 
 		old_i = i;

@@ -14,10 +14,10 @@
 extern "C" int sorm2r_(char *, char *, int *, int *, int *, float *, int *, 
 		       float *, float *, int *, float *, int *);
 
-extern "C" int
-magma_sormqr_gpu(char *side, char *trans, int *m, int *n, int *k, 
-		 float *a, int *lda, float *tau, float *c, int *ldc,
-		 float *work, int *lwork, float *td, int nb, int *info)
+extern "C" magma_int_t
+magma_sormqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_int_t k_, 
+		 float *a, magma_int_t lda_, float *tau, float *c, magma_int_t ldc_,
+		 float *work, magma_int_t *lwork, float *td, magma_int_t nb, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -121,6 +121,14 @@ magma_sormqr_gpu(char *side, char *trans, int *m, int *n, int *k,
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
     
+    char side[2] = {side_, 0};
+    char trans[2] = {trans_, 0};
+    int *m = &m_;
+    int *n = &n_;
+    int *k = &k_;
+    int *lda = &lda_;
+    int *ldc = &ldc_;
+
     float *dwork;
     int i, lddwork;
 
@@ -210,8 +218,8 @@ magma_sormqr_gpu(char *side, char *trans, int *m, int *n, int *k,
 	      ni = *n - i;
 	      jc = i;
 	    }
-	    magma_slarfb('F', 'C', mi, ni, &ib, a_ref(i, i), lda, 
-			 t_ref(i), &lddwork, c_ref(ic, jc), ldc, dwork, &nw);
+	    magma_slarfb('F', 'C', mi, ni, ib, a_ref(i, i), *lda, 
+			 t_ref(i), lddwork, c_ref(ic, jc), *ldc, dwork, nw);
 	  }
       } 
     else 

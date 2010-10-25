@@ -12,10 +12,10 @@
 #include "magmablas.h"
 #include <stdio.h>
 
-extern "C" int 
-magma_slahr2(int *n, int *k, int *nb, 
-	     float *da, float *dv, float *a, int *lda, 
-	     float *tau, float *t, int *ldt, float *y, int *ldy)
+extern "C" magma_int_t 
+magma_slahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_, 
+	     float *da, float *dv, float *a, magma_int_t lda_, 
+	     float *tau, float *t, magma_int_t ldt_, float *y, magma_int_t ldy_)
 {
 /*  -- MAGMA auxiliary routine (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -123,6 +123,13 @@ magma_slahr2(int *n, int *k, int *nb,
     =====================================================================    */
 
     #define min(a,b) ((a) <= (b) ? (a) : (b))
+
+    int *n = &n_;
+    int *nb = &nb_;
+    int *k = &k_;
+    int *lda = &lda_;
+    int *ldt = &ldt_;
+    int *ldy = &ldy_;
 
     int N = *n, ldda = *n;
 

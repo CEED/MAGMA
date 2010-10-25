@@ -46,9 +46,9 @@ float cpu_gpu_sdiff(int M, int N, float * a, int lda, float *da, int ldda)
 }
 
 
-extern "C" int
-magma_ssytrd(char *uplo, int *n, float *a, int *lda, float *d__, float *e, 
-	     float *tau, float *work, int *lwork, float *da, int *info)
+extern "C" magma_int_t
+magma_ssytrd(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *d__, float *e, 
+	     float *tau, float *work, magma_int_t *lwork, float *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -173,6 +173,10 @@ magma_ssytrd(char *uplo, int *n, float *a, int *lda, float *d__, float *e,
 
     #define max(a,b) ((a) >= (b) ? (a) : (b))
   
+    char uplo[2] = {uplo_, 0};
+    int *n = &n_;
+    int *lda = &lda_;
+
     int N = *n, ldda = *lda;
     int nb = magma_get_ssytrd_nb(*n); 
     float *dwork = da + (*n)*ldda - 1;
