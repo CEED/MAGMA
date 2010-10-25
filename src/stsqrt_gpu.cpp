@@ -6,11 +6,11 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
-#include "magma.h"
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include "magma.h"
 
 extern "C" int 
 magma_stsqrt_gpu(int *m, int *n, 

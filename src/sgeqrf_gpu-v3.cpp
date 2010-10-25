@@ -6,10 +6,10 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
-#include "magma.h"
 #include <stdio.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include "magma.h"
 
 extern "C" int 
 magma_sgeqrf_gpu3(int *m, int *n, float *a, int  *lda,  float  *tau,

@@ -6,8 +6,8 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 #include "magma.h"
 #include "magmablas.h"
 
@@ -87,8 +87,6 @@ magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *
     char uplo[2] = {uplo_, 0};
 
     /* Table of constant values */
-    static int c__1 = 1;
-    static int c_n1 = -1;
     static float c_b13 = -1.f;
     static float c_b14 = 1.f;
     
@@ -115,12 +113,9 @@ magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *
     cudaStreamCreate(&stream[0]);
     cudaStreamCreate(&stream[1]);
 
-    cublasStatus status;
-
     a_dim1 = *lda;
     a_offset = 1 + a_dim1 * 1;
     a -= a_offset;
-    unsigned int timer = 0;
 
     int nb = magma_get_spotrf_nb(*n);
 

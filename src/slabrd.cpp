@@ -6,13 +6,12 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
-#include "magma.h"
-#include "magmablas.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include "magma.h"
+#include "magmablas.h"
 
 extern "C" magma_int_t 
 magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_int_t lda_, float *d__, float *e,

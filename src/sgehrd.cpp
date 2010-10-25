@@ -6,12 +6,12 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
-#include "magma.h"
-#include "magmablas.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include "magma.h"
+#include "magmablas.h"
 
 extern "C" magma_int_t 
 magma_sgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, float *a, magma_int_t lda_, 
@@ -136,10 +136,9 @@ magma_sgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, float *a, magma
 
     float *d_A    = da;
     float *d_work = da + (N+nb)*ldda; 
-    float *d_t    = d_work + nb*ldda;
 
     /* Local variables */
-    static int i__, j;
+    static int i__;
 
     float *t;
     //cudaMallocHost( (void**)&t, nb*nb*sizeof(float) );

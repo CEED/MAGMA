@@ -6,12 +6,12 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
-#include "magma.h"
-#include "magmablas.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include "magma.h"
+#include "magmablas.h"
 
 extern "C" int sgebd2_(int *, int *, float *, int *, float *, float *, float *,
 		       float *, float *, int *);
@@ -146,10 +146,6 @@ magma_sgebrd(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     int *n = &n_;
     int *lda = &lda_;
 
-    static int c__1 = 1;
-    static int c_n1 = -1;
-    static int c__3 = 3;
-    static int c__2 = 2;
     static float c_b21 = -1.f;
     static float c_b22 = 1.f;
     
@@ -158,7 +154,7 @@ magma_sgebrd(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     /* Local variables */
     static int i__, j, nx;
     static float ws;
-    static int nbmin, iinfo;
+    static int iinfo;
     
     static int minmn;
     static int ldwrkx, ldwrky, lwkopt;
@@ -213,7 +209,7 @@ magma_sgebrd(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     ldwrkx = *m;
     ldwrky = *n;
 
-    float nflops = 0.f;
+    // float nflops = 0.f;
     
     /* Set the block/unblock crossover point NX. */
     nx = 128;

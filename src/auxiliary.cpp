@@ -6,10 +6,10 @@
        November 2010
 */
 
-#include "cuda.h"
-#include "cuda_runtime_api.h"
-#include "cublas.h"
 #include <stdio.h>
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 #include "magma.h"
 
 /* ////////////////////////////////////////////////////////////////////////////

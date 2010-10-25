@@ -6,11 +6,11 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
+#include <stdio.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 #include "magma.h"
 #include "magmablas.h"
-#include <stdio.h>
 
 extern "C" magma_int_t 
 magma_slahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_, 
@@ -131,7 +131,7 @@ magma_slahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
     int *ldt = &ldt_;
     int *ldy = &ldy_;
 
-    int N = *n, ldda = *n;
+    int ldda = *n;
 
     /* Table of constant values */
     static float c_b4 = -1.;

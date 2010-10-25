@@ -6,11 +6,11 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
-#include "magma.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include "magma.h"
 
 extern "C" magma_int_t
 magma_sgetrs_gpu(char trans_, magma_int_t n, magma_int_t nrhs, float *a , magma_int_t lda,
@@ -119,6 +119,8 @@ magma_sgetrs_gpu(char trans_, magma_int_t n, magma_int_t nrhs, float *a , magma_
       slaswp_(&nrhs, hwork, &n, &k1, &k2, ipiv , &k3);
       cublasSetMatrix( n, nrhs, sizeof(float), hwork,n, b,ldb);
     }
+
+    return 0;
 }
 
 #undef max

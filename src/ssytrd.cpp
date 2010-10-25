@@ -6,12 +6,12 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 #include "magma.h"
 #include "magmablas.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 extern "C" int ssytd2_(char *, int *, float *, int *,
 		       float *, float *, float *, int *);
@@ -181,10 +181,6 @@ magma_ssytrd(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *d__,
     int nb = magma_get_ssytrd_nb(*n); 
     float *dwork = da + (*n)*ldda - 1;
 
-    static int c__1 = 1;
-    static int c_n1 = -1;
-    static int c__3 = 3;
-    static int c__2 = 2;
     static float c_b22 = -1.f;
     static float c_b23 = 1.f;
     

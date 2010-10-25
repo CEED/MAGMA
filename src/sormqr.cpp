@@ -6,10 +6,10 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
-#include "magma.h"
 #include <stdio.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include "magma.h"
 
 extern "C" int sorm2r_(char *, char *, int *, int *, int *, float *, int *, 
 		       float *, float *, int *, float *, int *);
@@ -119,11 +119,6 @@ magma_sormqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
     int *lda = &lda_;
     int *ldc = &ldc_;
 
-    static int c__1 = 1;
-    static int c_n1 = -1;
-    static int c__2 = 2;
-    static int c__65 = 65;
-    
     // TTT --------------------------------------------------------------------
     float *dwork, *dc;
     cublasAlloc((*m)*(*n), sizeof(float), (void**)&dc);

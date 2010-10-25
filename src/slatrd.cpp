@@ -6,12 +6,12 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
-#include "magma.h"
-#include "magmablas.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include "magma.h"
+#include "magmablas.h"
 
 extern "C" void mssymv2(int m, int k, float *A, int lda, float *X, float *Y);
 extern "C" void test_mssymv_v2(char, int, float, float *, int, float *,
@@ -152,7 +152,7 @@ int magma_slatrd(char *uplo, int *n, int *nb, float *a,
  
 #define min(a,b)  (((a)<(b))?(a):(b))
 
-    TimeStruct start, end;
+    //TimeStruct start, end;
 
     static float c_b5 = -1.f;
     static float c_b6 = 1.f;

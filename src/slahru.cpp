@@ -6,10 +6,10 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
-#include "magma.h"
 #include <stdio.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include "magma.h"
 
 extern "C" int
 magma_slahru(int n, int k, int nb, float *a, int lda,

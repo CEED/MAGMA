@@ -1,10 +1,17 @@
+/*
+    -- MAGMA (version 1.0) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2010
+*/
+
 #include <stdio.h>
 #include <math.h>
-#include "magmablas.h"
+#include <cuda.h>
+#include <cublas.h>
 #include "magma.h"
-#include "cublas.h"
-#include "cuda.h"
-
+#include "magmablas.h"
 
 extern "C" magma_int_t
 magma_spotrs_gpu(char UPLO_, magma_int_t N , magma_int_t NRHS, float *A , magma_int_t LDA,
@@ -84,5 +91,7 @@ magma_spotrs_gpu(char UPLO_, magma_int_t N , magma_int_t NRHS, float *A , magma_
       cublasStrsm('L','L','N','N', N , NRHS, 1.0, A , LDA , B , LDB );
       cublasStrsm('L','L','T','N', N , NRHS, 1.0, A , LDA , B , LDB );
     }
+
+    return 0;
 }
 #undef MAX

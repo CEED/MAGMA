@@ -6,11 +6,10 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 #include "magma.h"
 #include "magmablas.h"
-
 
 extern "C" int 
 magma_spotrfu_gpu(char *uplo, int *n, float *a, int *lda, float *work, 

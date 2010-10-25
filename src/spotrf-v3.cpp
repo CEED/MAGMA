@@ -6,11 +6,11 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
+#include <stdio.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 #include "magma.h"
 #include "magmablas.h"
-#include <stdio.h>
 
 extern "C" int 
 magma_spotrf3(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *work, int *info)
@@ -108,8 +108,6 @@ magma_spotrf3(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *wor
     cudaStreamCreate(&stream[0]);
     cudaStreamCreate(&stream[1]);
     cudaStreamCreate(&stream[2]);
-
-    cublasStatus status;
 
     a_dim1 = *lda;
     ldda   = *n;

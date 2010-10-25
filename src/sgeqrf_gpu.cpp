@@ -6,10 +6,10 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
-#include "magma.h"
 #include <stdio.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include "magma.h"
 
 extern "C" magma_int_t
 magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  float  *tau,
@@ -148,6 +148,7 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  f
 
    if (nb >= nbmin && nb < k && nx < k) {
       /* Use blocked code initially */
+      old_i = 0; old_ib = nb;
       for (i = 0; i < k-nx; i += nb) {
 	ib = min(k-i, nb);
 	rows = *m -i;

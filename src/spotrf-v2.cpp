@@ -6,11 +6,11 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
+#include <stdio.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 #include "magma.h"
 #include "magmablas.h"
-#include <stdio.h>
 
 extern "C" int 
 magma_spotrf2(char uplo_, int n_, float *a, int lda_, int *info)
@@ -119,7 +119,7 @@ magma_spotrf2(char uplo_, int n_, float *a, int lda_, int *info)
       ldda = (ldda/32)*32 + 32;
 
     float *work;
-    status = cublasAlloc((*n)*ldda, sizeof(float), (void**)&work);
+    status = cublasAlloc((n_)*ldda, sizeof(float), (void**)(&work) );
     if (status != CUBLAS_STATUS_SUCCESS) {
       *info = -5;
       return 0;

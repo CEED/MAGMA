@@ -6,12 +6,12 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 #include "magma.h"
 #include "magmablas.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 extern "C" void mssymv2(int m, int k, float *A, int lda, float *X, float *Y);
 

@@ -6,11 +6,11 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
-#include "magma.h"
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include "magma.h"
 
 void ssplit_diag_block(int ib, float *a, int lda, float *work){
   int i, j, info;
@@ -177,6 +177,7 @@ magma_sgeqrf_gpu2(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  
 
    if (nb >= nbmin && nb < k) {
       /* Use blocked code initially */
+      old_i = 0; old_ib = nb;
       for (i = 0; i < k-nb; i += nb) {
 	ib = min(k-i, nb);
 	rows = *m -i;

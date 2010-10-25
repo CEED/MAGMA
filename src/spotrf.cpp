@@ -6,11 +6,11 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
+#include <stdio.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 #include "magma.h"
 #include "magmablas.h"
-#include <stdio.h>
 
 extern "C" int 
 magma_spotrf(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *work, int *info)
@@ -107,41 +107,39 @@ magma_spotrf(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *work
     cudaStreamCreate(&stream[1]);
     cudaStreamCreate(&stream[2]);
 
-    cublasStatus status;
-
-    a_dim1 = *lda;
-    ldda   = *n;
+    a_dim1 = lda_;
+    ldda   = n_;
 
     a_offset = 1 + a_dim1 * 1;
     a    -= a_offset;
-    work -= (1 + (*n));
+    work -= (1 + n_);
 
-    int nb = magma_get_spotrf_nb(*n);
+    int nb = magma_get_spotrf_nb(n_);
 
-    if (nb <= 1 || nb >= *n) {
+    if (nb <= 1 || nb >= n_) {
 	spotrf_(uplo, n, a_ref(1, 1), lda, info);
     } else {
 
         /* Use hybrid blocked code. */
 	if (upper) {
             /* Compute the Cholesky factorization A = U'*U. */
-	    for (j = 1; j <= *n; j += nb) {
+	    for (j = 1; j <= n_; j += nb) {
                /* Update and factorize the current diagonal block and test   
                   for non-positive-definiteness. Computing MIN */
-		i__4 = *n - j + 1;
+		i__4 = n_ - j + 1;
 		jb = min(nb,i__4);
 		i__3 = j - 1;
 		cublasSetMatrix(jb, i__4, sizeof(float),
-                                a_ref(j,j), *lda, da_ref(j,j), ldda);
+                                a_ref(j,j), lda_, da_ref(j,j), ldda);
                 cublasSsyrk('u', 't', jb, i__3, -1.f, da_ref(1,j),
                              ldda, 1.f, da_ref(j, j), ldda);
-                cudaMemcpy2DAsync(  a_ref(1,j), (*lda)*sizeof(float), 
-				   da_ref(1,j), ldda *sizeof(float), 
+                cudaMemcpy2DAsync(  a_ref(1,j), lda_*sizeof(float), 
+				   da_ref(1,j), ldda*sizeof(float), 
 				    sizeof(float)*(j+jb-1), jb,
 				    cudaMemcpyDeviceToHost,stream[1]);
 		
-		if (j + jb <= *n) {
-		  i__3 = *n - j - jb + 1;
+		if (j + jb <= n_) {
+		  i__3 = n_ - j - jb + 1;
 		  i__4 = j - 1;
 		  cublasSgemm('T', 'N', jb, i__3, i__4,
 			  -1.f, da_ref(1, j), ldda, da_ref(1, j + jb), ldda,
@@ -155,46 +153,46 @@ magma_spotrf(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *work
 		  break;
 		}
 		cudaMemcpy2DAsync(da_ref(j,j),  ldda * sizeof(float), 
-				  a_ref( j,j), (*lda)* sizeof(float), 
+				  a_ref( j,j), lda_* sizeof(float), 
 				  sizeof(float)*jb, jb, 
 				  cudaMemcpyHostToDevice,stream[0]);
 		
-		if (j + jb <= *n)
+		if (j + jb <= n_)
 		  cublasStrsm('L', 'U', 'T', 'N', jb, i__3,
 			      1.f, da_ref(j,j), ldda, da_ref(j, j+jb), ldda);
 	    }
 	} else {
             //=========================================================
             // Compute the Cholesky factorization A = L*L'.
-	    for (j = 1; j <= *n; j += nb) {
+	    for (j = 1; j <= n_; j += nb) {
                 //  Update and factorize the current diagonal block and test   
                 //  for non-positive-definiteness. Computing MIN 
-		i__4 = *n - j + 1;
+		i__4 = n_ - j + 1;
 		jb = min(nb,i__4);
 		i__3 = j - 1;
                 cublasSetMatrix(i__4, jb, sizeof(float), 
-				a_ref(j,j), *lda, da_ref(j,j), ldda);
+				a_ref(j,j), lda_, da_ref(j,j), ldda);
                 cublasSsyrk('l', 'n', jb, i__3, -1.f, da_ref(j,1), ldda, 
                             1.f, da_ref(j, j), ldda);
 		/*
-		cudaMemcpy2DAsync( a_ref(j,1), (*lda)*sizeof(float), 
+		cudaMemcpy2DAsync( a_ref(j,1), lda_*sizeof(float), 
 				   da_ref(j,1),  ldda *sizeof(float), 
 				   sizeof(float)*jb, j+jb-1, 
 				   cudaMemcpyDeviceToHost,stream[1]);
 		*/
-		cudaMemcpy2DAsync( a_ref(j,j), (*lda)*sizeof(float),
+		cudaMemcpy2DAsync( a_ref(j,j), lda_*sizeof(float),
                                    da_ref(j,j),  ldda *sizeof(float),
                                    sizeof(float)*jb, jb,
                                    cudaMemcpyDeviceToHost,stream[1]);
-		cudaMemcpy2DAsync( a_ref(j,1), (*lda)*sizeof(float),
+		cudaMemcpy2DAsync( a_ref(j,1), lda_*sizeof(float),
                                    da_ref(j,1),  ldda *sizeof(float),
                                    sizeof(float)*jb, j-1,
                                    cudaMemcpyDeviceToHost,stream[2]);
 
 
 
-                if (j + jb <= *n) {
-                    i__3 = *n - j - jb + 1;
+                if (j + jb <= n_) {
+                    i__3 = n_ - j - jb + 1;
                     i__4 = j - 1;
                     cublasSgemm('N', 'T', i__3, jb, i__4,
                             -1.f, da_ref(j + jb, 1), ldda, da_ref(j, 1), ldda,
@@ -207,12 +205,12 @@ magma_spotrf(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *work
                   *info = *info + j - 1;
 		  break;
 		}
-	        cudaMemcpy2DAsync(da_ref(j,j),  ldda * sizeof(float), 
-				  a_ref( j,j), (*lda)* sizeof(float), 
+	        cudaMemcpy2DAsync(da_ref(j,j), ldda * sizeof(float), 
+				  a_ref( j,j), lda_ * sizeof(float), 
 				  sizeof(float)*jb, jb, 
 				  cudaMemcpyHostToDevice,stream[0]);
 	        
-		if (j + jb <= *n)
+		if (j + jb <= n_)
 		  cublasStrsm('R', 'L', 'T', 'N', i__3, jb, 1.f, 
 			      da_ref(j, j), ldda, da_ref(j + jb, j), ldda);
 	    }

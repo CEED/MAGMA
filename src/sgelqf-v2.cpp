@@ -6,11 +6,11 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
+#include <stdio.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 #include "magma.h"
 #include "magmablas.h"
-#include <stdio.h>
 
 extern "C" magma_int_t
 magma_sgelqf2(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, float *tau, 
@@ -105,8 +105,8 @@ magma_sgelqf2(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, float 
     int *n = &n_;
     int *lda = &lda_;
 
-    int rows, cols, i, k, ib, nx, nbmin, iinfo;
-    int ldda, lddwork, old_i, old_ib;
+    int k, nx, nbmin, iinfo;
+    int ldda, lddwork;
     long int lquery;
 
     /* Function Body */

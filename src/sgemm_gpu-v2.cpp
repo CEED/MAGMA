@@ -1,13 +1,19 @@
-#include "cuda.h"
-#include "cublas.h"
+/*
+    -- MAGMA (version 1.0) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2010
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 #include "magma.h"
 #include "magmablas.h"
-#include <stdio.h>
-#include "cuda.h"
-#include "cuda_runtime_api.h"
-#include <stdlib.h>
-
-#include <ctype.h>
 
 extern "C" void 
 magmablas_sgemm(char TRANSA, char TRANSB, int m , int n , int k , 

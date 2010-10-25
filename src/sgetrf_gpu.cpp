@@ -6,12 +6,12 @@
        November 2010
 */
 
-#include "cuda.h"
-#include "cublas.h"
-#include "cuda_runtime_api.h"
+#include <stdio.h>
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 #include "magma.h"
 #include "magmablas.h"
-#include <stdio.h>
 
 extern "C" void
 magmablas_stranspose2(float *, int, float *, int, int, int);

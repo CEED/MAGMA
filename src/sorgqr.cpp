@@ -6,10 +6,10 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
-#include "magma.h"
 #include <stdio.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include "magma.h"
 
 extern "C" int sorg2r_(int*, int*, int*, float*, int*, float*, float*, int*);
 
@@ -84,11 +84,6 @@ magma_sorgqr(int *m, int *n, int *k, float *a,
     #define min(a,b)       (((a)<(b))?(a):(b))
     #define max(a,b)       (((a)>(b))?(a):(b))
 
-    static int c__1 = 1;
-    static int c_n1 = -1;
-    static int c__3 = 3;
-    static int c__2 = 2;
-    
     int a_dim1, a_offset, i__1, i__2, i__3;
     static int i__, j, l, ib, nb, ki, kk, nx, nbmin, iinfo;
     static int ldwork, lwkopt;

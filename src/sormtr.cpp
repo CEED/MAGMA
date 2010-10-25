@@ -6,10 +6,10 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
-#include "magma.h"
 #include <stdio.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include "magma.h"
 
 extern "C" int sormql_(char *, char *, int *, int *, int *, float *, int *, 
 		       float *, float *, int *, float *, int *, int *);
@@ -118,11 +118,7 @@ magma_sormtr(char *side, char *uplo, char *trans, int *m, int *n,
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
    
-    static int c__1 = 1;
-    static int c_n1 = -1;
-    static int c__2 = 2;
-    
-    int a_dim1, a_offset, c_dim1, c_offset, i__2, i__3;
+    int a_dim1, a_offset, c_dim1, c_offset, i__2;
     static int i1, i2, nb, mi, ni, nq, nw;
     long int left, upper, lquery;
     static int iinfo;

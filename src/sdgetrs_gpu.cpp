@@ -6,11 +6,11 @@
        November 2010
 */
 
-#include "cuda.h"
-#include "cublas.h"
+#include <stdio.h>
+#include <cuda.h>
+#include <cublas.h>
 #include "magma.h"
 #include "magmablas.h"
-#include <stdio.h>
 
 extern "C" int 
 magma_sdgetrs_gpu(int *n, int *nrhs, float *a, int *lda, 
