@@ -27,16 +27,14 @@ typedef int magma_int_t;
 /* 
  * MAGMA Blas Functions 
  */ 
-#include "magmablas_z.h"
-#include "magmablas_c.h"
-#include "magmablas_d.h"
-#include "magmablas_s.h"
-#include "magmablas_zc.h"
-#include "magmablas_ds.h"
+#include "magmablas.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+void magmablas_sdlaswp(int, double *, int, float *, int, int *);
+
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA function definitions
