@@ -57,13 +57,14 @@ void printout_devices( )
   for( int idevice = 0; idevice < ndevices; idevice++ )
     {
       char name[200];
-      unsigned int totalMem, clock;
+      size_t totalMem;
+      int clock;
       CUdevice dev;
 
       cuDeviceGet( &dev, idevice );
       cuDeviceGetName( name, sizeof(name), dev );
       cuDeviceTotalMem( &totalMem, dev );
-      cuDeviceGetAttribute( (int*)&clock,
+      cuDeviceGetAttribute( &clock,
                             CU_DEVICE_ATTRIBUTE_CLOCK_RATE, dev );
       printf( "device %d: %s, %.1f MHz clock, %.1f MB memory\n",
               idevice, name, clock/1000.f, totalMem/1024.f/1024.f );
