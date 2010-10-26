@@ -35,7 +35,6 @@ int main( int argc, char** argv)
     printout_devices( );
 
     float *h_A, *h_R, *h_work, *tau;
-    float *d_A;
     float gpu_perf, cpu_perf;
 
     TimeStruct start, end;
@@ -97,11 +96,6 @@ int main( int argc, char** argv)
     int nb = magma_get_sgeqrf_nb(min_mn);
     int lwork = N*nb;
 
-    status = cublasAlloc(n2+lwork, sizeof(float), (void**)&d_A);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-      fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
-    }
-
     cudaMallocHost( (void**)&h_work, lwork*sizeof(float) );
     //h_work = (float*)malloc(lwork * sizeof(float));
     if (h_work == 0) {
@@ -120,8 +114,7 @@ int main( int argc, char** argv)
       for(j = 0; j < n2; j++)
 	h_R[j] = h_A[j] = rand() / (float)RAND_MAX;
 
-      //magma_sgeqrf(M, N, h_R, M, tau, h_work, &lwork, d_A, info);
-      magma_sgeqrf2(M, N, h_R, M, tau, h_work, &lwork, info);
+      magma_sgeqrf(M, N, h_R, M, tau, h_work, &lwork, info);
 
       for(j=0; j<n2; j++)
         h_R[j] = h_A[j];
@@ -130,8 +123,7 @@ int main( int argc, char** argv)
          Performs operation using MAGMA
 	 =================================================================== */
       start = get_current_time();
-      //magma_sgeqrf(M, N, h_R, M, tau, h_work, &lwork, d_A, info);
-      magma_sgeqrf2(M, N, h_R, M, tau, h_work, &lwork, info);
+      magma_sgeqrf(M, N, h_R, M, tau, h_work, &lwork, info);
       end = get_current_time();
     
       gpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
@@ -198,7 +190,6 @@ int main( int argc, char** argv)
     free(tau);
     cublasFree(h_work);
     cublasFree(h_R);
-    cublasFree(d_A);
 
     /* Shutdown */
     status = cublasShutdown();

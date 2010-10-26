@@ -12,8 +12,9 @@
 #include "magma.h"
 
 extern "C" magma_int_t
-magma_sgeqrf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  float  *tau,
-             float *work, magma_int_t *lwork, float *da, magma_int_t *info )
+magma_sgeqrf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,  
+	     float  *tau, float *work, magma_int_t *lwork, 
+	     magma_int_t *info )
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -25,7 +26,8 @@ magma_sgeqrf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  float
     =======   
 
     SGEQRF computes a QR factorization of a real M-by-N matrix A:   
-    A = Q * R.   
+    A = Q * R. This version does not require work space on the GPU 
+    passed as input. GPU memory is allocated in the routine.
 
     Arguments   
     =========   
@@ -70,13 +72,10 @@ magma_sgeqrf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  float
             this value as the first entry of the WORK array, and no error   
             message related to LWORK is issued.
 
-    DA      (workspace)  REAL array on the GPU, dimension N*(M + NB), 
-            where NB can be obtained through magma_get_sgeqrf_nb(M).
-            (size to be reduced in upcoming versions).
-
     INFO    (output) INTEGER   
             = 0:  successful exit   
             < 0:  if INFO = -i, the i-th argument had an illegal value   
+                  if INFO = -8, the GPU memory allocation failed 
 
     Further Details   
     ===============   
@@ -109,7 +108,7 @@ magma_sgeqrf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  float
 
    /* Function Body */
    *info = 0;
-   int nb = magma_get_sgeqrf_nb(*m);
+   int nb = magma_get_sgeqrf_nb(min(*m, *n));
    
    int lwkopt = *n * nb;
    work[0] = (float) lwkopt;
@@ -134,16 +133,29 @@ magma_sgeqrf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  float
      return 0;
    }
 
-   float *dwork = da + (*m)*(*n);
-
+   cublasStatus status;
    static cudaStream_t stream[2];
    cudaStreamCreate(&stream[0]);
    cudaStreamCreate(&stream[1]);
 
    ldda = *m;
+   if (ldda %32 != 0)
+     ldda = (ldda/32)*32 + 32;
+
+   float *da;
+   status = cublasAlloc((*n)*ldda + nb*(*n+32), sizeof(float), (void**)&da);
+   if (status != CUBLAS_STATUS_SUCCESS) {
+      *info = -8;
+      return 0;
+    }
+   float *dwork = da + ldda*(*n);
+
    nbmin = 2;
    nx = 192;
    lddwork = *n;
+
+   if (lddwork %32 != 0)
+     lddwork = (lddwork/32)*32 + 32;
 
    if (nb >= nbmin && nb < k && nx < k) {
       /* Use blocked code initially */
@@ -175,9 +187,7 @@ magma_sgeqrf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  float
 
 	cudaStreamSynchronize(stream[1]);
 	int rows = *m-i;
-
 	sgeqrf_(&rows, &ib, a_ref(i,i), lda, tau+i, work, lwork, info);
-
 	/* Form the triangular factor of the block reflector   
 	   H = H(i) H(i+1) . . . H(i+ib-1) */
 	slarft_("F", "C", &rows, &ib, a_ref(i,i), lda, tau+i,
@@ -215,9 +225,11 @@ magma_sgeqrf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  float
       int rows = *m-i;
       sgeqrf_(&rows, &ib, a_ref(i,i), lda, tau+i, work, lwork, info);
    }
+
+   cublasFree(da);
    return 0; 
   
-   /* End of MAGMA_SGEQRF */
+/*     End of MAGMA_SGEQRF */
 
 } /* magma_sgeqrf */
 

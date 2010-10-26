@@ -13,7 +13,6 @@ include ../make.inc
              spotrf-v3.o \
              spotrf_gpu.o \
              sgeqrf.o \
-             sgeqrf-v2.o \
              sgeqrf_gpu.o \
              sgeqrf_gpu-v2.o \
              sgeqrs_gpu.o \
