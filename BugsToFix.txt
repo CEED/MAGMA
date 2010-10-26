@@ -1,4 +1,5 @@
-- Mordor8 / Cuda 3.1 / MKL : Problem in result precision with testing_zgeqrs_gpu 
+--------- Mordor8 / Cuda 3.1 / MKL : 
+          Problem in result precision with testing_sgeqrs_gpu 
 
   % ./testing_sgeqrs_gpu 
 device 0: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
@@ -19,7 +20,8 @@ Usage:
  4032  4032     12.8        189.6       3.80e-02   1.06e-05
 
 
-- Mordor8 / Cuda 3.1 / MKL : Problem in result precision with testing_zgeqrf_gpu 
+--------- Mordor8 / Cuda 3.1 / MKL : 
+          Problem in result precision with testing_sgeqrf_gpu 
 
 % ./testing_sgeqrf_gpu 
 device 0: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
@@ -42,3 +44,5 @@ Usage:
   960   960    9.85          38.99        1.074982e-06
  1056  1056    9.77          44.19        1.099405e-06
 
+* This is fine on cumin / cuda 2.3 / MKL 
+  864   864   36.23          45.20        1.118333e-06
