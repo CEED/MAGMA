@@ -18,6 +18,9 @@
 #include "cublas.h"
 #include "magma.h"
 
+#define min(a,b)  (((a)<(b))?(a):(b))
+
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing sgelqf
 */
@@ -34,7 +37,7 @@ int main( int argc, char** argv)
     TimeStruct start, end;
 
     /* Matrix size */
-    int N=0, n2, lda;
+    int M=0, N=0, n2;
     int size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
     
     cublasStatus status;
@@ -44,13 +47,22 @@ int main( int argc, char** argv)
       for(i = 1; i<argc; i++){	
 	if (strcmp("-N", argv[i])==0)
 	  N = atoi(argv[++i]);
+	else if (strcmp("-M", argv[i])==0)
+          M = atoi(argv[++i]);
       }
-      if (N>0) size[0] = size[9] = N;
-      else exit(1);
+      if (N>0 && M>0)
+        printf("  testing_sgeqrf -M %d -N %d\n\n", M, N);
+      else
+        {
+          printf("\nUsage: \n");
+          printf("  testing_sgeqrf -M %d -N %d\n\n", M, N);
+          exit(1);
+        }
     }
     else {
       printf("\nUsage: \n");
-      printf("  testing_sgelqf -N %d\n\n", 1024);
+      printf("  testing_sgelqf -M %d -N %d\n\n", 1024, 1024);
+      M = N = size[9];
     }
 
     /* Initialize CUBLAS */
@@ -59,8 +71,8 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! CUBLAS initialization error\n");
     }
 
-    lda = N;
-    n2 = size[9] * size[9];
+    n2  = M * N;
+    int min_mn = min(M,N);
 
     /* Allocate host memory for the matrix */
     h_A = (float*)malloc(n2 * sizeof(h_A[0]));
@@ -68,7 +80,7 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! host memory allocation error (A)\n");
     }
 
-    tau = (float*)malloc(size[9] * sizeof(float));
+    tau = (float*)malloc(min_mn * sizeof(float));
     if (tau == 0) {
       fprintf (stderr, "!!!! host memory allocation error (tau)\n");
     }
@@ -79,7 +91,8 @@ int main( int argc, char** argv)
     }
 
     // TTT: what should be the size for sgelqf-v2 ?
-    int lwork = 2*size[9]*magma_get_sgelqf_nb(size[9]);
+    int nb = magma_get_sgelqf_nb(min_mn);
+    int lwork = 2*size[9]*nb;
     status = cublasAlloc(n2+lwork, sizeof(float), (void**)&d_A);
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
@@ -91,17 +104,18 @@ int main( int argc, char** argv)
     }
 
     printf("\n\n");
-    printf("  N    CPU GFlop/s    GPU GFlop/s    ||R||_F / ||A||_F\n");
-    printf("========================================================\n");
+    printf("  M     N   CPU GFlop/s   GPU GFlop/s    ||R||_F / ||A||_F\n");
+    printf("==========================================================\n");
     for(i=0; i<10; i++){
-      N = lda = size[i];
-      n2 = N*N;
+      if (argc==1){
+	M = N = min_mn = size[i];
+	n2 = N*N;
+      }
 
       for(j = 0; j < n2; j++)
-	h_A[j] = rand() / (float)RAND_MAX;
+	h_R[j] = h_A[j] = rand() / (float)RAND_MAX;
 
-      // magma_sgelqf( N, N, h_R, N, tau, h_work, &lwork, d_A, info);
-      magma_sgelqf2( N, N, h_R, N, tau, h_work, &lwork, d_A, info);
+      magma_sgelqf(M, N, h_R, M, tau, h_work, &lwork, d_A, info);
 
       for(j=0; j<n2; j++)
         h_R[j] = h_A[j];    
@@ -110,23 +124,22 @@ int main( int argc, char** argv)
          Performs operation using MAGMA
 	 =================================================================== */
       start = get_current_time();
-      // magma_sgelqf( N, N, h_R, N, tau, h_work, &lwork, d_A, info);
-      magma_sgelqf2( N, N, h_R, N, tau, h_work, &lwork, d_A, info);
+      magma_sgelqf(M, N, h_R, M, tau, h_work, &lwork, d_A, info);
       end = get_current_time();
     
-      gpu_perf = 4.*N*N*N/(3.*1000000*GetTimerValue(start,end));
+      gpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
       // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
 
       /* =====================================================================
          Performs operation using LAPACK 
 	 =================================================================== */
       start = get_current_time();
-      sgelqf_(&N, &N, h_A, &lda, tau, h_work, &lwork, info);
+      sgelqf_(&M, &N, h_A, &M, tau, h_work, &lwork, info);
       end = get_current_time();
       if (info[0] < 0)  
 	printf("Argument %d of sgelqf had an illegal value.\n", -info[0]);     
   
-      cpu_perf = 4.*N*N*N/(3.*1000000*GetTimerValue(start,end));
+      cpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
       // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
       
       /* =====================================================================
@@ -134,23 +147,23 @@ int main( int argc, char** argv)
          =================================================================== */
       float work[1], matnorm, mone = -1.;
       int one = 1;
-      matnorm = slange_("f", &N, &N, h_A, &N, work);
+      matnorm = slange_("f", &M, &N, h_A, &M, work);
       saxpy_(&n2, &mone, h_A, &one, h_R, &one);
 
-      printf("%5d    %6.2f         %6.2f        %e\n", 
-	     size[i], cpu_perf, gpu_perf,
-	     slange_("f", &N, &N, h_R, &N, work) / matnorm);
+      printf("%5d %5d  %6.2f         %6.2f        %e\n",
+	     M, N, cpu_perf, gpu_perf,
+	     slange_("f", &M, &N, h_R, &M, work) / matnorm);
 
       /* =====================================================================
 	 Check the factorization
 	 =================================================================== */
       /* // block sgelqf and saxpy
       float result[2];
-      float *hwork_Q = (float*)malloc( N * N * sizeof(float));
-      float *hwork_R = (float*)malloc( N * N * sizeof(float));
+      float *hwork_Q = (float*)malloc( M * N * sizeof(float));
+      float *hwork_R = (float*)malloc( M * N * sizeof(float));
       float *rwork   = (float*)malloc( N * sizeof(float));
 
-      sqrt02(&N, &N, &N, h_A, h_R, hwork_Q, hwork_R, &N, tau, 
+      sqrt02(&M, &min_mn, &min_mn, h_A, h_R, hwork_Q, hwork_R, &M, tau, 
 	      h_work, &lwork, rwork, result); 
 
       printf("norm( R - Q'*A ) / ( M * norm(A) * EPS ) = %f\n", result[0]);

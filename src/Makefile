@@ -24,7 +24,6 @@ include ../make.inc
              slahru.o \
              slahr2.o \
              sgeqlf.o \
-             sgelqf-v2.o \
              sgelqf.o \
              sdgetrs_gpu.o \
              \

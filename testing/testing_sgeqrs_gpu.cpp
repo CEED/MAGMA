@@ -157,7 +157,7 @@ int main( int argc, char** argv)
 	  r[j+k*M] = b[j+k*M] = rand() / (float)RAND_MAX;
 
       cublasSetMatrix( M, N, sizeof(float), h_A, M, d_A, lda);
-      magma_sgeqrf_gpu( M, N, d_A, lda, tau, h_work, &lwork, d_work, info);
+      magma_sgeqrf_gpu( M, N, d_A, lda, tau, h_work, &lwork, info);
       cublasSetMatrix( M, N, sizeof(float), h_A, M, d_A, lda);
       cublasSetMatrix( M, nrhs, sizeof(float), b, M, d_b, M);
 
