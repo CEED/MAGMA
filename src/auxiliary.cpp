@@ -57,7 +57,7 @@ void printout_devices( )
   for( int idevice = 0; idevice < ndevices; idevice++ )
     {
       char name[200];
-      size_t totalMem;
+      unsigned int totalMem;
       int clock;
       CUdevice dev;
 
