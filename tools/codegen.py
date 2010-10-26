@@ -21,7 +21,8 @@ class Conversion:
   debug = False;
   test = False;
   make = False;
-  valid_precisions = [];
+  prefix = None;
+  required_precisions = [];
   files_in = [];
   files_out = [];
   def __init__(self, file, match, content):
@@ -39,19 +40,22 @@ class Conversion:
       self.precision = match[2].lower();
       # ['c','d','s']
       self.precisions = match[3].lower().split();
-      if len(self.valid_precisions):
-        self.precisions = self.valid_precisions;
+      if len(self.required_precisions):
+        self.precstmp = [];
+        for prec in (self.required_precisions):
+          if prec in(self.precisions):
+            self.precstmp.append(prec);
+        self.precisions = self.precstmp;
     except:
       raise ValueError(path.join(self.file[0],self.file[1])+' : Invalid conversion string');
     self.files_in.append(rel);
-      
-      
+
+
   def run(self):
     if self.convert_names() and not self.test:
       self.convert_data();
       self.export_data();
-    
-    
+
   def convert_names(self):
     self.names = [];
     self.dates = [];
@@ -62,12 +66,18 @@ class Conversion:
       new_file = self.convert(self.file[1], precision);
       if self.debug: print precision,':',
       if new_file <> self.file[1]:
-        conversion = path.join(self.file[0], new_file);
+        if self.prefix is None:
+          prefix = self.file[0]
+          makeprefix = '';
+        else:
+          prefix = self.prefix;
+          makeprefix = '--prefix '+prefix;
+        conversion = path.join(prefix, new_file);
         file_out = relpath(conversion);
         if self.make:
           file_in = relpath(path.join(self.file[0],self.file[1]));
           print file_out+':',file_in;
-          print "\t$(PYTHON)",path.realpath(sys.argv[0]),"--file",file_in,'-p',precision;
+          print "\t$(PYTHON)",path.realpath(sys.argv[0]),makeprefix,'-p',precision,"--file",file_in;
         self.names.append(new_file);
         self.files_out.append(file_out);
         if self.debug: print relpath(conversion), ':',
@@ -90,17 +100,20 @@ class Conversion:
         self.names.append(None);
         self.dates.append(None);
     return load;
-    
+
   def export_data(self):
     for i in range(len(self.names)):
       name = self.names[i];
       data = self.converted[i];
       if data is None or name is None: continue;
-      fd = open(path.join(self.file[0],name), 'w');
+      if self.prefix is None:
+        fd = open(path.join(self.file[0],name), 'w');
+      else:
+        fd = open(path.join(self.prefix,name), 'w');
       fd.write(data);
       fd.close();
-    
-    
+
+
   def convert_data(self):
     for i in range(len(self.precisions)):
       precision = self.precisions[i];
@@ -109,8 +122,7 @@ class Conversion:
       if name is not None and (date is None or date > 0):
         self.converted.append(self.convert(self.content, precision));
       else: self.converted.append(None);
-      
-      
+
   def substitute(self, sub_type, data, precision):
     try:
       work = subs[sub_type];
@@ -129,8 +141,7 @@ class Conversion:
         print 'Bad replacement pair ',i,'in',sub_type;
         continue;
     return data;
-    
-    
+
   def convert(self, data, precision):
     try:
       data = self.substitute('all', data, precision);
@@ -147,17 +158,18 @@ class Conversion:
 def grep(string,list):
     expr = re.compile(string)
     return filter(expr.search,list)
-    
+
 parser = OptionParser();
-parser.add_option('--debug', help='Print debugging messages.', action='store_true', dest='debug', default=False);
-parser.add_option('--in-files','--in', help='Print the filenames of files for precision generation.', action='store_true', dest='in_print', default=False);
-parser.add_option('--out-files','--out', help='Print the filenames for the precision generated files.', action='store_true', dest='out_print', default=False);
-parser.add_option('--out-clean','--clean', help='Remove the files that are the product of generation.', action='store_true', dest='out_clean', default=False);
-parser.add_option('--threads', help='Enter the number of threads to use for conversion.', action='store', type='int', dest='threads', default=1);
-parser.add_option('--file','-f', help='Specify a file(s) on which to operate.', action='append', dest='files', type='string', default=[]);
-parser.add_option('--prec','-p', help='Specify a precision(s) on which to operate.', action='append', dest='precs', type='string', default=[]);
-parser.add_option('--make', help='Spew a GNU Make friendly file to standard out.', action='store_true', dest='make', default=False);
-parser.add_option('--test', help='Don\'t actually do any work.', action='store_true', dest='test', default=False);
+parser.add_option("-d", "--debug",     help='Print debugging messages.',                                   action='store_true', dest='debug',     default=False);
+parser.add_option("-P", "--prefix",    help='The output directory if different from the input directory.', action='store',      dest='prefix',    default=None);
+parser.add_option("-i", "--in-files",  help='Print the filenames of files for precision generation.',      action='store_true', dest='in_print',  default=False);
+parser.add_option("-o", "--out-files", help='Print the filenames for the precision generated files.',      action='store_true', dest='out_print', default=False);
+parser.add_option("-c", "--clean",     help='Remove the files that are the product of generation.',        action='store_true', dest='out_clean', default=False);
+parser.add_option("-t", "--threads",   help='Enter the number of threads to use for conversion.',          action='store',      dest='threads',   default=1);
+parser.add_option("-f", "--file",      help='Specify a file(s) on which to operate.',                      action='store',      dest='fileslst', type='string', default="");
+parser.add_option("-p", "--prec",      help='Specify a precision(s) on which to operate.',                 action='store',      dest='precslst', type='string', default="");
+parser.add_option("-m", "--make",      help='Spew a GNU Make friendly file to standard out.',              action='store_true', dest='make',      default=False);
+parser.add_option("-T", "--test",      help='Don\'t actually do any work.',                                action='store_true', dest='test',      default=False);
 (options, args) = parser.parse_args();
 
 rex = re.compile(REGEX);
@@ -172,9 +184,11 @@ def check_gen(file):
     if m is None: continue;
     work.append((file, m.groups(), ''.join(lines)));
 
-if len(options.files):
-  for file in options.files:
-    check_gen(file);
+if options.fileslst:
+  options.files = options.fileslst.split();
+  if len(options.files):
+    for file in options.files:
+      check_gen(file);
 else:
   startDir = '.';
   for root, dirs, files in os.walk(startDir, True, None):
@@ -186,18 +200,27 @@ else:
     if '.svn' in dirs:
       dirs.remove('.svn');
 
-if options.threads > 1: sem = BoundedSemaphore(value=options.threads);
-if options.debug: Conversion.debug = True;
-if options.make: Conversion.make = True;
+Conversion.debug = options.debug;
+Conversion.make = options.make;
+Conversion.prefix = options.prefix;
+
 if options.out_print or options.out_clean or options.in_print or options.make or options.test:
   Conversion.test = True;
-if len(options.precs):
-  Conversion.valid_precisions = options.precs;
+
+if options.precslst:
+  options.precs = options.precslst.split();
+  if len(options.precs):
+    Conversion.required_precisions = options.precs;
 if options.make:
   print '## Automatically generated Makefile';
   print 'PYTHON ?= python';
 
 if len(work) is 0:
+  print 'gen = ';
+  print 'cleangen:';
+  print '\trm -f $(gen)';
+  print 'generation: $(gen)';
+  print '.PHONY: cleangen generation';
   sys.exit(0);
 
 for tuple in work:
