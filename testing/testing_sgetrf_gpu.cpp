@@ -158,7 +158,7 @@ int main( int argc, char** argv)
 	h_R[j] = h_A[j] = rand() / (float)RAND_MAX;
 
       cublasSetMatrix( M, N, sizeof(float), h_A, M, d_A, lda);
-      magma_sgetrf_gpu( M, N, d_A, lda, ipiv, info);
+      *info = magma_sgetrf_gpu( M, N, d_A, lda, ipiv);
       cublasSetMatrix( M, N, sizeof(float), h_A, M, d_A, lda);
 
       /* =====================================================================
@@ -180,7 +180,7 @@ int main( int argc, char** argv)
          Performs operation using MAGMA
 	 =================================================================== */
       start = get_current_time();
-      magma_sgetrf_gpu( M, N, d_A, lda, ipiv, info);
+      *info = magma_sgetrf_gpu( M, N, d_A, lda, ipiv);
       end = get_current_time();
       cublasGetMatrix( M, N, sizeof(float), d_A, lda, h_R, M);
 
