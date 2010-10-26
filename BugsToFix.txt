@@ -22,6 +22,35 @@ Usage:
  3072  3072     11.6        138.1       4.24e-02   4.98e-07
  4032  4032     12.8        189.6       3.80e-02   1.06e-05
 
+* I think this is resolved now. Function magma_sormqr_gpu
+  was declared in sorqrs_gpu with the wrong interface and everything
+  was getting messed up. Probably there are other magma functions
+  that were not originally in the .h files and we missed to give
+  them the correct interfaces when called (but in the files with
+  the sources they are with the new interface). Now we get:
+
+  [tomov@cumin testing]$ ./testing_sgeqrs_gpu
+  device 0: GeForce GTX 280, 1296.0 MHz clock, 1023.8 MB memory
+  device 1: Quadro NVS 290, 918.0 MHz clock, 255.3 MB memory
+
+  Usage: 
+    testing_sgeqrs_gpu -nrhs 3  -M 1024  -N 1024
+
+                                         ||b-Ax|| / (N||A||)
+  M     N    CPU GFlop/s   GPU GFlop/s      GPU      CPU    
+============================================================
+ 1024  1024     38.1         47.4       1.33e-09   6.63e-10
+ 2048  2048     60.3        117.8       2.27e-09   7.67e-10
+ 3072  3072     80.0        177.0       7.17e-10   1.92e-10
+ 4032  4032     91.5        218.5       6.49e-09   3.00e-09
+ 5184  5184     97.1        243.6       6.57e-10   2.05e-10
+ 6016  6016     97.9        253.8       9.45e-10   2.68e-10
+ 7040  7040     99.7        263.3       1.86e-09   9.22e-10
+ 8064  8064    101.0        269.9       1.68e-09   6.96e-10
+ 9088  9088    101.5        275.4       1.37e-09   4.61e-10
+10112 10112    101.7        279.6       1.32e-09   2.73e-10
+
+  I scaled also with N. Is this the usual scaling?
 
 --------- Mordor8 / Cuda 3.1 / MKL : 
           Problem in result precision with testing_sgeqrf_gpu 

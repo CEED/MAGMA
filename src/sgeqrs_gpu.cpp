@@ -12,12 +12,6 @@
 #include <cublas.h>
 #include "magma.h"
 
-extern "C" int
-magma_sormqr_gpu(char *side, char *trans, int *m, int *n, int *k,
-                 float *a, int *lda, float *tau, float *c, int *ldc,
-                 float *work, int *lwork, float *td, int nb, int *info);
-
-
 extern "C" magma_int_t 
 magma_sgeqrs_gpu(magma_int_t m_, magma_int_t n_, magma_int_t nrhs_, 
 		 float *a, magma_int_t lda_, float *tau, float *c, magma_int_t ldc_, 
@@ -135,9 +129,9 @@ magma_sgeqrs_gpu(magma_int_t m_, magma_int_t n_, magma_int_t nrhs_,
      return 0;
    }
 
-   magma_sormqr_gpu("L", "T", m, nrhs, n,
-		    a_ref(0,0), lda, tau, c, ldc,
-		    work, lwork, td, nb, info);
+   magma_sormqr_gpu('L', 'T', m_, nrhs_, n_,
+                    a_ref(0,0), lda_, tau, c, ldc_,
+                    work, lwork, td, nb, info);
 
    lddwork= k;
    dwork = td+2*lddwork*nb;

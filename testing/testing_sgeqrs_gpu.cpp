@@ -137,7 +137,7 @@ int main( int argc, char** argv)
     }
 
     printf("\n");
-    printf("                                         || b-Ax || / ||A||\n");
+    printf("                                         ||b-Ax|| / (N||A||)\n");
     printf("  M     N    CPU GFlop/s   GPU GFlop/s      GPU      CPU    \n");
     printf("============================================================\n");
     for(i=0; i<10; i++){
@@ -166,7 +166,7 @@ int main( int argc, char** argv)
 	 =================================================================== */
       start = get_current_time();
       magma_sgeqrf_gpu2( M, N, d_A, lda, tau, h_work, &lwork, d_work, info);
-
+      
       // Solve the least-squares problem min || A * X - B || 
       magma_sgeqrs_gpu( M, N, nrhs, d_A, lda, tau, 
 		       d_b, M, h_work, &lwork, d_work, info);
@@ -220,8 +220,8 @@ int main( int argc, char** argv)
 
       printf("%5d %5d   %6.1f       %6.1f       %7.2e   %7.2e\n",
              M, N, cpu_perf, gpu_perf,
-             slange_("f", &M, &nrhs, r, &M, work)/matnorm,
-	     slange_("f", &M, &nrhs, b, &M, work)/matnorm );
+             slange_("f", &M, &nrhs, r, &M, work)/(min_mn*matnorm),
+	     slange_("f", &M, &nrhs, b, &M, work)/(min_mn*matnorm) );
 
       if (argc != 1)
 	break;
