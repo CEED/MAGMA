@@ -41,7 +41,7 @@ int main( int argc, char** argv)
     TimeStruct start, end;
 
     /* Matrix size */
-    int M=0, N=0, n2, lda;
+    int M=0, N=0, n2;
     int size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
     
     cublasStatus status;
@@ -75,9 +75,7 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! CUBLAS initialization error\n");
     }
 
-    lda = M;
     n2  = M * N;
-
     int min_mn = min(M, N);
 
     /* Allocate host memory for the matrix */
@@ -111,19 +109,19 @@ int main( int argc, char** argv)
     }
 
     printf("\n\n");
-    printf("  N    CPU GFlop/s    GPU GFlop/s    ||R - Q'A|| / ||A||\n");
-    printf("========================================================\n");
+    printf("  M     N   CPU GFlop/s   GPU GFlop/s    ||R||_F / ||A||_F\n");
+    printf("==========================================================\n");
     for(i=0; i<10; i++){
       if (argc==1){
-	M = N = lda = min_mn = size[i];
+	M = N = min_mn = size[i];
 	n2 = M*N;
       }
 
       for(j = 0; j < n2; j++)
 	h_R[j] = h_A[j] = rand() / (float)RAND_MAX;
 
-      //magma_sgeqrf(M, N, h_R, lda, tau, h_work, &lwork, d_A, info);
-      magma_sgeqrf2(M, N, h_R, lda, tau, h_work, &lwork, info);
+      //magma_sgeqrf(M, N, h_R, M, tau, h_work, &lwork, d_A, info);
+      magma_sgeqrf2(M, N, h_R, M, tau, h_work, &lwork, info);
 
       for(j=0; j<n2; j++)
         h_R[j] = h_A[j];
@@ -132,8 +130,8 @@ int main( int argc, char** argv)
          Performs operation using MAGMA
 	 =================================================================== */
       start = get_current_time();
-      //magma_sgeqrf(M, N, h_R, lda, tau, h_work, &lwork, d_A, info);
-      magma_sgeqrf2(M, N, h_R, lda, tau, h_work, &lwork, info);
+      //magma_sgeqrf(M, N, h_R, M, tau, h_work, &lwork, d_A, info);
+      magma_sgeqrf2(M, N, h_R, M, tau, h_work, &lwork, info);
       end = get_current_time();
     
       gpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
@@ -149,7 +147,7 @@ int main( int argc, char** argv)
       float *hwork_R = (float*)malloc( M * N * sizeof(float));
       float *rwork   = (float*)malloc( N * sizeof(float));
 
-      sqrt02_(&M, &min_mn, &min_mn, h_A, h_R, hwork_Q, hwork_R, &lda, tau,
+      sqrt02_(&M, &min_mn, &min_mn, h_A, h_R, hwork_Q, hwork_R, &M, tau,
               h_work, &lwork, rwork, result);
 
       printf("norm( R - Q'*A ) / ( M * norm(A) * EPS ) = %f\n", result[0]);
@@ -162,7 +160,7 @@ int main( int argc, char** argv)
          Performs operation using LAPACK 
 	 =================================================================== */
       start = get_current_time();
-      sgeqrf_(&M, &N, h_A, &lda, tau, h_work, &lwork, info);
+      sgeqrf_(&M, &N, h_A, &M, tau, h_work, &lwork, info);
       end = get_current_time();
       if (info[0] < 0)  
 	printf("Argument %d of sgeqrf had an illegal value.\n", -info[0]);     
@@ -177,8 +175,9 @@ int main( int argc, char** argv)
       int one = 1;
       matnorm = slange_("f", &M, &N, h_A, &M, work);
       saxpy_(&n2, &mone, h_A, &one, h_R, &one);
-      printf("%5d    %6.2f         %6.2f        %e\n",
-             N, cpu_perf, gpu_perf,
+
+      printf("%5d %5d  %6.2f         %6.2f        %e\n",
+             M, N, cpu_perf, gpu_perf,
              slange_("f", &M, &N, h_R, &M, work) / matnorm);
       
       /* =====================================================================
