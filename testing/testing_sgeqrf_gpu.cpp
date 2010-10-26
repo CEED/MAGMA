@@ -33,16 +33,14 @@ int main( int argc, char** argv)
     cublasInit( );
     printout_devices( );
 
-    float *h_A, *h_R, *h_work, *tau;
-    float *d_A, *d_work;
+    float *h_A, *h_R, *h_work, *tau, *d_A;
     float gpu_perf, cpu_perf;
 
     TimeStruct start, end;
 
     /* Matrix size */
     int M=0, N=0, n2, lda;
-    int size[10] = {5*96, 6*96,7*96,8*96,9*96,10*96,11*96,12*96,13*96,14*96};
-    //int size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
+    int size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
     
     cublasStatus status;
     int i, j, info[1];
@@ -106,11 +104,6 @@ int main( int argc, char** argv)
       fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
     }
 
-    status = cublasAlloc(N*nb, sizeof(float), (void**)&d_work);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-      fprintf (stderr, "!!!! device memory allocation error (d_work)\n");
-    }
-
     cudaMallocHost( (void**)&h_work, lwork*sizeof(float) );
     if (h_work == 0) {
       fprintf (stderr, "!!!! host memory allocation error (work)\n");
@@ -132,14 +125,14 @@ int main( int argc, char** argv)
 	h_A[j] = rand() / (float)RAND_MAX;
 
       cublasSetMatrix( M, N, sizeof(float), h_A, M, d_A, lda);
-      magma_sgeqrf_gpu( M, N, d_A, lda, tau, h_work, &lwork, d_work, info);
+      magma_sgeqrf_gpu( M, N, d_A, lda, tau, h_work, &lwork, info);
       cublasSetMatrix( M, N, sizeof(float), h_A, M, d_A, lda);
 
       /* ====================================================================
          Performs operation using MAGMA
 	 =================================================================== */
       start = get_current_time();
-      magma_sgeqrf_gpu( M, N, d_A, lda, tau, h_work, &lwork, d_work, info);
+      magma_sgeqrf_gpu( M, N, d_A, lda, tau, h_work, &lwork, info);
       end = get_current_time();
     
       gpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
@@ -197,7 +190,6 @@ int main( int argc, char** argv)
     free(h_A);
     free(tau);
     cublasFree(h_work);
-    cublasFree(d_work);
     cublasFree(h_R);
     cublasFree(d_A);
 

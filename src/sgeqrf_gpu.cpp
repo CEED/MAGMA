@@ -12,8 +12,8 @@
 #include "magma.h"
 
 extern "C" magma_int_t
-magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  float  *tau,
-		 float *work, magma_int_t *lwork, float *dwork, magma_int_t *info )
+magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  
+		 float  *tau, float *work, magma_int_t *lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -75,6 +75,7 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  f
     INFO    (output) INTEGER   
             = 0:  successful exit   
             < 0:  if INFO = -i, the i-th argument had an illegal value   
+                  if INFO = -9, internal GPU memory allocation failed.
 
     Further Details   
     ===============   
@@ -139,6 +140,14 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  f
    cudaStreamCreate(&stream[0]);
    cudaStreamCreate(&stream[1]);
 
+   float *dwork;
+   cublasStatus status;
+   status = cublasAlloc((*n)*nb, sizeof(float), (void**)&dwork);
+   if (status != CUBLAS_STATUS_SUCCESS) {
+     *info = -9;
+     return 0;
+   }
+
    ldda = *m;
    nbmin = 2;
    // (TTT) nx = 192;
@@ -198,7 +207,9 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  f
    } else {
      i = 0;
    }
-   
+
+   cublasFree(dwork);
+
    /* Use unblocked code to factor the last or only block. */
    if (i < k) {
       ib   = *n-i;

@@ -152,7 +152,7 @@ magma_sgelqf2(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, float 
       cublasSetMatrix( *m, *n, sizeof(float), a, *lda, da, ldda);
       magmablas_sinplace_transpose( da, ldda, ldda );
       
-      magma_sgeqrf_gpu(*m, *n, da, *m, tau, work, lwork, dwork, &iinfo);
+      magma_sgeqrf_gpu(*m, *n, da, *m, tau, work, lwork, &iinfo);
 
       magmablas_sinplace_transpose( da, ldda, ldda );
       cublasGetMatrix( *m, *n, sizeof(float), da, ldda, a, *lda); 
