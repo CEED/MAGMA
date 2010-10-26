@@ -1,0 +1,20 @@
+include $(MAGMA_DIR)/make.inc
+
+#//////////////////////////////////////////////////////////////////////////
+# Precision generation 
+#//////////////////////////////////////////////////////////////////////////
+PYTHON ?= python
+CODEGEN = $(MAGMA_DIR)/tools/codegen.py
+
+cleanall: cleangen cleanmkgen
+
+cleanmkgen:
+	find . -name Makefile.gen -exec rm -f {} \;
+
+Makefile.gen: $(CODEGEN)
+	$(PYTHON) $(CODEGEN) --make -f "$(ZSRC) $(ZHDR)" > $@
+.DEFAULT_GOAL :=
+-include Makefile.gen
+.DEFAULT_GOAL :=
+
+#//////////////////////////////////////////////////////////////////////////
