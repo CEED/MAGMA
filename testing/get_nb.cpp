@@ -90,12 +90,6 @@ int magma_get_sgeqlf_nb(int m){
 extern "C"
 int magma_get_sgelqf_nb(int m){
   return magma_get_sgeqrf_nb(m);
-  if (m <= 2048)
-    return 32;
-  else if (m<=4032)
-    return 64;
-  else
-    return 128;
 }
 
 /* ////////////////////////////////////////////////////////////////////////////

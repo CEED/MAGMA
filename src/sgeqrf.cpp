@@ -138,24 +138,19 @@ magma_sgeqrf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
    cudaStreamCreate(&stream[0]);
    cudaStreamCreate(&stream[1]);
 
-   ldda = *m;
-   if (ldda %32 != 0)
-     ldda = (ldda/32)*32 + 32;
+   nbmin = 2;
+   nx = nb;
+
+   lddwork = ((*n+31)/32)*32;
+   ldda    = ((*m+31)/32)*32;
 
    float *da;
-   status = cublasAlloc((*n)*ldda + nb*(*n+32), sizeof(float), (void**)&da);
+   status = cublasAlloc((*n)*ldda + nb*lddwork, sizeof(float), (void**)&da);
    if (status != CUBLAS_STATUS_SUCCESS) {
       *info = -8;
       return 0;
     }
    float *dwork = da + ldda*(*n);
-
-   nbmin = 2;
-   nx = 192;
-   lddwork = *n;
-
-   if (lddwork %32 != 0)
-     lddwork = (lddwork/32)*32 + 32;
 
    if (nb >= nbmin && nb < k && nx < k) {
       /* Use blocked code initially */

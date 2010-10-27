@@ -13,7 +13,7 @@
 
 extern "C" magma_int_t
 magma_sgeqlf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, 
-	     float *tau, float *work, magma_int_t *lwork, float *da, magma_int_t *info)
+	     float *tau, float *work, magma_int_t *lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -64,21 +64,18 @@ magma_sgeqlf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
 
     LWORK   (input) INTEGER   
             The dimension of the array WORK.  LWORK >= max(1,N).   
-            For optimum performance LWORK >= N*NB, where NB is the   
-            optimal blocksize.   
+            For optimum performance LWORK >= N*NB, where NB can be obtained
+            through magma_get_sgeqlf_nb(M). 
 
             If LWORK = -1, then a workspace query is assumed; the routine   
             only calculates the optimal size of the WORK array, returns   
             this value as the first entry of the WORK array, and no error   
             message related to LWORK is issued by XERBLA.   
 
-    DA      (workspace)  REAL array on the GPU, dimension N*(M + NB),
-            where NB can be obtained through magma_get_sgeqlf_nb(M).
-            (size to be reduced in upcoming versions).
-
     INFO    (output) INTEGER   
             = 0:  successful exit   
             < 0:  if INFO = -i, the i-th argument had an illegal value   
+                  if INFO = -9, the GPU memory allocation failed
 
     Further Details   
     ===============   
@@ -144,16 +141,24 @@ magma_sgeqlf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     if (k == 0)
       return 0;
 
-    float *dwork = da + (*m)*(*n);
-
+    cublasStatus status;
     static cudaStream_t stream[2];
     cudaStreamCreate(&stream[0]);
     cudaStreamCreate(&stream[1]);
 
-    ldda = *m;
     nbmin = 2;
-    nx = 192;
-    lddwork = *n;
+    nx = nb;
+
+    lddwork = ((*n+31)/32)*32;
+    ldda    = ((*m+31)/32)*32;
+
+    float *da;
+    status = cublasAlloc((*n)*ldda + nb*lddwork, sizeof(float), (void**)&da);
+    if (status != CUBLAS_STATUS_SUCCESS) {
+      *info = -9;
+      return 0;
+    }
+    float *dwork = da + ldda*(*n);
 
     if (nb >= nbmin && nb < k && nx < k) {
         /*  Use blocked code initially.   
@@ -246,10 +251,11 @@ magma_sgeqlf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
 
       sgeqlf_(&mu, &nu, a_ref(0,0), lda, tau, work, lwork, &iinfo);
     }
-    work[0] = (float)*n * nb;
-    return 0;
 
-/*     End of MAGMA_SGEQLF */
+    cublasFree(da);
+    return 0;
+    
+    /* End of MAGMA_SGEQLF */
 
 } /* magma_sgeqlf */
 

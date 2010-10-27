@@ -150,7 +150,6 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
 
    ldda = *m;
    nbmin = 2;
-   // (TTT) nx = 192;
    nx = nb;
    ldwork = *m;
    lddwork= *n;
