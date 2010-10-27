@@ -28,7 +28,6 @@ int main( int argc, char** argv)
     printout_devices( );
 
     float *h_A, *h_R;
-    float *d_A;
     float gpu_perf, cpu_perf;
 
     TimeStruct start, end;
@@ -73,11 +72,6 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! host memory allocation error (R)\n");
     }
 
-    status = cublasAlloc(n2, sizeof(float), (void**)&d_A);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-      fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
-    }
-
     printf("\n\n");
     printf("  N    CPU GFlop/s    GPU GFlop/s    ||R||_F / ||A||_F\n");
     printf("========================================================\n");
@@ -90,8 +84,8 @@ int main( int argc, char** argv)
             for(j=0; j<n2; j+=(lda+1))
       	h_R[j] = (h_A[j]+=2000);
 
-      magma_spotrf('L', N, h_R, lda, d_A, info);
-      //magma_spotrf('U', N, h_R, lda, d_A, info);
+      magma_spotrf('L', N, h_R, lda, info);
+      //magma_spotrf('U', N, h_R, lda, info);
 
       for(j=0; j<n2; j++)
         h_R[j] = h_A[j];    
@@ -100,9 +94,8 @@ int main( int argc, char** argv)
          Performs operation using MAGMA 
 	 =================================================================== */
       start = get_current_time();
-      magma_spotrf('L', N, h_R, lda, d_A, info);
-      //magma_spotrf2('L', N, h_R, lda, info);
-      //magma_spotrf('U', N, h_R, lda, d_A, info);
+      magma_spotrf('L', N, h_R, lda, info);
+      //magma_spotrf('U', N, h_R, lda, info);
       end = get_current_time();
     
       gpu_perf = 1.*N*N*N/(3.*1000000*GetTimerValue(start,end));
@@ -141,7 +134,6 @@ int main( int argc, char** argv)
     /* Memory clean up */
     free(h_A);
     cublasFree(h_R);
-    cublasFree(d_A);
 
     /* Shutdown */
     status = cublasShutdown();

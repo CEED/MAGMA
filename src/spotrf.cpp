@@ -13,7 +13,7 @@
 #include "magmablas.h"
 
 extern "C" int 
-magma_spotrf(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *work, int *info)
+magma_spotrf(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, int *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -25,7 +25,9 @@ magma_spotrf(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *work
     =======   
 
     SPOTRF computes the Cholesky factorization of a real symmetric   
-    positive definite matrix A.   
+    positive definite matrix A. This version does not require work
+    space on the GPU passed as input. GPU memory is allocated in the
+    routine.
 
     The factorization has the form   
        A = U**T * U,  if UPLO = 'U', or   
@@ -62,12 +64,10 @@ magma_spotrf(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *work
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,N).   
 
-    WORK    (workspace) REAL array on the GPU, dimension (N, N)
-            (size to be reduced in upcoming versions).
-
     INFO    (output) INTEGER   
             = 0:  successful exit   
-            < 0:  if INFO = -i, the i-th argument had an illegal value   
+            < 0:  if INFO = -i, the i-th argument had an illegal value 
+                  if INFO = -6, the GPU memory allocation failed 
             > 0:  if INFO = i, the leading minor of order i is not   
                   positive definite, and the factorization could not be   
                   completed.   
@@ -107,8 +107,17 @@ magma_spotrf(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *work
     cudaStreamCreate(&stream[1]);
     cudaStreamCreate(&stream[2]);
 
-    a_dim1 = lda_;
-    ldda   = n_;
+    cublasStatus status;
+
+    a_dim1 = *lda;
+    ldda   = ((*n+31)/32)*32;
+    
+    float *work;
+    status = cublasAlloc((*n)*ldda, sizeof(float), (void**)&work);
+    if (status != CUBLAS_STATUS_SUCCESS) {
+      *info = -6;
+      return 0;
+    }
 
     a_offset = 1 + a_dim1 * 1;
     a    -= a_offset;
@@ -217,9 +226,12 @@ magma_spotrf(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *work
 	}
     }
     
+    work += 1 + (*n);
+    cublasFree(work);
+    
     return 0;
 
-/*     End of MAGMA_SPOTRF */
+    /* End of MAGMA_SPOTRF */
 
 } /* magma_spotrf */
 
