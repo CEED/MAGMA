@@ -20,8 +20,8 @@ magmablas_spermute_long2(float *, int, int *, int, int);
 
 
 extern "C" magma_int_t
-magma_sgelqf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, float *tau, 
-	     float *work, magma_int_t *lwork, float *da, magma_int_t *info)
+magma_sgelqf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, 
+	     float *tau, float *work, magma_int_t *lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -78,13 +78,10 @@ magma_sgelqf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, float *
             this value as the first entry of the WORK array, and no error   
             message related to LWORK is issued.
 
-    DA      (workspace)  REAL array on the GPU, dimension M*(N + NB),
-            where NB can be obtained through magma_get_sgeqrf_nb(M).
-            (size to be reduced in upcoming versions).
-
     INFO    (output) INTEGER   
             = 0:  successful exit   
             < 0:  if INFO = -i, the i-th argument had an illegal value   
+                  if INFO = -10 internal GPU memory allocation failed.
 
     Further Details   
     ===============   
@@ -104,7 +101,6 @@ magma_sgelqf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, float *
     =====================================================================    */
 
     #define  a_ref(a_1,a_2) ( a+(a_2)*(*lda) + (a_1))
-    #define da_ref(a_1,a_2) (da+(a_2)*ldda   + (a_1))
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
     
@@ -156,7 +152,7 @@ magma_sgelqf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, float *
 
 	status = cublasAlloc(maxdim*maxdim, sizeof(float), (void**)&dA);
 	if (status != CUBLAS_STATUS_SUCCESS) {
-	  *info = -7;
+	  *info = -10;
 	  return 0;
 	}
 
@@ -170,14 +166,14 @@ magma_sgelqf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, float *
 
 	status = cublasAlloc(2*maxn*maxm, sizeof(float), (void**)&dA);
 	if (status != CUBLAS_STATUS_SUCCESS) {
-	  *info = -7;
+	  *info = -10;
 	  return 0;
 	}
 
 	cublasSetMatrix( *m, *n, sizeof(float), a, *lda, dA, maxm);
 
 	dAT = dA + maxn * maxm;
-	magmablas_stranspose2( dAT, ldda, da, maxm, *m, *n );
+	magmablas_stranspose2( dAT, ldda, dA, maxm, *m, *n );
       }
 
     magma_sgeqrf_gpu(n_, m_, dAT, ldda, tau, work, lwork, &iinfo);
@@ -199,6 +195,5 @@ magma_sgelqf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, float *
 } /* magma_sgelqf */
 
 #undef  a_ref
-#undef da_ref
 #undef min
 #undef max

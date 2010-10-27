@@ -69,8 +69,8 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
             this value as the first entry of the WORK array, and no error   
             message related to LWORK is issued.   
 
-    DWORK   (workspace)  REAL array on the GPU, dimension N*NB,
-            where NB can be obtained through magma_get_sgeqrf_nb(M).
+    DWORK   (workspace)  REAL array on the GPU, dimension (M+N)*NB,
+            where NB can be obtained through magma_get_sgeqrf_nb(min(M,N)).
 
     INFO    (output) INTEGER   
             = 0:  successful exit   

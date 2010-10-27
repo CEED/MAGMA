@@ -59,7 +59,7 @@ int magma_get_dpotrf_nb(int n){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for sgeqrf based on m
+   -- Return nb for dgeqrf based on m
 */
 extern "C"
 int magma_get_dgeqrf_nb(int m){
@@ -89,6 +89,7 @@ int magma_get_sgeqlf_nb(int m){
 */
 extern "C"
 int magma_get_sgelqf_nb(int m){
+  return magma_get_sgeqrf_nb(m);
   if (m <= 2048)
     return 32;
   else if (m<=4032)
