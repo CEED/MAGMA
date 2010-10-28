@@ -59,7 +59,12 @@ void printout_devices( )
   for( int idevice = 0; idevice < ndevices; idevice++ )
     {
       char name[200];
+#if CUDA_VERSION > 3010 
       size_t totalMem;
+#else
+      unsigned int totalMem;
+#endif
+
       int clock;
       CUdevice dev;
 
