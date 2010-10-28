@@ -78,7 +78,7 @@ int main( int argc, char** argv)
     int size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
     
     cublasStatus status;
-    int i, j, info[1];
+    int i, j, info;
 
     if (argc != 1){
       for(i = 1; i<argc; i++){	
@@ -158,17 +158,17 @@ int main( int argc, char** argv)
 	h_R[j] = h_A[j] = rand() / (float)RAND_MAX;
 
       cublasSetMatrix( M, N, sizeof(float), h_A, M, d_A, lda);
-      *info = magma_sgetrf_gpu( M, N, d_A, lda, ipiv);
+      magma_sgetrf_gpu( M, N, d_A, lda, ipiv, &info);
       cublasSetMatrix( M, N, sizeof(float), h_A, M, d_A, lda);
 
       /* =====================================================================
          Performs operation using LAPACK
          =================================================================== */
       start = get_current_time();
-      sgetrf_(&M, &N, h_A, &M, ipiv, info);
+      sgetrf_(&M, &N, h_A, &M, ipiv, &info);
       end = get_current_time();
-      if (info[0] < 0)
-        printf("Argument %d of sgetrf had an illegal value.\n", -info[0]);
+      if (info < 0)
+        printf("Argument %d of sgetrf had an illegal value.\n", -info);
 
       cpu_perf = 2.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
       // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
@@ -180,7 +180,7 @@ int main( int argc, char** argv)
          Performs operation using MAGMA
 	 =================================================================== */
       start = get_current_time();
-      *info = magma_sgetrf_gpu( M, N, d_A, lda, ipiv);
+      magma_sgetrf_gpu( M, N, d_A, lda, ipiv, &info);
       end = get_current_time();
       cublasGetMatrix( M, N, sizeof(float), d_A, lda, h_R, M);
 
