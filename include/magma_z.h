@@ -103,7 +103,7 @@ magma_int_t magma_zgetrs_gpu( char trans, magma_int_t n, magma_int_t nrhs,
 			      double2 *b, magma_int_t ldb, magma_int_t *info,
 			      double2 *hwork);
 magma_int_t magma_zpotrf_gpu( char uplo,  magma_int_t n, double2 *A, 
-			      magma_int_t lda, double2 *work, magma_int_t *info);
+			      magma_int_t lda, magma_int_t *info);
 magma_int_t magma_zpotrs_gpu( char uplo,  magma_int_t n, magma_int_t nrhs, 
 			      double2 *A, magma_int_t lda, double2 *b,
 			      magma_int_t ldb, magma_int_t *info);

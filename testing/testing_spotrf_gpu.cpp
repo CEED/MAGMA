@@ -28,7 +28,7 @@ int main( int argc, char** argv)
     cublasInit( );
     printout_devices( );
 
-    float *h_A, *h_R, *h_work;
+    float *h_A, *h_R;
     float *d_A;
     float gpu_perf, cpu_perf;
 
@@ -64,7 +64,6 @@ int main( int argc, char** argv)
     n2 = size[9] * size[9];
 
     int maxNB = magma_get_spotrf_nb(size[9]);
-    cudaMallocHost( (void**)&h_work,  maxNB*maxNB*sizeof(float) );
 
     /* Allocate host memory for the matrix */
     h_A = (float*)malloc(n2 * sizeof(h_A[0]));
@@ -99,15 +98,15 @@ int main( int argc, char** argv)
 	h_R[j] = (h_A[j]+=2000);
 
       cublasSetMatrix( N, N, sizeof(float), h_A, N, d_A, lda);
-      magma_spotrf_gpu('U', N, d_A, lda, h_work, info);
+      magma_spotrf_gpu('U', N, d_A, lda, info);
       cublasSetMatrix( N, N, sizeof(float), h_A, N, d_A, lda);
       
       /* ====================================================================
          Performs operation using MAGMA 
 	 =================================================================== */
       start = get_current_time();
-      magma_spotrf_gpu('L', N, d_A, lda, h_work, info);
-      //magma_spotrf_gpu('U', N, d_A, lda, h_work, info);
+      magma_spotrf_gpu('L', N, d_A, lda, info);
+      //magma_spotrf_gpu('U', N, d_A, lda, info);
       end = get_current_time();
     
       gpu_perf = 1.*N*N*N/(3.*1000000*GetTimerValue(start,end));
@@ -146,7 +145,6 @@ int main( int argc, char** argv)
 
     /* Memory clean up */
     free(h_A);
-    cublasFree(h_work);
     cublasFree(h_R);
     cublasFree(d_A);
 

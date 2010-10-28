@@ -12,7 +12,7 @@
 #include "magmablas.h"
 
 extern "C" int 
-magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *work, 
+magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, 
 		 int *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -60,10 +60,6 @@ magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *
             The leading dimension of the array A.  LDA >= max(1,N).
             To benefit from coalescent memory accesses LDA must be
             dividable by 16.
-
-    WORK    (workspace) REAL array, dimension at least (nb, nb)
-            where nb can be obtained through magma_get_spotrf_nb(*n)
-            Work array allocated with cudaMallocHost.
 
     INFO    (output) INTEGER   
             = 0:  successful exit   
@@ -118,6 +114,9 @@ magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *
     a -= a_offset;
 
     int nb = magma_get_spotrf_nb(*n);
+
+    float *work;
+    cudaMallocHost( (void**)&work,  nb*nb*sizeof(float) );
 
     if (nb <= 1 || nb >= *n) {
       /*  Use unblocked code. */
@@ -212,9 +211,11 @@ magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *
 
 	}
     }
+
+    cublasFree(work);
     return 0;
 
-/*     End of MAGMA_SPOTRF_GPU */
+    /* End of MAGMA_SPOTRF_GPU */
 
 } /* magma_spotrf_gpu */
 

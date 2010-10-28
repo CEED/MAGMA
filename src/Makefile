@@ -9,8 +9,6 @@
 include ../make.inc
 
     ALLOBJ = spotrf.o \
-             spotrf-v2.o \
-             spotrf-v3.o \
              spotrf_gpu.o \
              sgeqrf.o \
              sgeqrf_gpu.o \
