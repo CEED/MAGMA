@@ -69,9 +69,6 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
             this value as the first entry of the WORK array, and no error   
             message related to LWORK is issued.   
 
-    DWORK   (workspace)  REAL array on the GPU, dimension (M+N)*NB,
-            where NB can be obtained through magma_get_sgeqrf_nb(min(M,N)).
-
     INFO    (output) INTEGER   
             = 0:  successful exit   
             < 0:  if INFO = -i, the i-th argument had an illegal value   
@@ -105,7 +102,7 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
    int *lda = &lda_;
 
    int i, k, ldwork, lddwork, old_i, old_ib, rows;
-   int nbmin, nx, ib, ldda;
+   int nbmin, nx, ib;
 
    /* Function Body */
    *info = 0;
@@ -148,7 +145,6 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
      return 0;
    }
 
-   ldda = *m;
    nbmin = 2;
    nx = nb;
    ldwork = *m;
@@ -222,7 +218,7 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
    }
    return 0; 
   
-/*     End of MAGMA_SGEQRF */
+   /* End of MAGMA_SGEQRF */
 
 } /* magma_sgeqrf_ */
 
