@@ -20,7 +20,8 @@ extern "C" void
 magmablas_spermute_long2(float *, int, int *, int, int);
 
 extern "C" magma_int_t 
-magma_sgetrf_gpu(magma_int_t m, magma_int_t n, float *a, magma_int_t lda, magma_int_t *ipiv)
+magma_sgetrf_gpu(magma_int_t m, magma_int_t n, float *a, magma_int_t lda,
+		 magma_int_t *ipiv, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -78,21 +79,23 @@ magma_sgetrf_gpu(magma_int_t m, magma_int_t n, float *a, magma_int_t lda, magma_
 #define max(a,b)  (((a)>(b))?(a):(b))
 #define min(a,b)  (((a)<(b))?(a):(b))
 
-    int info;
     int iinfo, nb;
     int maxm, maxn, mindim;
     int i, rows, cols, s, ldda, lddwork;
     float *dAT, *dA, *work;
 
     /* Check arguments */
-    info = 0;
+    *info = 0;
     if (m < 0)
-	return  -1;
+	*info = -1;
     else if (n < 0)
-	return -2;
+	*info = -2;
     else if (lda < max(1,m))
-	return -4;
+	*info = -4;
     
+    if (*info != 0)
+      return 0;
+
     /* Quick return if possible */
     if (m == 0 || n == 0)
       return 0;
@@ -106,7 +109,7 @@ magma_sgetrf_gpu(magma_int_t m, magma_int_t n, float *a, magma_int_t lda, magma_
 	/* Use CPU code. */
 	work = (float*)malloc(maxm * n * sizeof(float));
 	cublasGetMatrix(m, n, sizeof(float), a, lda, work, maxm);
-	sgetrf_(&m, &n, work, &maxm, ipiv, &info);
+	sgetrf_(&m, &n, work, &maxm, ipiv, info);
 	cublasSetMatrix(m, n, sizeof(float), work, maxm, a, lda);
 	free(work);
     } 
@@ -159,8 +162,8 @@ magma_sgetrf_gpu(magma_int_t m, magma_int_t n, float *a, magma_int_t lda, magma_
 	    // do the cpu part
 	    rows = m - i*nb;
 	    sgetrf_( &rows, &nb, work, &lddwork, ipiv+i*nb, &iinfo);
-	    if ( (info == 0) && (iinfo > 0) )
-		info = iinfo + i*nb;
+	    if ( (*info == 0) && (iinfo > 0) )
+		*info = iinfo + i*nb;
 	    
 	    magmablas_spermute_long2( dAT, ldda, ipiv, nb, i*nb );
 
@@ -196,8 +199,8 @@ magma_sgetrf_gpu(magma_int_t m, magma_int_t n, float *a, magma_int_t lda, magma_
 	
 	// do the cpu part
 	sgetrf_( &rows, &nb0, work, &lddwork, ipiv+s*nb, &iinfo);
-	if ( (info == 0) && (iinfo > 0) )
-	    info = iinfo + s*nb;
+	if ( (*info == 0) && (iinfo > 0) )
+	    *info = iinfo + s*nb;
 	magmablas_spermute_long2( dAT, ldda, ipiv, nb0, s*nb );
 
 	// upload i-th panel

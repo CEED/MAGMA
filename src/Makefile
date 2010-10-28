@@ -23,6 +23,7 @@ include ../make.inc
              slahr2.o \
              sgeqlf.o \
              sgelqf.o \
+             \
              sdgetrs_gpu.o \
              \
              auxiliary.o \

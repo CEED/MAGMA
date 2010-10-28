@@ -17,11 +17,6 @@ sdlaswp_kernel(int n, double *a, int lda, float *sa, int m, int *ipiv)
   int ind = blockIdx.x*num_threads + threadIdx.x, newind;
   float res;
 
-  /*
-  if (ind < m)
-    ind -= num_threads;
-  */
-
   if (ind < m) {
     sa   += ind;
     ipiv += ind;

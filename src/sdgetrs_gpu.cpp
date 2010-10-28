@@ -90,12 +90,12 @@ magma_sdgetrs_gpu(int *n, int *nrhs, float *a, int *lda,
 
   /* Solve L*X = B, overwriting B with X. */
   float fone = 1.;
-  magmablas_strsm('L','L','N','U', *n, *nrhs, fone, a, *lda, x, *ldb);
+  cublasStrsm('L','L','N','U', *n, *nrhs, fone, a, *lda, x, *ldb);
 
   /* Solve U*X = B, overwriting B with X. */
-  magmablas_strsm('L','U','N','N', *n, *nrhs, fone, a, *lda, x, *ldb);
+  cublasStrsm('L','U','N','N', *n, *nrhs, fone, a, *lda, x, *ldb);
 
   return 0;
-  /*     End of MAGMA_SDGETRS */
+  /* End of MAGMA_SDGETRS */
 
 } /* magma_sdgetrs */
