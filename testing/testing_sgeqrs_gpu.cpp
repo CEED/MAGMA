@@ -157,7 +157,7 @@ int main( int argc, char** argv)
 	  r[j+k*M] = b[j+k*M] = rand() / (float)RAND_MAX;
 
       cublasSetMatrix( M, N, sizeof(float), h_A, M, d_A, lda);
-      magma_sgeqrf_gpu( M, N, d_A, lda, tau, h_work, &lwork, info);
+      magma_sgeqrf_gpu( M, N, d_A, lda, tau, info);
       cublasSetMatrix( M, N, sizeof(float), h_A, M, d_A, lda);
       cublasSetMatrix( M, nrhs, sizeof(float), b, M, d_b, M);
 
@@ -165,7 +165,7 @@ int main( int argc, char** argv)
          Performs operation using MAGMA
 	 =================================================================== */
       start = get_current_time();
-      magma_sgeqrf_gpu2( M, N, d_A, lda, tau, h_work, &lwork, d_work, info);
+      magma_sgeqrf_gpu2( M, N, d_A, lda, tau, d_work, info);
       
       // Solve the least-squares problem min || A * X - B || 
       magma_sgeqrs_gpu( M, N, nrhs, d_A, lda, tau, 

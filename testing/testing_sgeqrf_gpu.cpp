@@ -125,14 +125,14 @@ int main( int argc, char** argv)
 	h_A[j] = rand() / (float)RAND_MAX;
 
       cublasSetMatrix( M, N, sizeof(float), h_A, M, d_A, lda);
-      magma_sgeqrf_gpu( M, N, d_A, lda, tau, h_work, &lwork, info);
+      magma_sgeqrf_gpu( M, N, d_A, lda, tau, info);
       cublasSetMatrix( M, N, sizeof(float), h_A, M, d_A, lda);
 
       /* ====================================================================
          Performs operation using MAGMA
 	 =================================================================== */
       start = get_current_time();
-      magma_sgeqrf_gpu( M, N, d_A, lda, tau, h_work, &lwork, info);
+      magma_sgeqrf_gpu( M, N, d_A, lda, tau, info);
       end = get_current_time();
     
       gpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));

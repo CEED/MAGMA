@@ -83,11 +83,9 @@ magma_int_t magma_zormqr_gpu(char side, char trans,
 			     float *work, magma_int_t *lwork, float *td, 
 			     magma_int_t nb, magma_int_t *info);
 magma_int_t magma_zgeqrf_gpu( magma_int_t m, magma_int_t n, double2 *A, 
-			      magma_int_t lda, double2 *tau, double2 *work, 
-			      magma_int_t *lwork, magma_int_t *info);
+			      magma_int_t lda, double2 *tau, magma_int_t *info);
 magma_int_t magma_zgeqrf_gpu2(magma_int_t m, magma_int_t n, double2 *A, 
-			      magma_int_t lda, double2 *tau, double2 *work, 
-			      magma_int_t *lwork, double2 *dwork, 
+			      magma_int_t lda, double2 *tau, double2 *dwork, 
 			      magma_int_t *info);
 magma_int_t magma_zgeqrs_gpu( magma_int_t m, magma_int_t n, magma_int_t nrhs, 
 			      double2 *A, magma_int_t lda, double2 *tau,

@@ -13,7 +13,7 @@
 
 extern "C" magma_int_t
 magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  
-		 float  *tau, float *work, magma_int_t *lwork, magma_int_t *info)
+		 float  *tau, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -54,21 +54,6 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
             The scalar factors of the elementary reflectors (see Further   
             Details).   
 
-    WORK    (workspace/output) REAL array, dimension (MAX(1,LWORK))   
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
-
-            Higher performance is achieved if A is in pinned memory, e.g.
-            allocated using cudaMallocHost.
-
-    LWORK   (input) INTEGER   
-            The dimension of the array WORK.  LWORK >= (M+N)*NB,   
-            where NB can be obtained through magma_get_sgeqrf_nb(M).
-
-            If LWORK = -1, then a workspace query is assumed; the routine   
-            only calculates the optimal size of the WORK array, returns   
-            this value as the first entry of the WORK array, and no error   
-            message related to LWORK is issued.   
-
     INFO    (output) INTEGER   
             = 0:  successful exit   
             < 0:  if INFO = -i, the i-th argument had an illegal value   
@@ -108,30 +93,22 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
    *info = 0;
    int nb = magma_get_sgeqrf_nb(*m);
    
-   int lwkopt = (*n+*m) * nb;
-   work[0] = (float) lwkopt;
-   long int lquery = *lwork == -1;
    if (*m < 0) {
      *info = -1;
    } else if (*n < 0) {
      *info = -2;
    } else if (*lda < max(1,*m)) {
      *info = -4;
-   } else if (*lwork < max(1,*n) && ! lquery) {
-     *info = -7;
    }
    if (*info != 0)
      return 0;
-   else if (lquery)
-     return 0;
 
    k = min(*m,*n);
-   if (k == 0) {
-     work[0] = 1.f;
+   if (k == 0) 
      return 0;
-   }
-
-   int lhwork = *lwork - (*m)*nb;
+   
+   int lwork  = (*m+*n) * nb;
+   int lhwork = lwork - (*m)*nb;
 
    static cudaStream_t stream[2];
    cudaStreamCreate(&stream[0]);
@@ -144,6 +121,9 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
      *info = -9;
      return 0;
    }
+
+   float *work;
+   cudaMallocHost((void**)&work, lwork*sizeof(float));
 
    nbmin = 2;
    nx = nb;
@@ -211,11 +191,13 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
       rows = *m-i;
       cublasGetMatrix(rows, ib, sizeof(float),
                       a_ref(i,i), *lda, work, rows);
-      lhwork = *lwork - rows*ib;
+      lhwork = lwork - rows*ib;
       sgeqrf_(&rows, &ib, work, &rows, tau+i, work+ib*rows, &lhwork, info);
       cublasSetMatrix(rows, ib, sizeof(float),
                       work, rows, a_ref(i,i), *lda);
    }
+   cublasFree(work);
+
    return 0; 
   
    /* End of MAGMA_SGEQRF */
