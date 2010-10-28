@@ -9,6 +9,8 @@
 #ifndef _MAGMABLAS_
 #define _MAGMABLAS_
 
+typedef int magma_int_t;
+
 #include "cublas.h"
 #include "cuda.h"
 

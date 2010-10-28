@@ -9,10 +9,13 @@
 #ifndef _MAGMA_
 #define _MAGMA_
 
+/* 
+ * MAGMA Blas Functions 
+ */ 
+#include "magmablas.h"
+
 #include "auxiliary.h"
 #include "magma_lapack.h"
-
-typedef int magma_int_t;
 
 /*
  * MAGMA functions
@@ -23,11 +26,6 @@ typedef int magma_int_t;
 #include "magma_s.h"
 #include "magma_zc.h"
 #include "magma_ds.h"
-
-/* 
- * MAGMA Blas Functions 
- */ 
-#include "magmablas.h"
 
 #ifdef __cplusplus
 extern "C" {
