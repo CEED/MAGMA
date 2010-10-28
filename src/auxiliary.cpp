@@ -10,6 +10,8 @@
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
+#include <inttypes.h>
+
 #include "magma.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -57,7 +59,7 @@ void printout_devices( )
   for( int idevice = 0; idevice < ndevices; idevice++ )
     {
       char name[200];
-      unsigned int totalMem;
+      size_t totalMem;
       int clock;
       CUdevice dev;
 
