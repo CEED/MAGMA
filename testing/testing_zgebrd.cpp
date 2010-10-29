@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 // includes, system
@@ -18,15 +21,15 @@
 #include "cublas.h"
 #include "magma.h"
 
-extern "C" int sorgbr_(char *, int *, int *, int *, float *a, int *,
-		       float *, float *, int *, int *); 
-extern "C" int sbdt01_(int *, int *, int *, float *, int *, float *, int *, 
-		       float *, float *, float *, int *, float *, float *);
-extern "C" int sort01_(char *, int *, int *, float *, int *, 
-		       float *, int *, float *);
+extern "C" int sorgbr_(char *, int *, int *, int *, double2 *a, int *,
+		       double2 *, double2 *, int *, int *); 
+extern "C" int sbdt01_(int *, int *, int *, double2 *, int *, double2 *, int *, 
+		       double2 *, double2 *, double2 *, int *, double2 *, double2 *);
+extern "C" int sort01_(char *, int *, int *, double2 *, int *, 
+		       double2 *, int *, double2 *);
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing sgebrd
+   -- Testing zgebrd
 */
 int main( int argc, char** argv) 
 {
@@ -34,10 +37,10 @@ int main( int argc, char** argv)
     cublasInit( );
     printout_devices( );
 
-    float *h_A, *h_R, *h_work;
-    float *taup, *tauq, *diag, *offdiag, *diag2, *offdiag2;
-    float *d_A;
-    float gpu_perf, cpu_perf;
+    double2 *h_A, *h_R, *h_work;
+    double2 *taup, *tauq, *diag, *offdiag, *diag2, *offdiag2;
+    double2 *d_A;
+    double2 gpu_perf, cpu_perf;
 
     TimeStruct start, end;
 
@@ -58,7 +61,7 @@ int main( int argc, char** argv)
     }
     else {
       printf("\nUsage: \n");
-      printf("  testing_sgebrd -N %d\n\n", 1024);
+      printf("  testing_zgebrd -N %d\n\n", 1024);
     }
 
     /* Initialize CUBLAS */
@@ -71,44 +74,44 @@ int main( int argc, char** argv)
     n2 = size[9] * size[9];
 
     /* Allocate host memory for the matrix */
-    h_A = (float*)malloc(n2 * sizeof(h_A[0]));
+    h_A = (double2*)malloc(n2 * sizeof(h_A[0]));
     if (h_A == 0) {
         fprintf (stderr, "!!!! host memory allocation error (A)\n");
     }
 
-    taup = (float*)malloc(size[9] * sizeof(float));
-    tauq = (float*)malloc(size[9] * sizeof(float));
+    taup = (double2*)malloc(size[9] * sizeof(double2));
+    tauq = (double2*)malloc(size[9] * sizeof(double2));
     if (taup == 0) {
       fprintf (stderr, "!!!! host memory allocation error (taup)\n");
     }
     
 
-    diag = (float*)malloc(size[9] * sizeof(float));
-    diag2= (float*)malloc(size[9] * sizeof(float));
+    diag = (double2*)malloc(size[9] * sizeof(double2));
+    diag2= (double2*)malloc(size[9] * sizeof(double2));
     if (diag == 0) {
       fprintf (stderr, "!!!! host memory allocation error (diag)\n");
     }
 
-    offdiag = (float*)malloc(size[9] * sizeof(float));
-    offdiag2= (float*)malloc(size[9] * sizeof(float));
+    offdiag = (double2*)malloc(size[9] * sizeof(double2));
+    offdiag2= (double2*)malloc(size[9] * sizeof(double2));
     if (offdiag == 0) {
       fprintf (stderr, "!!!! host memory allocation error (offdiag)\n");
     }
 
-    cudaMallocHost( (void**)&h_R,  n2*sizeof(float) );
+    cudaMallocHost( (void**)&h_R,  n2*sizeof(double2) );
     if (h_R == 0) {
         fprintf (stderr, "!!!! host memory allocation error (R)\n");
     }
 
-    int nb = magma_get_sgebrd_nb(size[9]);
+    int nb = magma_get_zgebrd_nb(size[9]);
     int lwork = 2*size[9]*nb;
-    status = cublasAlloc(n2+lwork, sizeof(float), (void**)&d_A);
+    status = cublasAlloc(n2+lwork, sizeof(double2), (void**)&d_A);
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
     }
 
-    cudaMallocHost( (void**)&h_work, (lwork)*sizeof(float) );
-    //h_work = (float*)malloc( nb *lwork * sizeof(float) );
+    cudaMallocHost( (void**)&h_work, (lwork)*sizeof(double2) );
+    //h_work = (double2*)malloc( nb *lwork * sizeof(double2) );
     if (h_work == 0) {
       fprintf (stderr, "!!!! host memory allocation error (work)\n");
     }
@@ -121,9 +124,9 @@ int main( int argc, char** argv)
       n2 = M*N;
 
       for(j = 0; j < n2; j++)
-	h_A[j] = rand() / (float)RAND_MAX;
+	h_A[j] = rand() / (double2)RAND_MAX;
       /*
-      magma_sgebrd(&M, &N, h_R, &N, diag, offdiag,
+      magma_zgebrd(&M, &N, h_R, &N, diag, offdiag,
 		   taup, tauq, h_work, &lwork, d_A, info);
       */
       for(j=0; j<n2; j++)
@@ -133,7 +136,7 @@ int main( int argc, char** argv)
          Performs operation using MAGMA
 	 =================================================================== */
       start = get_current_time();
-      magma_sgebrd( M, N, h_R, N, diag, offdiag, 
+      magma_zgebrd( M, N, h_R, N, diag, offdiag, 
 		   tauq, taup, h_work, &lwork, d_A, info);
       end = get_current_time();
     
@@ -144,13 +147,13 @@ int main( int argc, char** argv)
          Check the factorization
          =================================================================== */
       int lwork = nb * N * N;
-      float *PT      = (float*)malloc( N * N * sizeof(float));
-      float *work    = (float*)malloc( lwork * sizeof(float));
+      double2 *PT      = (double2*)malloc( N * N * sizeof(double2));
+      double2 *work    = (double2*)malloc( lwork * sizeof(double2));
 
-      float result[3] = {0., 0., 0.};
+      double2 result[3] = {0., 0., 0.};
       int test, one = 1;
       
-      slacpy_(" ", &N, &N, h_R, &N, PT, &N);
+      zlacpy_(" ", &N, &N, h_R, &N, PT, &N);
 
       // generate Q & P'
       sorgbr_("Q", &M, &M, &M, h_R, &N, tauq, work, &lwork, info);
@@ -177,12 +180,12 @@ int main( int argc, char** argv)
          Performs operation using LAPACK 
 	 =================================================================== */
       start = get_current_time();
-      sgebrd_(&M, &N, h_A, &N, diag2, offdiag2, tauq, taup,
+      zgebrd_(&M, &N, h_A, &N, diag2, offdiag2, tauq, taup,
       	      h_work, &lwork, info);
       end = get_current_time();
      
       if (info[0] < 0)  
-	printf("Argument %d of sgebrd had an illegal value.\n", -info[0]);
+	printf("Argument %d of zgebrd had an illegal value.\n", -info[0]);
   
       cpu_perf = (4.*M*N*N-4.*N*N*N/3.)/(1000000.*GetTimerValue(start,end));
       // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
