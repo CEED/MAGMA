@@ -59,7 +59,10 @@ $(LIBMAGMA): $(ALLOBJ)
 	$(RANLIB) $@
 
 clean:
-	rm -f *.o *~ $(LIBMAGMA)
+	rm -f *.o *~ 
+
+cleanall:
+	rm -f $(LIBMAGMA)
 
 .cpp.o:
 	$(CC) $(OPTS) $(INC) -c $< -o $@

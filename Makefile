@@ -23,11 +23,17 @@ test:
 	( cd testing/lin && $(MAKE) )
 	( cd testing     && $(MAKE) )
 
-cleanall:
+clean:
 	( cd src         && $(MAKE) clean )
 	( cd testing     && $(MAKE) clean )
 	( cd testing/lin && $(MAKE) clean )
-#	( cd magmablas   && $(MAKE) clean ) 
+	( cd magmablas   && $(MAKE) clean ) 
+
+cleanall:
+	( cd src         && $(MAKE) cleanall )
+	( cd testing     && $(MAKE) cleanall )
+	( cd testing/lin && $(MAKE) cleanall )
+	( cd magmablas   && $(MAKE) cleanall ) 
 	( cd lib && rm -f *.a )
 
 include ./Makefile.gen

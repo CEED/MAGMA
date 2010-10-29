@@ -41,6 +41,9 @@ $(EXE): $(ALLOBJ)
 clean:
 	rm -f $(OBJ) $(EXE) *.o *~
 
+cleanall: clean
+	rm -f $(EXE)
+
 .cpp.o:
 	$(CC) $(OPTS) $(INC) -c $< -o $@
 

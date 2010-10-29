@@ -29,7 +29,10 @@ $(LIBMAGMABLAS): $(ALLOBJ)
 	$(RANLIB) $@
 
 clean:
-	rm -f *.cu_o *~ *.a *.linkinfo ../lib/libmagmablas.a
+	rm -f *.cu_o *~ *.a *.linkinfo 
+
+cleanall: clean
+	rm -f ../lib/libmagmablas.a
 
 %.cu_o: %.cu
 	$(NVCC) $(NVOPTS) -gencode arch=compute_13,code=compute_13 -gencode arch=compute_10,code=compute_10 $(INC) -c $< -o $@

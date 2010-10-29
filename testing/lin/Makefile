@@ -45,6 +45,9 @@ liblapacktest.a: $(OBJ)
 clean:
 	rm -f $(OBJ) liblapacktest.a *~
 
+cleanall: clean
+	rm -f liblapacktest.a
+
 .f.o:
 	$(FORT) $(OPTS) $(INC) -c $< -o $@
 
