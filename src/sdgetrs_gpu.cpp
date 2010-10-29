@@ -12,9 +12,9 @@
 #include "magma.h"
 #include "magmablas.h"
 
-extern "C" int 
-magma_sdgetrs_gpu(int *n, int *nrhs, float *a, int *lda, 
-		  int *ipiv, float *x, double *b, int *ldb, int *info)
+extern "C" magma_int_t 
+magma_sdgetrs_gpu(magma_int_t n_, magma_int_t nrhs_, float *a, magma_int_t lda_, 
+		  magma_int_t *ipiv, float *x, double *b, magma_int_t ldb_, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -66,6 +66,8 @@ magma_sdgetrs_gpu(int *n, int *nrhs, float *a, int *lda,
             < 0:  if INFO = -i, the i-th argument had an illegal value   
 
     =====================================================================    */
+
+  magma_int_t *n = &n_, *nrhs = &nrhs_, *lda = &lda_, *ldb = &ldb_;
 
   *info = 0;
   if (*n < 0) {

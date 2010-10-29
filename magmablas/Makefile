@@ -16,6 +16,9 @@
              \
              sauxiliary.cu \
              \
+             dlag2s.cu \
+             slag2d.cu \
+             dgemv_MLU.cu \
 
     ALLOBJ = $(ALLSRC:.cu=.cu_o) 
 

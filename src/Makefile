@@ -33,6 +33,7 @@ ALLSRC= $(SSRC)	\
         sgelqf.o \
         \
         sdgetrs_gpu.o \
+        dsgesv_gpu.o \
         \
         auxiliary.o \
         \

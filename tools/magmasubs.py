@@ -44,6 +44,7 @@ subs = {
     ('MAGMA_ZC','MAGMA_DS'),
     ('MAGMABLAS_ZC','MAGMABLAS_DS'),
     ('magma_z','magma_d'),
+    ('magma_czgetrs','magma_sdgetrs'),
     ('magma_c','magma_s'),
     ('magmablas_z','magmablas_d'),
     ('magmablas_c','magmablas_s'),
