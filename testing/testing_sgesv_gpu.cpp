@@ -1,6 +1,6 @@
 /**
  *
- * @precisions normal z -> c d s
+ * @generated s
  *
  **/
 #include <stdio.h>
@@ -13,16 +13,16 @@
 #include "cublas.h"
 #include "magma.h"
 
-#define COMPLEX
-#undef REAL
+#define REAL
+#undef COMPLEX
 
-static int init_matrix(double2 *A, int size, int elem_size){
+static int init_matrix(float *A, int size, int elem_size){
   int j ; 
   
   for(j = 0; j < size; j++) {
-    A[j] = ( rand() / (double)RAND_MAX );
+    A[j] = ( rand() / (float)RAND_MAX );
 #if defined(COMPLEX)
-    A[j] += I*( rand() / (double)RAND_MAX );
+    A[j] += I*( rand() / (float)RAND_MAX );
 #endif
   }
 
@@ -58,7 +58,7 @@ int main(int argc , char **argv)
     }
 
     printf("\nUsage: \n");
-    printf("  testing_zgesv -nrhs %d -N %d\n\n", NRHS, 1024);
+    printf("  testing_sgesv -nrhs %d -N %d\n\n", NRHS, 1024);
 
     N = size[9];
     
@@ -77,45 +77,45 @@ int main(int argc , char **argv)
 
     LDB = LDX = LDA = N ;
     int status ;
-    double2 *d_A , * d_B , *d_X ; 
-    double2 *h_work_M_S;
+    float *d_A , * d_B , *d_X ; 
+    float *h_work_M_S;
     int *IPIV ;
-    double2 *A , *B, *X; 
+    float *A , *B, *X; 
  
     status = cublasAlloc((N+32)*(N+32) + 32*maxnb + lwork+2*maxnb*maxnb, 
-			 sizeof(double2), (void**)&d_A ) ;
+			 sizeof(float), (void**)&d_A ) ;
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
       exit(1);
     }
-    status = cublasAlloc(LDB*NRHS, sizeof(double2), (void**)&d_B ) ;
+    status = cublasAlloc(LDB*NRHS, sizeof(float), (void**)&d_B ) ;
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (d_B)\n");
       exit(1);
     }
-    status = cublasAlloc(LDB*NRHS, sizeof(double2), (void**)&d_X ) ;
+    status = cublasAlloc(LDB*NRHS, sizeof(float), (void**)&d_X ) ;
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (d_X)\n");
       exit(1);
     }
 
-    status = cudaMallocHost( (void**)&h_work_M_S, (lwork+32*maxnb)*sizeof(double2) );
+    status = cudaMallocHost( (void**)&h_work_M_S, (lwork+32*maxnb)*sizeof(float) );
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (h_work_M_S)\n");
       exit(1);
     }
     
-    A = ( double2 *) malloc ( sizeof(double2) * LDA*N);
+    A = ( float *) malloc ( sizeof(float) * LDA*N);
     if( A == NULL ) {
       printf("Allocation Error\n");
       exit(1);
     }	    	
-    B = ( double2 *) malloc ( sizeof(double2) * LDB*NRHS);
+    B = ( float *) malloc ( sizeof(float) * LDB*NRHS);
     if( B == NULL ){
       printf("Allocation Error\n");
       exit(1);
     }	    	
-    X = ( double2 *) malloc ( sizeof(double2) *LDB*NRHS);
+    X = ( float *) malloc ( sizeof(float) *LDB*NRHS);
     if( X == NULL ) {
       printf("Allocation Error\n");
       exit(1);
@@ -134,39 +134,39 @@ int main(int argc , char **argv)
       int dlda = (N/32)*32;
       if (dlda<N) dlda+=32;
 
-      init_matrix(A, LDA*N,    sizeof(double2));
-      init_matrix(B, LDB*NRHS, sizeof(double2));
+      init_matrix(A, LDA*N,    sizeof(float));
+      init_matrix(B, LDB*NRHS, sizeof(float));
       
-      double perf;
+      float perf;
       
       printf("%5d  %4d",N, NRHS); 
       
-      cublasSetMatrix( N, N,    sizeof( double2 ), A, N, d_A, dlda ) ;
-      cublasSetMatrix( N, NRHS, sizeof( double2 ), B, N, d_B, N    ) ;
+      cublasSetMatrix( N, N,    sizeof( float ), A, N, d_A, dlda ) ;
+      cublasSetMatrix( N, NRHS, sizeof( float ), B, N, d_B, N    ) ;
 
       //=====================================================================
       // Solve Ax = b through an LU factorization
       //=====================================================================
       start = get_current_time();
-      magma_zgetrf_gpu( N, N, d_A, dlda, IPIV, &info);
-      magma_zgetrs_gpu('N', N, NRHS, d_A, dlda, IPIV, d_B, LDB, &info, h_work_M_S);
+      magma_sgetrf_gpu( N, N, d_A, dlda, IPIV, &info);
+      magma_sgetrs_gpu('N', N, NRHS, d_A, dlda, IPIV, d_B, LDB, &info, h_work_M_S);
       end = get_current_time();
       perf = (2.*N*N*N/3.+2.*NRHS*N*N)/(1000000*GetTimerValue(start,end));
       printf("             %6.2f", perf);
-      cublasGetMatrix( N, NRHS, sizeof( double2 ), d_B , LDB, X ,LDX) ;
+      cublasGetMatrix( N, NRHS, sizeof( float ), d_B , LDB, X ,LDX) ;
       
       //=====================================================================
       // ERROR
       //=====================================================================
-      double Rnorm, Anorm, Bnorm;   
-      double *worke = (double *)malloc(N*sizeof(double));
+      float Rnorm, Anorm, Bnorm;   
+      float *worke = (float *)malloc(N*sizeof(float));
 
-      Anorm = zlange_("I", &N, &N, A, &LDA, worke);
-      Bnorm = zlange_("I", &N, &NRHS, B, &LDB, worke);
+      Anorm = slange_("I", &N, &N, A, &LDA, worke);
+      Bnorm = slange_("I", &N, &NRHS, B, &LDB, worke);
 
-      double2 ONE = -1.0 , NEGONE = 1.0 ;
-      zgemm_( "N", "N", &N, &NRHS, &N, &NEGONE, A, &LDA, X, &LDX, &ONE, B, &N);
-      Rnorm=zlange_("I", &N, &NRHS, B, &LDB, worke); 
+      float ONE = -1.0 , NEGONE = 1.0 ;
+      sgemm_( "N", "N", &N, &NRHS, &N, &NEGONE, A, &LDA, X, &LDX, &ONE, B, &N);
+      Rnorm=slange_("I", &N, &NRHS, B, &LDB, worke); 
       free(worke);
       
       printf("        %e\n", Rnorm/(Anorm*Bnorm));
