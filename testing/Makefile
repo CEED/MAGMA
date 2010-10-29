@@ -9,15 +9,16 @@
 MAGMA_DIR = ..
 include ../Makefile.internal
 
-ZSRC  = testing_zgesv_gpu.cpp
+ZSRC  = testing_zgesv_gpu.cpp	\
+	testing_zpotrf.cpp	\
+        testing_zpotrf_gpu.cpp 	\
+
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
 SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 
 #ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 ALLSRC= $(SSRC)	\
-	testing_spotrf.cpp \
-        testing_spotrf_gpu.cpp \
         testing_sgeqrf.cpp \
         testing_sgeqrf_gpu.cpp \
         testing_sgeqrs_gpu.cpp \

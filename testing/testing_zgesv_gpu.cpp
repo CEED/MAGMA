@@ -1,4 +1,9 @@
-/**
+/*
+ *  -- MAGMA (version 1.0) --
+ *     Univ. of Tennessee, Knoxville
+ *     Univ. of California, Berkeley
+ *     Univ. of Colorado, Denver
+ *     November 2010
  *
  * @precisions normal z -> c d s
  *

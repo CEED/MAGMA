@@ -1,11 +1,13 @@
 /*
-    -- MAGMA (version 1.0) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       November 2010
-*/
-
+ *  -- MAGMA (version 1.0) --
+ *     Univ. of Tennessee, Knoxville
+ *     Univ. of California, Berkeley
+ *     Univ. of Colorado, Denver
+ *     November 2010
+ *
+ * @precisions normal z -> c d s
+ *
+ **/
 // includes, system
 #include <stdlib.h>
 #include <stdio.h>
@@ -20,7 +22,7 @@
 #include "magmablas.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing spotrf
+   -- Testing zpotrf
 */
 int main( int argc, char** argv) 
 {
@@ -28,9 +30,9 @@ int main( int argc, char** argv)
     cublasInit( );
     printout_devices( );
 
-    float *h_A, *h_R;
-    float *d_A;
-    float gpu_perf, cpu_perf;
+    double2 *h_A, *h_R;
+    double2 *d_A;
+    double2 gpu_perf, cpu_perf;
 
     TimeStruct start, end;
 
@@ -51,7 +53,7 @@ int main( int argc, char** argv)
     }
     else {
       printf("\nUsage: \n");
-      printf("  testing_spotrf_gpu -N %d\n\n", 1024);
+      printf("  testing_zpotrf_gpu -N %d\n\n", 1024);
     }
 
     /* Initialize CUBLAS */
@@ -63,20 +65,20 @@ int main( int argc, char** argv)
     lda = N;
     n2 = size[9] * size[9];
 
-    int maxNB = magma_get_spotrf_nb(size[9]);
+    int maxNB = magma_get_zpotrf_nb(size[9]);
 
     /* Allocate host memory for the matrix */
-    h_A = (float*)malloc(n2 * sizeof(h_A[0]));
+    h_A = (double2*)malloc(n2 * sizeof(h_A[0]));
     if (h_A == 0) {
         fprintf (stderr, "!!!! host memory allocation error (A)\n");
     }
-    //h_R = (float*)malloc(n2 * sizeof(h_R[0]));
-    cudaMallocHost( (void**)&h_R,  n2*sizeof(float) );
+    //h_R = (double2*)malloc(n2 * sizeof(h_R[0]));
+    cudaMallocHost( (void**)&h_R,  n2*sizeof(double2) );
     if (h_R == 0) {
         fprintf (stderr, "!!!! host memory allocation error (R)\n");
     }
 
-    status = cublasAlloc(n2+32*size[9], sizeof(float), (void**)&d_A);
+    status = cublasAlloc(n2+32*size[9], sizeof(double2), (void**)&d_A);
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
     }
@@ -93,20 +95,20 @@ int main( int argc, char** argv)
       if (lda<N) lda+=32;
 
       for(j = 0; j < n2; j++)
-	h_A[j] = rand() / (float)RAND_MAX;
+	h_A[j] = rand() / (double2)RAND_MAX;
       for(j=0; j<n2; j+=(N+1))
 	h_R[j] = (h_A[j]+=2000);
 
-      cublasSetMatrix( N, N, sizeof(float), h_A, N, d_A, lda);
-      magma_spotrf_gpu('U', N, d_A, lda, info);
-      cublasSetMatrix( N, N, sizeof(float), h_A, N, d_A, lda);
+      cublasSetMatrix( N, N, sizeof(double2), h_A, N, d_A, lda);
+      magma_zpotrf_gpu('U', N, d_A, lda, info);
+      cublasSetMatrix( N, N, sizeof(double2), h_A, N, d_A, lda);
       
       /* ====================================================================
          Performs operation using MAGMA 
 	 =================================================================== */
       start = get_current_time();
-      magma_spotrf_gpu('L', N, d_A, lda, info);
-      //magma_spotrf_gpu('U', N, d_A, lda, info);
+      magma_zpotrf_gpu('L', N, d_A, lda, info);
+      //magma_zpotrf_gpu('U', N, d_A, lda, info);
       end = get_current_time();
     
       gpu_perf = 1.*N*N*N/(3.*1000000*GetTimerValue(start,end));
@@ -117,11 +119,11 @@ int main( int argc, char** argv)
          Performs operation using LAPACK 
 	 =================================================================== */
       start = get_current_time();
-      spotrf_("L", &N, h_A, &N, info);
-      //spotrf_("U", &N, h_A, &N, info);
+      zpotrf_("L", &N, h_A, &N, info);
+      //zpotrf_("U", &N, h_A, &N, info);
       end = get_current_time();
       if (info[0] < 0)  
-	printf("Argument %d of spotrf had an illegal value.\n", -info[0]);     
+	printf("Argument %d of zpotrf had an illegal value.\n", -info[0]);     
   
       cpu_perf = 1.*N*N*N/(3.*1000000*GetTimerValue(start,end));
       // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
@@ -130,14 +132,14 @@ int main( int argc, char** argv)
       /* =====================================================================
          Check the result compared to LAPACK
          =================================================================== */
-      cublasGetMatrix( N, N, sizeof(float), d_A, lda, h_R, N);
-      float work[1], matnorm, mone = -1.0;
+      cublasGetMatrix( N, N, sizeof(double2), d_A, lda, h_R, N);
+      double2 work[1], matnorm, mone = -1.0;
       int one = 1;
-      matnorm = slange_("f", &N, &N, h_A, &N, work);
-      saxpy_(&n2, &mone, h_A, &one, h_R, &one);
+      matnorm = zlange_("f", &N, &N, h_A, &N, work);
+      zaxpy_(&n2, &mone, h_A, &one, h_R, &one);
       printf("%5d    %6.2f         %6.2f        %e\n", 
 	     size[i], cpu_perf, gpu_perf,
-	     slange_("f", &N, &N, h_R, &N, work) / matnorm);
+	     zlange_("f", &N, &N, h_R, &N, work) / matnorm);
 
       if (argc != 1)
 	break;
