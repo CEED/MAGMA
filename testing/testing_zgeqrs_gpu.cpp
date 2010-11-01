@@ -186,7 +186,7 @@ int main( int argc, char** argv)
 
       // compute the residual
       if (nrhs == 1)
-	sgemv_("n", &M, &N, &mone, h_A, &M, x, &one, &fone, r, &one);
+	zgemv_("n", &M, &N, &mone, h_A, &M, x, &one, &fone, r, &one);
       else
 	zgemm_("n","n", &M, &nrhs, &N, &mone, h_A, &M, x, &N, &fone, r, &M);
       matnorm = zlange_("f", &M, &N, h_A, &M, work);
@@ -217,7 +217,7 @@ int main( int argc, char** argv)
 						 GetTimerValue(start,end));
 
       if (nrhs == 1)
-        sgemv_("n", &M, &N, &mone, h_A, &M, x, &one, &fone, b, &one);
+        zgemv_("n", &M, &N, &mone, h_A, &M, x, &one, &fone, b, &one);
       else
         zgemm_("n","n", &M, &nrhs, &N, &mone, h_A, &M, x, &M, &fone, b, &M);
 

@@ -72,6 +72,7 @@ subs = {
     ('ssymv','dsymv','csymv','zsymv'),
     ('sscal','dscal','cscal','zscal'),
     ('sdot','ddot','cdot','zdot'),
+    ('sbdt01','dbdt01','cbdt01','zbdt01'),
     ('saxpy','daxpy','caxpy','zaxpy'),
     ('ssymm','dsymm','chemm','zhemm'),
     ('SSYMM','DSYMM','CHEMM','ZHEMM'),

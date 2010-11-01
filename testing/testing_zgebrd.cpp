@@ -21,11 +21,11 @@
 #include "cublas.h"
 #include "magma.h"
 
-extern "C" int sorgbr_(char *, int *, int *, int *, double2 *a, int *,
+extern "C" int zungbr_(char *, int *, int *, int *, double2 *a, int *,
 		       double2 *, double2 *, int *, int *); 
-extern "C" int sbdt01_(int *, int *, int *, double2 *, int *, double2 *, int *, 
+extern "C" int zbdt01_(int *, int *, int *, double2 *, int *, double2 *, int *, 
 		       double2 *, double2 *, double2 *, int *, double2 *, double2 *);
-extern "C" int sort01_(char *, int *, int *, double2 *, int *, 
+extern "C" int zunt01_(char *, int *, int *, double2 *, int *, 
 		       double2 *, int *, double2 *);
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -156,17 +156,17 @@ int main( int argc, char** argv)
       zlacpy_(" ", &N, &N, h_R, &N, PT, &N);
 
       // generate Q & P'
-      sorgbr_("Q", &M, &M, &M, h_R, &N, tauq, work, &lwork, info);
+      zungbr_("Q", &M, &M, &M, h_R, &N, tauq, work, &lwork, info);
 
-      sorgbr_("P", &M, &M, &M,  PT, &N, taup, work, &lwork, info);
+      zungbr_("P", &M, &M, &M,  PT, &N, taup, work, &lwork, info);
 
       // Test 1:  Check the decomposition A := Q * B * PT
       //      2:  Check the orthogonality of Q
       //      3:  Check the orthogonality of PT
-      sbdt01_(&M, &N, &one, h_A, &M, h_R, &M, diag, offdiag, PT, &M,
+      zbdt01_(&M, &N, &one, h_A, &M, h_R, &M, diag, offdiag, PT, &M,
 	       work, &result[0]);
-      sort01_("Columns", &M, &M, h_R, &M, work, &lwork, &result[1]);
-      sort01_("Rows", &M, &N, PT, &M, work, &lwork, &result[2]);
+      zunt01_("Columns", &M, &M, h_R, &M, work, &lwork, &result[1]);
+      zunt01_("Rows", &M, &N, PT, &M, work, &lwork, &result[2]);
      
       //printf("N = %d\n", N);
       //printf("norm(A -  Q  B  PT) / ( N * norm(A) * EPS ) = %f\n", result[0]);

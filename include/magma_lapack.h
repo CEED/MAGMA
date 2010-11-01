@@ -117,6 +117,8 @@ int dgehrd_(int *, int *, int *, double *, int *,
 	    double *, double *, int *, int *);
 int dsytrd_(char *, int *, double *, int *, double *, double *,
 	    double *, double *, int *, int *);
+int dgebrd_(int *, int *, double *, int *, double *, double *, double *, 
+	    double *, double *, int *, int *);
 
 int dlarft_(char *, char *, int *, int *, double *, int *, double *,
 	    double *, int *);

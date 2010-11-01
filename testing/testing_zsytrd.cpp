@@ -45,7 +45,7 @@ int main( int argc, char** argv)
     TimeStruct start, end;
 
     /* Matrix size */
-    int N=0, n2, lda, ione = 1;
+    int N=0, n2, lda;
     int size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
     
     cublasStatus status;
@@ -185,7 +185,7 @@ int main( int argc, char** argv)
          Performs operation using LAPACK 
 	 =================================================================== */
       start = get_current_time();
-      ssytrd_("L", &N, h_A, &lda, diag2, offdiag2, tau2, h_work, &lwork, info);
+      zsytrd_("L", &N, h_A, &lda, diag2, offdiag2, tau2, h_work, &lwork, info);
       end = get_current_time();
      
       if (info[0] < 0)  
