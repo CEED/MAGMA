@@ -19,6 +19,11 @@
              dlag2s.cu \
              slag2d.cu \
              dgemv_MLU.cu \
+             \
+             sgemv_tesla.cu \
+             dgemv_tesla.cu \
+             gemv32_tesla.cu \
+             \
 
     ALLOBJ = $(ALLSRC:.cu=.cu_o) 
 
