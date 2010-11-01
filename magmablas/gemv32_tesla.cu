@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        November 2010
 */
-
+#include <stdio.h>
 #include "cublas.h"
 #include "magma.h"
 
@@ -328,6 +328,12 @@ magmablas_dgemv32_tesla(char tran, int m, int n, double alpha, double *A,
     =====================================================================  */
 
 	int blocks;
+
+	if ( n != 32 ) {
+	  fprintf(stderr, "magmablas_dgemv32_tesla: N has to be 32\n" );
+	  exit(-1);
+	}
+	  
 	if (m % 32==0)
 		blocks = m/32;
 	else
