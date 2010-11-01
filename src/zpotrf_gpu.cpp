@@ -142,7 +142,7 @@ magma_zpotrf_gpu(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_,
 		i__3 = nb, i__4 = *n - j + 1;
 		jb = min(i__3,i__4);
 		i__3 = j - 1;
-                cublasSherk('u', 't', jb, i__3, c_b13, a_ref(1,j),
+                cublasZherk('u', 't', jb, i__3, c_b13, a_ref(1,j),
                              *lda, c_b14, a_ref(j, j), *lda);
                 cudaMemcpy2DAsync(work, jb*sizeof(double2), a_ref(j,j), 
 				  (*lda) * sizeof(double2), 4*sizeof(double2), 
@@ -152,7 +152,7 @@ magma_zpotrf_gpu(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_,
                     /* Compute the current block row. */
 		    i__3 = *n - j - jb + 1;
 		    i__4 = j - 1;
-                    cublasSgemm('T', 'N', jb, i__3, i__4,
+                    cublasZgemm('T', 'N', jb, i__3, i__4,
                             c_b13, a_ref(1, j), *lda, a_ref(1, j + jb), *lda,
                             c_b14, a_ref(j, j + jb), *lda);
                  }
@@ -168,7 +168,7 @@ magma_zpotrf_gpu(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_,
 				   jb, cudaMemcpyHostToDevice,stream[0]);
 
                  if (j + jb <= *n)
-                    cublasStrsm('L', 'U', 'T', 'N', jb, i__3,
+                    cublasZtrsm('L', 'U', 'T', 'N', jb, i__3,
                            c_b14, a_ref(j, j), *lda, a_ref(j, j + jb),*lda);
 	    }
 	} else {
@@ -182,7 +182,7 @@ magma_zpotrf_gpu(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_,
 		i__3 = nb, i__4 = *n - j + 1;
 		jb = min(i__3,i__4);
 		i__3 = j - 1;
-                cublasSherk('l', 'n', jb, i__3, c_b13, a_ref(j,1), 
+                cublasZherk('l', 'n', jb, i__3, c_b13, a_ref(j,1), 
                              *lda, c_b14, a_ref(j, j), *lda);
                 cudaMemcpy2DAsync(work, jb*sizeof(double2), a_ref(j,j), 
 				  (*lda) * sizeof(double2), sizeof(double2)*jb, 
@@ -191,7 +191,7 @@ magma_zpotrf_gpu(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_,
                 if (j + jb <= *n) {
                     i__3 = *n - j - jb + 1;
                     i__4 = j - 1;
-                    cublasSgemm('N', 'T', i__3, jb, i__4,
+                    cublasZgemm('N', 'T', i__3, jb, i__4,
                             c_b13, a_ref(j + jb, 1), *lda, a_ref(j, 1), *lda,
                             c_b14, a_ref(j + jb, j), *lda);
                 }
@@ -207,7 +207,7 @@ magma_zpotrf_gpu(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_,
 				  jb, cudaMemcpyHostToDevice,stream[0]);
 	        
 		if (j + jb <= *n)
-		  cublasStrsm('R', 'L', 'T', 'N', i__3, jb, c_b14, 
+		  cublasZtrsm('R', 'L', 'T', 'N', i__3, jb, c_b14, 
 		  //magmablas_ztrsm('R', 'L', 'T', 'N', i__3, jb, c_b14,
 				  a_ref(j, j), *lda, a_ref(j + jb, j),*lda);
 	    }

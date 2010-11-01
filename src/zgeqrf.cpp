@@ -190,10 +190,10 @@ magma_zgeqrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
 	   H = H(i) H(i+1) . . . H(i+ib-1) */
 	zlarft_("F", "C", &rows, &ib, a_ref(i,i), lda, tau+i,
 		work, &ib);
-	spanel_to_q('U', ib, a_ref(i,i), *lda, work+ib*ib); 
+	zpanel_to_q('U', ib, a_ref(i,i), *lda, work+ib*ib); 
 	cublasSetMatrix(rows, ib, sizeof(double2), 
 			a_ref(i,i), *lda, da_ref(i,i), ldda);
-	sq_to_panel('U', ib, a_ref(i,i), *lda, work+ib*ib);
+	zq_to_panel('U', ib, a_ref(i,i), *lda, work+ib*ib);
 
 	if (i + ib < *n) {
 	  cublasSetMatrix(ib, ib, sizeof(double2), work, ib, dwork, lddwork);

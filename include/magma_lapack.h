@@ -120,6 +120,8 @@ int dsytrd_(char *, int *, double *, int *, double *, double *,
 
 int dlarft_(char *, char *, int *, int *, double *, int *, double *,
 	    double *, int *);
+int dlarfb_(char *, char *, char *, char *, int *, int *, int *, double *, 
+	    int *, double *, int *, double *, int *, double *, int *);
 int dlaset_(char *,int *,int *,double *,double *,double *a,int *);
 double dlamch_(char *);
 double dlansy_(char *, char *, int *, double *, int *, double *);

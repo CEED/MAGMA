@@ -160,10 +160,10 @@ magma_zgeqrf_gpu(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t  lda_,
 	/* Form the triangular factor of the block reflector
 	   H = H(i) H(i+1) . . . H(i+ib-1) */
 	zlarft_("F", "C", &rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &ib);
-	spanel_to_q('U', ib, work_ref(i), ldwork, hwork+ib*ib); 
+	zpanel_to_q('U', ib, work_ref(i), ldwork, hwork+ib*ib); 
 	cublasSetMatrix(rows, ib, sizeof(double2), 
 			work_ref(i), ldwork, a_ref(i,i), *lda);
-        sq_to_panel('U', ib, work_ref(i), ldwork, hwork+ib*ib);
+        zq_to_panel('U', ib, work_ref(i), ldwork, hwork+ib*ib);
 
 	if (i + ib < *n) {
 	  cublasSetMatrix(ib, ib, sizeof(double2), hwork, ib, dwork, lddwork);

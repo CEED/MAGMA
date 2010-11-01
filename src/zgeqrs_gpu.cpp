@@ -152,10 +152,10 @@ magma_zgeqrs_gpu(magma_int_t m_, magma_int_t n_, magma_int_t nrhs_,
    
    // update c
    if (*nrhs == 1)
-     cublasSgemv('n', i, ib, -1.f, a_ref(0, i), *lda,
+     cublasZgemv('n', i, ib, -1.f, a_ref(0, i), *lda,
 		 dwork + i, 1, 1.f, c, 1);
    else
-     cublasSgemm('n', 'n', i, *nrhs, ib, -1.f, a_ref(0, i), *lda,
+     cublasZgemm('n', 'n', i, *nrhs, ib, -1.f, a_ref(0, i), *lda,
 		 dwork + i, *ldc, 1.f, c, *ldc);
 
    int start = i-nb;
@@ -167,16 +167,16 @@ magma_zgeqrs_gpu(magma_int_t m_, magma_int_t n_, magma_int_t nrhs_,
        if (i + ib < *n) {
 	 if (*nrhs == 1)
 	   {
-	     cublasSgemv('n', ib, ib, 1.f, d_ref(i), ib,
+	     cublasZgemv('n', ib, ib, 1.f, d_ref(i), ib,
 			 c+i, 1, 0.f, dwork + i, 1);
-	     cublasSgemv('n', i, ib, -1.f, a_ref(0, i), *lda,
+	     cublasZgemv('n', i, ib, -1.f, a_ref(0, i), *lda,
 			 dwork + i, 1, 1.f, c, 1);
 	   }
 	 else
 	   {
-	     cublasSgemm('n', 'n', ib, *nrhs, ib, 1.f, d_ref(i), ib,
+	     cublasZgemm('n', 'n', ib, *nrhs, ib, 1.f, d_ref(i), ib,
                          c+i, *ldc, 0.f, dwork + i, *ldc);
-             cublasSgemm('n', 'n', i, *nrhs, ib, -1.f, a_ref(0, i), *lda,
+             cublasZgemm('n', 'n', i, *nrhs, ib, -1.f, a_ref(0, i), *lda,
                          dwork + i, *ldc, 1.f, c, *ldc);
 	   }
        }
@@ -184,7 +184,7 @@ magma_zgeqrs_gpu(magma_int_t m_, magma_int_t n_, magma_int_t nrhs_,
    }
 
    if (*nrhs==1)
-     cublasScopy(*n, dwork, 1, c, 1);
+     cublasZcopy(*n, dwork, 1, c, 1);
    else
      cudaMemcpy2D(c, (*ldc)*sizeof(double2),
 		  dwork, (*ldc)*sizeof(double2),

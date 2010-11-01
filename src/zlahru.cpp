@@ -104,13 +104,13 @@ magma_zlahru(int n, int k, int nb, double2 *a, int lda,
     cublasSetMatrix(nb, nb, sizeof(double2), t, nb, d_t, nb);
 
     /* V0 = M V */
-    cublasSgemm('N','N', k, nb, n-k, 1.0, d_a, ldda, v, ldda, 0.0, v0, ldda);
+    cublasZgemm('N','N', k, nb, n-k, 1.0, d_a, ldda, v, ldda, 0.0, v0, ldda);
 
     /* Update matrix M -= V0 T V' through
        1. d_work = T V'
        2. M -= V0 d_work                  */
-    cublasSgemm('N','T', nb, n-k, nb, 1., d_t,nb, v, ldda, 0., d_work,nb);
-    cublasSgemm('N','N', k, n-k, nb, -1., v0, ldda, d_work, nb, 1., d_a, ldda);
+    cublasZgemm('N','T', nb, n-k, nb, 1., d_t,nb, v, ldda, 0., d_work,nb);
+    cublasZgemm('N','N', k, n-k, nb, -1., v0, ldda, d_work, nb, 1., d_a, ldda);
     cublasGetMatrix(k, nb, sizeof(double2), d_a, ldda, a, lda);
     /*
     cudaMemcpy2DAsync(a, lda * sizeof(double2), d_a, ldda * sizeof(double2),
@@ -118,15 +118,15 @@ magma_zlahru(int n, int k, int nb, double2 *a, int lda,
     */
 
     /* Update G -= Y T -= Y d_work */
-    cublasSgemm('N','N', n-k, n-k-nb, nb, -1.0, y, ldda,
+    cublasZgemm('N','N', n-k, n-k-nb, nb, -1.0, y, ldda,
 		d_work+nb*nb, nb, 1.0, d_a + nb*ldda + k, ldda);
     
     /* Update G = (I - V T V') G = (I - work' V') G through
        1. Y = V' G
        2. G -= work' Y                                      */
-    cublasSgemm('T','N', nb, n-k-nb, n-k,
+    cublasZgemm('T','N', nb, n-k-nb, n-k,
 		1., v, ldda, d_a + nb*ldda+k, ldda, 0., y, nb);
-    cublasSgemm('T','N', n-k, n-k-nb, nb,
+    cublasZgemm('T','N', n-k, n-k-nb, nb,
 		-1.0, d_work, nb, y, nb, 1.0, d_a+nb*ldda+k, ldda);
     
     return 0;

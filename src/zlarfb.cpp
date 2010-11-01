@@ -108,17 +108,17 @@ magma_zlarfb(char direct, char storev,
     */
     //TimeStruct start, end;
     //start = get_current_time();
-    cublasSgemm('t', 'n', n, *k, m, 1.f, dc_ref(0, 0), *ldc,
+    cublasZgemm('t', 'n', n, *k, m, 1.f, dc_ref(0, 0), *ldc,
 		dv_ref(0,0), *ldv, 0.f, dwork, *ldwork);
     
     if (direct == 'F' || direct =='f')
-      cublasStrmm('r', 'u', 'n', 'n',
+      cublasZtrmm('r', 'u', 'n', 'n',
 		  n, *k, 1.f, dt, *ldt, dwork, *ldwork);
     else
-      cublasStrmm('r', 'l', 'n', 'n',
+      cublasZtrmm('r', 'l', 'n', 'n',
 		  n, *k, 1.f, dt, *ldt, dwork, *ldwork);
 
-    cublasSgemm('n', 't', m, n, *k, -1.f, dv_ref(0, 0), *ldv,
+    cublasZgemm('n', 't', m, n, *k, -1.f, dv_ref(0, 0), *ldv,
 		dwork, *ldwork, 1.f, dc_ref(0,0), *ldc);
     //end = get_current_time();
     //if (n!=*k)
@@ -126,13 +126,13 @@ magma_zlarfb(char direct, char storev,
     //	   m, n, (4.*n*(*k)*m+n*(*k)*(*k))/(1.e6*GetTimerValue(start,end)));
   }
   else {
-    cublasSgemm('n', 't', m, *k, n, 1.f, dc_ref(0, 0), *ldc,
+    cublasZgemm('n', 't', m, *k, n, 1.f, dc_ref(0, 0), *ldc,
                 dv_ref(0,0), *ldv, 0.f, dwork, *ldwork);
     
-    cublasStrmm('r', 'u', 'n', 'n',
+    cublasZtrmm('r', 'u', 'n', 'n',
 		m, *k, 1.f, dt, *ldt, dwork, *ldwork);
     
-    cublasSgemm('n', 'n', m, n, *k, -1.f, 
+    cublasZgemm('n', 'n', m, n, *k, -1.f, 
 		dwork, *ldwork,
 		dv_ref(0, 0), *ldv, 
 		1.f, dc_ref(0,0), *ldc);

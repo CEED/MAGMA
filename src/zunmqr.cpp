@@ -256,11 +256,11 @@ magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
 		    &tau[i__], t, &ib);
 
 	    // TTT ------------------------------------------------------------
-	    spanel_to_q('U', ib, &a[i__ + i__ * a_dim1], *lda, t+ib*ib);
+	    zpanel_to_q('U', ib, &a[i__ + i__ * a_dim1], *lda, t+ib*ib);
 	    cublasSetMatrix(i__4, ib, sizeof(double2),
 			    &a[i__ + i__ * a_dim1], *lda, 
 			    dwork, i__4);
-	    sq_to_panel('U', ib, &a[i__ + i__ * a_dim1], *lda, t+ib*ib);
+	    zq_to_panel('U', ib, &a[i__ + i__ * a_dim1], *lda, t+ib*ib);
 	    //-----------------------------------------------------------------
 
 	    if (left) 

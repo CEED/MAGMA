@@ -16,7 +16,7 @@
 #include "magma.h"
 #include "magmablas.h"
 
-extern "C" int sgebd2_(int *, int *, double2 *, int *, double2 *, double2 *, double2 *,
+extern "C" int zgebd2_(int *, int *, double2 *, int *, double2 *, double2 *, double2 *,
 		       double2 *, double2 *, int *);
 double2 cpu_gpu_sdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda);
 
@@ -33,7 +33,7 @@ magma_zgebrd(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
 
     Purpose   
     =======   
-    SGEBRD reduces a general real M-by-N matrix A to upper or lower   
+    ZGEBRD reduces a general real M-by-N matrix A to upper or lower   
     bidiagonal form B by an orthogonal transformation: Q\*\*H * A * P = B.   
 
     If m >= n, B is upper bidiagonal; if m < n, B is lower bidiagonal.   
@@ -275,7 +275,7 @@ magma_zgebrd(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
                       dwork + nb + 1 , ldwrky);
 
       //start = get_current_time();
-      cublasSgemm('N', 'T', i__3, i__4, nb, c_b21,
+      cublasZgemm('N', 'T', i__3, i__4, nb, c_b21,
 		  &da[(i__-1) + nb + (i__-1) * a_dim1], ldda, 
 		  &dwork[ldwrkx * nb + nb + 1], ldwrky, c_b22, 
 		  &da[(i__-1) + nb + ((i__-1) + nb) * a_dim1], ldda);
@@ -299,7 +299,7 @@ magma_zgebrd(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
       */
 
       //start = get_current_time();
-      cublasSgemm('N', 'N', i__3, i__4, nb, c_b21,
+      cublasZgemm('N', 'N', i__3, i__4, nb, c_b21,
 		  &dwork[nb + 1], ldwrkx, 
 		  &da[(i__-1) + ((i__-1) + nb) * a_dim1], ldda,
 		  c_b22, &da[(i__-1) + nb + ((i__-1) + nb) * a_dim1], ldda);
@@ -343,7 +343,7 @@ magma_zgebrd(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
 		      da + (i__-1) + (i__-1) * a_dim1, ldda,
 		      a  +  i__    +  i__    * a_dim1, *lda);
      
-    sgebd2_(&i__2, &i__1, &a[i__ + i__ * a_dim1], lda, &d__[i__], &e[i__],
+    zgebd2_(&i__2, &i__1, &a[i__ + i__ * a_dim1], lda, &d__[i__], &e[i__],
 	    &tauq[i__], &taup[i__], &work[1], &iinfo);
     work[1] = ws;
 

@@ -264,7 +264,7 @@ magma_zgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, double2 *a, mag
       cublasGetMatrix(*n, *n-i__+1, sizeof(double2), 
 		      d_A+ (i__-1)*ldda, ldda, 
 		      a  + (i__-1)*(*lda), *lda);
-    sgehd2_(n, &i__, ihi, a, lda, &tau[1], work, &iinfo);
+    zgehd2_(n, &i__, ihi, a, lda, &tau[1], work, &iinfo);
     work[0] = (double2) iws;
     
     // cublasFree(t); 

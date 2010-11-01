@@ -36,6 +36,7 @@ int magma_get_dgetrf_nb(int m);
 int magma_get_dgehrd_nb(int m);
 int magma_get_dsytrd_nb(int m);
 int magma_get_dgelqf_nb(int m);
+int magma_get_dgebrd_nb(int m);
 
 int magma_get_cpotrf_nb(int m);
 int magma_get_cgetrf_nb(int m);

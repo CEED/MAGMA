@@ -167,9 +167,9 @@ magma_zgetrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_, magma
 	    // make sure that gpu queue is empty
 	    cuCtxSynchronize();
 
-	    cublasStrsm( 'R', 'U', 'N', 'U', *n - (i+1)*nb, nb, 1, 
+	    cublasZtrsm( 'R', 'U', 'N', 'U', *n - (i+1)*nb, nb, 1, 
 			 inAT(i-1,i-1), ldda, inAT(i-1,i+1), ldda ); 
-	    cublasSgemm( 'N', 'N', *n-(i+1)*nb, *m-i*nb, nb, -1, 
+	    cublasZgemm( 'N', 'N', *n-(i+1)*nb, *m-i*nb, nb, -1, 
 			 inAT(i-1,i+1), ldda, inAT(i,i-1), ldda, 1, 
 			 inAT(i,i+1), ldda );
 	  
@@ -187,15 +187,15 @@ magma_zgetrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_, magma
 
 	  // do the small non-parallel computations
 	  if (s > (i+1)){
-	    cublasStrsm( 'R', 'U', 'N', 'U', nb, nb, 1, inAT(i,i), ldda, 
+	    cublasZtrsm( 'R', 'U', 'N', 'U', nb, nb, 1, inAT(i,i), ldda, 
 			 inAT(i, i+1), ldda);
-	    cublasSgemm( 'N', 'N', nb, *m-(i+1)*nb, nb, -1, inAT(i,i+1), ldda,
+	    cublasZgemm( 'N', 'N', nb, *m-(i+1)*nb, nb, -1, inAT(i,i+1), ldda,
 			 inAT(i+1,i), ldda, 1, inAT(i+1,i+1), ldda );
 	  }
 	  else{
-	    cublasStrsm( 'R', 'U', 'N', 'U', *n-s*nb, nb, 1, inAT(i,i), ldda,
+	    cublasZtrsm( 'R', 'U', 'N', 'U', *n-s*nb, nb, 1, inAT(i,i), ldda,
                          inAT(i, i+1), ldda);
-	    cublasSgemm( 'N', 'N', *n-(i+1)*nb, *m-(i+1)*nb, nb, 
+	    cublasZgemm( 'N', 'N', *n-(i+1)*nb, *m-(i+1)*nb, nb, 
 			 -1, inAT(i,i+1), ldda,
 			 inAT(i+1,i), ldda, 1, inAT(i+1,i+1), ldda );
 	  }
@@ -220,7 +220,7 @@ magma_zgetrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_, magma
       cublasSetMatrix(rows, nb0, sizeof(double2), work, *lda, dA, cols);
       magmablas_ztranspose2( inAT(s,s), ldda, dA, cols, rows, nb0);
 
-      cublasStrsm( 'R', 'U', 'N', 'U', *n-s*nb-nb0, nb0,
+      cublasZtrsm( 'R', 'U', 'N', 'U', *n-s*nb-nb0, nb0,
                    1, inAT(s,s), ldda, inAT(s, s)+nb0, ldda);
 
       if (maxdim*maxdim< 2*maxm*maxn){

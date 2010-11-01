@@ -14,7 +14,7 @@
 #include <cublas.h>
 #include "magma.h"
 
-extern "C" int sorg2r_(int*, int*, int*, double2*, int*, double2*, double2*, int*);
+extern "C" int zung2r_(int*, int*, int*, double2*, int*, double2*, double2*, int*);
 
 
 extern "C" int
@@ -152,7 +152,7 @@ magma_zungqr(int *m, int *n, int *k, double2 *a,
 	i__1 = *m - kk;
 	i__2 = *n - kk;
 	i__3 = *k - kk;
-	sorg2r_(&i__1, &i__2, &i__3, &a[kk + 1 + (kk + 1) * a_dim1], lda, &
+	zung2r_(&i__1, &i__2, &i__3, &a[kk + 1 + (kk + 1) * a_dim1], lda, &
 		tau[kk + 1], &work[1], &iinfo);
       }
 
@@ -181,7 +181,7 @@ magma_zungqr(int *m, int *n, int *k, double2 *a,
 	    
 	    /* Apply H to rows i:m of current block */
 	    i__2 = *m - i__ + 1;
-	    sorg2r_(&i__2, &ib, &ib, &a[i__ + i__ * a_dim1], lda, &tau[i__], &
+	    zung2r_(&i__2, &ib, &ib, &a[i__ + i__ * a_dim1], lda, &tau[i__], &
 		    work[1], &iinfo);
 
 	    /* Set rows 1:i-1 of current block to zero */

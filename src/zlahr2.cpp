@@ -171,9 +171,9 @@ magma_zlahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
 	  /* Update A(K+1:N,I); Update I-th column of A - Y * V' */
 	  i__2 = *n - *k + 1;
 	  i__3 = i__ - 1;
-	  scopy_(&i__3, &a[*k+i__-1+a_dim1], lda, &t[*nb*t_dim1+1], &c__1);
-	  strmv_("u","n","n",&i__3,&t[t_offset], ldt, &t[*nb*t_dim1+1], &c__1);
-	  sgemv_("NO TRANSPOSE", &i__2, &i__3, &c_b4, &y[*k + y_dim1],
+	  zcopy_(&i__3, &a[*k+i__-1+a_dim1], lda, &t[*nb*t_dim1+1], &c__1);
+	  ztrmv_("u","n","n",&i__3,&t[t_offset], ldt, &t[*nb*t_dim1+1], &c__1);
+	  zgemv_("NO TRANSPOSE", &i__2, &i__3, &c_b4, &y[*k + y_dim1],
 		 ldy, &t[*nb*t_dim1+1], &c__1, &c_b5, &a[*k+i__*a_dim1],&c__1);
 
 	  /* Apply I - V * T' * V' to this column (call it b) from the   
@@ -185,29 +185,29 @@ magma_zlahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
              w := V1' * b1                                                 */
 	  
 	  i__2 = i__ - 1;
-	  scopy_(&i__2, &a[*k+1+i__*a_dim1], &c__1, &t[*nb*t_dim1+1], &c__1);
-	  strmv_("Lower", "Transpose", "UNIT", &i__2, &a[*k + 1 + a_dim1], 
+	  zcopy_(&i__2, &a[*k+1+i__*a_dim1], &c__1, &t[*nb*t_dim1+1], &c__1);
+	  ztrmv_("Lower", "Transpose", "UNIT", &i__2, &a[*k + 1 + a_dim1], 
 		 lda, &t[*nb * t_dim1 + 1], &c__1);
 
 	  /* w := w + V2'*b2 */
 	  i__2 = *n - *k - i__ + 1;
 	  i__3 = i__ - 1;
-	  sgemv_("T", &i__2, &i__3, &c_b5, &a[*k + i__ + a_dim1], lda, 
+	  zgemv_("T", &i__2, &i__3, &c_b5, &a[*k + i__ + a_dim1], lda, 
 		 &a[*k+i__+i__*a_dim1], &c__1, &c_b5, &t[*nb*t_dim1+1], &c__1);
 
 	  /* w := T'*w */
 	  i__2 = i__ - 1;
-	  strmv_("U","T","N",&i__2, &t[t_offset], ldt, &t[*nb*t_dim1+1],&c__1);
+	  ztrmv_("U","T","N",&i__2, &t[t_offset], ldt, &t[*nb*t_dim1+1],&c__1);
 	  
 	  /* b2 := b2 - V2*w */
 	  i__2 = *n - *k - i__ + 1;
 	  i__3 = i__ - 1;
-	  sgemv_("N", &i__2, &i__3, &c_b4, &a[*k + i__ + a_dim1], lda, 
+	  zgemv_("N", &i__2, &i__3, &c_b4, &a[*k + i__ + a_dim1], lda, 
 		 &t[*nb*t_dim1+1], &c__1, &c_b5, &a[*k+i__+i__*a_dim1], &c__1);
 
 	  /* b1 := b1 - V1*w */
 	  i__2 = i__ - 1;
-	  strmv_("L","N","U",&i__2,&a[*k+1+a_dim1],lda,&t[*nb*t_dim1+1],&c__1);
+	  ztrmv_("L","N","U",&i__2,&a[*k+1+a_dim1],lda,&t[*nb*t_dim1+1],&c__1);
 	  zaxpy_(&i__2, &c_b4, &t[*nb * t_dim1 + 1], &c__1, 
 		 &a[*k + 1 + i__ * a_dim1], &c__1);
 	  
@@ -228,21 +228,21 @@ magma_zlahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
         cublasSetVector(i__3, sizeof(double2), 
                         &a[*k + i__ + i__*a_dim1], 1, dv+(i__-1)*(ldda+1), 1);
 
-	cublasSgemv('N', i__2+1, i__3, c_b5, 
+	cublasZgemv('N', i__2+1, i__3, c_b5, 
 		    da -1 + *k + i__ *ldda, ldda, 
 		    dv+(i__-1)*(ldda+1), c__1, c_b38, 
 		    da-1 + *k + (i__-1)*ldda, c__1);     
 	
 	i__2 = *n - *k - i__ + 1;
 	i__3 = i__ - 1;
-	sgemv_("T", &i__2, &i__3, &c_b5, &a[*k + i__ + a_dim1], lda,
+	zgemv_("T", &i__2, &i__3, &c_b5, &a[*k + i__ + a_dim1], lda,
 	       &a[*k+i__+i__*a_dim1], &c__1, &c_b38, &t[i__*t_dim1+1], &c__1);
 
 	/* Compute T(1:I,I) */
 	i__2 = i__ - 1;
 	d__1 = -tau[i__];
-	sscal_(&i__2, &d__1, &t[i__ * t_dim1 + 1], &c__1);
-	strmv_("U","N","N", &i__2, &t[t_offset], ldt, &t[i__*t_dim1+1], &c__1);
+	zscal_(&i__2, &d__1, &t[i__ * t_dim1 + 1], &c__1);
+	ztrmv_("U","N","N", &i__2, &t[t_offset], ldt, &t[i__*t_dim1+1], &c__1);
 	t[i__ + i__ * t_dim1] = tau[i__];
 
         cublasGetVector(*n - *k + 1, sizeof(double2),

@@ -143,7 +143,7 @@ magma_zpotrf(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, int *info
 		i__3 = j - 1;
 		cublasSetMatrix(jb, i__4, sizeof(double2),
                                 a_ref(j,j), lda_, da_ref(j,j), ldda);
-                cublasSherk('u', 't', jb, i__3, -1.f, da_ref(1,j),
+                cublasZherk('u', 't', jb, i__3, -1.f, da_ref(1,j),
                              ldda, 1.f, da_ref(j, j), ldda);
                 cudaMemcpy2DAsync(  a_ref(1,j), lda_*sizeof(double2), 
 				   da_ref(1,j), ldda*sizeof(double2), 
@@ -153,7 +153,7 @@ magma_zpotrf(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, int *info
 		if (j + jb <= n_) {
 		  i__3 = n_ - j - jb + 1;
 		  i__4 = j - 1;
-		  cublasSgemm('T', 'N', jb, i__3, i__4,
+		  cublasZgemm('T', 'N', jb, i__3, i__4,
 			  -1.f, da_ref(1, j), ldda, da_ref(1, j + jb), ldda,
 			  1.f, da_ref(j, j + jb), ldda);
 		}
@@ -170,7 +170,7 @@ magma_zpotrf(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, int *info
 				  cudaMemcpyHostToDevice,stream[0]);
 		
 		if (j + jb <= n_)
-		  cublasStrsm('L', 'U', 'T', 'N', jb, i__3,
+		  cublasZtrsm('L', 'U', 'T', 'N', jb, i__3,
 			      1.f, da_ref(j,j), ldda, da_ref(j, j+jb), ldda);
 	    }
 	} else {
@@ -184,7 +184,7 @@ magma_zpotrf(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, int *info
 		i__3 = j - 1;
                 cublasSetMatrix(i__4, jb, sizeof(double2), 
 				a_ref(j,j), lda_, da_ref(j,j), ldda);
-                cublasSherk('l', 'n', jb, i__3, -1.f, da_ref(j,1), ldda, 
+                cublasZherk('l', 'n', jb, i__3, -1.f, da_ref(j,1), ldda, 
                             1.f, da_ref(j, j), ldda);
 		/*
 		cudaMemcpy2DAsync( a_ref(j,1), lda_*sizeof(double2), 
@@ -206,7 +206,7 @@ magma_zpotrf(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, int *info
                 if (j + jb <= n_) {
                     i__3 = n_ - j - jb + 1;
                     i__4 = j - 1;
-                    cublasSgemm('N', 'T', i__3, jb, i__4,
+                    cublasZgemm('N', 'T', i__3, jb, i__4,
                             -1.f, da_ref(j + jb, 1), ldda, da_ref(j, 1), ldda,
                             1.f, da_ref(j + jb, j), ldda);
                 }
@@ -223,7 +223,7 @@ magma_zpotrf(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, int *info
 				  cudaMemcpyHostToDevice,stream[0]);
 	        
 		if (j + jb <= n_)
-		  cublasStrsm('R', 'L', 'T', 'N', i__3, jb, 1.f, 
+		  cublasZtrsm('R', 'L', 'T', 'N', i__3, jb, 1.f, 
 			      da_ref(j, j), ldda, da_ref(j + jb, j), ldda);
 	    }
 	}

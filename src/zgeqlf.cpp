@@ -215,10 +215,10 @@ magma_zgeqlf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
 	        zlarft_("B", "C", &rows, &ib, a_ref(0, cols), lda, 
 			tau + i, work, &ib);
        
-		spanel_to_q('L', ib, a_ref(rows-ib,cols), *lda, work+ib*ib);
+		zpanel_to_q('L', ib, a_ref(rows-ib,cols), *lda, work+ib*ib);
 		cublasSetMatrix(rows, ib, sizeof(double2),
 				a_ref(0,cols), *lda, da_ref(0,cols), ldda);
-		sq_to_panel('L', ib, a_ref(rows-ib,cols), *lda, work+ib*ib);
+		zq_to_panel('L', ib, a_ref(rows-ib,cols), *lda, work+ib*ib);
 
 		// Send the triangular part on the GPU
 		cublasSetMatrix(ib,ib,sizeof(double2), work, ib, dwork, lddwork);

@@ -182,7 +182,7 @@ magmablas_zgemm(char TRANSA, char TRANSB, int m , int n , int k ,
 	  }
 	  else{
 	    if( m % 64 == 0 && n%16 == 0 && k%16 == 0 ) 
-	      cublasSgemm(TRANSA, TRANSB, m, n, k, alpha, A, lda, 
+	      cublasZgemm(TRANSA, TRANSB, m, n, k, alpha, A, lda, 
 			  B, ldb, beta, C, ldc );
 	    else
 	      magmablas_zgemm_kernel_N_N_64_16_16_16_4(C,A,B, m, n, k, lda,
@@ -207,7 +207,7 @@ magmablas_zgemm(char TRANSA, char TRANSB, int m , int n , int k ,
 	}
 	else{
 	  if( m%64 == 0 && n %16 ==0 && k%4==0) 
-	    cublasSgemm(TRANSA, TRANSB, m, n, k, alpha, A, lda, B, 
+	    cublasZgemm(TRANSA, TRANSB, m, n, k, alpha, A, lda, B, 
 			ldb, beta, C, ldc );
 	  else 
 	    magmablas_zgemm_kernel_N_T_64_16_4_16_4(C,A,B, m, n,k,lda,
@@ -233,7 +233,7 @@ magmablas_zgemm(char TRANSA, char TRANSB, int m , int n , int k ,
 	}
 	else{
 	  if( m%32 == 0 && n %32 ==0 && k%8==0) 
-	    cublasSgemm(TRANSA, TRANSB, m, n, k, alpha, A, lda, B, ldb, 
+	    cublasZgemm(TRANSA, TRANSB, m, n, k, alpha, A, lda, B, ldb, 
 			beta, C, ldc );
 	  else
 	    magmablas_zgemm_kernel_T_N_32_32_8_8_8(C, A, B, m, n, k, lda,
@@ -256,7 +256,7 @@ magmablas_zgemm(char TRANSA, char TRANSB, int m , int n , int k ,
 	}
 	else{
 	  if( m%64 == 0 && n %16 ==0 && k%16==0) 
-	    cublasSgemm(TRANSA, TRANSB, m, n, k, alpha, A, lda, B, ldb, 
+	    cublasZgemm(TRANSA, TRANSB, m, n, k, alpha, A, lda, B, ldb, 
 			beta, C, ldc );
 	  else 
 	    magmablas_zgemm_kernel_T_T_64_16_16_16_4(C, B, A, n, m, k, ldb,
@@ -280,7 +280,7 @@ magmablas_zgemm(char TRANSA, char TRANSB, int m , int n , int k ,
                  cudaMemcpyDeviceToDevice);
     
     start = get_current_time();
-    cublasSgemm(TRANSA, TRANSB, m, n, k, alpha, A, lda,
+    cublasZgemm(TRANSA, TRANSB, m, n, k, alpha, A, lda,
 		B, ldb, beta, C, ldc );
     end = get_current_time();
     gpu_perf2 = 2.*m*n*k/(1000000*GetTimerValue(start,end));

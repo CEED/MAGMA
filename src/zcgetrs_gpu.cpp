@@ -95,10 +95,10 @@ magma_zcgetrs_gpu(magma_int_t n_, magma_int_t nrhs_, float2 *a, magma_int_t lda_
 
   /* Solve L*X = B, overwriting B with X. */
   float2 fone = 1.;
-  cublasStrsm('L','L','N','U', *n, *nrhs, fone, a, *lda, x, *ldb);
+  cublasCtrsm('L','L','N','U', *n, *nrhs, fone, a, *lda, x, *ldb);
 
   /* Solve U*X = B, overwriting B with X. */
-  cublasStrsm('L','U','N','N', *n, *nrhs, fone, a, *lda, x, *ldb);
+  cublasCtrsm('L','U','N','N', *n, *nrhs, fone, a, *lda, x, *ldb);
 
   return 0;
   /* End of MAGMA_ZCGETRS */

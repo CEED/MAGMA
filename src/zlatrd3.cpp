@@ -276,7 +276,7 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 			  a + i__   + 1 + i__   * a_dim1, 1,
                           da+(i__-1)+ 1 +(i__-1)* (*ldda), 1);
 	  
-	  //cublasSsymv(
+	  //cublasZsymv(
 	  //start = get_current_time();
           mssymv2(*n, i__,  da, *ldda, 
 		  da + (i__-1)* a_dim1, dw + 1 +  i__ *w_dim1);

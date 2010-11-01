@@ -306,7 +306,7 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
                             work  + 1, ldwork,
                             dwork + 1, lddwork);
 
-	    cublasSsyr2k('L', 'N', i__3, nb, c_b22, 
+	    cublasZsyr2k('L', 'N', i__3, nb, c_b22, 
 			 &da[(i__-1) + nb + (i__-1) * a_dim1], ldda, 
 			 &dwork[nb + 1], lddwork, c_b23, 
 			 &da[(i__-1) + nb + ((i__-1) + nb) * a_dim1], ldda);

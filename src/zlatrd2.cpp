@@ -267,7 +267,7 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 			  a + i__   + 1 + i__   * a_dim1, 1,
                           da+(i__-1)+ 1 +(i__-1)* (*ldda), 1);
 	  
-	  //cublasSsymv(
+	  //cublasZsymv(
 	  magmablas_zsymv(
 		      'L', i__2, c_b6, da+ (i__-1)+1 + ((i__-1)+1) * (*ldda),
 		      *ldda, da+ (i__-1)+1 + (i__-1)* a_dim1, c__1, c_b16,
