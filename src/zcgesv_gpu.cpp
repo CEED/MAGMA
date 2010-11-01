@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions mixed zc -> ds
+
 */
 
 #include <stdio.h>
@@ -18,9 +21,9 @@
 #define ITERMAX 30
 
 extern "C" magma_int_t
-magma_dsgesv_gpu(magma_int_t N, magma_int_t NRHS, double *A, magma_int_t LDA, magma_int_t *IPIV, double *B, 
-		 magma_int_t LDB, double *X, magma_int_t LDX, double *WORK, float *SWORK,
-		 magma_int_t *ITER, magma_int_t *INFO, float *H_SWORK, double *H_WORK,
+magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS, double2 *A, magma_int_t LDA, magma_int_t *IPIV, double2 *B, 
+		 magma_int_t LDB, double2 *X, magma_int_t LDX, double2 *WORK, float2 *SWORK,
+		 magma_int_t *ITER, magma_int_t *INFO, float2 *H_SWORK, double2 *H_WORK,
 		 magma_int_t *DIPIV)
 {
 /*  -- MAGMA (version 1.0) --
@@ -32,11 +35,11 @@ magma_dsgesv_gpu(magma_int_t N, magma_int_t NRHS, double *A, magma_int_t LDA, ma
     Purpose
     =======
 
-    DSGESV computes the solution to a real system of linear equations
+    ZCGESV computes the solution to a real system of linear equations
        A * X = B,
     where A is an N-by-N matrix and X and B are N-by-NRHS matrices.
 
-    DSGESV first attempts to factorize the matrix in SINGLE PRECISION
+    ZCGESV first attempts to factorize the matrix in SINGLE PRECISION
     and use this factorization within an iterative refinement procedure
     to produce a solution with DOUBLE PRECISION norm-wise backward error
     quality (see below). If the approach fails the method switches to a
@@ -76,7 +79,7 @@ magma_dsgesv_gpu(magma_int_t N, magma_int_t NRHS, double *A, magma_int_t LDA, ma
             On entry, the N-by-N coefficient matrix A.
             On exit, if iterative refinement has been successfully used
             (INFO.EQ.0 and ITER.GE.0, see description below), A is
-            unchanged. If double precision factorization has been used
+            unchanged. If double2 precision factorization has been used
             (INFO.EQ.0 and ITER.LT.0, see description below), then the
             array A contains the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
@@ -87,8 +90,8 @@ magma_dsgesv_gpu(magma_int_t N, magma_int_t NRHS, double *A, magma_int_t LDA, ma
     IPIV    (output) INTEGER array, dimension (N)
             The pivot indices that define the permutation matrix P;
             row i of the matrix was interchanged with row IPIV(i).
-            Corresponds either to the single precision factorization
-            (if INFO.EQ.0 and ITER.GE.0) or the double precision
+            Corresponzc either to the single precision factorization
+            (if INFO.EQ.0 and ITER.GE.0) or the double2 precision
             factorization (if INFO.EQ.0 and ITER.LT.0).
 
     B       (input) DOUBLE PRECISION array, dimension (LDB,NRHS)
@@ -111,7 +114,7 @@ magma_dsgesv_gpu(magma_int_t N, magma_int_t NRHS, double *A, magma_int_t LDA, ma
             right-hand sides or solutions in single precision.
 
     ITER    (output) INTEGER
-            < 0: iterative refinement has failed, double precision
+            < 0: iterative refinement has failed, double2 precision
                  factorization has been performed
                  -1 : the routine fell back to full precision for
                       implementation- or machine-specific reasons
@@ -163,41 +166,41 @@ magma_dsgesv_gpu(magma_int_t N, magma_int_t NRHS, double *A, magma_int_t LDA, ma
     *INFO =-9;
 
   if(*INFO!=0){
-    magma_xerbla("magma_dsgesv",INFO) ;
+    magma_xerbla("magma_zcgesv",INFO) ;
   }
 
   if( N == 0 || NRHS == 0 )
     return 0;
 
-  double ANRM , CTE , EPS;
+  double2 ANRM , CTE , EPS;
   EPS  = dlamch_("Epsilon");
-  ANRM = magma_dlange('I', N, N , A, LDA , WORK );
-  CTE = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;
+  ANRM = magma_zlange('I', N, N , A, LDA , WORK );
+  CTE = ANRM * EPS *  pow((double2)N,0.5) * BWDMAX ;
 
   int PTSA  = N*NRHS;
   int status ;
-  float RMAX = slamch_("O");
+  float2 RMAX = slamch_("O");
   int IITER ;
-  double alpha = -1.0;
-  double beta = 1 ;
+  double2 alpha = -1.0;
+  double2 beta = 1 ;
   int DLDA =  ((N+31) / 32 ) * 32 ; 
   
-  magmablas_dlag2s(N , NRHS , B , LDB , SWORK, N , RMAX );
+  magmablas_zlag2c(N , NRHS , B , LDB , SWORK, N , RMAX );
   if(*INFO !=0){
     *ITER = -2 ;
-    printf("magmablas_dlag2s\n");
+    printf("magmablas_zlag2c\n");
     goto L40;
   }
-  magmablas_dlag2s(N , N , A , LDA , SWORK+PTSA, LDA , RMAX); // Merge with DLANGE /
+  magmablas_zlag2c(N , N , A , LDA , SWORK+PTSA, LDA , RMAX); // Merge with DLANGE /
   if(*INFO !=0){
     *ITER = -2 ;
-    printf("magmablas_dlag2s\n");
+    printf("magmablas_zlag2c\n");
     goto L40;
   }
 
-  double XNRM[1] , RNRM[1] ;
+  double2 XNRM[1] , RNRM[1] ;
   
-  magma_sgetrf_gpu(N, N, SWORK+PTSA, LDA, IPIV, INFO);
+  magma_cgetrf_gpu(N, N, SWORK+PTSA, LDA, IPIV, INFO);
   
   // Generate parallel pivots
   {
@@ -211,22 +214,22 @@ magma_dsgesv_gpu(magma_int_t N, magma_int_t NRHS, double *A, magma_int_t LDA, ma
     *ITER = -3 ;
     goto L40;
   }
-  magma_dsgetrs_gpu(N, NRHS, SWORK+PTSA, LDA, DIPIV, SWORK, B, LDB, INFO);
+  magma_zcgetrs_gpu(N, NRHS, SWORK+PTSA, LDA, DIPIV, SWORK, B, LDB, INFO);
   int i,j ;
-  magmablas_slag2d(N , NRHS , SWORK, N , X , LDX , INFO );
-  magma_dlacpy(N, NRHS, B , LDB, WORK, N);
+  magmablas_clag2z(N , NRHS , SWORK, N , X , LDX , INFO );
+  magma_zlacpy(N, NRHS, B , LDB, WORK, N);
   if ( NRHS == 1 )
-     magmablas_dgemv_MLU(N, N, A, LDA, X, WORK);
+     magmablas_zgemv_MLU(N, N, A, LDA, X, WORK);
   else
      cublasDgemm( 'N', 'N', N, NRHS, N, -1.0, A, LDA, X, LDX, 1.0, WORK, N);
 
 
   for(i=0;i<NRHS;i++){
     j = cublasIdamax( N ,X+i*N, 1) ;
-    cublasGetMatrix( 1, 1, sizeof(double), X+i*N+j-1, 1,XNRM, 1 ) ;
+    cublasGetMatrix( 1, 1, sizeof(double2), X+i*N+j-1, 1,XNRM, 1 ) ;
     XNRM[0]= fabs( XNRM[0]);
     j = cublasIdamax ( N , WORK+i*N  , 1 ) ;
-    cublasGetMatrix( 1, 1, sizeof(double), WORK+i*N+j-1, 1, RNRM, 1 ) ;
+    cublasGetMatrix( 1, 1, sizeof(double2), WORK+i*N+j-1, 1, RNRM, 1 ) ;
     RNRM[0] =fabs( RNRM[0]);
     // printf("\n\t\t--   %lf  %lf --\n", RNRM[0] , XNRM[0]*CTE ); 
     if( RNRM[0] > XNRM[0]*CTE ){
@@ -243,23 +246,23 @@ magma_dsgesv_gpu(magma_int_t N, magma_int_t NRHS, double *A, magma_int_t LDA, ma
     {
       *INFO = 0 ;
       /*
-        Convert R (in WORK) from double precision to single precision
+        Convert R (in WORK) from double2 precision to single precision
         and store the result in SX.
         Solve the system SA*SX = SR.
         -- These two Tasks are merged here. 
       */
-      magma_dsgetrs_gpu( N, NRHS, SWORK+PTSA, LDA, DIPIV, SWORK, WORK, LDB, INFO);
+      magma_zcgetrs_gpu( N, NRHS, SWORK+PTSA, LDA, DIPIV, SWORK, WORK, LDB, INFO);
       if(INFO[0] !=0){
 	*ITER = -3 ;
 	goto L40;
       }
       for(i=0;i<NRHS;i++){
-	magmablas_dsaxpycp(SWORK+i*N,X+i*N,N,N,LDA,B+i*N,WORK+i*N) ;
+	magmablas_zcaxpycp(SWORK+i*N,X+i*N,N,N,LDA,B+i*N,WORK+i*N) ;
       }
       
-      magma_dlacpy(N, NRHS, B , LDB, WORK, N);
+      magma_zlacpy(N, NRHS, B , LDB, WORK, N);
       if( NRHS == 1 )
-        magmablas_dgemv_MLU(N, N, A, LDA, X, WORK);
+        magmablas_zgemv_MLU(N, N, A, LDA, X, WORK);
       else
         cublasDgemm( 'N', 'N', N, NRHS, N, alpha, A, LDA, X, LDX, beta, WORK, N);
 
@@ -270,10 +273,10 @@ magma_dsgesv_gpu(magma_int_t N, magma_int_t NRHS, double *A, magma_int_t LDA, ma
       for(i=0;i<NRHS;i++){
 	int j,inc=1 ;
 	j = cublasIdamax( N , X+i*N  , 1) ;
-	cublasGetMatrix( 1, 1, sizeof(double), X+i*N+j-1, 1, XNRM, 1 ) ;
+	cublasGetMatrix( 1, 1, sizeof(double2), X+i*N+j-1, 1, XNRM, 1 ) ;
 	XNRM[0] =  fabs (XNRM[0]) ;
 	j = cublasIdamax ( N ,WORK+i*N , 1 ) ;
-	cublasGetMatrix( 1, 1, sizeof(double), WORK+i*N+j-1, 1, RNRM, 1 ) ;
+	cublasGetMatrix( 1, 1, sizeof(double2), WORK+i*N+j-1, 1, RNRM, 1 ) ;
 	RNRM[0] =  fabs (RNRM[0]);
 	if( RNRM[0] > (XNRM[0]*CTE) ){
 	  goto L20;
@@ -293,24 +296,24 @@ magma_dsgesv_gpu(magma_int_t N, magma_int_t NRHS, double *A, magma_int_t LDA, ma
     If we are at this place of the code, this is because we have
     performed ITER=ITERMAX iterations and never satisified the
     stopping criterion, set up the ITER flag accordingly and follow up
-    on double precision routine.
+    on double2 precision routine.
   */
   *ITER = -ITERMAX - 1 ;
   
  L40:
   /*
     Single-precision iterative refinement failed to converge to a
-    satisfactory solution, so we resort to double precision.  
+    satisfactory solution, so we resort to double2 precision.  
   */
   if( *INFO != 0 ){
     return 0;
   }
 
-  printf("uncomment when double precision is available\n"); 
+  printf("uncomment when double2 precision is available\n"); 
   /*
-    magma_dgetrf_gpu(N, N, A, LDA, IPIV, INFO);
-    magma_dlacpy(N, NRHS, B , LDB, X, N);
-    magma_dgetrs_gpu('N', N, NRHS, A, LDA, IPIV, X, N, INFO, H_WORK);
+    magma_zgetrf_gpu(N, N, A, LDA, IPIV, INFO);
+    magma_zlacpy(N, NRHS, B , LDB, X, N);
+    magma_zgetrs_gpu('N', N, NRHS, A, LDA, IPIV, X, N, INFO, H_WORK);
   */
   return 0;
 }
