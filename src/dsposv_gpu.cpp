@@ -229,7 +229,7 @@ magma_dsposv_gpu(char UPLO, int N, int NRHS, double *A, int LDA, double *B,
     magma_spotrs_gpu(UPLO, N, NRHS, SWORK+PTSA, LDA, SWORK+PTSX, LDB, INFO);
 
     for(i=0;i<NRHS;i++){
-      magmablas_sdaxpycp(SWORK+i*N, X+i*N, N, N, LDA, B+i*N,WORK+i*N) ;
+      magmablas_dsaxpycp(SWORK+i*N, X+i*N, N, N, LDA, B+i*N,WORK+i*N) ;
     }
 
     if( NRHS == 1 )

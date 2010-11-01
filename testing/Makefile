@@ -11,7 +11,6 @@ include ../Makefile.internal
 
 ZSRC  = testing_zgetrf.cpp 	\
         testing_zgetrf_gpu.cpp 	\
-        testing_getrf_f.f      \
 	testing_zgesv_gpu.cpp	\
 	testing_zpotrf.cpp	\
         testing_zpotrf_gpu.cpp 	\
@@ -24,6 +23,8 @@ ZSRC  = testing_zgetrf.cpp 	\
         testing_zgehrd.cpp 	\
         testing_zsytrd.cpp 	\
         testing_zgebrd.cpp
+#        testing_zgetrf_f.f
+
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
@@ -49,7 +50,7 @@ cleanall: clean
 testing_%.o : testing_%.f
 	$(FORT) $(OPTS) $(INC) -c $< -o $@ 
 
-.cpp.o:
+testing_%.o : testing_%.cpp
 	$(CC) $(OPTS) $(INC) -c $< -o $@
 
 .o:

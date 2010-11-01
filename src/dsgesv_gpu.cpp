@@ -254,7 +254,7 @@ magma_dsgesv_gpu(int N, int NRHS, double *A, int LDA, int *IPIV, double *B,
 	goto L40;
       }
       for(i=0;i<NRHS;i++){
-	magmablas_sdaxpycp(SWORK+i*N,X+i*N,N,N,LDA,B+i*N,WORK+i*N) ;
+	magmablas_dsaxpycp(SWORK+i*N,X+i*N,N,N,LDA,B+i*N,WORK+i*N) ;
       }
       
       magma_dlacpy(N, NRHS, B , LDB, WORK, N);

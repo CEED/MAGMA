@@ -5,7 +5,7 @@
 !      Univ. of Colorado, Denver
 !      November 2010
 !
-!  @generated s
+!  @precisions normal z -> c d s
 !
 
 c==================================================================
