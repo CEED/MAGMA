@@ -71,7 +71,7 @@ subs = {
     ('sinplace','dinplace','cinplace','zinplace'),
     ('spermute','dpermute','cpermute','zpermute'),
     ('stranspose','dtranspose','ctranspose','ztranspose'),
-    ('STRANSPOSE','DTRANSPOSE','CTRANSPOSE','ZTRANSPOSE'),
+    ('SSIZE','DSIZE','CSIZE','ZSIZE'),
     ('scopy','dcopy','ccopy','zcopy'),
     ('strmv','dtrmv','ctrmv','ztrmv'),
     ('sgemv','dgemv','cgemv','zgemv'),

@@ -13,7 +13,7 @@
 
 __global__ void ztranspose_32( double2 *B, int ldb, double2 *A, int lda )
 {	
-	__shared__ double2 a[32][ZTRANSPOSE_SIZE+1];
+	__shared__ double2 a[32][ZSIZE_1SHARED+1];
 	
 	int inx = threadIdx.x;
 	int iny = threadIdx.y;
@@ -42,7 +42,7 @@ __global__ void ztranspose_32( double2 *B, int ldb, double2 *A, int lda )
 	B[8*ldb+16] = a[inx+16][iny+8];
 
 	__syncthreads();
-	A += ZTRANSPOSE_SIZE;
+	A += ZSIZE_1SHARED;
 	B += __mul24( 16, ldb);
 
         a[iny+0][inx] = A[0*lda];
@@ -69,7 +69,7 @@ magmablas_ztranspose(double2 *odata, int ldo,
                      int m, int n )
 {
 	//assert( (m%32) == 0 && (n%32) == 0, "misaligned transpose" );
-	dim3 threads( ZTRANSPOSE_SIZE, 8, 1 );
+	dim3 threads( ZSIZE_1SHARED, 8, 1 );
 	dim3 grid( m/32, n/32, 1 );
 	ztranspose_32<<< grid, threads >>>( odata, ldo, idata, ldi );
 }

@@ -8,10 +8,32 @@
        @precisions normal z -> s d c
 
 */
+#define PRECISION_z
+#include "commonblas.h"
+
+#if ZSIZE_2SHARED == 32
+#define COPY_1D_TO_2D( a, lda, b, inx, iny )	\
+    b[iny][inx]    = a[0];			\
+    b[iny+16][inx] = a[16*lda];
+
+#define COPY_2D_TO_1D( b, inx, iny, a, lda )	\
+    a[0]      = b[inx][iny];			\
+    a[16*lda] = b[inx+16][iny];
+
+#else
+
+#define COPY_1D_TO_2D( a, lda, b, inx, iny )	\
+    b[iny][inx] = a[0];
+
+#define COPY_2D_TO_1D( b, inx, iny, a, lda )	\
+    a[0]        = b[iny][inx];
+
+#endif
 
 __global__ void zinplace_T_even( double2 *matrix, int lda, int half )
 {	
-	__shared__ double2 a[32][33], b[32][33];
+        __shared__ double2 a[ZSIZE_2SHARED][ZSIZE_2SHARED+1];
+	__shared__ double2 b[ZSIZE_2SHARED][ZSIZE_2SHARED+1];
 	
 	int inx = threadIdx.x;
 	int iny = threadIdx.y;
@@ -20,36 +42,34 @@ __global__ void zinplace_T_even( double2 *matrix, int lda, int half )
 	int ibx = bottom ? (blockIdx.x - 1) : (blockIdx.y + half);
 	int iby = bottom ? blockIdx.y       : (blockIdx.x + half);
 
-	ibx *= 32;
-	iby *= 32;
+	ibx *= ZSIZE_2SHARED;
+	iby *= ZSIZE_2SHARED;
 
 	double2 *A = matrix + ibx + inx + __mul24( iby + iny, lda );
-	a[iny][inx] = A[0];
-	a[iny+16][inx] = A[16*lda];
-	
+	COPY_1D_TO_2D( A, lda, a, inx, iny);
+
 	if( ibx == iby )
 	{
 		__syncthreads();
-		A[0] = a[inx][iny];
-		A[16*lda] = a[inx][iny+16];
+		COPY_2D_TO_1D( a, inx, iny, A, lda);
 	}
 	else
 	{
 		double2 *B = matrix + iby + inx + __mul24( ibx + iny, lda );
 
-		b[iny][inx] = B[0];
-		b[iny+16][inx] = B[16*lda];
+		
+		COPY_1D_TO_2D( B, lda, b, inx, iny);
 		__syncthreads();
-		A[0] = b[inx][iny];
-		A[16*lda] = b[inx][iny+16];
-		B[0] = a[inx][iny];
-		B[16*lda] = a[inx][iny+16];
+
+		COPY_2D_TO_1D( b, inx, iny, A, lda);
+		COPY_2D_TO_1D( a, inx, iny, B, lda);
 	}
 } 
 
 __global__ void zinplace_T_odd( double2 *matrix, int lda, int half )
 {	
-	__shared__ double2 a[32][33], b[32][33];
+        __shared__ double2 a[ZSIZE_2SHARED][ZSIZE_2SHARED+1];
+	__shared__ double2 b[ZSIZE_2SHARED][ZSIZE_2SHARED+1];
 	
 	int inx = threadIdx.x;
 	int iny = threadIdx.y;
@@ -58,38 +78,34 @@ __global__ void zinplace_T_odd( double2 *matrix, int lda, int half )
 	int ibx = bottom ? blockIdx.x  : (blockIdx.y + half - 1);
 	int iby = bottom ? blockIdx.y  : (blockIdx.x + half);
 
-	ibx *= 32;
-	iby *= 32;
+	ibx *= ZSIZE_2SHARED;
+	iby *= ZSIZE_2SHARED;
 
 	double2 *A = matrix + ibx + inx + __mul24( iby + iny, lda );
-	a[iny][inx] = A[0];
-	a[iny+16][inx] = A[16*lda];
-	
+	COPY_1D_TO_2D( A, lda, a, inx, iny);
+
 	if( ibx == iby )
 	{
 		__syncthreads();
-		A[0] = a[inx][iny];
-		A[16*lda] = a[inx][iny+16];
+		COPY_2D_TO_1D( a, inx, iny, A, lda);
 	}
 	else
 	{
 		double2 *B = matrix + iby + inx + __mul24( ibx + iny, lda );
 
-		b[iny][inx] = B[0];
-		b[iny+16][inx] = B[16*lda];
+		COPY_1D_TO_2D( B, lda, b, inx, iny);
 		__syncthreads();
-		A[0] = b[inx][iny];
-		A[16*lda] = b[inx][iny+16];
-		B[0] = a[inx][iny];
-		B[16*lda] = a[inx][iny+16];
+
+		COPY_2D_TO_1D( b, inx, iny, A, lda);
+		COPY_2D_TO_1D( a, inx, iny, B, lda);
 	}
 } 
 
 extern "C" void 
 magmablas_zinplace_transpose( double2 *A, int lda, int n )
 {
-	dim3 threads( 32, 16 );
-	int in = n / 32;
+	dim3 threads( ZSIZE_2SHARED, 16 );
+	int in = n / ZSIZE_2SHARED;
 	if( in&1 )
 	{
 		dim3 grid( in, in/2+1 );

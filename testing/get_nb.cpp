@@ -183,6 +183,20 @@ int magma_get_sgebrd_nb(int m){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for sgebrd based on m;
+      the return value should be a multiple of 32
+*/
+extern "C"
+int magma_get_dgebrd_nb(int m){
+  //return 24;
+  return 32;
+  if (m <= 1024)
+    return 64;
+  else
+    return 64;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
    -- Return nb for ssytrd based on m;
       the return value should be a multiple of 32
 */

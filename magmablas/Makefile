@@ -21,7 +21,7 @@ DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
 SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 
 #ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
-ALLSRC= $(SSRC)		\
+ALLSRC= $(DSRC) $(SSRC)		\
         dlag2s.cu \
         slag2d.cu \
         dgemv_MLU.cu \

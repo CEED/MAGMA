@@ -23,10 +23,11 @@ ZSRC  = testing_zgetrf.cpp 	\
         testing_zgehrd.cpp 	\
         testing_zsytrd.cpp 	\
         testing_zgebrd.cpp	\
-	\
-	testing_zcgesv_gpu.cpp	\
-	testing_zcgeqrsv_gpu.cpp\
-	testing_zcposv_gpu.cpp
+
+#	\
+#	testing_zcgesv_gpu.cpp	\
+#	testing_zcgeqrsv_gpu.cpp\
+#	testing_zcposv_gpu.cpp
 #        testing_zgetrf_f.f
 
 
@@ -35,7 +36,7 @@ DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
 SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 
 #ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
-ALLSRC= $(SSRC)
+ALLSRC= $(DSRC) $(SSRC)
 
 ALLOBJF= $(ALLSRC:.f=.o)
 ALLOBJ = $(ALLOBJF:.cpp=.o)

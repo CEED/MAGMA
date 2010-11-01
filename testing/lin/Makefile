@@ -29,6 +29,7 @@ include ../../make.inc
           \
           sorgbr.f \
           sbdt01.f \
+          dbdt01.f \
           \
           sstt21.f \
           dstt21.f \

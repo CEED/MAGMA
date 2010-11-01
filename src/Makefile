@@ -44,10 +44,10 @@ ZSRC  = magma_zf77.cpp	\
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
-SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "s ds")
+SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 
 #ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
-ALLSRC= $(SSRC)	\
+ALLSRC= $(DSRC) $(SSRC)	\
         auxiliary.o \
         xerbla.o \
 
