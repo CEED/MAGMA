@@ -54,6 +54,7 @@ subs = {
   ],
   'normal' : [ ## Dictionary is keyed on substitution type
     ['s','d','c','z'], ## Special Line Indicating type columns
+    ('#define PRECISION_s', '#define PRECISION_d', '#define PRECISION_c', '#define PRECISION_z' ),
     ('#define REAL','#define REAL','#define COMPLEX','#define COMPLEX'),
     ('#undef COMPLEX','#undef COMPLEX','#undef REAL','#undef REAL'),
     ('#define SINGLE','#define DOUBLE','#define SINGLE','#define DOUBLE'),
@@ -70,6 +71,7 @@ subs = {
     ('sinplace','dinplace','cinplace','zinplace'),
     ('spermute','dpermute','cpermute','zpermute'),
     ('stranspose','dtranspose','ctranspose','ztranspose'),
+    ('STRANSPOSE','DTRANSPOSE','CTRANSPOSE','ZTRANSPOSE'),
     ('scopy','dcopy','ccopy','zcopy'),
     ('strmv','dtrmv','ctrmv','ztrmv'),
     ('sgemv','dgemv','cgemv','zgemv'),
