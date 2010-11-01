@@ -13,7 +13,8 @@ ZSRC  = zauxiliary.cu	\
 	zpermute-v2.cu	\
 	zclaswp.cu 	\
 	ztranspose.cu 	\
-
+	ztranspose-v2.cu\
+	zinplace_transpose.cu
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
@@ -21,9 +22,6 @@ SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 
 #ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 ALLSRC= $(SSRC)		\
-	sinplace_transpose.cu \
-        stranspose-v2.cu \
-        \
         dlag2s.cu \
         slag2d.cu \
         dgemv_MLU.cu \

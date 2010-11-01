@@ -13,7 +13,7 @@
 
 __global__ void ztranspose_32( double2 *B, int ldb, double2 *A, int lda )
 {	
-	__shared__ double2 a[32][ZTRANSPOSE_SIZE];
+	__shared__ double2 a[32][ZTRANSPOSE_SIZE+1];
 	
 	int inx = threadIdx.x;
 	int iny = threadIdx.y;
@@ -30,12 +30,12 @@ __global__ void ztranspose_32( double2 *B, int ldb, double2 *A, int lda )
 	
 	__syncthreads();
 	
-#if !defined(PRECISION_z)
+#if defined(PRECISION_s) || defined(PRECISION_d) || defined(PRECISION_c)
 	B[0*ldb] = a[inx][iny+0];
 	B[8*ldb] = a[inx][iny+8];
 	B[16*ldb] = a[inx][iny+16];
 	B[24*ldb] = a[inx][iny+24];
-#else
+#else /* defined(PRECISION_z) */
 	B[0*ldb]    = a[inx][iny+0];
 	B[8*ldb]    = a[inx][iny+8];
 	B[0*ldb+16] = a[inx+16][iny+0];

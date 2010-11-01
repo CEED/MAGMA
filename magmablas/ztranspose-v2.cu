@@ -4,12 +4,17 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
-*/
 
-__global__ void stranspose3_32( float *B, int ldb, float *A, int lda,
+       @precisions normal z -> s d c
+
+*/
+#define PRECISION_z
+#include "commonblas.h"
+
+__global__ void ztranspose3_32( double2 *B, int ldb, double2 *A, int lda,
                                 int m, int m32, int n, int n32)
 {
- 	__shared__ float a[32][33];
+ 	__shared__ double2 a[32][ZTRANSPOSE_SIZE+1];
 
         int inx = threadIdx.x;
         int iny = threadIdx.y;
@@ -27,27 +32,33 @@ __global__ void stranspose3_32( float *B, int ldb, float *A, int lda,
 
 	B += iby + inx + __mul24( ibx + iny, ldb );
 
+#if defined(PRECISION_s) || defined(PRECISION_d) || defined(PRECISION_c)
 	if (iby + inx < n){
-          if (ibx + iny <m){
-             B[0*ldb] = a[inx][iny+0];
-             if (ibx + iny + 8 <m){
-                B[8*ldb] = a[inx][iny+8];
-                if (ibx + iny +16 <m){
-                   B[16*ldb] = a[inx][iny+16];
-                   if (ibx + iny +24 <m)
-                      B[24*ldb] = a[inx][iny+24];
-                }
-             }
-          }
+	    if (ibx + iny <m){
+		B[0*ldb] = a[inx][iny+0];
+		if (ibx + iny + 8 <m){
+		    B[8*ldb] = a[inx][iny+8];
+		    if (ibx + iny +16 <m){
+			B[16*ldb] = a[inx][iny+16];
+			if (ibx + iny + 24 <m)
+			    B[24*ldb] = a[inx][iny+24];
+		    }
+		}
+	    }
         }
+#else /* defined(PRECISION_z) */
+	/* TODO: do the case for z */
+#error "Not implemented"
+#endif
+
 }
 
 
 
-__global__ void stranspose2_32( float *B, int ldb, float *A, int lda, 
+__global__ void ztranspose2_32( double2 *B, int ldb, double2 *A, int lda, 
                                 int m, int m32, int n, int n32)
 {	
-	__shared__ float a[32][33];
+	__shared__ double2 a[32][ZTRANSPOSE_SIZE+1];
 	
 	int inx = threadIdx.x;
 	int iny = threadIdx.y;
@@ -75,10 +86,33 @@ __global__ void stranspose2_32( float *B, int ldb, float *A, int lda,
 	
 	__syncthreads();
 	
+#if defined(PRECISION_s) || defined(PRECISION_d) || defined(PRECISION_c)
 	B[0*ldb] = a[inx][iny+0];
 	B[8*ldb] = a[inx][iny+8];
 	B[16*ldb] = a[inx][iny+16];
 	B[24*ldb] = a[inx][iny+24];
+#else /* defined(PRECISION_z) */
+	B[0*ldb]    = a[inx][iny+0];
+	B[8*ldb]    = a[inx][iny+8];
+	B[0*ldb+16] = a[inx+16][iny+0];
+	B[8*ldb+16] = a[inx+16][iny+8];
+
+	__syncthreads();
+	A += ZTRANSPOSE_SIZE;
+	B += __mul24( 16, ldb);
+
+        a[iny+0][inx] = A[0*lda];
+        a[iny+8][inx] = A[8*lda];
+        a[iny+16][inx] = A[16*lda];
+        a[iny+24][inx] = A[24*lda];
+
+        __syncthreads();
+
+	B[0*ldb] = a[inx][iny+0];
+	B[8*ldb] = a[inx][iny+8];
+	B[0*ldb+16] = a[inx+16][iny+0];
+	B[8*ldb+16] = a[inx+16][iny+8];
+#endif
 } 
 
 //
@@ -87,13 +121,13 @@ __global__ void stranspose2_32( float *B, int ldb, float *A, int lda,
 //             Note that ldi >= m and ldo >= n.
 //
 extern "C" void 
-magmablas_stranspose2(float *odata, int ldo, 
-                      float *idata, int ldi, 
+magmablas_ztranspose2(double2 *odata, int ldo, 
+                      double2 *idata, int ldi, 
                       int m, int n )
 {
-	dim3 threads( 32, 8, 1 );
+	dim3 threads( ZTRANSPOSE_SIZE, 8, 1 );
 	dim3 grid( (m+31)/32, (n+31)/32, 1 );
-	stranspose3_32<<< grid, threads >>>( odata, ldo, idata, ldi, 
+	ztranspose3_32<<< grid, threads >>>( odata, ldo, idata, ldi, 
                   //                           m, m%32, n, n%32);
                  m, (32-m%32)%32, n, (32-n%32)%32);
 }
