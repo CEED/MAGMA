@@ -11,6 +11,7 @@ include ../Makefile.internal
 
 ZSRC  = testing_zgetrf.cpp 	\
         testing_zgetrf_gpu.cpp 	\
+        testing_getrf_f.f      \
 	testing_zgesv_gpu.cpp	\
 	testing_zpotrf.cpp	\
         testing_zpotrf_gpu.cpp 	\
@@ -31,7 +32,8 @@ SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 #ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 ALLSRC= $(SSRC)	\
 
-ALLOBJ = $(ALLSRC:.cpp=.o)
+ALLOBJF= $(ALLSRC:.f=.o)
+ALLOBJ = $(ALLOBJF:.cpp=.o)
 EXE = $(ALLOBJ:.o=)
 
 all: $(EXE)
@@ -43,6 +45,9 @@ clean:
 
 cleanall: clean
 	rm -f $(EXE)
+
+testing_%.o : testing_%.f
+	$(FORT) $(OPTS) $(INC) -c $< -o $@ 
 
 .cpp.o:
 	$(CC) $(OPTS) $(INC) -c $< -o $@
