@@ -1,0 +1,10 @@
+#ifndef _COMMONBLAS_H_
+#define _COMMONBLAS_H_
+
+#define ZTRANSPOSE_SIZE 16
+#define CTRANSPOSE_SIZE 32
+#define DTRANSPOSE_SIZE 32
+#define STRANSPOSE_SIZE 32
+
+
+#endif /* _COMMONBLAS_H_ */
