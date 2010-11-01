@@ -146,6 +146,7 @@ subs = {
     ('SPOTRF','DPOTRF','CPOTRF','ZPOTRF'),
     ('spotrs','dpotrs','cpotrs','zpotrs'),
     ('SPOTRS','DPOTRS','CPOTRS','ZPOTRS'),
+    ('sort01','dort01','cunt01','zunt01'),
     ('sorglq','dorglq','cunglq','zunglq'),
     ('SORGLQ','DORGLQ','CUNGLQ','ZUNGLQ'),
     ('sorg2r','dorg2r','cung2r','zung2r'),
