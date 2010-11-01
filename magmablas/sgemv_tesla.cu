@@ -90,7 +90,7 @@ sgemv_kernel2(int n, int m, int n1, float* A, int lda,
 }
 
 extern "C" void
-magmablas_sgemv_tesla(int n, int m, float *A, int lda, float *x, float *z)
+magmablas_sgemv_tesla(int m, int n, float *A, int lda, float *x, float *z)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -103,13 +103,13 @@ magmablas_sgemv_tesla(int n, int m, float *A, int lda, float *x, float *z)
 
     This routine computes z = A x on the GPU.
 
-    N      - (input) INTEGER.
+    M      - (input) INTEGER.
              On entry, N specifies the number of rows of the matrix A.
 
-    M      - (input) INTEGER.
+    N      - (input) INTEGER.
              On entry, M specifies the number of columns of the matrix A
 
-    A      - (input) SINGLE PRECISION array of dimension ( LDA, m ) on the GPU.
+    A      - (input) SINGLE PRECISION array of dimension ( LDA, n ) on the GPU.
    
     LDA    - (input) INTEGER.
              LDA specifies the leading dimension of A.
@@ -122,15 +122,15 @@ magmablas_sgemv_tesla(int n, int m, float *A, int lda, float *x, float *z)
     ===================================================================== */
 
     int blocks;
-    if (n % num_threads==0)
-        blocks = n/num_threads;
+    if (m % num_threads==0)
+        blocks = m/num_threads;
     else
-        blocks = n/num_threads + 1;
+        blocks = m/num_threads + 1;
 
     dim3 grid(blocks, 1, 1);
     dim3 threads(num_threads, 1, 1);
  
-    sgemv_kernel<<<grid, threads>>>(n, m, (m / sgemv_bs)*sgemv_bs, 
+    sgemv_kernel<<<grid, threads>>>(m, n, (n / sgemv_bs)*sgemv_bs, 
                                     A, lda, x, z);
 }
 

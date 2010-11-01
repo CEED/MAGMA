@@ -311,7 +311,7 @@ magmablas_sgemv32_tesla(char tran, int m, int n, float alpha,
 }
 
 extern "C" void
-magmablas_dgemv32_tesla(char tran, int n, double alpha, double *A, 
+magmablas_dgemv32_tesla(char tran, int m, int n, double alpha, double *A, 
                         int lda, double *x, double *y)
 {
 /*  -- MAGMA (version 1.0) --
@@ -321,25 +321,26 @@ magmablas_dgemv32_tesla(char tran, int n, double alpha, double *A,
 
     This routine computes
        y = alpha A^T x 	      	 for tran = 'T' / 't' or
-      	y = alpha A x
-    where A is double precision array of dimension (32, N) for
-    tran = 'T' / 't', or of dimension (N, 32) otherwise.
-*/
+       y = alpha A x
+    where A is double precision array of dimension (32, M) for
+    tran = 'T' / 't', or of dimension (M, 32) otherwise.
+    N is not used in this case (as N == 32).
+    =====================================================================  */
 
 	int blocks;
-	if (n % 32==0)
-		blocks = n/32;
+	if (m % 32==0)
+		blocks = m/32;
 	else
-		blocks = n/32 + 1;
+		blocks = m/32 + 1;
 	dim3 grid(blocks, 1, 1);
 
 	if (tran == 'T' || tran == 't'){
 		dim3 threads(32, 2, 1);
-		dgemvT32_kernel<<<grid, threads>>>(n, alpha, A, lda, x, y);
+		dgemvT32_kernel<<<grid, threads>>>(m, alpha, A, lda, x, y);
 	}
 	else
 	{
 		dim3 threads(32, 1, 1);
-		dgemv32_kernel<<<grid, threads>>>(n, alpha, A, lda, x, y);
+		dgemv32_kernel<<<grid, threads>>>(m, alpha, A, lda, x, y);
 	}
 }
