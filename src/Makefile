@@ -32,7 +32,7 @@ ALLSRC= $(SSRC)	\
         sgeqlf.o \
         sgelqf.o \
         \
-        sdgetrs_gpu.o \
+        dsgetrs_gpu.o \
         dsgesv_gpu.o \
         dsgeqrsv_gpu.o \
         dsposv_gpu.o \
@@ -63,8 +63,10 @@ $(LIBMAGMA): $(ALLOBJ)
 clean:
 	rm -f *.o *~ 
 
-cleanall:
+cleanall: clean
 	rm -f $(LIBMAGMA)
 
 .cpp.o:
 	$(CC) $(OPTS) $(INC) -c $< -o $@
+
+.PHONY: clean cleanall

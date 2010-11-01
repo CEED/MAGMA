@@ -226,9 +226,9 @@ int main( int argc, char** argv)
         //=====================================================================
 
         start = get_current_time();
-        magma_zgeqrf_gpu2(&M, &N, d_A, &N, tau_d, h_work_d, &lwork_d, d_work_d, info);
-        magma_zgeqrs_gpu(&M, &N, &nrhs, d_A, &N, tau_d,
-                         d_b, &M, h_work_d, &lwork_d, d_work_d, info);
+        magma_zgeqrf_gpu2(M, N, d_A, N, tau_d, h_work_d, info);
+        magma_zgeqrs_gpu(M, N, nrhs, d_A, N, tau_d,
+                         d_b, M, h_work_d, &lwork_d, d_work_d, info);
         end = get_current_time();
         double2 dperf = gpu_perf = (4.*N*N*N/3.+2.*N*N)/(1000000.*GetTimerValue(start,end));
 
@@ -238,9 +238,9 @@ int main( int argc, char** argv)
 
 
         start = get_current_time();
-        magma_cgeqrf_gpu2(&M, &N, SWORK, &N, tau, h_work, &lwork, d_work, info);
-        magma_cgeqrs_gpu(&M, &N, &nrhs, SWORK, &N, tau,
-                         SWORK + M * N , &M, h_work, &lwork, d_work, info);
+        magma_cgeqrf_gpu2(M, N, SWORK, N, tau, h_work, info);
+        magma_cgeqrs_gpu(M, N, nrhs, SWORK, N, tau,
+                         SWORK + M * N , M, h_work, &lwork, d_work, info);
         end = get_current_time();
         double2 sperf = gpu_perf = (4.*N*N*N/3.+2.*N*N)/(1000000.*GetTimerValue(start,end));
 

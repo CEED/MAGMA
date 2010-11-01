@@ -13,7 +13,7 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t 
-magma_sdgetrs_gpu(magma_int_t n_, magma_int_t nrhs_, float *a, magma_int_t lda_, 
+magma_dsgetrs_gpu(magma_int_t n_, magma_int_t nrhs_, float *a, magma_int_t lda_, 
 		  magma_int_t *ipiv, float *x, double *b, magma_int_t ldb_, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -25,7 +25,7 @@ magma_sdgetrs_gpu(magma_int_t n_, magma_int_t nrhs_, float *a, magma_int_t lda_,
     Purpose   
     =======   
 
-    SDGETRS solves a system of linear equations   
+    DSGETRS solves a system of linear equations   
        A * X = B  or  A' * X = B   
     with a general N-by-N matrix A using the LU factorization computed   
     by MAGMA_SGETRF_GPU. B is in double, A and X in single precision. This 
@@ -88,7 +88,7 @@ magma_sdgetrs_gpu(magma_int_t n_, magma_int_t nrhs_, float *a, magma_int_t lda_,
     return 0;
   }
   /* Get X by row applying interchanges to B and cast to single */
-  magmablas_sdlaswp(*nrhs, b, *ldb, x, *n, ipiv);
+  magmablas_dslaswp(*nrhs, b, *ldb, x, *n, ipiv);
 
   /* Solve L*X = B, overwriting B with X. */
   float fone = 1.;
@@ -98,6 +98,6 @@ magma_sdgetrs_gpu(magma_int_t n_, magma_int_t nrhs_, float *a, magma_int_t lda_,
   cublasStrsm('L','U','N','N', *n, *nrhs, fone, a, *lda, x, *ldb);
 
   return 0;
-  /* End of MAGMA_SDGETRS */
+  /* End of MAGMA_DSGETRS */
 
-} /* magma_sdgetrs */
+} /* magma_dsgetrs */

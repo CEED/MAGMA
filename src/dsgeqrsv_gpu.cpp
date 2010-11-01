@@ -12,11 +12,11 @@
 #define BWDMAX 1.0
 #define ITERMAX 30
 
-extern "C" int
-magma_dsgeqrsv_gpu(int M, int N, int NRHS, double *A, int LDA, double *B, 
-		   int LDB, double *X,int LDX, double *WORK, float *SWORK, 
-		   int *ITER, int *INFO, float *tau, int lwork, float *h_work,
-		   float *d_work, double *tau_d, int lwork_d, double *h_work_d,
+extern "C" magma_int_t
+magma_dsgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS, double *A, magma_int_t LDA, double *B, 
+		   magma_int_t LDB, double *X,magma_int_t LDX, double *WORK, float *SWORK, 
+		   magma_int_t *ITER, magma_int_t *INFO, float *tau, magma_int_t lwork, float *h_work,
+		   float *d_work, double *tau_d, magma_int_t lwork_d, double *h_work_d,
 		   double *d_work_d)
 {
 /*  -- MAGMA (version 1.0) --

@@ -378,7 +378,7 @@ int main(int argc , char **argv){
     cublasSetMatrix( N, N, sizeof( double2 ), A, N, d_A, N ) ;
     float2 RMAX = slamch_("O");
     start = get_current_time();
-    magma_zgetrf_gpu(&N, &N, d_A, &N, IPIV, h_work_M_D, INFO);
+    magma_zgetrf_gpu(N, N, d_A, N, IPIV, INFO);
     end = get_current_time();
     perf = (2.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
     printf("\t%6.2f", perf);
@@ -390,8 +390,8 @@ int main(int argc , char **argv){
     cublasSetMatrix( N, N, sizeof( double2 ), A, N, d_A, N ) ;
     RMAX = slamch_("O");
     start = get_current_time();
-    magma_zgetrf_gpu(&N, &N, d_A, &N, IPIV, h_work_M_D, INFO);
-    magma_zgetrs_gpu("N",N ,NRHS, d_A ,N,IPIV, d_B, N,INFO, h_work_M_D );
+    magma_zgetrf_gpu(N, N, d_A, N, IPIV, INFO);
+    magma_zgetrs_gpu('N', N, NRHS, d_A ,N,IPIV, d_B, N,INFO, h_work_M_D );
     end = get_current_time();
     perf = (2.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
     printf("\t\t%6.2f", perf);
@@ -403,7 +403,7 @@ int main(int argc , char **argv){
     //=====================================================================
 
     start = get_current_time();
-    magma_cgetrf_gpu2(&N, &N,M_SWORK+PTSA, &LDA,IPIV, DIPIV, h_work_M_S, INFO);
+    magma_cgetrf_gpu2(N, N, M_SWORK+PTSA, LDA, IPIV, DIPIV, h_work_M_S, INFO);
     //magma_cgetrf_gpu(&N, &N, M_SWORK+PTSA, &N, IPIV, h_work_M_S, INFO);
     end = get_current_time();
     perf = (2.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
@@ -411,8 +411,8 @@ int main(int argc , char **argv){
     //fprintf(fp,"\t\t%6.2f", perf);
 
     start = get_current_time();
-    magma_cgetrf_gpu2(&N, &N,M_SWORK+PTSA, &LDA,IPIV, DIPIV, h_work_M_S, INFO);
-    magma_czgetrs_gpu(&N,&NRHS,M_SWORK+PTSA,&LDA,DIPIV,M_SWORK,d_B ,&LDB, INFO);
+    magma_cgetrf_gpu2(N, N, M_SWORK+PTSA, LDA, IPIV, DIPIV, h_work_M_S, INFO);
+    magma_zcgetrs_gpu(N, NRHS, M_SWORK+PTSA, LDA, DIPIV, M_SWORK, d_B , LDB, INFO);
     end = get_current_time();
     perf = (2.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
     printf("\t\t%6.2f", perf);

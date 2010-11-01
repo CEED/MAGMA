@@ -353,7 +353,7 @@ int main(int argc , char **argv){
     //                 Double Precision Factor 
     //=====================================================================
     start = get_current_time();
-    magma_zpotrf_gpu(&uplo, &N,d_A, &LDA, h_work_M_D, INFO);
+    magma_zpotrf_gpu(uplo, N, d_A, LDA, INFO);
     end = get_current_time();
     perf = (1.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
     printf("\t%6.2f", perf);
@@ -364,8 +364,8 @@ int main(int argc , char **argv){
     //=====================================================================
 
     start = get_current_time();
-    magma_zpotrf_gpu(&uplo, &N,d_A, &LDA, h_work_M_D, INFO);
-    magma_zpotrs_gpu( "L",N ,NRHS, d_A  , LDA ,d_B,LDB,INFO);
+    magma_zpotrf_gpu(uplo, N, d_A, LDA, INFO);
+    magma_zpotrs_gpu('L', N, NRHS, d_A, LDA, d_B, LDB, INFO);
     end = get_current_time();
     perf = (1.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
     printf("\t\t%6.2f", perf);
@@ -378,7 +378,7 @@ int main(int argc , char **argv){
     //=====================================================================
 
     start = get_current_time();
-    magma_cpotrf_gpu(&uplo, &N, M_SWORK+N*NRHS, &LDA, h_work_M_S, INFO);
+    magma_cpotrf_gpu(uplo, N, M_SWORK+N*NRHS, LDA, INFO);
     end = get_current_time();
     perf = (1.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
     printf("\t\t%6.2f ", perf);
@@ -390,8 +390,8 @@ int main(int argc , char **argv){
     //=====================================================================
 
     start = get_current_time();
-    magma_cpotrf_gpu(&uplo, &N, M_SWORK+N*NRHS, &LDA, h_work_M_S, INFO);
-    magma_cpotrs_gpu( "L",N ,NRHS, M_SWORK+N*NRHS  , LDA ,M_SWORK,LDB,INFO);
+    magma_cpotrf_gpu(uplo, N, M_SWORK+N*NRHS, LDA, INFO);
+    magma_cpotrs_gpu('L', N, NRHS, M_SWORK+N*NRHS, LDA, M_SWORK, LDB, INFO);
     end = get_current_time();
     perf = (1.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
     printf("\t\t%6.2f", perf);

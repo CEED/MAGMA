@@ -17,11 +17,11 @@
 #define BWDMAX 1.0
 #define ITERMAX 30
 
-extern "C" int
-magma_dsgesv_gpu(int N, int NRHS, double *A, int LDA, int *IPIV, double *B, 
-		 int LDB, double *X, int LDX, double *WORK, float *SWORK,
-		 int *ITER, int *INFO, float *H_SWORK, double *H_WORK,
-		 int *DIPIV)
+extern "C" magma_int_t
+magma_dsgesv_gpu(magma_int_t N, magma_int_t NRHS, double *A, magma_int_t LDA, magma_int_t *IPIV, double *B, 
+		 magma_int_t LDB, double *X, magma_int_t LDX, double *WORK, float *SWORK,
+		 magma_int_t *ITER, magma_int_t *INFO, float *H_SWORK, double *H_WORK,
+		 magma_int_t *DIPIV)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -211,7 +211,7 @@ magma_dsgesv_gpu(int N, int NRHS, double *A, int LDA, int *IPIV, double *B,
     *ITER = -3 ;
     goto L40;
   }
-  magma_sdgetrs_gpu(N, NRHS, SWORK+PTSA, LDA, DIPIV, SWORK, B, LDB, INFO);
+  magma_dsgetrs_gpu(N, NRHS, SWORK+PTSA, LDA, DIPIV, SWORK, B, LDB, INFO);
   int i,j ;
   magmablas_slag2d(N , NRHS , SWORK, N , X , LDX , INFO );
   magma_dlacpy(N, NRHS, B , LDB, WORK, N);
@@ -248,7 +248,7 @@ magma_dsgesv_gpu(int N, int NRHS, double *A, int LDA, int *IPIV, double *B,
         Solve the system SA*SX = SR.
         -- These two Tasks are merged here. 
       */
-      magma_sdgetrs_gpu( N, NRHS, SWORK+PTSA, LDA, DIPIV, SWORK, WORK, LDB, INFO);
+      magma_dsgetrs_gpu( N, NRHS, SWORK+PTSA, LDA, DIPIV, SWORK, WORK, LDB, INFO);
       if(INFO[0] !=0){
 	*ITER = -3 ;
 	goto L40;
