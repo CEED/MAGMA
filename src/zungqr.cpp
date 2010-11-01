@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdio.h>
@@ -11,12 +14,12 @@
 #include <cublas.h>
 #include "magma.h"
 
-extern "C" int sorg2r_(int*, int*, int*, float*, int*, float*, float*, int*);
+extern "C" int sorg2r_(int*, int*, int*, double2*, int*, double2*, double2*, int*);
 
 
 extern "C" int
-magma_sorgqr(int *m, int *n, int *k, float *a, 
-	     int *lda, float *tau, float *work, int *lwork, int *info)
+magma_zungqr(int *m, int *n, int *k, double2 *a, 
+	     int *lda, double2 *tau, double2 *work, int *lwork, int *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -27,13 +30,13 @@ magma_sorgqr(int *m, int *n, int *k, float *a,
     Purpose   
     =======   
 
-    SORGQR generates an M-by-N real matrix Q with orthonormal columns,   
+    ZUNGQR generates an M-by-N real matrix Q with orthonormal columns,   
     which is defined as the first N columns of a product of K elementary   
     reflectors of order M   
 
           Q  =  H(1) H(2) . . . H(k)   
 
-    as returned by SGEQRF.   
+    as returned by ZGEQRF.   
 
     Arguments   
     =========   
@@ -48,21 +51,21 @@ magma_sorgqr(int *m, int *n, int *k, float *a,
             The number of elementary reflectors whose product defines the   
             matrix Q. N >= K >= 0.   
 
-    A       (input/output) REAL array, dimension (LDA,N)   
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N)   
             On entry, the i-th column must contain the vector which   
             defines the elementary reflector H(i), for i = 1,2,...,k, as   
-            returned by SGEQRF in the first k columns of its array   
+            returned by ZGEQRF in the first k columns of its array   
             argument A.   
             On exit, the M-by-N matrix Q.   
 
     LDA     (input) INTEGER   
             The first dimension of the array A. LDA >= max(1,M).   
 
-    TAU     (input) REAL array, dimension (K)   
+    TAU     (input) COMPLEX_16 array, dimension (K)   
             TAU(i) must contain the scalar factor of the elementary   
-            reflector H(i), as returned by SGEQRF.   
+            reflector H(i), as returned by ZGEQRF.   
 
-    WORK    (workspace/output) REAL array, dimension (MAX(1,LWORK))   
+    WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
@@ -97,9 +100,9 @@ magma_sorgqr(int *m, int *n, int *k, float *a,
 
     /* Function Body */
     *info = 0;
-    nb = magma_get_sgeqrf_nb(*m);
+    nb = magma_get_zgeqrf_nb(*m);
     lwkopt = (*m + *n) * nb;
-    work[1] = (float) lwkopt;
+    work[1] = (double2) lwkopt;
     lquery = *lwork == -1;
     if (*m < 0) {
 	*info = -1;
@@ -164,13 +167,13 @@ magma_sorgqr(int *m, int *n, int *k, float *a,
 		/* Form the triangular factor of the block reflector   
 		   H = H(i) H(i+1) . . . H(i+ib-1) */
 		i__2 = *m - i__ + 1;
-		slarft_("Forward", "Columnwise", &i__2, &ib, 
+		zlarft_("Forward", "Columnwise", &i__2, &ib, 
 			&a[i__+i__*a_dim1], lda, &tau[i__], &work[1], &ldwork);
 
 		/* Apply H to A(i:m,i+ib:n) from the left */
 		i__2 = *m - i__ + 1;
 		i__3 = *n - i__ - ib + 1;
-		slarfb_("Left", "No transpose", "Forward", "Columnwise", &
+		zlarfb_("Left", "No transpose", "Forward", "Columnwise", &
 			i__2, &i__3, &ib, &a[i__ + i__ * a_dim1], lda, &work[
 			1], &ldwork, &a[i__ + (i__ + ib) * a_dim1], lda, &
 			work[ib + 1], &ldwork);
@@ -191,9 +194,9 @@ magma_sorgqr(int *m, int *n, int *k, float *a,
 
     return 0;
 
-/*     End of MAGMA_SORGQR */
+/*     End of MAGMA_ZUNGQR */
 
-} /* magma_sorgqr */
+} /* magma_zungqr */
 
 #undef min
 #undef max

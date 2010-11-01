@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <cuda_runtime_api.h>
@@ -12,7 +15,7 @@
 #include "magmablas.h"
 
 extern "C" int 
-magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, 
+magma_zpotrf_gpu(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, 
 		 int *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -24,12 +27,12 @@ magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_,
     Purpose   
     =======   
 
-    SPOTRF computes the Cholesky factorization of a real symmetric   
+    ZPOTRF computes the Cholesky factorization of a real hemmetric   
     positive definite matrix A.   
 
     The factorization has the form   
-       A = U**T * U,  if UPLO = 'U', or   
-       A = L  * L**T,  if UPLO = 'L',   
+       A = U\*\*H * U,  if UPLO = 'U', or   
+       A = L  * L\*\*H,  if UPLO = 'L',   
     where U is an upper triangular matrix and L is lower triangular.   
 
     This is the block version of the algorithm, calling Level 3 BLAS.   
@@ -44,8 +47,8 @@ magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_,
     N       (input) INTEGER   
             The order of the matrix A.  N >= 0.   
 
-    A       (input/output) REAL array on the GPU, dimension (LDA,N)   
-            On entry, the symmetric matrix A.  If UPLO = 'U', the leading   
+    A       (input/output) COMPLEX_16 array on the GPU, dimension (LDA,N)   
+            On entry, the hemmetric matrix A.  If UPLO = 'U', the leading   
             N-by-N upper triangular part of A contains the upper   
             triangular part of the matrix A, and the strictly lower   
             triangular part of A is not referenced.  If UPLO = 'L', the   
@@ -54,7 +57,7 @@ magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_,
             triangular part of A is not referenced.   
 
             On exit, if INFO = 0, the factor U or L from the Cholesky   
-            factorization A = U**T*U or A = L*L**T.   
+            factorization A = U\*\*H*U or A = L*L\*\*H.   
 
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,N).
@@ -83,8 +86,8 @@ magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_,
     char uplo[2] = {uplo_, 0};
 
     /* Table of constant values */
-    static float c_b13 = -1.f;
-    static float c_b14 = 1.f;
+    static double2 c_b13 = -1.f;
+    static double2 c_b14 = 1.f;
     
     /* System generated locals */
     int a_dim1, a_offset, i__1, i__2, i__3, i__4;
@@ -113,16 +116,16 @@ magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_,
     a_offset = 1 + a_dim1 * 1;
     a -= a_offset;
 
-    int nb = magma_get_spotrf_nb(*n);
+    int nb = magma_get_zpotrf_nb(*n);
 
-    float *work;
-    cudaMallocHost( (void**)&work,  nb*nb*sizeof(float) );
+    double2 *work;
+    cudaMallocHost( (void**)&work,  nb*nb*sizeof(double2) );
 
     if (nb <= 1 || nb >= *n) {
       /*  Use unblocked code. */
-      cublasGetMatrix(*n, *n, sizeof(float), a + a_offset, *lda, work, *n);
-      spotrf_(uplo, n, work, n, info);
-      cublasSetMatrix(*n, *n, sizeof(float), work, *n, a + a_offset, *lda);
+      cublasGetMatrix(*n, *n, sizeof(double2), a + a_offset, *lda, work, *n);
+      zpotrf_(uplo, n, work, n, info);
+      cublasSetMatrix(*n, *n, sizeof(double2), work, *n, a + a_offset, *lda);
     } else {
 
         /* Use blocked code. */
@@ -139,10 +142,10 @@ magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_,
 		i__3 = nb, i__4 = *n - j + 1;
 		jb = min(i__3,i__4);
 		i__3 = j - 1;
-                cublasSsyrk('u', 't', jb, i__3, c_b13, a_ref(1,j),
+                cublasSherk('u', 't', jb, i__3, c_b13, a_ref(1,j),
                              *lda, c_b14, a_ref(j, j), *lda);
-                cudaMemcpy2DAsync(work, jb*sizeof(float), a_ref(j,j), 
-				  (*lda) * sizeof(float), 4*sizeof(float), 
+                cudaMemcpy2DAsync(work, jb*sizeof(double2), a_ref(j,j), 
+				  (*lda) * sizeof(double2), 4*sizeof(double2), 
 				  jb, cudaMemcpyDeviceToHost,stream[1]);
 		
 		if (j + jb <= *n) {
@@ -155,13 +158,13 @@ magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_,
                  }
              
                  cudaStreamSynchronize(stream[1]);
-                 spotrf_("Upper", &jb, work, &jb, info);
+                 zpotrf_("Upper", &jb, work, &jb, info);
 		 if (*info != 0) {
 		   *info = *info + j - 1;
 		   break;
 		 }
-                 cudaMemcpy2DAsync(a_ref(j,j), (*lda) * sizeof(float), work, 
-				   jb*sizeof(float), sizeof(float)*jb, 
+                 cudaMemcpy2DAsync(a_ref(j,j), (*lda) * sizeof(double2), work, 
+				   jb*sizeof(double2), sizeof(double2)*jb, 
 				   jb, cudaMemcpyHostToDevice,stream[0]);
 
                  if (j + jb <= *n)
@@ -179,10 +182,10 @@ magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_,
 		i__3 = nb, i__4 = *n - j + 1;
 		jb = min(i__3,i__4);
 		i__3 = j - 1;
-                cublasSsyrk('l', 'n', jb, i__3, c_b13, a_ref(j,1), 
+                cublasSherk('l', 'n', jb, i__3, c_b13, a_ref(j,1), 
                              *lda, c_b14, a_ref(j, j), *lda);
-                cudaMemcpy2DAsync(work, jb*sizeof(float), a_ref(j,j), 
-				  (*lda) * sizeof(float), sizeof(float)*jb, 
+                cudaMemcpy2DAsync(work, jb*sizeof(double2), a_ref(j,j), 
+				  (*lda) * sizeof(double2), sizeof(double2)*jb, 
 				  jb, cudaMemcpyDeviceToHost,stream[1]);
 
                 if (j + jb <= *n) {
@@ -194,18 +197,18 @@ magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_,
                 }
 
                 cudaStreamSynchronize(stream[1]);
-	        spotrf_("Lower", &jb, work, &jb, info);
+	        zpotrf_("Lower", &jb, work, &jb, info);
 		if (*info != 0) {
                   *info = *info + j - 1;
                   break;
                 }
-	        cudaMemcpy2DAsync(a_ref(j,j), (*lda) * sizeof(float), work, 
-				  jb*sizeof(float), sizeof(float)*jb, 
+	        cudaMemcpy2DAsync(a_ref(j,j), (*lda) * sizeof(double2), work, 
+				  jb*sizeof(double2), sizeof(double2)*jb, 
 				  jb, cudaMemcpyHostToDevice,stream[0]);
 	        
 		if (j + jb <= *n)
 		  cublasStrsm('R', 'L', 'T', 'N', i__3, jb, c_b14, 
-		  //magmablas_strsm('R', 'L', 'T', 'N', i__3, jb, c_b14,
+		  //magmablas_ztrsm('R', 'L', 'T', 'N', i__3, jb, c_b14,
 				  a_ref(j, j), *lda, a_ref(j + jb, j),*lda);
 	    }
 
@@ -215,9 +218,9 @@ magma_spotrf_gpu(char uplo_, magma_int_t n_, float *a, magma_int_t lda_,
     cublasFree(work);
     return 0;
 
-    /* End of MAGMA_SPOTRF_GPU */
+    /* End of MAGMA_ZPOTRF_GPU */
 
-} /* magma_spotrf_gpu */
+} /* magma_zpotrf_gpu */
 
 #undef a_ref
 #undef min

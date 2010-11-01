@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdio.h>
@@ -16,9 +19,9 @@
 #include "magmablas.h"
 
 extern "C" void 
-magmablas_sgemm(char TRANSA, char TRANSB, int m , int n , int k , 
-		float alpha, const float *A, int lda, 
-		const float *B, int ldb, float beta, float *C, int ldc)
+magmablas_zgemm(char TRANSA, char TRANSB, int m , int n , int k , 
+		double2 alpha, const double2 *A, int lda, 
+		const double2 *B, int ldb, double2 beta, double2 *C, int ldc)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -29,7 +32,7 @@ magmablas_sgemm(char TRANSA, char TRANSB, int m , int n , int k ,
    Purpose
    =======
  
-   SGEMM  performs one of the matrix-matrix operations
+   ZGEMM  performs one of the matrix-matrix operations
  
       C := alpha*op( A )*op( B ) + beta*C,
  
@@ -144,11 +147,11 @@ magmablas_sgemm(char TRANSA, char TRANSB, int m , int n , int k ,
   
   if( alpha == 0.0){
     if( beta == 0.0){
-      magmablas_sgemm_kernel_ab_0( C,A,B, m, n,k,lda,ldb, ldc, alpha, beta);
+      magmablas_zgemm_kernel_ab_0( C,A,B, m, n,k,lda,ldb, ldc, alpha, beta);
       return ;
     }	
     else{
-      magmablas_sgemm_kernel_a_0( C,A,B, m, n,k,lda,ldb, ldc, alpha, beta);
+      magmablas_zgemm_kernel_a_0( C,A,B, m, n,k,lda,ldb, ldc, alpha, beta);
       return ;
     }		
   }
@@ -168,14 +171,14 @@ magmablas_sgemm(char TRANSA, char TRANSB, int m , int n , int k ,
 	if( m > cutoff && n > cutoff ){
 	  if( m % 64 == 0 && n%16 == 0 && k%16 == 0 ) 
 	    /*
-	    magmablas_sgemm_kernel_N_N_64_16_16_16_4_special( C,A,B, m, n, k,
+	    magmablas_zgemm_kernel_N_N_64_16_16_16_4_special( C,A,B, m, n, k,
 							      lda, ldb, ldc, 
 							      alpha, beta);
 	    */
 	    cublasSgemm( TRANSA, TRANSB, m, n, k, alpha, 
 			 A, lda, B, ldb, beta, C, ldc );
 	  else
-	    magmablas_sgemm_kernel_N_N_64_16_16_16_4( C,A,B, m, n, k, 
+	    magmablas_zgemm_kernel_N_N_64_16_16_16_4( C,A,B, m, n, k, 
 						      lda, ldb, ldc, 
 						      alpha, beta);
 	}
@@ -184,7 +187,7 @@ magmablas_sgemm(char TRANSA, char TRANSB, int m , int n , int k ,
 	    cublasSgemm( TRANSA, TRANSB, m, n, k, alpha, 
 			 A, lda, B, ldb, beta, C, ldc );
 	  else
-	    magmablas_sgemm_kernel_N_N_64_16_16_16_4( C,A,B, m, n, k,
+	    magmablas_zgemm_kernel_N_N_64_16_16_16_4( C,A,B, m, n, k,
 						      lda, ldb, ldc, 
 						      alpha, beta);	  
 	}
@@ -200,14 +203,14 @@ magmablas_sgemm(char TRANSA, char TRANSB, int m , int n , int k ,
 	if( m > cutoff && n > cutoff ){
 	  if( m%64 == 0 && n %16 ==0 && k%4==0) 
 	    /*
-	    magmablas_sgemm_kernel_N_T_64_16_4_16_4( C,A,B, m, n,k,
+	    magmablas_zgemm_kernel_N_T_64_16_4_16_4( C,A,B, m, n,k,
 						     lda, ldb, ldc, 
 						     alpha, beta);
 	    */
 	    cublasSgemm( TRANSA, TRANSB, m, n, k, alpha, 
 			 A, lda, B, ldb, beta, C, ldc );
 	  else 
-	    magmablas_sgemm_kernel_N_T_64_16_4_16_4( C,A,B, m, n, k,
+	    magmablas_zgemm_kernel_N_T_64_16_4_16_4( C,A,B, m, n, k,
 						     lda,ldb, ldc,
 						     alpha, beta);
 	}
@@ -216,7 +219,7 @@ magmablas_sgemm(char TRANSA, char TRANSB, int m , int n , int k ,
 	    cublasSgemm(TRANSA, TRANSB, m, n, k, alpha, 
 			A, lda, B, ldb, beta, C, ldc );
 	  else 
-	    magmablas_sgemm_kernel_N_T_64_16_4_16_4(C,A,B, m, n, k,
+	    magmablas_zgemm_kernel_N_T_64_16_4_16_4(C,A,B, m, n, k,
 						    lda,ldb, ldc, alpha, beta);
 	}
       }
@@ -231,13 +234,13 @@ magmablas_sgemm(char TRANSA, char TRANSB, int m , int n , int k ,
       if(m>cutoff && n > cutoff){
 	if( m%32 == 0 && n %32 ==0 && k%8==0) 
 	  /*
-	  magmablas_sgemm_kernel_T_N_32_32_8_8_8( C,A,B, m, n, k, 
+	  magmablas_zgemm_kernel_T_N_32_32_8_8_8( C,A,B, m, n, k, 
 						  lda, ldb, ldc, alpha, beta);
 	  */
 	  cublasSgemm( TRANSA, TRANSB, m, n, k, alpha, 
 			 A, lda, B, ldb, beta, C, ldc );
 	else
-	  magmablas_sgemm_kernel_T_N_32_32_8_8_8( C,A,B, m, n,k,
+	  magmablas_zgemm_kernel_T_N_32_32_8_8_8( C,A,B, m, n,k,
 						  lda,ldb, ldc, alpha, beta);
       }
       else{
@@ -245,7 +248,7 @@ magmablas_sgemm(char TRANSA, char TRANSB, int m , int n , int k ,
 	  cublasSgemm(TRANSA, TRANSB, m, n, k, alpha, 
 		      A, lda, B, ldb, beta, C, ldc );
 	else
-	  magmablas_sgemm_kernel_T_N_32_32_8_8_8( C,A,B, m,n,k,
+	  magmablas_zgemm_kernel_T_N_32_32_8_8_8( C,A,B, m,n,k,
 						  lda,ldb, ldc, alpha, beta);
       }	
     }
@@ -258,14 +261,14 @@ magmablas_sgemm(char TRANSA, char TRANSB, int m , int n , int k ,
       if( m > cutoff && n > cutoff ){
 	if( m%64 == 0 && n %16 ==0 && k%16==0)
 	  /* 
-	  magmablas_sgemm_kernel_T_T_64_16_16_16_4_v2( C,B,A, n, m, k,
+	  magmablas_zgemm_kernel_T_T_64_16_16_16_4_v2( C,B,A, n, m, k,
 						       ldb,lda, ldc, 
 						       alpha, beta);
 	  */
 	  cublasSgemm( TRANSA, TRANSB, m, n, k, alpha, 
 			 A, lda, B, ldb, beta, C, ldc );
 	else 
-	  magmablas_sgemm_kernel_T_T_64_16_16_16_4( C,B,A, n, m, k,
+	  magmablas_zgemm_kernel_T_T_64_16_16_16_4( C,B,A, n, m, k,
 						    ldb,lda, ldc, alpha, beta);
       }
       else{
@@ -273,7 +276,7 @@ magmablas_sgemm(char TRANSA, char TRANSB, int m , int n , int k ,
 	  cublasSgemm(TRANSA, TRANSB, m, n, k, alpha, 
 		      A, lda, B, ldb, beta, C, ldc );
 	else 
-	  magmablas_sgemm_kernel_T_T_64_16_16_16_4( C,B,A, n, m, k,
+	  magmablas_zgemm_kernel_T_T_64_16_16_16_4( C,B,A, n, m, k,
 						    ldb,lda, ldc, alpha, beta);
       }   
     }

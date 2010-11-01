@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdio.h>
@@ -12,8 +15,8 @@
 #include "magma.h"
 
 extern "C" magma_int_t
-magma_sgeqlf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, 
-	     float *tau, float *work, magma_int_t *lwork, magma_int_t *info)
+magma_zgeqlf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_, 
+	     double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -36,7 +39,7 @@ magma_sgeqlf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     N       (input) INTEGER   
             The number of columns of the matrix A.  N >= 0.   
 
-    A       (input/output) REAL array, dimension (LDA,N)   
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N)   
             On entry, the M-by-N matrix A.   
             On exit, if m >= n, the lower triangle of the subarray   
             A(m-n+1:m,1:n) contains the N-by-N lower triangular matrix L;   
@@ -52,11 +55,11 @@ magma_sgeqlf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,M).   
 
-    TAU     (output) REAL array, dimension (min(M,N))   
+    TAU     (output) COMPLEX_16 array, dimension (min(M,N))   
             The scalar factors of the elementary reflectors (see Further   
             Details).   
 
-    WORK    (workspace/output) REAL array, dimension (MAX(1,LWORK))   
+    WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
             Higher performance is achieved if WORK is in pinned memory, e.g.
@@ -65,7 +68,7 @@ magma_sgeqlf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     LWORK   (input) INTEGER   
             The dimension of the array WORK.  LWORK >= max(1,N).   
             For optimum performance LWORK >= N*NB, where NB can be obtained
-            through magma_get_sgeqlf_nb(M). 
+            through magma_get_zgeqlf_nb(M). 
 
             If LWORK = -1, then a workspace query is assumed; the routine   
             only calculates the optimal size of the WORK array, returns   
@@ -110,7 +113,7 @@ magma_sgeqlf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     long int lquery;
 
     *info = 0;
-    int nb = magma_get_sgeqlf_nb(*m);
+    int nb = magma_get_zgeqlf_nb(*m);
 
     lquery = *lwork == -1;
     if (*m < 0) {
@@ -124,9 +127,9 @@ magma_sgeqlf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     if (*info == 0) {
 	k = min(*m,*n);
 	if (k == 0)
-	  work[0] = (float)1;
+	  work[0] = (double2)1;
 	else 
-	  work[0] = (float)*n * nb;
+	  work[0] = (double2)*n * nb;
 
 	if (*lwork < max(1,*n) && ! lquery)
 	  *info = -7;
@@ -152,21 +155,21 @@ magma_sgeqlf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     lddwork = ((*n+31)/32)*32;
     ldda    = ((*m+31)/32)*32;
 
-    float *da;
-    status = cublasAlloc((*n)*ldda + nb*lddwork, sizeof(float), (void**)&da);
+    double2 *da;
+    status = cublasAlloc((*n)*ldda + nb*lddwork, sizeof(double2), (void**)&da);
     if (status != CUBLAS_STATUS_SUCCESS) {
       *info = -9;
       return 0;
     }
-    float *dwork = da + ldda*(*n);
+    double2 *dwork = da + ldda*(*n);
 
     if (nb >= nbmin && nb < k && nx < k) {
         /*  Use blocked code initially.   
 	    The last kk columns are handled by the block method.
             First, copy the matrix on the GPU except the last kk columns */
-        cudaMemcpy2DAsync(da_ref(0, 0),  ldda *sizeof(float),
-			  a_ref(0, 0), (*lda)*sizeof(float),
-			  sizeof(float)*(*m), (*n-nb),
+        cudaMemcpy2DAsync(da_ref(0, 0),  ldda *sizeof(double2),
+			  a_ref(0, 0), (*lda)*sizeof(double2),
+			  sizeof(double2)*(*m), (*n-nb),
 			  cudaMemcpyHostToDevice,stream[0]);
 
         ki = ((k - nx - 1) / nb) * nb;
@@ -179,14 +182,14 @@ magma_sgeqlf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
 		 2. Copy asynchronously the submatrix below the panel 
 		    to the CPU)                                        */
 	      rows = *m - k + i + ib;
-	      cudaMemcpy2DAsync(  a_ref(0,*n-k+i), (*lda)*sizeof(float),
-				  da_ref(0,*n-k+i), ldda *sizeof(float),
-				  sizeof(float)*rows, ib,
+	      cudaMemcpy2DAsync(  a_ref(0,*n-k+i), (*lda)*sizeof(double2),
+				  da_ref(0,*n-k+i), ldda *sizeof(double2),
+				  sizeof(double2)*rows, ib,
 				  cudaMemcpyDeviceToHost,stream[1]);
 
-	      cudaMemcpy2DAsync(  a_ref(rows,*n-k+i), (*lda)*sizeof(float),
-				  da_ref(rows,*n-k+i), ldda *sizeof(float),
-				  sizeof(float)*(*m-rows), ib,
+	      cudaMemcpy2DAsync(  a_ref(rows,*n-k+i), (*lda)*sizeof(double2),
+				  da_ref(rows,*n-k+i), ldda *sizeof(double2),
+				  sizeof(double2)*(*m-rows), ib,
 				  cudaMemcpyDeviceToHost,stream[0]);
 
 	      /* Apply H' to A(1:m-k+i+ib-1,1:n-k+i-1) from the left in
@@ -194,7 +197,7 @@ magma_sgeqlf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
 		 This is the main update from the lookahead techniques. */
 	      rows = *m - k + old_i + old_ib;
               cols = *n - k + old_i - old_ib;
-              magma_slarfb('B', 'C', rows, cols, old_ib,
+              magma_zlarfb('B', 'C', rows, cols, old_ib,
                            da_ref(0,cols+old_ib), ldda, dwork, lddwork,
                            da_ref(0, 0), ldda, dwork+old_ib, lddwork);
 	    }
@@ -204,31 +207,31 @@ magma_sgeqlf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
 	       A(1:m-k+i+ib-1,n-k+i:n-k+i+ib-1) */
 	    rows = *m - k + i + ib;
 	    cols = *n - k + i;
-	    sgeqlf_(&rows,&ib, a_ref(0,cols), lda, tau+i, work,lwork,&iinfo);
+	    zgeqlf_(&rows,&ib, a_ref(0,cols), lda, tau+i, work,lwork,&iinfo);
 
 	    if (cols > 0) {
 	        /* Form the triangular factor of the block reflector   
 		   H = H(i+ib-1) . . . H(i+1) H(i) */
-	        slarft_("B", "C", &rows, &ib, a_ref(0, cols), lda, 
+	        zlarft_("B", "C", &rows, &ib, a_ref(0, cols), lda, 
 			tau + i, work, &ib);
        
 		spanel_to_q('L', ib, a_ref(rows-ib,cols), *lda, work+ib*ib);
-		cublasSetMatrix(rows, ib, sizeof(float),
+		cublasSetMatrix(rows, ib, sizeof(double2),
 				a_ref(0,cols), *lda, da_ref(0,cols), ldda);
 		sq_to_panel('L', ib, a_ref(rows-ib,cols), *lda, work+ib*ib);
 
 		// Send the triangular part on the GPU
-		cublasSetMatrix(ib,ib,sizeof(float), work, ib, dwork, lddwork);
+		cublasSetMatrix(ib,ib,sizeof(double2), work, ib, dwork, lddwork);
 
 		/* Apply H' to A(1:m-k+i+ib-1,1:n-k+i-1) from the left in
 		   two steps - implementing the lookahead techniques.
 		   This is the update of first ib columns.                 */
 		if (i-ib >= k -kk)
-		  magma_slarfb('B', 'C', rows, ib, ib,
+		  magma_zlarfb('B', 'C', rows, ib, ib,
 			       da_ref(0,cols), ldda, dwork, lddwork,
 			       da_ref(0,cols-ib), ldda, dwork+ib, lddwork);
 		else{
-		  magma_slarfb('B', 'C', rows, cols, ib,
+		  magma_zlarfb('B', 'C', rows, cols, ib,
                                da_ref(0,cols), ldda, dwork, lddwork,
                                da_ref(0,0), ldda, dwork+ib, lddwork);
 		}
@@ -246,18 +249,18 @@ magma_sgeqlf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
 
     /* Use unblocked code to factor the last or only block */
     if (mu > 0 && nu > 0){
-      cublasGetMatrix(*m, nu, sizeof(float),
+      cublasGetMatrix(*m, nu, sizeof(double2),
 		      da_ref(0,0), ldda, a_ref(0,0), *lda);
 
-      sgeqlf_(&mu, &nu, a_ref(0,0), lda, tau, work, lwork, &iinfo);
+      zgeqlf_(&mu, &nu, a_ref(0,0), lda, tau, work, lwork, &iinfo);
     }
 
     cublasFree(da);
     return 0;
     
-    /* End of MAGMA_SGEQLF */
+    /* End of MAGMA_ZGEQLF */
 
-} /* magma_sgeqlf */
+} /* magma_zgeqlf */
 
 #undef  a_ref
 #undef da_ref

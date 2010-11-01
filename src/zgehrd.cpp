@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdio.h>
@@ -14,8 +17,8 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t 
-magma_sgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, float *a, magma_int_t lda_, 
-	     float *tau, float *work, magma_int_t *lwork, float *da, magma_int_t *info)
+magma_zgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, double2 *a, magma_int_t lda_, 
+	     double2 *tau, double2 *work, magma_int_t *lwork, double2 *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -74,7 +77,7 @@ magma_sgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, float *a, magma
 
     DA      (workspace)  SINGLE array on the GPU, dimension 
             N*N + 2*N*NB + NB*NB,
-            where NB can be obtained through magma_get_sgehrd_nb(N).
+            where NB can be obtained through magma_get_zgehrd_nb(N).
 
     INFO    (output) INTEGER   
             = 0:  successful exit   
@@ -130,19 +133,19 @@ magma_sgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, float *a, magma
     int *ihi = &ihi_;
     int *lda = &lda_;
 
-    int nb = magma_get_sgehrd_nb(*n);
+    int nb = magma_get_zgehrd_nb(*n);
     
     int N = *n, ldda = *n;
 
-    float *d_A    = da;
-    float *d_work = da + (N+nb)*ldda; 
+    double2 *d_A    = da;
+    double2 *d_work = da + (N+nb)*ldda; 
 
     /* Local variables */
     static int i__;
 
-    float *t;
-    //cudaMallocHost( (void**)&t, nb*nb*sizeof(float) );
-    t = (float *)malloc(nb*nb*sizeof(float));
+    double2 *t;
+    //cudaMallocHost( (void**)&t, nb*nb*sizeof(double2) );
+    t = (double2 *)malloc(nb*nb*sizeof(double2));
 
     static int ib;
     static int nh, iws;
@@ -155,7 +158,7 @@ magma_sgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, float *a, magma
     /* Function Body */
     *info = 0;
 
-    work[0] = (float) *n * nb;
+    work[0] = (double2) *n * nb;
 
     lquery = *lwork == -1;
     if (*n < 0) {
@@ -174,8 +177,8 @@ magma_sgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, float *a, magma
     else if (lquery)
       return 0;
 
-    //szero_32x32_block(d_A+N*ldda, ldda);
-    szero_nbxnb_block(nb, d_A+N*ldda, ldda);
+    //zzero_32x32_block(d_A+N*ldda, ldda);
+    zzero_nbxnb_block(nb, d_A+N*ldda, ldda);
 
     /* Set elements 1:ILO-1 and IHI:N-1 of TAU to zero */
     for (i__ = 1; i__ < *ilo; ++i__)
@@ -227,7 +230,7 @@ magma_sgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, float *a, magma
       /* Use blocked code */
 
       /* Copy the matrix to the GPU */
-      cublasSetMatrix(N, N, sizeof(float), a+(*ilo-1)*(*lda),*lda, d_A, ldda);
+      cublasSetMatrix(N, N, sizeof(double2), a+(*ilo-1)*(*lda),*lda, d_A, ldda);
 
       for (i__ = *ilo; i__ < *ihi - nb; i__ += nb) {
 	/* Computing MIN */
@@ -238,17 +241,17 @@ magma_sgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, float *a, magma
              which performs the reduction, and also the matrix Y = A*V*T */
 
 	/*   Get the current panel (no need for the 1st iteration) */
-	cublasGetMatrix(*ihi-i__+*ilo, ib, sizeof(float), 
+	cublasGetMatrix(*ihi-i__+*ilo, ib, sizeof(double2), 
 			d_A + (i__ - *ilo)*ldda  + i__ - *ilo, ldda,
 			a   + (i__ -   1 )*(*lda)+ i__ - 1   , *lda);
 	
-	magma_slahr2(*ihi, i__, ib, 
+	magma_zlahr2(*ihi, i__, ib, 
 		     d_A + (i__ - *ilo)*ldda, 
 		     d_A + N*ldda + 1,
 		     a   + (i__ -   1 )*(*lda) , *lda, 
 		     &tau[i__], t, nb, work, ldwork);
 
-	magma_slahru(*ihi, i__ - *ilo, ib, 
+	magma_zlahru(*ihi, i__ - *ilo, ib, 
 		     a   + (i__ -   1 )*(*lda), *lda,
 		     d_A + (i__ - *ilo)*ldda, 
 		     d_A + (i__ - *ilo)*ldda + i__ - 1,
@@ -258,20 +261,20 @@ magma_sgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, float *a, magma
 
     /* Use unblocked code to reduce the rest of the matrix */
     if (!(nb < nbmin || nb >= nh))
-      cublasGetMatrix(*n, *n-i__+1, sizeof(float), 
+      cublasGetMatrix(*n, *n-i__+1, sizeof(double2), 
 		      d_A+ (i__-1)*ldda, ldda, 
 		      a  + (i__-1)*(*lda), *lda);
     sgehd2_(n, &i__, ihi, a, lda, &tau[1], work, &iinfo);
-    work[0] = (float) iws;
+    work[0] = (double2) iws;
     
     // cublasFree(t); 
     free(t);
  
     return 0;
 
-    /* End of MAGMA_SGEHRD */
+    /* End of MAGMA_ZGEHRD */
 
-} /* magma_sgehrd */
+} /* magma_zgehrd */
 
 #undef min
 #undef max

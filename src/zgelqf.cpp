@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdio.h>
@@ -13,15 +16,15 @@
 #include "magmablas.h"
 
 extern "C" void
-magmablas_stranspose2(float *, int, float *, int, int, int);
+magmablas_ztranspose2(double2 *, int, double2 *, int, int, int);
 
 extern "C" void
-magmablas_spermute_long2(float *, int, int *, int, int);
+magmablas_zpermute_long2(double2 *, int, int *, int, int);
 
 
 extern "C" magma_int_t
-magma_sgelqf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, 
-	     float *tau, float *work, magma_int_t *lwork, magma_int_t *info)
+magma_zgelqf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_, 
+	     double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -32,7 +35,7 @@ magma_sgelqf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     Purpose   
     =======   
 
-    SGELQF computes an LQ factorization of a real M-by-N matrix A:   
+    ZGELQF computes an LQ factorization of a real M-by-N matrix A:   
     A = L * Q.   
 
     Arguments   
@@ -44,7 +47,7 @@ magma_sgelqf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     N       (input) INTEGER   
             The number of columns of the matrix A.  N >= 0.   
 
-    A       (input/output) REAL array, dimension (LDA,N)   
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N)   
             On entry, the M-by-N matrix A.   
             On exit, the elements on and below the diagonal of the array   
             contain the m-by-min(m,n) lower trapezoidal matrix L (L is   
@@ -58,11 +61,11 @@ magma_sgelqf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,M).   
 
-    TAU     (output) REAL array, dimension (min(M,N))   
+    TAU     (output) COMPLEX_16 array, dimension (min(M,N))   
             The scalar factors of the elementary reflectors (see Further   
             Details).   
 
-    WORK    (workspace/output) REAL array, dimension (MAX(1,LWORK))   
+    WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
             Higher performance is achieved if WORK is in pinned memory, e.g.
@@ -113,9 +116,9 @@ magma_sgelqf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
 
     /* Function Body */
     *info = 0;
-    int nb = magma_get_sgelqf_nb(*m); 
+    int nb = magma_get_zgelqf_nb(*m); 
 
-    work[0] = (float) *m * nb;
+    work[0] = (double2) *m * nb;
     lquery = *lwork == -1;
     if (*m < 0) {
 	*info = -1;
@@ -139,7 +142,7 @@ magma_sgelqf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     }
 
     int maxm, maxn, maxdim;
-    float *dA, *dAT;
+    double2 *dA, *dAT;
     cublasStatus status;
 
     maxm = ((*m + 31)/32)*32;
@@ -150,49 +153,49 @@ magma_sgelqf(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
       {
 	ldda = maxdim;
 
-	status = cublasAlloc(maxdim*maxdim, sizeof(float), (void**)&dA);
+	status = cublasAlloc(maxdim*maxdim, sizeof(double2), (void**)&dA);
 	if (status != CUBLAS_STATUS_SUCCESS) {
 	  *info = -10;
 	  return 0;
 	}
 
-	cublasSetMatrix( *m, *n, sizeof(float), a, *lda, dA, ldda);
+	cublasSetMatrix( *m, *n, sizeof(double2), a, *lda, dA, ldda);
 	dAT = dA;
-	magmablas_sinplace_transpose( dAT, ldda, ldda );
+	magmablas_zinplace_transpose( dAT, ldda, ldda );
       }
     else
       {
 	ldda = maxn;
 
-	status = cublasAlloc(2*maxn*maxm, sizeof(float), (void**)&dA);
+	status = cublasAlloc(2*maxn*maxm, sizeof(double2), (void**)&dA);
 	if (status != CUBLAS_STATUS_SUCCESS) {
 	  *info = -10;
 	  return 0;
 	}
 
-	cublasSetMatrix( *m, *n, sizeof(float), a, *lda, dA, maxm);
+	cublasSetMatrix( *m, *n, sizeof(double2), a, *lda, dA, maxm);
 
 	dAT = dA + maxn * maxm;
-	magmablas_stranspose2( dAT, ldda, dA, maxm, *m, *n );
+	magmablas_ztranspose2( dAT, ldda, dA, maxm, *m, *n );
       }
 
-    magma_sgeqrf_gpu(n_, m_, dAT, ldda, tau, &iinfo);
+    magma_zgeqrf_gpu(n_, m_, dAT, ldda, tau, &iinfo);
 
     if (maxdim*maxdim< 2*maxm*maxn){
-      magmablas_sinplace_transpose( dAT, ldda, ldda );
-      cublasGetMatrix( *m, *n, sizeof(float), dA, ldda, a, *lda);
+      magmablas_zinplace_transpose( dAT, ldda, ldda );
+      cublasGetMatrix( *m, *n, sizeof(double2), dA, ldda, a, *lda);
     } else {
-      magmablas_stranspose2( dA, maxm, dAT, ldda, *n, *m );
-      cublasGetMatrix( *m, *n, sizeof(float), dA, maxm, a, *lda);
+      magmablas_ztranspose2( dA, maxm, dAT, ldda, *n, *m );
+      cublasGetMatrix( *m, *n, sizeof(double2), dA, maxm, a, *lda);
     }
 
     cublasFree(dA);
 
     return 0;
 
-    /*     End of MAGMA_SGELQF */
+    /*     End of MAGMA_ZGELQF */
 
-} /* magma_sgelqf */
+} /* magma_zgelqf */
 
 #undef  a_ref
 #undef min

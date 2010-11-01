@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdlib.h>
@@ -13,33 +16,33 @@
 #include "magma.h"
 #include "magmablas.h"
 
-extern "C" int ssytd2_(char *, int *, float *, int *,
-		       float *, float *, float *, int *);
-extern "C" int ssyr2k_(char *, char *, int *, int *, float *, float *, 
-		       int *, float *, int *, float *, float *, int *);
-extern "C" int slatrd_(char *, int *, int *, float *,
-		       int *, float *, float *, float *, int *);
+extern "C" int ssytd2_(char *, int *, double2 *, int *,
+		       double2 *, double2 *, double2 *, int *);
+extern "C" int ssyr2k_(char *, char *, int *, int *, double2 *, double2 *, 
+		       int *, double2 *, int *, double2 *, double2 *, int *);
+extern "C" int slatrd_(char *, int *, int *, double2 *,
+		       int *, double2 *, double2 *, double2 *, int *);
 
-extern "C" void magmablas_ssyr2k(char, char, int, int, float, const float *, int,
-				const float *, int, float, float *, int);
-
-
-
-extern "C" int  magma_slatrd(char *, int *, int *, float *,
-			     int *, float *, float *, float *, int *,
-			     float *, int *, float *, int *);
+extern "C" void magmablas_zsyr2k(char, char, int, int, double2, const double2 *, int,
+				const double2 *, int, double2, double2 *, int);
 
 
-float cpu_gpu_sdiff(int M, int N, float * a, int lda, float *da, int ldda)
+
+extern "C" int  magma_zlatrd(char *, int *, int *, double2 *,
+			     int *, double2 *, double2 *, double2 *, int *,
+			     double2 *, int *, double2 *, int *);
+
+
+double2 cpu_gpu_sdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda)
 {
   int one = 1, j;
-  float mone = -1.f, work[1];
-  float *ha = (float*)malloc( M * N * sizeof(float));
+  double2 mone = -1.f, work[1];
+  double2 *ha = (double2*)malloc( M * N * sizeof(double2));
 
-  cublasGetMatrix(M, N, sizeof(float), da, ldda, ha, M);
+  cublasGetMatrix(M, N, sizeof(double2), da, ldda, ha, M);
   for(j=0; j<N; j++)
-    saxpy_(&M, &mone, a+j*lda, &one, ha+j*M, &one);
-  float res = slange_("f", &M, &N, ha, &M, work);
+    zaxpy_(&M, &mone, a+j*lda, &one, ha+j*M, &one);
+  double2 res = zlange_("f", &M, &N, ha, &M, work);
 
   free(ha);
   return res;
@@ -47,8 +50,8 @@ float cpu_gpu_sdiff(int M, int N, float * a, int lda, float *da, int ldda)
 
 
 extern "C" magma_int_t
-magma_ssytrd(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *d__, float *e, 
-	     float *tau, float *work, magma_int_t *lwork, float *da, magma_int_t *info)
+magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *d__, double2 *e, 
+	     double2 *tau, double2 *work, magma_int_t *lwork, double2 *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -58,9 +61,9 @@ magma_ssytrd(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *d__,
 
     Purpose   
     =======   
-    SSYTRD reduces a real symmetric matrix A to real symmetric   
+    SSYTRD reduces a real hemmetric matrix A to real hemmetric   
     tridiagonal form T by an orthogonal similarity transformation:   
-    Q**T * A * Q = T.   
+    Q\*\*H * A * Q = T.   
 
     Arguments   
     =========   
@@ -71,8 +74,8 @@ magma_ssytrd(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *d__,
     N       (input) INTEGER   
             The order of the matrix A.  N >= 0.   
 
-    A       (input/output) REAL array, dimension (LDA,N)   
-            On entry, the symmetric matrix A.  If UPLO = 'U', the leading   
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N)   
+            On entry, the hemmetric matrix A.  If UPLO = 'U', the leading   
             N-by-N upper triangular part of A contains the upper   
             triangular part of the matrix A, and the strictly lower   
             triangular part of A is not referenced.  If UPLO = 'L', the   
@@ -93,19 +96,19 @@ magma_ssytrd(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *d__,
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,N).   
 
-    D       (output) REAL array, dimension (N)   
+    D       (output) COMPLEX_16 array, dimension (N)   
             The diagonal elements of the tridiagonal matrix T:   
             D(i) = A(i,i).   
 
-    E       (output) REAL array, dimension (N-1)   
+    E       (output) COMPLEX_16 array, dimension (N-1)   
             The off-diagonal elements of the tridiagonal matrix T:   
             E(i) = A(i,i+1) if UPLO = 'U', E(i) = A(i+1,i) if UPLO = 'L'.   
 
-    TAU     (output) REAL array, dimension (N-1)   
+    TAU     (output) COMPLEX_16 array, dimension (N-1)   
             The scalar factors of the elementary reflectors (see Further   
             Details).   
 
-    WORK    (workspace/output) REAL array, dimension (MAX(1,LWORK))   
+    WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
@@ -120,7 +123,7 @@ magma_ssytrd(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *d__,
 
     DA      (workspace)  SINGLE array on the GPU, dimension
             N*N + 2*N*NB + NB*NB,
-            where NB can be obtained through magma_get_ssytrd_nb(N).
+            where NB can be obtained through magma_get_zsytrd_nb(N).
 
     INFO    (output) INTEGER   
             = 0:  successful exit   
@@ -178,11 +181,11 @@ magma_ssytrd(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *d__,
     int *lda = &lda_;
 
     int N = *n, ldda = *lda;
-    int nb = magma_get_ssytrd_nb(*n); 
-    float *dwork = da + (*n)*ldda - 1;
+    int nb = magma_get_zsytrd_nb(*n); 
+    double2 *dwork = da + (*n)*ldda - 1;
 
-    static float c_b22 = -1.f;
-    static float c_b23 = 1.f;
+    static double2 c_b22 = -1.f;
+    static double2 c_b23 = 1.f;
     
     /* System generated locals */
     int a_dim1, a_offset, i__1, i__3;
@@ -218,7 +221,7 @@ magma_ssytrd(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *d__,
       /* Determine the block size. */
       ldwork = lddwork = *n;
       lwkopt = *n * nb;
-      work[1] = (float) lwkopt;
+      work[1] = (double2) lwkopt;
     }
 
     if (*info != 0)
@@ -237,7 +240,7 @@ magma_ssytrd(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *d__,
     if (upper) {
 
         /* Copy the matrix to the GPU */ 
-        cublasSetMatrix(N, N, sizeof(float), a+a_offset, *lda, da, ldda);
+        cublasSetMatrix(N, N, sizeof(double2), a+a_offset, *lda, da, ldda);
 
         /*  Reduce the upper triangle of A.   
 	    Columns 1:kk are handled by the unblocked method. */
@@ -249,7 +252,7 @@ magma_ssytrd(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *d__,
 	       matrix W which is needed to update the unreduced part of   
 	       the matrix */
 	    i__3 = i__ + nb - 1;
-	    magma_slatrd(uplo, &i__3, &nb, &a[a_offset], lda, &e[1], &tau[1], 
+	    magma_zlatrd(uplo, &i__3, &nb, &a[a_offset], lda, &e[1], &tau[1], 
 			 &work[1], &ldwork, da, &ldda, dwork+1, &lddwork);
 
 	    /* Update the unreduced submatrix A(1:i-1,1:i-1), using an   
@@ -275,7 +278,7 @@ magma_ssytrd(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *d__,
       {
 	/* Copy the matrix to the GPU */
 	if (1<=*n-nx)
-	  cublasSetMatrix(N, N, sizeof(float), a+a_offset, *lda, da, ldda);
+	  cublasSetMatrix(N, N, sizeof(double2), a+a_offset, *lda, da, ldda);
 
 	/* Reduce the lower triangle of A */
 	for (i__ = 1; i__ <= *n-nx; i__ += nb) 
@@ -287,11 +290,11 @@ magma_ssytrd(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *d__,
 
 	    /*   Get the current panel (no need for the 1st iteration) */
 	    if (i__!=1)
-	      cublasGetMatrix(i__3, nb, sizeof(float),
+	      cublasGetMatrix(i__3, nb, sizeof(double2),
 			      da + (i__-1)*ldda  + (i__-1), ldda,
 			      a  +  i__   *a_dim1+  i__   , *lda);
 	    
-	    magma_slatrd(uplo, &i__3, &nb, &a[i__+i__ * a_dim1], lda, &e[i__], 
+	    magma_zlatrd(uplo, &i__3, &nb, &a[i__+i__ * a_dim1], lda, &e[i__], 
 			 &tau[i__], &work[1], &ldwork, 
 			 da + (i__-1)+(i__-1) * a_dim1, &ldda,
 			 dwork+1, &lddwork);
@@ -299,7 +302,7 @@ magma_ssytrd(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *d__,
 	    /* Update the unreduced submatrix A(i+ib:n,i+ib:n), using   
 	       an update of the form:  A := A - V*W' - W*V' */
 	    i__3 = *n - i__ - nb + 1;
-	    cublasSetMatrix(*n - i__ + 1, nb, sizeof(float),
+	    cublasSetMatrix(*n - i__ + 1, nb, sizeof(double2),
                             work  + 1, ldwork,
                             dwork + 1, lddwork);
 
@@ -321,18 +324,18 @@ magma_ssytrd(char uplo_, magma_int_t n_, float *a, magma_int_t lda_, float *d__,
 	i__1 = *n - i__ + 1;
 
 	if (1<=*n-nx)
-	  cublasGetMatrix(i__1, i__1, sizeof(float),
+	  cublasGetMatrix(i__1, i__1, sizeof(double2),
 			  da + (i__-1) + (i__-1) * a_dim1, ldda,
 			  a  +  i__    +  i__    * a_dim1, *lda);
 	
-	ssytrd_(uplo, &i__1, &a[i__ + i__ * a_dim1], lda, &d__[i__], &e[i__],
+	zsytrd_(uplo, &i__1, &a[i__ + i__ * a_dim1], lda, &d__[i__], &e[i__],
                 &tau[i__], &work[1], lwork, &iinfo);
 	
       }
 
-    work[1] = (float) lwkopt;
+    work[1] = (double2) lwkopt;
     return 0;
     
     /* End of SSYTRD */
     
-} /* ssytrd_ */
+} /* zsytrd_ */

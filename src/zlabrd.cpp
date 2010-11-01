@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdio.h>
@@ -14,10 +17,10 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t 
-magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_int_t lda_, float *d__, float *e,
-	     float *tauq, float *taup, float *x, magma_int_t ldx_, float *y, magma_int_t ldy_,
-	     float *da, magma_int_t ldda_, 
-	     float *dx, magma_int_t lddx_, float *dy, magma_int_t lddy_)
+magma_zlabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, double2 *a, magma_int_t lda_, double2 *d__, double2 *e,
+	     double2 *tauq, double2 *taup, double2 *x, magma_int_t ldx_, double2 *y, magma_int_t ldy_,
+	     double2 *da, magma_int_t ldda_, 
+	     double2 *dx, magma_int_t lddx_, double2 *dy, magma_int_t lddy_)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -48,7 +51,7 @@ magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_in
     NB      (input) INTEGER   
             The number of leading rows and columns of A to be reduced.   
 
-    A       (input/output) REAL array, dimension (LDA,N)   
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N)   
             On entry, the m by n general matrix to be reduced.   
             On exit, the first NB rows and columns of the matrix are   
             overwritten; the rest of the array is unchanged.   
@@ -69,30 +72,30 @@ magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_in
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,M).   
 
-    D       (output) REAL array, dimension (NB)   
+    D       (output) COMPLEX_16 array, dimension (NB)   
             The diagonal elements of the first NB rows and columns of   
             the reduced matrix.  D(i) = A(i,i).   
 
-    E       (output) REAL array, dimension (NB)   
+    E       (output) COMPLEX_16 array, dimension (NB)   
             The off-diagonal elements of the first NB rows and columns of   
             the reduced matrix.   
 
-    TAUQ    (output) REAL array dimension (NB)   
+    TAUQ    (output) COMPLEX_16 array dimension (NB)   
             The scalar factors of the elementary reflectors which   
             represent the orthogonal matrix Q. See Further Details.   
 
-    TAUP    (output) REAL array, dimension (NB)   
+    TAUP    (output) COMPLEX_16 array, dimension (NB)   
             The scalar factors of the elementary reflectors which   
             represent the orthogonal matrix P. See Further Details.   
 
-    X       (output) REAL array, dimension (LDX,NB)   
+    X       (output) COMPLEX_16 array, dimension (LDX,NB)   
             The m-by-nb matrix X required to update the unreduced part   
             of A.   
 
     LDX     (input) INTEGER   
             The leading dimension of the array X. LDX >= M.   
 
-    Y       (output) REAL array, dimension (LDY,NB)   
+    Y       (output) COMPLEX_16 array, dimension (LDY,NB)   
             The n-by-nb matrix Y required to update the unreduced part   
             of A.   
 
@@ -158,10 +161,10 @@ magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_in
     int *lddy = &lddy_;
 
     /* Table of constant values */
-    static float c_b4 = -1.f;
-    static float c_b5 = 1.f;
+    static double2 c_b4 = -1.f;
+    static double2 c_b5 = 1.f;
     static int c__1 = 1;
-    static float c_b16 = 0.f;
+    static double2 c_b16 = 0.f;
     
     /* System generated locals */
     int a_dim1, a_offset, x_dim1, x_offset, y_dim1, y_offset, i__1, i__2, 
@@ -192,7 +195,7 @@ magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_in
 	return 0;
     }
 
-    float *f = (float *)malloc(max(*n,*m)*sizeof(float ));
+    double2 *f = (double2 *)malloc(max(*n,*m)*sizeof(double2 ));
     static cudaStream_t stream[2];
     cudaStreamCreate(&stream[0]);
     cudaStreamCreate(&stream[1]);
@@ -216,7 +219,7 @@ magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_in
 
 	    i__2 = *m - i__ + 1;
 	    i__3 = i__ + 1;
-	    slarfg_(&i__2, &a[i__ + i__ * a_dim1], 
+	    zlarfg_(&i__2, &a[i__ + i__ * a_dim1], 
 		    &a[min(i__3,*m) + i__ * a_dim1], &c__1, &tauq[i__]);
 	    d__[i__] = a[i__ + i__ * a_dim1];
 	    if (i__ < *n) {
@@ -227,7 +230,7 @@ magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_in
 		i__3 = *n - i__;
 
 		// 1. Send the block reflector  A(i+1:m,i) to the GPU ------
-		cublasSetVector(i__2, sizeof(float),
+		cublasSetVector(i__2, sizeof(double2),
 				a + i__   + i__   * a_dim1, 1,
 				da+(i__-1)+(i__-1)* (*ldda), 1);
 		// 2. Multiply ---------------------------------------------
@@ -237,9 +240,9 @@ magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_in
 			    dy + i__ + 1 + i__ * y_dim1, c__1);
 		
 		// 3. Put the result back ----------------------------------
-		cudaMemcpy2DAsync(y+i__+1+i__*y_dim1, y_dim1*sizeof(float),
-				  dy+i__+1+i__*y_dim1, y_dim1*sizeof(float),
-				  sizeof(float)*i__3, 1,
+		cudaMemcpy2DAsync(y+i__+1+i__*y_dim1, y_dim1*sizeof(double2),
+				  dy+i__+1+i__*y_dim1, y_dim1*sizeof(double2),
+				  sizeof(double2)*i__3, 1,
 				  cudaMemcpyDeviceToHost,stream[1]);
 
 		i__2 = *m - i__ + 1;
@@ -264,7 +267,7 @@ magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_in
 
 		if (i__3!=0){
 		  i__2 = *n - i__;
-		  saxpy_(&i__2, &c_b5, f,&c__1, &y[i__+1+i__*y_dim1],&c__1);
+		  zaxpy_(&i__2, &c_b5, f,&c__1, &y[i__+1+i__*y_dim1],&c__1);
 		}
 
 		i__2 = i__ - 1;
@@ -290,7 +293,7 @@ magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_in
 		i__2 = *n - i__;
 		/* Computing MIN */
 		i__3 = i__ + 2;
-		slarfg_(&i__2, &a[i__ + (i__ + 1) * a_dim1], &a[i__ + min(
+		zlarfg_(&i__2, &a[i__ + (i__ + 1) * a_dim1], &a[i__ + min(
 			i__3,*n) * a_dim1], lda, &taup[i__]);
 		e[i__] = a[i__ + (i__ + 1) * a_dim1];
 		a[i__ + (i__ + 1) * a_dim1] = 1.f;
@@ -299,7 +302,7 @@ magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_in
 		i__2 = *m - i__;
 		i__3 = *n - i__;
                 // 1. Send the block reflector  A(i+1:m,i) to the GPU ------
-                cublasSetVector(i__3, sizeof(float),
+                cublasSetVector(i__3, sizeof(double2),
                                 a + i__   + (i__   +1)* a_dim1, *lda,
                                 da+(i__-1)+((i__-1)+1)*(*ldda), *ldda);
                 // 2. Multiply ---------------------------------------------
@@ -309,9 +312,9 @@ magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_in
 			    c_b16, dx + i__ + 1 + i__ * x_dim1, c__1);
 
 		// 3. Put the result back ----------------------------------
-		cudaMemcpy2DAsync(x+i__+1+i__*x_dim1, x_dim1*sizeof(float),
-				  dx+i__+1+i__*x_dim1, x_dim1*sizeof(float),
-				  sizeof(float)*i__2, 1,
+		cudaMemcpy2DAsync(x+i__+1+i__*x_dim1, x_dim1*sizeof(double2),
+				  dx+i__+1+i__*x_dim1, x_dim1*sizeof(double2),
+				  sizeof(double2)*i__2, 1,
                                   cudaMemcpyDeviceToHost,stream[1]);
 
 		i__2 = *n - i__;
@@ -332,7 +335,7 @@ magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_in
                 cudaStreamSynchronize(stream[1]);
 		if (i__!=0){
                   i__2 = *m - i__;
-                  saxpy_(&i__2, &c_b5, f,&c__1, &x[i__+1+i__*x_dim1],&c__1);
+                  zaxpy_(&i__2, &c_b5, f,&c__1, &x[i__+1+i__*x_dim1],&c__1);
 		}
 
 
@@ -366,7 +369,7 @@ magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_in
 	i__2 = *n - i__ + 1;
 	/* Computing MIN */
 	i__3 = i__ + 1;
-	slarfg_(&i__2, &a[i__ + i__ * a_dim1], 
+	zlarfg_(&i__2, &a[i__ + i__ * a_dim1], 
 		&a[i__ + min(i__3,*n) * a_dim1], lda, &taup[i__]);
 	d__[i__] = a[i__ + i__ * a_dim1];
 	if (i__ < *m) {
@@ -416,7 +419,7 @@ magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_in
 	  i__2 = *m - i__;
 	  /* Computing MIN */
 	  i__3 = i__ + 2;
-	  slarfg_(&i__2, &a[i__ + 1 + i__ * a_dim1],
+	  zlarfg_(&i__2, &a[i__ + 1 + i__ * a_dim1],
 		  &a[min(i__3,*m) + i__ * a_dim1], &c__1, &tauq[i__]);
 	  e[i__] = a[i__ + 1 + i__ * a_dim1];
 	  a[i__ + 1 + i__ * a_dim1] = 1.f;
@@ -456,9 +459,9 @@ magma_slabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, float *a, magma_in
     
     return 0;
 
-    /* End of MAGMA_SLABRD */
+    /* End of MAGMA_ZLABRD */
 
-} /* slabrd_ */
+} /* zlabrd_ */
 
 #undef min
 #undef max

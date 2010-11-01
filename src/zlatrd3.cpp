@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdlib.h>
@@ -13,12 +16,12 @@
 #include "magma.h"
 #include "magmablas.h"
 
-extern "C" void mssymv2(int m, int k, float *A, int lda, float *X, float *Y);
+extern "C" void mssymv2(int m, int k, double2 *A, int lda, double2 *X, double2 *Y);
 
 extern "C"
-int magma_slatrd(char *uplo, int *n, int *nb, float *a, 
-		 int *lda, float *e, float *tau, float *w, int *ldw,
-		 float *da, int *ldda, float *dw, int *lddw)
+int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a, 
+		 int *lda, double2 *e, double2 *tau, double2 *w, int *ldw,
+		 double2 *da, int *ldda, double2 *dw, int *lddw)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -28,8 +31,8 @@ int magma_slatrd(char *uplo, int *n, int *nb, float *a,
 
     Purpose   
     =======   
-    SLATRD reduces NB rows and columns of a real symmetric matrix A to   
-    symmetric tridiagonal form by an orthogonal similarity   
+    SLATRD reduces NB rows and columns of a real hemmetric matrix A to   
+    hemmetric tridiagonal form by an orthogonal similarity   
     transformation Q' * A * Q, and returns the matrices V and W which are   
     needed to apply the transformation to the unreduced part of A.   
 
@@ -44,7 +47,7 @@ int magma_slatrd(char *uplo, int *n, int *nb, float *a,
     =========   
     UPLO    (input) CHARACTER*1   
             Specifies whether the upper or lower triangular part of the   
-            symmetric matrix A is stored:   
+            hemmetric matrix A is stored:   
             = 'U': Upper triangular   
             = 'L': Lower triangular   
 
@@ -54,8 +57,8 @@ int magma_slatrd(char *uplo, int *n, int *nb, float *a,
     NB      (input) INTEGER   
             The number of rows and columns to be reduced.   
 
-    A       (input/output) REAL array, dimension (LDA,N)   
-            On entry, the symmetric matrix A.  If UPLO = 'U', the leading   
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N)   
+            On entry, the hemmetric matrix A.  If UPLO = 'U', the leading   
             n-by-n upper triangular part of A contains the upper   
             triangular part of the matrix A, and the strictly lower   
             triangular part of A is not referenced.  If UPLO = 'L', the   
@@ -78,18 +81,18 @@ int magma_slatrd(char *uplo, int *n, int *nb, float *a,
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= (1,N).   
 
-    E       (output) REAL array, dimension (N-1)   
+    E       (output) COMPLEX_16 array, dimension (N-1)   
             If UPLO = 'U', E(n-nb:n-1) contains the superdiagonal   
             elements of the last NB columns of the reduced matrix;   
             if UPLO = 'L', E(1:nb) contains the subdiagonal elements of   
             the first NB columns of the reduced matrix.   
 
-    TAU     (output) REAL array, dimension (N-1)   
+    TAU     (output) COMPLEX_16 array, dimension (N-1)   
             The scalar factors of the elementary reflectors, stored in   
             TAU(n-nb:n-1) if UPLO = 'U', and in TAU(1:nb) if UPLO = 'L'.   
             See Further Details.   
 
-    W       (output) REAL array, dimension (LDW,NB)   
+    W       (output) COMPLEX_16 array, dimension (LDW,NB)   
             The n-by-nb matrix W required to update the unreduced part   
             of A.   
 
@@ -126,7 +129,7 @@ int magma_slatrd(char *uplo, int *n, int *nb, float *a,
 
     The elements of the vectors v together form the n-by-nb matrix V   
     which is needed, with W, to apply the transformation to the unreduced   
-    part of the matrix, using a symmetric rank-2k update of the form:   
+    part of the matrix, using a hemmetric rank-2k update of the form:   
     A := A - V*W' - W*V'.   
 
     The contents of A on exit are illustrated by the following examples   
@@ -150,17 +153,17 @@ int magma_slatrd(char *uplo, int *n, int *nb, float *a,
 
     TimeStruct start, end;
 
-    static float c_b5 = -1.f;
-    static float c_b6 = 1.f;
+    static double2 c_b5 = -1.f;
+    static double2 c_b6 = 1.f;
     static int c__1 = 1;
-    static float c_b16 = 0.f;
+    static double2 c_b16 = 0.f;
     
     /* System generated locals */
     int a_dim1, a_offset, w_dim1, w_offset, i__2, i__3;
     /* Local variables */
     static int i__, iw;
   
-    static float alpha;
+    static double2 alpha;
 
     a_dim1 = *lda;
     a_offset = 1 + a_dim1;
@@ -172,10 +175,10 @@ int magma_slatrd(char *uplo, int *n, int *nb, float *a,
     w -= w_offset;
     dw-= 1 + *lddw;
 
-    float *ws = new float[3*(*n)];
-    float *f = ws;
-    float *c = f+(*n);
-    float *d = c+(*n);
+    double2 *ws = new double2[3*(*n)];
+    double2 *f = ws;
+    double2 *c = f+(*n);
+    double2 *d = c+(*n);
     
     /* Function Body */
     if (*n <= 0) {
@@ -200,7 +203,7 @@ int magma_slatrd(char *uplo, int *n, int *nb, float *a,
 	if (i__ > 1) {
 	  /* Generate elementary reflector H(i) to annihilate A(1:i-2,i) */
 	  i__2 = i__ - 1;
-	  slarfg_(&i__2, &a[i__ - 1 + i__ * a_dim1], &a[i__ * a_dim1 + 1], 
+	  zlarfg_(&i__2, &a[i__ - 1 + i__ * a_dim1], &a[i__ * a_dim1 + 1], 
 		  &c__1, &tau[i__ - 1]);
 	  e[i__ - 1] = a[i__ - 1 + i__ * a_dim1];
 	  a[i__ - 1 + i__ * a_dim1] = 1.f;
@@ -237,7 +240,7 @@ int magma_slatrd(char *uplo, int *n, int *nb, float *a,
 	  alpha = tau[i__ - 1] * -.5f * 
 	    sdot_(&i__2, &w[iw*w_dim1+1], &c__1, &a[i__ * a_dim1 + 1], &c__1);
 	  i__2 = i__ - 1;
-	  saxpy_(&i__2, &alpha, &a[i__ * a_dim1 + 1], &c__1, 
+	  zaxpy_(&i__2, &alpha, &a[i__ * a_dim1 + 1], &c__1, 
 		 &w[iw * w_dim1 + 1], &c__1);
 	}
 	
@@ -260,7 +263,7 @@ int magma_slatrd(char *uplo, int *n, int *nb, float *a,
 	  /* Generate elementary reflector H(i) to annihilate A(i+2:n,i) */
 	  i__2 = *n - i__;
 	  i__3 = i__ + 2;
-	  slarfg_(&i__2, &a[i__ + 1 + i__ * a_dim1], 
+	  zlarfg_(&i__2, &a[i__ + 1 + i__ * a_dim1], 
 		  &a[min(i__3,*n) + i__ * a_dim1], &c__1, &tau[i__]);
 	  e[i__] = a[i__ + 1 + i__ * a_dim1];
 	  a[i__ + 1 + i__ * a_dim1] = 1.f;
@@ -269,7 +272,7 @@ int magma_slatrd(char *uplo, int *n, int *nb, float *a,
 
 	  // TTT : this is the time consuming operation
 	  // 1. Send the block reflector  A(i+1:n,i) to the GPU
-	  cublasSetVector(i__2, sizeof(float),
+	  cublasSetVector(i__2, sizeof(double2),
 			  a + i__   + 1 + i__   * a_dim1, 1,
                           da+(i__-1)+ 1 +(i__-1)* (*ldda), 1);
 	  
@@ -278,13 +281,13 @@ int magma_slatrd(char *uplo, int *n, int *nb, float *a,
           mssymv2(*n, i__,  da, *ldda, 
 		  da + (i__-1)* a_dim1, dw + 1 +  i__ *w_dim1);
 	  /*
-	  magmablas_ssymv(
+	  magmablas_zsymv(
 		      'L', i__2, c_b6, da+ (i__-1)+1 + ((i__-1)+1) * (*ldda),
 		      *ldda, da+ (i__-1)+1 + (i__-1)* a_dim1, c__1, c_b16,
 		      dw+ i__ + 1 + i__ * w_dim1, c__1);
 	  */
 	  //end = get_current_time();
-	  //printf("%4d, ssyrk %4d GFlop/s: %5.2f \n", *n, i__2, 
+	  //printf("%4d, zherk %4d GFlop/s: %5.2f \n", *n, i__2, 
 	  //	 2.*i__2*i__2/(1000000.*GetTimerValue(start,end)));
 
 	  /*
@@ -299,7 +302,7 @@ int magma_slatrd(char *uplo, int *n, int *nb, float *a,
 		 &w[i__ * w_dim1 + 1], &c__1);
 
 	  // put the result back
-	  cublasGetVector(i__2, sizeof(float),
+	  cublasGetVector(i__2, sizeof(double2),
                           dw+ i__ + 1 + i__ * w_dim1, c__1,
                           w + i__ + 1 + i__ * w_dim1, c__1);
 
@@ -315,7 +318,7 @@ int magma_slatrd(char *uplo, int *n, int *nb, float *a,
 	  sscal_(&i__2, &tau[i__], &w[i__ + 1 + i__ * w_dim1], &c__1);
 	  alpha = tau[i__]* -.5f*sdot_(&i__2, &w[i__ +1+ i__ * w_dim1], 
 				       &c__1, &a[i__ +1+ i__ * a_dim1], &c__1);
-	  saxpy_(&i__2, &alpha, &a[i__ + 1 + i__ * a_dim1], &c__1, 
+	  zaxpy_(&i__2, &alpha, &a[i__ + 1 + i__ * a_dim1], &c__1, 
 		 &w[i__ + 1 + i__ * w_dim1], &c__1);
 	}
 
@@ -328,6 +331,6 @@ int magma_slatrd(char *uplo, int *n, int *nb, float *a,
     return 0;
 
     /* End of SLATRD */
-} /* slatrd_ */
+} /* zlatrd_ */
 
 #undef min

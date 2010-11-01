@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdio.h>
@@ -13,9 +16,9 @@
 #include "magmablas.h"
  
 extern "C" magma_int_t 
-magma_slarfb(char direct, char storev,
-	     magma_int_t m, magma_int_t n, magma_int_t k_, float *dv, magma_int_t ldv_, float *dt,
-	     magma_int_t ldt_, float *dc, magma_int_t ldc_, float *dwork, magma_int_t ldwork_)
+magma_zlarfb(char direct, char storev,
+	     magma_int_t m, magma_int_t n, magma_int_t k_, double2 *dv, magma_int_t ldv_, double2 *dt,
+	     magma_int_t ldt_, double2 *dc, magma_int_t ldc_, double2 *dwork, magma_int_t ldwork_)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Univ. of California Berkeley
@@ -52,27 +55,27 @@ magma_slarfb(char direct, char storev,
             The order of the matrix T (= the number of elementary
             reflectors whose product defines the block reflector).
 
-    V       (input) REAL array, dimension (LDV,K)
+    V       (input) COMPLEX_16 array, dimension (LDV,K)
             The matrix V. See further details.
 
     LDV     (input) INTEGER
             The leading dimension of the array V. LDV >= max(1,M);
 
-    T       (input) REAL array, dimension (LDT,K)
+    T       (input) COMPLEX_16 array, dimension (LDT,K)
             The triangular k by k matrix T in the representation of the
             block reflector.
 
     LDT     (input) INTEGER
             The leading dimension of the array T. LDT >= K.
 
-    C       (input/output) REAL array, dimension (LDC,N)
+    C       (input/output) COMPLEX_16 array, dimension (LDC,N)
             On entry, the m by n matrix C.
             On exit, C is overwritten by H*C.
 
     LDC     (input) INTEGER
             The leading dimension of the array C. LDA >= max(1,M).
 
-    WORK    (workspace) REAL array, dimension (LDWORK,K)
+    WORK    (workspace) COMPLEX_16 array, dimension (LDWORK,K)
 
     LDWORK  (input) INTEGER
             The leading dimension of the array WORK. LDWORK >= max(1,N);
@@ -98,7 +101,7 @@ magma_slarfb(char direct, char storev,
     /*
     if (n==1 && m%32==0){
       // This is used when we have to apply H on only one vector 
-      magmablas_sgemvt(m, *k, 1., dv_ref(0,0), *ldv, dc_ref(0, 0), dwork);
+      magmablas_zgemvt(m, *k, 1., dv_ref(0,0), *ldv, dc_ref(0, 0), dwork);
       printf("m= %d, n = %d, ldwork = %d\n", m, *k, *ldwork);
     }
     else
@@ -134,14 +137,14 @@ magma_slarfb(char direct, char storev,
 		dv_ref(0, 0), *ldv, 
 		1.f, dc_ref(0,0), *ldc);
     /*
-    float one = 1.f, zero = 0.f, mone = -1.f;
-    sgemm_("n", "t", &m, k, &n, &one, dc_ref(0, 0), ldc,
+    double2 one = 1.f, zero = 0.f, mone = -1.f;
+    zgemm_("n", "t", &m, k, &n, &one, dc_ref(0, 0), ldc,
 	  dv_ref(0,0), ldv, &zero, dwork, ldwork);
 
-    strmm_("r", "u", "n", "n",
+    ztrmm_("r", "u", "n", "n",
 	   &m, k, &one, dt, ldt, dwork, ldwork);
 
-    sgemm_("n", "n", &m, &n, k, &mone,
+    zgemm_("n", "n", &m, &n, k, &mone,
                 dwork, ldwork,
                 dv_ref(0, 0), ldv,
       		&one, dc_ref(0,0), ldc);
@@ -149,7 +152,7 @@ magma_slarfb(char direct, char storev,
   }
   return 0;
 
-} /* magma_slarfb */
+} /* magma_zlarfb */
 
 #undef dv_ref
 #undef dc_ref

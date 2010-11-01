@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdio.h>
@@ -13,14 +16,14 @@
 #include "magma.h"
 #include "magmablas.h"
 
-extern "C" int sgebd2_(int *, int *, float *, int *, float *, float *, float *,
-		       float *, float *, int *);
-float cpu_gpu_sdiff(int M, int N, float * a, int lda, float *da, int ldda);
+extern "C" int sgebd2_(int *, int *, double2 *, int *, double2 *, double2 *, double2 *,
+		       double2 *, double2 *, int *);
+double2 cpu_gpu_sdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda);
 
 extern "C" magma_int_t
-magma_sgebrd(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_, 
-	     float *d__, float *e, float *tauq, float *taup, float *work, 
-	     magma_int_t *lwork, float *da, magma_int_t *info)
+magma_zgebrd(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_, 
+	     double2 *d__, double2 *e, double2 *tauq, double2 *taup, double2 *work, 
+	     magma_int_t *lwork, double2 *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -31,7 +34,7 @@ magma_sgebrd(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     Purpose   
     =======   
     SGEBRD reduces a general real M-by-N matrix A to upper or lower   
-    bidiagonal form B by an orthogonal transformation: Q**T * A * P = B.   
+    bidiagonal form B by an orthogonal transformation: Q\*\*H * A * P = B.   
 
     If m >= n, B is upper bidiagonal; if m < n, B is lower bidiagonal.   
 
@@ -43,7 +46,7 @@ magma_sgebrd(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     N       (input) INTEGER   
             The number of columns in the matrix A.  N >= 0.   
 
-    A       (input/output) REAL array, dimension (LDA,N)   
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N)   
             On entry, the M-by-N general matrix to be reduced.   
             On exit,   
             if m >= n, the diagonal and the first superdiagonal are   
@@ -65,24 +68,24 @@ magma_sgebrd(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,M).   
 
-    D       (output) REAL array, dimension (min(M,N))   
+    D       (output) COMPLEX_16 array, dimension (min(M,N))   
             The diagonal elements of the bidiagonal matrix B:   
             D(i) = A(i,i).   
 
-    E       (output) REAL array, dimension (min(M,N)-1)   
+    E       (output) COMPLEX_16 array, dimension (min(M,N)-1)   
             The off-diagonal elements of the bidiagonal matrix B:   
             if m >= n, E(i) = A(i,i+1) for i = 1,2,...,n-1;   
             if m < n, E(i) = A(i+1,i) for i = 1,2,...,m-1.   
 
-    TAUQ    (output) REAL array dimension (min(M,N))   
+    TAUQ    (output) COMPLEX_16 array dimension (min(M,N))   
             The scalar factors of the elementary reflectors which   
             represent the orthogonal matrix Q. See Further Details.   
 
-    TAUP    (output) REAL array, dimension (min(M,N))   
+    TAUP    (output) COMPLEX_16 array, dimension (min(M,N))   
             The scalar factors of the elementary reflectors which   
             represent the orthogonal matrix P. See Further Details.   
 
-    WORK    (workspace/output) REAL array, dimension (MAX(1,LWORK))   
+    WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
@@ -146,14 +149,14 @@ magma_sgebrd(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     int *n = &n_;
     int *lda = &lda_;
 
-    static float c_b21 = -1.f;
-    static float c_b22 = 1.f;
+    static double2 c_b21 = -1.f;
+    static double2 c_b22 = 1.f;
     
     /* System generated locals */
     int a_dim1, a_offset, i__1, i__2, i__3, i__4;
     /* Local variables */
     static int i__, j, nx;
-    static float ws;
+    static double2 ws;
     static int iinfo;
     
     static int minmn;
@@ -174,11 +177,11 @@ magma_sgebrd(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
 
     //TimeStruct start, end;
 
-    int nb = magma_get_sgebrd_nb(*n), ldda = *m; 
-    float *dwork = da + (*n)*ldda - 1;
+    int nb = magma_get_zgebrd_nb(*n), ldda = *m; 
+    double2 *dwork = da + (*n)*ldda - 1;
 
     lwkopt = (*m + *n) * nb;
-    work[1] = (float) lwkopt;
+    work[1] = (double2) lwkopt;
     lquery = *lwork == -1;
     if (*m < 0) {
 	*info = -1;
@@ -205,18 +208,18 @@ magma_sgebrd(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
       return 0;
     }
 
-    ws = (float)max(*m,*n);
+    ws = (double2)max(*m,*n);
     ldwrkx = *m;
     ldwrky = *n;
 
-    // float nflops = 0.f;
+    // double2 nflops = 0.f;
     
     /* Set the block/unblock crossover point NX. */
     nx = 128;
 
     /* Copy the matrix to the GPU */
     if (minmn-nx>=1)
-      cublasSetMatrix(*m, *n, sizeof(float), a+a_offset, *lda, da, ldda);
+      cublasSetMatrix(*m, *n, sizeof(double2), a+a_offset, *lda, da, ldda);
 
     for (i__ = 1; i__ <= minmn - nx; i__ += nb) {
 
@@ -229,10 +232,10 @@ magma_sgebrd(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
       /*   Get the current panel (no need for the 1st iteration) */
       // TTT
       if (i__!=1) {
-	cublasGetMatrix(i__3, nb, sizeof(float),
+	cublasGetMatrix(i__3, nb, sizeof(double2),
 			da + (i__-1)*ldda  + (i__-1), ldda,
 			a  +  i__   *a_dim1+  i__   , *lda);
-	cublasGetMatrix(nb, i__4 - nb, sizeof(float),
+	cublasGetMatrix(nb, i__4 - nb, sizeof(double2),
                         da + (i__-1+nb)*ldda  + (i__-1), ldda,
                         a  + (i__  +nb)*a_dim1+  i__   , *lda);
       }
@@ -247,7 +250,7 @@ magma_sgebrd(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
 			   a  + (i__  +nb)*a_dim1+  i__   , *lda,
 			   da + (i__-1+nb)*ldda  + (i__-1), ldda));
       */
-      magma_slabrd(i__3, i__4, nb, 
+      magma_zlabrd(i__3, i__4, nb, 
 		   &a[i__ + i__ * a_dim1], *lda, &d__[i__],
 		   &e[i__], &tauq[i__], &taup[i__], 
 		   &work[1], ldwrkx,                   //  x
@@ -261,13 +264,13 @@ magma_sgebrd(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
       i__3 = *m - i__ - nb + 1;
       i__4 = *n - i__ - nb + 1;
       /* TTT
-      sgemm_("No transpose", "Transpose", &i__3, &i__4, &nb, &c_b21, 
+      zgemm_("No transpose", "Transpose", &i__3, &i__4, &nb, &c_b21, 
 	     &a[i__ + nb + i__ * a_dim1], lda, &work[ldwrkx * nb + nb + 1],
 	     &ldwrky, &c_b22, &a[i__ + nb + (i__ + nb) * a_dim1], lda);
       */
       
       // Send Y back to the GPU
-      cublasSetMatrix(max(i__3,i__4), 2*nb, sizeof(float),
+      cublasSetMatrix(max(i__3,i__4), 2*nb, sizeof(double2),
                       work  + nb + 1 , ldwrky,
                       dwork + nb + 1 , ldwrky);
 
@@ -290,7 +293,7 @@ magma_sgebrd(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
       i__3 = *m - i__ - nb + 1;
       i__4 = *n - i__ - nb + 1;
       /* TTT
-      sgemm_("No transpose", "No transpose", &i__3, &i__4, &nb, &c_b21,
+      zgemm_("No transpose", "No transpose", &i__3, &i__4, &nb, &c_b21,
 	     &work[nb + 1], &ldwrkx, &a[i__ + (i__ + nb) * a_dim1], lda,
 	     &c_b22, &a[i__ + nb + (i__ + nb) * a_dim1], lda);
       */
@@ -336,7 +339,7 @@ magma_sgebrd(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
     i__1 = *n - i__ + 1;
     // TTT
     if (1<=*n-nx)
-      cublasGetMatrix(i__2, i__1, sizeof(float),
+      cublasGetMatrix(i__2, i__1, sizeof(double2),
 		      da + (i__-1) + (i__-1) * a_dim1, ldda,
 		      a  +  i__    +  i__    * a_dim1, *lda);
      
@@ -344,12 +347,12 @@ magma_sgebrd(magma_int_t m_, magma_int_t n_, float *a, magma_int_t lda_,
 	    &tauq[i__], &taup[i__], &work[1], &iinfo);
     work[1] = ws;
 
-    //printf("sgemm \% = %f\n", 100.*3.*nflops/(8.*(*n)*(*n)*(*n)));
+    //printf("zgemm \% = %f\n", 100.*3.*nflops/(8.*(*n)*(*n)*(*n)));
 
     return 0;
 
     /* End of SGEBRD */
-} /* sgebrd_ */
+} /* zgebrd_ */
 
 #undef max
 #undef min

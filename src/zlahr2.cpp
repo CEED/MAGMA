@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdio.h>
@@ -13,9 +16,9 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t 
-magma_slahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_, 
-	     float *da, float *dv, float *a, magma_int_t lda_, 
-	     float *tau, float *t, magma_int_t ldt_, float *y, magma_int_t ldy_)
+magma_zlahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_, 
+	     double2 *da, double2 *dv, double2 *a, magma_int_t lda_, 
+	     double2 *tau, double2 *t, magma_int_t ldt_, double2 *y, magma_int_t ldy_)
 {
 /*  -- MAGMA auxiliary routine (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -48,7 +51,7 @@ magma_slahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
     NB      (input) INTEGER   
             The number of columns to be reduced.
 
-    DA      (input/output) REAL array on the GPU, dimension (LDA,N-K+1)   
+    DA      (input/output) COMPLEX_16 array on the GPU, dimension (LDA,N-K+1)   
             On entry, the n-by-(n-k+1) general matrix A.   
             On exit, the elements on and above the k-th subdiagonal in   
             the first NB columns are overwritten with the corresponding   
@@ -134,17 +137,17 @@ magma_slahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
     int ldda = *n;
 
     /* Table of constant values */
-    static float c_b4 = -1.;
-    static float c_b5 = 1.;
+    static double2 c_b4 = -1.;
+    static double2 c_b5 = 1.;
     static int c__1 = 1;
-    static float c_b38 = 0.;
+    static double2 c_b38 = 0.;
     
     /* System generated locals */
     int a_dim1, a_offset, t_dim1, t_offset, y_dim1, y_offset, i__2, i__3;
-    float d__1;
+    double2 d__1;
     /* Local variables */
     static int i__;
-    static float ei;
+    static double2 ei;
 
     --tau;
     a_dim1 = *lda;
@@ -205,7 +208,7 @@ magma_slahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
 	  /* b1 := b1 - V1*w */
 	  i__2 = i__ - 1;
 	  strmv_("L","N","U",&i__2,&a[*k+1+a_dim1],lda,&t[*nb*t_dim1+1],&c__1);
-	  saxpy_(&i__2, &c_b4, &t[*nb * t_dim1 + 1], &c__1, 
+	  zaxpy_(&i__2, &c_b4, &t[*nb * t_dim1 + 1], &c__1, 
 		 &a[*k + 1 + i__ * a_dim1], &c__1);
 	  
 	  a[*k + i__ - 1 + (i__ - 1) * a_dim1] = ei;
@@ -214,7 +217,7 @@ magma_slahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
 	/* Generate the elementary reflector H(I) to annihilate A(K+I+1:N,I) */
 	i__2 = *n - *k - i__ + 1;
 	i__3 = *k + i__ + 1;
-	slarfg_(&i__2, &a[*k + i__ + i__ * a_dim1], 
+	zlarfg_(&i__2, &a[*k + i__ + i__ * a_dim1], 
 		&a[min(i__3,*n) + i__ * a_dim1], &c__1, &tau[i__]);
 	ei = a[*k + i__ + i__ * a_dim1];
 	a[*k + i__ + i__ * a_dim1] = 1.;
@@ -222,7 +225,7 @@ magma_slahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
 	/* Compute  Y(K+1:N,I) */
         i__2 = *n - *k;
 	i__3 = *n - *k - i__ + 1;
-        cublasSetVector(i__3, sizeof(float), 
+        cublasSetVector(i__3, sizeof(double2), 
                         &a[*k + i__ + i__*a_dim1], 1, dv+(i__-1)*(ldda+1), 1);
 
 	cublasSgemv('N', i__2+1, i__3, c_b5, 
@@ -242,15 +245,15 @@ magma_slahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
 	strmv_("U","N","N", &i__2, &t[t_offset], ldt, &t[i__*t_dim1+1], &c__1);
 	t[i__ + i__ * t_dim1] = tau[i__];
 
-        cublasGetVector(*n - *k + 1, sizeof(float),
+        cublasGetVector(*n - *k + 1, sizeof(double2),
 	                da-1+ *k+(i__-1)*ldda, 1, y+ *k + i__*y_dim1, 1);
     }
     a[*k + *nb + *nb * a_dim1] = ei;
 
     return 0;
 
-    /* End of MAGMA_SLAHR2 */
+    /* End of MAGMA_ZLAHR2 */
 
-} /* magma_slahr2 */
+} /* magma_zlahr2 */
 
 #undef min

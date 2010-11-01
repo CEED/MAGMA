@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdio.h>
@@ -12,8 +15,8 @@
 #include "magma.h"
 
 extern "C" magma_int_t
-magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  
-		 float  *tau, magma_int_t *info)
+magma_zgeqrf_gpu(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t  lda_,  
+		 double2  *tau, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -24,7 +27,7 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
     Purpose   
     =======   
 
-    SGEQRF computes a QR factorization of a real M-by-N matrix A:   
+    ZGEQRF computes a QR factorization of a real M-by-N matrix A:   
     A = Q * R.   
 
     Arguments   
@@ -36,7 +39,7 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
     N       (input) INTEGER   
             The number of columns of the matrix A.  N >= 0.   
 
-    A       (input/output) REAL array on the GPU, dimension (LDA,N)   
+    A       (input/output) COMPLEX_16 array on the GPU, dimension (LDA,N)   
             On entry, the M-by-N matrix A.   
             On exit, the elements on and above the diagonal of the array   
             contain the min(M,N)-by-N upper trapezoidal matrix R (R is   
@@ -50,7 +53,7 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
             To benefit from coalescent memory accesses LDA must be
             dividable by 16.
 
-    TAU     (output) REAL array, dimension (min(M,N))   
+    TAU     (output) COMPLEX_16 array, dimension (min(M,N))   
             The scalar factors of the elementary reflectors (see Further   
             Details).   
 
@@ -91,7 +94,7 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
 
    /* Function Body */
    *info = 0;
-   int nb = magma_get_sgeqrf_nb(*m);
+   int nb = magma_get_zgeqrf_nb(*m);
    
    if (*m < 0) {
      *info = -1;
@@ -114,16 +117,16 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
    cudaStreamCreate(&stream[0]);
    cudaStreamCreate(&stream[1]);
 
-   float *dwork;
+   double2 *dwork;
    cublasStatus status;
-   status = cublasAlloc((*n)*nb, sizeof(float), (void**)&dwork);
+   status = cublasAlloc((*n)*nb, sizeof(double2), (void**)&dwork);
    if (status != CUBLAS_STATUS_SUCCESS) {
      *info = -9;
      return 0;
    }
 
-   float *work;
-   cudaMallocHost((void**)&work, lwork*sizeof(float));
+   double2 *work;
+   cudaMallocHost((void**)&work, lwork*sizeof(double2));
 
    nbmin = 2;
    nx = nb;
@@ -136,43 +139,43 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
       for (i = 0; i < k-nx; i += nb) {
 	ib = min(k-i, nb);
 	rows = *m -i;
-	cudaMemcpy2DAsync(  work_ref(i), ldwork*sizeof(float),
-			    a_ref(i,i), (*lda)*sizeof(float),
-			    sizeof(float)*rows, ib,
+	cudaMemcpy2DAsync(  work_ref(i), ldwork*sizeof(double2),
+			    a_ref(i,i), (*lda)*sizeof(double2),
+			    sizeof(double2)*rows, ib,
 			    cudaMemcpyDeviceToHost,stream[1]);
 	if (i>0){
 	  /* Apply H' to A(i:m,i+2*ib:n) from the left */
-	  magma_slarfb('F', 'C', *m-old_i, *n-old_i-2*old_ib, old_ib,
+	  magma_zlarfb('F', 'C', *m-old_i, *n-old_i-2*old_ib, old_ib,
 		       a_ref(old_i, old_i), *lda, dwork, lddwork, 
 		       a_ref(old_i, old_i+2*old_ib), *lda, 
 		       dwork+old_ib, lddwork);
-	  cudaMemcpy2DAsync(a_ref(old_i, old_i), (*lda) * sizeof(float), 
-			    work_ref(old_i), ldwork * sizeof(float),
-			    sizeof(float)*old_ib, old_ib,
+	  cudaMemcpy2DAsync(a_ref(old_i, old_i), (*lda) * sizeof(double2), 
+			    work_ref(old_i), ldwork * sizeof(double2),
+			    sizeof(double2)*old_ib, old_ib,
 			    cudaMemcpyHostToDevice,stream[0]);
 	}
 
 	cudaStreamSynchronize(stream[1]);
-	sgeqrf_(&rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &lhwork, info);
+	zgeqrf_(&rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &lhwork, info);
 	/* Form the triangular factor of the block reflector
 	   H = H(i) H(i+1) . . . H(i+ib-1) */
-	slarft_("F", "C", &rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &ib);
+	zlarft_("F", "C", &rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &ib);
 	spanel_to_q('U', ib, work_ref(i), ldwork, hwork+ib*ib); 
-	cublasSetMatrix(rows, ib, sizeof(float), 
+	cublasSetMatrix(rows, ib, sizeof(double2), 
 			work_ref(i), ldwork, a_ref(i,i), *lda);
         sq_to_panel('U', ib, work_ref(i), ldwork, hwork+ib*ib);
 
 	if (i + ib < *n) {
-	  cublasSetMatrix(ib, ib, sizeof(float), hwork, ib, dwork, lddwork);
+	  cublasSetMatrix(ib, ib, sizeof(double2), hwork, ib, dwork, lddwork);
 
 	  if (i+nb < k-nx)
 	    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
-	    magma_slarfb('F', 'C', rows, ib, ib, a_ref(i,i), *lda, dwork,
+	    magma_zlarfb('F', 'C', rows, ib, ib, a_ref(i,i), *lda, dwork,
 			 lddwork, a_ref(i,i+ib), *lda, dwork+ib, lddwork);
 	  else {
-	    magma_slarfb('F', 'C', rows, *n-i-ib, ib, a_ref(i,i), *lda, dwork,
+	    magma_zlarfb('F', 'C', rows, *n-i-ib, ib, a_ref(i,i), *lda, dwork,
 			 lddwork, a_ref(i,i+ib), *lda, dwork+ib, lddwork);
-	    cublasSetMatrix(ib, ib, sizeof(float),
+	    cublasSetMatrix(ib, ib, sizeof(double2),
 			    work_ref(i), ldwork, a_ref(i,i), *lda);
 	  }
 	  old_i = i;
@@ -189,20 +192,20 @@ magma_sgeqrf_gpu(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
    if (i < k) {
       ib   = *n-i;
       rows = *m-i;
-      cublasGetMatrix(rows, ib, sizeof(float),
+      cublasGetMatrix(rows, ib, sizeof(double2),
                       a_ref(i,i), *lda, work, rows);
       lhwork = lwork - rows*ib;
-      sgeqrf_(&rows, &ib, work, &rows, tau+i, work+ib*rows, &lhwork, info);
-      cublasSetMatrix(rows, ib, sizeof(float),
+      zgeqrf_(&rows, &ib, work, &rows, tau+i, work+ib*rows, &lhwork, info);
+      cublasSetMatrix(rows, ib, sizeof(double2),
                       work, rows, a_ref(i,i), *lda);
    }
    cublasFree(work);
 
    return 0; 
   
-   /* End of MAGMA_SGEQRF */
+   /* End of MAGMA_ZGEQRF */
 
-} /* magma_sgeqrf_ */
+} /* magma_zgeqrf_ */
 
 #undef a_ref
 #undef work_ref

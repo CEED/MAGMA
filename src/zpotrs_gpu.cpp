@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdio.h>
@@ -14,8 +17,8 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t
-magma_spotrs_gpu(char UPLO_, magma_int_t N , magma_int_t NRHS, float *A , magma_int_t LDA,
-		 float *B, magma_int_t LDB, magma_int_t *INFO)
+magma_zpotrs_gpu(char UPLO_, magma_int_t N , magma_int_t NRHS, double2 *A , magma_int_t LDA,
+		 double2 *B, magma_int_t LDB, magma_int_t *INFO)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -26,9 +29,9 @@ magma_spotrs_gpu(char UPLO_, magma_int_t N , magma_int_t NRHS, float *A , magma_
     Purpose
     =======
 
-    SPOTRS solves a system of linear equations A*X = B with a symmetric
+    ZPOTRS solves a system of linear equations A*X = B with a hemmetric
     positive definite matrix A using the Cholesky factorization
-    A = U**T*U or A = L*L**T computed by SPOTRF.
+    A = U\*\*H*U or A = L*L\*\*H computed by ZPOTRF.
 
     Arguments
     =========
@@ -44,14 +47,14 @@ magma_spotrs_gpu(char UPLO_, magma_int_t N , magma_int_t NRHS, float *A , magma_
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    A       (input) REAL array, dimension (LDA,N)
+    A       (input) COMPLEX_16 array, dimension (LDA,N)
             The triangular factor U or L from the Cholesky factorization
-            A = U**T*U or A = L*L**T, as computed by SPOTRF.
+            A = U\*\*H*U or A = L*L\*\*H, as computed by ZPOTRF.
 
     LDA     (input) INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    B       (input/output) REAL array, dimension (LDB,NRHS)
+    B       (input/output) COMPLEX_16 array, dimension (LDB,NRHS)
             On entry, the right hand side matrix B.
             On exit, the solution matrix X.
 
@@ -78,7 +81,7 @@ magma_spotrs_gpu(char UPLO_, magma_int_t N , magma_int_t NRHS, float *A , magma_
     if ( LDB < MAX(1,N))
       *INFO = -7;
     if( *INFO != 0 ){ 
-      magma_xerbla("magma_spotrs_gpu", INFO); 
+      magma_xerbla("magma_zpotrs_gpu", INFO); 
       return 0;
     }
     if( N==0 || NRHS ==0) 

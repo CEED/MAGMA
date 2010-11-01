@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdlib.h>
@@ -13,10 +16,10 @@
 #include "magma.h"
 
 extern "C" int 
-magma_stsqrt_gpu(int *m, int *n, 
-		 float *a1, float *a2, int  *lda,
-		 float  *tau, float *work, 
-		 int *lwork, float *dwork, int *info )
+magma_ztsqrt_gpu(int *m, int *n, 
+		 double2 *a1, double2 *a2, int  *lda,
+		 double2  *tau, double2 *work, 
+		 int *lwork, double2 *dwork, int *info )
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -27,7 +30,7 @@ magma_stsqrt_gpu(int *m, int *n,
     Purpose   
     =======   
 
-    SGEQRF computes a QR factorization of a real M-by-N matrix A:   
+    ZGEQRF computes a QR factorization of a real M-by-N matrix A:   
     A = Q * R.   
 
     Arguments   
@@ -39,7 +42,7 @@ magma_stsqrt_gpu(int *m, int *n,
     N       (input) INTEGER   
             The number of columns of the matrix A.  N >= 0.   
 
-    A       (input/output) REAL array on the GPU, dimension (LDA,N)   
+    A       (input/output) COMPLEX_16 array on the GPU, dimension (LDA,N)   
             On entry, the M-by-N matrix A.   
             On exit, the elements on and above the diagonal of the array   
             contain the min(M,N)-by-N upper trapezoidal matrix R (R is   
@@ -51,11 +54,11 @@ magma_stsqrt_gpu(int *m, int *n,
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,M).   
 
-    TAU     (output) REAL array, dimension (min(M,N))   
+    TAU     (output) COMPLEX_16 array, dimension (min(M,N))   
             The scalar factors of the elementary reflectors (see Further   
             Details).   
 
-    WORK    (workspace/output) REAL array, dimension (MAX(1,LWORK))   
+    WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
             Higher performance is achieved if WORK is in pinned memory, e.g.
@@ -63,15 +66,15 @@ magma_stsqrt_gpu(int *m, int *n,
 
     LWORK   (input) INTEGER   
             The dimension of the array WORK.  LWORK >= (M+N+NB)*NB,   
-            where NB can be obtained through magma_get_sgeqrf_nb(M).
+            where NB can be obtained through magma_get_zgeqrf_nb(M).
 
             If LWORK = -1, then a workspace query is assumed; the routine   
             only calculates the optimal size of the WORK array, returns   
             this value as the first entry of the WORK array, and no error   
             message related to LWORK is issued.   
 
-    DWORK   (workspace/output)  REAL array on the GPU, dimension 2*N*NB,
-            where NB can be obtained through magma_get_sgeqrf_nb(M).
+    DWORK   (workspace/output)  COMPLEX_16 array on the GPU, dimension 2*N*NB,
+            where NB can be obtained through magma_get_zgeqrf_nb(M).
             It starts with NB*NB blocks that store the triangular T 
             matrices, followed by the NB*NB blocks of the diagonal 
             inverses for the R matrix.
@@ -113,10 +116,10 @@ magma_stsqrt_gpu(int *m, int *n,
 
    /* Function Body */
    *info = 0;
-   int nb = magma_get_sgeqrf_nb(*m);
+   int nb = magma_get_zgeqrf_nb(*m);
 
    int lwkopt = (*n+*m) * nb;
-   work[0] = (float) lwkopt;
+   work[0] = (double2) lwkopt;
    long int lquery = *lwork == -1;
    if (*m < 0) {
      *info = -1;
@@ -156,23 +159,23 @@ magma_stsqrt_gpu(int *m, int *n,
      rows = *m;
      // Send the next panel (diagonal block of A1 & block column of A2) 
      // to the CPU (in work_a1 and work_a2)
-     cudaMemcpy2DAsync(  work_a2, ldwork*sizeof(float),
-			 a2_ref(0,i), (*lda)*sizeof(float),
-			 sizeof(float)*rows, ib,
+     cudaMemcpy2DAsync(  work_a2, ldwork*sizeof(double2),
+			 a2_ref(0,i), (*lda)*sizeof(double2),
+			 sizeof(double2)*rows, ib,
 			 cudaMemcpyDeviceToHost,stream[1]);
-     cudaMemcpy2DAsync(  work_a1, ldwork*sizeof(float),
-			 // a1_ref(i,i), (*lda)*sizeof(float),
+     cudaMemcpy2DAsync(  work_a1, ldwork*sizeof(double2),
+			 // a1_ref(i,i), (*lda)*sizeof(double2),
 			 // the diagonal of a1 is in d_ref generated and
-			 // passed from magma_sgeqrf_gpu2
-			 d_ref(i), ib*sizeof(float),
-			 sizeof(float)*ib, ib,
+			 // passed from magma_zgeqrf_gpu2
+			 d_ref(i), ib*sizeof(double2),
+			 sizeof(double2)*ib, ib,
 			 cudaMemcpyDeviceToHost,stream[1]);
      
 	if (i>0) {
 	  /* Apply H' to A(i:m,i+2*ib:n) from the left */
 	  // update T2
 	  cols = *n-old_i-2*old_ib;
-	  magma_sssrfb(*m, cols, &old_ib,
+	  magma_zssrfb(*m, cols, &old_ib,
 		       a2_ref(    0, old_i), lda, t_ref(old_i), &lddwork,
 		       a1_ref(old_i, old_i+2*old_ib), lda, 
                        a2_ref(    0, old_i+2*old_ib), lda,
@@ -187,22 +190,22 @@ magma_stsqrt_gpu(int *m, int *n,
 	
 	// Now diag of A1 is updated, send it back asynchronously to the GPU.
         // We have to play interchaning these copies to see which is faster
-	cudaMemcpy2DAsync(d_ref(i), ib * sizeof(float),
-			  work_a1 , ib * sizeof(float),
-			  sizeof(float)*ib, ib,
+	cudaMemcpy2DAsync(d_ref(i), ib * sizeof(double2),
+			  work_a1 , ib * sizeof(double2),
+			  sizeof(double2)*ib, ib,
 			  cudaMemcpyHostToDevice,stream[0]);
 	// Send the panel from A2 back to the GPU
-	cublasSetMatrix(*m, ib, sizeof(float),
+	cublasSetMatrix(*m, ib, sizeof(double2),
 			work_a2, ldwork, a2_ref(0,i), *lda);
 
 	if (i + ib < *n) {
 	  // Send the triangular factor T from hwork to the GPU in t_ref(i)
-	  cublasSetMatrix(ib, ib, sizeof(float), hwork, ib, t_ref(i), lddwork);
+	  cublasSetMatrix(ib, ib, sizeof(double2), hwork, ib, t_ref(i), lddwork);
 
 	  if (i+nb < k){
 	    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
 	    // if we can do one more step, first update T1
-	    magma_sssrfb(*m, ib, &ib, 
+	    magma_zssrfb(*m, ib, &ib, 
 			 a2_ref(    0, i), lda, t_ref(i), &lddwork,
 			 a1_ref(    i, i+ib), lda,
 			 a2_ref(    0, i+ib), lda,
@@ -211,7 +214,7 @@ magma_stsqrt_gpu(int *m, int *n,
 	  else {
 	    cols = *n-i-ib;
 	    // otherwise, update until the end and fix the panel
-	    magma_sssrfb(*m, cols, &ib, 
+	    magma_zssrfb(*m, cols, &ib, 
 			 a2_ref(    0, i), lda, t_ref(i), &lddwork,
 			 a1_ref(    i, i+ib), lda,
                          a2_ref(    0, i+ib), lda,
@@ -224,9 +227,9 @@ magma_stsqrt_gpu(int *m, int *n,
    
    return 0; 
    
-   /* End of MAGMA_STSQRT_GPU */
+   /* End of MAGMA_ZTSQRT_GPU */
 
-} /* magma_stsqrt_gpu */
+} /* magma_ztsqrt_gpu */
 
 #undef a1_ref
 #undef a2_ref

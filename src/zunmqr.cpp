@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdio.h>
@@ -11,13 +14,13 @@
 #include <cublas.h>
 #include "magma.h"
 
-extern "C" int sorm2r_(char *, char *, int *, int *, int *, float *, int *, 
-		       float *, float *, int *, float *, int *);
+extern "C" int sorm2r_(char *, char *, int *, int *, int *, double2 *, int *, 
+		       double2 *, double2 *, int *, double2 *, int *);
 
 extern "C" magma_int_t
-magma_sormqr(char side_, char trans_, magma_int_t m_, magma_int_t n_, 
-	     magma_int_t k_, float *a, magma_int_t lda_, float *tau, float *c__, magma_int_t ldc_,
-	     float *work, magma_int_t *lwork, magma_int_t *info)
+magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_, 
+	     magma_int_t k_, double2 *a, magma_int_t lda_, double2 *tau, double2 *c__, magma_int_t ldc_,
+	     double2 *work, magma_int_t *lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -27,30 +30,30 @@ magma_sormqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
 
     Purpose   
     =======   
-    SORMQR overwrites the general real M-by-N matrix C with   
+    ZUNMQR overwrites the general real M-by-N matrix C with   
 
                     SIDE = 'L'     SIDE = 'R'   
     TRANS = 'N':      Q * C          C * Q   
-    TRANS = 'T':      Q**T * C       C * Q**T   
+    TRANS = 'T':      Q\*\*H * C       C * Q\*\*H   
 
     where Q is a real orthogonal matrix defined as the product of k   
     elementary reflectors   
 
           Q = H(1) H(2) . . . H(k)   
 
-    as returned by SGEQRF. Q is of order M if SIDE = 'L' and of order N   
+    as returned by ZGEQRF. Q is of order M if SIDE = 'L' and of order N   
     if SIDE = 'R'.   
 
     Arguments   
     =========   
 
     SIDE    (input) CHARACTER*1   
-            = 'L': apply Q or Q**T from the Left;   
-            = 'R': apply Q or Q**T from the Right.   
+            = 'L': apply Q or Q\*\*H from the Left;   
+            = 'R': apply Q or Q\*\*H from the Right.   
 
     TRANS   (input) CHARACTER*1   
             = 'N':  No transpose, apply Q;   
-            = 'T':  Transpose, apply Q**T.   
+            = 'T':  Transpose, apply Q\*\*H.   
 
     M       (input) INTEGER   
             The number of rows of the matrix C. M >= 0.   
@@ -64,10 +67,10 @@ magma_sormqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
             If SIDE = 'L', M >= K >= 0;   
             if SIDE = 'R', N >= K >= 0.   
 
-    A       (input) REAL array, dimension (LDA,K)   
+    A       (input) COMPLEX_16 array, dimension (LDA,K)   
             The i-th column must contain the vector which defines the   
             elementary reflector H(i), for i = 1,2,...,k, as returned by   
-            SGEQRF in the first k columns of its array argument A.   
+            ZGEQRF in the first k columns of its array argument A.   
             A is modified by the routine but restored on exit.   
 
     LDA     (input) INTEGER   
@@ -75,18 +78,18 @@ magma_sormqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
             If SIDE = 'L', LDA >= max(1,M);   
             if SIDE = 'R', LDA >= max(1,N).   
 
-    TAU     (input) REAL array, dimension (K)   
+    TAU     (input) COMPLEX_16 array, dimension (K)   
             TAU(i) must contain the scalar factor of the elementary   
-            reflector H(i), as returned by SGEQRF.   
+            reflector H(i), as returned by ZGEQRF.   
 
-    C       (input/output) REAL array, dimension (LDC,N)   
+    C       (input/output) COMPLEX_16 array, dimension (LDC,N)   
             On entry, the M-by-N matrix C.   
-            On exit, C is overwritten by Q*C or Q**T*C or C*Q**T or C*Q.   
+            On exit, C is overwritten by Q*C or Q\*\*H*C or C*Q\*\*H or C*Q.   
 
     LDC     (input) INTEGER   
             The leading dimension of the array C. LDC >= max(1,M).   
 
-    WORK    (workspace/output) REAL array, dimension (MAX(1,LWORK))   
+    WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
@@ -120,18 +123,18 @@ magma_sormqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
     int *ldc = &ldc_;
 
     // TTT --------------------------------------------------------------------
-    float *dwork, *dc;
-    cublasAlloc((*m)*(*n), sizeof(float), (void**)&dc);
-    cublasAlloc(2*(*m+64)*64, sizeof(float), (void**)&dwork);
+    double2 *dwork, *dc;
+    cublasAlloc((*m)*(*n), sizeof(double2), (void**)&dc);
+    cublasAlloc(2*(*m+64)*64, sizeof(double2), (void**)&dwork);
     
-    cublasSetMatrix( *m, *n, sizeof(float), c__, *ldc, dc, *ldc);
+    cublasSetMatrix( *m, *n, sizeof(double2), c__, *ldc, dc, *ldc);
     dc -= (1 + *m);
     //-------------------------------------------------------------------------
 
     int a_dim1, a_offset, c_dim1, c_offset, i__4, i__5;
     /* Local variables */
     static int i__;
-    static float t[2*4160]	/* was [65][64] */;
+    static double2 t[2*4160]	/* was [65][64] */;
     static int i1, i2, i3, ib, ic, jc, nb, mi, ni, nq, nw, iws;
     long int left, notran, lquery;
     static int nbmin, iinfo;
@@ -185,7 +188,7 @@ magma_sormqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
 	   is used to define the local array T.    */
 	nb = 64;
 	lwkopt = max(1,nw) * nb;
-	work[1] = (float) lwkopt;
+	work[1] = (double2) lwkopt;
     }
 
     if (*info != 0) {
@@ -249,12 +252,12 @@ magma_sormqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
 	    /* Form the triangular factor of the block reflector   
 	       H = H(i) H(i+1) . . . H(i+ib-1) */
 	    i__4 = nq - i__ + 1;
-	    slarft_("F", "C", &i__4, &ib, &a[i__ + i__ * a_dim1], lda, 
+	    zlarft_("F", "C", &i__4, &ib, &a[i__ + i__ * a_dim1], lda, 
 		    &tau[i__], t, &ib);
 
 	    // TTT ------------------------------------------------------------
 	    spanel_to_q('U', ib, &a[i__ + i__ * a_dim1], *lda, t+ib*ib);
-	    cublasSetMatrix(i__4, ib, sizeof(float),
+	    cublasSetMatrix(i__4, ib, sizeof(double2),
 			    &a[i__ + i__ * a_dim1], *lda, 
 			    dwork, i__4);
 	    sq_to_panel('U', ib, &a[i__ + i__ * a_dim1], *lda, t+ib*ib);
@@ -276,20 +279,20 @@ magma_sormqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
 	    /* Apply H or H' */
 	    // TTT ------------------------------------------------------------
 	    //printf("%5d %5d %5d\n", mi, ni, ic + 1 + *m);
-	    cublasSetMatrix(ib, ib, sizeof(float), t, ib, dwork+i__4*ib, ib);
-	    magma_slarfb('F','C', mi, ni, ib,
+	    cublasSetMatrix(ib, ib, sizeof(double2), t, ib, dwork+i__4*ib, ib);
+	    magma_zlarfb('F','C', mi, ni, ib,
 			 dwork, i__4, dwork+i__4*ib, ib,
 			 &dc[ic + jc * c_dim1], *ldc, 
 			 dwork+i__4*ib + ib*ib, ni);
 	    //-----------------------------------------------------------------
 	    /*
-	    slarfb_(side, trans, "Forward", "Columnwise", &mi, &ni, &ib, 
+	    zlarfb_(side, trans, "Forward", "Columnwise", &mi, &ni, &ib, 
 		    &a[i__ + i__ * a_dim1], lda, t, &c__65, 
 		    &c__[ic + jc * c_dim1], ldc, &work[1], &ldwork);
 	    */
 	  }
       }
-    work[1] = (float) lwkopt;
+    work[1] = (double2) lwkopt;
 
     dc += (1 + *m);
     cublasFree(dc);
@@ -297,9 +300,9 @@ magma_sormqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
 
     return 0;
     
-/*     End of SORMQR */
+/*     End of ZUNMQR */
 
-} /* sormqr_ */
+} /* zunmqr_ */
 
 #undef min
 #undef max

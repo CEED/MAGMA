@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdio.h>
@@ -12,8 +15,8 @@
 #include "magma.h"
 
 extern "C" int
-magma_slahru(int n, int k, int nb, float *a, int lda,
-	     float *d_a, float *y, float *v, float *t, float *d_work)
+magma_zlahru(int n, int k, int nb, double2 *a, int lda,
+	     double2 *d_a, double2 *y, double2 *v, double2 *t, double2 *d_work)
 {
 /*  -- MAGMA auxiliary routine (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -94,11 +97,11 @@ magma_slahru(int n, int k, int nb, float *a, int lda,
     =====================================================================    */
 
     int ldda = n;
-    float *v0 = v + n - k;
-    float *d_t = d_work + nb*ldda;
+    double2 *v0 = v + n - k;
+    double2 *d_t = d_work + nb*ldda;
 
     /* Copy T from the CPU to D_T on the GPU */
-    cublasSetMatrix(nb, nb, sizeof(float), t, nb, d_t, nb);
+    cublasSetMatrix(nb, nb, sizeof(double2), t, nb, d_t, nb);
 
     /* V0 = M V */
     cublasSgemm('N','N', k, nb, n-k, 1.0, d_a, ldda, v, ldda, 0.0, v0, ldda);
@@ -108,10 +111,10 @@ magma_slahru(int n, int k, int nb, float *a, int lda,
        2. M -= V0 d_work                  */
     cublasSgemm('N','T', nb, n-k, nb, 1., d_t,nb, v, ldda, 0., d_work,nb);
     cublasSgemm('N','N', k, n-k, nb, -1., v0, ldda, d_work, nb, 1., d_a, ldda);
-    cublasGetMatrix(k, nb, sizeof(float), d_a, ldda, a, lda);
+    cublasGetMatrix(k, nb, sizeof(double2), d_a, ldda, a, lda);
     /*
-    cudaMemcpy2DAsync(a, lda * sizeof(float), d_a, ldda * sizeof(float),
-		      sizeof(float)*k, nb, cudaMemcpyDeviceToHost,stream[1]);
+    cudaMemcpy2DAsync(a, lda * sizeof(double2), d_a, ldda * sizeof(double2),
+		      sizeof(double2)*k, nb, cudaMemcpyDeviceToHost,stream[1]);
     */
 
     /* Update G -= Y T -= Y d_work */

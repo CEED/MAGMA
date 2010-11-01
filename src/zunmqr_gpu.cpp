@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdio.h>
@@ -11,13 +14,13 @@
 #include <cublas.h>
 #include "magma.h"
 
-extern "C" int sorm2r_(char *, char *, int *, int *, int *, float *, int *, 
-		       float *, float *, int *, float *, int *);
+extern "C" int sorm2r_(char *, char *, int *, int *, int *, double2 *, int *, 
+		       double2 *, double2 *, int *, double2 *, int *);
 
 extern "C" magma_int_t
-magma_sormqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_int_t k_, 
-		 float *a, magma_int_t lda_, float *tau, float *c, magma_int_t ldc_,
-		 float *work, magma_int_t *lwork, float *td, magma_int_t nb, magma_int_t *info)
+magma_zunmqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_int_t k_, 
+		 double2 *a, magma_int_t lda_, double2 *tau, double2 *c, magma_int_t ldc_,
+		 double2 *work, magma_int_t *lwork, double2 *td, magma_int_t nb, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -27,30 +30,30 @@ magma_sormqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
 
     Purpose   
     =======   
-    SORMQR overwrites the general real M-by-N matrix C with   
+    ZUNMQR overwrites the general real M-by-N matrix C with   
 
                     SIDE = 'L'     SIDE = 'R'   
     TRANS = 'N':      Q * C          C * Q   
-    TRANS = 'T':      Q**T * C       C * Q**T   
+    TRANS = 'T':      Q\*\*H * C       C * Q\*\*H   
 
     where Q is a real orthogonal matrix defined as the product of k   
     elementary reflectors   
 
           Q = H(1) H(2) . . . H(k)   
 
-    as returned by SGEQRF. Q is of order M if SIDE = 'L' and of order N   
+    as returned by ZGEQRF. Q is of order M if SIDE = 'L' and of order N   
     if SIDE = 'R'.   
 
     Arguments   
     =========   
 
     SIDE    (input) CHARACTER*1   
-            = 'L': apply Q or Q**T from the Left;   
-            = 'R': apply Q or Q**T from the Right.   
+            = 'L': apply Q or Q\*\*H from the Left;   
+            = 'R': apply Q or Q\*\*H from the Right.   
 
     TRANS   (input) CHARACTER*1   
             = 'N':  No transpose, apply Q;   
-            = 'T':  Transpose, apply Q**T.   
+            = 'T':  Transpose, apply Q\*\*H.   
 
     M       (input) INTEGER   
             The number of rows of the matrix C. M >= 0.   
@@ -64,10 +67,10 @@ magma_sormqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
             If SIDE = 'L', M >= K >= 0;   
             if SIDE = 'R', N >= K >= 0.   
 
-    A       (input) REAL array, dimension (LDA,K)   
+    A       (input) COMPLEX_16 array, dimension (LDA,K)   
             The i-th column must contain the vector which defines the   
             elementary reflector H(i), for i = 1,2,...,k, as returned by   
-            SGEQRF in the first k columns of its array argument A.   
+            ZGEQRF in the first k columns of its array argument A.   
             A is modified by the routine but restored on exit.   
 
     LDA     (input) INTEGER   
@@ -75,18 +78,18 @@ magma_sormqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
             If SIDE = 'L', LDA >= max(1,M);   
             if SIDE = 'R', LDA >= max(1,N).   
 
-    TAU     (input) REAL array, dimension (K)   
+    TAU     (input) COMPLEX_16 array, dimension (K)   
             TAU(i) must contain the scalar factor of the elementary   
-            reflector H(i), as returned by SGEQRF.   
+            reflector H(i), as returned by ZGEQRF.   
 
-    C       (input/output) REAL array, dimension (LDC,N)   
+    C       (input/output) COMPLEX_16 array, dimension (LDC,N)   
             On entry, the M-by-N matrix C.   
-            On exit, C is overwritten by Q*C or Q**T*C or C*Q**T or C*Q.   
+            On exit, C is overwritten by Q*C or Q\*\*H*C or C*Q\*\*H or C*Q.   
 
     LDC     (input) INTEGER   
             The leading dimension of the array C. LDC >= max(1,M).   
 
-    WORK    (workspace/output) REAL array, dimension (MAX(1,LWORK))   
+    WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
@@ -102,12 +105,12 @@ magma_sormqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
             this value as the first entry of the WORK array, and no error   
             message related to LWORK is issued by XERBLA.   
 
-    TD      (input) REAL array that is the output (the 9th argument)
-            of magma_sgeqrf_gpu2.
+    TD      (input) COMPLEX_16 array that is the output (the 9th argument)
+            of magma_zgeqrf_gpu2.
 
     NB      (input) INTEGER
             This is the blocking size that was used in pre-computing TD, e.g.,
-            the blocking size used in magma_sgeqrf_gpu2.
+            the blocking size used in magma_zgeqrf_gpu2.
 
     INFO    (output) INTEGER   
             = 0:  successful exit   
@@ -129,7 +132,7 @@ magma_sormqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
     int *lda = &lda_;
     int *ldc = &ldc_;
 
-    float *dwork;
+    double2 *dwork;
     int i, lddwork;
 
     int i1, i2, i3, ib, ic, jc, mi, ni, nq, nw;
@@ -170,7 +173,7 @@ magma_sormqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
     }
 
     lwkopt = (abs(*m-*k) + nb + 2*(*n))*nb;
-    work[0] = (float) lwkopt;
+    work[0] = (double2) lwkopt;
 
     if (*info != 0) {
 	return 0;
@@ -218,7 +221,7 @@ magma_sormqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
 	      ni = *n - i;
 	      jc = i;
 	    }
-	    magma_slarfb('F', 'C', mi, ni, ib, a_ref(i, i), *lda, 
+	    magma_zlarfb('F', 'C', mi, ni, ib, a_ref(i, i), *lda, 
 			 t_ref(i), lddwork, c_ref(ic, jc), *ldc, dwork, nw);
 	  }
       } 
@@ -239,22 +242,22 @@ magma_sormqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
 	jc = i;
       }
 
-      cublasGetMatrix(mi, ib, sizeof(float), a_ref(i,i), *lda, work, mi);
-      cublasGetMatrix(mi, ni, sizeof(float), c_ref(ic, jc), *ldc, 
+      cublasGetMatrix(mi, ib, sizeof(double2), a_ref(i,i), *lda, work, mi);
+      cublasGetMatrix(mi, ni, sizeof(double2), c_ref(ic, jc), *ldc, 
 		      work+mi*ib, mi);
 
       int lhwork = *lwork - mi*(ib + ni);
-      sormqr_("l", "t", &mi, &ni, &ib, work, &mi,
+      zunmqr_("l", "t", &mi, &ni, &ib, work, &mi,
 	      tau+i, work+mi*ib, &mi, work+mi*(ib+ni), &lhwork, info);
       
       // send the updated part of c back to the GPU
-      cublasSetMatrix(mi, ni, sizeof(float),
+      cublasSetMatrix(mi, ni, sizeof(double2),
                       work+mi*ib, mi, c_ref(ic, jc), *ldc);
     }
 
     return 0;
     
-    /* End of MAGMA_SORMQR_GPU */
+    /* End of MAGMA_ZUNMQR_GPU */
 }
 
 

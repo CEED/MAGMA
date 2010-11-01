@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdlib.h>
@@ -12,9 +15,9 @@
 #include <cublas.h>
 #include "magma.h"
 
-void ssplit_diag_block(int ib, float *a, int lda, float *work){
+void ssplit_diag_block(int ib, double2 *a, int lda, double2 *work){
   int i, j, info;
-  float *cola, *colw;
+  double2 *cola, *colw;
 
   for(i=0; i<ib; i++){
     cola = a    + i*lda;
@@ -26,12 +29,12 @@ void ssplit_diag_block(int ib, float *a, int lda, float *work){
     colw[i] = cola[i];
     cola[i] = 1.;
   }
-  strtri_("u", "n", &ib, work, &ib, &info);
+  ztrtri_("u", "n", &ib, work, &ib, &info);
 }
 
 extern "C" magma_int_t 
-magma_sgeqrf_gpu2(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,  
-                  float  *tau, float *dwork, magma_int_t *info )
+magma_zgeqrf_gpu2(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t  lda_,  
+                  double2  *tau, double2 *dwork, magma_int_t *info )
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -42,7 +45,7 @@ magma_sgeqrf_gpu2(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
     Purpose   
     =======   
 
-    SGEQRF computes a QR factorization of a real M-by-N matrix A:   
+    ZGEQRF computes a QR factorization of a real M-by-N matrix A:   
     A = Q * R. This version stores the triangular matrices used in 
     the factorization so that they can be applied directly (i.e.,
     without being recomputed) later. As a result, the application 
@@ -57,7 +60,7 @@ magma_sgeqrf_gpu2(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
     N       (input) INTEGER   
             The number of columns of the matrix A.  N >= 0.   
 
-    A       (input/output) REAL array on the GPU, dimension (LDA,N)   
+    A       (input/output) COMPLEX_16 array on the GPU, dimension (LDA,N)   
             On entry, the M-by-N matrix A.   
             On exit, the elements on and above the diagonal of the array   
             contain the min(M,N)-by-N upper trapezoidal matrix R (R is   
@@ -71,12 +74,12 @@ magma_sgeqrf_gpu2(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
             To benefit from coalescent memory accesses LDA must be
             dividable by 16.
 
-    TAU     (output) REAL array, dimension (min(M,N))   
+    TAU     (output) COMPLEX_16 array, dimension (min(M,N))   
             The scalar factors of the elementary reflectors (see Further   
             Details).   
 
-    DWORK   (workspace/output)  REAL array on the GPU, dimension 3*N*NB,
-            where NB can be obtained through magma_get_sgeqrf_nb(M).
+    DWORK   (workspace/output)  COMPLEX_16 array on the GPU, dimension 3*N*NB,
+            where NB can be obtained through magma_get_zgeqrf_nb(M).
             It starts with NB*NB blocks that store the triangular T 
             matrices, followed by the NB*NB blocks of the diagonal 
             inverses for the R matrix.
@@ -120,7 +123,7 @@ magma_sgeqrf_gpu2(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
 
    /* Function Body */
    *info = 0;
-   int nb = magma_get_sgeqrf_nb(*m);
+   int nb = magma_get_zgeqrf_nb(*m);
 
    if (*m < 0) {
      *info = -1;
@@ -143,10 +146,10 @@ magma_sgeqrf_gpu2(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
    cudaStreamCreate(&stream[0]);
    cudaStreamCreate(&stream[1]);
 
-   float *work;
-   cudaMallocHost((void**)&work, lwork*sizeof(float));
+   double2 *work;
+   cudaMallocHost((void**)&work, lwork*sizeof(double2));
 
-   float *ut = hwork+nb*(*n);
+   double2 *ut = hwork+nb*(*n);
    for(i=0; i<nb*nb; i++)
      ut[i] = 0.;
 
@@ -161,53 +164,53 @@ magma_sgeqrf_gpu2(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
       for (i = 0; i < k-nb; i += nb) {
 	ib = min(k-i, nb);
 	rows = *m -i;
-	cudaMemcpy2DAsync(  work_ref(i), ldwork*sizeof(float),
-			    a_ref(i,i), (*lda)*sizeof(float),
-			    sizeof(float)*rows, ib,
+	cudaMemcpy2DAsync(  work_ref(i), ldwork*sizeof(double2),
+			    a_ref(i,i), (*lda)*sizeof(double2),
+			    sizeof(double2)*rows, ib,
 			    cudaMemcpyDeviceToHost,stream[1]);
 	if (i>0){
 	  /* Apply H' to A(i:m,i+2*ib:n) from the left */
 	  cols = *n-old_i-2*old_ib;
-	  magma_slarfb('F', 'C', *m-old_i, cols, old_ib, 
+	  magma_zlarfb('F', 'C', *m-old_i, cols, old_ib, 
 		       a_ref(old_i, old_i), *lda, t_ref(old_i), lddwork, 
 		       a_ref(old_i, old_i+2*old_ib), *lda, 
 		       dd_ref(0), lddwork);
 	  
 	  /* store the diagonal */
-	  cudaMemcpy2DAsync(d_ref(old_i), old_ib * sizeof(float),
-                            ut, old_ib * sizeof(float),
-                            sizeof(float)*old_ib, old_ib,
+	  cudaMemcpy2DAsync(d_ref(old_i), old_ib * sizeof(double2),
+                            ut, old_ib * sizeof(double2),
+                            sizeof(double2)*old_ib, old_ib,
                             cudaMemcpyHostToDevice,stream[0]);
 	}
 
 	cudaStreamSynchronize(stream[1]);
-	sgeqrf_(&rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &lhwork, info);
+	zgeqrf_(&rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &lhwork, info);
 	/* Form the triangular factor of the block reflector
 	   H = H(i) H(i+1) . . . H(i+ib-1) */
-	slarft_("F", "C", &rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &ib);
+	zlarft_("F", "C", &rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &ib);
 	
 	/* Put 0s in the upper triangular part of a panel (and 1s on the 
 	   diagonal); copy the upper triangular in ut and invert it     */
 	cudaStreamSynchronize(stream[0]);
 	ssplit_diag_block(ib, work_ref(i), ldwork, ut); 
-	cublasSetMatrix(rows, ib, sizeof(float), 
+	cublasSetMatrix(rows, ib, sizeof(double2), 
 			work_ref(i), ldwork, a_ref(i,i), *lda);
 
 	if (i + ib < *n) {
 	  /* Send the triangular factor T to the GPU */
-	  cublasSetMatrix(ib, ib, sizeof(float), hwork, ib, t_ref(i), lddwork);
+	  cublasSetMatrix(ib, ib, sizeof(double2), hwork, ib, t_ref(i), lddwork);
 
 	  if (i+nb < k-nb){
 	    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
-	    magma_slarfb('F', 'C', rows, ib, ib, a_ref(i,i), *lda, t_ref(i),
+	    magma_zlarfb('F', 'C', rows, ib, ib, a_ref(i,i), *lda, t_ref(i),
 			 lddwork, a_ref(i,i+ib), *lda, dd_ref(0), lddwork);
 	  }
 	  else {
 	    cols = *n-i-ib;
-	    magma_slarfb('F','C',rows, cols, ib, a_ref(i,i), *lda, t_ref(i),
+	    magma_zlarfb('F','C',rows, cols, ib, a_ref(i,i), *lda, t_ref(i),
 			 lddwork, a_ref(i,i+ib), *lda, dd_ref(0), lddwork);
 	    /* Fix the diagonal block */
-	    cublasSetMatrix(ib, ib, sizeof(float), ut, ib, d_ref(i), ib);
+	    cublasSetMatrix(ib, ib, sizeof(double2), ut, ib, d_ref(i), ib);
 	  }
 	  old_i = i;
 	  old_ib = ib;
@@ -221,19 +224,19 @@ magma_sgeqrf_gpu2(magma_int_t m_, magma_int_t n_, float *a, magma_int_t  lda_,
    if (i < k) {
       ib   = *n-i;
       rows = *m-i;
-      cublasGetMatrix(rows, ib, sizeof(float),
+      cublasGetMatrix(rows, ib, sizeof(double2),
 		      a_ref(i,i), *lda, work, rows);
       lhwork = lwork - rows*ib;
-      sgeqrf_(&rows, &ib, work, &rows, tau+i, work+ib*rows, &lhwork, info);
-      cublasSetMatrix(rows, ib, sizeof(float),
+      zgeqrf_(&rows, &ib, work, &rows, tau+i, work+ib*rows, &lhwork, info);
+      cublasSetMatrix(rows, ib, sizeof(double2),
 		      work, rows, a_ref(i,i), *lda);
    }
    cublasFree(work);
    return 0; 
   
-/*     End of MAGMA_SGEQRF */
+/*     End of MAGMA_ZGEQRF */
 
-} /* magma_sgeqrf */
+} /* magma_zgeqrf */
 
 #undef a_ref
 #undef t_ref
