@@ -14,6 +14,7 @@ subs = {
     ('zlat2c','dlat2s'),
     ('clat2z','slat2d'),
     ('zlacpy','dlacpy'),
+    ('zclaswp','dslaswp'),
     ('zgemm','dgemm'),
     ('zherk','dsyrk'),
     ('zlansy','dlansy'),

@@ -8,7 +8,11 @@
 MAGMA_DIR = ..
 include ../Makefile.internal
 
-ZSRC  = zauxiliary.cu
+ZSRC  = zauxiliary.cu	\
+	zpermute.cu	\
+	zpermute-v2.cu	\
+	zclaswp.cu 	\
+
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
@@ -19,9 +23,6 @@ ALLSRC= $(SSRC)		\
 	sinplace_transpose.cu \
         stranspose.cu \
         stranspose-v2.cu \
-        spermute.cu \
-        spermute-v2.cu \
-        sdlaswp.cu \
         \
         dlag2s.cu \
         slag2d.cu \
