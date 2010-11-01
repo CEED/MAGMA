@@ -37,7 +37,8 @@ void magmablas_zgemm(char transA, char transB, magma_int_t m, magma_int_t n, mag
 		     double2 alpha, const double2 *A, magma_int_t lda, 
 		     const double2 *B, magma_int_t ldb, 
 		     double2 beta, double2 *C, magma_int_t ldc);
-void magmablas_zgemv(char, magma_int_t M, magma_int_t N, double2 *A, magma_int_t lda, double2 *X, double2 *);
+void magmablas_zgemv_tesla(char, magma_int_t M, magma_int_t N, double2 *A,
+			   magma_int_t lda, double2 *X, double2 *);
 void magmablas_zherk(char, char, magma_int_t, magma_int_t, double, double2 *, magma_int_t, double, double2 *, magma_int_t);
 void magmablas_zsymv(char, magma_int_t, double2, double2 *, magma_int_t, double2 *, magma_int_t, double2, double2 *, magma_int_t);
 void magmablas_zsyr2k(char, char, magma_int_t, magma_int_t, double2, const double2 *, magma_int_t, const double2 *, magma_int_t, double2, double2 *, magma_int_t);
@@ -58,11 +59,16 @@ void magmablas_zgemm_kernel_T_T_64_16_16_16_4_v2(double2 *, const double2 *, con
 
 
   /* Maybe all theses routines don't need to be in this file either */
-void magmablas_zgemv_MLU(magma_int_t, magma_int_t, double2 *, magma_int_t, double2 *, double2 *);
-void magmablas_zgemv32(char, magma_int_t, double2, double2 *, magma_int_t, double2 *, double2 *);
-void magmablas_zgemvt1(magma_int_t,magma_int_t,double2,double2 *,magma_int_t,double2 *,double2 *);
-void magmablas_zgemvt2(magma_int_t,magma_int_t,double2,double2 *,magma_int_t,double2 *,double2 *);
-void magmablas_zgemvt(magma_int_t,magma_int_t,double2,double2 *,magma_int_t,double2 *,double2 *);
+void magmablas_zgemv_MLU(magma_int_t, magma_int_t, double2 *, 
+			 magma_int_t, double2 *, double2 *);
+void magmablas_zgemv32_tesla(char, magma_int_t, double2, double2 *, 
+			     magma_int_t, double2 *, double2 *);
+void magmablas_zgemvt1_tesla(magma_int_t,magma_int_t,double2,double2 *,
+			     magma_int_t,double2 *,double2 *);
+void magmablas_zgemvt2_tesla(magma_int_t,magma_int_t,double2,double2 *,
+			     magma_int_t,double2 *,double2 *);
+void  magmablas_zgemvt_tesla(magma_int_t,magma_int_t,double2,double2 *,
+			     magma_int_t,double2 *,double2 *);
 
 void magmablas_zsymv6(char, magma_int_t, double2, double2 *, magma_int_t, double2 *, magma_int_t, double2, double2 *, magma_int_t, double2 *, magma_int_t);
 
