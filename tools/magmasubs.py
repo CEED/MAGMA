@@ -66,6 +66,9 @@ subs = {
     ('CORE_sasum','CORE_dasum','CORE_scasum','CORE_dzasum'),
     ('core_sasum','core_dasum','core_scasum','core_dzasum'),
     ('slag2d','dlag2s','clag2z','zlag2c'),
+    ('sinplace','dinplace','cinplace','zinplace'),
+    ('spermute','dpermute','cpermute','zpermute'),
+    ('stranspose','dtranspose','ctranspose','ztranspose'),
     ('scopy','dcopy','ccopy','zcopy'),
     ('strmv','dtrmv','ctrmv','ztrmv'),
     ('sgemv','dgemv','cgemv','zgemv'),
@@ -199,6 +202,7 @@ subs = {
     ('lansy','lansy','lanhe','lanhe'),
     ('stile','dtile','ctile','ztile'),
     ('szero','dzero','czero','zzero'),
+    ('sset','dset','cset','zset'),
   ],
   'tracing' : [
     ['plain','tau'],

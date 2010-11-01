@@ -5,27 +5,33 @@
 #      November 2010
 #//////////////////////////////////////////////////////////////////////////////
 
-    include ../make.inc
+MAGMA_DIR = ..
+include ../Makefile.internal
 
-    ALLSRC = sinplace_transpose.cu \
-             stranspose.cu \
-             stranspose-v2.cu \
-             spermute.cu \
-             spermute-v2.cu \
-             sdlaswp.cu \
-             \
-             sauxiliary.cu \
-             \
-             dlag2s.cu \
-             slag2d.cu \
-             dgemv_MLU.cu \
-             \
-             sgemv_tesla.cu \
-             dgemv_tesla.cu \
-             gemv32_tesla.cu \
-             \
+ZSRC  = zauxiliary.cu
 
-    ALLOBJ = $(ALLSRC:.cu=.cu_o) 
+CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
+DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
+SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
+
+#ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
+ALLSRC= $(SSRC)		\
+	sinplace_transpose.cu \
+        stranspose.cu \
+        stranspose-v2.cu \
+        spermute.cu \
+        spermute-v2.cu \
+        sdlaswp.cu \
+        \
+        dlag2s.cu \
+        slag2d.cu \
+        dgemv_MLU.cu \
+        \
+        sgemv_tesla.cu \
+        dgemv_tesla.cu \
+        gemv32_tesla.cu
+
+ALLOBJ = $(ALLSRC:.cu=.cu_o) 
 
 all: $(LIBMAGMABLAS)
 
