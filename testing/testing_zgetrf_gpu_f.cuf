@@ -18,29 +18,23 @@
       integer cublas_alloc
 
       double precision rnumber(2), matnorm, lapnorm, magnorm, work
-      complex*16, allocatable         :: h_A(:), h_R(:)
-      integer                         :: devptrA
-      integer,    allocatable         :: ipiv(:)
+      complex*16, allocatable          :: h_A(:), h_R(:)
+      complex*16, allocatable, device  :: d_A(:)
+      integer,    allocatable          :: ipiv(:)
 
-      integer i, n, nb, info, lda, size_of_elt
+      integer i, n, nb, info, lda
 
-      call cublas_init()
+      !call cublas_init()
 
       n   = 2048
       nb  = 128
       lda = n
-      size_of_elt = kind(complex*16)
-      print *,size_of_elt
 
 !------ Allocate CPU memory
       allocate(h_A(n*n), h_R(n*n), ipiv(n))
 
 !------ Allocate GPU memory
-      stat = cublas_alloc(n*n, size_of_elt, devPtrA)
-      if (stat .ne. 0) then
-         write(*,*) "device memory allocation failed"
-         stop
-      endif
+      allocate(d_A(n*n))
 
 !---- Initializa the matrix
       do i=1,n*n
@@ -49,19 +43,17 @@
         h_R(i) = rnumber(1)
       end do
 
-!---- devPtrA = h_A
-      call cublas_set_matrix (n, n, size_of_elt, h_A, lda, devptrA, lda)
+      d_A = h_A
 
 !---- Call magma -------------------
-      call magma_zgetrf_gpu(n, n, devptrA, lda, ipiv, info)
+      call magma_zgetrf_gpu(n, n, d_A, lda, ipiv, info)
       write(*,*) 'exit magma LU'
 
 !---- Call LAPACK ------------------
       call zgetrf(N, N, h_A, lda, ipiv, info)
       write(*,*) 'exit lapack LU'
 
-!---- h_R = devptrA
-      call cublas_get_matrix (n, n, size_of_elt, devptrA, lda, h_R, lda)
+      h_R = d_A
 
 !---- Compare the two results ------
       lapnorm = zlange('f', n, n, h_A, lda, work)
@@ -78,8 +70,8 @@
       deallocate(h_A, h_R, ipiv)
 
 !---- Free GPU memory
-      call cublas_free(devPtrA)
-      call cublas_shutdown
+      deallocate(d_A)
+      !call cublas_shutdown
 
  105  format((a10,es10.3))
 
