@@ -15,7 +15,7 @@
 #include <cublas.h>
 #include "magma.h"
 
-void ssplit_diag_block(int ib, double2 *a, int lda, double2 *work){
+void zsplit_diag_block(int ib, double2 *a, int lda, double2 *work){
   int i, j, info;
   double2 *cola, *colw;
 
@@ -192,7 +192,7 @@ magma_zgeqrf_gpu2(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t  lda_,
 	/* Put 0s in the upper triangular part of a panel (and 1s on the 
 	   diagonal); copy the upper triangular in ut and invert it     */
 	cudaStreamSynchronize(stream[0]);
-	ssplit_diag_block(ib, work_ref(i), ldwork, ut); 
+	zsplit_diag_block(ib, work_ref(i), ldwork, ut); 
 	cublasSetMatrix(rows, ib, sizeof(double2), 
 			work_ref(i), ldwork, a_ref(i,i), *lda);
 

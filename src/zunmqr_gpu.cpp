@@ -14,7 +14,7 @@
 #include <cublas.h>
 #include "magma.h"
 
-extern "C" int sorm2r_(char *, char *, int *, int *, int *, double2 *, int *, 
+extern "C" int zunm2r_(char *, char *, int *, int *, int *, double2 *, int *, 
 		       double2 *, double2 *, int *, double2 *, int *);
 
 extern "C" magma_int_t

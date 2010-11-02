@@ -14,7 +14,7 @@
 #include <cublas.h>
 #include "magma.h"
 
-extern "C" int sorm2r_(char *, char *, int *, int *, int *, double2 *, int *, 
+extern "C" int zunm2r_(char *, char *, int *, int *, int *, double2 *, int *, 
 		       double2 *, double2 *, int *, double2 *, int *);
 
 extern "C" magma_int_t
@@ -219,7 +219,7 @@ magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
     if (nb < nbmin || nb >= *k) 
       {
 	/* Use unblocked code */
-	sorm2r_(side, trans, m, n, k, &a[a_offset], lda, &tau[1], 
+	zunm2r_(side, trans, m, n, k, &a[a_offset], lda, &tau[1], 
 		&c__[c_offset], ldc, &work[1], &iinfo);
       } 
     else 

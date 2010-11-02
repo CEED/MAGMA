@@ -31,7 +31,7 @@ magma_zcgetrs_gpu(magma_int_t n_, magma_int_t nrhs_, float2 *a, magma_int_t lda_
     ZCGETRS solves a system of linear equations   
        A * X = B  or  A' * X = B   
     with a general N-by-N matrix A using the LU factorization computed   
-    by MAGMA_SGETRF_GPU. B is in double2, A and X in single precision. This 
+    by MAGMA_ZGETRF_GPU. B is in double2, A and X in single precision. This 
     routine is used in the mixed precision iterative solver magma_zcgesv.
 
     Arguments   
@@ -46,13 +46,13 @@ magma_zcgetrs_gpu(magma_int_t n_, magma_int_t nrhs_, float2 *a, magma_int_t lda_
 
     A       (input) REAL array on the GPU, dimension (LDA,N)   
             The factors L and U from the factorization A = P*L*U   
-            as computed by SGETRF.   
+            as computed by ZGETRF.   
 
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,N).   
 
     IPIV    (input) INTEGER array on the GPU, dimension (N)   
-            The pivot indices from SGETRF_GPU; Row i of the   
+            The pivot indices from ZGETRF_GPU; Row i of the   
             matrix was moved to row IPIV(i).
 
     X       (output) REAL array on the GPU, dimension (LDB,NRHS)

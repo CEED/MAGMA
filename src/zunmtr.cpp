@@ -14,7 +14,7 @@
 #include <cublas.h>
 #include "magma.h"
 
-extern "C" int sormql_(char *, char *, int *, int *, int *, double2 *, int *, 
+extern "C" int zunmql_(char *, char *, int *, int *, int *, double2 *, int *, 
 		       double2 *, double2 *, int *, double2 *, int *, int *);
 extern "C" int zunmqr_(char *, char *, int *, int *, int *, double2 *, int *, 
 		       double2 *, double2 *, int *, double2 *, int *, int *);
@@ -36,7 +36,7 @@ magma_zunmtr(char *side, char *uplo, char *trans, int *m, int *n,
     Purpose   
     =======   
 
-    SORMTR overwrites the general real M-by-N matrix C with   
+    ZUNMTR overwrites the general real M-by-N matrix C with   
 
                     SIDE = 'L'     SIDE = 'R'   
     TRANS = 'N':      Q * C          C * Q   
@@ -203,7 +203,7 @@ magma_zunmtr(char *side, char *uplo, char *trans, int *m, int *n,
       {
 	/* Q was determined by a call to SSYTRD with UPLO = 'U' */
 	i__2 = nq - 1;
-	sormql_(side, trans, &mi, &ni, &i__2, &a[(a_dim1 << 1) + 1], lda, &
+	zunmql_(side, trans, &mi, &ni, &i__2, &a[(a_dim1 << 1) + 1], lda, &
 		tau[1], &c__[c_offset], ldc, &work[1], lwork, &iinfo);
       }
     else 
@@ -223,7 +223,7 @@ magma_zunmtr(char *side, char *uplo, char *trans, int *m, int *n,
       }
     work[1] = (double2) lwkopt;
     return 0;
-/*     End of SORMTR */
+/*     End of ZUNMTR */
 
 } /* zunmtr_ */
 

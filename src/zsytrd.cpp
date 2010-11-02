@@ -16,17 +16,13 @@
 #include "magma.h"
 #include "magmablas.h"
 
-extern "C" int ssytd2_(char *, int *, double2 *, int *,
+extern "C" int zsytd2_(char *, int *, double2 *, int *,
 		       double2 *, double2 *, double2 *, int *);
-extern "C" int ssyr2k_(char *, char *, int *, int *, double2 *, double2 *, 
+extern "C" int zsyr2k_(char *, char *, int *, int *, double2 *, double2 *, 
 		       int *, double2 *, int *, double2 *, double2 *, int *);
-extern "C" int slatrd_(char *, int *, int *, double2 *,
-		       int *, double2 *, double2 *, double2 *, int *);
 
 extern "C" void magmablas_zsyr2k(char, char, int, int, double2, const double2 *, int,
 				const double2 *, int, double2, double2 *, int);
-
-
 
 extern "C" int  magma_zlatrd(char *, int *, int *, double2 *,
 			     int *, double2 *, double2 *, double2 *, int *,
@@ -61,7 +57,7 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 
     Purpose   
     =======   
-    SSYTRD reduces a real hemmetric matrix A to real hemmetric   
+    ZSYTRD reduces a real hemmetric matrix A to real hemmetric   
     tridiagonal form T by an orthogonal similarity transformation:   
     Q\*\*H * A * Q = T.   
 
@@ -258,7 +254,7 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 	    /* Update the unreduced submatrix A(1:i-1,1:i-1), using an   
 	       update of the form:  A := A - V*W' - W*V' */
 	    i__3 = i__ - 1;
-	    ssyr2k_(uplo, "No transpose", &i__3, &nb, &c_b22, 
+	    zsyr2k_(uplo, "No transpose", &i__3, &nb, &c_b22, 
 		    &a[i__ * a_dim1 + 1], lda, &work[1], 
 		    &ldwork, &c_b23, &a[a_offset], lda);
 
@@ -272,7 +268,7 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 	  }
 
 	/*  Use unblocked code to reduce the last or only block */
-	ssytd2_(uplo, &kk, &a[a_offset], lda, &d__[1], &e[1], &tau[1], &iinfo);
+	zsytd2_(uplo, &kk, &a[a_offset], lda, &d__[1], &e[1], &tau[1], &iinfo);
     } 
     else 
       {
@@ -336,6 +332,6 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
     work[1] = (double2) lwkopt;
     return 0;
     
-    /* End of SSYTRD */
+    /* End of ZSYTRD */
     
 } /* zsytrd_ */

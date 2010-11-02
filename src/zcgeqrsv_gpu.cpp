@@ -203,7 +203,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS, double2 *A, m
   ANRM = magma_zlange('I', N, N , A, LDA , WORK );
   CTE = ANRM * EPS *  pow((double2)N,0.5) * BWDMAX ;
   int PTSA  = N*NRHS;
-  float2 RMAX = slamch_("O");
+  float RMAX = slamch_("O");
   int IITER ;
   double2 alpha = -1.0;
   double2 beta = 1 ;

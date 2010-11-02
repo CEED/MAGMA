@@ -179,7 +179,7 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS, double2 *A, magma_int_t LDA, m
 
   int PTSA  = N*NRHS;
   int status ;
-  float2 RMAX = slamch_("O");
+  float RMAX = slamch_("O");
   int IITER ;
   double2 alpha = -1.0;
   double2 beta = 1 ;

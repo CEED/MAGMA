@@ -16,11 +16,11 @@
 #include "magma.h"
 #include "magmablas.h"
 
-extern "C" void mssymv2(int m, int k, double2 *A, int lda, double2 *X, double2 *Y);
-extern "C" void test_mssymv_v2(char, int, double2, double2 *, int, double2 *,
-			       int, double2, double2 *, int, double2 *);
-extern "C" void test_mssymv_v3(char, int, double2, double2 *, int, double2 *,
-                               int, double2, double2 *, int, double2 *);
+// extern "C" void mzsymv2(int m, int k, double2 *A, int lda, double2 *X, double2 *Y);
+// extern "C" void test_mzsymv_v2(char, int, double2, double2 *, int, double2 *,
+// 			       int, double2, double2 *, int, double2 *);
+// extern "C" void test_mzsymv_v3(char, int, double2, double2 *, int, double2 *,
+//                                int, double2, double2 *, int, double2 *);
 
 extern "C"
 int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a, 
@@ -309,22 +309,22 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 	  // the hemmetric matrix-vector (works with the herks) TTT
 	   // This works when matrix is divisible by the blocking size
 	  /*
-            mssymv2(*n, i__,  da, *ldda, 
+            mzsymv2(*n, i__,  da, *ldda, 
 		  da + (i__-1)* a_dim1, dw + 1 +  i__ *w_dim1);
 	  */
 
 	  /*
 	  if (*n<4500)
-	    test_mssymv_v2('L', *n, c_b6, da, *ldda, 
+	    test_mzsymv_v2('L', *n, c_b6, da, *ldda, 
 			   da+ (i__-1)* a_dim1, c__1, c_b16,
 			   dw+ 1 + i__ * w_dim1, c__1, dw);
 	  else
 	    if (*n%64==0)
-	      test_mssymv_v3('L', *n, c_b6, da, *ldda,
+	      test_mzsymv_v3('L', *n, c_b6, da, *ldda,
 			     da+ (i__-1)* a_dim1, c__1, c_b16,
 			     dw+ 1 + i__ * w_dim1, c__1, dw);
 	    else
-	      test_mssymv_v3('L', *n+32, c_b6, da, *ldda,
+	      test_mzsymv_v3('L', *n+32, c_b6, da, *ldda,
                              da+ (i__-1)* a_dim1, c__1, c_b16,
                              dw+ 1 + i__ * w_dim1, c__1, dw);
 	  */
@@ -349,7 +349,7 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 			    cudaMemcpyDeviceToHost,stream[1]);
 
 	  /*
-	  ssymv_("Lower", &i__2, &c_b6, &a[i__ + 1 + (i__ + 1) * a_dim1],
+	  zsymv_("Lower", &i__2, &c_b6, &a[i__ + 1 + (i__ + 1) * a_dim1],
 		 lda, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_b16, 
 		 &w[i__ + 1 + i__ * w_dim1], &c__1);
 	  */
