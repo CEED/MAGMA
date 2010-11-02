@@ -10,21 +10,18 @@
 
       program testing_zgetrf_gpu_f
 
-      external cublas_init, cublas_set_matrix, cublas_get_matrix
-      external cublas_shutdown, cublas_alloc
-      external zaxpy, zlange, zgetrf, magma_zgetrf_gpu
+      use cudafor
+      use iso_c_binding
 
+      external zaxpy, zlange, zgetrf, magma_zgetrf_gpu
       double precision zlange
-      integer cublas_alloc
 
       double precision rnumber(2), matnorm, lapnorm, magnorm, work
-      complex*16, allocatable          :: h_A(:), h_R(:)
-      complex*16, allocatable, device  :: d_A(:)
+      complex*16, allocatable  :: h_A(:), h_R(:)
+      complex*16, device, allocatable  :: d_A(:)
       integer,    allocatable          :: ipiv(:)
 
       integer i, n, nb, info, lda
-
-      !call cublas_init()
 
       n   = 2048
       nb  = 128

@@ -29,11 +29,13 @@ ZSRC  = testing_zgetrf.cpp 	\
 #	testing_zcgeqrsv_gpu.cpp\
 #	testing_zcposv_gpu.cpp
 
-ifeq ( $(FORT), "pgfortran" )
-	OBJ   = 
+OBJ = get_nb.o
+
+ifeq ($(FORT), pgfortran)
+	OBJ  := $(OBJ) fortran_thunking.o
 	ZSRCF = testing_zgetrf_gpu_f.cuf
 else
-	OBJ   = fortran.o
+	OBJ  := $(OBJ) fortran.o
 	ZSRCF = testing_zgetrf_gpu_f.f
 endif
 
@@ -60,7 +62,7 @@ clean:
 cleanall: clean
 	rm -f $(EXE)
 
-ifeq ( $(FORT), "pgfortran" )
+ifeq ($(FORT), pgfortran)
 testing_%.o : testing_%.cuf
 	$(FORT) $(OPTS) $(INC) -c $< -o $@ 
 else
@@ -74,6 +76,14 @@ testing_%.o : testing_%.cpp
 fortran.o : $(CUDADIR)/src/fortran.c
 	$(CC) $(OPTS) $(INC) -c $< -o $@
 
+fortran_thunking.o : $(CUDADIR)/src/fortran_thunking.c
+	$(CC) $(OPTS) $(INC) -c $< -o $@
+
+testing_%_f : testing_%_f.o $(OBJ)
+	$(FORT) $(OPTS) $(LDOPTS) $< $(OBJ) -o $@ lin/liblapacktest.a -L../lib \
+          -lcuda -lmagma -lmagmablas $(LIBDIR) $(LIB) 
+
 testing_% : testing_%.o $(OBJ)
-	$(FORT) $(LDOPTS) $< $(OBJ) -o $@ lin/liblapacktest.a -L../lib \
-          -lcuda -lmagma -lmagmablas $(LIBDIR) $(LIB) get_nb.cpp
+	$(FORT) $(OPTS) $(LDOPTS) $(NOMAIN) $< $(OBJ) -o $@ lin/liblapacktest.a -L../lib \
+          -lcuda -lmagma -lmagmablas $(LIBDIR) $(LIB) 
+

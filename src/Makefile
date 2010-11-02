@@ -9,8 +9,7 @@
 MAGMA_DIR = ..
 include ../Makefile.internal
 
-ZSRC  = magma_zf77.cpp	\
-	zpotrf.cpp	\
+ZSRC  = zpotrf.cpp	\
         zpotrf_gpu.cpp	\
         zgeqrf.cpp	\
         zgeqrf_gpu.cpp	\
@@ -41,6 +40,12 @@ ZSRC  = magma_zf77.cpp	\
         zcgesv_gpu.cpp 	\
         zcgeqrsv_gpu.cpp\
         zcposv_gpu.cpp
+
+ifeq ($(FORT), pgfortran)
+ZSRC := $(ZSRC) magma_zf77pgi.cpp
+else
+ZSRC := $(ZSRC) magma_zf77.cpp
+endif
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")

@@ -1,0 +1,32 @@
+#//////////////////////////////////////////////////////////////////////////////
+#   -- MAGMA (version 1.0) --
+#      Univ. of Tennessee, Knoxville
+#      Univ. of California, Berkeley
+#      Univ. of	Colorado, Denver
+#      November 2010
+#//////////////////////////////////////////////////////////////////////////////
+
+CC        = gcc
+NVCC      = nvcc
+FORT      = pgfortran
+
+ARCH      = ar
+ARCHFLAGS = cr
+RANLIB    = ranlib
+
+OPTS      = -O0 -DADD_ -m64
+NOMAIN    = -Mnomain
+NVOPTS    = --compiler-options -fno-strict-aliasing  -arch sm_13 \
+            -DUNIX 
+LDOPTS    = -fPIC
+
+LIB       = -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread -lcublas -lcudart -lm -lcudafor
+
+CUDADIR   = /mnt/scratch/cuda-3.1
+
+LIBDIR    = -L$(MKLROOT)/lib/em64t \
+            -L$(CUDADIR)/lib64
+INC       = -I../include -I$(CUDADIR)/include
+
+LIBMAGMA     = ../lib/libmagma.a
+LIBMAGMABLAS = ../lib/libmagmablas.a
