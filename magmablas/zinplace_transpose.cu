@@ -18,7 +18,7 @@
 
 #define COPY_2D_TO_1D( b, inx, iny, a, lda )	\
     a[0]      = b[inx][iny];			\
-    a[16*lda] = b[inx+16][iny];
+    a[16*lda] = b[inx][iny+16];
 
 #else
 
