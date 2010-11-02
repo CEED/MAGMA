@@ -190,7 +190,7 @@ magma_zunmqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
     lddwork= *k;
     dwork  = td+2*lddwork*nb; 
 
-    if (left && ! notran || ! left && notran) {
+    if ( (left && (! notran)) || ( (!left) && notran ) ) {
       i1 = 0;
       i2 = *k-nb;
       i3 = nb;
