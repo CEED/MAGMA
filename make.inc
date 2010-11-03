@@ -21,7 +21,7 @@
 
 	LIB       = -lmkl_em64t -lguide -lpthread -lcublas -lcudart -lm 
 
-	CUDADIR   = /usr/local/cuda-2.3
+	CUDADIR   = /usr/local/cuda-3.0
 
 	LIBDIR    = -L/home/tomov/intel/mkl/10.0.1.014/lib/em64t \
                     -L$(CUDADIR)/lib64

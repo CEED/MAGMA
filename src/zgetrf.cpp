@@ -124,18 +124,17 @@ magma_zgetrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_, magma
       maxdim = max(maxm, maxn);
 
       ldda = maxn;
-
-      status = cublasAlloc((nb+maxn)*maxm, sizeof(double2), (void**)&dA);
-      if (status != CUBLAS_STATUS_SUCCESS) {
-        *info = -7;
-        return 0;
-      }
-
-      da   = dA + nb*maxm;
       work = a;
 
       if (maxdim*maxdim < 2*maxm*maxn)
 	{
+	  status = cublasAlloc(nb*maxm+maxdim*maxdim, sizeof(double2), (void**)&dA);
+	  if (status != CUBLAS_STATUS_SUCCESS) {
+	    *info = -7;
+	    return 0;
+	  }
+	  da   = dA + nb*maxm;
+
 	  ldda = maxdim;
 	  cublasSetMatrix( *m, *n, sizeof(double2), a, *lda, da, ldda);
 
@@ -144,6 +143,13 @@ magma_zgetrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_, magma
 	}
       else
 	{
+	  status = cublasAlloc((nb+maxn)*maxm, sizeof(double2), (void**)&dA);
+	  if (status != CUBLAS_STATUS_SUCCESS) {
+	    *info = -7;
+	    return 0;
+	  }
+	  da   = dA + nb*maxm;
+
 	  cublasSetMatrix( *m, *n, sizeof(double2), a, *lda, da, maxm);
 
 	  status = cublasAlloc(maxm*maxn, sizeof(double2), (void**)&dAT);

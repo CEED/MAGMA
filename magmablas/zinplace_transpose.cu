@@ -26,7 +26,7 @@
     b[iny][inx] = a[0];
 
 #define COPY_2D_TO_1D( b, inx, iny, a, lda )	\
-    a[0]        = b[iny][inx];
+    a[0]        = b[inx][iny];
 
 #endif
 
