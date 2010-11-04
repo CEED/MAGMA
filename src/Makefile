@@ -52,7 +52,9 @@ DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
 SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 
 #ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
-ALLSRC= $(DSRC) $(SSRC)	\
+#ALLSRC= $(DSRC) $(SSRC)	\
+
+ALLSRC= $(ZSRC)	\
         auxiliary.o \
         xerbla.o \
 

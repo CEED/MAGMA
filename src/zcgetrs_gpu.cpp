@@ -16,8 +16,8 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t 
-magma_zcgetrs_gpu(magma_int_t n_, magma_int_t nrhs_, float2 *a, magma_int_t lda_, 
-		  magma_int_t *ipiv, float2 *x, double2 *b, magma_int_t ldb_, magma_int_t *info)
+magma_zcgetrs_gpu(magma_int_t n, magma_int_t nrhs, float2 *a, magma_int_t lda, 
+		  magma_int_t *ipiv, float2 *x, double2 *b, magma_int_t ldb, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -70,16 +70,14 @@ magma_zcgetrs_gpu(magma_int_t n_, magma_int_t nrhs_, float2 *a, magma_int_t lda_
 
     =====================================================================    */
 
-  magma_int_t *n = &n_, *nrhs = &nrhs_, *lda = &lda_, *ldb = &ldb_;
-
   *info = 0;
-  if (*n < 0) {
+  if (n < 0) {
     *info = -1;
-  } else if (*nrhs < 0) {
+  } else if (nrhs < 0) {
     *info = -2;
-  } else if (*lda < *n) {
+  } else if (lda < n) {
     *info = -4;
-  } else if (*ldb < *n) {
+  } else if (ldb < n) {
     *info = -8;
   }
   if (*info != 0) {
@@ -87,18 +85,18 @@ magma_zcgetrs_gpu(magma_int_t n_, magma_int_t nrhs_, float2 *a, magma_int_t lda_
   }
 
   /* Quick return if possible */
-  if (*n == 0 || *nrhs == 0) {
+  if (n == 0 || nrhs == 0) {
     return 0;
   }
   /* Get X by row applying interchanges to B and cast to single */
-  magmablas_zclaswp(*nrhs, b, *ldb, x, *n, ipiv);
+  magmablas_zclaswp(nrhs, b, ldb, x, n, ipiv);
 
   /* Solve L*X = B, overwriting B with X. */
   float2 fone = 1.;
-  cublasCtrsm('L','L','N','U', *n, *nrhs, fone, a, *lda, x, *ldb);
+  cublasCtrsm('L','L','N','U', n, nrhs, fone, a, lda, x, ldb);
 
   /* Solve U*X = B, overwriting B with X. */
-  cublasCtrsm('L','U','N','N', *n, *nrhs, fone, a, *lda, x, *ldb);
+  cublasCtrsm('L','U','N','N', n, nrhs, fone, a, lda, x, ldb);
 
   return 0;
   /* End of MAGMA_ZCGETRS */

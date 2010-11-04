@@ -21,7 +21,7 @@ extern "C" int zgebd2_(int *, int *, double2 *, int *, double2 *, double2 *, dou
 double2 cpu_gpu_sdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda);
 
 extern "C" magma_int_t
-magma_zgebrd(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_, 
+magma_zgebrd(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda, 
 	     double2 *d__, double2 *e, double2 *tauq, double2 *taup, double2 *work, 
 	     magma_int_t *lwork, double2 *da, magma_int_t *info)
 {
@@ -145,10 +145,6 @@ magma_zgebrd(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
     #define max(a,b) ((a) >= (b) ? (a) : (b)) 
     #define min(a,b)  (((a)<(b))?(a):(b))
 
-    int *m = &m_;
-    int *n = &n_;
-    int *lda = &lda_;
-
     static double2 c_b21 = -1.f;
     static double2 c_b22 = 1.f;
     
@@ -163,7 +159,7 @@ magma_zgebrd(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
     static int ldwrkx, ldwrky, lwkopt;
     static long int lquery;
 
-    a_dim1 = *lda;
+    a_dim1 = lda;
     a_offset = 1 + a_dim1;
     a -= a_offset;
     --d__;
@@ -177,22 +173,22 @@ magma_zgebrd(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
 
     //TimeStruct start, end;
 
-    int nb = magma_get_zgebrd_nb(*n), ldda = *m; 
-    double2 *dwork = da + (*n)*ldda - 1;
+    int nb = magma_get_zgebrd_nb(n), ldda = m; 
+    double2 *dwork = da + (n)*ldda - 1;
 
-    lwkopt = (*m + *n) * nb;
+    lwkopt = (m + n) * nb;
     work[1] = (double2) lwkopt;
     lquery = *lwork == -1;
-    if (*m < 0) {
+    if (m < 0) {
 	*info = -1;
-    } else if (*n < 0) {
+    } else if (n < 0) {
 	*info = -2;
-    } else if (*lda < max(1,*m)) {
+    } else if (lda < max(1,m)) {
 	*info = -4;
     } else /* if(complicated condition) */ {
       /* Computing MAX */
-      i__1 = max(1,*m);
-      if (*lwork < max(i__1,*n) && ! lquery) {
+      i__1 = max(1,m);
+      if (*lwork < max(i__1,n) && ! lquery) {
 	*info = -10;
       }
     }
@@ -202,15 +198,15 @@ magma_zgebrd(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
 	return 0;
 
     /* Quick return if possible */
-    minmn = min(*m,*n);
+    minmn = min(m,n);
     if (minmn == 0) {
       work[1] = 1.f;
       return 0;
     }
 
-    ws = (double2)max(*m,*n);
-    ldwrkx = *m;
-    ldwrky = *n;
+    ws = (double2)max(m,n);
+    ldwrkx = m;
+    ldwrky = n;
 
     // double2 nflops = 0.f;
     
@@ -219,39 +215,39 @@ magma_zgebrd(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
 
     /* Copy the matrix to the GPU */
     if (minmn-nx>=1)
-      cublasSetMatrix(*m, *n, sizeof(double2), a+a_offset, *lda, da, ldda);
+      cublasSetMatrix(m, n, sizeof(double2), a+a_offset, lda, da, ldda);
 
     for (i__ = 1; i__ <= minmn - nx; i__ += nb) {
 
       /*  Reduce rows and columns i:i+nb-1 to bidiagonal form and return   
           the matrices X and Y which are needed to update the unreduced   
           part of the matrix */
-      i__3 = *m - i__ + 1;
-      i__4 = *n - i__ + 1;
+      i__3 = m - i__ + 1;
+      i__4 = n - i__ + 1;
 
       /*   Get the current panel (no need for the 1st iteration) */
       // TTT
       if (i__!=1) {
 	cublasGetMatrix(i__3, nb, sizeof(double2),
 			da + (i__-1)*ldda  + (i__-1), ldda,
-			a  +  i__   *a_dim1+  i__   , *lda);
+			a  +  i__   *a_dim1+  i__   , lda);
 	cublasGetMatrix(nb, i__4 - nb, sizeof(double2),
                         da + (i__-1+nb)*ldda  + (i__-1), ldda,
-                        a  + (i__  +nb)*a_dim1+  i__   , *lda);
+                        a  + (i__  +nb)*a_dim1+  i__   , lda);
       }
       
       // if (i__== 1+nb)
       /*
       printf("Difference(%4d, %4d) L/U = %e, %e\n", i__3, nb,
 	     cpu_gpu_sdiff(i__3, nb,
-			   a  +  i__   *a_dim1+  i__   , *lda,
+			   a  +  i__   *a_dim1+  i__   , lda,
 			   da + (i__-1)*ldda  + (i__-1), ldda),
 	     cpu_gpu_sdiff(nb, i__4 - nb,
-			   a  + (i__  +nb)*a_dim1+  i__   , *lda,
+			   a  + (i__  +nb)*a_dim1+  i__   , lda,
 			   da + (i__-1+nb)*ldda  + (i__-1), ldda));
       */
       magma_zlabrd(i__3, i__4, nb, 
-		   &a[i__ + i__ * a_dim1], *lda, &d__[i__],
+		   &a[i__ + i__ * a_dim1], lda, &d__[i__],
 		   &e[i__], &tauq[i__], &taup[i__], 
 		   &work[1], ldwrkx,                   //  x
 		   &work[ldwrkx * nb + 1], ldwrky,     //  y
@@ -261,8 +257,8 @@ magma_zgebrd(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
 
       /*  Update the trailing submatrix A(i+nb:m,i+nb:n), using an update   
           of the form  A := A - V*Y' - X*U' */
-      i__3 = *m - i__ - nb + 1;
-      i__4 = *n - i__ - nb + 1;
+      i__3 = m - i__ - nb + 1;
+      i__4 = n - i__ - nb + 1;
       /* TTT
       zgemm_("No transpose", "Transpose", &i__3, &i__4, &nb, &c_b21, 
 	     &a[i__ + nb + i__ * a_dim1], lda, &work[ldwrkx * nb + nb + 1],
@@ -287,11 +283,11 @@ magma_zgebrd(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
       /*
       printf("  Difference after 1st gemm = %e\n",
              cpu_gpu_sdiff(i__3, i__4,
-			   &a[i__ + nb + (i__ + nb) * a_dim1], *lda,
+			   &a[i__ + nb + (i__ + nb) * a_dim1], lda,
 			   &da[(i__-1) + nb + ((i__-1) + nb) * a_dim1],ldda));
       */
-      i__3 = *m - i__ - nb + 1;
-      i__4 = *n - i__ - nb + 1;
+      i__3 = m - i__ - nb + 1;
+      i__4 = n - i__ - nb + 1;
       /* TTT
       zgemm_("No transpose", "No transpose", &i__3, &i__4, &nb, &c_b21,
 	     &work[nb + 1], &ldwrkx, &a[i__ + (i__ + nb) * a_dim1], lda,
@@ -311,11 +307,11 @@ magma_zgebrd(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
       /*
       printf("  Difference after 2nd gemm = %e\n",
              cpu_gpu_sdiff(i__3, i__4,
-                           &a[i__ + nb + (i__ + nb) * a_dim1], *lda,
+                           &a[i__ + nb + (i__ + nb) * a_dim1], lda,
                            &da[(i__-1) + nb + ((i__-1) + nb) * a_dim1],ldda));
       */
       /* Copy diagonal and off-diagonal elements of B back into A */
-      if (*m >= *n) {
+      if (m >= n) {
 	i__3 = i__ + nb - 1;
 	for (j = i__; j <= i__3; ++j) {
 	  a[j + j * a_dim1] = d__[j];
@@ -335,19 +331,19 @@ magma_zgebrd(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
     }
     
     /* Use unblocked code to reduce the remainder of the matrix */
-    i__2 = *m - i__ + 1;
-    i__1 = *n - i__ + 1;
+    i__2 = m - i__ + 1;
+    i__1 = n - i__ + 1;
     // TTT
-    if (1<=*n-nx)
+    if (1<=n-nx)
       cublasGetMatrix(i__2, i__1, sizeof(double2),
 		      da + (i__-1) + (i__-1) * a_dim1, ldda,
-		      a  +  i__    +  i__    * a_dim1, *lda);
+		      a  +  i__    +  i__    * a_dim1, lda);
      
     zgebd2_(&i__2, &i__1, &a[i__ + i__ * a_dim1], lda, &d__[i__], &e[i__],
 	    &tauq[i__], &taup[i__], &work[1], &iinfo);
     work[1] = ws;
 
-    //printf("zgemm \% = %f\n", 100.*3.*nflops/(8.*(*n)*(*n)*(*n)));
+    //printf("zgemm \% = %f\n", 100.*3.*nflops/(8.*(n)*(n)*(n)));
 
     return 0;
 
