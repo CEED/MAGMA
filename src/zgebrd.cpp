@@ -22,7 +22,7 @@ double2 cpu_gpu_sdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda)
 
 extern "C" magma_int_t
 magma_zgebrd(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda, 
-	     double2 *d__, double2 *e, double2 *tauq, double2 *taup, double2 *work, 
+	     double2 *d, double2 *e, double2 *tauq, double2 *taup, double2 *work, 
 	     magma_int_t *lwork, double2 *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -162,7 +162,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
     a_dim1 = lda;
     a_offset = 1 + a_dim1;
     a -= a_offset;
-    --d__;
+    --d;
     --e;
     --tauq;
     --taup;
@@ -247,7 +247,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
 			   da + (i__-1+nb)*ldda  + (i__-1), ldda));
       */
       magma_zlabrd(i__3, i__4, nb, 
-		   &a[i__ + i__ * a_dim1], lda, &d__[i__],
+		   &a[i__ + i__ * a_dim1], lda, &d[i__],
 		   &e[i__], &tauq[i__], &taup[i__], 
 		   &work[1], ldwrkx,                   //  x
 		   &work[ldwrkx * nb + 1], ldwrky,     //  y
@@ -314,14 +314,14 @@ magma_zgebrd(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
       if (m >= n) {
 	i__3 = i__ + nb - 1;
 	for (j = i__; j <= i__3; ++j) {
-	  a[j + j * a_dim1] = d__[j];
+	  a[j + j * a_dim1] = d[j];
 	  a[j + (j + 1) * a_dim1] = e[j];
 	  /* L10: */
 	}
       } else {
 	i__3 = i__ + nb - 1;
 	for (j = i__; j <= i__3; ++j) {
-	  a[j + j * a_dim1] = d__[j];
+	  a[j + j * a_dim1] = d[j];
 	  a[j + 1 + j * a_dim1] = e[j];
 	  /* L20: */
 	}
@@ -339,7 +339,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
 		      da + (i__-1) + (i__-1) * a_dim1, ldda,
 		      a  +  i__    +  i__    * a_dim1, lda);
      
-    zgebd2_(&i__2, &i__1, &a[i__ + i__ * a_dim1], lda, &d__[i__], &e[i__],
+    zgebd2_(&i__2, &i__1, &a[i__ + i__ * a_dim1], lda, &d[i__], &e[i__],
 	    &tauq[i__], &taup[i__], &work[1], &iinfo);
     work[1] = ws;
 

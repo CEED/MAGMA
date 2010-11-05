@@ -17,7 +17,7 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t 
-magma_zgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, double2 *a, magma_int_t lda_, 
+magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, double2 *a, magma_int_t lda,
 	     double2 *tau, double2 *work, magma_int_t *lwork, double2 *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -128,14 +128,9 @@ magma_zgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, double2 *a, mag
     #define min(a,b) ((a) <= (b) ? (a) : (b))
     #define max(a,b) ((a) >= (b) ? (a) : (b))
 
-    int *n = &n_;
-    int *ilo = &ilo_;
-    int *ihi = &ihi_;
-    int *lda = &lda_;
-
-    int nb = magma_get_zgehrd_nb(*n);
+    int nb = magma_get_zgehrd_nb(n);
     
-    int N = *n, ldda = *n;
+    int N = n, ldda = n;
 
     double2 *d_A    = da;
     double2 *d_work = da + (N+nb)*ldda; 
@@ -158,18 +153,18 @@ magma_zgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, double2 *a, mag
     /* Function Body */
     *info = 0;
 
-    work[0] = (double2) *n * nb;
+    work[0] = (double2) n * nb;
 
     lquery = *lwork == -1;
-    if (*n < 0) {
+    if (n < 0) {
 	*info = -1;
-    } else if (*ilo < 1 || *ilo > max(1,*n)) {
+    } else if (ilo < 1 || ilo > max(1,n)) {
 	*info = -2;
-    } else if (*ihi < min(*ilo,*n) || *ihi > *n) {
+    } else if (*ihi < min(ilo,n) || *ihi > n) {
 	*info = -3;
-    } else if (*lda < max(1,*n)) {
+    } else if (lda < max(1,n)) {
 	*info = -5;
-    } else if (*lwork < max(1,*n) && ! lquery) {
+    } else if (*lwork < max(1,n) && ! lquery) {
 	*info = -8;
     }
     if (*info != 0)
@@ -181,17 +176,17 @@ magma_zgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, double2 *a, mag
     zzero_nbxnb_block(nb, d_A+N*ldda, ldda);
 
     /* Set elements 1:ILO-1 and IHI:N-1 of TAU to zero */
-    for (i__ = 1; i__ < *ilo; ++i__)
+    for (i__ = 1; i__ < ilo; ++i__)
       tau[i__] = 0.;
    
-    for (i__ = max(1,*ihi); i__ < *n; ++i__)
+    for (i__ = max(1,*ihi); i__ < n; ++i__)
       tau[i__] = 0.;
 
     for(i__=0; i__< nb*nb; i__+=4)
       t[i__] = t[i__+1] = t[i__+2] = t[i__+3] = 0.;
 
     /* Quick return if possible */
-    nh = *ihi - *ilo + 1;
+    nh = *ihi - ilo + 1;
     if (nh <= 1) {
 	work[0] = 1.;
 	return 0;
@@ -206,33 +201,33 @@ magma_zgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, double2 *a, mag
       if (nb < nh) {
 
 	/* Determine if workspace is large enough for blocked code      */
-	iws = *n * nb;
+	iws = n * nb;
 	if (*lwork < iws) {
 
 	  /*    Not enough workspace to use optimal NB:  determine the   
                 minimum value of NB, and reduce NB or force use of   
                 unblocked code                                          */
 	  nbmin = nb;
-	  if (*lwork >= *n * nbmin)
-	    nb = *lwork / *n;
+	  if (*lwork >= n * nbmin)
+	    nb = *lwork / n;
 	  else 
 	    nb = 1;
 	}
       }
     }
-    ldwork = *n;
+    ldwork = n;
 
     if (nb < nbmin || nb >= nh) {
       /* Use unblocked code below */
-      i__ = *ilo;
+      i__ = ilo;
     } else {
 
       /* Use blocked code */
 
       /* Copy the matrix to the GPU */
-      cublasSetMatrix(N, N, sizeof(double2), a+(*ilo-1)*(*lda),*lda, d_A, ldda);
+      cublasSetMatrix(N, N, sizeof(double2), a+(ilo-1)*(lda),lda, d_A, ldda);
 
-      for (i__ = *ilo; i__ < *ihi - nb; i__ += nb) {
+      for (i__ = ilo; i__ < *ihi - nb; i__ += nb) {
 	/* Computing MIN */
 	ib = min(nb, *ihi - i__);
 
@@ -241,29 +236,29 @@ magma_zgehrd(magma_int_t n_, magma_int_t ilo_, magma_int_t ihi_, double2 *a, mag
              which performs the reduction, and also the matrix Y = A*V*T */
 
 	/*   Get the current panel (no need for the 1st iteration) */
-	cublasGetMatrix(*ihi-i__+*ilo, ib, sizeof(double2), 
-			d_A + (i__ - *ilo)*ldda  + i__ - *ilo, ldda,
-			a   + (i__ -   1 )*(*lda)+ i__ - 1   , *lda);
+	cublasGetMatrix(*ihi-i__+ilo, ib, sizeof(double2), 
+			d_A + (i__ - ilo)*ldda  + i__ - ilo, ldda,
+			a   + (i__ -   1 )*(lda)+ i__ - 1   , lda);
 	
 	magma_zlahr2(*ihi, i__, ib, 
-		     d_A + (i__ - *ilo)*ldda, 
+		     d_A + (i__ - ilo)*ldda, 
 		     d_A + N*ldda + 1,
-		     a   + (i__ -   1 )*(*lda) , *lda, 
+		     a   + (i__ -   1 )*(lda) , lda, 
 		     &tau[i__], t, nb, work, ldwork);
 
-	magma_zlahru(*ihi, i__ - *ilo, ib, 
-		     a   + (i__ -   1 )*(*lda), *lda,
-		     d_A + (i__ - *ilo)*ldda, 
-		     d_A + (i__ - *ilo)*ldda + i__ - 1,
+	magma_zlahru(*ihi, i__ - ilo, ib, 
+		     a   + (i__ -   1 )*(lda), lda,
+		     d_A + (i__ - ilo)*ldda, 
+		     d_A + (i__ - ilo)*ldda + i__ - 1,
 		     d_A + N*ldda, t, d_work);
       }
     }
 
     /* Use unblocked code to reduce the rest of the matrix */
     if (!(nb < nbmin || nb >= nh))
-      cublasGetMatrix(*n, *n-i__+1, sizeof(double2), 
+      cublasGetMatrix(n, n-i__+1, sizeof(double2), 
 		      d_A+ (i__-1)*ldda, ldda, 
-		      a  + (i__-1)*(*lda), *lda);
+		      a  + (i__-1)*(lda), lda);
     zgehd2_(n, &i__, ihi, a, lda, &tau[1], work, &iinfo);
     work[0] = (double2) iws;
     
