@@ -90,6 +90,8 @@ magma_zpotrf(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, int *info
     int a_dim1, a_offset, i__3, i__4, ldda;
     /* Local variables */
     static int j;
+    double2 c_one = MAGMA_S_ONE;
+    double2 c_neg_one = MAGMA_S_NEG_ONE;
 
     long int upper = lsame_(uplo, "U");
     *info = 0;
@@ -154,8 +156,8 @@ magma_zpotrf(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, int *info
 		  i__3 = n_ - j - jb + 1;
 		  i__4 = j - 1;
 		  cublasZgemm('T', 'N', jb, i__3, i__4,
-			  -1.f, da_ref(1, j), ldda, da_ref(1, j + jb), ldda,
-			  1.f, da_ref(j, j + jb), ldda);
+			  c_neg_one, da_ref(1, j), ldda, da_ref(1, j + jb), ldda,
+			  c_one, da_ref(j, j + jb), ldda);
 		}
              
 		cudaStreamSynchronize(stream[1]);
@@ -171,7 +173,7 @@ magma_zpotrf(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, int *info
 		
 		if (j + jb <= n_)
 		  cublasZtrsm('L', 'U', 'T', 'N', jb, i__3,
-			      1.f, da_ref(j,j), ldda, da_ref(j, j+jb), ldda);
+			      c_one, da_ref(j,j), ldda, da_ref(j, j+jb), ldda);
 	    }
 	} else {
             //=========================================================
@@ -207,8 +209,8 @@ magma_zpotrf(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, int *info
                     i__3 = n_ - j - jb + 1;
                     i__4 = j - 1;
                     cublasZgemm('N', 'T', i__3, jb, i__4,
-                            -1.f, da_ref(j + jb, 1), ldda, da_ref(j, 1), ldda,
-                            1.f, da_ref(j + jb, j), ldda);
+                            c_neg_one, da_ref(j + jb, 1), ldda, da_ref(j, 1), ldda,
+                            c_one, da_ref(j + jb, j), ldda);
                 }
 		
                 cudaStreamSynchronize(stream[1]);
@@ -223,7 +225,7 @@ magma_zpotrf(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, int *info
 				  cudaMemcpyHostToDevice,stream[0]);
 	        
 		if (j + jb <= n_)
-		  cublasZtrsm('R', 'L', 'T', 'N', i__3, jb, 1.f, 
+		  cublasZtrsm('R', 'L', 'T', 'N', i__3, jb, c_one, 
 			      da_ref(j, j), ldda, da_ref(j + jb, j), ldda);
 	    }
 	}

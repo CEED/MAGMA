@@ -78,8 +78,7 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_i
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    A       (input or input/output) DOUBLE PRECISION array,
-            dimension (LDA,N)
+    A       (input or input/output) DOUBLE PRECISION array, dimension (LDA,N)
             On entry, the symmetric matrix A.  If UPLO = 'U', the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
