@@ -75,6 +75,8 @@ magma_zgetrs_gpu(char trans_, magma_int_t n, magma_int_t nrhs, double2 *a , magm
 
     #define max(a,b)  (((a)>(b))?(a):(b))
 
+    double2 c_one = MAGMA_Z_ONE;
+
     char trans[2] = {trans_, 0};
 
     long int notran = lsame_(trans, "N");
@@ -108,12 +110,12 @@ magma_zgetrs_gpu(char trans_, magma_int_t n, magma_int_t nrhs, double2 *a , magm
       zlaswp_(&nrhs, hwork, &n, &k1, &k2, ipiv, &k3);
       cublasSetMatrix( n, nrhs, sizeof(double2), hwork, n, b, ldb);
       
-      cublasZtrsm('L','L','N','U', n , nrhs, 1.0, a , lda , b , ldb );
-      cublasZtrsm('L','U','N','N', n , nrhs, 1.0, a , lda , b , ldb );
+      cublasZtrsm('L','L','N','U', n , nrhs, c_one, a , lda , b , ldb );
+      cublasZtrsm('L','U','N','N', n , nrhs, c_one, a , lda , b , ldb );
     } else {
       /* Solve A' * X = B. */
-      cublasZtrsm('L','U','T','N', n , nrhs, 1.0, a , lda , b , ldb );
-      cublasZtrsm('L','L','T','U', n , nrhs, 1.0, a , lda , b , ldb );
+      cublasZtrsm('L','U','T','N', n , nrhs, c_one, a , lda , b , ldb );
+      cublasZtrsm('L','L','T','U', n , nrhs, c_one, a , lda , b , ldb );
 
       cublasGetMatrix( n, nrhs, sizeof(double2), b,ldb , hwork , n );
       int k1 = 1 ;

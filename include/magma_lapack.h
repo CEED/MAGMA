@@ -73,6 +73,7 @@ void csyrk_(char *, char *, int *, int *, float2 *,
 	    float2 *, int *, float2 *, float2 *, int *);
 void cherk_(char *, char *, int *, int *, float *,
 	    float2 *, int *, float *, float2 *, int *);
+int cgehd2_(int*,int*,int*,float2*,int*,float2*,float2*,int*);
 int cpotrf_(char *uplo, int *n, float2 *a, int *lda, int *info);
 int cgeqrf_(int*,int*,float2 *,int*,float2 *,float2 *,int *,int *);
 int clarft_(char *, char *, int *, int *, float2 *, int *, float2 *,
@@ -136,6 +137,7 @@ int dormqr_(char *, char *, int *, int *, int *, double *, int *,
 
 long int lsame_(char *, char *);
 
+int zgehd2_(int*,int*,int*,double2*,int*,double2*,double2*,int*);
 int zpotrf_(char *uplo, int *n, double2 *a, int *lda, int *info);
 int zgeqrf_(int*, int*, double2 *, int*, double2 *, double2 *,
 	    int *, int *);

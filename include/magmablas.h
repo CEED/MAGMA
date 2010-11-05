@@ -14,6 +14,7 @@ typedef int magma_int_t;
 #include "cublas.h"
 #include "cuda.h"
 
+#include "magmablas_z.h"
 #include "magmablas_c.h"
 #include "magmablas_d.h"
 #include "magmablas_s.h"

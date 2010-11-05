@@ -86,6 +86,10 @@ magma_zlarfb(char direct, char storev,
   #define dc_ref(a_1,a_2)    (dc+(a_2)*(*ldc) + a_1)
   #define dv_ref(a_1,a_2)    (dv+(a_2)*(*ldv) + a_1)
 
+  double2 c_zero = MAGMA_Z_ZERO;
+  double2 c_one = MAGMA_Z_ONE;
+  double2 c_neg_one = MAGMA_Z_NEG_ONE;
+
   int *k = &k_;
   int *ldv = &ldv_;
   int *ldt = &ldt_;
@@ -108,34 +112,34 @@ magma_zlarfb(char direct, char storev,
     */
     //TimeStruct start, end;
     //start = get_current_time();
-    cublasZgemm('t', 'n', n, *k, m, 1.f, dc_ref(0, 0), *ldc,
-		dv_ref(0,0), *ldv, 0.f, dwork, *ldwork);
+    cublasZgemm('t', 'n', n, *k, m, c_one, dc_ref(0, 0), *ldc,
+		dv_ref(0,0), *ldv, c_zero, dwork, *ldwork);
     
     if (direct == 'F' || direct =='f')
       cublasZtrmm('r', 'u', 'n', 'n',
-		  n, *k, 1.f, dt, *ldt, dwork, *ldwork);
+		  n, *k, c_one, dt, *ldt, dwork, *ldwork);
     else
       cublasZtrmm('r', 'l', 'n', 'n',
-		  n, *k, 1.f, dt, *ldt, dwork, *ldwork);
+		  n, *k, c_one, dt, *ldt, dwork, *ldwork);
 
-    cublasZgemm('n', 't', m, n, *k, -1.f, dv_ref(0, 0), *ldv,
-		dwork, *ldwork, 1.f, dc_ref(0,0), *ldc);
+    cublasZgemm('n', 't', m, n, *k, c_neg_one, dv_ref(0, 0), *ldv,
+		dwork, *ldwork, c_one, dc_ref(0,0), *ldc);
     //end = get_current_time();
     //if (n!=*k)
     //printf("%5d %5d  %7.2f\n",
     //	   m, n, (4.*n*(*k)*m+n*(*k)*(*k))/(1.e6*GetTimerValue(start,end)));
   }
   else {
-    cublasZgemm('n', 't', m, *k, n, 1.f, dc_ref(0, 0), *ldc,
-                dv_ref(0,0), *ldv, 0.f, dwork, *ldwork);
+    cublasZgemm('n', 't', m, *k, n, c_one, dc_ref(0, 0), *ldc,
+                dv_ref(0,0), *ldv, c_zero, dwork, *ldwork);
     
     cublasZtrmm('r', 'u', 'n', 'n',
-		m, *k, 1.f, dt, *ldt, dwork, *ldwork);
+		m, *k, c_one, dt, *ldt, dwork, *ldwork);
     
-    cublasZgemm('n', 'n', m, n, *k, -1.f, 
+    cublasZgemm('n', 'n', m, n, *k, c_neg_one, 
 		dwork, *ldwork,
 		dv_ref(0, 0), *ldv, 
-		1.f, dc_ref(0,0), *ldc);
+		c_one, dc_ref(0,0), *ldc);
     /*
     double2 one = 1.f, zero = 0.f, mone = -1.f;
     zgemm_("n", "t", &m, k, &n, &one, dc_ref(0, 0), ldc,

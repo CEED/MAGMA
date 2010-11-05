@@ -92,6 +92,10 @@ magma_zgeqrs_gpu(magma_int_t m_, magma_int_t n_, magma_int_t nrhs_,
    #define min(a,b)       (((a)<(b))?(a):(b))
    #define max(a,b)       (((a)>(b))?(a):(b))
 
+   double2 c_zero = MAGMA_Z_ZERO;
+   double2 c_one = MAGMA_Z_ONE;
+   double2 c_neg_one = MAGMA_Z_NEG_ONE;
+
    int *m = &m_;
    int *n = &n_;
    int *nrhs = &nrhs_;
@@ -106,7 +110,7 @@ magma_zgeqrs_gpu(magma_int_t m_, magma_int_t n_, magma_int_t nrhs_,
    int nb = magma_get_zgeqrf_nb(*m);
    
    int lwkopt = (*m-*n+nb+2*(*nrhs)) * nb;
-   work[0] = (double2) lwkopt;
+   MAGMA_Z_SET2REAL( work[0], (double) lwkopt );
    long int lquery = *lwork == -1;
    if (*m < 0)
      *info = -1;
@@ -128,7 +132,7 @@ magma_zgeqrs_gpu(magma_int_t m_, magma_int_t n_, magma_int_t nrhs_,
 
    k = min(*m,*n);
    if (k == 0) {
-     work[0] = 1.f;
+     work[0] = c_one;
      return 0;
    }
 
@@ -142,7 +146,7 @@ magma_zgeqrs_gpu(magma_int_t m_, magma_int_t n_, magma_int_t nrhs_,
    i    = (k-1)/nb * nb;
    ib   = *n-i;
    rows = *m-i;
-   double2 one = 1.;
+   double2 one = MAGMA_Z_ONE;
    ztrsm_("l", "u", "n", "n", &ib, nrhs, &one, work, &rows,
 	  work+rows*ib, &rows);
    
@@ -152,11 +156,11 @@ magma_zgeqrs_gpu(magma_int_t m_, magma_int_t n_, magma_int_t nrhs_,
    
    // update c
    if (*nrhs == 1)
-     cublasZgemv('n', i, ib, -1.f, a_ref(0, i), *lda,
-		 dwork + i, 1, 1.f, c, 1);
+     cublasZgemv('n', i, ib, c_neg_one, a_ref(0, i), *lda,
+		 dwork + i, 1, c_one, c, 1);
    else
-     cublasZgemm('n', 'n', i, *nrhs, ib, -1.f, a_ref(0, i), *lda,
-		 dwork + i, *ldc, 1.f, c, *ldc);
+     cublasZgemm('n', 'n', i, *nrhs, ib, c_neg_one, a_ref(0, i), *lda,
+		 dwork + i, *ldc, c_one, c, *ldc);
 
    int start = i-nb;
    if (nb < k) {
@@ -167,17 +171,17 @@ magma_zgeqrs_gpu(magma_int_t m_, magma_int_t n_, magma_int_t nrhs_,
        if (i + ib < *n) {
 	 if (*nrhs == 1)
 	   {
-	     cublasZgemv('n', ib, ib, 1.f, d_ref(i), ib,
-			 c+i, 1, 0.f, dwork + i, 1);
-	     cublasZgemv('n', i, ib, -1.f, a_ref(0, i), *lda,
-			 dwork + i, 1, 1.f, c, 1);
+	     cublasZgemv('n', ib, ib, c_one, d_ref(i), ib,
+			 c+i, 1, c_zero, dwork + i, 1);
+	     cublasZgemv('n', i, ib, c_neg_one, a_ref(0, i), *lda,
+			 dwork + i, 1, c_one, c, 1);
 	   }
 	 else
 	   {
-	     cublasZgemm('n', 'n', ib, *nrhs, ib, 1.f, d_ref(i), ib,
-                         c+i, *ldc, 0.f, dwork + i, *ldc);
-             cublasZgemm('n', 'n', i, *nrhs, ib, -1.f, a_ref(0, i), *lda,
-                         dwork + i, *ldc, 1.f, c, *ldc);
+	     cublasZgemm('n', 'n', ib, *nrhs, ib, c_one, d_ref(i), ib,
+                         c+i, *ldc, c_zero, dwork + i, *ldc);
+             cublasZgemm('n', 'n', i, *nrhs, ib, c_neg_one, a_ref(0, i), *lda,
+                         dwork + i, *ldc, c_one, c, *ldc);
 	   }
        }
      }

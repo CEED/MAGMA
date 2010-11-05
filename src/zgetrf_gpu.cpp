@@ -82,6 +82,9 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
 #define max(a,b)  (((a)>(b))?(a):(b))
 #define min(a,b)  (((a)<(b))?(a):(b))
 
+    double2 c_one = MAGMA_Z_ONE;
+    double2 c_neg_one = MAGMA_Z_NEG_ONE;
+
     int iinfo, nb;
     int maxm, maxn, mindim;
     int i, rows, cols, s, ldda, lddwork;
@@ -155,10 +158,10 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
 	    cuCtxSynchronize();
 	    
 	    if ( i>0 ){
-		cublasZtrsm( 'R', 'U', 'N', 'U', n - (i+1)*nb, nb, 1, 
+		cublasZtrsm( 'R', 'U', 'N', 'U', n - (i+1)*nb, nb, c_one, 
 			     inAT(i-1,i-1), ldda, inAT(i-1,i+1), ldda ); 
-		cublasZgemm( 'N', 'N', n-(i+1)*nb, m-i*nb, nb, -1, 
-			     inAT(i-1,i+1), ldda, inAT(i,i-1), ldda, 1, 
+		cublasZgemm( 'N', 'N', n-(i+1)*nb, m-i*nb, nb, c_neg_one, 
+			     inAT(i-1,i+1), ldda, inAT(i,i-1), ldda, c_one, 
 			     inAT(i,i+1), ldda );
 	    }
 	  
@@ -176,17 +179,17 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
 
 	    // do the small non-parallel computations
 	    if ( s > (i+1) ) {
-		cublasZtrsm( 'R', 'U', 'N', 'U', nb, nb, 1, inAT(i,i), ldda, 
+		cublasZtrsm( 'R', 'U', 'N', 'U', nb, nb, c_one, inAT(i,i), ldda, 
 			     inAT(i, i+1), ldda);
-		cublasZgemm( 'N', 'N', nb, m-(i+1)*nb, nb, -1, inAT(i,i+1), ldda,
-			     inAT(i+1,i), ldda, 1, inAT(i+1,i+1), ldda );
+		cublasZgemm( 'N', 'N', nb, m-(i+1)*nb, nb, c_neg_one, inAT(i,i+1), ldda,
+			     inAT(i+1,i), ldda, c_one, inAT(i+1,i+1), ldda );
 	    }
 	    else {
-		cublasZtrsm( 'R', 'U', 'N', 'U', n-s*nb, nb, 1, inAT(i,i), ldda,
+		cublasZtrsm( 'R', 'U', 'N', 'U', n-s*nb, nb, c_one, inAT(i,i), ldda,
 			     inAT(i, i+1), ldda);
 		cublasZgemm( 'N', 'N', n-(i+1)*nb, m-(i+1)*nb, nb, 
-			     -1, inAT(i,i+1), ldda,
-			     inAT(i+1,i), ldda, 1, inAT(i+1,i+1), ldda );
+			     c_neg_one, inAT(i,i+1), ldda,
+			     inAT(i+1,i), ldda, c_one, inAT(i+1,i+1), ldda );
 	    }
 	}
 
@@ -211,7 +214,7 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
 	magmablas_ztranspose2( inAT(s,s), ldda, dA, cols, rows, nb0);
 
 	cublasZtrsm( 'R', 'U', 'N', 'U', n-s*nb-nb0, nb0,
-		     1, inAT(s,s), ldda, inAT(s, s)+nb0, ldda);
+		     c_one, inAT(s,s), ldda, inAT(s, s)+nb0, ldda);
 
 	if ((m == n) && (m % 32 == 0) && (lda%32 == 0))
 	    magmablas_zinplace_transpose( dAT, lda, ldda );

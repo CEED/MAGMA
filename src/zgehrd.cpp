@@ -128,6 +128,9 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, double2 *a, magma_
     #define min(a,b) ((a) <= (b) ? (a) : (b))
     #define max(a,b) ((a) >= (b) ? (a) : (b))
 
+    double2 c_one = MAGMA_Z_ONE;
+    double2 c_zero = MAGMA_Z_ZERO;
+
     int nb = magma_get_zgehrd_nb(n);
     
     int N = n, ldda = n;
@@ -153,14 +156,14 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, double2 *a, magma_
     /* Function Body */
     *info = 0;
 
-    work[0] = (double2) n * nb;
+    MAGMA_Z_SET2REAL( work[0], (double) n * nb );
 
     lquery = *lwork == -1;
     if (n < 0) {
 	*info = -1;
     } else if (ilo < 1 || ilo > max(1,n)) {
 	*info = -2;
-    } else if (*ihi < min(ilo,n) || *ihi > n) {
+    } else if (ihi < min(ilo,n) || ihi > n) {
 	*info = -3;
     } else if (lda < max(1,n)) {
 	*info = -5;
@@ -177,18 +180,18 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, double2 *a, magma_
 
     /* Set elements 1:ILO-1 and IHI:N-1 of TAU to zero */
     for (i__ = 1; i__ < ilo; ++i__)
-      tau[i__] = 0.;
+      tau[i__] = c_zero;
    
-    for (i__ = max(1,*ihi); i__ < n; ++i__)
-      tau[i__] = 0.;
+    for (i__ = max(1,ihi); i__ < n; ++i__)
+      tau[i__] = c_zero;
 
     for(i__=0; i__< nb*nb; i__+=4)
-      t[i__] = t[i__+1] = t[i__+2] = t[i__+3] = 0.;
+      t[i__] = t[i__+1] = t[i__+2] = t[i__+3] = c_zero;
 
     /* Quick return if possible */
-    nh = *ihi - ilo + 1;
+    nh = ihi - ilo + 1;
     if (nh <= 1) {
-	work[0] = 1.;
+	work[0] = c_one;
 	return 0;
     }
 
@@ -227,26 +230,26 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, double2 *a, magma_
       /* Copy the matrix to the GPU */
       cublasSetMatrix(N, N, sizeof(double2), a+(ilo-1)*(lda),lda, d_A, ldda);
 
-      for (i__ = ilo; i__ < *ihi - nb; i__ += nb) {
+      for (i__ = ilo; i__ < ihi - nb; i__ += nb) {
 	/* Computing MIN */
-	ib = min(nb, *ihi - i__);
+	ib = min(nb, ihi - i__);
 
 	/*   Reduce columns i:i+ib-1 to Hessenberg form, returning the   
              matrices V and T of the block reflector H = I - V*T*V'   
              which performs the reduction, and also the matrix Y = A*V*T */
 
 	/*   Get the current panel (no need for the 1st iteration) */
-	cublasGetMatrix(*ihi-i__+ilo, ib, sizeof(double2), 
+	cublasGetMatrix(ihi-i__+ilo, ib, sizeof(double2), 
 			d_A + (i__ - ilo)*ldda  + i__ - ilo, ldda,
 			a   + (i__ -   1 )*(lda)+ i__ - 1   , lda);
 	
-	magma_zlahr2(*ihi, i__, ib, 
+	magma_zlahr2(ihi, i__, ib, 
 		     d_A + (i__ - ilo)*ldda, 
 		     d_A + N*ldda + 1,
 		     a   + (i__ -   1 )*(lda) , lda, 
 		     &tau[i__], t, nb, work, ldwork);
 
-	magma_zlahru(*ihi, i__ - ilo, ib, 
+	magma_zlahru(ihi, i__ - ilo, ib, 
 		     a   + (i__ -   1 )*(lda), lda,
 		     d_A + (i__ - ilo)*ldda, 
 		     d_A + (i__ - ilo)*ldda + i__ - 1,
@@ -259,8 +262,8 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, double2 *a, magma_
       cublasGetMatrix(n, n-i__+1, sizeof(double2), 
 		      d_A+ (i__-1)*ldda, ldda, 
 		      a  + (i__-1)*(lda), lda);
-    zgehd2_(n, &i__, ihi, a, lda, &tau[1], work, &iinfo);
-    work[0] = (double2) iws;
+    zgehd2_(&n, &i__, &ihi, a, &lda, &tau[1], work, &iinfo);
+    MAGMA_Z_SET2REAL( work[0], (double) iws );
     
     // cublasFree(t); 
     free(t);
