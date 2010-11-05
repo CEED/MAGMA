@@ -63,6 +63,7 @@ int sorgqr_(int *, int *, int *, float *, int *, float *,
 int sormqr_(char *, char *, int *, int *, int *, float *, int *,
 	    float *, float *, int *, float *, int *, int *);
 
+void ctrtri_(char *, char *, int *, double2 *, int *, int *);
 void ctrsm_(char *, char *, char *, char *,
 	    int *, int *, float2 *, float2 *, int *, float2 *,int*);
 int ctrmm_(char *, char *, char *, char *,
@@ -145,6 +146,7 @@ int zlaswp_(int *, double2 *, int *, int *, int *, int *, int *);
 double zlange_(char *, int *, int *, double2 *, int *, double *);
 int ztrmm_(char *, char *, char *, char *, int *, int *, 
 	   double2 *, double2 *, int *, double2 *,int *);
+void ztrtri_(char *, char *, int *, double2 *, int *, int *);
 void ztrsm_(char *, char *, char *, char *, int *, int *, 
 	    double2 *, double2 *, int *, double2 *,int*);
 int dsgesv_( int *, int *, double *, int *, int *, double *, int *, 

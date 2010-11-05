@@ -102,6 +102,8 @@ magma_zgeqrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
    #define min(a,b)  (((a)<(b))?(a):(b))
    #define max(a,b)  (((a)>(b))?(a):(b))
 
+   double2 c_one = MAGMA_Z_ONE;
+
    int *m = &m_;
    int *n = &n_;
    int *lda = &lda_;
@@ -114,7 +116,7 @@ magma_zgeqrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
    int nb = magma_get_zgeqrf_nb(min(*m, *n));
    
    int lwkopt = *n * nb;
-   work[0] = (double2) lwkopt;
+   MAGMA_Z_SET2REAL( work[0], (double)lwkopt );
    long int lquery = *lwork == -1;
    if (*m < 0) {
      *info = -1;
@@ -132,7 +134,7 @@ magma_zgeqrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
 
    k = min(*m,*n);
    if (k == 0) {
-     work[0] = 1.f;
+     work[0] = c_one;
      return 0;
    }
 

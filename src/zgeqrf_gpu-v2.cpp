@@ -18,16 +18,18 @@
 void zsplit_diag_block(int ib, double2 *a, int lda, double2 *work){
   int i, j, info;
   double2 *cola, *colw;
+  double2 c_zero = MAGMA_Z_ZERO;
+  double2 c_one = MAGMA_Z_ONE;
 
   for(i=0; i<ib; i++){
     cola = a    + i*lda;
     colw = work + i*ib;
     for(j=0; j<i; j++){
       colw[j] = cola[j];
-      cola[j] = 0.;
+      cola[j] = c_zero;
     }
     colw[i] = cola[i];
-    cola[i] = 1.;
+    cola[i] = c_one;
   }
   ztrtri_("u", "n", &ib, work, &ib, &info);
 }
@@ -125,6 +127,8 @@ magma_zgeqrf_gpu2(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t  lda_,
    *info = 0;
    int nb = magma_get_zgeqrf_nb(*m);
 
+   double2 c_zero = MAGMA_Z_ZERO;
+
    if (*m < 0) {
      *info = -1;
    } else if (*n < 0) {
@@ -151,7 +155,7 @@ magma_zgeqrf_gpu2(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t  lda_,
 
    double2 *ut = hwork+nb*(*n);
    for(i=0; i<nb*nb; i++)
-     ut[i] = 0.;
+     ut[i] = c_zero;
 
    ldda = *m;
    nbmin = 2;
