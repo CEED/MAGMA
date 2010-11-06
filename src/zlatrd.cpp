@@ -16,11 +16,6 @@
 #include "magma.h"
 #include "magmablas.h"
 
-// extern "C" void mzsymv2(int m, int k, double2 *A, int lda, double2 *X, double2 *Y);
-// extern "C" void test_mzsymv_v2(char, int, double2, double2 *, int, double2 *,
-// 			       int, double2, double2 *, int, double2 *);
-// extern "C" void test_mzsymv_v3(char, int, double2, double2 *, int, double2 *,
-//                                int, double2, double2 *, int, double2 *);
 
 extern "C"
 int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a, 
@@ -189,15 +184,11 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
       return 0;
     }
 
-    // TTT
-    double2 *dwork;
-    int bsz = 64 ;
-    int blocks   = *n / bsz  + ( *n % bsz != 0 )  ;
-    int workspace = 2* bsz * blocks * (  blocks +  1) /2 ;
-    workspace = (*ldda) * (blocks +  1);
-    cublasAlloc(workspace, sizeof(double2), (void **)&dwork); 
-
     if (lsame_(uplo, "U")) {
+
+      fprintf(stderr, "zlatrd: uplo has to be 'L'; 'U' not implemented \n");
+      exit(-1);
+
       /* Reduce last NB columns of upper triangle */
       for (i__ = *n; i__ >= *n - *nb + 1; --i__) {
 	iw = i__ - *n + *nb;
@@ -255,23 +246,20 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 	  zaxpy_(&i__2, &alpha, &a[i__ * a_dim1 + 1], &c__1, 
 		 &w[iw * w_dim1 + 1], &c__1);
 	}
-	
-	/* L10: */
       }
-    } else {
 
-      /* TTT: only the L case  is done for now */
+    } else {
 
       /*  Reduce first NB columns of lower triangle */
       for (i__ = 1; i__ <= *nb; ++i__) {
 	/* Update A(i:n,i) */
 	i__2 = *n - i__ + 1;
 	i__3 = i__ - 1;
-	//fprintf(stderr,"i= %d i__2 = %d\n", i__, i__2); 
 	zgemv_("No transpose", &i__2, &i__3, &c_b5, &a[i__ + a_dim1], lda, 
 	       &w[i__ + w_dim1], ldw, &c_b6, &a[i__ + i__ * a_dim1], &c__1);
 	zgemv_("No transpose", &i__2, &i__3, &c_b5, &w[i__ + w_dim1], ldw, 
 	       &a[i__ + a_dim1], lda, &c_b6, &a[i__ + i__ * a_dim1], &c__1);
+
 	if (i__ < *n) {
 	  /* Generate elementary reflector H(i) to annihilate A(i+2:n,i) */
 	  i__2 = *n - i__;
@@ -282,98 +270,25 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 	  a[i__ + 1 + i__ * a_dim1] = 1.f;
 
 	  /* Compute W(i+1:n,i) */ 
-
-	  // TTT : this is the time consuming operation
 	  // 1. Send the block reflector  A(i+1:n,i) to the GPU
 	  cublasSetVector(i__2, sizeof(double2),
 			  a + i__   + 1 + i__   * a_dim1, 1,
-                          da+(i__-1)+ 1 +(i__-1)* (*ldda), 1);
-	  
+                          da+(i__-1)+ 1 +(i__-1)* (*ldda), 1);	  
 	  
 	  cublasZsymv('L', i__2, c_b6, da+ (i__-1)+1 + ((i__-1)+1) * (*ldda),
 		      *ldda, da+ (i__-1)+1 + (i__-1)* a_dim1, c__1, c_b16,
 		      dw+ i__ + 1 + i__ * w_dim1, c__1);
 	  
-	  /*
-	  magmablas_zsymv6('L', *n, c_b6, da,
-		           *ldda, da + (i__-1)* a_dim1, c__1, c_b16,
-			              dw + 1 + i__ * w_dim1, c__1, dwork, i__-1);
-	  */
-	  /*
-	  magmablas_zsymv6('L', i__2, c_b6, da+ (i__-1)+1 + ((i__-1)+1) * (*ldda),
-			   *ldda, da+ (i__-1)+1 + (i__-1)* a_dim1, c__1, c_b16,
-			   dw+ i__ + 1 + i__ * w_dim1, c__1, dwork, -1);
-	  */
-
-	  //start = get_current_time();
-	  // the hemmetric matrix-vector (works with the herks) TTT
-	   // This works when matrix is divisible by the blocking size
-	  /*
-            mzsymv2(*n, i__,  da, *ldda, 
-		  da + (i__-1)* a_dim1, dw + 1 +  i__ *w_dim1);
-	  */
-
-	  /*
-	  if (*n<4500)
-	    test_mzsymv_v2('L', *n, c_b6, da, *ldda, 
-			   da+ (i__-1)* a_dim1, c__1, c_b16,
-			   dw+ 1 + i__ * w_dim1, c__1, dw);
-	  else
-	    if (*n%64==0)
-	      test_mzsymv_v3('L', *n, c_b6, da, *ldda,
-			     da+ (i__-1)* a_dim1, c__1, c_b16,
-			     dw+ 1 + i__ * w_dim1, c__1, dw);
-	    else
-	      test_mzsymv_v3('L', *n+32, c_b6, da, *ldda,
-                             da+ (i__-1)* a_dim1, c__1, c_b16,
-                             dw+ 1 + i__ * w_dim1, c__1, dw);
-	  */
-	  /*
-	  magmablas_zgemv(*n, *n,
-			  da, *ldda,
-			  da + (i__-1)* a_dim1, dw + 1 +  i__ *w_dim1);
-	  */
-	  /*
-	  magmablas_zsymv(
-		      'L', i__2, c_b6, da+ (i__-1)+1 + ((i__-1)+1) * (*ldda),
-		      *ldda, da+ (i__-1)+1 + (i__-1)* a_dim1, c__1, c_b16,
-		      dw+ i__ + 1 + i__ * w_dim1, c__1);
-	  */
-	  //end = get_current_time();
-	  //printf("%4d, zherk %4d GFlop/s: %5.2f \n", *n, i__2, 
-	  //	 2.*i__2*i__2/(1000000.*GetTimerValue(start,end)));
-
+	  // 2. Start putting the result back (asynchronously)
 	  cudaMemcpy2DAsync(w + i__ + 1 + i__ * w_dim1, w_dim1*sizeof(double2),
 			    dw+ i__ + 1 + i__ * w_dim1, w_dim1*sizeof(double2),
 			    sizeof(double2)*i__2, 1,
 			    cudaMemcpyDeviceToHost,stream[1]);
 
-	  /*
-	  zsymv_("Lower", &i__2, &c_b6, &a[i__ + 1 + (i__ + 1) * a_dim1],
-		 lda, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_b16, 
-		 &w[i__ + 1 + i__ * w_dim1], &c__1);
-	  */
-	 
 	  i__3 = i__ - 1;
 	  zgemv_("Transpose", &i__2, &i__3, &c_b6, &w[i__ + 1 + w_dim1], 
 		 ldw, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_b16, 
 		 &w[i__ * w_dim1 + 1], &c__1);
-
-	  // put the result back
-	  /*
-	  cublasGetVector(i__2, sizeof(double2),
-                          dw+ i__ + 1 + i__ * w_dim1, c__1,
-                          w + i__ + 1 + i__ * w_dim1, c__1);
-	  */
-
-	  /*
-	  zgemv_("No transpose", &i__2, &i__3, &c_b5, 
-		 &a[i__ + 1 + a_dim1], lda, &w[i__ * w_dim1 + 1], &c__1, 
-		 &c_b6, &w[i__ + 1 + i__ * w_dim1], &c__1);
-	  zgemv_("Transpose", &i__2, &i__3, &c_b6, &a[i__ + 1 + a_dim1], 
-		 lda, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_b16, 
-		 &w[i__ * w_dim1 + 1], &c__1);
-	  */
 
 	  zgemv_("No transpose", &i__2, &i__3, &c_b5,
                  &a[i__ + 1 + a_dim1], lda, &w[i__ * w_dim1 + 1], &c__1,
@@ -382,18 +297,12 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
                  lda, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_b16,
                  &w[i__ * w_dim1 + 1], &c__1);
 
-	  /*
-	  cublasGetVector(i__2, sizeof(double2),
-                          dw+ i__ + 1 + i__ * w_dim1, c__1,
-                          w + i__ + 1 + i__ * w_dim1, c__1);
-	  */
+	  // 3. Here is where we need it
 	  cudaStreamSynchronize(stream[1]);
 
 	  if (i__3!=0)
-	  zaxpy_(&i__2, &c_b6, f, &c__1, &w[i__ + 1 + i__ * w_dim1], &c__1);
-	  //==========
-
-
+	    zaxpy_(&i__2, &c_b6, f, &c__1, &w[i__ + 1 + i__ * w_dim1], &c__1);
+     
 	  zgemv_("No transpose", &i__2, &i__3, &c_b5, &w[i__ + 1 + w_dim1], 
 		 ldw, &w[i__ * w_dim1 + 1], &c__1, &c_b6, 
 		 &w[i__ + 1 + i__ * w_dim1], &c__1);
@@ -403,17 +312,14 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 	  zaxpy_(&i__2, &alpha, &a[i__ + 1 + i__ * a_dim1], &c__1, 
 		 &w[i__ + 1 + i__ * w_dim1], &c__1);
 	}
-
-	/* L20: */
       }
     }
 
     free(f);
-    cublasFree(dwork);
 
     return 0;
 
-    /* End of SLATRD */
+    /* End of ZLATRD */
 } /* zlatrd_ */
 
 #undef min
