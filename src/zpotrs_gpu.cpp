@@ -67,6 +67,8 @@ magma_zpotrs_gpu(char UPLO_, magma_int_t N , magma_int_t NRHS, double2 *A , magm
     =====================================================================   */
     #define MAX(a,b)       (((a)>(b))?(a):(b))
 
+    double2 c_one = MAGMA_Z_ONE;
+
     char UPLO[2] = {UPLO_, 0};
 
     *INFO = 0 ; 
@@ -87,12 +89,12 @@ magma_zpotrs_gpu(char UPLO_, magma_int_t N , magma_int_t NRHS, double2 *A , magm
     if( N==0 || NRHS ==0) 
       return 0;	
     if( *UPLO =='U' || *UPLO=='u'){
-      cublasZtrsm('L','U','T','N', N , NRHS, 1.0, A , LDA , B , LDB );
-      cublasZtrsm('L','U','N','N', N , NRHS, 1.0, A , LDA , B , LDB );
+      cublasZtrsm('L','U','T','N', N , NRHS, c_one, A , LDA , B , LDB );
+      cublasZtrsm('L','U','N','N', N , NRHS, c_one, A , LDA , B , LDB );
     }
     else{
-      cublasZtrsm('L','L','N','N', N , NRHS, 1.0, A , LDA , B , LDB );
-      cublasZtrsm('L','L','T','N', N , NRHS, 1.0, A , LDA , B , LDB );
+      cublasZtrsm('L','L','N','N', N , NRHS, c_one, A , LDA , B , LDB );
+      cublasZtrsm('L','L','T','N', N , NRHS, c_one, A , LDA , B , LDB );
     }
 
     return 0;

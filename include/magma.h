@@ -41,6 +41,8 @@
 #define MAGMA_Z_NEG_ONE {-1.0, 0.0}
 
 #define MAGMA_Z_SET2REAL(v, t) v.x = (t); v.y = 0.0
+#define MAGMA_Z_OP_NEG_ASGN(t, z) (t).x = (z).x; (t).y = (z).y
+#define MAGMA_Z_EQUAL(u,v) (((u).x == (v).x) && ((u).y == (v).y))
 
 #ifdef __cplusplus
 extern "C" {

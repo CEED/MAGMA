@@ -127,6 +127,10 @@ magma_zlahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
 
     #define min(a,b) ((a) <= (b) ? (a) : (b))
 
+    double2 c_zero = MAGMA_Z_ONE;
+    double2 c_one = MAGMA_Z_ONE;
+    double2 c_neg_one = MAGMA_Z_NEG_ONE;
+
     int *n = &n_;
     int *nb = &nb_;
     int *k = &k_;
@@ -137,10 +141,7 @@ magma_zlahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
     int ldda = *n;
 
     /* Table of constant values */
-    static double2 c_b4 = -1.;
-    static double2 c_b5 = 1.;
     static int c__1 = 1;
-    static double2 c_b38 = 0.;
     
     /* System generated locals */
     int a_dim1, a_offset, t_dim1, t_offset, y_dim1, y_offset, i__2, i__3;
@@ -173,8 +174,8 @@ magma_zlahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
 	  i__3 = i__ - 1;
 	  zcopy_(&i__3, &a[*k+i__-1+a_dim1], lda, &t[*nb*t_dim1+1], &c__1);
 	  ztrmv_("u","n","n",&i__3,&t[t_offset], ldt, &t[*nb*t_dim1+1], &c__1);
-	  zgemv_("NO TRANSPOSE", &i__2, &i__3, &c_b4, &y[*k + y_dim1],
-		 ldy, &t[*nb*t_dim1+1], &c__1, &c_b5, &a[*k+i__*a_dim1],&c__1);
+	  zgemv_("NO TRANSPOSE", &i__2, &i__3, &c_neg_one, &y[*k + y_dim1],
+		 ldy, &t[*nb*t_dim1+1], &c__1, &c_one, &a[*k+i__*a_dim1],&c__1);
 
 	  /* Apply I - V * T' * V' to this column (call it b) from the   
              left, using the last column of T as workspace   
@@ -192,8 +193,8 @@ magma_zlahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
 	  /* w := w + V2'*b2 */
 	  i__2 = *n - *k - i__ + 1;
 	  i__3 = i__ - 1;
-	  zgemv_("T", &i__2, &i__3, &c_b5, &a[*k + i__ + a_dim1], lda, 
-		 &a[*k+i__+i__*a_dim1], &c__1, &c_b5, &t[*nb*t_dim1+1], &c__1);
+	  zgemv_("T", &i__2, &i__3, &c_one, &a[*k + i__ + a_dim1], lda, 
+		 &a[*k+i__+i__*a_dim1], &c__1, &c_one, &t[*nb*t_dim1+1], &c__1);
 
 	  /* w := T'*w */
 	  i__2 = i__ - 1;
@@ -202,13 +203,13 @@ magma_zlahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
 	  /* b2 := b2 - V2*w */
 	  i__2 = *n - *k - i__ + 1;
 	  i__3 = i__ - 1;
-	  zgemv_("N", &i__2, &i__3, &c_b4, &a[*k + i__ + a_dim1], lda, 
-		 &t[*nb*t_dim1+1], &c__1, &c_b5, &a[*k+i__+i__*a_dim1], &c__1);
+	  zgemv_("N", &i__2, &i__3, &c_neg_one, &a[*k + i__ + a_dim1], lda, 
+		 &t[*nb*t_dim1+1], &c__1, &c_one, &a[*k+i__+i__*a_dim1], &c__1);
 
 	  /* b1 := b1 - V1*w */
 	  i__2 = i__ - 1;
 	  ztrmv_("L","N","U",&i__2,&a[*k+1+a_dim1],lda,&t[*nb*t_dim1+1],&c__1);
-	  zaxpy_(&i__2, &c_b4, &t[*nb * t_dim1 + 1], &c__1, 
+	  zaxpy_(&i__2, &c_neg_one, &t[*nb * t_dim1 + 1], &c__1, 
 		 &a[*k + 1 + i__ * a_dim1], &c__1);
 	  
 	  a[*k + i__ - 1 + (i__ - 1) * a_dim1] = ei;
@@ -220,7 +221,7 @@ magma_zlahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
 	zlarfg_(&i__2, &a[*k + i__ + i__ * a_dim1], 
 		&a[min(i__3,*n) + i__ * a_dim1], &c__1, &tau[i__]);
 	ei = a[*k + i__ + i__ * a_dim1];
-	a[*k + i__ + i__ * a_dim1] = 1.;
+	a[*k + i__ + i__ * a_dim1] = c_one;
 
 	/* Compute  Y(K+1:N,I) */
         i__2 = *n - *k;
@@ -228,19 +229,19 @@ magma_zlahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
         cublasSetVector(i__3, sizeof(double2), 
                         &a[*k + i__ + i__*a_dim1], 1, dv+(i__-1)*(ldda+1), 1);
 
-	cublasZgemv('N', i__2+1, i__3, c_b5, 
+	cublasZgemv('N', i__2+1, i__3, c_one, 
 		    da -1 + *k + i__ *ldda, ldda, 
-		    dv+(i__-1)*(ldda+1), c__1, c_b38, 
+		    dv+(i__-1)*(ldda+1), c__1, c_zero, 
 		    da-1 + *k + (i__-1)*ldda, c__1);     
 	
 	i__2 = *n - *k - i__ + 1;
 	i__3 = i__ - 1;
-	zgemv_("T", &i__2, &i__3, &c_b5, &a[*k + i__ + a_dim1], lda,
-	       &a[*k+i__+i__*a_dim1], &c__1, &c_b38, &t[i__*t_dim1+1], &c__1);
+	zgemv_("T", &i__2, &i__3, &c_one, &a[*k + i__ + a_dim1], lda,
+	       &a[*k+i__+i__*a_dim1], &c__1, &c_zero, &t[i__*t_dim1+1], &c__1);
 
 	/* Compute T(1:I,I) */
 	i__2 = i__ - 1;
-	d__1 = -tau[i__];
+	MAGMA_Z_OP_NEG_ASGN( d__1, tau[i__] );
 	zscal_(&i__2, &d__1, &t[i__ * t_dim1 + 1], &c__1);
 	ztrmv_("U","N","N", &i__2, &t[t_offset], ldt, &t[i__*t_dim1+1], &c__1);
 	t[i__ + i__ * t_dim1] = tau[i__];

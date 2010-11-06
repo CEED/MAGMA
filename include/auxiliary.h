@@ -41,12 +41,16 @@ int magma_get_dgebrd_nb(int m);
 int magma_get_cpotrf_nb(int m);
 int magma_get_cgetrf_nb(int m);
 int magma_get_cgeqrf_nb(int m);
+int magma_get_cgeqlf_nb(int m);
 int magma_get_cgehrd_nb(int m);
+int magma_get_cgelqf_nb(int m);
 
 int magma_get_zpotrf_nb(int m);
 int magma_get_zgetrf_nb(int m);
 int magma_get_zgeqrf_nb(int m);
+int magma_get_zgeqlf_nb(int m);
 int magma_get_zgehrd_nb(int m);
+int magma_get_zgelqf_nb(int m);
 
 TimeStruct get_current_time(void);
 double GetTimerValue(TimeStruct time_1, TimeStruct time_2);

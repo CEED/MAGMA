@@ -141,12 +141,15 @@ magmablas_zgemm(char TRANSA, char TRANSB, int m , int n , int k ,
  
    =====================================================================    */
 
-  if(m==0 || n==0  || ( ( alpha==0 || k==0 ) && beta ==1 ) ){
+  double2 c_zero = MAGMA_Z_ZERO;
+  double2 c_one = MAGMA_Z_ONE;
+
+  if(m==0 || n==0  || ( ( MAGMA_Z_EQUAL( alpha, c_zero) || k==0 ) && MAGMA_Z_EQUAL( beta, c_one ) ) ){
     return ;
   }
   
-  if( alpha == 0.0){
-    if( beta == 0.0){
+  if( MAGMA_Z_EQUAL( alpha, c_zero )){
+    if( MAGMA_Z_EQUAL( beta, c_zero )){
       magmablas_zgemm_kernel_ab_0( C,A,B, m, n,k,lda,ldb, ldc, alpha, beta);
       return ;
     }	

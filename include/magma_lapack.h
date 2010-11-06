@@ -68,7 +68,13 @@ void ctrsm_(char *, char *, char *, char *,
 	    int *, int *, float2 *, float2 *, int *, float2 *,int*);
 int ctrmm_(char *, char *, char *, char *,
 	   int *, int *, float2 *, float2 *, int *, float2 *,int *);
+int cgemv_(char *, int *, int *, float2 *, float2 *, int *,
+	   float2 *, int *, float2 *, float2 *, int *);
 void caxpy_(int *, float2 *, float2 *, int *, float2 *, int *);
+void ccopy_(int *, float2 *, int *, float2 *, int *);
+void ctrmv_(char*,char*,char*,int *,float2*,int*,float2*,int*);
+void clarfg_(int *, float2 *, float2 *x, int *, float2 *);
+void cscal_(int *, float2 *, float2 *, int *);
 void csyrk_(char *, char *, int *, int *, float2 *,
 	    float2 *, int *, float2 *, float2 *, int *);
 void cherk_(char *, char *, int *, int *, float *,
@@ -76,6 +82,8 @@ void cherk_(char *, char *, int *, int *, float *,
 int cgehd2_(int*,int*,int*,float2*,int*,float2*,float2*,int*);
 int cpotrf_(char *uplo, int *n, float2 *a, int *lda, int *info);
 int cgeqrf_(int*,int*,float2 *,int*,float2 *,float2 *,int *,int *);
+int cgeqlf_(int*,int*,float2 *,int*,float2 *,float2 *,int *,int *);
+int cgelqf_(int*,int*,float2 *,int*,float2 *,float2 *,int *,int *);
 int clarft_(char *, char *, int *, int *, float2 *, int *, float2 *,
 	    float2 *, int *);
 int cgetrf_(int *, int *, float2 *, int *, int *, int *);
@@ -141,6 +149,8 @@ int zgehd2_(int*,int*,int*,double2*,int*,double2*,double2*,int*);
 int zpotrf_(char *uplo, int *n, double2 *a, int *lda, int *info);
 int zgeqrf_(int*, int*, double2 *, int*, double2 *, double2 *,
 	    int *, int *);
+int zgeqlf_(int*,int*,double2 *,int*,double2 *,double2 *,int *,int *);
+int zgelqf_(int*,int*,double2 *,int*,double2 *,double2 *,int *,int *);
 int zlarft_(char *, char *, int *, int *, double2 *, int *, 
 	    double2 *, double2 *, int *);
 int zgetrf_(int *, int *, double2 *, int *, int *, int *);
@@ -151,9 +161,15 @@ int ztrmm_(char *, char *, char *, char *, int *, int *,
 void ztrtri_(char *, char *, int *, double2 *, int *, int *);
 void ztrsm_(char *, char *, char *, char *, int *, int *, 
 	    double2 *, double2 *, int *, double2 *,int*);
+int zgemv_(char *, int *, int *, double2 *, double2 *, int *,
+	   double2 *, int *, double2 *, double2 *, int *);
 int dsgesv_( int *, int *, double *, int *, int *, double *, int *, 
 	     double *, int *, double *, float *, int *, int *);
 void zaxpy_(int *, double2 *, double2 *, int *, double2 *, int *);
+void zcopy_(int *, double2 *, int *, double2 *, int *);
+void ztrmv_(char*,char*,char*,int *,double2*,int*,double2*,int*);
+void zlarfg_(int *, double2 *, double2 *x, int *, double2 *);
+void zscal_(int *, double2 *, double2 *, int *);
 void zherk_(char *, char *, int *, int *, double *,
 	    double2 *, int *, double *, double2 *, int *);
 double dsymm_(char *,char*,int *,int *,double *,double *,int *,

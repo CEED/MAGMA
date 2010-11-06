@@ -32,7 +32,7 @@ extern "C" int  magma_zlatrd(char *, int *, int *, double2 *,
 double2 cpu_gpu_sdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda)
 {
   int one = 1, j;
-  double2 mone = -1.f, work[1];
+  double2 mone = MAGMA_Z_NEG_ONE, work[1];
   double2 *ha = (double2*)malloc( M * N * sizeof(double2));
 
   cublasGetMatrix(M, N, sizeof(double2), da, ldda, ha, M);

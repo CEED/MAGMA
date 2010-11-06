@@ -102,6 +102,8 @@ magma_zgeqlf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
     
+    double2 c_one = MAGMA_Z_ONE;
+
     int *m = &m_;
     int *n = &n_;
     int *lda = &lda_;
@@ -127,9 +129,10 @@ magma_zgeqlf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
     if (*info == 0) {
 	k = min(*m,*n);
 	if (k == 0)
-	  work[0] = (double2)1;
-	else 
-	  work[0] = (double2)*n * nb;
+	  work[0] = c_one;
+	else {
+	  MAGMA_Z_SET2REAL( work[0], *n * nb );
+	}
 
 	if (*lwork < max(1,*n) && ! lquery)
 	  *info = -7;

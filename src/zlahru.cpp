@@ -96,10 +96,13 @@ magma_zlahru(int n, int k, int nb, double2 *a, int lda,
     
     =====================================================================    */
 
+    double2 c_zero = MAGMA_Z_ZERO;
+    double2 c_one = MAGMA_Z_ONE;
+    double2 c_neg_one = MAGMA_Z_NEG_ONE;
+
     int ldda = n;
     double2 *v0 = v + n - k;
     double2 *d_t = d_work + nb*ldda;
-    double2 c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_neg_one = MAGMA_Z_NEG_ONE;
 
     /* Copy T from the CPU to D_T on the GPU */
     cublasSetMatrix(nb, nb, sizeof(double2), t, nb, d_t, nb);
