@@ -27,7 +27,7 @@ magma_zlahru(int n, int k, int nb, double2 *a, int lda,
     Purpose
     =======
 
-    SLAHRU is an auxiliary MAGMA routine that is used in DGEHRD to update
+    ZLAHRU is an auxiliary MAGMA routine that is used in ZGEHRD to update
     the trailing sub-matrices after the reductions of the corresponding
     panels.
     See further details below.
@@ -99,35 +99,32 @@ magma_zlahru(int n, int k, int nb, double2 *a, int lda,
     int ldda = n;
     double2 *v0 = v + n - k;
     double2 *d_t = d_work + nb*ldda;
+    double2 c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_neg_one = MAGMA_Z_NEG_ONE;
 
     /* Copy T from the CPU to D_T on the GPU */
     cublasSetMatrix(nb, nb, sizeof(double2), t, nb, d_t, nb);
 
     /* V0 = M V */
-    cublasZgemm('N','N', k, nb, n-k, 1.0, d_a, ldda, v, ldda, 0.0, v0, ldda);
+    cublasZgemm('N','N', k, nb, n-k, c_one, d_a, ldda, v, ldda, c_zero, v0, ldda);
 
     /* Update matrix M -= V0 T V' through
        1. d_work = T V'
        2. M -= V0 d_work                  */
-    cublasZgemm('N','T', nb, n-k, nb, 1., d_t,nb, v, ldda, 0., d_work,nb);
-    cublasZgemm('N','N', k, n-k, nb, -1., v0, ldda, d_work, nb, 1., d_a, ldda);
+    cublasZgemm('N','T', nb, n-k, nb, c_one, d_t,nb, v, ldda, c_zero, d_work,nb);
+    cublasZgemm('N','N', k, n-k, nb, c_neg_one, v0, ldda, d_work, nb, c_one, d_a, ldda);
     cublasGetMatrix(k, nb, sizeof(double2), d_a, ldda, a, lda);
-    /*
-    cudaMemcpy2DAsync(a, lda * sizeof(double2), d_a, ldda * sizeof(double2),
-		      sizeof(double2)*k, nb, cudaMemcpyDeviceToHost,stream[1]);
-    */
 
     /* Update G -= Y T -= Y d_work */
-    cublasZgemm('N','N', n-k, n-k-nb, nb, -1.0, y, ldda,
-		d_work+nb*nb, nb, 1.0, d_a + nb*ldda + k, ldda);
+    cublasZgemm('N','N', n-k, n-k-nb, nb, c_neg_one, y, ldda,
+		d_work+nb*nb, nb, c_one, d_a + nb*ldda + k, ldda);
     
     /* Update G = (I - V T V') G = (I - work' V') G through
        1. Y = V' G
        2. G -= work' Y                                      */
     cublasZgemm('T','N', nb, n-k-nb, n-k,
-		1., v, ldda, d_a + nb*ldda+k, ldda, 0., y, nb);
+		c_one, v, ldda, d_a + nb*ldda+k, ldda, c_zero, y, nb);
     cublasZgemm('T','N', n-k, n-k-nb, nb,
-		-1.0, d_work, nb, y, nb, 1.0, d_a+nb*ldda+k, ldda);
+		c_neg_one, d_work, nb, y, nb, c_one, d_a+nb*ldda+k, ldda);
     
     return 0;
 }
