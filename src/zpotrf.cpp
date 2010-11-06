@@ -90,8 +90,8 @@ magma_zpotrf(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, int *info
     int a_dim1, a_offset, i__3, i__4, ldda;
     /* Local variables */
     static int j;
-    double2 c_one = MAGMA_S_ONE;
-    double2 c_neg_one = MAGMA_S_NEG_ONE;
+    double2 c_one = MAGMA_Z_ONE;
+    double2 c_neg_one = MAGMA_Z_NEG_ONE;
 
     long int upper = lsame_(uplo, "U");
     *info = 0;
