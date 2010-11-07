@@ -9,88 +9,45 @@
 #include "cublas.h"
 #include "magma.h"
 
-#define num_threads 64
-#define sgemv_bs 64
+#define num_threads 128
+#define sgemv_bs 32
+#define threadSize 128
 
 __global__ void 
-sgemv_kernel(int n, int m, int n1, float* A, int lda, float *x, float *y)
+sgemv_kernel_fermi(int n, int m, int n1, float* A, int lda, float *x, float *y)
 {
   int ind = blockIdx.x*num_threads + threadIdx.x;
 
   A += ind;
-  x += threadIdx.x;
 
   float res = 0.f;
 
-  __shared__ float buff[sgemv_bs];
   for(int i=0; i<n1; i += sgemv_bs ){
-    __syncthreads();
-    buff[threadIdx.x]  = x[i];
 
-    __syncthreads();
     #pragma unroll
     for(int j=0; j < sgemv_bs ; j++){
-       res+=A[0]*buff[j];
-       A+=lda;
+       res += A[0] * x[j];
+       A   += lda;
     }
+	x += sgemv_bs;
   }
-  __syncthreads();
 
   if (m>n1){
-     buff[threadIdx.x]  = x[n1];
 
-     __syncthreads();
      for(int j=0; j<(m-n1); j++){
-         res += A[0]*buff[j];
-         A+=lda;
+         res += A[0] * x[j];
+         A   += lda;
      }
   }
 
   if (ind<n)
      y[ind] = res;
+
 }
 
-__global__ void
-sgemv_kernel2(int n, int m, int n1, float* A, int lda, 
-              float *x, int incx, float *y)
-{
-  int ind = blockIdx.x*num_threads + threadIdx.x;
-
-  A += ind;
-  x += threadIdx.x * incx;
-
-  float res = 0.f;
-
-  __shared__ float buff[sgemv_bs];
-  for(int i=0; i<n1; i += sgemv_bs ){
-    __syncthreads();
-    buff[threadIdx.x]  = x[i*incx];
-
-    __syncthreads();
-    #pragma unroll
-    for(int j=0; j < sgemv_bs ; j++){
-       res+=A[0]*buff[j];
-       A+=lda;
-    }
-  }
-  __syncthreads();
-
-  if (m>n1){
-     buff[threadIdx.x]  = x[n1*incx];
-
-     __syncthreads();
-     for(int j=0; j<(m-n1); j++){
-         res += A[0]*buff[j];
-         A+=lda;
-     }
-  }
-
-  if (ind<n)
-     y[ind] = res;
-}
 
 extern "C" void
-magmablas_sgemv_tesla(int m, int n, float *A, int lda, float *x, float *z)
+magmablas_sgemv_fermi(int m, int n, float *A, int lda, float *x, float *z)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -104,12 +61,13 @@ magmablas_sgemv_tesla(int m, int n, float *A, int lda, float *x, float *z)
     This routine computes z = A x on the GPU.
 
     M      - (input) INTEGER.
-             On entry, N specifies the number of rows of the matrix A.
+             On entry, M specifies the number of rows of the matrix A.
 
     N      - (input) INTEGER.
-             On entry, M specifies the number of columns of the matrix A
+             On entry, N specifies the number of columns of the matrix A
 
-    A      - (input) SINGLE PRECISION array of dimension ( LDA, n ) on the GPU.
+    A      - (input) SINGLE PRECISION array of dimension 
+             (LDA, n) on the GPU.
    
     LDA    - (input) INTEGER.
              LDA specifies the leading dimension of A.
@@ -130,150 +88,86 @@ magmablas_sgemv_tesla(int m, int n, float *A, int lda, float *x, float *z)
     dim3 grid(blocks, 1, 1);
     dim3 threads(num_threads, 1, 1);
  
-    sgemv_kernel<<<grid, threads>>>(m, n, (n / sgemv_bs)*sgemv_bs, 
-                                    A, lda, x, z);
+    sgemv_kernel_fermi<<<grid, threads>>>(m, n, (n / sgemv_bs)*sgemv_bs, 
+                                          A, lda, x, z);
 }
 
-extern "C" void
-magmablas_sgemv2(int n, int m, float *A, int lda, float *x, int incx, float *z)
-{
-/*  -- MAGMA (version 1.0) --
-       Univ. of Tennessee, Knoxville
-       Univ. of California, Berkeley
-       Univ. of Colorado, Denver
-       November 2010
 
-    Purpose
-    =======
-
-    This routine computes z = A x on the GPU.
-    This version has INCX as an argument. 
-
-    N      - (input) INTEGER.
-             On entry, N specifies the number of rows of the matrix A.
-
-    M      - (input) INTEGER.
-             On entry, M specifies the number of columns of the matrix A
-
-    A      - (input) SINGLE PRECISION array of dimension ( LDA, m ) on the GPU.
-
-    LDA    - (input) INTEGER.
-             LDA specifies the leading dimension of A.
-
-    X      - (input) SINGLE PRECISION array of dimension n.
-
-    INCX   - (input) Specifies the increment for the elements of X. 
-             INCX must not be zero. Unchanged on exit.
-
-    Z      - (output) SINGLE PRECISION array of dimension m.
-             On exit Z = A X.
-
-    ===================================================================== */
-
-    int blocks;
-    if (n % num_threads==0)
-        blocks = n/num_threads;
-    else
-        blocks = n/num_threads + 1;
-
-    dim3 grid(blocks, 1, 1);
-    dim3 threads(num_threads, 1, 1);
-
-    sgemv_kernel2<<<grid, threads>>>(n, m, (m / sgemv_bs)*sgemv_bs,
-                                     A, lda, x, incx, z);
-}
 
 __global__ void 
-sgemvt_kernel1(int n, int m, float alpha, int n1, float* A, int lda,
-              float *x, float *y)
+sgemvt_kernel1_fermi(int m, int n, float alpha, int n1, float* A, int lda,
+                     float *x, float *y)
 {
-  const int inx = threadIdx.x;
-  const int iny = threadIdx.y;
+	unsigned int tx = threadIdx.x;
 
-  int ind  = iny + __mul24(blockIdx.x,32);
-  ind = inx + __mul24(ind,lda);
-  int ind2 = inx + __mul24(iny,32);
+	__shared__ float sdata[threadSize];
+	
+	volatile float *smem;
 
-  A += ind;
-  x += ind2;
+	float res;
+	res = 0.0f;
+     
+	for(int i=0; i<n1; i+= threadSize)
+	{
+		res += A[tx + i + lda * blockIdx.y] * x[tx + i];
+	}
 
-  float res = 0.f;
+	
+	if(m > n1)
+	{
+		if( tx + n1 <  m )
+		{
+			res  += A[tx + n1 + lda *blockIdx.y] * x[tx + n1];
+		}
+		else 
+		{
+			res  += 0.0f;
+		}
+	}	
 
-  __shared__ float buff[sgemv_bs];
-  __shared__ float la[32][33];
+    sdata[tx] = res;
+	__syncthreads();
+    
+    /*
+	if(tx < 128) 
+	{
+		sdata[tx] += sdata[tx + 128];
+	}
+    __syncthreads();
+	*/
 
-  for(int i=0; i<n1; i += sgemv_bs ){
-      buff[ind2]  = x[i];
-      #pragma unroll
-      for(int j=0; j<16; j++)
-         la[iny+__mul24(j,2)][inx] = A[j*__mul24(2,lda)];
+	if(tx < 64) 
+	{
+		sdata[tx] += sdata[tx + 64];
+	}
+    __syncthreads();
 
-      __syncthreads();
-      #pragma unroll
-      for(int j=0; j < 16; j++)
-        res += la[inx][iny*16+j]*buff[j+iny*16];
+	if(tx < 32)
+	{
+		smem = sdata;
+		smem[tx] += smem[tx + 32];
+		smem[tx] += smem[tx + 16];
+		smem[tx] += smem[tx +  8];
+		smem[tx] += smem[tx +  4];
+		smem[tx] += smem[tx +  2];
+		smem[tx] += smem[tx +  1];
+	}
 
-      A += 32;
+    if( tx == 0 ) 
+	{
+		y[blockIdx.y] = sdata[0]; 		
 
-      //===============================================
-      #pragma unroll
-      for(int j=0; j<16; j++)
-         la[iny+__mul24(j,2)][inx] = A[j*__mul24(2,lda)];
-
-      __syncthreads();
-
-      #pragma unroll
-      for(int j=0; j < 16; j++)
-        res += la[inx][iny*16+j]*buff[j+32+iny*16];
-      A += 32;
-    }
-
-    if (n>n1){
-      if (ind2>=(n-n1))
-         buff[ind2]=0.;
-      else
-         buff[ind2]  = x[n1];
-
-      #pragma unroll
-      for(int j=0; j<16; j++)
-         la[iny+__mul24(j,2)][inx] = A[j*__mul24(2,lda)];
-
-     __syncthreads();
-
-     if (n-n1>16){
-        #pragma unroll
-        for(int j=0; j < 16; j++)
-           res += la[inx][iny*16+j]*buff[j+iny*16];
-
-        A += 32;
-        #pragma unroll
-        for(int j=0; j<16; j++)
-          la[iny+__mul24(j,2)][inx] = A[j*__mul24(2,lda)];
-
-        __syncthreads();
-
-        #pragma unroll
-        for(int j=0; j < 16; j++)
-           res += la[inx][iny*16+j]*buff[j+32+iny*16];
-     }
-     else {
-        #pragma unroll
-        for(int j=0; j < 16; j++)
-          res += la[inx][iny*16+j]*buff[j+iny*16];
-     }
-  }
-  ind = inx + __mul24(blockIdx.x,32);
-
-  la[inx][iny]= res;
-  if (ind<m){
-     res = la[inx][0] + la[inx][1];
-     y[ind] = alpha*res;
-  }
+		if (blockIdx.y < n)
+		{
+			y[blockIdx.y] = y[blockIdx.y] * alpha;
+		}
+	}
 }
 
+
 __global__ void 
-sgemvt_kernel2(int n, int m, float alpha,
-               int n1, float* A, int lda, float *x, float *y)
+sgemvt_kernel2_fermi(int m, int n, float alpha,
+                     int n1, float* A, int lda, float *x, float *y)
 {
   const int inx = threadIdx.x;
   const int iny = threadIdx.y;
@@ -371,14 +265,14 @@ sgemvt_kernel2(int n, int m, float alpha,
   ind = inx + __mul24(blockIdx.x,16);
   la[inx][iny]= res;
   __syncthreads();
-  if (ind<m && iny==0){
+  if (ind<n && iny==0){
      res = la[inx][0] + la[inx][1] + la[inx][2] + la[inx][3];
      y[ind] = alpha*res;
   }
 }
 
 extern "C" void
-magmablas_sgemvt1_tesla(int m, int n, float alpha, float *A, int lda,
+magmablas_sgemvt1_fermi(int m, int n, float alpha, float *A, int lda,
                         float *x, float *z)
 {
 /*  -- MAGMA (version 1.0) --
@@ -399,7 +293,7 @@ magmablas_sgemvt1_tesla(int m, int n, float alpha, float *A, int lda,
     N      - (input) INTEGER.
              On entry, N specifies the number of columns of the matrix A
 
-    A      - (input) SINGLE PRECISION array of dimension ( LDA, N ) on the GPU.
+    A      - (input) SINGLE PRECISION array of dimension ( LDA, n ) on the GPU.
 
     LDA    - (input) INTEGER.
              LDA specifies the leading dimension of A.
@@ -410,22 +304,17 @@ magmablas_sgemvt1_tesla(int m, int n, float alpha, float *A, int lda,
              On exit Z = alpha A^t X.
 
     ===================================================================== */
-    int blocks;
 
-    if (n % 32==0)
-        blocks = n/32;
-    else
-        blocks = n/32 + 1;
+    dim3 grid    ( 1,  n,  1);
+    dim3 threads ( threadSize,   1,  1);
 
-    dim3 grid(blocks, 1, 1);
-    dim3 threads(32, 2, 1);
-
-    sgemvt_kernel1<<<grid, threads>>>(m, n, alpha, (m / sgemv_bs)*sgemv_bs,
-                                      A, lda, x, z);
+    sgemvt_kernel1_fermi<<<grid, threads>>>(m, n, alpha, 
+                                            (m/threadSize)*threadSize,
+                                            A, lda, x, z);	  
 }
 
 extern "C" void
-magmablas_sgemvt2_tesla(int m, int n, float alpha, float *A, int lda,
+magmablas_sgemvt2_fermi(int m, int n, float alpha, float *A, int lda,
                         float *x, float *z)
 {
 /*  -- MAGMA (version 1.0) --
@@ -468,12 +357,12 @@ magmablas_sgemvt2_tesla(int m, int n, float alpha, float *A, int lda,
     dim3 grid(blocks, 1, 1);
     dim3 threads(16, 4, 1);
 
-    sgemvt_kernel2<<<grid, threads>>>(m, n, alpha, (m / 32)*32,
-                                      A, lda, x, z);
+    sgemvt_kernel2_fermi<<<grid, threads>>>(m, n, alpha, (m / 32)*32,
+                                            A, lda, x, z);
 }
 
 extern "C" void
-magmablas_sgemvt_tesla(int m, int n, float alpha, float *A, int lda, 
+magmablas_sgemvt_fermi(int m, int n, float alpha, float *A, int lda, 
                        float *x, float *z)
 {
 /*  -- MAGMA (version 1.0) --
@@ -506,9 +395,9 @@ magmablas_sgemvt_tesla(int m, int n, float alpha, float *A, int lda,
     ===================================================================== */
 
     if (n<=128)
-      magmablas_sgemvt2_tesla(m, n, alpha, A, lda, x, z);
+      magmablas_sgemvt2_fermi(m, n, alpha, A, lda, x, z);
     else
-      magmablas_sgemvt1_tesla(m, n, alpha, A, lda, x, z);
+      magmablas_sgemvt1_fermi(m, n, alpha, A, lda, x, z);
 }
 
 #undef num_threads
