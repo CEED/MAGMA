@@ -16,6 +16,8 @@
 #include "magma.h"
 #include "magmablas.h"
 
+#define PRECISION_z
+#if defined(PRECISION_z) || defined(PRECISION_c)
 static inline
 double2
 operator*(double2 &u, const float &v) {
@@ -42,6 +44,7 @@ operator*(const double2 &u, const double2 &v) {
   t.y = u.y + v.y;
   return t;
 }
+#endif /* defined(PRECISION_z) || defined(PRECISION_c)*/
 
 extern "C"
 int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a, 

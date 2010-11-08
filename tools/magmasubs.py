@@ -51,6 +51,9 @@ subs = {
     ('magmablas_c','magmablas_s'),
     ('cublasZ','cublasD'),
     ('cublasC','cublasS'),
+    ('MAGMA_Z','MAGMA_D'),
+    ('MAGMA_C','MAGMA_S'),
+    ('cublasIzamax','cublasIdamax'),
   ],
   'normal' : [ ## Dictionary is keyed on substitution type
     ['s','d','c','z'], ## Special Line Indicating type columns
@@ -65,6 +68,7 @@ subs = {
     ('Workspace_s','Workspace_d','Workspace_c','Workspace_z'),
     ('workspace_s','workspace_d','workspace_c','workspace_z'),
     ('cublasS','cublasD','cublasC','cublasZ'),
+    ('cublasIsamax','cublasIdamax', 'cublascsamax','cublasIzamax'),
     ('spanel_to_q','dpanel_to_q','cpanel_to_q','zpanel_to_q'),
     ('sq_to_panel','dq_to_panel','cq_to_panel','zq_to_panel'),
     ('cblas_sasum','cblas_dasum','cblas_scasum','cblas_dzasum'),
