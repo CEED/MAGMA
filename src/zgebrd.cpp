@@ -145,9 +145,9 @@ magma_zgebrd(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
     #define max(a,b) ((a) >= (b) ? (a) : (b)) 
     #define min(a,b)  (((a)<(b))?(a):(b))
 
-    static double2 c_b21 = -1.f;
-    static double2 c_b22 = 1.f;
-    
+    double2 c_neg_one = MAGMA_Z_NEG_ONE;
+    double2 c_one = MAGMA_Z_ONE;
+
     /* System generated locals */
     int a_dim1, a_offset, i__1, i__2, i__3, i__4;
     /* Local variables */
@@ -177,7 +177,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
     double2 *dwork = da + (n)*ldda - 1;
 
     lwkopt = (m + n) * nb;
-    work[1] = (double2) lwkopt;
+    MAGMA_Z_SET2REAL( work[1], lwkopt );
     lquery = *lwork == -1;
     if (m < 0) {
 	*info = -1;
@@ -200,11 +200,11 @@ magma_zgebrd(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
     /* Quick return if possible */
     minmn = min(m,n);
     if (minmn == 0) {
-      work[1] = 1.f;
+      work[1] = c_one;
       return 0;
     }
 
-    ws = (double2)max(m,n);
+    MAGMA_Z_SET2REAL( ws, max(m,n) );
     ldwrkx = m;
     ldwrky = n;
 
@@ -260,9 +260,9 @@ magma_zgebrd(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
       i__3 = m - i__ - nb + 1;
       i__4 = n - i__ - nb + 1;
       /* TTT
-      zgemm_("No transpose", "Transpose", &i__3, &i__4, &nb, &c_b21, 
+      zgemm_("No transpose", "Transpose", &i__3, &i__4, &nb, &c_neg_one, 
 	     &a[i__ + nb + i__ * a_dim1], lda, &work[ldwrkx * nb + nb + 1],
-	     &ldwrky, &c_b22, &a[i__ + nb + (i__ + nb) * a_dim1], lda);
+	     &ldwrky, &c_one, &a[i__ + nb + (i__ + nb) * a_dim1], lda);
       */
       
       // Send Y back to the GPU
@@ -271,9 +271,9 @@ magma_zgebrd(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
                       dwork + nb + 1 , ldwrky);
 
       //start = get_current_time();
-      cublasZgemm('N', 'T', i__3, i__4, nb, c_b21,
+      cublasZgemm('N', 'T', i__3, i__4, nb, c_neg_one,
 		  &da[(i__-1) + nb + (i__-1) * a_dim1], ldda, 
-		  &dwork[ldwrkx * nb + nb + 1], ldwrky, c_b22, 
+		  &dwork[ldwrkx * nb + nb + 1], ldwrky, c_one, 
 		  &da[(i__-1) + nb + ((i__-1) + nb) * a_dim1], ldda);
       //end = get_current_time();
       //printf("N T %5d %5d GFlop/s: %f \n",  i__3, i__4,
@@ -289,16 +289,16 @@ magma_zgebrd(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
       i__3 = m - i__ - nb + 1;
       i__4 = n - i__ - nb + 1;
       /* TTT
-      zgemm_("No transpose", "No transpose", &i__3, &i__4, &nb, &c_b21,
+      zgemm_("No transpose", "No transpose", &i__3, &i__4, &nb, &c_neg_one,
 	     &work[nb + 1], &ldwrkx, &a[i__ + (i__ + nb) * a_dim1], lda,
-	     &c_b22, &a[i__ + nb + (i__ + nb) * a_dim1], lda);
+	     &c_one, &a[i__ + nb + (i__ + nb) * a_dim1], lda);
       */
 
       //start = get_current_time();
-      cublasZgemm('N', 'N', i__3, i__4, nb, c_b21,
+      cublasZgemm('N', 'N', i__3, i__4, nb, c_neg_one,
 		  &dwork[nb + 1], ldwrkx, 
 		  &da[(i__-1) + ((i__-1) + nb) * a_dim1], ldda,
-		  c_b22, &da[(i__-1) + nb + ((i__-1) + nb) * a_dim1], ldda);
+		  c_one, &da[(i__-1) + nb + ((i__-1) + nb) * a_dim1], ldda);
       //end = get_current_time();
       //printf("N N %5d %5d GFlop/s: %f \n",  i__3, i__4,
       //       (2. * i__3 * i__4 * nb)/(1000000.*GetTimerValue(start,end)));
@@ -339,7 +339,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
 		      da + (i__-1) + (i__-1) * a_dim1, ldda,
 		      a  +  i__    +  i__    * a_dim1, lda);
      
-    zgebd2_(&i__2, &i__1, &a[i__ + i__ * a_dim1], lda, &d[i__], &e[i__],
+    zgebd2_(&i__2, &i__1, &a[i__ + i__ * a_dim1], &lda, &d[i__], &e[i__],
 	    &tauq[i__], &taup[i__], &work[1], &iinfo);
     work[1] = ws;
 

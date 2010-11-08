@@ -16,6 +16,32 @@
 #include "magma.h"
 #include "magmablas.h"
 
+static inline
+double2
+operator*(double2 &u, const float &v) {
+  double2 t;
+  t.x = u.x * v;
+  t.y = u.y * v;
+  return t;
+}
+
+static inline
+double2
+operator*(double2 &u, const double &v) {
+  double2 t;
+  t.x = u.x * v;
+  t.y = u.y * v;
+  return t;
+}
+
+static inline
+double2
+operator*(const double2 &u, const double2 &v) {
+  double2 t;
+  t.x = u.x + v.x;
+  t.y = u.y + v.y;
+  return t;
+}
 
 extern "C"
 int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a, 
@@ -152,11 +178,12 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 
     //TimeStruct start, end;
 
-    static double2 c_b5 = -1.f;
-    static double2 c_b6 = 1.f;
-    static int c__1 = 1;
-    static double2 c_b16 = 0.f;
+    double2 c_neg_one = MAGMA_Z_NEG_ONE;
+    double2 c_one = MAGMA_Z_ONE;
+    double2 c_zero = MAGMA_Z_ZERO;
     
+    static int c__1 = 1;
+
     /* System generated locals */
     int a_dim1, a_offset, w_dim1, w_offset, i__2, i__3;
     /* Local variables */
@@ -195,13 +222,13 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 	if (i__ < *n) {
 	  /* Update A(1:i,i) */
 	  i__2 = *n - i__;
-	  zgemv_("No transpose", &i__, &i__2, &c_b5, 
+	  zgemv_("No transpose", &i__, &i__2, &c_neg_one, 
 		 &a[(i__+1)*a_dim1 + 1], lda, &w[i__ + (iw + 1)*w_dim1], ldw, 
-		 &c_b6, &a[i__ * a_dim1 + 1], &c__1);
+		 &c_one, &a[i__ * a_dim1 + 1], &c__1);
 	  i__2 = *n - i__;
-	  zgemv_("No transpose", &i__, &i__2, &c_b5, 
+	  zgemv_("No transpose", &i__, &i__2, &c_neg_one, 
 		 &w[(iw+1)*w_dim1 + 1], ldw, &a[i__ + (i__+1) * a_dim1], lda, 
-		 &c_b6, &a[i__ * a_dim1 + 1], &c__1);
+		 &c_one, &a[i__ * a_dim1 + 1], &c__1);
 	}
 	if (i__ > 1) {
 	  /* Generate elementary reflector H(i) to annihilate A(1:i-2,i) */
@@ -209,33 +236,33 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 	  zlarfg_(&i__2, &a[i__ - 1 + i__ * a_dim1], &a[i__ * a_dim1 + 1], 
 		  &c__1, &tau[i__ - 1]);
 	  e[i__ - 1] = a[i__ - 1 + i__ * a_dim1];
-	  a[i__ - 1 + i__ * a_dim1] = 1.f;
+	  a[i__ - 1 + i__ * a_dim1] = c_one;
   
 	  /* Compute W(1:i-1,i) */
 	  i__2 = i__ - 1;
-	  zsymv_("Upper", &i__2, &c_b6, &a[a_offset], lda, 
-		 &a[i__*a_dim1 +1], &c__1, &c_b16, &w[iw* w_dim1+1], &c__1);
+	  zsymv_("Upper", &i__2, &c_one, &a[a_offset], lda, 
+		 &a[i__*a_dim1 +1], &c__1, &c_zero, &w[iw* w_dim1+1], &c__1);
 	  if (i__ < *n) {
 	    i__2 = i__ - 1;
 	    i__3 = *n - i__;
-	    zgemv_("Transpose", &i__2, &i__3, &c_b6, 
+	    zgemv_("Transpose", &i__2, &i__3, &c_one, 
 		   &w[(iw+1)*w_dim1 + 1], ldw, &a[i__ * a_dim1 + 1], &c__1, 
-		   &c_b16, &w[i__ + 1 + iw * w_dim1], &c__1);
+		   &c_zero, &w[i__ + 1 + iw * w_dim1], &c__1);
 	    i__2 = i__ - 1;
 	    i__3 = *n - i__;
-	    zgemv_("No transpose", &i__2, &i__3, &c_b5, 
+	    zgemv_("No transpose", &i__2, &i__3, &c_neg_one, 
 		   &a[(i__+1)*a_dim1 + 1], lda, &w[i__ + 1 + iw * w_dim1], &
-		   c__1, &c_b6, &w[iw * w_dim1 + 1], &c__1);
+		   c__1, &c_one, &w[iw * w_dim1 + 1], &c__1);
 	    i__2 = i__ - 1;
 	    i__3 = *n - i__;
-	    zgemv_("Transpose", &i__2, &i__3, &c_b6, 
+	    zgemv_("Transpose", &i__2, &i__3, &c_one, 
 		   &a[(i__ + 1) * a_dim1 + 1], lda, &a[i__ * a_dim1 + 1], 
-		   &c__1, &c_b16, &w[i__ + 1 + iw * w_dim1], &c__1);
+		   &c__1, &c_zero, &w[i__ + 1 + iw * w_dim1], &c__1);
 	    i__2 = i__ - 1;
 	    i__3 = *n - i__;
-	    zgemv_("No transpose", &i__2, &i__3, &c_b5, 
+	    zgemv_("No transpose", &i__2, &i__3, &c_neg_one, 
 		   &w[(iw + 1) *  w_dim1 + 1], ldw, &w[i__ + 1 + iw * w_dim1],
-		   &c__1, &c_b6, &w[iw * w_dim1 + 1], &c__1);
+		   &c__1, &c_one, &w[iw * w_dim1 + 1], &c__1);
 	  }
 	  i__2 = i__ - 1;
 	  zscal_(&i__2, &tau[i__ - 1], &w[iw * w_dim1 + 1], &c__1);
@@ -255,10 +282,10 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 	/* Update A(i:n,i) */
 	i__2 = *n - i__ + 1;
 	i__3 = i__ - 1;
-	zgemv_("No transpose", &i__2, &i__3, &c_b5, &a[i__ + a_dim1], lda, 
-	       &w[i__ + w_dim1], ldw, &c_b6, &a[i__ + i__ * a_dim1], &c__1);
-	zgemv_("No transpose", &i__2, &i__3, &c_b5, &w[i__ + w_dim1], ldw, 
-	       &a[i__ + a_dim1], lda, &c_b6, &a[i__ + i__ * a_dim1], &c__1);
+	zgemv_("No transpose", &i__2, &i__3, &c_neg_one, &a[i__ + a_dim1], lda, 
+	       &w[i__ + w_dim1], ldw, &c_one, &a[i__ + i__ * a_dim1], &c__1);
+	zgemv_("No transpose", &i__2, &i__3, &c_neg_one, &w[i__ + w_dim1], ldw, 
+	       &a[i__ + a_dim1], lda, &c_one, &a[i__ + i__ * a_dim1], &c__1);
 
 	if (i__ < *n) {
 	  /* Generate elementary reflector H(i) to annihilate A(i+2:n,i) */
@@ -267,7 +294,7 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 	  zlarfg_(&i__2, &a[i__ + 1 + i__ * a_dim1], 
 		  &a[min(i__3,*n) + i__ * a_dim1], &c__1, &tau[i__]);
 	  e[i__] = a[i__ + 1 + i__ * a_dim1];
-	  a[i__ + 1 + i__ * a_dim1] = 1.f;
+	  a[i__ + 1 + i__ * a_dim1] = c_one;
 
 	  /* Compute W(i+1:n,i) */ 
 	  // 1. Send the block reflector  A(i+1:n,i) to the GPU
@@ -275,8 +302,8 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 			  a + i__   + 1 + i__   * a_dim1, 1,
                           da+(i__-1)+ 1 +(i__-1)* (*ldda), 1);	  
 	  
-	  cublasZsymv('L', i__2, c_b6, da+ (i__-1)+1 + ((i__-1)+1) * (*ldda),
-		      *ldda, da+ (i__-1)+1 + (i__-1)* a_dim1, c__1, c_b16,
+	  cublasZsymv('L', i__2, c_one, da+ (i__-1)+1 + ((i__-1)+1) * (*ldda),
+		      *ldda, da+ (i__-1)+1 + (i__-1)* a_dim1, c__1, c_zero,
 		      dw+ i__ + 1 + i__ * w_dim1, c__1);
 	  
 	  // 2. Start putting the result back (asynchronously)
@@ -286,25 +313,25 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 			    cudaMemcpyDeviceToHost,stream[1]);
 
 	  i__3 = i__ - 1;
-	  zgemv_("Transpose", &i__2, &i__3, &c_b6, &w[i__ + 1 + w_dim1], 
-		 ldw, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_b16, 
+	  zgemv_("Transpose", &i__2, &i__3, &c_one, &w[i__ + 1 + w_dim1], 
+		 ldw, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_zero, 
 		 &w[i__ * w_dim1 + 1], &c__1);
 
-	  zgemv_("No transpose", &i__2, &i__3, &c_b5,
+	  zgemv_("No transpose", &i__2, &i__3, &c_neg_one,
                  &a[i__ + 1 + a_dim1], lda, &w[i__ * w_dim1 + 1], &c__1,
-                 &c_b16, f, &c__1);
-	  zgemv_("Transpose", &i__2, &i__3, &c_b6, &a[i__ + 1 + a_dim1],
-                 lda, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_b16,
+                 &c_zero, f, &c__1);
+	  zgemv_("Transpose", &i__2, &i__3, &c_one, &a[i__ + 1 + a_dim1],
+                 lda, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_zero,
                  &w[i__ * w_dim1 + 1], &c__1);
 
 	  // 3. Here is where we need it
 	  cudaStreamSynchronize(stream[1]);
 
 	  if (i__3!=0)
-	    zaxpy_(&i__2, &c_b6, f, &c__1, &w[i__ + 1 + i__ * w_dim1], &c__1);
+	    zaxpy_(&i__2, &c_one, f, &c__1, &w[i__ + 1 + i__ * w_dim1], &c__1);
      
-	  zgemv_("No transpose", &i__2, &i__3, &c_b5, &w[i__ + 1 + w_dim1], 
-		 ldw, &w[i__ * w_dim1 + 1], &c__1, &c_b6, 
+	  zgemv_("No transpose", &i__2, &i__3, &c_neg_one, &w[i__ + 1 + w_dim1], 
+		 ldw, &w[i__ * w_dim1 + 1], &c__1, &c_one, 
 		 &w[i__ + 1 + i__ * w_dim1], &c__1);
 	  zscal_(&i__2, &tau[i__], &w[i__ + 1 + i__ * w_dim1], &c__1);
 	  alpha = tau[i__]* -.5f*zdot_(&i__2, &w[i__ +1+ i__ * w_dim1], 

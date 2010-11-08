@@ -121,6 +121,8 @@ magma_zunmtr(char *side, char *uplo, char *trans, int *m, int *n,
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
    
+    double2 c_one = MAGMA_Z_ONE;
+
     int a_dim1, a_offset, c_dim1, c_offset, i__2;
     static int i1, i2, nb, mi, ni, nq, nw;
     long int left, upper, lquery;
@@ -174,7 +176,7 @@ magma_zunmtr(char *side, char *uplo, char *trans, int *m, int *n,
       {
 	nb = 32;
 	lwkopt = max(1,nw) * nb;
-	work[1] = (double2) lwkopt;
+	MAGMA_Z_SET2REAL( work[1], lwkopt );
       }
 
     if (*info != 0) {
@@ -187,7 +189,7 @@ magma_zunmtr(char *side, char *uplo, char *trans, int *m, int *n,
 /*     Quick return if possible */
 
     if (*m == 0 || *n == 0 || nq == 1) {
-	work[1] = 1.f;
+	work[1] = c_one;
 	return 0;
     }
 
@@ -221,7 +223,7 @@ magma_zunmtr(char *side, char *uplo, char *trans, int *m, int *n,
 		     &tau[1],
 		     &c__[i1 + i2 * c_dim1], ldc, &work[1], lwork, &iinfo);
       }
-    work[1] = (double2) lwkopt;
+    MAGMA_Z_SET2REAL( work[1], lwkopt );
     return 0;
 /*     End of ZUNMTR */
 

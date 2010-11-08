@@ -87,6 +87,9 @@ magma_zungqr(int *m, int *n, int *k, double2 *a,
     #define min(a,b)       (((a)<(b))?(a):(b))
     #define max(a,b)       (((a)>(b))?(a):(b))
 
+    double2 c_one = MAGMA_Z_ONE;
+    double2 c_zero = MAGMA_Z_ZERO;
+
     int a_dim1, a_offset, i__1, i__2, i__3;
     static int i__, j, l, ib, nb, ki, kk, nx, nbmin, iinfo;
     static int ldwork, lwkopt;
@@ -102,7 +105,7 @@ magma_zungqr(int *m, int *n, int *k, double2 *a,
     *info = 0;
     nb = magma_get_zgeqrf_nb(*m);
     lwkopt = (*m + *n) * nb;
-    work[1] = (double2) lwkopt;
+    MAGMA_Z_SET2REAL( work[1], lwkopt );
     lquery = *lwork == -1;
     if (*m < 0) {
 	*info = -1;
@@ -122,7 +125,7 @@ magma_zungqr(int *m, int *n, int *k, double2 *a,
 
     /*  Quick return if possible */
     if (*n <= 0) {
-      work[1] = 1.f;
+      work[1] = c_one;
       return 0;
     }
 
@@ -139,7 +142,7 @@ magma_zungqr(int *m, int *n, int *k, double2 *a,
 	/* Set A(1:kk,kk+1:n) to zero. */
 	for (j = kk + 1; j <= *n; ++j)
 	  for (i__ = 1; i__ <= kk; ++i__)
-	    a[i__ + j * a_dim1] = 0.f;
+	    a[i__ + j * a_dim1] = c_zero;
       }
     else 
       {
@@ -188,7 +191,7 @@ magma_zungqr(int *m, int *n, int *k, double2 *a,
 	    i__2 = i__ + ib - 1;
 	    for (j = i__; j <= i__2; ++j)
 	      for (l = 1; l <= i__-1; ++l)
-		a[l + j * a_dim1] = 0.f;
+		a[l + j * a_dim1] = c_zero;
 	  }
       }
 

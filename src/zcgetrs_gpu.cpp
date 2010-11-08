@@ -92,7 +92,7 @@ magma_zcgetrs_gpu(magma_int_t n, magma_int_t nrhs, float2 *a, magma_int_t lda,
   magmablas_zclaswp(nrhs, b, ldb, x, n, ipiv);
 
   /* Solve L*X = B, overwriting B with X. */
-  float2 fone = 1.;
+  float2 fone = MAGMA_C_ONE;
   cublasCtrsm('L','L','N','U', n, nrhs, fone, a, lda, x, ldb);
 
   /* Solve U*X = B, overwriting B with X. */

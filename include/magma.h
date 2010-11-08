@@ -44,6 +44,10 @@
 #define MAGMA_Z_OP_NEG_ASGN(t, z) (t).x = (z).x; (t).y = (z).y
 #define MAGMA_Z_EQUAL(u,v) (((u).x == (v).x) && ((u).y == (v).y))
 
+/* Missing CUDA BLAS */
+extern void cublasZsymv(char uplo, int n, double2 alpha, double2 *a, int lda,
+                      double2 *x, int incx, double2 beta, double2 *y, int incy);
+
 #ifdef __cplusplus
 extern "C" {
 #endif

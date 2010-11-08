@@ -124,6 +124,8 @@ magma_zunmqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
     
+    double2 c_one = MAGMA_Z_ONE;
+
     char side[2] = {side_, 0};
     char trans[2] = {trans_, 0};
     int *m = &m_;
@@ -173,7 +175,7 @@ magma_zunmqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
     }
 
     lwkopt = (abs(*m-*k) + nb + 2*(*n))*nb;
-    work[0] = (double2) lwkopt;
+    MAGMA_Z_SET2REAL( work[0], lwkopt );
 
     if (*info != 0) {
 	return 0;
@@ -183,7 +185,7 @@ magma_zunmqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
 
     /* Quick return if possible */
     if (*m == 0 || *n == 0 || *k == 0) {
-	work[0] = 1.f;
+	work[0] = c_one;
 	return 0;
     }
 

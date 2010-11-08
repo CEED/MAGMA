@@ -34,11 +34,12 @@ double2 cpu_gpu_sdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda)
   int one = 1, j;
   double2 mone = MAGMA_Z_NEG_ONE, work[1];
   double2 *ha = (double2*)malloc( M * N * sizeof(double2));
+  double2 res;
 
   cublasGetMatrix(M, N, sizeof(double2), da, ldda, ha, M);
   for(j=0; j<N; j++)
     zaxpy_(&M, &mone, a+j*lda, &one, ha+j*M, &one);
-  double2 res = zlange_("f", &M, &N, ha, &M, work);
+  MAGMA_Z_SET2REAL( res, zlange_("f", &M, &N, ha, &M, work) );
 
   free(ha);
   return res;
@@ -180,8 +181,8 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
     int nb = magma_get_zsytrd_nb(*n); 
     double2 *dwork = da + (*n)*ldda - 1;
 
-    static double2 c_b22 = -1.f;
-    static double2 c_b23 = 1.f;
+    double2 c_neg_one = MAGMA_Z_NEG_ONE;
+    double2 c_one = MAGMA_Z_ONE;
     
     /* System generated locals */
     int a_dim1, a_offset, i__1, i__3;
@@ -217,7 +218,7 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
       /* Determine the block size. */
       ldwork = lddwork = *n;
       lwkopt = *n * nb;
-      work[1] = (double2) lwkopt;
+      MAGMA_Z_SET2REAL( work[1], lwkopt );
     }
 
     if (*info != 0)
@@ -227,7 +228,7 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 
     /* Quick return if possible */
     if (*n == 0) {
-	work[1] = 1.f;
+	work[1] = c_one;
 	return 0;
     }
 
@@ -254,9 +255,9 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 	    /* Update the unreduced submatrix A(1:i-1,1:i-1), using an   
 	       update of the form:  A := A - V*W' - W*V' */
 	    i__3 = i__ - 1;
-	    zsyr2k_(uplo, "No transpose", &i__3, &nb, &c_b22, 
+	    zsyr2k_(uplo, "No transpose", &i__3, &nb, &c_neg_one, 
 		    &a[i__ * a_dim1 + 1], lda, &work[1], 
-		    &ldwork, &c_b23, &a[a_offset], lda);
+		    &ldwork, &c_one, &a[a_offset], lda);
 
 	    /* Copy superdiagonal elements back into A, and diagonal   
 	       elements into D */
@@ -302,9 +303,9 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
                             work  + 1, ldwork,
                             dwork + 1, lddwork);
 
-	    cublasZsyr2k('L', 'N', i__3, nb, c_b22, 
+	    cublasZsyr2k('L', 'N', i__3, nb, c_neg_one, 
 			 &da[(i__-1) + nb + (i__-1) * a_dim1], ldda, 
-			 &dwork[nb + 1], lddwork, c_b23, 
+			 &dwork[nb + 1], lddwork, c_one, 
 			 &da[(i__-1) + nb + ((i__-1) + nb) * a_dim1], ldda);
 	    
 	    /* Copy subdiagonal elements back into A, and diagonal   
@@ -329,7 +330,7 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 	
       }
 
-    work[1] = (double2) lwkopt;
+    MAGMA_Z_SET2REAL( work[1], lwkopt );
     return 0;
     
     /* End of ZSYTRD */

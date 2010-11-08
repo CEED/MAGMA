@@ -84,11 +84,23 @@ int cpotrf_(char *uplo, int *n, float2 *a, int *lda, int *info);
 int cgeqrf_(int*,int*,float2 *,int*,float2 *,float2 *,int *,int *);
 int cgeqlf_(int*,int*,float2 *,int*,float2 *,float2 *,int *,int *);
 int cgelqf_(int*,int*,float2 *,int*,float2 *,float2 *,int *,int *);
+int csytrd_(char *, int *, float2 *, int *, float2 *, float2 *, 
+	    float2 *, float2 *, int *, int *);
 int clarft_(char *, char *, int *, int *, float2 *, int *, float2 *,
 	    float2 *, int *);
+int clarfb_(char *, char *, char *, char *, int *, int *, int *, float2 *, 
+	    int *, float2 *, int *, float2 *, int *, float2 *, int *);
 int cgetrf_(int *, int *, float2 *, int *, int *, int *);
 int claswp_(int *, float2 *, int *, int *, int *, int *, int *);
+int csymv_(char *, int *, float2 *, float2 *, int *, 
+	   float2 *, int *, float2 *, float2 *, int *);
+
+float2 cdot_(int *, float2 *, int *, float2 *, int *);
+
 float clange_(char *norm, int *, int *, float2 *, int *, float *);
+
+int cunmqr_(char *, char *, int *, int *, int *, float2 *, int *,
+	    float2 *, float2 *, int *, float2 *, int *, int *);
 
 void dtrtri_(char *, char *, int *, double *, int *, int *);
 void dtrsm_(char *, char *, char *, char *,
@@ -109,6 +121,8 @@ int dtrmm_(char *, char *, char *, char *, int *, int *,
 int dlaswp_(int *, double *, int *, int *, int *, int *, int *);
 int dsymv_(char *, int *, double *, double *, int *,
 	   double *, int *, double *, double *, int *);
+double dsymm_(char *,char*,int *,int *,double *,double *,int *,
+	      double *,int *,double *,double *,int *);
 
 double dnrm2_(int *, double *, int *);
 double dlange_(char *norm, int *, int *, double *, int *, double *);
@@ -145,17 +159,26 @@ int dormqr_(char *, char *, int *, int *, int *, double *, int *,
 
 long int lsame_(char *, char *);
 
+double2 zdot_(int *, double2 *, int *, double2 *, int *);
+
 int zgehd2_(int*,int*,int*,double2*,int*,double2*,double2*,int*);
 int zpotrf_(char *uplo, int *n, double2 *a, int *lda, int *info);
 int zgeqrf_(int*, int*, double2 *, int*, double2 *, double2 *,
 	    int *, int *);
 int zgeqlf_(int*,int*,double2 *,int*,double2 *,double2 *,int *,int *);
 int zgelqf_(int*,int*,double2 *,int*,double2 *,double2 *,int *,int *);
+int zsytrd_(char *, int *, double2 *, int *, double2 *, double2 *, 
+	    double2 *, double2 *, int *, int *);
 int zlarft_(char *, char *, int *, int *, double2 *, int *, 
 	    double2 *, double2 *, int *);
+int zlarfb_(char *, char *, char *, char *, int *, int *, int *, double2 *, 
+	    int *, double2 *, int *, double2 *, int *, double2 *, int *);
 int zgetrf_(int *, int *, double2 *, int *, int *, int *);
 int zlaswp_(int *, double2 *, int *, int *, int *, int *, int *);
-double zlange_(char *, int *, int *, double2 *, int *, double *);
+int zsymv_(char *, int *, double2 *, double2 *, int *, 
+	   double2 *, int *, double2 *, double2 *, int *);
+
+double zlange_(char *, int *, int *, double2 *, int *, double2 *);
 int ztrmm_(char *, char *, char *, char *, int *, int *, 
 	   double2 *, double2 *, int *, double2 *,int *);
 void ztrtri_(char *, char *, int *, double2 *, int *, int *);
@@ -172,8 +195,8 @@ void zlarfg_(int *, double2 *, double2 *x, int *, double2 *);
 void zscal_(int *, double2 *, double2 *, int *);
 void zherk_(char *, char *, int *, int *, double *,
 	    double2 *, int *, double *, double2 *, int *);
-double dsymm_(char *,char*,int *,int *,double *,double *,int *,
-	      double *,int *,double *,double *,int *);
+int zunmqr_(char *, char *, int *, int *, int *, double2 *, int *,
+	    double2 *, double2 *, int *, double2 *, int *, int *);
 
 #ifdef __cplusplus
 }

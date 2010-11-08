@@ -114,6 +114,8 @@ magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
     
+    double2 c_one = MAGMA_Z_ONE;
+
     char side[2] = {side_, 0};
     char trans[2] = {trans_, 0};
     int *m = &m_;
@@ -188,7 +190,7 @@ magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
 	   is used to define the local array T.    */
 	nb = 64;
 	lwkopt = max(1,nw) * nb;
-	work[1] = (double2) lwkopt;
+	MAGMA_Z_SET2REAL( work[1], lwkopt );
     }
 
     if (*info != 0) {
@@ -200,7 +202,7 @@ magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
     /* Quick return if possible */
 
     if (*m == 0 || *n == 0 || *k == 0) {
-	work[1] = 1.f;
+	work[1] = c_one;
 	return 0;
     }
 
@@ -292,7 +294,7 @@ magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
 	    */
 	  }
       }
-    work[1] = (double2) lwkopt;
+    MAGMA_Z_SET2REAL( work[1], lwkopt );
 
     dc += (1 + *m);
     cublasFree(dc);
