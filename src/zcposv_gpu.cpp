@@ -148,6 +148,10 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_i
 
   #define max(a,b)       (((a)>(b))?(a):(b))
 
+  double2 c_neg_one = MAGMA_Z_NEG_ONE;
+  double2 c_one = MAGMA_Z_ONE;
+  int c_ione = 1;
+
   *ITER = 0 ;
   *INFO = 0 ; 
 
@@ -169,22 +173,24 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_i
   if( N == 0 || NRHS == 0 ) 
     return 0;
 
-  double2 ANRM , CTE , EPS;
+  double ANRM , CTE , EPS;
   EPS  = dlamch_("Epsilon");
   ANRM = magma_zlansy(  'I',  UPLO , N ,A, LDA ,WORK);
-  CTE = ANRM * EPS *  pow((double2)N,0.5) * BWDMAX ;  
+  CTE = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;  
 
   int PTSA  = N*NRHS;
   int PTSX  = 0 ;  
   int status ; 
   float RMAX = slamch_("O");
   int IITER ;
-  double2 alpha = -1.0;
-  double2 beta = 1 ; 
+  double2 alpha = c_neg_one;
+  double2 beta = c_one; 
   double2 XNRM[1] , RNRM[1]; 
   int i1,j1,ii;
+  float2 RMAX_cplx;
+  MAGMA_Z_SET2REAL( RMAX_cplx, RMAX );
  
-  magmablas_zlag2c(N , NRHS , B , LDB , SWORK+PTSX, N , RMAX );
+  magmablas_zlag2c(N , NRHS , B , LDB , SWORK+PTSX, N , RMAX_cplx );
   if(*INFO !=0){
     *ITER = -2 ;
     goto L40;
@@ -206,19 +212,19 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_i
   magma_zlacpy(N, NRHS, B, LDB, WORK, N);
 
   if( NRHS == 1 )
-    magmablas_zcymv(UPLO, N, -1.0, A, LDA, X, 1, 1.0, WORK, 1);
+    magmablas_zcymv(UPLO, N, c_neg_one, A, LDA, X, 1, c_one, WORK, 1);
   else
-    cublasDsymm('L', UPLO, N, NRHS, -1.0, A, LDA, X, LDX, 1, WORK, N);
+    cublasZsymm('L', UPLO, N, NRHS, c_neg_one, A, LDA, X, LDX, c_one, WORK, N);
   
   int i, j;
   for(i=0; i<NRHS; i++){
-    j = cublasIdamax(N, X+i*N, 1); 
+    j = cublasIzamax(N, X+i*N, 1); 
     cublasGetMatrix(1, 1, sizeof(double2), X+i*N+j-1, 1,XNRM, 1);
-    XNRM[0]= fabs( XNRM[0]);
-    j = cublasIdamax (N, WORK+i*N, 1); 
+    MAGMA_Z_SET2REAL( XNRM[0], zlange_( "F", &c_ione, &c_ione, XNRM, &c_ione, XNRM ) );
+    j = cublasIzamax (N, WORK+i*N, 1); 
     cublasGetMatrix(1, 1, sizeof(double2), WORK+i*N+j-1, 1, RNRM, 1);
-    RNRM[0] =fabs( RNRM[0]); 
-    if( RNRM[0] > XNRM[0]*CTE ){
+    MAGMA_Z_SET2REAL( RNRM[0], zlange_( "F", &c_ione, &c_ione, RNRM, &c_ione, RNRM ) );
+    if( MAGMA_Z_GET_X( RNRM[0] ) > MAGMA_Z_GET_X( XNRM[0] ) *CTE ){
       goto L10;
     } 
   }
@@ -230,7 +236,7 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_i
 
   for(IITER=1;IITER<ITERMAX;){
     *INFO = 0 ; 
-    magmablas_zlag2c(N, NRHS, WORK, N, SWORK+PTSX, N, RMAX);
+    magmablas_zlag2c(N, NRHS, WORK, N, SWORK+PTSX, N, RMAX_cplx);
     if(*INFO !=0){
       *ITER = -2 ;
       goto L40;
@@ -244,17 +250,17 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_i
     if( NRHS == 1 )
       magmablas_zcymv(UPLO, N, alpha, A, LDA, X, 1, beta, WORK, 1);
     else 
-     cublasDsymm('L', UPLO, N, NRHS, alpha, A, LDA, X, LDX, beta, WORK, N);
+     cublasZsymm('L', UPLO, N, NRHS, alpha, A, LDA, X, LDX, beta, WORK, N);
 
     for(i=0; i<NRHS; i++){
       int j,inc=1 ;
-      j = cublasIdamax( N , X+i*N  , 1) ; 
+      j = cublasIzamax( N , X+i*N  , 1) ; 
       cublasGetMatrix( 1, 1, sizeof(double2), X+i*N+j-1, 1, XNRM, 1 ) ;
-      XNRM[0] =  fabs (XNRM[0]) ;
-      j = cublasIdamax ( N ,WORK+i*N , 1 ) ; 
+      MAGMA_Z_SET2REAL( XNRM[0], zlange_( "F", &c_ione, &c_ione, XNRM, &c_ione, XNRM ) );
+      j = cublasIzamax ( N ,WORK+i*N , 1 ) ; 
       cublasGetMatrix( 1, 1, sizeof(double2), WORK+i*N+j-1, 1, RNRM, 1 ) ;
-      RNRM[0] =  fabs (RNRM[0]); 
-      if( RNRM[0] > (XNRM[0]*CTE) ){
+      MAGMA_Z_SET2REAL( RNRM[0], zlange_( "F", &c_ione, &c_ione, RNRM, &c_ione, RNRM ) );
+      if( MAGMA_Z_GET_X( RNRM[0] ) > MAGMA_Z_GET_X( XNRM[0] ) *CTE ){
         goto L20;
       } 
     }

@@ -24,7 +24,8 @@ void magmablas_zclaswp(magma_int_t, double2 *, magma_int_t, float2 *, magma_int_
 void magmablas_zlag2c(magma_int_t, magma_int_t, const double2 *, magma_int_t, float2 *, magma_int_t, float2);
 void magmablas_clag2z(magma_int_t, magma_int_t, float2 *, magma_int_t, double2 *, magma_int_t, magma_int_t *);
 void magmablas_zgemv_MLU(magma_int_t, magma_int_t, double2 *, magma_int_t, double2 *, double2 *);
-void magma_zlat2c(char, magma_int_t, double *, magma_int_t, float *, magma_int_t, magma_int_t *);
+void magma_zlat2c(char, magma_int_t, double2 *, magma_int_t, float2 *, magma_int_t, magma_int_t *);
+void magmablas_zcymv(char UPLO, magma_int_t N, double2, double2 *, magma_int_t, double2 *, magma_int_t, double2, double2 *, magma_int_t);
 
 
 #ifdef __cplusplus

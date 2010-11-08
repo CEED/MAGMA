@@ -43,6 +43,7 @@
 #define MAGMA_Z_SET2REAL(v, t) v.x = (t); v.y = 0.0
 #define MAGMA_Z_OP_NEG_ASGN(t, z) (t).x = (z).x; (t).y = (z).y
 #define MAGMA_Z_EQUAL(u,v) (((u).x == (v).x) && ((u).y == (v).y))
+#define MAGMA_Z_GET_X(u) ((u).x)
 
 /* Missing CUDA BLAS */
 extern void cublasZsymv(char uplo, int n, double2 alpha, double2 *a, int lda,

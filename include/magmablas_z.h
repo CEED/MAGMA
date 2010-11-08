@@ -21,7 +21,7 @@ extern "C" {
 
   /* Maybe these functions should be in magma_z because they are not blas */
 double magma_zlange(char norm, magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda, double2 *work);
-double magma_zlansy(char norm, char uplo, magma_int_t n, double2 *A, magma_int_t lda, double *work);
+double magma_zlansy(char norm, char uplo, magma_int_t n, double2 *A, magma_int_t lda, double2 *work);
 void   magma_zlacpy(magma_int_t, magma_int_t, double2 *, magma_int_t, double2 *, magma_int_t);
 
   /* to make prescision generation easier, we should add a prefix like magma_ to these functions */
