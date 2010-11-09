@@ -41,22 +41,22 @@
 #define MAGMA_Z_NEG_ONE {-1.0, 0.0}
 
 #define MAGMA_Z_SET2REAL(v, t) v.x = (t); v.y = 0.0
-#define MAGMA_Z_OP_NEG_ASGN(t, z) (t).x = (z).x; (t).y = (z).y
+#define MAGMA_Z_OP_NEG_ASGN(t, z) (t).x = -(z).x; (t).y = -(z).y
 #define MAGMA_Z_EQUAL(u,v) (((u).x == (v).x) && ((u).y == (v).y))
 #define MAGMA_Z_GET_X(u) ((u).x)
 
 #define MAGMA_C_SET2REAL(v, t) v.x = (t); v.y = 0.0
-#define MAGMA_C_OP_NEG_ASGN(t, z) (t).x = (z).x; (t).y = (z).y
+#define MAGMA_C_OP_NEG_ASGN(t, z) (t).x = -(z).x; (t).y = -(z).y
 #define MAGMA_C_EQUAL(u,v) (((u).x == (v).x) && ((u).y == (v).y))
 #define MAGMA_C_GET_X(u) ((u).x)
 
 #define MAGMA_D_SET2REAL(v, t) v = (t);
-#define MAGMA_D_OP_NEG_ASGN(t, z) (t) = (z);
+#define MAGMA_D_OP_NEG_ASGN(t, z) (t) = -(z)
 #define MAGMA_D_EQUAL(u,v) ((u) == (v))
 #define MAGMA_D_GET_X(u) (u)
 
 #define MAGMA_S_SET2REAL(v, t) v = (t);
-#define MAGMA_S_OP_NEG_ASGN(t, z) (t) = (z);
+#define MAGMA_S_OP_NEG_ASGN(t, z) (t) = -(z)
 #define MAGMA_S_EQUAL(u,v) ((u) == (v))
 #define MAGMA_S_GET_X(u) (u)
 
