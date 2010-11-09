@@ -113,10 +113,10 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
 
     if (nb <= 1 || nb >= min(m,n)) {
 	/* Use CPU code. */
-	work = (double2*)malloc(maxm * n * sizeof(double2));
-	cublasGetMatrix(m, n, sizeof(double2), a, lda, work, maxm);
-	zgetrf_(&m, &n, work, &maxm, ipiv, info);
-	cublasSetMatrix(m, n, sizeof(double2), work, maxm, a, lda);
+	work = (double2*)malloc(m * n * sizeof(double2));
+	cublasGetMatrix(m, n, sizeof(double2), a, lda, work, m);
+	zgetrf_(&m, &n, work, &m, ipiv, info);
+	cublasSetMatrix(m, n, sizeof(double2), work, m, a, lda);
 	free(work);
     } 
     else {
