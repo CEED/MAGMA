@@ -34,7 +34,7 @@ double2 cpu_gpu_zdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda)
 
 
 extern "C" magma_int_t
-magma_zhetrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *d__, double2 *e, 
+magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double2 *d__, double2 *e, 
 	     double2 *tau, double2 *work, magma_int_t *lwork, double2 *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -160,13 +160,11 @@ magma_zhetrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 
     #define max(a,b) ((a) >= (b) ? (a) : (b))
   
-    char uplo[2] = {uplo_, 0};
-    int *n = &n_;
-    int *lda = &lda_;
+    char uplo_[2] = {uplo, 0};
 
-    int N = *n, ldda = *lda;
-    int nb = magma_get_zhetrd_nb(*n); 
-    double2 *dwork = da + (*n)*ldda - 1;
+    int N = n, ldda = lda;
+    int nb = magma_get_zhetrd_nb(n); 
+    double2 *dwork = da + (n)*ldda - 1;
 
     double2 z_neg_one = MAGMA_Z_NEG_ONE;
     double2 z_one = MAGMA_Z_ONE;
@@ -180,7 +178,7 @@ magma_zhetrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
     static int ldwork, lddwork, lwkopt;
     static long int lquery;
 
-    a_dim1 = *lda;
+    a_dim1 = lda;
     a_offset = 1 + a_dim1;
     a -= a_offset;
     --d__;
@@ -190,13 +188,13 @@ magma_zhetrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 
     /* Function Body */
     *info = 0;
-    long int upper = lapackf77_lsame(uplo, "U");
+    long int upper = lapackf77_lsame(uplo_, "U");
     lquery = *lwork == -1;
-    if (! upper && ! lapackf77_lsame(uplo, "L")) {
+    if (! upper && ! lapackf77_lsame(uplo_, "L")) {
 	*info = -1;
-    } else if (*n < 0) {
+    } else if (n < 0) {
 	*info = -2;
-    } else if (*lda < max(1,*n)) {
+    } else if (lda < max(1,n)) {
 	*info = -4;
     } else if (*lwork < 1 && ! lquery) {
 	*info = -9;
@@ -204,8 +202,8 @@ magma_zhetrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 
     if (*info == 0) {
       /* Determine the block size. */
-      ldwork = lddwork = *n;
-      lwkopt = *n * nb;
+      ldwork = lddwork = n;
+      lwkopt = n * nb;
       MAGMA_Z_SET2REAL( work[1], lwkopt );
     }
 
@@ -215,7 +213,7 @@ magma_zhetrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
       return 0;
 
     /* Quick return if possible */
-    if (*n == 0) {
+    if (n == 0) {
 	work[1] = z_one;
 	return 0;
     }
@@ -225,27 +223,27 @@ magma_zhetrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
     if (upper) {
 
         /* Copy the matrix to the GPU */ 
-        cublasSetMatrix(N, N, sizeof(double2), a+a_offset, *lda, da, ldda);
+        cublasSetMatrix(N, N, sizeof(double2), a+a_offset, lda, da, ldda);
 
         /*  Reduce the upper triangle of A.   
 	    Columns 1:kk are handled by the unblocked method. */
-        kk = *n - (*n - nx + nb - 1) / nb * nb;
+        kk = n - (n - nx + nb - 1) / nb * nb;
 	i__1 = kk + 1;
-	for (i__ = *n - nb + 1; i__ >= i__1; i__ -= nb) 
+	for (i__ = n - nb + 1; i__ >= i__1; i__ -= nb) 
 	  {
 	    /* Reduce columns i:i+nb-1 to tridiagonal form and form the   
 	       matrix W which is needed to update the unreduced part of   
 	       the matrix */
 	    i__3 = i__ + nb - 1;
-	    magma_zlatrd(uplo, &i__3, &nb, &a[a_offset], lda, &e[1], &tau[1], 
+	    magma_zlatrd(uplo_, &i__3, &nb, &a[a_offset], &lda, &e[1], &tau[1], 
 			 &work[1], &ldwork, da, &ldda, dwork+1, &lddwork);
 
 	    /* Update the unreduced submatrix A(1:i-1,1:i-1), using an   
 	       update of the form:  A := A - V*W' - W*V' */
 	    i__3 = i__ - 1;
-	    blasf77_zher2k(uplo, "No transpose", &i__3, &nb, &z_neg_one, 
-                           &a[i__ * a_dim1 + 1], lda, &work[1], 
-                           &ldwork, &d_one, &a[a_offset], lda);
+	    blasf77_zher2k(uplo_, "No transpose", &i__3, &nb, &z_neg_one, 
+                           &a[i__ * a_dim1 + 1], &lda, &work[1], 
+                           &ldwork, &d_one, &a[a_offset], &lda);
 
 	    /* Copy superdiagonal elements back into A, and diagonal   
 	       elements into D */
@@ -257,37 +255,37 @@ magma_zhetrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 	  }
 
 	/*  Use unblocked code to reduce the last or only block */
-	lapackf77_zhetd2(uplo, &kk, &a[a_offset], lda, &d__[1], &e[1], &tau[1], &iinfo);
+	lapackf77_zhetd2(uplo_, &kk, &a[a_offset], &lda, &d__[1], &e[1], &tau[1], &iinfo);
     } 
     else 
       {
 	/* Copy the matrix to the GPU */
-	if (1<=*n-nx)
-	  cublasSetMatrix(N, N, sizeof(double2), a+a_offset, *lda, da, ldda);
+	if (1<=n-nx)
+	  cublasSetMatrix(N, N, sizeof(double2), a+a_offset, lda, da, ldda);
 
 	/* Reduce the lower triangle of A */
-	for (i__ = 1; i__ <= *n-nx; i__ += nb) 
+	for (i__ = 1; i__ <= n-nx; i__ += nb) 
 	  {
 	    /* Reduce columns i:i+nb-1 to tridiagonal form and form the
                matrix W which is needed to update the unreduced part of
                the matrix */
-            i__3 = *n - i__ + 1;
+            i__3 = n - i__ + 1;
 
 	    /*   Get the current panel (no need for the 1st iteration) */
 	    if (i__!=1)
 	      cublasGetMatrix(i__3, nb, sizeof(double2),
 			      da + (i__-1)*ldda  + (i__-1), ldda,
-			      a  +  i__   *a_dim1+  i__   , *lda);
+			      a  +  i__   *a_dim1+  i__   , lda);
 	    
-	    magma_zlatrd(uplo, &i__3, &nb, &a[i__+i__ * a_dim1], lda, &e[i__], 
+	    magma_zlatrd(uplo_, &i__3, &nb, &a[i__+i__ * a_dim1], &lda, &e[i__], 
 			 &tau[i__], &work[1], &ldwork, 
 			 da + (i__-1)+(i__-1) * a_dim1, &ldda,
 			 dwork+1, &lddwork);
 	    
 	    /* Update the unreduced submatrix A(i+ib:n,i+ib:n), using   
 	       an update of the form:  A := A - V*W' - W*V' */
-	    i__3 = *n - i__ - nb + 1;
-	    cublasSetMatrix(*n - i__ + 1, nb, sizeof(double2),
+	    i__3 = n - i__ - nb + 1;
+	    cublasSetMatrix(n - i__ + 1, nb, sizeof(double2),
                             work  + 1, ldwork,
                             dwork + 1, lddwork);
 
@@ -306,14 +304,14 @@ magma_zhetrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 	  }
 
 	/* Use unblocked code to reduce the last or only block */
-	i__1 = *n - i__ + 1;
+	i__1 = n - i__ + 1;
 
-	if (1<=*n-nx)
+	if (1<=n-nx)
 	  cublasGetMatrix(i__1, i__1, sizeof(double2),
 			  da + (i__-1) + (i__-1) * a_dim1, ldda,
-			  a  +  i__    +  i__    * a_dim1, *lda);
+			  a  +  i__    +  i__    * a_dim1, lda);
 	
-	lapackf77_zhetrd(uplo, &i__1, &a[i__ + i__ * a_dim1], lda, &d__[i__], &e[i__],
+	lapackf77_zhetrd(uplo_, &i__1, &a[i__ + i__ * a_dim1], &lda, &d__[i__], &e[i__],
                          &tau[i__], &work[1], lwork, &iinfo);
 	
       }

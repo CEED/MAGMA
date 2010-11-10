@@ -15,7 +15,7 @@
 #include "magma.h"
 
 extern "C" magma_int_t
-magma_zgeqrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,  
+magma_zgeqrf(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
 	     double2  *tau, double2 *work, magma_int_t *lwork, 
 	     magma_int_t *info )
 {
@@ -97,34 +97,30 @@ magma_zgeqrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
 
     =====================================================================    */
 
-   #define  a_ref(a_1,a_2) ( a+(a_2)*(*lda) + (a_1))
+   #define  a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
    #define da_ref(a_1,a_2) (da+(a_2)*ldda   + (a_1))
    #define min(a,b)  (((a)<(b))?(a):(b))
    #define max(a,b)  (((a)>(b))?(a):(b))
 
    double2 c_one = MAGMA_Z_ONE;
 
-   int *m = &m_;
-   int *n = &n_;
-   int *lda = &lda_;
-
    int i, k, lddwork, old_i, old_ib;
    int nbmin, nx, ib, ldda;
 
    /* Function Body */
    *info = 0;
-   int nb = magma_get_zgeqrf_nb(min(*m, *n));
+   int nb = magma_get_zgeqrf_nb(min(m, n));
    
-   int lwkopt = *n * nb;
+   int lwkopt = n * nb;
    MAGMA_Z_SET2REAL( work[0], (double)lwkopt );
    long int lquery = *lwork == -1;
-   if (*m < 0) {
+   if (m < 0) {
      *info = -1;
-   } else if (*n < 0) {
+   } else if (n < 0) {
      *info = -2;
-   } else if (*lda < max(1,*m)) {
+   } else if (lda < max(1,m)) {
      *info = -4;
-   } else if (*lwork < max(1,*n) && ! lquery) {
+   } else if (*lwork < max(1,n) && ! lquery) {
      *info = -7;
    }
    if (*info != 0)
@@ -132,7 +128,7 @@ magma_zgeqrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
    else if (lquery)
      return 0;
 
-   k = min(*m,*n);
+   k = min(m,n);
    if (k == 0) {
      work[0] = c_one;
      return 0;
@@ -146,58 +142,58 @@ magma_zgeqrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
    nbmin = 2;
    nx = nb;
 
-   lddwork = ((*n+31)/32)*32;
-   ldda    = ((*m+31)/32)*32;
+   lddwork = ((n+31)/32)*32;
+   ldda    = ((m+31)/32)*32;
 
    double2 *da;
-   status = cublasAlloc((*n)*ldda + nb*lddwork, sizeof(double2), (void**)&da);
+   status = cublasAlloc((n)*ldda + nb*lddwork, sizeof(double2), (void**)&da);
    if (status != CUBLAS_STATUS_SUCCESS) {
       *info = -8;
       return 0;
     }
-   double2 *dwork = da + ldda*(*n);
+   double2 *dwork = da + ldda*(n);
 
    if (nb >= nbmin && nb < k && nx < k) {
       /* Use blocked code initially */
       cudaMemcpy2DAsync(da_ref(0,nb),  ldda *sizeof(double2),
-                         a_ref(0,nb), (*lda)*sizeof(double2),
-                        sizeof(double2)*(*m), (*n-nb), 
+                         a_ref(0,nb), (lda)*sizeof(double2),
+                        sizeof(double2)*(m), (n-nb), 
                         cudaMemcpyHostToDevice,stream[0]);
 
       old_i = 0; old_ib = nb;
       for (i = 0; i < k-nx; i += nb) {
 	ib = min(k-i, nb);
 	if (i>0){
-	  cudaMemcpy2DAsync(  a_ref(i,i), (*lda)*sizeof(double2),
+	  cudaMemcpy2DAsync(  a_ref(i,i), (lda)*sizeof(double2),
 			      da_ref(i,i), ldda *sizeof(double2),
-			      sizeof(double2)*(*m-i), ib,
+			      sizeof(double2)*(m-i), ib,
 			      cudaMemcpyDeviceToHost,stream[1]);
 	  
-	  cudaMemcpy2DAsync(  a_ref(0,i), (*lda)*sizeof(double2),
+	  cudaMemcpy2DAsync(  a_ref(0,i), (lda)*sizeof(double2),
 			      da_ref(0,i), ldda *sizeof(double2),
 			      sizeof(double2)*i, ib,
 			      cudaMemcpyDeviceToHost,stream[0]);
 	  
 	  /* Apply H' to A(i:m,i+2*ib:n) from the left */
-	  magma_zlarfb('F','C', *m-old_i, *n-old_i-2*old_ib, old_ib,
+	  magma_zlarfb('F','C', m-old_i, n-old_i-2*old_ib, old_ib,
 		       da_ref(old_i, old_i), ldda, dwork, lddwork, 
 		       da_ref(old_i, old_i+2*old_ib), ldda, 
 		       dwork+old_ib, lddwork);
 	}
 
 	cudaStreamSynchronize(stream[1]);
-	int rows = *m-i;
-	lapackf77_zgeqrf(&rows, &ib, a_ref(i,i), lda, tau+i, work, lwork, info);
+	int rows = m-i;
+	lapackf77_zgeqrf(&rows, &ib, a_ref(i,i), &lda, tau+i, work, lwork, info);
 	/* Form the triangular factor of the block reflector   
 	   H = H(i) H(i+1) . . . H(i+ib-1) */
-	lapackf77_zlarft("F", "C", &rows, &ib, a_ref(i,i), lda, tau+i,
+	lapackf77_zlarft("F", "C", &rows, &ib, a_ref(i,i), &lda, tau+i,
 		work, &ib);
-	zpanel_to_q('U', ib, a_ref(i,i), *lda, work+ib*ib); 
+	zpanel_to_q('U', ib, a_ref(i,i), lda, work+ib*ib); 
 	cublasSetMatrix(rows, ib, sizeof(double2), 
-			a_ref(i,i), *lda, da_ref(i,i), ldda);
-	zq_to_panel('U', ib, a_ref(i,i), *lda, work+ib*ib);
+			a_ref(i,i), lda, da_ref(i,i), ldda);
+	zq_to_panel('U', ib, a_ref(i,i), lda, work+ib*ib);
 
-	if (i + ib < *n) {
+	if (i + ib < n) {
 	  cublasSetMatrix(ib, ib, sizeof(double2), work, ib, dwork, lddwork);
 
 	  if (i+ib < k-nx)
@@ -205,7 +201,7 @@ magma_zgeqrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
 	    magma_zlarfb('F','C', rows, ib, ib, da_ref(i,i), ldda, dwork,
 			 lddwork, da_ref(i,i+ib), ldda, dwork+ib, lddwork);
 	  else 
-	    magma_zlarfb('F','C',rows, *n-i-ib, ib, da_ref(i,i), ldda, dwork,
+	    magma_zlarfb('F','C',rows, n-i-ib, ib, da_ref(i,i), ldda, dwork,
 			 lddwork, da_ref(i,i+ib), ldda, dwork+ib, lddwork);
        
 	  old_i = i;
@@ -218,12 +214,12 @@ magma_zgeqrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
    
    /* Use unblocked code to factor the last or only block. */
    if (i < k) {
-      ib = *n-i;
+      ib = n-i;
       if (i!=0)
-	cublasGetMatrix(*m, ib, sizeof(double2),
-			da_ref(0,i), ldda, a_ref(0,i), *lda);
-      int rows = *m-i;
-      lapackf77_zgeqrf(&rows, &ib, a_ref(i,i), lda, tau+i, work, lwork, info);
+	cublasGetMatrix(m, ib, sizeof(double2),
+			da_ref(0,i), ldda, a_ref(0,i), lda);
+      int rows = m-i;
+      lapackf77_zgeqrf(&rows, &ib, a_ref(i,i), &lda, tau+i, work, lwork, info);
    }
 
    cublasFree(da);

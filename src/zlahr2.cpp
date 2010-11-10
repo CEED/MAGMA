@@ -16,9 +16,9 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t 
-magma_zlahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_, 
-	     double2 *da, double2 *dv, double2 *a, magma_int_t lda_, 
-	     double2 *tau, double2 *t, magma_int_t ldt_, double2 *y, magma_int_t ldy_)
+magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
+	     double2 *da, double2 *dv, double2 *a, magma_int_t lda,
+	     double2 *tau, double2 *t, magma_int_t ldt, double2 *y, magma_int_t ldy)
 {
 /*  -- MAGMA auxiliary routine (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -131,14 +131,7 @@ magma_zlahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
     double2 c_one = MAGMA_Z_ONE;
     double2 c_neg_one = MAGMA_Z_NEG_ONE;
 
-    int *n = &n_;
-    int *nb = &nb_;
-    int *k = &k_;
-    int *lda = &lda_;
-    int *ldt = &ldt_;
-    int *ldy = &ldy_;
-
-    int ldda = *n;
+    int ldda = n;
 
     /* Table of constant values */
     static int c__1 = 1;
@@ -151,31 +144,31 @@ magma_zlahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
     static double2 ei;
 
     --tau;
-    a_dim1 = *lda;
+    a_dim1 = lda;
     a_offset = 1 + a_dim1;
     a -= a_offset;
-    t_dim1 = *ldt;
+    t_dim1 = ldt;
     t_offset = 1 + t_dim1;
     t -= t_offset;
-    y_dim1 = *ldy;
+    y_dim1 = ldy;
     y_offset = 1 + y_dim1;
     y -= y_offset;
 
     /* Function Body */
-    if (*n <= 1)
+    if (n <= 1)
       return 0;
     
 
-    for (i__ = 1; i__ <= *nb; ++i__) {
+    for (i__ = 1; i__ <= nb; ++i__) {
 	if (i__ > 1) {
 
 	  /* Update A(K+1:N,I); Update I-th column of A - Y * V' */
-	  i__2 = *n - *k + 1;
+	  i__2 = n - k + 1;
 	  i__3 = i__ - 1;
-	  blasf77_zcopy(&i__3, &a[*k+i__-1+a_dim1], lda, &t[*nb*t_dim1+1], &c__1);
-	  blasf77_ztrmv("u","n","n",&i__3,&t[t_offset], ldt, &t[*nb*t_dim1+1], &c__1);
-	  blasf77_zgemv("NO TRANSPOSE", &i__2, &i__3, &c_neg_one, &y[*k + y_dim1],
-		 ldy, &t[*nb*t_dim1+1], &c__1, &c_one, &a[*k+i__*a_dim1],&c__1);
+	  blasf77_zcopy(&i__3, &a[k+i__-1+a_dim1], &lda, &t[nb*t_dim1+1], &c__1);
+	  blasf77_ztrmv("u","n","n",&i__3,&t[t_offset], &ldt, &t[nb*t_dim1+1], &c__1);
+	  blasf77_zgemv("NO TRANSPOSE", &i__2, &i__3, &c_neg_one, &y[k + y_dim1],
+		 &ldy, &t[nb*t_dim1+1], &c__1, &c_one, &a[k+i__*a_dim1],&c__1);
 
 	  /* Apply I - V * T' * V' to this column (call it b) from the   
              left, using the last column of T as workspace   
@@ -186,70 +179,70 @@ magma_zlahr2(magma_int_t n_, magma_int_t k_, magma_int_t nb_,
              w := V1' * b1                                                 */
 	  
 	  i__2 = i__ - 1;
-	  blasf77_zcopy(&i__2, &a[*k+1+i__*a_dim1], &c__1, &t[*nb*t_dim1+1], &c__1);
-	  blasf77_ztrmv("Lower", "Transpose", "UNIT", &i__2, &a[*k + 1 + a_dim1], 
-		 lda, &t[*nb * t_dim1 + 1], &c__1);
+	  blasf77_zcopy(&i__2, &a[k+1+i__*a_dim1], &c__1, &t[nb*t_dim1+1], &c__1);
+	  blasf77_ztrmv("Lower", "Transpose", "UNIT", &i__2, &a[k + 1 + a_dim1], 
+		 &lda, &t[nb * t_dim1 + 1], &c__1);
 
 	  /* w := w + V2'*b2 */
-	  i__2 = *n - *k - i__ + 1;
+	  i__2 = n - k - i__ + 1;
 	  i__3 = i__ - 1;
-	  blasf77_zgemv("T", &i__2, &i__3, &c_one, &a[*k + i__ + a_dim1], lda, 
-		 &a[*k+i__+i__*a_dim1], &c__1, &c_one, &t[*nb*t_dim1+1], &c__1);
+	  blasf77_zgemv("T", &i__2, &i__3, &c_one, &a[k + i__ + a_dim1], &lda, 
+		 &a[k+i__+i__*a_dim1], &c__1, &c_one, &t[nb*t_dim1+1], &c__1);
 
 	  /* w := T'*w */
 	  i__2 = i__ - 1;
-	  blasf77_ztrmv("U","T","N",&i__2, &t[t_offset], ldt, &t[*nb*t_dim1+1],&c__1);
+	  blasf77_ztrmv("U","T","N",&i__2, &t[t_offset], &ldt, &t[nb*t_dim1+1],&c__1);
 	  
 	  /* b2 := b2 - V2*w */
-	  i__2 = *n - *k - i__ + 1;
+	  i__2 = n - k - i__ + 1;
 	  i__3 = i__ - 1;
-	  blasf77_zgemv("N", &i__2, &i__3, &c_neg_one, &a[*k + i__ + a_dim1], lda, 
-		 &t[*nb*t_dim1+1], &c__1, &c_one, &a[*k+i__+i__*a_dim1], &c__1);
+	  blasf77_zgemv("N", &i__2, &i__3, &c_neg_one, &a[k + i__ + a_dim1], &lda, 
+		 &t[nb*t_dim1+1], &c__1, &c_one, &a[k+i__+i__*a_dim1], &c__1);
 
 	  /* b1 := b1 - V1*w */
 	  i__2 = i__ - 1;
-	  blasf77_ztrmv("L","N","U",&i__2,&a[*k+1+a_dim1],lda,&t[*nb*t_dim1+1],&c__1);
-	  blasf77_zaxpy(&i__2, &c_neg_one, &t[*nb * t_dim1 + 1], &c__1, 
-		 &a[*k + 1 + i__ * a_dim1], &c__1);
+	  blasf77_ztrmv("L","N","U",&i__2,&a[k+1+a_dim1],&lda,&t[nb*t_dim1+1],&c__1);
+	  blasf77_zaxpy(&i__2, &c_neg_one, &t[nb * t_dim1 + 1], &c__1, 
+		 &a[k + 1 + i__ * a_dim1], &c__1);
 	  
-	  a[*k + i__ - 1 + (i__ - 1) * a_dim1] = ei;
+	  a[k + i__ - 1 + (i__ - 1) * a_dim1] = ei;
 	}
 	
 	/* Generate the elementary reflector H(I) to annihilate A(K+I+1:N,I) */
-	i__2 = *n - *k - i__ + 1;
-	i__3 = *k + i__ + 1;
-	lapackf77_zlarfg(&i__2, &a[*k + i__ + i__ * a_dim1], 
-                         &a[min(i__3,*n) + i__ * a_dim1], &c__1, &tau[i__]);
-	ei = a[*k + i__ + i__ * a_dim1];
-	a[*k + i__ + i__ * a_dim1] = c_one;
+	i__2 = n - k - i__ + 1;
+	i__3 = k + i__ + 1;
+	lapackf77_zlarfg(&i__2, &a[k + i__ + i__ * a_dim1], 
+                         &a[min(i__3,n) + i__ * a_dim1], &c__1, &tau[i__]);
+	ei = a[k + i__ + i__ * a_dim1];
+	a[k + i__ + i__ * a_dim1] = c_one;
 
 	/* Compute  Y(K+1:N,I) */
-        i__2 = *n - *k;
-	i__3 = *n - *k - i__ + 1;
+        i__2 = n - k;
+	i__3 = n - k - i__ + 1;
         cublasSetVector(i__3, sizeof(double2), 
-                        &a[*k + i__ + i__*a_dim1], 1, dv+(i__-1)*(ldda+1), 1);
+                        &a[k + i__ + i__*a_dim1], 1, dv+(i__-1)*(ldda+1), 1);
 
 	cublasZgemv('N', i__2+1, i__3, c_one, 
-		    da -1 + *k + i__ *ldda, ldda, 
+		    da -1 + k + i__ * ldda, ldda, 
 		    dv+(i__-1)*(ldda+1), c__1, c_zero, 
-		    da-1 + *k + (i__-1)*ldda, c__1);     
+		    da-1 + k + (i__-1)*ldda, c__1);     
 	
-	i__2 = *n - *k - i__ + 1;
+	i__2 = n - k - i__ + 1;
 	i__3 = i__ - 1;
-	blasf77_zgemv("T", &i__2, &i__3, &c_one, &a[*k + i__ + a_dim1], lda,
-	       &a[*k+i__+i__*a_dim1], &c__1, &c_zero, &t[i__*t_dim1+1], &c__1);
+	blasf77_zgemv("T", &i__2, &i__3, &c_one, &a[k + i__ + a_dim1], &lda,
+	       &a[k+i__+i__*a_dim1], &c__1, &c_zero, &t[i__*t_dim1+1], &c__1);
 
 	/* Compute T(1:I,I) */
 	i__2 = i__ - 1;
 	MAGMA_Z_OP_NEG_ASGN( d__1, tau[i__] );
 	blasf77_zscal(&i__2, &d__1, &t[i__ * t_dim1 + 1], &c__1);
-	blasf77_ztrmv("U","N","N", &i__2, &t[t_offset], ldt, &t[i__*t_dim1+1], &c__1);
+	blasf77_ztrmv("U","N","N", &i__2, &t[t_offset], &ldt, &t[i__*t_dim1+1], &c__1);
 	t[i__ + i__ * t_dim1] = tau[i__];
 
-        cublasGetVector(*n - *k + 1, sizeof(double2),
-	                da-1+ *k+(i__-1)*ldda, 1, y+ *k + i__*y_dim1, 1);
+        cublasGetVector(n - k + 1, sizeof(double2),
+	                da-1+ k+(i__-1)*ldda, 1, y+ k + i__*y_dim1, 1);
     }
-    a[*k + *nb + *nb * a_dim1] = ei;
+    a[k + nb + nb * a_dim1] = ei;
 
     return 0;
 

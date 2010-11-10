@@ -17,8 +17,8 @@
  
 extern "C" magma_int_t 
 magma_zlarfb(char direct, char storev,
-	     magma_int_t m, magma_int_t n, magma_int_t k_, double2 *dv, magma_int_t ldv_, double2 *dt,
-	     magma_int_t ldt_, double2 *dc, magma_int_t ldc_, double2 *dwork, magma_int_t ldwork_)
+	     magma_int_t m, magma_int_t n, magma_int_t k, double2 *dv, magma_int_t ldv, double2 *dt,
+	     magma_int_t ldt, double2 *dc, magma_int_t ldc, double2 *dwork, magma_int_t ldwork)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Univ. of California Berkeley
@@ -82,19 +82,13 @@ magma_zlarfb(char direct, char storev,
 
     ===================================================================      */
 
-  #define dwork_ref(a_1,a_2) (dwork+(a_2)*(*ldwork) + a_1)
-  #define dc_ref(a_1,a_2)    (dc+(a_2)*(*ldc) + a_1)
-  #define dv_ref(a_1,a_2)    (dv+(a_2)*(*ldv) + a_1)
+  #define dwork_ref(a_1,a_2) (dwork+(a_2)*(ldwork) + a_1)
+  #define dc_ref(a_1,a_2)    (dc+(a_2)*(ldc) + a_1)
+  #define dv_ref(a_1,a_2)    (dv+(a_2)*(ldv) + a_1)
 
   double2 c_zero = MAGMA_Z_ZERO;
   double2 c_one = MAGMA_Z_ONE;
   double2 c_neg_one = MAGMA_Z_NEG_ONE;
-
-  int *k = &k_;
-  int *ldv = &ldv_;
-  int *ldt = &ldt_;
-  int *ldc = &ldc_;
-  int *ldwork = &ldwork_;
 
   /* Function Body */
   if (m <= 0 || n <= 0) {
@@ -105,41 +99,41 @@ magma_zlarfb(char direct, char storev,
     /*
     if (n==1 && m%32==0){
       // This is used when we have to apply H on only one vector 
-      magmablas_zgemvt(m, *k, 1., dv_ref(0,0), *ldv, dc_ref(0, 0), dwork);
-      printf("m= %d, n = %d, ldwork = %d\n", m, *k, *ldwork);
+      magmablas_zgemvt(m, k, 1., dv_ref(0,0), ldv, dc_ref(0, 0), dwork);
+      printf("m= %d, n = %d, ldwork = %d\n", m, k, ldwork);
     }
     else
     */
     //TimeStruct start, end;
     //start = get_current_time();
-    cublasZgemm('t', 'n', n, *k, m, c_one, dc_ref(0, 0), *ldc,
-		dv_ref(0,0), *ldv, c_zero, dwork, *ldwork);
+    cublasZgemm('t', 'n', n, k, m, c_one, dc_ref(0, 0), ldc,
+		dv_ref(0,0), ldv, c_zero, dwork, ldwork);
     
     if (direct == 'F' || direct =='f')
       cublasZtrmm('r', 'u', 'n', 'n',
-		  n, *k, c_one, dt, *ldt, dwork, *ldwork);
+		  n, k, c_one, dt, ldt, dwork, ldwork);
     else
       cublasZtrmm('r', 'l', 'n', 'n',
-		  n, *k, c_one, dt, *ldt, dwork, *ldwork);
+		  n, k, c_one, dt, ldt, dwork, ldwork);
 
-    cublasZgemm('n', 't', m, n, *k, c_neg_one, dv_ref(0, 0), *ldv,
-		dwork, *ldwork, c_one, dc_ref(0,0), *ldc);
+    cublasZgemm('n', 't', m, n, k, c_neg_one, dv_ref(0, 0), ldv,
+		dwork, ldwork, c_one, dc_ref(0,0), ldc);
     //end = get_current_time();
-    //if (n!=*k)
+    //if (n!=k)
     //printf("%5d %5d  %7.2f\n",
-    //	   m, n, (4.*n*(*k)*m+n*(*k)*(*k))/(1.e6*GetTimerValue(start,end)));
+    //	   m, n, (4.*n*(k)*m+n*(k)*(k))/(1.e6*GetTimerValue(start,end)));
   }
   else {
-    cublasZgemm('n', 't', m, *k, n, c_one, dc_ref(0, 0), *ldc,
-                dv_ref(0,0), *ldv, c_zero, dwork, *ldwork);
+    cublasZgemm('n', 't', m, k, n, c_one, dc_ref(0, 0), ldc,
+                dv_ref(0,0), ldv, c_zero, dwork, ldwork);
     
     cublasZtrmm('r', 'u', 'n', 'n',
-		m, *k, c_one, dt, *ldt, dwork, *ldwork);
+		m, k, c_one, dt, ldt, dwork, ldwork);
     
-    cublasZgemm('n', 'n', m, n, *k, c_neg_one, 
-		dwork, *ldwork,
-		dv_ref(0, 0), *ldv, 
-		c_one, dc_ref(0,0), *ldc);
+    cublasZgemm('n', 'n', m, n, k, c_neg_one, 
+		dwork, ldwork,
+		dv_ref(0, 0), ldv, 
+		c_one, dc_ref(0,0), ldc);
     /*
     double2 one = 1.f, zero = 0.f, mone = -1.f;
     blasf77_zgemm("n", "t", &m, k, &n, &one, dc_ref(0, 0), ldc,

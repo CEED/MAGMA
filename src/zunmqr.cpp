@@ -15,8 +15,8 @@
 #include "magma.h"
 
 extern "C" magma_int_t
-magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_, 
-	     magma_int_t k_, double2 *a, magma_int_t lda_, double2 *tau, double2 *c__, magma_int_t ldc_,
+magma_zunmqr(char side, char trans, magma_int_t m, magma_int_t n,
+	     magma_int_t k, double2 *a, magma_int_t lda, double2 *tau, double2 *c__, magma_int_t ldc,
 	     double2 *work, magma_int_t *lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -113,21 +113,16 @@ magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
     
     double2 c_one = MAGMA_Z_ONE;
 
-    char side[2] = {side_, 0};
-    char trans[2] = {trans_, 0};
-    int *m = &m_;
-    int *n = &n_;
-    int *k = &k_;
-    int *lda = &lda_;
-    int *ldc = &ldc_;
+    char side_[2] = {side, 0};
+    char trans_[2] = {trans, 0};
 
     // TTT --------------------------------------------------------------------
     double2 *dwork, *dc;
-    cublasAlloc((*m)*(*n), sizeof(double2), (void**)&dc);
-    cublasAlloc(2*(*m+64)*64, sizeof(double2), (void**)&dwork);
+    cublasAlloc((m)*(n), sizeof(double2), (void**)&dc);
+    cublasAlloc(2*(m+64)*64, sizeof(double2), (void**)&dwork);
     
-    cublasSetMatrix( *m, *n, sizeof(double2), c__, *ldc, dc, *ldc);
-    dc -= (1 + *m);
+    cublasSetMatrix( m, n, sizeof(double2), c__, ldc, dc, ldc);
+    dc -= (1 + m);
     //-------------------------------------------------------------------------
 
     int a_dim1, a_offset, c_dim1, c_offset, i__4, i__5;
@@ -139,43 +134,43 @@ magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
     static int nbmin, iinfo;
     static int ldwork, lwkopt;
 
-    a_dim1 = *lda;
+    a_dim1 = lda;
     a_offset = 1 + a_dim1;
     a -= a_offset;
     --tau;
-    c_dim1 = *ldc;
+    c_dim1 = ldc;
     c_offset = 1 + c_dim1;
     c__ -= c_offset;
     --work;
 
     /* Function Body */
     *info = 0;
-    left = lapackf77_lsame(side, "L");
-    notran = lapackf77_lsame(trans, "N");
+    left = lapackf77_lsame(side_, "L");
+    notran = lapackf77_lsame(trans_, "N");
     lquery = *lwork == -1;
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
 
     if (left) {
-	nq = *m;
-	nw = *n;
+	nq = m;
+	nw = n;
     } else {
-	nq = *n;
-	nw = *m;
+	nq = n;
+	nw = m;
     }
-    if (! left && ! lapackf77_lsame(side, "R")) {
+    if (! left && ! lapackf77_lsame(side_, "R")) {
 	*info = -1;
-    } else if (! notran && ! lapackf77_lsame(trans, "T")) {
+    } else if (! notran && ! lapackf77_lsame(trans_, "T")) {
 	*info = -2;
-    } else if (*m < 0) {
+    } else if (m < 0) {
 	*info = -3;
-    } else if (*n < 0) {
+    } else if (n < 0) {
 	*info = -4;
-    } else if (*k < 0 || *k > nq) {
+    } else if (k < 0 || k > nq) {
 	*info = -5;
-    } else if (*lda < max(1,nq)) {
+    } else if (lda < max(1,nq)) {
 	*info = -7;
-    } else if (*ldc < max(1,*m)) {
+    } else if (ldc < max(1,m)) {
 	*info = -10;
     } else if (*lwork < max(1,nw) && ! lquery) {
 	*info = -12;
@@ -198,14 +193,14 @@ magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
 
     /* Quick return if possible */
 
-    if (*m == 0 || *n == 0 || *k == 0) {
+    if (m == 0 || n == 0 || k == 0) {
 	work[1] = c_one;
 	return 0;
     }
 
     nbmin = 2;
     ldwork = nw;
-    if (nb > 1 && nb < *k) {
+    if (nb > 1 && nb < k) {
 	iws = nw * nb;
 	if (*lwork < iws) {
 	    nb = *lwork / ldwork;
@@ -215,85 +210,85 @@ magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
 	iws = nw;
     }
 
-    if (nb < nbmin || nb >= *k) 
+    if (nb < nbmin || nb >= k) 
       {
 	/* Use unblocked code */
-	lapackf77_zunm2r(side, trans, m, n, k, &a[a_offset], lda, &tau[1], 
-		&c__[c_offset], ldc, &work[1], &iinfo);
+	lapackf77_zunm2r(side_, trans_, &m, &n, &k, &a[a_offset], &lda, &tau[1], 
+		&c__[c_offset], &ldc, &work[1], &iinfo);
       } 
     else 
       {
 	/* Use blocked code */
 	if (left && ! notran || ! left && notran) {
 	    i1 = 1;
-	    i2 = *k;
+	    i2 = k;
 	    i3 = nb;
 	} else {
-	    i1 = (*k - 1) / nb * nb + 1;
+	    i1 = (k - 1) / nb * nb + 1;
 	    i2 = 1;
 	    i3 = -nb;
 	}
 
 	if (left) {
-	    ni = *n;
+	    ni = n;
 	    jc = 1;
 	} else {
-	    mi = *m;
+	    mi = m;
 	    ic = 1;
 	}
 	
 	for (i__ = i1; i3 < 0 ? i__ >= i2 : i__ <= i2; i__ += i3) 
 	  {
 	    /* Computing MIN */
-	    i__4 = nb, i__5 = *k - i__ + 1;
+	    i__4 = nb, i__5 = k - i__ + 1;
 	    ib = min(i__4,i__5);
 
 	    /* Form the triangular factor of the block reflector   
 	       H = H(i) H(i+1) . . . H(i+ib-1) */
 	    i__4 = nq - i__ + 1;
-	    lapackf77_zlarft("F", "C", &i__4, &ib, &a[i__ + i__ * a_dim1], lda, 
+	    lapackf77_zlarft("F", "C", &i__4, &ib, &a[i__ + i__ * a_dim1], &lda, 
 		    &tau[i__], t, &ib);
 
 	    // TTT ------------------------------------------------------------
-	    zpanel_to_q('U', ib, &a[i__ + i__ * a_dim1], *lda, t+ib*ib);
+	    zpanel_to_q('U', ib, &a[i__ + i__ * a_dim1], lda, t+ib*ib);
 	    cublasSetMatrix(i__4, ib, sizeof(double2),
-			    &a[i__ + i__ * a_dim1], *lda, 
+			    &a[i__ + i__ * a_dim1], lda, 
 			    dwork, i__4);
-	    zq_to_panel('U', ib, &a[i__ + i__ * a_dim1], *lda, t+ib*ib);
+	    zq_to_panel('U', ib, &a[i__ + i__ * a_dim1], lda, t+ib*ib);
 	    //-----------------------------------------------------------------
 
 	    if (left) 
 	      {
 		/* H or H' is applied to C(i:m,1:n) */
-		mi = *m - i__ + 1;
+		mi = m - i__ + 1;
 		ic = i__;
 	      } 
 	    else 
 	      {
 		/* H or H' is applied to C(1:m,i:n) */
-		ni = *n - i__ + 1;
+		ni = n - i__ + 1;
 		jc = i__;
 	      }
 	    
 	    /* Apply H or H' */
 	    // TTT ------------------------------------------------------------
-	    //printf("%5d %5d %5d\n", mi, ni, ic + 1 + *m);
+	    //printf("%5d %5d %5d\n", mi, ni, ic + 1 + m);
 	    cublasSetMatrix(ib, ib, sizeof(double2), t, ib, dwork+i__4*ib, ib);
 	    magma_zlarfb('F','C', mi, ni, ib,
 			 dwork, i__4, dwork+i__4*ib, ib,
-			 &dc[ic + jc * c_dim1], *ldc, 
+			 &dc[ic + jc * c_dim1], ldc, 
 			 dwork+i__4*ib + ib*ib, ni);
 	    //-----------------------------------------------------------------
 	    /*
 	    lapackf77_zlarfb(side, trans, "Forward", "Columnwise", &mi, &ni, &ib, 
-		    &a[i__ + i__ * a_dim1], lda, t, &c__65, 
-		    &c__[ic + jc * c_dim1], ldc, &work[1], &ldwork);
+		    &a[i__ + i__ * a_dim1], &lda, t, &c__65, 
+		    &c__[ic + jc * c_dim1], &ldc, &work[1], &ldwork);
 	    */
 	  }
       }
     MAGMA_Z_SET2REAL( work[1], lwkopt );
 
-    dc += (1 + *m);
+    dc += (1 + m);
     cublasFree(dc);
     cublasFree(dwork);
 

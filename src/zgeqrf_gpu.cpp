@@ -15,7 +15,7 @@
 #include "magma.h"
 
 extern "C" magma_int_t
-magma_zgeqrf_gpu(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t  lda_,  
+magma_zgeqrf_gpu(magma_int_t m, magma_int_t n, double2 *a, magma_int_t  lda,
 		 double2  *tau, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -79,39 +79,35 @@ magma_zgeqrf_gpu(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t  lda_,
 
     =====================================================================    */
 
-   #define a_ref(a_1,a_2) ( a+(a_2)*(*lda) + (a_1))
+   #define a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
    #define work_ref(a_1)  ( work + (a_1)) 
-   #define hwork          ( work + (nb)*(*m))
+   #define hwork          ( work + (nb)*(m))
    #define min(a,b)       (((a)<(b))?(a):(b))
    #define max(a,b)       (((a)>(b))?(a):(b))
-
-   int *m = &m_;
-   int *n = &n_;
-   int *lda = &lda_;
 
    int i, k, ldwork, lddwork, old_i, old_ib, rows;
    int nbmin, nx, ib;
 
    /* Function Body */
    *info = 0;
-   int nb = magma_get_zgeqrf_nb(*m);
+   int nb = magma_get_zgeqrf_nb(m);
    
-   if (*m < 0) {
+   if (m < 0) {
      *info = -1;
-   } else if (*n < 0) {
+   } else if (n < 0) {
      *info = -2;
-   } else if (*lda < max(1,*m)) {
+   } else if (lda < max(1,m)) {
      *info = -4;
    }
    if (*info != 0)
      return 0;
 
-   k = min(*m,*n);
+   k = min(m,n);
    if (k == 0) 
      return 0;
    
-   int lwork  = (*m+*n) * nb;
-   int lhwork = lwork - (*m)*nb;
+   int lwork  = (m+n) * nb;
+   int lhwork = lwork - (m)*nb;
 
    static cudaStream_t stream[2];
    cudaStreamCreate(&stream[0]);
@@ -119,7 +115,7 @@ magma_zgeqrf_gpu(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t  lda_,
 
    double2 *dwork;
    cublasStatus status;
-   status = cublasAlloc((*n)*nb, sizeof(double2), (void**)&dwork);
+   status = cublasAlloc((n)*nb, sizeof(double2), (void**)&dwork);
    if (status != CUBLAS_STATUS_SUCCESS) {
      *info = -9;
      return 0;
@@ -130,26 +126,26 @@ magma_zgeqrf_gpu(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t  lda_,
 
    nbmin = 2;
    nx = nb;
-   ldwork = *m;
-   lddwork= *n;
+   ldwork = m;
+   lddwork= n;
 
    if (nb >= nbmin && nb < k && nx < k) {
       /* Use blocked code initially */
       old_i = 0; old_ib = nb;
       for (i = 0; i < k-nx; i += nb) {
 	ib = min(k-i, nb);
-	rows = *m -i;
+	rows = m -i;
 	cudaMemcpy2DAsync(  work_ref(i), ldwork*sizeof(double2),
-			    a_ref(i,i), (*lda)*sizeof(double2),
+			    a_ref(i,i), (lda)*sizeof(double2),
 			    sizeof(double2)*rows, ib,
 			    cudaMemcpyDeviceToHost,stream[1]);
 	if (i>0){
 	  /* Apply H' to A(i:m,i+2*ib:n) from the left */
-	  magma_zlarfb('F', 'C', *m-old_i, *n-old_i-2*old_ib, old_ib,
-		       a_ref(old_i, old_i), *lda, dwork, lddwork, 
-		       a_ref(old_i, old_i+2*old_ib), *lda, 
+	  magma_zlarfb('F', 'C', m-old_i, n-old_i-2*old_ib, old_ib,
+		       a_ref(old_i, old_i), lda, dwork, lddwork, 
+		       a_ref(old_i, old_i+2*old_ib), lda, 
 		       dwork+old_ib, lddwork);
-	  cudaMemcpy2DAsync(a_ref(old_i, old_i), (*lda) * sizeof(double2), 
+	  cudaMemcpy2DAsync(a_ref(old_i, old_i), (lda) * sizeof(double2), 
 			    work_ref(old_i), ldwork * sizeof(double2),
 			    sizeof(double2)*old_ib, old_ib,
 			    cudaMemcpyHostToDevice,stream[0]);
@@ -162,21 +158,21 @@ magma_zgeqrf_gpu(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t  lda_,
 	lapackf77_zlarft("F", "C", &rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &ib);
 	zpanel_to_q('U', ib, work_ref(i), ldwork, hwork+ib*ib); 
 	cublasSetMatrix(rows, ib, sizeof(double2), 
-			work_ref(i), ldwork, a_ref(i,i), *lda);
+			work_ref(i), ldwork, a_ref(i,i), lda);
         zq_to_panel('U', ib, work_ref(i), ldwork, hwork+ib*ib);
 
-	if (i + ib < *n) {
+	if (i + ib < n) {
 	  cublasSetMatrix(ib, ib, sizeof(double2), hwork, ib, dwork, lddwork);
 
 	  if (i+nb < k-nx)
 	    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
-	    magma_zlarfb('F', 'C', rows, ib, ib, a_ref(i,i), *lda, dwork,
-			 lddwork, a_ref(i,i+ib), *lda, dwork+ib, lddwork);
+	    magma_zlarfb('F', 'C', rows, ib, ib, a_ref(i,i), lda, dwork,
+			 lddwork, a_ref(i,i+ib), lda, dwork+ib, lddwork);
 	  else {
-	    magma_zlarfb('F', 'C', rows, *n-i-ib, ib, a_ref(i,i), *lda, dwork,
-			 lddwork, a_ref(i,i+ib), *lda, dwork+ib, lddwork);
+	    magma_zlarfb('F', 'C', rows, n-i-ib, ib, a_ref(i,i), lda, dwork,
+			 lddwork, a_ref(i,i+ib), lda, dwork+ib, lddwork);
 	    cublasSetMatrix(ib, ib, sizeof(double2),
-			    work_ref(i), ldwork, a_ref(i,i), *lda);
+			    work_ref(i), ldwork, a_ref(i,i), lda);
 	  }
 	  old_i = i;
 	  old_ib = ib;
@@ -190,14 +186,14 @@ magma_zgeqrf_gpu(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t  lda_,
 
    /* Use unblocked code to factor the last or only block. */
    if (i < k) {
-      ib   = *n-i;
-      rows = *m-i;
+      ib   = n-i;
+      rows = m-i;
       cublasGetMatrix(rows, ib, sizeof(double2),
-                      a_ref(i,i), *lda, work, rows);
+                      a_ref(i,i), lda, work, rows);
       lhwork = lwork - rows*ib;
       lapackf77_zgeqrf(&rows, &ib, work, &rows, tau+i, work+ib*rows, &lhwork, info);
       cublasSetMatrix(rows, ib, sizeof(double2),
-                      work, rows, a_ref(i,i), *lda);
+                      work, rows, a_ref(i,i), lda);
    }
    cublasFree(work);
 

@@ -16,8 +16,8 @@
 #include "magma.h"
 
 extern "C" magma_int_t 
-magma_zgeqrs_gpu(magma_int_t m_, magma_int_t n_, magma_int_t nrhs_, 
-		 double2 *a, magma_int_t lda_, double2 *tau, double2 *c, magma_int_t ldc_, 
+magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
+		 double2 *a, magma_int_t lda, double2 *tau, double2 *c, magma_int_t ldc,
 		 double2 *work, magma_int_t *lwork, double2 *td, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -86,7 +86,7 @@ magma_zgeqrs_gpu(magma_int_t m_, magma_int_t n_, magma_int_t nrhs_,
 
     =====================================================================    */
 
-   #define a_ref(a_1,a_2) ( a+(a_2)*(*lda) + (a_1))
+   #define a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
    #define t_ref(a_1)     (td+(a_1))
    #define d_ref(a_1)     (td+(lddwork+(a_1))*nb)
    #define min(a,b)       (((a)<(b))?(a):(b))
@@ -96,31 +96,25 @@ magma_zgeqrs_gpu(magma_int_t m_, magma_int_t n_, magma_int_t nrhs_,
    double2 c_one = MAGMA_Z_ONE;
    double2 c_neg_one = MAGMA_Z_NEG_ONE;
 
-   int *m = &m_;
-   int *n = &n_;
-   int *nrhs = &nrhs_;
-   int *lda = &lda_;
-   int *ldc = &ldc_;
-
    double2 *dwork;
    int i, k, lddwork, rows, ib;
 
    /* Function Body */
    *info = 0;
-   int nb = magma_get_zgeqrf_nb(*m);
+   int nb = magma_get_zgeqrf_nb(m);
    
-   int lwkopt = (*m-*n+nb+2*(*nrhs)) * nb;
+   int lwkopt = (m-n+nb+2*(nrhs)) * nb;
    MAGMA_Z_SET2REAL( work[0], (double) lwkopt );
    long int lquery = *lwork == -1;
-   if (*m < 0)
+   if (m < 0)
      *info = -1;
-   else if (*n < 0 || *m < *n)
+   else if (n < 0 || m < n)
      *info = -2;
-   else if (*nrhs < 0)
+   else if (nrhs < 0)
      *info = -3;
-   else if (*lda < max(1,*m))
+   else if (lda < max(1,m))
      *info = -5;
-   else if (*ldc < max(1,*m))
+   else if (ldc < max(1,m))
      *info = -8;
    else if (*lwork < lwkopt && ! lquery)
      *info = -10;
@@ -130,69 +124,69 @@ magma_zgeqrs_gpu(magma_int_t m_, magma_int_t n_, magma_int_t nrhs_,
    else if (lquery)
      return 0;
 
-   k = min(*m,*n);
+   k = min(m,n);
    if (k == 0) {
      work[0] = c_one;
      return 0;
    }
 
-   magma_zunmqr_gpu('L', 'T', m_, nrhs_, n_,
-                    a_ref(0,0), lda_, tau, c, ldc_,
+   magma_zunmqr_gpu('L', 'T', m, nrhs, n,
+                    a_ref(0,0), lda, tau, c, ldc,
                     work, lwork, td, nb, info);
 
    lddwork= k;
    dwork = td+2*lddwork*nb;
 
    i    = (k-1)/nb * nb;
-   ib   = *n-i;
-   rows = *m-i;
+   ib   = n-i;
+   rows = m-i;
    double2 one = MAGMA_Z_ONE;
-   blasf77_ztrsm("l", "u", "n", "n", &ib, nrhs, &one, work, &rows,
+   blasf77_ztrsm("l", "u", "n", "n", &ib, &nrhs, &one, work, &rows,
 	  work+rows*ib, &rows);
    
    // update the solution vector
-   cublasSetMatrix(rows, *nrhs, sizeof(double2),
-		   work+rows*ib, rows, dwork+i, *ldc);
+   cublasSetMatrix(rows, nrhs, sizeof(double2),
+		   work+rows*ib, rows, dwork+i, ldc);
    
    // update c
-   if (*nrhs == 1)
-     cublasZgemv('n', i, ib, c_neg_one, a_ref(0, i), *lda,
+   if (nrhs == 1)
+     cublasZgemv('n', i, ib, c_neg_one, a_ref(0, i), lda,
 		 dwork + i, 1, c_one, c, 1);
    else
-     cublasZgemm('n', 'n', i, *nrhs, ib, c_neg_one, a_ref(0, i), *lda,
-		 dwork + i, *ldc, c_one, c, *ldc);
+     cublasZgemm('n', 'n', i, nrhs, ib, c_neg_one, a_ref(0, i), lda,
+		 dwork + i, ldc, c_one, c, ldc);
 
    int start = i-nb;
    if (nb < k) {
      for (i = start; i >=0; i -= nb) {
        ib = min(k-i, nb);
-       rows = *m -i;
+       rows = m -i;
 
-       if (i + ib < *n) {
-	 if (*nrhs == 1)
+       if (i + ib < n) {
+	 if (nrhs == 1)
 	   {
 	     cublasZgemv('n', ib, ib, c_one, d_ref(i), ib,
 			 c+i, 1, c_zero, dwork + i, 1);
-	     cublasZgemv('n', i, ib, c_neg_one, a_ref(0, i), *lda,
+	     cublasZgemv('n', i, ib, c_neg_one, a_ref(0, i), lda,
 			 dwork + i, 1, c_one, c, 1);
 	   }
 	 else
 	   {
-	     cublasZgemm('n', 'n', ib, *nrhs, ib, c_one, d_ref(i), ib,
-                         c+i, *ldc, c_zero, dwork + i, *ldc);
-             cublasZgemm('n', 'n', i, *nrhs, ib, c_neg_one, a_ref(0, i), *lda,
-                         dwork + i, *ldc, c_one, c, *ldc);
+	     cublasZgemm('n', 'n', ib, nrhs, ib, c_one, d_ref(i), ib,
+                         c+i, ldc, c_zero, dwork + i, ldc);
+             cublasZgemm('n', 'n', i, nrhs, ib, c_neg_one, a_ref(0, i), lda,
+                         dwork + i, ldc, c_one, c, ldc);
 	   }
        }
      }
    }
 
-   if (*nrhs==1)
-     cublasZcopy(*n, dwork, 1, c, 1);
+   if (nrhs==1)
+     cublasZcopy(n, dwork, 1, c, 1);
    else
-     cudaMemcpy2D(c, (*ldc)*sizeof(double2),
-		  dwork, (*ldc)*sizeof(double2),
-		  (*n)*sizeof(double2), *nrhs, cudaMemcpyDeviceToDevice);
+     cudaMemcpy2D(c, (ldc)*sizeof(double2),
+		  dwork, (ldc)*sizeof(double2),
+		  (n)*sizeof(double2), nrhs, cudaMemcpyDeviceToDevice);
 
    return 0; 
 }

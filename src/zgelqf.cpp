@@ -16,7 +16,7 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t
-magma_zgelqf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_, 
+magma_zgelqf(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda, 
 	     double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -96,32 +96,28 @@ magma_zgelqf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
 
     =====================================================================    */
 
-    #define  a_ref(a_1,a_2) ( a+(a_2)*(*lda) + (a_1))
+    #define  a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
     
     double2 c_one = MAGMA_Z_ONE;
-
-    int *m = &m_;
-    int *n = &n_;
-    int *lda = &lda_;
 
     int iinfo, ldda;
     long int lquery;
 
     /* Function Body */
     *info = 0;
-    int nb = magma_get_zgelqf_nb(*m); 
+    int nb = magma_get_zgelqf_nb(m); 
 
-    MAGMA_Z_SET2REAL( work[0], *m * nb );
+    MAGMA_Z_SET2REAL( work[0], m * nb );
     lquery = *lwork == -1;
-    if (*m < 0) {
+    if (m < 0) {
 	*info = -1;
-    } else if (*n < 0) {
+    } else if (n < 0) {
 	*info = -2;
-    } else if (*lda < max(1,*m)) {
+    } else if (lda < max(1,m)) {
 	*info = -4;
-    } else if (*lwork < max(1,*m) && ! lquery) {
+    } else if (*lwork < max(1,m) && ! lquery) {
 	*info = -7;
     }
     if (*info != 0) {
@@ -131,7 +127,7 @@ magma_zgelqf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
     }
 
     /*  Quick return if possible */
-    if (min(*m, *n) == 0) {
+    if (min(m, n) == 0) {
 	work[0] = c_one;
 	return 0;
     }
@@ -140,8 +136,8 @@ magma_zgelqf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
     double2 *dA, *dAT;
     cublasStatus status;
 
-    maxm = ((*m + 31)/32)*32;
-    maxn = ((*n + 31)/32)*32;
+    maxm = ((m + 31)/32)*32;
+    maxn = ((n + 31)/32)*32;
     maxdim = max(maxm, maxn);
 
     if (maxdim*maxdim < 2*maxm*maxn)
@@ -154,7 +150,7 @@ magma_zgelqf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
 	  return 0;
 	}
 
-	cublasSetMatrix( *m, *n, sizeof(double2), a, *lda, dA, ldda);
+	cublasSetMatrix( m, n, sizeof(double2), a, lda, dA, ldda);
 	dAT = dA;
 	magmablas_zinplace_transpose( dAT, ldda, ldda );
       }
@@ -168,20 +164,20 @@ magma_zgelqf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
 	  return 0;
 	}
 
-	cublasSetMatrix( *m, *n, sizeof(double2), a, *lda, dA, maxm);
+	cublasSetMatrix( m, n, sizeof(double2), a, lda, dA, maxm);
 
 	dAT = dA + maxn * maxm;
-	magmablas_ztranspose2( dAT, ldda, dA, maxm, *m, *n );
+	magmablas_ztranspose2( dAT, ldda, dA, maxm, m, n );
       }
 
-    magma_zgeqrf_gpu(n_, m_, dAT, ldda, tau, &iinfo);
+    magma_zgeqrf_gpu(n, m, dAT, ldda, tau, &iinfo);
 
     if (maxdim*maxdim< 2*maxm*maxn){
       magmablas_zinplace_transpose( dAT, ldda, ldda );
-      cublasGetMatrix( *m, *n, sizeof(double2), dA, ldda, a, *lda);
+      cublasGetMatrix( m, n, sizeof(double2), dA, ldda, a, lda);
     } else {
-      magmablas_ztranspose2( dA, maxm, dAT, ldda, *n, *m );
-      cublasGetMatrix( *m, *n, sizeof(double2), dA, maxm, a, *lda);
+      magmablas_ztranspose2( dA, maxm, dAT, ldda, n, m );
+      cublasGetMatrix( m, n, sizeof(double2), dA, maxm, a, lda);
     }
 
     cublasFree(dA);
