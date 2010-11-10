@@ -15,8 +15,8 @@
 #include "magma.h"
 
 extern "C" magma_int_t
-magma_zunmqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_int_t k_, 
-		 double2 *a, magma_int_t lda_, double2 *tau, double2 *c, magma_int_t ldc_,
+magma_zunmqr_gpu(char side, char trans, magma_int_t m, magma_int_t n, magma_int_t k, 
+		 double2 *a, magma_int_t lda, double2 *tau, double2 *c, magma_int_t ldc,
 		 double2 *work, magma_int_t *lwork, double2 *td, magma_int_t nb, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -115,21 +115,16 @@ magma_zunmqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
 
     =====================================================================   */
 
-    #define a_ref(a_1,a_2) ( a+(a_2)*(*lda) + (a_1))
-    #define c_ref(a_1,a_2) ( c+(a_2)*(*ldc) + (a_1))
+    #define a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
+    #define c_ref(a_1,a_2) ( c+(a_2)*(ldc) + (a_1))
     #define t_ref(a_1)     (td+(a_1))
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
     
     double2 c_one = MAGMA_Z_ONE;
 
-    char side[2] = {side_, 0};
-    char trans[2] = {trans_, 0};
-    int *m = &m_;
-    int *n = &n_;
-    int *k = &k_;
-    int *lda = &lda_;
-    int *ldc = &ldc_;
+    char side_[2] = {side, 0};
+    char trans_[2] = {trans, 0};
 
     double2 *dwork;
     int i, lddwork;
@@ -140,38 +135,38 @@ magma_zunmqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
 
     /* Function Body */
     *info = 0;
-    left = lapackf77_lsame(side, "L");
-    notran = lapackf77_lsame(trans, "N");
+    left = lapackf77_lsame(side_, "L");
+    notran = lapackf77_lsame(trans_, "N");
     lquery = *lwork == -1;
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
 
     if (left) {
-	nq = *m;
-	nw = *n;
+	nq = m;
+	nw = n;
     } else {
-	nq = *n;
-	nw = *m;
+	nq = n;
+	nw = m;
     }
-    if (! left && ! lapackf77_lsame(side, "R")) {
+    if (! left && ! lapackf77_lsame(side_, "R")) {
 	*info = -1;
-    } else if (! notran && ! lapackf77_lsame(trans, "T")) {
+    } else if (! notran && ! lapackf77_lsame(trans_, "T")) {
 	*info = -2;
-    } else if (*m < 0) {
+    } else if (m < 0) {
 	*info = -3;
-    } else if (*n < 0) {
+    } else if (n < 0) {
 	*info = -4;
-    } else if (*k < 0 || *k > nq) {
+    } else if (k < 0 || k > nq) {
 	*info = -5;
-    } else if (*lda < max(1,nq)) {
+    } else if (lda < max(1,nq)) {
 	*info = -7;
-    } else if (*ldc < max(1,*m)) {
+    } else if (ldc < max(1,m)) {
 	*info = -10;
     } else if (*lwork < max(1,nw) && ! lquery) {
 	*info = -12;
     }
 
-    lwkopt = (abs(*m-*k) + nb + 2*(*n))*nb;
+    lwkopt = (abs(m-k) + nb + 2*(n))*nb;
     MAGMA_Z_SET2REAL( work[0], lwkopt );
 
     if (*info != 0) {
@@ -181,47 +176,47 @@ magma_zunmqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
     }
 
     /* Quick return if possible */
-    if (*m == 0 || *n == 0 || *k == 0) {
+    if (m == 0 || n == 0 || k == 0) {
 	work[0] = c_one;
 	return 0;
     }
 
-    lddwork= *k;
+    lddwork= k;
     dwork  = td+2*lddwork*nb; 
 
     if ( (left && (! notran)) || ( (!left) && notran ) ) {
       i1 = 0;
-      i2 = *k-nb;
+      i2 = k-nb;
       i3 = nb;
     } else {
-      i1 = (*k - 1 - nb) / nb * nb;
+      i1 = (k - 1 - nb) / nb * nb;
       i2 = 0;
       i3 = -nb;
     }
     
     if (left) {
-      ni = *n;
+      ni = n;
       jc = 0;
     } else {
-      mi = *m;
+      mi = m;
       ic = 0;
     }
     
-    if (nb < *k)
+    if (nb < k)
       {
 	for (i = i1; i3 < 0 ? i > i2 : i < i2; i += i3) 
 	  {
-	    ib = min(nb, *k - i);
+	    ib = min(nb, k - i);
 	    if (left){
-	      mi = *m - i;
+	      mi = m - i;
 	      ic = i;
 	    }
 	    else {
-	      ni = *n - i;
+	      ni = n - i;
 	      jc = i;
 	    }
-	    magma_zlarfb('F', 'C', mi, ni, ib, a_ref(i, i), *lda, 
-			 t_ref(i), lddwork, c_ref(ic, jc), *ldc, dwork, nw);
+	    magma_zlarfb('F', 'C', mi, ni, ib, a_ref(i, i), lda, 
+			 t_ref(i), lddwork, c_ref(ic, jc), ldc, dwork, nw);
 	  }
       } 
     else 
@@ -230,19 +225,19 @@ magma_zunmqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
       }
     
     /* Use unblocked code to multiply the last or only block. */
-    if (i < *k) {
-      ib   = *k-i;
+    if (i < k) {
+      ib   = k-i;
       if (left){
-	mi = *m - i;
+	mi = m - i;
 	ic = i;
       }
       else {
-	ni = *n - i;
+	ni = n - i;
 	jc = i;
       }
 
-      cublasGetMatrix(mi, ib, sizeof(double2), a_ref(i,i), *lda, work, mi);
-      cublasGetMatrix(mi, ni, sizeof(double2), c_ref(ic, jc), *ldc, 
+      cublasGetMatrix(mi, ib, sizeof(double2), a_ref(i,i), lda, work, mi);
+      cublasGetMatrix(mi, ni, sizeof(double2), c_ref(ic, jc), ldc, 
 		      work+mi*ib, mi);
 
       int lhwork = *lwork - mi*(ib + ni);
@@ -251,7 +246,7 @@ magma_zunmqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
       
       // send the updated part of c back to the GPU
       cublasSetMatrix(mi, ni, sizeof(double2),
-                      work+mi*ib, mi, c_ref(ic, jc), *ldc);
+                      work+mi*ib, mi, c_ref(ic, jc), ldc);
     }
 
     return 0;

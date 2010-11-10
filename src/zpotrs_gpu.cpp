@@ -17,7 +17,7 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t
-magma_zpotrs_gpu(char UPLO_, magma_int_t N , magma_int_t NRHS, double2 *A , magma_int_t LDA,
+magma_zpotrs_gpu(char UPLO, magma_int_t N , magma_int_t NRHS, double2 *A , magma_int_t LDA,
 		 double2 *B, magma_int_t LDB, magma_int_t *INFO)
 {
 /*  -- MAGMA (version 1.0) --
@@ -69,10 +69,8 @@ magma_zpotrs_gpu(char UPLO_, magma_int_t N , magma_int_t NRHS, double2 *A , magm
 
     double2 c_one = MAGMA_Z_ONE;
 
-    char UPLO[2] = {UPLO_, 0};
-
     *INFO = 0 ; 
-    if( *UPLO !='U' && *UPLO !='u' && *UPLO !='L' && *UPLO!='l')
+    if( UPLO !='U' && UPLO !='u' && UPLO !='L' && UPLO!='l')
       *INFO = - 1 ; 
     if( N < 0 )
       *INFO = -2 ; 
@@ -88,7 +86,7 @@ magma_zpotrs_gpu(char UPLO_, magma_int_t N , magma_int_t NRHS, double2 *A , magm
     }
     if( N==0 || NRHS ==0) 
       return 0;	
-    if( *UPLO =='U' || *UPLO=='u'){
+    if( UPLO =='U' || UPLO=='u'){
       cublasZtrsm('L','U','T','N', N , NRHS, c_one, A , LDA , B , LDB );
       cublasZtrsm('L','U','N','N', N , NRHS, c_one, A , LDA , B , LDB );
     }
