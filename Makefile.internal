@@ -11,7 +11,7 @@ cleanall: cleangen cleanmkgen
 cleanmkgen:
 	find . -name Makefile.gen -exec rm -f {} \;
 
-Makefile.gen: $(CODEGEN)
+Makefile.gen: $(CODEGEN) Makefile
 	$(PYTHON) $(CODEGEN) --make -f "$(ZSRC) $(ZHDR)" > $@
 .DEFAULT_GOAL :=
 -include Makefile.gen

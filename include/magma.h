@@ -64,6 +64,10 @@
 extern void cublasZsymv(char uplo, int n, double2 alpha, double2 *a, int lda,
                       double2 *x, int incx, double2 beta, double2 *y, int incy);
 
+extern void cublasCsymv(char uplo, int n, float2 alpha, float2 *a, int lda,
+                        float2 *x, int incx, float2 beta, float2 *y, int incy);
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif

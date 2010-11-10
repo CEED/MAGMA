@@ -93,9 +93,9 @@ magma_zpotrf(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, int *info
     double2 c_one = MAGMA_Z_ONE;
     double2 c_neg_one = MAGMA_Z_NEG_ONE;
 
-    long int upper = lsame_(uplo, "U");
+    long int upper = lapackf77_lsame(uplo, "U");
     *info = 0;
-    if (! upper && ! lsame_(uplo, "L")) {
+    if (! upper && ! lapackf77_lsame(uplo, "L")) {
       *info = -1;
     } else if (*n < 0) {
       *info = -2;
@@ -131,7 +131,7 @@ magma_zpotrf(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, int *info
     int nb = magma_get_zpotrf_nb(n_);
 
     if (nb <= 1 || nb >= n_) {
-	zpotrf_(uplo, n, a_ref(1, 1), lda, info);
+	lapackf77_zpotrf(uplo, n, a_ref(1, 1), lda, info);
     } else {
 
         /* Use hybrid blocked code. */
@@ -161,7 +161,7 @@ magma_zpotrf(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, int *info
 		}
              
 		cudaStreamSynchronize(stream[1]);
-		zpotrf_("Upper", &jb, a_ref(j,j), lda, info);
+		lapackf77_zpotrf("Upper", &jb, a_ref(j,j), lda, info);
 		if (*info != 0) {
 		  *info = *info + j - 1;
 		  break;
@@ -214,7 +214,7 @@ magma_zpotrf(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, int *info
                 }
 		
                 cudaStreamSynchronize(stream[1]);
-	        zpotrf_("Lower", &jb, a_ref(j, j), lda, info);
+	        lapackf77_zpotrf("Lower", &jb, a_ref(j, j), lda, info);
 		if (*info != 0){
                   *info = *info + j - 1;
 		  break;

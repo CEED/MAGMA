@@ -33,6 +33,10 @@ inc : 	./include/magma_z.h		\
 	./include/magmablas_d.h		\
 	./include/magmablas_s.h		\
 	./include/magmablas_zc.h	\
-	./include/magmablas_ds.h
+	./include/magmablas_ds.h	\
+	./include/magma_zlapack.h	\
+	./include/magma_clapack.h	\
+	./include/magma_dlapack.h	\
+	./include/magma_slapack.h
 
 

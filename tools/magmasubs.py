@@ -54,6 +54,10 @@ subs = {
     ('MAGMA_Z','MAGMA_D'),
     ('MAGMA_C','MAGMA_S'),
     ('cublasIzamax','cublasIdamax'),
+    ('lapackf77_z','lapackf77_d'),
+    ('lapackf77_c','lapackf77_s'),
+    ('blasf77_z','blasf77_d'),
+    ('blasf77_c','blasf77_s'),
   ],
   'normal' : [ ## Dictionary is keyed on substitution type
     ['s','d','c','z'], ## Special Line Indicating type columns
@@ -67,6 +71,10 @@ subs = {
     ('float','double','cuFloatComplex','cuDoubleComplex'),
     ('Workspace_s','Workspace_d','Workspace_c','Workspace_z'),
     ('workspace_s','workspace_d','workspace_c','workspace_z'),
+    ('lapackf77_s','lapackf77_d','lapackf77_c','lapackf77_z'),
+    ('lapackf77_s','lapackf77_d','lapackf77_s','lapackf77_d'),
+    ('blasf77_s','blasf77_d','blasf77_c','blasf77_z'),
+    ('blasf77_s','blasf77_d','blasf77_s','blasf77_d'),
     ('cublasS','cublasD','cublasC','cublasZ'),
     ('cublasIsamax','cublasIdamax', 'cublascsamax','cublasIzamax'),
     ('spanel_to_q','dpanel_to_q','cpanel_to_q','zpanel_to_q'),
