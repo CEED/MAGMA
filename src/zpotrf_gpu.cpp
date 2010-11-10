@@ -92,9 +92,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
     /* Local variables */
     static int j;
 
-    long int upper = lsame_(uplo_, "U");
+    long int upper = lapackf77_lsame(uplo_, "U");
     *info = 0;
-    if (! upper && ! lsame_(uplo_, "L")) {
+    if (! upper && ! lapackf77_lsame(uplo_, "L")) {
       *info = -1;
     } else if (n < 0) {
       *info = -2;
@@ -122,7 +122,7 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
     if (nb <= 1 || nb >= n) {
       /*  Use unblocked code. */
       cublasGetMatrix(n, n, sizeof(double2), a + a_offset, lda, work, n);
-      zpotrf_(uplo_, &n, work, &n, info);
+      lapackf77_zpotrf(uplo_, &n, work, &n, info);
       cublasSetMatrix(n, n, sizeof(double2), work, n, a + a_offset, lda);
     } else {
 
@@ -156,7 +156,7 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
                  }
              
                  cudaStreamSynchronize(stream[1]);
-                 zpotrf_("Upper", &jb, work, &jb, info);
+                 lapackf77_zpotrf("Upper", &jb, work, &jb, info);
 		 if (*info != 0) {
 		   *info = *info + j - 1;
 		   break;
@@ -195,7 +195,7 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
                 }
 
                 cudaStreamSynchronize(stream[1]);
-	        zpotrf_("Lower", &jb, work, &jb, info);
+	        lapackf77_zpotrf("Lower", &jb, work, &jb, info);
 		if (*info != 0) {
                   *info = *info + j - 1;
                   break;

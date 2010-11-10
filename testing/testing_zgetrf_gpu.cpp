@@ -26,7 +26,7 @@
 double2 get_LU_error(int M, int N, double2 *A, int *lda, double2 *LU, int *IPIV){
   int min_mn = min(M,N), intONE = 1, i, j;
 
-  zlaswp_( &N, A, lda, &intONE, &min_mn, IPIV, &intONE);
+  lapackf77_zlaswp( &N, A, lda, &intONE, &min_mn, IPIV, &intONE);
 
   double2 *L = (double2 *) calloc (M*min_mn, sizeof(double2));
   double2 *U = (double2 *) calloc (N*min_mn, sizeof(double2));
@@ -40,17 +40,17 @@ double2 get_LU_error(int M, int N, double2 *A, int *lda, double2 *LU, int *IPIV)
     for(i=0; i<min_mn; i++)
       U[i+j*min_mn] = (i <= j ? LU[i+j*(*lda)] :  0.);
 
-  double2 matnorm = zlange_("f", &M, &N, A, lda, work);
+  double2 matnorm = lapackf77_zlange("f", &M, &N, A, lda, work);
   double2 alpha = 1., beta = 0.;
 
-  zgemm_("N", "N", &M, &N, &min_mn, &alpha, L, &M, U, &min_mn, 
+  blasf77_zgemm("N", "N", &M, &N, &min_mn, &alpha, L, &M, U, &min_mn, 
 	&beta, LU, lda);
 
   for( j = 0; j < N; j++ )
     for( i = 0; i < M; i++ )
       LU[i+j*(*lda)] = LU[i+j*(*lda)] - A[i+j*(*lda)];
   
-  double2 residual = zlange_("f", &M, &N, LU, lda, work);
+  double2 residual = lapackf77_zlange("f", &M, &N, LU, lda, work);
 
   free(L);
   free(work);
@@ -167,7 +167,7 @@ int main( int argc, char** argv)
          Performs operation using LAPACK
          =================================================================== */
       start = get_current_time();
-      zgetrf_(&M, &N, h_A, &M, ipiv, &info);
+      lapackf77_zgetrf(&M, &N, h_A, &M, ipiv, &info);
       end = get_current_time();
       if (info < 0)
         printf("Argument %d of zgetrf had an illegal value.\n", -info);

@@ -14,9 +14,6 @@
 #include <cublas.h>
 #include "magma.h"
 
-extern "C" int zunm2r_(char *, char *, int *, int *, int *, double2 *, int *, 
-		       double2 *, double2 *, int *, double2 *, int *);
-
 extern "C" magma_int_t
 magma_zunmqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_int_t k_, 
 		 double2 *a, magma_int_t lda_, double2 *tau, double2 *c, magma_int_t ldc_,
@@ -143,8 +140,8 @@ magma_zunmqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
 
     /* Function Body */
     *info = 0;
-    left = lsame_(side, "L");
-    notran = lsame_(trans, "N");
+    left = lapackf77_lsame(side, "L");
+    notran = lapackf77_lsame(trans, "N");
     lquery = *lwork == -1;
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
@@ -156,9 +153,9 @@ magma_zunmqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
 	nq = *n;
 	nw = *m;
     }
-    if (! left && ! lsame_(side, "R")) {
+    if (! left && ! lapackf77_lsame(side, "R")) {
 	*info = -1;
-    } else if (! notran && ! lsame_(trans, "T")) {
+    } else if (! notran && ! lapackf77_lsame(trans, "T")) {
 	*info = -2;
     } else if (*m < 0) {
 	*info = -3;
@@ -249,7 +246,7 @@ magma_zunmqr_gpu(char side_, char trans_, magma_int_t m_, magma_int_t n_, magma_
 		      work+mi*ib, mi);
 
       int lhwork = *lwork - mi*(ib + ni);
-      zunmqr_("l", "t", &mi, &ni, &ib, work, &mi,
+      lapackf77_zunmqr("l", "t", &mi, &ni, &ib, work, &mi,
 	      tau+i, work+mi*ib, &mi, work+mi*(ib+ni), &lhwork, info);
       
       // send the updated part of c back to the GPU

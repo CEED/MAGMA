@@ -16,9 +16,7 @@
 #include "magma.h"
 #include "magmablas.h"
 
-extern "C" int zgebd2_(int *, int *, double2 *, int *, double2 *, double2 *, double2 *,
-		       double2 *, double2 *, int *);
-double2 cpu_gpu_sdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda);
+double2 cpu_gpu_zdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda);
 
 extern "C" magma_int_t
 magma_zgebrd(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda, 
@@ -260,7 +258,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
       i__3 = m - i__ - nb + 1;
       i__4 = n - i__ - nb + 1;
       /* TTT
-      zgemm_("No transpose", "Transpose", &i__3, &i__4, &nb, &c_neg_one, 
+      blasf77_zgemm("No transpose", "Transpose", &i__3, &i__4, &nb, &c_neg_one, 
 	     &a[i__ + nb + i__ * a_dim1], lda, &work[ldwrkx * nb + nb + 1],
 	     &ldwrky, &c_one, &a[i__ + nb + (i__ + nb) * a_dim1], lda);
       */
@@ -289,7 +287,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
       i__3 = m - i__ - nb + 1;
       i__4 = n - i__ - nb + 1;
       /* TTT
-      zgemm_("No transpose", "No transpose", &i__3, &i__4, &nb, &c_neg_one,
+      blasf77_zgemm("No transpose", "No transpose", &i__3, &i__4, &nb, &c_neg_one,
 	     &work[nb + 1], &ldwrkx, &a[i__ + (i__ + nb) * a_dim1], lda,
 	     &c_one, &a[i__ + nb + (i__ + nb) * a_dim1], lda);
       */
@@ -339,8 +337,8 @@ magma_zgebrd(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
 		      da + (i__-1) + (i__-1) * a_dim1, ldda,
 		      a  +  i__    +  i__    * a_dim1, lda);
      
-    zgebd2_(&i__2, &i__1, &a[i__ + i__ * a_dim1], &lda, &d[i__], &e[i__],
-	    &tauq[i__], &taup[i__], &work[1], &iinfo);
+    lapackf77_zgebd2(&i__2, &i__1, &a[i__ + i__ * a_dim1], &lda, &d[i__], &e[i__],
+                     &tauq[i__], &taup[i__], &work[1], &iinfo);
     work[1] = ws;
 
     //printf("zgemm \% = %f\n", 100.*3.*nflops/(8.*(n)*(n)*(n)));

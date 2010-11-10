@@ -27,6 +27,7 @@ operator*(double2 &u, const float &v) {
   return t;
 }
 
+#if defined(PRECISION_z)
 static inline
 double2
 operator*(double2 &u, const double &v) {
@@ -35,6 +36,7 @@ operator*(double2 &u, const double &v) {
   t.y = u.y * v;
   return t;
 }
+#endif
 
 static inline
 double2
@@ -214,7 +216,7 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
       return 0;
     }
 
-    if (lsame_(uplo, "U")) {
+    if (lapackf77_lsame(uplo, "U")) {
 
       fprintf(stderr, "zlatrd: uplo has to be 'L'; 'U' not implemented \n");
       exit(-1);
@@ -225,55 +227,55 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 	if (i__ < *n) {
 	  /* Update A(1:i,i) */
 	  i__2 = *n - i__;
-	  zgemv_("No transpose", &i__, &i__2, &c_neg_one, 
+	  blasf77_zgemv("No transpose", &i__, &i__2, &c_neg_one, 
 		 &a[(i__+1)*a_dim1 + 1], lda, &w[i__ + (iw + 1)*w_dim1], ldw, 
 		 &c_one, &a[i__ * a_dim1 + 1], &c__1);
 	  i__2 = *n - i__;
-	  zgemv_("No transpose", &i__, &i__2, &c_neg_one, 
+	  blasf77_zgemv("No transpose", &i__, &i__2, &c_neg_one, 
 		 &w[(iw+1)*w_dim1 + 1], ldw, &a[i__ + (i__+1) * a_dim1], lda, 
 		 &c_one, &a[i__ * a_dim1 + 1], &c__1);
 	}
 	if (i__ > 1) {
 	  /* Generate elementary reflector H(i) to annihilate A(1:i-2,i) */
 	  i__2 = i__ - 1;
-	  zlarfg_(&i__2, &a[i__ - 1 + i__ * a_dim1], &a[i__ * a_dim1 + 1], 
+	  lapackf77_zlarfg(&i__2, &a[i__ - 1 + i__ * a_dim1], &a[i__ * a_dim1 + 1], 
 		  &c__1, &tau[i__ - 1]);
 	  e[i__ - 1] = a[i__ - 1 + i__ * a_dim1];
 	  a[i__ - 1 + i__ * a_dim1] = c_one;
   
 	  /* Compute W(1:i-1,i) */
 	  i__2 = i__ - 1;
-	  zsymv_("Upper", &i__2, &c_one, &a[a_offset], lda, 
+	  blasf77_zsymv("Upper", &i__2, &c_one, &a[a_offset], lda, 
 		 &a[i__*a_dim1 +1], &c__1, &c_zero, &w[iw* w_dim1+1], &c__1);
 	  if (i__ < *n) {
 	    i__2 = i__ - 1;
 	    i__3 = *n - i__;
-	    zgemv_("Transpose", &i__2, &i__3, &c_one, 
+	    blasf77_zgemv("Transpose", &i__2, &i__3, &c_one, 
 		   &w[(iw+1)*w_dim1 + 1], ldw, &a[i__ * a_dim1 + 1], &c__1, 
 		   &c_zero, &w[i__ + 1 + iw * w_dim1], &c__1);
 	    i__2 = i__ - 1;
 	    i__3 = *n - i__;
-	    zgemv_("No transpose", &i__2, &i__3, &c_neg_one, 
+	    blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, 
 		   &a[(i__+1)*a_dim1 + 1], lda, &w[i__ + 1 + iw * w_dim1], &
 		   c__1, &c_one, &w[iw * w_dim1 + 1], &c__1);
 	    i__2 = i__ - 1;
 	    i__3 = *n - i__;
-	    zgemv_("Transpose", &i__2, &i__3, &c_one, 
+	    blasf77_zgemv("Transpose", &i__2, &i__3, &c_one, 
 		   &a[(i__ + 1) * a_dim1 + 1], lda, &a[i__ * a_dim1 + 1], 
 		   &c__1, &c_zero, &w[i__ + 1 + iw * w_dim1], &c__1);
 	    i__2 = i__ - 1;
 	    i__3 = *n - i__;
-	    zgemv_("No transpose", &i__2, &i__3, &c_neg_one, 
+	    blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, 
 		   &w[(iw + 1) *  w_dim1 + 1], ldw, &w[i__ + 1 + iw * w_dim1],
 		   &c__1, &c_one, &w[iw * w_dim1 + 1], &c__1);
 	  }
 	  i__2 = i__ - 1;
-	  zscal_(&i__2, &tau[i__ - 1], &w[iw * w_dim1 + 1], &c__1);
+	  blasf77_zscal(&i__2, &tau[i__ - 1], &w[iw * w_dim1 + 1], &c__1);
 	  i__2 = i__ - 1;
 	  alpha = tau[i__ - 1] * -.5f * 
-	    zdot_(&i__2, &w[iw*w_dim1+1], &c__1, &a[i__ * a_dim1 + 1], &c__1);
+	    blasf77_zdot(&i__2, &w[iw*w_dim1+1], &c__1, &a[i__ * a_dim1 + 1], &c__1);
 	  i__2 = i__ - 1;
-	  zaxpy_(&i__2, &alpha, &a[i__ * a_dim1 + 1], &c__1, 
+	  blasf77_zaxpy(&i__2, &alpha, &a[i__ * a_dim1 + 1], &c__1, 
 		 &w[iw * w_dim1 + 1], &c__1);
 	}
       }
@@ -285,16 +287,16 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 	/* Update A(i:n,i) */
 	i__2 = *n - i__ + 1;
 	i__3 = i__ - 1;
-	zgemv_("No transpose", &i__2, &i__3, &c_neg_one, &a[i__ + a_dim1], lda, 
+	blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, &a[i__ + a_dim1], lda, 
 	       &w[i__ + w_dim1], ldw, &c_one, &a[i__ + i__ * a_dim1], &c__1);
-	zgemv_("No transpose", &i__2, &i__3, &c_neg_one, &w[i__ + w_dim1], ldw, 
+	blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, &w[i__ + w_dim1], ldw, 
 	       &a[i__ + a_dim1], lda, &c_one, &a[i__ + i__ * a_dim1], &c__1);
 
 	if (i__ < *n) {
 	  /* Generate elementary reflector H(i) to annihilate A(i+2:n,i) */
 	  i__2 = *n - i__;
 	  i__3 = i__ + 2;
-	  zlarfg_(&i__2, &a[i__ + 1 + i__ * a_dim1], 
+	  lapackf77_zlarfg(&i__2, &a[i__ + 1 + i__ * a_dim1], 
 		  &a[min(i__3,*n) + i__ * a_dim1], &c__1, &tau[i__]);
 	  e[i__] = a[i__ + 1 + i__ * a_dim1];
 	  a[i__ + 1 + i__ * a_dim1] = c_one;
@@ -316,14 +318,14 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 			    cudaMemcpyDeviceToHost,stream[1]);
 
 	  i__3 = i__ - 1;
-	  zgemv_("Transpose", &i__2, &i__3, &c_one, &w[i__ + 1 + w_dim1], 
+	  blasf77_zgemv("Transpose", &i__2, &i__3, &c_one, &w[i__ + 1 + w_dim1], 
 		 ldw, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_zero, 
 		 &w[i__ * w_dim1 + 1], &c__1);
 
-	  zgemv_("No transpose", &i__2, &i__3, &c_neg_one,
+	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one,
                  &a[i__ + 1 + a_dim1], lda, &w[i__ * w_dim1 + 1], &c__1,
                  &c_zero, f, &c__1);
-	  zgemv_("Transpose", &i__2, &i__3, &c_one, &a[i__ + 1 + a_dim1],
+	  blasf77_zgemv("Transpose", &i__2, &i__3, &c_one, &a[i__ + 1 + a_dim1],
                  lda, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_zero,
                  &w[i__ * w_dim1 + 1], &c__1);
 
@@ -331,15 +333,15 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 	  cudaStreamSynchronize(stream[1]);
 
 	  if (i__3!=0)
-	    zaxpy_(&i__2, &c_one, f, &c__1, &w[i__ + 1 + i__ * w_dim1], &c__1);
+	    blasf77_zaxpy(&i__2, &c_one, f, &c__1, &w[i__ + 1 + i__ * w_dim1], &c__1);
      
-	  zgemv_("No transpose", &i__2, &i__3, &c_neg_one, &w[i__ + 1 + w_dim1], 
+	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, &w[i__ + 1 + w_dim1], 
 		 ldw, &w[i__ * w_dim1 + 1], &c__1, &c_one, 
 		 &w[i__ + 1 + i__ * w_dim1], &c__1);
-	  zscal_(&i__2, &tau[i__], &w[i__ + 1 + i__ * w_dim1], &c__1);
-	  alpha = tau[i__]* -.5f*zdot_(&i__2, &w[i__ +1+ i__ * w_dim1], 
+	  blasf77_zscal(&i__2, &tau[i__], &w[i__ + 1 + i__ * w_dim1], &c__1);
+	  alpha = tau[i__]* -.5f*blasf77_zdot(&i__2, &w[i__ +1+ i__ * w_dim1], 
 				       &c__1, &a[i__ +1+ i__ * a_dim1], &c__1);
-	  zaxpy_(&i__2, &alpha, &a[i__ + 1 + i__ * a_dim1], &c__1, 
+	  blasf77_zaxpy(&i__2, &alpha, &a[i__ + 1 + i__ * a_dim1], &c__1, 
 		 &w[i__ + 1 + i__ * w_dim1], &c__1);
 	}
       }

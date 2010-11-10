@@ -21,15 +21,13 @@
 #include "cublas.h"
 #include "magma.h"
 
-extern "C" void sorgtr_(char *, int *, double2 *, int *, double2 *, double2 *,
-			int *, int *);
-
-extern "C" void ssyt21_(int *, char *, int *, int *, double2 *, int *, double2 *,
-			double2 *, double2 *, int *, double2 *, int *, double2 *, 
-			double2 *, double2 *);
+#define lapackf77_zungtr zungtr_
+#define lapackf77_zhet21 zhet21_
+extern "C" void lapackf77_zungtr(char *, int *, double2 *, int *, double2 *, double2 *, int *, int *);
+extern "C" void lapackf77_zhet21(int *, char *, int *, int *, double2 *, int *, double2 *, double2 *, double2 *, int *, double2 *, int *, double2 *, double2 *, double2 *);
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing ssytrd
+   -- Testing zhetrd
 */
 int main( int argc, char** argv) 
 {
@@ -106,7 +104,7 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! host memory allocation error (R)\n");
     }
 
-    int nb = magma_get_ssytrd_nb(size[9]);
+    int nb = magma_get_zhetrd_nb(size[9]);
     //int lwork = 2*size[9]*nb;
     int lwork = 2*size[9]*lda/nb;
     status = cublasAlloc(n2+lwork, sizeof(double2), (void**)&d_A);
@@ -136,7 +134,7 @@ int main( int argc, char** argv)
       for(j = 0; j < n2; j++)
 	h_A[j] = rand() / (double2)RAND_MAX;
       /*
-      magma_zsytrd("L", &N, h_R, &lda, diag, offdiag,
+      magma_zhetrd("L", &N, h_R, &lda, diag, offdiag,
 		   tau, h_work, &lwork, d_A, info);
       */
       for(j=0; j<n2; j++)
@@ -163,15 +161,15 @@ int main( int argc, char** argv)
 
       int test, one = 1;
 
-      zlacpy_("L", &N, &N, h_R, &lda, hwork_Q, &N);
-      sorgtr_("L", &N, hwork_Q, &N, tau, h_work, &lwork, info);
+      lapackf77_zlacpy("L", &N, &N, h_R, &lda, hwork_Q, &N);
+      lapackf77_zungtr("L", &N, hwork_Q, &N, tau, h_work, &lwork, info);
 
       test = 2;
-      ssyt21_(&test, "L", &N, &one, h_A, &lda, diag, offdiag, 
+      lapackf77_zhet21(&test, "L", &N, &one, h_A, &lda, diag, offdiag, 
 	      hwork_Q, &N, h_R, &lda, tau, work, &result[0]);
 
       test = 3;
-      ssyt21_(&test, "L", &N, &one, h_A, &lda, diag, offdiag,
+      lapackf77_zhet21(&test, "L", &N, &one, h_A, &lda, diag, offdiag,
 	      hwork_Q, &N, h_R, &lda, tau, work, &result[1]);
       
       //printf("N = %d\n", N);
@@ -185,11 +183,11 @@ int main( int argc, char** argv)
          Performs operation using LAPACK 
 	 =================================================================== */
       start = get_current_time();
-      zsytrd_("L", &N, h_A, &lda, diag2, offdiag2, tau2, h_work, &lwork, info);
+      lapackf77_zhetrd("L", &N, h_A, &lda, diag2, offdiag2, tau2, h_work, &lwork, info);
       end = get_current_time();
      
       if (info[0] < 0)  
-	printf("Argument %d of ssytrd had an illegal value.\n", -info[0]);
+	printf("Argument %d of zhetrd had an illegal value.\n", -info[0]);
   
       cpu_perf = 4.*N*N*N/(3.*1000000*GetTimerValue(start,end));
       // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));

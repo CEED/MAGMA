@@ -43,7 +43,7 @@ int magma_get_cgetrf_nb(int m);
 int magma_get_cgeqrf_nb(int m);
 int magma_get_cgeqlf_nb(int m);
 int magma_get_cgehrd_nb(int m);
-int magma_get_csytrd_nb(int m);
+int magma_get_chetrd_nb(int m);
 int magma_get_cgelqf_nb(int m);
 int magma_get_cgebrd_nb(int m);
 
@@ -52,7 +52,7 @@ int magma_get_zgetrf_nb(int m);
 int magma_get_zgeqrf_nb(int m);
 int magma_get_zgeqlf_nb(int m);
 int magma_get_zgehrd_nb(int m);
-int magma_get_zsytrd_nb(int m);
+int magma_get_zhetrd_nb(int m);
 int magma_get_zgelqf_nb(int m);
 int magma_get_zgebrd_nb(int m);
 

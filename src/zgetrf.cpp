@@ -15,13 +15,6 @@
 #include "magma.h"
 #include "magmablas.h"
 
-extern "C" void
-magmablas_ztranspose2(double2 *, int, double2 *, int, int, int);
-
-extern "C" void
-magmablas_zpermute_long2(double2 *, int, int *, int, int);
-
-
 extern "C" magma_int_t 
 magma_zgetrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_, magma_int_t *ipiv, magma_int_t *info)
 {
@@ -116,7 +109,7 @@ magma_zgetrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_, magma
 
     if (nb <= 1 || nb >= min(*m,*n)) {
       /* Use CPU code. */
-      zgetrf_(m, n, a, lda, ipiv, info);
+      lapackf77_zgetrf(m, n, a, lda, ipiv, info);
     } else {
       /* Use hybrid blocked code. */
       int maxm, maxn, ldda, maxdim;
@@ -163,7 +156,7 @@ magma_zgetrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_, magma
 	  magmablas_ztranspose2( dAT, ldda, da, maxm, *m, *n );
 	}
 
-      zgetrf_( m, &nb, work, lda, ipiv, &iinfo);
+      lapackf77_zgetrf( m, &nb, work, lda, ipiv, &iinfo);
       for( i = 0; i < s; i++ )
         {
 	  // download i-th panel
@@ -184,7 +177,7 @@ magma_zgetrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_, magma
 	  
 	    // do the cpu part
 	    rows = *m - i*nb;
-	    zgetrf_( &rows, &nb, work, lda, ipiv+i*nb, &iinfo);
+	    lapackf77_zgetrf( &rows, &nb, work, lda, ipiv+i*nb, &iinfo);
 	  }
 	  if (*info == 0 && iinfo > 0)
 	    *info = iinfo + i*nb;
@@ -221,7 +214,7 @@ magma_zgetrf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_, magma
       cuCtxSynchronize();
 
       // do the cpu part
-      zgetrf_( &rows, &nb0, work, lda, ipiv+s*nb, &iinfo);
+      lapackf77_zgetrf( &rows, &nb0, work, lda, ipiv+s*nb, &iinfo);
       if (*info == 0 && iinfo > 0)
         *info = iinfo + s*nb;
       magmablas_zpermute_long2( dAT, ldda, ipiv, nb0, s*nb );

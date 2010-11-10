@@ -21,11 +21,11 @@
 #include "cublas.h"
 #include "magma.h"
 
-extern "C" void shst01_(int *, int *, int *, double2 *, int *, double2 *, int *, 
-			double2 *, int *, double2 *, int *, double2 *);
-extern "C" void sorghr_(int *, int *, int *, double2 *, int *, double2 *, 
-			double2 *, int *, int *);
+#define lapackf77_zunghr zunghr_
+#define lapackf77_zhst01 zhst01_
 
+extern "C" void lapackf77_zhst01(int *, int *, int *, double2 *, int *, double2 *, int *, double2 *, int *, double2 *, int *, double2 *);
+extern "C" void lapackf77_zunghr(int *, int *, int *, double2 *, int *, double2 *, double2 *, int *, int *);
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgehrd
@@ -140,8 +140,8 @@ int main( int argc, char** argv)
         for(int i=j+2; i<N; i++)
           h_R[i+j*N] = 0.;
 
-      sorghr_(&N, &ione, &N, hwork_Q, &N, tau, h_work, &lwork, info);
-      shst01_(&N, &ione, &N, h_A, &N, h_R, &N, hwork_Q, &N,
+      lapackf77_zunghr(&N, &ione, &N, hwork_Q, &N, tau, h_work, &lwork, info);
+      lapackf77_zhst01(&N, &ione, &N, h_A, &N, h_R, &N, hwork_Q, &N,
               twork, &ltwork, result);
       
       //printf("N = %d\n", N);
@@ -155,7 +155,7 @@ int main( int argc, char** argv)
          Performs operation using LAPACK 
 	 =================================================================== */
       start = get_current_time();
-      zgehrd_(&N, &ione, &N, h_R, &lda, tau, h_work, &lwork, info);
+      lapackf77_zgehrd(&N, &ione, &N, h_R, &lda, tau, h_work, &lwork, info);
       end = get_current_time();
       if (info[0] < 0)  
 	printf("Argument %d of zgehrd had an illegal value.\n", -info[0]);

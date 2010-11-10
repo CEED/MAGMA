@@ -130,7 +130,7 @@ int main( int argc, char** argv)
          Performs operation using LAPACK 
 	 =================================================================== */
       start = get_current_time();
-      zgelqf_(&M, &N, h_A, &M, tau, h_work, &lwork, info);
+      lapackf77_zgelqf(&M, &N, h_A, &M, tau, h_work, &lwork, info);
       end = get_current_time();
       if (info[0] < 0)  
 	printf("Argument %d of zgelqf had an illegal value.\n", -info[0]);     
@@ -143,12 +143,12 @@ int main( int argc, char** argv)
          =================================================================== */
       double2 work[1], matnorm, mone = -1.;
       int one = 1;
-      matnorm = zlange_("f", &M, &N, h_A, &M, work);
-      zaxpy_(&n2, &mone, h_A, &one, h_R, &one);
+      matnorm = lapackf77_zlange("f", &M, &N, h_A, &M, work);
+      blasf77_zaxpy(&n2, &mone, h_A, &one, h_R, &one);
 
       printf("%5d %5d  %6.2f         %6.2f        %e\n",
 	     M, N, cpu_perf, gpu_perf,
-	     zlange_("f", &M, &N, h_R, &M, work) / matnorm);
+	     lapackf77_zlange("f", &M, &N, h_R, &M, work) / matnorm);
 
       /* =====================================================================
 	 Check the factorization

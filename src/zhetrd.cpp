@@ -16,20 +16,7 @@
 #include "magma.h"
 #include "magmablas.h"
 
-extern "C" int zsytd2_(char *, int *, double2 *, int *,
-		       double2 *, double2 *, double2 *, int *);
-extern "C" int zsyr2k_(char *, char *, int *, int *, double2 *, double2 *, 
-		       int *, double2 *, int *, double2 *, double2 *, int *);
-
-extern "C" void magmablas_zsyr2k(char, char, int, int, double2, const double2 *, int,
-				const double2 *, int, double2, double2 *, int);
-
-extern "C" int  magma_zlatrd(char *, int *, int *, double2 *,
-			     int *, double2 *, double2 *, double2 *, int *,
-			     double2 *, int *, double2 *, int *);
-
-
-double2 cpu_gpu_sdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda)
+double2 cpu_gpu_zdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda)
 {
   int one = 1, j;
   double2 mone = MAGMA_Z_NEG_ONE, work[1];
@@ -38,8 +25,8 @@ double2 cpu_gpu_sdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda)
 
   cublasGetMatrix(M, N, sizeof(double2), da, ldda, ha, M);
   for(j=0; j<N; j++)
-    zaxpy_(&M, &mone, a+j*lda, &one, ha+j*M, &one);
-  MAGMA_Z_SET2REAL( res, zlange_("f", &M, &N, ha, &M, work) );
+    blasf77_zaxpy(&M, &mone, a+j*lda, &one, ha+j*M, &one);
+  MAGMA_Z_SET2REAL( res, lapackf77_zlange("f", &M, &N, ha, &M, work) );
 
   free(ha);
   return res;
@@ -47,7 +34,7 @@ double2 cpu_gpu_sdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda)
 
 
 extern "C" magma_int_t
-magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *d__, double2 *e, 
+magma_zhetrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *d__, double2 *e, 
 	     double2 *tau, double2 *work, magma_int_t *lwork, double2 *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -58,7 +45,7 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 
     Purpose   
     =======   
-    ZSYTRD reduces a real hemmetric matrix A to real hemmetric   
+    ZHETRD reduces a real hemmetric matrix A to real hemmetric   
     tridiagonal form T by an orthogonal similarity transformation:   
     Q\*\*H * A * Q = T.   
 
@@ -120,7 +107,7 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 
     DA      (workspace)  SINGLE array on the GPU, dimension
             N*N + 2*N*NB + NB*NB,
-            where NB can be obtained through magma_get_zsytrd_nb(N).
+            where NB can be obtained through magma_get_zhetrd_nb(N).
 
     INFO    (output) INTEGER   
             = 0:  successful exit   
@@ -178,11 +165,12 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
     int *lda = &lda_;
 
     int N = *n, ldda = *lda;
-    int nb = magma_get_zsytrd_nb(*n); 
+    int nb = magma_get_zhetrd_nb(*n); 
     double2 *dwork = da + (*n)*ldda - 1;
 
-    double2 c_neg_one = MAGMA_Z_NEG_ONE;
-    double2 c_one = MAGMA_Z_ONE;
+    double2 z_neg_one = MAGMA_Z_NEG_ONE;
+    double2 z_one = MAGMA_Z_ONE;
+    double  d_one = MAGMA_D_ONE;
     
     /* System generated locals */
     int a_dim1, a_offset, i__1, i__3;
@@ -202,9 +190,9 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 
     /* Function Body */
     *info = 0;
-    long int upper = lsame_(uplo, "U");
+    long int upper = lapackf77_lsame(uplo, "U");
     lquery = *lwork == -1;
-    if (! upper && ! lsame_(uplo, "L")) {
+    if (! upper && ! lapackf77_lsame(uplo, "L")) {
 	*info = -1;
     } else if (*n < 0) {
 	*info = -2;
@@ -228,7 +216,7 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 
     /* Quick return if possible */
     if (*n == 0) {
-	work[1] = c_one;
+	work[1] = z_one;
 	return 0;
     }
 
@@ -255,9 +243,9 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 	    /* Update the unreduced submatrix A(1:i-1,1:i-1), using an   
 	       update of the form:  A := A - V*W' - W*V' */
 	    i__3 = i__ - 1;
-	    zsyr2k_(uplo, "No transpose", &i__3, &nb, &c_neg_one, 
-		    &a[i__ * a_dim1 + 1], lda, &work[1], 
-		    &ldwork, &c_one, &a[a_offset], lda);
+	    blasf77_zher2k(uplo, "No transpose", &i__3, &nb, &z_neg_one, 
+                           &a[i__ * a_dim1 + 1], lda, &work[1], 
+                           &ldwork, &d_one, &a[a_offset], lda);
 
 	    /* Copy superdiagonal elements back into A, and diagonal   
 	       elements into D */
@@ -269,7 +257,7 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 	  }
 
 	/*  Use unblocked code to reduce the last or only block */
-	zsytd2_(uplo, &kk, &a[a_offset], lda, &d__[1], &e[1], &tau[1], &iinfo);
+	lapackf77_zhetd2(uplo, &kk, &a[a_offset], lda, &d__[1], &e[1], &tau[1], &iinfo);
     } 
     else 
       {
@@ -303,9 +291,9 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
                             work  + 1, ldwork,
                             dwork + 1, lddwork);
 
-	    cublasZsyr2k('L', 'N', i__3, nb, c_neg_one, 
+	    cublasZher2k('L', 'N', i__3, nb, z_neg_one, 
 			 &da[(i__-1) + nb + (i__-1) * a_dim1], ldda, 
-			 &dwork[nb + 1], lddwork, c_one, 
+			 &dwork[nb + 1], lddwork, d_one, 
 			 &da[(i__-1) + nb + ((i__-1) + nb) * a_dim1], ldda);
 	    
 	    /* Copy subdiagonal elements back into A, and diagonal   
@@ -325,14 +313,14 @@ magma_zsytrd(char uplo_, magma_int_t n_, double2 *a, magma_int_t lda_, double2 *
 			  da + (i__-1) + (i__-1) * a_dim1, ldda,
 			  a  +  i__    +  i__    * a_dim1, *lda);
 	
-	zsytrd_(uplo, &i__1, &a[i__ + i__ * a_dim1], lda, &d__[i__], &e[i__],
-                &tau[i__], &work[1], lwork, &iinfo);
+	lapackf77_zhetrd(uplo, &i__1, &a[i__ + i__ * a_dim1], lda, &d__[i__], &e[i__],
+                         &tau[i__], &work[1], lwork, &iinfo);
 	
       }
 
     MAGMA_Z_SET2REAL( work[1], lwkopt );
     return 0;
     
-    /* End of ZSYTRD */
+    /* End of ZHETRD */
     
-} /* zsytrd_ */
+} /* zhetrd_ */

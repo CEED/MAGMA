@@ -210,16 +210,16 @@ magma_zlabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, double2 *a, magma_
 	    /*  Update A(i:m,i) */
 	    i__2 = *m - i__ + 1;
 	    i__3 = i__ - 1;
-	    zgemv_("No transpose", &i__2, &i__3, &c_neg_one, &a[i__ + a_dim1], lda, 
+	    blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, &a[i__ + a_dim1], lda, 
 		   &y[i__+y_dim1], ldy, &c_one, &a[i__ + i__ * a_dim1], &c__1);
-	    zgemv_("No transpose", &i__2, &i__3, &c_neg_one, &x[i__ + x_dim1], ldx, 
+	    blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, &x[i__ + x_dim1], ldx, 
 		   &a[i__*a_dim1+1], &c__1, &c_one, &a[i__+i__*a_dim1], &c__1);
 	    
 	    /* Generate reflection Q(i) to annihilate A(i+1:m,i) */
 
 	    i__2 = *m - i__ + 1;
 	    i__3 = i__ + 1;
-	    zlarfg_(&i__2, &a[i__ + i__ * a_dim1], 
+	    lapackf77_zlarfg(&i__2, &a[i__ + i__ * a_dim1], 
 		    &a[min(i__3,*m) + i__ * a_dim1], &c__1, &tauq[i__]);
 	    d__[i__] = a[i__ + i__ * a_dim1];
 	    if (i__ < *n) {
@@ -247,18 +247,18 @@ magma_zlabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, double2 *a, magma_
 
 		i__2 = *m - i__ + 1;
 		i__3 = i__ - 1;
-		zgemv_("Transpose", &i__2, &i__3, &c_one, &a[i__ + a_dim1], 
+		blasf77_zgemv("Transpose", &i__2, &i__3, &c_one, &a[i__ + a_dim1], 
 			lda, &a[i__ + i__ * a_dim1], &c__1, &c_zero, 
 		       &y[i__ * y_dim1 + 1], &c__1);
 
 		i__2 = *n - i__;
                 i__3 = i__ - 1;
-                zgemv_("N", &i__2, &i__3, &c_neg_one, &y[i__ + 1 +y_dim1], ldy, 
+                blasf77_zgemv("N", &i__2, &i__3, &c_neg_one, &y[i__ + 1 +y_dim1], ldy, 
 		       &y[i__ * y_dim1 + 1], &c__1, 
 		       &c_zero, f, &c__1);
                 i__2 = *m - i__ + 1;
                 i__3 = i__ - 1;
-                zgemv_("Transpose", &i__2, &i__3, &c_one, &x[i__ + x_dim1],
+                blasf77_zgemv("Transpose", &i__2, &i__3, &c_one, &x[i__ + x_dim1],
 		       ldx, &a[i__ + i__ * a_dim1], &c__1, &c_zero, 
 		       &y[i__ * y_dim1 + 1], &c__1);
 		
@@ -267,25 +267,25 @@ magma_zlabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, double2 *a, magma_
 
 		if (i__3!=0){
 		  i__2 = *n - i__;
-		  zaxpy_(&i__2, &c_one, f,&c__1, &y[i__+1+i__*y_dim1],&c__1);
+		  blasf77_zaxpy(&i__2, &c_one, f,&c__1, &y[i__+1+i__*y_dim1],&c__1);
 		}
 
 		i__2 = i__ - 1;
 		i__3 = *n - i__;
-		zgemv_("Transpose", &i__2, &i__3, &c_neg_one, &a[(i__ + 1) * 
+		blasf77_zgemv("Transpose", &i__2, &i__3, &c_neg_one, &a[(i__ + 1) * 
 			a_dim1 + 1], lda, &y[i__ * y_dim1 + 1], &c__1, &c_one, 
 			&y[i__ + 1 + i__ * y_dim1], &c__1);
 		i__2 = *n - i__;
-		zscal_(&i__2, &tauq[i__], &y[i__ + 1 + i__ * y_dim1], &c__1);
+		blasf77_zscal(&i__2, &tauq[i__], &y[i__ + 1 + i__ * y_dim1], &c__1);
 
 		/* Update A(i,i+1:n) */
 		i__2 = *n - i__;
-		zgemv_("No transpose", &i__2, &i__, &c_neg_one, &y[i__ + 1 + 
+		blasf77_zgemv("No transpose", &i__2, &i__, &c_neg_one, &y[i__ + 1 + 
 			y_dim1], ldy, &a[i__ + a_dim1], lda, &c_one, &a[i__ + (
 			i__ + 1) * a_dim1], lda);
 		i__2 = i__ - 1;
 		i__3 = *n - i__;
-		zgemv_("Transpose", &i__2, &i__3, &c_neg_one, &a[(i__ + 1) * 
+		blasf77_zgemv("Transpose", &i__2, &i__3, &c_neg_one, &a[(i__ + 1) * 
 			a_dim1 + 1], lda, &x[i__ + x_dim1], ldx, &c_one, &a[
 			i__ + (i__ + 1) * a_dim1], lda);
 
@@ -293,7 +293,7 @@ magma_zlabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, double2 *a, magma_
 		i__2 = *n - i__;
 		/* Computing MIN */
 		i__3 = i__ + 2;
-		zlarfg_(&i__2, &a[i__ + (i__ + 1) * a_dim1], &a[i__ + min(
+		lapackf77_zlarfg(&i__2, &a[i__ + (i__ + 1) * a_dim1], &a[i__ + min(
 			i__3,*n) * a_dim1], lda, &taup[i__]);
 		e[i__] = a[i__ + (i__ + 1) * a_dim1];
 		a[i__ + (i__ + 1) * a_dim1] = c_one;
@@ -318,16 +318,16 @@ magma_zlabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, double2 *a, magma_
                                   cudaMemcpyDeviceToHost,stream[1]);
 
 		i__2 = *n - i__;
-		zgemv_("Transpose", &i__2, &i__, &c_one, &y[i__ + 1 + y_dim1], 
+		blasf77_zgemv("Transpose", &i__2, &i__, &c_one, &y[i__ + 1 + y_dim1], 
 			ldy, &a[i__ + (i__ + 1) * a_dim1], lda, &c_zero, &x[
 			i__ * x_dim1 + 1], &c__1);
 
 		i__2 = *m - i__;
-                zgemv_("N", &i__2, &i__, &c_neg_one, &a[i__ + 1 + a_dim1], lda, 
+                blasf77_zgemv("N", &i__2, &i__, &c_neg_one, &a[i__ + 1 + a_dim1], lda, 
 		       &x[i__ * x_dim1 + 1], &c__1, &c_zero, f, &c__1);
                 i__2 = i__ - 1;
                 i__3 = *n - i__;
-		zgemv_("N", &i__2, &i__3, &c_one, &a[(i__ + 1) * a_dim1 + 1], 
+		blasf77_zgemv("N", &i__2, &i__3, &c_one, &a[(i__ + 1) * a_dim1 + 1], 
 		       lda, &a[i__ + (i__ + 1) * a_dim1], lda,
 		       &c_zero, &x[i__ * x_dim1 + 1], &c__1);
 
@@ -335,17 +335,17 @@ magma_zlabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, double2 *a, magma_
                 cudaStreamSynchronize(stream[1]);
 		if (i__!=0){
                   i__2 = *m - i__;
-                  zaxpy_(&i__2, &c_one, f,&c__1, &x[i__+1+i__*x_dim1],&c__1);
+                  blasf77_zaxpy(&i__2, &c_one, f,&c__1, &x[i__+1+i__*x_dim1],&c__1);
 		}
 
 
 		i__2 = *m - i__;
 		i__3 = i__ - 1;
-		zgemv_("No transpose", &i__2, &i__3, &c_neg_one, &x[i__ + 1 + 
+		blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, &x[i__ + 1 + 
 			x_dim1], ldx, &x[i__ * x_dim1 + 1], &c__1, &c_one, &x[
 			i__ + 1 + i__ * x_dim1], &c__1);
 		i__2 = *m - i__;
-		zscal_(&i__2, &taup[i__], &x[i__ + 1 + i__ * x_dim1], &c__1);
+		blasf77_zscal(&i__2, &taup[i__], &x[i__ + 1 + i__ * x_dim1], &c__1);
 	    }
 	}
     } else {
@@ -358,18 +358,18 @@ magma_zlabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, double2 *a, magma_
 	/* Update A(i,i:n) */
 	i__2 = *n - i__ + 1;
 	i__3 = i__ - 1;
-	zgemv_("No transpose", &i__2, &i__3, &c_neg_one, &y[i__ + y_dim1], ldy, 
+	blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, &y[i__ + y_dim1], ldy, 
 	       &a[i__ + a_dim1], lda, &c_one, &a[i__ + i__ * a_dim1], lda);
 	i__2 = i__ - 1;
 	i__3 = *n - i__ + 1;
-	zgemv_("Transpose", &i__2, &i__3, &c_neg_one, &a[i__ * a_dim1 + 1], 
+	blasf77_zgemv("Transpose", &i__2, &i__3, &c_neg_one, &a[i__ * a_dim1 + 1], 
 	       lda, &x[i__ + x_dim1], ldx, &c_one, &a[i__ + i__ * a_dim1], lda);
 
 	/* Generate reflection P(i) to annihilate A(i,i+1:n) */
 	i__2 = *n - i__ + 1;
 	/* Computing MIN */
 	i__3 = i__ + 1;
-	zlarfg_(&i__2, &a[i__ + i__ * a_dim1], 
+	lapackf77_zlarfg(&i__2, &a[i__ + i__ * a_dim1], 
 		&a[i__ + min(i__3,*n) * a_dim1], lda, &taup[i__]);
 	d__[i__] = a[i__ + i__ * a_dim1];
 	if (i__ < *m) {
@@ -378,40 +378,40 @@ magma_zlabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, double2 *a, magma_
 	  /* Compute X(i+1:m,i) */
 	  i__2 = *m - i__;
 	  i__3 = *n - i__ + 1;
-	  zgemv_("No transpose", &i__2, &i__3, &c_one, 
+	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_one, 
 		 &a[i__ + 1 + i__ * a_dim1], lda, &a[i__ + i__ * a_dim1], lda, 
 		 &c_zero, &x[i__ + 1 + i__ * x_dim1], &c__1);
 	  i__2 = *n - i__ + 1;
 	  i__3 = i__ - 1;
-	  zgemv_("Transpose", &i__2, &i__3, &c_one, &y[i__ + y_dim1], 
+	  blasf77_zgemv("Transpose", &i__2, &i__3, &c_one, &y[i__ + y_dim1], 
 		 ldy, &a[i__ + i__ * a_dim1], lda, &c_zero, 
 		 &x[i__ *  x_dim1 + 1], &c__1);
 	  i__2 = *m - i__;
 	  i__3 = i__ - 1;
-	  zgemv_("No transpose", &i__2, &i__3, &c_neg_one, 
+	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, 
 		 &a[i__ + 1 + a_dim1], lda, &x[i__ * x_dim1 + 1], &c__1, &c_one, 
 		 &x[i__ + 1 + i__ * x_dim1], &c__1);
 	  i__2 = i__ - 1;
 	  i__3 = *n - i__ + 1;
-	  zgemv_("No transpose", &i__2, &i__3, &c_one, 
+	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_one, 
 		 &a[i__ * a_dim1 + 1], lda, &a[i__ + i__ * a_dim1], lda, &c_zero, 
 		 &x[i__ * x_dim1 + 1], &c__1);
 	  i__2 = *m - i__;
 	  i__3 = i__ - 1;
-	  zgemv_("No transpose", &i__2, &i__3, &c_neg_one, 
+	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, 
 		 &x[i__ + 1 + x_dim1], ldx, &x[i__ * x_dim1 + 1], &c__1, &c_one,
 		 &x[i__ + 1 + i__ * x_dim1], &c__1);
 	  i__2 = *m - i__;
-	  zscal_(&i__2, &taup[i__], &x[i__ + 1 + i__ * x_dim1], &c__1);
+	  blasf77_zscal(&i__2, &taup[i__], &x[i__ + 1 + i__ * x_dim1], &c__1);
 	  
 	  /* Update A(i+1:m,i) */
 	  i__2 = *m - i__;
 	  i__3 = i__ - 1;
-	  zgemv_("No transpose", &i__2, &i__3, &c_neg_one, 
+	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, 
 		 &a[i__ + 1 + a_dim1], lda, &y[i__ + y_dim1], ldy, &c_one, 
 		 &a[i__ + 1 + i__ * a_dim1], &c__1);
 	  i__2 = *m - i__;
-	  zgemv_("No transpose", &i__2, &i__, &c_neg_one, 
+	  blasf77_zgemv("No transpose", &i__2, &i__, &c_neg_one, 
 		 &x[i__ + 1 + x_dim1], ldx, &a[i__ * a_dim1 + 1], &c__1, &c_one,
 		 &a[i__ + 1 + i__ * a_dim1], &c__1);
 	  
@@ -419,7 +419,7 @@ magma_zlabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, double2 *a, magma_
 	  i__2 = *m - i__;
 	  /* Computing MIN */
 	  i__3 = i__ + 2;
-	  zlarfg_(&i__2, &a[i__ + 1 + i__ * a_dim1],
+	  lapackf77_zlarfg(&i__2, &a[i__ + 1 + i__ * a_dim1],
 		  &a[min(i__3,*m) + i__ * a_dim1], &c__1, &tauq[i__]);
 	  e[i__] = a[i__ + 1 + i__ * a_dim1];
 	  a[i__ + 1 + i__ * a_dim1] = c_one;
@@ -427,30 +427,30 @@ magma_zlabrd(magma_int_t m_, magma_int_t n_, magma_int_t nb_, double2 *a, magma_
 	  /* Compute Y(i+1:n,i) */
 	  i__2 = *m - i__;
 	  i__3 = *n - i__;
-	  zgemv_("Transpose", &i__2, &i__3, &c_one, 
+	  blasf77_zgemv("Transpose", &i__2, &i__3, &c_one, 
 		 &a[i__ + 1 + (i__ + 1) * a_dim1], lda, 
 		 &a[i__ + 1 + i__ * a_dim1], &c__1, 
 		 &c_zero, &y[i__ + 1 + i__ * y_dim1], &c__1);
 	  i__2 = *m - i__;
 	  i__3 = i__ - 1;
-	  zgemv_("Transpose", &i__2, &i__3, &c_one, &a[i__ + 1 + a_dim1], 
+	  blasf77_zgemv("Transpose", &i__2, &i__3, &c_one, &a[i__ + 1 + a_dim1], 
 		 lda, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_zero, 
 		 &y[ i__ * y_dim1 + 1], &c__1);
 	  i__2 = *n - i__;
 	  i__3 = i__ - 1;
-	  zgemv_("No transpose", &i__2, &i__3, &c_neg_one, 
+	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, 
 		 &y[i__ + 1 + y_dim1], ldy, &y[i__ * y_dim1 + 1], &c__1, 
 		 &c_one, &y[i__ + 1 + i__ * y_dim1], &c__1);
 	  i__2 = *m - i__;
-	  zgemv_("Transpose", &i__2, &i__, &c_one, &x[i__ + 1 + x_dim1], 
+	  blasf77_zgemv("Transpose", &i__2, &i__, &c_one, &x[i__ + 1 + x_dim1], 
 		 ldx, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_zero, 
 		 &y[i__ * y_dim1 + 1], &c__1);
 	  i__2 = *n - i__;
-	  zgemv_("Transpose", &i__, &i__2, &c_neg_one, 
+	  blasf77_zgemv("Transpose", &i__, &i__2, &c_neg_one, 
 		 &a[(i__ + 1) * a_dim1 + 1], lda, &y[i__ * y_dim1 + 1], 
 		 &c__1, &c_one, &y[i__ + 1 + i__ * y_dim1], &c__1);
 	  i__2 = *n - i__;
-	  zscal_(&i__2, &tauq[i__], &y[i__ + 1 + i__ * y_dim1], &c__1);
+	  blasf77_zscal(&i__2, &tauq[i__], &y[i__ + 1 + i__ * y_dim1], &c__1);
 	}
       }
     }

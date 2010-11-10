@@ -147,7 +147,7 @@ magma_zgeqrs_gpu(magma_int_t m_, magma_int_t n_, magma_int_t nrhs_,
    ib   = *n-i;
    rows = *m-i;
    double2 one = MAGMA_Z_ONE;
-   ztrsm_("l", "u", "n", "n", &ib, nrhs, &one, work, &rows,
+   blasf77_ztrsm("l", "u", "n", "n", &ib, nrhs, &one, work, &rows,
 	  work+rows*ib, &rows);
    
    // update the solution vector

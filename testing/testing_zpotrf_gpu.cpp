@@ -119,8 +119,8 @@ int main( int argc, char** argv)
          Performs operation using LAPACK 
 	 =================================================================== */
       start = get_current_time();
-      zpotrf_("L", &N, h_A, &N, info);
-      //zpotrf_("U", &N, h_A, &N, info);
+      lapackf77_zpotrf("L", &N, h_A, &N, info);
+      //lapackf77_zpotrf("U", &N, h_A, &N, info);
       end = get_current_time();
       if (info[0] < 0)  
 	printf("Argument %d of zpotrf had an illegal value.\n", -info[0]);     
@@ -135,11 +135,11 @@ int main( int argc, char** argv)
       cublasGetMatrix( N, N, sizeof(double2), d_A, lda, h_R, N);
       double2 work[1], matnorm, mone = -1.0;
       int one = 1;
-      matnorm = zlange_("f", &N, &N, h_A, &N, work);
-      zaxpy_(&n2, &mone, h_A, &one, h_R, &one);
+      matnorm = lapackf77_zlange("f", &N, &N, h_A, &N, work);
+      blasf77_zaxpy(&n2, &mone, h_A, &one, h_R, &one);
       printf("%5d    %6.2f         %6.2f        %e\n", 
 	     size[i], cpu_perf, gpu_perf,
-	     zlange_("f", &N, &N, h_R, &N, work) / matnorm);
+	     lapackf77_zlange("f", &N, &N, h_R, &N, work) / matnorm);
 
       if (argc != 1)
 	break;

@@ -142,13 +142,13 @@ magma_zlarfb(char direct, char storev,
 		c_one, dc_ref(0,0), *ldc);
     /*
     double2 one = 1.f, zero = 0.f, mone = -1.f;
-    zgemm_("n", "t", &m, k, &n, &one, dc_ref(0, 0), ldc,
+    blasf77_zgemm("n", "t", &m, k, &n, &one, dc_ref(0, 0), ldc,
 	  dv_ref(0,0), ldv, &zero, dwork, ldwork);
 
-    ztrmm_("r", "u", "n", "n",
+    blasf77_ztrmm("r", "u", "n", "n",
 	   &m, k, &one, dt, ldt, dwork, ldwork);
 
-    zgemm_("n", "n", &m, &n, k, &mone,
+    blasf77_zgemm("n", "n", &m, &n, k, &mone,
                 dwork, ldwork,
                 dv_ref(0, 0), ldv,
       		&one, dc_ref(0,0), ldc);

@@ -21,12 +21,14 @@
 #include "cublas.h"
 #include "magma.h"
 
-extern "C" int zungbr_(char *, int *, int *, int *, double2 *a, int *,
-		       double2 *, double2 *, int *, int *); 
-extern "C" int zbdt01_(int *, int *, int *, double2 *, int *, double2 *, int *, 
-		       double2 *, double2 *, double2 *, int *, double2 *, double2 *);
-extern "C" int zunt01_(char *, int *, int *, double2 *, int *, 
-		       double2 *, int *, double2 *);
+
+#define lapackf77_zungbr zungbr_
+#define lapackf77_zbdt01 zbdt01_
+#define lapackf77_zunt01 zunt01_
+
+extern "C" int lapackf77_zungbr(char *, int *, int *, int *, double2 *a, int *, double2 *, double2 *, int *, int *); 
+extern "C" int lapackf77_zbdt01(int *, int *, int *, double2 *, int *, double2 *, int *, double2 *, double2 *, double2 *, int *, double2 *, double2 *);
+extern "C" int lapackf77_zunt01(char *, int *, int *, double2 *, int *, double2 *, int *, double2 *);
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgebrd
@@ -153,20 +155,20 @@ int main( int argc, char** argv)
       double2 result[3] = {0., 0., 0.};
       int test, one = 1;
       
-      zlacpy_(" ", &N, &N, h_R, &N, PT, &N);
+      lapackf77_zlacpy(" ", &N, &N, h_R, &N, PT, &N);
 
       // generate Q & P'
-      zungbr_("Q", &M, &M, &M, h_R, &N, tauq, work, &lwork, info);
+      lapackf77_zungbr("Q", &M, &M, &M, h_R, &N, tauq, work, &lwork, info);
 
-      zungbr_("P", &M, &M, &M,  PT, &N, taup, work, &lwork, info);
+      lapackf77_zungbr("P", &M, &M, &M,  PT, &N, taup, work, &lwork, info);
 
       // Test 1:  Check the decomposition A := Q * B * PT
       //      2:  Check the orthogonality of Q
       //      3:  Check the orthogonality of PT
-      zbdt01_(&M, &N, &one, h_A, &M, h_R, &M, diag, offdiag, PT, &M,
+      lapackf77_zbdt01(&M, &N, &one, h_A, &M, h_R, &M, diag, offdiag, PT, &M,
 	       work, &result[0]);
-      zunt01_("Columns", &M, &M, h_R, &M, work, &lwork, &result[1]);
-      zunt01_("Rows", &M, &N, PT, &M, work, &lwork, &result[2]);
+      lapackf77_zunt01("Columns", &M, &M, h_R, &M, work, &lwork, &result[1]);
+      lapackf77_zunt01("Rows", &M, &N, PT, &M, work, &lwork, &result[2]);
      
       //printf("N = %d\n", N);
       //printf("norm(A -  Q  B  PT) / ( N * norm(A) * EPS ) = %f\n", result[0]);
@@ -180,7 +182,7 @@ int main( int argc, char** argv)
          Performs operation using LAPACK 
 	 =================================================================== */
       start = get_current_time();
-      zgebrd_(&M, &N, h_A, &N, diag2, offdiag2, tauq, taup,
+      lapackf77_zgebrd(&M, &N, h_A, &N, diag2, offdiag2, tauq, taup,
       	      h_work, &lwork, info);
       end = get_current_time();
      

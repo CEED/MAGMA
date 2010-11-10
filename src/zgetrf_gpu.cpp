@@ -115,7 +115,7 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
 	/* Use CPU code. */
 	work = (double2*)malloc(m * n * sizeof(double2));
 	cublasGetMatrix(m, n, sizeof(double2), a, lda, work, m);
-	zgetrf_(&m, &n, work, &m, ipiv, info);
+	lapackf77_zgetrf(&m, &n, work, &m, ipiv, info);
 	cublasSetMatrix(m, n, sizeof(double2), work, m, a, lda);
 	free(work);
     } 
@@ -167,7 +167,7 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
 	  
 	    // do the cpu part
 	    rows = m - i*nb;
-	    zgetrf_( &rows, &nb, work, &lddwork, ipiv+i*nb, &iinfo);
+	    lapackf77_zgetrf( &rows, &nb, work, &lddwork, ipiv+i*nb, &iinfo);
 	    if ( (*info == 0) && (iinfo > 0) )
 		*info = iinfo + i*nb;
 	    
@@ -204,7 +204,7 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
 	cuCtxSynchronize();
 	
 	// do the cpu part
-	zgetrf_( &rows, &nb0, work, &lddwork, ipiv+s*nb, &iinfo);
+	lapackf77_zgetrf( &rows, &nb0, work, &lddwork, ipiv+s*nb, &iinfo);
 	if ( (*info == 0) && (iinfo > 0) )
 	    *info = iinfo + s*nb;
 	magmablas_zpermute_long2( dAT, ldda, ipiv, nb0, s*nb );

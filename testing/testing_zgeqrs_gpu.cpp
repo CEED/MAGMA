@@ -186,10 +186,10 @@ int main( int argc, char** argv)
 
       // compute the residual
       if (nrhs == 1)
-	zgemv_("n", &M, &N, &mone, h_A, &M, x, &one, &fone, r, &one);
+	blasf77_zgemv("n", &M, &N, &mone, h_A, &M, x, &one, &fone, r, &one);
       else
-	zgemm_("n","n", &M, &nrhs, &N, &mone, h_A, &M, x, &N, &fone, r, &M);
-      matnorm = zlange_("f", &M, &N, h_A, &M, work);
+	blasf77_zgemm("n","n", &M, &nrhs, &N, &mone, h_A, &M, x, &N, &fone, r, &M);
+      matnorm = lapackf77_zlange("f", &M, &N, h_A, &M, work);
 
       /* =====================================================================
          Performs operation using LAPACK 
@@ -199,32 +199,32 @@ int main( int argc, char** argv)
           x[j+k*M] = b[j+k*M];
       
       start = get_current_time();
-      zgeqrf_(&M, &N, h_R, &M, tau, h_work, &lwork, info);
+      lapackf77_zgeqrf(&M, &N, h_R, &M, tau, h_work, &lwork, info);
 
       if (info[0] < 0)  
 	printf("Argument %d of zgeqrf had an illegal value.\n", -info[0]);
 
       // Solve the least-squares problem: min || A * X - B ||
       // 1. B(1:M,1:NRHS) = Q^T B(1:M,1:NRHS)
-      zunmqr_("l", "t", &M, &nrhs, &min_mn, h_R, &M,
+      lapackf77_zunmqr("l", "t", &M, &nrhs, &min_mn, h_R, &M,
 	      tau, x, &M, h_work, &lwork, info);
 
       // 2. B(1:N,1:NRHS) := inv(R) * B(1:M,1:NRHS)
-      ztrsm_("l", "u", "n", "n", &N, &nrhs, &fone, h_R, &M, x, &M);
+      blasf77_ztrsm("l", "u", "n", "n", &N, &nrhs, &fone, h_R, &M, x, &M);
 
       end = get_current_time();
       cpu_perf = (4.*M*N*min_mn/3.+3.*nrhs*N*N)/(1000000.*
 						 GetTimerValue(start,end));
 
       if (nrhs == 1)
-        zgemv_("n", &M, &N, &mone, h_A, &M, x, &one, &fone, b, &one);
+        blasf77_zgemv("n", &M, &N, &mone, h_A, &M, x, &one, &fone, b, &one);
       else
-        zgemm_("n","n", &M, &nrhs, &N, &mone, h_A, &M, x, &M, &fone, b, &M);
+        blasf77_zgemm("n","n", &M, &nrhs, &N, &mone, h_A, &M, x, &M, &fone, b, &M);
 
       printf("%5d %5d   %6.1f       %6.1f       %7.2e   %7.2e\n",
              M, N, cpu_perf, gpu_perf,
-             zlange_("f", &M, &nrhs, r, &M, work)/(min_mn*matnorm),
-	     zlange_("f", &M, &nrhs, b, &M, work)/(min_mn*matnorm) );
+             lapackf77_zlange("f", &M, &nrhs, r, &M, work)/(min_mn*matnorm),
+	     lapackf77_zlange("f", &M, &nrhs, b, &M, work)/(min_mn*matnorm) );
 
       if (argc != 1)
 	break;

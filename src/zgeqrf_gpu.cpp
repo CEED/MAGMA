@@ -156,10 +156,10 @@ magma_zgeqrf_gpu(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t  lda_,
 	}
 
 	cudaStreamSynchronize(stream[1]);
-	zgeqrf_(&rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &lhwork, info);
+	lapackf77_zgeqrf(&rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &lhwork, info);
 	/* Form the triangular factor of the block reflector
 	   H = H(i) H(i+1) . . . H(i+ib-1) */
-	zlarft_("F", "C", &rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &ib);
+	lapackf77_zlarft("F", "C", &rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &ib);
 	zpanel_to_q('U', ib, work_ref(i), ldwork, hwork+ib*ib); 
 	cublasSetMatrix(rows, ib, sizeof(double2), 
 			work_ref(i), ldwork, a_ref(i,i), *lda);
@@ -195,7 +195,7 @@ magma_zgeqrf_gpu(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t  lda_,
       cublasGetMatrix(rows, ib, sizeof(double2),
                       a_ref(i,i), *lda, work, rows);
       lhwork = lwork - rows*ib;
-      zgeqrf_(&rows, &ib, work, &rows, tau+i, work+ib*rows, &lhwork, info);
+      lapackf77_zgeqrf(&rows, &ib, work, &rows, tau+i, work+ib*rows, &lhwork, info);
       cublasSetMatrix(rows, ib, sizeof(double2),
                       work, rows, a_ref(i,i), *lda);
    }

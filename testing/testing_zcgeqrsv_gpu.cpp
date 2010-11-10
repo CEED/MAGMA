@@ -195,7 +195,7 @@ int main( int argc, char** argv)
 
         for(j=0; j<N; j++)
             rr[j] = b[j] = rand() / (double2)RAND_MAX;
-//      zlag2c_( &N , &N , h_A , &N, h_AA, &N , info ) ;
+//      lapackf77_zlag2c( &N , &N , h_A , &N, h_AA, &N , info ) ;
 //`      cublasSetVector(n2, sizeof(float2), h_AA, 1, SWORK, 1);
         cublasSetVector(n2, sizeof(double2), h_A, 1, d_A, 1);
         cublasSetVector(N, sizeof(double2), b, 1, d_b, 1);
@@ -218,8 +218,8 @@ int main( int argc, char** argv)
         cublasGetVector(N, sizeof(double2), X, 1, x, 1);
         double2 work[1], fone = 1.0, mone = -1., matnorm;
         int one = 1;
-        dgemv_("n", &N, &N, &mone, h_A, &N, x, &one, &fone, rr, &one);
-        matnorm = zlange_("f", &N, &N, h_A, &N, work);
+        blasf77_dgemv("n", &N, &N, &mone, h_A, &N, x, &one, &fone, rr, &one);
+        matnorm = lapackf77_zlange("f", &N, &N, h_A, &N, work);
 
         //=====================================================================
         //                 Double Precision Solve
@@ -249,24 +249,24 @@ int main( int argc, char** argv)
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
-        dgeqrf_(&M, &N, h_A, &lda, tau_d, h_work_d, &lwork_d, info);
+        lapackf77_dgeqrf(&M, &N, h_A, &lda, tau_d, h_work_d, &lwork_d, info);
         if (info[0] < 0)
             printf("Argument %d of sgeqrf had an illegal value.\n", -info[0]);
 
         // Solve the least-squares problem: min || A * X - B ||
-        dormqr_("l", "t", &M, &nrhs, &M, h_A, &lda,
+        lapackf77_dormqr("l", "t", &M, &nrhs, &M, h_A, &lda,
                 tau_d, b, &M, h_work_d, &lwork_d, info);
         // B(1:N,1:NRHS) := inv(R) * B(1:N,1:NRHS)
-        ztrsm_("l", "u", "n", "n", &M, &nrhs, &fone, h_A, &lda, b, &M);
+        blasf77_ztrsm("l", "u", "n", "n", &M, &nrhs, &fone, h_A, &lda, b, &M);
         end = get_current_time();
         cpu_perf = (4.*N*N*N/3.+2.*N*N)/(1000000.*GetTimerValue(start,end));
         printf("%5d \t%8.2f\t%9.2f\t%6.2f\t%6.2f  \t %e",
                size[i], cpu_perf, dperf, sperf, mperf ,
-               zlange_("f", &N, &nrhs, rr, &N, work)/matnorm );
+               lapackf77_zlange("f", &N, &nrhs, rr, &N, work)/matnorm );
         printf(" %2d \n", ITER[0]);
         //fprintf(fp,"%5d \t%8.2f\t%9.2f\t%6.2f\t%6.2f  \t%e",
         //       size[i], cpu_perf, dperf, sperf, mperf ,
-        //       zlange_("f", &N, &nrhs, rr, &N, work)/matnorm );
+        //       lapackf77_zlange("f", &N, &nrhs, rr, &N, work)/matnorm );
         //fprintf(fp, " %2d \n", ITER[0]);
 
         if (argc != 1)

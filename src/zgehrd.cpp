@@ -262,7 +262,7 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, double2 *a, magma_
       cublasGetMatrix(n, n-i__+1, sizeof(double2), 
 		      d_A+ (i__-1)*ldda, ldda, 
 		      a  + (i__-1)*(lda), lda);
-    zgehd2_(&n, &i__, &ihi, a, &lda, &tau[1], work, &iinfo);
+    lapackf77_zgehd2(&n, &i__, &ihi, a, &lda, &tau[1], work, &iinfo);
     MAGMA_Z_SET2REAL( work[0], (double) iws );
     
     // cublasFree(t); 

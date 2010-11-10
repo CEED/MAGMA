@@ -90,8 +90,8 @@ int main(int argc , char **argv){
   //printf("Iterative Refinement\n");
   //fprintf(fp,"Iterative Refinement\n");
   
- printf("\n\nEpsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
- //fprintf(fp, "\nEpsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
+ printf("\n\nEpsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", lapackf77_dlamch("Epsilon"), lapackf77_slamch("Epsilon"));
+ //fprintf(fp, "\nEpsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", lapackf77_dlamch("Epsilon"), lapackf77_slamch("Epsilon"));
 
   TimeStruct start, end;
  int LEVEL=1;
@@ -341,10 +341,10 @@ int main(int argc , char **argv){
     cublasSetMatrix( N, NRHS, sizeof( double2 ), X, N, d_X, N ) ;
     cublasSetMatrix( N, NRHS, sizeof( double2 ), B, N, d_B, N ) ;
 
-    zlacpy_("All", &N, &NRHS, B , &LDB, X, &N);
+    lapackf77_zlacpy("All", &N, &NRHS, B , &LDB, X, &N);
 
     int iter_CPU = ITER ;
-    zlacpy_("All", &N, &NRHS, X , &LDB, res_, &N);
+    lapackf77_zlacpy("All", &N, &NRHS, X , &LDB, res_, &N);
 
 
     //=====================================================================
@@ -367,16 +367,16 @@ int main(int argc , char **argv){
       //=====================================================================
       double2 Rnorm, Anorm;
       double2 *worke = (double2 *)malloc(N*sizeof(double2));
-      Anorm = zlange_("I", &N, &N, A, &N, worke);
+      Anorm = lapackf77_zlange("I", &N, &N, A, &N, worke);
       double2 ONE = -1.0 , NEGONE = 1.0 ;
-      zgemm_( "No Transpose", "No Transpose", &N, &NRHS, &N, &NEGONE, A, &N, X, &LDX, &ONE, B, &N);
-      Rnorm=zlange_("I", &N, &NRHS, B, &LDB, worke);
+      blasf77_zgemm( "No Transpose", "No Transpose", &N, &NRHS, &N, &NEGONE, A, &N, X, &LDX, &ONE, B, &N);
+      Rnorm=lapackf77_zlange("I", &N, &NRHS, B, &LDB, worke);
       free(worke);
     //=====================================================================
     //              DP - GPU 
     //=====================================================================
     cublasSetMatrix( N, N, sizeof( double2 ), A, N, d_A, N ) ;
-    float2 RMAX = slamch_("O");
+    float2 RMAX = lapackf77_slamch("O");
     start = get_current_time();
     magma_zgetrf_gpu(N, N, d_A, N, IPIV, INFO);
     end = get_current_time();
@@ -388,7 +388,7 @@ int main(int argc , char **argv){
 
 
     cublasSetMatrix( N, N, sizeof( double2 ), A, N, d_A, N ) ;
-    RMAX = slamch_("O");
+    RMAX = lapackf77_slamch("O");
     start = get_current_time();
     magma_zgetrf_gpu(N, N, d_A, N, IPIV, INFO);
     magma_zgetrs_gpu('N', N, NRHS, d_A ,N,IPIV, d_B, N,INFO, h_work_M_D );

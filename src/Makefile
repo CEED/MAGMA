@@ -27,7 +27,7 @@ ZSRC  = zpotrf.cpp	\
         zgemm_gpu.cpp 	\
         zpotrs_gpu.cpp 	\
         \
-        zsytrd.cpp 	\
+        zhetrd.cpp 	\
         zlatrd.cpp 	\
         zgebrd.cpp 	\
         zlabrd.cpp 	\
@@ -51,10 +51,7 @@ CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
 SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 
-#ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
-#ALLSRC= $(DSRC) $(SSRC)	\
-
-ALLSRC= $(ZSRC)	\
+ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
         auxiliary.o \
         xerbla.o \
 

@@ -53,6 +53,10 @@ magma_int_t magma_zlabrd( magma_int_t m, magma_int_t n, magma_int_t nb,
 			  magma_int_t ldy, double2 *da, magma_int_t ldda, 
 			  double2 *dx, magma_int_t lddx, 
 			  double2 *dy, magma_int_t lddy);
+  /* TODO: this interface need to be changed */
+magma_int_t magma_zlatrd( char *uplo, magma_int_t *n, magma_int_t *nb, double2 *a, 
+                          magma_int_t *lda, double2 *e, double2 *tau, double2 *w, magma_int_t *ldw,
+                          double2 *da, magma_int_t *ldda, double2 *dw, magma_int_t *lddw);
 magma_int_t magma_zlahr2( magma_int_t m, magma_int_t n, magma_int_t nb, 
 			  double2 *da, double2 *dv, double2 *a, 
 			  magma_int_t lda, double2 *tau, double2 *t, 
@@ -68,10 +72,13 @@ magma_int_t magma_zlarfb( char direct, char storev, magma_int_t m,
 			  magma_int_t ldwork);
 magma_int_t magma_zpotrf( char uplo, magma_int_t n, double2 *A, 
 			  magma_int_t lda, magma_int_t *info);
-magma_int_t magma_zsytrd( char uplo, magma_int_t n, double2 *A, 
+magma_int_t magma_zhetrd( char uplo, magma_int_t n, double2 *A, 
 			  magma_int_t lda, double2 *d, double2 *e, 
 			  double2 *tau, double2 *work, magma_int_t *lwork, 
 			  double2 *da, magma_int_t *info);
+magma_int_t magma_zunmqr(char side, char trans, magma_int_t m, magma_int_t n, magma_int_t k, 
+                         double2 *a, magma_int_t lda, double2 *tau, double2 *c, magma_int_t ldc,
+                         double2 *work, magma_int_t *lwork, magma_int_t *info);
 
 /* //////////////////////////////////////////////////////////////////////////// 
  -- MAGMA function definitions / Data on GPU

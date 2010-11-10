@@ -23,7 +23,8 @@
 
 #define min(a,b)  (((a)<(b))?(a):(b))
 
-extern "C" void sqrt02_(int *, int *, int *, double2 *, double2 *, double2 *,
+#define lapackf77_zqrt02 zqrt02_
+extern "C" void lapackf77_zqrt02(int *, int *, int *, double2 *, double2 *, double2 *,
                         double2 *, int *, double2 *, double2 *,
 			int *, double2 *, double2 *);
 
@@ -145,7 +146,7 @@ int main( int argc, char** argv)
          Performs operation using LAPACK 
 	 =================================================================== */
       start = get_current_time();
-      zgeqrf_(&M, &N, h_A, &M, tau, h_work, &lwork, info);
+      lapackf77_zgeqrf(&M, &N, h_A, &M, tau, h_work, &lwork, info);
       end = get_current_time();
       if (info[0] < 0)  
 	printf("Argument %d of zgeqrf had an illegal value.\n", -info[0]);
@@ -160,11 +161,11 @@ int main( int argc, char** argv)
       
       double2 work[1], matnorm = 1., mone = -1.;
       int one = 1;
-      matnorm = zlange_("f", &M, &N, h_A, &M, work);
-      zaxpy_(&n2, &mone, h_A, &one, h_R, &one);
+      matnorm = lapackf77_zlange("f", &M, &N, h_A, &M, work);
+      blasf77_zaxpy(&n2, &mone, h_A, &one, h_R, &one);
       printf("%5d %5d  %6.2f         %6.2f        %e\n", 
 	     M, N, cpu_perf, gpu_perf,
-	     zlange_("f", &M, &N, h_R, &M, work) / matnorm);
+	     lapackf77_zlange("f", &M, &N, h_R, &M, work) / matnorm);
       
       /* =====================================================================
          Check the factorization
@@ -175,7 +176,7 @@ int main( int argc, char** argv)
       double2 *hwork_R = (double2*)malloc( M * N * sizeof(double2));
       double2 *rwork   = (double2*)malloc( N * sizeof(double2));
 
-      sqrt02_(&M, &min_mn, &min_mn, h_A, h_R, hwork_Q, hwork_R, &lda, tau,
+      lapackf77_zqrt02(&M, &min_mn, &min_mn, h_A, h_R, hwork_Q, hwork_R, &lda, tau,
 	      h_work, &lwork, rwork, result);
 
       printf("norm( R - Q'*A ) / ( M * norm(A) * EPS ) = %f\n", result[0]);

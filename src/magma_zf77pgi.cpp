@@ -35,7 +35,7 @@
     #define MAGMA_ZLAHRU magma_zlahru_
     #define MAGMA_ZLARFB magma_zlarfb_
     #define MAGMA_ZPOTRF magma_zpotrf_
-    #define MAGMA_ZSYTRD magma_zsytrd_
+    #define MAGMA_ZHETRD magma_zhetrd_
     
     #define MAGMA_ZUNMQR_GPU magma_zunmqr_gpu_
     #define MAGMA_ZGEQRF_GPU magma_zgeqrf_gpu_
@@ -59,7 +59,7 @@
     #define MAGMA_ZLAHRU magma_zlahru
     #define MAGMA_ZLARFB magma_zlarfb
     #define MAGMA_ZPOTRF magma_zpotrf
-    #define MAGMA_ZSYTRD magma_zsytrd
+    #define MAGMA_ZHETRD magma_zhetrd
     
     #define MAGMA_ZUNMQR_GPU magma_zunmqr_gpu
     #define MAGMA_ZGEQRF_GPU magma_zgeqrf_gpu
@@ -116,8 +116,8 @@ void MAGMA_ZLARFB( char *direct, char *storev, magma_int_t *m, magma_int_t *n, m
 void MAGMA_ZPOTRF( char *uplo, magma_int_t *n, double2 *A, magma_int_t *lda, magma_int_t *info)
 { magma_zpotrf( uplo[0], *n, A, *lda, info); }
 
-void MAGMA_ZSYTRD( char *uplo, magma_int_t *n, double2 *A, magma_int_t *lda, double2 *d, double2 *e, double2 *tau, double2 *work, magma_int_t *lwork, double2 *da, magma_int_t *info)
-{ magma_zsytrd( uplo[0], *n, A, *lda, d, e, tau, work, lwork, da, info); }
+void MAGMA_ZHETRD( char *uplo, magma_int_t *n, double2 *A, magma_int_t *lda, double2 *d, double2 *e, double2 *tau, double2 *work, magma_int_t *lwork, double2 *da, magma_int_t *info)
+{ magma_zhetrd( uplo[0], *n, A, *lda, d, e, tau, work, lwork, da, info); }
 
 
 /* //////////////////////////////////////////////////////////////////////////// 

@@ -166,12 +166,12 @@ int main(int argc , char **argv)
       double Rnorm, Anorm, Bnorm;   
       double *worke = (double *)malloc(N*sizeof(double));
 
-      Anorm = zlange_("I", &N, &N, A, &LDA, worke);
-      Bnorm = zlange_("I", &N, &NRHS, B, &LDB, worke);
+      Anorm = lapackf77_zlange("I", &N, &N, A, &LDA, worke);
+      Bnorm = lapackf77_zlange("I", &N, &NRHS, B, &LDB, worke);
 
       double2 ONE = -1.0 , NEGONE = 1.0 ;
-      zgemm_( "N", "N", &N, &NRHS, &N, &NEGONE, A, &LDA, X, &LDX, &ONE, B, &N);
-      Rnorm=zlange_("I", &N, &NRHS, B, &LDB, worke); 
+      blasf77_zgemm( "N", "N", &N, &NRHS, &N, &NEGONE, A, &LDA, X, &LDX, &ONE, B, &N);
+      Rnorm=lapackf77_zlange("I", &N, &NRHS, B, &LDB, worke); 
       free(worke);
       
       printf("        %e\n", Rnorm/(Anorm*Bnorm));

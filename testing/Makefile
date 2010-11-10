@@ -21,7 +21,7 @@ ZSRC  = testing_zgetrf.cpp 	\
         testing_zgelqf.cpp 	\
         \
         testing_zgehrd.cpp 	\
-        testing_zsytrd.cpp 	\
+        testing_zhetrd.cpp 	\
         testing_zgebrd.cpp
 
 #	\

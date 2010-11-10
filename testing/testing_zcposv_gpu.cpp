@@ -134,8 +134,8 @@ int main(int argc , char **argv){
     printf("\nUsage:\n\t\t ./testing_zcposv -N 1024");
   //  fprintf(fp, "\nUsage:\n\t\t ./testing_zcposv -N 1024");
 
- printf("\n\nEpsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
- //fprintf(fp, "Epsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", dlamch_("Epsilon"), slamch_("Epsilon"));
+ printf("\n\nEpsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", lapackf77_dlamch("Epsilon"), lapackf77_slamch("Epsilon"));
+ //fprintf(fp, "Epsilon(Double): %10.20lf \nEpsilon(Single): %10.20lf\n", lapackf77_dlamch("Epsilon"), lapackf77_slamch("Epsilon"));
 
   TimeStruct start, end;
 
@@ -331,22 +331,22 @@ int main(int argc , char **argv){
     double2 Rnorm, Anorm, Xnorm, Bnorm;
 
     double2 *worke = (double2 *)malloc(N*sizeof(double2));
-    Anorm = zlansy_(&norm, &uplo,  &N, As, &N, worke);
- //   Anorm = zlange_("I", &N, &N, As, &N, worke);
+    Anorm = lapackf77_zlansy(&norm, &uplo,  &N, As, &N, worke);
+ //   Anorm = lapackf77_zlange("I", &N, &N, As, &N, worke);
 
-    Xnorm = zlange_(&norm, &N, &NRHS, res_, &LDB, worke);
-    Bnorm = zlange_(&norm, &N, &NRHS, Bs, &LDB, worke);
-    zcymm_( &side, &uplo, &N, &NRHS, &NEGONE, As, &LDA, res_, &LDX, &ONE, Bs, &N);
-    Rnorm=zlange_(&norm, &N, &NRHS, Bs, &LDB, worke);
-    double2 eps1 = dlamch_("Epsilon");
+    Xnorm = lapackf77_zlange(&norm, &N, &NRHS, res_, &LDB, worke);
+    Bnorm = lapackf77_zlange(&norm, &N, &NRHS, Bs, &LDB, worke);
+    blasf77_zsymm( &side, &uplo, &N, &NRHS, &NEGONE, As, &LDA, res_, &LDX, &ONE, Bs, &N);
+    Rnorm=lapackf77_zlange(&norm, &N, &NRHS, Bs, &LDB, worke);
+    double2 eps1 = lapackf77_dlamch("Epsilon");
     printf("\t--   %e %e --\t", Rnorm ,  Anorm);
     free(worke);
 */
       double2 Rnorm, Anorm;
       double2 *worke = (double2 *)malloc(N*sizeof(double2));
-      Anorm = zlansy_( &norm, &uplo,  &N, As, &N, worke);
-      zcymm_( &side, &uplo, &N, &NRHS, &NEGONE, As, &LDA, res_, &LDX, &ONE, Bs, &N);
-      Rnorm=zlange_("I", &N, &NRHS, Bs, &LDB, worke);
+      Anorm = lapackf77_zlansy( &norm, &uplo,  &N, As, &N, worke);
+      blasf77_zsymm( &side, &uplo, &N, &NRHS, &NEGONE, As, &LDA, res_, &LDX, &ONE, Bs, &N);
+      Rnorm=lapackf77_zlange("I", &N, &NRHS, Bs, &LDB, worke);
       free(worke);
 
     //=====================================================================

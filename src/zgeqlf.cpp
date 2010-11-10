@@ -210,12 +210,12 @@ magma_zgeqlf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
 	       A(1:m-k+i+ib-1,n-k+i:n-k+i+ib-1) */
 	    rows = *m - k + i + ib;
 	    cols = *n - k + i;
-	    zgeqlf_(&rows,&ib, a_ref(0,cols), lda, tau+i, work,lwork,&iinfo);
+	    lapackf77_zgeqlf(&rows,&ib, a_ref(0,cols), lda, tau+i, work,lwork,&iinfo);
 
 	    if (cols > 0) {
 	        /* Form the triangular factor of the block reflector   
 		   H = H(i+ib-1) . . . H(i+1) H(i) */
-	        zlarft_("B", "C", &rows, &ib, a_ref(0, cols), lda, 
+	        lapackf77_zlarft("B", "C", &rows, &ib, a_ref(0, cols), lda, 
 			tau + i, work, &ib);
        
 		zpanel_to_q('L', ib, a_ref(rows-ib,cols), *lda, work+ib*ib);
@@ -255,7 +255,7 @@ magma_zgeqlf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_,
       cublasGetMatrix(*m, nu, sizeof(double2),
 		      da_ref(0,0), ldda, a_ref(0,0), *lda);
 
-      zgeqlf_(&mu, &nu, a_ref(0,0), lda, tau, work, lwork, &iinfo);
+      lapackf77_zgeqlf(&mu, &nu, a_ref(0,0), lda, tau, work, lwork, &iinfo);
     }
 
     cublasFree(da);

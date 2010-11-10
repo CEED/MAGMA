@@ -79,9 +79,9 @@ magma_zgetrs_gpu(char trans_, magma_int_t n, magma_int_t nrhs, double2 *a , magm
 
     char trans[2] = {trans_, 0};
 
-    long int notran = lsame_(trans, "N");
+    long int notran = lapackf77_lsame(trans, "N");
     *info = 0;
-    if (! notran && ! lsame_(trans, "T") && ! lsame_(trans, "C")) {
+    if (! notran && ! lapackf77_lsame(trans, "T") && ! lapackf77_lsame(trans, "C")) {
       *info = -1;
     } else if (n < 0) {
       *info = -2;
@@ -107,7 +107,7 @@ magma_zgetrs_gpu(char trans_, magma_int_t n, magma_int_t nrhs, double2 *a , magm
       int k1 = 1 ;
       int k2 = n;
       int k3 = 1 ;
-      zlaswp_(&nrhs, hwork, &n, &k1, &k2, ipiv, &k3);
+      lapackf77_zlaswp(&nrhs, hwork, &n, &k1, &k2, ipiv, &k3);
       cublasSetMatrix( n, nrhs, sizeof(double2), hwork, n, b, ldb);
       
       cublasZtrsm('L','L','N','U', n , nrhs, c_one, a , lda , b , ldb );
@@ -121,7 +121,7 @@ magma_zgetrs_gpu(char trans_, magma_int_t n, magma_int_t nrhs, double2 *a , magm
       int k1 = 1 ;
       int k2 = n;
       int k3 = -1;
-      zlaswp_(&nrhs, hwork, &n, &k1, &k2, ipiv , &k3);
+      lapackf77_zlaswp(&nrhs, hwork, &n, &k1, &k2, ipiv , &k3);
       cublasSetMatrix( n, nrhs, sizeof(double2), hwork,n, b,ldb);
     }
 

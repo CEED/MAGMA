@@ -14,9 +14,6 @@
 #include <cublas.h>
 #include "magma.h"
 
-extern "C" int zunm2r_(char *, char *, int *, int *, int *, double2 *, int *, 
-		       double2 *, double2 *, int *, double2 *, int *);
-
 extern "C" magma_int_t
 magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_, 
 	     magma_int_t k_, double2 *a, magma_int_t lda_, double2 *tau, double2 *c__, magma_int_t ldc_,
@@ -153,8 +150,8 @@ magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
 
     /* Function Body */
     *info = 0;
-    left = lsame_(side, "L");
-    notran = lsame_(trans, "N");
+    left = lapackf77_lsame(side, "L");
+    notran = lapackf77_lsame(trans, "N");
     lquery = *lwork == -1;
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
@@ -166,9 +163,9 @@ magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
 	nq = *n;
 	nw = *m;
     }
-    if (! left && ! lsame_(side, "R")) {
+    if (! left && ! lapackf77_lsame(side, "R")) {
 	*info = -1;
-    } else if (! notran && ! lsame_(trans, "T")) {
+    } else if (! notran && ! lapackf77_lsame(trans, "T")) {
 	*info = -2;
     } else if (*m < 0) {
 	*info = -3;
@@ -221,7 +218,7 @@ magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
     if (nb < nbmin || nb >= *k) 
       {
 	/* Use unblocked code */
-	zunm2r_(side, trans, m, n, k, &a[a_offset], lda, &tau[1], 
+	lapackf77_zunm2r(side, trans, m, n, k, &a[a_offset], lda, &tau[1], 
 		&c__[c_offset], ldc, &work[1], &iinfo);
       } 
     else 
@@ -254,7 +251,7 @@ magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
 	    /* Form the triangular factor of the block reflector   
 	       H = H(i) H(i+1) . . . H(i+ib-1) */
 	    i__4 = nq - i__ + 1;
-	    zlarft_("F", "C", &i__4, &ib, &a[i__ + i__ * a_dim1], lda, 
+	    lapackf77_zlarft("F", "C", &i__4, &ib, &a[i__ + i__ * a_dim1], lda, 
 		    &tau[i__], t, &ib);
 
 	    // TTT ------------------------------------------------------------
@@ -288,7 +285,7 @@ magma_zunmqr(char side_, char trans_, magma_int_t m_, magma_int_t n_,
 			 dwork+i__4*ib + ib*ib, ni);
 	    //-----------------------------------------------------------------
 	    /*
-	    zlarfb_(side, trans, "Forward", "Columnwise", &mi, &ni, &ib, 
+	    lapackf77_zlarfb(side, trans, "Forward", "Columnwise", &mi, &ni, &ib, 
 		    &a[i__ + i__ * a_dim1], lda, t, &c__65, 
 		    &c__[ic + jc * c_dim1], ldc, &work[1], &ldwork);
 	    */

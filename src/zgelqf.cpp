@@ -15,13 +15,6 @@
 #include "magma.h"
 #include "magmablas.h"
 
-extern "C" void
-magmablas_ztranspose2(double2 *, int, double2 *, int, int, int);
-
-extern "C" void
-magmablas_zpermute_long2(double2 *, int, int *, int, int);
-
-
 extern "C" magma_int_t
 magma_zgelqf(magma_int_t m_, magma_int_t n_, double2 *a, magma_int_t lda_, 
 	     double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info)

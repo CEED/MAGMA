@@ -14,9 +14,6 @@
 #include <cublas.h>
 #include "magma.h"
 
-extern "C" int zung2r_(int*, int*, int*, double2*, int*, double2*, double2*, int*);
-
-
 extern "C" int
 magma_zungqr(int *m, int *n, int *k, double2 *a, 
 	     int *lda, double2 *tau, double2 *work, int *lwork, int *info)
@@ -155,7 +152,7 @@ magma_zungqr(int *m, int *n, int *k, double2 *a,
 	i__1 = *m - kk;
 	i__2 = *n - kk;
 	i__3 = *k - kk;
-	zung2r_(&i__1, &i__2, &i__3, &a[kk + 1 + (kk + 1) * a_dim1], lda, &
+	lapackf77_zung2r(&i__1, &i__2, &i__3, &a[kk + 1 + (kk + 1) * a_dim1], lda, &
 		tau[kk + 1], &work[1], &iinfo);
       }
 
@@ -170,13 +167,13 @@ magma_zungqr(int *m, int *n, int *k, double2 *a,
 		/* Form the triangular factor of the block reflector   
 		   H = H(i) H(i+1) . . . H(i+ib-1) */
 		i__2 = *m - i__ + 1;
-		zlarft_("Forward", "Columnwise", &i__2, &ib, 
+		lapackf77_zlarft("Forward", "Columnwise", &i__2, &ib, 
 			&a[i__+i__*a_dim1], lda, &tau[i__], &work[1], &ldwork);
 
 		/* Apply H to A(i:m,i+ib:n) from the left */
 		i__2 = *m - i__ + 1;
 		i__3 = *n - i__ - ib + 1;
-		zlarfb_("Left", "No transpose", "Forward", "Columnwise", &
+		lapackf77_zlarfb("Left", "No transpose", "Forward", "Columnwise", &
 			i__2, &i__3, &ib, &a[i__ + i__ * a_dim1], lda, &work[
 			1], &ldwork, &a[i__ + (i__ + ib) * a_dim1], lda, &
 			work[ib + 1], &ldwork);
@@ -184,7 +181,7 @@ magma_zungqr(int *m, int *n, int *k, double2 *a,
 	    
 	    /* Apply H to rows i:m of current block */
 	    i__2 = *m - i__ + 1;
-	    zung2r_(&i__2, &ib, &ib, &a[i__ + i__ * a_dim1], lda, &tau[i__], &
+	    lapackf77_zung2r(&i__2, &ib, &ib, &a[i__ + i__ * a_dim1], lda, &tau[i__], &
 		    work[1], &iinfo);
 
 	    /* Set rows 1:i-1 of current block to zero */
