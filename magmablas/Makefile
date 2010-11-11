@@ -28,7 +28,27 @@ ALLSRC= $(DSRC) $(SSRC)		\
         \
         sgemv_tesla.cu \
         dgemv_tesla.cu \
-        gemv32_tesla.cu
+        gemv32_tesla.cu \
+        \
+        sgemm_tesla.cu \
+        sgemm_tesla_a_0.cu \
+        sgemm_tesla_ab_0.cu \
+        sgemm_tesla_N_N_64_16_16_16_4.cu \
+        sgemm_tesla_N_N_64_16_16_16_4_special.cu \
+        sgemm_tesla_N_T_64_16_4_16_4.cu \
+        sgemm_tesla_T_N_32_32_8_8_8.cu \
+        sgemm_tesla_T_T_64_16_16_16_4.cu \
+        \
+        dgemm_tesla.cu \
+        dgemm_tesla_a_0.cu \
+        dgemm_tesla_ab_0.cu \
+        dgemm_tesla_N_N_64_16_16_16_4.cu \
+        dgemm_tesla_N_N_64_16_16_16_4_special.cu \
+        dgemm_tesla_N_T_64_16_4_16_4.cu \
+        dgemm_tesla_T_N_32_32_8_8_8.cu \
+        dgemm_tesla_T_T_64_16_16_16_4.cu \
+        dgemm_tesla_T_T_64_16_16_16_4_v2.cu \
+        \
 
 ALLOBJ = $(ALLSRC:.cu=.cu_o) 
 

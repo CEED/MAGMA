@@ -1,4 +1,4 @@
-*
+/*
     -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
