@@ -22,7 +22,9 @@ ZSRC  = testing_zgetrf.cpp 	\
         \
         testing_zgehrd.cpp 	\
         testing_zhetrd.cpp 	\
-        testing_zgebrd.cpp
+        testing_zgebrd.cpp      \
+        \
+        testing_zgemm.cpp       \
 
 #	\
 #	testing_zcgesv_gpu.cpp	\

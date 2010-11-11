@@ -83,7 +83,7 @@ int main( int argc, char** argv)
 
       for(j = 0; j < n2; j++)
 	h_A[j] = rand() / (double2)RAND_MAX;
-            for(j=0; j<n2; j+=(lda+1))
+      for(j=0; j<n2; j+=(lda+1))
       	h_R[j] = (h_A[j]+=2000);
 
       magma_zpotrf('L', N, h_R, lda, info);
