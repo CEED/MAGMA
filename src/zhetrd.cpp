@@ -34,7 +34,7 @@ double2 cpu_gpu_zdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda)
 
 
 extern "C" magma_int_t
-magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double2 *d__, double2 *e, 
+magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double2 *d, double2 *e, 
 	     double2 *tau, double2 *work, magma_int_t *lwork, double2 *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -181,7 +181,7 @@ magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double2 *d__
     a_dim1 = lda;
     a_offset = 1 + a_dim1;
     a -= a_offset;
-    --d__;
+    --d;
     --e;
     --tau;
     --work;
@@ -250,12 +250,12 @@ magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double2 *d__
 	    i__3 = i__ + nb - 1;
 	    for (j = i__; j <= i__3; ++j) {
 		a[j - 1 + j * a_dim1] = e[j - 1];
-		d__[j] = a[j + j * a_dim1];
+		d[j] = a[j + j * a_dim1];
 	    }
 	  }
 
 	/*  Use unblocked code to reduce the last or only block */
-	lapackf77_zhetd2(uplo_, &kk, &a[a_offset], &lda, &d__[1], &e[1], &tau[1], &iinfo);
+	lapackf77_zhetd2(uplo_, &kk, &a[a_offset], &lda, &d[1], &e[1], &tau[1], &iinfo);
     } 
     else 
       {
@@ -299,7 +299,7 @@ magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double2 *d__
 	    i__3 = i__ + nb - 1;
 	    for (j = i__; j <= i__3; ++j) {
 	      a[j + 1 + j * a_dim1] = e[j];
-	      d__[j] = a[j + j * a_dim1];
+	      d[j] = a[j + j * a_dim1];
 	    }
 	  }
 
@@ -311,7 +311,7 @@ magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double2 *d__
 			  da + (i__-1) + (i__-1) * a_dim1, ldda,
 			  a  +  i__    +  i__    * a_dim1, lda);
 	
-	lapackf77_zhetrd(uplo_, &i__1, &a[i__ + i__ * a_dim1], &lda, &d__[i__], &e[i__],
+	lapackf77_zhetrd(uplo_, &i__1, &a[i__ + i__ * a_dim1], &lda, &d[i__], &e[i__],
                          &tau[i__], &work[1], lwork, &iinfo);
 	
       }
