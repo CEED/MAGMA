@@ -16,7 +16,7 @@
 
 extern "C" int
 magma_zunmtr(char *side, char *uplo, char *trans, int *m, int *n, 
-	     double2 *a, int *lda, double2 *tau, double2 *c__, int *ldc,
+	     double2 *a, int *lda, double2 *tau, double2 *c, int *ldc,
 	     double2 *work, int *lwork, int *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -127,7 +127,7 @@ magma_zunmtr(char *side, char *uplo, char *trans, int *m, int *n,
     --tau;
     c_dim1 = *ldc;
     c_offset = 1 + c_dim1;
-    c__ -= c_offset;
+    c -= c_offset;
     --work;
 
     /* Function Body */
@@ -198,7 +198,7 @@ magma_zunmtr(char *side, char *uplo, char *trans, int *m, int *n,
 	/* Q was determined by a call to SSYTRD with UPLO = 'U' */
 	i__2 = nq - 1;
 	lapackf77_zunmql(side, trans, &mi, &ni, &i__2, &a[(a_dim1 << 1) + 1], lda, &
-		tau[1], &c__[c_offset], ldc, &work[1], lwork, &iinfo);
+		tau[1], &c[c_offset], ldc, &work[1], lwork, &iinfo);
       }
     else 
       {
@@ -213,7 +213,7 @@ magma_zunmtr(char *side, char *uplo, char *trans, int *m, int *n,
 	i__2 = nq - 1;
 	magma_zunmqr(side[0], trans[0], mi, ni, i__2, &a[a_dim1 + 2], *lda, 
 		     &tau[1],
-		     &c__[i1 + i2 * c_dim1], *ldc, &work[1], lwork, &iinfo);
+		     &c[i1 + i2 * c_dim1], *ldc, &work[1], lwork, &iinfo);
       }
     MAGMA_Z_SET2REAL( work[1], lwkopt );
     return 0;

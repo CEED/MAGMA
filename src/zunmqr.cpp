@@ -16,7 +16,7 @@
 
 extern "C" magma_int_t
 magma_zunmqr(char side, char trans, magma_int_t m, magma_int_t n,
-	     magma_int_t k, double2 *a, magma_int_t lda, double2 *tau, double2 *c__, magma_int_t ldc,
+	     magma_int_t k, double2 *a, magma_int_t lda, double2 *tau, double2 *c, magma_int_t ldc,
 	     double2 *work, magma_int_t *lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -121,7 +121,7 @@ magma_zunmqr(char side, char trans, magma_int_t m, magma_int_t n,
     cublasAlloc((m)*(n), sizeof(double2), (void**)&dc);
     cublasAlloc(2*(m+64)*64, sizeof(double2), (void**)&dwork);
     
-    cublasSetMatrix( m, n, sizeof(double2), c__, ldc, dc, ldc);
+    cublasSetMatrix( m, n, sizeof(double2), c, ldc, dc, ldc);
     dc -= (1 + m);
     //-------------------------------------------------------------------------
 
@@ -140,7 +140,7 @@ magma_zunmqr(char side, char trans, magma_int_t m, magma_int_t n,
     --tau;
     c_dim1 = ldc;
     c_offset = 1 + c_dim1;
-    c__ -= c_offset;
+    c -= c_offset;
     --work;
 
     /* Function Body */
@@ -214,7 +214,7 @@ magma_zunmqr(char side, char trans, magma_int_t m, magma_int_t n,
       {
 	/* Use unblocked code */
 	lapackf77_zunm2r(side_, trans_, &m, &n, &k, &a[a_offset], &lda, &tau[1], 
-		&c__[c_offset], &ldc, &work[1], &iinfo);
+		&c[c_offset], &ldc, &work[1], &iinfo);
       } 
     else 
       {
@@ -282,7 +282,7 @@ magma_zunmqr(char side, char trans, magma_int_t m, magma_int_t n,
 	    /*
 	    lapackf77_zlarfb(side, trans, "Forward", "Columnwise", &mi, &ni, &ib, 
 		    &a[i__ + i__ * a_dim1], &lda, t, &c__65, 
-		    &c__[ic + jc * c_dim1], &ldc, &work[1], &ldwork);
+		    &c[ic + jc * c_dim1], &ldc, &work[1], &ldwork);
 	    */
 	  }
       }
