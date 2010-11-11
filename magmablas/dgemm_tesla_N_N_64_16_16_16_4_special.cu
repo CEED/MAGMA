@@ -1,4 +1,4 @@
-/*
+*
     -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -9,7 +9,7 @@
 #include "cublas.h"
 #include "magma.h"
 
-__device__ void saxpy(float a,float *b, float *c) {
+__device__ void saxpy(double a,double *b, double *c) {
 	c[0] += a * b[0];
 	c[1] += a * b[1];
 	c[2] += a * b[2];
@@ -29,10 +29,10 @@ __device__ void saxpy(float a,float *b, float *c) {
 }
 
 extern "C" __global__ void 
-sgemm_kernel_N_N_64_16_16_16_4_special(float *C, const float *A, const float *B, 
+dgemm_kernel_N_N_64_16_16_16_4_special(double *C, const double *A, const double *B,
                                        int m, int n, int k, 
                                        int lda, int ldb, int ldc, 
-                                       float alpha, float beta)
+                                       double alpha, double beta) 
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -65,17 +65,17 @@ sgemm_kernel_N_N_64_16_16_16_4_special(float *C, const float *A, const float *B,
 	A += ibx + idt;
 	C += ibx +idt +__mul24( iby,ldc);
 
-	const float *Bend = B + k;
+	const double *Bend = B + k;
 
 
-	float Cb[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	double Cb[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 	m = 2*lda ; 
 	n = 3*lda ;
 
 	do {
-		//float Ab[4] = {A[0], A[lda], A[2*lda], A[3*lda]};
-		float Ab[4] = {A[0], A[lda], A[m], A[n]};
-		__shared__ float Bb[16][17];
+		//double Ab[4] = {A[0], A[lda], A[2*lda], A[3*lda]};
+		double Ab[4] = {A[0], A[lda], A[m], A[n]};
+		__shared__ double Bb[16][17];
 		Bb[tx][ty+0] = B[0];
 		Bb[tx][ty+4] = B[4*ldb];
 		Bb[tx][ty+8] = B[8*ldb];
@@ -119,16 +119,16 @@ sgemm_kernel_N_N_64_16_16_16_4_special(float *C, const float *A, const float *B,
 }
 
 extern "C" void
-magmablas_sgemm_kernel_N_N_64_16_16_16_4_special(float *C, 
-                                                 const float *A, 
-                                                 const float *B,
+magmablas_dgemm_kernel_N_N_64_16_16_16_4_special(double *C, 
+                                                 const double *A, 
+                                                 const double *B, 
                                                  int m, int n, int k,
-                                                 int lda, int ldb, int ldc, 
-                                                 float alpha, float beta)
+                                                 int lda, int ldb, int ldc,
+                                                 double alpha, double beta)
 {
         dim3 threads( 16, 4 );
         dim3 grid(m/64,n/16);
-        sgemm_kernel_N_N_64_16_16_16_4_special<<< grid, threads >>>(C, A, B, 
+        dgemm_kernel_N_N_64_16_16_16_4_special<<< grid, threads >>>(C, A, B,
                                                                     m, n, k,
                                                                     lda, ldb, ldc, 
                                                                     alpha, beta);

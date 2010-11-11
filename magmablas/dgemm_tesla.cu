@@ -25,7 +25,7 @@ magmablas_dgemm_tesla(char TRANSA, char TRANSB, int m , int n , int k ,
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       August 2010
+       November 2010
 
    Purpose
    =======
