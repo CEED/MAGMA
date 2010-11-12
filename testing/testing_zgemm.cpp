@@ -42,10 +42,13 @@ double verifyResult(const double2 *mat, const double2 *mat_ref) {
 
 int main( int argc, char** argv) 
 {
-  int oneTime =64;
-  int step   = 64 ;
-  int count  = 80;   
+  int oneTime =1024;
+  int step   = 1024;
+  int count  = 10;   
   int flag   = 0 ;
+
+  char TRANSA = 'N' ;
+  char TRANSB = 'N' ;
 
   if (argc != 1){
     for(int i = 1; i<argc; i++){
@@ -55,11 +58,25 @@ int main( int argc, char** argv)
 	count = 1;
 	flag = 0 ;
       }
+      else if (strcmp("-NN", argv[i])==0){
+	TRANSA = TRANSB = 'N';
+      }
+      else if (strcmp("-TT", argv[i])==0){
+	TRANSA = TRANSB = 'T';
+      }
+      else if (strcmp("-NT", argv[i])==0){
+	TRANSA = 'N';
+	TRANSB = 'T';
+      }
+      else if (strcmp("-TN", argv[i])==0){
+	TRANSA = 'T';
+	TRANSB = 'N';
+      }
     }
   }
 
   printf("\nUsage: \n");
-  printf("  testing_zgemm -N %d \n\n", 1024);
+  printf("  testing_zgemm [-NN|NT|TN|TT] [-N %d] \n\n", 1024);
  
   TimeStruct start, end;
   double cuda_perf , magma_perf ; 
@@ -69,10 +86,8 @@ int main( int argc, char** argv)
   printout_devices( );
   printf("\n");
    
-  char TRANSA = 'N' ;
-  char TRANSB = 'N' ;
   printf("\n");
-
+  printf("Testing TRANSA = %c  TRANSB = %c\n", TRANSA, TRANSB);  
   printf("    N     MAGMA GFLop/s    CUBLAS GFlop/s       error\n");
   printf("========================================================\n");
   for(int i=oneTime;i<=(oneTime+(count-1)*step);i+=step){
