@@ -46,7 +46,6 @@ int main( int argc, char** argv)
   int step   = 64 ;
   int count  = 80;   
   int flag   = 0 ;
-  int fermi  = 0;
 
   if (argc != 1){
     for(int i = 1; i<argc; i++){
@@ -56,13 +55,11 @@ int main( int argc, char** argv)
 	count = 1;
 	flag = 0 ;
       }
-      else if (strcmp("-fermi", argv[i])==0)
-	fermi = 1;
     }
   }
 
   printf("\nUsage: \n");
-  printf("  testing_zgemm -N %d [-tesla]|-fermi \n\n", 1024);
+  printf("  testing_zgemm -N %d \n\n", 1024);
  
   TimeStruct start, end;
   double cuda_perf , magma_perf ; 
