@@ -16,10 +16,12 @@
 
 #include <ctype.h>
 
+#if __CUDA_ARCH__ < 200
+
 extern "C" void 
-magmablas_dgemm_tesla(char TRANSA, char TRANSB, int m , int n , int k , 
-                      double alpha, const double *A, int lda, const double *B, 
-                      int ldb, double beta, double *C, int ldc)
+magmablas_dgemm(char TRANSA, char TRANSB, int m , int n , int k , 
+                double alpha, const double *A, int lda, const double *B, 
+                int ldb, double beta, double *C, int ldc)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -136,9 +138,6 @@ magmablas_dgemm_tesla(char TRANSA, char TRANSB, int m , int n , int k ,
             in  the  calling  (sub)  program.   LDC  must  be  at  least
             max( 1, m ).
             Unchanged on exit.
- 
- 
-   Level 3 Blas routine.
    =====================================================================    */
 
    if(m==0 || n==0  || ( ( alpha==0 || k==0 ) && beta ==1 ) ){
@@ -243,3 +242,5 @@ magmablas_dgemm_tesla(char TRANSA, char TRANSB, int m , int n , int k ,
         }
         
 }
+
+#endif
