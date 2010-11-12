@@ -29,9 +29,17 @@ ALLSRC= $(DSRC) $(SSRC)		\
         sgemv_tesla.cu \
         dgemv_tesla.cu \
         gemv32_tesla.cu \
+        ssymv_tesla.cu \
+        dsymv_tesla.cu \
+        chemv_tesla.cu \
+        zhemv_tesla.cu \
         \
         sgemm_fermi.cu \
         dgemm_fermi.cu \
+        ssymv_fermi.cu \
+        dsymv_fermi.cu \
+        chemv_fermi.cu \
+        zhemv_fermi.cu \
         \
         sgemm_tesla.cu \
         sgemm_tesla_a_0.cu \

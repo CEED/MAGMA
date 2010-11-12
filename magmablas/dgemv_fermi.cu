@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 1.0) --
+    -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2009
 */
 
 #include "cublas.h"
@@ -12,6 +12,8 @@
 #define num_threads 64
 #define dgemv_bs 64
 #define threadSize 128
+
+
 
 __global__ void 
 dgemv_kernel_fermi(int n, int m, int n1, double* A, int lda, double *x, double *y)
@@ -53,31 +55,31 @@ dgemv_kernel_fermi(int n, int m, int n1, double* A, int lda, double *x, double *
 
 
 extern "C" void
-magmablas_dgemv_fermi(int m, int n, double *A, int lda, double *x, double *z)
+magmablas_dgemv_fermi(int n, int m, double *A, int lda, double *x, double *z)
 {
-/*  -- MAGMA (version 1.0) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2009
 
     Purpose
     =======
 
     This routine computes z = A x on the GPU.
 
-    M      - (input) INTEGER.
-             On entry, M specifies the number of rows of the matrix A.
-
     N      - (input) INTEGER.
-             On entry, N specifies the number of columns of the matrix A
+             On entry, N specifies the number of rows of the matrix A.
 
-    A      - (input) DOUBLE PRECISION array of dimension (LDA, n) on the GPU.
+    M      - (input) INTEGER.
+             On entry, M specifies the number of columns of the matrix A
+
+    A      - (input) DOUBLE PRECISION array of dimension ( LDA, m ) on the GPU.
    
     LDA    - (input) INTEGER.
              LDA specifies the leading dimension of A.
 
-    X      - (input) DOUBLE PRECISION array of dimension n.
+    X      - (input) DOUBLE PRECISION array of dimension m.
      
     Z      - (output) DOUBLE PRECISION array of	dimension m. 
              On exit Z = A X.
@@ -85,22 +87,22 @@ magmablas_dgemv_fermi(int m, int n, double *A, int lda, double *x, double *z)
     ===================================================================== */
 
     int blocks;
-    if (m % num_threads==0)
-        blocks = m/num_threads;
+    if (n % num_threads==0)
+        blocks = n/num_threads;
     else
-        blocks = m/num_threads + 1;
+        blocks = n/num_threads + 1;
 
     dim3 grid(blocks, 1, 1);
     dim3 threads(num_threads, 1, 1);
  
-    dgemv_kernel_fermi<<<grid, threads>>>(m, n, (n / dgemv_bs)*dgemv_bs, 
-                                          A, lda, x, z);
+    dgemv_kernel_fermi<<<grid, threads>>>(n, m, (m / dgemv_bs)*dgemv_bs, 
+                                    A, lda, x, z);
 }
 
 
 __global__ void
 dgemvt_kernel1_fermi(int m, int n, double alpha, int n1, double* A, int lda,
-                     double *x, double *y)
+              double *x, double *y)
 {
 	unsigned int tx = threadIdx.x;
 
@@ -171,14 +173,14 @@ dgemvt_kernel1_fermi(int m, int n, double alpha, int n1, double* A, int lda,
 
 __global__ void
 dgemvt_kernel2_fermi(int m, int n, double alpha,
-		     int n1, double* A, int lda, double *x, double *y)
+		int n1, double* A, int lda, double *x, double *y)
 {
   const int inx = threadIdx.x;
   const int iny = threadIdx.y;
 
-  int ind  = iny + __mul24(blockIdx.x,16);
-  ind = inx + __mul24(ind,lda);
-  int ind2 = inx + __mul24(iny,16);
+  int ind  = iny + blockIdx.x * 16;
+  ind = inx + ind * lda;
+  int ind2 = inx + iny * 16;
   if (ind2>31)
      ind2-=32;
 
@@ -196,7 +198,7 @@ dgemvt_kernel2_fermi(int m, int n, double alpha,
      buff[ind2]  = x[i];
      #pragma unroll
      for(int j=0; j<4; j++)
-        la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
+        la[iny + j * 4][inx] = A[j * 4 * lda];
 
      __syncthreads();
      #pragma unroll
@@ -208,7 +210,7 @@ dgemvt_kernel2_fermi(int m, int n, double alpha,
      //===========================================
      #pragma unroll
      for(int j=0; j<4; j++)
-         la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
+         la[iny+ j * 4][inx] = A[j* 4 * lda];
 
      __syncthreads();
 
@@ -227,7 +229,7 @@ dgemvt_kernel2_fermi(int m, int n, double alpha,
      __syncthreads();
      #pragma unroll
      for(int j=0; j<4; j++)
-         la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
+         la[iny+ j * 4 ][inx] = A[j* 4 * lda];
 
      __syncthreads();
      if (n-n1>4){
@@ -239,7 +241,7 @@ dgemvt_kernel2_fermi(int m, int n, double alpha,
         __syncthreads();
         #pragma unroll
           for(int j=0; j<4; j++)
-            la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
+            la[iny+ j * 4][inx] = A[j* 4 * lda];
 
         __syncthreads();
 
@@ -255,7 +257,7 @@ dgemvt_kernel2_fermi(int m, int n, double alpha,
   }
 
   __syncthreads();
-  ind = inx + __mul24(blockIdx.x,16);
+  ind = inx + blockIdx.x * 16;
   la[inx][iny]= res;
   __syncthreads();
   if (ind<n){
@@ -266,13 +268,13 @@ dgemvt_kernel2_fermi(int m, int n, double alpha,
 
 extern "C" void
 magmablas_dgemvt1_fermi(int m, int n, double alpha, double *A, int lda,
-                        double *x, double *z)
+                  double *x, double *z)
 {
-/*  -- MAGMA (version 1.0) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2009
 
     Purpose
     =======
@@ -302,20 +304,21 @@ magmablas_dgemvt1_fermi(int m, int n, double alpha, double *A, int lda,
 	dim3 grid    ( 1,  n,  1);
 	dim3 threads ( threadSize,   1,  1);
 
-	dgemvt_kernel1_fermi<<<grid, threads>>>( m, n, alpha, 
-                                                (m/threadSize)*threadSize,
-                                                A, lda, x, z);
+	dgemvt_kernel1_fermi<<<grid, threads>>>( m, n, alpha, ( m / threadSize) * threadSize,
+				                                       A, lda, x, z);
+
+
 }
 
 extern "C" void
 magmablas_dgemvt2_fermi(int m, int n, double alpha, double *A, int lda,
-                        double *x, double *z)
+                  double *x, double *z)
 {
-/*  -- MAGMA (version 1.0) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2009
 
     Purpose
     =======
@@ -352,18 +355,18 @@ magmablas_dgemvt2_fermi(int m, int n, double alpha, double *A, int lda,
     dim3 threads(16, 4, 1);
 
     dgemvt_kernel2_fermi<<<grid, threads>>>(m, n, alpha, (m / 32)*32,
-                                            A, lda, x, z);
+                                      A, lda, x, z);
 }
 
 extern "C" void
 magmablas_dgemvt_fermi(int m, int n, double alpha, double *A, int lda,
-                       double *x, double *z)
+                 double *x, double *z)
 {
-/*  -- MAGMA (version 1.0) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2009
 
     Purpose
     =======
@@ -396,3 +399,4 @@ magmablas_dgemvt_fermi(int m, int n, double alpha, double *A, int lda,
 
 #undef num_threads
 #undef dgemv_bs
+#undef threadSize

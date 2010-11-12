@@ -1,20 +1,22 @@
 /*
-    -- MAGMA (version 1.0) --
+    -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2009
 */
 
 #include "cublas.h"
 #include "magma.h"
+#include "constant.h"
 
 #define num_threads 128
 #define sgemv_bs 32
 #define threadSize 128
 
+
 __global__ void 
-sgemv_kernel_fermi(int n, int m, int n1, float* A, int lda, float *x, float *y)
+sgemv_kernel1_fermi(int n, int m, int n1, float* A, int lda, float *x, float *y)
 {
   int ind = blockIdx.x*num_threads + threadIdx.x;
 
@@ -45,34 +47,70 @@ sgemv_kernel_fermi(int n, int m, int n1, float* A, int lda, float *x, float *y)
 
 }
 
+__global__ void 
+sgemv_kernel2_fermi(int n, int m, int n1, float* A, int lda, float *x, float *y)
+{
+  int ind = blockIdx.x*num_threads + threadIdx.x;
+
+  A += ind;
+  x += threadIdx.x;
+
+  float res = 0.f;
+
+  __shared__ float buff[num_threads];
+  for(int i=0; i<n1; i += num_threads ){
+    __syncthreads();
+    buff[threadIdx.x]  = x[i];
+
+    __syncthreads();
+    #pragma unroll
+    for(int j=0; j < num_threads ; j++){
+       res+=A[0]*buff[j];
+       A+=lda;
+    }
+  }
+  __syncthreads();
+
+  if (m>n1){
+     buff[threadIdx.x]  = x[n1];
+
+     __syncthreads();
+     for(int j=0; j<(m-n1); j++){
+         res += A[0]*buff[j];
+         A+=lda;
+     }
+  }
+
+  if (ind<n)
+     y[ind] = res;
+}
 
 extern "C" void
-magmablas_sgemv_fermi(int m, int n, float *A, int lda, float *x, float *z)
+magmablas_sgemv_fermi(int n, int m, float *A, int lda, float *x, float *z)
 {
-/*  -- MAGMA (version 1.0) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2009
 
     Purpose
     =======
 
     This routine computes z = A x on the GPU.
 
-    M      - (input) INTEGER.
-             On entry, M specifies the number of rows of the matrix A.
-
     N      - (input) INTEGER.
-             On entry, N specifies the number of columns of the matrix A
+             On entry, N specifies the number of rows of the matrix A.
 
-    A      - (input) SINGLE PRECISION array of dimension 
-             (LDA, n) on the GPU.
+    M      - (input) INTEGER.
+             On entry, M specifies the number of columns of the matrix A
+
+    A      - (input) SINGLE PRECISION array of dimension ( LDA, m ) on the GPU.
    
     LDA    - (input) INTEGER.
              LDA specifies the leading dimension of A.
 
-    X      - (input) SINGLE PRECISION array of dimension n.
+    X      - (input) SINGLE PRECISION array of dimension m.
      
     Z      - (output) SINGLE PRECISION array of	dimension m. 
              On exit Z = A X.
@@ -80,23 +118,26 @@ magmablas_sgemv_fermi(int m, int n, float *A, int lda, float *x, float *z)
     ===================================================================== */
 
     int blocks;
-    if (m % num_threads==0)
-        blocks = m/num_threads;
+    if (n % num_threads==0)
+        blocks = n/num_threads;
     else
-        blocks = m/num_threads + 1;
+        blocks = n/num_threads + 1;
 
     dim3 grid(blocks, 1, 1);
     dim3 threads(num_threads, 1, 1);
- 
-    sgemv_kernel_fermi<<<grid, threads>>>(m, n, (n / sgemv_bs)*sgemv_bs, 
-                                          A, lda, x, z);
+    if(n<=8500) 
+		sgemv_kernel1_fermi<<<grid, threads>>>(n, m, (m / sgemv_bs)*sgemv_bs, 
+			                            A, lda, x, z);
+    else
+		sgemv_kernel2_fermi<<<grid, threads>>>(n, m, (m / num_threads)*num_threads, 
+			                            A, lda, x, z);
 }
 
 
 
 __global__ void 
 sgemvt_kernel1_fermi(int m, int n, float alpha, int n1, float* A, int lda,
-                     float *x, float *y)
+              float *x, float *y)
 {
 	unsigned int tx = threadIdx.x;
 
@@ -167,14 +208,14 @@ sgemvt_kernel1_fermi(int m, int n, float alpha, int n1, float* A, int lda,
 
 __global__ void 
 sgemvt_kernel2_fermi(int m, int n, float alpha,
-                     int n1, float* A, int lda, float *x, float *y)
+               int n1, float* A, int lda, float *x, float *y)
 {
   const int inx = threadIdx.x;
   const int iny = threadIdx.y;
 
-  int ind  = iny + __mul24(blockIdx.x,16);
-  ind = inx + __mul24(ind,lda);
-  int ind2 = inx + __mul24(iny,16);
+  int ind  = iny + blockIdx.x * 16;
+  ind = inx + ind * lda;
+  int ind2 = inx + iny * 16;
   if (ind2>31)
      ind2-=32;
 
@@ -190,7 +231,7 @@ sgemvt_kernel2_fermi(int m, int n, float alpha,
      buff[ind2]  = x[i];
      #pragma unroll
      for(int j=0; j<4; j++)
-        la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
+        la[iny + j * 4][inx] = A[j* 4 * lda];
 
      __syncthreads();
      #pragma unroll
@@ -203,7 +244,7 @@ sgemvt_kernel2_fermi(int m, int n, float alpha,
      //===========================================
      #pragma unroll
      for(int j=0; j<4; j++)
-         la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
+         la[iny+ j * 4][inx] = A[j* 4 * lda];
 
      __syncthreads();
 
@@ -224,9 +265,9 @@ sgemvt_kernel2_fermi(int m, int n, float alpha,
      #pragma unroll
      for(int j=0; j<4; j++)
          if (inx>=(n-n1))
-            la[iny+__mul24(j,4)][inx] =  0.f;
+            la[iny + j * 4][inx] =  0.f;
          else
-            la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
+            la[iny + j * 4][inx] = A[j* 4 * lda];
 
      __syncthreads();
      if (n-n1>4){
@@ -240,9 +281,9 @@ sgemvt_kernel2_fermi(int m, int n, float alpha,
 	#pragma unroll
 	for(int j=0; j<4; j++)
           if (inx+16>=(n-n1))
-             la[iny+__mul24(j,4)][inx] = 0.f;
+             la[iny+ j * 4][inx] = 0.f;
           else
-             la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
+             la[iny+ j * 4][inx] = A[j* 4* lda];
 
         __syncthreads();
 
@@ -262,7 +303,7 @@ sgemvt_kernel2_fermi(int m, int n, float alpha,
   }
 
   __syncthreads();
-  ind = inx + __mul24(blockIdx.x,16);
+  ind = inx + blockIdx.x * 16;
   la[inx][iny]= res;
   __syncthreads();
   if (ind<n && iny==0){
@@ -273,13 +314,13 @@ sgemvt_kernel2_fermi(int m, int n, float alpha,
 
 extern "C" void
 magmablas_sgemvt1_fermi(int m, int n, float alpha, float *A, int lda,
-                        float *x, float *z)
+                  float *x, float *z)
 {
-/*  -- MAGMA (version 1.0) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2009
 
     Purpose
     =======
@@ -308,20 +349,21 @@ magmablas_sgemvt1_fermi(int m, int n, float alpha, float *A, int lda,
     dim3 grid    ( 1,  n,  1);
     dim3 threads ( threadSize,   1,  1);
 
-    sgemvt_kernel1_fermi<<<grid, threads>>>(m, n, alpha, 
-                                            (m/threadSize)*threadSize,
-                                            A, lda, x, z);	  
+    sgemvt_kernel1_fermi<<<grid, threads>>>( m, n, alpha, ( m / threadSize) * threadSize,
+                                       A, lda, x, z);
+
+									  
 }
 
 extern "C" void
 magmablas_sgemvt2_fermi(int m, int n, float alpha, float *A, int lda,
-                        float *x, float *z)
+                  float *x, float *z)
 {
-/*  -- MAGMA (version 1.0) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2009
 
     Purpose
     =======
@@ -358,18 +400,18 @@ magmablas_sgemvt2_fermi(int m, int n, float alpha, float *A, int lda,
     dim3 threads(16, 4, 1);
 
     sgemvt_kernel2_fermi<<<grid, threads>>>(m, n, alpha, (m / 32)*32,
-                                            A, lda, x, z);
+                                      A, lda, x, z);
 }
 
 extern "C" void
 magmablas_sgemvt_fermi(int m, int n, float alpha, float *A, int lda, 
-                       float *x, float *z)
+                 float *x, float *z)
 {
-/*  -- MAGMA (version 1.0) --
+/*  -- MAGMA (version 0.2) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2009
 
     Purpose
     =======
@@ -398,7 +440,10 @@ magmablas_sgemvt_fermi(int m, int n, float alpha, float *A, int lda,
       magmablas_sgemvt2_fermi(m, n, alpha, A, lda, x, z);
     else
       magmablas_sgemvt1_fermi(m, n, alpha, A, lda, x, z);
+    
+
 }
 
 #undef num_threads
 #undef sgemv_bs
+#undef threadSize 
