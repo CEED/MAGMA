@@ -24,7 +24,6 @@ ZSRC  = zpotrf.cpp	\
         zlahr2.cpp 	\
         zgeqlf.cpp 	\
         zgelqf.cpp 	\
-        zgemm_gpu.cpp 	\
         zpotrs_gpu.cpp 	\
         \
         zhetrd.cpp 	\
