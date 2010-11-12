@@ -29,10 +29,6 @@ ALLSRC= $(DSRC) $(SSRC)		\
         sgemv_tesla.cu \
         dgemv_tesla.cu \
         gemv32_tesla.cu \
-        ssymv_tesla.cu \
-        dsymv_tesla.cu \
-        chemv_tesla.cu \
-        zhemv_tesla.cu \
         \
         sgemm_fermi.cu \
         dgemm_fermi.cu \
@@ -58,8 +54,12 @@ ALLSRC= $(DSRC) $(SSRC)		\
         dgemm_tesla_N_T_64_16_4_16_4.cu \
         dgemm_tesla_T_N_32_32_8_8_8.cu \
         dgemm_tesla_T_T_64_16_16_16_4.cu \
-        dgemm_tesla_T_T_64_16_16_16_4_v2.cu \
-        \
+        dgemm_tesla_T_T_64_16_16_16_4_v2.cu
+
+#         ssymv_tesla.cu \
+#         dsymv_tesla.cu \
+#         chemv_tesla.cu \
+#         zhemv_tesla.cu \
 
 ALLOBJ = $(ALLSRC:.cu=.cu_o) 
 
@@ -75,5 +75,11 @@ clean:
 cleanall: clean
 	rm -f ../lib/libmagmablas.a
 
+%_tesla.cu_o: %_tesla.cu
+	$(NVCC) $(NVOPTS) $(TESLAOPT) $(INC) -c $< -o $@
+
+%_fermi.cu_o: %_fermi.cu
+	$(NVCC) $(NVOPTS) $(FERMIOPT) $(INC) -c $< -o $@
+
 %.cu_o: %.cu
-	$(NVCC) $(NVOPTS) -gencode arch=compute_13,code=compute_13 -gencode arch=compute_10,code=compute_10 $(INC) -c $< -o $@
+	$(NVCC) $(NVOPTS) $(DEFGPUOPT) $(INC) -c $< -o $@
