@@ -55,20 +55,20 @@ magma_zlarfb(char direct, char storev,
             The order of the matrix T (= the number of elementary
             reflectors whose product defines the block reflector).
 
-    V       (input) COMPLEX_16 array, dimension (LDV,K)
+    DV      (input) COMPLEX_16 array, dimension (LDV,K)
             The matrix V. See further details.
 
     LDV     (input) INTEGER
             The leading dimension of the array V. LDV >= max(1,M);
 
-    T       (input) COMPLEX_16 array, dimension (LDT,K)
+    DT      (input) COMPLEX_16 array, dimension (LDT,K)
             The triangular k by k matrix T in the representation of the
             block reflector.
 
     LDT     (input) INTEGER
             The leading dimension of the array T. LDT >= K.
 
-    C       (input/output) COMPLEX_16 array, dimension (LDC,N)
+    DC      (input/output) COMPLEX_16 array, dimension (LDC,N)
             On entry, the m by n matrix C.
             On exit, C is overwritten by H*C.
 

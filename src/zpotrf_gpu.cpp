@@ -71,9 +71,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
                   positive definite, and the factorization could not be   
                   completed.   
 
-    =====================================================================   
+    =====================================================================   */
 
-       Test the input parameters.   
+    /* Test the input parameters.   
 
        Parameter adjustments */
 
