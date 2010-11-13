@@ -1,7 +1,7 @@
 include $(MAGMA_DIR)/make.inc
 
 TESLAOPT  = -arch sm_13 -gencode arch=compute_13,code=compute_13 -gencode arch=compute_10,code=compute_10 
-FERMIOPT  = -arch sm_20 -gencode arch=compute_20,code=compute_20
+FERMIOPT  = -arch sm_20 
 
 #//////////////////////////////////////////////////////////////////////////
 # Precision generation 

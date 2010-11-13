@@ -1,31 +1,35 @@
 #//////////////////////////////////////////////////////////////////////////////
-#   -- MAGMA (version 1.0) --
+#   -- MAGMA (version 0.2) --
 #      Univ. of Tennessee, Knoxville
 #      Univ. of California, Berkeley
 #      Univ. of	Colorado, Denver
-#      November 2010
+#      November 2009
+#
+#      Contributed by: Allan Menezes (Ontario, Canada)
 #//////////////////////////////////////////////////////////////////////////////
 
-	CC        = gcc
-	NVCC      = nvcc
-	FORT      = gfortran
+GPU_TARGET = 1
 
-	ARCH      = ar
-	ARCHFLAGS = cr
-	RANLIB    = ranlib
+MAKE      = colormake
+CC        = gcc
+NVCC      = nvcc
+FORT      = gfortran
 
-	OPTS      = -O3 -DADD_ -g
-	NVOPTS    = --compiler-options -fno-strict-aliasing  -arch sm_13 \
-                    -DUNIX -O3
-	LDOPTS    = -fPIC
+ARCH      = ar
+ARCHFLAGS = cr
+RANLIB    = ranlib
 
-	LIB       = -lmkl_em64t -lguide -lpthread -lcublas -lcudart -lm 
+OPTS      = -O0 -g3 -DADD_ -Wall
+NOMAIN    = 
+NVOPTS    = --compiler-options -fno-strict-aliasing -DUNIX -O3
+LDOPTS    = -fPIC
 
-	CUDADIR   = /usr/local/cuda-3.0
+LIB       = -lgoto2  -lpthread -lcublas -lcudart -lm 
 
-	LIBDIR    = -L/home/tomov/intel/mkl/10.0.1.014/lib/em64t \
-                    -L$(CUDADIR)/lib64
-	INC       = -I../include -I$(CUDADIR)/include
-	
-	LIBMAGMA     = ../lib/libmagma.a
-	LIBMAGMABLAS = ../lib/libmagmablas.a
+CUDADIR   = /opt/cuda
+
+LIBDIR    = -L/opt/gotoblas2 -L${CUDADIR}/lib64 -L/usr/lib/nvidia-current
+INC       = -I../include -I${CUDADIR}/include
+
+LIBMAGMA     = ../lib/libmagma.a
+LIBMAGMABLAS = ../lib/libmagmablas.a

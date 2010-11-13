@@ -13,12 +13,9 @@
 #include <stdio.h>
 #include <cuda_runtime.h>
 #include <cuda.h>
+#include <cublas.h>
 
 //#define magmablas_dgemm magmablas_dgemm_fermi
-
-#if !( defined( __CUDA_ARCH__ ) &&  __CUDA_ARCH__ >= 200
-#error "This file has to be compile with -arch sm_X with X >= 20"
-#else
 
 texture<int2,1>  tex_x_double_A;
 texture<int2,1>  tex_x_double_B;
@@ -173,7 +170,6 @@ fermiDgemm_v2_kernel_NN(double *C, const double *A, const double *B,
 
 		C += ldc*16;
 	}
-#endif
 }
 
 extern "C" __global__ void 
@@ -182,7 +178,6 @@ fermiDgemm_v2_kernel_TN(double *C, const double *A, const double *B,
                         int ldc, double alpha, double beta,
                         int offsetA, int offsetB) 
 {
-#if __CUDA_ARCH__ >= 200
     const  int tx = threadIdx.x;
     const  int ty = threadIdx.y;
 
@@ -311,7 +306,6 @@ fermiDgemm_v2_kernel_TN(double *C, const double *A, const double *B,
 		}
 		C+=ldc*16;
 	}
-#endif
 }
 
 extern "C" __global__ void 
@@ -450,7 +444,6 @@ fermiDgemm_v2_kernel_NT(double *C, const double *A, const double *B,
                         int ldc, double alpha, double beta,
                         int offsetA, int offsetB) 
 {
-#if __CUDA_ARCH__ >= 200
 	const  int tx = threadIdx.x;
 	const  int ty = threadIdx.y;
 
@@ -571,13 +564,7 @@ fermiDgemm_v2_kernel_NT(double *C, const double *A, const double *B,
 
 		C+=ldc*16;
 	}
-#endif
 }
-
-#include<stdio.h>
-#include "cublas.h"
-
-#if __CUDA_ARCH__ >= 200
 
 extern "C" void
 magmablas_dgemm(char TRANSA, char TRANSB, int m , int n , int k , 
@@ -752,5 +739,3 @@ magmablas_dgemm(char TRANSA, char TRANSB, int m , int n , int k ,
 	cudaUnbindTexture ( tex_x_double_A ) ;
 	cudaUnbindTexture ( tex_x_double_B ) ;
 }
-
-#endif
