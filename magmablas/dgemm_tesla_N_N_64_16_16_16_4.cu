@@ -10,7 +10,7 @@
 #include "magma.h"
 
 
-__device__ void saxpy(double a,double *b, double *c) {
+static __device__ void saxpy(double a,double *b, double *c) {
 	c[0] += a * b[0];
 	c[1] += a * b[1];
 	c[2] += a * b[2];
