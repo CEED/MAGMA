@@ -298,7 +298,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS, double2 *A, m
     /*  Check whether the NRHS normwise backward errors satisfy the
 	stopping criterion. If yes, set ITER=IITER>0 and return.     */
     for(i=0;i<NRHS;i++){
-      int j,inc=1 ;
+      int j;
       j = cublasIzamax( N , X+i*N  , 1) ;
       cublasGetMatrix( 1, 1, sizeof(double2), X+i*N+j-1, 1, XNRM, 1 ) ;
       MAGMA_Z_SET2REAL( XNRM[0], lapackf77_zlange( "F", &c_ione, &c_ione, XNRM, &c_ione, XNRM ) );

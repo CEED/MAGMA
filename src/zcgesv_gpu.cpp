@@ -183,12 +183,10 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS, double2 *A, magma_int_t LDA, m
   CTE = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;
 
   int PTSA  = N*NRHS;
-  int status ;
   float RMAX = lapackf77_slamch("O");
   int IITER ;
   double2 alpha = c_neg_one;
   double2 beta = c_one;
-  int DLDA =  ((N+31) / 32 ) * 32 ; 
   
   float2 RMAX_cplx;
   MAGMA_Z_SET2REAL( RMAX_cplx, RMAX );
@@ -279,7 +277,7 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS, double2 *A, magma_int_t LDA, m
         stopping criterion. If yes, set ITER=IITER>0 and return.
       */
       for(i=0;i<NRHS;i++){
-	int j,inc=1 ;
+	int j;
 	j = cublasIzamax( N , X+i*N  , 1) ;
 	cublasGetMatrix( 1, 1, sizeof(double2), X+i*N+j-1, 1, XNRM, 1 ) ;
 	MAGMA_Z_SET2REAL( XNRM[0],  lapackf77_zlange( "F", &c_ione, &c_ione, XNRM, &c_ione, XNRM ) );

@@ -28,9 +28,9 @@ extern "C" {
 
 #endif
 
-long int lapackf77_lsame(char *, char *);
-float    lapackf77_slamch(char *);
-double   lapackf77_dlamch(char *);
+long int lapackf77_lsame(const char *, const char *);
+float    lapackf77_slamch(const char *);
+double   lapackf77_dlamch(const char *);
 int      lapackf77_zcgesv(int *, int *, double2 *, int *, int *, double2 *, int *, double2 *, int *, double2 *, float2 *, int *, int *);
 int      lapackf77_dsgesv(int *, int *, double *, int *, int *, double *, int *, double *, int *, double *, float *, int *, int *);
 

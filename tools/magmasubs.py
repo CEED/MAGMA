@@ -238,6 +238,7 @@ subs = {
     ('ger','ger','geru','geru'),
     ('symm','symm','hemm','hemm'),
     ('gemm','gemm','gemm','gemm'),
+    ('symv','symv','hemv','hemv'),
     ('syrk','syrk','herk','herk'),
     ('syr2k','syr2k','her2k','her2k'),
     ('lansy','lansy','lanhe','lanhe'),

@@ -245,7 +245,7 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
   
 	  /* Compute W(1:i-1,i) */
 	  i__2 = i__ - 1;
-	  blasf77_zsymv("Upper", &i__2, &c_one, &a[a_offset], lda, 
+	  blasf77_zhemv("Upper", &i__2, &c_one, &a[a_offset], lda, 
 		 &a[i__*a_dim1 +1], &c__1, &c_zero, &w[iw* w_dim1+1], &c__1);
 	  if (i__ < *n) {
 	    i__2 = i__ - 1;
@@ -307,7 +307,7 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 			  a + i__   + 1 + i__   * a_dim1, 1,
                           da+(i__-1)+ 1 +(i__-1)* (*ldda), 1);	  
 	  
-	  cublasZsymv('L', i__2, c_one, da+ (i__-1)+1 + ((i__-1)+1) * (*ldda),
+	  cublasZhemv('L', i__2, c_one, da+ (i__-1)+1 + ((i__-1)+1) * (*ldda),
 		      *ldda, da+ (i__-1)+1 + (i__-1)* a_dim1, c__1, c_zero,
 		      dw+ i__ + 1 + i__ * w_dim1, c__1);
 	  

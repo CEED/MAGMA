@@ -64,25 +64,16 @@
 #define MAGMA_S_GET_X(u) (u)
 #define MAGMA_S_ASSIGN(v, t) (v) = (t)
 
-/* Missing CUDA BLAS */
-extern void cublasZsymv(char uplo, int n, double2 alpha, double2 *a, int lda,
-                      double2 *x, int incx, double2 beta, double2 *y, int incy);
-
-extern void cublasCsymv(char uplo, int n, float2 alpha, float2 *a, int lda,
-                        float2 *x, int incx, float2 beta, float2 *y, int incy);
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 void magmablas_sdlaswp(int, double *, int, float *, int, int *);
 
-
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA function definitions
 */
-void magma_xerbla(char *name , magma_int_t *info);
+void magma_xerbla(const char *name, magma_int_t *info);
 
 #ifdef __cplusplus
 }

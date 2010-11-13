@@ -15,7 +15,7 @@
 #include "magma.h"
 
 extern "C" magma_int_t
-magma_zunmqr(char side, char trans, magma_int_t m, magma_int_t n,
+magma_zunmqr(const char side, const char trans, magma_int_t m, magma_int_t n,
 	     magma_int_t k, double2 *a, magma_int_t lda, double2 *tau, double2 *c, magma_int_t ldc,
 	     double2 *work, magma_int_t *lwork, magma_int_t *info)
 {
@@ -219,7 +219,7 @@ magma_zunmqr(char side, char trans, magma_int_t m, magma_int_t n,
     else 
       {
 	/* Use blocked code */
-	if (left && ! notran || ! left && notran) {
+	if ( ( left && (! notran) ) ||  ( (! left) && notran ) ) {
 	    i1 = 1;
 	    i2 = k;
 	    i3 = nb;
