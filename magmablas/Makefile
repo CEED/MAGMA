@@ -91,11 +91,11 @@ clean:
 cleanall: clean
 	rm -f ../lib/libmagmablas.a
 
-%_tesla.cu_o: %_tesla.cu
-	$(NVCC) $(NVOPTS) $(TESLAOPT) $(INC) -c $< -o $@
+# %_tesla.cu_o: %_tesla.cu
+# 	$(NVCC) $(NVOPTS) $(TESLAOPT) $(INC) -c $< -o $@
 
-%_fermi.cu_o: %_fermi.cu
-	$(NVCC) $(NVOPTS) $(FERMIOPT) $(INC) -c $< -o $@
+# %_fermi.cu_o: %_fermi.cu
+# 	$(NVCC) $(NVOPTS) $(FERMIOPT) $(INC) -c $< -o $@
 
 %.cu_o: %.cu
 	$(NVCC) $(NVOPTS) $(GPUOPT) $(INC) -c $< -o $@
