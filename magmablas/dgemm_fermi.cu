@@ -10,15 +10,18 @@
     blk_M=64 blk_N=64 blk_K=16 nthd_x=64 nthd_y=4
 */
 
+#include <stdio.h>
 #include <cuda_runtime.h>
 #include <cuda.h>
-#include "stdio.h"
 
+//#define magmablas_dgemm magmablas_dgemm_fermi
+
+#if !( defined( __CUDA_ARCH__ ) &&  __CUDA_ARCH__ >= 200
+#error "This file has to be compile with -arch sm_X with X >= 20"
+#else
 
 texture<int2,1>  tex_x_double_A;
 texture<int2,1>  tex_x_double_B;
-
-#if __CUDA_ARCH__ >= 200
 
 static __inline__ __device__ double fetch_x_A(const int& i)
 {
@@ -32,15 +35,12 @@ static __inline__ __device__ double fetch_x_B(const int& i)
   return __hiloint2double(v.y, v.x);
 }
 
-#endif
-
 extern "C" __global__ void 
 fermiDgemm_v2_kernel_NN(double *C, const double *A, const double *B,  
                         int m, int n, int k, int lda, int ldb,  
                         int ldc, double alpha, double beta,
                         int offsetA, int offsetB) 
 {
-#if __CUDA_ARCH__ >= 200
 	const  int tx = threadIdx.x;
 	const  int ty = threadIdx.y;
 
@@ -320,7 +320,6 @@ fermiDgemm_v2_kernel_TT(double *C, const double *A, const double *B,
                         int ldc, double alpha, double beta,
                         int offsetA, int offsetB) 
 {
-#if __CUDA_ARCH__ >= 200
 	const  int tx = threadIdx.x;
 	const  int ty = threadIdx.y;
 
@@ -442,7 +441,6 @@ fermiDgemm_v2_kernel_TT(double *C, const double *A, const double *B,
 
 		C+=ldc*16;
 	}
-#endif
 }
 
 	

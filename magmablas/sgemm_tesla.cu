@@ -6,17 +6,16 @@
        November 2010
 */
 
-#include "cuda.h"
-#include "cublas.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <cuda.h>
+#include <cublas.h>
+#include <cuda_runtime_api.h>
 #include "magma.h"
 #include "magmablas.h"
-#include <stdio.h>
-#include "cuda_runtime_api.h"
-#include <stdlib.h>
 
-#include <ctype.h>
-
-#if __CUDA_ARCH__ < 200
+//#define magmablas_sgemm magmablas_sgemm_tesla
 
 extern "C" void 
 magmablas_sgemm(char TRANSA, char TRANSB, int m , int n , int k , 
@@ -282,4 +281,3 @@ magmablas_sgemm(char TRANSA, char TRANSB, int m , int n , int k ,
     }
   }
 } 
-#endif
