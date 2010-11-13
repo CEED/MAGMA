@@ -6,26 +6,33 @@
 #      November 2009
 #//////////////////////////////////////////////////////////////////////////////
 
-	CC        = icc
-	NVCC      = nvcc
-	FORT      = ifort
+#
+# GPU_TARGET specifies for which GPU you want to compile MAGMA
+#      0: Tesla family
+#      1: Fermi Family
+#
+GPU_TARGET = 0
 
-	ARCH      = ar
-	ARCHFLAGS = cr
-	RANLIB    = ranlib
+CC        = icc
+NVCC      = nvcc
+FORT      = ifort
 
-	OPTS      = -O3 -DADD_
-	NVOPTS    = --compiler-options -fno-strict-aliasing  -arch sm_13 \
-                    -DUNIX -O3
-	LDOPTS    = -fPIC -nofor_main
+ARCH      = ar
+ARCHFLAGS = cr
+RANLIB    = ranlib
 
-	LIB       = -lmkl_em64t -lguide -lpthread -lcublas -lm 
+OPTS      = -O3 -DADD_
+NVOPTS    = --compiler-options -fno-strict-aliasing  -arch sm_13 \
+            -DUNIX -O3
+LDOPTS    = -fPIC -nofor_main
 
-	CUDADIR   = /usr/local/cuda
+LIB       = -lmkl_em64t -lguide -lpthread -lcublas -lm 
 
-	LIBDIR    = -L$(HOME)/intel/mkl/10.0.1.014/lib/em64t \
-                    -L$(CUDADIR)/lib64
-	INC       = -I../include -I$(CUDADIR)/include
-	
-	LIBMAGMA     = ../lib/libmagma.a
-	LIBMAGMABLAS = ../lib/libmagmablas.a
+CUDADIR   = /usr/local/cuda
+
+LIBDIR    = -L$(HOME)/intel/mkl/10.0.1.014/lib/em64t \
+            -L$(CUDADIR)/lib64
+INC       = -I../include -I$(CUDADIR)/include
+
+LIBMAGMA     = ../lib/libmagma.a
+LIBMAGMABLAS = ../lib/libmagmablas.a

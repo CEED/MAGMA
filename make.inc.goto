@@ -8,25 +8,32 @@
 #      Contributed by: Allan Menezes (Ontario, Canada)
 #//////////////////////////////////////////////////////////////////////////////
 
-	CC        = gcc
-	NVCC      = nvcc
-	FORT      = gfortran
+#
+# GPU_TARGET specifies for which GPU you want to compile MAGMA
+#      0: Tesla family
+#      1: Fermi Family
+#
+GPU_TARGET = 0
 
-	ARCH      = ar
-	ARCHFLAGS = cr
-	RANLIB    = ranlib
+CC        = gcc
+NVCC      = nvcc
+FORT      = gfortran
 
-	OPTS      = -O3 -DADD_
-	NVOPTS    = --compiler-options -fno-strict-aliasing  -arch sm_13 \
-                    -DUNIX -O3
-	LDOPTS    = -fPIC
+ARCH      = ar
+ARCHFLAGS = cr
+RANLIB    = ranlib
 
-	LIB       = -lgoto  -lpthread -lcublas -lcudart -llapack -lm 
+OPTS      = -O3 -DADD_
+NVOPTS    = --compiler-options -fno-strict-aliasing  -arch sm_13 \
+            -DUNIX -O3
+LDOPTS    = -fPIC
 
-	CUDADIR   = /usr/local/cuda
+LIB       = -lgoto  -lpthread -lcublas -lcudart -llapack -lm 
 
-	LIBDIR    = -L/bummer/GotoBLAS -L/usr/local/cuda/lib64 -L/usr/lib64
-	INC       = -I../include -I$(CUDADIR)/include
-	
-	LIBMAGMA     = ../lib/libmagma.a
-	LIBMAGMABLAS = ../lib/libmagmablas.a
+CUDADIR   = /usr/local/cuda
+
+LIBDIR    = -L/bummer/GotoBLAS -L/usr/local/cuda/lib64 -L/usr/lib64
+INC       = -I../include -I$(CUDADIR)/include
+
+LIBMAGMA     = ../lib/libmagma.a
+LIBMAGMABLAS = ../lib/libmagmablas.a
