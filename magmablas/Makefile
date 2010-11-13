@@ -31,6 +31,9 @@ TESLASRC =      sgemv_tesla.cu 	\
 	        dgemv_tesla.cu 	\
 	        gemv32_tesla.cu \
 		\
+                strsm_tesls.cu \
+                dtrsm_tesla.cu \
+                \
 	        ssymv_tesla.cu 	\
 	        dsymv_tesla.cu 	\
 	        chemv_tesla.cu 	\
