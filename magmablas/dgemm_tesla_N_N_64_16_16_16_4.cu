@@ -10,7 +10,7 @@
 #include "magma.h"
 
 
-static __device__ void saxpy(double a,double *b, double *c) {
+static __device__ void daxpy(double a,double *b, double *c) {
 	c[0] += a * b[0];
 	c[1] += a * b[1];
 	c[2] += a * b[2];
@@ -112,28 +112,28 @@ dgemm_kernel_N_N_64_16_16_16_4(double *C, const double *A, const double *B,
 	        __syncthreads();
 	  
 		A += 4 * lda;
-		saxpy(Ab[0], &Bb[0][0], Cb); Ab[0] = A[0*lda];
-		saxpy(Ab[1], &Bb[1][0], Cb); Ab[1] = A[1*lda];
-		saxpy(Ab[2], &Bb[2][0], Cb); Ab[2] = A[2*lda];
-		saxpy(Ab[3], &Bb[3][0], Cb); Ab[3] = A[3*lda];
+		daxpy(Ab[0], &Bb[0][0], Cb); Ab[0] = A[0*lda];
+		daxpy(Ab[1], &Bb[1][0], Cb); Ab[1] = A[1*lda];
+		daxpy(Ab[2], &Bb[2][0], Cb); Ab[2] = A[2*lda];
+		daxpy(Ab[3], &Bb[3][0], Cb); Ab[3] = A[3*lda];
 		
 		A += 4 * lda;
-		saxpy(Ab[0], &Bb[4][0], Cb); Ab[0] = A[0*lda];
-		saxpy(Ab[1], &Bb[5][0], Cb); Ab[1] = A[1*lda];
-		saxpy(Ab[2], &Bb[6][0], Cb); Ab[2] = A[2*lda];
-		saxpy(Ab[3], &Bb[7][0], Cb); Ab[3] = A[3*lda];
+		daxpy(Ab[0], &Bb[4][0], Cb); Ab[0] = A[0*lda];
+		daxpy(Ab[1], &Bb[5][0], Cb); Ab[1] = A[1*lda];
+		daxpy(Ab[2], &Bb[6][0], Cb); Ab[2] = A[2*lda];
+		daxpy(Ab[3], &Bb[7][0], Cb); Ab[3] = A[3*lda];
 		
 		A += 4 * lda;
-		saxpy(Ab[0], &Bb[8][0], Cb); Ab[0] = A[0*lda];
-		saxpy(Ab[1], &Bb[9][0], Cb); Ab[1] = A[1*lda];
-		saxpy(Ab[2], &Bb[10][0], Cb); Ab[2] = A[2*lda];
-		saxpy(Ab[3], &Bb[11][0], Cb); Ab[3] = A[3*lda];
+		daxpy(Ab[0], &Bb[8][0], Cb); Ab[0] = A[0*lda];
+		daxpy(Ab[1], &Bb[9][0], Cb); Ab[1] = A[1*lda];
+		daxpy(Ab[2], &Bb[10][0], Cb); Ab[2] = A[2*lda];
+		daxpy(Ab[3], &Bb[11][0], Cb); Ab[3] = A[3*lda];
 
 		A += 4 * lda;
-		saxpy(Ab[0], &Bb[12][0], Cb);
-		saxpy(Ab[1], &Bb[13][0], Cb);
-		saxpy(Ab[2], &Bb[14][0], Cb);
-		saxpy(Ab[3], &Bb[15][0], Cb);
+		daxpy(Ab[0], &Bb[12][0], Cb);
+		daxpy(Ab[1], &Bb[13][0], Cb);
+		daxpy(Ab[2], &Bb[14][0], Cb);
+		daxpy(Ab[3], &Bb[15][0], Cb);
 
 		B += 16;
 
@@ -181,7 +181,7 @@ dgemm_kernel_N_N_64_16_16_16_4(double *C, const double *A, const double *B,
 	        __syncthreads();
 
 		for(int i=0;i<k;i++){
-			saxpy(A[0],&Bb[i+0][0], Cb);
+			daxpy(A[0],&Bb[i+0][0], Cb);
 			A+=lda;
 		}
 	}

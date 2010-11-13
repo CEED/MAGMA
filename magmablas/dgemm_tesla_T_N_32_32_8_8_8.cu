@@ -9,7 +9,7 @@
 #include "cublas.h"
 #include "magma.h"
 
-static __device__ void saxpy(double a,double *b, double *c) {
+static __device__ void daxpy(double a,double *b, double *c) {
 	c[0] += a * b[0];
 	c[1] += a * b[1];
 	c[2] += a * b[2];
@@ -148,18 +148,18 @@ dgemm_kernel_T_N_32_32_8_8_8(double *C, const double *A, const double *B,
 		__syncthreads();
 		
 		
-		saxpy(ABb[idt][0], &Bb[0][l], Cb);Ap[0]=A[as1]; 
-		saxpy(ABb[idt][1], &Bb[1][l], Cb);Ap[1]=A[as2];
-		saxpy(ABb[idt][2], &Bb[2][l], Cb);Ap[2]=A[as3];
-		saxpy(ABb[idt][3], &Bb[3][l], Cb);Ap[3]=A[as4]; 
+		daxpy(ABb[idt][0], &Bb[0][l], Cb);Ap[0]=A[as1]; 
+		daxpy(ABb[idt][1], &Bb[1][l], Cb);Ap[1]=A[as2];
+		daxpy(ABb[idt][2], &Bb[2][l], Cb);Ap[2]=A[as3];
+		daxpy(ABb[idt][3], &Bb[3][l], Cb);Ap[3]=A[as4]; 
 	
-		saxpy(ABb[idt][4], &Bb[4][l], Cb);
+		daxpy(ABb[idt][4], &Bb[4][l], Cb);
 		b=B[bs1];
-		saxpy(ABb[idt][5], &Bb[5][l], Cb);
+		daxpy(ABb[idt][5], &Bb[5][l], Cb);
 		b1=B[bs2];
-		saxpy(ABb[idt][6], &Bb[6][l], Cb); 
+		daxpy(ABb[idt][6], &Bb[6][l], Cb); 
 		b2=B[bs3];
-		saxpy(ABb[idt][7], &Bb[7][l], Cb); 
+		daxpy(ABb[idt][7], &Bb[7][l], Cb); 
 		b3=B[bs4];
 
 		B += 8;
@@ -188,22 +188,22 @@ dgemm_kernel_T_N_32_32_8_8_8(double *C, const double *A, const double *B,
 		if(as1+ty>=k){ as1=0*lda;as2=0*lda;as3=0*lda;as4=0*lda;A-=8;}		
 
 		as1=0;
-		saxpy(ABb[idt][0], &Bb[0][l], Cb);
+		daxpy(ABb[idt][0], &Bb[0][l], Cb);
 		Ap[0]=A[as1]; 
-		saxpy(ABb[idt][1], &Bb[1][l], Cb);
+		daxpy(ABb[idt][1], &Bb[1][l], Cb);
 		Ap[1]=A[as2];
-		saxpy(ABb[idt][2], &Bb[2][l], Cb);
+		daxpy(ABb[idt][2], &Bb[2][l], Cb);
 		Ap[2]=A[as3];
-		saxpy(ABb[idt][3], &Bb[3][l], Cb);
+		daxpy(ABb[idt][3], &Bb[3][l], Cb);
 		Ap[3]=A[as4]; 
 	
-		saxpy(ABb[idt][4], &Bb[4][l], Cb);
+		daxpy(ABb[idt][4], &Bb[4][l], Cb);
 		b=B[bs1];
-		saxpy(ABb[idt][5], &Bb[5][l], Cb);
+		daxpy(ABb[idt][5], &Bb[5][l], Cb);
 		b1=B[bs2];
-		saxpy(ABb[idt][6], &Bb[6][l], Cb); 
+		daxpy(ABb[idt][6], &Bb[6][l], Cb); 
 		b2=B[bs3];
-		saxpy(ABb[idt][7], &Bb[7][l], Cb); 
+		daxpy(ABb[idt][7], &Bb[7][l], Cb); 
 		b3=B[bs4];
 	}
 	k=k%8;
@@ -222,7 +222,7 @@ dgemm_kernel_T_N_32_32_8_8_8(double *C, const double *A, const double *B,
 		__syncthreads();
 
 		for(int i=0;i<k;i++){
-			saxpy(ABb[idt][i],&Bb[i][l], Cb);
+			daxpy(ABb[idt][i],&Bb[i][l], Cb);
 		}
 	}
 
