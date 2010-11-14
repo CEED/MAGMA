@@ -93,7 +93,6 @@ int main( int argc, char** argv)
   for(int i=oneTime;i<=(oneTime+(count-1)*step);i+=step){
     for( int ops = 0 ; ops <1 + flag ; ops ++){
       
-      double2 *A, *B, * C ; 
       double2 ALPHA=1 ,BETA = 1;  
 
       

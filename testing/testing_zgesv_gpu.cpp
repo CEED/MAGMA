@@ -42,7 +42,6 @@ int main(int argc , char **argv)
     cuInit( 0 );
     cublasInit( );
 
-    int printall = 0 ;
     printout_devices( );
 
     int i, info, NRHS = 100, N = 0;

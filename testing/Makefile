@@ -24,12 +24,12 @@ ZSRC  = testing_zgetrf.cpp 	\
         testing_zhetrd.cpp 	\
         testing_zgebrd.cpp      \
         \
-        testing_zgemm.cpp       \
+        testing_zgemm.cpp
 
-#	\
 #	testing_zcgesv_gpu.cpp	\
 #	testing_zcgeqrsv_gpu.cpp\
 #	testing_zcposv_gpu.cpp
+
 
 OBJ = get_nb.o
 

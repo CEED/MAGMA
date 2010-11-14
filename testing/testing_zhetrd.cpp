@@ -161,7 +161,7 @@ int main( int argc, char** argv)
 
       test = 2;
       lapackf77_zhet21(&test, "L", &N, &one, h_A, &lda, diag, offdiag, 
-	      hwork_Q, &N, h_R, &lda, tau, work, &result[0]);
+                       hwork_Q, &N, h_R, &lda, tau, work, &result[0]);
 
       test = 3;
       lapackf77_zhet21(&test, "L", &N, &one, h_A, &lda, diag, offdiag,

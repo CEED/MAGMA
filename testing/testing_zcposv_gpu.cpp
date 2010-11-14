@@ -20,8 +20,7 @@
 
 /*
 */
-
-int init_matrix_sym(void *A, int size , int elem_size, int lda){
+void init_matrix_sym(void *A, int size , int elem_size, int lda){
     int i ;
     int j ;
     if( elem_size==sizeof(double2)){
@@ -69,10 +68,7 @@ int init_matrix_sym(void *A, int size , int elem_size, int lda){
     }
 }
 
-
-
-
-int init_matrix(void *A, int size , int elem_size){
+void init_matrix(void *A, int size , int elem_size){
     if( elem_size==sizeof(double2)){
 	double2 *AD; 
 	AD = (double2*)A ; 
@@ -90,7 +86,7 @@ int init_matrix(void *A, int size , int elem_size){
     }
 }
 
-int copy_matrix(void *S, void *D,int size , int elem_size){
+void copy_matrix(void *S, void *D,int size , int elem_size){
     if( elem_size==sizeof(double2)){
 	double2 *SD, *DD; 
 	SD = (double2*)S ; 
@@ -117,7 +113,6 @@ void die(char *message){
 
 
 int main(int argc , char **argv){
- int  printall =0 ; 
 // FILE *fp ;
 // fp = fopen("results_zcposv.txt","w");
 // if( fp == NULL ) return 1;
@@ -139,14 +134,12 @@ int main(int argc , char **argv){
 
   TimeStruct start, end;
 
-  int LEVEL=1;
   int i ;
   int startN= 1024 ;
   int count = 8;
   int step = 1024;  
   int N = count * step ;
   int NRHS=1 ;
-  int error = 0 ;
   int once  = 0 ; 
 
  
@@ -282,8 +275,6 @@ int main(int argc , char **argv){
          N = sizetest[i] ;
     else N  = once ;
   
-    int N1 = N;
-    
     int INFO[1];
 
     LDB = LDX = LDA = N ;
@@ -304,8 +295,6 @@ int main(int argc , char **argv){
     fflush(stdout);
 
     char uplo = 'L';
-    int IPIV[N];
-    int iter_CPU = 0 ;
 
     //=====================================================================
     //              Mixed Precision Iterative Refinement - GPU 

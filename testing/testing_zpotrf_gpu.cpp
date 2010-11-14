@@ -65,8 +65,6 @@ int main( int argc, char** argv)
     lda = N;
     n2 = size[9] * size[9];
 
-    int maxNB = magma_get_zpotrf_nb(size[9]);
-
     /* Allocate host memory for the matrix */
     h_A = (double2*)malloc(n2 * sizeof(h_A[0]));
     if (h_A == 0) {

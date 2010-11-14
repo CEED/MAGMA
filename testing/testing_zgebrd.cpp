@@ -145,7 +145,6 @@ int main( int argc, char** argv)
       double2 *work    = (double2*)malloc( lwork * sizeof(double2));
 
       double2 result[3] = {0., 0., 0.};
-      int test, one = 1;
       
       lapackf77_zlacpy(" ", &N, &N, h_R, &N, PT, &N);
 
@@ -157,7 +156,7 @@ int main( int argc, char** argv)
       // Test 1:  Check the decomposition A := Q * B * PT
       //      2:  Check the orthogonality of Q
       //      3:  Check the orthogonality of PT
-      lapackf77_zbdt01(&M, &N, &one, h_A, &M, h_R, &M, diag, offdiag, PT, &M,
+      lapackf77_zbdt01(&M, &N, &ione, h_A, &M, h_R, &M, diag, offdiag, PT, &M,
 	       work, &result[0]);
       lapackf77_zunt01("Columns", &M, &M, h_R, &M, work, &lwork, &result[1]);
       lapackf77_zunt01("Rows", &M, &N, PT, &M, work, &lwork, &result[2]);
