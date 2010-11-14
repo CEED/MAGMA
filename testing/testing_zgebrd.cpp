@@ -22,14 +22,6 @@
 #include "magma.h"
 
 
-#define lapackf77_zungbr zungbr_
-#define lapackf77_zbdt01 zbdt01_
-#define lapackf77_zunt01 zunt01_
-
-extern "C" int lapackf77_zungbr(char *, int *, int *, int *, double2 *a, int *, double2 *, double2 *, int *, int *); 
-extern "C" int lapackf77_zbdt01(int *, int *, int *, double2 *, int *, double2 *, int *, double2 *, double2 *, double2 *, int *, double2 *, double2 *);
-extern "C" int lapackf77_zunt01(char *, int *, int *, double2 *, int *, double2 *, int *, double2 *);
-
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgebrd
 */

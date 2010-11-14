@@ -56,6 +56,14 @@ extern "C" {
 #    define lapackf77_zunmr2 zunmr2_
 #    define lapackf77_zung2r zung2r_
 #    define lapackf77_zhetd2 zhetd2_
+#    define lapackf77_zungbr zungbr_
+#    define lapackf77_zbdt01 zbdt01_
+#    define lapackf77_zunt01 zunt01_
+#    define lapackf77_zunghr zunghr_
+#    define lapackf77_zhst01 zhst01_
+#    define lapackf77_zqrt02 zqrt02_
+#    define lapackf77_zungtr zungtr_
+#    define lapackf77_zhet21 zhet21_
 
 #elif defined(NOCHANGE)
 
@@ -96,6 +104,14 @@ extern "C" {
 #    define lapackf77_zunmr2 zunmr2
 #    define lapackf77_zung2r zung2r
 #    define lapackf77_zhetd2 zhetd2
+#    define lapackf77_zungbr zungbr
+#    define lapackf77_zbdt01 zbdt01
+#    define lapackf77_zunt01 zunt01
+#    define lapackf77_zunghr zunghr
+#    define lapackf77_zhst01 zhst01
+#    define lapackf77_zqrt02 zqrt02
+#    define lapackf77_zungtr zungtr
+#    define lapackf77_zhet21 zhet21
 
 #endif
 
@@ -136,6 +152,15 @@ int    lapackf77_zunmql(const char *, const char *, int *, int *, int *, double2
 int    lapackf77_zunm2r(const char *, const char *, int *, int *, int *, double2 *, int *, double2 *, double2 *, int *, double2 *, int *);
 int    lapackf77_zung2r(int*, int*, int*, double2*, int*, double2*, double2*, int*);
 int    lapackf77_zhetd2(const char *, int *, double2 *, int *, double2 *, double2 *, double2 *, int *);
+int    lapackf77_zungbr(char *, int *, int *, int *, double2 *a, int *, double2 *, double2 *, int *, int *); 
+int    lapackf77_zbdt01(int *, int *, int *, double2 *, int *, double2 *, int *, double2 *, double2 *, double2 *, int *, double2 *, double2 *);
+int    lapackf77_zunt01(char *, int *, int *, double2 *, int *, double2 *, int *, double2 *);
+void   lapackf77_zhst01(int *, int *, int *, double2 *, int *, double2 *, int *, double2 *, int *, double2 *, int *, double2 *);
+void   lapackf77_zunghr(int *, int *, int *, double2 *, int *, double2 *, double2 *, int *, int *);
+void   lapackf77_zqrt02(int *, int *, int *, double2 *, double2 *, double2 *, double2 *, int *, double2 *, double2 *, int *, double2 *, double2 *);
+void   lapackf77_zungtr(char *, int *, double2 *, int *, double2 *, double2 *, int *, int *);
+void   lapackf77_zhet21(int *, char *, int *, int *, double2 *, int *, double2 *, double2 *, double2 *, int *, double2 *, int *, double2 *, double2 *, double2 *);
+
 
 #ifdef __cplusplus
 }

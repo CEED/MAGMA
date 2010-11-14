@@ -21,12 +21,6 @@
 #include "cublas.h"
 #include "magma.h"
 
-#define lapackf77_zunghr zunghr_
-#define lapackf77_zhst01 zhst01_
-
-extern "C" void lapackf77_zhst01(int *, int *, int *, double2 *, int *, double2 *, int *, double2 *, int *, double2 *, int *, double2 *);
-extern "C" void lapackf77_zunghr(int *, int *, int *, double2 *, int *, double2 *, double2 *, int *, int *);
-
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgehrd
 */

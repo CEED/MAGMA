@@ -21,12 +21,9 @@
 #include "cublas.h"
 #include "magma.h"
 
+#ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
-
-#define lapackf77_zqrt02 zqrt02_
-
-extern "C" void lapackf77_zqrt02(int *, int *, int *, double2 *, double2 *, double2 *, double2 *, int *, double2 *, double2 *, int *, double2 *, double2 *);
-
+#endif
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeqrf

@@ -403,7 +403,7 @@ int main(int argc , char **argv){
     //=====================================================================
 
     start = get_current_time();
-    magma_cgetrf_gpu2(N, N, M_SWORK+PTSA, LDA, IPIV, DIPIV, h_work_M_S, INFO);
+    magma_cgetrf_gpu(N, N, M_SWORK+PTSA, LDA, IPIV, DIPIV, h_work_M_S, INFO);
     //magma_cgetrf_gpu(&N, &N, M_SWORK+PTSA, &N, IPIV, h_work_M_S, INFO);
     end = get_current_time();
     perf = (2.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
@@ -411,7 +411,7 @@ int main(int argc , char **argv){
     //fprintf(fp,"\t\t%6.2f", perf);
 
     start = get_current_time();
-    magma_cgetrf_gpu2(N, N, M_SWORK+PTSA, LDA, IPIV, DIPIV, h_work_M_S, INFO);
+    magma_cgetrf_gpu(N, N, M_SWORK+PTSA, LDA, IPIV, DIPIV, h_work_M_S, INFO);
     magma_zcgetrs_gpu(N, NRHS, M_SWORK+PTSA, LDA, DIPIV, M_SWORK, d_B , LDB, INFO);
     end = get_current_time();
     perf = (2.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));

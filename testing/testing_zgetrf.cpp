@@ -20,8 +20,12 @@
 #include "cublas.h"
 #include "magma.h"
 
+#ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
+#endif
+#ifndef max
 #define max(a,b)  (((a)<(b))?(b):(a))
+#endif
 
 double2 get_LU_error(int M, int N, double2 *A, int *lda, double2 *LU, int *IPIV){
   int min_mn = min(M,N), intONE = 1, i, j;

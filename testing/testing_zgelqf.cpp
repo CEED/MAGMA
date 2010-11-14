@@ -20,8 +20,9 @@
 #include "cublas.h"
 #include "magma.h"
 
+#ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
-
+#endif
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgelqf
