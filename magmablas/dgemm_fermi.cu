@@ -63,7 +63,7 @@ fermiDgemm_v2_kernel_NN(double *C, const double *A, const double *B,
 
 	#pragma unroll
 	for(int y=0; y<4; y++)
-		Abs[tx2+ y*16][ty2] = (tll<k)*fetch_x_A(trackA + y*16) ;
+		Abs[tx2+ y*16][ty2] = /* (tll<k)* */ fetch_x_A(trackA + y*16) ;
 
 	#pragma unroll
 	for(int y=0; y<4; y++)
@@ -71,14 +71,13 @@ fermiDgemm_v2_kernel_NN(double *C, const double *A, const double *B,
 
 	__syncthreads();
 
-	const double *Bend = B + k-16;
-
 	double Axs[4];
 	double Bxp[4];
 
 	double Cb[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 
-	do 
+	int k1;
+	for(k1=0; k1<(k-16); k1+=16)
 	{
 		tll+=16;
 		A += lda *16  ;
@@ -88,7 +87,7 @@ fermiDgemm_v2_kernel_NN(double *C, const double *A, const double *B,
 
 		#pragma unroll
 		for( int y=0; y<4; y++)
-			xxA[y] = (tll<k)*fetch_x_A(trackA + y*16);
+			xxA[y] = /* (tll<k)* */ fetch_x_A(trackA + y*16);
 
 		#pragma unroll
 		for( int y=0; y<4; y++)
@@ -129,7 +128,6 @@ fermiDgemm_v2_kernel_NN(double *C, const double *A, const double *B,
 
 		__syncthreads();
 	}
-	while (B < Bend);
 
 	C += tx2 + ibx  + __mul24 (ty2 +  iby ,ldc);
 
@@ -204,22 +202,21 @@ fermiDgemm_v2_kernel_TN(double *C, const double *A, const double *B,
 
     #pragma unroll
     for(int y=0; y<4; y++)
-		Abs[ty2*4+y][tx2] = (tll<k)*fetch_x_A(trackA + y*lda);
+		Abs[ty2*4+y][tx2] = /* (tll<k)* */ fetch_x_A(trackA + y*lda);
 
     #pragma unroll
     for(int y=0; y<4; y++)
-		Bb[tx2][ty2*4+y] = (tll<k)*fetch_x_B( trackB + y*ldb );
+		Bb[tx2][ty2*4+y] = /* (tll<k)* */ fetch_x_B( trackB + y*ldb );
 
     __syncthreads();
-
-    const double *Bend = B + k-16;
    
     double Axs[4];
     double Bxp[4];
 
     double Cb[16] = {0,0,0,0,    0,0,0,0, 0,0,0,0, 0,0,0,0};
 
-    do 
+    int k1;
+    for(k1=0; k1<(k-16); k1+=16)
     {
 		tll +=16;
 		B += 16;
@@ -229,11 +226,11 @@ fermiDgemm_v2_kernel_TN(double *C, const double *A, const double *B,
 
 		#pragma unroll
 		for(int y=0; y<4; y++)
-			xxA[y] = (tll<k)*fetch_x_A(trackA + y*lda);
+			xxA[y] = /* (tll<k)* */ fetch_x_A(trackA + y*lda);
 
 		#pragma unroll
 		for(int y=0; y<4; y++)
-			xxB[y] = (tll<k)*fetch_x_B(trackB + y*ldb);
+			xxB[y] = /* (tll<k)* */ fetch_x_B(trackB + y*ldb);
 
 		#pragma unroll 
 		for(int j1=0;j1<16;j1++)
@@ -266,8 +263,7 @@ fermiDgemm_v2_kernel_TN(double *C, const double *A, const double *B,
 		for(int y=0; y<4; y++)
 			Bb[tx2][ty2*4+y] =xxB[y];
 		__syncthreads();
-	} 
-	while (B < Bend);
+	}
 
 	C += tx2 + ibx  + __mul24 (ty2 + iby ,ldc);
 
@@ -340,7 +336,7 @@ fermiDgemm_v2_kernel_TT(double *C, const double *A, const double *B,
 
 	#pragma unroll
 	for(int y=0; y<4; y++)
-		Abs[ty2+16*y][tx2] = (tll<k)*fetch_x_A(trackA +  lda*16*y);
+		Abs[ty2+16*y][tx2] = /* (tll<k)* */ fetch_x_A(trackA +  lda*16*y);
 
 	#pragma unroll
 	for(int y=0; y<4; y++)
@@ -348,13 +344,13 @@ fermiDgemm_v2_kernel_TT(double *C, const double *A, const double *B,
 
 	__syncthreads();
 
-	const double *Bend = B + k*ldb - 16*ldb;
-
 	double Axs[4];
 	double Bxp[4];
 
 	double Cb[16] = {0,0,0,0, 0,0,0,0,  0,0,0,0, 0,0,0,0};
-	do 
+	
+        int k1;
+	for(k1=0; k1<(k-16); k1+=16)
 	{
 		tll+=16;
 		A += 16;
@@ -364,7 +360,7 @@ fermiDgemm_v2_kernel_TT(double *C, const double *A, const double *B,
 		
 		#pragma unroll
 		for( int y=0; y<4; y++)
-			xxA[y] = (tll<k)*fetch_x_A(trackA + lda*y*16);
+			xxA[y] = /* (tll<k)* */ fetch_x_A(trackA + lda*y*16);
 
 		#pragma unroll
 		for( int y=0; y<4; y++)
@@ -399,7 +395,6 @@ fermiDgemm_v2_kernel_TT(double *C, const double *A, const double *B,
 
 		__syncthreads();
 	} 
-	while (B < Bend);
 
 	C += tx2 + ibx  + __mul24 (ty2 +  iby ,ldc);
 
@@ -470,21 +465,21 @@ fermiDgemm_v2_kernel_NT(double *C, const double *A, const double *B,
 
 	#pragma unroll
 	for(int y=0; y<4; y++)
-		Abs[tx2+ y*16][ty2] = (tll<k)*fetch_x_A(trackA + y*16);
+		Abs[tx2+ y*16][ty2] = /* (tll<k)* */ fetch_x_A(trackA + y*16);
 
 	#pragma unroll
 	for(int y=0; y<4; y++)
-		Bb[ty2][tx2+16*y] = (tll<k)*fetch_x_B(trackB+16*y);
+		Bb[ty2][tx2+16*y] = /* (tll<k)* */ fetch_x_B(trackB+16*y);
 
 	__syncthreads();
-
-	const double *Bend = B + k*ldb - 16*ldb;
 
 	double Axs[4];
 	double Bxp[4];
 
 	double Cb[16] = {0,0,0,0, 0,0,0,0,  0,0,0,0, 0,0,0,0};
-	do 
+	
+        int k1;
+	for(k1=0; k1<(k-16); k1+=16)
 	{
 		tll += 16;
 		A += lda *16  ;
@@ -494,11 +489,11 @@ fermiDgemm_v2_kernel_NT(double *C, const double *A, const double *B,
 
 		#pragma unroll
 		for( int y=0; y<4; y++)
-			xxA[y] = (tll<k)*fetch_x_A(trackA + y*16);	// tll same in the NN case
+			xxA[y] = /* (tll<k)* */ fetch_x_A(trackA + y*16);
 
 		#pragma unroll
 		for( int y=0; y<4; y++)
-			xxB[y] = (tll<k)*fetch_x_B( trackB + 16*y);
+			xxB[y] = /* (tll<k)* */ fetch_x_B( trackB + 16*y);
 
 		#pragma unroll 
 		for( int j1=0;j1<16;j1++)
@@ -528,7 +523,6 @@ fermiDgemm_v2_kernel_NT(double *C, const double *A, const double *B,
 
 		__syncthreads();
 	} 
-	while (B < Bend);
 
 	C += tx2 + ibx + __mul24(ty2 + iby ,ldc);
 

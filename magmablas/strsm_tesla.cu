@@ -14,7 +14,7 @@
 #define min(a,b) (a<=b)?a:b
 #define max(a,b) (a>=b)?a:b
 #define qmod(a,b) ((a)-(__mul24((b),(a)/(b))))
-//define cublasSgemm magmablas_sgemm
+//#define cublasSgemm magmablas_sgemm
 
 #define b_copy();	dim3 dimBlock((M>=MAX_THREAD_PER_BLOCK)?MAX_THREAD_PER_BLOCK:(WARP_SIZE*((M/WARP_SIZE)+(M%WARP_SIZE!=0))), 1);\
 					dim3 dimGrid(M/dimBlock.x+(M%dimBlock.x!=0), N);\
