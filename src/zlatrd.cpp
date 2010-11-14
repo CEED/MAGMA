@@ -50,7 +50,7 @@ operator*(const double2 &u, const double2 &v) {
 
 extern "C"
 int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a, 
-		 int *lda, double2 *e, double2 *tau, double2 *w, int *ldw,
+		 int *lda, double *e, double2 *tau, double2 *w, int *ldw,
 		 double2 *da, int *ldda, double2 *dw, int *lddw)
 {
 /*  -- MAGMA (version 1.0) --
@@ -240,7 +240,8 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 	  i__2 = i__ - 1;
 	  lapackf77_zlarfg(&i__2, &a[i__ - 1 + i__ * a_dim1], &a[i__ * a_dim1 + 1], 
 		  &c__1, &tau[i__ - 1]);
-	  e[i__ - 1] = a[i__ - 1 + i__ * a_dim1];
+
+	  e[i__ - 1] = MAGMA_Z_GET_X( a[i__ - 1 + i__ * a_dim1] );
 	  a[i__ - 1 + i__ * a_dim1] = c_one;
   
 	  /* Compute W(1:i-1,i) */
@@ -298,7 +299,7 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 	  i__3 = i__ + 2;
 	  lapackf77_zlarfg(&i__2, &a[i__ + 1 + i__ * a_dim1], 
 		  &a[min(i__3,*n) + i__ * a_dim1], &c__1, &tau[i__]);
-	  e[i__] = a[i__ + 1 + i__ * a_dim1];
+	  e[i__] = MAGMA_Z_GET_X( a[i__ + 1 + i__ * a_dim1] );
 	  a[i__ + 1 + i__ * a_dim1] = c_one;
 
 	  /* Compute W(i+1:n,i) */ 

@@ -17,7 +17,7 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t 
-magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb, double2 *a, magma_int_t lda, double2 *d, double2 *e,
+magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb, double2 *a, magma_int_t lda, double *d, double *e,
 	     double2 *tauq, double2 *taup, double2 *x, magma_int_t ldx, double2 *y, magma_int_t ldy,
 	     double2 *da, magma_int_t ldda, 
 	     double2 *dx, magma_int_t lddx, double2 *dy, magma_int_t lddy)
@@ -211,7 +211,7 @@ magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb, double2 *a, magma_int
 	    i__3 = i__ + 1;
 	    lapackf77_zlarfg(&i__2, &a[i__ + i__ * a_dim1], 
 		    &a[min(i__3,m) + i__ * a_dim1], &c__1, &tauq[i__]);
-	    d[i__] = a[i__ + i__ * a_dim1];
+	    d[i__] = MAGMA_Z_GET_X( a[i__ + i__ * a_dim1] );
 	    if (i__ < n) {
 		a[i__ + i__ * a_dim1] = c_one;
 
@@ -285,7 +285,7 @@ magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb, double2 *a, magma_int
 		i__3 = i__ + 2;
 		lapackf77_zlarfg(&i__2, &a[i__ + (i__ + 1) * a_dim1], &a[i__ + min(
 			i__3,n) * a_dim1], &lda, &taup[i__]);
-		e[i__] = a[i__ + (i__ + 1) * a_dim1];
+		e[i__] = MAGMA_Z_GET_X (a[i__ + (i__ + 1) * a_dim1] );
 		a[i__ + (i__ + 1) * a_dim1] = c_one;
 
 		/* Compute X(i+1:m,i) */
@@ -361,7 +361,7 @@ magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb, double2 *a, magma_int
 	i__3 = i__ + 1;
 	lapackf77_zlarfg(&i__2, &a[i__ + i__ * a_dim1], 
 		&a[i__ + min(i__3,n) * a_dim1], &lda, &taup[i__]);
-	d[i__] = a[i__ + i__ * a_dim1];
+	d[i__] = MAGMA_Z_GET_X( a[i__ + i__ * a_dim1] );
 	if (i__ < m) {
 	  a[i__ + i__ * a_dim1] = c_one;
 	  
@@ -411,7 +411,7 @@ magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb, double2 *a, magma_int
 	  i__3 = i__ + 2;
 	  lapackf77_zlarfg(&i__2, &a[i__ + 1 + i__ * a_dim1],
 		  &a[min(i__3,m) + i__ * a_dim1], &c__1, &tauq[i__]);
-	  e[i__] = a[i__ + 1 + i__ * a_dim1];
+	  e[i__] = MAGMA_Z_GET_X( a[i__ + 1 + i__ * a_dim1] );
 	  a[i__ + 1 + i__ * a_dim1] = c_one;
 	  
 	  /* Compute Y(i+1:n,i) */

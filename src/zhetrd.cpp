@@ -34,7 +34,7 @@ double2 cpu_gpu_zdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda)
 
 
 extern "C" magma_int_t
-magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double2 *d, double2 *e, 
+magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double *d, double *e, 
 	     double2 *tau, double2 *work, magma_int_t *lwork, double2 *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -249,8 +249,8 @@ magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double2 *d, 
 	       elements into D */
 	    i__3 = i__ + nb - 1;
 	    for (j = i__; j <= i__3; ++j) {
-		a[j - 1 + j * a_dim1] = e[j - 1];
-		d[j] = a[j + j * a_dim1];
+		MAGMA_Z_SET2REAL( a[j - 1 + j * a_dim1], e[j - 1] );
+		d[j] = MAGMA_Z_GET_X( a[j + j * a_dim1] );
 	    }
 	  }
 
@@ -298,8 +298,8 @@ magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double2 *d, 
 	       elements into D */
 	    i__3 = i__ + nb - 1;
 	    for (j = i__; j <= i__3; ++j) {
-	      a[j + 1 + j * a_dim1] = e[j];
-	      d[j] = a[j + j * a_dim1];
+		MAGMA_Z_SET2REAL( a[j + 1 + j * a_dim1], e[j] );
+		d[j] = MAGMA_Z_GET_X( a[j + j * a_dim1] );
 	    }
 	  }
 
