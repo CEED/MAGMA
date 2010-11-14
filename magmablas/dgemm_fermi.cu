@@ -202,7 +202,7 @@ fermiDgemm_v2_kernel_TN(double *C, const double *A, const double *B,
 
     #pragma unroll
     for(int y=0; y<4; y++)
-		Abs[ty2*4+y][tx2] = /* (tll<k)* */ fetch_x_A(trackA + y*lda);
+		Abs[ty2*4+y][tx2] =  (tll<k)*  fetch_x_A(trackA + y*lda);
 
     #pragma unroll
     for(int y=0; y<4; y++)
@@ -226,7 +226,7 @@ fermiDgemm_v2_kernel_TN(double *C, const double *A, const double *B,
 
 		#pragma unroll
 		for(int y=0; y<4; y++)
-			xxA[y] = /* (tll<k)* */ fetch_x_A(trackA + y*lda);
+			xxA[y] =  (tll<k)*  fetch_x_A(trackA + y*lda);
 
 		#pragma unroll
 		for(int y=0; y<4; y++)
