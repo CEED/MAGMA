@@ -9,32 +9,33 @@
 
 */
 
-#include "cublas.h"
+#include <cublas.h>
 #include "magma.h"
 
-#define num_threazc 64
+#define num_threadzc 64
 
 __global__ void
-zclaswp_kernel(int n, double2 *a, int lda, float2 *sa, int m, int *ipiv)
+zclaswp_kernel(int n, cuDoubleComplex *a, int lda, cuFloatComplex *sa, int m, int *ipiv)
 {
-  int ind = blockIdx.x*num_threazc + threadIdx.x, newind;
-  float2 res;
-
-  if (ind < m) {
-    sa   += ind;
-    ipiv += ind;
-
-    newind = ipiv[0];
- 
-    for(int i=0; i<n; i++) {
-       res = (float2)a[newind+i*lda];
-       sa[i*lda] = res; 
+    int ind = blockIdx.x*num_threadzc + threadIdx.x, newind;
+    cuFloatComplex res;
+    
+    if (ind < m) {
+        sa   += ind;
+        ipiv += ind;
+        
+        newind = ipiv[0];
+        
+        for(int i=0; i<n; i++) {
+            res = MAGMA_C_MAKE( (float)cuCreal(a[newind+i*lda]),
+                                (float)cuCimag(a[newind+i*lda]) );
+            sa[i*lda] = res; 
+        }
     }
-  }
 }
 
 extern "C" void
-magmablas_zclaswp(int n, double2 *a, int lda, float2 *sa, int m, int *ipiv)
+magmablas_zclaswp(int n, cuDoubleComplex *a, int lda, cuFloatComplex *sa, int m, int *ipiv)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -69,15 +70,15 @@ magmablas_zclaswp(int n, double2 *a, int lda, float2 *sa, int m, int *ipiv)
     ===================================================================== */
 
     int blocks;
-    if (m % num_threazc==0)
-	blocks = m/num_threazc;
+    if (m % num_threadzc==0)
+	blocks = m/num_threadzc;
     else
-        blocks = m/num_threazc + 1;
+        blocks = m/num_threadzc + 1;
 
     dim3 grid(blocks, 1, 1);
-    dim3 threazc(num_threazc, 1, 1);
+    dim3 threazc(num_threadzc, 1, 1);
 
     zclaswp_kernel<<<grid, threazc>>>(n, a, lda, sa, m, ipiv);
 }
 
-#undef num_threazc
+#undef num_threadzc

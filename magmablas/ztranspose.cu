@@ -9,11 +9,12 @@
 
 */
 #define PRECISION_z
+#include <cublas.h>
 #include "commonblas.h"
 
-__global__ void ztranspose_32( double2 *B, int ldb, double2 *A, int lda )
+__global__ void ztranspose_32( cuDoubleComplex *B, int ldb, cuDoubleComplex *A, int lda )
 {	
-	__shared__ double2 a[32][ZSIZE_1SHARED+1];
+	__shared__ cuDoubleComplex a[32][ZSIZE_1SHARED+1];
 	
 	int inx = threadIdx.x;
 	int iny = threadIdx.y;
@@ -64,8 +65,8 @@ __global__ void ztranspose_32( double2 *B, int ldb, double2 *A, int lda )
 //             This version works when m and n are divisible by 32.
 //
 extern "C" void 
-magmablas_ztranspose(double2 *odata, int ldo, 
-                     double2 *idata, int ldi, 
+magmablas_ztranspose(cuDoubleComplex *odata, int ldo, 
+                     cuDoubleComplex *idata, int ldi, 
                      int m, int n )
 {
 	//assert( (m%32) == 0 && (n%32) == 0, "misaligned transpose" );

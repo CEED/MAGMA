@@ -130,61 +130,61 @@ extern "C" {
 
 #endif
 
-void    blasf77_zaxpy( const int *, double2 *, double2 *, const int *, double2 *, const int *);
-void    blasf77_zcopy( const int *, double2 *, const int *, double2 *, const int *);
-double2 blasf77_zdot ( const int *, double2 *, const int *, double2 *, const int *);
-void    blasf77_zgemm( const char *, const char *, const int *, const int *, const int *, double2 *, double2 *, const int *, double2 *, const int *, double2 *,double2 *, const int *);
-void    blasf77_zgemv( const char *, const int  *, const int *, double2 *, double2 *, const int *, double2 *, const int *, double2 *, double2 *, const int *);
-void    blasf77_zhemm( const char *, const char *, const int *, const int *, double2 *, double2 *, const int *, double2 *, const int *, double2 *,double2 *, const int *);
-void    blasf77_zhemv( const char *, const int  *, double2 *, double2 *, const int *, double2 *, const int *, double2 *, double2 *, const int *);
-void    blasf77_zher2k(const char *, const char *, const int *, const int *, double2 *, double2 *, const int *, double2 *, const int *, double *,  double2 *, const int *);
-void    blasf77_zherk( const char *, const char *, const int *, const int *, double  *, double2 *, const int *, double *, double2 *, const int *);
-void    blasf77_zscal( const int *, double2 *, double2 *, const int *);
-void    blasf77_zsymm( const char *, const char *, const int *, const int *, double2 *, double2 *, const int *, double2 *, const int *, double2 *,double2 *, const int *);
-void    blasf77_zsyr2k(const char *, const char *, const int *, const int *, double2 *, double2 *, const int *, double2 *, const int *, double2 *, double2 *, const int *);
-void    blasf77_zsyrk( const char *, const char *, const int *, const int *, double2 *, double2 *, const int *, double2 *, double2 *, const int *);
-void    blasf77_ztrmm( const char *, const char *, const char *, const char *, const int *, const int *, double2 *, double2 *, const int *, double2 *,const int *);
-void    blasf77_ztrmv( const char *, const char *, const char*, const int *, double2*,  const int *, double2 *, const int*);
-void    blasf77_ztrsm( const char *, const char *, const char *, const char *, const int *, const int *, double2 *, double2 *, const int *, double2 *,const int*);
+void    blasf77_zaxpy( const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *);
+void    blasf77_zcopy( const int *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *);
+cuDoubleComplex blasf77_zdot ( const int *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *);
+void    blasf77_zgemm( const char *, const char *, const int *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *,cuDoubleComplex *, const int *);
+void    blasf77_zgemv( const char *, const int  *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *);
+void    blasf77_zhemm( const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *,cuDoubleComplex *, const int *);
+void    blasf77_zhemv( const char *, const int  *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *);
+void    blasf77_zher2k(const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, double *,  cuDoubleComplex *, const int *);
+void    blasf77_zherk( const char *, const char *, const int *, const int *, double  *, cuDoubleComplex *, const int *, double *, cuDoubleComplex *, const int *);
+void    blasf77_zscal( const int *, cuDoubleComplex *, cuDoubleComplex *, const int *);
+void    blasf77_zsymm( const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *,cuDoubleComplex *, const int *);
+void    blasf77_zsyr2k(const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *);
+void    blasf77_zsyrk( const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *);
+void    blasf77_ztrmm( const char *, const char *, const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *,const int *);
+void    blasf77_ztrmv( const char *, const char *, const char*, const int *, cuDoubleComplex*,  const int *, cuDoubleComplex *, const int*);
+void    blasf77_ztrsm( const char *, const char *, const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *,const int*);
 
-void    lapackf77_zgebd2(magma_int_t *m, magma_int_t *n, double2 *a, magma_int_t *lda, double *d, double *e, double2 *tauq, double2 *taup, double2 *work, magma_int_t *info);
-void    lapackf77_zgebrd(magma_int_t *m, magma_int_t *n, double2 *a, magma_int_t *lda, double *d, double *e, double2 *tauq, double2 *taup, double2 *work, magma_int_t *lwork, magma_int_t *info);
-void    lapackf77_zgehd2(magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi, double2 *a, magma_int_t *lda, double2 *tau, double2 *work, magma_int_t *info);
-void    lapackf77_zgehrd(magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi, double2 *a, magma_int_t *lda, double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info);
-void    lapackf77_zgelqf(magma_int_t *m, magma_int_t *n, double2 *a, magma_int_t *lda, double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info);
-void    lapackf77_zgeqlf(magma_int_t *m, magma_int_t *n, double2 *a, magma_int_t *lda, double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info);
-void    lapackf77_zgeqrf(magma_int_t *m, magma_int_t *n, double2 *a, magma_int_t *lda, double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info);
-void    lapackf77_zgetrf(magma_int_t *m, magma_int_t *n, double2 *a, magma_int_t *lda, magma_int_t *ipiv, magma_int_t *info);
-void    lapackf77_zhetd2(const char *uplo, magma_int_t *n, double2 *a, magma_int_t *lda, double *d, double *e, double2 *tau, magma_int_t *info);
-void    lapackf77_zhetrd(const char *uplo, magma_int_t *n, double2 *a, magma_int_t *lda, double *d, double *e, double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info);
-void    lapackf77_zlacpy(const char *uplo, magma_int_t *m, magma_int_t *n, const double2 *a, magma_int_t *lda, double2 *b, magma_int_t *ldb);
-double  lapackf77_zlange(const char *norm, magma_int_t *m, magma_int_t *n, const double2 *a, magma_int_t *lda, double *work);
-double  lapackf77_zlanhe(const char *norm, const char *uplo, magma_int_t *n, const double2 *a, magma_int_t *lda, double * work);
-double  lapackf77_zlansy(const char *norm, const char *uplo, magma_int_t *n, const double2 *a, magma_int_t *lda, double * work);
-void    lapackf77_zlarfb(const char *side, const char *trans, const char *direct, const char *storev, magma_int_t *m, magma_int_t *n, magma_int_t *k, const double2 *v, magma_int_t *ldv, const double2 *t, magma_int_t *ldt, double2 *c, magma_int_t *ldc, double2 *work, magma_int_t *ldwork);
-void    lapackf77_zlarfg(magma_int_t *n, double2 *alpha, double2 *x, magma_int_t *incx, double2 *tau);
-void    lapackf77_zlarft(const char *direct, const char *storev, magma_int_t *n, magma_int_t *k, double2 *v, magma_int_t *ldv, const double2 *tau, double2 *t, magma_int_t *ldt);
-void    lapackf77_zlarnv(magma_int_t *idist, magma_int_t *iseed, magma_int_t *n, double2 *x);
-void    lapackf77_zlaswp(magma_int_t *n, double2 *a, magma_int_t *lda, magma_int_t *k1, magma_int_t *k2, magma_int_t *ipiv, magma_int_t *incx);
-void    lapackf77_zpotrf(const char *uplo, magma_int_t *n, double2 *a, magma_int_t *lda, magma_int_t *info);
-void    lapackf77_ztrtri(const char *uplo, const char *diag, magma_int_t *n, double2 *a, magma_int_t *lda, magma_int_t *info);
-void    lapackf77_zung2r(magma_int_t *m, magma_int_t *n, magma_int_t *k, double2 *a, magma_int_t *lda, const double2 *tau, double2 *work, magma_int_t *info);
-void    lapackf77_zungbr(const char *vect, magma_int_t *m, magma_int_t *n, magma_int_t *k, double2 *a, magma_int_t *lda, const double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info);
-void    lapackf77_zunghr(magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi, double2 *a, magma_int_t *lda, const double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info);
-void    lapackf77_zungtr(const char *uplo, magma_int_t *n, double2 *a, magma_int_t *lda, const double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info);
-void    lapackf77_zunm2r(const char *side, const char *trans, magma_int_t *m, magma_int_t *n, magma_int_t *k, const double2 *a, magma_int_t *lda, const double2 *tau, double2 *c, magma_int_t *ldc, double2 *work, magma_int_t *info);
-void    lapackf77_zunmlq(const char *side, const char *trans, magma_int_t *m, magma_int_t *n, magma_int_t *k, const double2 *a, magma_int_t *lda, const double2 *tau, double2 *c, magma_int_t *ldc, double2 *work, magma_int_t *lwork, magma_int_t *info);
-void    lapackf77_zunmql(const char *side, const char *trans, magma_int_t *m, magma_int_t *n, magma_int_t *k, const double2 *a, magma_int_t *lda, const double2 *tau, double2 *c, magma_int_t *ldc, double2 *work, magma_int_t *lwork, magma_int_t *info);
-void    lapackf77_zunmqr(const char *side, const char *trans, magma_int_t *m, magma_int_t *n, magma_int_t *k, const double2 *a, magma_int_t *lda, const double2 *tau, double2 *c, magma_int_t *ldc, double2 *work, magma_int_t *lwork, magma_int_t *info);
+void    lapackf77_zgebd2(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, double *d, double *e, cuDoubleComplex *tauq, cuDoubleComplex *taup, cuDoubleComplex *work, magma_int_t *info);
+void    lapackf77_zgebrd(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, double *d, double *e, cuDoubleComplex *tauq, cuDoubleComplex *taup, cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
+void    lapackf77_zgehd2(magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi, cuDoubleComplex *a, magma_int_t *lda, cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *info);
+void    lapackf77_zgehrd(magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi, cuDoubleComplex *a, magma_int_t *lda, cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
+void    lapackf77_zgelqf(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
+void    lapackf77_zgeqlf(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
+void    lapackf77_zgeqrf(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
+void    lapackf77_zgetrf(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *ipiv, magma_int_t *info);
+void    lapackf77_zhetd2(const char *uplo, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, double *d, double *e, cuDoubleComplex *tau, magma_int_t *info);
+void    lapackf77_zhetrd(const char *uplo, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, double *d, double *e, cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
+void    lapackf77_zlacpy(const char *uplo, magma_int_t *m, magma_int_t *n, const cuDoubleComplex *a, magma_int_t *lda, cuDoubleComplex *b, magma_int_t *ldb);
+double  lapackf77_zlange(const char *norm, magma_int_t *m, magma_int_t *n, const cuDoubleComplex *a, magma_int_t *lda, double *work);
+double  lapackf77_zlanhe(const char *norm, const char *uplo, magma_int_t *n, const cuDoubleComplex *a, magma_int_t *lda, double * work);
+double  lapackf77_zlansy(const char *norm, const char *uplo, magma_int_t *n, const cuDoubleComplex *a, magma_int_t *lda, double * work);
+void    lapackf77_zlarfb(const char *side, const char *trans, const char *direct, const char *storev, magma_int_t *m, magma_int_t *n, magma_int_t *k, const cuDoubleComplex *v, magma_int_t *ldv, const cuDoubleComplex *t, magma_int_t *ldt, cuDoubleComplex *c, magma_int_t *ldc, cuDoubleComplex *work, magma_int_t *ldwork);
+void    lapackf77_zlarfg(magma_int_t *n, cuDoubleComplex *alpha, cuDoubleComplex *x, magma_int_t *incx, cuDoubleComplex *tau);
+void    lapackf77_zlarft(const char *direct, const char *storev, magma_int_t *n, magma_int_t *k, cuDoubleComplex *v, magma_int_t *ldv, const cuDoubleComplex *tau, cuDoubleComplex *t, magma_int_t *ldt);
+void    lapackf77_zlarnv(magma_int_t *idist, magma_int_t *iseed, magma_int_t *n, cuDoubleComplex *x);
+void    lapackf77_zlaswp(magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *k1, magma_int_t *k2, magma_int_t *ipiv, magma_int_t *incx);
+void    lapackf77_zpotrf(const char *uplo, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *info);
+void    lapackf77_ztrtri(const char *uplo, const char *diag, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *info);
+void    lapackf77_zung2r(magma_int_t *m, magma_int_t *n, magma_int_t *k, cuDoubleComplex *a, magma_int_t *lda, const cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *info);
+void    lapackf77_zungbr(const char *vect, magma_int_t *m, magma_int_t *n, magma_int_t *k, cuDoubleComplex *a, magma_int_t *lda, const cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
+void    lapackf77_zunghr(magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi, cuDoubleComplex *a, magma_int_t *lda, const cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
+void    lapackf77_zungtr(const char *uplo, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, const cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
+void    lapackf77_zunm2r(const char *side, const char *trans, magma_int_t *m, magma_int_t *n, magma_int_t *k, const cuDoubleComplex *a, magma_int_t *lda, const cuDoubleComplex *tau, cuDoubleComplex *c, magma_int_t *ldc, cuDoubleComplex *work, magma_int_t *info);
+void    lapackf77_zunmlq(const char *side, const char *trans, magma_int_t *m, magma_int_t *n, magma_int_t *k, const cuDoubleComplex *a, magma_int_t *lda, const cuDoubleComplex *tau, cuDoubleComplex *c, magma_int_t *ldc, cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
+void    lapackf77_zunmql(const char *side, const char *trans, magma_int_t *m, magma_int_t *n, magma_int_t *k, const cuDoubleComplex *a, magma_int_t *lda, const cuDoubleComplex *tau, cuDoubleComplex *c, magma_int_t *ldc, cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
+void    lapackf77_zunmqr(const char *side, const char *trans, magma_int_t *m, magma_int_t *n, magma_int_t *k, const cuDoubleComplex *a, magma_int_t *lda, const cuDoubleComplex *tau, cuDoubleComplex *c, magma_int_t *ldc, cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
 
   /*
    * Testing functions
    */
-void    lapackf77_zbdt01(int *, int *, int *, double2 *, int *, double2 *, int *, double2 *, double2 *, double2 *, int *, double2 *, double2 *);
-void    lapackf77_zhet21(int *, const char *, int *, int *, double2 *, int *, double2 *, double2 *, double2 *, int *, double2 *, int *, double2 *, double2 *, double2 *);
-void    lapackf77_zhst01(int *, int *, int *, double2 *, int *, double2 *, int *, double2 *, int *, double2 *, int *, double2 *);
-void    lapackf77_zqrt02(int *, int *, int *, double2 *, double2 *, double2 *, double2 *, int *, double2 *, double2 *, int *, double2 *, double2 *);
-void    lapackf77_zunt01(const char *, int *, int *, double2 *, int *, double2 *, int *, double2 *);
+void    lapackf77_zbdt01(int *, int *, int *, cuDoubleComplex *, int *, cuDoubleComplex *, int *, cuDoubleComplex *, cuDoubleComplex *, cuDoubleComplex *, int *, cuDoubleComplex *, cuDoubleComplex *);
+void    lapackf77_zhet21(int *, const char *, int *, int *, cuDoubleComplex *, int *, cuDoubleComplex *, cuDoubleComplex *, cuDoubleComplex *, int *, cuDoubleComplex *, int *, cuDoubleComplex *, cuDoubleComplex *, cuDoubleComplex *);
+void    lapackf77_zhst01(int *, int *, int *, cuDoubleComplex *, int *, cuDoubleComplex *, int *, cuDoubleComplex *, int *, cuDoubleComplex *, int *, cuDoubleComplex *);
+void    lapackf77_zqrt02(int *, int *, int *, cuDoubleComplex *, cuDoubleComplex *, cuDoubleComplex *, cuDoubleComplex *, int *, cuDoubleComplex *, cuDoubleComplex *, int *, cuDoubleComplex *, cuDoubleComplex *);
+void    lapackf77_zunt01(const char *, int *, int *, cuDoubleComplex *, int *, cuDoubleComplex *, int *, cuDoubleComplex *);
 
 #ifdef __cplusplus
 }
