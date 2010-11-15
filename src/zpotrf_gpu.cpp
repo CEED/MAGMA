@@ -14,8 +14,7 @@
 #include "magma.h"
 #include "magmablas.h"
 
-#define A(i, j)  (a   +(j)*lda  + (i))
-#define dA(i, j) (work+(j)*ldda + (i))
+#define A(i, j)  (a + (j)*lda + (i))
 
 extern "C" int 
 magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda, 
@@ -80,18 +79,15 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
 
        Parameter adjustments */
 
-    #define a_ref(a_1,a_2) (a+(a_2)*a_dim1 + a_1)
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
 
     char uplo_[2] = {uplo, 0};
 
     /* Table of constant values */
-    double2 c_one = MAGMA_Z_ONE;
+    double2 c_one     = MAGMA_Z_ONE;
     double2 c_neg_one = MAGMA_Z_NEG_ONE;
     
-    /* System generated locals */
-    int a_dim1, a_offset, i__1, i__2, i__3, i__4;
     /* Local variables */
     static int j;
 
@@ -113,10 +109,6 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
     cudaStreamCreate(&stream[0]);
     cudaStreamCreate(&stream[1]);
 
-    a_dim1 = lda;
-    a_offset = 1 + a_dim1 * 1;
-    a -= a_offset;
-
     int nb = magma_get_zpotrf_nb(n);
 
     double2 *work;
@@ -124,9 +116,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
 
     if (nb <= 1 || nb >= n) {
         /*  Use unblocked code. */
-        cublasGetMatrix(n, n, sizeof(double2), a + a_offset, lda, work, n);
+        cublasGetMatrix(n, n, sizeof(double2), a, lda, work, n);
         lapackf77_zpotrf(uplo_, &n, work, &n, info);
-        cublasSetMatrix(n, n, sizeof(double2), work, n, a + a_offset, lda);
+        cublasSetMatrix(n, n, sizeof(double2), work, n, a, lda);
     } else {
 
         /* Use blocked code. */
@@ -139,12 +131,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
                    for non-positive-definiteness. Computing MIN */
 		jb = min(nb, (n-j));
                 
-                i__3 = nb, i__4 = n - j;
-		i__3 = j;
-
                 cublasZherk(MagmaUpper, MagmaConjTrans, jb, j, 
-                            -1.0, A(0, j), lda, 
-                            1.0,  A(j, j), lda);
+                            -1.0f, A(0, j), lda, 
+                            1.0f,  A(j, j), lda);
 
                 cudaMemcpy2DAsync(work,    jb *sizeof(double2), 
                                   A(j, j), lda*sizeof(double2), 
@@ -182,8 +171,6 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
 	} else {
             //=========================================================
             // Compute the Cholesky factorization A = L*L'.
-	    i__2 = n;
-	    i__1 = nb;
 	    for (j=0; j<n; j+=nb) {
 
                 //  Update and factorize the current diagonal block and test   
@@ -210,7 +197,7 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
                 cudaStreamSynchronize(stream[1]);
 	        lapackf77_zpotrf(MagmaLowerStr, &jb, work, &jb, info);
 		if (*info != 0) {
-                    *info = *info + j - 1;
+                    *info = *info + j;
                     break;
                 }
 	        cudaMemcpy2DAsync(A(j, j), lda*sizeof(double2), 
@@ -234,7 +221,3 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
     /* End of MAGMA_ZPOTRF_GPU */
 
 } /* magma_zpotrf_gpu */
-
-#undef a_ref
-#undef min
-#undef max

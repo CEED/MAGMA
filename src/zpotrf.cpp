@@ -87,7 +87,7 @@ magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
     char uplo_[2] = {uplo, 0};
     int  ldda;
     static int j, jb;
-    double2 c_one = MAGMA_Z_ONE;
+    double2 c_one     = MAGMA_Z_ONE;
     double2 c_neg_one = MAGMA_Z_NEG_ONE;
 
     long int upper = lapackf77_lsame(uplo_, "U");
@@ -135,8 +135,8 @@ magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
                                 A(j, j), lda, dA(j, j), ldda);
 
                 cublasZherk(MagmaUpper, MagmaConjTrans, jb, j, 
-                            -1., dA(0, j), ldda, 
-                            1.,  dA(j, j), ldda);
+                            -1.f, dA(0, j), ldda, 
+                            1.f,  dA(j, j), ldda);
 
                 cudaMemcpy2DAsync(  A(0, j), lda *sizeof(double2), 
 				   dA(0, j), ldda*sizeof(double2), 
