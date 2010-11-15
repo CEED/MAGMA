@@ -41,6 +41,8 @@ int main( int argc, char** argv)
     cublasStatus status;
     int i, j, info[1];
     const char *uplo = MagmaLowerStr;
+    int ione     = 1;
+    int ISEED[4] = {0,0,0,1};
 
     if (argc != 1){
       for(i = 1; i<argc; i++){	
@@ -82,12 +84,16 @@ int main( int argc, char** argv)
       N = lda = size[i];
       n2 = N*N;
 
-      for(j = 0; j < n2; j++) {
-          MAGMA_Z_SET2REAL( h_A[j], (rand() / (double)RAND_MAX) );
-      }
-      for(j=0; j<n2; j+=(lda+1)) {
-          MAGMA_Z_SET2REAL( h_A[j], ( MAGMA_Z_GET_X(h_A[j]) + 2000. ) );
-          h_R[j] = h_A[j];          
+      lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
+      { 
+        int i, j;
+        for(i=0; i<N; i++) {
+          MAGMA_Z_SET2REAL( h_A[i*lda+i], ( MAGMA_Z_GET_X(h_A[i*lda+i]) + 2000. ) );
+          h_R[j] = h_A[j];
+          
+          for(j=0; j<i; j++)
+            h_A[i*lda+j] = h_A[j*lda+i];
+        }
       }
 
       magma_zpotrf(uplo[0], N, h_R, lda, info);
