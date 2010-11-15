@@ -27,6 +27,34 @@
 #include "magma_zc.h"
 #include "magma_ds.h"
 
+#define MagmaNoTrans       'N'
+#define MagmaTrans         'T'
+#define MagmaConjTrans     'C'
+
+#define MagmaUpper         'U'
+#define MagmaLower         'L'
+#define MagmaUpperLower    'A'
+
+#define MagmaNonUnit       'N'
+#define MagmaUnit          'U'
+
+#define MagmaLeft          'L'
+#define MagmaRight         'R'
+
+#define MagmaNoTransStr    "NonTrans"
+#define MagmaTransStr      "Trans"
+#define MagmaConjTransStr  "Conj"
+
+#define MagmaUpperStr      "Upper"
+#define MagmaLowerStr      "Lower"
+#define MagmaUpperLowerStr "All"
+
+#define MagmaNonUnitStr    "NonUnit"
+#define MagmaUnitStr       "Unit"
+
+#define MagmaLeftStr       "Left"
+#define MagmaRightStr      "Right"
+
 #define MAGMA_S_ZERO 0.0f
 #define MAGMA_S_ONE 1.0f
 #define MAGMA_S_NEG_ONE -1.0f
@@ -40,7 +68,7 @@
 #define MAGMA_Z_ONE {1.0, 0.0}
 #define MAGMA_Z_NEG_ONE {-1.0, 0.0}
 
-#define MAGMA_Z_SET2REAL(v, t) v.x = (t); v.y = 0.0
+#define MAGMA_Z_SET2REAL(v, t)    (v).x = (t); (v).y = 0.0
 #define MAGMA_Z_OP_NEG_ASGN(t, z) (t).x = -(z).x; (t).y = -(z).y
 #define MAGMA_Z_EQUAL(u,v) (((u).x == (v).x) && ((u).y == (v).y))
 #define MAGMA_Z_GET_X(u) ((u).x)

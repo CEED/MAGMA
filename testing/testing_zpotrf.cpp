@@ -13,11 +13,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 
 // includes, project
-#include "cuda.h"
-#include "cuda_runtime_api.h"
-#include "cublas.h"
 #include "magma.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -30,7 +30,7 @@ int main( int argc, char** argv)
     printout_devices( );
 
     double2 *h_A, *h_R;
-    double2 gpu_perf, cpu_perf;
+    double gpu_perf, cpu_perf;
 
     TimeStruct start, end;
 
@@ -40,6 +40,7 @@ int main( int argc, char** argv)
     
     cublasStatus status;
     int i, j, info[1];
+    const char *uplo = MagmaLowerStr;
 
     if (argc != 1){
       for(i = 1; i<argc; i++){	
@@ -64,7 +65,7 @@ int main( int argc, char** argv)
     n2 = size[9] * size[9];
 
     /* Allocate host memory for the matrix */
-    h_A = (double2*)malloc(n2 * sizeof(h_A[0]));
+    h_A = (double2*)malloc(n2 * sizeof(double2));
     if (h_A == 0) {
         fprintf (stderr, "!!!! host memory allocation error (A)\n");
     }
@@ -81,13 +82,15 @@ int main( int argc, char** argv)
       N = lda = size[i];
       n2 = N*N;
 
-      for(j = 0; j < n2; j++)
-	h_A[j] = rand() / (double2)RAND_MAX;
-      for(j=0; j<n2; j+=(lda+1))
-      	h_R[j] = (h_A[j]+=2000);
+      for(j = 0; j < n2; j++) {
+          MAGMA_Z_SET2REAL( h_A[j], (rand() / (double)RAND_MAX) );
+      }
+      for(j=0; j<n2; j+=(lda+1)) {
+          MAGMA_Z_SET2REAL( h_A[j], ( MAGMA_Z_GET_X(h_A[j]) + 2000. ) );
+          h_R[j] = h_A[j];          
+      }
 
-      magma_zpotrf('L', N, h_R, lda, info);
-      //magma_zpotrf('U', N, h_R, lda, info);
+      magma_zpotrf(uplo[0], N, h_R, lda, info);
 
       for(j=0; j<n2; j++)
         h_R[j] = h_A[j];    
@@ -96,8 +99,7 @@ int main( int argc, char** argv)
          Performs operation using MAGMA 
 	 =================================================================== */
       start = get_current_time();
-      magma_zpotrf('L', N, h_R, lda, info);
-      //magma_zpotrf('U', N, h_R, lda, info);
+      magma_zpotrf(uplo[0], N, h_R, lda, info);
       end = get_current_time();
     
       gpu_perf = 1.*N*N*N/(3.*1000000*GetTimerValue(start,end));
@@ -108,8 +110,7 @@ int main( int argc, char** argv)
          Performs operation using LAPACK 
 	 =================================================================== */
       start = get_current_time();
-      lapackf77_zpotrf("L", &N, h_A, &lda, info);
-      //lapackf77_zpotrf("U", &N, h_A, &lda, info);
+      lapackf77_zpotrf(uplo, &N, h_A, &lda, info);
       end = get_current_time();
       if (info[0] < 0)  
 	printf("Argument %d of zpotrf had an illegal value.\n", -info[0]);     
@@ -121,7 +122,8 @@ int main( int argc, char** argv)
       /* =====================================================================
          Check the result compared to LAPACK
          =================================================================== */
-      double2 work[1], matnorm, mone = -1.;
+      double work[1], matnorm;
+      double2 mone = MAGMA_Z_NEG_ONE;
       int one = 1;
       matnorm = lapackf77_zlange("f", &N, &N, h_A, &N, work);
       blasf77_zaxpy(&n2, &mone, h_A, &one, h_R, &one);

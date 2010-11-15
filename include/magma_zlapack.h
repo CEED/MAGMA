@@ -156,7 +156,7 @@ void    lapackf77_zgetrf(magma_int_t *m, magma_int_t *n, double2 *a, magma_int_t
 void    lapackf77_zhetd2(const char *uplo, magma_int_t *n, double2 *a, magma_int_t *lda, double *d, double *e, double2 *tau, magma_int_t *info);
 void    lapackf77_zhetrd(const char *uplo, magma_int_t *n, double2 *a, magma_int_t *lda, double *d, double *e, double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info);
 void    lapackf77_zlacpy(const char *uplo, magma_int_t *m, magma_int_t *n, const double2 *a, magma_int_t *lda, double2 *b, magma_int_t *ldb);
-double  lapackf77_zlange(const char *norm, magma_int_t *m, magma_int_t *n, const double2 *a, magma_int_t *lda, double2 *work);
+double  lapackf77_zlange(const char *norm, magma_int_t *m, magma_int_t *n, const double2 *a, magma_int_t *lda, double *work);
 double  lapackf77_zlanhe(const char *norm, const char *uplo, magma_int_t *n, const double2 *a, magma_int_t *lda, double * work);
 double  lapackf77_zlansy(const char *norm, const char *uplo, magma_int_t *n, const double2 *a, magma_int_t *lda, double * work);
 void    lapackf77_zlarfb(const char *side, const char *trans, const char *direct, const char *storev, magma_int_t *m, magma_int_t *n, magma_int_t *k, const double2 *v, magma_int_t *ldv, const double2 *t, magma_int_t *ldt, double2 *c, magma_int_t *ldc, double2 *work, magma_int_t *ldwork);

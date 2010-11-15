@@ -56,7 +56,7 @@ EXE = $(ALLOBJ:.o=)
 
 all: $(EXE)
 
-$(EXE): $(ALLOBJ) $(LIBMAGMA) $(LIBMAGMABLAS)
+$(EXE): $(LIBMAGMA) $(LIBMAGMABLAS)
 
 clean:
 	rm -f $(OBJ) *.o *~

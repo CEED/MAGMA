@@ -15,6 +15,9 @@
 #include "magma.h"
 #include "magmablas.h"
 
+#define A(i, j)  (a   +(j)*lda  + (i))
+#define dA(i, j) (work+(j)*ldda + (i))
+
 extern "C" int 
 magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
 {
@@ -85,7 +88,8 @@ magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
     char uplo_[2] = {uplo, 0};
 
     /* System generated locals */
-    int a_dim1, a_offset, i__3, i__4, ldda;
+    int ldda;
+
     /* Local variables */
     static int j;
     double2 c_one = MAGMA_Z_ONE;
@@ -112,134 +116,126 @@ magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
 
     cublasStatus status;
 
-    a_dim1 = lda;
     ldda   = ((n+31)/32)*32;
     
     double2 *work;
     status = cublasAlloc((n)*ldda, sizeof(double2), (void**)&work);
     if (status != CUBLAS_STATUS_SUCCESS) {
+
       *info = -6;
       return 0;
     }
 
-    a_offset = 1 + a_dim1 * 1;
-    a    -= a_offset;
-    work -= (1 + n);
-
     int nb = magma_get_zpotrf_nb(n);
 
     if (nb <= 1 || nb >= n) {
-	lapackf77_zpotrf(uplo_, &n, a_ref(1, 1), &lda, info);
+	lapackf77_zpotrf(uplo_, &n, a, &lda, info);
     } else {
 
         /* Use hybrid blocked code. */
 	if (upper) {
             /* Compute the Cholesky factorization A = U'*U. */
-	    for (j = 1; j <= n; j += nb) {
-               /* Update and factorize the current diagonal block and test   
-                  for non-positive-definiteness. Computing MIN */
-		i__4 = n - j + 1;
-		jb = min(nb,i__4);
-		i__3 = j - 1;
-		cublasSetMatrix(jb, i__4, sizeof(double2),
-                                a_ref(j,j), lda, da_ref(j,j), ldda);
-                cublasZherk('u', 't', jb, i__3, -1.f, da_ref(1,j),
-                             ldda, 1.f, da_ref(j, j), ldda);
-                cudaMemcpy2DAsync(  a_ref(1,j), lda*sizeof(double2), 
-				   da_ref(1,j), ldda*sizeof(double2), 
-				    sizeof(double2)*(j+jb-1), jb,
-				    cudaMemcpyDeviceToHost,stream[1]);
+	    for (j=0; j<n; j += nb) {
+                /* Update and factorize the current diagonal block and test   
+                   for non-positive-definiteness. Computing MIN */
+                jb = min(nb, (n-j));
+		cublasSetMatrix(jb, (n-j), sizeof(double2), 
+                                A(j, j), lda, dA(j, j), ldda);
+
+                cublasZherk(MagmaUpper, MagmaConjTrans, jb, j, 
+                            -1.f, dA(0, j), ldda, 
+                            1.f,  dA(j, j), ldda);
+
+                cudaMemcpy2DAsync(  A(0, j), lda *sizeof(double2), 
+				   dA(0, j), ldda*sizeof(double2), 
+                                    sizeof(double2)*(j+jb), jb,
+				    cudaMemcpyDeviceToHost, stream[1]);
 		
-		if (j + jb <= n) {
-		  i__3 = n - j - jb + 1;
-		  i__4 = j - 1;
-		  cublasZgemm('T', 'N', jb, i__3, i__4,
-			  c_neg_one, da_ref(1, j), ldda, da_ref(1, j + jb), ldda,
-			  c_one, da_ref(j, j + jb), ldda);
+		if ( (j+jb) < n) {
+                    cublasZgemm(MagmaConjTrans, MagmaNoTrans, 
+                                jb, (n-j-jb), j,
+                                c_neg_one, dA(0, j   ), ldda, 
+                                           dA(0, j+jb), ldda,
+                                c_one,     dA(j, j+jb), ldda);
 		}
              
 		cudaStreamSynchronize(stream[1]);
-		lapackf77_zpotrf("Upper", &jb, a_ref(j,j), &lda, info);
+		lapackf77_zpotrf(MagmaUpperStr, &jb, A(j, j), &lda, info);
 		if (*info != 0) {
-		  *info = *info + j - 1;
+		  *info = *info + j;
 		  break;
 		}
-		cudaMemcpy2DAsync(da_ref(j,j),  ldda * sizeof(double2), 
-				  a_ref( j,j), lda* sizeof(double2), 
+		cudaMemcpy2DAsync(dA(j, j), ldda * sizeof(double2), 
+				   A(j, j), lda  * sizeof(double2), 
 				  sizeof(double2)*jb, jb, 
 				  cudaMemcpyHostToDevice,stream[0]);
 		
-		if (j + jb <= n)
-		  cublasZtrsm('L', 'U', 'T', 'N', jb, i__3,
-			      c_one, da_ref(j,j), ldda, da_ref(j, j+jb), ldda);
+		if ( (j+jb) < n )
+                  cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
+                              jb, (n-j-jb),
+                              c_one, dA(j, j   ), ldda, 
+                                     dA(j, j+jb), ldda);
 	    }
 	} else {
             //=========================================================
             // Compute the Cholesky factorization A = L*L'.
-	    for (j = 1; j <= n; j += nb) {
+	    for (j=0; j<n; j+=nb) {
                 //  Update and factorize the current diagonal block and test   
                 //  for non-positive-definiteness. Computing MIN 
-		i__4 = n - j + 1;
-		jb = min(nb,i__4);
-		i__3 = j - 1;
-                cublasSetMatrix(i__4, jb, sizeof(double2), 
-				a_ref(j,j), lda, da_ref(j,j), ldda);
-                cublasZherk('l', 'n', jb, i__3, -1.f, da_ref(j,1), ldda, 
-                            1.f, da_ref(j, j), ldda);
+		jb = min(nb, (n-j));
+                cublasSetMatrix((n-j), jb, sizeof(double2), 
+				A(j, j), lda, dA(j, j), ldda);
+
+                cublasZherk(MagmaLower, MagmaNoTrans, jb, j,
+                            -1.f, dA(j, 0), ldda, 
+                            1.f,  dA(j, j), ldda);
 		/*
-		cudaMemcpy2DAsync( a_ref(j,1), lda*sizeof(double2), 
-				   da_ref(j,1),  ldda *sizeof(double2), 
-				   sizeof(double2)*jb, j+jb-1, 
+		cudaMemcpy2DAsync( A(j, 0), lda *sizeof(double2), 
+				   dA(j,0), ldda*sizeof(double2), 
+				   sizeof(double2)*jb, j+jb, 
 				   cudaMemcpyDeviceToHost,stream[1]);
 		*/
-		cudaMemcpy2DAsync( a_ref(j,j), lda*sizeof(double2),
-                                   da_ref(j,j),  ldda *sizeof(double2),
+		cudaMemcpy2DAsync( A(j,j),  lda *sizeof(double2),
+                                   dA(j,j), ldda*sizeof(double2),
                                    sizeof(double2)*jb, jb,
                                    cudaMemcpyDeviceToHost,stream[1]);
-		cudaMemcpy2DAsync( a_ref(j,1), lda*sizeof(double2),
-                                   da_ref(j,1),  ldda *sizeof(double2),
-                                   sizeof(double2)*jb, j-1,
+		cudaMemcpy2DAsync( A(j, 0),  lda *sizeof(double2),
+                                   dA(j, 0), ldda*sizeof(double2),
+                                   sizeof(double2)*jb, j,
                                    cudaMemcpyDeviceToHost,stream[2]);
 
-
-
-                if (j + jb <= n) {
-                    i__3 = n - j - jb + 1;
-                    i__4 = j - 1;
-                    cublasZgemm('N', 'T', i__3, jb, i__4,
-                            c_neg_one, da_ref(j + jb, 1), ldda, da_ref(j, 1), ldda,
-                            c_one, da_ref(j + jb, j), ldda);
+                if ( (j+jb) < n) {
+                    cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
+                                 (n-j-jb), jb, j,
+                                 c_neg_one, dA(j+jb, 0), ldda, 
+                                            dA(j,    0), ldda,
+                                 c_one,     dA(j+jb, j), ldda);
                 }
 		
                 cudaStreamSynchronize(stream[1]);
-	        lapackf77_zpotrf("Lower", &jb, a_ref(j, j), &lda, info);
+	        lapackf77_zpotrf(MagmaLowerStr, &jb, A(j, j), &lda, info);
 		if (*info != 0){
-                  *info = *info + j - 1;
+                  *info = *info + j;
 		  break;
 		}
-	        cudaMemcpy2DAsync(da_ref(j,j), ldda * sizeof(double2), 
-				  a_ref( j,j), lda * sizeof(double2), 
-				  sizeof(double2)*jb, jb, 
-				  cudaMemcpyHostToDevice,stream[0]);
+	        cudaMemcpy2DAsync( dA(j, j), ldda*sizeof(double2), 
+				   A(j, j),  lda *sizeof(double2), 
+                                   sizeof(double2)*jb, jb, 
+                                   cudaMemcpyHostToDevice,stream[0]);
 	        
-		if (j + jb <= n)
-		  cublasZtrsm('R', 'L', 'T', 'N', i__3, jb, c_one, 
-			      da_ref(j, j), ldda, da_ref(j + jb, j), ldda);
+		if ( (j+jb) < n)
+		  cublasZtrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
+                              (n-j-jb), jb, 
+                              c_one, dA(j,    j), ldda, 
+                                     dA(j+jb, j), ldda);
 	    }
 	}
     }
     
-    work += 1 + (n);
     cublasFree(work);
     
     return 0;
 
     /* End of MAGMA_ZPOTRF */
-
 } /* magma_zpotrf */
-
-#undef a_ref
-#undef da_ref
-#undef min
-#undef max
 
