@@ -80,18 +80,13 @@ magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
 
     =====================================================================    */
 
-    #define  a_ref(a_1,a_2) (a+(a_2)*a_dim1 + a_1)
-    #define da_ref(a_1,a_2) (work+(a_2)*ldda + a_1)
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
 
-    char uplo_[2] = {uplo, 0};
-
-    /* System generated locals */
-    int ldda;
-
     /* Local variables */
-    static int j;
+    char uplo_[2] = {uplo, 0};
+    int  ldda;
+    static int j, jb;
     double2 c_one = MAGMA_Z_ONE;
     double2 c_neg_one = MAGMA_Z_NEG_ONE;
 
@@ -107,8 +102,6 @@ magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
     if (*info != 0)
       return 0;
 
-    static int jb;
-
     static cudaStream_t stream[3];
     cudaStreamCreate(&stream[0]);
     cudaStreamCreate(&stream[1]);
@@ -121,9 +114,8 @@ magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
     double2 *work;
     status = cublasAlloc((n)*ldda, sizeof(double2), (void**)&work);
     if (status != CUBLAS_STATUS_SUCCESS) {
-
-      *info = -6;
-      return 0;
+	*info = -6;
+	return 0;
     }
 
     int nb = magma_get_zpotrf_nb(n);
@@ -143,8 +135,8 @@ magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
                                 A(j, j), lda, dA(j, j), ldda);
 
                 cublasZherk(MagmaUpper, MagmaConjTrans, jb, j, 
-                            -1.f, dA(0, j), ldda, 
-                            1.f,  dA(j, j), ldda);
+                            -1., dA(0, j), ldda, 
+                            1.,  dA(j, j), ldda);
 
                 cudaMemcpy2DAsync(  A(0, j), lda *sizeof(double2), 
 				   dA(0, j), ldda*sizeof(double2), 
@@ -215,8 +207,8 @@ magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
                 cudaStreamSynchronize(stream[1]);
 	        lapackf77_zpotrf(MagmaLowerStr, &jb, A(j, j), &lda, info);
 		if (*info != 0){
-                  *info = *info + j;
-		  break;
+                    *info = *info + j;
+                    break;
 		}
 	        cudaMemcpy2DAsync( dA(j, j), ldda*sizeof(double2), 
 				   A(j, j),  lda *sizeof(double2), 
@@ -224,10 +216,10 @@ magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
                                    cudaMemcpyHostToDevice,stream[0]);
 	        
 		if ( (j+jb) < n)
-		  cublasZtrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
-                              (n-j-jb), jb, 
-                              c_one, dA(j,    j), ldda, 
-                                     dA(j+jb, j), ldda);
+                    cublasZtrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
+                                (n-j-jb), jb, 
+                                c_one, dA(j,    j), ldda, 
+                                       dA(j+jb, j), ldda);
 	    }
 	}
     }
