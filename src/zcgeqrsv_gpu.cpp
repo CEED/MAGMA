@@ -204,7 +204,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS, double2 *A, m
   double ANRM , CTE , EPS;
 
   EPS  = lapackf77_dlamch("Epsilon");
-  ANRM = magma_zlange('I', N, N , A, LDA , WORK );
+  ANRM = magma_zlange('I', N, N , A, LDA, WORK );
   CTE = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;
   int PTSA  = N*NRHS;
   float RMAX = lapackf77_slamch("O");
@@ -255,10 +255,10 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS, double2 *A, m
   for(i=0;i<NRHS;i++){
     j = cublasIzamax( N ,X+i*N, 1) ;
     cublasGetMatrix( 1, 1, sizeof(double2), X+i*N+j-1, 1,XNRM, 1 ) ;
-    MAGMA_Z_SET2REAL( XNRM[0], lapackf77_zlange( "F", &c_ione, &c_ione, XNRM, &c_ione, XNRM ) );
+    MAGMA_Z_SET2REAL( XNRM[0], lapackf77_zlange( "F", &c_ione, &c_ione, XNRM, &c_ione, NULL ) );
     j = cublasIzamax ( N , WORK+i*N  , 1 ) ;
     cublasGetMatrix( 1, 1, sizeof(double2), WORK+i*N+j-1, 1, RNRM, 1 ) ;
-    MAGMA_Z_SET2REAL( RNRM[0], lapackf77_zlange( "F", &c_ione, &c_ione, RNRM, &c_ione, RNRM ) );
+    MAGMA_Z_SET2REAL( RNRM[0], lapackf77_zlange( "F", &c_ione, &c_ione, RNRM, &c_ione, NULL ) );
     if( MAGMA_Z_GET_X( RNRM[0] ) > MAGMA_Z_GET_X( XNRM[0] ) *CTE ){
       goto L10;
     }
@@ -301,10 +301,10 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS, double2 *A, m
       int j;
       j = cublasIzamax( N , X+i*N  , 1) ;
       cublasGetMatrix( 1, 1, sizeof(double2), X+i*N+j-1, 1, XNRM, 1 ) ;
-      MAGMA_Z_SET2REAL( XNRM[0], lapackf77_zlange( "F", &c_ione, &c_ione, XNRM, &c_ione, XNRM ) );
+      MAGMA_Z_SET2REAL( XNRM[0], lapackf77_zlange( "F", &c_ione, &c_ione, XNRM, &c_ione, NULL ) );
       j = cublasIzamax ( N ,WORK+i*N , 1 ) ;
       cublasGetMatrix( 1, 1, sizeof(double2), WORK+i*N+j-1, 1, RNRM, 1 ) ;
-      MAGMA_Z_SET2REAL( RNRM[0], lapackf77_zlange( "F", &c_ione, &c_ione, RNRM, &c_ione, RNRM ) );
+      MAGMA_Z_SET2REAL( RNRM[0], lapackf77_zlange( "F", &c_ione, &c_ione, RNRM, &c_ione, NULL ) );
       if( MAGMA_Z_GET_X( RNRM[0] ) > MAGMA_Z_GET_X( XNRM[0] ) *CTE ){
         goto L20;
       }

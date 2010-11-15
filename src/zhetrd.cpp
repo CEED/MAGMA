@@ -19,7 +19,8 @@
 double2 cpu_gpu_zdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda)
 {
   int one = 1, j;
-  double2 mone = MAGMA_Z_NEG_ONE, work[1];
+  double2 mone = MAGMA_Z_NEG_ONE;
+  double  work[1];
   double2 *ha = (double2*)malloc( M * N * sizeof(double2));
   double2 res;
 
