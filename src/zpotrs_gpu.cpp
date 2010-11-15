@@ -17,10 +17,10 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t
-magma_zpotrs_gpu(char UPLO, magma_int_t N , magma_int_t NRHS, double2 *A , magma_int_t LDA,
-		 double2 *B, magma_int_t LDB, magma_int_t *INFO)
+magma_zpotrs_gpu(char uplo, magma_int_t n, magma_int_t nrhs, 
+                 double2 *A, magma_int_t lda, double2 *B, magma_int_t ldb, magma_int_t *info)
 {
-/*  -- MAGMA (version 1.0) --
+/*  -- magma (version 1.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -65,36 +65,35 @@ magma_zpotrs_gpu(char UPLO, magma_int_t N , magma_int_t NRHS, double2 *A , magma
             = 0:  successful exit
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================   */
-    #define MAX(a,b)       (((a)>(b))?(a):(b))
+    #define max(a,b) (((a)>(b))?(a):(b))
 
     double2 c_one = MAGMA_Z_ONE;
-
-    *INFO = 0 ; 
-    if( UPLO !='U' && UPLO !='u' && UPLO !='L' && UPLO!='l')
-      *INFO = - 1 ; 
-    if( N < 0 )
-      *INFO = -2 ; 
-    if( NRHS < 0) 
-      *INFO = -3 ; 
-    if ( LDA < MAX(1,N))
-      *INFO = -5; 
-    if ( LDB < MAX(1,N))
-      *INFO = -7;
-    if( *INFO != 0 ){ 
-      magma_xerbla("magma_zpotrs_gpu", INFO); 
-      return 0;
+    
+    *info = 0 ; 
+    if( (uplo != 'U') && (uplo != 'u') && (uplo != 'L') && (uplo != 'l') )
+        *info = -1; 
+    if( n < 0 )
+        *info = -2; 
+    if( nrhs < 0) 
+        *info = -3; 
+    if ( lda < max(1, n) )
+        *info = -5; 
+    if ( ldb < max(1, n) )
+        *info = -7;
+    if( *info != 0 ){ 
+        magma_xerbla("magma_zpotrs_gpu", info); 
+        return 0;
     }
-    if( N==0 || NRHS ==0) 
-      return 0;	
-    if( UPLO =='U' || UPLO=='u'){
-      cublasZtrsm('L','U','T','N', N , NRHS, c_one, A , LDA , B , LDB );
-      cublasZtrsm('L','U','N','N', N , NRHS, c_one, A , LDA , B , LDB );
+    if( (n==0) || (nrhs ==0) )
+        return 0;	
+    if( (uplo=='U') || (uplo=='u') ){
+        cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, n, nrhs, c_one, A, lda, B, ldb);
+        cublasZtrsm(MagmaLeft, MagmaUpper, MagmaNoTrans,   MagmaNonUnit, n, nrhs, c_one, A, lda, B, ldb);
     }
     else{
-      cublasZtrsm('L','L','N','N', N , NRHS, c_one, A , LDA , B , LDB );
-      cublasZtrsm('L','L','T','N', N , NRHS, c_one, A , LDA , B , LDB );
+        cublasZtrsm(MagmaLeft, MagmaLower, MagmaNoTrans,   MagmaNonUnit, n, nrhs, c_one, A, lda, B, ldb);
+        cublasZtrsm(MagmaLeft, MagmaLower, MagmaConjTrans, MagmaNonUnit, n, nrhs, c_one, A, lda, B, ldb);
     }
 
     return 0;
 }
-#undef MAX
