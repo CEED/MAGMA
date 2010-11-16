@@ -110,7 +110,7 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
     *info = 0;
     int nb = magma_get_zgelqf_nb(m);
 
-    MAGMA_Z_SET2REAL( work[0], m * nb );
+    work[0] = MAGMA_Z_MAKE( (double)(m*nb), 0 );
     lquery = (lwork == -1);
     if (m < 0) {
 	*info = -1;

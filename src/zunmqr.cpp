@@ -17,7 +17,7 @@
 extern "C" magma_int_t
 magma_zunmqr(const char side, const char trans, magma_int_t m, magma_int_t n,
 	     magma_int_t k, double2 *a, magma_int_t lda, double2 *tau, double2 *c, magma_int_t ldc,
-	     double2 *work, magma_int_t *lwork, magma_int_t *info)
+	     double2 *work, magma_int_t lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -147,7 +147,7 @@ magma_zunmqr(const char side, const char trans, magma_int_t m, magma_int_t n,
     *info = 0;
     left = lapackf77_lsame(side_, "L");
     notran = lapackf77_lsame(trans_, "N");
-    lquery = *lwork == -1;
+    lquery = (lwork == -1);
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
 
@@ -172,7 +172,7 @@ magma_zunmqr(const char side, const char trans, magma_int_t m, magma_int_t n,
 	*info = -7;
     } else if (ldc < max(1,m)) {
 	*info = -10;
-    } else if (*lwork < max(1,nw) && ! lquery) {
+    } else if (lwork < max(1,nw) && ! lquery) {
 	*info = -12;
     }
 
@@ -202,8 +202,8 @@ magma_zunmqr(const char side, const char trans, magma_int_t m, magma_int_t n,
     ldwork = nw;
     if (nb > 1 && nb < k) {
 	iws = nw * nb;
-	if (*lwork < iws) {
-	    nb = *lwork / ldwork;
+	if (lwork < iws) {
+	    nb = lwork / ldwork;
 	    nbmin = 64;
 	}
     } else {

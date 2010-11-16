@@ -177,7 +177,7 @@ int main( int argc, char** argv)
 
         // Solve the least-squares problem min || A * X - B ||
         magma_zgeqrs_gpu( M, N, nrhs, d_A, lda, tau,
-                          d_b, M, h_work, &lwork, d_work, &info);
+                          d_b, M, h_work, lwork, d_work, &info);
         end = get_current_time();
 
         gpu_perf=(4.*M*N*min_mn/3. + 3.*nrhs*N*N)/(1000000.*
@@ -192,9 +192,9 @@ int main( int argc, char** argv)
 
         // compute the residual
         if (nrhs == 1)
-            blasf77_zgemv("n", &M, &N, &mzone, h_A, &M, x, &ione, &zone, r, &ione);
+            blasf77_zgemv( MagmaNoTransStr, &M, &N, &mzone, h_A, &M, x, &ione, &zone, r, &ione);
         else
-            blasf77_zgemm("n","n", &M, &nrhs, &N, &mzone, h_A, &M, x, &N, &zone, r, &M);
+            blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &M, &nrhs, &N, &mzone, h_A, &M, x, &N, &zone, r, &M);
         matnorm = lapackf77_zlange("f", &M, &N, h_A, &M, work);
 
         /* =====================================================================
@@ -212,20 +212,23 @@ int main( int argc, char** argv)
 
         // Solve the least-squares problem: min || A * X - B ||
         // 1. B(1:M,1:NRHS) = Q^T B(1:M,1:NRHS)
-        lapackf77_zunmqr("l", "t", &M, &nrhs, &min_mn, h_R, &M,
-                         tau, x, &M, h_work, &lwork, &info);
+        lapackf77_zunmqr( MagmaLeftStr, MagmaConjTransStr, 
+                          &M, &nrhs, &min_mn, 
+                          h_R, &M, tau, 
+                          x, &M, h_work, &lwork, &info);
 
         // 2. B(1:N,1:NRHS) := inv(R) * B(1:M,1:NRHS)
-        blasf77_ztrsm("l", "u", "n", "n", &N, &nrhs, &zone, h_R, &M, x, &M);
+        blasf77_ztrsm( MagmaLeftStr, MagmaUpperStr, MagmaNoTransStr, MagmaNonUnitStr, 
+                       &N, &nrhs, &zone, h_R, &M, x, &M);
 
         end = get_current_time();
         cpu_perf = (4.*M*N*min_mn/3.+3.*nrhs*N*N)/(1000000.*
                                                    GetTimerValue(start,end));
 
         if (nrhs == 1)
-            blasf77_zgemv("n", &M, &N, &mzone, h_A, &M, x, &ione, &zone, b, &ione);
+            blasf77_zgemv( MagmaNoTransStr, &M, &N, &mzone, h_A, &M, x, &ione, &zone, b, &ione);
         else
-            blasf77_zgemm("n","n", &M, &nrhs, &N, &mzone, h_A, &M, x, &M, &zone, b, &M);
+            blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &M, &nrhs, &N, &mzone, h_A, &M, x, &M, &zone, b, &M);
 
         printf("%5d %5d   %6.1f       %6.1f       %7.2e   %7.2e\n",
                M, N, cpu_perf, gpu_perf,

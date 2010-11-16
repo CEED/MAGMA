@@ -124,7 +124,7 @@ void MAGMA_ZHETRD( char *uplo, magma_int_t *n, double2 *A, magma_int_t *lda, dou
  -- MAGMA function definitions / Data on GPU
 */
 void MAGMA_ZUNMQR_GPU(char *side, char *trans, magma_int_t *m, magma_int_t *n, magma_int_t *k, double2 *a, magma_int_t *lda, double2 *tau, double2 *c, magma_int_t *ldc, double2 *work, magma_int_t *lwork, double2 *td, magma_int_t *nb, magma_int_t *info)
-{ magma_zunmqr_gpu(side[0], trans[0], *m, *n, *k, a, *lda, tau, c, *ldc, work, lwork, td, *nb, info); }
+{ magma_zunmqr_gpu(side[0], trans[0], *m, *n, *k, a, *lda, tau, c, *ldc, work, *lwork, td, *nb, info); }
 
 void MAGMA_ZGEQRF_GPU( magma_int_t *m, magma_int_t *n, double2 *A, magma_int_t *lda, double2 *tau, magma_int_t *info)
 { magma_zgeqrf_gpu( *m, *n, A, *lda, tau, info); }
@@ -133,7 +133,7 @@ void MAGMA_ZGEQRF_GPU2(magma_int_t *m, magma_int_t *n, double2 *A, magma_int_t *
 { magma_zgeqrf_gpu2(*m, *n, A, *lda, tau, dwork, info); }
 
 void MAGMA_ZGEQRS_GPU( magma_int_t *m, magma_int_t *n, magma_int_t *nrhs, double2 *A, magma_int_t *lda, double2 *tau, double2 *c, magma_int_t *ldc, double2 *work, magma_int_t *lwork, double2 *td, magma_int_t *info)
-{ magma_zgeqrs_gpu( *m, *n, *nrhs, A, *lda, tau, c, *ldc, work, lwork, td, info); }
+{ magma_zgeqrs_gpu( *m, *n, *nrhs, A, *lda, tau, c, *ldc, work, *lwork, td, info); }
 
 void MAGMA_ZGETRF_GPU( magma_int_t *m, magma_int_t *n, double2 *A, magma_int_t *lda, magma_int_t *ipiv, magma_int_t *info)
 { magma_zgetrf_gpu( *m, *n, A, *lda, ipiv, info); }

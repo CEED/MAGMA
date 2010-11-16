@@ -128,7 +128,7 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
 	if (k == 0)
             work[0] = c_one;
 	else {
-            MAGMA_Z_SET2REAL( work[0], n * nb );
+            work[0] = MAGMA_Z_MAKE( n*nb, 0 );
 	}
 
 	if (lwork < max(1,n) && ! lquery)

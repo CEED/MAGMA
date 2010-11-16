@@ -19,6 +19,7 @@
 #include "magma.h"
 #include "magmablas.h"
 
+#define PRECISION_z
 int M , N , K , LDA, LDB , LDC ;
 
 double verifyResult(const cuDoubleComplex *mat, const cuDoubleComplex *mat_ref) {
@@ -43,8 +44,8 @@ int main( int argc, char** argv)
     int count  = 10;
     int flag   = 0 ;
 
-    char TRANSA = 'N' ;
-    char TRANSB = 'N' ;
+    char TRANSA = 'N';
+    char TRANSB = 'N';
     int ione     = 1;
     int ISEED[4] = {0,0,0,1};
     
@@ -57,19 +58,40 @@ int main( int argc, char** argv)
                 flag = 0 ;
             }
             else if (strcmp("-NN", argv[i])==0){
-                TRANSA = TRANSB = 'N';
+                TRANSA = TRANSB = MagmaNoTrans;
             }
             else if (strcmp("-TT", argv[i])==0){
-                TRANSA = TRANSB = 'T';
+                TRANSA = TRANSB = MagmaTrans;
             }
             else if (strcmp("-NT", argv[i])==0){
-                TRANSA = 'N';
-                TRANSB = 'T';
+                TRANSA = MagmaNoTrans;
+                TRANSB = MagmaTrans;
             }
             else if (strcmp("-TN", argv[i])==0){
-                TRANSA = 'T';
-                TRANSB = 'N';
+                TRANSA = MagmaTrans;
+                TRANSB = MagmaNoTrans;
             }
+#if defined(PRECISION_z) || defined(PRECISION_c)
+            else if (strcmp("-NC", argv[i])==0){
+                TRANSA = MagmaNoTrans;
+                TRANSB = MagmaConjTrans;
+            }
+            else if (strcmp("-TC", argv[i])==0){
+                TRANSA = MagmaTrans;
+                TRANSB = MagmaConjTrans;
+            }
+            else if (strcmp("-CN", argv[i])==0){
+                TRANSA = MagmaConjTrans;
+                TRANSB = MagmaNoTrans;
+            }
+            else if (strcmp("-CT", argv[i])==0){
+                TRANSA = MagmaConjTrans;
+                TRANSB = MagmaTrans;
+            }
+            else if (strcmp("-CC", argv[i])==0){
+                TRANSA = TRANSB = MagmaConjTrans;
+            }
+#endif
         }
     }
 
@@ -130,13 +152,13 @@ int main( int argc, char** argv)
             cublasAlloc( size_B1, sizeof(cuDoubleComplex), (void**)&d_B_m ) ;
             cublasAlloc( size_C1, sizeof(cuDoubleComplex), (void**)&d_C_m ) ;
             if(TRANSA=='N')
-                cublasSetMatrix( M, K, sizeof( cuDoubleComplex ), h_A,   LDA, d_A_m, LDA ) ;
+                cublasSetMatrix( M, K, sizeof( cuDoubleComplex ), h_A, LDA, d_A_m, LDA ) ;
             else
-                cublasSetMatrix( K, M, sizeof( cuDoubleComplex ), h_A,   LDA, d_A_m, LDA ) ;
+                cublasSetMatrix( K, M, sizeof( cuDoubleComplex ), h_A, LDA, d_A_m, LDA ) ;
             if(TRANSB=='N')
-                cublasSetMatrix( K, N, sizeof( cuDoubleComplex ), h_B,   LDB, d_B_m, LDB ) ;
+                cublasSetMatrix( K, N, sizeof( cuDoubleComplex ), h_B, LDB, d_B_m, LDB ) ;
             else
-                cublasSetMatrix( N, K, sizeof( cuDoubleComplex ), h_B,   LDB, d_B_m, LDB ) ;
+                cublasSetMatrix( N, K, sizeof( cuDoubleComplex ), h_B, LDB, d_B_m, LDB ) ;
             cublasSetMatrix( M, N, sizeof( cuDoubleComplex ), h_C_m, LDC, d_C_m, LDC ) ;
 
 
@@ -158,13 +180,13 @@ int main( int argc, char** argv)
             cublasAlloc( size_B1, sizeof(cuDoubleComplex), (void**)&d_B_c ) ;
             cublasAlloc( size_C1, sizeof(cuDoubleComplex), (void**)&d_C_c ) ;
             if(TRANSA=='N')
-                cublasSetMatrix( M, K, sizeof( cuDoubleComplex ), h_A,   LDA, d_A_c, LDA ) ;
+                cublasSetMatrix( M, K, sizeof( cuDoubleComplex ), h_A, LDA, d_A_c, LDA ) ;
             else
-                cublasSetMatrix( K, M, sizeof( cuDoubleComplex ), h_A,   LDA, d_A_c, LDA ) ;
+                cublasSetMatrix( K, M, sizeof( cuDoubleComplex ), h_A, LDA, d_A_c, LDA ) ;
             if(TRANSB=='N')
-                cublasSetMatrix( K, N, sizeof( cuDoubleComplex ), h_B,   LDB, d_B_c, LDB ) ;
+                cublasSetMatrix( K, N, sizeof( cuDoubleComplex ), h_B, LDB, d_B_c, LDB ) ;
             else
-                cublasSetMatrix( N, K, sizeof( cuDoubleComplex ), h_B,   LDB, d_B_c, LDB ) ;
+                cublasSetMatrix( N, K, sizeof( cuDoubleComplex ), h_B, LDB, d_B_c, LDB ) ;
 
             cublasSetMatrix( M, N, sizeof( cuDoubleComplex ), h_C_c, LDC, d_C_c, LDC ) ;
             start = get_current_time();

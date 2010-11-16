@@ -113,7 +113,7 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
     int nb = magma_get_zgeqrf_nb(min(m, n));
 
     int lwkopt = n * nb;
-    MAGMA_Z_SET2REAL( work[0], (double)lwkopt );
+    work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );
     long int lquery = (lwork == -1);
     if (m < 0) {
         *info = -1;
