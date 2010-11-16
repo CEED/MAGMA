@@ -13,38 +13,32 @@ SRC = 	zbdt01.f  \
 	zhst01.f  \
 	zunt01.f  \
 	zqrt02.f  \
+	zlarfy.f  \
+	zstt21.f  \
 	\
 	cbdt01.f  \
 	chet21.f  \
 	chst01.f  \
 	cunt01.f  \
 	cqrt02.f  \
+        clarfy.f  \
+	cstt21.f  \
 	\
 	dbdt01.f  \
 	dsyt21.f  \
 	dhst01.f  \
 	dort01.f  \
 	dqrt02.f  \
+        dlarfy.f  \
+        dstt21.f  \
 	\
 	sbdt01.f  \
 	ssyt21.f  \
 	shst01.f  \
 	sort01.f  \
 	sqrt02.f  \
-	\
-	sorghr.f  \
-        slabad.f  \
-        \
-        dorghr.f  \
-        dlabad.f  \
-        \
-        slarfy.f \
-        dlarfy.f \
-        \
-        sorgbr.f \
-        \
-        sstt21.f \
-        dstt21.f \
+        slarfy.f  \
+        sstt21.f
 
     OBJ = $(SRC:.f=.o)
     EXE = $(OBJ:.o=)
