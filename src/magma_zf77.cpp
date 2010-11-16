@@ -119,7 +119,7 @@ void MAGMA_ZGEQLF( magma_int_t *m, magma_int_t *n, double2 *A, magma_int_t *lda,
 
 void MAGMA_ZGEQRF( magma_int_t *m, magma_int_t *n, double2 *A, magma_int_t *lda, double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info)
 { 
-    magma_zgeqrf( *m, *n, A, *lda, tau, work, lwork, info); 
+    magma_zgeqrf( *m, *n, A, *lda, tau, work, *lwork, info); 
 }
 
 void MAGMA_ZGETRF( magma_int_t *m, magma_int_t *n, double2 *A, magma_int_t *lda, magma_int_t *ipiv, magma_int_t *info)
@@ -150,13 +150,13 @@ void MAGMA_ZLAHRU( magma_int_t *m, magma_int_t *n, magma_int_t *nb, double2 *a, 
     magma_zlahru( *m, *n, *nb, a, *lda, d_a, y, v, t, d_w); 
 }
 
-void MAGMA_ZLARFB( char *direct, char *storev, magma_int_t *m, magma_int_t *n, magma_int_t *k, devptr_t *dv, magma_int_t *ldv, devptr_t *dt, magma_int_t *ldt, devptr_t *dc, magma_int_t *ldc, devptr_t *dwork, magma_int_t *ldwork)
+void MAGMA_ZLARFB( char *side, char *trans, char *direct, char *storev, magma_int_t *m, magma_int_t *n, magma_int_t *k, devptr_t *dv, magma_int_t *ldv, devptr_t *dt, magma_int_t *ldt, devptr_t *dc, magma_int_t *ldc, devptr_t *dwork, magma_int_t *ldwork)
 { 
     cuDoubleComplex *d_v = (cuDoubleComplex *)(*dv);
     cuDoubleComplex *d_t = (cuDoubleComplex *)(*dt);
     cuDoubleComplex *d_c = (cuDoubleComplex *)(*dc);
     cuDoubleComplex *d_w = (cuDoubleComplex *)(*dwork);
-    magma_zlarfb( direct[0], storev[0], *m, *n, *k, d_v, *ldv, d_t, *ldt, d_c, *ldc, d_w, *ldwork); 
+    magma_zlarfb( side[0], trans[0], direct[0], storev[0], *m, *n, *k, d_v, *ldv, d_t, *ldt, d_c, *ldc, d_w, *ldwork); 
 }
 
 void MAGMA_ZPOTRF( char *uplo, magma_int_t *n, double2 *A, magma_int_t *lda, magma_int_t *info)

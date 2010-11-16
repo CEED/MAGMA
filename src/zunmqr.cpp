@@ -274,7 +274,8 @@ magma_zunmqr(const char side, const char trans, magma_int_t m, magma_int_t n,
 	    // TTT ------------------------------------------------------------
 	    //printf("%5d %5d %5d\n", mi, ni, ic + 1 + m);
 	    cublasSetMatrix(ib, ib, sizeof(double2), t, ib, dwork+i__4*ib, ib);
-	    magma_zlarfb('F','C', mi, ni, ib,
+	    magma_zlarfb(MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
+                         mi, ni, ib,
 			 dwork, i__4, dwork+i__4*ib, ib,
 			 &dc[ic + jc * c_dim1], ldc, 
 			 dwork+i__4*ib + ib*ib, ni);

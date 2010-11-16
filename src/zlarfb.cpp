@@ -14,11 +14,12 @@
 #include <cublas.h>
 #include "magma.h"
 #include "magmablas.h"
- 
-extern "C" magma_int_t 
-magma_zlarfb(char direct, char storev,
-	     magma_int_t m, magma_int_t n, magma_int_t k, double2 *dv, magma_int_t ldv, double2 *dt,
-	     magma_int_t ldt, double2 *dc, magma_int_t ldc, double2 *dwork, magma_int_t ldwork)
+
+extern "C" magma_int_t
+magma_zlarfb(char side, char trans, char direct, char storev,
+	     magma_int_t m, magma_int_t n, magma_int_t k,
+             cuDoubleComplex *dv, magma_int_t ldv, cuDoubleComplex *dt,    magma_int_t ldt,
+             cuDoubleComplex *dc, magma_int_t ldc, cuDoubleComplex *dwork, magma_int_t ldwork)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Univ. of California Berkeley
@@ -32,6 +33,14 @@ magma_zlarfb(char direct, char storev,
 
     Arguments
     =========
+
+    SIDE    (input) CHARACTER
+            = 'L': apply H or H' from the Left
+            = 'R': apply H or H' from the Right (Not implemented)
+
+    TRANS   (input) CHARACTER
+            = 'N': apply H  (No transpose)      (Not implemented)
+            = 'C': apply H' (Conjugate transpose)
 
     DIRECT  (input) CHARACTER
             Indicates how H is formed from a product of elementary
@@ -82,76 +91,96 @@ magma_zlarfb(char direct, char storev,
 
     ===================================================================      */
 
-  #define dwork_ref(a_1,a_2) (dwork+(a_2)*(ldwork) + a_1)
-  #define dc_ref(a_1,a_2)    (dc+(a_2)*(ldc) + a_1)
-  #define dv_ref(a_1,a_2)    (dv+(a_2)*(ldv) + a_1)
+#define dwork_ref(a_1,a_2) (dwork+(a_2)*(ldwork)+ a_1)
+#define dc_ref(a_1,a_2)    (dc   +(a_2)*(ldc)   + a_1)
+#define dv_ref(a_1,a_2)    (dv   +(a_2)*(ldv)   + a_1)
 
-  double2 c_zero = MAGMA_Z_ZERO;
-  double2 c_one = MAGMA_Z_ONE;
-  double2 c_neg_one = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
-  /* Function Body */
-  if (m <= 0 || n <= 0) {
-    return 0;
-  }
- 
-  if (storev == 'c' || storev == 'C'){
-    /*
-    if (n==1 && m%32==0){
-      // This is used when we have to apply H on only one vector 
-      magmablas_zgemvt(m, k, 1., dv_ref(0,0), ldv, dc_ref(0, 0), dwork);
-      printf("m= %d, n = %d, ldwork = %d\n", m, k, ldwork);
+    /* Function Body */
+    if (m <= 0 || n <= 0) {
+        return 0;
     }
-    else
-    */
-    //TimeStruct start, end;
-    //start = get_current_time();
-    cublasZgemm('t', 'n', n, k, m, c_one, dc_ref(0, 0), ldc,
-		dv_ref(0,0), ldv, c_zero, dwork, ldwork);
-    
-    if (direct == 'F' || direct =='f')
-      cublasZtrmm('r', 'u', 'n', 'n',
-		  n, k, c_one, dt, ldt, dwork, ldwork);
-    else
-      cublasZtrmm('r', 'l', 'n', 'n',
-		  n, k, c_one, dt, ldt, dwork, ldwork);
 
-    cublasZgemm('n', 't', m, n, k, c_neg_one, dv_ref(0, 0), ldv,
-		dwork, ldwork, c_one, dc_ref(0,0), ldc);
-    //end = get_current_time();
-    //if (n!=k)
-    //printf("%5d %5d  %7.2f\n",
-    //	   m, n, (4.*n*(k)*m+n*(k)*(k))/(1.e6*GetTimerValue(start,end)));
-  }
-  else {
-    cublasZgemm('n', 't', m, k, n, c_one, dc_ref(0, 0), ldc,
-                dv_ref(0,0), ldv, c_zero, dwork, ldwork);
-    
-    cublasZtrmm('r', 'u', 'n', 'n',
-		m, k, c_one, dt, ldt, dwork, ldwork);
-    
-    cublasZgemm('n', 'n', m, n, k, c_neg_one, 
-		dwork, ldwork,
-		dv_ref(0, 0), ldv, 
-		c_one, dc_ref(0,0), ldc);
-    /*
-    double2 one = 1.f, zero = 0.f, mone = -1.f;
-    blasf77_zgemm("n", "t", &m, k, &n, &one, dc_ref(0, 0), ldc,
+    if ( ( side  == 'r' || side  == 'R') ||
+         ( trans == 'n' || trans == 'N') ) {
+        int info = -1;
+        fprintf(stderr, "The cases (side == right) or (trans == NoTrans) are not implemented\n");
+        magma_xerbla(__func__, &info);
+        return 0;
+    }
+
+    if ( storev == 'c' || storev == 'C'){
+        /*
+          if (n==1 && m%32==0){
+          // This is used when we have to apply H on only one vector
+          magmablas_zgemvt(m, k, 1., dv_ref(0,0), ldv, dc_ref(0, 0), dwork);
+          printf("m= %d, n = %d, ldwork = %d\n", m, k, ldwork);
+          }
+          else
+        */
+        //TimeStruct start, end;
+        //start = get_current_time();
+        cublasZgemm( MagmaConjTrans, MagmaNoTrans,
+                     n, k, m,
+                     c_one,  dc_ref(0, 0), ldc,
+                             dv_ref(0, 0), ldv,
+                     c_zero, dwork,        ldwork);
+
+        if (direct == 'F' || direct =='f')
+            cublasZtrmm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
+                         n, k, 
+                         c_one, dt,    ldt, 
+                                dwork, ldwork);
+        else
+            cublasZtrmm( MagmaRight, MagmaLower, MagmaNoTrans, MagmaNonUnit,
+                         n, k, 
+                         c_one, dt,    ldt, 
+                                dwork, ldwork);
+
+        cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
+                     m, n, k, 
+                     c_neg_one, dv_ref(0, 0), ldv,
+                                dwork,        ldwork, 
+                     c_one,     dc_ref(0,0),  ldc);
+        //end = get_current_time();
+        //if (n!=k)
+        //printf("%5d %5d  %7.2f\n",
+        //	   m, n, (4.*n*(k)*m+n*(k)*(k))/(1.e6*GetTimerValue(start,end)));
+    }
+    else {
+        cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
+                     m, k, n, 
+                     c_one,  dc_ref(0, 0), ldc,
+                             dv_ref(0, 0), ldv, 
+                     c_zero, dwork,        ldwork);
+
+        cublasZtrmm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
+                     m, k, 
+                     c_one, dt,    ldt, 
+                            dwork, ldwork);
+
+        cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+                     m, n, k, 
+                     c_neg_one, dwork,        ldwork,
+                                dv_ref(0, 0), ldv,
+                      c_one,    dc_ref(0, 0), ldc);
+        /*
+          cuDoubleComplex one = 1.f, zero = 0.f, mone = -1.f;
+          blasf77_zgemm("n", "t", &m, k, &n, &one, dc_ref(0, 0), ldc,
 	  dv_ref(0,0), ldv, &zero, dwork, ldwork);
 
-    blasf77_ztrmm("r", "u", "n", "n",
-	   &m, k, &one, dt, ldt, dwork, ldwork);
+          blasf77_ztrmm("r", "u", "n", "n",
+          &m, k, &one, dt, ldt, dwork, ldwork);
 
-    blasf77_zgemm("n", "n", &m, &n, k, &mone,
-                dwork, ldwork,
-                dv_ref(0, 0), ldv,
-      		&one, dc_ref(0,0), ldc);
-    */
-  }
-  return 0;
+          blasf77_zgemm("n", "n", &m, &n, k, &mone,
+          dwork, ldwork,
+          dv_ref(0, 0), ldv,
+          &one, dc_ref(0,0), ldc);
+        */
+    }
+    return 0;
 
 } /* magma_zlarfb */
-
-#undef dv_ref
-#undef dc_ref
-#undef dwork_ref

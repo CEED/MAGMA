@@ -215,7 +215,8 @@ magma_zunmqr_gpu(char side, char trans, magma_int_t m, magma_int_t n, magma_int_
 	      ni = n - i;
 	      jc = i;
 	    }
-	    magma_zlarfb('F', 'C', mi, ni, ib, a_ref(i, i), lda, 
+	    magma_zlarfb(MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
+                         mi, ni, ib, a_ref(i, i), lda, 
 			 t_ref(i), lddwork, c_ref(ic, jc), ldc, dwork, nw);
 	  }
       } 

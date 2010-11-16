@@ -41,6 +41,12 @@
 #define MagmaLeft          'L'
 #define MagmaRight         'R'
 
+#define MagmaForward       'F'
+#define MagmaBackward      'B'
+                           
+#define MagmaColumnwise    'C'
+#define MagmaRowwise       'R'
+
 #define MagmaNoTransStr    "NonTrans"
 #define MagmaTransStr      "Trans"
 #define MagmaConjTransStr  "Conj"
@@ -54,6 +60,12 @@
 
 #define MagmaLeftStr       "Left"
 #define MagmaRightStr      "Right"
+
+#define MagmaForwardStr    "Forward"
+#define MagmaBackwardStr   "Backward"
+
+#define MagmaColumnwiseStr "Columnwise"
+#define MagmaRowwiseStr    "Rowwise"
 
 #define MAGMA_Z_SET2REAL(v, t)    (v).x = (t); (v).y = 0.0
 #define MAGMA_Z_OP_NEG_ASGN(t, z) (t).x = -(z).x; (t).y = -(z).y

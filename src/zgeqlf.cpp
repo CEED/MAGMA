@@ -196,7 +196,8 @@ magma_zgeqlf(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
 		 This is the main update from the lookahead techniques. */
 	      rows = m - k + old_i + old_ib;
               cols = n - k + old_i - old_ib;
-              magma_zlarfb('B', 'C', rows, cols, old_ib,
+              magma_zlarfb(MagmaLeft, MagmaConjTrans, MagmaBackward, MagmaColumnwise,
+                           rows, cols, old_ib,
                            da_ref(0,cols+old_ib), ldda, dwork, lddwork,
                            da_ref(0, 0), ldda, dwork+old_ib, lddwork);
 	    }
@@ -226,11 +227,13 @@ magma_zgeqlf(magma_int_t m, magma_int_t n, double2 *a, magma_int_t lda,
 		   two steps - implementing the lookahead techniques.
 		   This is the update of first ib columns.                 */
 		if (i-ib >= k -kk)
-		  magma_zlarfb('B', 'C', rows, ib, ib,
+		  magma_zlarfb(MagmaLeft, MagmaConjTrans, MagmaBackward, MagmaColumnwise,
+                               rows, ib, ib,
 			       da_ref(0,cols), ldda, dwork, lddwork,
 			       da_ref(0,cols-ib), ldda, dwork+ib, lddwork);
 		else{
-		  magma_zlarfb('B', 'C', rows, cols, ib,
+		  magma_zlarfb(MagmaLeft, MagmaConjTrans, MagmaBackward, MagmaColumnwise,
+                               rows, cols, ib,
                                da_ref(0,cols), ldda, dwork, lddwork,
                                da_ref(0,0), ldda, dwork+ib, lddwork);
 		}
