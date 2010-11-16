@@ -18,7 +18,8 @@
 
 extern "C" magma_int_t
 magma_zpotrs_gpu(char uplo, magma_int_t n, magma_int_t nrhs, 
-                 double2 *A, magma_int_t lda, double2 *B, magma_int_t ldb, magma_int_t *info)
+                 cuDoubleComplex *A, magma_int_t lda, 
+                 cuDoubleComplex *B, magma_int_t ldb, magma_int_t *info)
 {
 /*  -- magma (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -67,7 +68,7 @@ magma_zpotrs_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
     =====================================================================   */
     #define max(a,b) (((a)>(b))?(a):(b))
 
-    double2 c_one = MAGMA_Z_ONE;
+    cuDoubleComplex c_one = MAGMA_Z_ONE;
     
     *info = 0 ; 
     if( (uplo != 'U') && (uplo != 'u') && (uplo != 'L') && (uplo != 'l') )

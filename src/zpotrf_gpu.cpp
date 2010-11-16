@@ -17,7 +17,7 @@
 #define A(i, j)  (a + (j)*lda + (i))
 
 extern "C" int 
-magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda, 
+magma_zpotrf_gpu(char uplo, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
 		 int *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -85,8 +85,8 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
     char uplo_[2] = {uplo, 0};
 
     /* Table of constant values */
-    double2 c_one     = MAGMA_Z_ONE;
-    double2 c_neg_one = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     
     /* Local variables */
     static int j;
@@ -111,14 +111,14 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
 
     int nb = magma_get_zpotrf_nb(n);
 
-    double2 *work;
-    cudaMallocHost( (void**)&work,  nb*nb*sizeof(double2) );
+    cuDoubleComplex *work;
+    cudaMallocHost( (void**)&work,  nb*nb*sizeof(cuDoubleComplex) );
 
     if (nb <= 1 || nb >= n) {
         /*  Use unblocked code. */
-        cublasGetMatrix(n, n, sizeof(double2), a, lda, work, n);
+        cublasGetMatrix(n, n, sizeof(cuDoubleComplex), a, lda, work, n);
         lapackf77_zpotrf(uplo_, &n, work, &n, info);
-        cublasSetMatrix(n, n, sizeof(double2), work, n, a, lda);
+        cublasSetMatrix(n, n, sizeof(cuDoubleComplex), work, n, a, lda);
     } else {
 
         /* Use blocked code. */
@@ -135,9 +135,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
                             -1.0f, A(0, j), lda, 
                             1.0f,  A(j, j), lda);
 
-                cudaMemcpy2DAsync(work,    jb *sizeof(double2), 
-                                  A(j, j), lda*sizeof(double2), 
-                                  jb*sizeof(double2), jb, 
+                cudaMemcpy2DAsync(work,    jb *sizeof(cuDoubleComplex), 
+                                  A(j, j), lda*sizeof(cuDoubleComplex), 
+                                  jb*sizeof(cuDoubleComplex), jb, 
                                   cudaMemcpyDeviceToHost,stream[1]);
 		
 		if ( (j+jb) < n) {
@@ -157,9 +157,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
                     break;
                 }
                 
-                cudaMemcpy2DAsync( A(j, j), lda*sizeof(double2), 
-                                   work,    jb *sizeof(double2), 
-                                   sizeof(double2)*jb, jb, 
+                cudaMemcpy2DAsync( A(j, j), lda*sizeof(cuDoubleComplex), 
+                                   work,    jb *sizeof(cuDoubleComplex), 
+                                   sizeof(cuDoubleComplex)*jb, jb, 
                                    cudaMemcpyHostToDevice,stream[0]);
 
                 if ( (j+jb) < n)
@@ -181,9 +181,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
                             -1.f, A(j, 0), lda, 
                             1.f,  A(j, j), lda);
 		
-                cudaMemcpy2DAsync( work,    jb *sizeof(double2),
-                                   A(j, j), lda*sizeof(double2),
-                                   sizeof(double2)*jb, jb,
+                cudaMemcpy2DAsync( work,    jb *sizeof(cuDoubleComplex),
+                                   A(j, j), lda*sizeof(cuDoubleComplex),
+                                   sizeof(cuDoubleComplex)*jb, jb,
                                    cudaMemcpyDeviceToHost,stream[1]);
 		
                 if ( (j+jb) < n) {
@@ -200,9 +200,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n, double2 *a, magma_int_t lda,
                     *info = *info + j;
                     break;
                 }
-	        cudaMemcpy2DAsync(A(j, j), lda*sizeof(double2), 
-                                  work,    jb *sizeof(double2), 
-                                  sizeof(double2)*jb, jb, 
+	        cudaMemcpy2DAsync(A(j, j), lda*sizeof(cuDoubleComplex), 
+                                  work,    jb *sizeof(cuDoubleComplex), 
+                                  sizeof(cuDoubleComplex)*jb, jb, 
                                   cudaMemcpyHostToDevice,stream[0]);
 	        
 		if ( (j+jb) < n)

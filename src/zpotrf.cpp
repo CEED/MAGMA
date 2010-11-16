@@ -19,7 +19,7 @@
 #define dA(i, j) (work+(j)*ldda + (i))
 
 extern "C" int 
-magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
+magma_zpotrf(char uplo, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, int *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -87,8 +87,8 @@ magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
     char uplo_[2] = {uplo, 0};
     int  ldda;
     static int j, jb;
-    double2 c_one     = MAGMA_Z_ONE;
-    double2 c_neg_one = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     long int upper = lapackf77_lsame(uplo_, "U");
     *info = 0;
@@ -111,8 +111,8 @@ magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
 
     ldda   = ((n+31)/32)*32;
     
-    double2 *work;
-    status = cublasAlloc((n)*ldda, sizeof(double2), (void**)&work);
+    cuDoubleComplex *work;
+    status = cublasAlloc((n)*ldda, sizeof(cuDoubleComplex), (void**)&work);
     if (status != CUBLAS_STATUS_SUCCESS) {
 	*info = -6;
 	return 0;
@@ -131,16 +131,16 @@ magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
                 /* Update and factorize the current diagonal block and test   
                    for non-positive-definiteness. Computing MIN */
                 jb = min(nb, (n-j));
-		cublasSetMatrix(jb, (n-j), sizeof(double2), 
+		cublasSetMatrix(jb, (n-j), sizeof(cuDoubleComplex), 
                                 A(j, j), lda, dA(j, j), ldda);
 
                 cublasZherk(MagmaUpper, MagmaConjTrans, jb, j, 
                             -1.f, dA(0, j), ldda, 
                             1.f,  dA(j, j), ldda);
 
-                cudaMemcpy2DAsync(  A(0, j), lda *sizeof(double2), 
-				   dA(0, j), ldda*sizeof(double2), 
-                                    sizeof(double2)*(j+jb), jb,
+                cudaMemcpy2DAsync(  A(0, j), lda *sizeof(cuDoubleComplex), 
+				   dA(0, j), ldda*sizeof(cuDoubleComplex), 
+                                    sizeof(cuDoubleComplex)*(j+jb), jb,
 				    cudaMemcpyDeviceToHost, stream[1]);
 		
 		if ( (j+jb) < n) {
@@ -157,9 +157,9 @@ magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
 		  *info = *info + j;
 		  break;
 		}
-		cudaMemcpy2DAsync(dA(j, j), ldda * sizeof(double2), 
-				   A(j, j), lda  * sizeof(double2), 
-				  sizeof(double2)*jb, jb, 
+		cudaMemcpy2DAsync(dA(j, j), ldda * sizeof(cuDoubleComplex), 
+				   A(j, j), lda  * sizeof(cuDoubleComplex), 
+				  sizeof(cuDoubleComplex)*jb, jb, 
 				  cudaMemcpyHostToDevice,stream[0]);
 		
 		if ( (j+jb) < n )
@@ -175,25 +175,25 @@ magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
                 //  Update and factorize the current diagonal block and test   
                 //  for non-positive-definiteness. Computing MIN 
 		jb = min(nb, (n-j));
-                cublasSetMatrix((n-j), jb, sizeof(double2), 
+                cublasSetMatrix((n-j), jb, sizeof(cuDoubleComplex), 
 				A(j, j), lda, dA(j, j), ldda);
 
                 cublasZherk(MagmaLower, MagmaNoTrans, jb, j,
                             -1.f, dA(j, 0), ldda, 
                             1.f,  dA(j, j), ldda);
 		/*
-		cudaMemcpy2DAsync( A(j, 0), lda *sizeof(double2), 
-				   dA(j,0), ldda*sizeof(double2), 
-				   sizeof(double2)*jb, j+jb, 
+		cudaMemcpy2DAsync( A(j, 0), lda *sizeof(cuDoubleComplex), 
+				   dA(j,0), ldda*sizeof(cuDoubleComplex), 
+				   sizeof(cuDoubleComplex)*jb, j+jb, 
 				   cudaMemcpyDeviceToHost,stream[1]);
 		*/
-		cudaMemcpy2DAsync( A(j,j),  lda *sizeof(double2),
-                                   dA(j,j), ldda*sizeof(double2),
-                                   sizeof(double2)*jb, jb,
+		cudaMemcpy2DAsync( A(j,j),  lda *sizeof(cuDoubleComplex),
+                                   dA(j,j), ldda*sizeof(cuDoubleComplex),
+                                   sizeof(cuDoubleComplex)*jb, jb,
                                    cudaMemcpyDeviceToHost,stream[1]);
-		cudaMemcpy2DAsync( A(j, 0),  lda *sizeof(double2),
-                                   dA(j, 0), ldda*sizeof(double2),
-                                   sizeof(double2)*jb, j,
+		cudaMemcpy2DAsync( A(j, 0),  lda *sizeof(cuDoubleComplex),
+                                   dA(j, 0), ldda*sizeof(cuDoubleComplex),
+                                   sizeof(cuDoubleComplex)*jb, j,
                                    cudaMemcpyDeviceToHost,stream[2]);
 
                 if ( (j+jb) < n) {
@@ -210,9 +210,9 @@ magma_zpotrf(char uplo, magma_int_t n, double2 *a, magma_int_t lda, int *info)
                     *info = *info + j;
                     break;
 		}
-	        cudaMemcpy2DAsync( dA(j, j), ldda*sizeof(double2), 
-				   A(j, j),  lda *sizeof(double2), 
-                                   sizeof(double2)*jb, jb, 
+	        cudaMemcpy2DAsync( dA(j, j), ldda*sizeof(cuDoubleComplex), 
+				   A(j, j),  lda *sizeof(cuDoubleComplex), 
+                                   sizeof(cuDoubleComplex)*jb, jb, 
                                    cudaMemcpyHostToDevice,stream[0]);
 	        
 		if ( (j+jb) < n)
