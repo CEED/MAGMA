@@ -30,7 +30,6 @@ ZSRC  = testing_zgetrf.cpp 	\
 #	testing_zcgeqrsv_gpu.cpp\
 #	testing_zcposv_gpu.cpp
 
-
 OBJ = get_nb.o
 
 ifeq ($(FORT), pgfortran)
@@ -46,9 +45,7 @@ CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
 SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 
-#ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
-ALLSRC= $(DSRC) $(SSRC)
-
+ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 ALLOBJF = $(ALLSRC:.f=.o)
 ALLOBJF:= $(ALLOBJF:.cuf=.o)
 ALLOBJ = $(ALLOBJF:.cpp=.o)
@@ -73,6 +70,9 @@ testing_%.o : testing_%.f
 endif
 
 testing_%.o : testing_%.cpp
+	$(CC) $(OPTS) $(INC) -c $< -o $@
+
+%.o: %.cpp
 	$(CC) $(OPTS) $(INC) -c $< -o $@
 
 fortran.o : $(CUDADIR)/src/fortran.c

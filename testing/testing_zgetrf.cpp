@@ -54,7 +54,7 @@ double get_LU_error(int M, int N, cuDoubleComplex *A, int lda, cuDoubleComplex *
 
     for( j = 0; j < N; j++ ) {
         for( i = 0; i < M; i++ ) {
-            MAGMA_Z_OP_NEG( LU[i+j*lda], A[i+j*lda]);
+            MAGMA_Z_OP_NEG( LU[i+j*lda], LU[i+j*lda], A[i+j*lda]);
         }
     }
     double residual = lapackf77_zlange("f", &M, &N, LU, &lda, work);

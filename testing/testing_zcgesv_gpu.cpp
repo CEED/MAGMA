@@ -11,9 +11,9 @@
 #include <stdio.h>
 #include<stdlib.h>
 #include<math.h>
-#include "cuda.h"
-#include "cuda_runtime_api.h"
-#include "cublas.h"
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 #include "magmablas.h"
 #include "magma.h"
 #define ITERMAX 30

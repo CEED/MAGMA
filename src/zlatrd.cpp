@@ -274,7 +274,7 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 	  blasf77_zscal(&i__2, &tau[i__ - 1], &w[iw * w_dim1 + 1], &c__1);
 	  i__2 = i__ - 1;
 	  alpha = tau[i__ - 1] * -.5f * 
-	    blasf77_zdot(&i__2, &w[iw*w_dim1+1], &c__1, &a[i__ * a_dim1 + 1], &c__1);
+	    blasf77_zdotc(&i__2, &w[iw*w_dim1+1], &c__1, &a[i__ * a_dim1 + 1], &c__1);
 	  i__2 = i__ - 1;
 	  blasf77_zaxpy(&i__2, &alpha, &a[i__ * a_dim1 + 1], &c__1, 
 		 &w[iw * w_dim1 + 1], &c__1);
@@ -340,7 +340,7 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 		 ldw, &w[i__ * w_dim1 + 1], &c__1, &c_one, 
 		 &w[i__ + 1 + i__ * w_dim1], &c__1);
 	  blasf77_zscal(&i__2, &tau[i__], &w[i__ + 1 + i__ * w_dim1], &c__1);
-	  alpha = tau[i__]* -.5f*blasf77_zdot(&i__2, &w[i__ +1+ i__ * w_dim1], 
+	  alpha = tau[i__]* -.5f*blasf77_zdotc(&i__2, &w[i__ +1+ i__ * w_dim1], 
 				       &c__1, &a[i__ +1+ i__ * a_dim1], &c__1);
 	  blasf77_zaxpy(&i__2, &alpha, &a[i__ + 1 + i__ * a_dim1], &c__1, 
 		 &w[i__ + 1 + i__ * w_dim1], &c__1);

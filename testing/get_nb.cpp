@@ -225,6 +225,32 @@ int magma_get_cgeqrf_nb(int m){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for cgeqrf based on m
+*/
+extern "C"
+int magma_get_cgeqlf_nb(int m){
+  if (m <= 2048)
+    return 32;
+  else if (m<=4032)
+    return 64;
+  else
+    return 128;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for cgeqrf based on m
+*/
+extern "C"
+int magma_get_cgelqf_nb(int m){
+  if (m <= 2048)
+    return 32;
+  else if (m<=4032)
+    return 64;
+  else
+    return 128;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
    -- Return nb for cgetrf based on m;
       the return value should be multiple of 64
 */
@@ -261,7 +287,7 @@ int magma_get_zgetrf_nb(int n){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for cgeqrf based on m
+   -- Return nb for zgeqlf based on m
 */
 extern "C"
 int magma_get_zgeqrf_nb(int m){
@@ -269,4 +295,105 @@ int magma_get_zgeqrf_nb(int m){
     return 64;
   else
     return 128;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for czeqlf based on m
+*/
+extern "C"
+int magma_get_zgeqlf_nb(int m){
+  if (m <= 1024)
+    return 64;
+  else
+    return 128;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for czeqlf based on m
+*/
+extern "C"
+int magma_get_zgelqf_nb(int m){
+  if (m <= 1024)
+    return 64;
+  else
+    return 128;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for dgehrd based on m;
+      the return value should be a multiple of 32
+*/
+extern "C"
+int magma_get_zgehrd_nb(int m){
+  if (m <= 2048)
+    return 32;
+  else
+    return 64;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for sgehrd based on m;
+      the return value should be a multiple of 32
+*/
+extern "C"
+int magma_get_cgehrd_nb(int m){
+  if (m <= 1024)
+    return 32;
+  else
+    return 64;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for ssytrd based on m;
+      the return value should be a multiple of 32
+*/
+extern "C"
+int magma_get_chetrd_nb(int m){
+  //return 24;
+  return 32;
+  if (m <= 1024)
+    return 64;
+  else
+    return 64;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for ssytrd based on m;
+      the return value should be a multiple of 32
+*/
+extern "C"
+int magma_get_zhetrd_nb(int m){
+  //return 24;
+  return 32;
+  if (m <= 1024)
+    return 64;
+  else
+    return 64;
+}
+
+/* //////////////////////////////////////////////////////////////////////////// -- Return nb for cgebrd based on m;
+      the return value should be a multiple of 32
+*/
+extern "C"
+int magma_get_cgebrd_nb(int m){
+  //return 24;
+  return 32;
+  if (m <= 1024)
+    return 64;
+  else
+    return 64;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for zgebrd based on m;
+      the return value should be a multiple of 32
+*/
+extern "C"
+int magma_get_zgebrd_nb(int m){
+  //return 24;
+  return 32;
+  if (m <= 1024)
+    return 64;
+  else
+    return 64;
 }

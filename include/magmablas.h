@@ -31,4 +31,7 @@ int lsame_c(char ch, char *s);
 }
 #endif
 
+#define magmablas_zgemm cublasZgemm
+#define magmablas_cgemm cublasCgemm
+
 #endif

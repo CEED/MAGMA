@@ -60,7 +60,7 @@
 #define MAGMA_Z_EQUAL(u,v)        (((u).x == (v).x) && ((u).y == (v).y))
 #define MAGMA_Z_GET_X(u)          ((u).x)
 #define MAGMA_Z_ASSIGN(v, t)      (v).x = (t).x; (v).y = (t).y
-#define MAGMA_Z_OP_NEG(t, z)      (t).x = (t).x-(z).x; (t).y = (t).y-(z).y
+#define MAGMA_Z_OP_NEG(a, b, c)   (a).x = (b).x-(c).x; (a).y = (b).y-(c).y
 #define MAGMA_Z_MAKE(r, i)        make_cuDoubleComplex(r, i)
 #define MAGMA_Z_ZERO              make_cuDoubleComplex(0.0, 0.0)
 #define MAGMA_Z_ONE               make_cuDoubleComplex(1.0, 0.0)
@@ -71,7 +71,7 @@
 #define MAGMA_C_EQUAL(u,v)        (((u).x == (v).x) && ((u).y == (v).y))
 #define MAGMA_C_GET_X(u)          ((u).x)
 #define MAGMA_C_ASSIGN(v, t)      (v).x = (t).x; (v).y = (t).y
-#define MAGMA_C_OP_NEG(t, z)      (t).x = (t).x-(z).x; (t).y = (t).y-(z).y
+#define MAGMA_C_OP_NEG(a, b, c)   (a).x = (b).x-(c).x; (a).y = (b).y-(c).y
 #define MAGMA_C_MAKE(r, i)        make_cuFloatComplex(r, i)
 #define MAGMA_C_ZERO              make_cuFloatComplex(0.0, 0.0)
 #define MAGMA_C_ONE               make_cuFloatComplex(1.0, 0.0)
@@ -82,7 +82,7 @@
 #define MAGMA_D_EQUAL(u,v)        ((u) == (v))
 #define MAGMA_D_GET_X(u)          (u)
 #define MAGMA_D_ASSIGN(v, t)      (v) = (t)
-#define MAGMA_D_OP_NEG(t, z)      (t) = (t) - (z)
+#define MAGMA_D_OP_NEG(a, b, c)   (a) = (b) - (c)
 #define MAGMA_D_MAKE(r, i)        (r)
 #define MAGMA_D_ZERO              (0.0)
 #define MAGMA_D_ONE               (1.0)
@@ -93,7 +93,7 @@
 #define MAGMA_S_EQUAL(u,v)        ((u) == (v))
 #define MAGMA_S_GET_X(u)          (u)
 #define MAGMA_S_ASSIGN(v, t)      (v) = (t)
-#define MAGMA_S_OP_NEG(t, z)      (t) = (t) - (z)
+#define MAGMA_S_OP_NEG(a, b, c)   (a) = (b) - (c)
 #define MAGMA_S_MAKE(r, i)        (r)
 #define MAGMA_S_ZERO              (0.0)
 #define MAGMA_S_ONE               (1.0)

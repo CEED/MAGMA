@@ -11,6 +11,7 @@
 #ifndef MAGMA_ZLAPACK_H
 #define MAGMA_ZLAPACK_H
 
+#define PRECISION_z
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -22,7 +23,7 @@ extern "C" {
 
 #    define blasf77_zaxpy      zaxpy_
 #    define blasf77_zcopy      zcopy_
-#    define blasf77_zdot       zdot_ 
+#    define blasf77_zdotc      zdotc_ 
 #    define blasf77_zgemm      zgemm_
 #    define blasf77_zgemv      zgemv_
 #    define blasf77_zhemm      zhemm_
@@ -72,12 +73,14 @@ extern "C" {
 #    define lapackf77_zhst01   zhst01_
 #    define lapackf77_zqrt02   zqrt02_
 #    define lapackf77_zunt01   zunt01_
+#    define lapackf77_zlarfy   zlarfy_
+#    define lapackf77_zstt21   zstt21_
 
 #elif defined(NOCHANGE)
 
 #    define blasf77_zaxpy      zaxpy
 #    define blasf77_zcopy      zcopy
-#    define blasf77_zdot       zdot 
+#    define blasf77_zdotc      zdotc 
 #    define blasf77_zgemm      zgemm
 #    define blasf77_zgemv      zgemv
 #    define blasf77_zhemm      zhemm
@@ -127,12 +130,14 @@ extern "C" {
 #    define lapackf77_zhst01   zhst01
 #    define lapackf77_zqrt02   zqrt02
 #    define lapackf77_zunt01   zunt01
+#    define lapackf77_zlarfy   zlarfy
+#    define lapackf77_zstt21   zstt21
 
 #endif
 
 void    blasf77_zaxpy( const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *);
 void    blasf77_zcopy( const int *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *);
-cuDoubleComplex blasf77_zdot ( const int *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *);
+cuDoubleComplex blasf77_zdotc( const int *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *);
 void    blasf77_zgemm( const char *, const char *, const int *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *,cuDoubleComplex *, const int *);
 void    blasf77_zgemv( const char *, const int  *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *);
 void    blasf77_zhemm( const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *,cuDoubleComplex *, const int *);
@@ -180,14 +185,25 @@ void    lapackf77_zunmqr(const char *side, const char *trans, magma_int_t *m, ma
   /*
    * Testing functions
    */
-void    lapackf77_zbdt01(int *, int *, int *, cuDoubleComplex *, int *, cuDoubleComplex *, int *, cuDoubleComplex *, cuDoubleComplex *, cuDoubleComplex *, int *, cuDoubleComplex *, cuDoubleComplex *);
-void    lapackf77_zhet21(int *, const char *, int *, int *, cuDoubleComplex *, int *, cuDoubleComplex *, cuDoubleComplex *, cuDoubleComplex *, int *, cuDoubleComplex *, int *, cuDoubleComplex *, cuDoubleComplex *, cuDoubleComplex *);
-void    lapackf77_zhst01(int *, int *, int *, cuDoubleComplex *, int *, cuDoubleComplex *, int *, cuDoubleComplex *, int *, cuDoubleComplex *, int *, cuDoubleComplex *);
-void    lapackf77_zqrt02(int *, int *, int *, cuDoubleComplex *, cuDoubleComplex *, cuDoubleComplex *, cuDoubleComplex *, int *, cuDoubleComplex *, cuDoubleComplex *, int *, cuDoubleComplex *, cuDoubleComplex *);
-void    lapackf77_zunt01(const char *, int *, int *, cuDoubleComplex *, int *, cuDoubleComplex *, int *, cuDoubleComplex *);
+#if defined(PRECISION_z) || defined(PRECISION_c)
+void    lapackf77_zbdt01(int *m, int *n, int *kd, cuDoubleComplex *A, int *lda, cuDoubleComplex *Q, int *ldq, double *D, double *E, cuDoubleComplex *PT, int *ldpt, cuDoubleComplex *work, double *rwork, double *resid);
+void    lapackf77_zhet21(int *itype, const char *uplo, int *n, int *kband, cuDoubleComplex *A, int *lda, double *D, double *E, cuDoubleComplex *U, int *ldu, cuDoubleComplex *V, int *ldv, cuDoubleComplex *TAU, cuDoubleComplex *work, double *rwork, double *result);
+void    lapackf77_zhst01(int *n, int *ilo, int *ihi, cuDoubleComplex *A, int *lda, cuDoubleComplex *H, int *lda, cuDoubleComplex *Q, int *ldq, cuDoubleComplex *work, int *lwork, double *rwork, double *result);
+void    lapackf77_zstt21(int *n, int *kband, double *AD, double *AE, double *SD, double *SE, cuDoubleComplex *U, int *ldu, cuDoubleComplex *work, double *rwork, double *result);
+void    lapackf77_zunt01(const char *rowcol, int *m, int *n, cuDoubleComplex *U, int *ldu, cuDoubleComplex *work, int *lwork, double *work, double *resid);
+#else
+void    lapackf77_zbdt01(int *m, int *n, int *kd, cuDoubleComplex *A, int *lda, cuDoubleComplex *Q, int *ldq, double *D, double *E, cuDoubleComplex *PT, int *ldpt, cuDoubleComplex *work, double *resid);
+void    lapackf77_zhet21(int *itype, const char *uplo, int *n, int *kband, cuDoubleComplex *A, int *lda, double *D, double *E, cuDoubleComplex *U, int *ldu, cuDoubleComplex *V, int *ldv, cuDoubleComplex *TAU, cuDoubleComplex *work, double *result);
+void    lapackf77_zhst01(int *n, int *ilo, int *ihi, cuDoubleComplex *A, int *lda, cuDoubleComplex *H, int *lda, cuDoubleComplex *Q, int *ldq, cuDoubleComplex *work, int *lwork, double *result);
+void    lapackf77_zstt21(int *n, int *kband, double *AD, double *AE, double *SD, double *SE, cuDoubleComplex *U, int *ldu, cuDoubleComplex *work, double *result);
+void    lapackf77_zunt01(const char *rowcol, int *m, int *n, cuDoubleComplex *U, int *ldu, cuDoubleComplex *work, int *lwork, double *resid);
+#endif
+void    lapackf77_zlarfy(const char *uplo, int *N, cuDoubleComplex *V, int *incv, cuDoubleComplex *tau, cuDoubleComplex *C, int *ldc, cuDoubleComplex *work);
+void    lapackf77_zqrt02(int *m, int *n, int *k, cuDoubleComplex *A, cuDoubleComplex *AF, cuDoubleComplex *Q, cuDoubleComplex *R, int *lda, cuDoubleComplex *TAU, cuDoubleComplex *work, int *lwork, double *rwork, double *result);
 
 #ifdef __cplusplus
 }
 #endif
 
+#undef PRECISION_z
 #endif /* MAGMA ZLAPACK */
