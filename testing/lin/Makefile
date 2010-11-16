@@ -8,31 +8,43 @@
 
 include ../../make.inc
 
-    SRC = cqrt02.f  \
-          zqrt02.f  \
-          shst01.f  \
-          sorghr.f  \
-          sqrt02.f  \
-          slabad.f  \
-          sort01.f  \
-          \
-          dhst01.f  \
-          dorghr.f  \
-          dqrt02.f  \
-          dlabad.f  \
-          dort01.f  \
-          \
-          ssyt21.f \
-          slarfy.f \
-          dsyt21.f \
-          dlarfy.f \
-          \
-          sorgbr.f \
-          sbdt01.f \
-          dbdt01.f \
-          \
-          sstt21.f \
-          dstt21.f \
+SRC = 	zbdt01.f  \
+	zhet21.f  \
+	zhst01.f  \
+	zunt01.f  \
+	zqrt02.f  \
+	\
+	cbdt01.f  \
+	chet21.f  \
+	chst01.f  \
+	cunt01.f  \
+	cqrt02.f  \
+	\
+	dbdt01.f  \
+	dsyt21.f  \
+	dhst01.f  \
+	dort01.f  \
+	dqrt02.f  \
+	\
+	sbdt01.f  \
+	ssyt21.f  \
+	shst01.f  \
+	sort01.f  \
+	sqrt02.f  \
+	\
+	sorghr.f  \
+        slabad.f  \
+        \
+        dorghr.f  \
+        dlabad.f  \
+        \
+        slarfy.f \
+        dlarfy.f \
+        \
+        sorgbr.f \
+        \
+        sstt21.f \
+        dstt21.f \
 
     OBJ = $(SRC:.f=.o)
     EXE = $(OBJ:.o=)
