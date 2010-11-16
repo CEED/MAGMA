@@ -112,7 +112,7 @@ magma_zlarfb(char side, char trans, char direct, char storev,
         return 0;
     }
 
-    if ( storev == 'c' || storev == 'C'){
+    if ( storev == 'c' || storev == 'C') {
         /*
           if (n==1 && m%32==0){
           // This is used when we have to apply H on only one vector

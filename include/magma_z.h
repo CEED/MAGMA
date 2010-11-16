@@ -34,12 +34,12 @@ magma_int_t magma_zgehrd( magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 			  double2 *A, magma_int_t lda, double2 *tau, 
 			  double2 *work, magma_int_t *lwork, double2 *da,
 			  magma_int_t *info);
-magma_int_t magma_zgelqf( magma_int_t m, magma_int_t n, double2 *A, 
-			  magma_int_t lda, double2 *tau, double2 *work, 
-			  magma_int_t *lwork, magma_int_t *info);
-magma_int_t magma_zgeqlf( magma_int_t m, magma_int_t n, double2 *A,
-			  magma_int_t lda, double2 *tau, double2 *work, 
-			  magma_int_t *lwork, magma_int_t *info);
+magma_int_t magma_zgelqf( magma_int_t m, magma_int_t n, 
+                          double2 *A,    magma_int_t lda,   double2 *tau, 
+                          double2 *work, magma_int_t lwork, magma_int_t *info);
+magma_int_t magma_zgeqlf( magma_int_t m, magma_int_t n, 
+                          double2 *A,    magma_int_t lda,   double2 *tau, 
+                          double2 *work, magma_int_t lwork, magma_int_t *info);
 magma_int_t magma_zgeqrf( magma_int_t m, magma_int_t n, double2 *A, 
 			  magma_int_t lda, double2 *tau, double2 *work, 
 			  magma_int_t lwork, magma_int_t *info);

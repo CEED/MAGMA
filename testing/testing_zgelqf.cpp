@@ -115,7 +115,7 @@ int main( int argc, char** argv)
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
 
-        magma_zgelqf(M, N, h_R, M, tau, h_work, &lwork, &info);
+        magma_zgelqf(M, N, h_R, M, tau, h_work, lwork, &info);
 
         for(j=0; j<n2; j++)
             h_R[j] = h_A[j];
@@ -124,7 +124,7 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-        magma_zgelqf(M, N, h_R, M, tau, h_work, &lwork, &info);
+        magma_zgelqf(M, N, h_R, M, tau, h_work, lwork, &info);
         end = get_current_time();
 
         gpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
