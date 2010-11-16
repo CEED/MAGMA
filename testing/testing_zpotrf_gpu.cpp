@@ -95,7 +95,9 @@ int main( int argc, char** argv)
       lda = (N/32)*32;
       if (lda<N) lda+=32;
 
+      /* Initialize the matrix */
       lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
+      /* Symmetrize and increase the diagonal */
       { 
         int i, j;
         for(i=0; i<N; i++) {

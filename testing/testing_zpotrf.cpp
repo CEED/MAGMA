@@ -84,7 +84,9 @@ int main( int argc, char** argv)
       N = lda = size[i];
       n2 = N*N;
 
+      /* Initialize the matrix */
       lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
+      /* Symmetrize and increase the diagonal */
       { 
         int i, j;
         for(i=0; i<N; i++) {

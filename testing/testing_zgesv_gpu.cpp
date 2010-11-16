@@ -125,6 +125,7 @@ int main(int argc , char **argv)
         int dlda = (N/32)*32;
         if (dlda<N) dlda+=32;
 
+        /* Initialize the matrices */
         szeA = LDA*N; szeB = LDB*NRHS;
         lapackf77_zlarnv( &ione, ISEED, &szeA, A );
         lapackf77_zlarnv( &ione, ISEED, &szeB, B );

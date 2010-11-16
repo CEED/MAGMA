@@ -159,6 +159,7 @@ int main( int argc, char** argv)
             lda = M;
         }
 
+        /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
 
