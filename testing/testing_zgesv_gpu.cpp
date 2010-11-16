@@ -142,7 +142,7 @@ int main(int argc , char **argv)
         //=====================================================================
         start = get_current_time();
         magma_zgetrf_gpu( N, N, d_A, dlda, IPIV, &info);
-        magma_zgetrs_gpu('N', N, NRHS, d_A, dlda, IPIV, d_B, LDB, &info, h_work_M_S);
+        magma_zgetrs_gpu( MagmaNoTrans, N, NRHS, d_A, dlda, IPIV, d_B, LDB, &info, h_work_M_S);
         end = get_current_time();
         perf = (2.*N*N*N/3.+2.*NRHS*N*N)/(1000000*GetTimerValue(start,end));
         printf("             %6.2f", perf);
@@ -159,7 +159,7 @@ int main(int argc , char **argv)
 
         cuDoubleComplex ONE    = MAGMA_Z_ONE;
         cuDoubleComplex NEGONE = MAGMA_Z_NEG_ONE;
-        blasf77_zgemm( "N", "N", &N, &NRHS, &N, &ONE, A, &LDA, X, &LDX, &NEGONE, B, &N);
+        blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &N, &NRHS, &N, &ONE, A, &LDA, X, &LDX, &NEGONE, B, &N);
         Rnorm=lapackf77_zlange("I", &N, &NRHS, B, &LDB, worke);
         free(worke);
 

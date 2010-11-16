@@ -165,7 +165,7 @@ int main( int argc, char** argv)
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-        lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
+        lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &M, h_R, &M );
 
         cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_A, M, d_A, lda);
         magma_zgetrf_gpu( M, N, d_A, lda, ipiv, &info);

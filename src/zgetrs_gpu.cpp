@@ -16,8 +16,8 @@
 #include "magma.h"
 
 extern "C" magma_int_t
-magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs, double2 *a , magma_int_t lda,
-		 magma_int_t *ipiv, double2 *b, magma_int_t ldb, magma_int_t *info, double2 *hwork)
+magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs, cuDoubleComplex *a , magma_int_t lda,
+		 magma_int_t *ipiv, cuDoubleComplex *b, magma_int_t ldb, magma_int_t *info, cuDoubleComplex *hwork)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -40,16 +40,16 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs, double2 *a , magma
             = 'N':  A * X = B  (No transpose)
             = 'T':  A'* X = B  (Transpose)
             = 'C':  A'* X = B  (Conjugate transpose = Transpose)
- 
+
     N       (input) INTEGER
             The order of the matrix A.  N >= 0.
- 
+
     NRHS    (input) INTEGER
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
     A       (input) COMPLEX_16 array on the GPU, dimension (LDA,N)
-            The factors L and U from the factorization A = P*L*U as computed 
+            The factors L and U from the factorization A = P*L*U as computed
             by ZGETRF_GPU.
 
     LDA     (input) INTEGER
@@ -75,54 +75,56 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs, double2 *a , magma
 
     #define max(a,b)  (((a)>(b))?(a):(b))
 
-    double2 c_one = MAGMA_Z_ONE;
+    cuDoubleComplex c_one = MAGMA_Z_ONE;
 
     char trans_[2] = {trans, 0};
 
     long int notran = lapackf77_lsame(trans_, "N");
     *info = 0;
-    if (! notran && ! lapackf77_lsame(trans_, "T") && ! lapackf77_lsame(trans_, "C")) {
-      *info = -1;
+    if ( (! notran) && 
+         (! lapackf77_lsame(trans_, "T")) && 
+         (! lapackf77_lsame(trans_, "C")) ) {
+        *info = -1;
     } else if (n < 0) {
-      *info = -2;
+        *info = -2;
     } else if (nrhs < 0) {
-      *info = -3;
+        *info = -3;
     } else if (lda < max(1,n)) {
-      *info = -5;
+        *info = -5;
     } else if (ldb < max(1,n)) {
-      *info = -8;
+        *info = -8;
     }
     if (*info != 0) {
-      return 0;
+        return 0;
     }
 
     /* Quick return if possible */
     if (n == 0 || nrhs == 0) {
-      return 0;
+        return 0;
     }
 
     if (notran) {
-      /* Solve A * X = B. */
-      cublasGetMatrix( n, nrhs, sizeof(double2), b,ldb ,hwork, n);
-      int k1 = 1 ;
-      int k2 = n;
-      int k3 = 1 ;
-      lapackf77_zlaswp(&nrhs, hwork, &n, &k1, &k2, ipiv, &k3);
-      cublasSetMatrix( n, nrhs, sizeof(double2), hwork, n, b, ldb);
-      
-      cublasZtrsm('L','L','N','U', n , nrhs, c_one, a , lda , b , ldb );
-      cublasZtrsm('L','U','N','N', n , nrhs, c_one, a , lda , b , ldb );
-    } else {
-      /* Solve A' * X = B. */
-      cublasZtrsm('L','U','T','N', n , nrhs, c_one, a , lda , b , ldb );
-      cublasZtrsm('L','L','T','U', n , nrhs, c_one, a , lda , b , ldb );
+        /* Solve A * X = B. */
+        cublasGetMatrix( n, nrhs, sizeof(cuDoubleComplex), b,ldb ,hwork, n);
+        int k1 = 1 ;
+        int k2 = n;
+        int k3 = 1 ;
+        lapackf77_zlaswp(&nrhs, hwork, &n, &k1, &k2, ipiv, &k3);
+        cublasSetMatrix( n, nrhs, sizeof(cuDoubleComplex), hwork, n, b, ldb);
 
-      cublasGetMatrix( n, nrhs, sizeof(double2), b,ldb , hwork , n );
-      int k1 = 1 ;
-      int k2 = n;
-      int k3 = -1;
-      lapackf77_zlaswp(&nrhs, hwork, &n, &k1, &k2, ipiv , &k3);
-      cublasSetMatrix( n, nrhs, sizeof(double2), hwork,n, b,ldb);
+        cublasZtrsm(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit,    n , nrhs, c_one, a , lda , b , ldb );
+        cublasZtrsm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, n , nrhs, c_one, a , lda , b , ldb );
+    } else {
+        /* Solve A' * X = B. */
+        cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, n , nrhs, c_one, a , lda , b , ldb );
+        cublasZtrsm(MagmaLeft, MagmaLower, MagmaConjTrans, MagmaUnit,    n , nrhs, c_one, a , lda , b , ldb );
+
+        cublasGetMatrix( n, nrhs, sizeof(cuDoubleComplex), b,ldb , hwork , n );
+        int k1 = 1 ;
+        int k2 = n;
+        int k3 = -1;
+        lapackf77_zlaswp(&nrhs, hwork, &n, &k1, &k2, ipiv , &k3);
+        cublasSetMatrix( n, nrhs, sizeof(cuDoubleComplex), hwork,n, b,ldb);
     }
 
     return 0;

@@ -13,31 +13,22 @@
 #
 GPU_TARGET = 1
 
+MAKE      = make -j 4
 CC        = gcc
 NVCC      = nvcc
 FORT      = gfortran
 
+
 ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
-
-OPTS      = -O3 -DADD_ -g
-NVOPTS    = --compiler-options -fno-strict-aliasing  -arch sm_13 \
-            -DUNIX -O3
+OPTS      = -O0 -DADD_ -g3 -Wall
+NVOPTS    = --compiler-options -fno-strict-aliasing  -DUNIX 
 LDOPTS    = -fPIC
-
-LIB       = -lmkl_em64t -lguide -lpthread -lcublas -lcudart -lm 
-
+LIB       = -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread -lcublas -lcudart -lm 
 CUDADIR   = /mnt/scratch/cuda-3.1
-
-#/home/tomov/intel/mkl/10.0.1.014/lib/em64t \
-
-LIBDIR    = -L/mnt/scratch/sw/intel/F-11.0.083/mkl/lib/em64t \
-            -Wl,-rpath,/mnt/scratch/sw/intel/F-11.0.083/mkl/lib/em64t \
-	    -L/mnt/scratch/sw/intel/F-11.0.083/lib/intel64 \
-	    -Wl,-rpath,/mnt/scratch/sw/intel/F-11.0.083/lib/intel64 \
-            -L$(CUDADIR)/lib64 \
-            -Wl,-rpath,$(CUDADIR)/lib64
+LIBDIR    = -L$(MKLROOT) \
+            -L$(CUDADIR)/lib64
 INC       = -I../include -I$(CUDADIR)/include
 
 LIBMAGMA     = ../lib/libmagma.a
