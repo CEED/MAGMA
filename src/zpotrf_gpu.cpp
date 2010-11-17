@@ -17,8 +17,8 @@
 #define A(i, j)  (a + (j)*lda + (i))
 
 extern "C" int 
-magma_zpotrf_gpu(char uplo, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
-		 int *info)
+magma_zpotrf_gpu(char uplo, magma_int_t n, 
+                 cuDoubleComplex *a, magma_int_t lda, int *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
