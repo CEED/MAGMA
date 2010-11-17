@@ -129,7 +129,7 @@ int main( int argc, char** argv)
            =================================================================== */
         start = get_current_time();
         magma_zgebrd( M, N, h_R, N, diag, offdiag,
-                      tauq, taup, h_work, &lwork, d_A, &info);
+                      tauq, taup, h_work, lwork, d_A, &info);
         end = get_current_time();
 
         gpu_perf =(4.*M*N*N-4.*N*N*N/3.)/(1000000.*GetTimerValue(start,end));
@@ -144,7 +144,7 @@ int main( int argc, char** argv)
 
         double result[3] = {0., 0., 0.};
 
-        lapackf77_zlacpy(" ", &N, &N, h_R, &N, PT, &N);
+        lapackf77_zlacpy(MagmaUpperLowerStr, &N, &N, h_R, &N, PT, &N);
 
         // generate Q & P'
         lapackf77_zungbr("Q", &M, &M, &M, h_R, &N, tauq, work, &lwork, &info);
