@@ -104,13 +104,19 @@ magma_zlarfb(char side, char trans, char direct, char storev,
         return 0;
     }
 
-    if ( ( side  == 'r' || side  == 'R') ||
-         ( trans == 'n' || trans == 'N') ) {
+    char transt;
+    if (trans == 'N' || trans == 'n')
+      transt = MagmaConjTrans;
+    else
+      transt = MagmaNoTrans;
+
+    if ( ( side  == 'r' || side  == 'R') ) 
+      {
         int info = -1;
-        fprintf(stderr, "The cases (side == right) or (trans == NoTrans) are not implemented\n");
+        fprintf(stderr, "The case (side == right) is not implemented\n");
         magma_xerbla(__func__, &info);
         return 0;
-    }
+      }
 
     if ( storev == 'c' || storev == 'C') {
         /*
@@ -121,8 +127,6 @@ magma_zlarfb(char side, char trans, char direct, char storev,
           }
           else
         */
-        //TimeStruct start, end;
-        //start = get_current_time();
         cublasZgemm( MagmaConjTrans, MagmaNoTrans,
                      n, k, m,
                      c_one,  dc_ref(0, 0), ldc,
@@ -130,12 +134,12 @@ magma_zlarfb(char side, char trans, char direct, char storev,
                      c_zero, dwork,        ldwork);
 
         if (direct == 'F' || direct =='f')
-            cublasZtrmm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
+            cublasZtrmm( MagmaRight, MagmaUpper, transt, MagmaNonUnit,
                          n, k, 
                          c_one, dt,    ldt, 
                                 dwork, ldwork);
         else
-            cublasZtrmm( MagmaRight, MagmaLower, MagmaNoTrans, MagmaNonUnit,
+            cublasZtrmm( MagmaRight, MagmaLower, transt, MagmaNonUnit,
                          n, k, 
                          c_one, dt,    ldt, 
                                 dwork, ldwork);
@@ -145,10 +149,6 @@ magma_zlarfb(char side, char trans, char direct, char storev,
                      c_neg_one, dv_ref(0, 0), ldv,
                                 dwork,        ldwork, 
                      c_one,     dc_ref(0,0),  ldc);
-        //end = get_current_time();
-        //if (n!=k)
-        //printf("%5d %5d  %7.2f\n",
-        //	   m, n, (4.*n*(k)*m+n*(k)*(k))/(1.e6*GetTimerValue(start,end)));
     }
     else {
         cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
@@ -157,7 +157,7 @@ magma_zlarfb(char side, char trans, char direct, char storev,
                              dv_ref(0, 0), ldv, 
                      c_zero, dwork,        ldwork);
 
-        cublasZtrmm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
+        cublasZtrmm( MagmaRight, MagmaUpper, transt, MagmaNonUnit,
                      m, k, 
                      c_one, dt,    ldt, 
                             dwork, ldwork);
@@ -167,19 +167,6 @@ magma_zlarfb(char side, char trans, char direct, char storev,
                      c_neg_one, dwork,        ldwork,
                                 dv_ref(0, 0), ldv,
                       c_one,    dc_ref(0, 0), ldc);
-        /*
-          cuDoubleComplex one = 1.f, zero = 0.f, mone = -1.f;
-          blasf77_zgemm("n", "t", &m, k, &n, &one, dc_ref(0, 0), ldc,
-	  dv_ref(0,0), ldv, &zero, dwork, ldwork);
-
-          blasf77_ztrmm("r", "u", "n", "n",
-          &m, k, &one, dt, ldt, dwork, ldwork);
-
-          blasf77_zgemm("n", "n", &m, &n, k, &mone,
-          dwork, ldwork,
-          dv_ref(0, 0), ldv,
-          &one, dc_ref(0,0), ldc);
-        */
     }
     return 0;
 

@@ -11,10 +11,6 @@
 #include "magma.h"
 #include <stdio.h>
 
-extern "C" int sorg2r_(int*, int*, int*, float*, int*, float*, float*, int*);
-extern "C" void magma_slaset(int m, int n, float *A, int lda);
-
-
 
 extern "C" int
 magma_sorgqr_gpu(int *m, int *n, int *k, float *da, int *ldda, 
@@ -108,7 +104,7 @@ magma_sorgqr_gpu(int *m, int *n, int *k, float *da, int *ldda,
 	kk = min(*k, ki + nb);
 	
 	/* Set A(1:kk,kk+1:n) to zero. */ 
-        magma_slaset(kk, *n-kk, da_ref(0,kk), *ldda);
+        magmablas_slaset(kk, *n-kk, da_ref(0,kk), *ldda);
       }
     else 
       kk = 0;
@@ -153,9 +149,9 @@ magma_sorgqr_gpu(int *m, int *n, int *k, float *da, int *ldda,
 	      {
 		/* Apply H to A(i:m,i+ib:n) from the left */
 		i__3 = *n - i - ib;
-		magma_slarfb('N', 'F', 'C', i__2, i__3, &ib, da_ref(i, i), ldda,
-			     t_ref(i), &lddwork, da_ref(i, i+ib), ldda, 
-			     dwork + 2*lddwork*nb, &lddwork);
+		magma_slarfb('L', 'N', 'F', 'C', i__2, i__3, ib, da_ref(i, i), *ldda,
+			     t_ref(i), lddwork, da_ref(i, i+ib), *ldda, 
+			     dwork + 2*lddwork*nb, lddwork);
 	      }
    
 	    /* Apply H to rows i:m of current block on the CPU */
@@ -168,7 +164,7 @@ magma_sorgqr_gpu(int *m, int *n, int *k, float *da, int *ldda,
 
 	    /* Set rows 1:i-1 of current block to zero */
             i__2 = i + ib;
-	    magma_slaset(i, i__2 - i, da_ref(0,i), *ldda);
+	    magmablas_slaset(i, i__2 - i, da_ref(0,i), *ldda);
 	  }
       }
     cublasFree(work);
