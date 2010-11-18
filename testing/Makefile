@@ -40,12 +40,12 @@ else
 	ZSRCF = testing_zgetrf_gpu_f.f
 endif
 
-ZSRC += $(ZSRCF)
+ZSRC += $(ZSRCF) 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
 SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 
-ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
+ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC) testing_sgeqrf_gpu.cpp
 ALLOBJF = $(ALLSRC:.f=.o)
 ALLOBJF:= $(ALLOBJF:.cuf=.o)
 ALLOBJ = $(ALLOBJF:.cpp=.o)
