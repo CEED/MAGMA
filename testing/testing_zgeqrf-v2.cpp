@@ -67,7 +67,10 @@ void *cpu_thread(void *a)
 
     M=MG.m-i*MG.nb;
     N=MG.nb;
-    K=min(MG.nb,MG.n-MG.nthreads*MG.nb);
+    K=MG.nb;
+    if (i == (MG.np_gpu - 1)) {
+      K = MG.n-MG.nthreads*MG.nb-(MG.np_gpu-1)*MG.nb; 
+    }
     WORK = (cuDoubleComplex*)malloc(sizeof(cuDoubleComplex)*M*N);
 
     //slarfb_("L","T","F","C",&M,&N,&K,MG.a+i*MG.nb*MG.lda+i*MG.nb,&MG.lda,MG.t+i*MG.nb*MG.nb,&K,
