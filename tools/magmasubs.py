@@ -155,6 +155,7 @@ subs = {
     ('SGETRF','DGETRF','CGETRF','ZGETRF'),
     ('sgetrs','dgetrs','cgetrs','zgetrs'),
     ('SGETRS','DGETRS','CGETRS','ZGETRS'),
+    ('slaset','dlaset','claset','zlaset'),
     ('slacgv','dlacgv','clacgv','zlacgv'),
     ('slacpy','dlacpy','clacpy','zlacpy'),
     ('slagsy','dlagsy','claghe','zlaghe'),
