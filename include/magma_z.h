@@ -43,6 +43,14 @@ magma_int_t magma_zgeqlf( magma_int_t m, magma_int_t n,
 magma_int_t magma_zgeqrf( magma_int_t m, magma_int_t n, double2 *A, 
 			  magma_int_t lda, double2 *tau, double2 *work, 
 			  magma_int_t lwork, magma_int_t *info);
+magma_int_t magma_zgeqrf2(magma_int_t m, magma_int_t n,
+			  cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *tau,
+			  cuDoubleComplex *work, magma_int_t lwork,
+			  magma_int_t *info);
+magma_int_t magma_zgeqrf3(magma_int_t m, magma_int_t n,
+			  cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *tau,
+			  cuDoubleComplex *work, magma_int_t lwork,
+			  magma_int_t *info);
 magma_int_t magma_zgetrf( magma_int_t m, magma_int_t n, double2 *A, 
 			  magma_int_t lda, magma_int_t *ipiv, 
 			  magma_int_t *info);
