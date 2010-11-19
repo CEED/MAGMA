@@ -32,7 +32,7 @@ void magmablas_zlaset(magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda)
 
 void magmablas_zinplace_transpose(double2 *, magma_int_t, magma_int_t);
 void magmablas_zpermute_long(double2 *, magma_int_t, magma_int_t *, magma_int_t, magma_int_t);
-void magmablas_zpermute_long2(double2 *, magma_int_t, magma_int_t, magma_int_t *, magma_int_t, magma_int_t);
+void magmablas_zpermute_long2(double2 *, magma_int_t, magma_int_t *, magma_int_t, magma_int_t);
 void magmablas_ztranspose(double2 *, magma_int_t, double2 *, magma_int_t, magma_int_t, magma_int_t);
 void magmablas_ztranspose2(double2 *, magma_int_t, double2 *, magma_int_t, magma_int_t, magma_int_t);
 
