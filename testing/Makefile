@@ -15,6 +15,7 @@ ZSRC  = testing_zgetrf.cpp 	\
 	testing_zpotrf.cpp	\
         testing_zpotrf_gpu.cpp 	\
         testing_zgeqrf.cpp 	\
+        testing_zgeqrf-v2.cpp 	\
         testing_zgeqrf_gpu.cpp 	\
         testing_zgeqrs_gpu.cpp 	\
         testing_zgeqlf.cpp 	\
