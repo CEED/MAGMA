@@ -143,8 +143,8 @@ magma_sorgqr_gpu(int *m, int *n, int *k, float *da, int *ldda,
 	    cudaMemcpy2DAsync(panel,         i__2  * sizeof(float), 
 			      da_ref(i,i), (*ldda) * sizeof(float), 
 			      sizeof(float)*i__2, ib,
-			      cudaMemcpyDeviceToHost,stream[1]);
-
+			      cudaMemcpyDeviceToHost,stream[0]);
+	    
 	    if (i + ib < *n) 
 	      {
 		/* Apply H to A(i:m,i+ib:n) from the left */
@@ -155,13 +155,13 @@ magma_sorgqr_gpu(int *m, int *n, int *k, float *da, int *ldda,
 	      }
    
 	    /* Apply H to rows i:m of current block on the CPU */
-	    cudaStreamSynchronize(stream[1]);
+	    cudaStreamSynchronize(stream[0]);
 	    sorg2r_(&i__2, &ib, &ib, panel, &i__2, &tau[i], work, &iinfo);
 	    cudaMemcpy2DAsync(da_ref(i,i), (*ldda) * sizeof(float),
 			      panel,         i__2  * sizeof(float),
 			      sizeof(float)*i__2, ib,
-                              cudaMemcpyHostToDevice,stream[2]);
-
+                              cudaMemcpyHostToDevice,stream[1]);
+	    
 	    /* Set rows 1:i-1 of current block to zero */
             i__2 = i + ib;
 	    magmablas_slaset(i, i__2 - i, da_ref(0,i), *ldda);
