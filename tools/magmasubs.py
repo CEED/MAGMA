@@ -174,6 +174,7 @@ subs = {
     ('slarft','dlarft','clarft','zlarft'),
     ('slarnv','dlarnv','clarnv','zlarnv'),
     ('slaswp','dlaswp','claswp','zlaswp'),
+    ('sswap','dswap','cswap','zswap'),
     ('splgsy','dplgsy','cplghe','zplghe'),
     ('spotrf','dpotrf','cpotrf','zpotrf'),
     ('spotrf','dpotrf','cpotrf','zpotrf'),

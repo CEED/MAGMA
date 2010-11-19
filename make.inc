@@ -11,7 +11,7 @@
 #      0: Tesla Family
 #      1: Fermi Family
 #
-GPU_TARGET = 1
+GPU_TARGET = 0
 
 MAKE      = make -j 4
 CC        = gcc
@@ -23,7 +23,7 @@ ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
 OPTS      = -O0 -DADD_ -g3 -Wall
-NVOPTS    = --compiler-options -fno-strict-aliasing  -DUNIX 
+NVOPTS    = -g --compiler-options -fno-strict-aliasing  -DUNIX 
 LDOPTS    = -fPIC
 LIB       = -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread -lcublas -lcudart -lm 
 CUDADIR   = /mnt/scratch/cuda-3.1

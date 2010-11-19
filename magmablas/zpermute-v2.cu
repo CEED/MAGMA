@@ -10,6 +10,7 @@
 */
 
 #include <stdio.h>
+#include <cublas.h>
 
 #define BLOCK_SIZE 64
 
@@ -25,6 +26,26 @@ typedef struct {
         short ipiv[BLOCK_SIZE];
 } zlaswp_params_t2;
 
+typedef struct {
+  cuDoubleComplex *A1;
+  cuDoubleComplex *A2;
+  int n; /*, lda1, lda2;*/
+} swap_params_t;
+
+__global__ void myzswap( swap_params_t params )
+{
+  unsigned int tid = threadIdx.x + __mul24(blockDim.x, blockIdx.x);
+  if( tid < params.n )
+    {
+/*       int lda1 = params.lda1; */
+/*       int lda2 = params.lda2; */
+      cuDoubleComplex *A1 = params.A1 + tid;
+      cuDoubleComplex *A2 = params.A2 + tid;
+      cuDoubleComplex temp = *A1;
+      *A1 = *A2;
+      *A2 = temp;
+    }
+}
 
 __global__ void myzlaswp2( zlaswp_params_t2 params )
 {
@@ -83,6 +104,35 @@ magmablas_zpermute_long2( double2 *dAT, int lda, int *ipiv, int nb, int ind )
             ipiv[ind + k + j] += ind;
         }
         zlaswp3( params );
+}
+
+extern "C" void 
+magmablas_zlaswp( int n, cuDoubleComplex *dAT, int lda, 
+                  int i1, int i2, int *ipiv, int inci )
+{
+  int k;
+  
+  for( k=(i1-1); k<i2; k+=BLOCK_SIZE )
+    {
+      int sb = min(BLOCK_SIZE, i2-k);
+      //zlaswp_params_t params = { dAT, lda, lda, ind + k };
+      zlaswp_params_t2 params = { dAT+k*lda, n, lda, 0, sb };
+      for( int j = 0; j < sb; j++ )
+        {
+          params.ipiv[j] = ipiv[(k+j)*inci] - k - 1;
+        }
+      zlaswp3( params );
+    }
+}
+
+extern "C" void 
+magmablas_zswap( int n, cuDoubleComplex *dA1T, int lda1, 
+                 cuDoubleComplex *dA2T, int lda2)
+{
+  swap_params_t params = { dA1T, dA2T, n }; /*, lda1, lda2 };*/
+  int  blocksize = 64;
+  dim3 blocks = (params.n+blocksize-1) / blocksize;
+  myzswap<<< blocks, blocksize >>>( params );
 }
 
 #undef BLOCK_SIZE
