@@ -89,7 +89,12 @@ int main( int argc, char** argv)
       printf("  testing_sorgqr_gpu -M %d  -N %d  -K %d\n\n", 1024, 1024, 1024);
       M = N = K = size[9];
     }
-
+    
+    int tt = magma_get_sgeqrf_nb(N);
+    M = ((M+tt-1)/tt)*tt;
+    N = ((N+tt-1)/tt)*tt;
+    K = N;
+    
     /* Initialize CUBLAS */
     status = cublasInit();
     if (status != CUBLAS_STATUS_SUCCESS) {
@@ -182,7 +187,7 @@ int main( int argc, char** argv)
       if (info[0] < 0)  
 	printf("Argument %d of sgeqrf had an illegal value.\n", -info[0]);
 
-      sorgqr_(&M, &M, &K, h_A, &M, tau, h_work, &lwork, info);
+      sorgqr_(&M, &N, &K, h_A, &M, tau, h_work, &lwork, info);
       end = get_current_time();
       cpu_perf = (4.*M*N*min_mn/3.+4.*M*min_mn*K/3.)/(1000000.*
 						      GetTimerValue(start,end));
