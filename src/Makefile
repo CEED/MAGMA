@@ -12,6 +12,8 @@ include ../Makefile.internal
 ZSRC  = zpotrf.cpp	\
         zpotrf_gpu.cpp	\
         zgeqrf.cpp	\
+        zgeqrf-v2.cpp   \
+        zgeqrf-v3.cpp   \
         zgeqrf_gpu.cpp	\
         zgeqrf_gpu-v2.cpp \
         zgeqrs_gpu.cpp	\
