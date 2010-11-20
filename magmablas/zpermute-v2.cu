@@ -26,13 +26,21 @@ typedef struct {
         short ipiv[BLOCK_SIZE];
 } zlaswp_params_t2;
 
+/*********************************************************
+ *
+ * SWAP BLAS: permute to set of N elements
+ *
+ ********************************************************/
+/*
+ *  First version: line per line
+ */
 typedef struct {
   cuDoubleComplex *A1;
   cuDoubleComplex *A2;
   int n, lda1, lda2;
-} swap_params_t;
+} zswap_params_t;
 
-__global__ void myzswap( swap_params_t params )
+__global__ void myzswap( zswap_params_t params )
 {
   unsigned int x = threadIdx.x + blockDim.x*blockIdx.x;
   unsigned int offset1 = __mul24( x, params.lda1);
@@ -47,6 +55,137 @@ __global__ void myzswap( swap_params_t params )
     }
 }
 
+extern "C" void zswap( zswap_params_t &params )
+{
+ 	int blocksize = 64;
+	dim3 blocks = (params.n+blocksize-1) / blocksize;
+	myzswap<<< blocks, blocksize >>>( params );
+}
+
+/*
+ *  Blocked version: swap several pair of line
+ */
+typedef struct {
+  cuDoubleComplex *A1;
+  cuDoubleComplex *A2;
+  int n, ldx1, ldx2, ldy1, ldy2, npivots;
+  short ipiv[BLOCK_SIZE];
+} zswapblk_params_t;
+
+__global__ void myzswapblk( zswapblk_params_t params )
+{
+  unsigned int y = threadIdx.x + blockDim.x*blockIdx.x;
+  unsigned int offset1 = __mul24( y, params.ldy1);
+  unsigned int offset2 = __mul24( y, params.ldy2);
+  if( y < params.n )
+    {
+      cuDoubleComplex *A1 = params.A1 + offset1 - params.ldx1;
+      cuDoubleComplex *A2 = params.A2 + offset2;
+      
+      for( int i = 0; i < params.npivots; i++ )
+        {
+          A1 += params.ldx1;
+          if ( params.ipiv[i] == -1 )
+            continue;
+          cuDoubleComplex tmp1  = *A1;
+          cuDoubleComplex *tmp2 = A2 + params.ipiv[i]*params.ldx2;
+          *A1   = *tmp2;
+          *tmp2 = tmp1;
+        }
+    }
+}
+
+extern "C" void zswapblk( zswapblk_params_t &params )
+{
+ 	int blocksize = 64;
+	dim3 blocks = (params.n+blocksize-1) / blocksize;
+	myzswapblk<<< blocks, blocksize >>>( params );
+}
+
+
+/*
+ *  Blocked version: swap several pair of line
+ */
+typedef struct {
+  cuDoubleComplex *A1;
+  cuDoubleComplex *A2;
+  int n, lda1, lda2, npivots;
+  short ipiv[BLOCK_SIZE];
+} zswapcm_params_t;
+
+__global__ void myzswapcm( zswapcm_params_t params )
+{
+    unsigned int id = threadIdx.x;
+    cuDoubleComplex *A1 = params.A1 + id;
+    cuDoubleComplex *A2 = params.A2;
+    if ( ( id < params.npivots )
+         && ( params.ipiv[id] != -1) )
+    {
+        int i;
+        for(i=0; i<params.n; i++) {
+            cuDoubleComplex *pt  = A2+params.ipiv[id];
+            cuDoubleComplex  tmp = *A1;
+            __syncthreads();
+            *A1 = *pt;
+            A1+=params.lda1;
+            *A2 = tmp;
+            __syncthreads();
+            A1+=params.lda1;
+            A2+=params.lda2;
+        }
+    }
+}
+
+extern "C" void zswapcm( zswapcm_params_t &params )
+{
+ 	int blocksize = 64;
+	myzswapcm<<< 1, blocksize >>>( params );
+}
+
+
+/*********************************************************
+ *
+ * LAPACK Swap: permute a set of lines following ipiv
+ *
+ ********************************************************/
+typedef struct {
+    double2 *A;
+    int n, ldx, ldy, j0, npivots;
+    short ipiv[BLOCK_SIZE];
+} zlaswpx_params_t;
+
+__global__ void myzlaswpx( zlaswpx_params_t params )
+{
+    unsigned int y = threadIdx.x + __mul24(blockDim.x, blockIdx.x);
+    unsigned int offset1 = __mul24( y, params.ldy);
+    if( y < params.n )
+    {
+        int ldx = params.ldx;
+        cuDoubleComplex *A = params.A + offset1 + ldx * params.j0;
+        cuDoubleComplex *Ai = A;
+        
+        for( int i = 0; i < params.npivots; i++ )
+        {
+            int j = params.ipiv[i];
+            cuDoubleComplex *p2 = A + j*ldx;
+            cuDoubleComplex temp = *Ai;
+            *Ai = *p2;
+            *p2 = temp;
+            Ai += ldx;
+        }
+    }
+}
+
+extern "C" void zlaswpx( zlaswpx_params_t &params )
+{
+ 	int blocksize = 64;
+	dim3 blocks = (params.n+blocksize-1) / blocksize;
+	myzlaswpx<<< blocks, blocksize >>>( params );
+}
+
+/*
+ * Old version
+ */
 __global__ void myzlaswp2( zlaswp_params_t2 params )
 {
         unsigned int tid = threadIdx.x + __mul24(blockDim.x, blockIdx.x);
@@ -126,14 +265,84 @@ magmablas_zlaswp( int n, cuDoubleComplex *dAT, int lda,
 }
 
 extern "C" void 
+magmablas_zlaswpx( int n, cuDoubleComplex *dAT, int ldx, int ldy, 
+                   int i1, int i2, int *ipiv, int inci )
+{
+  int k;
+  
+  for( k=(i1-1); k<i2; k+=BLOCK_SIZE )
+    {
+      int sb = min(BLOCK_SIZE, i2-k);
+      //zlaswp_params_t params = { dAT, lda, lda, ind + k };
+      zlaswpx_params_t params = { dAT+k*ldx, n, ldx, ldy, 0, sb };
+      for( int j = 0; j < sb; j++ )
+        {
+          params.ipiv[j] = ipiv[(k+j)*inci] - k - 1;
+        }
+      zlaswpx( params );
+    }
+}
+
+extern "C" void 
 magmablas_zswap( int n, cuDoubleComplex *dA1T, int lda1, 
                  cuDoubleComplex *dA2T, int lda2)
 {
-    swap_params_t params = { dA1T, dA2T, n, lda1, lda2 };
+    zswap_params_t params = { dA1T, dA2T, n, lda1, lda2 };
     int  blocksize = 64;
     int  blocks = (params.n+blocksize-1) / blocksize;
     
     myzswap<<< blocks, blocksize >>>( params );
+}
+
+extern "C" void 
+magmablas_zswapblk( int n, cuDoubleComplex *dA1T, int ldx1, int ldy1, 
+                    cuDoubleComplex *dA2T, int ldx2, int ldy2,
+                    int i1, int i2, int *ipiv, int inci)
+{
+    int  k;
+/*   int blocksize = 64; */
+/*   int  blocks = (n+blocksize-1) / blocksize; */
+
+#if 1
+/*     if (ldx1 == 1) { */
+/*         for( k=(i1-1); k<i2; k+=BLOCK_SIZE ) */
+/*         { */
+/*             int sb = min(BLOCK_SIZE, i2-k); */
+/*             zswapcm_params_t params = { dA1T+k, dA2T, n, ldy1, ldy2, sb }; */
+/*             for( int j = 0; j < sb; j++ ) */
+/*             { */
+/*                 if ( (k+j) == ipiv[(k+j)*inci] - 1 ) */
+/*                     params.ipiv[j] = -1; */
+/*                 else */
+/*                     params.ipiv[j] = ipiv[(k+j)*inci] - 1; */
+/*             } */
+/*             zswapcm ( params ); */
+/*         } */
+/*     } else { */
+        for( k=(i1-1); k<i2; k+=BLOCK_SIZE )
+        {
+            int sb = min(BLOCK_SIZE, i2-k);
+            zswapblk_params_t params = { dA1T+k*ldx1, dA2T, n, ldx1, ldx2, ldy1, ldy2, sb };
+            for( int j = 0; j < sb; j++ )
+            {
+                if ( (k+j) == ipiv[(k+j)*inci] - 1 )
+                    params.ipiv[j] = -1;
+                else
+                    params.ipiv[j] = ipiv[(k+j)*inci] - 1;
+            }
+            zswapblk ( params );
+            //myzswap2<<< blocks, blocksize >>>( params );
+        }
+/*     } */
+#else 
+    for ( k=i1-1; k<i2; k++) {
+      if ( k != (ipiv[k]-1)) {
+        zswap_params_t params = { dA1T+k*ldx1, dA2T+(ipiv[k]-1)*ldx2, n, ldy1, ldy2 };
+        //      myzswap<<< blocks, blocksize >>>( params );
+        zswap( params );
+      }
+    }
+#endif
 }
 
 #undef BLOCK_SIZE
