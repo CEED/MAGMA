@@ -11,6 +11,8 @@ include ../Makefile.internal
 ZSRC  = zauxiliary.cu	\
 	zpermute.cu	\
 	zpermute-v2.cu	\
+	zswap.cu	\
+	zswapblk.cu	\
 	zclaswp.cu 	\
 	ztranspose.cu 	\
 	ztranspose-v2.cu\
