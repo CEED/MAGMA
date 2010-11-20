@@ -71,7 +71,7 @@ magmablas_zswap( int n, cuDoubleComplex *dA1T, int lda1,
     int  blocksize = 64;
     int  blocks = (params.n+blocksize-1) / blocksize;
     
-    myzswap<<< blocks, blocksize >>>( params );
+    zswap( params );
 }
 
 /*********************************************************/
