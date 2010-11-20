@@ -34,6 +34,7 @@ extern "C" {
 #    define blasf77_zsymm      zsymm_
 #    define blasf77_zsyr2k     zsyr2k_
 #    define blasf77_zsyrk      zsyrk_
+#    define blasf77_zswap      zswap_
 #    define blasf77_ztrmm      ztrmm_
 #    define blasf77_ztrmv      ztrmv_
 #    define blasf77_ztrsm      ztrsm_
@@ -92,6 +93,7 @@ extern "C" {
 #    define blasf77_zsymm      zsymm
 #    define blasf77_zsyr2k     zsyr2k
 #    define blasf77_zsyrk      zsyrk
+#    define blasf77_zswap      zswap
 #    define blasf77_ztrmm      ztrmm
 #    define blasf77_ztrmv      ztrmv
 #    define blasf77_ztrsm      ztrsm
@@ -150,6 +152,7 @@ void    blasf77_zscal( const int *, cuDoubleComplex *, cuDoubleComplex *, const 
 void    blasf77_zsymm( const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *,cuDoubleComplex *, const int *);
 void    blasf77_zsyr2k(const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *);
 void    blasf77_zsyrk( const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *);
+void    blasf77_zswap( int *, cuDoubleComplex *, int *, cuDoubleComplex *, int *);
 void    blasf77_ztrmm( const char *, const char *, const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *,const int *);
 void    blasf77_ztrmv( const char *, const char *, const char*, const int *, cuDoubleComplex*,  const int *, cuDoubleComplex *, const int*);
 void    blasf77_ztrsm( const char *, const char *, const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *,const int*);

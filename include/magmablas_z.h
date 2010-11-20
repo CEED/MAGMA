@@ -72,8 +72,8 @@ void magmablas_zgemm_kernel_T_T_64_16_16_16_4_v2(double2 *, const double2 *, con
 
 
   /* Maybe all theses routines don't need to be in this file either */
-void magmablas_zgemv_MLU(magma_int_t, magma_int_t, double2 *, 
-			 magma_int_t, double2 *, double2 *);
+void magmablas_zgemv_MLU( magma_int_t, magma_int_t, double2 *, 
+                          magma_int_t, double2 *, double2 *);
 void magmablas_zgemv32_tesla(char, magma_int_t, magma_int_t, double2, double2 *, 
 			     magma_int_t, double2 *, double2 *);
 void magmablas_zgemvt1_tesla(magma_int_t,magma_int_t,double2,double2 *,

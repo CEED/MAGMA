@@ -17,12 +17,13 @@
 #include <cuda_runtime_api.h>
 #include <cublas.h>
 
-//#define CHECK
+#define CHECK
 // includes, project
 #include "magma.h"
 #include "magmablas.h"
 
 #define PRECISION_z
+#if 0
 static void printMatrix( cuDoubleComplex *A, int m, int n, int lda){
     char name[256];
     FILE *file = fopen("toto.mtx", "w");
@@ -38,7 +39,19 @@ static void printMatrix( cuDoubleComplex *A, int m, int n, int lda){
     fprintf(stderr, "----------------------------------------\n\n");
 #endif
 }
+#endif
 
+#ifdef CHECK
+static int diffMatrix( cuDoubleComplex *A, cuDoubleComplex *B, int m, int n, int lda){
+    int i, j;
+    for(i=0; i<m; i++) {
+	for(j=0; j<n; j++)
+	    if ( !(MAGMA_Z_EQUAL( A[lda*j+i], B[lda*j+i] )) )
+                return 0;
+    }
+    return 1;
+}
+#endif
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zpotrf
 */
@@ -49,7 +62,6 @@ int main( int argc, char** argv)
     printout_devices( );
 
     double2 *h_A1, *h_A2;
-    double2 *h_A3, *h_A4;
     double2 *d_A1, *d_A2;
     double gpu_perf, cpu_perf;
     double gpu_perf2, cpu_perf2;
@@ -65,8 +77,6 @@ int main( int argc, char** argv)
     int i, j;
     int ione     = 1;
     int ISEED[4] = {0,0,0,1};
-    int l1 = 10;
-    int l2 = 5;
     int *ipiv;
     
     if (argc != 1){
@@ -102,17 +112,6 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! host memory allocation error (A)\n");
     }
   
-#ifdef CHECK        
-    cudaMallocHost((void**)(&h_A3), n2 * sizeof(double2));
-    if (h_A3 == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (A)\n");
-    }
-    
-    cudaMallocHost((void**)(&h_A4), n2 * sizeof(double2));
-    if (h_A4 == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (A)\n");
-    }
-#endif
     ipiv = (int*)malloc(N * sizeof(int));
     if (ipiv == 0) {
         fprintf (stderr, "!!!! host memory allocation error (ipiv)\n");
@@ -127,7 +126,7 @@ int main( int argc, char** argv)
       fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
     }
 
-#ifdef CHECK        
+#ifdef CHECK2        
     for(i=0; i<N; i++) {
 	for(j=0; j<N; j++)
             h_A1[lda*j+i] = MAGMA_Z_MAKE( (double)(i), 0.);
@@ -140,12 +139,29 @@ int main( int argc, char** argv)
      lapackf77_zlarnv( &ione, ISEED, &n2, h_A1 );
      lapackf77_zlarnv( &ione, ISEED, &n2, h_A2 );
 #endif
+
     for(i=0; i<N; i++) {
         ipiv[i] = (int)((rand()*1.*N) / (RAND_MAX * 1.)) + 1;
 #ifdef CHECK
         fprintf(stderr, "%d\n", ipiv[i]);
 #endif
     }
+
+#ifdef CHECK        
+    double2 *h_A3, *h_A4;
+    cudaMallocHost((void**)(&h_A3), n2 * sizeof(double2));
+    if (h_A3 == 0) {
+        fprintf (stderr, "!!!! host memory allocation error (A)\n");
+    }
+    
+    cudaMallocHost((void**)(&h_A4), n2 * sizeof(double2));
+    if (h_A4 == 0) {
+        fprintf (stderr, "!!!! host memory allocation error (A)\n");
+    }
+
+    memcpy(h_A3, h_A1, n2 * sizeof(double2));
+    memcpy(h_A4, h_A2, n2 * sizeof(double2));
+#endif
 
     /* Initialize the matrix */
     cublasSetMatrix( N, N, sizeof(double2), h_A1, lda, d_A1, lda);
@@ -172,8 +188,19 @@ int main( int argc, char** argv)
         gpu_perf = 1.*N*N/(1000000.*GetTimerValue(start,end));
         
 #ifdef CHECK        
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A1, size[9], d_A1, size[9]);
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A2, size[9], d_A2, size[9]);
+        for ( j=0; j<N; j++) {
+            if ( j != (ipiv[j]-1)) {
+              blasf77_zswap( &N, h_A1+lda*j, &ione, h_A2+lda*(ipiv[j]-1), &ione);
+            }
+        }
+        cublasGetMatrix( N, N, sizeof(double2), d_A1, N, h_A2, N);
+        if ( diffMatrix( h_A1, h_A2, N, N, N ) == 1 ) {
+            fprintf(stderr, "Check BLAS swap RM: FAILED\n");
+        } else {
+            fprintf(stderr, "Check BLAS swap RM: PASSED\n");
+        }
+        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A3, size[9], d_A1, size[9]);
+        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A4, size[9], d_A2, size[9]);
 #endif
 
         /* Column Major */
@@ -187,20 +214,24 @@ int main( int argc, char** argv)
         cpu_perf = 1.*N*N/(1000000.*GetTimerValue(start,end));
         
 #ifdef CHECK        
-        cublasGetMatrix( N, N, sizeof(double2), d_A2, N, h_A3, N);
-        printMatrix( h_A3, N, N, N);
-        cublasGetMatrix( N, N, sizeof(double2), d_A1, N, h_A3, N);
-        printMatrix( h_A3, N, N, N);
+        for ( j=0; j<N; j++) {
+            if ( j != (ipiv[j]-1)) {
+              blasf77_zswap( &N, h_A1+lda*j, &lda, h_A2+lda*(ipiv[j]-1), &lda);
+            }
+        }
+        cublasGetMatrix( N, N, sizeof(double2), d_A1, N, h_A2, N);
+        if ( diffMatrix( h_A1, h_A2, N, N, N ) == 1 ) {
+            fprintf(stderr, "Check BLAS swap CM: FAILED\n");
+        } else {
+            fprintf(stderr, "Check BLAS swap CM: PASSED\n");
+        }
+        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A3, size[9], d_A1, size[9]);
+        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A4, size[9], d_A2, size[9]);
 #endif
 
         /*
          * Version 2 of BLAS swap
          */
-
-#ifdef CHECK        
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A1, size[9], d_A1, size[9]);
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A2, size[9], d_A2, size[9]);
-#endif
 
         /* Row Major */
         start = get_current_time();
@@ -209,24 +240,41 @@ int main( int argc, char** argv)
         gpu_perf2 = 1.*N*N/(1000000.*GetTimerValue(start,end));
         
 #ifdef CHECK        
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A1, size[9], d_A1, size[9]);
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A2, size[9], d_A2, size[9]);
+        for ( j=0; j<N; j++) {
+            if ( j != (ipiv[j]-1)) {
+              blasf77_zswap( &N, h_A1+lda*j, &ione, h_A2+lda*(ipiv[j]-1), &ione);
+            }
+        }
+        cublasGetMatrix( N, N, sizeof(double2), d_A1, N, h_A2, N);
+        if ( diffMatrix( h_A1, h_A2, N, N, N ) == 1 ) {
+            fprintf(stderr, "Check BLASblk swap RM: FAILED\n");
+        } else {
+            fprintf(stderr, "Check BLASblk swap RM: PASSED\n");
+        }
+        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A3, size[9], d_A1, size[9]);
+        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A4, size[9], d_A2, size[9]);
 #endif
+
         /* Column Major */
         start = get_current_time();
         magmablas_zswapblk( N, d_A1, 1, lda, d_A2, 1, lda, 1, N, ipiv, 1, 0);
         end = get_current_time();
         cpu_perf2 = 1.*N*N/(1000000.*GetTimerValue(start,end));
         
-#ifdef CHECK
-        cublasGetMatrix( N, N, sizeof(double2), d_A2, N, h_A4, N);
-        printMatrix( h_A4, N, N, N);
-        cublasGetMatrix( N, N, sizeof(double2), d_A1, N, h_A4, N);
-        printMatrix( h_A4, N, N, N);
-#endif
-
 #ifdef CHECK        
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A1, size[9], d_A1, size[9]);
+        for ( j=0; j<N; j++) {
+            if ( j != (ipiv[j]-1)) {
+              blasf77_zswap( &N, h_A1+lda*j, &lda, h_A2+lda*(ipiv[j]-1), &lda);
+            }
+        }
+        cublasGetMatrix( N, N, sizeof(double2), d_A1, N, h_A2, N);
+        if ( diffMatrix( h_A1, h_A2, N, N, N ) == 1 ) {
+            fprintf(stderr, "Check BLASblk swap CM: FAILED\n");
+        } else {
+            fprintf(stderr, "Check BLASblk swap CM: PASSED\n");
+        }
+        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A3, size[9], d_A1, size[9]);
+        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A4, size[9], d_A2, size[9]);
 #endif
         /*
          * Version 1 of LAPACK swap (Old one)
@@ -237,8 +285,17 @@ int main( int argc, char** argv)
         gpu_perfx = 1.*N*N/(1000000.*GetTimerValue(start,end));
 
 #ifdef CHECK        
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A1, size[9], d_A1, size[9]);
+        lapackf77_zlaswp( &N, h_A1, &N, &ione, &N, ipiv, &ione);
+        cublasGetMatrix( N, N, sizeof(double2), d_A1, N, h_A2, N);
+        if ( diffMatrix( h_A1, h_A2, N, N, N ) == 1 ) {
+            fprintf(stderr, "Check OldLapack swap RM: FAILED\n");
+        } else {
+            fprintf(stderr, "Check OldLapack swap RM: PASSED\n");
+        }
+        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A3, size[9], d_A1, size[9]);
+        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A4, size[9], d_A2, size[9]);
 #endif
+
         /* Row Major */
         start = get_current_time();
         magmablas_zlaswpx( N, d_A1, N, 1, 1, N, ipiv, 1);
@@ -246,8 +303,17 @@ int main( int argc, char** argv)
         gpu_perf3 = 1.*N*N/(1000000.*GetTimerValue(start,end));
 
 #ifdef CHECK        
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A1, size[9], d_A1, size[9]);
+        lapackf77_zlaswp( &N, h_A1, &N, &ione, &N, ipiv, &ione);
+        cublasGetMatrix( N, N, sizeof(double2), d_A1, N, h_A2, N);
+        if ( diffMatrix( h_A1, h_A2, N, N, N ) == 1 ) {
+            fprintf(stderr, "Check Laswp RM: FAILED\n");
+        } else {
+            fprintf(stderr, "Check Laswp RM: PASSED\n");
+        }
+        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A3, size[9], d_A1, size[9]);
+        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A4, size[9], d_A2, size[9]);
 #endif
+
         /* Col Major */
         start = get_current_time();
         magmablas_zlaswpx( N, d_A1, 1, N, 1, N, ipiv, 1);
@@ -255,9 +321,19 @@ int main( int argc, char** argv)
         cpu_perf3 = 1.*N*N/(1000000.*GetTimerValue(start,end));
 
 #ifdef CHECK        
-        for(j=0; j<n2; j++) {
-            if ( !(MAGMA_Z_EQUAL( h_A3[j], h_A4[j] ))) fprintf(stderr, "Problem ( %e, %e )\n", h_A3[j], h_A4[j]);
+        for ( j=0; j<N; j++) {
+            if ( j != (ipiv[j]-1)) {
+              blasf77_zswap( &N, h_A1+lda*j, &lda, h_A1+lda*(ipiv[j]-1), &lda);
+            }
         }
+        cublasGetMatrix( N, N, sizeof(double2), d_A1, N, h_A2, N);
+        if ( diffMatrix( h_A1, h_A2, N, N, N ) == 1 ) {
+            fprintf(stderr, "Check Laswp RM: FAILED\n");
+        } else {
+            fprintf(stderr, "Check Laswp RM: PASSED\n");
+        }
+        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A3, size[9], d_A1, size[9]);
+        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A4, size[9], d_A2, size[9]);
 #endif
 
         printf("%5d      %6.2f / %6.2f    %6.2f / %6.2f   %6.2f / %6.2f   %6.2f \n", 

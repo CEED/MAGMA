@@ -9,7 +9,8 @@
 MAGMA_DIR = ..
 include ../Makefile.internal
 
-ZSRC  = testing_zgetrf.cpp 	\
+ZSRC  = testing_zswap.cpp 	\
+        testing_zgetrf.cpp 	\
         testing_zgetrf_gpu.cpp 	\
 	testing_zgesv_gpu.cpp	\
 	testing_zpotrf.cpp	\
