@@ -11,21 +11,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 
 // includes, project
-#include "cuda.h"
-#include "cuda_runtime_api.h"
-#include "cublas.h"
 #include "magma.h"
 
 #define min(a,b)  (((a)<(b))?(a):(b))
-
-extern "C" int magma_sorgqr_gpu(int *m, int *n, int *k,
-				float *da, int *ldda, float *tau,
-				float *dwork, int *info);
-extern "C" int sorgqr_(int *m, int *n, int *k, float *a, int *lda,
-		       float *tau, float *work, int *lwork, int *info);
-
 
 static float cpu_gpu_sdiff(int M, int N, float * a, int lda, float *da, int ldda)
 {
@@ -187,7 +180,7 @@ int main( int argc, char** argv)
       if (info[0] < 0)  
 	printf("Argument %d of sgeqrf had an illegal value.\n", -info[0]);
 
-      sorgqr_(&M, &N, &K, h_A, &M, tau, h_work, &lwork, info);
+      lapackf77_sorgqr(&M, &N, &K, h_A, &M, tau, h_work, &lwork, info);
       end = get_current_time();
       cpu_perf = (4.*M*N*min_mn/3.+4.*M*min_mn*K/3.)/(1000000.*
 						      GetTimerValue(start,end));
