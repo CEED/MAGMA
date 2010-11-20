@@ -44,7 +44,7 @@ void magmablas_zswap( int n, cuDoubleComplex *dA1, int lda1, cuDoubleComplex *dA
 
 void magmablas_zswapblk( int n, cuDoubleComplex *dA1T, int ldx1, int ldy1, 
                          cuDoubleComplex *dA2T, int ldx2, int ldy2,
-                         int i1, int i2, int *ipiv, int inci);
+                         int i1, int i2, int *ipiv, int inci, int offset );
 
 void magmablas_zgemm(char transA, char transB, magma_int_t m, magma_int_t n, magma_int_t k, 
 		     double2 alpha, const double2 *A, magma_int_t lda, 

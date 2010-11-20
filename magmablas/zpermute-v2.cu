@@ -103,46 +103,6 @@ extern "C" void zswapblk( zswapblk_params_t &params )
 }
 
 
-/*
- *  Blocked version: swap several pair of line
- */
-typedef struct {
-  cuDoubleComplex *A1;
-  cuDoubleComplex *A2;
-  int n, lda1, lda2, npivots;
-  short ipiv[BLOCK_SIZE];
-} zswapcm_params_t;
-
-__global__ void myzswapcm( zswapcm_params_t params )
-{
-    unsigned int id = threadIdx.x;
-    cuDoubleComplex *A1 = params.A1 + id;
-    cuDoubleComplex *A2 = params.A2;
-    if ( ( id < params.npivots )
-         && ( params.ipiv[id] != -1) )
-    {
-        int i;
-        for(i=0; i<params.n; i++) {
-            cuDoubleComplex *pt  = A2+params.ipiv[id];
-            cuDoubleComplex  tmp = *A1;
-            __syncthreads();
-            *A1 = *pt;
-            A1+=params.lda1;
-            *A2 = tmp;
-            __syncthreads();
-            A1+=params.lda1;
-            A2+=params.lda2;
-        }
-    }
-}
-
-extern "C" void zswapcm( zswapcm_params_t &params )
-{
- 	int blocksize = 64;
-	myzswapcm<<< 1, blocksize >>>( params );
-}
-
-
 /*********************************************************
  *
  * LAPACK Swap: permute a set of lines following ipiv
@@ -297,52 +257,24 @@ magmablas_zswap( int n, cuDoubleComplex *dA1T, int lda1,
 extern "C" void 
 magmablas_zswapblk( int n, cuDoubleComplex *dA1T, int ldx1, int ldy1, 
                     cuDoubleComplex *dA2T, int ldx2, int ldy2,
-                    int i1, int i2, int *ipiv, int inci)
+                    int i1, int i2, int *ipiv, int inci, int offset )
 {
-    int  k;
-/*   int blocksize = 64; */
-/*   int  blocks = (n+blocksize-1) / blocksize; */
-
-#if 1
-/*     if (ldx1 == 1) { */
-/*         for( k=(i1-1); k<i2; k+=BLOCK_SIZE ) */
-/*         { */
-/*             int sb = min(BLOCK_SIZE, i2-k); */
-/*             zswapcm_params_t params = { dA1T+k, dA2T, n, ldy1, ldy2, sb }; */
-/*             for( int j = 0; j < sb; j++ ) */
-/*             { */
-/*                 if ( (k+j) == ipiv[(k+j)*inci] - 1 ) */
-/*                     params.ipiv[j] = -1; */
-/*                 else */
-/*                     params.ipiv[j] = ipiv[(k+j)*inci] - 1; */
-/*             } */
-/*             zswapcm ( params ); */
-/*         } */
-/*     } else { */
-        for( k=(i1-1); k<i2; k+=BLOCK_SIZE )
+    int  k, im;
+    for( k=(i1-1); k<i2; k+=BLOCK_SIZE )
+    {
+        int sb = min(BLOCK_SIZE, i2-k);
+        zswapblk_params_t params = { dA1T+k*ldx1, dA2T, n, ldx1, ldx2, ldy1, ldy2, sb };
+        for( int j = 0; j < sb; j++ )
         {
-            int sb = min(BLOCK_SIZE, i2-k);
-            zswapblk_params_t params = { dA1T+k*ldx1, dA2T, n, ldx1, ldx2, ldy1, ldy2, sb };
-            for( int j = 0; j < sb; j++ )
-            {
-                if ( (k+j) == ipiv[(k+j)*inci] - 1 )
-                    params.ipiv[j] = -1;
-                else
-                    params.ipiv[j] = ipiv[(k+j)*inci] - 1;
-            }
-            zswapblk ( params );
-            //myzswap2<<< blocks, blocksize >>>( params );
+            im = ipiv[(k+j)*inci] - 1;
+            if ( (k+j) == im)
+                params.ipiv[j] = -1;
+            else
+                params.ipiv[j] = im - offset;
         }
-/*     } */
-#else 
-    for ( k=i1-1; k<i2; k++) {
-      if ( k != (ipiv[k]-1)) {
-        zswap_params_t params = { dA1T+k*ldx1, dA2T+(ipiv[k]-1)*ldx2, n, ldy1, ldy2 };
-        //      myzswap<<< blocks, blocksize >>>( params );
-        zswap( params );
-      }
+        zswapblk ( params );
+        //myzswapblk<<< blocks, blocksize >>>( params );
     }
-#endif
 }
 
 #undef BLOCK_SIZE
