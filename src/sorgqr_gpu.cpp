@@ -6,10 +6,10 @@
        November 2010
 */
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
-#include "magma.h"
 #include <stdio.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include "magma.h"
 
 
 extern "C" int
@@ -125,7 +125,7 @@ magma_sorgqr_gpu(int *m, int *n, int *k, float *da, int *ldda,
 	i__3 = *k - kk;
 	cublasGetMatrix(i__1, i__2, sizeof(float),
 			da_ref(kk, kk), *ldda, panel, i__1);
-	sorg2r_(&i__1, &i__2, &i__3, panel, &i__1, &tau[kk], work, &iinfo);
+	lapackf77_sorg2r(&i__1, &i__2, &i__3, panel, &i__1, &tau[kk], work, &iinfo);
 
 	cublasSetMatrix(i__1, i__2, sizeof(float),
 			panel, i__1, da_ref(kk, kk), *ldda);
@@ -149,14 +149,15 @@ magma_sorgqr_gpu(int *m, int *n, int *k, float *da, int *ldda,
 	      {
 		/* Apply H to A(i:m,i+ib:n) from the left */
 		i__3 = *n - i - ib;
-		magma_slarfb('L', 'N', 'F', 'C', i__2, i__3, ib, da_ref(i, i), *ldda,
-			     t_ref(i), lddwork, da_ref(i, i+ib), *ldda, 
-			     dwork + 2*lddwork*nb, lddwork);
+		magma_slarfb( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, 
+                              i__2, i__3, ib, da_ref(i, i), *ldda,
+                              t_ref(i), lddwork, da_ref(i, i+ib), *ldda, 
+                              dwork + 2*lddwork*nb, lddwork);
 	      }
    
 	    /* Apply H to rows i:m of current block on the CPU */
 	    cudaStreamSynchronize(stream[0]);
-	    sorg2r_(&i__2, &ib, &ib, panel, &i__2, &tau[i], work, &iinfo);
+	    lapackf77_sorg2r(&i__2, &ib, &ib, panel, &i__2, &tau[i], work, &iinfo);
 	    cudaMemcpy2DAsync(da_ref(i,i), (*ldda) * sizeof(float),
 			      panel,         i__2  * sizeof(float),
 			      sizeof(float)*i__2, ib,
