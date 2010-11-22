@@ -63,18 +63,18 @@ void *cpu_thread(void *a)
       sched_yield();
     }
 
-//fprintf(stderr,"thread=%d panel=%d\n",t,i);
-
     M=MG.m-i*MG.nb;
     N=MG.nb;
     K=MG.nb;
-    if (i == (MG.np_gpu - 1)) {
-      K = MG.n-MG.nthreads*MG.nb-(MG.np_gpu-1)*MG.nb; 
-    }
-    WORK = (cuDoubleComplex*)malloc(sizeof(cuDoubleComplex)*M*N);
+	if (MG.m >= MG.n) {
+      if (i == (MG.np_gpu - 1)) {
+        K = MG.n-MG.nthreads*MG.nb-(MG.np_gpu-1)*MG.nb; 
+      }
+	}
 
-    //slarfb_("L","T","F","C",&M,&N,&K,MG.a+i*MG.nb*MG.lda+i*MG.nb,&MG.lda,MG.t+i*MG.nb*MG.nb,&K,
-            //MG.a+MG.m*MG.n-(MG.nthreads-t)*MG.nb*MG.lda+i*MG.nb,&MG.lda,WORK,&N);
+//fprintf(stderr,"thread=%d panel=%d K=%d\n",t,i,K);
+
+    WORK = (cuDoubleComplex*)malloc(sizeof(cuDoubleComplex)*M*N);
 
     lapackf77_zlarfb(MagmaLeftStr, MagmaTransStr, MagmaForwardStr, MagmaColumnwiseStr,
                      &M,&N,&K,MG.a+i*MG.nb*MG.lda+i*MG.nb,&MG.lda,MG.t+i*MG.nb*MG.nb,&K,
@@ -104,7 +104,13 @@ void magma_init (int m, int n, cuDoubleComplex *a, int nthreads)
   MG.a = a;
   MG.t = (cuDoubleComplex*)malloc(sizeof(cuDoubleComplex)*MG.n*MG.nb);
 
-fprintf(stderr,"MG.np_gpu=%d\n",MG.np_gpu);
+  if (MG.n > MG.m) {
+    MG.np_gpu = m/MG.nb;
+    if (m%MG.nb != 0)
+      MG.np_gpu++;
+  }
+
+//fprintf(stderr,"MG.np_gpu=%d\n",MG.np_gpu);
 
   MG.p = (volatile cuDoubleComplex **) malloc (MG.np_gpu*sizeof(cuDoubleComplex*));
 
