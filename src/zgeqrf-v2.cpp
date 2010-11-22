@@ -207,6 +207,7 @@ int cnt=-1;
             int rows = m-i;
 
 cnt++;
+//fprintf(stderr,"cnt0=%d\n",cnt);
 
             lapackf77_zgeqrf(&rows, &ib, a_ref(i,i), &lda, tau+i, work, &lwork, info);
             /* Form the triangular factor of the block reflector
@@ -219,7 +220,10 @@ cnt++;
                             a_ref(i,i), lda, da_ref(i,i), ldda);
             zq_to_panel(MagmaUpper, ib, a_ref(i,i), lda, work+ib*ib);
 
-MG.p[cnt]=a;
+if (cnt < MG.np_gpu) {
+  MG.p[cnt]=a;
+  //fprintf(stderr,"cnt1=%d\n",cnt);
+}
 
             if (i + ib < n) {
                 //cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), work, ib, dwork, lddwork);
@@ -254,13 +258,21 @@ MG.p[cnt]=a;
         int rows = m-i;
 
 cnt++;
+//fprintf(stderr,"cnt2=%d\n",cnt);
 
         lapackf77_zgeqrf(&rows, &ib, a_ref(i,i), &lda, tau+i, work, &lwork, info);
-        lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr, 
-                          //&rows, &ib, a_ref(i,i), &lda, tau+i, work, &ib);
-                          &rows, &ib, a_ref(i,i), &lda, tau+i, MG.t+cnt*nb*nb, &ib);
 
-MG.p[cnt]=a;
+if (cnt < MG.np_gpu) {
+  //fprintf(stderr,"rows=%d ib=%d\n",rows,ib);
+       
+        int ib2=min(ib,nb);
+
+        lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr, 
+                          &rows, &ib2, a_ref(i,i), &lda, tau+i, MG.t+cnt*nb*nb, &ib2);
+
+  MG.p[cnt]=a;
+  //fprintf(stderr,"cnt3=%d\n",cnt);
+}
 
     }
 
