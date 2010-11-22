@@ -111,61 +111,50 @@ magma_zgeqrf3(magma_int_t m, magma_int_t n,
 
     ====================================================================    */
 
-/*
+  cuDoubleComplex c_one = MAGMA_Z_ONE;
 
-  int i,j,l;
-
-  int ii=-1,jj=-1,ll=-1;
-
-  char sgeqrt_dag_label[1000];
-  char slarfb_dag_label[1000];
+  int k;
 
   *info = 0;
 
-  int K;
-
-  work[0] = (float) (*n)*MG.nb;
-  long int lquery = *lwork == -1;
-
-  // check arguments
-  if (*m < 0) {
+  int lwkopt = n * MG.nb;
+  work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );
+  long int lquery = (lwork == -1);
+  if (m < 0) {
     *info = -1;
-  } else if (*n < 0) {
+  } else if (n < 0) {
     *info = -2;
-  } else if (*lda < max(1,*m)) {
+  } else if (lda < max(1,m)) {
     *info = -4;
-  } else if (*lwork < max(1,*n) && ! lquery) {
+  } else if (lwork < max(1,n) && ! lquery) {
     *info = -7;
   }
   if (*info != 0)
     return 0;
   else if (lquery)
     return 0;
-
-  int k = min(*m,*n);
+  k = min(m,n);
   if (k == 0) {
-    work[0] = 1.f;
+    work[0] = c_one;
     return 0;
   }
 
-*/
+  int M=MG.nthreads*MG.nb;
+  int N=MG.nthreads*MG.nb;
 
-//fprintf(stderr,"fjfj\n");
+  if (MG.m > MG.n) {
+    M = MG.m - (MG.n-MG.nthreads*MG.nb);
+  }
 
-int k;
+  magma_zgeqrf2(m,n-MG.nthreads*MG.nb, a, m, tau, work, lwork, info);
 
-int M=MG.nthreads*MG.nb;
-int N=MG.nthreads*MG.nb;
-
-magma_zgeqrf2(m,n-MG.nthreads*MG.nb, a, m, tau, work, lwork, info);
-
-for (k = 0; k < MG.nthreads; k++){
-  pthread_join(MG.thread[k], NULL);
-}
-
-  magma_zgeqrf2(M, N, a+(n-MG.nthreads*MG.nb)*m+(n-MG.nthreads*MG.nb), m, 
-               &tau[n-MG.nthreads*MG.nb], work, lwork, info);
-
+  for (k = 0; k < MG.nthreads; k++){
+    pthread_join(MG.thread[k], NULL);
+  }
+ 
+    magma_zgeqrf2(M, N, a+(n-MG.nthreads*MG.nb)*m+(n-MG.nthreads*MG.nb), m, 
+                  &tau[n-MG.nthreads*MG.nb], work, lwork, info);
+ 
 }
 
 #undef min
