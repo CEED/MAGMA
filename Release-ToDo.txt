@@ -84,6 +84,9 @@ DONE 6.       Mathieu     Update the Makefile to the same comportement as PLASMA
                                   magma_zsetib( int func, int ib )
 ---------------------------------------------------------------------------------
 15.            Peng        Fix a bug in gemm on Fermi for big matrices
+---------------------------------------------------------------------------------
+16.            Stan        Fix a bug in clean up with trd
+
 
 
  
