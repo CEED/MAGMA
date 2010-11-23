@@ -43,22 +43,13 @@ __global__ void myzswap( zswap_params_t params )
     }
 }
 
-extern "C" void zswap( zswap_params_t &params )
-{
-    int blocksize = 64;
-    dim3 blocks = (params.n+blocksize-1) / blocksize;
-    myzswap<<< blocks, blocksize >>>( params );
-}
-
-
 extern "C" void 
 magmablas_zswap( int n, cuDoubleComplex *dA1T, int lda1, 
                  cuDoubleComplex *dA2T, int lda2)
 {
+    int blocksize = 64;
+    dim3 blocks = ( (params.n+blocksize-1) / blocksize, 1, 1);
     zswap_params_t params = { dA1T, dA2T, n, lda1, lda2 };
-/*     int  blocksize = 64; */
-/*     int  blocks = (params.n+blocksize-1) / blocksize; */
-    
-    zswap( params );
+    myzswap<<< blocks, blocksize >>>( params );
 }
 

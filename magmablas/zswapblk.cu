@@ -48,19 +48,13 @@ __global__ void myzswapblk( zswapblk_params_t params )
     }
 }
 
-extern "C" void zswapblk( zswapblk_params_t &params )
-{
-    int blocksize = 64;
-    dim3 blocks = (params.n+blocksize-1) / blocksize;
-    myzswapblk<<< blocks, blocksize >>>( params );
-}
-
-
 extern "C" void 
 magmablas_zswapblk( int n, cuDoubleComplex *dA1T, int ldx1, int ldy1, 
                     cuDoubleComplex *dA2T, int ldx2, int ldy2,
                     int i1, int i2, int *ipiv, int inci, int offset )
 {
+    int blocksize = 64;
+    dim3 blocks = ( (params.n+blocksize-1) / blocksize, 1, 1);
     int  k, im;
     for( k=(i1-1); k<i2; k+=BLOCK_SIZE )
     {
@@ -74,7 +68,7 @@ magmablas_zswapblk( int n, cuDoubleComplex *dA1T, int ldx1, int ldy1,
             else
                 params.ipiv[j] = im - offset;
         }
-        zswapblk ( params );
+        myzswapblk<<< blocks, blocksize >>>( params );
     }
 }
 
