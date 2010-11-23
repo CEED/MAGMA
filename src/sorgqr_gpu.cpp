@@ -77,10 +77,6 @@ magma_sorgqr_gpu(int *m, int *n, int *k, float *da, int *ldda,
     static int i, ib, nb, ki, kk, iinfo;
     int lddwork = min(*m, *n);
 
-    static cudaStream_t stream[2];
-    cudaStreamCreate(&stream[0]);
-    cudaStreamCreate(&stream[1]);
-
     nb = magma_get_sgeqrf_nb(*m);
 
     *info = 0;
@@ -95,6 +91,10 @@ magma_sorgqr_gpu(int *m, int *n, int *k, float *da, int *ldda,
     } 
     if (*info != 0 || *n <= 0)
       return 0;
+
+    static cudaStream_t stream[2];
+    cudaStreamCreate(&stream[0]);
+    cudaStreamCreate(&stream[1]);
 
     if (nb >= 2 && nb < *k) 
       {
@@ -169,6 +169,8 @@ magma_sorgqr_gpu(int *m, int *n, int *k, float *da, int *ldda,
 	  }
       }
     cublasFree(work);
+    cudaStreamDestroy(stream[0]);
+    cudaStreamDestroy(stream[1]);
 
     return 0;
 

@@ -78,7 +78,8 @@ Task  Done      Who       What
 ---------------------------------------------------------------------------------
 14.                        Find another way to set all the nb, inside this MAGMA_init 
                            another one and provide the user a way to change it.
-
+---------------------------------------------------------------------------------
+15.            Peng        Fix a bug in gemm on Fermi for big matrices
 
 
  

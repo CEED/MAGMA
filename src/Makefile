@@ -56,6 +56,7 @@ ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
         auxiliary.o \
         xerbla.o \
         sorgqr_gpu.o \
+        sssssmpw_gpu.o \
 
 ALLOBJ = $(ALLSRC:.cpp=.o)
 
