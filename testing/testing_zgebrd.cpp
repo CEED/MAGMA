@@ -35,7 +35,7 @@ int main( int argc, char** argv)
     cuDoubleComplex *taup, *tauq;
     double          *diag, *offdiag, *diag2, *offdiag2;
     cuDoubleComplex *d_A;
-    double           gpu_perf, cpu_perf;
+    double           gpu_perf, cpu_perf, eps;
 
     TimeStruct start, end;
 
@@ -65,7 +65,10 @@ int main( int argc, char** argv)
     status = cublasInit();
     if (status != CUBLAS_STATUS_SUCCESS) {
         fprintf (stderr, "!!!! CUBLAS initialization error\n");
+        return 127;
     }
+
+    eps = lapackf77_dlamch( "E" );
 
     lda = N;
     n2 = size[9] * size[9];
@@ -74,12 +77,14 @@ int main( int argc, char** argv)
     h_A = (cuDoubleComplex*)malloc(n2 * sizeof(h_A[0]));
     if (h_A == 0) {
         fprintf (stderr, "!!!! host memory allocation error (A)\n");
+        return 127;
     }
 
     taup = (cuDoubleComplex*)malloc(size[9] * sizeof(cuDoubleComplex));
     tauq = (cuDoubleComplex*)malloc(size[9] * sizeof(cuDoubleComplex));
     if (taup == 0) {
         fprintf (stderr, "!!!! host memory allocation error (taup)\n");
+        return 127;
     }
 
 
@@ -87,17 +92,20 @@ int main( int argc, char** argv)
     diag2= (double*)malloc(size[9] * sizeof(double));
     if (diag == 0) {
         fprintf (stderr, "!!!! host memory allocation error (diag)\n");
+        return 127;
     }
 
     offdiag = (double*)malloc(size[9] * sizeof(double));
     offdiag2= (double*)malloc(size[9] * sizeof(double));
     if (offdiag == 0) {
         fprintf (stderr, "!!!! host memory allocation error (offdiag)\n");
+        return 127;
     }
 
     cudaMallocHost( (void**)&h_R,  n2*sizeof(cuDoubleComplex) );
     if (h_R == 0) {
         fprintf (stderr, "!!!! host memory allocation error (R)\n");
+        return 127;
     }
 
     int nb = magma_get_zgebrd_nb(size[9]);
@@ -105,12 +113,14 @@ int main( int argc, char** argv)
     status = cublasAlloc(n2+lwork, sizeof(cuDoubleComplex), (void**)&d_A);
     if (status != CUBLAS_STATUS_SUCCESS) {
         fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
+        return 127;
     }
 
     cudaMallocHost( (void**)&h_work, (lwork)*sizeof(cuDoubleComplex) );
     //h_work = (cuDoubleComplex*)malloc( nb *lwork * sizeof(cuDoubleComplex) );
     if (h_work == 0) {
         fprintf (stderr, "!!!! host memory allocation error (work)\n");
+        return 127;
     }
 
     printf("\n\n");
@@ -193,7 +203,7 @@ int main( int argc, char** argv)
            =================================================================== */
         printf("%5d   %6.2f        %6.2f       %4.2e %4.2e %4.2e\n",
                size[i], cpu_perf, gpu_perf,
-               result[0]*5.96e-08, result[1]*5.96e-08, result[2]*5.96e-08);
+               result[0]*eps, result[1]*eps, result[2]*eps );
         
         if (argc != 1)
             break;
@@ -214,5 +224,8 @@ int main( int argc, char** argv)
     status = cublasShutdown();
     if (status != CUBLAS_STATUS_SUCCESS) {
         fprintf (stderr, "!!!! shutdown error (A)\n");
+        return 127;
     }
+
+    return 0;
 }
