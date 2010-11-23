@@ -31,7 +31,7 @@ Task  Done      Who       What
                           (I am adding the lapack zgeev.cpp zheevd.cpp zgesvd.cpp
                            to the repository).
 ---------------------------------------------------------------------------------
-6.            Mathieu     Update the Makefile to the same comportement as PLASMA, 
+DONE 6.       Mathieu     Update the Makefile to the same comportement as PLASMA, 
                           to use the same MakeRelease  script or at least close
 ---------------------------------------------------------------------------------
 7.                        Move some macros from magma.h to another file in src, 
@@ -76,7 +76,7 @@ Task  Done      Who       What
                             either through QUARK or our own or for future integration
                             with other packages]
 ---------------------------------------------------------------------------------
-14.                        Find another way to set all the nb, inside this MAGMA_init 
+14.            Mathieu     Find another way to set all the nb, inside this MAGMA_init 
                            another one and provide the user a way to change it.
 ---------------------------------------------------------------------------------
 15.            Peng        Fix a bug in gemm on Fermi for big matrices
