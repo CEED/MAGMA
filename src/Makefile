@@ -33,6 +33,7 @@ ZSRC  = zpotrf.cpp	\
         zgebrd.cpp 	\
         zlabrd.cpp 	\
         zungqr.cpp 	\
+        zungqr_gpu.cpp	\
         zunmtr.cpp 	\
         zunmqr.cpp 	\
         zunmqr_gpu.cpp	\
@@ -55,7 +56,6 @@ SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
         auxiliary.cpp 	\
         xerbla.cpp 	\
-        sorgqr_gpu.cpp	\
 	get_nb.cpp
 
 ALLOBJ = $(ALLSRC:.cpp=.o)
