@@ -731,26 +731,27 @@ magmablas_sgemm(char TRANSA, char TRANSB,
 	if (TRANSB == 'N' ||  TRANSB == 'n')
 	   TransB = 0;
 
-        size_t sizeA = (size_t) lda * (size_t) (!TransA ? k : m);
-        size_t sizeB = (size_t) ldb * (size_t) (!TransB ? n : k);
+	size_t sizeA = (size_t) lda * (size_t) (!TransA ? k : m);
+	size_t sizeB = (size_t) ldb * (size_t) (!TransB ? n : k);
 
  	size_t CUBLAS_MAX_1DBUF_SIZE = (1 << 27) - 512;
-	printf("CUBLAS_MAX_1DBUF_SIZE = %x \n", CUBLAS_MAX_1DBUF_SIZE);
 	if (sizeA>=CUBLAS_MAX_1DBUF_SIZE ||
-            sizeB>=CUBLAS_MAX_1DBUF_SIZE )
-        {
-           cublasSgemm(TRANSA, TRANSB, m, n, k, alpha,
-                       A, lda, B, ldb,
-                       beta, C, ldc);
-        }
+			sizeB>=CUBLAS_MAX_1DBUF_SIZE )
+	{
+		//printf("Exceeding texuture limit (CUBLAS_MAX_1DBUF_SIZE=%ld), using cublasSgemm\n", CUBLAS_MAX_1DBUF_SIZE);
+		cublasSgemm(TRANSA, TRANSB, m, n, k, alpha,
+				A, lda, B, ldb,
+				beta, C, ldc);
+		return;
+	}
 
-	cudaError_t  errt;
-        errt = cudaBindTexture(&offsetA, tex_x_float_A, (int2 *)A, 
-                               sizeA * sizeof(A[0]));
+	cudaError_t errt;
+	errt = cudaBindTexture(&offsetA, tex_x_float_A, (int2 *)A, 
+			sizeA * sizeof(A[0]));
 	if( errt != cudaSuccess) printf("can not bind to texture \n");
 
 	errt = cudaBindTexture(&offsetB, tex_x_float_B, (int2 *)B, 
-                               sizeB * sizeof(B[0]));
+			sizeB * sizeof(B[0]));
 	if( errt != cudaSuccess) printf("can not bind to texture \n");
 
 	dim3 threads( 64, 4 );
