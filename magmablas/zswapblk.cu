@@ -53,8 +53,8 @@ magmablas_zswapblk( int n, cuDoubleComplex *dA1T, int ldx1, int ldy1,
                     cuDoubleComplex *dA2T, int ldx2, int ldy2,
                     int i1, int i2, int *ipiv, int inci, int offset )
 {
-    int blocksize = 64;
-    dim3 blocks = ( (params.n+blocksize-1) / blocksize, 1, 1);
+    int  blocksize = 64;
+    dim3 blocks( (n+blocksize-1) / blocksize, 1, 1);
     int  k, im;
     for( k=(i1-1); k<i2; k+=BLOCK_SIZE )
     {
