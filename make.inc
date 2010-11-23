@@ -1,35 +1,35 @@
 #//////////////////////////////////////////////////////////////////////////////
-#   -- MAGMA (version 1.0) --
+#   -- MAGMA (version 0.2) --
 #      Univ. of Tennessee, Knoxville
 #      Univ. of California, Berkeley
 #      Univ. of	Colorado, Denver
-#      November 2010
+#      November 2009
+#
+#      Contributed by: Allan Menezes (Ontario, Canada)
 #//////////////////////////////////////////////////////////////////////////////
 
-#
-# GPU_TARGET specifies for which GPU you want to compile MAGMA
-#      0: Tesla Family
-#      1: Fermi Family
-#
-GPU_TARGET = 0
+GPU_TARGET = 1
 
-MAKE      = make -j 4
+MAKE      = colormake
 CC        = gcc
 NVCC      = nvcc
 FORT      = gfortran
 
-
 ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
-OPTS      = -O0 -DADD_ -g3 -Wall
-NVOPTS    = -g --compiler-options -fno-strict-aliasing  -DUNIX 
+
+OPTS      = -O0 -g3 -DADD_ -Wall
+NOMAIN    = -Mnomain
+NVOPTS    = --compiler-options -fno-strict-aliasing -DUNIX -O3
 LDOPTS    = -fPIC
-LIB       = -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread -lcublas -lcudart -lm 
-CUDADIR   = /mnt/scratch/cuda-3.1
-LIBDIR    = -L$(MKLROOT) \
-            -L$(CUDADIR)/lib64
-INC       = -I../include -I$(CUDADIR)/include
+
+LIB       = -lgoto2  -lpthread -lcublas -lcudart -lm 
+
+CUDADIR   = /opt/cuda
+
+LIBDIR    = -L/opt/gotoblas2 -L${CUDADIR}/lib64 -L/usr/lib/nvidia-current
+INC       = -I../include -I${CUDADIR}/include
 
 LIBMAGMA     = ../lib/libmagma.a
 LIBMAGMABLAS = ../lib/libmagmablas.a
