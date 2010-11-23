@@ -10,7 +10,7 @@ To do list for MAGMA 1.0 release (Wednesday, November 24):
 
 Task  Done      Who       What
 =================================================================================
-1.            Mathieu     Moving sorgqr_gpu.cpp and dependancies to complex, 
+DONE 1.       Mathieu     Moving sorgqr_gpu.cpp and dependancies to complex, 
                           testing it
                           [to be moved to zungqr_gpu.cpp] 
 ---------------------------------------------------------------------------------
@@ -41,6 +41,7 @@ DONE 6.       Mathieu     Update the Makefile to the same comportement as PLASMA
                            in their stuff; concern here is not to increase number
                            of dependancies, h files, etc, just something to 
                            think about ...]
+                           For now, we should let it like this for the first shot.
 ---------------------------------------------------------------------------------
 8.                         Don't include automatically magma_lapack.h in magma.h =>
                            add this line of include to amost all files
@@ -51,6 +52,7 @@ DONE 6.       Mathieu     Update the Makefile to the same comportement as PLASMA
                            it out of the release and put a check mark on this task.
                            I thought originally to take it out but since Mathieu
                            is mentioning it, now it sounds as a possibility]
+                           Move to next release.
 ---------------------------------------------------------------------------------
 10.             Stan       Check all mixed-precision files (zcposv_gpu.cpp, 
                            zcgesv_gpu.cpp, zcgetrs_gpu.cpp , zcgeqrsv_gpu.cpp), 
@@ -68,7 +70,7 @@ DONE 6.       Mathieu     Update the Makefile to the same comportement as PLASMA
                            - Clean the char parameters to use the define Magma...[Str]
                            [Stan: this is a big one ...]
 ---------------------------------------------------------------------------------
-12.                        Clean zungqr.cpp, it should be updated regarding the 
+12.            Mathieu     Clean zungqr.cpp, it should be updated regarding the 
                            conversion of sorgqr_gpu.cpp
 ---------------------------------------------------------------------------------
 13.                        Create a MAGMA_Init function
