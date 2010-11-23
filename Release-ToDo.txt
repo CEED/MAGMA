@@ -58,7 +58,7 @@ Task  Done      Who       What
 ---------------------------------------------------------------------------------
 11.                        auxiliary.cpp
                            zgehrd.cpp, zlahr2.cpp, zlahru.cpp
-                           zhetrd.cpp, zlatrd.cpp
+                Hatem      zhetrd.cpp, zlatrd.cpp
                            ztsqrt_gpu.cpp
                            zunmqr.cpp
                            zunmtr.cpp
