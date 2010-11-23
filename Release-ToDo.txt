@@ -11,7 +11,8 @@ To do list for MAGMA 1.0 release (Wednesday, November 24):
 Task  Done      Who       What
 =================================================================================
 1.                        Moving sorgqr_gpu.cpp and dependancies to complex, 
-                          testing it 
+                          testing it
+                          [to be moved to zungqr_gpu.cpp] 
 ---------------------------------------------------------------------------------
 2.            Piotr       Bug in gebrd.cpp due to code clean up and conversion
 ---------------------------------------------------------------------------------
@@ -30,4 +31,54 @@ Task  Done      Who       What
                           (I am adding the lapack zgeev.cpp zheevd.cpp zgesvd.cpp
                            to the repository).
 ---------------------------------------------------------------------------------
+6.            Mathieu     Update the Makefile to the same comportement as PLASMA, 
+                          to use the same MakeRelease  script or at least close
+---------------------------------------------------------------------------------
+7.                        Move some macros from magma.h to another file in src, 
+                          not use on the user side.
+                          [Stan: Matheieu, I would like a user to be able to 
+                           copy a file and be able to easily modify and incorporate
+                           in their stuff; concern here is not to increase number
+                           of dependancies, h files, etc, just something to 
+                           think about ...]
+---------------------------------------------------------------------------------
+8.                         Don't include automatically magma_lapack.h in magma.h =>
+                           add this line of include to amost all files
+---------------------------------------------------------------------------------
+9.                         Multi-cores files have to be: moved to complex, updated 
+                           to the last release of PLASMA, and cleaned.
+                          [Stan: if this turne out to be too much work we can take
+                           it out of the release and put a check mark on this task.
+                           I thought originally to take it out but since Mathieu
+                           is mentioning it, now it sounds as a possibility]
+---------------------------------------------------------------------------------
+10.             Stan       Check all mixed-precision files (zcposv_gpu.cpp, 
+                           zcgesv_gpu.cpp, zcgetrs_gpu.cpp , zcgeqrsv_gpu.cpp), 
+                           some files are missing in magmablas.
+---------------------------------------------------------------------------------
+11.                        auxiliary.cpp
+                           zgehrd.cpp, zlahr2.cpp, zlahru.cpp
+                           zhetrd.cpp, zlatrd.cpp
+                           ztsqrt_gpu.cpp
+                           zunmqr.cpp
+                           zunmtr.cpp
+                           Clean all these files: - Move from double2 to cuDoubleComplex
+                           - Check interface, has to be the same than LAPACK, if they 
+                             are workspace, they are allocated inside the function.
+                           - Clean the char parameters to use the define Magma...[Str]
+                           [Stan: this is a big one ...]
+---------------------------------------------------------------------------------
+12.                        Clean zungqr.cpp, it should be updated regarding the 
+                           conversion of sorgqr_gpu.cpp
+---------------------------------------------------------------------------------
+13.                        Create a MAGMA_Init function
+                           [Stan: this is in case we add threads handling in magma
+                            either through QUARK or our own or for future integration
+                            with other packages]
+---------------------------------------------------------------------------------
+14.                        Find another way to set all the nb, inside this MAGMA_init 
+                           another one and provide the user a way to change it.
+
+
+
  
