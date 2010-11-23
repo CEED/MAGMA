@@ -64,7 +64,7 @@ fermiSgemm_v2_kernel_NN(float *C, const float *A, const float *B,
 	// each thread reads 6 data point, 1 point in each 16x16 subblock
 	#pragma unroll
 	for(int y=0; y<6; y++)
-		Abs[tx2+y*16][ty2] = (tll<k)*fetch_x_A(trackA + y*16, A);
+		Abs[tx2+y*16][ty2] = /* (tll<k)* */ fetch_x_A(trackA + y*16, A);
 
 	#pragma unroll
 	for(int y=0; y<6; y++)
@@ -114,7 +114,7 @@ fermiSgemm_v2_kernel_NN(float *C, const float *A, const float *B,
 		// pre-read the next A and B
 		#pragma unroll
 		for( int y=0; y<6; y++)
-			xxA[y] = (tll<k)*fetch_x_A(trackA + y*16, A);	
+			xxA[y] = /* (tll<k)* */ fetch_x_A(trackA + y*16, A);	
 			// without going through texture and tll protection, 
 			// nonzeros are fetched
 			// texture boundary control seems to be providing
@@ -243,7 +243,7 @@ fermiSgemm_v2_kernel_TN(float *C, const float *A, const float *B,
 
 	#pragma unroll
 	for(int y=0; y<6; y++)
-		Bb[tx2][ty2*6+y] = (tll<k)*fetch_x_B(trackB + y*ldb, B ) ;
+		Bb[tx2][ty2*6+y] = /* (tll<k)* */ fetch_x_B(trackB + y*ldb, B ) ;
 
 	__syncthreads();
 
@@ -269,7 +269,7 @@ fermiSgemm_v2_kernel_TN(float *C, const float *A, const float *B,
 
 		#pragma unroll
 		for( int y=0; y<6; y++)
-			xxB[y] = (tll<k)*fetch_x_B(trackB + y*ldb, B);
+			xxB[y] = /* (tll<k)* */ fetch_x_B(trackB + y*ldb, B);
 
 		// computing
 		#pragma unroll 
@@ -372,7 +372,7 @@ fermiSgemm_v2_kernel_TT(float *C, const float *A, const float *B,
 
 	#pragma unroll
 	for(int y=0; y<6; y++)
-		Abs[ty2+16*y][tx2] = (tll<k)*fetch_x_A(trackA +  lda*16*y, A);
+		Abs[ty2+16*y][tx2] = /* (tll<k)* */ fetch_x_A(trackA +  lda*16*y, A);
 
 	#pragma unroll
 	for(int y=0; y<6; y++)
@@ -397,7 +397,7 @@ fermiSgemm_v2_kernel_TT(float *C, const float *A, const float *B,
 		
 		#pragma unroll
 		for( int y=0; y<6; y++)
-			xxA[y] = (tll<k)*fetch_x_A(trackA + lda*y*16, A);
+			xxA[y] = /* (tll<k)* */ fetch_x_A(trackA + lda*y*16, A);
 
 		#pragma unroll
 		for( int y=0; y<6; y++)
@@ -505,11 +505,11 @@ fermiSgemm_v2_kernel_NT(float *C, const float *A, const float *B,
 
 	#pragma unroll
 	for(int y=0; y<6; y++)
-		Abs[tx2+ y*16][ty2] = (tll<k)*fetch_x_A(trackA + y*16, A);
+		Abs[tx2+ y*16][ty2] = /* (tll<k)* */ fetch_x_A(trackA + y*16, A);
 
 	#pragma unroll
 	for(int y=0; y<6; y++)
-		Bb[ty2][tx2+16*y] = (tll<k)*fetch_x_B(trackB+16*y, B);
+		Bb[ty2][tx2+16*y] = /* (tll<k)* */ fetch_x_B(trackB+16*y, B);
 
 	__syncthreads();
 
@@ -530,12 +530,12 @@ fermiSgemm_v2_kernel_NT(float *C, const float *A, const float *B,
 
 		#pragma unroll
 		for( int y=0; y<6; y++)
-			xxA[y] = (tll<k)*fetch_x_A(trackA + y*16, A);	
+			xxA[y] = /* (tll<k)* */ fetch_x_A(trackA + y*16, A);	
 			// tll same in the NN case
 
 		#pragma unroll
 		for( int y=0; y<6; y++)
-			xxB[y] = (tll<k)*fetch_x_B( trackB + 16*y, B);
+			xxB[y] = /* (tll<k)* */ fetch_x_B( trackB + 16*y, B);
 
 		#pragma unroll 
 		for( int j1=0;j1<16;j1++)
@@ -733,6 +733,16 @@ magmablas_sgemm(char TRANSA, char TRANSB,
 
         size_t sizeA = (size_t) lda * (size_t) (!TransA ? k : m);
         size_t sizeB = (size_t) ldb * (size_t) (!TransB ? n : k);
+
+ 	size_t CUBLAS_MAX_1DBUF_SIZE = (1 << 27) - 512;
+	printf("CUBLAS_MAX_1DBUF_SIZE = %x \n", CUBLAS_MAX_1DBUF_SIZE);
+	if (sizeA>=CUBLAS_MAX_1DBUF_SIZE ||
+            sizeB>=CUBLAS_MAX_1DBUF_SIZE )
+        {
+           cublasSgemm(TRANSA, TRANSB, m, n, k, alpha,
+                       A, lda, B, ldb,
+                       beta, C, ldc);
+        }
 
 	cudaError_t  errt;
         errt = cudaBindTexture(&offsetA, tex_x_float_A, (int2 *)A, 
