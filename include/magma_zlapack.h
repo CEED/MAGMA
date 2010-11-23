@@ -141,7 +141,6 @@ extern "C" {
 
 void    blasf77_zaxpy( const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *);
 void    blasf77_zcopy( const int *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *);
-cuDoubleComplex blasf77_zdotc( const int *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *);
 void    blasf77_zgemm( const char *, const char *, const int *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *,cuDoubleComplex *, const int *);
 void    blasf77_zgemv( const char *, const int  *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *);
 void    blasf77_zhemm( const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *,cuDoubleComplex *, const int *);
