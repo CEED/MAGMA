@@ -80,6 +80,8 @@ subs = {
     ('workspace_s','workspace_d','workspace_c','workspace_z'),
     ('lapackf77_s','lapackf77_d','lapackf77_c','lapackf77_z'),
     ('lapackf77_s','lapackf77_d','lapackf77_s','lapackf77_d'),
+    ('sdot_sub','ddot_sub','cdotu_sub','zdotu_sub'),
+    ('sdot_sub','ddot_sub','cdotc_sub','zdotc_sub'),
     ('sdot','ddot','cdotc','zdotc'),
     ('blasf77_s','blasf77_d','blasf77_c','blasf77_z'),
     ('blasf77_s','blasf77_d','blasf77_s','blasf77_d'),

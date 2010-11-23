@@ -15,8 +15,10 @@
 #include <cublas.h>
 #include "magma.h"
 #include "magmablas.h"
+#include "cblas.h"
 
 #define PRECISION_z
+
 #if defined(PRECISION_z) || defined(PRECISION_c)
 static inline
 double2
@@ -186,6 +188,7 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
     double2 c_neg_one = MAGMA_Z_NEG_ONE;
     double2 c_one = MAGMA_Z_ONE;
     double2 c_zero = MAGMA_Z_ZERO;
+    double2 value = MAGMA_Z_ZERO;
     
     static int c__1 = 1;
 
@@ -273,8 +276,13 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 	  i__2 = i__ - 1;
 	  blasf77_zscal(&i__2, &tau[i__ - 1], &w[iw * w_dim1 + 1], &c__1);
 	  i__2 = i__ - 1;
+#if defined(PRECISION_z) || defined(PRECISION_c)
+	  cblas_zdotc_sub(i__2, &w[iw*w_dim1+1], c__1, &a[i__ * a_dim1 + 1], c__1, &value);
+	  alpha = tau[i__ - 1] * -.5f * value;
+#else
 	  alpha = tau[i__ - 1] * -.5f * 
-	    blasf77_zdotc(&i__2, &w[iw*w_dim1+1], &c__1, &a[i__ * a_dim1 + 1], &c__1);
+	    cblas_zdotc(i__2, &w[iw*w_dim1+1], c__1, &a[i__ * a_dim1 + 1], c__1);
+#endif
 	  i__2 = i__ - 1;
 	  blasf77_zaxpy(&i__2, &alpha, &a[i__ * a_dim1 + 1], &c__1, 
 		 &w[iw * w_dim1 + 1], &c__1);
@@ -340,8 +348,14 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 		 ldw, &w[i__ * w_dim1 + 1], &c__1, &c_one, 
 		 &w[i__ + 1 + i__ * w_dim1], &c__1);
 	  blasf77_zscal(&i__2, &tau[i__], &w[i__ + 1 + i__ * w_dim1], &c__1);
-	  alpha = tau[i__]* -.5f*blasf77_zdotc(&i__2, &w[i__ +1+ i__ * w_dim1], 
-				       &c__1, &a[i__ +1+ i__ * a_dim1], &c__1);
+#if defined(PRECISION_z) || defined(PRECISION_c)
+	  cblas_zdotc_sub(i__2, &w[i__ +1+ i__ * w_dim1], 
+				       c__1, &a[i__ +1+ i__ * a_dim1], c__1, &value);
+	  alpha = tau[i__]* -.5f * value;
+#else
+	  alpha = tau[i__]* -.5f*cblas_zdotc(i__2, &w[i__ +1+ i__ * w_dim1], 
+				       c__1, &a[i__ +1+ i__ * a_dim1], c__1);
+#endif
 	  blasf77_zaxpy(&i__2, &alpha, &a[i__ + 1 + i__ * a_dim1], &c__1, 
 		 &w[i__ + 1 + i__ * w_dim1], &c__1);
 	}
