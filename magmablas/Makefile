@@ -66,6 +66,10 @@ TESLASRC =      sgemv_tesla.cu 	\
 
 ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
         dlag2s.cu 	\
+        dlacpy.cu       \
+        dlansy.cu       \
+        dlat2s.cu       \
+        dsaxpycp.cu     \
         slag2d.cu 	\
         dgemv_MLU.cu
 
