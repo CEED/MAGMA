@@ -55,7 +55,8 @@ SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
         auxiliary.cpp 	\
         xerbla.cpp 	\
-        sorgqr_gpu.cpp
+        sorgqr_gpu.cpp	\
+	get_nb.cpp
 
 ALLOBJ = $(ALLSRC:.cpp=.o)
 
