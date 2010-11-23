@@ -1,0 +1,33 @@
+We have to finish the release by Wednesday. As we go, here is where
+we would put tasks to be done. Column 'Who' shows who is doing it -
+if it is empty and you start doing it put your name there, if your
+name is there it is suggested that you do it. As you go and discover 
+problems and other tasks you can add them to the list. 
+Here is what I started and will keep adding. Thanks.
+
+
+To do list for MAGMA 1.0 release (Wednesday, November 24):
+
+Task  Done      Who       What
+=================================================================================
+1.                        Moving sorgqr_gpu.cpp and dependancies to complex, 
+                          testing it 
+---------------------------------------------------------------------------------
+2.            Piotr       Bug in gebrd.cpp due to code clean up and conversion
+---------------------------------------------------------------------------------
+3.                        Bug in gehrd.cpp due to code clean up and conversion
+---------------------------------------------------------------------------------
+4.                        Move int to magma_int_t everywhere (if you do it ask me for 
+                          an emai from Jill with some comments)
+---------------------------------------------------------------------------------
+5.            Hatem       Add the basic symmetric and nonsymmetric eigensolvers
+                          and svd and testing for them - this will be just as an
+                          example of accelerating LAPACK by accelerating only
+                          the components currently available - 2-sided in this
+                          case. Hatem, please generate a list of the orthogonal
+                          routines needed - they may be easy to port and have
+                          a lot of flops to easily accelerate with GPU
+                          (I am adding the lapack zgeev.cpp zheevd.cpp zgesvd.cpp
+                           to the repository).
+---------------------------------------------------------------------------------
+ 
