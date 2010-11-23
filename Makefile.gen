@@ -4,39 +4,51 @@
 #      Univ. of California, Berkeley
 #      Univ. of Colorado, Denver
 #      November 2010
+#
 #//////////////////////////////////////////////////////////////////////////////
+PYTHON ?= python
+CODEGEN = $(MAGMA_DIR)/tools/codegen.py
 
-# Generation script for 4 precisions
-PYTHON  ?= python
-CODEGEN  = ./tools/codegen.py
-
-.Makefile.gen: $(CODEGEN)
-	$(PYTHON) $(CODEGEN) --make > $@
-.DEFAULT_GOAL :=
-include ./.Makefile.gen
-.DEFAULT_GOAL := all
-
-libmagma : inc
-libmagmablas : inc
 cleanall: cleangen cleanmkgen
+
 cleanmkgen:
-	(find . -name .Makefile.gen -exec rm -f {} \;)
+	find . -name .Makefile.gen -exec rm -f {} \;
 
-inc : 	./include/magma_z.h		\
-	./include/magma_c.h		\
-	./include/magma_d.h		\
-	./include/magma_s.h		\
-	./include/magma_zc.h		\
-	./include/magma_ds.h		\
-	./include/magmablas_z.h		\
-	./include/magmablas_c.h		\
-	./include/magmablas_d.h		\
-	./include/magmablas_s.h		\
-	./include/magmablas_zc.h	\
-	./include/magmablas_ds.h	\
-	./include/magma_zlapack.h	\
-	./include/magma_clapack.h	\
-	./include/magma_dlapack.h	\
-	./include/magma_slapack.h
+generation:
+	(cd $(MAGMA_DIR)/include   && $(MAKE) generate )
+	(cd $(MAGMA_DIR)/src       && $(MAKE) generate )
+	(cd $(MAGMA_DIR)/magmablas && $(MAKE) generate )
+	(cd $(MAGMA_DIR)/testing   && $(MAKE) generate )
 
+headers: 
+	(cd include && $(MAKE) )
 
+libmagma    : headers
+libmagmablas: headers
+
+# These 6 trules are used by the MakePlasmaRelease.pl script to set correctly 
+# [SDC]SRC and [SDC]HDR variable in the release
+printCSRC: 
+	@$(PYTHON) $(CODEGEN) --out -f "$(ZSRC)" -p "c"
+
+printDSRC: 
+	@$(PYTHON) $(CODEGEN) --out -f "$(ZSRC)" -p "d ds"
+
+printSSRC: 
+	@$(PYTHON) $(CODEGEN) --out -f "$(ZSRC)" -p "s"
+
+printCHDR: 
+	@$(PYTHON) $(CODEGEN) --out -f "$(ZHDR)" -p "c"
+
+printDHDR: 
+	@$(PYTHON) $(CODEGEN) --out -f "$(ZHDR)" -p "d ds"
+
+printSHDR: 
+	@$(PYTHON) $(CODEGEN) --out -f "$(ZHDR)" -p "s"
+
+.Makefile.gen: $(CODEGEN) Makefile
+	$(PYTHON) $(CODEGEN) --make -f "$(ZSRC) $(ZHDR)" > $@
+
+.DEFAULT_GOAL :=
+-include .Makefile.gen
+.DEFAULT_GOAL :=

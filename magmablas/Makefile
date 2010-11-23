@@ -78,6 +78,7 @@ ifeq (${GPU_TARGET}, 1)
 ALLSRC += $(FERMISRC)
 GPUOPT = ${FERMIOPT}
 endif
+
 ALLOBJ = $(ALLSRC:.cu=.cu_o) 
 
 all: $(LIBMAGMABLAS)
@@ -86,17 +87,17 @@ $(LIBMAGMABLAS): $(ALLOBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
 
-clean:
-	rm -f *.cu_o *~ *.a *.linkinfo 
-
-cleanall: clean
-	rm -f ../lib/libmagmablas.a
-
-# %_tesla.cu_o: %_tesla.cu
-# 	$(NVCC) $(NVOPTS) $(TESLAOPT) $(INC) -c $< -o $@
-
-# %_fermi.cu_o: %_fermi.cu
-# 	$(NVCC) $(NVOPTS) $(FERMIOPT) $(INC) -c $< -o $@
+.cpp.o:
+	$(CC) $(OPTS) $(INC) -c $< -o $@
 
 %.cu_o: %.cu
 	$(NVCC) $(NVOPTS) $(GPUOPT) $(INC) -c $< -o $@
+
+
+clean:
+	rm -f *.cu_o *.o *~ *.linkinfo
+
+cleanall: clean
+	rm -f *.a
+	rm -f $(LIBMAGMABLAS)
+

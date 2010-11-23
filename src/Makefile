@@ -42,10 +42,10 @@ ZSRC  = zpotrf.cpp	\
         zcgeqrsv_gpu.cpp\
         zcposv_gpu.cpp
 
-ifeq ($(FORT), pgfortran)
-ZSRC := $(ZSRC) magma_zf77pgi.cpp
-else
+ifeq ($(PGIFORTRAN), 0)
 ZSRC := $(ZSRC) magma_zf77.cpp
+else
+ZSRC := $(ZSRC) magma_zf77pgi.cpp
 endif
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
@@ -53,9 +53,9 @@ DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
 SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 
 ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
-        auxiliary.o \
-        xerbla.o \
-        sorgqr_gpu.o \
+        auxiliary.cpp 	\
+        xerbla.cpp 	\
+        sorgqr_gpu.cpp
 
 ALLOBJ = $(ALLSRC:.cpp=.o)
 
@@ -65,13 +65,12 @@ $(LIBMAGMA): $(ALLOBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
 
-clean:
-	rm -f *.o *~ 
-
-cleanall: clean
-	rm -f $(LIBMAGMA)
-
 .cpp.o:
 	$(CC) $(OPTS) $(INC) -c $< -o $@
 
-.PHONY: clean cleanall
+clean:
+	rm -f *.cu_o *.o *~ *.linkinfo
+
+cleanall: clean
+	rm -f *.a
+	rm -f $(LIBMAGMA)

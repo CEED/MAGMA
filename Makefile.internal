@@ -1,23 +1,23 @@
+#//////////////////////////////////////////////////////////////////////////////
+#   -- MAGMA (version 1.0) --
+#      Univ. of Tennessee, Knoxville
+#      Univ. of California, Berkeley
+#      Univ. of Colorado, Denver
+#      November 2010
+#//////////////////////////////////////////////////////////////////////////////
+
 include $(MAGMA_DIR)/make.inc
+-include $(MAGMA_DIR)/make.inc.${ARCH}
 
-TESLAOPT  = -arch sm_13 -gencode arch=compute_13,code=compute_13 -gencode arch=compute_10,code=compute_10 
-FERMIOPT  = -arch sm_20 
+TESLAOPT = -arch sm_13 -gencode arch=compute_13,code=compute_13 -gencode arch=compute_10,code=compute_10 
+FERMIOPT = -arch sm_20 
 
-#//////////////////////////////////////////////////////////////////////////
-# Precision generation 
-#//////////////////////////////////////////////////////////////////////////
-PYTHON ?= python
-CODEGEN = $(MAGMA_DIR)/tools/codegen.py
+ifeq (${GPU_TARGET}, 0)
+GPUOPT = ${TESLAOPT}
+endif
 
-cleanall: cleangen cleanmkgen
+ifeq (${GPU_TARGET}, 1)
+GPUOPT = ${FERMIOPT}
+endif
 
-cleanmkgen:
-	find . -name Makefile.gen -exec rm -f {} \;
-
-Makefile.gen: $(CODEGEN) Makefile
-	$(PYTHON) $(CODEGEN) --make -f "$(ZSRC) $(ZHDR)" > $@
-.DEFAULT_GOAL :=
--include Makefile.gen
-.DEFAULT_GOAL :=
-
-#//////////////////////////////////////////////////////////////////////////
+-include $(MAGMA_DIR)/Makefile.gen
