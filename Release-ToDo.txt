@@ -10,7 +10,7 @@ To do list for MAGMA 1.0 release (Wednesday, November 24):
 
 Task  Done      Who       What
 =================================================================================
-1.                        Moving sorgqr_gpu.cpp and dependancies to complex, 
+1.            Mathieu     Moving sorgqr_gpu.cpp and dependancies to complex, 
                           testing it
                           [to be moved to zungqr_gpu.cpp] 
 ---------------------------------------------------------------------------------
@@ -76,8 +76,12 @@ DONE 6.       Mathieu     Update the Makefile to the same comportement as PLASMA
                             either through QUARK or our own or for future integration
                             with other packages]
 ---------------------------------------------------------------------------------
-14.            Mathieu     Find another way to set all the nb, inside this MAGMA_init 
+14.                        Find another way to set all the nb, inside this MAGMA_init 
                            another one and provide the user a way to change it.
+                           Partially done: get_nb has been moved to src andit's ok for tomorrow.
+                           But we should create a set of functions: 
+                                  magma_zgetib( int func, int M  )
+                                  magma_zsetib( int func, int ib )
 ---------------------------------------------------------------------------------
 15.            Peng        Fix a bug in gemm on Fermi for big matrices
 
