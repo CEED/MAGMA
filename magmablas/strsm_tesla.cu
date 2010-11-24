@@ -6,10 +6,11 @@
        November 2010
 */
 
-#include "cublas.h"
-#include "cuda.h"
+#include <cublas.h>
+#include <cuda.h>
 #include "magmablas.h"
 
+#define magma_strsm_tesla magma_strsm
 
 #define min(a,b) (a<=b)?a:b
 #define max(a,b) (a>=b)?a:b
@@ -1829,7 +1830,7 @@ void diag_strtri (int M, char uplo, char diag, float *A, float *d_dinvA, int lda
  * magmablas_strsm
  */
 extern "C"
-void magmablas_strsm ( char side, char uplo, char tran, char diag, int M, int N, float alpha, float* A, int lda, float* b, int ldb)
+void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, int N, float alpha, float* A, int lda, float* b, int ldb)
 {
 	/*  -- magma (version 0.1) --
 		univ. of tennessee, knoxville

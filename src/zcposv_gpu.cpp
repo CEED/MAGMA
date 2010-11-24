@@ -22,9 +22,12 @@
 //#define cublasZhemm magmablas_zhemm
 
 extern "C" magma_int_t
-magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_int_t LDA, double2 *B, 
-                 magma_int_t LDB, double2 *X, magma_int_t LDX, double2 *WORK, float2 *SWORK,
-                 magma_int_t *ITER, magma_int_t *INFO, float2 *H_SWORK, double2 *H_WORK)
+magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, 
+                 cuDoubleComplex *A, magma_int_t LDA, 
+                 cuDoubleComplex *B, magma_int_t LDB, 
+                 cuDoubleComplex *X, magma_int_t LDX, 
+                 cuDoubleComplex *dworkd, cuFloatComplex *dworks,
+                 magma_int_t *ITER, magma_int_t *INFO)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -91,7 +94,7 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_i
             triangular part of A is not referenced.
             On exit, if iterative refinement has been successfully used
             (INFO.EQ.0 and ITER.GE.0, see description below), then A is
-            unchanged, if double2 precision factorization has been used
+            unchanged, if double factorization has been used
             (INFO.EQ.0 and ITER.LT.0, see description below), then the
             array A contains the factor U or L from the Cholesky
             factorization A = U**T*U or A = L*L**T.
@@ -111,15 +114,15 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_i
     LDX     (input) INTEGER
             The leading dimension of the array X.  LDX >= max(1,N).
 
-    WORK    (workspace) DOUBLE PRECISION array, dimension (N*NRHS)
+    dworkd    (workspace) DOUBLE PRECISION array, dimension (N*NRHS)
             This array is used to hold the residual vectors.
 
-    SWORK   (workspace) REAL array, dimension (N*(N+NRHS))
+    dworks   (workspace) REAL array, dimension (N*(N+NRHS))
             This array is used to use the single precision matrix and the
             right-hand sides or solutions in single precision.
 
     ITER    (output) INTEGER
-            < 0: iterative refinement has failed, double2 precision
+            < 0: iterative refinement has failed, double precision
                  factorization has been performed
                  -1 : the routine fell back to full precision for
                       implementation- or machine-specific reasons
@@ -139,20 +142,12 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_i
                   factorization could not be completed, and the solution
                   has not been computed.
 
-    H_SWORK    (workspace) REAL array, dimension at least (nb, nb)
-            where nb can be obtained through magma_get_cpotrf_nb(*n)
-            Work array allocated with cudaMallocHost.
-
-    H_WORK   (workspace) DOUBLE array, dimension at least (nb, nb)
-             where nb can be obtained through magma_get_zpotrf_nb(*n)
-             Work array allocated with cudaMallocHost.
-
     =====================================================================    */
 
   #define max(a,b)       (((a)>(b))?(a):(b))
 
-  double2 c_neg_one = MAGMA_Z_NEG_ONE;
-  double2 c_one = MAGMA_Z_ONE;
+  cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+  cuDoubleComplex c_one     = MAGMA_Z_ONE;
   int c_ione = 1;
 
   *ITER = 0 ;
@@ -178,52 +173,52 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_i
 
   double ANRM , CTE , EPS;
   EPS  = lapackf77_dlamch("Epsilon");
-  ANRM = magmablas_zlanhe(  'I',  UPLO , N ,A, LDA ,WORK);
-  CTE = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;  
+  ANRM = magmablas_zlanhe(  'I',  UPLO , N ,A, LDA ,dworkd);
+  CTE  = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;  
 
   int PTSA  = N*NRHS;
   int PTSX  = 0 ;  
   float RMAX = lapackf77_slamch("O");
   int IITER ;
-  double2 alpha = c_neg_one;
-  double2 beta = c_one; 
-  double2 XNRM[1] , RNRM[1]; 
-  float2 RMAX_cplx;
+  cuDoubleComplex alpha = c_neg_one;
+  cuDoubleComplex beta = c_one; 
+  cuDoubleComplex XNRM[1] , RNRM[1]; 
+  cuFloatComplex RMAX_cplx;
   MAGMA_Z_SET2REAL( RMAX_cplx, RMAX );
  
-  magmablas_zlag2c(N , NRHS , B , LDB , SWORK+PTSX, N , RMAX_cplx );
+  magmablas_zlag2c(N , NRHS , B , LDB , dworks+PTSX, N , RMAX_cplx );
   if(*INFO !=0){
     *ITER = -2 ;
     goto L40;
   } 
   
-  magmablas_zlat2c(UPLO ,  N ,  A , LDA , SWORK+PTSA, N , INFO ); 
+  magmablas_zlat2c(UPLO ,  N ,  A , LDA , dworks+PTSA, N , INFO ); 
   if(*INFO !=0){
     *ITER = -2 ;
     goto L40;
   }   
-  magma_cpotrf_gpu(UPLO, N, SWORK+ PTSA, LDA, INFO);
+  magma_cpotrf_gpu(UPLO, N, dworks+ PTSA, LDA, INFO);
   if(INFO[0] !=0){
     *ITER = -3 ;
     goto L40;
   }
-  magma_cpotrs_gpu(UPLO, N , NRHS, SWORK+PTSA, LDA, SWORK+PTSX, LDB, INFO);
-  magmablas_clag2z(N, NRHS, SWORK+PTSX, N, X, LDX, INFO);
+  magma_cpotrs_gpu(UPLO, N , NRHS, dworks+PTSA, LDA, dworks+PTSX, LDB, INFO);
+  magmablas_clag2z(N, NRHS, dworks+PTSX, N, X, LDX, INFO);
 
-  magmablas_zlacpy(N, NRHS, B, LDB, WORK, N);
+  magmablas_zlacpy(N, NRHS, B, LDB, dworkd, N);
 
   if( NRHS == 1 )
-    cublasZhemv(UPLO, N, c_neg_one, A, LDA, X, 1, c_one, WORK, 1);
+    cublasZhemv(UPLO, N, c_neg_one, A, LDA, X, 1, c_one, dworkd, 1);
   else
-    cublasZhemm('L', UPLO, N, NRHS, c_neg_one, A, LDA, X, LDX, c_one, WORK, N);
+    cublasZhemm('L', UPLO, N, NRHS, c_neg_one, A, LDA, X, LDX, c_one, dworkd, N);
   
   int i, j;
   for(i=0; i<NRHS; i++){
     j = cublasIzamax(N, X+i*N, 1); 
-    cublasGetMatrix(1, 1, sizeof(double2), X+i*N+j-1, 1,XNRM, 1);
+    cublasGetMatrix(1, 1, sizeof(cuDoubleComplex), X+i*N+j-1, 1,XNRM, 1);
     MAGMA_Z_SET2REAL( XNRM[0], lapackf77_zlange( "F", &c_ione, &c_ione, XNRM, &c_ione, NULL ) );
-    j = cublasIzamax (N, WORK+i*N, 1); 
-    cublasGetMatrix(1, 1, sizeof(double2), WORK+i*N+j-1, 1, RNRM, 1);
+    j = cublasIzamax (N, dworkd+i*N, 1); 
+    cublasGetMatrix(1, 1, sizeof(cuDoubleComplex), dworkd+i*N+j-1, 1, RNRM, 1);
     MAGMA_Z_SET2REAL( RNRM[0], lapackf77_zlange( "F", &c_ione, &c_ione, RNRM, &c_ione, NULL ) );
     if( MAGMA_Z_GET_X( RNRM[0] ) > MAGMA_Z_GET_X( XNRM[0] ) *CTE ){
       goto L10;
@@ -237,29 +232,29 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_i
 
   for(IITER=1;IITER<ITERMAX;){
     *INFO = 0 ; 
-    magmablas_zlag2c(N, NRHS, WORK, N, SWORK+PTSX, N, RMAX_cplx);
+    magmablas_zlag2c(N, NRHS, dworkd, N, dworks+PTSX, N, RMAX_cplx);
     if(*INFO !=0){
       *ITER = -2 ;
       goto L40;
     } 
-    magma_cpotrs_gpu(UPLO, N, NRHS, SWORK+PTSA, LDA, SWORK+PTSX, LDB, INFO);
+    magma_cpotrs_gpu(UPLO, N, NRHS, dworks+PTSA, LDA, dworks+PTSX, LDB, INFO);
 
     for(i=0;i<NRHS;i++){
-      magmablas_zcaxpycp(SWORK+i*N, X+i*N, N, N, LDA, B+i*N,WORK+i*N) ;
+      magmablas_zcaxpycp(dworks+i*N, X+i*N, N, N, LDA, B+i*N,dworkd+i*N) ;
     }
 
     if( NRHS == 1 )
-      cublasZhemv(UPLO, N, alpha, A, LDA, X, 1, beta, WORK, 1);
+      cublasZhemv(UPLO, N, alpha, A, LDA, X, 1, beta, dworkd, 1);
     else 
-      cublasZhemm('L', UPLO, N, NRHS, alpha, A, LDA, X, LDX, beta, WORK, N);
+      cublasZhemm('L', UPLO, N, NRHS, alpha, A, LDA, X, LDX, beta, dworkd, N);
 
     for(i=0; i<NRHS; i++){
       int j;
       j = cublasIzamax( N , X+i*N  , 1) ; 
-      cublasGetMatrix( 1, 1, sizeof(double2), X+i*N+j-1, 1, XNRM, 1 ) ;
+      cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), X+i*N+j-1, 1, XNRM, 1 ) ;
       MAGMA_Z_SET2REAL( XNRM[0], lapackf77_zlange( "F", &c_ione, &c_ione, XNRM, &c_ione, NULL ) );
-      j = cublasIzamax ( N ,WORK+i*N , 1 ) ; 
-      cublasGetMatrix( 1, 1, sizeof(double2), WORK+i*N+j-1, 1, RNRM, 1 ) ;
+      j = cublasIzamax ( N ,dworkd+i*N , 1 ) ; 
+      cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), dworkd+i*N+j-1, 1, RNRM, 1 ) ;
       MAGMA_Z_SET2REAL( RNRM[0], lapackf77_zlange( "F", &c_ione, &c_ione, RNRM, &c_ione, NULL ) );
       if( MAGMA_Z_GET_X( RNRM[0] ) > MAGMA_Z_GET_X( XNRM[0] ) *CTE ){
         goto L20;
