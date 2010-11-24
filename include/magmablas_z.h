@@ -45,10 +45,11 @@ void magmablas_zlaswp( magma_int_t N, cuDoubleComplex *dAT, magma_int_t lda,
                        magma_int_t i1, magma_int_t i2, magma_int_t *ipiv, int inci );
 void magmablas_zlaswpx( magma_int_t N, cuDoubleComplex *dAT, magma_int_t ldx, magma_int_t ldy,
                         magma_int_t i1, magma_int_t i2, magma_int_t *ipiv, int inci );
-void magmablas_zswap( int n, cuDoubleComplex *dA1, int lda1, cuDoubleComplex *dA2, int lda2);
 
-void magmablas_zswapblk( int n, cuDoubleComplex *dA1T, int ldx1, int ldy1, 
-                         cuDoubleComplex *dA2T, int ldx2, int ldy2,
+void magmablas_zswap( int n, cuDoubleComplex *dA1, int lda1, cuDoubleComplex *dA2, int lda2);
+void magmablas_zswapblk( char storev, int n, 
+                         cuDoubleComplex *dA1, int lda1, 
+                         cuDoubleComplex *dA2, int lda2,
                          int i1, int i2, int *ipiv, int inci, int offset );
 
   /*

@@ -26,9 +26,9 @@ typedef struct {
     cuDoubleComplex *A1;
     cuDoubleComplex *A2;
     int n, lda1, lda2;
-} zswap_params_t;
+} magmagpu_zswap_params_t;
 
-__global__ void myzswap( zswap_params_t params )
+__global__ void magmagpu_zswap( magmagpu_zswap_params_t params )
 {
     unsigned int x = threadIdx.x + __mul24(blockDim.x, blockIdx.x);
     unsigned int offset1 = __mul24( x, params.lda1);
@@ -49,7 +49,7 @@ magmablas_zswap( int n, cuDoubleComplex *dA1T, int lda1,
 {
     int  blocksize = 64;
     dim3 blocks( (n+blocksize-1) / blocksize, 1, 1);
-    zswap_params_t params = { dA1T, dA2T, n, lda1, lda2 };
-    myzswap<<< blocks, blocksize >>>( params );
+    magmagpu_zswap_params_t params = { dA1T, dA2T, n, lda1, lda2 };
+    magmagpu_zswap<<< blocks, blocksize >>>( params );
 }
 
