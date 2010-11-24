@@ -13,9 +13,9 @@
 #include <stdlib.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
+#include <cblas.h>
 #include "magma.h"
 #include "magmablas.h"
-#include "cblas.h"
 
 #define PRECISION_z
 
@@ -188,7 +188,10 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
     double2 c_neg_one = MAGMA_Z_NEG_ONE;
     double2 c_one = MAGMA_Z_ONE;
     double2 c_zero = MAGMA_Z_ZERO;
+
+#if defined(PRECISION_z) || defined(PRECISION_c)
     double2 value = MAGMA_Z_ZERO;
+#endif
     
     static int c__1 = 1;
 
