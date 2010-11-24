@@ -12,6 +12,8 @@
 #include <cublas.h>
 #include "magma.h"
 
+#define PRECISION_z
+
 __device__ int flag = 0; 
 
 static __global__ void 

@@ -17,6 +17,7 @@
 
 //#define num_threads 64
 #define dgemv_bs 32
+#define PRECISION_z
 
 /*------------------------------------------ UPLO = 'L' ----------------------------------*/
 __device__ int flag = 0; 
