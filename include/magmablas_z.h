@@ -18,6 +18,8 @@
 extern "C" {
 #endif
 
+double cpu_gpu_zdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda);
+
 
   /* Maybe these functions should be in magma_z because they are not blas */
 double magma_zlange(char norm, magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda, double2 *work);
