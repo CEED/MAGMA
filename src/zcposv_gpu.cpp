@@ -205,7 +205,7 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS,
   magma_cpotrs_gpu(UPLO, N , NRHS, dworks+PTSA, LDA, dworks+PTSX, LDB, INFO);
   magmablas_clag2z(N, NRHS, dworks+PTSX, N, X, LDX, INFO);
 
-  magmablas_zlacpy(N, NRHS, B, LDB, dworkd, N);
+  magmablas_zlacpy( MagmaUpperLower, N, NRHS, B, LDB, dworkd, N);
 
   if( NRHS == 1 )
     cublasZhemv(UPLO, N, c_neg_one, A, LDA, X, 1, c_one, dworkd, 1);
@@ -272,7 +272,7 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS,
   if( *INFO != 0 ){
     return 0;
   }
-  magmablas_zlacpy(N, NRHS, B , LDB, X, N);
+  magmablas_zlacpy( MagmaUpperLower, N, NRHS, B , LDB, X, N);
   magma_zpotrs_gpu(UPLO, N, NRHS, A, LDA, X, LDB, INFO);
   return 0;
 }

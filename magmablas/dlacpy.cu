@@ -8,66 +8,65 @@
 
 #include <stdio.h>
 
-extern "C" __global__ void 
-dlacpy_generic(int M, int N, double *SA, int LDSA , double *A , int LDA, int *INFO ) 
+static __global__ void 
+dlacpy_generic(int M, int N, double *A, int LDA, double *B, int LDB ) 
 { 
-	int ibx = blockIdx.x * 64;
-	int tx = threadIdx.x;
-	int ty = threadIdx.y;
-	int idt = ty * 16 + tx;
-
-	if( (ibx+idt) >=M ){
-		SA+= M-1;
-   		A+=  M-1;
-	}
-	else{
-		SA+= ibx+idt;
-   		A+=ibx+idt;
-	}
-	const double * SAend = SA+LDSA*N;
-	double Ap[1]={SA[0]};
-	do {
-		SA+=LDSA;
-		A[0] = Ap[0];
-		Ap[0]=SA[0];	
-		A+=LDA;
-	} while (SA < SAend);
-	A[0] = Ap[0];
+    int ibx = blockIdx.x * 64;
+    int tx  = threadIdx.x;
+    int ty  = threadIdx.y;
+    int idt = ty * 16 + tx;
+    
+    if( (ibx+idt) >=M ){
+        A += M-1;
+        B += M-1;
+    }
+    else{
+        A += ibx+idt;
+        B += ibx+idt;
+    }
+    const double * Aend = A+LDA*N;
+    double Ap[1]={A[0]};
+    do {
+        A += LDA;
+        B[0] = Ap[0];
+        Ap[0]= A[0];	
+        B += LDB;
+    } while (A < Aend);
+    B[0] = Ap[0];
 }
 
-extern "C" __global__ void 
-dlacpy_special(int M, int N, double *SA, int LDSA , double *A , int LDA, int *INFO ) 
+static __global__ void 
+dlacpy_special(int M, int N, double *A, int LDA, double *B, int LDB ) 
 { 
-	int ibx = blockIdx.x * 64;
-	int tx = threadIdx.x;
-	int ty = threadIdx.y;
-	int idt = ty * 16 + tx;
-	if( (ibx+idt) >=M ){
-		SA+= M-1;
-   		A+=  M-1;
-	}
-	else{
-		SA+= ibx+idt;
-   		A+=ibx+idt;
-	}
-	double Ap[1]={SA[0]};
-	A[0] = Ap[0];
+    int ibx = blockIdx.x * 64;
+    int tx  = threadIdx.x;
+    int ty  = threadIdx.y;
+    int idt = ty * 16 + tx;
+    if( (ibx+idt) >=M ){
+        A += M-1;
+        B += M-1;
+    }
+    else{
+        A += ibx+idt;
+        B += ibx+idt;
+    }
+    double Ap[1]={A[0]};
+    B[0] = Ap[0];
 }
 
 extern "C" void 
-magmablas_dlacpy_64_64_16_4_v2(int M, int N, double *SA, int LDSA , double *A , 
-                               int LDA, int *INFO)
+magmablas_dlacpy_64_64_16_4_v2(int M, int N, double *A, int LDA, double *B, int LDB )
 {
         dim3 threads( 16, 4 );
-        dim3 grid(M/64+(M%64!=0),1);
+        dim3 grid( M/64+(M%64!=0), 1 );
 	if( N == 1 ) 
-	        dlacpy_special<<< grid, threads >>> (  M, N,SA, LDSA ,A,LDA,INFO) ;
+            dlacpy_special<<< grid, threads >>> ( M, N, A, LDA, B, LDB ) ;
 	else	
-  	      dlacpy_generic<<< grid, threads >>> (  M, N,SA, LDSA ,A,LDA,INFO) ;
+            dlacpy_generic<<< grid, threads >>> ( M, N, A, LDA, B, LDB ) ;
 }
 
 extern "C" void 
-magmablas_dlacpy(int M, int N, double *SA, int LDSA , double *A , int LDA)
+magmablas_dlacpy(char uplo, int M, int N, double *A, int LDA, double *B, int LDB)
 {
 /*
     Note
@@ -113,5 +112,5 @@ magmablas_dlacpy(int M, int N, double *SA, int LDSA , double *A , int LDA)
   =====================================================================   */
         int INFO ;
         INFO = 0 ;  
-	magmablas_dlacpy_64_64_16_4_v2(M,N,SA,LDSA,A,LDA, &INFO);
+	magmablas_dlacpy_64_64_16_4_v2(M, N, A, LDA, B, LDB);
 }
