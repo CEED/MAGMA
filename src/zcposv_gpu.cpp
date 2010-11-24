@@ -173,7 +173,7 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS,
 
   double ANRM , CTE , EPS;
   EPS  = lapackf77_dlamch("Epsilon");
-  ANRM = magmablas_zlanhe(  'I',  UPLO , N ,A, LDA ,dworkd);
+  ANRM = magmablas_zlanhe(  'I',  UPLO , N ,A, LDA, (double*)dworkd);
   CTE  = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;  
 
   int PTSA  = N*NRHS;

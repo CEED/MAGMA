@@ -14,15 +14,20 @@ ZSRC  = zauxiliary.cu	\
 	zswap.cu	\
 	zswapblk.cu	\
 	zlacpy.cu	\
+	ztranspose.cu 	\
+	ztranspose-v2.cu\
+	zinplace_transpose.cu	\
+	\
 	zclaswp.cu 	\
         zcaxpycp.cu     \
 	zlag2c.cu       \
 	clag2z.cu       \
-	ztranspose.cu 	\
-	ztranspose-v2.cu\
-	zinplace_transpose.cu
 
-#	zlat2c.cu       \
+ifeq (${GPU_TARGET}, 1)
+ZSRC += zlat2c.cu	\
+	zlange.cu       \
+	zlanhe.cu
+endif
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
@@ -74,8 +79,6 @@ TESLASRC =      sgemv_tesla.cu 	\
 # 		zhemv_tesla.cu
 
 ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
-        dlansy.cu       \
-        dlange.cu       \
         dgemv_MLU.cu
 
 ifeq (${GPU_TARGET}, 0)

@@ -75,14 +75,14 @@ int main(int argc, char **argv)
   size+= N*NRHS;
   status = cublasAlloc( size, sizeof(cuFloatComplex), (void**)&M_SWORK ) ;
   if (status != CUBLAS_STATUS_SUCCESS) {
-    fprintf (stderr, "!!!! device memory allocation error (dipiv)\n");
+    fprintf (stderr, "!!!! device memory allocation error (M_SWORK)\n");
     goto FREE2;
   }
 
   size= N*NRHS;
   status = cublasAlloc( size, sizeof(cuDoubleComplex), (void**)&M_WORK ) ;
   if (status != CUBLAS_STATUS_SUCCESS) {
-    fprintf (stderr, "!!!! device memory allocation error (dipiv)\n");
+    fprintf (stderr, "!!!! device memory allocation error (M_WORK)\n");
     goto FREE2_1;
   }
   

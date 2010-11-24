@@ -32,8 +32,8 @@ void   zzero_nbxnb_block(magma_int_t, double2 *, magma_int_t);
 
 void magmablas_zlaset(magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda);
 void magmablas_zlacpy( char uplo, magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda, double2 *B, magma_int_t ldb);
-double magmablas_zlanhe( char norm, char uplo, magma_int_t n, double2 *A, magma_int_t lda, double2 *WORK);
-double magmablas_zlansy( char norm, char uplo, magma_int_t n, double2 *A, magma_int_t lda, double2 *WORK);
+double magmablas_zlanhe( char norm, char uplo, magma_int_t n, double2 *A, magma_int_t lda, double *WORK);
+double magmablas_zlansy( char norm, char uplo, magma_int_t n, double2 *A, magma_int_t lda, double *WORK);
 
 void magmablas_zinplace_transpose(double2 *, magma_int_t, magma_int_t);
 void magmablas_zpermute_long(double2 *, magma_int_t, magma_int_t *, magma_int_t, magma_int_t);

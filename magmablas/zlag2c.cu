@@ -36,9 +36,9 @@ zlag2c_generic(const cuDoubleComplex *A, cuFloatComplex *SA, int M, int N, int l
     do{
         A+=lda ; 
 
-        if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+        if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
-            || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+            || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) > RMAX) 
 #endif
             )
             {
@@ -50,9 +50,9 @@ zlag2c_generic(const cuDoubleComplex *A, cuFloatComplex *SA, int M, int N, int l
 		
     }while( A < Aend  ) ; 
 
-    if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+    if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
-        || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+        || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) > RMAX) 
 #endif
         )
         {
@@ -81,9 +81,9 @@ zlag2c_special(const cuDoubleComplex *A, cuFloatComplex *SA, int M, int N, int l
     }
     cuDoubleComplex Ap[1] = {A[0]};
 
-    if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+    if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
-        || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+        || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) > RMAX) 
 #endif
         )
         {

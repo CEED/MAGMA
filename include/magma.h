@@ -78,6 +78,8 @@
 #define MAGMA_Z_ASSIGN(v, t)      (v).x = (t).x; (v).y = (t).y
 #define MAGMA_Z_OP_NEG(a, b, c)   (a).x = (b).x-(c).x; (a).y = (b).y-(c).y
 #define MAGMA_Z_MAKE(r, i)        make_cuDoubleComplex((r), (i))
+#define MAGMA_Z_REAL(a)           cuCreal(a)
+#define MAGMA_Z_IMAG(a)           cuCimag(a)
 #define MAGMA_Z_ADD(a, b)         cuCadd((a), (b))
 #define MAGMA_Z_SUB(a, b)         cuCsub((a), (b))
 #define MAGMA_Z_MUL(a, b)         cuCmul((a), (b))
@@ -93,6 +95,8 @@
 #define MAGMA_C_ASSIGN(v, t)      (v).x = (t).x; (v).y = (t).y
 #define MAGMA_C_OP_NEG(a, b, c)   (a).x = (b).x-(c).x; (a).y = (b).y-(c).y
 #define MAGMA_C_MAKE(r, i)        make_cuFloatComplex((r), (i))
+#define MAGMA_C_REAL(a)           cuCrealf(a)
+#define MAGMA_C_IMAG(a)           cuCimagf(a)
 #define MAGMA_C_ADD(a, b)         cuCaddf((a), (b))
 #define MAGMA_C_SUB(a, b)         cuCsubf((a), (b))
 #define MAGMA_C_MUL(a, b)         cuCmulf((a), (b))
@@ -108,6 +112,8 @@
 #define MAGMA_D_ASSIGN(v, t)      (v) = (t)
 #define MAGMA_D_OP_NEG(a, b, c)   (a) = (b) - (c)
 #define MAGMA_D_MAKE(r, i)        (r)
+#define MAGMA_D_REAL(a)           (a)
+#define MAGMA_D_IMAG(a)           (a)
 #define MAGMA_D_ADD(a, b)         ( (a) + (b) )
 #define MAGMA_D_SUB(a, b)         ( (a) - (b) )
 #define MAGMA_D_MUL(a, b)         ( (a) * (b) )
@@ -123,6 +129,8 @@
 #define MAGMA_S_ASSIGN(v, t)      (v) = (t)
 #define MAGMA_S_OP_NEG(a, b, c)   (a) = (b) - (c)
 #define MAGMA_S_MAKE(r, i)        (r)
+#define MAGMA_S_REAL(a)           (a)
+#define MAGMA_S_IMAG(a)           (a)
 #define MAGMA_S_ADD(a, b)         ( (a) + (b) )
 #define MAGMA_S_SUB(a, b)         ( (a) - (b) )
 #define MAGMA_S_MUL(a, b)         ( (a) * (b) )

@@ -4,24 +4,29 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdio.h>
-#include "cuda.h"
+#include <cublas.h>
+#include "magma.h"
+
 #define BLOCK_SIZE 32
 
 //#define num_threads 64
 #define dgemv_bs 32
 
 __global__ void
-l_dlansy_special (int n, double* A, int lda,  double *y){
+l_zlanhe_special (int n, cuDoubleComplex* A, int lda,  double *y){
   int tx = threadIdx.x ; 
   int ty = threadIdx.y ; 
   int ind = blockIdx.x*  dgemv_bs + tx ;
-  double res = 0.f;
+  double res = 0.;
 
-  __shared__ double la   [dgemv_bs][dgemv_bs+1];
-
+  __shared__ cuDoubleComplex la[dgemv_bs][dgemv_bs+1];
+  	
   A += ind;
   A+= ty * lda  ;  
   int break_d  =   blockIdx.x* dgemv_bs ;
@@ -35,7 +40,7 @@ l_dlansy_special (int n, double* A, int lda,  double *y){
 
     #pragma unroll 8 
     for(int j=0; j < 8 ; j++){
-       res+=fabs( la[tx][j+ty*8]) ;
+       res+=cuCabs( la[tx][j+ty*8]) ;
     }
     A+=lda* dgemv_bs ;
     __syncthreads(); 
@@ -61,7 +66,7 @@ l_dlansy_special (int n, double* A, int lda,  double *y){
   __syncthreads();
     #pragma unroll 8
     for(int j=0; j < dgemv_bs/4 ; j++){
-     res+=fabs(la[tx][j+ty*8]);
+     res+=cuCabs(la[tx][j+ty*8]);
     }
   break_d  += dgemv_bs ; 
   __syncthreads();
@@ -74,23 +79,26 @@ l_dlansy_special (int n, double* A, int lda,  double *y){
       __syncthreads();
     #pragma unroll 8
     for(int j=0; j < dgemv_bs/4;j++){
-       res+= fabs(la[tx][j+ty*8]);
+       res+= cuCabs(la[tx][j+ty*8]);
     }
       __syncthreads();
   }
 
 
-   la[tx][ty]= res ;
+  la[tx][ty] = MAGMA_Z_MAKE( res, 0. );
    __syncthreads();
    if( ty == 0 ) {
-     res = res + la[tx][1]+ la[tx][2]+ la[tx][3] ;
-     y[ind] =res;
+     res = res 
+       + MAGMA_Z_REAL( la[tx][1] ) 
+       + MAGMA_Z_REAL( la[tx][2] )
+       + MAGMA_Z_REAL( la[tx][3] );
+     y[ind] = res;
    }
 
 }
 
 __global__ void
-l_dlansy_generic(int n, double* A, int lda,  double *y , int m_full_block , 
+l_zlanhe_generic(int n, cuDoubleComplex* A, int lda,  double *y , int m_full_block , 
                  int m_mod_32)
 { 
   int tx = threadIdx.x ; 
@@ -98,9 +106,9 @@ l_dlansy_generic(int n, double* A, int lda,  double *y , int m_full_block ,
 
   int ind = blockIdx.x*  dgemv_bs + tx ;
   
-  double res = 0.f;
+  double res = 0.;
 
-  __shared__ double la   [dgemv_bs][dgemv_bs+1];
+  __shared__ cuDoubleComplex la   [dgemv_bs][dgemv_bs+1];
 
   if( blockIdx.x == m_full_block ) {
   /************************************************************************
@@ -130,7 +138,7 @@ l_dlansy_generic(int n, double* A, int lda,  double *y , int m_full_block ,
 
 	    #pragma unroll 8 
 	    for(int j=0; j < 8 ; j++){
-	       res+=fabs( la[tx][j+ty*8]);
+	       res+=cuCabs( la[tx][j+ty*8]);
 	    }
 	    A+=lda* dgemv_bs ;
 	    __syncthreads(); 
@@ -150,27 +158,30 @@ l_dlansy_generic(int n, double* A, int lda,  double *y , int m_full_block ,
 		else
 			count = m_mod_32 ;
 		for(j =0;j<=count;j++){
-			res+= fabs( A[j*lda]) ;
+			res+= cuCabs( A[j*lda]) ;
                 }
 		A+=(tx)*lda;
 		count = 1 ; 
 		for(;j<m_mod_32;j++){
-			res+=fabs( A[count]) ;
+			res+=cuCabs( A[count]) ;
 			count++;
 		}
           }
           else{
           }
 	  __syncthreads(); 
-   	 la[tx][ty]= res ;
+          la[tx][ty]= MAGMA_Z_MAKE( res, 0. ) ;
           __syncthreads();
          /*--------------------------------------------------------
 	 The leader accumulates all the results from his peer. 
          ----------------------------------------------------------*/
          if( ty == 0 ) {
-             res = res + la[tx][1]+ la[tx][2]+ la[tx][3] ;
-	     if( tx < m_mod_32)
-                 y[ind] =res;
+           res = res 
+             + MAGMA_Z_REAL( la[tx][1] ) 
+             + MAGMA_Z_REAL( la[tx][2] )
+             + MAGMA_Z_REAL( la[tx][3] );
+           if( tx < m_mod_32)
+             y[ind] = res;
          }
 	 
   }
@@ -197,7 +208,7 @@ l_dlansy_generic(int n, double* A, int lda,  double *y , int m_full_block ,
 
     #pragma unroll 8 
     for(int j=0; j < 8 ; j++){
-       res+=fabs(la[tx][j+ty*8]);
+       res+=cuCabs(la[tx][j+ty*8]);
     }
     A+=lda* dgemv_bs ;
     __syncthreads(); 
@@ -233,7 +244,7 @@ l_dlansy_generic(int n, double* A, int lda,  double *y , int m_full_block ,
   -----------------------------------*/
     #pragma unroll 8
     for(int j=0; j < dgemv_bs/4 ; j++){
-     res+= fabs(la[tx][j+ty*8]);
+     res+= cuCabs(la[tx][j+ty*8]);
     }
   break_d  += dgemv_bs ; 
   __syncthreads();
@@ -251,7 +262,7 @@ l_dlansy_generic(int n, double* A, int lda,  double *y , int m_full_block ,
       __syncthreads();
     #pragma unroll 8
     for(int j=0; j < dgemv_bs/4;j++){
-       res+=fabs(la[tx][j+ty*8]);
+       res+=cuCabs(la[tx][j+ty*8]);
     }
       __syncthreads();
   }
@@ -272,9 +283,9 @@ l_dlansy_generic(int n, double* A, int lda,  double *y , int m_full_block ,
    #pragma unroll 8
     for(int j=0; j<dgemv_bs; j+=4){
        if( tx < m_mod_32 ) 
-       la[ty+j][tx] = 1.0 * A[ j * lda];
+         la[ty+j][tx] = MAGMA_Z_MUL( MAGMA_Z_ONE,  A[ j * lda] );
        else
-       la[ty+j][tx] = 0.0 * A[ j * lda];
+         la[ty+j][tx] = MAGMA_Z_MUL( MAGMA_Z_ZERO, A[ j * lda] );
        
     }
     __syncthreads();
@@ -285,18 +296,21 @@ l_dlansy_generic(int n, double* A, int lda,  double *y , int m_full_block ,
     -----------------------------------------*/	
     #pragma unroll 8
     for(int j=0; j < dgemv_bs/4;j++){
-       res+=fabs(la[tx][j+ty*8]);
+       res+=cuCabs(la[tx][j+ty*8]);
     }
     __syncthreads();
    
 
-   la[tx][ty]= res ;
+    la[tx][ty]= MAGMA_Z_MAKE( res, 0. );
    __syncthreads();
    /*--------------------------------------------------------
 	The leader accumulates all the results from his peer. 
    ----------------------------------------------------------*/
    if( ty == 0 ) {
-     res = res + la[tx][1]+ la[tx][2]+ la[tx][3] ;
+     res = res 
+       + MAGMA_Z_REAL( la[tx][1] ) 
+       + MAGMA_Z_REAL( la[tx][2] )
+       + MAGMA_Z_REAL( la[tx][3] );
      y[ind] = res;
    }
 
@@ -305,7 +319,7 @@ l_dlansy_generic(int n, double* A, int lda,  double *y , int m_full_block ,
 }
 
 __global__ void
-u_dlansy_generic (int n, double* A, int lda, double *y , int m_full_block , int m_mod_32){
+u_zlanhe_generic (int n, cuDoubleComplex* A, int lda, double *y , int m_full_block , int m_mod_32){
 
   
   int tx = threadIdx.x ; 
@@ -313,10 +327,10 @@ u_dlansy_generic (int n, double* A, int lda, double *y , int m_full_block , int 
 
   int ind = blockIdx.x*  dgemv_bs + tx ;
   
-  double res = 0.f;
+  double res = 0.;
 
 
-  __shared__ double la   [dgemv_bs][dgemv_bs+1];
+  __shared__ cuDoubleComplex la   [dgemv_bs][dgemv_bs+1];
   int blockIdxx =  blockIdx.x ;
 
   if( blockIdx.x == m_full_block ) {
@@ -353,7 +367,7 @@ u_dlansy_generic (int n, double* A, int lda, double *y , int m_full_block , int 
 
 	    #pragma unroll 8 
 	    for(int j=0; j < 8 ; j++){
-	       res+=fabs(la[tx][j+ty*8]);
+	       res+=cuCabs(la[tx][j+ty*8]);
 	    }
 	    A-=lda* dgemv_bs ;
 	    __syncthreads(); 
@@ -373,27 +387,30 @@ u_dlansy_generic (int n, double* A, int lda, double *y , int m_full_block , int 
 		else
 			count = m_mod_32 ;
 		for(j =0;j<count;j++){
-			res+= fabs( A[-j*lda] );
+			res+= cuCabs( A[-j*lda] );
                 }
 		A-=(count-1)*lda;
 		count = 1 ; 
 		for(;j<m_mod_32;j++){
-			res+= fabs( A[-count] );
+			res+= cuCabs( A[-count] );
 			count++;
 		}
           }
           else{
           }
 	  __syncthreads(); 
-   	 la[tx][ty]= res ;
+          la[tx][ty]= MAGMA_Z_MAKE( res, 0. );
           __syncthreads();
          /*--------------------------------------------------------
 	 The leader accumulates all the results from his peer. 
          ----------------------------------------------------------*/
          if( ty == 0 ) {
-             res = res + la[tx][1]+ la[tx][2]+ la[tx][3] ;
-	     if( tx < m_mod_32)
-                 y[ind] = res;
+           res = res 
+             + MAGMA_Z_REAL( la[tx][1] ) 
+             + MAGMA_Z_REAL( la[tx][2] )
+             + MAGMA_Z_REAL( la[tx][3] );
+           if( tx < m_mod_32)
+             y[ind] = res;
          }
 	 
   }
@@ -406,7 +423,7 @@ u_dlansy_generic (int n, double* A, int lda, double *y , int m_full_block , int 
   ****************************************
   -------------------------------------*/
   ind = blockIdx.x *  dgemv_bs + tx + m_mod_32 ;
-  double *A1 = A ; 
+  cuDoubleComplex *A1 = A ; 
   A+= lda*(n-1)  ; 
 
   A += ind;
@@ -425,7 +442,7 @@ u_dlansy_generic (int n, double* A, int lda, double *y , int m_full_block , int 
 
     #pragma unroll 8 
     for(int j=0; j < 8 ; j++){
-       res+=fabs( la[tx][j+ty*8]);
+       res+=cuCabs( la[tx][j+ty*8]);
     }
     A-=lda* dgemv_bs ;
     __syncthreads(); 
@@ -461,7 +478,7 @@ u_dlansy_generic (int n, double* A, int lda, double *y , int m_full_block , int 
   -----------------------------------*/
     #pragma unroll 8
     for(int j=0; j < dgemv_bs/4 ; j++){
-     res+=fabs(  la[tx][j+ty*8] ) ;
+     res+=cuCabs(  la[tx][j+ty*8] ) ;
     }
   break_d  += dgemv_bs ; 
   __syncthreads();
@@ -481,7 +498,7 @@ u_dlansy_generic (int n, double* A, int lda, double *y , int m_full_block , int 
       __syncthreads();
     #pragma unroll 8
     for(int j=0; j < dgemv_bs/4;j++){
-       res+=fabs ( la[31-tx][j+ty*8] );
+       res+=cuCabs ( la[31-tx][j+ty*8] );
     }
       __syncthreads();
   }
@@ -493,18 +510,21 @@ u_dlansy_generic (int n, double* A, int lda, double *y , int m_full_block , int 
    A1 = A1 + m_mod_32 * lda + tx *lda ;  
    if( ty == 0  ) {
 	for( int j = 0 ;  j < m_mod_32 ; j++){
-		res+=  fabs (  A1[ j + lda * (blockIdx.x) * 32 ] ) ;
+		res+=  cuCabs (  A1[ j + lda * (blockIdx.x) * 32 ] ) ;
 	}
    }
     __syncthreads();
 
-   la[tx][ty]= res ;
+    la[tx][ty]= MAGMA_Z_MAKE( res, 0);
    __syncthreads();
    /*--------------------------------------------------------
 	The leader accumulates all the results from his peer. 
    ----------------------------------------------------------*/
    if( ty == 0 ) {
-     res = res + la[tx][1]+ la[tx][2]+ la[tx][3] ;
+     res = res 
+       + MAGMA_Z_REAL( la[tx][1] ) 
+       + MAGMA_Z_REAL( la[tx][2] )
+       + MAGMA_Z_REAL( la[tx][3] );
      y[ind] =  res;
    }
 
@@ -513,11 +533,11 @@ u_dlansy_generic (int n, double* A, int lda, double *y , int m_full_block , int 
 }
 
 __global__ void
-u_dlansy_special (int n, double* A, int lda, double *y ){
+u_zlanhe_special (int n, cuDoubleComplex* A, int lda, double *y ){
   int tx = threadIdx.x ; 
   int ty = threadIdx.y ; 
   int ind = blockIdx.x*  dgemv_bs + tx ;
-  double res = 0.f;
+  double res = 0.;
 
   /*
 	Reverse Computation ... 
@@ -527,7 +547,7 @@ u_dlansy_special (int n, double* A, int lda, double *y ){
   */
 
   A+= lda*(n-1) ; 
-  __shared__ double la   [dgemv_bs][dgemv_bs+1];
+  __shared__ cuDoubleComplex la   [dgemv_bs][dgemv_bs+1];
 
 
   A += ind;
@@ -543,7 +563,7 @@ u_dlansy_special (int n, double* A, int lda, double *y ){
 
     #pragma unroll 8 
     for(int j=0; j < 8 ; j++){
-       res+=fabs(la[tx][j+ty*8]);
+       res+=cuCabs(la[tx][j+ty*8]);
     }
     A-=lda* dgemv_bs ;
     __syncthreads(); 
@@ -574,7 +594,7 @@ u_dlansy_special (int n, double* A, int lda, double *y ){
   __syncthreads();
     #pragma unroll 8
     for(int j=0; j < dgemv_bs/4 ; j++){
-     res+= fabs(la[tx][j+ty*8]);
+     res+= cuCabs(la[tx][j+ty*8]);
     }
 
   break_d  += dgemv_bs ; 
@@ -591,17 +611,20 @@ u_dlansy_special (int n, double* A, int lda, double *y ){
       __syncthreads();
     #pragma unroll 8
     for(int j=0; j < dgemv_bs/4;j++){
-       res+=fabs( la[31-tx][j+ty*8]);
+       res+=cuCabs( la[31-tx][j+ty*8]);
     }
       __syncthreads();
   }
 
 
-   la[tx][ty]= res ;
+  la[tx][ty]= MAGMA_Z_MAKE( res, 0. );
 
    __syncthreads();
    if( ty == 0 ) {
-     res = res + la[tx][1]+ la[tx][2]+ la[tx][3] ;
+     res = res 
+       + MAGMA_Z_REAL( la[tx][1] ) 
+       + MAGMA_Z_REAL( la[tx][2] )
+       + MAGMA_Z_REAL( la[tx][3] );
      y[ind] =   res;
    }
 
@@ -611,7 +634,7 @@ u_dlansy_special (int n, double* A, int lda, double *y ){
 
 
 
-extern "C" void mdlansy (char uplo , int m ,  double *A , int lda ,  double *Y  )
+extern "C" void mzlanhe (char uplo , int m ,  cuDoubleComplex *A , int lda ,  double *Y  )
 {
 /*
 Note:
@@ -629,10 +652,10 @@ Note:
 
     if( m % dgemv_bs == 0 ) {
 	    if( uplo == 'L' || uplo == 'l'){	
-		    l_dlansy_special <<<grid, threads>>> (m, A, lda, Y);
+		    l_zlanhe_special <<<grid, threads>>> (m, A, lda, Y);
 	    }
             else{
-		    u_dlansy_special <<<grid, threads>>> (m, A, lda,  Y);
+		    u_zlanhe_special <<<grid, threads>>> (m, A, lda,  Y);
 	    } 
 		
     } 
@@ -640,10 +663,10 @@ Note:
 	    int  m_full_block = (m - m % 32 ) /32 ; 
 	    int  m_mod_32 = m%32 ;  
 	    if( uplo == 'L' || uplo == 'l'){
-		    l_dlansy_generic <<<grid, threads>>> (m, A, lda, Y , m_full_block , m_mod_32);
+		    l_zlanhe_generic <<<grid, threads>>> (m, A, lda, Y , m_full_block , m_mod_32);
 	    }	
 	    else{
-		    u_dlansy_generic <<<grid, threads>>> (m, A, lda, Y , m_full_block , m_mod_32);
+		    u_zlanhe_generic <<<grid, threads>>> (m, A, lda, Y , m_full_block , m_mod_32);
 	    }	
     }
 }
@@ -658,17 +681,17 @@ Reproduced from xSYMV routines...
 #include <stdio.h>
 
 extern "C" double 
-magmablas_dlansy(char norm, char uplo, int n, double *A, int lda, double *WORK)
+magmablas_zlanhe(char norm, char uplo, int n, cuDoubleComplex *A, int lda, double *WORK)
 {
 	if( norm != 'I' && norm !='i')	{
                 printf("Only normI is available\n");
 		exit(1);
 	}
         else{
-		mdlansy ( uplo , n , A , lda , WORK);
+		mzlanhe ( uplo , n , A , lda , WORK);
 		int val = cublasIdamax(n,WORK,1);
 	        double retVal[1];
-		cublasGetMatrix( 1, 1, sizeof( double ), WORK+val-1, 1, retVal, 1 ) ;
+		cublasGetMatrix( 1, 1, sizeof( cuDoubleComplex ), WORK+val-1, 1, retVal, 1 ) ;
 		return retVal[0];
         }
 

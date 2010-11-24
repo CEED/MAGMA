@@ -42,9 +42,9 @@ l_zlat2c_special (int n, cuDoubleComplex* A, int lda,  cuFloatComplex *SA , int 
 #pragma unroll 8
         for(int j=0; j < dgemv_bs ; j+=4){
             temp = A[j*lda] ;
-            if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+            if( (cuCreal(temp) < mRMAX) || (cuCreal(temp) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
-                || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+                || (cuCimag(temp) < mRMAX) || (cuCimag(temp) > RMAX) 
 #endif
                 )
                 {
@@ -76,9 +76,9 @@ l_zlat2c_special (int n, cuDoubleComplex* A, int lda,  cuFloatComplex *SA , int 
 #pragma unroll 8
     for(int j =0; j<dgemv_bs; j+=4){
         temp =  la[ty+j][tx] ;
-        if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+        if( (cuCreal(temp) < mRMAX) || (cuCreal(temp) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
-            || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+            || (cuCimag(temp) < mRMAX) || (cuCimag(temp) > RMAX) 
 #endif
             )
             {
@@ -136,9 +136,9 @@ l_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA , int m_
 #pragma unroll 8
             for(int j=0; j < dgemv_bs ; j+=4){
                 temp = A[j*lda] ;
-                if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+                if( (cuCreal(temp) < mRMAX) || (cuCreal(temp) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
-                    || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+                    || (cuCimag(temp) < mRMAX) || (cuCimag(temp) > RMAX) 
 #endif
                     )
                     {
@@ -165,9 +165,9 @@ l_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA , int m_
                 count = m_mod_32 ;
             for(j =0;j<=count;j++){
                 temp =  A[j*lda] ;
-                if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+                if( (cuCreal(temp) < mRMAX) || (cuCreal(temp) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
-                    || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+                    || (cuCimag(temp) < mRMAX) || (cuCimag(temp) > RMAX) 
 #endif
                     )
                     {
@@ -180,9 +180,9 @@ l_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA , int m_
             count = 1 ;
             for(;j<m_mod_32;j++){
                 temp= A[count] ;
-                if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+                if( (cuCreal(temp) < mRMAX) || (cuCreal(temp) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
-                    || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+                    || (cuCimag(temp) < mRMAX) || (cuCimag(temp) > RMAX) 
 #endif
                     )
                     {
@@ -226,9 +226,9 @@ l_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA , int m_
 #pragma unroll 8
             for(int j=0; j < dgemv_bs ; j+=4){
                 temp = A[j*lda] ;
-                if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+                if( (cuCreal(temp) < mRMAX) || (cuCreal(temp) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
-                    || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+                    || (cuCimag(temp) < mRMAX) || (cuCimag(temp) > RMAX) 
 #endif
                     )
                     {
@@ -274,9 +274,9 @@ l_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA , int m_
 #pragma unroll 8
         for(int j =0; j<dgemv_bs; j+=4){
             temp =  la[ty+j][tx] ;
-            if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+            if( (cuCreal(temp) < mRMAX) || (cuCreal(temp) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
-                || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+                || (cuCimag(temp) < mRMAX) || (cuCimag(temp) > RMAX) 
 #endif
                 )
                 {
@@ -348,9 +348,9 @@ u_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA, int m_f
 #pragma unroll 8
             for(int j=0; j < dgemv_bs ; j+=4){
                 temp  = A[-j*lda] ;
-                if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+                if( (cuCreal(temp) < mRMAX) || (cuCreal(temp) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
-                    || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+                    || (cuCimag(temp) < mRMAX) || (cuCimag(temp) > RMAX) 
 #endif
                     )
                     {
@@ -377,9 +377,9 @@ u_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA, int m_f
                 count = m_mod_32 ;
             for(j =0;j<count;j++){
                 temp =  A[-j*lda] ;
-                if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+                if( (cuCreal(temp) < mRMAX) || (cuCreal(temp) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
-                    || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+                    || (cuCimag(temp) < mRMAX) || (cuCimag(temp) > RMAX) 
 #endif
                     )
                     {
@@ -392,9 +392,9 @@ u_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA, int m_f
             count = 1 ;
             for(;j<m_mod_32;j++){
                 temp =  A[-count] ;
-                if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+                if( (cuCreal(temp) < mRMAX) || (cuCreal(temp) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
-                    || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+                    || (cuCimag(temp) < mRMAX) || (cuCimag(temp) > RMAX) 
 #endif
                     )
                     {
@@ -443,9 +443,9 @@ u_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA, int m_f
 #pragma unroll 8
             for(int j=0; j < dgemv_bs ; j+=4){
                 temp  = A[-j*lda] ;
-                if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+                if( (cuCreal(temp) < mRMAX) || (cuCreal(temp) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
-                    || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+                    || (cuCimag(temp) < mRMAX) || (cuCimag(temp) > RMAX) 
 #endif
                     )
                     {
@@ -489,9 +489,9 @@ u_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA, int m_f
         for(int j =0; j<dgemv_bs; j+=4){
             temp =   la[tx][31-ty-j];
             // temp =  la[ty+j][tx] ;
-            if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+            if( (cuCreal(temp) < mRMAX) || (cuCreal(temp) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
-                || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+                || (cuCimag(temp) < mRMAX) || (cuCimag(temp) > RMAX) 
 #endif
                 )
                 {
@@ -548,9 +548,9 @@ u_zlat2c_special (int n, cuDoubleComplex* A, int lda, cuFloatComplex  *SA , int 
         for(int j=0; j < dgemv_bs ; j+=4){
             //   la[tx][ty+j] = A[-j*lda] ;
             temp =  A[-j*lda] ;
-            if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+            if( (cuCreal(temp) < mRMAX) || (cuCreal(temp) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
-                || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+                || (cuCimag(temp) < mRMAX) || (cuCimag(temp) > RMAX) 
 #endif
                 )
                 {
@@ -587,9 +587,9 @@ u_zlat2c_special (int n, cuDoubleComplex* A, int lda, cuFloatComplex  *SA , int 
 #pragma unroll 8
     for(int j =0; j<dgemv_bs; j+=4){
         temp =   la[tx][31-ty-j];
-        if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+        if( (cuCreal(temp) < mRMAX) || (cuCreal(temp) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
-            || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+            || (cuCimag(temp) < mRMAX) || (cuCimag(temp) > RMAX) 
 #endif
             )
             {
