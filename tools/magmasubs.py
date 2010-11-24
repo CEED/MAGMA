@@ -73,6 +73,8 @@ subs = {
     ('cuCabs', 'abs' ),  
     ('cuCabsf','absf'),
     ('zcaxpy','dsaxpy'),
+    ('magma_get_c','magma_get_s'),
+    ('magma_get_z','magma_get_d'),
     ],
   'normal' : [ ## Dictionary is keyed on substitution type
     ['s','d','c','z'], ## Special Line Indicating type columns
@@ -265,6 +267,7 @@ subs = {
     ('MAGMABLAS_S','MAGMABLAS_D','MAGMABLAS_C','MAGMABLAS_Z'),
     ('magma_s','magma_d','magma_c','magma_z'),
     ('magmablas_s','magmablas_d','magmablas_c','magmablas_z'),
+    ('magma_get_s','magma_get_d','magma_get_c','magma_get_z'),
     ('ger','ger','gerc','gerc'),
     ('ger','ger','geru','geru'),
     ('orgtr','orgtr','ungtr','ungtr'),
