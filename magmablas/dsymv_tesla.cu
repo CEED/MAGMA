@@ -6,6 +6,7 @@
 #define thread_x 64
 #define thread_y 4
 
+#define magmablas_dsymv_tesla magmablas_dsymv
 
 __global__ void
 test_l_dsymv_special_v6_ts_tesla(int n, double alpha,  double* A, int lda, double *x, 
@@ -766,7 +767,7 @@ void magmablas_dsymv6_tesla(char uplo, int m, double alpha, double *A, int lda,
 
 extern "C"
 void  magmablas_dsymv_tesla( char uplo , int m , double alpha,  double *A , int lda , 
-				double *X , int incx, double beta, double *Y, int incy)
+	 		    double *X , int incx, double beta, double *Y, int incy)
 {
 
 	

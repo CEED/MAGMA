@@ -18,6 +18,9 @@
 #define ITERMAX 30
 #define BWDMAX 1.0
 
+//#define cublasZhemv magmablas_zhemv
+//#define cublasZhemm magmablas_zhemm
+
 extern "C" magma_int_t
 magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_int_t LDA, double2 *B, 
                  magma_int_t LDB, double2 *X, magma_int_t LDX, double2 *WORK, float2 *SWORK,
@@ -175,7 +178,7 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_i
 
   double ANRM , CTE , EPS;
   EPS  = lapackf77_dlamch("Epsilon");
-  ANRM = magma_zlansy(  'I',  UPLO , N ,A, LDA ,WORK);
+  ANRM = magmablas_zlanhe(  'I',  UPLO , N ,A, LDA ,WORK);
   CTE = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;  
 
   int PTSA  = N*NRHS;
@@ -194,7 +197,7 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_i
     goto L40;
   } 
   
-  magma_zlat2c(UPLO ,  N ,  A , LDA , SWORK+PTSA, N , INFO ); 
+  magmablas_zlat2c(UPLO ,  N ,  A , LDA , SWORK+PTSA, N , INFO ); 
   if(*INFO !=0){
     *ITER = -2 ;
     goto L40;
@@ -207,12 +210,12 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_i
   magma_cpotrs_gpu(UPLO, N , NRHS, SWORK+PTSA, LDA, SWORK+PTSX, LDB, INFO);
   magmablas_clag2z(N, NRHS, SWORK+PTSX, N, X, LDX, INFO);
 
-  magma_zlacpy(N, NRHS, B, LDB, WORK, N);
+  magmablas_zlacpy(N, NRHS, B, LDB, WORK, N);
 
   if( NRHS == 1 )
-    magmablas_zcymv(UPLO, N, c_neg_one, A, LDA, X, 1, c_one, WORK, 1);
+    cublasZhemv(UPLO, N, c_neg_one, A, LDA, X, 1, c_one, WORK, 1);
   else
-    cublasZsymm('L', UPLO, N, NRHS, c_neg_one, A, LDA, X, LDX, c_one, WORK, N);
+    cublasZhemm('L', UPLO, N, NRHS, c_neg_one, A, LDA, X, LDX, c_one, WORK, N);
   
   int i, j;
   for(i=0; i<NRHS; i++){
@@ -246,9 +249,9 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_i
     }
 
     if( NRHS == 1 )
-      magmablas_zcymv(UPLO, N, alpha, A, LDA, X, 1, beta, WORK, 1);
+      cublasZhemv(UPLO, N, alpha, A, LDA, X, 1, beta, WORK, 1);
     else 
-     cublasZsymm('L', UPLO, N, NRHS, alpha, A, LDA, X, LDX, beta, WORK, N);
+      cublasZhemm('L', UPLO, N, NRHS, alpha, A, LDA, X, LDX, beta, WORK, N);
 
     for(i=0; i<NRHS; i++){
       int j;
@@ -274,7 +277,7 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS, double2 *A, magma_i
   if( *INFO != 0 ){
     return 0;
   }
-  magma_zlacpy(N, NRHS, B , LDB, X, N);
+  magmablas_zlacpy(N, NRHS, B , LDB, X, N);
   magma_zpotrs_gpu(UPLO, N, NRHS, A, LDA, X, LDB, INFO);
   return 0;
 }

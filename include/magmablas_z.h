@@ -31,8 +31,10 @@ void   zzero_nbxnb_block(magma_int_t, double2 *, magma_int_t);
 void magmablas_zlaset(magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda);
 void magmablas_zlacpy(magma_int_t m, magma_int_t n, double2 *SA, magma_int_t ldsa ,
 		      double2 *A, magma_int_t lda);
-double2 magmablas_zlansy(char norm, char uplo, magma_int_t n, double2 *A, 
-                         magma_int_t lda, double2 *WORK);
+double magmablas_zlanhe( char norm, char uplo, magma_int_t n, double2 *A, 
+			 magma_int_t lda, double2 *WORK);
+double magmablas_zlansy( char norm, char uplo, magma_int_t n, double2 *A, 
+			 magma_int_t lda, double2 *WORK);
 
 void magmablas_zinplace_transpose(double2 *, magma_int_t, magma_int_t);
 void magmablas_zpermute_long(double2 *, magma_int_t, magma_int_t *, magma_int_t, magma_int_t);
@@ -57,9 +59,11 @@ void magmablas_zgemm(char transA, char transB, magma_int_t m, magma_int_t n, mag
 void magmablas_zgemv_tesla(magma_int_t M, magma_int_t N, double2 *A,
 			   magma_int_t lda, double2 *X, double2 *);
 void magmablas_zherk(char, char, magma_int_t, magma_int_t, double, double2 *, magma_int_t, double, double2 *, magma_int_t);
-void magmablas_zsymv(char, magma_int_t, double2, double2 *, magma_int_t, double2 *, magma_int_t, double2, double2 *, magma_int_t);
-void magmablas_zsyr2k(char, char, magma_int_t, magma_int_t, double2, const double2 *, magma_int_t, const double2 *, magma_int_t, double2, double2 *, magma_int_t);
 void magmablas_zsyrk(char, char, magma_int_t, magma_int_t, double2, double2 *, magma_int_t, double2, double2 *, magma_int_t);
+void magmablas_zhemv(char, magma_int_t, double2, double2 *, magma_int_t, double2 *, magma_int_t, double2, double2 *, magma_int_t);
+void magmablas_zsymv(char, magma_int_t, double2, double2 *, magma_int_t, double2 *, magma_int_t, double2, double2 *, magma_int_t);
+void magmablas_zher2k(char, char, magma_int_t, magma_int_t, double2, const double2 *, magma_int_t, const double2 *, magma_int_t, double, double2 *, magma_int_t);
+void magmablas_zsyr2k(char, char, magma_int_t, magma_int_t, double2, const double2 *, magma_int_t, const double2 *, magma_int_t, double2, double2 *, magma_int_t);
 void magmablas_ztrmm(char, char, char, char, magma_int_t, magma_int_t, double2, double2 *, magma_int_t, double2 *, magma_int_t);
 void magmablas_ztrsm(char, char, char, char, magma_int_t, magma_int_t, double2, double2 *, magma_int_t, double2 *, magma_int_t);
 
