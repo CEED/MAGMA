@@ -17,6 +17,7 @@ ZSRC  = zauxiliary.cu	\
 	zclaswp.cu 	\
         zcaxpycp.cu     \
 	zlag2c.cu       \
+	clag2z.cu       \
 	ztranspose.cu 	\
 	ztranspose-v2.cu\
 	zinplace_transpose.cu

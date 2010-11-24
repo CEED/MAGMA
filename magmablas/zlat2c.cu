@@ -19,9 +19,12 @@
 #define dgemv_bs 32
 
 /*------------------------------------------ UPLO = 'L' ----------------------------------*/
-__global__ void
-l_zlat2c_special (int n, cuDoubleComplex* A, int lda,  cuFloatComplex *SA , int *INFO , double RMAX ,int ldsa ){
+__device__ int flag = 0; 
 
+__global__ void
+l_zlat2c_special (int n, cuDoubleComplex* A, int lda,  cuFloatComplex *SA , int *INFO, double RMAX, int ldsa )
+{
+    double mRMAX = - RMAX;
     int tx  = threadIdx.x ;
     int ty  = threadIdx.y ;
     int ind = blockIdx.x*  dgemv_bs + tx ;
@@ -34,14 +37,19 @@ l_zlat2c_special (int n, cuDoubleComplex* A, int lda,  cuFloatComplex *SA , int 
     SA += ty * ldsa;
 
     int break_d  =   blockIdx.x* dgemv_bs ;
-    cuDoubleComplex flag = MAGMA_Z_ZERO ;
     cuDoubleComplex temp ;
     for(int  i=0; i<break_d; i += dgemv_bs ){
 #pragma unroll 8
         for(int j=0; j < dgemv_bs ; j+=4){
             temp = A[j*lda] ;
-            if( cuCabs(temp) > RMAX )
-                flag = MAGMA_Z_ONE ;
+            if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+#endif
+                )
+                {
+                    flag = 1;
+                }
             SA[j*ldsa] = cuComplexDoubleToFloat(temp);
         }
         A  += lda *dgemv_bs ;
@@ -68,23 +76,30 @@ l_zlat2c_special (int n, cuDoubleComplex* A, int lda,  cuFloatComplex *SA , int 
 #pragma unroll 8
     for(int j =0; j<dgemv_bs; j+=4){
         temp =  la[ty+j][tx] ;
-        if( cuCabs(temp) > RMAX )
-            flag = MAGMA_Z_ONE ;
+        if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+#if defined(PRECISION_z) || defined(PRECISION_c)
+            || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+#endif
+            )
+            {
+                flag = 1;
+            }
         SA[j*ldsa] = cuComplexDoubleToFloat(temp);
     }
 
     __syncthreads();
-    la[tx][ty] = flag ;
-    __syncthreads();
-    if( ty == 0 ) {
-        //  INFO[0] = flag+ la[tx] [1] +  la[tx] [2] + la[tx] [3] ;
-    }
+    //la[tx][ty] = flag ;
+    //__syncthreads();
+    //if( ty == 0 ) {
+    //    //  INFO[0] = flag+ la[tx] [1] +  la[tx] [2] + la[tx] [3] ;
+    //}
 }
 
 __global__ void
 l_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA , int m_full_block,
                  int m_mod_32 , int *INFO , double RMAX , int ldsa)
 {
+    double mRMAX = - RMAX;
     int tx = threadIdx.x ;
     int ty = threadIdx.y ;
 
@@ -94,7 +109,6 @@ l_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA , int m_
     __shared__ cuDoubleComplex la   [dgemv_bs][dgemv_bs+1];
 
     cuDoubleComplex temp ;
-    cuDoubleComplex flag = MAGMA_Z_ZERO ;
 
     if( blockIdx.x == m_full_block ) {
         /************************************************************************
@@ -122,8 +136,14 @@ l_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA , int m_
 #pragma unroll 8
             for(int j=0; j < dgemv_bs ; j+=4){
                 temp = A[j*lda] ;
-                if( cuCabs(temp) > RMAX )
-                    flag = MAGMA_Z_ONE ;
+                if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                    || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+#endif
+                    )
+                    {
+                        flag = 1;
+                    }
                 SA[j*ldsa] = cuComplexDoubleToFloat(temp);
             }
             A  += lda *dgemv_bs ;
@@ -145,8 +165,14 @@ l_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA , int m_
                 count = m_mod_32 ;
             for(j =0;j<=count;j++){
                 temp =  A[j*lda] ;
-                if( cuCabs(temp) > RMAX )
-                    flag = MAGMA_Z_ONE ;
+                if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                    || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+#endif
+                    )
+                    {
+                        flag = 1;
+                    }
                 SA[j*ldsa] = cuComplexDoubleToFloat(temp);
             }
             A  += (tx)*lda;
@@ -154,8 +180,14 @@ l_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA , int m_
             count = 1 ;
             for(;j<m_mod_32;j++){
                 temp= A[count] ;
-                if( cuCabs(temp) > RMAX )
-                    flag = MAGMA_Z_ONE ;
+                if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                    || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+#endif
+                    )
+                    {
+                        flag = 1;
+                    }
                 SA[count] = cuComplexDoubleToFloat(temp);
                 count++;
             }
@@ -163,15 +195,15 @@ l_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA , int m_
         else{
         }
 
-        la[tx][ty] = flag ;
+        //la[tx][ty] = flag ;
 
         __syncthreads();
         /*--------------------------------------------------------
           The leader accumulates all the results from his peer.
           ----------------------------------------------------------*/
-        if( ty == 0 ) {
+        //if( ty == 0 ) {
             //  INFO[ind] = ld[tx][0] +  ld[tx][1] + ld[tx][2] + ld[tx][3] ;
-        }
+        //}
 
     }
 
@@ -194,8 +226,14 @@ l_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA , int m_
 #pragma unroll 8
             for(int j=0; j < dgemv_bs ; j+=4){
                 temp = A[j*lda] ;
-                if( cuCabs(temp) > RMAX )
-                    flag = MAGMA_Z_ONE ;
+                if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                    || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+#endif
+                    )
+                    {
+                        flag = 1;
+                    }
                 SA[j*ldsa] = cuComplexDoubleToFloat(temp);
             }
             A  += lda *dgemv_bs ;
@@ -236,20 +274,26 @@ l_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA , int m_
 #pragma unroll 8
         for(int j =0; j<dgemv_bs; j+=4){
             temp =  la[ty+j][tx] ;
-            if( cuCabs(temp) > RMAX )
-                flag = MAGMA_Z_ONE ;
+            if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+#endif
+                )
+                {
+                    flag = 1;
+                }
             SA[j*ldsa] = cuComplexDoubleToFloat(temp);
         }
         __syncthreads();
-        la[tx] [ty ] = flag ;
-        __syncthreads();
+        //la[tx] [ty ] = flag ;
+        //__syncthreads();
         /*--------------------------------------------------------
           The leader accumulates all the results from his peer.
           ----------------------------------------------------------*/
-        if( ty == 0 )
-            {
+        //if( ty == 0 )
+        //    {
                 //  INFO [ind] =  flag + la[tx][1]+ la[tx][2]+ la[tx][3] ;
-            }
+        //    }
     }
 }
 
@@ -261,13 +305,12 @@ __global__ void
 u_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA, int m_full_block,
                  int m_mod_32 , int *INFO , double RMAX , int ldsa)
 {
+    double mRMAX = - RMAX;
     int tx = threadIdx.x ;
     int ty = threadIdx.y ;
 
     int ind = blockIdx.x*  dgemv_bs + tx ;
 
-
-    cuDoubleComplex flag = MAGMA_Z_ZERO ;
 
     __shared__ cuDoubleComplex la   [dgemv_bs][dgemv_bs+1];
     int blockIdxx =  blockIdx.x ;
@@ -305,8 +348,14 @@ u_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA, int m_f
 #pragma unroll 8
             for(int j=0; j < dgemv_bs ; j+=4){
                 temp  = A[-j*lda] ;
-                if( cuCabs(temp) > RMAX )
-                    flag = MAGMA_Z_ONE ;
+                if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                    || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+#endif
+                    )
+                    {
+                        flag = 1;
+                    }
                 SA[-j*ldsa] = cuComplexDoubleToFloat(temp);
             }
             A  -= lda *dgemv_bs ;
@@ -328,8 +377,14 @@ u_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA, int m_f
                 count = m_mod_32 ;
             for(j =0;j<count;j++){
                 temp =  A[-j*lda] ;
-                if( cuCabs(temp) > RMAX )
-                    flag = MAGMA_Z_ONE ;
+                if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                    || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+#endif
+                    )
+                    {
+                        flag = 1;
+                    }
                 SA[-j*ldsa] = cuComplexDoubleToFloat(temp);
             }
             A-=(count-1)*lda;
@@ -337,8 +392,14 @@ u_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA, int m_f
             count = 1 ;
             for(;j<m_mod_32;j++){
                 temp =  A[-count] ;
-                if( cuCabs(temp) > RMAX )
-                    flag = MAGMA_Z_ONE ;
+                if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                    || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+#endif
+                    )
+                    {
+                        flag = 1;
+                    }
                 SA[-count] = cuComplexDoubleToFloat(temp);
                 count++;
             }
@@ -349,11 +410,11 @@ u_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA, int m_f
         /*--------------------------------------------------------
           The leader accumulates all the results from his peer.
           ----------------------------------------------------------*/
-        la[tx][ty] = flag ;
-        __syncthreads();
-        if( ty == 0 ) {
-            // INFO [ind] = flag  + la[tx][1] + la[tx][2] + la[tx][3]  ;
-        }
+        //la[tx][ty] = flag ;
+        //__syncthreads();
+        //if( ty == 0 ) {
+        //    // INFO [ind] = flag  + la[tx][1] + la[tx][2] + la[tx][3]  ;
+        //}
 
     }
 
@@ -382,8 +443,14 @@ u_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA, int m_f
 #pragma unroll 8
             for(int j=0; j < dgemv_bs ; j+=4){
                 temp  = A[-j*lda] ;
-                if( cuCabs(temp) > RMAX )
-                    flag = MAGMA_Z_ONE ;
+                if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                    || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+#endif
+                    )
+                    {
+                        flag = 1;
+                    }
                 SA[-j*ldsa] = cuComplexDoubleToFloat(temp);
             }
             A-=lda* dgemv_bs ;
@@ -422,33 +489,39 @@ u_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA, int m_f
         for(int j =0; j<dgemv_bs; j+=4){
             temp =   la[tx][31-ty-j];
             // temp =  la[ty+j][tx] ;
-            if( cuCabs(temp) > RMAX )
-                flag = MAGMA_Z_ONE ;
+            if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+#endif
+                )
+                {
+                    flag = 1;
+                }
             SA[- j*ldsa] = cuComplexDoubleToFloat(temp);
         }
 
         /*--------------------------------------------------------
           The leader accumulates all the results from his peer.
           ----------------------------------------------------------*/
-        la[tx] [ty] = flag ;
-        __syncthreads();
-
-        if( ty == 0 ) {
-            //  INFO[ind] = flag +  la[tx] [1] +  la[tx] [2] + la[tx] [3]  ;
-        }
+        //la[tx] [ty] = flag ;
+        //__syncthreads();
+        //
+        //if( ty == 0 ) {
+        //    //  INFO[ind] = flag +  la[tx] [1] +  la[tx] [2] + la[tx] [3]  ;
+        //}
 
     }
-
 }
 
 /*- ---------------------------------------------- UPLO = 'U' ----------------------------------*/
 /*Good Dimension*/
 __global__ void
-u_zlat2c_special (int n, cuDoubleComplex* A, int lda, cuFloatComplex  *SA , int * INFO , double RMAX , int ldsa ){
+u_zlat2c_special (int n, cuDoubleComplex* A, int lda, cuFloatComplex  *SA , int * INFO , double RMAX , int ldsa )
+{
+    double mRMAX = - RMAX;
     int tx = threadIdx.x ;
     int ty = threadIdx.y ;
     int ind = blockIdx.x*  dgemv_bs + tx ;
-    cuDoubleComplex flag = MAGMA_Z_ZERO ;
 
     /*
       Reverse Computation ...
@@ -456,8 +529,6 @@ u_zlat2c_special (int n, cuDoubleComplex* A, int lda, cuFloatComplex  *SA , int 
       - Triangle
       - Up
     */
-
-
     A+= lda*(n-1) ;
     SA+= ldsa*(n-1) ;
 
@@ -477,8 +548,14 @@ u_zlat2c_special (int n, cuDoubleComplex* A, int lda, cuFloatComplex  *SA , int 
         for(int j=0; j < dgemv_bs ; j+=4){
             //   la[tx][ty+j] = A[-j*lda] ;
             temp =  A[-j*lda] ;
-            if( cuCabs(temp) > RMAX )
-                flag = MAGMA_Z_ONE ;
+            if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+#endif
+                )
+                {
+                    flag = 1;
+                }
             SA[-j*ldsa] = cuComplexDoubleToFloat(temp);
         }
         A-=lda* dgemv_bs ;
@@ -510,18 +587,24 @@ u_zlat2c_special (int n, cuDoubleComplex* A, int lda, cuFloatComplex  *SA , int 
 #pragma unroll 8
     for(int j =0; j<dgemv_bs; j+=4){
         temp =   la[tx][31-ty-j];
-        if( cuCabs(temp) > RMAX )
-            flag = MAGMA_Z_ONE ;
+        if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+#if defined(PRECISION_z) || defined(PRECISION_c)
+            || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+#endif
+            )
+            {
+                flag = 1;
+            }
         SA[- j*ldsa] = cuComplexDoubleToFloat(temp);
     }
 
-    la[tx][ty] = flag ;
-
-    __syncthreads();
-
-    if( ty == 0 ) {
-        // INFO[0] = flag + la[tx][1] + la[tx][2] + la[tx][3] ;
-    }
+    //la[tx][ty] = flag ;
+    //
+    //__syncthreads();
+    //
+    //if( ty == 0 ) {
+    //    // INFO[0] = flag + la[tx][1] + la[tx][2] + la[tx][3] ;
+    //}
 }
 
 
@@ -564,11 +647,6 @@ mzlat2c(char uplo, int m, cuDoubleComplex *A, int lda, cuFloatComplex *Y, int LD
 }
 
 
-
-
-
-
-
 /*
   Interface ..................................
   Reproduced from dlansy routines...
@@ -589,7 +667,8 @@ magmablas_zlat2c(char uplo, int n, cuDoubleComplex *A, int lda,
       The routine converts a double-precision triangular
       matrix A to a single-precision triangular matrix SA.
     */
-    mzlat2c( uplo , n , A , lda , SA , LDSA ,  INFO );
+    *INFO = 0;
+    mzlat2c( uplo, n, A, lda, SA, LDSA, INFO );
     /*
       int val = cublasIdamax(n,WORK,1);
       double retVal[1];

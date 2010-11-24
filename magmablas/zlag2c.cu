@@ -10,13 +10,15 @@
 */
 #include <stdio.h>
 #include <cublas.h>
+#include "magma.h"
 
-__device__ int flag = 1 ; 
+__device__ int flag = 0; 
 
 static __global__ void 
 zlag2c_generic(const cuDoubleComplex *A, cuFloatComplex *SA, int M, int N, int lda,
-               int LDSA, double RMAX) 
+               int LDSA, double RMAX ) 
 {
+    double mRMAX = - RMAX;
     int ibx = blockIdx.x * 64;
     int tx  = threadIdx.x;
     int ty  = threadIdx.y;
@@ -34,16 +36,28 @@ zlag2c_generic(const cuDoubleComplex *A, cuFloatComplex *SA, int M, int N, int l
     do{
         A+=lda ; 
 
-        if( cuCabs(Ap[0]) > RMAX ) 
-            flag = 1; 
+        if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+#if defined(PRECISION_z) || defined(PRECISION_c)
+            || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+#endif
+            )
+            {
+                flag = 1; 
+            }
         SA[0] = cuComplexDoubleToFloat( Ap[0] );
         Ap[0] = A[0];	
         SA += LDSA;
 		
     }while( A < Aend  ) ; 
 
-    if( cuCabs(Ap[0]) > RMAX ) 
-        flag = 0 ; 
+    if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+#if defined(PRECISION_z) || defined(PRECISION_c)
+        || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+#endif
+        )
+        {
+            flag = 1;
+        }
     SA[0] = cuComplexDoubleToFloat( Ap[0] );
 
 }
@@ -52,6 +66,7 @@ static  __global__ void
 zlag2c_special(const cuDoubleComplex *A, cuFloatComplex *SA, int M, int N, int lda,int LDSA, 
                double RMAX) 
 {
+    double mRMAX = - RMAX;
     int ibx = blockIdx.x * 64;
     int tx  = threadIdx.x;
     int ty  = threadIdx.y;
@@ -65,14 +80,23 @@ zlag2c_special(const cuDoubleComplex *A, cuFloatComplex *SA, int M, int N, int l
         SA += ibx+idt;
     }
     cuDoubleComplex Ap[1] = {A[0]};
-    if( cuCabs(Ap[0]) > RMAX ) 
-        flag = 0 ; 
+
+    if( (cuCreal(Ap[0]) < mRMAX) || (cuCreal(Ap[0]) < mRMAX)
+#if defined(PRECISION_z) || defined(PRECISION_c)
+        || (cuCimag(Ap[0]) < mRMAX) || (cuCimag(Ap[0]) < mRMAX) 
+#endif
+        )
+        {
+            flag = 1;
+        }
     SA[0] = cuComplexDoubleToFloat( Ap[0] );
 }
 
 static void 
-magmablas_zlag2c_64_64_16_4_v2(int M, int N , const cuDoubleComplex *A, int lda, cuFloatComplex *SA, 
-                               int LDSA, float RMAX ) 
+magmablas_zlag2c_64_64_16_4_v2(int M, int N , 
+                               const cuDoubleComplex *A, int lda, 
+                               cuFloatComplex *SA, int LDSA, 
+                               double RMAX, magma_int_t *info ) 
 {    
     if( M==0 || N==0 ){
         printf("One of the Matrix Dimension is 0\n");
@@ -82,18 +106,19 @@ magmablas_zlag2c_64_64_16_4_v2(int M, int N , const cuDoubleComplex *A, int lda,
     dim3 threads( 16, 4 );
     dim3 grid(M/64+(M%64!=0),1);
     if( N > 1){ 
-        zlag2c_generic<<< grid, threads >>> ( A, SA, M, N, lda, LDSA, (double)RMAX ) ;
+        zlag2c_generic<<< grid, threads >>> ( A, SA, M, N, lda, LDSA, RMAX ) ;
     }
     else{
-        zlag2c_special<<< grid, threads >>> ( A, SA, M, N, lda, LDSA, (double)RMAX ) ;
+        zlag2c_special<<< grid, threads >>> ( A, SA, M, N, lda, LDSA, RMAX ) ;
     }
+    *info = flag;
 }           
 
 extern "C" void 
 magmablas_zlag2c( int M, int N , 
                   const cuDoubleComplex *A, int lda, 
                   cuFloatComplex *SA, int LDSA, 
-                  float RMAX ) 
+                  magma_int_t *info ) 
 {    
 /*
   Note
@@ -145,6 +170,7 @@ magmablas_zlag2c( int M, int N ,
 
   ===========================================================================  */
 
-	magmablas_zlag2c_64_64_16_4_v2(M , N , A , lda , SA , LDSA , RMAX ) ; 
+    double RMAX = (double)lapackf77_slamch("O");
+    magmablas_zlag2c_64_64_16_4_v2(M, N, A, lda, SA, LDSA, RMAX, info ) ; 
 
 }
