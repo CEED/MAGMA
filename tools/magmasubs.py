@@ -37,6 +37,7 @@ subs = {
     ('zhemv','dsymv'),
     ('Zhemv','Dsymv'),
     ('zlanhe','dlansy'),
+    ('clanhe','slansy'),
     ('zlaghe','dlagsy'),
     ('ztrmm','dtrmm'),
     ('ctrmm','strmm'),
