@@ -11,6 +11,7 @@
 
 #include <cublas.h>
 #include "magma.h"
+#include "magma_lapack.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- This is an auxiliary routine called from zgehrd.  The routine is called
