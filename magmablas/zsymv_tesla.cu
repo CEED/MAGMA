@@ -56,18 +56,11 @@ inline __host__ __device__ void operator*=(double2 &a, double s)
 	a.x *= s; a.y *= s;
 }
 
-inline __host__ __device__ double2 conjugate(double2 a)
-{
-   double2 b;
-   b.x = a.x;
-   b.y = 0.0f-a.y;
-   return b;
-}
 
-#define thread_seg 128  // used in zhemv_tesla1_kernel 
-#define threadSize 128  // used in zhemv_tesla2_kernel
+#define thread_seg 128  // used in zsymv_tesla1_kernel 
+#define threadSize 128  // used in zsymv_tesla2_kernel
 
-__global__ void zhemv_tesla1_kernel( int m , double2 alpha ,  double2 *A , int lda ,  double2 *x, int incx , double2 beta ,
+__global__ void zsymv_tesla1_kernel( int m , double2 alpha ,  double2 *A , int lda ,  double2 *x, int incx , double2 beta ,
 double2 *y ,  int incy, int n1 )
 {
 	int tid = blockIdx.x * thread_seg  + threadIdx.x;
@@ -89,7 +82,7 @@ double2 *y ,  int incy, int n1 )
 }	
 
 
-__global__ void zhemv_tesla2_kernel( int m , double2 alpha ,  double2 *A , int lda ,  double2 *x, int incx , double2 beta ,
+__global__ void zsymv_tesla2_kernel( int m , double2 alpha ,  double2 *A , int lda ,  double2 *x, int incx , double2 beta ,
 double2 *y ,  int incy, int n1 )
 
 {
@@ -107,7 +100,7 @@ double2 *y ,  int incy, int n1 )
 
 	for(int i=blockIdx.y; i< (m1 + blockIdx.y); i+= threadSize)
 	{
-		res +=  conjugate(A[tx + i + lda * blockIdx.y])  * x[tx + i];
+		res +=  A[tx + i + lda * blockIdx.y]  * x[tx + i];
 	}
 
 	
@@ -115,7 +108,7 @@ double2 *y ,  int incy, int n1 )
 	{
 		if( (tx + m1 + blockIdx.y) <  m )
 		{
-			res  += conjugate (A[tx + m1 + blockIdx.y + lda *blockIdx.y]) * x[tx + m1 + blockIdx.y];
+			res  += A[tx + m1 + blockIdx.y + lda *blockIdx.y] * x[tx + m1 + blockIdx.y];
 		}
 		else 
 		{
@@ -150,7 +143,7 @@ double2 *y ,  int incy, int n1 )
 }
 
 
-extern "C" void mzhemv_tesla(char side , char uplo , int m , double2 alpha ,  double2 *A , int lda , 
+extern "C" void mzsymv_tesla(char side , char uplo , int m , double2 alpha ,  double2 *A , int lda , 
  double2 *X , int incx , double2 beta , double2 *Y , int incy )
 
 {
@@ -162,14 +155,14 @@ extern "C" void mzhemv_tesla(char side , char uplo , int m , double2 alpha ,  do
 	dim3 grid1( blocks, 1, 1);
 	dim3 threads1(thread_seg, 1, 1);
 
-	zhemv_tesla1_kernel <<< grid1, threads1 >>> (m , alpha ,  A , lda , X , incx, beta , Y, incy, n1);
+	zsymv_tesla1_kernel <<< grid1, threads1 >>> (m , alpha ,  A , lda , X , incx, beta , Y, incy, n1);
 
 
 	n1 = (m/ threadSize) * threadSize;
 	dim3 grid2(  1, m,  1);
 	dim3 threads2(threadSize, 1, 1);
 
-	zhemv_tesla2_kernel <<< grid2, threads2 >>> (m , alpha ,  A , lda , X , incx, beta , Y, incy, n1);
+	zsymv_tesla2_kernel <<< grid2, threads2 >>> (m , alpha ,  A , lda , X , incx, beta , Y, incy, n1);
 
   
 }
@@ -179,7 +172,7 @@ extern "C" void mzhemv_tesla(char side , char uplo , int m , double2 alpha ,  do
 Interface ..................................
 */
 
-extern "C" void  magmablas_zhemv_tesla (char uplo , int m , double2 alpha ,  double2 *A , int lda ,  double2 *X , int incx , double2 beta , double2 *Y , int incy )
+extern "C" void  magmablas_zsymv_tesla (char uplo , int m , double2 alpha ,  double2 *A , int lda ,  double2 *X , int incx , double2 beta , double2 *Y , int incy )
 {
 /*
   DSYMV  performs the matrix-vector  operation
@@ -261,6 +254,6 @@ extern "C" void  magmablas_zhemv_tesla (char uplo , int m , double2 alpha ,  dou
 */
 
         char side = 'a' ;
-	mzhemv_tesla (side, uplo , m , alpha , A , lda , X , incx , beta , Y , incy );
+	mzsymv_tesla (side, uplo , m , alpha , A , lda , X , incx , beta , Y , incy );
 
 }
