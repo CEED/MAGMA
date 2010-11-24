@@ -138,8 +138,8 @@ void MAGMA_ZGEQRS_GPU( magma_int_t *m, magma_int_t *n, magma_int_t *nrhs, double
 void MAGMA_ZGETRF_GPU( magma_int_t *m, magma_int_t *n, double2 *A, magma_int_t *lda, magma_int_t *ipiv, magma_int_t *info)
 { magma_zgetrf_gpu( *m, *n, A, *lda, ipiv, info); }
 
-void MAGMA_ZGETRS_GPU( char *trans, magma_int_t *n, magma_int_t *nrhs, double2 *A, magma_int_t *lda, magma_int_t *ipiv, double2 *b, magma_int_t *ldb, magma_int_t *info, double2 *hwork)
-{ magma_zgetrs_gpu( trans[0], *n, *nrhs, A, *lda, ipiv, b, *ldb, info, hwork); }
+void MAGMA_ZGETRS_GPU( char *trans, magma_int_t *n, magma_int_t *nrhs, double2 *A, magma_int_t *lda, magma_int_t *ipiv, double2 *b, magma_int_t *ldb, magma_int_t *info)
+{ magma_zgetrs_gpu( trans[0], *n, *nrhs, A, *lda, ipiv, b, *ldb, info ); }
 
 void MAGMA_ZPOTRF_GPU( char *uplo,  magma_int_t *n, double2 *A, magma_int_t *lda, magma_int_t *info)
 { magma_zpotrf_gpu( uplo[0], *n, A, *lda, info); }

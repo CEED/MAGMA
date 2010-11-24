@@ -18,10 +18,13 @@ extern "C" {
 /* Mixed precision */
 magma_int_t magma_zcgetrs_gpu( magma_int_t n, magma_int_t nrhs, float2 *a, magma_int_t lda, 
                                magma_int_t *ipiv, float2 *x, double2 *b, magma_int_t ldb, magma_int_t *info);
-magma_int_t magma_zcgesv_gpu( magma_int_t N, magma_int_t NRHS, double2 *A, magma_int_t LDA, magma_int_t *IPIV, double2 *B, 
-                              magma_int_t LDB, double2 *X, magma_int_t LDX, double2 *WORK, float2 *SWORK,
-                              magma_int_t *ITER, magma_int_t *INFO, float2 *H_SWORK, double2 *H_WORK,
-                              magma_int_t *DIPIV);
+magma_int_t magma_zcgesv_gpu( magma_int_t N, magma_int_t NRHS, 
+                              cuDoubleComplex *A, magma_int_t LDA, 
+                              magma_int_t *IPIV, magma_int_t *DIPIV,
+                              cuDoubleComplex *B, magma_int_t LDB, 
+                              cuDoubleComplex *X, magma_int_t LDX, 
+                              cuDoubleComplex *WORK, cuFloatComplex *SWORK,
+                              magma_int_t *ITER, magma_int_t *INFO);
 magma_int_t magma_zcposv_gpu( char uplo, magma_int_t n, magma_int_t nrhs, 
                               cuDoubleComplex *A, magma_int_t lda, 
                               cuDoubleComplex *B, magma_int_t ldb, 

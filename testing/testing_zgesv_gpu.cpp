@@ -66,7 +66,6 @@ int main(int argc , char **argv)
     LDB = LDX = LDA = N ;
     int status ;
     cuDoubleComplex *d_A, *d_B, *d_X;
-    cuDoubleComplex *h_work_M_S;
     int *IPIV ;
     cuDoubleComplex *A, *B, *X;
     int szeA, szeB;
@@ -87,12 +86,6 @@ int main(int argc , char **argv)
     status = cublasAlloc(LDB*NRHS, sizeof(cuDoubleComplex), (void**)&d_X ) ;
     if (status != CUBLAS_STATUS_SUCCESS) {
         fprintf (stderr, "!!!! device memory allocation error (d_X)\n");
-        exit(1);
-    }
-
-    status = cudaMallocHost( (void**)&h_work_M_S, (lwork+32*maxnb)*sizeof(cuDoubleComplex) );
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! device memory allocation error (h_work_M_S)\n");
         exit(1);
     }
 
@@ -142,7 +135,7 @@ int main(int argc , char **argv)
         //=====================================================================
         start = get_current_time();
         magma_zgetrf_gpu( N, N, d_A, dlda, IPIV, &info);
-        magma_zgetrs_gpu( MagmaNoTrans, N, NRHS, d_A, dlda, IPIV, d_B, LDB, &info, h_work_M_S);
+        magma_zgetrs_gpu( MagmaNoTrans, N, NRHS, d_A, dlda, IPIV, d_B, LDB, &info);
         end = get_current_time();
         perf = (2.*N*N*N/3.+2.*NRHS*N*N)/(1000000*GetTimerValue(start,end));
         printf("             %6.2f", perf);
@@ -170,7 +163,6 @@ int main(int argc , char **argv)
     free(X);
     free(B);
     free(A);
-    cublasFree(h_work_M_S);
     cublasFree(d_X);
     cublasFree(d_B);
     cublasFree(d_A);

@@ -23,10 +23,16 @@
 #define ITERMAX 30
 
 extern "C" magma_int_t
-magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS, double2 *A, magma_int_t LDA, double2 *B, 
-		   magma_int_t LDB, double2 *X,magma_int_t LDX, double2 *WORK, float2 *SWORK, 
-		   magma_int_t *ITER, magma_int_t *INFO, float2 *tau, magma_int_t lwork, float2 *h_work,
-		   float2 *d_work, double2 *tau_d, magma_int_t lwork_d, double2 *h_work_d,
+magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS, 
+                   double2 *A, magma_int_t LDA, 
+                   double2 *B, magma_int_t LDB, 
+                   double2 *X, magma_int_t LDX, 
+                   double2 *WORK, float2 *SWORK, 
+		   magma_int_t *ITER, magma_int_t *INFO,
+                   float2 *tau, magma_int_t lwork, 
+                   float2 *h_work, float2 *d_work, 
+                   double2 *tau_d, magma_int_t lwork_d, 
+                   double2 *h_work_d,
 		   double2 *d_work_d)
 {
 /*  -- MAGMA (version 1.0) --
@@ -204,7 +210,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS, double2 *A, m
   double ANRM , CTE , EPS;
 
   EPS  = lapackf77_dlamch("Epsilon");
-  ANRM = magma_zlange('I', N, N , A, LDA, WORK );
+  ANRM = magmablas_zlange('I', N, N , A, LDA, (double*)WORK );
   CTE = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;
   int PTSA  = N*NRHS;
   int IITER ;
@@ -241,7 +247,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS, double2 *A, m
   magmablas_clag2z(N, NRHS, SWORK, N, X, LDX, INFO);
 
   // X = X in DP 
-  magma_zlacpy(N, NRHS, B , LDB, WORK, N);
+  magmablas_zlacpy(MagmaUpperLower, N, NRHS, B , LDB, WORK, N);
 
   // WORK = B in DP; WORK contains the residual ...
   if( NRHS == 1 )
@@ -287,7 +293,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS, double2 *A, m
     }
 
     /* unnecessary may be */
-    magma_zlacpy(N, NRHS, B , LDB, WORK, N);
+    magmablas_zlacpy(MagmaUpperLower, N, NRHS, B , LDB, WORK, N);
     if( NRHS == 1 )
         magmablas_zgemv_MLU(N,N, A,LDA,X,WORK);
     else
@@ -329,7 +335,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS, double2 *A, m
   if( *INFO != 0 ){
     return 0;
   }
-  magma_zlacpy(N, NRHS, B , LDB, X, N);
+  magmablas_zlacpy(MagmaUpperLower, N, NRHS, B , LDB, X, N);
   magma_zgeqrs_gpu(M, N, NRHS, A, N, tau_d,
 		   X, M, h_work_d, lwork_d, d_work_d, INFO);
   return 0;

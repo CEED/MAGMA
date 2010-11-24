@@ -16,8 +16,12 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t 
-magma_zcgetrs_gpu(magma_int_t n, magma_int_t nrhs, float2 *a, magma_int_t lda, 
-		  magma_int_t *ipiv, float2 *x, double2 *b, magma_int_t ldb, magma_int_t *info)
+magma_zcgetrs_gpu(magma_int_t n, magma_int_t nrhs, 
+                  cuFloatComplex  *a, magma_int_t lda, 
+		  magma_int_t     *ipiv, 
+                  cuFloatComplex  *x, 
+                  cuDoubleComplex *b, magma_int_t ldb, 
+                  magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -31,7 +35,7 @@ magma_zcgetrs_gpu(magma_int_t n, magma_int_t nrhs, float2 *a, magma_int_t lda,
     ZCGETRS solves a system of linear equations   
        A * X = B  or  A' * X = B   
     with a general N-by-N matrix A using the LU factorization computed   
-    by MAGMA_ZGETRF_GPU. B is in double2, A and X in single precision. This 
+    by MAGMA_ZGETRF_GPU. B is in double, A and X in single precision. This 
     routine is used in the mixed precision iterative solver magma_zcgesv.
 
     Arguments   
@@ -88,15 +92,18 @@ magma_zcgetrs_gpu(magma_int_t n, magma_int_t nrhs, float2 *a, magma_int_t lda,
   if (n == 0 || nrhs == 0) {
     return 0;
   }
+
   /* Get X by row applying interchanges to B and cast to single */
   magmablas_zclaswp(nrhs, b, ldb, x, n, ipiv);
 
   /* Solve L*X = B, overwriting B with X. */
-  float2 fone = MAGMA_C_ONE;
-  cublasCtrsm('L','L','N','U', n, nrhs, fone, a, lda, x, ldb);
+  cuFloatComplex fone = MAGMA_C_ONE;
+  cublasCtrsm( MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit, 
+               n, nrhs, fone, a, lda, x, ldb);
 
   /* Solve U*X = B, overwriting B with X. */
-  cublasCtrsm('L','U','N','N', n, nrhs, fone, a, lda, x, ldb);
+  cublasCtrsm( MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
+               n, nrhs, fone, a, lda, x, ldb);
 
   return 0;
   /* End of MAGMA_ZCGETRS */

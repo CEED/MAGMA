@@ -99,8 +99,7 @@ magma_int_t magma_zgetrf_gpu2(magma_int_t m, magma_int_t n, double2 *A,
 			      magma_int_t *dipiv, double2 *work, magma_int_t *info);
 magma_int_t magma_zgetrs_gpu( char trans, magma_int_t n, magma_int_t nrhs, 
 			      double2 *A, magma_int_t lda, magma_int_t *ipiv, 
-			      double2 *b, magma_int_t ldb, magma_int_t *info,
-			      double2 *hwork);
+			      double2 *b, magma_int_t ldb, magma_int_t *info);
 magma_int_t magma_zgeqrf_gpu( magma_int_t m, magma_int_t n, double2 *A, 
 			      magma_int_t lda, double2 *tau, magma_int_t *info);
 magma_int_t magma_zgeqrf_gpu2(magma_int_t m, magma_int_t n, double2 *A, 

@@ -30,10 +30,10 @@ ZSRC  = testing_zswap.cpp 	\
 
 
 ifeq (${GPU_TARGET}, 1)
-ZSRC += testing_zcposv_gpu.cpp
+ZSRC += testing_zcposv_gpu.cpp	\
+	testing_zcgesv_gpu.cpp
 endif
 
-#	testing_zcgesv_gpu.cpp	\
 #	testing_zcgeqrsv_gpu.cpp\
 #	
 
