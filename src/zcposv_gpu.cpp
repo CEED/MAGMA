@@ -178,15 +178,12 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS,
 
   int PTSA  = N*NRHS;
   int PTSX  = 0 ;  
-  float RMAX = lapackf77_slamch("O");
   int IITER ;
   cuDoubleComplex alpha = c_neg_one;
   cuDoubleComplex beta = c_one; 
   cuDoubleComplex XNRM[1] , RNRM[1]; 
-  cuFloatComplex RMAX_cplx;
-  MAGMA_Z_SET2REAL( RMAX_cplx, RMAX );
  
-  magmablas_zlag2c(N , NRHS , B , LDB , dworks+PTSX, N , RMAX_cplx );
+  magmablas_zlag2c(N , NRHS , B , LDB , dworks+PTSX, N, INFO );
   if(*INFO !=0){
     *ITER = -2 ;
     goto L40;
@@ -232,7 +229,7 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS,
 
   for(IITER=1;IITER<ITERMAX;){
     *INFO = 0 ; 
-    magmablas_zlag2c(N, NRHS, dworkd, N, dworks+PTSX, N, RMAX_cplx);
+    magmablas_zlag2c(N, NRHS, dworkd, N, dworks+PTSX, N, INFO );
     if(*INFO !=0){
       *ITER = -2 ;
       goto L40;

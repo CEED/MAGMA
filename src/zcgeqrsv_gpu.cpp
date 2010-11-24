@@ -207,19 +207,17 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS, double2 *A, m
   ANRM = magma_zlange('I', N, N , A, LDA, WORK );
   CTE = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;
   int PTSA  = N*NRHS;
-  float RMAX = lapackf77_slamch("O");
   int IITER ;
   double2 alpha = c_neg_one;
   double2 beta = c_one;
-  float2 RMAX_cplx;
-  MAGMA_Z_SET2REAL( RMAX_cplx, RMAX );
-  magmablas_zlag2c(N , NRHS , B , LDB , SWORK, N , RMAX_cplx );
+
+  magmablas_zlag2c(N, NRHS, B, LDB, SWORK, N, INFO );
   if(*INFO !=0){
     *ITER = -2 ;
     printf("magmablas_zlag2c\n");
     goto L40;
   }
-  magmablas_zlag2c(N , N , A , LDA , SWORK+PTSA, N , RMAX_cplx ); // Merge with DLANGE /
+  magmablas_zlag2c(N, N, A, LDA, SWORK+PTSA, N, INFO ); // Merge with DLANGE /
   if(*INFO !=0){
     *ITER = -2 ;
     printf("magmablas_zlag2c\n");
@@ -277,7 +275,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS, double2 *A, m
         Solve the system SA*SX = SR.
         -- These two Tasks are merged here. */
     // make SWORK = WORK ... residuals... 
-    magmablas_zlag2c(N , NRHS, WORK, LDB, SWORK, N, RMAX_cplx );
+    magmablas_zlag2c(N , NRHS, WORK, LDB, SWORK, N, INFO );
     magma_cgeqrs_gpu(M, N, NRHS, SWORK+PTSA, N, tau, SWORK,
 		     M, h_work, lwork, d_work, INFO);
     if(INFO[0] !=0){
