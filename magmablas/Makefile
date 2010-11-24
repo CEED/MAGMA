@@ -27,6 +27,7 @@ FERMISRC =	sgemm_fermi.cu \
 		ssymv_fermi.cu \
 	        dsymv_fermi.cu \
 		zsymv_fermi.cu \
+		csymv_fermi.cu \
 		chemv_fermi.cu \
 	        zhemv_fermi.cu \
                 \
@@ -43,6 +44,7 @@ TESLASRC =      sgemv_tesla.cu 	\
 	        ssymv_tesla.cu 	\
 	        dsymv_tesla.cu 	\
 	        chemv_tesla.cu 	\
+		    csymv_tesla.cu \
 	        \
 	        sgemm_tesla.cu 					\
 		sgemm_tesla_a_0.cu 				\
