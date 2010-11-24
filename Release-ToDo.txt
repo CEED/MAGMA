@@ -88,7 +88,8 @@ DONE 6.       Mathieu     Update the Makefile to the same comportement as PLASMA
 15.            Peng        Fix a bug in gemm on Fermi for big matrices
 ---------------------------------------------------------------------------------
 16.            Stan        Fix a bug in clean up with trd
-
-
+---------------------------------------------------------------------------------
+17.                        {d,z}getrf give wrong results
+                           {c,d,z}getrf_gpu give wrong results
 
  
