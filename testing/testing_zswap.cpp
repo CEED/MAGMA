@@ -17,27 +17,11 @@
 #include <cuda_runtime_api.h>
 #include <cublas.h>
 
-//#define CHECK2
 // includes, project
 #include "magma.h"
 #include "magmablas.h"
 
 #define PRECISION_z
-
-static int printMatrix( cuDoubleComplex *A, int m, int n, int lda){
-    int i, j;
-    printf("-----------------------------------------------\n");
-#if defined(PRECISION_d) ||defined(PRECISION_s)
-    for(i=0; i<m; i++) {
-      for(j=0; j<n; j++){
-        printf( "%e ", A[lda*j+i]);
-      }
-      printf("\n");
-    }
-#endif
-    printf("-----------------------------------------------\n");
-    return 0;
-}
 
 static int diffMatrix( cuDoubleComplex *A, cuDoubleComplex *B, int m, int n, int lda){
     int i, j;
