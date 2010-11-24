@@ -26,6 +26,7 @@ FERMISRC =	sgemm_fermi.cu \
 	        dgemm_fermi.cu \
 		ssymv_fermi.cu \
 	        dsymv_fermi.cu \
+		zsymv_fermi.cu \
 		chemv_fermi.cu \
 	        zhemv_fermi.cu \
                 \
