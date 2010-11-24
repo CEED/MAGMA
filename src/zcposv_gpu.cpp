@@ -173,8 +173,9 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS,
 
   double ANRM , CTE , EPS;
   EPS  = lapackf77_dlamch("Epsilon");
-  ANRM = magmablas_zlanhe(  'I',  UPLO , N ,A, LDA, (double*)dworkd);
-  CTE  = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;  
+
+  //ANRM = magmablas_zlanhe(  'I',  UPLO , N ,A, LDA, (double*)dworkd);
+  //CTE  = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;  
 
   int PTSA  = N*NRHS;
   int PTSX  = 0 ;  
@@ -193,7 +194,11 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS,
   if(*INFO !=0){
     *ITER = -2 ;
     goto L40;
-  }   
+  }
+ 
+  ANRM = magmablas_clanhe(  'I',  UPLO , N , dworks+PTSA, N, (float *)dworkd);
+  CTE  = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;
+
   magma_cpotrf_gpu(UPLO, N, dworks+ PTSA, LDA, INFO);
   if(INFO[0] !=0){
     *ITER = -3 ;
