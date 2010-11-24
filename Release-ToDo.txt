@@ -91,5 +91,7 @@ DONE 6.       Mathieu     Update the Makefile to the same comportement as PLASMA
 ---------------------------------------------------------------------------------
 17.                        {d,z}getrf give wrong results
                            {c,d,z}getrf_gpu give wrong results
-
+---------------------------------------------------------------------------------
+18.                        The number of flops has to be adjusted for the complex
+                           versions in testing for measuring performance.
  
