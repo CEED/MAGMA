@@ -75,6 +75,7 @@ TESLASRC =      sgemv_tesla.cu 	\
 
 ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
         dlansy.cu       \
+        dlange.cu       \
         dgemv_MLU.cu
 
 ifeq (${GPU_TARGET}, 0)
