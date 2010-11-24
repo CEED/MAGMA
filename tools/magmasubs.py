@@ -67,6 +67,8 @@ subs = {
     ('lapackf77_c','lapackf77_s'),
     ('blasf77_z','blasf77_d'),
     ('blasf77_c','blasf77_s'),
+    ('cuComplexFloatToDouble','(double)'),
+    ('cuComplexDoubleToFloat','(float)'),
   ],
   'normal' : [ ## Dictionary is keyed on substitution type
     ['s','d','c','z'], ## Special Line Indicating type columns

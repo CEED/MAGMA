@@ -4,12 +4,16 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+
+       @precisions normal z -> s d c
+
 */
 
 #include <stdio.h>
+#include <cublas.h>
 
 static __global__ void 
-dlacpy_generic(int M, int N, double *A, int LDA, double *B, int LDB ) 
+zlacpy_generic(int M, int N, cuDoubleComplex *A, int LDA, cuDoubleComplex *B, int LDB ) 
 { 
     int ibx = blockIdx.x * 64;
     int tx  = threadIdx.x;
@@ -24,8 +28,8 @@ dlacpy_generic(int M, int N, double *A, int LDA, double *B, int LDB )
         A += ibx+idt;
         B += ibx+idt;
     }
-    const double * Aend = A+LDA*N;
-    double Ap[1]={A[0]};
+    const cuDoubleComplex * Aend = A+LDA*N;
+    cuDoubleComplex Ap[1]={A[0]};
     do {
         A += LDA;
         B[0] = Ap[0];
@@ -36,7 +40,7 @@ dlacpy_generic(int M, int N, double *A, int LDA, double *B, int LDB )
 }
 
 static __global__ void 
-dlacpy_special(int M, int N, double *A, int LDA, double *B, int LDB ) 
+zlacpy_special(int M, int N, cuDoubleComplex *A, int LDA, cuDoubleComplex *B, int LDB ) 
 { 
     int ibx = blockIdx.x * 64;
     int tx  = threadIdx.x;
@@ -50,23 +54,23 @@ dlacpy_special(int M, int N, double *A, int LDA, double *B, int LDB )
         A += ibx+idt;
         B += ibx+idt;
     }
-    double Ap[1]={A[0]};
+    cuDoubleComplex Ap[1]={A[0]};
     B[0] = Ap[0];
 }
 
 extern "C" void 
-magmablas_dlacpy_64_64_16_4_v2(int M, int N, double *A, int LDA, double *B, int LDB )
+magmablas_zlacpy_64_64_16_4_v2(int M, int N, cuDoubleComplex *A, int LDA, cuDoubleComplex *B, int LDB )
 {
         dim3 threads( 16, 4 );
         dim3 grid( M/64+(M%64!=0), 1 );
 	if( N == 1 ) 
-            dlacpy_special<<< grid, threads >>> ( M, N, A, LDA, B, LDB ) ;
+            zlacpy_special<<< grid, threads >>> ( M, N, A, LDA, B, LDB ) ;
 	else	
-            dlacpy_generic<<< grid, threads >>> ( M, N, A, LDA, B, LDB ) ;
+            zlacpy_generic<<< grid, threads >>> ( M, N, A, LDA, B, LDB ) ;
 }
 
 extern "C" void 
-magmablas_dlacpy(char uplo, int M, int N, double *A, int LDA, double *B, int LDB)
+magmablas_zlacpy(char uplo, int M, int N, cuDoubleComplex *A, int LDA, cuDoubleComplex *B, int LDB)
 {
 /*
     Note
@@ -77,7 +81,7 @@ magmablas_dlacpy(char uplo, int M, int N, double *A, int LDA, double *B, int LDB
   Purpose
   =======
 
-  DLACPY copies all or part of a two-dimensional matrix A to another
+  ZLACPY copies all or part of a two-dimensional matrix A to another
   matrix B.
 
   Arguments
@@ -95,7 +99,7 @@ magmablas_dlacpy(char uplo, int M, int N, double *A, int LDA, double *B, int LDB
   N       (input) INTEGER
           The number of columns of the matrix A.  N >= 0.
 
-  A       (input) DOUBLE PRECISION array, dimension (LDA,N)
+  A       (input) COMPLEX DOUBLE PRECISION array, dimension (LDA,N)
           The m by n matrix A.  If UPLO = 'U', only the upper triangle
           or trapezoid is accessed; if UPLO = 'L', only the lower
           triangle or trapezoid is accessed.
@@ -103,14 +107,19 @@ magmablas_dlacpy(char uplo, int M, int N, double *A, int LDA, double *B, int LDB
   LDA     (input) INTEGER
           The leading dimension of the array A.  LDA >= max(1,M).
 
-  B       (output) DOUBLE PRECISION array, dimension (LDB,N)
+  B       (output) COMPLEX DOUBLE PRECISION array, dimension (LDB,N)
           On exit, B = A in the locations specified by UPLO.
 
   LDB     (input) INTEGER
           The leading dimension of the array B.  LDB >= max(1,M).
 
   =====================================================================   */
-        int INFO ;
-        INFO = 0 ;  
-	magmablas_dlacpy_64_64_16_4_v2(M, N, A, LDA, B, LDB);
+
+    if ( (uplo == 'U') || (uplo == 'u') ) {
+        fprintf(stderr, "Lacpy upper is not implemented\n");
+    } else if ( (uplo == 'L') || (uplo == 'l') ) {
+        fprintf(stderr, "Lacpy lower is not implemented\n");
+    } else {
+	magmablas_zlacpy_64_64_16_4_v2(M, N, A, LDA, B, LDB);
+    }
 }

@@ -13,7 +13,9 @@ ZSRC  = zauxiliary.cu	\
 	zpermute-v2.cu	\
 	zswap.cu	\
 	zswapblk.cu	\
+	zlacpy.cu	\
 	zclaswp.cu 	\
+        zcaxpycp.cu     \
 	ztranspose.cu 	\
 	ztranspose-v2.cu\
 	zinplace_transpose.cu
@@ -69,10 +71,8 @@ TESLASRC =      sgemv_tesla.cu 	\
 
 ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
         dlag2s.cu 	\
-        dlacpy.cu       \
         dlansy.cu       \
         dlat2s.cu       \
-        dsaxpycp.cu     \
         slag2d.cu 	\
         dgemv_MLU.cu
 
