@@ -78,7 +78,7 @@ magmablas_dgemv_MLU(int n, int m, double *A, int lda, double *x, double *z)
     Purpose
     =======
 
-    This routine computes z = A x on the GPU.
+    This routine computes z = z - Ax on the GPU.
 
     N      - (input) INTEGER.
              On entry, N specifies the number of rows of the matrix A.
@@ -94,7 +94,7 @@ magmablas_dgemv_MLU(int n, int m, double *A, int lda, double *x, double *z)
     X      - (input) DOUBLE PRECISION array of dimension m.
      
     Z      - (output) DOUBLE PRECISION array of	dimension m. 
-             On exit Z = A X.
+             On exit Z = A - A X.
 
     ===================================================================== */
 
