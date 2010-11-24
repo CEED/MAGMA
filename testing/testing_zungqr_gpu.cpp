@@ -23,25 +23,6 @@
 
 #define min(a,b)  (((a)<(b))?(a):(b))
 
-static double cpu_gpu_sdiff(int M, int N, 
-                            cuDoubleComplex * a, int lda, 
-                            cuDoubleComplex *da, int ldda)
-{
-  int one = 1, j;
-  cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
-  double work[1];
-  cuDoubleComplex *ha = (cuDoubleComplex*)malloc( M * N * sizeof(cuDoubleComplex));
-
-  cublasGetMatrix(M, N, sizeof(cuDoubleComplex), da, ldda, ha, M);
-  for(j=0; j<N; j++)
-    blasf77_zaxpy(&M, &mone, a+j*lda, &one, ha+j*M, &one);
-  double res = lapackf77_zlange("f", &M, &N, ha, &M, work);
-
-  free(ha);
-  return res;
-}
-
-
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing sorgqr_gpu
 */
