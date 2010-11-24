@@ -20,18 +20,13 @@ extern "C" {
 
 double cpu_gpu_zdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda);
 
-
-  /* Maybe these functions should be in magma_z because they are not blas */
-double magma_zlange(char norm, magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda, double2 *work);
-double magma_zlansy(char norm, char uplo, magma_int_t n, double2 *A, magma_int_t lda, double2 *work);
-void   magma_zlacpy(magma_int_t, magma_int_t, double2 *, magma_int_t, double2 *, magma_int_t);
-
   /* to make prescision generation easier, we should add a prefix like magma_ to these functions */
 void   zzero_32x32_block(double2 *, magma_int_t);
 void   zzero_nbxnb_block(magma_int_t, double2 *, magma_int_t);
 
-void magmablas_zlaset(magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda);
-void magmablas_zlacpy( char uplo, magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda, double2 *B, magma_int_t ldb);
+void   magmablas_zlaset(magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda);
+void   magmablas_zlacpy( char uplo, magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda, double2 *B, magma_int_t ldb);
+double magmablas_zlange( char norm, magma_int_t m, magma_int_t n, double2 *A, magma_int_t lda, double *WORK);
 double magmablas_zlanhe( char norm, char uplo, magma_int_t n, double2 *A, magma_int_t lda, double *WORK);
 double magmablas_zlansy( char norm, char uplo, magma_int_t n, double2 *A, magma_int_t lda, double *WORK);
 
