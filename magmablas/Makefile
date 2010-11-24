@@ -16,11 +16,12 @@ ZSRC  = zauxiliary.cu	\
 	zlacpy.cu	\
 	zclaswp.cu 	\
         zcaxpycp.cu     \
-	zlat2c.cu       \
 	zlag2c.cu       \
 	ztranspose.cu 	\
 	ztranspose-v2.cu\
 	zinplace_transpose.cu
+
+#	zlat2c.cu       \
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
@@ -72,7 +73,6 @@ TESLASRC =      sgemv_tesla.cu 	\
 # 		zhemv_tesla.cu
 
 ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
-        dlag2s.cu 	\
         dlansy.cu       \
         slag2d.cu 	\
         dgemv_MLU.cu

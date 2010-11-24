@@ -69,9 +69,10 @@ subs = {
     ('blasf77_c','blasf77_s'),
     ('cuComplexFloatToDouble','(double)'),
     ('cuComplexDoubleToFloat','(float)'),
-    ('cuCabs', 'abs' ),
+    ('cuCabs', 'abs' ),  
     ('cuCabsf','absf'),
-  ],
+    ('zcaxpy','dsaxpy'),
+    ],
   'normal' : [ ## Dictionary is keyed on substitution type
     ['s','d','c','z'], ## Special Line Indicating type columns
     ('#define PRECISION_s', '#define PRECISION_d', '#define PRECISION_c', '#define PRECISION_z' ),
