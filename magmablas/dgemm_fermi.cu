@@ -673,22 +673,33 @@ magmablas_dgemm(char TRANSA, char TRANSB, int m , int n , int k ,
             Unchanged on exit.
    =====================================================================    */
 
-	if (m<=0 || n<=0 || k<=0)
+   if (m<=0 || n<=0 || k<=0)
 	   return;
 
-	size_t offsetA = 0;
-        size_t offsetB = 0;
+			size_t offsetA = 0;
+			size_t offsetB = 0;
 
-        int TransA = 1, TransB = 1;
-        if (TRANSA == 'N' ||  TRANSA == 'n')
-           TransA = 0;
-        if (TRANSB == 'N' ||  TRANSB == 'n')
-           TransB = 0;
+			int TransA = 1, TransB = 1;
+			if (TRANSA == 'N' ||  TRANSA == 'n')
+				TransA = 0;
+			if (TRANSB == 'N' ||  TRANSB == 'n')
+				TransB = 0;
 
-	size_t sizeA = (size_t) lda * (size_t) (!TransA ? k : m);
-        size_t sizeB = (size_t) ldb * (size_t) (!TransB ? n : k);
+			size_t sizeA = (size_t) lda * (size_t) (!TransA ? k : m);
+			size_t sizeB = (size_t) ldb * (size_t) (!TransB ? n : k);
+ 	
+			size_t CUBLAS_MAX_1DBUF_SIZE = ((1 << 27) - 512)/2;
+	if (sizeA>=CUBLAS_MAX_1DBUF_SIZE ||
+			sizeB>=CUBLAS_MAX_1DBUF_SIZE )
+	{
+	//	printf("Exceeding texuture limit (CUBLAS_MAX_1DBUF_SIZE=%ld), using cublasSgemm\n", CUBLAS_MAX_1DBUF_SIZE);
+		cublasDgemm(TRANSA, TRANSB, m, n, k, alpha,
+				A, lda, B, ldb,
+				beta, C, ldc);
+		return;
+	}
 
-	cudaError_t  errt;
+			cudaError_t  errt;
 	errt = cudaBindTexture(&offsetA, tex_x_double_A, (int2 *)A,
                                sizeA * sizeof(A[0]));
 	if( errt != cudaSuccess) 
