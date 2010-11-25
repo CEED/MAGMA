@@ -24,8 +24,9 @@ test_l_ssymv_special_v6_ts_tesla(int n, float alpha,  float* A, int lda, float *
   float res_ = 0.f;
   float res1 = 0.f ; 
 
-  __shared__ float la   [16][66]; 
+  __shared__ float la   [16][67]; 
   __shared__ float buff [64];
+  __shared__ float buff2 [64];
 
   float tr[4];
   float b[4];
@@ -175,9 +176,7 @@ test_l_ssymv_special_v6_ts_tesla(int n, float alpha,  float* A, int lda, float *
    A-=tx_; 
 
    A= A - lda * blkc * 64;
-   x= x - blkc * 64  *incx  ; 
-   
-   x= x- tx*incx;  
+   x= x - blkc * 64  *incx  ;   
 
    A+=4 * ty* lda  ;  
    A+=tx; 
@@ -199,6 +198,12 @@ test_l_ssymv_special_v6_ts_tesla(int n, float alpha,  float* A, int lda, float *
 	 {
 		res_=0.f;
 		count++;
+		if(ty == 0){
+			buff2[tx] = x[i*incx];
+			if(tx <= kstan)
+				buff2[tx] = 0.0;
+		}
+	 	__syncthreads();
 
        #pragma unroll  
        for( int k=0;k<4;k++)
@@ -210,7 +215,7 @@ test_l_ssymv_special_v6_ts_tesla(int n, float alpha,  float* A, int lda, float *
 	 	   #pragma unroll  
 			for(int j=0; j < 4 ; j++)
 			{
-				res += tr[j] * x[ 16 * k + ty * 4 + j];
+				res += tr[j] * buff2[ 16 * k + ty * 4 + j];
 	
             	la[( j + ty * 4)][tx] = tr[j] * buff[tx]; 
 			}
@@ -258,6 +263,9 @@ test_l_ssymv_special_v6_ts_tesla(int n, float alpha,  float* A, int lda, float *
   {
 	    res_=0.f;
 		count++;
+		if(ty == 0)
+			buff2[tx] = x[i*incx];
+        __syncthreads();
 		
 		#pragma unroll  
 		for( int k=0;k<4;k++)
@@ -268,7 +276,7 @@ test_l_ssymv_special_v6_ts_tesla(int n, float alpha,  float* A, int lda, float *
 			 #pragma unroll  
 			for(int j=0; j < 4 ; j++)
 			{
-				 res += tr[j] * x[ i + 16*k + ty*4+(j)];
+				 res += tr[j] * buff2[ 16*k + ty*4+(j)];
 		         la[( j + ty * 4)][tx] = tr[j] * buff[tx]; 
 			}
 			__syncthreads();
@@ -347,7 +355,7 @@ test_l_ssymv_generic_v6_ts_tesla(int n, float alpha, float* A, int lda, float *x
   int blkc= blockIdx.x ;
   float res = 0.f;
   float res_ = 0.f;
-  __shared__ float la   [16][66];  
+  __shared__ float la   [16][67];  
   __shared__ float buff [64];
   __shared__ float buff2 [64];
   float tr[4];

@@ -6,7 +6,6 @@
 #define thread_x 64
 #define thread_y 4
 
-#define magmablas_dsymv_tesla magmablas_dsymv
 
 __global__ void
 test_l_dsymv_special_v6_ts_tesla(int n, double alpha,  double* A, int lda, double *x, 
@@ -25,8 +24,9 @@ test_l_dsymv_special_v6_ts_tesla(int n, double alpha,  double* A, int lda, doubl
   double res_ = 0.f;
   double res1 = 0.f ; 
 
-  __shared__ double la   [16][66]; 
+  __shared__ double la   [16][67]; 
   __shared__ double buff [64];
+  __shared__ double buff2 [64];
 
   double tr[4];
   double b[4];
@@ -178,7 +178,6 @@ test_l_dsymv_special_v6_ts_tesla(int n, double alpha,  double* A, int lda, doubl
    A= A - lda * blkc * 64;
    x= x - blkc * 64  *incx  ; 
    
-   x= x- tx*incx; 
 
    A+=4 * ty* lda  ;  
    A+=tx; 
@@ -199,6 +198,12 @@ test_l_dsymv_special_v6_ts_tesla(int n, double alpha,  double* A, int lda, doubl
 	 {
 		res_=0.f;
 		count++;
+		if( ty == 0){
+			buff2[tx] = x[i*incx];
+			if(tx <= kstan)
+				buff2[tx] = 0.0f;
+		}
+	 	__syncthreads();
        #pragma unroll  
        for( int k=0;k<4;k++)
 	   {
@@ -209,7 +214,7 @@ test_l_dsymv_special_v6_ts_tesla(int n, double alpha,  double* A, int lda, doubl
 	 	   #pragma unroll  
 			for(int j=0; j < 4 ; j++)
 			{
-				res += tr[j] * x[ 16 * k + ty * 4 + j];
+				res += tr[j] * buff2[ 16 * k + ty * 4 + j];
 
             	la[( j + ty * 4)][tx] = tr[j] * buff[tx]; 
 			}
@@ -256,6 +261,9 @@ test_l_dsymv_special_v6_ts_tesla(int n, double alpha,  double* A, int lda, doubl
   {
 	    res_=0.f;
 		count++;
+		if(ty==0)
+			buff2[tx] = x[i*incx];
+        __syncthreads();
 
 		#pragma unroll  
 		for( int k=0;k<4;k++)
@@ -266,7 +274,7 @@ test_l_dsymv_special_v6_ts_tesla(int n, double alpha,  double* A, int lda, doubl
 			 #pragma unroll  
 			for(int j=0; j < 4 ; j++)
 			{
-				 res += tr[j] * x[ i + 16*k + ty*4+(j)];
+				 res += tr[j] * buff2[  16*k + ty*4+(j)];
 		         la[( j + ty * 4)][tx] = tr[j] * buff[tx]; 
 			}
 			__syncthreads();
@@ -344,7 +352,7 @@ test_l_dsymv_generic_v6_ts_tesla(int n, double alpha, double* A, int lda, double
   int blkc= blockIdx.x ;
   double res = 0.f;
   double res_ = 0.f;
-  __shared__ double la   [16][66];  
+  __shared__ double la   [16][67];  
   __shared__ double buff [64];
   __shared__ double buff2 [64];
   double tr[4];
@@ -767,7 +775,7 @@ void magmablas_dsymv6_tesla(char uplo, int m, double alpha, double *A, int lda,
 
 extern "C"
 void  magmablas_dsymv_tesla( char uplo , int m , double alpha,  double *A , int lda , 
-	 		    double *X , int incx, double beta, double *Y, int incy)
+				double *X , int incx, double beta, double *Y, int incy)
 {
 
 	

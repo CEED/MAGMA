@@ -85,8 +85,9 @@ test_l_chemv_special_v6_ts_tesla(int n, float2 alpha,  float2* A, int lda, float
   float2 res_ = zero;
   float2 res1 = zero; 
 
-  __shared__ float2 la   [16][66]; 
+  __shared__ float2 la   [16][67]; 
   __shared__ float2 buff [64];
+  __shared__ float2 buff2 [64];
 
   float2 tr[4];
   float2 b[4];
@@ -238,7 +239,6 @@ test_l_chemv_special_v6_ts_tesla(int n, float2 alpha,  float2* A, int lda, float
    A= A - lda * blkc * 64;
    x= x - blkc * 64  *incx  ; 
    
-   x= x- tx*incx; 
 
    A+=4 * ty* lda  ;  
    A+=tx; 
@@ -259,6 +259,12 @@ test_l_chemv_special_v6_ts_tesla(int n, float2 alpha,  float2* A, int lda, float
 	 {
 		res_=zero;
 		count++;
+		if(ty==0){
+			buff2 [tx] = x[i*incx];
+			if(tx <= kstan)
+				buff2[tx] = zero;
+        }
+	   __syncthreads();
        #pragma unroll  
        for( int k=0;k<4;k++)
 	   {
@@ -269,7 +275,7 @@ test_l_chemv_special_v6_ts_tesla(int n, float2 alpha,  float2* A, int lda, float
 	 	   #pragma unroll  
 			for(int j=0; j < 4 ; j++)
 			{
-				res += tr[j] * x[ 16 * k + ty * 4 + j];
+				res += tr[j] * buff2[ 16 * k + ty * 4 + j];
             	la[( j + ty * 4)][tx] = conjugate(tr[j]) * buff[tx]; 
 			}
 	 		  __syncthreads();
@@ -315,6 +321,9 @@ test_l_chemv_special_v6_ts_tesla(int n, float2 alpha,  float2* A, int lda, float
   {
 	    res_=zero;
 		count++;
+        if(ty == 0)
+			buff2[tx] = x[i*incx];
+        __syncthreads();
 
 		#pragma unroll  
 		for( int k=0;k<4;k++)
@@ -325,7 +334,7 @@ test_l_chemv_special_v6_ts_tesla(int n, float2 alpha,  float2* A, int lda, float
 			 #pragma unroll  
 			for(int j=0; j < 4 ; j++)
 			{
-				 res += tr[j] * x[ i + 16*k + ty*4+(j)];
+				 res += tr[j] * buff2[ 16*k + ty*4+(j)];
 		         la[( j + ty * 4)][tx] = conjugate( tr[j] )* buff[tx]; 
 			}
 			__syncthreads();
@@ -404,7 +413,7 @@ test_l_chemv_generic_v6_ts_tesla(int n, float2 alpha, float2* A, int lda, float2
   float2 zero = {0.0f, 0.0f};
   float2 res = zero;
   float2 res_ = zero;
-  __shared__ float2 la   [16][66];  
+  __shared__ float2 la   [16][67];  
   __shared__ float2 buff [64];
   __shared__ float2 buff2 [64];
   float2 tr[4];
