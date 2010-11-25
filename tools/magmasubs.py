@@ -75,6 +75,10 @@ subs = {
     ('zcaxpy','dsaxpy'),
     ('magma_get_c','magma_get_s'),
     ('magma_get_z','magma_get_d'),
+    ('#define PRECISION_z', '#define PRECISION_d'),
+    ('#define PRECISION_c', '#define PRECISION_s'),
+    ('#undef PRECISION_z', '#undef PRECISION_d'),
+    ('#undef PRECISION_c', '#undef PRECISION_s'),
     ],
   'normal' : [ ## Dictionary is keyed on substitution type
     ['s','d','c','z'], ## Special Line Indicating type columns
