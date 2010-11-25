@@ -16,7 +16,7 @@
 #include <cuda.h>
 #include <cublas.h>
 
-//#define magmablas_sgemm magmablas_sgemm_fermi
+#define magmablas_sgemm_fermi magmablas_sgemm
 
 texture<float,1>  tex_x_float_A;
 texture<float,1>  tex_x_float_B;
@@ -606,10 +606,10 @@ fermiSgemm_v2_kernel_NT(float *C, const float *A, const float *B,
 //=================================================================================
 
 extern "C" void
-magmablas_sgemm(char TRANSA, char TRANSB, 
-                int m , int n , int k , float alpha, 
-                const float *A, int lda, const float *B, int ldb, 
-                float beta, float *C, int ldc ) 
+magmablas_sgemm_fermi( char TRANSA, char TRANSB, int m , int n , int k , 
+                       float alpha, const float *A, int lda, 
+                                    const float *B, int ldb, 
+                       float beta,        float *C, int ldc ) 
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville

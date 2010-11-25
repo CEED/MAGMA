@@ -15,12 +15,13 @@
 #include "magma.h"
 #include "magmablas.h"
 
-//#define magmablas_dgemm magmablas_dgemm_tesla
+#define magmablas_dgemm_tesla magmablas_dgemm
 
 extern "C" void 
-magmablas_dgemm(char TRANSA, char TRANSB, int m , int n , int k , 
-                double alpha, const double *A, int lda, const double *B, 
-                int ldb, double beta, double *C, int ldc)
+magmablas_dgemm_tesla( char TRANSA, char TRANSB, int m , int n , int k , 
+                       double alpha, const double *A, int lda, 
+                                     const double *B, int ldb,
+                       double beta,        double *C, int ldc)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
