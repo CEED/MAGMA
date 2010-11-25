@@ -19,32 +19,32 @@
 #      0: Tesla Family
 #      1: Fermi Family
 #
-	GPU_TARGET = 1
+GPU_TARGET = 1
 
-	CC        = gcc
-	NVCC      = nvcc
-	FORT      = gfortran
+CC        = gcc
+NVCC      = nvcc
+FORT      = gfortran
 
-	ARCH      = ar
-	ARCHFLAGS = cr
-	RANLIB    = ranlib
+ARCH      = ar
+ARCHFLAGS = cr
+RANLIB    = ranlib
 
-	OPTS      = -O3 -DADD_
-	NVOPTS    = --compiler-options -fno-strict-aliasing -DUNIX -O3
-	LDOPTS    = -fPIC -L/mnt/scratch/sw/intel/11.1.069/lib/intel64 -L/mnt/scratch/sw/intel/11.1.069/mkl/lib/em64t
+OPTS      = -O3 -DADD_
+NVOPTS    = --compiler-options -fno-strict-aliasing -DUNIX -O3 -DADD_
+LDOPTS    = -fPIC -L/mnt/scratch/sw/intel/11.1.069/lib/intel64 -L/mnt/scratch/sw/intel/11.1.069/mkl/lib/em64t
 
-	LIB       = -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_core -lguide -lpthread -lcublas -lm -fopenmp
+LIB       = -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_core -lguide -lpthread -lcublas -lm -fopenmp
 
-#	CUDADIR   = /mnt/scratch/cuda/
-#	CUDADIR   = /mnt/scratch/cuda-2.3
-#	CUDADIR   = /mnt/scratch/cuda-3.0/cuda/
-#	CUDADIR   = /mnt/scratch/cuda-3.1/cuda
-	CUDADIR   = /mnt/scratch/cuda-3.2/
+#CUDADIR   = /mnt/scratch/cuda/
+#CUDADIR   = /mnt/scratch/cuda-2.3
+#CUDADIR   = /mnt/scratch/cuda-3.0/cuda/
+#CUDADIR   = /mnt/scratch/cuda-3.1/cuda
+CUDADIR   = /mnt/scratch/cuda-3.2/
 
-	LIBDIR    = -L/mnt/scratch/sw/intel/11.1.069/lib/intel64 \
-                    -L$(CUDADIR)/lib64
+LIBDIR    = -L/mnt/scratch/sw/intel/11.1.069/lib/intel64 \
+            -L$(CUDADIR)/lib64
 
-	INC       = -I../include -I$(CUDADIR)/include
-	
-	LIBMAGMA     = ../lib/libmagma.a
-	LIBMAGMABLAS = ../lib/libmagmablas.a
+INC       = -I../include -I$(CUDADIR)/include
+
+LIBMAGMA     = ../lib/libmagma.a
+LIBMAGMABLAS = ../lib/libmagmablas.a

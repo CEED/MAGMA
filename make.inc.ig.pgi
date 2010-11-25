@@ -23,8 +23,7 @@ RANLIB    = ranlib
 
 OPTS      = -O0 -DADD_ -m64
 NOMAIN    = -Mnomain
-NVOPTS    = --compiler-options -fno-strict-aliasing  -arch sm_13 \
-            -DUNIX 
+NVOPTS    = --compiler-options -fno-strict-aliasing -DUNIX -DADD_
 LDOPTS    = -fPIC
 
 LIB       = -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread -lcublas -lcudart -lm -lcudafor
