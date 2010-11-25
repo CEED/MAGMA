@@ -150,8 +150,8 @@ magma_zgeqrf_gpu2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t 
     cuDoubleComplex *work;
     cublasStatus status = cudaMallocHost((void**)&work, lwork*sizeof(cuDoubleComplex));
     if (status != CUBLAS_STATUS_SUCCESS) {
-      magma_xerbla( "magma_zgeqrf_gpu2", -9 );
       *info = -9;
+      magma_xerbla( "magma_zgeqrf_gpu2", info );
       return 0;
     }
 
