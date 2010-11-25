@@ -10,30 +10,29 @@
 */
 #include <stdio.h>
 #include <math.h>
+#include <cublas.h>
+#include <cuda.h>
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include "magma.h"
 #include "magmablas.h"
-#include "magma.h"
-#include "cublas.h"
-#include "cuda.h"
-#include "cuda.h"
-#include "cuda_runtime_api.h"
-#include "cublas.h"
-#include "magma.h"
 
 #define BWDMAX 1.0
 #define ITERMAX 30
 
 extern "C" magma_int_t
 magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS, 
-                   double2 *A, magma_int_t LDA, 
-                   double2 *B, magma_int_t LDB, 
-                   double2 *X, magma_int_t LDX, 
-                   double2 *WORK, float2 *SWORK, 
+                   cuDoubleComplex *A, magma_int_t LDA, 
+                   cuDoubleComplex *B, magma_int_t LDB, 
+                   cuDoubleComplex *X, magma_int_t LDX, 
+                   cuDoubleComplex *WORK, cuFloatComplex *SWORK, 
 		   magma_int_t *ITER, magma_int_t *INFO,
-                   float2 *tau, magma_int_t lwork, 
-                   float2 *h_work, float2 *d_work, 
-                   double2 *tau_d, magma_int_t lwork_d, 
-                   double2 *h_work_d,
-		   double2 *d_work_d)
+                   cuFloatComplex *tau, magma_int_t lwork, 
+                   cuFloatComplex *h_work, cuFloatComplex *d_work, 
+                   cuDoubleComplex *tau_d, magma_int_t lwork_d, 
+                   cuDoubleComplex *h_work_d,
+		   cuDoubleComplex *d_work_d)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -179,166 +178,174 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
 
   #define max(a,b)       (((a)>(b))?(a):(b))
 
-  double2 c_neg_one = MAGMA_Z_NEG_ONE;
-  double2 c_one = MAGMA_Z_ONE;
-  int c_ione = 1;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    int             c_ione    = 1;
+    cuDoubleComplex XNRMv, RNRMv; 
+    double          XNRM, RNRM; 
+    double          ANRM , CTE , EPS;
+    int             IITER, PTSA;
+    int             i, j;
 
-  /*
-    Check The Parameters. 
-  */
-  *ITER = 0 ;
-  *INFO = 0 ;
-  if ( N <0)
-    *INFO = -1;
-  else if(NRHS<0)
-    *INFO =-3;
-  else if(LDA < max(1,N))
-    *INFO =-5;
-  else if( LDB < max(1,N))
-    *INFO =-7;
-  else if( LDX < max(1,N))
-    *INFO =-9;
-
-  if(*INFO!=0){
-    printf("%d %d %d\n", M , N , NRHS);
-    magma_xerbla("magma_zcgeqrsv_gpu",INFO) ;
-  }
-
-  if( N == 0 || NRHS == 0 )
-    return 0;
-
-  double ANRM , CTE , EPS;
-
-  EPS  = lapackf77_dlamch("Epsilon");
-  ANRM = magmablas_zlange('I', N, N , A, LDA, (double*)WORK );
-  CTE = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;
-  int PTSA  = N*NRHS;
-  int IITER ;
-  double2 alpha = c_neg_one;
-  double2 beta = c_one;
-
-  magmablas_zlag2c(N, NRHS, B, LDB, SWORK, N, INFO );
-  if(*INFO !=0){
-    *ITER = -2 ;
-    printf("magmablas_zlag2c\n");
-    goto L40;
-  }
-  magmablas_zlag2c(N, N, A, LDA, SWORK+PTSA, N, INFO ); // Merge with DLANGE /
-  if(*INFO !=0){
-    *ITER = -2 ;
-    printf("magmablas_zlag2c\n");
-    goto L40;
-  }
-  double2 XNRM[1] , RNRM[1] ;
-
-  // In an ideal version these variables should come from user.
-  magma_cgeqrf_gpu2(M, N, SWORK+PTSA, N, tau, d_work, INFO);
-
-  if(INFO[0] !=0){
-    *ITER = -3 ;
-    goto L40;
-  }
-
-  // SWORK = B 
-  magma_cgeqrs_gpu(M, N, NRHS, SWORK+PTSA, N, tau, SWORK, M, 
-		   h_work, lwork, d_work, INFO);
-
-  // SWORK = X in SP 
-  magmablas_clag2z(N, NRHS, SWORK, N, X, LDX, INFO);
-
-  // X = X in DP 
-  magmablas_zlacpy(MagmaUpperLower, N, NRHS, B , LDB, WORK, N);
-
-  // WORK = B in DP; WORK contains the residual ...
-  if( NRHS == 1 )
-    magmablas_zgemv_MLU(N, N, A, LDA, X, WORK);
-  else
-    cublasZgemm('N', 'N', N, NRHS, N, c_neg_one, A, LDA, X, LDX, c_one, WORK, N);
-
-  int i,j;
-  for(i=0;i<NRHS;i++){
-    j = cublasIzamax( N ,X+i*N, 1) ;
-    cublasGetMatrix( 1, 1, sizeof(double2), X+i*N+j-1, 1,XNRM, 1 ) ;
-    MAGMA_Z_SET2REAL( XNRM[0], lapackf77_zlange( "F", &c_ione, &c_ione, XNRM, &c_ione, NULL ) );
-    j = cublasIzamax ( N , WORK+i*N  , 1 ) ;
-    cublasGetMatrix( 1, 1, sizeof(double2), WORK+i*N+j-1, 1, RNRM, 1 ) ;
-    MAGMA_Z_SET2REAL( RNRM[0], lapackf77_zlange( "F", &c_ione, &c_ione, RNRM, &c_ione, NULL ) );
-    if( MAGMA_Z_GET_X( RNRM[0] ) > MAGMA_Z_GET_X( XNRM[0] ) *CTE ){
-      goto L10;
-    }
-  }
-  
-  *ITER =0;
-  return 0;
-
- L10:
-  ;
-
-  for(IITER=1;IITER<ITERMAX;){
+    /*
+      Check The Parameters. 
+    */
+    *ITER = 0 ;
     *INFO = 0 ;
-    /*  Convert R (in WORK) from double2 precision to single precision
-        and store the result in SX.
-        Solve the system SA*SX = SR.
-        -- These two Tasks are merged here. */
-    // make SWORK = WORK ... residuals... 
-    magmablas_zlag2c(N , NRHS, WORK, LDB, SWORK, N, INFO );
-    magma_cgeqrs_gpu(M, N, NRHS, SWORK+PTSA, N, tau, SWORK,
-		     M, h_work, lwork, d_work, INFO);
+    if ( N <0)
+        *INFO = -1;
+    else if(NRHS<0)
+        *INFO =-3;
+    else if(LDA < max(1,N))
+        *INFO =-5;
+    else if( LDB < max(1,N))
+        *INFO =-7;
+    else if( LDX < max(1,N))
+        *INFO =-9;
+
+    if(*INFO!=0){
+        printf("%d %d %d\n", M , N , NRHS);
+        magma_xerbla("magma_zcgeqrsv_gpu",INFO) ;
+    }
+
+    if( N == 0 || NRHS == 0 )
+        return 0;
+
+    EPS  = lapackf77_dlamch("Epsilon");
+    ANRM = magmablas_zlange('I', N, N, A, LDA, (double*)WORK );
+    CTE  = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;
+    PTSA = N*NRHS;
+
+    magmablas_zlag2c(N, NRHS, B, LDB, SWORK, N, INFO );
+    if(*INFO !=0){
+        *ITER = -2 ;
+        printf("magmablas_zlag2c\n");
+        goto L40;
+    }
+    magmablas_zlag2c(N, N, A, LDA, SWORK+PTSA, N, INFO ); // Merge with DLANGE /
+    if(*INFO !=0){
+        *ITER = -2 ;
+        printf("magmablas_zlag2c\n");
+        goto L40;
+    }
+
+    // In an ideal version these variables should come from user.
+    magma_cgeqrf_gpu2(M, N, SWORK+PTSA, N, tau, d_work, INFO);
+
     if(INFO[0] !=0){
-      *ITER = -3 ;
-      goto L40;
-    }
-    for(i=0;i<NRHS;i++){
-       magmablas_zcaxpycp(SWORK+i*N,X+i*N,N,N,LDA,B+i*N,WORK+i*N) ;
+        *ITER = -3 ;
+        goto L40;
     }
 
-    /* unnecessary may be */
+    // SWORK = B 
+    magma_cgeqrs_gpu(M, N, NRHS, SWORK+PTSA, N, tau, SWORK, M, 
+                     h_work, lwork, d_work, INFO);
+
+    // SWORK = X in SP 
+    magmablas_clag2z(N, NRHS, SWORK, N, X, LDX, INFO);
+
+    // X = X in DP 
     magmablas_zlacpy(MagmaUpperLower, N, NRHS, B , LDB, WORK, N);
-    if( NRHS == 1 )
-        magmablas_zgemv_MLU(N,N, A,LDA,X,WORK);
-    else
-        cublasZgemm('N', 'N', N, NRHS, N, alpha, A, LDA, X, LDX, beta, WORK, N);
 
-    /*  Check whether the NRHS normwise backward errors satisfy the
-	stopping criterion. If yes, set ITER=IITER>0 and return.     */
-    for(i=0;i<NRHS;i++){
-      int j;
-      j = cublasIzamax( N , X+i*N  , 1) ;
-      cublasGetMatrix( 1, 1, sizeof(double2), X+i*N+j-1, 1, XNRM, 1 ) ;
-      MAGMA_Z_SET2REAL( XNRM[0], lapackf77_zlange( "F", &c_ione, &c_ione, XNRM, &c_ione, NULL ) );
-      j = cublasIzamax ( N ,WORK+i*N , 1 ) ;
-      cublasGetMatrix( 1, 1, sizeof(double2), WORK+i*N+j-1, 1, RNRM, 1 ) ;
-      MAGMA_Z_SET2REAL( RNRM[0], lapackf77_zlange( "F", &c_ione, &c_ione, RNRM, &c_ione, NULL ) );
-      if( MAGMA_Z_GET_X( RNRM[0] ) > MAGMA_Z_GET_X( XNRM[0] ) *CTE ){
-        goto L20;
-      }
+    // WORK = B in DP; WORK contains the residual ...
+    if( NRHS == 1 )
+        cublasZgemv( MagmaNoTrans, N, N, c_neg_one, A, LDA, X, 1, c_one, WORK, 1);
+    else
+        cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, NRHS, N, 
+                     c_neg_one, A,    LDA, 
+                                X,    LDX, 
+                     c_one,     WORK, N );
+
+    for(i=0; i<NRHS; i++){
+        j = cublasIzamax( N, X+i*N, 1) ;
+        cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), X+i*N+j-1, 1, &XNRMv, 1);
+        XNRM = lapackf77_zlange( "F", &c_ione, &c_ione, &XNRMv, &c_ione, NULL );
+      
+        j = cublasIzamax ( N, WORK+i*N, 1 );
+        cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), WORK+i*N+j-1, 1, &RNRMv, 1);
+        RNRM = lapackf77_zlange( "F", &c_ione, &c_ione, &RNRMv, &c_ione, NULL );
+      
+        if( RNRM >  XNRM *CTE ){
+            goto L10;
+        }
     }
 
-    /*  If we are here, the NRHS normwise backward errors satisfy
-        the stopping criterion, we are good to exit.                    */
-    *ITER = IITER ;
+    *ITER =0;
     return 0;
-  L20:
-    IITER++ ;
-  }
 
-  /* If we are at this place of the code, this is because we have
-     performed ITER=ITERMAX iterations and never satisified the
-     stopping criterion, set up the ITER flag accordingly and follow
-     up on double2 precision routine.                                    */
-  *ITER = -ITERMAX - 1 ;
+  L10:
+    ;
 
- L40:
-  /* Single-precision iterative refinement failed to converge to a
-     satisfactory solution, so we resort to double2 precision.           */
-  magma_zgeqrf_gpu2(M, N, A, N, tau_d, d_work_d, INFO);
-  if( *INFO != 0 ){
+    for(IITER=1; IITER<ITERMAX; ) {
+        *INFO = 0 ;
+        /*  Convert R (in WORK) from double2 precision to single precision
+            and store the result in SX.
+            Solve the system SA*SX = SR.
+            -- These two Tasks are merged here. */
+        // make SWORK = WORK ... residuals... 
+        magmablas_zlag2c( N, NRHS, WORK, LDB, SWORK, N, INFO );
+        magma_cgeqrs_gpu( M, N, NRHS, SWORK+PTSA, N, tau, SWORK,
+                          M, h_work, lwork, d_work, INFO);
+
+        if(INFO[0] !=0) {
+            *ITER = -3 ;
+            goto L40;
+        }
+        for(i=0;i<NRHS;i++) {
+            magmablas_zcaxpycp( SWORK+i*N, X+i*N, N, N, LDA, B+i*N, WORK+i*N);
+        }
+
+        /* unnecessary may be */
+        magmablas_zlacpy(MagmaUpperLower, N, NRHS, B, LDB, WORK, N);
+        if( NRHS == 1 )
+            cublasZgemv( MagmaNoTrans, N, N, c_neg_one, A, LDA, X, 1, c_one, WORK, 1);
+        else
+            cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, NRHS, N, 
+                         c_neg_one, A, LDA, X, LDX, c_one, WORK, N);
+
+        /*  Check whether the NRHS normwise backward errors satisfy the
+            stopping criterion. If yes, set ITER=IITER>0 and return.     */
+        for(i=0;i<NRHS;i++)
+        {
+            j = cublasIzamax( N, X+i*N, 1) ;
+            cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), X+i*N+j-1, 1, &XNRMv, 1);
+            XNRM = lapackf77_zlange( "F", &c_ione, &c_ione, &XNRMv, &c_ione, NULL );
+            
+            j = cublasIzamax ( N, WORK+i*N, 1 );
+            cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), WORK+i*N+j-1, 1, &RNRMv, 1 );
+            RNRM = lapackf77_zlange( "F", &c_ione, &c_ione, &RNRMv, &c_ione, NULL );
+            
+            if( RNRM >  XNRM *CTE ){
+                goto L20;
+            }
+        }
+
+        /*  If we are here, the NRHS normwise backward errors satisfy
+            the stopping criterion, we are good to exit.                    */
+        *ITER = IITER ;
+        return 0;
+      L20:
+        IITER++ ;
+    }
+
+    /* If we are at this place of the code, this is because we have
+       performed ITER=ITERMAX iterations and never satisified the
+       stopping criterion, set up the ITER flag accordingly and follow
+       up on double2 precision routine.                                    */
+    *ITER = -ITERMAX - 1 ;
+
+  L40:
+
+    /* Single-precision iterative refinement failed to converge to a
+       satisfactory solution, so we resort to double2 precision.           */
+    magma_zgeqrf_gpu2(M, N, A, N, tau_d, d_work_d, INFO);
+    if( *INFO != 0 ){
+        return 0;
+    }
+    magmablas_zlacpy(MagmaUpperLower, N, NRHS, B , LDB, X, N);
+    magma_zgeqrs_gpu(M, N, NRHS, A, N, tau_d,
+                     X, M, h_work_d, lwork_d, d_work_d, INFO);
     return 0;
-  }
-  magmablas_zlacpy(MagmaUpperLower, N, NRHS, B , LDB, X, N);
-  magma_zgeqrs_gpu(M, N, NRHS, A, N, tau_d,
-		   X, M, h_work_d, lwork_d, d_work_d, INFO);
-  return 0;
 }
 
 #undef max

@@ -89,6 +89,7 @@ magma_zgeqrf_gpu2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t 
     INFO    (output) INTEGER
             = 0:  successful exit
             < 0:  if INFO = -i, the i-th argument had an illegal value
+                  if INFO = -9, internal GPU memory allocation failed.
 
     Further Details
     ===============
@@ -188,7 +189,8 @@ magma_zgeqrf_gpu2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t 
             /* Form the triangular factor of the block reflector
                H = H(i) H(i+1) . . . H(i+ib-1) */
             lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr, 
-                              &rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &ib);
+                              &rows, &ib, 
+                              work_ref(i), &ldwork, tau+i, hwork, &ib);
 
             /* Put 0s in the upper triangular part of a panel (and 1s on the
                diagonal); copy the upper triangular in ut and invert it     */
@@ -217,7 +219,7 @@ magma_zgeqrf_gpu2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t 
                     /* Fix the diagonal block */
                     cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), ut, ib, d_ref(i), ib);
                 }
-                old_i = i;
+                old_i  = i;
                 old_ib = ib;
             }
         }
@@ -230,11 +232,14 @@ magma_zgeqrf_gpu2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t 
         ib   = n-i;
         rows = m-i;
         cublasGetMatrix(rows, ib, sizeof(cuDoubleComplex),
-                        a_ref(i,i), lda, work, rows);
+                        a_ref(i, i), lda, 
+                        work,        rows);
         lhwork = lwork - rows*ib;
         lapackf77_zgeqrf(&rows, &ib, work, &rows, tau+i, work+ib*rows, &lhwork, info);
+        
         cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
-                        work, rows, a_ref(i,i), lda);
+                        work,        rows, 
+                        a_ref(i, i), lda);
     }
     cublasFree(work);
     return 0;

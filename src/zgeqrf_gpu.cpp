@@ -9,6 +9,7 @@
 
 */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
@@ -212,7 +213,6 @@ magma_zgeqrf_gpu(magma_int_t m, magma_int_t n,
                         a_ref(i, i), lda);
     }
     cublasFree(work);
-
     return 0;
 
     /* End of MAGMA_ZGEQRF */

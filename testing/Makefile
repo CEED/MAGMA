@@ -29,10 +29,9 @@ ZSRC  = testing_zswap.cpp 	\
 	testing_zungqr_gpu.cpp  \
 	\
 	testing_zcposv_gpu.cpp	\
-	testing_zcgesv_gpu.cpp
+	testing_zcgesv_gpu.cpp	\
+	testing_zcgeqrsv_gpu.cpp
 
-#	testing_zcgeqrsv_gpu.cpp\
-#	
 
 ifeq ($(FORT), pgfortran)
 	FOBJ := fortran_thunking.o
