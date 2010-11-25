@@ -8,6 +8,8 @@
 
 #include "cublas.h"
 #include "magma.h"
+#define magmablas_dgemv_fermi magmablas_dgemv
+#define magmablas_dgemvt_fermi magmablas_dgemvt
 
 #define num_threads 64
 #define dgemv_bs 64

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "cuda.h"
 #include "cublas.h"
+#define magmablas_ssymv_fermi magmablas_ssymv 
 
 #define dgemv_bs 64
 #define thread_x 64
@@ -728,7 +729,6 @@ void magmablas_ssymv6_fermi(char uplo, int m, float alpha, float *A, int lda,
    kstan != -1   y(kstan+1:m-1) := alpha*A(kstan+1:m-1,kstan+1:m-1)*x(kstan+1:m-1)+
                                    beta*y(kstan+1:m-1)
 
-   This kernel is recommended for GTX280. It achieves up to 102 GFlop/s.
    It ia recommended that lda is multiple of 16. Otherwise performance would be 
    deteriorated as the memory accesses would not be fully coalescent.
 */

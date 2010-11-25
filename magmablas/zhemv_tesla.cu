@@ -1,8 +1,17 @@
+/*
+    -- MAGMA (version 1.0) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2010
+
+*/
 #include <stdio.h>
 #include "cuda.h"
 #include "cublas.h"
+#include "magma.h"
 
-#define MAGMA_Z_SET2REAL(v, t) v.x = (t); v.y = 0.0
+#define magmablas_zhemv_tesla magmablas_zhemv 
 
 inline __host__ __device__ double2 make_double2(double s)
 {

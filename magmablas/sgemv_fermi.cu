@@ -9,6 +9,8 @@
 #include "cublas.h"
 #include "magma.h"
 #include "constant.h"
+#define magmablas_sgemv_fermi magmablas_sgemv
+#define magmablas_sgemvt_fermi magmablas_sgemvt
 
 #define num_threads 128
 #define sgemv_bs 32

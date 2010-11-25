@@ -10,6 +10,7 @@
 #include "cuda.h"
 #include "cublas.h"
 #include "magma.h"
+#define magmablas_csymv_fermi magmablas_csymv 
 
 #define dgemv_bs 64
 #define thread_x 64

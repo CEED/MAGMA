@@ -44,16 +44,16 @@ FERMISRC =	sgemm_fermi.cu 	\
 
 TESLASRC =      sgemv_tesla.cu	\
 	        dgemv_tesla.cu 	\
+	        ssymv_tesla.cu 	\
+	        dsymv_tesla.cu 	\
+		    csymv_tesla.cu \
+		    zsymv_tesla.cu \
+	        chemv_tesla.cu 	\
+	        zhemv_tesla.cu 	\
 	        gemv32_tesla.cu \
-		\
                 strsm_tesla.cu  \
                 dtrsm_tesla.cu  \
                 \
-	        ssymv_tesla.cu 	\
-	        dsymv_tesla.cu 	\
-	        chemv_tesla.cu 	\
-		csymv_tesla.cu  \
-	        \
 	        sgemm_tesla.cu 					\
 		sgemm_tesla_a_0.cu 				\
 		sgemm_tesla_ab_0.cu 				\

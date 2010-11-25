@@ -11,6 +11,8 @@
 
 #define num_threads 64
 #define sgemv_bs 64
+#define magmablas_sgemv_tesla magmablas_sgemv
+#define magmablas_sgemvt_tesla magmablas_sgemvt
 
 __global__ void 
 sgemv_kernel(int n, int m, int n1, float* A, int lda, float *x, float *y)

@@ -10,6 +10,7 @@
 #include "cuda.h"
 #include "cublas.h"
 #include "magma.h"
+#define magmablas_csymv_tesla magmablas_csymv 
 
 #define dgemv_bs 64
 #define thread_x 64
@@ -18,13 +19,13 @@
 #define quarter_thread_x 16
 #define half_thread_x 32
 
-inline __host__ __device__ float2 make_float2(float s)
+inline __host__ __device__ float2 make_float2(double s)
 {
 	return make_float2(s, s);
 }
 inline __host__ __device__ float2 make_float2(int2 a)
 {
-	return make_float2(float(a.x), float(a.y));
+	return make_float2(double(a.x), double(a.y));
 }
 
 // negate
@@ -57,19 +58,27 @@ inline __host__ __device__ float2 operator*(float2 a, float2 b)
 {
     return make_float2(a.x * b.x - a.y * b.y, a.y * b.x + a.x * b.y);
 }
-inline __host__ __device__ float2 operator*(float2 a, float s)
+inline __host__ __device__ float2 operator*(float2 a, double s)
 {
 	return make_float2(a.x * s, a.y * s);
 }
-inline __host__ __device__ float2 operator*(float s, float2 a)
+inline __host__ __device__ float2 operator*(double s, float2 a)
 {
 	return make_float2(a.x * s, a.y * s);
 }
-inline __host__ __device__ void operator*=(float2 &a, float s)
+inline __host__ __device__ void operator*=(float2 &a, double s)
 {
 	a.x *= s; a.y *= s;
 }
-
+/*
+inline __host__ __device__ float2 conjugate(float2 a)
+{
+   float2 b;
+   b.x = a.x;
+   b.y = 0.0f-a.y;
+   return b;
+}
+*/
 __global__ void
 magma_l_csymv_special_v6_ts_tesla(int n, float2 alpha,  float2* A, int lda, float2 *x, 
                            int incx, float2 beta, float2 *y, int iny, float2 *WC, 
@@ -88,8 +97,9 @@ magma_l_csymv_special_v6_ts_tesla(int n, float2 alpha,  float2* A, int lda, floa
   MAGMA_Z_SET2REAL(res_, 0) ; 
   MAGMA_Z_SET2REAL(res1, 0) ; 
 
-  __shared__ float2 la   [quarter_thread_x][thread_x+2]; 
+  __shared__ float2 la   [quarter_thread_x][thread_x+3]; 
   __shared__ float2 buff [thread_x];
+  __shared__ float2 buff2 [thread_x];
 
   float2 tr[4];
   float2 b[4];
@@ -254,7 +264,6 @@ magma_l_csymv_special_v6_ts_tesla(int n, float2 alpha,  float2* A, int lda, floa
    A= A - lda * blkc * thread_x;
    x= x - blkc * thread_x  *incx  ; 
    
-   x= x- tx*incx; 
 
    A+=4 * ty* lda  ;  
    A+=tx; 
@@ -275,6 +284,12 @@ magma_l_csymv_special_v6_ts_tesla(int n, float2 alpha,  float2* A, int lda, floa
 	 {
        MAGMA_Z_SET2REAL(res_,0);
 		count++;
+		if(ty==0){
+			buff2[tx] = x[i*incx];
+			if(tx <= kstan){
+				MAGMA_Z_SET2REAL(buff2[tx], 0);
+			}	
+		}
        #pragma unroll  
        for( int k=0;k<4;k++)
 	   {
@@ -285,7 +300,7 @@ magma_l_csymv_special_v6_ts_tesla(int n, float2 alpha,  float2* A, int lda, floa
 	 	   #pragma unroll  
 			for(int j=0; j < 4 ; j++)
 			{
-				res += tr[j] * x[ quarter_thread_x * k + ty * 4 + j];
+				res += tr[j] * buff2[ quarter_thread_x * k + ty * 4 + j];
             	la[( j + ty * 4)][tx] = tr[j] * buff[tx]; 
 			}
 	 		  __syncthreads();
@@ -331,7 +346,10 @@ magma_l_csymv_special_v6_ts_tesla(int n, float2 alpha,  float2* A, int lda, floa
   {
        MAGMA_Z_SET2REAL(res_,0);
 		count++;
-
+		if(ty ==0)
+			buff2[tx] = x[i*incx];
+        __syncthreads();
+      
 		#pragma unroll  
 		for( int k=0;k<4;k++)
 		{
@@ -341,7 +359,7 @@ magma_l_csymv_special_v6_ts_tesla(int n, float2 alpha,  float2* A, int lda, floa
 			 #pragma unroll  
 			for(int j=0; j < 4 ; j++)
 			{
-				 res += tr[j] * x[ i + quarter_thread_x*k + ty*4+(j)];
+				 res += tr[j] * buff2[  quarter_thread_x*k + ty*4+(j)];
 		         la[( j + ty * 4)][tx] =  tr[j] * buff[tx]; 
 			}
 			__syncthreads();
@@ -423,7 +441,7 @@ magma_l_csymv_generic_v6_ts_tesla(int n, float2 alpha, float2* A, int lda, float
        MAGMA_Z_SET2REAL(res,0);
   float2 res_;
        MAGMA_Z_SET2REAL(res_,0);
-  __shared__ float2 la   [quarter_thread_x][thread_x+2];  
+  __shared__ float2 la   [quarter_thread_x][thread_x+3];  
   __shared__ float2 buff [thread_x];
   __shared__ float2 buff2 [thread_x];
   float2 tr[4];
@@ -825,7 +843,6 @@ void magmablas_csymv6_tesla(char uplo, int m, float2 alpha, float2 *A, int lda,
    kstan != -1   y(kstan+1:m-1) := alpha*A(kstan+1:m-1,kstan+1:m-1)*x(kstan+1:m-1)+
                                    beta*y(kstan+1:m-1)
 
-   This kernel is recommended for GTX280. It achieves up to 102 GFlop/s.
    It ia recommended that lda is multiple of 16. Otherwise performance would be 
    deteriorated as the memory accesses would not be fully coalescent.
 */
