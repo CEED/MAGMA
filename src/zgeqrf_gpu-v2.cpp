@@ -148,7 +148,12 @@ magma_zgeqrf_gpu2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t 
     cudaStreamCreate(&stream[1]);
 
     cuDoubleComplex *work;
-    cudaMallocHost((void**)&work, lwork*sizeof(cuDoubleComplex));
+    cublasStatus status = cudaMallocHost((void**)&work, lwork*sizeof(cuDoubleComplex));
+    if (status != CUBLAS_STATUS_SUCCESS) {
+      magma_xerbla( "magma_zgeqrf_gpu2", -9 );
+      *info = -9;
+      return 0;
+    }
 
     cuDoubleComplex *ut = hwork+nb*(n);
     for(i=0; i<nb*nb; i++)
@@ -241,7 +246,7 @@ magma_zgeqrf_gpu2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t 
                         work,        rows, 
                         a_ref(i, i), lda);
     }
-    cublasFree(work);
+    cudaFreeHost(work);
     return 0;
 
 /*     End of MAGMA_ZGEQRF */
