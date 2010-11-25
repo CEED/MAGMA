@@ -17,7 +17,14 @@
 #include "magma.h"
 #include "magmablas.h"
 
-int main(int argc , char **argv){
+#define PRECISION_z
+
+int main(int argc , char **argv)
+{
+#if defined(PRECISION_z) && (GPUSHMEM < 200)
+    fprintf(stderr, "This functionnality is not available in MAGMA for this precisions actually\n");
+    return EXIT_SUCCESS;
+#else
     cuInit( 0 );
     cublasInit( );
 
@@ -312,4 +319,6 @@ int main(int argc , char **argv){
   FREE1:
     //fclose(fp);
     cublasShutdown();
+
+#endif /*defined(PRECISION_z) && (GPUSHMEM < 200)*/
 }

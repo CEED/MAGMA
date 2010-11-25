@@ -26,13 +26,10 @@ ZSRC  = testing_zswap.cpp 	\
 	testing_zgeqrf_gpu.cpp 	\
 	testing_zgeqrs_gpu.cpp 	\
 	testing_zgesv_gpu.cpp	\
-	testing_zungqr_gpu.cpp
-
-
-ifeq (${GPU_TARGET}, 1)
-ZSRC += testing_zcposv_gpu.cpp	\
+	testing_zungqr_gpu.cpp  \
+	\
+	testing_zcposv_gpu.cpp	\
 	testing_zcgesv_gpu.cpp
-endif
 
 #	testing_zcgeqrsv_gpu.cpp\
 #	

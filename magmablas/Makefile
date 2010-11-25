@@ -14,6 +14,8 @@ ZSRC  = zauxiliary.cu	\
 	zswap.cu	\
 	zswapblk.cu	\
 	zlacpy.cu	\
+	zlange.cu       \
+	zlanhe.cu	\
 	ztranspose.cu 	\
 	ztranspose-v2.cu\
 	zinplace_transpose.cu	\
@@ -22,40 +24,35 @@ ZSRC  = zauxiliary.cu	\
         zcaxpycp.cu     \
 	zlag2c.cu       \
 	clag2z.cu       \
-
-ifeq (${GPU_TARGET}, 1)
-ZSRC += zlat2c.cu	\
-	zlange.cu       \
-	zlanhe.cu
-endif
+	zlat2c.cu
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
 SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 
-FERMISRC =	sgemm_fermi.cu \
-	        dgemm_fermi.cu \
-		ssymv_fermi.cu \
-	        dsymv_fermi.cu \
-		zsymv_fermi.cu \
-		csymv_fermi.cu \
-		chemv_fermi.cu \
-	        zhemv_fermi.cu \
+FERMISRC =	sgemm_fermi.cu 	\
+	        dgemm_fermi.cu 	\
+		ssymv_fermi.cu 	\
+	        dsymv_fermi.cu 	\
+		zsymv_fermi.cu 	\
+		csymv_fermi.cu 	\
+		chemv_fermi.cu 	\
+	        zhemv_fermi.cu 	\
                 \
-                strsm_tesla.cu \
-                dtrsm_tesla.cu \
+                strsm_tesla.cu 	\
+                dtrsm_tesla.cu	\
 
-TESLASRC =      sgemv_tesla.cu 	\
+TESLASRC =      sgemv_tesla.cu	\
 	        dgemv_tesla.cu 	\
 	        gemv32_tesla.cu \
 		\
-                strsm_tesla.cu \
-                dtrsm_tesla.cu \
+                strsm_tesla.cu  \
+                dtrsm_tesla.cu  \
                 \
 	        ssymv_tesla.cu 	\
 	        dsymv_tesla.cu 	\
 	        chemv_tesla.cu 	\
-		    csymv_tesla.cu \
+		csymv_tesla.cu  \
 	        \
 	        sgemm_tesla.cu 					\
 		sgemm_tesla_a_0.cu 				\

@@ -31,8 +31,8 @@ extern "C" __global__ void magma_zlange_special(const cuDoubleComplex *A, double
 	cuDoubleComplex Ap[4]={A[0],A[lda],A[2*lda],A[3*lda]};
 	
    	C+=ibx+idt;
-	__shared__ double Cbb[64];;
-		A+=4*lda;
+	__shared__ double Cbb[64];
+        A += 4*lda;
 	do {
 		Cb[0]+=cuCabs(Ap[0]);
 		Ap[0]=A[0];	

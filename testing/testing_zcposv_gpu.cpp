@@ -18,8 +18,14 @@
 #include "magma.h"
 #include "magmablas.h"
 
+#define PRECISION_z
+
 int main(int argc, char **argv)
 {
+#if defined(PRECISION_z) && (GPUSHMEM < 200)
+  fprintf(stderr, "This functionnality is not available in MAGMA for this precisions actually\n");
+  return EXIT_SUCCESS;
+#else
   printf("Iterative Refinement- Cholesky \n");
   printf("\n");
   cuInit( 0 );
@@ -279,4 +285,6 @@ FREE2_1:
     cublasFree(M_SWORK);  
 FREE2:
     cublasShutdown();
+
+#endif /*defined(PRECISION_z) && (GPUSHMEM < 200)*/
 }

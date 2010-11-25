@@ -17,7 +17,9 @@
 
 //#define num_threads 64
 #define dgemv_bs 32
+
 #define PRECISION_z
+#if (!defined(PRECISION_z)) || (GPUSHMEM >= 200)
 
 /*------------------------------------------ UPLO = 'L' ----------------------------------*/
 __device__ int flag = 0; 
@@ -653,13 +655,6 @@ mzlat2c(char uplo, int m, cuDoubleComplex *A, int lda, cuFloatComplex *Y, int LD
   Reproduced from dlansy routines...
   How to deliver the info.
 */
-
-
-#include "cublas.h"
-#include "magma.h"
-#include <stdio.h>
-
-
 extern "C" void
 magmablas_zlat2c(char uplo, int n, cuDoubleComplex *A, int lda,
                  cuFloatComplex *SA, int LDSA, int *INFO)
@@ -677,3 +672,5 @@ magmablas_zlat2c(char uplo, int n, cuDoubleComplex *A, int lda,
       return retVal[0];
     */
 }
+
+#endif /*  (!defined(PRECISION_z)) || (GPUSHMEM >= 200) */

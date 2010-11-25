@@ -18,6 +18,9 @@
 //#define num_threads 64
 #define dgemv_bs 32
 
+#define PRECISION_z
+#if (!defined(PRECISION_z)) || (GPUSHMEM >= 200)
+
 __global__ void
 l_zlanhe_special (int n, cuDoubleComplex* A, int lda,  double *y){
   int tx = threadIdx.x ; 
@@ -672,16 +675,9 @@ Note:
 }
 
 
-/*
-Interface ..................................
-Reproduced from xSYMV routines... 
-*/
-#include "cublas.h"
-#include "magma.h"
-#include <stdio.h>
-
 extern "C" double 
-magmablas_zlanhe(char norm, char uplo, int n, cuDoubleComplex *A, int lda, double *WORK)
+magmablas_zlanhe(char norm, char uplo, int n, 
+                 cuDoubleComplex *A, int lda, double *WORK )
 {
 	if( norm != 'I' && norm !='i')	{
                 printf("Only normI is available\n");
@@ -696,3 +692,5 @@ magmablas_zlanhe(char norm, char uplo, int n, cuDoubleComplex *A, int lda, doubl
         }
 
 }
+
+#endif /* (!defined(PRECISION_z)) || (GPUSHMEM >= 200) */

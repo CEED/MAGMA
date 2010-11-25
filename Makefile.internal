@@ -10,8 +10,8 @@ include $(MAGMA_DIR)/make.inc
 -include $(MAGMA_DIR)/make.inc.${MACHINE}
 
 PGIFORTRAN ?= 0
-TESLAOPT = -arch sm_13 -gencode arch=compute_13,code=compute_13 -gencode arch=compute_10,code=compute_10 
-FERMIOPT = -arch sm_20 
+TESLAOPT = -arch sm_13 -DGPUSHMEM=130 -gencode arch=compute_13,code=compute_13 -gencode arch=compute_10,code=compute_10 
+FERMIOPT = -arch sm_20 -DGPUSHMEM=200
 
 ifeq (${GPU_TARGET}, 0)
 GPUOPT = ${TESLAOPT}
