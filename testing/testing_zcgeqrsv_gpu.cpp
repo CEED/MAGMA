@@ -254,7 +254,7 @@ int main( int argc, char** argv)
             printf("Argument %d of sgeqrf had an illegal value.\n", -info);
         
         // Solve the least-squares problem: min || A * X - B ||
-        lapackf77_zunmqr( "l", "t", &M, &nrhs, &M, h_A, &lda,
+        lapackf77_zunmqr( MagmaLeftStr, MagmaConjTransStr, &M, &nrhs, &M, h_A, &lda,
                           tau_d, b, &M, h_work_d, &lwork_d, &info);
 
         // B(1:N,1:NRHS) := inv(R) * B(1:N,1:NRHS)
