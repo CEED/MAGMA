@@ -59,6 +59,7 @@ extern "C" {
 #    define lapackf77_zlarft   zlarft_
 #    define lapackf77_zlarnv   zlarnv_
 #    define lapackf77_zlaswp   zlaswp_
+#    define lapackf77_zlatrd   zlatrd_
 #    define lapackf77_zpotrf   zpotrf_
 #    define lapackf77_ztrtri   ztrtri_
 #    define lapackf77_zung2r   zung2r_
@@ -119,6 +120,7 @@ extern "C" {
 #    define lapackf77_zlarft   zlarft
 #    define lapackf77_zlarnv   zlarnv
 #    define lapackf77_zlaswp   zlaswp
+#    define lapackf77_zlatrd   zlatrd
 #    define lapackf77_zpotrf   zpotrf
 #    define lapackf77_ztrtri   ztrtri
 #    define lapackf77_zung2r   zung2r
@@ -178,6 +180,7 @@ void    lapackf77_zlarfg(magma_int_t *n, cuDoubleComplex *alpha, cuDoubleComplex
 void    lapackf77_zlarft(const char *direct, const char *storev, magma_int_t *n, magma_int_t *k, cuDoubleComplex *v, magma_int_t *ldv, const cuDoubleComplex *tau, cuDoubleComplex *t, magma_int_t *ldt);
 void    lapackf77_zlarnv(magma_int_t *idist, magma_int_t *iseed, magma_int_t *n, cuDoubleComplex *x);
 void    lapackf77_zlaswp(magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *k1, magma_int_t *k2, magma_int_t *ipiv, magma_int_t *incx);
+void    lapackf77_zlatrd(const char *uplo, magma_int_t *n, magma_int_t *nb, cuDoubleComplex *a, magma_int_t *lda, double *e, cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *ldwork);
 void    lapackf77_zpotrf(const char *uplo, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *info);
 void    lapackf77_ztrtri(const char *uplo, const char *diag, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *info);
 void    lapackf77_zung2r(magma_int_t *m, magma_int_t *n, magma_int_t *k, cuDoubleComplex *a, magma_int_t *lda, const cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *info);
