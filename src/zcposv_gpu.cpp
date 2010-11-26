@@ -196,7 +196,7 @@ magma_zcposv_gpu(char UPLO, magma_int_t N, magma_int_t NRHS,
         goto L40;
     }
  
-    ANRM = magmablas_clanhe(  'I',  UPLO , N , dworks+PTSA, N, (float2 *)dworkd);
+    ANRM = magmablas_clanhe(  'I',  UPLO , N , dworks+PTSA, N, (float *)dworkd);
     CTE  = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;
 
     magma_cpotrf_gpu(UPLO, N, dworks+ PTSA, LDA, INFO);
