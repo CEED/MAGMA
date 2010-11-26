@@ -23,7 +23,7 @@
 #define dY(i, j) (dy+(j)*lddy + (i))
 
 extern "C" magma_int_t
-magma_slabrd2(magma_int_t m, magma_int_t n, magma_int_t nb,
+magma_slabrd(magma_int_t m, magma_int_t n, magma_int_t nb,
              float *a, magma_int_t lda,
              float *d, float *e,
 	     float *tauq, float *taup,
@@ -198,9 +198,8 @@ magma_slabrd2(magma_int_t m, magma_int_t n, magma_int_t nb,
     }
 
     float *f = (float *)malloc(max(n,m)*sizeof(float ));
-    static cudaStream_t stream[2];
-    cudaStreamCreate(&stream[0]);
-    cudaStreamCreate(&stream[1]);
+    static cudaStream_t stream;
+    cudaStreamCreate(&stream);
 
     if (m >= n) {
 
@@ -239,12 +238,16 @@ magma_slabrd2(magma_int_t m, magma_int_t n, magma_int_t nb,
 			    dA(i__-1 , i__-1 + 1), ldda, 
 			    dA(i__-1 , i__-1), c__1, c_b16, 
 			    dY(i__+1 , i__  ), c__1);
-		
+		/*
+		magmablas_sgemvt_tesla(i__2, i__3, c_b5,
+				       dA(i__-1 , i__-1 + 1), ldda,
+				       dA(i__-1 , i__-1), dY(i__+1 , i__  ));
+		*/
 		// 3. Put the result back ----------------------------------
 		cudaMemcpy2DAsync( Y( i__+1,i__), y_dim1*sizeof(float),
 				   dY(i__+1,i__), y_dim1*sizeof(float),
 				  sizeof(float)*i__3, 1,
-				  cudaMemcpyDeviceToHost,stream[1]);
+				  cudaMemcpyDeviceToHost,stream);
 
 		i__2 = m - i__ + 1;
 		i__3 = i__ - 1;
@@ -264,7 +267,7 @@ magma_slabrd2(magma_int_t m, magma_int_t n, magma_int_t nb,
 		       Y(1, i__), &c__1);
 		
 		// 4. Synch to make sure the result is back ----------------
-		cudaStreamSynchronize(stream[1]);
+		cudaStreamSynchronize(stream);
 
 		if (i__3!=0){
 		  i__2 = n - i__;
@@ -304,17 +307,24 @@ magma_slabrd2(magma_int_t m, magma_int_t n, magma_int_t nb,
                 cublasSetVector(i__3, sizeof(float),
                                 A(i__ , i__  +1), lda,
                                 dA(i__-1, (i__-1)+1), ldda);
+
                 // 2. Multiply ---------------------------------------------
+		cublasScopy( i__3, dA(i__-1, i__-1+1), ldda, dY(1,1), 1);
                 cublasSgemv('N', i__2, i__3, c_b5,
                             dA(i__-1+1 ,i__-1+1), ldda,
-                            dA(i__-1 , i__-1 + 1), ldda, 
+			    // dA(i__-1 , i__-1 + 1), ldda, 
+			    dY(1,1), 1,
 			    c_b16, dX(i__ + 1 , i__), c__1);
-
+		/*
+		magmablas_sgemv_tesla(i__2, i__3,
+				      dA(i__-1+1 ,i__-1+1), ldda,
+				      dY(1,1), dX(i__ + 1 , i__));
+		*/
 		// 3. Put the result back ----------------------------------
 		cudaMemcpy2DAsync( X(i__+1,i__), x_dim1*sizeof(float),
 				  dX(i__+1,i__), x_dim1*sizeof(float),
 				  sizeof(float)*i__2, 1,
-                                  cudaMemcpyDeviceToHost,stream[1]);
+                                  cudaMemcpyDeviceToHost,stream);
 
 		i__2 = n - i__;
 		sgemv_("Transpose", &i__2, &i__, &c_b5, Y(i__ + 1 , 1), 
@@ -330,7 +340,7 @@ magma_slabrd2(magma_int_t m, magma_int_t n, magma_int_t nb,
 		       &c_b16, X(1,i__), &c__1);
 
 		// 4. Synch to make sure the result is back ----------------
-                cudaStreamSynchronize(stream[1]);
+                cudaStreamSynchronize(stream);
 		if (i__!=0){
                   i__2 = m - i__;
                   saxpy_(&i__2, &c_b5, f,&c__1, X(i__+1,i__),&c__1);
@@ -449,7 +459,7 @@ magma_slabrd2(magma_int_t m, magma_int_t n, magma_int_t nb,
 	}
       }
     }
-    
+    cudaStreamDestroy(stream);
     free(f);
     
     return 0;
