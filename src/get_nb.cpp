@@ -183,7 +183,7 @@ int magma_get_sgebrd_nb(int m){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for sgebrd based on m;
+   -- Return nb for dgebrd based on m;
       the return value should be a multiple of 32
 */
 extern "C"
@@ -371,7 +371,8 @@ int magma_get_zhetrd_nb(int m){
     return 64;
 }
 
-/* //////////////////////////////////////////////////////////////////////////// -- Return nb for cgebrd based on m;
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for cgebrd based on m;
       the return value should be a multiple of 32
 */
 extern "C"
