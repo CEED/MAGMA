@@ -168,6 +168,7 @@ magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb,
 	    i__3;
     /* Local variables */
     static int i__;
+    cuDoubleComplex alpha;
 
     a_dim1 = lda;
     a_offset = 1 + a_dim1;
@@ -219,11 +220,12 @@ magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb,
 	    
 	    /* Generate reflection Q(i) to annihilate A(i+1:m,i) */
 
+            alpha = a[i__ + i__ * a_dim1];
 	    i__2 = m - i__ + 1;
 	    i__3 = i__ + 1;
-	    lapackf77_zlarfg(&i__2, &a[i__ + i__ * a_dim1], 
+	    lapackf77_zlarfg(&i__2, &alpha, 
 		    &a[min(i__3,m) + i__ * a_dim1], &c__1, &tauq[i__]);
-	    d[i__] = MAGMA_Z_GET_X( a[i__ + i__ * a_dim1] );
+	    d[i__] = MAGMA_Z_GET_X( alpha );
 	    if (i__ < n) {
 		a[i__ + i__ * a_dim1] = c_one;
 
@@ -305,9 +307,10 @@ magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb,
 		i__2 = n - i__;
 		/* Computing MIN */
 		i__3 = i__ + 2;
-		lapackf77_zlarfg(&i__2, &a[i__ + (i__ + 1) * a_dim1], &a[i__ + min(
+		alpha = a[i__ + (i__ + 1) * a_dim1];
+		lapackf77_zlarfg(&i__2, &alpha, &a[i__ + min(
 			i__3,n) * a_dim1], &lda, &taup[i__]);
-		e[i__] = MAGMA_Z_GET_X (a[i__ + (i__ + 1) * a_dim1] );
+		e[i__] = MAGMA_Z_GET_X ( alpha );
 		a[i__ + (i__ + 1) * a_dim1] = c_one;
 
 		/* Compute X(i+1:m,i) */
@@ -396,9 +399,10 @@ magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb,
 	i__2 = n - i__ + 1;
 	/* Computing MIN */
 	i__3 = i__ + 1;
-	lapackf77_zlarfg(&i__2, &a[i__ + i__ * a_dim1], 
+        alpha = a[i__ + i__ * a_dim1];
+	lapackf77_zlarfg(&i__2, &alpha, 
 		&a[i__ + min(i__3,n) * a_dim1], &lda, &taup[i__]);
-	d[i__] = MAGMA_Z_GET_X( a[i__ + i__ * a_dim1] );
+	d[i__] = MAGMA_Z_GET_X( alpha );
 	if (i__ < m) {
 	  a[i__ + i__ * a_dim1] = c_one;
 	  
@@ -456,9 +460,10 @@ magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb,
 	  i__2 = m - i__;
 	  /* Computing MIN */
 	  i__3 = i__ + 2;
-	  lapackf77_zlarfg(&i__2, &a[i__ + 1 + i__ * a_dim1],
+          alpha = a[i__ + 1 + i__ * a_dim1];
+	  lapackf77_zlarfg(&i__2, &alpha,
 		  &a[min(i__3,m) + i__ * a_dim1], &c__1, &tauq[i__]);
-	  e[i__] = MAGMA_Z_GET_X( a[i__ + 1 + i__ * a_dim1] );
+	  e[i__] = MAGMA_Z_GET_X( alpha );
 	  a[i__ + 1 + i__ * a_dim1] = c_one;
 	  
 	  /* Compute Y(i+1:n,i) */
