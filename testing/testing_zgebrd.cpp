@@ -137,10 +137,19 @@ int main( int argc, char** argv)
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-        start = get_current_time();
-        magma_zgebrd( M, N, h_R, N, diag, offdiag,
+        if (getenv("MAGMA_USE_LAPACK")) {
+          start = get_current_time();
+          lapackf77_zgebrd( &M, &N, h_R, &N, diag, offdiag,
+                      tauq, taup, h_work, &lwork, &info);
+          end = get_current_time();
+        } else {
+          start = get_current_time();
+          magma_zgebrd( M, N, h_R, N, diag, offdiag,
                       tauq, taup, h_work, lwork, d_A, &info);
-        end = get_current_time();
+          end = get_current_time();
+	}
+        if (getenv("MAGMA_SHOW_INFO"))
+          printf("zgebrd_INFO=%d\n", info);
 
         gpu_perf =(4.*M*N*N-4.*N*N*N/3.)/(1000000.*GetTimerValue(start,end));
         // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));

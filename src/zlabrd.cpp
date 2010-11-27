@@ -382,8 +382,8 @@ magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb,
 	       &a[i__ + a_dim1], &lda, &c_one, &a[i__ + i__ * a_dim1], &lda);
         i__2 = i__ - 1;
 #if defined(PRECISION_z) || defined(PRECISION_c)
-	lapackf77_zlacgv(&i__2, &a[i__ + a_dim1], &lda);
-        lapackf77_zlacgv(&i__2, &x[i__ + x_dim1], &ldx);
+	lapackf77_zlacgv(&i__3, &a[i__ + a_dim1], &lda);
+        lapackf77_zlacgv(&i__3, &x[i__ + x_dim1], &ldx);
 #endif
 	i__3 = n - i__ + 1;
 	blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_neg_one, &a[i__ * a_dim1 + 1],
@@ -445,6 +445,9 @@ magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb,
 		 &a[i__ + 1 + a_dim1], &lda, &y[i__ + y_dim1], &ldy, &c_one, 
 		 &a[i__ + 1 + i__ * a_dim1], &c__1);
 	  i__2 = m - i__;
+#if defined(PRECISION_z) || defined(PRECISION_c)
+	  lapackf77_zlacgv(&i__3, &y[i__ + y_dim1], &ldy);
+#endif
 	  blasf77_zgemv("No transpose", &i__2, &i__, &c_neg_one, 
 		 &x[i__ + 1 + x_dim1], &ldx, &a[i__ * a_dim1 + 1], &c__1, &c_one,
 		 &a[i__ + 1 + i__ * a_dim1], &c__1);
