@@ -18,7 +18,7 @@
 //#include <cblas.h>
 
 // trace
-#include "event_trace.h"
+#include <event_trace.h>
 
 /*
 

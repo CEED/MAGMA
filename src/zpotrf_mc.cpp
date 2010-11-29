@@ -17,7 +17,7 @@
 #include <quark.h>
 //#include <cblas.h>
 
-#include "event_trace.h"
+#include <event_trace.h>
 
 /*
 
