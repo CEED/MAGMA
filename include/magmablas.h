@@ -27,6 +27,15 @@ extern "C" {
 
 int lsame_c(char ch, char *s);
 
+void magmablas_sgemm_fermi80(char TRANSA, char TRANSB, int m , int n , int k ,
+                             float alpha, const float *A, int lda,
+                             const float *B, int ldb,
+		             float beta, float *C, int ldc );
+void magmablas_sgemm_fermi64(char TRANSA, char TRANSB, int m , int n , int k ,
+                             float alpha, const float *A, int lda,
+                             const float *B, int ldb,
+			     float beta, float *C, int ldc );
+
 #ifdef __cplusplus
 }
 #endif
