@@ -9,7 +9,7 @@
 MAGMA_DIR = .
 include ./Makefile.internal
 
-all: lib test
+all: lib quark test
 
 lib: libmagma libmagmablas
 
@@ -21,6 +21,9 @@ libmagma:
 libmagmablas:
 	( cd magmablas && $(MAKE) )
 
+quark:
+	( cd quark && $(MAKE) )
+
 test:
 	( cd testing/lin && $(MAKE) )
 	( cd testing     && $(MAKE) )
@@ -28,6 +31,7 @@ test:
 clean:
 	( cd include     && $(MAKE) clean )
 	( cd src         && $(MAKE) clean )
+	( cd quark       && $(MAKE) clean )
 	( cd testing     && $(MAKE) clean )
 	( cd testing/lin && $(MAKE) clean )
 	( cd magmablas   && $(MAKE) clean ) 
@@ -35,6 +39,7 @@ clean:
 cleanall:
 	( cd include     && $(MAKE) cleanall )
 	( cd src         && $(MAKE) cleanall )
+	( cd quark       && $(MAKE) cleanall )
 	( cd testing     && $(MAKE) cleanall )
 	( cd testing/lin && $(MAKE) cleanall )
 	( cd magmablas   && $(MAKE) cleanall ) 
