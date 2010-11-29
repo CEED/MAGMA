@@ -11,6 +11,9 @@ include ../Makefile.internal
 
 ZSRC  = testing_zswap.cpp 	\
 	testing_zgetrf.cpp 	\
+	testing_zgetrf_mc.cpp 	\
+	testing_zgeqrf_mc.cpp 	\
+	testing_zpotrf_mc.cpp 	\
 	testing_zpotrf.cpp	\
 	testing_zgeqrf.cpp 	\
 	testing_zgeqrf-v2.cpp 	\
@@ -79,7 +82,7 @@ testing_%_f : testing_%_f.o $(FOBJ)
 
 testing_% : testing_%.o
 	$(FORT) $(OPTS) $(LDOPTS) $(NOMAIN) $< $(OBJ) -o $@ lin/liblapacktest.a -L../lib \
-          -lcuda -lmagma -lmagmablas $(LIBDIR) $(LIB) 
+          -lcuda -lmagma -lmagmablas $(LIBDIR) $(LIB) ../quark/libquark.a
 
 #
 # These two files are provided by cuda
