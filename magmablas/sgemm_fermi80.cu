@@ -101,11 +101,11 @@ fermiSgemm_v2_kernel_NN_80(float *C, const float *A, const float *B,
 		{
 			#pragma unroll
 			for( int y=0; y<bx; y++)
-				Axs[y] = Abs[ty2+y*16][j1];
+				Axs[y] = Abs[tx2+y*16][j1];
 
 			#pragma unroll
 			for( int y=0; y<by; y++)
-				Bxp[y]= Bb[j1][tx2+y*16];
+				Bxp[y]= Bb[j1][ty2+y*16];
 
 			#pragma unroll 
 			for( int x=0; x<bx; x++)
@@ -138,11 +138,11 @@ fermiSgemm_v2_kernel_NN_80(float *C, const float *A, const float *B,
 		{
 			#pragma unroll
 			for( int y=0;y<bx;y++)
-				Axs[y] = Abs[ty2+y*16][j1] ;
+				Axs[y] = Abs[tx2+y*16][j1] ;
 
 			#pragma unroll
 			for( int y=0;y<by;y++)
-				Bxp[y]= Bb[j1][tx2+y*16];
+				Bxp[y]= Bb[j1][ty2+y*16];
 
 			#pragma unroll 
 			for( int x=0;x<bx;x++)
@@ -170,7 +170,8 @@ fermiSgemm_v2_kernel_NN_80(float *C, const float *A, const float *B,
 	} 
 	while (B < Bend);
 
-	C += ty2 + ibx  + __mul24 (tx2 +  iby ,ldc);
+	//C += ty2 + ibx  + __mul24 (tx2 +  iby ,ldc);
+	C += tx2 + ibx  + __mul24 (ty2 +  iby ,ldc);
 
 	// tail case
 	#pragma unroll 
@@ -179,11 +180,11 @@ fermiSgemm_v2_kernel_NN_80(float *C, const float *A, const float *B,
 
 		#pragma unroll
 		for( int y=0;y<by;y++)
-			Bxp[y]= Bb[j1][tx2+y*16];
+			Bxp[y]= Bb[j1][ty2+y*16];
 
 		#pragma unroll
 		for( int y=0;y<bx;y++)
-			Axs[y] = Abs[ty2+y*16][j1] ;
+			Axs[y] = Abs[tx2+y*16][j1] ;
 
 		#pragma unroll 
 		for( int x=0;x<bx;x++)
