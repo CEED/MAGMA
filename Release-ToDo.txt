@@ -10,16 +10,16 @@ To do list for MAGMA 1.0 release (Wednesday, November 24):
 
 Task  Done      Who       What
 =================================================================================
-DONE 1.       Mathieu     Moving sorgqr_gpu.cpp and dependancies to complex, 
+1.    DONE      Mathieu     Moving sorgqr_gpu.cpp and dependancies to complex, 
                           testing it
                           [to be moved to zungqr_gpu.cpp] 
 ---------------------------------------------------------------------------------
-2.            Piotr       Bug in gebrd.cpp due to code clean up and conversion
+2.    DONE    Piotr       Bug in gebrd.cpp due to code clean up and conversion
 ---------------------------------------------------------------------------------
 3.                        Bug in gehrd.cpp due to code clean up and conversion
 ---------------------------------------------------------------------------------
 4.                        Move int to magma_int_t everywhere (if you do it ask me for 
-                          an emai from Jill with some comments)
+                          an emai from Jill.Reese@MathWorks with some comments)
 ---------------------------------------------------------------------------------
 5.            Hatem       Add the basic symmetric and nonsymmetric eigensolvers
                           and svd and testing for them - this will be just as an
@@ -31,7 +31,7 @@ DONE 1.       Mathieu     Moving sorgqr_gpu.cpp and dependancies to complex,
                           (I am adding the lapack zgeev.cpp zheevd.cpp zgesvd.cpp
                            to the repository).
 ---------------------------------------------------------------------------------
-DONE 6.       Mathieu     Update the Makefile to the same comportement as PLASMA, 
+6.    DONE    Mathieu     Update the Makefile to the same comportement as PLASMA, 
                           to use the same MakeRelease  script or at least close
 ---------------------------------------------------------------------------------
 7.                        Move some macros from magma.h to another file in src, 
