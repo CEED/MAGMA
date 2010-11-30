@@ -17,8 +17,8 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t 
-magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, double2 *a, magma_int_t lda,
-	     double2 *tau, double2 *work, magma_int_t *lwork, double2 *da, magma_int_t *info)
+magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, cuDoubleComplex *a, magma_int_t lda,
+	     cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *lwork, cuDoubleComplex *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -128,22 +128,22 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, double2 *a, magma_
     #define min(a,b) ((a) <= (b) ? (a) : (b))
     #define max(a,b) ((a) >= (b) ? (a) : (b))
 
-    double2 c_one = MAGMA_Z_ONE;
-    double2 c_zero = MAGMA_Z_ZERO;
+    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    cuDoubleComplex c_zero = MAGMA_Z_ZERO;
 
     int nb = magma_get_zgehrd_nb(n);
     
     int N = n, ldda = n;
 
-    double2 *d_A    = da;
-    double2 *d_work = da + (N+nb)*ldda; 
+    cuDoubleComplex *d_A    = da;
+    cuDoubleComplex *d_work = da + (N+nb)*ldda; 
 
     /* Local variables */
     static int i__;
 
-    double2 *t;
-    //cudaMallocHost( (void**)&t, nb*nb*sizeof(double2) );
-    t = (double2 *)malloc(nb*nb*sizeof(double2));
+    cuDoubleComplex *t;
+    //cudaMallocHost( (void**)&t, nb*nb*sizeof(cuDoubleComplex) );
+    t = (cuDoubleComplex *)malloc(nb*nb*sizeof(cuDoubleComplex));
 
     static int ib;
     static int nh, iws;
@@ -228,7 +228,7 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, double2 *a, magma_
       /* Use blocked code */
 
       /* Copy the matrix to the GPU */
-      cublasSetMatrix(N, N, sizeof(double2), a+(ilo-1)*(lda),lda, d_A, ldda);
+      cublasSetMatrix(N, N, sizeof(cuDoubleComplex), a+(ilo-1)*(lda),lda, d_A, ldda);
 
       for (i__ = ilo; i__ < ihi - nb; i__ += nb) {
 	/* Computing MIN */
@@ -239,7 +239,7 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, double2 *a, magma_
              which performs the reduction, and also the matrix Y = A*V*T */
 
 	/*   Get the current panel (no need for the 1st iteration) */
-	cublasGetMatrix(ihi-i__+ilo, ib, sizeof(double2), 
+	cublasGetMatrix(ihi-i__+ilo, ib, sizeof(cuDoubleComplex), 
 			d_A + (i__ - ilo)*ldda  + i__ - ilo, ldda,
 			a   + (i__ -   1 )*(lda)+ i__ - 1   , lda);
 	
@@ -259,7 +259,7 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, double2 *a, magma_
 
     /* Use unblocked code to reduce the rest of the matrix */
     if (!(nb < nbmin || nb >= nh))
-      cublasGetMatrix(n, n-i__+1, sizeof(double2), 
+      cublasGetMatrix(n, n-i__+1, sizeof(cuDoubleComplex), 
 		      d_A+ (i__-1)*ldda, ldda, 
 		      a  + (i__-1)*(lda), lda);
     lapackf77_zgehd2(&n, &i__, &ihi, a, &lda, &tau[1], work, &iinfo);

@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 extern "C"
-void magma_xerbla(char *srname , int *info)
+void magma_xerbla(char *srname , magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
