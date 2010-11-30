@@ -365,6 +365,10 @@ magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb,
 #if defined(PRECISION_z) || defined(PRECISION_c)
 		i__2 = n - i__;
                 lapackf77_zlacgv( &i__2,  &a[i__+(i__+1)*a_dim1], &lda );
+                // 4. Send the block reflector  A(i+1:m,i) to the GPU after ZLACGV()
+                cublasSetVector(i__2, sizeof(cuDoubleComplex),
+                                a + i__   + (i__   +1)* a_dim1, lda,
+                                da+(i__-1)+((i__-1)+1)*(ldda), ldda);
 #endif
 	    }
 	}
