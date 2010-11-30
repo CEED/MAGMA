@@ -25,4 +25,8 @@ OPTS   += -DGPUSHMEM=200
 LDOPTS += -DGPUSHMEM=200
 endif
 
+LIB    := -lquark $(LIB)
+LIBDIR += -L../quark/lib
+INC    += -I../include -I../quark/include
+
 -include $(MAGMA_DIR)/Makefile.gen

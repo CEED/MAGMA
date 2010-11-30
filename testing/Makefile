@@ -82,7 +82,7 @@ testing_%_f : testing_%_f.o $(FOBJ)
 
 testing_% : testing_%.o
 	$(FORT) $(OPTS) $(LDOPTS) $(NOMAIN) $< $(OBJ) -o $@ lin/liblapacktest.a -L../lib \
-          -lcuda -lmagma -lmagmablas $(LIBDIR) $(LIB) ../quark/libquark.a
+          -lcuda -lmagma -lmagmablas $(LIBDIR) $(LIB) 
 
 #
 # These two files are provided by cuda
