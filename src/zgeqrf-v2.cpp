@@ -207,9 +207,13 @@ int cnt=-1;
             int rows = m-i;
 
 cnt++;
-//fprintf(stderr,"cnt0=%d\n",cnt);
+//fprintf(stderr,"cnt0=%d rows=%d ib=%d\n",cnt,rows,ib);
 
-            lapackf77_zgeqrf(&rows, &ib, a_ref(i,i), &lda, tau+i, work, &lwork, info);
+//if (cnt == 0)
+  //lapackf77_zgeqrf(&rows, &ib, a_ref(i,i), &lda, tau+i, work, &lwork, info);
+//else
+  magma_zgeqrf_mc(&rows, &ib, a_ref(i,i), &lda, tau+i, work, &lwork, info);
+
             /* Form the triangular factor of the block reflector
                H = H(i) H(i+1) . . . H(i+ib-1) */
             lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr, 
@@ -258,7 +262,7 @@ if (cnt < MG.np_gpu) {
         int rows = m-i;
 
 cnt++;
-//fprintf(stderr,"cnt2=%d\n",cnt);
+//fprintf(stderr,"cnt2=%d rows=%d ib=%d\n",cnt,rows,ib);
 
         lapackf77_zgeqrf(&rows, &ib, a_ref(i,i), &lda, tau+i, work, &lwork, info);
 

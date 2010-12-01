@@ -153,7 +153,8 @@ magma_zgeqrf3(magma_int_t m, magma_int_t n,
   }
 
   if (MG.m >= MG.n) {
-    magma_zgeqrf2(M, N, a+(n-MG.nthreads*MG.nb)*m+(n-MG.nthreads*MG.nb), m, 
+    //magma_zgeqrf2(M, N, a+(n-MG.nthreads*MG.nb)*m+(n-MG.nthreads*MG.nb), m, 
+    magma_zgeqrf(M, N, a+(n-MG.nthreads*MG.nb)*m+(n-MG.nthreads*MG.nb), m, 
                   &tau[n-MG.nthreads*MG.nb], work, lwork, info);
   }
  
