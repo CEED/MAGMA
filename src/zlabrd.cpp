@@ -181,8 +181,7 @@ magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb,
     x_dim1 = ldx;
     x_offset = 1 + x_dim1;
     x -= x_offset;
-    //dx-=1 + lddx;
-    dy-=1 + lddx;
+    dx-= 1 + lddx;
 
     y_dim1 = ldy;
     y_offset = 1 + y_dim1;
