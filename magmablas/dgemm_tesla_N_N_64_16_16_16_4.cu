@@ -6,9 +6,9 @@
        November 2010
 */
 
-#include "cublas.h"
-#include "magma.h"
-
+#include <cublas.h>
+#include "magmablas.h"
+#include "commonblas_d.h"
 
 static __device__ void daxpy(double a,double *b, double *c) {
 	c[0] += a * b[0];

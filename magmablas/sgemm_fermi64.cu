@@ -16,6 +16,8 @@
 #include <cuda_runtime.h>
 #include <cuda.h>
 #include <cublas.h>
+#include "magmablas.h"
+#include "commonblas_s.h"
 
 #define blks 4
 #define bx   4

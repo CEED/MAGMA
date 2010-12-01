@@ -6,8 +6,9 @@
        November 2010
 */
 
-#include "cublas.h"
-#include "magma.h"
+#include <cublas.h>
+#include "magmablas.h"
+#include "commonblas_s.h"
 
 static __device__ void saxpy(float a,float *b, float *c) {
 	c[0] += a * b[0];

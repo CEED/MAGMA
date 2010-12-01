@@ -8,6 +8,14 @@
 MAGMA_DIR = ..
 include ../Makefile.internal
 
+ZHDR  = commonblas_z.h
+CHDR  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZHDR)" -o -p c)
+DHDR  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZHDR)" -o -p "d ds")
+SHDR  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZHDR)" -o -p s)
+
+ALLHDR= $(ZHDR) $(CHDR) $(DHDR) $(SHDR) \
+        commonblas.h
+
 ZSRC  = zauxiliary.cu	\
 	zpermute.cu	\
 	zpermute-v2.cu	\
@@ -48,8 +56,8 @@ TESLASRC =      sgemv_tesla.cu	\
 	        dgemv_tesla.cu 	\
 	        ssymv_tesla.cu 	\
 	        dsymv_tesla.cu 	\
-		    csymv_tesla.cu \
-		    zsymv_tesla.cu \
+		csymv_tesla.cu \
+		zsymv_tesla.cu \
 	        chemv_tesla.cu 	\
 	        zhemv_tesla.cu 	\
 	        gemv32_tesla.cu \
@@ -92,18 +100,17 @@ endif
 
 ALLOBJ = $(ALLSRC:.cu=.cu_o) 
 
-all: $(LIBMAGMABLAS)
+all: $(LIBMAGMABLAS) 
 
-$(LIBMAGMABLAS): $(ALLOBJ)
+$(LIBMAGMABLAS): $(ALLHDR) $(ALLOBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
 
-.cpp.o:
+%.o : %.cpp 
 	$(CC) $(OPTS) $(INC) -c $< -o $@
 
 %.cu_o: %.cu
 	$(NVCC) $(NVOPTS) $(GPUOPT) $(INC) -c $< -o $@
-
 
 clean:
 	rm -f *.cu_o *.o *~ *.linkinfo
@@ -111,4 +118,3 @@ clean:
 cleanall: clean
 	rm -f *.a
 	rm -f $(LIBMAGMABLAS)
-

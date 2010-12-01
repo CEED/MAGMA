@@ -242,6 +242,8 @@ subs = {
     ('\*\*T','\*\*T','\*\*H','\*\*H'),
     ('BLAS_s','BLAS_d','BLAS_s','BLAS_d'),
     ('BLAS_s','BLAS_d','BLAS_c','BLAS_z'),
+    ('BLAS_S','BLAS_D','BLAS_C','BLAS_Z'),
+    ('blas_s','blas_d','blas_c','blas_z'),
     ('fabsf','fabs','cabsf','cabs'),
     ('fabsf','fabs','cuCabsf','cuCabs'),
     ('cblas_is','cblas_id','cblas_ic','cblas_iz'),

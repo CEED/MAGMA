@@ -14,6 +14,7 @@
 #include <cuda_runtime_api.h>
 #include "magma.h"
 #include "magmablas.h"
+#include "commonblas_d.h"
 
 #define magmablas_dgemm_tesla magmablas_dgemm
 

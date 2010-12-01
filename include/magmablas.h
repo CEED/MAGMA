@@ -11,8 +11,8 @@
 
 typedef int magma_int_t;
 
-#include "cublas.h"
-#include "cuda.h"
+#include <cublas.h>
+#include <cuda.h>
 
 #include "magmablas_z.h"
 #include "magmablas_c.h"
@@ -20,25 +20,6 @@ typedef int magma_int_t;
 #include "magmablas_s.h"
 #include "magmablas_zc.h"
 #include "magmablas_ds.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int lsame_c(char ch, char *s);
-
-void magmablas_sgemm_fermi80(char TRANSA, char TRANSB, int m , int n , int k ,
-                             float alpha, const float *A, int lda,
-                             const float *B, int ldb,
-		             float beta, float *C, int ldc );
-void magmablas_sgemm_fermi64(char TRANSA, char TRANSB, int m , int n , int k ,
-                             float alpha, const float *A, int lda,
-                             const float *B, int ldb,
-			     float beta, float *C, int ldc );
-
-#ifdef __cplusplus
-}
-#endif
 
 #define magmablas_zgemm cublasZgemm
 #define magmablas_cgemm cublasCgemm

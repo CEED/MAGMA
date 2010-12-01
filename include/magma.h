@@ -143,8 +143,6 @@
 extern "C" {
 #endif
 
-void magmablas_sdlaswp(int, double *, int, float *, int, int *);
-
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA function definitions
 */

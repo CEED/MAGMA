@@ -6,9 +6,9 @@
        November 2010
 */
 
-#include "cublas.h"
-#include "magma.h"
-
+#include <cublas.h>
+#include "magmablas.h"
+#include "commonblas_s.h"
 
 extern "C" __global__ void  
 sgemm_kernel_a_0(float *C, const float *A, const float *B, 

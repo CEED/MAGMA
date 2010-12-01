@@ -54,10 +54,10 @@ Task  Done      Who       What
                            is mentioning it, now it sounds as a possibility]
                            Move to next release.
 ---------------------------------------------------------------------------------
-10.             Stan       Check all mixed-precision files:
-                               DONE - zcposv_gpu.cpp
-                Mathieu        - zcgesv_gpu.cpp
-                Mathieu        - zcgetrs_gpu.cpp
+10.   DONE                 Check all mixed-precision files:
+                               - zcposv_gpu.cpp
+                               - zcgesv_gpu.cpp
+                               - zcgetrs_gpu.cpp
                                - zcgeqrsv_gpu.cpp), 
                            some files are missing in magmablas.
 ---------------------------------------------------------------------------------
@@ -73,8 +73,8 @@ Task  Done      Who       What
                            - Clean the char parameters to use the define Magma...[Str]
                            [Stan: this is a big one ...]
 ---------------------------------------------------------------------------------
-12.            Mathieu     Clean zungqr.cpp, it should be updated regarding the 
-                           conversion of sorgqr_gpu.cpp
+12.  DONE      Mathieu     Clean zungqr.cpp, it should be updated regarding the 
+                           conversion of sorgqr_gpu.cpp (File has been removed by someone)
 ---------------------------------------------------------------------------------
 13.                        Create a MAGMA_Init function
                            [Stan: this is in case we add threads handling in magma

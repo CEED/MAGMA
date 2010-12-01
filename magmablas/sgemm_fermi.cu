@@ -15,6 +15,8 @@
 #include <cuda_runtime.h>
 #include <cuda.h>
 #include <cublas.h>
+#include "magmablas.h"
+#include "commonblas_s.h"
 
 #define magmablas_sgemm_fermi magmablas_sgemm
 

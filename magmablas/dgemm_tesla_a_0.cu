@@ -6,9 +6,9 @@
        November 2010
 */
 
-#include "cublas.h"
-#include "magma.h"
-
+#include <cublas.h>
+#include "magmablas.h"
+#include "commonblas_d.h"
 
 extern "C" __global__ void  
 dgemm_kernel_a_0(double *C, const double *A, const double *B,

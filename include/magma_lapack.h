@@ -32,13 +32,13 @@ extern "C" {
 
 #endif
 
-long int lapackf77_lsame(const char *, const char *);
-float    lapackf77_slamch(const char *);
-double   lapackf77_dlamch(const char *);
-void     lapackf77_slabad(float *, float *);
-void     lapackf77_dlabad(double *, double*);
-void     lapackf77_zcgesv(int *, int *, double2 *, int *, int *, double2 *, int *, double2 *, int *, double2 *, float2 *, int *, int *);
-void     lapackf77_dsgesv(int *, int *, double *, int *, int *, double *, int *, double *, int *, double *, float *, int *, int *);
+long int lapackf77_lsame( const char *ca, const char *cb);
+float    lapackf77_slamch(const char *cmach);
+double   lapackf77_dlamch(const char *cmach);
+void     lapackf77_slabad(float  *small, float  *large);
+void     lapackf77_dlabad(double *small, double *large);
+void     lapackf77_zcgesv(int *n, int *nrhs, double2 *A, int *lda, int *IPIV, double2 *B, int *ldb, double2 *X, int *ldx, double2 *work, float2 *swork, double *rwork, int *iter, int *info);
+void     lapackf77_dsgesv(int *n, int *nrhs, double  *A, int *lda, int *IPIV, double  *B, int *ldb, double  *X, int *ldx, double  *work, float  *swork,                int *iter, int *info);
 
 #ifdef __cplusplus
 }
