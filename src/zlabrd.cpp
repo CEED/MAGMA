@@ -181,6 +181,7 @@ magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb,
     x_dim1 = ldx;
     x_offset = 1 + x_dim1;
     x -= x_offset;
+    //dx-=1 + lddx;
     dy-=1 + lddx;
 
     y_dim1 = ldy;
@@ -321,9 +322,12 @@ magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb,
                                 a + i__   + (i__   +1)* a_dim1, lda,
                                 da+(i__-1)+((i__-1)+1)*(ldda), ldda);
                 // 2. Multiply ---------------------------------------------
+		//cublasZcopy(i__3, da+(i__-1)+((i__-1)+1)*(ldda), ldda,
+		//	    dy + 1 + lddy, 1);
                 cublasZgemv('N', i__2, i__3, c_one,
                             da + (i__-1)+1+ ((i__-1)+1) * (ldda), ldda,
-                            da + (i__-1) +  ((i__-1)+1) * (ldda), ldda, 
+                            da + (i__-1) +  ((i__-1)+1) * (ldda), ldda,
+			    //dy + 1 + lddy, 1,
 			    c_zero, dx + i__ + 1 + i__ * x_dim1, c__1);
 
 		// 3. Put the result back ----------------------------------
