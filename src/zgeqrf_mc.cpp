@@ -128,6 +128,8 @@ extern "C" int EN_BEE;
 
 extern "C" int TRACE;
 
+extern "C" Quark *quark;
+
 void sgetro (char *trans, const int m, const int n, const cuDoubleComplex *A, const int LDA, cuDoubleComplex *B, const int LDB) 
 {
   const cuDoubleComplex *Atmp;
@@ -598,6 +600,8 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
 
   int nb = EN_BEE;
 
+//fprintf(stderr, "m=%d n=%d nb=%d\n",*m,*n,nb);
+
   int lwkopt = *n * nb;
   work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );
 
@@ -629,8 +633,8 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
   cuDoubleComplex **local_work = (cuDoubleComplex**) malloc(sizeof(cuDoubleComplex*)*(nt-1)*mt);
   memset(local_work, 0, sizeof(cuDoubleComplex*)*(nt-1)*mt);
 
-  Quark *quark;
-  quark = QUARK_New(4);
+  //Quark *quark;
+  //quark = QUARK_New(4);
 
   int priority;
 
@@ -643,7 +647,7 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
     sprintf(sgeqrt_dag_label, "GEQRT %d",ii);
 
     QUARK_Insert_Task_sgeqrt(quark, 
-      0, (*m)-i, min(nb,(*n)-i), A(i,i), *m, T(i), nb, &tau[i], sgeqrt_dag_label);
+      0, (*m)-i, min(nb,(*n)-i), A(i,i), *lda, T(i), nb, &tau[i], sgeqrt_dag_label);
 
     if (i > 0) {
 
@@ -659,17 +663,17 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
 
         QUARK_Insert_Task_slarfb(quark, 0, 
           (*m)-(i-nb), min(nb,(*n)-(i-nb)), min(nb,(*m)-(i-nb)), min(nb,(*n)-j), nb, 
-          A(i-nb,i-nb), *m, A(i-nb,j), *m, T(i-nb), nb, W(ii-1,jj), nb, slarfb_dag_label, priority);
+          A(i-nb,i-nb), *lda, A(i-nb,j), *lda, T(i-nb), nb, W(ii-1,jj), nb, slarfb_dag_label, priority);
 
         sprintf(strmm_dag_label, "TRMM %d %d",ii-1, jj);
 
         QUARK_Insert_Task_strmm(quark, 0, min(nb,(*m)-(i-nb)), min(nb,(*n)-j), c_neg_one, 
-          A(i-nb,i-nb), *m, W(ii-1,jj), nb, c_one, A(i-nb,j), *m, strmm_dag_label, priority);
+          A(i-nb,i-nb), *lda, W(ii-1,jj), nb, c_one, A(i-nb,j), *lda, strmm_dag_label, priority);
 
           sprintf(sgemm_dag_label, "GEMM %d %d %d",ii-1, jj, ll);
 
           QUARK_Insert_Task_sgemm(quark, 0, (*m)-i, min(nb,(*n)-j), min(nb,(*n)-(i-nb)), c_neg_one,
-            A(i,i-nb), *m, W(ii-1,jj), nb, c_one, A(i,j), *m, A(i,j), sgemm_dag_label, priority, jj);
+            A(i,i-nb), *lda, W(ii-1,jj), nb, c_one, A(i,j), *lda, A(i,j), sgemm_dag_label, priority, jj);
 
       }
 
@@ -691,17 +695,17 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
 
       QUARK_Insert_Task_slarfb(quark, 0, 
         (*m)-i, min(nb,(*n)-i), min(nb,(*m)-i), min(nb,(*n)-j), nb, 
-        A(i,i), *m, A(i,j), *m, T(i), nb, W(ii,jj), nb, slarfb_dag_label, priority);
+        A(i,i), *lda, A(i,j), *lda, T(i), nb, W(ii,jj), nb, slarfb_dag_label, priority);
 
       sprintf(strmm_dag_label, "TRMM %d %d",ii, jj);
 
       QUARK_Insert_Task_strmm(quark, 0, min(nb,(*m)-i), min(nb,(*n)-j), c_neg_one, 
-        A(i,i), *m, W(ii,jj), nb, c_one, A(i,j), *m, strmm_dag_label, priority);
+        A(i,i), *lda, W(ii,jj), nb, c_one, A(i,j), *lda, strmm_dag_label, priority);
 
         sprintf(sgemm_dag_label, "GEMM %d %d %d",ii, jj, ll);
 
         QUARK_Insert_Task_sgemm(quark, 0, (*m)-i-nb, min(nb,(*n)-j), min(nb,(*n)-i), c_neg_one,
-          A(i+nb,i), *m, W(ii,jj), nb, c_one, A(i+nb,j), *m, A(i+nb,j), sgemm_dag_label, priority, jj);
+          A(i+nb,i), *lda, W(ii,jj), nb, c_one, A(i+nb,j), *lda, A(i+nb,j), sgemm_dag_label, priority, jj);
 
     }
 
@@ -709,7 +713,7 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
 
   QUARK_Barrier(quark);
 
-  QUARK_Delete(quark);
+  //QUARK_Delete(quark);
 
   for(k = 0 ; k < (nt-1)*mt; k++) {
     if (local_work[k] != NULL) {
