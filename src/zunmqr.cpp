@@ -1,4 +1,4 @@
-/*
+b/*
     -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -15,9 +15,13 @@
 #include "magma.h"
 
 extern "C" magma_int_t
-magma_zunmqr(const char side, const char trans, magma_int_t m, magma_int_t n,
-	     magma_int_t k, double2 *a, magma_int_t lda, double2 *tau, double2 *c, magma_int_t ldc,
-	     double2 *work, magma_int_t lwork, magma_int_t *info)
+magma_zunmqr(const char side, const char trans, 
+             magma_int_t m, magma_int_t n, magma_int_t k, 
+             cuDoubleComplex *a,    magma_int_t lda, 
+             cuDoubleComplex *tau, 
+             cuDoubleComplex *c,    magma_int_t ldc,
+	     cuDoubleComplex *work, magma_int_t lwork, 
+             magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -111,24 +115,24 @@ magma_zunmqr(const char side, const char trans, magma_int_t m, magma_int_t n,
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
     
-    double2 c_one = MAGMA_Z_ONE;
+    cuDoubleComplex c_one = MAGMA_Z_ONE;
 
     char side_[2] = {side, 0};
     char trans_[2] = {trans, 0};
 
     // TTT --------------------------------------------------------------------
-    double2 *dwork, *dc;
-    cublasAlloc((m)*(n), sizeof(double2), (void**)&dc);
-    cublasAlloc(2*(m+64)*64, sizeof(double2), (void**)&dwork);
+    cuDoubleComplex *dwork, *dc;
+    cublasAlloc((m)*(n), sizeof(cuDoubleComplex), (void**)&dc);
+    cublasAlloc(2*(m+64)*64, sizeof(cuDoubleComplex), (void**)&dwork);
     
-    cublasSetMatrix( m, n, sizeof(double2), c, ldc, dc, ldc);
+    cublasSetMatrix( m, n, sizeof(cuDoubleComplex), c, ldc, dc, ldc);
     dc -= (1 + m);
     //-------------------------------------------------------------------------
 
     int a_dim1, a_offset, c_dim1, c_offset, i__4, i__5;
     /* Local variables */
     static int i__;
-    static double2 t[2*4160]	/* was [65][64] */;
+    static cuDoubleComplex t[2*4160]	/* was [65][64] */;
     static int i1, i2, i3, ib, ic, jc, nb, mi, ni, nq, nw, iws;
     long int left, notran, lquery;
     static int nbmin, iinfo;
@@ -251,7 +255,7 @@ magma_zunmqr(const char side, const char trans, magma_int_t m, magma_int_t n,
 
 	    // TTT ------------------------------------------------------------
 	    zpanel_to_q('U', ib, &a[i__ + i__ * a_dim1], lda, t+ib*ib);
-	    cublasSetMatrix(i__4, ib, sizeof(double2),
+	    cublasSetMatrix(i__4, ib, sizeof(cuDoubleComplex),
 			    &a[i__ + i__ * a_dim1], lda, 
 			    dwork, i__4);
 	    zq_to_panel('U', ib, &a[i__ + i__ * a_dim1], lda, t+ib*ib);
@@ -273,7 +277,7 @@ magma_zunmqr(const char side, const char trans, magma_int_t m, magma_int_t n,
 	    /* Apply H or H' */
 	    // TTT ------------------------------------------------------------
 	    //printf("%5d %5d %5d\n", mi, ni, ic + 1 + m);
-	    cublasSetMatrix(ib, ib, sizeof(double2), t, ib, dwork+i__4*ib, ib);
+	    cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), t, ib, dwork+i__4*ib, ib);
 	    magma_zlarfb(MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                          mi, ni, ib,
 			 dwork, i__4, dwork+i__4*ib, ib,

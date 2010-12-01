@@ -17,9 +17,9 @@
 
 extern "C" int 
 magma_ztsqrt_gpu(int *m, int *n, 
-		 double2 *a1, double2 *a2, int  *lda,
-		 double2  *tau, double2 *work, 
-		 int *lwork, double2 *dwork, int *info )
+		 cuDoubleComplex *a1, cuDoubleComplex *a2, int  *lda,
+		 cuDoubleComplex  *tau, cuDoubleComplex *work, 
+		 int *lwork, cuDoubleComplex *dwork, int *info )
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -119,7 +119,7 @@ magma_ztsqrt_gpu(int *m, int *n,
    int nb = magma_get_zgeqrf_nb(*m);
 
    int lwkopt = (*n+*m) * nb;
-   work[0] = (double2) lwkopt;
+   work[0] = (cuDoubleComplex) lwkopt;
    long int lquery = *lwork == -1;
    if (*m < 0) {
      *info = -1;
@@ -159,16 +159,16 @@ magma_ztsqrt_gpu(int *m, int *n,
      rows = *m;
      // Send the next panel (diagonal block of A1 & block column of A2) 
      // to the CPU (in work_a1 and work_a2)
-     cudaMemcpy2DAsync(  work_a2, ldwork*sizeof(double2),
-			 a2_ref(0,i), (*lda)*sizeof(double2),
-			 sizeof(double2)*rows, ib,
+     cudaMemcpy2DAsync(  work_a2, ldwork*sizeof(cuDoubleComplex),
+			 a2_ref(0,i), (*lda)*sizeof(cuDoubleComplex),
+			 sizeof(cuDoubleComplex)*rows, ib,
 			 cudaMemcpyDeviceToHost,stream[1]);
-     cudaMemcpy2DAsync(  work_a1, ldwork*sizeof(double2),
-			 // a1_ref(i,i), (*lda)*sizeof(double2),
+     cudaMemcpy2DAsync(  work_a1, ldwork*sizeof(cuDoubleComplex),
+			 // a1_ref(i,i), (*lda)*sizeof(cuDoubleComplex),
 			 // the diagonal of a1 is in d_ref generated and
 			 // passed from magma_zgeqrf_gpu2
-			 d_ref(i), ib*sizeof(double2),
-			 sizeof(double2)*ib, ib,
+			 d_ref(i), ib*sizeof(cuDoubleComplex),
+			 sizeof(cuDoubleComplex)*ib, ib,
 			 cudaMemcpyDeviceToHost,stream[1]);
      
 	if (i>0) {
@@ -190,17 +190,17 @@ magma_ztsqrt_gpu(int *m, int *n,
 	
 	// Now diag of A1 is updated, send it back asynchronously to the GPU.
         // We have to play interchaning these copies to see which is faster
-	cudaMemcpy2DAsync(d_ref(i), ib * sizeof(double2),
-			  work_a1 , ib * sizeof(double2),
-			  sizeof(double2)*ib, ib,
+	cudaMemcpy2DAsync(d_ref(i), ib * sizeof(cuDoubleComplex),
+			  work_a1 , ib * sizeof(cuDoubleComplex),
+			  sizeof(cuDoubleComplex)*ib, ib,
 			  cudaMemcpyHostToDevice,stream[0]);
 	// Send the panel from A2 back to the GPU
-	cublasSetMatrix(*m, ib, sizeof(double2),
+	cublasSetMatrix(*m, ib, sizeof(cuDoubleComplex),
 			work_a2, ldwork, a2_ref(0,i), *lda);
 
 	if (i + ib < *n) {
 	  // Send the triangular factor T from hwork to the GPU in t_ref(i)
-	  cublasSetMatrix(ib, ib, sizeof(double2), hwork, ib, t_ref(i), lddwork);
+	  cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), hwork, ib, t_ref(i), lddwork);
 
 	  if (i+nb < k){
 	    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */

@@ -18,8 +18,8 @@
 
 
 extern "C" magma_int_t
-magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double *d, double *e, 
-	     double2 *tau, double2 *work, magma_int_t *lwork, double2 *da, magma_int_t *info)
+magma_zhetrd(char uplo, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, double *d, double *e, 
+	     cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *lwork, cuDoubleComplex *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -148,10 +148,10 @@ magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double *d, d
 
     int N = n, ldda = lda;
     int nb = magma_get_zhetrd_nb(n); 
-    double2 *dwork = da + (n)*ldda - 1;
+    cuDoubleComplex *dwork = da + (n)*ldda - 1;
 
-    double2 z_neg_one = MAGMA_Z_NEG_ONE;
-    double2 z_one = MAGMA_Z_ONE;
+    cuDoubleComplex z_neg_one = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex z_one = MAGMA_Z_ONE;
     double  d_one = MAGMA_D_ONE;
     
     /* System generated locals */
@@ -207,7 +207,7 @@ magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double *d, d
     if (upper) {
 
         /* Copy the matrix to the GPU */ 
-        cublasSetMatrix(N, N, sizeof(double2), a+a_offset, lda, da, ldda);
+        cublasSetMatrix(N, N, sizeof(cuDoubleComplex), a+a_offset, lda, da, ldda);
 
         /*  Reduce the upper triangle of A.   
 	    Columns 1:kk are handled by the unblocked method. */
@@ -245,7 +245,7 @@ magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double *d, d
       {
 	/* Copy the matrix to the GPU */
 	if (1<=n-nx)
-	  cublasSetMatrix(N, N, sizeof(double2), a+a_offset, lda, da, ldda);
+	  cublasSetMatrix(N, N, sizeof(cuDoubleComplex), a+a_offset, lda, da, ldda);
 
 	/* Reduce the lower triangle of A */
 	for (i__ = 1; i__ <= n-nx; i__ += nb) 
@@ -257,7 +257,7 @@ magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double *d, d
 
 	    /*   Get the current panel (no need for the 1st iteration) */
 	    if (i__!=1)
-	      cublasGetMatrix(i__3, nb, sizeof(double2),
+	      cublasGetMatrix(i__3, nb, sizeof(cuDoubleComplex),
 			      da + (i__-1)*ldda  + (i__-1), ldda,
 			      a  +  i__   *a_dim1+  i__   , lda);
 	    
@@ -269,7 +269,7 @@ magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double *d, d
 	    /* Update the unreduced submatrix A(i+ib:n,i+ib:n), using   
 	       an update of the form:  A := A - V*W' - W*V' */
 	    i__3 = n - i__ - nb + 1;
-	    cublasSetMatrix(n - i__ + 1, nb, sizeof(double2),
+	    cublasSetMatrix(n - i__ + 1, nb, sizeof(cuDoubleComplex),
                             work  + 1, ldwork,
                             dwork + 1, lddwork);
 
@@ -291,7 +291,7 @@ magma_zhetrd(char uplo, magma_int_t n, double2 *a, magma_int_t lda, double *d, d
 	i__1 = n - i__ + 1;
 
 	if (1<=n-nx)
-	  cublasGetMatrix(i__1, i__1, sizeof(double2),
+	  cublasGetMatrix(i__1, i__1, sizeof(cuDoubleComplex),
 			  da + (i__-1) + (i__-1) * a_dim1, ldda,
 			  a  +  i__    +  i__    * a_dim1, lda);
 	

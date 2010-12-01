@@ -15,9 +15,13 @@
 #include "magma.h"
 
 extern "C" int
-magma_zunmtr(char *side, char *uplo, char *trans, int *m, int *n, 
-	     double2 *a, int *lda, double2 *tau, double2 *c, int *ldc,
-	     double2 *work, int *lwork, int *info)
+magma_zunmtr(char *side, char *uplo, char *trans,
+             int *m, int *n, 
+	     cuDoubleComplex *a,    int *lda, 
+             cuDoubleComplex *tau, 
+             cuDoubleComplex *c,    int *ldc,
+	     cuDoubleComplex *work, int *lwork, 
+             int *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -113,7 +117,7 @@ magma_zunmtr(char *side, char *uplo, char *trans, int *m, int *n,
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
    
-    double2 c_one = MAGMA_Z_ONE;
+    cuDoubleComplex c_one = MAGMA_Z_ONE;
 
     int a_dim1, a_offset, c_dim1, c_offset, i__2;
     static int i1, i2, nb, mi, ni, nq, nw;

@@ -16,10 +16,10 @@
 #include "magmablas.h"
 
 extern "C" int
-magma_zgesvd_(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n, 
-	      cuDoubleComplex *a, magma_int_t *lda, double *s, cuDoubleComplex *u, 
-	      magma_int_t *ldu, cuDoubleComplex *vt, magma_int_t *ldvt, cuDoubleComplex *work, 
-	      magma_int_t *lwork, double *rwork, magma_int_t *info)
+magma_zgesvd_( char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n, 
+               cuDoubleComplex *a, magma_int_t *lda, double *s, cuDoubleComplex *u, 
+               magma_int_t *ldu, cuDoubleComplex *vt, magma_int_t *ldvt, cuDoubleComplex *work, 
+               magma_int_t *lwork, double *rwork, magma_int_t *info )
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
