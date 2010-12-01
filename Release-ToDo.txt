@@ -112,37 +112,43 @@ Task  Done      Who       What
 21                         Add zlansy.cu functions (Relies on task 20)
 ---------------------------------------------------------------------------------
 22                         Status of src directory 
+                           
+                            CPU  /  GPU  / Remark   
+                 zpotrf   -  ok  /  ok 
+                 zpotrs   -  -   /  ok
+                 zcposv   -  -   /  ok
 
+                 zgetrf   -  ok  /  ok   / GPU version: need to have more explicit names but it's ok
+                 zgetrs   -  -   /  ok
+                 zcgetrs  -  -   /  ok
+
+                 zgeqrf   -  ok  /  ok   / GPU version: maybe we should add dwork/ldwork to follow cpu interface
+                 zgelqf   -  ok  /  - 
+                 zgeqlf   -  ok  /  - 
+
+                 zgebrd   -  -   /  ok
+               
                  zcgeqrsv - Interface needs to be clean, it's a big mess with all the different workspace 
                             No CPU interface
                             GPU interface should be close to the lapack one
                  zcgesv   - No CPU interface
                             GPU interface should be close to the lapack one
-                 zcgetrs  - No CPU interface, GPU ok
-                 zcposv   - No CPU interface, GPU ok
-                 zgebrd   - No GPU interface, CPU ok 
                  zgeev    - No GPU interface
                             Still F2c
                             Need to use lapackf77/blasf77 macros
                  zgehrd   - No GPU interface
                             Still F2C
-                 zgelqf   - No GPU interface, CPU ok
-                 zgeqlf   - No GPU interface, CPU ok
-                 zgeqrf   - Ok (Nice to see one :) )
-                 zgeqrf_gpu - We should add dwork and ldwork to follow cpu interface
                  zgeqrf-v2  - Need to be cleaned, doesn't do the same thing than _gpu-v2 ???
                  zgeqrf-v3       - 
                  zgeqrf_gpu-v2   -
-                 zgeqrf_mc       -
                  zgeqrs_gpu  - No CPU interface
                                GPU interface doesn't follow lapack. Need Td pointer which is provided only by zgeqrs_gpu-v2.
-                 zgesvd      - No comments
-                 zgetrf      - Ok (CPU and GPU interface)
+                 zgeqrf_mc   -
                  zgetrf_mc   - 
-                 zgetrs_gpu  - No CPU interface, GPU Ok
+                 zpotrf_mc   -
+                 zgesvd      - No comments
                  zheevd      - No comments
-                 zhetrd      - No GPU interface
-                               CPU  in F2C
+                 zhetrd      - No GPU interface /  CPU  in F2C
                  zlabrd      - Interface needs to be clean because it's a CPU file with device pointers in the interface.
                                Still F2C, maybe we can take release 479 and add changes from Piotr
                  zlahr2      - Interface needs to be clean because it's a CPU file with device pointers in the interface.
@@ -150,9 +156,6 @@ Task  Done      Who       What
                  zlahru      - Should be called _gpu or change the interface because of the mix between cpu and gpu buffer
                  zlarfb      - Need to be renamed in _gpu => GPU ok and No CPU interface
                  zlatrd      - Stil in F2C, a lot to do
-                 zpotrf      - CPU and GPU ok
-                 zpotrf_mc   -
-                 zpotrs_gpu  - No CPU interface / GPU ok
                  ztsqrt_gpu  - No CPU interface / still fortran interface
                  zungqr_gpu  - Need to add lwork to follow lapack interface / No CPU interface
                  zunmqr      - F2C code
