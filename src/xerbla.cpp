@@ -1,8 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "magma.h"
 
 extern "C"
-void magma_xerbla(char *srname , magma_int_t *info)
+void magma_xerbla(const char *srname , magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
