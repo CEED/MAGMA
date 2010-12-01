@@ -9,20 +9,20 @@
 MAGMA_DIR = .
 include ./Makefile.internal
 
-all: lib libquark test
+all: lib test
 
-lib: libmagma libmagmablas
+lib: libquark libmagma libmagmablas
 
 clean: cleanall
 
 libmagma:
-	( cd src && $(MAKE) )
+	( cd src         && $(MAKE) )
 
 libmagmablas:
-	( cd magmablas && $(MAKE) )
+	( cd magmablas   && $(MAKE) )
 
 libquark:
-	( cd quark && $(MAKE) )
+	( cd quark       && $(MAKE) )
 
 test:
 	( cd testing/lin && $(MAKE) )
@@ -45,4 +45,27 @@ cleanall:
 	( cd magmablas   && $(MAKE) cleanall ) 
 	( cd lib && rm -f *.a )
 
+
+dir:
+	mkdir -p $(prefix)
+	mkdir -p $(prefix)/include
+	mkdir -p $(prefix)/lib
+	mkdir -p $(prefix)/lib/pkgconfig
+
+install: lib dir
+#       MAGMA
+	cp $(MAGMA_DIR)/include/*.h  $(prefix)/include
+	cp $(LIBMAGMA)               $(prefix)/lib
+	cp $(LIBMAGMABLAS)           $(prefix)/lib
+#       QUARK
+	cp $(QUARKDIR)/include/quark.h             $(prefix)/include
+	cp $(QUARKDIR)/include/quark_unpack_args.h $(prefix)/include
+	cp $(QUARKDIR)/include/icl_hash.h          $(prefix)/include
+	cp $(QUARKDIR)/include/icl_list.h          $(prefix)/include
+	cp $(QUARKDIR)/lib/libquark.a              $(prefix)/lib
+#       pkgconfig
+	cat $(MAGMA_DIR)/lib/pkgconfig/magma.pc | \
+	    sed -e s+\__PREFIX+"$(prefix)"+     | \
+	    sed -e s+\__LIBEXT+"$(LIBEXT)"+       \
+	    > $(prefix)/lib/pkgconfig/magma.pc
 

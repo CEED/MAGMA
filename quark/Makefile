@@ -8,7 +8,7 @@ clean:
 	rm -f *.o *~
 
 cleanall: clean
-	rm -f *.a
+	rm -f lib/libquark.a
 
 .c.o:
 	$(CC) $(OPTS) -Iinclude $(INC) -c $< -o $@

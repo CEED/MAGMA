@@ -32,7 +32,7 @@ LIB       = -lgoto  -lpthread -lcublas -lcudart -llapack -lm
 CUDADIR   = /usr/local/cuda
 
 LIBDIR    = -L/bummer/GotoBLAS -L/usr/local/cuda/lib64 -L/usr/lib64
-INC       = -I../include -I$(CUDADIR)/include
+INC       = -I$(CUDADIR)/include
 
-LIBMAGMA     = ../lib/libmagma.a
-LIBMAGMABLAS = ../lib/libmagmablas.a
+#LIBMAGMA     = libmagma.a
+#LIBMAGMABLAS = libmagmablas.a

@@ -44,7 +44,7 @@ CUDADIR   = /mnt/scratch/cuda-3.2/
 LIBDIR    = -L/mnt/scratch/sw/intel/11.1.069/lib/intel64 \
             -L$(CUDADIR)/lib64
 
-INC       = -I../include -I../quark/include -I$(CUDADIR)/include
+INC       = -I$(CUDADIR)/include
 
-LIBMAGMA     = ../lib/libmagma.a
-LIBMAGMABLAS = ../lib/libmagmablas.a
+#LIBMAGMA     = libmagma.a
+#LIBMAGMABLAS = libmagmablas.a

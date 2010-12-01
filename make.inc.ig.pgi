@@ -32,7 +32,7 @@ CUDADIR   = /mnt/scratch/cuda-3.1
 
 LIBDIR    = -L$(MKLROOT)/lib/em64t \
             -L$(CUDADIR)/lib64
-INC       = -I../include -I$(CUDADIR)/include
+INC       = -I$(CUDADIR)/include
 
-LIBMAGMA     = ../lib/libmagma.a
-LIBMAGMABLAS = ../lib/libmagmablas.a
+#LIBMAGMA     = libmagma.a
+#LIBMAGMABLAS = libmagmablas.a

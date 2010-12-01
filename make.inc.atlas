@@ -33,7 +33,7 @@ CUDADIR   = /usr/local/cuda
 LIBDIR    = -L/home/tomov/LIBS/ATLAS/lib/Linux_HAMMER64SSE2 \
             -L/home/tomov/LIBS/CLAPACK-3.1.1/F2CLIBS/ \
             -L$(CUDADIR)/lib
-INC       = -I../include -I$(CUDADIR)/include
+INC       = -I$(CUDADIR)/include
 
-LIBMAGMA     = ../lib/libmagma.a
-LIBMAGMABLAS = ../lib/libmagmablas.a
+#LIBMAGMA     = libmagma.a
+#LIBMAGMABLAS = libmagmablas.a
