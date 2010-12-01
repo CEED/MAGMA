@@ -15,7 +15,7 @@
 #include <string.h>
 #include <math.h>
 
-//#include <quark.h>
+#include <quark.h>
 
 // includes, project
 #include "cuda.h"
@@ -30,6 +30,8 @@
 int EN_BEE;
 
 int TRACE;
+
+Quark *quark;
 
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -210,9 +212,13 @@ int main( int argc, char** argv)
          Performs operation using multicore 
 	 =================================================================== */
 
+quark = QUARK_New(4);
+
       start = get_current_time();
       magma_zgeqrf_mc(&M, &N, h_A2, &M, tau, h_work2, &lwork, info);
       end = get_current_time();
+
+QUARK_Delete(quark);
 
       if (info[0] < 0)  
         printf("Argument %d of sgeqrf had an illegal value.\n", -info[0]);
