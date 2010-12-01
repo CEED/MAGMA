@@ -1,4 +1,4 @@
-b/*
+/*
     -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -8,7 +8,6 @@ b/*
        @precisions normal z -> s d c
 
 */
-
 #include <stdio.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
