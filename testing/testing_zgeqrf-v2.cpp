@@ -18,6 +18,8 @@
 #include <cuda_runtime_api.h>
 #include <cublas.h>
 
+#include <quark.h>
+
 // includes, project
 #include "magma.h"
 
@@ -110,7 +112,7 @@ void magma_init (int m, int n, cuDoubleComplex *a, int nthreads)
       MG.np_gpu++;
   }
 
-//fprintf(stderr,"MG.np_gpu=%d\n",MG.np_gpu);
+fprintf(stderr,"MG.np_gpu=%d\n",MG.np_gpu);
 
   MG.p = (volatile cuDoubleComplex **) malloc (MG.np_gpu*sizeof(cuDoubleComplex*));
 
@@ -125,13 +127,26 @@ void magma_init (int m, int n, cuDoubleComplex *a, int nthreads)
   }
 }
 
+int EN_BEE;
+
+int TRACE;
+
+Quark *quark;
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeqrf
 */
 int main( int argc, char** argv) 
 {
 
-int nthreads=3;
+int nthreads=2;
+
+EN_BEE = 32;
+
+TRACE = 0;
+
+int nquarkthreads=2;
+
 
     cuInit( 0 );
     cublasInit( );
@@ -151,29 +166,39 @@ int nthreads=3;
     int ione     = 1;
     int ISEED[4] = {0,0,0,1};
 
+	int loop = argc;
+
     if (argc != 1){
-        for(i = 1; i<argc; i++){
-            if (strcmp("-N", argv[i])==0)
-                N = atoi(argv[++i]);
-            else if (strcmp("-M", argv[i])==0)
-                M = atoi(argv[++i]);
-            else if (strcmp("-T", argv[i])==0)
-                nthreads = atoi(argv[++i]);
+      for(i = 1; i<argc; i++){      
+        if (strcmp("-N", argv[i])==0)
+          N = atoi(argv[++i]);
+        else if (strcmp("-M", argv[i])==0)
+          M = atoi(argv[++i]);
+        else if (strcmp("-b", argv[i])==0)
+          EN_BEE = atoi(argv[++i]);
+        else if (strcmp("-P", argv[i])==0)
+          nthreads = atoi(argv[++i]);
+        else if (strcmp("-Q", argv[i])==0)
+          nquarkthreads = atoi(argv[++i]);
+      }
+
+      if ((M>0 && N>0) || (M==0 && N==0)) {
+        printf("  testing_zgeqrf-v2 -M %d -N %d\n\n", M, N);
+        if (M==0 && N==0) {
+          M = N = size[9];
+          loop = 1;
         }
-        if (N>0 && M>0)
-            printf("  testing_zgeqrf -M %d -N %d\n\n", M, N);
-        else
-            {
-                printf("\nUsage: \n");
-                printf("  testing_zgeqrf -M %d -N %d\n\n", M, N);
-                exit(1);
-            }
-    }
-    else {
+      } else {
         printf("\nUsage: \n");
-        printf("  testing_zgeqrf -M %d -N %d\n\n", 1024, 1024);
-        M = N = size[9];
+        printf("  testing_zgeqrf-v2 -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
+        exit(1);
+      }
+    } else {
+      printf("\nUsage: \n");
+      printf("  testing_zgeqrf-v2 -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
+      M = N = size[9];
     }
+
 
     /* Initialize CUBLAS */
     status = cublasInit();
@@ -213,7 +238,7 @@ int nthreads=3;
     printf("  M     N   CPU GFlop/s   GPU GFlop/s    ||R||_F / ||A||_F\n");
     printf("==========================================================\n");
     for(i=0; i<10; i++){
-        if (argc==1){
+        if (loop==1){
             M = N = min_mn = size[i];
             n2 = M*N;
         }
@@ -222,7 +247,7 @@ int nthreads=3;
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &M, h_R, &M );
 
-        magma_zgeqrf(M, N, h_R, M, tau, h_work, lwork, &info);
+        //magma_zgeqrf(M, N, h_R, M, tau, h_work, lwork, &info);
 
         for(j=0; j<n2; j++)
             h_R[j] = h_A[j];
@@ -232,6 +257,8 @@ int nthreads=3;
            =================================================================== */
 
 magma_init(M, N, h_R, nthreads);
+
+quark = QUARK_New(nquarkthreads);
 
         start = get_current_time();
         magma_zgeqrf3(M, N, h_R, M, tau, h_work, lwork, &info);
@@ -294,7 +321,7 @@ magma_init(M, N, h_R, nthreads);
           N*result[0]*5.96e-08);
         */
 
-        if (argc != 1)
+        if (loop != 1)
             break;
     }
 
