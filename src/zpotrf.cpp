@@ -18,8 +18,9 @@
 #define A(i, j)  (a   +(j)*lda  + (i))
 #define dA(i, j) (work+(j)*ldda + (i))
 
-extern "C" int 
-magma_zpotrf(char uplo, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, int *info)
+extern "C" magma_int_t 
+magma_zpotrf(char uplo, magma_int_t n, 
+             cuDoubleComplex *a, magma_int_t lda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -87,8 +88,10 @@ magma_zpotrf(char uplo, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, int 
     char uplo_[2] = {uplo, 0};
     int  ldda;
     static int j, jb;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex zone  = MAGMA_Z_ONE;
+    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
+    double          done  = (double) 1.0;
+    double          mdone = (double)-1.0;
 
     long int upper = lapackf77_lsame(uplo_, "U");
     *info = 0;
@@ -133,10 +136,10 @@ magma_zpotrf(char uplo, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, int 
                 jb = min(nb, (n-j));
 		cublasSetMatrix(jb, (n-j), sizeof(cuDoubleComplex), 
                                 A(j, j), lda, dA(j, j), ldda);
-
+                
                 cublasZherk(MagmaUpper, MagmaConjTrans, jb, j, 
-                            -1.f, dA(0, j), ldda, 
-                            1.f,  dA(j, j), ldda);
+                            mdone, dA(0, j), ldda, 
+                            done,  dA(j, j), ldda);
 
                 cudaMemcpy2DAsync(  A(0, j), lda *sizeof(cuDoubleComplex), 
 				   dA(0, j), ldda*sizeof(cuDoubleComplex), 
@@ -146,9 +149,9 @@ magma_zpotrf(char uplo, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, int 
 		if ( (j+jb) < n) {
                     cublasZgemm(MagmaConjTrans, MagmaNoTrans, 
                                 jb, (n-j-jb), j,
-                                c_neg_one, dA(0, j   ), ldda, 
+                                mzone, dA(0, j   ), ldda, 
                                            dA(0, j+jb), ldda,
-                                c_one,     dA(j, j+jb), ldda);
+                                zone,     dA(j, j+jb), ldda);
 		}
              
 		cudaStreamSynchronize(stream[1]);
@@ -165,7 +168,7 @@ magma_zpotrf(char uplo, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, int 
 		if ( (j+jb) < n )
                   cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
                               jb, (n-j-jb),
-                              c_one, dA(j, j   ), ldda, 
+                              zone, dA(j, j   ), ldda, 
                                      dA(j, j+jb), ldda);
 	    }
 	} else {
@@ -179,8 +182,8 @@ magma_zpotrf(char uplo, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, int 
 				A(j, j), lda, dA(j, j), ldda);
 
                 cublasZherk(MagmaLower, MagmaNoTrans, jb, j,
-                            -1.f, dA(j, 0), ldda, 
-                            1.f,  dA(j, j), ldda);
+                            mdone, dA(j, 0), ldda, 
+                            done,  dA(j, j), ldda);
 		/*
 		cudaMemcpy2DAsync( A(j, 0), lda *sizeof(cuDoubleComplex), 
 				   dA(j,0), ldda*sizeof(cuDoubleComplex), 
@@ -199,9 +202,9 @@ magma_zpotrf(char uplo, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, int 
                 if ( (j+jb) < n) {
                     cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
                                  (n-j-jb), jb, j,
-                                 c_neg_one, dA(j+jb, 0), ldda, 
-                                            dA(j,    0), ldda,
-                                 c_one,     dA(j+jb, j), ldda);
+                                 mzone, dA(j+jb, 0), ldda, 
+                                        dA(j,    0), ldda,
+                                 zone,  dA(j+jb, j), ldda);
                 }
 		
                 cudaStreamSynchronize(stream[1]);
@@ -218,8 +221,8 @@ magma_zpotrf(char uplo, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, int 
 		if ( (j+jb) < n)
                     cublasZtrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
                                 (n-j-jb), jb, 
-                                c_one, dA(j,    j), ldda, 
-                                       dA(j+jb, j), ldda);
+                                zone, dA(j,    j), ldda, 
+                                      dA(j+jb, j), ldda);
 	    }
 	}
     }

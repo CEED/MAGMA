@@ -14,11 +14,11 @@
 #include "magma.h"
 #include "magmablas.h"
 
-#define A(i, j)  (a + (j)*lda + (i))
+#define dA(i, j)  (dA + (j)*ldda + (i))
 
-extern "C" int 
+extern "C" magma_int_t
 magma_zpotrf_gpu(char uplo, magma_int_t n, 
-                 cuDoubleComplex *a, magma_int_t lda, int *info)
+                 cuDoubleComplex *dA, magma_int_t ldda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -30,11 +30,11 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
     =======   
 
     ZPOTRF computes the Cholesky factorization of a real hemmetric   
-    positive definite matrix A.   
+    positive definite matrix dA.   
 
     The factorization has the form   
-       A = U\*\*H * U,  if UPLO = 'U', or   
-       A = L  * L\*\*H,  if UPLO = 'L',   
+       dA = U\*\*H * U,  if UPLO = 'U', or   
+       dA = L  * L\*\*H,  if UPLO = 'L',   
     where U is an upper triangular matrix and L is lower triangular.   
 
     This is the block version of the algorithm, calling Level 3 BLAS.   
@@ -43,27 +43,27 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
     =========   
 
     UPLO    (input) CHARACTER*1   
-            = 'U':  Upper triangle of A is stored;   
-            = 'L':  Lower triangle of A is stored.   
+            = 'U':  Upper triangle of dA is stored;   
+            = 'L':  Lower triangle of dA is stored.   
 
     N       (input) INTEGER   
-            The order of the matrix A.  N >= 0.   
+            The order of the matrix dA.  N >= 0.   
 
-    A       (input/output) COMPLEX_16 array on the GPU, dimension (LDA,N)   
-            On entry, the hemmetric matrix A.  If UPLO = 'U', the leading   
-            N-by-N upper triangular part of A contains the upper   
-            triangular part of the matrix A, and the strictly lower   
-            triangular part of A is not referenced.  If UPLO = 'L', the   
-            leading N-by-N lower triangular part of A contains the lower   
-            triangular part of the matrix A, and the strictly upper   
-            triangular part of A is not referenced.   
+    dA      (input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N)   
+            On entry, the hemmetric matrix dA.  If UPLO = 'U', the leading   
+            N-by-N upper triangular part of dA contains the upper   
+            triangular part of the matrix dA, and the strictly lower   
+            triangular part of dA is not referenced.  If UPLO = 'L', the   
+            leading N-by-N lower triangular part of dA contains the lower   
+            triangular part of the matrix dA, and the strictly upper   
+            triangular part of dA is not referenced.   
 
             On exit, if INFO = 0, the factor U or L from the Cholesky   
-            factorization A = U\*\*H*U or A = L*L\*\*H.   
+            factorization dA = U\*\*H*U or dA = L*L\*\*H.   
 
-    LDA     (input) INTEGER   
-            The leading dimension of the array A.  LDA >= max(1,N).
-            To benefit from coalescent memory accesses LDA must be
+    LDDA     (input) INTEGER   
+            The leading dimension of the array dA.  LDDA >= max(1,N).
+            To benefit from coalescent memory accesses LDDA must be
             dividable by 16.
 
     INFO    (output) INTEGER   
@@ -82,28 +82,25 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
 
-    char uplo_[2] = {uplo, 0};
-
-    /* Table of constant values */
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    
     /* Local variables */
-    static int j;
-
+    static int j, jb;
+    char uplo_[2] = {uplo, 0};
+    cuDoubleComplex zone  = MAGMA_Z_ONE;
+    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
+    double          done  = (double) 1.0;
+    double          mdone = (double)-1.0;
+       
     long int upper = lapackf77_lsame(uplo_, "U");
     *info = 0;
     if (! upper && ! lapackf77_lsame(uplo_, "L")) {
-      *info = -1;
+        *info = -1;
     } else if (n < 0) {
-      *info = -2;
-    } else if (lda < max(1,n)) {
-      *info = -4;
+        *info = -2;
+    } else if (ldda < max(1,n)) {
+        *info = -4;
     }
     if (*info != 0)
-      return 0;
-
-    static int jb;
+        return 0;
 
     static cudaStream_t stream[2];
     cudaStreamCreate(&stream[0]);
@@ -112,13 +109,13 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
     int nb = magma_get_zpotrf_nb(n);
 
     cuDoubleComplex *work;
-    cudaMallocHost( (void**)&work,  nb*nb*sizeof(cuDoubleComplex) );
+    cudaMallocHost( (void**)&work, nb*nb*sizeof(cuDoubleComplex) );
 
     if (nb <= 1 || nb >= n) {
         /*  Use unblocked code. */
-        cublasGetMatrix(n, n, sizeof(cuDoubleComplex), a, lda, work, n);
+        cublasGetMatrix(n, n, sizeof(cuDoubleComplex), dA, ldda, work, n);
         lapackf77_zpotrf(uplo_, &n, work, &n, info);
-        cublasSetMatrix(n, n, sizeof(cuDoubleComplex), work, n, a, lda);
+        cublasSetMatrix(n, n, sizeof(cuDoubleComplex), work, n, dA, ldda);
     } else {
 
         /* Use blocked code. */
@@ -132,11 +129,11 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
 		jb = min(nb, (n-j));
                 
                 cublasZherk(MagmaUpper, MagmaConjTrans, jb, j, 
-                            -1.0f, A(0, j), lda, 
-                            1.0f,  A(j, j), lda);
+                            mdone, dA(0, j), ldda, 
+                            done,  dA(j, j), ldda);
 
-                cudaMemcpy2DAsync(work,    jb *sizeof(cuDoubleComplex), 
-                                  A(j, j), lda*sizeof(cuDoubleComplex), 
+                cudaMemcpy2DAsync(work,     jb  *sizeof(cuDoubleComplex), 
+                                  dA(j, j), ldda*sizeof(cuDoubleComplex), 
                                   jb*sizeof(cuDoubleComplex), jb, 
                                   cudaMemcpyDeviceToHost,stream[1]);
 		
@@ -144,9 +141,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                     /* Compute the current block row. */
                     cublasZgemm(MagmaConjTrans, MagmaNoTrans, 
                                 jb, (n-j-jb), j,
-                                c_neg_one, A(0, j   ), lda, 
-                                           A(0, j+jb), lda,
-                                c_one,     A(j, j+jb), lda);
+                                mzone, dA(0, j   ), ldda, 
+                                       dA(0, j+jb), ldda,
+                                zone,  dA(j, j+jb), ldda);
                 }
                 
                 cudaStreamSynchronize(stream[1]);
@@ -157,16 +154,16 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                     break;
                 }
                 
-                cudaMemcpy2DAsync( A(j, j), lda*sizeof(cuDoubleComplex), 
-                                   work,    jb *sizeof(cuDoubleComplex), 
+                cudaMemcpy2DAsync( dA(j, j), ldda*sizeof(cuDoubleComplex), 
+                                   work,     jb  *sizeof(cuDoubleComplex), 
                                    sizeof(cuDoubleComplex)*jb, jb, 
                                    cudaMemcpyHostToDevice,stream[0]);
 
                 if ( (j+jb) < n)
                     cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
                                  jb, (n-j-jb),
-                                 c_one, A(j, j   ), lda, 
-                                        A(j, j+jb), lda);
+                                 zone, dA(j, j   ), ldda, 
+                                       dA(j, j+jb), ldda);
 	    }
 	} else {
             //=========================================================
@@ -178,20 +175,20 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                 jb = min(nb, (n-j));
 
                 cublasZherk(MagmaLower, MagmaNoTrans, jb, j,
-                            -1.f, A(j, 0), lda, 
-                            1.f,  A(j, j), lda);
+                            mdone, dA(j, 0), ldda, 
+                            done,  dA(j, j), ldda);
 		
-                cudaMemcpy2DAsync( work,    jb *sizeof(cuDoubleComplex),
-                                   A(j, j), lda*sizeof(cuDoubleComplex),
+                cudaMemcpy2DAsync( work,     jb  *sizeof(cuDoubleComplex),
+                                   dA(j, j), ldda*sizeof(cuDoubleComplex),
                                    sizeof(cuDoubleComplex)*jb, jb,
                                    cudaMemcpyDeviceToHost,stream[1]);
 		
                 if ( (j+jb) < n) {
                     cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
                                  (n-j-jb), jb, j,
-                                 c_neg_one, A(j+jb, 0), lda, 
-                                            A(j,    0), lda,
-                                 c_one,     A(j+jb, j), lda);
+                                 mzone, dA(j+jb, 0), ldda, 
+                                        dA(j,    0), ldda,
+                                 zone,  dA(j+jb, j), ldda);
                 }
 
                 cudaStreamSynchronize(stream[1]);
@@ -200,16 +197,16 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                     *info = *info + j;
                     break;
                 }
-	        cudaMemcpy2DAsync(A(j, j), lda*sizeof(cuDoubleComplex), 
-                                  work,    jb *sizeof(cuDoubleComplex), 
+	        cudaMemcpy2DAsync(dA(j, j), ldda*sizeof(cuDoubleComplex), 
+                                  work,     jb  *sizeof(cuDoubleComplex), 
                                   sizeof(cuDoubleComplex)*jb, jb, 
                                   cudaMemcpyHostToDevice,stream[0]);
 	        
 		if ( (j+jb) < n)
                     cublasZtrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
                                 (n-j-jb), jb, 
-                                c_one, A(j,    j), lda, 
-                                       A(j+jb, j), lda);
+                                zone, dA(j,    j), ldda, 
+                                      dA(j+jb, j), ldda);
 	    }
 
 	}
