@@ -131,7 +131,8 @@ int cnt=-1;
 
     /* Function Body */
     *info = 0;
-    int nb = magma_get_zgeqrf_nb(min(m, n));
+    //int nb = magma_get_zgeqrf_nb(min(m, n));
+    int nb = MG.nb;
 
     int lwkopt = n * nb;
     work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );
