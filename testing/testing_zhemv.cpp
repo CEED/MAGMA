@@ -41,17 +41,18 @@ int main(int argc, char **argv)
     int ISEED[4] = {0,0,0,1};
     int st       = 64;
     int incx     = 1;
-    double2 mzone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
     double  work[1];
     double  res;
+    char uplo = MagmaLower;
     
     fp = fopen ("results_zhemv.txt", "w") ;
     if( fp == NULL ){ printf("Couldn't open output file\n"); exit(1);}
 
     printf("HEMV cuDoubleComplex Precision\n\n"
-           "Usage\n\t\t testing_zhemv N\n\n");
+           "Usage\n\t\t testing_zhemv U|L N\n\n");
     fprintf(fp, "HEMV cuDoubleComplex Precision\n\n"
-            "Usage\n\t\t testing_zhemv N\n\n");
+            "Usage\n\t\t testing_zhemv U|L N\n\n");
     
     assert( CUDA_SUCCESS == cuInit( 0 ),
             "CUDA: Not initialized\n" );
@@ -66,15 +67,18 @@ int main(int argc, char **argv)
 	
 
     N = 8*1024+64;
-    if( argc == 2 ) {
-        st = N = atoi( argv[1] );
+    if( argc > 1 ) {
+      uplo = argv[1][0];
+    }
+    if( argc > 2 ) {
+      st = N = atoi( argv[2] );
     }
     matsize = N*N;
     vecsize = N*incx;
 
-    double2 *A = (double2*)malloc( matsize*sizeof( double2 ) );
-    double2 *X = (double2*)malloc( vecsize*sizeof( double2 ) );
-    double2 *Y = (double2*)malloc( vecsize*sizeof( double2 ) );
+    cuDoubleComplex *A = (cuDoubleComplex*)malloc( matsize*sizeof( cuDoubleComplex ) );
+    cuDoubleComplex *X = (cuDoubleComplex*)malloc( vecsize*sizeof( cuDoubleComplex ) );
+    cuDoubleComplex *Y = (cuDoubleComplex*)malloc( vecsize*sizeof( cuDoubleComplex ) );
     
     assert( ((A != NULL) && (X != NULL) && (Y != NULL)), "memory allocation error (A, X or Y)" );
     
@@ -91,18 +95,18 @@ int main(int argc, char **argv)
     lapackf77_zlarnv( &ione, ISEED, &vecsize, X );
     lapackf77_zlarnv( &ione, ISEED, &vecsize, Y );
 	
-    double2 *Ycublas = (double2*)malloc(vecsize*sizeof( double2 ) );
-    double2 *Ymagma  = (double2*)malloc(vecsize*sizeof( double2 ) );
+    cuDoubleComplex *Ycublas = (cuDoubleComplex*)malloc(vecsize*sizeof( cuDoubleComplex ) );
+    cuDoubleComplex *Ymagma  = (cuDoubleComplex*)malloc(vecsize*sizeof( cuDoubleComplex ) );
 	
     assert( ((Ycublas != NULL) && (Ymagma != NULL)), "memory allocation error (Y cublas or magma)" );
     
-    double2 *dA, *dX, *dY;
+    cuDoubleComplex *dA, *dX, *dY;
     
-    assert( CUBLAS_STATUS_SUCCESS == cublasAlloc( matsize, sizeof(double2), (void**)&dA ),
+    assert( CUBLAS_STATUS_SUCCESS == cublasAlloc( matsize, sizeof(cuDoubleComplex), (void**)&dA ),
             "CUBLAS: Problem of allocation of dA\n" );
-    assert( CUBLAS_STATUS_SUCCESS == cublasAlloc( vecsize, sizeof(double2), (void**)&dX ),
+    assert( CUBLAS_STATUS_SUCCESS == cublasAlloc( vecsize, sizeof(cuDoubleComplex), (void**)&dX ),
             "CUBLAS: Problem of allocation of dX\n" );
-    assert( CUBLAS_STATUS_SUCCESS == cublasAlloc( vecsize, sizeof(double2), (void**)&dY ),
+    assert( CUBLAS_STATUS_SUCCESS == cublasAlloc( vecsize, sizeof(cuDoubleComplex), (void**)&dY ),
             "CUBLAS: Problem of allocation of dY\n" );
 
     printf( "   n   CUBLAS,Gflop/s   MAGMABLAS0.2,Gflop/s   \"error\"\n" 
@@ -113,8 +117,8 @@ int main(int argc, char **argv)
     for( m = st; m < N+1; m = (int)((m+1)*1.1) )
     {
         int lda  = m;
-        double2 alpha = MAGMA_Z_MAKE(  1.5, -2.3 );
-        double2 beta  = MAGMA_Z_MAKE( -0.6,  0.8 );
+        cuDoubleComplex alpha = MAGMA_Z_MAKE(  1.5, -2.3 );
+        cuDoubleComplex beta  = MAGMA_Z_MAKE( -0.6,  0.8 );
         double time, gflops;
         double flops = FLOPS( (double)m ) / 1e6;
 
@@ -124,34 +128,34 @@ int main(int argc, char **argv)
         /* =====================================================================
            Performs operation using CUDA-BLAS
            =================================================================== */
-        cublasSetMatrix( m, m, sizeof( double2 ), A, N,    dA, lda  );
-        cublasSetVector( m,    sizeof( double2 ), X, incx, dX, incx );
-        cublasSetVector( m,    sizeof( double2 ), Y, incx, dY, incx );
+        cublasSetMatrix( m, m, sizeof( cuDoubleComplex ), A, N,    dA, lda  );
+        cublasSetVector( m,    sizeof( cuDoubleComplex ), X, incx, dX, incx );
+        cublasSetVector( m,    sizeof( cuDoubleComplex ), Y, incx, dY, incx );
 
-        cublasZhemv( MagmaLower, m, alpha, dA, lda, dX, incx, beta, dY, incx );
-        cublasSetVector( m, sizeof( double2 ), Y, incx, dY, incx );
+        cublasZhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
+        cublasSetVector( m, sizeof( cuDoubleComplex ), Y, incx, dY, incx );
         
         start = get_current_time();
-        cublasZhemv( MagmaLower, m, alpha, dA, lda, dX, incx, beta, dY, incx );
+        cublasZhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
         end = get_current_time();
         time = GetTimerValue(start,end); 
         
-        cublasGetVector( m, sizeof( double2 ), dY, incx, Ycublas, incx );
+        cublasGetVector( m, sizeof( cuDoubleComplex ), dY, incx, Ycublas, incx );
         
         gflops = flops / time;
         printf(     "%11.2f", gflops );
         fprintf(fp, "%11.2f", gflops );
         
-        cublasSetVector( m, sizeof( double2 ), Y, incx, dY, incx );
-        magmablas_zhemv( MagmaLower, m, alpha, dA, lda, dX, incx, beta, dY, incx );
-        cublasSetVector( m, sizeof( double2 ), Y, incx, dY, incx );
+        cublasSetVector( m, sizeof( cuDoubleComplex ), Y, incx, dY, incx );
+        magmablas_zhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
+        cublasSetVector( m, sizeof( cuDoubleComplex ), Y, incx, dY, incx );
         
         start = get_current_time();
-        magmablas_zhemv( MagmaLower, m, alpha, dA, lda, dX, incx, beta, dY, incx );
+        magmablas_zhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
         end = get_current_time();
         time = GetTimerValue(start,end) ; 
         
-        cublasGetVector( m, sizeof( double2 ), dY, incx, Ymagma, incx );
+        cublasGetVector( m, sizeof( cuDoubleComplex ), dY, incx, Ymagma, incx );
         
         gflops = flops / time;
         printf(     "%11.2f", gflops );
