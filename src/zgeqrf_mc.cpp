@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 0.2) --
+    -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2009
+       November 2010
 
        @precisions normal z -> s d c
 
@@ -515,11 +515,11 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
                  cuDoubleComplex *work, magma_int_t *lwork,
                  magma_int_t *info)
 {
-/*  -- MAGMA (version 0.2) --
+/*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2009
+       November 2010
 
     Purpose   
     =======   
