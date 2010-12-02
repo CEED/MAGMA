@@ -114,6 +114,8 @@ extern "C" int EN_BEE;
 
 extern "C" int TRACE;
 
+extern "C" Quark *quark;
+
 void SCHED_sgemm(Quark* quark)
 {
 int M;
@@ -339,7 +341,7 @@ int *info)
   char label[10000];
 
   // start scheduler 
-  Quark *quark = QUARK_New(4);
+  //Quark *quark = QUARK_New(4);
 
   ii = -1;
 
@@ -572,7 +574,7 @@ int *info)
         
   QUARK_Barrier(quark);
 
-  QUARK_Delete(quark);
+  //QUARK_Delete(quark);
 
   if (TRACE == 1) {
     //dump_trace(4);
