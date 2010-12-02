@@ -5,7 +5,7 @@
  *     Univ. of Colorado, Denver
  *     November 2010
  *
- *  @precisions normal z -> c
+ *  @precisions normal z -> c d s
  *
  **/
 #include <stdlib.h>
@@ -23,9 +23,9 @@
 
 #define PRECISION_z
 #if defined(PRECISION_z) || defined(PRECISION_c)
-#define FLOPS(n) ( 8. * (n) * (n) )
+#define FLOPS(m, n) ( 8. * (m) * (n) )
 #else
-#define FLOPS(n) ( 2. * (n) * (n) )
+#define FLOPS(m, n) ( 2. * (m) * (n) )
 #endif
 
 int main(int argc, char **argv)
@@ -34,7 +34,7 @@ int main(int argc, char **argv)
     CUcontext context;
     FILE *fp ; 
     TimeStruct start, end;
-    int N, m;
+    int N, m, n;
     int matsize;
     int vecsize;
     int ione     = 1;
@@ -44,15 +44,15 @@ int main(int argc, char **argv)
     cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
     double  work[1];
     double  res;
-    char uplo = MagmaLower;
+    char trans = MagmaNoTrans;
     
-    fp = fopen ("results_zhemv.txt", "w") ;
+    fp = fopen ("results_zgemv.txt", "w") ;
     if( fp == NULL ){ printf("Couldn't open output file\n"); exit(1);}
 
-    printf("HEMV cuDoubleComplex Precision\n\n"
-           "Usage\n\t\t testing_zhemv U|L N\n\n");
-    fprintf(fp, "HEMV cuDoubleComplex Precision\n\n"
-            "Usage\n\t\t testing_zhemv U|L N\n\n");
+    printf("GEMV cuDoubleComplex Precision\n\n"
+           "Usage\n\t\t testing_zgemv N|T|C N\n\n");
+    fprintf(fp, "GEMV cuDoubleComplex Precision\n\n"
+            "Usage\n\t\t testing_zgemv N|T|C N\n\n");
     
     assert( CUDA_SUCCESS == cuInit( 0 ),
             "CUDA: Not initialized\n" );
@@ -65,10 +65,9 @@ int main(int argc, char **argv)
 	
     printout_devices( );
 	
-
     N = 8*1024+64;
     if( argc > 1 ) {
-      uplo = argv[1][0];
+      trans = argv[1][0];
     }
     if( argc > 2 ) {
       st = N = atoi( argv[2] );
@@ -83,15 +82,6 @@ int main(int argc, char **argv)
     assert( ((A != NULL) && (X != NULL) && (Y != NULL)), "memory allocation error (A, X or Y)" );
     
     lapackf77_zlarnv( &ione, ISEED, &matsize, A );
-    /* Make A hermitian */
-    { 
-        int i, j;
-        for(i=0; i<N; i++) {
-            A[i*N+i] = MAGMA_Z_MAKE( MAGMA_Z_REAL(A[i*N+i]), 0. );
-            for(j=0; j<i; j++)
-                A[i*N+j] = cuConj(A[j*N+i]);
-        }
-    }
     lapackf77_zlarnv( &ione, ISEED, &vecsize, X );
     lapackf77_zlarnv( &ione, ISEED, &vecsize, Y );
 	
@@ -116,11 +106,11 @@ int main(int argc, char **argv)
     
     for( m = st; m < N+1; m = (int)((m+1)*1.1) )
     {
-        int lda  = m;
+        int lda = m;
         cuDoubleComplex alpha = MAGMA_Z_MAKE(  1.5, -2.3 );
         cuDoubleComplex beta  = MAGMA_Z_MAKE( -0.6,  0.8 );
         double time, gflops;
-        double flops = FLOPS( (double)m ) / 1e6;
+        double flops = FLOPS( (double)m, (double)m ) / 1e6;
 
         printf(      "%5d ", m );
         fprintf( fp, "%5d ", m );
@@ -132,11 +122,14 @@ int main(int argc, char **argv)
         cublasSetVector( m,    sizeof( cuDoubleComplex ), X, incx, dX, incx );
         cublasSetVector( m,    sizeof( cuDoubleComplex ), Y, incx, dY, incx );
 
-        cublasZhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
+        /*
+         * Cublas Version
+         */
+        cublasZgemv( trans, m, m, alpha, dA, lda, dX, incx, beta, dY, incx );
         cublasSetVector( m, sizeof( cuDoubleComplex ), Y, incx, dY, incx );
         
         start = get_current_time();
-        cublasZhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
+        cublasZgemv( trans, m, m, alpha, dA, lda, dX, incx, beta, dY, incx );
         end = get_current_time();
         time = GetTimerValue(start,end); 
         
@@ -145,13 +138,16 @@ int main(int argc, char **argv)
         gflops = flops / time;
         printf(     "%11.2f", gflops );
         fprintf(fp, "%11.2f", gflops );
-        
+
+        /*
+         * Magma Version
+         */
         cublasSetVector( m, sizeof( cuDoubleComplex ), Y, incx, dY, incx );
-        magmablas_zhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
+        magmablas_zgemv( trans, m, m, alpha, dA, lda, dX, incx, beta, dY, incx );
         cublasSetVector( m, sizeof( cuDoubleComplex ), Y, incx, dY, incx );
         
         start = get_current_time();
-        magmablas_zhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
+        magmablas_zgemv( trans, m, m, alpha, dA, lda, dX, incx, beta, dY, incx );
         end = get_current_time();
         time = GetTimerValue(start,end) ; 
         
@@ -167,18 +163,16 @@ int main(int argc, char **argv)
         
         blasf77_zaxpy( &m, &mzone, Ymagma, &incx, Ycublas, &incx);
         res = lapackf77_zlange( "M", &m, &ione, Ycublas, &m, work );
-            
+
 #if 0
         printf(      "\t\t %8.6e", res / m );
         fprintf( fp, "\t\t %8.6e", res / m );
 
         /*
-         * Extra check with cblas vs magma
+         * CBlas comparaison
          */
         cblas_zcopy( m, Y, incx, Ycublas, incx );
-        cblas_zhemv( CblasColMajor, CblasLower, m, 
-                     CBLAS_SADDR(alpha), A, N, X, incx, 
-                     CBLAS_SADDR(beta), Ycublas, incx );
+        cblas_zgemv( trans, m, m, CBLAS_SADDR(alpha), A, N, X, incx, CBLAS_SADDR(beta), Ycublas, incx );
 
         blasf77_zaxpy( &m, &mzone, Ymagma, &incx, Ycublas, &incx);
         res = lapackf77_zlange( "M", &m, &ione, Ycublas, &m, work );
@@ -186,6 +180,7 @@ int main(int argc, char **argv)
 
         printf(      "\t\t %8.6e\n", res / m );
         fprintf( fp, "\t\t %8.6e\n", res / m );
+
     }
     
     free( A );
