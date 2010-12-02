@@ -15,7 +15,7 @@
 #include <string.h>
 #include <math.h>
 
-//#include <quark.h>
+#include <quark.h>
 
 // includes, project
 #include "cuda.h"
@@ -30,6 +30,8 @@
 int EN_BEE;
 
 int TRACE;
+
+Quark *quark;
 
 double get_LU_error(int M, int N, cuDoubleComplex *A, int lda, cuDoubleComplex *LU, int *IPIV){
   int min_mn = min(M,N), intONE = 1, i, j;
@@ -220,9 +222,14 @@ int main( int argc, char** argv)
       /* =====================================================================
          Performs operation using multi-core
          =================================================================== */
+
+quark = QUARK_New(4);
+
       start = get_current_time();
       magma_zgetrf_mc(&M, &N, h_A2, &M, ipiv, info);
       end = get_current_time();
+
+QUARK_Delete(quark);
 
       if (info[0] < 0)      
         printf("Argument %d of magma_sgeqrf_mc had an illegal value.\n", -info[0]);
