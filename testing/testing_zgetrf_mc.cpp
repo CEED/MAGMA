@@ -227,7 +227,7 @@ int main( int argc, char** argv)
       if (info[0] < 0)      
         printf("Argument %d of magma_sgeqrf_mc had an illegal value.\n", -info[0]);
 
-      cpu2_perf = 2.*N*N*N/(3.*1000000*GetTimerValue(start,end));
+      cpu2_perf = 2.*M*N*min(M,N)/(3.*1000000*GetTimerValue(start,end));
   
       /* ====================================================================
          Performs operation using MAGMA
