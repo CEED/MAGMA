@@ -93,7 +93,10 @@ void magma_init (int m, int n, cuDoubleComplex *a, int nthreads)
   int i;
 
   MG.nthreads = nthreads;
-  MG.nb = magma_get_sgeqrf_nb(min(m, n));
+
+  if (MG.nb == -1)
+    //MG.nb = magma_get_sgeqrf_nb(min(m, n));
+    MG.nb = 128;
 
   int np = n/MG.nb;
   if (n%MG.nb != 0)
@@ -166,6 +169,8 @@ int nquarkthreads=2;
     int ione     = 1;
     int ISEED[4] = {0,0,0,1};
 
+    MG.nb=-1;
+
 	int loop = argc;
 
     if (argc != 1){
@@ -174,6 +179,8 @@ int nquarkthreads=2;
           N = atoi(argv[++i]);
         else if (strcmp("-M", argv[i])==0)
           M = atoi(argv[++i]);
+        else if (strcmp("-B", argv[i])==0)
+          MG.nb = atoi(argv[++i]);
         else if (strcmp("-b", argv[i])==0)
           EN_BEE = atoi(argv[++i]);
         else if (strcmp("-P", argv[i])==0)
