@@ -253,6 +253,7 @@ subs = {
     ('MagmaTrans','MagmaTrans','MagmaConjTrans','MagmaConjTrans'),
     ('REAL','DOUBLE_PRECISION','COMPLEX','COMPLEX_16'),
     ('','','conjf','conj'),
+    ('','','cuConjf','cuConj'),
     ('CORE_S','CORE_D','CORE_C','CORE_Z'),
     ('CORE_s','CORE_d','CORE_c','CORE_z'),
     ('CORE_s','CORE_d','CORE_s','CORE_d'),

@@ -62,6 +62,7 @@ extern "C" {
 #    define lapackf77_zlatrd   zlatrd_
 #    define lapackf77_zpotrf   zpotrf_
 #    define lapackf77_ztrtri   ztrtri_
+#    define lapackf77_zsymv    zsymv_
 #    define lapackf77_zung2r   zung2r_
 #    define lapackf77_zungqr   zungqr_
 #    define lapackf77_zungbr   zungbr_
@@ -123,6 +124,7 @@ extern "C" {
 #    define lapackf77_zlatrd   zlatrd
 #    define lapackf77_zpotrf   zpotrf
 #    define lapackf77_ztrtri   ztrtri
+#    define lapackf77_zsymv    zsymv
 #    define lapackf77_zung2r   zung2r
 #    define lapackf77_zungqr   zungqr
 #    define lapackf77_zungbr   zungbr
@@ -183,6 +185,9 @@ void    lapackf77_zlaswp(magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, m
 void    lapackf77_zlatrd(const char *uplo, magma_int_t *n, magma_int_t *nb, cuDoubleComplex *a, magma_int_t *lda, double *e, cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *ldwork);
 void    lapackf77_zpotrf(const char *uplo, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *info);
 void    lapackf77_ztrtri(const char *uplo, const char *diag, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *info);
+#if defined(PRECISION_z) || defined(PRECISION_c)
+void    lapackf77_zsymv(const char *uplo, const magma_int_t *N, const cuDoubleComplex *alpha, const cuDoubleComplex *A, const magma_int_t *lda, const cuDoubleComplex *X, const magma_int_t *incX, const cuDoubleComplex *beta, cuDoubleComplex *Y, const magma_int_t *incY);
+#endif
 void    lapackf77_zung2r(magma_int_t *m, magma_int_t *n, magma_int_t *k, cuDoubleComplex *a, magma_int_t *lda, const cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *info);
 void    lapackf77_zungqr(magma_int_t *m, magma_int_t *n, magma_int_t *k, cuDoubleComplex *a, magma_int_t *lda, const cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *ldwork, magma_int_t *info);
 void    lapackf77_zungbr(const char *vect, magma_int_t *m, magma_int_t *n, magma_int_t *k, cuDoubleComplex *a, magma_int_t *lda, const cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
