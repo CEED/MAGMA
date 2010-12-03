@@ -219,8 +219,8 @@ if len(work) is 0:
   print 'gen = ';
   print 'cleangen:';
   print '\trm -f $(gen)';
-  print 'generation: $(gen)';
-  print '.PHONY: cleangen generation';
+  print 'generate: $(gen)';
+  print '.PHONY: cleangen generate';
   sys.exit(0);
 
 for tuple in work:
@@ -235,8 +235,8 @@ if options.make:
   print 'gen = ',' '+' '.join(c.files_out);
   print 'cleangen:';
   print '\trm -f $(gen)';
-  print 'generation: $(gen)';
-  print '.PHONY: cleangen generation';
+  print 'generate: $(gen)';
+  print '.PHONY: cleangen generate';
 if options.in_print: print ' '.join(c.files_in);
 if options.out_print: print ' '.join(c.files_out);
 if options.out_clean:

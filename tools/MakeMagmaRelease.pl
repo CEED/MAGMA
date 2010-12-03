@@ -11,46 +11,29 @@ my $micro;
 #Options par défaut
 my $DIRNAME;
 my $BASENAME;
-my $svn    = "https://icl.cs.utk.edu/svn/plasma/trunk";
-my $svninst= "https://icl.cs.utk.edu/svn/plasma/plasma-installer";
+my $svn    = "https://icl.cs.utk.edu/svn/magma/branches/sc_release/tools";
+#my $svninst= "https://icl.cs.utk.edu/svn/plasma/plasma-installer";
 my $user   = "";
 
 my @file2delete = (
     "Makefile.gen",
-    "control/Makefile.gen",
-    "compute/Makefile.gen",
-    "core_blas/Makefile.gen",
-    "examples/Makefile.gen",
-    "testing/Makefile.gen",
-    "timing/Makefile.gen",
-    "docs/doxygen/Makefile.gen",
     "tools",
     "quark/examples",
     "quark/docs",
-    "GenerateZDCS.cmake.optional",
-    "CMakeBuildNotes",
-    "CMakeLists.txt",
-    "control/CMakeLists.txt",
-    "include/CMakeLists.txt",
-    "timing/CMakeLists.txt",
-    "docs/asciidoc/CMakeBuildNotes.txt",
-    "core_blas/CMakeLists.txt",
-    "compute/CMakeLists.txt",
-    "testing/lin/CMakeLists.txt",
-    "testing/CMakeLists.txt",
-    "examples/CMakeLists.txt",
-    "makes/cmake32.bat",
-    "makes/cmake64.bat"
+    "include/Makefile",
     );
 
 my $RELEASE_PATH;
 my %opts;
 my $NUMREL = "";
 
+my @vars = ( 'SSRC', 'DSRC', 'CSRC', 'SHDR', 'DHDR', 'CHDR' );
+
 sub myCmd {
     my ($cmd) = @_ ;
     my $err = 0;
 
+    print $cmd;
     $err = system($cmd);
     if ($err != 0) {
     	print "Error during execution of the following command:\n$cmd\n";
@@ -58,12 +41,32 @@ sub myCmd {
     }    
 }
     
+sub CleanMakefile {
+    my ($file) = @_ ;
+    my $str;
+    my $dir;
+
+    # Replace the [SDC]SRC and [SDC]HDR variables by their values
+    print $file;
+    $dir = `dirname $file`; chop $dir;
+
+    foreach my $v (@vars)
+    {
+        # The first command is to be sure that Makefile.gen is
+        # uptodate because we are touching at each step Makefile, so
+        # it will be generated during next cvall otherwise
+        myCmd("cd $dir && make .Makefile.gen");
+        $str = `cd $dir && make print$v`; chop $str;
+        myCmd("sed -i 's/${v}[ ]*=.*/$v = $str/' $file");
+    }
+}
+
 sub MakeRelease {
 
     my $numversion = $major.'.'.$minor.'.'.$micro;
     my $cmd;
 
-    $RELEASE_PATH = $ENV{ PWD}."/plasma_".$numversion;
+    $RELEASE_PATH = $ENV{ PWD}."/magma_".$numversion;
 
     # Sauvegarde du rep courant
     my $dir = `pwd`; chop $dir;
@@ -74,17 +77,22 @@ sub MakeRelease {
     chdir $RELEASE_PATH;
 
     # Change version in plasma.h
-    myCmd("sed -i 's/PLASMA_VERSION_MAJOR[ ]*[0-9]/PLASMA_VERSION_MAJOR $major/' include/plasma.h"); 
-    myCmd("sed -i 's/PLASMA_VERSION_MINOR[ ]*[0-9]/PLASMA_VERSION_MINOR $minor/' include/plasma.h");
-    myCmd("sed -i 's/PLASMA_VERSION_MICRO[ ]*[0-9]/PLASMA_VERSION_MICRO $micro/' include/plasma.h");
+    #myCmd("sed -i 's/PLASMA_VERSION_MAJOR[ ]*[0-9]/PLASMA_VERSION_MAJOR $major/' include/plasma.h"); 
+    #myCmd("sed -i 's/PLASMA_VERSION_MINOR[ ]*[0-9]/PLASMA_VERSION_MINOR $minor/' include/plasma.h");
+    #myCmd("sed -i 's/PLASMA_VERSION_MICRO[ ]*[0-9]/PLASMA_VERSION_MICRO $micro/' include/plasma.h");
 
     # Change the version in comments 
-    myCmd("find -type f -exec sed -i 's/\@version[ ]*[.0-9]*/\@version $numversion/' {} \\;");
+    #myCmd("find -type f -exec sed -i 's/\@version[ ]*[.0-9]*/\@version $numversion/' {} \\;");
 
     #Precision Generation
     print "Generate the different precision\n"; 
     myCmd("touch make.inc");
-    myCmd("make generate");
+    myCmd("make generation");
+
+    # Clean the Makefile form the precision generation process
+    foreach my $file (`find $RELEASE_PATH -name Makefile | xargs grep -l "[SCD]SRC"`){
+ 	CleanMakefile( $file );
+    }
 
     #Compile the documentation
     print "Compile the documentation\n"; 
@@ -100,8 +108,17 @@ sub MakeRelease {
     # Remove 'include Makefile.gen from Makefile'
     myCmd("find $RELEASE_PATH -name Makefile -exec sed -i '/Makefile.gen/ d' {} \\;");
 
+    # Remove the lines relative to include directory in root Makefile
+    myCmd("sed -i '/cd include/ d' $RELEASE_PATH/Makefile");
+
+    # Remove '.Makefile.gen files'
+    myCmd("find $RELEASE_PATH -name .Makefile.gen -exec rm -f {} \\;");
+
     chdir $dir;
 
+    # Save the InstallationGuide if we want to do a plasma-installer release
+    #myCmd("cp $RELEASE_PATH/InstallationGuide README-installer");
+
     #Create tarball
     print "Create the tarball\n";
     $DIRNAME=`dirname $RELEASE_PATH`;
@@ -112,27 +129,30 @@ sub MakeRelease {
 
 }
 
-sub MakeInstallerRelease {
-
-    my $numversion = $major.'.'.$minor.'.'.$micro;
-    my $cmd;
-
-    $RELEASE_PATH = $ENV{ PWD}."/plasma-installer";
-
-    # Sauvegarde du rep courant
-    my $dir = `pwd`; chop $dir;
-
-    $cmd = 'svn export --force '.$NUMREL.' '.$user.' '.$svninst.' '.$RELEASE_PATH;
-    myCmd($cmd);
-    
-    #Create tarball
-    print "Create the tarball\n";
-    $DIRNAME=`dirname $RELEASE_PATH`;
-    $BASENAME=`basename $RELEASE_PATH`;
-    chop $DIRNAME;
-    chop $BASENAME;
-    myCmd("(cd $DIRNAME && tar cvzf ${BASENAME}.tar.gz $BASENAME)");
-}
+#sub MakeInstallerRelease {
+#
+#    my $numversion = $major.'.'.$minor.'.'.$micro;
+#    my $cmd;
+#
+#    $RELEASE_PATH = $ENV{ PWD}."/plasma-installer_".$numversion;
+#
+#    # Sauvegarde du rep courant
+#    my $dir = `pwd`; chop $dir;
+#
+#    $cmd = 'svn export --force '.$NUMREL.' '.$user.' '.$svninst.' '.$RELEASE_PATH;
+#    myCmd($cmd);
+#    
+#    # Save the InstallationGuide if we want to do a plasma-installer release
+#    myCmd("cp README-installer $RELEASE_PATH/README");
+#
+#    #Create tarball
+#    print "Create the tarball\n";
+#    $DIRNAME=`dirname $RELEASE_PATH`;
+#    $BASENAME=`basename $RELEASE_PATH`;
+#    chop $DIRNAME;
+#    chop $BASENAME;
+#    myCmd("(cd $DIRNAME && tar cvzf ${BASENAME}.tar.gz $BASENAME)");
+#}
 
 sub Usage {
     
@@ -140,7 +160,7 @@ sub Usage {
     print "   -h   Print this help\n";
     print "   -d   Choose directory for release\n";
     print "   -r   Choose svn release number\n";
-    print "   -s   Choose plasma directory for export\n";
+    print "   -s   Choose magma directory for export\n";
     print "   -u   username\n";
 
 }
@@ -176,4 +196,4 @@ $minor = $ARGV[1];
 $micro = $ARGV[2];
 
 MakeRelease();
-MakeInstallerRelease();
+#MakeInstallerRelease();
