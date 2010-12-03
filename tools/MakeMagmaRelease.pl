@@ -11,7 +11,7 @@ my $micro;
 #Options par défaut
 my $DIRNAME;
 my $BASENAME;
-my $svn    = "https://icl.cs.utk.edu/svn/magma/branches/sc_release/tools";
+my $svn    = "https://icl.cs.utk.edu/svn/magma/branches/sc_release";
 #my $svninst= "https://icl.cs.utk.edu/svn/plasma/plasma-installer";
 my $user   = "";
 
@@ -21,7 +21,14 @@ my @file2delete = (
     "quark/examples",
     "quark/docs",
     "include/Makefile",
-    );
+    "make.inc.cumin",
+    "make.inc.disco",
+    "make.inc.ig",
+    "make.inc.ig.pgi",
+    "Release-ToDo.txt",
+    "BugsToFix.txt",
+    "testing/fortran2.cpp",
+);
 
 my $RELEASE_PATH;
 my %opts;
@@ -33,7 +40,9 @@ sub myCmd {
     my ($cmd) = @_ ;
     my $err = 0;
 
-    print $cmd;
+    print "---------------------------------------------------------------\n";
+    print $cmd."\n";
+    print "---------------------------------------------------------------\n";
     $err = system($cmd);
     if ($err != 0) {
     	print "Error during execution of the following command:\n$cmd\n";
@@ -56,8 +65,10 @@ sub CleanMakefile {
         # uptodate because we are touching at each step Makefile, so
         # it will be generated during next cvall otherwise
         myCmd("cd $dir && make .Makefile.gen");
-        $str = `cd $dir && make print$v`; chop $str;
-        myCmd("sed -i 's/${v}[ ]*=.*/$v = $str/' $file");
+        if ( system("cd $dir && grep $v Makefile") == 0 ) {
+            $str = `cd $dir && make print$v`; chop $str;
+            myCmd("sed -i 's/${v}[ ]*=.*/$v = $str/' $file");
+        }
     }
 }
 
