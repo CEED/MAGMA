@@ -54,7 +54,9 @@ void magmablas_zsymv(char u,                magma_int_t N, cuDoubleComplex alpha
   /*
    * Level 3 BLAS
    */
-void magmablas_zgemm(                char tA, char tB, magma_int_t m, magma_int_t n, magma_int_t k, cuDoubleComplex alpha, const cuDoubleComplex *A, magma_int_t lda, const cuDoubleComplex *B, magma_int_t ldb, cuDoubleComplex beta, cuDoubleComplex *C, magma_int_t ldc);
+void magmablas_zgemm(char tA, char tB, magma_int_t m, magma_int_t n, magma_int_t k, cuDoubleComplex alpha, const cuDoubleComplex *A, magma_int_t lda, const cuDoubleComplex *B, magma_int_t ldb, cuDoubleComplex beta, cuDoubleComplex *C, magma_int_t ldc);
+void magmablas_zgemm_fermi80(char tA, char tB, magma_int_t m, magma_int_t n, magma_int_t k, cuDoubleComplex alpha, const cuDoubleComplex *A, magma_int_t lda, const cuDoubleComplex *B, magma_int_t ldb, cuDoubleComplex beta, cuDoubleComplex *C, magma_int_t ldc);
+  void magmablas_zgemm_fermi64(char tA, char tB, magma_int_t m, magma_int_t n, magma_int_t k, cuDoubleComplex alpha, const cuDoubleComplex *A, magma_int_t lda, const cuDoubleComplex *B, magma_int_t ldb, cuDoubleComplex beta, cuDoubleComplex *C, magma_int_t ldc);
 void magmablas_zhemm(char s, char u,                   magma_int_t m, magma_int_t n,                cuDoubleComplex alpha, const cuDoubleComplex *A, magma_int_t lda, const cuDoubleComplex *B, magma_int_t ldb, cuDoubleComplex beta, cuDoubleComplex *C, magma_int_t ldc);
 void magmablas_zsymm(char s, char u,                   magma_int_t m, magma_int_t n,                cuDoubleComplex alpha, const cuDoubleComplex *A, magma_int_t lda, const cuDoubleComplex *B, magma_int_t ldb, cuDoubleComplex beta, cuDoubleComplex *C, magma_int_t ldc);
 void magmablas_zsyrk(        char u, char t,                          magma_int_t n, magma_int_t k, cuDoubleComplex alpha, const cuDoubleComplex *A, magma_int_t lda,                                    cuDoubleComplex beta, cuDoubleComplex *C, magma_int_t ldc);
