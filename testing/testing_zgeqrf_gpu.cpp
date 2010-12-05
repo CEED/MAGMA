@@ -49,7 +49,7 @@ int main( int argc, char** argv)
 
     /* Matrix size */
     magma_int_t M=0, N=0, n2, lda;
-    magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
+    magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,9984};
 
     cublasStatus status;
     magma_int_t i, info;
