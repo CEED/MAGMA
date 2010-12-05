@@ -25,8 +25,10 @@
 extern "C" magma_int_t
 magma_zlarfb(char side, char trans, char direct, char storev,
 	     magma_int_t m, magma_int_t n, magma_int_t k,
-             cuDoubleComplex *dv, magma_int_t ldv, cuDoubleComplex *dt,    magma_int_t ldt,
-             cuDoubleComplex *dc, magma_int_t ldc, cuDoubleComplex *dwork, magma_int_t ldwork)
+             cuDoubleComplex *dv, magma_int_t ldv, cuDoubleComplex *dt,
+	     magma_int_t ldt,
+             cuDoubleComplex *dc, magma_int_t ldc, 
+	     cuDoubleComplex *dwork, magma_int_t ldwork)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Univ. of California Berkeley
@@ -119,7 +121,7 @@ magma_zlarfb(char side, char trans, char direct, char storev,
 
     if ( ( side  == 'r' || side  == 'R') ) 
       {
-        int info = -1;
+        magma_int_t info = -1;
         fprintf(stderr, "The case (side == right) is not implemented\n");
         magma_xerbla(__func__, &info);
         return 0;

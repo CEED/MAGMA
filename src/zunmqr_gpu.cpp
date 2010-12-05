@@ -132,11 +132,11 @@ magma_zunmqr_gpu(char side, char trans,
     char trans_[2] = {trans, 0};
 
     cuDoubleComplex *dwork;
-    int i, lddwork;
+    magma_int_t i, lddwork;
 
-    int i1, i2, i3, ib, ic, jc, mi, ni, nq, nw;
-    long int left, notran, lquery;
-    static int lwkopt;
+    magma_int_t i1, i2, i3, ib, ic, jc, mi, ni, nq, nw;
+    long magma_int_t left, notran, lquery;
+    static magma_int_t lwkopt;
 
     /* Function Body */
     *info = 0;
@@ -247,7 +247,7 @@ magma_zunmqr_gpu(char side, char trans,
         cublasGetMatrix(mi, ni, sizeof(cuDoubleComplex), c_ref(ic, jc), ldc,
                         work+mi*ib, mi);
 
-        int lhwork = lwork - mi*(ib + ni);
+        magma_int_t lhwork = lwork - mi*(ib + ni);
         lapackf77_zunmqr( MagmaLeftStr, MagmaConjTransStr, 
                           &mi, &ni, &ib, 
                           work,       &mi, tau+i, 
