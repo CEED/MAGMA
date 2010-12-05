@@ -39,13 +39,13 @@ int main( int argc, char** argv)
     TimeStruct start, end;
 
     /* Matrix size */
-    int M=0, N=0, K, n2, lda;
-    int size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
+    magma_int_t M=0, N=0, K, n2, lda;
+    magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,9984};
     
     cublasStatus status;
-    int i, info[1];
-    int ione     = 1;
-    int ISEED[4] = {0,0,0,1};
+    magma_int_t i, info[1];
+    magma_int_t ione     = 1;
+    magma_int_t ISEED[4] = {0,0,0,1};
 
     if (argc != 1){
       for(i = 1; i<argc; i++){	
@@ -72,7 +72,7 @@ int main( int argc, char** argv)
       M = N = K = size[9];
     }
     
-    int tt = magma_get_zgeqrf_nb(N);
+    magma_int_t tt = magma_get_zgeqrf_nb(N);
     M = ((M+tt-1)/tt)*tt;
     N = ((N+tt-1)/tt)*tt;
     K = N;
@@ -87,7 +87,7 @@ int main( int argc, char** argv)
     if (lda<M) lda+=32;
     n2  = M * N;
 
-    int min_mn = min(M, N);
+    magma_int_t min_mn = min(M, N);
 
     /* Allocate host memory for the matrix */
     h_A = (cuDoubleComplex*)malloc(n2 * sizeof(h_A[0]));
@@ -105,8 +105,8 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! host memory allocation error (R)\n");
     }
 
-    int nb = magma_get_zgeqrf_nb(M);
-    int lwork = (M+2*N+nb)*nb;
+    magma_int_t nb = magma_get_zgeqrf_nb(M);
+    magma_int_t lwork = (M+2*N+nb)*nb;
 
     lwork = (M+2*N+nb)*nb;
 
