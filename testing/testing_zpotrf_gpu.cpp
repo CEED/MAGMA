@@ -21,6 +21,14 @@
 #include "magma.h"
 #include "magmablas.h"
 
+// define pfactor for number of flops in complex  
+#define PRECISION_z
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+   #define pfactor 1.
+#else
+   #define pfactor 4.
+#endif
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zpotrf
 */
@@ -38,7 +46,7 @@ int main( int argc, char** argv)
 
     /* Matrix size */
     int N=0, n2, lda;
-    int size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10080};
+    int size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10240};
     
     cublasStatus status;
     int i, info[1];
@@ -120,7 +128,7 @@ int main( int argc, char** argv)
       magma_zpotrf_gpu(uplo[0], N, d_A, lda, info);
       end = get_current_time();
     
-      gpu_perf = 1.*N*N*N/(3.*1000000*GetTimerValue(start,end));
+      gpu_perf = pfactor*N*N*N/(3.*1000000*GetTimerValue(start,end));
       // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
       // printf("Speed: %f GFlops \n", gpu_perf);
 
@@ -133,7 +141,7 @@ int main( int argc, char** argv)
       if (info[0] < 0)  
 	printf("Argument %d of zpotrf had an illegal value.\n", -info[0]);     
   
-      cpu_perf = 1.*N*N*N/(3.*1000000*GetTimerValue(start,end));
+      cpu_perf = pfactor*N*N*N/(3.*1000000*GetTimerValue(start,end));
       // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
       // printf("Speed: %f GFlops \n", cpu_perf);
       
