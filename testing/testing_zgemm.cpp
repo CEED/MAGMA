@@ -20,12 +20,12 @@
 #include "magmablas.h"
 
 #define PRECISION_z
-int M , N , K , LDA, LDB , LDC ;
+magma_int_t M , N , K , LDA, LDB , LDC ;
 
 double verifyResult(const cuDoubleComplex *mat, const cuDoubleComplex *mat_ref) {
     double norm = 0.0;
-    for (int i = 0; i < M; i++) {
-        for (int j = 0; j < N; j++) {
+    for (magma_int_t i = 0; i < M; i++) {
+        for (magma_int_t j = 0; j < N; j++) {
             cuDoubleComplex tmp;
             MAGMA_Z_OP_NEG(tmp, mat[i+j * M ], mat_ref[i+j * M ]);
             if (cuCabs( tmp ) > norm){
@@ -36,21 +36,28 @@ double verifyResult(const cuDoubleComplex *mat, const cuDoubleComplex *mat_ref) 
     return norm;
 }
 
+// define pfactor for number of flops in complex
+#define PRECISION_z
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+   #define pfactor 1.
+#else
+   #define pfactor 4.
+#endif
 
 int main( int argc, char** argv)
 {
-    int oneTime =1024;
-    int step   = 1024;
-    int count  = 10;
-    int flag   = 0 ;
+    magma_int_t oneTime =1024;
+    magma_int_t step   = 1024;
+    magma_int_t count  = 10;
+    magma_int_t flag   = 0 ;
 
     char TRANSA = 'N';
     char TRANSB = 'N';
-    int ione     = 1;
-    int ISEED[4] = {0,0,0,1};
+    magma_int_t ione     = 1;
+    magma_int_t ISEED[4] = {0,0,0,1};
     
     if (argc != 1){
-        for(int i = 1; i<argc; i++){
+        for(magma_int_t i = 1; i<argc; i++){
             if (strcmp("-N", argv[i])==0){
                 oneTime = atoi(argv[++i]);
                 step =  1000  ;
@@ -110,14 +117,14 @@ int main( int argc, char** argv)
     printf("Testing TRANSA = %c  TRANSB = %c\n", TRANSA, TRANSB);
     printf("    N     MAGMA GFLop/s    CUBLAS GFlop/s       error\n");
     printf("========================================================\n");
-    for(int i=oneTime;i<=(oneTime+(count-1)*step);i+=step){
-        for( int ops = 0 ; ops <1 + flag ; ops ++){
+    for(magma_int_t i=oneTime;i<=(oneTime+(count-1)*step);i+=step){
+        for( magma_int_t ops = 0 ; ops <1 + flag ; ops ++){
 
             cuDoubleComplex ALPHA = MAGMA_Z_ONE;
             cuDoubleComplex BETA  = MAGMA_Z_ONE;
 
             M = N = K = LDA = LDB = LDC =i+ops;
-            int size_A1 , size_B1, size_C1 ;
+            magma_int_t size_A1 , size_B1, size_C1 ;
 
             if( TRANSA == 'N')
                 size_A1 = LDA * K ;
@@ -168,7 +175,7 @@ int main( int argc, char** argv)
             end = get_current_time();
 
             cublasGetMatrix( M, N, sizeof( cuDoubleComplex ), d_C_m, LDC, h_C_m, LDC ) ;
-            magma_perf = 2.*M*N*K/(GetTimerValue(start,end))/1e6 ;
+            magma_perf = pfactor*2.*M*N*K/(GetTimerValue(start,end))/1e6 ;
             cublasFree(d_A_m);
             cublasFree(d_B_m);
             cublasFree(d_C_m);
@@ -194,7 +201,7 @@ int main( int argc, char** argv)
                          d_B_c, LDB, BETA, d_C_c, LDC );
             end = get_current_time();
             cublasGetMatrix( M, N, sizeof( cuDoubleComplex ), d_C_c, LDC, h_C_c, LDC ) ;
-            cuda_perf = 2.*M*N*K/(GetTimerValue(start,end))/1e6 ;
+            cuda_perf = pfactor*2.*M*N*K/(GetTimerValue(start,end))/1e6 ;
 
             // * Memory clean up * /
             cublasFree(d_A_c);

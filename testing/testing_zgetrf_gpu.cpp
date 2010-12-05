@@ -27,8 +27,8 @@
 #define max(a,b)  (((a)<(b))?(b):(a))
 #endif
 
-double get_LU_error(int M, int N, cuDoubleComplex *A, int lda, cuDoubleComplex *LU, int *IPIV){
-    int min_mn = min(M,N), intONE = 1, i, j;
+double get_LU_error(magma_int_t M, magma_int_t N, cuDoubleComplex *A, magma_int_t lda, cuDoubleComplex *LU, magma_int_t *IPIV){
+    magma_int_t min_mn = min(M,N), intONE = 1, i, j;
 
     lapackf77_zlaswp( &N, A, &lda, &intONE, &min_mn, IPIV, &intONE);
 
@@ -65,6 +65,14 @@ double get_LU_error(int M, int N, cuDoubleComplex *A, int lda, cuDoubleComplex *
     return residual / (matnorm * N);
 }
 
+// define pfactor for number of flops in complex
+#define PRECISION_z
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+   #define pfactor 1.
+#else
+   #define pfactor 4.
+#endif
+
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgetrf
@@ -77,19 +85,19 @@ int main( int argc, char** argv)
 
     cuDoubleComplex *h_A, *h_R, *h_work;
     cuDoubleComplex *d_A;
-    int *ipiv;
+    magma_int_t *ipiv;
     double gpu_perf, cpu_perf;
 
     TimeStruct start, end;
 
     /* Matrix size */
-    int M = 0, N = 0, n2, lda;
-    int size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
+    magma_int_t M = 0, N = 0, n2, lda;
+    magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
 
     cublasStatus status;
-    int i, j, info;
-    int ione     = 1;
-    int ISEED[4] = {0,0,0,1};
+    magma_int_t i, j, info;
+    magma_int_t ione     = 1;
+    magma_int_t ISEED[4] = {0,0,0,1};
 
     if (argc != 1){
         for(i = 1; i<argc; i++){
@@ -122,7 +130,7 @@ int main( int argc, char** argv)
     lda = ((M+31)/32)*32;
     n2 = M * N;
 
-    int min_mn = min(M, N);
+    magma_int_t min_mn = min(M, N);
 
     /* Allocate host memory for the matrix */
     h_A = (cuDoubleComplex*)malloc(n2 * sizeof(h_A[0]));
@@ -130,7 +138,7 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! host memory allocation error (A)\n");
     }
 
-    ipiv = (int*)malloc(min_mn * sizeof(int));
+    ipiv = (magma_int_t*)malloc(min_mn * sizeof(magma_int_t));
     if (ipiv == 0) {
         fprintf (stderr, "!!!! host memory allocation error (ipiv)\n");
     }
@@ -140,8 +148,8 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! host memory allocation error (R)\n");
     }
 
-    int nb = magma_get_zgetrf_nb(min_mn);
-    int lwork = (M+32) * nb;
+    magma_int_t nb = magma_get_zgetrf_nb(min_mn);
+    magma_int_t lwork = (M+32) * nb;
     status = cublasAlloc(lda *N, sizeof(cuDoubleComplex), (void**)&d_A);
     if (status != CUBLAS_STATUS_SUCCESS) {
         fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
@@ -180,7 +188,7 @@ int main( int argc, char** argv)
         if (info < 0)
             printf("Argument %d of zgetrf had an illegal value.\n", -info);
 
-        cpu_perf = 2.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
+        cpu_perf = pfactor*2.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
         // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
 
         for(j=0; j<n2; j++)
@@ -194,7 +202,7 @@ int main( int argc, char** argv)
         end = get_current_time();
         cublasGetMatrix( M, N, sizeof(cuDoubleComplex), d_A, lda, h_R, M);
 
-        gpu_perf = 2.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
+        gpu_perf = pfactor*2.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
         // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
 
         /* =====================================================================

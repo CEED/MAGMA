@@ -25,6 +25,14 @@
 #define min(a,b)  (((a)<(b))?(a):(b))
 #endif
 
+// define pfactor for number of flops in complex
+#define PRECISION_z
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+   #define pfactor 1.
+#else
+   #define pfactor 4.
+#endif
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeqrf
 */
@@ -40,13 +48,13 @@ int main( int argc, char** argv)
     TimeStruct start, end;
 
     /* Matrix size */
-    int M=0, N=0, n2, lda;
-    int size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
+    magma_int_t M=0, N=0, n2, lda;
+    magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
 
     cublasStatus status;
-    int i, info;
-    int ione     = 1;
-    int ISEED[4] = {0,0,0,1};
+    magma_int_t i, info;
+    magma_int_t ione     = 1;
+    magma_int_t ISEED[4] = {0,0,0,1};
 
     if (argc != 1){
         for(i = 1; i<argc; i++){
@@ -81,7 +89,7 @@ int main( int argc, char** argv)
 
     n2  = M * N;
 
-    int min_mn = min(M, N);
+    magma_int_t min_mn = min(M, N);
 
     /* Allocate host memory for the matrix */
     h_A = (cuDoubleComplex*)malloc(n2 * sizeof(h_A[0]));
@@ -99,8 +107,8 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! host memory allocation error (R)\n");
     }
 
-    int nb = magma_get_zgeqrf_nb(min_mn);
-    int lwork = (M+N)*nb;
+    magma_int_t nb = magma_get_zgeqrf_nb(min_mn);
+    magma_int_t lwork = (M+N)*nb;
 
     status = cublasAlloc(lda*N, sizeof(cuDoubleComplex), (void**)&d_A);
     if (status != CUBLAS_STATUS_SUCCESS) {
@@ -138,7 +146,7 @@ int main( int argc, char** argv)
         magma_zgeqrf_gpu( M, N, d_A, lda, tau, &info);
         end = get_current_time();
 
-        gpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
+        gpu_perf = pfactor*4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
         // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
 
         /* =====================================================================
@@ -150,7 +158,7 @@ int main( int argc, char** argv)
         if (info < 0)
             printf("Argument %d of zgeqrf had an illegal value.\n", -info);
 
-        cpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
+        cpu_perf = pfactor*4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
         // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
 
         /* =====================================================================
@@ -160,7 +168,7 @@ int main( int argc, char** argv)
 
         double work[1], matnorm = 1.;
         cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
-        int one = 1;
+        magma_int_t one = 1;
         matnorm = lapackf77_zlange("f", &M, &N, h_A, &M, work);
         blasf77_zaxpy(&n2, &mone, h_A, &one, h_R, &one);
         printf("%5d %5d  %6.2f         %6.2f        %e\n",
