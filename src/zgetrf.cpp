@@ -15,8 +15,18 @@
 #include "magma.h"
 #include "magmablas.h"
 
+// === Define what BLAS to use ============================================
+#define PRECISION_z
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+  #define cublasZgemm magmablas_zgemm
+  #define cublasZtrsm magmablas_ztrsm
+#endif
+// === End defining what BLAS to use =======================================
+
+
 extern "C" magma_int_t
-magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, magma_int_t *ipiv, magma_int_t *info)
+magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
+	     magma_int_t *ipiv, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -84,7 +94,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
 
     /* Function Body */
     *info = 0;
-    int iinfo, nb = magma_get_zgetrf_nb(m);
+    magma_int_t iinfo, nb = magma_get_zgetrf_nb(m);
 
     if (m < 0)
         *info = -1;
@@ -108,8 +118,8 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
         lapackf77_zgetrf(&m, &n, a, &lda, ipiv, info);
     } else {
         /* Use hybrid blocked code. */
-        int maxm, maxn, ldda, maxdim;
-        int i, rows, cols, s = min(m, n)/nb;
+        magma_int_t maxm, maxn, ldda, maxdim;
+        magma_int_t i, rows, cols, s = min(m, n)/nb;
 
         maxm = ((m + 31)/32)*32;
         maxn = ((n + 31)/32)*32;
@@ -212,7 +222,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
                 }
             }
 
-        int nb0 = min(m - s*nb, n - s*nb);
+        magma_int_t nb0 = min(m - s*nb, n - s*nb);
         rows = m - s*nb;
         cols = maxm - s*nb;
 

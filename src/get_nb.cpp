@@ -408,16 +408,6 @@ int magma_get_sgetrf_nb(int m){
     return 64;
   else
     return 192;
-
-  if (m<=3200)
-    return 64;
-  else
-    return 320;
-
-  if (m <= 2048)
-    return 64;
-  else
-    return 128;
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -473,8 +463,10 @@ extern "C"
 int magma_get_dgetrf_nb(int m){
   if (m <= 2048)
     return 64;
+  else if (m<7200)
+    return 192;
   else
-    return 128;
+    return 256;
 }
 
 /* ////////////////////////////////////////////////////////////////////////////

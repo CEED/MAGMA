@@ -16,6 +16,14 @@
 #include "magma.h"
 #include "magmablas.h"
 
+// === Define what BLAS to use ============================================
+#define PRECISION_z
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+  #define cublasZgemm magmablas_zgemm
+  #define cublasZtrsm magmablas_ztrsm
+#endif
+// === End defining what BLAS to use =======================================
+
 extern "C" magma_int_t
 magma_zgetrf_gpu(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
 		 magma_int_t *ipiv, magma_int_t *info)
@@ -69,7 +77,6 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
                   has been completed, but the factor U is exactly
                   singular, and division by zero will occur if it is used
                   to solve a system of equations.
-
     =====================================================================    */
 
 #define inAT(i,j) (dAT + (i)*nb*ldda + (j)*nb)
@@ -79,9 +86,9 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
-    int iinfo, nb;
-    int maxm, maxn, mindim;
-    int i, rows, cols, s, ldda, lddwork;
+    magma_int_t iinfo, nb;
+    magma_int_t maxm, maxn, mindim;
+    magma_int_t i, rows, cols, s, ldda, lddwork;
     cuDoubleComplex *dAT, *dA, *work;
 
     /* Check arguments */
@@ -172,8 +179,8 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
                 magmablas_zpermute_long2( dAT, ldda, ipiv, nb, i*nb );
 
                 // upload i-th panel
-                cublasSetMatrix( m-i*nb, nb, sizeof(cuDoubleComplex), work, lddwork, dA, cols);
-                magmablas_ztranspose( inAT(i,i), ldda, dA, cols, cols, nb);
+                cublasSetMatrix(m-i*nb, nb, sizeof(cuDoubleComplex), work, lddwork, dA, cols);
+                magmablas_ztranspose(inAT(i,i), ldda, dA, cols, cols, nb);
 
                 // do the small non-parallel computations
                 if ( s > (i+1) ) {
@@ -200,7 +207,7 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
                 }
             }
 
-	int nb0 = min(m - s*nb, n - s*nb);
+	magma_int_t nb0 = min(m - s*nb, n - s*nb);
 	rows = m - s*nb;
 	cols = maxm - s*nb;
 

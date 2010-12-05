@@ -92,8 +92,7 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
 
-    /* Local variables */
-    static int j, jb;
+    magma_int_t j, jb;
     char uplo_[2] = {uplo, 0};
     cuDoubleComplex zone  = MAGMA_Z_ONE;
     cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
@@ -116,7 +115,7 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
     cudaStreamCreate(&stream[0]);
     cudaStreamCreate(&stream[1]);
 
-    int nb = magma_get_zpotrf_nb(n);
+    magma_int_t nb = magma_get_zpotrf_nb(n);
 
     cuDoubleComplex *work;
     cudaMallocHost( (void**)&work, nb*nb*sizeof(cuDoubleComplex) );
