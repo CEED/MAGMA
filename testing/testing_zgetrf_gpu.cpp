@@ -27,7 +27,10 @@
 #define max(a,b)  (((a)<(b))?(b):(a))
 #endif
 
-double get_LU_error(magma_int_t M, magma_int_t N, cuDoubleComplex *A, magma_int_t lda, cuDoubleComplex *LU, magma_int_t *IPIV){
+double get_LU_error(magma_int_t M, magma_int_t N, cuDoubleComplex *A, 
+		    magma_int_t lda, cuDoubleComplex *LU, 
+		    magma_int_t *IPIV)
+{
     magma_int_t min_mn = min(M,N), intONE = 1, i, j;
 
     lapackf77_zlaswp( &N, A, &lda, &intONE, &min_mn, IPIV, &intONE);
@@ -92,7 +95,7 @@ int main( int argc, char** argv)
 
     /* Matrix size */
     magma_int_t M = 0, N = 0, n2, lda;
-    magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
+    magma_int_t size[10] = {960,1920,3072,4032,4992,5952,7104,8064,9024,9984};
 
     cublasStatus status;
     magma_int_t i, j, info;
