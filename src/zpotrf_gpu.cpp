@@ -14,6 +14,21 @@
 #include "magma.h"
 #include "magmablas.h"
 
+// === Define what BLAS to use ============================================
+#define PRECISION_z
+#if (defined(PRECISION_s) || defined(PRECISION_d)) 
+  #define cublasZgemm magmablas_zgemm
+  #define cublasZtrsm magmablas_ztrsm
+#endif
+
+#if (GPUSHMEM >= 200)
+  #if (defined(PRECISION_s))
+     #undef  cublasSgemm
+     #define cublasSgemm magmablas_sgemm_fermi80
+  #endif
+#endif
+// === End defining what BLAS to use =======================================
+
 #define dA(i, j)  (dA + (j)*ldda + (i))
 
 extern "C" magma_int_t
@@ -72,12 +87,7 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
             > 0:  if INFO = i, the leading minor of order i is not   
                   positive definite, and the factorization could not be   
                   completed.   
-
     =====================================================================   */
-
-    /* Test the input parameters.   
-
-       Parameter adjustments */
 
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
@@ -211,6 +221,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
 
 	}
     }
+
+    cudaStreamDestroy(stream[0]);
+    cudaStreamDestroy(stream[1]);
 
     cublasFree(work);
     return 0;

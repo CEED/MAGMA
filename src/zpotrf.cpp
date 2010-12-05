@@ -15,6 +15,21 @@
 #include "magma.h"
 #include "magmablas.h"
 
+// === Define what BLAS to use ============================================
+#define PRECISION_z
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+  #define cublasZgemm magmablas_zgemm
+  #define cublasZtrsm magmablas_ztrsm
+#endif
+
+#if (GPUSHMEM >= 200)
+#if (defined(PRECISION_s))
+     #undef  cublasSgemm
+     #define cublasSgemm magmablas_sgemm_fermi80
+  #endif
+#endif
+// === End defining what BLAS to use ======================================
+
 #define A(i, j)  (a   +(j)*lda  + (i))
 #define dA(i, j) (work+(j)*ldda + (i))
 
@@ -105,10 +120,9 @@ magma_zpotrf(char uplo, magma_int_t n,
     if (*info != 0)
       return 0;
 
-    static cudaStream_t stream[3];
+    static cudaStream_t stream[2];
     cudaStreamCreate(&stream[0]);
     cudaStreamCreate(&stream[1]);
-    cudaStreamCreate(&stream[2]);
 
     cublasStatus status;
 
@@ -197,7 +211,7 @@ magma_zpotrf(char uplo, magma_int_t n,
 		cudaMemcpy2DAsync( A(j, 0),  lda *sizeof(cuDoubleComplex),
                                    dA(j, 0), ldda*sizeof(cuDoubleComplex),
                                    sizeof(cuDoubleComplex)*jb, j,
-                                   cudaMemcpyDeviceToHost,stream[2]);
+                                   cudaMemcpyDeviceToHost,stream[0]);
 
                 if ( (j+jb) < n) {
                     cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
@@ -227,6 +241,9 @@ magma_zpotrf(char uplo, magma_int_t n,
 	}
     }
     
+    cudaStreamDestroy(stream[0]);
+    cudaStreamDestroy(stream[1]);
+
     cublasFree(work);
     
     return 0;

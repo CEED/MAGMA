@@ -368,13 +368,9 @@ int magma_get_zgebrd_nb(int m){
 */ 
 extern "C"
 int magma_get_spotrf_nb(int n){
-
-  return 320;
-  if (n <= 3328)
+  if (n<=1024)
     return 160;
-  else if (n<=4000)
-    return 240;
-  else 
+  else
     return 320;
 }
 
@@ -429,9 +425,7 @@ int magma_get_sgetrf_nb(int m){
 */ 
 extern "C"
 int magma_get_dpotrf_nb(int n){
-  if (n <= 3328)
-    return 128;
-  else if (n<=4256)
+  if (n<=4256)
     return 128;
   else 
     return 256;
@@ -646,7 +640,7 @@ int magma_get_cgetrf_nb(int m){
 */
 extern "C"
 int magma_get_cpotrf_nb(int n){
-  return 64;
+  return 128;
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
