@@ -383,19 +383,6 @@ int magma_get_sgeqrf_nb(int m){
     return 96;
   else
     return 192;
-  if (m< 3000)
-    return 80;
-  else
-    return 160;
-  
-
-  return 128;
-  if (m <= 2048)
-    return 32;
-  else if (m<=4032)
-    return 64;
-  else
-    return 128;
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -426,8 +413,6 @@ int magma_get_dpotrf_nb(int n){
 */
 extern "C"
 int magma_get_dgeqrf_nb(int m){
-  return 64;
-  //return 256;
   if (m <= 2048)
     return 64;
   else 
