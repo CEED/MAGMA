@@ -20,6 +20,14 @@
 // includes, project
 #include "magma.h"
 
+// define pfactor for number of flops in complex
+#define PRECISION_z
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+   #define pfactor 1.
+#else
+   #define pfactor 4.
+#endif
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zpotrf
 */
@@ -35,14 +43,14 @@ int main( int argc, char** argv)
     TimeStruct start, end;
 
     /* Matrix size */
-    int N=0, n2, lda;
-    int size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10240};
+    magma_int_t N=0, n2, lda;
+    magma_int_t size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10240};
     
     cublasStatus status;
-    int i, j, info[1];
+    magma_int_t i, j, info[1];
     const char *uplo = MagmaLowerStr;
-    int ione     = 1;
-    int ISEED[4] = {0,0,0,1};
+    magma_int_t ione     = 1;
+    magma_int_t ISEED[4] = {0,0,0,1};
 
     if (argc != 1){
       for(i = 1; i<argc; i++){	
@@ -88,7 +96,7 @@ int main( int argc, char** argv)
       lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
       /* Symmetrize and increase the diagonal */
       { 
-        int i, j;
+        magma_int_t i, j;
         for(i=0; i<N; i++) {
           MAGMA_Z_SET2REAL( h_A[i*lda+i], ( MAGMA_Z_GET_X(h_A[i*lda+i]) + 2000. ) );
           h_R[j] = h_A[j];
@@ -110,7 +118,7 @@ int main( int argc, char** argv)
       magma_zpotrf(uplo[0], N, h_R, lda, info);
       end = get_current_time();
     
-      gpu_perf = 1.*N*N*N/(3.*1000000*GetTimerValue(start,end));
+      gpu_perf = pfactor*N*N*N/(3.*1000000*GetTimerValue(start,end));
       // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
       // printf("Speed: %f GFlops \n", gpu_perf);
 
@@ -123,7 +131,7 @@ int main( int argc, char** argv)
       if (info[0] < 0)  
 	printf("Argument %d of zpotrf had an illegal value.\n", -info[0]);     
   
-      cpu_perf = 1.*N*N*N/(3.*1000000*GetTimerValue(start,end));
+      cpu_perf = pfactor*N*N*N/(3.*1000000*GetTimerValue(start,end));
       // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
       // printf("Speed: %f GFlops \n", cpu_perf);
       
@@ -132,7 +140,7 @@ int main( int argc, char** argv)
          =================================================================== */
       double work[1], matnorm;
       double2 mone = MAGMA_Z_NEG_ONE;
-      int one = 1;
+      magma_int_t one = 1;
       matnorm = lapackf77_zlange("f", &N, &N, h_A, &N, work);
       blasf77_zaxpy(&n2, &mone, h_A, &one, h_R, &one);
       printf("%5d    %6.2f         %6.2f        %e\n", 

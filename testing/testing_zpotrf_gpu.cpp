@@ -45,13 +45,13 @@ int main( int argc, char** argv)
     TimeStruct start, end;
 
     /* Matrix size */
-    int N=0, n2, lda;
-    int size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10240};
+    magma_int_t N=0, n2, lda;
+    magma_int_t size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10240};
     
     cublasStatus status;
-    int i, info[1];
-    int ione     = 1;
-    int ISEED[4] = {0,0,0,1};
+    magma_int_t i, info[1];
+    magma_int_t ione     = 1;
+    magma_int_t ISEED[4] = {0,0,0,1};
     const char *uplo = MagmaUpperStr;
     
     if (argc != 1){
@@ -107,7 +107,7 @@ int main( int argc, char** argv)
       lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
       /* Symmetrize and increase the diagonal */
       { 
-        int i, j;
+        magma_int_t i, j;
         for(i=0; i<N; i++) {
           MAGMA_Z_SET2REAL( h_A[i*N+i], ( MAGMA_Z_GET_X(h_A[i*N+i]) + 2000. ) );
           h_R[i*N+i] = h_A[i*N+i];
@@ -151,7 +151,7 @@ int main( int argc, char** argv)
       cublasGetMatrix( N, N, sizeof(double2), d_A, lda, h_R, N);
       double work[1], matnorm;
       double2 mone = MAGMA_Z_NEG_ONE;
-      int one = 1;
+      magma_int_t one = 1;
       matnorm = lapackf77_zlange("f", &N, &N, h_A, &N, work);
       blasf77_zaxpy(&n2, &mone, h_A, &one, h_R, &one);
       printf("%5d    %6.2f         %6.2f        %e\n", 
