@@ -287,6 +287,7 @@ subs = {
     ('ormr2','ormr2','unmr2','unmr2'),
     ('orm2r','orm2r','unm2r','unm2r'),
     ('org2r','org2r','ung2r','ung2r'),
+    ('orgqr','orgqr','ungqr','ungqr'),
     ('symm','symm','hemm','hemm'),
     ('gemm','gemm','gemm','gemm'),
     ('symv','symv','hemv','hemv'),
