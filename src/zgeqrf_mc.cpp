@@ -227,7 +227,7 @@ if (TRACE == 1) {
 
 }
 
-void SCHED_sgeqrt(Quark* quark)
+void SCHED_zgeqrt(Quark* quark)
 {
 int M;
 int N;
@@ -247,31 +247,31 @@ quark_unpack_args_9(quark, M, N, IB, A, LDA, T, LDT, TAU, WORK);
 //fprintf(stderr,"sgeqrt\n");
 
 if (M < 0) { 
-  printf("SCHED_sgeqrt: illegal value of M\n");
+  printf("SCHED_zgeqrt: illegal value of M\n");
 }
 
 if (N < 0) { 
-  printf("SCHED_sgeqrt: illegal value of N\n");
+  printf("SCHED_zgeqrt: illegal value of N\n");
 }
 
 if ((IB < 0) || ( (IB == 0) && ((M > 0) && (N > 0)) )) {
-  printf("SCHED_sgeqrt: illegal value of IB\n");
+  printf("SCHED_zgeqrt: illegal value of IB\n");
 }
 
 if ((LDA < max(1,M)) && (M > 0)) {
-  printf("SCHED_sgeqrt: illegal value of LDA\n");
+  printf("SCHED_zgeqrt: illegal value of LDA\n");
 }
 
 if ((LDT < max(1,IB)) && (IB > 0)) {
-  printf("SCHED_sgeqrt: illegal value of LDT\n");
+  printf("SCHED_zgeqrt: illegal value of LDT\n");
 }
 
   //if (TRACE == 1)
     //core_event_start(QUARK_Thread_Rank(quark));
 
-//lapackf77_zgeqrf(&M, &N, A, &LDA, TAU, WORK, &lwork, &iinfo);
+lapackf77_zgeqrf(&M, &N, A, &LDA, TAU, WORK, &lwork, &iinfo);
 //lwork=(int)WORK[0];
-lwork=N;
+lwork=(int)MAGMA_Z_REAL(WORK[0]);
 lapackf77_zgeqrf(&M, &N, A, &LDA, TAU, WORK, &lwork, &iinfo);
 
 lapackf77_zlarft("F", "C", &M, &N, A, &LDA, TAU, T, &LDT);
@@ -439,7 +439,7 @@ void QUARK_Insert_Task_strmm(Quark *quark, Quark_Task_Flags *task_flags,
     0);
 }
 
-void QUARK_Insert_Task_sgeqrt(Quark *quark, Quark_Task_Flags *task_flags, 
+void QUARK_Insert_Task_zgeqrt(Quark *quark, Quark_Task_Flags *task_flags, 
   int m,
   int n,
   cuDoubleComplex *a,
@@ -452,7 +452,7 @@ void QUARK_Insert_Task_sgeqrt(Quark *quark, Quark_Task_Flags *task_flags,
 
   int priority = 1000;
 
-  QUARK_Insert_Task(quark, SCHED_sgeqrt, task_flags,
+  QUARK_Insert_Task(quark, SCHED_zgeqrt, task_flags,
     sizeof(int),           &m,        VALUE,
     sizeof(int),           &n,        VALUE,
     sizeof(int),           &ldt,      VALUE,
@@ -588,6 +588,7 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
 
   int ii=-1,jj=-1,ll=-1;
 
+  // DAG labels
   char sgeqrt_dag_label[1000]; 
   char slarfb_dag_label[1000];
   char strmm_dag_label[1000];
@@ -600,13 +601,12 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
 
   int nb = EN_BEE;
 
-//fprintf(stderr, "m=%d n=%d nb=%d\n",*m,*n,nb);
-
   int lwkopt = *n * nb;
   work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );
 
   long int lquery = *lwork == -1;
 
+  // check input arguments
   if (*m < 0) {
     *info = -1;
   } else if (*n < 0) {
@@ -633,11 +633,9 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
   cuDoubleComplex **local_work = (cuDoubleComplex**) malloc(sizeof(cuDoubleComplex*)*(nt-1)*mt);
   memset(local_work, 0, sizeof(cuDoubleComplex*)*(nt-1)*mt);
 
-  //Quark *quark;
-  //quark = QUARK_New(4);
-
   int priority;
 
+  // traverse diagonal blocks
   for (i = 0; i < k; i += nb) {
 
     ii++;
@@ -646,13 +644,15 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
 
     sprintf(sgeqrt_dag_label, "GEQRT %d",ii);
 
-    QUARK_Insert_Task_sgeqrt(quark, 
+    // factor diagonal block, also compute T matrix
+    QUARK_Insert_Task_zgeqrt(quark, 
       0, (*m)-i, min(nb,(*n)-i), A(i,i), *lda, T(i), nb, &tau[i], sgeqrt_dag_label);
 
     if (i > 0) {
 
       priority = 100;
 
+      // update panels in a left looking fashion
       for (j = (i-nb) + (2*nb); j < *n; j += nb) { 
 
         jj++;
@@ -661,17 +661,20 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
 
         sprintf(slarfb_dag_label, "LARFB %d %d",ii-1, jj);
 
+        // perform part of update
         QUARK_Insert_Task_slarfb(quark, 0, 
           (*m)-(i-nb), min(nb,(*n)-(i-nb)), min(nb,(*m)-(i-nb)), min(nb,(*n)-j), nb, 
           A(i-nb,i-nb), *lda, A(i-nb,j), *lda, T(i-nb), nb, W(ii-1,jj), nb, slarfb_dag_label, priority);
 
         sprintf(strmm_dag_label, "TRMM %d %d",ii-1, jj);
 
+        // perform more of update
         QUARK_Insert_Task_strmm(quark, 0, min(nb,(*m)-(i-nb)), min(nb,(*n)-j), c_neg_one, 
           A(i-nb,i-nb), *lda, W(ii-1,jj), nb, c_one, A(i-nb,j), *lda, strmm_dag_label, priority);
 
           sprintf(sgemm_dag_label, "GEMM %d %d %d",ii-1, jj, ll);
 
+          // finish update
           QUARK_Insert_Task_sgemm(quark, 0, (*m)-i, min(nb,(*n)-j), min(nb,(*n)-(i-nb)), c_neg_one,
             A(i,i-nb), *lda, W(ii-1,jj), nb, c_one, A(i,j), *lda, A(i,j), sgemm_dag_label, priority, jj);
 
@@ -683,6 +686,7 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
 
     jj = ii;
 
+    // handle case of short wide rectangular matrix
     if (j < (*n)) {
 
       priority = 0;
@@ -693,17 +697,20 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
 
       sprintf(slarfb_dag_label, "LARFB %d %d",ii, jj);
 
+      // perform part of update
       QUARK_Insert_Task_slarfb(quark, 0, 
         (*m)-i, min(nb,(*n)-i), min(nb,(*m)-i), min(nb,(*n)-j), nb, 
         A(i,i), *lda, A(i,j), *lda, T(i), nb, W(ii,jj), nb, slarfb_dag_label, priority);
 
       sprintf(strmm_dag_label, "TRMM %d %d",ii, jj);
 
+      // perform more of update 
       QUARK_Insert_Task_strmm(quark, 0, min(nb,(*m)-i), min(nb,(*n)-j), c_neg_one, 
         A(i,i), *lda, W(ii,jj), nb, c_one, A(i,j), *lda, strmm_dag_label, priority);
 
         sprintf(sgemm_dag_label, "GEMM %d %d %d",ii, jj, ll);
 
+        // finish update
         QUARK_Insert_Task_sgemm(quark, 0, (*m)-i-nb, min(nb,(*n)-j), min(nb,(*n)-i), c_neg_one,
           A(i+nb,i), *lda, W(ii,jj), nb, c_one, A(i+nb,j), *lda, A(i+nb,j), sgemm_dag_label, priority, jj);
 
@@ -711,10 +718,10 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
 
   }
 
+  // wait for all tasks to finish executing
   QUARK_Barrier(quark);
 
-  //QUARK_Delete(quark);
-
+  // free memory
   for(k = 0 ; k < (nt-1)*mt; k++) {
     if (local_work[k] != NULL) {
       free(local_work[k]);
