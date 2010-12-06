@@ -43,7 +43,9 @@ ZSRC  = zpotrf.cpp	\
         zcgetrs_gpu.cpp \
         zcgesv_gpu.cpp 	\
         zcgeqrsv_gpu.cpp\
-        zcposv_gpu.cpp
+        zcposv_gpu.cpp  \
+        \
+        zgeev.cpp       \
 
 ifeq ($(PGIFORTRAN), 0)
 ZSRC := $(ZSRC) magma_zf77.cpp
