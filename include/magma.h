@@ -139,7 +139,9 @@
 #define MAGMA_S_ONE               (1.0)
 #define MAGMA_S_NEG_ONE           (-1.0)
 
+#ifndef CBLAS_SADDR
 #define CBLAS_SADDR(a)  &(a)
+#endif
 
 #ifdef __cplusplus
 extern "C" {
