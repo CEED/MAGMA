@@ -53,7 +53,17 @@ dgemv_kernel(int n, int m, int n1, double* A, int lda, double *x, double *y)
 }
 
 extern "C" void
-magmablas_dgemv_tesla(int n, int m, double *A, int lda, double *x, double *z)
+magmablas_dgemvt_tesla(int m, int n, double alpha, double *A, int lda,
+                       double *x, double *z);
+
+extern "C" void
+magmablas_dgemv_tesla(char trans,
+                      magma_int_t m, magma_int_t n,
+                      double alpha, 
+                      double *A, magma_int_t lda, 
+                      double *x, magma_int_t incx,
+                      double beta,
+                      double *z, magma_int_t incz)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -63,38 +73,83 @@ magmablas_dgemv_tesla(int n, int m, double *A, int lda, double *x, double *z)
 
     Purpose
     =======
+    This routine computes:
+    1) z =       A   x    if trans == 'N' or 'n', alpha == 1, beta == 0,
+                          and incx == incz == 1 (using magmablas code)
+    2) z = alpha A^t x    if trans == 'T' or 't', beta == 0,
+                          and incx == incz == 1 (using magmablas code)
+    3) z = alpha A^trans x + beta z
+                          otherwise, using CUBLAS.
 
-    This routine computes z = A x on the GPU.
+   Arguments
+   ==========
+    TRANS  - CHARACTER*1
+             On entry, TRANS specifies the operation to be performed as
+             follows:
+               TRANS = 'N' or 'n'   z := alpha*A *x + beta*z
+               TRANS = 'T' or 't'   z := alpha*A'*x + beta*z
 
-    N      - (input) INTEGER.
+    M      - (input) INTEGER
              On entry, N specifies the number of rows of the matrix A.
 
-    M      - (input) INTEGER.
+    N      - (input) INTEGER.
              On entry, M specifies the number of columns of the matrix A
 
-    A      - (input) DOUBLE PRECISION array of dimension ( LDA, m ) on the GPU.
+    ALPHA  - DOUBLE PRECISION
+             On entry, ALPHA specifies the scalar alpha.
+             Unchanged on exit.
+
+    A      - (input) DOUBLE PRECISION array of dimension ( LDA, n ) on the GPU.
    
-    LDA    - (input) INTEGER.
+    LDA    - (input) INTEGER
              LDA specifies the leading dimension of A.
 
-    X      - (input) DOUBLE PRECISION array of dimension n.
-     
-    Z      - (output) DOUBLE PRECISION array of	dimension m. 
-             On exit Z = A X.
+    X      - (input) DOUBLE PRECISION array of dimension 
+             n if trans == 'n'
+             m if trans == 't'
+      
+    INCX   - (input) Specifies the increment for the elements of X.
+             INCX must not be zero. Unchanged on exit.
 
+    BETA   - DOUBLE PRECISION
+             On entry, BETA specifies the scalar beta. When BETA is
+             supplied as zero then Y need not be set on input.
+             Unchanged on exit
+
+    Z      - (output) DOUBLE PRECISION array of	dimension 
+             m if trans == 'n'
+             n if trans == 't' 
+             
+    INCZ  - (input) Specifies the increment for the elements of Z.
+            INCZ must not be zero. Unchanged on exit.
     ===================================================================== */
 
-    int blocks;
-    if (n % num_threads==0)
-        blocks = n/num_threads;
-    else
-        blocks = n/num_threads + 1;
+    if (incx == 1 && incz == 1 && beta == 0.)
+       if (trans == 'n' || trans == 'N')
+          if (alpha == 1.)
+            {
+              int blocks;
+              if (m % num_threads==0)
+                 blocks = m/num_threads;
+              else
+                 blocks = m/num_threads + 1;
 
-    dim3 grid(blocks, 1, 1);
-    dim3 threads(num_threads, 1, 1);
+              dim3 grid(blocks, 1, 1);
+              dim3 threads(num_threads, 1, 1);
  
-    dgemv_kernel<<<grid, threads>>>(n, m, (m / dgemv_bs)*dgemv_bs, 
-                                    A, lda, x, z);
+              dgemv_kernel<<<grid, threads>>>(m, n, 
+                                              (n/dgemv_bs)*dgemv_bs, 
+                                              A, lda, x, z);
+          }
+         else
+           cublasDgemv(trans, m, n, alpha, A, lda,
+                       x, incx, beta, z, incz);
+       else
+         magmablas_dgemvt_tesla(m, n, alpha, A, lda, x, z);
+    else
+      cublasDgemv(trans, m, n, alpha, A, lda,
+                  x, incx, beta, z, incz);
+
 }
 
 __global__ void
@@ -311,8 +366,8 @@ magmablas_dgemvt1_tesla(int m, int n, double alpha, double *A, int lda,
 
     Z      - (output) DOUBLE PRECISION array of dimension n.
              On exit Z = alpha A^t X.
-
     ===================================================================== */
+
     int blocks;
 
     if (n % 32==0)
@@ -338,7 +393,6 @@ magmablas_dgemvt2_tesla(int m, int n, double alpha, double *A, int lda,
 
     Purpose
     =======
-
     This routine computes z = alpha A^t x on the GPU. Used in least squares
     solver for N small (e.g. = BS, a block size of order 64, 128, etc).
 
@@ -357,7 +411,6 @@ magmablas_dgemvt2_tesla(int m, int n, double alpha, double *A, int lda,
 
     Z      - (output) DOUBLE PRECISION array of dimension n.
              On exit Z = alpha A^t X.
-
     ===================================================================== */
 
     int blocks;
@@ -386,7 +439,6 @@ magmablas_dgemvt_tesla(int m, int n, double alpha, double *A, int lda,
 
     Purpose
     =======
-
     This routine computes z = alpha A^t x on the GPU.
 
     M      - (input) INTEGER.
@@ -395,7 +447,7 @@ magmablas_dgemvt_tesla(int m, int n, double alpha, double *A, int lda,
     N      - (input) INTEGER.
              On entry, N specifies the number of columns of the matrix A
 
-    A      - (input) SINGLE PRECISION array of dimension ( LDA, n ) on the GPU.
+    A      - (input) SINGLE PRECISION array of dimension (LDA, n) on the GPU.
 
     LDA    - (input) INTEGER.
              LDA specifies the leading dimension of A.
@@ -404,7 +456,6 @@ magmablas_dgemvt_tesla(int m, int n, double alpha, double *A, int lda,
 
     Z      - (output) SINGLE PRECISION array of dimension n.
              On exit Z = alpha A^t X.
-
     ===================================================================== */
 
     if (n<=128)
