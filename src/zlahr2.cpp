@@ -15,6 +15,8 @@
 #include "magma.h"
 #include "magmablas.h"
 
+#define PRECISION_z
+
 extern "C" magma_int_t 
 magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
 	     cuDoubleComplex *da, cuDoubleComplex *dv, 
@@ -162,10 +164,18 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
 	  /* Update A(K+1:N,I); Update I-th column of A - Y * V' */
 	  i__2 = n - k + 1;
 	  i__3 = i__ - 1;
+          #if defined(PRECISION_z) || defined(PRECISION_c)
+	     lapackf77_zlacgv(&i__3, &a[k+i__-1+a_dim1], &lda);
+          #endif
 	  blasf77_zcopy(&i__3, &a[k+i__-1+a_dim1], &lda, &t[nb*t_dim1+1], &c__1);
 	  blasf77_ztrmv("u","n","n",&i__3,&t[t_offset], &ldt, &t[nb*t_dim1+1], &c__1);
+
 	  blasf77_zgemv("NO TRANSPOSE", &i__2, &i__3, &c_neg_one, &y[k + y_dim1],
-		 &ldy, &t[nb*t_dim1+1], &c__1, &c_one, &a[k+i__*a_dim1],&c__1);
+			&ldy, &t[nb*t_dim1+1], &c__1, &c_one, &a[k+i__*a_dim1],&c__1);
+
+          #if defined(PRECISION_z) || defined(PRECISION_c)
+             lapackf77_zlacgv(&i__3, &a[k+i__-1+a_dim1], &lda);
+          #endif
 
 	  /* Apply I - V * T' * V' to this column (call it b) from the   
              left, using the last column of T as workspace   
@@ -177,18 +187,20 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
 	  
 	  i__2 = i__ - 1;
 	  blasf77_zcopy(&i__2, &a[k+1+i__*a_dim1], &c__1, &t[nb*t_dim1+1], &c__1);
-	  blasf77_ztrmv("Lower", "Transpose", "UNIT", &i__2, &a[k + 1 + a_dim1], 
-		 &lda, &t[nb * t_dim1 + 1], &c__1);
+	  blasf77_ztrmv("Lower", MagmaConjTransStr, "UNIT", &i__2, 
+			&a[k + 1 + a_dim1], &lda, &t[nb * t_dim1 + 1], &c__1);
 
 	  /* w := w + V2'*b2 */
 	  i__2 = n - k - i__ + 1;
 	  i__3 = i__ - 1;
-	  blasf77_zgemv("T", &i__2, &i__3, &c_one, &a[k + i__ + a_dim1], &lda, 
-		 &a[k+i__+i__*a_dim1], &c__1, &c_one, &t[nb*t_dim1+1], &c__1);
+	  blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_one, 
+			&a[k + i__ + a_dim1], &lda, &a[k+i__+i__*a_dim1], &c__1, 
+			&c_one, &t[nb*t_dim1+1], &c__1);
 
 	  /* w := T'*w */
 	  i__2 = i__ - 1;
-	  blasf77_ztrmv("U","T","N",&i__2, &t[t_offset], &ldt, &t[nb*t_dim1+1],&c__1);
+	  blasf77_ztrmv("U", MagmaConjTransStr, "N", &i__2, &t[t_offset], &ldt, 
+			&t[nb*t_dim1+1], &c__1);
 	  
 	  /* b2 := b2 - V2*w */
 	  i__2 = n - k - i__ + 1;
@@ -226,8 +238,9 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
 	
 	i__2 = n - k - i__ + 1;
 	i__3 = i__ - 1;
-	blasf77_zgemv("T", &i__2, &i__3, &c_one, &a[k + i__ + a_dim1], &lda,
-	       &a[k+i__+i__*a_dim1], &c__1, &c_zero, &t[i__*t_dim1+1], &c__1);
+	blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_one, 
+		      &a[k + i__ + a_dim1], &lda, &a[k+i__+i__*a_dim1], &c__1, 
+		      &c_zero, &t[i__*t_dim1+1], &c__1);
 
 	/* Compute T(1:I,I) */
 	i__2 = i__ - 1;
