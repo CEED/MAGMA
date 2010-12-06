@@ -137,18 +137,20 @@ magma_zheevd(char *jobz, char *uplo, magma_int_t *n,
 
     Modified description of INFO. Sven, 16 Feb 05.   
     =====================================================================   */
-    /* Table of constant values */
+
+    #define min(a,b)       (((a)<(b))?(a):(b)) 
+    #define max(a,b)       (((a)>(b))?(a):(b))
+
     static magma_int_t c__1 = 1;
     static magma_int_t c_n1 = -1;
     static magma_int_t c__0 = 0;
     static double c_b18 = 1.;
     
-    /* System generated locals */
     magma_int_t a_dim1, a_offset, i__1, i__2;
     double d__1;
-    /* Builtin functions */
+
     double sqrt(double);
-    /* Local variables */
+
     static double eps;
     static magma_int_t inde;
     static double anrm;
@@ -158,21 +160,18 @@ magma_zheevd(char *jobz, char *uplo, magma_int_t *n,
     extern int dscal_(magma_int_t *, double *, double *, 
 	    magma_int_t *);
     static double sigma;
-    extern logical lsame_(char *, char *);
     static magma_int_t iinfo, lwmin, liopt;
-    static logical lower;
+    static magma_int_t lower;
     static magma_int_t llrwk, lropt;
-    static logical wantz;
+    static magma_int_t wantz;
     static magma_int_t indwk2, llwrk2;
     extern double dlamch_(char *);
     static magma_int_t iscale;
     static double safmin;
     extern magma_int_t ilaenv_(magma_int_t *, char *, char *, magma_int_t *, magma_int_t *, 
-	    magma_int_t *, magma_int_t *, ftnlen, ftnlen);
+	    magma_int_t *, magma_int_t *, magma_int_t, magma_int_t);
     extern int xerbla_(char *, magma_int_t *);
     static double bignum;
-    extern double zlanhe_(char *, char *, magma_int_t *, cuDoubleComplex *, 
-	    magma_int_t *, double *);
     static magma_int_t indtau;
     extern int 
       dsterf_(magma_int_t *, double *, double *, magma_int_t *), 
@@ -186,12 +185,10 @@ magma_zheevd(char *jobz, char *uplo, magma_int_t *n,
     extern int 
       zhetrd_(char *, magma_int_t *, cuDoubleComplex *, 
 	      magma_int_t *, double *, double *, cuDoubleComplex *, 
-	      cuDoubleComplex *, magma_int_t *, magma_int_t *), 
-      zlacpy_(char *, magma_int_t *, magma_int_t *, cuDoubleComplex *, magma_int_t *, 
-	      cuDoubleComplex *, magma_int_t *);
+	      cuDoubleComplex *, magma_int_t *, magma_int_t *);
     static magma_int_t lrwmin, llwork;
     static double smlnum;
-    static logical lquery;
+    static magma_int_t lquery;
     extern int zunmtr_(char *, char *, char *, magma_int_t *, magma_int_t *, cuDoubleComplex *, 
 		       magma_int_t *, cuDoubleComplex *, cuDoubleComplex *, magma_int_t *, 
 		       cuDoubleComplex *, magma_int_t *, magma_int_t *);
@@ -205,14 +202,14 @@ magma_zheevd(char *jobz, char *uplo, magma_int_t *n,
     --iwork;
 
     /* Function Body */
-    wantz = lsame_(jobz, "V");
-    lower = lsame_(uplo, "L");
+    wantz = lapackf77_lsame(jobz, "V");
+    lower = lapackf77_lsame(uplo, "L");
     lquery = *lwork == -1 || *lrwork == -1 || *liwork == -1;
 
     *info = 0;
-    if (! (wantz || lsame_(jobz, "N"))) {
+    if (! (wantz || lapackf77_lsame(jobz, "N"))) {
 	*info = -1;
-    } else if (! (lower || lsame_(uplo, "U"))) {
+    } else if (! (lower || lapackf77_lsame(uplo, "U"))) {
 	*info = -2;
     } else if (*n < 0) {
 	*info = -3;
@@ -242,12 +239,12 @@ magma_zheevd(char *jobz, char *uplo, magma_int_t *n,
 	    }
 	    /* Computing MAX */
 	    i__1 = lwmin, i__2 = *n + ilaenv_(&c__1, "ZHETRD", uplo, n, &c_n1,
-					      &c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
+					      &c_n1, &c_n1, 6, 1);
 	    lopt = max(i__1,i__2);
 	    lropt = lrwmin;
 	    liopt = liwmin;
 	}
-	work[1].r = (double) lopt, work[1].i = 0.;
+	MAGMA_Z_SET2REAL(work[1], (double) lopt);
 	rwork[1] = (double) lropt;
 	iwork[1] = liopt;
 
@@ -275,10 +272,10 @@ magma_zheevd(char *jobz, char *uplo, magma_int_t *n,
 
     if (*n == 1) {
 	i__1 = a_dim1 + 1;
-	w[1] = a[i__1].r;
+	w[1] = MAGMA_Z_REAL(a[i__1]);
 	if (wantz) {
 	    i__1 = a_dim1 + 1;
-	    a[i__1].r = 1., a[i__1].i = 0.;
+	    MAGMA_Z_SET2REAL(a[i__1], 1.);
 	}
 	return 0;
     }
@@ -292,7 +289,7 @@ magma_zheevd(char *jobz, char *uplo, magma_int_t *n,
     rmax = sqrt(bignum);
 
     /* Scale matrix to allowable range, if necessary. */
-    anrm = zlanhe_("M", uplo, n, &a[a_offset], lda, &rwork[1]);
+    anrm = lapackf77_zlanhe("M", uplo, n, &a[a_offset], lda, &rwork[1]);
     iscale = 0;
     if (anrm > 0. && anrm < rmin) {
 	iscale = 1;
@@ -329,7 +326,7 @@ magma_zheevd(char *jobz, char *uplo, magma_int_t *n,
 		&llwrk2, &rwork[indrwk], &llrwk, &iwork[1], liwork, info);
 	zunmtr_("L", uplo, "N", n, n, &a[a_offset], lda, &work[indtau], &work[
 		indwrk], n, &work[indwk2], &llwrk2, &iinfo);
-	zlacpy_("A", n, n, &work[indwrk], n, &a[a_offset], lda);
+	lapackf77_zlacpy("A", n, n, &work[indwrk], n, &a[a_offset], lda);
     }
 
     /* If matrix was scaled, then rescale eigenvalues appropriately. */
@@ -343,11 +340,9 @@ magma_zheevd(char *jobz, char *uplo, magma_int_t *n,
 	dscal_(&imax, &d__1, &w[1], &c__1);
     }
 
-    work[1].r = (double) lopt, work[1].i = 0.;
+    MAGMA_Z_SET2REAL(work[1], (double) lopt);
     rwork[1] = (double) lropt;
     iwork[1] = liopt;
 
     return 0;
-
-    /* End of MAGMA_ZHEEVD */
 } /* magma_zheevd */
