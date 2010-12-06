@@ -14,10 +14,12 @@
 #include <cublas.h>
 #include "magma.h"
 
-extern "C" int
-magma_zlahru(int n, int k, int nb, cuDoubleComplex *a, int lda,
+extern "C" magma_int_t
+magma_zlahru(magma_int_t n, magma_int_t k, magma_int_t nb, 
+	     cuDoubleComplex *a, magma_int_t lda,
              cuDoubleComplex *d_a, cuDoubleComplex *y,
-             cuDoubleComplex *v, cuDoubleComplex *t, cuDoubleComplex *d_work)
+             cuDoubleComplex *v, cuDoubleComplex *t, 
+	     cuDoubleComplex *d_work)
 {
 /*  -- MAGMA auxiliary routine (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -27,7 +29,6 @@ magma_zlahru(int n, int k, int nb, cuDoubleComplex *a, int lda,
 
     Purpose
     =======
-
     ZLAHRU is an auxiliary MAGMA routine that is used in ZGEHRD to update
     the trailing sub-matrices after the reductions of the corresponding
     panels.
@@ -35,7 +36,6 @@ magma_zlahru(int n, int k, int nb, cuDoubleComplex *a, int lda,
 
     Arguments
     =========
-
     N       (input) INTEGER
             The order of the matrix A.  N >= 0.
 
@@ -85,7 +85,6 @@ magma_zlahru(int n, int k, int nb, cuDoubleComplex *a, int lda,
 
     Further Details
     ===============
-
     This implementation follows the algorithm and notations described in:
 
     S. Tomov and J. Dongarra, "Accelerating the reduction to upper Hessenberg
@@ -94,14 +93,13 @@ magma_zlahru(int n, int k, int nb, cuDoubleComplex *a, int lda,
     May 24, 2009.
 
     The difference is that here M is computed on the GPU.
-
     =====================================================================    */
 
     cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
-    int ldda = n;
+    magma_int_t ldda = n;
     cuDoubleComplex *v0 = v + n - k;
     cuDoubleComplex *d_t = d_work + nb*ldda;
 

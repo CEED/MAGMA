@@ -17,8 +17,10 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t 
-magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, cuDoubleComplex *a, magma_int_t lda,
-	     cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *lwork, cuDoubleComplex *da, magma_int_t *info)
+magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, 
+	     cuDoubleComplex *a, magma_int_t lda,
+	     cuDoubleComplex *tau, cuDoubleComplex *work, 
+	     magma_int_t *lwork, cuDoubleComplex *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -131,29 +133,25 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, cuDoubleComplex *a
     cuDoubleComplex c_one = MAGMA_Z_ONE;
     cuDoubleComplex c_zero = MAGMA_Z_ZERO;
 
-    int nb = magma_get_zgehrd_nb(n);
-    
-    int N = n, ldda = n;
+    magma_int_t nb = magma_get_zgehrd_nb(n);
+    magma_int_t N = n, ldda = n;
 
     cuDoubleComplex *d_A    = da;
     cuDoubleComplex *d_work = da + (N+nb)*ldda; 
 
-    /* Local variables */
-    static int i__;
+    magma_int_t i__;
 
     cuDoubleComplex *t;
-    //cudaMallocHost( (void**)&t, nb*nb*sizeof(cuDoubleComplex) );
     t = (cuDoubleComplex *)malloc(nb*nb*sizeof(cuDoubleComplex));
 
-    static int ib;
-    static int nh, iws;
-    static int nbmin, iinfo;
-    static int ldwork;
-    static int lquery;
+    magma_int_t ib;
+    magma_int_t nh, iws;
+    magma_int_t nbmin, iinfo;
+    magma_int_t ldwork;
+    magma_int_t lquery;
 
     --tau;
 
-    /* Function Body */
     *info = 0;
 
     MAGMA_Z_SET2REAL( work[0], (double) n * nb );
@@ -175,7 +173,6 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, cuDoubleComplex *a
     else if (lquery)
       return 0;
 
-    //zzero_32x32_block(d_A+N*ldda, ldda);
     zzero_nbxnb_block(nb, d_A+N*ldda, ldda);
 
     /* Set elements 1:ILO-1 and IHI:N-1 of TAU to zero */
@@ -265,13 +262,9 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, cuDoubleComplex *a
     lapackf77_zgehd2(&n, &i__, &ihi, a, &lda, &tau[1], work, &iinfo);
     MAGMA_Z_SET2REAL( work[0], (double) iws );
     
-    // cublasFree(t); 
     free(t);
  
     return 0;
-
-    /* End of MAGMA_ZGEHRD */
-
 } /* magma_zgehrd */
 
 #undef min

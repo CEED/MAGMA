@@ -17,8 +17,10 @@
 
 extern "C" magma_int_t 
 magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
-	     double2 *da, double2 *dv, double2 *a, magma_int_t lda,
-	     double2 *tau, double2 *t, magma_int_t ldt, double2 *y, magma_int_t ldy)
+	     cuDoubleComplex *da, cuDoubleComplex *dv, 
+	     cuDoubleComplex *a, magma_int_t lda,
+	     cuDoubleComplex *tau, cuDoubleComplex *t, magma_int_t ldt, 
+	     cuDoubleComplex *y, magma_int_t ldy)
 {
 /*  -- MAGMA auxiliary routine (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -122,26 +124,22 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
     form through hybrid GPU-based computing," University of Tennessee Computer
     Science Technical Report, UT-CS-09-642 (also LAPACK Working Note 219),
     May 24, 2009.
-
     =====================================================================    */
 
     #define min(a,b) ((a) <= (b) ? (a) : (b))
 
-    double2 c_zero = MAGMA_Z_ZERO;
-    double2 c_one = MAGMA_Z_ONE;
-    double2 c_neg_one = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_zero = MAGMA_Z_ZERO;
+    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
-    int ldda = n;
-
-    /* Table of constant values */
-    static int c__1 = 1;
+    magma_int_t ldda = n;
+    magma_int_t c__1 = 1;
     
-    /* System generated locals */
-    int a_dim1, a_offset, t_dim1, t_offset, y_dim1, y_offset, i__2, i__3;
-    double2 d__1;
-    /* Local variables */
-    static int i__;
-    static double2 ei;
+    magma_int_t a_dim1, a_offset, t_dim1, t_offset, y_dim1, y_offset, i__2, i__3;
+    cuDoubleComplex d__1;
+
+    magma_int_t i__;
+    cuDoubleComplex ei;
 
     --tau;
     a_dim1 = lda;
@@ -158,7 +156,6 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
     if (n <= 1)
       return 0;
     
-
     for (i__ = 1; i__ <= nb; ++i__) {
 	if (i__ > 1) {
 
@@ -219,7 +216,7 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
 	/* Compute  Y(K+1:N,I) */
         i__2 = n - k;
 	i__3 = n - k - i__ + 1;
-        cublasSetVector(i__3, sizeof(double2), 
+        cublasSetVector(i__3, sizeof(cuDoubleComplex), 
                         &a[k + i__ + i__*a_dim1], 1, dv+(i__-1)*(ldda+1), 1);
 
 	cublasZgemv('N', i__2+1, i__3, c_one, 
@@ -239,15 +236,12 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
 	blasf77_ztrmv("U","N","N", &i__2, &t[t_offset], &ldt, &t[i__*t_dim1+1], &c__1);
 	t[i__ + i__ * t_dim1] = tau[i__];
 
-        cublasGetVector(n - k + 1, sizeof(double2),
+        cublasGetVector(n - k + 1, sizeof(cuDoubleComplex),
 	                da-1+ k+(i__-1)*ldda, 1, y+ k + i__*y_dim1, 1);
     }
     a[k + nb + nb * a_dim1] = ei;
 
     return 0;
-
-    /* End of MAGMA_ZLAHR2 */
-
 } /* magma_zlahr2 */
 
 #undef min
