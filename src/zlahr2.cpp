@@ -127,7 +127,7 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
 
     #define min(a,b) ((a) <= (b) ? (a) : (b))
 
-    double2 c_zero = MAGMA_Z_ONE;
+    double2 c_zero = MAGMA_Z_ZERO;
     double2 c_one = MAGMA_Z_ONE;
     double2 c_neg_one = MAGMA_Z_NEG_ONE;
 
