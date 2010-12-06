@@ -65,6 +65,8 @@ int main( int argc, char** argv)
     int ione     = 1;
     int ISEED[4] = {0,0,0,1};
 
+    int cores = 4;
+
 
 
     if (argc != 1){
@@ -75,6 +77,8 @@ int main( int argc, char** argv)
           M = atoi(argv[++i]);
         else if (strcmp("-T", argv[i])==0)
           TRACE = atoi(argv[++i]);
+        else if (strcmp("-C", argv[i])==0)
+          cores = atoi(argv[++i]);
         else if (strcmp("-B", argv[i])==0)
           EN_BEE = atoi(argv[++i]);
       }
@@ -212,7 +216,7 @@ int main( int argc, char** argv)
          Performs operation using multicore 
 	 =================================================================== */
 
-quark = QUARK_New(4);
+quark = QUARK_New(cores);
 
       start = get_current_time();
       magma_zgeqrf_mc(&M, &N, h_A2, &M, tau, h_work2, &lwork, info);
