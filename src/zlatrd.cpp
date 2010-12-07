@@ -178,20 +178,17 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
     where d denotes a diagonal element of the reduced matrix, a denotes   
     an element of the original matrix that is unchanged, and vi denotes   
     an element of the vector defining H(i).   
-
     =====================================================================    */
  
-#define min(a,b)  (((a)<(b))?(a):(b))
-
-    //TimeStruct start, end;
+    #define min(a,b)  (((a)<(b))?(a):(b))
 
     double2 c_neg_one = MAGMA_Z_NEG_ONE;
-    double2 c_one = MAGMA_Z_ONE;
-    double2 c_zero = MAGMA_Z_ZERO;
+    double2 c_one     = MAGMA_Z_ONE;
+    double2 c_zero    = MAGMA_Z_ZERO;
 
-#if defined(PRECISION_z) || defined(PRECISION_c)
-    double2 value = MAGMA_Z_ZERO;
-#endif
+    #if defined(PRECISION_z) || defined(PRECISION_c)
+       double2 value = MAGMA_Z_ZERO;
+    #endif
     
     static int c__1 = 1;
 
@@ -213,14 +210,14 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
     dw-= 1 + *lddw;
 
     double2 *f = (double2 *)malloc((*n)*sizeof(double2 ));
-    static cudaStream_t stream[2];
-    cudaStreamCreate(&stream[0]);
-    cudaStreamCreate(&stream[1]);
 
     /* Function Body */
     if (*n <= 0) {
       return 0;
     }
+
+    static cudaStream_t stream;
+    cudaStreamCreate(&stream);
 
     if (lapackf77_lsame(uplo, "U")) {
 
@@ -257,7 +254,7 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 	  if (i__ < *n) {
 	    i__2 = i__ - 1;
 	    i__3 = *n - i__;
-	    blasf77_zgemv("Transpose", &i__2, &i__3, &c_one, 
+	    blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_one, 
 		   &w[(iw+1)*w_dim1 + 1], ldw, &a[i__ * a_dim1 + 1], &c__1, 
 		   &c_zero, &w[i__ + 1 + iw * w_dim1], &c__1);
 	    i__2 = i__ - 1;
@@ -267,7 +264,7 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 		   c__1, &c_one, &w[iw * w_dim1 + 1], &c__1);
 	    i__2 = i__ - 1;
 	    i__3 = *n - i__;
-	    blasf77_zgemv("Transpose", &i__2, &i__3, &c_one, 
+	    blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_one, 
 		   &a[(i__ + 1) * a_dim1 + 1], lda, &a[i__ * a_dim1 + 1], 
 		   &c__1, &c_zero, &w[i__ + 1 + iw * w_dim1], &c__1);
 	    i__2 = i__ - 1;
@@ -327,22 +324,22 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 	  cudaMemcpy2DAsync(w + i__ + 1 + i__ * w_dim1, w_dim1*sizeof(double2),
 			    dw+ i__ + 1 + i__ * w_dim1, w_dim1*sizeof(double2),
 			    sizeof(double2)*i__2, 1,
-			    cudaMemcpyDeviceToHost,stream[1]);
+			    cudaMemcpyDeviceToHost,stream);
 
 	  i__3 = i__ - 1;
-	  blasf77_zgemv("Transpose", &i__2, &i__3, &c_one, &w[i__ + 1 + w_dim1], 
+	  blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_one, &w[i__ + 1 + w_dim1], 
 		 ldw, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_zero, 
 		 &w[i__ * w_dim1 + 1], &c__1);
 
 	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one,
                  &a[i__ + 1 + a_dim1], lda, &w[i__ * w_dim1 + 1], &c__1,
                  &c_zero, f, &c__1);
-	  blasf77_zgemv("Transpose", &i__2, &i__3, &c_one, &a[i__ + 1 + a_dim1],
+	  blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_one, &a[i__ + 1 + a_dim1],
                  lda, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_zero,
                  &w[i__ * w_dim1 + 1], &c__1);
 
 	  // 3. Here is where we need it
-	  cudaStreamSynchronize(stream[1]);
+	  cudaStreamSynchronize(stream);
 
 	  if (i__3!=0)
 	    blasf77_zaxpy(&i__2, &c_one, f, &c__1, &w[i__ + 1 + i__ * w_dim1], &c__1);
@@ -360,16 +357,15 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
 				       c__1, &a[i__ +1+ i__ * a_dim1], c__1);
 #endif
 	  blasf77_zaxpy(&i__2, &alpha, &a[i__ + 1 + i__ * a_dim1], &c__1, 
-		 &w[i__ + 1 + i__ * w_dim1], &c__1);
+			&w[i__ + 1 + i__ * w_dim1], &c__1);
 	}
       }
     }
 
     free(f);
+    cudaStreamDestroy(stream);
 
     return 0;
-
-    /* End of ZLATRD */
 } /* zlatrd_ */
 
 #undef min

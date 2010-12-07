@@ -18,8 +18,11 @@
 
 
 extern "C" magma_int_t
-magma_zhetrd(char uplo, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, double *d, double *e, 
-	     cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *lwork, cuDoubleComplex *da, magma_int_t *info)
+magma_zhetrd(char uplo, magma_int_t n, 
+	     cuDoubleComplex *a, magma_int_t lda, 
+	     double *d, double *e, cuDoubleComplex *tau,
+	     cuDoubleComplex *work, magma_int_t *lwork, 
+	     cuDoubleComplex *da, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
