@@ -101,14 +101,16 @@ magma_zpotrf(char uplo, magma_int_t n,
 
     /* Local variables */
     char uplo_[2] = {uplo, 0};
-    int  ldda;
-    static int j, jb;
-    cuDoubleComplex zone  = MAGMA_Z_ONE;
-    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
-    double          done  = (double) 1.0;
-    double          mdone = (double)-1.0;
+    magma_int_t        ldda, nb;
+    static magma_int_t j, jb;
+    cublasStatus       status;
+    cuDoubleComplex    zone  = MAGMA_Z_ONE;
+    cuDoubleComplex    mzone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex   *work;
+    double             done  = (double) 1.0;
+    double             mdone = (double)-1.0;
+    long int           upper = lapackf77_lsame(uplo_, "U");
 
-    long int upper = lapackf77_lsame(uplo_, "U");
     *info = 0;
     if (! upper && ! lapackf77_lsame(uplo_, "L")) {
       *info = -1;
@@ -124,18 +126,15 @@ magma_zpotrf(char uplo, magma_int_t n,
     cudaStreamCreate(&stream[0]);
     cudaStreamCreate(&stream[1]);
 
-    cublasStatus status;
-
-    ldda   = ((n+31)/32)*32;
+    ldda = ((n+31)/32)*32;
     
-    cuDoubleComplex *work;
     status = cublasAlloc((n)*ldda, sizeof(cuDoubleComplex), (void**)&work);
     if (status != CUBLAS_STATUS_SUCCESS) {
 	*info = -6;
 	return 0;
     }
 
-    int nb = magma_get_zpotrf_nb(n);
+    nb = magma_get_zpotrf_nb(n);
 
     if (nb <= 1 || nb >= n) {
 	lapackf77_zpotrf(uplo_, &n, a, &lda, info);

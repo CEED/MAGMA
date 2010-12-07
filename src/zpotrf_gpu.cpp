@@ -92,16 +92,17 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
 
-    magma_int_t j, jb;
-    char uplo_[2] = {uplo, 0};
+    magma_int_t     j, jb, nb;
+    char            uplo_[2] = {uplo, 0};
     cuDoubleComplex zone  = MAGMA_Z_ONE;
     cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex *work;
     double          done  = (double) 1.0;
     double          mdone = (double)-1.0;
-       
-    long int upper = lapackf77_lsame(uplo_, "U");
+    long int        upper = lapackf77_lsame(uplo_, "U");
+
     *info = 0;
-    if (! upper && ! lapackf77_lsame(uplo_, "L")) {
+    if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
         *info = -1;
     } else if (n < 0) {
         *info = -2;
@@ -115,12 +116,11 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
     cudaStreamCreate(&stream[0]);
     cudaStreamCreate(&stream[1]);
 
-    magma_int_t nb = magma_get_zpotrf_nb(n);
+    nb = magma_get_zpotrf_nb(n);
 
-    cuDoubleComplex *work;
     cudaMallocHost( (void**)&work, nb*nb*sizeof(cuDoubleComplex) );
 
-    if (nb <= 1 || nb >= n) {
+    if ((nb <= 1) || (nb >= n)) {
         /*  Use unblocked code. */
         cublasGetMatrix(n, n, sizeof(cuDoubleComplex), dA, ldda, work, n);
         lapackf77_zpotrf(uplo_, &n, work, &n, info);
@@ -224,7 +224,7 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
     cudaStreamDestroy(stream[0]);
     cudaStreamDestroy(stream[1]);
 
-    cublasFree(work);
+    cudaFreeHost(work);
     return 0;
 
     /* End of MAGMA_ZPOTRF_GPU */

@@ -24,9 +24,9 @@
 // === End defining what BLAS to use =======================================
 
 extern "C" magma_int_t
-magma_zpotrs_gpu(char uplo, magma_int_t n, magma_int_t nrhs, 
-                 cuDoubleComplex *dA, magma_int_t ldda, 
-                 cuDoubleComplex *dB, magma_int_t lddb, magma_int_t *info)
+magma_zposv_gpu( char uplo, magma_int_t n, magma_int_t nrhs, 
+		 cuDoubleComplex *dA, magma_int_t ldda, 
+                 cuDoubleComplex *dB, magma_int_t lddb, magma_int_t *info )
 {
 /*  -- magma (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -55,18 +55,18 @@ magma_zpotrs_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    A       (input) COMPLEX_16 array, dimension (LDA,N)
+    dA      (input) COMPLEX_16 array, dimension (LDA,N)
             The triangular factor U or L from the Cholesky factorization
             A = U\*\*H*U or A = L*L\*\*H, as computed by ZPOTRF.
 
-    LDA     (input) INTEGER
+    LDDA    (input) INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    B       (input/output) COMPLEX_16 array, dimension (LDB,NRHS)
+    dB      (input/output) COMPLEX_16 array, dimension (LDB,NRHS)
             On entry, the right hand side matrix B.
             On exit, the solution matrix X.
 
-    LDB     (input) INTEGER
+    LDDB    (input) INTEGER
             The leading dimension of the array B.  LDB >= max(1,N).
 
     INFO    (output) INTEGER
@@ -94,6 +94,8 @@ magma_zpotrs_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
     }
     if( (n==0) || (nrhs ==0) )
         return 0;	
+
+    magma_zpotrf_gpu(uplo, n, dA, ldda, info);
     if( (uplo=='U') || (uplo=='u') ){
         cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb);
         cublasZtrsm(MagmaLeft, MagmaUpper, MagmaNoTrans,   MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb);
