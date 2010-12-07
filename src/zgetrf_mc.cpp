@@ -15,231 +15,107 @@
 #include <cublas.h>
 #include <magma.h>
 #include <quark.h>
-//#include <cblas.h>
-
-// trace
-#include <event_trace.h>
-
-/*
-
-int    event_num        [MAX_THREADS];
-double event_start_time [MAX_THREADS];
-double event_end_time   [MAX_THREADS];
-double event_log        [MAX_THREADS][MAX_EVENTS];
-char *event_label       [MAX_THREADS][MAX_EVENTS];
-int log_events = 1;
-char tasklabel[200];
-char taskcolor[200];
-
-double get_current_timee(void) {
-  struct timeval tp;
-  gettimeofday( &tp, NULL );
-  return tp.tv_sec + 1e-6 * tp.tv_usec;
-}
-
-// dump trace
-void dump_trace(int cores_num) {
-  char trace_file_name[32];
-  FILE *trace_file;
-  double end;
-  int event, core;
-  double scale = 30000.0;
-
-  sprintf(trace_file_name, "trace.svg");
-  trace_file = fopen(trace_file_name, "w");
-
-  int x_end_max = -1;
-
-  for (core = 0; core < cores_num; core++) {
-    event = event_num[core]-4;
-    end = event_log[core][event+2] - event_log[0][1];
-    x_end_max = max(x_end_max, (int)(end * scale) + 20);
-  }
-
-fprintf(trace_file,
-"<?xml version=\"1.0\" standalone=\"no\"?>"
-"<svg version=\"1.1\" baseProfile=\"full\" xmlns=\"http://www.w3.org/2000/svg\" "
-"xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:ev=\"http://www.w3.org/2001/xml-events\"  "
-">\n"
-"  <g font-size=\"20\">\n");
-
-for (core = 0; core < cores_num; core++)
-
-for (event = 0; event < event_num[core]; event += 4) {
-
-int    tag   = (int)event_log[core][event+0];
-double start =      event_log[core][event+1];
-double end   =      event_log[core][event+2];
-int    color = (int)event_log[core][event+3];
-char   *label = event_label[core][event+0];
-
-start -= event_log[0][1];
-end   -= event_log[0][1];
-
-fprintf(trace_file,
-"    "
-"<rect x=\"%.2lf\" y=\"%.0lf\" width=\"%.2lf\" height=\"%.0lf\" "
-"fill=\"#%06x\" stroke=\"#000000\" stroke-width=\"1\"/>\n",
-start * scale,  // x
-core * 100.0,   // y
-(end - start) * scale, // width
-90.0,           // height
-color);
-
-  fprintf(trace_file,
-  "    "
-  "<text x=\"%.2lf\" y=\"%.0lf\" font-size=\"20\" fill=\"black\">"
-  "%s"
-  "</text>\n",
-  start * scale + 10, // x
-  core * 100.0 + 20, // y
-  label);
-
-}
-//}
-
-fprintf(trace_file,
-"  </g>\n"
-"</svg>\n");
-
-fclose(trace_file);
-}
-
-*/
-
 
 #define  A(m,n) (a+(n)*(*lda)+(m))
 
+// block size from driver
 extern "C" int EN_BEE;
 
-extern "C" int TRACE;
-
+// QUARK scheduler initialized in driver
 extern "C" Quark *quark;
 
-void SCHED_sgemm(Quark* quark)
+// task execution code
+void SCHED_zgemm(Quark* quark)
 {
-int M;
-int N;
-int K;
-cuDoubleComplex *A1;
-int LDA;
-cuDoubleComplex *A2;
-cuDoubleComplex *A3;
+  int M;
+  int N;
+  int K;
+  cuDoubleComplex *A1;
+  int LDA;
+  cuDoubleComplex *A2;
+  cuDoubleComplex *A3;
 
-cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
-cuDoubleComplex one = MAGMA_Z_ONE;
+  cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
+  cuDoubleComplex one = MAGMA_Z_ONE;
 	
-int color;
+  quark_unpack_args_7(quark, M, N, K, A1, LDA, A2, A3);
 
-quark_unpack_args_7(quark, M, N, K, A1, LDA, A2, A3);
-
-//if (TRACE == 1)
-  //core_event_start(QUARK_Thread_Rank(quark));
-
-blasf77_zgemm("n", "n", 
-  &M, &N, &K, &mone, A1, &LDA, A2, &LDA, &one, A3, &LDA);
-
-//if (TRACE == 1) {
-  //core_event_end(QUARK_Thread_Rank(quark));
-  //core_log_event_label(0x0000ff,QUARK_Thread_Rank(quark),0,"");
-//}
+  blasf77_zgemm("n", "n", 
+    &M, &N, &K, &mone, A1, &LDA, A2, &LDA, &one, A3, &LDA);
 
 }
 
+// task execution code
 void SCHED_panel_update(Quark* quark)
 {
-int N;
-cuDoubleComplex *A1;
-int LDA;
-int K2;
-int *IPIV;
-cuDoubleComplex *A2;
-int M;
-int K;
-cuDoubleComplex *A3;
-cuDoubleComplex *A4;
+  int N;
+  cuDoubleComplex *A1;
+  int LDA;
+  int K2;
+  int *IPIV;
+  cuDoubleComplex *A2;
+  int M;
+  int K;
+  cuDoubleComplex *A3;
+  cuDoubleComplex *A4;
 
-int ione=1;
-cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
-cuDoubleComplex one = MAGMA_Z_ONE;
+  int ione=1;
+  cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
+  cuDoubleComplex one = MAGMA_Z_ONE;
 	
-int color;
+  quark_unpack_args_10(quark, N, A1, LDA, K2, IPIV, A2, M, K, A3, A4);
 
-quark_unpack_args_10(quark, N, A1, LDA, K2, IPIV, A2, M, K, A3, A4);
+  lapackf77_zlaswp(&N, A1, &LDA, &ione, &K2, IPIV, &ione); 
 
-//if (TRACE == 1)
-  //core_event_start(QUARK_Thread_Rank(quark));
+  blasf77_ztrsm("l", "l", "n", "u",
+    &K2, &N, &one, A2, &LDA, A1, &LDA);
 
-lapackf77_zlaswp(&N, A1, &LDA, &ione, &K2, IPIV, &ione); 
+  if (M > 0) {
 
-blasf77_ztrsm("l", "l", "n", "u",
-  &K2, &N, &one, A2, &LDA, A1, &LDA);
+  blasf77_zgemm("n","n", 
+    &M, &N, &K, &mone, A3, &LDA, A1, &LDA, &one, A4, &LDA);
 
-if (M > 0) {
-
-blasf77_zgemm("n","n", 
-  &M, &N, &K, &mone, A3, &LDA, A1, &LDA, &one, A4, &LDA);
+  }
 
 }
 
-//if (TRACE == 1) {
-  //core_event_end(QUARK_Thread_Rank(quark));
-  //core_log_event_label(0x00ffff,QUARK_Thread_Rank(quark),0,"");
-//}
-
-}
-
-void SCHED_sgetrf(Quark* quark)
+// task execution code
+void SCHED_zgetrf(Quark* quark)
 {
-int M;
-int N;
-cuDoubleComplex *A;
-int LDA;
-int *IPIV;
+  int M;
+  int N;
+  cuDoubleComplex *A;
+  int LDA;
+  int *IPIV;
 
-int *iinfo;
+  int *iinfo;
 
-int info;
+  int info;
 
-quark_unpack_args_5(quark, M, N, A, LDA, IPIV);
+  quark_unpack_args_5(quark, M, N, A, LDA, IPIV);
 
-//if (TRACE == 1)
-  //core_event_start(QUARK_Thread_Rank(quark));
+  lapackf77_zgetrf(&M, &N, A, &LDA, IPIV, &info); 
 
-lapackf77_zgetrf(&M, &N, A, &LDA, IPIV, &info); 
-
-if (info > 0) {
-  iinfo[1] = iinfo[0] + info;
-}
-
-//if (TRACE == 1) {
-  //core_event_end(QUARK_Thread_Rank(quark));
-  //core_log_event_label(0x00ff00,QUARK_Thread_Rank(quark),0,"");
-//}
+  if (info > 0) {
+    iinfo[1] = iinfo[0] + info;
+  }
 
 }
 
-void SCHED_slaswp(Quark* quark)
+// task execution code
+void SCHED_zlaswp(Quark* quark)
 {
-int N;
-cuDoubleComplex *A;
-int LDA;
-int K2;
-int *IPIV;
+  int N;
+  cuDoubleComplex *A;
+  int LDA;
+  int K2;
+  int *IPIV;
 
-int ione=1;
+  int ione=1;
 
-quark_unpack_args_5(quark, N, A, LDA, K2, IPIV);
+  quark_unpack_args_5(quark, N, A, LDA, K2, IPIV);
 
-//if (TRACE == 1)
-  //core_event_start(QUARK_Thread_Rank(quark));
-
-lapackf77_zlaswp(&N, A, &LDA, &ione, &K2, IPIV, &ione); 
-
-//if (TRACE == 1) {
-  //core_event_end(QUARK_Thread_Rank(quark));
-  //core_log_event_label(0x9932cc,QUARK_Thread_Rank(quark),0,"");
-//}
+  lapackf77_zlaswp(&N, A, &LDA, &ione, &K2, IPIV, &ione); 
 
 }
 
@@ -340,9 +216,6 @@ int *info)
 
   char label[10000];
 
-  // start scheduler 
-  //Quark *quark = QUARK_New(4);
-
   ii = -1;
 
   // loop across diagonal blocks
@@ -398,7 +271,7 @@ int *info)
 
         sprintf(label, "GEMM %d %d %d", ii, jj, ll);
   
-        QUARK_Insert_Task(quark, SCHED_sgemm, 0,
+        QUARK_Insert_Task(quark, SCHED_zgemm, 0,
           sizeof(int),             &MMM,     VALUE,
           sizeof(int),             &NN,      VALUE,
           sizeof(int),             &nb,      VALUE,
@@ -424,7 +297,7 @@ int *info)
 
     sprintf(label, "GETRF %d", ii);
   
-    QUARK_Insert_Task(quark, SCHED_sgetrf, 0,
+    QUARK_Insert_Task(quark, SCHED_zgetrf, 0,
       sizeof(int),             &M,       VALUE,
       sizeof(int),             &N,       VALUE,
       sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   INOUT,
@@ -501,7 +374,7 @@ int *info)
 
         sprintf(label, "GEMM %d %d %d", ii, jj, ll);
   
-        QUARK_Insert_Task(quark, SCHED_sgemm, 0,
+        QUARK_Insert_Task(quark, SCHED_zgemm, 0,
           sizeof(int),             &MMM,     VALUE,
           sizeof(int),             &NN,      VALUE,
           sizeof(int),             &nb,      VALUE,
@@ -542,7 +415,7 @@ int *info)
 
       sprintf(label, "LASWPF %d %d", ii, jj);
   
-      QUARK_Insert_Task(quark, SCHED_slaswp, 0,
+      QUARK_Insert_Task(quark, SCHED_zlaswp, 0,
         sizeof(int),             &nb,       VALUE,
         sizeof(cuDoubleComplex)*(*m)*(*n), A(i,j),    INOUT,
         sizeof(int),             lda,         VALUE,
@@ -574,13 +447,7 @@ int *info)
         
   QUARK_Barrier(quark);
 
-  //QUARK_Delete(quark);
-
-  if (TRACE == 1) {
-    //dump_trace(4);
-  }
 }
-
 #undef A
 
 
