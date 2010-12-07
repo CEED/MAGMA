@@ -21,9 +21,9 @@
 
 #if defined(PRECISION_z) || defined(PRECISION_c)
 static inline
-double2
-operator*(double2 &u, const float &v) {
-  double2 t;
+cuDoubleComplex
+operator*(cuDoubleComplex &u, const float &v) {
+  cuDoubleComplex t;
   t.x = u.x * v;
   t.y = u.y * v;
   return t;
@@ -31,9 +31,9 @@ operator*(double2 &u, const float &v) {
 
 #if defined(PRECISION_z)
 static inline
-double2
-operator*(double2 &u, const double &v) {
-  double2 t;
+cuDoubleComplex
+operator*(cuDoubleComplex &u, const double &v) {
+  cuDoubleComplex t;
   t.x = u.x * v;
   t.y = u.y * v;
   return t;
@@ -41,19 +41,22 @@ operator*(double2 &u, const double &v) {
 #endif
 
 static inline
-double2
-operator*(const double2 &u, const double2 &v) {
-  double2 t;
-  t.x = u.x + v.x;
-  t.y = u.y + v.y;
+cuDoubleComplex
+operator*(const cuDoubleComplex &u, const cuDoubleComplex &v) {
+  cuDoubleComplex t;
+  t.x = u.x*v.x - u.y*v.y;
+  t.y = u.x*v.y + u.y*v.x;
   return t;
 }
 #endif /* defined(PRECISION_z) || defined(PRECISION_c)*/
 
-extern "C"
-int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a, 
-		 int *lda, double *e, double2 *tau, double2 *w, int *ldw,
-		 double2 *da, int *ldda, double2 *dw, int *lddw)
+extern "C" magma_int_t 
+magma_zlatrd(char *uplo, magma_int_t *n, magma_int_t *nb, 
+	     cuDoubleComplex *a, magma_int_t *lda, 
+	     double *e, cuDoubleComplex *tau, 
+	     cuDoubleComplex *w, magma_int_t *ldw,
+	     cuDoubleComplex *da, magma_int_t *ldda, 
+	     cuDoubleComplex *dw, magma_int_t *lddw)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -182,22 +185,20 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
  
     #define min(a,b)  (((a)<(b))?(a):(b))
 
-    double2 c_neg_one = MAGMA_Z_NEG_ONE;
-    double2 c_one     = MAGMA_Z_ONE;
-    double2 c_zero    = MAGMA_Z_ZERO;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
 
     #if defined(PRECISION_z) || defined(PRECISION_c)
-       double2 value = MAGMA_Z_ZERO;
+       cuDoubleComplex value = MAGMA_Z_ZERO;
     #endif
     
-    static int c__1 = 1;
+    static magma_int_t c__1 = 1;
 
-    /* System generated locals */
-    int a_dim1, a_offset, w_dim1, w_offset, i__2, i__3;
-    /* Local variables */
-    static int i__, iw;
+    magma_int_t a_dim1, a_offset, w_dim1, w_offset, i__2, i__3;
+    static magma_int_t i__, iw;
   
-    static double2 alpha;
+    static cuDoubleComplex alpha;
 
     a_dim1 = *lda;
     a_offset = 1 + a_dim1;
@@ -209,9 +210,8 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
     w -= w_offset;
     dw-= 1 + *lddw;
 
-    double2 *f = (double2 *)malloc((*n)*sizeof(double2 ));
+    cuDoubleComplex *f = (cuDoubleComplex *)malloc((*n)*sizeof(cuDoubleComplex ));
 
-    /* Function Body */
     if (*n <= 0) {
       return 0;
     }
@@ -292,74 +292,98 @@ int magma_zlatrd(char *uplo, int *n, int *nb, double2 *a,
     } else {
 
       /*  Reduce first NB columns of lower triangle */
-      for (i__ = 1; i__ <= *nb; ++i__) {
-	/* Update A(i:n,i) */
-	i__2 = *n - i__ + 1;
-	i__3 = i__ - 1;
-	blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, &a[i__ + a_dim1], lda, 
-	       &w[i__ + w_dim1], ldw, &c_one, &a[i__ + i__ * a_dim1], &c__1);
-	blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, &w[i__ + w_dim1], ldw, 
-	       &a[i__ + a_dim1], lda, &c_one, &a[i__ + i__ * a_dim1], &c__1);
+      for (i__ = 1; i__ <= *nb; ++i__) 
+	{
 
-	if (i__ < *n) {
-	  /* Generate elementary reflector H(i) to annihilate A(i+2:n,i) */
-	  i__2 = *n - i__;
-	  i__3 = i__ + 2;
-	  lapackf77_zlarfg(&i__2, &a[i__ + 1 + i__ * a_dim1], 
-		  &a[min(i__3,*n) + i__ * a_dim1], &c__1, &tau[i__]);
-	  e[i__] = MAGMA_Z_GET_X( a[i__ + 1 + i__ * a_dim1] );
-	  a[i__ + 1 + i__ * a_dim1] = c_one;
-
-	  /* Compute W(i+1:n,i) */ 
-	  // 1. Send the block reflector  A(i+1:n,i) to the GPU
-	  cublasSetVector(i__2, sizeof(double2),
-			  a + i__   + 1 + i__   * a_dim1, 1,
-                          da+(i__-1)+ 1 +(i__-1)* (*ldda), 1);	  
-	  
-	  cublasZhemv('L', i__2, c_one, da+ (i__-1)+1 + ((i__-1)+1) * (*ldda),
-		      *ldda, da+ (i__-1)+1 + (i__-1)* a_dim1, c__1, c_zero,
-		      dw+ i__ + 1 + i__ * w_dim1, c__1);
-	  
-	  // 2. Start putting the result back (asynchronously)
-	  cudaMemcpy2DAsync(w + i__ + 1 + i__ * w_dim1, w_dim1*sizeof(double2),
-			    dw+ i__ + 1 + i__ * w_dim1, w_dim1*sizeof(double2),
-			    sizeof(double2)*i__2, 1,
-			    cudaMemcpyDeviceToHost,stream);
-
+	  /* Update A(i:n,i) */
+	  i__2 = *n - i__ + 1;
 	  i__3 = i__ - 1;
-	  blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_one, &w[i__ + 1 + w_dim1], 
-		 ldw, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_zero, 
-		 &w[i__ * w_dim1 + 1], &c__1);
+          #if defined(PRECISION_z) || defined(PRECISION_c)
+	      lapackf77_zlacgv(&i__3, &w[i__ + w_dim1], ldw);
+          #endif
+	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, 
+			&a[i__ + a_dim1], lda, 
+			&w[i__ + w_dim1], ldw, &c_one, 
+			&a[i__ + i__ * a_dim1], &c__1);
+          #if defined(PRECISION_z) || defined(PRECISION_c)
+	      lapackf77_zlacgv(&i__3, &w[i__ + w_dim1], ldw);
+	      lapackf77_zlacgv(&i__3, &a[i__ + a_dim1], lda);
+          #endif
+	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, 
+			&w[i__ + w_dim1], ldw, 
+			&a[i__ + a_dim1], lda, &c_one,
+			&a[i__ + i__ * a_dim1], &c__1);
+          #if defined(PRECISION_z) || defined(PRECISION_c)
+	      lapackf77_zlacgv(&i__3, &a[i__ + a_dim1], lda);
+          #endif
 
-	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one,
-                 &a[i__ + 1 + a_dim1], lda, &w[i__ * w_dim1 + 1], &c__1,
-                 &c_zero, f, &c__1);
-	  blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_one, &a[i__ + 1 + a_dim1],
-                 lda, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_zero,
-                 &w[i__ * w_dim1 + 1], &c__1);
+	  if (i__ < *n) 
+	    {
+	      /* Generate elementary reflector H(i) to annihilate A(i+2:n,i) */
+	      i__2 = *n - i__;
+	      i__3 = i__ + 2;
+	      MAGMA_Z_ASSIGN(alpha, a[i__ + 1 + i__ * a_dim1]);
+	      lapackf77_zlarfg(&i__2, &alpha, 
+			       &a[min(i__3,*n) + i__ * a_dim1], &c__1, &tau[i__]);
+	      e[i__] = MAGMA_Z_GET_X( alpha );
+	      MAGMA_Z_SET2REAL(a[i__ + 1 + i__ * a_dim1], 1.);
 
-	  // 3. Here is where we need it
-	  cudaStreamSynchronize(stream);
+	      /* Compute W(i+1:n,i) */ 
+	      // 1. Send the block reflector  A(i+1:n,i) to the GPU
+	      cublasSetVector(i__2, sizeof(cuDoubleComplex),
+			      a + i__   + 1 + i__   * a_dim1, 1,
+			      da+(i__-1)+ 1 +(i__-1)* (*ldda), 1);	  
+	  
+	      cublasZhemv('L', i__2, c_one, da+ (i__-1)+1 + ((i__-1)+1) * (*ldda),
+			  *ldda, da+ (i__-1)+1 + (i__-1)* a_dim1, c__1, c_zero,
+			  dw+ i__ + 1 + i__ * w_dim1, c__1);
+	  
+	      // 2. Start putting the result back (asynchronously)
+	      cudaMemcpy2DAsync(w +i__+1+i__*w_dim1, w_dim1*sizeof(cuDoubleComplex),
+				dw+i__+1+i__*w_dim1, w_dim1*sizeof(cuDoubleComplex),
+				sizeof(cuDoubleComplex)*i__2, 1,
+				cudaMemcpyDeviceToHost,stream);
 
-	  if (i__3!=0)
-	    blasf77_zaxpy(&i__2, &c_one, f, &c__1, &w[i__ + 1 + i__ * w_dim1], &c__1);
+	      i__3 = i__ - 1;
+	      blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_one,
+			    &w[i__ + 1 + w_dim1], ldw, 
+			    &a[i__ + 1 + i__ * a_dim1], &c__1, &c_zero, 
+			    &w[i__ * w_dim1 + 1], &c__1);
+
+	      blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one,
+			    &a[i__ + 1 + a_dim1], lda, 
+			    &w[i__ * w_dim1 + 1], &c__1,
+			    &c_zero, f, &c__1);
+	      blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_one,
+			    &a[i__ + 1 + a_dim1], lda, 
+			    &a[i__ + 1 + i__ * a_dim1], &c__1, &c_zero,
+			    &w[i__ * w_dim1 + 1], &c__1);
+
+	      // 3. Here is where we need it
+	      cudaStreamSynchronize(stream);
+
+	      if (i__3!=0)
+		blasf77_zaxpy(&i__2, &c_one, f, &c__1, 
+			      &w[i__ + 1 + i__ * w_dim1], &c__1);
      
-	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, &w[i__ + 1 + w_dim1], 
-		 ldw, &w[i__ * w_dim1 + 1], &c__1, &c_one, 
-		 &w[i__ + 1 + i__ * w_dim1], &c__1);
-	  blasf77_zscal(&i__2, &tau[i__], &w[i__ + 1 + i__ * w_dim1], &c__1);
-#if defined(PRECISION_z) || defined(PRECISION_c)
-	  cblas_zdotc_sub(i__2, &w[i__ +1+ i__ * w_dim1], 
-				       c__1, &a[i__ +1+ i__ * a_dim1], c__1, &value);
-	  alpha = tau[i__]* -.5f * value;
-#else
-	  alpha = tau[i__]* -.5f*cblas_zdotc(i__2, &w[i__ +1+ i__ * w_dim1], 
-				       c__1, &a[i__ +1+ i__ * a_dim1], c__1);
-#endif
-	  blasf77_zaxpy(&i__2, &alpha, &a[i__ + 1 + i__ * a_dim1], &c__1, 
-			&w[i__ + 1 + i__ * w_dim1], &c__1);
+	      blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one,
+			    &w[i__ + 1 + w_dim1], ldw, 
+			    &w[i__ * w_dim1 + 1], &c__1, &c_one, 
+			    &w[i__ + 1 + i__ * w_dim1], &c__1);
+	      blasf77_zscal(&i__2, &tau[i__], &w[i__ + 1 + i__ * w_dim1], &c__1);
+              #if defined(PRECISION_z) || defined(PRECISION_c)
+	          cblas_zdotc_sub(i__2, &w[i__ +1+ i__ * w_dim1], 
+				  c__1, &a[i__ +1+ i__ * a_dim1], c__1, &value);
+		  alpha = tau[i__]* -.5f * value;
+              #else
+	          alpha = tau[i__]* -.5f*cblas_zdotc(i__2, &w[i__ +1+ i__ * w_dim1], 
+						     c__1, &a[i__ +1+ i__ * a_dim1],
+						     c__1);
+              #endif
+	      blasf77_zaxpy(&i__2, &alpha, &a[i__ + 1 + i__ * a_dim1], &c__1, 
+			    &w[i__ + 1 + i__ * w_dim1], &c__1);
+	    }
 	}
-      }
     }
 
     free(f);
