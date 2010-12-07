@@ -11,6 +11,12 @@ include ../Makefile.internal
 
 ZSRC  = zpotrf.cpp	\
         zpotrf_gpu.cpp	\
+        zpotrs_gpu.cpp	\
+        zposv_gpu.cpp	\
+        zgetrf.cpp	\
+        zgetrf_gpu.cpp 	\
+        zgetrs_gpu.cpp 	\
+        zgesv_gpu.cpp 	\
         zgeqrf.cpp	\
         zgeqrf_mc.cpp	\
         zgetrf_mc.cpp	\
@@ -21,15 +27,11 @@ ZSRC  = zpotrf.cpp	\
         zgeqrf_gpu-v2.cpp \
         zgeqrs_gpu.cpp	\
         zlarfb.cpp	\
-        zgetrf.cpp	\
-        zgetrf_gpu.cpp 	\
-        zgetrs_gpu.cpp 	\
         zgehrd.cpp 	\
         zlahru.cpp 	\
         zlahr2.cpp 	\
         zgeqlf.cpp 	\
         zgelqf.cpp 	\
-        zpotrs_gpu.cpp 	\
         \
         zhetrd.cpp 	\
         zlatrd.cpp 	\
