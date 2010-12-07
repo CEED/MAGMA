@@ -108,11 +108,11 @@ magma_zunmqr_gpu(char side, char trans,
             message related to LWORK is issued by XERBLA.
 
     TD      (input) COMPLEX_16 array that is the output (the 9th argument)
-            of magma_zgeqrf_gpu2.
+            of magma_zgeqrf_gpu.
 
     NB      (input) INTEGER
             This is the blocking size that was used in pre-computing TD, e.g.,
-            the blocking size used in magma_zgeqrf_gpu2.
+            the blocking size used in magma_zgeqrf_gpu.
 
     INFO    (output) INTEGER
             = 0:  successful exit

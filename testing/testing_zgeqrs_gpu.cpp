@@ -165,7 +165,7 @@ int main( int argc, char** argv)
         lapackf77_zlacpy( MagmaUpperLowerStr, &M, &nrhs, b, &M, r, &M );
 
         cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_A, M, d_A, lda);
-        magma_zgeqrf_gpu( M, N, d_A, lda, tau, &info);
+        magma_zgeqrf2_gpu( M, N, d_A, lda, tau, &info);
         cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_A, M, d_A, lda);
         cublasSetMatrix( M, nrhs, sizeof(cuDoubleComplex), b, M, d_b, M);
 
@@ -173,7 +173,7 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-        magma_zgeqrf_gpu2( M, N, d_A, lda, tau, d_work, &info);
+        magma_zgeqrf_gpu( M, N, d_A, lda, tau, d_work, &info);
 
         // Solve the least-squares problem min || A * X - B ||
         magma_zgeqrs_gpu( M, N, nrhs, d_A, lda, tau,

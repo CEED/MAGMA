@@ -171,7 +171,7 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
             magmablas_ztranspose2( dAT, ldda, dA, maxm, m, n );
         }
 
-    magma_zgeqrf_gpu(n, m, dAT, ldda, tau, &iinfo);
+    magma_zgeqrf2_gpu(n, m, dAT, ldda, tau, &iinfo);
 
     if (maxdim*maxdim< 2*maxm*maxn){
         magmablas_zinplace_transpose( dAT, ldda, ldda );

@@ -86,6 +86,7 @@ void *cpu_thread(void *a)
 
   }
 
+  return (void*)NULL;
 }
 
 void magma_init (int m, int n, cuDoubleComplex *a, int nthreads)

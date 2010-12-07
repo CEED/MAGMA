@@ -92,7 +92,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
             unchanged. If double2 precision factorization has been used
             (INFO.EQ.0 and ITER.LT.0, see description below), then the
             array A contains the QR factorization of A as returned by
-            function DGEQRF_GPU2.
+            function DGEQRF_GPU.
 
     LDA     (input) INTEGER
             The leading dimension of the array A.  LDA >= max(1,M).
@@ -135,7 +135,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
 
     TAU     (output) REAL array, dimension (N)
             On exit, TAU(i) contains the scalar factor of the elementary
-            reflector H(i), as returned by magma_cgeqrf_gpu2.
+            reflector H(i), as returned by magma_cgeqrf_gpu.
 
     LWORK   (input) INTEGER   
             The dimension of the array H_WORK.  LWORK >= (M+N+NB)*NB,   
@@ -154,7 +154,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     TAU_D   (output) DOUBLE REAL array, dimension (N)
             On exit, if the matrix had to be factored in double2 precision,
             TAU(i) contains the scalar factor of the elementary
-            reflector H(i), as returned by magma_zgeqrf_gpu2.
+            reflector H(i), as returned by magma_zgeqrf_gpu.
 
     LWORK_D (input) INTEGER   
             The dimension of the array H_WORK_D. LWORK_D >= (M+N+NB)*NB,   
@@ -230,7 +230,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     }
 
     // In an ideal version these variables should come from user.
-    magma_cgeqrf_gpu2(M, N, SWORK+PTSA, N, tau, d_work, INFO);
+    magma_cgeqrf_gpu(M, N, SWORK+PTSA, N, tau, d_work, INFO);
 
     if(INFO[0] !=0){
         *ITER = -3 ;
@@ -338,7 +338,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
 
     /* Single-precision iterative refinement failed to converge to a
        satisfactory solution, so we resort to double2 precision.           */
-    magma_zgeqrf_gpu2(M, N, A, N, tau_d, d_work_d, INFO);
+    magma_zgeqrf_gpu(M, N, A, N, tau_d, d_work_d, INFO);
     if( *INFO != 0 ){
         return 0;
     }

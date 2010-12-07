@@ -142,14 +142,14 @@ int main( int argc, char** argv)
       lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &M, h_R, &M );
 
       cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_A, M, d_A, lda);
-      magma_zgeqrf_gpu(M, N, d_A, lda, tau, info);
+      magma_zgeqrf2_gpu(M, N, d_A, lda, tau, info);
       cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_A, M, d_A, lda);
 
       /* ====================================================================
          Performs operation using MAGMA
 	 =================================================================== */
       start = get_current_time();
-      magma_zgeqrf_gpu2(M, N, d_A, lda, tau, d_work, info);
+      magma_zgeqrf_gpu(M, N, d_A, lda, tau, d_work, info);
       magma_zungqr_gpu(M, N, K, d_A, lda, tau, d_work, info);
       end = get_current_time();
 

@@ -136,14 +136,14 @@ int main( int argc, char** argv)
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
 
         cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_A, M, d_A, lda);
-        magma_zgeqrf_gpu( M, N, d_A, lda, tau, &info);
+        magma_zgeqrf2_gpu( M, N, d_A, lda, tau, &info);
         cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_A, M, d_A, lda);
 
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-        magma_zgeqrf_gpu( M, N, d_A, lda, tau, &info);
+        magma_zgeqrf2_gpu( M, N, d_A, lda, tau, &info);
         end = get_current_time();
 
         gpu_perf = pfactor*4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));

@@ -166,7 +166,7 @@ magma_ztsqrt_gpu(int *m, int *n,
      cudaMemcpy2DAsync(  work_a1, ldwork*sizeof(cuDoubleComplex),
 			 // a1_ref(i,i), (*lda)*sizeof(cuDoubleComplex),
 			 // the diagonal of a1 is in d_ref generated and
-			 // passed from magma_zgeqrf_gpu2
+			 // passed from magma_zgeqrf_gpu
 			 d_ref(i), ib*sizeof(cuDoubleComplex),
 			 sizeof(cuDoubleComplex)*ib, ib,
 			 cudaMemcpyDeviceToHost,stream[1]);

@@ -57,7 +57,7 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
 
     TAU     (input) COMPLEX_16 array, dimension (N)
             TAU(i) must contain the scalar factor of the elementary
-            reflector H(i), as returned by MAGMA_ZGEQRF_GPU2.
+            reflector H(i), as returned by MAGMA_ZGEQRF_GPU.
 
     C       (input/output) COMPLEX_16 array on the GPU, dimension (LDC,NRHS)
             On entry, the M-by-NRHS matrix C.
@@ -79,7 +79,7 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
             this value as the first entry of the WORK array.
 
     TD      (input) COMPLEX_16 array that is the output (the 9th argument)
-            of magma_zgeqrf_gpu2.
+            of magma_zgeqrf_gpu.
 
     INFO    (output) INTEGER
             = 0:  successful exit

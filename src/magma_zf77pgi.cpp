@@ -38,8 +38,8 @@
     #define MAGMA_ZHETRD magma_zhetrd_
     
     #define MAGMA_ZUNMQR_GPU magma_zunmqr_gpu_
-    #define MAGMA_ZGEQRF_GPU magma_zgeqrf_gpu_
-    #define MAGMA_ZGEQRF_GPU2 magma_zgeqrf_gpu2_
+    #define MAGMA_ZGEQRF_GPU  magma_zgeqrf_gpu_
+    #define MAGMA_ZGEQRF2_GPU magma_zgeqrf2_gpu_
     #define MAGMA_ZGEQRS_GPU magma_zgeqrs_gpu_
     #define MAGMA_ZGETRF_GPU magma_zgetrf_gpu_
     #define MAGMA_ZGETRS_GPU magma_zgetrs_gpu_
@@ -62,8 +62,8 @@
     #define MAGMA_ZHETRD magma_zhetrd
     
     #define MAGMA_ZUNMQR_GPU magma_zunmqr_gpu
-    #define MAGMA_ZGEQRF_GPU magma_zgeqrf_gpu
-    #define MAGMA_ZGEQRF_GPU2 magma_zgeqrf_gpu2
+    #define MAGMA_ZGEQRF_GPU  magma_zgeqrf_gpu
+    #define MAGMA_ZGEQRF2_GPU magma_zgeqrf2_gpu
     #define MAGMA_ZGEQRS_GPU magma_zgeqrs_gpu
     #define MAGMA_ZGETRF_GPU magma_zgetrf_gpu
     #define MAGMA_ZGETRS_GPU magma_zgetrs_gpu
@@ -126,11 +126,11 @@ void MAGMA_ZHETRD( char *uplo, magma_int_t *n, double2 *A, magma_int_t *lda, dou
 void MAGMA_ZUNMQR_GPU(char *side, char *trans, magma_int_t *m, magma_int_t *n, magma_int_t *k, double2 *a, magma_int_t *lda, double2 *tau, double2 *c, magma_int_t *ldc, double2 *work, magma_int_t *lwork, double2 *td, magma_int_t *nb, magma_int_t *info)
 { magma_zunmqr_gpu(side[0], trans[0], *m, *n, *k, a, *lda, tau, c, *ldc, work, *lwork, td, *nb, info); }
 
-void MAGMA_ZGEQRF_GPU( magma_int_t *m, magma_int_t *n, double2 *A, magma_int_t *lda, double2 *tau, magma_int_t *info)
-{ magma_zgeqrf_gpu( *m, *n, A, *lda, tau, info); }
+void MAGMA_ZGEQRF2_GPU( magma_int_t *m, magma_int_t *n, double2 *A, magma_int_t *lda, double2 *tau, magma_int_t *info)
+{ magma_zgeqrf2_gpu( *m, *n, A, *lda, tau, info); }
 
-void MAGMA_ZGEQRF_GPU2(magma_int_t *m, magma_int_t *n, double2 *A, magma_int_t *lda, double2 *tau, double2 *dwork, magma_int_t *info)
-{ magma_zgeqrf_gpu2(*m, *n, A, *lda, tau, dwork, info); }
+void MAGMA_ZGEQRF_GPU(magma_int_t *m, magma_int_t *n, double2 *A, magma_int_t *lda, double2 *tau, double2 *dwork, magma_int_t *info)
+{ magma_zgeqrf_gpu(*m, *n, A, *lda, tau, dwork, info); }
 
 void MAGMA_ZGEQRS_GPU( magma_int_t *m, magma_int_t *n, magma_int_t *nrhs, double2 *A, magma_int_t *lda, double2 *tau, double2 *c, magma_int_t *ldc, double2 *work, magma_int_t *lwork, double2 *td, magma_int_t *info)
 { magma_zgeqrs_gpu( *m, *n, *nrhs, A, *lda, tau, c, *ldc, work, *lwork, td, info); }
