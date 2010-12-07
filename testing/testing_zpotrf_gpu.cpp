@@ -76,7 +76,7 @@ int main( int argc, char** argv)
     printf("========================================================\n");
     for(i=0; i<10; i++){
 	N   = size[i];
-	lda = size[9]; 
+	lda = N; 
 	n2  = N*N;
         flops = FLOPS( (double)N ) / 1000000;
 	
@@ -99,10 +99,10 @@ int main( int argc, char** argv)
 	/* ====================================================================
 	   Performs operation using MAGMA 
 	   =================================================================== */
-	cublasSetMatrix( N, N, sizeof(double2), h_A, N, d_A, ldda);
+	cublasSetMatrix( N, N, sizeof(double2), h_A, lda, d_A, ldda);
 	magma_zpotrf_gpu(uplo[0], N, d_A, ldda, &info);
 
-	cublasSetMatrix( N, N, sizeof(double2), h_A, N, d_A, ldda);
+	cublasSetMatrix( N, N, sizeof(double2), h_A, lda, d_A, ldda);
       	start = get_current_time();
 	magma_zpotrf_gpu(uplo[0], N, d_A, ldda, &info);
 	end = get_current_time();
@@ -115,7 +115,7 @@ int main( int argc, char** argv)
 	   Performs operation using LAPACK 
 	   =================================================================== */
 	start = get_current_time();
-	lapackf77_zpotrf(uplo, &N, h_A, &N, &info);
+	lapackf77_zpotrf(uplo, &N, h_A, &lda, &info);
 	end = get_current_time();
 	if (info < 0)  
 	    printf("Argument %d of zpotrf had an illegal value.\n", -info);
@@ -125,12 +125,12 @@ int main( int argc, char** argv)
 	/* =====================================================================
 	   Check the result compared to LAPACK
 	   =================================================================== */
-	cublasGetMatrix( N, N, sizeof(double2), d_A, ldda, h_R, N);
-	matnorm = lapackf77_zlange("f", &N, &N, h_A, &N, work);
+	cublasGetMatrix( N, N, sizeof(double2), d_A, ldda, h_R, lda);
+	matnorm = lapackf77_zlange("f", &N, &N, h_A, &lda, work);
 	blasf77_zaxpy(&n2, &mzone, h_A, &ione, h_R, &ione);
 	printf("%5d    %6.2f         %6.2f        %e\n", 
 	       size[i], cpu_perf, gpu_perf,
-	       lapackf77_zlange("f", &N, &N, h_R, &N, work) / matnorm);
+	       lapackf77_zlange("f", &N, &N, h_R, &lda, work) / matnorm);
 	
 	if (argc != 1)
 	    break;
