@@ -23,7 +23,7 @@
 // === End defining what BLAS to use =======================================
 
 extern "C" magma_int_t
-magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs, 
+magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs, 
                  cuDoubleComplex *dA, magma_int_t ldda,
 		 magma_int_t *ipiv, 
                  cuDoubleComplex *dB, magma_int_t lddb, 
@@ -87,23 +87,17 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
 
     cuDoubleComplex c_one = MAGMA_Z_ONE;
     cuDoubleComplex *work = NULL;
-    char            trans_[2] = {trans, 0};
-    long int    notran = lapackf77_lsame(trans_, "N");
     magma_int_t i1, i2, inc;
 
     *info = 0;
-    if ( (! notran) && 
-         (! lapackf77_lsame(trans_, "T")) && 
-         (! lapackf77_lsame(trans_, "C")) ) {
+    if (n < 0) {
         *info = -1;
-    } else if (n < 0) {
-        *info = -2;
     } else if (nrhs < 0) {
-        *info = -3;
+        *info = -2;
     } else if (ldda < max(1,n)) {
-        *info = -5;
+        *info = -4;
     } else if (lddb < max(1,n)) {
-        *info = -8;
+        *info = -7;
     }
     if (*info != 0) {
         return 0;
@@ -119,29 +113,20 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
         return -7;
     }
       
-    i1 = 1;
-    i2 = n;
-    if (notran) {
-	inc = 1;
+    magma_zgetrf_gpu( n, n, dA, ldda, ipiv, info);
 
-        /* Solve A * X = B. */
-        cublasGetMatrix( n, nrhs, sizeof(cuDoubleComplex), dB, lddb, work, n);
-        lapackf77_zlaswp(&nrhs, work, &n, &i1, &i2, ipiv, &inc);
-        cublasSetMatrix( n, nrhs, sizeof(cuDoubleComplex), work, n, dB, lddb);
+    /* Solve A * X = B. */
+    i1  = 1;
+    i2  = n;
+    inc = 1;
 
-        cublasZtrsm(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit,    n, nrhs, c_one, dA, ldda, dB, lddb );
-        cublasZtrsm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb );
-    } else {
-	inc = -1;
+    cublasGetMatrix( n, nrhs, sizeof(cuDoubleComplex), dB, lddb, work, n);
+    lapackf77_zlaswp(&nrhs, work, &n, &i1, &i2, ipiv, &inc);
+    cublasSetMatrix( n, nrhs, sizeof(cuDoubleComplex), work, n, dB, lddb);
+    
+    cublasZtrsm(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit,    n, nrhs, c_one, dA, ldda, dB, lddb );
+    cublasZtrsm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb );
 
-        /* Solve A' * X = B. */
-        cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb );
-        cublasZtrsm(MagmaLeft, MagmaLower, MagmaConjTrans, MagmaUnit,    n, nrhs, c_one, dA, ldda, dB, lddb );
-
-        cublasGetMatrix( n, nrhs, sizeof(cuDoubleComplex), dB, lddb, work, n );
-        lapackf77_zlaswp(&nrhs, work, &n, &i1, &i2, ipiv, &inc);
-        cublasSetMatrix( n, nrhs, sizeof(cuDoubleComplex), work, n, dB, lddb);
-    }
     free(work);
 
     return 0;

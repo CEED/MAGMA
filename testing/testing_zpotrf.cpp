@@ -38,15 +38,15 @@ int main( int argc, char** argv)
 {
     TESTING_CUDA_INIT();
 
-    TimeStruct  start, end;
-    double      flops, gpu_perf, cpu_perf;
-    double2    *h_A, *h_R;
-    magma_int_t N=0, n2, lda;
-    magma_int_t size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10240};
+    TimeStruct       start, end;
+    double           flops, gpu_perf, cpu_perf;
+    cuDoubleComplex *h_A, *h_R;
+    magma_int_t      N=0, n2, lda;
+    magma_int_t      size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10240};
 
     magma_int_t  i, info;
     const char  *uplo     = MagmaLowerStr;
-    double2      mzone    = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex      mzone    = MAGMA_Z_NEG_ONE;
     magma_int_t  ione     = 1;
     magma_int_t  ISEED[4] = {0,0,0,1};
     double       work[1], matnorm;
@@ -66,8 +66,8 @@ int main( int argc, char** argv)
 
     /* Allocate host memory for the matrix */
     n2 = size[9] * size[9];
-    TESTING_MALLOC(    h_A, double2, n2);
-    TESTING_HOSTALLOC( h_R, double2, n2);
+    TESTING_MALLOC(    h_A, cuDoubleComplex, n2);
+    TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2);
 
     printf("\n\n");
     printf("  N    CPU GFlop/s    GPU GFlop/s    ||R||_F / ||A||_F\n");
@@ -75,7 +75,7 @@ int main( int argc, char** argv)
     for(i=0; i<10; i++){
         N     = size[i];
         lda   = N;
-        n2    = N*N;
+        n2    = lda*N;
         flops = FLOPS( (double)N ) / 1000000;
 
         /* ====================================================================

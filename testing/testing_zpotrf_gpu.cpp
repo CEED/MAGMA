@@ -40,14 +40,14 @@ int main( int argc, char** argv)
 
     TimeStruct  start, end;
     double      flops, gpu_perf, cpu_perf;
-    double2     *h_A, *h_R;
-    double2     *d_A;
+    cuDoubleComplex     *h_A, *h_R;
+    cuDoubleComplex     *d_A;
     magma_int_t N = 0, n2, lda, ldda;
     magma_int_t size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10240};
     
     magma_int_t i, info;
     const char *uplo     = MagmaUpperStr;
-    double2     mzone    = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex     mzone    = MAGMA_Z_NEG_ONE;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     double      work[1], matnorm;
@@ -67,9 +67,9 @@ int main( int argc, char** argv)
 
     /* Allocate host memory for the matrix */
     n2 = size[9] * size[9];
-    TESTING_MALLOC(    h_A, double2, n2);
-    TESTING_HOSTALLOC( h_R, double2, n2);
-    TESTING_DEVALLOC(  d_A, double2, n2+32*size[9] );
+    TESTING_MALLOC(    h_A, cuDoubleComplex, n2);
+    TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2);
+    TESTING_DEVALLOC(  d_A, cuDoubleComplex, n2+32*size[9] );
 
     printf("\n\n");
     printf("  N    CPU GFlop/s    GPU GFlop/s    ||R||_F / ||A||_F\n");
@@ -77,7 +77,7 @@ int main( int argc, char** argv)
     for(i=0; i<10; i++){
 	N   = size[i];
 	lda = N; 
-	n2  = N*N;
+	n2  = lda*N;
         flops = FLOPS( (double)N ) / 1000000;
 	
 	ldda = (N/32)*32;
@@ -99,10 +99,10 @@ int main( int argc, char** argv)
 	/* ====================================================================
 	   Performs operation using MAGMA 
 	   =================================================================== */
-	cublasSetMatrix( N, N, sizeof(double2), h_A, lda, d_A, ldda);
+	cublasSetMatrix( N, N, sizeof(cuDoubleComplex), h_A, lda, d_A, ldda);
 	magma_zpotrf_gpu(uplo[0], N, d_A, ldda, &info);
 
-	cublasSetMatrix( N, N, sizeof(double2), h_A, lda, d_A, ldda);
+	cublasSetMatrix( N, N, sizeof(cuDoubleComplex), h_A, lda, d_A, ldda);
       	start = get_current_time();
 	magma_zpotrf_gpu(uplo[0], N, d_A, ldda, &info);
 	end = get_current_time();
@@ -125,7 +125,7 @@ int main( int argc, char** argv)
 	/* =====================================================================
 	   Check the result compared to LAPACK
 	   =================================================================== */
-	cublasGetMatrix( N, N, sizeof(double2), d_A, ldda, h_R, lda);
+	cublasGetMatrix( N, N, sizeof(cuDoubleComplex), d_A, ldda, h_R, lda);
 	matnorm = lapackf77_zlange("f", &N, &N, h_A, &lda, work);
 	blasf77_zaxpy(&n2, &mzone, h_A, &ione, h_R, &ione);
 	printf("%5d    %6.2f         %6.2f        %e\n", 
