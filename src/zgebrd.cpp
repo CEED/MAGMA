@@ -140,7 +140,6 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     where d and e denote diagonal and off-diagonal elements of B, vi
     denotes an element of the vector defining H(i), and ui an element of
     the vector defining G(i).
-
     =====================================================================    */
 
     #define max(a,b) ((a) >= (b) ? (a) : (b))
@@ -149,23 +148,19 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
 
-    /* System generated locals */
-    int  ncol, nrow, jmax;
-    /* Local variables */
-    static int i, j, nx;
+    magma_int_t  ncol, nrow, jmax;
+
+    static magma_int_t i, j, nx;
     static cuDoubleComplex ws;
-    static int iinfo;
+    static magma_int_t iinfo;
 
-    static int minmn;
-    static int ldwrkx, ldwrky, lwkopt;
-    static long int lquery;
+    magma_int_t minmn;
+    magma_int_t ldwrkx, ldwrky, lwkopt;
+    magma_int_t lquery;
 
-    /* Function Body */
     *info = 0;
 
-    //TimeStruct start, end;
-
-    int nb = magma_get_zgebrd_nb(n), ldda = m;
+    magma_int_t nb = magma_get_zgebrd_nb(n), ldda = m;
     cuDoubleComplex *dwork = da + (n)*ldda;
 
     lwkopt = (m + n) * nb;
@@ -198,8 +193,6 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     MAGMA_Z_SET2REAL( ws, max(m,n) );
     ldwrkx = m;
     ldwrky = n;
-
-    // cuDoubleComplex nflops = 0.f;
 
     /* Set the block/unblock crossover point NX. */
     nx = 128;
@@ -263,7 +256,6 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
             for (j = i; j < jmax; ++j) {
                 *A(j, j  ) = MAGMA_Z_MAKE( d[j], 0. );
                 *A(j, j+1) = MAGMA_Z_MAKE( e[j], 0. );
-                /* L10: */
             }
         } else {
             jmax = i + nb;
@@ -273,14 +265,12 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
                 /* L20: */
             }
         }
-
-        /* L30: */
     }
 
     /* Use unblocked code to reduce the remainder of the matrix */
     nrow = m - i;
     ncol = n - i;
-    // TTT
+
     if ( 0 < (n-nx) )
         cublasGetMatrix(nrow, ncol, sizeof(cuDoubleComplex),
                         dA(i, i), ldda,
@@ -291,8 +281,6 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
                       tauq+i, taup+i, work, &iinfo);
     work[0] = ws;
     return 0;
-
-    /* End of SGEBRD */
 } /* zgebrd_ */
 
 #undef max

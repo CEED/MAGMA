@@ -130,8 +130,8 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
 
     #define min(a,b) ((a) <= (b) ? (a) : (b))
 
-    cuDoubleComplex c_zero = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    cuDoubleComplex c_one     = MAGMA_Z_ONE;
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     magma_int_t ldda = n;

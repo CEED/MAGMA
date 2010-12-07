@@ -471,6 +471,4 @@ L50:
 
     MAGMA_Z_SET2REAL(work[1], (double) maxwrk);
     return 0;
-
-    /* End of MAGMA_ZGEEV */
 } /* magma_zgeev */
