@@ -27,10 +27,10 @@
 #define min(a,b)  (((a)<(b))?(a):(b))
 #endif
 
+// block size
 int EN_BEE;
 
-int TRACE;
-
+// QUARK scheduler intialized here
 Quark *quark;
 
 double get_LU_error(int M, int N, cuDoubleComplex *A, int lda, cuDoubleComplex *LU, int *IPIV){
@@ -71,19 +71,11 @@ double get_LU_error(int M, int N, cuDoubleComplex *A, int lda, cuDoubleComplex *
   return residual / (matnorm * N);
 }
 
-
-
-
-
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing sgetrf
+   -- Testing zgetrf_mc
 */
 int main( int argc, char** argv) 
 {
-    ////cuInit( 0 );
-    ////cublasInit( );
-    ////printout_devices( );
-
     cuDoubleComplex *h_A, *h_A2, *h_R, *h_work;
     cuDoubleComplex *d_A;
     int *ipiv, *dipiv;
@@ -95,7 +87,6 @@ int main( int argc, char** argv)
     int N=0, n2, lda, M=0;
     int size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
     
-    ////cublasStatus status;
     int i, j, info[1];
     int ione     = 1;
     int ISEED[4] = {0,0,0,1};
@@ -103,8 +94,6 @@ int main( int argc, char** argv)
     int cores = 4;
 
     EN_BEE = 128;
-
-    TRACE = 0;
 
     int loop = argc;
 
@@ -114,15 +103,13 @@ int main( int argc, char** argv)
           N = atoi(argv[++i]);
         else if (strcmp("-M", argv[i])==0)
           M = atoi(argv[++i]);
-        else if (strcmp("-T", argv[i])==0)
-          TRACE = atoi(argv[++i]);
         else if (strcmp("-C", argv[i])==0)
           cores = atoi(argv[++i]);
         else if (strcmp("-B", argv[i])==0)
           EN_BEE = atoi(argv[++i]);
       }
       if ((M>0 && N>0) || (M==0 && N==0)) {
-        printf("  testing_sgetrf_gpu -M %d -N %d -B %d -T %d\n\n", M, N, EN_BEE, TRACE);
+        printf("  testing_sgetrf_gpu -M %d -N %d -B %d\n\n", M, N, EN_BEE);
         if (M==0 && N==0) {
           M = N = size[9];
           loop = 1;
@@ -138,55 +125,25 @@ int main( int argc, char** argv)
       M = N = size[9];
     }
 
-
-    /* Initialize CUBLAS */
-    ////status = cublasInit();
-    ////if (status != CUBLAS_STATUS_SUCCESS) {
-        ////fprintf (stderr, "!!!! CUBLAS initialization error\n");
-    ////}
-
     n2 = M * N;
 
     int min_mn = min(M, N);
 
     /* Allocate host memory for the matrix */
-    h_A = (cuDoubleComplex*)malloc(n2 * sizeof(h_A[0]));
-    if (h_A == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (A)\n");
-    }
-
     h_A2 = (cuDoubleComplex*)malloc(n2 * sizeof(h_A2[0]));
     if (h_A2 == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (A2)\n");
+        fprintf (stderr, "!!!! host memory allocation error (h_A2)\n");
+    }
+
+    h_A = (cuDoubleComplex*)malloc(n2 * sizeof(h_A[0]));
+    if (h_A == 0) {
+        fprintf (stderr, "!!!! host memory allocation error (h_A)\n");
     }
 
     ipiv = (int*)malloc(min_mn * sizeof(int));
     if (ipiv == 0) {
       fprintf (stderr, "!!!! host memory allocation error (ipiv)\n");
     }
-
-    ////status = cublasAlloc(size[9],sizeof(int), (void**)&dipiv);
-    ////if (status != CUBLAS_STATUS_SUCCESS) {
-      ////fprintf (stderr, "!!!! device memory allocation error (dipiv)\n");
-    ////}
-  
-    ////cudaMallocHost( (void**)&h_R,  n2*sizeof(float) );
-    ////if (h_R == 0) {
-        ////fprintf (stderr, "!!!! host memory allocation error (R)\n");
-    ////}
-
-    ////int maxnb = magma_get_sgetrf_nb(size[9]);
-    ////int lwork = size[9]*maxnb;
-    ////status = cublasAlloc((size[9]+32)*(size[9]+32) + 32*maxnb + 
-      ////lwork+2*maxnb*maxnb,sizeof(float), (void**)&d_A);
-    ////if (status != CUBLAS_STATUS_SUCCESS) {
-      ////fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
-    ////}
-
-    ////cudaMallocHost( (void**)&h_work, (lwork+32*maxnb)*sizeof(float) );
-    ////if (h_work == 0) {
-      ////fprintf (stderr, "!!!! host memory allocation error (work)\n");
-    ////}
 
     printf("\n\n");
     printf("  M    N   magma_sgetrf_mc GFlop/s     ||PA-LU|| / (||A||*N)\n");
@@ -202,59 +159,24 @@ int main( int argc, char** argv)
       lapackf77_zlarnv( &ione, ISEED, &n2, h_A2 );
       lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A2, &M, h_A, &M );
 
-      ////cublasSetMatrix( N, N, sizeof(float), h_A, N, d_A, lda);
-      ////magma_sgetrf_gpu2(&N, &N, d_A, &lda, ipiv, dipiv, h_work, info);
-
-      /* =====================================================================
-         Performs operation using LAPACK
-         =================================================================== */
-      start = get_current_time();
-      //sgetrf_(&M, &N, h_A, &M, ipiv, info);
-      end = get_current_time();
-
-      //float error = get_LU_error(M, N, h_A2, &M, h_A, ipiv);
-
-      if (info[0] < 0)
-        printf("Argument %d of sgetrf had an illegal value.\n", -info[0]);
-
-      cpu_perf = 2.*N*N*N/(3.*1000000*GetTimerValue(start,end));
-      // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
-      
-      //for(j=0; j<n2; j++)
-        //h_A[j] = h_R[j];
-
       /* =====================================================================
          Performs operation using multi-core
          =================================================================== */
 
-quark = QUARK_New(cores);
+	  // initialize scheduler
+      quark = QUARK_New(cores);
 
       start = get_current_time();
       magma_zgetrf_mc(&M, &N, h_A2, &M, ipiv, info);
       end = get_current_time();
 
-QUARK_Delete(quark);
+      // shut down scheduler
+      QUARK_Delete(quark);
 
       if (info[0] < 0)      
         printf("Argument %d of magma_sgeqrf_mc had an illegal value.\n", -info[0]);
 
       cpu2_perf = 2.*M*N*min(M,N)/(3.*1000000*GetTimerValue(start,end));
-  
-      /* ====================================================================
-         Performs operation using MAGMA
-      =================================================================== */
-      ////cublasSetMatrix( N, N, sizeof(float), h_A, N, d_A, lda);
-      ////start = get_current_time();
-      ////magma_sgetrf_gpu2(&N, &N, d_A, &lda, ipiv, dipiv, h_work, info);
-      ////end = get_current_time();
-      ////cublasGetMatrix( N, N, sizeof(float), d_A, lda, h_R, N);
-
-      ////gpu_perf = 2.*N*N*N/(3.*1000000*GetTimerValue(start,end));
-      // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
-     
-      /* =====================================================================
-      Check the factorization
-      =================================================================== */
   
       double error = get_LU_error(M, N, h_A, M, h_A2, ipiv);
 
@@ -266,17 +188,7 @@ QUARK_Delete(quark);
     }
 
     /* Memory clean up */
-    free(h_A);
     free(h_A2);
+    free(h_A);
     free(ipiv);
-    //cublasFree(h_work);
-    //cublasFree(h_R);
-    //cublasFree(d_A);
-    //cublasFree(dipiv);
-
-    /* Shutdown */
-    //status = cublasShutdown();
-    //if (status != CUBLAS_STATUS_SUCCESS) {
-        //fprintf (stderr, "!!!! shutdown error (A)\n");
-    //}
 }
