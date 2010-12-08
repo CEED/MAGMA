@@ -11,280 +11,227 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
 #include "magma.h"
-#include "magmablas.h"
+#include "testings.h"
 
 #define PRECISION_z
+// Flops formula
+#define FMULS_POTRF(n)       ((n) * (1.0 / 6.0 * (n) + 0.5) * (n))
+#define FADDS_POTRF(n)       ((n) * (1.0 / 6.0 * (n) )      * (n))
+#define FMULS_POTRS(n, nrhs) ((nrhs) * (n) * ((n) + 1))
+#define FADDS_POTRS(n, nrhs) ((nrhs) * (n) * ((n) - 1))
+#if defined(PRECISION_z) || defined(PRECISION_c)
+#define FLOPS_POTRF(n)       ( 6.*FMULS_POTRF(n)       + 2.*FADDS_POTRF(n)       )
+#define FLOPS_POTRS(n, nrhs) ( 6.*FMULS_POTRS(n, nrhs) + 2.*FADDS_POTRS(n, nrhs) )
+#else
+#define FLOPS_POTRF(n)       (    FMULS_POTRF(n)       +    FADDS_POTRF(n)       )
+#define FLOPS_POTRS(n, nrhs) (    FMULS_POTRS(n, nrhs) +    FADDS_POTRS(n, nrhs) )
+#endif
 
 int main(int argc, char **argv)
 {
 #if defined(PRECISION_z) && (GPUSHMEM < 200)
-  fprintf(stderr, "This functionnality is not available in MAGMA for this precisions actually\n");
-  return EXIT_SUCCESS;
+    fprintf(stderr, "This functionnality is not available in MAGMA for this precisions actually\n");
+    return EXIT_SUCCESS;
 #else
-  printf("Iterative Refinement- Cholesky \n");
-  printf("\n");
-  cuInit( 0 );
-  cublasInit( );
+    TESTING_CUDA_INIT();
+
+    TimeStruct  start, end;
+    double      flopsF, flopsS, gpu_perf;
+    double      gpu_perfdf, gpu_perfds;
+    double      gpu_perfsf, gpu_perfss;
+    double      Rnorm, Anorm;
+    cuDoubleComplex zone  = MAGMA_Z_ONE;
+    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex *h_A, *h_B, *h_X, *h_R;
+    cuDoubleComplex *d_A, *d_B, *d_X, *d_WORKD;
+    cuFloatComplex  *d_As, *d_Bs, *d_WORKS;
+    double          *h_workd;
+    magma_int_t lda, ldb, ldx;
+    magma_int_t i, iter, info, size;
+    magma_int_t N;
+    magma_int_t ione     = 1;
+    magma_int_t NRHS     = 1;
+    magma_int_t ISEED[4] = {0,0,0,1};
+    magma_int_t sizetest[10] = {1024,2048,3072,4032,5184,6016,7040,7520,8064,8192};
+    const char *uplo = MagmaUpperStr;
     
-  printout_devices( );
-
-
-  printf("\nUsage:\n\t\t ./testing_dsposv -N 1024");
-  printf("\n\nEpsilon(CuDoubleComplex): %10.20lf \nEpsilon(Single): %10.20lf\n", 
-	 lapackf77_dlamch("Epsilon"), lapackf77_slamch("Epsilon"));
-
-  TimeStruct start, end;
-
-  int i ;
-  int startN= 1024 ;
-  int count = 8;
-  int step = 1024;  
-  int N = count * step ;
-  int NRHS=1 ;
-  int once  = 0 ;  
-
-  N =startN+(count-1) * step ;
-
-  if( argc == 3) { 
-      N  = atoi( argv[2]);
-      once = N ; 
-  }
-  int sizetest[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
-
-  printf("  N   DP-Factor  DP-Solve  SP-Factor  SP-Solve  MP-Solve  ||b-Ax||/||A||  NumIter\n");
-  printf("==================================================================================\n");
-
-  int size; 
-  int LDA, LDB, LDX;
-  int ITER, INFO;
-
-  LDB = LDX = LDA = N ;
-
-  int status ;
-   
-  cuDoubleComplex *M_WORK;
-  cuFloatComplex  *M_SWORK;
-  cuDoubleComplex *As, *Bs, *Xs;
-  cuDoubleComplex *res_ ; 
-  cuDoubleComplex *CACHE ;  
-  int CACHE_L  = 10000 ;
-  cuDoubleComplex *d_A , * d_B , *d_X;
-  int ione     = 1;
-  int ISEED[4] = {0,0,0,1};
-
-  size =N*N;
-  size+= N*NRHS;
-  status = cublasAlloc( size, sizeof(cuFloatComplex), (void**)&M_SWORK ) ;
-  if (status != CUBLAS_STATUS_SUCCESS) {
-    fprintf (stderr, "!!!! device memory allocation error (M_SWORK)\n");
-    goto FREE2;
-  }
-
-  size= N*NRHS;
-  status = cublasAlloc( size, sizeof(cuDoubleComplex), (void**)&M_WORK ) ;
-  if (status != CUBLAS_STATUS_SUCCESS) {
-    fprintf (stderr, "!!!! device memory allocation error (M_WORK)\n");
-    goto FREE2_1;
-  }
-  
-  size =LDA * N ;
-  As = ( cuDoubleComplex *) malloc ( sizeof ( cuDoubleComplex ) * size);
-  if( As == NULL ){
-    printf("Allocation A\n");
-    goto FREE3;
-  }
-
-  size = NRHS * N ;
-  Bs = ( cuDoubleComplex *) malloc ( sizeof ( cuDoubleComplex ) * size);
-  if( Bs == NULL ){
-    printf("Allocation A\n");
-    goto FREE4;
-  }
-
-  Xs = ( cuDoubleComplex *) malloc ( sizeof ( cuDoubleComplex ) * size);
-  if( Xs == NULL ){
-    printf("Allocation A\n");
-    goto FREE5;
-  }
- 
-  size = N*NRHS ;
-  res_ = ( cuDoubleComplex *) malloc ( sizeof(cuDoubleComplex)*size);
-  if( res_ == NULL ){
-    printf("Allocation A\n");
-    goto FREE6;
-  }
-
-  size = CACHE_L * CACHE_L ;
-  CACHE = ( cuDoubleComplex *) malloc ( sizeof( cuDoubleComplex) * size ) ; 
-  if( CACHE == NULL ){
-    printf("Allocation A\n");
-    goto FREE7;
-  }
-  
-  size = N * N ;
-  status = cublasAlloc( size, sizeof(cuDoubleComplex), (void**)&d_A ) ;
-  if (status != CUBLAS_STATUS_SUCCESS) {
-    fprintf (stderr, "!!!! device memory allocation error (dipiv)\n");
-    goto FREE8;
-  }
-
-  size = LDB * NRHS ;
-  d_B = ( cuDoubleComplex *) malloc ( sizeof ( cuDoubleComplex ) * size);
-  status = cublasAlloc( size, sizeof(cuDoubleComplex), (void**)&d_B ) ;
-  if (status != CUBLAS_STATUS_SUCCESS) {
-    fprintf (stderr, "!!!! device memory allocation error (dipiv)\n");
-    goto FREE9;
-  }
-
-  d_X = ( cuDoubleComplex *) malloc ( sizeof ( cuDoubleComplex ) * size);
-  status = cublasAlloc( size, sizeof(cuDoubleComplex), (void**)&d_X ) ;
-  if (status != CUBLAS_STATUS_SUCCESS) {
-    fprintf (stderr, "!!!! device memory allocation error (dipiv)\n");
-    goto FREE10;
-  }
-
-  for(i=0;i<count;i++){
-      NRHS =  1 ; 
-      N = step*(i)+startN;
-      if( once == 0 ) 
-          N = sizetest[i] ;
-      else N  = once ;
-  
-      LDB = LDX = LDA = N ;
-
-      size = LDA * N ;
-      /* Initialize the matrix */
-      lapackf77_zlarnv( &ione, ISEED, &size, As );
-      /* Symmetrize and increase the diagonal */
-      { 
-        int i, j;
-        for(i=0; i<N; i++) {
-          As[i*LDA+i] = MAGMA_Z_MAKE( (MAGMA_Z_GET_X(As[i*LDA+i]) + 2000.), 0. );
-          
-          for(j=0; j<i; j++)
-            As[i*LDA+j] = As[j*LDA+i];
-        }
-      }
-      
-      size = LDB * NRHS ;
-      lapackf77_zlarnv( &ione, ISEED, &size, Bs );
-      
-      cublasSetMatrix( N, N,    sizeof( cuDoubleComplex ), As, N, d_A, N ) ;
-      cublasSetMatrix( N, NRHS, sizeof( cuDoubleComplex ), Bs, N, d_B, N ) ;
+    if (argc != 1){
+	for(i = 1; i<argc; i++){	
+	    if (strcmp("-N", argv[i])==0)
+		N = atoi(argv[++i]);
+	}
+	if (N>0) sizetest[0] = sizetest[9] = N;
+	else exit(1);
+    }
+    else {
+	printf("\nUsage: \n");
+	printf("  testing_zcposv_gpu -N %d\n\n", 1024);
+    }
+    printf("Epsilon(double): %8.6e\n"
+	   "Epsilon(single): %8.6e\n\n", 
+	   lapackf77_dlamch("Epsilon"), lapackf77_slamch("Epsilon") );
     
-      double perf ;  
+    N = sizetest[9];
+    ldb = ldx = lda = N ;
+    TESTING_MALLOC( h_A, cuDoubleComplex, lda*N    );
+    TESTING_MALLOC( h_B, cuDoubleComplex, ldb*NRHS );
+    TESTING_MALLOC( h_X, cuDoubleComplex, ldx*NRHS );
+    TESTING_MALLOC( h_R, cuDoubleComplex, ldx*NRHS );
+    TESTING_MALLOC( h_workd, double, N );
+    
+    TESTING_DEVALLOC( d_A,     cuDoubleComplex, lda*N      );
+    TESTING_DEVALLOC( d_B,     cuDoubleComplex, ldb*NRHS   );
+    TESTING_DEVALLOC( d_X,     cuDoubleComplex, ldx*NRHS   );
+    TESTING_DEVALLOC( d_WORKS, cuFloatComplex,  N*(N+NRHS) );
+    TESTING_DEVALLOC( d_WORKD, cuDoubleComplex, N*NRHS     );
+  
+    printf("  N   DP-Factor  DP-Solve  SP-Factor  SP-Solve  MP-Solve  ||b-Ax||/||A||  NumIter\n");
+    printf("==================================================================================\n");
+    for(i=0; i<10; i++){
+	N = sizetest[i] ;
+	
+	flopsF = FLOPS_POTRF( (double)N ) / 1000000;
+	flopsS = flopsF + ( FLOPS_POTRS( (double)N, (double)NRHS ) / 1000000 );
+	ldb = ldx = lda = N;
+	
+	/* Initialize the matrix */
+	size = lda * N ;
+	lapackf77_zlarnv( &ione, ISEED, &size, h_A );
+	/* Symmetrize and increase the diagonal */
+	{
+	    magma_int_t i, j;
+	    for(i=0; i<N; i++) {
+		MAGMA_Z_SET2REAL( h_A[i*lda+i], ( MAGMA_Z_GET_X(h_A[i*lda+i]) + 1.*N ) );
+		for(j=0; j<i; j++)
+		    h_A[i*lda+j] = cuConj(h_A[j*lda+i]);
+	    }
+	}
+	
+	size = ldb * NRHS ;
+	lapackf77_zlarnv( &ione, ISEED, &size, h_B );
+      
+	cublasSetMatrix( N, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, lda );
+	cublasSetMatrix( N, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, ldb );
+    
+	printf("%5d  ", N); fflush(stdout);
 
-      printf("%5d  ", N); 
-      fflush(stdout);
+	//=====================================================================
+	//              Mixed Precision Iterative Refinement - GPU 
+	//=====================================================================
+	start = get_current_time();
+	magma_zcposv_gpu(uplo[0], N, NRHS, d_A, lda, d_B, ldb, d_X, ldx, 
+			 d_WORKD, d_WORKS, &iter, &info);
+	end = get_current_time();
+	if (info < 0)
+            printf("Argument %d of magma_zcposv had an illegal value.\n", -info);
+	gpu_perf = flopsS / GetTimerValue(start, end);
 
-      char uplo = 'L';
+	//=====================================================================
+	//                 Error Computation 
+	//=====================================================================
+	cublasGetMatrix( N, NRHS, sizeof(cuDoubleComplex), d_X, ldx, h_R, ldx ) ;
 
-      //=====================================================================
-      //              Mixed Precision Iterative Refinement - GPU 
-      //=====================================================================
-      start = get_current_time();
-      magma_zcposv_gpu(uplo, N, NRHS, d_A, LDA, d_B, LDA, d_X, LDA, M_WORK, 
-                       M_SWORK, &ITER, &INFO);
-      end = get_current_time();
-      perf = (1.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
-      cublasGetMatrix( N, NRHS, sizeof( cuDoubleComplex), d_X, N,res_, N ) ;
-      double lperf = perf ; 
+	Anorm = lapackf77_zlanhe( "I", uplo, &N, h_A, &N, h_workd);
+	blasf77_zhemm( "L", uplo, &N, &NRHS, 
+		       &zone,  h_A, &lda,
+		               h_R, &ldx,
+		       &mzone, h_B, &ldb);
+	Rnorm = lapackf77_zlange( "I", &N, &NRHS, h_B, &ldb, h_workd);
 
-      //=====================================================================
-      //                 Error Computation 
-      //=====================================================================
-      char norm='I';
-      char side ='L';
-      cuDoubleComplex ONE = MAGMA_Z_NEG_ONE;
-      cuDoubleComplex NEGONE = MAGMA_Z_ONE ;
+	//=====================================================================
+	//                 Double Precision Factor 
+	//=====================================================================
+	cublasSetMatrix( N, N, sizeof(cuDoubleComplex), h_A, lda, d_A, lda );
 
-      double Rnorm, Anorm;
-      double *worke = (double *)malloc(N*sizeof(double));
-      Anorm = lapackf77_zlanhe( &norm, &uplo,  &N, As, &N, worke);
-      blasf77_zhemm( &side, &uplo, &N, &NRHS, &NEGONE, As, &LDA, res_, &LDX, &ONE, Bs, &N);
-      Rnorm = lapackf77_zlange("I", &N, &NRHS, Bs, &LDB, worke);
-      free(worke);
+	start = get_current_time();
+	magma_zpotrf_gpu(uplo[0], N, d_A, lda, &info);
+	end = get_current_time();
+	if (info < 0)
+	    printf("Argument %d of magma_zposv had an illegal value.\n", -info);
+	gpu_perfdf = flopsF / GetTimerValue(start, end);
 
-      //=====================================================================
-      //                 Double Precision Factor 
-      //=====================================================================
-      start = get_current_time();
-      magma_zpotrf_gpu(uplo, N, d_A, LDA, &INFO);
-      end = get_current_time();
-      perf = (1.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
-      printf("%6.2f    ", perf);
-      fflush(stdout);
+	printf("%6.2f    ", gpu_perfdf); fflush(stdout);
 
-      //=====================================================================
-      //                 Double Precision Solve 
-      //=====================================================================
-      start = get_current_time();
-      magma_zpotrf_gpu(uplo, N, d_A, LDA, &INFO);
-      magma_zpotrs_gpu('L', N, NRHS, d_A, LDA, d_B, LDB, &INFO);
-      end = get_current_time();
-      perf = (1.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
-      printf("%6.2f    ", perf);
-      fflush(stdout);
+	//=====================================================================
+	//                 Double Precision Solve 
+	//=====================================================================
+	cublasSetMatrix( N, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, lda );
+	cublasSetMatrix( N, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, ldb );
+    
+	start = get_current_time();
+	magma_zpotrf_gpu(uplo[0], N, d_A, lda, &info);
+	magma_zpotrs_gpu(uplo[0], N, NRHS, d_A, lda, d_B, ldb, &info);
+	end = get_current_time();
+	if (info < 0)
+	    printf("Argument %d of magma_zpotrs had an illegal value.\n", -info);
 
-      //=====================================================================
-      //                 Single Precision Factor 
-      //=====================================================================
-      start = get_current_time();
-      magma_cpotrf_gpu(uplo, N, M_SWORK+N*NRHS, LDA, &INFO);
-      end = get_current_time();
-      perf = (1.*N*N*N/3.)/(1000000*GetTimerValue(start,end));
-      printf("%6.2f     ", perf);
-      fflush(stdout);
+	gpu_perfds = flopsS / GetTimerValue(start, end);
 
-      //=====================================================================
-      //                 Single Precision Solve 
-      //=====================================================================
-      start = get_current_time();
-      magma_cpotrf_gpu(uplo, N, M_SWORK+N*NRHS, LDA, &INFO);
-      magma_cpotrs_gpu('L', N, NRHS, M_SWORK+N*NRHS, LDA, M_SWORK, LDB, &INFO);
-      end = get_current_time();
-      perf = (1.*N*N*N/3.+2.*N*N)/(1000000*GetTimerValue(start,end));
-      printf("%6.2f    ", perf);
-      fflush(stdout);
+	printf("%6.2f    ", gpu_perfds); fflush(stdout);
 
-      printf("%6.2f     ", lperf);
-      printf("%e    %3d", Rnorm/Anorm, ITER);
+	//=====================================================================
+	//                 Single Precision Factor 
+	//=====================================================================
+	d_As = d_WORKS;
+	d_Bs = d_WORKS + N*N;
+	cublasSetMatrix( N, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, lda );
+	cublasSetMatrix( N, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, ldb );
+	magmablas_zlag2c(N, N,    d_A, lda, d_As, N, &info ); 
+	magmablas_zlag2c(N, NRHS, d_B, ldb, d_Bs, N, &info );
 
-      fflush(stdout);
+	start = get_current_time();
+	magma_cpotrf_gpu(uplo[0], N, d_As, N, &info);
+	end = get_current_time();
+	if (info < 0)
+	    printf("Argument %d of magma_cpotrf had an illegal value.\n", -info);
 
-      printf("\n");
+	gpu_perfsf = flopsF / GetTimerValue(start, end);
+	printf("%6.2f     ", gpu_perfsf); fflush(stdout);
 
-      if( once != 0 ){
-	break;
-      } 
-  }
+	//=====================================================================
+	//                 Single Precision Solve 
+	//=====================================================================
+	magmablas_zlag2c(N, N,    d_A, lda, d_As, N, &info ); 
+	magmablas_zlag2c(N, NRHS, d_B, ldb, d_Bs, N, &info );
 
-   cublasFree(d_X);
-FREE10: 
-   cublasFree(d_B);
-FREE9: 
-   cublasFree(d_A);
-FREE8: 
-    free(CACHE);
-FREE7:
-    free(res_);
-FREE6:
-    free(Xs);
-FREE5:
-    free(Bs);
-FREE4:
-    free(As);
-FREE3:
-    cublasFree(M_WORK);  
-FREE2_1:
-    cublasFree(M_SWORK);  
-FREE2:
-    cublasShutdown();
+	start = get_current_time();
+	magma_cpotrf_gpu(uplo[0], N, d_As, lda, &info);
+	magma_cpotrs_gpu(uplo[0], N, NRHS, d_As, N, d_Bs, N, &info);
+	end = get_current_time();
+	if (info < 0)
+	    printf("Argument %d of magma_cpotrs had an illegal value.\n", -info);
 
+	gpu_perfss = flopsS / GetTimerValue(start, end);
+	printf("%6.2f     ", gpu_perfss); fflush(stdout);
+
+	printf("%6.2f     ", gpu_perf);
+	printf("%e    %3d\n", Rnorm/Anorm, iter); fflush(stdout);
+
+	if( argc != 1 ){
+	    break;
+	} 
+    }
+
+    /* Memory clean up */
+    TESTING_FREE( h_A );
+    TESTING_FREE( h_B );
+    TESTING_FREE( h_X );
+    TESTING_FREE( h_R );
+    TESTING_FREE( h_workd );
+    
+    TESTING_DEVFREE( d_A );
+    TESTING_DEVFREE( d_B );
+    TESTING_DEVFREE( d_X );
+    TESTING_DEVFREE( d_WORKS );
+    TESTING_DEVFREE( d_WORKD );
+
+    /* Shutdown */
+    TESTING_CUDA_FINALIZE();
 #endif /*defined(PRECISION_z) && (GPUSHMEM < 200)*/
 }

@@ -42,6 +42,7 @@ subs = {
     ('ztrmm','dtrmm'),
     ('ctrmm','strmm'),
     ('zunmqr','dormqr'),
+    ('cuConj',''),
     ('Conj',''),
     ('zpotrf','dpotrf'),
     ('cpotrf','spotrf'),

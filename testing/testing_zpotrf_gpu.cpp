@@ -40,14 +40,14 @@ int main( int argc, char** argv)
 
     TimeStruct  start, end;
     double      flops, gpu_perf, cpu_perf;
-    cuDoubleComplex     *h_A, *h_R;
-    cuDoubleComplex     *d_A;
+    cuDoubleComplex *h_A, *h_R;
+    cuDoubleComplex *d_A;
     magma_int_t N = 0, n2, lda, ldda;
     magma_int_t size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10240};
     
     magma_int_t i, info;
     const char *uplo     = MagmaUpperStr;
-    cuDoubleComplex     mzone    = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex mzone= MAGMA_Z_NEG_ONE;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     double      work[1], matnorm;
@@ -66,10 +66,11 @@ int main( int argc, char** argv)
     }
 
     /* Allocate host memory for the matrix */
-    n2 = size[9] * size[9];
+    n2   = size[9] * size[9];
+    ldda = (size[9]/32) * 32;
     TESTING_MALLOC(    h_A, cuDoubleComplex, n2);
     TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2);
-    TESTING_DEVALLOC(  d_A, cuDoubleComplex, n2+32*size[9] );
+    TESTING_DEVALLOC(  d_A, cuDoubleComplex, ldda*size[9] );
 
     printf("\n\n");
     printf("  N    CPU GFlop/s    GPU GFlop/s    ||R||_F / ||A||_F\n");
