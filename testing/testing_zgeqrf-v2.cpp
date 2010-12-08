@@ -99,6 +99,11 @@ void magma_init (int m, int n, cuDoubleComplex *a, int nthreads)
     //MG.nb = magma_get_sgeqrf_nb(min(m, n));
     MG.nb = 128;
 
+  if (MG.nb * MG.nthreads >= n){
+    fprintf(stderr,"\n\nNumber of threads times block size not less than width of matrix.\n\n");
+	exit(1);
+  }
+
   int np = n/MG.nb;
   if (n%MG.nb != 0)
     np++;
@@ -174,6 +179,8 @@ int nquarkthreads=2;
 
 	int loop = argc;
 
+    int accuracyflag = 1;
+
     if (argc != 1){
       for(i = 1; i<argc; i++){      
         if (strcmp("-N", argv[i])==0)
@@ -184,6 +191,8 @@ int nquarkthreads=2;
           MG.nb = atoi(argv[++i]);
         else if (strcmp("-b", argv[i])==0)
           EN_BEE = atoi(argv[++i]);
+        else if (strcmp("-A", argv[i])==0)
+          accuracyflag = atoi(argv[++i]);
         else if (strcmp("-P", argv[i])==0)
           nthreads = atoi(argv[++i]);
         else if (strcmp("-Q", argv[i])==0)
@@ -272,6 +281,8 @@ quark = QUARK_New(nquarkthreads);
         magma_zgeqrf3(M, N, h_R, M, tau, h_work, lwork, &info);
         end = get_current_time();
 
+QUARK_Delete(quark);
+
         gpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
         // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
         
@@ -298,7 +309,8 @@ quark = QUARK_New(nquarkthreads);
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
-        lapackf77_zgeqrf(&M, &N, h_A, &M, tau, h_work, &lwork, &info);
+        if (accuracyflag == 1)
+          lapackf77_zgeqrf(&M, &N, h_A, &M, tau, h_work, &lwork, &info);
         end = get_current_time();
         if (info < 0)
             printf("Argument %d of zgeqrf had an illegal value.\n", -info);
@@ -313,12 +325,19 @@ quark = QUARK_New(nquarkthreads);
         cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
         int one = 1;
 
-        matnorm = lapackf77_zlange("f", &M, &N, h_A, &M, work);
-        blasf77_zaxpy(&n2, &mone, h_A, &one, h_R, &one);
+        if (accuracyflag == 1){
+          matnorm = lapackf77_zlange("f", &M, &N, h_A, &M, work);
+          blasf77_zaxpy(&n2, &mone, h_A, &one, h_R, &one);
+        }
 
-        printf("%5d %5d  %6.2f         %6.2f        %e\n",
-               M, N, cpu_perf, gpu_perf,
-               lapackf77_zlange("f", &M, &N, h_R, &M, work) / matnorm);
+        if (accuracyflag == 1){
+          printf("%5d %5d  %6.2f         %6.2f        %e\n",
+                 M, N, cpu_perf, gpu_perf,
+                 lapackf77_zlange("f", &M, &N, h_R, &M, work) / matnorm);
+        } else {
+          printf("%5d %5d                %6.2f          \n",
+                 M, N, gpu_perf);
+        }
 
         /* =====================================================================
            Print performance and error.
