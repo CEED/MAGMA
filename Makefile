@@ -58,11 +58,11 @@ install: lib dir
 	cp $(LIBMAGMA)               $(prefix)/lib
 	cp $(LIBMAGMABLAS)           $(prefix)/lib
 #       QUARK
-	cp $(QUARKDIR)/include/quark.h             $(prefix)/include
-	cp $(QUARKDIR)/include/quark_unpack_args.h $(prefix)/include
-	cp $(QUARKDIR)/include/icl_hash.h          $(prefix)/include
-	cp $(QUARKDIR)/include/icl_list.h          $(prefix)/include
-	cp $(QUARKDIR)/lib/libquark.a              $(prefix)/lib
+#	cp $(QUARKDIR)/include/quark.h             $(prefix)/include
+#	cp $(QUARKDIR)/include/quark_unpack_args.h $(prefix)/include
+#	cp $(QUARKDIR)/include/icl_hash.h          $(prefix)/include
+#	cp $(QUARKDIR)/include/icl_list.h          $(prefix)/include
+#	cp $(QUARKDIR)/lib/libquark.a              $(prefix)/lib
 #       pkgconfig
 	cat $(MAGMA_DIR)/lib/pkgconfig/magma.pc | \
 	    sed -e s+\__PREFIX+"$(prefix)"+     | \
