@@ -85,7 +85,7 @@ int magma_get_sgeqlf_nb(int m){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for sgeqlf based on m
+   -- Return nb for sgelqf based on m
 */
 extern "C"
 int magma_get_sgelqf_nb(int m){
@@ -105,7 +105,7 @@ int magma_get_dgetrf_nb(int m){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for sgeqlf based on m
+   -- Return nb for dgeqlf based on m
 */
 extern "C"
 int magma_get_dgeqlf_nb(int m){
@@ -118,7 +118,7 @@ int magma_get_dgeqlf_nb(int m){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for sgeqlf based on m
+   -- Return nb for dgelqf based on m
 */
 extern "C"
 int magma_get_dgelqf_nb(int m){
@@ -205,7 +205,7 @@ int magma_get_cgeqrf_nb(int m){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for cgeqrf based on m
+   -- Return nb for cgeqlf based on m
 */
 extern "C"
 int magma_get_cgeqlf_nb(int m){
@@ -267,7 +267,7 @@ int magma_get_zgetrf_nb(int n){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for zgeqlf based on m
+   -- Return nb for zgeqrf based on m
 */
 extern "C"
 int magma_get_zgeqrf_nb(int m){
@@ -278,7 +278,7 @@ int magma_get_zgeqrf_nb(int m){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for czeqlf based on m
+   -- Return nb for zgeqlf based on m
 */
 extern "C"
 int magma_get_zgeqlf_nb(int m){
@@ -424,16 +424,11 @@ int magma_get_dgeqrf_nb(int m){
 */
 extern "C"
 int magma_get_sgeqlf_nb(int m){
-  if (m <= 1024)
-    return 32;
-  else if (m<=4032)
-    return 64;
-  else
-    return 128;
+  return magma_get_sgeqrf_nb(m);
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for sgeqlf based on m
+   -- Return nb for sgelqf based on m
 */
 extern "C"
 int magma_get_sgelqf_nb(int m){
@@ -455,29 +450,19 @@ int magma_get_dgetrf_nb(int m){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for sgeqlf based on m
+   -- Return nb for dgeqlf based on m
 */
 extern "C"
 int magma_get_dgeqlf_nb(int m){
-  if (m <= 1024)
-    return 32;
-  else if (m<=4032)
-    return 64;
-  else
-    return 128;
+  return magma_get_dgeqrf_nb(m);
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for sgeqlf based on m
+   -- Return nb for dgelqf based on m
 */
 extern "C"
 int magma_get_dgelqf_nb(int m){
-  if (m <= 2048)
-    return 32;
-  else if (m<=4032)
-    return 64;
-  else
-    return 128;
+  return magma_get_dgeqrf_nb(m);
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -575,7 +560,7 @@ int magma_get_cgeqrf_nb(int m){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for cgeqrf based on m
+   -- Return nb for cgeqlf based on m
 */
 extern "C"
 int magma_get_cgeqlf_nb(int m){
@@ -637,7 +622,7 @@ int magma_get_zgetrf_nb(int n){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for zgeqlf based on m
+   -- Return nb for zgeqrf based on m
 */
 extern "C"
 int magma_get_zgeqrf_nb(int m){
@@ -648,7 +633,7 @@ int magma_get_zgeqrf_nb(int m){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for czeqlf based on m
+   -- Return nb for zgeqlf based on m
 */
 extern "C"
 int magma_get_zgeqlf_nb(int m){
