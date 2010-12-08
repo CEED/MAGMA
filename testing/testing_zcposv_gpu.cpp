@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     double      Rnorm, Anorm;
     cuDoubleComplex zone  = MAGMA_Z_ONE;
     cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *h_A, *h_B, *h_X, *h_R;
+    cuDoubleComplex *h_A, *h_B, *h_X;
     cuDoubleComplex *d_A, *d_B, *d_X, *d_WORKD;
     cuFloatComplex  *d_As, *d_Bs, *d_WORKS;
     double          *h_workd;
@@ -82,14 +82,13 @@ int main(int argc, char **argv)
     TESTING_MALLOC( h_A, cuDoubleComplex, lda*N    );
     TESTING_MALLOC( h_B, cuDoubleComplex, ldb*NRHS );
     TESTING_MALLOC( h_X, cuDoubleComplex, ldx*NRHS );
-    TESTING_MALLOC( h_R, cuDoubleComplex, ldx*NRHS );
     TESTING_MALLOC( h_workd, double, N );
     
-    TESTING_DEVALLOC( d_A,     cuDoubleComplex, lda*N      );
-    TESTING_DEVALLOC( d_B,     cuDoubleComplex, ldb*NRHS   );
-    TESTING_DEVALLOC( d_X,     cuDoubleComplex, ldx*NRHS   );
-    TESTING_DEVALLOC( d_WORKS, cuFloatComplex,  N*(N+NRHS) );
-    TESTING_DEVALLOC( d_WORKD, cuDoubleComplex, N*NRHS     );
+    TESTING_DEVALLOC( d_A,     cuDoubleComplex, lda*N       );
+    TESTING_DEVALLOC( d_B,     cuDoubleComplex, ldb*NRHS    );
+    TESTING_DEVALLOC( d_X,     cuDoubleComplex, ldx*NRHS    );
+    TESTING_DEVALLOC( d_WORKS, cuFloatComplex,  lda*(N+NRHS));
+    TESTING_DEVALLOC( d_WORKD, cuDoubleComplex, N*NRHS      );
   
     printf("  N   DP-Factor  DP-Solve  SP-Factor  SP-Solve  MP-Solve  ||b-Ax||/||A||  NumIter\n");
     printf("==================================================================================\n");
@@ -135,12 +134,12 @@ int main(int argc, char **argv)
 	//=====================================================================
 	//                 Error Computation 
 	//=====================================================================
-	cublasGetMatrix( N, NRHS, sizeof(cuDoubleComplex), d_X, ldx, h_R, ldx ) ;
+	cublasGetMatrix( N, NRHS, sizeof(cuDoubleComplex), d_X, ldx, h_X, ldx ) ;
 
 	Anorm = lapackf77_zlanhe( "I", uplo, &N, h_A, &N, h_workd);
 	blasf77_zhemm( "L", uplo, &N, &NRHS, 
 		       &zone,  h_A, &lda,
-		               h_R, &ldx,
+		               h_X, &ldx,
 		       &mzone, h_B, &ldb);
 	Rnorm = lapackf77_zlange( "I", &N, &NRHS, h_B, &ldb, h_workd);
 
@@ -153,7 +152,7 @@ int main(int argc, char **argv)
 	magma_zpotrf_gpu(uplo[0], N, d_A, lda, &info);
 	end = get_current_time();
 	if (info < 0)
-	    printf("Argument %d of magma_zposv had an illegal value.\n", -info);
+	    printf("Argument %d of magma_zpotrf had an illegal value.\n", -info);
 	gpu_perfdf = flopsF / GetTimerValue(start, end);
 
 	printf("%6.2f    ", gpu_perfdf); fflush(stdout);
@@ -179,7 +178,7 @@ int main(int argc, char **argv)
 	//                 Single Precision Factor 
 	//=====================================================================
 	d_As = d_WORKS;
-	d_Bs = d_WORKS + N*N;
+	d_Bs = d_WORKS + lda*N;
 	cublasSetMatrix( N, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, lda );
 	cublasSetMatrix( N, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, ldb );
 	magmablas_zlag2c(N, N,    d_A, lda, d_As, N, &info ); 
@@ -222,7 +221,6 @@ int main(int argc, char **argv)
     TESTING_FREE( h_A );
     TESTING_FREE( h_B );
     TESTING_FREE( h_X );
-    TESTING_FREE( h_R );
     TESTING_FREE( h_workd );
     
     TESTING_DEVFREE( d_A );

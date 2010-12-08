@@ -111,7 +111,10 @@ Task  Done      Who       What
 ---------------------------------------------------------------------------------
 21                         Add zlansy.cu functions (Relies on task 20)
 ---------------------------------------------------------------------------------
-22                         Status of src directory 
+22                         zclaswp interface should be:	
+			   ZCLASWP( N, A, LDA, SA, LDSA, K1, K2, IPIV, INCX ) 
+---------------------------------------------------------------------------------
+23                         Status of src directory 
                            
                             CPU  /  GPU  / Remark   
                  zpotrf   -  ok  /  ok 
