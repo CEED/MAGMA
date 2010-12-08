@@ -146,17 +146,34 @@ extern "C"
 void cpanel_to_q(char uplo, int ib, float2 *a, int lda, float2 *work){
   int i, j, k = 0;
   float2 *col;
-  for(i=0; i<ib; i++){
-    col = a + i*lda;
-    for(j=0; j<i; j++){
-      work[k  ].x = col[j].x;
-      work[k++].y = col[j].y;
-      col[j].x = col[j].y = 0.;
+
+  if (uplo == 'U' || uplo == 'u'){
+    for(i=0; i<ib; i++){
+      col = a + i*lda;
+      for(j=0; j<i; j++){
+	work[k  ].x = col[j].x;
+	work[k++].y = col[j].y;
+	col[j].x = col[j].y = 0.;
+      }
+      work[k  ].x = col[i].x;
+      work[k++].y = col[i].y;
+      col[j].x = 1.;
+      col[j].y = 0.;
     }
-    work[k  ].x = col[i].x;
-    work[k++].y = col[i].y;
-    col[j].x = 1.;
-    col[j].y = 0.;
+  }
+  else {
+    for(i=0; i<ib; i++){
+      col = a + i*lda;
+      work[k  ].x = col[i].x;
+      work[k++].y = col[i].y;
+      col[i].x = 1.;
+      col[i].y = 0.;
+      for(j=i+1; j<ib; j++){
+        work[k  ].x = col[j].x;
+	work[k++].y = col[j].y;
+        col[j].x = col[j].y = 0.;
+      }
+    }
   }
 }
 
@@ -167,11 +184,23 @@ extern "C"
 void cq_to_panel(char uplo, int ib, float2 *a, int lda, float2 *work){
   int i, j, k = 0;
   float2 *col;
-  for(i=0; i<ib; i++){
-    col = a + i*lda;
-    for(j=0; j<=i; j++){
-      col[j].x = work[k  ].x;
-      col[j].y = work[k++].y;
+
+  if (uplo == 'U' || uplo == 'u'){
+    for(i=0; i<ib; i++){
+      col = a + i*lda;
+      for(j=0; j<=i; j++){
+	col[j].x = work[k  ].x;
+	col[j].y = work[k++].y;
+      }
+    }
+  }
+  else {
+    for(i=0; i<ib; i++){
+      col = a + i*lda;
+      for(j=i; j<ib; j++){
+        col[j].x = work[k  ].x;
+	col[j].y = work[k++].y;
+      }
     }
   }
 }
@@ -239,17 +268,34 @@ extern "C"
 void zpanel_to_q(char uplo, int ib, double2 *a, int lda, double2 *work){
   int i, j, k = 0;
   double2 *col;
-  for(i=0; i<ib; i++){
-    col = a + i*lda;
-    for(j=0; j<i; j++){
-      work[k  ].x = col[j].x;
-      work[k++].y = col[j].y;
-      col[j].x = col[j].y = 0.;
+
+  if (uplo == 'U' || uplo == 'u'){
+    for(i=0; i<ib; i++){
+      col = a + i*lda;
+      for(j=0; j<i; j++){
+	work[k  ].x = col[j].x;
+	work[k++].y = col[j].y;
+	col[j].x = col[j].y = 0.;
+      }
+      work[k  ].x = col[i].x;
+      work[k++].y = col[i].y;
+      col[j].x = 1.;
+      col[j].y = 0.;
     }
-    work[k  ].x = col[i].x;
-    work[k++].y = col[i].y;
-    col[j].x = 1.;
-    col[j].y = 0.;
+  }
+  else {
+    for(i=0; i<ib; i++){
+      col = a + i*lda;
+      work[k  ].x = col[i].x;
+      work[k++].y = col[i].y;
+      col[i].x = 1.;
+      col[i].y = 0.;
+      for(j=i+1; j<ib; j++){
+	work[k  ].x = col[j].x;
+	work[k++].y = col[j].y;
+	col[j].x = col[j].y = 0.;
+      }
+    }
   }
 }
 
@@ -260,11 +306,23 @@ extern "C"
 void zq_to_panel(char uplo, int ib, double2 *a, int lda, double2 *work){
   int i, j, k = 0;
   double2 *col;
-  for(i=0; i<ib; i++){
-    col = a + i*lda;
-    for(j=0; j<=i; j++){
-      col[j].x = work[k  ].x;
-      col[j].y = work[k++].y;
+
+  if (uplo == 'U' || uplo == 'u'){
+    for(i=0; i<ib; i++){
+      col = a + i*lda;
+      for(j=0; j<=i; j++){
+	col[j].x = work[k  ].x;
+	col[j].y = work[k++].y;
+      }
+    }
+  }
+  else {
+    for(i=0; i<ib; i++){
+      col = a + i*lda;
+      for(j=i; j<ib; j++){
+        col[j].x = work[k  ].x;
+        col[j].y = work[k++].y;
+      }
     }
   }
 }
