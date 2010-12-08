@@ -116,15 +116,22 @@ Task  Done      Who       What
 ---------------------------------------------------------------------------------
 23                         Status of src directory 
                            
-                            CPU  /  GPU  / Remark   
+                            CPU  /  GPU  / Remark 
+     One sided
                  zpotrf   -  ok  /  ok 
                  zpotrs   -  -   /  ok
-                 zcposv   -  -   /  ok
+                 zposv    -  -   /  ok
 
-                 zgetrf   -  ok  /  ok   / GPU version: need to have more explicit names but it's ok
+                 zgetrf   -  ok  /  ok
                  zgetrs   -  -   /  ok
-                 zcgetrs  -  -   /  ok
+                 zgesv    -  -   /  ok
 
+     Mix precision
+                 zcposv   -  -   /  ok
+                 zcgesv   -  -   /  ok
+                 zcgetrs  -  -   /  ok
+  
+     -----------------------
                  zgeqrf   -  ok  /  ok   / GPU version: maybe we should add dwork/ldwork to follow cpu interface
                  zgelqf   -  ok  /  - 
                  zgeqlf   -  ok  /  - 
@@ -133,8 +140,6 @@ Task  Done      Who       What
                
                  zcgeqrsv - Interface needs to be clean, it's a big mess with all the different workspace 
                             No CPU interface
-                            GPU interface should be close to the lapack one
-                 zcgesv   - No CPU interface
                             GPU interface should be close to the lapack one
                  zgeev    - No GPU interface
                             Still F2c
@@ -146,9 +151,6 @@ Task  Done      Who       What
                  zgeqrf_gpu-v2   -
                  zgeqrs_gpu  - No CPU interface
                                GPU interface doesn't follow lapack. Need Td pointer which is provided only by zgeqrs_gpu-v2.
-                 zgeqrf_mc   -
-                 zgetrf_mc   - 
-                 zpotrf_mc   -
                  zgesvd      - No comments
                  zheevd      - No comments
                  zhetrd      - No GPU interface /  CPU  in F2C
@@ -164,5 +166,10 @@ Task  Done      Who       What
                  zunmqr      - F2C code
                  zunmqr_gpu  - Same problem than geqrs, need arguments from geqrf2, so it doesn't have the same interface than lapack or CPU version
                  zunmtr      - F2C code with fortran interface
+
+      Multi-cores:
+                 zgeqrf_mc   -
+                 zgetrf_mc   - 
+                 zpotrf_mc   -
 
 
