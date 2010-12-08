@@ -17,11 +17,11 @@
 extern "C" magma_int_t
 magma_zunmqr_gpu(char side, char trans,
                  magma_int_t m, magma_int_t n, magma_int_t k,
-		 cuDoubleComplex *a,    magma_int_t lda, 
+		 cuDoubleComplex *dA,    magma_int_t ldda, 
                  cuDoubleComplex *tau,
-                 cuDoubleComplex *c,    magma_int_t ldc,
-		 cuDoubleComplex *work, magma_int_t lwork,
-                 cuDoubleComplex *td,   magma_int_t nb, 
+                 cuDoubleComplex *dC,    magma_int_t lddc,
+		 cuDoubleComplex *hwork, magma_int_t lwork,
+                 cuDoubleComplex *dT,    magma_int_t nb, 
                  magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -69,33 +69,33 @@ magma_zunmqr_gpu(char side, char trans,
             If SIDE = 'L', M >= K >= 0;
             if SIDE = 'R', N >= K >= 0.
 
-    A       (input) COMPLEX_16 array, dimension (LDA,K)
+    A       (input) COMPLEX_16 array, dimension (LDDA,K)
             The i-th column must contain the vector which defines the
             elementary reflector H(i), for i = 1,2,...,k, as returned by
             ZGEQRF in the first k columns of its array argument A.
             A is modified by the routine but restored on exit.
 
-    LDA     (input) INTEGER
+    LDDA     (input) INTEGER
             The leading dimension of the array A.
-            If SIDE = 'L', LDA >= max(1,M);
-            if SIDE = 'R', LDA >= max(1,N).
+            If SIDE = 'L', LDDA >= max(1,M);
+            if SIDE = 'R', LDDA >= max(1,N).
 
     TAU     (input) COMPLEX_16 array, dimension (K)
             TAU(i) must contain the scalar factor of the elementary
             reflector H(i), as returned by ZGEQRF.
 
-    C       (input/output) COMPLEX_16 array, dimension (LDC,N)
+    C       (input/output) COMPLEX_16 array, dimension (LDDC,N)
             On entry, the M-by-N matrix C.
             On exit, C is overwritten by Q*C or Q\*\*H*C or C*Q\*\*H or C*Q.
 
-    LDC     (input) INTEGER
-            The leading dimension of the array C. LDC >= max(1,M).
+    LDDC     (input) INTEGER
+            The leading dimension of the array C. LDDC >= max(1,M).
 
-    WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
+    HWORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))
+            On exit, if INFO = 0, HWORK(1) returns the optimal LWORK.
 
     LWORK   (input) INTEGER
-            The dimension of the array WORK.
+            The dimension of the array HWORK.
             If SIDE = 'L', LWORK >= max(1,N);
             if SIDE = 'R', LWORK >= max(1,M).
             For optimum performance LWORK >= N*NB if SIDE = 'L', and
@@ -103,15 +103,15 @@ magma_zunmqr_gpu(char side, char trans,
             blocksize.
 
             If LWORK = -1, then a workspace query is assumed; the routine
-            only calculates the optimal size of the WORK array, returns
-            this value as the first entry of the WORK array, and no error
+            only calculates the optimal size of the HWORK array, returns
+            this value as the first entry of the HWORK array, and no error
             message related to LWORK is issued by XERBLA.
 
-    TD      (input) COMPLEX_16 array that is the output (the 9th argument)
+    DT      (input) COMPLEX_16 array that is the output (the 9th argument)
             of magma_zgeqrf_gpu.
 
     NB      (input) INTEGER
-            This is the blocking size that was used in pre-computing TD, e.g.,
+            This is the blocking size that was used in pre-computing DT, e.g.,
             the blocking size used in magma_zgeqrf_gpu.
 
     INFO    (output) INTEGER
@@ -120,9 +120,9 @@ magma_zunmqr_gpu(char side, char trans,
 
     =====================================================================   */
 
-    #define a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
-    #define c_ref(a_1,a_2) ( c+(a_2)*(ldc) + (a_1))
-    #define t_ref(a_1)     (td+(a_1))
+    #define a_ref(a_1,a_2) (dA+(a_2)*(ldda) + (a_1))
+    #define c_ref(a_1,a_2) (dC+(a_2)*(lddc) + (a_1))
+    #define t_ref(a_1)     (dT+(a_1))
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
 
@@ -163,16 +163,16 @@ magma_zunmqr_gpu(char side, char trans,
 	*info = -4;
     } else if (k < 0 || k > nq) {
 	*info = -5;
-    } else if (lda < max(1,nq)) {
+    } else if (ldda < max(1,nq)) {
 	*info = -7;
-    } else if (ldc < max(1,m)) {
+    } else if (lddc < max(1,m)) {
 	*info = -10;
     } else if (lwork < max(1,nw) && ! lquery) {
 	*info = -12;
     }
 
     lwkopt = (abs(m-k) + nb + 2*(n))*nb;
-    work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
+    hwork[0] = MAGMA_Z_MAKE( lwkopt, 0 );
 
     if (*info != 0) {
 	return 0;
@@ -182,12 +182,12 @@ magma_zunmqr_gpu(char side, char trans,
 
     /* Quick return if possible */
     if (m == 0 || n == 0 || k == 0) {
-	work[0] = c_one;
+	hwork[0] = c_one;
 	return 0;
     }
 
     lddwork= k;
-    dwork  = td+2*lddwork*nb;
+    dwork  = dT+2*lddwork*nb;
 
     if ( (left && (! notran)) || ( (!left) && notran ) ) {
         i1 = 0;
@@ -220,10 +220,10 @@ magma_zunmqr_gpu(char side, char trans,
                 ni = n - i;
                 jc = i;
             }
-            magma_zlarfb(MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-                         mi, ni, ib, 
-                         a_ref(i,  i ), lda, t_ref(i), lddwork, 
-                         c_ref(ic, jc), ldc, dwork,    nw);
+            magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
+			      mi, ni, ib, 
+			      a_ref(i,  i ), ldda, t_ref(i), lddwork, 
+			      c_ref(ic, jc), lddc, dwork,    nw);
         }
     }
     else
@@ -243,20 +243,21 @@ magma_zunmqr_gpu(char side, char trans,
             jc = i;
         }
 
-        cublasGetMatrix(mi, ib, sizeof(cuDoubleComplex), a_ref(i,i), lda, work, mi);
-        cublasGetMatrix(mi, ni, sizeof(cuDoubleComplex), c_ref(ic, jc), ldc,
-                        work+mi*ib, mi);
+        cublasGetMatrix(mi, ib, sizeof(cuDoubleComplex), 
+			a_ref(i,  i ), ldda, hwork, mi);
+        cublasGetMatrix(mi, ni, sizeof(cuDoubleComplex), 
+			c_ref(ic, jc), lddc, hwork+mi*ib, mi);
 
         magma_int_t lhwork = lwork - mi*(ib + ni);
         lapackf77_zunmqr( MagmaLeftStr, MagmaConjTransStr, 
                           &mi, &ni, &ib, 
-                          work,       &mi, tau+i, 
-                          work+mi*ib, &mi, 
-                          work+mi*(ib+ni), &lhwork, info);
+                          hwork,       &mi, tau+i, 
+                          hwork+mi*ib, &mi, 
+                          hwork+mi*(ib+ni), &lhwork, info);
 
         // send the updated part of c back to the GPU
         cublasSetMatrix(mi, ni, sizeof(cuDoubleComplex),
-                        work+mi*ib, mi, c_ref(ic, jc), ldc);
+                        hwork+mi*ib, mi, c_ref(ic, jc), lddc);
     }
 
     return 0;

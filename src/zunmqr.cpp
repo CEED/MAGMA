@@ -277,11 +277,11 @@ magma_zunmqr(const char side, const char trans,
 	    // TTT ------------------------------------------------------------
 	    //printf("%5d %5d %5d\n", mi, ni, ic + 1 + m);
 	    cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), t, ib, dwork+i__4*ib, ib);
-	    magma_zlarfb(MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-                         mi, ni, ib,
-			 dwork, i__4, dwork+i__4*ib, ib,
-			 &dc[ic + jc * c_dim1], ldc, 
-			 dwork+i__4*ib + ib*ib, ni);
+	    magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
+			      mi, ni, ib,
+			      dwork, i__4, dwork+i__4*ib, ib,
+			      &dc[ic + jc * c_dim1], ldc, 
+			      dwork+i__4*ib + ib*ib, ni);
 	    //-----------------------------------------------------------------
 	    /*
 	    lapackf77_zlarfb(side, trans, "Forward", "Columnwise", &mi, &ni, &ib, 

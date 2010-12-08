@@ -155,10 +155,10 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 	      {
 		/* Apply H to A(i:m,i+ib:n) from the left */
 		i__3 = n - i - ib;
-		magma_zlarfb( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise,
-                              i__2, i__3, ib,
-                              da_ref(i, i   ), ldda, t_ref(i),             lddwork,
-                              da_ref(i, i+ib), ldda, dwork + 2*lddwork*nb, lddwork);
+		magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise,
+				  i__2, i__3, ib,
+				  da_ref(i, i   ), ldda, t_ref(i),             lddwork,
+				  da_ref(i, i+ib), ldda, dwork + 2*lddwork*nb, lddwork);
 	      }
 
 	    /* Apply H to rows i:m of current block on the CPU */

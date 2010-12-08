@@ -45,7 +45,6 @@ typedef size_t devptr_t;
     #define MAGMA_ZLABRD magma_zlabrd_
     #define MAGMA_ZLAHR2 magma_zlahr2_
     #define MAGMA_ZLAHRU magma_zlahru_
-    #define MAGMA_ZLARFB magma_zlarfb_
     #define MAGMA_ZPOTRF magma_zpotrf_
     #define MAGMA_ZHETRD magma_zhetrd_
     
@@ -55,6 +54,7 @@ typedef size_t devptr_t;
     #define MAGMA_ZGEQRS_GPU magma_zgeqrs_gpu_
     #define MAGMA_ZGETRF_GPU magma_zgetrf_gpu_
     #define MAGMA_ZGETRS_GPU magma_zgetrs_gpu_
+    #define MAGMA_ZLARFB_GPU magma_zlarfb_gpu_
     #define MAGMA_ZPOTRF_GPU magma_zpotrf_gpu_
     #define MAGMA_ZPOTRS_GPU magma_zpotrs_gpu_
 
@@ -69,7 +69,6 @@ typedef size_t devptr_t;
     #define MAGMA_ZLABRD magma_zlabrd
     #define MAGMA_ZLAHR2 magma_zlahr2
     #define MAGMA_ZLAHRU magma_zlahru
-    #define MAGMA_ZLARFB magma_zlarfb
     #define MAGMA_ZPOTRF magma_zpotrf
     #define MAGMA_ZHETRD magma_zhetrd
     
@@ -79,6 +78,7 @@ typedef size_t devptr_t;
     #define MAGMA_ZGEQRS_GPU magma_zgeqrs_gpu
     #define MAGMA_ZGETRF_GPU magma_zgetrf_gpu
     #define MAGMA_ZGETRS_GPU magma_zgetrs_gpu
+    #define MAGMA_ZLARFB_GPU magma_zlarfb_gpu
     #define MAGMA_ZPOTRF_GPU magma_zpotrf_gpu
     #define MAGMA_ZPOTRS_GPU magma_zpotrs_gpu
 
@@ -150,15 +150,6 @@ void MAGMA_ZLAHRU( magma_int_t *m, magma_int_t *n, magma_int_t *nb, double2 *a, 
     magma_zlahru( *m, *n, *nb, a, *lda, d_a, y, v, t, d_w); 
 }
 
-void MAGMA_ZLARFB( char *side, char *trans, char *direct, char *storev, magma_int_t *m, magma_int_t *n, magma_int_t *k, devptr_t *dv, magma_int_t *ldv, devptr_t *dt, magma_int_t *ldt, devptr_t *dc, magma_int_t *ldc, devptr_t *dwork, magma_int_t *ldwork)
-{ 
-    cuDoubleComplex *d_v = (cuDoubleComplex *)(*dv);
-    cuDoubleComplex *d_t = (cuDoubleComplex *)(*dt);
-    cuDoubleComplex *d_c = (cuDoubleComplex *)(*dc);
-    cuDoubleComplex *d_w = (cuDoubleComplex *)(*dwork);
-    magma_zlarfb( side[0], trans[0], direct[0], storev[0], *m, *n, *k, d_v, *ldv, d_t, *ldt, d_c, *ldc, d_w, *ldwork); 
-}
-
 void MAGMA_ZPOTRF( char *uplo, magma_int_t *n, double2 *A, magma_int_t *lda, magma_int_t *info)
 { 
     magma_zpotrf( uplo[0], *n, A, *lda, info); 
@@ -216,6 +207,15 @@ void MAGMA_ZGETRS_GPU( char *trans, magma_int_t *n, magma_int_t *nrhs, devptr_t 
     cuDoubleComplex *d_a = (cuDoubleComplex *)(*A);
     cuDoubleComplex *d_b = (cuDoubleComplex *)(*b);
     magma_zgetrs_gpu( trans[0], *n, *nrhs, d_a, *lda, ipiv, d_b, *ldb, info); 
+}
+
+void MAGMA_ZLARFB_GPU( char *side, char *trans, char *direct, char *storev, magma_int_t *m, magma_int_t *n, magma_int_t *k, devptr_t *dv, magma_int_t *ldv, devptr_t *dt, magma_int_t *ldt, devptr_t *dc, magma_int_t *ldc, devptr_t *dwork, magma_int_t *ldwork)
+{ 
+    cuDoubleComplex *d_v = (cuDoubleComplex *)(*dv);
+    cuDoubleComplex *d_t = (cuDoubleComplex *)(*dt);
+    cuDoubleComplex *d_c = (cuDoubleComplex *)(*dc);
+    cuDoubleComplex *d_w = (cuDoubleComplex *)(*dwork);
+    magma_zlarfb_gpu( side[0], trans[0], direct[0], storev[0], *m, *n, *k, d_v, *ldv, d_t, *ldt, d_c, *ldc, d_w, *ldwork); 
 }
 
 void MAGMA_ZPOTRF_GPU( char *uplo,  magma_int_t *n, devptr_t *A, magma_int_t *lda, magma_int_t *info)

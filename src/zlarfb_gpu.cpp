@@ -23,12 +23,12 @@
 // === End defining what BLAS to use =======================================
 
 extern "C" magma_int_t
-magma_zlarfb(char side, char trans, char direct, char storev,
-	     magma_int_t m, magma_int_t n, magma_int_t k,
-             cuDoubleComplex *dv, magma_int_t ldv, cuDoubleComplex *dt,
-	     magma_int_t ldt,
-             cuDoubleComplex *dc, magma_int_t ldc, 
-	     cuDoubleComplex *dwork, magma_int_t ldwork)
+magma_zlarfb_gpu( char side, char trans, char direct, char storev,
+		  magma_int_t m, magma_int_t n, magma_int_t k,
+		  cuDoubleComplex *dV,    magma_int_t ldv, 
+		  cuDoubleComplex *dT,    magma_int_t ldt,
+		  cuDoubleComplex *dC,    magma_int_t ldc, 
+		  cuDoubleComplex *dwork, magma_int_t ldwork)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Univ. of California Berkeley
@@ -100,10 +100,6 @@ magma_zlarfb(char side, char trans, char direct, char storev,
 
     ===================================================================      */
 
-#define dwork_ref(a_1,a_2) (dwork+(a_2)*(ldwork)+ a_1)
-#define dc_ref(a_1,a_2)    (dc   +(a_2)*(ldc)   + a_1)
-#define dv_ref(a_1,a_2)    (dv   +(a_2)*(ldv)   + a_1)
-
     cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -138,44 +134,44 @@ magma_zlarfb(char side, char trans, char direct, char storev,
         */
         cublasZgemm( MagmaConjTrans, MagmaNoTrans,
                      n, k, m,
-                     c_one,  dc_ref(0, 0), ldc,
-                             dv_ref(0, 0), ldv,
-                     c_zero, dwork,        ldwork);
+                     c_one,  dC,    ldc,
+                             dV,    ldv,
+                     c_zero, dwork, ldwork);
 
         if (direct == 'F' || direct =='f')
             cublasZtrmm( MagmaRight, MagmaUpper, transt, MagmaNonUnit,
                          n, k, 
-                         c_one, dt,    ldt, 
+                         c_one, dT,    ldt, 
                                 dwork, ldwork);
         else
             cublasZtrmm( MagmaRight, MagmaLower, transt, MagmaNonUnit,
                          n, k, 
-                         c_one, dt,    ldt, 
+                         c_one, dT,    ldt, 
                                 dwork, ldwork);
 
         cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
                      m, n, k, 
-                     c_neg_one, dv_ref(0, 0), ldv,
-                                dwork,        ldwork, 
-                     c_one,     dc_ref(0,0),  ldc);
+                     c_neg_one, dV,    ldv,
+                                dwork, ldwork, 
+                     c_one,     dC,    ldc);
     }
     else {
         cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
                      m, k, n, 
-                     c_one,  dc_ref(0, 0), ldc,
-                             dv_ref(0, 0), ldv, 
-                     c_zero, dwork,        ldwork);
+                     c_one,  dC,    ldc,
+                             dV,    ldv, 
+                     c_zero, dwork, ldwork);
 
         cublasZtrmm( MagmaRight, MagmaUpper, transt, MagmaNonUnit,
                      m, k, 
-                     c_one, dt,    ldt, 
+                     c_one, dT,    ldt, 
                             dwork, ldwork);
 
         cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
                      m, n, k, 
-                     c_neg_one, dwork,        ldwork,
-                                dv_ref(0, 0), ldv,
-                      c_one,    dc_ref(0, 0), ldc);
+                     c_neg_one, dwork, ldwork,
+                                dV,    ldv,
+                     c_one,     dC,    ldc);
     }
     return 0;
 

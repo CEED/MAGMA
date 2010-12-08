@@ -198,10 +198,10 @@ int cnt=-1;
                                    cudaMemcpyDeviceToHost,stream[0]);
 
                 /* Apply H' to A(i:m,i+2*ib:n) from the left */
-                magma_zlarfb(MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
-                             m-old_i, n-old_i-2*old_ib, old_ib,
-                             da_ref(old_i, old_i),          ldda, dwork,        lddwork,
-                             da_ref(old_i, old_i+2*old_ib), ldda, dwork+old_ib, lddwork);
+                magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
+				  m-old_i, n-old_i-2*old_ib, old_ib,
+				  da_ref(old_i, old_i),          ldda, dwork,        lddwork,
+				  da_ref(old_i, old_i+2*old_ib), ldda, dwork+old_ib, lddwork);
             }
 
             cudaStreamSynchronize(stream[1]);
@@ -236,15 +236,15 @@ if (cnt < MG.np_gpu) {
 
                 if (i+ib < k-nx)
                     /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
-                    magma_zlarfb(MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
-                                 rows, ib, ib, 
-                                 da_ref(i, i   ), ldda, dwork,    lddwork, 
-                                 da_ref(i, i+ib), ldda, dwork+ib, lddwork);
+                    magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
+				      rows, ib, ib, 
+				      da_ref(i, i   ), ldda, dwork,    lddwork, 
+				      da_ref(i, i+ib), ldda, dwork+ib, lddwork);
                 else
-                    magma_zlarfb(MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
-                                 rows, n-i-ib, ib, 
-                                 da_ref(i, i   ), ldda, dwork,    lddwork, 
-                                 da_ref(i, i+ib), ldda, dwork+ib, lddwork);
+                    magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
+				      rows, n-i-ib, ib, 
+				      da_ref(i, i   ), ldda, dwork,    lddwork, 
+				      da_ref(i, i+ib), ldda, dwork+ib, lddwork);
 
                 old_i  = i;
                 old_ib = ib;
