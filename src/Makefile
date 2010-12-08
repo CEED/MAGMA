@@ -27,38 +27,37 @@ ZSRC  = zpotrf.cpp	\
 	zcgesv_gpu.cpp	\
 	zcgetrs_gpu.cpp	\
 	\
+	zgeqrf.cpp	\
+        zgeqrf_mc.cpp	\
+        zgetrf_mc.cpp	\
+        zpotrf_mc.cpp	\
+        zgeqrf-v2.cpp   \
+        zgeqrf-v3.cpp   \
+        zgehrd.cpp 	\
+        zlahru.cpp 	\
+        zlahr2.cpp 	\
+        zgeqlf.cpp 	\
+        zgelqf.cpp 	\
+        \
+        zhetrd.cpp 	\
+        zlatrd.cpp 	\
+        zgebrd.cpp 	\
+        zlabrd.cpp 	\
+        zungqr_gpu.cpp	\
+        zunmtr.cpp 	\
+        zunmqr.cpp 	\
+        \
+        zcgeqrsv_gpu.cpp\
+        \
+        zgeev.cpp       \
+        zheevd.cpp      \
+        zgesvd.cpp      \
 
-        # zgeqrf.cpp	\
-        # zgeqrf_mc.cpp	\
-        # zgetrf_mc.cpp	\
-        # zpotrf_mc.cpp	\
-        # zgeqrf-v2.cpp   \
-        # zgeqrf-v3.cpp   \
-        # zgehrd.cpp 	\
-        # zlahru.cpp 	\
-        # zlahr2.cpp 	\
-        # zgeqlf.cpp 	\
-        # zgelqf.cpp 	\
-        # \
-        # zhetrd.cpp 	\
-        # zlatrd.cpp 	\
-        # zgebrd.cpp 	\
-        # zlabrd.cpp 	\
-        # zungqr_gpu.cpp	\
-        # zunmtr.cpp 	\
-        # zunmqr.cpp 	\
-        # \
-        # zcgeqrsv_gpu.cpp\
-        # \
-        # zgeev.cpp       \
-        # zheevd.cpp      \
-        # zgesvd.cpp      \
-
-#ifeq ($(PGIFORTRAN), 0)
-#ZSRC := $(ZSRC) magma_zf77.cpp
-#else
-#ZSRC := $(ZSRC) magma_zf77pgi.cpp
-#endif
+ifeq ($(PGIFORTRAN), 0)
+ZSRC := $(ZSRC) magma_zf77.cpp
+else
+ZSRC := $(ZSRC) magma_zf77pgi.cpp
+endif
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")

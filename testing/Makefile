@@ -22,34 +22,32 @@ ZSRC  = testing_zgemm.cpp	\
 	\
 	testing_zcposv_gpu.cpp	\
 	testing_zcgesv_gpu.cpp	\
-
-        #
-        # testing_zswap.cpp 	\
-        # testing_zgetrf_mc.cpp \
-        # testing_zgeqrf_mc.cpp \
-        # testing_zpotrf_mc.cpp \
-        # testing_zgeqrf.cpp 	\
-        # testing_zgeqrf-v2.cpp \
-        # testing_zgeqlf.cpp 	\
-        # testing_zgelqf.cpp 	\
-        # testing_zgehrd.cpp 	\
-        # testing_zhetrd.cpp 	\
-        # testing_zgebrd.cpp    \
-        # \
-        # testing_zgesv_gpu.cpp	\
-        # testing_zungqr_gpu.cpp  \
-        # \
-        # testing_zcposv_gpu.cpp	\
-        # testing_zcgeqrsv_gpu.cpp
+	testing_zswap.cpp 	\
+        testing_zgetrf_mc.cpp \
+        testing_zgeqrf_mc.cpp \
+        testing_zpotrf_mc.cpp \
+        testing_zgeqrf.cpp 	\
+        testing_zgeqrf-v2.cpp \
+        testing_zgeqlf.cpp 	\
+        testing_zgelqf.cpp 	\
+        testing_zgehrd.cpp 	\
+        testing_zhetrd.cpp 	\
+        testing_zgebrd.cpp    \
+        \
+        testing_zgesv_gpu.cpp	\
+        testing_zungqr_gpu.cpp  \
+        \
+        testing_zcposv_gpu.cpp	\
+        testing_zcgeqrsv_gpu.cpp
 
 
-#ifeq ($(FORT), pgfortran)
-#	FOBJ := fortran_thunking.o
-#	ZSRCF = testing_zgetrf_gpu_f.cuf
-#else
-#	FOBJ := fortran.o
-#	ZSRCF = testing_zgetrf_gpu_f.f
-#endif
+ifeq ($(FORT), pgfortran)
+	FOBJ := fortran_thunking.o
+	ZSRCF = testing_zgetrf_gpu_f.cuf
+else
+	FOBJ := fortran.o
+	ZSRCF = testing_zgetrf_gpu_f.f
+endif
 
 ZSRC += $(ZSRCF) 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)

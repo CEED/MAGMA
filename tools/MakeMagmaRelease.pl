@@ -127,8 +127,9 @@ sub MakeRelease {
     my $numversion = $major.'.'.$minor.'.'.$micro;
     my $cmd;
 
-    if ($rc != 0)
-	$numversion .= "-rc".$rc;
+    if ( $rc > 0 ) {
+	$numversion = $numversion."-rc".$rc;
+    }
 
     $RELEASE_PATH = $ENV{ PWD}."/magma_".$numversion;
 
