@@ -51,6 +51,8 @@ FERMISRC =	sgemm_fermi.cu 	\
                 \
                 strsm_tesla.cu 	\
                 dtrsm_tesla.cu	\
+                \
+                ssyr2k.cu       \
 
 TESLASRC =      sgemv_tesla.cu	\
 	        dgemv_tesla.cu 	\
@@ -81,7 +83,9 @@ TESLASRC =      sgemv_tesla.cu	\
 		dgemm_tesla_N_T_64_16_4_16_4.cu 		\
 		dgemm_tesla_T_N_32_32_8_8_8.cu 			\
 		dgemm_tesla_T_T_64_16_16_16_4.cu 		\
-		dgemm_tesla_T_T_64_16_16_16_4_v2.cu
+		dgemm_tesla_T_T_64_16_16_16_4_v2.cu             \
+                \
+                ssyr2k.cu                                       \
 
 # 		zhemv_tesla.cu
 
