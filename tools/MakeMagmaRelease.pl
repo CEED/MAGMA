@@ -14,12 +14,13 @@ my $BASENAME;
 my $svn    = "https://icl.cs.utk.edu/svn/magma/branches/sc_release";
 #my $svninst= "https://icl.cs.utk.edu/svn/plasma/plasma-installer";
 my $user   = "";
+my $rc = 0;
 
 my @file2delete = (
     "Makefile.gen",
     "tools",
-    "quark/examples",
-    "quark/docs",
+    "quark",
+    "docs",
     "include/Makefile",
     "make.inc.cumin",
     "make.inc.disco",
@@ -28,7 +29,56 @@ my @file2delete = (
     "Release-ToDo.txt",
     "BugsToFix.txt",
     "testing/fortran2.cpp",
-);
+    "src/magma_zf77.cpp",
+    "src/magma_zf77pgi.cpp",
+    "src/zcgeqrsv_gpu.cpp",
+    "src/zgebrd.cpp",
+    "src/zgeev.cpp",
+    "src/zgehrd.cpp",
+    "src/zgelqf.cpp",
+    "src/zgeqlf.cpp",
+    "src/zgeqrf.cpp",
+    "src/zgeqrf_mc.cpp",
+    "src/zgeqrf-v2.cpp",
+    "src/zgeqrf-v3.cpp",
+    "src/zgesvd.cpp",
+    "src/zgetrf_mc.cpp",
+    "src/zheevd.cpp",
+    "src/zhetrd.cpp",
+    "src/zlabrd.cpp",
+    "src/zlahr2.cpp",
+    "src/zlahru.cpp",
+    "src/zlatrd.cpp",
+    "src/zpotrf_mc.cpp",
+    "src/ztsqrt_gpu.cpp",
+    "src/zungqr_gpu.cpp",
+    "src/zunmqr.cpp",
+    "src/zunmtr.cpp",
+    "testing/fortran2.cpp",
+    "testing/results_fermi.txt",
+    "testing/testing_dgemv.cpp",
+    "testing/testing_dgemvt.cpp",
+    "testing/testing_sgemv.cpp",
+    "testing/testing_sgemvt.cpp",
+    "testing/testing_zcgeqrsv_gpu.cpp",
+    "testing/testing_zgebrd.cpp",
+    "testing/testing_zgehrd.cpp",
+    "testing/testing_zgelqf.cpp",
+    "testing/testing_zgemv.cpp",
+    "testing/testing_zgeqlf.cpp",
+    "testing/testing_zgeqrf.cpp",
+    "testing/testing_zgeqrf_mc.cpp",
+    "testing/testing_zgeqrf-v2.cpp",
+    "testing/testing_zgesv_gpu.cpp",
+    "testing/testing_zgetrf_f.f",
+    "testing/testing_zgetrf_gpu_f.cuf",
+    "testing/testing_zgetrf_gpu_f.f",
+    "testing/testing_zgetrf_mc.cpp",
+    "testing/testing_zhetrd.cpp",
+    "testing/testing_zpotrf_mc.cpp",
+    "testing/testing_zswap.cpp",
+    "testing/testing_zungqr_gpu.cpp",
+   );
 
 my $RELEASE_PATH;
 my %opts;
@@ -77,6 +127,9 @@ sub MakeRelease {
     my $numversion = $major.'.'.$minor.'.'.$micro;
     my $cmd;
 
+    if ($rc != 0)
+	$numversion .= "-rc".$rc;
+
     $RELEASE_PATH = $ENV{ PWD}."/magma_".$numversion;
 
     # Sauvegarde du rep courant
@@ -106,9 +159,9 @@ sub MakeRelease {
     }
 
     #Compile the documentation
-    print "Compile the documentation\n"; 
-    system("make -C ./docs");
-    myCmd("rm -f make.inc");
+    #print "Compile the documentation\n"; 
+    #system("make -C ./docs");
+    #myCmd("rm -f make.inc");
     
     #Remove non required files (Makefile.gen)
     foreach my $file (@file2delete){
@@ -176,7 +229,7 @@ sub Usage {
 
 }
 
-getopts("hd:u:r:s:",\%opts);
+getopts("hd:u:r:s:c:",\%opts);
 
 if ( defined $opts{h} ){
     Usage();
@@ -195,6 +248,9 @@ if (defined $opts{r}){
 }
 if (defined $opts{s}){
     $svn = $opts{s};
+}
+if (defined $opts{c}){
+    $rc = $opts{c};
 }
 
 if ( ($#ARGV + 1) < 3 ) {
