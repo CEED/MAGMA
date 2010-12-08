@@ -24,6 +24,14 @@
 #define min(a,b)  (((a)<(b))?(a):(b))
 #endif
 
+// define pfactor for number of flops in complex
+#define PRECISION_z
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+   #define pfactor 1.
+#else
+   #define pfactor 4.
+#endif
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgelqf
 */
@@ -113,7 +121,7 @@ int main( int argc, char** argv)
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-        lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
+        lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &M, h_R, &M );
 
         magma_zgelqf(M, N, h_R, M, tau, h_work, lwork, &info);
 
@@ -127,7 +135,7 @@ int main( int argc, char** argv)
         magma_zgelqf(M, N, h_R, M, tau, h_work, lwork, &info);
         end = get_current_time();
 
-        gpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
+        gpu_perf = pfactor*4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
         // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
 
         /* =====================================================================
@@ -139,7 +147,7 @@ int main( int argc, char** argv)
         if (info < 0)
             printf("Argument %d of zgelqf had an illegal value.\n", -info);
 
-        cpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
+        cpu_perf = pfactor*4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
         // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
 
         /* =====================================================================
