@@ -17,9 +17,9 @@
 
 extern "C" magma_int_t
 magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
-		 cuDoubleComplex *a,  magma_int_t lda, cuDoubleComplex *tau, 
+		 cuDoubleComplex *a,  magma_int_t lda, cuDoubleComplex *tau, cuDoubleComplex *td, 
                  cuDoubleComplex *c,  magma_int_t ldc, cuDoubleComplex *work, magma_int_t lwork, 
-                 cuDoubleComplex *td, magma_int_t *info)
+                 magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville

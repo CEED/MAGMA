@@ -195,12 +195,14 @@ void MAGMA_ZGEQRF_GPU(magma_int_t *m, magma_int_t *n, devptr_t *A, magma_int_t *
     magma_zgeqrf_gpu(*m, *n, d_a, *lda, tau, d_w, info); 
 }
 
-void MAGMA_ZGEQRS_GPU( magma_int_t *m, magma_int_t *n, magma_int_t *nrhs, devptr_t *A, magma_int_t *lda, double2 *tau, devptr_t *c, magma_int_t *ldc, double2 *work, magma_int_t *lwork, devptr_t *td, magma_int_t *info)
+void MAGMA_ZGEQRS_GPU( magma_int_t *m, magma_int_t *n, magma_int_t *nrhs, 
+		       devptr_t *A, magma_int_t *lda, double2 *tau, devptr_t *td, 
+		       devptr_t *c, magma_int_t *ldc, double2 *work, magma_int_t *lwork, magma_int_t *info)
 { 
     cuDoubleComplex *d_a  = (cuDoubleComplex *)(*A);
     cuDoubleComplex *d_c  = (cuDoubleComplex *)(*c);
     cuDoubleComplex *d_td = (cuDoubleComplex *)(*td);
-    magma_zgeqrs_gpu( *m, *n, *nrhs, d_a, *lda, tau, d_c, *ldc, work, *lwork, d_td, info); 
+    magma_zgeqrs_gpu( *m, *n, *nrhs, d_a, *lda, tau, d_td, d_c, *ldc, work, *lwork, info); 
 }
 
 void MAGMA_ZGETRF_GPU( magma_int_t *m, magma_int_t *n, devptr_t *A, magma_int_t *lda, magma_int_t *ipiv, magma_int_t *info)

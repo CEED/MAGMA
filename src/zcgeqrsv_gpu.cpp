@@ -238,8 +238,8 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     }
 
     // SWORK = B 
-    magma_cgeqrs_gpu(M, N, NRHS, SWORK+PTSA, N, tau, SWORK, M, 
-                     h_work, lwork, d_work, INFO);
+    magma_cgeqrs_gpu(M, N, NRHS, SWORK+PTSA, N, tau, d_work, 
+		     SWORK, M, h_work, lwork, INFO);
 
     // SWORK = X in SP 
     magmablas_clag2z(N, NRHS, SWORK, N, X, LDX, INFO);
@@ -284,8 +284,8 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
             -- These two Tasks are merged here. */
         // make SWORK = WORK ... residuals... 
         magmablas_zlag2c( N, NRHS, WORK, LDB, SWORK, N, INFO );
-        magma_cgeqrs_gpu( M, N, NRHS, SWORK+PTSA, N, tau, SWORK,
-                          M, h_work, lwork, d_work, INFO);
+        magma_cgeqrs_gpu( M, N, NRHS, SWORK+PTSA, N, tau, d_work,
+			  SWORK, M, h_work, lwork, INFO);
 
         if(INFO[0] !=0) {
             *ITER = -3 ;
@@ -343,8 +343,8 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
         return 0;
     }
     magmablas_zlacpy(MagmaUpperLower, N, NRHS, B , LDB, X, N);
-    magma_zgeqrs_gpu(M, N, NRHS, A, N, tau_d,
-                     X, M, h_work_d, lwork_d, d_work_d, INFO);
+    magma_zgeqrs_gpu(M, N, NRHS, A, N, tau_d, d_work_d,
+                     X, M, h_work_d, lwork_d, INFO);
     return 0;
 }
 
