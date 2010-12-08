@@ -777,11 +777,9 @@ void magmablas_ssymv6_tesla(char uplo, int m, float alpha, float *A, int lda,
 }
 
 extern "C"
-void  magmablas_ssymv_tesla( char uplo , int m , float alpha,  float *A , int lda , 
-				float *X , int incx, float beta, float *Y, int incy)
+void  magmablas_ssymv_tesla(char uplo , int m , float alpha,  float *A , int lda , 
+			    float *X , int incx, float beta, float *Y, int incy)
 {
-
-	
 	float *dC_work;
 	int bsz = 64;
 	int blocks = m / bsz + (m %bsz != 0);
