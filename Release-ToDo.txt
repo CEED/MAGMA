@@ -16,9 +16,9 @@ Task  Done      Who       What
 ---------------------------------------------------------------------------------
 2.    DONE    Piotr       Bug in gebrd.cpp due to code clean up and conversion
 ---------------------------------------------------------------------------------
-3.                        Bug in gehrd.cpp due to code clean up and conversion
+3.    DONE                Bug in gehrd.cpp due to code clean up and conversion
 ---------------------------------------------------------------------------------
-4.                        Move int to magma_int_t everywhere (if you do it ask me for 
+4.    CONSIDERE DONE      Move int to magma_int_t everywhere (if you do it ask me for 
                           an emai from Jill.Reese@MathWorks with some comments)
 ---------------------------------------------------------------------------------
 5.            Hatem       Add the basic symmetric and nonsymmetric eigensolvers
@@ -46,7 +46,7 @@ Task  Done      Who       What
 8.                         Don't include automatically magma_lapack.h in magma.h =>
                            add this line of include to amost all files
 ---------------------------------------------------------------------------------
-9.                         Multi-cores files have to be: moved to complex, updated 
+9.   DONE                  Multi-cores files have to be: moved to complex, updated 
                            to the last release of PLASMA, and cleaned.
                           [Stan: if this turne out to be too much work we can take
                            it out of the release and put a check mark on this task.
@@ -88,11 +88,11 @@ Task  Done      Who       What
                                   magma_zgetib( int func, int M  )
                                   magma_zsetib( int func, int ib )
 ---------------------------------------------------------------------------------
-15.            Peng        Fix a bug in gemm on Fermi for big matrices
+15.  DONE      Peng        Fix a bug in gemm on Fermi for big matrices
 ---------------------------------------------------------------------------------
-16.            Stan        Fix a bug in clean up with trd
+16.  DONE      Stan        Fix a bug in clean up with trd
 ---------------------------------------------------------------------------------
-18.                        The number of flops has to be adjusted for the complex
+18.  DONE for some         The number of flops has to be adjusted for the complex
                            versions in testing for measuring performance.
 ---------------------------------------------------------------------------------
 19                         Mixed precision files doesn't work in zc on tesla because of the 
@@ -103,7 +103,7 @@ Task  Done      Who       What
                                - zcgetrs_gpu.cpp
                                - zcgeqrsv_gpu.cpp), 
 ---------------------------------------------------------------------------------
-20                         Clean the norm computations and zlat2c files to make them work 
+20   DONE                  Clean the norm computations and zlat2c files to make them work 
                            on tesla:
                               - zlanhe.cu
                               - zlange.cu
