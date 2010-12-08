@@ -126,13 +126,16 @@ Task  Done      Who       What
                  zgetrs   -  -   /  ok
                  zgesv    -  -   /  ok
 
+                 zgeqrf   - MISSING /  ok  
+                 zgeqrs   -  -   /  ok  
+
+
      Mix precision
                  zcposv   -  -   /  ok
                  zcgesv   -  -   /  ok
                  zcgetrs  -  -   /  ok
   
      -----------------------
-                 zgeqrf   -  ok  /  ok   / GPU version: maybe we should add dwork/ldwork to follow cpu interface
                  zgelqf   -  ok  /  - 
                  zgeqlf   -  ok  /  - 
 
@@ -149,8 +152,6 @@ Task  Done      Who       What
                  zgeqrf-v2  - Need to be cleaned, doesn't do the same thing than _gpu-v2 ???
                  zgeqrf-v3       - 
                  zgeqrf_gpu-v2   -
-                 zgeqrs_gpu  - No CPU interface
-                               GPU interface doesn't follow lapack. Need Td pointer which is provided only by zgeqrs_gpu-v2.
                  zgesvd      - No comments
                  zheevd      - No comments
                  zhetrd      - No GPU interface /  CPU  in F2C
