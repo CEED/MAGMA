@@ -11,7 +11,7 @@ include ./Makefile.internal
 
 all: lib test
 
-lib: libquark libmagma libmagmablas
+lib: libmagma libmagmablas
 
 clean: cleanall
 
