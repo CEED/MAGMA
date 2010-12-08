@@ -25,6 +25,14 @@
 #define min(a,b)  (((a)<(b))?(a):(b))
 #endif
 
+// define pfactor for number of flops in complex
+#define PRECISION_s
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+   #define pfactor 1.
+#else
+   #define pfactor 4.
+#endif
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeqlf
 */
@@ -126,7 +134,7 @@ int main( int argc, char** argv)
         magma_zgeqlf( M, N, h_R, M, tau, h_work, lwork, &info);
         end = get_current_time();
 
-        gpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
+        gpu_perf = pfactor*4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
         // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
 
         /* =====================================================================
@@ -138,7 +146,7 @@ int main( int argc, char** argv)
         if (info < 0)
             printf("Argument %d of zgeqlf had an illegal value.\n", -info);
 
-        cpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
+        cpu_perf = pfactor*4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
         // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
 
         /* =====================================================================
