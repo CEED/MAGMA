@@ -113,7 +113,6 @@ int main( int argc, char** argv)
     }
 
     cudaMallocHost( (void**)&h_work, (lwork)*sizeof(cuDoubleComplex) );
-    //h_work = (cuDoubleComplex*)malloc( lwork * sizeof(cuDoubleComplex) );
     if (h_work == 0) {
         fprintf (stderr, "!!!! host memory allocation error (work)\n");
     }
@@ -149,8 +148,10 @@ int main( int argc, char** argv)
         /* =====================================================================
            Check the factorization
            =================================================================== */
-        cuDoubleComplex *hwork_Q = (cuDoubleComplex*)malloc( N * N * sizeof(cuDoubleComplex));
-        cuDoubleComplex *work    = (cuDoubleComplex*)malloc( 2 * N * N * sizeof(cuDoubleComplex));
+        cuDoubleComplex *hwork_Q = 
+	  (cuDoubleComplex*)malloc( N * N * sizeof(cuDoubleComplex));
+        cuDoubleComplex *work    = 
+	  (cuDoubleComplex*)malloc( 2 * N * N * sizeof(cuDoubleComplex));
 
         double result[2] = {0., 0.};
 
@@ -182,18 +183,14 @@ int main( int argc, char** argv)
 
 #endif
 
-        //printf("N = %d\n", N);
-        //printf("norm( A - Q H Q') / ( N * norm(A) * EPS ) = %f\n", result[0]);
-        //printf("norm( I - Q'  Q ) / ( N * EPS )           = %f\n", result[1]);
-        //printf("\n");
-
         free(hwork_Q);
         free(work);
         /* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
-        lapackf77_zhetrd("L", &N, h_A, &lda, diag2, offdiag2, tau2, h_work, &lwork, &info);
+        lapackf77_zhetrd("L", &N, h_A, &lda, diag2, offdiag2, tau2, 
+			 h_work, &lwork, &info);
         end = get_current_time();
 
         if (info < 0)
@@ -219,7 +216,6 @@ int main( int argc, char** argv)
     free(diag);    free(diag2);
     free(offdiag); free(offdiag2);
     cublasFree(h_work);
-    //free(h_work);
     cublasFree(h_R);
     cublasFree(d_A);
 
