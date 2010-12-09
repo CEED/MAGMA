@@ -71,17 +71,17 @@ int main( int argc, char** argv)
                 M = atoi(argv[++i]);
         }
         if (M>0 && N>0)
-            printf("  testing_zgetrf -M %d -N %d\n\n", M, N);
+            printf("  testing_zgeqrf_gpu -M %d -N %d\n\n", M, N);
         else
             {
                 printf("\nUsage: \n");
-                printf("  testing_zgetrf -M %d -N %d\n\n", 1024, 1024);
+                printf("  testing_zgeqrf_gpu -M %d -N %d\n\n", 1024, 1024);
                 exit(1);
             }
     }
     else {
         printf("\nUsage: \n");
-        printf("  testing_zgetrf_gpu -M %d -N %d\n\n", 1024, 1024);
+        printf("  testing_zgeqrf_gpu -M %d -N %d\n\n", 1024, 1024);
         M = N = size[9];
     }
 
