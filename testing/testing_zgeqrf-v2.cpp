@@ -32,6 +32,7 @@
 typedef struct {
   int nthreads;
   int nb;
+  int ob;
   int np_gpu;
   int m;
   int n;
@@ -66,11 +67,14 @@ void *cpu_thread(void *a)
     }
 
     M=MG.m-i*MG.nb;
-    N=MG.nb;
+    //N=MG.nb;
+    N=MG.ob;
     K=MG.nb;
-	if (MG.m >= MG.n) {
+	//if (MG.m >= MG.n) {
+	if (MG.m >= (MG.n-(MG.nthreads*MG.ob))) {
       if (i == (MG.np_gpu - 1)) {
-        K = MG.n-MG.nthreads*MG.nb-(MG.np_gpu-1)*MG.nb; 
+        //K = MG.n-MG.nthreads*MG.nb-(MG.np_gpu-1)*MG.nb; 
+        K = MG.n-MG.nthreads*MG.ob-(MG.np_gpu-1)*MG.nb; 
       }
 	}
 
@@ -80,7 +84,8 @@ void *cpu_thread(void *a)
 
     lapackf77_zlarfb(MagmaLeftStr, MagmaTransStr, MagmaForwardStr, MagmaColumnwiseStr,
                      &M,&N,&K,MG.a+i*MG.nb*MG.lda+i*MG.nb,&MG.lda,MG.t+i*MG.nb*MG.nb,&K,
-                     MG.a+MG.m*MG.n-(MG.nthreads-t)*MG.nb*MG.lda+i*MG.nb,&MG.lda,WORK,&N);
+                     //MG.a+MG.m*MG.n-(MG.nthreads-t)*MG.nb*MG.lda+i*MG.nb,&MG.lda,WORK,&N);
+                     MG.a+MG.m*MG.n-(MG.nthreads-t)*MG.ob*MG.lda+i*MG.nb,&MG.lda,WORK,&N);
 
     free(WORK);
 
@@ -99,23 +104,32 @@ void magma_init (int m, int n, cuDoubleComplex *a, int nthreads)
     //MG.nb = magma_get_sgeqrf_nb(min(m, n));
     MG.nb = 128;
 
-  if (MG.nb * MG.nthreads >= n){
+  if (MG.ob == -1)
+    MG.ob = MG.nb;
+
+  //if (MG.nb * MG.nthreads >= n){
+  if (MG.ob * MG.nthreads >= n){
     fprintf(stderr,"\n\nNumber of threads times block size not less than width of matrix.\n\n");
 	exit(1);
   }
 
-  int np = n/MG.nb;
-  if (n%MG.nb != 0)
-    np++;
+  //int np = n/MG.nb;
+  //if (n%MG.nb != 0)
+    //np++;
 
-  MG.np_gpu = np - MG.nthreads;
+  //MG.np_gpu = np - MG.nthreads;
+  MG.np_gpu = (n-(MG.nthreads * MG.ob)) / MG.nb;
+  if ( (n-(MG.nthreads * MG.ob)) % MG.nb != 0)
+    MG.np_gpu++;
+
   MG.m = m;
   MG.n = n;
   MG.lda = m;
   MG.a = a;
   MG.t = (cuDoubleComplex*)malloc(sizeof(cuDoubleComplex)*MG.n*MG.nb);
 
-  if (MG.n > MG.m) {
+  //if (MG.n > MG.m) {
+  if ((MG.n-(MG.nthreads*MG.ob)) > MG.m) {
     MG.np_gpu = m/MG.nb;
     if (m%MG.nb != 0)
       MG.np_gpu++;
@@ -176,6 +190,7 @@ int nquarkthreads=2;
     int ISEED[4] = {0,0,0,1};
 
     MG.nb=-1;
+    MG.ob=-1;
 
 	int loop = argc;
 
@@ -187,8 +202,10 @@ int nquarkthreads=2;
           N = atoi(argv[++i]);
         else if (strcmp("-M", argv[i])==0)
           M = atoi(argv[++i]);
-        else if (strcmp("-B", argv[i])==0)
+        else if (strcmp("-O", argv[i])==0)
           MG.nb = atoi(argv[++i]);
+        else if (strcmp("-B", argv[i])==0)
+          MG.ob = atoi(argv[++i]);
         else if (strcmp("-b", argv[i])==0)
           EN_BEE = atoi(argv[++i]);
         else if (strcmp("-A", argv[i])==0)
