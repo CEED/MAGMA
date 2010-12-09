@@ -46,7 +46,7 @@ int main( int argc, char** argv)
 
     magma_int_t  i, info;
     const char  *uplo     = MagmaLowerStr;
-    cuDoubleComplex      mzone    = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
     magma_int_t  ione     = 1;
     magma_int_t  ISEED[4] = {0,0,0,1};
     double       work[1], matnorm;

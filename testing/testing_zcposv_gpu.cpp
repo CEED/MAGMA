@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     double          *h_workd;
     magma_int_t lda, ldb, ldx;
     magma_int_t i, iter, info, size;
-    magma_int_t N;
+    magma_int_t N        = 0;
     magma_int_t ione     = 1;
     magma_int_t NRHS     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
@@ -65,13 +65,15 @@ int main(int argc, char **argv)
 	for(i = 1; i<argc; i++){	
 	    if (strcmp("-N", argv[i])==0)
 		N = atoi(argv[++i]);
+	    else if (strcmp("-nrhs", argv[i])==0)
+		NRHS = atoi(argv[++i]);
 	}
 	if (N>0) sizetest[0] = sizetest[9] = N;
 	else exit(1);
     }
     else {
 	printf("\nUsage: \n");
-	printf("  testing_zcposv_gpu -N %d\n\n", 1024);
+	printf("  testing_zcposv_gpu -nrhs %d -N %d\n\n", NRHS, 1024);
     }
     printf("Epsilon(double): %8.6e\n"
 	   "Epsilon(single): %8.6e\n\n", 
