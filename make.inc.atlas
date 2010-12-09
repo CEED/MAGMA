@@ -1,9 +1,9 @@
 #//////////////////////////////////////////////////////////////////////////////
-#   -- MAGMA (version 0.2) --
+#   -- MAGMA (version 1.0) --
 #      Univ. of Tennessee, Knoxville
 #      Univ. of California, Berkeley
 #      Univ. of Colorado, Denver
-#      November 2009
+#      November 2010
 #//////////////////////////////////////////////////////////////////////////////
 
 #
@@ -23,7 +23,7 @@ RANLIB    = ranlib
 
 OPTS      = -O3 -DADD_
 NVOPT     = --compiler-options -fno-strict-aliasing -DUNIX -O3 -DADD_
-LDOPTS    = -fPIC
+LDOPTS    = -fPIC -Xlinker -zmuldefs
 
 LIB       = /home/tomov/LIBS/lapack-lite-3.1.1/lapack_LINUX64.a \
             -lf77blas -latlas -lf2c -lcublas -lm
@@ -35,5 +35,5 @@ LIBDIR    = -L/home/tomov/LIBS/ATLAS/lib/Linux_HAMMER64SSE2 \
             -L$(CUDADIR)/lib
 INC       = -I$(CUDADIR)/include
 
-#LIBMAGMA     = libmagma.a
-#LIBMAGMABLAS = libmagmablas.a
+LIBMAGMA     = ../lib/libmagma.a
+LIBMAGMABLAS = ../lib/libmagmablas.a

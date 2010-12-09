@@ -1,9 +1,9 @@
 #//////////////////////////////////////////////////////////////////////////////
-#   -- MAGMA (version 0.2) --
+#   -- MAGMA (version 1.0) --
 #      Univ. of Tennessee, Knoxville
 #      Univ. of California, Berkeley
 #      Univ. of	Colorado, Denver
-#      November 2009
+#      November 2010
 #//////////////////////////////////////////////////////////////////////////////
 
 #
@@ -23,7 +23,7 @@ RANLIB    = ranlib
 
 OPTS      = -O3 -DADD_
 NVOPTS    = --compiler-options -fno-strict-aliasing -DUNIX -O3 -DADD_
-LDOPTS    = -fPIC -nofor_main
+LDOPTS    = -fPIC -nofor_main -Xlinker -zmuldefs
 
 LIB       = -lmkl_em64t -lguide -lpthread -lcublas -lm 
 
@@ -33,5 +33,5 @@ LIBDIR    = -L$(HOME)/intel/mkl/10.0.1.014/lib/em64t \
             -L$(CUDADIR)/lib64
 INC       = -I$(CUDADIR)/include
 
-#LIBMAGMA     = libmagma.a
-#LIBMAGMABLAS = libmagmablas.a
+LIBMAGMA     = ../lib/libmagma.a
+LIBMAGMABLAS = ../lib/libmagmablas.a
