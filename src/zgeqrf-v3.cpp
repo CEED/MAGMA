@@ -22,6 +22,7 @@
 typedef struct {
   int nthreads;
   int nb;
+  int ob;
   int np_gpu;
   int m;
   int n;
@@ -152,7 +153,7 @@ magma_zgeqrf3(magma_int_t m, magma_int_t n,
     pthread_join(MG.thread[k], NULL);
   }
 
-  if (MG.m >= MG.n) {
+  if (MG.m >= (MG.n - (MG.nthreads*MG.ob))) {
     magma_zgeqrf2(M, N, a+(n-MG.nthreads*MG.nb)*m+(n-MG.nthreads*MG.nb), m, 
     //magma_zgeqrf(M, N, a+(n-MG.nthreads*MG.nb)*m+(n-MG.nthreads*MG.nb), m, 
                   &tau[n-MG.nthreads*MG.nb], work, lwork, info);
