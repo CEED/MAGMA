@@ -30,13 +30,13 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     Purpose
     =======
 
-    ZUNGQR generates an M-by-N real matrix Q with orthonormal columns,
+    ZUNGQR generates an M-by-N COMPLEX_16 matrix Q with orthonormal columns,
     which is defined as the first N columns of a product of K elementary
     reflectors of order M
 
           Q  =  H(1) H(2) . . . H(k)
 
-    as returned by SGEQRF_GPU2.
+    as returned by ZGEQRF_GPU.
 
     Arguments
     =========
@@ -51,22 +51,22 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
             The number of elementary reflectors whose product defines the
             matrix Q. N >= K >= 0.
 
-    DA      (input/output) REAL array A on the GPU device, dimension (LDDA,N).
-            On entry, the i-th column must contain the vector which
-            defines the elementary reflector H(i), for i = 1,2,...,k, as
-            returned by SGEQRF in the first k columns of its array
-            argument A.
+    DA      (input/output) COMPLEX_16 array A on the GPU device, 
+            dimension (LDDA,N). On entry, the i-th column must contain 
+            the vector which defines the elementary reflector H(i), for
+            i = 1,2,...,k, as returned by ZGEQRF_GPU in the first k 
+            columns of its array argument A.
             On exit, the M-by-N matrix Q.
 
     LDDA    (input) INTEGER
             The first dimension of the array A. LDDA >= max(1,M).
 
-    TAU     (input) REAL array, dimension (K)
+    TAU     (input) COMPLEX_16 array, dimension (K)
             TAU(i) must contain the scalar factor of the elementary
-            reflector H(i), as returned by SGEQRF.
+            reflector H(i), as returned by ZGEQRF_GPU.
 
-    DWORK   (input) REAL work space array on the GPU device.
-            This must be the 8th argument of magma_sgeqrf_gpu2.
+    DWORK   (input) COMPLEX_16 work space array on the GPU device.
+            This must be the 7th argument of magma_zgeqrf_gpu.
 
     INFO    (output) INTEGER
             = 0:  successful exit
