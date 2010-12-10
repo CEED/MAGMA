@@ -15,7 +15,7 @@
 #include "magma.h"
 #include "magmablas.h"
 
-extern "C" int
+extern "C" magma_int_t
 magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n, 
 	     cuDoubleComplex *a, magma_int_t *lda, double *s, cuDoubleComplex *u, 
 	     magma_int_t *ldu, cuDoubleComplex *vt, magma_int_t *ldvt, 

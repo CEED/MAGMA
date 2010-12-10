@@ -5,8 +5,7 @@
        Univ. of Colorado, Denver
        November 2010
 
-       @precisions normal z -> s d c
-
+       to go to real 'w' must be changed to 'wr', 'wi' everywhere
 */
 
 #include <stdio.h>
@@ -15,7 +14,7 @@
 #include "magma.h"
 #include "magmablas.h"
 
-extern "C" int
+extern "C" magma_int_t
 magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n, 
 	    cuDoubleComplex *a, magma_int_t *lda, 
 	    cuDoubleComplex *w, 
@@ -125,8 +124,7 @@ magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
     double d__1, d__2;
     cuDoubleComplex z__1, z__2;
 
-    double sqrt(double), d_imag(cuDoubleComplex *);
-    void d_cnjg(cuDoubleComplex *, cuDoubleComplex *);
+    double sqrt(double);
 
     static magma_int_t i__, k, ihi;
     static double scl;
@@ -268,7 +266,7 @@ magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
     if (*n == 0) {
 	return 0;
     }
-
+   
     /* Get machine constants */
     eps = dlamch_("P");
     smlnum = dlamch_("S");
@@ -401,11 +399,11 @@ magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
 		/* Computing 2nd power */
 		d__1 = MAGMA_Z_REAL(vl[i__3]);
 		/* Computing 2nd power */
-		d__2 = d_imag(&vl[k + i__ * vl_dim1]);
+		d__2 = MAGMA_Z_IMAG(vl[k + i__ * vl_dim1]);
 		rwork[irwork + k - 1] = d__1 * d__1 + d__2 * d__2;
 	      }
 	    k = idamax_(n, &rwork[irwork], &c__1);
-	    d_cnjg(&z__2, &vl[k + i__ * vl_dim1]);
+	    MAGMA_Z_CNJG(z__2, vl[k + i__ * vl_dim1]);
 	    d__1 = sqrt(rwork[irwork + k - 1]);
 	    MAGMA_Z_DSCALE(z__1, z__2, d__1);
 	    MAGMA_Z_ASSIGN(tmp, z__1);
@@ -436,11 +434,11 @@ magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
 		/* Computing 2nd power */
 		d__1 = MAGMA_Z_REAL(vr[i__3]);
 		/* Computing 2nd power */
-		d__2 = d_imag(&vr[k + i__ * vr_dim1]);
+		d__2 = MAGMA_Z_IMAG(vr[k + i__ * vr_dim1]);
 		rwork[irwork + k - 1] = d__1 * d__1 + d__2 * d__2;
 	    }
 	    k = idamax_(n, &rwork[irwork], &c__1);
-	    d_cnjg(&z__2, &vr[k + i__ * vr_dim1]);
+	    MAGMA_Z_CNJG(z__2, vr[k + i__ * vr_dim1]);
 	    d__1 = sqrt(rwork[irwork + k - 1]);
 	    MAGMA_Z_DSCALE(z__1, z__2, d__1);
 	    MAGMA_Z_ASSIGN(tmp, z__1);
