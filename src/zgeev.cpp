@@ -304,9 +304,13 @@ magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
     itau = 1;
     iwrk = itau + *n;
     i__1 = *lwork - iwrk + 1;
-    lapackf77_zgehrd(n, &ilo, &ihi, &a[a_offset], lda, &work[itau], &work[iwrk], &i__1,
-		     &ierr);
-
+    /*
+    lapackf77_zgehrd(n, &ilo, &ihi, &a[a_offset], lda,
+		     &work[itau], &work[iwrk], &i__1, &ierr);
+    */
+    magma_zgehrd(*n, ilo, ihi, &a[a_offset], *lda,
+		 &work[itau], &work[iwrk], &i__1, &ierr);
+    
     if (wantvl) {
       /*        Want left eigenvectors   
 		Copy Householder vectors to VL */

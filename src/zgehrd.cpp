@@ -20,7 +20,7 @@ extern "C" magma_int_t
 magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, 
 	     cuDoubleComplex *a, magma_int_t lda,
 	     cuDoubleComplex *tau, cuDoubleComplex *work, 
-	     magma_int_t *lwork, cuDoubleComplex *da, magma_int_t *info)
+	     magma_int_t *lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -77,10 +77,6 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
             this value as the first entry of the WORK array, and no error   
             message related to LWORK is issued by XERBLA.   
 
-    DA      (workspace)  SINGLE array on the GPU, dimension 
-            N*N + 2*N*NB + NB*NB,
-            where NB can be obtained through magma_get_zgehrd_nb(N).
-
     INFO    (output) INTEGER   
             = 0:  successful exit   
             < 0:  if INFO = -i, the i-th argument had an illegal value.   
@@ -136,14 +132,6 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     magma_int_t nb = magma_get_zgehrd_nb(n);
     magma_int_t N = n, ldda = n;
 
-    cuDoubleComplex *d_A    = da;
-    cuDoubleComplex *d_work = da + (N+nb)*ldda; 
-
-    magma_int_t i__;
-
-    cuDoubleComplex *t;
-    t = (cuDoubleComplex *)malloc(nb*nb*sizeof(cuDoubleComplex));
-
     magma_int_t ib;
     magma_int_t nh, iws;
     magma_int_t nbmin, iinfo;
@@ -153,7 +141,6 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     --tau;
 
     *info = 0;
-
     MAGMA_Z_SET2REAL( work[0], (double) n * nb );
 
     lquery = *lwork == -1;
@@ -173,6 +160,28 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     else if (lquery)
       return 0;
 
+    /* Quick return if possible */
+    nh = ihi - ilo + 1;
+    if (nh <= 1) {
+      work[0] = c_one;
+      return 0;
+    }
+
+    cuDoubleComplex *da;
+    cublasStatus status;
+    status = cublasAlloc(N*ldda+2*N*nb+nb*nb, sizeof(cuDoubleComplex), (void**)&da);
+    if (status != CUBLAS_STATUS_SUCCESS) {
+      fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
+    }
+    
+    cuDoubleComplex *d_A    = da;
+    cuDoubleComplex *d_work = da + (N+nb)*ldda;
+
+    magma_int_t i__;
+
+    cuDoubleComplex *t;
+    t = (cuDoubleComplex *)malloc(nb*nb*sizeof(cuDoubleComplex));
+
     zzero_nbxnb_block(nb, d_A+N*ldda, ldda);
 
     /* Set elements 1:ILO-1 and IHI:N-1 of TAU to zero */
@@ -184,13 +193,6 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 
     for(i__=0; i__< nb*nb; i__+=4)
       t[i__] = t[i__+1] = t[i__+2] = t[i__+3] = c_zero;
-
-    /* Quick return if possible */
-    nh = ihi - ilo + 1;
-    if (nh <= 1) {
-	work[0] = c_one;
-	return 0;
-    }
 
     nbmin = 2;
     iws = 1;
@@ -262,6 +264,7 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     lapackf77_zgehd2(&n, &i__, &ihi, a, &lda, &tau[1], work, &iinfo);
     MAGMA_Z_SET2REAL( work[0], (double) iws );
     
+    cublasFree(da);
     free(t);
  
     return 0;
