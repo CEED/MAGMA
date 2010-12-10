@@ -73,6 +73,10 @@ extern "C" {
 #    define lapackf77_zunmql   zunmql_
 #    define lapackf77_zunmqr   zunmqr_
 
+#    define lapackf77_zgeev    zgeev_
+#    define lapackf77_zheevd   zheevd_
+#    define lapackf77_zgesvd   zgesvd_
+
 #    define lapackf77_zbdt01   zbdt01_
 #    define lapackf77_zhet21   zhet21_
 #    define lapackf77_zhst01   zhst01_
@@ -134,6 +138,10 @@ extern "C" {
 #    define lapackf77_zunmlq   zunmlq
 #    define lapackf77_zunmql   zunmql
 #    define lapackf77_zunmqr   zunmqr
+
+#    define lapackf77_zgeev    zgeev
+#    define lapackf77_zheevd   zheevd
+#    define lapackf77_zgesvd   zgesvd  
 
 #    define lapackf77_zbdt01   zbdt01
 #    define lapackf77_zhet21   zhet21
@@ -197,6 +205,10 @@ void    lapackf77_zunm2r(const char *side, const char *trans, magma_int_t *m, ma
 void    lapackf77_zunmlq(const char *side, const char *trans, magma_int_t *m, magma_int_t *n, magma_int_t *k, const cuDoubleComplex *a, magma_int_t *lda, const cuDoubleComplex *tau, cuDoubleComplex *c, magma_int_t *ldc, cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
 void    lapackf77_zunmql(const char *side, const char *trans, magma_int_t *m, magma_int_t *n, magma_int_t *k, const cuDoubleComplex *a, magma_int_t *lda, const cuDoubleComplex *tau, cuDoubleComplex *c, magma_int_t *ldc, cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
 void    lapackf77_zunmqr(const char *side, const char *trans, magma_int_t *m, magma_int_t *n, magma_int_t *k, const cuDoubleComplex *a, magma_int_t *lda, const cuDoubleComplex *tau, cuDoubleComplex *c, magma_int_t *ldc, cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
+
+void lapackf77_zgeev(char *jobvl, char *jobvr, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, cuDoubleComplex *w,  cuDoubleComplex *vl, magma_int_t *ldvl, cuDoubleComplex *vr, magma_int_t *ldvr, cuDoubleComplex *work, magma_int_t *lwork, double *rwork, magma_int_t *info);
+void lapackf77_zheevd(char *jobz, char *uplo, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, double *w, cuDoubleComplex *work, magma_int_t *lwork, double *rwork, magma_int_t *lrwork, magma_int_t *iwork, magma_int_t *liwork, magma_int_t *info);
+void lapackf77_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda, double *s, cuDoubleComplex *u, magma_int_t *ldu, cuDoubleComplex *vt, magma_int_t *ldvt, cuDoubleComplex *work, magma_int_t *lwork, double *rwork, magma_int_t *info );
 
   /*
    * Testing functions
