@@ -19,6 +19,8 @@
 typedef struct {
   int nthreads;
   int nb;
+  int ob;
+  int fb;
   int np_gpu;
   int m;
   int n;
