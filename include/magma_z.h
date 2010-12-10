@@ -25,8 +25,7 @@ magma_int_t magma_zgebrd( magma_int_t m, magma_int_t n, cuDoubleComplex *A,
 			  magma_int_t *info);
 magma_int_t magma_zgehrd( magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 			  cuDoubleComplex *A, magma_int_t lda, cuDoubleComplex *tau, 
-			  cuDoubleComplex *work, magma_int_t *lwork, cuDoubleComplex *da,
-			  magma_int_t *info);
+			  cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
 magma_int_t magma_zgelqf( magma_int_t m, magma_int_t n, 
                           cuDoubleComplex *A,    magma_int_t lda,   cuDoubleComplex *tau, 
                           cuDoubleComplex *work, magma_int_t lwork, magma_int_t *info);
