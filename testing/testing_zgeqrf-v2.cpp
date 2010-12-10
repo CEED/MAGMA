@@ -119,6 +119,7 @@ void magma_init (int m, int n, cuDoubleComplex *a, int nthreads)
 
   //MG.np_gpu = np - MG.nthreads;
   MG.np_gpu = (n-(MG.nthreads * MG.ob)) / MG.nb;
+
   if ( (n-(MG.nthreads * MG.ob)) % MG.nb != 0)
     MG.np_gpu++;
 
@@ -203,9 +204,9 @@ int nquarkthreads=2;
         else if (strcmp("-M", argv[i])==0)
           M = atoi(argv[++i]);
         else if (strcmp("-O", argv[i])==0)
-          MG.nb = atoi(argv[++i]);
-        else if (strcmp("-B", argv[i])==0)
           MG.ob = atoi(argv[++i]);
+        else if (strcmp("-B", argv[i])==0)
+          MG.nb = atoi(argv[++i]);
         else if (strcmp("-b", argv[i])==0)
           EN_BEE = atoi(argv[++i]);
         else if (strcmp("-A", argv[i])==0)
