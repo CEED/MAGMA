@@ -33,6 +33,7 @@ typedef struct {
   int nthreads;
   int nb;
   int ob;
+  int fb;
   int np_gpu;
   int m;
   int n;
@@ -106,6 +107,9 @@ void magma_init (int m, int n, cuDoubleComplex *a, int nthreads)
 
   if (MG.ob == -1)
     MG.ob = MG.nb;
+
+  if (MG.fb == -1)
+    MG.fb = MG.nb;
 
   //if (MG.nb * MG.nthreads >= n){
   if (MG.ob * MG.nthreads >= n){
@@ -192,6 +196,7 @@ int nquarkthreads=2;
 
     MG.nb=-1;
     MG.ob=-1;
+    MG.fb=-1;
 
 	int loop = argc;
 
@@ -203,6 +208,8 @@ int nquarkthreads=2;
           N = atoi(argv[++i]);
         else if (strcmp("-M", argv[i])==0)
           M = atoi(argv[++i]);
+        else if (strcmp("-F", argv[i])==0)
+          MG.fb = atoi(argv[++i]);
         else if (strcmp("-O", argv[i])==0)
           MG.ob = atoi(argv[++i]);
         else if (strcmp("-B", argv[i])==0)
