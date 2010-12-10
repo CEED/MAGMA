@@ -33,7 +33,6 @@ int main( int argc, char** argv)
     printout_devices( );
 
     cuDoubleComplex *h_A, *h_R, *h_work, *tau;
-    cuDoubleComplex *d_A;
     double gpu_perf, cpu_perf;
 
     TimeStruct start, end;
@@ -87,11 +86,6 @@ int main( int argc, char** argv)
 
     int nb = magma_get_zgehrd_nb(size[9]);
     int lwork = size[9]*nb;
-    status = cublasAlloc(n2+2*lwork+nb*nb, sizeof(cuDoubleComplex), (void**)&d_A);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
-    }
-
     cudaMallocHost( (void**)&h_work, lwork*sizeof(cuDoubleComplex) );
     if (h_work == 0) {
         fprintf (stderr, "!!!! host memory allocation error (work)\n");
@@ -112,11 +106,11 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-        magma_zgehrd( N, ione, N, h_R, N, tau, h_work, &lwork, d_A, &info);
+        magma_zgehrd( N, ione, N, h_R, N, tau, h_work, &lwork, &info);
         end = get_current_time();
 
         gpu_perf = 10.*N*N*N/(3.*1000000*GetTimerValue(start,end));
-        // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
+        printf("GPU Processing time: %f (s) \n", GetTimerValue(start,end)/1000.);
 
         /* =====================================================================
            Check the factorization
@@ -163,7 +157,7 @@ int main( int argc, char** argv)
             printf("Argument %d of zgehrd had an illegal value.\n", -info);
 
         cpu_perf = 10.*N*N*N/(3.*1000000*GetTimerValue(start,end));
-        // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
+        printf("CPU Processing time: %f (s) \n", GetTimerValue(start,end)/1000.);
 
         /* =====================================================================
            Print performance and error.
@@ -181,7 +175,6 @@ int main( int argc, char** argv)
     free(tau);
     cublasFree(h_work);
     cublasFree(h_R);
-    cublasFree(d_A);
 
     /* Shutdown */
     status = cublasShutdown();

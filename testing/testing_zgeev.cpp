@@ -133,7 +133,9 @@ int main( int argc, char** argv)
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
 
-        magma_zgeev("V", "V", &N, h_R, &N, w1, VL, &N, VR, &N, 
+        //magma_zgeev("V", "V", 
+	magma_zgeev("N", "N",
+		    &N, h_R, &N, w1, VL, &N, VR, &N, 
 		    h_work, &lwork, rwork, &info);
 
         for(j=0; j<n2; j++)
@@ -143,7 +145,9 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-        magma_zgeev("V", "V", &N, h_R, &N, w1, VL, &N, VR, &N,
+        //magma_zgeev("V", "V",
+	magma_zgeev("N", "N",
+		    &N, h_R, &N, w1, VL, &N, VR, &N,
                     h_work, &lwork, rwork, &info);
         end = get_current_time();
 
@@ -153,7 +157,9 @@ int main( int argc, char** argv)
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
-        lapackf77_zgeev("V", "V", &N, h_A, &N, w2, VL, &N, VR, &N,
+        // lapackf77_zgeev("V", "V",
+	lapackf77_zgeev("N", "N",
+			&N, h_A, &N, w2, VL, &N, VR, &N,
 			h_work, &lwork, rwork, &info);
         end = get_current_time();
         if (info < 0)
