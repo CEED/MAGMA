@@ -140,23 +140,23 @@ magma_zgeqrf3(magma_int_t m, magma_int_t n,
     return 0;
   }
 
-  int M=MG.nthreads*MG.nb;
-  int N=MG.nthreads*MG.nb;
+  int M=MG.nthreads*MG.ob;
+  int N=MG.nthreads*MG.ob;
 
   if (MG.m > MG.n) {
-    M = MG.m - (MG.n-MG.nthreads*MG.nb);
+    M = MG.m - (MG.n-MG.nthreads*MG.ob);
   }
 
-  magma_zgeqrf2(m,n-MG.nthreads*MG.nb, a, m, tau, work, lwork, info);
+  magma_zgeqrf2(m,n-MG.nthreads*MG.ob, a, m, tau, work, lwork, info);
 
   for (k = 0; k < MG.nthreads; k++){
     pthread_join(MG.thread[k], NULL);
   }
 
   if (MG.m >= (MG.n - (MG.nthreads*MG.ob))) {
-    magma_zgeqrf2(M, N, a+(n-MG.nthreads*MG.nb)*m+(n-MG.nthreads*MG.nb), m, 
+    magma_zgeqrf2(M, N, a+(n-MG.nthreads*MG.ob)*m+(n-MG.nthreads*MG.ob), m, 
     //magma_zgeqrf(M, N, a+(n-MG.nthreads*MG.nb)*m+(n-MG.nthreads*MG.nb), m, 
-                  &tau[n-MG.nthreads*MG.nb], work, lwork, info);
+                  &tau[n-MG.nthreads*MG.ob], work, lwork, info);
   }
  
 }
