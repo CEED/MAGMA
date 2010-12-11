@@ -114,7 +114,11 @@ Task  Done      Who       What
 22                         zclaswp interface should be:	
 			   ZCLASWP( N, A, LDA, SA, LDSA, K1, K2, IPIV, INCX ) 
 ---------------------------------------------------------------------------------
-23                         Status of src directory 
+23                         magma module describing the interfaces for use 
+                           from fortran 
+---------------------------------------------------------------------------------
+
+                           Status of src directory 
                            
                             CPU  /  GPU  / Remark 
      One sided
