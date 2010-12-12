@@ -117,6 +117,12 @@ Task  Done      Who       What
 23                         magma module describing the interfaces for use 
                            from fortran 
 ---------------------------------------------------------------------------------
+24                         Fix geev in real arithmetic. The interface in real is 
+                           different; w has to be replaced by a pair of arguments -
+                           'wr', and 'wi'.
+---------------------------------------------------------------------------------
+
+
 
                            Status of src directory 
                            
