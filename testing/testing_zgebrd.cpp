@@ -117,7 +117,6 @@ int main( int argc, char** argv)
     }
 
     cudaMallocHost( (void**)&h_work, (lwork)*sizeof(cuDoubleComplex) );
-    //h_work = (cuDoubleComplex*)malloc( nb *lwork * sizeof(cuDoubleComplex) );
     if (h_work == 0) {
         fprintf (stderr, "!!!! host memory allocation error (work)\n");
         return 127;
@@ -185,11 +184,6 @@ int main( int argc, char** argv)
         lapackf77_zunt01("Columns", &M, &M, h_R, &M, work, &lwork, &result[1]);
         lapackf77_zunt01("Rows", &M, &N, PT, &M, work, &lwork, &result[2]);
 #endif
-        //printf("N = %d\n", N);
-        //printf("norm(A -  Q  B  PT) / ( N * norm(A) * EPS ) = %f\n", result[0]);
-        //printf("norm(I -  Q' *  Q ) / ( N * EPS )           = %f\n", result[1]);
-        //printf("norm(I - PT' * PT ) / ( N * EPS )           = %f\n", result[2]);
-        //printf("\n");
 
         free(PT);
         free(work);
@@ -225,7 +219,6 @@ int main( int argc, char** argv)
     free(diag);    free(diag2);
     free(offdiag); free(offdiag2);
     cublasFree(h_work);
-    //free(h_work);
     cublasFree(h_R);
     cublasFree(d_A);
 

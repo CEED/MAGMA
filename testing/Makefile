@@ -39,7 +39,8 @@ ZSRC  = testing_zgemm.cpp	\
         \
         testing_zcgeqrsv_gpu.cpp \
         \
-        testing_zgeev.cpp \
+        testing_zgeev.cpp  \
+        testing_zgesvd.cpp \
 
 
 ifeq ($(FORT), pgfortran)
