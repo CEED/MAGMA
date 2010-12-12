@@ -95,10 +95,9 @@ extern "C" {
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA function definitions / Data on CPU
 */
-void MAGMA_ZGEBRD( magma_int_t *m, magma_int_t *n, double2 *A, magma_int_t *lda, double *d, double *e, double2 *tauq,  double2 *taup, double2 *work, magma_int_t *lwork, devptr_t *da, magma_int_t *info)
+void MAGMA_ZGEBRD( magma_int_t *m, magma_int_t *n, double2 *A, magma_int_t *lda, double *d, double *e, double2 *tauq,  double2 *taup, double2 *work, magma_int_t *lwork, magma_int_t *info)
 { 
-    cuDoubleComplex *d_a = (cuDoubleComplex *)(*da);
-    magma_zgebrd( *m, *n, A, *lda, d, e, tauq,  taup, work, *lwork, d_a, info); 
+    magma_zgebrd( *m, *n, A, *lda, d, e, tauq,  taup, work, *lwork, info); 
 }
 
 void MAGMA_ZGEHRD( magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi, double2 *A, magma_int_t *lda, double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info)
