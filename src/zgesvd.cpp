@@ -796,8 +796,12 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		   (CWorkspace: need 3*N, prefer 2*N+2*N*NB)   
 		   (RWorkspace: need N) */
 		i__2 = *lwork - iwork + 1;
+		/*
 		lapackf77_zgebrd(n, n, &a[a_offset], lda, &s[1], &rwork[ie], 
 				 &work[itauq], &work[itaup], &work[iwork], &i__2, &ierr);
+		*/
+		magma_zgebrd(*n, *n, &a[a_offset], *lda, &s[1], &rwork[ie],
+			     &work[itauq], &work[itaup], &work[iwork], i__2, &ierr);
 		ncvt = 0;
 		if (wntvo || wntvas) {
 
@@ -887,9 +891,14 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		    (CWorkspace: need N*N+3*N, prefer N*N+2*N+2*N*NB)   
 		    (RWorkspace: need N) */
 		i__2 = *lwork - iwork + 1;
+		/*
 		lapackf77_zgebrd(n, n, &work[ir], &ldwrkr, &s[1], &rwork[ie], &
 				 work[itauq], &work[itaup], &work[iwork], &i__2, &
 				 ierr);
+		*/
+		magma_zgebrd(*n, *n, &work[ir], ldwrkr, &s[1], &rwork[ie], &
+			     work[itauq], &work[itaup], &work[iwork], i__2, &
+			     ierr);
 		
 		/*  Generate left vectors bidiagonalizing R   
 		    (CWorkspace: need N*N+3*N, prefer N*N+2*N+N*NB)   
@@ -938,8 +947,12 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		    (CWorkspace: need 2*N+M, prefer 2*N+(M+N)*NB)   
 		    (RWorkspace: N) */
 		i__3 = *lwork - iwork + 1;
+		/*
 		lapackf77_zgebrd(m, n, &a[a_offset], lda, &s[1], &rwork[ie], 
 				 &work[itauq], &work[itaup], &work[iwork], &i__3, &ierr);
+		*/
+		magma_zgebrd(*m, *n, &a[a_offset], *lda, &s[1], &rwork[ie],
+			     &work[itauq], &work[itaup], &work[iwork], i__3, &ierr);
 		
 		/* Generate left vectors bidiagonalizing A   
                    (CWorkspace: need 3*N, prefer 2*N+N*NB)   
@@ -1023,9 +1036,14 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		    (CWorkspace: need N*N+3*N, prefer N*N+2*N+2*N*NB)   
 		    (RWorkspace: need N) */
 		i__3 = *lwork - iwork + 1;
+		/*
 		lapackf77_zgebrd(n, n, &vt[vt_offset], ldvt, &s[1], &rwork[ie], &
 				 work[itauq], &work[itaup], &work[iwork], &i__3, &
 				 ierr);
+		*/
+		magma_zgebrd(*n, *n, &vt[vt_offset], *ldvt, &s[1], &rwork[ie], &
+			     work[itauq], &work[itaup], &work[iwork], i__3, &ierr);
+
 		lapackf77_zlacpy("L", n, n, &vt[vt_offset], ldvt, &work[ir], &
 				 ldwrkr);
 		
@@ -1109,9 +1127,13 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                    (CWorkspace: need 3*N, prefer 2*N+2*N*NB)   
                    (RWorkspace: N) */
 		i__2 = *lwork - iwork + 1;
+		/*
 		lapackf77_zgebrd(n, n, &vt[vt_offset], ldvt, &s[1], &rwork[ie], &
 				 work[itauq], &work[itaup], &work[iwork], &i__2, &
 				 ierr);
+		*/
+		magma_zgebrd(*n, *n, &vt[vt_offset], *ldvt, &s[1], &rwork[ie], &
+			     work[itauq], &work[itaup], &work[iwork], i__2, &ierr);
 
 		/* Multiply Q in A by left vectors bidiagonalizing R   
                    (CWorkspace: need 2*N+M, prefer 2*N+M*NB)   
@@ -1193,9 +1215,14 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: need N*N+3*N, prefer N*N+2*N+2*N*NB)   
                       (RWorkspace: need N) */
 		  i__2 = *lwork - iwork + 1;
+		  /*
 		  lapackf77_zgebrd(n, n, &work[ir], &ldwrkr, &s[1], &rwork[ie], &
 				   work[itauq], &work[itaup], &work[iwork], &
 				   i__2, &ierr);
+		  */
+		  magma_zgebrd(*n, *n, &work[ir], ldwrkr, &s[1], &rwork[ie], &
+			       work[itauq], &work[itaup], &work[iwork], 
+			       i__2, &ierr);
 
 		  /*  Generate left vectors bidiagonalizing R in WORK(IR)   
                       (CWorkspace: need N*N+3*N, prefer N*N+2*N+N*NB)   
@@ -1256,9 +1283,14 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: need 3*N, prefer 2*N+2*N*NB)   
                       (RWorkspace: need N) */
 		  i__2 = *lwork - iwork + 1;
+		  /*
 		  lapackf77_zgebrd(n, n, &a[a_offset], lda, &s[1], &rwork[ie], &
 				   work[itauq], &work[itaup], &work[iwork], &
 				   i__2, &ierr);
+		  */
+		  magma_zgebrd(*n, *n, &a[a_offset], *lda, &s[1], &rwork[ie], &
+			       work[itauq], &work[itaup], &work[iwork], 
+			       i__2, &ierr);
 		  
 		  /*  Multiply Q in U by left vectors bidiagonalizing R   
                       (CWorkspace: need 2*N+M, prefer 2*N+M*NB)   
@@ -1342,9 +1374,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                                    prefer 2*N*N+2*N+2*N*NB)   
                       (RWorkspace: need   N) */
 		  i__2 = *lwork - iwork + 1;
+		  /*
 		  lapackf77_zgebrd(n, n, &work[iu], &ldwrku, &s[1], &rwork[ie], &
 				   work[itauq], &work[itaup], &work[iwork], &
 				   i__2, &ierr);
+		  */
+		  magma_zgebrd(*n, *n, &work[iu], ldwrku, &s[1], &rwork[ie], &
+			       work[itauq], &work[itaup], &work[iwork],
+			       i__2, &ierr);
+
 		  lapackf77_zlacpy("U", n, n, &work[iu], &ldwrku, &work[ir], &
 				   ldwrkr);
 		  
@@ -1422,10 +1460,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: need 3*N, prefer 2*N+2*N*NB)   
                       (RWorkspace: need N) */
 		  i__2 = *lwork - iwork + 1;
+		  /*
 		  lapackf77_zgebrd(n, n, &a[a_offset], lda, &s[1], &rwork[ie], &
 				   work[itauq], &work[itaup], &work[iwork], &
 				   i__2, &ierr);
-		  
+		  */
+		  magma_zgebrd(*n, *n, &a[a_offset], *lda, &s[1], &rwork[ie], &
+			       work[itauq], &work[itaup], &work[iwork],
+			       i__2, &ierr);
+
 		  /*  Multiply Q in U by left vectors bidiagonalizing R   
                       (CWorkspace: need 2*N+M, prefer 2*N+M*NB)   
                       (RWorkspace: 0) */
@@ -1510,9 +1553,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: need N) */
 
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(n, n, &work[iu], &ldwrku, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*n, *n, &work[iu], ldwrku, &s[1], &rwork[ie], &
+				     work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
+			
 			lapackf77_zlacpy("U", n, n, &work[iu], &ldwrku, &vt[vt_offset],
 				 ldvt);
 
@@ -1598,9 +1647,14 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: need N) */
 
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(n, n, &vt[vt_offset], ldvt, &s[1], &rwork[ie],
 				 &work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*n, *n, &vt[vt_offset], *ldvt, &s[1], &rwork[ie],
+				     &work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
 
 /*                    Multiply Q in U by left bidiagonalizing vectors   
                       in VT   
@@ -1701,9 +1755,14 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: need N) */
 
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(n, n, &work[ir], &ldwrkr, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*n, *n, &work[ir], ldwrkr, &s[1], &rwork[ie], &
+				     work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
 
 /*                    Generate left bidiagonalizing vectors in WORK(IR)   
                       (CWorkspace: need N*N+3*N, prefer N*N+2*N+N*NB)   
@@ -1777,10 +1836,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: need N) */
 
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(n, n, &a[a_offset], lda, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
-
+			*/
+			magma_zgebrd(*n, *n, &a[a_offset], *lda, &s[1], &rwork[ie], &
+				     work[itauq], &work[itaup], &work[iwork],
+				     i__2, &ierr);
+			
 /*                    Multiply Q in U by left bidiagonalizing vectors   
                       in A   
                       (CWorkspace: need 2*N+M, prefer 2*N+M*NB)   
@@ -1880,9 +1944,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: need   N) */
 
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(n, n, &work[iu], &ldwrku, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*n, *n, &work[iu], ldwrku, &s[1], &rwork[ie], &
+				     work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
+
 			lapackf77_zlacpy("U", n, n, &work[iu], &ldwrku, &work[ir], &
 				ldwrkr);
 
@@ -1973,9 +2043,14 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: need N) */
 
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(n, n, &a[a_offset], lda, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*n, *n, &a[a_offset], *lda, &s[1], &rwork[ie], &
+				     work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
 
 /*                    Multiply Q in U by left bidiagonalizing vectors   
                       in A   
@@ -2073,9 +2148,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: need N) */
 
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(n, n, &work[iu], &ldwrku, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*n, *n, &work[iu], ldwrku, &s[1], &rwork[ie], &
+				     work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
+
 			lapackf77_zlacpy("U", n, n, &work[iu], &ldwrku, &vt[vt_offset],
 				 ldvt);
 
@@ -2166,9 +2247,14 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: need N) */
 
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(n, n, &vt[vt_offset], ldvt, &s[1], &rwork[ie],
 				 &work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*n, *n, &vt[vt_offset], *ldvt, &s[1], &rwork[ie],
+				     &work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
 
 /*                    Multiply Q in U by left bidiagonalizing vectors   
                       in VT   
@@ -2223,8 +2309,13 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
              (RWorkspace: need N) */
 
 	    i__2 = *lwork - iwork + 1;
+	    /*
 	    lapackf77_zgebrd(m, n, &a[a_offset], lda, &s[1], &rwork[ie], &work[itauq], 
 		    &work[itaup], &work[iwork], &i__2, &ierr);
+	    */
+	    magma_zgebrd(*m, *n, &a[a_offset], *lda, &s[1], &rwork[ie], &work[itauq],
+			 &work[itaup], &work[iwork], i__2, &ierr);
+
 	    if (wntuas) {
 
 /*              If left singular vectors desired in U, copy result to U   
@@ -2367,8 +2458,13 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                 (RWorkspace: need M) */
 
 		i__2 = *lwork - iwork + 1;
+		/*
 		lapackf77_zgebrd(m, m, &a[a_offset], lda, &s[1], &rwork[ie], &work[
 			itauq], &work[itaup], &work[iwork], &i__2, &ierr);
+		*/
+		magma_zgebrd(*m, *m, &a[a_offset], *lda, &s[1], &rwork[ie], 
+			     &work[itauq], &work[itaup], &work[iwork], i__2, &ierr);
+
 		if (wntuo || wntuas) {
 
 /*                 If left singular vectors desired, generate Q   
@@ -2475,9 +2571,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                    (RWorkspace: need M) */
 
 		    i__2 = *lwork - iwork + 1;
+		    /*
 		    lapackf77_zgebrd(m, m, &work[ir], &ldwrkr, &s[1], &rwork[ie], &
 			    work[itauq], &work[itaup], &work[iwork], &i__2, &
 			    ierr);
+		    */
+		    magma_zgebrd(*m, *m, &work[ir], ldwrkr, &s[1], &rwork[ie], &
+				 work[itauq], &work[itaup], &work[iwork], i__2, &
+				 ierr);
+
 
 /*                 Generate right vectors bidiagonalizing L   
                    (CWorkspace: need M*M+3*M-1, prefer M*M+2*M+(M-1)*NB)   
@@ -2532,8 +2634,12 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                    (RWorkspace: need M) */
 
 		    i__3 = *lwork - iwork + 1;
+		    /*
 		    lapackf77_zgebrd(m, n, &a[a_offset], lda, &s[1], &rwork[ie], &work[
 			    itauq], &work[itaup], &work[iwork], &i__3, &ierr);
+		    */
+		    magma_zgebrd(*m, *n, &a[a_offset], *lda, &s[1], &rwork[ie],
+				 &work[itauq], &work[itaup], &work[iwork], i__3, &ierr);
 
 /*                 Generate right vectors bidiagonalizing A   
                    (CWorkspace: need 3*M, prefer 2*M+M*NB)   
@@ -2630,8 +2736,13 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                    (RWorkspace: need M) */
 
 		    i__3 = *lwork - iwork + 1;
+		    /*
 		    lapackf77_zgebrd(m, m, &u[u_offset], ldu, &s[1], &rwork[ie], &work[
 			    itauq], &work[itaup], &work[iwork], &i__3, &ierr);
+		    */
+		    magma_zgebrd(*m, *m, &u[u_offset], *ldu, &s[1], &rwork[ie], 
+				 &work[itauq], &work[itaup], &work[iwork], i__3, &ierr);
+
 		    lapackf77_zlacpy("U", m, m, &u[u_offset], ldu, &work[ir], &ldwrkr);
 
 /*                 Generate right vectors bidiagonalizing L in WORK(IR)   
@@ -2722,8 +2833,12 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                    (RWorkspace: need M) */
 
 		    i__2 = *lwork - iwork + 1;
+		    /*
 		    lapackf77_zgebrd(m, m, &u[u_offset], ldu, &s[1], &rwork[ie], &work[
 			    itauq], &work[itaup], &work[iwork], &i__2, &ierr);
+		    */
+		    magma_zgebrd(*m, *m, &u[u_offset], *ldu, &s[1], &rwork[ie],
+				 &work[itauq], &work[itaup], &work[iwork], i__2, &ierr);
 
 /*                 Multiply right vectors bidiagonalizing L by Q in A   
                    (CWorkspace: need 2*M+N, prefer 2*M+N*NB)   
@@ -2816,9 +2931,14 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: need M) */
 
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(m, m, &work[ir], &ldwrkr, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*m, *m, &work[ir], ldwrkr, &s[1], &rwork[ie], &
+				     work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
 
 /*                    Generate right vectors bidiagonalizing L in   
                       WORK(IR)   
@@ -2891,10 +3011,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: need M) */
 
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(m, m, &a[a_offset], lda, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
-
+			*/
+			magma_zgebrd(*m, *m, &a[a_offset], *lda, &s[1], &rwork[ie], &
+				     work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
+			
 /*                    Multiply right vectors bidiagonalizing L by Q in VT   
                       (CWorkspace: need 2*M+N, prefer 2*M+N*NB)   
                       (RWorkspace: 0) */
@@ -2988,9 +3113,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: need   M) */
 
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(m, m, &work[iu], &ldwrku, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*m, *m, &work[iu], ldwrku, &s[1], &rwork[ie], &
+				     work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
+
 			lapackf77_zlacpy("L", m, m, &work[iu], &ldwrku, &work[ir], &
 				ldwrkr);
 
@@ -3078,9 +3209,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: need M) */
 
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(m, m, &a[a_offset], lda, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*m, *m, &a[a_offset], *lda, &s[1], &rwork[ie], &
+				     work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
+
 
 /*                    Multiply right vectors bidiagonalizing L by Q in VT   
                       (CWorkspace: need 2*M+N, prefer 2*M+N*NB)   
@@ -3162,9 +3299,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			    (CWorkspace: need M*M+3*M, prefer M*M+2*M+2*M*NB)   
 			    (RWorkspace: need M) */
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(m, m, &work[iu], &ldwrku, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*m, *m, &work[iu], ldwrku, &s[1], &rwork[ie], &
+				     work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
+
 			lapackf77_zlacpy("L", m, m, &work[iu], &ldwrku, &u[u_offset], 
 				ldu);
 
@@ -3236,9 +3379,14 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			   (CWorkspace: need 3*M, prefer 2*M+2*M*NB)   
 			   (RWorkspace: need M) */
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(m, m, &u[u_offset], ldu, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*m, *m, &u[u_offset], *ldu, &s[1], &rwork[ie], &
+				     work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
 
 			/*  Multiply right bidiagonalizing vectors in U by Q   
 			    in VT   
@@ -3321,9 +3469,14 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			    (CWorkspace: need M*M+3*M, prefer M*M+2*M+2*M*NB)   
 			    (RWorkspace: need M) */
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(m, m, &work[ir], &ldwrkr, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*m, *m, &work[ir], ldwrkr, &s[1], &rwork[ie], &
+				     work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
 
 			/* Generate right bidiagonalizing vectors in WORK(IR)   
 			   (CWorkspace: need   M*M+3*M-1,   
@@ -3387,9 +3540,14 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			    (CWorkspace: need 3*M, prefer 2*M+2*M*NB)   
 			    (RWorkspace: need M) */
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(m, m, &a[a_offset], lda, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*m, *m, &a[a_offset], *lda, &s[1], &rwork[ie], &
+				     work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
 
 			/*  Multiply right bidiagonalizing vectors in A by Q   
 			    in VT   
@@ -3475,9 +3633,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			   prefer 2*M*M+2*M+2*M*NB)   
 			   (RWorkspace: need   M) */
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(m, m, &work[iu], &ldwrku, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*m, *m, &work[iu], ldwrku, &s[1], &rwork[ie], &
+				     work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
+
 			lapackf77_zlacpy("L", m, m, &work[iu], &ldwrku, &work[ir], &
 				ldwrkr);
 
@@ -3554,9 +3718,14 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			   (CWorkspace: need 3*M, prefer 2*M+2*M*NB)   
 			   (RWorkspace: need M) */
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(m, m, &a[a_offset], lda, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*m, *m, &a[a_offset], *lda, &s[1], &rwork[ie], &
+				     work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
 
 			/* Multiply right bidiagonalizing vectors in A by Q   
 			   in VT (CWorkspace: need 2*M+N, prefer 2*M+N*NB)   
@@ -3639,9 +3808,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			   (CWorkspace: need M*M+3*M, prefer M*M+2*M+2*M*NB)   
 			   (RWorkspace: need M) */
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(m, m, &work[iu], &ldwrku, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*m, *m, &work[iu], ldwrku, &s[1], &rwork[ie], &
+				     work[itauq], &work[itaup], &work[iwork], 
+				     i__2, &ierr);
+
 			lapackf77_zlacpy("L", m, m, &work[iu], &ldwrku, &u[u_offset], 
 				ldu);
 
@@ -3716,9 +3891,14 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			   (CWorkspace: need 3*M, prefer 2*M+2*M*NB)   
 			   (RWorkspace: need M) */
 			i__2 = *lwork - iwork + 1;
+			/*
 			lapackf77_zgebrd(m, m, &u[u_offset], ldu, &s[1], &rwork[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
+			*/
+			magma_zgebrd(*m, *m, &u[u_offset], *ldu, &s[1], &rwork[ie], &
+				      work[itauq], &work[itaup], &work[iwork], 
+				      i__2, &ierr);
 
 			/* Multiply right bidiagonalizing vectors in U by Q   
 			   in VT   
@@ -3764,8 +3944,13 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
              (RWorkspace: M) */
 
 	    i__2 = *lwork - iwork + 1;
+	    /*
 	    lapackf77_zgebrd(m, n, &a[a_offset], lda, &s[1], &rwork[ie], &work[itauq], 
 		    &work[itaup], &work[iwork], &i__2, &ierr);
+	    */
+	    magma_zgebrd(*m, *n, &a[a_offset], *lda, &s[1], &rwork[ie], &work[itauq],
+			 &work[itaup], &work[iwork], i__2, &ierr);
+
 	    if (wntuas) {
 	      /* If left singular vectors desired in U, copy result to U   
                 and generate left bidiagonalizing vectors in U   
@@ -3890,3 +4075,26 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
     return 0;
 } /* magma_zgesvd */
+
+extern "C"
+int s_cat(char *lp, char *rpp[], magma_int_t *rnp, magma_int_t*np, magma_int_t ll)
+{
+  magma_int_t i, n, nc;
+  char *f__rp;
+
+  n = (int)*np;
+  for(i = 0 ; i < n ; ++i)
+    {
+      nc = ll;
+      if(rnp[i] < nc)
+	nc = rnp[i];
+      ll -= nc;
+      f__rp = rpp[i];
+      while(--nc >= 0)
+	*lp++ = *f__rp++;
+    }
+  while(--ll >= 0)
+    *lp++ = ' ';
+
+  return 0;
+}

@@ -24,7 +24,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
              cuDoubleComplex *a, magma_int_t lda, double *d, double *e,
              cuDoubleComplex *tauq, cuDoubleComplex *taup, 
              cuDoubleComplex *work, magma_int_t lwork, 
-             cuDoubleComplex *da,   magma_int_t *info)
+	     magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -161,7 +161,6 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     *info = 0;
 
     magma_int_t nb = magma_get_zgebrd_nb(n), ldda = m;
-    cuDoubleComplex *dwork = da + (n)*ldda;
 
     lwkopt = (m + n) * nb;
     work[0] = MAGMA_Z_MAKE( lwkopt, 0. );
@@ -190,6 +189,16 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
         return 0;
     }
 
+    cuDoubleComplex *da;
+    cublasStatus status = cublasAlloc(n*ldda+2*n*nb, 
+				      sizeof(cuDoubleComplex), (void**)&da);
+    if (status != CUBLAS_STATUS_SUCCESS) {
+      fprintf (stderr, "!!!! device memory allocation error in zgebrd\n");
+      return 0; 
+    }
+
+    cuDoubleComplex *dwork = da + (n)*ldda;
+
     MAGMA_Z_SET2REAL( ws, max(m,n) );
     ldwrkx = m;
     ldwrky = n;
@@ -210,7 +219,6 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
         ncol = n - i;
 
         /*   Get the current panel (no need for the 1st iteration) */
-        // TTT
         if ( i > 0 ) {
             cublasGetMatrix(nrow, nb, sizeof(cuDoubleComplex),
                             dA(i, i), ldda, 
@@ -280,6 +288,8 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
                       A(i, i), &lda, d+i, e+i,
                       tauq+i, taup+i, work, &iinfo);
     work[0] = ws;
+    cublasFree(da);
+
     return 0;
 } /* zgebrd_ */
 
