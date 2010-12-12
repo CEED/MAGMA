@@ -32,7 +32,10 @@
 int main( int argc, char** argv) 
 {
     cuInit( 0 );
-    cublasInit( );
+    cublasStatus status = cublasInit( );
+    if (status != CUBLAS_STATUS_SUCCESS) {
+      fprintf (stderr, "!!!! CUBLAS initialization error\n");
+    }
     printout_devices( );
 
     cuDoubleComplex *h_A, *h_R, *VL, *VR, *h_work, *w1, *w2;
@@ -45,7 +48,6 @@ int main( int argc, char** argv)
     magma_int_t N=0, n2;
     magma_int_t size[8] = {1024,2048,3072,4032,5184,6016,7040,8064};
 
-    cublasStatus status;
     magma_int_t i, j, info;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
@@ -61,6 +63,13 @@ int main( int argc, char** argv)
             {
                 printf("\nUsage: \n");
                 printf("  testing_zgeev -N %d\n\n", N);
+		
+		/* Shutdown */
+		status = cublasShutdown();
+		if (status != CUBLAS_STATUS_SUCCESS) {
+		  fprintf (stderr, "!!!! shutdown error (A)\n");
+		}
+
                 exit(1);
             }
     }
@@ -68,12 +77,6 @@ int main( int argc, char** argv)
         printf("\nUsage: \n");
         printf("  testing_zgeev -N %d\n\n", 1024);
         N = size[7];
-    }
-
-    /* Initialize CUBLAS */
-    status = cublasInit();
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! CUBLAS initialization error\n");
     }
 
     n2  = N * N;
