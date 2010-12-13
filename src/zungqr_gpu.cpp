@@ -175,7 +175,7 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 	    magmablas_zlaset(i, i__2 - i, da_ref(0,i), ldda);
 	  }
       }
-    cublasFree(work);
+    cudaFreeHost(work);
     cudaStreamDestroy(stream[0]);
     cudaStreamDestroy(stream[1]);
 
