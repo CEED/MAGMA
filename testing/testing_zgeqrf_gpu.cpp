@@ -70,6 +70,12 @@ int main( int argc, char** argv)
             else if (strcmp("-M", argv[i])==0)
                 M = atoi(argv[++i]);
         }
+        if ( M == 0 ) {
+	    M = N;
+	}
+	if ( N == 0 ) {
+	    N = M;
+	}
         if (M>0 && N>0)
             printf("  testing_zgeqrf_gpu -M %d -N %d\n\n", M, N);
         else
