@@ -101,14 +101,15 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
 
+    cuDoubleComplex *dA, *dAT;
     cuDoubleComplex c_one = MAGMA_Z_ONE;
-
-    int iinfo, ldda;
+    magma_int_t maxm, maxn, maxdim, nb;
+    magma_int_t iinfo, ldda;
     long int lquery;
 
     /* Function Body */
     *info = 0;
-    int nb = magma_get_zgelqf_nb(m);
+    nb = magma_get_zgelqf_nb(m);
 
     work[0] = MAGMA_Z_MAKE( (double)(m*nb), 0 );
     lquery = (lwork == -1);
@@ -122,20 +123,16 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
 	*info = -7;
     }
     if (*info != 0) {
-	return 0;
+	return MAGMA_ERR_ILLEGAL_VALUE;
     } else if (lquery) {
-	return 0;
+	return MAGMA_SUCCESS;
     }
 
     /*  Quick return if possible */
     if (min(m, n) == 0) {
 	work[0] = c_one;
-	return 0;
+	return MAGMA_SUCCESS;
     }
-
-    int maxm, maxn, maxdim;
-    cuDoubleComplex *dA, *dAT;
-    cublasStatus status;
 
     maxm = ((m + 31)/32)*32;
     maxn = ((n + 31)/32)*32;
@@ -145,10 +142,9 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
         {
             ldda = maxdim;
 
-            status = cublasAlloc(maxdim*maxdim, sizeof(cuDoubleComplex), (void**)&dA);
-            if (status != CUBLAS_STATUS_SUCCESS) {
+            if (CUBLAS_STATUS_SUCCESS != cublasAlloc(maxdim*maxdim, sizeof(cuDoubleComplex), (void**)&dA)) {
                 *info = -10;
-                return 0;
+                return MAGMA_ERR_CUBLASALLOC;
             }
 
             cublasSetMatrix( m, n, sizeof(cuDoubleComplex), a, lda, dA, ldda);
@@ -159,10 +155,9 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
         {
             ldda = maxn;
 
-            status = cublasAlloc(2*maxn*maxm, sizeof(cuDoubleComplex), (void**)&dA);
-            if (status != CUBLAS_STATUS_SUCCESS) {
-                *info = -10;
-                return 0;
+            if (CUBLAS_STATUS_SUCCESS != cublasAlloc(2*maxn*maxm, sizeof(cuDoubleComplex), (void**)&dA)) {
+		*info = -10;
+		return MAGMA_ERR_CUBLASALLOC;
             }
 
             cublasSetMatrix( m, n, sizeof(cuDoubleComplex), a, lda, dA, maxm);
@@ -183,10 +178,7 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
 
     cublasFree(dA);
 
-    return 0;
-
-    /*     End of MAGMA_ZGELQF */
-
+    return MAGMA_SUCCESS;
 } /* magma_zgelqf */
 
 #undef  a_ref
