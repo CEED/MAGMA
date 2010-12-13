@@ -30,7 +30,7 @@ magma_zhetrd(char uplo, magma_int_t n,
 	     cuDoubleComplex *a, magma_int_t lda, 
 	     double *d, double *e, cuDoubleComplex *tau,
 	     cuDoubleComplex *work, magma_int_t *lwork, 
-	     cuDoubleComplex *da, magma_int_t *info)
+	     magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -159,7 +159,6 @@ magma_zhetrd(char uplo, magma_int_t n,
 
     int N = n, ldda = lda;
     int nb = magma_get_zhetrd_nb(n); 
-    cuDoubleComplex *dwork = da + (n)*ldda - 1;
 
     cuDoubleComplex z_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex z_one = MAGMA_Z_ONE;
@@ -212,6 +211,16 @@ magma_zhetrd(char uplo, magma_int_t n,
 	work[1] = z_one;
 	return 0;
     }
+
+    cuDoubleComplex *da;
+    cublasStatus status;
+    status = cublasAlloc(N*ldda+2*N*nb, sizeof(cuDoubleComplex), (void**)&da);
+    if (status != CUBLAS_STATUS_SUCCESS) {
+      fprintf (stderr, "!!!! device memory allocation error (magma_zhetrd)\n");
+      return 0;
+    }
+
+    cuDoubleComplex *dwork = da + (n)*ldda - 1;
 
     nx = 128;
 
@@ -310,10 +319,8 @@ magma_zhetrd(char uplo, magma_int_t n,
                          &tau[i__], &work[1], lwork, &iinfo);
 	
       }
-
+    
+    cublasFree(da);
     MAGMA_Z_SET2REAL( work[1], lwkopt );
     return 0;
-    
-    /* End of ZHETRD */
-    
 } /* zhetrd_ */

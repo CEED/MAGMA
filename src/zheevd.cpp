@@ -16,10 +16,14 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t 
-magma_zheevd(char *jobz, char *uplo, magma_int_t *n, 
-	     cuDoubleComplex *a, magma_int_t *lda, double *w, cuDoubleComplex *work, 
-	     magma_int_t *lwork, double *rwork, magma_int_t *lrwork, magma_int_t *iwork, 
-	     magma_int_t *liwork, magma_int_t *info)
+magma_zheevd(char *jobz, char *uplo, 
+	     magma_int_t *n, 
+	     cuDoubleComplex *a, magma_int_t *lda, 
+	     double *w, 
+	     cuDoubleComplex *work, magma_int_t *lwork,
+	     double *rwork, magma_int_t *lrwork,
+	     magma_int_t *iwork, magma_int_t *liwork,
+	     magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -182,15 +186,12 @@ magma_zheevd(char *jobz, char *uplo, magma_int_t *n,
 	      magma_int_t *, cuDoubleComplex *, magma_int_t *, double *, magma_int_t *, 
 	      magma_int_t *, magma_int_t *, magma_int_t *);
     static magma_int_t indrwk, indwrk, liwmin;
-    extern int 
-      zhetrd_(char *, magma_int_t *, cuDoubleComplex *, 
-	      magma_int_t *, double *, double *, cuDoubleComplex *, 
-	      cuDoubleComplex *, magma_int_t *, magma_int_t *);
     static magma_int_t lrwmin, llwork;
     static double smlnum;
     static magma_int_t lquery;
-    extern int zunmtr_(char *, char *, char *, magma_int_t *, magma_int_t *, cuDoubleComplex *, 
-		       magma_int_t *, cuDoubleComplex *, cuDoubleComplex *, magma_int_t *, 
+    extern int zunmtr_(char *, char *, char *, magma_int_t *, magma_int_t *,
+		       cuDoubleComplex *, magma_int_t *, cuDoubleComplex *,
+		       cuDoubleComplex *, magma_int_t *, 
 		       cuDoubleComplex *, magma_int_t *, magma_int_t *);
 
     a_dim1 = *lda;
@@ -312,9 +313,13 @@ magma_zheevd(char *jobz, char *uplo, magma_int_t *n,
     llwork = *lwork - indwrk + 1;
     llwrk2 = *lwork - indwk2 + 1;
     llrwk = *lrwork - indrwk + 1;
-    zhetrd_(uplo, n, &a[a_offset], lda, &w[1], &rwork[inde], &work[indtau], &
-	    work[indwrk], &llwork, &iinfo);
-
+    /*
+    lapackf77_zhetrd(uplo, n, &a[a_offset], lda, &w[1], &rwork[inde], 
+		     &work[indtau], &work[indwrk], &llwork, &iinfo);
+    */
+    magma_zhetrd(uplo[0], *n, &a[a_offset], *lda, &w[1], &rwork[inde],
+		 &work[indtau], &work[indwrk], &llwork, &iinfo);
+    
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call   
        ZSTEDC to generate the eigenvector matrix, WORK(INDWRK), of the   
        tridiagonal matrix, then call ZUNMTR to multiply it to the Householder 
@@ -324,8 +329,8 @@ magma_zheevd(char *jobz, char *uplo, magma_int_t *n,
     } else {
 	zstedc_("I", n, &w[1], &rwork[inde], &work[indwrk], n, &work[indwk2], 
 		&llwrk2, &rwork[indrwk], &llrwk, &iwork[1], liwork, info);
-	zunmtr_("L", uplo, "N", n, n, &a[a_offset], lda, &work[indtau], &work[
-		indwrk], n, &work[indwk2], &llwrk2, &iinfo);
+	zunmtr_("L", uplo, "N", n, n, &a[a_offset], lda, &work[indtau], 
+		&work[indwrk], n, &work[indwk2], &llwrk2, &iinfo);
 	lapackf77_zlacpy("A", n, n, &work[indwrk], n, &a[a_offset], lda);
     }
 

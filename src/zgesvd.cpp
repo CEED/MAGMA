@@ -15,6 +15,8 @@
 #include "magma.h"
 #include "magmablas.h"
 
+//#define lapackf77_zgebrd MAGMA_ZGEBRD
+
 extern "C" magma_int_t
 magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n, 
 	     cuDoubleComplex *a, magma_int_t *lda, double *s, cuDoubleComplex *u, 
@@ -802,6 +804,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		*/
 		magma_zgebrd(*n, *n, &a[a_offset], *lda, &s[1], &rwork[ie],
 			     &work[itauq], &work[itaup], &work[iwork], i__2, &ierr);
+		
 		ncvt = 0;
 		if (wntvo || wntvas) {
 
