@@ -31,13 +31,9 @@ my @file2delete = (
     "testing/fortran2.cpp",
     "src/magma_zf77.cpp",
     "src/magma_zf77pgi.cpp",
-    "src/zcgeqrsv_gpu.cpp",
     "src/zgebrd.cpp",
     "src/zgeev.cpp",
     "src/zgehrd.cpp",
-    "src/zgelqf.cpp",
-    "src/zgeqlf.cpp",
-    "src/zgeqrf.cpp",
     "src/zgeqrf_mc.cpp",
     "src/zgeqrf-v2.cpp",
     "src/zgeqrf-v3.cpp",
@@ -60,16 +56,11 @@ my @file2delete = (
     "testing/testing_dgemvt.cpp",
     "testing/testing_sgemv.cpp",
     "testing/testing_sgemvt.cpp",
-    "testing/testing_zcgeqrsv_gpu.cpp",
     "testing/testing_zgebrd.cpp",
     "testing/testing_zgehrd.cpp",
-    "testing/testing_zgelqf.cpp",
     "testing/testing_zgemv.cpp",
-    "testing/testing_zgeqlf.cpp",
-    "testing/testing_zgeqrf.cpp",
     "testing/testing_zgeqrf_mc.cpp",
     "testing/testing_zgeqrf-v2.cpp",
-    "testing/testing_zgesv_gpu.cpp",
     "testing/testing_zgetrf_f.f",
     "testing/testing_zgetrf_gpu_f.cuf",
     "testing/testing_zgetrf_gpu_f.f",
@@ -162,7 +153,7 @@ sub MakeRelease {
     #Compile the documentation
     #print "Compile the documentation\n"; 
     #system("make -C ./docs");
-    #myCmd("rm -f make.inc");
+    myCmd("rm -f make.inc");
     
     #Remove non required files (Makefile.gen)
     foreach my $file (@file2delete){
