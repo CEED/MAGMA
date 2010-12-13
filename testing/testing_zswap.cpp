@@ -42,9 +42,9 @@ int main( int argc, char** argv)
     cublasInit( );
     printout_devices( );
 
-    double2 *h_A1, *h_A2;
-    double2 *d_A1, *d_A2;
-    double2 *h_A3, *h_A4;
+    cuDoubleComplex *h_A1, *h_A2;
+    cuDoubleComplex *d_A1, *d_A2;
+    cuDoubleComplex *h_A3, *h_A4;
     double gpu_perf, cpu_perf;
     double gpu_perf2, cpu_perf2;
     double gpu_perf3, cpu_perf3;
@@ -85,12 +85,12 @@ int main( int argc, char** argv)
     n2 = N*N;
 
     /* Allocate host memory for the matrix */
-    cudaMallocHost((void**)(&h_A1), n2 * sizeof(double2));
+    cudaMallocHost((void**)(&h_A1), n2 * sizeof(cuDoubleComplex));
     if (h_A1 == 0) {
         fprintf (stderr, "!!!! host memory allocation error (A)\n");
     }
     
-    cudaMallocHost((void**)(&h_A2), n2 * sizeof(double2));
+    cudaMallocHost((void**)(&h_A2), n2 * sizeof(cuDoubleComplex));
     if (h_A2 == 0) {
         fprintf (stderr, "!!!! host memory allocation error (A)\n");
     }
@@ -100,11 +100,11 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! host memory allocation error (ipiv)\n");
     }
   
-    status = cublasAlloc(n2+32*N, sizeof(double2), (void**)&d_A1);
+    status = cublasAlloc(n2+32*N, sizeof(cuDoubleComplex), (void**)&d_A1);
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
     }
-    status = cublasAlloc(n2+32*N, sizeof(double2), (void**)&d_A2);
+    status = cublasAlloc(n2+32*N, sizeof(cuDoubleComplex), (void**)&d_A2);
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
     }
@@ -123,22 +123,22 @@ int main( int argc, char** argv)
      lapackf77_zlarnv( &ione, ISEED, &n2, h_A2 );
 #endif
 
-    cudaMallocHost((void**)(&h_A3), n2 * sizeof(double2));
+    cudaMallocHost((void**)(&h_A3), n2 * sizeof(cuDoubleComplex));
     if (h_A3 == 0) {
         fprintf (stderr, "!!!! host memory allocation error (A)\n");
     }
     
-    cudaMallocHost((void**)(&h_A4), n2 * sizeof(double2));
+    cudaMallocHost((void**)(&h_A4), n2 * sizeof(cuDoubleComplex));
     if (h_A4 == 0) {
         fprintf (stderr, "!!!! host memory allocation error (A)\n");
     }
 
-    memcpy(h_A3, h_A1, n2 * sizeof(double2));
-    memcpy(h_A4, h_A2, n2 * sizeof(double2));
+    memcpy(h_A3, h_A1, n2 * sizeof(cuDoubleComplex));
+    memcpy(h_A4, h_A2, n2 * sizeof(cuDoubleComplex));
 
     /* Initialize the matrix */
-    cublasSetMatrix( N, N, sizeof(double2), h_A1, lda, d_A1, lda);
-    cublasSetMatrix( N, N, sizeof(double2), h_A2, lda, d_A2, lda);
+    cublasSetMatrix( N, N, sizeof(cuDoubleComplex), h_A1, lda, d_A1, lda);
+    cublasSetMatrix( N, N, sizeof(cuDoubleComplex), h_A2, lda, d_A2, lda);
     
     printf("\n\n");
     printf("  N         CM V1     RM V1    CM V2     RM V2      CM LAP RM      OLD LAP  GFlop/s    \n");
@@ -174,14 +174,14 @@ int main( int argc, char** argv)
               blasf77_zswap( &N, h_A1+lda*j, &ione, h_A2+lda*(ipiv[j]-1), &ione);
             }
         }
-        cublasGetMatrix( N, N, sizeof(double2), d_A1, N, h_A2, N);
+        cublasGetMatrix( N, N, sizeof(cuDoubleComplex), d_A1, N, h_A2, N);
         check += diffMatrix( h_A1, h_A2, N, N, N )*1;
 
         /* Column Major */
-        memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(double2));
-        memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(double2));
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A3, size[9], d_A1, size[9]);
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A4, size[9], d_A2, size[9]);
+        memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(cuDoubleComplex));
+        memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(cuDoubleComplex));
+        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A3, size[9], d_A1, size[9]);
+        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A4, size[9], d_A2, size[9]);
 
         start = get_current_time();
         for ( j=0; j<N; j++) {
@@ -197,7 +197,7 @@ int main( int argc, char** argv)
               blasf77_zswap( &N, h_A1+j, &lda, h_A2+(ipiv[j]-1), &lda);
             }
         }
-        cublasGetMatrix( N, N, sizeof(double2), d_A1, N, h_A2, N);
+        cublasGetMatrix( N, N, sizeof(cuDoubleComplex), d_A1, N, h_A2, N);
         check += diffMatrix( h_A1, h_A2, N, N, N )*2;
 
         /*
@@ -205,10 +205,10 @@ int main( int argc, char** argv)
          */
 
         /* Row Major */
-        memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(double2));
-        memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(double2));
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A3, size[9], d_A1, size[9]);
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A4, size[9], d_A2, size[9]);
+        memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(cuDoubleComplex));
+        memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(cuDoubleComplex));
+        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A3, size[9], d_A1, size[9]);
+        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A4, size[9], d_A2, size[9]);
 
         start = get_current_time();
         magmablas_zswapblk( 'R', N, d_A1, lda, d_A2, lda, 1, N, ipiv, 1, 0);
@@ -220,14 +220,14 @@ int main( int argc, char** argv)
               blasf77_zswap( &N, h_A1+lda*j, &ione, h_A2+lda*(ipiv[j]-1), &ione);
             }
         }
-        cublasGetMatrix( N, N, sizeof(double2), d_A1, N, h_A2, N);
+        cublasGetMatrix( N, N, sizeof(cuDoubleComplex), d_A1, N, h_A2, N);
         check += diffMatrix( h_A1, h_A2, N, N, N )*4;
 
         /* Column Major */
-        memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(double2));
-        memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(double2));
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A3, size[9], d_A1, size[9]);
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A4, size[9], d_A2, size[9]);
+        memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(cuDoubleComplex));
+        memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(cuDoubleComplex));
+        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A3, size[9], d_A1, size[9]);
+        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A4, size[9], d_A2, size[9]);
 
         start = get_current_time();
         magmablas_zswapblk( 'C', N, d_A1, lda, d_A2, lda, 1, N, ipiv, 1, 0);
@@ -239,17 +239,17 @@ int main( int argc, char** argv)
               blasf77_zswap( &N, h_A1+j, &lda, h_A2+(ipiv[j]-1), &lda);
             }
         }
-        cublasGetMatrix( N, N, sizeof(double2), d_A1, N, h_A2, N);
+        cublasGetMatrix( N, N, sizeof(cuDoubleComplex), d_A1, N, h_A2, N);
         check += diffMatrix( h_A1, h_A2, N, N, N )*8;
 
         /*
          * Version 1 of LAPACK swap (Old one)
          */
 
-        memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(double2));
-        memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(double2));
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A3, size[9], d_A1, size[9]);
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A4, size[9], d_A2, size[9]);
+        memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(cuDoubleComplex));
+        memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(cuDoubleComplex));
+        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A3, size[9], d_A1, size[9]);
+        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A4, size[9], d_A2, size[9]);
 
         start = get_current_time();
         magmablas_zlaswp( N, d_A1, N, 1, N, ipiv, 1);
@@ -261,14 +261,14 @@ int main( int argc, char** argv)
               blasf77_zswap( &N, h_A1+lda*j, &ione, h_A1+lda*(ipiv[j]-1), &ione);
             }
         }
-        cublasGetMatrix( N, N, sizeof(double2), d_A1, N, h_A2, N);
+        cublasGetMatrix( N, N, sizeof(cuDoubleComplex), d_A1, N, h_A2, N);
         check += diffMatrix( h_A1, h_A2, N, N, N )*16;
 
         /* Row Major */
-        memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(double2));
-        memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(double2));
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A3, size[9], d_A1, size[9]);
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A4, size[9], d_A2, size[9]);
+        memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(cuDoubleComplex));
+        memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(cuDoubleComplex));
+        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A3, size[9], d_A1, size[9]);
+        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A4, size[9], d_A2, size[9]);
 
         start = get_current_time();
         magmablas_zlaswpx( N, d_A1, N, 1, 1, N, ipiv, 1);
@@ -280,14 +280,14 @@ int main( int argc, char** argv)
               blasf77_zswap( &N, h_A1+lda*j, &ione, h_A1+lda*(ipiv[j]-1), &ione);
             }
         }
-        cublasGetMatrix( N, N, sizeof(double2), d_A1, N, h_A2, N);
+        cublasGetMatrix( N, N, sizeof(cuDoubleComplex), d_A1, N, h_A2, N);
         check += diffMatrix( h_A1, h_A2, N, N, N )*32;
 
         /* Col Major */
-        memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(double2));
-        memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(double2));
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A3, size[9], d_A1, size[9]);
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A4, size[9], d_A2, size[9]);
+        memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(cuDoubleComplex));
+        memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(cuDoubleComplex));
+        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A3, size[9], d_A1, size[9]);
+        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A4, size[9], d_A2, size[9]);
 
         start = get_current_time();
         magmablas_zlaswpx( N, d_A1, lda, N, 1, N, ipiv, 1);
@@ -295,7 +295,7 @@ int main( int argc, char** argv)
         cpu_perf3 = 1.*N*N/(1000000.*GetTimerValue(start,end));
 
         lapackf77_zlaswp( &N, h_A1, &N, &ione, &N, ipiv, &ione);
-        cublasGetMatrix( N, N, sizeof(double2), d_A1, N, h_A2, N);
+        cublasGetMatrix( N, N, sizeof(cuDoubleComplex), d_A1, N, h_A2, N);
         check += diffMatrix( h_A1, h_A2, N, N, N )*64;
 
         printf("%5d      %6.2f / %6.2f    %6.2f / %6.2f   %6.2f / %6.2f   %6.2f (%s: %d)\n", 
@@ -305,10 +305,10 @@ int main( int argc, char** argv)
         if (argc != 1)
           break;
 
-        memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(double2));
-        memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(double2));
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A3, size[9], d_A1, size[9]);
-        cublasSetMatrix( size[9], size[9], sizeof(double2), h_A4, size[9], d_A2, size[9]);
+        memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(cuDoubleComplex));
+        memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(cuDoubleComplex));
+        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A3, size[9], d_A1, size[9]);
+        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A4, size[9], d_A2, size[9]);
     }
     
     /* Memory clean up */
