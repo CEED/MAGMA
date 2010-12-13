@@ -155,85 +155,10 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
 	return 0;
     }
 
-    magma_zunmqr_gpu( MagmaLeft, MagmaConjTrans, 
-                      m, nrhs, n,
-                      dA, ldda, tau, 
-                      dB, lddb, hwork, lwork, dT, nb, info);
-    if ( *info != 0 ) {
-	cublasFree(dT);
-	free(tau);
-	magma_xerbla("magma_zgels_gpu", info);
-	return 0;
-    }
+    magma_zgeqrs_gpu(m, n, nrhs, 
+		     dA, ldda, tau, dT, 
+		     dB, lddb, hwork, lwork, info);
 
-    lddwork= k;
-    dwork = dT+2*lddwork*nb;
-
-    i    = (k-1)/nb * nb;
-    ib   = n-i;
-    rows = m-i;
-
-    blasf77_ztrsm( MagmaLeftStr, MagmaUpperStr, MagmaNoTransStr, MagmaNonUnitStr, 
-                   &ib, &nrhs, 
-                   &c_one, hwork,         &rows, 
-                           hwork+rows*ib, &rows);
-
-    // update the solution vector
-    cublasSetMatrix(rows, nrhs, sizeof(cuDoubleComplex),
-                    hwork+rows*ib, rows, dwork+i, lddb);
-
-    // update c
-    if (nrhs == 1)
-        cublasZgemv( MagmaNoTrans, i, ib, 
-                     c_neg_one, a_ref(0, i), ldda,
-                                dwork + i,   1, 
-                     c_one,     dB,           1);
-    else
-        cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
-                     i, nrhs, ib, 
-                     c_neg_one, a_ref(0, i), ldda,
-                                dwork + i,   lddb, 
-                     c_one,     dB,           lddb);
-
-    int start = i-nb;
-    if (nb < k) {
-        for (i = start; i >=0; i -= nb) {
-            ib = min(k-i, nb);
-            rows = m -i;
-
-            if (i + ib < n) {
-                if (nrhs == 1)
-                    {
-                        cublasZgemv( MagmaNoTrans, ib, ib, 
-                                     c_one,  d_ref(i), ib,
-                                             dB+i,      1, 
-                                     c_zero, dwork+i,  1);
-                        cublasZgemv( MagmaNoTrans, i, ib, 
-                                     c_neg_one, a_ref(0, i), ldda,
-                                                dwork + i,   1, 
-                                     c_one,     dB,           1);
-                    }
-                else
-                    {
-                        cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
-                                     ib, nrhs, ib, 
-                                     c_one,  d_ref(i), ib,
-                                             dB+i,      lddb, 
-                                     c_zero, dwork+i,  lddb);
-                        cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
-                                     i, nrhs, ib, 
-                                     c_neg_one, a_ref(0, i), ldda,
-                                                dwork + i,   lddb, 
-                                     c_one,     dB,          lddb);
-                    }
-            }
-        }
-    }
-
-    cudaMemcpy2D(dB,    lddb*sizeof(cuDoubleComplex),
-		 dwork, lddb*sizeof(cuDoubleComplex),
-		 (n)*sizeof(cuDoubleComplex), nrhs, cudaMemcpyDeviceToDevice);
-    
     cublasFree(dT);
     free(tau);
 

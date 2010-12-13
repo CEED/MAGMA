@@ -58,7 +58,7 @@ int main( int argc, char** argv)
     cuDoubleComplex  mzone = MAGMA_Z_NEG_ONE;
     cuDoubleComplex  zone  = MAGMA_Z_ONE;
     cuDoubleComplex *h_A, *h_A2, *h_B, *h_X, *h_R, *tau, *hwork, tmp[1];
-    cuDoubleComplex *d_A, *d_B, *d_T;
+    cuDoubleComplex *d_A, *d_B;
 
     /* Matrix size */
     magma_int_t M = 0, N = 0, n2;
@@ -113,7 +113,6 @@ int main( int argc, char** argv)
 
     TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*N      );
     TESTING_DEVALLOC( d_B, cuDoubleComplex, lddb*nrhs   );
-    TESTING_DEVALLOC( d_T, cuDoubleComplex, min_mn*nb*3 );
 
     /*
      * Get size for host workspace
@@ -160,17 +159,11 @@ int main( int argc, char** argv)
         cublasSetMatrix( M, nrhs, sizeof(cuDoubleComplex), h_B, ldb, d_B, lddb);
 
         start = get_current_time();
-        magma_zgeqrf_gpu( M, N, d_A, ldda, tau, d_T, &info);
-        if (info < 0)
-            printf("Argument %d of magma_zgeqrf had an illegal value.\n", -info);
-
-        // Solve the least-squares problem min || A * X - B ||
-        magma_zgeqrs_gpu( M, N, nrhs, 
-			  d_A, ldda, tau, d_T, 
-                          d_B, lddb, hwork, lworkgpu, &info);
+	magma_zgels_gpu( MagmaNoTrans, M, N, nrhs, d_A, ldda, 
+			 d_B, lddb, hwork, lworkgpu, &info);
         end = get_current_time();
 	if (info < 0)
-	    printf("Argument %d of magma_zgeqrs had an illegal value.\n", -info);
+	    printf("Argument %d of magma_zgels had an illegal value.\n", -info);
 	
 	gpu_perf = flops / GetTimerValue(start, end);
 
@@ -190,26 +183,12 @@ int main( int argc, char** argv)
         lapackf77_zlacpy( MagmaUpperLowerStr, &M, &nrhs, h_B, &ldb, h_X, &ldb );
 
         start = get_current_time();
-        lapackf77_zgeqrf(&M, &N, h_A, &M, tau, hwork, &lhwork, &info);
-        if (info < 0)
-            printf("Argument %d of lapackf77_zgeqrf had an illegal value.\n", -info);
-
-        // Solve the least-squares problem: min || A * X - B ||
-        // 1. B(1:M,1:NRHS) = Q^T B(1:M,1:NRHS)
-        lapackf77_zunmqr( MagmaLeftStr, MagmaConjTransStr, 
-                          &M, &nrhs, &min_mn, 
-                          h_A, &lda, tau,
-                          h_X, &ldb, hwork, &lhwork, &info);
-        if (info < 0)
-            printf("Argument %d of lapackf77_zunmqr had an illegal value.\n", -info);
-
-        // 2. B(1:N,1:NRHS) := inv(R) * B(1:M,1:NRHS)
-        blasf77_ztrsm( MagmaLeftStr, MagmaUpperStr, MagmaNoTransStr, MagmaNonUnitStr, 
-                       &N, &nrhs, &zone, 
-		       h_A, &lda, 
-		       h_X, &ldb);
+	lapackf77_zgels( MagmaNoTransStr, &M, &N, &nrhs,
+			 h_A, &lda, h_X, &ldb, hwork, &lhwork, &info);
         end = get_current_time();
         cpu_perf = flops / GetTimerValue(start, end);
+        if (info < 0)
+	  printf("Argument %d of lapackf77_zgels had an illegal value.\n", -info);
 
 	blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &M, &nrhs, &N, 
 		       &mzone, h_A2, &lda, 
@@ -235,7 +214,6 @@ int main( int argc, char** argv)
     TESTING_FREE( hwork );
     TESTING_DEVFREE( d_A );
     TESTING_DEVFREE( d_B );
-    TESTING_DEVFREE( d_T );
 
     /* Shutdown */
     TESTING_CUDA_FINALIZE();
