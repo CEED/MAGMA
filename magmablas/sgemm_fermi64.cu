@@ -196,12 +196,12 @@ fermiSgemm_v2_kernel_NN_64(float *C, const float *A, const float *B,
 	// __syncthreads();
 
 	// C += ty2 + ibx  + __mul24 (tx2 +  iby ,ldc);
-	int gy = iby + tx2;
+	int gy = iby + ty2;
 	// writing C
 	#pragma unroll
 	for( int y=0; y<by; y++, gy+=16)
 	{
-		int gx = ibx + ty2; 
+		int gx = ibx + tx2; 
 		#pragma unroll
 		for(int x=0; x<bx; x++, gx+=16)
 		{
