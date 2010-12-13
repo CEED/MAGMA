@@ -157,7 +157,7 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
     /*
       Check The Parameters. 
     */
-    *iter = 0 ;
+    *info = *iter = 0 ;
     if ( N <0)
 	*info = -1;
     else if(NRHS<0)
