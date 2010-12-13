@@ -83,7 +83,7 @@ magma_int_t magma_zpotrf_mc( char *uplo, magma_int_t *n, cuDoubleComplex *A,
 magma_int_t magma_zhetrd( char uplo, magma_int_t n, cuDoubleComplex *A, 
 			  magma_int_t lda, double *d, double *e, 
 			  cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *lwork, 
-			  cuDoubleComplex *da, magma_int_t *info);
+			  magma_int_t *info);
 magma_int_t magma_zunmqr( char side, char trans, 
                           magma_int_t m, magma_int_t n, magma_int_t k, 
                           cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *tau, 
