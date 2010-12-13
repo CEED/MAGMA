@@ -136,32 +136,33 @@ Task  Done      Who       What
                  zgetrs   -  -   /  ok
                  zgesv    -  -   /  ok
 
-                 zgeqrf   - MISSING /  ok  
+		 /* New interface on GPU with dT */
+                 zgeqrf   -  -   /  ok  
                  zgeqrs   -  -   /  ok  
 		 zgels    -  -   /  ok  (Works only for QR)
+		 zlarfb   -  -   /  ok
+		 zunmqr   -  -   /  ok
+
+		 /* Lapack interface on CPU */
+		 zgeqrf   -  ok  / (zgeqrf2, only for code factorization)
+		 zgeqlf   -  ok  /  -
+		 zgelqf   -  ok  /  -
 
      Mix precision
                  zcposv   -  -   /  ok
                  zcgesv   -  -   /  ok
                  zcgetrs  -  -   /  ok
-  
+		 zcgeqrsv -  -   /  ok  
      -----------------------
-                 zgelqf   -  ok  /  - => move to v2
-                 zgeqlf   -  ok  /  - => move to v2
 
                  zgebrd   -  -   /  ok
-               
-                 zcgeqrsv - Interface needs to be clean, it's a big mess with all the different workspace 
-                            No CPU interface
-                            GPU interface should be close to the lapack one
-                 zgeev    - No GPU interface
+               	 zgeev    - No GPU interface
                             Still F2c
                             Need to use lapackf77/blasf77 macros
                  zgehrd   - No GPU interface
                             Still F2C
                  zgeqrf-v2  - Need to be cleaned, doesn't do the same thing than _gpu-v2 ???
                  zgeqrf-v3       - 
-                 zgeqrf_gpu-v2   -
                  zgesvd      - No comments
                  zheevd      - No comments
                  zhetrd      - No GPU interface /  CPU  in F2C
@@ -170,12 +171,10 @@ Task  Done      Who       What
                  zlahr2      - Interface needs to be clean because it's a CPU file with device pointers in the interface.
                                Still F2C
                  zlahru      - Should be called _gpu or change the interface because of the mix between cpu and gpu buffer
-                 zlarfb      - Need to be renamed in _gpu => GPU ok and No CPU interface
                  zlatrd      - Stil in F2C, a lot to do
                  ztsqrt_gpu  - No CPU interface / still fortran interface
                  zungqr_gpu  - Need to add lwork to follow lapack interface / No CPU interface
                  zunmqr      - F2C code
-                 zunmqr_gpu  - Same problem than geqrs, need arguments from geqrf2, so it doesn't have the same interface than lapack or CPU version
                  zunmtr      - F2C code with fortran interface
 
       Multi-cores:
