@@ -83,11 +83,12 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
             The scalar factors of the elementary reflectors (see Further
             Details).
 
-    dT      (workspace/output)  COMPLEX_16 array on the GPU, dimension 3*N*NB,
+    dT      (workspace/output)  COMPLEX_16 array on the GPU, 
+            dimension (2*MIN(M, N) + (N+31)/32*32 )*NB,
             where NB can be obtained through magma_get_zgeqrf_nb(M).
-            It starts with NB*NB blocks that store the triangular T
-            matrices, followed by the NB*NB blocks of the diagonal
-            inverses for the R matrix.
+            It starts with MIN(M,N)*NB block that store the triangular T
+            matrices, followed by the MIN(M,N)*NB block of the diagonal
+            inverses for the R matrix. The rest of the array is used as workspace.
 
     INFO    (output) INTEGER
             = 0:  successful exit

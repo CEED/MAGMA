@@ -20,11 +20,33 @@
 #include <cuda_runtime_api.h>
 #include <cublas.h>
 #include "magma.h"
+#include "testings.h"
 
+#ifndef min
+#define min(a,b)  (((a)<(b))?(a):(b))
+#endif
+#ifndef max
+#define max(a,b)  (((a)<(b))?(b):(a))
+#endif
+
+// Flops formula
 #define PRECISION_z
+#define FMULS_GEQRF(M, N) (((M) > (N)) ? ((N) * ((N) * (  0.5-(1./3.) * (N) + (M)) + (M))) \
+                                       : ((M) * ((M) * ( -0.5-(1./3.) * (M) + (N)) + 2.*(N))))
+#define FADDS_GEQRF(M, N) (((M) > (N)) ? ((N) * ((N) * (  0.5-(1./3.) * (N) + (M)))) \
+                                       : ((M) * ((M) * ( -0.5-(1./3.) * (M) + (N)) + (N))))
+#define FMULS_GEQRS(M, N, NRHS) ((NRHS) * (N) * ( 2.* (M) - 0.5 * (N) ))
+#define FADDS_GEQRS(M, N, NRHS) ((NRHS) * (N) * ( 2.* (M) - 0.5 * (N) ))
+#if defined(PRECISION_z) || defined(PRECISION_c)
+#define FLOPS_GEQRF(m, n      ) ( 6.*FMULS_GEQRF(m, n      ) + 2.*FADDS_GEQRF(m, n      ) )
+#define FLOPS_GEQRS(m, n, nrhs) ( 6.*FMULS_GEQRS(m, n, nrhs) + 2.*FADDS_GEQRS(m, n, nrhs) )
+#else
+#define FLOPS_GEQRF(m, n      ) (    FMULS_GEQRF(m, n      ) +    FADDS_GEQRF(m, n      ) )
+#define FLOPS_GEQRS(m, n, nrhs) (    FMULS_GEQRS(m, n, nrhs) +    FADDS_GEQRS(m, n, nrhs) )
+#endif
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing dgeqrs
+   -- Testing zcgeqrsv
 */
 int main( int argc, char** argv)
 {
@@ -32,159 +54,80 @@ int main( int argc, char** argv)
     fprintf(stderr, "This functionnality is not available in MAGMA for this precisions actually\n");
     return EXIT_SUCCESS;
 #else
+    TESTING_CUDA_INIT();
 
-    printf("Iterative Refinement- QR \n");
-    printf("\n");
-
-    cuInit( 0 );
-    cublasInit( );
-    printout_devices( );
-
-    cuDoubleComplex *h_A, *h_R, *h_work_d, *tau_d;
-    cuDoubleComplex *d_A, *d_work_d, *d_x;
-    cuFloatComplex *tau , *h_work  , *d_work ;
-    cuDoubleComplex *x, *b, *rr;
-    cuDoubleComplex *d_b;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    double          cpu_perf, mperf, dperf, sperf;
-    double          wnorm, matnorm;
-    int nrhs = 1;
-    int ione     = 1;
-    int ISEED[4] = {0,0,0,1};
-
-    TimeStruct start, end;
-
-    /* Matrix size */
-    int M, N=0, n2, lda;
-    int size[10] = {1024,2048,3072,4032,5184,6016,7040,8000, 9088,10112};
-
-
-    
-    cublasStatus status;
-    int i, info;
-
+    TimeStruct  start, end;
+    double      flops, gpu_perf, cpu_perf;
+    double      gpu_perfd, gpu_perfs;
+    double      Rnorm, Anorm, work[1];
+    cuDoubleComplex zone  = MAGMA_Z_ONE;
+    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex *h_A, *h_B, *h_X, *h_R;
+    cuDoubleComplex *d_A, *d_B, *d_X, *d_T;
+    cuFloatComplex  *d_SA, *d_SB, *d_ST;
+    cuDoubleComplex *h_workd, *tau, tmp[1];
+    cuFloatComplex  *h_works, *tau_s;
+    magma_int_t lda,  ldb,  ldx, lhwork;
+    magma_int_t ldda, lddb, lddx;
+    magma_int_t i, iter, info, size, min_mn, nb;
+    magma_int_t M        = 0;
+    magma_int_t N        = 0;
+    magma_int_t ione     = 1;
+    magma_int_t NRHS     = 1;
+    magma_int_t ISEED[4] = {0,0,0,1};
+    magma_int_t sizetest[10] = {1024,2048,3072,4032,5184,6016,7040,7520,8064,8192};
+        
     if (argc != 1){
-        for(i = 1; i<argc; i++){
-            if (strcmp("-N", argv[i])==0)
-                N = atoi(argv[++i]);
-        }
-        if (N>0) size[0] = size[5] = N;
-        else exit(1);
+	for(i = 1; i<argc; i++){	
+	    if (strcmp("-N", argv[i])==0)
+		N = atoi(argv[++i]);
+	    else if (strcmp("-M", argv[i])==0)
+		M = atoi(argv[++i]);
+	    else if (strcmp("-nrhs", argv[i])==0)
+		NRHS = atoi(argv[++i]);
+	}
+	if (N>0) sizetest[0] = sizetest[9] = N;
+	else exit(1);
     }
     else {
-        printf("\nUsage: \n");
-        printf("  testing_zcgeqrsv_gpu -N %d\n\n", 1024);
+	printf("\nUsage: \n");
+	printf("  testing_zcgeqrsv_gpu -M %d -N %d -nrhs %d\n\n", 1024, 1024, NRHS);
     }
+    printf("Epsilon(double): %8.6e\n"
+	   "Epsilon(single): %8.6e\n\n", 
+	   lapackf77_dlamch("Epsilon"), lapackf77_slamch("Epsilon") );
 
-    /* Initialize CUBLAS */
-    status = cublasInit();
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! CUBLAS initialization error\n");
-        exit(1);;
-    }
-    int size5 = size[7];
-    lda = N;
-    n2 = size5 * size5;
-    cuFloatComplex *  h_AA ;
-    /* Allocate host memory for the matrix */
-    h_AA = (cuFloatComplex*)malloc(n2 * sizeof(h_AA[0]));
-    if (h_AA == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (A)\n");
-        exit(1);;
-    }
+    N = sizetest[9];
+    if (M == 0) M = N;
+    ldb  = lda = M;
+    ldx  = N;
+    ldda = ((M+31)/32)*32;
+    lddb = ldda;
+    lddx = ((N+31)/32)*32;    
+    nb = max( magma_get_zgeqrf_nb( M ), magma_get_cgeqrf_nb( M ) );
+    min_mn = min( M, N );
 
-    h_A = (cuDoubleComplex*)malloc(n2 * sizeof(h_A[0]));
-    if (h_A == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (A)\n");
-        exit(1);;
-    }
+    TESTING_MALLOC( h_A, cuDoubleComplex, lda*N    );
+    TESTING_MALLOC( h_B, cuDoubleComplex, ldb*NRHS );
+    TESTING_MALLOC( h_X, cuDoubleComplex, ldx*NRHS );
+    TESTING_MALLOC( h_R, cuDoubleComplex, ldb*NRHS );
+    TESTING_MALLOC( tau, cuDoubleComplex, min_mn   );
 
-    tau_d = (cuDoubleComplex*)malloc(size5 * sizeof(cuDoubleComplex));
-    if (tau_d == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (tau_d)\n");
-        exit(1);;
-    }
-    tau = (cuFloatComplex*)malloc(size5 * sizeof(cuFloatComplex));
-    if (tau == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (tau)\n");
-        exit(1);;
-    }
+    TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*N      );
+    TESTING_DEVALLOC( d_B, cuDoubleComplex, lddb*NRHS   );
+    TESTING_DEVALLOC( d_X, cuDoubleComplex, lddx*NRHS   );
+    TESTING_DEVALLOC( d_T, cuDoubleComplex, ( 2*min_mn+ (N+31)/32*32 )*nb );
+    tau_s = (cuFloatComplex*)tau;
+    d_ST  = (cuFloatComplex*)d_T;
 
-    x = (cuDoubleComplex*)malloc(size5 * sizeof(cuDoubleComplex));
-    b = (cuDoubleComplex*)malloc(size5 * sizeof(cuDoubleComplex));
-    rr = (cuDoubleComplex*)malloc(size5 * sizeof(cuDoubleComplex));
+    lhwork = -1;
+    lapackf77_zgels( MagmaNoTransStr, &M, &N, &NRHS,
+		     h_A, &lda, h_B, &ldb, tmp, &lhwork, &info);
+    lhwork = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
+    lhwork = max( lhwork, (nb * max((M-N+nb+2*(NRHS)), 1) ) );
 
-    cudaMallocHost( (void**)&h_R,  n2*sizeof(cuDoubleComplex) );
-    if (h_R == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (R)\n");
-        exit(1);;
-    }
-
-    int nb = magma_get_zgeqrf_nb(size5);
-    int nb_s = magma_get_cgeqrf_nb(size5);
-    int lwork_d = (3*size5+nb)*nb;
-    int lwork = (3*size5+nb)*nb_s;
-    cuFloatComplex *SWORK ;
-
-    status = cublasAlloc(n2, sizeof(cuDoubleComplex), (void**)&d_A);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
-        exit(1);;
-    }
-
-    status = cublasAlloc(n2, sizeof(cuFloatComplex), (void**)&SWORK);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! device memory allocation error (SWORK)\n");
-        exit(1);;
-    }
-
-    cuDoubleComplex *X , *WORK ;
-    status = cublasAlloc(size5, sizeof(cuDoubleComplex), (void**)&WORK);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! device memory allocation error (WORK)\n");
-        exit(1);;
-    }
-    status = cublasAlloc(size5, sizeof(cuDoubleComplex), (void**)&X);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! device memory allocation error (X)\n");
-        exit(1);;
-    }
-    int ITER[1] ;
-    status = cublasAlloc(size5, sizeof(cuDoubleComplex), (void**)&d_b);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! device memory allocation error (d_b)\n");
-        exit(1);;
-    }
-
-    status = cublasAlloc(lwork_d, sizeof(cuDoubleComplex), (void**)&d_work_d);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! device memory allocation error (d_work_d)\n");
-        exit(1);;
-    }
-    status = cublasAlloc(lwork, sizeof(cuFloatComplex), (void**)&d_work);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! device memory allocation error (d_work)\n");
-        exit(1);
-    }
-
-    //status = cublasAlloc(nb, sizeof(cuDoubleComplex), (void**)&d_x);
-    status = cublasAlloc(size5, sizeof(cuDoubleComplex), (void**)&d_x);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! device memory allocation error (d_x)\n");
-        exit(1);;
-    }
-
-    cudaMallocHost( (void**)&h_work_d, lwork_d*sizeof(cuDoubleComplex) );
-    if (h_work_d == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (work)\n");
-        exit(1);;
-    }
-    cudaMallocHost( (void**)&h_work, lwork_d*sizeof(cuFloatComplex) );
-    if (h_work == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (work)\n");
-        exit(1);;
-    }
+    TESTING_MALLOC( h_workd, cuDoubleComplex, lhwork );
+    h_works = (cuFloatComplex*)h_workd;
 
     printf("\n\n");
     printf("           CPU GFlop/s                 GPU GFlop/s   \n");
@@ -192,113 +135,114 @@ int main( int argc, char** argv)
     printf("=========================================================================================\n");
 
     for(i=0; i<8; i++){
-        M = N = lda = size[i]  ;
-        n2 = N*N;
+        M = N = sizetest[i];
+	lda = ldb = M;
+	ldx = N;
+	ldda = lddb = ((M+31)/32) * 32;
+	lddx = ((N+31)/32) * 32;
 
-        lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-        lapackf77_zlarnv( &ione, ISEED, &N,  b   );
-        lapackf77_zlacpy( MagmaUpperLowerStr, &N, &ione, b, &N, rr, &N );
+	flops = ( FLOPS_GEQRF( (double)M, (double)N ) 
+		  + FLOPS_GEQRS( (double)M, (double)N, (double)NRHS ) ) / 1000000;
 
-        cublasSetVector(n2, sizeof(cuDoubleComplex), h_A, 1, d_A, 1);
-        cublasSetVector(N,  sizeof(cuDoubleComplex), b,   1, d_b, 1);
+	/* Initialize matrices */
+        size = lda*N;
+        lapackf77_zlarnv( &ione, ISEED, &size, h_A );
+        size = ldb*NRHS;
+        lapackf77_zlarnv( &ione, ISEED, &size, h_B );
+        lapackf77_zlacpy( MagmaUpperLowerStr, &M, &NRHS, h_B, &ldb, h_R, &ldb );
+
+        cublasSetMatrix( M, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, ldda );
+        cublasSetMatrix( M, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, lddb );
 
         //=====================================================================
         //              Mixed Precision Iterative Refinement - GPU
         //=====================================================================
         start = get_current_time();
-        magma_zcgeqrsv_gpu( M, N, nrhs, 
-                            d_A, N, d_b, N, X, N, 
-                            WORK, SWORK, ITER, &info, 
-                            tau, lwork, h_work, d_work, tau_d, lwork_d,
-                            h_work_d, d_work_d);
+        magma_zcgeqrsv_gpu( M, N, NRHS, 
+                            d_A, ldda, d_B, lddb, 
+			    d_X, lddx, &iter, &info );
         end = get_current_time();
-        mperf = (4.*N*N*N/3.+2.*N*N)/(1000000.*GetTimerValue(start,end));
+	if (info < 0)
+	  printf("Argument %d of magma_zcgeqrsv had an illegal value.\n", -info);
+	gpu_perf = flops / GetTimerValue(start, end);
         
         //=====================================================================
         //                 Error Computation
         //=====================================================================
-        cublasGetVector(N, sizeof(cuDoubleComplex), X, 1, x, 1);
-        blasf77_zgemv( MagmaNoTransStr, &N, &N, 
-                       &c_neg_one, h_A, &N, 
-                                   x,   &ione, 
-                       &c_one,     rr,  &ione);
-        matnorm = lapackf77_zlange("f", &N, &N, h_A, &N, &wnorm);
+        cublasGetMatrix(N, NRHS, sizeof(cuDoubleComplex), d_X, lddx, h_X, ldx);
+        blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr,
+		       &M, &NRHS, &N,
+                       &mzone, h_A, &lda, 
+                               h_X, &ldx, 
+                       &zone,  h_R, &ldb);
+        Anorm = lapackf77_zlange("f", &N, &N,    h_A, &lda, work);
+        Rnorm = lapackf77_zlange("f", &N, &NRHS, h_R, &ldb, work);
 
         //=====================================================================
         //                 Double Precision Solve
         //=====================================================================
+        cublasSetMatrix( M, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, ldda );
+        cublasSetMatrix( M, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, lddb );
 
-        start = get_current_time();
-        magma_zgeqrf_gpu(M, N, d_A, N, tau_d, d_work_d, &info);
-        magma_zgeqrs_gpu( M, N, nrhs, d_A, N, tau_d, d_work_d,
-                          d_b, M, h_work_d, lwork_d, &info);
+	start = get_current_time();
+        magma_zgels_gpu( MagmaNoTrans, M, N, NRHS, d_A, ldda, 
+			 d_B, lddb, h_workd, lhwork, &info);
         end = get_current_time();
-        dperf = (4.*N*N*N/3.+2.*N*N)/(1000000.*GetTimerValue(start,end));
+	gpu_perfd = flops / GetTimerValue(start, end);
+
 
         //=====================================================================
         //                 Single Precision Solve
         //=====================================================================
-        start = get_current_time();
-        magma_cgeqrf_gpu( M, N, SWORK, N, tau, d_work, &info);
-        magma_cgeqrs_gpu( M, N, nrhs, SWORK, N, tau, d_work,
-                          SWORK + M * N , M, h_work, lwork, &info);
+        cublasSetMatrix( M, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, ldda );
+        cublasSetMatrix( M, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, lddb );
+
+	/* The allocation of d_SA and d_SB is done here to avoir 
+	   to double the memory used on GPU with zcgeqrsv */
+	TESTING_DEVALLOC( d_SA, cuFloatComplex, ldda*N      );
+	TESTING_DEVALLOC( d_SB, cuFloatComplex, lddb*NRHS   );
+	magmablas_zlag2c(M, N,    d_A, ldda, d_SA, ldda, &info);
+	magmablas_zlag2c(N, NRHS, d_B, lddb, d_SB, lddb, &info);
+
+	start = get_current_time();
+        magma_cgels_gpu( MagmaNoTrans, M, N, NRHS, d_SA, ldda, 
+			 d_SB, lddb, h_works, lhwork, &info);
         end = get_current_time();
-        sperf = (4.*N*N*N/3.+2.*N*N)/(1000000.*GetTimerValue(start,end));
+	gpu_perfs = flops / GetTimerValue(start, end);
+	TESTING_DEVFREE( d_SA );
+	TESTING_DEVFREE( d_SB );
 
         /* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
-        lapackf77_zgeqrf(&M, &N, h_A, &lda, tau_d, h_work_d, &lwork_d, &info);
-        if (info < 0)
-            printf("Argument %d of sgeqrf had an illegal value.\n", -info);
-        
-        // Solve the least-squares problem: min || A * X - B ||
-        lapackf77_zunmqr( MagmaLeftStr, MagmaConjTransStr, &M, &nrhs, &M, h_A, &lda,
-                          tau_d, b, &M, h_work_d, &lwork_d, &info);
-
-        // B(1:N,1:NRHS) := inv(R) * B(1:N,1:NRHS)
-        blasf77_ztrsm( MagmaLeftStr, MagmaUpperStr, MagmaNoTransStr, MagmaNonUnitStr, 
-                       &M, &nrhs, &c_one, h_A, &lda, b, &M);
+        lapackf77_zgels( MagmaNoTransStr, &M, &N, &NRHS,
+			 h_A, &lda, h_B, &ldb, h_workd, &lhwork, &info);
         end = get_current_time();
-        cpu_perf = (4.*N*N*N/3.+2.*N*N)/(1000000.*GetTimerValue(start,end));
+        cpu_perf = flops / GetTimerValue(start, end);
 
-
-        printf("%5d \t%8.2f\t%9.2f\t%6.2f\t%6.2f  \t %e",
-               size[i], cpu_perf, dperf, sperf, mperf ,
-               lapackf77_zlange("f", &N, &nrhs, rr, &N, &wnorm) / matnorm );
-
-        printf(" %2d \n", ITER[0]);
+        printf("%5d \t%8.2f\t%9.2f\t%6.2f\t%6.2f  \t %e %2d \n",
+               sizetest[i], cpu_perf, gpu_perfd, gpu_perfs, gpu_perf, Rnorm / Anorm, iter );
 
         if (argc != 1)
             break;
     }
 
     /* Memory clean up */
-    free(h_A);
-    free(h_AA);
-    free(tau_d);
-    free(tau);
-    free(x);
-    free(b);
-    free(rr);
-    cublasFree(h_work_d);
-    cublasFree(d_work_d);
-    cublasFree(h_work);
-    cublasFree(d_work);
-    cublasFree(d_x);
-    cublasFree(h_R);
-    cublasFree(d_A);
-    cublasFree(d_b);
-    cublasFree(WORK);
-    cublasFree(SWORK);
-    cublasFree(X);
+    TESTING_FREE( h_A );
+    TESTING_FREE( h_B );
+    TESTING_FREE( h_X );
+    TESTING_FREE( h_R );
+    TESTING_FREE( tau );
+    TESTING_FREE( h_workd );
+
+    TESTING_DEVFREE( d_A );
+    TESTING_DEVFREE( d_B );
+    TESTING_DEVFREE( d_X );
+    TESTING_DEVFREE( d_T );
 
     /* Shutdown */
-    status = cublasShutdown();
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! shutdown error (A)\n");
-    }
+    TESTING_CUDA_FINALIZE();
 
 #endif /*defined(PRECISION_z) && (GPUSHMEM < 200)*/
 }
