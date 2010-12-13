@@ -240,7 +240,7 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
 	    cublasFree(dAT);
 	}
 
-	cublasFree(work);
+	cudaFreeHost(work);
 	cublasFree(dAP);
     }
     return 0;
