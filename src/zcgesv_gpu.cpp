@@ -82,7 +82,7 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
             On entry, the N-by-N coefficient matrix A.
             On exit, if iterative refinement has been successfully used
             (info.EQ.0 and ITER.GE.0, see description below), A is
-            unchanged. If double2 precision factorization has been used
+            unchanged. If double precision factorization has been used
             (info.EQ.0 and ITER.LT.0, see description below), then the
             array A contains the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
@@ -94,7 +94,7 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
             The pivot indices that define the permutation matrix P;
             row i of the matrix was interchanged with row IPIV(i).
             Corresponzc either to the single precision factorization
-            (if info.EQ.0 and ITER.GE.0) or the double2 precision
+            (if info.EQ.0 and ITER.GE.0) or the double precision
             factorization (if info.EQ.0 and ITER.LT.0).
 
     dIPIV   (output) INTEGER array on the GPU, dimension (min(M,N))
@@ -121,7 +121,7 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
             right-hand sides or solutions in single precision.
 
     iter    (output) INTEGER
-            < 0: iterative refinement has failed, double2 precision
+            < 0: iterative refinement has failed, double precision
                  factorization has been performed
                  -1 : the routine fell back to full precision for
                       implementation- or machine-specific reasons

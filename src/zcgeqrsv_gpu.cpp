@@ -83,7 +83,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
             On entry, the M-by-N coefficient matrix A.
             On exit, if iterative refinement has been successfully used
             (info.EQ.0 and ITER.GE.0, see description below), A is
-            unchanged. If double2 precision factorization has been used
+            unchanged. If double precision factorization has been used
             (info.EQ.0 and ITER.LT.0, see description below), then the
             array A contains the QR factorization of A as returned by
             function DGEQRF_GPU.
@@ -111,7 +111,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
             right-hand sides or solutions in single precision.
 
     ITER    (output) INTEGER
-            < 0: iterative refinement has failed, double2 precision
+            < 0: iterative refinement has failed, double precision
                  factorization has been performed
                  -1 : the routine fell back to full precision for
                       implementation- or machine-specific reasons
@@ -146,7 +146,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
             inverses for the R matrix.
 
     TAU_D   (output) DOUBLE REAL array, dimension (N)
-            On exit, if the matrix had to be factored in double2 precision,
+            On exit, if the matrix had to be factored in double precision,
             TAU(i) contains the scalar factor of the elementary
             reflector H(i), as returned by magma_zgeqrf_gpu.
 
@@ -157,14 +157,14 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     H_WORK_D (workspace/output) DOUBLE REAL array, dimension (MAX(1,LWORK_D))
             This memory is unattached if the iterative refinement worked, 
             otherwise it is used as workspace to factor the matrix in
-            double2 precision. Higher performance is achieved if H_WORK_D is 
+            double precision. Higher performance is achieved if H_WORK_D is 
             in pinned memory, e.g. allocated using cudaMallocHost. 
 
     D_WORK_D (workspace/output) DOUBLE REAL array on the GPU, dimension 2*N*NB,
             where NB can be obtained through magma_get_dgeqrf_nb(M).
             This memory is unattached if the iterative refinement worked, 
             otherwise it is used as workspace to factor the matrix in
-            double2 precision. It starts with NB*NB blocks that store the 
+            double precision. It starts with NB*NB blocks that store the 
             triangular T matrices, followed by the NB*NB blocks of the 
             diagonal inverses for the R matrix.
 
@@ -377,7 +377,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     /* If we are at this place of the code, this is because we have
        performed ITER=ITERMAX iterations and never satisified the
        stopping criterion, set up the ITER flag accordingly and follow
-       up on double2 precision routine.                                    */
+       up on double precision routine.                                    */
     *iter = -ITERMAX - 1 ;
 
   L40:
@@ -394,7 +394,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
 	if( CUBLAS_STATUS_SUCCESS != cublasAlloc(size, sizeof(cuDoubleComplex), (void**)&dworkd) ) {
 	    fprintf(stderr, "Allocation of dworkd2 failed\n");
 	    magma_xerbla("magma_zcgeqrsv_gpu", info);
-	    return -7;
+	    return MAGMA_ERR_CUBLASALLOC;
 	}
     }
     tau = dworkd;
@@ -408,13 +408,13 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
 	    cublasFree(dworkd);
 	    fprintf(stderr, "Allocation of hworkd2 failed\n");
 	    magma_xerbla("magma_zcgeqrsv_gpu", info);
-	    return -7;
+	    return MAGMA_ERR_ALLOCATION;
 	}
     }
     hworkd = (cuDoubleComplex*) hworks;
 
     /* Single-precision iterative refinement failed to converge to a
-       satisfactory solution, so we resort to double2 precision.           */
+       satisfactory solution, so we resort to double precision.           */
     ret = magma_zgeqrf_gpu(M, N, dA, ldda, tau, dT, info);
     if( (ret != MAGMA_SUCCESS) || (*info != 0) ){
 	cublasFree(dworkd);

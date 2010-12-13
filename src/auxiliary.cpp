@@ -265,9 +265,9 @@ void dq_to_panel(char uplo, int ib, double *a, int lda, double *work){
    -- Put 0s in the upper triangular part of a panel (and 1s on the diagonal)
 */
 extern "C"
-void zpanel_to_q(char uplo, int ib, double2 *a, int lda, double2 *work){
+void zpanel_to_q(char uplo, int ib, cuDoubleComplex *a, int lda, cuDoubleComplex *work){
   int i, j, k = 0;
-  double2 *col;
+  cuDoubleComplex *col;
 
   if (uplo == 'U' || uplo == 'u'){
     for(i=0; i<ib; i++){
@@ -303,9 +303,9 @@ void zpanel_to_q(char uplo, int ib, double2 *a, int lda, double2 *work){
    -- Restores a panel (after call to "panel_to_q")
 */
 extern "C"
-void zq_to_panel(char uplo, int ib, double2 *a, int lda, double2 *work){
+void zq_to_panel(char uplo, int ib, cuDoubleComplex *a, int lda, cuDoubleComplex *work){
   int i, j, k = 0;
-  double2 *col;
+  cuDoubleComplex *col;
 
   if (uplo == 'U' || uplo == 'u'){
     for(i=0; i<ib; i++){
