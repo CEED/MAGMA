@@ -108,14 +108,17 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
     hwork[0] = MAGMA_Z_MAKE( (double)lwkopt, 0. );
 
     *info = 0;
-    if (m < 0)
-        *info = -1;
-    else if (n < 0 || m < n)
+    /* For now, N is the only case working */
+    if ( (trans != 'N') && (trans != 'n' ) )
+	*info = -1;
+    else if (m < 0)
         *info = -2;
-    else if (nrhs < 0)
+    else if (n < 0 || m < n) /* LQ is not handle for now*/
         *info = -3;
+    else if (nrhs < 0)
+        *info = -4;
     else if (ldda < max(1,m))
-        *info = -5;
+        *info = -6;
     else if (lddb < max(1,m))
         *info = -8;
     else if (lwork < lwkopt && ! lquery)
