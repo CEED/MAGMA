@@ -103,18 +103,17 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
 
+    cuDoubleComplex *da, *dwork;
     cuDoubleComplex c_one = MAGMA_Z_ONE;
-
-    int i, k, lddwork, old_i, old_ib;
-
-    int rows, cols;
-    static int ib, ki, kk, mu, nu, nx, nbmin, iinfo, ldda;
+    magma_int_t i, k, lddwork, old_i, old_ib, nb;
+    magma_int_t rows, cols;
+    magma_int_t ib, ki, kk, mu, nu, iinfo, ldda;
     long int lquery;
 
+    nb = magma_get_zgeqlf_nb(m);
     *info = 0;
-    int nb = magma_get_zgeqlf_nb(m);
-
     lquery = (lwork == -1);
+
     if (m < 0) {
 	*info = -1;
     } else if (n < 0) {
@@ -136,43 +135,37 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
     }
 
     if (*info != 0)
-        return 0;
+        return MAGMA_ERR_ILLEGAL_VALUE;
     else if (lquery)
-        return 0;
+        return MAGMA_SUCCESS;
 
     /* Quick return if possible */
     if (k == 0)
-        return 0;
-
-    cublasStatus status;
-    static cudaStream_t stream[2];
-    cudaStreamCreate(&stream[0]);
-    cudaStreamCreate(&stream[1]);
-
-    nbmin = 2;
-    nx = nb;
+        return MAGMA_SUCCESS;
 
     lddwork = ((n+31)/32)*32;
     ldda    = ((m+31)/32)*32;
 
-    cuDoubleComplex *da;
-    status = cublasAlloc((n)*ldda + nb*lddwork, sizeof(cuDoubleComplex), (void**)&da);
-    if (status != CUBLAS_STATUS_SUCCESS) {
+    if (CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*ldda + nb*lddwork, sizeof(cuDoubleComplex), (void**)&da)) {
         *info = -9;
-        return 0;
+        return MAGMA_ERR_CUBLASALLOC;
     }
-    cuDoubleComplex *dwork = da + ldda*(n);
+    dwork = da + ldda*(n);
 
-    if (nb >= nbmin && nb < k && nx < k) {
+    static cudaStream_t stream[2];
+    cudaStreamCreate(&stream[0]);
+    cudaStreamCreate(&stream[1]);
+
+    if ( (nb > 1) && (nb < k) ) {
         /*  Use blocked code initially.
 	    The last kk columns are handled by the block method.
             First, copy the matrix on the GPU except the last kk columns */
         cudaMemcpy2DAsync(da_ref(0, 0), ldda*sizeof(cuDoubleComplex),
 			  a_ref(0, 0),  lda *sizeof(cuDoubleComplex),
 			  sizeof(cuDoubleComplex)*(m), (n-nb),
-			  cudaMemcpyHostToDevice,stream[0]);
+			  cudaMemcpyHostToDevice, stream[0]);
 
-        ki = ((k - nx - 1) / nb) * nb;
+        ki = ((k - nb - 1) / nb) * nb;
 	kk = min(k, ki + nb);
 	for (i = k - kk + ki; i >= k -kk; i -= nb) {
 	    ib = min(k-i,nb);
@@ -259,11 +252,10 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
         lapackf77_zgeqlf(&mu, &nu, a_ref(0,0), &lda, tau, work, &lwork, &iinfo);
     }
 
-    cublasFree(da);
-    return 0;
-
-    /* End of MAGMA_ZGEQLF */
-
+    cudaStreamDestroy( stream[0] );
+    cudaStreamDestroy( stream[1] );
+    cublasFree( da );
+    return MAGMA_SUCCESS;
 } /* magma_zgeqlf */
 
 #undef  a_ref

@@ -120,7 +120,7 @@ int main( int argc, char** argv)
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-        lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &M, h_R, &M );
+        lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
 
         /* ====================================================================
            Performs operation using MAGMA
@@ -147,7 +147,7 @@ int main( int argc, char** argv)
         /* =====================================================================
            Check the result compared to LAPACK
            =================================================================== */
-        matnorm = lapackf77_zlange("f", &M, &N, h_A, &M, work);
+        matnorm = lapackf77_zlange("f", &M, &N, h_A, &lda, work);
         blasf77_zaxpy(&n2, &mzone, h_A, &ione, h_R, &ione);
 
         printf("%5d %5d  %6.2f         %6.2f        %e\n",
@@ -158,4 +158,12 @@ int main( int argc, char** argv)
             break;
     }
 
+    /* Memory clean up */
+    TESTING_FREE( tau );
+    TESTING_FREE( h_A );
+    TESTING_HOSTFREE( h_R );
+    TESTING_FREE( h_work );
+
+    /* Shutdown */
+    TESTING_CUDA_FINALIZE();
 }

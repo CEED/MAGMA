@@ -107,7 +107,7 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
     cuDoubleComplex c_one = MAGMA_Z_ONE;
 
     int i, k, lddwork, old_i, old_ib;
-    int nbmin, nx, ib, ldda;
+    int ib, ldda;
 
     /* Function Body */
     *info = 0;
@@ -136,9 +136,6 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
         return MAGMA_SUCCESS;
     }
 
-    nbmin = 2;
-    nx = nb;
-
     lddwork = ((n+31)/32)*32;
     ldda    = ((m+31)/32)*32;
 
@@ -153,7 +150,7 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
 
     dwork = da + ldda*(n);
 
-    if (nb >= nbmin && nb < k && nx < k) {
+    if ( (nb > 1) && (nb < k) ) {
         /* Use blocked code initially */
         cudaMemcpy2DAsync(da_ref(0,nb), ldda*sizeof(cuDoubleComplex),
                            a_ref(0,nb), lda *sizeof(cuDoubleComplex),
@@ -161,7 +158,7 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
                           cudaMemcpyHostToDevice,stream[0]);
 
         old_i = 0; old_ib = nb;
-        for (i = 0; i < k-nx; i += nb) {
+        for (i = 0; i < k-nb; i += nb) {
             ib = min(k-i, nb);
             if (i>0){
                 cudaMemcpy2DAsync( a_ref(i,i),  lda *sizeof(cuDoubleComplex),
@@ -196,7 +193,7 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
             if (i + ib < n) {
                 cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), work, ib, dwork, lddwork);
 
-                if (i+ib < k-nx)
+                if (i+ib < k-nb)
                     /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
 				      rows, ib, ib, 
