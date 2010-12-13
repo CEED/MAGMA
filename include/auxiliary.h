@@ -72,8 +72,8 @@ void cq_to_panel(char uplo, int ib, float2 *a, int lda, float2 *work);
 void dpanel_to_q(char uplo, int ib, double *a, int lda, double *work);
 void dq_to_panel(char uplo, int ib, double *a, int lda, double *work);
 
-void zpanel_to_q(char uplo, int ib, double2 *a, int lda, double2 *work);
-void zq_to_panel(char uplo, int ib, double2 *a, int lda, double2 *work);
+void zpanel_to_q(char uplo, int ib, cuDoubleComplex *a, int lda, cuDoubleComplex *work);
+void zq_to_panel(char uplo, int ib, cuDoubleComplex *a, int lda, cuDoubleComplex *work);
 
 float getv(float *da);
 
