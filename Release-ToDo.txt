@@ -138,7 +138,7 @@ Task  Done      Who       What
 
                  zgeqrf   - MISSING /  ok  
                  zgeqrs   -  -   /  ok  
-
+		 zgels    -  -   /  ok  (Works only for QR)
 
      Mix precision
                  zcposv   -  -   /  ok
@@ -146,8 +146,8 @@ Task  Done      Who       What
                  zcgetrs  -  -   /  ok
   
      -----------------------
-                 zgelqf   -  ok  /  - 
-                 zgeqlf   -  ok  /  - 
+                 zgelqf   -  ok  /  - => move to v2
+                 zgeqlf   -  ok  /  - => move to v2
 
                  zgebrd   -  -   /  ok
                
