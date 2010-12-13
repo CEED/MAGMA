@@ -35,7 +35,6 @@ int main( int argc, char** argv)
     cuDoubleComplex *h_A, *h_R, *h_work;
     cuDoubleComplex *tau, *tau2;
     double          *diag, *offdiag, *diag2, *offdiag2;
-    cuDoubleComplex *d_A;
     double gpu_perf, cpu_perf;
 
     TimeStruct start, end;
@@ -105,12 +104,8 @@ int main( int argc, char** argv)
     }
 
     int nb = magma_get_zhetrd_nb(size[9]);
-    //int lwork = 2*size[9]*nb;
-    int lwork = 2*size[9]*lda/nb;
-    status = cublasAlloc(n2+lwork, sizeof(cuDoubleComplex), (void**)&d_A);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
-    }
+    int lwork = 2*size[9]*nb;
+    //int lwork = 2*size[9]*lda/nb;
 
     cudaMallocHost( (void**)&h_work, (lwork)*sizeof(cuDoubleComplex) );
     if (h_work == 0) {
@@ -139,7 +134,7 @@ int main( int argc, char** argv)
            =================================================================== */
         start = get_current_time();
         magma_zhetrd('L', N, h_R, lda, diag, offdiag,
-                     tau, h_work, &lwork, d_A, &info);
+                     tau, h_work, &lwork, &info);
         end = get_current_time();
 
         gpu_perf = 4.*N*N*N/(3.*1000000*GetTimerValue(start,end));
@@ -217,7 +212,6 @@ int main( int argc, char** argv)
     free(offdiag); free(offdiag2);
     cublasFree(h_work);
     cublasFree(h_R);
-    cublasFree(d_A);
 
     /* Shutdown */
     status = cublasShutdown();
