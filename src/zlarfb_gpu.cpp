@@ -106,7 +106,7 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
 
     /* Function Body */
     if (m <= 0 || n <= 0) {
-        return 0;
+        return MAGMA_SUCCESS;
     }
 
     char transt;
@@ -120,7 +120,7 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
         magma_int_t info = -1;
         fprintf(stderr, "The case (side == right) is not implemented\n");
         magma_xerbla(__func__, &info);
-        return 0;
+        return MAGMA_ERR_ILLEGAL_VALUE;
       }
 
     if ( storev == 'c' || storev == 'C') {
@@ -173,6 +173,5 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
                                 dV,    ldv,
                      c_one,     dC,    ldc);
     }
-    return 0;
-
+    return MAGMA_SUCCESS;
 } /* magma_zlarfb */

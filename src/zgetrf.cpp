@@ -89,7 +89,6 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
 #define max(a,b)  (((a)>(b))?(a):(b))
 #define min(a,b)  (((a)<(b))?(a):(b))
 
-    cublasStatus status;
     cuDoubleComplex *dAT, *dA, *da, *work;
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -106,11 +105,11 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
         *info = -4;
 
     if (*info != 0)
-        return 0;
+        return MAGMA_ERR_ILLEGAL_VALUE;
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        return 0;
+        return MAGMA_SUCCESS;
 
     nb = magma_get_zgetrf_nb(m);
 
@@ -131,10 +130,9 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
 
         if (maxdim*maxdim < 2*maxm*maxn)
         {
-	    status = cublasAlloc(nb*maxm+maxdim*maxdim, sizeof(cuDoubleComplex), (void**)&dA);
-	    if (status != CUBLAS_STATUS_SUCCESS) {
-		*info = -7;
-		return 0;
+	    if (CUBLAS_STATUS_SUCCESS != cublasAlloc(nb*maxm+maxdim*maxdim, sizeof(cuDoubleComplex), (void**)&dA) ) {
+	        *info = -7;
+		return MAGMA_ERR_CUBLASALLOC;
 	    }
 	    da = dA + nb*maxm;
 	    
@@ -146,20 +144,19 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
 	}
         else
         {
-	    status = cublasAlloc((nb+maxn)*maxm, sizeof(cuDoubleComplex), (void**)&dA);
-	    if (status != CUBLAS_STATUS_SUCCESS) {
-		*info = -7;
-		return 0;
+	    if (CUBLAS_STATUS_SUCCESS != cublasAlloc((nb+maxn)*maxm, sizeof(cuDoubleComplex), (void**)&dA) ) {
+	        *info = -7;
+		return MAGMA_ERR_CUBLASALLOC;
 	    }
 	    da = dA + nb*maxm;
 	    
 	    cublasSetMatrix( m, n, sizeof(cuDoubleComplex), a, lda, da, maxm);
 	    
-	    status = cublasAlloc(maxm*maxn, sizeof(cuDoubleComplex), (void**)&dAT);
-	    if (status != CUBLAS_STATUS_SUCCESS) {
-		*info = -7;
-		return 0;
+	    if (CUBLAS_STATUS_SUCCESS != cublasAlloc(maxm*maxn, sizeof(cuDoubleComplex), (void**)&dAT) ) {
+		cublasFree(dA);
+		return MAGMA_ERR_CUBLASALLOC;
 	    }
+
 	    magmablas_ztranspose2( dAT, ldda, da, maxm, m, n );
 	}
 	

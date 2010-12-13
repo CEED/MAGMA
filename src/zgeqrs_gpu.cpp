@@ -99,11 +99,11 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex *dwork;
-    int i, k, lddwork, rows, ib;
+    magma_int_t i, k, lddwork, rows, ib, ret;
 
     /* Function Body */
-    int nb     = magma_get_zgeqrf_nb(m);
-    int lwkopt = (m-n+nb+2*(nrhs)) * nb;
+    magma_int_t nb     = magma_get_zgeqrf_nb(m);
+    magma_int_t lwkopt = (m-n+nb+2*(nrhs)) * nb;
     long int lquery = (lwork == -1);
 
     hwork[0] = MAGMA_Z_MAKE( (double)lwkopt, 0. );
@@ -123,20 +123,23 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
         *info = -10;
 
     if (*info != 0)
-        return 0;
+        return MAGMA_ERR_ILLEGAL_VALUE;
     else if (lquery)
-        return 0;
+        return MAGMA_SUCCESS;
 
     k = min(m,n);
     if (k == 0) {
         hwork[0] = c_one;
-        return 0;
+        return MAGMA_SUCCESS;
     }
 
-    magma_zunmqr_gpu( MagmaLeft, MagmaConjTrans, 
-                      m, nrhs, n,
-                      a_ref(0,0), ldda, tau, 
-                      dB, lddb, hwork, lwork, dT, nb, info);
+    ret = magma_zunmqr_gpu( MagmaLeft, MagmaConjTrans, 
+			    m, nrhs, n,
+			    a_ref(0,0), ldda, tau, 
+			    dB, lddb, hwork, lwork, dT, nb, info);
+    if ( (ret != MAGMA_SUCCESS) || ( *info != 0 ) ) {
+	return ret;
+    }
 
     lddwork= k;
     dwork = dT+2*lddwork*nb;
@@ -206,7 +209,7 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
 		 dwork, lddb*sizeof(cuDoubleComplex),
 		 (n)*sizeof(cuDoubleComplex), nrhs, cudaMemcpyDeviceToDevice);
     
-    return 0;
+    return MAGMA_SUCCESS;
 }
 
 #undef a_ref

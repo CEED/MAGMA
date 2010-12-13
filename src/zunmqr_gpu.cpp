@@ -134,7 +134,7 @@ magma_zunmqr_gpu(char side, char trans,
     cuDoubleComplex *dwork;
     magma_int_t i, lddwork;
 
-    magma_int_t i1, i2, i3, ib, ic, jc, mi, ni, nq, nw;
+    magma_int_t i1, i2, i3, ib, ic, jc, mi, ni, nq, nw, ret;
     long int left, notran, lquery;
     static magma_int_t lwkopt;
 
@@ -175,15 +175,15 @@ magma_zunmqr_gpu(char side, char trans,
     hwork[0] = MAGMA_Z_MAKE( lwkopt, 0 );
 
     if (*info != 0) {
-	return 0;
+	return MAGMA_ERR_ILLEGAL_VALUE;
     } else if (lquery) {
-	return 0;
+	return MAGMA_SUCCESS;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0 || k == 0) {
 	hwork[0] = c_one;
-	return 0;
+	return MAGMA_SUCCESS;
     }
 
     lddwork= k;
@@ -220,10 +220,12 @@ magma_zunmqr_gpu(char side, char trans,
                 ni = n - i;
                 jc = i;
             }
-            magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-			      mi, ni, ib, 
-			      a_ref(i,  i ), ldda, t_ref(i), lddwork, 
-			      c_ref(ic, jc), lddc, dwork,    nw);
+            ret = magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
+				    mi, ni, ib, 
+				    a_ref(i,  i ), ldda, t_ref(i), lddwork, 
+				    c_ref(ic, jc), lddc, dwork,    nw);
+	    if ( ret != MAGMA_SUCCESS )
+	      return ret;
         }
     }
     else
@@ -260,6 +262,6 @@ magma_zunmqr_gpu(char side, char trans,
                         hwork+mi*ib, mi, c_ref(ic, jc), lddc);
     }
 
-    return 0;
+    return MAGMA_SUCCESS;
     /* End of MAGMA_ZUNMQR_GPU */
 }

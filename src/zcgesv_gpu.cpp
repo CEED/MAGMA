@@ -147,12 +147,12 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
 
     cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
     cuDoubleComplex zone  = MAGMA_Z_ONE;
-    int             ione  = 1;
+    magma_int_t     ione  = 1;
     double          cte, eps;
     cuDoubleComplex Xnrmv, Rnrmv;
     cuFloatComplex  *dSA, *dSX;
     double          Anrm, Xnrm, Rnrm;
-    int i, j, iiter ;
+    magma_int_t     i, j, iiter, ret;
     
     /*
       Check The Parameters. 
@@ -170,11 +170,12 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
 	*info =-9;
     
     if(*info!=0){
-	magma_xerbla("magma_zcgesv",info) ;
+	magma_xerbla("magma_zcgesv",info);
+	return MAGMA_ERR_ILLEGAL_VALUE;
     }
     
     if( N == 0 || NRHS == 0 )
-	return 0;
+	return MAGMA_SUCCESS;
     
     eps  = lapackf77_dlamch("Epsilon");
     Anrm = magmablas_zlange('I', N, N, dA, ldda, (double*)dworkd );
@@ -236,7 +237,7 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
     }
     
     *iter = 0;
-    return 0;
+    return MAGMA_SUCCESS;
   L10:
     ;
     
@@ -289,7 +290,7 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
 	*/
 	
 	*iter = iiter ;
-	return 0;
+	return MAGMA_SUCCESS;
       L20:
 	iiter++ ;
     }
@@ -307,14 +308,16 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
       satisfactory solution, so we resort to cuDoubleComplex precision.  
     */
     if( *info != 0 ){
-	return 0;
+	return MAGMA_SUCCESS;
     }
     
-    magma_zgetrf_gpu( N, N, dA, ldda, IPIV, info );
+    ret = magma_zgetrf_gpu( N, N, dA, ldda, IPIV, info );
+    if( (ret != MAGMA_SUCCESS) || (*info != 0) ){
+	return ret;
+    }
     magmablas_zlacpy( MagmaUpperLower, N, NRHS, dB, lddb, dX, N );
-    magma_zgetrs_gpu( MagmaNoTrans, N, NRHS, dA, ldda, IPIV, dX, N, info );
-    
-    return 0;
+    ret = magma_zgetrs_gpu( MagmaNoTrans, N, NRHS, dA, ldda, IPIV, dX, N, info );
+    return ret;
 }
 
 #undef max

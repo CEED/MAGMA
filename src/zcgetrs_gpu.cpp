@@ -90,12 +90,12 @@ magma_zcgetrs_gpu(magma_int_t n, magma_int_t nrhs,
 	*info = -9;
     }
     if (*info != 0) {
-	return 0;
+	return MAGMA_ERR_ILLEGAL_VALUE;
     }
 
     /* Quick return if possible */
     if (n == 0 || nrhs == 0) {
-	return 0;
+	return MAGMA_SUCCESS;
     }
     
     /* Get X by row applying interchanges to B and cast to single */
@@ -113,7 +113,7 @@ magma_zcgetrs_gpu(magma_int_t n, magma_int_t nrhs,
     cublasCtrsm( MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
 		 n, nrhs, cone, dA, ldda, dX, lddx);
     
-    return 0;
+    return MAGMA_SUCCESS;
     /* End of MAGMA_ZCGETRS */
     
 } /* magma_zcgetrs */

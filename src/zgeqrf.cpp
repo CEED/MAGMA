@@ -98,11 +98,12 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
 
     =====================================================================    */
 
-   #define  a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
-   #define da_ref(a_1,a_2) (da+(a_2)*ldda  + (a_1))
-   #define min(a,b)  (((a)<(b))?(a):(b))
-   #define max(a,b)  (((a)>(b))?(a):(b))
+    #define  a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
+    #define da_ref(a_1,a_2) (da+(a_2)*ldda  + (a_1))
+    #define min(a,b)  (((a)<(b))?(a):(b))
+    #define max(a,b)  (((a)>(b))?(a):(b))
 
+    cuDoubleComplex *da, *dwork;
     cuDoubleComplex c_one = MAGMA_Z_ONE;
 
     int i, k, lddwork, old_i, old_ib;
@@ -125,20 +126,15 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
         *info = -7;
     }
     if (*info != 0)
-        return 0;
+        return MAGMA_ERR_ILLEGAL_VALUE;
     else if (lquery)
-        return 0;
+        return MAGMA_SUCCESS;
 
     k = min(m,n);
     if (k == 0) {
         work[0] = c_one;
-        return 0;
+        return MAGMA_SUCCESS;
     }
-
-    cublasStatus status;
-    static cudaStream_t stream[2];
-    cudaStreamCreate(&stream[0]);
-    cudaStreamCreate(&stream[1]);
 
     nbmin = 2;
     nx = nb;
@@ -146,13 +142,16 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
     lddwork = ((n+31)/32)*32;
     ldda    = ((m+31)/32)*32;
 
-    cuDoubleComplex *da;
-    status = cublasAlloc((n)*ldda + nb*lddwork, sizeof(cuDoubleComplex), (void**)&da);
-    if (status != CUBLAS_STATUS_SUCCESS) {
+    if (CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*ldda + nb*lddwork, sizeof(cuDoubleComplex), (void**)&da) ) {
         *info = -8;
-        return 0;
+        return MAGMA_ERR_CUBLASALLOC;
     }
-    cuDoubleComplex *dwork = da + ldda*(n);
+
+    static cudaStream_t stream[2];
+    cudaStreamCreate(&stream[0]);
+    cudaStreamCreate(&stream[1]);
+
+    dwork = da + ldda*(n);
 
     if (nb >= nbmin && nb < k && nx < k) {
         /* Use blocked code initially */
@@ -227,11 +226,10 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
         lapackf77_zgeqrf(&rows, &ib, a_ref(i,i), &lda, tau+i, work, &lwork, info);
     }
 
-    cublasFree(da);
-    return 0;
-
-/*     End of MAGMA_ZGEQRF */
-
+    cudaStreamDestroy( stream[0] );
+    cudaStreamDestroy( stream[1] );
+    cublasFree( da );
+    return MAGMA_SUCCESS;
 } /* magma_zgeqrf */
 
 #undef min

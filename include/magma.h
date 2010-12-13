@@ -67,8 +67,16 @@
 #define MagmaColumnwiseStr "Columnwise"
 #define MagmaRowwiseStr    "Rowwise"
 
-/**************************************************************************/
-/*
+/**************************************************************************
+ *   Return codes
+ */
+#define MAGMA_SUCCESS             0
+#define MAGMA_ERR_ILLEGAL_VALUE  -4
+#define MAGMA_ERR_ALLOCATION     -5
+#define MAGMA_ERR_HOSTALLOC      -6
+#define MAGMA_ERR_CUBLASALLOC    -7
+
+/**************************************************************************
  *   Macros to deal with cuda complex
  */
 #define MAGMA_Z_SET2REAL(v, t)    (v).x = (t); (v).y = 0.0

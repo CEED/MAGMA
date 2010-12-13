@@ -87,7 +87,7 @@ magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs,
 
     cuDoubleComplex c_one = MAGMA_Z_ONE;
     cuDoubleComplex *work = NULL;
-    magma_int_t i1, i2, inc;
+    magma_int_t i1, i2, inc, ret;
 
     *info = 0;
     if (n < 0) {
@@ -100,21 +100,24 @@ magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs,
         *info = -7;
     }
     if (*info != 0) {
-        return 0;
+        return MAGMA_ERR_ILLEGAL_VALUE;
     }
 
     /* Quick return if possible */
     if (n == 0 || nrhs == 0) {
-        return 0;
+        return MAGMA_SUCCESS;
+    }
+
+    ret = magma_zgetrf_gpu( n, n, dA, ldda, ipiv, info);
+    if ( (ret != MAGMA_SUCCESS) || ( *info != 0 ) ) {
+	return ret;
     }
 
     work = (cuDoubleComplex*)malloc(n * nrhs * sizeof(cuDoubleComplex));
     if ( !work ) {
-        return -7;
+        return MAGMA_ERR_ALLOCATION;
     }
       
-    magma_zgetrf_gpu( n, n, dA, ldda, ipiv, info);
-
     /* Solve A * X = B. */
     i1  = 1;
     i2  = n;
@@ -129,7 +132,7 @@ magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs,
 
     free(work);
 
-    return 0;
+    return MAGMA_SUCCESS;
 }
 
 #undef max

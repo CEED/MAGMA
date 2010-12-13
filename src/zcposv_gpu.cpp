@@ -148,11 +148,11 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
 
     cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
     cuDoubleComplex zone  = MAGMA_Z_ONE;
-    int             ione  = 1;
+    magma_int_t     ione  = 1;
     cuFloatComplex *dSA, *dSX;
     cuDoubleComplex Xnrmv, Rnrmv; 
     double          Xnrm, Rnrm, Anrm, cte, eps;
-    int i, j, iiter;
+    magma_int_t     i, j, iiter, ret;
 
     *iter = 0 ;
     *info = 0 ; 
@@ -169,11 +169,12 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
         *info =-9;
    
     if( *info != 0 ){
-        magma_xerbla("magma_zcposv", info);
+        magma_xerbla("magma_zcposv", info);	
+	return MAGMA_ERR_ILLEGAL_VALUE;
     }
 
     if( n == 0 || nrhs == 0 ) 
-        return 0;
+        return MAGMA_SUCCESS;
 
     eps = lapackf77_dlamch("Epsilon");
 
@@ -227,7 +228,7 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
         }
     }
     *iter =0; 
-    return 0;
+    return MAGMA_SUCCESS;
   
   L10:
     ;
@@ -265,20 +266,20 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
         }  
 
         *iter = iiter;
-        return 0;
+        return MAGMA_SUCCESS;
       L20:
         iiter++ ;
     }
     *iter = -ITERMAX - 1; 
   
   L40:
-    magma_zpotrf_gpu(uplo, n, dA, ldda, info);
-    if( *info != 0 ){
-        return 0;
+    ret = magma_zpotrf_gpu(uplo, n, dA, ldda, info);
+    if( (ret != MAGMA_SUCCESS) || (*info != 0) ){
+	return ret;
     }
     magmablas_zlacpy( MagmaUpperLower, n, nrhs, dB, lddb, dX, lddx);
-    magma_zpotrs_gpu(uplo, n, nrhs, dA, ldda, dX, lddx, info);
-    return 0;
+    ret = magma_zpotrs_gpu(uplo, n, nrhs, dA, ldda, dX, lddx, info);
+    return ret;
 }
 
 #undef max

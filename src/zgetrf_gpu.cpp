@@ -102,11 +102,11 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
 	*info = -4;
 
     if (*info != 0)
-        return 0;
+        return MAGMA_ERR_ILLEGAL_VALUE;
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        return 0;
+        return MAGMA_SUCCESS;
 
     /* Function Body */
     mindim = min(m, n);
@@ -131,23 +131,26 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
 
 	dAT = dA;
 
-	cublasStatus status;
-	status = cublasAlloc(nb*maxm, sizeof(cuDoubleComplex), (void**)&dAP);
-	if (status != CUBLAS_STATUS_SUCCESS)
-	    return -7;
+	if ( CUBLAS_STATUS_SUCCESS != cublasAlloc(nb*maxm, sizeof(cuDoubleComplex), (void**)&dAP) ) {
+	    return MAGMA_ERR_CUBLASALLOC;
+	}
 
 	if ((m == n) && (m % 32 == 0) && (ldda%32 == 0))
 	    magmablas_zinplace_transpose( dAT, ldda, lddat );
 	else {
-	    status = cublasAlloc(maxm*maxn, sizeof(cuDoubleComplex), (void**)&dAT);
-	    if (status != CUBLAS_STATUS_SUCCESS)
-		return -7;
+	    if ( CUBLAS_STATUS_SUCCESS != cublasAlloc(maxm*maxn, sizeof(cuDoubleComplex), (void**)&dAT) ) {
+		cublasFree( dAP );
+		return MAGMA_ERR_CUBLASALLOC;
+	    }
 	    magmablas_ztranspose2( dAT, lddat, dA, ldda, m, n );
 	}
 
-	cudaMallocHost( (void**)&work, maxm*nb*sizeof(cuDoubleComplex) );
-	if (work == 0)
-	    return -7;
+	if ( cudaSuccess != cudaMallocHost( (void**)&work, maxm*nb*sizeof(cuDoubleComplex) ) ) {
+	    cublasFree( dAP );
+	    if (! ((m == n) && (m % 32 == 0) && (ldda%32 == 0)) )
+		cublasFree( dAT );
+	    return MAGMA_ERR_HOSTALLOC;
+	}
 
 	for( i=0; i<s; i++ )
             {
@@ -240,10 +243,10 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
 	    cublasFree(dAT);
 	}
 
-	cudaFreeHost(work);
 	cublasFree(dAP);
+	cudaFreeHost(work);
     }
-    return 0;
+    return MAGMA_SUCCESS;
 
     /* End of MAGMA_ZGETRF_GPU */
 }

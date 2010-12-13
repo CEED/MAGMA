@@ -104,11 +104,11 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
         *info = -4;
     }
     if (*info != 0)
-        return 0;
+        return MAGMA_ERR_ILLEGAL_VALUE;
 
     k = min(m,n);
     if (k == 0)
-        return 0;
+        return MAGMA_SUCCESS;
 
     nb = magma_get_zgeqrf_nb(m);
 
@@ -117,12 +117,13 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
 
     if ( CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*nb, sizeof(cuDoubleComplex), (void**)&dwork) ) {
 	*info = -9;
-        return -7;
+        return MAGMA_ERR_CUBLASALLOC;
     }
 
-    if (CUBLAS_STATUS_SUCCESS != cudaMallocHost( (void**)&work, lwork*sizeof(cuDoubleComplex)) ) {
-	*info = -9;
-        return -7;
+    if ( cudaSuccess != cudaMallocHost( (void**)&work, lwork*sizeof(cuDoubleComplex)) ) {
+      	*info = -9;
+	cublasFree( dwork );
+        return MAGMA_ERR_HOSTALLOC;
     }
 
     static cudaStream_t stream[2];
@@ -219,5 +220,5 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
     cudaFreeHost(work);
     cudaStreamDestroy(stream[0]);
     cudaStreamDestroy(stream[1]);
-    return 0;
+    return MAGMA_SUCCESS;
 } /* magma_zgeqrf2_gpu */

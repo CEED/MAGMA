@@ -76,6 +76,7 @@ magma_zposv_gpu( char uplo, magma_int_t n, magma_int_t nrhs,
     #define max(a,b) (((a)>(b))?(a):(b))
 
     cuDoubleComplex c_one = MAGMA_Z_ONE;
+    magma_int_t ret;
     
     *info = 0 ; 
     if( (uplo != 'U') && (uplo != 'u') && (uplo != 'L') && (uplo != 'l') )
@@ -90,12 +91,16 @@ magma_zposv_gpu( char uplo, magma_int_t n, magma_int_t nrhs,
         *info = -7;
     if( *info != 0 ){ 
         magma_xerbla("magma_zpotrs_gpu", info); 
-        return 0;
+        return MAGMA_ERR_ILLEGAL_VALUE;
     }
     if( (n==0) || (nrhs ==0) )
-        return 0;	
+        return MAGMA_SUCCESS;	
 
-    magma_zpotrf_gpu(uplo, n, dA, ldda, info);
+    ret = magma_zpotrf_gpu(uplo, n, dA, ldda, info);
+    if ( (ret != MAGMA_SUCCESS) || ( *info != 0 ) ) {
+	return ret;
+    }
+
     if( (uplo=='U') || (uplo=='u') ){
         cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb);
         cublasZtrsm(MagmaLeft, MagmaUpper, MagmaNoTrans,   MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb);
@@ -105,5 +110,5 @@ magma_zposv_gpu( char uplo, magma_int_t n, magma_int_t nrhs,
         cublasZtrsm(MagmaLeft, MagmaLower, MagmaConjTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb);
     }
 
-    return 0;
+    return MAGMA_SUCCESS;
 }

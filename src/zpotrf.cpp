@@ -103,7 +103,6 @@ magma_zpotrf(char uplo, magma_int_t n,
     char uplo_[2] = {uplo, 0};
     magma_int_t        ldda, nb;
     static magma_int_t j, jb;
-    cublasStatus       status;
     cuDoubleComplex    zone  = MAGMA_Z_ONE;
     cuDoubleComplex    mzone = MAGMA_Z_NEG_ONE;
     cuDoubleComplex   *work;
@@ -120,19 +119,18 @@ magma_zpotrf(char uplo, magma_int_t n,
       *info = -4;
     }
     if (*info != 0)
-      return 0;
+      return MAGMA_ERR_ILLEGAL_VALUE;
+
+    ldda = ((n+31)/32)*32;
+    
+    if (CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*ldda, sizeof(cuDoubleComplex), (void**)&work)) {
+	*info = -6;
+	return MAGMA_ERR_CUBLASALLOC;
+    }
 
     static cudaStream_t stream[2];
     cudaStreamCreate(&stream[0]);
     cudaStreamCreate(&stream[1]);
-
-    ldda = ((n+31)/32)*32;
-    
-    status = cublasAlloc((n)*ldda, sizeof(cuDoubleComplex), (void**)&work);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-	*info = -6;
-	return 0;
-    }
 
     nb = magma_get_zpotrf_nb(n);
 
@@ -245,8 +243,6 @@ magma_zpotrf(char uplo, magma_int_t n,
 
     cublasFree(work);
     
-    return 0;
-
-    /* End of MAGMA_ZPOTRF */
+    return MAGMA_SUCCESS;
 } /* magma_zpotrf */
 
