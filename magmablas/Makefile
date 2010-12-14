@@ -38,7 +38,8 @@ CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
 SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 
-FERMISRC =	sgemm_fermi.cu 	\
+FERMISRC =	sgemv_fermi.cu  \
+                sgemm_fermi.cu 	\
                 sgemm_fermi80.cu\
                 sgemm_fermi64.cu\
 	        dgemm_fermi.cu 	\
