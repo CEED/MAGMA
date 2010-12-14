@@ -116,7 +116,7 @@ int main(int argc , char **argv)
         lapackf77_zlarnv( &ione, ISEED, &size, h_B );
         lapackf77_zlacpy( MagmaUpperLowerStr, &N, &NRHS, h_B, &ldb, h_X, &ldx);
 
-        printf("%5d",N);
+        printf("%5d  ",N);
 
         cublasSetMatrix( N, N,    sizeof( cuDoubleComplex ), h_A, lda, d_A, ldda );
         cublasSetMatrix( N, NRHS, sizeof( cuDoubleComplex ), h_B, ldb, d_B, lddb );
