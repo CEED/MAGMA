@@ -777,24 +777,25 @@ extern "C"
 void  magmablas_dsymv_tesla( char uplo , int m , double alpha,  double *A , int lda , 
 				double *X , int incx, double beta, double *Y, int incy)
 {
-
-	
-	double *dC_work;
-	int bsz = 64;
-	int blocks = m / bsz + (m %bsz != 0);
-	int workspace = lda * (blocks + 1);
-	cublasAlloc( workspace, sizeof(double), (void**)&dC_work ) ;
+	if (uplo == 'U' || uplo == 'u')
+                cublasDsymv(uplo, m, alpha, A, lda, X, incx, beta, Y, incy);
+        else
+        {
+		double *dC_work;
+		int bsz = 64;
+		int blocks = m / bsz + (m %bsz != 0);
+		int workspace = lda * (blocks + 1);
+		cublasAlloc( workspace, sizeof(double), (void**)&dC_work ) ;
 			
-	cublasGetError( ) ;
+		cublasGetError( ) ;	
 
+		int kstan = -1;
 
-	int kstan = -1;
+		magmablas_dsymv6_tesla(uplo, m, alpha, A, lda, X, incx, beta, Y, incy, 
+        	              dC_work, kstan);
 
-	magmablas_dsymv6_tesla(uplo, m, alpha, A, lda, X, incx, beta, Y, incy, 
-                      dC_work, kstan);
-
-	cublasFree(dC_work);
-
+		cublasFree(dC_work);
+	}
 }
 
 #undef thread_x 

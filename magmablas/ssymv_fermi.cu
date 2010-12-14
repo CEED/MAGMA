@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "cuda.h"
 #include "cublas.h"
+
 #define magmablas_ssymv_fermi magmablas_ssymv 
 
 #define dgemv_bs 64
@@ -772,23 +773,25 @@ extern "C"
 void  magmablas_ssymv_fermi( char uplo , int m , float alpha,  float *A , int lda , 
 				float *X , int incx, float beta, float *Y, int incy)
 {
-
-	
-	float *dC_work;
-	int bsz = 64;
-	int blocks = m / bsz + (m %bsz != 0);
-	int workspace = lda * (blocks + 1);
-	cublasAlloc( workspace, sizeof(float), (void**)&dC_work ) ;
+	if (uplo == 'U' || uplo == 'u')
+		cublasSsymv(uplo, m, alpha, A, lda, X, incx, beta, Y, incy);
+	else
+	{	
+		float *dC_work;
+		int bsz = 64;
+		int blocks = m / bsz + (m %bsz != 0);
+		int workspace = lda * (blocks + 1);
+		cublasAlloc( workspace, sizeof(float), (void**)&dC_work ) ;
 			
-	cublasGetError( ) ;
+		cublasGetError( ) ;
 
-	int kstan = -1;
+		int kstan = -1;
 
-	magmablas_ssymv6_fermi(uplo, m, alpha, A, lda, X, incx, beta, Y, incy, 
-                      dC_work, kstan);
+		magmablas_ssymv6_fermi(uplo, m, alpha, A, lda, X, incx, beta, Y, incy, 
+        		              dC_work, kstan);
 
-	cublasFree(dC_work);
-
+		cublasFree(dC_work);
+	}
 }
 
 #undef thread_x 
