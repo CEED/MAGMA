@@ -67,7 +67,7 @@ int main( int argc, char** argv)
 
     /* Allocate host memory for the matrix */
     n2   = size[9] * size[9];
-    ldda = (size[9]/32) * 32;
+    ldda = ((size[9]+31)/32) * 32;
     TESTING_MALLOC(    h_A, cuDoubleComplex, n2);
     TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2);
     TESTING_DEVALLOC(  d_A, cuDoubleComplex, ldda*size[9] );
@@ -81,8 +81,7 @@ int main( int argc, char** argv)
 	n2  = lda*N;
         flops = FLOPS( (double)N ) / 1000000;
 	
-	ldda = (N/32)*32;
-	if (ldda<N) ldda+=32;
+	ldda = ((N+31)/32)*32;
 
 	/* Initialize the matrix */
 	lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
