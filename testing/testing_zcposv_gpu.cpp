@@ -59,7 +59,8 @@ int main(int argc, char **argv)
     magma_int_t NRHS     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t sizetest[10] = {1024,2048,3072,4032,5184,6016,7040,7520,8064,8192};
-    const char *uplo = MagmaUpperStr;
+    // const char *uplo = MagmaUpperStr;
+    const char *uplo = MagmaLowerStr;
     
     if (argc != 1){
 	for(i = 1; i<argc; i++){	
@@ -91,7 +92,7 @@ int main(int argc, char **argv)
     TESTING_DEVALLOC( d_X,     cuDoubleComplex, ldx*NRHS    );
     TESTING_DEVALLOC( d_WORKS, cuFloatComplex,  lda*(N+NRHS));
     TESTING_DEVALLOC( d_WORKD, cuDoubleComplex, N*NRHS      );
-  
+
     printf("  N   DP-Factor  DP-Solve  SP-Factor  SP-Solve  MP-Solve  ||b-Ax||/||A||  NumIter\n");
     printf("==================================================================================\n");
     for(i=0; i<10; i++){
@@ -109,8 +110,6 @@ int main(int argc, char **argv)
 	    magma_int_t i, j;
 	    for(i=0; i<N; i++) {
 		MAGMA_Z_SET2REAL( h_A[i*lda+i], ( MAGMA_Z_GET_X(h_A[i*lda+i]) + 1.*N ) );
-		for(j=0; j<i; j++)
-		    h_A[i*lda+j] = cuConj(h_A[j*lda+i]);
 	    }
 	}
 	
