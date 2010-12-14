@@ -6,8 +6,9 @@
        November 2010
 */
 
-#include "stdio.h"
-#include "cublas.h"
+#include <stdio.h>
+#include <cublas.h>
+
 #include "magma.h"
 #define magmablas_sgemv_fermi magmablas_sgemv
 

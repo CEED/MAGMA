@@ -8,7 +8,8 @@
 */
 
 #include <stdio.h>
-#include "cublas.h"
+#include <cublas.h>
+
 #include "magma.h"
 #define magmablas_dgemv_fermi magmablas_dgemv
 
@@ -343,23 +344,85 @@ magmablas_dgemvt_fermi(int m, int n, double alpha, double *A, int lda,
 }
 
 extern "C" 
-void magmablas_dgemv_fermi(char flag, int m, int n, double alpha, double *A, int lda, 
-                 double *x, double *y)
+void magmablas_dgemv_fermi(char trans,
+                           magma_int_t m, magma_int_t n,
+                           double alpha, 
+                           double *A, magma_int_t lda, 
+                           double *x, magma_int_t incx,
+                           double beta,
+                           double *z, magma_int_t incz)
 {
-	if (flag == 'N' || flag == 'n')
-	{
-		magmablas_dgemvn_fermi(m, n, alpha, A, lda, x, y);
-	}
-	else if(flag == 'T' || flag == 't')
-	{
-		magmablas_dgemvt_fermi(m, n, alpha, A, lda, x, y);
-	}
-	else 
-	{
-		printf("Not Available\n");
-	}
+/*  -- MAGMA (version 1.0) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2010
 
+    Purpose
+    =======
+    This routine computes:
+    1) z =       A   x    if trans == 'N' or 'n', alpha == 1, beta == 0, 
+                          and incx == incz == 1 (using magmablas code)
+    2) z = alpha A^t x    if trans == 'T' or 't', beta == 0,
+                          and incx == incz == 1 (using magmablas code)
+    3) z = alpha A^trans x + beta z
+                          otherwise, using CUBLAS.
+
+   Arguments
+   ==========
+    TRANS  - CHARACTER*1
+             On entry, TRANS specifies the operation to be performed as
+             follows:
+               TRANS = 'N' or 'n'   z := alpha*A *x + beta*z
+               TRANS = 'T' or 't'   z := alpha*A'*x + beta*z
+
+    M      - (input) INTEGER
+             On entry, N specifies the number of rows of the matrix A.
+
+    N      - (input) INTEGER
+             On entry, M specifies the number of columns of the matrix A
+ 
+    ALPHA  - DOUBLE REAL
+             On entry, ALPHA specifies the scalar alpha.
+             Unchanged on exit.
+
+    A      - (input) DOUBLE PRECISION array of dimension ( LDA, n ) on the GPU.
+   
+    LDA    - (input) INTEGER
+             LDA specifies the leading dimension of A.
+
+    X      - (input) DOUBLE PRECISION array of dimension 
+             n if trans == 'n'
+             m if trans == 't'
+     
+    INCX   - (input) Specifies the increment for the elements of X.
+             INCX must not be zero. Unchanged on exit.
+  
+    BETA   - DOUBLE REAL
+             On entry, BETA specifies the scalar beta. When BETA is
+             supplied as zero then Y need not be set on input.
+             Unchanged on exit.
+
+    Z      - (output) DOUBLE PRECISION array of	dimension 
+             m if trans == 'n'
+             n if trans == 't' 
+
+    INCZ  - (input) Specifies the increment for the elements of Z.
+            INCZ must not be zero. Unchanged on exit.
+    ===================================================================== */
+
+    if (incx == 1 && incz == 1 && beta == 0.) {
+       if (trans == 'n' || trans == 'N')
+           magmablas_dgemvn_fermi(m,  n, alpha, A, lda, x, z);
+       else if (trans == 't' || trans == 'T')
+          magmablas_dgemvt_fermi(m,  n, alpha, A, lda, x, z);
+       else
+          printf("trans = %c in sgemv_fermi is not available\n", trans);	       
+    }
+    else
+       cublasDgemv(trans, m, n, alpha, A, lda, x, incx, beta, z, incz);
 }
+
 #undef num_threads
 #undef dgemv_bs
 #undef threadSize
