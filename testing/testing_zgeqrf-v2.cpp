@@ -59,39 +59,37 @@ void *cpu_thread(void *a)
   int K;
   cuDoubleComplex *WORK;
 
-//fprintf(stderr,"thread=%d\n",t);
-
   // traverse panels 
-  for (i = 0; i < MG.np_gpu; i++) {
-    while (MG.p[i] == NULL) {
-      sched_yield();
-    }
-
-    M=MG.m-i*MG.nb;
-    //N=MG.nb;
-    N=MG.ob;
-    K=MG.nb;
-	//if (MG.m >= MG.n) {
-	if (MG.m >= (MG.n-(MG.nthreads*MG.ob))) {
-      if (i == (MG.np_gpu - 1)) {
-        //K = MG.n-MG.nthreads*MG.nb-(MG.np_gpu-1)*MG.nb; 
-        K = MG.n-MG.nthreads*MG.ob-(MG.np_gpu-1)*MG.nb; 
+  for (i = 0; i < MG.np_gpu; i++) 
+    {
+      while (MG.p[i] == NULL) {
+	sched_yield();
       }
+    
+      M=MG.m-i*MG.nb;
+      //N=MG.nb;
+      N=MG.ob;
+      K=MG.nb;
+      //if (MG.m >= MG.n) {
+      if (MG.m >= (MG.n-(MG.nthreads*MG.ob))) {
+	if (i == (MG.np_gpu - 1)) {
+	  //K = MG.n-MG.nthreads*MG.nb-(MG.np_gpu-1)*MG.nb; 
+	  K = MG.n-MG.nthreads*MG.ob-(MG.np_gpu-1)*MG.nb; 
 	}
+      }
 
-//fprintf(stderr,"thread=%d panel=%d K=%d\n",t,i,K);
-
-    WORK = (cuDoubleComplex*)malloc(sizeof(cuDoubleComplex)*M*N);
-
-    lapackf77_zlarfb(MagmaLeftStr, MagmaTransStr, MagmaForwardStr, MagmaColumnwiseStr,
-                     &M,&N,&K,MG.a+i*MG.nb*MG.lda+i*MG.nb,&MG.lda,MG.t+i*MG.nb*MG.nb,&K,
-                     //MG.a+MG.m*MG.n-(MG.nthreads-t)*MG.nb*MG.lda+i*MG.nb,&MG.lda,WORK,&N);
-                     MG.a+MG.m*MG.n-(MG.nthreads-t)*MG.ob*MG.lda+i*MG.nb,&MG.lda,WORK,&N);
-
-    free(WORK);
-
-  }
-
+      //fprintf(stderr,"thread=%d panel=%d K=%d\n",t,i,K);
+      
+      WORK = (cuDoubleComplex*)malloc(sizeof(cuDoubleComplex)*M*N);
+      
+      lapackf77_zlarfb(MagmaLeftStr, MagmaTransStr, MagmaForwardStr, MagmaColumnwiseStr,
+		       &M,&N,&K,MG.a+i*MG.nb*MG.lda+i*MG.nb,&MG.lda,MG.t+i*MG.nb*MG.nb,&K,
+		       //MG.a+MG.m*MG.n-(MG.nthreads-t)*MG.nb*MG.lda+i*MG.nb,&MG.lda,WORK,&N);
+		       MG.a+MG.m*MG.n-(MG.nthreads-t)*MG.ob*MG.lda+i*MG.nb,&MG.lda,WORK,&N);
+      
+      free(WORK);
+    }
+  
   return (void*)NULL;
 }
 
@@ -140,20 +138,21 @@ void magma_init (int m, int n, cuDoubleComplex *a, int nthreads)
       MG.np_gpu++;
   }
 
-fprintf(stderr,"MG.np_gpu=%d\n",MG.np_gpu);
+  fprintf(stderr,"MG.np_gpu=%d\n",MG.np_gpu);
 
   MG.p = (volatile cuDoubleComplex **) malloc (MG.np_gpu*sizeof(cuDoubleComplex*));
 
   for (i = 0; i < MG.np_gpu; i++) {
     MG.p[i] = NULL;
   }
-
+  
   MG.thread = (pthread_t*)malloc(sizeof(pthread_t)*MG.nthreads);
-
+  
   for (i = 0; i < MG.nthreads; i++){
     pthread_create(&MG.thread[i], NULL, cpu_thread, (void *)(long int)i);
   }
 }
+
 
 int EN_BEE;
 
@@ -166,15 +165,10 @@ Quark *quark;
 */
 int main( int argc, char** argv) 
 {
-
-int nthreads=2;
-
-EN_BEE = 32;
-
-TRACE = 0;
-
-int nquarkthreads=2;
-
+    int nthreads=2;
+    EN_BEE = 32;
+    TRACE = 0;
+    int nquarkthreads=2;
 
     cuInit( 0 );
     cublasInit( );
@@ -198,48 +192,53 @@ int nquarkthreads=2;
     MG.ob=-1;
     MG.fb=-1;
 
-	int loop = argc;
-
+    int loop = argc;
     int accuracyflag = 1;
 
-    if (argc != 1){
-      for(i = 1; i<argc; i++){      
-        if (strcmp("-N", argv[i])==0)
-          N = atoi(argv[++i]);
-        else if (strcmp("-M", argv[i])==0)
-          M = atoi(argv[++i]);
-        else if (strcmp("-F", argv[i])==0)
-          MG.fb = atoi(argv[++i]);
-        else if (strcmp("-O", argv[i])==0)
-          MG.ob = atoi(argv[++i]);
-        else if (strcmp("-B", argv[i])==0)
-          MG.nb = atoi(argv[++i]);
-        else if (strcmp("-b", argv[i])==0)
-          EN_BEE = atoi(argv[++i]);
-        else if (strcmp("-A", argv[i])==0)
-          accuracyflag = atoi(argv[++i]);
-        else if (strcmp("-P", argv[i])==0)
-          nthreads = atoi(argv[++i]);
-        else if (strcmp("-Q", argv[i])==0)
-          nquarkthreads = atoi(argv[++i]);
+    if (argc != 1)
+      {
+	for(i = 1; i<argc; i++){      
+	  if (strcmp("-N", argv[i])==0)
+	    N = atoi(argv[++i]);
+	  else if (strcmp("-M", argv[i])==0)
+	    M = atoi(argv[++i]);
+	  else if (strcmp("-F", argv[i])==0)
+	    MG.fb = atoi(argv[++i]);
+	  else if (strcmp("-O", argv[i])==0)
+	    MG.ob = atoi(argv[++i]);
+	  else if (strcmp("-B", argv[i])==0)
+	    MG.nb = atoi(argv[++i]);
+	  else if (strcmp("-b", argv[i])==0)
+	    EN_BEE = atoi(argv[++i]);
+	  else if (strcmp("-A", argv[i])==0)
+	    accuracyflag = atoi(argv[++i]);
+	  else if (strcmp("-P", argv[i])==0)
+	    nthreads = atoi(argv[++i]);
+	  else if (strcmp("-Q", argv[i])==0)
+	    nquarkthreads = atoi(argv[++i]);
+	}
+	
+	if ((M>0 && N>0) || (M==0 && N==0)) 
+	  {
+	    printf("  testing_zgeqrf-v2 -M %d -N %d\n\n", M, N);
+	    if (M==0 && N==0) {
+	      M = N = size[9];
+	      loop = 1;
+	    }
+	  } 
+	else 
+	  {
+	    printf("\nUsage: \n");
+	    printf("  testing_zgeqrf-v2 -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
+	    exit(1);
+	  }
+      } 
+    else 
+      {
+	printf("\nUsage: \n");
+	printf("  testing_zgeqrf-v2 -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
+	M = N = size[9];
       }
-
-      if ((M>0 && N>0) || (M==0 && N==0)) {
-        printf("  testing_zgeqrf-v2 -M %d -N %d\n\n", M, N);
-        if (M==0 && N==0) {
-          M = N = size[9];
-          loop = 1;
-        }
-      } else {
-        printf("\nUsage: \n");
-        printf("  testing_zgeqrf-v2 -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
-        exit(1);
-      }
-    } else {
-      printf("\nUsage: \n");
-      printf("  testing_zgeqrf-v2 -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
-      M = N = size[9];
-    }
 
 
     /* Initialize CUBLAS */
@@ -297,16 +296,15 @@ int nquarkthreads=2;
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
+	magma_init(M, N, h_R, nthreads);
 
-magma_init(M, N, h_R, nthreads);
-
-quark = QUARK_New(nquarkthreads);
+	quark = QUARK_New(nquarkthreads);
 
         start = get_current_time();
         magma_zgeqrf3(M, N, h_R, M, tau, h_work, lwork, &info);
         end = get_current_time();
 
-QUARK_Delete(quark);
+	QUARK_Delete(quark);
 
         gpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
         // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
