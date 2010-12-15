@@ -5,6 +5,8 @@
        Univ. of Colorado, Denver
        November 2010
 
+	   @p_recisions normal z -> s d c
+
        to go to real 'w' must be changed to 'wr', 'wi' everywhere
 */
 
@@ -15,12 +17,12 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t
-magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n, 
-	    cuDoubleComplex *a, magma_int_t *lda, 
-	    cuDoubleComplex *w, 
-	    cuDoubleComplex *vl, magma_int_t *ldvl, 
-	    cuDoubleComplex *vr, magma_int_t *ldvr, 
-	    cuDoubleComplex *work, magma_int_t *lwork, 
+magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
+	    cuDoubleComplex *a, magma_int_t *lda,
+	    cuDoubleComplex *geev_w_array,
+	    cuDoubleComplex *vl, magma_int_t *ldvl,
+	    cuDoubleComplex *vr, magma_int_t *ldvr,
+	    cuDoubleComplex *work, magma_int_t *lwork,
 	    double *rwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -178,7 +180,6 @@ magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
     a_dim1 = *lda;
     a_offset = 1 + a_dim1;
     a -= a_offset;
-    --w;
     vl_dim1 = *ldvl;
     vl_offset = 1 + vl_dim1;
     vl -= vl_offset;
@@ -229,17 +230,17 @@ magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
 		i__1 = maxwrk, i__2 = *n + (*n - 1) * ilaenv_(&c__1, "ZUNGHR",
 			 " ", n, &c__1, n, &c_n1, 6, 1);
 		maxwrk = max(i__1,i__2);
-		zhseqr_("S", "V", n, &c__1, n, &a[a_offset], lda, &w[1], &vl[
+		zhseqr_("S", "V", n, &c__1, n, &a[a_offset], lda, geev_w_array, &vl[
 			vl_offset], ldvl, &work[1], &c_n1, info);
 	    } else if (wantvr) {
 	      /* Computing MAX */
 		i__1 = maxwrk, i__2 = *n + (*n - 1) * ilaenv_(&c__1, "ZUNGHR",
 			 " ", n, &c__1, n, &c_n1, 6, 1);
 		maxwrk = max(i__1,i__2);
-		zhseqr_("S", "V", n, &c__1, n, &a[a_offset], lda, &w[1], &vr[
+		zhseqr_("S", "V", n, &c__1, n, &a[a_offset], lda, geev_w_array, &vr[
 			vr_offset], ldvr, &work[1], &c_n1, info);
 	    } else {
-		zhseqr_("E", "N", n, &c__1, n, &a[a_offset], lda, &w[1], &vr[
+		zhseqr_("E", "N", n, &c__1, n, &a[a_offset], lda, geev_w_array, &vr[
 			vr_offset], ldvr, &work[1], &c_n1, info);
 	    }
 	    hswork = (magma_int_t) MAGMA_Z_REAL(work[1]);
@@ -329,7 +330,7 @@ magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
            (RWorkspace: none) */
 	iwrk = itau;
 	i__1 = *lwork - iwrk + 1;
-	zhseqr_("S", "V", n, &ilo, &ihi, &a[a_offset], lda, &w[1], &vl[
+	zhseqr_("S", "V", n, &ilo, &ihi, &a[a_offset], lda, geev_w_array, &vl[
 		vl_offset], ldvl, &work[iwrk], &i__1, info);
 
 	if (wantvr) {
@@ -356,7 +357,7 @@ magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
            (RWorkspace: none) */
 	iwrk = itau;
 	i__1 = *lwork - iwrk + 1;
-	zhseqr_("S", "V", n, &ilo, &ihi, &a[a_offset], lda, &w[1], &vr[
+	zhseqr_("S", "V", n, &ilo, &ihi, &a[a_offset], lda, geev_w_array, &vr[
 		vr_offset], ldvr, &work[iwrk], &i__1, info);
     } else {
       /*  Compute eigenvalues only   
@@ -365,7 +366,7 @@ magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
 
 	iwrk = itau;
 	i__1 = *lwork - iwrk + 1;
-	zhseqr_("E", "N", n, &ilo, &ihi, &a[a_offset], lda, &w[1], &vr[
+	zhseqr_("E", "N", n, &ilo, &ihi, &a[a_offset], lda, geev_w_array, &vr[
 		vr_offset], ldvr, &work[iwrk], &i__1, info);
     }
 
@@ -462,12 +463,10 @@ L50:
 	/* Computing MAX */
 	i__3 = *n - *info;
 	i__2 = max(i__3,1);
-	zlascl_("G", &c__0, &c__0, &cscale, &anrm, &i__1, &c__1, &w[*info + 1]
-		, &i__2, &ierr);
+	zlascl_("G", &c__0, &c__0, &cscale, &anrm, &i__1, &c__1, geev_w_array + *info, &i__2, &ierr);
 	if (*info > 0) {
 	    i__1 = ilo - 1;
-	    zlascl_("G", &c__0, &c__0, &cscale, &anrm, &i__1, &c__1, &w[1], n,
-		     &ierr);
+	    zlascl_("G", &c__0, &c__0, &cscale, &anrm, &i__1, &c__1, geev_w_array, n, &ierr);
 	}
     }
 
