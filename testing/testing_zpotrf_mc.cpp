@@ -14,13 +14,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-
 #include <quark.h>
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 
 // includes, project
-#include "cuda.h"
-#include "cuda_runtime_api.h"
-#include "cublas.h"
 #include "magma.h"
 #include "magmablas.h"
 
@@ -29,6 +28,17 @@ int EN_BEE;
 
 // QUARK scheduler initialized here
 Quark *quark;
+
+// Flops formula
+#define PRECISION_z
+#define FMULS(n) ((n) * (1.0 / 6.0 * (n) + 0.5) * (n))
+#define FADDS(n) ((n) * (1.0 / 6.0 * (n) )      * (n))
+#if defined(PRECISION_z) || defined(PRECISION_c)
+#define FLOPS(n) ( 6. * FMULS(n) + 2. * FADDS(n) )
+#else
+#define FLOPS(n) (      FMULS(n) +      FADDS(n) )
+#endif
+
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zpotrf_mc
@@ -92,76 +102,68 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! host memory allocation error (A2)\n");
     }
 
+    /* Initialize the Quark scheduler */
+    quark = QUARK_New(cores);
+    
     printf("\n\n");
     printf("  N    Multicore GFlop/s    ||R||_F / ||A||_F\n");
     printf("=============================================\n");
-    for(i=0; i<10; i++){
-      N = lda = size[i];
-      n2 = N*N;
+    for(i=0; i<10; i++)
+      {
+	N = lda = size[i];
+	n2 = N*N;
 
-    lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
+	lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
+	
+	for(j=0; j<N; j++) 
+	  MAGMA_Z_SET2REAL( h_A[j*lda+j], ( MAGMA_Z_GET_X(h_A[j*lda+j]) + 2000. ) );
 
-    {      
-      int i, j;
-      for(i=0; i<N; i++) {
-        MAGMA_Z_SET2REAL( h_A[i*lda+i], ( MAGMA_Z_GET_X(h_A[i*lda+i]) + 2000. ) );
+	for(j=0; j<n2; j++)
+	  h_A2[j] = h_A[j];
 
-        for(j=0; j<i; j++)
-          h_A[i*lda+j] = h_A[j*lda+i];
-      }
-    }
+	/* =====================================================================
+	   Performs operation using LAPACK 
+	   =================================================================== */
 
-    for(j=0; j<n2; j++)
-      h_A2[j] = h_A[j];
+	//lapackf77_zpotrf("L", &N, h_A, &lda, info);
+	lapackf77_zpotrf("U", &N, h_A, &lda, info);
+	
+	if (info[0] < 0)  
+	  printf("Argument %d of zpotrf had an illegal value.\n", -info[0]);     
 
-      /* =====================================================================
-         Performs operation using LAPACK 
-      =================================================================== */
-
-      //lapackf77_zpotrf("L", &N, h_A, &lda, info);
-      lapackf77_zpotrf("U", &N, h_A, &lda, info);
-
-      if (info[0] < 0)  
-        printf("Argument %d of zpotrf had an illegal value.\n", -info[0]);     
-
-      /* =====================================================================
-         Performs operation using multi-core 
-      =================================================================== */
-
-      // initialize scheduler
-      quark = QUARK_New(cores);
-
-      start = get_current_time();
-      //magma_zpotrf_mc("L", &N, h_A2, &lda, info);
-      magma_zpotrf_mc("U", &N, h_A2, &lda, info);
-      end = get_current_time();
-
-      // shut down scheduler
-      QUARK_Delete(quark);
-
-      if (info[0] < 0)  
-        printf("Argument %d of magma_zpotrf_mc had an illegal value.\n", -info[0]);     
+	/* =====================================================================
+	   Performs operation using multi-core 
+	   =================================================================== */
+	start = get_current_time();
+	//magma_zpotrf_mc("L", &N, h_A2, &lda, info);
+	magma_zpotrf_mc("U", &N, h_A2, &lda, info);
+	end = get_current_time();
+	
+	if (info[0] < 0)  
+	  printf("Argument %d of magma_zpotrf_mc had an illegal value.\n", -info[0]);     
   
-      cpu_perf2 = 1.*N*N*N/(3.*1000000*GetTimerValue(start,end));
-      
-      /* =====================================================================
-         Check the result compared to LAPACK
-         =================================================================== */
+	cpu_perf2 = FLOPS( (double)N ) / (1000000.*GetTimerValue(start,end));
+	
+	/* =====================================================================
+	   Check the result compared to LAPACK
+	   =================================================================== */
+	double work[1], matnorm = 1.;
+	cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
+	int one = 1;
 
-      double work[1], matnorm = 1.;
-      cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
-      int one = 1;
+	matnorm = lapackf77_zlange("f", &N, &N, h_A, &N, work);
+	blasf77_zaxpy(&n2, &mone, h_A, &one, h_A2, &one);
+	printf("%5d     %6.2f                %e\n", 
+	       size[i], cpu_perf2,  
+	       lapackf77_zlange("f", &N, &N, h_A2, &N, work) / matnorm);
 
-      matnorm = lapackf77_zlange("f", &N, &N, h_A, &N, work);
-      blasf77_zaxpy(&n2, &mone, h_A, &one, h_A2, &one);
-      printf("%5d     %6.2f                %e\n", 
-      size[i], cpu_perf2,  
-      lapackf77_zlange("f", &N, &N, h_A2, &N, work) / matnorm);
-
-      if (loop != 1)
-        break;
-    }
-
+	if (loop != 1)
+	  break;
+      }
+    
+    /* Shut down the Quark scheduler */
+    QUARK_Delete(quark);
+    
     /* Memory clean up */
     free(h_A);
     free(h_A2);
