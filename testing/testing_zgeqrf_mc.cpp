@@ -18,30 +18,44 @@
 #include <quark.h>
 
 // includes, project
-#include "cuda.h"
-#include "cuda_runtime_api.h"
-#include "cublas.h"
-#include "magma.h"
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
+#include <magma.h>
 
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
 #endif
 
+/* Flops formula */
+#define PRECISION_z
+#define FMULS_GEQRF(M, N) (((M) > (N)) ? ((N) * ((N) * (  0.5-(1./3.) * (N) + (M)) + (M))) \
+                                       : ((M) * ((M) * ( -0.5-(1./3.) * (M) + (N)) + 2.*(N))))
+#define FADDS_GEQRF(M, N) (((M) > (N)) ? ((N) * ((N) * (  0.5-(1./3.) * (N) + (M)))) \
+                                       : ((M) * ((M) * ( -0.5-(1./3.) * (M) + (N)) + (N))))
+#if defined(PRECISION_z) || defined(PRECISION_c)
+#define FLOPS(m, n) ( 6.*FMULS_GEQRF(m, n) + 2.*FADDS_GEQRF(m, n) )
+#else
+#define FLOPS(m, n) (    FMULS_GEQRF(m, n) +    FADDS_GEQRF(m, n) )
+#endif
+
+/* block size */
 int EN_BEE;
 
+/* QUARK scheduler - initialized inside main */
 Quark *quark;
-
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeqrf
 */
 int main( int argc, char** argv) 
 {
-    EN_BEE = 128;
+    EN_BEE = -1;
 
     cuDoubleComplex *h_A, *h_R, *h_A2, *h_A3, *h_work, *h_work2, *tau, *d_work2;
     cuDoubleComplex *d_A, *d_work;
     float gpu_perf, cpu_perf, cpu2_perf;
+	double flops;
 
     TimeStruct start, end;
 
@@ -113,6 +127,10 @@ int main( int argc, char** argv)
       fprintf (stderr, "!!!! host memory allocation error (tau)\n");
     }
 
+    /* Initialize the QUARK scheduler */
+    quark = QUARK_New(cores);
+
+      start = get_current_time();
     printf("\n\n");
     printf("   M     N          sgeqrf      magma_sgeqrf_mc Gflop/s    ||R||_F / ||A||_F\n");
     printf("==============================================================================\n");
@@ -122,6 +140,8 @@ int main( int argc, char** argv)
         M = N = size[i];
         n2 = M*N;
       }
+
+	  flops = FLOPS( (double)M, (double)N ) / 1000000;
 
       /* Initialize the matrix */
       lapackf77_zlarnv( &ione, ISEED, &n2, h_A2 );
@@ -138,26 +158,19 @@ int main( int argc, char** argv)
       if (info[0] < 0)  
         printf("Argument %d of sgeqrf had an illegal value.\n", -info[0]);
  
-      cpu2_perf = 4.*M*N*min(M,N)/(3.*1000000*GetTimerValue(start,end));
+      cpu2_perf = flops / GetTimerValue(start, end);
 
 	  /* =====================================================================
          Performs operation using multicore 
 	 =================================================================== */
 
-      // initialize QUARK
-      quark = QUARK_New(cores);
-
-      start = get_current_time();
       magma_zgeqrf_mc(&M, &N, h_A2, &M, tau, h_work2, &lwork, info);
       end = get_current_time();
-
-      // shut down QUARK
-      QUARK_Delete(quark);
 
       if (info[0] < 0)  
         printf("Argument %d of sgeqrf had an illegal value.\n", -info[0]);
   
-      cpu_perf = 4.*M*N*min(M,N)/(3.*1000000*GetTimerValue(start,end));
+      cpu_perf = flops / GetTimerValue(start, end);
       
       /* =====================================================================
          Check the result compared to LAPACK
@@ -176,6 +189,9 @@ int main( int argc, char** argv)
       if (loop != 1)
 	break;
     }
+
+    /* Shut down the QUARK scheduler */
+    QUARK_Delete(quark);
 
     /* Memory clean up */
     free(h_A2);
