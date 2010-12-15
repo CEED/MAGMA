@@ -37,7 +37,7 @@ magma_zpotrs_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
     Purpose
     =======
 
-    ZPOTRS solves a system of linear equations A*X = B with a hemmetric
+    ZPOTRS solves a system of linear equations A*X = B with a Hermitian
     positive definite matrix A using the Cholesky factorization
     A = U\*\*H*U or A = L*L\*\*H computed by ZPOTRF.
 

@@ -43,8 +43,7 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
 
     Purpose   
     =======   
-
-    ZPOTRF computes the Cholesky factorization of a real hemmetric   
+    ZPOTRF computes the Cholesky factorization of a Hermitian   
     positive definite matrix dA.   
 
     The factorization has the form   
@@ -56,7 +55,6 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
 
     Arguments   
     =========   
-
     UPLO    (input) CHARACTER*1   
             = 'U':  Upper triangle of dA is stored;   
             = 'L':  Lower triangle of dA is stored.   
@@ -65,7 +63,7 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
             The order of the matrix dA.  N >= 0.   
 
     dA      (input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N)   
-            On entry, the hemmetric matrix dA.  If UPLO = 'U', the leading   
+            On entry, the Hermitian matrix dA.  If UPLO = 'U', the leading   
             N-by-N upper triangular part of dA contains the upper   
             triangular part of the matrix dA, and the strictly lower   
             triangular part of dA is not referenced.  If UPLO = 'L', the   
