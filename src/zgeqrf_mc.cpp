@@ -456,7 +456,7 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
   cuDoubleComplex c_one = MAGMA_Z_ONE;
   cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
-  int nb = EN_BEE;
+  int nb = (EN_BEE==-1)? magma_get_zpotrf_nb(*n): EN_BEE;
 
   int lwkopt = *n * nb;
   work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );
