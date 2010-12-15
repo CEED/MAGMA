@@ -24,7 +24,7 @@
 #if defined(PRECISION_z) || defined(PRECISION_c)
 #define FLOPS(m, n, k) ( 8. * ((m) * (k) * (n)) )
 #else
-#define FLOPS(m, n, k) (      ((m) * (k) * (n)) )
+#define FLOPS(m, n, k) ( 2. * ((m) * (k) * (n)) )
 #endif
 
 int main( int argc, char** argv)
