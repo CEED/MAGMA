@@ -62,7 +62,7 @@ int main( int argc, char** argv)
 
     int cores = 4;
 
-    EN_BEE = 128;
+    EN_BEE = -1;
 
     int loop = argc;
     

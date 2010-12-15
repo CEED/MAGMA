@@ -209,7 +209,7 @@ magma_zpotrf_mc(char *uplo,
     return 0;
 
   // get block size
-  magma_int_t nb = EN_BEE;
+  magma_int_t nb = (EN_BEE==-1)? magma_get_zpotrf_nb(*n): EN_BEE;
 
   magma_int_t i,j,k;
   magma_int_t ii,jj,kk;
