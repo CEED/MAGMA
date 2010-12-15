@@ -73,7 +73,7 @@ int main( int argc, char** argv)
       }
     } else {
       printf("\nUsage: \n");
-      printf("  testing_spotrf_gpu -N %d -B 128 \n\n", 1024);
+      printf("  testing_zpotrf_mc -N %d -B 128 \n\n", 1024);
       N = size[9];
     }
 
@@ -140,7 +140,7 @@ int main( int argc, char** argv)
       QUARK_Delete(quark);
 
       if (info[0] < 0)  
-        printf("Argument %d of magma_spotrf_mc had an illegal value.\n", -info[0]);     
+        printf("Argument %d of magma_zpotrf_mc had an illegal value.\n", -info[0]);     
   
       cpu_perf2 = 1.*N*N*N/(3.*1000000*GetTimerValue(start,end));
       

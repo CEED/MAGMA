@@ -109,19 +109,19 @@ int main( int argc, char** argv)
           EN_BEE = atoi(argv[++i]);
       }
       if ((M>0 && N>0) || (M==0 && N==0)) {
-        printf("  testing_sgetrf_gpu -M %d -N %d -B %d\n\n", M, N, EN_BEE);
+        printf("  testing_zgetrf_mc -M %d -N %d -B %d\n\n", M, N, EN_BEE);
         if (M==0 && N==0) {
           M = N = size[9];
           loop = 1;
         }
       } else {
         printf("\nUsage: \n");
-        printf("  testing_sgetrf_gpu -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
+        printf("  testing_zgetrf_mc -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
         exit(1);
       }
     } else {
       printf("\nUsage: \n");
-      printf("  testing_sgetrf_gpu -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
+      printf("  testing_zgetrf_mc -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
       M = N = size[9];
     }
 
