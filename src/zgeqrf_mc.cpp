@@ -21,10 +21,10 @@
 #define  W(k,n) &(local_work[(mt)*(n-1)+(k)])
 
 // block size comes from command line
-extern "C" int EN_BEE;
+extern int EN_BEE;
 
 // quark scheduling environment gets initialized in driver
-extern "C" Quark *quark;
+extern Quark *quark;
 
 void getro (char *trans, const int m, const int n, const cuDoubleComplex *A, const int LDA, cuDoubleComplex *B, const int LDB) 
 {
@@ -383,7 +383,7 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
     Purpose   
     =======   
 
-    SGEQRF computes a QR factorization of a real M-by-N matrix A:   
+    ZGEQRF computes a QR factorization of a real M-by-N matrix A:   
     A = Q * R.   
 
     Arguments   
@@ -395,7 +395,7 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
     N       (input) INTEGER   
             The number of columns of the matrix A.  N >= 0.   
 
-    A       (input/output) REAL array, dimension (LDA,N)   
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N)   
             On entry, the M-by-N matrix A.   
             On exit, the elements on and above the diagonal of the array   
             contain the min(M,N)-by-N upper trapezoidal matrix R (R is   
@@ -407,11 +407,11 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,M).   
 
-    TAU     (output) REAL array, dimension (min(M,N))   
+    TAU     (output) COMPLEX_16 array, dimension (min(M,N))   
             The scalar factors of the elementary reflectors (see Further   
             Details).   
 
-    WORK    (workspace/output) REAL array, dimension (MAX(1,LWORK))   
+    WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
@@ -428,7 +428,6 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
 
     Further Details   
     ===============   
-
     The matrix Q is represented as a product of elementary reflectors   
 
        Q = H(1) H(2) . . . H(k), where k = min(m,n).   
@@ -440,7 +439,6 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
     where tau is a real scalar, and v is a real vector with   
     v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),   
     and tau in TAU(i).   
-
     ====================================================================    */
 
   int i,j,l;
@@ -579,15 +577,15 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
 
   // wait for all tasks to finish executing
   QUARK_Barrier(quark);
-
+  
   // free memory
   for(k = 0 ; k < (nt-1)*mt; k++) {
     if (local_work[k] != NULL) {
       free(local_work[k]);
-}
+    }
   }
   free(local_work);
-
+  
 }
 
 #undef A

@@ -19,10 +19,10 @@
 #define  A(m,n) (a+(n)*(*lda)+(m))
 
 // block size from driver
-extern "C" int EN_BEE;
+extern int EN_BEE;
 
 // QUARK scheduler initialized in driver
-extern "C" Quark *quark;
+extern Quark *quark;
 
 // task execution code
 void SCHED_zgemm(Quark* quark)
@@ -120,13 +120,9 @@ void SCHED_zlaswp(Quark* quark)
 }
 
 extern "C" int 
-magma_zgetrf_mc(
-int *m,
-int *n,
-cuDoubleComplex *a,
-int *lda,
-int *ipiv,
-int *info)
+magma_zgetrf_mc(int *m, int *n,
+		cuDoubleComplex *a, int *lda,
+		int *ipiv, int *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -137,7 +133,7 @@ int *info)
     Purpose   
     =======   
 
-    SGETRF computes an LU factorization of a general M-by-N matrix A   
+    ZGETRF computes an LU factorization of a general M-by-N matrix A   
     using partial pivoting with row interchanges.   
 
     The factorization has the form   
@@ -157,7 +153,7 @@ int *info)
     N       (input) INTEGER   
             The number of columns of the matrix A.  N >= 0.   
 
-    A       (input/output) REAL array, dimension (LDA,N)   
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N)   
             On entry, the M-by-N matrix to be factored.   
             On exit, the factors L and U from the factorization   
             A = P*L*U; the unit diagonal elements of L are not stored.   
@@ -176,7 +172,6 @@ int *info)
                   has been completed, but the factor U is exactly   
                   singular, and division by zero will occur if it is used   
                   to solve a system of equations.   
-
     =====================================================================    */
 
   int i,j,l;

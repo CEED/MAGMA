@@ -435,4 +435,4 @@ magma_zpotrf_mc(char *uplo,
 #undef A
 
 
-//  LocalWords:  hermitian
+
