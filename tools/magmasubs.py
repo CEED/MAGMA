@@ -268,6 +268,7 @@ subs = {
     ('CblasTrans','CblasTrans','CblasConjTrans','CblasConjTrans'),
     ('MagmaTrans','MagmaTrans','MagmaConjTrans','MagmaConjTrans'),
     ('REAL','DOUBLE_PRECISION','COMPLEX','COMPLEX_16'),
+    ('symmetric','symmetric','Hermitian','Hermitian'),
     ('','','conjf','conj'),
     ('','','cuConjf','cuConj'),
     ('CORE_S','CORE_D','CORE_C','CORE_Z'),
