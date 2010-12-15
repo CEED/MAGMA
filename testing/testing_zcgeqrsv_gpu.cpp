@@ -130,9 +130,9 @@ int main( int argc, char** argv)
     h_works = (cuFloatComplex*)h_workd;
 
     printf("\n\n");
-    printf("           CPU GFlop/s                 GPU GFlop/s   \n");
-    printf("  N          Doule           Double\tSingle\t Mixed    || b-Ax || / ||A||\n");
-    printf("=========================================================================================\n");
+    printf("        CPU GFlop/s         G P U  GFlop/s   \n");
+    printf("  N         DP          DP       SP       MP    ||b-Ax||/||A||  NumIter\n");
+    printf("=======================================================================\n");
 
     for(i=0; i<8; i++){
         M = N = sizetest[i];
@@ -197,7 +197,7 @@ int main( int argc, char** argv)
         cublasSetMatrix( M, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, ldda );
         cublasSetMatrix( M, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, lddb );
 
-	/* The allocation of d_SA and d_SB is done here to avoir 
+	/* The allocation of d_SA and d_SB is done here to avoid 
 	   to double the memory used on GPU with zcgeqrsv */
 	TESTING_DEVALLOC( d_SA, cuFloatComplex, ldda*N      );
 	TESTING_DEVALLOC( d_SB, cuFloatComplex, lddb*NRHS   );
@@ -221,7 +221,7 @@ int main( int argc, char** argv)
         end = get_current_time();
         cpu_perf = flops / GetTimerValue(start, end);
 
-        printf("%5d \t%8.2f\t%9.2f\t%6.2f\t%6.2f  \t %e %2d \n",
+        printf("%5d  %8.2f   %9.2f   %6.2f   %6.2f    %e    %2d\n",
                sizetest[i], cpu_perf, gpu_perfd, gpu_perfs, gpu_perf, Rnorm / Anorm, iter );
 
         if (argc != 1)
