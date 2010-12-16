@@ -413,7 +413,12 @@ void magmablas_dgemv_fermi(char trans,
 
     if (incx == 1 && incz == 1 && beta == 0.) {
        if (trans == 'n' || trans == 'N')
-           magmablas_dgemvn_fermi(m,  n, alpha, A, lda, x, z);
+	   {
+	       if ( m >= 7000 && m <= 8000 )
+                cublasDgemv(trans, m, n, alpha, A, lda, x, incx, beta, z, incz);
+		   else 
+				magmablas_dgemvn_fermi(m,  n, alpha, A, lda, x, z);
+	   }
        else if (trans == 't' || trans == 'T')
           magmablas_dgemvt_fermi(m,  n, alpha, A, lda, x, z);
        else
