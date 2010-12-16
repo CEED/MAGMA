@@ -14,6 +14,13 @@
 #include <cublas.h>
 #include "magma.h"
 
+// === Define what BLAS to use ============================================
+#define PRECISION_z
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+ #define cublasZgemm magmablas_zgemm
+#endif
+// === End defining what BLAS to use =======================================
+
 extern "C" magma_int_t
 magma_zlahru(magma_int_t n, magma_int_t k, magma_int_t nb, 
 	     cuDoubleComplex *a, magma_int_t lda,
