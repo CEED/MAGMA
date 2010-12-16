@@ -203,8 +203,8 @@ magma_zgeqrf2(magma_int_t m, magma_int_t n,
             cudaStreamSynchronize(stream[1]);
             int rows = m-i;
 
-	    cnt++;
-	    magma_zgeqrf_mc(&rows, &ib, a_ref(i,i), &lda, tau+i, work, &lwork, info);
+	        cnt++;
+	        magma_zgeqrf_mc(&rows, &ib, a_ref(i,i), &lda, tau+i, work, &lwork, info);
 
             /* Form the triangular factor of the block reflector
                H = H(i) H(i+1) . . . H(i+ib-1) */
@@ -215,12 +215,11 @@ magma_zgeqrf2(magma_int_t m, magma_int_t n,
                             a_ref(i,i), lda, da_ref(i,i), ldda);
             zq_to_panel(MagmaUpper, ib, a_ref(i,i), lda, work+ib*ib);
 	    
-	    if (cnt < MG.np_gpu) {
-	      MG.p[cnt]=a;
-	    }
+	        if (cnt < MG.np_gpu) {
+	          MG.p[cnt]=a;
+	        }
 
-            if (i + ib < n) 
-	      {
+            if (i + ib < n) { 
 		        cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), MG.t+cnt*nb*nb, ib, dwork, lddwork);
 
                 if (i+ib < k-nx)
