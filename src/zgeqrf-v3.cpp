@@ -36,7 +36,7 @@ typedef struct {
 
 
 
-extern "C" MAGMA_GLOBALS MG;
+extern MAGMA_GLOBALS MG;
 
 extern "C" magma_int_t
 magma_zgeqrf3(magma_int_t m, magma_int_t n, 
@@ -119,6 +119,7 @@ magma_zgeqrf3(magma_int_t m, magma_int_t n,
 
   *info = 0;
 
+  /* Check arguments */
   int lwkopt = n * MG.nb;
   work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );
   long int lquery = (lwork == -1);
@@ -148,17 +149,20 @@ magma_zgeqrf3(magma_int_t m, magma_int_t n,
     M = MG.m - (MG.n-MG.nthreads*MG.ob);
   }
 
+  /* Use MAGMA code to factor left portion of matrix, waking up threads 
+	 along the way to perform updates on the right portion of matrix */
   magma_zgeqrf2(m,n-MG.nthreads*MG.ob, a, m, tau, work, lwork, info);
 
+  /* Wait for all update threads to finish */
   for (k = 0; k < MG.nthreads; k++){
     pthread_join(MG.thread[k], NULL);
   }
 
   MG.nb = MG.fb;
 
+  /* Use MAGMA code to perform final factorization if necessary */
   if (MG.m >= (MG.n - (MG.nthreads*MG.ob))) {
     magma_zgeqrf2(M, N, a+(n-MG.nthreads*MG.ob)*m+(n-MG.nthreads*MG.ob), m, 
-    //magma_zgeqrf(M, N, a+(n-MG.nthreads*MG.nb)*m+(n-MG.nthreads*MG.nb), m, 
                   &tau[n-MG.nthreads*MG.ob], work, lwork, info);
   }
  
