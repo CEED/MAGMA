@@ -18,13 +18,13 @@
 
 #define  A(m,n) (a+(n)*(*lda)+(m))
 
-// block size from driver
+/* Block size from driver */
 extern int EN_BEE;
 
-// QUARK scheduler initialized in driver
+/*` QUARK scheduler initialized in driver */
 extern Quark *quark;
 
-// task execution code
+/* Task execution code */
 void SCHED_zgemm(Quark* quark)
 {
   int M;
@@ -45,7 +45,7 @@ void SCHED_zgemm(Quark* quark)
 
 }
 
-// task execution code
+/* Task execution code */
 void SCHED_panel_update(Quark* quark)
 {
   int N;
@@ -79,7 +79,7 @@ void SCHED_panel_update(Quark* quark)
 
 }
 
-// task execution code
+/* Task execution code */
 void SCHED_zgetrf(Quark* quark)
 {
   int M;
@@ -102,7 +102,7 @@ void SCHED_zgetrf(Quark* quark)
 
 }
 
-// task execution code
+/* Task execution code */
 void SCHED_zlaswp(Quark* quark)
 {
   int N;
@@ -191,9 +191,9 @@ magma_zgetrf_mc(int *m, int *n,
 
   *info = 0;
 
-  int nb = EN_BEE;
+  int nb = (EN_BEE==-1)? magma_get_zpotrf_nb(*n): EN_BEE;
 
-  // check arguments
+  /* Check arguments */
   if (*m < 0) {
     *info = -1;
   } else if (*n < 0) {
@@ -213,7 +213,7 @@ magma_zgetrf_mc(int *m, int *n,
 
   ii = -1;
 
-  // loop across diagonal blocks
+  /* Loop across diagonal blocks */
   for (i = 0; i < k; i += nb) {
 
     ii++;
@@ -222,7 +222,7 @@ magma_zgetrf_mc(int *m, int *n,
 
     priority = 10000 - ii;
 
-    // update panels in left looking fashion
+    /* Update panels in left looking fashion */
     for (j = 0; j < i; j += nb) { 
 
       jj++;
@@ -255,7 +255,7 @@ magma_zgetrf_mc(int *m, int *n,
 
       ll = jj + 1;
 
-      // split gemm into tiles
+      /* Split gemm into tiles */
       for (l = j + (2*nb); l < (*m); l += nb) {
 
         ll++;
@@ -318,14 +318,14 @@ magma_zgetrf_mc(int *m, int *n,
 
   priority = 0;
 
-  // if n > m
+  /* If n > m */
   for (i = K; i < (*n); i += nb) {
 
     ii++;
 
     jj = -1;
 
-    // update remaining panels in left looking fashion
+    /* Update remaining panels in left looking fashion */
     for (j = 0; j < (*m); j += nb) { 
 
       jj++;
@@ -358,7 +358,7 @@ magma_zgetrf_mc(int *m, int *n,
 
       ll = jj + 1;
 
-      // split gemm into tiles
+      /* Split gemm into tiles */
       for (l = j + (2*nb); l < (*m); l += nb) {
 
         ll++;
@@ -392,7 +392,7 @@ magma_zgetrf_mc(int *m, int *n,
 
   ii = -1;
 
-  // swap behinds
+  /* Swap behinds */
   for (i = 0; i < k; i += nb) {
 
     ii++;
@@ -427,10 +427,10 @@ magma_zgetrf_mc(int *m, int *n,
 
   }
 
-  // synchronization point
+  /* Synchronization point */
   QUARK_Barrier(quark);
 
-  // fix pivot
+  /* Fix pivot */
   ii = -1;
 
   for (i = 0; i < k; i +=nb) {
