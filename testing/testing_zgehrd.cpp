@@ -21,7 +21,15 @@
 // includes, project
 #include "magma.h"
 
+// Flops formula
 #define PRECISION_z
+#define CHECK_ERROR
+#if defined(PRECISION_z) || defined(PRECISION_c)
+  #define FLOPS(n) ( 4.*10. * n * n * n / 3. )
+#else
+  #define FLOPS(n) (    10. * n * n * n / 3. )
+#endif
+
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgehrd
@@ -109,14 +117,15 @@ int main( int argc, char** argv)
         magma_zgehrd( N, ione, N, h_R, N, tau, h_work, &lwork, &info);
         end = get_current_time();
 
-        gpu_perf = 10.*N*N*N/(3.*1000000*GetTimerValue(start,end));
-        printf("GPU Processing time: %f (s) \n", GetTimerValue(start,end)/1000.);
+        gpu_perf = FLOPS(N)/(1000000.*GetTimerValue(start,end));
+        //printf("GPU Processing time: %f (s) \n", GetTimerValue(start,end)/1000.);
 
         /* =====================================================================
            Check the factorization
            =================================================================== */
 
-        double result[2];
+        double result[2] = {0., 0.};
+#ifdef CHECK_ERROR
         cuDoubleComplex *hwork_Q = (cuDoubleComplex*)malloc( N * N * sizeof(cuDoubleComplex));
         cuDoubleComplex *twork   = (cuDoubleComplex*)malloc( 2* N * N * sizeof(cuDoubleComplex));
         int ltwork = 2*N*N;
@@ -140,11 +149,6 @@ int main( int argc, char** argv)
                          twork, &ltwork, result);
 #endif
 
-        //printf("N = %d\n", N);
-        //printf("norm( A - Q H Q') / ( M * norm(A) * EPS ) = %f\n", result[0]);
-        //printf("norm( I - Q'  Q ) / ( M * EPS )           = %f\n", result[1]);
-        //printf("\n");
-
         free(hwork_Q);
         free(twork);
         /* =====================================================================
@@ -155,9 +159,10 @@ int main( int argc, char** argv)
         end = get_current_time();
         if (info < 0)
             printf("Argument %d of zgehrd had an illegal value.\n", -info);
+#endif
 
-        cpu_perf = 10.*N*N*N/(3.*1000000*GetTimerValue(start,end));
-        printf("CPU Processing time: %f (s) \n", GetTimerValue(start,end)/1000.);
+        cpu_perf = FLOPS(N)/(1000000.*GetTimerValue(start,end));
+        //printf("CPU Processing time: %f (s) \n", GetTimerValue(start,end)/1000.);
 
         /* =====================================================================
            Print performance and error.
