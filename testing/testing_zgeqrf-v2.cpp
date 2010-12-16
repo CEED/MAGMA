@@ -9,7 +9,7 @@
 
 */
 
-// includes, system
+/* Includes, system */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -20,11 +20,23 @@
 
 #include <quark.h>
 
-// includes, project
+/* Includes, project */
 #include "magma.h"
 
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
+#endif
+
+// Flops formula
+#define PRECISION_z
+#define FMULS_GEQRF(M, N) (((M) > (N)) ? ((N) * ((N) * (  0.5-(1./3.) * (N) + (M)) + (M))) \
+		                                       : ((M) * ((M) * ( -0.5-(1./3.) * (M) + (N)) + 2.*(N))))
+#define FADDS_GEQRF(M, N) (((M) > (N)) ? ((N) * ((N) * (  0.5-(1./3.) * (N) + (M)))) \
+		                                       : ((M) * ((M) * ( -0.5-(1./3.) * (M) + (N)) + (N))))
+#if defined(PRECISION_z) || defined(PRECISION_c)
+#define FLOPS(m, n) ( 6.*FMULS_GEQRF(m, n) + 2.*FADDS_GEQRF(m, n) )
+#else
+#define FLOPS(m, n) (    FMULS_GEQRF(m, n) +    FADDS_GEQRF(m, n) )
 #endif
 
 #include <pthread.h>
@@ -48,6 +60,7 @@ typedef struct {
 
 MAGMA_GLOBALS MG;
 
+/* Update thread */
 void *cpu_thread(void *a)
 {
   int i;
@@ -59,36 +72,33 @@ void *cpu_thread(void *a)
   int K;
   cuDoubleComplex *WORK;
 
-  // traverse panels 
+  /* Traverse panels */
   for (i = 0; i < MG.np_gpu; i++) 
-    {
-      while (MG.p[i] == NULL) {
-	sched_yield();
-      }
-    
-      M=MG.m-i*MG.nb;
-      //N=MG.nb;
-      N=MG.ob;
-      K=MG.nb;
-      //if (MG.m >= MG.n) {
-      if (MG.m >= (MG.n-(MG.nthreads*MG.ob))) {
-	if (i == (MG.np_gpu - 1)) {
-	  //K = MG.n-MG.nthreads*MG.nb-(MG.np_gpu-1)*MG.nb; 
-	  K = MG.n-MG.nthreads*MG.ob-(MG.np_gpu-1)*MG.nb; 
-	}
-      }
+  {
 
-      //fprintf(stderr,"thread=%d panel=%d K=%d\n",t,i,K);
-      
-      WORK = (cuDoubleComplex*)malloc(sizeof(cuDoubleComplex)*M*N);
-      
-      lapackf77_zlarfb(MagmaLeftStr, MagmaTransStr, MagmaForwardStr, MagmaColumnwiseStr,
-		       &M,&N,&K,MG.a+i*MG.nb*MG.lda+i*MG.nb,&MG.lda,MG.t+i*MG.nb*MG.nb,&K,
-		       //MG.a+MG.m*MG.n-(MG.nthreads-t)*MG.nb*MG.lda+i*MG.nb,&MG.lda,WORK,&N);
-		       MG.a+MG.m*MG.n-(MG.nthreads-t)*MG.ob*MG.lda+i*MG.nb,&MG.lda,WORK,&N);
-      
-      free(WORK);
+    /* Wait till time to update panel */
+    while (MG.p[i] == NULL) {
+      sched_yield();
     }
+    
+    M=MG.m-i*MG.nb;
+    N=MG.ob;
+    K=MG.nb;
+    if (MG.m >= (MG.n-(MG.nthreads*MG.ob))) {
+	  if (i == (MG.np_gpu - 1)) {
+	    K = MG.n-MG.nthreads*MG.ob-(MG.np_gpu-1)*MG.nb; 
+	  }
+    }
+
+    /* Update panel */
+    WORK = (cuDoubleComplex*)malloc(sizeof(cuDoubleComplex)*M*N);
+      
+    lapackf77_zlarfb(MagmaLeftStr, MagmaTransStr, MagmaForwardStr, MagmaColumnwiseStr,
+	          &M,&N,&K,MG.a+i*MG.nb*MG.lda+i*MG.nb,&MG.lda,MG.t+i*MG.nb*MG.nb,&K,
+		      MG.a+MG.m*MG.n-(MG.nthreads-t)*MG.ob*MG.lda+i*MG.nb,&MG.lda,WORK,&N);
+      
+    free(WORK);
+  }
   
   return (void*)NULL;
 }
@@ -100,7 +110,6 @@ void magma_init (int m, int n, cuDoubleComplex *a, int nthreads)
   MG.nthreads = nthreads;
 
   if (MG.nb == -1)
-    //MG.nb = magma_get_sgeqrf_nb(min(m, n));
     MG.nb = 128;
 
   if (MG.ob == -1)
@@ -109,17 +118,11 @@ void magma_init (int m, int n, cuDoubleComplex *a, int nthreads)
   if (MG.fb == -1)
     MG.fb = MG.nb;
 
-  //if (MG.nb * MG.nthreads >= n){
   if (MG.ob * MG.nthreads >= n){
     fprintf(stderr,"\n\nNumber of threads times block size not less than width of matrix.\n\n");
 	exit(1);
   }
 
-  //int np = n/MG.nb;
-  //if (n%MG.nb != 0)
-    //np++;
-
-  //MG.np_gpu = np - MG.nthreads;
   MG.np_gpu = (n-(MG.nthreads * MG.ob)) / MG.nb;
 
   if ( (n-(MG.nthreads * MG.ob)) % MG.nb != 0)
@@ -131,7 +134,6 @@ void magma_init (int m, int n, cuDoubleComplex *a, int nthreads)
   MG.a = a;
   MG.t = (cuDoubleComplex*)malloc(sizeof(cuDoubleComplex)*MG.n*MG.nb);
 
-  //if (MG.n > MG.m) {
   if ((MG.n-(MG.nthreads*MG.ob)) > MG.m) {
     MG.np_gpu = m/MG.nb;
     if (m%MG.nb != 0)
@@ -175,7 +177,7 @@ int main( int argc, char** argv)
     printout_devices( );
 
     cuDoubleComplex *h_A, *h_R, *h_work, *tau;
-    double gpu_perf, cpu_perf;
+    double gpu_perf, cpu_perf, flops;
 
     TimeStruct start, end;
 
@@ -270,7 +272,6 @@ int main( int argc, char** argv)
     int lwork = N*nb;
 
     cudaMallocHost( (void**)&h_work, lwork*sizeof(cuDoubleComplex) );
-    //h_work = (cuDoubleComplex*)malloc(lwork * sizeof(cuDoubleComplex));
     if (h_work == 0) {
         fprintf (stderr, "!!!! host memory allocation error (work)\n");
     }
@@ -284,6 +285,8 @@ int main( int argc, char** argv)
             n2 = M*N;
         }
 
+        flops = FLOPS( (double)M, (double)N ) / 1000000;
+
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &M, h_R, &M );
@@ -296,39 +299,19 @@ int main( int argc, char** argv)
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-	magma_init(M, N, h_R, nthreads);
+	    magma_init(M, N, h_R, nthreads);
 
-	quark = QUARK_New(nquarkthreads);
+	    quark = QUARK_New(nquarkthreads);
 
         start = get_current_time();
         magma_zgeqrf3(M, N, h_R, M, tau, h_work, lwork, &info);
         end = get_current_time();
 
-	QUARK_Delete(quark);
+	    QUARK_Delete(quark);
 
-        gpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
-        // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
-        
-        /* =====================================================================
-           Check the factorization
-           =================================================================== */
-        /*
-          cuDoubleComplex result[2];
+        gpu_perf = flops / GetTimerValue(start, end);
 
-          cuDoubleComplex *hwork_Q = (cuDoubleComplex*)malloc( M * N * sizeof(cuDoubleComplex));
-          cuDoubleComplex *hwork_R = (cuDoubleComplex*)malloc( M * N * sizeof(cuDoubleComplex));
-          cuDoubleComplex *rwork   = (cuDoubleComplex*)malloc( N * sizeof(cuDoubleComplex));
-
-          lapackf77_zqrt02(&M, &min_mn, &min_mn, h_A, h_R, hwork_Q, hwork_R, &M, tau,
-          h_work, &lwork, rwork, result);
-
-          printf("norm( R - Q'*A ) / ( M * norm(A) * EPS ) = %f\n", result[0]);
-          printf("norm( I - Q'*Q ) / ( M * EPS )           = %f\n", result[1]);
-          free(hwork_Q);
-          free(hwork_R);
-          free(rwork);
-        */
-        /* =====================================================================
+		/* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
@@ -339,7 +322,6 @@ int main( int argc, char** argv)
             printf("Argument %d of zgeqrf had an illegal value.\n", -info);
 
         cpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
-        // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
 
         /* =====================================================================
            Check the result compared to LAPACK
@@ -361,15 +343,6 @@ int main( int argc, char** argv)
           printf("%5d %5d                %6.2f          \n",
                  M, N, gpu_perf);
         }
-
-        /* =====================================================================
-           Print performance and error.
-           =================================================================== */
-        /*
-          printf("%5d    %6.2f         %6.2f        %e\n",
-          N, cpu_perf, gpu_perf,
-          N*result[0]*5.96e-08);
-        */
 
         if (loop != 1)
             break;
