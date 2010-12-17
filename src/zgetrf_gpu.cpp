@@ -237,7 +237,7 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
                             inAT(s,s)+nb0, lddat);
 
 	if ((m == n) && (m % 32 == 0) && (ldda%32 == 0))
-	    magmablas_zinplace_transpose( dAT, ldda, lddat );
+	    magmablas_zinplace_transpose( dAT, lddat, ldda );
 	else {
 	    magmablas_ztranspose2( dA, ldda, dAT, lddat, n, m );
 	    cublasFree(dAT);
