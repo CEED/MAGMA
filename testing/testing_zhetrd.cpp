@@ -21,7 +21,14 @@
 // includes, project
 #include "magma.h"
 
+// Flops formula
 #define PRECISION_z
+#define CHECK_ERROR
+#if defined(PRECISION_z) || defined(PRECISION_c)
+#define FLOPS(n) ( 4.* 4. * n * n * n / 3. )
+#else
+#define FLOPS(n) (     4. * n * n * n / 3. )
+#endif
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhetrd
@@ -35,7 +42,7 @@ int main( int argc, char** argv)
     cuDoubleComplex *h_A, *h_R, *h_work;
     cuDoubleComplex *tau, *tau2;
     double          *diag, *offdiag, *diag2, *offdiag2;
-    double gpu_perf, cpu_perf;
+    double gpu_perf, cpu_perf, eps;
 
     TimeStruct start, end;
 
@@ -67,6 +74,8 @@ int main( int argc, char** argv)
     if (status != CUBLAS_STATUS_SUCCESS) {
         fprintf (stderr, "!!!! CUBLAS initialization error\n");
     }
+
+    eps = lapackf77_dlamch( "E" );
 
     lda = N;
     if (N%32!=0)
@@ -137,18 +146,18 @@ int main( int argc, char** argv)
                      tau, h_work, &lwork, &info);
         end = get_current_time();
 
-        gpu_perf = 4.*N*N*N/(3.*1000000*GetTimerValue(start,end));
+        gpu_perf = FLOPS(N)/(1000000.*GetTimerValue(start,end));
         // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
 
         /* =====================================================================
            Check the factorization
            =================================================================== */
+	double result[2] = {0., 0.};
+#ifdef CHECK_ERROR
         cuDoubleComplex *hwork_Q = 
 	  (cuDoubleComplex*)malloc( N * N * sizeof(cuDoubleComplex));
         cuDoubleComplex *work    = 
 	  (cuDoubleComplex*)malloc( 2 * N * N * sizeof(cuDoubleComplex));
-
-        double result[2] = {0., 0.};
 
         int test;
 
@@ -187,11 +196,11 @@ int main( int argc, char** argv)
         lapackf77_zhetrd("L", &N, h_A, &lda, diag2, offdiag2, tau2, 
 			 h_work, &lwork, &info);
         end = get_current_time();
-
+#endif
         if (info < 0)
             printf("Argument %d of zhetrd had an illegal value.\n", -info);
 
-        cpu_perf = 4.*N*N*N/(3.*1000000*GetTimerValue(start,end));
+        cpu_perf = FLOPS(N)/(1000000.*GetTimerValue(start,end));
         // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
 
         /* =====================================================================
@@ -199,7 +208,7 @@ int main( int argc, char** argv)
            =================================================================== */
         printf("%5d    %6.2f         %6.2f      %e %e\n",
                size[i], cpu_perf, gpu_perf,
-               result[0]*5.96e-08, result[1]*5.96e-08);
+               result[0]*eps, result[1]*eps);
 
         if (argc != 1)
             break;
