@@ -22,7 +22,7 @@ extern magma_int_t EN_BEE;
 extern Quark *quark;
 
 // task execution code
-void SCHED_zgemm(Quark* quark)
+static void SCHED_zgemm(Quark* quark)
 {
   magma_int_t UPPER;
   magma_int_t M;

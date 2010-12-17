@@ -25,7 +25,7 @@ extern int EN_BEE;
 extern Quark *quark;
 
 /* Task execution code */
-void SCHED_zgemm(Quark* quark)
+static void SCHED_zgemm(Quark* quark)
 {
   int M;
   int N;
@@ -46,7 +46,7 @@ void SCHED_zgemm(Quark* quark)
 }
 
 /* Task execution code */
-void SCHED_panel_update(Quark* quark)
+static void SCHED_panel_update(Quark* quark)
 {
   int N;
   cuDoubleComplex *A1;

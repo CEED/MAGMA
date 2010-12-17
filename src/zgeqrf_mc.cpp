@@ -198,7 +198,7 @@ void SCHED_ztrmm(Quark *quark)
 }
 
 // task execution code
-void SCHED_zgemm(Quark *quark)
+static void SCHED_zgemm(Quark *quark)
 {
   int m;
   int n;
