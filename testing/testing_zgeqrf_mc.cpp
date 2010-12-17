@@ -132,8 +132,8 @@ int main( int argc, char** argv)
 
       start = get_current_time();
     printf("\n\n");
-    printf("   M     N          sgeqrf      magma_sgeqrf_mc Gflop/s    ||R||_F / ||A||_F\n");
-    printf("==============================================================================\n");
+    printf("   M     N       LAPACK Gflop/s     Multi-core Gflop/s    ||R||_F / ||A||_F\n");
+    printf("===========================================================================\n");
     for(i=0; i<10; i++){
 
       if (loop == 1) {
@@ -164,6 +164,7 @@ int main( int argc, char** argv)
          Performs operation using multicore 
 	 =================================================================== */
 
+      start = get_current_time();
       magma_zgeqrf_mc(&M, &N, h_A2, &M, tau, h_work2, &lwork, info);
       end = get_current_time();
 
@@ -182,7 +183,7 @@ int main( int argc, char** argv)
       matnorm = lapackf77_zlange("f", &M, &N, h_A2, &M, work);
 
       blasf77_zaxpy(&n2, &mone, h_A2, &one, h_A3, &one);
-      printf("%5d  %5d      %6.2f                %6.2f           %e\n", 
+      printf("%5d  %5d       %6.2f               %6.2f           %e\n", 
 	     M,  N, cpu2_perf, cpu_perf,
 	     lapackf77_zlange("f", &M, &N, h_A3, &M, work) / matnorm);
 
