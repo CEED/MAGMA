@@ -146,7 +146,6 @@ int main( int argc, char** argv)
 	n2    = lda*N;
 	ldda  = ((M+31)/32)*32;
 	flops = FLOPS( (double)M, (double)min_mn ) / 1000000;
-	fprintf(stderr, "%e\n", flops);
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
