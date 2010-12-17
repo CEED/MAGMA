@@ -19,6 +19,13 @@
 #define A(i, j)  (a + (j)*lda  + (i))
 #define dA(i, j) (da+ (j)*ldda + (i))
 
+// === Define what BLAS to use ============================================
+#define PRECISION_z
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+  #define cublasZgemm magmablas_zgemm
+#endif
+// === End defining what BLAS to use ======================================
+
 extern "C" magma_int_t
 magma_zgebrd(magma_int_t m, magma_int_t n,
              cuDoubleComplex *a, magma_int_t lda, double *d, double *e,
