@@ -1,19 +1,25 @@
 include ../make.inc
 
-all: 	lib/libquark.a
 
-lib: 	lib/libquark.a
+LIBQUARK = lib/libquark.so
+ifeq (${ARCH}, ar)
+	LIBQUARK = lib/libquark.a
+endif
+
+all: 	${LIBQUARK}
+
+lib: 	${LIBQUARK}
 
 clean:
 	rm -f *.o *~
 
 cleanall: clean
-	rm -f lib/libquark.a
+	rm -f ${LIBQUARK}
 
 .c.o:
 	$(CC) $(OPTS) -Iinclude $(INC) -c $< -o $@
 
-lib/libquark.a: icl_hash.o icl_list.o quarkos.o quark.o
+${LIBQUARK}: icl_hash.o icl_list.o quarkos.o quark.o
 	$(ARCH) $(ARCHFLAGS) $@ $^
 	$(RANLIB) $@
 
