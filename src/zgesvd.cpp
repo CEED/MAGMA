@@ -164,7 +164,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 	    i__2, i__3, i__4;
     char ch__1[2];
 
-    int s_cat(char *, char **, magma_int_t *, magma_int_t *, magma_int_t);
+    int sp_cat(char *, char **, magma_int_t *, magma_int_t *, magma_int_t);
     double sqrt(double);
 
     static magma_int_t i__, ie, ir, iu, blk, ncu;
@@ -276,7 +276,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 	     Writing concatenation */
 	  i__1[0] = 1, a__1[0] = jobu;
 	  i__1[1] = 1, a__1[1] = jobvt;
-	  s_cat(ch__1, a__1, i__1, &c__2, 2);
+	  sp_cat(ch__1, a__1, i__1, &c__2, 2);
 	  mnthr = ilaenv_(&c__6, "ZGESVD", ch__1, m, n, &c__0, &c__0, 6, 2);
 	  if (*m >= mnthr) {
 	    if (wntun) {
@@ -503,7 +503,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 	     Writing concatenation */
 	  i__1[0] = 1, a__1[0] = jobu;
 	  i__1[1] = 1, a__1[1] = jobvt;
-	  s_cat(ch__1, a__1, i__1, &c__2, 2);
+	  sp_cat(ch__1, a__1, i__1, &c__2, 2);
 	  mnthr = ilaenv_(&c__6, "ZGESVD", ch__1, m, n, &c__0, &c__0, 6, 2);
 	  if (*n >= mnthr) {
 	    if (wntvn) {
@@ -4079,25 +4079,3 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
     return 0;
 } /* magma_zgesvd */
 
-extern "C"
-int s_cat(char *lp, char *rpp[], magma_int_t *rnp, magma_int_t*np, magma_int_t ll)
-{
-  magma_int_t i, n, nc;
-  char *f__rp;
-
-  n = (int)*np;
-  for(i = 0 ; i < n ; ++i)
-    {
-      nc = ll;
-      if(rnp[i] < nc)
-	nc = rnp[i];
-      ll -= nc;
-      f__rp = rpp[i];
-      while(--nc >= 0)
-	*lp++ = *f__rp++;
-    }
-  while(--ll >= 0)
-    *lp++ = ' ';
-
-  return 0;
-}

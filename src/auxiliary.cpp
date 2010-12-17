@@ -388,3 +388,29 @@ float getv(float *da){
   cublasGetVector(1, sizeof(float), da, 1, res, 1);
   return res[0];
 }
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Auxiliary function sp_cat
+*/
+extern "C"
+int sp_cat(char *lp, char *rpp[], magma_int_t *rnp, magma_int_t*np, magma_int_t ll)
+{
+  magma_int_t i, n, nc;
+  char *f__rp;
+
+  n = (int)*np;
+  for(i = 0 ; i < n ; ++i)
+    {
+      nc = ll;
+      if(rnp[i] < nc)
+        nc = rnp[i];
+      ll -= nc;
+      f__rp = rpp[i];
+      while(--nc >= 0)
+        *lp++ = *f__rp++;
+    }
+  while(--ll >= 0)
+    *lp++ = ' ';
+
+  return 0;
+}
