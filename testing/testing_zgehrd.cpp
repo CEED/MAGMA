@@ -41,7 +41,7 @@ int main( int argc, char** argv)
     printout_devices( );
 
     cuDoubleComplex *h_A, *h_R, *h_work, *tau;
-    double gpu_perf, cpu_perf;
+    double gpu_perf, cpu_perf, eps;
 
     TimeStruct start, end;
 
@@ -72,6 +72,8 @@ int main( int argc, char** argv)
     if (status != CUBLAS_STATUS_SUCCESS) {
         fprintf (stderr, "!!!! CUBLAS initialization error\n");
     }
+
+    eps = lapackf77_dlamch( "E" );
 
     lda = N;
     n2 = size[9] * size[9];
@@ -169,7 +171,7 @@ int main( int argc, char** argv)
            =================================================================== */
         printf("%5d    %6.2f         %6.2f      %e %e\n",
                size[i], cpu_perf, gpu_perf,
-               result[0]*5.96e-08, result[1]*5.96e-08);
+               result[0]*eps, result[1]*eps);
 
         if (argc != 1)
             break;
