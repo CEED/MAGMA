@@ -48,6 +48,8 @@ operator*(const cuDoubleComplex &u, const cuDoubleComplex &v) {
   t.y = u.x*v.y + u.y*v.x;
   return t;
 }
+#else
+// #define cublasZhemv magmablas_zhemv
 #endif /* defined(PRECISION_z) || defined(PRECISION_c)*/
 
 extern "C" magma_int_t 

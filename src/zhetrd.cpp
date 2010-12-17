@@ -222,7 +222,10 @@ magma_zhetrd(char uplo, magma_int_t n,
 
     cuDoubleComplex *dwork = da + (n)*ldda - 1;
 
-    nx = 128;
+    if (N < 2048)
+      nx = N;
+    else
+      nx = 512;
 
     if (upper) {
 
