@@ -20,8 +20,8 @@
 
 #define PRECISION_z
 // Flops formula
-#define FMULS_GETRF(m, n   ) (0.5 * (n) * ((n) * ((m) - (1./3.) * (n)) - (n)))
-#define FADDS_GETRF(m, n   ) (0.5 * (n) * ((n) * ((m) - (1./3.) * (n))      ))
+#define FMULS_GETRF(m, n   ) (0.5 * (n) * ((n) * ((m) - (1./3.) * (n) - 1. ) + (m)))
+#define FADDS_GETRF(m, n   ) (0.5 * (n) * ((n) * ((m) - (1./3.) * (n)      ) - (m)))
 #define FMULS_GETRS(m, nrhs) ((nrhs) * (m) *  (m)     )
 #define FADDS_GETRS(m, nrhs) ((nrhs) * (m) * ((m) - 1))
 #if defined(PRECISION_z) || defined(PRECISION_c)

@@ -30,8 +30,8 @@
 
 // Flops formula
 #define PRECISION_z
-#define FMULS(m, n) (0.5 * (n) * ((n) * ((m) - (1./3.) * (n)) - (n)))
-#define FADDS(m, n) (0.5 * (n) * ((n) * ((m) - (1./3.) * (n))      ))
+#define FMULS(m, n) (0.5 * (n) * ((n) * ((m) - (1./3.) * (n) - 1. ) + (m)))
+#define FADDS(m, n) (0.5 * (n) * ((n) * ((m) - (1./3.) * (n)      ) - (m)))
 #if defined(PRECISION_z) || defined(PRECISION_c)
 #define FLOPS(m, n) ( 6. * FMULS(m, n) + 2. * FADDS(m, n) )
 #else
@@ -69,7 +69,7 @@ double get_LU_error(magma_int_t M, magma_int_t N,
 
     for( j = 0; j < N; j++ ) {
         for( i = 0; i < M; i++ ) {
-            MAGMA_Z_OP_NEG( LU[i+j*lda], LU[i+j*lda], A[i+j*lda]);
+            LU[i+j*lda] = MAGMA_Z_SUB( LU[i+j*lda], A[i+j*lda] );
 	}
     }
     residual = lapackf77_zlange("f", &M, &N, LU, &lda, work);
@@ -145,7 +145,8 @@ int main( int argc, char** argv)
 	lda   = M;
 	n2    = lda*N;
 	ldda  = ((M+31)/32)*32;
-	flops = FLOPS( (double)M, (double)N ) / 1000000;
+	flops = FLOPS( (double)M, (double)min_mn ) / 1000000;
+	fprintf(stderr, "%e\n", flops);
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
