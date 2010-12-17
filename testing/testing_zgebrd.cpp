@@ -21,7 +21,17 @@
 // includes, project
 #include "magma.h"
 
+// Flops formula
 #define PRECISION_z
+#define CHECK_ERROR
+#if defined(PRECISION_z) || defined(PRECISION_c)
+#define FLOPS(m,n) ( 4.*(4.*m*n*n-4.*m*n*n/3.))
+#else
+#define FLOPS(m,n) (     4.*m*n*n-4.*m*n*n/3.)
+#endif
+
+
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgebrd
 */
@@ -143,17 +153,17 @@ int main( int argc, char** argv)
         if (getenv("MAGMA_SHOW_INFO"))
           printf("zgebrd_INFO=%d\n", info);
 
-        gpu_perf =(4.*M*N*N-4.*N*N*N/3.)/(1000000.*GetTimerValue(start,end));
+        gpu_perf =FLOPS(M,N)/(1000000.*GetTimerValue(start,end));
         // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
 
         /* =====================================================================
            Check the factorization
            =================================================================== */
+	double result[3] = {0., 0., 0.};
+#ifdef CHECK_ERROR
         int lwork = nb * N * N;
         cuDoubleComplex *PT      = (cuDoubleComplex*)malloc( N * N * sizeof(cuDoubleComplex));
         cuDoubleComplex *work    = (cuDoubleComplex*)malloc( lwork * sizeof(cuDoubleComplex));
-
-        double result[3] = {0., 0., 0.};
 
         lapackf77_zlacpy(MagmaUpperLowerStr, &N, &N, h_R, &N, PT, &N);
 
@@ -190,8 +200,8 @@ int main( int argc, char** argv)
 
         if (info < 0)
             printf("Argument %d of zgebrd had an illegal value.\n", -info);
-
-        cpu_perf = (4.*M*N*N-4.*N*N*N/3.)/(1000000.*GetTimerValue(start,end));
+#endif
+        cpu_perf = FLOPS(M,N)/(1000000.*GetTimerValue(start,end));
         // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
 
         /* =====================================================================
