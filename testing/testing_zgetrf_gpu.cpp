@@ -97,7 +97,7 @@ int main( int argc, char** argv)
     magma_int_t M = 0, N = 0, n2, lda, ldda;
     magma_int_t size[10] = {960,1920,3072,4032,4992,5952,7104,8064,9024,9984};
 
-    magma_int_t i, info, min_mn, nb;
+    magma_int_t i, info, min_mn, nb, maxn;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
 
@@ -124,6 +124,7 @@ int main( int argc, char** argv)
     }
 
     ldda   = ((M+31)/32)*32;
+    maxn   = ((N+31)/32)*32;
     n2     = M * N;
     min_mn = min(M, N);
     nb     = magma_get_zgetrf_nb(min_mn);
@@ -132,7 +133,7 @@ int main( int argc, char** argv)
     TESTING_MALLOC(ipiv, magma_int_t, min_mn);
     TESTING_MALLOC(    h_A, cuDoubleComplex, n2     );
     TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2     );
-    TESTING_DEVALLOC(  d_A, cuDoubleComplex, ldda*N );
+    TESTING_DEVALLOC(  d_A, cuDoubleComplex, ldda*maxn );
 
     printf("\n\n");
     printf("  M     N   CPU GFlop/s    GPU GFlop/s   ||PA-LU||/(||A||*N)\n");
