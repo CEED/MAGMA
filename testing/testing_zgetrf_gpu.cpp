@@ -133,7 +133,7 @@ int main( int argc, char** argv)
     TESTING_MALLOC(ipiv, magma_int_t, min_mn);
     TESTING_MALLOC(    h_A, cuDoubleComplex, n2     );
     TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2     );
-    TESTING_DEVALLOC(  d_A, cuDoubleComplex, ldda*maxn );
+    TESTING_DEVALLOC(  d_A, cuDoubleComplex, ldda*N);
 
     printf("\n\n");
     printf("  M     N   CPU GFlop/s    GPU GFlop/s   ||PA-LU||/(||A||*N)\n");
