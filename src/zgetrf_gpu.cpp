@@ -80,7 +80,7 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
                   to solve a system of equations.
     =====================================================================    */
 
-#define inAT(i,j) (dAT + (i)*nb*ldda + (j)*nb)
+#define inAT(i,j) (dAT + (i)*nb*lddat + (j)*nb)
 #define max(a,b)  (((a)>(b))?(a):(b))
 #define min(a,b)  (((a)<(b))?(a):(b))
 
