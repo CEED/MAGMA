@@ -27,7 +27,8 @@ dgemvn_kernel_fermi(int n, int m, int n1, double alpha,  double* A, int lda, dou
   A += ind;
   x += threadIdx.x;
 
-  double res = 0.f;
+
+  double res = 0.0;
 
   __shared__ double buff[dgemv_bs];
   for(int i=0; i<n1; i += dgemv_bs ){
@@ -115,7 +116,7 @@ dgemvt_kernel1_fermi(int m, int n, double alpha, int n1, double* A, int lda,
 	volatile double *smem;
 
 	double res;
-	res = 0.0f;
+	res = 0.0;
 
 	for(int i=0; i<n1; i+= threadSize)
 	{
@@ -130,7 +131,7 @@ dgemvt_kernel1_fermi(int m, int n, double alpha, int n1, double* A, int lda,
 		}
 		else
 		{
-			res  += 0.0f;
+			res  += 0.0;
 		}
     }
 
@@ -325,14 +326,14 @@ magmablas_dgemvt_fermi(int m, int n, double alpha, double *A, int lda,
     N      - (input) INTEGER.
              On entry, n specifies the number of columns of the matrix A
 
-    A      - (input) SINGLE PRECISION array of dimension ( LDA, n ) on the GPU.
+    A      - (input) DOUBLE PRECISION array of dimension ( LDA, n ) on the GPU.
 
     LDA    - (input) INTEGER.
              LDA specifies the leading dimension of A.
 
-    X      - (input) SINGLE PRECISION array of dimension m.
+    X      - (input) DOUBLE PRECISION array of dimension m.
 
-    Y      - (output) SINGLE PRECISION array of dimension n.
+    Y      - (output) DOUBLE PRECISION array of dimension n.
              On exit y = alpha A^t X.
 
     ===================================================================== */
@@ -377,10 +378,10 @@ void magmablas_dgemv_fermi(char trans,
                TRANS = 'T' or 't'   z := alpha*A'*x + beta*z
 
     M      - (input) INTEGER
-             On entry, N specifies the number of rows of the matrix A.
+             On entry, m specifies the number of rows of the matrix A.
 
     N      - (input) INTEGER
-             On entry, M specifies the number of columns of the matrix A
+             On entry, n specifies the number of columns of the matrix A
  
     ALPHA  - DOUBLE REAL
              On entry, ALPHA specifies the scalar alpha.

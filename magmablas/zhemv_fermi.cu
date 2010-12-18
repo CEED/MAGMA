@@ -879,6 +879,10 @@ void  magmablas_zhemv_fermi( char uplo , int m , double2 alpha,  double2 *A , in
 				double2 *X , int incx, double2 beta, double2 *Y, int incy)
 {
 
+	if (uplo == 'U' || uplo == 'u')
+		cublasZhemv(uplo, m, alpha, A, lda, X, incx, beta, Y, incy);
+	else
+	{	
 	
 	double2 *dC_work;
 	int bsz = thread_x;
@@ -894,6 +898,7 @@ void  magmablas_zhemv_fermi( char uplo , int m , double2 alpha,  double2 *A , in
                       dC_work, kstan);
 
 	cublasFree(dC_work);
+	}
 
 }
 

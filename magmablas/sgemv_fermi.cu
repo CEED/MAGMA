@@ -424,10 +424,10 @@ magmablas_sgemv_fermi(char trans,
                TRANS = 'T' or 't'   z := alpha*A'*x + beta*z
 
     M      - (input) INTEGER
-             On entry, N specifies the number of rows of the matrix A.
+             On entry, m specifies the number of rows of the matrix A.
 
     N      - (input) INTEGER
-             On entry, M specifies the number of columns of the matrix A
+             On entry, n specifies the number of columns of the matrix A
  
     ALPHA  - REAL
              On entry, ALPHA specifies the scalar alpha.
