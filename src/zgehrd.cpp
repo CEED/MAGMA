@@ -30,13 +30,11 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 
     Purpose   
     =======   
-
-    DGEHRD reduces a real general matrix A to upper Hessenberg form H by   
+    DGEHRD reduces a COMPLEX_16 general matrix A to upper Hessenberg form H by   
     an orthogonal similarity transformation:  Q' * A * Q = H .   
 
     Arguments   
     =========   
-
     N       (input) INTEGER   
             The order of the matrix A.  N >= 0.   
 
@@ -48,7 +46,7 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
             set to 1 and N respectively. See Further Details.   
             1 <= ILO <= IHI <= N, if N > 0; ILO=1 and IHI=0, if N=0.   
 
-    A       (input/output) SINGLE PRECISION array, dimension (LDA,N)   
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N)   
             On entry, the N-by-N general matrix to be reduced.   
             On exit, the upper triangle and the first subdiagonal of A   
             are overwritten with the upper Hessenberg matrix H, and the   
@@ -59,12 +57,12 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,N).   
 
-    TAU     (output) SINGLE PRECISION array, dimension (N-1)   
+    TAU     (output) COMPLEX_16 array, dimension (N-1)   
             The scalar factors of the elementary reflectors (see Further   
             Details). Elements 1:ILO-1 and IHI:N-1 of TAU are set to   
             zero.   
 
-    WORK    (workspace/output) SINGLE PRECISION array, dimension (LWORK)   
+    WORK    (workspace/output) COMPLEX_16 array, dimension (LWORK)   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
@@ -179,8 +177,9 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 
     magma_int_t i__;
 
-    cuDoubleComplex *t;
-    t = (cuDoubleComplex *)malloc(nb*nb*sizeof(cuDoubleComplex));
+    cuDoubleComplex *t, *d_t;
+    t   = (cuDoubleComplex *)malloc(nb*nb*sizeof(cuDoubleComplex));
+    d_t = d_work + nb * ldda;
 
     zzero_nbxnb_block(nb, d_A+N*ldda, ldda);
 
@@ -248,11 +247,14 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 		     a   + (i__ -   1 )*(lda) , lda, 
 		     &tau[i__], t, nb, work, ldwork);
 
+	/* Copy T from the CPU to D_T on the GPU */
+	cublasSetMatrix(nb, nb, sizeof(cuDoubleComplex), t, nb, d_t, nb);
+
 	magma_zlahru(ihi, i__ - ilo, ib, 
 		     a   + (i__ -   1 )*(lda), lda,
 		     d_A + (i__ - ilo)*ldda, 
 		     d_A + (i__ - ilo)*ldda + i__ - 1,
-		     d_A + N*ldda, t, d_work);
+		     d_A + N*ldda, d_t, d_work);
       }
     }
 
