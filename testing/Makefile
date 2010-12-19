@@ -42,6 +42,8 @@ ZSRC  = testing_zgemm.cpp	\
         testing_zgeev.cpp       \
         testing_zgesvd.cpp      \
         testing_zheevd.cpp      \
+	    testing_sgemv.cpp	\
+	    testing_dgemv.cpp	\
 
 
 ifeq ($(FORT), pgfortran)
