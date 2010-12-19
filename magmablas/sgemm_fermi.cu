@@ -533,12 +533,12 @@ fermiSgemm_v2_kernel_NT(float *C, const float *A, const float *B,
 
 		#pragma unroll
 		for( int y=0; y<6; y++)
-			xxA[y] = /* (tll<k)* */ fetch_x_A(trackA + y*16, A);	
+			xxA[y] =  (tll<k)*  fetch_x_A(trackA + y*16, A);	
 			// tll same in the NN case
 
 		#pragma unroll
 		for( int y=0; y<6; y++)
-			xxB[y] = /* (tll<k)* */ fetch_x_B( trackB + 16*y, B);
+			xxB[y] =  (tll<k)*  fetch_x_B( trackB + 16*y, B);
 
 		#pragma unroll 
 		for( int j1=0;j1<16;j1++)

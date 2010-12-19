@@ -128,18 +128,18 @@ int main( int argc, char** argv)
     }
     
     lda = ldc = M;
-    ldb = K;
+    ldb = Bm;
     
     ldda = lddc = ((M+31)/32)*32;
-    lddb = ((K+31)/32)*32;
+    lddb = ((ldb+31)/32)*32;
     
     TESTING_MALLOC( h_A,  cuDoubleComplex, lda*K );
-    TESTING_MALLOC( h_B,  cuDoubleComplex, ldb*N );
+    TESTING_MALLOC( h_B,  cuDoubleComplex, ldb*Bn );
     TESTING_MALLOC( h_C,  cuDoubleComplex, ldc*N );
     TESTING_MALLOC( h_C2, cuDoubleComplex, ldc*N );
 
     TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*K );
-    TESTING_DEVALLOC( d_B, cuDoubleComplex, lddb*N );
+    TESTING_DEVALLOC( d_B, cuDoubleComplex, lddb*Bn );
     TESTING_DEVALLOC( d_C, cuDoubleComplex, lddc*N );
 
     printf("\nUsage: \n");
