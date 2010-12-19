@@ -23,6 +23,7 @@ ZSRC  = zpotrf.cpp	\
 	zgels_gpu.cpp	\
 	zlarfb_gpu.cpp	\
         zunmqr_gpu.cpp	\
+        zunghr.cpp      \
 	\
 	zcposv_gpu.cpp	\
 	zcgesv_gpu.cpp	\
@@ -35,6 +36,7 @@ ZSRC  = zpotrf.cpp	\
         zgeqrf-v2.cpp   \
         zgeqrf-v3.cpp   \
         zgehrd.cpp 	\
+        zgehrd2.cpp     \
         zlahru.cpp 	\
         zlahr2.cpp 	\
         zgeqlf.cpp 	\

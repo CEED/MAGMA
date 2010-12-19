@@ -309,8 +309,8 @@ magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
     lapackf77_zgehrd(n, &ilo, &ihi, &a[a_offset], lda,
 		     &work[itau], &work[iwrk], &i__1, &ierr);
     */
-    magma_zgehrd(*n, ilo, ihi, &a[a_offset], *lda,
-		 &work[itau], &work[iwrk], &i__1, &ierr);
+    magma_zgehrd2(*n, ilo, ihi, &a[a_offset], *lda,
+		  &work[itau], &work[iwrk], &i__1, &ierr);
     
     if (wantvl) {
       /*        Want left eigenvectors   

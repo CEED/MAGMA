@@ -17,12 +17,10 @@
 #include "magmablas.h"
 
 extern "C" magma_int_t 
-magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi, 
-	     cuDoubleComplex *a, magma_int_t lda,
-	     cuDoubleComplex *tau, 
-	     cuDoubleComplex *work, magma_int_t *lwork,
-	     cuDoubleComplex *dT,
-	     magma_int_t *info)
+magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi, 
+	      cuDoubleComplex *a, magma_int_t lda,
+	      cuDoubleComplex *tau, cuDoubleComplex *work, 
+	      magma_int_t *lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -33,10 +31,7 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     Purpose   
     =======   
     DGEHRD reduces a COMPLEX_16 general matrix A to upper Hessenberg form H by   
-    an orthogonal similarity transformation:  Q' * A * Q = H . This version 
-    stores the triangular matrices used in the factorization so that they can
-    be applied directly (i.e., without being recomputed) later. As a result,
-    the application of Q is much faster.  
+    an orthogonal similarity transformation:  Q' * A * Q = H .   
 
     Arguments   
     =========   
@@ -80,10 +75,6 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
             this value as the first entry of the WORK array, and no error   
             message related to LWORK is issued by XERBLA.   
 
-    dT      (output)  COMPLEX_16 array on the GPU, dimension N*NB,
-            where NB is the optimal blocksize. It stores the NB*NB blocks 
-            of the triangular T matrices, used the the reduction.
-
     INFO    (output) INTEGER   
             = 0:  successful exit   
             < 0:  if INFO = -i, the i-th argument had an illegal value.   
@@ -126,7 +117,6 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     form through hybrid GPU-based computing," University of Tennessee Computer
     Science Technical Report, UT-CS-09-642 (also LAPACK Working Note 219),
     May 24, 2009.
-
     =====================================================================    */
 
     #define min(a,b) ((a) <= (b) ? (a) : (b))
@@ -256,7 +246,6 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 		     &tau[i__], t, nb, work, ldwork);
 
 	/* Copy T from the CPU to D_T on the GPU */
-	d_t = dT + (i__ - ilo)*nb;
 	cublasSetMatrix(nb, nb, sizeof(cuDoubleComplex), t, nb, d_t, nb);
 
 	magma_zlahru(ihi, i__ - ilo, ib, 
@@ -279,7 +268,7 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     free(t);
  
     return 0;
-} /* magma_zgehrd */
+} /* magma_zgehrd2 */
 
 #undef min
 #undef max
