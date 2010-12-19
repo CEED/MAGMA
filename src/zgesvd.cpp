@@ -181,8 +181,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
     extern int 
       dlascl_(char *, magma_int_t *, magma_int_t *, 
 	      double *, double *, magma_int_t *, magma_int_t *, double *, 
-	      magma_int_t *, magma_int_t *),
-      xerbla_(char *, magma_int_t *);
+	      magma_int_t *, magma_int_t *);
     extern magma_int_t ilaenv_(magma_int_t *, char *, char *, magma_int_t *,
 			       magma_int_t *, magma_int_t *, magma_int_t *, 
 			       magma_int_t, magma_int_t);
@@ -735,7 +734,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
     
     if (*info != 0) {
 	i__2 = -(*info);
-	xerbla_("ZGESVD", &i__2);
+	magma_xerbla("magma_zgesvd", &i__2);
 	return 0;
     } else if (lquery) {
 	return 0;
