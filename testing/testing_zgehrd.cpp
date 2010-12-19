@@ -32,7 +32,7 @@
 
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing zgehrd
+   -- Testing zgehrd2
 */
 int main( int argc, char** argv)
 {
@@ -64,7 +64,7 @@ int main( int argc, char** argv)
     }
     else {
         printf("\nUsage: \n");
-        printf("  testing_zgehrd -N %d\n\n", 1024);
+        printf("  testing_zgehrd2 -N %d\n\n", 1024);
     }
 
     /* Initialize CUBLAS */
@@ -116,7 +116,7 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-        magma_zgehrd( N, ione, N, h_R, N, tau, h_work, &lwork, &info);
+        magma_zgehrd2( N, ione, N, h_R, N, tau, h_work, &lwork, &info);
         end = get_current_time();
 
         gpu_perf = FLOPS(N)/(1000000.*GetTimerValue(start,end));
@@ -139,7 +139,8 @@ int main( int argc, char** argv)
             for(int i=j+2; i<N; i++)
                 h_R[i+j*N] = MAGMA_Z_ZERO;
 
-        lapackf77_zunghr(&N, &ione, &N, hwork_Q, &N, tau, h_work, &lwork, &info);
+	magma_zunghr(&N, &ione, &N, hwork_Q, &N, tau, h_work, &lwork, &info);
+        //lapackf77_zunghr(&N, &ione, &N, hwork_Q, &N, tau, h_work, &lwork, &info);
 
 #if defined(PRECISION_z) || defined(PRECISION_c) 
         double *rwork   = (double*)malloc( N * sizeof(double));
