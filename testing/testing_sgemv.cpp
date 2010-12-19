@@ -92,8 +92,8 @@ int main(int argc, char **argv)
 	printf( "\n");
 	fprintf(fp,  "\n");
 	const int nb = 64;
-	printf( "   n   CUBLAS,Gflop/s   MAGMABLAS0.2,Gflop/s   \"error\"\n" );
-	fprintf(fp, "   n   CUBLAS,Gflop/s   MAGMABLAS0.2,Gflop/s   \"error\"\n" );
+	printf( "   n   CUBLAS,Gflop/s   MAGMABLAS1.0,Gflop/s   \"error\"\n" );
+	fprintf(fp, "   n   CUBLAS,Gflop/s   MAGMABLAS1.0,Gflop/s   \"error\"\n" );
 	printf("==============================================================\n");
 	fprintf(fp, "==============================================================\n");
 	for( int idim = 1; idim <= N/nb; idim = int((idim+1)*1.1) )
@@ -166,7 +166,7 @@ int main(int argc, char **argv)
 			Q( cublasGetError( ) );
 			Q( cublasSetMatrix( m*stride, 1, sizeof( float ), C+m*stride, stride* ldc, dB,stride* ldc ) );
 			Q( cublasGetError( ) );
-                        magmablas_sgemv(m, m, dA, lda, dB, dC);
+			magmablas_sgemv('n', m, m, 1.0, dA, lda, dB, 1, 0., dC, 1);
 
 			Q( cublasGetError( ) );
 			Q( cublasGetMatrix( m*stridec, 1, sizeof( float ), dC,stridec* ldc, our_result,stridec* ldc ) );
@@ -174,7 +174,7 @@ int main(int argc, char **argv)
 		     
 	
                         start = get_current_time();
-			magmablas_sgemv(m, m, dA, lda, dB, dC);
+			magmablas_sgemv('n', m, m, 1.0, dA, lda, dB, 1, 0., dC, 1);
 			end = get_current_time();
 		        cublas_time = GetTimerValue(start,end) ; 
 			cublasFree( dA );
