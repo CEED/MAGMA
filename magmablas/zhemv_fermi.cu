@@ -81,14 +81,14 @@ inline __host__ __device__ double2 conjugate(double2 a)
 }
 
 __global__ void
-magma_l_zhemv_special_v6_ts_fermi(int n, double2 alpha,  double2* A, int lda, double2 *x, 
-                           int incx, double2 beta, double2 *y, int iny, double2 *WC, 
-                           int kstan)
+magma_l_zhemv_special_v6_ts_fermi(magma_int_t n, double2 alpha,  double2* A, magma_int_t lda, double2 *x, 
+                           magma_int_t incx, double2 beta, double2 *y, magma_int_t iny, double2 *WC, 
+                           magma_int_t kstan)
 {
-  int tx = threadIdx.x ; 
-  int ty = threadIdx.y ; 
+  magma_int_t tx = threadIdx.x ; 
+  magma_int_t ty = threadIdx.y ; 
 
-  int blkc= blockIdx.x ;
+  magma_int_t blkc= blockIdx.x ;
   
 
   double2 res;
@@ -109,9 +109,9 @@ magma_l_zhemv_special_v6_ts_fermi(int n, double2 alpha,  double2* A, int lda, do
   x  += blkc * thread_x  * incx;
   A  += blkc * thread_x + lda * blkc * thread_x;
 
-  const int td = (thread_x * ty ) + tx  ; 
-  int tx_ = td % half_thread_x ; 
-  int ty_ = td /half_thread_x ; 
+  const magma_int_t td = (thread_x * ty ) + tx  ; 
+  magma_int_t tx_ = td % half_thread_x ; 
+  magma_int_t ty_ = td /half_thread_x ; 
 
   A += ty_* lda + tx_ ;  
   x += tx * incx;
@@ -128,12 +128,12 @@ magma_l_zhemv_special_v6_ts_fermi(int n, double2 alpha,  double2* A, int lda, do
    tx = tx_ ; ty = ty_ ; 
 
    #pragma unroll  
-   for(int j =0; j<half_thread_x; j +=8)
+   for(magma_int_t j =0; j<half_thread_x; j +=8)
          la[0][ bank_shift * (ty_+j) + tx_] =  A[ j * lda];
    __syncthreads();
 
    #pragma unroll 
-   for(int  i=ty_*4; i<(ty_ * 4 + 4)  ; i++){
+   for(magma_int_t  i=ty_*4; i<(ty_ * 4 + 4)  ; i++){
          if ( i < tx_ )   {
 	        la[0][bank_shift * tx_ + i] = conjugate( la[0][ i * bank_shift + tx_] ) ; 
          }
@@ -143,7 +143,7 @@ magma_l_zhemv_special_v6_ts_fermi(int n, double2 alpha,  double2* A, int lda, do
    __syncthreads();
  
    #pragma unroll 
-   for(int j=0; j < 4 ; j++)
+   for(magma_int_t j=0; j < 4 ; j++)
       res+= conjugate( la[0][bank_shift * tx_ + j + ty_ * 4] ) * buff[j + ty_ * 4];
    __syncthreads();
 
@@ -165,11 +165,11 @@ magma_l_zhemv_special_v6_ts_fermi(int n, double2 alpha,  double2* A, int lda, do
 
    A+= half_thread_x + half_thread_x *lda ;
    #pragma unroll 
-   for(int j =0; j<half_thread_x; j+=8)
+   for(magma_int_t j =0; j<half_thread_x; j+=8)
          la[0][bank_shift*(ty_+j)+tx_] = A[ j * lda];
    __syncthreads();
    #pragma unroll 
-   for(int  i=ty_*4; i<(4+ty_*4) ; i++){
+   for(magma_int_t  i=ty_*4; i<(4+ty_*4) ; i++){
          if ( i < tx_ )   {
 	        la[0][bank_shift*tx_+i] = conjugate( la[0][bank_shift*i+tx_] ) ; 
          }
@@ -179,7 +179,7 @@ magma_l_zhemv_special_v6_ts_fermi(int n, double2 alpha,  double2* A, int lda, do
    __syncthreads();
 
    #pragma unroll 
-   for(int j=0; j < 4 ; j++)
+   for(magma_int_t j=0; j < 4 ; j++)
       res+= conjugate( la[0][bank_shift*tx_+j+ty_*4] ) * buff[half_thread_x + j + 4 * ty_];
    __syncthreads();
    la[0][bank_shift*tx_+ty_]= res ;  
@@ -205,16 +205,16 @@ magma_l_zhemv_special_v6_ts_fermi(int n, double2 alpha,  double2* A, int lda, do
    MAGMA_Z_SET2REAL(res_,0);
 
    #pragma unroll  
-   for(int j =0; j<half_thread_x; j+=8)
+   for(magma_int_t j =0; j<half_thread_x; j+=8)
        tr[j/8] = A[ j * lda];
    #pragma unroll 
-   for(int j=0; j < 4 ; j++){
+   for(magma_int_t j=0; j < 4 ; j++){
       res += tr[j] * buff[ j*8 + ty_];
       la[0][bank_shift*(ty_+j*8)+tx_] = tr[j];	
    }
    __syncthreads();
    #pragma unroll  
-   for(int j=0; j < 4 ; j++)
+   for(magma_int_t j=0; j < 4 ; j++)
       res_+= conjugate(la[0][bank_shift*tx_+j+ty_*4]) * buff[half_thread_x +j+ty_*4];
    __syncthreads();
 
@@ -269,8 +269,8 @@ magma_l_zhemv_special_v6_ts_fermi(int n, double2 alpha,  double2* A, int lda, do
    A+=4 * ty* lda  ;  
    A+=tx; 
 
-   int wc_c = 0 ; 
-   int count = 0 ; 
+   magma_int_t wc_c = 0 ; 
+   magma_int_t count = 0 ; 
 
 
    tx_ = td % quarter_thread_x ; 
@@ -281,19 +281,19 @@ magma_l_zhemv_special_v6_ts_fermi(int n, double2 alpha,  double2* A, int lda, do
 
    if( blkc * thread_x >=thread_x) 
      #pragma unroll 
-     for(int  i=0; i<thread_x; i += thread_x )
+     for(magma_int_t  i=0; i<thread_x; i += thread_x )
 	 {
        MAGMA_Z_SET2REAL(res_,0);
 		count++;
        #pragma unroll  
-       for( int k=0;k<4;k++)
+       for( magma_int_t k=0;k<4;k++)
 	   {
 			#pragma unroll  
-			for(int j=0; j < 4 ; j++)
+			for(magma_int_t j=0; j < 4 ; j++)
 			tr[j] = A[j*lda];
 
 	 	   #pragma unroll  
-			for(int j=0; j < 4 ; j++)
+			for(magma_int_t j=0; j < 4 ; j++)
 			{
 				res += tr[j] * x[ quarter_thread_x * k + ty * 4 + j];
             	la[( j + ty * 4)][tx] = conjugate(tr[j]) * buff[tx]; 
@@ -304,7 +304,7 @@ magma_l_zhemv_special_v6_ts_fermi(int n, double2 alpha,  double2* A, int lda, do
        MAGMA_Z_SET2REAL(res_,0);
 
             #pragma unroll  
-			for(int j=0; j < 4 ; j++)
+			for(magma_int_t j=0; j < 4 ; j++)
 			{
 				res_+=la[tx_][ty_*4+j] ;
 			}
@@ -315,12 +315,12 @@ magma_l_zhemv_special_v6_ts_fermi(int n, double2 alpha,  double2* A, int lda, do
        }
 
        #pragma unroll  
-       for(int k=0; k < 4 ; k++){
+       for(magma_int_t k=0; k < 4 ; k++){
          la[tx_][ty_+quarter_thread_x*k]= b[k] ;
        }
        __syncthreads();
        if( ty_ < 4 ) {	
-		int k = ty_*quarter_thread_x;
+		magma_int_t k = ty_*quarter_thread_x;
      	 res_ = la[tx_][0+k] + la[tx_][1+k]+ 
                 la[tx_][2+k] + la[tx_][3+k]+ 
                 la[tx_][4+k] + la[tx_][5+k]+ 
@@ -337,19 +337,19 @@ magma_l_zhemv_special_v6_ts_fermi(int n, double2 alpha,  double2* A, int lda, do
 	   
     }
 
-  for(int  i=thread_x; i< (blkc * thread_x); i += thread_x )
+  for(magma_int_t  i=thread_x; i< (blkc * thread_x); i += thread_x )
   {
        MAGMA_Z_SET2REAL(res_,0);
 		count++;
 
 		#pragma unroll  
-		for( int k=0;k<4;k++)
+		for( magma_int_t k=0;k<4;k++)
 		{
 			#pragma unroll  
-			for(int j=0; j < 4 ; j++)
+			for(magma_int_t j=0; j < 4 ; j++)
 					tr[j] = A[j*lda] ;
 			 #pragma unroll  
-			for(int j=0; j < 4 ; j++)
+			for(magma_int_t j=0; j < 4 ; j++)
 			{
 				 res += tr[j] * x[ i + quarter_thread_x*k + ty*4+(j)];
 		         la[( j + ty * 4)][tx] = conjugate( tr[j] )* buff[tx]; 
@@ -359,7 +359,7 @@ magma_l_zhemv_special_v6_ts_fermi(int n, double2 alpha,  double2* A, int lda, do
 			
        MAGMA_Z_SET2REAL(res_,0);
 		    #pragma unroll  
-			for(int j=0; j < 4 ; j++)
+			for(magma_int_t j=0; j < 4 ; j++)
                   res_+=la[tx_][ty_*4+j] ;
 		
 			b[k] = res_ ;
@@ -370,12 +370,12 @@ magma_l_zhemv_special_v6_ts_fermi(int n, double2 alpha,  double2* A, int lda, do
 
 	
    #pragma unroll  
-   for(int k=0; k < 4 ; k++){
+   for(magma_int_t k=0; k < 4 ; k++){
        la[tx_][ty_+quarter_thread_x*k]= b[k] ;
    }
    __syncthreads();
    if( ty_ < 4 ) {	
-	int k = ty_*quarter_thread_x;
+	magma_int_t k = ty_*quarter_thread_x;
      	res_ = la[tx_][0+k] + la[tx_][1+k]+ 
                la[tx_][2+k] + la[tx_][3+k]+
                la[tx_][4+k] + la[tx_][5+k]+
@@ -403,16 +403,16 @@ magma_l_zhemv_special_v6_ts_fermi(int n, double2 alpha,  double2* A, int lda, do
 }
 
 __global__ void
-magma_l_zhemv_special_update_v6_ts_fermi(int n, double2 alpha, double2* A, int lda, double2 *x, 
-                                  int inx, double2 beta, double2 *y, int iny, 
-                                  double2 *WC, int kstan)
+magma_l_zhemv_special_update_v6_ts_fermi(magma_int_t n, double2 alpha, double2* A, magma_int_t lda, double2 *x, 
+                                  magma_int_t inx, double2 beta, double2 *y, magma_int_t iny, 
+                                  double2 *WC, magma_int_t kstan)
 {
-  int tx = threadIdx.x ;
-  int ind = (blockIdx.x)* thread_x + tx ;
+  magma_int_t tx = threadIdx.x ;
+  magma_int_t ind = (blockIdx.x)* thread_x + tx ;
   double2 Ca ;
        MAGMA_Z_SET2REAL(Ca,0);
   WC+= tx+(blockIdx.x)*thread_x + lda*blockIdx.x  ;
-  for(int i=(blockIdx.x)*thread_x ;i<n;i+=thread_x){
+  for(magma_int_t i=(blockIdx.x)*thread_x ;i<n;i+=thread_x){
           Ca+=WC[0] ;
           WC+=thread_x;
   }
@@ -421,13 +421,13 @@ magma_l_zhemv_special_update_v6_ts_fermi(int n, double2 alpha, double2* A, int l
 }
 
 __global__ void
-magma_l_zhemv_generic_v6_ts_fermi(int n, double2 alpha, double2* A, int lda, double2 *x, 
-                           int inx, double2 beta, double2 *y, int iny, double2 *WC,
-                           int m_mod_thread_x, int kstan)
+magma_l_zhemv_generic_v6_ts_fermi(magma_int_t n, double2 alpha, double2* A, magma_int_t lda, double2 *x, 
+                           magma_int_t inx, double2 beta, double2 *y, magma_int_t iny, double2 *WC,
+                           magma_int_t m_mod_thread_x, magma_int_t kstan)
 {
-  int tx = threadIdx.x ; 
-  int ty = threadIdx.y ; 
-  int blkc= blockIdx.x ;
+  magma_int_t tx = threadIdx.x ; 
+  magma_int_t ty = threadIdx.y ; 
+  magma_int_t blkc= blockIdx.x ;
   
   double2 res;
        MAGMA_Z_SET2REAL(res,0);
@@ -438,10 +438,10 @@ magma_l_zhemv_generic_v6_ts_fermi(int n, double2 alpha, double2* A, int lda, dou
   __shared__ double2 buff2 [thread_x];
   double2 tr[4];
   double2 b[8];
-  int break_d  =   (blkc)* thread_x  ;
-  const int td = (thread_x * ty ) + tx  ; 
-  int tx_ = td % half_thread_x ; 
-  int ty_ = td /half_thread_x ; 
+  magma_int_t break_d  =   (blkc)* thread_x  ;
+  const magma_int_t td = (thread_x * ty ) + tx  ; 
+  magma_int_t tx_ = td % half_thread_x ; 
+  magma_int_t ty_ = td /half_thread_x ; 
   double2 res1; 
        MAGMA_Z_SET2REAL(res1,0);
   WC+= tx+(blkc)*thread_x;
@@ -451,7 +451,7 @@ magma_l_zhemv_generic_v6_ts_fermi(int n, double2 alpha, double2* A, int lda, dou
   x+=break_d *inx  ;
   x+=tx*inx;
 
- int trackA ; 
+ magma_int_t trackA ; 
  if( blkc == ( gridDim.x - 1 ) ) {
    if( ty == 0 ){
       if( tx > m_mod_thread_x )
@@ -481,7 +481,7 @@ if( ty==0 && tx<=kstan  && blkc == 0 ) {
 // It could be a potential bug -- from synchronization or from cuda or compiler 
 if( blkc == ( gridDim.x - 1 ) ) {
   #pragma unroll  
-  for(int j =0; j<half_thread_x; j+=8){
+  for(magma_int_t j =0; j<half_thread_x; j+=8){
          if( ( ty_ + j ) > m_mod_thread_x ) 
              {
 			 MAGMA_Z_SET2REAL(la[0][bank_shift*(ty_+j)+tx_], 9999);
@@ -493,14 +493,14 @@ if( blkc == ( gridDim.x - 1 ) ) {
 }
 else{
   #pragma unroll  
-  for(int j =0; j<half_thread_x; j+=8){
+  for(magma_int_t j =0; j<half_thread_x; j+=8){
          la[0][bank_shift*(ty_+j)+tx_] = A[ j * lda];
   }
 }
   tx = tx_ ; ty = ty_ ; 
   __syncthreads();
   #pragma unroll 
-  for(int  i=ty_*4; i<(ty_*4+4)  ; i++){
+  for(magma_int_t  i=ty_*4; i<(ty_*4+4)  ; i++){
          if ( i < tx_ )   {
 	        la[0][bank_shift*tx_+i] = conjugate(la[0][i*bank_shift+tx_]) ; 
          }
@@ -509,7 +509,7 @@ else{
   }
   __syncthreads();
   #pragma unroll 
-  for(int j=0; j < 4 ; j++)
+  for(magma_int_t j=0; j < 4 ; j++)
       res += conjugate(la[0][bank_shift*tx_+j+ty_*4])* buff[j+ty_*4];
   __syncthreads();
   la[0][bank_shift*tx_+ty_]= res ;  
@@ -532,7 +532,7 @@ if( blkc == ( gridDim.x - 1 ) ) {
        trackA=tx_+half_thread_x;
   A+= trackA+half_thread_x*lda ;
   #pragma unroll  
-  for(int j =0; j<half_thread_x; j+=8){
+  for(magma_int_t j =0; j<half_thread_x; j+=8){
          if( ( ty_ + j+half_thread_x ) > m_mod_thread_x ) 
               {
 			  MAGMA_Z_SET2REAL(la[0][bank_shift*(ty_+j)+tx_], 99999);
@@ -547,14 +547,14 @@ if( blkc == ( gridDim.x - 1 ) ) {
 else{
   A+= half_thread_x + half_thread_x *lda ;
   #pragma unroll  
-  for(int j =0; j<half_thread_x; j+=8){
+  for(magma_int_t j =0; j<half_thread_x; j+=8){
          la[0][bank_shift*(ty_+j)+tx_] = A[ j * lda];
   }
 }
 
   __syncthreads();
   #pragma unroll 
-  for(int  i=ty_*4; i<(4+ty_*4) ; i++){
+  for(magma_int_t  i=ty_*4; i<(4+ty_*4) ; i++){
          if ( i < tx_ )   {
 	        la[0][bank_shift*tx_+i] = conjugate(la[0][bank_shift*i+tx_]) ; 
          }
@@ -563,7 +563,7 @@ else{
   }
   __syncthreads();
   #pragma unroll 
-  for(int j=0; j < 4 ; j++)
+  for(magma_int_t j=0; j < 4 ; j++)
       res+= conjugate(la[0][bank_shift*tx_+j+ty_*4]) * buff[half_thread_x + j + 4 * ty_];
 	  
   __syncthreads();
@@ -596,7 +596,7 @@ if( blkc == ( gridDim.x - 1 ) ) {
        trackA=tx_;
   A+= trackA ;
   #pragma unroll  
-  for(int j =0; j<half_thread_x; j+=8)
+  for(magma_int_t j =0; j<half_thread_x; j+=8)
        if( ( ty_ + j ) > m_mod_thread_x ) 
        {
 	     MAGMA_Z_SET2REAL(tr[j/8], 99999);
@@ -608,18 +608,18 @@ if( blkc == ( gridDim.x - 1 ) ) {
 }
 else{
   #pragma unroll  
-  for(int j =0; j<half_thread_x; j+=8)
+  for(magma_int_t j =0; j<half_thread_x; j+=8)
        tr[j/8] = A[ j * lda];
 }
    __syncthreads();
   #pragma unroll 
-  for(int j=0; j < 4 ; j++){
+  for(magma_int_t j=0; j < 4 ; j++){
       res+= tr[j] * buff[ j*8 + ty_];
       la[0][bank_shift*(ty_+j*8)+tx_] = tr[j];	
   }
   __syncthreads();
   #pragma unroll  
-  for(int j=0; j < 4 ; j++)
+  for(magma_int_t j=0; j < 4 ; j++)
       res_+= conjugate(la[0][bank_shift*tx_+j+ty_*4]) * buff[half_thread_x +j+ty_*4];
   __syncthreads();
 
@@ -679,8 +679,8 @@ else{
   A+=tx; 
 }
 
-  int wc_c = 0 ; 
-  int count = 0 ; 
+  magma_int_t wc_c = 0 ; 
+  magma_int_t count = 0 ; 
 
 
   tx_ = td % quarter_thread_x ; 
@@ -691,12 +691,12 @@ else{
 
 
    #pragma unroll  
-   for(int j=0; j < 4 ; j++)
+   for(magma_int_t j=0; j < 4 ; j++)
         b[j] =  buff[ty_*4+j];
 
   if( break_d > 0) 
   #pragma unroll 
-  for(int  i=0; i< thread_x; i += thread_x ){
+  for(magma_int_t  i=0; i< thread_x; i += thread_x ){
        MAGMA_Z_SET2REAL(res_,0);
     count++;
     if( ty== 0 ) {
@@ -710,12 +710,12 @@ else{
            
     __syncthreads();
     #pragma unroll  
-    for( int k=0;k<4;k++){
+    for( magma_int_t k=0;k<4;k++){
   	   #pragma unroll  
-	   for(int j=0; j < 4 ; j++)
+	   for(magma_int_t j=0; j < 4 ; j++)
 	      tr[j] = A[j*lda] ;
    	   #pragma unroll  
-	   for(int j=0; j < 4 ; j++){
+	   for(magma_int_t j=0; j < 4 ; j++){
    	     res+=tr[j]*buff2[quarter_thread_x*k + ty*4+(j)];
   	     la[( (j)+ty*4)][tx] = conjugate(tr[j]); 
 	    }
@@ -723,38 +723,38 @@ else{
 	
          MAGMA_Z_SET2REAL(res_, 0) ; 
    	    #pragma unroll  
-	    for(int j=0; j < 4 ; j++)
+	    for(magma_int_t j=0; j < 4 ; j++)
                   res_+=la[tx_][ty_*4+j]* b[j] ;
 	    b[4+k] = res_ ; 	
    	    __syncthreads();
 	    A+=lda* quarter_thread_x ;
    }
    #pragma unroll  
-   for(int k=0; k < 4 ; k++){
+   for(magma_int_t k=0; k < 4 ; k++){
        la[tx_][ty_+quarter_thread_x*k]= b[4+k] ;
    }
    __syncthreads();
    if( ty_ < 4 ) {	
-	int k = ty_*quarter_thread_x;
+	magma_int_t k = ty_*quarter_thread_x;
      	res_ = la[tx_][0+k] + la[tx_][1+k]+ la[tx_][2+k]+la[tx_][3+k]+la[tx_][4+k]+la[tx_][5+k]+la[tx_][6+k]+la[tx_][7+k]+la[tx_][8+k]+la[tx_][9+k]+la[tx_][10+k]+la[tx_][11+k]+la[tx_][12+k]+la[tx_][13+k]+la[tx_][14+k]+la[tx_][15+k];
      	WC[k + wc_c*lda ] =   res_; 
     }
     wc_c++;
    __syncthreads();
   }
-  for(int  i=thread_x; i<break_d; i += thread_x ){
+  for(magma_int_t  i=thread_x; i<break_d; i += thread_x ){
     MAGMA_Z_SET2REAL(res_, 0) ; 
     count++;
     if(ty == 0 )
            buff2[tx]  = x[i*inx];
     __syncthreads();
     #pragma unroll  
-    for( int k=0;k<4;k++){
+    for( magma_int_t k=0;k<4;k++){
   	   #pragma unroll  
-	   for(int j=0; j < 4 ; j++)
+	   for(magma_int_t j=0; j < 4 ; j++)
 	      tr[j] = A[j*lda] ;
    	   #pragma unroll  
- 	   for(int j=0; j < 4 ; j++){
+ 	   for(magma_int_t j=0; j < 4 ; j++){
    	     res+=tr[j]*buff2[quarter_thread_x*k + ty*4+(j)];
   	     la[( (j)+ty*4)][tx] = conjugate(tr[j]); 
 	    }
@@ -762,19 +762,19 @@ else{
 	    
         MAGMA_Z_SET2REAL(res_, 0) ; 
    	    #pragma unroll  
-	    for(int j=0; j < 4 ; j++)
+	    for(magma_int_t j=0; j < 4 ; j++)
                   res_+=la[tx_][ty_*4+j]* b[j] ;
 	    b[4+k] = res_ ; 	
    	    __syncthreads();
 	    A+=lda* quarter_thread_x ;
    }
    #pragma unroll  
-   for(int k=0; k < 4 ; k++){
+   for(magma_int_t k=0; k < 4 ; k++){
        la[tx_][ty_+quarter_thread_x*k]= b[4+k] ;
    }
    __syncthreads();
    if( ty_ < 4 ) {	
-	int k = ty_*quarter_thread_x;
+	magma_int_t k = ty_*quarter_thread_x;
      	res_ = la[tx_][0+k] + la[tx_][1+k]+ la[tx_][2+k]+la[tx_][3+k]+la[tx_][4+k]+la[tx_][5+k]+la[tx_][6+k]+la[tx_][7+k]+la[tx_][8+k]+la[tx_][9+k]+la[tx_][10+k]+la[tx_][11+k]+la[tx_][12+k]+la[tx_][13+k]+la[tx_][14+k]+la[tx_][15+k];
      	WC[k + wc_c*lda ] =   res_; 
     }
@@ -796,13 +796,13 @@ else{
 }
 
 __global__ void
-magma_l_zhemv_generic_update_v6_ts_fermi (int n, double2 alpha ,  double2* A, int lda, double2 *x, int inx , double2 beta ,  double2 *y , int iny , double2 *WC, int kstan ){
-  int tx = threadIdx.x ;
-  int ind = (blockIdx.x)* thread_x + tx ;
+magma_l_zhemv_generic_update_v6_ts_fermi (magma_int_t n, double2 alpha ,  double2* A, magma_int_t lda, double2 *x, magma_int_t inx , double2 beta ,  double2 *y , magma_int_t iny , double2 *WC, magma_int_t kstan ){
+  magma_int_t tx = threadIdx.x ;
+  magma_int_t ind = (blockIdx.x)* thread_x + tx ;
   double2 Ca;
   MAGMA_Z_SET2REAL(Ca, 0) ; 
   WC+= tx+(blockIdx.x)*thread_x + lda*blockIdx.x  ;
-  for(int i=(blockIdx.x)*thread_x ;i<n;i+=thread_x){
+  for(magma_int_t i=(blockIdx.x)*thread_x ;i<n;i+=thread_x){
           Ca+=WC[0] ;
           WC+=thread_x;
   }
@@ -814,9 +814,9 @@ magma_l_zhemv_generic_update_v6_ts_fermi (int n, double2 alpha ,  double2* A, in
 
 
 extern "C"
-void magmablas_zhemv6_fermi(char uplo, int m, double2 alpha, double2 *A, int lda, 
-                      double2 *X, int incx, double2 beta, double2 *Y, int incy, 
-                      double2 *dC_work, int kstan)
+void magmablas_zhemv6_fermi(char uplo, magma_int_t m, double2 alpha, double2 *A, magma_int_t lda, 
+                      double2 *X, magma_int_t incx, double2 beta, double2 *Y, magma_int_t incy, 
+                      double2 *dC_work, magma_int_t kstan)
 
 
 {
@@ -839,7 +839,7 @@ void magmablas_zhemv6_fermi(char uplo, int m, double2 alpha, double2 *A, int lda
    deteriorated as the memory accesses would not be fully coalescent.
 */
 
-    int blocks;
+    magma_int_t blocks;
     if (m % dgemv_bs==0)
         blocks = m/ dgemv_bs;
     else
@@ -861,7 +861,7 @@ void magmablas_zhemv6_fermi(char uplo, int m, double2 alpha, double2 *A, int lda
 		
     } 
     else{	
-      int  m_mod_thread_x = m%dgemv_bs ; 
+      magma_int_t  m_mod_thread_x = m%dgemv_bs ; 
       if (uplo == 'L' || uplo == 'l'){
          magma_l_zhemv_generic_v6_ts_fermi <<<grid, threads>>> (m, alpha, A, lda, 
                     X, incx ,beta,  Y , incy, dC_work, m_mod_thread_x-1, kstan);
@@ -875,8 +875,8 @@ void magmablas_zhemv6_fermi(char uplo, int m, double2 alpha, double2 *A, int lda
 }
 
 extern "C"
-void  magmablas_zhemv_fermi( char uplo , int m , double2 alpha,  double2 *A , int lda , 
-				double2 *X , int incx, double2 beta, double2 *Y, int incy)
+void  magmablas_zhemv_fermi( char uplo , magma_int_t m , double2 alpha,  double2 *A , magma_int_t lda , 
+				double2 *X , magma_int_t incx, double2 beta, double2 *Y, magma_int_t incy)
 {
 
 	if (uplo == 'U' || uplo == 'u')
@@ -885,14 +885,14 @@ void  magmablas_zhemv_fermi( char uplo , int m , double2 alpha,  double2 *A , in
 	{	
 	
 	double2 *dC_work;
-	int bsz = thread_x;
-	int blocks = m / bsz + (m %bsz != 0);
-	int workspace = lda * (blocks + 1);
+	magma_int_t bsz = thread_x;
+	magma_int_t blocks = m / bsz + (m %bsz != 0);
+	magma_int_t workspace = lda * (blocks + 1);
 	cublasAlloc( workspace, sizeof(double2), (void**)&dC_work ) ;
 			
 	cublasGetError( ) ;
 
-	int kstan = -1;
+	magma_int_t kstan = -1;
 
 	magmablas_zhemv6_fermi(uplo, m, alpha, A, lda, X, incx, beta, Y, incy, 
                       dC_work, kstan);
