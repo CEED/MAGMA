@@ -15,9 +15,9 @@
 #define dgemv_bs 64
 
 __global__ void 
-dgemv_kernel(int n, int m, int n1, double* A, int lda, double *x, double *y)
+dgemv_kernel(magma_int_t n, magma_int_t m, magma_int_t n1, double* A, magma_int_t lda, double *x, double *y)
 {
-  int ind = blockIdx.x*num_threads + threadIdx.x;
+  magma_int_t ind = blockIdx.x*num_threads + threadIdx.x;
 
   A += ind;
   x += threadIdx.x;
@@ -25,13 +25,13 @@ dgemv_kernel(int n, int m, int n1, double* A, int lda, double *x, double *y)
   double res = 0.f;
 
   __shared__ double buff[dgemv_bs];
-  for(int i=0; i<n1; i += dgemv_bs ){
+  for(magma_int_t i=0; i<n1; i += dgemv_bs ){
     __syncthreads();
     buff[threadIdx.x]  = x[i];
 
     __syncthreads();
     #pragma unroll
-    for(int j=0; j < dgemv_bs ; j++){
+    for(magma_int_t j=0; j < dgemv_bs ; j++){
        res+=A[0]*buff[j];
        A+=lda;
     }
@@ -42,7 +42,7 @@ dgemv_kernel(int n, int m, int n1, double* A, int lda, double *x, double *y)
      buff[threadIdx.x]  = x[n1];
 
      __syncthreads();
-     for(int j=0; j<(m-n1); j++){
+     for(magma_int_t j=0; j<(m-n1); j++){
          res += A[0]*buff[j];
          A+=lda;
      }
@@ -53,7 +53,7 @@ dgemv_kernel(int n, int m, int n1, double* A, int lda, double *x, double *y)
 }
 
 extern "C" void
-magmablas_dgemvt_tesla(int m, int n, double alpha, double *A, int lda,
+magmablas_dgemvt_tesla(magma_int_t m, magma_int_t n, double alpha, double *A, magma_int_t lda,
                        double *x, double *z);
 
 extern "C" void
@@ -90,10 +90,10 @@ magmablas_dgemv_tesla(char trans,
                TRANS = 'T' or 't'   z := alpha*A'*x + beta*z
 
     M      - (input) INTEGER
-             On entry, N specifies the number of rows of the matrix A.
+             On entry, M specifies the number of rows of the matrix A.
 
     N      - (input) INTEGER.
-             On entry, M specifies the number of columns of the matrix A
+             On entry, N specifies the number of columns of the matrix A
 
     ALPHA  - DOUBLE PRECISION
              On entry, ALPHA specifies the scalar alpha.
@@ -128,7 +128,7 @@ magmablas_dgemv_tesla(char trans,
        if (trans == 'n' || trans == 'N')
           if (alpha == 1.)
             {
-              int blocks;
+              magma_int_t blocks;
               if (m % num_threads==0)
                  blocks = m/num_threads;
               else
@@ -153,15 +153,15 @@ magmablas_dgemv_tesla(char trans,
 }
 
 __global__ void
-dgemvt_kernel1(int n, int m, double alpha, int n1, double* A, int lda,
+dgemvt_kernel1(magma_int_t n, magma_int_t m, double alpha, magma_int_t n1, double* A, magma_int_t lda,
               double *x, double *y)
 {
-  const int inx = threadIdx.x;
-  const int iny = threadIdx.y;
+  const magma_int_t inx = threadIdx.x;
+  const magma_int_t iny = threadIdx.y;
 
-  int ind  = iny + __mul24(blockIdx.x,32);
+  magma_int_t ind  = iny + __mul24(blockIdx.x,32);
   ind = inx + __mul24(ind,lda);
-  int ind2 = inx + __mul24(iny,32);
+  magma_int_t ind2 = inx + __mul24(iny,32);
 
   A += ind;
   x += ind2;
@@ -171,28 +171,28 @@ dgemvt_kernel1(int n, int m, double alpha, int n1, double* A, int lda,
   __shared__ double buff[dgemv_bs];
   __shared__ double la[32][33];
 
-  for(int i=0; i<n1; i += dgemv_bs ){
+  for(magma_int_t i=0; i<n1; i += dgemv_bs ){
       buff[ind2]  = x[i];
       #pragma unroll
-      for(int j=0; j<16; j++)
+      for(magma_int_t j=0; j<16; j++)
          la[iny+__mul24(j,2)][inx] = A[j*__mul24(2,lda)];
 
       __syncthreads();
       #pragma unroll
-      for(int j=0; j < 16; j++)
+      for(magma_int_t j=0; j < 16; j++)
         res += la[inx][iny*16+j]*buff[j+iny*16];
 
       A += 32;
 
       //===============================================
       #pragma unroll
-      for(int j=0; j<16; j++)
+      for(magma_int_t j=0; j<16; j++)
          la[iny+__mul24(j,2)][inx] = A[j*__mul24(2,lda)];
 
       __syncthreads();
 
       #pragma unroll
-      for(int j=0; j < 16; j++)
+      for(magma_int_t j=0; j < 16; j++)
         res += la[inx][iny*16+j]*buff[j+32+iny*16];
       A += 32;
     }
@@ -204,30 +204,30 @@ dgemvt_kernel1(int n, int m, double alpha, int n1, double* A, int lda,
          buff[ind2]  = x[n1];
 
       #pragma unroll
-      for(int j=0; j<16; j++)
+      for(magma_int_t j=0; j<16; j++)
          la[iny+__mul24(j,2)][inx] = A[j*__mul24(2,lda)];
 
      __syncthreads();
 
      if (n-n1>16){
 	#pragma unroll
-        for(int j=0; j < 16; j++)
+        for(magma_int_t j=0; j < 16; j++)
            res += la[inx][iny*16+j]*buff[j+iny*16];
 
         A += 32;
         #pragma unroll
-        for(int j=0; j<16; j++)
+        for(magma_int_t j=0; j<16; j++)
           la[iny+__mul24(j,2)][inx] = A[j*__mul24(2,lda)];
 
 	__syncthreads();
 
         #pragma unroll
-        for(int j=0; j < 16; j++)
+        for(magma_int_t j=0; j < 16; j++)
            res += la[inx][iny*16+j]*buff[j+32+iny*16];
      }
      else {
         #pragma unroll
-        for(int j=0; j < 16; j++)
+        for(magma_int_t j=0; j < 16; j++)
           res += la[inx][iny*16+j]*buff[j+iny*16];
      }
   }
@@ -241,15 +241,15 @@ dgemvt_kernel1(int n, int m, double alpha, int n1, double* A, int lda,
 }
 
 __global__ void
-dgemvt_kernel2(int n, int m, double alpha,
-		int n1, double* A, int lda, double *x, double *y)
+dgemvt_kernel2(magma_int_t n, magma_int_t m, double alpha,
+		magma_int_t n1, double* A, magma_int_t lda, double *x, double *y)
 {
-  const int inx = threadIdx.x;
-  const int iny = threadIdx.y;
+  const magma_int_t inx = threadIdx.x;
+  const magma_int_t iny = threadIdx.y;
 
-  int ind  = iny + __mul24(blockIdx.x,16);
+  magma_int_t ind  = iny + __mul24(blockIdx.x,16);
   ind = inx + __mul24(ind,lda);
-  int ind2 = inx + __mul24(iny,16);
+  magma_int_t ind2 = inx + __mul24(iny,16);
   if (ind2>31)
      ind2-=32;
 
@@ -263,28 +263,28 @@ dgemvt_kernel2(int n, int m, double alpha,
   __shared__ double buff[32];
   __shared__ double la[16][17];
 
-  for(int i=0; i<n1; i += 32 ){
+  for(magma_int_t i=0; i<n1; i += 32 ){
      buff[ind2]  = x[i];
      #pragma unroll
-     for(int j=0; j<4; j++)
+     for(magma_int_t j=0; j<4; j++)
         la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
 
      __syncthreads();
      #pragma unroll
-     for(int j=0; j < 4; j++)
+     for(magma_int_t j=0; j < 4; j++)
        res += la[inx][iny*4+j]*buff[j+iny*4];
 
      A += 16;
     __syncthreads();
      //===========================================
      #pragma unroll
-     for(int j=0; j<4; j++)
+     for(magma_int_t j=0; j<4; j++)
          la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
 
      __syncthreads();
 
      #pragma unroll
-     for(int j=0; j < 4; j++)
+     for(magma_int_t j=0; j < 4; j++)
         res += la[inx][iny*4+j]*buff[j+16+iny*4];
      A += 16;
   }
@@ -297,30 +297,30 @@ dgemvt_kernel2(int n, int m, double alpha,
 
      __syncthreads();
      #pragma unroll
-     for(int j=0; j<4; j++)
+     for(magma_int_t j=0; j<4; j++)
          la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
 
      __syncthreads();
      if (n-n1>4){
         #pragma unroll
-	for(int j=0; j < 4; j++)
+	for(magma_int_t j=0; j < 4; j++)
            res += la[inx][iny*4+j]*buff[j+iny*4];
 
         A += 16;
         __syncthreads();
         #pragma unroll
-          for(int j=0; j<4; j++)
+          for(magma_int_t j=0; j<4; j++)
             la[iny+__mul24(j,4)][inx] = A[j*__mul24(4,lda)];
 
         __syncthreads();
 
         #pragma unroll
-        for(int j=0; j < 4; j++)
+        for(magma_int_t j=0; j < 4; j++)
            res += la[inx][iny*4+j]*buff[j+16+iny*4];
      }
      else {
         #pragma unroll
-        for(int j=0; j < 4; j++)
+        for(magma_int_t j=0; j < 4; j++)
           res += la[inx][iny*4+j]*buff[j+iny*4];
      }
   }
@@ -336,7 +336,7 @@ dgemvt_kernel2(int n, int m, double alpha,
 }
 
 extern "C" void
-magmablas_dgemvt1_tesla(int m, int n, double alpha, double *A, int lda,
+magmablas_dgemvt1_tesla(magma_int_t m, magma_int_t n, double alpha, double *A, magma_int_t lda,
                         double *x, double *z)
 {
 /*  -- MAGMA (version 1.0) --
@@ -368,7 +368,7 @@ magmablas_dgemvt1_tesla(int m, int n, double alpha, double *A, int lda,
              On exit Z = alpha A^t X.
     ===================================================================== */
 
-    int blocks;
+    magma_int_t blocks;
 
     if (n % 32==0)
         blocks = n/32;
@@ -382,7 +382,7 @@ magmablas_dgemvt1_tesla(int m, int n, double alpha, double *A, int lda,
 }
 
 extern "C" void
-magmablas_dgemvt2_tesla(int m, int n, double alpha, double *A, int lda,
+magmablas_dgemvt2_tesla(magma_int_t m, magma_int_t n, double alpha, double *A, magma_int_t lda,
                         double *x, double *z)
 {
 /*  -- MAGMA (version 1.0) --
@@ -413,7 +413,7 @@ magmablas_dgemvt2_tesla(int m, int n, double alpha, double *A, int lda,
              On exit Z = alpha A^t X.
     ===================================================================== */
 
-    int blocks;
+    magma_int_t blocks;
 
     if (n % 16==0)
         blocks = n/16;
@@ -428,7 +428,7 @@ magmablas_dgemvt2_tesla(int m, int n, double alpha, double *A, int lda,
 }
 
 extern "C" void
-magmablas_dgemvt_tesla(int m, int n, double alpha, double *A, int lda,
+magmablas_dgemvt_tesla(magma_int_t m, magma_int_t n, double alpha, double *A, magma_int_t lda,
                        double *x, double *z)
 {
 /*  -- MAGMA (version 1.0) --
