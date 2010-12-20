@@ -122,7 +122,7 @@ magma_zunmqr_gpu(char side, char trans,
 
     #define a_ref(a_1,a_2) (dA+(a_2)*(ldda) + (a_1))
     #define c_ref(a_1,a_2) (dC+(a_2)*(lddc) + (a_1))
-    #define t_ref(a_1)     (dT+(a_1))
+    #define t_ref(a_1)     (dT+(a_1)*nb)
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
 
@@ -222,7 +222,7 @@ magma_zunmqr_gpu(char side, char trans,
             }
             ret = magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
 				    mi, ni, ib, 
-				    a_ref(i,  i ), ldda, t_ref(i), lddwork, 
+				    a_ref(i,  i ), ldda, t_ref(i), nb, 
 				    c_ref(ic, jc), lddc, dwork,    nw);
 	    if ( ret != MAGMA_SUCCESS )
 	      return ret;

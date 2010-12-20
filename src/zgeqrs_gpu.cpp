@@ -90,7 +90,6 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     =====================================================================    */
 
    #define a_ref(a_1,a_2) (dA+(a_2)*(ldda) + (a_1))
-   #define t_ref(a_1)     (dT+(a_1))
    #define d_ref(a_1)     (dT+(lddwork+(a_1))*nb)
    #define min(a,b)       (((a)<(b))?(a):(b))
    #define max(a,b)       (((a)>(b))?(a):(b))
@@ -213,5 +212,4 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
 }
 
 #undef a_ref
-#undef t_ref
 #undef d_ref

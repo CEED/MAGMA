@@ -29,7 +29,6 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 
     Purpose
     =======
-
     ZUNGQR generates an M-by-N COMPLEX_16 matrix Q with orthonormal columns,
     which is defined as the first N columns of a product of K elementary
     reflectors of order M
@@ -40,7 +39,6 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 
     Arguments
     =========
-
     M       (input) INTEGER
             The number of rows of the matrix Q. M >= 0.
 
@@ -66,7 +64,7 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
             reflector H(i), as returned by ZGEQRF_GPU.
 
     DWORK   (input) COMPLEX_16 work space array on the GPU device.
-            This must be the 7th argument of magma_zgeqrf_gpu.
+            This must be the 6th argument of magma_zgeqrf_gpu.
 
     INFO    (output) INTEGER
             = 0:  successful exit
@@ -74,7 +72,7 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     =====================================================================    */
 
     #define da_ref(a_1,a_2) (da+(a_2)*(ldda) + (a_1))
-    #define t_ref(a_1)      (dwork+(a_1))
+    #define t_ref(a_1)      (dwork+(a_1)*nb)
     #define min(a,b)        (((a)<(b))?(a):(b))
     #define max(a,b)        (((a)>(b))?(a):(b))
 
@@ -157,7 +155,7 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 		i__3 = n - i - ib;
 		magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise,
 				  i__2, i__3, ib,
-				  da_ref(i, i   ), ldda, t_ref(i),             lddwork,
+				  da_ref(i, i   ), ldda, t_ref(i),             nb,
 				  da_ref(i, i+ib), ldda, dwork + 2*lddwork*nb, lddwork);
 	      }
 

@@ -113,7 +113,7 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
     =====================================================================    */
 
     #define a_ref(a_1,a_2) (dA+(a_2)*(ldda) + (a_1))
-    #define t_ref(a_1)     (dT+(a_1))
+    #define t_ref(a_1)     (dT+(a_1)*nb)
     #define d_ref(a_1)     (dT+(lddwork+(a_1))*nb)
     #define dd_ref(a_1)    (dT+(2*lddwork+(a_1))*nb)
     #define work_ref(a_1)  ( work + (a_1))
@@ -178,7 +178,7 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
                 cols = n-old_i-2*old_ib;
                 magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
 				  m-old_i, cols, old_ib,
-				  a_ref(old_i, old_i         ), ldda, t_ref(old_i), lddwork,
+				  a_ref(old_i, old_i         ), ldda, t_ref(old_i), nb,
 				  a_ref(old_i, old_i+2*old_ib), ldda, dd_ref(0),    lddwork);
 		
                 /* store the diagonal */
@@ -205,20 +205,20 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
 
             if (i + ib < n) {
                 /* Send the triangular factor T to the GPU */
-                cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), hwork, ib, t_ref(i), lddwork);
+                cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), hwork, ib, t_ref(i), nb);
 
                 if (i+nb < k-nb){
                     /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
 				      rows, ib, ib, 
-				      a_ref(i, i   ), ldda, t_ref(i),  lddwork, 
+				      a_ref(i, i   ), ldda, t_ref(i),  nb, 
 				      a_ref(i, i+ib), ldda, dd_ref(0), lddwork);
                 }
                 else {
                     cols = n-i-ib;
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
 				      rows, cols, ib, 
-				      a_ref(i, i   ), ldda, t_ref(i),  lddwork, 
+				      a_ref(i, i   ), ldda, t_ref(i),  nb, 
 				      a_ref(i, i+ib), ldda, dd_ref(0), lddwork);
                     /* Fix the diagonal block */
                     cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), ut, ib, d_ref(i), ib);
