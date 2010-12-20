@@ -773,6 +773,9 @@ void magmablas_dsymv6_tesla(char uplo, int m, double alpha, double *A, int lda,
     }
 }
 
+extern "C" void cublasDsymv(char uplo , int m , double alpha,  double *A , int lda ,
+                                double *X , int incx, double beta, double *Y, int incy);
+
 extern "C"
 void  magmablas_dsymv_tesla( char uplo , int m , double alpha,  double *A , int lda , 
 				double *X , int incx, double beta, double *Y, int incy)

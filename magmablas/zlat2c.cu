@@ -673,4 +673,336 @@ magmablas_zlat2c(char uplo, int n, cuDoubleComplex *A, int lda,
     */
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+#else
+///////////////////////////////////////////////////////////////////////////////////////////
+/*------------------------------------------ UPLO = 'L' ----------------------------------*/
+
+__global__ void
+l_zlat2c_special (int n, cuDoubleComplex* A, int lda,  cuFloatComplex *SA , int *INFO, 
+                  double RMAX, int ldsa )
+{
+    int tx  = threadIdx.x ;
+    int ty  = threadIdx.y ;
+    int ind = blockIdx.x*  dgemv_bs + tx ;
+
+    A  += ind;
+    SA += ind;
+    A  += ty * lda;
+    SA += ty * ldsa;
+
+    int break_d  =   (blockIdx.x+1)* dgemv_bs ;
+    for(int  i=0; i<break_d; i += dgemv_bs ){
+
+        #pragma unroll 8
+        for(int j=0; j < dgemv_bs ; j+=4)
+            SA[j*ldsa] = cuComplexDoubleToFloat(A[j*lda]);
+
+        A  += lda *dgemv_bs ;
+        SA += ldsa*dgemv_bs ;
+    }
+}
+
+
+__global__ void
+l_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA , int m_full_block,
+                 int m_mod_32 , int *INFO , double RMAX , int ldsa)
+{
+    int tx = threadIdx.x ;
+    int ty = threadIdx.y ;
+
+    int ind = blockIdx.x*  dgemv_bs + tx ;
+
+    if( blockIdx.x == m_full_block ) {
+        /************************************************************************
+   -- Last block --
+   -- We will do something unusual here
+   -- For sufficiently large matrix the overhead will be very low
+        *************************************************************************/
+        if  ( tx < m_mod_32 ){
+            A+= ( blockIdx.x * dgemv_bs + tx ) ;
+            SA+= ( blockIdx.x * dgemv_bs + tx ) ;
+        }
+        else{
+            A+= ( blockIdx.x * dgemv_bs + m_mod_32 -1) ;
+            SA+= ( blockIdx.x * dgemv_bs + m_mod_32 -1) ;
+        }
+        A+= ty * lda  ;
+        SA+= ty * ldsa  ;
+        int break_d  =   blockIdx.x* dgemv_bs ;
+
+        /*----------------------------
+          Go Right
+          -------------------------------*/
+
+        for(int  i=0; i<break_d; i += dgemv_bs ){
+            #pragma unroll 8
+            for(int j=0; j < dgemv_bs ; j+=4)
+                SA[j*ldsa] = cuComplexDoubleToFloat(A[j*lda]);
+            
+            A  += lda *dgemv_bs ;
+            SA += ldsa*dgemv_bs ;
+        }
+        /*
+          we don't need to make zero, as those computation will be discarded.
+        */
+        if( ty==0  ) {
+            /*--------------------------------------------
+              he will compute the triangular parts
+              others will be waiting with values.
+              -----------------------------------------------*/
+            int j ;
+            int count = 1 ;
+            if( tx < m_mod_32 )
+                count = tx ;
+            else
+                count = m_mod_32 ;
+            for(j =0;j<=count;j++)
+                SA[j*ldsa] = cuComplexDoubleToFloat(A[j*lda]);
+            
+            A  += (tx)*lda;
+            SA += (tx)*ldsa;
+            count = 1 ;
+            for(;j<m_mod_32;j++){
+                SA[count] = cuComplexDoubleToFloat(A[count]);
+                count++;
+            }
+        }
+        else{
+        }
+
+        __syncthreads();
+    }
+
+    else{
+        /* **************************************
+         -- All the blocks but the last one --
+           ************************************** */
+        A += ind;
+        SA += ind;
+        A+= ty * lda  ;
+        SA+= ty * ldsa  ;
+        int break_d  =   (blockIdx.x+1)* dgemv_bs ;
+
+        /*----------------------------
+          Go Right
+          -------------------------------*/
+        for(int  i=0; i<break_d; i += dgemv_bs ){
+            #pragma unroll 8
+            for(int j=0; j < dgemv_bs ; j+=4)
+                SA[j*ldsa] = cuComplexDoubleToFloat(A[j*lda]);
+            
+            A  += lda *dgemv_bs ;
+            SA += ldsa*dgemv_bs ;
+        }
+   }
+}
+
+/*- ---------------------------------------------- UPLO = 'U' ----------------------------------*/
+/* Generic Case*/
+
+__global__ void
+u_zlat2c_generic(int n, cuDoubleComplex* A, int lda, cuFloatComplex *SA, int m_full_block,
+                 int m_mod_32 , int *INFO , double RMAX , int ldsa)
+{
+    int tx = threadIdx.x ;
+    int ty = threadIdx.y ;
+
+    int ind = blockIdx.x*  dgemv_bs + tx ;
+
+    int blockIdxx =  blockIdx.x ;
+    if( blockIdx.x == m_full_block ) {
+
+        /************************************************************************
+   -- Last block --
+   -- We will do something unusual here
+   -- For sufficiently large matrix the overhead will be very low
+        *************************************************************************/
+        ind =  tx ;
+        A+= lda*(n-1) ;
+        SA+= ldsa*(n-1) ;
+
+
+        if  ( tx < m_mod_32 ){
+            A+= (  tx ) ;
+            SA+= (  tx ) ;
+        }
+        else{
+            A+= (  m_mod_32 -1) ;
+            SA+= (  m_mod_32 -1) ;
+        }
+        A-= ty * lda  ;
+        SA-= ty * ldsa  ;
+        int break_d  =   (blockIdx.x)* dgemv_bs ;
+
+        /*----------------------------
+          Go Right
+          -------------------------------*/
+        for(int  i=0; i<break_d; i += dgemv_bs ){
+            #pragma unroll 8
+            for(int j=0; j < dgemv_bs ; j+=4)
+                SA[-j*ldsa] = cuComplexDoubleToFloat(A[-j*lda]);
+            
+            A  -= lda *dgemv_bs ;
+            SA -= ldsa*dgemv_bs ;
+        }
+        /*
+          we don't need to make zero, as those computation will be discarded.
+        */
+        if( ty==0  ) {
+            /*--------------------------------------------
+              he will compute the triangular parts
+              others will be waiting with values.
+              -----------------------------------------------*/
+            int j ;
+            int count = 1 ;
+            if( tx < m_mod_32 )
+                count =m_mod_32- tx ;
+            else
+                count = m_mod_32 ;
+            for(j =0;j<count;j++)
+                SA[-j*ldsa] = cuComplexDoubleToFloat(A[-j*lda]);
+            
+            A-=(count-1)*lda;
+            SA-=(count-1)*ldsa;
+            count = 1 ;
+            for(;j<m_mod_32;j++){
+                SA[-count] = cuComplexDoubleToFloat(A[-count]);
+                count++;
+            }
+        }
+        else{
+        }
+    }
+
+    else{
+        /* **************************************
+           -- All the blocks but the last one --
+           -- By the way this code can be optimized more.
+           **************************************        */
+        ind = blockIdx.x *  dgemv_bs + tx + m_mod_32 ;
+        A+= lda*(n-1)  ;
+        SA+= ldsa*(n-1)  ;
+
+        A += ind;
+        SA += ind;
+        A-= ty * lda  ;
+        SA-= ty * ldsa  ;
+
+        int break_d  = (n / dgemv_bs -   blockIdxx )* dgemv_bs ;
+        /*----------------------------
+          Go Left
+          -------------------------------*/
+        for(int  i=0; i<break_d; i += dgemv_bs ){
+            #pragma unroll 8
+            for(int j=0; j < dgemv_bs ; j+=4)
+                SA[-j*ldsa] = cuComplexDoubleToFloat(A[-j*lda]);
+            
+            A-=lda* dgemv_bs ;
+            SA-=ldsa* dgemv_bs ;
+        }
+    }
+}
+
+
+/*- ---------------------------------------------- UPLO = 'U' ----------------------------------*/
+/*Good Dimension*/
+__global__ void
+u_zlat2c_special (int n, cuDoubleComplex* A, int lda, cuFloatComplex  *SA , 
+                  int * INFO , double RMAX , int ldsa )
+{
+    int tx = threadIdx.x ;
+    int ty = threadIdx.y ;
+    int ind = blockIdx.x*  dgemv_bs + tx ;
+
+    /*
+      Reverse Computation ...
+      - Left
+      - Triangle
+      - Up
+    */
+    A+= lda*(n-1) ;
+    SA+= ldsa*(n-1) ;
+
+    A += ind;
+    SA += ind;
+
+    A-= ty * lda  ;
+    SA-= ty * ldsa  ;
+
+    int break_d  = (n / dgemv_bs -   blockIdx.x )* dgemv_bs ;
+
+    for(int  i=0; i<break_d; i += dgemv_bs ){
+        #pragma unroll 8
+        for(int j=0; j < dgemv_bs ; j+=4)
+            SA[-j*ldsa] = cuComplexDoubleToFloat(A[-j*lda]);
+        
+        A-=lda* dgemv_bs ;
+        SA-=ldsa* dgemv_bs ;
+    }
+}
+
+
+extern "C" void
+mzlat2c(char uplo, int m, cuDoubleComplex *A, int lda, cuFloatComplex *Y, int LDSA, int *INFO)
+{
+    /*
+      Note:
+      The UPLO = 'U' Version can be optimized more.
+    */
+    double RMAX = (double)lapackf77_slamch("O");
+    int blocks;
+    if (m % dgemv_bs==0)
+        blocks = m/ dgemv_bs;
+    else
+        blocks = m/ dgemv_bs + 1;
+
+    dim3 grid(blocks, 1, 1);
+    dim3 threads(32, 4, 1);
+
+    if( m % dgemv_bs == 0 ) {
+        if( uplo == 'L' || uplo == 'l'){
+            l_zlat2c_special <<<grid, threads>>> (m, A, lda, Y ,INFO ,  RMAX , LDSA  );
+        }
+        else{
+            u_zlat2c_special <<<grid, threads>>> (m, A, lda,  Y , INFO , RMAX , LDSA  );
+        }
+
+    }
+    else{
+        int  m_full_block = (m - m % 32 ) /32 ;
+        int  m_mod_32 = m%32 ;
+        if( uplo == 'L' || uplo == 'l'){
+            l_zlat2c_generic <<<grid, threads>>> (m, A, lda, Y , m_full_block , m_mod_32 , INFO , RMAX , LDSA );
+        }
+        else{
+            u_zlat2c_generic <<<grid, threads>>> (m, A, lda, Y , m_full_block , m_mod_32 , INFO , RMAX , LDSA );
+        }
+    }
+}
+
+
+/*
+  Interface ..................................
+  Reproduced from dlansy routines...
+  How to deliver the info.
+*/
+extern "C" void
+magmablas_zlat2c(char uplo, int n, cuDoubleComplex *A, int lda,
+                 cuFloatComplex *SA, int LDSA, int *INFO)
+{
+    /*
+      The routine converts a double-precision triangular
+      matrix A to a single-precision triangular matrix SA.
+    */
+    *INFO = 0;
+    mzlat2c( uplo, n, A, lda, SA, LDSA, INFO );
+    /*
+      int val = cublasIdamax(n,WORK,1);
+      double retVal[1];
+      cublasGetMatrix( 1, 1, sizeof( double ), WORK+val-1, 1, retVal, 1 ) ;
+      return retVal[0];
+    */
+}
+
 #endif /*  (!defined(PRECISION_z)) || (GPUSHMEM >= 200) */
