@@ -16,15 +16,12 @@
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
+#include "flops.h"
 #include "magma.h"
 #include "testings.h"
 
 #define PRECISION_z
 // Flops formula
-#define FMULS_POTRF(n)       ((n) * (1.0 / 6.0 * (n) + 0.5) * (n))
-#define FADDS_POTRF(n)       ((n) * (1.0 / 6.0 * (n) )      * (n))
-#define FMULS_POTRS(n, nrhs) ((nrhs) * (n) * ((n) + 1))
-#define FADDS_POTRS(n, nrhs) ((nrhs) * (n) * ((n) - 1))
 #if defined(PRECISION_z) || defined(PRECISION_c)
 #define FLOPS_POTRF(n)       ( 6.*FMULS_POTRF(n)       + 2.*FADDS_POTRF(n)       )
 #define FLOPS_POTRS(n, nrhs) ( 6.*FMULS_POTRS(n, nrhs) + 2.*FADDS_POTRS(n, nrhs) )
@@ -103,7 +100,7 @@ int main(int argc, char **argv)
 	lapackf77_zlarnv( &ione, ISEED, &size, h_A );
 	/* Symmetrize and increase the diagonal */
 	{
-	    magma_int_t i, j;
+	    magma_int_t i;
 	    for(i=0; i<N; i++) {
 		MAGMA_Z_SET2REAL( h_A[i*lda+i], ( MAGMA_Z_GET_X(h_A[i*lda+i]) + 1.*N ) );
 	    }

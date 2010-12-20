@@ -16,15 +16,12 @@
 #include <cuda_runtime_api.h>
 #include <cublas.h>
 
+#include "flops.h"
 #include "magma.h"
 #include "testings.h"
 
 #define PRECISION_z
 // Flops formula
-#define FMULS_GETRF(m, n   ) (0.5 * (n) * ((n) * ((m) - (1./3.) * (n) - 1. ) + (m)))
-#define FADDS_GETRF(m, n   ) (0.5 * (n) * ((n) * ((m) - (1./3.) * (n)      ) - (m)))
-#define FMULS_GETRS(m, nrhs) ((nrhs) * (m) *  (m)     )
-#define FADDS_GETRS(m, nrhs) ((nrhs) * (m) * ((m) - 1))
 #if defined(PRECISION_z) || defined(PRECISION_c)
 #define FLOPS_GETRF(m, n   ) ( 6.*FMULS_GETRF(m, n   ) + 2.*FADDS_GETRF(m, n   ) )
 #define FLOPS_GETRS(m, nrhs) ( 6.*FMULS_GETRS(m, nrhs) + 2.*FADDS_GETRS(m, nrhs) )

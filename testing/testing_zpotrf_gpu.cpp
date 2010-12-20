@@ -18,17 +18,16 @@
 #include <cublas.h>
 
 // includes, project
+#include "flops.h"
 #include "magma.h"
 #include "testings.h"
 
 #define PRECISION_z
 // Flops formula
-#define FMULS(n) ((n) * (1.0 / 6.0 * (n) + 0.5) * (n))
-#define FADDS(n) ((n) * (1.0 / 6.0 * (n) )      * (n))
 #if defined(PRECISION_z) || defined(PRECISION_c)
-#define FLOPS(n) ( 6. * FMULS(n) + 2. * FADDS(n) )
+#define FLOPS(n) ( 6. * FMULS_POTRF(n) + 2. * FADDS_POTRF(n) )
 #else
-#define FLOPS(n) (      FMULS(n) +      FADDS(n) )
+#define FLOPS(n) (      FMULS_POTRF(n) +      FADDS_POTRF(n) )
 #endif
 
 /* ////////////////////////////////////////////////////////////////////////////
