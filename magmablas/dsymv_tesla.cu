@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "cuda.h"
-#include "cublas.h"
+#include <cuda.h>
+#include <cublas.h>
 #define magmablas_dsymv_tesla magmablas_dsymv 
 
 #define dgemv_bs 64
@@ -772,9 +772,6 @@ void magmablas_dsymv6_tesla(char uplo, int m, double alpha, double *A, int lda,
       }	
     }
 }
-
-extern "C" void cublasDsymv(char uplo , int m , double alpha,  double *A , int lda ,
-                                double *X , int incx, double beta, double *Y, int incy);
 
 extern "C"
 void  magmablas_dsymv_tesla( char uplo , int m , double alpha,  double *A , int lda , 
