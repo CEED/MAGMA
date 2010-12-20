@@ -18,6 +18,7 @@
 #include <cublas.h>
 
 // includes, project
+#include "flops.h"
 #include "magma.h"
 #include "testings.h"
 
@@ -30,12 +31,10 @@
 
 // Flops formula
 #define PRECISION_z
-#define FMULS(m, n) (0.5 * (n) * ((n) * ((m) - (1./3.) * (n) - 1. ) + (m)))
-#define FADDS(m, n) (0.5 * (n) * ((n) * ((m) - (1./3.) * (n)      ) - (m)))
 #if defined(PRECISION_z) || defined(PRECISION_c)
-#define FLOPS(m, n) ( 6. * FMULS(m, n) + 2. * FADDS(m, n) )
+#define FLOPS(m, n) ( 6. * FMULS_GETRF(m, n) + 2. * FADDS_GETRF(m, n) )
 #else
-#define FLOPS(m, n) (      FMULS(m, n) +      FADDS(m, n) )
+#define FLOPS(m, n) (      FMULS_GETRF(m, n) +      FADDS_GETRF(m, n) )
 #endif
 
 double get_LU_error(magma_int_t M, magma_int_t N, 
@@ -146,7 +145,7 @@ int main( int argc, char** argv)
 	lda   = M;
 	n2    = lda*N;
 	ldda  = ((M+31)/32)*32;
-	flops = FLOPS( (double)M, (double)min_mn ) / 1000000;
+	flops = FLOPS( (double)M, (double)N ) / 1000000;
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
