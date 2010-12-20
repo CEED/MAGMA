@@ -109,7 +109,7 @@ __global__ void
 dgemvt_kernel1_fermi(magma_int_t m, magma_int_t n, double alpha, magma_int_t n1, double* A, magma_int_t lda,
               double *x, double *y)
 {
-	unsigned magma_int_t tx = threadIdx.x;
+	magma_int_t tx = threadIdx.x;
 
 	__shared__ double sdata[threadSize];
 

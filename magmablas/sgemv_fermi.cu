@@ -141,7 +141,7 @@ __global__ void
 sgemvt_kernel1_fermi(magma_int_t m, magma_int_t n, float alpha, magma_int_t n1, float* A, magma_int_t lda,
               float *x, float *y)
 {
-	unsigned magma_int_t tx = threadIdx.x;
+	magma_int_t tx = threadIdx.x;
 
 	__shared__ float sdata[threadSize];
 	
