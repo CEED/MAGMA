@@ -37,7 +37,7 @@ typedef size_t devptr_t;
 #ifdef ADD_
 
     #define MAGMA_ZGEBRD magma_zgebrd_
-    #define MAGMA_ZGEHRD magma_zgehrd_
+    #define MAGMA_ZGEHRD2 magma_zgehrd2_
     #define MAGMA_ZGELQF magma_zgelqf_
     #define MAGMA_ZGEQLF magma_zgeqlf_
     #define MAGMA_ZGEQRF magma_zgeqrf_
@@ -61,7 +61,7 @@ typedef size_t devptr_t;
 #elif defined (NOCHANGE)
 
     #define MAGMA_ZGEBRD magma_zgebrd
-    #define MAGMA_ZGEHRD magma_zgehrd
+    #define MAGMA_ZGEHRD2 magma_zgehrd2
     #define MAGMA_ZGELQF magma_zgelqf
     #define MAGMA_ZGEQLF magma_zgeqlf
     #define MAGMA_ZGEQRF magma_zgeqrf
@@ -100,9 +100,9 @@ void MAGMA_ZGEBRD( magma_int_t *m, magma_int_t *n, double2 *A, magma_int_t *lda,
     magma_zgebrd( *m, *n, A, *lda, d, e, tauq,  taup, work, *lwork, info); 
 }
 
-  void MAGMA_ZGEHRD( magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi, double2 *A, magma_int_t *lda, double2 *tau, double2 *work, magma_int_t *lwork, double2 *dT, magma_int_t *info)
+void MAGMA_ZGEHRD2( magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi, double2 *A, magma_int_t *lda, double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info)
 { 
-    magma_zgehrd( *n, *ilo, *ihi, A, *lda, tau, work, lwork, dT, info); 
+    magma_zgehrd2( *n, *ilo, *ihi, A, *lda, tau, work, lwork, info); 
 }
 
 void MAGMA_ZGELQF( magma_int_t *m, magma_int_t *n, double2 *A, magma_int_t *lda, double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info)
