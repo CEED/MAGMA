@@ -72,11 +72,6 @@ int main( int argc, char** argv)
       M = N = K = size[9];
     }
     
-    magma_int_t tt = magma_get_zgeqrf_nb(N);
-    M = ((M+tt-1)/tt)*tt;
-    N = ((N+tt-1)/tt)*tt;
-    K = N;
-    
     /* Initialize CUBLAS */
     status = cublasInit();
     if (status != CUBLAS_STATUS_SUCCESS) {
