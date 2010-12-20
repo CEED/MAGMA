@@ -660,17 +660,11 @@ magmablas_zlat2c(char uplo, int n, cuDoubleComplex *A, int lda,
                  cuFloatComplex *SA, int LDSA, int *INFO)
 {
     /*
-      The routine converts a double-precision triangular
-      matrix A to a single-precision triangular matrix SA.
+      The routine converts a COMPLEX_16 triangular
+      matrix A to COMPLEX triangular matrix SA.
     */
     *INFO = 0;
     mzlat2c( uplo, n, A, lda, SA, LDSA, INFO );
-    /*
-      int val = cublasIdamax(n,WORK,1);
-      double retVal[1];
-      cublasGetMatrix( 1, 1, sizeof( double ), WORK+val-1, 1, retVal, 1 ) ;
-      return retVal[0];
-    */
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -992,8 +986,9 @@ magmablas_zlat2c(char uplo, int n, cuDoubleComplex *A, int lda,
                  cuFloatComplex *SA, int LDSA, int *INFO)
 {
     /*
-      The routine converts a double-precision triangular
-      matrix A to a single-precision triangular matrix SA.
+      The routine converts a COMPLEX_16 triangular
+      matrix A (along with its block diagonal entries) to a COMPLEX 
+      triangular matrix SA (along with its block diagonal entries).
     */
     *INFO = 0;
     mzlat2c( uplo, n, A, lda, SA, LDSA, INFO );
