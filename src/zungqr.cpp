@@ -16,10 +16,11 @@
 
 
 extern "C" magma_int_t
-magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
-                 cuDoubleComplex *da, magma_int_t ldda,
-		 cuDoubleComplex *tau, cuDoubleComplex *dwork,
-                 magma_int_t nb, magma_int_t *info)
+magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
+	     magma_int_t nb,
+	     cuDoubleComplex *da, magma_int_t ldda,
+	     cuDoubleComplex *tau, cuDoubleComplex *dwork,
+	     magma_int_t nb, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -49,6 +50,11 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
             The number of elementary reflectors whose product defines the
             matrix Q. N >= K >= 0.
 
+    NB      (input) INTEGER
+            The block size used in the generation of the elementary
+            reflectors H(i) in DA. Thus this gives the dimensions of
+            the matrices T, stored in DWORK.
+
     DA      (input/output) COMPLEX_16 array A on the GPU device, 
             dimension (LDDA,N). On entry, the i-th column must contain 
             the vector which defines the elementary reflector H(i), for
@@ -64,12 +70,12 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
             reflector H(i), as returned by ZGEQRF_GPU.
 
     DWORK   (input) COMPLEX_16 work space array on the GPU device.
-            This must be the 6th argument of magma_zgeqrf_gpu.
+            This must be the 7th argument of magma_zgeqrf_gpu.
 
     NB      (input) INTEGER
             This is the block size used in ZGEQRF_GPU, and correspondingly
-            the size of the T matrices, used in the factorization, and 
-            stored in DWORK. 
+            the size of the T matrices, used in the factorization, and
+            stored in DWORK.
 
     INFO    (output) INTEGER
             = 0:  successful exit
@@ -82,7 +88,7 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     #define max(a,b)        (((a)>(b))?(a):(b))
 
     magma_int_t  i__1, i__2, i__3;
-    static magma_int_t i, ib, ki, kk, iinfo;
+    static magma_int_t i, ib, nb, ki, kk, iinfo;
     magma_int_t lddwork = min(m, n);
 
     *info = 0;

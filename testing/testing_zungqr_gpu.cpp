@@ -145,7 +145,8 @@ int main( int argc, char** argv)
 	 =================================================================== */
       start = get_current_time();
       magma_zgeqrf_gpu(M, N, d_A, lda, tau, d_work, info);
-      magma_zungqr_gpu(M, N, K, d_A, lda, tau, d_work, info);
+      nb = magma_get_zgeqrf_nb(M);
+      magma_zungqr_gpu(M, N, K, d_A, lda, tau, d_work, nb, info);
       end = get_current_time();
 
       // Get d_A back to the CPU to compare with the CPU result.
