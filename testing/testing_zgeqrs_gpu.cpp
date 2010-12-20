@@ -99,7 +99,7 @@ int main( int argc, char** argv)
     lddb   = ldda;
     n2     = M * N;
     min_mn = min(M, N);
-    nb     = magma_get_zgetrf_nb(M);
+    nb     = magma_get_zgeqrf_nb(M);
     lda = ldb = M;
     lworkgpu = nb*max((M-N+nb+2*(nrhs)), 1);
 
