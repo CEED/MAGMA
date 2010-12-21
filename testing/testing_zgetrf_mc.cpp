@@ -14,27 +14,23 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <cublas.h>
 
 #include <quark.h>
 
 /* includes, project */
-#include "cuda.h"
-#include "cuda_runtime_api.h"
-#include "cublas.h"
+#include "flops.h"
 #include "magma.h"
-
-#ifndef min
-#define min(a,b)  (((a)<(b))?(a):(b))
-#endif
+#include "testings.h"
 
 /* Flops formula */
 #define PRECISION_z
-#define FMULS(m, n) (0.5 * (n) * ((n) * ((m) - (1./3.) * (n)) - (n)))
-#define FADDS(m, n) (0.5 * (n) * ((n) * ((m) - (1./3.) * (n))      ))
 #if defined(PRECISION_z) || defined(PRECISION_c)
-#define FLOPS(m, n) ( 6. * FMULS(m, n) + 2. * FADDS(m, n) )
+#define FLOPS(m, n) ( 6. * FMULS_GETRF(m, n) + 2. * FADDS_GETRF(m, n) )
 #else
-#define FLOPS(m, n) (      FMULS(m, n) +      FADDS(m, n) )
+#define FLOPS(m, n) (      FMULS_GETRF(m, n) +      FADDS_GETRF(m, n) )
 #endif
 
 /* Block size */

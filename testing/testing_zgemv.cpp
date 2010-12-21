@@ -16,16 +16,18 @@
 #include <cuda_runtime_api.h>
 #include <cublas.h>
 #include <cblas.h>
+
+#include "flops.h"
 #include "magma.h"
-#include "magmablas.h"
+#include "testings.h"
 
 #define assert( check, ... ) { if( !(check) ) { fprintf(stderr, __VA_ARGS__ ); exit(-1); } }
 
 #define PRECISION_z
 #if defined(PRECISION_z) || defined(PRECISION_c)
-#define FLOPS(m, n) ( 8. * (m) * (n) )
+#define FLOPS(m, n) ( 6. * FMULS_GEMV(m, n) + 2. * FADDS_GEMV(m, n))
 #else
-#define FLOPS(m, n) ( 2. * (m) * (n) )
+#define FLOPS(m, n) (      FMULS_GEMV(m, n) +      FADDS_GEMV(m, n))
 #endif
 
 int main(int argc, char **argv)

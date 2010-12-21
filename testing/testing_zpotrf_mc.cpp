@@ -22,7 +22,7 @@
 // includes, project
 #include "flops.h"
 #include "magma.h"
-#include "magmablas.h"
+#include "testings.h"
 
 // block size
 int EN_BEE;

@@ -15,6 +15,7 @@
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
+
 #include "flops.h"
 #include "magma.h"
 #include "testings.h"

@@ -19,7 +19,9 @@
 #include <cublas.h>
 
 // includes, project
+#include "flops.h"
 #include "magma.h"
+#include "testings.h"
 
 // Flops formula
 #define PRECISION_z

@@ -19,7 +19,7 @@
 
 // includes, project
 #include "magma.h"
-#include "magmablas.h"
+#include "testings.h"
 
 #define PRECISION_z
 

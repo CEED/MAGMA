@@ -19,24 +19,12 @@
 #include <cublas.h>
 
 // includes, project
+#include "flops.h"
 #include "magma.h"
 #include "testings.h"
 
-#ifndef min
-#define min(a,b)  (((a)<(b))?(a):(b))
-#endif
-#ifndef max
-#define max(a,b)  (((a)<(b))?(b):(a))
-#endif
-
 // Flops formula
 #define PRECISION_z
-#define FMULS_GEQRF(M, N) (((M) > (N)) ? ((N) * ((N) * (  0.5-(1./3.) * (N) + (M)) + (M))) \
-                                       : ((M) * ((M) * ( -0.5-(1./3.) * (M) + (N)) + 2.*(N))))
-#define FADDS_GEQRF(M, N) (((M) > (N)) ? ((N) * ((N) * (  0.5-(1./3.) * (N) + (M)))) \
-                                       : ((M) * ((M) * ( -0.5-(1./3.) * (M) + (N)) + (N))))
-#define FMULS_GEQRS(M, N, NRHS) ((NRHS) * (N) * ( 2.* (M) - 0.5 * (N) ))
-#define FADDS_GEQRS(M, N, NRHS) ((NRHS) * (N) * ( 2.* (M) - 0.5 * (N) ))
 #if defined(PRECISION_z) || defined(PRECISION_c)
 #define FLOPS_GEQRF(m, n      ) ( 6.*FMULS_GEQRF(m, n      ) + 2.*FADDS_GEQRF(m, n      ) )
 #define FLOPS_GEQRS(m, n, nrhs) ( 6.*FMULS_GEQRS(m, n, nrhs) + 2.*FADDS_GEQRS(m, n, nrhs) )

@@ -21,18 +21,12 @@
 #include <quark.h>
 
 /* Includes, project */
+#include "flops.h"
 #include "magma.h"
-
-#ifndef min
-#define min(a,b)  (((a)<(b))?(a):(b))
-#endif
+#include "testings.h"
 
 // Flops formula
 #define PRECISION_z
-#define FMULS_GEQRF(M, N) (((M) > (N)) ? ((N) * ((N) * (  0.5-(1./3.) * (N) + (M)) + (M))) \
-		                                       : ((M) * ((M) * ( -0.5-(1./3.) * (M) + (N)) + 2.*(N))))
-#define FADDS_GEQRF(M, N) (((M) > (N)) ? ((N) * ((N) * (  0.5-(1./3.) * (N) + (M)))) \
-		                                       : ((M) * ((M) * ( -0.5-(1./3.) * (M) + (N)) + (N))))
 #if defined(PRECISION_z) || defined(PRECISION_c)
 #define FLOPS(m, n) ( 6.*FMULS_GEQRF(m, n) + 2.*FADDS_GEQRF(m, n) )
 #else

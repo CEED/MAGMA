@@ -19,7 +19,9 @@
 #include <cublas.h>
 
 // includes, project
+#include "flops.h"
 #include "magma.h"
+#include "testings.h"
 
 // Flops formula
 #define PRECISION_z
@@ -29,8 +31,6 @@
 #else
 #define FLOPS(m,n) (     4.*m*n*n-4.*m*n*n/3.)
 #endif
-
-
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgebrd

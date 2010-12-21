@@ -7,8 +7,6 @@
 
        @precisions mixed zc -> ds
 */
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,6 +14,7 @@
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
+
 #include "flops.h"
 #include "magma.h"
 #include "testings.h"
@@ -98,7 +97,8 @@ int main(int argc, char **argv)
 	/* Initialize the matrix */
 	size = lda * N ;
 	lapackf77_zlarnv( &ione, ISEED, &size, h_A );
-	/* Symmetrize and increase the diagonal */
+	/* Increase the diagonal (We don't set the matrix as 
+	   hermitian since we use only a triangular part) */
 	{
 	    magma_int_t i;
 	    for(i=0; i<N; i++) {

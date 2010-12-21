@@ -22,13 +22,6 @@
 #include "magma.h"
 #include "testings.h"
 
-#ifndef min
-#define min(a,b)  (((a)<(b))?(a):(b))
-#endif
-#ifndef max
-#define max(a,b)  (((a)<(b))?(b):(a))
-#endif
-
 // Flops formula
 #define PRECISION_z
 #if defined(PRECISION_z) || defined(PRECISION_c)

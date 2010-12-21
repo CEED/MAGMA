@@ -16,15 +16,17 @@
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
+
+#include "flops.h"
 #include "magma.h"
 #include "testings.h"
 
 // Flops formula
 #define PRECISION_z
 #if defined(PRECISION_z) || defined(PRECISION_c)
-#define FLOPS(m, n, k) ( 8. * ((m) * (k) * (n)) )
+#define FLOPS(m, n, k) ( 6. * FMULS_GEMM(m, n, k) + 2. * FADDS_GEMM(m, n, k))
 #else
-#define FLOPS(m, n, k) ( 2. * ((m) * (k) * (n)) )
+#define FLOPS(m, n, k) (      FMULS_GEMM(m, n, k) +      FADDS_GEMM(m, n, k))
 #endif
 
 int main( int argc, char** argv)

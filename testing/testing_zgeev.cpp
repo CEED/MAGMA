@@ -19,12 +19,9 @@
 #include <cublas.h>
 
 // includes, project
+#include "flops.h"
 #include "magma.h"
-
-#ifndef min
-#define min(a,b)  (((a)<(b))?(a):(b))
-#endif
-
+#include "testings.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeev

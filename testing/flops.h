@@ -29,8 +29,17 @@
 #define _FLOPS_H_
 
 /*
- * Level 3 BLAS 
+ * Level 2 BLAS 
  */  
+#define FMULS_GEMV(m, n) ((m) * (n) + 2. * (m))
+#define FADDS_GEMV(m, n) ((m) * (n)           )
+
+#define FMULS_SYMV(n) ((n) * (n) + 2. * (n))
+#define FADDS_SYMV(n) ((n) * (n)           )
+
+/*
+ * Level 3 BLAS 
+ */
 #define FMULS_GEMM(m, n, k) ((m) * (n) * (k))
 #define FADDS_GEMM(m, n, k) ((m) * (n) * (k))
 

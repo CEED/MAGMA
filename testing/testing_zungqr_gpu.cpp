@@ -19,9 +19,9 @@
 #include <cublas.h>
 
 // includes, project
+#include "flops.h"
 #include "magma.h"
-
-#define min(a,b)  (((a)<(b))?(a):(b))
+#include "testings.h"
 
 // Flops formula
 #define PRECISION_z
