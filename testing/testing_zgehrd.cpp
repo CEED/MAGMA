@@ -117,13 +117,13 @@ int main( int argc, char** argv)
 
         for(j=0; j<n2; j++)
             hwork_Q[j] = h_R[j];
-
+ 
         for(j=0; j<N-1; j++)
             for(int i=j+2; i<N; i++)
                 h_R[i+j*N] = MAGMA_Z_ZERO;
 
 	//lapackf77_zunghr(&N, &ione, &N, hwork_Q, &N, tau, h_work, &lwork, &info);
-	magma_zunghr(&N, &ione, &N, hwork_Q, &N, tau, dT, nb, &info);
+	magma_zunghr(N, ione, N, hwork_Q, N, tau, dT, nb, &info);
 
 #if defined(PRECISION_z) || defined(PRECISION_c) 
         double *rwork   = (double*)malloc( N * sizeof(double));

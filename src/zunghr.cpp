@@ -15,8 +15,8 @@
 #include "magma.h"
 
 extern "C" magma_int_t
-magma_zunghr(magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi, 
-	     cuDoubleComplex *a, magma_int_t *lda, 
+magma_zunghr(magma_int_t n, magma_int_t ilo, magma_int_t ihi, 
+	     cuDoubleComplex *a, magma_int_t lda, 
 	     cuDoubleComplex *tau,
 	     cuDoubleComplex *dT, magma_int_t nb,
 	     magma_int_t *info)
@@ -74,94 +74,68 @@ magma_zunghr(magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi,
             < 0:  if INFO = -i, the i-th argument had an illegal value   
     ===================================================================== */
 
+    #define a_ref(i,j)( a + (j)*lda+ (i))
     #define min(a,b)  (((a)<(b))?(a):(b))
     #define max(a,b)  (((a)>(b))?(a):(b))
 
-    static magma_int_t c__1 = 1;
-    static magma_int_t c_n1 = -1;
-    
-    magma_int_t a_dim1, a_offset, i__1, i__2, i__3, i__4;
-
-    magma_int_t i__, j, nh, iinfo;
-    magma_int_t lwkopt;
-
-    a_dim1 = *lda;
-    a_offset = 1 + a_dim1;
-    a -= a_offset;
-    --tau;
+    magma_int_t i, j, nh, iinfo;
 
     *info = 0;
-    nh = *ihi - *ilo;
-    if (*n < 0) {
-	*info = -1;
-    } else if (*ilo < 1 || *ilo > max(1,*n)) {
-	*info = -2;
-    } else if (*ihi < min(*ilo,*n) || *ihi > *n) {
-	*info = -3;
-    } else if (*lda < max(1,*n)) {
+    nh = ihi - ilo;
+    if (n < 0)
+      *info = -1;
+    else if (ilo < 1 || ilo > max(1,n)) 
+      *info = -2;
+    else if (ihi < min(ilo,n) || ihi > n) 
+      *info = -3;
+    else if (lda < max(1,n)) 
 	*info = -5;
-    }
 
     if (*info != 0) {
-	i__1 = -(*info);
-	magma_xerbla("magma_zunghr", &i__1);
+	i = -(*info);
+	magma_xerbla("magma_zunghr", &i);
 	return MAGMA_ERR_ILLEGAL_VALUE;
     }
 
     /* Quick return if possible */
-    if (*n == 0) 
+    if (n == 0) 
       return MAGMA_SUCCESS;
 
     /* Shift the vectors which define the elementary reflectors one   
        column to the right, and set the first ilo and the last n-ihi   
        rows and columns to those of the unit matrix */
-    i__1 = *ilo + 1;
-    for (j = *ihi; j >= i__1; --j) {
-	i__2 = j - 1;
-	for (i__ = 1; i__ <= i__2; ++i__) {
-	    i__3 = i__ + j * a_dim1;
-	    a[i__3] = MAGMA_Z_ZERO;
-	}
-	i__2 = *ihi;
-	for (i__ = j + 1; i__ <= i__2; ++i__) {
-	    i__3 = i__ + j * a_dim1;
-	    i__4 = i__ + (j - 1) * a_dim1;
-	    a[i__3] = a[i__4];
-	}
-	i__2 = *n;
-	for (i__ = *ihi + 1; i__ <= i__2; ++i__) {
-	    i__3 = i__ + j * a_dim1;
-	    a[i__3] = MAGMA_Z_ZERO;
-	}
+    for (j = ihi-1; j >= ilo; --j) {
+      for (i = 0; i < j-1; ++i) 
+	*a_ref(i, j) = MAGMA_Z_ZERO;
+	
+      for (i = j; i < ihi; ++i)
+	*a_ref(i, j) = *a_ref(i, j - 1);
+	
+      for (i = ihi; i < n; ++i)
+	*a_ref(i, j) = MAGMA_Z_ZERO;
     }
-    i__1 = *ilo;
-    for (j = 1; j <= i__1; ++j) {
-	i__2 = *n;
-	for (i__ = 1; i__ <= i__2; ++i__) {
-	    i__3 = i__ + j * a_dim1;
-	    a[i__3] = MAGMA_Z_ZERO;
-	}
-	i__2 = j + j * a_dim1;
-	a[i__2] = MAGMA_Z_ONE;
+    for (j = 0; j < ilo; ++j) {
+      for (i = 1; i <= n; ++i)
+	*a_ref(i, j) = MAGMA_Z_ZERO;
+	
+      *a_ref(j, j) = MAGMA_Z_ONE;
     }
-    i__1 = *n;
-    for (j = *ihi + 1; j <= i__1; ++j) {
-	i__2 = *n;
-	for (i__ = 1; i__ <= i__2; ++i__) {
-	    i__3 = i__ + j * a_dim1;
-	    a[i__3] = MAGMA_Z_ZERO; 
-	}
-	i__2 = j + j * a_dim1;
-	a[i__2] = MAGMA_Z_ONE;
+    for (j = ihi; j < n; ++j) {
+      for (i = 0; i < n; ++i)
+	*a_ref(i, j) = MAGMA_Z_ZERO; 
+	
+      *a_ref(j, j) = MAGMA_Z_ONE;
     }
 
-    if (nh > 0) 
-      {
-	/* Generate Q(ilo+1:ihi,ilo+1:ihi) */
-	magma_zungqr(nh, nh, nh,
-		     &a[*ilo + 1 + (*ilo + 1) * a_dim1], *lda,
-		     &tau[*ilo], dT, nb, &iinfo);
-    }
+    if (nh > 0)
+      /* Generate Q(ilo+1:ihi,ilo+1:ihi) */
+      magma_zungqr(nh, nh, nh,
+		   a_ref(ilo, ilo), lda,
+		   tau+ilo-1, dT, nb, &iinfo);
 
     return MAGMA_SUCCESS;
 } /* magma_zunghr */
+
+#undef a
+#undef min
+#undef max
