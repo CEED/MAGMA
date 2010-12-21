@@ -111,14 +111,6 @@ int main( int argc, char** argv)
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
 
-        magma_zgeev("V", "V", 
-	//magma_zgeev("N", "N",
-		    &N, h_R, &N, w1, VL, &N, VR, &N, 
-		    h_work, &lwork, rwork, &info);
-
-        for(j=0; j<n2; j++)
-            h_R[j] = h_A[j];
-
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
