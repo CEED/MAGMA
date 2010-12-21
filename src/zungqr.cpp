@@ -117,7 +117,10 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
 	return MAGMA_ERR_CUBLASALLOC;
       }
 
-    /* TTT - it may be faster to set everything to 0 */
+    /* Allocate CPU work space */
+    magma_int_t lwork = n * nb;
+    cuDoubleComplex *work = (cuDoubleComplex *)malloc(lwork*sizeof(cuDoubleComplex));
+
     if ( (nb > 1) && (nb < k) )
       {
 	/*  Use blocked code after the last block.
@@ -130,10 +133,6 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
       }
     else
       kk = 0;
-
-    /* Allocate CPU work space */
-    magma_int_t lwork = n * nb;
-    cuDoubleComplex *work = (cuDoubleComplex *)malloc(lwork*sizeof(cuDoubleComplex));
 
     /* Use unblocked code for the last or only block. */
     if (kk < n)
