@@ -38,14 +38,11 @@
 */
 int main( int argc, char** argv)
 {
-    cuInit( 0 );
-    cublasInit( );
-    printout_devices( );
-
-    cuDoubleComplex *h_A, *h_R, *h_work, *tau;
-    double gpu_perf, cpu_perf, eps;
+    TESTING_CUDA_INIT();
 
     TimeStruct start, end;
+    cuDoubleComplex *h_A, *h_R, *h_work, *tau, *dT;
+    double gpu_perf, cpu_perf, eps;
 
     /* Matrix size */
     int N=0, n2, lda;
@@ -69,39 +66,19 @@ int main( int argc, char** argv)
         printf("  testing_zgehrd2 -N %d\n\n", 1024);
     }
 
-    /* Initialize CUBLAS */
-    status = cublasInit();
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! CUBLAS initialization error\n");
-    }
-
     eps = lapackf77_dlamch( "E" );
 
     lda = N;
     n2 = size[9] * size[9];
 
-    /* Allocate host memory for the matrix */
-    h_A = (cuDoubleComplex*)malloc(n2 * sizeof(h_A[0]));
-    if (h_A == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (A)\n");
-    }
-
-    tau = (cuDoubleComplex*)malloc(size[9] * sizeof(cuDoubleComplex));
-    if (tau == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (tau)\n");
-    }
-
-    cudaMallocHost( (void**)&h_R,  n2*sizeof(cuDoubleComplex) );
-    if (h_R == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (R)\n");
-    }
-
     int nb = magma_get_zgehrd_nb(size[9]);
     int lwork = size[9]*nb;
-    cudaMallocHost( (void**)&h_work, lwork*sizeof(cuDoubleComplex) );
-    if (h_work == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (work)\n");
-    }
+    
+    TESTING_MALLOC   ( h_A   , cuDoubleComplex, n2        );
+    TESTING_MALLOC   ( tau   , cuDoubleComplex, size[9]   );
+    TESTING_HOSTALLOC( h_R   , cuDoubleComplex, n2        );
+    TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork     );
+    TESTING_DEVALLOC ( dT    , cuDoubleComplex, nb*size[9]);
 
     printf("\n\n");
     printf("  N    CPU GFlop/s    GPU GFlop/s   |A-QHQ'|/N|A|  |I-QQ'|/N \n");
@@ -118,7 +95,8 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-        magma_zgehrd2( N, ione, N, h_R, N, tau, h_work, &lwork, &info);
+        // magma_zgehrd2( N, ione, N, h_R, N, tau, h_work, &lwork, &info);
+	magma_zgehrd ( N, ione, N, h_R, N, tau, h_work, &lwork, dT, &info);
         end = get_current_time();
 
         gpu_perf = FLOPS(N)/(1000000.*GetTimerValue(start,end));
@@ -127,11 +105,14 @@ int main( int argc, char** argv)
         /* =====================================================================
            Check the factorization
            =================================================================== */
-
         double result[2] = {0., 0.};
+
 #ifdef CHECK_ERROR
-        cuDoubleComplex *hwork_Q = (cuDoubleComplex*)malloc( N * N * sizeof(cuDoubleComplex));
-        cuDoubleComplex *twork   = (cuDoubleComplex*)malloc( 2* N * N * sizeof(cuDoubleComplex));
+        cuDoubleComplex *hwork_Q, *twork;
+
+	TESTING_HOSTALLOC( hwork_Q, cuDoubleComplex, N*N );
+        twork   = (cuDoubleComplex*)malloc( 2* N * N * sizeof(cuDoubleComplex));
+	
         int ltwork = 2*N*N;
 
         for(j=0; j<n2; j++)
@@ -141,8 +122,8 @@ int main( int argc, char** argv)
             for(int i=j+2; i<N; i++)
                 h_R[i+j*N] = MAGMA_Z_ZERO;
 
-	magma_zunghr(&N, &ione, &N, hwork_Q, &N, tau, h_work, &lwork, &info);
-        //lapackf77_zunghr(&N, &ione, &N, hwork_Q, &N, tau, h_work, &lwork, &info);
+	//lapackf77_zunghr(&N, &ione, &N, hwork_Q, &N, tau, h_work, &lwork, &info);
+	magma_zunghr(&N, &ione, &N, hwork_Q, &N, tau, dT, nb, &info);
 
 #if defined(PRECISION_z) || defined(PRECISION_c) 
         double *rwork   = (double*)malloc( N * sizeof(double));
@@ -154,7 +135,7 @@ int main( int argc, char** argv)
                          twork, &ltwork, result);
 #endif
 
-        free(hwork_Q);
+	TESTING_HOSTFREE( hwork_Q );
         free(twork);
         /* =====================================================================
            Performs operation using LAPACK
@@ -181,14 +162,13 @@ int main( int argc, char** argv)
     }
 
     /* Memory clean up */
-    free(h_A);
-    free(tau);
-    cublasFree(h_work);
-    cublasFree(h_R);
+    TESTING_FREE    ( h_A  );
+    TESTING_FREE    ( tau  );
+    TESTING_HOSTFREE(h_work);
+    TESTING_HOSTFREE( h_R  );
+    TESTING_DEVFREE ( dT   );
 
     /* Shutdown */
-    status = cublasShutdown();
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! shutdown error (A)\n");
-    }
+    TESTING_CUDA_FINALIZE();
+    return EXIT_SUCCESS;
 }

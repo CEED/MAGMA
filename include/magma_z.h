@@ -100,7 +100,7 @@ magma_int_t magma_zunmqr( char side, char trans,
 magma_int_t magma_zunghr( magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi,
 			  cuDoubleComplex *a, magma_int_t *lda,
 			  cuDoubleComplex *tau,
-			  cuDoubleComplex *work, magma_int_t *lwork,
+			  cuDoubleComplex *dT, magma_int_t nb,
 			  magma_int_t *info);
 magma_int_t  magma_zgeev( char *jobvl, char *jobvr, magma_int_t *n,
 			  cuDoubleComplex *a, magma_int_t *lda,

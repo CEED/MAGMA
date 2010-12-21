@@ -68,8 +68,10 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
             TAU(i) must contain the scalar factor of the elementary
             reflector H(i), as returned by ZGEQRF_GPU.
 
-    DT      (input) COMPLEX_16 work space array on the GPU device.
-            This must be the 7th argument of magma_zgeqrf_gpu.
+    DT      (input) COMPLEX_16 array on the GPU device.
+            DT contains the T matrices used in blocking the elementary
+            reflectors H(i), e.g., this can be the 6th argument of 
+            magma_zgeqrf_gpu.
 
     NB      (input) INTEGER
             This is the block size used in ZGEQRF_GPU, and correspondingly
@@ -91,7 +93,7 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
     magma_int_t lwork, ldda;
     static magma_int_t i, ib, ki, kk, iinfo;
     magma_int_t lddwork = min(m, n);
-    cuDoubleComplex *da, *work;
+    cuDoubleComplex *da, *work, *dwork;
     static cudaStream_t stream;
 
     *info = 0;
@@ -112,12 +114,14 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
 
     /* Allocate GPU work space */
     ldda = ((m+31)/32)*32;
+    lddwork = ((lddwork+31)/32)*32;
     if (CUBLAS_STATUS_SUCCESS != 
-	cublasAlloc((n)*ldda, sizeof(cuDoubleComplex), (void**)&da)) 
+	cublasAlloc((n)*ldda + nb*lddwork, sizeof(cuDoubleComplex), (void**)&da)) 
       {
 	*info = -11;
 	return MAGMA_ERR_CUBLASALLOC;
       }
+    dwork = da + (n)*ldda;
 
     /* Allocate CPU work space */
     lwork = n * nb;
@@ -178,8 +182,8 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
 		i__3 = n - i - ib;
 		magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise,
 				  i__2, i__3, ib,
-				  da_ref(i, i   ), ldda, t_ref(i),             nb,
-				  da_ref(i, i+ib), ldda, dT + 2*lddwork*nb, lddwork);
+				  da_ref(i, i   ), ldda, t_ref(i),      nb,
+				  da_ref(i, i+ib), ldda,    dwork, lddwork);
 	      }
 
 	    /* Apply H to rows i:m of current block on the CPU */
