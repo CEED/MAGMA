@@ -17,6 +17,7 @@
 #include <pthread.h>
 
 typedef struct {
+  int flag;
   int nthreads;
   int nb;
   int ob;
@@ -29,6 +30,7 @@ typedef struct {
   cuDoubleComplex *t;
   pthread_t *thread;
   cuDoubleComplex **p;
+  cuDoubleComplex *w;
 } MAGMA_GLOBALS;
 
 extern MAGMA_GLOBALS MG;
@@ -210,15 +212,15 @@ magma_zgeqrf2(magma_int_t m, magma_int_t n,
                H = H(i) H(i+1) . . . H(i+ib-1) */
             lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr, 
                               &rows, &ib, a_ref(i,i), &lda, tau+i, MG.t+cnt*nb*nb, &ib);
-            zpanel_to_q(MagmaUpper, ib, a_ref(i,i), lda, work+ib*ib);
-            cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
-                            a_ref(i,i), lda, da_ref(i,i), ldda);
-            zq_to_panel(MagmaUpper, ib, a_ref(i,i), lda, work+ib*ib);
-	    
 	        if (cnt < MG.np_gpu) {
 	          MG.p[cnt]=a;
 	        }
-
+			zpanel_to_q(MagmaUpper, ib, a_ref(i,i), lda, MG.w+cnt*MG.nb*MG.nb);
+            cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
+                            a_ref(i,i), lda, da_ref(i,i), ldda);
+			if (MG.flag == 1)
+			  zq_to_panel(MagmaUpper, ib, a_ref(i,i), lda, MG.w+cnt*MG.nb*MG.nb);
+	    
             if (i + ib < n) { 
 		        cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), MG.t+cnt*nb*nb, ib, dwork, lddwork);
 

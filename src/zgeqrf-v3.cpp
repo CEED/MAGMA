@@ -20,6 +20,7 @@
 #include <pthread.h>
 
 typedef struct {
+  int flag;
   int nthreads;
   int nb;
   int ob;
@@ -32,6 +33,7 @@ typedef struct {
   cuDoubleComplex *t;
   pthread_t *thread;
   cuDoubleComplex **p;
+  cuDoubleComplex *w;
 } MAGMA_GLOBALS;
 
 
@@ -115,7 +117,7 @@ magma_zgeqrf3(magma_int_t m, magma_int_t n,
 
   cuDoubleComplex c_one = MAGMA_Z_ONE;
 
-  int k;
+  int k, ib;
 
   *info = 0;
 
@@ -158,7 +160,15 @@ magma_zgeqrf3(magma_int_t m, magma_int_t n,
     pthread_join(MG.thread[k], NULL);
   }
 
+  for (k = 0; k < MG.np_gpu-1; k++){
+    ib = min(MG.nb,(n-MG.nthreads*MG.ob)-MG.nb*k);
+    zq_to_panel(MagmaUpper, ib, a+k*MG.nb*lda+k*MG.nb, lda, MG.w+MG.nb*MG.nb*k);
+  }
+
+
   MG.nb = MG.fb;
+
+  MG.flag = 1;
 
   /* Use MAGMA code to perform final factorization if necessary */
   if (MG.m >= (MG.n - (MG.nthreads*MG.ob))) {

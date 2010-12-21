@@ -36,6 +36,7 @@
 #include <pthread.h>
 
 typedef struct {
+  int flag;
   int nthreads;
   int nb;
   int ob;
@@ -48,6 +49,7 @@ typedef struct {
   cuDoubleComplex *t;
   pthread_t *thread;
   volatile cuDoubleComplex **p;
+  cuDoubleComplex *w;
 } MAGMA_GLOBALS;
 
 
@@ -147,6 +149,10 @@ void magma_init (int m, int n, cuDoubleComplex *a, int nthreads)
   for (i = 0; i < MG.nthreads; i++){
     pthread_create(&MG.thread[i], NULL, cpu_thread, (void *)(long int)i);
   }
+
+  MG.w = (cuDoubleComplex *)malloc(sizeof(cuDoubleComplex)*MG.np_gpu*MG.nb*MG.nb);
+
+  MG.flag = 0;
 }
 
 
