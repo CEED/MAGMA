@@ -166,4 +166,5 @@ int main( int argc, char** argv)
 
     /* Shutdown */
     TESTING_CUDA_FINALIZE();
+    return EXIT_SUCCESS;
 }

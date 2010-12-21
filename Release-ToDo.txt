@@ -142,6 +142,7 @@ Task  Done      Who       What
 		 zgels    -  -   /  ok  (Works only for QR)
 		 zlarfb   -  -   /  ok
 		 zunmqr   -  -   /  ok
+                 zungqr   -  ok  /  ok 
 
 		 /* Lapack interface on CPU */
 		 zgeqrf   -  ok  / (zgeqrf2, only for code factorization)
@@ -173,7 +174,6 @@ Task  Done      Who       What
                  zlahru      - Should be called _gpu or change the interface because of the mix between cpu and gpu buffer
                  zlatrd      - Stil in F2C, a lot to do
                  ztsqrt_gpu  - No CPU interface / still fortran interface
-                 zungqr_gpu  - Need to add lwork to follow lapack interface / No CPU interface
                  zunmqr      - F2C code
                  zunmtr      - F2C code with fortran interface
 

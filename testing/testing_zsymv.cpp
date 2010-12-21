@@ -33,7 +33,7 @@ int main(int argc, char **argv)
     TESTING_CUDA_INIT();
 
     TimeStruct  start, end;
-    double      flops, magma_perf, cuda_perf, error, work[1];
+    double      flops, magma_perf, error, work[1];
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
