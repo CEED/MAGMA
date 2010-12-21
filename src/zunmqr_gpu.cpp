@@ -144,8 +144,10 @@ magma_zunmqr_gpu(char side, char trans,
     notran = lapackf77_lsame(trans_, "N");
     lquery = (lwork == -1);
 
-    /* NQ is the order of Q and NW is the minimum dimension of WORK */
+    if (!left || notran)
+      printf("zunmqr_gpu called with arguments not yet supported\n");
 
+    /* NQ is the order of Q and NW is the minimum dimension of WORK */
     if (left) {
 	nq = m;
 	nw = n;
