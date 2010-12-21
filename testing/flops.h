@@ -36,6 +36,8 @@
 
 #define FMULS_SYMV(n) ((n) * (n) + 2. * (n))
 #define FADDS_SYMV(n) ((n) * (n)           )
+#define FMULS_HEMV FMULS_SYMV
+#define FADDS_HEMV FADDS_SYMV
 
 /*
  * Level 3 BLAS 
@@ -45,15 +47,23 @@
 
 #define FMULS_SYMM_L(m, n) ((m) * (m) * (n))
 #define FADDS_SYMM_L(m, n) ((m) * (m) * (n))
+#define FMULS_HEMM_L FMULS_SYMM_L
+#define FADDS_HEMM_L FADDS_SYMM_L
 
 #define FMULS_SYMM_R(m, n) ((m) * (n) * (n))
 #define FADDS_SYMM_R(m, n) ((m) * (n) * (n))
+#define FMULS_HEMM_R FMULS_SYMM_R
+#define FADDS_HEMM_R FADDS_SYMM_R
 
 #define FMULS_SYRK(k, n) (0.5 * (k) * (n) * ((n)+1))
 #define FADDS_SYRK(k, n) (0.5 * (k) * (n) * ((n)+1))
+#define FMULS_HERK FMULS_SYRK
+#define FADDS_HERK FADDS_SYRK
 
 #define FMULS_SYR2K(k, n) ((k) * (n) * (n)      )
 #define FADDS_SYR2K(k, n) ((k) * (n) * (n) + (n))
+#define FMULS_HER2K FMULS_SYR2K
+#define FADDS_HER2K FADDS_SYR2K
 
 #define FMULS_TRMM_L(m, n) (0.5 * (n) * (m) * ((m)+1))
 #define FADDS_TRMM_L(m, n) (0.5 * (n) * (m) * ((m)-1))
@@ -136,9 +146,20 @@
 //UNMQR, UNMLQ, UNMQL, UNMRQ (Left)
 //UNMQR, UNMLQ, UNMQL, UNMRQ (Right)
 
-//TRTRI
-//GEHRD
-//SYTRD
-//GEBRD
+#define FMULS_TRTRI(n) ((n) * ((n) * ( 1./6. * (n) + 0.5 ) + 1./3.))
+#define FADDS_TRTRI(n) ((n) * ((n) * ( 1./6. * (n) - 0.5 ) + 1./3.))
+
+#define FMULS_GEHRD(n) ( (n) * ((n) * (5./3. *(n) + 0.5) - 7./6.) - 13. )
+#define FADDS_GEHRD(n) ( (n) * ((n) * (5./3. *(n) - 1. ) - 2./3.) -  8. )
+
+#define FMULS_SYTRD(n) ( (n) *  ( (n) * ( 2./3. * (n) + 2.5 ) - 1./6. ) - 15.)
+#define FADDS_SYTRD(n) ( (n) *  ( (n) * ( 2./3. * (n) + 1.  ) - 8./3. ) -  4.)
+#define FMULS_HETRD FMULS_SYTRD
+#define FADDS_HETRD FADDS_SYTRD
+
+#define FMULS_GEBRD(m, n) ( ((m) >= (n)) ? ((n) * ((n) * (2. * (m) - 2./3. * (n) + 2. )       + 20./3.)) \
+                            :              ((m) * ((m) * (2. * (n) - 2./3. * (m) + 2. )       + 20./3.)) )
+#define FADDS_GEBRD(m, n) ( ((m) >= (n)) ? ((n) * ((n) * (2. * (m) - 2./3. * (n) + 1. ) - (m) +  5./3.)) \
+                            :              ((m) * ((m) * (2. * (n) - 2./3. * (m) + 1. ) - (n) +  5./3.)) )
 
 #endif /* _FLOPS_H_ */
