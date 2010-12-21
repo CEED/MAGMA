@@ -17,8 +17,7 @@
 
 extern "C" magma_int_t
 magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
-	     magma_int_t nb,
-	     cuDoubleComplex *da, magma_int_t ldda,
+	     cuDoubleComplex *a, magma_int_t lda,
 	     cuDoubleComplex *tau, cuDoubleComplex *dwork,
 	     magma_int_t nb, magma_int_t *info)
 {
@@ -36,7 +35,7 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
 
           Q  =  H(1) H(2) . . . H(k)
 
-    as returned by ZGEQRF_GPU.
+    as returned by ZGEQRF.
 
     Arguments
     =========
@@ -55,15 +54,15 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
             reflectors H(i) in DA. Thus this gives the dimensions of
             the matrices T, stored in DWORK.
 
-    DA      (input/output) COMPLEX_16 array A on the GPU device, 
-            dimension (LDDA,N). On entry, the i-th column must contain 
-            the vector which defines the elementary reflector H(i), for
-            i = 1,2,...,k, as returned by ZGEQRF_GPU in the first k 
-            columns of its array argument A.
+    A       (input/output) COMPLEX_16 array A, dimension (LDDA,N). 
+            On entry, the i-th column must contain the vector
+            which defines the elementary reflector H(i), for
+            i = 1,2,...,k, as returned by ZGEQRF_GPU in the 
+            first k columns of its array argument A.
             On exit, the M-by-N matrix Q.
 
-    LDDA    (input) INTEGER
-            The first dimension of the array A. LDDA >= max(1,M).
+    LDA     (input) INTEGER
+            The first dimension of the array A. LDA >= max(1,M).
 
     TAU     (input) COMPLEX_16 array, dimension (K)
             TAU(i) must contain the scalar factor of the elementary
@@ -82,13 +81,14 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
             < 0:  if INFO = -i, the i-th argument has an illegal value
     =====================================================================    */
 
-    #define da_ref(a_1,a_2) (da+(a_2)*(ldda) + (a_1))
+    #define  a_ref(i,j)     ( a + (j)*lda  + (i))
+    #define da_ref(i,j)     (da + (j)*ldda + (i))
     #define t_ref(a_1)      (dwork+(a_1)*nb)
     #define min(a,b)        (((a)<(b))?(a):(b))
     #define max(a,b)        (((a)>(b))?(a):(b))
 
     magma_int_t  i__1, i__2, i__3;
-    static magma_int_t i, ib, nb, ki, kk, iinfo;
+    static magma_int_t i, ib, ki, kk, iinfo;
     magma_int_t lddwork = min(m, n);
 
     *info = 0;
@@ -98,16 +98,26 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
 	*info = -2;
     } else if ((k < 0) || (k > n)) {
 	*info = -3;
-    } else if (ldda < max(1,m)) {
+    } else if (lda < max(1,m)) {
 	*info = -5;
     }
     if ( (*info != 0) || (n <= 0))
       return 0;
 
-    static cudaStream_t stream[2];
-    cudaStreamCreate(&stream[0]);
-    cudaStreamCreate(&stream[1]);
+    static cudaStream_t stream;
+    cudaStreamCreate(&stream);
 
+    /* Allocate GPU work space */
+    cuDoubleComplex *da;
+    magma_int_t ldda = ((m+31)/32)*32;
+    if (CUBLAS_STATUS_SUCCESS != 
+	cublasAlloc((n)*ldda, sizeof(cuDoubleComplex), (void**)&da)) 
+      {
+	*info = -11;
+	return MAGMA_ERR_CUBLASALLOC;
+      }
+
+    /* TTT - it may be faster to set everything to 0 */
     if ( (nb > 1) && (nb < k) )
       {
 	/*  Use blocked code after the last block.
@@ -121,13 +131,9 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
     else
       kk = 0;
 
-    /* Allocate work space on CPU in pinned memory */
-    magma_int_t lwork = (n+m) * nb;
-    if (kk < n)
-      lwork = max(lwork, n * nb + (m-kk)*(n-kk));
-    cuDoubleComplex *work, *panel;
-    cudaMallocHost( (void**)&work, (lwork)*sizeof(cuDoubleComplex) );
-    panel = work + n * nb;
+    /* Allocate CPU work space */
+    magma_int_t lwork = n * nb;
+    cuDoubleComplex *work = (cuDoubleComplex *)malloc(lwork*sizeof(cuDoubleComplex));
 
     /* Use unblocked code for the last or only block. */
     if (kk < n)
@@ -135,13 +141,13 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
 	i__1 = m - kk;
 	i__2 = n - kk;
 	i__3 = k - kk;
-	cublasGetMatrix(i__1, i__2, sizeof(cuDoubleComplex),
-			da_ref(kk, kk), ldda, panel, i__1);
-	lapackf77_zungqr(&i__1, &i__2, &i__3, panel, &i__1, &tau[kk], 
-			 work, &lwork, &iinfo);
+	lapackf77_zungqr(&i__1, &i__2, &i__3, 
+			 a_ref(kk, kk), &lda,
+			 &tau[kk], work, &lwork, &iinfo);
 
 	cublasSetMatrix(i__1, i__2, sizeof(cuDoubleComplex),
-			panel, i__1, da_ref(kk, kk), ldda);
+ 			 a_ref(kk, kk), lda, 
+			da_ref(kk, kk), ldda);
       }
 
     if (kk > 0)
@@ -151,13 +157,13 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
 	  {
 	    ib = min(nb, k - i);
 
-	    /* Send current panel to the CPU for update */
+	    /* Send the current panel to the GPU */
 	    i__2 = m - i;
-	    cudaMemcpy2DAsync(panel,       i__2 * sizeof(cuDoubleComplex),
-			      da_ref(i,i), ldda * sizeof(cuDoubleComplex),
-			      sizeof(cuDoubleComplex)*i__2, ib,
-			      cudaMemcpyDeviceToHost,stream[0]);
-
+	    zpanel_to_q(MagmaUpper, ib, a_ref(i,i), lda, work);
+	    cublasSetMatrix( i__2, ib, sizeof(cuDoubleComplex),
+			      a_ref(i, i), lda,
+			     da_ref(i, i), ldda);
+			     
 	    if (i + ib < n)
 	      {
 		/* Apply H to A(i:m,i+ib:n) from the left */
@@ -169,29 +175,33 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
 	      }
 
 	    /* Apply H to rows i:m of current block on the CPU */
-	    cudaStreamSynchronize(stream[0]);
-	    lapackf77_zungqr(&i__2, &ib, &ib, panel, &i__2, &tau[i], 
-			     work, &lwork, &iinfo);
+	    lapackf77_zungqr(&i__2, &ib, &ib, 
+			     a_ref(i, i), &lda, 
+			     &tau[i], work, &lwork, &iinfo);
 	    cudaMemcpy2DAsync(da_ref(i,i), ldda * sizeof(cuDoubleComplex),
-			      panel,       i__2 * sizeof(cuDoubleComplex),
+			       a_ref(i,i), lda * sizeof(cuDoubleComplex),
 			      sizeof(cuDoubleComplex)*i__2, ib,
-                              cudaMemcpyHostToDevice,stream[1]);
+                              cudaMemcpyHostToDevice, stream);
 
 	    /* Set rows 1:i-1 of current block to zero */
             i__2 = i + ib;
 	    magmablas_zlaset(i, i__2 - i, da_ref(0,i), ldda);
 	  }
       }
-    cudaFreeHost(work);
-    cudaStreamDestroy(stream[0]);
-    cudaStreamDestroy(stream[1]);
+
+    cublasGetMatrix(m, n, sizeof(cuDoubleComplex),
+		    da_ref(0, 0), ldda, a_ref(0, 0), lda);
+
+    
+    cudaStreamDestroy(stream);
+    cublasFree(da);
+    free(work);
 
     return 0;
-
-    /* End of MAGMA_ZUNGQR_GPU */
-} /* magma_zungqr_gpu */
+} /* magma_zungqr */
 
 #undef da_ref
+#undef a_ref
 #undef t_ref
 #undef min
 #undef max

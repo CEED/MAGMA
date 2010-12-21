@@ -143,8 +143,9 @@ int main( int argc, char** argv)
       /* ====================================================================
          Performs operation using MAGMA
 	 =================================================================== */
-      start = get_current_time();
       magma_zgeqrf_gpu(M, N, d_A, lda, tau, d_work, info);
+
+      start = get_current_time();
       nb = magma_get_zgeqrf_nb(M);
       magma_zungqr_gpu(M, N, K, d_A, lda, tau, d_work, nb, info);
       end = get_current_time();
@@ -152,25 +153,24 @@ int main( int argc, char** argv)
       // Get d_A back to the CPU to compare with the CPU result.
       cublasGetMatrix(M, N, sizeof(cuDoubleComplex), d_A, lda, h_R, M);
 
-      gpu_perf=(4.*M*N*min_mn/3. + 4.*M*min_mn*K/3.)/(1000000.*
-						      GetTimerValue(start,end));
+      gpu_perf=(4.*M*min_mn*K/3.)/(1000000. * GetTimerValue(start,end));
       cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
       double work[1];
       double matnorm = lapackf77_zlange("f", &M, &N, h_A, &M, work);
+
       /* =====================================================================
          Performs operation using LAPACK 
 	 =================================================================== */
-      start = get_current_time();
       lapackf77_zgeqrf(&M, &N, h_A, &M, tau, h_work, &lwork, info);
-
       if (info[0] < 0)  
 	printf("Argument %d of sgeqrf had an illegal value.\n", -info[0]);
 
-      lapackf77_zungqr(&M, &N, &K, h_A, &M, tau, h_work, &lwork, info);
+      start = get_current_time();
+      //lapackf77_zungqr(&M, &N, &K, h_A, &M, tau, h_work, &lwork, info);
+      magma_zungqr(M, N, K, h_A, M, tau, d_work, nb, info);
       end = get_current_time();
-      cpu_perf = (4.*M*N*min_mn/3.+4.*M*min_mn*K/3.)/(1000000.*
-						      GetTimerValue(start,end));
-      
+
+      cpu_perf = (4.*M*min_mn*K/3.)/(1000000.* GetTimerValue(start,end));      
       blasf77_zaxpy(&n2, &mone, h_A, &ione, h_R, &ione);
       
       printf("%5d %5d   %6.1f       %6.1f         %7.2e \n",

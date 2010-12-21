@@ -181,8 +181,6 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     cudaStreamDestroy(stream[1]);
 
     return 0;
-
-    /* End of MAGMA_ZUNGQR_GPU */
 } /* magma_zungqr_gpu */
 
 #undef da_ref
