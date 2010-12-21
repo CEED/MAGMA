@@ -123,6 +123,7 @@ int main( int argc, char** argv)
                 h_R[i+j*N] = MAGMA_Z_ZERO;
 
 	//lapackf77_zunghr(&N, &ione, &N, hwork_Q, &N, tau, h_work, &lwork, &info);
+	nb = magma_get_zgehrd_nb(N);
 	magma_zunghr(N, ione, N, hwork_Q, N, tau, dT, nb, &info);
 
 #if defined(PRECISION_z) || defined(PRECISION_c) 
