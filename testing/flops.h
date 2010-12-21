@@ -112,8 +112,23 @@
 #define FMULS_GELQF(m, n) FMULS_GERQF(m, n)
 #define FADDS_GELQF(m, n) FADDS_GERQF(m, n)
 
-//UNGQR UNGQL
-//UNGRQ UNGLQ
+#define FMULS_UNGQR(m, n, k) ((k) * (2.* (m) * (n) +  2. * (n) - 5./3. + (k) * ( 2./3. * (k) - ((m) + (n)) - 1.)))
+#define FADDS_UNGQR(m, n, k) ((k) * (2.* (m) * (n) + (n) - (m) + 1./3. + (k) * ( 2./3. * (k) - ((m) + (n))     )))
+#define FMULS_UNGQL FMULS_UNGQR
+#define FMULS_ORGQR FMULS_UNGQR
+#define FMULS_ORGQL FMULS_UNGQR
+#define FADDS_UNGQL FADDS_UNGQR
+#define FADDS_ORGQR FADDS_UNGQR
+#define FADDS_ORGQL FADDS_UNGQR
+
+#define FMULS_UNGRQ(m, n, k) ((k) * (2.* (m) * (n) + (m) + (n) - 2./3. + (k) * ( 2./3. * (k) - ((m) + (n)) - 1.)))
+#define FADDS_UNGRQ(m, n, k) ((k) * (2.* (m) * (n) + (m) - (n) + 1./3. + (k) * ( 2./3. * (k) - ((m) + (n))     )))
+#define FMULS_UNGLQ FMULS_UNGRQ
+#define FMULS_ORGRQ FMULS_UNGRQ
+#define FMULS_ORGLQ FMULS_UNGRQ
+#define FADDS_UNGLQ FADDS_UNGRQ
+#define FADDS_ORGRQ FADDS_UNGRQ
+#define FADDS_ORGLQ FADDS_UNGRQ
 
 #define FMULS_GEQRS(m, n, nrhs) ((nrhs) * ((n) * ( 2.* (m) - 0.5 * (n) + 2.5)))
 #define FADDS_GEQRS(m, n, nrhs) ((nrhs) * ((n) * ( 2.* (m) - 0.5 * (n) + 0.5)))
