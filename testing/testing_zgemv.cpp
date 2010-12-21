@@ -21,8 +21,6 @@
 #include "magma.h"
 #include "testings.h"
 
-#define assert( check, ... ) { if( !(check) ) { fprintf(stderr, __VA_ARGS__ ); exit(-1); } }
-
 #define PRECISION_z
 #if defined(PRECISION_z) || defined(PRECISION_c)
 #define FLOPS(m, n) ( 6. * FMULS_GEMV(m, n) + 2. * FADDS_GEMV(m, n))
@@ -32,172 +30,202 @@
 
 int main(int argc, char **argv)
 {	
-    CUdevice  dev;
-    CUcontext context;
-    FILE *fp ; 
-    TimeStruct start, end;
-    int N, m, n;
-    int matsize;
-    int vecsize;
-    int ione     = 1;
-    int ISEED[4] = {0,0,0,1};
-    int st       = 64;
-    int incx     = 1;
+    TESTING_CUDA_INIT();
+
+    TimeStruct  start, end;
+    double      flops, magma_perf, cuda_perf, error, work[1];
+    magma_int_t ione     = 1;
+    magma_int_t ISEED[4] = {0,0,0,1};
     cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
-    double  work[1];
-    double  res;
-    char trans = MagmaNoTrans;
+
+    FILE        *fp ; 
+    magma_int_t i, lda, Xm, Ym;
+    magma_int_t M, M0 = 0;
+    magma_int_t N, N0 = 0;
+    magma_int_t szeA, szeX, szeY;
+    magma_int_t istart = 64;
+    magma_int_t iend   = 10240;
+    magma_int_t incx = 1;
+    magma_int_t incy = 1;
+    char        trans = MagmaNoTrans;
+    cuDoubleComplex alpha = MAGMA_Z_MAKE(  1.5, -2.3 );
+    cuDoubleComplex beta  = MAGMA_Z_MAKE( -0.6,  0.8 );
+    cuDoubleComplex *A, *X, *Y, *Ycublas, *Ymagma;
+    cuDoubleComplex *dA, *dX, *dY;
+        
+    if (argc != 1){
+        for(i=1; i<argc; i++){
+            if ( strcmp("-n", argv[i]) == 0 ){
+                N0 = atoi(argv[++i]);
+            }
+            else if ( strcmp("-m", argv[i]) == 0 ){
+                M0 = atoi(argv[++i]);
+            }
+            else if (strcmp("-N", argv[i])==0){
+                trans = MagmaNoTrans;
+            }
+            else if (strcmp("-T", argv[i])==0){
+                trans = MagmaTrans;
+            }
+#if defined(PRECISION_z) || defined(PRECISION_c)
+            else if (strcmp("-C", argv[i])==0){
+                trans = MagmaConjTrans;
+            }
+#endif
+        }
+    }
+
+    if ( (M0 != 0) && (N0 != 0) )
+        iend = istart + 1;
+
+    M = N = iend;
+    if ( M0 != 0 ) M = M0;
+    if ( N0 != 0 ) N = N0;
+
+    if( trans == MagmaNoTrans ) {
+	Xm = N;
+	Ym = M;
+    }  else {
+	Xm = M;
+	Ym = N;
+    }
+
+    lda = M;
     
+    szeA = lda*N;
+    szeX = incx*Xm;
+    szeY = incy*Ym;
+      
+    TESTING_MALLOC( A, cuDoubleComplex, szeA );
+    TESTING_MALLOC( X, cuDoubleComplex, szeX );
+    TESTING_MALLOC( Y, cuDoubleComplex, szeY );
+    TESTING_MALLOC( Ycublas, cuDoubleComplex, szeY );
+    TESTING_MALLOC( Ymagma,  cuDoubleComplex, szeY );
+
+    TESTING_DEVALLOC( dA, cuDoubleComplex, szeA );
+    TESTING_DEVALLOC( dX, cuDoubleComplex, szeX );
+    TESTING_DEVALLOC( dY, cuDoubleComplex, szeY );
+
+    /* Initialize the matrix */
+    lapackf77_zlarnv( &ione, ISEED, &szeA, A );
+    lapackf77_zlarnv( &ione, ISEED, &szeX, X );
+    lapackf77_zlarnv( &ione, ISEED, &szeY, Y );
+
     fp = fopen ("results_zgemv.txt", "w") ;
     if( fp == NULL ){ printf("Couldn't open output file\n"); exit(1);}
 
-    printf("GEMV cuDoubleComplex Precision\n\n"
-           "Usage\n\t\t testing_zgemv N|T|C N\n\n");
-    fprintf(fp, "GEMV cuDoubleComplex Precision\n\n"
-            "Usage\n\t\t testing_zgemv N|T|C N\n\n");
-    
-    assert( CUDA_SUCCESS == cuInit( 0 ),
-            "CUDA: Not initialized\n" );
-    assert( CUDA_SUCCESS == cuDeviceGet( &dev, 0 ),
-            "CUDA: Cannot get the device\n");
-    assert( CUDA_SUCCESS == cuCtxCreate( &context, 0, dev ),
-            "CUDA: Cannot create the context\n");
-    assert( CUDA_SUCCESS == cublasInit( ),
-            "CUBLAS: Not initialized\n" );
-	
-    printout_devices( );
-	
-    N = 8*1024+64;
-    if( argc > 1 ) {
-      trans = argv[1][0];
-    }
-    if( argc > 2 ) {
-      st = N = atoi( argv[2] );
-    }
-    matsize = N*N;
-    vecsize = N*incx;
+    printf("\nUsage: \n");
+    printf("  testing_zgemv [-N|T|C] [-m %d] [-n %d]\n\n", 1024, 1024);
 
-    cuDoubleComplex *A = (cuDoubleComplex*)malloc( matsize*sizeof( cuDoubleComplex ) );
-    cuDoubleComplex *X = (cuDoubleComplex*)malloc( vecsize*sizeof( cuDoubleComplex ) );
-    cuDoubleComplex *Y = (cuDoubleComplex*)malloc( vecsize*sizeof( cuDoubleComplex ) );
-    
-    assert( ((A != NULL) && (X != NULL) && (Y != NULL)), "memory allocation error (A, X or Y)" );
-    
-    lapackf77_zlarnv( &ione, ISEED, &matsize, A );
-    lapackf77_zlarnv( &ione, ISEED, &vecsize, X );
-    lapackf77_zlarnv( &ione, ISEED, &vecsize, Y );
-	
-    cuDoubleComplex *Ycublas = (cuDoubleComplex*)malloc(vecsize*sizeof( cuDoubleComplex ) );
-    cuDoubleComplex *Ymagma  = (cuDoubleComplex*)malloc(vecsize*sizeof( cuDoubleComplex ) );
-	
-    assert( ((Ycublas != NULL) && (Ymagma != NULL)), "memory allocation error (Y cublas or magma)" );
-    
-    cuDoubleComplex *dA, *dX, *dY;
-    
-    assert( CUBLAS_STATUS_SUCCESS == cublasAlloc( matsize, sizeof(cuDoubleComplex), (void**)&dA ),
-            "CUBLAS: Problem of allocation of dA\n" );
-    assert( CUBLAS_STATUS_SUCCESS == cublasAlloc( vecsize, sizeof(cuDoubleComplex), (void**)&dX ),
-            "CUBLAS: Problem of allocation of dX\n" );
-    assert( CUBLAS_STATUS_SUCCESS == cublasAlloc( vecsize, sizeof(cuDoubleComplex), (void**)&dY ),
-            "CUBLAS: Problem of allocation of dY\n" );
-
-    printf( "   n   CUBLAS,Gflop/s   MAGMABLAS0.2,Gflop/s   \"error\"\n" 
+    printf( "   m    n   CUBLAS,Gflop/s   MAGMABLAS0.2,Gflop/s   \"error\"\n" 
             "==============================================================\n");
-    fprintf(fp, "   n   CUBLAS,Gflop/s   MAGMABLAS0.2,Gflop/s   \"error\"\n" 
+    fprintf(fp, "   m    n   CUBLAS,Gflop/s   MAGMABLAS0.2,Gflop/s   \"error\"\n" 
             "==============================================================\n");
     
-    for( m = st; m < N+1; m = (int)((m+1)*1.1) )
+    for( i=istart; i < iend; i = (int)((i+1)*1.1) )
     {
-        int lda = m;
-        cuDoubleComplex alpha = MAGMA_Z_MAKE(  1.5, -2.3 );
-        cuDoubleComplex beta  = MAGMA_Z_MAKE( -0.6,  0.8 );
-        double time, gflops;
-        double flops = FLOPS( (double)m, (double)m ) / 1e6;
+	M = N = i;
+	if ( M0 != 0 ) M = M0;
+	if ( N0 != 0 ) N = N0;
 
-        printf(      "%5d ", m );
-        fprintf( fp, "%5d ", m );
+        if( trans == MagmaNoTrans ) {
+            Xm = N;
+            Ym = M;
+        }  else {
+            Xm = M;
+            Ym = N;
+        }
+        
+        lda = M;
+	flops = FLOPS( (double)M, (double)N ) / 1000000;
+
+        printf(      "%5d %5d ", M, N );
+        fprintf( fp, "%5d %5d ", M, N );
 
         /* =====================================================================
            Performs operation using CUDA-BLAS
            =================================================================== */
-        cublasSetMatrix( m, m, sizeof( cuDoubleComplex ), A, N,    dA, lda  );
-        cublasSetVector( m,    sizeof( cuDoubleComplex ), X, incx, dX, incx );
-        cublasSetVector( m,    sizeof( cuDoubleComplex ), Y, incx, dY, incx );
+        cublasSetMatrix( M,  N, sizeof( cuDoubleComplex ), A, lda,  dA, lda  );
+        cublasSetVector( Xm,    sizeof( cuDoubleComplex ), X, incx, dX, incx );
+        cublasSetVector( Ym,    sizeof( cuDoubleComplex ), Y, incy, dY, incy );
 
         /*
          * Cublas Version
          */
-        cublasZgemv( trans, m, m, alpha, dA, lda, dX, incx, beta, dY, incx );
-        cublasSetVector( m, sizeof( cuDoubleComplex ), Y, incx, dY, incx );
-        
         start = get_current_time();
-        cublasZgemv( trans, m, m, alpha, dA, lda, dX, incx, beta, dY, incx );
+        cublasZgemv( trans, M, N, alpha, dA, lda, dX, incx, beta, dY, incy );
         end = get_current_time();
-        time = GetTimerValue(start,end); 
         
-        cublasGetVector( m, sizeof( cuDoubleComplex ), dY, incx, Ycublas, incx );
+        cublasGetVector( Ym, sizeof( cuDoubleComplex ), dY, incy, Ycublas, incy );
         
-        gflops = flops / time;
-        printf(     "%11.2f", gflops );
-        fprintf(fp, "%11.2f", gflops );
+	cuda_perf = flops / GetTimerValue(start, end);
+        printf(     "%11.2f", cuda_perf );
+        fprintf(fp, "%11.2f", cuda_perf );
 
         /*
          * Magma Version
          */
-        cublasSetVector( m, sizeof( cuDoubleComplex ), Y, incx, dY, incx );
-        magmablas_zgemv( trans, m, m, alpha, dA, lda, dX, incx, beta, dY, incx );
-        cublasSetVector( m, sizeof( cuDoubleComplex ), Y, incx, dY, incx );
+        cublasSetVector( Ym, sizeof( cuDoubleComplex ), Y, incy, dY, incy );
         
         start = get_current_time();
-        magmablas_zgemv( trans, m, m, alpha, dA, lda, dX, incx, beta, dY, incx );
+        magmablas_zgemv( trans, M, N, alpha, dA, lda, dX, incx, beta, dY, incy );
         end = get_current_time();
-        time = GetTimerValue(start,end) ; 
         
-        cublasGetVector( m, sizeof( cuDoubleComplex ), dY, incx, Ymagma, incx );
+        cublasGetVector( Ym, sizeof( cuDoubleComplex ), dY, incx, Ymagma, incx );
         
-        gflops = flops / time;
-        printf(     "%11.2f", gflops );
-        fprintf(fp, "%11.2f", gflops );
+	magma_perf = flops / GetTimerValue(start, end);
+        printf(     "%11.2f", magma_perf );
+        fprintf(fp, "%11.2f", magma_perf );
 
         /* =====================================================================
            Computing the Difference Cublas VS Magma
            =================================================================== */
         
-        blasf77_zaxpy( &m, &mzone, Ymagma, &incx, Ycublas, &incx);
-        res = lapackf77_zlange( "M", &m, &ione, Ycublas, &m, work );
+        blasf77_zaxpy( &Ym, &mzone, Ymagma, &incy, Ycublas, &incy);
+        error = lapackf77_zlange( "M", &Ym, &ione, Ycublas, &Ym, work );
 
 #if 0
-        printf(      "\t\t %8.6e", res / m );
-        fprintf( fp, "\t\t %8.6e", res / m );
+        printf(      "\t\t %8.6e", error / Ym );
+        fprintf( fp, "\t\t %8.6e", error / Ym );
 
         /*
          * CBlas comparaison
          */
-        cblas_zcopy( m, Y, incx, Ycublas, incx );
-        cblas_zgemv( trans, m, m, CBLAS_SADDR(alpha), A, N, X, incx, CBLAS_SADDR(beta), Ycublas, incx );
-
-        blasf77_zaxpy( &m, &mzone, Ymagma, &incx, Ycublas, &incx);
-        res = lapackf77_zlange( "M", &m, &ione, Ycublas, &m, work );
+        {
+            CBLAS_TRANSPOSE blastrans = CblasNoTrans;
+            if ( trans == MagmaConjTrans )
+                blastrans = CblasConjTrans;
+            else if ( trans == MagmaTrans )
+                blastrans = CblasTrans;
+            
+            cblas_zcopy( Ym, Y, incy, Ycublas, incy );
+            cblas_zgemv( CblasColMajor, blastrans, M, N, 
+                         CBLAS_SADDR(alpha), A, lda, 
+                                             X, incx, 
+                         CBLAS_SADDR(beta), Ycublas, incy );
+            
+            blasf77_zaxpy( &Ym, &mzone, Ymagma, &incy, Ycublas, &incy);
+            error = lapackf77_zlange( "M", &Ym, &ione, Ycublas, &Ym, work );
+        }
 #endif
 
-        printf(      "\t\t %8.6e\n", res / m );
-        fprintf( fp, "\t\t %8.6e\n", res / m );
+        printf(      "\t\t %8.6e\n", error / Ym );
+        fprintf( fp, "\t\t %8.6e\n", error / Ym );
 
     }
     
-    free( A );
-    free( X );
-    free( Y );
-    free( Ycublas );
-    free( Ymagma );
-    
-    cudaFree( dA );
-    cudaFree( dX );
-    cudaFree( dY );
-     
-    fclose( fp ) ; 
-    cuCtxDetach( context );
-    cublasShutdown();
-    
+    /* Free Memory */
+    TESTING_FREE( A );
+    TESTING_FREE( X );
+    TESTING_FREE( Y );
+    TESTING_FREE( Ycublas );
+    TESTING_FREE( Ymagma );
+
+    TESTING_DEVFREE( dA );
+    TESTING_DEVFREE( dX );
+    TESTING_DEVFREE( dY );
+
+    /* Free device */
+    TESTING_CUDA_FINALIZE();
     return 0;
 }	
