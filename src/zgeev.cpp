@@ -173,9 +173,8 @@ magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
 	      cuDoubleComplex *, magma_int_t *, magma_int_t *,
 	      magma_int_t *, cuDoubleComplex *, double *, magma_int_t *);
     magma_int_t lquery, wantvr;
-    extern int zunghr_(magma_int_t *, magma_int_t *, magma_int_t *, 
-		       cuDoubleComplex *, magma_int_t *, cuDoubleComplex *,
-		       cuDoubleComplex *, magma_int_t *, magma_int_t *);
+
+    TimeStruct start, end;
 
     a_dim1 = *lda;
     a_offset = 1 + a_dim1;
@@ -306,12 +305,28 @@ magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
     iwrk = itau + *n;
     i__1 = *lwork - iwrk + 1;
     /*
-    lapackf77_zgehrd(n, &ilo, &ihi, &a[a_offset], lda,
-		     &work[itau], &work[iwrk], &i__1, &ierr);
+     // vesion 1 - LAPACK
+     lapackf77_zgehrd(n, &ilo, &ihi, &a[a_offset], lda,
+                      &work[itau], &work[iwrk], &i__1, &ierr);
     */
-    magma_zgehrd2(*n, ilo, ihi, &a[a_offset], *lda,
-		  &work[itau], &work[iwrk], &i__1, &ierr);
-    
+    /*
+      // version 2 - LAPACK consistent HRD
+      magma_zgehrd2(*n, ilo, ihi, &a[a_offset], *lda,
+                    &work[itau], &work[iwrk], &i__1, &ierr);
+    */
+    // version 3 - LAPACK consistent MAGMA HRD + matrices T stored, if eigenvectors are needed
+    magma_int_t nb = magma_get_zgehrd_nb(*n);
+    cuDoubleComplex *dT;
+    if( CUBLAS_STATUS_SUCCESS != cublasAlloc( nb*(*n), sizeof(cuDoubleComplex), (void**)&dT) ) { 
+      fprintf (stderr, "!!!! cublasAlloc failed in zgeev for dT\n");	
+      exit(-1);								
+    }
+    start = get_current_time();
+    magma_zgehrd(*n, ilo, ihi, &a[a_offset], *lda,
+		 &work[itau], &work[iwrk], &i__1, dT, &ierr);
+    end = get_current_time();
+    printf("    Time for zgehrd = %5.2f sec\n", GetTimerValue(start,end)/1000.);
+
     if (wantvl) {
       /*        Want left eigenvectors   
 		Copy Householder vectors to VL */
@@ -322,8 +337,17 @@ magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
            (CWorkspace: need 2*N-1, prefer N+(N-1)*NB)   
            (RWorkspace: none) */
 	i__1 = *lwork - iwrk + 1;
-	zunghr_(n, &ilo, &ihi, &vl[vl_offset], ldvl, &work[itau], &work[iwrk],
-		 &i__1, &ierr);
+	/*
+	  // version 1 & 2 - LAPACK
+	  lapackf77_zunghr(n, &ilo, &ihi, &vl[vl_offset], ldvl, &work[itau], &work[iwrk],
+	                   &i__1, &ierr);
+	*/
+	// version 3 - LAPACK consistent MAGMA HRD + matrices T stored
+	start = get_current_time();
+	magma_zunghr(*n, ilo, ihi, &vl[vl_offset], *ldvl, &work[itau], 
+		     dT, nb, &ierr);
+	end = get_current_time();
+	printf("    Time for zunghr = %5.2f sec\n", GetTimerValue(start,end)/1000.);
 
 	/* Perform QR iteration, accumulating Schur vectors in VL   
            (CWorkspace: need 1, prefer HSWORK (see comments) )   
@@ -349,8 +373,17 @@ magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
            (CWorkspace: need 2*N-1, prefer N+(N-1)*NB)   
            (RWorkspace: none) */
 	i__1 = *lwork - iwrk + 1;
-	zunghr_(n, &ilo, &ihi, &vr[vr_offset], ldvr, &work[itau], &work[iwrk],
-		 &i__1, &ierr);
+	/*
+          // version 1 & 2 - LAPACK
+	  lapackf77_zunghr(n, &ilo, &ihi, &vr[vr_offset], ldvr, &work[itau], &work[iwrk],
+	                   &i__1, &ierr);
+	*/
+	// version 3 - LAPACK consistent MAGMA HRD + matrices T stored
+	start = get_current_time();
+        magma_zunghr(*n, ilo, ihi, &vr[vr_offset], *ldvr, &work[itau],
+                     dT, nb, &ierr);
+	end = get_current_time();
+	printf("    Time for zunghr = %5.2f sec\n", GetTimerValue(start,end)/1000.);
 
 	/* Perform QR iteration, accumulating Schur vectors in VR   
            (CWorkspace: need 1, prefer HSWORK (see comments) )   
@@ -470,6 +503,7 @@ L50:
 	}
     }
 
+    cublasFree( dT );
     MAGMA_Z_SET2REAL(work[1], (double) maxwrk);
     return 0;
 } /* magma_zgeev */
