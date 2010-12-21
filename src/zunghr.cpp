@@ -136,6 +136,6 @@ magma_zunghr(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     return MAGMA_SUCCESS;
 } /* magma_zunghr */
 
-#undef a
+#undef a_ref
 #undef min
 #undef max
