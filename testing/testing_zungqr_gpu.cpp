@@ -33,7 +33,7 @@
 
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing sorgqr_gpu
+   -- Testing zungqr_gpu
 */
 int main( int argc, char** argv) 
 {
@@ -66,18 +66,18 @@ int main( int argc, char** argv)
 	  K = atoi(argv[++i]);
       }
       if (N>0 && M>0 && M >= N && K >0 && K <= N)
-	printf("  testing_sorgqr_gpu -M %d -N %d -K %d\n\n", M, N, K);
+	printf("  testing_zungqr_gpu -M %d -N %d -K %d\n\n", M, N, K);
       else
         {
           printf("\nUsage: \n");
-          printf("  testing_sorgqr_gpu  -M %d  -N %d  -K %d\n\n", M, N, K);
+          printf("  testing_zungqr_gpu  -M %d  -N %d  -K %d\n\n", M, N, K);
 	  printf("  M, N, and K have to to be K <= N <= M, exit.\n");
           exit(1);
         }
     }
     else {
       printf("\nUsage: \n");
-      printf("  testing_sorgqr_gpu -M %d  -N %d  -K %d\n\n", 1024, 1024, 1024);
+      printf("  testing_zungqr_gpu -M %d  -N %d  -K %d\n\n", 1024, 1024, 1024);
       M = N = K = size[9];
     }
     
