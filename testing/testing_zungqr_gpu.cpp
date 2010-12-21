@@ -23,6 +23,15 @@
 
 #define min(a,b)  (((a)<(b))?(a):(b))
 
+// Flops formula
+#define PRECISION_z
+#if defined(PRECISION_z) || defined(PRECISION_c)
+#define FLOPS(m, n, k) ( 4.* 4.* m * min(m, n) * k /3. )
+#else
+#define FLOPS(m, n, k) (     4.* m * min(m, n) * k /3. )
+#endif
+
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing sorgqr_gpu
 */
@@ -32,7 +41,7 @@ int main( int argc, char** argv)
     cublasInit( );
     printout_devices( );
 
-    cuDoubleComplex *h_A, *h_R, *h_work, *tau;
+    cuDoubleComplex *h_R, *h_A, *h_work, *tau;
     cuDoubleComplex *d_A, *d_work;
     double gpu_perf, cpu_perf;
 
@@ -85,9 +94,9 @@ int main( int argc, char** argv)
     magma_int_t min_mn = min(M, N);
 
     /* Allocate host memory for the matrix */
-    h_A = (cuDoubleComplex*)malloc(n2 * sizeof(h_A[0]));
-    if (h_A == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (A)\n");
+    h_R = (cuDoubleComplex*)malloc(n2 * sizeof(h_R[0]));
+    if (h_R == 0) {
+        fprintf (stderr, "!!!! host memory allocation error (h_R)\n");
     }
 
     tau = (cuDoubleComplex*)malloc(min_mn * sizeof(cuDoubleComplex));
@@ -95,9 +104,9 @@ int main( int argc, char** argv)
       fprintf (stderr, "!!!! host memory allocation error (tau)\n");
     }
   
-    cudaMallocHost( (void**)&h_R,  n2*sizeof(cuDoubleComplex) );
-    if (h_R == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (R)\n");
+    cudaMallocHost( (void**)&h_A,  n2*sizeof(cuDoubleComplex) );
+    if (h_A == 0) {
+        fprintf (stderr, "!!!! host memory allocation error (h_A)\n");
     }
 
     magma_int_t nb = magma_get_zgeqrf_nb(M);
@@ -153,7 +162,7 @@ int main( int argc, char** argv)
       // Get d_A back to the CPU to compare with the CPU result.
       cublasGetMatrix(M, N, sizeof(cuDoubleComplex), d_A, lda, h_R, M);
 
-      gpu_perf=(4.*M*min_mn*K/3.)/(1000000. * GetTimerValue(start,end));
+      gpu_perf= FLOPS(M, N, K)/(1000000. * GetTimerValue(start,end));
       cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
       double work[1];
       double matnorm = lapackf77_zlange("f", &M, &N, h_A, &M, work);
@@ -170,7 +179,7 @@ int main( int argc, char** argv)
       magma_zungqr(M, N, K, h_A, M, tau, d_work, nb, info);
       end = get_current_time();
 
-      cpu_perf = (4.*M*min_mn*K/3.)/(1000000.* GetTimerValue(start,end));      
+      cpu_perf = FLOPS(M, N, K)/(1000000.* GetTimerValue(start,end));      
       blasf77_zaxpy(&n2, &mone, h_A, &ione, h_R, &ione);
       
       printf("%5d %5d   %6.1f       %6.1f         %7.2e \n",
@@ -182,11 +191,11 @@ int main( int argc, char** argv)
     }
 
     /* Memory clean up */
-    free(h_A);
+    free(h_R);
     free(tau);
-    cublasFree(h_work);
+    cudaFreeHost(h_work);
     cublasFree(d_work);
-    cublasFree(h_R);
+    cudaFreeHost(h_A);
     cublasFree(d_A);
 
     /* Shutdown */
