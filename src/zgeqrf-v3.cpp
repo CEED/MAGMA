@@ -160,18 +160,20 @@ magma_zgeqrf3(magma_int_t m, magma_int_t n,
     pthread_join(MG.thread[k], NULL);
   }
 
+  /* Unzero upper part of each panel */
   for (k = 0; k < MG.np_gpu-1; k++){
     ib = min(MG.nb,(n-MG.nthreads*MG.ob)-MG.nb*k);
     zq_to_panel(MagmaUpper, ib, a+k*MG.nb*lda+k*MG.nb, lda, MG.w+MG.nb*MG.nb*k);
   }
 
-
+  /* Use final blocking size */
   MG.nb = MG.fb;
 
+  /* Flag MAGMA code to internally unzero upper part of each panel */
   MG.flag = 1;
 
   /* Use MAGMA code to perform final factorization if necessary */
-  if (MG.m >= (MG.n - (MG.nthreads*MG.ob))) {
+  if (MG.m > (MG.n - (MG.nthreads*MG.ob))) {
     magma_zgeqrf2(M, N, a+(n-MG.nthreads*MG.ob)*m+(n-MG.nthreads*MG.ob), lda, 
                   &tau[n-MG.nthreads*MG.ob], work, lwork, info);
   }
