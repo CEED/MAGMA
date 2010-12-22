@@ -25,11 +25,10 @@
 
 // Flops formula
 #define PRECISION_z
-#define CHECK_ERROR
 #if defined(PRECISION_z) || defined(PRECISION_c)
-#define FLOPS(m,n) ( 4.*(4.*m*n*n-4.*m*n*n/3.))
+#define FLOPS(m, n) ( 6. * FMULS_GEBRD(m, n) + 2. * FADDS_GEBRD(m, n))
 #else
-#define FLOPS(m,n) (     4.*m*n*n-4.*m*n*n/3.)
+#define FLOPS(m, n) (      FMULS_GEBRD(m, n) +      FADDS_GEBRD(m, n))
 #endif
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -37,199 +36,197 @@
 */
 int main( int argc, char** argv)
 {
-    cuInit( 0 );
-    cublasInit( );
-    printout_devices( );
+    TESTING_CUDA_INIT();
 
-    cuDoubleComplex *h_A, *h_R, *h_work;
+    TimeStruct       start, end;
+    double           eps, flops, gpu_perf, cpu_perf;
+    cuDoubleComplex *h_A, *h_Q, *h_PT, *h_work, *chkwork;
     cuDoubleComplex *taup, *tauq;
-    double          *diag, *offdiag, *diag2, *offdiag2;
-    double           gpu_perf, cpu_perf, eps;
-
-    TimeStruct start, end;
+    double          *diag, *offdiag, *rwork;
+    double           result[3] = {0., 0., 0.};
 
     /* Matrix size */
-    int M, N=0, n2, lda;
-    int size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
+    magma_int_t M = 0, N = 0, n2, lda, lhwork, lchkwork;
+    magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
 
-    cublasStatus status;
-    int i, info;
-    int ione     = 1;
-    int ISEED[4] = {0,0,0,1};
-    
+    magma_int_t i, info, minmn, nb, uselapack, checkres;
+    magma_int_t ione     = 1;
+    magma_int_t ISEED[4] = {0,0,0,1};
+
     if (argc != 1){
         for(i = 1; i<argc; i++){
             if (strcmp("-N", argv[i])==0)
                 N = atoi(argv[++i]);
+            else if (strcmp("-M", argv[i])==0)
+                M = atoi(argv[++i]);
         }
-        if (N>0) size[0] = size[9] = N;
-        else exit(1);
+        if ( M == 0 ) {
+	    M = N;
+	}
+	if ( N == 0 ) {
+	    N = M;
+	}
+        if (N>0 && M>0)
+            printf("  testing_zgebrd -M %d -N %d\n\n", M, N);
+        else
+            {
+                printf("\nUsage: \n");
+                printf("  testing_zgebrd -M %d -N %d\n\n", 1024, 1024);
+                exit(1);
+            }
     }
     else {
         printf("\nUsage: \n");
-        printf("  testing_zgebrd -N %d\n\n", 1024);
+        printf("  testing_zgebrd -M %d -N %d\n\n", 1024, 1024);
+        M = N = size[9];
     }
 
-    /* Initialize CUBLAS */
-    status = cublasInit();
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! CUBLAS initialization error\n");
-        return 127;
-    }
+    uselapack = getenv("MAGMA_USE_LAPACK") != NULL;
+    checkres  = getenv("MAGMA_TESTINGS_CHECK") != NULL;
 
     eps = lapackf77_dlamch( "E" );
-
-    lda = N;
-    n2 = size[9] * size[9];
+    lda = M = N;
+    n2  = lda * N;
+    nb  = magma_get_zgebrd_nb(N);
+    minmn = min(M, N);
 
     /* Allocate host memory for the matrix */
-    h_A = (cuDoubleComplex*)malloc(n2 * sizeof(h_A[0]));
-    if (h_A == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (A)\n");
-        return 127;
-    }
+    TESTING_MALLOC( h_A,     cuDoubleComplex, lda*N );
+    TESTING_MALLOC( tauq,    cuDoubleComplex, minmn  );
+    TESTING_MALLOC( taup,    cuDoubleComplex, minmn  );
+    TESTING_MALLOC( diag,    double, minmn   );
+    TESTING_MALLOC( offdiag, double, (minmn-1) );
+    TESTING_HOSTALLOC( h_Q, cuDoubleComplex, lda*N );
 
-    taup = (cuDoubleComplex*)malloc(size[9] * sizeof(cuDoubleComplex));
-    tauq = (cuDoubleComplex*)malloc(size[9] * sizeof(cuDoubleComplex));
-    if (taup == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (taup)\n");
-        return 127;
-    }
+    lhwork = (M + N)*nb;
+    TESTING_HOSTALLOC( h_work, cuDoubleComplex, lhwork );
 
-
-    diag = (double*)malloc(size[9] * sizeof(double));
-    diag2= (double*)malloc(size[9] * sizeof(double));
-    if (diag == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (diag)\n");
-        return 127;
-    }
-
-    offdiag = (double*)malloc(size[9] * sizeof(double));
-    offdiag2= (double*)malloc(size[9] * sizeof(double));
-    if (offdiag == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (offdiag)\n");
-        return 127;
-    }
-
-    cudaMallocHost( (void**)&h_R,  n2*sizeof(cuDoubleComplex) );
-    if (h_R == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (R)\n");
-        return 127;
-    }
-
-    int nb = magma_get_zgebrd_nb(size[9]);
-    int lwork = 2*size[9]*nb;
-    cudaMallocHost( (void**)&h_work, (lwork)*sizeof(cuDoubleComplex) );
-    if (h_work == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (work)\n");
-        return 127;
+    if ( checkres ) {
+        lchkwork = minmn * nb;
+        TESTING_MALLOC( h_PT,    cuDoubleComplex, lda*N   );
+        TESTING_MALLOC( chkwork, cuDoubleComplex, lchkwork );
+        rwork = NULL; /* To avoir unused variable warning */
+#if defined(PRECISION_z) || defined(PRECISION_c) 
+        TESTING_MALLOC( rwork, double, 5*minmn );
+#endif
     }
 
     printf("\n\n");
-    printf("  N    CPU GFlop/s    GPU GFlop/s   |A-QHQ'|/N|A|  |I-QQ'|/N \n");
-    printf("=============================================================\n");
+    printf("  M    N    CPU GFlop/s    GPU GFlop/s   |A-QHQ'|/N|A|  |I-QQ'|/N \n");
+    printf("==================================================================\n");
     for(i=0; i<10; i++){
-        M = N = lda = size[i];
-        n2 = M*N;
+        if (argc == 1) {
+            M = N = size[i];
+        }
+        minmn = min(M, N);
+        lda   = M;
+        n2    = lda*N;
+        lhwork   = (M + N)*nb;
+        lchkwork = minmn * nb;
+        flops = FLOPS( (double)M, (double)N ) / 1e6;
 
         /* Initialize the matrices */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-        lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
+        lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_Q, &lda );
 
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-        if (getenv("MAGMA_USE_LAPACK")) {
-          start = get_current_time();
-          lapackf77_zgebrd( &M, &N, h_R, &N, diag, offdiag,
-                      tauq, taup, h_work, &lwork, &info);
-          end = get_current_time();
+        start = get_current_time();
+        if ( uselapack ) {
+            lapackf77_zgebrd( &M, &N, h_Q, &lda, 
+                              diag, offdiag, tauq, taup, 
+                              h_work, &lhwork, &info);
         } else {
-          start = get_current_time();
-          magma_zgebrd( M, N, h_R, N, diag, offdiag,
-                      tauq, taup, h_work, lwork, &info);
-          end = get_current_time();
+            magma_zgebrd( M, N, h_Q, lda, 
+                          diag, offdiag, tauq, taup, 
+                          h_work, lhwork, &info);
 	}
-        if (getenv("MAGMA_SHOW_INFO"))
-          printf("zgebrd_INFO=%d\n", info);
+        end = get_current_time();
+        if ( info < 0 )
+            printf("Argument %d of lapackf77_zgebrd|magma_zgebrd had an illegal value\n", -info);
 
-        gpu_perf =FLOPS(M,N)/(1000000.*GetTimerValue(start,end));
-        // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
+        gpu_perf = flops / GetTimerValue(start,end);
 
         /* =====================================================================
            Check the factorization
            =================================================================== */
-	double result[3] = {0., 0., 0.};
-#ifdef CHECK_ERROR
-        int lwork = nb * N * N;
-        cuDoubleComplex *PT      = (cuDoubleComplex*)malloc( N * N * sizeof(cuDoubleComplex));
-        cuDoubleComplex *work    = (cuDoubleComplex*)malloc( lwork * sizeof(cuDoubleComplex));
-
-        lapackf77_zlacpy(MagmaUpperLowerStr, &N, &N, h_R, &N, PT, &N);
-
-        // generate Q & P'
-        lapackf77_zungbr("Q", &M, &M, &M, h_R, &N, tauq, work, &lwork, &info);
-        lapackf77_zungbr("P", &M, &M, &M,  PT, &N, taup, work, &lwork, &info);
-
-        // Test 1:  Check the decomposition A := Q * B * PT
-        //      2:  Check the orthogonality of Q
-        //      3:  Check the orthogonality of PT
+        if ( checkres ) {
+            lapackf77_zlacpy(MagmaUpperLowerStr, &M, &N, h_Q, &lda, h_PT, &N);
+            
+            // generate Q & P'
+            lapackf77_zungbr("Q", &M, &minmn, &N, h_Q,  &lda, tauq, chkwork, &lchkwork, &info);
+            lapackf77_zungbr("P", &minmn, &N, &M, h_PT, &lda, taup, chkwork, &lchkwork, &info);
+            
+            // Test 1:  Check the decomposition A := Q * B * PT
+            //      2:  Check the orthogonality of Q
+            //      3:  Check the orthogonality of PT
 #if defined(PRECISION_z) || defined(PRECISION_c) 
-        double *rwork   = (double*)malloc( M * sizeof(double));
-        lapackf77_zbdt01(&M, &N, &ione, h_A, &M, h_R, &M, diag, offdiag, PT, &M,
-                         work, rwork, &result[0]);
-        lapackf77_zunt01("Columns", &M, &M, h_R, &M, work, &lwork, rwork, &result[1]);
-        lapackf77_zunt01("Rows", &M, &N, PT, &M, work, &lwork, rwork, &result[2]);
-        free(rwork);
+            lapackf77_zbdt01(&M, &N, &ione, 
+                             h_A, &lda, h_Q, &lda, 
+                             diag, offdiag, h_PT, &lda,
+                             chkwork, rwork, &result[0]);
+            lapackf77_zunt01("Columns", &M, &minmn, h_Q,  &lda, chkwork, &lchkwork, rwork, &result[1]);
+            lapackf77_zunt01("Rows",    &minmn, &N, h_PT, &lda, chkwork, &lchkwork, rwork, &result[2]);
 #else
-        lapackf77_zbdt01(&M, &N, &ione, h_A, &M, h_R, &M, diag, offdiag, PT, &M,
-                         work, &result[0]);
-        lapackf77_zunt01("Columns", &M, &M, h_R, &M, work, &lwork, &result[1]);
-        lapackf77_zunt01("Rows", &M, &N, PT, &M, work, &lwork, &result[2]);
+            lapackf77_zbdt01(&M, &N, &ione, 
+                             h_A, &lda, h_Q, &lda, 
+                             diag, offdiag, h_PT, &lda,
+                             chkwork, &result[0]);
+            lapackf77_zunt01("Columns", &M, &minmn, h_Q,  &lda, chkwork, &lchkwork, &result[1]);
+            lapackf77_zunt01("Rows",    &minmn, &N, h_PT, &lda, chkwork, &lchkwork, &result[2]);
 #endif
+        }
 
-        free(PT);
-        free(work);
         /* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
-        lapackf77_zgebrd(&M, &N, h_A, &N, diag2, offdiag2, tauq, taup,
-                         h_work, &lwork, &info);
+        lapackf77_zgebrd(&M, &N, h_A, &lda, 
+                         diag, offdiag, tauq, taup,
+                         h_work, &lhwork, &info);
         end = get_current_time();
 
         if (info < 0)
-            printf("Argument %d of zgebrd had an illegal value.\n", -info);
-#endif
-        cpu_perf = FLOPS(M,N)/(1000000.*GetTimerValue(start,end));
-        // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
+            printf("Argument %d of lapackf77_zgebrd had an illegal value.\n", -info);
+
+        cpu_perf = flops / GetTimerValue(start,end);
 
         /* =====================================================================
            Print performance and error.
            =================================================================== */
-        printf("%5d   %6.2f        %6.2f       %4.2e %4.2e %4.2e\n",
-               size[i], cpu_perf, gpu_perf,
-               result[0]*eps, result[1]*eps, result[2]*eps );
-        
+        if ( checkres ) {
+            printf("%5d %5d   %6.2f        %6.2f       %4.2e %4.2e %4.2e\n",
+                   M, N, cpu_perf, gpu_perf,
+                   result[0]*eps, result[1]*eps, result[2]*eps );
+        } else {
+            printf("%5d %5d   %6.2f        %6.2f\n",
+                   M, N, cpu_perf, gpu_perf );
+        }
+
         if (argc != 1)
             break;
     }
 
     /* Memory clean up */
-    free(h_A);
-    free(taup);
-    free(tauq);
-    free(diag);    free(diag2);
-    free(offdiag); free(offdiag2);
-    cublasFree(h_work);
-    cublasFree(h_R);
+    /* Allocate host memory for the matrix */
+    TESTING_FREE( h_A );
+    TESTING_FREE( tauq );
+    TESTING_FREE( taup );
+    TESTING_FREE( diag );
+    TESTING_FREE( offdiag );
+    TESTING_HOSTFREE( h_Q );
+    TESTING_HOSTFREE( h_work );
 
-    /* Shutdown */
-    status = cublasShutdown();
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! shutdown error (A)\n");
-        return 127;
+    if ( checkres ) {
+        TESTING_FREE( h_PT );
+        TESTING_FREE( chkwork );
+#if defined(PRECISION_z) || defined(PRECISION_c) 
+        TESTING_FREE( rwork );
+#endif
     }
 
-    return 0;
+    /* Shutdown */
+    TESTING_CUDA_FINALIZE();
+    return EXIT_SUCCESS;
 }
