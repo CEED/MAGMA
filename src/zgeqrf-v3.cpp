@@ -153,7 +153,7 @@ magma_zgeqrf3(magma_int_t m, magma_int_t n,
 
   /* Use MAGMA code to factor left portion of matrix, waking up threads 
 	 along the way to perform updates on the right portion of matrix */
-  magma_zgeqrf2(m,n-MG.nthreads*MG.ob, a, m, tau, work, lwork, info);
+  magma_zgeqrf2(m,n-MG.nthreads*MG.ob, a, lda, tau, work, lwork, info);
 
   /* Wait for all update threads to finish */
   for (k = 0; k < MG.nthreads; k++){
@@ -172,7 +172,7 @@ magma_zgeqrf3(magma_int_t m, magma_int_t n,
 
   /* Use MAGMA code to perform final factorization if necessary */
   if (MG.m >= (MG.n - (MG.nthreads*MG.ob))) {
-    magma_zgeqrf2(M, N, a+(n-MG.nthreads*MG.ob)*m+(n-MG.nthreads*MG.ob), m, 
+    magma_zgeqrf2(M, N, a+(n-MG.nthreads*MG.ob)*m+(n-MG.nthreads*MG.ob), lda, 
                   &tau[n-MG.nthreads*MG.ob], work, lwork, info);
   }
  
