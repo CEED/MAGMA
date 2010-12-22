@@ -154,8 +154,9 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
 
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    cuDoubleComplex *da, *dwork;
 
-    magma_int_t  ncol, nrow, jmax;
+    magma_int_t ncol, nrow, jmax, nb, ldda;
 
     static magma_int_t i, j, nx;
     static cuDoubleComplex ws;
@@ -165,13 +166,15 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     magma_int_t ldwrkx, ldwrky, lwkopt;
     magma_int_t lquery;
 
-    *info = 0;
-
-    magma_int_t nb = magma_get_zgebrd_nb(n), ldda = m;
+    nb   = magma_get_zgebrd_nb(n);
+    ldda = m;
 
     lwkopt = (m + n) * nb;
     work[0] = MAGMA_Z_MAKE( lwkopt, 0. );
     lquery = (lwork == -1);
+    
+    /* Check arguments */
+    *info = 0;
     if (m < 0) {
 	*info = -1;
     } else if (n < 0) {
@@ -185,26 +188,23 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
         }
     }
     if (*info < 0)
-	return 0;
+	return MAGMA_ERR_ILLEGAL_VALUE;
     else if (lquery)
-	return 0;
+	return MAGMA_SUCCESS;
 
     /* Quick return if possible */
     minmn = min(m,n);
     if (minmn == 0) {
         work[0] = c_one;
-        return 0;
+        return MAGMA_SUCCESS;
     }
 
-    cuDoubleComplex *da;
-    cublasStatus status = cublasAlloc(n*ldda+2*n*nb, 
-				      sizeof(cuDoubleComplex), (void**)&da);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-      fprintf (stderr, "!!!! device memory allocation error in zgebrd\n");
-      return 0; 
+    if ( CUBLAS_STATUS_SUCCESS 
+         != cublasAlloc(n*ldda+2*n*nb, sizeof(cuDoubleComplex), (void**)&da) ) {
+        fprintf (stderr, "!!!! device memory allocation error in zgebrd\n" );
+        return MAGMA_ERR_CUBLASALLOC; 
     }
-
-    cuDoubleComplex *dwork = da + (n)*ldda;
+    dwork = da + (n)*ldda;
 
     MAGMA_Z_SET2REAL( ws, max(m,n) );
     ldwrkx = m;
@@ -295,9 +295,9 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
                       A(i, i), &lda, d+i, e+i,
                       tauq+i, taup+i, work, &iinfo);
     work[0] = ws;
-    cublasFree(da);
 
-    return 0;
+    cublasFree(da);
+    return MAGMA_SUCCESS;
 } /* zgebrd_ */
 
 #undef max
