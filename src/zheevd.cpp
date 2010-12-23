@@ -329,8 +329,13 @@ magma_zheevd(char *jobz, char *uplo,
     } else {
 	zstedc_("I", n, &w[1], &rwork[inde], &work[indwrk], n, &work[indwk2], 
 		&llwrk2, &rwork[indrwk], &llrwk, &iwork[1], liwork, info);
+       
 	zunmtr_("L", uplo, "N", n, n, &a[a_offset], lda, &work[indtau], 
 		&work[indwrk], n, &work[indwk2], &llwrk2, &iinfo);
+	/*
+	  magma_zunmtr("L", uplo, "N", n, n, &a[a_offset], lda, &work[indtau],
+	               &work[indwrk], n, &work[indwk2], &llwrk2, &iinfo);
+	*/
 	lapackf77_zlacpy("A", n, n, &work[indwrk], n, &a[a_offset], lda);
     }
 
