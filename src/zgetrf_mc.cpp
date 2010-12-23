@@ -18,12 +18,6 @@
 
 #define  A(m,n) (a+(n)*(*lda)+(m))
 
-/* Block size from driver */
-extern int EN_BEE;
-
-/*` QUARK scheduler initialized in driver */
-extern Quark *quark;
-
 /* Task execution code */
 static void SCHED_zgemm(Quark* quark)
 {
@@ -119,8 +113,9 @@ void SCHED_zlaswp(Quark* quark)
 
 }
 
-extern "C" int 
-magma_zgetrf_mc(int *m, int *n,
+extern "C" magma_int_t 
+magma_zgetrf_mc(magma_context *cntxt,
+		int *m, int *n,
 		cuDoubleComplex *a, int *lda,
 		int *ipiv, int *info)
 {
@@ -132,7 +127,6 @@ magma_zgetrf_mc(int *m, int *n,
 
     Purpose   
     =======   
-
     ZGETRF computes an LU factorization of a general M-by-N matrix A   
     using partial pivoting with row interchanges.   
 
@@ -146,6 +140,8 @@ magma_zgetrf_mc(int *m, int *n,
 
     Arguments   
     =========   
+    CNTXT   (input) MAGMA_CONTEXT
+            CNTXT specifies the MAGMA hardware context for this routine.   
 
     M       (input) INTEGER   
             The number of rows of the matrix A.  M >= 0.   
@@ -174,274 +170,282 @@ magma_zgetrf_mc(int *m, int *n,
                   to solve a system of equations.   
     =====================================================================    */
 
-  int i,j,l;
+    if (cntxt->num_cores == 1 && cntxt->num_gpus == 1)
+      {
+	int result = magma_zgetrf(*m, *n, a, *lda, ipiv, info);
+	return result;
+      }
+    
+    int EN_BEE   = cntxt->nb;
+    Quark* quark = cntxt->quark;
 
-  int ii,jj,ll;
+    int i,j,l;
+    int ii,jj,ll;
 
-  void *fakedep;
+    void *fakedep;
 
-  int ione=1;
+    int ione=1;
 
-  cuDoubleComplex fone = MAGMA_Z_ONE;
-  cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex fone = MAGMA_Z_ONE;
+    cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
 
-  int M,N,MM,NN,MMM,K;
+    int M,N,MM,NN,MMM,K;
 
-  int priority=0;
+    int priority=0;
 
-  *info = 0;
+    *info = 0;
+    
+    int nb = (EN_BEE==-1)? magma_get_zpotrf_nb(*n): EN_BEE;
 
-  int nb = (EN_BEE==-1)? magma_get_zpotrf_nb(*n): EN_BEE;
+    /* Check arguments */
+    if (*m < 0) {
+      *info = -1;
+    } else if (*n < 0) {
+      *info = -2;
+    } else if (*lda < max(1,*m)) {
+      *info = -4;
+    }
+    if (*info != 0)
+      return 0;
+    
+    int k = min(*m,*n);
 
-  /* Check arguments */
-  if (*m < 0) {
-    *info = -1;
-  } else if (*n < 0) {
-    *info = -2;
-  } else if (*lda < max(1,*m)) {
-    *info = -4;
-  }
-  if (*info != 0)
-    return 0;
-
-  int k = min(*m,*n);
-
-  int iinfo[2];
+    int iinfo[2];
     iinfo[1] = 0;
 
-  char label[10000];
+    char label[10000];
+    
+    ii = -1;
+    
+    /* Loop across diagonal blocks */
+    for (i = 0; i < k; i += nb) 
+      {
+	ii++;
 
-  ii = -1;
+	jj = -1;
 
-  /* Loop across diagonal blocks */
-  for (i = 0; i < k; i += nb) {
+	priority = 10000 - ii;
 
-    ii++;
+	/* Update panels in left looking fashion */
+	for (j = 0; j < i; j += nb) 
+	  { 
+	    jj++;
 
-    jj = -1;
+	    NN=min(nb,(*n)-i);
+	    MM=min(nb,(*m)-j);
 
-    priority = 10000 - ii;
+	    l = j + nb;
 
-    /* Update panels in left looking fashion */
-    for (j = 0; j < i; j += nb) { 
+	    MMM = min(nb,(*m)-l);
 
-      jj++;
-
-      NN=min(nb,(*n)-i);
-      MM=min(nb,(*m)-j);
-
-      l = j + nb;
-
-      MMM = min(nb,(*m)-l);
-
-      sprintf(label, "UPDATE %d %d", ii, jj);
-  
-      QUARK_Insert_Task(quark, SCHED_panel_update, 0,
-        sizeof(int),             &NN,      VALUE,
-        sizeof(cuDoubleComplex)*(*m)*(*n), A(j,i),   INOUT,
-        sizeof(int),             lda,        VALUE,
-        sizeof(int),             &MM,      VALUE,
-        sizeof(cuDoubleComplex)*nb,        &ipiv[j], INPUT,
-        sizeof(cuDoubleComplex)*(*m)*(*n), A(j,j),   INPUT,
-        sizeof(int),             &MMM,     VALUE,
-        sizeof(int),             &nb,      VALUE,
-        sizeof(cuDoubleComplex)*(*m)*(*n), A(l,j),   INPUT,
-        sizeof(cuDoubleComplex)*(*m)*(*n), A(l,i),   INOUT,
-        sizeof(int),             &priority,VALUE | TASK_PRIORITY,
-        sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   OUTPUT,
-        strlen(label)+1,         label,    VALUE | TASKLABEL,
-        5,                       "cyan",   VALUE | TASKCOLOR,
-        0);
-
-      ll = jj + 1;
-
-      /* Split gemm into tiles */
-      for (l = j + (2*nb); l < (*m); l += nb) {
-
-        ll++;
-
-        MMM = min(nb,(*m)-l);
-
-        fakedep = (void *)(intptr_t)(j+1);
-
-        sprintf(label, "GEMM %d %d %d", ii, jj, ll);
-  
-        QUARK_Insert_Task(quark, SCHED_zgemm, 0,
-          sizeof(int),             &MMM,     VALUE,
-          sizeof(int),             &NN,      VALUE,
-          sizeof(int),             &nb,      VALUE,
-          sizeof(cuDoubleComplex)*(*m)*(*n), A(l,j),   INPUT,
-          sizeof(int),             lda,        VALUE,
-          sizeof(cuDoubleComplex)*(*m)*(*n), A(j,i),   INPUT,
-          sizeof(cuDoubleComplex)*(*m)*(*n), A(l,i),   INOUT,
-          sizeof(int),             &priority,VALUE | TASK_PRIORITY,
-          sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   OUTPUT | GATHERV,
-          sizeof(void*),           fakedep,  OUTPUT | GATHERV,
-          strlen(label)+1,         label,    VALUE | TASKLABEL,
-          5,                       "blue",   VALUE | TASKCOLOR,
-          0);
-
-      }  
-
-    }
-
-    M=(*m)-i;
-    N=min(nb,(*n)-i);
-
-    iinfo[0] = i;
-
-    sprintf(label, "GETRF %d", ii);
-  
-    QUARK_Insert_Task(quark, SCHED_zgetrf, 0,
-      sizeof(int),             &M,       VALUE,
-      sizeof(int),             &N,       VALUE,
-      sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   INOUT,
-      sizeof(int),             lda,        VALUE,
-      sizeof(cuDoubleComplex)*nb,        &ipiv[i], OUTPUT,
-      sizeof(int),             iinfo,    OUTPUT,
-      sizeof(int),             &priority,VALUE | TASK_PRIORITY,
-      strlen(label)+1,         label,    VALUE | TASKLABEL,
-      6,                       "green",  VALUE | TASKCOLOR,
-      0);
-
-  }
-
-  K = (*m)/nb;
-
-  if ((K*nb)==(*m)) {
-    ii = K - 1;
-    K = *m;
-  } else {
-    ii = k;
-    K = (K+1)*nb;
-  }
-
-  priority = 0;
-
-  /* If n > m */
-  for (i = K; i < (*n); i += nb) {
-
-    ii++;
-
-    jj = -1;
-
-    /* Update remaining panels in left looking fashion */
-    for (j = 0; j < (*m); j += nb) { 
-
-      jj++;
-
-      NN=min(nb,(*n)-i);
-      MM=min(nb,(*m)-j);
-
-      l = j + nb;
-
-      MMM = min(nb,(*m)-l);
-
-      sprintf(label, "UPDATE %d %d", ii, jj);
-  
-      QUARK_Insert_Task(quark, SCHED_panel_update, 0,
-        sizeof(int),             &NN,      VALUE,
-        sizeof(cuDoubleComplex)*(*m)*(*n), A(j,i),   INOUT,
-        sizeof(int),             lda,        VALUE,
-        sizeof(int),             &MM,      VALUE,
-        sizeof(cuDoubleComplex)*nb,        &ipiv[j], INPUT,
-        sizeof(cuDoubleComplex)*(*m)*(*n), A(j,j),   INPUT,
-        sizeof(int),             &MMM,     VALUE,
-        sizeof(int),             &nb,      VALUE,
-        sizeof(cuDoubleComplex)*(*m)*(*n), A(l,j),   INPUT,
-        sizeof(cuDoubleComplex)*(*m)*(*n), A(l,i),   INOUT,
-        sizeof(int),             &priority,VALUE | TASK_PRIORITY,
-        sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   OUTPUT,
-        strlen(label)+1,         label,    VALUE | TASKLABEL,
-        5,                       "cyan",   VALUE | TASKCOLOR,
-        0);
-
-      ll = jj + 1;
-
-      /* Split gemm into tiles */
-      for (l = j + (2*nb); l < (*m); l += nb) {
-
-        ll++;
-
-        MMM = min(nb,(*m)-l);
-
-        fakedep = (void *)(intptr_t)(j+1);
-
-        sprintf(label, "GEMM %d %d %d", ii, jj, ll);
-  
-        QUARK_Insert_Task(quark, SCHED_zgemm, 0,
-          sizeof(int),             &MMM,     VALUE,
-          sizeof(int),             &NN,      VALUE,
-          sizeof(int),             &nb,      VALUE,
-          sizeof(cuDoubleComplex)*(*m)*(*n), A(l,j),   INPUT,
-          sizeof(int),             lda,        VALUE,
-          sizeof(cuDoubleComplex)*(*m)*(*n), A(j,i),   INPUT,
-          sizeof(cuDoubleComplex)*(*m)*(*n), A(l,i),   INOUT,
-          sizeof(int),             &priority,VALUE | TASK_PRIORITY,
-          sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   OUTPUT | GATHERV,
-          sizeof(void*),           fakedep,  OUTPUT | GATHERV,
-          strlen(label)+1,         label,    VALUE | TASKLABEL,
-          5,                       "blue",   VALUE | TASKCOLOR,
-          0);
-
+	    sprintf(label, "UPDATE %d %d", ii, jj);
+	    
+	    QUARK_Insert_Task(quark, SCHED_panel_update, 0,
+			      sizeof(int),             &NN,      VALUE,
+			      sizeof(cuDoubleComplex)*(*m)*(*n), A(j,i),   INOUT,
+			      sizeof(int),             lda,        VALUE,
+			      sizeof(int),             &MM,      VALUE,
+			      sizeof(cuDoubleComplex)*nb,        &ipiv[j], INPUT,
+			      sizeof(cuDoubleComplex)*(*m)*(*n), A(j,j),   INPUT,
+			      sizeof(int),             &MMM,     VALUE,
+			      sizeof(int),             &nb,      VALUE,
+			      sizeof(cuDoubleComplex)*(*m)*(*n), A(l,j),   INPUT,
+			      sizeof(cuDoubleComplex)*(*m)*(*n), A(l,i),   INOUT,
+			      sizeof(int),             &priority,VALUE | TASK_PRIORITY,
+			      sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   OUTPUT,
+			      strlen(label)+1,         label,    VALUE | TASKLABEL,
+			      5,                       "cyan",   VALUE | TASKCOLOR,
+			      0);
+	    
+	    ll = jj + 1;
+	    
+	    /* Split gemm into tiles */
+	    for (l = j + (2*nb); l < (*m); l += nb) 
+	      {
+		ll++;
+		
+		MMM = min(nb,(*m)-l);
+		
+		fakedep = (void *)(intptr_t)(j+1);
+		
+		sprintf(label, "GEMM %d %d %d", ii, jj, ll);
+		
+		QUARK_Insert_Task(quark, SCHED_zgemm, 0,
+				  sizeof(int),             &MMM,     VALUE,
+				  sizeof(int),             &NN,      VALUE,
+				  sizeof(int),             &nb,      VALUE,
+				  sizeof(cuDoubleComplex)*(*m)*(*n), A(l,j),   INPUT,
+				  sizeof(int),             lda,        VALUE,
+				  sizeof(cuDoubleComplex)*(*m)*(*n), A(j,i),   INPUT,
+				  sizeof(cuDoubleComplex)*(*m)*(*n), A(l,i),   INOUT,
+				  sizeof(int),             &priority,VALUE | TASK_PRIORITY,
+				  sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   OUTPUT | GATHERV,
+				  sizeof(void*),           fakedep,  OUTPUT | GATHERV,
+				  strlen(label)+1,         label,    VALUE | TASKLABEL,
+				  5,                       "blue",   VALUE | TASKCOLOR,
+				  0);
+		
+	      }  
+	    
+	  }
+	
+	M=(*m)-i;
+	N=min(nb,(*n)-i);
+	
+	iinfo[0] = i;
+	
+	sprintf(label, "GETRF %d", ii);
+	
+	QUARK_Insert_Task(quark, SCHED_zgetrf, 0,
+			  sizeof(int),             &M,       VALUE,
+			  sizeof(int),             &N,       VALUE,
+			  sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   INOUT,
+			  sizeof(int),             lda,        VALUE,
+			  sizeof(cuDoubleComplex)*nb,        &ipiv[i], OUTPUT,
+			  sizeof(int),             iinfo,    OUTPUT,
+			  sizeof(int),             &priority,VALUE | TASK_PRIORITY,
+			  strlen(label)+1,         label,    VALUE | TASKLABEL,
+			  6,                       "green",  VALUE | TASKCOLOR,
+			  0);
+	
       }
-
+    
+    K = (*m)/nb;
+    
+    if ((K*nb)==(*m)) {
+      ii = K - 1;
+      K = *m;
+    } else {
+      ii = k;
+      K = (K+1)*nb;
     }
+    
+    priority = 0;
+    
+    /* If n > m */
+    for (i = K; i < (*n); i += nb) 
+      {
+	ii++;
+	
+	jj = -1;
+	
+	/* Update remaining panels in left looking fashion */
+	for (j = 0; j < (*m); j += nb) 
+	  { 
+	    jj++;
 
-  }
-
-  ii = -1;
-
-  /* Swap behinds */
-  for (i = 0; i < k; i += nb) {
-
-    ii++;
-
-    jj = -1;
-
-    MM = min(nb,(*m)-i);
-    MM = min(MM,(*n)-i);
-
-    for (j = 0; j < i; j += nb) {
-
-      jj++;
-
-      fakedep = (void *)(intptr_t)(j+1);
-
-      sprintf(label, "LASWPF %d %d", ii, jj);
-  
-      QUARK_Insert_Task(quark, SCHED_zlaswp, 0,
-        sizeof(int),             &nb,       VALUE,
-        sizeof(cuDoubleComplex)*(*m)*(*n), A(i,j),    INOUT,
-        sizeof(int),             lda,         VALUE,
-        sizeof(int),             &MM,       VALUE,
-        sizeof(cuDoubleComplex)*nb,        &ipiv[i],  INPUT,
-        sizeof(int),             &priority, VALUE | TASK_PRIORITY,
-        sizeof(void*),           fakedep,   INPUT,
-        sizeof(cuDoubleComplex)*(*m)*(*n), A(i+nb,j), OUTPUT,
-        strlen(label)+1,         label,     VALUE | TASKLABEL,
-        7,                       "purple",  VALUE | TASKCOLOR,
-        0);
-
+	    NN=min(nb,(*n)-i);
+	    MM=min(nb,(*m)-j);
+	    
+	    l = j + nb;
+	    
+	    MMM = min(nb,(*m)-l);
+	    
+	    sprintf(label, "UPDATE %d %d", ii, jj);
+	    
+	    QUARK_Insert_Task(quark, SCHED_panel_update, 0,
+			      sizeof(int),             &NN,      VALUE,
+			      sizeof(cuDoubleComplex)*(*m)*(*n), A(j,i),   INOUT,
+			      sizeof(int),             lda,        VALUE,
+			      sizeof(int),             &MM,      VALUE,
+			      sizeof(cuDoubleComplex)*nb,        &ipiv[j], INPUT,
+			      sizeof(cuDoubleComplex)*(*m)*(*n), A(j,j),   INPUT,
+			      sizeof(int),             &MMM,     VALUE,
+			      sizeof(int),             &nb,      VALUE,
+			      sizeof(cuDoubleComplex)*(*m)*(*n), A(l,j),   INPUT,
+			      sizeof(cuDoubleComplex)*(*m)*(*n), A(l,i),   INOUT,
+			      sizeof(int),             &priority,VALUE | TASK_PRIORITY,
+			      sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   OUTPUT,
+			      strlen(label)+1,         label,    VALUE | TASKLABEL,
+			      5,                       "cyan",   VALUE | TASKCOLOR,
+			      0);
+	    
+	    ll = jj + 1;
+	    
+	    /* Split gemm into tiles */
+	    for (l = j + (2*nb); l < (*m); l += nb) {
+	      
+	      ll++;
+	      
+	      MMM = min(nb,(*m)-l);
+	      
+	      fakedep = (void *)(intptr_t)(j+1);
+	      
+	      sprintf(label, "GEMM %d %d %d", ii, jj, ll);
+	      
+	      QUARK_Insert_Task(quark, SCHED_zgemm, 0,
+				sizeof(int),             &MMM,     VALUE,
+				sizeof(int),             &NN,      VALUE,
+				sizeof(int),             &nb,      VALUE,
+				sizeof(cuDoubleComplex)*(*m)*(*n), A(l,j),   INPUT,
+				sizeof(int),             lda,        VALUE,
+				sizeof(cuDoubleComplex)*(*m)*(*n), A(j,i),   INPUT,
+				sizeof(cuDoubleComplex)*(*m)*(*n), A(l,i),   INOUT,
+				sizeof(int),             &priority,VALUE | TASK_PRIORITY,
+				sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   OUTPUT | GATHERV,
+				sizeof(void*),           fakedep,  OUTPUT | GATHERV,
+				strlen(label)+1,         label,    VALUE | TASKLABEL,
+				5,                       "blue",   VALUE | TASKCOLOR,
+				0);
+	      
+	    }
+	    
+	  }
+	
+      }
+    
+    ii = -1;
+    
+    /* Swap behinds */
+    for (i = 0; i < k; i += nb) {
+      
+      ii++;
+      
+      jj = -1;
+      
+      MM = min(nb,(*m)-i);
+      MM = min(MM,(*n)-i);
+      
+      for (j = 0; j < i; j += nb) {
+	
+	jj++;
+	
+	fakedep = (void *)(intptr_t)(j+1);
+	
+	sprintf(label, "LASWPF %d %d", ii, jj);
+	
+	QUARK_Insert_Task(quark, SCHED_zlaswp, 0,
+			  sizeof(int),             &nb,       VALUE,
+			  sizeof(cuDoubleComplex)*(*m)*(*n), A(i,j),    INOUT,
+			  sizeof(int),             lda,         VALUE,
+			  sizeof(int),             &MM,       VALUE,
+			  sizeof(cuDoubleComplex)*nb,        &ipiv[i],  INPUT,
+			  sizeof(int),             &priority, VALUE | TASK_PRIORITY,
+			  sizeof(void*),           fakedep,   INPUT,
+			  sizeof(cuDoubleComplex)*(*m)*(*n), A(i+nb,j), OUTPUT,
+			  strlen(label)+1,         label,     VALUE | TASKLABEL,
+			  7,                       "purple",  VALUE | TASKCOLOR,
+			  0);
+	
+      }
+      
     }
+    
+    /* Synchronization point */
+    QUARK_Barrier(quark);
+    
+    /* Fix pivot */
+    ii = -1;
 
-  }
-
-  /* Synchronization point */
-  QUARK_Barrier(quark);
-
-  /* Fix pivot */
-  ii = -1;
-
-  for (i = 0; i < k; i +=nb) {
-    ii++;
-    for (j = 0; j < min(nb,(k-i)); j++) {
-      ipiv[ii*nb+j] += ii*nb;
+    for (i = 0; i < k; i +=nb) {
+      ii++;
+      for (j = 0; j < min(nb,(k-i)); j++) {
+	ipiv[ii*nb+j] += ii*nb;
+      } 
     } 
-  } 
-        
-  QUARK_Barrier(quark);
-
+    
+    QUARK_Barrier(quark);
+    
 }
 #undef A
 

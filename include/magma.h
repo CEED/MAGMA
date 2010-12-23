@@ -6,20 +6,44 @@
        November 2010
 */
 
+#include <quark.h>
+
 #ifndef _MAGMA_
 #define _MAGMA_
 
-/* 
+/* ------------------------------------------------------------
  * MAGMA Blas Functions 
- */ 
+ * --------------------------------------------------------- */ 
 #include "magmablas.h"
 
 #include "auxiliary.h"
 #include "magma_lapack.h"
 
-/*
+/* ------------------------------------------------------------
+ * MAGMA Context
+ * --------------------------------------------------------- */
+typedef struct context
+{
+  /* Number of CPU core in this context */
+  magma_int_t num_cores;
+
+  /* Number of GPUs in this context */
+  magma_int_t num_gpus;
+
+  /* GPU contexts */
+  CUcontext *gpu_context;
+
+  /* QUARK scheduler */
+  Quark *quark;
+
+  /* Block size, internally used for some algorithms */
+  magma_int_t nb;
+
+} magma_context;
+
+/* ------------------------------------------------------------
  * MAGMA functions
- */
+ * --------------------------------------------------------- */
 #include "magma_z.h"
 #include "magma_c.h"
 #include "magma_d.h"
@@ -67,18 +91,18 @@
 #define MagmaColumnwiseStr "Columnwise"
 #define MagmaRowwiseStr    "Rowwise"
 
-/**************************************************************************
+/* ------------------------------------------------------------
  *   Return codes
- */
+ * --------------------------------------------------------- */
 #define MAGMA_SUCCESS             0
 #define MAGMA_ERR_ILLEGAL_VALUE  -4
 #define MAGMA_ERR_ALLOCATION     -5
 #define MAGMA_ERR_HOSTALLOC      -6
 #define MAGMA_ERR_CUBLASALLOC    -7
 
-/**************************************************************************
+/* ------------------------------------------------------------
  *   Macros to deal with cuda complex
- */
+ * --------------------------------------------------------- */
 #define MAGMA_Z_SET2REAL(v, t)    (v).x = (t); (v).y = 0.0
 #define MAGMA_Z_OP_NEG_ASGN(t, z) (t).x = -(z).x; (t).y = -(z).y
 #define MAGMA_Z_EQUAL(u,v)        (((u).x == (v).x) && ((u).y == (v).y))
@@ -163,10 +187,13 @@
 extern "C" {
 #endif
 
-/* ////////////////////////////////////////////////////////////////////////////
-   -- MAGMA function definitions
-*/
+/* ------------------------------------------------------------
+ *   -- MAGMA function definitions
+ * --------------------------------------------------------- */
 void magma_xerbla(const char *name, magma_int_t *info);
+magma_context *magma_init(magma_int_t ncpu, magma_int_t ngpu,
+			  magma_int_t argc, char **argv);
+void magma_finalize(magma_context *cntxt);
 
 #ifdef __cplusplus
 }

@@ -33,14 +33,11 @@
 #define FLOPS(m, n) (      FMULS_GETRF(m, n) +      FADDS_GETRF(m, n) )
 #endif
 
-/* Block size */
-int EN_BEE;
-
-/* QUARK scheduler - intialized in main */
-Quark *quark;
-
-double get_LU_error(int M, int N, cuDoubleComplex *A, int lda, cuDoubleComplex *LU, int *IPIV){
-  int min_mn = min(M,N), intONE = 1, i, j;
+double get_LU_error(magma_int_t M, magma_int_t N, 
+		    cuDoubleComplex *A, magma_int_t lda,
+		    cuDoubleComplex *LU, magma_int_t *IPIV)
+{
+  magma_int_t min_mn = min(M,N), intONE = 1, i, j;
 
   lapackf77_zlaswp( &N, A, &lda, &intONE, &min_mn, IPIV, &intONE);
 
@@ -82,26 +79,26 @@ double get_LU_error(int M, int N, cuDoubleComplex *A, int lda, cuDoubleComplex *
 */
 int main( int argc, char** argv) 
 {
-    cuDoubleComplex *h_A, *h_A2, *h_R, *h_work;
-    cuDoubleComplex *d_A;
-    int *ipiv, *dipiv;
+    cuDoubleComplex *h_A, *h_A2;
+    magma_int_t *ipiv;
     double flops, gpu_perf, cpu_perf, cpu2_perf;
 
     TimeStruct start, end;
 
     /* Matrix size */
-    int N=0, n2, lda, M=0;
-    int size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
+    magma_int_t N=0, n2, lda, M=0;
+    magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
     
-    int i, j, info[1];
-    int ione     = 1;
-    int ISEED[4] = {0,0,0,1};
+    magma_int_t i, j, info[1];
+    magma_int_t ione     = 1;
+    magma_int_t ISEED[4] = {0,0,0,1};
 
-    int cores = 4;
+    magma_int_t num_cores = 4;
+    magma_int_t num_gpus  = 0;
 
-    EN_BEE = -1;
+    magma_int_t EN_BEE = -1;
 
-    int loop = argc;
+    magma_int_t loop = argc;
 
     if (argc != 1){
       for(i = 1; i<argc; i++){      
@@ -110,52 +107,44 @@ int main( int argc, char** argv)
         else if (strcmp("-M", argv[i])==0)
           M = atoi(argv[++i]);
         else if (strcmp("-C", argv[i])==0)
-          cores = atoi(argv[++i]);
+          num_cores = atoi(argv[++i]);
         else if (strcmp("-B", argv[i])==0)
           EN_BEE = atoi(argv[++i]);
       }
       if ((M>0 && N>0) || (M==0 && N==0)) {
-        printf("  testing_zgetrf_mc -M %d -N %d -B %d\n\n", M, N, EN_BEE);
+        printf("  testing_zgetrf_mc -M %d -N %d -B %d -C %d\n\n", 
+	       M, N, EN_BEE, num_cores);
         if (M==0 && N==0) {
           M = N = size[9];
           loop = 1;
         }
       } else {
         printf("\nUsage: \n");
-        printf("  testing_zgetrf_mc -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
+	printf("  Make sure you set the number of BLAS threads to 1, e.g.,\n");
+	printf("   > setenv MKL_NUM_THREADS 1\n");
+        printf("   > testing_zgetrf_mc -M %d -N %d -C 4 -B 128\n\n", 1024, 1024);
         exit(1);
       }
     } else {
       printf("\nUsage: \n");
-      printf("  testing_zgetrf_mc -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
+      printf("  Make sure you set the number of BLAS threads to 1, e.g.,\n");
+      printf("   > setenv MKL_NUM_THREADS 1\n");
+      printf("   > testing_zgetrf_mc -M %d -N %d -C 4 -B 128\n\n", 1024, 1024);
       M = N = size[9];
     }
 
     n2 = M * N;
-
-    int min_mn = min(M, N);
-
+    magma_int_t min_mn = min(M, N);
+    
     /* Allocate host memory for the matrix */
-    h_A2 = (cuDoubleComplex*)malloc(n2 * sizeof(h_A2[0]));
-    if (h_A2 == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (h_A2)\n");
-    }
+    TESTING_MALLOC( h_A2, cuDoubleComplex, n2    );
+    TESTING_MALLOC( h_A , cuDoubleComplex, n2    );
+    TESTING_MALLOC( ipiv, magma_int_t    , min_mn);
 
-    h_A = (cuDoubleComplex*)malloc(n2 * sizeof(h_A[0]));
-    if (h_A == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (h_A)\n");
-    }
-
-    ipiv = (int*)malloc(min_mn * sizeof(int));
-    if (ipiv == 0) {
-      fprintf (stderr, "!!!! host memory allocation error (ipiv)\n");
-    }
-
-    /* Initialize the QUARK scheduler */
-    quark = QUARK_New(cores);
+    magma_context *context = magma_init(num_cores, num_gpus, argc, argv);
 
     printf("\n\n");
-    printf("  M    N   magma_sgetrf_mc GFlop/s     ||PA-LU|| / (||A||*N)\n");
+    printf("  M    N           GFlop/s        ||PA-LU|| / (||A||*N)\n");
     printf("========================================================\n");
     for(i=0; i<10; i++){
 
@@ -175,7 +164,7 @@ int main( int argc, char** argv)
          =================================================================== */
 
       start = get_current_time();
-      magma_zgetrf_mc(&M, &N, h_A2, &M, ipiv, info);
+      magma_zgetrf_mc(context, &M, &N, h_A2, &M, ipiv, info);
       end = get_current_time();
 
       if (info[0] < 0)      
@@ -192,12 +181,11 @@ int main( int argc, char** argv)
         break;
     }
 
-    /* Shut down the QUARK scheduler */
-
-      QUARK_Delete(quark);
-
     /* Memory clean up */
-    free(h_A2);
-    free(h_A);
-    free(ipiv);
+    TESTING_FREE( h_A2 );
+    TESTING_FREE( h_A  );
+    TESTING_FREE( ipiv );
+
+    /* Shut down the MAGMA context */
+    magma_finalize(context);
 }
