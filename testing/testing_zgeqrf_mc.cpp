@@ -33,19 +33,11 @@
 #define FLOPS(m, n) (    FMULS_GEQRF(m, n) +    FADDS_GEQRF(m, n) )
 #endif
 
-/* block size */
-int EN_BEE;
-
-/* QUARK scheduler - initialized inside main */
-Quark *quark;
-
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeqrf
 */
 int main( int argc, char** argv) 
 {
-    EN_BEE = -1;
-
     cuDoubleComplex *h_A, *h_R, *h_A2, *h_A3, *h_work, *h_work2, *tau, *d_work2;
     cuDoubleComplex *d_A, *d_work;
     float gpu_perf, cpu_perf, cpu2_perf;
@@ -64,7 +56,8 @@ int main( int argc, char** argv)
     int ione     = 1;
     int ISEED[4] = {0,0,0,1};
 
-    int cores = 4;
+    int num_cores = 4;
+    int num_gpus = 0;
 
     if (argc != 1){
       for(i = 1; i<argc; i++){      
@@ -73,12 +66,10 @@ int main( int argc, char** argv)
         else if (strcmp("-M", argv[i])==0)
           M = atoi(argv[++i]);
         else if (strcmp("-C", argv[i])==0)
-          cores = atoi(argv[++i]);
-        else if (strcmp("-B", argv[i])==0)
-          EN_BEE = atoi(argv[++i]);
+         num_cores = atoi(argv[++i]);
       }
       if ((M>0 && N>0) || (M==0 && N==0)) {
-        printf("  testing_zgeqrf_mc -M %d -N %d -B %d\n\n", M, N, EN_BEE);
+        printf("  testing_zgeqrf_mc -M %d -N %d \n\n", M, N);
         if (M==0 && N==0) {
           M = N = size[9];
           loop = 1;
@@ -121,10 +112,11 @@ int main( int argc, char** argv)
       fprintf (stderr, "!!!! host memory allocation error (tau)\n");
     }
 
-    /* Initialize the QUARK scheduler */
-    quark = QUARK_New(cores);
+    /* Initialize MAGMA hardware context, seeting how many CPU cores 
+       and how many GPUs to be used in the consequent computations  */
+    magma_context *context;
+    context = magma_init(num_cores, num_gpus, argc, argv);
 
-      start = get_current_time();
     printf("\n\n");
     printf("   M     N       LAPACK Gflop/s     Multi-core Gflop/s    ||R||_F / ||A||_F\n");
     printf("===========================================================================\n");
@@ -159,7 +151,7 @@ int main( int argc, char** argv)
 	 =================================================================== */
 
       start = get_current_time();
-      magma_zgeqrf_mc(&M, &N, h_A2, &M, tau, h_work2, &lwork, info);
+      magma_zgeqrf_mc(context, &M, &N, h_A2, &M, tau, h_work2, &lwork, info);
       end = get_current_time();
 
       if (info[0] < 0)  
@@ -185,12 +177,13 @@ int main( int argc, char** argv)
 	break;
     }
 
-    /* Shut down the QUARK scheduler */
-    QUARK_Delete(quark);
-
     /* Memory clean up */
     free(h_A2);
     free(tau);
 	free(h_A3);
 	free(h_work2);
+
+    /* Shut down the MAGMA context */
+    magma_finalize(context);
+
 }

@@ -20,12 +20,6 @@
 #define  T(m) (work+(m)*(nb))
 #define  W(k,n) &(local_work[(mt)*(n-1)+(k)])
 
-// block size comes from command line
-extern int EN_BEE;
-
-// quark scheduling environment gets initialized in driver
-extern Quark *quark;
-
 void getro (char *trans, const int m, const int n, const cuDoubleComplex *A, const int LDA, cuDoubleComplex *B, const int LDB) 
 {
   const cuDoubleComplex *Atmp;
@@ -369,7 +363,7 @@ void QUARK_Insert_Task_zlarfb(Quark *quark, Quark_Task_Flags *task_flags,
 }
 
 extern "C" int 
-magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
+magma_zgeqrf_mc( magma_context *cntxt, magma_int_t *m, magma_int_t *n,
                  cuDoubleComplex *a,    magma_int_t *lda, cuDoubleComplex *tau,
                  cuDoubleComplex *work, magma_int_t *lwork,
                  magma_int_t *info)
@@ -388,6 +382,8 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
 
     Arguments   
     =========   
+    CNTXT   (input) MAGMA_CONTEXT
+            CNTXT specifies the MAGMA hardware context for this routine.   
 
     M       (input) INTEGER   
             The number of rows of the matrix A.  M >= 0.   
@@ -441,9 +437,17 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
     and tau in TAU(i).   
     ====================================================================    */
 
+  if (cntxt->num_cores == 1 && cntxt->num_gpus == 1)
+  {
+    int result = magma_zgeqrf(*m, *n, a, *lda, tau, work, *lwork, info);
+    return result;
+  }
+
   int i,j,l;
 
   int ii=-1,jj=-1,ll=-1;
+
+  Quark* quark = cntxt->quark;
 
   // DAG labels
   char sgeqrt_dag_label[1000]; 
@@ -456,7 +460,7 @@ magma_zgeqrf_mc( magma_int_t *m, magma_int_t *n,
   cuDoubleComplex c_one = MAGMA_Z_ONE;
   cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
-  int nb = (EN_BEE==-1)? magma_get_zpotrf_nb(*n): EN_BEE;
+  int nb = (cntxt->nb ==-1)? magma_get_zpotrf_nb(*n): cntxt->nb;
 
   int lwkopt = *n * nb;
   work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );
