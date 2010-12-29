@@ -19,8 +19,12 @@
 #define  A(m,n) (a+(n)*(*lda)+(m))
 #define  T(m) (work+(m)*(nb))
 #define  W(k,n) &(local_work[(mt)*(n-1)+(k)])
+#define min(a,b)  (((a)<(b))?(a):(b))
+#define max(a,b)  (((a)>(b))?(a):(b))
 
-void getro (char *trans, const int m, const int n, const cuDoubleComplex *A, const int LDA, cuDoubleComplex *B, const int LDB) 
+void getro (char *trans, const int m, const int n, 
+	    const cuDoubleComplex *A, const int LDA, 
+	    cuDoubleComplex *B, const int LDB) 
 {
   const cuDoubleComplex *Atmp;
 
@@ -57,7 +61,6 @@ void getro (char *trans, const int m, const int n, const cuDoubleComplex *A, con
 // task execution code
 void SCHED_zlarfb(Quark* quark)
 {
-
   int M;
   int N;
   int MM;
@@ -595,5 +598,6 @@ magma_zgeqrf_mc( magma_context *cntxt, magma_int_t *m, magma_int_t *n,
 #undef A
 #undef T
 #undef W
-
+#undef min
+#undef max
 

@@ -17,6 +17,9 @@
 #include <quark.h>
 
 #define  A(m,n) (a+(n)*(*lda)+(m))
+#define min(a,b)  (((a)<(b))?(a):(b))
+#define max(a,b)  (((a)>(b))?(a):(b))
+
 
 /* Task execution code */
 static void SCHED_zgemm(Quark* quark)
@@ -127,8 +130,8 @@ magma_zgetrf_mc(magma_context *cntxt,
 
     Purpose   
     =======   
-    ZGETRF computes an LU factorization of a general M-by-N matrix A   
-    using partial pivoting with row interchanges.   
+    ZGETRF computes an LU factorization of a general COMPLEX_16 
+    M-by-N matrix A using partial pivoting with row interchanges.   
 
     The factorization has the form   
        A = P * L * U   
@@ -447,6 +450,8 @@ magma_zgetrf_mc(magma_context *cntxt,
     QUARK_Barrier(quark);
     
 }
-#undef A
 
+#undef A
+#undef min
+#undef max
 

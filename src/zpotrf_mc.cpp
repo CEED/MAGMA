@@ -17,6 +17,8 @@
 #include <quark.h>
 
 #define  A(m,n) (a+(n)*(*lda)+(m))
+#define min(a,b)  (((a)<(b))?(a):(b))
+#define max(a,b)  (((a)>(b))?(a):(b))
 
 extern magma_int_t EN_BEE;
 extern Quark *quark;
@@ -219,14 +221,11 @@ magma_zpotrf_mc(char *uplo,
 
   magma_int_t iinfo[2];
   iinfo[1] = 0;
-
   ii = -1;
 
   // traverse diagonal blocks
   for (i = 0; i < (*n); i += nb) {
-
     ii++;
-
     temp2 = min(nb,(*n)-i);
  
     // if not first block
@@ -264,7 +263,6 @@ magma_zpotrf_mc(char *uplo,
             strlen(label)+1,         label,     VALUE | TASKLABEL,
             6,                       "green",   VALUE | TASKCOLOR,
             0);
-
         }   
 
       } else {
@@ -273,7 +271,6 @@ magma_zpotrf_mc(char *uplo,
 
         // split syrk into tiles
         for (j = 0; j < i; j += nb) {
-
           jj++;
 
           sprintf(label, "SYRK %d %d", ii, jj);
@@ -303,11 +300,8 @@ magma_zpotrf_mc(char *uplo,
               strlen(label)+1,         label,     VALUE | TASKLABEL,
               6,                       "green",   VALUE | TASKCOLOR,
               0);
-
           }
-
         }
-
       }
 
       // if not last block
@@ -317,21 +311,16 @@ magma_zpotrf_mc(char *uplo,
 
         // split gemm into tiles
         for (j = i+nb; j < (*n); j += nb){
-
-          jj++;
-
+	  jj++;
           kk = -1;
 
           for (k = 0; k < i; k += nb) {
-
             kk++;
-
             temp = min(nb,(*n)-j);
 
             sprintf(label, "GEMM %d %d %d", ii, jj, kk);
 
             if (upper) {
-
               QUARK_Insert_Task(quark, SCHED_zgemm, 0,
                 sizeof(magma_int_t),             &upper,    VALUE,
                 sizeof(magma_int_t),             &nb,       VALUE,
@@ -359,16 +348,11 @@ magma_zpotrf_mc(char *uplo,
                 strlen(label)+1,         label,     VALUE | TASKLABEL,
                 5,                       "blue",    VALUE | TASKCOLOR,
                 0);
-
             }
-
           }
-
         }
-
-	  }
-
-	}
+      }  
+    }
 
     iinfo[0] = i;
 
@@ -419,20 +403,16 @@ magma_zpotrf_mc(char *uplo,
             strlen(label)+1,         label,     VALUE | TASKLABEL,
             4,                       "red",     VALUE | TASKCOLOR,
             0);
-
         }
-
-	  }
-
+      } 
     }
-
   }
-
+  
   QUARK_Barrier(quark);
-
 }
 
 #undef A
-
+#undef min
+#undef max
 
 

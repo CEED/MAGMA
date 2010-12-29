@@ -10,11 +10,12 @@
 */
 
 #include <stdio.h>
+#include <pthread.h>
+
 #include <cuda_runtime_api.h>
 #include <cublas.h>
-#include "magma.h"
 
-#include <pthread.h>
+#include "magma.h"
 
 typedef struct {
   int flag;
@@ -31,15 +32,13 @@ typedef struct {
   pthread_t *thread;
   cuDoubleComplex **p;
   cuDoubleComplex *w;
-} MAGMA_GLOBALS;
-
-extern MAGMA_GLOBALS MG;
+} MAGMA_QR_GLOBALS;
 
 extern "C" magma_int_t
-magma_zgeqrf2(magma_int_t m, magma_int_t n, 
-             cuDoubleComplex *a,    magma_int_t lda, cuDoubleComplex *tau, 
-             cuDoubleComplex *work, magma_int_t lwork,
-             magma_int_t *info )
+magma_zgeqrf2(magma_context *cntxt, magma_int_t m, magma_int_t n, 
+	      cuDoubleComplex *a,    magma_int_t lda, cuDoubleComplex *tau, 
+	      cuDoubleComplex *work, magma_int_t lwork,
+	      magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -49,13 +48,14 @@ magma_zgeqrf2(magma_int_t m, magma_int_t n,
 
     Purpose
     =======
-
-    ZGEQRF computes a QR factorization of a real M-by-N matrix A:
+    ZGEQRF computes a QR factorization of a COMPLEX_16 M-by-N matrix A:
     A = Q * R. This version does not require work space on the GPU
     passed as input. GPU memory is allocated in the routine.
 
     Arguments
     =========
+    CNTXT   (input) MAGMA_CONTEXT
+            CNTXT specifies the MAGMA hardware context for this routine.
 
     M       (input) INTEGER
             The number of rows of the matrix A.  M >= 0.
@@ -117,20 +117,21 @@ magma_zgeqrf2(magma_int_t m, magma_int_t n,
     and tau in TAU(i).
     =====================================================================    */
 
-   #define  a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
-   #define da_ref(a_1,a_2) (da+(a_2)*ldda  + (a_1))
-   #define min(a,b)  (((a)<(b))?(a):(b))
-   #define max(a,b)  (((a)>(b))?(a):(b))
+    #define  a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
+    #define da_ref(a_1,a_2) (da+(a_2)*ldda  + (a_1))
+    #define min(a,b)  (((a)<(b))?(a):(b))
+    #define max(a,b)  (((a)>(b))?(a):(b))
 
     int cnt=-1;
-
     cuDoubleComplex c_one = MAGMA_Z_ONE;
 
     int i, k, lddwork, old_i, old_ib;
     int nbmin, nx, ib, ldda;
 
     *info = 0;
-    int nb = MG.nb;
+
+    MAGMA_QR_GLOBALS *qr_params = (MAGMA_QR_GLOBALS *)cntxt->params;
+    int nb = qr_params->nb;
 
     int lwkopt = n * nb;
     work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );
@@ -145,14 +146,14 @@ magma_zgeqrf2(magma_int_t m, magma_int_t n,
         *info = -7;
     }
     if (*info != 0)
-        return 0;
+      return MAGMA_ERR_ILLEGAL_VALUE;
     else if (lquery)
-        return 0;
+      return MAGMA_SUCCESS;
 
     k = min(m,n);
     if (k == 0) {
         work[0] = c_one;
-        return 0;
+        return MAGMA_SUCCESS;
     }
 
     cublasStatus status;
@@ -205,71 +206,73 @@ magma_zgeqrf2(magma_int_t m, magma_int_t n,
             cudaStreamSynchronize(stream[1]);
             int rows = m-i;
 
-	        cnt++;
-	        magma_zgeqrf_mc(&rows, &ib, a_ref(i,i), &lda, tau+i, work, &lwork, info);
+	    cnt++;
+	    magma_zgeqrf_mc(cntxt, &rows, &ib, a_ref(i,i), &lda, 
+			    tau+i, work, &lwork, info);
 
             /* Form the triangular factor of the block reflector
                H = H(i) H(i+1) . . . H(i+ib-1) */
             lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr, 
-                              &rows, &ib, a_ref(i,i), &lda, tau+i, MG.t+cnt*nb*nb, &ib);
-	        if (cnt < MG.np_gpu) {
-	          MG.p[cnt]=a;
-	        }
-			zpanel_to_q(MagmaUpper, ib, a_ref(i,i), lda, MG.w+cnt*MG.nb*MG.nb);
+                              &rows, &ib, a_ref(i,i), &lda, tau+i, qr_params->t+cnt*nb*nb, &ib);
+	    if (cnt < qr_params->np_gpu) {
+	      qr_params->p[cnt]=a;
+	    }
+	    zpanel_to_q(MagmaUpper, ib, a_ref(i,i), lda, qr_params->w+cnt*qr_params->nb*qr_params->nb);
             cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
                             a_ref(i,i), lda, da_ref(i,i), ldda);
-			if (MG.flag == 1)
-			  zq_to_panel(MagmaUpper, ib, a_ref(i,i), lda, MG.w+cnt*MG.nb*MG.nb);
+	    if (qr_params->flag == 1)
+	      zq_to_panel(MagmaUpper, ib, a_ref(i,i), lda, qr_params->w+cnt*qr_params->nb*qr_params->nb);
 	    
             if (i + ib < n) { 
-		        cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), MG.t+cnt*nb*nb, ib, dwork, lddwork);
+	      cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), qr_params->t+cnt*nb*nb, ib, dwork, lddwork);
 
-                if (i+ib < k-nx)
-                    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
-                    magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
-				      rows, ib, ib, 
-				      da_ref(i, i   ), ldda, dwork,    lddwork, 
-				      da_ref(i, i+ib), ldda, dwork+ib, lddwork);
-                else
-                    magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
-				      rows, n-i-ib, ib, 
-				      da_ref(i, i   ), ldda, dwork,    lddwork, 
-				      da_ref(i, i+ib), ldda, dwork+ib, lddwork);
+	      if (i+ib < k-nx)
+		/* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
+		magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
+				  rows, ib, ib, 
+				  da_ref(i, i   ), ldda, dwork,    lddwork, 
+				  da_ref(i, i+ib), ldda, dwork+ib, lddwork);
+	      else
+		magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
+				  rows, n-i-ib, ib, 
+				  da_ref(i, i   ), ldda, dwork,    lddwork, 
+				  da_ref(i, i+ib), ldda, dwork+ib, lddwork);
 
-                old_i  = i;
-                old_ib = ib;
+	      old_i  = i;
+	      old_ib = ib;
             }
         }
     } else {
-        i = 0;
+      i = 0;
     }
     
     /* Use unblocked code to factor the last or only block. */
-    if (i < k) {
-        ib = n-i;
-        if (i!=0)
-            cublasGetMatrix(m, ib, sizeof(cuDoubleComplex),
-                            da_ref(0,i), ldda, a_ref(0,i), lda);
+    if (i < k) 
+      {
+	ib = n-i;
+	if (i!=0)
+	  cublasGetMatrix(m, ib, sizeof(cuDoubleComplex),
+			  da_ref(0,i), ldda, a_ref(0,i), lda);
         int rows = m-i;
-
+	
         cnt++;
-
         lapackf77_zgeqrf(&rows, &ib, a_ref(i,i), &lda, tau+i, work, &lwork, info);
 	
-	    if (cnt < MG.np_gpu) {
-	  
-	        int ib2=min(ib,nb);
-	  
-	        lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr, 
-                              &rows, &ib2, a_ref(i,i), &lda, tau+i, MG.t+cnt*nb*nb, &ib2);
-	  
-	        MG.p[cnt]=a;
-	    }
-	
-    }
+	if (cnt < qr_params->np_gpu) 
+	  {
+	    int ib2=min(ib,nb);
+	    
+	    lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr, 
+                              &rows, &ib2, a_ref(i,i), &lda, tau+i, qr_params->t+cnt*nb*nb, &ib2);
+	    
+	    qr_params->p[cnt]=a;
+	  }
+      }
     
+    cudaStreamDestroy( stream[0] );
+    cudaStreamDestroy( stream[1] );
     cublasFree(da);
-    return 0;
+    return MAGMA_SUCCESS;
 } /* magma_zgeqrf */
 
 #undef min
