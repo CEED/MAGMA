@@ -39,6 +39,9 @@ typedef struct context
   /* Block size, internally used for some algorithms */
   magma_int_t nb;
 
+  /* Pointer to other global algorithm-dependent parameters */ 
+  void *params;
+
 } magma_context;
 
 /* ------------------------------------------------------------
