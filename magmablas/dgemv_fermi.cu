@@ -113,7 +113,7 @@ dgemvt_kernel1_fermi(magma_int_t m, magma_int_t n, double alpha, magma_int_t n1,
 
 	__shared__ double sdata[threadSize];
 
-	volatile double *smem;
+//	volatile double *smem;
 
 	double res;
 	res = 0.0;
@@ -155,6 +155,7 @@ dgemvt_kernel1_fermi(magma_int_t m, magma_int_t n, double alpha, magma_int_t n1,
 
 	if(tx < 32)
 	{
+	/*
 		smem = sdata;
 		smem[tx] += smem[tx + 32];
 		smem[tx] += smem[tx + 16];
@@ -162,6 +163,15 @@ dgemvt_kernel1_fermi(magma_int_t m, magma_int_t n, double alpha, magma_int_t n1,
 	    smem[tx] += smem[tx +  4];
 		smem[tx] += smem[tx +  2];
 		smem[tx] += smem[tx +  1];
+	*/
+		sdata[tx] += sdata[tx + 32];
+	}
+    if(tx == 0)
+	{
+		for(int i=1;i<32;i++)
+		{
+			sdata[tx] += sdata[tx + i];
+		}
 	}
 
 	if( tx == 0 )
