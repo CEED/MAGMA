@@ -34,9 +34,6 @@ extern "C" {
 #define LOGPRINTF(args...) { fprintf(stderr,"%s:%d: [%s] ",__FILE__,__LINE__,__FUNCTION__); fprintf(stderr, args); }
 // #define DBGPRINTF(args...) { fprintf(stderr, args); }
 
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#define min(a, b) ((a) < (b) ? (a) : (b))
-
 #define QUARK_SUCCESS 0
 #define QUARK_ERR -1
 
