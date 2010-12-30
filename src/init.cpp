@@ -94,7 +94,7 @@ magma_init( magma_int_t ncpu, magma_int_t ngpu,
     
     context->nb = -1;
     for(i = 1; i<argc; i++)
-      if (strcmp("-B", argv[i])==0)
+      if (strcmp("-b", argv[i])==0)
 	context->nb = atoi(argv[++i]);
     
     return context;
