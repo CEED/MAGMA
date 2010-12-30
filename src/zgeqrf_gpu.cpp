@@ -49,8 +49,7 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
 
     Purpose
     =======
-
-    ZGEQRF computes a QR factorization of a real M-by-N matrix A:
+    ZGEQRF computes a QR factorization of a COMPLEX_16 M-by-N matrix A:
     A = Q * R. This version stores the triangular matrices used in
     the factorization so that they can be applied directly (i.e.,
     without being recomputed) later. As a result, the application
@@ -58,7 +57,6 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
 
     Arguments
     =========
-
     M       (input) INTEGER
             The number of rows of the matrix A.  M >= 0.
 
@@ -97,7 +95,6 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
 
     Further Details
     ===============
-
     The matrix Q is represented as a product of elementary reflectors
 
        Q = H(1) H(2) . . . H(k), where k = min(m,n).
@@ -109,7 +106,6 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
     where tau is a real scalar, and v is a real vector with
     v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),
     and tau in TAU(i).
-
     =====================================================================    */
 
     #define a_ref(a_1,a_2) (dA+(a_2)*(ldda) + (a_1))
