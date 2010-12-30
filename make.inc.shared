@@ -18,7 +18,7 @@
 
 	ARCH      = gcc
 	ARCHFLAGS = -shared -o
-	RANLIB    = ls
+	RANLIB    = strip
 
 	OPTS      = -DADD_ -O3 -fPIC
 	NVOPTS    = -DADD_ --shared --compiler-options '-fPIC' -DUNIX -O3
