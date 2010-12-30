@@ -116,7 +116,7 @@ void magma_qr_init(MAGMA_QR_GLOBALS *qr_params,
 
   if (qr_params->ob * qr_params->nthreads >= n){
     fprintf(stderr,"\n\nNumber of threads times block size not less than width of matrix.\n\n");
-	exit(1);
+    exit(1);
   }
 
   qr_params->np_gpu = (n-(qr_params->nthreads * qr_params->ob)) / qr_params->nb;
@@ -128,7 +128,9 @@ void magma_qr_init(MAGMA_QR_GLOBALS *qr_params,
   qr_params->n = n;
   qr_params->lda = m;
   qr_params->a = a;
-  qr_params->t = (cuDoubleComplex*)malloc(sizeof(cuDoubleComplex)*qr_params->n*qr_params->nb);
+  qr_params->t = (cuDoubleComplex*)malloc(sizeof(cuDoubleComplex)*
+					  qr_params->n*
+					  qr_params->nb);
 
   if ((qr_params->n-(qr_params->nthreads*qr_params->ob)) > qr_params->m) {
     qr_params->np_gpu = m/qr_params->nb;
@@ -138,11 +140,11 @@ void magma_qr_init(MAGMA_QR_GLOBALS *qr_params,
 
   fprintf(stderr,"qr_params->np_gpu=%d\n",qr_params->np_gpu);
 
-  qr_params->p = (volatile cuDoubleComplex **) malloc (qr_params->np_gpu*sizeof(cuDoubleComplex*));
+  qr_params->p = (volatile cuDoubleComplex **) malloc (sizeof(cuDoubleComplex*)*
+						       qr_params->np_gpu);
 
-  for (i = 0; i < qr_params->np_gpu; i++) {
+  for (i = 0; i < qr_params->np_gpu; i++)
     qr_params->p[i] = NULL;
-  }
   
   qr_params->thread = (pthread_t*)malloc(sizeof(pthread_t)*qr_params->nthreads);
   
@@ -150,17 +152,15 @@ void magma_qr_init(MAGMA_QR_GLOBALS *qr_params,
     pthread_create(&qr_params->thread[i], NULL, cpu_thread, (void *)(long int)i);
   }
 
-  qr_params->w = (cuDoubleComplex *)malloc(sizeof(cuDoubleComplex)*qr_params->np_gpu*qr_params->nb*qr_params->nb);
+  qr_params->w = (cuDoubleComplex *)malloc(sizeof(cuDoubleComplex)*
+					   qr_params->np_gpu*qr_params->nb*
+					   qr_params->nb);
 
   qr_params->flag = 0;
 }
 
-
-int EN_BEE;
-
 int TRACE;
 
-Quark *quark;
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeqrf
@@ -170,8 +170,6 @@ int main( int argc, char** argv)
     magma_int_t nquarkthreads=2;
     magma_int_t nthreads=2;
     magma_int_t num_gpus  = 1;
-
-    EN_BEE = 32;
     TRACE = 0;
 
     cuDoubleComplex *h_A, *h_R, *h_work, *tau;
@@ -208,8 +206,6 @@ int main( int argc, char** argv)
 	    MG.ob = atoi(argv[++i]);
 	  else if (strcmp("-B", argv[i])==0)
 	    MG.nb = atoi(argv[++i]);
-	  else if (strcmp("-b", argv[i])==0)
-	    EN_BEE = atoi(argv[++i]);
 	  else if (strcmp("-A", argv[i])==0)
 	    accuracyflag = atoi(argv[++i]);
 	  else if (strcmp("-P", argv[i])==0)

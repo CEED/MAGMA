@@ -108,11 +108,11 @@ int main( int argc, char** argv)
           M = atoi(argv[++i]);
         else if (strcmp("-C", argv[i])==0)
           num_cores = atoi(argv[++i]);
-        else if (strcmp("-B", argv[i])==0)
+        else if (strcmp("-b", argv[i])==0)
           EN_BEE = atoi(argv[++i]);
       }
       if ((M>0 && N>0) || (M==0 && N==0)) {
-        printf("  testing_zgetrf_mc -M %d -N %d -B %d -C %d\n\n", 
+        printf("  testing_zgetrf_mc -M %d -N %d -b %d -C %d\n\n", 
 	       M, N, EN_BEE, num_cores);
         if (M==0 && N==0) {
           M = N = size[9];
@@ -122,14 +122,14 @@ int main( int argc, char** argv)
         printf("\nUsage: \n");
 	printf("  Make sure you set the number of BLAS threads to 1, e.g.,\n");
 	printf("   > setenv MKL_NUM_THREADS 1\n");
-        printf("   > testing_zgetrf_mc -M %d -N %d -C 4 -B 128\n\n", 1024, 1024);
+        printf("   > testing_zgetrf_mc -M %d -N %d -C 4 -b 128\n\n", 1024, 1024);
         exit(1);
       }
     } else {
       printf("\nUsage: \n");
       printf("  Make sure you set the number of BLAS threads to 1, e.g.,\n");
       printf("   > setenv MKL_NUM_THREADS 1\n");
-      printf("   > testing_zgetrf_mc -M %d -N %d -C 4 -B 128\n\n", 1024, 1024);
+      printf("   > testing_zgetrf_mc -M %d -N %d -C 4 -b 128\n\n", 1024, 1024);
       M = N = size[9];
     }
 
