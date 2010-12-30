@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
@@ -50,11 +51,9 @@ typedef struct {
   pthread_t *thread;
   volatile cuDoubleComplex **p;
   cuDoubleComplex *w;
-} MAGMA_GLOBALS;
+} MAGMA_QR_GLOBALS;
 
-
-
-MAGMA_GLOBALS MG;
+MAGMA_QR_GLOBALS MG;
 
 /* Update thread */
 void *cpu_thread(void *a)
@@ -99,60 +98,61 @@ void *cpu_thread(void *a)
   return (void*)NULL;
 }
 
-void magma_init (int m, int n, cuDoubleComplex *a, int nthreads)
+void magma_qr_init(MAGMA_QR_GLOBALS *qr_params,
+		   int m, int n, cuDoubleComplex *a, int nthreads)
 {
   int i;
 
-  MG.nthreads = nthreads;
+  qr_params->nthreads = nthreads;
 
-  if (MG.nb == -1)
-    MG.nb = 128;
+  if (qr_params->nb == -1)
+    qr_params->nb = 128;
 
-  if (MG.ob == -1)
-    MG.ob = MG.nb;
+  if (qr_params->ob == -1)
+    qr_params->ob = qr_params->nb;
 
-  if (MG.fb == -1)
-    MG.fb = MG.nb;
+  if (qr_params->fb == -1)
+    qr_params->fb = qr_params->nb;
 
-  if (MG.ob * MG.nthreads >= n){
+  if (qr_params->ob * qr_params->nthreads >= n){
     fprintf(stderr,"\n\nNumber of threads times block size not less than width of matrix.\n\n");
 	exit(1);
   }
 
-  MG.np_gpu = (n-(MG.nthreads * MG.ob)) / MG.nb;
+  qr_params->np_gpu = (n-(qr_params->nthreads * qr_params->ob)) / qr_params->nb;
 
-  if ( (n-(MG.nthreads * MG.ob)) % MG.nb != 0)
-    MG.np_gpu++;
+  if ( (n-(qr_params->nthreads * qr_params->ob)) % qr_params->nb != 0)
+    qr_params->np_gpu++;
 
-  MG.m = m;
-  MG.n = n;
-  MG.lda = m;
-  MG.a = a;
-  MG.t = (cuDoubleComplex*)malloc(sizeof(cuDoubleComplex)*MG.n*MG.nb);
+  qr_params->m = m;
+  qr_params->n = n;
+  qr_params->lda = m;
+  qr_params->a = a;
+  qr_params->t = (cuDoubleComplex*)malloc(sizeof(cuDoubleComplex)*qr_params->n*qr_params->nb);
 
-  if ((MG.n-(MG.nthreads*MG.ob)) > MG.m) {
-    MG.np_gpu = m/MG.nb;
-    if (m%MG.nb != 0)
-      MG.np_gpu++;
+  if ((qr_params->n-(qr_params->nthreads*qr_params->ob)) > qr_params->m) {
+    qr_params->np_gpu = m/qr_params->nb;
+    if (m%qr_params->nb != 0)
+      qr_params->np_gpu++;
   }
 
-  fprintf(stderr,"MG.np_gpu=%d\n",MG.np_gpu);
+  fprintf(stderr,"qr_params->np_gpu=%d\n",qr_params->np_gpu);
 
-  MG.p = (volatile cuDoubleComplex **) malloc (MG.np_gpu*sizeof(cuDoubleComplex*));
+  qr_params->p = (volatile cuDoubleComplex **) malloc (qr_params->np_gpu*sizeof(cuDoubleComplex*));
 
-  for (i = 0; i < MG.np_gpu; i++) {
-    MG.p[i] = NULL;
+  for (i = 0; i < qr_params->np_gpu; i++) {
+    qr_params->p[i] = NULL;
   }
   
-  MG.thread = (pthread_t*)malloc(sizeof(pthread_t)*MG.nthreads);
+  qr_params->thread = (pthread_t*)malloc(sizeof(pthread_t)*qr_params->nthreads);
   
-  for (i = 0; i < MG.nthreads; i++){
-    pthread_create(&MG.thread[i], NULL, cpu_thread, (void *)(long int)i);
+  for (i = 0; i < qr_params->nthreads; i++){
+    pthread_create(&qr_params->thread[i], NULL, cpu_thread, (void *)(long int)i);
   }
 
-  MG.w = (cuDoubleComplex *)malloc(sizeof(cuDoubleComplex)*MG.np_gpu*MG.nb*MG.nb);
+  qr_params->w = (cuDoubleComplex *)malloc(sizeof(cuDoubleComplex)*qr_params->np_gpu*qr_params->nb*qr_params->nb);
 
-  MG.flag = 0;
+  qr_params->flag = 0;
 }
 
 
@@ -167,14 +167,12 @@ Quark *quark;
 */
 int main( int argc, char** argv) 
 {
-    int nthreads=2;
+    magma_int_t nquarkthreads=2;
+    magma_int_t nthreads=2;
+    magma_int_t num_gpus  = 1;
+
     EN_BEE = 32;
     TRACE = 0;
-    int nquarkthreads=2;
-
-    cuInit( 0 );
-    cublasInit( );
-    printout_devices( );
 
     cuDoubleComplex *h_A, *h_R, *h_work, *tau;
     double gpu_perf, cpu_perf, flops;
@@ -231,50 +229,37 @@ int main( int argc, char** argv)
 	else 
 	  {
 	    printf("\nUsage: \n");
-	    printf("  testing_zgeqrf-v2 -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
+	    printf("  Make sure you set the number of BLAS threads to 1, e.g.,\n");
+	    printf("   > setenv MKL_NUM_THREADS 1\n");
+	    printf("   > testing_zgeqrf-v2 -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
 	    exit(1);
 	  }
       } 
     else 
       {
 	printf("\nUsage: \n");
-	printf("  testing_zgeqrf-v2 -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
+	printf("  Make sure you set the number of BLAS threads to 1, e.g.,\n");
+        printf("   > setenv MKL_NUM_THREADS 1\n");
+	printf("   > testing_zgeqrf-v2 -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
 	M = N = size[9];
       }
 
-
-    /* Initialize CUBLAS */
-    status = cublasInit();
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! CUBLAS initialization error\n");
-    }
+    /* Initialize MAGMA hardware context, seeting how many CPU cores
+       and how many GPUs to be used in the consequent computations  */
+    magma_context *context;
+    context = magma_init(nquarkthreads, num_gpus, argc, argv);
+    context->params = (void *)(&MG);
 
     n2  = M * N;
     int min_mn = min(M, N);
-
-    /* Allocate host memory for the matrix */
-    h_A = (cuDoubleComplex*)malloc(n2 * sizeof(h_A[0]));
-    if (h_A == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (A)\n");
-    }
-
-    tau = (cuDoubleComplex*)malloc(min_mn * sizeof(cuDoubleComplex));
-    if (tau == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (tau)\n");
-    }
-
-    cudaMallocHost( (void**)&h_R,  n2*sizeof(cuDoubleComplex) );
-    if (h_R == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (R)\n");
-    }
-
     int nb = magma_get_zgeqrf_nb(min_mn);
     int lwork = N*nb;
 
-    cudaMallocHost( (void**)&h_work, lwork*sizeof(cuDoubleComplex) );
-    if (h_work == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (work)\n");
-    }
+    /* Allocate host memory for the matrix */
+    TESTING_MALLOC   ( h_A  , cuDoubleComplex, n2    );
+    TESTING_MALLOC   ( tau  , cuDoubleComplex, min_mn);
+    TESTING_HOSTALLOC( h_R  , cuDoubleComplex, n2    );
+    TESTING_HOSTALLOC(h_work, cuDoubleComplex, lwork );
 
     printf("\n\n");
     printf("  M     N   CPU GFlop/s   GPU GFlop/s    ||R||_F / ||A||_F\n");
@@ -294,24 +279,20 @@ int main( int argc, char** argv)
         //magma_zgeqrf(M, N, h_R, M, tau, h_work, lwork, &info);
 
         for(j=0; j<n2; j++)
-            h_R[j] = h_A[j];
+	  h_R[j] = h_A[j];
 
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-	    magma_init(M, N, h_R, nthreads);
-
-	    quark = QUARK_New(nquarkthreads);
-
+	magma_qr_init(&MG, M, N, h_R, nthreads);
+	
         start = get_current_time();
-        magma_zgeqrf3(M, N, h_R, M, tau, h_work, lwork, &info);
+        magma_zgeqrf3(context, M, N, h_R, M, tau, h_work, lwork, &info);
         end = get_current_time();
-
-	    QUARK_Delete(quark);
 
         gpu_perf = flops / GetTimerValue(start, end);
 
-		/* =====================================================================
+	/* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
@@ -319,10 +300,10 @@ int main( int argc, char** argv)
           lapackf77_zgeqrf(&M, &N, h_A, &M, tau, h_work, &lwork, &info);
         end = get_current_time();
         if (info < 0)
-            printf("Argument %d of zgeqrf had an illegal value.\n", -info);
+	  printf("Argument %d of zgeqrf had an illegal value.\n", -info);
 
         cpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
-
+	
         /* =====================================================================
            Check the result compared to LAPACK
            =================================================================== */
@@ -349,14 +330,11 @@ int main( int argc, char** argv)
     }
 
     /* Memory clean up */
-    free(h_A);
-    free(tau);
-    cublasFree(h_work);
-    cublasFree(h_R);
+    TESTING_FREE    ( h_A  );
+    TESTING_FREE    ( tau  );
+    TESTING_HOSTFREE(h_work);
+    TESTING_HOSTFREE( h_R  );
 
-    /* Shutdown */
-    status = cublasShutdown();
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! shutdown error (A)\n");
-    }
+    /* Shut down the MAGMA context */
+    magma_finalize(context);
 }
