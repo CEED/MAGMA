@@ -48,8 +48,8 @@ int main(int argc, char **argv)
     magma_int_t incx = 1;
     magma_int_t incy = 1;
     char        trans = MagmaNoTrans;
-    cuDoubleComplex alpha = MAGMA_Z_MAKE(  1.5, -2.3 );
-    cuDoubleComplex beta  = MAGMA_Z_MAKE( -0.6,  0.8 );
+    cuDoubleComplex alpha = MAGMA_Z_MAKE(1., 0.); // MAGMA_Z_MAKE(  1.5, -2.3 );
+    cuDoubleComplex beta  = MAGMA_Z_MAKE(0., 0.); // MAGMA_Z_MAKE( -0.6,  0.8 );
     cuDoubleComplex *A, *X, *Y, *Ycublas, *Ymagma;
     cuDoubleComplex *dA, *dX, *dY;
         
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 	Ym = N;
     }
 
-    lda = M;
+    lda = ((M+31)/32)*32;
     
     szeA = lda*N;
     szeX = incx*Xm;
@@ -135,8 +135,8 @@ int main(int argc, char **argv)
             Xm = M;
             Ym = N;
         }
-        
-        lda = M;
+         
+        lda = ((M+31)/32)*32;
 	flops = FLOPS( (double)M, (double)N ) / 1000000;
 
         printf(      "%5d %5d ", M, N );

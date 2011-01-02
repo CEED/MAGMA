@@ -39,14 +39,14 @@ int main(int argc, char **argv)
     cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
 
     FILE        *fp ; 
-    magma_int_t N, m, i, lda;
+    magma_int_t N, m, i, lda, LDA;
     magma_int_t matsize;
     magma_int_t vecsize;
     magma_int_t istart = 64;
     magma_int_t incx = 1;
     char        uplo = MagmaLower;
-    cuDoubleComplex alpha = MAGMA_Z_MAKE(  1.5, -2.3 );
-    cuDoubleComplex beta  = MAGMA_Z_MAKE( -0.6,  0.8 );
+    cuDoubleComplex alpha = MAGMA_Z_MAKE(1., 0.); // MAGMA_Z_MAKE(  1.5, -2.3 );
+    cuDoubleComplex beta  = MAGMA_Z_MAKE(0., 0.); // MAGMA_Z_MAKE( -0.6,  0.8 );
     cuDoubleComplex *A, *X, *Y, *Ycublas, *Ymagma;
     cuDoubleComplex *dA, *dX, *dY;
     
@@ -63,7 +63,8 @@ int main(int argc, char **argv)
     if( argc > 2 ) {
       istart = N = atoi( argv[2] );
     }
-    matsize = N*N;
+    LDA = ((N+31)/32)*32;
+    matsize = N*LDA;
     vecsize = N*incx;
 
     TESTING_MALLOC( A, cuDoubleComplex, matsize );
@@ -82,9 +83,9 @@ int main(int argc, char **argv)
     { 
         magma_int_t i, j;
         for(i=0; i<N; i++) {
-            A[i*N+i] = MAGMA_Z_MAKE( MAGMA_Z_REAL(A[i*N+i]), 0. );
+            A[i*LDA+i] = MAGMA_Z_MAKE( MAGMA_Z_REAL(A[i*LDA+i]), 0. );
             for(j=0; j<i; j++)
-                A[i*N+j] = cuConj(A[j*N+i]);
+                A[i*LDA+j] = cuConj(A[j*LDA+i]);
         }
     }
 	
@@ -95,7 +96,8 @@ int main(int argc, char **argv)
     
     for( i = istart; i<N+1; i = (int)((i+1)*1.1) )
     {
-        lda = m = i;
+        m = i;
+	lda = ((m+31)/32)*32;
         flops = FLOPS( (double)m ) / 1e6;
 
         printf(      "%5d ", m );
@@ -108,7 +110,7 @@ int main(int argc, char **argv)
         /* =====================================================================
            Performs operation using CUDA-BLAS
            =================================================================== */
-        cublasSetMatrix( m, m, sizeof( cuDoubleComplex ), A, N,    dA, lda  );
+        cublasSetMatrix( m, m, sizeof( cuDoubleComplex ), A, LDA ,  dA, lda  );
         cublasSetVector( m,    sizeof( cuDoubleComplex ), X, incx, dX, incx );
         cublasSetVector( m,    sizeof( cuDoubleComplex ), Y, incx, dY, incx );
 
@@ -152,9 +154,9 @@ int main(int argc, char **argv)
          */
         cblas_zcopy( m, Y, incx, Ycublas, incx );
         cblas_zhemv( CblasColMajor, CblasLower, m, 
-                     CBLAS_SADDR(alpha), A, N, X, incx, 
+                     CBLAS_SADDR(alpha), A, LDA, X, incx, 
                      CBLAS_SADDR(beta), Ycublas, incx );
-
+ 
         blasf77_zaxpy( &m, &mzone, Ymagma, &incx, Ycublas, &incx);
         error = lapackf77_zlange( "M", &m, &ione, Ycublas, &m, work );
 #endif
