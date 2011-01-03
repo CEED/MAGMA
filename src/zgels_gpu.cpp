@@ -127,7 +127,8 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
     int ldtwork = ( 2*k + ((n+31)/32)*32 )*nb;
     if (nb < nrhs)
       ldtwork = ( 2*k + ((n+31)/32)*32 )*nrhs;
-    if( CUBLAS_STATUS_SUCCESS != cublasAlloc(ldtwork, sizeof(cuDoubleComplex), (void**)&dT) ) {
+    if( CUBLAS_STATUS_SUCCESS != cublasAlloc(ldtwork, 
+					     sizeof(cuDoubleComplex), (void**)&dT) ) {
         magma_xerbla("magma_zgels_gpu", info);
 	return MAGMA_ERR_CUBLASALLOC;
     }

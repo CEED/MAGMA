@@ -31,15 +31,12 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
 
     Purpose
     =======
-
     Solves the least squares problem
            min || A*X - C ||
-    using the QR factorization A = Q*R computed by ZGEQRF_GPU2.
-
+    using the QR factorization A = Q*R computed by ZGEQRF_GPU.
 
     Arguments
     =========
-
     M       (input) INTEGER
             The number of rows of the matrix A. M >= 0.
 
@@ -54,21 +51,30 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
             elementary reflector H(i), for i = 1,2,...,n, as returned by
             ZGEQRF_GPU2 in the first n columns of its array argument A.
 
-    LDDA     (input) INTEGER
+    LDDA    (input) INTEGER
             The leading dimension of the array A, LDDA >= M.
 
     TAU     (input) COMPLEX_16 array, dimension (N)
             TAU(i) must contain the scalar factor of the elementary
             reflector H(i), as returned by MAGMA_ZGEQRF_GPU.
 
-    DB       (input/output) COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
+    DB      (input/output) COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
             On entry, the M-by-NRHS matrix C.
             On exit, the N-by-NRHS solution matrix X.
 
-    LDDB     (input) INTEGER
+    DT      (input) COMPLEX_16 array that is the output (the 6th argument)
+            of magma_zgeqrf_gpu of size
+            2*MIN(M, N)*NB + ((N+31)/32*32 )* MAX(NB, NRHS). 
+            The array starts with a block of size MIN(M,N)*NB that stores 
+            the triangular T matrices used in the QR factorization, 
+            followed by MIN(M,N)*NB block storing the diagonal block 
+            inverses for the R matrix, followed by work space of size 
+            ((N+31)/32*32 )* MAX(NB, NRHS).
+
+    LDDB    (input) INTEGER
             The leading dimension of the array DB. LDDB >= M.
 
-    HWORK    (workspace/output) COMPLEX_16 array, dimension (LWORK)
+    HWORK   (workspace/output) COMPLEX_16 array, dimension (LWORK)
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
     LWORK   (input) INTEGER
@@ -80,13 +86,9 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
             only calculates the optimal size of the HWORK array, returns
             this value as the first entry of the WORK array.
 
-    DT      (input) COMPLEX_16 array that is the output (the 9th argument)
-            of magma_zgeqrf_gpu.
-
     INFO    (output) INTEGER
             = 0:  successful exit
             < 0:  if INFO = -i, the i-th argument had an illegal value
-
     =====================================================================    */
 
    #define a_ref(a_1,a_2) (dA+(a_2)*(ldda) + (a_1))
