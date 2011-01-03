@@ -32,10 +32,12 @@
 
 int main(int argc , char **argv)
 {
+  /*
 #if defined(PRECISION_z) && (GPUSHMEM < 200)
     fprintf(stderr, "This functionnality is not available in MAGMA for this precisions actually\n");
     return EXIT_SUCCESS;
 #else
+  */
     TESTING_CUDA_INIT();
 
     TimeStruct  start, end;
@@ -105,7 +107,7 @@ int main(int argc , char **argv)
 
 	ldb  = ldx = lda = N;
 	ldda = ((N+31)/32)*32;
-	lddb = lddx = ldda;
+	lddb = lddx = N;//ldda;
 
 	/* Initialize matrices */
         size = lda * N;
@@ -236,5 +238,5 @@ int main(int argc , char **argv)
     /* Shutdown */
     TESTING_CUDA_FINALIZE();
 
-#endif /*defined(PRECISION_z) && (GPUSHMEM < 200)*/
+    //#endif /*defined(PRECISION_z) && (GPUSHMEM < 200)*/
 }
