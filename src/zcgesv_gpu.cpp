@@ -165,12 +165,12 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
     else if(ldda < max(1,N))
 	*info =-4;
     else if( lddb < max(1,N))
-	*info =-7;
+	*info =-8;
     else if( lddx < max(1,N))
-	*info =-9;
+	*info =-10;
     
     if(*info!=0){
-	magma_xerbla("magma_zcgesv",info);
+	magma_xerbla("magma_zcgesv_gpu",info);
 	return MAGMA_ERR_ILLEGAL_VALUE;
     }
     
