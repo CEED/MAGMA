@@ -125,7 +125,8 @@ Task  Done      Who       What
                            different; w has to be replaced by a pair of arguments -
                            'wr', and 'wi'.
 ---------------------------------------------------------------------------------
-25                         Possible bug in zcgeqrsv_gpu at least on Tesla for
+25   Ignore (for now)
+               Stan        Possible bug in zcgeqrsv_gpu at least on Tesla for
                            sizes not divisible by 32, e.g.,
 
 [tomov@cumin testing]$ ./testing_dsgeqrsv_gpu -N 1025 -nrhs 1
@@ -138,6 +139,13 @@ Epsilon(single): 5.960464e-08
   N         DP          DP       SP       MP    ||b-Ax||/||A||  NumIter
 =======================================================================
  1025     20.80       20.31    35.93    28.18    0.000000e+00     0
+
+   * this is a problem on Tesla. Apparently comes from sgemms used in slarfb.
+     I can not reproduce the problem with just QR factorization or solver.
+     Even here somethimes runs correctly but sometimes the card goes into
+     a "weird" state and gives these results.
+    
+     Any ideas on this are welcome. Obviously it would require more testing.
 
 ---------------------------------------------------------------------------------
 26             Stan         Bug in zcgesv_gpu when N is not multiple of 32,
