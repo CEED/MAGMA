@@ -24,12 +24,6 @@
 #include "magma.h"
 #include "testings.h"
 
-// block size
-int EN_BEE;
-
-// QUARK scheduler initialized here
-Quark *quark;
-
 // Flops formula
 #define PRECISION_z
 #if defined(PRECISION_z) || defined(PRECISION_c)
@@ -42,7 +36,7 @@ Quark *quark;
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zpotrf_mc
 */
-int main( int argc, char** argv) 
+int main( magma_int_t argc, char** argv) 
 {
     cuDoubleComplex *h_A, *h_R, *h_work, *h_A2;
     cuDoubleComplex *d_A;
@@ -51,28 +45,25 @@ int main( int argc, char** argv)
     TimeStruct start, end;
 
     /* Matrix size */
-    int N=0, n2, lda;
-    int size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10080};
+    magma_int_t N=0, n2, lda;
+    magma_int_t size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10080};
     
-    int i, j, info[1];
+    magma_int_t i, j, info[1];
 
-    int ione     = 1;
-    int ISEED[4] = {0,0,0,1};
+    magma_int_t ione     = 1;
+    magma_int_t ISEED[4] = {0,0,0,1};
 
-    int cores = 4;
+    magma_int_t num_cores = 4;
+	int num_gpus = 0;
 
-    EN_BEE = -1;
-
-    int loop = argc;
+    magma_int_t loop = argc;
     
     if (argc != 1){
       for(i = 1; i<argc; i++){      
         if (strcmp("-N", argv[i])==0)
           N = atoi(argv[++i]);
-        else if (strcmp("-T", argv[i])==0)
-          cores = atoi(argv[++i]);
-        else if (strcmp("-B", argv[i])==0)
-          EN_BEE = atoi(argv[++i]);
+        else if (strcmp("-C", argv[i])==0)
+          num_cores = atoi(argv[++i]);
       }
       if (N==0) {
         N = size[9];
@@ -101,8 +92,11 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! host memory allocation error (A2)\n");
     }
 
-    /* Initialize the Quark scheduler */
-    quark = QUARK_New(cores);
+    /* Initialize MAGMA hardware context, seeting how many CPU cores 
+       and how many GPUs to be used in the consequent computations  */
+    magma_context *context;
+    context = magma_init(num_cores, num_gpus, argc, argv);
+
     
     printf("\n\n");
     printf("  N    Multicore GFlop/s    ||R||_F / ||A||_F\n");
@@ -134,8 +128,8 @@ int main( int argc, char** argv)
 	   Performs operation using multi-core 
 	   =================================================================== */
 	start = get_current_time();
-	//magma_zpotrf_mc("L", &N, h_A2, &lda, info);
-	magma_zpotrf_mc("U", &N, h_A2, &lda, info);
+	//magma_zpotrf_mc(context, "L", &N, h_A2, &lda, info);
+	magma_zpotrf_mc(context, "U", &N, h_A2, &lda, info);
 	end = get_current_time();
 	
 	if (info[0] < 0)  
@@ -160,10 +154,12 @@ int main( int argc, char** argv)
 	  break;
       }
     
-    /* Shut down the Quark scheduler */
-    QUARK_Delete(quark);
-    
     /* Memory clean up */
     free(h_A);
     free(h_A2);
+
+    /* Shut down the MAGMA context */
+    magma_finalize(context);
+
+
 }

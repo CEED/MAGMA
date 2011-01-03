@@ -20,9 +20,6 @@
 #define min(a,b)  (((a)<(b))?(a):(b))
 #define max(a,b)  (((a)>(b))?(a):(b))
 
-extern magma_int_t EN_BEE;
-extern Quark *quark;
-
 // task execution code
 static void SCHED_zgemm(Quark* quark)
 {
@@ -142,7 +139,7 @@ void SCHED_ztrsm(Quark* quark)
 }
 
 extern "C" magma_int_t 
-magma_zpotrf_mc(char *uplo,
+magma_zpotrf_mc(magma_context *cntxt, char *uplo,
 		magma_int_t *n,
 		cuDoubleComplex *a, magma_int_t *lda,
 		magma_int_t *info)
@@ -167,6 +164,9 @@ magma_zpotrf_mc(char *uplo,
 
     Arguments   
     =========   
+    CNTXT   (input) MAGMA_CONTEXT
+            CNTXT specifies the MAGMA hardware context for this routine.   
+
     UPLO    (input) CHARACTER*1   
             = 'U':  Upper triangle of A is stored;   
             = 'L':  Lower triangle of A is stored.   
@@ -197,6 +197,12 @@ magma_zpotrf_mc(char *uplo,
                   completed.   
     =====================================================================   */
 
+  if (cntxt->num_cores == 1 && cntxt->num_gpus == 1)
+  {
+    magma_int_t result = magma_zpotrf(*uplo, *n, a, *lda, info);
+    return result;
+  }
+
   // check arguments
   magma_int_t upper = (magma_int_t) lsame_(uplo, "U");                                          
   *info = 0;
@@ -210,8 +216,10 @@ magma_zpotrf_mc(char *uplo,
   if (*info != 0)
     return 0;
 
+  Quark* quark = cntxt->quark;
+
   // get block size
-  magma_int_t nb = (EN_BEE==-1)? magma_get_zpotrf_nb(*n): EN_BEE;
+  magma_int_t nb = (cntxt->nb ==-1)? magma_get_zpotrf_nb(*n): cntxt->nb;
 
   magma_int_t i,j,k;
   magma_int_t ii,jj,kk;
