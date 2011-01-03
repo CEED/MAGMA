@@ -32,12 +32,6 @@
 
 int main(int argc , char **argv)
 {
-  /*
-#if defined(PRECISION_z) && (GPUSHMEM < 200)
-    fprintf(stderr, "This functionnality is not available in MAGMA for this precisions actually\n");
-    return EXIT_SUCCESS;
-#else
-  */
     TESTING_CUDA_INIT();
 
     TimeStruct  start, end;
@@ -217,8 +211,7 @@ int main(int argc , char **argv)
 	printf("%6.2f     ", gpu_perf);
 	printf("%e    %3d\n", Rnorm/Anorm, iter); fflush(stdout);
 
-        if( argc != 1 ) break ;
-        
+        if( argc != 1 ) break ;        
     }
 
     /* Memory clean up */
@@ -237,6 +230,4 @@ int main(int argc , char **argv)
 
     /* Shutdown */
     TESTING_CUDA_FINALIZE();
-
-    //#endif /*defined(PRECISION_z) && (GPUSHMEM < 200)*/
 }
