@@ -22,13 +22,13 @@
 #define min(a,b)  (((a)<(b))?(a):(b))
 #define max(a,b)  (((a)>(b))?(a):(b))
 
-void getro (char *trans, const int m, const int n, 
-	    const cuDoubleComplex *A, const int LDA, 
-	    cuDoubleComplex *B, const int LDB) 
+void getro (char *trans, const magma_int_t m, const magma_int_t n, 
+	    const cuDoubleComplex *A, const magma_int_t LDA, 
+	    cuDoubleComplex *B, const magma_int_t LDB) 
 {
   const cuDoubleComplex *Atmp;
 
-  int i, j;
+  magma_int_t i, j;
 
   for (i=0; i<m; i++) {
     Atmp = A + i;
@@ -61,15 +61,15 @@ void getro (char *trans, const int m, const int n,
 // task execution code
 void SCHED_zlarfb(Quark* quark)
 {
-  int M;
-  int N;
-  int MM;
-  int NN;
-  int IB;
-  int LDV;
-  int LDC;
-  int LDT;
-  int LDW;
+  magma_int_t M;
+  magma_int_t N;
+  magma_int_t MM;
+  magma_int_t NN;
+  magma_int_t IB;
+  magma_int_t LDV;
+  magma_int_t LDC;
+  magma_int_t LDT;
+  magma_int_t LDW;
 
   cuDoubleComplex *V;
   cuDoubleComplex *C;
@@ -97,7 +97,7 @@ void SCHED_zlarfb(Quark* quark)
   blasf77_ztrmm("r","l","n","u",
     &NN, &MM, &c_one, V, &LDV, *W, &LDW);
 
-  int K=M-MM;
+  magma_int_t K=M-MM;
 
   blasf77_zgemm(MagmaConjTransStr, "n", &NN, &MM, &K,
     &c_one, &C[MM], &LDC, &V[MM], &LDV, &c_one, *W, &LDW);
@@ -110,18 +110,18 @@ void SCHED_zlarfb(Quark* quark)
 // task execution code
 void SCHED_zgeqrt(Quark* quark)
 {
-  int M;
-  int N;
-  int IB;
+  magma_int_t M;
+  magma_int_t N;
+  magma_int_t IB;
   cuDoubleComplex *A;
-  int LDA;
+  magma_int_t LDA;
   cuDoubleComplex *T;
-  int LDT;
+  magma_int_t LDT;
   cuDoubleComplex *TAU;
   cuDoubleComplex *WORK;
 
-  int iinfo;
-  int lwork=-1;
+  magma_int_t iinfo;
+  magma_int_t lwork=-1;
 
   quark_unpack_args_9(quark, M, N, IB, A, LDA, T, LDT, TAU, WORK);
 
@@ -146,7 +146,7 @@ void SCHED_zgeqrt(Quark* quark)
   }
 
   lapackf77_zgeqrf(&M, &N, A, &LDA, TAU, WORK, &lwork, &iinfo);
-  lwork=(int)MAGMA_Z_REAL(WORK[0]);
+  lwork=(magma_int_t)MAGMA_Z_REAL(WORK[0]);
   lapackf77_zgeqrf(&M, &N, A, &LDA, TAU, WORK, &lwork, &iinfo);
 
   lapackf77_zlarft("F", "C", &M, &N, A, &LDA, TAU, T, &LDT);
@@ -156,21 +156,21 @@ void SCHED_zgeqrt(Quark* quark)
 // task execution code
 void SCHED_ztrmm(Quark *quark)
 {
-  int m;
-  int n;
+  magma_int_t m;
+  magma_int_t n;
   cuDoubleComplex alpha;
   cuDoubleComplex *a;
-  int lda;
+  magma_int_t lda;
   cuDoubleComplex **b;
-  int ldb;
+  magma_int_t ldb;
   cuDoubleComplex beta;
   cuDoubleComplex *c;
-  int ldc;
+  magma_int_t ldc;
   cuDoubleComplex *work;
 
-  int j;
+  magma_int_t j;
 
-  int one = 1;
+  magma_int_t one = 1;
 
   quark_unpack_args_11(quark, m, n, alpha, a, lda, b, ldb, beta, c, ldc, work);
 
@@ -197,21 +197,21 @@ void SCHED_ztrmm(Quark *quark)
 // task execution code
 static void SCHED_zgemm(Quark *quark)
 {
-  int m;
-  int n;
-  int k;
+  magma_int_t m;
+  magma_int_t n;
+  magma_int_t k;
   cuDoubleComplex alpha;
   cuDoubleComplex *a;
-  int lda;
+  magma_int_t lda;
   cuDoubleComplex **b;
-  int ldb;
+  magma_int_t ldb;
   cuDoubleComplex beta;
   cuDoubleComplex *c;
-  int ldc;
+  magma_int_t ldc;
   
   cuDoubleComplex *fake;
 
-  int dkdk;
+  magma_int_t dkdk;
 
   quark_unpack_args_13(quark, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc, fake, dkdk);
       
@@ -222,38 +222,38 @@ static void SCHED_zgemm(Quark *quark)
 
 // wrapper around QUARK_Insert_Task .. makes code more readable at task insertion time
 void QUARK_Insert_Task_zgemm(Quark *quark, Quark_Task_Flags *task_flags, 
-  int m, 
-  int n, 
-  int k,
+  magma_int_t m, 
+  magma_int_t n, 
+  magma_int_t k,
   cuDoubleComplex alpha,
   cuDoubleComplex *a,
-  int lda,
+  magma_int_t lda,
   cuDoubleComplex **b,
-  int ldb,
+  magma_int_t ldb,
   cuDoubleComplex beta,
   cuDoubleComplex *c,
-  int ldc,
+  magma_int_t ldc,
   cuDoubleComplex *fake,
   char *dag_label,
-  int priority, 
-  int dkdk)
+  magma_int_t priority, 
+  magma_int_t dkdk)
 {
 
   QUARK_Insert_Task(quark, SCHED_zgemm, task_flags,
-    sizeof(int),           &m,     VALUE,
-    sizeof(int),           &n,     VALUE,
-    sizeof(int),           &k,     VALUE,
+    sizeof(magma_int_t),           &m,     VALUE,
+    sizeof(magma_int_t),           &n,     VALUE,
+    sizeof(magma_int_t),           &k,     VALUE,
     sizeof(cuDoubleComplex),         &alpha, VALUE,
     sizeof(cuDoubleComplex)*ldb*ldb, a,      INPUT,
-    sizeof(int),           &lda,   VALUE,
+    sizeof(magma_int_t),           &lda,   VALUE,
     sizeof(cuDoubleComplex*),        b,      INPUT,
-    sizeof(int),           &ldb,   VALUE,
+    sizeof(magma_int_t),           &ldb,   VALUE,
     sizeof(cuDoubleComplex),         &beta,  VALUE,
     sizeof(cuDoubleComplex)*ldb*ldb, c,      INOUT | LOCALITY,
-    sizeof(int),           &ldc,   VALUE,
+    sizeof(magma_int_t),           &ldc,   VALUE,
     sizeof(cuDoubleComplex)*ldb*ldb, fake,   OUTPUT | GATHERV,
-    sizeof(int),           &priority, VALUE | TASK_PRIORITY,
-    sizeof(int),&dkdk,VALUE,
+    sizeof(magma_int_t),           &priority, VALUE | TASK_PRIORITY,
+    sizeof(magma_int_t),&dkdk,VALUE,
     strlen(dag_label)+1,   dag_label, VALUE | TASKLABEL,
 6,                     "purple",   VALUE | TASKCOLOR,
     0);
@@ -261,33 +261,33 @@ void QUARK_Insert_Task_zgemm(Quark *quark, Quark_Task_Flags *task_flags,
 
 // wrapper around QUARK_Insert_Task .. makes code more readable at task insertion time
 void QUARK_Insert_Task_ztrmm(Quark *quark, Quark_Task_Flags *task_flags,
-  int m,
-  int n,
+  magma_int_t m,
+  magma_int_t n,
   cuDoubleComplex alpha, 
   cuDoubleComplex *a,
-  int lda,
+  magma_int_t lda,
   cuDoubleComplex **b,
-  int ldb,
+  magma_int_t ldb,
   cuDoubleComplex beta,
   cuDoubleComplex *c,
-  int ldc,
+  magma_int_t ldc,
   char *dag_label,
-  int priority)
+  magma_int_t priority)
 {
 
   QUARK_Insert_Task(quark, SCHED_ztrmm, task_flags,
-    sizeof(int),           &m,     VALUE,
-    sizeof(int),           &n,     VALUE,
+    sizeof(magma_int_t),           &m,     VALUE,
+    sizeof(magma_int_t),           &n,     VALUE,
     sizeof(cuDoubleComplex),         &alpha, VALUE,
     sizeof(cuDoubleComplex)*ldb*ldb, a,      INPUT,
-    sizeof(int),           &lda,   VALUE,
+    sizeof(magma_int_t),           &lda,   VALUE,
     sizeof(cuDoubleComplex*),        b,      INPUT,
-    sizeof(int),           &ldb,   VALUE,
+    sizeof(magma_int_t),           &ldb,   VALUE,
     sizeof(cuDoubleComplex),         &beta,  VALUE,
     sizeof(cuDoubleComplex)*ldb*ldb, c,      INOUT | LOCALITY,
-    sizeof(int),           &ldc,   VALUE,
+    sizeof(magma_int_t),           &ldc,   VALUE,
     sizeof(cuDoubleComplex)*ldb*ldb, NULL,   SCRATCH,
-    sizeof(int),           &priority, VALUE | TASK_PRIORITY,
+    sizeof(magma_int_t),           &priority, VALUE | TASK_PRIORITY,
     strlen(dag_label)+1,   dag_label, VALUE | TASKLABEL,
     6,                     "orange",   VALUE | TASKCOLOR,
     0);
@@ -295,29 +295,29 @@ void QUARK_Insert_Task_ztrmm(Quark *quark, Quark_Task_Flags *task_flags,
 
 // wrapper around QUARK_Insert_Task .. makes code more readable at task insertion time
 void QUARK_Insert_Task_zgeqrt(Quark *quark, Quark_Task_Flags *task_flags, 
-  int m,
-  int n,
+  magma_int_t m,
+  magma_int_t n,
   cuDoubleComplex *a,
-  int lda,
+  magma_int_t lda,
   cuDoubleComplex *t,
-  int ldt,
+  magma_int_t ldt,
   cuDoubleComplex *tau,
   char *dag_label)
 {
 
-  int priority = 1000;
+  magma_int_t priority = 1000;
 
   QUARK_Insert_Task(quark, SCHED_zgeqrt, task_flags,
-    sizeof(int),           &m,        VALUE,
-    sizeof(int),           &n,        VALUE,
-    sizeof(int),           &ldt,      VALUE,
+    sizeof(magma_int_t),           &m,        VALUE,
+    sizeof(magma_int_t),           &n,        VALUE,
+    sizeof(magma_int_t),           &ldt,      VALUE,
     sizeof(cuDoubleComplex)*m*n,     a,         INOUT | LOCALITY,
-    sizeof(int),           &lda,      VALUE,
+    sizeof(magma_int_t),           &lda,      VALUE,
     sizeof(cuDoubleComplex)*ldt*ldt, t,         OUTPUT,
-    sizeof(int),           &ldt,      VALUE,
+    sizeof(magma_int_t),           &ldt,      VALUE,
     sizeof(cuDoubleComplex)*ldt,     tau,       OUTPUT,
     sizeof(cuDoubleComplex)*ldt*ldt, NULL,      SCRATCH,
-    sizeof(int),           &priority, VALUE | TASK_PRIORITY,
+    sizeof(magma_int_t),           &priority, VALUE | TASK_PRIORITY,
     strlen(dag_label)+1,   dag_label, VALUE | TASKLABEL,
     6,                     "green",   VALUE | TASKCOLOR,
     0);
@@ -326,46 +326,46 @@ void QUARK_Insert_Task_zgeqrt(Quark *quark, Quark_Task_Flags *task_flags,
 
 // wrapper around QUARK_Insert_Task .. makes code more readable at task insertion time
 void QUARK_Insert_Task_zlarfb(Quark *quark, Quark_Task_Flags *task_flags,
-  int m,
-  int n,
-  int mm,
-  int nn,
-  int ib,
+  magma_int_t m,
+  magma_int_t n,
+  magma_int_t mm,
+  magma_int_t nn,
+  magma_int_t ib,
   cuDoubleComplex *v,
-  int ldv,
+  magma_int_t ldv,
   cuDoubleComplex *c,
-  int ldc,
+  magma_int_t ldc,
   cuDoubleComplex *t,
-  int ldt,
+  magma_int_t ldt,
   cuDoubleComplex **w,
-  int ldw,
+  magma_int_t ldw,
   char *dag_label,
-  int priority)
+  magma_int_t priority)
 
 {
 
   QUARK_Insert_Task(quark, SCHED_zlarfb, task_flags,
-    sizeof(int),         &m,        VALUE,
-    sizeof(int),         &n,        VALUE,
-    sizeof(int),         &mm,       VALUE,
-    sizeof(int),         &nn,       VALUE,
-    sizeof(int),         &ib,       VALUE,
+    sizeof(magma_int_t),         &m,        VALUE,
+    sizeof(magma_int_t),         &n,        VALUE,
+    sizeof(magma_int_t),         &mm,       VALUE,
+    sizeof(magma_int_t),         &nn,       VALUE,
+    sizeof(magma_int_t),         &ib,       VALUE,
     sizeof(cuDoubleComplex)*m*n,   v,         INPUT,
-    sizeof(int),         &ldv,      VALUE,
+    sizeof(magma_int_t),         &ldv,      VALUE,
     sizeof(cuDoubleComplex)*m*n,   c,         INPUT,
-    sizeof(int),         &ldc,      VALUE,
+    sizeof(magma_int_t),         &ldc,      VALUE,
     sizeof(cuDoubleComplex)*ib*ib, t,         INPUT,
-    sizeof(int),         &ldt,      VALUE,
+    sizeof(magma_int_t),         &ldt,      VALUE,
     sizeof(cuDoubleComplex*),      w,         OUTPUT | LOCALITY,
-    sizeof(int),         &ldw,      VALUE,
-    sizeof(int),         &priority, VALUE | TASK_PRIORITY,
+    sizeof(magma_int_t),         &ldw,      VALUE,
+    sizeof(magma_int_t),         &priority, VALUE | TASK_PRIORITY,
     strlen(dag_label)+1, dag_label, VALUE | TASKLABEL,
     6,                   "cyan",    VALUE | TASKCOLOR,
     0);
 
 }
 
-extern "C" int 
+extern "C" magma_int_t 
 magma_zgeqrf_mc( magma_context *cntxt, magma_int_t *m, magma_int_t *n,
                  cuDoubleComplex *a,    magma_int_t *lda, cuDoubleComplex *tau,
                  cuDoubleComplex *work, magma_int_t *lwork,
@@ -388,10 +388,10 @@ magma_zgeqrf_mc( magma_context *cntxt, magma_int_t *m, magma_int_t *n,
     CNTXT   (input) MAGMA_CONTEXT
             CNTXT specifies the MAGMA hardware context for this routine.   
 
-    M       (input) INTEGER   
+    M       (input) magma_int_tEGER   
             The number of rows of the matrix A.  M >= 0.   
 
-    N       (input) INTEGER   
+    N       (input) magma_int_tEGER   
             The number of columns of the matrix A.  N >= 0.   
 
     A       (input/output) COMPLEX_16 array, dimension (LDA,N)   
@@ -403,7 +403,7 @@ magma_zgeqrf_mc( magma_context *cntxt, magma_int_t *m, magma_int_t *n,
             product of min(m,n) elementary reflectors (see Further   
             Details).   
 
-    LDA     (input) INTEGER   
+    LDA     (input) magma_int_tEGER   
             The leading dimension of the array A.  LDA >= max(1,M).   
 
     TAU     (output) COMPLEX_16 array, dimension (min(M,N))   
@@ -413,7 +413,7 @@ magma_zgeqrf_mc( magma_context *cntxt, magma_int_t *m, magma_int_t *n,
     WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
-    LWORK   (input) INTEGER   
+    LWORK   (input) magma_int_tEGER   
             The dimension of the array WORK.  LWORK >= N*NB. 
 
             If LWORK = -1, then a workspace query is assumed; the routine   
@@ -421,7 +421,7 @@ magma_zgeqrf_mc( magma_context *cntxt, magma_int_t *m, magma_int_t *n,
             this value as the first entry of the WORK array, and no error   
             message related to LWORK is issued.
 
-    INFO    (output) INTEGER   
+    INFO    (output) magma_int_tEGER   
             = 0:  successful exit   
             < 0:  if INFO = -i, the i-th argument had an illegal value   
 
@@ -442,13 +442,13 @@ magma_zgeqrf_mc( magma_context *cntxt, magma_int_t *m, magma_int_t *n,
 
   if (cntxt->num_cores == 1 && cntxt->num_gpus == 1)
   {
-    int result = magma_zgeqrf(*m, *n, a, *lda, tau, work, *lwork, info);
+    magma_int_t result = magma_zgeqrf(*m, *n, a, *lda, tau, work, *lwork, info);
     return result;
   }
 
-  int i,j,l;
+  magma_int_t i,j,l;
 
-  int ii=-1,jj=-1,ll=-1;
+  magma_int_t ii=-1,jj=-1,ll=-1;
 
   Quark* quark = cntxt->quark;
 
@@ -463,9 +463,9 @@ magma_zgeqrf_mc( magma_context *cntxt, magma_int_t *m, magma_int_t *n,
   cuDoubleComplex c_one = MAGMA_Z_ONE;
   cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
-  int nb = (cntxt->nb ==-1)? magma_get_zpotrf_nb(*n): cntxt->nb;
+  magma_int_t nb = (cntxt->nb ==-1)? magma_get_zpotrf_nb(*n): cntxt->nb;
 
-  int lwkopt = *n * nb;
+  magma_int_t lwkopt = *n * nb;
   work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );
 
   long int lquery = *lwork == -1;
@@ -485,19 +485,19 @@ magma_zgeqrf_mc( magma_context *cntxt, magma_int_t *m, magma_int_t *n,
   else if (lquery)
     return 0;
 
-  int k = min(*m,*n);
+  magma_int_t k = min(*m,*n);
   if (k == 0) {
     work[0] = c_one;
     return 0;
   }
 
-  int nt = (((*n)%nb) == 0) ? (*n)/nb : (*n)/nb + 1;
-  int mt = (((*m)%nb) == 0) ? (*m)/nb : (*m)/nb + 1;
+  magma_int_t nt = (((*n)%nb) == 0) ? (*n)/nb : (*n)/nb + 1;
+  magma_int_t mt = (((*m)%nb) == 0) ? (*m)/nb : (*m)/nb + 1;
 
   cuDoubleComplex **local_work = (cuDoubleComplex**) malloc(sizeof(cuDoubleComplex*)*(nt-1)*mt);
   memset(local_work, 0, sizeof(cuDoubleComplex*)*(nt-1)*mt);
 
-  int priority;
+  magma_int_t priority;
 
   // traverse diagonal blocks
   for (i = 0; i < k; i += nb) {

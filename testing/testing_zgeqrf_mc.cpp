@@ -36,7 +36,7 @@
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeqrf
 */
-int main( int argc, char** argv) 
+int main( magma_int_t argc, char** argv) 
 {
     cuDoubleComplex *h_A, *h_R, *h_A2, *h_A3, *h_work, *h_work2, *tau, *d_work2;
     cuDoubleComplex *d_A, *d_work;
@@ -46,18 +46,18 @@ int main( int argc, char** argv)
     TimeStruct start, end;
 
     /* Matrix size */
-    int N=0, n2, lda, M=0;
-    int size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
+    magma_int_t N=0, n2, lda, M=0;
+    magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
     
-    int i, j, info[1];
+    magma_int_t i, j, info[1];
 
-    int loop = argc;
+    magma_int_t loop = argc;
 
-    int ione     = 1;
-    int ISEED[4] = {0,0,0,1};
+    magma_int_t ione     = 1;
+    magma_int_t ISEED[4] = {0,0,0,1};
 
-    int num_cores = 4;
-    int num_gpus = 0;
+    magma_int_t num_cores = 4;
+    magma_int_t num_gpus = 0;
 
     if (argc != 1){
       for(i = 1; i<argc; i++){      
@@ -87,7 +87,7 @@ int main( int argc, char** argv)
 
     n2 = M * N;
 
-    int min_mn = min(M,N);
+    magma_int_t min_mn = min(M,N);
 
     /* Allocate host memory for the matrix */
     h_A2 = (cuDoubleComplex*)malloc(n2 * sizeof(h_A2[0]));
@@ -95,7 +95,7 @@ int main( int argc, char** argv)
         fprintf (stderr, "!!!! host memory allocation error (A2)\n");
     }
 
-    int lwork = n2;
+    magma_int_t lwork = n2;
 
     h_work2 = (cuDoubleComplex*)malloc(lwork * sizeof(cuDoubleComplex));
     if (h_work2 == 0) {
@@ -165,7 +165,7 @@ int main( int argc, char** argv)
 
       double work[1], matnorm = 1.;
 	  cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
-      int one = 1;
+      magma_int_t one = 1;
       matnorm = lapackf77_zlange("f", &M, &N, h_A2, &M, work);
 
       blasf77_zaxpy(&n2, &mone, h_A2, &one, h_A3, &one);
