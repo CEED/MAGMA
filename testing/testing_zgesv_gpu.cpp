@@ -31,7 +31,7 @@
 #endif
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing sgesv
+   -- Testing zgesv_gpu
 */
 int main(int argc , char **argv)
 {
@@ -129,6 +129,9 @@ int main(int argc , char **argv)
 
         printf("%5d  %4d             %6.2f        %e\n",
 	       N, NRHS, gpu_perf, Rnorm/(Anorm*Bnorm) );
+
+	if (argc != 1)
+	  break;
     }
 
     /* Memory clean up */
