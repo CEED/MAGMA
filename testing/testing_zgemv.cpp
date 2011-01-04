@@ -198,7 +198,7 @@ int main(int argc, char **argv)
             else if ( trans == MagmaTrans )
                 blastrans = CblasTrans;
             
-            cblas_zcopy( Ym, Y, incy, Ycublas, incy );
+            blasf77_zcopy( &Ym, Y, &incy, Ycublas, &incy );
             cblas_zgemv( CblasColMajor, blastrans, M, N, 
                          CBLAS_SADDR(alpha), A, lda, 
                                              X, incx, 

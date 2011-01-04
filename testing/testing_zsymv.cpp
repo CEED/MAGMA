@@ -127,7 +127,7 @@ int main(int argc, char **argv)
            Computing the Difference Lapack VS Magma
            =================================================================== */
         
-        cblas_zcopy( m, Y, incx, Ycublas, incx );
+        blasf77_zcopy( &m, Y, &incx, Ycublas, &incx );
         lapackf77_zsymv( MagmaLowerStr, &m, &alpha, A, &LDA, X, &incx, &beta, Ycublas, &incx );
 
         blasf77_zaxpy( &m, &mzone, Ymagma, &incx, Ycublas, &incx);
