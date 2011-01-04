@@ -85,7 +85,7 @@ int main( int argc, char** argv)
     checkres  = getenv("MAGMA_TESTINGS_CHECK") != NULL;
 
     eps = lapackf77_dlamch( "E" );
-    lda = M = N;
+    lda = M;
     n2  = lda * N;
     nb  = magma_get_zgebrd_nb(N);
     minmn = min(M, N);
@@ -102,7 +102,9 @@ int main( int argc, char** argv)
     TESTING_HOSTALLOC( h_work, cuDoubleComplex, lhwork );
 
     if ( checkres ) {
-        lchkwork = minmn * nb;
+        lchkwork = max(minmn * nb, M+N);
+        /* For optimal performance in zunt01 */
+        lchkwork = max(lchkwork, minmn*minmn);
         TESTING_MALLOC( h_PT,    cuDoubleComplex, lda*N   );
         TESTING_MALLOC( chkwork, cuDoubleComplex, lchkwork );
         rwork = NULL; /* To avoir unused variable warning */
@@ -122,7 +124,9 @@ int main( int argc, char** argv)
         lda   = M;
         n2    = lda*N;
         lhwork   = (M + N)*nb;
-        lchkwork = minmn * nb;
+        lchkwork = max(minmn * nb, M+N);
+        /* For optimal performance in zunt01 */
+        lchkwork = max(lchkwork, minmn*minmn);
         flops = FLOPS( (double)M, (double)N ) / 1e6;
 
         /* Initialize the matrices */
@@ -152,11 +156,15 @@ int main( int argc, char** argv)
            Check the factorization
            =================================================================== */
         if ( checkres ) {
-            lapackf77_zlacpy(MagmaUpperLowerStr, &M, &N, h_Q, &lda, h_PT, &N);
+            lapackf77_zlacpy(MagmaUpperLowerStr, &M, &N, h_Q, &lda, h_PT, &lda);
             
             // generate Q & P'
             lapackf77_zungbr("Q", &M, &minmn, &N, h_Q,  &lda, tauq, chkwork, &lchkwork, &info);
+            if ( info < 0 )
+              printf("Argument %d of lapackf77_zungbr had an illegal value\n", -info);
             lapackf77_zungbr("P", &minmn, &N, &M, h_PT, &lda, taup, chkwork, &lchkwork, &info);
+            if ( info < 0 )
+              printf("Argument %d of lapackf77_zungbr (2) had an illegal value\n", -info);
             
             // Test 1:  Check the decomposition A := Q * B * PT
             //      2:  Check the orthogonality of Q
