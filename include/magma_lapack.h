@@ -25,6 +25,9 @@ extern "C" {
 #    define lapackf77_dlag2s dlag2s_
 #    define lapackf77_slag2d slag2d_
 
+#    define blasf77_ddot     ddot_
+#    define blasf77_sdot     sdot_ 
+
 #elif defined(NOCHANGE)
 
 #    define lapackf77_lsame  lsame
@@ -40,6 +43,9 @@ extern "C" {
 #    define lapackf77_dlag2s dlag2s
 #    define lapackf77_slag2d slag2d
 
+#    define blasf77_ddot     ddot
+#    define blasf77_sdot     sdot
+
 #endif
 
 long int lapackf77_lsame( const char *ca, const char *cb);
@@ -54,6 +60,9 @@ void     lapackf77_zlag2c( int *m, int *n, cuDoubleComplex *a,  int *lda,  float
 void     lapackf77_clag2z( int *m, int *n, float2  *sa, int *ldsa, cuDoubleComplex *a,  int *lda,  int *info );
 void     lapackf77_dlag2s( int *m, int *n, double  *a,  int *lda,  float   *sa, int *ldsa, int *info );
 void     lapackf77_slag2d( int *m, int *n, float   *sa, int *ldsa, double  *a,  int *lda,  int *info );
+
+double blasf77_ddot( int *, double *, int *, double *, int *);
+double blasf77_sdot( int *, float *, int *, float *, int *);
 
 #ifdef __cplusplus
 }
