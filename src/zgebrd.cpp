@@ -181,11 +181,8 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
 	*info = -2;
     } else if (lda < max(1,m)) {
 	*info = -4;
-    } else /* if(complicated condition) */ {
-        /* Computing MAX */
-        if ((lwork < max( max(1, m), n)) && ! lquery) {
-            *info = -10;
-        }
+    } else if ( (lwork < max( max(1, m), n)) && (! lquery) ) {
+        *info = -10;
     }
     if (*info < 0)
 	return MAGMA_ERR_ILLEGAL_VALUE;
@@ -200,7 +197,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     }
 
     if ( CUBLAS_STATUS_SUCCESS 
-         != cublasAlloc(n*ldda+2*n*nb, sizeof(cuDoubleComplex), (void**)&da) ) {
+         != cublasAlloc(n*ldda+(m+n)*nb, sizeof(cuDoubleComplex), (void**)&da) ) {
         fprintf (stderr, "!!!! device memory allocation error in zgebrd\n" );
         return MAGMA_ERR_CUBLASALLOC; 
     }
@@ -235,13 +232,11 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
                             A( i, i+nb), lda);
         }
 
-        magma_zlabrd(nrow, ncol, nb,
-                     A(i, i), lda, d+i, e+i, tauq+i, taup+i,
-                     work,              ldwrkx,     //  x
-                     work +(ldwrkx*nb), ldwrky,     //  y
-                     dA(i, i),          ldda,
-                     dwork,             ldwrkx,     // dx
-                     dwork+(ldwrkx*nb), ldwrky);    // dy
+        magma_zlabrd_gpu(nrow, ncol, nb,
+                         A(i, i),          lda,    dA(i, i),          ldda,
+                         d+i, e+i, tauq+i, taup+i,
+                         work,             ldwrkx, dwork,             ldwrkx,  // x, dx
+                         work+(ldwrkx*nb), ldwrky, dwork+(ldwrkx*nb), ldwrky); // y, dy
 
         /*  Update the trailing submatrix A(i+nb:m,i+nb:n), using an update
             of the form  A := A - V*Y' - X*U' */

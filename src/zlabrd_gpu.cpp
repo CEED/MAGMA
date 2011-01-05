@@ -14,7 +14,6 @@
 #include <cuda_runtime_api.h>
 #include <cublas.h>
 #include "magma.h"
-#include "magmablas.h"
 
 // === Define what BLAS to use ============================================
 #define PRECISION_z
@@ -24,15 +23,11 @@
 // === End defining what BLAS to use ======================================
 
 extern "C" magma_int_t 
-magma_zlabrd(magma_int_t m, magma_int_t n, magma_int_t nb,
-             cuDoubleComplex *a, magma_int_t lda,
-             double *d, double *e,
-             cuDoubleComplex *tauq, cuDoubleComplex *taup,
-             cuDoubleComplex *x, magma_int_t ldx,
-             cuDoubleComplex *y, magma_int_t ldy,
-             cuDoubleComplex *da, magma_int_t ldda, 
-             cuDoubleComplex *dx, magma_int_t lddx,
-             cuDoubleComplex *dy, magma_int_t lddy)
+magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
+                  cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *da, magma_int_t ldda,
+                  double *d, double *e, cuDoubleComplex *tauq, cuDoubleComplex *taup,
+                  cuDoubleComplex *x, magma_int_t ldx, cuDoubleComplex *dx, magma_int_t lddx,
+                  cuDoubleComplex *y, magma_int_t ldy, cuDoubleComplex *dy, magma_int_t lddy)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
