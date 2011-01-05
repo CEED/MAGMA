@@ -111,7 +111,7 @@ magma_zpotrf(char uplo, magma_int_t n,
     long int           upper = lapackf77_lsame(uplo_, "U");
 
     *info = 0;
-    if (! upper && ! lapackf77_lsame(uplo_, "L")) {
+    if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
       *info = -1;
     } else if (n < 0) {
       *info = -2;
@@ -120,6 +120,10 @@ magma_zpotrf(char uplo, magma_int_t n,
     }
     if (*info != 0)
       return MAGMA_ERR_ILLEGAL_VALUE;
+
+    /* Quick return */
+    if ( n == 0 )
+      return MAGMA_SUCCESS;
 
     ldda = ((n+31)/32)*32;
     
