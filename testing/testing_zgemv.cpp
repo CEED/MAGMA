@@ -15,7 +15,6 @@
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
-#include <cblas.h>
 
 #include "flops.h"
 #include "magma.h"
@@ -185,32 +184,32 @@ int main(int argc, char **argv)
         error = lapackf77_zlange( "M", &Ym, &ione, Ycublas, &Ym, work );
 
 #if 0
-        printf(      "\t\t %8.6e", error / Ym );
-        fprintf( fp, "\t\t %8.6e", error / Ym );
+        printf(      "\t\t %8.6e", error / (double)Ym );
+        fprintf( fp, "\t\t %8.6e", error / (double)Ym );
 
         /*
-         * CBlas comparaison
+         * Blas comparaison
          */
         {
-            CBLAS_TRANSPOSE blastrans = CblasNoTrans;
+            char *blastrans = MagmaNoTransStr;
             if ( trans == MagmaConjTrans )
-                blastrans = CblasConjTrans;
+                blastrans = MagmaConjTransStr;
             else if ( trans == MagmaTrans )
-                blastrans = CblasTrans;
+                blastrans = MagmaTransStr;
             
             blasf77_zcopy( &Ym, Y, &incy, Ycublas, &incy );
-            cblas_zgemv( CblasColMajor, blastrans, M, N, 
-                         CBLAS_SADDR(alpha), A, lda, 
-                                             X, incx, 
-                         CBLAS_SADDR(beta), Ycublas, incy );
+            blasf77_zgemv( blastrans, &M, &N, 
+                           &alpha, A,       &lda, 
+                                   X,       &incx, 
+                           &beta,  Ycublas, &incy );
             
             blasf77_zaxpy( &Ym, &mzone, Ymagma, &incy, Ycublas, &incy);
             error = lapackf77_zlange( "M", &Ym, &ione, Ycublas, &Ym, work );
         }
 #endif
 
-        printf(      "\t\t %8.6e\n", error / Ym );
-        fprintf( fp, "\t\t %8.6e\n", error / Ym );
+        printf(      "\t\t %8.6e\n", error / (double)Ym );
+        fprintf( fp, "\t\t %8.6e\n", error / (double)Ym );
 
     }
     
