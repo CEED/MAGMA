@@ -45,7 +45,7 @@ ZSRC  = zpotrf.cpp	\
         zhetrd.cpp 	\
         zlatrd.cpp 	\
         zgebrd.cpp 	\
-        zlabrd.cpp 	\
+        zlabrd_gpu.cpp	\
         zungqr_gpu.cpp	\
         zungqr.cpp      \
         zunmtr.cpp 	\
