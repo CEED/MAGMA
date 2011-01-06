@@ -244,9 +244,12 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
         ncol = n - i - nb;
 
         // Send Y back to the GPU
-        cublasSetMatrix(max(nrow, ncol), 2*nb, sizeof(cuDoubleComplex),
-                        work  + nb, ldwrky,
-                        dwork + nb, ldwrky);
+	cublasSetMatrix(nrow, nb, sizeof(cuDoubleComplex),
+			work  + nb, ldwrkx,
+			dwork + nb, ldwrkx);
+	cublasSetMatrix(ncol, nb, sizeof(cuDoubleComplex),
+			work  + (ldwrkx+1)*nb, ldwrky,
+			dwork + (ldwrkx+1)*nb, ldwrky);
 
         cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
                      nrow, ncol, nb, 
