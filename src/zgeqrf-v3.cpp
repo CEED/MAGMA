@@ -19,22 +19,60 @@
 
 #include <pthread.h>
 
+/* ------------------------------------------------------------
+ * MAGMA QR params
+ * --------------------------------------------------------- */
 typedef struct {
+
+  /* Whether or not to restore upper part of matrix */
   int flag;
+
+  /* Number of MAGMA threads */
   int nthreads;
+
+  /* Block size for left side of matrix */
   int nb;
+
+  /* Block size for right side of matrix */
   int ob;
+
+  /* Block size for final factorization */
   int fb;
+
+  /* Number of panels for left side of matrix */
   int np_gpu;
+
+  /* Number of rows */
   int m;
+
+  /* Number of columns */
   int n;
+
+  /* Leading dimension */
   int lda;
+
+  /* Matrix to be factorized */
   cuDoubleComplex *a;
+
+  /* Storage for every T */
   cuDoubleComplex *t;
-  pthread_t *thread;
-  cuDoubleComplex **p;
+
+  /* Flags to wake up MAGMA threads */
+  volatile cuDoubleComplex **p;
+
+  /* Synchronization flag */
+  volatile int sync0;
+
+  /* One synchronization flag for each MAGMA thread */
+  volatile int *sync1;
+  
+  /* Synchronization flag */
+  volatile int sync2;
+
+  /* Work space */
   cuDoubleComplex *w;
-} MAGMA_QR_GLOBALS;
+
+} magma_qr_params;
 
 
 extern "C" magma_int_t
@@ -110,7 +148,7 @@ magma_zgeqrf3(magma_context *cntxt, magma_int_t m, magma_int_t n,
 
     cuDoubleComplex c_one = MAGMA_Z_ONE;
     int k, ib;
-    MAGMA_QR_GLOBALS *qr_params = (MAGMA_QR_GLOBALS *)cntxt->params;
+    magma_qr_params *qr_params = (magma_qr_params *)cntxt->params;
 
     *info = 0;
 
@@ -149,8 +187,11 @@ magma_zgeqrf3(magma_context *cntxt, magma_int_t m, magma_int_t n,
 		  a, lda, tau, work, lwork, info);
 
     /* Wait for all update threads to finish */
-    for (k = 0; k < qr_params->nthreads; k++)
-      pthread_join(qr_params->thread[k], NULL);
+    for (k = 0; k < qr_params->nthreads; k++) {
+      while (qr_params->sync1[k] == 0) {
+        sched_yield();
+      }
+    }
     
     /* Unzero upper part of each panel */
     for (k = 0; k < qr_params->np_gpu-1; k++){
@@ -172,6 +213,21 @@ magma_zgeqrf3(magma_context *cntxt, magma_int_t m, magma_int_t n,
 		    (n-qr_params->nthreads*qr_params->ob), lda, 
 		    &tau[n-qr_params->nthreads*qr_params->ob],
 		    work, lwork, info);
+
+    /* Prepare for next run */
+    for (k = 0; k < qr_params->np_gpu; k++) {
+      qr_params->p[k] = NULL;
+    }
+
+    for (k = 0; k < qr_params->nthreads; k++) {
+      qr_params->sync1[k] = 0;
+    }
+
+    /* Infrastructure for next run is not in place yet */
+    qr_params->sync0 = 0;
+
+    /* Signal update threads to get in position for next run */
+    qr_params->sync2 = 1;
 }
 
 #undef min

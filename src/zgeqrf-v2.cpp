@@ -17,22 +17,61 @@
 
 #include "magma.h"
 
+/* ------------------------------------------------------------
+ * MAGMA QR params
+ * --------------------------------------------------------- */
 typedef struct {
+
+  /* Whether or not to restore upper part of matrix */
   int flag;
+
+  /* Number of MAGMA threads */
   int nthreads;
+
+  /* Block size for left side of matrix */
   int nb;
+
+  /* Block size for right side of matrix */
   int ob;
+
+  /* Block size for final factorization */
   int fb;
+
+  /* Number of panels for left side of matrix */
   int np_gpu;
+
+  /* Number of rows */
   int m;
+
+  /* Number of columns */
   int n;
+
+  /* Leading dimension */
   int lda;
+
+  /* Matrix to be factorized */
   cuDoubleComplex *a;
+
+  /* Storage for every T */
   cuDoubleComplex *t;
-  pthread_t *thread;
-  cuDoubleComplex **p;
+
+  /* Flags to wake up MAGMA threads */
+  volatile cuDoubleComplex **p;
+
+  /* Synchronization flag */
+  volatile int sync0;
+
+  /* One synchronization flag for each MAGMA thread */
+  volatile int *sync1;
+  
+  /* Synchronization flag */
+  volatile int sync2;
+
+  /* Work space */
   cuDoubleComplex *w;
-} MAGMA_QR_GLOBALS;
+
+} magma_qr_params;
+
 
 extern "C" magma_int_t
 magma_zgeqrf2(magma_context *cntxt, magma_int_t m, magma_int_t n, 
@@ -130,7 +169,7 @@ magma_zgeqrf2(magma_context *cntxt, magma_int_t m, magma_int_t n,
 
     *info = 0;
 
-    MAGMA_QR_GLOBALS *qr_params = (MAGMA_QR_GLOBALS *)cntxt->params;
+    magma_qr_params *qr_params = (magma_qr_params *)cntxt->params;
     int nb = qr_params->nb;
 
     int lwkopt = n * nb;

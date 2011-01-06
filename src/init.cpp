@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <pthread.h>
 
 #include <cuda.h>
 #include <cuda_runtime_api.h>
@@ -17,8 +18,13 @@
 
 #include "magma.h"
 
+typedef struct {
+  int tid;
+  void *params;
+} t_params;
+
 extern "C" magma_context *
-magma_init( magma_int_t ncpu, magma_int_t ngpu,
+magma_init( void *params, void* (*func)(void *a), magma_int_t nthread, magma_int_t ncpu, magma_int_t ngpu,
 	    magma_int_t argc, char **argv)
 {
 /*  -- MAGMA (version 1.0) --
@@ -41,9 +47,25 @@ magma_init( magma_int_t ncpu, magma_int_t ngpu,
             Number of GPU cores to be used in the computations.
     ===================================================================== */
 
+    t_params **tp = (t_params**)malloc(sizeof(t_params*)*nthread);
+
+    pthread_t *thread;
+
     magma_int_t i;
     magma_context *context;
     context  = (magma_context *)malloc(sizeof(magma_context));
+
+    if (nthread > 0) {
+      thread = (pthread_t*)malloc(sizeof(pthread_t)*nthread);
+
+      for (i = 0; i < nthread; i++){
+        tp[i] = (t_params*)malloc(sizeof(t_params));
+		tp[i]->params = params;
+		tp[i]->tid = i;
+        pthread_create(&thread[i], NULL, func, (void *)tp[i]);
+      }
+    }
+
 
     if (ncpu <= 1)
       ncpu = 1;
@@ -56,8 +78,8 @@ magma_init( magma_int_t ncpu, magma_int_t ngpu,
 
     if (ncpu > 1)
       {
-	/* Initialize the QUARK scheduler */
-	context->quark = QUARK_New(ncpu);
+	    /* Initialize the QUARK scheduler */
+        context->quark = QUARK_New(ncpu);
       }
 
     if (ngpu > 1)

@@ -36,70 +36,130 @@
 
 #include <pthread.h>
 
-typedef struct {
-  int flag;
-  int nthreads;
-  int nb;
-  int ob;
-  int fb;
-  int np_gpu;
-  int m;
-  int n;
-  int lda;
-  cuDoubleComplex *a;
-  cuDoubleComplex *t;
-  pthread_t *thread;
-  volatile cuDoubleComplex **p;
-  cuDoubleComplex *w;
-} MAGMA_QR_GLOBALS;
 
-MAGMA_QR_GLOBALS MG;
+/* ------------------------------------------------------------
+ * MAGMA QR params
+ * --------------------------------------------------------- */
+typedef struct {
+
+  /* Whether or not to restore upper part of matrix */
+  int flag;
+
+  /* Number of MAGMA threads */
+  int nthreads;
+
+  /* Block size for left side of matrix */
+  int nb;
+
+  /* Block size for right side of matrix */
+  int ob;
+
+  /* Block size for final factorization */
+  int fb;
+
+  /* Number of panels for left side of matrix */
+  int np_gpu;
+
+  /* Number of rows */
+  int m;
+
+  /* Number of columns */
+  int n;
+
+  /* Leading dimension */
+  int lda;
+
+  /* Matrix to be factorized */
+  cuDoubleComplex *a;
+
+  /* Storage for every T */
+  cuDoubleComplex *t;
+
+  /* Flags to wake up MAGMA threads */
+  volatile cuDoubleComplex **p;
+
+  /* Synchronization flag */
+  volatile int sync0;
+
+  /* One synchronization flag for each MAGMA thread */
+  volatile int *sync1;
+  
+  /* Synchronization flag */
+  volatile int sync2;
+
+  /* Work space */
+  cuDoubleComplex *w;
+
+} magma_qr_params;
+
+//magma_qr_params MG;
+
+typedef struct {
+  int tid;
+  void *params;
+} t_params;
+
 
 /* Update thread */
-void *cpu_thread(void *a)
+extern "C" void *cpu_thread(void *a)
 {
   int i;
+  t_params *tp = (t_params*)a;
 
-  long int t = (long int) a;
+  magma_qr_params *mp = (magma_qr_params*)tp->params;
+
+  //long int t = (long int) a;
+  long int t = (long int) tp->tid;
 
   int M;
   int N;
   int K;
   cuDoubleComplex *WORK;
 
-  /* Traverse panels */
-  for (i = 0; i < MG.np_gpu; i++) 
+loop:
+
+  while (mp->sync0 == 0) {
+    sched_yield();
+  }
+    
+  for (i = 0; i < mp->np_gpu; i++) 
   {
 
-    /* Wait till time to update panel */
-    while (MG.p[i] == NULL) {
+    while (mp->p[i] == NULL) {
       sched_yield();
     }
     
-    M=MG.m-i*MG.nb;
-    N=MG.ob;
-    K=MG.nb;
-    if (MG.m >= (MG.n-(MG.nthreads*MG.ob))) {
-	  if (i == (MG.np_gpu - 1)) {
-	    K = MG.n-MG.nthreads*MG.ob-(MG.np_gpu-1)*MG.nb; 
+    M=mp->m-i*mp->nb;
+    N=mp->ob;
+    K=mp->nb;
+    if (mp->m >= (mp->n-(mp->nthreads*mp->ob))) {
+	  if (i == (mp->np_gpu - 1)) {
+	    K = mp->n-mp->nthreads*mp->ob-(mp->np_gpu-1)*mp->nb; 
 	  }
     }
 
-    /* Update panel */
     WORK = (cuDoubleComplex*)malloc(sizeof(cuDoubleComplex)*M*N);
       
     lapackf77_zlarfb(MagmaLeftStr, MagmaTransStr, MagmaForwardStr, MagmaColumnwiseStr,
-	          &M,&N,&K,MG.a+i*MG.nb*MG.lda+i*MG.nb,&MG.lda,MG.t+i*MG.nb*MG.nb,&K,
-		      MG.a+MG.m*MG.n-(MG.nthreads-t)*MG.ob*MG.lda+i*MG.nb,&MG.lda,WORK,&N);
+	          &M,&N,&K,mp->a+i*mp->nb*mp->lda+i*mp->nb,&(mp->lda),mp->t+i*mp->nb*mp->nb,&K,
+		      mp->a+mp->m*mp->n-(mp->nthreads-t)*mp->ob*mp->lda+i*mp->nb,&(mp->lda),WORK,&N);
       
     free(WORK);
   }
+
+  mp->sync1[t] = 1;
   
+  while (mp->sync2 == 0) {
+    sched_yield();
+  }
+
+goto loop;
+    
   return (void*)NULL;
 }
 
-void magma_qr_init(MAGMA_QR_GLOBALS *qr_params,
-		   int m, int n, cuDoubleComplex *a, int nthreads)
+void magma_qr_init(magma_qr_params *qr_params,
+                   int m, int n, cuDoubleComplex *a, int nthreads)
 {
   int i;
 
@@ -129,8 +189,8 @@ void magma_qr_init(MAGMA_QR_GLOBALS *qr_params,
   qr_params->lda = m;
   qr_params->a = a;
   qr_params->t = (cuDoubleComplex*)malloc(sizeof(cuDoubleComplex)*
-					  qr_params->n*
-					  qr_params->nb);
+                  qr_params->n*
+                  qr_params->nb);
 
   if ((qr_params->n-(qr_params->nthreads*qr_params->ob)) > qr_params->m) {
     qr_params->np_gpu = m/qr_params->nb;
@@ -141,22 +201,21 @@ void magma_qr_init(MAGMA_QR_GLOBALS *qr_params,
   fprintf(stderr,"qr_params->np_gpu=%d\n",qr_params->np_gpu);
 
   qr_params->p = (volatile cuDoubleComplex **) malloc (sizeof(cuDoubleComplex*)*
-						       qr_params->np_gpu);
+                  qr_params->np_gpu);
 
   for (i = 0; i < qr_params->np_gpu; i++)
     qr_params->p[i] = NULL;
-  
-  qr_params->thread = (pthread_t*)malloc(sizeof(pthread_t)*qr_params->nthreads);
-  
-  for (i = 0; i < qr_params->nthreads; i++){
-    pthread_create(&qr_params->thread[i], NULL, cpu_thread, (void *)(long int)i);
-  }
 
+  qr_params->sync0 = 1;
+  
   qr_params->w = (cuDoubleComplex *)malloc(sizeof(cuDoubleComplex)*
-					   qr_params->np_gpu*qr_params->nb*
-					   qr_params->nb);
+                 qr_params->np_gpu*qr_params->nb*
+                 qr_params->nb);
 
   qr_params->flag = 0;
+
+  qr_params->sync2 = 0;
+
 }
 
 int TRACE;
@@ -172,10 +231,14 @@ int main( int argc, char** argv)
     magma_int_t num_gpus  = 1;
     TRACE = 0;
 
+    //magma_qr_params mp;
+
     cuDoubleComplex *h_A, *h_R, *h_work, *tau;
     double gpu_perf, cpu_perf, flops;
 
     TimeStruct start, end;
+
+    magma_qr_params *mp = (magma_qr_params*)malloc(sizeof(magma_qr_params));
 
     /* Matrix size */
     int M=0, N=0, n2;
@@ -186,9 +249,9 @@ int main( int argc, char** argv)
     int ione     = 1;
     int ISEED[4] = {0,0,0,1};
 
-    MG.nb=-1;
-    MG.ob=-1;
-    MG.fb=-1;
+    mp->nb=-1;
+    mp->ob=-1;
+    mp->fb=-1;
 
     int loop = argc;
     int accuracyflag = 1;
@@ -201,11 +264,11 @@ int main( int argc, char** argv)
 	  else if (strcmp("-M", argv[i])==0)
 	    M = atoi(argv[++i]);
 	  else if (strcmp("-F", argv[i])==0)
-	    MG.fb = atoi(argv[++i]);
+	    mp->fb = atoi(argv[++i]);
 	  else if (strcmp("-O", argv[i])==0)
-	    MG.ob = atoi(argv[++i]);
+	    mp->ob = atoi(argv[++i]);
 	  else if (strcmp("-B", argv[i])==0)
-	    MG.nb = atoi(argv[++i]);
+	    mp->nb = atoi(argv[++i]);
 	  else if (strcmp("-A", argv[i])==0)
 	    accuracyflag = atoi(argv[++i]);
 	  else if (strcmp("-P", argv[i])==0)
@@ -242,9 +305,15 @@ int main( int argc, char** argv)
 
     /* Initialize MAGMA hardware context, seeting how many CPU cores
        and how many GPUs to be used in the consequent computations  */
+    mp->sync0 = 0;
     magma_context *context;
-    context = magma_init(nquarkthreads, num_gpus, argc, argv);
-    context->params = (void *)(&MG);
+    context = magma_init((void*)(mp),cpu_thread, nthreads, nquarkthreads, num_gpus, argc, argv);
+    context->params = (void *)(mp);
+
+    mp->sync1 = (volatile int *) malloc (sizeof(int)*nthreads);
+
+    for (i = 0; i < nthreads; i++)
+      mp->sync1[i] = 0;
 
     n2  = M * N;
     int min_mn = min(M, N);
@@ -275,13 +344,13 @@ int main( int argc, char** argv)
         //magma_zgeqrf(M, N, h_R, M, tau, h_work, lwork, &info);
 
         for(j=0; j<n2; j++)
-	  h_R[j] = h_A[j];
+	      h_R[j] = h_A[j];
 
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-	magma_qr_init(&MG, M, N, h_R, nthreads);
-	
+	    magma_qr_init(mp, M, N, h_R, nthreads);
+
         start = get_current_time();
         magma_zgeqrf3(context, M, N, h_R, M, tau, h_work, lwork, &info);
         end = get_current_time();

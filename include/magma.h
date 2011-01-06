@@ -194,7 +194,7 @@ extern "C" {
  *   -- MAGMA function definitions
  * --------------------------------------------------------- */
 void magma_xerbla(const char *name, magma_int_t *info);
-magma_context *magma_init(magma_int_t ncpu, magma_int_t ngpu,
+magma_context *magma_init(void *, void* (*func)(void *a), magma_int_t nthread, magma_int_t ncpu, magma_int_t ngpu,
 			  magma_int_t argc, char **argv);
 void magma_finalize(magma_context *cntxt);
 

@@ -33,6 +33,7 @@
 #define FLOPS(m, n) (    FMULS_GEQRF(m, n) +    FADDS_GEQRF(m, n) )
 #endif
 
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeqrf
 */
@@ -115,7 +116,7 @@ int main( magma_int_t argc, char** argv)
     /* Initialize MAGMA hardware context, seeting how many CPU cores 
        and how many GPUs to be used in the consequent computations  */
     magma_context *context;
-    context = magma_init(num_cores, num_gpus, argc, argv);
+    context = magma_init(NULL, NULL, 0, num_cores, num_gpus, argc, argv);
 
     printf("\n\n");
     printf("   M     N       LAPACK Gflop/s     Multi-core Gflop/s    ||R||_F / ||A||_F\n");

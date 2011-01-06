@@ -144,7 +144,7 @@ int main( int argc, char** argv)
     /* Initialize MAGMA hardware context, seeting how many CPU cores 
        and how many GPUs to be used in the consequent computations  */
     magma_context *context;
-    context = magma_init(num_cores, num_gpus, argc, argv);
+    context = magma_init(NULL, NULL, 0, num_cores, num_gpus, argc, argv);
 
     printf("\n\n");
     printf("  M    N           GFlop/s        ||PA-LU|| / (||A||*N)\n");
