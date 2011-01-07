@@ -57,6 +57,9 @@ typedef struct {
   /* Block size for final factorization */
   int fb;
 
+  /* Block size for multi-core factorization */
+  int ib;
+
   /* Number of panels for left side of matrix */
   int np_gpu;
 
@@ -252,6 +255,7 @@ int main( int argc, char** argv)
     mp->nb=-1;
     mp->ob=-1;
     mp->fb=-1;
+    mp->ib=32;
 
     int loop = argc;
     int accuracyflag = 1;
@@ -269,6 +273,8 @@ int main( int argc, char** argv)
 	    mp->ob = atoi(argv[++i]);
 	  else if (strcmp("-B", argv[i])==0)
 	    mp->nb = atoi(argv[++i]);
+	  else if (strcmp("-b", argv[i])==0)
+	    mp->ib = atoi(argv[++i]);
 	  else if (strcmp("-A", argv[i])==0)
 	    accuracyflag = atoi(argv[++i]);
 	  else if (strcmp("-P", argv[i])==0)

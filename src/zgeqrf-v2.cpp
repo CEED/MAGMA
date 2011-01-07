@@ -37,6 +37,9 @@ typedef struct {
   /* Block size for final factorization */
   int fb;
 
+  /* Block size for multi-core factorization */
+  int ib;
+
   /* Number of panels for left side of matrix */
   int np_gpu;
 
@@ -246,8 +249,10 @@ magma_zgeqrf2(magma_context *cntxt, magma_int_t m, magma_int_t n,
             int rows = m-i;
 
 	    cnt++;
+        cntxt->nb = qr_params->ib;
 	    magma_zgeqrf_mc(cntxt, &rows, &ib, a_ref(i,i), &lda, 
 			    tau+i, work, &lwork, info);
+        cntxt->nb = nb;
 
             /* Form the triangular factor of the block reflector
                H = H(i) H(i+1) . . . H(i+ib-1) */
