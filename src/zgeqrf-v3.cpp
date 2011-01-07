@@ -39,6 +39,9 @@ typedef struct {
   /* Block size for final factorization */
   int fb;
 
+  /* Block size for multi-core factorization */
+  int ib;
+
   /* Number of panels for left side of matrix */
   int np_gpu;
 
