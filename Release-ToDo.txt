@@ -151,6 +151,21 @@ Epsilon(single): 5.960464e-08
 26             Stan         Bug in zcgesv_gpu when N is not multiple of 32,
                             nrhs > 1, and ld for X and RHS > N.
 ---------------------------------------------------------------------------------
+27             Peng         Bug in dtrsm for tesla
+     
+[tomov@cumin testing]$ ./testing_dgetrf_gpu -M 287 -N 579                                        device 0: GeForce GTX 280, 1296.0 MHz clock, 1023.8 MB memory
+device 1: Quadro NVS 290, 918.0 MHz clock, 255.3 MB memory
+  testing_dgetrf -M 287 -N 579
+
+
+
+  M     N   CPU GFlop/s    GPU GFlop/s   ||PA-LU||/(||A||*N)
+============================================================
+  287   579    1.91         4418.97         3.925370e-04
+
+If I use cublasDtrsm in dgetrf_gpu I don't get the error.
+
+---------------------------------------------------------------------------------
 
                           
 
