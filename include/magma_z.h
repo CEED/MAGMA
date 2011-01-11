@@ -99,7 +99,7 @@ magma_int_t magma_zunghr( magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 			  magma_int_t *info);
 magma_int_t  magma_zgeev( char *jobvl, char *jobvr, magma_int_t *n,
 			  cuDoubleComplex *a, magma_int_t *lda,
-			  cuDoubleComplex *w,
+			  cuDoubleComplex *geev_w_array,
 			  cuDoubleComplex *vl, magma_int_t *ldvl,
 			  cuDoubleComplex *vr, magma_int_t *ldvr,
 			  cuDoubleComplex *work, magma_int_t *lwork,
