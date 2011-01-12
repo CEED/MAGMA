@@ -93,6 +93,7 @@ subs = {
     ('real','double precision','complex','complex\*16'),
     ('real','double precision','real','double precision'),
     ('geev_wr_array, float *geev_wi_array','geev_wr_array, double *geev_wi_array','geev_w_array','geev_w_array'),
+    ('sizeof_real','sizeof_double','sizeof_complex','sizeof_complex_16'),
     ('float','double','cuFloatComplex','cuDoubleComplex'),
     ('Workspace_s','Workspace_d','Workspace_c','Workspace_z'),
     ('workspace_s','workspace_d','workspace_c','workspace_z'),
