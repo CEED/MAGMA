@@ -65,7 +65,7 @@ ALLOBJF:= $(ALLOBJF:.cuf=.o)
 ALLOBJ  = $(ALLOBJF:.cpp=.o)
 EXE     = $(ALLOBJ:.o=)
 
-all: $(EXE)
+all: $(EXE) magma.mod
 
 $(EXE): $(LIBMAGMA) $(LIBMAGMABLAS)
 
@@ -76,15 +76,22 @@ cleanall: clean
 	rm -f $(EXE)
 
 ifeq ($(FORT), pgfortran)
-testing_%.o : testing_%.cuf
+testing_%.o : testing_%.cuf magma.mod
 	$(FORT) $(OPTS) $(INC) -c $< -o $@ 
 else
-testing_%.o : testing_%.f
+testing_%.o : testing_%.f magma.mod
 	$(FORT) $(OPTS) $(INC) -c $< -o $@ 
 endif
 
 %.o: %.cpp
 	$(CC) $(OPTS) $(INC) -c $< -o $@
+
+#
+# MAGMA Fortran module. Once finalized, the generated magma.mod
+# has to be moved in the include directory
+#
+magma.mod: magma_module_f77.f
+	$(FORT) $(OPTS) $(INC) -c $<
 
 testing_%_f : testing_%_f.o $(FOBJ)
 	$(FORT) $(OPTS) $(LDOPTS) $< $(FOBJ) -o $@ lin/liblapacktest.a -L../lib \
