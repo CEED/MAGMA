@@ -1,17 +1,14 @@
-/**
- *
- * @file magma_zf77.c
- *
- *  PLASMA computational routines
- *  PLASMA is a software package provided by Univ. of Tennessee,
- *  Univ. of California Berkeley and Univ. of Colorado Denver
- *
- * @version 2.1.0
- * @author Mathieu Faverge
- * @date 2009-11-15
- * @precisions normal z -> c d s
- *
- **/
+/*
+    -- MAGMA (version 1.0) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2010
+
+       @precisions normal z -> s d c
+
+*/
+
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
@@ -53,6 +50,7 @@ typedef size_t devptr_t;
     #define MAGMA_ZGEQRS_GPU magma_zgeqrs_gpu_
     #define MAGMA_ZGETRF_GPU magma_zgetrf_gpu_
     #define MAGMA_ZGETRS_GPU magma_zgetrs_gpu_
+    #define MAGMA_ZGESV_GPU  magma_zgesv_gpu_
     #define MAGMA_ZLABRD_GPU magma_zlabrd_gpu_
     #define MAGMA_ZLARFB_GPU magma_zlarfb_gpu_
     #define MAGMA_ZPOTRF_GPU magma_zpotrf_gpu_
@@ -77,6 +75,7 @@ typedef size_t devptr_t;
     #define MAGMA_ZGEQRS_GPU magma_zgeqrs_gpu
     #define MAGMA_ZGETRF_GPU magma_zgetrf_gpu
     #define MAGMA_ZGETRS_GPU magma_zgetrs_gpu
+    #define MAGMA_ZGESV_GPU  magma_zgesv_gpu
     #define MAGMA_ZLABRD_GPU magma_zlabrd_gpu
     #define MAGMA_ZLARFB_GPU magma_zlarfb_gpu
     #define MAGMA_ZPOTRF_GPU magma_zpotrf_gpu
@@ -208,9 +207,16 @@ void MAGMA_ZGETRF_GPU( magma_int_t *m, magma_int_t *n, devptr_t *A, magma_int_t 
 
 void MAGMA_ZGETRS_GPU( char *trans, magma_int_t *n, magma_int_t *nrhs, devptr_t *A, magma_int_t *lda, magma_int_t *ipiv, devptr_t *b, magma_int_t *ldb, magma_int_t *info)
 { 
-    cuDoubleComplex *d_a = (cuDoubleComplex *)(*A);
-    cuDoubleComplex *d_b = (cuDoubleComplex *)(*b);
-    magma_zgetrs_gpu( trans[0], *n, *nrhs, d_a, *lda, ipiv, d_b, *ldb, info); 
+  cuDoubleComplex *d_a = (cuDoubleComplex *)(uintptr_t)(*A);
+  cuDoubleComplex *d_b = (cuDoubleComplex *)(uintptr_t)(*b);
+  magma_zgetrs_gpu( trans[0], *n, *nrhs, d_a, *lda, ipiv, d_b, *ldb, info); 
+}
+
+void MAGMA_ZGESV_GPU( magma_int_t *n, magma_int_t *nrhs, devptr_t *dA, magma_int_t *lda, magma_int_t *ipiv, devptr_t *dB, magma_int_t *ldb, magma_int_t *info)
+{
+  cuDoubleComplex *d_a = (cuDoubleComplex *)(*dA);
+  cuDoubleComplex *d_b = (cuDoubleComplex *)(*dB);
+  magma_zgesv_gpu( *n, *nrhs, d_a, *lda, ipiv, d_b, *ldb, info);
 }
 
 void MAGMA_ZLARFB_GPU( char *side, char *trans, char *direct, char *storev, magma_int_t *m, magma_int_t *n, magma_int_t *k, devptr_t *dv, magma_int_t *ldv, devptr_t *dt, magma_int_t *ldt, devptr_t *dc, magma_int_t *ldc, devptr_t *dwork, magma_int_t *ldwork)
