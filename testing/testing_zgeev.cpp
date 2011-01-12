@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        November 2010
 
-       to go to real 'w' must be changed to 'wr', 'wi' everywhere
+       @precisions normal z -> s d c
 
 */
 
@@ -27,7 +27,8 @@
    -- Testing zgeev
 */
 
-// #define CHECK_ERROR
+#define CHECK_ERROR
+#define PRECISION_z
 
 int main( int argc, char** argv) 
 {
@@ -80,6 +81,17 @@ int main( int argc, char** argv)
       fprintf (stderr, "!!!! host memory allocation error (w2)\n");
     }
 
+    #if (defined(PRECISION_s) || defined(PRECISION_d))
+    cuDoubleComplex *w1i = (cuDoubleComplex*)malloc(N * sizeof(cuDoubleComplex));
+    if (w1i == 0) {
+      fprintf (stderr, "!!!! host memory allocation error (w1i)\n");
+    }
+    cuDoubleComplex *w2i = (cuDoubleComplex*)malloc(N * sizeof(cuDoubleComplex));
+    if (w1i == 0) {
+      fprintf (stderr, "!!!! host memory allocation error (w2i)\n");
+    }
+    #endif
+
     rwork = (double*)malloc(2 * N * sizeof(double));
     if (rwork == 0) {
       fprintf (stderr, "!!!! host memory allocation error (rwork)\n");
@@ -115,10 +127,17 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
+        #if (defined(PRECISION_c) || defined(PRECISION_z))
         magma_zgeev("V", "V",
         //magma_zgeev("N", "N",
 		    &N, h_R, &N, w1, VL, &N, VR, &N,
                     h_work, &lwork, rwork, &info);
+        #else
+	magma_zgeev("V", "V",
+		    //magma_zgeev("N", "N",
+                    &N, h_R, &N, w1, w1i, VL, &N, VR, &N,
+                    h_work, &lwork, rwork, &info);
+	#endif
         end = get_current_time();
 
         gpu_time = GetTimerValue(start,end)/1000.;
@@ -127,10 +146,17 @@ int main( int argc, char** argv)
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
+        #if (defined(PRECISION_c) || defined(PRECISION_z))
         lapackf77_zgeev("V", "V",
 	//lapackf77_zgeev("N", "N",
 			&N, h_A, &N, w2, VL, &N, VR, &N,
 			h_work, &lwork, rwork, &info);
+	#else
+	lapackf77_zgeev("V", "V",
+	//lapackf77_zgeev("N", "N",
+                        &N, h_A, &N, w2, w2i, VL, &N, VR, &N,
+                        h_work, &lwork, rwork, &info);
+        #endif
         end = get_current_time();
         if (info < 0)
             printf("Argument %d of zgeev had an illegal value.\n", -info);
@@ -146,6 +172,7 @@ int main( int argc, char** argv)
 
 #ifdef CHECK_ERROR
         matnorm = lapackf77_zlange("f", &N, &one, w1, &N, work);
+	printf("norm = %f\n", matnorm);
         blasf77_zaxpy(&N, &mone, w1, &one, w2, &one);
 
 	result = lapackf77_zlange("f", &N, &one, w2, &N, work) / matnorm;
@@ -162,6 +189,10 @@ int main( int argc, char** argv)
     /* Memory clean up */
     free(w1);
     free(w2);
+    #if (defined(PRECISION_s) || defined(PRECISION_d))
+    free(w1i);
+    free(w2i);
+    #endif
     free(rwork);
     cublasFree(h_work);
 
