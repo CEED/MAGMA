@@ -89,7 +89,7 @@ int main( int argc, char** argv)
     magma_int_t M = 0, N = 0, n2, lda, ldda;
     magma_int_t size[10] = {960,1920,3072,4032,4992,5952,7104,8064,9024,9984};
 
-    magma_int_t i, info, min_mn, nb, maxn;
+    magma_int_t i, info, min_mn, nb, maxn, ret;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
 
@@ -125,7 +125,7 @@ int main( int argc, char** argv)
     TESTING_MALLOC(ipiv, magma_int_t, min_mn);
     TESTING_MALLOC(    h_A, cuDoubleComplex, n2     );
     TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2     );
-    TESTING_DEVALLOC(  d_A, cuDoubleComplex, ldda*N);
+    TESTING_DEVALLOC(  d_A, cuDoubleComplex, ldda*N );
 
     printf("\n\n");
     printf("  M     N   CPU GFlop/s    GPU GFlop/s   ||PA-LU||/(||A||*N)\n");
@@ -160,12 +160,14 @@ int main( int argc, char** argv)
            =================================================================== */
         cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_R, lda, d_A, ldda);
         start = get_current_time();
-        magma_zgetrf_gpu( M, N, d_A, ldda, ipiv, &info);
+        ret = magma_zgetrf_gpu( M, N, d_A, ldda, ipiv, &info);
         end = get_current_time();
         if (info < 0)
             printf("Argument %d of zgetrf had an illegal value.\n", -info);
+        if (ret != MAGMA_SUCCESS)
+            printf("magma_zgetrf returned with error code %d\n", ret);
 
-	gpu_perf = flops / GetTimerValue(start, end);
+        gpu_perf = flops / GetTimerValue(start, end);
 
         /* =====================================================================
            Check the factorization
