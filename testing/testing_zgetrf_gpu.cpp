@@ -159,9 +159,6 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_R, lda, d_A, ldda);
-        magma_zgetrf_gpu( M, N, d_A, ldda, ipiv, &info);
-
-        cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_R, lda, d_A, ldda);
         start = get_current_time();
         magma_zgetrf_gpu( M, N, d_A, ldda, ipiv, &info);
         end = get_current_time();
