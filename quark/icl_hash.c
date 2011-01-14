@@ -6,7 +6,7 @@
  * This simple hash table implementation should be easy to drop into
  * any other peice of code, it does not depend on anything else :-)
  */
-/* $Id: icl_hash.c 1441 2010-07-07 20:33:25Z yarkhan $ */
+/* $Id: icl_hash.c 1746 2010-11-07 18:43:24Z kurzak $ */
 /* $UTK_Copyright: $ */
 
 #include <stdlib.h>
@@ -40,9 +40,9 @@ hash_pjw(void* key)
 {
     char *datum = (char *)key;
     unsigned int hash_value, i;
-    
+
     if(!datum) return 0;
-    
+
     for (hash_value = 0; *datum; ++datum) {
         hash_value = (hash_value << ONE_EIGHTH) + *datum;
         if ((i = hash_value & HIGH_BITS) != 0)
@@ -71,23 +71,23 @@ icl_hash_create( int nbuckets, unsigned int (*hash_function)(void*), int (*hash_
 {
     icl_hash_t *ht;
     int i;
-    
+
     ht = (icl_hash_t*) malloc(sizeof(icl_hash_t));
     assert(ht!=NULL);
     if(!ht) return NULL;
-    
+
     ht->nentries = 0;
     ht->buckets = (icl_entry_t**)malloc(nbuckets * sizeof(icl_entry_t*));
     assert(ht->buckets!=NULL);
     if(!ht->buckets) return NULL;
-    
+
     ht->nbuckets = nbuckets;
     for(i=0;i<ht->nbuckets;i++)
         ht->buckets[i] = NULL;
-    
+
     ht->hash_function = hash_function ? hash_function : hash_pjw;
     ht->hash_key_compare = hash_key_compare ? hash_key_compare : string_compare;
-    
+
     return ht;
 }
 
@@ -106,15 +106,15 @@ icl_hash_find(icl_hash_t *ht, void* key)
 {
     icl_entry_t* curr;
     unsigned int hash_val;
-    
+
     if(!ht || !key) return NULL;
-    
+
     hash_val = (* ht->hash_function)(key) % ht->nbuckets;
-    
+
     for (curr=ht->buckets[hash_val]; curr != NULL; curr=curr->next)
         if ( ht->hash_key_compare(curr->key, key))
             return(curr->data);
-    
+
     return NULL;
 }
 
@@ -133,27 +133,27 @@ icl_hash_insert(icl_hash_t *ht, void* key, void *data)
 {
     icl_entry_t *curr, *prev;
     unsigned int hash_val;
-    
+
     if(!ht || !key) return NULL;
-    
+
     hash_val = (* ht->hash_function)(key) % ht->nbuckets;
-    
+
     for (prev=NULL,curr=ht->buckets[hash_val]; curr != NULL; prev=curr, curr=curr->next)
         if ( ht->hash_key_compare(curr->key, key))
             return(NULL); /* key already exists */
-    
+
     /* if key was not found */
     curr = (icl_entry_t*)malloc(sizeof(icl_entry_t));
     assert(curr != NULL);
     if(!curr) return NULL;
-    
+
     curr->key = key;
     curr->data = data;
     curr->next = ht->buckets[hash_val]; /* add at start */
-    
+
     ht->buckets[hash_val] = curr;
     ht->nentries++;
-    
+
     return curr;
 }
 
@@ -173,11 +173,11 @@ icl_hash_update_insert(icl_hash_t *ht, void* key, void *data, void **olddata)
 {
     icl_entry_t *curr, *prev;
     unsigned int hash_val;
-    
+
     if(!ht || !key) return NULL;
-    
+
     hash_val = (* ht->hash_function)(key) % ht->nbuckets;
-    
+
     /* Scan bucket[hash_val] for key */
     for (prev=NULL,curr=ht->buckets[hash_val]; curr != NULL; prev=curr, curr=curr->next)
         /* If key found, remove node from list, free old key, and setup olddata for the return */
@@ -186,28 +186,28 @@ icl_hash_update_insert(icl_hash_t *ht, void* key, void *data, void **olddata)
                 *olddata = curr->data;
                 free(curr->key);
             }
-            
+
             if (prev == NULL)
                 ht->buckets[hash_val] = curr->next;
             else
                 prev->next = curr->next;
         }
-    
+
     /* Since key was either not found, or found-and-removed, create and prepend new node */
     curr = (icl_entry_t*)malloc(sizeof(icl_entry_t));
     assert(curr!=NULL);
     if(curr == NULL) return NULL; /* out of memory */
-    
+
     curr->key = key;
     curr->data = data;
     curr->next = ht->buckets[hash_val]; /* add at start */
-    
+
     ht->buckets[hash_val] = curr;
     ht->nentries++;
-    
+
     if(olddata!=NULL && *olddata!=NULL)
         *olddata = NULL;
-    
+
     return curr;
 }
 
@@ -225,10 +225,10 @@ int icl_hash_delete(icl_hash_t *ht, void* key, void (*free_key)(void*), void (*f
 {
     icl_entry_t *curr, *prev;
     unsigned int hash_val;
-    
+
     if(!ht || !key) return -1;
     hash_val = (* ht->hash_function)(key) % ht->nbuckets;
-    
+
     prev = NULL;
     for (curr=ht->buckets[hash_val]; curr != NULL; )  {
         if ( ht->hash_key_compare(curr->key, key)) {
@@ -263,9 +263,9 @@ icl_hash_destroy(icl_hash_t *ht, void (*free_key)(void*), void (*free_data)(void
 {
     icl_entry_t *bucket, *curr, *next;
     int i;
-    
+
     if(!ht) return -1;
-    
+
     for (i=0; i<ht->nbuckets; i++) {
         bucket = ht->buckets[i];
         for (curr=bucket; curr!=NULL; ) {
@@ -276,10 +276,10 @@ icl_hash_destroy(icl_hash_t *ht, void (*free_key)(void*), void (*free_data)(void
             curr=next;
         }
     }
-    
+
     if(ht->buckets) free(ht->buckets);
     if(ht) free(ht);
-    
+
     return 0;
 }
 
@@ -298,9 +298,9 @@ icl_hash_dump(FILE* stream, icl_hash_t* ht)
 {
     icl_entry_t *bucket, *curr;
     int i;
-    
+
     if(!ht) return -1;
-    
+
     for(i=0; i<ht->nbuckets; i++) {
         bucket = ht->buckets[i];
         for(curr=bucket; curr!=NULL; ) {
@@ -309,6 +309,6 @@ icl_hash_dump(FILE* stream, icl_hash_t* ht)
             curr=curr->next;
         }
     }
-    
+
     return 0;
 }

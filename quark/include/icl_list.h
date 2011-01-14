@@ -4,12 +4,11 @@
  * Header file for the icl_list routines.
  *
  */
-/* $Id: icl_list.h 1316 2010-05-11 19:30:31Z yarkhan $ */
+/* $Id: icl_list.h 1532 2010-09-07 15:38:18Z yarkhan $ */
 /* $UTK_Copyright: $ */
 
 #ifndef ICL_LIST_H
 #define ICL_LIST_H
-
 
 #if defined(c_plusplus) || defined(__cplusplus)
 extern "C" {
@@ -42,7 +41,6 @@ int
 
 #define icl_list_foreach( list, ptr) \
     for (ptr = icl_list_first(list); ptr != NULL; ptr = icl_list_next(list, ptr)) 
-
 
 #if defined(c_plusplus) || defined(__cplusplus)
 }

@@ -4,12 +4,11 @@
  * Header file for icl_hash routines.
  *
  */
-/* $Id: icl_hash.h 1441 2010-07-07 20:33:25Z yarkhan $ */
+/* $Id: icl_hash.h 1532 2010-09-07 15:38:18Z yarkhan $ */
 /* $UTK_Copyright: $ */
 
 #ifndef icl_hash_h
 #define icl_hash_h
-
 
 #if defined(c_plusplus) || defined(__cplusplus)
 extern "C" {
@@ -53,10 +52,8 @@ int icl_hash_delete( icl_hash_t *ht, void* key, void (*free_key)(void*), void (*
              tmpent=tmpent->next)
 
 
-
 #if defined(c_plusplus) || defined(__cplusplus)
 }
 #endif
-
 
 #endif /* icl_hash_h */

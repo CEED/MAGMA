@@ -7,42 +7,50 @@
  * PLASMA is a software package provided by Univ. of Tennessee,
  * Univ. of California Berkeley and Univ. of Colorado Denver
  *
- * @version 2.1.0
+ * @version 2.3.1
  * @author Asim YarKhan
- * @date 2009-11-15
+ * @date 2010-11-15
  *
  **/
 
-#ifndef quark_h
-#define quark_h
+#ifndef QUARK_H
+#define QUARK_H
 
-#include <pthread.h>
 #include <limits.h>
-#include <stdint.h>
 #include <stdio.h>
 
-#include "icl_list.h"
-#include "icl_hash.h"
+#if defined( _WIN32 )
+  /* This must be included before INPUT is defined below, otherwise we
+     have a name clash/problem  */
+  #include <windows.h>
+  #include <limits.h>
+#else 
+  #include <inttypes.h>
+#endif
+
 #include "quark_unpack_args.h"
 
 #if defined(c_plusplus) || defined(__cplusplus)
 extern "C" {
 #endif
 
-#define DBGPRINTF(args...) if (0) {};
+//#define DBGPRINTF(args...) if (0) {};
 /* #define DBGPRINTF(args...) { fprintf(stderr,"%s:%d: [%s] ",__FILE__,__LINE__,__FUNCTION__); fprintf(stderr, args); } */
-#define LOGPRINTF(args...) { fprintf(stderr,"%s:%d: [%s] ",__FILE__,__LINE__,__FUNCTION__); fprintf(stderr, args); }
+//#define LOGPRINTF(args...) { fprintf(stderr,"%s:%d: [%s] ",__FILE__,__LINE__,__FUNCTION__); fprintf(stderr, args); }
 // #define DBGPRINTF(args...) { fprintf(stderr, args); }
 
 #define QUARK_SUCCESS 0
 #define QUARK_ERR -1
+#define QUARK_ERR_UNEXPECTED -1
+#define QUARK_ERR_NOT_SUPPORTED -2
 
 /* Data items can be: */
 /*  INPUT, OUTPUT, INOUT:  these data items create dependencies */
 /*  VALUE:  these data items get copied over */
 /*  NODEP:  these data items get copied over, and are not used for dependencies */
 /*  SCRATCH:  these data items can be allocated (and deallocted) by the scheduler when tasks execute  */
-typedef enum { INPUT=0x01, OUTPUT=0x02, INOUT=0x03, VALUE=0x04, NODEP=0x05, SCRATCH=0x06 } quark_direction_t;
+typedef enum { QINPUT=0x01, OUTPUT=0x02, INOUT=0x03, VALUE=0x04, NODEP=0x05, SCRATCH=0x06 } quark_direction_t;
+#define INPUT 0x01
 
 /* Data locality flag; ie keep data on the same core if possible */
 #define LOCALITY ( 1 << 3 )
@@ -57,22 +65,26 @@ typedef enum { INPUT=0x01, OUTPUT=0x02, INOUT=0x03, VALUE=0x04, NODEP=0x05, SCRA
 #define NOGATHERV 0x00
 
 /* The following are task level flags, that can be either provided as additional arguments to the task, or via SET functions */
-/* The current scaler is to be used as a task label; should be null terminated string, provided after the function arguments */
+/* The task label; should be provided as a null terminated string */
 #define TASK_LABEL ( 1 << 6 )
 #define TASKLABEL ( 1 << 6 )    /* depreciated label */
-/* The current scaler is to be used as a task color; should be null terminated string, provided after the function arguments */
+/* The task color; should be provided as a null terminated string */
 #define TASK_COLOR ( 1 << 7 )
 #define TASKCOLOR ( 1 << 7 )    /* depreciated label */
-/* The current task gets the priority associated with the current sizeof(double) VALUE parameter here   */
+/* The priority of the task, provided as an integer */
 #define TASK_PRIORITY ( 1 << 8 )
-/* Lock the task to a specific thread number (0 ... NTHREADS-1 */
+/* Lock the task to a specific thread number (0 ... NTHREADS-1), provided as an integer */
 #define TASK_LOCK_TO_THREAD ( 1 << 9 )
-/* The sequence pointer to be associated with the task */
+/* The sequence pointer to be associated with the task, provided as a pointer */
 #define TASK_SEQUENCE ( 1 << 10 )
+/* An integere for the number of threads require */
+#define TASK_THREAD_COUNT ( 1 << 11 )
+/* Lock the task to a thead mask (0 ... NTHREADS-1) bits long, provided as a character array (byte array) */
+// #define TASK_LOCK_TO_THREAD_MASK ( 1 << 12 )
 
 /* The range for priority values */
-#define MIN_PRIORITY 0
-#define MAX_PRIORITY INT_MAX
+#define QUARK_TASK_MIN_PRIORITY 0
+#define QUARK_TASK_MAX_PRIORITY INT_MAX
 
 /* Definition of structure holding scheduler information */
 typedef struct quark_s Quark;
@@ -87,10 +99,13 @@ struct quark_task_flags_s {
     char *task_color;
     char *task_label;
     void *task_sequence;
+    int task_thread_count;
+//    char *task_lock_to_thread_mask;
 };
+
 typedef struct quark_task_flags_s Quark_Task_Flags;
 /* Static initializer for Quark_Task_Flags_t */
-#define Quark_Task_Flags_Initializer { (int)0, (int)-1, (char *)NULL, (char *)NULL, (void *)NULL }
+#define Quark_Task_Flags_Initializer { (int)0, (int)-1, (char *)NULL, (char *)NULL, (void *)NULL, (int)1 }
 
 /* Setup scheduler data structures, assumes threads are managed seperately */
 Quark *QUARK_Setup(int num_threads);
@@ -124,8 +139,15 @@ void QUARK_Free(Quark * quark);
 /* Cancel a specific task */
 int QUARK_Cancel_Task(Quark *quark, unsigned long long taskid);
 
-/* Returns a pointer to the list of arguments, used when unpacking the arguments */
-icl_list_t *QUARK_Args_List(Quark *quark);
+/* Returns a pointer to the list of arguments, used when unpacking the
+   arguments; Returna a pointer to icl_list_t, so icl_list.h will need
+   bo included if you use this function */
+void *QUARK_Args_List(Quark *quark);
+
+/* Return a pointer to an argument.  The variable last_arg should be
+   NULL on the first call, then each subsequent call will used
+   last_arg to get the the next argument. */
+void *QUARK_Args_Pop( void *args_list, void **last_arg);
 
 /* Utility function returning rank of the current thread */
 int QUARK_Thread_Rank(Quark *quark);
@@ -172,4 +194,4 @@ Quark_Sequence *QUARK_Get_Sequence(Quark *quark);
 }
 #endif
 
-#endif                          /* quark.h */
+#endif                          /* QUARK.H */

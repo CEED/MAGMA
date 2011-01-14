@@ -12,7 +12,7 @@
 #define OVERHEAD1_COLOR 0x8A2BE2 /* purple1 */
 #define OVERHEAD2_COLOR 0x4B0082 /* purple2 */
 
-#define MAX_THREADS 48
+#define MAX_THREADS 60 
 #define MAX_EVENTS 1048576
 //#define MAX_EVENTS 16384
 //define MAX_EVENTS 8192

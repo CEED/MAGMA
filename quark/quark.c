@@ -9,23 +9,29 @@
  * QUARK is a software package provided by Univ. of Tennessee,
  * Univ. of California Berkeley and Univ. of Colorado Denver.
  *
- * @version 2.1.0
+ * @version 2.3.1
  * @author Asim YarKhan
- * @date 2009-11-15
+ * @date 2010-11-15
  *
- * @defgroup QUARK QUARK: QUeuing And Runtime for Kernels
  */
 
 /**
- * @defgroup QUARK_Unsupported QUARK: Unsupported functions 
+ * @defgroup QUARK QUARK: QUeuing And Runtime for Kernels
+ *
+ * These functions are available from the QUARK library for the
+ * scheduling of kernel routines.
+ */
+
+/**
+ * @defgroup QUARK_Unsupported QUARK: Unsupported functions
  *
  * These functions are used by internal QUARK and PLASMA developers to
  * obtain very specific behavior, but are unsupported and may have
  * unexpected results.
  */
 
-/* **************************************************************************** 
-   
+/* ****************************************************************************
+
 Summary of environment flags:
 
 Change the window size (default should be checked in the code)
@@ -47,14 +53,17 @@ export QUARK_DOT_DAG_ENABLE=1
 #include <limits.h>
 #include <errno.h>
 
-#if defined( _WIN32 ) || defined( _WIN64 )
-#include "plasmawinthread.h"
-#else
-#include <pthread.h>
+#ifndef inline
+#define inline __inline
 #endif
 
-#ifndef inline
-#define inline __inline__
+#if defined( _WIN32 ) || defined( _WIN64 )
+#  define fopen(ppfile, name, mode) fopen_s(ppfile, name, mode)
+#  define strdup _strdup
+#  include "quarkwinthread.h"
+#else
+#  define fopen(ppfile, name, mode) *ppfile = fopen(name, mode)
+#  include <pthread.h>
 #endif
 
 #ifdef TRUE
@@ -70,10 +79,14 @@ export QUARK_DOT_DAG_ENABLE=1
 #include "bsd_queue.h"
 #include "bsd_tree.h"
 #include "quark.h"
+#include "quark_unpack_args.h"
 
 #ifndef ULLONG_MAX
 # define ULLONG_MAX 18446744073709551615ULL
 #endif
+
+/* External functions */
+int quark_getenv_int(char* name, int defval);
 
 #define DIRECTION_MASK 0x07
 typedef enum { NOTREADY, QUEUED, RUNNING, DONE, CANCELLED } task_status;
@@ -101,6 +114,7 @@ struct quark_s {
     int war_dependencies_enable;
 #define tasklevel_width_max_level 5000
     int dot_dag_enable;
+    int queue_before_computing;
     int tasklevel_width[tasklevel_width_max_level];
     pthread_mutex_t dot_dag_mutex;
     pthread_mutex_t completed_tasks_mutex;
@@ -125,7 +139,7 @@ typedef struct worker_s {
 } Worker;
 
 typedef struct quark_task_s {
-    pthread_mutex_t task_mutex;    
+    pthread_mutex_t task_mutex;
     void (*function) (Quark *);    /* task function pointer */
     volatile task_status status; /* Status of task; NOTREADY, READY; QUEUED; DONE */
     volatile int num_dependencies; /* number of dependencies */
@@ -133,15 +147,16 @@ typedef struct quark_task_s {
     icl_list_t *args_list;        /* list of arguments (copies of scalar values and pointers) */
     icl_list_t *dependency_list;  /* list of dependencies */
     icl_list_t *scratch_list;        /* List of scratch space information and their sizes */
-    volatile int locality_thread_id; /* Thread to run task on to preserve data locality of some dependency */
+    volatile struct dependency_s *locality_preserving_dep; /* Try to run task on core that preserves the locality of this dependency */
     unsigned long long taskid; /* An identifier, used only for generating DAGs */
     unsigned long long tasklevel; /* An identifier, used only for generating DAGs */
     int lock_to_thread;
     char *task_label;            /* Label for this task, used in dot_dag generation */
     char *task_color;            /* Color for this task, used in dot_dag generation */
     int priority;                    /* Is this a high priority task */
-    Quark_Sequence *sequence;  
+    Quark_Sequence *sequence;
     struct ll_list_node_s *ptr_to_task_in_sequence; /* convenience pointer to this task in the sequence */
+    int task_thread_count;                /* Num of threads required by task */
 } Task;
 
 typedef struct dependency_s {
@@ -176,19 +191,21 @@ typedef struct address_set_node_s {
     volatile bool delete_data_at_address_when_node_is_deleted; /* used when data is copied in order to handle false dependencies  */
     unsigned long long last_writer_taskid; /* used for generating DOT DAGs */
     unsigned long long last_writer_tasklevel; /* used for tracking critical depth */
+    unsigned long long last_reader_or_writer_taskid; /* used for generating DOT DAGs */
+    unsigned long long last_reader_or_writer_tasklevel; /* used for tracking critical depth */
 } Address_Set_Node;
 
 /* Data structure for a list containing long long int values.  Used to
  * track task ids in sequences of tasks, so that the tasks in a
  * sequence can be controlled */
-typedef struct ll_list_node_s { 
+typedef struct ll_list_node_s {
     long long int val;
     LIST_ENTRY( ll_list_node_s ) entries;
 } ll_list_node_t;
 LIST_HEAD(ll_list_head_s, ll_list_node_s);
 typedef struct ll_list_head_s ll_list_head_t;
 
-typedef struct completed_tasks_node_s { 
+typedef struct completed_tasks_node_s {
     Task *task;
     int workerid;
     TAILQ_ENTRY( completed_tasks_node_s ) entries;
@@ -210,7 +227,7 @@ static int compare_task_priority_tree_nodes( task_priority_tree_node_t *n1, task
     return n2->priority - n1->priority;
 }
 /* Generate red-black tree functions */
-RB_GENERATE_STATIC( task_priority_tree_head_s, task_priority_tree_node_s, n_entry, compare_task_priority_tree_nodes );
+RB_GENERATE( task_priority_tree_head_s, task_priority_tree_node_s, n_entry, compare_task_priority_tree_nodes );
 
 
 /* **************************************************************************** */
@@ -241,12 +258,13 @@ int  quark_setaffinity(int rank);
 void quark_topology_init();
 void quark_topology_finalize();
 int  quark_get_numthreads();
-int  quark_get_affthreads(int, int*);
+int  *quark_get_affthreads();
 int  quark_yield();
 
 /* **************************************************************************** */
 /**
- * Mutex wrappers for tracing/timing purposes
+ * Mutex wrappers for tracing/timing purposes.  Makes it easier to
+ * profile the costs of these pthreads routines.
  */
 inline static int pthread_mutex_lock_asn(pthread_mutex_t *mtx) { return pthread_mutex_lock( mtx ); }
 inline static int pthread_mutex_trylock_asn(pthread_mutex_t *mtx) { return pthread_mutex_trylock( mtx ); }
@@ -277,8 +295,6 @@ static char *quark_task_default_color = "white";
 #define GATHERVDEPCOLOR "green"
 #define DOT_DAG_FILENAME "dot_dag_file.dot"
 FILE *dot_dag_file;
-#define dot_dag_printf(args...)                                 \
-    if ( quark->dot_dag_enable ) fprintf(dot_dag_file, args)
 #define dot_dag_level_update( parent_level, child_level, quark )       \
     if ( quark->dot_dag_enable ) {                                     \
         pthread_mutex_lock_wrap( &quark->dot_dag_mutex );                   \
@@ -307,7 +323,7 @@ static Task *quark_task_new()
     assert(task->args_list != NULL);
     task->dependency_list = icl_list_new();
     assert(task->dependency_list != NULL);
-    task->locality_thread_id = -1;
+    task->locality_preserving_dep = NULL;
     task->status = NOTREADY;
     task->scratch_list = icl_list_new();
     assert( task->scratch_list != NULL);
@@ -317,15 +333,16 @@ static Task *quark_task_new()
     pthread_mutex_init(&task->task_mutex, NULL);
     task->ptr_to_task_in_sequence = NULL;
     task->sequence = NULL;
-    task->priority = MIN_PRIORITY;
+    task->priority = QUARK_TASK_MIN_PRIORITY;
     task->task_label = quark_task_default_label;
     task->task_color = quark_task_default_color;
     task->lock_to_thread = -1;
+    task->task_thread_count = 1;
     return task;
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Free the task data structure
  */
 static void task_delete(Quark *quark, Task *task)
@@ -354,7 +371,7 @@ static void task_delete(Quark *quark, Task *task)
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Return the rank of a thread
  */
 int QUARK_Thread_Rank(Quark *quark)
@@ -362,24 +379,62 @@ int QUARK_Thread_Rank(Quark *quark)
     pthread_t self_id = pthread_self();
     int  i;
     for (i=0; i<quark->num_threads; i++)
-        if (pthread_equal(quark->worker[i]->thread_id, self_id)) 
+        if (pthread_equal(quark->worker[i]->thread_id, self_id))
             return i;
     return -1;
 }
 
 /* **************************************************************************** */
-/** 
- * Return a pointer to the list of arguments
+/**
+ * Return a pointer to the argument list being processed by the
+ * current task and worker.
+ *
+ * @param[in] quark
+ *         The scheduler's main data structure.
+ * @return
+ *          Pointer to the current argument list (icl_list_t *)
+ * @ingroup QUARK
  */
-icl_list_t *QUARK_Args_List(Quark *quark)
+void *QUARK_Args_List(Quark *quark)
 {
     Task *curr_task = quark->worker[QUARK_Thread_Rank(quark)]->current_task_ptr;
     assert( curr_task != NULL );
-    return (icl_list_t *)curr_task->args_list;
+    return (void *)curr_task->args_list;
 }
 
 /* **************************************************************************** */
-/** 
+/**
+ * Return a pointer to the next argument.  The variable last_arg
+ * should be NULL on the first call, then each subsequent call will
+ * used last_arg to get the the next argument. The argument list is
+ * not actually popped, it is preservered intact.
+ *
+ * @param[in] args_list
+ *         Pointer to the current arguments
+ * @param[inout] last_arg
+ *         Pointer to the last argument; should be NULL on the first call
+ * @return
+ *          Pointer to the next argument
+ * @ingroup QUARK
+ */
+void *QUARK_Args_Pop( void *args_list, void **last_arg)
+{
+    icl_list_t *args = (icl_list_t *)args_list;
+    icl_list_t *node = (icl_list_t *)*last_arg;
+    void *arg = NULL;
+    if ( node == NULL ) {
+        node = icl_list_first( args );
+        if (node!=NULL) arg = node->data;
+    } else {
+        node = icl_list_next( args, node );
+        if (node!=NULL) arg = node->data;
+    }
+    *last_arg = node;
+    return arg;
+}
+
+/* **************************************************************************** */
+/**
  * Well known hash function: Fowler/Noll/Vo - 32 bit version
  */
 static inline unsigned int fnv_hash_function( void *key, int len )
@@ -393,7 +448,7 @@ static inline unsigned int fnv_hash_function( void *key, int len )
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Hash function to map addresses, cut into "long" size chunks, then
  * XOR. The result will be matched to hash table size using mod in the
  * hash table implementation
@@ -406,7 +461,7 @@ static inline unsigned int address_hash_function(void *address)
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Adress compare function for hash table */
 static inline int address_key_compare(void *addr1, void *addr2)
 {
@@ -414,7 +469,7 @@ static inline int address_key_compare(void *addr1, void *addr2)
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Hash function for unsigned long longs (used for taskid)
  */
 static inline unsigned int ullong_hash_function( void *key )
@@ -424,7 +479,7 @@ static inline unsigned int ullong_hash_function( void *key )
     return hashval;
 }
 /* **************************************************************************** */
-/** 
+/**
  * Compare unsigned long longs for hash keys (used for taskid)
  */
 static inline int ullong_key_compare( void *key1, void *key2  )
@@ -433,7 +488,7 @@ static inline int ullong_key_compare( void *key1, void *key2  )
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Rotate the next worker queue that will get a task assigned to it.
  * The master (0) never gets round-robin tasks assigned to it.
  */
@@ -448,7 +503,7 @@ static inline int quark_revolve_robin(Quark * quark)
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Duplicate the argument, allocating a memory buffer for it
  */
 static inline char *arg_dup(char *arg, int size)
@@ -460,7 +515,7 @@ static inline char *arg_dup(char *arg, int size)
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Allocate and initialize a dependency structure
  */
 static inline Dependency *dependency_new(void *addr, long long size, quark_direction_t dir, bool loc, Task *task, bool accumulator, bool gatherv, icl_list_t *task_args_list_node_ptr)
@@ -479,11 +534,17 @@ static inline Dependency *dependency_new(void *addr, long long size, quark_direc
     dep->task_args_list_node_ptr = task_args_list_node_ptr; /* convenience ptr for WAR address updating */
     dep->task_dependency_list_node_ptr = NULL; /* convenience ptr */
     dep->ready = FALSE;
+    /* For the task, track the dependency to be use to do locality
+     * preservation; by default, use first output dependency.  */
+    if ( dep->locality )
+        task->locality_preserving_dep = dep;
+    else if ( (task->locality_preserving_dep == NULL) && ( dep->direction==OUTPUT || dep->direction==INOUT) )
+        task->locality_preserving_dep = dep;
     return dep;
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Allocate and initialize a worker structure
  */
 static Worker *worker_new(Quark *quark, int rank)
@@ -505,7 +566,7 @@ static Worker *worker_new(Quark *quark, int rank)
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Cleanup and free worker data structures
  */
 static void worker_delete(Worker * worker)
@@ -523,7 +584,7 @@ static void worker_delete(Worker * worker)
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * The task requires scratch workspace, which will be allocated if
  * needed.  This records the scratch requirements.
  */
@@ -538,7 +599,7 @@ static Scratch *scratch_new( void *arg_ptr, int arg_size, icl_list_t *task_args_
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Allocate any needed scratch space;
  */
 static void scratch_allocate( Task *task )
@@ -559,7 +620,7 @@ static void scratch_allocate( Task *task )
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Deallocate any scratch space.
  */
 static void scratch_deallocate( Task *task )
@@ -567,34 +628,13 @@ static void scratch_deallocate( Task *task )
     icl_list_t *scr_node;
     for (scr_node = icl_list_first( task->scratch_list );
          scr_node != NULL && scr_node->data!=NULL;
-         scr_node = icl_list_next(task->scratch_list, scr_node)) {      
+         scr_node = icl_list_next(task->scratch_list, scr_node)) {
         Scratch *scratch = (Scratch *)scr_node->data;
         if ( scratch->ptr == NULL ) {
             /* If scratch had to be allocated, free it */
             free(*(void **)scratch->task_args_list_node_ptr->data);
         }
     }
-}
-
-/* **************************************************************************** */
-/** 
- * Check for an integer in an environment variable, returning the
- * integer value or a provided default value 
-*/
-static int getenv_int(char* name, int defval)
-{
-  char *envstr = NULL;
-  long int longval = -1;
-  char *endptr;
-  extern int errno;
-  if (name == NULL) return defval;
-  /* Env variable does not exist */
-  if ((envstr = getenv(name)) == NULL) return defval;
-  /* Convert to long, checking for errors */
-  longval = strtol(envstr, &endptr, 10);
-  if ((errno == ERANGE) || (longval==0 && endptr==envstr))
-    return defval;
-  return (int)longval;
 }
 
 /* **************************************************************************** */
@@ -605,7 +645,7 @@ static int getenv_int(char* name, int defval)
  * num_threads worker threads.
  *
  * @param[in] num_threads
- *          Number of threads to be used (1 master and rest compute workers). 
+ *          Number of threads to be used (1 master and rest compute workers).
  * @return
  *          Pointer to the QUARK scheduler data structure.
  * @ingroup QUARK
@@ -616,11 +656,19 @@ Quark *QUARK_Setup(int num_threads)
     Quark *quark = (Quark *) malloc(sizeof(Quark));
     assert(quark != NULL);
     /* Used to tell master when to act as worker */
-    int quark_unroll_tasks_per_thread = getenv_int("QUARK_UNROLL_TASKS_PER_THREAD", 20);
-    int quark_unroll_tasks = getenv_int("QUARK_UNROLL_TASKS", quark_unroll_tasks_per_thread * num_threads);
-    quark->low_water_mark = (int)(quark_unroll_tasks);
-    quark->high_water_mark = (int)(quark->low_water_mark + quark->low_water_mark*0.25);
-    quark->war_dependencies_enable = getenv_int("QUARK_WAR_DEPENDENCIES_ENABLE", 0);
+    int quark_unroll_tasks_per_thread = quark_getenv_int("QUARK_UNROLL_TASKS_PER_THREAD", 20);
+    int quark_unroll_tasks = quark_getenv_int("QUARK_UNROLL_TASKS", quark_unroll_tasks_per_thread * num_threads);
+    quark->war_dependencies_enable = quark_getenv_int("QUARK_WAR_DEPENDENCIES_ENABLE", 0);
+    quark->queue_before_computing = quark_getenv_int("QUARK_QUEUE_BEFORE_COMPUTING", 0);
+    quark->dot_dag_enable = quark_getenv_int("QUARK_DOT_DAG_ENABLE", 0);
+    if ( quark->dot_dag_enable ) quark->queue_before_computing = 1;
+    if ( quark->queue_before_computing==1 || quark_unroll_tasks==0 ) {
+        quark->high_water_mark = (int)(INT_MAX - 1);
+        quark->low_water_mark = (int)(quark->high_water_mark);
+    } else {
+        quark->low_water_mark = (int)(quark_unroll_tasks);
+        quark->high_water_mark = (int)(quark->low_water_mark + quark->low_water_mark*0.25);
+    }
     quark->num_queued_tasks = 0;
     pthread_cond_init( &quark->num_queued_tasks_cond, NULL );
     quark->num_threads = num_threads;
@@ -646,15 +694,14 @@ Quark *QUARK_Setup(int num_threads)
     /* The structure for the 0th worker will be used by the master */
     quark->worker[0] = worker_new(quark, 0);
     quark->worker[0]->thread_id = pthread_self();
-    quark->dot_dag_enable = getenv_int("QUARK_DOT_DAG_ENABLE", 0);
     if ( quark->dot_dag_enable ) {
-        dot_dag_file = fopen(DOT_DAG_FILENAME, "w"); /* global FILE variable */
-        dot_dag_printf("digraph G { size=\"10,7.5\"; center=1; orientation=portrait; \n");
+        fopen(&dot_dag_file, DOT_DAG_FILENAME, "w"); /* global FILE variable */
+        fprintf(dot_dag_file, "digraph G { size=\"10,7.5\"; center=1; orientation=portrait; \n");
         for (i=0; i<tasklevel_width_max_level; i++ )
             quark->tasklevel_width[i] = 0;
         pthread_mutex_init(&quark->dot_dag_mutex, NULL);
-        /* dot_dag_printf( "%d [label=\"%d %d\",style=\"invis\"]\n", 0, 0, quark->tasklevel_width[i] ); */
-        dot_dag_printf( "%d [style=\"invis\"]\n", 0);
+        /* fprintf(dot_dag_file, "%d [label=\"%d %d\",style=\"invis\"]\n", 0, 0, quark->tasklevel_width[i] ); */
+        fprintf(dot_dag_file, "%d [style=\"invis\"]\n", 0);
     }
     /* Launch workers; first create the structures */
     for(i = 1; i < num_threads; i++)
@@ -665,7 +712,7 @@ Quark *QUARK_Setup(int num_threads)
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by the master thread.  Allocate and initialize the scheduler
  * data stuctures and spawn worker threads.  Used when this scheduler
  * is to do all the thread management.
@@ -697,8 +744,7 @@ Quark *QUARK_New(int num_threads)
     /* Create scheduler data structures for master and workers */
     Quark *quark = QUARK_Setup(nthrd);
     /* Get binding informations */
-    quark->coresbind = (int *) malloc(nthrd * sizeof(int));
-    quark_get_affthreads(nthrd, quark->coresbind);
+    quark->coresbind = quark_get_affthreads();
     /* Setup thread attributes */
     pthread_attr_init(&quark->thread_attr);
     /* pthread_setconcurrency(quark->num_threads); */
@@ -713,7 +759,7 @@ Quark *QUARK_New(int num_threads)
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by the master thread.  Wait for all the tasks to be
  * completed, then return.  The worker tasks will NOT exit from their
  * work loop.
@@ -727,12 +773,12 @@ void QUARK_Barrier(Quark * quark)
     quark->all_tasks_queued = TRUE;
     while ( quark->num_tasks > 0 ) {
         process_completed_tasks(quark);
-        work_main_loop( quark->worker[0] ); 
+        work_main_loop( quark->worker[0] );
     }
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by the master thread.  Wait for all the
  * tasks to be completed, then return.  The worker tasks will also
  * exit from their work loop at this time.
@@ -751,7 +797,7 @@ void QUARK_Waitall(Quark * quark)
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by the master thread.  Free all QUARK data structures, this
  * assumes that all usage of QUARK is completed.  This interface does
  * not manage, delete or close down the worker threads.
@@ -765,12 +811,12 @@ void QUARK_Free(Quark * quark)
     int i;
     QUARK_Waitall(quark);
     /* Write the level matching/forcing information */
-    if ( quark->dot_dag_enable ) { 
+    if ( quark->dot_dag_enable ) {
         for (i=1; i<tasklevel_width_max_level && quark->tasklevel_width[i]!=0; i++ ) {
-            dot_dag_printf( "%d [label=\"%d:%d\"]\n", i, i, quark->tasklevel_width[i] );
-            dot_dag_printf( "%d->%d [style=\"invis\"];\n", i-1, i );
+            fprintf(dot_dag_file, "%d [label=\"%d:%d\"]\n", i, i, quark->tasklevel_width[i] );
+            fprintf(dot_dag_file, "%d->%d [style=\"invis\"];\n", i-1, i );
         }
-        dot_dag_printf("} \n");
+        fprintf(dot_dag_file, "} \n");
     }
     /* Destroy hash tables, workers and other data structures */
     for (i = 1; i < quark->num_threads; i++)
@@ -789,7 +835,7 @@ void QUARK_Free(Quark * quark)
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by the master thread.  Wait for all tasks to complete, then
  * join/end the worker threads, and clean up all the data structures.
  *
@@ -801,7 +847,7 @@ void QUARK_Delete(Quark * quark)
 {
     void *exitcodep = NULL;
     int   i;
-    
+
     QUARK_Waitall( quark );
     /* Wait for workers to quit and join threads */
     for (i = 1; i < quark->num_threads; i++)
@@ -815,7 +861,7 @@ void QUARK_Delete(Quark * quark)
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Use the task_flags data structure to set various items in the task
  * (priority, lock_to_thread, color, labels, etc )
 */
@@ -827,12 +873,13 @@ Task *quark_set_task_flags_in_task_structure( Quark *quark, Task *task, Quark_Ta
         if ( task_flags->task_color && quark->dot_dag_enable ) task->task_color = strdup(task_flags->task_color);
         if ( task_flags->task_label && quark->dot_dag_enable ) task->task_label = strdup(task_flags->task_label);
         if ( task_flags->task_sequence ) task->sequence = task_flags->task_sequence;
+        if ( task_flags->task_thread_count > 1 ) task->task_thread_count = task_flags->task_thread_count;
     }
     return task;
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by the master thread.  This is used in argument packing, to
  * create an initial task data structure.  Arguments can be packed
  * into this structure, and it can be submitted later.
@@ -842,20 +889,19 @@ Task *quark_set_task_flags_in_task_structure( Quark *quark, Task *task, Quark_Ta
  * @param[in] function
  *          The function (task) to be executed by the scheduler
  * @param[in] task_flags
- *          Flags to specify task behavior 
+ *          Flags to specify task behavior
  * @ingroup QUARK
  */
 Task *QUARK_Task_Init(Quark * quark, void (*function) (Quark *), Quark_Task_Flags *task_flags )
 {
     Task *task = quark_task_new();
-    task->locality_thread_id = quark_revolve_robin(quark);
     task->function = function;
     quark_set_task_flags_in_task_structure( quark, task, task_flags );
     return task;
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by the master thread.  This is used in argument packing, to
  * pack/add arguments to a task data structure.
  *
@@ -870,13 +916,13 @@ Task *QUARK_Task_Init(Quark * quark, void (*function) (Quark *), Quark_Task_Flag
  * @param[in] arg_flags
  *          Flags indicating argument usage and various decorators
  *          INPUT, OUTPUT, INOUT, VALUE, NODEP, SCRATCH
- *          LOCALITY, ACCUMULATOR, GATHERV 
+ *          LOCALITY, ACCUMULATOR, GATHERV
  *          TASK_COLOR, TASK_LABEL (special decorators for VALUE)
  *          e.g., arg_flags    INPUT | LOCALITY | ACCUMULATOR
  *          e.g., arg_flags    VALUE | TASK_COLOR
  * @ingroup QUARK
  */
-void QUARK_Task_Pack_Arg( Quark *quark, Task *task, int arg_size, void *arg_ptr, int arg_flags ) 
+void QUARK_Task_Pack_Arg( Quark *quark, Task *task, int arg_size, void *arg_ptr, int arg_flags )
 {
     icl_list_t *task_args_list_node_ptr=NULL;
     // extract information from the flags
@@ -885,15 +931,17 @@ void QUARK_Task_Pack_Arg( Quark *quark, Task *task, int arg_size, void *arg_ptr,
     bool gatherv = (bool) ((arg_flags & GATHERV) != 0 );
     bool task_priority = (bool) ((arg_flags & TASK_PRIORITY) != 0 );
     bool task_lock_to_thread = (bool) ((arg_flags & TASK_LOCK_TO_THREAD) != 0 );
+    bool task_thread_count = (bool) ((arg_flags & TASK_THREAD_COUNT) != 0 );
     bool task_color = (bool) ((arg_flags & TASK_COLOR) != 0 );
     bool task_label = (bool) ((arg_flags & TASK_LABEL) != 0 );
     bool task_sequence = (bool) ((arg_flags & TASK_SEQUENCE) != 0 );
     quark_direction_t arg_direction = (quark_direction_t) (arg_flags & DIRECTION_MASK);
     if (arg_direction == VALUE) {
         /* If argument is a value; Copy the contents to the argument buffer */
-        if ( task_priority ) task->priority = *((int *)arg_ptr); 
-        else if ( task_lock_to_thread ) task->lock_to_thread = *((int *)arg_ptr); 
-        else if ( task_sequence ) task->sequence = *((Quark_Sequence **)arg_ptr); 
+        if ( task_priority ) task->priority = *((int *)arg_ptr);
+        else if ( task_lock_to_thread ) task->lock_to_thread = *((int *)arg_ptr);
+        else if ( task_thread_count ) task->task_thread_count = *((int *)arg_ptr);
+        else if ( task_sequence ) task->sequence = *((Quark_Sequence **)arg_ptr);
         else if ( task_color && quark->dot_dag_enable ) {
             if ( task->task_color && task->task_color!=quark_task_default_color) free(task->task_color);
             task->task_color = arg_dup(arg_ptr, arg_size);
@@ -922,7 +970,7 @@ void QUARK_Task_Pack_Arg( Quark *quark, Task *task, int arg_size, void *arg_ptr,
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by the master thread.  Add a new task to the scheduler,
  * providing the data pointers, sizes, and dependency information.
  * This function provides the main user interface for the user to
@@ -955,7 +1003,7 @@ unsigned long long QUARK_Insert_Task_Packed(Quark * quark, Task *task )
 /*             printf("sequence %p task %ld addto \n", task->sequence, task->taskid ); */
 /*         } */
         /* TODO FIXME */
-        if ( task->sequence->status == QUARK_ERR ) 
+        if ( task->sequence->status == QUARK_ERR )
             task->function = NULL;
         ll_list_node_t *entry = malloc(sizeof(ll_list_node_t));
         entry->val = task->taskid;
@@ -974,6 +1022,7 @@ unsigned long long QUARK_Insert_Task_Packed(Quark * quark, Task *task )
      * then quark->finalize and quark->all_tasks_queued must be set false */
     quark->all_tasks_queued = FALSE;
     quark_insert_task_dependencies( quark, task );
+    /* FIXME does this need to be protected */
     quark->num_tasks++;
     /* Save the task, indexed by its taskid */
     pthread_mutex_lock_wrap( &quark->task_set_mutex );
@@ -993,7 +1042,7 @@ unsigned long long QUARK_Insert_Task_Packed(Quark * quark, Task *task )
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by the master thread.  Add a new task to the scheduler,
  * providing the data pointers, sizes, and dependency information.
  * This function provides the main user interface for the user to
@@ -1004,21 +1053,21 @@ unsigned long long QUARK_Insert_Task_Packed(Quark * quark, Task *task )
  * @param[in] function
  *          The function (task) to be executed by the scheduler
  * @param[in] task_flags
- *          Flags to specify task behavior 
- * @param[in] ... 
+ *          Flags to specify task behavior
+ * @param[in] ...
  *          Triplets of the form, ending with 0 for arg_size.
  *            arg_size, arg_ptr, arg_flags where
  *          arg_size: int: Size of the argument in bytes (0 cannot be used here)
  *          arg_ptr: pointer: Pointer to data or argument
  *          arg_flags: int: Flags indicating argument usage and various decorators
  *            INPUT, OUTPUT, INOUT, VALUE, NODEP, SCRATCH
- *            LOCALITY, ACCUMULATOR, GATHERV 
+ *            LOCALITY, ACCUMULATOR, GATHERV
  *            TASK_COLOR, TASK_LABEL (special decorators for VALUE)
  *            e.g., arg_flags    INPUT | LOCALITY | ACCUMULATOR
  *            e.g., arg_flags    VALUE | TASK_COLOR
  * @return
  *          A long, long integer which can be used to refer to
- *          this task (e.g. for cancellation) 
+ *          this task (e.g. for cancellation)
  * @ingroup QUARK
  */
 unsigned long long QUARK_Insert_Task(Quark * quark, void (*function) (Quark *), Quark_Task_Flags *task_flags, ...)
@@ -1039,12 +1088,12 @@ unsigned long long QUARK_Insert_Task(Quark * quark, void (*function) (Quark *), 
     va_end(varg_list);
 
     taskid = QUARK_Insert_Task_Packed( quark, task );
-    
+
     return taskid ;
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Run this task in the current thread, at once, without scheduling.
  * This is an unsupported function that can be used by developers for
  * testing.
@@ -1054,19 +1103,19 @@ unsigned long long QUARK_Insert_Task(Quark * quark, void (*function) (Quark *), 
  * @param[in] function
  *          The function (task) to be executed by the scheduler
  * @param[in] task_flags
- *          Flags to specify task behavior 
- * @param[in] ... 
+ *          Flags to specify task behavior
+ * @param[in] ...
  *          Triplets of the form, ending with 0 for arg_size.
  *            arg_size, arg_ptr, arg_flags where
  *          arg_size: int: Size of the argument in bytes (0 cannot be used here)
  *          arg_ptr: pointer: Pointer to data or argument
  *          arg_flags: int: Flags indicating argument usage and various decorators
  *            INPUT, OUTPUT, INOUT, VALUE, NODEP, SCRATCH
- *            LOCALITY, ACCUMULATOR, GATHERV 
+ *            LOCALITY, ACCUMULATOR, GATHERV
  *            TASK_COLOR, TASK_LABEL (special decorators for VALUE)
  *            e.g., arg_flags    INPUT | LOCALITY | ACCUMULATOR
  *            e.g., arg_flags    VALUE | TASK_COLOR
- * @return 
+ * @return
  *           -1 since the task is run at once and there is no need for a task handle.
  * @ingroup QUARK_Unsupported
  */
@@ -1074,9 +1123,9 @@ unsigned long long QUARK_Execute_Task(Quark * quark, void (*function) (Quark *),
 {
     va_list varg_list;
     int arg_size;
-    
+
     Task *task = QUARK_Task_Init(quark, function, task_flags);
-    
+
     va_start(varg_list, task_flags);
     // For each argument
     while( (arg_size = va_arg(varg_list, int)) != 0) {
@@ -1085,7 +1134,7 @@ unsigned long long QUARK_Execute_Task(Quark * quark, void (*function) (Quark *),
         QUARK_Task_Pack_Arg( quark, task, arg_size, arg_ptr, arg_flags );
     }
     va_end(varg_list);
-    
+
     int thread_rank = QUARK_Thread_Rank(quark);
     Worker *worker = quark->worker[thread_rank];
     if ( task->function == NULL ) {
@@ -1114,7 +1163,7 @@ unsigned long long QUARK_Execute_Task(Quark * quark, void (*function) (Quark *),
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by any thread.  Cancel a task that is in the scheduler.
  * This works by simply making the task a NULL task.  The scheduler
  * still processes all the standard dependencies for this task, but
@@ -1134,9 +1183,9 @@ int QUARK_Cancel_Task(Quark *quark, unsigned long long taskid)
 {
     pthread_mutex_lock_wrap( &quark->task_set_mutex );
     Task *task = icl_hash_find( quark->task_set, &taskid );
-    if ( task == NULL ) { 
+    if ( task == NULL ) {
         pthread_mutex_unlock_wrap( &quark->task_set_mutex );
-        return -1; 
+        return -1;
     }
     pthread_mutex_lock_wrap( &task->task_mutex );
     pthread_mutex_unlock_wrap( &quark->task_set_mutex );
@@ -1150,7 +1199,7 @@ int QUARK_Cancel_Task(Quark *quark, unsigned long long taskid)
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Allocate and initialize address_set_node structure.  These are
  * inserted into the hash table.
  */
@@ -1169,11 +1218,13 @@ static Address_Set_Node *address_set_node_new( void* address, int size )
     address_set_node->delete_data_at_address_when_node_is_deleted = FALSE;
     address_set_node->last_writer_taskid = 0;
     address_set_node->last_writer_tasklevel = 0;
+    address_set_node->last_reader_or_writer_taskid = 0;
+    address_set_node->last_reader_or_writer_tasklevel = 0;
     return address_set_node;
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Clean and free address set node structures.
  */
 static void address_set_node_delete( Quark *quark, Address_Set_Node *address_set_node )
@@ -1185,7 +1236,7 @@ static void address_set_node_delete( Quark *quark, Address_Set_Node *address_set
     /* Do not free this structure if we are generating DAGs.  The
      * structure contains information about the last task to write the
      * data used to make DAG edges */
-    if ( quark->dot_dag_enable ) 
+    if ( quark->dot_dag_enable )
         return;
 
     /* Remove any data structures in the waiting_deps list */
@@ -1198,7 +1249,7 @@ static void address_set_node_delete( Quark *quark, Address_Set_Node *address_set
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Queue ready tasks on a worker node, either using locality
  * information or a round robin scheme.  The address_set_mutex should
  * be set when calling this, since we touch the task data structure
@@ -1206,33 +1257,50 @@ static void address_set_node_delete( Quark *quark, Address_Set_Node *address_set
  */
 static void quark_check_and_queue_ready_task( Quark *quark, Task *task )
 {
+    int worker_thread_id = -1;
     Worker *worker = NULL;
+    int assigned_thread_count = 0;
+
     if ( task->num_dependencies_remaining > 0 || task->status == QUEUED || task->status == RUNNING || task->status == DONE) return;
     task->status = QUEUED;
     /* Assign task to thread.  Locked tasks get sent to appropriate
      * thread.  Locality tasks should have be correctly placed.  Tasks
      * without either should have the original round robin thread
      * assignment */
-    if ( task->lock_to_thread >= 0) 
-        worker = quark->worker[task->lock_to_thread % quark->num_threads];
-    else        
-        worker = quark->worker[task->locality_thread_id];
-    /* Create a new entry for the ready list */
-    task_priority_tree_node_t *new_task_tree_node = malloc(sizeof(task_priority_tree_node_t));
-    assert( new_task_tree_node != NULL );
-    new_task_tree_node->priority = task->priority;
-    new_task_tree_node->task = task;
-    /* Insert new entry into the ready list */
-    pthread_mutex_lock_ready_list(&worker->ready_list_mutex);
-    RB_INSERT( task_priority_tree_head_s, worker->ready_list, new_task_tree_node );
-    worker->ready_list_size++;
-    pthread_mutex_unlock_ready_list(&worker->ready_list_mutex);
-    pthread_cond_broadcast( &quark->num_queued_tasks_cond );
-    quark->num_queued_tasks++;
+    if ( task->lock_to_thread >= 0) {
+        worker_thread_id = task->lock_to_thread % quark->num_threads;
+    } else if ( task->locality_preserving_dep != NULL ) {
+        int last_thread = task->locality_preserving_dep->address_set_node_ptr->last_thread;
+        if ( last_thread >= 0 ) worker_thread_id = last_thread;
+    }
+    if ( worker_thread_id < 0 ) worker_thread_id = quark_revolve_robin(quark);
+
+    /* Handle tasks that need multiple threads */
+    while ( assigned_thread_count < task->task_thread_count) {
+
+        worker = quark->worker[worker_thread_id];
+        /* Create a new entry for the ready list */
+        task_priority_tree_node_t *new_task_tree_node = malloc(sizeof(task_priority_tree_node_t));
+        assert( new_task_tree_node != NULL );
+        new_task_tree_node->priority = task->priority;
+        new_task_tree_node->task = task;
+        /* Insert new entry into the ready list */
+        pthread_mutex_lock_ready_list(&worker->ready_list_mutex);
+        RB_INSERT( task_priority_tree_head_s, worker->ready_list, new_task_tree_node );
+        worker->ready_list_size++;
+        pthread_mutex_unlock_ready_list(&worker->ready_list_mutex);
+        pthread_cond_broadcast( &quark->num_queued_tasks_cond );
+        quark->num_queued_tasks++;
+
+        assigned_thread_count++;
+        /* TODO Abort when too many threads requested */
+        if ( assigned_thread_count < task->task_thread_count )
+            worker_thread_id = (worker_thread_id+1) % quark->num_threads;
+    }
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Routine to avoid false (WAR write-after-read) dependencies by
  * making copies of the data.  Check if there are suffient INPUTS in
  * the beginning of a address dependency followed by a OUTPUT or an
@@ -1266,8 +1334,8 @@ void quark_avoid_war_dependencies( Quark *quark, Address_Set_Node *asn_old, Task
     else min_input_deps = (int)(7 + 27 * avg_queued_tasks_per_thread);
 
     /* Override computed value using environment variable */
-    min_input_deps = getenv_int( "QUARK_AVOID_WAR_WHEN_NUM_WAITING_READS", min_input_deps );
-    
+    min_input_deps = quark_getenv_int( "QUARK_AVOID_WAR_WHEN_NUM_WAITING_READS", min_input_deps );
+
     /* Shortcut return if there are not enough input tasks */
     if ( asn_old->num_waiting_input < min_input_deps ) return;
 
@@ -1317,7 +1385,7 @@ void quark_avoid_war_dependencies( Quark *quark, Address_Set_Node *asn_old, Task
                 dep->address_set_node_ptr = asn_new;
                 dep->address_set_waiting_deps_node_ptr = dep_node_new;
                 if (dep->ready == FALSE) { /* dep->ready will always be FALSE */
-                    dep->ready = TRUE;    
+                    dep->ready = TRUE;
                     dot_dag_print_edge( parent_task->taskid, task->taskid, DEPCOLOR );
                     dot_dag_level_update( parent_task->tasklevel, task->tasklevel, quark );
                     task->num_dependencies_remaining--;
@@ -1336,7 +1404,7 @@ void quark_avoid_war_dependencies( Quark *quark, Address_Set_Node *asn_old, Task
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by a worker each time a task is removed from an address set
  * node.  Sweeps through a sequence of GATHERV dependencies from the
  * beginning, and enables them all. Assumes address_set_mutex is
@@ -1357,10 +1425,10 @@ static void address_set_node_initial_gatherv_check_and_launch(Quark *quark, Addr
         /* Update next_dep ready status */
         if ( next_dep->ready == FALSE ) {
             /* Record the locality information with the task data structure */
-            if ( next_dep->locality ) next_task->locality_thread_id = worker_rank;
+            //if ( next_dep->locality ) next_task->locality_preserving_dep = worker_rank;
             /* Mark the next dependency as ready since we have GATHERV flag */
             next_dep->ready = TRUE;
-            dot_dag_print_edge( completed_task->taskid, next_task->taskid, GATHERVDEPCOLOR ); 
+            dot_dag_print_edge( completed_task->taskid, next_task->taskid, GATHERVDEPCOLOR );
             dot_dag_level_update( completed_task->tasklevel, next_task->tasklevel, quark );
             next_task->num_dependencies_remaining--;
             /* If the dep status became true check related task, and put onto ready queues */
@@ -1369,9 +1437,9 @@ static void address_set_node_initial_gatherv_check_and_launch(Quark *quark, Addr
 
     }
 }
-    
+
 /* **************************************************************************** */
-/** 
+/**
  * Called by a worker each time a task is removed from an address set
  * node.  Sweeps through a sequence of ACCUMULATOR tasks from the
  * beginning and prepends one at the beginning if only one (chained)
@@ -1388,7 +1456,7 @@ static void address_set_node_accumulator_find_prepend(Quark *quark, Address_Set_
     icl_list_t *last_dep_node = NULL;
     icl_list_t *swap_node = NULL;
     int acc_dep_count = 0;
-    
+
     /* FOR each ACCUMULATOR task waiting at the beginning of address_set_node  */
     for (dep_node = icl_list_first(address_set_node->waiting_deps);
          dep_node != NULL;
@@ -1402,10 +1470,10 @@ static void address_set_node_accumulator_find_prepend(Quark *quark, Address_Set_
         if ( task->num_dependencies_remaining==1 ) {
             if (first_ready_dep_node==NULL) first_ready_dep_node = dep_node;
             last_ready_dep_node = dep_node;
-        } 
+        }
         last_dep_node = dep_node; /* TODO */
         acc_dep_count++;
-    } 
+    }
 
     /* Choose and move chosen ready node to the front of the list */
     /* Heuristic: Flip-flop between first-ready and last-ready.
@@ -1418,7 +1486,7 @@ static void address_set_node_accumulator_find_prepend(Quark *quark, Address_Set_
     if (acc_dep_count % 2 == 0 ) {
         if ( last_ready_dep_node!=NULL ) swap_node = last_ready_dep_node;
     } else {
-        if ( first_ready_dep_node != NULL ) swap_node = first_ready_dep_node; 
+        if ( first_ready_dep_node != NULL ) swap_node = first_ready_dep_node;
     }
     if ( swap_node != NULL ) {
         Dependency *dependency = (Dependency *)swap_node->data;
@@ -1427,7 +1495,7 @@ static void address_set_node_accumulator_find_prepend(Quark *quark, Address_Set_
                 icl_list_t *tmp_swap_node = icl_list_prepend( address_set_node->waiting_deps, dependency );
                 dependency->address_set_waiting_deps_node_ptr = tmp_swap_node;
                 icl_list_delete( address_set_node->waiting_deps, swap_node, NULL );
-        } 
+        }
         /* Lock the dependency in place by setting ACC to false now */
         dependency->accumulator = FALSE;
     }
@@ -1435,7 +1503,7 @@ static void address_set_node_accumulator_find_prepend(Quark *quark, Address_Set_
 
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by a worker each time a task is removed from an address set
  * node.  Sweeps through a sequence of initial INPUT dependencies on
  * an address, and launches any that are ready to go. Assumes
@@ -1452,7 +1520,7 @@ static void address_set_node_initial_input_check_and_launch(Quark *quark, Addres
         Task *next_task = next_dep->task;
         /* Break when we hit an output dependency */
         if ( (next_dep->direction==OUTPUT || next_dep->direction==INOUT) ) {
-            if ( completed_dep->direction == INPUT ) { 
+            if ( completed_dep->direction == INPUT ) {
                 /* Print DAG connections for antidependencies */
                 dot_dag_print_edge( completed_task->taskid, next_task->taskid, ANTIDEPCOLOR );
                 dot_dag_level_update( completed_task->tasklevel, next_task->tasklevel, quark );
@@ -1462,11 +1530,11 @@ static void address_set_node_initial_input_check_and_launch(Quark *quark, Addres
         /* Update next_dep ready status; this logic assumes the breaks at the bottom */
         if ( next_dep->direction==INPUT && next_dep->ready == FALSE ) {
             /* Record the locality information with the task data structure */
-            if ( next_dep->locality ) next_task->locality_thread_id = worker_rank;
+            //if ( next_dep->locality ) next_task->locality_thread_id = worker_rank;
             /* If next_dep is INPUT, mark the next dependency as ready */
             next_dep->ready = TRUE;
             /* Only OUTPUT->INPUT edges get here */
-            dot_dag_print_edge( completed_task->taskid, next_task->taskid, DEPCOLOR ); 
+            dot_dag_print_edge( completed_task->taskid, next_task->taskid, DEPCOLOR );
             dot_dag_level_update( completed_task->tasklevel, next_task->tasklevel, quark );
             next_task->num_dependencies_remaining--;
             /* If the dep status became true check related task, and put onto ready queues */
@@ -1480,14 +1548,14 @@ static void address_set_node_initial_input_check_and_launch(Quark *quark, Addres
              * activate next INPUT/OUTPUT/INOUT dep, others should already be
              * handled; if original dep was OUTPUT/INOUT, need to keep
              * going till next OUTPUT/INOUT */
-            if ( completed_dep->direction == INPUT ) break; 
+            if ( completed_dep->direction == INPUT ) break;
         }
     }
 }
-    
+
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by a worker each time a task is removed from an address set
  * node.  Checks any initial OUTPUT/INOUT dependencies on an address,
  * and launches any tasks that are ready to go. Assumes
@@ -1504,14 +1572,15 @@ static void address_set_node_initial_output_check_and_launch(Quark *quark, Addre
             /* Process OUTPUT next_deps, if at beginning of address_set_list waiting_deps starts  */
             if ( next_dep->ready == FALSE ) {
                 /* Record the locality information with the task data structure */
-                if ( next_dep->locality ) next_task->locality_thread_id = worker_rank;
+                //if ( next_dep->locality ) next_task->locality_thread_id = worker_rank;
                 /* If next_dep is output, mark the next dep as ready only if it is at the front */
                 next_dep->ready = TRUE;
-                if ( completed_dep->direction==OUTPUT || completed_dep->direction==INOUT ) {
-                    Task *task = completed_dep->task;
-                    dot_dag_print_edge( task->taskid, next_task->taskid, DEPCOLOR );
-                    dot_dag_level_update( task->tasklevel, next_task->tasklevel, quark );
-                }
+                Task *completed_task = completed_dep->task;
+                if ( completed_dep->direction==OUTPUT || completed_dep->direction==INOUT )
+                    dot_dag_print_edge( completed_task->taskid, next_task->taskid, DEPCOLOR );
+                /*  else                      */ /* Handled in initial_input_check_and_launch */
+                /*     dot_dag_print_edge( completed_task->taskid, next_task->taskid, ANTIDEPCOLOR ); */
+                dot_dag_level_update( completed_task->tasklevel, next_task->tasklevel, quark );
                 next_task->num_dependencies_remaining--;
                 quark_check_and_queue_ready_task( quark, next_task );
             }
@@ -1520,7 +1589,7 @@ static void address_set_node_initial_output_check_and_launch(Quark *quark, Addre
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by the master insert task dependencies into the hash table.
  * Any tasks that are ready to run are queued.  The address_set_mutex
  * must be locked before calling this routine.
@@ -1561,7 +1630,7 @@ static void quark_insert_task_dependencies(Quark * quark, Task * task)
             if ( prev_task->taskid == task->taskid ) {
                 /* The curr dependency will updated using the ordering INPUT < OUTPUT < INOUT  */
                 /* When the scheduler checks the front of the dependency list, it will find the correct dep setting */
-                dep->direction = (dep->direction > prev_dep->direction ? dep->direction : prev_dep->direction );
+                dep->direction = (dep->direction > prev_dep->direction ? INOUT : prev_dep->direction );
                 if ( prev_dep->ready == FALSE ) {
                     prev_dep->ready = TRUE;
                     task->num_dependencies_remaining--;
@@ -1573,7 +1642,7 @@ static void quark_insert_task_dependencies(Quark * quark, Task * task)
                 prev_dep_node = icl_list_prev( address_set_node->waiting_deps, curr_dep_node);
             }
         }
-        
+
         /* This will avoid WAR dependencies if possible: if enabled, and
          * the current dependency is a write, and there were only reads
          * earlier (input>1, output+inout=1) */
@@ -1589,8 +1658,8 @@ static void quark_insert_task_dependencies(Quark * quark, Task * task)
                 dep->ready = FALSE;
             } else {
                 dep->ready = TRUE;
-                dot_dag_print_edge( address_set_node->last_writer_taskid, task->taskid, DEPCOLOR );
-                dot_dag_level_update( address_set_node->last_writer_tasklevel, task->tasklevel, quark );
+                dot_dag_print_edge( address_set_node->last_reader_or_writer_taskid, task->taskid, DEPCOLOR );
+                dot_dag_level_update( address_set_node->last_reader_or_writer_tasklevel, task->tasklevel, quark );
                 task->num_dependencies_remaining--;
             }
         } else if ( dep->direction == INPUT ) {
@@ -1618,7 +1687,7 @@ static void quark_insert_task_dependencies(Quark * quark, Task * task)
 
 
 /* **************************************************************************** */
-/** 
+/**
  * This function is called by a thread when it wants to start working.
  * This is used in a system that does its own thread management, so
  * each worker thread in that system must call this routine to get the
@@ -1638,7 +1707,7 @@ void QUARK_Worker_Loop(Quark *quark, int thread_rank)
 
 
 /* **************************************************************************** */
-/** 
+/**
  * Called when spawning the worker thread to set affinity to specific
  * core and then call the main work loop.  This function is used
  * internally, when the scheduler spawns and manages the threads.  If
@@ -1656,7 +1725,7 @@ static void work_set_affinity_and_call_main_loop(Worker *worker)
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by the workers (and master) to continue executing tasks
  * until some exit condition is reached.
  */
@@ -1674,9 +1743,11 @@ static void work_main_loop(Worker *worker)
 
     /* Queue all tasks before running; this line for debugging use */
     /* while ( !quark->all_tasks_queued ) { if (worker_rank==0) return; else {} } */
+    if ( quark->queue_before_computing )
+        while ( !quark->all_tasks_queued ) { if (worker_rank==0) return; else {} }
     /* Master never does work; this line for debugging use  */
     /* if (worker_rank == 0) return; */
-    
+
     while ( !worker->finalize ) {
         /* Repeatedly try to find a task, first trying my own ready list,
          * then trying to steal from someone else */
@@ -1700,7 +1771,7 @@ static void work_main_loop(Worker *worker)
                         task_priority_tree_node = RB_MIN( task_priority_tree_head_s, worker_victim->ready_list );
                     else if ( worker_rank!=ready_list_victim && worker_victim->executing_task==TRUE )
                         task_priority_tree_node = RB_MAX( task_priority_tree_head_s, worker_victim->ready_list );
-                    else 
+                    else
                         task_priority_tree_node = NULL;
                     /* Access task, checking to make sure it is not pinned to a thread */
                     if ( task_priority_tree_node != NULL ) {
@@ -1717,7 +1788,7 @@ static void work_main_loop(Worker *worker)
                     }
                     pthread_mutex_unlock_ready_list( &worker_victim->ready_list_mutex );
                 }
-            } 
+            }
             /* If no task found */
             if (task == NULL) {
                 /* Choose the next victim queue */
@@ -1768,7 +1839,7 @@ static void work_main_loop(Worker *worker)
 
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by the control program.  Creates a new sequence data
  * structure and returns it.  This can be used to put a sequence of
  * tasks into a group and cancel that group if an error condition
@@ -1793,7 +1864,7 @@ Quark_Sequence *QUARK_Sequence_Create( Quark *quark )
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Can be called by any thread.  Cancels all the remaining tasks in a
  * sequence using QUARK_Cancel_Task and changes the state so that
  * future tasks belonging to that sequence are ignored.
@@ -1831,7 +1902,7 @@ int QUARK_Sequence_Cancel( Quark *quark, Quark_Sequence *sequence )
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by the control program.  Cancels all the remaining tasks in
  * a sequence using QUARK_Cancel_Task and deletes the sequence data
  * structure.
@@ -1871,7 +1942,7 @@ Quark_Sequence *QUARK_Sequence_Destroy( Quark *quark, Quark_Sequence *sequence )
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Called by the control program.  Returns when all the tasks in a
  * sequence have completed.
  *
@@ -1889,14 +1960,14 @@ int QUARK_Sequence_Wait( Quark *quark, Quark_Sequence *sequence )
     int myrank = QUARK_Thread_Rank( quark );
     while ( !LIST_EMPTY( sequence->tasks_in_sequence ) ) {
         process_completed_tasks( quark );
-        work_main_loop( quark->worker[myrank] ); 
-    } 
+        work_main_loop( quark->worker[myrank] );
+    }
     return QUARK_SUCCESS;
 }
 
 
 /* **************************************************************************** */
-/** 
+/**
  * For the current thread, in the current task being executed, return
  * the task's sequence value.  This is the value provided when the
  * task was Task_Inserted into a sequence.
@@ -1914,7 +1985,7 @@ Quark_Sequence *QUARK_Get_Sequence(Quark *quark)
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * For the current thread, in the current task being executed, return
  * the task label.  This is the value that was optionally provided
  * when the task was Task_Inserted.
@@ -1934,22 +2005,28 @@ char *QUARK_Get_Task_Label(Quark *quark)
 
 
 /* **************************************************************************** */
-/** 
+/**
  * When a task is completed, queue it for further handling by another
  * process.
  */
 static void worker_remove_completed_task_enqueue_for_later_processing(Quark *quark, Task *task, int worker_rank)
 {
-    completed_tasks_node_t *node = malloc(sizeof(completed_tasks_node_t));
-    node->task = task;
-    node->workerid = worker_rank;
-    pthread_mutex_lock_completed_tasks( &quark->completed_tasks_mutex );
-    TAILQ_INSERT_TAIL( quark->completed_tasks, node, entries );
-    pthread_mutex_unlock_completed_tasks( &quark->completed_tasks_mutex );
+    int threads_remaining_for_this_task = -1;
+    pthread_mutex_lock_wrap( &task->task_mutex );
+    threads_remaining_for_this_task = --task->task_thread_count;
+    pthread_mutex_unlock_wrap( &task->task_mutex );
+    if ( threads_remaining_for_this_task == 0 ) {
+        completed_tasks_node_t *node = malloc(sizeof(completed_tasks_node_t));
+        node->task = task;
+        node->workerid = worker_rank;
+        pthread_mutex_lock_completed_tasks( &quark->completed_tasks_mutex );
+        TAILQ_INSERT_TAIL( quark->completed_tasks, node, entries );
+        pthread_mutex_unlock_completed_tasks( &quark->completed_tasks_mutex );
+    }
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Handle the queue of completed tasks.
  */
 static void process_completed_tasks(Quark *quark)
@@ -1959,13 +2036,13 @@ static void process_completed_tasks(Quark *quark)
         node = NULL;
         if ( pthread_mutex_trylock_asn( &quark->address_set_mutex ) == 0 ) {
             if ( pthread_mutex_trylock_completed_tasks( &quark->completed_tasks_mutex ) == 0 ) {
-                node = TAILQ_FIRST(quark->completed_tasks); 
+                node = TAILQ_FIRST(quark->completed_tasks);
                 if ( node!= NULL ) TAILQ_REMOVE( quark->completed_tasks, node, entries );
-                pthread_mutex_unlock_completed_tasks( &quark->completed_tasks_mutex );        
+                pthread_mutex_unlock_completed_tasks( &quark->completed_tasks_mutex );
             }
             if ( node != NULL ) {
                 remove_completed_task_and_check_for_ready( quark, node->task, node->workerid );
-                free( node );            
+                free( node );
             }
             pthread_mutex_unlock_asn( &quark->address_set_mutex );
         }
@@ -1973,7 +2050,7 @@ static void process_completed_tasks(Quark *quark)
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Handle a single completed task, finding its children and putting
  * the children that are ready to go (all dependencies satisfied) into
  * worker ready queues.
@@ -1983,11 +2060,11 @@ static void remove_completed_task_and_check_for_ready(Quark *quark, Task *task, 
     if ( quark->dot_dag_enable ) {
         pthread_mutex_lock_wrap( &quark->dot_dag_mutex );
         if (task->tasklevel < 1) task->tasklevel=1;
-        dot_dag_printf("t%lld [fillcolor=\"%s\",label=\"%s\",style=filled];\n", task->taskid, task->task_color, task->task_label);
+        fprintf(dot_dag_file, "t%lld [fillcolor=\"%s\",label=\"%s\",style=filled];\n", task->taskid, task->task_color, task->task_label);
         /* Track the width of each task level */
         quark->tasklevel_width[task->tasklevel]++;
-        /* dot_dag_printf("// critical-path depth %ld \n", task->tasklevel ); */
-        dot_dag_printf("{rank=same;%lld;t%lld};\n", task->tasklevel, task->taskid );
+        /* fprintf(dot_dag_file, "// critical-path depth %ld \n", task->tasklevel ); */
+        fprintf(dot_dag_file, "{rank=same;%lld;t%lld};\n", task->tasklevel, task->taskid );
         pthread_mutex_unlock_wrap( &quark->dot_dag_mutex );
     }
 
@@ -1998,15 +2075,18 @@ static void remove_completed_task_and_check_for_ready(Quark *quark, Task *task, 
          dep_node = icl_list_next(task->dependency_list, dep_node)) {
         Dependency  *dep = (Dependency *)dep_node->data;
         Address_Set_Node *address_set_node = dep->address_set_node_ptr;
-        
+
         /* Mark the address/data as having been written by worker_rank  */
-        if ( dep->direction==OUTPUT || dep->direction==INOUT ) {
+        if ( dep->direction==OUTPUT || dep->direction==INOUT )
             address_set_node->last_thread = worker_rank;
-            if ( quark->dot_dag_enable ) {
+        if ( quark->dot_dag_enable ) {
+            if ( dep->direction==OUTPUT || dep->direction==INOUT ) {
                 /* Track last writer and level, needed when this structure becomes empty */
                 address_set_node->last_writer_taskid = task->taskid;
                 address_set_node->last_writer_tasklevel = task->tasklevel;
             }
+            address_set_node->last_reader_or_writer_taskid = task->taskid;
+            address_set_node->last_reader_or_writer_tasklevel = task->tasklevel;
         }
         /* Check the address set node to avoid WAR dependencies; if
          * just completed a write, and at least one more write
@@ -2030,7 +2110,7 @@ static void remove_completed_task_and_check_for_ready(Quark *quark, Task *task, 
         if (dep->direction == INPUT) address_set_node->num_waiting_input--;
         else if (dep->direction == OUTPUT) address_set_node->num_waiting_output--;
         else if (dep->direction == INOUT) address_set_node->num_waiting_inout--;
-        
+
         /* If this address_set_node has no more waiting_deps, remove it */
         if ( icl_list_first(address_set_node->waiting_deps) == NULL )
             address_set_node_delete( quark, address_set_node );
@@ -2041,13 +2121,13 @@ static void remove_completed_task_and_check_for_ready(Quark *quark, Task *task, 
 }
 
 /* **************************************************************************** */
-/** 
+/**
  * Set various task level flags.  This flag data structure is then
  * provided when the task is created/inserted.  Each flag can take a
  * value which is either an integer or a pointer.
  *
  *          Select from one of the flags:
- *          TASK_PRIORITY : an integer (0-MAX_INT) 
+ *          TASK_PRIORITY : an integer (0-MAX_INT)
  *          TASK_LOCK_TO_THREAD : an integer for the thread number
  *          TASK_LABEL : a string pointer (NULL terminated) for the label
  *          TASK_COLOR :  a string pointer (NULL terminated) for the color.
@@ -2055,33 +2135,36 @@ static void remove_completed_task_and_check_for_ready(Quark *quark, Task *task, 
  *
  * @param[in,out] flags
  *          Pointer to a Quark_Task_Flags structure
- * @param[in] flag 
+ * @param[in] flag
  *          One of the flags ( TASK_PRIORITY, TASK_LOCK_TO_THREAD, TASK_LABEL, TASK_COLOR, TASK_SEQUENCE )
  * @param[in] val
  *          A integer or a pointer value for the flag ( uses the intptr_t )
  * @return Pointer to the updated Quark_Task_Flags structure
  * @ingroup QUARK
  */
-Quark_Task_Flags *QUARK_Task_Flag_Set( Quark_Task_Flags *flags, int flag, intptr_t val )
+Quark_Task_Flags *QUARK_Task_Flag_Set( Quark_Task_Flags *task_flags, int flag, intptr_t val )
 {
     switch (flag)  {
     case TASK_PRIORITY:
-        flags->task_priority = (int)val;
+        task_flags->task_priority = (int)val;
         break;
     case TASK_LOCK_TO_THREAD:
-        flags->task_lock_to_thread = (int)val;
+        task_flags->task_lock_to_thread = (int)val;
         break;
     case TASK_LABEL:
-        flags->task_label = (char *)val;
+        task_flags->task_label = (char *)val;
         break;
     case TASK_COLOR:
-        flags->task_color = (char *)val;
+        task_flags->task_color = (char *)val;
         break;
     case TASK_SEQUENCE:
-        flags->task_sequence = (Quark_Sequence *)val;
+        task_flags->task_sequence = (Quark_Sequence *)val;
+        break;
+    case TASK_THREAD_COUNT:
+        task_flags->task_thread_count = (int)val;
         break;
     }
-    return flags;
+    return task_flags;
 }
-    
+
 

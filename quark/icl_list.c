@@ -4,15 +4,11 @@
  * Dependency free doubly linked list implementation.
  *
  */
-/* $Id: icl_list.c 1381 2010-06-19 18:38:59Z mfaverge $ */
+/* $Id: icl_list.c 1693 2010-10-26 18:29:56Z yarkhan $ */
 /* $UTK_Copyright: $ */
 
 #include <stdio.h>
 #include <stdlib.h>
-
-#ifndef inline
-#define inline __inline__
-#endif
 
 #include "icl_list.h"
 
@@ -192,7 +188,7 @@ icl_list_size(icl_list_t *head)
  * @returns pointer to the first item.  returns NULL on error.
  */
 
-inline icl_list_t *
+icl_list_t *
 icl_list_first(icl_list_t *head)
 {
   if(head)
@@ -209,7 +205,7 @@ icl_list_first(icl_list_t *head)
  * @returns pointer to the last item.  returns NULL on error.
  */
 
-inline icl_list_t *
+icl_list_t *
 icl_list_last(icl_list_t *head)
 {
     icl_list_t *pos;

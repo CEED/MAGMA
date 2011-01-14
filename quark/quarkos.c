@@ -3,15 +3,15 @@
  * @file quarkos.c
  *
  *  This file handles the mapping from pthreads calls to windows threads
- *  Quark is a software package provided by Univ. of Tennessee,
+ *  QUARK is a software package provided by Univ. of Tennessee,
  *  Univ. of California Berkeley and Univ. of Colorado Denver
  *
- *  Note : this file is a copy of plasmaos.c for use of Quark alone
- *
- * @version 2.1.0
+ * @version 2.3.1
  * @author Piotr Luszczek
  * @author Mathieu Faverge
- * @date 2009-11-15
+ * @date 2010-11-15
+ *
+ *  Note : this file is a copy of a PLASMA file for use of QUARK alone
  *
  **/
 
@@ -43,11 +43,22 @@ kern_return_t thread_policy_set(thread_act_t thread, thread_policy_flavor_t flav
 
 #include <errno.h>
 #include <stdlib.h>
-#ifdef PLASMA_OS_WINDOWS
-#include "plasmawinthread.h"
+#include <stdio.h>
+//#include "common.h"
+#if defined( _WIN32 ) || defined( _WIN64 )
+#include "quarkwinthread.h"
 #else
 #include <pthread.h>
 #endif
+
+#include "quark.h"
+#define QUARK_SUCCESS 0
+#define QUARK_ERR -1
+#define QUARK_ERR_UNEXPECTED -1
+
+// maximum cores per context
+#define CONTEXT_THREADS_MAX  256
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,19 +68,12 @@ static pthread_mutex_t  mutextopo = PTHREAD_MUTEX_INITIALIZER;
 static volatile int sys_corenbr = 1;
 static volatile int topo_initialized = 0;
 
-int  quark_setaffinity(int rank);
-void quark_topology_init();
-void quark_topology_finalize();
-int  quark_get_numthreads();
-int  quark_get_affthreads(int, int*);
-int  quark_yield();
-
   /*
    * Topology functions
    */
 #ifdef QUARK_HWLOC
 #include "quarkos-hwloc.c"
-#else 
+#else
 
 void quark_topology_init(){
     pthread_mutex_lock(&mutextopo);
@@ -83,7 +87,7 @@ void quark_topology_init(){
         int mib[4];
         int cpu;
         size_t len = sizeof(cpu);
-        
+
         /* set the mib for hw.ncpu */
         mib[0] = CTL_HW;
         mib[1] = HW_AVAILCPU;
@@ -125,58 +129,59 @@ int quark_setaffinity(int rank) {
         cpu_set_t set;
         CPU_ZERO( &set );
         CPU_SET( rank, &set );
-        
+
 #if (defined HAVE_OLD_SCHED_SETAFFINITY)
         if( sched_setaffinity( 0, &set ) < 0 )
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
         if( sched_setaffinity( 0, sizeof(set), &set) < 0 )
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
             {
-                return -1;
+                return QUARK_ERR_UNEXPECTED;
             }
 
-        return 0;
+        return QUARK_SUCCESS;
     }
 #elif (defined QUARK_OS_MACOS)
     {
         thread_affinity_policy_data_t ap;
         int                           ret;
-        
+
         ap.affinity_tag = 1; /* non-null affinity tag */
         ret = thread_policy_set( mach_thread_self(),
                                  THREAD_AFFINITY_POLICY,
                                  (integer_t*) &ap,
                                  THREAD_AFFINITY_POLICY_COUNT
             );
-        if(ret != 0) 
-            return -1;
+        if(ret != 0)
+            return QUARK_ERR_UNEXPECTED;
 
-        return 0;
+        return QUARK_SUCCESS;
     }
 #elif (defined QUARK_OS_WINDOWS)
     {
         DWORD mask = 1 << rank;
 
         if( SetThreadAffinityMask(GetCurrentThread(), mask) == 0)
-            return -1;
-        
-        return 0;
+            return QUARK_ERR_UNEXPECTED;
+
+        return QUARK_SUCCESS;
     }
 #elif (defined QUARK_OS_AIX)
     {
         tid_t self_ktid = thread_self ();
         bindprocessor(BINDTHREAD, self_ktid, rank);
-        return 0;
+        return QUARK_SUCCESS;
     }
 #else
-    return -1;
+    return QUARK_ERR_NOT_SUPPORTED;
 #endif
 #endif /* QUARK_AFFINITY_DISABLE */
+    return QUARK_ERR_NOT_SUPPORTED;
 }
 #endif /* QUARK_HWLOC */
 
 /** ****************************************************************************
-   A thread can unlock the CPU if it has nothing to do to let 
+   A thread can unlock the CPU if it has nothing to do to let
    another thread of less priority running for example for I/O.
  */
 int quark_yield() {
@@ -185,10 +190,10 @@ int quark_yield() {
 #elif QUARK_OS_WINDOWS
     return SleepEx(0,0);
 #else
-    return -1;
+    return QUARK_ERR_NOT_SUPPORTED;
 #endif
 }
-    
+
 #ifdef QUARK_OS_WINDOWS
 #define QUARK_GETENV(var, str) {                    \
         int len = 512;                               \
@@ -212,7 +217,7 @@ int quark_yield() {
 
 /** ****************************************************************************
  * Check for an integer in an environment variable, returning the
- * integer value or a provided default value 
+ * integer value or a provided default value
 */
 int quark_get_numthreads()
 {
@@ -220,7 +225,7 @@ int quark_get_numthreads()
     char    *endptr;
     long int thrdnbr = -1;
     extern int errno;
-    
+
     /* Env variable does not exist, we search the system number of core */
     QUARK_GETENV("QUARK_NUM_THREADS", envstr);
     if ( envstr == NULL ) {
@@ -232,19 +237,20 @@ int quark_get_numthreads()
             QUARK_CLEANENV(envstr);
             return -1;
         }
-    } 
+    }
     QUARK_CLEANENV(envstr);
     return (int)thrdnbr;
 }
 
-int quark_get_affthreads(int num_thread, int *coresbind) {
+int *quark_get_affthreads(/* int *coresbind */) {
     char *envstr = NULL;
     int i;
-
+    
+    int *coresbind = (int *)malloc(CONTEXT_THREADS_MAX*sizeof(int));
     /* Env variable does not exist, we search the system number of core */
     QUARK_GETENV("QUARK_AFF_THREADS", envstr);
     if ( envstr == NULL) {
-        for (i = 0; i < num_thread; i++)
+        for (i = 0; i < CONTEXT_THREADS_MAX; i++)
             coresbind[i] = i % sys_corenbr;
     }
     else {
@@ -254,7 +260,7 @@ int quark_get_affthreads(int num_thread, int *coresbind) {
         long int val;
 
         /* We use the content of the QUARK_AFF_THREADS env. variable */
-        for (i = 0; i < num_thread; i++) {
+        for (i = 0; i < CONTEXT_THREADS_MAX; i++) {
             if (!wrap) {
                 val = strtol(envstr, &endptr, 10);
                 if (endptr != envstr) {
@@ -264,12 +270,12 @@ int quark_get_affthreads(int num_thread, int *coresbind) {
                 else {
                     /* there must be at least one entry */
                     if (i < 1) {
-                        /* quark_error("quark_get_affthreads", 
-                           "QUARK_AFF_THREADS should have at least one entry => everything will be bind on core 0"); */
+                        //quark_error("quark_get_affthreads", "QUARK_AFF_THREADS should have at least one entry => everything will be bind on core 0");
+                        fprintf(stderr, "quark_get_affthreads: QUARK_AFF_THREADS should have at least one entry => everything will be bind on core 0");
                         coresbind[i] = 0;
                         i++;
                     }
-                    
+
                     /* there is no more values in the string                                 */
                     /* the next threads are binded with a round robin policy over this array */
                     wrap = 1;
@@ -284,9 +290,36 @@ int quark_get_affthreads(int num_thread, int *coresbind) {
         }
     }
     QUARK_CLEANENV(envstr);
-    return 0;
+    /* return QUARK_SUCCESS; */
+    return coresbind;
 }
+
+
+/** ****************************************************************************
+*/
+int quark_getenv_int(char* name, int defval)
+{
+    char    *envstr  = NULL;
+    char    *endptr;
+    long int longval = -1;
+    extern int errno;
+
+    QUARK_GETENV(name, envstr);
+    if ( envstr == NULL ) {
+        longval = defval;
+    } else {
+        /* Convert to long, checking for errors */
+        longval = strtol(envstr, &endptr, 10);
+        if ((errno == ERANGE) || ((longval==0) && (endptr==envstr))) {
+            longval = defval;
+        }
+    }
+    QUARK_CLEANENV(envstr);
+    return (int)longval;
+}
+
 
 #ifdef __cplusplus
 }
 #endif
+
