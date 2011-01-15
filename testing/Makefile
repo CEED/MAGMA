@@ -90,7 +90,7 @@ endif
 # MAGMA Fortran module. Once finalized, the generated magma.mod
 # has to be moved in the include directory
 #
-magma.mod: magma_module_f77.f
+magma.mod: magma_module_f77.f90
 	$(FORT) $(OPTS) $(INC) -c $<
 
 testing_%_f : testing_%_f.o $(FOBJ)

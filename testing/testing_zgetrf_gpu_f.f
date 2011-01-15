@@ -23,14 +23,14 @@
       double precision, allocatable   :: work(:)
       complex*16, allocatable         :: h_A(:), h_B(:), h_X(:)
       complex*16, allocatable         :: h_A2(:)
-      integer                            devptrA(4), devptrB(4)
+      integer(kind=16)                 :: devptrA, devptrB
       integer,    allocatable         :: ipiv(:)
 
       complex*16 zone, mzone
       integer i, n, info, stat, lda, size_of_elt, nrhs
 
-      PARAMETER          ( nrhs = 1, zone = 1, mzone = -1 )
-
+      PARAMETER          ( nrhs = 1, zone = 1., mzone = -1. )
+      
       call cublas_init()
 
       n   = 2048
