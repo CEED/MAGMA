@@ -614,11 +614,14 @@ int magma_get_zpotrf_nb(int n){
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for spotrf based on n
+   -- Return nb for zgetrf based on n
 */
 extern "C"
 int magma_get_zgetrf_nb(int n){
-  return 128;
+  if (n<=3072)
+    return 64;
+  else
+    return 128;
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
