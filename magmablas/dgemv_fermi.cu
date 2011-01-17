@@ -106,14 +106,13 @@ magmablas_dgemvn_fermi(magma_int_t n, magma_int_t m, double alpha, double *A, ma
 
 
 __global__ void
-dgemvt_kernel1_fermi(magma_int_t m, magma_int_t n, double alpha, magma_int_t n1, double* A, magma_int_t lda,
+dgemvt_kernel_fermi(magma_int_t m, magma_int_t n, double alpha, magma_int_t n1, double* A, magma_int_t lda,
               double *x, double *y)
 {
 	magma_int_t tx = threadIdx.x;
 
 	__shared__ double sdata[threadSize];
 
-//	volatile double *smem;
 
 	double res;
 	res = 0.0;
@@ -131,21 +130,14 @@ dgemvt_kernel1_fermi(magma_int_t m, magma_int_t n, double alpha, magma_int_t n1,
 		}
 		else
 		{
-			res  += 0.0;
+			res  = res;
 		}
     }
 
 	sdata[tx] = res;
 	 __syncthreads();
 
-/*	
-	if(tx < 128)
-	{
-		sdata[tx] += sdata[tx + 128];
-	}
-	__syncthreads();
-	
-*/
+
 	if(tx < 64)
 	{
 		sdata[tx] += sdata[tx + 64];
@@ -155,15 +147,6 @@ dgemvt_kernel1_fermi(magma_int_t m, magma_int_t n, double alpha, magma_int_t n1,
 
 	if(tx < 32)
 	{
-	/*
-		smem = sdata;
-		smem[tx] += smem[tx + 32];
-		smem[tx] += smem[tx + 16];
-		smem[tx] += smem[tx +  8];
-	    smem[tx] += smem[tx +  4];
-		smem[tx] += smem[tx +  2];
-		smem[tx] += smem[tx +  1];
-	*/
 		sdata[tx] += sdata[tx + 32];
 	}
     if(tx == 0)
@@ -186,134 +169,7 @@ dgemvt_kernel1_fermi(magma_int_t m, magma_int_t n, double alpha, magma_int_t n1,
 }
 
 
-__global__ void
-dgemvt_kernel2_fermi(magma_int_t m, magma_int_t n, double alpha,
-		magma_int_t n1, double* A, magma_int_t lda, double *x, double *y)
-{
-  const magma_int_t inx = threadIdx.x;
-  const magma_int_t iny = threadIdx.y;
 
-  magma_int_t ind  = iny + blockIdx.x * 16;
-  ind = inx + ind * lda;
-  magma_int_t ind2 = inx + iny * 16;
-  if (ind2>31)
-     ind2-=32;
-
-  A += ind;
-  x += ind2;
-  if (ind2>31)
-     ind2-=32;
-
-  double res = 0.f;
-
-  __shared__ double buff[32];
-  __shared__ double la[16][17];
-
-  for(magma_int_t i=0; i<n1; i += 32 ){
-     buff[ind2]  = x[i];
-     #pragma unroll
-     for(magma_int_t j=0; j<4; j++)
-        la[iny + j * 4][inx] = A[j * 4 * lda];
-
-     __syncthreads();
-     #pragma unroll
-     for(magma_int_t j=0; j < 4; j++)
-       res += la[inx][iny*4+j]*buff[j+iny*4];
-
-     A += 16;
-    __syncthreads();
-     //===========================================
-     #pragma unroll
-     for(magma_int_t j=0; j<4; j++)
-         la[iny+ j * 4][inx] = A[j* 4 * lda];
-
-     __syncthreads();
-
-     #pragma unroll
-     for(magma_int_t j=0; j < 4; j++)
-        res += la[inx][iny*4+j]*buff[j+16+iny*4];
-     A += 16;
-  }
-
-  if (n>n1){
-     if (ind2>=(n-n1))
-        buff[ind2]=0.;
-     else
-        buff[ind2]  = x[n1];
-
-     __syncthreads();
-     #pragma unroll
-     for(magma_int_t j=0; j<4; j++)
-         la[iny+ j * 4 ][inx] = A[j* 4 * lda];
-
-     __syncthreads();
-     if (n-n1>4){
-        #pragma unroll
-	for(magma_int_t j=0; j < 4; j++)
-           res += la[inx][iny*4+j]*buff[j+iny*4];
-
-        A += 16;
-        __syncthreads();
-        #pragma unroll
-          for(magma_int_t j=0; j<4; j++)
-            la[iny+ j * 4][inx] = A[j* 4 * lda];
-
-        __syncthreads();
-
-        #pragma unroll
-        for(magma_int_t j=0; j < 4; j++)
-           res += la[inx][iny*4+j]*buff[j+16+iny*4];
-     }
-     else {
-        #pragma unroll
-        for(magma_int_t j=0; j < 4; j++)
-          res += la[inx][iny*4+j]*buff[j+iny*4];
-     }
-  }
-
-  __syncthreads();
-  ind = inx + blockIdx.x * 16;
-  la[inx][iny]= res;
-  __syncthreads();
-  if (ind<n){
-     res = la[inx][0] + la[inx][1] + la[inx][2] + la[inx][3];
-     y[ind] = alpha*res;
-  }
-}
-
-extern "C" void
-magmablas_dgemvt1_fermi(magma_int_t m, magma_int_t n, double alpha, double *A, magma_int_t lda,
-                  double *x, double *y)
-{
-
-
-	dim3 grid    ( 1,  n,  1);
-	dim3 threads ( threadSize,   1,  1);
-
-	dgemvt_kernel1_fermi<<<grid, threads>>>( m, n, alpha, ( m / threadSize) * threadSize,
-				                                       A, lda, x, y);
-
-
-}
-
-extern "C" void
-magmablas_dgemvt2_fermi(magma_int_t m, magma_int_t n, double alpha, double *A, magma_int_t lda,
-                  double *x, double *y)
-{
-
-    magma_int_t blocks;
-
-    if (n % 16==0)
-        blocks = n/16;
-    else
-        blocks = n/16 + 1;
-
-    dim3 grid(blocks, 1, 1);
-    dim3 threads(16, 4, 1);
-
-    dgemvt_kernel2_fermi<<<grid, threads>>>(m, n, alpha, (m / 32)*32,
-                                      A, lda, x, y);
-}
 
 extern "C" void
 magmablas_dgemvt_fermi(magma_int_t m, magma_int_t n, double alpha, double *A, magma_int_t lda,
@@ -348,11 +204,14 @@ magmablas_dgemvt_fermi(magma_int_t m, magma_int_t n, double alpha, double *A, ma
 
     ===================================================================== */
 
-    if (n<=128)
-      magmablas_dgemvt2_fermi(m, n, alpha, A, lda, x, y);
-    else
-      magmablas_dgemvt1_fermi(m, n, alpha, A, lda, x, y);
+	dim3 grid    ( 1,  n,  1);
+	dim3 threads ( threadSize,   1,  1);
+
+	dgemvt_kernel_fermi<<<grid, threads>>>( m, n, alpha, ( m / threadSize) * threadSize,
+				                                       A, lda, x, y);
 }
+
+
 
 extern "C" 
 void magmablas_dgemv_fermi(char trans,
