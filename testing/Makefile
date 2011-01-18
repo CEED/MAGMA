@@ -41,14 +41,15 @@ ZSRC  = testing_zgemm.cpp	\
         \
         testing_zgeev.cpp       \
         testing_zgesvd.cpp      \
-        testing_zheevd.cpp      \
+        testing_zheevd.cpp
 
 ifeq ($(FORT), pgfortran)
 	FOBJ := fortran_thunking.o
 	ZSRCF = testing_zgetrf_gpu_f.cuf
 else
 	FOBJ := fortran.o
-	ZSRCF = testing_zgetrf_gpu_f.f
+	ZSRCF = testing_zgetrf_gpu_f.f	\
+		magma_zf77.f90
 endif
 
 ZSRC += $(ZSRCF) 
@@ -60,10 +61,11 @@ DSRC +=   testing_dgemv.cpp
 SSRC +=   testing_sgemv.cpp
 
 ALLSRC  = $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
-ALLOBJF = $(ALLSRC:.f=.o)
-ALLOBJF:= $(ALLOBJF:.cuf=.o)
-ALLOBJ  = $(ALLOBJF:.cpp=.o)
-EXE     = $(ALLOBJ:.o=)
+ALLOBJ  = $(ALLSRC:.f=.o)
+ALLOBJ := $(ALLOBJ:.cuf=.o)
+ALLOBJ := $(ALLOBJ:.cpp=.o)
+EXE    := $(ALLOBJ:.o=)
+ALLOBJ := $(ALLOBJ:.f90=.o)
 
 all: $(EXE) magma.mod
 
@@ -90,7 +92,10 @@ endif
 # MAGMA Fortran module. Once finalized, the generated magma.mod
 # has to be moved in the include directory
 #
-magma.mod: magma_module_f77.f90
+magma.mod: magma_module_f77.f90 magma_zf77.mod magma_cf77.mod magma_df77.mod magma_sf77.mod
+	$(FORT) $(OPTS) $(INC) -c $<
+
+%.mod: %.f90
 	$(FORT) $(OPTS) $(INC) -c $<
 
 testing_%_f : testing_%_f.o $(FOBJ)
