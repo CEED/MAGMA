@@ -11,6 +11,7 @@ include ../Makefile.internal
 
 ZSRC  = testing_zgemm.cpp	\
 	testing_zhemv.cpp	\
+	testing_zgemv.cpp	\
 	testing_zsymv.cpp	\
 	testing_zpotrf.cpp	\
 	testing_zgetrf.cpp 	\
@@ -39,7 +40,7 @@ ZSRC  = testing_zgemm.cpp	\
         \
         testing_zcgeqrsv_gpu.cpp\
         \
-        testing_zgeev.cpp       \
+#        testing_zgeev.cpp       \
         testing_zgesvd.cpp      \
         testing_zheevd.cpp
 
@@ -56,8 +57,8 @@ CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
 SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 
-DSRC +=   testing_dgemv.cpp
-SSRC +=   testing_sgemv.cpp
+#DSRC +=   testing_dgemv.cpp
+#SSRC +=   testing_sgemv.cpp
 
 ALLSRC  = $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 ALLOBJF  = $(ALLSRC:.f=.o)
