@@ -26,10 +26,21 @@ __global__ void ztranspose3_32( cuDoubleComplex *B, int ldb,
         A += ibx + inx + __mul24( iby + iny, lda );
 	B += iby + inx + __mul24( ibx + iny, ldb );
 
-        a[iny+0][inx]  = A[0*lda];
-        a[iny+8][inx]  = A[8*lda];
-        a[iny+16][inx] = A[16*lda];
-        a[iny+24][inx] = A[24*lda];
+        int t2 = iby+iny;
+	if (ibx+inx<m)
+        {
+          if (t2   <n) {
+             a[iny+0][inx] = A[0*lda];
+      	     if	(t2+ 8<n) {
+                a[iny+8][inx] = A[8*lda];
+      	      	if (t2 + 16<n) {
+                   a[iny+16][inx] = A[16*lda];
+      	      	   if (t2 + 24<n)
+                      a[iny+24][inx] = A[24*lda];
+                }
+      	     }
+      	   }
+      	}
 
         __syncthreads();
 
