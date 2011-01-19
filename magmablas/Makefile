@@ -60,6 +60,8 @@ FERMISRC =	sgemv_fermi.cu  \
 
 TESLASRC =      sgemv_tesla.cu	\
 	        dgemv_tesla.cu 	\
+	        cgemv_tesla.cu 	\
+	        zgemv_tesla.cu 	\
 	        ssymv_tesla.cu 	\
 	        dsymv_tesla.cu 	\
 		csymv_tesla.cu \
