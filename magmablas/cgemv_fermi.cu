@@ -333,7 +333,14 @@ magmablas_cgemv_fermi(char flag, int m, int n, float2 alpha, float2 *A, int lda,
 	{
 		if (flag == 'N' || flag == 'n')
 		{
-			magmablas_cgemvn_fermi(m,  n, alpha, A, lda, x, y);
+			if(m<8000)
+			{
+				cublasCgemv(flag, m, n, alpha, A, lda, x, incx, beta, y, incy);
+		   	}
+			else 
+			{
+				magmablas_cgemvn_fermi(m,  n, alpha, A, lda, x, y);
+			}
 		}
 		else if(flag == 'T' || flag == 't')
 		{
@@ -341,7 +348,7 @@ magmablas_cgemv_fermi(char flag, int m, int n, float2 alpha, float2 *A, int lda,
 		}
 		else 
 		{
-			printf("Not Available\n");
+			cublasCgemv(flag, m, n, alpha, A, lda, x, incx, beta, y, incy);
 		}
 	}
 	else 
