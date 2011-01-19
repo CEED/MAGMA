@@ -57,9 +57,6 @@ CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
 SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 
-#DSRC +=   testing_dgemv.cpp
-#SSRC +=   testing_sgemv.cpp
-
 ALLSRC  = $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 ALLOBJF  = $(ALLSRC:.f=.o)
 ALLOBJF := $(ALLOBJF:.cuf=.o)
@@ -107,14 +104,4 @@ fortran.o : $(CUDADIR)/src/fortran.c
 
 fortran_thunking.o : $(CUDADIR)/src/fortran_thunking.c
 	$(CC) $(OPTS) $(INC) -c $< -o $@
-
-
-###################################################
-# To be remove as soon as we have zgemv and cgemv
-#
-testing_dgemv.cpp : testing_zgemv.cpp
-	$(PYTHON) $(CODEGEN) -p d --file testing_zgemv.cpp
-testing_sgemv.cpp : testing_zgemv.cpp
-	$(PYTHON) $(CODEGEN) -p s --file testing_zgemv.cpp
-####################################################
 
