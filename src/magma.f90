@@ -8,10 +8,10 @@
 
 module magma
 
-  use magma_zf77
-  use magma_df77
-  use magma_cf77
-  use magma_sf77
+  use magma_zfortran
+  use magma_dfortran
+  use magma_cfortran
+  use magma_sfortran
   
   implicit none
 

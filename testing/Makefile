@@ -48,8 +48,7 @@ ifeq ($(FORT), pgfortran)
 	ZSRCF = testing_zgetrf_gpu_f.cuf
 else
 	FOBJ := fortran.o
-	ZSRCF = testing_zgetrf_gpu_f.f	\
-		magma_zf77.f90
+	ZSRCF = testing_zgetrf_gpu_f.f
 endif
 
 ZSRC += $(ZSRCF) 
@@ -61,13 +60,12 @@ DSRC +=   testing_dgemv.cpp
 SSRC +=   testing_sgemv.cpp
 
 ALLSRC  = $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
-ALLOBJ  = $(ALLSRC:.f=.o)
-ALLOBJ := $(ALLOBJ:.cuf=.o)
-ALLOBJ := $(ALLOBJ:.cpp=.o)
-EXE    := $(ALLOBJ:.o=)
-ALLOBJ := $(ALLOBJ:.f90=.o)
+ALLOBJF  = $(ALLSRC:.f=.o)
+ALLOBJF := $(ALLOBJF:.cuf=.o)
+ALLOBJ   = $(ALLOBJF:.cpp=.o)
+EXE      = $(ALLOBJ:.o=)
 
-all: $(EXE) magma.mod
+all: $(EXE)
 
 $(EXE): $(LIBMAGMA) $(LIBMAGMABLAS)
 
@@ -78,10 +76,10 @@ cleanall: clean
 	rm -f $(EXE)
 
 ifeq ($(FORT), pgfortran)
-testing_%.o : testing_%.cuf magma.mod
+testing_%.o : testing_%.cuf
 	$(FORT) $(OPTS) $(INC) -c $< -o $@ 
 else
-testing_%.o : testing_%.f magma.mod
+testing_%.o : testing_%.f
 	$(FORT) $(OPTS) $(INC) -c $< -o $@ 
 endif
 
@@ -92,12 +90,6 @@ endif
 # MAGMA Fortran module. Once finalized, the generated magma.mod
 # has to be moved in the include directory
 #
-magma.mod: magma_module_f77.f90 magma_zf77.mod magma_cf77.mod magma_df77.mod magma_sf77.mod
-	$(FORT) $(OPTS) $(INC) -c $<
-
-%.mod: %.f90
-	$(FORT) $(OPTS) $(INC) -c $<
-
 testing_%_f : testing_%_f.o $(FOBJ)
 	$(FORT) $(OPTS) $(LDOPTS) $< $(FOBJ) -o $@ lin/liblapacktest.a -L../lib \
           -lcuda -lmagma -lmagmablas -lmagma $(LIBDIR) $(LIB) 

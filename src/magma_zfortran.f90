@@ -8,7 +8,7 @@
 !   @precisions normal z -> c d s
 !
 
-module magma_zf77
+module magma_zfortran
   
   implicit none
   
@@ -26,5 +26,5 @@ module magma_zf77
         integer(kind=16) dA, dB
       end subroutine magma_zgetrs_gpu
      
-  End interface
-end module magma_zf77
+   end interface
+end module magma_zfortran
