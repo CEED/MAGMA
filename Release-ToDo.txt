@@ -164,6 +164,20 @@ device 1: Quadro NVS 290, 918.0 MHz clock, 255.3 MB memory
   287   579    1.91         4418.97         3.925370e-04
 
 If I use cublasDtrsm in dgetrf_gpu I don't get the error.
+---------------------------------------------------------------------------------
+28             Peng         Bug in strsm on Fermi, e.g.,
+
+tomov:disco /mnt/scratch/tomov/sc_release/testing> ./testing_sgetrf_gpu -M 1024 -N 2048    <-  1:59AM
+device 0: Tesla C2050, 1147.0 MHz clock, 3071.7 MB memory
+device 1: Quadro NVS 290, 918.0 MHz clock, 255.7 MB memory
+  testing_sgetrf -M 1024 -N 2048
+
+
+
+  M     N   CPU GFlop/s    GPU GFlop/s   ||PA-LU||/(||A||*N)
+============================================================
+ 1024  2048   31.81          97.18         1.544789e-04
+ 
 
 ---------------------------------------------------------------------------------
 
