@@ -211,6 +211,10 @@ magma_zgeqrf3(magma_context *cntxt, magma_int_t m, magma_int_t n,
     
     /* Use MAGMA code to perform final factorization if necessary */
     if (qr_params->m > (qr_params->n - (qr_params->nthreads*qr_params->ob)))
+
+      if (M > (qr_params->m-(qr_params->nb*qr_params->np_gpu)))
+        M = qr_params->m-(qr_params->nb*qr_params->np_gpu);
+
       magma_zgeqrf2(cntxt, M, N,
 		    a + (n-qr_params->nthreads*qr_params->ob)*m+
 		    (n-qr_params->nthreads*qr_params->ob), lda, 
