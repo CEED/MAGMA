@@ -27,7 +27,7 @@ ALLHDR= magma.h 	\
 all: $(ALLHDR)
 
 clean:
-	rm -f *~
+	rm -f *~ *.mod
 
 cleanall: clean
 
