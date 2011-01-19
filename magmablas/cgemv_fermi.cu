@@ -9,13 +9,11 @@
 #include "stdio.h"
 #include "cublas.h"
 #include "magma.h"
-#include "constant.h"
 
 #define num_threads 128
 #define cgemv_bs 32
 #define threadSize 128
 
-#define MAGMA_Z_SET2REAL(v, t) v.x = (t); v.y = 0.0
 #define magmablas_cgemv_fermi magmablas_cgemv 
 
 
@@ -196,19 +194,20 @@ magmablas_cgemvn_fermi(int n, int m, float2 alpha, float2 *A, int lda, float2 *x
 
     dim3 grid(blocks, 1, 1);
     dim3 threads(num_threads, 1, 1);
-//    if(n<=8500) 
+  /*  if(n<=8500) 
 		cgemvn_kernel1_fermi<<<grid, threads>>>(n, m, (m / cgemv_bs)*cgemv_bs, 
 			                           alpha, A, lda, x, y);
- /*   else 
+	else 
+   */
 		cgemvn_kernel2_fermi<<<grid, threads>>>(n, m, (m / num_threads)*num_threads, 
 			                           alpha, A, lda, x, y);
-  */
+
 }
 
 
 
 __global__ void 
-cgemvt_kernel1_fermi(int m, int n, float2 alpha, int n1, float2* A, int lda,
+cgemvt_kernel_fermi(int m, int n, float2 alpha, int n1, float2* A, int lda,
               float2 *x, float2 *y)
 {
 	unsigned int tx = threadIdx.x;
@@ -281,148 +280,7 @@ cgemvt_kernel1_fermi(int m, int n, float2 alpha, int n1, float2* A, int lda,
 }
 
 
-__global__ void 
-cgemvt_kernel2_fermi(int m, int n, float2 alpha,
-               int n1, float2* A, int lda, float2 *x, float2 *y)
-{
-  const int inx = threadIdx.x;
-  const int iny = threadIdx.y;
 
-  int ind  = iny + blockIdx.x * 16;
-  ind = inx + ind * lda;
-  int ind2 = inx + iny * 16;
-  if (ind2>31)
-     ind2-=32;
-
-  A += ind;
-  x += ind2;
-
-  float2 res;
-  MAGMA_Z_SET2REAL(res, 0.0f);
-  float2 zero;
-  MAGMA_Z_SET2REAL(zero, 0.0f);
-
-  __shared__ float2 buff[32];
-  __shared__ float2 la[16][17];
-
-  for(int i=0; i<n1; i += 32 ){
-     buff[ind2]  = x[i];
-     #pragma unroll
-     for(int j=0; j<4; j++)
-        la[iny + j * 4][inx] = A[j* 4 * lda];
-
-     __syncthreads();
-     #pragma unroll
-     for(int j=0; j < 4; j++)
-       res += la[inx][iny*4+j]*buff[j+iny*4];
-
-     A += 16;
-
-     __syncthreads();
-     //===========================================
-     #pragma unroll
-     for(int j=0; j<4; j++)
-         la[iny+ j * 4][inx] = A[j* 4 * lda];
-
-     __syncthreads();
-
-     #pragma unroll
-     for(int j=0; j < 4; j++)
-        res += la[inx][iny*4+j]*buff[j+16+iny*4];
-     A += 16;
-  }
-
-  __syncthreads(); // 1
-  if (n>n1){
-     if (ind2>=(n-n1))
-	buff[ind2]=zero;
-     else
-        buff[ind2]  = x[n1];
-
-     __syncthreads();
-     #pragma unroll
-     for(int j=0; j<4; j++)
-         if (inx>=(n-n1))
-            la[iny + j * 4][inx] =  zero;
-         else
-            la[iny + j * 4][inx] = A[j* 4 * lda];
-
-     __syncthreads();
-     if (n-n1>4){
-        #pragma unroll
-        for(int j=0; j < 4; j++){
-           ind =  j+iny*4;
-           res += la[inx][ind]*buff[ind];
-        }
-	A += 16;
-        __syncthreads();
-	#pragma unroll
-	for(int j=0; j<4; j++)
-          if (inx+16>=(n-n1))
-             la[iny+ j * 4][inx] = zero;
-          else
-             la[iny+ j * 4][inx] = A[j* 4* lda];
-
-        __syncthreads();
-
-        #pragma unroll
-	for(int j=0; j < 4; j++){
-           ind = j+4*iny;
-           res += la[inx][ind]*buff[16+ind];
-        }
-     }
-     else {
-	#pragma unroll
-        for(int j=0; j < 4; j++){
-          ind = j+iny*4;
-          res += la[inx][ind]*buff[ind];
-        }
-     }
-  }
-
-  __syncthreads();
-  ind = inx + blockIdx.x * 16;
-  la[inx][iny]= res;
-  __syncthreads();
-  if (ind<n && iny==0){
-     res = la[inx][0] + la[inx][1] + la[inx][2] + la[inx][3];
-     y[ind] = alpha*res;
-  }
-}
-
-extern "C" void
-magmablas_cgemvt1_fermi(int m, int n, float2 alpha, float2 *A, int lda,
-                  float2 *x, float2 *y)
-{
-
-
-    dim3 grid    ( 1,  n,  1);
-    dim3 threads ( threadSize,   1,  1);
-
-    cgemvt_kernel1_fermi<<<grid, threads>>>( m, n, alpha, ( m / threadSize) * threadSize,
-                                       A, lda, x, y);
-
-									  
-}
-
-extern "C" void
-magmablas_cgemvt2_fermi(int m, int n, float2 alpha, float2 *A, int lda,
-                  float2 *x, float2 *y)
-{
-
-    int blocks;
-
-    if (n % 16==0)
-        blocks = n/16;
-    else
-        blocks = n/16 + 1;
-
-    dim3 grid(blocks, 1, 1);
-    dim3 threads(16, 4, 1);
-
-    cgemvt_kernel2_fermi<<<grid, threads>>>(m, n, alpha, (m / 32)*32,
-                                      A, lda, x, y);
-}
 
 extern "C" void
 magmablas_cgemvt_fermi(int m, int n, float2 alpha, float2 *A, int lda, 
@@ -457,31 +315,40 @@ magmablas_cgemvt_fermi(int m, int n, float2 alpha, float2 *A, int lda,
 
     ===================================================================== */
 
-    if (n<=128)
-      magmablas_cgemvt2_fermi(m, n, alpha, A, lda, x, y);
-    else
-      magmablas_cgemvt1_fermi(m, n, alpha, A, lda, x, y);
+    dim3 grid    ( 1,  n,  1);
+    dim3 threads ( threadSize,   1,  1);
+
+    cgemvt_kernel_fermi<<<grid, threads>>>( m, n, alpha, ( m / threadSize) * threadSize,
+                                       A, lda, x, y);
     
 
 }
 
 
 extern "C" void
-magmablas_cgemv_fermi(char flag, int m, int n, float2 alpha, float2 *A, int lda, float2 *x, float2 *y) 
+magmablas_cgemv_fermi(char flag, int m, int n, float2 alpha, float2 *A, int lda, float2 *x, int incx, float2 beta, float2 *y, int incy ) 
 {
 
-	if (flag == 'N' || flag == 'n')
+    if(beta.x==0 && beta.y==0)
 	{
-		magmablas_cgemvn_fermi(m,  n, alpha, A, lda, x, y);
-	}
-	else if(flag == 'T' || flag == 't')
-	{
-		magmablas_cgemvt_fermi(m,  n, alpha, A, lda, x, y);
+		if (flag == 'N' || flag == 'n')
+		{
+			magmablas_cgemvn_fermi(m,  n, alpha, A, lda, x, y);
+		}
+		else if(flag == 'T' || flag == 't')
+		{
+			magmablas_cgemvt_fermi(m,  n, alpha, A, lda, x, y);
+		}
+		else 
+		{
+			printf("Not Available\n");
+		}
 	}
 	else 
 	{
-		printf("Not Available\n");
+		cublasCgemv(flag, m, n, alpha, A, lda, x, incx, beta, y, incy);
 	}
+
 }
 
 
