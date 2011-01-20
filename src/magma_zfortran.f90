@@ -16,15 +16,18 @@ module magma_zfortran
   interface
      
      subroutine magma_zgetrf_gpu(m, n, A, lda, ipiv, info)
-       integer   m, n, lda, ipiv(*), info
-       integer(kind=16) A
+       integer,          intent(in)    :: m, n, lda
+       integer,          intent(out)   :: ipiv(*), info
+       integer(kind=16), intent(inout) :: A
      end subroutine magma_zgetrf_gpu
      
-      subroutine magma_zgetrs_gpu(trans, n, nrhs, dA, ldda, ipiv, dB, lddb, info)
-        character trans
-        integer n, nrhs, ldda, ipiv(*), lddb, info
-        integer(kind=16) dA, dB
-      end subroutine magma_zgetrs_gpu
+     subroutine magma_zgetrs_gpu(trans, n, nrhs, dA, ldda, ipiv, dB, lddb, info)
+       character,        intent(in)    :: trans
+       integer,          intent(in)    :: n, nrhs, ldda, ipiv(*), lddb
+       integer,          intent(out)   :: info
+       integer(kind=16), intent(in)    :: dA
+       integer(kind=16), intent(inout) :: dB
+     end subroutine magma_zgetrs_gpu
      
-   end interface
+  end interface
 end module magma_zfortran
