@@ -151,7 +151,7 @@ int main( int argc, char** argv)
     printf("Testing transA = %c  transB = %c\n", transA, transB);
     printf("    M    N    K     MAGMA GFLop/s    CUBLAS GFlop/s       error\n");
     printf("==================================================================\n");
-    for(i=istart; i<iend; i *= 1.25 )
+    for(i=istart; i<iend; i = (int)(i*1.25) )
     {
 	M = N = K = i;
 	if ( M0 != 0 ) M = M0;

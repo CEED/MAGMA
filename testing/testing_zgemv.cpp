@@ -226,5 +226,5 @@ int main(int argc, char **argv)
 
     /* Free device */
     TESTING_CUDA_FINALIZE();
-    return 0;
-}	
+    return EXIT_SUCCESS;
+}

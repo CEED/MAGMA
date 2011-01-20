@@ -19,15 +19,17 @@
       double precision zlange
       integer cublas_alloc
 
-      double precision rnumber(2), Anorm, Bnorm, Rnorm 
-      double precision, allocatable   :: work(:)
-      complex*16, allocatable         :: h_A(:), h_B(:), h_X(:)
-      complex*16, allocatable         :: h_A2(:)
-      integer(kind=16)                 :: devptrA, devptrB
-      integer,    allocatable         :: ipiv(:)
+      double precision              :: rnumber(2), Anorm, Bnorm, Rnorm 
+      double precision, allocatable :: work(:)
+      complex*16, allocatable       :: h_A(:), h_B(:), h_X(:)
+      complex*16, allocatable       :: h_A2(:)
+      integer(kind=16)              :: devptrA, devptrB
+      integer,    allocatable       :: ipiv(:)
 
-      complex*16 zone, mzone
-      integer i, n, info, stat, lda, size_of_elt, nrhs
+      complex*16                    :: zone, mzone
+      integer                       :: i, n, info, stat, lda
+      integer                       :: size_of_elt, nrhs
+      double precision              :: flops, tstart, tend
 
       PARAMETER          ( nrhs = 1, zone = 1., mzone = -1. )
       
@@ -75,7 +77,9 @@
      $                       lda)
 
 !---- Call magma LU ----------------
+      call magma_gettime_f(tstart)
       call magma_zgetrf_gpu(n, n, devptrA, lda, ipiv, info)
+      call magma_gettime_f(tend)
 
 !---- Call magma solve -------------
       call magma_zgetrs_gpu('n', n, nrhs, devptrA, lda, ipiv, devptrB, 
@@ -102,6 +106,12 @@ c      call zgesv(n, nrhs, h_A2, lda, ipiv, h_X, lda, info)
       write(*,105) '  || b || = ', Bnorm
       write(*,105) '  || b - A x || / (||A|| ||b||) = ', 
      $                Rnorm/(Anorm*Bnorm)
+
+      flops = 2. * n * n * n / 3.  
+
+      write(*,*)   '  flops   = ',  flops
+      write(*,*)   '  time    = ',  (tend - tstart)
+      write(*,*)   '  Gflops  = ',  flops / (tend-tstart) / 1e6
       write(*,*)
 
 !---- Free CPU memory
