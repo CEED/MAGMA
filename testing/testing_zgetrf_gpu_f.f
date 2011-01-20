@@ -19,36 +19,43 @@
       double precision zlange
       integer cublas_alloc
 
-      double precision rnumber(2), Anorm, Bnorm, Rnorm 
-      double precision, allocatable   :: work(:)
-      complex*16, allocatable         :: h_A(:), h_B(:), h_X(:)
-      complex*16, allocatable         :: h_A2(:)
-      integer(kind=16)                 :: devptrA, devptrB
-      integer,    allocatable         :: ipiv(:)
+      double precision              :: rnumber(2), Anorm, Bnorm, Rnorm 
+      double precision, allocatable :: work(:)
+      complex*16, allocatable       :: h_A(:), h_B(:), h_X(:)
+      complex*16, allocatable       :: h_A2(:)
+      integer(kind=16)              :: devptrA, devptrB
+      integer,    allocatable       :: ipiv(:)
 
-      complex*16 zone, mzone
-      integer i, n, info, stat, lda, size_of_elt, nrhs
+      complex*16                    :: zone, mzone
+      integer                       :: i, n, info, stat, lda
+      integer                       :: size_of_elt, nrhs
+      real(kind=8)                  :: flops, t, tstart(2), tend(2)
 
       PARAMETER          ( nrhs = 1, zone = 1., mzone = -1. )
       
       call cublas_init()
 
       n   = 2048
-      lda = n
+      lda  = n
+      ldda = ((n+31)/32)*32
       size_of_elt = sizeof_complex_16
  
 !------ Allocate CPU memory
-      allocate(h_A(n*n), h_B(n*nrhs), h_X(n*nrhs), work(n), ipiv(n))
+      allocate(h_A(lda*n))
       allocate(h_A2(n*n))
+      allocate(h_B(lda*nrhs))
+      allocate(h_X(lda*nrhs))
+      allocate(work(n))
+      allocate(ipiv(n))
 
 !------ Allocate GPU memory
-      stat = cublas_alloc(n*n, size_of_elt, devPtrA)
+      stat = cublas_alloc(ldda*n, size_of_elt, devPtrA)
       if (stat .ne. 0) then
          write(*,*) "device memory allocation failed"
          stop
       endif
 
-      stat = cublas_alloc(n*nrhs, size_of_elt, devPtrB)
+      stat = cublas_alloc(ldda*nrhs, size_of_elt, devPtrB)
       if (stat .ne. 0) then
          write(*,*) "device memory allocation failed"
          stop
@@ -68,28 +75,38 @@
       end do
 
 !---- devPtrA = h_A
-      call cublas_set_matrix(n, n, size_of_elt, h_A, lda, devptrA, lda)
+      call cublas_set_matrix(n, n, size_of_elt, h_A, lda, devptrA, ldda)
 
 !---- devPtrB = h_B
       call cublas_set_matrix(n, nrhs, size_of_elt, h_B, lda, devptrB, 
-     $                       lda)
+     $                       ldda)
 
 !---- Call magma LU ----------------
-      call magma_zgetrf_gpu(n, n, devptrA, lda, ipiv, info)
+      call magma_gettime_f(tstart)
+      call magma_zgetrf_gpu(n, n, devptrA, ldda, ipiv, info)
+      call magma_gettime_f(tend)
+
+      if ( info .ne. 0 )  then
+         write(*,*) "Info : ", info
+      end if
 
 !---- Call magma solve -------------
-      call magma_zgetrs_gpu('n', n, nrhs, devptrA, lda, ipiv, devptrB, 
-     $                      lda, info)
+      call magma_zgetrs_gpu('n', n, nrhs, devptrA, ldda, ipiv, devptrB, 
+     $                      ldda, info)
+
+      if ( info .ne. 0 )  then
+         write(*,*) "Info : ", info
+      end if
 
 !---- h_X = devptrB
-      call cublas_get_matrix (n, nrhs, size_of_elt, devptrB, lda, h_X, 
+      call cublas_get_matrix (n, nrhs, size_of_elt, devptrB, ldda, h_X, 
      $                        lda)
 
 !---- Solve using LAPACK ----------------------------------------------
 c      call zgesv(n, nrhs, h_A2, lda, ipiv, h_X, lda, info)
 
 !---- Compare the two results ------
-      Anorm = zlange('I', n, n, h_A, lda, work)
+      Anorm = zlange('I', n, n,    h_A, lda, work)
       Bnorm = zlange('I', n, nrhs, h_B, lda, work)
 
       call zgemm('n', 'n', n,  nrhs, n, zone, h_A, lda, h_X, lda,
@@ -102,6 +119,11 @@ c      call zgesv(n, nrhs, h_A2, lda, ipiv, h_X, lda, info)
       write(*,105) '  || b || = ', Bnorm
       write(*,105) '  || b - A x || / (||A|| ||b||) = ', 
      $                Rnorm/(Anorm*Bnorm)
+
+      flops = 2. * n * n * n / 3.  
+      call magma_gettimervalue_f(tstart, tend, t)
+
+      write(*,*)   '  Gflops  = ',  flops / t / 1e6
       write(*,*)
 
 !---- Free CPU memory

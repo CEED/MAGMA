@@ -15,9 +15,11 @@
 #include "magma.h"
 
 #if defined(ADD_)
-#    define magma_gettime_f    magma_gettime_f_
+#    define magma_gettime_f        magma_gettime_f_
+#    define magma_gettimervalue_f  magma_gettimervalue_f_
 #elif defined(NOCHANGE)
 #endif
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Get current time
 */ 
@@ -40,7 +42,8 @@ TimeStruct get_current_time(void)
 extern "C"
 void magma_gettime_f(double *time) {
   TimeStruct tmp = get_current_time();
-  *time = (1000.*(double)(tmp.sec) + (double)(tmp.usec) * 0.001);
+  time[0] = tmp.sec;
+  time[1] = tmp.usec;
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -55,6 +58,16 @@ double GetTimerValue(TimeStruct time_1, TimeStruct time_2)
   usec = time_2.usec - time_1.usec;
 
   return (1000.*(double)(sec) + (double)(usec) * 0.001);
+}
+
+extern "C"
+void magma_gettimervalue_f(double *start, double *end, double *result) {
+  TimeStruct time1, time2;
+  time1.sec  = start[0];
+  time1.usec = start[1];
+  time2.sec  = end[0];
+  time2.usec = end[1];
+  *result = GetTimerValue(time1, time2);
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
