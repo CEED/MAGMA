@@ -14,6 +14,10 @@
 
 #include "magma.h"
 
+#if defined(ADD_)
+#    define magma_gettime_f    magma_gettime_f_
+#elif defined(NOCHANGE)
+#endif
 /* ////////////////////////////////////////////////////////////////////////////
    -- Get current time
 */ 
@@ -33,6 +37,11 @@ TimeStruct get_current_time(void)
   return (time);
 }
 
+extern "C"
+void magma_gettime_f(double *time) {
+  TimeStruct tmp = get_current_time();
+  *time = (1000.*(double)(tmp.sec) + (double)(tmp.usec) * 0.001);
+}
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- End elapsed time
