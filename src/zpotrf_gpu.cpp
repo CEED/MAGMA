@@ -159,15 +159,14 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                 cudaStreamSynchronize(stream[1]);
 
                 lapackf77_zpotrf(MagmaUpperStr, &jb, work, &jb, info);
-                if (*info != 0) {
-                    *info = *info + j;
-                    break;
-                }
-                
                 cudaMemcpy2DAsync( dA(j, j), ldda*sizeof(cuDoubleComplex), 
                                    work,     jb  *sizeof(cuDoubleComplex), 
                                    sizeof(cuDoubleComplex)*jb, jb, 
                                    cudaMemcpyHostToDevice,stream[0]);
+		if (*info != 0) {
+		  *info = *info + j;
+		  break;
+                }
 
                 if ( (j+jb) < n)
                     cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
@@ -203,14 +202,14 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
 
                 cudaStreamSynchronize(stream[1]);
 	        lapackf77_zpotrf(MagmaLowerStr, &jb, work, &jb, info);
-		if (*info != 0) {
-                    *info = *info + j;
-                    break;
-                }
 	        cudaMemcpy2DAsync(dA(j, j), ldda*sizeof(cuDoubleComplex), 
                                   work,     jb  *sizeof(cuDoubleComplex), 
                                   sizeof(cuDoubleComplex)*jb, jb, 
                                   cudaMemcpyHostToDevice,stream[0]);
+		if (*info != 0) {
+		  *info = *info + j;
+		  break;
+                }
 	        
 		if ( (j+jb) < n)
                     cublasZtrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
