@@ -62,9 +62,11 @@ ZSRC := $(ZSRC) 		\
 	magma_zf77.cpp		\
 	magma_zfortran.f90	\
 	magma.f90
+FFLAGS:= $(OPTS)
 else
 ZSRC := $(ZSRC) 		\
 	magma_zf77pgi.cpp
+FFLAGS:= $(OPTS) -J../include
 endif
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
@@ -90,7 +92,7 @@ $(LIBMAGMA): $(ALLOBJ)
 	$(CC) $(OPTS) $(INC) -c $< -o $@
 
 %.o : %.f90 
-	$(FORT) $(OPTS) $(INC) -c $< -o $@
+	$(FORT) $(FFLAGS) $(INC) -c $< -o $@
 
 clean:
 	rm -f *.cu_o *.o *~ *.linkinfo
