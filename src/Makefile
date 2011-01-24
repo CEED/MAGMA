@@ -62,11 +62,11 @@ ZSRC := $(ZSRC) 		\
 	magma_zf77.cpp		\
 	magma_zfortran.f90	\
 	magma.f90
-FFLAGS:= $(OPTS)
+FFLAGS = $(OPTS) -J../include
 else
 ZSRC := $(ZSRC) 		\
 	magma_zf77pgi.cpp
-FFLAGS:= $(OPTS) -J../include
+FFLAGS = $(OPTS)
 endif
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
