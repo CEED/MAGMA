@@ -165,7 +165,7 @@ int main( int argc, char** argv)
         if (info < 0)
             printf("Argument %d of zgetrf had an illegal value.\n", -info);
         if (ret != MAGMA_SUCCESS)
-            printf("magma_zgetrf returned with error code %d\n", ret);
+            printf("magma_zgetrf_gpu returned with error code %d\n", ret);
 
         gpu_perf = flops / GetTimerValue(start, end);
 
