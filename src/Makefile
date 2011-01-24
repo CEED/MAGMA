@@ -90,7 +90,7 @@ $(LIBMAGMA): $(ALLOBJ)
 	$(CC) $(OPTS) $(INC) -c $< -o $@
 
 %.o : %.f90 
-	$(FORT) $(OPTS) $(INC) -J../include -c $< -o $@
+	$(FORT) $(OPTS) $(INC) -c $< -o $@
 
 clean:
 	rm -f *.cu_o *.o *~ *.linkinfo
