@@ -29,7 +29,8 @@
       complex*16                    :: zone, mzone
       integer                       :: i, n, info, stat, lda
       integer                       :: size_of_elt, nrhs
-      real(kind=8)                  :: flops, t, tstart(2), tend(2)
+      real(kind=8)                  :: flops, t
+      integer                       :: tstart(2), tend(2)
 
       PARAMETER          ( nrhs = 1, zone = 1., mzone = -1. )
       

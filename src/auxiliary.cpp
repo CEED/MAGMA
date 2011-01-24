@@ -40,7 +40,7 @@ TimeStruct get_current_time(void)
 }
 
 extern "C"
-void magma_gettime_f(double *time) {
+void magma_gettime_f(unsigned int *time) {
   TimeStruct tmp = get_current_time();
   time[0] = tmp.sec;
   time[1] = tmp.usec;
@@ -61,7 +61,7 @@ double GetTimerValue(TimeStruct time_1, TimeStruct time_2)
 }
 
 extern "C"
-void magma_gettimervalue_f(double *start, double *end, double *result) {
+void magma_gettimervalue_f(unsigned int *start, unsigned int *end, double *result) {
   TimeStruct time1, time2;
   time1.sec  = start[0];
   time1.usec = start[1];
