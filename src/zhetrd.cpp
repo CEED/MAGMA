@@ -29,7 +29,7 @@ extern "C" magma_int_t
 magma_zhetrd(char uplo, magma_int_t n, 
 	     cuDoubleComplex *a, magma_int_t lda, 
 	     double *d, double *e, cuDoubleComplex *tau,
-	     cuDoubleComplex *work, magma_int_t *lwork, 
+	     cuDoubleComplex *work, magma_int_t lwork, 
 	     magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -183,14 +183,14 @@ magma_zhetrd(char uplo, magma_int_t n,
     /* Function Body */
     *info = 0;
     long int upper = lapackf77_lsame(uplo_, "U");
-    lquery = *lwork == -1;
+    lquery = lwork == -1;
     if (! upper && ! lapackf77_lsame(uplo_, "L")) {
 	*info = -1;
     } else if (n < 0) {
 	*info = -2;
     } else if (lda < max(1,n)) {
 	*info = -4;
-    } else if (*lwork < 1 && ! lquery) {
+    } else if (lwork < 1 && ! lquery) {
 	*info = -9;
     }
 
@@ -319,7 +319,7 @@ magma_zhetrd(char uplo, magma_int_t n,
 			  a  +  i__    +  i__    * a_dim1, lda);
 	
 	lapackf77_zhetrd(uplo_, &i__1, &a[i__ + i__ * a_dim1], &lda, &d[i__], &e[i__],
-                         &tau[i__], &work[1], lwork, &iinfo);
+                         &tau[i__], &work[1], &lwork, &iinfo);
 	
       }
     

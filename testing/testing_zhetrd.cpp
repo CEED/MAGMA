@@ -27,9 +27,9 @@
 #define PRECISION_z
 #define CHECK_ERROR
 #if defined(PRECISION_z) || defined(PRECISION_c)
-#define FLOPS(n) ( 4.* 4. * n * n * n / 3. )
+#define FLOPS(n) ( 6. * FMULS_HETRD(n) + 2. * FADDS_HETRD(n))
 #else
-#define FLOPS(n) (     4. * n * n * n / 3. )
+#define FLOPS(n) (      FMULS_HETRD(n) +      FADDS_HETRD(n))
 #endif
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -37,196 +37,199 @@
 */
 int main( int argc, char** argv)
 {
-    cuInit( 0 );
-    cublasInit( );
-    printout_devices( );
+    TESTING_CUDA_INIT();
 
-    cuDoubleComplex *h_A, *h_R, *h_work;
-    cuDoubleComplex *tau, *tau2;
-    double          *diag, *offdiag, *diag2, *offdiag2;
-    double gpu_perf, cpu_perf, eps;
-
-    TimeStruct start, end;
+    TimeStruct       start, end;
+    double           eps, flops, gpu_perf, cpu_perf;
+    cuDoubleComplex *h_A, *h_R, *h_Q, *h_work, *work;
+    cuDoubleComplex *tau;
+    double          *diag, *offdiag, *rwork;
+    double           result[3] = {0., 0., 0.};
 
     /* Matrix size */
-    int N=0, n2, lda;
-    int size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
+    magma_int_t N = 0, n2, lda, lwork;
+    magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
 
-    cublasStatus status;
-    int i, info;
-    int ione     = 1;
-    int ISEED[4] = {0,0,0,1};
-    
+    magma_int_t i, info, nb, checkres;
+    magma_int_t ione     = 1;
+    magma_int_t itwo     = 2;
+    magma_int_t ithree   = 3;
+    magma_int_t ISEED[4] = {0,0,0,1};
+    char *uplo = MagmaLowerStr;
+
     if (argc != 1){
         for(i = 1; i<argc; i++){
             if (strcmp("-N", argv[i])==0)
                 N = atoi(argv[++i]);
+            else if (strcmp("-U", argv[i])==0)
+                uplo = MagmaUpperStr;
+            else if (strcmp("-L", argv[i])==0)
+                uplo = MagmaLowerStr;
         }
-        if (N>0) size[0] = size[9] = N;
-        else exit(1);
+        if ( N > 0 )
+            printf("  testing_zhetrd -L|U -N %d\n\n", N);
+        else
+        {
+            printf("\nUsage: \n");
+            printf("  testing_zhetrd -L|U -N %d\n\n", 1024);
+            exit(1);
+        }
     }
     else {
         printf("\nUsage: \n");
-        printf("  testing_zhetrd -N %d\n\n", 1024);
+        printf("  testing_zhetrd -L|U -N %d\n\n", 1024);
         N = size[9];
     }
 
-    /* Initialize CUBLAS */
-    status = cublasInit();
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! CUBLAS initialization error\n");
-    }
+    checkres  = getenv("MAGMA_TESTINGS_CHECK") != NULL;
 
     eps = lapackf77_dlamch( "E" );
-
     lda = N;
-    if (N%32!=0)
-        lda = (N/32)*32 + 32;
-    n2 = size[9] * lda;
+    n2  = lda * N;
+    nb  = magma_get_zhetrd_nb(N);
+    /* We suppose the magma nb is bigger than lapack nb */
+    lwork = N*nb; 
 
     /* Allocate host memory for the matrix */
-    h_A = (cuDoubleComplex*)malloc(n2 * sizeof(h_A[0]));
-    if (h_A == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (A)\n");
-    }
+    TESTING_MALLOC(    h_A,    cuDoubleComplex, lda*N );
+    TESTING_HOSTALLOC( h_R,    cuDoubleComplex, lda*N );
+    TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork );
+    TESTING_MALLOC(    tau,    cuDoubleComplex, N-1   );
+    TESTING_MALLOC( diag,    double, N   );
+    TESTING_MALLOC( offdiag, double, N-1 );
 
-    tau = (cuDoubleComplex*)malloc(size[9] * sizeof(cuDoubleComplex));
-    tau2= (cuDoubleComplex*)malloc(size[9] * sizeof(cuDoubleComplex));
-    if (tau == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (tau)\n");
-    }
+    /* To avoid uninitialized variable warning */
+    h_Q   = NULL;
+    work  = NULL;
+    rwork = NULL; 
 
-
-    diag = (double*)malloc(size[9] * sizeof(double));
-    diag2= (double*)malloc(size[9] * sizeof(double));
-    if (diag == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (diag)\n");
-    }
-
-    offdiag = (double*)malloc(size[9] * sizeof(double));
-    offdiag2= (double*)malloc(size[9] * sizeof(double));
-    if (offdiag == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (offdiag)\n");
-    }
-
-    cudaMallocHost( (void**)&h_R,  n2*sizeof(cuDoubleComplex) );
-    if (h_R == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (R)\n");
-    }
-
-    int nb = magma_get_zhetrd_nb(size[9]);
-    int lwork = 2*size[9]*nb;
-    //int lwork = 2*size[9]*lda/nb;
-
-    cudaMallocHost( (void**)&h_work, (lwork)*sizeof(cuDoubleComplex) );
-    if (h_work == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (work)\n");
+    if ( checkres ) {
+        lwork = max( lwork, 2*(N*N) ); /* size require by zhet21 */
+        TESTING_MALLOC( h_Q,  cuDoubleComplex, lda*N );
+        TESTING_MALLOC( work, cuDoubleComplex, 2*N*N );
+#if defined(PRECISION_z) || defined(PRECISION_c) 
+        TESTING_MALLOC( rwork, double, N );
+#endif
     }
 
     printf("\n\n");
     printf("  N    CPU GFlop/s    GPU GFlop/s   |A-QHQ'|/N|A|  |I-QQ'|/N \n");
     printf("=============================================================\n");
     for(i=0; i<10; i++){
-        N = size[i];
+        if (argc == 1) {
+            N = size[i];
+        }
+        lda  = N;
+        n2   = N*lda;
+        flops = FLOPS( (double)N ) / 1e6;
 
-        if (N%32==0)
-            lda = N;
-        else
-            lda = (N/32)*32+32;
-
-        n2 = N*lda;
-
-        /* Initialize the matrices */
+        /* ====================================================================
+           Initialize the matrix
+           =================================================================== */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
+        /* Make the matrix hermitian */
+        {
+            magma_int_t i, j;
+            for(i=0; i<N; i++) {
+                MAGMA_Z_SET2REAL( h_A[i*lda+i], ( MAGMA_Z_GET_X(h_A[i*lda+i]) ) );
+                for(j=0; j<i; j++)
+                    h_A[i*lda+j] = cuConj(h_A[j*lda+i]);
+            }
+        }
         lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
 
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-        magma_zhetrd('L', N, h_R, lda, diag, offdiag,
-                     tau, h_work, &lwork, &info);
+        magma_zhetrd(uplo[0], N, h_R, lda, diag, offdiag, 
+                     tau, h_work, lwork, &info);
         end = get_current_time();
+        if ( info < 0 )
+            printf("Argument %d of magma_zhetrd had an illegal value\n", -info);
 
-        gpu_perf = FLOPS(N)/(1000000.*GetTimerValue(start,end));
-        // printf("GPU Processing time: %f (ms) \n", GetTimerValue(start,end));
+        gpu_perf = flops / GetTimerValue(start,end);
 
         /* =====================================================================
            Check the factorization
            =================================================================== */
-	double result[2] = {0., 0.};
-#ifdef CHECK_ERROR
-        cuDoubleComplex *hwork_Q = 
-	  (cuDoubleComplex*)malloc( N * N * sizeof(cuDoubleComplex));
-        cuDoubleComplex *work    = 
-	  (cuDoubleComplex*)malloc( 2 * N * N * sizeof(cuDoubleComplex));
+        if ( checkres ) {
 
-        int test;
-
-        lapackf77_zlacpy("L", &N, &N, h_R, &lda, hwork_Q, &N);
-        lapackf77_zungtr("L", &N, hwork_Q, &N, tau, h_work, &lwork, &info);
+            lapackf77_zlacpy(uplo, &N, &N, h_R, &lda, h_Q, &lda);
+            lapackf77_zungtr(uplo, &N, h_Q, &lda, tau, h_work, &lwork, &info);
 
 #if defined(PRECISION_z) || defined(PRECISION_c) 
-        double *rwork   = (double*)malloc( N * sizeof(double));
+            lapackf77_zhet21(&itwo, uplo, &N, &ione, 
+                             h_A, &lda, diag, offdiag,
+                             h_Q, &lda, h_R, &lda, 
+                             tau, work, rwork, &result[0]);
 
-        test = 2;
-        lapackf77_zhet21(&test, "L", &N, &ione, h_A, &lda, diag, offdiag,
-                         hwork_Q, &N, h_R, &lda, tau, work, rwork, &result[0]);
+            lapackf77_zhet21(&ithree, uplo, &N, &ione, 
+                             h_A, &lda, diag, offdiag,
+                             h_Q, &lda, h_R, &lda, 
+                             tau, work, rwork, &result[1]);
 
-        test = 3;
-        lapackf77_zhet21(&test, "L", &N, &ione, h_A, &lda, diag, offdiag,
-                         hwork_Q, &N, h_R, &lda, tau, work, rwork, &result[1]);
-
-        free(rwork);
 #else
-        test = 2;
-        lapackf77_zhet21(&test, "L", &N, &ione, h_A, &lda, diag, offdiag,
-                         hwork_Q, &N, h_R, &lda, tau, work, &result[0]);
 
-        test = 3;
-        lapackf77_zhet21(&test, "L", &N, &ione, h_A, &lda, diag, offdiag,
-                         hwork_Q, &N, h_R, &lda, tau, work, &result[1]);
+            lapackf77_zhet21(&itwo, uplo, &N, &ione, 
+                             h_A, &lda, diag, offdiag,
+                             h_Q, &lda, h_R, &lda, 
+                             tau, work, &result[0]);
+
+            lapackf77_zhet21(&ithree, uplo, &N, &ione, 
+                             h_A, &lda, diag, offdiag,
+                             h_Q, &lda, h_R, &lda, 
+                             tau, work, &result[1]);
 
 #endif
+        }
 
-        free(hwork_Q);
-        free(work);
         /* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
-        lapackf77_zhetrd("L", &N, h_A, &lda, diag2, offdiag2, tau2, 
+        lapackf77_zhetrd(uplo, &N, h_A, &lda, diag, offdiag, tau, 
 			 h_work, &lwork, &info);
         end = get_current_time();
-#endif
-        if (info < 0)
-            printf("Argument %d of zhetrd had an illegal value.\n", -info);
 
-        cpu_perf = FLOPS(N)/(1000000.*GetTimerValue(start,end));
-        // printf("CPU Processing time: %f (ms) \n", GetTimerValue(start,end));
+        if (info < 0)
+            printf("Argument %d of lapackf77_zhetrd had an illegal value.\n", -info);
+
+        cpu_perf = flops / GetTimerValue(start,end);
 
         /* =====================================================================
            Print performance and error.
            =================================================================== */
-        printf("%5d    %6.2f         %6.2f      %e %e\n",
-               size[i], cpu_perf, gpu_perf,
-               result[0]*eps, result[1]*eps);
+        if ( checkres ) {
+            printf("%5d   %6.2f        %6.2f       %4.2e %4.2e\n",
+                   N, cpu_perf, gpu_perf,
+                   result[0]*eps, result[1]*eps );
+        } else {
+            printf("%5d   %6.2f        %6.2f\n",
+                   N, cpu_perf, gpu_perf );
+        }
 
         if (argc != 1)
             break;
     }
 
     /* Memory clean up */
-    free(h_A);
-    free(tau);     free(tau2);
-    free(diag);    free(diag2);
-    free(offdiag); free(offdiag2);
-    cublasFree(h_work);
-    cublasFree(h_R);
+    TESTING_FREE( h_A );
+    TESTING_FREE( tau );
+    TESTING_FREE( diag );
+    TESTING_FREE( offdiag );
+    TESTING_HOSTFREE( h_R );
+    TESTING_HOSTFREE( h_work );
+
+    if ( checkres ) {
+        TESTING_FREE( h_Q );
+        TESTING_FREE( work );
+#if defined(PRECISION_z) || defined(PRECISION_c) 
+        TESTING_FREE( rwork );
+#endif
+    }
 
     /* Shutdown */
-    status = cublasShutdown();
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! shutdown error (A)\n");
-    }
+    TESTING_CUDA_FINALIZE();
+    return EXIT_SUCCESS;
 }
