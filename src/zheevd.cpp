@@ -318,7 +318,7 @@ magma_zheevd(char *jobz, char *uplo,
 		     &work[indtau], &work[indwrk], &llwork, &iinfo);
     */
     magma_zhetrd(uplo[0], *n, &a[a_offset], *lda, &w[1], &rwork[inde],
-		 &work[indtau], &work[indwrk], &llwork, &iinfo);
+		 &work[indtau], &work[indwrk], llwork, &iinfo);
     
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call   
        ZSTEDC to generate the eigenvector matrix, WORK(INDWRK), of the   
