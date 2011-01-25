@@ -54,7 +54,7 @@ int main( int argc, char** argv)
     magma_int_t itwo     = 2;
     magma_int_t ithree   = 3;
     magma_int_t ISEED[4] = {0,0,0,1};
-    char *uplo = MagmaLowerStr;
+    char *uplo = (char *)MagmaLowerStr;
 
     if (argc != 1){
         for(i = 1; i<argc; i++){
@@ -63,9 +63,9 @@ int main( int argc, char** argv)
                 once = 1;
             }
             else if (strcmp("-U", argv[i])==0)
-                uplo = MagmaUpperStr;
+                uplo = (char *)MagmaUpperStr;
             else if (strcmp("-L", argv[i])==0)
-                uplo = MagmaLowerStr;
+                uplo = (char *)MagmaLowerStr;
         }
         if ( N > 0 )
             printf("  testing_zhetrd -L|U -N %d\n\n", N);
