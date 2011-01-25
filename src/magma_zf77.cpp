@@ -161,7 +161,7 @@ void MAGMA_ZPOTRF( char *uplo, magma_int_t *n, double2 *A, magma_int_t *lda, mag
 
 void MAGMA_ZHETRD( char *uplo, magma_int_t *n, double2 *A, magma_int_t *lda, double *d, double *e, double2 *tau, double2 *work, magma_int_t *lwork, magma_int_t *info)
 { 
-    magma_zhetrd( uplo[0], *n, A, *lda, d, e, tau, work, lwork, info); 
+    magma_zhetrd( uplo[0], *n, A, *lda, d, e, tau, work, *lwork, info); 
 }
 
 
