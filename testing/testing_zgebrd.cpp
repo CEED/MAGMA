@@ -101,13 +101,17 @@ int main( int argc, char** argv)
     lhwork = (M + N)*nb;
     TESTING_HOSTALLOC( h_work, cuDoubleComplex, lhwork );
 
+    /* To avoid uninitialized variable warning */
+    h_PT    = NULL;
+    chkwork = NULL;
+    rwork   = NULL; 
+
     if ( checkres ) {
         lchkwork = max(minmn * nb, M+N);
         /* For optimal performance in zunt01 */
         lchkwork = max(lchkwork, minmn*minmn);
         TESTING_MALLOC( h_PT,    cuDoubleComplex, lda*N   );
         TESTING_MALLOC( chkwork, cuDoubleComplex, lchkwork );
-        rwork = NULL; /* To avoir unused variable warning */
 #if defined(PRECISION_z) || defined(PRECISION_c) 
         TESTING_MALLOC( rwork, double, 5*minmn );
 #endif
@@ -217,7 +221,6 @@ int main( int argc, char** argv)
     }
 
     /* Memory clean up */
-    /* Allocate host memory for the matrix */
     TESTING_FREE( h_A );
     TESTING_FREE( tauq );
     TESTING_FREE( taup );
