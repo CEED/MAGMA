@@ -113,7 +113,7 @@ magma_int_t  magma_zgeev( char jobvl, char jobvr, magma_int_t n,
 			  cuDoubleComplex *vl,   magma_int_t ldvl,
 			  cuDoubleComplex *vr,   magma_int_t ldvr,
 			  cuDoubleComplex *work, magma_int_t lwork,
-			  double *rwork, magma_int_t *info); /* Sould not have rwork */
+			  magma_int_t *info);
 #endif
 magma_int_t magma_zheevd( char *jobz, char *uplo, magma_int_t *n,
 			  cuDoubleComplex *a, magma_int_t *lda, double *w, 

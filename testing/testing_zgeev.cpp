@@ -85,7 +85,12 @@ int main( int argc, char** argv)
     lda   = N;
     n2    = lda * N;
     nb    = magma_get_zgehrd_nb(N);
-    lwork = N*nb;
+
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+    lwork = N*(2+nb);
+#else
+    lwork = N*(1+nb);
+#endif
 
     w1i   = NULL; 
     w2i   = NULL;
@@ -131,9 +136,9 @@ int main( int argc, char** argv)
                     h_work, lwork, rwork, &info);
 #else
         magma_zgeev(jobl[0], jobr[0],
-		    N, h_R, lda, w1, w1i,
+ 		    N, h_R, lda, w1, w1i,
                     VL, lda, VR, lda,
-                    h_work, lwork, rwork, &info);
+                    h_work, lwork, &info);
 #endif
         end = get_current_time();
         if (info < 0)
@@ -167,7 +172,7 @@ int main( int argc, char** argv)
            =================================================================== */
         if ( checkres ) {
             matnorm = lapackf77_zlange("f", &N, &ione, w1, &N, rwork);
-            printf("norm = %f\n", matnorm);
+            printf("norm = %e\n", matnorm);
             blasf77_zaxpy(&N, &mzone, w1, &ione, w2, &ione);
 
             result = lapackf77_zlange("f", &N, &ione, w2, &N, rwork) / matnorm;

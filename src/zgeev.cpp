@@ -12,10 +12,18 @@
 #include <stdio.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
+#include <cblas.h>
 #include "magma.h"
 #include "magmablas.h"
 
 #define PRECISION_z
+
+/*
+ * VERSION1 - LAPACK
+ * VERSION2 - MAGMA whithout T
+ * VERSION3 - MAGMA with T
+ */
+#define VERSION3
 
 #if (defined(PRECISION_c) || defined(PRECISION_z))
 
@@ -120,6 +128,10 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
     #define min(a,b)       (((a)<(b))?(a):(b))
     #define max(a,b)       (((a)>(b))?(a):(b))
 
+    /* TODO: replace this by magma_get_nb */
+    extern magma_int_t ilaenv_(magma_int_t *, const char *, const char *, magma_int_t *, magma_int_t *, 
+                               magma_int_t *, magma_int_t *, magma_int_t, magma_int_t);
+
     magma_int_t c__1 = 1;
     magma_int_t c__0 = 0;
     magma_int_t c_n1 = -1;
@@ -129,56 +141,29 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
     double d__1, d__2;
     cuDoubleComplex z__1, z__2;
 
-    double sqrt(double);
-
-    static magma_int_t i__, k, ihi;
-    static double scl;
-    static magma_int_t ilo;
-    static double dum[1], eps;
-    static cuDoubleComplex tmp;
-    static magma_int_t ibal;
-    static char side[1];
-    static double anrm;
-    static magma_int_t ierr, itau, iwrk, nout;
-    extern int 
-      zscal_(magma_int_t *, cuDoubleComplex *, cuDoubleComplex *, magma_int_t *), 
-      dlabad_(double *, double *);
-    extern double dznrm2_(magma_int_t *, cuDoubleComplex *, magma_int_t *);
+    magma_int_t i__, k, ihi;
+    double scl;
+    magma_int_t ilo;
+    double dum[1], eps;
+    cuDoubleComplex tmp;
+    magma_int_t ibal;
+    double anrm;
+    magma_int_t ierr, itau, iwrk, nout;
     magma_int_t scalea;
-    extern double dlamch_(char *);
-    static double cscale;
-    extern int 
-      zgebak_(char *, char *, magma_int_t *, magma_int_t *, magma_int_t *, double *,
-	      magma_int_t *, cuDoubleComplex *, magma_int_t *, magma_int_t *), 
-      zgebal_(char *, magma_int_t *, cuDoubleComplex *, magma_int_t *, 
-	      magma_int_t *, magma_int_t *, double *, magma_int_t *);
-    extern magma_int_t idamax_(magma_int_t *, double *, magma_int_t *);
-    extern int xerbla_(char *, magma_int_t *);
-    extern magma_int_t ilaenv_(magma_int_t *, char *, char *, magma_int_t *, magma_int_t *, 
-			       magma_int_t *, magma_int_t *, magma_int_t, magma_int_t);
+    double cscale;
     magma_int_t select[1];
-    extern int zdscal_(magma_int_t *, double *, 
-		       cuDoubleComplex *, magma_int_t *);
     static double bignum;
-    extern int 
-      zlascl_(char *, magma_int_t *, magma_int_t *, double *, double *, magma_int_t *, 
-	      magma_int_t *, cuDoubleComplex *, magma_int_t *, magma_int_t *);
     static magma_int_t minwrk, maxwrk;
     magma_int_t wantvl;
     static double smlnum;
     static magma_int_t hswork, irwork;
-    extern int 
-      zhseqr_(char *, char *, magma_int_t *, magma_int_t *, magma_int_t *,
-	      cuDoubleComplex *, magma_int_t *, cuDoubleComplex *, cuDoubleComplex *,
-	      magma_int_t *, cuDoubleComplex *, magma_int_t *, magma_int_t *),
-      ztrevc_(char *, char *, magma_int_t *, magma_int_t *, cuDoubleComplex *,
-	      magma_int_t *, cuDoubleComplex *, magma_int_t *, 
-	      cuDoubleComplex *, magma_int_t *, magma_int_t *,
-	      magma_int_t *, cuDoubleComplex *, double *, magma_int_t *);
     magma_int_t lquery, wantvr;
+    magma_int_t nb = 0;
+    cuDoubleComplex *dT = NULL;
 
     TimeStruct start, end;
 
+    char side[2]   = {0, 0};
     char jobvl_[2] = {jobvl, 0};
     char jobvr_[2] = {jobvr, 0};
 
@@ -206,9 +191,9 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
 	*info = -3;
     } else if (lda < max(1,n)) {
 	*info = -5;
-    } else if (ldvl < 1 || wantvl && ldvl < n) {
+    } else if ( (ldvl < 1) || (wantvl && (ldvl < n))) {
 	*info = -8;
-    } else if (ldvr < 1 || wantvr && ldvr < n) {
+    } else if ( (ldvr < 1) || (wantvr && (ldvr < n))) {
 	*info = -10;
     }
 
@@ -227,8 +212,8 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
 	    minwrk = 1;
 	    maxwrk = 1;
 	} else {
-	    maxwrk = n + n * ilaenv_(&c__1, "ZGEHRD", " ", &n, &c__1, &n, &
-				       c__0, 6, 1);
+	    maxwrk = n + n * ilaenv_(&c__1, "ZGEHRD", " ", &n, &c__1, 
+                                     &n, &c__0, 6, 1);
 	    minwrk = n << 1;
 	    if (wantvl) {
 	      /* Computing MAX */
@@ -236,17 +221,17 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
 			 " ", &n, &c__1, &n, &c_n1, 6, 1);
 		maxwrk = max(i__1,i__2);
 
-		zhseqr_("S", "V", &n, &c__1, &n, &a[a_offset], &lda, geev_w_array, 
+		lapackf77_zhseqr("S", "V", &n, &c__1, &n, &a[a_offset], &lda, geev_w_array, 
 			&vl[vl_offset], &ldvl, &work[1], &c_n1, info);
 	    } else if (wantvr) {
 	      /* Computing MAX */
 		i__1 = maxwrk, i__2 = n + (n - 1) * ilaenv_(&c__1, "ZUNGHR",
 			 " ", &n, &c__1, &n, &c_n1, 6, 1);
 		maxwrk = max(i__1,i__2);
-		zhseqr_("S", "V", &n, &c__1, &n, &a[a_offset], &lda, geev_w_array, 
+		lapackf77_zhseqr("S", "V", &n, &c__1, &n, &a[a_offset], &lda, geev_w_array, 
 			&vr[vr_offset], &ldvr, &work[1], &c_n1, info);
 	    } else {
-		zhseqr_("E", "N", &n, &c__1, &n, &a[a_offset], &lda, geev_w_array, 
+		lapackf77_zhseqr("E", "N", &n, &c__1, &n, &a[a_offset], &lda, geev_w_array, 
 			&vr[vr_offset], &ldvr, &work[1], &c_n1, info);
 	    }
 	    hswork = (magma_int_t) MAGMA_Z_REAL(work[1]);
@@ -263,22 +248,32 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
 
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("ZGEEV ", &i__1);
-	return 0;
+	magma_xerbla("ZGEEV ", &i__1);
+	return MAGMA_ERR_ILLEGAL_VALUE;
     } else if (lquery) {
-	return 0;
+	return MAGMA_SUCCESS;
     }
 
     /* Quick return if possible */
     if (n == 0) {
-	return 0;
+	return MAGMA_SUCCESS;
     }
    
+    // if eigenvectors are needed
+#if defined(VERSION3)
+    nb = magma_get_zgehrd_nb(n);
+    if (CUBLAS_STATUS_SUCCESS != 
+        cublasAlloc( nb*n, sizeof(cuDoubleComplex), (void**)&dT)) {
+	*info = -6;
+	return MAGMA_ERR_CUBLASALLOC;
+    }
+#endif
+
     /* Get machine constants */
-    eps = dlamch_("P");
-    smlnum = dlamch_("S");
+    eps    = lapackf77_dlamch("P");
+    smlnum = lapackf77_dlamch("S");
     bignum = 1. / smlnum;
-    dlabad_(&smlnum, &bignum);
+    lapackf77_dlabad(&smlnum, &bignum);
     smlnum = sqrt(smlnum) / eps;
     bignum = 1. / smlnum;
 
@@ -293,7 +288,7 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
 	cscale = bignum;
     }
     if (scalea) {
-	zlascl_("G", &c__0, &c__0, &anrm, &cscale, &n, &n, &a[a_offset], &lda, &
+	lapackf77_zlascl("G", &c__0, &c__0, &anrm, &cscale, &n, &n, &a[a_offset], &lda, &
 		ierr);
     }
 
@@ -301,7 +296,7 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
        (CWorkspace: none)   
        (RWorkspace: need N) */
     ibal = 1;
-    zgebal_("B", &n, &a[a_offset], &lda, &ilo, &ihi, &rwork[ibal], &ierr);
+    lapackf77_zgebal("B", &n, &a[a_offset], &lda, &ilo, &ihi, &rwork[ibal], &ierr);
 
     /* Reduce to upper Hessenberg form   
        (CWorkspace: need 2*N, prefer N+N*NB)   
@@ -309,29 +304,29 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
     itau = 1;
     iwrk = itau + n;
     i__1 = lwork - iwrk + 1;
-    /*
-     // vesion 1 - LAPACK
-     lapackf77_zgehrd(&n, &ilo, &ihi, &a[a_offset], &lda,
-                      &work[itau], &work[iwrk], &i__1, &ierr);
-    */
-    /*
-      // version 2 - LAPACK consistent HRD
-      magma_zgehrd2(n, ilo, ihi, &a[a_offset], lda,
-                    &work[itau], &work[iwrk], &i__1, &ierr);
-    */
-    // version 3 - LAPACK consistent MAGMA HRD + matrices T stored, 
-    // if eigenvectors are needed
-    magma_int_t nb = magma_get_zgehrd_nb(n);
-    cuDoubleComplex *dT;
-    if( CUBLAS_STATUS_SUCCESS != 
-	cublasAlloc( nb*(n), sizeof(cuDoubleComplex), (void**)&dT) ) 
-      { 
-	fprintf (stderr, "!!!! cublasAlloc failed in zgeev for dT\n");	
-	exit(-1);								
-      }
+
     start = get_current_time();
+#if defined(VERSION1)
+    /*
+     * Version 1 - LAPACK
+     */
+    lapackf77_zgehrd(&n, &ilo, &ihi, &a[a_offset], &lda,
+                     &work[itau], &work[iwrk], &i__1, &ierr);
+    
+#elif defined(VERSION2)
+    /*
+     *  Version 2 - LAPACK consistent HRD
+     */
+    magma_zgehrd2(n, ilo, ihi, &a[a_offset], lda,
+                  &work[itau], &work[iwrk], &i__1, &ierr);
+    
+#elif defined(VERSION3)
+    /*  
+     * Version 3 - LAPACK consistent MAGMA HRD + matrices T stored, 
+     */
     magma_zgehrd(n, ilo, ihi, &a[a_offset], lda,
-		 &work[itau], &work[iwrk], i__1, dT, &ierr);
+                 &work[itau], &work[iwrk], i__1, dT, &ierr);
+#endif
     end = get_current_time();
     printf("    Time for zgehrd = %5.2f sec\n", GetTimerValue(start,end)/1000.);
 
@@ -339,21 +334,28 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
       /*        Want left eigenvectors   
 		Copy Householder vectors to VL */
 	*(unsigned char *)side = 'L';
-	lapackf77_zlacpy("L", &n, &n, &a[a_offset], &lda, &vl[vl_offset], &ldvl);
+	lapackf77_zlacpy(MagmaLowerStr, &n, &n, 
+                         &a[a_offset], &lda, &vl[vl_offset], &ldvl);
 
 	/* Generate unitary matrix in VL   
            (CWorkspace: need 2*N-1, prefer N+(N-1)*NB)   
            (RWorkspace: none) */
 	i__1 = lwork - iwrk + 1;
-	/*
-	  // version 1 & 2 - LAPACK
-	  lapackf77_zunghr(&n, &ilo, &ihi, &vl[vl_offset], &ldvl, &work[itau], &work[iwrk],
-	                   &i__1, &ierr);
-	*/
-	// version 3 - LAPACK consistent MAGMA HRD + matrices T stored
+
 	start = get_current_time();
+#if defined(VERSION1) || defined(VERSION2)
+	/*
+         * Version 1 & 2 - LAPACK
+         */
+        lapackf77_zunghr(&n, &ilo, &ihi, &vl[vl_offset], &ldvl, 
+                         &work[itau], &work[iwrk], &i__1, &ierr);
+#elif defined(VERSION3)
+        /*
+         * Version 3 - LAPACK consistent MAGMA HRD + matrices T stored
+         */
 	magma_zunghr(n, ilo, ihi, &vl[vl_offset], ldvl, &work[itau], 
 		     dT, nb, &ierr);
+#endif
 	end = get_current_time();
 	printf("    Time for zunghr = %5.2f sec\n", GetTimerValue(start,end)/1000.);
 
@@ -362,34 +364,40 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
            (RWorkspace: none) */
 	iwrk = itau;
 	i__1 = lwork - iwrk + 1;
-	zhseqr_("S", "V", &n, &ilo, &ihi, &a[a_offset], &lda, geev_w_array, &vl[
+	lapackf77_zhseqr("S", "V", &n, &ilo, &ihi, &a[a_offset], &lda, geev_w_array, &vl[
 		vl_offset], &ldvl, &work[iwrk], &i__1, info);
 
 	if (wantvr) {
 	  /* Want left and right eigenvectors   
              Copy Schur vectors to VR */
-	    *(unsigned char *)side = 'B';
+	    side[0] = 'B';
 	    lapackf77_zlacpy("F", &n, &n, &vl[vl_offset], &ldvl, &vr[vr_offset], &ldvr);
 	}
 
     } else if (wantvr) {
-      /*  Want right eigenvectors   
-          Copy Householder vectors to VR */
-	*(unsigned char *)side = 'R';
+        /*  Want right eigenvectors   
+            Copy Householder vectors to VR */
+	side[0] = 'R';
 	lapackf77_zlacpy("L", &n, &n, &a[a_offset], &lda, &vr[vr_offset], &ldvr);
+
 	/* Generate unitary matrix in VR   
            (CWorkspace: need 2*N-1, prefer N+(N-1)*NB)   
            (RWorkspace: none) */
 	i__1 = lwork - iwrk + 1;
-	/*
-          // version 1 & 2 - LAPACK
-	  lapackf77_zunghr(&n, &ilo, &ihi, &vr[vr_offset], &ldvr, &work[itau], &work[iwrk],
-	                   &i__1, &ierr);
-	*/
-	// version 3 - LAPACK consistent MAGMA HRD + matrices T stored
 	start = get_current_time();
-        magma_zunghr(n, ilo, ihi, &vr[vr_offset], ldvr, &work[itau],
-                     dT, nb, &ierr);
+#if defined(VERSION1) || defined(VERSION2)
+	/*
+         * Version 1 & 2 - LAPACK
+         */
+        lapackf77_zunghr(&n, &ilo, &ihi, &vr[vr_offset], &ldvr, 
+                         &work[itau], &work[iwrk], &i__1, &ierr);
+#elif defined(VERSION3)
+        /*
+         * Version 3 - LAPACK consistent MAGMA HRD + matrices T stored
+         */
+        magma_zunghr(n, ilo, ihi, &vr[vr_offset], ldvr, 
+                     &work[itau], dT, nb, &ierr);
+#endif
 	end = get_current_time();
 	printf("    Time for zunghr = %5.2f sec\n", GetTimerValue(start,end)/1000.);
 
@@ -398,7 +406,7 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
            (RWorkspace: none) */
 	iwrk = itau;
 	i__1 = lwork - iwrk + 1;
-	zhseqr_("S", "V", &n, &ilo, &ihi, &a[a_offset], &lda, geev_w_array, 
+	lapackf77_zhseqr("S", "V", &n, &ilo, &ihi, &a[a_offset], &lda, geev_w_array, 
 		&vr[vr_offset], &ldvr, &work[iwrk], &i__1, info);
     } else {
       /*  Compute eigenvalues only   
@@ -406,7 +414,7 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
           (RWorkspace: none) */
 	iwrk = itau;
 	i__1 = lwork - iwrk + 1;
-	zhseqr_("E", "N", &n, &ilo, &ihi, &a[a_offset], &lda, geev_w_array,
+	lapackf77_zhseqr("E", "N", &n, &ilo, &ihi, &a[a_offset], &lda, geev_w_array,
 		&vr[vr_offset], &ldvr, &work[iwrk], &i__1, info);
     }
 
@@ -416,43 +424,43 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
     }
 
     if (wantvl || wantvr) {
-      /*  Compute left and/or right eigenvectors   
-          (CWorkspace: need 2*N)   
-          (RWorkspace: need 2*N) */
+        /*  Compute left and/or right eigenvectors   
+            (CWorkspace: need 2*N)   
+            (RWorkspace: need 2*N) */
 	irwork = ibal + n;
-	ztrevc_(side, "B", select, &n, &a[a_offset], &lda, &vl[vl_offset], &ldvl,
+	lapackf77_ztrevc(side, "B", select, &n, &a[a_offset], &lda, &vl[vl_offset], &ldvl,
 		&vr[vr_offset], &ldvr, &n, &nout, &work[iwrk], &rwork[irwork], 
 		&ierr);
     }
 
     if (wantvl) {
-      /*  Undo balancing of left eigenvectors   
-	  (CWorkspace: none)   
-          (RWorkspace: need N) */
-	zgebak_("B", "L", &n, &ilo, &ihi, &rwork[ibal], &n, &vl[vl_offset], 
-		&ldvl, &ierr);
+        /*  Undo balancing of left eigenvectors   
+            (CWorkspace: none)   
+            (RWorkspace: need N) */
+	lapackf77_zgebak("B", "L", &n, &ilo, &ihi, &rwork[ibal], &n, 
+                         &vl[vl_offset], &ldvl, &ierr);
 
 	/* Normalize left eigenvectors and make largest component real */
 	i__1 = n;
 	for (i__ = 1; i__ <= i__1; ++i__) {
-	    scl = 1. / dznrm2_(&n, &vl[i__ * vl_dim1 + 1], &c__1);
-	    zdscal_(&n, &scl, &vl[i__ * vl_dim1 + 1], &c__1);
+	    scl = 1. / cblas_dznrm2(n, &vl[i__ * vl_dim1 + 1], 1);
+	    cblas_zdscal(n, scl, &vl[i__ * vl_dim1 + 1], 1);
 	    i__2 = n;
 	    for (k = 1; k <= i__2; ++k) 
-	      {
-		i__3 = k + i__ * vl_dim1;
-		/* Computing 2nd power */
+	    {
+                i__3 = k + i__ * vl_dim1;
+                /* Computing 2nd power */
 		d__1 = MAGMA_Z_REAL(vl[i__3]);
 		/* Computing 2nd power */
 		d__2 = MAGMA_Z_IMAG(vl[k + i__ * vl_dim1]);
 		rwork[irwork + k - 1] = d__1 * d__1 + d__2 * d__2;
-	      }
-	    k = idamax_(&n, &rwork[irwork], &c__1);
+            }
+	    k = cblas_idamax(n, &rwork[irwork], 1);
 	    MAGMA_Z_CNJG(z__2, vl[k + i__ * vl_dim1]);
 	    d__1 = sqrt(rwork[irwork + k - 1]);
 	    MAGMA_Z_DSCALE(z__1, z__2, d__1);
 	    MAGMA_Z_ASSIGN(tmp, z__1);
-	    zscal_(&n, &tmp, &vl[i__ * vl_dim1 + 1], &c__1);
+	    cblas_zscal(n, CBLAS_SADDR(tmp), &vl[i__ * vl_dim1 + 1], 1);
 	    i__2 = k + i__ * vl_dim1;
 	    i__3 = k + i__ * vl_dim1;
 	    d__1 = MAGMA_Z_REAL(vl[i__3]);
@@ -465,14 +473,14 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
       /*  Undo balancing of right eigenvectors   
           (CWorkspace: none)   
           (RWorkspace: need N) */
-	zgebak_("B", "R", &n, &ilo, &ihi, &rwork[ibal], &n, &vr[vr_offset], 
-		&ldvr, &ierr);
+	lapackf77_zgebak("B", "R", &n, &ilo, &ihi, &rwork[ibal], &n, 
+                         &vr[vr_offset], &ldvr, &ierr);
 
 	/* Normalize right eigenvectors and make largest component real */
 	i__1 = n;
 	for (i__ = 1; i__ <= i__1; ++i__) {
-	    scl = 1. / dznrm2_(&n, &vr[i__ * vr_dim1 + 1], &c__1);
-	    zdscal_(&n, &scl, &vr[i__ * vr_dim1 + 1], &c__1);
+	    scl = 1. / cblas_dznrm2(n, &vr[i__ * vr_dim1 + 1], 1);
+	    cblas_zdscal(n, scl, &vr[i__ * vr_dim1 + 1], 1);
 	    i__2 = n;
 	    for (k = 1; k <= i__2; ++k) {
 		i__3 = k + i__ * vr_dim1;
@@ -482,12 +490,12 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
 		d__2 = MAGMA_Z_IMAG(vr[k + i__ * vr_dim1]);
 		rwork[irwork + k - 1] = d__1 * d__1 + d__2 * d__2;
 	    }
-	    k = idamax_(&n, &rwork[irwork], &c__1);
+	    k = cblas_idamax(n, &rwork[irwork], 1);
 	    MAGMA_Z_CNJG(z__2, vr[k + i__ * vr_dim1]);
 	    d__1 = sqrt(rwork[irwork + k - 1]);
 	    MAGMA_Z_DSCALE(z__1, z__2, d__1);
 	    MAGMA_Z_ASSIGN(tmp, z__1);
-	    zscal_(&n, &tmp, &vr[i__ * vr_dim1 + 1], &c__1);
+	    cblas_zscal(n, CBLAS_SADDR(tmp), &vr[i__ * vr_dim1 + 1], 1);
 	    i__2 = k + i__ * vr_dim1;
 	    i__3 = k + i__ * vr_dim1;
 	    d__1 = MAGMA_Z_REAL(vr[i__3]);
@@ -503,32 +511,34 @@ L50:
 	/* Computing MAX */
 	i__3 = n - *info;
 	i__2 = max(i__3,1);
-	zlascl_("G", &c__0, &c__0, &cscale, &anrm, &i__1, &c__1, 
+	lapackf77_zlascl("G", &c__0, &c__0, &cscale, &anrm, &i__1, &c__1, 
 		geev_w_array + *info, &i__2, &ierr);
 	if (*info > 0) {
 	    i__1 = ilo - 1;
-	    zlascl_("G", &c__0, &c__0, &cscale, &anrm, &i__1, &c__1, 
+	    lapackf77_zlascl("G", &c__0, &c__0, &cscale, &anrm, &i__1, &c__1, 
 		    geev_w_array, &n, &ierr);
 	}
     }
 
+#if defined(VERSION3)
     cublasFree( dT );
+#endif
     MAGMA_Z_SET2REAL(work[1], (double) maxwrk);
-    return 0;
+    return MAGMA_SUCCESS;
 } /* magma_zgeev */
 
 #else
 
 extern "C" magma_int_t
 magma_zgeev(char jobvl, char jobvr, magma_int_t n,
-	    cuDoubleComplex *a,    magma_int_t lda,
-	    cuDoubleComplex *wr, cuDoubleComplex *wi,
-	    cuDoubleComplex *vl,   magma_int_t ldvl,
-	    cuDoubleComplex *vr,   magma_int_t ldvr,
+	    cuDoubleComplex *a, magma_int_t lda,
+	    cuDoubleComplex *WR, cuDoubleComplex *WI,
+	    cuDoubleComplex *vl, magma_int_t ldvl,
+	    cuDoubleComplex *vr, magma_int_t ldvr,
 	    cuDoubleComplex *work, magma_int_t lwork,
-	    double *rwork, magma_int_t *info)
+	    magma_int_t *info)
 {
-  /*  -- MAGMA (version 1.0) --
+/*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -615,102 +625,73 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
                   eigenvalues, and no eigenvectors have been computed;   
                   elements and i+1:N of W contain eigenvalues which have   
                   converged.   
-		  =====================================================================    */
+    =====================================================================    */
 
-#define min(a,b)       (((a)<(b))?(a):(b))
-#define max(a,b)       (((a)>(b))?(a):(b))
+    #define min(a,b)       (((a)<(b))?(a):(b))
+    #define max(a,b)       (((a)>(b))?(a):(b))
 
-  magma_int_t c__1 = 1;
-  magma_int_t c__0 = 0;
-  magma_int_t c_n1 = -1;
+    /* TODO: replace this by magma_get_nb */
+    extern magma_int_t ilaenv_(magma_int_t *, const char *, const char *, magma_int_t *, magma_int_t *, 
+                               magma_int_t *, magma_int_t *, magma_int_t, magma_int_t);
+
+    magma_int_t c__1 = 1;
+    magma_int_t c__0 = 0;
+    magma_int_t c_n1 = -1;
     
-  magma_int_t a_dim1, a_offset, vl_dim1, vl_offset, vr_dim1, vr_offset, i__1, 
-    i__2, i__3;
-  double d__1, d__2;
-  cuDoubleComplex z__1, z__2;
+    magma_int_t a_dim1, a_offset, vl_dim1, vl_offset, vr_dim1, vr_offset, i__1, 
+	    i__2, i__3;
+    double d__1, d__2;
 
-  double sqrt(double);
-
-  static magma_int_t i__, k, ihi;
-  static double scl;
-  static magma_int_t ilo;
-  static double dum[1], eps;
-  static cuDoubleComplex tmp;
-  static magma_int_t ibal;
-  static char side[1];
-  static double anrm;
-  static magma_int_t ierr, itau, iwrk, nout;
-    extern int 
-      zscal_(magma_int_t *, cuDoubleComplex *, cuDoubleComplex *, magma_int_t *), 
-      dlabad_(double *, double *);
-    extern double dznrm2_(magma_int_t *, cuDoubleComplex *, magma_int_t *);
+    magma_int_t i__, k, ihi, ilo;
+    double      r__, cs, sn, scl;
+    double dum[1], eps;
+    magma_int_t ibal;
+    double anrm;
+    magma_int_t ierr, itau, iwrk, nout;
     magma_int_t scalea;
-    extern double dlamch_(char *);
-    static double cscale;
-    extern int 
-      zgebak_(char *, char *, magma_int_t *, magma_int_t *, magma_int_t *, double *,
-	      magma_int_t *, cuDoubleComplex *, magma_int_t *, magma_int_t *), 
-      zgebal_(char *, magma_int_t *, cuDoubleComplex *, magma_int_t *, 
-	      magma_int_t *, magma_int_t *, double *, magma_int_t *);
-    extern magma_int_t idamax_(magma_int_t *, double *, magma_int_t *);
-    extern int xerbla_(char *, magma_int_t *);
-    extern magma_int_t ilaenv_(magma_int_t *, char *, char *, magma_int_t *, magma_int_t *, 
-			       magma_int_t *, magma_int_t *, magma_int_t, magma_int_t);
-    magma_int_t select[1];
-    extern int zdscal_(magma_int_t *, double *, 
-		       cuDoubleComplex *, magma_int_t *);
-    static double bignum;
-    extern int 
-      zlascl_(char *, magma_int_t *, magma_int_t *, double *, double *, magma_int_t *, 
-	      magma_int_t *, cuDoubleComplex *, magma_int_t *, magma_int_t *);
-    static magma_int_t minwrk, maxwrk;
+    double cscale;
+    double bignum;
+    magma_int_t minwrk, maxwrk;
     magma_int_t wantvl;
-    static double smlnum;
-    static magma_int_t hswork, irwork;
-    extern int 
-      zhseqr_(char *, char *, magma_int_t *, magma_int_t *, magma_int_t *,
-	      cuDoubleComplex *, magma_int_t *, cuDoubleComplex *, cuDoubleComplex *,
-	      cuDoubleComplex *,
-	      magma_int_t *, cuDoubleComplex *, magma_int_t *, magma_int_t *),
-      ztrevc_(char *, char *, magma_int_t *, magma_int_t *, cuDoubleComplex *,
-	      magma_int_t *, cuDoubleComplex *, magma_int_t *, 
-	      cuDoubleComplex *, magma_int_t *, magma_int_t *,
-	      magma_int_t *, cuDoubleComplex *, double *, magma_int_t *);
-    magma_int_t lquery, wantvr;
+    double smlnum;
+    magma_int_t hswork;
+    magma_int_t lquery, wantvr, select[1];
 
+    magma_int_t nb = 0;
+    cuDoubleComplex *dT = NULL;
     TimeStruct start, end;
 
+    char side[2]   = {0, 0};
     char jobvl_[2] = {jobvl, 0};
     char jobvr_[2] = {jobvr, 0};
 
-    a_dim1 = lda;
+    a_dim1   = lda;
     a_offset = 1 + a_dim1;
-    a -= a_offset;
-    vl_dim1 = ldvl;
+    a       -= a_offset;
+    vl_dim1   = ldvl;
     vl_offset = 1 + vl_dim1;
-    vl -= vl_offset;
-    vr_dim1 = ldvr;
+    vl       -= vl_offset;
+    vr_dim1   = ldvr;
     vr_offset = 1 + vr_dim1;
-    vr -= vr_offset;
+    vr       -= vr_offset;
     --work;
-    --rwork;
 
     *info = 0;
     lquery = lwork == -1;
     wantvl = lapackf77_lsame(jobvl_, "V");
     wantvr = lapackf77_lsame(jobvr_, "V");
     if (! wantvl && ! lapackf77_lsame(jobvl_, "N")) {
-      *info = -1;
+	*info = -1;
     } else if (! wantvr && ! lapackf77_lsame(jobvr_, "N")) {
-      *info = -2;
+	*info = -2;
     } else if (n < 0) {
-      *info = -3;
+	*info = -3;
     } else if (lda < max(1,n)) {
-      *info = -5;
-    } else if (ldvl < 1 || wantvl && ldvl < n) {
-      *info = -8;
-    } else if (ldvr < 1 || wantvr && ldvr < n) {
-      *info = -10;
+	*info = -5;
+    } else if ( (ldvl < 1) || (wantvl && (ldvl < n))) {
+	*info = -9;
+    } else if ( (ldvr < 1) || (wantvr && (ldvr < n))) {
+	*info = -11;
     }
 
     /*  Compute workspace   
@@ -718,307 +699,387 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
          minimal amount of workspace needed at that point in the code,   
          as well as the preferred amount for good performance.   
          CWorkspace refers to complex workspace, and RWorkspace to real   
-         workspace. NB refers to the optimal block size for the   
-         immediately following subroutine, as returned by ILAENV.   
-         HSWORK refers to the workspace preferred by ZHSEQR, as   
+         workspace. NB refers to the optimal block size for the immediately
+         following subroutine, as returned by ILAENV.
+         HSWORK refers to the workspace preferred by ZHSEQR, as 
          calculated below. HSWORK is computed assuming ILO=1 and IHI=N,   
          the worst case.) */
     if (*info == 0) {
-      if (n == 0) {
-	minwrk = 1;
-	maxwrk = 1;
-      } else {
-	maxwrk = n + n * ilaenv_(&c__1, "ZGEHRD", " ", &n, &c__1, &n, &
-				   c__0, 6, 1);
-	minwrk = n << 1;
-	if (wantvl) {
-	  /* Computing MAX */
-	  i__1 = maxwrk, i__2 = n + (n - 1) * ilaenv_(&c__1, "ZUNGHR",
-							" ", &n, &c__1, &n, &c_n1, 6, 1);
-	  maxwrk = max(i__1,i__2);
-
-	  zhseqr_("S", "V", &n, &c__1, &n, &a[a_offset], &lda, wr, wi, 
-		  &vl[vl_offset], &ldvl, &work[1], &c_n1, info);
-	} else if (wantvr) {
-	  /* Computing MAX */
-	  i__1 = maxwrk, i__2 = n + (n - 1) * ilaenv_(&c__1, "ZUNGHR",
-							" ", &n, &c__1, &n, &c_n1, 6, 1);
-	  maxwrk = max(i__1,i__2);
-	  zhseqr_("S", "V", &n, &c__1, &n, &a[a_offset], &lda, wr, wi, 
-		  &vr[vr_offset], &ldvr, &work[1], &c_n1, info);
+	if (n == 0) {
+	    minwrk = 1;
+	    maxwrk = 1;
 	} else {
-	  zhseqr_("E", "N", &n, &c__1, &n, &a[a_offset], &lda, wr, wi, 
-		  &vr[vr_offset], &ldvr, &work[1], &c_n1, info);
-	}
-	hswork = (magma_int_t) MAGMA_Z_REAL(work[1]);
-	/* Computing MAX */
-	i__1 = max(maxwrk,hswork);
-	maxwrk = max(i__1,minwrk);
-      }
-      MAGMA_Z_SET2REAL(work[1], (double) maxwrk);
+	    maxwrk = (n << 1) + n * ilaenv_(&c__1, "ZGEHRD", " ", 
+                                            &n, &c__1, &n, &c__0, 6, 1);
+	    if (wantvl) {
+		minwrk = n << 2;
+                /* Computing MAX */
+		i__1 = maxwrk;
+                i__2 = (n << 1) + (n - 1) * ilaenv_(&c__1, "ZUNGHR"," ", 
+                                                    &n, &c__1, &n, &c_n1, 6, 1);
+		maxwrk = max(i__1,i__2);
 
-      if (lwork < minwrk && ! lquery) {
-	*info = -12;
-      }
+		lapackf77_zhseqr("S", "V", &n, &c__1, &n, &a[a_offset], &lda, WR, WI, 
+			&vl[vl_offset], &ldvl, &work[1], &c_n1, info);
+                hswork = (magma_int_t)work[1];
+
+                /* Computing MAX */
+		i__1 = maxwrk;
+                i__2 = n + 1;
+                i__1 = max(i__1, i__2);
+                i__2 = n + hswork;
+		maxwrk = max(i__1,i__2);
+
+                /* Computing MAX */
+		i__1 = maxwrk;
+                i__2 = n << 2;
+		maxwrk = max(i__1,i__2);
+	    } 
+            else if (wantvr) {
+		minwrk = n << 2;
+                /* Computing MAX */
+		i__1 = maxwrk;
+                i__2 = (n << 1) + (n - 1) * ilaenv_(&c__1, "ZUNGHR", " ", 
+                                                    &n, &c__1, &n, &c_n1, 6, 1);
+		maxwrk = max(i__1, i__2);
+		lapackf77_zhseqr("S", "V", &n, &c__1, &n, &a[a_offset], &lda, WR, WI, 
+                        &vr[vr_offset], &ldvr, &work[1], &c_n1, info);
+		hswork = (magma_int_t) work[1];
+                /* Computing MAX */
+		i__1 = maxwrk;
+                i__2 = n + 1;
+                i__1 = max(i__1, i__2);
+                i__2 = n + hswork;
+		maxwrk = max(i__1,i__2);
+                /* Computing MAX */
+		i__1 = maxwrk;
+                i__2 = n << 2;
+                maxwrk = max(i__1,i__2);
+	    } else {
+		minwrk = n * 3;
+		lapackf77_zhseqr("E", "N", &n, &c__1, &n, &a[a_offset], &lda, WR, WI,
+			&vr[vr_offset], &ldvr, &work[1], &c_n1, info);
+		hswork = (magma_int_t) work[1];
+                /* Computing MAX */
+		i__1 = maxwrk;
+                i__2 = n + 1;
+                i__1 = max(i__1,i__2);
+                i__2 = n + hswork;
+		maxwrk = max(i__1,i__2);
+	    }
+	    maxwrk = max(maxwrk, minwrk);
+	}
+	work[1] = (double)maxwrk;
+
+	if ( (lwork < minwrk) && (! lquery) ) {
+	    *info = -13;
+	}
     }
 
     if (*info != 0) {
-      i__1 = -(*info);
-      xerbla_("ZGEEV ", &i__1);
-      return 0;
+	i__1 = -(*info);
+	magma_xerbla("ZGEEV ", &i__1);
+	return MAGMA_ERR_ILLEGAL_VALUE;
     } else if (lquery) {
-      return 0;
+	return MAGMA_SUCCESS;
     }
 
     /* Quick return if possible */
     if (n == 0) {
-      return 0;
+	return MAGMA_SUCCESS;
     }
    
+    // if eigenvectors are needed
+#if defined(VERSION3)
+    nb = magma_get_zgehrd_nb(n);
+    if (CUBLAS_STATUS_SUCCESS != 
+        cublasAlloc( nb*n, sizeof(cuDoubleComplex), (void**)&dT)) {
+	*info = -6;
+	return MAGMA_ERR_CUBLASALLOC;
+    }
+#endif
+
     /* Get machine constants */
-    eps = dlamch_("P");
-    smlnum = dlamch_("S");
+    eps    = lapackf77_dlamch("P");
+    smlnum = lapackf77_dlamch("S");
     bignum = 1. / smlnum;
-    dlabad_(&smlnum, &bignum);
-    smlnum = sqrt(smlnum) / eps;
+    lapackf77_dlabad(&smlnum, &bignum);
+    smlnum = (double)sqrt((double)smlnum) / eps;
+    fprintf(stderr, "smlnum : %e\n", smlnum);
     bignum = 1. / smlnum;
 
     /* Scale A if max element outside range [SMLNUM,BIGNUM] */
-    anrm = zlange_("M", &n, &n, &a[a_offset], &lda, dum);
+    anrm = lapackf77_zlange("M", &n, &n, &a[a_offset], &lda, dum);
     scalea = 0;
     if (anrm > 0. && anrm < smlnum) {
-      scalea = 1;
-      cscale = smlnum;
+	scalea = 1;
+	cscale = smlnum;
     } else if (anrm > bignum) {
-      scalea = 1;
-      cscale = bignum;
+	scalea = 1;
+	cscale = bignum;
     }
     if (scalea) {
-      zlascl_("G", &c__0, &c__0, &anrm, &cscale, &n, &n, &a[a_offset], &lda, &
-	      ierr);
+	lapackf77_zlascl("G", &c__0, &c__0, &anrm, &cscale, &n, &n, 
+                &a[a_offset], &lda, &ierr);
     }
 
-    /* Balance the matrix
-       (CWorkspace: none)
-       (RWorkspace: need N) */
+    /* Balance the matrix   
+       (Workspace: need N) */
     ibal = 1;
-    zgebal_("B", &n, &a[a_offset], &lda, &ilo, &ihi, &rwork[ibal], &ierr);
+    lapackf77_zgebal("B", &n, &a[a_offset], &lda, &ilo, &ihi, &work[ibal], &ierr);
 
-    /* Reduce to upper Hessenberg form
-       (CWorkspace: need 2*N, prefer N+N*NB)
-       (RWorkspace: none) */
-    itau = 1;
+    /* Reduce to upper Hessenberg form   
+       (Workspace: need 3*N, prefer 2*N+N*NB) */
+    itau = ibal + n;
     iwrk = itau + n;
     i__1 = lwork - iwrk + 1;
 
+    start = get_current_time();
+#if defined(VERSION1)
     /*
-     // vesion 1 - LAPACK
-     lapackf77_zgehrd(&n, &ilo, &ihi, &a[a_offset], &lda,
-                      &work[itau], &work[iwrk], &i__1, &ierr);
-    */
-      /*
-      // version 2 - LAPACK consistent HRD
-      magma_zgehrd2(n, ilo, ihi, &a[a_offset], lda,
-                    &work[itau], &work[iwrk], &i__1, &ierr);
-      */
-      // version 3 - LAPACK consistent MAGMA HRD + matrices T stored, 
-      // if eigenvectors are needed
-      magma_int_t nb = magma_get_zgehrd_nb(n);
-      cuDoubleComplex *dT;
-      if( CUBLAS_STATUS_SUCCESS != 
-	  cublasAlloc( nb*(n), sizeof(cuDoubleComplex), (void**)&dT) ) 
-	{ 
-	  fprintf (stderr, "!!!! cublasAlloc failed in zgeev for dT\n");
-	  exit(-1);
-	}
-      start = get_current_time();
-      magma_zgehrd(n, ilo, ihi, &a[a_offset], lda,
-		   &work[itau], &work[iwrk], i__1, dT, &ierr);
-      end = get_current_time();
-      printf("    Time for zgehrd = %5.2f sec\n", GetTimerValue(start,end)/1000.);
+     * Version 1 - LAPACK
+     */
+    lapackf77_zgehrd(&n, &ilo, &ihi, &a[a_offset], &lda,
+                     &work[itau], &work[iwrk], &i__1, &ierr);
+    
+#elif defined(VERSION2)
+    /*
+     *  Version 2 - LAPACK consistent HRD
+     */
+    magma_zgehrd2(n, ilo, ihi, &a[a_offset], lda,
+                  &work[itau], &work[iwrk], &i__1, &ierr);
+    
+#elif defined(VERSION3)
+    /*  
+     * Version 3 - LAPACK consistent MAGMA HRD + matrices T stored, 
+     */
+    magma_zgehrd(n, ilo, ihi, &a[a_offset], lda,
+                 &work[itau], &work[iwrk], i__1, dT, &ierr);
+#endif
+    end = get_current_time();
+    printf("    Time for zgehrd = %5.2f sec\n", GetTimerValue(start,end)/1000.);
 
-      if (wantvl) {
-	/*        Want left eigenvectors   
-		  Copy Householder vectors to VL */
-	*(unsigned char *)side = 'L';
-	lapackf77_zlacpy("L", &n, &n, &a[a_offset], &lda, &vl[vl_offset], &ldvl);
+    if (wantvl) {
+      /*        Want left eigenvectors   
+		Copy Householder vectors to VL */
+	side[0] = 'L';
+	lapackf77_zlacpy(MagmaLowerStr, &n, &n, 
+                         &a[a_offset], &lda, &vl[vl_offset], &ldvl);
 
-	/* Generate unitary matrix in VL   
-           (CWorkspace: need 2*N-1, prefer N+(N-1)*NB)   
-           (RWorkspace: none) */
+        /* 
+         * Generate orthogonal matrix in VL 
+         *   (Workspace: need 3*N-1, prefer 2*N+(N-1)*NB) 
+         */
 	i__1 = lwork - iwrk + 1;
-	/*
-	    // version 1 & 2 - LAPACK
-	      lapackf77_zunghr(&n, &ilo, &ihi, &vl[vl_offset], &ldvl, &work[itau], &work[iwrk],
-	                         &i__1, &ierr);
-	*/
-	// version 3 - LAPACK consistent MAGMA HRD + matrices T stored
+
 	start = get_current_time();
+#if defined(VERSION1) || defined(VERSION2)
+	/*
+         * Version 1 & 2 - LAPACK
+         */
+        lapackf77_zunghr(&n, &ilo, &ihi, &vl[vl_offset], &ldvl, 
+                         &work[itau], &work[iwrk], &i__1, &ierr);
+#elif defined(VERSION3)
+        /*
+         * Version 3 - LAPACK consistent MAGMA HRD + matrices T stored
+         */
 	magma_zunghr(n, ilo, ihi, &vl[vl_offset], ldvl, &work[itau], 
 		     dT, nb, &ierr);
+#endif
 	end = get_current_time();
 	printf("    Time for zunghr = %5.2f sec\n", GetTimerValue(start,end)/1000.);
 
-	/* Perform QR iteration, accumulating Schur vectors in VL   
-           (CWorkspace: need 1, prefer HSWORK (see comments) )   
-           (RWorkspace: none) */
+        /*
+         * Perform QR iteration, accumulating Schur vectors in VL
+         *   (Workspace: need N+1, prefer N+HSWORK (see comments) )
+         */
 	iwrk = itau;
 	i__1 = lwork - iwrk + 1;
-	zhseqr_("S", "V", &n, &ilo, &ihi, &a[a_offset], &lda, wr, wi,
-		&vl[vl_offset], &ldvl, &work[iwrk], &i__1, info);
+	lapackf77_zhseqr("S", "V", &n, &ilo, &ihi, &a[a_offset], &lda, WR, WI, 
+                         &vl[vl_offset], &ldvl, &work[iwrk], &i__1, info);
 
 	if (wantvr) {
 	  /* Want left and right eigenvectors   
              Copy Schur vectors to VR */
-	  *(unsigned char *)side = 'B';
-	  lapackf77_zlacpy("F", &n, &n, &vl[vl_offset], &ldvl, &vr[vr_offset], &ldvr);
+	    side[0] = 'B';
+	    lapackf77_zlacpy("F", &n, &n, &vl[vl_offset], &ldvl, &vr[vr_offset], &ldvr);
 	}
 
-      } else if (wantvr) {
-	/*  Want right eigenvectors   
-	    Copy Householder vectors to VR */
-	*(unsigned char *)side = 'R';
+    } else if (wantvr) {
+        /*  Want right eigenvectors   
+            Copy Householder vectors to VR */
+	side[0] = 'R';
 	lapackf77_zlacpy("L", &n, &n, &a[a_offset], &lda, &vr[vr_offset], &ldvr);
-	/* Generate unitary matrix in VR   
-           (CWorkspace: need 2*N-1, prefer N+(N-1)*NB)   
-           (RWorkspace: none) */
+
+        /*
+         * Generate orthogonal matrix in VR
+         *   (Workspace: need 3*N-1, prefer 2*N+(N-1)*NB) 
+         */
 	i__1 = lwork - iwrk + 1;
-	/*
-          // version 1 & 2 - LAPACK
-	    lapackf77_zunghr(&n, &ilo, &ihi, &vr[vr_offset], &ldvr, &work[itau], &work[iwrk],
-	                       &i__1, &ierr);
-	*/
-	// version 3 - LAPACK consistent MAGMA HRD + matrices T stored
 	start = get_current_time();
-        magma_zunghr(n, ilo, ihi, &vr[vr_offset], ldvr, &work[itau],
-                     dT, nb, &ierr);
+#if defined(VERSION1) || defined(VERSION2)
+	/*
+         * Version 1 & 2 - LAPACK
+         */
+        lapackf77_zunghr(&n, &ilo, &ihi, &vr[vr_offset], &ldvr, 
+                         &work[itau], &work[iwrk], &i__1, &ierr);
+#elif defined(VERSION3)
+        /*
+         * Version 3 - LAPACK consistent MAGMA HRD + matrices T stored
+         */
+        magma_zunghr(n, ilo, ihi, &vr[vr_offset], ldvr, 
+                     &work[itau], dT, nb, &ierr);
+#endif
 	end = get_current_time();
 	printf("    Time for zunghr = %5.2f sec\n", GetTimerValue(start,end)/1000.);
 
-	/* Perform QR iteration, accumulating Schur vectors in VR   
-           (CWorkspace: need 1, prefer HSWORK (see comments) )   
-           (RWorkspace: none) */
+	/* 
+         * Perform QR iteration, accumulating Schur vectors in VR   
+         *   (Workspace: need N+1, prefer N+HSWORK (see comments) ) 
+         */
 	iwrk = itau;
 	i__1 = lwork - iwrk + 1;
-	zhseqr_("S", "V", &n, &ilo, &ihi, &a[a_offset], &lda, wr, wi, 
+	lapackf77_zhseqr("S", "V", &n, &ilo, &ihi, &a[a_offset], &lda, WR, WI,
 		&vr[vr_offset], &ldvr, &work[iwrk], &i__1, info);
-      } else {
-	/*  Compute eigenvalues only   
-          (CWorkspace: need 1, prefer HSWORK (see comments) )   
-          (RWorkspace: none) */
+    } else {
+        /*  
+         * Compute eigenvalues only   
+         *   (Workspace: need N+1, prefer N+HSWORK (see comments) ) 
+         */
 	iwrk = itau;
 	i__1 = lwork - iwrk + 1;
-	zhseqr_("E", "N", &n, &ilo, &ihi, &a[a_offset], &lda, wr, wi,
+	lapackf77_zhseqr("E", "N", &n, &ilo, &ihi, &a[a_offset], &lda, WR, WI,
 		&vr[vr_offset], &ldvr, &work[iwrk], &i__1, info);
-      }
+    }
 
-      /* If INFO > 0 from ZHSEQR, then quit */
-      if (*info > 0) {
+    /* If INFO > 0 from ZHSEQR, then quit */
+    if (*info > 0) {
+        fprintf(stderr, "ZHSEQR returned with info = %d\n", *info);
 	goto L50;
-      }
+    }
 
-      if (wantvl || wantvr) {
-	/*  Compute left and/or right eigenvectors   
-          (CWorkspace: need 2*N)   
-          (RWorkspace: need 2*N) */
-	irwork = ibal + n;
-	ztrevc_(side, "B", select, &n, &a[a_offset], &lda, &vl[vl_offset], &ldvl,
-		&vr[vr_offset], &ldvr, &n, &nout, &work[iwrk], &rwork[irwork], 
-		&ierr);
-      }
-      if (wantvl) {
-	/*  Undo balancing of left eigenvectors   
-	      (CWorkspace: none)   
-	      (RWorkspace: need N) */
-	zgebak_("B", "L", &n, &ilo, &ihi, &rwork[ibal], &n, &vl[vl_offset], 
-		&ldvl, &ierr);
+    if (wantvl || wantvr) {
+        /*  
+         * Compute left and/or right eigenvectors   
+         *   (Workspace: need 4*N) 
+         */
+	lapackf77_ztrevc(side, "B", select, &n, &a[a_offset], &lda, &vl[vl_offset], &ldvl,
+		&vr[vr_offset], &ldvr, &n, &nout, &work[iwrk], &ierr);
+    }
+
+    if (wantvl) {
+        /*  
+         * Undo balancing of left eigenvectors   
+         *   (Workspace: need N) 
+         */
+	lapackf77_zgebak("B", "L", &n, &ilo, &ihi, 
+                         &work[ibal], &n, &vl[vl_offset], &ldvl, &ierr);
 
 	/* Normalize left eigenvectors and make largest component real */
 	i__1 = n;
 	for (i__ = 1; i__ <= i__1; ++i__) {
-	  scl = 1. / dznrm2_(&n, &vl[i__ * vl_dim1 + 1], &c__1);
-	  zdscal_(&n, &scl, &vl[i__ * vl_dim1 + 1], &c__1);
-	  i__2 = n;
-	  for (k = 1; k <= i__2; ++k) 
-	    {
-	      i__3 = k + i__ * vl_dim1;
-	      /* Computing 2nd power */
-	      d__1 = MAGMA_Z_REAL(vl[i__3]);
-	      /* Computing 2nd power */
-	      d__2 = MAGMA_Z_IMAG(vl[k + i__ * vl_dim1]);
-	      rwork[irwork + k - 1] = d__1 * d__1 + d__2 * d__2;
-	    }
-	  k = idamax_(&n, &rwork[irwork], &c__1);
-	  MAGMA_Z_CNJG(z__2, vl[k + i__ * vl_dim1]);
-	  d__1 = sqrt(rwork[irwork + k - 1]);
-	  MAGMA_Z_DSCALE(z__1, z__2, d__1);
-	  MAGMA_Z_ASSIGN(tmp, z__1);
-	  zscal_(&n, &tmp, &vl[i__ * vl_dim1 + 1], &c__1);
-	  i__2 = k + i__ * vl_dim1;
-	  i__3 = k + i__ * vl_dim1;
-	  d__1 = MAGMA_Z_REAL(vl[i__3]);
-	  MAGMA_Z_SET2REAL(z__1, d__1);
-	  MAGMA_Z_ASSIGN(vl[i__2], z__1);
+	    if ( WI[i__-1] == 0.) {
+		scl = cblas_dznrm2(n, &vl[i__ * vl_dim1 + 1], 1);
+                scl = 1. / scl;
+		cblas_zscal(n, CBLAS_SADDR(scl), &vl[i__ * vl_dim1 + 1], 1);
+	    } else if (WI[i__-1] > 0.) {
+		d__1 = cblas_dznrm2(n, &vl[ i__      * vl_dim1 + 1], 1);
+		d__2 = cblas_dznrm2(n, &vl[(i__ + 1) * vl_dim1 + 1], 1);
+		scl = lapackf77_dlapy2(&d__1, &d__2);
+                fprintf(stderr, "d1=%e, d2=%e, scl = (%e, %e)\n",
+                        d__1, d__2, scl, 1. / scl);
+                scl = 1. / scl;
+		cblas_zscal(n, CBLAS_SADDR(scl), &vl[ i__      * vl_dim1 + 1], 1);
+		cblas_zscal(n, CBLAS_SADDR(scl), &vl[(i__ + 1) * vl_dim1 + 1], 1);
+		i__2 = n;
+		for (k = 1; k <= i__2; ++k) {
+                    /* Computing 2nd power */
+                    d__1 = vl[k + i__ * vl_dim1];
+                    /* Computing 2nd power */
+                    d__2 = vl[k + (i__ + 1) * vl_dim1];
+                    work[iwrk + k - 1] = d__1 * d__1 + d__2 * d__2;
+                }
+		k = cblas_izamax(n, &work[iwrk], 1);
+                fprintf(stderr, "k = %d, i = %d, (%e, %e)\n",
+                        k, i__, vl[k +  i__      * vl_dim1], vl[k + (i__ + 1) * vl_dim1]);
+                lapackf77_zlartg(&vl[k +  i__      * vl_dim1], 
+                                 &vl[k + (i__ + 1) * vl_dim1], &cs, &sn, &r__);
+		cblas_zrot(n, &vl[ i__      * vl_dim1 + 1], 1, 
+                           &vl[(i__ + 1) * vl_dim1 + 1], 1, cs, CBLAS_SADDR(sn));
+		vl[k + (i__ + 1) * vl_dim1] = 0.;
+            }
 	}
-      }
-      if (wantvr) {
-	/*  Undo balancing of right eigenvectors   
-          (CWorkspace: none)   
-          (RWorkspace: need N) */
-	zgebak_("B", "R", &n, &ilo, &ihi, &rwork[ibal], &n, &vr[vr_offset], 
-		&ldvr, &ierr);
+    }
+
+    if (wantvr) {
+        /*  
+         * Undo balancing of right eigenvectors   
+         *   (Workspace: need N) 
+         */
+	lapackf77_zgebak("B", "R", &n, &ilo, &ihi, &work[ibal], &n, 
+                         &vr[vr_offset], &ldvr, &ierr);
 
 	/* Normalize right eigenvectors and make largest component real */
 	i__1 = n;
 	for (i__ = 1; i__ <= i__1; ++i__) {
-	  scl = 1. / dznrm2_(&n, &vr[i__ * vr_dim1 + 1], &c__1);
-	  zdscal_(&n, &scl, &vr[i__ * vr_dim1 + 1], &c__1);
-	  i__2 = n;
-	  for (k = 1; k <= i__2; ++k) {
-	    i__3 = k + i__ * vr_dim1;
-	    /* Computing 2nd power */
-	    d__1 = MAGMA_Z_REAL(vr[i__3]);
-	    /* Computing 2nd power */
-	    d__2 = MAGMA_Z_IMAG(vr[k + i__ * vr_dim1]);
-	    rwork[irwork + k - 1] = d__1 * d__1 + d__2 * d__2;
-	  }
-	  k = idamax_(&n, &rwork[irwork], &c__1);
-	  MAGMA_Z_CNJG(z__2, vr[k + i__ * vr_dim1]);
-	  d__1 = sqrt(rwork[irwork + k - 1]);
-	  MAGMA_Z_DSCALE(z__1, z__2, d__1);
-	  MAGMA_Z_ASSIGN(tmp, z__1);
-	  zscal_(&n, &tmp, &vr[i__ * vr_dim1 + 1], &c__1);
-	  i__2 = k + i__ * vr_dim1;
-	  i__3 = k + i__ * vr_dim1;
-	  d__1 = MAGMA_Z_REAL(vr[i__3]);
-	  MAGMA_Z_SET2REAL(z__1, d__1);
-	  MAGMA_Z_ASSIGN(vr[i__2], z__1);
-	}
-      }
+	    if (WI[i__-1] == 0.) {
+		scl = 1. / cblas_dznrm2(n, &vr[i__ * vr_dim1 + 1], 1);
+		cblas_zscal(n, CBLAS_SADDR(scl), &vr[i__ * vr_dim1 + 1], 1);
+	    } else if (WI[i__-1] > 0.) {
+		d__1 = cblas_znrm2(n, &vr[ i__      * vr_dim1 + 1], 1);
+		d__2 = cblas_znrm2(n, &vr[(i__ + 1) * vr_dim1 + 1], 1);
+		scl = lapackf77_dlapy2(&d__1, &d__2);
+                scl = 1. / scl;
+		cblas_zscal(n, CBLAS_SADDR(scl), &vr[ i__      * vr_dim1 + 1], 1);
+		cblas_zscal(n, CBLAS_SADDR(scl), &vr[(i__ + 1) * vr_dim1 + 1], 1);
+		i__2 = n;
+		for (k = 1; k <= i__2; ++k) {
+                    /* Computing 2nd power */
+		    d__1 = vr[k + i__ * vr_dim1];
+                    /* Computing 2nd power */
+		    d__2 = vr[k + (i__ + 1) * vr_dim1];
+		    work[iwrk + k - 1] = d__1 * d__1 + d__2 * d__2;
+                }
+		k = cblas_izamax(n, &work[iwrk], 1);
+		lapackf77_zlartg(&vr[k + i__ * vr_dim1], &vr[k + (i__ + 1) * vr_dim1], 
+			&cs, &sn, &r__);
+		cblas_zrot(n, &vr[ i__      * vr_dim1 + 1], 1, 
+                              &vr[(i__ + 1) * vr_dim1 + 1], 1, cs, CBLAS_SADDR(sn));
+		vr[k + (i__ + 1) * vr_dim1] = 0.;
+            }
+        }
+    }
 
-      /*  Undo scaling if necessary */
-    L50:
-      if (scalea) {
+    /*  Undo scaling if necessary */
+L50:
+    if (scalea) {
 	i__1 = n - *info;
 	/* Computing MAX */
 	i__3 = n - *info;
 	i__2 = max(i__3,1);
-	zlascl_("G", &c__0, &c__0, &cscale, &anrm, &i__1, &c__1, 
-		wr + *info, &i__2, &ierr);
-	zlascl_("G", &c__0, &c__0, &cscale, &anrm, &i__1, &c__1,
-                wi + *info, &i__2, &ierr);
+	lapackf77_zlascl("G", &c__0, &c__0, &cscale, &anrm, &i__1, &c__1, 
+                         WR + (*info), &i__2, &ierr);
+	i__1 = n - *info;
+        /* Computing MAX */
+	i__3 = n - *info;
+	i__2 = max(i__3,1);
+	lapackf77_zlascl("G", &c__0, &c__0, &cscale, &anrm, &i__1, &c__1, 
+                WI + (*info), &i__2, &ierr);
 	if (*info > 0) {
-	  i__1 = ilo - 1;
-	  zlascl_("G", &c__0, &c__0, &cscale, &anrm, &i__1, &c__1, 
-		  wr, &n, &ierr);
-	  zlascl_("G", &c__0, &c__0, &cscale, &anrm, &i__1, &c__1,
-                  wi, &n, &ierr);
+	    i__1 = ilo - 1;
+	    lapackf77_zlascl("G", &c__0, &c__0, &cscale, &anrm, &i__1, &c__1, 
+                    WR, &n, &ierr);
+	    i__1 = ilo - 1;
+	    lapackf77_zlascl("G", &c__0, &c__0, &cscale, &anrm, &i__1, &c__1,
+		    WI, &n, &ierr);
 	}
-      }
+    }
 
-      cublasFree( dT );
-      MAGMA_Z_SET2REAL(work[1], (double) maxwrk);
-      return 0;
-    } /* magma_zgeev */
+#if defined(VERSION3)
+    cublasFree( dT );
+#endif
+    work[1] = (double) maxwrk;
+    return MAGMA_SUCCESS;
+} /* magma_zgeev */
 
 #endif

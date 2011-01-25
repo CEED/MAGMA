@@ -40,9 +40,10 @@ ZSRC  = testing_zgemm.cpp	\
         \
         testing_zcgeqrsv_gpu.cpp\
         \
-#        testing_zgeev.cpp       \
-        testing_zgesvd.cpp      \
-        testing_zheevd.cpp
+        testing_zgeev.cpp       \
+
+#        testing_zgesvd.cpp      \
+#        testing_zheevd.cpp
 
 ifeq ($(FORT), pgfortran)
 	FOBJ := fortran_thunking.o

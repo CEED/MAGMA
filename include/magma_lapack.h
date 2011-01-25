@@ -25,6 +25,9 @@ extern "C" {
 #    define lapackf77_dlag2s dlag2s_
 #    define lapackf77_slag2d slag2d_
 
+#    define lapackf77_dlapy2 dlapy2_
+#    define lapackf77_slapy2 slapy2_
+
 #    define blasf77_ddot     ddot_
 #    define blasf77_sdot     sdot_ 
 
@@ -43,6 +46,9 @@ extern "C" {
 #    define lapackf77_dlag2s dlag2s
 #    define lapackf77_slag2d slag2d
 
+#    define lapackf77_dlapy2 dlapy2
+#    define lapackf77_slapy2 slapy2
+
 #    define blasf77_ddot     ddot
 #    define blasf77_sdot     sdot
 
@@ -53,16 +59,21 @@ float    lapackf77_slamch(const char *cmach);
 double   lapackf77_dlamch(const char *cmach);
 void     lapackf77_slabad(float  *small, float  *large);
 void     lapackf77_dlabad(double *small, double *large);
-void     lapackf77_zcgesv(int *n, int *nrhs, cuDoubleComplex *A, int *lda, int *IPIV, cuDoubleComplex *B, int *ldb, cuDoubleComplex *X, int *ldx, cuDoubleComplex *work, float2 *swork, double *rwork, int *iter, int *info);
-void     lapackf77_dsgesv(int *n, int *nrhs, double  *A, int *lda, int *IPIV, double  *B, int *ldb, double  *X, int *ldx, double  *work, float  *swork,                int *iter, int *info);
+void     lapackf77_zcgesv(magma_int_t *n, magma_int_t *nrhs, cuDoubleComplex *A, magma_int_t *lda, magma_int_t *IPIV, cuDoubleComplex *B, magma_int_t *ldb, 
+                          cuDoubleComplex *X, magma_int_t *ldx, cuDoubleComplex *work, cuFloatComplex *swork, double *rwork, magma_int_t *iter, magma_int_t *info);
+void     lapackf77_dsgesv(magma_int_t *n, magma_int_t *nrhs, double          *A, magma_int_t *lda, magma_int_t *IPIV, double          *B, magma_int_t *ldb, 
+                          double          *X, magma_int_t *ldx, double          *work, float          *swork,                magma_int_t *iter, magma_int_t *info);
 
-void     lapackf77_zlag2c( int *m, int *n, cuDoubleComplex *a,  int *lda,  float2  *sa, int *ldsa, int *info );
-void     lapackf77_clag2z( int *m, int *n, float2  *sa, int *ldsa, cuDoubleComplex *a,  int *lda,  int *info );
-void     lapackf77_dlag2s( int *m, int *n, double  *a,  int *lda,  float   *sa, int *ldsa, int *info );
-void     lapackf77_slag2d( int *m, int *n, float   *sa, int *ldsa, double  *a,  int *lda,  int *info );
+void     lapackf77_zlag2c( magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,  magma_int_t *lda,  cuFloatComplex  *sa, magma_int_t *ldsa, magma_int_t *info );
+void     lapackf77_clag2z( magma_int_t *m, magma_int_t *n, cuFloatComplex  *sa, magma_int_t *ldsa, cuDoubleComplex *a,  magma_int_t *lda,  magma_int_t *info );
+void     lapackf77_dlag2s( magma_int_t *m, magma_int_t *n, double          *a,  magma_int_t *lda,  float           *sa, magma_int_t *ldsa, magma_int_t *info );
+void     lapackf77_slag2d( magma_int_t *m, magma_int_t *n, float           *sa, magma_int_t *ldsa, double          *a,  magma_int_t *lda,  magma_int_t *info );
 
-double blasf77_ddot( int *, double *, int *, double *, int *);
-double blasf77_sdot( int *, float *, int *, float *, int *);
+double   lapackf77_dlapy2( double *x, double *y  );
+float    lapackf77_slapy2( float  *x, float  *y  );
+
+double   blasf77_ddot( magma_int_t *, double *, magma_int_t *, double *, magma_int_t *);
+float    blasf77_sdot( magma_int_t *, float *,  magma_int_t *, float *,  magma_int_t *);
 
 #ifdef __cplusplus
 }
