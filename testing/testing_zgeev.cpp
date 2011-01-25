@@ -26,180 +26,176 @@
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeev
 */
-
-#define CHECK_ERROR
 #define PRECISION_z
 
 int main( int argc, char** argv) 
 {
     TESTING_CUDA_INIT();
 
-    TimeStruct start, end;
+    TimeStruct       start, end;
     cuDoubleComplex *h_A, *h_R, *VL, *VR, *h_work, *w1, *w2;
-    double *rwork;
-    double gpu_time, cpu_time;
+    cuDoubleComplex *w1i, *w2i;
+    cuDoubleComplex  mzone = MAGMA_Z_NEG_ONE;
+    double          *rwork;
+    double           gpu_time, cpu_time, matnorm, result;
 
     /* Matrix size */
-    magma_int_t N=0, n2;
+    magma_int_t N=0, n2, lda, nb, lwork;
     magma_int_t size[8] = {1024,2048,3072,4032,5184,6016,7040,8064};
 
-    magma_int_t i, j, info;
+    magma_int_t i, info, checkres, once = 0;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
 
+    char *jobl = (char *)"V";
+    char *jobr = (char *)"V";
+
     if (argc != 1){
         for(i = 1; i<argc; i++){
-            if (strcmp("-N", argv[i])==0)
+            if (strcmp("-N", argv[i])==0) {
                 N = atoi(argv[++i]);
-        }
-        if (N>0)
-            printf("  testing_zgeev -N %d\n\n", N);
-        else
-            {
-                printf("\nUsage: \n");
-                printf("  testing_zgeev -N %d\n\n", N);
-		
-		/* Shutdown */
-		TESTING_CUDA_FINALIZE();
-                exit(1);
+                once = 1;
             }
+            else if (strcmp("-LN", argv[i])==0)
+                jobl = (char *)"N";
+            else if (strcmp("-LV", argv[i])==0)
+                jobl = (char *)"V";
+            else if (strcmp("-RN", argv[i])==0)
+                jobr = (char *)"N";
+            else if (strcmp("-RV", argv[i])==0)
+                jobr = (char *)"V";
+        }
+        if ( N > 0 )
+            printf("  testing_zgeev -L[N|V] -R[N|V] -N %d\n\n", N);
+        else
+        {
+            printf("\nUsage: \n");
+            printf("  testing_zgeev -L[N|V] -R[N|V] -N %d\n\n", 1024);
+            exit(1);
+        }
     }
     else {
         printf("\nUsage: \n");
-        printf("  testing_zgeev -N %d\n\n", 1024);
+        printf("  testing_zgeev -L[N|V] -R[N|V] -N %d\n\n", 1024);
         N = size[7];
     }
 
-    n2  = N * N;
+    checkres = getenv("MAGMA_TESTINGS_CHECK") != NULL;
 
-    w1 = (cuDoubleComplex*)malloc(N * sizeof(cuDoubleComplex));
-    if (w1 == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (w1)\n");
-    }
-    w2 = (cuDoubleComplex*)malloc(N * sizeof(cuDoubleComplex));
-    if (w1 == 0) {
-      fprintf (stderr, "!!!! host memory allocation error (w2)\n");
-    }
+    lda   = N;
+    n2    = lda * N;
+    nb    = magma_get_zgehrd_nb(N);
+    lwork = N*nb;
 
-    #if (defined(PRECISION_s) || defined(PRECISION_d))
-    cuDoubleComplex *w1i = (cuDoubleComplex*)malloc(N * sizeof(cuDoubleComplex));
-    if (w1i == 0) {
-      fprintf (stderr, "!!!! host memory allocation error (w1i)\n");
-    }
-    cuDoubleComplex *w2i = (cuDoubleComplex*)malloc(N * sizeof(cuDoubleComplex));
-    if (w1i == 0) {
-      fprintf (stderr, "!!!! host memory allocation error (w2i)\n");
-    }
-    #endif
+    w1i   = NULL; 
+    w2i   = NULL;
+    rwork = NULL;
 
-    rwork = (double*)malloc(2 * N * sizeof(double));
-    if (rwork == 0) {
-      fprintf (stderr, "!!!! host memory allocation error (rwork)\n");
-    }
+    TESTING_MALLOC( w1,  cuDoubleComplex, N );
+    TESTING_MALLOC( w2,  cuDoubleComplex, N );
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+    TESTING_MALLOC( w1i, cuDoubleComplex, N );
+    TESTING_MALLOC( w2i, cuDoubleComplex, N );
+#endif
+    TESTING_MALLOC( rwork, double, 2*N ); /* Why is it existing in real ??? */
 
     TESTING_MALLOC   ( h_A, cuDoubleComplex, n2);
     TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2);
     TESTING_HOSTALLOC( VL , cuDoubleComplex, n2);
     TESTING_HOSTALLOC( VR , cuDoubleComplex, n2);
-
-    magma_int_t nb = 128;//magma_get_zgeev_nb(N);
-    magma_int_t lwork = N*nb;
-
-    cudaMallocHost( (void**)&h_work, lwork*sizeof(cuDoubleComplex) );
-    if (h_work == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (work)\n");
-    }
+    TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork);
 
     printf("\n\n");
     printf("  N     CPU Time(s)    GPU Time(s)     ||R||_F / ||A||_F\n");
     printf("==========================================================\n");
     for(i=0; i<8; i++){
-        if (argc==1){
+        if ( argc == 1 ){
             N = size[i];
-            n2 = N*N;
         }
+        
+        lda = N;
+        n2  = lda*N;
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-        lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
+        lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
 
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-        #if (defined(PRECISION_c) || defined(PRECISION_z))
-        magma_zgeev("V", "V",
-        //magma_zgeev("N", "N",
-		    &N, h_R, &N, w1, VL, &N, VR, &N,
-                    h_work, &lwork, rwork, &info);
-        #else
-	magma_zgeev("V", "V",
-		    //magma_zgeev("N", "N",
-                    &N, h_R, &N, w1, w1i, VL, &N, VR, &N,
-                    h_work, &lwork, rwork, &info);
-	#endif
+#if (defined(PRECISION_c) || defined(PRECISION_z))
+        magma_zgeev(jobl[0], jobr[0],
+		    N, h_R, lda, w1, 
+                    VL, lda, VR, lda,
+                    h_work, lwork, rwork, &info);
+#else
+        magma_zgeev(jobl[0], jobr[0],
+		    N, h_R, lda, w1, w1i,
+                    VL, lda, VR, lda,
+                    h_work, lwork, rwork, &info);
+#endif
         end = get_current_time();
+        if (info < 0)
+            printf("Argument %d of magma_zgeev had an illegal value.\n", -info);
 
-        gpu_time = GetTimerValue(start,end)/1000.;
+        gpu_time = GetTimerValue(start,end) / 1e3;
 
         /* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
-        #if (defined(PRECISION_c) || defined(PRECISION_z))
-        lapackf77_zgeev("V", "V",
-	//lapackf77_zgeev("N", "N",
-			&N, h_A, &N, w2, VL, &N, VR, &N,
+#if (defined(PRECISION_c) || defined(PRECISION_z))
+        lapackf77_zgeev(jobl, jobr,
+			&N, h_A, &lda, w2, 
+                        VL, &lda, VR, &lda,
 			h_work, &lwork, rwork, &info);
-	#else
-	lapackf77_zgeev("V", "V",
-	//lapackf77_zgeev("N", "N",
-                        &N, h_A, &N, w2, w2i, VL, &N, VR, &N,
-                        h_work, &lwork, rwork, &info);
-        #endif
+#else
+        lapackf77_zgeev(jobl, jobr,
+			&N, h_A, &lda, w2, w2i, 
+                        VL, &lda, VR, &lda,
+			h_work, &lwork, &info);
+#endif
         end = get_current_time();
         if (info < 0)
             printf("Argument %d of zgeev had an illegal value.\n", -info);
 
-        cpu_time = GetTimerValue(start,end)/1000.;
+        cpu_time = GetTimerValue(start,end) / 1e3;
 
         /* =====================================================================
            Check the result compared to LAPACK
            =================================================================== */
-        double work[1], matnorm = 1., result = 0.;
-        cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
-        magma_int_t one = 1;
+        if ( checkres ) {
+            matnorm = lapackf77_zlange("f", &N, &ione, w1, &N, rwork);
+            printf("norm = %f\n", matnorm);
+            blasf77_zaxpy(&N, &mzone, w1, &ione, w2, &ione);
 
-#ifdef CHECK_ERROR
-        matnorm = lapackf77_zlange("f", &N, &one, w1, &N, work);
-	printf("norm = %f\n", matnorm);
-        blasf77_zaxpy(&N, &mone, w1, &one, w2, &one);
+            result = lapackf77_zlange("f", &N, &ione, w2, &N, rwork) / matnorm;
 
-	result = lapackf77_zlange("f", &N, &one, w2, &N, work) / matnorm;
-#endif
-
-        printf("%5d     %6.2f         %6.2f         %e\n",
-               N, cpu_time, gpu_time,
-               result);
+            printf("%5d     %6.2f         %6.2f         %e\n",
+                   N, cpu_time, gpu_time, result);
+        } else {
+            printf("%5d     %6.2f         %6.2f\n",
+                   N, cpu_time, gpu_time);
+        }
 
         if (argc != 1)
             break;
     }
 
     /* Memory clean up */
-    free(w1);
-    free(w2);
-    #if (defined(PRECISION_s) || defined(PRECISION_d))
-    free(w1i);
-    free(w2i);
-    #endif
-    free(rwork);
-    cublasFree(h_work);
-
-    TESTING_FREE    ( h_A );
+    TESTING_FREE(w1);
+    TESTING_FREE(w2);
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+    TESTING_FREE(w1i);
+    TESTING_FREE(w2i);
+#endif
+    TESTING_FREE(rwork);
+    TESTING_FREE( h_A );
     TESTING_HOSTFREE( h_R );
     TESTING_HOSTFREE( VL  );
     TESTING_HOSTFREE( VR  );
+    TESTING_HOSTFREE(rwork);
 
     /* Shutdown */
     TESTING_CUDA_FINALIZE();

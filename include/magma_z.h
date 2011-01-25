@@ -10,6 +10,7 @@
 
 #ifndef _MAGMA_Z_H_
 #define _MAGMA_Z_H_
+#define PRECISION_z
 
 #ifdef __cplusplus
 extern "C" {
@@ -97,13 +98,23 @@ magma_int_t magma_zunghr( magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 			  cuDoubleComplex *tau,
 			  cuDoubleComplex *dT, magma_int_t nb,
 			  magma_int_t *info);
-magma_int_t  magma_zgeev( char *jobvl, char *jobvr, magma_int_t *n,
-			  cuDoubleComplex *a, magma_int_t *lda,
-			  cuDoubleComplex *geev_w_array,
-			  cuDoubleComplex *vl, magma_int_t *ldvl,
-			  cuDoubleComplex *vr, magma_int_t *ldvr,
-			  cuDoubleComplex *work, magma_int_t *lwork,
+#if defined(PRECISION_z) || defined(PRECISION_c)
+magma_int_t  magma_zgeev( char jobvl, char jobvr, magma_int_t n,
+			  cuDoubleComplex *a, magma_int_t lda,
+			  cuDoubleComplex *w,
+			  cuDoubleComplex *vl, magma_int_t ldvl,
+			  cuDoubleComplex *vr, magma_int_t ldvr,
+			  cuDoubleComplex *work, magma_int_t lwork,
 			  double *rwork, magma_int_t *info);
+#else
+magma_int_t  magma_zgeev( char jobvl, char jobvr, magma_int_t n,
+			  cuDoubleComplex *a,    magma_int_t lda,
+			  cuDoubleComplex *wr, cuDoubleComplex *wi,
+			  cuDoubleComplex *vl,   magma_int_t ldvl,
+			  cuDoubleComplex *vr,   magma_int_t ldvr,
+			  cuDoubleComplex *work, magma_int_t lwork,
+			  double *rwork, magma_int_t *info); /* Sould not have rwork */
+#endif
 magma_int_t magma_zheevd( char *jobz, char *uplo, magma_int_t *n,
 			  cuDoubleComplex *a, magma_int_t *lda, double *w, 
 			  cuDoubleComplex *work, magma_int_t *lwork, 
@@ -178,5 +189,6 @@ magma_int_t magma_zunmqr_gpu( char side, char trans,
 }
 #endif
 
+#undef PRECISION_z
 #endif /* _MAGMA_Z_H_ */
 
