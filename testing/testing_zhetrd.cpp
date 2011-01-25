@@ -44,13 +44,13 @@ int main( int argc, char** argv)
     cuDoubleComplex *h_A, *h_R, *h_Q, *h_work, *work;
     cuDoubleComplex *tau;
     double          *diag, *offdiag, *rwork;
-    double           result[3] = {0., 0., 0.};
+    double           result[2] = {0., 0.};
 
     /* Matrix size */
     magma_int_t N = 0, n2, lda, lwork;
     magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
 
-    magma_int_t i, info, nb, checkres;
+    magma_int_t i, info, nb, checkres, once = 0;
     magma_int_t ione     = 1;
     magma_int_t itwo     = 2;
     magma_int_t ithree   = 3;
@@ -59,8 +59,10 @@ int main( int argc, char** argv)
 
     if (argc != 1){
         for(i = 1; i<argc; i++){
-            if (strcmp("-N", argv[i])==0)
+            if (strcmp("-N", argv[i])==0) {
                 N = atoi(argv[++i]);
+                once = 1;
+            }
             else if (strcmp("-U", argv[i])==0)
                 uplo = MagmaUpperStr;
             else if (strcmp("-L", argv[i])==0)
@@ -104,7 +106,6 @@ int main( int argc, char** argv)
     rwork = NULL; 
 
     if ( checkres ) {
-        lwork = max( lwork, 2*(N*N) ); /* size require by zhet21 */
         TESTING_MALLOC( h_Q,  cuDoubleComplex, lda*N );
         TESTING_MALLOC( work, cuDoubleComplex, 2*N*N );
 #if defined(PRECISION_z) || defined(PRECISION_c) 
@@ -116,7 +117,7 @@ int main( int argc, char** argv)
     printf("  N    CPU GFlop/s    GPU GFlop/s   |A-QHQ'|/N|A|  |I-QQ'|/N \n");
     printf("=============================================================\n");
     for(i=0; i<10; i++){
-        if (argc == 1) {
+        if ( !once ) {
             N = size[i];
         }
         lda  = N;
@@ -201,7 +202,7 @@ int main( int argc, char** argv)
            Print performance and error.
            =================================================================== */
         if ( checkres ) {
-            printf("%5d   %6.2f        %6.2f       %4.2e %4.2e\n",
+            printf("%5d   %6.2f        %6.2f       %e %e\n",
                    N, cpu_perf, gpu_perf,
                    result[0]*eps, result[1]*eps );
         } else {
@@ -209,7 +210,7 @@ int main( int argc, char** argv)
                    N, cpu_perf, gpu_perf );
         }
 
-        if (argc != 1)
+        if ( once )
             break;
     }
 
