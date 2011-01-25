@@ -25,7 +25,6 @@
 
 // Flops formula
 #define PRECISION_z
-#define CHECK_ERROR
 #if defined(PRECISION_z) || defined(PRECISION_c)
 #define FLOPS(n) ( 6. * FMULS_HETRD(n) + 2. * FADDS_HETRD(n))
 #else

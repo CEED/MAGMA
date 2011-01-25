@@ -328,7 +328,7 @@ magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
       }
     start = get_current_time();
     magma_zgehrd(*n, ilo, ihi, &a[a_offset], *lda,
-		 &work[itau], &work[iwrk], &i__1, dT, &ierr);
+		 &work[itau], &work[iwrk], i__1, dT, &ierr);
     end = get_current_time();
     printf("    Time for zgehrd = %5.2f sec\n", GetTimerValue(start,end)/1000.);
 
@@ -827,7 +827,7 @@ magma_zgeev(char *jobvl, char *jobvr, magma_int_t *n,
 	}
       start = get_current_time();
       magma_zgehrd(*n, ilo, ihi, &a[a_offset], *lda,
-		   &work[itau], &work[iwrk], &i__1, dT, &ierr);
+		   &work[itau], &work[iwrk], i__1, dT, &ierr);
       end = get_current_time();
       printf("    Time for zgehrd = %5.2f sec\n", GetTimerValue(start,end)/1000.);
 
