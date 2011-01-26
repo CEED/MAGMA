@@ -94,7 +94,7 @@ testing_%_f : testing_%_f.o $(FOBJ)
           -lcuda -lmagma -lmagmablas -lmagma $(LIBDIR) $(LIB) 
 
 testing_% : testing_%.o
-	$(FORT) $(OPTS) $(LDOPTS) $(NOMAIN) $< $(OBJ) -o $@ lin/liblapacktest.a -L../lib \
+	$(CC) $(OPTS) $(LDOPTS) $(NOMAIN) $< $(OBJ) -o $@ lin/liblapacktest.a -L../lib \
           -lcuda -lmagma -lmagmablas -lmagma $(LIBDIR) $(LIB) 
 
 #

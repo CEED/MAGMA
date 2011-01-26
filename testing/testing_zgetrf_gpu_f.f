@@ -23,7 +23,7 @@
       double precision, allocatable :: work(:)
       complex*16, allocatable       :: h_A(:), h_B(:), h_X(:)
       complex*16, allocatable       :: h_A2(:)
-      integer(kind=16)              :: devptrA, devptrB
+      real, dimension(4)            :: devptrA, devptrB
       integer,    allocatable       :: ipiv(:)
 
       complex*16                    :: zone, mzone
