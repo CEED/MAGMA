@@ -22,7 +22,7 @@ ARCHFLAGS = cr
 RANLIB    = ranlib
 
 OPTS      = -O3 -DADD_
-NVOPT     = --compiler-options -fno-strict-aliasing -DUNIX -O3 -DADD_
+NVOPTS    = --compiler-options -fno-strict-aliasing -DUNIX -O3 -DADD_
 LDOPTS    = -fPIC -Xlinker -zmuldefs
 
 LIB       = /home/tomov/LIBS/lapack-lite-3.1.1/lapack_LINUX64.a \
