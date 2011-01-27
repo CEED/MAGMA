@@ -322,6 +322,129 @@ magmablas_zgemvt_fermi(int m, int n, double2 alpha, double2 *A, int lda,
 }
 
 
+
+__global__ void 
+zgemvc_kernel_fermi(int m, int n, double2 alpha, int n1, double2* A, int lda,
+              double2 *x, double2 *y)
+{
+	unsigned int tx = threadIdx.x;
+
+	__shared__ double2 sdata[threadSize];
+	
+
+	double2 res;
+    MAGMA_Z_SET2REAL(res, 0.0);
+	double2 zero;
+    MAGMA_Z_SET2REAL(zero, 0.0);
+     
+	for(int i=0; i<n1; i+= threadSize)
+	{
+		res += conjugate(A[tx + i + lda * blockIdx.y]) * x[tx + i];
+	}
+
+	
+	if(m > n1)
+	{
+		if( tx + n1 <  m )
+		{
+			res  += conjugate(A[tx + n1 + lda *blockIdx.y]) * x[tx + n1];
+		}
+		else 
+		{
+			res  += zero;
+		}
+	}	
+
+    sdata[tx] = res;
+	__syncthreads();
+    
+    /*
+	if(tx < 128) 
+	{
+		sdata[tx] += sdata[tx + 128];
+	}
+    __syncthreads();
+	*/
+
+	if(tx < 64) 
+	{
+		sdata[tx] += sdata[tx + 64];
+	}
+    __syncthreads();
+
+	if(tx < 32) 
+	{
+		sdata[tx] += sdata[tx + 32];
+	}
+
+    if(tx == 0)
+	{
+		for(int i=1;i<32;i++)
+		{
+			sdata[tx] += sdata[tx + i];
+		}
+	}
+
+    if( tx == 0 ) 
+	{
+		y[blockIdx.y] = sdata[0]; 		
+
+		if (blockIdx.y < n)
+		{
+			y[blockIdx.y] = y[blockIdx.y] * alpha;
+		}
+	}
+}
+
+
+
+
+extern "C" void
+magmablas_zgemvc_fermi(int m, int n, double2 alpha, double2 *A, int lda, 
+                 double2 *x, double2 *y)
+{
+/*  -- MAGMA (version 1.0) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2010
+
+    Purpose
+    =======
+
+    This routine computes y = alpha *conjg(A^t) *  x on the GPU.
+
+    M      - (input) INTEGER.
+             On entry, M specifies the number of rows of the matrix A.
+
+    N      - (input) INTEGER.
+             On entry, N specifies the number of columns of the matrix A
+
+    A      - (input) SINGLE PRECISION array of dimension ( LDA, n ) on the GPU.
+
+    LDA    - (input) INTEGER.
+             LDA specifies the leading dimension of A.
+
+    X      - (input) SINGLE PRECISION array of dimension m.
+
+    Y      - (output) SINGLE PRECISION array of dimension n.
+             On exit Y = alpha conjg(A^t) X.
+
+    ===================================================================== */
+
+    
+    dim3 grid    ( 1,  n,  1);
+    dim3 threads ( threadSize,   1,  1);
+
+    zgemvc_kernel_fermi<<<grid, threads>>>( m, n, alpha, ( m / threadSize) * threadSize,
+                                       A, lda, x, y);
+
+}
+
+
+
+
+
 extern "C" void
 magmablas_zgemv_fermi(char flag, int m, int n, double2 alpha, double2 *A, int lda, double2 *x, int incx, double2 beta, double2 *y, int incy) 
 {
@@ -342,6 +465,10 @@ magmablas_zgemv_fermi(char flag, int m, int n, double2 alpha, double2 *A, int ld
 		else if(flag == 'T' || flag == 't')
 		{
 			magmablas_zgemvt_fermi(m,  n, alpha, A, lda, x, y);
+		}
+		else if(flag == 'C' || flag == 'c') 
+		{
+			magmablas_zgemvc_fermi(m,  n, alpha, A, lda, x, y);
 		}
 		else 
 		{
