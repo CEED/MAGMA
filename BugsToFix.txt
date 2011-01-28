@@ -1,4 +1,4 @@
---------- General:
+ --------- General:
    - Mixed precision routines shouldn't be called all [zc|ds]XXXX and not [cz|sd]XXXX ?
 
 --------- Mordor8 / Cuda 3.1 / MKL : 
