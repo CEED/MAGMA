@@ -78,3 +78,33 @@ Usage:
 
 * This is fine on cumin / cuda 2.3 / MKL 
   864   864   36.23          45.20        1.118333e-06
+
+
+
+I'm seeing the following strange behavior on ig:
+
+
+horton:ig /mnt/scratch/horton/magma/sc_release/testing> ./testing_dsposv_gpu                                                <-  9:52AM
+device 0: GeForce GTX 480, 1401.0 MHz clock, 1535.6 MB memory
+device 1: Tesla C870, 1350.0 MHz clock, 1535.8 MB memory
+device 2: Tesla C870, 1350.0 MHz clock, 1535.8 MB memory
+
+Usage: 
+  testing_dsposv_gpu -nrhs 1 -N 1024
+
+Epsilon(double): 1.110223e-16
+Epsilon(single): 5.960464e-08
+
+  N   DP-Factor  DP-Solve  SP-Factor  SP-Solve  MP-Solve  ||b-Ax||/||A||  NumIter
+==================================================================================
+ 1024   56.20     33.29     35.40      32.27       9.14     1.778652e-18      2
+ 2048   67.54     54.19    137.42     123.42      89.83     1.445694e-18      2
+ 3072   92.42     79.25    280.85     257.12     197.74     1.021926e-18      2
+ 4032  3208.69    663.92    376.11     348.78     281.62     8.017330e-19      2
+ 5184  3274.46    886.74    455.42     431.95     367.43     9.517764e-19      2
+ 6016  4817.23    1156.95    490.98     471.49     409.51     7.773586e-19      2
+ 7040  6946.69    1487.62    541.02     522.67     461.70     7.342018e-19      2
+ 7520  8150.22    1646.49    562.97     545.76     528.27     nan      0
+ 8064  9797.58    1847.85    576.66     559.65     501.49     7.210256e-19      2
+ 8192  10097.26    1894.09    582.43     565.59     507.61     7.055070e-19      2
+
