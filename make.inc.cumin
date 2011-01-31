@@ -22,8 +22,9 @@ ARCHFLAGS = cr
 RANLIB    = ranlib
 
 OPTS      = -O3 -DADD_ -g
-NVOPTS    = --compiler-options -fno-strict-aliasing -DUNIX -O3 -DADD_
-LDOPTS    = -fPIC
+#NVOPTS    = -DADD_ --compiler-options -fno-strict-aliasing -DUNIX -O3 -g -G
+NVOPTS    = -DADD_ --compiler-options -fno-strict-aliasing -DUNIX -O3
+LDOPTS    = -fPIC -Xlinker -zmuldefs
 
 LIB       = -lmkl_em64t -lguide -lpthread -lcublas -lcudart -lm 
 
@@ -31,7 +32,7 @@ CUDADIR   = /usr/local/cuda-3.0
 
 LIBDIR    = -L/home/tomov/intel/mkl/10.0.1.014/lib/em64t \
             -L$(CUDADIR)/lib64
-INC       = -I$(CUDADIR)/include
+INC       = -I../include -I../quark/include -I$(CUDADIR)/include
 
-#LIBMAGMA     = libmagma.a
-#LIBMAGMABLAS = libmagmablas.a
+LIBMAGMA     = ../lib/libmagma.a
+LIBMAGMABLAS = ../lib/libmagmablas.a
