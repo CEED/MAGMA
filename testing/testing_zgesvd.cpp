@@ -188,8 +188,8 @@ int main( int argc, char** argv)
     free(S2);
     free(rwork);
     free(U);
-    cublasFree(h_work);
-    cublasFree(h_R);
+    cudaFreeHost(h_work);
+    cudaFreeHost(h_R);
 
     /* Shutdown */
     status = cublasShutdown();
