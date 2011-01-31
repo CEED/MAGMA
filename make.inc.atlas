@@ -25,14 +25,14 @@ OPTS      = -O3 -DADD_
 NVOPTS    = --compiler-options -fno-strict-aliasing -DUNIX -O3 -DADD_
 LDOPTS    = -fPIC -Xlinker -zmuldefs
 
-LIB       = /home/tomov/LIBS/lapack-lite-3.1.1/lapack_LINUX64.a \
-            -lf77blas -latlas -lf2c -lcublas -lm
+LIB       = /home/tomov/LIB/lapack-lite-3.1.1/lapack_LINUX64.a \
+            -lf77blas -latlas -lcblas -lf2c -lcublas -lm
 
-CUDADIR   = /usr/local/cuda
+CUDADIR   = /usr/local/cuda-3.0
 
-LIBDIR    = -L/home/tomov/LIBS/ATLAS/lib/Linux_HAMMER64SSE2 \
-            -L/home/tomov/LIBS/CLAPACK-3.1.1/F2CLIBS/ \
-            -L$(CUDADIR)/lib
+LIBDIR    = -L/home/tomov/LIB/ATLAS/lib/Linux_UNKNOWNSSE2 \
+            -L/home/tomov/LIB/CLAPACK-3.1.1/F2CLIBS/ \
+            -L$(CUDADIR)/lib64
 INC       = -I$(CUDADIR)/include
 
 LIBMAGMA     = ../lib/libmagma.a
