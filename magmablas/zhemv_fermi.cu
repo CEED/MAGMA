@@ -5,12 +5,16 @@
        Univ. of Colorado, Denver
        November 2010
 
+       @precisions normal z -> c
+
 */
 
 #include <stdio.h>
-#include "cuda.h"
-#include "cublas.h"
+#include <cuda.h>
+#include <cublas.h>
 #include "magma.h"
+#include "operators.h"
+
 #define magmablas_zhemv_fermi magmablas_zhemv 
 
 #define dgemv_bs 64
@@ -20,69 +24,9 @@
 #define quarter_thread_x 16
 #define half_thread_x 32
 
-inline __host__ __device__ double2 make_double2(double s)
-{
-	return make_double2(s, s);
-}
-inline __host__ __device__ double2 make_double2(int2 a)
-{
-	return make_double2(double(a.x), double(a.y));
-}
-
-// negate
-inline __host__ __device__ double2 operator-(double2 &a)
-{
-	return make_double2(-a.x, -a.y);
-}
-// addition
-inline __host__ __device__ double2 operator+(double2 a, double2 b)
-{
-	return make_double2(a.x + b.x, a.y + b.y);
-}
-inline __host__ __device__ void operator+=(double2 &a, double2 b)
-{
-	a.x += b.x; a.y += b.y;
-}
-
-// subtract
-inline __host__ __device__ double2 operator-(double2 a, double2 b)
-{
-	return make_double2(a.x - b.x, a.y - b.y);
-}
-inline __host__ __device__ void operator-=(double2 &a, double2 b)
-{
-	a.x -= b.x; a.y -= b.y;
-}
-
-// multiply
-inline __host__ __device__ double2 operator*(double2 a, double2 b)
-{
-    return make_double2(a.x * b.x - a.y * b.y, a.y * b.x + a.x * b.y);
-}
-inline __host__ __device__ double2 operator*(double2 a, double s)
-{
-	return make_double2(a.x * s, a.y * s);
-}
-inline __host__ __device__ double2 operator*(double s, double2 a)
-{
-	return make_double2(a.x * s, a.y * s);
-}
-inline __host__ __device__ void operator*=(double2 &a, double s)
-{
-	a.x *= s; a.y *= s;
-}
-
-inline __host__ __device__ double2 conjugate(double2 a)
-{
-   double2 b;
-   b.x = a.x;
-   b.y = 0.0f-a.y;
-   return b;
-}
-
 __global__ void
-magma_l_zhemv_special_v6_ts_fermi(magma_int_t n, double2 alpha,  double2* A, magma_int_t lda, double2 *x, 
-                           magma_int_t incx, double2 beta, double2 *y, magma_int_t iny, double2 *WC, 
+magma_l_zhemv_special_v6_ts_fermi(magma_int_t n, cuDoubleComplex alpha,  cuDoubleComplex* A, magma_int_t lda, cuDoubleComplex *x, 
+                           magma_int_t incx, cuDoubleComplex beta, cuDoubleComplex *y, magma_int_t iny, cuDoubleComplex *WC, 
                            magma_int_t kstan)
 {
   magma_int_t tx = threadIdx.x ; 
@@ -91,18 +35,18 @@ magma_l_zhemv_special_v6_ts_fermi(magma_int_t n, double2 alpha,  double2* A, mag
   magma_int_t blkc= blockIdx.x ;
   
 
-  double2 res;
-  double2 res_;
-  double2 res1; 
+  cuDoubleComplex res;
+  cuDoubleComplex res_;
+  cuDoubleComplex res1; 
   MAGMA_Z_SET2REAL(res, 0) ; 
   MAGMA_Z_SET2REAL(res_, 0) ; 
   MAGMA_Z_SET2REAL(res1, 0) ; 
 
-  __shared__ double2 la   [quarter_thread_x][thread_x+2]; 
-  __shared__ double2 buff [thread_x];
+  __shared__ cuDoubleComplex la   [quarter_thread_x][thread_x+2]; 
+  __shared__ cuDoubleComplex buff [thread_x];
 
-  double2 tr[4];
-  double2 b[4];
+  cuDoubleComplex tr[4];
+  cuDoubleComplex b[4];
 
 
   WC += tx + blkc * thread_x;
@@ -118,11 +62,13 @@ magma_l_zhemv_special_v6_ts_fermi(magma_int_t n, double2 alpha,  double2* A, mag
 
   if( ty == 0 ){
       if ( blkc ==0 && tx <= kstan )
-	  {
-         MAGMA_Z_SET2REAL(buff[tx], 0);
-	  }
+      {
+          MAGMA_Z_SET2REAL(buff[tx], 0);
+      }
       else
+      {
           buff[tx] = x[0];
+      }
    } // obtain the vector x store in buff;
 
    tx = tx_ ; ty = ty_ ; 
@@ -135,7 +81,7 @@ magma_l_zhemv_special_v6_ts_fermi(magma_int_t n, double2 alpha,  double2* A, mag
    #pragma unroll 
    for(magma_int_t  i=ty_*4; i<(ty_ * 4 + 4)  ; i++){
          if ( i < tx_ )   {
-	        la[0][bank_shift * tx_ + i] = conjugate( la[0][ i * bank_shift + tx_] ) ; 
+	        la[0][bank_shift * tx_ + i] = cuConj( la[0][ i * bank_shift + tx_] ) ; 
          }
 	 else 
 	        la[0][bank_shift * tx_ + i] = la[0][ bank_shift * tx_ + i]  ;
@@ -144,7 +90,7 @@ magma_l_zhemv_special_v6_ts_fermi(magma_int_t n, double2 alpha,  double2* A, mag
  
    #pragma unroll 
    for(magma_int_t j=0; j < 4 ; j++)
-      res+= conjugate( la[0][bank_shift * tx_ + j + ty_ * 4] ) * buff[j + ty_ * 4];
+      res+= cuConj( la[0][bank_shift * tx_ + j + ty_ * 4] ) * buff[j + ty_ * 4];
    __syncthreads();
 
    la[0][bank_shift*tx_+ty_]= res ;  
@@ -171,7 +117,7 @@ magma_l_zhemv_special_v6_ts_fermi(magma_int_t n, double2 alpha,  double2* A, mag
    #pragma unroll 
    for(magma_int_t  i=ty_*4; i<(4+ty_*4) ; i++){
          if ( i < tx_ )   {
-	        la[0][bank_shift*tx_+i] = conjugate( la[0][bank_shift*i+tx_] ) ; 
+	        la[0][bank_shift*tx_+i] = cuConj( la[0][bank_shift*i+tx_] ) ; 
          }
 	 else 
 	        la[0][bank_shift*tx_+i] = la[0][bank_shift*tx_+i]  ;
@@ -180,12 +126,12 @@ magma_l_zhemv_special_v6_ts_fermi(magma_int_t n, double2 alpha,  double2* A, mag
 
    #pragma unroll 
    for(magma_int_t j=0; j < 4 ; j++)
-      res+= conjugate( la[0][bank_shift*tx_+j+ty_*4] ) * buff[half_thread_x + j + 4 * ty_];
+      res+= cuConj( la[0][bank_shift*tx_+j+ty_*4] ) * buff[half_thread_x + j + 4 * ty_];
    __syncthreads();
    la[0][bank_shift*tx_+ty_]= res ;  
    __syncthreads();
 
-   double2 res2;
+   cuDoubleComplex res2;
    MAGMA_Z_SET2REAL(res2,0);
    if( ty_== 1 ) 
       res2 = la[0][tx_*bank_shift+0]+la[0][tx_*bank_shift+1]+
@@ -215,7 +161,7 @@ magma_l_zhemv_special_v6_ts_fermi(magma_int_t n, double2 alpha,  double2* A, mag
    __syncthreads();
    #pragma unroll  
    for(magma_int_t j=0; j < 4 ; j++)
-      res_+= conjugate(la[0][bank_shift*tx_+j+ty_*4]) * buff[half_thread_x +j+ty_*4];
+      res_+= cuConj(la[0][bank_shift*tx_+j+ty_*4]) * buff[half_thread_x +j+ty_*4];
    __syncthreads();
 
    la[0][bank_shift*tx_+ty_]= res ;
@@ -296,7 +242,7 @@ magma_l_zhemv_special_v6_ts_fermi(magma_int_t n, double2 alpha,  double2* A, mag
 			for(magma_int_t j=0; j < 4 ; j++)
 			{
 				res += tr[j] * x[ quarter_thread_x * k + ty * 4 + j];
-            	la[( j + ty * 4)][tx] = conjugate(tr[j]) * buff[tx]; 
+            	la[( j + ty * 4)][tx] = cuConj(tr[j]) * buff[tx]; 
 			}
 	 		  __syncthreads();
 
@@ -352,7 +298,7 @@ magma_l_zhemv_special_v6_ts_fermi(magma_int_t n, double2 alpha,  double2* A, mag
 			for(magma_int_t j=0; j < 4 ; j++)
 			{
 				 res += tr[j] * x[ i + quarter_thread_x*k + ty*4+(j)];
-		         la[( j + ty * 4)][tx] = conjugate( tr[j] )* buff[tx]; 
+		         la[( j + ty * 4)][tx] = cuConj( tr[j] )* buff[tx]; 
 			}
 			__syncthreads();
 
@@ -403,13 +349,13 @@ magma_l_zhemv_special_v6_ts_fermi(magma_int_t n, double2 alpha,  double2* A, mag
 }
 
 __global__ void
-magma_l_zhemv_special_update_v6_ts_fermi(magma_int_t n, double2 alpha, double2* A, magma_int_t lda, double2 *x, 
-                                  magma_int_t inx, double2 beta, double2 *y, magma_int_t iny, 
-                                  double2 *WC, magma_int_t kstan)
+magma_l_zhemv_special_update_v6_ts_fermi(magma_int_t n, cuDoubleComplex alpha, cuDoubleComplex* A, magma_int_t lda, cuDoubleComplex *x, 
+                                  magma_int_t inx, cuDoubleComplex beta, cuDoubleComplex *y, magma_int_t iny, 
+                                  cuDoubleComplex *WC, magma_int_t kstan)
 {
   magma_int_t tx = threadIdx.x ;
   magma_int_t ind = (blockIdx.x)* thread_x + tx ;
-  double2 Ca ;
+  cuDoubleComplex Ca ;
        MAGMA_Z_SET2REAL(Ca,0);
   WC+= tx+(blockIdx.x)*thread_x + lda*blockIdx.x  ;
   for(magma_int_t i=(blockIdx.x)*thread_x ;i<n;i+=thread_x){
@@ -421,28 +367,28 @@ magma_l_zhemv_special_update_v6_ts_fermi(magma_int_t n, double2 alpha, double2* 
 }
 
 __global__ void
-magma_l_zhemv_generic_v6_ts_fermi(magma_int_t n, double2 alpha, double2* A, magma_int_t lda, double2 *x, 
-                           magma_int_t inx, double2 beta, double2 *y, magma_int_t iny, double2 *WC,
+magma_l_zhemv_generic_v6_ts_fermi(magma_int_t n, cuDoubleComplex alpha, cuDoubleComplex* A, magma_int_t lda, cuDoubleComplex *x, 
+                           magma_int_t inx, cuDoubleComplex beta, cuDoubleComplex *y, magma_int_t iny, cuDoubleComplex *WC,
                            magma_int_t m_mod_thread_x, magma_int_t kstan)
 {
   magma_int_t tx = threadIdx.x ; 
   magma_int_t ty = threadIdx.y ; 
   magma_int_t blkc= blockIdx.x ;
   
-  double2 res;
+  cuDoubleComplex res;
        MAGMA_Z_SET2REAL(res,0);
-  double2 res_;
+  cuDoubleComplex res_;
        MAGMA_Z_SET2REAL(res_,0);
-  __shared__ double2 la   [quarter_thread_x][thread_x+2];  
-  __shared__ double2 buff [thread_x];
-  __shared__ double2 buff2 [thread_x];
-  double2 tr[4];
-  double2 b[8];
+  __shared__ cuDoubleComplex la   [quarter_thread_x][thread_x+2];  
+  __shared__ cuDoubleComplex buff [thread_x];
+  __shared__ cuDoubleComplex buff2 [thread_x];
+  cuDoubleComplex tr[4];
+  cuDoubleComplex b[8];
   magma_int_t break_d  =   (blkc)* thread_x  ;
   const magma_int_t td = (thread_x * ty ) + tx  ; 
   magma_int_t tx_ = td % half_thread_x ; 
   magma_int_t ty_ = td /half_thread_x ; 
-  double2 res1; 
+  cuDoubleComplex res1; 
        MAGMA_Z_SET2REAL(res1,0);
   WC+= tx+(blkc)*thread_x;
   A+= (blkc)* thread_x  ;
@@ -502,7 +448,7 @@ else{
   #pragma unroll 
   for(magma_int_t  i=ty_*4; i<(ty_*4+4)  ; i++){
          if ( i < tx_ )   {
-	        la[0][bank_shift*tx_+i] = conjugate(la[0][i*bank_shift+tx_]) ; 
+	        la[0][bank_shift*tx_+i] = cuConj(la[0][i*bank_shift+tx_]) ; 
          }
 	 else 
 	        la[0][bank_shift*tx_+i] = la[0][bank_shift*tx_+i]  ;
@@ -510,7 +456,7 @@ else{
   __syncthreads();
   #pragma unroll 
   for(magma_int_t j=0; j < 4 ; j++)
-      res += conjugate(la[0][bank_shift*tx_+j+ty_*4])* buff[j+ty_*4];
+      res += cuConj(la[0][bank_shift*tx_+j+ty_*4])* buff[j+ty_*4];
   __syncthreads();
   la[0][bank_shift*tx_+ty_]= res ;  
   __syncthreads();
@@ -556,7 +502,7 @@ else{
   #pragma unroll 
   for(magma_int_t  i=ty_*4; i<(4+ty_*4) ; i++){
          if ( i < tx_ )   {
-	        la[0][bank_shift*tx_+i] = conjugate(la[0][bank_shift*i+tx_]) ; 
+	        la[0][bank_shift*tx_+i] = cuConj(la[0][bank_shift*i+tx_]) ; 
          }
 	 else 
 	        la[0][bank_shift*tx_+i] = la[0][bank_shift*tx_+i]  ;
@@ -564,12 +510,12 @@ else{
   __syncthreads();
   #pragma unroll 
   for(magma_int_t j=0; j < 4 ; j++)
-      res+= conjugate(la[0][bank_shift*tx_+j+ty_*4]) * buff[half_thread_x + j + 4 * ty_];
+      res+= cuConj(la[0][bank_shift*tx_+j+ty_*4]) * buff[half_thread_x + j + 4 * ty_];
 	  
   __syncthreads();
   la[0][bank_shift*tx_+ty_]= res ;  
   __syncthreads();
-   double2 res2;  
+   cuDoubleComplex res2;  
        MAGMA_Z_SET2REAL(res2,0);
    if( ty_== 1 ) 
       res2 = la[0][tx_*bank_shift+0]+la[0][tx_*bank_shift+1]+la[0][tx_*bank_shift+2]+la[0][tx_*bank_shift+3]+la[0][tx_*bank_shift+4]+la[0][tx_*bank_shift+5]+la[0][tx_*bank_shift+6]+la[0][tx_*bank_shift+7];
@@ -620,7 +566,7 @@ else{
   __syncthreads();
   #pragma unroll  
   for(magma_int_t j=0; j < 4 ; j++)
-      res_+= conjugate(la[0][bank_shift*tx_+j+ty_*4]) * buff[half_thread_x +j+ty_*4];
+      res_+= cuConj(la[0][bank_shift*tx_+j+ty_*4]) * buff[half_thread_x +j+ty_*4];
   __syncthreads();
 
 
@@ -717,7 +663,7 @@ else{
    	   #pragma unroll  
 	   for(magma_int_t j=0; j < 4 ; j++){
    	     res+=tr[j]*buff2[quarter_thread_x*k + ty*4+(j)];
-  	     la[( (j)+ty*4)][tx] = conjugate(tr[j]); 
+  	     la[( (j)+ty*4)][tx] = cuConj(tr[j]); 
 	    }
 	    __syncthreads();
 	
@@ -756,7 +702,7 @@ else{
    	   #pragma unroll  
  	   for(magma_int_t j=0; j < 4 ; j++){
    	     res+=tr[j]*buff2[quarter_thread_x*k + ty*4+(j)];
-  	     la[( (j)+ty*4)][tx] = conjugate(tr[j]); 
+  	     la[( (j)+ty*4)][tx] = cuConj(tr[j]); 
 	    }
 	    __syncthreads();
 	    
@@ -796,10 +742,10 @@ else{
 }
 
 __global__ void
-magma_l_zhemv_generic_update_v6_ts_fermi (magma_int_t n, double2 alpha ,  double2* A, magma_int_t lda, double2 *x, magma_int_t inx , double2 beta ,  double2 *y , magma_int_t iny , double2 *WC, magma_int_t kstan ){
+magma_l_zhemv_generic_update_v6_ts_fermi (magma_int_t n, cuDoubleComplex alpha ,  cuDoubleComplex* A, magma_int_t lda, cuDoubleComplex *x, magma_int_t inx , cuDoubleComplex beta ,  cuDoubleComplex *y , magma_int_t iny , cuDoubleComplex *WC, magma_int_t kstan ){
   magma_int_t tx = threadIdx.x ;
   magma_int_t ind = (blockIdx.x)* thread_x + tx ;
-  double2 Ca;
+  cuDoubleComplex Ca;
   MAGMA_Z_SET2REAL(Ca, 0) ; 
   WC+= tx+(blockIdx.x)*thread_x + lda*blockIdx.x  ;
   for(magma_int_t i=(blockIdx.x)*thread_x ;i<n;i+=thread_x){
@@ -814,9 +760,9 @@ magma_l_zhemv_generic_update_v6_ts_fermi (magma_int_t n, double2 alpha ,  double
 
 
 extern "C"
-void magmablas_zhemv6_fermi(char uplo, magma_int_t m, double2 alpha, double2 *A, magma_int_t lda, 
-                      double2 *X, magma_int_t incx, double2 beta, double2 *Y, magma_int_t incy, 
-                      double2 *dC_work, magma_int_t kstan)
+void magmablas_zhemv6_fermi(char uplo, magma_int_t m, cuDoubleComplex alpha, cuDoubleComplex *A, magma_int_t lda, 
+                      cuDoubleComplex *X, magma_int_t incx, cuDoubleComplex beta, cuDoubleComplex *Y, magma_int_t incy, 
+                      cuDoubleComplex *dC_work, magma_int_t kstan)
 
 
 {
@@ -875,8 +821,8 @@ void magmablas_zhemv6_fermi(char uplo, magma_int_t m, double2 alpha, double2 *A,
 }
 
 extern "C"
-void  magmablas_zhemv_fermi( char uplo , magma_int_t m , double2 alpha,  double2 *A , magma_int_t lda , 
-				double2 *X , magma_int_t incx, double2 beta, double2 *Y, magma_int_t incy)
+void  magmablas_zhemv_fermi( char uplo , magma_int_t m , cuDoubleComplex alpha,  cuDoubleComplex *A , magma_int_t lda , 
+				cuDoubleComplex *X , magma_int_t incx, cuDoubleComplex beta, cuDoubleComplex *Y, magma_int_t incy)
 {
 
 	if (uplo == 'U' || uplo == 'u')
@@ -884,11 +830,11 @@ void  magmablas_zhemv_fermi( char uplo , magma_int_t m , double2 alpha,  double2
 	else
 	{	
 	
-	double2 *dC_work;
+	cuDoubleComplex *dC_work;
 	magma_int_t bsz = thread_x;
 	magma_int_t blocks = m / bsz + (m %bsz != 0);
 	magma_int_t workspace = lda * (blocks + 1);
-	cublasAlloc( workspace, sizeof(double2), (void**)&dC_work ) ;
+	cublasAlloc( workspace, sizeof(cuDoubleComplex), (void**)&dC_work ) ;
 			
 	cublasGetError( ) ;
 
