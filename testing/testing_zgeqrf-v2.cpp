@@ -36,6 +36,8 @@
 
 #include <pthread.h>
 
+#define PRECISION_z
+
 
 /* ------------------------------------------------------------
  * MAGMA QR params
@@ -43,34 +45,34 @@
 typedef struct {
 
   /* Whether or not to restore upper part of matrix */
-  int flag;
+  magma_int_t flag;
 
   /* Number of MAGMA threads */
-  int nthreads;
+  magma_int_t nthreads;
 
   /* Block size for left side of matrix */
-  int nb;
+  magma_int_t nb;
 
   /* Block size for right side of matrix */
-  int ob;
+  magma_int_t ob;
 
   /* Block size for final factorization */
-  int fb;
+  magma_int_t fb;
 
   /* Block size for multi-core factorization */
-  int ib;
+  magma_int_t ib;
 
   /* Number of panels for left side of matrix */
-  int np_gpu;
+  magma_int_t np_gpu;
 
   /* Number of rows */
-  int m;
+  magma_int_t m;
 
   /* Number of columns */
-  int n;
+  magma_int_t n;
 
   /* Leading dimension */
-  int lda;
+  magma_int_t lda;
 
   /* Matrix to be factorized */
   cuDoubleComplex *a;
@@ -82,13 +84,13 @@ typedef struct {
   volatile cuDoubleComplex **p;
 
   /* Synchronization flag */
-  volatile int sync0;
+  volatile magma_int_t sync0;
 
   /* One synchronization flag for each MAGMA thread */
-  volatile int *sync1;
+  volatile magma_int_t *sync1;
   
   /* Synchronization flag */
-  volatile int sync2;
+  volatile magma_int_t sync2;
 
   /* Work space */
   cuDoubleComplex *w;
@@ -98,7 +100,7 @@ typedef struct {
 //magma_qr_params MG;
 
 typedef struct {
-  int tid;
+  magma_int_t tid;
   void *params;
 } t_params;
 
@@ -106,17 +108,17 @@ typedef struct {
 /* Update thread */
 extern "C" void *cpu_thread(void *a)
 {
-  int i;
+  magma_int_t i;
   t_params *tp = (t_params*)a;
 
   magma_qr_params *mp = (magma_qr_params*)tp->params;
 
-  //long int t = (long int) a;
+  //long magma_int_t t = (long int) a;
   long int t = (long int) tp->tid;
 
-  int M;
-  int N;
-  int K;
+  magma_int_t M;
+  magma_int_t N;
+  magma_int_t K;
   cuDoubleComplex *WORK;
 
 loop:
@@ -162,9 +164,9 @@ goto loop;
 }
 
 void magma_qr_init(magma_qr_params *qr_params,
-                   int m, int n, cuDoubleComplex *a, int nthreads)
+                   magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t nthreads)
 {
-  int i;
+  magma_int_t i;
 
   qr_params->nthreads = nthreads;
 
@@ -227,7 +229,7 @@ int TRACE;
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeqrf
 */
-int main( int argc, char** argv) 
+int main( magma_int_t argc, char** argv) 
 {
     magma_int_t nquarkthreads=2;
     magma_int_t nthreads=2;
@@ -244,21 +246,26 @@ int main( int argc, char** argv)
     magma_qr_params *mp = (magma_qr_params*)malloc(sizeof(magma_qr_params));
 
     /* Matrix size */
-    int M=0, N=0, n2;
-    int size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
+    magma_int_t M=0, N=0, n2;
+    magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
 
     cublasStatus status;
-    int i, j, info;
-    int ione     = 1;
-    int ISEED[4] = {0,0,0,1};
+    magma_int_t i, j, info;
+    magma_int_t ione     = 1;
+    magma_int_t ISEED[4] = {0,0,0,1};
 
     mp->nb=-1;
     mp->ob=-1;
     mp->fb=-1;
     mp->ib=32;
 
-    int loop = argc;
-    int accuracyflag = 1;
+    magma_int_t loop = argc;
+    magma_int_t accuracyflag = 1;
+
+    char precision;
+
+    magma_int_t nc = -1;
+    magma_int_t ncps = -1;
 
     if (argc != 1)
       {
@@ -281,6 +288,10 @@ int main( int argc, char** argv)
 	    nthreads = atoi(argv[++i]);
 	  else if (strcmp("-Q", argv[i])==0)
 	    nquarkthreads = atoi(argv[++i]);
+	  else if (strcmp("-nc", argv[i])==0)
+	    nc = atoi(argv[++i]);
+	  else if (strcmp("-ncps", argv[i])==0)
+	    ncps = atoi(argv[++i]);
 	}
 	
 	if ((M>0 && N>0) || (M==0 && N==0)) 
@@ -309,6 +320,27 @@ int main( int argc, char** argv)
 	M = N = size[9];
       }
 
+    /* Auto tune based on number of cores and number of cores per socket if provided */
+    if ((nc > 0) && (ncps > 0)) {
+      precision = 's';
+      #if (defined(PRECISION_d))
+        precision = 'd';
+      #endif
+      #if (defined(PRECISION_c))
+        precision = 'c';
+      #endif
+      #if (defined(PRECISION_z))
+        precision = 'z';
+      #endif
+            
+      auto_tune('q', precision, nc, ncps, M, N,
+                &(mp->nb), &(mp->ob), &(mp->ib), &nthreads, &nquarkthreads);
+          
+fprintf(stderr,"%d %d %d %d %d\n",mp->nb,mp->ob,mp->ib,nquarkthreads,nthreads);
+          
+    }       
+
+
     /* Initialize MAGMA hardware context, seeting how many CPU cores
        and how many GPUs to be used in the consequent computations  */
     mp->sync0 = 0;
@@ -316,15 +348,15 @@ int main( int argc, char** argv)
     context = magma_init((void*)(mp),cpu_thread, nthreads, nquarkthreads, num_gpus, argc, argv);
     context->params = (void *)(mp);
 
-    mp->sync1 = (volatile int *) malloc (sizeof(int)*nthreads);
+    mp->sync1 = (volatile magma_int_t *) malloc (sizeof(int)*nthreads);
 
     for (i = 0; i < nthreads; i++)
       mp->sync1[i] = 0;
 
     n2  = M * N;
-    int min_mn = min(M, N);
-    int nb = magma_get_zgeqrf_nb(min_mn);
-    int lwork = N*nb;
+    magma_int_t min_mn = min(M, N);
+    magma_int_t nb = magma_get_zgeqrf_nb(min_mn);
+    magma_int_t lwork = N*nb;
 
     /* Allocate host memory for the matrix */
     TESTING_MALLOC   ( h_A  , cuDoubleComplex, n2    );
@@ -380,7 +412,7 @@ int main( int argc, char** argv)
            =================================================================== */
         double work[1], matnorm = 1.;
         cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
-        int one = 1;
+        magma_int_t one = 1;
 
         if (accuracyflag == 1){
           matnorm = lapackf77_zlange("f", &M, &N, h_A, &M, work);
