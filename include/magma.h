@@ -198,6 +198,11 @@ magma_context *magma_init(void *, void* (*func)(void *a), magma_int_t nthread, m
 			  magma_int_t argc, char **argv);
 void magma_finalize(magma_context *cntxt);
 
+void auto_tune(char algorithm, char precision, magma_int_t ncores, magma_int_t ncorespsocket,
+               magma_int_t m, magma_int_t n, magma_int_t *nb, magma_int_t *ob, magma_int_t *ib,
+               magma_int_t *nthreads, magma_int_t *nquarkthreads);  
+
+
 #ifdef __cplusplus
 }
 #endif
