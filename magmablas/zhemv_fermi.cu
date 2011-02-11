@@ -24,6 +24,91 @@
 #define quarter_thread_x 16
 #define half_thread_x 32
 
+/*
+    
+    Purpose
+    =======
+  
+    magmablas_zhemv_fermi  performs the matrix-vector operation on fermi:
+  
+       y := alpha*A*x + beta*y,
+  
+    where alpha and beta are scalars, x and y are n element vectors and
+    A is an n by n hermitian matrix.
+  
+    Arguments
+    ==========
+  
+    UPLO   - CHARACTER*1.
+             On entry, UPLO specifies whether the upper or lower
+             triangular part of the array A is to be referenced as
+             follows:
+  
+                UPLO = 'U' or 'u'   Only the upper triangular part of A
+                                    is to be referenced.
+  
+                UPLO = 'L' or 'l'   Only the lower triangular part of A
+                                    is to be referenced.
+  
+             Unchanged on exit.
+  
+    N      - INTEGER.
+             On entry, N specifies the order of the matrix A.
+             N must be at least zero.
+             Unchanged on exit.
+  
+    ALPHA  - COMPLEX*16      .
+             On entry, ALPHA specifies the scalar alpha.
+             Unchanged on exit.
+  
+    A      - COMPLEX*16       array of DIMENSION ( LDA, n ).
+             Before entry with  UPLO = 'U' or 'u', the leading n by n
+             upper triangular part of the array A must contain the upper
+             triangular part of the hermitian matrix and the strictly
+             lower triangular part of A is not referenced.
+             Before entry with UPLO = 'L' or 'l', the leading n by n
+             lower triangular part of the array A must contain the lower
+             triangular part of the hermitian matrix and the strictly
+             upper triangular part of A is not referenced.
+             Note that the imaginary parts of the diagonal elements need
+             not be set and are assumed to be zero.
+             Unchanged on exit.
+  
+    LDA    - INTEGER.
+             On entry, LDA specifies the first dimension of A as declared
+             in the calling (sub) program. LDA must be at least
+             max( 1, n ).
+             Unchanged on exit.
+  
+    X      - COMPLEX*16       array of dimension at least
+             ( 1 + ( n - 1 )*abs( INCX ) ).
+             Before entry, the incremented array X must contain the n
+             element vector x.
+             Unchanged on exit.
+  
+    INCX   - INTEGER.
+             On entry, INCX specifies the increment for the elements of
+             X. INCX must not be zero.
+             Unchanged on exit.
+  
+    BETA   - COMPLEX*16      .
+             On entry, BETA specifies the scalar beta. When BETA is
+             supplied as zero then Y need not be set on input.
+             Unchanged on exit.
+  
+    Y      - COMPLEX*16       array of dimension at least
+             ( 1 + ( n - 1 )*abs( INCY ) ).
+             Before entry, the incremented array Y must contain the n
+             element vector y. On exit, Y is overwritten by the updated
+             vector y.
+  
+    INCY   - INTEGER.
+             On entry, INCY specifies the increment for the elements of
+             Y. INCY must not be zero.
+             Unchanged on exit.
+
+*/
+
 __global__ void
 magma_l_zhemv_special_v6_ts_fermi(magma_int_t n, cuDoubleComplex alpha,  cuDoubleComplex* A, magma_int_t lda, cuDoubleComplex *x, 
                            magma_int_t incx, cuDoubleComplex beta, cuDoubleComplex *y, magma_int_t iny, cuDoubleComplex *WC, 
@@ -760,9 +845,9 @@ magma_l_zhemv_generic_update_v6_ts_fermi (magma_int_t n, cuDoubleComplex alpha ,
 
 
 extern "C"
-void magmablas_zhemv6_fermi(char uplo, magma_int_t m, cuDoubleComplex alpha, cuDoubleComplex *A, magma_int_t lda, 
-                      cuDoubleComplex *X, magma_int_t incx, cuDoubleComplex beta, cuDoubleComplex *Y, magma_int_t incy, 
-                      cuDoubleComplex *dC_work, magma_int_t kstan)
+void magmablas_zhemv_fermi_L(magma_int_t m, cuDoubleComplex alpha, cuDoubleComplex *A, magma_int_t lda, 
+                             cuDoubleComplex *X, magma_int_t incx, cuDoubleComplex beta, cuDoubleComplex *Y, magma_int_t incy, 
+                             cuDoubleComplex *dC_work, magma_int_t kstan)
 
 
 {
@@ -795,59 +880,76 @@ void magmablas_zhemv6_fermi(char uplo, magma_int_t m, cuDoubleComplex alpha, cuD
     dim3 threads(thread_x, thread_y, 1);
     dim3 threads_u(dgemv_bs, 1, 1);
     if(m % dgemv_bs == 0 ) {
-       if( uplo == 'L' || uplo == 'l'){
-	  magma_l_zhemv_special_v6_ts_fermi <<<grid, threads>>>(m, alpha, 
-                   A, lda, X, incx ,beta,  Y , incy, dC_work, kstan);
-	  magma_l_zhemv_special_update_v6_ts_fermi<<<grid, threads_u>>>(m, alpha, 
-                        A, lda, X, incx ,beta,  Y , incy, dC_work, kstan);
-       }
-       else{
-          printf("Not Available Now.\n");
-      } 
-		
+        magma_l_zhemv_special_v6_ts_fermi <<<grid, threads>>>(
+            m, alpha, A, lda, X, incx, beta, Y, incy, dC_work, kstan);
+        magma_l_zhemv_special_update_v6_ts_fermi<<<grid, threads_u>>>(
+            m, alpha, A, lda, X, incx, beta, Y, incy, dC_work, kstan);
     } 
     else{	
       magma_int_t  m_mod_thread_x = m%dgemv_bs ; 
-      if (uplo == 'L' || uplo == 'l'){
-         magma_l_zhemv_generic_v6_ts_fermi <<<grid, threads>>> (m, alpha, A, lda, 
-                    X, incx ,beta,  Y , incy, dC_work, m_mod_thread_x-1, kstan);
-         magma_l_zhemv_generic_update_v6_ts_fermi<<<grid, threads_u>>>(m, alpha, 
-                        A, lda, X, incx ,beta,  Y , incy, dC_work, kstan);
-      }	
-      else{
-         printf("Not Available Now.\n");
-      }	
+      magma_l_zhemv_generic_v6_ts_fermi <<<grid, threads>>> (
+          m, alpha, A, lda, X, incx ,beta,  Y , incy, dC_work, m_mod_thread_x-1, kstan);
+      magma_l_zhemv_generic_update_v6_ts_fermi<<<grid, threads_u>>>(
+          m, alpha, A, lda, X, incx ,beta,  Y , incy, dC_work, kstan);
     }
 }
 
 extern "C"
-void  magmablas_zhemv_fermi( char uplo , magma_int_t m , cuDoubleComplex alpha,  cuDoubleComplex *A , magma_int_t lda , 
-				cuDoubleComplex *X , magma_int_t incx, cuDoubleComplex beta, cuDoubleComplex *Y, magma_int_t incy)
+magma_int_t
+magmablas_zhemv_fermi( char uplo, magma_int_t n, 
+                       cuDoubleComplex alpha, cuDoubleComplex *A, magma_int_t lda, 
+                                              cuDoubleComplex *X, magma_int_t incx, 
+                       cuDoubleComplex beta,  cuDoubleComplex *Y, magma_int_t incy)
 {
-
-	if (uplo == 'U' || uplo == 'u')
-		cublasZhemv(uplo, m, alpha, A, lda, X, incx, beta, Y, incy);
-	else
-	{	
-	
-	cuDoubleComplex *dC_work;
-	magma_int_t bsz = thread_x;
-	magma_int_t blocks = m / bsz + (m %bsz != 0);
+    char      uplo_[2] = {uplo, 0};
+    long int  upper    = lapackf77_lsame(uplo_, "U");
+  
+    /*
+     * Test the input parameters.
+     */
+    if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
+        return -1;
+    } else if ( n < 0 ) {
+        return -2;
+    } else if ( lda < max(1,n) ) {
+        return -5;
+    } else if ( incx == 0 ) {
+        return -7;
+    } else if ( incy == 0 ) {
+        return -10;
+    }
+    
+    /*
+     * Quick return if possible.
+     */
+    if ( (n == 0) || ( MAGMA_Z_EQUAL(alpha, MAGMA_Z_ZERO) && MAGMA_Z_EQUAL(beta, MAGMA_Z_ONE) ) )
+        return MAGMA_SUCCESS;
+    
+    /* TODO: Upper case is not implemented in MAGMA */
+    if ( upper )
+        cublasZhemv(uplo, n, alpha, A, lda, X, incx, beta, Y, incy);
+    else
+    {	
+       	cuDoubleComplex *dC_work;
+	magma_int_t blocks    = n / thread_x + (n % thread_x != 0);
 	magma_int_t workspace = lda * (blocks + 1);
+
+        /* TODO: need to add a MAGMA context to handle workspaces */
 	cublasAlloc( workspace, sizeof(cuDoubleComplex), (void**)&dC_work ) ;
-			
-	cublasGetError( ) ;
+        cublasGetError( ) ;
 
 	magma_int_t kstan = -1;
 
-	magmablas_zhemv6_fermi(uplo, m, alpha, A, lda, X, incx, beta, Y, incy, 
-                      dC_work, kstan);
+	magmablas_zhemv_fermi_L(n, alpha, A, lda, X, incx, beta, Y, incy, 
+                                dC_work, kstan);
 
 	cublasFree(dC_work);
-	}
-
+        cublasGetError( ) ;
+    }
+    return MAGMA_SUCCESS;
 }
 
 #undef thread_x 
 #undef thread_y 
 #undef dgemv_bs 
+
