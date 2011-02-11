@@ -36,13 +36,11 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
 
     Purpose
     =======
-
-    SLARFB applies a real block reflector H or its transpose H' to a
-    real m by n matrix C, from the left.
+    ZLARFB applies a real block reflector H or its transpose H' to a
+    COMPLEX_16 m by n matrix C, from the left.
 
     Arguments
     =========
-
     SIDE    (input) CHARACTER
             = 'L': apply H or H' from the Left
             = 'R': apply H or H' from the Right (Not implemented)
@@ -97,7 +95,6 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
 
     LDWORK  (input) INTEGER
             The leading dimension of the array WORK. LDWORK >= max(1,N);
-
     ===================================================================      */
 
     cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
