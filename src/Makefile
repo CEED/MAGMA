@@ -75,6 +75,7 @@ ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
         init.cpp        \
         auxiliary.cpp 	\
         xerbla.cpp 	\
+        auto_tune.cpp 	\
 	get_nb.cpp
 
 ALLOBJ  = $(ALLSRC:.cpp=.o)
