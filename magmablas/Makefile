@@ -35,7 +35,8 @@ ZSRC  = zauxiliary.cu	\
 	zlat2c.cu       \
 
 ifeq (${GPU_TARGET}, 1)
-ZSRC += zhemv_fermi.cu
+ZSRC += zhemv_fermi.cu	\
+	zsymv_fermi.cu
 endif	
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
@@ -50,10 +51,6 @@ FERMISRC =	sgemv_fermi.cu  \
                 sgemm_fermi80.cu\
                 sgemm_fermi64.cu\
 	        dgemm_fermi.cu 	\
-		ssymv_fermi.cu 	\
-	        dsymv_fermi.cu 	\
-		zsymv_fermi.cu 	\
-		csymv_fermi.cu 	\
                 \
                 strsm_tesla.cu 	\
                 dtrsm_tesla.cu	\
