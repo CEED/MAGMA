@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     if( fp == NULL ){ printf("Couldn't open output file\n"); exit(1);}
 
     printf("SYMV cuDoubleComplex Precision\n\n"
-           "Usage\n\t\t testing_zhemv U|L N\n\n");
+           "Usage\n\t\t testing_zsymv U|L N\n\n");
 
     N = 8*1024+64;
     if( argc > 1 ) {
