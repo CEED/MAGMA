@@ -11,6 +11,7 @@
 #ifndef _MAGMABLAS_Z_H_
 #define _MAGMABLAS_Z_H_
 
+#define PRECISION_z
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -85,12 +86,14 @@ void magmablas_zgemv(char t, magma_int_t M, magma_int_t N,
 		     cuDoubleComplex * X, magma_int_t incX, 
 		     cuDoubleComplex beta, 
 		     cuDoubleComplex *Y, magma_int_t incY);
-void magmablas_zhemv(char u, magma_int_t N, 
-		     cuDoubleComplex alpha, 
-		     cuDoubleComplex *A, magma_int_t lda, 
-		     cuDoubleComplex * X, magma_int_t incX, 
-		     cuDoubleComplex beta, 
-		     cuDoubleComplex *Y, magma_int_t incY);
+#if defined(PRECISION_z) || defined(PRECISION_c)
+magma_int_t magmablas_zhemv(char u, magma_int_t N, 
+                            cuDoubleComplex alpha, 
+                            cuDoubleComplex *A, magma_int_t lda, 
+                            cuDoubleComplex * X, magma_int_t incX, 
+                            cuDoubleComplex beta, 
+                            cuDoubleComplex *Y, magma_int_t incY);
+#endif
 void magmablas_zsymv(char u, magma_int_t N, 
 		     cuDoubleComplex alpha, 
 		     cuDoubleComplex *A, magma_int_t lda, 
@@ -177,4 +180,5 @@ void magmablas_ztrsm(char s, char u, char t, char d,
 }
 #endif
 
+#undef PRECISION_z
 #endif
