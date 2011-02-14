@@ -189,7 +189,10 @@ equal to N and sometimes lddx. In the tester lddx is passed as N so we can not
 detect the bug. I (Stan) am not fixing it now as the problem may involve some
 other kernels (I remeber there was an issue somewhere)
 ---------------------------------------------------------------------------------
-
+30                          Remove DA from the description of function zhetrd
+                            after we pass all tests (the work space is now allocated
+                            in the routine itself).
+---------------------------------------------------------------------------------
 
                            Status of src directory 
                            
