@@ -180,8 +180,15 @@ device 1: Quadro NVS 290, 918.0 MHz clock, 255.7 MB memory
  
 
 ---------------------------------------------------------------------------------
+29             Peng         To check if this bug is related to the dtrsm bug.
+ 
+http://icl.cs.utk.edu/magma/forum/viewtopic.php?f=2&t=127&sid=d2479bd1fcd4f88d39111f9611810a8e
 
-                          
+*** Also looking in the code dX (and probably dB) are used sometimes with lddx
+equal to N and sometimes lddx. In the tester lddx is passed as N so we can not
+detect the bug. I (Stan) am not fixing it now as the problem may involve some
+other kernels (I remeber there was an issue somewhere)
+---------------------------------------------------------------------------------
 
 
                            Status of src directory 
