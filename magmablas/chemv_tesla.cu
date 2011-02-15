@@ -854,7 +854,7 @@ void magmablas_chemv6_tesla(char uplo, int m, float2 alpha, float2 *A, int lda,
 }
 
 extern "C"
-void  magmablas_chemv_tesla( char uplo , int m , float2 alpha,  float2 *A , int lda , 
+int  magmablas_chemv_tesla( char uplo , int m , float2 alpha,  float2 *A , int lda , 
 				float2 *X , int incx, float2 beta, float2 *Y, int incy)
 {
 
@@ -873,6 +873,9 @@ void  magmablas_chemv_tesla( char uplo , int m , float2 alpha,  float2 *A , int 
                       dC_work, kstan);
 
 	cublasFree(dC_work);
+	cublasGetError( ) ;
+
+	return MAGMA_SUCCESS;
 
 }
 

@@ -188,7 +188,7 @@ extern "C" void mzhemv_tesla(char side , char uplo , int m , double2 alpha ,  do
 Interface ..................................
 */
 
-extern "C" void  magmablas_zhemv_tesla (char uplo , int m , double2 alpha ,  double2 *A , int lda ,  double2 *X , int incx , double2 beta , double2 *Y , int incy )
+extern "C" int  magmablas_zhemv_tesla (char uplo , int m , double2 alpha ,  double2 *A , int lda ,  double2 *X , int incx , double2 beta , double2 *Y , int incy )
 {
 /*
   DSYMV  performs the matrix-vector  operation
@@ -271,5 +271,7 @@ extern "C" void  magmablas_zhemv_tesla (char uplo , int m , double2 alpha ,  dou
 
         char side = 'a' ;
 	mzhemv_tesla (side, uplo , m , alpha , A , lda , X , incx , beta , Y , incy );
+
+	return MAGMA_SUCCESS;
 
 }
