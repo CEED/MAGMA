@@ -8,6 +8,9 @@
        @precisions normal z -> c
 
 */
+#define PRECISION_z
+/*The version for tesla can be found in zhemv_130.cu */
+#if (GPUSHMEM >= 200)
 
 #include <stdio.h>
 #include <cuda.h>
@@ -15,7 +18,7 @@
 #include "magma.h"
 #include "operators.h"
 
-#define magmablas_zhemv_fermi magmablas_zhemv
+#define magmablas_zhemv_200 magmablas_zhemv
 
 #define zhemv_bs         64
 #define thread_x         64
@@ -29,12 +32,12 @@
  */
 
 __global__ void
-magmablas_zhemv_fermi_L_special( magma_int_t n, cuDoubleComplex alpha,
-                                 cuDoubleComplex* A, magma_int_t lda,
-                                 cuDoubleComplex *x, magma_int_t incx,
-                                 cuDoubleComplex beta,
-                                 cuDoubleComplex *y, magma_int_t incy,
-                                 cuDoubleComplex *WC)
+magmablas_zhemv_200_L_special( magma_int_t n, cuDoubleComplex alpha,
+                               cuDoubleComplex *A, magma_int_t lda,
+                               cuDoubleComplex *x, magma_int_t incx,
+                               cuDoubleComplex  beta,
+                               cuDoubleComplex *y, magma_int_t incy,
+                               cuDoubleComplex *WC)
 {
     magma_int_t tx   = threadIdx.x ;
     magma_int_t ty   = threadIdx.y ;
@@ -90,10 +93,10 @@ magmablas_zhemv_fermi_L_special( magma_int_t n, cuDoubleComplex alpha,
     __syncthreads();
 
     if( ty_== 0 )
-        res1 = la[0][tx_*bank_shift+0]+la[0][tx_*bank_shift+1]+
-            la[0][tx_*bank_shift+2]+la[0][tx_*bank_shift+3]+
-            la[0][tx_*bank_shift+4]+la[0][tx_*bank_shift+5]+
-            la[0][tx_*bank_shift+6]+la[0][tx_*bank_shift+7];
+      res1 = la[0][tx_*bank_shift+0]+la[0][tx_*bank_shift+1]
+        +    la[0][tx_*bank_shift+2]+la[0][tx_*bank_shift+3]
+        +    la[0][tx_*bank_shift+4]+la[0][tx_*bank_shift+5]
+        +    la[0][tx_*bank_shift+6]+la[0][tx_*bank_shift+7];
     else
         {
             MAGMA_Z_SET2REAL(res1,0);
@@ -130,14 +133,14 @@ magmablas_zhemv_fermi_L_special( magma_int_t n, cuDoubleComplex alpha,
     cuDoubleComplex res2;
     MAGMA_Z_SET2REAL(res2,0);
     if( ty_== 1 )
-        res2 = la[0][tx_*bank_shift+0]+la[0][tx_*bank_shift+1]+
-            la[0][tx_*bank_shift+2]+la[0][tx_*bank_shift+3]+
-            la[0][tx_*bank_shift+4]+la[0][tx_*bank_shift+5]+
-            la[0][tx_*bank_shift+6]+la[0][tx_*bank_shift+7];
+        res2 = la[0][tx_*bank_shift+0]+la[0][tx_*bank_shift+1]
+          +    la[0][tx_*bank_shift+2]+la[0][tx_*bank_shift+3]
+          +    la[0][tx_*bank_shift+4]+la[0][tx_*bank_shift+5]
+          +    la[0][tx_*bank_shift+6]+la[0][tx_*bank_shift+7];
     else
-	{
-            MAGMA_Z_SET2REAL(res2,0);
-        }
+    {
+        MAGMA_Z_SET2REAL(res2,0);
+    }
     __syncthreads();
 
     MAGMA_Z_SET2REAL(res,0);
@@ -165,10 +168,11 @@ magmablas_zhemv_fermi_L_special( magma_int_t n, cuDoubleComplex alpha,
     la[0][bank_shift*tx_+ty_]= res ;
     __syncthreads();
     if( ty_ == 1 )
-        res2 =res2+  la[0][tx_*bank_shift+0]+la[0][tx_*bank_shift+1]+
-            la[0][tx_*bank_shift+2]+la[0][tx_*bank_shift+3]+
-            la[0][tx_*bank_shift+4]+la[0][tx_*bank_shift+5]+
-            la[0][tx_*bank_shift+6]+la[0][tx_*bank_shift+7];
+        res2 = res2 
+            +  la[0][tx_*bank_shift+0]+la[0][tx_*bank_shift+1]
+            +  la[0][tx_*bank_shift+2]+la[0][tx_*bank_shift+3]
+            +  la[0][tx_*bank_shift+4]+la[0][tx_*bank_shift+5]
+            +  la[0][tx_*bank_shift+6]+la[0][tx_*bank_shift+7];
     else
         {
             MAGMA_Z_SET2REAL(res2,0);
@@ -178,10 +182,11 @@ magmablas_zhemv_fermi_L_special( magma_int_t n, cuDoubleComplex alpha,
     la[0][bank_shift*tx_+ty_]= res_ ;
     __syncthreads();
     if( ty_ == 0 ) {
-        res1 =res1+  la[0][tx_*bank_shift+0]+la[0][tx_*bank_shift+1]+
-            la[0][tx_*bank_shift+2]+la[0][tx_*bank_shift+3]+
-            la[0][tx_*bank_shift+4]+la[0][tx_*bank_shift+5]+
-            la[0][tx_*bank_shift+6]+la[0][tx_*bank_shift+7];
+        res1 = res1
+            +  la[0][tx_*bank_shift+0]+la[0][tx_*bank_shift+1]
+            +  la[0][tx_*bank_shift+2]+la[0][tx_*bank_shift+3]
+            +  la[0][tx_*bank_shift+4]+la[0][tx_*bank_shift+5]
+            +  la[0][tx_*bank_shift+6]+la[0][tx_*bank_shift+7];
     }
     else
         {
@@ -266,14 +271,14 @@ magmablas_zhemv_fermi_L_special( magma_int_t n, cuDoubleComplex alpha,
             __syncthreads();
             if( ty_ < 4 ) {
                 magma_int_t k = ty_*quarter_thread_x;
-                res_ = la[tx_][0+k] + la[tx_][1+k]+
-                    la[tx_][2+k] + la[tx_][3+k]+
-                    la[tx_][4+k] + la[tx_][5+k]+
-                    la[tx_][6+k] + la[tx_][7+k]+
-                    la[tx_][8+k] + la[tx_][9+k]+
-                    la[tx_][10+k]+ la[tx_][11+k]+
-                    la[tx_][12+k]+ la[tx_][13+k]+
-                    la[tx_][14+k]+ la[tx_][15+k];
+                res_ = la[tx_][0+k] + la[tx_][1+k]
+                    +  la[tx_][2+k] + la[tx_][3+k]
+                    +  la[tx_][4+k] + la[tx_][5+k]
+                    +  la[tx_][6+k] + la[tx_][7+k]
+                    +  la[tx_][8+k] + la[tx_][9+k]
+                    +  la[tx_][10+k]+ la[tx_][11+k]
+                    +  la[tx_][12+k]+ la[tx_][13+k]
+                    +  la[tx_][14+k]+ la[tx_][15+k];
                 WC[k + wc_c*lda ] =   res_;
             }
 
@@ -321,14 +326,14 @@ magmablas_zhemv_fermi_L_special( magma_int_t n, cuDoubleComplex alpha,
         __syncthreads();
         if( ty_ < 4 ) {
             magma_int_t k = ty_*quarter_thread_x;
-            res_ = la[tx_][0+k] + la[tx_][1+k]+
-                la[tx_][2+k] + la[tx_][3+k]+
-                la[tx_][4+k] + la[tx_][5+k]+
-                la[tx_][6+k] + la[tx_][7+k]+
-                la[tx_][8+k] + la[tx_][9+k]+
-                la[tx_][10+k]+ la[tx_][11+k]+
-                la[tx_][12+k]+ la[tx_][13+k]+
-                la[tx_][14+k]+ la[tx_][15+k];
+            res_ = la[tx_][0+k] + la[tx_][1+k]
+                +  la[tx_][2+k] + la[tx_][3+k]
+                +  la[tx_][4+k] + la[tx_][5+k]
+                +  la[tx_][6+k] + la[tx_][7+k]
+                +  la[tx_][8+k] + la[tx_][9+k]
+                +  la[tx_][10+k]+ la[tx_][11+k]
+                +  la[tx_][12+k]+ la[tx_][13+k]
+                +  la[tx_][14+k]+ la[tx_][15+k];
             WC[k + wc_c*lda ] =   res_;
         }
 
@@ -342,7 +347,8 @@ magmablas_zhemv_fermi_L_special( magma_int_t n, cuDoubleComplex alpha,
     la[ty][tx]= res ;
     __syncthreads();
     if( ty == 0 ) {
-        res=la[0][tx]+ la[1][tx]+ la[2][tx]+ la[3][tx] ;
+        res = la[0][tx]+ la[1][tx]
+            + la[2][tx]+ la[3][tx];
         WC[0+lda*(blkc)  ] =  res;
     }
 }
@@ -351,13 +357,13 @@ magmablas_zhemv_fermi_L_special( magma_int_t n, cuDoubleComplex alpha,
  *    Lower case for generic sizes
  */
 __global__ void
-magmablas_zhemv_fermi_L_generic(magma_int_t n, cuDoubleComplex alpha,
-                                cuDoubleComplex* A, magma_int_t lda,
-                                cuDoubleComplex *x, magma_int_t incx,
-                                cuDoubleComplex beta,
-                                cuDoubleComplex *y, magma_int_t incy,
-                                cuDoubleComplex *WC,
-                                magma_int_t m_mod_thread_x)
+magmablas_zhemv_200_L_generic(magma_int_t n, cuDoubleComplex alpha,
+                              cuDoubleComplex *A, magma_int_t lda,
+                              cuDoubleComplex *x, magma_int_t incx,
+                              cuDoubleComplex beta,
+                              cuDoubleComplex *y, magma_int_t incy,
+                              cuDoubleComplex *WC,
+                              magma_int_t m_mod_thread_x)
 {
     magma_int_t tx   = threadIdx.x ;
     magma_int_t ty   = threadIdx.y ;
@@ -450,7 +456,14 @@ magmablas_zhemv_fermi_L_generic(magma_int_t n, cuDoubleComplex alpha,
     la[0][bank_shift*tx_+ty_]= res ;
     __syncthreads();
     if( ty_== 0 )
-        res1 = la[0][tx_*bank_shift+0]+la[0][tx_*bank_shift+1]+la[0][tx_*bank_shift+2]+la[0][tx_*bank_shift+3]+la[0][tx_*bank_shift+4]+la[0][tx_*bank_shift+5]+la[0][tx_*bank_shift+6]+la[0][tx_*bank_shift+7];
+        res1 = la[0][tx_*bank_shift+0] 
+            +  la[0][tx_*bank_shift+1]
+            +  la[0][tx_*bank_shift+2]
+            +  la[0][tx_*bank_shift+3]
+            +  la[0][tx_*bank_shift+4]
+            +  la[0][tx_*bank_shift+5]
+            +  la[0][tx_*bank_shift+6]
+            +  la[0][tx_*bank_shift+7];
     else
     {
         MAGMA_Z_SET2REAL(res1,0);
@@ -462,9 +475,9 @@ magmablas_zhemv_fermi_L_generic(magma_int_t n, cuDoubleComplex alpha,
 
     if( blkc == ( gridDim.x - 1 ) ) {
         if ( (tx_+half_thread_x) > m_mod_thread_x )
-            trackA=m_mod_thread_x;
+            trackA = m_mod_thread_x;
         else
-            trackA=tx_+half_thread_x;
+            trackA = tx_ + half_thread_x;
         A+= trackA+half_thread_x*lda ;
 
         #pragma unroll
@@ -572,7 +585,15 @@ magmablas_zhemv_fermi_L_generic(magma_int_t n, cuDoubleComplex alpha,
     la[0][bank_shift*tx_+ty_]= res ;
     __syncthreads();
     if( ty_ == 1 )
-        res2 =res2+  la[0][tx_*bank_shift+0]+la[0][tx_*bank_shift+1]+la[0][tx_*bank_shift+2]+la[0][tx_*bank_shift+3]+la[0][tx_*bank_shift+4]+la[0][tx_*bank_shift+5]+la[0][tx_*bank_shift+6]+la[0][tx_*bank_shift+7];
+        res2 = res2
+            +  la[0][tx_*bank_shift+0]
+            +  la[0][tx_*bank_shift+1]
+            +  la[0][tx_*bank_shift+2]
+            +  la[0][tx_*bank_shift+3]
+            +  la[0][tx_*bank_shift+4]
+            +  la[0][tx_*bank_shift+5]
+            +  la[0][tx_*bank_shift+6]
+            +  la[0][tx_*bank_shift+7];
     else
     {
         MAGMA_Z_SET2REAL(res2,0);
@@ -583,7 +604,15 @@ magmablas_zhemv_fermi_L_generic(magma_int_t n, cuDoubleComplex alpha,
     __syncthreads();
 
     if( ty_ == 0 ) {
-        res1 =res1+  la[0][tx_*bank_shift+0]+la[0][tx_*bank_shift+1]+la[0][tx_*bank_shift+2]+la[0][tx_*bank_shift+3]+la[0][tx_*bank_shift+4]+la[0][tx_*bank_shift+5]+la[0][tx_*bank_shift+6]+la[0][tx_*bank_shift+7];
+        res1 = res1
+            +  la[0][tx_*bank_shift+0]
+            +  la[0][tx_*bank_shift+1]
+            +  la[0][tx_*bank_shift+2]
+            +  la[0][tx_*bank_shift+3]
+            +  la[0][tx_*bank_shift+4]
+            +  la[0][tx_*bank_shift+5]
+            +  la[0][tx_*bank_shift+6]
+            +  la[0][tx_*bank_shift+7];
     }
     else
     {
@@ -676,7 +705,14 @@ magmablas_zhemv_fermi_L_generic(magma_int_t n, cuDoubleComplex alpha,
 
             if( ty_ < 4 ) {
                 magma_int_t k = ty_*quarter_thread_x;
-                res_ = la[tx_][0+k] + la[tx_][1+k]+ la[tx_][2+k]+la[tx_][3+k]+la[tx_][4+k]+la[tx_][5+k]+la[tx_][6+k]+la[tx_][7+k]+la[tx_][8+k]+la[tx_][9+k]+la[tx_][10+k]+la[tx_][11+k]+la[tx_][12+k]+la[tx_][13+k]+la[tx_][14+k]+la[tx_][15+k];
+                res_ = la[tx_][0+k] + la[tx_][1+k] 
+                    +  la[tx_][2+k] + la[tx_][3+k]
+                    +  la[tx_][4+k] + la[tx_][5+k]
+                    +  la[tx_][6+k] + la[tx_][7+k]
+                    +  la[tx_][8+k] + la[tx_][9+k]
+                    +  la[tx_][10+k]+ la[tx_][11+k]
+                    +  la[tx_][12+k]+ la[tx_][13+k]
+                    +  la[tx_][14+k]+ la[tx_][15+k];
                 WC[k + wc_c*lda ] =   res_;
             }
             wc_c++;
@@ -720,7 +756,14 @@ magmablas_zhemv_fermi_L_generic(magma_int_t n, cuDoubleComplex alpha,
 
         if( ty_ < 4 ) {
             magma_int_t k = ty_*quarter_thread_x;
-            res_ = la[tx_][0+k] + la[tx_][1+k]+ la[tx_][2+k]+la[tx_][3+k]+la[tx_][4+k]+la[tx_][5+k]+la[tx_][6+k]+la[tx_][7+k]+la[tx_][8+k]+la[tx_][9+k]+la[tx_][10+k]+la[tx_][11+k]+la[tx_][12+k]+la[tx_][13+k]+la[tx_][14+k]+la[tx_][15+k];
+            res_ = la[tx_][0+k] + la[tx_][1+k] 
+                +  la[tx_][2+k] + la[tx_][3+k]
+                +  la[tx_][4+k] + la[tx_][5+k]
+                +  la[tx_][6+k] + la[tx_][7+k]
+                +  la[tx_][8+k] + la[tx_][9+k]
+                +  la[tx_][10+k]+ la[tx_][11+k]
+                +  la[tx_][12+k]+ la[tx_][13+k]
+                +  la[tx_][14+k]+ la[tx_][15+k];
             WC[k + wc_c*lda ] =   res_;
         }
         wc_c++;
@@ -740,12 +783,12 @@ magmablas_zhemv_fermi_L_generic(magma_int_t n, cuDoubleComplex alpha,
 }
 
 __global__ void
-magmablas_zhemv_fermi_L_update(magma_int_t n, cuDoubleComplex alpha,
-                               cuDoubleComplex* A, magma_int_t lda,
-                               cuDoubleComplex *x, magma_int_t incx,
-                               cuDoubleComplex beta,
-                               cuDoubleComplex *y, magma_int_t incy,
-                               cuDoubleComplex *WC )
+magmablas_zhemv_200_L_update(magma_int_t n, cuDoubleComplex alpha,
+                         cuDoubleComplex* A, magma_int_t lda,
+                         cuDoubleComplex *x, magma_int_t incx,
+                         cuDoubleComplex beta,
+                         cuDoubleComplex *y, magma_int_t incy,
+                         cuDoubleComplex *WC )
 {
     magma_int_t i;
     magma_int_t tx  = threadIdx.x ;
@@ -765,14 +808,12 @@ magmablas_zhemv_fermi_L_update(magma_int_t n, cuDoubleComplex alpha,
 
 
 extern "C"
-void magmablas_zhemv_fermi_L(magma_int_t m, cuDoubleComplex alpha,
-                             cuDoubleComplex *A, magma_int_t lda,
-                             cuDoubleComplex *X, magma_int_t incx,
-                             cuDoubleComplex beta,
-                             cuDoubleComplex *Y, magma_int_t incy,
-                             cuDoubleComplex *dC_work)
-
-
+void magmablas_zhemv_200_L(magma_int_t m, cuDoubleComplex alpha,
+                           cuDoubleComplex *A, magma_int_t lda,
+                           cuDoubleComplex *X, magma_int_t incx,
+                           cuDoubleComplex beta,
+                           cuDoubleComplex *Y, magma_int_t incy,
+                           cuDoubleComplex *dC_work)
 {
     magma_int_t blocks;
 
@@ -790,16 +831,16 @@ void magmablas_zhemv_fermi_L(magma_int_t m, cuDoubleComplex alpha,
      * otherwise, we call the generic case.
      */
     if(m % zhemv_bs == 0 ) {
-        magmablas_zhemv_fermi_L_special <<<grid, threads>>>(
+        magmablas_zhemv_200_L_special <<<grid, threads>>>(
             m, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
     }
     else{
         magma_int_t m_mod_thread_x = m%zhemv_bs - 1;
-        magmablas_zhemv_fermi_L_generic <<<grid, threads>>> (
+        magmablas_zhemv_200_L_generic <<<grid, threads>>> (
             m, alpha, A, lda, X, incx ,beta, Y, incy, dC_work, m_mod_thread_x);
     }
 
-    magmablas_zhemv_fermi_L_update<<<grid, threads_u>>>(
+    magmablas_zhemv_200_L_update<<<grid, threads_u>>>(
         m, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
 }
 
@@ -808,7 +849,7 @@ void magmablas_zhemv_fermi_L(magma_int_t m, cuDoubleComplex alpha,
     Purpose
     =======
 
-    magmablas_zhemv_fermi  performs the matrix-vector operation on fermi:
+    magmablas_zhemv  performs the matrix-vector operation on fermi:
 
        y := alpha*A*x + beta*y,
 
@@ -893,10 +934,12 @@ void magmablas_zhemv_fermi_L(magma_int_t m, cuDoubleComplex alpha,
 
 extern "C"
 magma_int_t
-magmablas_zhemv_fermi( char uplo, magma_int_t n,
-                       cuDoubleComplex alpha, cuDoubleComplex *A, magma_int_t lda,
-                                              cuDoubleComplex *X, magma_int_t incx,
-                       cuDoubleComplex beta,  cuDoubleComplex *Y, magma_int_t incy)
+magmablas_zhemv_200( char uplo, magma_int_t n,
+                     cuDoubleComplex alpha, 
+                     cuDoubleComplex *A, magma_int_t lda,
+                     cuDoubleComplex *X, magma_int_t incx,
+                     cuDoubleComplex beta,  
+                     cuDoubleComplex *Y, magma_int_t incy)
 {
     char      uplo_[2] = {uplo, 0};
     long int  upper    = lapackf77_lsame(uplo_, "U");
@@ -935,10 +978,12 @@ magmablas_zhemv_fermi( char uplo, magma_int_t n,
 	cublasAlloc( workspace, sizeof(cuDoubleComplex), (void**)&dC_work ) ;
         cublasGetError( ) ;
 
-	magmablas_zhemv_fermi_L(n, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
+	magmablas_zhemv_200_L(n, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
 
 	cublasFree(dC_work);
         cublasGetError( ) ;
     }
     return MAGMA_SUCCESS;
 }
+
+#endif /* (!defined(PRECISION_z)) || (GPUSHMEM >= 200) */
