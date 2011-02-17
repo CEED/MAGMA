@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        November 2010
 
-       @precisions normal z -> s d c
+       @precisions normal z -> c
 
 */
 
@@ -57,7 +57,7 @@ magma_zheevd(char *jobz, char *uplo,
     N       (input) INTEGER   
             The order of the matrix A.  N >= 0.   
 
-    A       (input/output) COMPLEX*16 array, dimension (LDA, N)   
+    A       (input/output) COMPLEX_16 array, dimension (LDA, N)   
             On entry, the Hermitian matrix A.  If UPLO = 'U', the   
             leading N-by-N upper triangular part of A contains the   
             upper triangular part of the matrix A.  If UPLO = 'L',   
@@ -75,7 +75,7 @@ magma_zheevd(char *jobz, char *uplo,
     W       (output) DOUBLE PRECISION array, dimension (N)   
             If INFO = 0, the eigenvalues in ascending order.   
 
-    WORK    (workspace/output) COMPLEX*16 array, dimension (MAX(1,LWORK))   
+    WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
