@@ -740,7 +740,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
     /* Get machine constants */
     eps = dlamch_("P");
-    smlnum = sqrt(dlamch_("S")) / eps;
+    smlnum = magma_dsqrt(dlamch_("S")) / eps;
     bignum = 1. / smlnum;
 
     /* Scale A if max element outside range [SMLNUM,BIGNUM] */

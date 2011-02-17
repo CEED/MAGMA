@@ -293,7 +293,7 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
     smlnum = lapackf77_dlamch("S");
     bignum = 1. / smlnum;
     lapackf77_dlabad(&smlnum, &bignum);
-    smlnum = (double)sqrt((double)smlnum) / eps;
+    smlnum = magma_dsqrt(smlnum) / eps;
     fprintf(stderr, "smlnum : %e\n", smlnum);
     bignum = 1. / smlnum;
 

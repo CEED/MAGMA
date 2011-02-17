@@ -106,6 +106,7 @@ subs = {
     ('cublasS','cublasD','cublasC','cublasZ'),
     ('cublasIsamax','cublasIdamax', 'cublasIcamax','cublasIzamax'),
     ('cublasIsamax','cublasIdamax', 'cublasIsamax','cublasIdamax'),
+    ('magma_ssqrt','magma_dsqrt', 'magma_ssqrt','magma_dsqrt'),
     ('cpu_gpu_s','cpu_gpu_d','cpu_gpu_c','cpu_gpu_z'),
     ('spanel_to_q','dpanel_to_q','cpanel_to_q','zpanel_to_q'),
     ('sq_to_panel','dq_to_panel','cq_to_panel','zq_to_panel'),

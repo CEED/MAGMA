@@ -265,7 +265,7 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
     smlnum = lapackf77_dlamch("S");
     bignum = 1. / smlnum;
     lapackf77_dlabad(&smlnum, &bignum);
-    smlnum = sqrt(smlnum) / eps;
+    smlnum = magma_dsqrt(smlnum) / eps;
     bignum = 1. / smlnum;
 
     /* Scale A if max element outside range [SMLNUM,BIGNUM] */
@@ -448,7 +448,7 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
             }
 	    k = cblas_idamax(n, &rwork[irwork], 1);
 	    MAGMA_Z_CNJG(z__2, vl[k + i__ * vl_dim1]);
-	    d__1 = sqrt(rwork[irwork + k - 1]);
+	    d__1 = magma_dsqrt(rwork[irwork + k - 1]);
 	    MAGMA_Z_DSCALE(z__1, z__2, d__1);
 	    MAGMA_Z_ASSIGN(tmp, z__1);
 	    cblas_zscal(n, CBLAS_SADDR(tmp), &vl[i__ * vl_dim1 + 1], 1);
@@ -483,7 +483,7 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
 	    }
 	    k = cblas_idamax(n, &rwork[irwork], 1);
 	    MAGMA_Z_CNJG(z__2, vr[k + i__ * vr_dim1]);
-	    d__1 = sqrt(rwork[irwork + k - 1]);
+	    d__1 = magma_dsqrt(rwork[irwork + k - 1]);
 	    MAGMA_Z_DSCALE(z__1, z__2, d__1);
 	    MAGMA_Z_ASSIGN(tmp, z__1);
 	    cblas_zscal(n, CBLAS_SADDR(tmp), &vr[i__ * vr_dim1 + 1], 1);

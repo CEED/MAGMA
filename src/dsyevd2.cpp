@@ -256,8 +256,8 @@ magma_dsyevd(char *jobz, char *uplo,
     eps = dlamch_("Precision");
     smlnum = safmin / eps;
     bignum = 1. / smlnum;
-    rmin = sqrt(smlnum);
-    rmax = sqrt(bignum);
+    rmin = magma_dsqrt(smlnum);
+    rmax = magma_dsqrt(bignum);
 
     /* Scale matrix to allowable range, if necessary. */
     anrm = lapackf77_dlansy("M", uplo, n, &a[a_offset], lda, &work[1]);

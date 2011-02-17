@@ -277,8 +277,8 @@ magma_zheevd(char *jobz, char *uplo,
     eps = dlamch_("Precision");
     smlnum = safmin / eps;
     bignum = 1. / smlnum;
-    rmin = sqrt(smlnum);
-    rmax = sqrt(bignum);
+    rmin = magma_dsqrt(smlnum);
+    rmax = magma_dsqrt(bignum);
 
     /* Scale matrix to allowable range, if necessary. */
     anrm = lapackf77_zlanhe("M", uplo, n, &a[a_offset], lda, &rwork[1]);

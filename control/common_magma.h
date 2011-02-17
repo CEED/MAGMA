@@ -66,4 +66,12 @@
 #define roundup(a, b) (b <= 0) ? (a) : (((a) + (b)-1) & ~((b)-1))
 #endif
 
+/** ****************************************************************************
+ *  Define magma_[sd]sqrt functions 
+ *    - sqrt alone cannot be catched by the generation script because of tsqrt
+ */
+
+#define magma_dsqrt sqrt
+#define magma_ssqrt sqrt
+
 #endif /* _MAGMA_COMMON_H_ */
