@@ -153,8 +153,6 @@ magma_zheevd(char *jobz, char *uplo,
     magma_int_t a_dim1, a_offset, i__1, i__2;
     double d__1;
 
-    double sqrt(double);
-
     static double eps;
     static magma_int_t inde;
     static double anrm;
