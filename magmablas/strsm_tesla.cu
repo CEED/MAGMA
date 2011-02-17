@@ -1787,6 +1787,7 @@ void diag_strtri (int M, char uplo, char diag, float *A, float *d_dinvA, int lda
 					triple_sgemm_update_above64_part3_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
 					break;
 			}
+			if (i*2>=M) break;
 		}
 	}
 	else
