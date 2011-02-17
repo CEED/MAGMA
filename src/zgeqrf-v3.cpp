@@ -144,7 +144,7 @@ magma_zgeqrf3(magma_context *cntxt, magma_int_t m, magma_int_t n,
 
        H(i) = I - tau * v * v'   
 
-    where tau is a real scalar, and v is a real vector with   
+    where tau is a complex scalar, and v is a complex vector with   
     v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),   
     and tau in TAU(i).
     ====================================================================    */

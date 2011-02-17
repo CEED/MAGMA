@@ -46,7 +46,7 @@ magma_zpotrf(char uplo, magma_int_t n,
     Purpose   
     =======   
 
-    ZPOTRF computes the Cholesky factorization of a real Hermitian   
+    ZPOTRF computes the Cholesky factorization of a complex Hermitian   
     positive definite matrix A. This version does not require work
     space on the GPU passed as input. GPU memory is allocated in the
     routine.

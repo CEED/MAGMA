@@ -29,7 +29,7 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
     Purpose
     =======
 
-    ZGELQF computes an LQ factorization of a real M-by-N matrix A:
+    ZGELQF computes an LQ factorization of a COMPLEX_16 M-by-N matrix A:
     A = L * Q.
 
     Arguments
@@ -91,10 +91,9 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
 
        H(i) = I - tau * v * v'
 
-    where tau is a real scalar, and v is a real vector with
+    where tau is a complex scalar, and v is a complex vector with
     v(1:i-1) = 0 and v(i) = 1; v(i+1:n) is stored on exit in A(i,i+1:n),
     and tau in TAU(i).
-
     =====================================================================    */
 
     #define  a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))

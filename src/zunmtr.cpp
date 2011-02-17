@@ -32,13 +32,13 @@ magma_zunmtr(char *side, char *uplo, char *trans,
     Purpose   
     =======   
 
-    ZUNMTR overwrites the general real M-by-N matrix C with   
+    ZUNMTR overwrites the general complex M-by-N matrix C with   
 
                     SIDE = 'L'     SIDE = 'R'   
     TRANS = 'N':      Q * C          C * Q   
     TRANS = 'T':      Q\*\*H * C       C * Q\*\*H   
 
-    where Q is a real orthogonal matrix of order nq, with nq = m if   
+    where Q is a complex orthogonal matrix of order nq, with nq = m if   
     SIDE = 'L' and nq = n if SIDE = 'R'. Q is defined as the product of   
     nq-1 elementary reflectors, as returned by SSYTRD:   
 

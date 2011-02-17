@@ -30,7 +30,7 @@ magma_ztsqrt_gpu(int *m, int *n,
     Purpose   
     =======   
 
-    ZGEQRF computes a QR factorization of a real M-by-N matrix A:   
+    ZGEQRF computes a QR factorization of a complex M-by-N matrix A:   
     A = Q * R.   
 
     Arguments   
@@ -94,10 +94,9 @@ magma_ztsqrt_gpu(int *m, int *n,
 
        H(i) = I - tau * v * v'   
 
-    where tau is a real scalar, and v is a real vector with   
+    where tau is a complex scalar, and v is a complex vector with   
     v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),   
     and tau in TAU(i).   
-
     =====================================================================    */
 
    #define a1_ref(a_1,a_2) ( a1+(a_2)*(*lda) + (a_1))
