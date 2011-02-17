@@ -38,7 +38,7 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
     Purpose
     =======
 
-    ZCGESV computes the solution to a real system of linear equations
+    ZCGESV computes the solution to a complex system of linear equations
        A * X = B,
     where A is an N-by-N matrix and X and B are N-by-NRHS matrices.
 
@@ -78,7 +78,7 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    dA       (input or input/output) DOUBLE PRECISION array, dimension (ldda,N)
+    dA       (input or input/output) COMPLEX_16 array, dimension (ldda,N)
             On entry, the N-by-N coefficient matrix A.
             On exit, if iterative refinement has been successfully used
             (info.EQ.0 and ITER.GE.0, see description below), A is
@@ -101,22 +101,22 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
             The pivot indices; for 1 <= i <= min(M,N), row i of the
             matrix was moved to row IPIV(i).
 
-    dB       (input) DOUBLE PRECISION array, dimension (lddb,NRHS)
+    dB       (input) COMPLEX_16 array, dimension (lddb,NRHS)
             The N-by-NRHS right hand side matrix B.
 
     lddb     (input) INTEGER
             The leading dimension of the array B.  lddb >= max(1,N).
 
-    dX       (output) DOUBLE PRECISION array, dimension (lddx,NRHS)
+    dX       (output) COMPLEX_16 array, dimension (lddx,NRHS)
             If info = 0, the N-by-NRHS solution matrix X.
 
     lddx     (input) INTEGER
             The leading dimension of the array X.  lddx >= max(1,N).
 
-    dworkd    (workspace) DOUBLE PRECISION array, dimension (N*NRHS)
+    dworkd    (workspace) COMPLEX_16 array, dimension (N*NRHS)
             This array is used to hold the residual vectors.
 
-    dworks   (workspace) REAL array, dimension (N*(N+NRHS))
+    dworks   (workspace) COMPLEX array, dimension (N*(N+NRHS))
             This array is used to store the single precision matrix and the
             right-hand sides or solutions in single precision.
 

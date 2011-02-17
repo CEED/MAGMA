@@ -30,12 +30,11 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
     Purpose
     =======
 
-    ZGEQRF computes a QR factorization of a real M-by-N matrix A:
+    ZGEQRF computes a QR factorization of a complex M-by-N matrix A:
     A = Q * R.
 
     Arguments
     =========
-
     M       (input) INTEGER
             The number of rows of the matrix A.  M >= 0.
 
@@ -51,7 +50,7 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
             product of min(m,n) elementary reflectors (see Further
             Details).
 
-    LDDA     (input) INTEGER
+    LDDA    (input) INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,M).
             To benefit from coalescent memory accesses LDDA must be
             dividable by 16.
@@ -76,10 +75,9 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
 
        H(i) = I - tau * v * v'
 
-    where tau is a real scalar, and v is a real vector with
+    where tau is a complex scalar, and v is a complex vector with
     v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),
     and tau in TAU(i).
-
     =====================================================================    */
 
     #define dA(a_1,a_2)    ( dA+(a_2)*(ldda) + (a_1))

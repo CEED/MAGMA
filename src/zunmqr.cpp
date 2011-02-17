@@ -30,13 +30,13 @@ magma_zunmqr(const char side, const char trans,
 
     Purpose   
     =======   
-    ZUNMQR overwrites the general real M-by-N matrix C with   
+    ZUNMQR overwrites the general complex M-by-N matrix C with   
 
                     SIDE = 'L'     SIDE = 'R'   
     TRANS = 'N':      Q * C          C * Q   
     TRANS = 'T':      Q\*\*H * C       C * Q\*\*H   
 
-    where Q is a real orthogonal matrix defined as the product of k   
+    where Q is a complex orthogonal matrix defined as the product of k   
     elementary reflectors   
 
           Q = H(1) H(2) . . . H(k)   

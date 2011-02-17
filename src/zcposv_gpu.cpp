@@ -39,19 +39,19 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
     Purpose
     =======
 
-    ZCPOSV computes the solution to a real system of linear equations
+    ZCPOSV computes the solution to a complex system of linear equations
        A * X = B,
     where A is an N-by-N symmetric positive definite matrix and X and B
     are N-by-NRHS matrices.
 
-    ZCPOSV first attempts to factorize the matrix in SINGLE PRECISION
+    ZCPOSV first attempts to factorize the matrix in complex SINGLE PRECISION
     and use this factorization within an iterative refinement procedure
-    to produce a solution with DOUBLE PRECISION norm-wise backward error
+    to produce a solution with complex DOUBLE PRECISION norm-wise backward error
     quality (see below). If the approach fails the method switches to a
-    DOUBLE PRECISION factorization and solve.
+    complex DOUBLE PRECISION factorization and solve.
 
     The iterative refinement is not going to be a winning strategy if
-    the ratio SINGLE PRECISION performance over DOUBLE PRECISION
+    the ratio complex SINGLE PRECISION performance over DOUBLE PRECISION
     performance is too small. A reasonable strategy should take the
     number of right-hand sides and the size of the matrix into account.
     This might be done with a call to ILAENV in the future. Up to now, we
@@ -85,7 +85,7 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    A       (input or input/output) DOUBLE PRECISION array, dimension (LDA,N)
+    A       (input or input/output) COMPLEX_16 array, dimension (LDA,N)
             On entry, the symmetric matrix A.  If UPLO = 'U', the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
@@ -103,24 +103,24 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
     LDA     (input) INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    B       (input) DOUBLE PRECISION array, dimension (LDB,NRHS)
+    B       (input) COMPLEX_16 array, dimension (LDB,NRHS)
             The N-by-NRHS right hand side matrix B.
 
     LDB     (input) INTEGER
             The leading dimension of the array B.  LDB >= max(1,N).
 
-    X       (output) DOUBLE PRECISION array, dimension (LDX,NRHS)
+    X       (output) COMPLEX_16 array, dimension (LDX,NRHS)
             If INFO = 0, the N-by-NRHS solution matrix X.
 
     LDX     (input) INTEGER
             The leading dimension of the array X.  LDX >= max(1,N).
 
-    dworkd    (workspace) DOUBLE PRECISION array, dimension (N*NRHS)
+    dworkd  (workspace) COMPLEX_16 array, dimension (N*NRHS)
             This array is used to hold the residual vectors.
 
-    dworks   (workspace) REAL array, dimension (N*(N+NRHS))
-            This array is used to use the single precision matrix and the
-            right-hand sides or solutions in single precision.
+    dworks  (workspace) COMPLEX array, dimension (N*(N+NRHS))
+            This array is used to use the complex single precision matrix 
+            and the right-hand sides or solutions in single precision.
 
     ITER    (output) INTEGER
             < 0: iterative refinement has failed, double precision

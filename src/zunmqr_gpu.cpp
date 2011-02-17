@@ -32,13 +32,13 @@ magma_zunmqr_gpu(char side, char trans,
 
     Purpose
     =======
-    ZUNMQR overwrites the general real M-by-N matrix C with
+    ZUNMQR overwrites the general complex M-by-N matrix C with
 
                     SIDE = 'L'     SIDE = 'R'
     TRANS = 'N':      Q * C          C * Q
     TRANS = 'T':      Q\*\*H * C       C * Q\*\*H
 
-    where Q is a real orthogonal matrix defined as the product of k
+    where Q is a complex orthogonal matrix defined as the product of k
     elementary reflectors
 
           Q = H(1) H(2) . . . H(k)
@@ -48,7 +48,6 @@ magma_zunmqr_gpu(char side, char trans,
 
     Arguments
     =========
-
     SIDE    (input) CHARACTER*1
             = 'L': apply Q or Q\*\*H from the Left;
             = 'R': apply Q or Q\*\*H from the Right.
@@ -117,7 +116,6 @@ magma_zunmqr_gpu(char side, char trans,
     INFO    (output) INTEGER
             = 0:  successful exit
             < 0:  if INFO = -i, the i-th argument had an illegal value
-
     =====================================================================   */
 
     #define a_ref(a_1,a_2) (dA+(a_2)*(ldda) + (a_1))
