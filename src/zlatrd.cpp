@@ -84,7 +84,7 @@ magma_zlatrd(char *uplo, magma_int_t *n, magma_int_t *nb,
     =========   
     UPLO    (input) CHARACTER*1   
             Specifies whether the upper or lower triangular part of the   
-            hemmetric matrix A is stored:   
+            Hermitian matrix A is stored:   
             = 'U': Upper triangular   
             = 'L': Lower triangular   
 
@@ -95,7 +95,7 @@ magma_zlatrd(char *uplo, magma_int_t *n, magma_int_t *nb,
             The number of rows and columns to be reduced.   
 
     A       (input/output) COMPLEX_16 array, dimension (LDA,N)   
-            On entry, the hemmetric matrix A.  If UPLO = 'U', the leading   
+            On entry, the Hermitian matrix A.  If UPLO = 'U', the leading   
             n-by-n upper triangular part of A contains the upper   
             triangular part of the matrix A, and the strictly lower   
             triangular part of A is not referenced.  If UPLO = 'L', the   
@@ -166,7 +166,7 @@ magma_zlatrd(char *uplo, magma_int_t *n, magma_int_t *nb,
 
     The elements of the vectors v together form the n-by-nb matrix V   
     which is needed, with W, to apply the transformation to the unreduced   
-    part of the matrix, using a hemmetric rank-2k update of the form:   
+    part of the matrix, using a Hermitian rank-2k update of the form:   
     A := A - V*W' - W*V'.   
 
     The contents of A on exit are illustrated by the following examples   

@@ -40,7 +40,7 @@ magma_zhetrd(char uplo, magma_int_t n,
 
     Purpose   
     =======   
-    ZHETRD reduces a real hemmetric matrix A to real hemmetric   
+    ZHETRD reduces a complex Hermitian matrix A to real symmetric   
     tridiagonal form T by an orthogonal similarity transformation:   
     Q\*\*H * A * Q = T.   
 
@@ -54,7 +54,7 @@ magma_zhetrd(char uplo, magma_int_t n,
             The order of the matrix A.  N >= 0.   
 
     A       (input/output) COMPLEX_16 array, dimension (LDA,N)   
-            On entry, the hemmetric matrix A.  If UPLO = 'U', the leading   
+            On entry, the Hermitian matrix A.  If UPLO = 'U', the leading   
             N-by-N upper triangular part of A contains the upper   
             triangular part of the matrix A, and the strictly lower   
             triangular part of A is not referenced.  If UPLO = 'L', the   
@@ -120,7 +120,7 @@ magma_zhetrd(char uplo, magma_int_t n,
 
        H(i) = I - tau * v * v'
 
-    where tau is a real scalar, and v is a real vector with   
+    where tau is a complex scalar, and v is a complex vector with   
     v(i+1:n) = 0 and v(i) = 1; v(1:i-1) is stored on exit in   
     A(1:i-1,i+1), and tau in TAU(i).   
 
@@ -133,7 +133,7 @@ magma_zhetrd(char uplo, magma_int_t n,
 
        H(i) = I - tau * v * v'   
 
-    where tau is a real scalar, and v is a real vector with   
+    where tau is a complex scalar, and v is a complex vector with   
     v(1:i) = 0 and v(i+1) = 1; v(i+2:n) is stored on exit in A(i+2:n,i),   
     and tau in TAU(i).
 
