@@ -56,51 +56,27 @@ ZSRC  = zpotrf.cpp	\
         zgeev.cpp       \
         dgeev.cpp       \
         zheevd.cpp      \
-        zgesvd.cpp      \
-
-ifeq ($(PGIFORTRAN), 0)
-ZSRC := $(ZSRC) 		\
-	magma_zf77.cpp		\
-	magma_zfortran.f90	\
-	magma.f90
-else
-ZSRC := $(ZSRC) 		\
-	magma_zf77pgi.cpp
-endif
+        zgesvd.cpp
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
 SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 
-ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
-        init.cpp        \
-        auxiliary.cpp 	\
-        xerbla.cpp 	\
-        auto_tune.cpp 	\
-	get_nb.cpp
-
+ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 ALLOBJ  = $(ALLSRC:.cpp=.o)
-ALLOBJ := $(ALLOBJ:.f90=.o)
 
 all: $(LIBMAGMA)
 
 $(LIBMAGMA): $(ALLOBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
-	cp *.mod ../include
 
 .cpp.o:
 	$(CC) $(OPTS) $(INC) -c $< -o $@
 
-%.o : %.f90 
-	$(FORT) $(OPTS) $(INC) -c $< -o $@
-
 clean:
-	rm -f *.cu_o *.o *~ *.linkinfo *.mod
+	rm -f *.o *~ *.linkinfo
 
 cleanall: clean
 	rm -f *.a
 	rm -f $(LIBMAGMA)
-
-# Extra dependencies
-magma.o: magma_zfortran.o magma_cfortran.o magma_dfortran.o magma_sfortran.o 

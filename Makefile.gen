@@ -16,6 +16,7 @@ cleanmkgen:
 
 generation:
 	(cd $(MAGMA_DIR)/include   && $(MAKE) generate )
+	(cd $(MAGMA_DIR)/control   && $(MAKE) generate )
 	(cd $(MAGMA_DIR)/src       && $(MAKE) generate )
 	(cd $(MAGMA_DIR)/magmablas && $(MAKE) generate )
 	(cd $(MAGMA_DIR)/testing   && $(MAKE) generate )

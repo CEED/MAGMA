@@ -16,6 +16,7 @@ lib: libquark libmagma libmagmablas
 clean: cleanall
 
 libmagma:
+	( cd control     && $(MAKE) )
 	( cd src         && $(MAKE) )
 
 libmagmablas:
@@ -30,6 +31,7 @@ test:
 
 clean:
 	( cd include     && $(MAKE) clean )
+	( cd control     && $(MAKE) clean )
 	( cd src         && $(MAKE) clean )
 	( cd quark       && $(MAKE) clean )
 	( cd testing     && $(MAKE) clean )
@@ -38,6 +40,7 @@ clean:
 
 cleanall:
 	( cd include     && $(MAKE) cleanall )
+	( cd control     && $(MAKE) cleanall )
 	( cd src         && $(MAKE) cleanall )
 	( cd quark       && $(MAKE) cleanall )
 	( cd testing     && $(MAKE) cleanall )
