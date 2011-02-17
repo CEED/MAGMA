@@ -37,7 +37,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 
     Purpose   
     =======   
-    ZLABRD reduces the first NB rows and columns of a real general   
+    ZLABRD reduces the first NB rows and columns of a complex general   
     m by n matrix A to upper or lower bidiagonal form by an orthogonal   
     transformation Q' * A * P, and returns the matrices X and Y which   
     are needed to apply the transformation to the unreduced part of A.   
@@ -121,7 +121,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 
        H(i) = I - tauq * v * v'  and G(i) = I - taup * u * u'   
 
-    where tauq and taup are real scalars, and v and u are real vectors.   
+    where tauq and taup are complex scalars, and v and u are complex vectors.   
 
     If m >= n, v(1:i-1) = 0, v(i) = 1, and v(i:m) is stored on exit in   
     A(i:m,i); u(1:i) = 0, u(i+1) = 1, and u(i+1:n) is stored on exit in   

@@ -36,7 +36,7 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
 
     Purpose
     =======
-    ZLARFB applies a real block reflector H or its transpose H' to a
+    ZLARFB applies a complex block reflector H or its transpose H' to a
     COMPLEX_16 m by n matrix C, from the left.
 
     Arguments

@@ -99,7 +99,7 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 
        H(i) = I - tau * v * v'   
 
-    where tau is a real scalar, and v is a real vector with   
+    where tau is a complex scalar, and v is a complex vector with   
     v(1:i) = 0, v(i+1) = 1 and v(ihi+1:n) = 0; v(i+2:ihi) is stored on   
     exit in A(i+2:ihi,i), and tau in TAU(i).   
 

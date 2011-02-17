@@ -68,17 +68,17 @@ magma_zlatrd(char *uplo, magma_int_t *n, magma_int_t *nb,
 
     Purpose   
     =======   
-    SLATRD reduces NB rows and columns of a real hemmetric matrix A to   
-    hemmetric tridiagonal form by an orthogonal similarity   
+    ZLATRD reduces NB rows and columns of a complex Hermitian matrix A to   
+    Hermitian tridiagonal form by an orthogonal similarity   
     transformation Q' * A * Q, and returns the matrices V and W which are   
     needed to apply the transformation to the unreduced part of A.   
 
-    If UPLO = 'U', SLATRD reduces the last NB rows and columns of a   
+    If UPLO = 'U', ZLATRD reduces the last NB rows and columns of a   
     matrix, of which the upper triangle is supplied;   
-    if UPLO = 'L', SLATRD reduces the first NB rows and columns of a   
+    if UPLO = 'L', ZLATRD reduces the first NB rows and columns of a   
     matrix, of which the lower triangle is supplied.   
 
-    This is an auxiliary routine called by SSYTRD.   
+    This is an auxiliary routine called by ZHETRD.   
 
     Arguments   
     =========   
@@ -147,7 +147,7 @@ magma_zlatrd(char *uplo, magma_int_t *n, magma_int_t *nb,
 
        H(i) = I - tau * v * v'   
 
-    where tau is a real scalar, and v is a real vector with   
+    where tau is a complex scalar, and v is a complex vector with   
     v(i:n) = 0 and v(i-1) = 1; v(1:i-1) is stored on exit in A(1:i-1,i),   
     and tau in TAU(i-1).   
 
@@ -160,7 +160,7 @@ magma_zlatrd(char *uplo, magma_int_t *n, magma_int_t *nb,
 
        H(i) = I - tau * v * v'   
 
-    where tau is a real scalar, and v is a real vector with   
+    where tau is a complex scalar, and v is a complex vector with   
     v(1:i) = 0 and v(i+1) = 1; v(i+1:n) is stored on exit in A(i+1:n,i),   
     and tau in TAU(i).   
 

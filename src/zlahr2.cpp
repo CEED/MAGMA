@@ -38,7 +38,7 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
     Purpose   
     =======   
 
-    SLAHR2 reduces the first NB columns of a real general n-BY-(n-k+1)   
+    SLAHR2 reduces the first NB columns of a complex general n-BY-(n-k+1)   
     matrix A so that elements below the k-th subdiagonal are zero. The   
     reduction is performed by an orthogonal similarity transformation   
     Q' * A * Q. The routine returns the matrices V and T which determine   
@@ -69,22 +69,23 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
             product of elementary reflectors. The other columns of A are   
             unchanged. See Further Details.   
 
-    DV      
+    DV      (output) COMPLEX_16 array on the GPU, dimension (N, NB)
+            On exit this contains the Householder vectors of the transformation.
 
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,N).   
 
-    TAU     (output) DOUBLE PRECISION array, dimension (NB)   
+    TAU     (output) COMPLEX_16 array, dimension (NB)   
             The scalar factors of the elementary reflectors. See Further   
             Details.   
 
-    T       (output) DOUBLE PRECISION array, dimension (LDT,NB)   
+    T       (output) COMPLEX_16 array, dimension (LDT,NB)   
             The upper triangular matrix T.   
 
     LDT     (input) INTEGER   
             The leading dimension of the array T.  LDT >= NB.   
 
-    Y       (output) DOUBLE PRECISION array, dimension (LDY,NB)   
+    Y       (output) COMPLEX_16 array, dimension (LDY,NB)   
             The n-by-nb matrix Y.   
 
     LDY     (input) INTEGER   
@@ -92,7 +93,6 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
 
     Further Details   
     ===============   
-
     The matrix Q is represented as a product of nb elementary reflectors   
 
        Q = H(1) H(2) . . . H(nb).   
@@ -101,7 +101,7 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
 
        H(i) = I - tau * v * v'   
 
-    where tau is a real scalar, and v is a real vector with   
+    where tau is a complex scalar, and v is a complex vector with   
     v(1:i+k-1) = 0, v(i+k) = 1; v(i+k+1:n) is stored on exit in   
     A(i+k+1:n,i), and tau in TAU(i).   
 

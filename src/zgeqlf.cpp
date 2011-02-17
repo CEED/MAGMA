@@ -28,7 +28,7 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
     Purpose
     =======
 
-    SGEQLF computes a QL factorization of a real M-by-N matrix A:
+    SGEQLF computes a QL factorization of a COMPLEX_16 M-by-N matrix A:
     A = Q * L.
 
     Arguments
@@ -92,10 +92,9 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
 
        H(i) = I - tau * v * v'
 
-    where tau is a real scalar, and v is a real vector with
+    where tau is a complex scalar, and v is a complex vector with
     v(m-k+i+1:m) = 0 and v(m-k+i) = 1; v(1:m-k+i-1) is stored on exit in
     A(1:m-k+i-1,n-k+i), and tau in TAU(i).
-
     =====================================================================    */
 
     #define  a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))

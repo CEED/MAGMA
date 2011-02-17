@@ -41,7 +41,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
 
     Purpose
     =======
-    ZGEBRD reduces a general real M-by-N matrix A to upper or lower
+    ZGEBRD reduces a general complex M-by-N matrix A to upper or lower
     bidiagonal form B by an orthogonal transformation: Q\*\*H * A * P = B.
 
     If m >= n, B is upper bidiagonal; if m < n, B is lower bidiagonal.
@@ -119,7 +119,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
        Q = H(1) H(2) . . . H(n)  and  P = G(1) G(2) . . . G(n-1)
     Each H(i) and G(i) has the form:
        H(i) = I - tauq * v * v'  and G(i) = I - taup * u * u'
-    where tauq and taup are real scalars, and v and u are real vectors;
+    where tauq and taup are complex scalars, and v and u are complex vectors;
     v(1:i-1) = 0, v(i) = 1, and v(i+1:m) is stored on exit in A(i+1:m,i);
     u(1:i) = 0, u(i+1) = 1, and u(i+2:n) is stored on exit in A(i,i+2:n);
     tauq is stored in TAUQ(i) and taup in TAUP(i).
@@ -128,7 +128,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
        Q = H(1) H(2) . . . H(m-1)  and  P = G(1) G(2) . . . G(m)
     Each H(i) and G(i) has the form:
        H(i) = I - tauq * v * v'  and G(i) = I - taup * u * u'
-    where tauq and taup are real scalars, and v and u are real vectors;
+    where tauq and taup are complex scalars, and v and u are complex vectors;
     v(1:i) = 0, v(i+1) = 1, and v(i+2:m) is stored on exit in A(i+2:m,i);
     u(1:i-1) = 0, u(i) = 1, and u(i+1:n) is stored on exit in A(i,i+1:n);
     tauq is stored in TAUQ(i) and taup in TAUP(i).
