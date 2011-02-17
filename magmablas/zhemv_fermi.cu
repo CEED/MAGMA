@@ -986,4 +986,4 @@ magmablas_zhemv_200( char uplo, magma_int_t n,
     return MAGMA_SUCCESS;
 }
 
-#endif /* (!defined(PRECISION_z)) || (GPUSHMEM >= 200) */
+#endif /* (GPUSHMEM >= 200) */
