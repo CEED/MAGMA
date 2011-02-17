@@ -8,6 +8,8 @@
 MAGMA_DIR = ..
 include ../Makefile.internal
 
+INC += -I$(MAGMA_DIR)/control
+
 ZHDR  = commonblas_z.h
 CHDR  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZHDR)" -o -p c)
 DHDR  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZHDR)" -o -p "d ds")
@@ -33,10 +35,10 @@ ZSRC  = zauxiliary.cu	\
 	zlag2c.cu       \
 	clag2z.cu       \
 	zlat2c.cu       \
+	zhemv_fermi.cu
 
 ifeq (${GPU_TARGET}, 1)
-ZSRC += zhemv_fermi.cu	\
-	zsymv_fermi.cu
+ZSRC += zsymv_fermi.cu
 endif	
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
@@ -63,10 +65,10 @@ TESLASRC =      sgemv_tesla.cu	\
 	        zgemv_tesla.cu 	\
 	        ssymv_tesla.cu 	\
 	        dsymv_tesla.cu 	\
-		csymv_tesla.cu \
-		zsymv_tesla.cu \
-	        chemv_tesla.cu 	\
-	        zhemv_tesla.cu 	\
+		csymv_tesla.cu	\
+		zsymv_tesla.cu	\
+		chemv_tesla.cu	\
+		zhemv_tesla.cu	\
 	        gemv32_tesla.cu \
                 strsm_tesla.cu  \
                 dtrsm_tesla.cu  \
