@@ -27,9 +27,7 @@
 */
 int main( int argc, char** argv) 
 {
-    cuInit( 0 );
-    cublasInit( );
-    printout_devices( );
+    TESTING_CUDA_INIT();
 
     cuDoubleComplex *h_A, *h_R, *h_work;
     double *rwork, *w1, *w2;
@@ -70,44 +68,19 @@ int main( int argc, char** argv)
     n2  = N * N;
 
     /* Allocate host memory for the matrix */
-    h_A = (cuDoubleComplex*)malloc(n2 * sizeof(h_A[0]));
-    if (h_A == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (A)\n");
-    }
-
-    w1 = (double*)malloc(N * sizeof(double));
-    if (w1 == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (w1)\n");
-    }
-    w2 = (double*)malloc(N * sizeof(double));
-    if (w1 == 0) {
-      fprintf (stderr, "!!!! host memory allocation error (w2)\n");
-    }
-
-    cudaMallocHost( (void**)&h_R,  n2*sizeof(cuDoubleComplex) );
-    if (h_R == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (R)\n");
-    }
+    TESTING_MALLOC(   h_A, cuDoubleComplex, n2);
+    TESTING_MALLOC(    w1, double         ,  N);
+    TESTING_MALLOC(    w2, double         ,  N);
+    TESTING_HOSTALLOC(h_R, cuDoubleComplex, n2);
 
     magma_int_t nb = 128;//magma_get_zheevd_nb(N);
     magma_int_t lwork = N*nb + N*N;
     magma_int_t lrwork = 1 + 5*N +2*N*N;
     magma_int_t liwork = 3 + 5*N;
 
-    cudaMallocHost( (void**)&h_work, lwork*sizeof(cuDoubleComplex) );
-    if (h_work == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (work)\n");
-    }
-    
-    rwork = (double*)malloc(lrwork * sizeof(double));
-    if (rwork == 0) {
-      fprintf (stderr, "!!!! host memory allocation error (rwork)\n");
-    }
-
-    iwork = (magma_int_t*)malloc(liwork * sizeof(magma_int_t));
-    if (iwork == 0) {
-      fprintf (stderr, "!!!! host memory allocation error (iwork)\n");
-    }
+    TESTING_HOSTALLOC(h_work, cuDoubleComplex,  lwork);
+    TESTING_MALLOC(    rwork,          double, lrwork);
+    TESTING_MALLOC(    iwork,     magma_int_t, liwork);
     
     printf("\n\n");
     printf("  N     CPU Time(s)    GPU Time(s)     ||R||_F / ||A||_F\n");
@@ -128,9 +101,8 @@ int main( int argc, char** argv)
 		     rwork, &lrwork, 
 		     iwork, &liwork, 
 		     &info);
-
-        for(j=0; j<n2; j++)
-            h_R[j] = h_A[j];
+	
+	lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
 
         /* ====================================================================
            Performs operation using MAGMA
@@ -178,19 +150,16 @@ int main( int argc, char** argv)
         if (argc != 1)
             break;
     }
-
+ 
     /* Memory clean up */
-    free(h_A);
-    free(w1);
-    free(w2);
-    free(rwork);
-    free(iwork);
-    cublasFree(h_work);
-    cublasFree(h_R);
+    TESTING_FREE(       h_A);
+    TESTING_FREE(        w1);
+    TESTING_FREE(        w2);
+    TESTING_FREE(     rwork);
+    TESTING_FREE(     iwork);
+    TESTING_HOSTFREE(h_work);
+    TESTING_HOSTFREE(   h_R);
 
     /* Shutdown */
-    status = cublasShutdown();
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! shutdown error (A)\n");
-    }
+    TESTING_CUDA_FINALIZE();
 }

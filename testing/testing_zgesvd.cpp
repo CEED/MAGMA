@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        November 2010
 
-       to go to real 'w' must be changed to 'wr', 'wi' everywhere
+       @precisions normal z -> s d c
 
 */
 
