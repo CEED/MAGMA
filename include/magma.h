@@ -20,31 +20,6 @@
 #include "magma_lapack.h"
 
 /* ------------------------------------------------------------
- * MAGMA Context
- * --------------------------------------------------------- */
-typedef struct context
-{
-  /* Number of CPU core in this context */
-  magma_int_t num_cores;
-
-  /* Number of GPUs in this context */
-  magma_int_t num_gpus;
-
-  /* GPU contexts */
-  CUcontext *gpu_context;
-
-  /* QUARK scheduler */
-  Quark *quark;
-
-  /* Block size, internally used for some algorithms */
-  magma_int_t nb;
-
-  /* Pointer to other global algorithm-dependent parameters */ 
-  void *params;
-
-} magma_context;
-
-/* ------------------------------------------------------------
  * MAGMA functions
  * --------------------------------------------------------- */
 #include "magma_z.h"
@@ -194,14 +169,6 @@ extern "C" {
  *   -- MAGMA function definitions
  * --------------------------------------------------------- */
 void magma_xerbla(const char *name, magma_int_t *info);
-magma_context *magma_init(void *, void* (*func)(void *a), magma_int_t nthread, magma_int_t ncpu, magma_int_t ngpu,
-			  magma_int_t argc, char **argv);
-void magma_finalize(magma_context *cntxt);
-
-void auto_tune(char algorithm, char precision, magma_int_t ncores, magma_int_t ncorespsocket,
-               magma_int_t m, magma_int_t n, magma_int_t *nb, magma_int_t *ob, magma_int_t *ib,
-               magma_int_t *nthreads, magma_int_t *nquarkthreads);  
-
 
 #ifdef __cplusplus
 }
