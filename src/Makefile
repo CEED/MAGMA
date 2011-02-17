@@ -54,6 +54,7 @@ ZSRC  = zpotrf.cpp	\
         zcgeqrsv_gpu.cpp\
         \
         zgeev.cpp       \
+        dgeev.cpp       \
         zheevd.cpp      \
         zgesvd.cpp      \
 
