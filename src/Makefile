@@ -9,6 +9,8 @@
 MAGMA_DIR = ..
 include ../Makefile.internal
 
+INC += -I$(MAGMA_DIR)/control
+
 ZSRC  = zpotrf.cpp	\
         zpotrf_gpu.cpp	\
         zpotrs_gpu.cpp	\
