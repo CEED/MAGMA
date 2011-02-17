@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        November 2010
 
-    @precisions normal z -> c d s
+    @precisions normal z -> c
 
 */
 
