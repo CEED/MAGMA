@@ -8,13 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include "magma.h"
-#include "magmablas.h"
+#include "common_magma.h"
 
 #define A(i, j)  (a + (j)*lda  + (i))
 #define dA(i, j) (da+ (j)*ldda + (i))
@@ -149,8 +143,6 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     the vector defining G(i).
     =====================================================================    */
 
-    #define max(a,b) ((a) >= (b) ? (a) : (b))
-    #define min(a,b)  (((a)<(b))?(a):(b))
 
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
@@ -298,5 +290,3 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     return MAGMA_SUCCESS;
 } /* zgebrd_ */
 
-#undef max
-#undef min

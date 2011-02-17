@@ -8,12 +8,7 @@
        @precisions mixed zc -> ds
 
 */
-#include <stdio.h>
-#include <math.h>
-#include <cublas.h>
-#include <cuda.h>
-#include "magma.h"
-#include "magmablas.h"
+#include "common_magma.h"
 
 #define ITERMAX 30
 #define BWDMAX 1.0
@@ -145,7 +140,6 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
 
     =====================================================================    */
 
-  #define max(a,b)       (((a)>(b))?(a):(b))
 
     cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
     cuDoubleComplex zone  = MAGMA_Z_ONE;
@@ -283,4 +277,3 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
     return ret;
 }
 
-#undef max

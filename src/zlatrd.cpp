@@ -8,49 +8,9 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include <cblas.h>
-#include "magma.h"
-#include "magmablas.h"
+#include "common_magma.h"
 
 #define PRECISION_z
-
-#if defined(PRECISION_z) || defined(PRECISION_c)
-static inline
-cuDoubleComplex
-operator*(cuDoubleComplex &u, const float &v) {
-  cuDoubleComplex t;
-  t.x = u.x * v;
-  t.y = u.y * v;
-  return t;
-}
-
-#if defined(PRECISION_z)
-static inline
-cuDoubleComplex
-operator*(cuDoubleComplex &u, const double &v) {
-  cuDoubleComplex t;
-  t.x = u.x * v;
-  t.y = u.y * v;
-  return t;
-}
-#endif
-
-static inline
-cuDoubleComplex
-operator*(const cuDoubleComplex &u, const cuDoubleComplex &v) {
-  cuDoubleComplex t;
-  t.x = u.x*v.x - u.y*v.y;
-  t.y = u.x*v.y + u.y*v.x;
-  return t;
-}
-#else
-// #define cublasZhemv magmablas_zhemv
-#endif /* defined(PRECISION_z) || defined(PRECISION_c)*/
 
 extern "C" magma_int_t 
 magma_zlatrd(char *uplo, magma_int_t *n, magma_int_t *nb, 
@@ -185,7 +145,6 @@ magma_zlatrd(char *uplo, magma_int_t *n, magma_int_t *nb,
     an element of the vector defining H(i).   
     =====================================================================    */
  
-    #define min(a,b)  (((a)<(b))?(a):(b))
 
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
@@ -394,4 +353,3 @@ magma_zlatrd(char *uplo, magma_int_t *n, magma_int_t *nb,
     return 0;
 } /* zlatrd_ */
 
-#undef min

@@ -8,11 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdio.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include "magma.h"
+#include "common_magma.h"
 
 // === Define what BLAS to use ============================================
 #define PRECISION_z

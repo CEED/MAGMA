@@ -8,16 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdio.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include "magma.h"
-
-#define min(a,b)  (((a)<(b))?(a):(b))
-#define max(a,b)  (((a)>(b))?(a):(b))
-
-#include <pthread.h>
+#include "common_magma.h"
 
 /* ------------------------------------------------------------
  * MAGMA QR params
@@ -237,5 +228,3 @@ magma_zgeqrf3(magma_context *cntxt, magma_int_t m, magma_int_t n,
     qr_params->sync2 = 1;
 }
 
-#undef min
-#undef max

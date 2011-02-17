@@ -9,12 +9,8 @@
 
 */
 
-#include <stdio.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
+#include "common_magma.h"
 #include <cblas.h>
-#include "magma.h"
-#include "magmablas.h"
 
 #define PRECISION_d
 
@@ -123,9 +119,6 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
                   converged.   
     =====================================================================    */
 
-    #define min(a,b)       (((a)<(b))?(a):(b))
-    #define max(a,b)       (((a)>(b))?(a):(b))
-
     /* TODO: replace this by magma_get_nb */
     extern magma_int_t ilaenv_(magma_int_t *, const char *, const char *, magma_int_t *, magma_int_t *, 
                                magma_int_t *, magma_int_t *, magma_int_t, magma_int_t);
@@ -147,7 +140,7 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
     magma_int_t scalea;
     double cscale;
     double bignum;
-    magma_int_t minwrk, maxwrk;
+    magma_int_t minwrk, maxwrk = -1;
     magma_int_t wantvl;
     double smlnum;
     magma_int_t hswork;

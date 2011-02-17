@@ -8,12 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdio.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include "magma.h"
-#include "magmablas.h"
+#include "common_magma.h"
 
 // === Define what BLAS to use ============================================
 #define PRECISION_z
@@ -84,8 +79,6 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
     =====================================================================    */
 
 #define inAT(i,j) (dAT + (i)*nb*ldda + (j)*nb)
-#define max(a,b)  (((a)>(b))?(a):(b))
-#define min(a,b)  (((a)<(b))?(a):(b))
 
     cuDoubleComplex *dAT, *dA, *da, *work;
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
@@ -259,5 +252,3 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
 } /* magma_zgetrf */
 
 #undef inAT
-#undef max
-#undef min

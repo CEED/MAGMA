@@ -8,13 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include "magma.h"
+#include "common_magma.h"
 
 void zsplit_diag_block(int ib, cuDoubleComplex *a, int lda, cuDoubleComplex *work){
     int i, j, info;
@@ -114,8 +108,6 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
     #define dd_ref(a_1)    (dT+(2*lddwork+(a_1))*nb)
     #define work_ref(a_1)  ( work + (a_1))
     #define hwork          ( work + (nb)*(m))
-    #define min(a,b)       (((a)<(b))?(a):(b))
-    #define max(a,b)       (((a)>(b))?(a):(b))
 
     magma_int_t i, k, old_i, old_ib, rows, cols;
     magma_int_t ib, nb;
@@ -255,5 +247,3 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
 #undef t_ref
 #undef d_ref
 #undef work_ref
-#undef min
-#undef max

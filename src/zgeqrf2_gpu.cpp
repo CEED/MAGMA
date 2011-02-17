@@ -8,12 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include "magma.h"
+#include "common_magma.h"
 
 extern "C" magma_int_t
 magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
@@ -83,8 +78,6 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
     #define dA(a_1,a_2)    ( dA+(a_2)*(ldda) + (a_1))
     #define work_ref(a_1)  ( work + (a_1))
     #define hwork          ( work + (nb)*(m))
-    #define min(a,b)       (((a)<(b))?(a):(b))
-    #define max(a,b)       (((a)>(b))?(a):(b))
 
     cuDoubleComplex *dwork;
     cuDoubleComplex *work;

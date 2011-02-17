@@ -26,6 +26,8 @@
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
+#include <math.h>
+#include <string.h>
 
 #if defined( _WIN32 ) || defined( _WIN64 )
 #include "magmawinthread.h"

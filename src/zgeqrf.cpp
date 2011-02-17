@@ -8,11 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdio.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include "magma.h"
+#include "common_magma.h"
 
 extern "C" magma_int_t
 magma_zgeqrf(magma_int_t m, magma_int_t n, 
@@ -96,8 +92,6 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
 
     #define  a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
     #define da_ref(a_1,a_2) (da+(a_2)*ldda  + (a_1))
-    #define min(a,b)  (((a)<(b))?(a):(b))
-    #define max(a,b)  (((a)>(b))?(a):(b))
 
     cuDoubleComplex *da, *dwork;
     cuDoubleComplex c_one = MAGMA_Z_ONE;
@@ -225,5 +219,3 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
     return MAGMA_SUCCESS;
 } /* magma_zgeqrf */
 
-#undef min
-#undef max

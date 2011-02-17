@@ -8,13 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include "magma.h"
-#include "magmablas.h"
+#include "common_magma.h"
 
 extern "C" magma_int_t 
 magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi, 
@@ -119,8 +113,6 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     May 24, 2009.
     =====================================================================    */
 
-    #define min(a,b) ((a) <= (b) ? (a) : (b))
-    #define max(a,b) ((a) >= (b) ? (a) : (b))
 
     cuDoubleComplex c_one = MAGMA_Z_ONE;
     cuDoubleComplex c_zero = MAGMA_Z_ZERO;
@@ -270,5 +262,3 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     return 0;
 } /* magma_zgehrd2 */
 
-#undef min
-#undef max

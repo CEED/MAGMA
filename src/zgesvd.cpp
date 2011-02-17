@@ -8,12 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdio.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include "magma.h"
-#include "magmablas.h"
+#include "common_magma.h"
 
 //#define lapackf77_zgebrd MAGMA_ZGEBRD
 
@@ -148,8 +143,6 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
     ===================================================================== */
 
-    #define min(a,b)       (((a)<(b))?(a):(b))
-    #define max(a,b)       (((a)>(b))?(a):(b))
 
     static cuDoubleComplex c_b1 = MAGMA_Z_ZERO;
     static cuDoubleComplex c_b2 = MAGMA_Z_ONE;

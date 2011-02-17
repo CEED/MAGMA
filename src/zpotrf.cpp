@@ -8,12 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdio.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include "magma.h"
-#include "magmablas.h"
+#include "common_magma.h"
 
 // === Define what BLAS to use ============================================
 #define PRECISION_z
@@ -96,8 +91,6 @@ magma_zpotrf(char uplo, magma_int_t n,
 
     =====================================================================    */
 
-    #define min(a,b)  (((a)<(b))?(a):(b))
-    #define max(a,b)  (((a)>(b))?(a):(b))
 
     /* Local variables */
     char uplo_[2] = {uplo, 0};

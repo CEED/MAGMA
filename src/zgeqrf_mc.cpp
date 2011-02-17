@@ -8,19 +8,11 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <cublas.h>
-#include <magma.h>
-#include <quark.h>
+#include "common_magma.h"
 
 #define  A(m,n) (a+(n)*(*lda)+(m))
 #define  T(m) (work+(m)*(nb))
 #define  W(k,n) &(local_work[(mt)*(n-1)+(k)])
-#define min(a,b)  (((a)<(b))?(a):(b))
-#define max(a,b)  (((a)>(b))?(a):(b))
 
 void getro (char *trans, const magma_int_t m, const magma_int_t n, 
 	    const cuDoubleComplex *A, const magma_int_t LDA, 
@@ -598,6 +590,4 @@ magma_zgeqrf_mc( magma_context *cntxt, magma_int_t *m, magma_int_t *n,
 #undef A
 #undef T
 #undef W
-#undef min
-#undef max
 

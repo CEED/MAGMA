@@ -8,13 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdio.h>
-#include <math.h>
-#include <cuda.h>
-#include <cublas.h>
-#include "magma.h"
-#include "magmablas.h"
+#include "common_magma.h"
 
 // === Define what BLAS to use ============================================
 #define PRECISION_z
@@ -73,7 +67,6 @@ magma_zpotrs_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
             = 0:  successful exit
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================   */
-    #define max(a,b) (((a)>(b))?(a):(b))
 
     cuDoubleComplex c_one = MAGMA_Z_ONE;
     

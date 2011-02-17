@@ -8,12 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include "magma.h"
+#include "common_magma.h"
 
 extern "C" int 
 magma_ztsqrt_gpu(int *m, int *n, 
@@ -107,8 +102,6 @@ magma_ztsqrt_gpu(int *m, int *n,
    #define work_a1        ( work )
    #define work_a2        ( work + nb ) 
    #define hwork          ( work + (nb)*(*m))
-   #define min(a,b)       (((a)<(b))?(a):(b))
-   #define max(a,b)       (((a)>(b))?(a):(b))
 
    int i, k, ldwork, lddwork, old_i, old_ib, rows, cols;
    int nbmin, ib, ldda;
@@ -238,5 +231,3 @@ magma_ztsqrt_gpu(int *m, int *n,
 #undef hwork 
 #undef work_a1
 #undef work_a2
-#undef min
-#undef max

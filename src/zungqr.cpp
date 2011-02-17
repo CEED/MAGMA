@@ -8,12 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdio.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include "magma.h"
-
+#include "common_magma.h"
 
 extern "C" magma_int_t
 magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
@@ -86,8 +81,6 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
     #define  a_ref(i,j)     ( a + (j)*lda  + (i))
     #define da_ref(i,j)     (da + (j)*ldda + (i))
     #define t_ref(a_1)      (dT+(a_1)*nb)
-    #define min(a,b)        (((a)<(b))?(a):(b))
-    #define max(a,b)        (((a)>(b))?(a):(b))
 
     magma_int_t  i__1, i__2, i__3;
     magma_int_t lwork, ldda;
@@ -215,5 +208,3 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
 #undef da_ref
 #undef a_ref
 #undef t_ref
-#undef min
-#undef max

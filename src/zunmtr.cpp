@@ -8,11 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdio.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include "magma.h"
+#include "common_magma.h"
 
 extern "C" int
 magma_zunmtr(char *side, char *uplo, char *trans,
@@ -114,8 +110,6 @@ magma_zunmtr(char *side, char *uplo, char *trans,
 
     =====================================================================    */
 
-    #define min(a,b)  (((a)<(b))?(a):(b))
-    #define max(a,b)  (((a)>(b))?(a):(b))
    
     cuDoubleComplex c_one = MAGMA_Z_ONE;
 
@@ -225,8 +219,6 @@ magma_zunmtr(char *side, char *uplo, char *trans,
 
 } /* zunmtr_ */
 
-#undef max
-#undef min
 
 /*
   lapackf77_zunmtr("L", "L", "N", n, n, &a[a_offset], lda, &work[indtau], 

@@ -8,11 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdio.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include "magma.h"
+#include "common_magma.h"
 
 extern "C" magma_int_t
 magma_zunghr(magma_int_t n, magma_int_t ilo, magma_int_t ihi, 
@@ -75,8 +71,6 @@ magma_zunghr(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     ===================================================================== */
 
     #define a_ref(i,j)( a + (j)*lda+ (i))
-    #define min(a,b)  (((a)<(b))?(a):(b))
-    #define max(a,b)  (((a)>(b))?(a):(b))
 
     magma_int_t i, j, nh, iinfo;
 
@@ -137,5 +131,3 @@ magma_zunghr(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 } /* magma_zunghr */
 
 #undef a_ref
-#undef min
-#undef max

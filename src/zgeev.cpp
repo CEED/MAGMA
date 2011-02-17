@@ -8,13 +8,8 @@
        @precisions normal z -> c
 
 */
-
-#include <stdio.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
+#include "common_magma.h"
 #include <cblas.h>
-#include "magma.h"
-#include "magmablas.h"
 
 #define PRECISION_z
 
@@ -123,8 +118,6 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
                   converged.   
     =====================================================================    */
 
-    #define min(a,b)       (((a)<(b))?(a):(b))
-    #define max(a,b)       (((a)>(b))?(a):(b))
 
     /* TODO: replace this by magma_get_nb */
     extern magma_int_t ilaenv_(magma_int_t *, const char *, const char *, magma_int_t *, magma_int_t *, 

@@ -8,18 +8,9 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <cublas.h>
-#include <magma.h>
-#include <quark.h>
+#include "common_magma.h"
 
 #define  A(m,n) (a+(n)*(*lda)+(m))
-#define min(a,b)  (((a)<(b))?(a):(b))
-#define max(a,b)  (((a)>(b))?(a):(b))
-
 
 /* Task execution code */
 static void SCHED_zgemm(Quark* quark)
@@ -452,6 +443,4 @@ magma_zgetrf_mc(magma_context *cntxt,
 }
 
 #undef A
-#undef min
-#undef max
 
