@@ -32,11 +32,6 @@ ZSRC  = zpotrf.cpp	\
 	zcgetrs_gpu.cpp	\
 	\
 	zgeqrf.cpp	\
-        zgeqrf_mc.cpp	\
-        zgetrf_mc.cpp	\
-        zpotrf_mc.cpp	\
-        zgeqrf-v2.cpp   \
-        zgeqrf-v3.cpp   \
         zgehrd.cpp 	\
         zgehrd2.cpp     \
         zlahru.cpp 	\

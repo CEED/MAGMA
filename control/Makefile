@@ -24,10 +24,8 @@ DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
 SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 
 ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
-        init.cpp        \
         auxiliary.cpp 	\
         xerbla.cpp 	\
-        auto_tune.cpp 	\
 	get_nb.cpp
 
 ALLOBJ  = $(ALLSRC:.cpp=.o)

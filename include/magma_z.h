@@ -36,25 +36,9 @@ magma_int_t magma_zgelqf( magma_int_t m, magma_int_t n,
 magma_int_t magma_zgeqlf( magma_int_t m, magma_int_t n, 
                           cuDoubleComplex *A,    magma_int_t lda,   cuDoubleComplex *tau, 
                           cuDoubleComplex *work, magma_int_t lwork, magma_int_t *info);
-magma_int_t magma_zgeqrf_mc(magma_context *cntxt, magma_int_t *m, magma_int_t *n, 
-                          cuDoubleComplex *A, magma_int_t *lda, 
-			  cuDoubleComplex *tau, cuDoubleComplex *work, 
-			  magma_int_t *lwork, magma_int_t *info);
 magma_int_t magma_zgeqrf( magma_int_t m, magma_int_t n, cuDoubleComplex *A, 
 			  magma_int_t lda, cuDoubleComplex *tau, cuDoubleComplex *work, 
 			  magma_int_t lwork, magma_int_t *info);
-magma_int_t magma_zgetrf_mc( magma_context *cntxt,
-			  magma_int_t *m, magma_int_t *n, cuDoubleComplex *A, 
-			  magma_int_t *lda, magma_int_t *ipiv, 
-			  magma_int_t *info);
-magma_int_t magma_zgeqrf2(magma_context *cntxt, magma_int_t m, magma_int_t n,
-			  cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *tau,
-			  cuDoubleComplex *work, magma_int_t lwork,
-			  magma_int_t *info);
-magma_int_t magma_zgeqrf3(magma_context *cntxt, magma_int_t m, magma_int_t n,
-			  cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *tau,
-			  cuDoubleComplex *work, magma_int_t lwork,
-			  magma_int_t *info);
 magma_int_t magma_zgetrf( magma_int_t m, magma_int_t n, cuDoubleComplex *A, 
 			  magma_int_t lda, magma_int_t *ipiv, 
 			  magma_int_t *info);
@@ -71,8 +55,6 @@ magma_int_t magma_zlahru( magma_int_t m, magma_int_t n, magma_int_t nb,
 			  cuDoubleComplex *dwork);
 magma_int_t magma_zpotrf( char uplo, magma_int_t n, cuDoubleComplex *A, 
 			  magma_int_t lda, magma_int_t *info);
-magma_int_t magma_zpotrf_mc( magma_context *cntxt, char *uplo, magma_int_t *n, cuDoubleComplex *A, 
-			  magma_int_t *lda, magma_int_t *info);
 magma_int_t magma_zhetrd( char uplo, magma_int_t n, cuDoubleComplex *A, 
 			  magma_int_t lda, double *d, double *e, 
 			  cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t lwork, 

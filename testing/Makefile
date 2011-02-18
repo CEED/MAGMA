@@ -24,11 +24,7 @@ ZSRC  = testing_zgemm.cpp	\
 	testing_zcposv_gpu.cpp	\
 	testing_zcgesv_gpu.cpp	\
 	testing_zswap.cpp 	\
-        testing_zgetrf_mc.cpp   \
-        testing_zgeqrf_mc.cpp   \
-        testing_zpotrf_mc.cpp   \
         testing_zgeqrf.cpp 	\
-        testing_zgeqrf-v2.cpp   \
         testing_zgeqlf.cpp 	\
         testing_zgelqf.cpp 	\
         testing_zgehrd.cpp 	\

@@ -42,8 +42,8 @@ l_zlat2c_special (int n, cuDoubleComplex* A, int lda,  cuFloatComplex *SA , int 
     int break_d  =   blockIdx.x* dgemv_bs ;
     cuDoubleComplex temp ;
     for(int  i=0; i<break_d; i += dgemv_bs ){
-#pragma unroll 8
-        for(int j=0; j < dgemv_bs ; j+=4){
+        #pragma unroll 8
+        for(int j=0; j < dgemv_bs; j+=4){
             temp = A[j*lda] ;
             if( (cuCreal(temp) < mRMAX) || (cuCreal(temp) > RMAX)
 #if defined(PRECISION_z) || defined(PRECISION_c)
