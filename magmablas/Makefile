@@ -35,13 +35,10 @@ ZSRC  = zauxiliary.cu	\
 	zlag2c.cu       \
 	clag2z.cu       \
 	zlat2c.cu       \
+	zsymv_fermi.cu	\
 	zhemv_fermi.cu	\
 	zhemv_tesla.cu	\
 	chemv_tesla.cu
-
-ifeq (${GPU_TARGET}, 1)
-ZSRC += zsymv_fermi.cu
-endif	
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
