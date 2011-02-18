@@ -5,14 +5,14 @@
        Univ. of Colorado, Denver
        November 2010
 
-       @precisions normal c -> c
+       @precisions normal c
 
 */
+#include "common_magma.h"
 #define PRECISION_c
+
 /*The version for fermi can be found in chemv_tesla.cu */
 #if (GPUSHMEM < 200)
-
-#include "common_magma.h"
 
 #define magmablas_chemv_130 magmablas_chemv
 

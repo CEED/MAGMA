@@ -11,11 +11,11 @@
        and cublas is prefered to this implementation. 
 
 */
+#include "common_magma.h"
 #define PRECISION_z
+
 /*The version for fermi can be found in zhemv_fermi.cu */
 #if defined(PRECISION_z) && (GPUSHMEM < 200)
-
-#include "common_magma.h"
 
 #define magmablas_zhemv_130 magmablas_zhemv
 

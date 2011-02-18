@@ -8,11 +8,11 @@
        @precisions normal z -> c
 
 */
+#include "common_magma.h"
 #define PRECISION_z
+
 /*The version for tesla can be found in zhemv_tesla.cu */
 #if (GPUSHMEM >= 200)
-
-#include "common_magma.h"
 
 #define magmablas_zhemv_200 magmablas_zhemv
 

@@ -8,11 +8,11 @@
        @precisions normal z -> c d s
 
 */
+#include "common_magma.h"
 #define PRECISION_z
+
 /*The version for tesla can be found in zsymv_tesla.cu */
 #if (GPUSHMEM >= 200)
-
-#include "common_magma.h"
 
 #define magmablas_zsymv_200 magmablas_zsymv
 
@@ -960,8 +960,13 @@ magmablas_zsymv_200( char uplo, magma_int_t n,
         return MAGMA_SUCCESS;
 
     /* TODO: Upper case is not implemented in MAGMA */
-    if ( upper )
+    if ( upper ) {
+#if defined(PRECISION_z) || defined(PRECISION_c)
         fprintf(stderr, "%s: %s\n", __func__, "Upper case not implemented");
+#else
+        cublasZsymv(uplo, n, alpha, A, lda, X, incx, beta, Y, incy);
+#endif
+    }
     else
     {
 	cuDoubleComplex *dC_work;

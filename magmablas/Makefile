@@ -36,6 +36,8 @@ ZSRC  = zauxiliary.cu	\
 	clag2z.cu       \
 	zlat2c.cu       \
 	zsymv_fermi.cu	\
+	zsymv_tesla.cu	\
+	csymv_tesla.cu	\
 	zhemv_fermi.cu	\
 	zhemv_tesla.cu	\
 	chemv_tesla.cu
@@ -62,10 +64,6 @@ TESLASRC =      sgemv_tesla.cu	\
 	        dgemv_tesla.cu 	\
 	        cgemv_tesla.cu 	\
 	        zgemv_tesla.cu 	\
-	        ssymv_tesla.cu 	\
-	        dsymv_tesla.cu 	\
-		csymv_tesla.cu	\
-		zsymv_tesla.cu	\
 	        gemv32_tesla.cu \
                 strsm_tesla.cu  \
                 dtrsm_tesla.cu  \
