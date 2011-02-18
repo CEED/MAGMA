@@ -5,15 +5,10 @@
        Univ. of Colorado, Denver
        November 2010
 
-       @generated d
+       @precisions normal d -> s
 
 */
-
-#include <stdio.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include "magma.h"
-#include "magmablas.h"
+#include "common_magma.h"
 
 extern "C" magma_int_t 
 magma_dsyevd(char *jobz, char *uplo, 
@@ -123,9 +118,6 @@ magma_dsyevd(char *jobz, char *uplo,
 
     Modified description of INFO. Sven, 16 Feb 05.   
     =====================================================================   */
-
-    #define min(a,b)       (((a)<(b))?(a):(b)) 
-    #define max(a,b)       (((a)>(b))?(a):(b))
 
     static magma_int_t c__1 = 1;
     static magma_int_t c_n1 = -1;

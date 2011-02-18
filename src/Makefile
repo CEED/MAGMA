@@ -53,6 +53,7 @@ ZSRC  = zpotrf.cpp	\
         zgeev.cpp       \
         dgeev.cpp       \
         zheevd.cpp      \
+        dsyevd.cpp      \
         zgesvd.cpp
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
