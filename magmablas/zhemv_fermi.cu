@@ -9,14 +9,10 @@
 
 */
 #define PRECISION_z
-/*The version for tesla can be found in zhemv_130.cu */
+/*The version for tesla can be found in zhemv_tesla.cu */
 #if (GPUSHMEM >= 200)
 
-#include <stdio.h>
-#include <cuda.h>
-#include <cublas.h>
-#include "magma.h"
-#include "operators.h"
+#include "common_magma.h"
 
 #define magmablas_zhemv_200 magmablas_zhemv
 
