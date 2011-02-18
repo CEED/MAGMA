@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       February 2011
 */
 #include "common_magma.h"
 
@@ -48,8 +48,6 @@ diag_strtri_kernel_upper (char diag, float *A, float *d_dinvA, int lda)
 	#pragma unroll
 	for (i=0; i<BLOCK_SIZE; i++)
 		Bs[i*BLOCK_SIZE+tx] = ((float)(tx<=i))*(*(Aoff+i*lda+tx));	// read in the whole square block of my A and zero out the non data triangular
-		//Bs[i*BLOCK_SIZE+tx] = *(Aoff+i*lda+tx);	// read in the whole square block of my A
-												// not the upper or lower diagonal
 
 	// Synchronize to make sure the matrices are loaded
 	__syncthreads();
@@ -520,7 +518,6 @@ __global__ void
 triple_sgemm_update_16_part2_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
 {
 	const int bIdy = blockIdx.y/npages;
-//	const int page = (blockIdx.y)%(npages);
 	const int page = qmod(blockIdx.y, npages);
 	const int inx = threadIdx.x;
 	const int iny = threadIdx.y;
@@ -617,7 +614,6 @@ __global__ void
 triple_sgemm_update_32_part1_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
 {
 	const int bIdy = blockIdx.y/npages;
-//	const int page = (blockIdx.y)%(npages);
 	const int page = qmod(blockIdx.y, npages);
 	const int inx = threadIdx.x;
 	const int iny = threadIdx.y;
@@ -706,7 +702,6 @@ __global__ void
 triple_sgemm_update_32_part2_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
 {
 	const int bIdy = blockIdx.y/npages;
-//	const int page = (blockIdx.y)%(npages);
 	const int page = qmod(blockIdx.y, npages);
 	const int inx = threadIdx.x;
 	const int iny = threadIdx.y;
@@ -794,7 +789,6 @@ __global__ void
 triple_sgemm_update_32_part1_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
 {
 	const int bIdy = blockIdx.y/npages;
-//	const int page = (blockIdx.y)%(npages);
 	const int page = qmod(blockIdx.y, npages);
 	const int inx = threadIdx.x;
 	const int iny = threadIdx.y;
@@ -883,7 +877,6 @@ __global__ void
 triple_sgemm_update_32_part2_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
 {
 	const int bIdy = blockIdx.y/npages;
-//	const int page = (blockIdx.y)%(npages);
 	const int page = qmod(blockIdx.y, npages);
 	const int inx = threadIdx.x;
 	const int iny = threadIdx.y;
@@ -971,7 +964,6 @@ __global__ void
 triple_sgemm_update_64_part1_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
 {
 	const int bIdy = blockIdx.y/npages;
-//	const int page = (blockIdx.y)%(npages);
 	const int page = qmod(blockIdx.y, npages);
 	const int inx = threadIdx.x;
 	const int iny = threadIdx.y;
@@ -1055,7 +1047,6 @@ __global__ void
 triple_sgemm_update_64_part2_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
 {
 	const int bIdy = blockIdx.y/npages;
-//	const int page = (blockIdx.y)%(npages);
 	const int page = qmod(blockIdx.y, npages);
 	const int inx = threadIdx.x;
 	const int iny = threadIdx.y;
@@ -1139,7 +1130,6 @@ __global__ void
 triple_sgemm_update_64_part1_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
 {
 	const int bIdy = blockIdx.y/npages;
-//	const int page = (blockIdx.y)%(npages);
 	const int page = qmod(blockIdx.y, npages);
 	const int inx = threadIdx.x;
 	const int iny = threadIdx.y;
@@ -1222,7 +1212,6 @@ __global__ void
 triple_sgemm_update_64_part2_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
 {
 	const int bIdy = blockIdx.y/npages;
-//	const int page = (blockIdx.y)%(npages);
 	const int page = qmod(blockIdx.y, npages);
 	const int inx = threadIdx.x;
 	const int iny = threadIdx.y;
@@ -1307,7 +1296,6 @@ __global__ void
 triple_sgemm_update_above64_part1_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
 {
 	const int bIdy = blockIdx.y/npages;
-//	const int page = (blockIdx.y)%(npages);
 	const int page = qmod(blockIdx.y, npages);
 	const int inx = threadIdx.x;
 	const int iny = threadIdx.y;
@@ -1391,7 +1379,6 @@ __global__ void
 triple_sgemm_update_above64_part1_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
 {
 	const int bIdy = blockIdx.y/npages;
-//	const int page = (blockIdx.y)%(npages);
 	const int page = qmod(blockIdx.y, npages);
 	const int inx = threadIdx.x;
 	const int iny = threadIdx.y;
@@ -1476,7 +1463,6 @@ __global__ void
 triple_sgemm_update_above64_part2_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
 {
 	const int bIdy = blockIdx.y/npages;
-//	const int page = (blockIdx.y)%(npages);
 	const int page = qmod(blockIdx.y, npages);
 	const int inx = threadIdx.x;
 	const int iny = threadIdx.y;
@@ -1561,7 +1547,6 @@ __global__ void
 triple_sgemm_update_above64_part3_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
 {
 	const int bIdy = blockIdx.y/npages;
-//	const int page = (blockIdx.y)%(npages);
 	const int page = qmod(blockIdx.y, npages);
 	const int inx = threadIdx.x;
 	const int iny = threadIdx.y;
@@ -1607,7 +1592,6 @@ __global__ void
 triple_sgemm_update_above64_part3_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
 {
 	const int bIdy = blockIdx.y/npages;
-//	const int page = (blockIdx.y)%(npages);
 	const int page = qmod(blockIdx.y, npages);
 	const int inx = threadIdx.x;
 	const int iny = threadIdx.y;
@@ -1650,7 +1634,6 @@ __global__ void
 triple_sgemm_update_above64_part2_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
 {
 	const int bIdy = blockIdx.y/npages;
-//	const int page = (blockIdx.y)%(npages);
 	const int page = qmod(blockIdx.y, npages);
 	const int inx = threadIdx.x;
 	const int iny = threadIdx.y;
@@ -1750,7 +1733,6 @@ void diag_strtri (int M, char uplo, char diag, float *A, float *d_dinvA, int lda
 	if (uplo == 'l' || uplo == 'L')
 	{
 		// solve the diagonal blocks
-		//printf ("nblocks = %d\n", nblocks);
 		diag_strtri_kernel_lower<<<nblocks, BLOCK_SIZE>>>(diag, A, d_dinvA, lda);
 
 		// update the inverse up to the size of BLOCK_SIZE
@@ -1760,8 +1742,6 @@ void diag_strtri (int M, char uplo, char diag, float *A, float *d_dinvA, int lda
 			dim3 dimBlock((i<=32)?(i/4):16, 4);
 			dim3 dimGrid(i/(dimBlock.x*dimBlock.y), npages*(i/16));	//emulated 3D grid, see 3d_grid.txt 
 			
-//			printf ("(%d): dimBlock(%d,%d), dimGrid(%d,%d), npages=%d\n", i, dimBlock.x, dimBlock.y, dimGrid.x, dimGrid.y, npages); 
-
 			switch (i)
 			{
 				case 16:
@@ -1796,8 +1776,6 @@ void diag_strtri (int M, char uplo, char diag, float *A, float *d_dinvA, int lda
 			dim3 dimBlock((i<=32)?(i/4):16, 4);
 			dim3 dimGrid(i/(dimBlock.x*dimBlock.y), npages*(i/16));	//emulated 3D grid, see 3d_grid.txt 
 			
-//			printf ("R(%d): dimBlock(%d,%d), dimGrid(%d,%d), npages=%d\n", i, dimBlock.x, dimBlock.y, dimGrid.x, dimGrid.y, npages); 
-
 			switch (i)
 			{
 				case 16:
@@ -2114,17 +2092,6 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
 		cudaMemset (d_x, 0, N*M*sizeof(float));
 		cudaMemset (d_dinvA, 0, NB*((N/NB)+(N%NB!=0))*NB*sizeof(float));
 		diag_strtri (N, uplo, diag, A, d_dinvA, lda);
-
-		/*
-		FILE * pfile;
-		pfile = fopen ("A.mat","w");
-		gpu_ship_to_matlab (pfile, A, N, N); 
-		fclose (pfile);
-
-		pfile = fopen ("Av.mat","w");
-		gpu_ship_to_matlab (pfile, d_dinvA, NB, NB*((N/NB)+(N%NB!=0))); 
-		fclose (pfile);
-		*/
 
 		if (tran == 'N' || tran == 'n')
 		/* the non-transpose case */
