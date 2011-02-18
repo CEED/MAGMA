@@ -19,11 +19,11 @@
 
 #define magmablas_zhemv_130 magmablas_zhemv
 
-#define thread_seg 128  // used in zhemv_tesla1_kernel 
-#define threadSize 128  // used in zhemv_tesla2_kernel
+#define thread_seg 128  // used in zhemv_130_kernel1 
+#define threadSize 128  // used in zhemv_130_kernel2
 
 __global__ void 
-magmablas_zhemv_tesla_kernel1( magma_int_t m, cuDoubleComplex alpha,
+magmablas_zhemv_130_kernel1( magma_int_t m, cuDoubleComplex alpha,
                                cuDoubleComplex *A, magma_int_t lda,
                                cuDoubleComplex *x, magma_int_t incx,
                                cuDoubleComplex beta,
@@ -45,7 +45,7 @@ magmablas_zhemv_tesla_kernel1( magma_int_t m, cuDoubleComplex alpha,
 }	
 
 __global__ void 
-magmablas_zhemv_tesla_kernel2( magma_int_t m, cuDoubleComplex alpha,
+magmablas_zhemv_130_kernel2( magma_int_t m, cuDoubleComplex alpha,
                                cuDoubleComplex *A, magma_int_t lda,
                                cuDoubleComplex *x, magma_int_t incx,
                                cuDoubleComplex beta,
@@ -108,7 +108,7 @@ magmablas_zhemv_tesla_kernel2( magma_int_t m, cuDoubleComplex alpha,
     Purpose
     =======
 
-    magmablas_zhemv_tesla  performs the matrix-vector operation on tesla:
+    magmablas_zhemv_130  performs the matrix-vector operation on tesla:
 
        y := alpha*A*x + beta*y,
 
@@ -193,7 +193,7 @@ magmablas_zhemv_tesla_kernel2( magma_int_t m, cuDoubleComplex alpha,
 
 extern "C"
 magma_int_t
-magmablas_zhemv_tesla( char uplo, magma_int_t n,
+magmablas_zhemv_130( char uplo, magma_int_t n,
                        cuDoubleComplex alpha, 
                        cuDoubleComplex *A, magma_int_t lda,
                        cuDoubleComplex *X, magma_int_t incx,
@@ -236,10 +236,10 @@ magmablas_zhemv_tesla( char uplo, magma_int_t n,
         cublasZhemv(uplo, n, alpha, A, lda, X, incx, beta, Y, incy);
     else
     {
-        magmablas_zhemv_tesla_kernel1 <<< grid1, threads1 >>> 
+        magmablas_zhemv_130_kernel1 <<< grid1, threads1 >>> 
             (n, alpha, A, lda, X, incx, beta, Y, incy);
 
-        magmablas_zhemv_tesla_kernel2 <<< grid2, threads2 >>> 
+        magmablas_zhemv_130_kernel2 <<< grid2, threads2 >>> 
             (n, alpha, A, lda, X, incx, beta, Y, incy);
     }
 

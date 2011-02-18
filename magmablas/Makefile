@@ -36,7 +36,8 @@ ZSRC  = zauxiliary.cu	\
 	clag2z.cu       \
 	zlat2c.cu       \
 	zhemv_fermi.cu	\
-	zhemv_tesla.cu
+	zhemv_tesla.cu	\
+	chemv_tesla.cu
 
 ifeq (${GPU_TARGET}, 1)
 ZSRC += zsymv_fermi.cu
@@ -68,7 +69,6 @@ TESLASRC =      sgemv_tesla.cu	\
 	        dsymv_tesla.cu 	\
 		csymv_tesla.cu	\
 		zsymv_tesla.cu	\
-		chemv_tesla.cu	\
 	        gemv32_tesla.cu \
                 strsm_tesla.cu  \
                 dtrsm_tesla.cu  \
