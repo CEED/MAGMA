@@ -10,7 +10,15 @@
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
-#include <inttypes.h>
+
+#if defined( _WIN32 )
+  /* This must be included before INPUT is defined below, otherwise we
+     have a name clash/problem  */
+  #include <windows.h>
+  #include <limits.h>
+#else 
+  #include <inttypes.h>
+#endif
 
 #include "magma.h"
 
