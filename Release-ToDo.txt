@@ -35,7 +35,7 @@ Task  Done      Who       What
 6.    DONE    Mathieu     Update the Makefile to the same comportement as PLASMA, 
                           to use the same MakeRelease  script or at least close
 ---------------------------------------------------------------------------------
-7.                        Move some macros from magma.h to another file in src, 
+7.   DONE                 Move some macros from magma.h to another file in src, 
                           not use on the user side.
                           [Stan: Matheieu, I would like a user to be able to 
                            copy a file and be able to easily modify and incorporate
@@ -44,7 +44,7 @@ Task  Done      Who       What
                            think about ...]
                            For now, we should let it like this for the first shot.
 ---------------------------------------------------------------------------------
-8.                         Don't include automatically magma_lapack.h in magma.h =>
+8.   DONE                  Don't include automatically magma_lapack.h in magma.h =>
                            add this line of include to amost all files
 ---------------------------------------------------------------------------------
 9.   DONE                  Multi-cores files have to be: moved to complex, updated 
