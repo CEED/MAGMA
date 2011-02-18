@@ -5,9 +5,7 @@
        Univ. of Colorado, Denver
        November 2010
 */
-
-#include <cublas.h>
-#include "magmablas.h"
+#include "common_magma.h"
 #include "commonblas_s.h"
 
 static __device__ void saxpy(float a,float *b, float *c) {

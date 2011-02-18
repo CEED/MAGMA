@@ -8,9 +8,7 @@
        @precisions mixed zc -> ds
 
 */
-
-#include <cublas.h>
-#include "magma.h"
+#include "common_magma.h"
 
 #define num_threadzc 64
 

@@ -8,10 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <cublas.h>
-#include "magma.h"
-#include "magma_lapack.h"
+#include "common_magma.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- This is an auxiliary routine called from zgehrd.  The routine is called

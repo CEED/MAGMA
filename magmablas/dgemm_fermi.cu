@@ -9,12 +9,7 @@
 /*
     blk_M=64 blk_N=64 blk_K=16 nthd_x=64 nthd_y=4
 */
-
-#include <stdio.h>
-#include <cuda_runtime.h>
-#include <cuda.h>
-#include <cublas.h>
-#include "magmablas.h"
+#include "common_magma.h"
 #include "commonblas_d.h"
 
 #define magmablas_dgemm_fermi magmablas_dgemm

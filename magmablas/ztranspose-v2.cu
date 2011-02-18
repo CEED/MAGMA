@@ -8,8 +8,8 @@
        @precisions normal z -> s d c
 
 */
+#include "common_magma.h"
 #define PRECISION_z
-#include <cublas.h>
 #include "commonblas.h"
 
 __global__ void ztranspose3_32( cuDoubleComplex *B, int ldb, 

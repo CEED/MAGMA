@@ -8,17 +8,13 @@
   @precisions mixed zc -> ds
 
 */
+#include "common_magma.h"
+#define PRECISION_z
 
-#include <stdio.h>
-#include <cuda.h>
-#include "magma.h"
-#include "magma_lapack.h"
 #define BLOCK_SIZE 32
-
 //#define num_threads 64
 #define dgemv_bs 32
 
-#define PRECISION_z
 #if (!defined(PRECISION_z)) || (GPUSHMEM >= 200)
 
 /*------------------------------------------ UPLO = 'L' ----------------------------------*/

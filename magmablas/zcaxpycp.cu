@@ -8,8 +8,7 @@
   @precisions mixed zc -> ds
 
 */
-#include <cublas.h>
-#include "magma.h"
+#include "common_magma.h"
 
 extern "C" __global__ void
 zcaxpycp_special(cuFloatComplex *R, cuDoubleComplex *X, int M, int ldr,int lda, cuDoubleComplex *B,cuDoubleComplex *W )

@@ -5,9 +5,8 @@
        Univ. of Colorado, Denver
        November 2010
 */
+#include "common_magma.h"
 
-#include "cublas.h"
-#include "magma.h"
 #define magmablas_dgemv_tesla magmablas_dgemv
 #define magmablas_dgemvt_tesla magmablas_dgemvt
 

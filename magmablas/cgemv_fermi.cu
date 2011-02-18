@@ -5,82 +5,13 @@
        Univ. of Colorado, Denver
        November 2010
 */
-
-#include "stdio.h"
-#include "cublas.h"
-#include "magma.h"
+#include "common_magma.h"
 
 #define num_threads 128
 #define cgemv_bs 32
 #define threadSize 128
 
 #define magmablas_cgemv_fermi magmablas_cgemv 
-
-
-
-inline __host__ __device__ float2 make_float2(float s)
-{
-	return make_float2(s, s);
-}
-inline __host__ __device__ float2 make_float2(int2 a)
-{
-	return make_float2(float(a.x), float(a.y));
-}
-
-// negate
-inline __host__ __device__ float2 operator-(float2 &a)
-{
-	return make_float2(-a.x, -a.y);
-}
-// addition
-inline __host__ __device__ float2 operator+(float2 a, float2 b)
-{
-	return make_float2(a.x + b.x, a.y + b.y);
-}
-inline __host__ __device__ void operator+=(float2 &a, float2 b)
-{
-	a.x += b.x; a.y += b.y;
-}
-
-// subtract
-inline __host__ __device__ float2 operator-(float2 a, float2 b)
-{
-	return make_float2(a.x - b.x, a.y - b.y);
-}
-inline __host__ __device__ void operator-=(float2 &a, float2 b)
-{
-	a.x -= b.x; a.y -= b.y;
-}
-
-// multiply
-inline __host__ __device__ float2 operator*(float2 a, float2 b)
-{
-    return make_float2(a.x * b.x - a.y * b.y, a.y * b.x + a.x * b.y);
-}
-inline __host__ __device__ float2 operator*(float2 a, float s)
-{
-	return make_float2(a.x * s, a.y * s);
-}
-inline __host__ __device__ float2 operator*(float s, float2 a)
-{
-	return make_float2(a.x * s, a.y * s);
-}
-inline __host__ __device__ void operator*=(float2 &a, float s)
-{
-	a.x *= s; a.y *= s;
-}
-
-inline __host__ __device__ float2 conjugate(float2 a)
-{
-   float2 b;
-   b.x = a.x;
-   b.y = 0.0f-a.y;
-   return b;
-}
-
-
-
-
 
 __global__ void 
 cgemvn_kernel1_fermi(int n, int m, int n1, float2 alpha, float2* A, int lda, float2 *x, float2 *y)
@@ -343,7 +274,7 @@ cgemvc_kernel_fermi(int m, int n, float2 alpha, int n1, float2* A, int lda,
      
 	for(int i=0; i<n1; i+= threadSize)
 	{
-		res += conjugate(A[tx + i + lda * blockIdx.y]) * x[tx + i];
+		res += cuConjf(A[tx + i + lda * blockIdx.y]) * x[tx + i];
 	}
 
 	
@@ -351,7 +282,7 @@ cgemvc_kernel_fermi(int m, int n, float2 alpha, int n1, float2* A, int lda,
 	{
 		if( tx + n1 <  m )
 		{
-			res  += conjugate(A[tx + n1 + lda *blockIdx.y]) * x[tx + n1];
+			res  += cuConjf(A[tx + n1 + lda *blockIdx.y]) * x[tx + n1];
 		}
 		else 
 		{

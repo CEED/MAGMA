@@ -17,7 +17,6 @@
 #include "magmablas.h"
 
 #include "auxiliary.h"
-#include "magma_lapack.h"
 
 /* ------------------------------------------------------------
  * MAGMA functions

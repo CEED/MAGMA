@@ -5,8 +5,6 @@
        Univ. of Colorado, Denver
        November 2010
 
-    @precisions normal z -> c
-
 */
 
 // includes, system
@@ -24,14 +22,14 @@
 #include "testings.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing zheevd
+   -- Testing dsyevd
 */
 int main( int argc, char** argv) 
 {
     TESTING_CUDA_INIT();
 
-    cuDoubleComplex *h_A, *h_R, *h_work;
-    double *rwork, *w1, *w2;
+    double *h_A, *h_R, *h_work;
+    double *w1, *w2;
     magma_int_t *iwork;
     double gpu_time, cpu_time;
 
@@ -52,35 +50,33 @@ int main( int argc, char** argv)
                 N = atoi(argv[++i]);
         }
         if (N>0)
-            printf("  testing_zheevd -N %d\n\n", N);
+            printf("  testing_dsyevd -N %d\n\n", N);
         else
             {
                 printf("\nUsage: \n");
-                printf("  testing_zheevd -N %d\n\n", N);
+                printf("  testing_dsyevd -N %d\n\n", N);
                 exit(1);
             }
     }
     else {
         printf("\nUsage: \n");
-        printf("  testing_zheevd -N %d\n\n", 1024);
+        printf("  testing_dsyevd -N %d\n\n", 1024);
         N = size[7];
     }
 
     n2  = N * N;
 
     /* Allocate host memory for the matrix */
-    TESTING_MALLOC(   h_A, cuDoubleComplex, n2);
+    TESTING_MALLOC(   h_A, double, n2);
     TESTING_MALLOC(    w1, double         ,  N);
     TESTING_MALLOC(    w2, double         ,  N);
-    TESTING_HOSTALLOC(h_R, cuDoubleComplex, n2);
+    TESTING_HOSTALLOC(h_R, double, n2);
 
-    magma_int_t nb = 128;//magma_get_zheevd_nb(N);
-    magma_int_t lwork = N*nb + N*N;
-    magma_int_t lrwork = 1 + 5*N +2*N*N;
+    magma_int_t nb = 128;//magma_get_dsyevd_nb(N);
+    magma_int_t lwork = 1 + 6*N*nb + 2*N*N;
     magma_int_t liwork = 3 + 5*N;
 
-    TESTING_HOSTALLOC(h_work, cuDoubleComplex,  lwork);
-    TESTING_MALLOC(    rwork,          double, lrwork);
+    TESTING_HOSTALLOC(h_work, double,  lwork);
     TESTING_MALLOC(    iwork,     magma_int_t, liwork);
     
     printf("\n\n");
@@ -93,26 +89,24 @@ int main( int argc, char** argv)
         }
 
         /* Initialize the matrix */
-        lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-        lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
+        lapackf77_dlarnv( &ione, ISEED, &n2, h_A );
+        lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
 
-	magma_zheevd("V", "L",
+	magma_dsyevd("V", "L",
 		     &N, h_R, &N, w1,
 		     h_work, &lwork, 
-		     rwork, &lrwork, 
 		     iwork, &liwork, 
 		     &info);
 	
-	lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
+	lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
 
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-	magma_zheevd("V", "L",
+	magma_dsyevd("V", "L",
                      &N, h_R, &N, w1,
                      h_work, &lwork,
-                     rwork, &lrwork,
                      iwork, &liwork,
                      &info);
         end = get_current_time();
@@ -123,15 +117,14 @@ int main( int argc, char** argv)
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
-	lapackf77_zheevd("V", "L",
+	lapackf77_dsyevd("V", "L",
 			 &N, h_A, &N, w2,
 			 h_work, &lwork,
-			 rwork, &lrwork,
 			 iwork, &liwork,
 			 &info);
         end = get_current_time();
         if (info < 0)
-            printf("Argument %d of zheevd had an illegal value.\n", -info);
+            printf("Argument %d of dsyevd had an illegal value.\n", -info);
 
         cpu_time = GetTimerValue(start,end)/1000.;
 
@@ -156,7 +149,6 @@ int main( int argc, char** argv)
     TESTING_FREE(       h_A);
     TESTING_FREE(        w1);
     TESTING_FREE(        w2);
-    TESTING_FREE(     rwork);
     TESTING_FREE(     iwork);
     TESTING_HOSTFREE(h_work);
     TESTING_HOSTFREE(   h_R);

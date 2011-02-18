@@ -5,15 +5,10 @@
        Univ. of Colorado, Denver
        November 2010
 */
-
-#include <cublas.h>
-#include <cuda.h>
-#include "magmablas.h"
+#include "common_magma.h"
 
 #define magmablas_strsm_tesla magmablas_strsm
 
-#define min(a,b) (a<=b)?a:b
-#define max(a,b) (a>=b)?a:b
 #define qmod(a,b) ((a)-(__mul24((b),(a)/(b))))
 //#define cublasSgemm magmablas_sgemm_fermi64
 

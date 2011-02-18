@@ -5,81 +5,13 @@
        Univ. of Colorado, Denver
        November 2010
 */
-
-#include "stdio.h"
-#include "cublas.h"
-#include "magma.h"
+#include "common_magma.h"
 
 #define num_threads 128
-#define zgemv_bs 32
-#define threadSize 128
+#define zgemv_bs     32
+#define threadSize  128
 
 #define magmablas_zgemv_fermi magmablas_zgemv
-
-
-inline __host__ __device__ double2 make_double2(double s)
-{
-	return make_double2(s, s);
-}
-inline __host__ __device__ double2 make_double2(int2 a)
-{
-	return make_double2(double(a.x), double(a.y));
-}
-
-// negate
-inline __host__ __device__ double2 operator-(double2 &a)
-{
-	return make_double2(-a.x, -a.y);
-}
-// addition
-inline __host__ __device__ double2 operator+(double2 a, double2 b)
-{
-	return make_double2(a.x + b.x, a.y + b.y);
-}
-inline __host__ __device__ void operator+=(double2 &a, double2 b)
-{
-	a.x += b.x; a.y += b.y;
-}
-
-// subtract
-inline __host__ __device__ double2 operator-(double2 a, double2 b)
-{
-	return make_double2(a.x - b.x, a.y - b.y);
-}
-inline __host__ __device__ void operator-=(double2 &a, double2 b)
-{
-	a.x -= b.x; a.y -= b.y;
-}
-
-// multiply
-inline __host__ __device__ double2 operator*(double2 a, double2 b)
-{
-    return make_double2(a.x * b.x - a.y * b.y, a.y * b.x + a.x * b.y);
-}
-inline __host__ __device__ double2 operator*(double2 a, double s)
-{
-	return make_double2(a.x * s, a.y * s);
-}
-inline __host__ __device__ double2 operator*(double s, double2 a)
-{
-	return make_double2(a.x * s, a.y * s);
-}
-inline __host__ __device__ void operator*=(double2 &a, double s)
-{
-	a.x *= s; a.y *= s;
-}
-
-inline __host__ __device__ double2 conjugate(double2 a)
-{
-   double2 b;
-   b.x = a.x;
-   b.y = 0.0f-a.y;
-   return b;
-}
-
-
-
-
 
 __global__ void 
 zgemvn_kernel1_fermi(int n, int m, int n1, double2 alpha, double2* A, int lda, double2 *x, double2 *y)
@@ -339,7 +271,7 @@ zgemvc_kernel_fermi(int m, int n, double2 alpha, int n1, double2* A, int lda,
      
 	for(int i=0; i<n1; i+= threadSize)
 	{
-		res += conjugate(A[tx + i + lda * blockIdx.y]) * x[tx + i];
+		res += cuConj(A[tx + i + lda * blockIdx.y]) * x[tx + i];
 	}
 
 	
@@ -347,7 +279,7 @@ zgemvc_kernel_fermi(int m, int n, double2 alpha, int n1, double2* A, int lda,
 	{
 		if( tx + n1 <  m )
 		{
-			res  += conjugate(A[tx + n1 + lda *blockIdx.y]) * x[tx + n1];
+			res  += cuConj(A[tx + n1 + lda *blockIdx.y]) * x[tx + n1];
 		}
 		else 
 		{

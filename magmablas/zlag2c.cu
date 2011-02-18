@@ -8,10 +8,7 @@
        @precisions mixed zc -> ds
 
 */
-#include <stdio.h>
-#include <cublas.h>
-#include "magma.h"
-#include "magmablas.h"
+#include "common_magma.h"
 
 #define PRECISION_z
 #define blksize 64

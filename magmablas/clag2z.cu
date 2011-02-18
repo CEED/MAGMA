@@ -8,9 +8,7 @@
        @precisions mixed zc -> ds
 
 */
-
-#include <stdio.h>
-#include <cublas.h>
+#include "common_magma.h"
 
 static __global__ void 
 clag2z_generic(int M, int N, 

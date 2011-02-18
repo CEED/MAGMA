@@ -8,10 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdio.h>
-#include <cuda.h>
-#include <cublas.h>
+#include "common_magma.h"
 
 extern "C" __global__ void magma_zlange_special(const cuDoubleComplex *A, double *C, int M, int N, int lda) {
 

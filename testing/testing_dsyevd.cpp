@@ -20,6 +20,7 @@
 
 // includes, project
 #include "magma.h"
+#include "magma_lapack.h"
 #include "testings.h"
 
 /* ////////////////////////////////////////////////////////////////////////////

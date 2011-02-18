@@ -5,14 +5,7 @@
        Univ. of Colorado, Denver
        November 2010
 */
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <cuda.h>
-#include <cublas.h>
-#include <cuda_runtime_api.h>
-#include "magmablas.h"
+#include "common_magma.h"
 #include "commonblas_s.h"
 
 #define magmablas_sgemm_tesla magmablas_sgemm
@@ -157,8 +150,8 @@ magmablas_sgemm_tesla( char TRANSA, char TRANSB, int m , int n , int k ,
   }
   int cutoff = 512 ;
   if(ldc < m ) return ;
-  TRANSA = toupper( TRANSA) ; 
-  TRANSB = toupper( TRANSB) ; 
+  TRANSA = toupper( TRANSA ); 
+  TRANSB = toupper( TRANSB ); 
   if(TRANSA=='N' ){
     if(TRANSB=='N')
       { 

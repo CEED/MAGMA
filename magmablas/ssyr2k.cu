@@ -5,10 +5,7 @@
        Univ. of Colorado, Denver
        November 2010
 */
-
-#include <cublas.h>
-#include <cuda.h>
-#include "magmablas.h"
+#include "common_magma.h"
 
 #define block_M 32
 #define block_N 32

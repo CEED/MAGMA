@@ -20,6 +20,7 @@
 // includes, project
 #include "flops.h"
 #include "magma.h"
+#include "magma_lapack.h"
 #include "testings.h"
 
 #define PRECISION_z

@@ -28,6 +28,7 @@
 #include <cublas.h>
 #include <math.h>
 #include <string.h>
+#include <ctype.h>
 
 #if defined( _WIN32 ) || defined( _WIN64 )
 #include "magmawinthread.h"
@@ -42,6 +43,7 @@
 #endif
 
 #include "magma.h"
+#include "magma_lapack.h"
 #include "operators.h"
 
 /** ****************************************************************************

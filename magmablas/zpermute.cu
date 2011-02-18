@@ -8,6 +8,7 @@
        @precisions normal z -> s d c
 
 */
+#include "common_magma.h"
 
 #define BLOCK_SIZE 64
 

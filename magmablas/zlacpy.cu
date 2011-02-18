@@ -8,9 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdio.h>
-#include <cublas.h>
+#include "common_magma.h"
 
 static __global__ void 
 zlacpy_generic(int M, int N, cuDoubleComplex *A, int LDA, cuDoubleComplex *B, int LDB ) 

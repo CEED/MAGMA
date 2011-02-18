@@ -5,15 +5,7 @@
        Univ. of Colorado, Denver
        November 2010
 */
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <cuda.h>
-#include <cublas.h>
-#include <cuda_runtime_api.h>
-#include "magma.h"
-#include "magmablas.h"
+#include "common_magma.h"
 #include "commonblas_d.h"
 
 #define magmablas_dgemm_tesla magmablas_dgemm

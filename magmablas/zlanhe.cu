@@ -8,10 +8,7 @@
        @precisions normal z -> s d c
 
 */
-
-#include <stdio.h>
-#include <cublas.h>
-#include "magma.h"
+#include "common_magma.h"
 
 #define BLOCK_SIZE 32
 

@@ -6,11 +6,8 @@
        Univ. of Colorado, Denver
        November 2010
 */
+#include "common_magma.h"
 
-#include <stdio.h>
-#include <cublas.h>
-
-#include "magma.h"
 #define magmablas_dgemv_fermi magmablas_dgemv
 
 #define num_threads 64
