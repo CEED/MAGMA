@@ -5,6 +5,8 @@
        Univ. of Colorado, Denver
        November 2010
 
+    @precisions normal d -> s
+
 */
 
 // includes, system

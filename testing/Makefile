@@ -38,7 +38,8 @@ ZSRC  = testing_zgemm.cpp	\
         \
         testing_zgeev.cpp       \
         testing_zgesvd.cpp      \
-        testing_zheevd.cpp
+        testing_zheevd.cpp      \
+        testing_dsyevd.cpp    
 
 ifeq ($(FORT), pgfortran)
 	FOBJ := fortran_thunking.o
