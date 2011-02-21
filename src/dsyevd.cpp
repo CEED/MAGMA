@@ -1,4 +1,4 @@
-/*
+/*    
     -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -11,12 +11,12 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t 
-magma_dsyevd(char *jobz, char *uplo, 
-	     magma_int_t *n, 
-	     double *a, magma_int_t *lda, 
+magma_dsyevd(char jobz, char uplo, 
+	     magma_int_t n, 
+	     double *a, magma_int_t lda, 
 	     double *w, 
-	     double *work, magma_int_t *lwork,
-	     magma_int_t *iwork, magma_int_t *liwork,
+	     double *work, magma_int_t lwork,
+	     magma_int_t *iwork, magma_int_t liwork,
 	     magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -119,6 +119,8 @@ magma_dsyevd(char *jobz, char *uplo,
     Modified description of INFO. Sven, 16 Feb 05.   
     =====================================================================   */
 
+    char uplo_[2] = {uplo, 0};
+    char jobz_[2] = {jobz, 0};
     static magma_int_t c__1 = 1;
     static magma_int_t c_n1 = -1;
     static magma_int_t c__0 = 0;
@@ -133,39 +135,27 @@ magma_dsyevd(char *jobz, char *uplo,
     static magma_int_t imax;
     static double rmin, rmax;
     static magma_int_t lopt;
-    extern int dscal_(magma_int_t *, double *, double *, 
-	    magma_int_t *);
     static double sigma;
     static magma_int_t iinfo, lwmin, liopt;
     static magma_int_t lower;
     static magma_int_t wantz;
     static magma_int_t indwk2, llwrk2;
-    extern double dlamch_(char *);
     static magma_int_t iscale;
     static double safmin;
     extern magma_int_t ilaenv_(magma_int_t *, char *, char *, magma_int_t *, magma_int_t *, 
 	    magma_int_t *, magma_int_t *, magma_int_t, magma_int_t);
-    extern int xerbla_(char *, magma_int_t *);
     static double bignum;
     static magma_int_t indtau;
-    extern int 
-      dsterf_(magma_int_t *, double *, double *, magma_int_t *), 
-      dlascl_(char *, magma_int_t *, magma_int_t *, double *, 
-	      double *, magma_int_t *, magma_int_t *, double *, magma_int_t *, 
-	    magma_int_t *), 
-      dstedc_(char *, magma_int_t *, double *, double *, double *, 
-	      magma_int_t *, double *, magma_int_t *, 
-	      magma_int_t *, magma_int_t *, magma_int_t *);
     static magma_int_t indwrk, liwmin;
     static magma_int_t llwork;
     static double smlnum;
     static magma_int_t lquery;
-    extern int dormtr_(char *, char *, char *, magma_int_t *, magma_int_t *,
-		       double *, magma_int_t *, double *,
-		       double *, magma_int_t *, 
-		       double *, magma_int_t *, magma_int_t *);
+    //extern int dormtr_(char *, char *, char *, magma_int_t *, magma_int_t *,
+		       //double *, magma_int_t *, double *,
+		       //double *, magma_int_t *, 
+		       //double *, magma_int_t *, magma_int_t *);
 
-    a_dim1 = *lda;
+    a_dim1 = lda;
     a_offset = 1 + a_dim1;
     a -= a_offset;
     --w;
@@ -173,23 +163,23 @@ magma_dsyevd(char *jobz, char *uplo,
     --iwork;
 
     /* Function Body */
-    wantz = lapackf77_lsame(jobz, "V");
-    lower = lapackf77_lsame(uplo, "L");
-    lquery = *lwork == -1 || *liwork == -1;
+    wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);
+    lower = lapackf77_lsame(uplo_, MagmaLowerStr);
+    lquery = lwork == -1 || liwork == -1;
 
     *info = 0;
-    if (! (wantz || lapackf77_lsame(jobz, "N"))) {
+    if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVectorsStr))) {
 	*info = -1;
-    } else if (! (lower || lapackf77_lsame(uplo, "U"))) {
+    } else if (! (lower || lapackf77_lsame(uplo_, MagmaUpperStr))) {
 	*info = -2;
-    } else if (*n < 0) {
+    } else if (n < 0) {
 	*info = -3;
-    } else if (*lda < max(1,*n)) {
+    } else if (lda < max(1,n)) {
 	*info = -5;
     }
 
     if (*info == 0) {
-	if (*n <= 1) {
+	if (n <= 1) {
   	    lwmin = 1;
 	    liwmin = 1;
 	    lopt = lwmin;
@@ -197,15 +187,15 @@ magma_dsyevd(char *jobz, char *uplo,
 	} else {
  	   if (wantz) {
 		/* Computing 2nd power */
-		i__1 = *n;
-		lwmin = *n * 6 + 1 + (i__1 * i__1 << 1);
-		liwmin = *n * 5 + 3;
+		i__1 = n;
+		lwmin = n * 6 + 1 + (i__1 * i__1 << 1);
+		liwmin = n * 5 + 3;
 	    } else {
-	     lwmin = (*n << 1) + 1;
+	     lwmin = (n << 1) + 1;
 	      liwmin = 1;
 	    }
 	    /* Computing MAX */
-	    i__1 = lwmin, i__2 = *n + ilaenv_(&c__1, "DSYTRD", uplo, n, &c_n1,
+	    i__1 = lwmin, i__2 = n + ilaenv_(&c__1, "DSYTRD", uplo_, &n, &c_n1,
 					      &c_n1, &c_n1, 6, 1);
 	    lopt = max(i__1,i__2);
 	    liopt = liwmin;
@@ -213,46 +203,46 @@ magma_dsyevd(char *jobz, char *uplo,
 	MAGMA_D_SET2REAL(work[1], (double) lopt);
 	iwork[1] = liopt;
 
-	if (*lwork < lwmin && ! lquery) {
+	if (lwork < lwmin && ! lquery) {
 	    *info = -8;
-	} else if (*liwork < liwmin && ! lquery) {
+	} else if (liwork < liwmin && ! lquery) {
 	    *info = -10;
 	}
     }
 
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("DSYEVD", &i__1);
-	return 0;
+	lapackf77_xerbla("DSYEVD", &i__1);
+	return MAGMA_ERR_ILLEGAL_VALUE;
     } else if (lquery) {
-	return 0;
+	return MAGMA_SUCCESS;
     }
 
     /* Quick return if possible */
-    if (*n == 0) {
-	return 0;
+    if (n == 0) {
+	return MAGMA_SUCCESS;
     }
 
-    if (*n == 1) {
+    if (n == 1) {
 	i__1 = a_dim1 + 1;
 	w[1] = MAGMA_D_REAL(a[i__1]);
 	if (wantz) {
 	    i__1 = a_dim1 + 1;
 	    MAGMA_D_SET2REAL(a[i__1], 1.);
 	}
-	return 0;
+	return MAGMA_SUCCESS;
     }
 
     /* Get machine constants. */
-    safmin = dlamch_("Safe minimum");
-    eps = dlamch_("Precision");
+    safmin = lapackf77_dlamch("Safe minimum");
+    eps = lapackf77_dlamch("Precision");
     smlnum = safmin / eps;
     bignum = 1. / smlnum;
     rmin = magma_dsqrt(smlnum);
     rmax = magma_dsqrt(bignum);
 
     /* Scale matrix to allowable range, if necessary. */
-    anrm = lapackf77_dlansy("M", uplo, n, &a[a_offset], lda, &work[1]);
+    anrm = lapackf77_dlansy("M", uplo_, &n, &a[a_offset], &lda, &work[1]);
     iscale = 0;
     if (anrm > 0. && anrm < rmin) {
 	iscale = 1;
@@ -262,23 +252,23 @@ magma_dsyevd(char *jobz, char *uplo,
 	sigma = rmax / anrm;
     }
     if (iscale == 1) {
-	dlascl_(uplo, &c__0, &c__0, &c_b18, &sigma, n, n, &a[a_offset], 
-		lda, info);
+	lapackf77_dlascl(uplo_, &c__0, &c__0, &c_b18, &sigma, &n, &n, &a[a_offset], 
+		&lda, info);
     }
 
     /* Call DSYTRD to reduce symmetric matrix to tridiagonal form. */
     inde = 1;
-    indtau = inde + *n;
-    indwrk = indtau + *n;
-    llwork = *lwork - indwrk + 1;
-    indwk2 = indwrk + *n * *n;
-    llwrk2 = *lwork - indwk2 + 1;
+    indtau = inde + n;
+    indwrk = indtau + n;
+    llwork = lwork - indwrk + 1;
+    indwk2 = indwrk + n * n;
+    llwrk2 = lwork - indwk2 + 1;
   
     /*
-    lapackf77_dsytrd(uplo, n, &a[a_offset], lda, &w[1], &work[inde], 
+    lapackf77_dsytrd(uplo_, &n, &a[a_offset], &lda, &w[1], &work[inde], 
 		     &work[indtau], &work[indwrk], &llwork, &iinfo);
     */
-    magma_dsytrd(uplo[0], *n, &a[a_offset], *lda, &w[1], &work[inde],
+    magma_dsytrd(uplo_[0], n, &a[a_offset], lda, &w[1], &work[inde],
 		 &work[indtau], &work[indwrk], llwork, &iinfo);
     
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call   
@@ -286,28 +276,28 @@ magma_dsyevd(char *jobz, char *uplo,
        tridiagonal matrix, then call DORMTR to multiply it to the Householder 
        transformations represented as Householder vectors in A. */
     if (! wantz) {
-	dsterf_(n, &w[1], &work[inde], info);
+	lapackf77_dsterf(&n, &w[1], &work[inde], info);
     } else {
-	dstedc_("I", n, &w[1], &work[inde], &work[indwrk], n, &work[indwk2], 
-		&llwrk2, &iwork[1], liwork, info);
+	lapackf77_dstedc("I", &n, &w[1], &work[inde], &work[indwrk], &n, &work[indwk2], 
+		&llwrk2, &iwork[1], &liwork, info);
        
-	dormtr_("L", uplo, "N", n, n, &a[a_offset], lda, &work[indtau], 
-		&work[indwrk], n, &work[indwk2], &llwrk2, &iinfo);
+	lapackf77_dormtr("L", uplo_, "N", &n, &n, &a[a_offset], &lda, &work[indtau], 
+		&work[indwrk], &n, &work[indwk2], &llwrk2, &iinfo);
 	/*
-	  magma_dormtr("L", uplo, "N", n, n, &a[a_offset], lda, &work[indtau],
+	  magma_dormtr("L", uplo_, "N", n, n, &a[a_offset], &lda, &work[indtau],
 	               &work[indwrk], n, &work[indwk2], &llwrk2, &iinfo);
 	*/
-	lapackf77_dlacpy("A", n, n, &work[indwrk], n, &a[a_offset], lda);
+	lapackf77_dlacpy("A", &n, &n, &work[indwrk], &n, &a[a_offset], &lda);
     }
 
     /* If matrix was scaled, then rescale eigenvalues appropriately. */
     if (iscale == 1) {
 	d__1 = 1. / sigma;
-	dscal_(n, &d__1, &w[1], &c__1);
+	blasf77_dscal(&n, &d__1, &w[1], &c__1);
     }
 
     MAGMA_D_SET2REAL(work[1], (double) lopt);
     iwork[1] = liopt;
 
-    return 0;
+    return MAGMA_SUCCESS;
 } /* magma_dsyevd */

@@ -46,6 +46,10 @@ int main( int argc, char** argv)
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
 
+    char *uplo = MagmaLowerStr;
+    char *jobz = MagmaVectorsStr;
+
+
     if (argc != 1){
         for(i = 1; i<argc; i++){
             if (strcmp("-N", argv[i])==0)
@@ -94,10 +98,10 @@ int main( int argc, char** argv)
         lapackf77_dlarnv( &ione, ISEED, &n2, h_A );
         lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
 
-	magma_dsyevd("V", "L",
-		     &N, h_R, &N, w1,
-		     h_work, &lwork, 
-		     iwork, &liwork, 
+	magma_dsyevd(jobz[0], uplo[0],
+		     N, h_R, N, w1,
+		     h_work, lwork, 
+		     iwork, liwork, 
 		     &info);
 	
 	lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
@@ -106,10 +110,10 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-	magma_dsyevd("V", "L",
-                     &N, h_R, &N, w1,
-                     h_work, &lwork,
-                     iwork, &liwork,
+	magma_dsyevd(jobz[0], uplo[0],
+                     N, h_R, N, w1,
+                     h_work, lwork,
+                     iwork, liwork,
                      &info);
         end = get_current_time();
 
@@ -119,7 +123,7 @@ int main( int argc, char** argv)
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
-	lapackf77_dsyevd("V", "L",
+	lapackf77_dsyevd(jobz, uplo,
 			 &N, h_A, &N, w2,
 			 h_work, &lwork,
 			 iwork, &liwork,

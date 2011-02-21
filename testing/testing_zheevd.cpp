@@ -46,6 +46,10 @@ int main( int argc, char** argv)
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
 
+    //const char *uplo = MagmaLowerStr;
+    char *uplo = MagmaLowerStr;
+	char *jobz = MagmaVectorsStr;
+
     if (argc != 1){
         for(i = 1; i<argc; i++){
             if (strcmp("-N", argv[i])==0)
@@ -96,11 +100,11 @@ int main( int argc, char** argv)
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
 
-	magma_zheevd("V", "L",
-		     &N, h_R, &N, w1,
-		     h_work, &lwork, 
-		     rwork, &lrwork, 
-		     iwork, &liwork, 
+	magma_zheevd(jobz[0], uplo[0],
+		     N, h_R, N, w1,
+		     h_work, lwork, 
+		     rwork, lrwork, 
+		     iwork, liwork, 
 		     &info);
 	
 	lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
@@ -109,11 +113,11 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-	magma_zheevd("V", "L",
-                     &N, h_R, &N, w1,
-                     h_work, &lwork,
-                     rwork, &lrwork,
-                     iwork, &liwork,
+	magma_zheevd(jobz[0], uplo[0],
+                     N, h_R, N, w1,
+                     h_work, lwork,
+                     rwork, lrwork,
+                     iwork, liwork,
                      &info);
         end = get_current_time();
 
@@ -123,7 +127,7 @@ int main( int argc, char** argv)
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
-	lapackf77_zheevd("V", "L",
+	lapackf77_zheevd(jobz, uplo,
 			 &N, h_A, &N, w2,
 			 h_work, &lwork,
 			 rwork, &lrwork,

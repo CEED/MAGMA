@@ -48,6 +48,9 @@
 #define MagmaColumnwise    'C'
 #define MagmaRowwise       'R'
 
+#define MagmaNoVectors     'N'
+#define MagmaVectors       'V'
+
 #define MagmaNoTransStr    "NonTrans"
 #define MagmaTransStr      "Trans"
 #define MagmaConjTransStr  "Conj"
@@ -67,6 +70,9 @@
 
 #define MagmaColumnwiseStr "Columnwise"
 #define MagmaRowwiseStr    "Rowwise"
+
+#define MagmaNoVectorsStr  "NoVectors"
+#define MagmaVectorsStr    "Vectors"
 
 /* ------------------------------------------------------------
  *   Return codes
