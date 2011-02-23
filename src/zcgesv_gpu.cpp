@@ -14,7 +14,7 @@
 #define ITERMAX 30
 
 extern "C" magma_int_t
-magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS, 
+magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS, 
                  cuDoubleComplex *dA, magma_int_t ldda, 
                  magma_int_t *IPIV,  magma_int_t *dIPIV,
                  cuDoubleComplex *dB, magma_int_t lddb, 
@@ -30,9 +30,8 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
 
     Purpose
     =======
-
     ZCGESV computes the solution to a complex system of linear equations
-       A * X = B,
+       A * X = B or A' * X = B
     where A is an N-by-N matrix and X and B are N-by-NRHS matrices.
 
     ZCGESV first attempts to factorize the matrix in SINGLE PRECISION
@@ -62,6 +61,11 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
 
     Arguments
     =========
+    TRANS   (input) CHARACTER*1
+            Specifies the form of the system of equations:
+            = 'N':  A * X = B  (No transpose)
+            = 'T':  A'* X = B  (Transpose)
+            = 'C':  A'* X = B  (Conjugate transpose = Transpose)
 
     N       (input) INTEGER
             The number of linear equations, i.e., the order of the
@@ -71,7 +75,7 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    dA       (input or input/output) COMPLEX_16 array, dimension (ldda,N)
+    dA      (input or input/output) COMPLEX_16 array, dimension (ldda,N)
             On entry, the N-by-N coefficient matrix A.
             On exit, if iterative refinement has been successfully used
             (info.EQ.0 and ITER.GE.0, see description below), A is
@@ -80,7 +84,7 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
             array A contains the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
 
-    ldda     (input) INTEGER
+    ldda    (input) INTEGER
             The leading dimension of the array A.  ldda >= max(1,N).
 
     IPIV    (output) INTEGER array, dimension (N)
@@ -94,22 +98,22 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
             The pivot indices; for 1 <= i <= min(M,N), row i of the
             matrix was moved to row IPIV(i).
 
-    dB       (input) COMPLEX_16 array, dimension (lddb,NRHS)
+    dB      (input) COMPLEX_16 array, dimension (lddb,NRHS)
             The N-by-NRHS right hand side matrix B.
 
-    lddb     (input) INTEGER
+    lddb    (input) INTEGER
             The leading dimension of the array B.  lddb >= max(1,N).
 
-    dX       (output) COMPLEX_16 array, dimension (lddx,NRHS)
+    dX      (output) COMPLEX_16 array, dimension (lddx,NRHS)
             If info = 0, the N-by-NRHS solution matrix X.
 
-    lddx     (input) INTEGER
+    lddx    (input) INTEGER
             The leading dimension of the array X.  lddx >= max(1,N).
 
-    dworkd    (workspace) COMPLEX_16 array, dimension (N*NRHS)
+    dworkd  (workspace) COMPLEX_16 array, dimension (N*NRHS)
             This array is used to hold the residual vectors.
 
-    dworks   (workspace) COMPLEX array, dimension (N*(N+NRHS))
+    dworks  (workspace) COMPLEX array, dimension (N*(N+NRHS))
             This array is used to store the single precision matrix and the
             right-hand sides or solutions in single precision.
 
@@ -126,16 +130,14 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
             > 0: iterative refinement has been successfully used.
                  Returns the number of iterations
  
-    info    (output) INTEGER
+    info   (output) INTEGER
             = 0:  successful exit
             < 0:  if info = -i, the i-th argument had an illegal value
             > 0:  if info = i, U(i,i) computed in DOUBLE PRECISION is
                   exactly zero.  The factorization has been completed,
                   but the factor U is exactly singular, so the solution
                   could not be computed.
-
     =====================================================================    */
-
 
     cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
     cuDoubleComplex zone  = MAGMA_Z_ONE;
@@ -176,7 +178,6 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
     dSX = dworks;
     dSA = dworks+N*NRHS;
     
-    magmablas_zlag2c(N, NRHS, dB, lddb, dSX, N, info );
     if(*info !=0){
 	*iter = -2 ;
 	printf("magmablas_zlag2c\n");
@@ -194,7 +195,7 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
     // Generate parallel pivots
     {
 	int *newipiv  = (int*)malloc(N * sizeof(int));
-	swp2pswp(N, IPIV, newipiv);
+	swp2pswp(trans, N, IPIV, newipiv);
 	cudaMemcpy(dIPIV, newipiv, N*sizeof(int), cudaMemcpyHostToDevice);
 	free(newipiv);
     }
@@ -203,15 +204,14 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
 	*iter = -3 ;
 	goto L40;
     }
-    magma_zcgetrs_gpu(N, NRHS, dSA, N, dIPIV, dB, lddb, dSX, N, info);
-
-    magmablas_clag2z(N, NRHS, dSX, N, dX, lddx, info );
+    magma_zcgetrs_gpu(trans, N, NRHS, dSA, N, dIPIV, dB, lddb, dX, lddx, dSX, info);
+    
     magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dworkd, N);
      /* TODO: update optimisation from gemv_MLU into classic gemv */
     if ( NRHS == 1 ) 
-	cublasZgemv( MagmaNoTrans, N, N, mzone, dA, ldda, dX, 1, zone, dworkd, 1);
+	cublasZgemv( trans, N, N, mzone, dA, ldda, dX, 1, zone, dworkd, 1);
     else
-	cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, NRHS, N, mzone, dA, ldda, dX, lddx, zone, dworkd, N);
+	cublasZgemm( trans, MagmaNoTrans, N, NRHS, N, mzone, dA, ldda, dX, lddx, zone, dworkd, N);
     
     for(i=0;i<NRHS;i++)
     {
@@ -239,24 +239,26 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
 	/*
 	  Convert R (in dworkd) from cuDoubleComplex precision to single precision
 	  and store the result in SX.
-	  Solve the system SA*SX = SR.
+	  Solve the system SA * X = dworkd and store the result in dworkd.
 	  -- These two Tasks are merged here. 
 	*/
-	magma_zcgetrs_gpu( N, NRHS, dSA, N, dIPIV, dworkd, lddb, dSX, N, info);
+	magma_zcgetrs_gpu(trans, N, NRHS, dSA, N, dIPIV, dworkd, lddb, dworkd, N, dSX, info);
 	if(info[0] != 0){
 	    *iter = -3 ;
 	    goto L40;
 	}
+	/* Add the correction (dworkd) to dX and make dworkd = dB.
+           This saves going through dworkd a second time (if done with one more kernel). */
 	for(i=0;i<NRHS;i++){
-	    magmablas_zcaxpycp(dSX+i*N, dX+i*N, N, N, ldda, dB+i*N, dworkd+i*N);
+	    magmablas_zaxpycp(dworkd+i*N, dX+i*N, N, dB+i*N);
 	}
 	
-	magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dworkd, N);
+	//magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dworkd, N);
 	if( NRHS == 1 )
 	    /* TODO: update optimisation from gemv_MLU into classic gemv */
-	    cublasZgemv( MagmaNoTrans, N, N, mzone, dA, ldda, dX, 1, zone, dworkd, 1);
+	    cublasZgemv( trans, N, N, mzone, dA, ldda, dX, 1, zone, dworkd, 1);
 	else
-	    cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, NRHS, N, mzone, dA, ldda, dX, lddx, zone, dworkd, N);
+	    cublasZgemm( trans, MagmaNoTrans, N, NRHS, N, mzone, dA, ldda, dX, lddx, zone, dworkd, N);
 	
 	/*
 	  Check whether the NRHS normwise backward errors satisfy the
@@ -308,7 +310,7 @@ magma_zcgesv_gpu(magma_int_t N, magma_int_t NRHS,
 	return ret;
     }
     magmablas_zlacpy( MagmaUpperLower, N, NRHS, dB, lddb, dX, N );
-    ret = magma_zgetrs_gpu( MagmaNoTrans, N, NRHS, dA, ldda, IPIV, dX, N, info );
+    ret = magma_zgetrs_gpu( trans, N, NRHS, dA, ldda, IPIV, dX, N, info );
     return ret;
 }
 

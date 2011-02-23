@@ -319,7 +319,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
         }
 
         for(i=0; i<NRHS; i++) {
-            magmablas_zcaxpycp( dSX+i*N, dX+i*lddx, N, N, ldda, dB+i*lddb, dR+i*N );
+            magmablas_zcaxpycp( dSX+i*N, dX+i*lddx, N, dB+i*lddb, dR+i*N );
         }
 
         /* unnecessary may be */

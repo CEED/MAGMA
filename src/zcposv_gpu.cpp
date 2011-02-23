@@ -238,7 +238,7 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
         magma_cpotrs_gpu(uplo, n, nrhs, dSA, ldda, dSX, lddb, info);
       
         for(i=0;i<nrhs;i++){
-            magmablas_zcaxpycp(dworks+i*n, dX+i*n, n, n, ldda, dB+i*n,dworkd+i*n) ;
+            magmablas_zcaxpycp(dworks+i*n, dX+i*n, n, dB+i*n,dworkd+i*n) ;
         }
       
         if( nrhs == 1 )
