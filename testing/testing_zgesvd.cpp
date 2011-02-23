@@ -22,6 +22,7 @@
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
+#define PRECISION_z
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgesvd
@@ -156,9 +157,15 @@ int main( int argc, char** argv)
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
+#if defined(PRECISION_z) || defined(PRECISION_c)
 	lapackf77_zgesvd("A", "A", &M, &N,
 			 h_A, &M, S2, U, &M,
 			 VT, &N, h_work, &lwork, rwork, &info);
+#else
+	lapackf77_zgesvd("A", "A", &M, &N,
+			 h_A, &M, S2, U, &M,
+			 VT, &N, h_work, &lwork, &info);
+#endif
         end = get_current_time();
         if (info < 0)
             printf("Argument %d of zgesvd had an illegal value.\n", -info);

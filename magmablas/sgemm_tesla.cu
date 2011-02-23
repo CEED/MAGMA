@@ -13,7 +13,7 @@
 extern "C" void 
 magmablas_sgemm_tesla( char TRANSA, char TRANSB, int m , int n , int k , 
                        float alpha, const float *A, int lda, 
-                                     const float *B, int ldb,
+                                    const float *B, int ldb,
                        float beta,        float *C, int ldc)
 {
 /*  -- MAGMA (version 1.0) --

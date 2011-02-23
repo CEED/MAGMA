@@ -23,14 +23,6 @@ extern "C" {
 #    define lapackf77_xerbla xerbla_
 #    define lapackf77_dsterf dsterf_
 #    define lapackf77_ssterf ssterf_
-#    define lapackf77_zstedc zstedc_
-#    define lapackf77_cstedc cstedc_
-#    define lapackf77_dstedc dstedc_
-#    define lapackf77_sstedc sstedc_
-#    define lapackf77_zunmtr zunmtr_
-#    define lapackf77_cunmtr cunmtr_
-#    define lapackf77_dormtr dormtr_
-#    define lapackf77_sormtr sormtr_
 
 #    define lapackf77_zlag2c zlag2c_
 #    define lapackf77_clag2z clag2z_
@@ -56,14 +48,6 @@ extern "C" {
 #    define lapackf77_xerbla xerbla
 #    define lapackf77_dsterf dsterf
 #    define lapackf77_ssterf ssterf
-#    define lapackf77_zstedc zstedc
-#    define lapackf77_cstedc cstedc
-#    define lapackf77_dstedc dstedc
-#    define lapackf77_sstedc sstedc
-#    define lapackf77_zunmtr zunmtr
-#    define lapackf77_cunmtr cunmtr
-#    define lapackf77_dormtr dormtr
-#    define lapackf77_sormtr sormtr
 
 #    define lapackf77_zlag2c zlag2c
 #    define lapackf77_clag2z clag2z
@@ -88,37 +72,9 @@ void     lapackf77_zcgesv(magma_int_t *n, magma_int_t *nrhs, cuDoubleComplex *A,
 void     lapackf77_dsgesv(magma_int_t *n, magma_int_t *nrhs, double          *A, magma_int_t *lda, magma_int_t *IPIV, double          *B, magma_int_t *ldb, 
                           double          *X, magma_int_t *ldx, double          *work, float          *swork,                magma_int_t *iter, magma_int_t *info);
 
-int lapackf77_xerbla(char *, magma_int_t *);
-int lapackf77_dsterf(magma_int_t *, double *, double *, magma_int_t *);
-int lapackf77_ssterf(magma_int_t *, float *, float *, magma_int_t *);
-int lapackf77_zstedc(char *, magma_int_t *, double *, double *, cuDoubleComplex *,
-                     magma_int_t *, cuDoubleComplex *, magma_int_t *, double *, magma_int_t *,
-                     magma_int_t *, magma_int_t *, magma_int_t *);
-int lapackf77_cstedc(char *, magma_int_t *, float *, float *, cuFloatComplex *,
-                     magma_int_t *, cuFloatComplex *, magma_int_t *, float *, magma_int_t *,
-                     magma_int_t *, magma_int_t *, magma_int_t *);
-int lapackf77_dstedc(char *, magma_int_t *, double *, double *, double *,
-                     magma_int_t *, double *, magma_int_t *,
-                      magma_int_t *, magma_int_t *, magma_int_t *);
-int lapackf77_sstedc(char *, magma_int_t *, float *, float *, float *,
-                     magma_int_t *, float *, magma_int_t *,
-                     magma_int_t *, magma_int_t *, magma_int_t *);
-int lapackf77_zunmtr(char *, char *, char *, magma_int_t *, magma_int_t *,
-                     cuDoubleComplex *, magma_int_t *, cuDoubleComplex *,
-                     cuDoubleComplex *, magma_int_t *,
-                     cuDoubleComplex *, magma_int_t *, magma_int_t *);
-int lapackf77_cunmtr(char *, char *, char *, magma_int_t *, magma_int_t *,
-                     cuFloatComplex *, magma_int_t *, cuFloatComplex *,
-                     cuFloatComplex *, magma_int_t *,
-                     cuFloatComplex *, magma_int_t *, magma_int_t *);
-int lapackf77_dormtr(char *, char *, char *, magma_int_t *, magma_int_t *,
-            double *, magma_int_t *, double *,
-            double *, magma_int_t *, 
-            double *, magma_int_t *, magma_int_t *);
-int lapackf77_sormtr(char *, char *, char *, magma_int_t *, magma_int_t *,
-            float *, magma_int_t *, float *,
-            float *, magma_int_t *, 
-            float *, magma_int_t *, magma_int_t *);
+void     lapackf77_xerbla(char *, magma_int_t *);
+void     lapackf77_dsterf(magma_int_t *, double *, double *, magma_int_t *);
+void     lapackf77_ssterf(magma_int_t *, float *, float *, magma_int_t *);
 
 void     lapackf77_zlag2c( magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,  magma_int_t *lda,  cuFloatComplex  *sa, magma_int_t *ldsa, magma_int_t *info );
 void     lapackf77_clag2z( magma_int_t *m, magma_int_t *n, cuFloatComplex  *sa, magma_int_t *ldsa, cuDoubleComplex *a,  magma_int_t *lda,  magma_int_t *info );
