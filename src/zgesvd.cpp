@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        November 2010
 
-       @precisions normal z -> s d c
+       @precisions normal z -> c
 
 */
 #include "common_magma.h"
@@ -170,43 +170,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
     static magma_int_t chunk, minmn;
     static magma_int_t wrkbl, itaup, itauq, mnthr, iwork;
     magma_int_t wntua, wntva, wntun, wntuo, wntvn, wntvo, wntus, wntvs;
-    extern double dlamch_(char *);
-    extern int 
-      dlascl_(char *, magma_int_t *, magma_int_t *, 
-	      double *, double *, magma_int_t *, magma_int_t *, double *, 
-	      magma_int_t *, magma_int_t *);
-    extern magma_int_t ilaenv_(magma_int_t *, char *, char *, magma_int_t *,
+    extern magma_int_t ilaenv_(magma_int_t *, const char *, const char *, magma_int_t *,
 			       magma_int_t *, magma_int_t *, magma_int_t *, 
 			       magma_int_t, magma_int_t);
     static double bignum;
-    extern int 
-      zlascl_(char *, magma_int_t *, magma_int_t *, double *, 
-		       double *, magma_int_t *, magma_int_t *, 
-		       cuDoubleComplex *, magma_int_t *, magma_int_t *), 
-      zlaset_(char *, magma_int_t *, magma_int_t *, cuDoubleComplex *, 
-	      cuDoubleComplex *, cuDoubleComplex *, magma_int_t *);
     static magma_int_t ldwrkr;
-    extern int zbdsqr_(char *, magma_int_t *, magma_int_t *, magma_int_t *,
-		       magma_int_t *, double *, double *, cuDoubleComplex *, 
-		       magma_int_t *, cuDoubleComplex *, magma_int_t *,
-		       cuDoubleComplex *, magma_int_t *,
-		       double *, magma_int_t *);
     static magma_int_t minwrk, ldwrku, maxwrk;
     static double smlnum;
     static magma_int_t irwork;
-    extern int 
-      zunmbr_(char *, char *, char *, magma_int_t *, 
-	      magma_int_t *, magma_int_t *, cuDoubleComplex *, magma_int_t *,
-	      cuDoubleComplex *, cuDoubleComplex *, magma_int_t *,
-	      cuDoubleComplex *, magma_int_t *, magma_int_t *), 
-      zunglq_(magma_int_t *, magma_int_t *, magma_int_t *,
-	      cuDoubleComplex *, magma_int_t *, cuDoubleComplex *, 
-	      cuDoubleComplex *, magma_int_t *, magma_int_t *);
     magma_int_t lquery, wntuas, wntvas;
-    extern int zungqr_(magma_int_t *, magma_int_t *, magma_int_t *, 
-		       cuDoubleComplex *, magma_int_t *, cuDoubleComplex *,
-		       cuDoubleComplex *, magma_int_t *, magma_int_t  *);
-
 
     a_dim1 = *lda;
     a_offset = 1 + a_dim1;
@@ -237,7 +209,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
     if (! (wntua || wntus || wntuo || wntun)) {
 	*info = -1;
-    } else if (! (wntva || wntvs || wntvo || wntvn) || wntvo && wntuo) {
+    } else if (! (wntva || wntvs || wntvo || wntvn) || (wntvo && wntuo) ) {
 	*info = -2;
     } else if (*m < 0) {
 	*info = -3;
@@ -245,9 +217,9 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 	*info = -4;
     } else if (*lda < max(1,*m)) {
 	*info = -6;
-    } else if (*ldu < 1 || wntuas && *ldu < *m) {
+    } else if ((*ldu < 1) || (wntuas && (*ldu < *m)) ) {
 	*info = -9;
-    } else if (*ldvt < 1 || wntva && *ldvt < *n || wntvs && *ldvt < minmn) {
+    } else if ((*ldvt < 1) || (wntva && (*ldvt < *n)) || (wntvs && (*ldvt < minmn)) ) {
 	*info = -11;
     }
 
@@ -739,8 +711,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
     }
 
     /* Get machine constants */
-    eps = dlamch_("P");
-    smlnum = magma_dsqrt(dlamch_("S")) / eps;
+    eps = lapackf77_dlamch("P");
+    smlnum = magma_dsqrt(lapackf77_dlamch("S")) / eps;
     bignum = 1. / smlnum;
 
     /* Scale A if max element outside range [SMLNUM,BIGNUM] */
@@ -748,12 +720,12 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
     iscl = 0;
     if (anrm > 0. && anrm < smlnum) {
 	iscl = 1;
-	zlascl_("G", &c__0, &c__0, &anrm, &smlnum, m, n, 
-		&a[a_offset], lda, &ierr);
+	lapackf77_zlascl("G", &c__0, &c__0, &anrm, &smlnum, m, n, 
+                         &a[a_offset], lda, &ierr);
     } else if (anrm > bignum) {
         iscl = 1;
-	zlascl_("G", &c__0, &c__0, &anrm, &bignum, m, n, 
-		&a[a_offset], lda, &ierr);
+	lapackf77_zlascl("G", &c__0, &c__0, &anrm, &bignum, m, n, 
+                         &a[a_offset], lda, &ierr);
     }
 
     if (*m >= *n) {
@@ -780,7 +752,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		/* Zero out below R */
 		i__2 = *n - 1;
 		i__3 = *n - 1;
-		zlaset_("L", &i__2, &i__3, &c_b1, &c_b1, &a[a_dim1 + 2], lda);
+		lapackf77_zlaset("L", &i__2, &i__3, &c_b1, &c_b1, &a[a_dim1 + 2], lda);
 		ie = 1;
 		itauq = 1;
 		itaup = itauq + *n;
@@ -814,9 +786,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		   singular vectors of A in A if desired   
 		   (CWorkspace: 0)   
 		   (RWorkspace: need BDSPAC) */
-		zbdsqr_("U", n, &ncvt, &c__0, &c__0, &s[1], &rwork[ie], 
-			&a[a_offset], lda, cdum, &c__1, cdum, &c__1,
-			&rwork[irwork], info);
+		lapackf77_zbdsqr("U", n, &ncvt, &c__0, &c__0, &s[1], &rwork[ie], 
+			&a[a_offset], lda, cdum, &c__1, cdum, &c__1, &rwork[irwork], info);
 		
 		/* If right singular vectors desired in VT, copy them there */
 		if (wntvas) {
@@ -869,14 +840,14 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		lapackf77_zlacpy("U", n, n, &a[a_offset], lda, &work[ir], &ldwrkr);
 		i__2 = *n - 1;
 		i__3 = *n - 1;
-		zlaset_("L", &i__2, &i__3, &c_b1, &c_b1, &work[ir + 1], &ldwrkr);
+		lapackf77_zlaset("L", &i__2, &i__3, &c_b1, &c_b1, &work[ir + 1], &ldwrkr);
 
 		/*  Generate Q in A   
 		    (CWorkspace: need N*N+2*N, prefer N*N+N+N*NB)   
 		    (RWorkspace: 0) */
 		i__2 = *lwork - iwork + 1;
-		zungqr_(m, n, n, &a[a_offset], lda, &work[itau], 
-			&work[iwork], &i__2, &ierr);
+		lapackf77_zungqr(m, n, n, &a[a_offset], lda, &work[itau], 
+                                 &work[iwork], &i__2, &ierr);
 		ie = 1;
 		itauq = itau;
 		itaup = itauq + *n;
@@ -907,7 +878,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		    singular vectors of R in WORK(IR)   
 		    (CWorkspace: need N*N)   
 		    (RWorkspace: need BDSPAC) */
-		zbdsqr_("U", n, &c__0, n, &c__0, &s[1], &rwork[ie], cdum, 
+		lapackf77_zbdsqr("U", n, &c__0, n, &c__0, &s[1], &rwork[ie], cdum, 
 			&c__1, &work[ir], &ldwrkr, cdum, &c__1,
 			&rwork[irwork], info);
 		iu = itauq;
@@ -961,7 +932,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                    singular vectors of A in A   
                    (CWorkspace: need 0)   
                    (RWorkspace: need BDSPAC) */
-		zbdsqr_("U", n, &c__0, m, &c__0, &s[1], &rwork[ie], cdum, 
+		lapackf77_zbdsqr("U", n, &c__0, m, &c__0, &s[1], &rwork[ie], cdum, 
 			&c__1, &a[a_offset], lda, cdum, &c__1, 
 			&rwork[irwork], info);
 	      }
@@ -1012,7 +983,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		if (*n > 1) {
 		  i__3 = *n - 1;
 		  i__2 = *n - 1;
-		  zlaset_("L", &i__3, &i__2, &c_b1, &c_b1, &vt[vt_dim1 
+		  lapackf77_zlaset("L", &i__3, &i__2, &c_b1, &c_b1, &vt[vt_dim1 
 							       + 2], ldvt);
 		}
 		
@@ -1020,8 +991,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		    (CWorkspace: need N*N+2*N, prefer N*N+N+N*NB)   
 		    (RWorkspace: 0) */
 		i__3 = *lwork - iwork + 1;
-		zungqr_(m, n, n, &a[a_offset], lda, &work[itau],
-			&work[iwork], &i__3, &ierr);
+		lapackf77_zungqr(m, n, n, &a[a_offset], lda, &work[itau],
+                                 &work[iwork], &i__3, &ierr);
 		ie = 1;
 		itauq = itau;
 		itaup = itauq + *n;
@@ -1062,7 +1033,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		    singular vectors of R in VT   
 		    (CWorkspace: need N*N)   
 		    (RWorkspace: need BDSPAC) */
-		zbdsqr_("U", n, n, n, &c__0, &s[1], &rwork[ie], 
+		lapackf77_zbdsqr("U", n, n, n, &c__0, &s[1], &rwork[ie], 
 			&vt[vt_offset], ldvt, &work[ir], &ldwrkr, cdum, &c__1,
 			&rwork[irwork], info);
 		iu = itauq;
@@ -1104,15 +1075,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		if (*n > 1) {
 		  i__2 = *n - 1;
 		  i__3 = *n - 1;
-		  zlaset_("L", &i__2, &i__3, &c_b1, &c_b1, &vt[vt_dim1+2], ldvt);
+		  lapackf77_zlaset("L", &i__2, &i__3, &c_b1, &c_b1, &vt[vt_dim1+2], ldvt);
 		}
 		
 		/*  Generate Q in A   
 		    (CWorkspace: need 2*N, prefer N+N*NB)   
 		    (RWorkspace: 0) */
 		i__2 = *lwork - iwork + 1;
-		zungqr_(m, n, n, &a[a_offset], lda, &work[itau],
-			&work[iwork], &i__2, &ierr);
+		lapackf77_zungqr(m, n, n, &a[a_offset], lda, &work[itau],
+                                 &work[iwork], &i__2, &ierr);
 		ie = 1;
 		itauq = itau;
 		itaup = itauq + *n;
@@ -1134,7 +1105,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                    (CWorkspace: need 2*N+M, prefer 2*N+M*NB)   
                    (RWorkspace: 0) */
 		i__2 = *lwork - iwork + 1;
-		zunmbr_("Q", "R", "N", m, n, n, &vt[vt_offset], ldvt, &
+		lapackf77_zunmbr("Q", "R", "N", m, n, n, &vt[vt_offset], ldvt, &
 			work[itauq], &a[a_offset], lda, &work[iwork], &
 			i__2, &ierr);
 		
@@ -1152,7 +1123,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                    (CWorkspace: 0)   
                    (RWorkspace: need BDSPAC) */
 
-		zbdsqr_("U", n, n, m, &c__0, &s[1], &rwork[ie],
+		lapackf77_zbdsqr("U", n, n, m, &c__0, &s[1], &rwork[ie],
 			&vt[vt_offset], ldvt, &a[a_offset], lda, cdum, &c__1, 
 			&rwork[irwork], info);
 	      }
@@ -1192,15 +1163,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 				   ldwrkr);
 		  i__2 = *n - 1;
 		  i__3 = *n - 1;
-		  zlaset_("L", &i__2, &i__3, &c_b1, &c_b1, &work[ir + 1]
+		  lapackf77_zlaset("L", &i__2, &i__3, &c_b1, &c_b1, &work[ir + 1]
 			  , &ldwrkr);
 		  
 		  /*  Generate Q in A   
                       (CWorkspace: need N*N+2*N, prefer N*N+N+N*NB)   
                       (RWorkspace: 0) */
 		  i__2 = *lwork - iwork + 1;
-		  zungqr_(m, n, n, &a[a_offset], lda, &work[itau], &
-			  work[iwork], &i__2, &ierr);
+		  lapackf77_zungqr(m, n, n, &a[a_offset], lda, &work[itau], &
+                                   work[iwork], &i__2, &ierr);
 		  ie = 1;
 		  itauq = itau;
 		  itaup = itauq + *n;
@@ -1231,7 +1202,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       singular vectors of R in WORK(IR)   
                       (CWorkspace: need N*N)   
                       (RWorkspace: need BDSPAC) */
-		  zbdsqr_("U", n, &c__0, n, &c__0, &s[1], &rwork[ie], 
+		  lapackf77_zbdsqr("U", n, &c__0, n, &c__0, &s[1], &rwork[ie], 
 			  cdum, &c__1, &work[ir], &ldwrkr, cdum, &c__1, 
 			  &rwork[irwork], info);
 
@@ -1261,8 +1232,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: need 2*N, prefer N+N*NB)   
                       (RWorkspace: 0) */
 		  i__2 = *lwork - iwork + 1;
-		  zungqr_(m, n, n, &u[u_offset], ldu, &work[itau], &
-			  work[iwork], &i__2, &ierr);
+		  lapackf77_zungqr(m, n, n, &u[u_offset], ldu, &work[itau], &
+                                   work[iwork], &i__2, &ierr);
 		  ie = 1;
 		  itauq = itau;
 		  itaup = itauq + *n;
@@ -1271,7 +1242,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		  /* Zero out below R in A */
 		  i__2 = *n - 1;
 		  i__3 = *n - 1;
-		  zlaset_("L", &i__2, &i__3, &c_b1, &c_b1, &a[a_dim1 + 
+		  lapackf77_zlaset("L", &i__2, &i__3, &c_b1, &c_b1, &a[a_dim1 + 
 							      2], lda);
 		  
 		  /*  Bidiagonalize R in A   
@@ -1291,7 +1262,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: need 2*N+M, prefer 2*N+M*NB)   
                       (RWorkspace: 0) */
 		  i__2 = *lwork - iwork + 1;
-		  zunmbr_("Q", "R", "N", m, n, n, &a[a_offset], lda, &
+		  lapackf77_zunmbr("Q", "R", "N", m, n, n, &a[a_offset], lda, &
 			  work[itauq], &u[u_offset], ldu, &work[iwork], 
 			  &i__2, &ierr);
 		  irwork = ie + *n;
@@ -1300,7 +1271,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       singular vectors of A in U   
                       (CWorkspace: 0)   
                       (RWorkspace: need BDSPAC) */
-		  zbdsqr_("U", n, &c__0, m, &c__0, &s[1], &rwork[ie], 
+		  lapackf77_zbdsqr("U", n, &c__0, m, &c__0, &s[1], &rwork[ie], 
 			  cdum, &c__1, &u[u_offset], ldu, cdum, &c__1, &
 			  rwork[irwork], info);
 		}
@@ -1349,15 +1320,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 				   ldwrku);
 		  i__2 = *n - 1;
 		  i__3 = *n - 1;
-		  zlaset_("L", &i__2, &i__3, &c_b1, &c_b1, &work[iu + 1]
+		  lapackf77_zlaset("L", &i__2, &i__3, &c_b1, &c_b1, &work[iu + 1]
 			  , &ldwrku);
 		  
 		  /*  Generate Q in A   
                       (CWorkspace: need 2*N*N+2*N, prefer 2*N*N+N+N*NB)   
                       (RWorkspace: 0) */
 		  i__2 = *lwork - iwork + 1;
-		  zungqr_(m, n, n, &a[a_offset], lda, &work[itau], &
-			  work[iwork], &i__2, &ierr);
+		  lapackf77_zungqr(m, n, n, &a[a_offset], lda, &work[itau], &
+                                   work[iwork], &i__2, &ierr);
 		  ie = 1;
 		  itauq = itau;
 		  itaup = itauq + *n;
@@ -1402,7 +1373,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       right singular vectors of R in WORK(IR)   
                       (CWorkspace: need 2*N*N)   
                       (RWorkspace: need BDSPAC) */
-		  zbdsqr_("U", n, n, n, &c__0, &s[1], &rwork[ie],
+		  lapackf77_zbdsqr("U", n, n, n, &c__0, &s[1], &rwork[ie],
 			  &work[ir], &ldwrkr, &work[iu], &ldwrku, cdum, &c__1,
 			  &rwork[irwork], info);
 		  
@@ -1438,8 +1409,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: need 2*N, prefer N+N*NB)   
                       (RWorkspace: 0) */
 		  i__2 = *lwork - iwork + 1;
-		  zungqr_(m, n, n, &u[u_offset], ldu, &work[itau], &
-			  work[iwork], &i__2, &ierr);
+		  lapackf77_zungqr(m, n, n, &u[u_offset], ldu, &work[itau], &
+                                   work[iwork], &i__2, &ierr);
 		  ie = 1;
 		  itauq = itau;
 		  itaup = itauq + *n;
@@ -1448,7 +1419,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		  /*  Zero out below R in A */
 		  i__2 = *n - 1;
 		  i__3 = *n - 1;
-		  zlaset_("L", &i__2, &i__3, &c_b1, &c_b1, &a[a_dim1 + 
+		  lapackf77_zlaset("L", &i__2, &i__3, &c_b1, &c_b1, &a[a_dim1 + 
 							      2], lda);
 		  
 		  /*  Bidiagonalize R in A   
@@ -1468,7 +1439,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: need 2*N+M, prefer 2*N+M*NB)   
                       (RWorkspace: 0) */
 		  i__2 = *lwork - iwork + 1;
-		  zunmbr_("Q", "R", "N", m, n, n, &a[a_offset], lda, &
+		  lapackf77_zunmbr("Q", "R", "N", m, n, n, &a[a_offset], lda, &
 			  work[itauq], &u[u_offset], ldu, &work[iwork], 
 			  &i__2, &ierr);
 
@@ -1485,7 +1456,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       singular vectors of A in A   
                       (CWorkspace: 0)   
                       (RWorkspace: need BDSPAC) */
-		  zbdsqr_("U", n, n, m, &c__0, &s[1], &rwork[ie],
+		  lapackf77_zbdsqr("U", n, n, m, &c__0, &s[1], &rwork[ie],
 			  &a[a_offset], lda, &u[u_offset], ldu, cdum, &
 			  c__1, &rwork[irwork], info);
 		}
@@ -1528,7 +1499,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 				ldwrku);
 			i__2 = *n - 1;
 			i__3 = *n - 1;
-			zlaset_("L", &i__2, &i__3, &c_b1, &c_b1, &work[iu + 1]
+			lapackf77_zlaset("L", &i__2, &i__3, &c_b1, &c_b1, &work[iu + 1]
 				, &ldwrku);
 
 /*                    Generate Q in A   
@@ -1536,8 +1507,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zungqr_(m, n, n, &a[a_offset], lda, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zungqr(m, n, n, &a[a_offset], lda, &work[itau], &
+                                         work[iwork], &i__2, &ierr);
 			ie = 1;
 			itauq = itau;
 			itaup = itauq + *n;
@@ -1585,7 +1556,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: need N*N)   
                       (RWorkspace: need BDSPAC) */
 
-			zbdsqr_("U", n, n, n, &c__0, &s[1], &rwork[ie], &vt[
+			lapackf77_zbdsqr("U", n, n, n, &c__0, &s[1], &rwork[ie], &vt[
 				vt_offset], ldvt, &work[iu], &ldwrku, cdum, &
 				c__1, &rwork[irwork], info);
 
@@ -1619,8 +1590,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zungqr_(m, n, n, &u[u_offset], ldu, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zungqr(m, n, n, &u[u_offset], ldu, &work[itau], &
+                                         work[iwork], &i__2, &ierr);
 
 /*                    Copy R to VT, zeroing out below it */
 
@@ -1629,7 +1600,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			if (*n > 1) {
 			    i__2 = *n - 1;
 			    i__3 = *n - 1;
-			    zlaset_("L", &i__2, &i__3, &c_b1, &c_b1, &vt[
+			    lapackf77_zlaset("L", &i__2, &i__3, &c_b1, &c_b1, &vt[
 				    vt_dim1 + 2], ldvt);
 			}
 			ie = 1;
@@ -1657,7 +1628,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zunmbr_("Q", "R", "N", m, n, n, &vt[vt_offset], ldvt, 
+			lapackf77_zunmbr("Q", "R", "N", m, n, n, &vt[vt_offset], ldvt, 
 				&work[itauq], &u[u_offset], ldu, &work[iwork],
 				 &i__2, &ierr);
 
@@ -1677,7 +1648,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: 0)   
                       (RWorkspace: need BDSPAC) */
 
-			zbdsqr_("U", n, n, m, &c__0, &s[1], &rwork[ie], &vt[
+			lapackf77_zbdsqr("U", n, n, m, &c__0, &s[1], &rwork[ie], &vt[
 				vt_offset], ldvt, &u[u_offset], ldu, cdum, &
 				c__1, &rwork[irwork], info);
 
@@ -1730,7 +1701,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 				ldwrkr);
 			i__2 = *n - 1;
 			i__3 = *n - 1;
-			zlaset_("L", &i__2, &i__3, &c_b1, &c_b1, &work[ir + 1]
+			lapackf77_zlaset("L", &i__2, &i__3, &c_b1, &c_b1, &work[ir + 1]
 				, &ldwrkr);
 
 /*                    Generate Q in U   
@@ -1738,8 +1709,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zungqr_(m, m, n, &u[u_offset], ldu, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zungqr(m, m, n, &u[u_offset], ldu, &work[itau], &
+                                         work[iwork], &i__2, &ierr);
 			ie = 1;
 			itauq = itau;
 			itaup = itauq + *n;
@@ -1773,7 +1744,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: need N*N)   
                       (RWorkspace: need BDSPAC) */
 
-			zbdsqr_("U", n, &c__0, n, &c__0, &s[1], &rwork[ie], 
+			lapackf77_zbdsqr("U", n, &c__0, n, &c__0, &s[1], &rwork[ie], 
 				cdum, &c__1, &work[ir], &ldwrkr, cdum, &c__1, 
 				&rwork[irwork], info);
 
@@ -1812,8 +1783,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zungqr_(m, m, n, &u[u_offset], ldu, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zungqr(m, m, n, &u[u_offset], ldu, &work[itau], &
+                                         work[iwork], &i__2, &ierr);
 			ie = 1;
 			itauq = itau;
 			itaup = itauq + *n;
@@ -1823,7 +1794,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
 			i__2 = *n - 1;
 			i__3 = *n - 1;
-			zlaset_("L", &i__2, &i__3, &c_b1, &c_b1, &a[a_dim1 + 
+			lapackf77_zlaset("L", &i__2, &i__3, &c_b1, &c_b1, &a[a_dim1 + 
 				2], lda);
 
 /*                    Bidiagonalize R in A   
@@ -1846,7 +1817,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zunmbr_("Q", "R", "N", m, n, n, &a[a_offset], lda, &
+			lapackf77_zunmbr("Q", "R", "N", m, n, n, &a[a_offset], lda, &
 				work[itauq], &u[u_offset], ldu, &work[iwork], 
 				&i__2, &ierr)
 				;
@@ -1857,7 +1828,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: 0)   
                       (RWorkspace: need BDSPAC) */
 
-			zbdsqr_("U", n, &c__0, m, &c__0, &s[1], &rwork[ie], 
+			lapackf77_zbdsqr("U", n, &c__0, m, &c__0, &s[1], &rwork[ie], 
 				cdum, &c__1, &u[u_offset], ldu, cdum, &c__1, &
 				rwork[irwork], info);
 
@@ -1916,8 +1887,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zungqr_(m, m, n, &u[u_offset], ldu, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zungqr(m, m, n, &u[u_offset], ldu, &work[itau], &
+                                         work[iwork], &i__2, &ierr);
 
 /*                    Copy R to WORK(IU), zeroing out below it */
 
@@ -1925,7 +1896,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 				ldwrku);
 			i__2 = *n - 1;
 			i__3 = *n - 1;
-			zlaset_("L", &i__2, &i__3, &c_b1, &c_b1, &work[iu + 1]
+			lapackf77_zlaset("L", &i__2, &i__3, &c_b1, &c_b1, &work[iu + 1]
 				, &ldwrku);
 			ie = 1;
 			itauq = itau;
@@ -1975,7 +1946,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: need 2*N*N)   
                       (RWorkspace: need BDSPAC) */
 
-			zbdsqr_("U", n, n, n, &c__0, &s[1], &rwork[ie], &work[
+			lapackf77_zbdsqr("U", n, n, n, &c__0, &s[1], &rwork[ie], &work[
 				ir], &ldwrkr, &work[iu], &ldwrku, cdum, &c__1,
 				 &rwork[irwork], info);
 
@@ -2019,8 +1990,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zungqr_(m, m, n, &u[u_offset], ldu, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zungqr(m, m, n, &u[u_offset], ldu, &work[itau], &
+                                         work[iwork], &i__2, &ierr);
 			ie = 1;
 			itauq = itau;
 			itaup = itauq + *n;
@@ -2030,7 +2001,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
 			i__2 = *n - 1;
 			i__3 = *n - 1;
-			zlaset_("L", &i__2, &i__3, &c_b1, &c_b1, &a[a_dim1 + 
+			lapackf77_zlaset("L", &i__2, &i__3, &c_b1, &c_b1, &a[a_dim1 + 
 				2], lda);
 
 /*                    Bidiagonalize R in A   
@@ -2053,7 +2024,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zunmbr_("Q", "R", "N", m, n, n, &a[a_offset], lda, &
+			lapackf77_zunmbr("Q", "R", "N", m, n, n, &a[a_offset], lda, &
 				work[itauq], &u[u_offset], ldu, &work[iwork], 
 				&i__2, &ierr)
 				;
@@ -2073,7 +2044,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: 0)   
                       (RWorkspace: need BDSPAC) */
 
-			zbdsqr_("U", n, n, m, &c__0, &s[1], &rwork[ie], &a[
+			lapackf77_zbdsqr("U", n, n, m, &c__0, &s[1], &rwork[ie], &a[
 				a_offset], lda, &u[u_offset], ldu, cdum, &
 				c__1, &rwork[irwork], info);
 
@@ -2122,8 +2093,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zungqr_(m, m, n, &u[u_offset], ldu, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zungqr(m, m, n, &u[u_offset], ldu, &work[itau], &
+                                         work[iwork], &i__2, &ierr);
 
 /*                    Copy R to WORK(IU), zeroing out below it */
 
@@ -2131,7 +2102,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 				ldwrku);
 			i__2 = *n - 1;
 			i__3 = *n - 1;
-			zlaset_("L", &i__2, &i__3, &c_b1, &c_b1, &work[iu + 1]
+			lapackf77_zlaset("L", &i__2, &i__3, &c_b1, &c_b1, &work[iu + 1]
 				, &ldwrku);
 			ie = 1;
 			itauq = itau;
@@ -2180,7 +2151,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: need N*N)   
                       (RWorkspace: need BDSPAC) */
 
-			zbdsqr_("U", n, n, n, &c__0, &s[1], &rwork[ie], &vt[
+			lapackf77_zbdsqr("U", n, n, n, &c__0, &s[1], &rwork[ie], &vt[
 				vt_offset], ldvt, &work[iu], &ldwrku, cdum, &
 				c__1, &rwork[irwork], info);
 
@@ -2219,8 +2190,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zungqr_(m, m, n, &u[u_offset], ldu, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zungqr(m, m, n, &u[u_offset], ldu, &work[itau], &
+                                         work[iwork], &i__2, &ierr);
 
 /*                    Copy R from A to VT, zeroing out below it */
 
@@ -2229,7 +2200,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			if (*n > 1) {
 			    i__2 = *n - 1;
 			    i__3 = *n - 1;
-			    zlaset_("L", &i__2, &i__3, &c_b1, &c_b1, &vt[
+			    lapackf77_zlaset("L", &i__2, &i__3, &c_b1, &c_b1, &vt[
 				    vt_dim1 + 2], ldvt);
 			}
 			ie = 1;
@@ -2257,7 +2228,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zunmbr_("Q", "R", "N", m, n, n, &vt[vt_offset], ldvt, 
+			lapackf77_zunmbr("Q", "R", "N", m, n, n, &vt[vt_offset], ldvt, 
 				&work[itauq], &u[u_offset], ldu, &work[iwork],
 				 &i__2, &ierr);
 
@@ -2277,7 +2248,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: 0)   
                       (RWorkspace: need BDSPAC) */
 
-			zbdsqr_("U", n, n, m, &c__0, &s[1], &rwork[ie], &vt[
+			lapackf77_zbdsqr("U", n, n, m, &c__0, &s[1], &rwork[ie], &vt[
 				vt_offset], ldvt, &u[u_offset], ldu, cdum, &
 				c__1, &rwork[irwork], info);
 
@@ -2384,7 +2355,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                 (CWorkspace: 0)   
                 (RWorkspace: need BDSPAC) */
 
-		zbdsqr_("U", n, &ncvt, &nru, &c__0, &s[1], &rwork[ie], &vt[
+		lapackf77_zbdsqr("U", n, &ncvt, &nru, &c__0, &s[1], &rwork[ie], &vt[
 			vt_offset], ldvt, &u[u_offset], ldu, cdum, &c__1, &
 			rwork[irwork], info);
 	    } else if (! wntuo && wntvo) {
@@ -2395,7 +2366,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                 (CWorkspace: 0)   
                 (RWorkspace: need BDSPAC) */
 
-		zbdsqr_("U", n, &ncvt, &nru, &c__0, &s[1], &rwork[ie], &a[
+		lapackf77_zbdsqr("U", n, &ncvt, &nru, &c__0, &s[1], &rwork[ie], &a[
 			a_offset], lda, &u[u_offset], ldu, cdum, &c__1, &
 			rwork[irwork], info);
 	    } else {
@@ -2406,7 +2377,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                 (CWorkspace: 0)   
                 (RWorkspace: need BDSPAC) */
 
-		zbdsqr_("U", n, &ncvt, &nru, &c__0, &s[1], &rwork[ie], &vt[
+		lapackf77_zbdsqr("U", n, &ncvt, &nru, &c__0, &s[1], &rwork[ie], &vt[
 			vt_offset], ldvt, &a[a_offset], lda, cdum, &c__1, &
 			rwork[irwork], info);
 	    }
@@ -2441,7 +2412,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
 		i__2 = *m - 1;
 		i__3 = *m - 1;
-		zlaset_("U", &i__2, &i__3, &c_b1, &c_b1, &a[(a_dim1 << 1) + 1]
+		lapackf77_zlaset("U", &i__2, &i__3, &c_b1, &c_b1, &a[(a_dim1 << 1) + 1]
 			, lda);
 		ie = 1;
 		itauq = 1;
@@ -2481,7 +2452,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                 (CWorkspace: 0)   
                 (RWorkspace: need BDSPAC) */
 
-		zbdsqr_("U", m, &c__0, &nru, &c__0, &s[1], &rwork[ie], cdum, &
+		lapackf77_zbdsqr("U", m, &c__0, &nru, &c__0, &s[1], &rwork[ie], cdum, &
 			c__1, &a[a_offset], lda, cdum, &c__1, &rwork[irwork], 
 			info);
 
@@ -2546,7 +2517,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		    lapackf77_zlacpy("L", m, m, &a[a_offset], lda, &work[ir], &ldwrkr);
 		    i__2 = *m - 1;
 		    i__3 = *m - 1;
-		    zlaset_("U", &i__2, &i__3, &c_b1, &c_b1, &work[ir + 
+		    lapackf77_zlaset("U", &i__2, &i__3, &c_b1, &c_b1, &work[ir + 
 			    ldwrkr], &ldwrkr);
 
 /*                 Generate Q in A   
@@ -2554,8 +2525,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                    (RWorkspace: 0) */
 
 		    i__2 = *lwork - iwork + 1;
-		    zunglq_(m, n, m, &a[a_offset], lda, &work[itau], &work[
-			    iwork], &i__2, &ierr);
+		    lapackf77_zunglq(m, n, m, &a[a_offset], lda, &work[itau], 
+                                     &work[iwork], &i__2, &ierr);
 		    ie = 1;
 		    itauq = itau;
 		    itaup = itauq + *m;
@@ -2590,7 +2561,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                    (CWorkspace: need M*M)   
                    (RWorkspace: need BDSPAC) */
 
-		    zbdsqr_("U", m, m, &c__0, &c__0, &s[1], &rwork[ie], &work[
+		    lapackf77_zbdsqr("U", m, m, &c__0, &c__0, &s[1], &rwork[ie], &work[
 			    ir], &ldwrkr, cdum, &c__1, cdum, &c__1, &rwork[
 			    irwork], info);
 		    iu = itauq;
@@ -2650,7 +2621,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                    (CWorkspace: 0)   
                    (RWorkspace: need BDSPAC) */
 
-		    zbdsqr_("L", m, n, &c__0, &c__0, &s[1], &rwork[ie], &a[
+		    lapackf77_zbdsqr("L", m, n, &c__0, &c__0, &s[1], &rwork[ie], &a[
 			    a_offset], lda, cdum, &c__1, cdum, &c__1, &rwork[
 			    irwork], info);
 
@@ -2711,7 +2682,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		    lapackf77_zlacpy("L", m, m, &a[a_offset], lda, &u[u_offset], ldu);
 		    i__3 = *m - 1;
 		    i__2 = *m - 1;
-		    zlaset_("U", &i__3, &i__2, &c_b1, &c_b1, &u[(u_dim1 << 1) 
+		    lapackf77_zlaset("U", &i__3, &i__2, &c_b1, &c_b1, &u[(u_dim1 << 1) 
 			    + 1], ldu);
 
 /*                 Generate Q in A   
@@ -2719,8 +2690,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                    (RWorkspace: 0) */
 
 		    i__3 = *lwork - iwork + 1;
-		    zunglq_(m, n, m, &a[a_offset], lda, &work[itau], &work[
-			    iwork], &i__3, &ierr);
+		    lapackf77_zunglq(m, n, m, &a[a_offset], lda, &work[itau], 
+                                     &work[iwork], &i__3, &ierr);
 		    ie = 1;
 		    itauq = itau;
 		    itaup = itauq + *m;
@@ -2763,7 +2734,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                    (CWorkspace: need M*M)   
                    (RWorkspace: need BDSPAC) */
 
-		    zbdsqr_("U", m, m, m, &c__0, &s[1], &rwork[ie], &work[ir],
+		    lapackf77_zbdsqr("U", m, m, m, &c__0, &s[1], &rwork[ie], &work[ir],
 			     &ldwrkr, &u[u_offset], ldu, cdum, &c__1, &rwork[
 			    irwork], info);
 		    iu = itauq;
@@ -2808,7 +2779,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		    lapackf77_zlacpy("L", m, m, &a[a_offset], lda, &u[u_offset], ldu);
 		    i__2 = *m - 1;
 		    i__3 = *m - 1;
-		    zlaset_("U", &i__2, &i__3, &c_b1, &c_b1, &u[(u_dim1 << 1) 
+		    lapackf77_zlaset("U", &i__2, &i__3, &c_b1, &c_b1, &u[(u_dim1 << 1) 
 			    + 1], ldu);
 
 /*                 Generate Q in A   
@@ -2816,8 +2787,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                    (RWorkspace: 0) */
 
 		    i__2 = *lwork - iwork + 1;
-		    zunglq_(m, n, m, &a[a_offset], lda, &work[itau], &work[
-			    iwork], &i__2, &ierr);
+		    lapackf77_zunglq(m, n, m, &a[a_offset], lda, &work[itau], 
+                                     &work[iwork], &i__2, &ierr);
 		    ie = 1;
 		    itauq = itau;
 		    itaup = itauq + *m;
@@ -2840,7 +2811,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                    (RWorkspace: 0) */
 
 		    i__2 = *lwork - iwork + 1;
-		    zunmbr_("P", "L", "C", m, n, m, &u[u_offset], ldu, &work[
+		    lapackf77_zunmbr("P", "L", "C", m, n, m, &u[u_offset], ldu, &work[
 			    itaup], &a[a_offset], lda, &work[iwork], &i__2, &
 			    ierr);
 
@@ -2859,7 +2830,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                    (CWorkspace: 0)   
                    (RWorkspace: need BDSPAC) */
 
-		    zbdsqr_("U", m, n, m, &c__0, &s[1], &rwork[ie], &a[
+		    lapackf77_zbdsqr("U", m, n, m, &c__0, &s[1], &rwork[ie], &a[
 			    a_offset], lda, &u[u_offset], ldu, cdum, &c__1, &
 			    rwork[irwork], info);
 
@@ -2906,7 +2877,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 				ldwrkr);
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			zlaset_("U", &i__2, &i__3, &c_b1, &c_b1, &work[ir + 
+			lapackf77_zlaset("U", &i__2, &i__3, &c_b1, &c_b1, &work[ir + 
 				ldwrkr], &ldwrkr);
 
 /*                    Generate Q in A   
@@ -2914,8 +2885,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zunglq_(m, n, m, &a[a_offset], lda, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zunglq(m, n, m, &a[a_offset], lda, &work[itau], 
+                                         &work[iwork], &i__2, &ierr);
 			ie = 1;
 			itauq = itau;
 			itaup = itauq + *m;
@@ -2950,7 +2921,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: need M*M)   
                       (RWorkspace: need BDSPAC) */
 
-			zbdsqr_("U", m, m, &c__0, &c__0, &s[1], &rwork[ie], &
+			lapackf77_zbdsqr("U", m, m, &c__0, &c__0, &s[1], &rwork[ie], &
 				work[ir], &ldwrkr, cdum, &c__1, cdum, &c__1, &
 				rwork[irwork], info);
 
@@ -2987,8 +2958,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zunglq_(m, n, m, &vt[vt_offset], ldvt, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zunglq(m, n, m, &vt[vt_offset], ldvt, &work[itau], 
+                                         &work[iwork], &i__2, &ierr);
 			ie = 1;
 			itauq = itau;
 			itaup = itauq + *m;
@@ -2998,7 +2969,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			zlaset_("U", &i__2, &i__3, &c_b1, &c_b1, &a[(a_dim1 <<
+			lapackf77_zlaset("U", &i__2, &i__3, &c_b1, &c_b1, &a[(a_dim1 <<
 				 1) + 1], lda);
 
 /*                    Bidiagonalize L in A   
@@ -3020,7 +2991,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zunmbr_("P", "L", "C", m, n, m, &a[a_offset], lda, &
+			lapackf77_zunmbr("P", "L", "C", m, n, m, &a[a_offset], lda, &
 				work[itaup], &vt[vt_offset], ldvt, &work[
 				iwork], &i__2, &ierr);
 			irwork = ie + *m;
@@ -3030,7 +3001,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: 0)   
                       (RWorkspace: need BDSPAC) */
 
-			zbdsqr_("U", m, n, &c__0, &c__0, &s[1], &rwork[ie], &
+			lapackf77_zbdsqr("U", m, n, &c__0, &c__0, &s[1], &rwork[ie], &
 				vt[vt_offset], ldvt, cdum, &c__1, cdum, &c__1,
 				 &rwork[irwork], info);
 
@@ -3086,7 +3057,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 				ldwrku);
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			zlaset_("U", &i__2, &i__3, &c_b1, &c_b1, &work[iu + 
+			lapackf77_zlaset("U", &i__2, &i__3, &c_b1, &c_b1, &work[iu + 
 				ldwrku], &ldwrku);
 
 /*                    Generate Q in A   
@@ -3094,8 +3065,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zunglq_(m, n, m, &a[a_offset], lda, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zunglq(m, n, m, &a[a_offset], lda, &work[itau], 
+                                         &work[iwork], &i__2, &ierr);
 			ie = 1;
 			itauq = itau;
 			itaup = itauq + *m;
@@ -3144,7 +3115,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: need 2*M*M)   
                       (RWorkspace: need BDSPAC) */
 
-			zbdsqr_("U", m, m, m, &c__0, &s[1], &rwork[ie], &work[
+			lapackf77_zbdsqr("U", m, m, m, &c__0, &s[1], &rwork[ie], &work[
 				iu], &ldwrku, &work[ir], &ldwrkr, cdum, &c__1,
 				 &rwork[irwork], info);
 
@@ -3185,8 +3156,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zunglq_(m, n, m, &vt[vt_offset], ldvt, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zunglq(m, n, m, &vt[vt_offset], ldvt, &work[itau], 
+                                         &work[iwork], &i__2, &ierr);
 			ie = 1;
 			itauq = itau;
 			itaup = itauq + *m;
@@ -3196,7 +3167,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			zlaset_("U", &i__2, &i__3, &c_b1, &c_b1, &a[(a_dim1 <<
+			lapackf77_zlaset("U", &i__2, &i__3, &c_b1, &c_b1, &a[(a_dim1 <<
 				 1) + 1], lda);
 
 /*                    Bidiagonalize L in A   
@@ -3219,7 +3190,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (RWorkspace: 0) */
 
 			i__2 = *lwork - iwork + 1;
-			zunmbr_("P", "L", "C", m, n, m, &a[a_offset], lda, &
+			lapackf77_zunmbr("P", "L", "C", m, n, m, &a[a_offset], lda, &
 				work[itaup], &vt[vt_offset], ldvt, &work[
 				iwork], &i__2, &ierr);
 
@@ -3238,7 +3209,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                       (CWorkspace: 0)   
                       (RWorkspace: need BDSPAC) */
 
-			zbdsqr_("U", m, n, m, &c__0, &s[1], &rwork[ie], &vt[
+			lapackf77_zbdsqr("U", m, n, m, &c__0, &s[1], &rwork[ie], &vt[
 				vt_offset], ldvt, &a[a_offset], lda, cdum, &
 				c__1, &rwork[irwork], info);
 
@@ -3276,15 +3247,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 				ldwrku);
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			zlaset_("U", &i__2, &i__3, &c_b1, &c_b1, &work[iu + 
+			lapackf77_zlaset("U", &i__2, &i__3, &c_b1, &c_b1, &work[iu + 
 				ldwrku], &ldwrku);
 
 			/*  Generate Q in A   
 			    (CWorkspace: need M*M+2*M, prefer M*M+M+M*NB)   
 			    (RWorkspace: 0) */
 			i__2 = *lwork - iwork + 1;
-			zunglq_(m, n, m, &a[a_offset], lda, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zunglq(m, n, m, &a[a_offset], lda, &work[itau], 
+                                         &work[iwork], &i__2, &ierr);
 			ie = 1;
 			itauq = itau;
 			itaup = itauq + *m;
@@ -3327,7 +3298,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			   singular vectors of L in WORK(IU)   
 			   (CWorkspace: need M*M)   
 			   (RWorkspace: need BDSPAC) */
-			zbdsqr_("U", m, m, m, &c__0, &s[1], &rwork[ie], &work[
+			lapackf77_zbdsqr("U", m, m, m, &c__0, &s[1], &rwork[ie], &work[
 				iu], &ldwrku, &u[u_offset], ldu, cdum, &c__1, 
 				&rwork[irwork], info);
 
@@ -3355,15 +3326,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			   (CWorkspace: need 2*M, prefer M+M*NB)   
 			   (RWorkspace: 0) */
 			i__2 = *lwork - iwork + 1;
-			zunglq_(m, n, m, &vt[vt_offset], ldvt, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zunglq(m, n, m, &vt[vt_offset], ldvt, &work[itau], 
+                                         &work[iwork], &i__2, &ierr);
 
 			/* Copy L to U, zeroing out above it */
 			lapackf77_zlacpy("L", m, m, &a[a_offset], lda, &u[u_offset], 
 				ldu);
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			zlaset_("U", &i__2, &i__3, &c_b1, &c_b1, &u[(u_dim1 <<
+			lapackf77_zlaset("U", &i__2, &i__3, &c_b1, &c_b1, &u[(u_dim1 <<
 				 1) + 1], ldu);
 			ie = 1;
 			itauq = itau;
@@ -3388,7 +3359,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			    (CWorkspace: need 2*M+N, prefer 2*M+N*NB)   
 			    (RWorkspace: 0) */
 			i__2 = *lwork - iwork + 1;
-			zunmbr_("P", "L", "C", m, n, m, &u[u_offset], ldu, &
+			lapackf77_zunmbr("P", "L", "C", m, n, m, &u[u_offset], ldu, &
 				work[itaup], &vt[vt_offset], ldvt, &work[
 				iwork], &i__2, &ierr);
 
@@ -3405,7 +3376,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			    singular vectors of A in VT   
 			    (CWorkspace: 0)   
 			    (RWorkspace: need BDSPAC) */
-			zbdsqr_("U", m, n, m, &c__0, &s[1], &rwork[ie], &vt[
+			lapackf77_zbdsqr("U", m, n, m, &c__0, &s[1], &rwork[ie], &vt[
 				vt_offset], ldvt, &u[u_offset], ldu, cdum, &
 				c__1, &rwork[irwork], info);
 		    }
@@ -3446,15 +3417,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 				ldwrkr);
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			zlaset_("U", &i__2, &i__3, &c_b1, &c_b1, &work[ir + 
+			lapackf77_zlaset("U", &i__2, &i__3, &c_b1, &c_b1, &work[ir + 
 				ldwrkr], &ldwrkr);
 
 			/* Generate Q in VT   
 			   (CWorkspace: need M*M+M+N, prefer M*M+M+N*NB)   
 			   (RWorkspace: 0) */
 			i__2 = *lwork - iwork + 1;
-			zunglq_(n, n, m, &vt[vt_offset], ldvt, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zunglq(n, n, m, &vt[vt_offset], ldvt, &work[itau], 
+                                         &work[iwork], &i__2, &ierr);
 			ie = 1;
 			itauq = itau;
 			itaup = itauq + *m;
@@ -3486,7 +3457,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			   singular vectors of L in WORK(IR)   
 			   (CWorkspace: need M*M)   
 			   (RWorkspace: need BDSPAC) */
-			zbdsqr_("U", m, m, &c__0, &c__0, &s[1], &rwork[ie], &
+			lapackf77_zbdsqr("U", m, m, &c__0, &c__0, &s[1], &rwork[ie], &
 				work[ir], &ldwrkr, cdum, &c__1, cdum, &c__1, &
 				rwork[irwork], info);
 
@@ -3518,8 +3489,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			    (CWorkspace: need M+N, prefer M+N*NB)   
 			    (RWorkspace: 0) */
 			i__2 = *lwork - iwork + 1;
-			zunglq_(n, n, m, &vt[vt_offset], ldvt, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zunglq(n, n, m, &vt[vt_offset], ldvt, &work[itau], 
+                                         &work[iwork], &i__2, &ierr);
 			ie = 1;
 			itauq = itau;
 			itaup = itauq + *m;
@@ -3528,7 +3499,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			/* Zero out above L in A */
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			zlaset_("U", &i__2, &i__3, &c_b1, &c_b1, &a[(a_dim1 <<
+			lapackf77_zlaset("U", &i__2, &i__3, &c_b1, &c_b1, &a[(a_dim1 <<
 				 1) + 1], lda);
 
 			/*  Bidiagonalize L in A   
@@ -3549,7 +3520,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			    (CWorkspace: need 2*M+N, prefer 2*M+N*NB)   
 			    (RWorkspace: 0) */
 			i__2 = *lwork - iwork + 1;
-			zunmbr_("P", "L", "C", m, n, m, &a[a_offset], lda, &
+			lapackf77_zunmbr("P", "L", "C", m, n, m, &a[a_offset], lda, &
 				work[itaup], &vt[vt_offset], ldvt, &work[
 				iwork], &i__2, &ierr);
 			irwork = ie + *m;
@@ -3558,7 +3529,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			    singular vectors of A in VT   
 			    (CWorkspace: 0)   
 			    (RWorkspace: need BDSPAC) */
-			zbdsqr_("U", m, n, &c__0, &c__0, &s[1], &rwork[ie], &
+			lapackf77_zbdsqr("U", m, n, &c__0, &c__0, &s[1], &rwork[ie], &
 				vt[vt_offset], ldvt, cdum, &c__1, cdum, &c__1,
 				 &rwork[irwork], info);
 
@@ -3607,15 +3578,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			   (CWorkspace: need 2*M*M+M+N, prefer 2*M*M+M+N*NB)   
 			   (RWorkspace: 0) */
 			i__2 = *lwork - iwork + 1;
-			zunglq_(n, n, m, &vt[vt_offset], ldvt, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zunglq(n, n, m, &vt[vt_offset], ldvt, &work[itau], 
+                                         &work[iwork], &i__2, &ierr);
 
 			/* Copy L to WORK(IU), zeroing out above it */
 			lapackf77_zlacpy("L", m, m, &a[a_offset], lda, &work[iu], &
 				ldwrku);
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			zlaset_("U", &i__2, &i__3, &c_b1, &c_b1, &work[iu + 
+			lapackf77_zlaset("U", &i__2, &i__3, &c_b1, &c_b1, &work[iu + 
 				ldwrku], &ldwrku);
 			ie = 1;
 			itauq = itau;
@@ -3661,7 +3632,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			   right singular vectors of L in WORK(IU)   
 			   (CWorkspace: need 2*M*M)   
 			   (RWorkspace: need BDSPAC) */
-			zbdsqr_("U", m, m, m, &c__0, &s[1], &rwork[ie], &work[
+			lapackf77_zbdsqr("U", m, m, m, &c__0, &s[1], &rwork[ie], &work[
 				iu], &ldwrku, &work[ir], &ldwrkr, cdum, &c__1,
 				 &rwork[irwork], info);
 
@@ -3696,8 +3667,8 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			   (CWorkspace: need M+N, prefer M+N*NB)   
 			   (RWorkspace: 0) */
 			i__2 = *lwork - iwork + 1;
-			zunglq_(n, n, m, &vt[vt_offset], ldvt, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zunglq(n, n, m, &vt[vt_offset], ldvt, &work[itau], 
+                                         &work[iwork], &i__2, &ierr);
 			ie = 1;
 			itauq = itau;
 			itaup = itauq + *m;
@@ -3706,7 +3677,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			/* Zero out above L in A */
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			zlaset_("U", &i__2, &i__3, &c_b1, &c_b1, &a[(a_dim1 <<
+			lapackf77_zlaset("U", &i__2, &i__3, &c_b1, &c_b1, &a[(a_dim1 <<
 				 1) + 1], lda);
 
 			/* Bidiagonalize L in A   
@@ -3726,7 +3697,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			   in VT (CWorkspace: need 2*M+N, prefer 2*M+N*NB)   
 			   (RWorkspace: 0) */
 			i__2 = *lwork - iwork + 1;
-			zunmbr_("P", "L", "C", m, n, m, &a[a_offset], lda, &
+			lapackf77_zunmbr("P", "L", "C", m, n, m, &a[a_offset], lda, &
 				work[itaup], &vt[vt_offset], ldvt, &work[
 				iwork], &i__2, &ierr);
 
@@ -3743,7 +3714,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			    singular vectors of A in VT   
 			    (CWorkspace: 0)   
 			    (RWorkspace: need BDSPAC) */
-			zbdsqr_("U", m, n, m, &c__0, &s[1], &rwork[ie], &vt[
+			lapackf77_zbdsqr("U", m, n, m, &c__0, &s[1], &rwork[ie], &vt[
 				vt_offset], ldvt, &a[a_offset], lda, cdum, &
 				c__1, &rwork[irwork], info);
 
@@ -3784,15 +3755,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			   (CWorkspace: need M*M+M+N, prefer M*M+M+N*NB)   
 			   (RWorkspace: 0) */
 			i__2 = *lwork - iwork + 1;
-			zunglq_(n, n, m, &vt[vt_offset], ldvt, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zunglq(n, n, m, &vt[vt_offset], ldvt, &work[itau], 
+                                         &work[iwork], &i__2, &ierr);
 
 			/* Copy L to WORK(IU), zeroing out above it */
 			lapackf77_zlacpy("L", m, m, &a[a_offset], lda, &work[iu], &
 				ldwrku);
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			zlaset_("U", &i__2, &i__3, &c_b1, &c_b1, &work[iu + 
+			lapackf77_zlaset("U", &i__2, &i__3, &c_b1, &c_b1, &work[iu + 
 				ldwrku], &ldwrku);
 			ie = 1;
 			itauq = itau;
@@ -3835,7 +3806,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			   singular vectors of L in WORK(IU)   
 			   (CWorkspace: need M*M)   
 			   (RWorkspace: need BDSPAC) */
-			zbdsqr_("U", m, m, m, &c__0, &s[1], &rwork[ie], &work[
+			lapackf77_zbdsqr("U", m, m, m, &c__0, &s[1], &rwork[ie], &work[
 				iu], &ldwrku, &u[u_offset], ldu, cdum, &c__1, 
 				&rwork[irwork], info);
 
@@ -3867,15 +3838,15 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			   (CWorkspace: need M+N, prefer M+N*NB)   
 			   (RWorkspace: 0) */
 			i__2 = *lwork - iwork + 1;
-			zunglq_(n, n, m, &vt[vt_offset], ldvt, &work[itau], &
-				work[iwork], &i__2, &ierr);
+			lapackf77_zunglq(n, n, m, &vt[vt_offset], ldvt, &work[itau], 
+                                         &work[iwork], &i__2, &ierr);
 
 			/* Copy L to U, zeroing out above it */
 			lapackf77_zlacpy("L", m, m, &a[a_offset], lda, &u[u_offset], 
 				ldu);
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			zlaset_("U", &i__2, &i__3, &c_b1, &c_b1, &u[(u_dim1 <<
+			lapackf77_zlaset("U", &i__2, &i__3, &c_b1, &c_b1, &u[(u_dim1 <<
 				 1) + 1], ldu);
 			ie = 1;
 			itauq = itau;
@@ -3900,7 +3871,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			   (CWorkspace: need 2*M+N, prefer 2*M+N*NB)   
 			   (RWorkspace: 0) */
 			i__2 = *lwork - iwork + 1;
-			zunmbr_("P", "L", "C", m, n, m, &u[u_offset], ldu, &
+			lapackf77_zunmbr("P", "L", "C", m, n, m, &u[u_offset], ldu, &
 				work[itaup], &vt[vt_offset], ldvt, &work[
 				iwork], &i__2, &ierr);
 
@@ -3917,7 +3888,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 			   singular vectors of A in VT   
 			   (CWorkspace: 0)   
 			   (RWorkspace: need BDSPAC) */
-			zbdsqr_("U", m, n, m, &c__0, &s[1], &rwork[ie], &vt[
+			lapackf77_zbdsqr("U", m, n, m, &c__0, &s[1], &rwork[ie], &vt[
 				vt_offset], ldvt, &u[u_offset], ldu, cdum, &
 				c__1, &rwork[irwork], info);
 		    }
@@ -4015,7 +3986,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                 (CWorkspace: 0)   
                 (RWorkspace: need BDSPAC) */
 
-		zbdsqr_("L", m, &ncvt, &nru, &c__0, &s[1], &rwork[ie], &vt[
+		lapackf77_zbdsqr("L", m, &ncvt, &nru, &c__0, &s[1], &rwork[ie], &vt[
 			vt_offset], ldvt, &u[u_offset], ldu, cdum, &c__1, &
 			rwork[irwork], info);
 	    } else if (! wntuo && wntvo) {
@@ -4026,7 +3997,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                 (CWorkspace: 0)   
                 (RWorkspace: need BDSPAC) */
 
-		zbdsqr_("L", m, &ncvt, &nru, &c__0, &s[1], &rwork[ie], &a[
+		lapackf77_zbdsqr("L", m, &ncvt, &nru, &c__0, &s[1], &rwork[ie], &a[
 			a_offset], lda, &u[u_offset], ldu, cdum, &c__1, &
 			rwork[irwork], info);
 	    } else {
@@ -4036,7 +4007,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
                 (CWorkspace: 0)   
                 (RWorkspace: need BDSPAC) */
 
-		zbdsqr_("L", m, &ncvt, &nru, &c__0, &s[1], &rwork[ie], &vt[
+		lapackf77_zbdsqr("L", m, &ncvt, &nru, &c__0, &s[1], &rwork[ie], &vt[
 			vt_offset], ldvt, &a[a_offset], lda, cdum, &c__1, &
 			rwork[irwork], info);
 	    }
@@ -4046,22 +4017,22 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
     /* Undo scaling if necessary */
     if (iscl == 1) {
 	if (anrm > bignum) {
-	    dlascl_("G", &c__0, &c__0, &bignum, &anrm, &minmn, &c__1, &s[1], &
-		    minmn, &ierr);
+	    lapackf77_dlascl("G", &c__0, &c__0, &bignum, &anrm, &minmn, &c__1, 
+                             &s[1], &minmn, &ierr);
 	}
 	if (*info != 0 && anrm > bignum) {
 	    i__2 = minmn - 1;
-	    dlascl_("G", &c__0, &c__0, &bignum, &anrm, &i__2, &c__1, &rwork[
-		    ie], &minmn, &ierr);
+	    lapackf77_dlascl("G", &c__0, &c__0, &bignum, &anrm, &i__2, &c__1, 
+                             &rwork[ie], &minmn, &ierr);
 	}
 	if (anrm < smlnum) {
-	    dlascl_("G", &c__0, &c__0, &smlnum, &anrm, &minmn, &c__1, &s[1], &
-		    minmn, &ierr);
+	    lapackf77_dlascl("G", &c__0, &c__0, &smlnum, &anrm, &minmn, &c__1, 
+                             &s[1], &minmn, &ierr);
 	}
 	if (*info != 0 && anrm < smlnum) {
 	    i__2 = minmn - 1;
-	    dlascl_("G", &c__0, &c__0, &smlnum, &anrm, &i__2, &c__1, &rwork[
-		    ie], &minmn, &ierr);
+	    lapackf77_dlascl("G", &c__0, &c__0, &smlnum, &anrm, &i__2, &c__1, 
+                             &rwork[ie], &minmn, &ierr);
 	}
     }
 

@@ -41,14 +41,13 @@ int main( int argc, char** argv)
     magma_int_t N=0, n2;
     magma_int_t size[8] = {1024,2048,3072,4032,5184,6016,7040,8064};
 
-    cublasStatus status;
-    magma_int_t i, j, info;
+    magma_int_t i, info;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
 
     //const char *uplo = MagmaLowerStr;
-    char *uplo = MagmaLowerStr;
-	char *jobz = MagmaVectorsStr;
+    char *uplo = (char*)MagmaLowerStr;
+    char *jobz = (char*)MagmaVectorsStr;
 
     if (argc != 1){
         for(i = 1; i<argc; i++){

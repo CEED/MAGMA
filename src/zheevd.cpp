@@ -162,8 +162,8 @@ magma_zheevd(char jobz, char uplo,
     static magma_int_t indwk2, llwrk2;
     static magma_int_t iscale;
     static double safmin;
-    extern magma_int_t ilaenv_(magma_int_t *, char *, char *, magma_int_t *, magma_int_t *, 
-	    magma_int_t *, magma_int_t *, magma_int_t, magma_int_t);
+    extern magma_int_t ilaenv_(magma_int_t *, const char *,const  char *, magma_int_t *, magma_int_t *, 
+                               magma_int_t *, magma_int_t *, magma_int_t, magma_int_t);
     static double bignum;
     static magma_int_t indtau;
     static magma_int_t indrwk, indwrk, liwmin;

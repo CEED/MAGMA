@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        November 2010
 
-       @precisions normal z -> s d c
+       @precisions normal z -> c
 
 */
 
@@ -36,7 +36,7 @@ int main( int argc, char** argv)
     }
     printout_devices( );
 
-    cuDoubleComplex *h_A, *h_R, *S, *U, *VT, *h_work;
+    cuDoubleComplex *h_A, *h_R, *U, *VT, *h_work;
     double *S1, *S2, *rwork;
     double gpu_time, cpu_time;
 
