@@ -32,8 +32,29 @@ zclaswp_kernel(int n, cuDoubleComplex *a, int lda, cuFloatComplex *sa, int m, in
     }
 }
 
+__global__ void
+zclaswp_inv_kernel(int n, cuDoubleComplex *a, int lda, cuFloatComplex *sa, int m, int *ipiv)
+{
+    int ind = blockIdx.x*num_threadzc + threadIdx.x, newind;
+    cuDoubleComplex res;
+
+    if (ind < m) {
+        a   += ind;
+        ipiv += ind;
+
+        newind = ipiv[0];
+
+        for(int i=0; i<n; i++) {
+            res = MAGMA_Z_MAKE( (double)cuCrealf(sa[newind+i*lda]),
+                                (double)cuCimagf(sa[newind+i*lda]) );
+            a[i*lda] = res;
+        }
+    }
+}
+
+
 extern "C" void
-magmablas_zclaswp(int n, cuDoubleComplex *a, int lda, cuFloatComplex *sa, int m, int *ipiv)
+magmablas_zclaswp(int n, cuDoubleComplex *a, int lda, cuFloatComplex *sa, int m, int *ipiv, int incx)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -43,7 +64,6 @@ magmablas_zclaswp(int n, cuDoubleComplex *a, int lda, cuFloatComplex *sa, int m,
 
     Purpose
     =======
-
     Row i of A is casted to single precision in row ipiv[i] of SA, 0<=i<m.
 
     N      - (input) INTEGER.
@@ -65,6 +85,9 @@ magmablas_zclaswp(int n, cuDoubleComplex *a, int lda, cuFloatComplex *sa, int m,
              The vector of pivot indices. Row i of A is casted to single 
              precision in row ipiv[i] of SA, 0<=i<m. 
 
+    INCX   - (input) INTEGER
+             If IPIV is negative, the pivots are applied in reverse 
+             order, otherwise in straight-forward order.
     ===================================================================== */
 
     int blocks;
@@ -76,7 +99,10 @@ magmablas_zclaswp(int n, cuDoubleComplex *a, int lda, cuFloatComplex *sa, int m,
     dim3 grid(blocks, 1, 1);
     dim3 threazc(num_threadzc, 1, 1);
 
-    zclaswp_kernel<<<grid, threazc>>>(n, a, lda, sa, m, ipiv);
+    if (incx >=0)
+      zclaswp_kernel<<<grid, threazc>>>(n, a, lda, sa, m, ipiv);
+    else
+      zclaswp_inv_kernel<<<grid, threazc>>>(n, a, lda, sa, m, ipiv);
 }
 
 #undef num_threadzc

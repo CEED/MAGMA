@@ -64,13 +64,13 @@ magmablas_zlag2c( int M, int N ,
 	- SLAMCH that's needed is called from underlying BLAS
 	- Only used in iterative refinement
 	- Do we want to provide this in the release?
+
   Purpose
   =======
+  ZLAG2C converts a COMPLEX_16 matrix A to a COMPLEX
+  matrix SA.
 
-  ZLAG2C converts a DOUBLE PRECISION matrix, SA, to a SINGLE
-  PRECISION matrix, A.
-
-  RMAX is the overflow for the SINGLE PRECISION arithmetic
+  RMAX is the overflow for the COMPLEX arithmetic.
   ZLAG2C checks that all the entries of A are between -RMAX and
   RMAX. If not the convertion is aborted and a flag is raised.
 
@@ -78,20 +78,19 @@ magmablas_zlag2c( int M, int N ,
 
   Arguments
   =========
-
   M       (input) INTEGER
           The number of lines of the matrix A.  M >= 0.
 
   N       (input) INTEGER
           The number of columns of the matrix A.  N >= 0.
 
-  A       (input) DOUBLE PRECISION array, dimension (LDA,N)
+  A       (input) COMPLEX_16 array, dimension (LDA,N)
           On entry, the M-by-N coefficient matrix A.
 
   LDA     (input) INTEGER
           The leading dimension of the array A.  LDA >= max(1,M).
 
-  SA      (output) REAL array, dimension (LDSA,N)
+  SA      (output) COMPLEX array, dimension (LDSA,N)
           On exit, if INFO=0, the M-by-N coefficient matrix SA; if
           INFO>0, the content of SA is unspecified.
 
@@ -100,10 +99,9 @@ magmablas_zlag2c( int M, int N ,
 
   INFO    (output) INTEGER
           = 0:  successful exit.
-          = 1:  an entry of the matrix A is greater than the SINGLE
-                PRECISION overflow threshold, in this case, the content
+          = 1:  an entry of the matrix A is greater than the COMPLEX
+                overflow threshold, in this case, the content
                 of SA in exit is unspecified.
-
   ===========================================================================  */
 
     double RMAX = (double)lapackf77_slamch("O");
