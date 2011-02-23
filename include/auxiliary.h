@@ -64,7 +64,7 @@ void printout_devices();
 void spanel_to_q(char uplo, int ib, float *a, int lda, float *work);
 void sq_to_panel(char uplo, int ib, float *a, int lda, float *work);
 
-void swp2pswp(int n, int *ipiv, int *newipiv);
+void swp2pswp(char trans, int n, int *ipiv, int *newipiv);
 
 void cpanel_to_q(char uplo, int ib, float2 *a, int lda, float2 *work);
 void cq_to_panel(char uplo, int ib, float2 *a, int lda, float2 *work);
