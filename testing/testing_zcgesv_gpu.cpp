@@ -55,7 +55,11 @@ int main(int argc , char **argv)
     magma_int_t NRHS     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t sizetest[10] = {1024,2048,3072,4032,5184,6016,7040,7520,8064,8192};
-        
+
+    char trans = MagmaNoTrans;
+    //char trans = MagmaConjTrans;
+    char trans_str[2] = {trans, 0};
+
     if (argc != 1){
 	for(i = 1; i<argc; i++){	
 	    if (strcmp("-N", argv[i])==0)
@@ -120,7 +124,7 @@ int main(int argc , char **argv)
         //              MIXED - GPU
         //=====================================================================
         start = get_current_time();
-        magma_zcgesv_gpu( N, NRHS, 
+        magma_zcgesv_gpu( trans, N, NRHS, 
 			  d_A, ldda, h_ipiv, d_ipiv, 
 			  d_B, lddb, d_X, lddx, 
 			  d_WORKD, d_WORKS, &iter, &info);
@@ -135,7 +139,7 @@ int main(int argc , char **argv)
         cublasGetMatrix( N, NRHS, sizeof( cuDoubleComplex ), d_X, lddx, h_X, ldx );
 
         Anorm = lapackf77_zlange("I", &N, &N, h_A, &lda, h_workd);
-        blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, 
+        blasf77_zgemm( trans_str, MagmaNoTransStr, 
                        &N, &NRHS, &N, 
                        &zone,  h_A, &lda,
                                h_X, &ldx,
@@ -164,7 +168,7 @@ int main(int argc , char **argv)
 
         start = get_current_time();
         magma_zgetrf_gpu(N, N, d_A, ldda, h_ipiv, &info);
-        magma_zgetrs_gpu( MagmaNoTrans, N, NRHS, d_A, ldda, h_ipiv, d_B, lddb, &info );
+        magma_zgetrs_gpu( trans, N, NRHS, d_A, ldda, h_ipiv, d_B, lddb, &info );
         end = get_current_time();
 	if (info < 0)
 	    printf("Argument %d of magma_zgetrs had an illegal value.\n", -info);
@@ -200,7 +204,7 @@ int main(int argc , char **argv)
 
         start = get_current_time();
         magma_cgetrf_gpu( N, N,    d_As, ldda, h_ipiv, &info);
-        magma_cgetrs_gpu( MagmaNoTrans, N, NRHS, d_As, ldda, h_ipiv, 
+        magma_cgetrs_gpu( trans, N, NRHS, d_As, ldda, h_ipiv, 
 			  d_Bs, lddb, &info);
         end = get_current_time();
         if (info < 0)
