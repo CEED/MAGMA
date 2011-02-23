@@ -6,10 +6,7 @@
        November 2010
 */
 
-#include <stdio.h>
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
+#include "common_magma.h"
 
 #if defined( _WIN32 )
   /* This must be included before INPUT is defined below, otherwise we
@@ -19,8 +16,6 @@
 #else 
   #include <inttypes.h>
 #endif
-
-#include "magma.h"
 
 #if defined(ADD_)
 #    define magma_gettime_f        magma_gettime_f_
@@ -365,43 +360,82 @@ void zq_to_panel(char uplo, int ib, cuDoubleComplex *a, int lda, cuDoubleComplex
       has to be done sequentially.
 */
 extern "C"
-void swp2pswp(int n, int *ipiv, int *newipiv){
+void swp2pswp(char trans, int n, int *ipiv, int *newipiv){
   int i, newind, ind;
-  
+  char            trans_[2] = {trans, 0};
+  long int    notran = lapackf77_lsame(trans_, "N");
+
   for(i=0; i<n; i++)
     newipiv[i] = -1;
   
-  for(i=0; i<n; i++){
-    newind = ipiv[i] - 1;
-    if (newipiv[newind] == -1) {
-      if (newipiv[i]==-1){
-        newipiv[i] = newind;
-        if (newind>i)
-          newipiv[newind]= i;
+  if (notran){
+    for(i=0; i<n; i++){
+      newind = ipiv[i] - 1;
+      if (newipiv[newind] == -1) {
+	if (newipiv[i]==-1){
+	  newipiv[i] = newind;
+	  if (newind>i)
+	    newipiv[newind]= i;
+	}
+	else
+	  {
+	    ind = newipiv[i];
+	    newipiv[i] = newind;
+	    if (newind>i)
+	      newipiv[newind]= ind;
+	  }
       }
-      else
-        {
-          ind = newipiv[i];
+      else {
+	if (newipiv[i]==-1){
+	  if (newind>i){
+	    ind = newipiv[newind];
+	    newipiv[newind] = i;
+	    newipiv[i] = ind;
+	  }
+	  else
+	    newipiv[i] = newipiv[newind];
+	}
+	else{
+	  ind = newipiv[i];
+	  newipiv[i] = newipiv[newind];
+	  if (newind > i)
+	    newipiv[newind] = ind;
+	}
+      }
+    }
+  } else {
+    for(i=n-1; i>=0; i--){
+      newind = ipiv[i] - 1;
+      if (newipiv[newind] == -1) {
+        if (newipiv[i]==-1){
           newipiv[i] = newind;
           if (newind>i)
-            newipiv[newind]= ind;
-        }
-    }
-    else {
-      if (newipiv[i]==-1){
-        if (newind>i){
-          ind = newipiv[newind];
-          newipiv[newind] = i;
-          newipiv[i] = ind;
+            newipiv[newind]= i;
         }
         else
-          newipiv[i] = newipiv[newind];
+          {
+            ind = newipiv[i];
+            newipiv[i] = newind;
+            if (newind>i)
+              newipiv[newind]= ind;
+          }
       }
-      else{
-	ind = newipiv[i];
-	newipiv[i] = newipiv[newind];
-        if (newind > i)
-          newipiv[newind] = ind;
+      else {
+        if (newipiv[i]==-1){
+          if (newind>i){
+            ind = newipiv[newind];
+            newipiv[newind] = i;
+            newipiv[i] = ind;
+          }
+          else
+            newipiv[i] = newipiv[newind];
+        }
+        else{
+          ind = newipiv[i];
+          newipiv[i] = newipiv[newind];
+          if (newind > i)
+            newipiv[newind] = ind;
+        }
       }
     }
   }
