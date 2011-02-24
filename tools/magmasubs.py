@@ -261,6 +261,8 @@ subs = {
     ('sqrt02','dqrt02','cqrt02','zqrt02'),
     ('ssytrd','dsytrd','chetrd','zhetrd'),
     ('SSYTRD','DSYTRD','CHETRD','ZHETRD'),
+    ('ssybbd','dsybbd','chebbd','zhebbd'),
+    ('SSYBBD','DSYBBD','CHEBBD','ZHEBBD'),
     ('ssytd2','dsytd2','chetd2','zhetd2'),
     ('ssyt21','dsyt21','chet21','zhet21'),
     ('shst01','dhst01','chst01','zhst01'),
