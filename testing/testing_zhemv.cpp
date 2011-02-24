@@ -120,21 +120,39 @@ int main(int argc, char **argv)
         end = get_current_time();
 
         cublasGetVector( m, sizeof( cuDoubleComplex ), dY, incx, Ycublas, incx );
+	
         
         cuda_perf = flops / GetTimerValue(start,end);
         printf(     "%11.2f", cuda_perf );
         fprintf(fp, "%11.2f", cuda_perf );
-        
+	
+#if defined(PRECISION_z) || defined(PRECISION_c)
+
+#else
+	cuDoubleComplex *dC_work;
+	int blocks    = m / 64 + (m % 64 != 0);
+	int workspace = lda * (blocks + 1);
+
+	cublasAlloc( workspace, sizeof(cuDoubleComplex), (void**)&dC_work ) ;
+        cublasGetError( ) ;
+#endif        
         cublasSetVector( m, sizeof( cuDoubleComplex ), Y, incx, dY, incx );
         magmablas_zhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
         cublasSetVector( m, sizeof( cuDoubleComplex ), Y, incx, dY, incx );
+	
         
         start = get_current_time();
         magmablas_zhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
         end = get_current_time();
         
         cublasGetVector( m, sizeof( cuDoubleComplex ), dY, incx, Ymagma, incx );
-        
+
+#if defined(PRECISION_z) || defined(PRECISION_c)
+	
+#else 
+	cublasFree(dC_work);
+        cublasGetError( ) ;
+#endif        
         magma_perf = flops / GetTimerValue(start,end);
         printf(     "%11.2f", magma_perf );
         fprintf(fp, "%11.2f", magma_perf );
