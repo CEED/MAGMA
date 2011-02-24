@@ -13,10 +13,11 @@
 //#define lapackf77_zgebrd MAGMA_ZGEBRD
 
 extern "C" magma_int_t
-magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n, 
-	     cuDoubleComplex *a, magma_int_t *lda, double *s, cuDoubleComplex *u, 
-	     magma_int_t *ldu, cuDoubleComplex *vt, magma_int_t *ldvt, 
-	     cuDoubleComplex *work, magma_int_t *lwork,
+magma_zgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_, 
+	     cuDoubleComplex *a,    magma_int_t lda_, double *s, 
+             cuDoubleComplex *u,    magma_int_t ldu_, 
+             cuDoubleComplex *vt,   magma_int_t ldvt_, 
+	     cuDoubleComplex *work, magma_int_t lwork_,
 	     double *rwork, magma_int_t *info )
 {
 /*  -- MAGMA (version 1.0) --
@@ -144,21 +145,23 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
     ===================================================================== */
 
 
+    char jobu_[2]  = {jobu, 0};
+    char jobvt_[2] = {jobvt, 0};
+    magma_int_t *m     = &m_;
+    magma_int_t *n     = &n_;
+    magma_int_t *lda   = &lda_;
+    magma_int_t *ldu   = &ldu_;
+    magma_int_t *ldvt  = &ldvt_;
+    magma_int_t *lwork = &lwork_;
+
     static cuDoubleComplex c_b1 = MAGMA_Z_ZERO;
     static cuDoubleComplex c_b2 = MAGMA_Z_ONE;
-    static magma_int_t c__6 = 6;
     static magma_int_t c__0 = 0;
-    static magma_int_t c__2 = 2;
     static magma_int_t c__1 = 1;
     static magma_int_t c_n1 = -1;
     
-    char *a__1[2];
-    magma_int_t a_dim1, a_offset, u_dim1, u_offset, vt_dim1, vt_offset, i__1[2], 
-	    i__2, i__3, i__4;
-    char ch__1[2];
-
-    int sp_cat(char *, char **, magma_int_t *, magma_int_t *, magma_int_t);
-    double sqrt(double);
+    magma_int_t a_dim1, a_offset, u_dim1, u_offset, vt_dim1, vt_offset, 
+        i__2, i__3, i__4;
 
     static magma_int_t i__, ie, ir, iu, blk, ncu;
     static double dum[1], eps;
@@ -170,41 +173,25 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
     static magma_int_t chunk, minmn;
     static magma_int_t wrkbl, itaup, itauq, mnthr, iwork;
     magma_int_t wntua, wntva, wntun, wntuo, wntvn, wntvo, wntus, wntvs;
-    extern magma_int_t ilaenv_(magma_int_t *, const char *, const char *, magma_int_t *,
-			       magma_int_t *, magma_int_t *, magma_int_t *, 
-			       magma_int_t, magma_int_t);
     static double bignum;
     static magma_int_t ldwrkr;
-    static magma_int_t minwrk, ldwrku, maxwrk;
+    static magma_int_t ldwrku, maxwrk;
     static double smlnum;
     static magma_int_t irwork;
     magma_int_t lquery, wntuas, wntvas;
 
-    a_dim1 = *lda;
-    a_offset = 1 + a_dim1;
-    a -= a_offset;
-    --s;
-    u_dim1 = *ldu;
-    u_offset = 1 + u_dim1;
-    u -= u_offset;
-    vt_dim1 = *ldvt;
-    vt_offset = 1 + vt_dim1;
-    vt -= vt_offset;
-    --work;
-    --rwork;
-
     *info = 0;
     minmn = min(*m,*n);
-    wntua = lapackf77_lsame(jobu, "A");
-    wntus = lapackf77_lsame(jobu, "S");
+    wntua = lapackf77_lsame(jobu_, "A");
+    wntus = lapackf77_lsame(jobu_, "S");
     wntuas = wntua || wntus;
-    wntuo = lapackf77_lsame(jobu, "O");
-    wntun = lapackf77_lsame(jobu, "N");
-    wntva = lapackf77_lsame(jobvt, "A");
-    wntvs = lapackf77_lsame(jobvt, "S");
+    wntuo = lapackf77_lsame(jobu_, "O");
+    wntun = lapackf77_lsame(jobu_, "N");
+    wntva = lapackf77_lsame(jobvt_, "A");
+    wntvs = lapackf77_lsame(jobvt_, "S");
     wntvas = wntva || wntvs;
-    wntvo = lapackf77_lsame(jobvt, "O");
-    wntvn = lapackf77_lsame(jobvt, "N");
+    wntvo = lapackf77_lsame(jobvt_, "O");
+    wntvn = lapackf77_lsame(jobvt_, "N");
     lquery = *lwork == -1;
 
     if (! (wntua || wntus || wntuo || wntun)) {
@@ -223,492 +210,39 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 	*info = -11;
     }
 
-    /*     Compute workspace   
-	   (Note: Comments in the code beginning "Workspace:" describe the   
-	   minimal amount of workspace needed at that point in the code,   
-	   as well as the preferred amount for good performance.   
-	   CWorkspace refers to complex workspace, and RWorkspace to   
-	   real workspace. NB refers to the optimal block size for the   
-	   immediately following subroutine, as returned by ILAENV.) */
+    /*     Compute workspace   */ 
+    lapackf77_zgesvd(jobu_, jobvt_, m, n, a, lda, s, u, ldu, vt, ldvt, work, &c_n1, rwork, info );
 
-    if (*info == 0) {
-	minwrk = 1;
-	maxwrk = 1;
-	if (*m >= *n && minmn > 0) {
-
-	  /* Space needed for ZBDSQR is BDSPAC = 5*N   
-	     Writing concatenation */
-	  i__1[0] = 1, a__1[0] = jobu;
-	  i__1[1] = 1, a__1[1] = jobvt;
-	  sp_cat(ch__1, a__1, i__1, &c__2, 2);
-	  mnthr = ilaenv_(&c__6, "ZGESVD", ch__1, m, n, &c__0, &c__0, 6, 2);
-	  if (*m >= mnthr) {
-	    if (wntun) {
-	      
-	      /* Path 1 (M much larger than N, JOBU='N') */
-	      maxwrk = *n + *n * ilaenv_(&c__1, "ZGEQRF", " ", m, n, &
-					 c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = maxwrk, i__3 = (*n << 1) + (*n << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", n, n, &c_n1, &c_n1, 6, 1);
-	      maxwrk = max(i__2,i__3);
-	      if (wntvo || wntvas) {
-		/* Computing MAX */
-		i__2 = maxwrk, i__3 = (*n << 1) + (*n - 1) * 
-		  ilaenv_(&c__1, "ZUNGBR", "P", n, n, n, &c_n1, 6, 1);
-		maxwrk = max(i__2,i__3);
-	      }
-	      minwrk = *n * 3;
-	    } else if (wntuo && wntvn) {
-	      
-	      /* Path 2 (M much larger than N, JOBU='O', JOBVT='N') */
-	      wrkbl = *n + *n * ilaenv_(&c__1, "ZGEQRF", " ", m, n, &
-					c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = *n + *n * ilaenv_(&c__1, "ZUNGQR", 
-						     " ", m, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + (*n << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", n, n, &c_n1, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + *n * 
-		ilaenv_(&c__1, "ZUNGBR", "Q", n, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = *n * *n + wrkbl, i__3 = *n * *n + *m * *n;
-	      maxwrk = max(i__2,i__3);
-	      minwrk = (*n << 1) + *m;
-	    } else if (wntuo && wntvas) {
-	      
-	      /* Path 3 (M much larger than N, JOBU='O', JOBVT='S' or 'A') */
-	      wrkbl = *n + *n * ilaenv_(&c__1, "ZGEQRF", " ", m, n, &
-					c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = *n + *n * ilaenv_(&c__1, "ZUNGQR", 
-						     " ", m, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + (*n << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", n, n, &c_n1, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + *n * 
-		ilaenv_(&c__1, "ZUNGBR", "Q", n, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + (*n - 1) * 
-		ilaenv_(&c__1, "ZUNGBR", "P", n, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = *n * *n + wrkbl, i__3 = *n * *n + *m * *n;
-	      maxwrk = max(i__2,i__3);
-	      minwrk = (*n << 1) + *m;
-	    } else if (wntus && wntvn) {
-	      
-	      /* Path 4 (M much larger than N, JOBU='S', JOBVT='N') */
-	      wrkbl = *n + *n * ilaenv_(&c__1, "ZGEQRF", " ", m, n, &
-					c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = *n + *n * ilaenv_(&c__1, "ZUNGQR", 
-						     " ", m, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + (*n << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", n, n, &c_n1, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + *n * 
-		ilaenv_(&c__1, "ZUNGBR", "Q", n, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      maxwrk = *n * *n + wrkbl;
-	      minwrk = (*n << 1) + *m;
-	    } else if (wntus && wntvo) {
-	      
-	      /* Path 5 (M much larger than N, JOBU='S', JOBVT='O') */
-	      wrkbl = *n + *n * ilaenv_(&c__1, "ZGEQRF", " ", m, n, &
-					c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = *n + *n * ilaenv_(&c__1, "ZUNGQR", 
-						     " ", m, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + (*n << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", n, n, &c_n1, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + *n * 
-		ilaenv_(&c__1, "ZUNGBR", "Q", n, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + (*n - 1) * 
-		ilaenv_(&c__1, "ZUNGBR", "P", n, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      maxwrk = (*n << 1) * *n + wrkbl;
-	      minwrk = (*n << 1) + *m;
-	    } else if (wntus && wntvas) {
-	      
-	      /* Path 6 (M much larger than N, JOBU='S', JOBVT='S' or 'A') */
-	      wrkbl = *n + *n * ilaenv_(&c__1, "ZGEQRF", " ", m, n, &
-					c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = *n + *n * ilaenv_(&c__1, "ZUNGQR", 
-						     " ", m, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + (*n << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", n, n, &c_n1, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + *n * 
-		ilaenv_(&c__1, "ZUNGBR", "Q", n, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + (*n - 1) * 
-		ilaenv_(&c__1, "ZUNGBR", "P", n, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      maxwrk = *n * *n + wrkbl;
-	      minwrk = (*n << 1) + *m;
-	    } else if (wntua && wntvn) {
-	      
-	      /* Path 7 (M much larger than N, JOBU='A', JOBVT='N') */
-	      wrkbl = *n + *n * ilaenv_(&c__1, "ZGEQRF", " ", m, n, &
-					c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = *n + *m * ilaenv_(&c__1, "ZUNGQR", 
-						     " ", m, m, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + (*n << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", n, n, &c_n1, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + *n * 
-		ilaenv_(&c__1, "ZUNGBR", "Q", n, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      maxwrk = *n * *n + wrkbl;
-	      minwrk = (*n << 1) + *m;
-	    } else if (wntua && wntvo) {
-	      
-	      /* Path 8 (M much larger than N, JOBU='A', JOBVT='O') */
-	      wrkbl = *n + *n * ilaenv_(&c__1, "ZGEQRF", " ", m, n, &
-					c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = *n + *m * ilaenv_(&c__1, "ZUNGQR", 
-						     " ", m, m, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + (*n << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", n, n, &c_n1, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + *n * 
-		ilaenv_(&c__1, "ZUNGBR", "Q", n, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + (*n - 1) * 
-		ilaenv_(&c__1, "ZUNGBR", "P", n, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      maxwrk = (*n << 1) * *n + wrkbl;
-	      minwrk = (*n << 1) + *m;
-	    } else if (wntua && wntvas) {
-	      
-	      /* Path 9 (M much larger than N, JOBU='A', JOBVT='S' or 'A') */
-	      wrkbl = *n + *n * ilaenv_(&c__1, "ZGEQRF", " ", m, n, &
-					c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = *n + *m * ilaenv_(&c__1, "ZUNGQR", 
-						     " ", m, m, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + (*n << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", n, n, &c_n1, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + *n * 
-		ilaenv_(&c__1, "ZUNGBR", "Q", n, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*n << 1) + (*n - 1) * 
-		ilaenv_(&c__1, "ZUNGBR", "P", n, n, n, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      maxwrk = *n * *n + wrkbl;
-	      minwrk = (*n << 1) + *m;
-	    }
-	  } else {
-	    
-	    /* Path 10 (M at least N, but not much larger) */
-	    maxwrk = (*n << 1) + (*m + *n) * ilaenv_(&c__1, "ZGEBRD", 
-						     " ", m, n, &c_n1, &c_n1, 6, 1);
-	    if (wntus || wntuo) {
-	      /* Computing MAX */
-	      i__2 = maxwrk, i__3 = (*n << 1) + *n * 
-		ilaenv_(&c__1, "ZUNGBR", "Q", m, n, n, &c_n1, 6, 1);
-	      maxwrk = max(i__2,i__3);
-	    }
-	    if (wntua) {
-	      /* Computing MAX */
-	      i__2 = maxwrk, i__3 = (*n << 1) + *m * 
-		ilaenv_(&c__1, "ZUNGBR", "Q", m, m, n, &c_n1, 6, 1);
-	      maxwrk = max(i__2,i__3);
-	    }
-	    if (! wntvn) {
-	      /* Computing MAX */
-	      i__2 = maxwrk, i__3 = (*n << 1) + (*n - 1) * 
-		ilaenv_(&c__1, "ZUNGBR", "P", n, n, n, &c_n1, 6, 1);
-	      maxwrk = max(i__2,i__3);
-	    }
-	    minwrk = (*n << 1) + *m;
-	  }
-	} else if (minmn > 0) {
-	  
-	  /* Space needed for ZBDSQR is BDSPAC = 5*M   
-	     Writing concatenation */
-	  i__1[0] = 1, a__1[0] = jobu;
-	  i__1[1] = 1, a__1[1] = jobvt;
-	  sp_cat(ch__1, a__1, i__1, &c__2, 2);
-	  mnthr = ilaenv_(&c__6, "ZGESVD", ch__1, m, n, &c__0, &c__0, 6, 2);
-	  if (*n >= mnthr) {
-	    if (wntvn) {
-
-	      /* Path 1t(N much larger than M, JOBVT='N') */
-	      maxwrk = *m + *m * ilaenv_(&c__1, "ZGELQF", " ", m, n, &
-					 c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = maxwrk, i__3 = (*m << 1) + (*m << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", m, m, &c_n1, &c_n1, 6, 1);
-	      maxwrk = max(i__2,i__3);
-	      if (wntuo || wntuas) {
-		/* Computing MAX */
-		i__2 = maxwrk, i__3 = (*m << 1) + *m * 
-		  ilaenv_(&c__1, "ZUNGBR", "Q", m, m, m, &c_n1, 6, 1);
-		maxwrk = max(i__2,i__3);
-	      }
-	      minwrk = *m * 3;
-	    } else if (wntvo && wntun) {
-	      
-	      /* Path 2t(N much larger than M, JOBU='N', JOBVT='O') */
-	      wrkbl = *m + *m * ilaenv_(&c__1, "ZGELQF", " ", m, n, &
-					c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = *m + *m * ilaenv_(&c__1, "ZUNGLQ", 
-						     " ", m, n, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + (*m << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", m, m, &c_n1, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + (*m - 1) * 
-		ilaenv_(&c__1, "ZUNGBR", "P", m, m, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = *m * *m + wrkbl, i__3 = *m * *m + *m * *n;
-	      maxwrk = max(i__2,i__3);
-	      minwrk = (*m << 1) + *n;
-	    } else if (wntvo && wntuas) {
-	      
-	      /* Path 3t(N much larger than M, JOBU='S' or 'A', JOBVT='O') */
-	      wrkbl = *m + *m * ilaenv_(&c__1, "ZGELQF", " ", m, n, &
-					c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = *m + *m * ilaenv_(&c__1, "ZUNGLQ", 
-						     " ", m, n, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + (*m << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", m, m, &c_n1, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + (*m - 1) * 
-		ilaenv_(&c__1, "ZUNGBR", "P", m, m, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + *m * 
-		ilaenv_(&c__1, "ZUNGBR", "Q", m, m, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = *m * *m + wrkbl, i__3 = *m * *m + *m * *n;
-	      maxwrk = max(i__2,i__3);
-	      minwrk = (*m << 1) + *n;
-	    } else if (wntvs && wntun) {
-	      
-	      /* Path 4t(N much larger than M, JOBU='N', JOBVT='S') */
-	      wrkbl = *m + *m * ilaenv_(&c__1, "ZGELQF", " ", m, n, &
-					c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = *m + *m * ilaenv_(&c__1, "ZUNGLQ", 
-						     " ", m, n, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + (*m << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", m, m, &c_n1, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + (*m - 1) * 
-		ilaenv_(&c__1, "ZUNGBR", "P", m, m, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      maxwrk = *m * *m + wrkbl;
-	      minwrk = (*m << 1) + *n;
-	    } else if (wntvs && wntuo) {
-	      
-	      /* Path 5t(N much larger than M, JOBU='O', JOBVT='S') */
-	      wrkbl = *m + *m * ilaenv_(&c__1, "ZGELQF", " ", m, n, &
-					c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = *m + *m * ilaenv_(&c__1, "ZUNGLQ", 
-						     " ", m, n, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + (*m << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", m, m, &c_n1, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + (*m - 1) * 
-		ilaenv_(&c__1, "ZUNGBR", "P", m, m, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + *m * 
-		ilaenv_(&c__1, "ZUNGBR", "Q", m, m, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      maxwrk = (*m << 1) * *m + wrkbl;
-	      minwrk = (*m << 1) + *n;
-	    } else if (wntvs && wntuas) {
-	      
-	      /* Path 6t(N much larger than M, JOBU='S' or 'A', JOBVT='S') */
-	      wrkbl = *m + *m * ilaenv_(&c__1, "ZGELQF", " ", m, n, &
-					c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = *m + *m * ilaenv_(&c__1, "ZUNGLQ", 
-						     " ", m, n, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + (*m << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", m, m, &c_n1, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + (*m - 1) *
-		ilaenv_(&c__1, "ZUNGBR", "P", m, m, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + *m * 
-		ilaenv_(&c__1, "ZUNGBR", "Q", m, m, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      maxwrk = *m * *m + wrkbl;
-	      minwrk = (*m << 1) + *n;
-	    } else if (wntva && wntun) {
-	      
-	      /* Path 7t(N much larger than M, JOBU='N', JOBVT='A') */
-	      wrkbl = *m + *m * ilaenv_(&c__1, "ZGELQF", " ", m, n, &
-					c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = *m + *n * ilaenv_(&c__1, "ZUNGLQ", 
-						     " ", n, n, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + (*m << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", m, m, &c_n1, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + (*m - 1) * 
-		ilaenv_(&c__1, "ZUNGBR", "P", m, m, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      maxwrk = *m * *m + wrkbl;
-	      minwrk = (*m << 1) + *n;
-	    } else if (wntva && wntuo) {
-	      
-	      /* Path 8t(N much larger than M, JOBU='O', JOBVT='A') */
-	      wrkbl = *m + *m * ilaenv_(&c__1, "ZGELQF", " ", m, n, &
-					c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = *m + *n * ilaenv_(&c__1, "ZUNGLQ", 
-						     " ", n, n, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + (*m << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", m, m, &c_n1, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + (*m - 1) * 
-		ilaenv_(&c__1, "ZUNGBR", "P", m, m, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + *m * 
-		ilaenv_(&c__1, "ZUNGBR", "Q", m, m, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      maxwrk = (*m << 1) * *m + wrkbl;
-	      minwrk = (*m << 1) + *n;
-	    } else if (wntva && wntuas) {
-	      
-	      /* Path 9t(N much larger than M, JOBU='S' or 'A', JOBVT='A') */
-	      wrkbl = *m + *m * ilaenv_(&c__1, "ZGELQF", " ", m, n, &
-					c_n1, &c_n1, 6, 1);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = *m + *n * ilaenv_(&c__1, "ZUNGLQ", 
-						     " ", n, n, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + (*m << 1) * 
-		ilaenv_(&c__1, "ZGEBRD", " ", m, m, &c_n1, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + (*m - 1) * 
-		ilaenv_(&c__1, "ZUNGBR", "P", m, m, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      /* Computing MAX */
-	      i__2 = wrkbl, i__3 = (*m << 1) + *m *
-		ilaenv_(&c__1, "ZUNGBR", "Q", m, m, m, &c_n1, 6, 1);
-	      wrkbl = max(i__2,i__3);
-	      maxwrk = *m * *m + wrkbl;
-	      minwrk = (*m << 1) + *n;
-	    }
-	  } else {
-	    
-	    /* Path 10t(N greater than M, but not much larger) */
-	    maxwrk = (*m << 1) + (*m + *n) * ilaenv_(&c__1, "ZGEBRD", 
-						     " ", m, n, &c_n1, &c_n1, 6, 1);
-	    if (wntvs || wntvo) {
-	      /* Computing MAX */
-	      i__2 = maxwrk, i__3 = (*m << 1) + *m * 
-		ilaenv_(&c__1, "ZUNGBR", "P", m, n, m, &c_n1, 6, 1);
-	      maxwrk = max(i__2,i__3);
-	    }
-	    if (wntva) {
-	      /* Computing MAX */
-	      i__2 = maxwrk, i__3 = (*m << 1) + *n * 
-		ilaenv_(&c__1, "ZUNGBR", "P", n, n, m, &c_n1, 6, 1);
-	      maxwrk = max(i__2,i__3);
-	    }
-	    if (! wntun) {
-	      /* Computing MAX */
-	      i__2 = maxwrk, i__3 = (*m << 1) + (*m - 1) * 
-		ilaenv_(&c__1, "ZUNGBR", "Q", m, m, m, &c_n1, 6, 1);
-	      maxwrk = max(i__2,i__3);
-	    }
-	    minwrk = (*m << 1) + *n;
-	  }
-	}
-	maxwrk = max(maxwrk,minwrk);
-	MAGMA_Z_SET2REAL(work[1], (double) maxwrk);
-	
-	if (*lwork < minwrk && ! lquery) {
-	  *info = -13;
-	}
+    maxwrk = (magma_int_t)MAGMA_Z_REAL(work[0]);
+    if ( !lquery && (lwork_ < maxwrk) ) {
+        *info = -13;
     }
     
     if (*info != 0) {
 	i__2 = -(*info);
 	magma_xerbla("magma_zgesvd", &i__2);
-	return 0;
+	return MAGMA_ERR_ILLEGAL_VALUE;
     } else if (lquery) {
-	return 0;
+	return MAGMA_SUCCESS;
     }
 
     /* Quick return if possible */
     if (*m == 0 || *n == 0) {
-	return 0;
+	return MAGMA_SUCCESS;
     }
+
+    a_dim1 = *lda;
+    a_offset = 1 + a_dim1;
+    a -= a_offset;
+    --s;
+    u_dim1 = *ldu;
+    u_offset = 1 + u_dim1;
+    u -= u_offset;
+    vt_dim1 = *ldvt;
+    vt_offset = 1 + vt_dim1;
+    vt -= vt_offset;
+    --work;
+    --rwork;
 
     /* Get machine constants */
     eps = lapackf77_dlamch("P");
@@ -737,7 +271,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
 	    if (wntun) {
 
-	      /* Path 1 (M much larger than N, JOBU='N')   
+	      /* Path 1 (M much larger than N, JOBU_='N')   
 		 No left singular vectors to be computed */
 		itau = 1;
 		iwork = itau + *n;
@@ -797,7 +331,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		
 	    } else if (wntuo && wntvn) {
 
-	      /*  Path 2 (M much larger than N, JOBU='O', JOBVT='N')   
+	      /*  Path 2 (M much larger than N, JOBU_='O', JOBVT_='N')   
 		  N left singular vectors to be overwritten on A and   
 		  no right singular vectors to be computed */
 	      if (*lwork >= *n * *n + *n * 3) {
@@ -939,7 +473,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 	      
 	    } else if (wntuo && wntvas) {
 	      
-	      /*  Path 3 (M much larger than N, JOBU='O', JOBVT='S' or 'A')   
+	      /*  Path 3 (M much larger than N, JOBU_='O', JOBVT_='S' or 'A')   
 		  N left singular vectors to be overwritten on A and   
 		  N right singular vectors to be computed in VT */
 	      if (*lwork >= *n * *n + *n * 3) {
@@ -1132,7 +666,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 	      
 	      if (wntvn) {
 		
-		/*  Path 4 (M much larger than N, JOBU='S', JOBVT='N')   
+		/*  Path 4 (M much larger than N, JOBU_='S', JOBVT_='N')   
 		    N left singular vectors to be computed in U and   
 		    no right singular vectors to be computed */
 		if (*lwork >= *n * *n + *n * 3) {
@@ -1278,7 +812,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		
 	      } else if (wntvo) {
 		
-		/* Path 5 (M much larger than N, JOBU='S', JOBVT='O')   
+		/* Path 5 (M much larger than N, JOBU_='S', JOBVT_='O')   
                    N left singular vectors to be computed in U and   
                    N right singular vectors to be overwritten on A */
 		if (*lwork >= (*n << 1) * *n + *n * 3) {
@@ -1463,7 +997,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 		
 	      } else if (wntvas) {
 		
-		/* Path 6 (M much larger than N, JOBU='S', JOBVT='S' or 'A')   
+		/* Path 6 (M much larger than N, JOBU_='S', JOBVT_='S' or 'A')   
                    N left singular vectors to be computed in U and   
                    N right singular vectors to be computed in VT */
 
@@ -1660,7 +1194,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
 		if (wntvn) {
 
-/*                 Path 7 (M much larger than N, JOBU='A', JOBVT='N')   
+/*                 Path 7 (M much larger than N, JOBU_='A', JOBVT_='N')   
                    M left singular vectors to be computed in U and   
                    no right singular vectors to be computed   
 
@@ -1836,7 +1370,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
 		} else if (wntvo) {
 
-/*                 Path 8 (M much larger than N, JOBU='A', JOBVT='O')   
+/*                 Path 8 (M much larger than N, JOBU_='A', JOBVT_='O')   
                    M left singular vectors to be computed in U and   
                    N right singular vectors to be overwritten on A   
 
@@ -2052,7 +1586,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
 		} else if (wntvas) {
 
-/*                 Path 9 (M much larger than N, JOBU='A', JOBVT='S'   
+/*                 Path 9 (M much larger than N, JOBU_='A', JOBVT_='S'   
                            or 'A')   
                    M left singular vectors to be computed in U and   
                    N right singular vectors to be computed in VT   
@@ -2394,7 +1928,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
 	    if (wntvn) {
 
-/*              Path 1t(N much larger than M, JOBVT='N')   
+/*              Path 1t(N much larger than M, JOBVT_='N')   
                 No right singular vectors to be computed */
 
 		itau = 1;
@@ -2464,7 +1998,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
 	    } else if (wntvo && wntun) {
 
-/*              Path 2t(N much larger than M, JOBU='N', JOBVT='O')   
+/*              Path 2t(N much larger than M, JOBU_='N', JOBVT_='O')   
                 M right singular vectors to be overwritten on A and   
                 no left singular vectors to be computed */
 
@@ -2629,7 +2163,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
 	    } else if (wntvo && wntuas) {
 
-/*              Path 3t(N much larger than M, JOBU='S' or 'A', JOBVT='O')   
+/*              Path 3t(N much larger than M, JOBU_='S' or 'A', jobvt_='O')   
                 M right singular vectors to be overwritten on A and   
                 M left singular vectors to be computed in U */
 
@@ -2840,7 +2374,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
 		if (wntun) {
 
-/*                 Path 4t(N much larger than M, JOBU='N', JOBVT='S')   
+/*                 Path 4t(N much larger than M, JOBU_='N', JOBVT='S')   
                    M right singular vectors to be computed in VT and   
                    no left singular vectors to be computed */
 
@@ -3009,7 +2543,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
 		} else if (wntuo) {
 
-/*                 Path 5t(N much larger than M, JOBU='O', JOBVT='S')   
+/*                 Path 5t(N much larger than M, JOBU_='O', JOBVT='S')   
                    M right singular vectors to be computed in VT and   
                    M left singular vectors to be overwritten on A */
 
@@ -3217,7 +2751,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
 		} else if (wntuas) {
 
-		  /*   Path 6t(N much larger than M, JOBU='S' or 'A',   
+		  /*   Path 6t(N much larger than M, JOBU_='S' or 'A',   
 		       JOBVT='S')   
 		       M right singular vectors to be computed in VT and   
 		       M left singular vectors to be computed in U */
@@ -3384,7 +2918,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 	    } else if (wntva) {
 		if (wntun) {
 
-		  /*  Path 7t(N much larger than M, JOBU='N', JOBVT='A')   
+		  /*  Path 7t(N much larger than M, JOBU_='N', JOBVT='A')   
 		      N right singular vectors to be computed in VT and   
 		      no left singular vectors to be computed   
 
@@ -3537,7 +3071,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
 		} else if (wntuo) {
 
-		  /*  Path 8t(N much larger than M, JOBU='O', JOBVT='A')   
+		  /*  Path 8t(N much larger than M, JOBU_='O', JOBVT='A')   
 		      N right singular vectors to be computed in VT and   
 		      M left singular vectors to be overwritten on A   
 
@@ -3722,7 +3256,7 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 
 		} else if (wntuas) {
 
-		  /*  Path 9t(N much larger than M, JOBU='S' or 'A',   
+		  /*  Path 9t(N much larger than M, JOBU_='S' or 'A',   
                              JOBVT='A')   
 			     N right singular vectors to be computed in VT and   
 			     M left singular vectors to be computed in U   
@@ -4039,6 +3573,6 @@ magma_zgesvd(char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
     /* Return optimal workspace in WORK(1) */
     MAGMA_Z_SET2REAL(work[1], (double) maxwrk);
 
-    return 0;
+    return MAGMA_SUCCESS;
 } /* magma_zgesvd */
 

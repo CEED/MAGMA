@@ -135,9 +135,9 @@ int main( int argc, char** argv)
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &M, h_R, &M );
 
-	magma_zgesvd("A", "A", &M, &N,
-		     h_R, &M, S1, U, &M,
-		     VT, &N, h_work, &lwork, rwork, &info); 
+	magma_zgesvd('A', 'A', M, N,
+		     h_R, M, S1, U, M,
+		     VT, N, h_work, lwork, rwork, &info); 
 
         for(j=0; j<n2; j++)
             h_R[j] = h_A[j];
@@ -146,9 +146,9 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-	magma_zgesvd("A", "A", &M, &N,
-                     h_R, &M, S1, U, &M,
-                     VT, &N, h_work, &lwork, rwork, &info);
+	magma_zgesvd('A', 'A', M, N,
+                     h_R, M, S1, U, M,
+                     VT, N, h_work, lwork, rwork, &info);
         end = get_current_time();
 
         gpu_time = GetTimerValue(start,end)/1000.;
