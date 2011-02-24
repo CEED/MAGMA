@@ -83,15 +83,15 @@ magmablas_zlaset(magma_int_t m, magma_int_t n,
       returns the Frobenious norm of the difference of the two matrices.
       The function is used for debugging.
 */
-double cpu_gpu_zdiff(int M, int N, double2 * a, int lda, double2 *da, int ldda)
+double cpu_gpu_zdiff(int M, int N, cuDoubleComplex * a, int lda, cuDoubleComplex *da, int ldda)
 {
   int one = 1, j;
-  double2 mone = MAGMA_Z_NEG_ONE;
+  cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
   double  work[1];
-  double2 *ha = (double2*)malloc( M * N * sizeof(double2));
+  cuDoubleComplex *ha = (cuDoubleComplex*)malloc( M * N * sizeof(cuDoubleComplex));
   double res;
 
-  cublasGetMatrix(M, N, sizeof(double2), da, ldda, ha, M);
+  cublasGetMatrix(M, N, sizeof(cuDoubleComplex), da, ldda, ha, M);
   for(j=0; j<N; j++)
     blasf77_zaxpy(&M, &mone, a+j*lda, &one, ha+j*M, &one);
   res = lapackf77_zlange("f", &M, &N, ha, &M, work);

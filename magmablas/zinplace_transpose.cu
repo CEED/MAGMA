@@ -31,10 +31,10 @@
 
 #endif
 
-__global__ void zinplace_T_even( double2 *matrix, int lda, int half )
+__global__ void zinplace_T_even( cuDoubleComplex *matrix, int lda, int half )
 {	
-        __shared__ double2 a[ZSIZE_2SHARED][ZSIZE_2SHARED+1];
-	__shared__ double2 b[ZSIZE_2SHARED][ZSIZE_2SHARED+1];
+        __shared__ cuDoubleComplex a[ZSIZE_2SHARED][ZSIZE_2SHARED+1];
+	__shared__ cuDoubleComplex b[ZSIZE_2SHARED][ZSIZE_2SHARED+1];
 	
 	int inx = threadIdx.x;
 	int iny = threadIdx.y;
@@ -46,7 +46,7 @@ __global__ void zinplace_T_even( double2 *matrix, int lda, int half )
 	ibx *= ZSIZE_2SHARED;
 	iby *= ZSIZE_2SHARED;
 
-	double2 *A = matrix + ibx + inx + __mul24( iby + iny, lda );
+	cuDoubleComplex *A = matrix + ibx + inx + __mul24( iby + iny, lda );
 	COPY_1D_TO_2D( A, lda, a, inx, iny);
 
 	if( ibx == iby )
@@ -56,7 +56,7 @@ __global__ void zinplace_T_even( double2 *matrix, int lda, int half )
 	}
 	else
 	{
-		double2 *B = matrix + iby + inx + __mul24( ibx + iny, lda );
+		cuDoubleComplex *B = matrix + iby + inx + __mul24( ibx + iny, lda );
 
 		
 		COPY_1D_TO_2D( B, lda, b, inx, iny);
@@ -67,10 +67,10 @@ __global__ void zinplace_T_even( double2 *matrix, int lda, int half )
 	}
 } 
 
-__global__ void zinplace_T_odd( double2 *matrix, int lda, int half )
+__global__ void zinplace_T_odd( cuDoubleComplex *matrix, int lda, int half )
 {	
-        __shared__ double2 a[ZSIZE_2SHARED][ZSIZE_2SHARED+1];
-	__shared__ double2 b[ZSIZE_2SHARED][ZSIZE_2SHARED+1];
+        __shared__ cuDoubleComplex a[ZSIZE_2SHARED][ZSIZE_2SHARED+1];
+	__shared__ cuDoubleComplex b[ZSIZE_2SHARED][ZSIZE_2SHARED+1];
 	
 	int inx = threadIdx.x;
 	int iny = threadIdx.y;
@@ -82,7 +82,7 @@ __global__ void zinplace_T_odd( double2 *matrix, int lda, int half )
 	ibx *= ZSIZE_2SHARED;
 	iby *= ZSIZE_2SHARED;
 
-	double2 *A = matrix + ibx + inx + __mul24( iby + iny, lda );
+	cuDoubleComplex *A = matrix + ibx + inx + __mul24( iby + iny, lda );
 	COPY_1D_TO_2D( A, lda, a, inx, iny);
 
 	if( ibx == iby )
@@ -92,7 +92,7 @@ __global__ void zinplace_T_odd( double2 *matrix, int lda, int half )
 	}
 	else
 	{
-		double2 *B = matrix + iby + inx + __mul24( ibx + iny, lda );
+		cuDoubleComplex *B = matrix + iby + inx + __mul24( ibx + iny, lda );
 
 		COPY_1D_TO_2D( B, lda, b, inx, iny);
 		__syncthreads();
@@ -103,7 +103,7 @@ __global__ void zinplace_T_odd( double2 *matrix, int lda, int half )
 } 
 
 extern "C" void 
-magmablas_zinplace_transpose( double2 *A, int lda, int n )
+magmablas_zinplace_transpose( cuDoubleComplex *A, int lda, int n )
 {
 	dim3 threads( ZSIZE_2SHARED, 16 );
 	int in = n / ZSIZE_2SHARED;

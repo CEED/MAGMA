@@ -14,13 +14,13 @@
 #define magmablas_zgemv_fermi magmablas_zgemv
 
 __global__ void 
-zgemvn_kernel1_fermi(int n, int m, int n1, double2 alpha, double2* A, int lda, double2 *x, double2 *y)
+zgemvn_kernel1_fermi(int n, int m, int n1, cuDoubleComplex alpha, cuDoubleComplex* A, int lda, cuDoubleComplex *x, cuDoubleComplex *y)
 {
   int ind = blockIdx.x*num_threads + threadIdx.x;
 
   A += ind;
 
-  double2 res;
+  cuDoubleComplex res;
   MAGMA_Z_SET2REAL(res, 0.0f);
 
   for(int i=0; i<n1; i += zgemv_bs ){
@@ -47,17 +47,17 @@ zgemvn_kernel1_fermi(int n, int m, int n1, double2 alpha, double2* A, int lda, d
 }
 
 __global__ void 
-zgemvn_kernel2_fermi(int n, int m, int n1, double2 alpha,  double2* A, int lda, double2 *x, double2 *y)
+zgemvn_kernel2_fermi(int n, int m, int n1, cuDoubleComplex alpha,  cuDoubleComplex* A, int lda, cuDoubleComplex *x, cuDoubleComplex *y)
 {
   int ind = blockIdx.x*num_threads + threadIdx.x;
 
   A += ind;
   x += threadIdx.x;
 
-  double2 res;
+  cuDoubleComplex res;
   MAGMA_Z_SET2REAL(res, 0.0f);
 
-  __shared__ double2 buff[num_threads];
+  __shared__ cuDoubleComplex buff[num_threads];
   for(int i=0; i<n1; i += num_threads ){
     __syncthreads();
     buff[threadIdx.x]  = x[i];
@@ -86,7 +86,7 @@ zgemvn_kernel2_fermi(int n, int m, int n1, double2 alpha,  double2* A, int lda, 
 }
 
 extern "C" void
-magmablas_zgemvn_fermi(int n, int m, double2 alpha, double2 *A, int lda, double2 *x, double2 *y)
+magmablas_zgemvn_fermi(int n, int m, cuDoubleComplex alpha, cuDoubleComplex *A, int lda, cuDoubleComplex *x, cuDoubleComplex *y)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -136,17 +136,17 @@ magmablas_zgemvn_fermi(int n, int m, double2 alpha, double2 *A, int lda, double2
 
 
 __global__ void 
-zgemvt_kernel_fermi(int m, int n, double2 alpha, int n1, double2* A, int lda,
-              double2 *x, double2 *y)
+zgemvt_kernel_fermi(int m, int n, cuDoubleComplex alpha, int n1, cuDoubleComplex* A, int lda,
+              cuDoubleComplex *x, cuDoubleComplex *y)
 {
 	unsigned int tx = threadIdx.x;
 
-	__shared__ double2 sdata[threadSize];
+	__shared__ cuDoubleComplex sdata[threadSize];
 	
 
-	double2 res;
+	cuDoubleComplex res;
     MAGMA_Z_SET2REAL(res, 0.0);
-	double2 zero;
+	cuDoubleComplex zero;
     MAGMA_Z_SET2REAL(zero, 0.0);
      
 	for(int i=0; i<n1; i+= threadSize)
@@ -212,8 +212,8 @@ zgemvt_kernel_fermi(int m, int n, double2 alpha, int n1, double2* A, int lda,
 
 
 extern "C" void
-magmablas_zgemvt_fermi(int m, int n, double2 alpha, double2 *A, int lda, 
-                 double2 *x, double2 *y)
+magmablas_zgemvt_fermi(int m, int n, cuDoubleComplex alpha, cuDoubleComplex *A, int lda, 
+                 cuDoubleComplex *x, cuDoubleComplex *y)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -256,17 +256,17 @@ magmablas_zgemvt_fermi(int m, int n, double2 alpha, double2 *A, int lda,
 
 
 __global__ void 
-zgemvc_kernel_fermi(int m, int n, double2 alpha, int n1, double2* A, int lda,
-              double2 *x, double2 *y)
+zgemvc_kernel_fermi(int m, int n, cuDoubleComplex alpha, int n1, cuDoubleComplex* A, int lda,
+              cuDoubleComplex *x, cuDoubleComplex *y)
 {
 	unsigned int tx = threadIdx.x;
 
-	__shared__ double2 sdata[threadSize];
+	__shared__ cuDoubleComplex sdata[threadSize];
 	
 
-	double2 res;
+	cuDoubleComplex res;
     MAGMA_Z_SET2REAL(res, 0.0);
-	double2 zero;
+	cuDoubleComplex zero;
     MAGMA_Z_SET2REAL(zero, 0.0);
      
 	for(int i=0; i<n1; i+= threadSize)
@@ -332,8 +332,8 @@ zgemvc_kernel_fermi(int m, int n, double2 alpha, int n1, double2* A, int lda,
 
 
 extern "C" void
-magmablas_zgemvc_fermi(int m, int n, double2 alpha, double2 *A, int lda, 
-                 double2 *x, double2 *y)
+magmablas_zgemvc_fermi(int m, int n, cuDoubleComplex alpha, cuDoubleComplex *A, int lda, 
+                 cuDoubleComplex *x, cuDoubleComplex *y)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -378,7 +378,7 @@ magmablas_zgemvc_fermi(int m, int n, double2 alpha, double2 *A, int lda,
 
 
 extern "C" void
-magmablas_zgemv_fermi(char flag, int m, int n, double2 alpha, double2 *A, int lda, double2 *x, int incx, double2 beta, double2 *y, int incy) 
+magmablas_zgemv_fermi(char flag, int m, int n, cuDoubleComplex alpha, cuDoubleComplex *A, int lda, cuDoubleComplex *x, int incx, cuDoubleComplex beta, cuDoubleComplex *y, int incy) 
 {
 
     if(beta.x==0.0 && beta.y==0.0 && incx ==1 && incy==1)
