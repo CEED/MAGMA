@@ -126,7 +126,7 @@ magma_dsyevd(char jobz, char uplo,
     static magma_int_t c__0 = 0;
     static double c_b18 = 1.;
     
-    magma_int_t a_dim1, a_offset, i__1, i__2;
+    magma_int_t a_dim1, a_offset, i__1;
     double d__1;
 
     static double eps;
@@ -141,25 +141,12 @@ magma_dsyevd(char jobz, char uplo,
     static magma_int_t indwk2, llwrk2;
     static magma_int_t iscale;
     static double safmin;
-    extern magma_int_t ilaenv_(magma_int_t *, const char *, const char *, magma_int_t *, magma_int_t *, 
-                               magma_int_t *, magma_int_t *, magma_int_t, magma_int_t);
     static double bignum;
     static magma_int_t indtau;
     static magma_int_t indwrk, liwmin;
     static magma_int_t llwork;
     static double smlnum;
     static magma_int_t lquery;
-    //extern int dormtr_(char *, char *, char *, magma_int_t *, magma_int_t *,
-		       //double *, magma_int_t *, double *,
-		       //double *, magma_int_t *, 
-		       //double *, magma_int_t *, magma_int_t *);
-
-    a_dim1 = lda;
-    a_offset = 1 + a_dim1;
-    a -= a_offset;
-    --w;
-    --work;
-    --iwork;
 
     /* Function Body */
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);
@@ -177,36 +164,17 @@ magma_dsyevd(char jobz, char uplo,
 	*info = -5;
     }
 
-    if (*info == 0) {
-	if (n <= 1) {
-  	    lwmin = 1;
-	    liwmin = 1;
-	    lopt = lwmin;
-	    liopt = liwmin;
-	} else {
- 	   if (wantz) {
-		/* Computing 2nd power */
-		i__1 = n;
-		lwmin = n * 6 + 1 + (i__1 * i__1 << 1);
-		liwmin = n * 5 + 3;
-	    } else {
-	     lwmin = (n << 1) + 1;
-	      liwmin = 1;
-	    }
-	    /* Computing MAX */
-	    i__1 = lwmin, i__2 = n + ilaenv_(&c__1, "DSYTRD", uplo_, &n, &c_n1,
-					      &c_n1, &c_n1, 6, 1);
-	    lopt = max(i__1,i__2);
-	    liopt = liwmin;
-	}
-	MAGMA_D_SET2REAL(work[1], (double) lopt);
-	iwork[1] = liopt;
+    lapackf77_dsyevd(jobz_, uplo_, &n, 
+                     a, &lda, w, work, &c_n1, 
+                     iwork, &c_n1, info);
 
-	if (lwork < lwmin && ! lquery) {
-	    *info = -8;
-	} else if (liwork < liwmin && ! lquery) {
-	    *info = -10;
-	}
+    lwmin  = (magma_int_t)work[0];
+    liwmin = (magma_int_t)iwork[0];
+
+    if ((lwork < lwmin) && !lquery) {
+        *info = -8;
+    } else if ((liwork < liwmin) && ! lquery) {
+        *info = -10;
     }
 
     if (*info != 0) {
@@ -223,14 +191,19 @@ magma_dsyevd(char jobz, char uplo,
     }
 
     if (n == 1) {
-	i__1 = a_dim1 + 1;
-	w[1] = MAGMA_D_REAL(a[i__1]);
+        w[0] = a[0];
 	if (wantz) {
-	    i__1 = a_dim1 + 1;
-	    MAGMA_D_SET2REAL(a[i__1], 1.);
+            a[0] = 1.;
 	}
 	return MAGMA_SUCCESS;
     }
+
+    a_dim1 = lda;
+    a_offset = 1 + a_dim1;
+    a -= a_offset;
+    --w;
+    --work;
+    --iwork;
 
     /* Get machine constants. */
     safmin = lapackf77_dlamch("Safe minimum");

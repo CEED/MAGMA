@@ -145,7 +145,7 @@ magma_zheevd(char jobz, char uplo,
     static magma_int_t c__0 = 0;
     static double c_b18 = 1.;
     
-    magma_int_t a_dim1, a_offset, i__1, i__2;
+    magma_int_t a_dim1, a_offset, i__1;
     double d__1;
 
     static double eps;
@@ -153,31 +153,20 @@ magma_zheevd(char jobz, char uplo,
     static double anrm;
     static magma_int_t imax;
     static double rmin, rmax;
-    static magma_int_t lopt;
     static double sigma;
-    static magma_int_t iinfo, lwmin, liopt;
+    static magma_int_t iinfo, lwmin;
     static magma_int_t lower;
-    static magma_int_t llrwk, lropt;
+    static magma_int_t llrwk;
     static magma_int_t wantz;
     static magma_int_t indwk2, llwrk2;
     static magma_int_t iscale;
     static double safmin;
-    extern magma_int_t ilaenv_(magma_int_t *, const char *,const  char *, magma_int_t *, magma_int_t *, 
-                               magma_int_t *, magma_int_t *, magma_int_t, magma_int_t);
     static double bignum;
     static magma_int_t indtau;
     static magma_int_t indrwk, indwrk, liwmin;
     static magma_int_t lrwmin, llwork;
     static double smlnum;
     static magma_int_t lquery;
-
-    a_dim1 = lda;
-    a_offset = 1 + a_dim1;
-    a -= a_offset;
-    --w;
-    --work;
-    --rwork;
-    --iwork;
 
     /* Function Body */
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);
@@ -195,44 +184,20 @@ magma_zheevd(char jobz, char uplo,
 	*info = -5;
     }
 
-    if (*info == 0) {
-	if (n <= 1) {
-	    lwmin = 1;
-	    lrwmin = 1;
-	    liwmin = 1;
-	    lopt = lwmin;
-	    lropt = lrwmin;
-	    liopt = liwmin;
-	} else {
-	    if (wantz) {
-		lwmin = (n << 1) + n * n;
-		/* Computing 2nd power */
-		i__1 = n;
-		lrwmin = n * 5 + 1 + (i__1 * i__1 << 1);
-		liwmin = n * 5 + 3;
-	    } else {
-	      lwmin = n + 1;
-	      lrwmin = n;
-	      liwmin = 1;
-	    }
-	    /* Computing MAX */
-	    i__1 = lwmin, i__2 = n + ilaenv_(&c__1, "ZHETRD", uplo_, &n, &c_n1,
-					      &c_n1, &c_n1, 6, 1);
-	    lopt = max(i__1,i__2);
-	    lropt = lrwmin;
-	    liopt = liwmin;
-	}
-	MAGMA_Z_SET2REAL(work[1], (double) lopt);
-	rwork[1] = (double) lropt;
-	iwork[1] = liopt;
+    lapackf77_zheevd(jobz_, uplo_, &n, 
+                     a, &lda, w, work, &c_n1, 
+                     rwork, &c_n1, iwork, &c_n1, info);
 
-	if (lwork < lwmin && ! lquery) {
-	    *info = -8;
-	} else if (lrwork < lrwmin && ! lquery) {
-	    *info = -10;
-	} else if (liwork < liwmin && ! lquery) {
-	    *info = -12;
-	}
+    lwmin  = (magma_int_t)MAGMA_Z_REAL(work[0]);
+    lrwmin = (magma_int_t)rwork[0];
+    liwmin = (magma_int_t)iwork[0];
+
+    if ((lwork < lwmin) && !lquery) {
+        *info = -8;
+    } else if ((lrwork < lrwmin) && ! lquery) {
+        *info = -10;
+    } else if ((liwork < liwmin) && ! lquery) {
+        *info = -12;
     }
 
     if (*info != 0) {
@@ -249,14 +214,20 @@ magma_zheevd(char jobz, char uplo,
     }
 
     if (n == 1) {
-	i__1 = a_dim1 + 1;
-	w[1] = MAGMA_Z_REAL(a[i__1]);
+	w[0] = MAGMA_Z_REAL(a[0]);
 	if (wantz) {
-	    i__1 = a_dim1 + 1;
-	    MAGMA_Z_SET2REAL(a[i__1], 1.);
+	    a[0] = MAGMA_Z_ONE;
 	}
 	return MAGMA_SUCCESS;
     }
+
+    a_dim1 = lda;
+    a_offset = 1 + a_dim1;
+    a -= a_offset;
+    --w;
+    --work;
+    --rwork;
+    --iwork;
 
     /* Get machine constants. */
     safmin = lapackf77_dlamch("Safe minimum");
@@ -327,9 +298,9 @@ magma_zheevd(char jobz, char uplo,
 	blasf77_dscal(&imax, &d__1, &w[1], &c__1);
     }
 
-    MAGMA_Z_SET2REAL(work[1], (double) lopt);
-    rwork[1] = (double) lropt;
-    iwork[1] = liopt;
+    work[1]  = MAGMA_Z_MAKE((double) lwmin, 0.);
+    rwork[1] = (double) lrwmin;
+    iwork[1] = liwmin;
 
     return MAGMA_SUCCESS;
 } /* magma_zheevd */

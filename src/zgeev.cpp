@@ -119,10 +119,6 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
     =====================================================================    */
 
 
-    /* TODO: replace this by magma_get_nb */
-    extern magma_int_t ilaenv_(magma_int_t *, const char *, const char *, magma_int_t *, magma_int_t *, 
-                               magma_int_t *, magma_int_t *, magma_int_t, magma_int_t);
-
     magma_int_t c__1 = 1;
     magma_int_t c__0 = 0;
     magma_int_t c_n1 = -1;
@@ -144,10 +140,10 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
     double cscale;
     magma_int_t select[1];
     static double bignum;
-    static magma_int_t minwrk, maxwrk;
+    static magma_int_t maxwrk;
     magma_int_t wantvl;
     static double smlnum;
-    static magma_int_t hswork, irwork;
+    static magma_int_t irwork;
     magma_int_t lquery, wantvr;
     magma_int_t nb = 0;
     cuDoubleComplex *dT = NULL;
@@ -157,18 +153,6 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
     char side[2]   = {0, 0};
     char jobvl_[2] = {jobvl, 0};
     char jobvr_[2] = {jobvr, 0};
-
-    a_dim1 = lda;
-    a_offset = 1 + a_dim1;
-    a -= a_offset;
-    vl_dim1 = ldvl;
-    vl_offset = 1 + vl_dim1;
-    vl -= vl_offset;
-    vr_dim1 = ldvr;
-    vr_offset = 1 + vr_dim1;
-    vr -= vr_offset;
-    --work;
-    --rwork;
 
     *info = 0;
     lquery = lwork == -1;
@@ -188,53 +172,15 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
 	*info = -10;
     }
 
-    /*  Compute workspace   
-        (Note: Comments in the code beginning "Workspace:" describe the   
-         minimal amount of workspace needed at that point in the code,   
-         as well as the preferred amount for good performance.   
-         CWorkspace refers to complex workspace, and RWorkspace to real   
-         workspace. NB refers to the optimal block size for the   
-         immediately following subroutine, as returned by ILAENV.   
-         HSWORK refers to the workspace preferred by ZHSEQR, as   
-         calculated below. HSWORK is computed assuming ILO=1 and IHI=N,   
-         the worst case.) */
-    if (*info == 0) {
-	if (n == 0) {
-	    minwrk = 1;
-	    maxwrk = 1;
-	} else {
-	    maxwrk = n + n * ilaenv_(&c__1, "ZGEHRD", " ", &n, &c__1, 
-                                     &n, &c__0, 6, 1);
-	    minwrk = n << 1;
-	    if (wantvl) {
-	      /* Computing MAX */
-		i__1 = maxwrk, i__2 = n + (n - 1) * ilaenv_(&c__1, "ZUNGHR",
-			 " ", &n, &c__1, &n, &c_n1, 6, 1);
-		maxwrk = max(i__1,i__2);
+    /*  Compute workspace   */
+    lapackf77_zgeev(jobvl_, jobvr_, &n, a, &lda, geev_w_array, 
+                    vl, &ldvl, vr, &ldvr, work, &c_n1, rwork, info);
 
-		lapackf77_zhseqr("S", "V", &n, &c__1, &n, &a[a_offset], &lda, geev_w_array, 
-			&vl[vl_offset], &ldvl, &work[1], &c_n1, info);
-	    } else if (wantvr) {
-	      /* Computing MAX */
-		i__1 = maxwrk, i__2 = n + (n - 1) * ilaenv_(&c__1, "ZUNGHR",
-			 " ", &n, &c__1, &n, &c_n1, 6, 1);
-		maxwrk = max(i__1,i__2);
-		lapackf77_zhseqr("S", "V", &n, &c__1, &n, &a[a_offset], &lda, geev_w_array, 
-			&vr[vr_offset], &ldvr, &work[1], &c_n1, info);
-	    } else {
-		lapackf77_zhseqr("E", "N", &n, &c__1, &n, &a[a_offset], &lda, geev_w_array, 
-			&vr[vr_offset], &ldvr, &work[1], &c_n1, info);
-	    }
-	    hswork = (magma_int_t) MAGMA_Z_REAL(work[1]);
-	    /* Computing MAX */
-	    i__1 = max(maxwrk,hswork);
-	    maxwrk = max(i__1,minwrk);
-	}
-	MAGMA_Z_SET2REAL(work[1], (double) maxwrk);
 
-	if (lwork < minwrk && ! lquery) {
-	    *info = -12;
-	}
+    maxwrk = (magma_int_t)MAGMA_Z_REAL(work[0]);
+
+    if (lwork < maxwrk && ! lquery) {
+        *info = -12;
     }
 
     if (*info != 0) {
@@ -259,6 +205,18 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
 	return MAGMA_ERR_CUBLASALLOC;
     }
 #endif
+
+    a_dim1 = lda;
+    a_offset = 1 + a_dim1;
+    a -= a_offset;
+    vl_dim1 = ldvl;
+    vl_offset = 1 + vl_dim1;
+    vl -= vl_offset;
+    vr_dim1 = ldvr;
+    vr_offset = 1 + vr_dim1;
+    vr -= vr_offset;
+    --work;
+    --rwork;
 
     /* Get machine constants */
     eps    = lapackf77_dlamch("P");
@@ -514,7 +472,7 @@ L50:
 #if defined(VERSION3)
     cublasFree( dT );
 #endif
-    MAGMA_Z_SET2REAL(work[1], (double) maxwrk);
+    work[1] = MAGMA_Z_MAKE((double) maxwrk, 0.);
     return MAGMA_SUCCESS;
 } /* magma_zgeev */
 

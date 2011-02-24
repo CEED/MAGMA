@@ -211,7 +211,8 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
     }
 
     /*     Compute workspace   */ 
-    lapackf77_zgesvd(jobu_, jobvt_, m, n, a, lda, s, u, ldu, vt, ldvt, work, &c_n1, rwork, info );
+    lapackf77_zgesvd(jobu_, jobvt_, m, n, a, lda, s, u, ldu, 
+                     vt, ldvt, work, &c_n1, rwork, info );
 
     maxwrk = (magma_int_t)MAGMA_Z_REAL(work[0]);
     if ( !lquery && (lwork_ < maxwrk) ) {
