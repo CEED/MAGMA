@@ -45,6 +45,7 @@
 #include "magma.h"
 #include "magma_lapack.h"
 #include "operators.h"
+#include "transpose.h"
 
 /** ****************************************************************************
  *  Determine if weak symbol are allowed 

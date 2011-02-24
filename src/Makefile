@@ -54,7 +54,13 @@ ZSRC  = zpotrf.cpp	\
         dgeev.cpp       \
         zheevd.cpp      \
         dsyevd.cpp      \
-        zgesvd.cpp
+        zgesvd.cpp	\
+	\
+	zgessm_gpu.cpp	\
+	zssssm_gpu.cpp
+
+#	zgetfl_gpu.cpp	\
+#	ztstrf_gpu.cpp	\
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
