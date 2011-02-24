@@ -20,7 +20,6 @@ extern "C" {
 #    define lapackf77_zcgesv zcgesv_
 #    define lapackf77_dsgesv dsgesv_
 
-#    define lapackf77_xerbla xerbla_
 #    define lapackf77_dsterf dsterf_
 #    define lapackf77_ssterf ssterf_
 
@@ -45,7 +44,6 @@ extern "C" {
 #    define lapackf77_zcgesv zcgesv
 #    define lapackf77_dsgesv dsgesv
 
-#    define lapackf77_xerbla xerbla
 #    define lapackf77_dsterf dsterf
 #    define lapackf77_ssterf ssterf
 
@@ -72,7 +70,6 @@ void     lapackf77_zcgesv(magma_int_t *n, magma_int_t *nrhs, cuDoubleComplex *A,
 void     lapackf77_dsgesv(magma_int_t *n, magma_int_t *nrhs, double          *A, magma_int_t *lda, magma_int_t *IPIV, double          *B, magma_int_t *ldb, 
                           double          *X, magma_int_t *ldx, double          *work, float          *swork,                magma_int_t *iter, magma_int_t *info);
 
-void     lapackf77_xerbla(const char *func, magma_int_t *info);
 void     lapackf77_dsterf(magma_int_t *, double *, double *, magma_int_t *);
 void     lapackf77_ssterf(magma_int_t *, float *, float *, magma_int_t *);
 

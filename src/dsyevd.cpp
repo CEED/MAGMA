@@ -126,7 +126,7 @@ magma_dsyevd(char jobz, char uplo,
     static magma_int_t c__0 = 0;
     static double c_b18 = 1.;
     
-    magma_int_t a_dim1, a_offset, i__1;
+    magma_int_t a_dim1, a_offset;
     double d__1;
 
     static double eps;
@@ -178,8 +178,7 @@ magma_dsyevd(char jobz, char uplo,
     }
 
     if (*info != 0) {
-	i__1 = -(*info);
-	lapackf77_xerbla("DSYEVD", &i__1);
+	magma_xerbla("magma_dsyevd", info);
 	return MAGMA_ERR_ILLEGAL_VALUE;
     } else if (lquery) {
 	return MAGMA_SUCCESS;
