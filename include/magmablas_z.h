@@ -176,6 +176,18 @@ void magmablas_ztrsm(char s, char u, char t, char d,
 		     /*const*/ cuDoubleComplex *A, magma_int_t lda,
 		     cuDoubleComplex *B, magma_int_t ldb);
 
+
+  /*
+   * Workspace interface (alphabetical order)
+   */
+magma_int_t magmablasw_zsymv(char u, magma_int_t N, 
+			     cuDoubleComplex alpha, 
+			     cuDoubleComplex *A, magma_int_t lda, 
+			     cuDoubleComplex *X, magma_int_t incX, 
+			     cuDoubleComplex beta, 
+			     cuDoubleComplex *Y, magma_int_t incY,
+			     cuDoubleComplex *dWork);
+
 #ifdef __cplusplus
 }
 #endif

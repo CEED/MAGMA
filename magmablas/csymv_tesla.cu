@@ -14,7 +14,8 @@
 /*The version for fermi can be found in csymv_tesla.cu */
 #if (GPUSHMEM < 200)
 
-#define magmablas_csymv_130 magmablas_csymv
+#define magmablas_csymv_130  magmablas_csymv
+#define magmablasw_csymv_130 magmablasw_csymv
 
 #define csymv_bs         64
 #define thread_x         64
@@ -43,12 +44,12 @@ magmablas_csymv_130_L_special( magma_int_t n, cuFloatComplex alpha,
     cuFloatComplex res_ = MAGMA_C_ZERO;
     cuFloatComplex res1 = MAGMA_C_ZERO;
 
-    __shared__ cuFloatComplex la   [quarter_thread_x][thread_x+3]; /* Why +3? */ 
+    __shared__ cuFloatComplex la   [quarter_thread_x][thread_x+1]; /* Why +3? */ 
     __shared__ cuFloatComplex buff [thread_x];
     __shared__ cuFloatComplex buff2[thread_x];
 
     cuFloatComplex tr[4];
-    cuFloatComplex b[4];
+    cuFloatComplex b[8];
 
     magma_int_t break_d   =  thread_x * blkc;
     const magma_int_t td  = (thread_x * ty ) + tx;
@@ -221,10 +222,17 @@ magmablas_csymv_130_L_special( magma_int_t n, cuFloatComplex alpha,
 
     WC-=tx ;
     WC+=tx_;
+	
 
-    if( blkc * thread_x >=thread_x)
+
+    #pragma unroll
+    for(magma_int_t j=0;j<4;j++)
+    {
+	b[j] = buff[ty_*4+j];
+    }
+    
         #pragma unroll
-        for(magma_int_t i=0; i<thread_x; i += thread_x )
+        for(magma_int_t i=0; i<thread_x*blkc; i += thread_x )
         {
             res_ = MAGMA_C_ZERO;
             count++;
@@ -243,7 +251,7 @@ magmablas_csymv_130_L_special( magma_int_t n, cuFloatComplex alpha,
                 for(magma_int_t j=0; j < 4 ; j++)
                 {
                     res += tr[j] * buff2[ quarter_thread_x * k + ty * 4 + j];
-                    la[( j + ty * 4)][tx] = tr[j] * buff[tx];
+                    la[( j + ty * 4)][tx] = tr[j];
                 }
                 __syncthreads();
 
@@ -253,9 +261,9 @@ magmablas_csymv_130_L_special( magma_int_t n, cuFloatComplex alpha,
                 #pragma unroll
                 for(magma_int_t j=0; j < 4 ; j++)
                 {
-                    res_+=la[tx_][ty_*4+j] ;
+                    res_+=la[tx_][ty_*4+j] * b[j];
                 }
-                b[k] = res_ ;
+                b[4+k] = res_ ;
                 __syncthreads();
 
                 A += lda * quarter_thread_x ;
@@ -263,7 +271,7 @@ magmablas_csymv_130_L_special( magma_int_t n, cuFloatComplex alpha,
 
             #pragma unroll
             for(magma_int_t k=0; k < 4 ; k++){
-                la[tx_][ty_+quarter_thread_x*k]= b[k] ;
+                la[tx_][ty_+quarter_thread_x*k]= b[4+k] ;
             }
             __syncthreads();
             if( ty_ < 4 ) {
@@ -283,63 +291,6 @@ magmablas_csymv_130_L_special( magma_int_t n, cuFloatComplex alpha,
             __syncthreads();
 
         }
-
-    for(magma_int_t  i=thread_x; i< (blkc * thread_x); i += thread_x )
-    {
-        res_ = MAGMA_C_ZERO;
-        count++;
-        if(ty == 0)
-            buff2[tx] = x[i*incx];
-        __syncthreads();
-
-        #pragma unroll
-        for( magma_int_t k=0;k<4;k++)
-	{
-            #pragma unroll
-            for(magma_int_t j=0; j < 4 ; j++)
-                tr[j] = A[j*lda] ;
-
-            #pragma unroll
-            for(magma_int_t j=0; j < 4 ; j++)
-            {
-                res += tr[j] * buff2[ quarter_thread_x*k + ty*4+(j)];
-                la[( j + ty * 4)][tx] = tr[j] * buff[tx];
-            }
-            __syncthreads();
-
-            MAGMA_C_SET2REAL(res_,0);
-
-            #pragma unroll
-            for(magma_int_t j=0; j < 4 ; j++)
-                res_+=la[tx_][ty_*4+j] ;
-
-            b[k] = res_ ;
-            __syncthreads();
-
-            A += lda * quarter_thread_x ;
-        }
-
-        #pragma unroll
-        for(magma_int_t k=0; k < 4 ; k++){
-            la[tx_][ty_+quarter_thread_x*k]= b[k] ;
-        }
-        __syncthreads();
-        if( ty_ < 4 ) {
-            magma_int_t k = ty_*quarter_thread_x;
-            res_ = la[tx_][0+k] + la[tx_][1+k]
-                +  la[tx_][2+k] + la[tx_][3+k]
-                +  la[tx_][4+k] + la[tx_][5+k]
-                +  la[tx_][6+k] + la[tx_][7+k]
-                +  la[tx_][8+k] + la[tx_][9+k]
-                +  la[tx_][10+k]+ la[tx_][11+k]
-                +  la[tx_][12+k]+ la[tx_][13+k]
-                +  la[tx_][14+k]+ la[tx_][15+k];
-            WC[k + wc_c*lda ] =   res_;
-        }
-
-        wc_c++;
-        __syncthreads();
-    }
 
     WC+=tx ;
     WC-=tx_;
@@ -664,9 +615,8 @@ magmablas_csymv_130_L_generic(magma_int_t n, cuFloatComplex alpha,
     for(magma_int_t j=0; j < 4 ; j++)
         b[j] =  buff[ty_*4+j];
 
-    if( break_d > 0)
         #pragma unroll
-        for(magma_int_t  i=0; i< thread_x; i += thread_x ){
+        for(magma_int_t  i=0; i< break_d; i += thread_x ){
             MAGMA_C_SET2REAL(res_,0);
             count++;
             if( ty== 0 ) {
@@ -718,58 +668,6 @@ magmablas_csymv_130_L_generic(magma_int_t n, cuFloatComplex alpha,
             wc_c++;
             __syncthreads();
         }
-
-    for(magma_int_t  i=thread_x; i<break_d; i += thread_x ){
-        MAGMA_C_SET2REAL(res_, 0) ;
-        count++;
-        if(ty == 0 )
-            buff2[tx]  = x[i*incx];
-        __syncthreads();
-
-        #pragma unroll
-        for( magma_int_t k=0;k<4;k++){
-	    #pragma unroll
-            for(magma_int_t j=0; j < 4 ; j++)
-                tr[j] = A[j*lda] ;
-            #pragma unroll
-            for(magma_int_t j=0; j < 4 ; j++){
-                res+=tr[j]*buff2[quarter_thread_x*k + ty*4+(j)];
-                la[( (j)+ty*4)][tx] = tr[j];
-	    }
-	    __syncthreads();
-
-            MAGMA_C_SET2REAL(res_, 0) ;
-
-	    #pragma unroll
-	    for(magma_int_t j=0; j < 4 ; j++)
-                res_+=la[tx_][ty_*4+j]* b[j] ;
-	    b[4+k] = res_ ;
-	    __syncthreads();
-	    A+=lda* quarter_thread_x ;
-        }
-
-        #pragma unroll
-        for(magma_int_t k=0; k < 4 ; k++){
-            la[tx_][ty_+quarter_thread_x*k]= b[4+k] ;
-        }
-        __syncthreads();
-
-        if( ty_ < 4 ) {
-            magma_int_t k = ty_*quarter_thread_x;
-            res_ = la[tx_][0+k] + la[tx_][1+k] 
-                +  la[tx_][2+k] + la[tx_][3+k]
-                +  la[tx_][4+k] + la[tx_][5+k]
-                +  la[tx_][6+k] + la[tx_][7+k]
-                +  la[tx_][8+k] + la[tx_][9+k]
-                +  la[tx_][10+k]+ la[tx_][11+k]
-                +  la[tx_][12+k]+ la[tx_][13+k]
-                +  la[tx_][14+k]+ la[tx_][15+k];
-            WC[k + wc_c*lda ] =   res_;
-        }
-        wc_c++;
-        __syncthreads();
-    }
-
 
     WC+=tx ;
     WC-=tx_;
@@ -983,10 +881,63 @@ magmablas_csymv_130( char uplo, magma_int_t n,
 	cublasAlloc( workspace, sizeof(cuFloatComplex), (void**)&dC_work ) ;
         cublasGetError( ) ;
 
-	magmablas_csymv_130_L(n, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
+	magmablasw_csymv_130( uplo, n, alpha, 
+			      A, lda, X, incx,
+			      beta, Y, incy, dC_work);
 
 	cublasFree(dC_work);
         cublasGetError( ) ;
+    }
+    return MAGMA_SUCCESS;
+}
+
+extern "C"
+magma_int_t
+magmablasw_csymv_130( char uplo, magma_int_t n,
+		      cuFloatComplex alpha, 
+		      cuFloatComplex *A, magma_int_t lda,
+		      cuFloatComplex *X, magma_int_t incx,
+		      cuFloatComplex beta,  
+		      cuFloatComplex *Y, magma_int_t incy,
+		      cuFloatComplex *dC_work)
+{
+
+    char      uplo_[2] = {uplo, 0};
+    long int  upper    = lapackf77_lsame(uplo_, "U");
+
+    /*
+     * Test the input parameters.
+     */
+    if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
+        return -1;
+    } else if ( n < 0 ) {
+        return -2;
+    } else if ( lda < max(1,n) ) {
+        return -5;
+    } else if ( incx == 0 ) {
+        return -7;
+    } else if ( incy == 0 ) {
+        return -10;
+    }
+
+    /*
+     * Quick return if possible.
+     */
+    if ( (n == 0) || ( MAGMA_C_EQUAL(alpha, MAGMA_C_ZERO) && MAGMA_C_EQUAL(beta, MAGMA_C_ONE) ) )
+        return MAGMA_SUCCESS;
+
+    /* TODO: Upper case is not implemented in MAGMA */
+    if ( upper ) {
+#if defined(PRECISION_z) || defined(PRECISION_c)
+        fprintf(stderr, "%s: %s\n", __func__, "Upper case not implemented");
+#else
+        cublasCsymv(uplo, n, alpha, A, lda, X, incx, beta, Y, incy);
+#endif
+    }
+
+    else
+    {
+	magmablas_csymv_130_L(n, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
     }
     return MAGMA_SUCCESS;
 }
