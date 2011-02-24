@@ -11,12 +11,12 @@
 #include "common_magma.h"
 
 extern "C" int
-magma_zunmtr(char *side, char *uplo, char *trans,
-             int *m, int *n, 
-	     cuDoubleComplex *a,    int *lda, 
+magma_zunmtr(char side, char uplo, char trans,
+             int m, int n, 
+	     cuDoubleComplex *a,    int lda, 
              cuDoubleComplex *tau, 
-             cuDoubleComplex *c,    int *ldc,
-	     cuDoubleComplex *work, int *lwork, 
+             cuDoubleComplex *c,    int ldc,
+	     cuDoubleComplex *work, int lwork, 
              int *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -113,52 +113,53 @@ magma_zunmtr(char *side, char *uplo, char *trans,
    
     cuDoubleComplex c_one = MAGMA_Z_ONE;
 
+    char side_[2]  = {side, 0};
+    char uplo_[2]  = {uplo, 0};
+    char trans_[2] = {trans, 0};
     int a_dim1, a_offset, c_dim1, c_offset, i__2;
     static int i1, i2, nb, mi, ni, nq, nw;
     long int left, upper, lquery;
     static int iinfo;
     static int lwkopt;
 
-    a_dim1 = *lda;
+    a_dim1 = lda;
     a_offset = 1 + a_dim1;
     a -= a_offset;
-    --tau;
-    c_dim1 = *ldc;
+    c_dim1 = ldc;
     c_offset = 1 + c_dim1;
     c -= c_offset;
-    --work;
 
     /* Function Body */
     *info = 0;
-    left = lapackf77_lsame(side, "L");
-    upper = lapackf77_lsame(uplo, "U");
-    lquery = *lwork == -1;
+    left   = lapackf77_lsame(side_, "L");
+    upper  = lapackf77_lsame(uplo_, "U");
+    lquery = lwork == -1;
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
 
     if (left) {
-	nq = *m;
-	nw = *n;
+	nq = m;
+	nw = n;
     } else {
-	nq = *n;
-	nw = *m;
+	nq = n;
+	nw = m;
     }
-    if (! left && ! lapackf77_lsame(side, "R")) {
+    if (! left && ! lapackf77_lsame(side_, "R")) {
 	*info = -1;
-    } else if (! upper && ! lapackf77_lsame(uplo, "L")) {
+    } else if (! upper && ! lapackf77_lsame(uplo_, "L")) {
 	*info = -2;
-    } else if (! lapackf77_lsame(trans, "N") && ! lapackf77_lsame(trans, 
-	    "T")) {
+    } else if (! lapackf77_lsame(trans_, "N") && 
+               ! lapackf77_lsame(trans_, "C")) {
 	*info = -3;
-    } else if (*m < 0) {
+    } else if (m < 0) {
 	*info = -4;
-    } else if (*n < 0) {
+    } else if (n < 0) {
 	*info = -5;
-    } else if (*lda < max(1,nq)) {
+    } else if (lda < max(1,nq)) {
 	*info = -7;
-    } else if (*ldc < max(1,*m)) {
+    } else if (ldc < max(1,m)) {
 	*info = -10;
-    } else if (*lwork < max(1,nw) && ! lquery) {
+    } else if (lwork < max(1,nw) && ! lquery) {
 	*info = -12;
     }
 
@@ -166,37 +167,37 @@ magma_zunmtr(char *side, char *uplo, char *trans,
       {
 	nb = 32;
 	lwkopt = max(1,nw) * nb;
-	MAGMA_Z_SET2REAL( work[1], lwkopt );
+	MAGMA_Z_SET2REAL( work[0], lwkopt );
       }
 
     if (*info != 0) {
 	i__2 = -(*info);
-	return 0;
+	return MAGMA_ERR_ILLEGAL_VALUE;
     } else if (lquery) {
-	return 0;
+	return MAGMA_SUCCESS;
     }
 
 /*     Quick return if possible */
 
-    if (*m == 0 || *n == 0 || nq == 1) {
-	work[1] = c_one;
-	return 0;
+    if (m == 0 || n == 0 || nq == 1) {
+	work[0] = c_one;
+	return MAGMA_SUCCESS;
     }
 
     if (left) {
-	mi = *m - 1;
-	ni = *n;
+	mi = m - 1;
+	ni = n;
     } else {
-	mi = *m;
-	ni = *n - 1;
+	mi = m;
+	ni = n - 1;
     }
 
     if (upper) 
       {
 	/* Q was determined by a call to SSYTRD with UPLO = 'U' */
 	i__2 = nq - 1;
-	lapackf77_zunmql(side, trans, &mi, &ni, &i__2, &a[(a_dim1 << 1) + 1], lda, &
-		tau[1], &c[c_offset], ldc, &work[1], lwork, &iinfo);
+	lapackf77_zunmql(side_, trans_, &mi, &ni, &i__2, &a[(a_dim1 << 1) + 1], &lda, 
+                         tau, &c[c_offset], &ldc, work, &lwork, &iinfo);
       }
     else 
       {
@@ -209,18 +210,12 @@ magma_zunmtr(char *side, char *uplo, char *trans,
 	    i2 = 2;
 	}
 	i__2 = nq - 1;
-	magma_zunmqr(side[0], trans[0], mi, ni, i__2, &a[a_dim1 + 2], *lda, 
-		     &tau[1],
-		     &c[i1 + i2 * c_dim1], *ldc, &work[1], *lwork, &iinfo);
+	magma_zunmqr(side, trans, mi, ni, i__2, &a[a_dim1 + 2], lda, tau,
+		     &c[i1 + i2 * c_dim1], ldc, work, lwork, &iinfo);
       }
-    MAGMA_Z_SET2REAL( work[1], lwkopt );
-    return 0;
+    MAGMA_Z_SET2REAL( work[0], lwkopt );
+    return MAGMA_SUCCESS;
 /*     End of ZUNMTR */
 
 } /* zunmtr_ */
 
-
-/*
-  lapackf77_zunmtr("L", "L", "N", n, n, &a[a_offset], lda, &work[indtau], 
-          &work[indwrk], n, &work[indwk2], &llwrk2, &iinfo);
-*/

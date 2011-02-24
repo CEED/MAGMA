@@ -280,7 +280,7 @@ magma_zheevd(char jobz, char uplo,
 	lapackf77_zunmtr("L", uplo_, "N", &n, &n, &a[a_offset], &lda, &work[indtau], 
 		&work[indwrk], &n, &work[indwk2], &llwrk2, &iinfo);
 	/*
-	  magma_zunmtr("L", uplo_[0], "N", &n, &n, &a[a_offset], &lda, &work[indtau],
+	  magma_zunmtr(MagmaLeft, uplo, MagmaNoTrans, &n, &n, &a[a_offset], &lda, &work[indtau],
 	               &work[indwrk], &n, &work[indwk2], &llwrk2, &iinfo);
 	*/
 	lapackf77_zlacpy("A", &n, &n, &work[indwrk], &n, &a[a_offset], &lda);
