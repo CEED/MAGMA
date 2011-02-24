@@ -252,6 +252,7 @@ subs = {
     ('spotri','dpotri','cpotri','zpotri'),
     ('strtri','dtrtri','ctrtri','ztrtri'),
     ('slatrd','dlatrd','clatrd','zlatrd'),
+    ('SLATRD','DLATRD','CLATRD','ZLATRD'),
     ('slartg','dlartg','clartg','zlartg'),
     ('slahr', 'dlahr', 'clahr', 'zlahr'),
     ('slabrd','dlabrd','clabrd','zlabrd'),

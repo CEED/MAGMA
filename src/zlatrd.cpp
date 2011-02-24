@@ -13,12 +13,12 @@
 #define PRECISION_z
 
 extern "C" magma_int_t 
-magma_zlatrd(char *uplo, magma_int_t *n, magma_int_t *nb, 
-	     cuDoubleComplex *a, magma_int_t *lda, 
+magma_zlatrd(char uplo, magma_int_t n_, magma_int_t nb_, 
+	     cuDoubleComplex *a,  magma_int_t lda_, 
 	     double *e, cuDoubleComplex *tau, 
-	     cuDoubleComplex *w, magma_int_t *ldw,
-	     cuDoubleComplex *da, magma_int_t *ldda, 
-	     cuDoubleComplex *dw, magma_int_t *lddw)
+	     cuDoubleComplex *w,  magma_int_t ldw_,
+	     cuDoubleComplex *da, magma_int_t ldda_, 
+	     cuDoubleComplex *dw, magma_int_t lddw_)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -85,7 +85,8 @@ magma_zlatrd(char *uplo, magma_int_t *n, magma_int_t *nb,
             the first NB columns of the reduced matrix.   
 
     TAU     (output) COMPLEX_16 array, dimension (N-1)   
-            The scalar factors of the elementary reflectors, stored in   
+            The scalar factors of the elementary reflectors, store     
+d in   
             TAU(n-nb:n-1) if UPLO = 'U', and in TAU(1:nb) if UPLO = 'L'.   
             See Further Details.   
 
@@ -145,6 +146,14 @@ magma_zlatrd(char *uplo, magma_int_t *n, magma_int_t *nb,
     an element of the vector defining H(i).   
     =====================================================================    */
  
+  
+    char uplo_[2]  = {uplo, 0};
+    magma_int_t *n    = &n_;
+    magma_int_t *nb   = &nb_;
+    magma_int_t *lda  = &lda_;
+    magma_int_t *ldw  = &ldw_;
+    magma_int_t *ldda = &ldda_;
+    magma_int_t *lddw = &lddw_;
 
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
@@ -180,7 +189,7 @@ magma_zlatrd(char *uplo, magma_int_t *n, magma_int_t *nb,
     static cudaStream_t stream;
     cudaStreamCreate(&stream);
 
-    if (lapackf77_lsame(uplo, "U")) {
+    if (lapackf77_lsame(uplo_, "U")) {
 
       fprintf(stderr, "zlatrd: uplo has to be 'L'; 'U' not implemented \n");
       exit(-1);

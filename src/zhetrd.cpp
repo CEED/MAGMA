@@ -235,8 +235,8 @@ magma_zhetrd(char uplo, magma_int_t n,
 	       matrix W which is needed to update the unreduced part of   
 	       the matrix */
 	    i__3 = i__ + nb - 1;
-	    magma_zlatrd(uplo_, &i__3, &nb, &a[a_offset], &lda, &e[1], &tau[1], 
-			 &work[1], &ldwork, da, &ldda, dwork+1, &lddwork);
+	    magma_zlatrd(uplo, i__3, nb, &a[a_offset], lda, &e[1], &tau[1], 
+			 &work[1], ldwork, da, ldda, dwork+1, lddwork);
 
 	    /* Update the unreduced submatrix A(1:i-1,1:i-1), using an   
 	       update of the form:  A := A - V*W' - W*V' */
@@ -277,10 +277,10 @@ magma_zhetrd(char uplo, magma_int_t n,
 			      da + (i__-1)*ldda  + (i__-1), ldda,
 			      a  +  i__   *a_dim1+  i__   , lda);
 	    
-	    magma_zlatrd(uplo_, &i__3, &nb, &a[i__+i__ * a_dim1], &lda, &e[i__], 
-			 &tau[i__], &work[1], &ldwork, 
-			 da + (i__-1)+(i__-1) * a_dim1, &ldda,
-			 dwork+1, &lddwork);
+	    magma_zlatrd(uplo, i__3, nb, &a[i__+i__ * a_dim1], lda, &e[i__], 
+			 &tau[i__], &work[1], ldwork, 
+			 da + (i__-1)+(i__-1) * a_dim1, ldda,
+			 dwork+1, lddwork);
 	    
 	    /* Update the unreduced submatrix A(i+ib:n,i+ib:n), using   
 	       an update of the form:  A := A - V*W' - W*V' */

@@ -42,9 +42,9 @@ magma_int_t magma_zgeqrf( magma_int_t m, magma_int_t n, cuDoubleComplex *A,
 magma_int_t magma_zgetrf( magma_int_t m, magma_int_t n, cuDoubleComplex *A, 
 			  magma_int_t lda, magma_int_t *ipiv, 
 			  magma_int_t *info);
-magma_int_t magma_zlatrd( char *uplo, magma_int_t *n, magma_int_t *nb, cuDoubleComplex *a, 
-                          magma_int_t *lda, double *e, cuDoubleComplex *tau, cuDoubleComplex *w, magma_int_t *ldw,
-                          cuDoubleComplex *da, magma_int_t *ldda, cuDoubleComplex *dw, magma_int_t *lddw);
+magma_int_t magma_zlatrd( char uplo, magma_int_t n, magma_int_t nb, cuDoubleComplex *a, 
+                          magma_int_t lda, double *e, cuDoubleComplex *tau, cuDoubleComplex *w, magma_int_t ldw,
+                          cuDoubleComplex *da, magma_int_t ldda, cuDoubleComplex *dw, magma_int_t lddw);
 magma_int_t magma_zlahr2( magma_int_t m, magma_int_t n, magma_int_t nb, 
 			  cuDoubleComplex *da, cuDoubleComplex *dv, cuDoubleComplex *a, 
 			  magma_int_t lda, cuDoubleComplex *tau, cuDoubleComplex *t, 
