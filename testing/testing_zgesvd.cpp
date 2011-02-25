@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        November 2010
 
-       @precisions normal z -> c
+       @precisions normal z -> c d s
 
 */
 
@@ -37,7 +37,10 @@ int main( int argc, char** argv)
     printout_devices( );
 
     cuDoubleComplex *h_A, *h_R, *U, *VT, *h_work;
-    double *S1, *S2, *rwork;
+    double *S1, *S2;
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    double *rwork;
+#endif
     double gpu_time, cpu_time;
 
     TimeStruct start, end;
@@ -104,11 +107,12 @@ int main( int argc, char** argv)
     if (S2 == 0) {
       fprintf (stderr, "!!!! host memory allocation error (S2)\n");
     }
+#if defined(PRECISION_z) || defined(PRECISION_c)
     rwork = (double*)malloc(5 * min_mn * sizeof(double));
     if (rwork == 0) {
       fprintf (stderr, "!!!! host memory allocation error (rwork)\n");
     }
-
+#endif
     cudaMallocHost( (void**)&h_R,  n2*sizeof(cuDoubleComplex) );
     if (h_R == 0) {
         fprintf (stderr, "!!!! host memory allocation error (R)\n");
@@ -135,10 +139,15 @@ int main( int argc, char** argv)
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &M, h_R, &M );
 
+#if defined(PRECISION_z) || defined(PRECISION_c)
 	magma_zgesvd('A', 'A', M, N,
 		     h_R, M, S1, U, M,
 		     VT, N, h_work, lwork, rwork, &info); 
-
+#else
+	magma_zgesvd('A', 'A', M, N,
+		     h_R, M, S1, U, M,
+		     VT, N, h_work, lwork, &info); 
+#endif
         for(j=0; j<n2; j++)
             h_R[j] = h_A[j];
 
@@ -146,9 +155,15 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
+#if defined(PRECISION_z) || defined(PRECISION_c)
 	magma_zgesvd('A', 'A', M, N,
                      h_R, M, S1, U, M,
                      VT, N, h_work, lwork, rwork, &info);
+#else
+	magma_zgesvd('A', 'A', M, N,
+		     h_R, M, S1, U, M,
+		     VT, N, h_work, lwork, &info); 
+#endif
         end = get_current_time();
 
         gpu_time = GetTimerValue(start,end)/1000.;
@@ -194,7 +209,9 @@ int main( int argc, char** argv)
     free(VT);
     free(S1);
     free(S2);
+#if defined(PRECISION_z) || defined(PRECISION_c)
     free(rwork);
+#endif
     free(U);
     cudaFreeHost(h_work);
     cudaFreeHost(h_R);

@@ -217,7 +217,7 @@ void    blasf77_ztrsm( const char *, const char *, const char *, const char *, c
    */
 void    lapackf77_zbdsqr(const char *uplo, magma_int_t *n, magma_int_t *nvct, magma_int_t *nru,  magma_int_t *ncc, 
                          double *D, double *E, cuDoubleComplex *VT, magma_int_t *ldvt, cuDoubleComplex *U, magma_int_t *ldu, 
-                         cuDoubleComplex *C, magma_int_t *ldc, DWORKFORZ magma_int_t *info);
+                         cuDoubleComplex *C, magma_int_t *ldc, double *work, magma_int_t *info);
 void    lapackf77_zgebak(const char *job, const char *side, magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi, 
                          double *scale, magma_int_t *m, cuDoubleComplex *v, magma_int_t *ldv, magma_int_t *info);
 void    lapackf77_zgebal(const char *job, magma_int_t *n, cuDoubleComplex *A, magma_int_t *lda, 

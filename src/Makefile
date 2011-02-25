@@ -55,10 +55,10 @@ ZSRC  = zpotrf.cpp	\
         zheevd.cpp      \
         dsyevd.cpp      \
         zgesvd.cpp	\
+	dgesvd.cpp	\
 	\
 	zgessm_gpu.cpp	\
 	zssssm_gpu.cpp
-
 #	zgetfl_gpu.cpp	\
 #	ztstrf_gpu.cpp	\
 

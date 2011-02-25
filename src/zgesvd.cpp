@@ -232,6 +232,9 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
 	return MAGMA_SUCCESS;
     }
 
+    mnthr  = (magma_int_t)( (double)(min( m_, n_ )) * 1.6 );
+    wrkbl  = maxwrk; /* Not optimal */
+
     a_dim1 = *lda;
     a_offset = 1 + a_dim1;
     a -= a_offset;

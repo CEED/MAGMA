@@ -328,6 +328,7 @@ subs = {
     ('ormbr','ormbr','unmbr','unmbr'),
     ('org2r','org2r','ung2r','ung2r'),
     ('orgqr','orgqr','ungqr','ungqr'),
+    ('orglq','orglq','unglq','unglq'),
     ('syev','syevd','heevd','heevd'),
     ('symm','symm','hemm','hemm'),
     ('gemm','gemm','gemm','gemm'),
