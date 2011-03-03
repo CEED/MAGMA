@@ -891,6 +891,41 @@ magmablas_csymv_130( char uplo, magma_int_t n,
     return MAGMA_SUCCESS;
 }
 
+/*************************************************************************
+
+    Purpose
+    =======
+
+    magmablasw_csymv  performs the matrix-vector operation on fermi:
+
+       y := alpha*A*x + beta*y,
+
+    where alpha and beta are scalars, x and y are n element vectors and
+    A is an n by n hermitian matrix.
+
+    the interface of magmablasw_csymv is different from magmablas_csymv in
+    the last argument dC_work
+
+    As magma implements csymv through two steps:
+    1) perform the multiplication in each thread blocks and put the intermediate value 
+       in a space of device memory which we call working space. dC_work is the working space
+    2) sum the intermediate values and store the final result in y.
+    
+    the size of dC_work is
+ 
+	    lda * (n/thread_x + (n%thread_x !=0)  
+    where thread_x = 64 
+    
+    magamblasw_csymv requires users to explicitly a working space, while magmablas_csymv is 
+    a wrapper routine of magmabalsw_csymv allocating the working space inside the routine 
+    and provides the same interface with cublas. 
+    
+    If users need to call csymv frequently, we suggest to use magmablasw_csymv instead of magmablas_csymv.
+    As the overhead of allocating and free in device memory in magmablas_csymv would hurt performance.
+    Our tests show that this penalty is about 10Gflop/s when matrix size is around 10000.
+    
+*/
+
 extern "C"
 magma_int_t
 magmablasw_csymv_130( char uplo, magma_int_t n,

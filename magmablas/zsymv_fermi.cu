@@ -15,6 +15,7 @@
 #if (GPUSHMEM >= 200)
 
 #define magmablas_zsymv_200 magmablas_zsymv
+#define magmablasw_zsymv_200 magmablas_zsymv
 
 #define zsymv_bs         64
 #define thread_x         64
@@ -984,5 +985,95 @@ magmablas_zsymv_200( char uplo, magma_int_t n,
     }
     return MAGMA_SUCCESS;
 }
+
+
+/*************************************************************************
+
+    Purpose
+    =======
+
+    magmablasw_zsymv  performs the matrix-vector operation on fermi:
+
+       y := alpha*A*x + beta*y,
+
+    where alpha and beta are scalars, x and y are n element vectors and
+    A is an n by n hermitian matrix.
+
+    the interface of magmablasw_zsymv is different from magmablas_zsymv in
+    the last argument dC_work
+
+    As magma implements zsymv through two steps:
+    1) perform the multiplication in each thread blocks and put the intermediate value 
+       in a space of device memory which we call working space. dC_work is the working space
+    2) sum the intermediate values and store the final result in y.
+    
+    the size of dC_work is
+ 
+	    lda * (n/thread_x + (n%thread_x !=0)  
+    where thread_x = 64 
+    
+    magamblasw_zsymv requires users to explicitly a working space, while magmablas_zsymv is 
+    a wrapper routine of magmabalsw_zsymv allocating the working space inside the routine 
+    and provides the same interface with cublas. 
+    
+    If users need to call zsymv frequently, we suggest to use magmablasw_zsymv instead of magmablas_zsymv.
+    As the overhead of allocating and free in device memory in magmablas_zsymv would hurt performance.
+    Our tests show that this penalty is about 10Gflop/s when matrix size is around 10000.
+    
+*/
+
+
+extern "C"
+magma_int_t
+magmablasw_zsymv_200( char uplo, magma_int_t n,
+                      cuDoubleComplex alpha, 
+                      cuDoubleComplex *A, magma_int_t lda,
+                      cuDoubleComplex *X, magma_int_t incx,
+                      cuDoubleComplex beta,  
+                      cuDoubleComplex *Y, magma_int_t incy,
+		      cuDoubleComplex *dC_work)
+{
+    char      uplo_[2] = {uplo, 0};
+    long int  upper    = lapackf77_lsame(uplo_, "U");
+
+    /*
+     * Test the input parameters.
+     */
+    if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
+        return -1;
+    } else if ( n < 0 ) {
+        return -2;
+    } else if ( lda < max(1,n) ) {
+        return -5;
+    } else if ( incx == 0 ) {
+        return -7;
+    } else if ( incy == 0 ) {
+        return -10;
+    }
+
+    /*
+     * Quick return if possible.
+     */
+    if ( (n == 0) || ( MAGMA_Z_EQUAL(alpha, MAGMA_Z_ZERO) && MAGMA_Z_EQUAL(beta, MAGMA_Z_ONE) ) )
+        return MAGMA_SUCCESS;
+
+    /* TODO: Upper case is not implemented in MAGMA */
+    if ( upper ) {
+#if defined(PRECISION_z) || defined(PRECISION_c)
+        fprintf(stderr, "%s: %s\n", __func__, "Upper case not implemented");
+#else
+        cublasZsymv(uplo, n, alpha, A, lda, X, incx, beta, Y, incy);
+#endif
+    }
+    else
+    {
+
+	magmablas_zsymv_200_L(n, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
+
+    }
+    return MAGMA_SUCCESS;
+}
+
+
 
 #endif /* (GPUSHMEM >= 200) */
