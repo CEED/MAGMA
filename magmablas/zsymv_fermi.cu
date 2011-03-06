@@ -15,7 +15,7 @@
 #if (GPUSHMEM >= 200)
 
 #define magmablas_zsymv_200 magmablas_zsymv
-#define magmablasw_zsymv_200 magmablas_zsymv
+#define magmablasw_zsymv_200 magmablasw_zsymv
 
 #define zsymv_bs         64
 #define thread_x         64
