@@ -6,7 +6,7 @@
        November 2010
 */
 
-#include <quark.h>
+/*#include <quark.h>*/
 
 #ifndef _MAGMA_
 #define _MAGMA_
