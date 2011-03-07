@@ -25,7 +25,7 @@ prefix ?= ./install
 #
 QUARKDIR ?= $(MAGMA_DIR)/quark
 INCQUARK  = -I$(QUARKDIR)/include
-LIBQUARK  = -L$(QUARKDIR)/lib -lquark
+#LIBQUARK  = -L$(QUARKDIR)/lib -lquark
 
 #
 # NVCC options for the different cards
