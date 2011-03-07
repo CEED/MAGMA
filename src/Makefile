@@ -15,40 +15,35 @@ ZSRC  = zpotrf.cpp	\
         zpotrf_gpu.cpp	\
         zpotrs_gpu.cpp	\
         zposv_gpu.cpp	\
+	\
         zgetrf.cpp	\
         zgetrf_gpu.cpp 	\
         zgetrs_gpu.cpp 	\
         zgesv_gpu.cpp 	\
+	\
+	zgeqrf.cpp	\
+	zgeqlf.cpp	\
+	zgelqf.cpp	\
+        zungqr.cpp	\
 	zgeqrf_gpu.cpp  \
 	zgeqrf2_gpu.cpp	\
 	zgeqrs_gpu.cpp	\
 	zgels_gpu.cpp	\
 	zlarfb_gpu.cpp	\
         zunmqr_gpu.cpp	\
-        zunghr.cpp      \
+        zungqr_gpu.cpp	\
 	\
-	zcposv_gpu.cpp	\
-	zcgesv_gpu.cpp	\
-	zcgetrs_gpu.cpp	\
-	\
-	zgeqrf.cpp	\
-        zgehrd.cpp 	\
+	zgebrd.cpp 	\
+	zlabrd_gpu.cpp	\
+	zgehrd.cpp 	\
         zgehrd2.cpp     \
         zlahru.cpp 	\
         zlahr2.cpp 	\
-        zgeqlf.cpp 	\
-        zgelqf.cpp 	\
-        \
+        zunghr.cpp      \
         zhetrd.cpp 	\
         zlatrd.cpp 	\
-        zgebrd.cpp 	\
-        zlabrd_gpu.cpp	\
-        zungqr_gpu.cpp	\
-        zungqr.cpp      \
         zunmtr.cpp 	\
         zunmqr.cpp 	\
-        \
-        zcgeqrsv_gpu.cpp\
         \
         zgeev.cpp       \
         dgeev.cpp       \
@@ -56,6 +51,11 @@ ZSRC  = zpotrf.cpp	\
         dsyevd.cpp      \
         zgesvd.cpp	\
 	dgesvd.cpp	\
+	\
+	zcposv_gpu.cpp	\
+	zcgesv_gpu.cpp	\
+	zcgetrs_gpu.cpp	\
+	zcgeqrsv_gpu.cpp
 	\
 	zgessm_gpu.cpp	\
 	zssssm_gpu.cpp
