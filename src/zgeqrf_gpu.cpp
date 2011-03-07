@@ -10,6 +10,14 @@
 */
 #include "common_magma.h"
 
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Auxiliary function: 'a' is pointer to the current panel holding the 
+      Householder vectors for the QR factorization of the panel. This routine
+      puts ones on the diagonal and zeros in the upper triangular part of 'a'.
+      The upper triangular values are stored in work. Than the inverse is 
+      calculated in place in work, so as final result work holds the inverse
+      of the upper triangular diagonal block.
+ */
 void zsplit_diag_block(int ib, cuDoubleComplex *a, int lda, cuDoubleComplex *work){
     int i, j, info;
     cuDoubleComplex *cola, *colw;
