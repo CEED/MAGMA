@@ -219,6 +219,8 @@ other kernels (I remeber there was an issue somewhere)
 		 zgeqlf   -  ok  /  -
 		 zgelqf   -  ok  /  -
 
+                 zgebrd   -  -   /  ok
+
      Mix precision
                  zcposv   -  -   /  ok
                  zcgesv   -  -   /  ok
@@ -226,7 +228,6 @@ other kernels (I remeber there was an issue somewhere)
 		 zcgeqrsv -  -   /  ok  
      -----------------------
 
-                 zgebrd   -  -   /  ok
                	 zgeev    - No GPU interface
                             Still F2c
                             Need to use lapackf77/blasf77 macros
