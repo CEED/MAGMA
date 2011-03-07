@@ -13,33 +13,33 @@ ZSRC  = testing_zgemm.cpp	\
 	testing_zhemv.cpp	\
 	testing_zgemv.cpp	\
 	testing_zsymv.cpp	\
+	\
 	testing_zpotrf.cpp	\
 	testing_zgetrf.cpp 	\
+	testing_zgeqrf.cpp 	\
+	testing_zgeqlf.cpp 	\
+	testing_zgelqf.cpp 	\
 	\
-	testing_zgetrf_gpu.cpp 	\
 	testing_zpotrf_gpu.cpp 	\
+	testing_zgetrf_gpu.cpp 	\
+	testing_zgesv_gpu.cpp	\
 	testing_zgeqrf_gpu.cpp 	\
         testing_zgeqrs_gpu.cpp 	\
+	testing_zungqr_gpu.cpp	\
 	\
-	testing_zcposv_gpu.cpp	\
-	testing_zcgesv_gpu.cpp	\
-	testing_zswap.cpp 	\
-        testing_zgeqrf.cpp 	\
-        testing_zgeqlf.cpp 	\
-        testing_zgelqf.cpp 	\
+	testing_zgebrd.cpp	\
         testing_zgehrd.cpp 	\
         testing_zhetrd.cpp 	\
-        testing_zgebrd.cpp      \
-        \
-        testing_zgesv_gpu.cpp	\
-        testing_zungqr_gpu.cpp  \
-        \
-        testing_zcgeqrsv_gpu.cpp\
-        \
         testing_zgeev.cpp       \
         testing_zgesvd.cpp      \
         testing_zheevd.cpp      \
-        testing_dsyevd.cpp    
+        testing_dsyevd.cpp	\
+	\
+	testing_zcposv_gpu.cpp	\
+	testing_zcgesv_gpu.cpp	\
+	testing_zcgeqrsv_gpu.cpp
+
+#testing_zswap.cpp
 
 ifeq ($(FORT), pgfortran)
 	FOBJ := fortran_thunking.o
