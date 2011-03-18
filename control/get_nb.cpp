@@ -629,7 +629,9 @@ int magma_get_zgetrf_nb(int n){
 */
 extern "C"
 int magma_get_zgeqrf_nb(int m){
-  if (m <= 1024)
+  if (m<=2048)
+    return 32;
+  else if (m<=4032)
     return 64;
   else
     return 128;
