@@ -10,14 +10,14 @@
 */
 #include "common_magma.h"
 
-extern "C" int
+extern "C" magma_int_t
 magma_zunmtr(char side, char uplo, char trans,
-             int m, int n, 
-	     cuDoubleComplex *a,    int lda, 
+             magma_int_t m, magma_int_t n, 
+	     cuDoubleComplex *a,    magma_int_t lda, 
              cuDoubleComplex *tau, 
-             cuDoubleComplex *c,    int ldc,
-	     cuDoubleComplex *work, int lwork, 
-             int *info)
+             cuDoubleComplex *c,    magma_int_t ldc,
+	     cuDoubleComplex *work, magma_int_t lwork, 
+             magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -27,7 +27,6 @@ magma_zunmtr(char side, char uplo, char trans,
 
     Purpose   
     =======   
-
     ZUNMTR overwrites the general complex M-by-N matrix C with   
 
                     SIDE = 'L'     SIDE = 'R'   
@@ -44,7 +43,6 @@ magma_zunmtr(char side, char uplo, char trans,
 
     Arguments   
     =========   
-
     SIDE    (input) CHARACTER*1   
             = 'L': apply Q or Q\*\*H from the Left;   
             = 'R': apply Q or Q\*\*H from the Right.   
@@ -107,36 +105,25 @@ magma_zunmtr(char side, char uplo, char trans,
     INFO    (output) INTEGER   
             = 0:  successful exit   
             < 0:  if INFO = -i, the i-th argument had an illegal value   
-
     =====================================================================    */
-
    
     cuDoubleComplex c_one = MAGMA_Z_ONE;
 
     char side_[2]  = {side, 0};
     char uplo_[2]  = {uplo, 0};
     char trans_[2] = {trans, 0};
-    int a_dim1, a_offset, c_dim1, c_offset, i__2;
-    static int i1, i2, nb, mi, ni, nq, nw;
-    long int left, upper, lquery;
-    static int iinfo;
-    static int lwkopt;
+    magma_int_t  i__2;
+    static magma_int_t i1, i2, nb, mi, ni, nq, nw;
+    long magma_int_t left, upper, lquery;
+    static magma_int_t iinfo;
+    static magma_int_t lwkopt;
 
-    a_dim1 = lda;
-    a_offset = 1 + a_dim1;
-    a -= a_offset;
-    c_dim1 = ldc;
-    c_offset = 1 + c_dim1;
-    c -= c_offset;
-
-    /* Function Body */
     *info = 0;
     left   = lapackf77_lsame(side_, "L");
     upper  = lapackf77_lsame(uplo_, "U");
     lquery = lwork == -1;
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
-
     if (left) {
 	nq = m;
 	nw = n;
@@ -177,8 +164,7 @@ magma_zunmtr(char side, char uplo, char trans,
 	return MAGMA_SUCCESS;
     }
 
-/*     Quick return if possible */
-
+    /* Quick return if possible */
     if (m == 0 || n == 0 || nq == 1) {
 	work[0] = c_one;
 	return MAGMA_SUCCESS;
@@ -196,26 +182,25 @@ magma_zunmtr(char side, char uplo, char trans,
       {
 	/* Q was determined by a call to SSYTRD with UPLO = 'U' */
 	i__2 = nq - 1;
-	lapackf77_zunmql(side_, trans_, &mi, &ni, &i__2, &a[(a_dim1 << 1) + 1], &lda, 
-                         tau, &c[c_offset], &ldc, work, &lwork, &iinfo);
+	lapackf77_zunmql(side_, trans_, &mi, &ni, &i__2, &a[lda], &lda, 
+                         tau, c, &ldc, work, &lwork, &iinfo);
       }
     else 
       {
 	/* Q was determined by a call to SSYTRD with UPLO = 'L' */
 	if (left) {
-	    i1 = 2;
-	    i2 = 1;
-	} else {
 	    i1 = 1;
-	    i2 = 2;
+	    i2 = 0;
+	} else {
+	    i1 = 0;
+	    i2 = 1;
 	}
 	i__2 = nq - 1;
-	magma_zunmqr(side, trans, mi, ni, i__2, &a[a_dim1 + 2], lda, tau,
-		     &c[i1 + i2 * c_dim1], ldc, work, lwork, &iinfo);
+	magma_zunmqr(side, trans, mi, ni, i__2, &a[1], lda, tau,
+		     &c[i1 + i2 * ldc], ldc, work, lwork, &iinfo);
       }
+
     MAGMA_Z_SET2REAL( work[0], lwkopt );
     return MAGMA_SUCCESS;
-/*     End of ZUNMTR */
-
 } /* zunmtr_ */
 
