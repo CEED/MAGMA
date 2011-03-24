@@ -43,7 +43,6 @@ magma_zunmqr(const char side, const char trans,
 
     Arguments   
     =========   
-
     SIDE    (input) CHARACTER*1   
             = 'L': apply Q or Q\*\*H from the Left;   
             = 'R': apply Q or Q\*\*H from the Right.   
@@ -105,9 +104,7 @@ magma_zunmqr(const char side, const char trans,
     INFO    (output) INTEGER   
             = 0:  successful exit   
             < 0:  if INFO = -i, the i-th argument had an illegal value   
-
     =====================================================================   */
-
     
     cuDoubleComplex c_one = MAGMA_Z_ONE;
 
@@ -119,18 +116,18 @@ magma_zunmqr(const char side, const char trans,
     cublasAlloc((m)*(n), sizeof(cuDoubleComplex), (void**)&dc);
     cublasAlloc(2*(m+64)*64, sizeof(cuDoubleComplex), (void**)&dwork);
     
-    cublasSetMatrix( m, n, sizeof(cuDoubleComplex), c, ldc, dc, ldc);
+    cublasSetMatrix( m, n, sizeof(cuDoubleComplex), c, ldc, dc, m);
     dc -= (1 + m);
     //-------------------------------------------------------------------------
 
-    int a_dim1, a_offset, c_dim1, c_offset, i__4, i__5;
+    magma_int_t a_dim1, a_offset, c_dim1, c_offset, i__4, i__5;
     /* Local variables */
-    static int i__;
+    static magma_int_t i__;
     static cuDoubleComplex t[2*4160]	/* was [65][64] */;
-    static int i1, i2, i3, ib, ic, jc, nb, mi, ni, nq, nw, iws;
+    static magma_int_t i1, i2, i3, ib, ic, jc, nb, mi, ni, nq, nw, iws;
     long int left, notran, lquery;
-    static int nbmin, iinfo;
-    static int ldwork, lwkopt;
+    static magma_int_t nbmin, iinfo;
+    static magma_int_t ldwork, lwkopt;
 
     a_dim1 = lda;
     a_offset = 1 + a_dim1;
@@ -272,15 +269,15 @@ magma_zunmqr(const char side, const char trans,
 	    // TTT ------------------------------------------------------------
 	    //printf("%5d %5d %5d\n", mi, ni, ic + 1 + m);
 	    cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), t, ib, dwork+i__4*ib, ib);
-	    magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
+	    magma_zlarfb_gpu( side, trans, MagmaForward, MagmaColumnwise,
 			      mi, ni, ib,
 			      dwork, i__4, dwork+i__4*ib, ib,
-			      &dc[ic + jc * c_dim1], ldc, 
+			      &dc[ic + jc * m], m, 
 			      dwork+i__4*ib + ib*ib, ni);
 	    //-----------------------------------------------------------------
 	    /*
-	    lapackf77_zlarfb(side, trans, "Forward", "Columnwise", &mi, &ni, &ib, 
-		    &a[i__ + i__ * a_dim1], &lda, t, &c__65, 
+	    lapackf77_zlarfb(side_, trans_, "Forward", "Columnwise", &mi, &ni, &ib, 
+		    &a[i__ + i__ * a_dim1], &lda, t, &ib, 
 		    &c[ic + jc * c_dim1], &ldc, &work[1], &ldwork);
 	    */
 	  }
