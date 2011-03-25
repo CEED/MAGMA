@@ -251,13 +251,13 @@ magma_dsyevd(char jobz, char uplo,
     } else {
 	lapackf77_dstedc("I", &n, &w[1], &work[inde], &work[indwrk], &n, &work[indwk2], 
 		&llwrk2, &iwork[1], &liwork, info);
-       
+	/*
 	lapackf77_dormtr("L", uplo_, "N", &n, &n, &a[a_offset], &lda, &work[indtau], 
 		&work[indwrk], &n, &work[indwk2], &llwrk2, &iinfo);
-	/*
-	  magma_dormtr("L", uplo_, "N", n, n, &a[a_offset], &lda, &work[indtau],
-	               &work[indwrk], n, &work[indwk2], &llwrk2, &iinfo);
 	*/
+	magma_dormtr(MagmaLeft, uplo, MagmaNoTrans, n, n, &a[a_offset], lda, &work[indtau],
+		     &work[indwrk], n, &work[indwk2], llwrk2, &iinfo);
+	
 	lapackf77_dlacpy("A", &n, &n, &work[indwrk], &n, &a[a_offset], &lda);
     }
 
