@@ -142,14 +142,18 @@ int main( int argc, char** argv)
            Check the result compared to LAPACK
            =================================================================== */
         double work[1], matnorm = 1., mone = MAGMA_D_NEG_ONE;
+	cuDoubleComplex mcone = MAGMA_Z_NEG_ONE;
         magma_int_t one = 1;
 
         matnorm = lapackf77_dlange("f", &N, &one, w1, &N, work);
         blasf77_daxpy(&N, &mone, w1, &one, w2, &one);
 
-        printf("%5d     %6.2f         %6.2f         %e\n",
+	blasf77_zaxpy(&N, &mcone, h_A, &one, h_R, &one);
+
+        printf("%5d     %6.2f         %6.2f         %e %e\n",
                N, cpu_time, gpu_time,
-               lapackf77_dlange("f", &N, &one, w2, &N, work) / matnorm);
+               lapackf77_dlange("f", &N, &one, w2, &N, work) / matnorm,
+	       lapackf77_zlange("f", &N, &one, h_R, &N, work) );
 
         if (argc != 1)
             break;

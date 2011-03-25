@@ -142,9 +142,12 @@ int main( int argc, char** argv)
         matnorm = lapackf77_dlange("f", &N, &one, w1, &N, work);
         blasf77_daxpy(&N, &mone, w1, &one, w2, &one);
 
-        printf("%5d     %6.2f         %6.2f         %e\n",
+	blasf77_daxpy(&N, &mone, h_A, &one, h_R, &one);
+
+        printf("%5d     %6.2f         %6.2f         %e %e\n",
                N, cpu_time, gpu_time,
-               lapackf77_dlange("f", &N, &one, w2, &N, work) / matnorm);
+               lapackf77_dlange("f", &N, &one, w2, &N, work) / matnorm,
+	       lapackf77_dlange("f", &N, &one, h_R, &N, work));
 
         if (argc != 1)
             break;
