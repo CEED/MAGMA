@@ -31,7 +31,7 @@ magma_zunmqr(const char side, const char trans,
 
                     SIDE = 'L'     SIDE = 'R'   
     TRANS = 'N':      Q * C          C * Q   
-    TRANS = 'T':      Q\*\*H * C       C * Q\*\*H   
+    TRANS = 'T':      Q\*\*H * C     C * Q\*\*H   
 
     where Q is a complex orthogonal matrix defined as the product of k   
     elementary reflectors   
@@ -242,7 +242,7 @@ magma_zunmqr(const char side, const char trans,
 	       H = H(i) H(i+1) . . . H(i+ib-1) */
 	    i__4 = nq - i__ + 1;
 	    lapackf77_zlarft("F", "C", &i__4, &ib, &a[i__ + i__ * a_dim1], &lda, 
-		    &tau[i__], t, &ib);
+			     &tau[i__], t, &ib);
 
 	    // TTT ------------------------------------------------------------
 	    zpanel_to_q('U', ib, &a[i__ + i__ * a_dim1], lda, t+ib*ib);
@@ -281,6 +281,8 @@ magma_zunmqr(const char side, const char trans,
 		    &c[ic + jc * c_dim1], &ldc, &work[1], &ldwork);
 	    */
 	  }
+
+	cublasGetMatrix(m, n, sizeof(cuDoubleComplex), &dc[1+m], m, &c[c_offset], ldc);
       }
     MAGMA_Z_SET2REAL( work[1], lwkopt );
 
@@ -288,10 +290,7 @@ magma_zunmqr(const char side, const char trans,
     cublasFree(dc);
     cublasFree(dwork);
 
-    return 0;
-    
-/*     End of ZUNMQR */
-
+    return MAGMA_SUCCESS;
 } /* zunmqr_ */
 
 
