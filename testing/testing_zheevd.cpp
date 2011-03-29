@@ -77,8 +77,8 @@ int main( int argc, char** argv)
     TESTING_MALLOC(    w2, double         ,  N);
     TESTING_HOSTALLOC(h_R, cuDoubleComplex, n2);
 
-    magma_int_t nb = 128;//magma_get_zheevd_nb(N);
-    magma_int_t lwork = N*nb + N*N;
+    magma_int_t nb = magma_get_zhetrd_nb(N);
+    magma_int_t lwork = 2*N*nb + N*N;
     magma_int_t lrwork = 1 + 5*N +2*N*N;
     magma_int_t liwork = 3 + 5*N;
 

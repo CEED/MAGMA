@@ -77,8 +77,8 @@ int main( int argc, char** argv)
     TESTING_MALLOC(    w2, double         ,  N);
     TESTING_HOSTALLOC(h_R, double, n2);
 
-    magma_int_t nb = 128;//magma_get_dsyevd_nb(N);
-    magma_int_t lwork = 1 + 6*N*nb + 2*N*N;
+    magma_int_t nb = magma_get_dsytrd_nb(N);
+    magma_int_t lwork = N*nb + 6*N + 2*N*N; //1 + 6*N*nb + 2*N*N;
     magma_int_t liwork = 3 + 5*N;
 
     TESTING_HOSTALLOC(h_work, double,  lwork);
