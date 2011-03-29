@@ -11,7 +11,10 @@
        @precisions normal z -> c d s
 
 */
+#ifdef MAGMA_WITH_PLASMA
+
 #include <plasma.h>
+#include <core_blas.h>
 #include "common_magma.h"
 
 #define cublasZgemm magmablas_zgemm
@@ -93,7 +96,7 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
 
     int iinfo = 0;
     int maxm, mindim;
-    int i, j, im, s, ip, ii, p = 1;
+    int i, j, im, s, ip, ii, sb, p = 1;
     cuDoubleComplex *dAT, *dUT;
     cuDoubleComplex *dAp, *dUp;
 #ifndef WITHOUTTRTRI
@@ -139,16 +142,19 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
     if ( ib >= mindim ) {
 	/* Use CPU code. */
         CORE_ztstrf(m, n, ib, nb,
-                    hU, ldhu,
-                    hA, ldha,
-                    hL, ldhl,
+                    (PLASMA_Complex64_t*)hU, ldhu,
+                    (PLASMA_Complex64_t*)hA, ldha,
+                    (PLASMA_Complex64_t*)hL, ldhl,
                     ipiv,
-                    hwork, ldhwork,
+                    (PLASMA_Complex64_t*)hwork, ldhwork,
                     info);
 
 #ifndef WITHOUTTRTRI
-        CORE_zlacpy( PlasmaUpperLower, mindim, mindim, hL, ldhl, hL2, ldhl );
-        CORE_ztrtri( PlasmaLower, PlasmaUnit, mindim, hL2, ldhl, info );
+        CORE_zlacpy( PlasmaUpperLower, mindim, mindim, 
+                     (PLASMA_Complex64_t*)hL, ldhl, 
+                     (PLASMA_Complex64_t*)hL2, ldhl );
+        CORE_ztrtri( PlasmaLower, PlasmaUnit, mindim, 
+                     (PLASMA_Complex64_t*)hL2, ldhl, info );
         if (*info != 0 ) {
           fprintf(stderr, "ERROR, trtri returned with info = %d\n", *info);
         }          
@@ -217,11 +223,11 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
 
             // do the cpu part
             CORE_ztstrf(m, sb, ib, nb,
-                        hU(i, i), ldhu, 
-                        hA(0, i), ldha,
-                        hL(i),    ldhl, 
+                        (PLASMA_Complex64_t*)hU(i, i), ldhu, 
+                        (PLASMA_Complex64_t*)hA(0, i), ldha,
+                        (PLASMA_Complex64_t*)hL(i),    ldhl, 
                         ipiv+ii, 
-                        hwork, ldhwork, 
+                        (PLASMA_Complex64_t*)hwork, ldhwork, 
                         info);
 
             if ( (*info == 0) && (iinfo > 0) )
@@ -256,8 +262,11 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
 #endif
 
 #ifndef WITHOUTTRTRI
-	    CORE_zlacpy( PlasmaUpperLower, sb, sb, hL(i), ldhl, hL2(i), ldhl );
-            CORE_ztrtri( PlasmaLower, PlasmaUnit, sb, hL2(i), ldhl, info );
+	    CORE_zlacpy( PlasmaUpperLower, sb, sb, 
+                         (PLASMA_Complex64_t*)hL(i), ldhl, 
+                         (PLASMA_Complex64_t*)hL2(i), ldhl );
+            CORE_ztrtri( PlasmaLower, PlasmaUnit, sb, 
+                         (PLASMA_Complex64_t*)hL2(i), ldhl, info );
             if (*info != 0 ) {
               fprintf(stderr, "ERROR, trtri returned with info = %d\n", *info);
             }   
@@ -318,3 +327,5 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
     }
     return MAGMA_SUCCESS;
 }
+
+#endif

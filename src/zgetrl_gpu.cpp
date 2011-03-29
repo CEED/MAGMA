@@ -11,6 +11,8 @@
        @precisions normal z -> c d s
 
 */
+#ifdef MAGMA_WITH_PLASMA
+
 #include <plasma.h>
 #include <core_blas.h>
 #include "common_magma.h"
@@ -20,7 +22,7 @@
 //#define cublasZtrmm magmablas_ztrmm
 
 extern "C" magma_int_t
-magma_zgetfl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
+magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
                   cuDoubleComplex *hA, magma_int_t ldha, cuDoubleComplex *dA, magma_int_t ldda,
                   cuDoubleComplex *hL, magma_int_t ldhl, cuDoubleComplex *dL, magma_int_t lddl,
                   magma_int_t *ipiv, 
@@ -128,9 +130,12 @@ magma_zgetfl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
 	lapackf77_zgetrf(&m, &n, hA, &ldha, ipiv, info);
 
 #ifndef WITHOUTTRTRI
-        CORE_zlacpy(PlasmaUpperLower, mindim, mindim, hA, ldha, hL2, ldhl );
+        CORE_zlacpy(PlasmaUpperLower, mindim, mindim, 
+                    (PLASMA_Complex64_t*)hA, ldha, 
+                    (PLASMA_Complex64_t*)hL2, ldhl );
 
-        CORE_ztrtri( PlasmaLower, PlasmaUnit, mindim, hL2, ldhl, info );
+        CORE_ztrtri( PlasmaLower, PlasmaUnit, mindim, 
+                     (PLASMA_Complex64_t*)hL2, ldhl, info );
         if (*info != 0 ) {
           fprintf(stderr, "ERROR, trtri returned with info = %d\n", *info);
         }          
@@ -202,9 +207,12 @@ magma_zgetfl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
             magmablas_zlaswp( n-ii, AT(0, i), ldda, ii+1, ii+sb, ipiv, 1 );
 
 #ifndef WITHOUTTRTRI
-            CORE_zlacpy(PlasmaLower, sb, sb, hA(i, i), ldha, hL2(i), ldhl );
+            CORE_zlacpy(PlasmaLower, sb, sb, 
+                        (PLASMA_Complex64_t*)hA(i, i), ldha, 
+                        (PLASMA_Complex64_t*)hL2(i), ldhl );
             
-            CORE_ztrtri( PlasmaLower, PlasmaUnit, sb, hL2(i), ldhl, info );
+            CORE_ztrtri( PlasmaLower, PlasmaUnit, sb, 
+                         (PLASMA_Complex64_t*)hL2(i), ldhl, info );
             if (*info != 0 ) {
               fprintf(stderr, "ERROR, trtri returned with info = %d\n", *info);
             }
@@ -261,3 +269,5 @@ magma_zgetfl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
     }
     return MAGMA_SUCCESS;
 }
+
+#endif

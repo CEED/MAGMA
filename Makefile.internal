@@ -45,10 +45,18 @@ ifeq (${GPU_TARGET}, 1)
 	LDOPTS += -DGPUSHMEM=200
 endif
 
-
 LIB := $(LIBQUARK) $(LIB)
 INC += -I../include $(INCQUARK)
 
 LIBEXT = $(LIBDIR) $(LIB)
+
+# Use Plasma to compile zgetfl and ztstrf
+PLASMA = $(shell pkg-config --libs plasma 2> /dev/null )
+ifeq (1, $(words $(findstring plasma, $(PLASMA))))
+	OPTS    := $(OPTS) -DMAGMA_WITH_PLASMA
+	INC     := $(INC) $(shell pkg-config --cflags-only-I plasma)
+	LIBEXT  := $(LIBEXT) $(shell pkg-config --libs plasma)
+	require := plasma
+endif
 
 -include $(MAGMA_DIR)/Makefile.gen
