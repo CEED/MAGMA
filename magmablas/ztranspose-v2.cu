@@ -180,10 +180,14 @@ magmablas_ztranspose2(cuDoubleComplex *odata, int ldo,
                       cuDoubleComplex *idata, int ldi, 
                       int m, int n )
 {
-	dim3 threads( ZSIZE_1SHARED, 8, 1 );
-	dim3 grid( (m+31)/32, (n+31)/32, 1 );
-	ztranspose3_32<<< grid, threads >>>( odata, ldo, idata, ldi, 
-                                             // m, m%32, n, n%32);
-                                             m, (32-m%32)%32, n, (32-n%32)%32);
+    /* Quick return */
+    if ( (m == 0) || (n == 0) )
+        return;
+
+    dim3 threads( ZSIZE_1SHARED, 8, 1 );
+    dim3 grid( (m+31)/32, (n+31)/32, 1 );
+    ztranspose3_32<<< grid, threads >>>( odata, ldo, idata, ldi, 
+                                         // m, m%32, n, n%32);
+                                         m, (32-m%32)%32, n, (32-n%32)%32);
 }
 
