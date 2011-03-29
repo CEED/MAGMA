@@ -39,7 +39,7 @@ int main( int argc, char** argv)
 {
     TESTING_CUDA_INIT();
 
-    TimeStruct       start, end;
+    magma_timestr_t       start, end;
     double           eps, flops, gpu_perf, cpu_perf;
     cuDoubleComplex *h_A, *h_Q, *h_PT, *h_work, *chkwork;
     cuDoubleComplex *taup, *tauq;

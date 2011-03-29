@@ -42,7 +42,7 @@ int main( magma_int_t argc, char** argv)
     cuDoubleComplex *d_A;
     float gpu_perf, cpu_perf, cpu_perf2;
 
-    TimeStruct start, end;
+    magma_timestr_t start, end;
 
     /* Matrix size */
     magma_int_t N=0, n2, lda;

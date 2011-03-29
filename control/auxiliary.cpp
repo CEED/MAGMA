@@ -8,13 +8,23 @@
 
 #include "common_magma.h"
 
-#if defined( _WIN32 )
-  /* This must be included before INPUT is defined below, otherwise we
-     have a name clash/problem  */
-  #include <windows.h>
-  #include <limits.h>
-#else 
-  #include <inttypes.h>
+#if defined( _WIN32 ) || defined( _WIN64 )
+
+#  include <windows.h>
+#  include <limits.h>
+#  include <time.h>
+#  include <sys/timeb.h>
+#  if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
+#    define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
+#  else
+#    define DELTA_EPOCH_IN_MICROSECS  11644473600000000ULL
+#  endif
+
+#else
+
+#  include <inttypes.h>
+#  include <sys/time.h>
+
 #endif
 
 #if defined(ADD_)
@@ -26,16 +36,57 @@
 /* ////////////////////////////////////////////////////////////////////////////
    -- Get current time
 */ 
+#if defined( _WIN32 ) || defined( _WIN64 )
+struct timezone
+{
+    int  tz_minuteswest; /* minutes W of Greenwich */
+    int  tz_dsttime;     /* type of dst correction */
+};
+
 extern "C"
-TimeStruct get_current_time(void)
+int gettimeofday(struct timeval* tv, struct timezone* tz)
+{
+    FILETIME         ft;
+    unsigned __int64 tmpres = 0;
+    static int       tzflag;
+
+    if (NULL != tv)
+        {
+            GetSystemTimeAsFileTime(&ft);
+            tmpres |=  ft.dwHighDateTime;
+            tmpres <<= 32;
+            tmpres |=  ft.dwLowDateTime;
+
+            /*converting file time to unix epoch*/
+            tmpres /= 10;  /*convert into microseconds*/
+            tmpres -= DELTA_EPOCH_IN_MICROSECS;
+
+            tv->tv_sec  = (long)(tmpres / 1000000UL);
+            tv->tv_usec = (long)(tmpres % 1000000UL);
+        }
+    if (NULL != tz)
+        {
+            if (!tzflag)
+                {
+                    _tzset();
+                    tzflag++;
+                }
+            tz->tz_minuteswest = _timezone / 60;
+            tz->tz_dsttime     = _daylight;
+        }
+    return 0;
+}
+#endif
+
+extern "C"
+magma_timestr_t get_current_time(void)
 {
   static struct timeval  time_val;
-  static struct timezone time_zone;
 
-  TimeStruct time;
+  magma_timestr_t time;
 
   cudaThreadSynchronize();
-  gettimeofday(&time_val, &time_zone);
+  gettimeofday(&time_val, NULL);
 
   time.sec  = time_val.tv_sec;
   time.usec = time_val.tv_usec;
@@ -44,7 +95,7 @@ TimeStruct get_current_time(void)
 
 extern "C"
 void magma_gettime_f(unsigned int *time) {
-  TimeStruct tmp = get_current_time();
+  magma_timestr_t tmp = get_current_time();
   time[0] = tmp.sec;
   time[1] = tmp.usec;
 }
@@ -53,7 +104,7 @@ void magma_gettime_f(unsigned int *time) {
    -- End elapsed time
 */ 
 extern "C"
-double GetTimerValue(TimeStruct time_1, TimeStruct time_2)
+double GetTimerValue(magma_timestr_t time_1, magma_timestr_t time_2)
 {
   int sec, usec;
 
@@ -65,7 +116,7 @@ double GetTimerValue(TimeStruct time_1, TimeStruct time_2)
 
 extern "C"
 void magma_gettimervalue_f(unsigned int *start, unsigned int *end, double *result) {
-  TimeStruct time1, time2;
+  magma_timestr_t time1, time2;
   time1.sec  = start[0];
   time1.usec = start[1];
   time2.sec  = end[0];

@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 {
     TESTING_CUDA_INIT();
 
-    TimeStruct  start, end;
+    magma_timestr_t  start, end;
     double      flopsF, flopsS, gpu_perf;
     double      gpu_perfdf, gpu_perfds;
     double      gpu_perfsf, gpu_perfss;

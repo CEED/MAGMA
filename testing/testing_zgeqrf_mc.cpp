@@ -45,7 +45,7 @@ int main( magma_int_t argc, char** argv)
     float gpu_perf, cpu_perf, cpu2_perf;
 	double flops;
 
-    TimeStruct start, end;
+    magma_timestr_t start, end;
 
     /* Matrix size */
     magma_int_t N=0, n2, lda, M=0;

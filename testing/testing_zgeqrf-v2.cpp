@@ -242,7 +242,7 @@ int main( magma_int_t argc, char** argv)
     cuDoubleComplex *h_A, *h_R, *h_work, *tau;
     double gpu_perf, cpu_perf, flops;
 
-    TimeStruct start, end;
+    magma_timestr_t start, end;
 
     magma_qr_params *mp = (magma_qr_params*)malloc(sizeof(magma_qr_params));
 

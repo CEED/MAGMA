@@ -34,7 +34,7 @@ int main( int argc, char** argv)
 {
     TESTING_CUDA_INIT();
 
-    TimeStruct  start, end;
+    magma_timestr_t  start, end;
     double      flops, magma_perf, cuda_perf, error, work[1];
     char        transA = MagmaNoTrans;
     char        transB = MagmaNoTrans;

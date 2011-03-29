@@ -40,7 +40,7 @@ int main( int argc, char** argv)
 {
     TESTING_CUDA_INIT();
 
-    TimeStruct       start, end;
+    magma_timestr_t       start, end;
     double           flops, gpu_perf, cpu_perf;
     double           matnorm, work[1];
     cuDoubleComplex  mzone= MAGMA_Z_NEG_ONE;

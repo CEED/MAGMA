@@ -9,12 +9,11 @@
 #ifndef _MAGMA_AUXILIARY_
 #define _MAGMA_AUXILIARY_
 
-#include <sys/time.h>
-typedef struct timestruct
+typedef struct magma_timestr_s
 {
   unsigned int sec;
   unsigned int usec;
-} TimeStruct;
+} magma_timestr_t;
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,8 +55,8 @@ int magma_get_zhetrd_nb(int m);
 int magma_get_zgelqf_nb(int m);
 int magma_get_zgebrd_nb(int m);
 
-TimeStruct get_current_time(void);
-double GetTimerValue(TimeStruct time_1, TimeStruct time_2);
+magma_timestr_t get_current_time(void);
+double GetTimerValue(magma_timestr_t time_1, magma_timestr_t time_2);
 
 void printout_devices();
 

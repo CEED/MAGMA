@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 {	
     TESTING_CUDA_INIT();
 
-    TimeStruct  start, end;
+    magma_timestr_t  start, end;
     double      flops, magma_perf, error, work[1];
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};

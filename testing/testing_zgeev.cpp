@@ -33,7 +33,7 @@ int main( int argc, char** argv)
 {
     TESTING_CUDA_INIT();
 
-    TimeStruct       start, end;
+    magma_timestr_t       start, end;
     cuDoubleComplex *h_A, *h_R, *VL, *VR, *h_work, *w1, *w2;
     cuDoubleComplex *w1i, *w2i;
     cuDoubleComplex  mzone = MAGMA_Z_NEG_ONE;

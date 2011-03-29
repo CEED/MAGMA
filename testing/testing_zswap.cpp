@@ -51,7 +51,7 @@ int main( int argc, char** argv)
     double gpu_perf3, cpu_perf3;
     double gpu_perfx;
 
-    TimeStruct start, end;
+    magma_timestr_t start, end;
 
     /* Matrix size */
     int N=64, n2, lda;
