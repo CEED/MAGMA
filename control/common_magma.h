@@ -48,6 +48,18 @@
 #include "transpose.h"
 
 /** ****************************************************************************
+ *  If __func__ is not defined try to use __FUNCTION___, 
+ *   otherwise "FUNC" is printed
+ */
+#ifndef __func__
+#ifdef __FUNCTION___
+#  define __func__ __FUNCTION__
+#else
+#  define __func__ "Magma function:"
+#endif
+#endif
+
+/** ****************************************************************************
  *  Determine if weak symbol are allowed 
  */
 #if defined(linux) || defined(__linux) || defined(__linux__)
