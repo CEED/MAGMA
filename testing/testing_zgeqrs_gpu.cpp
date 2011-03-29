@@ -90,7 +90,7 @@ int main( int argc, char** argv)
     min_mn = min(M, N);
     nb     = magma_get_zgeqrf_nb(M);
     lda = ldb = M;
-    lworkgpu = nb*max((M-N+nb+2*(nrhs)), 1);
+    lworkgpu = (M-N + nb)*(nrhs+2*nb);
 
     /* Allocate host memory for the matrix */
     TESTING_MALLOC( tau,  cuDoubleComplex, min_mn   );
