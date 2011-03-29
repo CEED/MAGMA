@@ -61,8 +61,8 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
 
     LWORK   (input) INTEGER
             The dimension of the array WORK, LWORK >= max(1,NRHS).
-            For optimum performance LWORK >= (M-N+NB+2*NRHS)*NB, where NB is
-            the blocksize given by magma_get_zgeqrf_nb( M ).
+            For optimum performance LWORK >= (M-N+NB)*(NRHS + 2*NB), where 
+            NB is the blocksize given by magma_get_zgeqrf_nb( M ).
 
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the HWORK array, returns
@@ -74,14 +74,12 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
     =====================================================================    */
 
    #define a_ref(a_1,a_2) (dA+(a_2)*(ldda) + (a_1))
-   #define d_ref(a_1)     (dT+(lddwork+(a_1))*nb)
 
     cuDoubleComplex *dT, *tau;
     magma_int_t k, ret;
 
-    /* Function Body */
     magma_int_t nb     = magma_get_zgeqrf_nb(m);
-    magma_int_t lwkopt = (m-n+nb+2*(nrhs)) * nb;
+    magma_int_t lwkopt = (m-n+nb)*(nrhs+2*nb);
     long int lquery = (lwork == -1);
 
     hwork[0] = MAGMA_Z_MAKE( (double)lwkopt, 0. );
@@ -157,4 +155,4 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
 }
 
 #undef a_ref
-#undef d_ref
+

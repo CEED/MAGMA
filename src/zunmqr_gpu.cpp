@@ -91,11 +91,9 @@ magma_zunmqr_gpu(char side, char trans,
 
     LWORK   (input) INTEGER
             The dimension of the array HWORK.
-            If SIDE = 'L', LWORK >= max(1,N);
-            if SIDE = 'R', LWORK >= max(1,M).
-            For optimum performance LWORK >= N*NB if SIDE = 'L', and
-            LWORK >= M*NB if SIDE = 'R', where NB is the optimal
-            blocksize.
+            LWORK >= (M-K+NB)*(N+2*NB) if SIDE = 'L', 
+            and LWORK >= (N-K+NB)*(M+2*NB) if SIDE = 'R', where NB is the 
+            optimal blocksize.
 
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the HWORK array, returns
@@ -165,7 +163,7 @@ magma_zunmqr_gpu(char side, char trans,
 	*info = -12;
     }
 
-    lwkopt = (abs(m-k) + nb + 2*(n))*nb;
+    lwkopt = (m-k+nb)*(n+2*nb);
     hwork[0] = MAGMA_Z_MAKE( lwkopt, 0 );
 
     if (*info != 0) {
