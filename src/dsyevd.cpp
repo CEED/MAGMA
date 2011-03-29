@@ -148,7 +148,6 @@ magma_dsyevd(char jobz, char uplo,
     static double smlnum;
     static magma_int_t lquery;
 
-    /* Function Body */
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);
     lower = lapackf77_lsame(uplo_, MagmaLowerStr);
     lquery = lwork == -1 || liwork == -1;
