@@ -96,7 +96,7 @@ int main( int argc, char** argv)
     TESTING_MALLOC(    h_A,    cuDoubleComplex, lda*N );
     TESTING_HOSTALLOC( h_R,    cuDoubleComplex, lda*N );
     TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork );
-    TESTING_MALLOC(    tau,    cuDoubleComplex, N-1   );
+    TESTING_MALLOC(    tau,    cuDoubleComplex, N     );
     TESTING_MALLOC( diag,    double, N   );
     TESTING_MALLOC( offdiag, double, N-1 );
 
