@@ -193,6 +193,16 @@ other kernels (I remeber there was an issue somewhere)
                             after we pass all tests (the work space is now allocated
                             in the routine itself).
 ---------------------------------------------------------------------------------
+31                          There could be a bug in zgeqrf2_gpu. There is a call to 
+                            zlarfb that uses V with 0s in the upper triangular
+                            part, and immediately after this we call asynchronously
+                            (in another stream) a kernel that will fix V to be in 
+                            LAPACK layout. 
+ 
+                            I don't see errors now; this is just a note where to look
+                            in case we start seeing. 
+---------------------------------------------------------------------------------
+                            
 
                            Status of src directory 
                            
