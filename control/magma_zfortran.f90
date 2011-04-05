@@ -15,19 +15,19 @@ module magma_zfortran
   !---- Fortran interfaces to MAGMA subroutines ----
   interface
      
-     subroutine magma_zgetrf_gpu(m, n, A, lda, ipiv, info)
+     subroutine magmaf_zgetrf_gpu(m, n, A, lda, ipiv, info)
        integer,          intent(in)     :: m, n, lda
        integer,          intent(out)    :: ipiv(*), info
        real, dimension(4), intent(inout):: A
-     end subroutine magma_zgetrf_gpu
+     end subroutine magmaf_zgetrf_gpu
      
-     subroutine magma_zgetrs_gpu(trans, n, nrhs, dA, ldda, ipiv, dB, lddb, info)
+     subroutine magmaf_zgetrs_gpu(trans, n, nrhs, dA, ldda, ipiv, dB, lddb, info)
        character,        intent(in)     :: trans
        integer,          intent(in)     :: n, nrhs, ldda, ipiv(*), lddb
        integer,          intent(out)    :: info
        real, dimension(4), intent(in)   :: dA
        real, dimension(4), intent(inout):: dB
-     end subroutine magma_zgetrs_gpu
+     end subroutine magmaf_zgetrs_gpu
      
   end interface
 end module magma_zfortran

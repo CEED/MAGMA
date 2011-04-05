@@ -84,7 +84,7 @@
 
 !---- Call magma LU ----------------
       call magma_gettime_f(tstart)
-      call magma_zgetrf_gpu(n, n, devptrA, ldda, ipiv, info)
+      call magmaf_zgetrf_gpu(n, n, devptrA, ldda, ipiv, info)
       call magma_gettime_f(tend)
 
       if ( info .ne. 0 )  then
@@ -92,7 +92,7 @@
       end if
 
 !---- Call magma solve -------------
-      call magma_zgetrs_gpu('n', n, nrhs, devptrA, ldda, ipiv, devptrB, 
+      call magmaf_zgetrs_gpu('n', n, nrhs, devptrA, ldda, ipiv, devptrB, 
      $                      ldda, info)
 
       if ( info .ne. 0 )  then
