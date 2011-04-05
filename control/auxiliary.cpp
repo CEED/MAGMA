@@ -10,8 +10,6 @@
 
 #if defined( _WIN32 ) || defined( _WIN64 )
 
-#  include <windows.h>
-#  include <limits.h>
 #  include <time.h>
 #  include <sys/timeb.h>
 #  if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
@@ -22,7 +20,6 @@
 
 #else
 
-#  include <inttypes.h>
 #  include <sys/time.h>
 
 #endif

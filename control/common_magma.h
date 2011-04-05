@@ -31,15 +31,18 @@
 #include <ctype.h>
 
 #if defined( _WIN32 ) || defined( _WIN64 )
-#include "magmawinthread.h"
-#else
-#include <pthread.h>
-#endif
 
-#if defined( _WIN32 ) || defined( _WIN64 )
-#include <io.h>
+#  include "magmawinthread.h"
+#  include <windows.h>
+#  include <limits.h>
+#  include <io.h>
+
 #else
-#include <unistd.h>
+
+#  include <pthread.h>
+#  include <unistd.h>
+#  include <inttypes.h>
+
 #endif
 
 #include "magma.h"
