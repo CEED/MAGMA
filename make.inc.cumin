@@ -1,0 +1,39 @@
+#//////////////////////////////////////////////////////////////////////////////
+#   -- MAGMA (version 1.0) --
+#      Univ. of Tennessee, Knoxville
+#      Univ. of California, Berkeley
+#      Univ. of	Colorado, Denver
+#      November 2010
+#//////////////////////////////////////////////////////////////////////////////
+
+#
+# GPU_TARGET specifies for which GPU you want to compile MAGMA
+#      0: Tesla family
+#      1: Fermi Family
+#
+GPU_TARGET = 0
+
+CC        = gcc
+NVCC      = nvcc
+FORT      = gfortran
+
+ARCH      = ar
+ARCHFLAGS = cr
+RANLIB    = ranlib
+
+OPTS      = -O3 -DADD_ -g
+FOPTS     = -O3 -DADD_ -g -x f95-cpp-input
+#NVOPTS    = -DADD_ --compiler-options -fno-strict-aliasing -DUNIX -O3 -g -G
+NVOPTS    = -DADD_ --compiler-options -fno-strict-aliasing -DUNIX -O3
+LDOPTS    = -fPIC -Xlinker -zmuldefs
+
+LIB       = -lmkl_em64t -lguide -lpthread -lcublas -lcudart -lm 
+
+CUDADIR   = /usr/local/cuda-3.0
+
+LIBDIR    = -L/home/tomov/intel/mkl/10.0.1.014/lib/em64t \
+            -L$(CUDADIR)/lib64
+INC       = -I../include -I../quark/include -I$(CUDADIR)/include
+
+LIBMAGMA     = ../lib/libmagma.a
+LIBMAGMABLAS = ../lib/libmagmablas.a

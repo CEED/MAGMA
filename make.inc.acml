@@ -1,31 +1,37 @@
 #//////////////////////////////////////////////////////////////////////////////
-#   -- MAGMA (version 0.2) --
+#   -- MAGMA (version 1.0) --
 #      Univ. of Tennessee, Knoxville
 #      Univ. of California, Berkeley
 #      Univ. of	Colorado, Denver
-#      November 2009
+#      November 2010
 #//////////////////////////////////////////////////////////////////////////////
 
-	CC        = gcc
-	NVCC      = nvcc
-	FORT      = ifort
+#
+# GPU_TARGET specifies for which GPU you want to compile MAGMA
+#      0: Tesla family
+#      1: Fermi Family
+#
+GPU_TARGET = 0
 
-	ARCH      = ar
-	ARCHFLAGS = cr
-	RANLIB    = ranlib
+CC        = gcc
+NVCC      = nvcc
+FORT      = ifort
 
-	OPTS      = -O3 -DADD_ -fPIC 
-	NVOPTS    = --compiler-options -fno-strict-aliasing  -arch sm_13 \
-                    -DUNIX -O3
-	LDOPTS    = -fPIC 
+ARCH      = ar
+ARCHFLAGS = cr
+RANLIB    = ranlib
 
-	LIB       = -lacml -lpthread -lcublas -lm 
+OPTS      = -O3 -DADD_ -fPIC 
+NVOPTS    = --compiler-options -fno-strict-aliasing -DUNIX -O3 -DADD_
+LDOPTS    = -fPIC -Xlinker -zmuldefs
 
-	CUDADIR   = /sw/analysis-x64/cuda/2.3/sl5.0_binary/
+LIB       = -lacml -lpthread -lcublas -lm 
 
-	LIBDIR    = -L/sw/analysis-x64/acml/4.1.0/sl5_binary/pgi64/lib \
-                    -L$(CUDADIR)/lib64 
-	INC       = -I../include -I$(CUDADIR)/include
-	
-	LIBMAGMA     = ../lib/libmagma.a
-	LIBMAGMABLAS = ../lib/libmagmablas.a
+CUDADIR   = /sw/analysis-x64/cuda/2.3/sl5.0_binary/
+
+LIBDIR    = -L/sw/analysis-x64/acml/4.1.0/sl5_binary/pgi64/lib \
+            -L$(CUDADIR)/lib64 
+INC       = -I$(CUDADIR)/include
+
+LIBMAGMA     = ../lib/libmagma.a
+LIBMAGMABLAS = ../lib/libmagmablas.a

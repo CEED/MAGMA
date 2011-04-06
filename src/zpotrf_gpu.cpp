@@ -1,68 +1,79 @@
 /*
-    -- MAGMA (version 0.2) --
+    -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2009
+       November 2010
+
+       @precisions normal z -> s d c
+
 */
+#include "common_magma.h"
 
-#include "cuda_runtime_api.h"
-#include "cublas.h"
-#include "magma.h"
-#include "magmablas.h"
-#include <stdio.h>
+// === Define what BLAS to use ============================================
+#define PRECISION_z
+#if (defined(PRECISION_s) || defined(PRECISION_d)) 
+  #define cublasZgemm magmablas_zgemm
+  #define cublasZtrsm magmablas_ztrsm
+#endif
 
-extern "C" int 
-magma_zpotrf_gpu(char *uplo, int *n, double2 *a, int *lda, double2 *work, 
-		 int *info)
+#if (GPUSHMEM >= 200)
+  #if (defined(PRECISION_s))
+     #undef  cublasSgemm
+     #define cublasSgemm magmablas_sgemm_fermi80
+  #endif
+#endif
+// === End defining what BLAS to use =======================================
+
+#define dA(i, j)  (dA + (j)*ldda + (i))
+
+extern "C" magma_int_t
+magma_zpotrf_gpu(char uplo, magma_int_t n, 
+                 cuDoubleComplex *dA, magma_int_t ldda, magma_int_t *info)
 {
-/*  -- MAGMA (version 0.2) --
+/*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2009
+       November 2010
 
     Purpose   
     =======   
-
-    ZPOTRF computes the Cholesky factorization of a double complex symmetric   
-    positive definite matrix A.   
+    ZPOTRF computes the Cholesky factorization of a complex Hermitian   
+    positive definite matrix dA.   
 
     The factorization has the form   
-       A = U**T * U,  if UPLO = 'U', or   
-       A = L  * L**T,  if UPLO = 'L',   
+       dA = U\*\*H * U,  if UPLO = 'U', or   
+       dA = L  * L\*\*H,  if UPLO = 'L',   
     where U is an upper triangular matrix and L is lower triangular.   
 
     This is the block version of the algorithm, calling Level 3 BLAS.   
 
     Arguments   
     =========   
-
     UPLO    (input) CHARACTER*1   
-            = 'U':  Upper triangle of A is stored;   
-            = 'L':  Lower triangle of A is stored.   
+            = 'U':  Upper triangle of dA is stored;   
+            = 'L':  Lower triangle of dA is stored.   
 
     N       (input) INTEGER   
-            The order of the matrix A.  N >= 0.   
+            The order of the matrix dA.  N >= 0.   
 
-    A       (input/output) DOUBLE COMPLEX array on the GPU, dimension (LDA,N)
-            On entry, the symmetric matrix A.  If UPLO = 'U', the leading   
-            N-by-N upper triangular part of A contains the upper   
-            triangular part of the matrix A, and the strictly lower   
-            triangular part of A is not referenced.  If UPLO = 'L', the   
-            leading N-by-N lower triangular part of A contains the lower   
-            triangular part of the matrix A, and the strictly upper   
-            triangular part of A is not referenced.   
+    dA      (input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N)   
+            On entry, the Hermitian matrix dA.  If UPLO = 'U', the leading   
+            N-by-N upper triangular part of dA contains the upper   
+            triangular part of the matrix dA, and the strictly lower   
+            triangular part of dA is not referenced.  If UPLO = 'L', the   
+            leading N-by-N lower triangular part of dA contains the lower   
+            triangular part of the matrix dA, and the strictly upper   
+            triangular part of dA is not referenced.   
 
             On exit, if INFO = 0, the factor U or L from the Cholesky   
-            factorization A = U**T*U or A = L*L**T.   
+            factorization dA = U\*\*H*U or dA = L*L\*\*H.   
 
-    LDA     (input) INTEGER   
-            The leading dimension of the array A.  LDA >= max(1,N).   
-
-    WORK    (workspace) DOUBLE COMPLEX array, dimension at least (nb, nb)
-            where nb can be obtained through magma_get_zpotrf_nb(*n)
-            Work array allocated with cudaMallocHost.
+    LDDA     (input) INTEGER   
+            The leading dimension of the array dA.  LDDA >= max(1,N).
+            To benefit from coalescent memory accesses LDDA must be
+            dividable by 16.
 
     INFO    (output) INTEGER   
             = 0:  successful exit   
@@ -70,154 +81,143 @@ magma_zpotrf_gpu(char *uplo, int *n, double2 *a, int *lda, double2 *work,
             > 0:  if INFO = i, the leading minor of order i is not   
                   positive definite, and the factorization could not be   
                   completed.   
+    =====================================================================   */
 
-    =====================================================================   
 
-       Test the input parameters.   
+    magma_int_t     j, jb, nb;
+    char            uplo_[2] = {uplo, 0};
+    cuDoubleComplex zone  = MAGMA_Z_ONE;
+    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex *work;
+    double          done  = (double) 1.0;
+    double          mdone = (double)-1.0;
+    long int        upper = lapackf77_lsame(uplo_, "U");
 
-       Parameter adjustments */
-
-    #define a_ref(a_1,a_2) (a+(a_2)*a_dim1 + a_1)
-    #define min(a,b)  (((a)<(b))?(a):(b))
-    #define max(a,b)  (((a)>(b))?(a):(b))
-
-    /* Table of constant values */
-    static int c__1 = 1;
-    static int c_n1 = -1;
-    static double2 cmone = {-1.0, 0.0};
-    static double2 cone = {1.0, 0.0};
-    
-    /* System generated locals */
-    int a_dim1, a_offset, i__1, i__2, i__3, i__4;
-    /* Local variables */
-    static int j;
-
-    long int upper = lsame_(uplo, "U");
     *info = 0;
-    if (! upper && ! lsame_(uplo, "L")) {
-      *info = -1;
-    } else if (*n < 0) {
-      *info = -2;
-    } else if (*lda < max(1,*n)) {
-      *info = -4;
+    if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
+        *info = -1;
+    } else if (n < 0) {
+        *info = -2;
+    } else if (ldda < max(1,n)) {
+        *info = -4;
     }
     if (*info != 0)
-      return 0;
+        return MAGMA_ERR_ILLEGAL_VALUE;
 
-    static int jb;
+    nb = magma_get_zpotrf_nb(n);
+
+    if (cudaSuccess != cudaMallocHost( (void**)&work, nb*nb*sizeof(cuDoubleComplex) ) ) {
+	*info = -6;
+	return MAGMA_ERR_HOSTALLOC;
+    }
 
     static cudaStream_t stream[2];
     cudaStreamCreate(&stream[0]);
     cudaStreamCreate(&stream[1]);
 
-    int n2 = (*n)*(*n);
-    cublasStatus status;
-
-    a_dim1 = *lda;
-    a_offset = 1 + a_dim1 * 1;
-    a -= a_offset;
-    unsigned int timer = 0;
-
-    int nb = magma_get_zpotrf_nb(*n);
-
-    if (nb <= 1 || nb >= *n) {
-      /*  Use unblocked code. */
-      cublasGetMatrix(*n, *n, sizeof(double2), a + a_offset, *lda, work, *n);
-      zpotrf_(uplo, n, work, n, info);
-      cublasSetMatrix(*n, *n, sizeof(double2), work, *n, a + a_offset, *n);
+    if ((nb <= 1) || (nb >= n)) {
+        /*  Use unblocked code. */
+        cublasGetMatrix(n, n, sizeof(cuDoubleComplex), dA, ldda, work, n);
+        lapackf77_zpotrf(uplo_, &n, work, &n, info);
+        cublasSetMatrix(n, n, sizeof(cuDoubleComplex), work, n, dA, ldda);
     } else {
 
         /* Use blocked code. */
 	if (upper) {
-
+            
             /* Compute the Cholesky factorization A = U'*U. */
+            for (j=0; j<n; j+=nb) {
+                
+                /* Update and factorize the current diagonal block and test   
+                   for non-positive-definiteness. Computing MIN */
+		jb = min(nb, (n-j));
+                
+                cublasZherk(MagmaUpper, MagmaConjTrans, jb, j, 
+                            mdone, dA(0, j), ldda, 
+                            done,  dA(j, j), ldda);
 
-	    i__1 = *n;
-	    i__2 = nb;
-	    for (j = 1; i__2 < 0 ? j >= i__1 : j <= i__1; j += i__2) {
-
-               /* Update and factorize the current diagonal block and test   
-                  for non-positive-definiteness. Computing MIN */
-		i__3 = nb, i__4 = *n - j + 1;
-		jb = min(i__3,i__4);
-		i__3 = j - 1;
-                magmablas_zherk('u', 'c', jb, i__3, -1.f, a_ref(1,j),
-                             *lda, 1.f, a_ref(j, j), *lda);
-                cudaMemcpy2DAsync(work, jb*sizeof(double2), a_ref(j,j), 
-				  (*lda) * sizeof(double2), 4*sizeof(double2), 
-				  jb, cudaMemcpyDeviceToHost,stream[1]);
+                cudaMemcpy2DAsync(work,     jb  *sizeof(cuDoubleComplex), 
+                                  dA(j, j), ldda*sizeof(cuDoubleComplex), 
+                                  jb*sizeof(cuDoubleComplex), jb, 
+                                  cudaMemcpyDeviceToHost,stream[1]);
 		
-		if (j + jb <= *n) {
+		if ( (j+jb) < n) {
                     /* Compute the current block row. */
-		    i__3 = *n - j - jb + 1;
-		    i__4 = j - 1;
-                    cublasZgemm('C', 'N', jb, i__3, i__4,
-                            cmone, a_ref(1, j), *lda, a_ref(1, j + jb), *lda,
-                            cone, a_ref(j, j + jb), *lda);
-                 }
-             
-                 cudaStreamSynchronize(stream[1]);
-                 zpotrf_("Upper", &jb, work, &jb, info);
-		 if (*info != 0) {
-		   *info = *info + j - 1;
-		   break;
-		 }
-                 cudaMemcpy2DAsync(a_ref(j,j), (*lda) * sizeof(double2), work, 
-				   jb*sizeof(double2), sizeof(double2)*jb, 
-				   jb, cudaMemcpyHostToDevice,stream[0]);
+                    cublasZgemm(MagmaConjTrans, MagmaNoTrans, 
+                                jb, (n-j-jb), j,
+                                mzone, dA(0, j   ), ldda, 
+                                       dA(0, j+jb), ldda,
+                                zone,  dA(j, j+jb), ldda);
+                }
+                
+                cudaStreamSynchronize(stream[1]);
 
-                 if (j + jb <= *n)
-                    magmablas_ztrsm('L', 'U', 'C', 'N', jb, i__3,
-                           cone, a_ref(j, j), *lda, a_ref(j, j + jb),*lda);
+                lapackf77_zpotrf(MagmaUpperStr, &jb, work, &jb, info);
+                cudaMemcpy2DAsync( dA(j, j), ldda*sizeof(cuDoubleComplex), 
+                                   work,     jb  *sizeof(cuDoubleComplex), 
+                                   sizeof(cuDoubleComplex)*jb, jb, 
+                                   cudaMemcpyHostToDevice,stream[0]);
+		if (*info != 0) {
+		  *info = *info + j;
+		  break;
+                }
+
+                if ( (j+jb) < n)
+                    cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
+                                 jb, (n-j-jb),
+                                 zone, dA(j, j   ), ldda, 
+                                       dA(j, j+jb), ldda);
 	    }
 	} else {
             //=========================================================
             // Compute the Cholesky factorization A = L*L'.
-	    i__2 = *n;
-	    i__1 = nb;
-	    for (j = 1; i__1 < 0 ? j >= i__2 : j <= i__2; j += i__1) {
+	    for (j=0; j<n; j+=nb) {
+
                 //  Update and factorize the current diagonal block and test   
                 //  for non-positive-definiteness. Computing MIN 
-		i__3 = nb, i__4 = *n - j + 1;
-		jb = min(i__3,i__4);
-		i__3 = j - 1;
-                magmablas_zherk('l', 'n', jb, i__3, -1.f, a_ref(j,1), 
-                             *lda, 1.f, a_ref(j, j), *lda);
-                cudaMemcpy2DAsync(work, jb*sizeof(double2), a_ref(j,j), 
-				  (*lda) * sizeof(double2), sizeof(double2)*jb, 
-				  jb, cudaMemcpyDeviceToHost,stream[1]);
+                jb = min(nb, (n-j));
 
-                if (j + jb <= *n) {
-                    i__3 = *n - j - jb + 1;
-                    i__4 = j - 1;
-                    cublasZgemm('N', 'C', i__3, jb, i__4,
-                            cmone, a_ref(j + jb, 1), *lda, a_ref(j, 1), *lda,
-                            cone, a_ref(j + jb, j), *lda);
+                cublasZherk(MagmaLower, MagmaNoTrans, jb, j,
+                            mdone, dA(j, 0), ldda, 
+                            done,  dA(j, j), ldda);
+		
+                cudaMemcpy2DAsync( work,     jb  *sizeof(cuDoubleComplex),
+                                   dA(j, j), ldda*sizeof(cuDoubleComplex),
+                                   sizeof(cuDoubleComplex)*jb, jb,
+                                   cudaMemcpyDeviceToHost,stream[1]);
+		
+                if ( (j+jb) < n) {
+                    cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
+                                 (n-j-jb), jb, j,
+                                 mzone, dA(j+jb, 0), ldda, 
+                                        dA(j,    0), ldda,
+                                 zone,  dA(j+jb, j), ldda);
                 }
 
                 cudaStreamSynchronize(stream[1]);
-	        zpotrf_("Lower", &jb, work, &jb, info);
+	        lapackf77_zpotrf(MagmaLowerStr, &jb, work, &jb, info);
+	        cudaMemcpy2DAsync(dA(j, j), ldda*sizeof(cuDoubleComplex), 
+                                  work,     jb  *sizeof(cuDoubleComplex), 
+                                  sizeof(cuDoubleComplex)*jb, jb, 
+                                  cudaMemcpyHostToDevice,stream[0]);
 		if (*info != 0) {
-                  *info = *info + j - 1;
-                  break;
+		  *info = *info + j;
+		  break;
                 }
-	        cudaMemcpy2DAsync(a_ref(j,j), (*lda) * sizeof(double2), work, 
-				  jb*sizeof(double2), sizeof(double2)*jb, 
-				  jb, cudaMemcpyHostToDevice,stream[0]);
 	        
-		if (j + jb <= *n)
-                    magmablas_ztrsm('R', 'L', 'C', 'N', i__3,
-		          jb, cone, a_ref(j, j), *lda, a_ref(j + jb, j),*lda);
+		if ( (j+jb) < n)
+                    cublasZtrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
+                                (n-j-jb), jb, 
+                                zone, dA(j,    j), ldda, 
+                                      dA(j+jb, j), ldda);
 	    }
 
 	}
     }
-    return 0;
 
-/*     End of MAGMA_ZPOTRF_GPU */
+    cudaStreamDestroy(stream[0]);
+    cudaStreamDestroy(stream[1]);
+    cudaFreeHost(work);
 
+    return MAGMA_SUCCESS;
 } /* magma_zpotrf_gpu */
-
-#undef a_ref
-#undef min
-#undef max

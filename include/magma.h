@@ -1,283 +1,179 @@
 /*
-    -- MAGMA (version 0.2) --
+    -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2009
+       November 2010
 */
+
+/*#include <quark.h>*/
 
 #ifndef _MAGMA_
 #define _MAGMA_
 
-#include "auxiliary.h"
+/* ------------------------------------------------------------
+ * MAGMA Blas Functions 
+ * --------------------------------------------------------- */ 
 #include "magmablas.h"
+
+#include "auxiliary.h"
+
+/* ------------------------------------------------------------
+ * MAGMA functions
+ * --------------------------------------------------------- */
+#include "magma_z.h"
+#include "magma_c.h"
+#include "magma_d.h"
+#include "magma_s.h"
+#include "magma_zc.h"
+#include "magma_ds.h"
+
+#define MagmaNoTrans       'N'
+#define MagmaTrans         'T'
+#define MagmaConjTrans     'C'
+
+#define MagmaUpper         'U'
+#define MagmaLower         'L'
+#define MagmaUpperLower    'A'
+
+#define MagmaNonUnit       'N'
+#define MagmaUnit          'U'
+
+#define MagmaLeft          'L'
+#define MagmaRight         'R'
+
+#define MagmaForward       'F'
+#define MagmaBackward      'B'
+                           
+#define MagmaColumnwise    'C'
+#define MagmaRowwise       'R'
+
+#define MagmaNoVectors     'N'
+#define MagmaVectors       'V'
+
+#define MagmaNoTransStr    "NonTrans"
+#define MagmaTransStr      "Trans"
+#define MagmaConjTransStr  "Conj"
+
+#define MagmaUpperStr      "Upper"
+#define MagmaLowerStr      "Lower"
+#define MagmaUpperLowerStr "All"
+
+#define MagmaNonUnitStr    "NonUnit"
+#define MagmaUnitStr       "Unit"
+
+#define MagmaLeftStr       "Left"
+#define MagmaRightStr      "Right"
+
+#define MagmaForwardStr    "Forward"
+#define MagmaBackwardStr   "Backward"
+
+#define MagmaColumnwiseStr "Columnwise"
+#define MagmaRowwiseStr    "Rowwise"
+
+#define MagmaNoVectorsStr  "NoVectors"
+#define MagmaVectorsStr    "Vectors"
+
+/* ------------------------------------------------------------
+ *   Return codes
+ * --------------------------------------------------------- */
+#define MAGMA_SUCCESS             0
+#define MAGMA_ERR_ILLEGAL_VALUE  -4
+#define MAGMA_ERR_ALLOCATION     -5
+#define MAGMA_ERR_HOSTALLOC      -6
+#define MAGMA_ERR_CUBLASALLOC    -7
+
+/* ------------------------------------------------------------
+ *   Macros to deal with cuda complex
+ * --------------------------------------------------------- */
+#define MAGMA_Z_SET2REAL(v, t)    (v).x = (t); (v).y = 0.0
+#define MAGMA_Z_OP_NEG_ASGN(t, z) (t).x = -(z).x; (t).y = -(z).y
+#define MAGMA_Z_EQUAL(u,v)        (((u).x == (v).x) && ((u).y == (v).y))
+#define MAGMA_Z_GET_X(u)          ((u).x)
+#define MAGMA_Z_ASSIGN(v, t)      (v).x = (t).x; (v).y = (t).y
+#define MAGMA_Z_CNJG(v, t)        (v).x = (t).x; (v).y = -(t).y
+#define MAGMA_Z_DSCALE(v, t, s)   (v).x = (t).x/(s); (v).y = (t).y/(s)      
+#define MAGMA_Z_OP_NEG(a, b, c)   (a).x = (b).x-(c).x; (a).y = (b).y-(c).y
+#define MAGMA_Z_MAKE(r, i)        make_cuDoubleComplex((r), (i))
+#define MAGMA_Z_REAL(a)           cuCreal(a)
+#define MAGMA_Z_IMAG(a)           cuCimag(a)
+#define MAGMA_Z_ADD(a, b)         cuCadd((a), (b))
+#define MAGMA_Z_SUB(a, b)         cuCsub((a), (b))
+#define MAGMA_Z_MUL(a, b)         cuCmul((a), (b))
+#define MAGMA_Z_DIV(a, b)         cuCdiv((a), (b))
+#define MAGMA_Z_ZERO              make_cuDoubleComplex(0.0, 0.0)
+#define MAGMA_Z_ONE               make_cuDoubleComplex(1.0, 0.0)
+#define MAGMA_Z_NEG_ONE           make_cuDoubleComplex(-1.0, 0.0)
+
+#define MAGMA_C_SET2REAL(v, t)    (v).x = (t); (v).y = 0.0
+#define MAGMA_C_OP_NEG_ASGN(t, z) (t).x = -(z).x; (t).y = -(z).y
+#define MAGMA_C_EQUAL(u,v)        (((u).x == (v).x) && ((u).y == (v).y))
+#define MAGMA_C_GET_X(u)          ((u).x)
+#define MAGMA_C_ASSIGN(v, t)      (v).x = (t).x; (v).y = (t).y
+#define MAGMA_C_CNJG(v, t)        (v).x= (t).x; (v).y = -(t).y
+#define MAGMA_C_DSCALE(v, t, s)   (v).x = (t).x/(s); (v).y = (t).y/(s)
+#define MAGMA_C_OP_NEG(a, b, c)   (a).x = (b).x-(c).x; (a).y = (b).y-(c).y
+#define MAGMA_C_MAKE(r, i)        make_cuFloatComplex((r), (i))
+#define MAGMA_C_REAL(a)           cuCrealf(a)
+#define MAGMA_C_IMAG(a)           cuCimagf(a)
+#define MAGMA_C_ADD(a, b)         cuCaddf((a), (b))
+#define MAGMA_C_SUB(a, b)         cuCsubf((a), (b))
+#define MAGMA_C_MUL(a, b)         cuCmulf((a), (b))
+#define MAGMA_C_DIV(a, b)         cuCdivf((a), (b))
+#define MAGMA_C_ZERO              make_cuFloatComplex(0.0, 0.0)
+#define MAGMA_C_ONE               make_cuFloatComplex(1.0, 0.0)
+#define MAGMA_C_NEG_ONE           make_cuFloatComplex(-1.0, 0.0)
+
+#define MAGMA_D_SET2REAL(v, t)    (v) = (t);
+#define MAGMA_D_OP_NEG_ASGN(t, z) (t) = -(z)
+#define MAGMA_D_EQUAL(u,v)        ((u) == (v))
+#define MAGMA_D_GET_X(u)          (u)
+#define MAGMA_D_ASSIGN(v, t)      (v) = (t)
+#define MAGMA_D_CNJG(v, t)        (v) = (t)
+#define MAGMA_D_DSCALE(v, t, s)   (v) = (t)/(s)
+#define MAGMA_D_OP_NEG(a, b, c)   (a) = (b) - (c)
+#define MAGMA_D_MAKE(r, i)        (r)
+#define MAGMA_D_REAL(a)           (a)
+#define MAGMA_D_IMAG(a)           (a)
+#define MAGMA_D_ADD(a, b)         ( (a) + (b) )
+#define MAGMA_D_SUB(a, b)         ( (a) - (b) )
+#define MAGMA_D_MUL(a, b)         ( (a) * (b) )
+#define MAGMA_D_DIV(a, b)         ( (a) / (b) )
+#define MAGMA_D_ZERO              (0.0)
+#define MAGMA_D_ONE               (1.0)
+#define MAGMA_D_NEG_ONE           (-1.0)
+
+#define MAGMA_S_SET2REAL(v, t)    (v) = (t);
+#define MAGMA_S_OP_NEG_ASGN(t, z) (t) = -(z)
+#define MAGMA_S_EQUAL(u,v)        ((u) == (v))
+#define MAGMA_S_GET_X(u)          (u)
+#define MAGMA_S_ASSIGN(v, t)      (v) = (t)
+#define MAGMA_S_CNJG(v, t)        (v) = (t)
+#define MAGMA_S_DSCALE(v, t, s)   (v) = (t)/(s)
+#define MAGMA_S_OP_NEG(a, b, c)   (a) = (b) - (c)
+#define MAGMA_S_MAKE(r, i)        (r)
+#define MAGMA_S_REAL(a)           (a)
+#define MAGMA_S_IMAG(a)           (a)
+#define MAGMA_S_ADD(a, b)         ( (a) + (b) )
+#define MAGMA_S_SUB(a, b)         ( (a) - (b) )
+#define MAGMA_S_MUL(a, b)         ( (a) * (b) )
+#define MAGMA_S_DIV(a, b)         ( (a) / (b) )
+#define MAGMA_S_ZERO              (0.0)
+#define MAGMA_S_ONE               (1.0)
+#define MAGMA_S_NEG_ONE           (-1.0)
+
+#ifndef CBLAS_SADDR
+#define CBLAS_SADDR(a)  &(a)
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* ////////////////////////////////////////////////////////////////////////////
-   -- MAGMA function definitions
-*/
-int magma_spotrf(char *, int *, float *, int *, float *, int *);
-int magma_spotrf2(char *, int *, float *, int *, int *);
-int magma_spotrf3(char *, int *, float *, int *, float *, int *);
-int magma_spotrf_gpu(char *, int *, float *, int *, float *, int *);
-int magma_slarfb(char, char, int, int, int *, float *, int *, float *,
-                 int *, float *, int *, float *, int *);
-int magma_sgeqrf(int *, int *, float *, int  *,  float  *,
-		 float *, int *, float *, int *);
-int magma_sgeqrf2(int *, int *, float *, int  *,  float  *,
-		  float *, int *, int *);
-int magma_sgeqrf_gpu(int *, int *, float *, int  *,  float  *,
-		     float *, int *, float *, int *);
-int magma_sgeqrf_gpu2(int *, int *, float *, int  *,  float  *,
-		      float *, int *, float *, int *);
-int magma_sgeqrf_gpu3(int *, int *, float *, int  *,  float  *,
-		      float *, int *, float *, int *);
-int magma_sgeqrs_gpu(int *, int *, int *, float *, int *, float *, float *,
-                     int *, float *, int *, float *, int *);
-int magma_sgeqlf(int *, int *, float *, int  *,  float  *,
-                 float *, int *, float *, int *);
-int magma_sgelqf(int *, int *, float *, int  *,  float  *,
-                 float *, int *, float *, int *);
-int magma_sgelqf2(int *, int *, float *, int  *,  float  *,
-		  float *, int *, float *, int *);
-int magma_sgetrf(int *, int *, float *, int *, int *, float *, float *, int *);
-int magma_sgetrf2(int *, int *, float *, int *, int *, float *, int *);
-int magma_sgetrf_gpu(int *, int *, float *, int *, int *, float *, int *);
-int magma_sgetrf_gpu2(int *, int *, float *, int *, int *,int *,float*,int*);
-int magma_sgetrs_gpu(char *, int, int, float *, int,
-		     int *, float *, int, int *, float *);
-int magma_sgehrd(int *, int *, int *, float *, int *, float *, float *,
-                 int *, float *, int *);
-int magma_slahr2(int *, int *, int *, float *, float *, float *, int *,
-                 float *, float *, int *, float *, int *);
-int magma_slahru(int, int, int,  float *, int,
-                 float *, float *, float *, float *, float *);
-int magma_ssytrd(char *, int *, float *, int *, float *, float *, 
-		 float *, float *, int *, float *, int *);
-int magma_sgebrd(int *, int *, float *, int *, float *, float *, float *, 
-		 float *, float *, int *, float *, int *);
-int magma_slabrd(int *, int *, int *, float *, int *, float *, float *, 
-		 float *, float *, float *, int *, float *, int *,
-		 float *, int *, float *, int *, float *, int *);
-
-int magma_dpotrf(char *, int *, double *, int *, double *, int *);
-int magma_dpotrf_gpu(char *, int *, double *, int *, double *, int *);
-int magma_dlarfb(char, char, int, int, int *, double *, int *, double *,
-                 int *, double *, int *, double *, int *);
-int magma_dgeqrf(int *, int *, double *, int  *,  double  *,
-		 double *, int *, double *, int *);
-int magma_dgeqrf_gpu(int *, int *, double *, int  *, double  *,
-		     double *, int *, double *, int *);
-int magma_dgeqrf_gpu2(int *, int *, double *, int  *, double  *,
-                      double *, int *, double *, int *);
-int magma_dgeqrs_gpu(int *, int *, int *, double *, int *, double *, double *,
-                     int *, double *, int *, double *, int *);
-int magma_dgeqlf(int *, int *, double *, int  *, double  *,
-		 double *, int *, double *, int *);
-int magma_dgelqf(int *, int *, double *, int  *, double *,
-		 double *, int *, double *, int *);
-int magma_dgelqf2(int *, int *, double *, int  *, double *,
-		  double *, int *, double *, int *);
-int magma_dgetrf(int *, int *, double *, int *, int *, double*, double*, int*);
-int magma_dgetrf_gpu(int *, int *, double *, int *, int *, double *, int *);
-int magma_dgetrs_gpu(char *, int, int, double *, int,
-                     int *, double *, int, int *, double *);
-int magma_dgehrd(int *, int *, int *, double *, int *, double *, double *,
-		 int *, double *, int *);
-int magma_dlahr2(int *, int *, int *, double *, double *, double *, int *,
-                 double *, double *, int *, double *, int *);
-int magma_dlahru(int, int, int,  double *, int,
-		 double *, double *, double *, double *, double *);
-int magma_dsytrd(char *, int *, double *, int *, double *, double *,
-		 double *, double *, int *, double *, int *);
-
-int magma_cpotrf(char *, int *, float2 *, int *, float2 *, int *);
-int magma_cgetrf(int *, int *, float2 *, int *, int *, 
-		 float2 *, float2 *, int *);
-int magma_clarfb(char, char, int, int, int *, float2 *, int *, float2 *,
-                 int *, float2 *, int *, float2 *, int *);
-int magma_cgeqrf(int *, int *, float2 *, int  *,  float2  *,
-                 float2 *, int *, float2 *, int *);
-int magma_cpotrf_gpu(char *, int *, float2 *, int *, float2 *, int *);
-int magma_cgetrf_gpu(int *, int *, float2 *, int *, int *, float2 *, int *);
-int magma_cgeqrf_gpu(int *, int *, float2 *, int  *,  float2  *,
-		     float2 *, int *, float2 *, int *);
-
-int magma_zpotrf(char *, int *, double2 *, int *, double2 *, int *);
-int magma_zgetrf(int *, int *, double2 *, int *, int *,
-                 double2 *, double2 *, int *);
-int magma_zlarfb(char, char, int, int, int *, double2 *, int *, double2 *,
-                 int *, double2 *, int *, double2 *, int *);
-int magma_zgeqrf(int *, int *, double2 *, int  *,  double2  *,
-                 double2 *, int *, double2 *, int *);
-int magma_zpotrf_gpu(char *, int *, double2 *, int *, double2 *, int *);
-int magma_zgetrf_gpu(int *, int *, double2 *, int *, int *, double2 *, int *);
-int magma_zgeqrf_gpu(int *, int *, double2 *, int  *, double2  *,
-		     double2 *, int *, double2 *, int *);
-
-int magma_sdgetrs_gpu(int *n, int *nrhs, float *a, int *lda,
-                  int *ipiv, float *x, double *b, int *ldb, int *info);
-int magma_dsgesv_gpu(int, int, double *, int, int *, double *, int, double *,
-		     int, double *, float *, int *, int *, float *, double *,
-		     int *);
-int magma_spotrs_gpu(char *, int, int, float *, int, float *, int, int *);
-int magma_dpotrs_gpu(char *, int, int, double *, int, double *, int, int *);
-int magma_dsposv_gpu(char, int, int, double *, int, double *, int, double *,
-		     int, double *, float *, int *, int *, float *, double *);
-
-void magma_xerbla(char *name , int *info);
-
-int magma_dsgeqrsv_gpu(int, int, int, double *, int, double *, int, double *,
-		       int, double *, float *, int *, int *, float *, int, 
-		       float *, float *, double *, int, double *, double *);
-
-/* ////////////////////////////////////////////////////////////////////////////
-   -- LAPACK Externs used in MAGMA
-*/
-void strtri_(char *, char *, int *, float *, int *, int *);
-void strsm_(char *, char *, char *, char *,
-	    int *, int *, float *, float *, int *, float *, int*);
-void sgemm_(char *, char *, int *, int *, int *, float *,
-	    float *, int *, float *, int *, float *, float *, int *);
-int sgemv_(char *, int *, int *, float *, float *, int *,
-	   float *, int *, float *, float *, int *);
-void saxpy_(int *, float *, float *, int *, float *, int *);
-int scopy_(int *, float *, int *, float *, int *);
-int strmv_(char*,char*,char*,int *,float *, int *, float *, int *);
-int slarfg_(int *, float *, float *x, int *, float *);
-int sscal_(int *, float *, float *, int *);
-void ssyrk_(char *, char *, int *, int *, float *, float *,
-	    int *, float *, float *, int *);
-int strmm_(char *, char *, char *, char *,
-	   int *, int *, float *, float *, int *, float *, int *);
-int slaswp_(int *, float *, int *, int *, int *, int *, int *);
-int ssymv_(char *, int *, float *, float *, int *, 
-	   float *, int *, float *, float *, int *);
-
-float snrm2_(int *, float *, int *);
-float slange_(char *norm, int *, int *, float *, int *, float *);
-float sdot_(int *, float *, int *, float *, int *);
-
-int sgehd2_(int*, int*, int*, float*, int*, float*, float*, int*);
-int spotrf_(char *uplo, int *n, float *a, int *lda, int *info);
-int spotf2_(char *, int *, float *, int *, int *);
-int sgeqrf_(int*,int*,float *,int*,float *,float *,int *,int *);
-int sgeqlf_(int*,int*,float *,int*,float *,float *,int *,int *);
-int sgelqf_(int*,int*,float *,int*,float *,float *,int *,int *);
-int sgelq2_(int*,int*,float *,int*,float *,float *,int *);
-int sgeql2_(int*,int*,float *,int*,float *,float *,int *);
-int sgehrd_(int *, int *, int *, float *, int *,
-	    float *, float *, int *, int *);
-int ssytrd_(char *, int *, float *, int *, float *, float *, 
-	    float *, float *, int *, int *);
-int sgebrd_(int *, int *, float *, int *, float *, float *, float *, 
-	    float *, float *, int *, int *);
-
-int slarft_(char *, char *, int *, int *, float *, int *, float *,
-	    float *, int *);
-int slarfb_(char *, char *, char *, char *, int *, int *, int *, float *, 
-	    int *, float *, int *, float *, int *, float *, int *);
-int sgetrf_(int *, int *, float *, int *, int *, int *);
-
-int slaset_(char *,int *,int *,float *,float *,float *a,int *);
-float slamch_(char *);
-float slansy_(char *, char *, int *, float *, int *, float *);
-int slacpy_(char *, int *, int *, float *, int *, float *, int *);
-int sorgqr_(int *, int *, int *, float *, int *, float *, 
-	    float *, int *, int *);
-int sormqr_(char *, char *, int *, int *, int *, float *, int *,
-	    float *, float *, int *, float *, int *, int *);
-
-void ctrsm_(char *, char *, char *, char *,
-	    int *, int *, float2 *, float2 *, int *, float2 *,int*);
-int ctrmm_(char *, char *, char *, char *,
-	   int *, int *, float2 *, float2 *, int *, float2 *,int *);
-void caxpy_(int *, float2 *, float2 *, int *, float2 *, int *);
-void csyrk_(char *, char *, int *, int *, float2 *,
-	    float2 *, int *, float2 *, float2 *, int *);
-void cherk_(char *, char *, int *, int *, float *,
-	    float2 *, int *, float *, float2 *, int *);
-int cpotrf_(char *uplo, int *n, float2 *a, int *lda, int *info);
-int cgeqrf_(int*,int*,float2 *,int*,float2 *,float2 *,int *,int *);
-int clarft_(char *, char *, int *, int *, float2 *, int *, float2 *,
-	    float2 *, int *);
-int cgetrf_(int *, int *, float2 *, int *, int *, int *);
-int claswp_(int *, float2 *, int *, int *, int *, int *, int *);
-float clange_(char *norm, int *, int *, float2 *, int *, float *);
-
-void dtrtri_(char *, char *, int *, double *, int *, int *);
-void dtrsm_(char *, char *, char *, char *,
-	    int *, int *, double *, double *, int *, double *,int*);
-void dgemm_(char *, char *, int *, int *, int *, double *,
-	    double *, int *, double *, int *, double *,double *, int *);
-int dgemv_(char *, int *, int *, double *, double *, int *,
-	   double *, int *, double *, double *, int *);
-void daxpy_(int *, double *, double *, int *, double *, int *);
-int dcopy_(int *, double *, int *, double *, int *);
-int dtrmv_(char*,char*,char*,int *,double*,int*,double*,int*);
-int dlarfg_(int *, double *, double *x, int *, double *);
-int dscal_(int *, double *, double *, int *);
-void dsyrk_(char *, char *, int *, int *, double *, double *,
-	    int *, double *, double *, int *);
-int dtrmm_(char *, char *, char *, char *, int *, int *, 
-	   double *, double *, int *, double *, int *);
-int dlaswp_(int *, double *, int *, int *, int *, int *, int *);
-int dsymv_(char *, int *, double *, double *, int *,
-	   double *, int *, double *, double *, int *);
-
-double dnrm2_(int *, double *, int *);
-double dlange_(char *norm, int *, int *, double *, int *, double *);
-double ddot_(int *, double *, int *, double *, int *);
-
-int dgehd2_(int*,int*,int*,double*,int*,double*,double*,int*);
-int dpotrf_(char *uplo, int *n, double *a, int *lda, int *info);
-int dpotf2_(char *, int *, double *, int *, int *);
-int dgeqrf_(int*,int*,double *,int*,double *,double *,int *,int *);
-int dgeqlf_(int*,int*,double *,int*,double *,double *,int *,int *);
-int dgelqf_(int*,int*,double *,int*,double *,double *,int *,int *);
-int dgelq2_(int*,int*,double *,int*,double *,double *,int *);
-int dgeql2_(int*,int*,double *,int*,double *,double *,int *);
-int dgetrf_(int *, int *, double *, int *, int *, int *);
-int dgehrd_(int *, int *, int *, double *, int *, 
-	    double *, double *, int *, int *);
-int dsytrd_(char *, int *, double *, int *, double *, double *,
-	    double *, double *, int *, int *);
-
-int dlarft_(char *, char *, int *, int *, double *, int *, double *,
-	    double *, int *);
-int dlaset_(char *,int *,int *,double *,double *,double *a,int *);
-double dlamch_(char *);
-double dlansy_(char *, char *, int *, double *, int *, double *);
-int dlacpy_(char *, int *, int *, double *, int *, double *, int *);
-int dorgqr_(int *, int *, int *, double *, int *, double *, 
-	    double *, int *, int *);
-int dormqr_(char *, char *, int *, int *, int *, double *, int *,
-	    double *, double *, int *, double *, int *, int *);
-
-long int lsame_(char *, char *);
-
-int zpotrf_(char *uplo, int *n, double2 *a, int *lda, int *info);
-int zgeqrf_(int*, int*, double2 *, int*, double2 *, double2 *,
-	    int *, int *);
-int zlarft_(char *, char *, int *, int *, double2 *, int *, 
-	    double2 *, double2 *, int *);
-int zgetrf_(int *, int *, double2 *, int *, int *, int *);
-int zlaswp_(int *, double2 *, int *, int *, int *, int *, int *);
-double zlange_(char *, int *, int *, double2 *, int *, double *);
-int ztrmm_(char *, char *, char *, char *, int *, int *, 
-	   double2 *, double2 *, int *, double2 *,int *);
-void ztrsm_(char *, char *, char *, char *, int *, int *, 
-	    double2 *, double2 *, int *, double2 *,int*);
-int dsgesv_( int *, int *, double *, int *, int *, double *, int *, 
-	     double *, int *, double *, float *, int *, int *);
-void zaxpy_(int *, double2 *, double2 *, int *, double2 *, int *);
-void zherk_(char *, char *, int *, int *, double *,
-	    double2 *, int *, double *, double2 *, int *);
-double dsymm_(char *,char*,int *,int *,double *,double *,int *,
-	      double *,int *,double *,double *,int *);
+/* ------------------------------------------------------------
+ *   -- MAGMA function definitions
+ * --------------------------------------------------------- */
+void magma_xerbla(const char *name, magma_int_t *info);
 
 #ifdef __cplusplus
 }

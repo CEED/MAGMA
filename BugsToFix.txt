@@ -1,0 +1,149 @@
+ --------- General:
+   - Mixed precision routines shouldn't be called all [zc|ds]XXXX and not [cz|sd]XXXX ?
+
+--------- Mordor8 / Cuda 3.1 / MKL : 
+          Problem in result precision with testing_sgeqrs_gpu 
+
+  % ./testing_sgeqrs_gpu 
+device 0: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
+device 1: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
+device 2: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
+device 3: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
+
+Usage: 
+  testing_sgeqrs_gpu -nrhs 3  -M 1024  -N 1024
+
+
+                                         || b-Ax || / ||A||
+  M     N    CPU GFlop/s   GPU GFlop/s      GPU      CPU    
+============================================================
+ 1024  1024      8.9         20.0       7.08e-02   6.55e-07
+ 2048  2048     10.0         88.8       5.31e-02   1.67e-06
+ 3072  3072     11.6        138.1       4.24e-02   4.98e-07
+ 4032  4032     12.8        189.6       3.80e-02   1.06e-05
+
+* I think this is resolved now. Function magma_sormqr_gpu
+  was declared in sorqrs_gpu with the wrong interface and everything
+  was getting messed up. Probably there are other magma functions
+  that were not originally in the .h files and we missed to give
+  them the correct interfaces when called (but in the files with
+  the sources they are with the new interface). Now we get:
+
+  [tomov@cumin testing]$ ./testing_sgeqrs_gpu
+  device 0: GeForce GTX 280, 1296.0 MHz clock, 1023.8 MB memory
+  device 1: Quadro NVS 290, 918.0 MHz clock, 255.3 MB memory
+
+  Usage: 
+    testing_sgeqrs_gpu -nrhs 3  -M 1024  -N 1024
+
+                                         ||b-Ax|| / (N||A||)
+  M     N    CPU GFlop/s   GPU GFlop/s      GPU      CPU    
+============================================================
+ 1024  1024     38.1         47.4       1.33e-09   6.63e-10
+ 2048  2048     60.3        117.8       2.27e-09   7.67e-10
+ 3072  3072     80.0        177.0       7.17e-10   1.92e-10
+ 4032  4032     91.5        218.5       6.49e-09   3.00e-09
+ 5184  5184     97.1        243.6       6.57e-10   2.05e-10
+ 6016  6016     97.9        253.8       9.45e-10   2.68e-10
+ 7040  7040     99.7        263.3       1.86e-09   9.22e-10
+ 8064  8064    101.0        269.9       1.68e-09   6.96e-10
+ 9088  9088    101.5        275.4       1.37e-09   4.61e-10
+10112 10112    101.7        279.6       1.32e-09   2.73e-10
+
+  I scaled also with N. Is this the usual scaling?
+
+--------- Mordor8 / Cuda 3.1 / MKL : 
+          Problem in result precision with testing_sgeqrf_gpu 
+
+% ./testing_sgeqrf_gpu 
+device 0: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
+device 1: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
+device 2: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
+device 3: Tesla T10 Processor, 1440.0 MHz clock, 4095.8 MB memory
+
+Usage: 
+  testing_sgeqrf_gpu -M 1024 -N 1024
+
+
+
+  M     N   CPU GFlop/s   GPU GFlop/s    ||R||_F / ||A||_F
+==========================================================
+  480   480    9.36          15.13        9.586813e-07
+  576   576    9.46          19.99        1.297000e-06
+  672   672    9.91          23.70        1.177226e-06
+  768   768    8.10          29.30        4.734992e-06
+  864   864    9.72          34.37        1.372392e-04
+  960   960    9.85          38.99        1.074982e-06
+ 1056  1056    9.77          44.19        1.099405e-06
+
+* This is fine on cumin / cuda 2.3 / MKL 
+  864   864   36.23          45.20        1.118333e-06
+
+
+
+I'm seeing the following strange behavior on ig:
+
+
+horton:ig /mnt/scratch/horton/magma/sc_release/testing> ./testing_dsposv_gpu                                                <-  9:52AM
+device 0: GeForce GTX 480, 1401.0 MHz clock, 1535.6 MB memory
+device 1: Tesla C870, 1350.0 MHz clock, 1535.8 MB memory
+device 2: Tesla C870, 1350.0 MHz clock, 1535.8 MB memory
+
+Usage: 
+  testing_dsposv_gpu -nrhs 1 -N 1024
+
+Epsilon(double): 1.110223e-16
+Epsilon(single): 5.960464e-08
+
+  N   DP-Factor  DP-Solve  SP-Factor  SP-Solve  MP-Solve  ||b-Ax||/||A||  NumIter
+==================================================================================
+ 1024   56.20     33.29     35.40      32.27       9.14     1.778652e-18      2
+ 2048   67.54     54.19    137.42     123.42      89.83     1.445694e-18      2
+ 3072   92.42     79.25    280.85     257.12     197.74     1.021926e-18      2
+ 4032  3208.69    663.92    376.11     348.78     281.62     8.017330e-19      2
+ 5184  3274.46    886.74    455.42     431.95     367.43     9.517764e-19      2
+ 6016  4817.23    1156.95    490.98     471.49     409.51     7.773586e-19      2
+ 7040  6946.69    1487.62    541.02     522.67     461.70     7.342018e-19      2
+ 7520  8150.22    1646.49    562.97     545.76     528.27     nan      0
+ 8064  9797.58    1847.85    576.66     559.65     501.49     7.210256e-19      2
+ 8192  10097.26    1894.09    582.43     565.59     507.61     7.055070e-19      2
+
+
+Keeneland has bad results for testing_dsgesv_gpu, testing_zcgesv_gpu, and
+testing_zgesv_gpu:
+
+[mhorton@kid079 testing]$ ./testing_dsgesv_gpu -N 1024
+device 0: Tesla M2070, 1147.0 MHz clock, 5375.4 MB memory
+device 1: Tesla M2070, 1147.0 MHz clock, 5375.4 MB memory
+device 2: Tesla M2070, 1147.0 MHz clock, 5375.4 MB memory
+Epsilon(double): 1.110223e-16
+Epsilon(single): 5.960464e-08
+
+  N   DP-Factor  DP-Solve  SP-Factor  SP-Solve  MP-Solve  ||b-Ax||/||A|| NumIter
+==================================================================================
+ 1024MAGMA Error: On Routine magma_dsgesv argument number -4200595 had an illegal value
+
+[mhorton@kid079 testing]$ ./testing_zcgesv_gpu -N 1024
+device 0: Tesla M2070, 1147.0 MHz clock, 5375.4 MB memory
+device 1: Tesla M2070, 1147.0 MHz clock, 5375.4 MB memory
+device 2: Tesla M2070, 1147.0 MHz clock, 5375.4 MB memory
+Epsilon(double): 1.110223e-16
+Epsilon(single): 5.960464e-08
+
+  N   DP-Factor  DP-Solve  SP-Factor  SP-Solve  MP-Solve  ||b-Ax||/||A|| NumIter
+==================================================================================
+ 1024MAGMA Error: On Routine magma_zcgesv argument number -4200267 had an illegal value
+
+[mhorton@kid079 testing]$ ./testing_zgesv_gpu -N 1024 -nrhs 1
+device 0: Tesla M2070, 1147.0 MHz clock, 5375.4 MB memory
+device 1: Tesla M2070, 1147.0 MHz clock, 5375.4 MB memory
+device 2: Tesla M2070, 1147.0 MHz clock, 5375.4 MB memory
+
+
+  N     NRHS       GPU GFlop/s      || b-Ax || / ||A||
+========================================================
+ 1024     1               7.86        5.850626e-16
+Segmentation fault
+
+
+

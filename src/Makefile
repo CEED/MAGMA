@@ -1,83 +1,75 @@
 #//////////////////////////////////////////////////////////////////////////////
-#   -- MAGMA (version 0.2) --
+#   -- MAGMA (version 1.0) --
 #      Univ. of Tennessee, Knoxville
 #      Univ. of California, Berkeley
 #      Univ. of Colorado, Denver
-#      November 2009
+#      November 2010
 #//////////////////////////////////////////////////////////////////////////////
 
-include ../make.inc
+MAGMA_DIR = ..
+include ../Makefile.internal
 
-    ALLOBJ = spotrf.o \
-             spotrf-v2.o \
-             spotrf_gpu.o \
-             sgeqrf.o \
-             sgeqrf-v2.o \
-             sgeqrf_gpu.o \
-             sgeqrf_gpu-v2.o \
-             sgeqrf_gpu-v3.o \
-             sgeqrs_gpu.o \
-             slarfb.o \
-             sssrfb.o \
-             sgetrf.o \
-             sgetrf_gpu-v2.o \
-             sgetrf_gpu.o \
-             sgetrs_gpu.o \
-             sgehrd.o \
-             slahru.o \
-             slahr2.o \
-             sgeqlf.o \
-             sgelqf-v2.o \
-             sgelqf.o \
-             sdgetrs_gpu.o \
-             \
-             dpotrf.o \
-             dpotrf_gpu.o \
-             dgeqrf.o \
-             dgeqrf_gpu.o \
-             dgeqrf_gpu-v2.o \
-             dgeqrs_gpu.o \
-             dlarfb.o \
-             dgetrf.o \
-             dgetrf_gpu.o \
-             dgetrs_gpu.o \
-             dgehrd.o \
-             dlahru.o \
-             dlahr2.o \
-             dgeqlf.o \
-             dgelqf-v2.o \
-             dgelqf.o \
-             \
-             cpotrf.o \
-             cgeqrf.o \
-             clarfb.o \
-             cgetrf.o \
-             cpotrf_gpu.o \
-             cgeqrf_gpu.o \
-             cgetrf_gpu.o \
-             \
-             zpotrf.o \
-             zgeqrf.o \
-             zlarfb.o \
-             zgetrf.o \
-             zpotrf_gpu.o \
-             zgeqrf_gpu.o \
-             zgetrf_gpu.o \
-             \
-             auxiliary.o \
-             \
-             dsgesv_gpu.o \
-             dsgeqrsv_gpu.o \
-             dsposv_gpu.o \
-             dgemm_gpu.o \
-             sgemm_gpu.o \
-             spotrs_gpu.o \
-             dpotrs_gpu.o \
-             xerbla.o \
-             sgetrf_mine.o \
-             sgetf2_mine.o \
-             dgetrf_mine.o \
-             dgetf2_mine.o \
+INC += -I$(MAGMA_DIR)/control
+
+ZSRC  = zpotrf.cpp	\
+        zpotrf_gpu.cpp	\
+        zpotrs_gpu.cpp	\
+        zposv_gpu.cpp	\
+	\
+        zgetrf.cpp	\
+        zgetrf_gpu.cpp 	\
+        zgetrs_gpu.cpp 	\
+        zgesv_gpu.cpp 	\
+	\
+	zgeqrf.cpp	\
+	zgeqlf.cpp	\
+	zgelqf.cpp	\
+        zungqr.cpp	\
+	zgeqrf_gpu.cpp  \
+	zgeqrf2_gpu.cpp	\
+	zgeqrf3_gpu.cpp \
+	zgeqrs_gpu.cpp	\
+	zgeqrs3_gpu.cpp \
+	zgels_gpu.cpp	\
+	zlarfb_gpu.cpp	\
+        zunmqr_gpu.cpp	\
+        zungqr_gpu.cpp	\
+	\
+	zgebrd.cpp 	\
+	zlabrd_gpu.cpp	\
+	zgehrd.cpp 	\
+        zgehrd2.cpp     \
+        zlahru.cpp 	\
+        zlahr2.cpp 	\
+        zunghr.cpp      \
+        zhetrd.cpp 	\
+        zlatrd.cpp 	\
+        zunmtr.cpp 	\
+        zunmqr.cpp 	\
+        \
+        zgeev.cpp       \
+        dgeev.cpp       \
+        zheevd.cpp      \
+        dsyevd.cpp      \
+        zgesvd.cpp	\
+	dgesvd.cpp	\
+	\
+	zcposv_gpu.cpp	\
+	zcgesv_gpu.cpp	\
+	zcgetrs_gpu.cpp	\
+	zcgeqrsv_gpu.cpp\
+	\
+	zgessm_gpu.cpp	\
+	zssssm_gpu.cpp  \
+	zgetrl_gpu.cpp	\
+	ztstrf_gpu.cpp
+
+CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
+DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
+SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
+
+ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
+ALLOBJ  = $(ALLSRC:.cpp=.o)
 
 all: $(LIBMAGMA)
 
@@ -85,10 +77,12 @@ $(LIBMAGMA): $(ALLOBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
 
-clean:
-	rm -f *.o *~ *.a
-
 .cpp.o:
 	$(CC) $(OPTS) $(INC) -c $< -o $@
-.f.o:
-	$(FORT) $(OPTS) $(INC) -c $< -o $@
+
+clean:
+	rm -f *.o *~ *.linkinfo
+
+cleanall: clean
+	rm -f *.a
+	rm -f $(LIBMAGMA)

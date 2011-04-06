@@ -1,15 +1,16 @@
-This is pdfTeXk, Version 3.141592-1.40.3 (Web2C 7.5.6) (format=latex 2008.12.4)  19 JUL 2009 19:05
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2010.9.10)  19 OCT 2010 15:22
 entering extended mode
+ restricted \write18 enabled.
  %&-line parsing enabled.
 **magma.tex
 (./magma.tex
-LaTeX2e <2005/12/01>
-Babel <v3.8h> and hyphenation patterns for english, usenglishmax, dumylang, noh
+LaTeX2e <2009/09/24>
+Babel <v3.8l> and hyphenation patterns for english, usenglishmax, dumylang, noh
 yphenation, loaded.
 (/usr/share/texmf-texlive/tex/latex/base/book.cls
-Document Class: book 2005/09/16 v1.4f Standard LaTeX document class
+Document Class: book 2007/10/19 v1.4h Standard LaTeX document class
 (/usr/share/texmf-texlive/tex/latex/base/bk10.clo
-File: bk10.clo 2005/09/16 v1.4f Standard LaTeX file (size option)
+File: bk10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 )
 \c@part=\count79
 \c@chapter=\count80
@@ -35,15 +36,15 @@ Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
 \KV@toks@=\toks14
 )
 (/usr/share/texmf-texlive/tex/latex/graphics/graphics.sty
-Package: graphics 2006/02/20 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
 
 (/usr/share/texmf-texlive/tex/latex/graphics/trig.sty
 Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
 )
 (/etc/texmf/tex/latex/config/graphics.cfg
-File: graphics.cfg 2007/01/18 v1.5 graphics configuration of teTeX/TeXLive
+File: graphics.cfg 2009/08/28 v1.8 graphics configuration of TeX Live
 )
-Package graphics Info: Driver file: dvips.def on input line 90.
+Package graphics Info: Driver file: dvips.def on input line 91.
 
 (/usr/share/texmf-texlive/tex/latex/graphics/dvips.def
 File: dvips.def 1999/02/16 v3.0i Driver-dependant file (DPC,SPQR)
@@ -61,7 +62,7 @@ Package: verbatim 2003/08/22 v1.5q LaTeX2e package for verbatim enhancements
 \verbatim@in@stream=\read1
 )
 (/usr/share/texmf-texlive/tex/latex/tools/array.sty
-Package: array 2005/08/23 v2.4b Tabular extension package (FMi)
+Package: array 2008/09/09 v2.4c Tabular extension package (FMi)
 \col@sep=\dimen107
 \extrarowheight=\dimen108
 \NC@list=\toks17
@@ -74,10 +75,11 @@ Package: color 2005/11/14 v1.0j Standard LaTeX Color (DPC)
 (/etc/texmf/tex/latex/config/color.cfg
 File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
 )
-Package color Info: Driver file: dvips.def on input line 130.
+Package color Info: Driver file: pdftex.def on input line 130.
 
-(/usr/share/texmf-texlive/tex/latex/graphics/dvipsnam.def
-File: dvipsnam.def 1999/02/16 v3.0i Driver-dependant file (DPC,SPQR)
+(/usr/share/texmf-texlive/tex/latex/pdftex-def/pdftex.def
+File: pdftex.def 2009/08/25 v0.04m Graphics/color for pdfTeX
+\Gread@gobject=\count88
 ))
 (/usr/share/texmf-texlive/tex/latex/tools/longtable.sty
 Package: longtable 2004/02/01 v4.11 Multi-page Table package (DPC)
@@ -85,16 +87,16 @@ Package: longtable 2004/02/01 v4.11 Multi-page Table package (DPC)
 \LTright=\skip46
 \LTpre=\skip47
 \LTpost=\skip48
-\LTchunksize=\count88
+\LTchunksize=\count89
 \LTcapwidth=\dimen109
 \LT@head=\box26
 \LT@firsthead=\box27
 \LT@foot=\box28
 \LT@lastfoot=\box29
-\LT@cols=\count89
-\LT@rows=\count90
-\c@LT@tables=\count91
-\c@LT@chunks=\count92
+\LT@cols=\count90
+\LT@rows=\count91
+\c@LT@tables=\count92
+\c@LT@chunks=\count93
 \LT@p@ftn=\toks18
 )
 (/usr/share/texmf-texlive/tex/latex/amsmath/amsmath.sty
@@ -117,13 +119,13 @@ Package: amsbsy 1999/11/29 v1.2d
 (/usr/share/texmf-texlive/tex/latex/amsmath/amsopn.sty
 Package: amsopn 1999/12/14 v2.01 operator names
 )
-\inf@bad=\count93
+\inf@bad=\count94
 LaTeX Info: Redefining \frac on input line 211.
-\uproot@=\count94
-\leftroot@=\count95
+\uproot@=\count95
+\leftroot@=\count96
 LaTeX Info: Redefining \overline on input line 307.
-\classnum@=\count96
-\DOTSCASE@=\count97
+\classnum@=\count97
+\DOTSCASE@=\count98
 LaTeX Info: Redefining \ldots on input line 379.
 LaTeX Info: Redefining \dots on input line 382.
 LaTeX Info: Redefining \cdots on input line 467.
@@ -132,15 +134,15 @@ LaTeX Info: Redefining \cdots on input line 467.
 \big@size=\dimen112
 LaTeX Font Info:    Redeclaring font encoding OML on input line 567.
 LaTeX Font Info:    Redeclaring font encoding OMS on input line 568.
-\macc@depth=\count98
-\c@MaxMatrixCols=\count99
+\macc@depth=\count99
+\c@MaxMatrixCols=\count100
 \dotsspace@=\muskip10
-\c@parentequation=\count100
-\dspbrk@lvl=\count101
+\c@parentequation=\count101
+\dspbrk@lvl=\count102
 \tag@help=\toks20
-\row@=\count102
-\column@=\count103
-\maxfields@=\count104
+\row@=\count103
+\column@=\count104
+\maxfields@=\count105
 \andhelp@=\toks21
 \eqnshift@=\dimen113
 \alignsep@=\dimen114
@@ -156,11 +158,11 @@ LaTeX Info: Redefining \[ on input line 2666.
 LaTeX Info: Redefining \] on input line 2667.
 )
 (/usr/share/texmf-texlive/tex/latex/amsfonts/amsfonts.sty
-Package: amsfonts 2001/10/25 v2.2f
+Package: amsfonts 2009/06/22 v3.00 Basic AMSFonts support
 \symAMSa=\mathgroup4
 \symAMSb=\mathgroup5
 LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
-(Font)                  U/euf/m/n --> U/euf/b/n on input line 132.
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 96.
 )
 (/usr/share/texmf-texlive/tex/latex/base/latexsym.sty
 Package: latexsym 1998/08/17 v2.2e Standard LaTeX package (lasy symbols)
@@ -179,7 +181,7 @@ Package: algorithm
 Document Style `algorithm' - floating environment
 (/usr/share/texmf-texlive/tex/latex/float/float.sty
 Package: float 2001/11/08 v1.3d Float enhancements (AL)
-\c@float@type=\count105
+\c@float@type=\count106
 \float@exts=\toks24
 \float@box=\box32
 \@float@everytoks=\toks25
@@ -189,33 +191,33 @@ Package: float 2001/11/08 v1.3d Float enhancements (AL)
 Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
 )
 \@float@every@algorithm=\toks26
-\c@algorithm=\count106
+\c@algorithm=\count107
 ) (./algorithmic.sty
 Package: algorithmic 
 
 Document Style `algorithmic' - environment
 (/usr/share/texmf-texlive/tex/latex/tools/calc.sty
-Package: calc 2005/08/06 v4.2 Infix arithmetic (KKT,FJ)
-\calc@Acount=\count107
-\calc@Bcount=\count108
+Package: calc 2007/08/22 v4.3 Infix arithmetic (KKT,FJ)
+\calc@Acount=\count108
+\calc@Bcount=\count109
 \calc@Adimen=\dimen120
 \calc@Bdimen=\dimen121
 \calc@Askip=\skip52
 \calc@Bskip=\skip53
-LaTeX Info: Redefining \setlength on input line 75.
-LaTeX Info: Redefining \addtolength on input line 76.
-\calc@Ccount=\count109
+LaTeX Info: Redefining \setlength on input line 76.
+LaTeX Info: Redefining \addtolength on input line 77.
+\calc@Ccount=\count110
 \calc@Cskip=\skip54
 )
-\c@ALC@line=\count110
-\c@ALC@rem=\count111
-\c@ALC@depth=\count112
+\c@ALC@line=\count111
+\c@ALC@rem=\count112
+\c@ALC@depth=\count113
 \ALC@tlm=\skip55
 )
-\c@theo=\count113
-\c@defi=\count114
-\c@Algo=\count115
-\c@Remark=\count116
+\c@theo=\count114
+\c@defi=\count115
+\c@Algo=\count116
+\c@Remark=\count117
  (./magma.aux)
 \openout1 = `magma.aux'.
 
@@ -232,6 +234,19 @@ LaTeX Font Info:    ... okay on input line 75.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 75.
 LaTeX Font Info:    ... okay on input line 75.
 
+(/usr/share/texmf-texlive/tex/context/base/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count118
+\scratchdimen=\dimen122
+\scratchbox=\box34
+\nofMPsegments=\count119
+\nofMParguments=\count120
+\everyMPshowfont=\toks27
+\MPscratchCnt=\count121
+\MPscratchDim=\dimen123
+\MPnumerator=\count122
+\everyMPtoPDFconversion=\toks28
+)
 
 ! LaTeX Error: There's no line here to end.
 
@@ -241,1357 +256,19 @@ Type  H <return>  for immediate help.
                                                   
 l.77 \maketitle
                
-? 
-! Missing number, treated as zero.
-<to be read again> 
-                   \vrule 
-l.77 \maketitle
-               
-? 
-! Illegal unit of measure (pt inserted).
-<to be read again> 
-                   \vrule 
-l.77 \maketitle
-               
-? 
-LaTeX Font Info:    Try loading font information for U+msa on input line 77.
-(/usr/share/texmf-texlive/tex/latex/amsfonts/umsa.fd
-File: umsa.fd 2002/01/19 v2.2g AMS font definitions
-)
-LaTeX Font Info:    Try loading font information for U+msb on input line 77.
-
-(/usr/share/texmf-texlive/tex/latex/amsfonts/umsb.fd
-File: umsb.fd 2002/01/19 v2.2g AMS font definitions
-)
-LaTeX Font Info:    Try loading font information for U+lasy on input line 77.
-
-(/usr/share/texmf-texlive/tex/latex/base/ulasy.fd
-File: ulasy.fd 1998/08/17 v2.2e LaTeX symbol font definitions
-)
-
-LaTeX Warning: No \author given.
-
-[1
-
-
-] [2] (./magma.toc)
-\tf@toc=\write3
-\openout3 = `magma.toc'.
-
- [3
-
-]
-Chapter 1.
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 161.
-
-(/usr/share/texmf-texlive/tex/latex/base/omscmr.fd
-File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
-)
-LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 161.
- [4
-
-]
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 191--191
-[]    \OT1/cmtt/m/n/10 SGETRF computes an LU factorization of a general M-by-N 
-matrix A[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 196--196
-[]    \OT1/cmtt/m/n/10 where P is a permutation matrix, L is lower triangular w
-ith unit[] 
- []
-
-
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 197--197
-[]    \OT1/cmtt/m/n/10 diagonal elements (lower trapezoidal if m > n), and U is
- upper[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 200--200
-[]    \OT1/cmtt/m/n/10 This is the right-looking Level 3 BLAS version of the al
-gorithm.[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 214--214
-[]            \OT1/cmtt/m/n/10 A = P*L*U; the unit diagonal elements of L are n
-ot stored.[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 216--216
-[]            \OT1/cmtt/m/n/10 Higher performance is achieved if A is in pinned
- memory,[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 220--220
-[]            \OT1/cmtt/m/n/10 The leading dimension of the array A.  LDA >= ma
-x(1,M).[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 223--223
-[]            \OT1/cmtt/m/n/10 The pivot indices; for 1 <= i <= min(M,N), row i
- of the[] 
- []
-
-[5]
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 227--227
-[]            \OT1/cmtt/m/n/10 where NB can be obtained through magma_get_sgetr
-f_nb(M).[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 229--229
-[]            \OT1/cmtt/m/n/10 Higher performance is achieved if WORK is in pin
-ned memory,[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 234--234
-[]            \OT1/cmtt/m/n/10 where NB can be obtained through magma_get_sgetr
-f_nb(M).[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 240--240
-[]            \OT1/cmtt/m/n/10 < 0:  if INFO = -i, the i-th argument had an ill
-egal value[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 241--241
-[]            \OT1/cmtt/m/n/10 > 0:  if INFO = i, U(i,i) is exactly zero. The f
-actorization[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 243--243
-[]                  \OT1/cmtt/m/n/10 singular, and division by zero will occur 
-if it is used[] 
- []
-
-
-Overfull \hbox (53.99652pt too wide) in paragraph at lines 246--246
-[]    \OT1/cmtt/m/n/10 ========================================================
-============= */[] 
- []
-
-[6]
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 279--279
-[]            \OT1/cmtt/m/n/10 On exit, the elements on and above the diagonal 
-of the array[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 280--280
-[]            \OT1/cmtt/m/n/10 contain the min(M,N)-by-N upper trapezoidal matr
-ix R (R is[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 281--281
-[]            \OT1/cmtt/m/n/10 upper triangular if m >= n); the elements below 
-the diagonal,[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 282--282
-[]            \OT1/cmtt/m/n/10 with the array TAU, represent the orthogonal mat
-rix Q as a[] 
- []
-
-
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 283--283
-[]            \OT1/cmtt/m/n/10 product of min(m,n) elementary reflectors (see F
-urther[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 286--286
-[]            \OT1/cmtt/m/n/10 Higher performance is achieved if A is in pinned
- memory,[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 290--290
-[]            \OT1/cmtt/m/n/10 The leading dimension of the array A.  LDA >= ma
-x(1,M).[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 293--293
-[]            \OT1/cmtt/m/n/10 The scalar factors of the elementary reflectors 
-(see Further[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 296--296
-[]    \OT1/cmtt/m/n/10 WORK    (workspace/output) REAL array, dimension (MAX(1,
-LWORK))[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 297--297
-[]            \OT1/cmtt/m/n/10 On exit, if INFO = 0, WORK(1) returns the optima
-l LWORK.[] 
- []
-
-[7]
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 304--304
-[]            \OT1/cmtt/m/n/10 where NB can be obtained through magma_get_sgeqr
-f_nb(M).[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 306--306
-[]            \OT1/cmtt/m/n/10 If LWORK = -1, then a workspace query is assumed
-; the routine[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 307--307
-[]            \OT1/cmtt/m/n/10 only calculates the optimal size of the WORK arr
-ay, returns[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 308--308
-[]            \OT1/cmtt/m/n/10 this value as the first entry of the WORK array,
- and no error[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 311--311
-[]    \OT1/cmtt/m/n/10 DA      (workspace)  REAL array on the GPU, dimension N*
-(M + NB),[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 312--312
-[]            \OT1/cmtt/m/n/10 where NB can be obtained through magma_get_sgeqr
-f_nb(M).[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 317--317
-[]            \OT1/cmtt/m/n/10 < 0:  if INFO = -i, the i-th argument had an ill
-egal value[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 322--322
-[]    \OT1/cmtt/m/n/10 The matrix Q is represented as a product of elementary r
-eflectors[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 331--331
-[]    \OT1/cmtt/m/n/10 v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in
- A(i+1:m,i),[] 
- []
-
-
-Overfull \hbox (53.99652pt too wide) in paragraph at lines 334--334
-[]    \OT1/cmtt/m/n/10 ========================================================
-============= */[] 
- []
-
-[8]
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 353--353
-[]    \OT1/cmtt/m/n/10 SPOTRF computes the Cholesky factorization of a real sym
-metric[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 359--359
-[]    \OT1/cmtt/m/n/10 where U is an upper triangular matrix and L is lower tri
-angular.[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 361--361
-[]    \OT1/cmtt/m/n/10 This is the block version of the algorithm, calling Leve
-l 3 BLAS.[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 374--374
-[]            \OT1/cmtt/m/n/10 On entry, the symmetric matrix A.  If UPLO = 'U'
-, the leading[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 376--376
-[]            \OT1/cmtt/m/n/10 triangular part of the matrix A, and the strictl
-y lower[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 377--377
-[]            \OT1/cmtt/m/n/10 triangular part of A is not referenced.  If UPLO
- = 'L', the[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 378--378
-[]            \OT1/cmtt/m/n/10 leading N-by-N lower triangular part of A contai
-ns the lower[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 379--379
-[]            \OT1/cmtt/m/n/10 triangular part of the matrix A, and the strictl
-y upper[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 382--382
-[]            \OT1/cmtt/m/n/10 On exit, if INFO = 0, the factor U or L from the
- Cholesky[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 385--385
-[]            \OT1/cmtt/m/n/10 Higher performance is achieved if A is in pinned
- memory,[] 
- []
-
-[9]
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 389--389
-[]            \OT1/cmtt/m/n/10 The leading dimension of the array A.  LDA >= ma
-x(1,N).[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 396--396
-[]            \OT1/cmtt/m/n/10 < 0:  if INFO = -i, the i-th argument had an ill
-egal value[] 
- []
-
-
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 397--397
-[]            \OT1/cmtt/m/n/10 > 0:  if INFO = i, the leading minor of order i 
-is not[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 398--398
-[]                  \OT1/cmtt/m/n/10 positive definite, and the factorization c
-ould not be[] 
- []
-
-
-Overfull \hbox (53.99652pt too wide) in paragraph at lines 401--401
-[]    \OT1/cmtt/m/n/10 ========================================================
-============= */[] 
- []
-
-[10]
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 420--420
-[]    \OT1/cmtt/m/n/10 SGETRF computes an LU factorization of a general M-by-N 
-matrix A[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 425--425
-[]    \OT1/cmtt/m/n/10 where P is a permutation matrix, L is lower triangular w
-ith unit[] 
- []
-
-
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 426--426
-[]    \OT1/cmtt/m/n/10 diagonal elements (lower trapezoidal if m > n), and U is
- upper[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 429--429
-[]    \OT1/cmtt/m/n/10 This is the right-looking Level 3 BLAS version of the al
-gorithm.[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 440--440
-[]    \OT1/cmtt/m/n/10 A       (input/output) REAL array on the GPU, dimension 
-(LDA,N) where[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 441--441
-[]            \OT1/cmtt/m/n/10 LDA >= max(M, N)+k1 , k1<32 such that (max(M, N)
-+k1)%32==0.[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 448--448
-[]            \OT1/cmtt/m/n/10 A = P*L*U; the unit diagonal elements of L are n
-ot stored.[] 
- []
-
-
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 449--449
-[]            \OT1/cmtt/m/n/10 The rest of A is considered work space and is ch
-anged.[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 452--452
-[]            \OT1/cmtt/m/n/10 The leading dimension of the array A.  LDA >= ma
-x(1,M).[] 
- []
-
-[11]
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 455--455
-[]            \OT1/cmtt/m/n/10 The pivot indices; for 1 <= i <= min(M,N), row i
- of the[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 459--459
-[]            \OT1/cmtt/m/n/10 where NB can be obtained through magma_get_sgetr
-f_nb(M).[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 461--461
-[]            \OT1/cmtt/m/n/10 Higher performance is achieved if WORK is in pin
-ned memory,[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 466--466
-[]            \OT1/cmtt/m/n/10 < 0:  if INFO = -i, the i-th argument had an ill
-egal value[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 467--467
-[]            \OT1/cmtt/m/n/10 > 0:  if INFO = i, U(i,i) is exactly zero. The f
-actorization[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 469--469
-[]                  \OT1/cmtt/m/n/10 singular, and division by zero will occur 
-if it is used[] 
- []
-
-
-Overfull \hbox (53.99652pt too wide) in paragraph at lines 472--472
-[]    \OT1/cmtt/m/n/10 ========================================================
-============= */[] 
- []
-
-[12]
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 481--481
-[]\OT1/cmtt/m/n/10 magma_sgeqrf_gpu(int *m, int *n, float *a, int  *lda,  float
-  *tau,[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 482--482
-[]                 \OT1/cmtt/m/n/10 float *work, int *lwork, float *dwork, int 
-*info )[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 503--503
-[]    \OT1/cmtt/m/n/10 A       (input/output) REAL array on the GPU, dimension 
-(LDA,N)[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 505--505
-[]            \OT1/cmtt/m/n/10 On exit, the elements on and above the diagonal 
-of the array[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 506--506
-[]            \OT1/cmtt/m/n/10 contain the min(M,N)-by-N upper trapezoidal matr
-ix R (R is[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 507--507
-[]            \OT1/cmtt/m/n/10 upper triangular if m >= n); the elements below 
-the diagonal,[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 508--508
-[]            \OT1/cmtt/m/n/10 with the array TAU, represent the orthogonal mat
-rix Q as a[] 
- []
-
-
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 509--509
-[]            \OT1/cmtt/m/n/10 product of min(m,n) elementary reflectors (see F
-urther[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 513--513
-[]            \OT1/cmtt/m/n/10 The leading dimension of the array A.  LDA >= ma
-x(1,M).[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 516--516
-[]            \OT1/cmtt/m/n/10 The scalar factors of the elementary reflectors 
-(see Further[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 519--519
-[]    \OT1/cmtt/m/n/10 WORK    (workspace/output) REAL array, dimension (MAX(1,
-LWORK))[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 520--520
-[]            \OT1/cmtt/m/n/10 On exit, if INFO = 0, WORK(1) returns the optima
-l LWORK.[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 522--522
-[]            \OT1/cmtt/m/n/10 Higher performance is achieved if A is in pinned
- memory,[] 
- []
-
-[13]
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 527--527
-[]            \OT1/cmtt/m/n/10 where NB can be obtained through magma_get_sgeqr
-f_nb(M).[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 529--529
-[]            \OT1/cmtt/m/n/10 If LWORK = -1, then a workspace query is assumed
-; the routine[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 530--530
-[]            \OT1/cmtt/m/n/10 only calculates the optimal size of the WORK arr
-ay, returns[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 531--531
-[]            \OT1/cmtt/m/n/10 this value as the first entry of the WORK array,
- and no error[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 535--535
-[]            \OT1/cmtt/m/n/10 where NB can be obtained through magma_get_sgeqr
-f_nb(M).[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 539--539
-[]            \OT1/cmtt/m/n/10 < 0:  if INFO = -i, the i-th argument had an ill
-egal value[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 544--544
-[]    \OT1/cmtt/m/n/10 The matrix Q is represented as a product of elementary r
-eflectors[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 553--553
-[]    \OT1/cmtt/m/n/10 v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in
- A(i+1:m,i),[] 
- []
-
-
-Overfull \hbox (53.99652pt too wide) in paragraph at lines 556--556
-[]    \OT1/cmtt/m/n/10 ========================================================
-============= */[] 
- []
-
-[14]
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 575--575
-[]    \OT1/cmtt/m/n/10 SPOTRF computes the Cholesky factorization of a real sym
-metric[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 581--581
-[]    \OT1/cmtt/m/n/10 where U is an upper triangular matrix and L is lower tri
-angular.[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 583--583
-[]    \OT1/cmtt/m/n/10 This is the block version of the algorithm, calling Leve
-l 3 BLAS.[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 595--595
-[]    \OT1/cmtt/m/n/10 A       (input/output) REAL array on the GPU, dimension 
-(LDA,N)[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 596--596
-[]            \OT1/cmtt/m/n/10 On entry, the symmetric matrix A.  If UPLO = 'U'
-, the leading[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 598--598
-[]            \OT1/cmtt/m/n/10 triangular part of the matrix A, and the strictl
-y lower[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 599--599
-[]            \OT1/cmtt/m/n/10 triangular part of A is not referenced.  If UPLO
- = 'L', the[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 600--600
-[]            \OT1/cmtt/m/n/10 leading N-by-N lower triangular part of A contai
-ns the lower[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 601--601
-[]            \OT1/cmtt/m/n/10 triangular part of the matrix A, and the strictl
-y upper[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 604--604
-[]            \OT1/cmtt/m/n/10 On exit, if INFO = 0, the factor U or L from the
- Cholesky[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 608--608
-[]            \OT1/cmtt/m/n/10 The leading dimension of the array A.  LDA >= ma
-x(1,N).[] 
- []
-
-[15]
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 611--611
-[]            \OT1/cmtt/m/n/10 where nb can be obtained through magma_get_spotr
-f_nb(*n)[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 616--616
-[]            \OT1/cmtt/m/n/10 < 0:  if INFO = -i, the i-th argument had an ill
-egal value[] 
- []
-
-
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 617--617
-[]            \OT1/cmtt/m/n/10 > 0:  if INFO = i, the leading minor of order i 
-is not[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 618--618
-[]                  \OT1/cmtt/m/n/10 positive definite, and the factorization c
-ould not be[] 
- []
-
-
-Overfull \hbox (53.99652pt too wide) in paragraph at lines 621--621
-[]    \OT1/cmtt/m/n/10 ========================================================
-============= */[] 
- []
-
-[16]
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 640--640
-[]    \OT1/cmtt/m/n/10 DGETRF computes an LU factorization of a general M-by-N 
-matrix A[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 645--645
-[]    \OT1/cmtt/m/n/10 where P is a permutation matrix, L is lower triangular w
-ith unit[] 
- []
-
-
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 646--646
-[]    \OT1/cmtt/m/n/10 diagonal elements (lower trapezoidal if m > n), and U is
- upper[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 649--649
-[]    \OT1/cmtt/m/n/10 This is the right-looking Level 3 BLAS version of the al
-gorithm.[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 663--663
-[]            \OT1/cmtt/m/n/10 A = P*L*U; the unit diagonal elements of L are n
-ot stored.[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 665--665
-[]            \OT1/cmtt/m/n/10 Higher performance is achieved if A is in pinned
- memory,[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 669--669
-[]            \OT1/cmtt/m/n/10 The leading dimension of the array A.  LDA >= ma
-x(1,M).[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 672--672
-[]            \OT1/cmtt/m/n/10 The pivot indices; for 1 <= i <= min(M,N), row i
- of the[] 
- []
-
-[17]
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 676--676
-[]            \OT1/cmtt/m/n/10 where NB can be obtained through magma_get_sgetr
-f_nb(M).[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 678--678
-[]            \OT1/cmtt/m/n/10 Higher performance is achieved if WORK is in pin
-ned memory,[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 683--683
-[]            \OT1/cmtt/m/n/10 where NB can be obtained through magma_get_sgetr
-f_nb(M).[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 689--689
-[]            \OT1/cmtt/m/n/10 < 0:  if INFO = -i, the i-th argument had an ill
-egal value[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 690--690
-[]            \OT1/cmtt/m/n/10 > 0:  if INFO = i, U(i,i) is exactly zero. The f
-actorization[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 692--692
-[]                  \OT1/cmtt/m/n/10 singular, and division by zero will occur 
-if it is used[] 
- []
-
-
-Overfull \hbox (53.99652pt too wide) in paragraph at lines 695--695
-[]    \OT1/cmtt/m/n/10 ========================================================
-============= */[] 
- []
-
-[18]
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 728--728
-[]            \OT1/cmtt/m/n/10 On exit, the elements on and above the diagonal 
-of the array[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 729--729
-[]            \OT1/cmtt/m/n/10 contain the min(M,N)-by-N upper trapezoidal matr
-ix R (R is[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 730--730
-[]            \OT1/cmtt/m/n/10 upper triangular if m >= n); the elements below 
-the diagonal,[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 731--731
-[]            \OT1/cmtt/m/n/10 with the array TAU, represent the orthogonal mat
-rix Q as a[] 
- []
-
-
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 732--732
-[]            \OT1/cmtt/m/n/10 product of min(m,n) elementary reflectors (see F
-urther[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 735--735
-[]            \OT1/cmtt/m/n/10 Higher performance is achieved if A is in pinned
- memory,[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 739--739
-[]            \OT1/cmtt/m/n/10 The leading dimension of the array A.  LDA >= ma
-x(1,M).[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 742--742
-[]            \OT1/cmtt/m/n/10 The scalar factors of the elementary reflectors 
-(see Further[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 745--745
-[]    \OT1/cmtt/m/n/10 WORK    (workspace/output) DOUBLE array, dimension (MAX(
-1,LWORK))[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 746--746
-[]            \OT1/cmtt/m/n/10 On exit, if INFO = 0, WORK(1) returns the optima
-l LWORK.[] 
- []
-
-[19]
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 753--753
-[]            \OT1/cmtt/m/n/10 where NB can be obtained through magma_get_dgeqr
-f_nb(M).[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 755--755
-[]            \OT1/cmtt/m/n/10 If LWORK = -1, then a workspace query is assumed
-; the routine[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 756--756
-[]            \OT1/cmtt/m/n/10 only calculates the optimal size of the WORK arr
-ay, returns[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 757--757
-[]            \OT1/cmtt/m/n/10 this value as the first entry of the WORK array,
- and no error[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 760--760
-[]    \OT1/cmtt/m/n/10 DA      (workspace)  DOUBLE array on the GPU, dimension 
-N*(M + NB),[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 761--761
-[]            \OT1/cmtt/m/n/10 where NB can be obtained through magma_get_dgeqr
-f_nb(M).[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 766--766
-[]            \OT1/cmtt/m/n/10 < 0:  if INFO = -i, the i-th argument had an ill
-egal value[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 771--771
-[]    \OT1/cmtt/m/n/10 The matrix Q is represented as a product of elementary r
-eflectors[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 780--780
-[]    \OT1/cmtt/m/n/10 v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in
- A(i+1:m,i),[] 
- []
-
-
-Overfull \hbox (53.99652pt too wide) in paragraph at lines 783--783
-[]    \OT1/cmtt/m/n/10 ========================================================
-============= */[] 
- []
-
-[20]
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 792--792
-[]\OT1/cmtt/m/n/10 magma_dpotrf(char *uplo, int *n, double *a, int *lda, double
- *work,[] 
- []
-
-
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 802--802
-[]    \OT1/cmtt/m/n/10 DPOTRF computes the Cholesky factorization of a real sym
-metric[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 808--808
-[]    \OT1/cmtt/m/n/10 where U is an upper triangular matrix and L is lower tri
-angular.[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 810--810
-[]    \OT1/cmtt/m/n/10 This is the block version of the algorithm, calling Leve
-l 3 BLAS.[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 823--823
-[]            \OT1/cmtt/m/n/10 On entry, the symmetric matrix A.  If UPLO = 'U'
-, the leading[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 825--825
-[]            \OT1/cmtt/m/n/10 triangular part of the matrix A, and the strictl
-y lower[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 826--826
-[]            \OT1/cmtt/m/n/10 triangular part of A is not referenced.  If UPLO
- = 'L', the[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 827--827
-[]            \OT1/cmtt/m/n/10 leading N-by-N lower triangular part of A contai
-ns the lower[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 828--828
-[]            \OT1/cmtt/m/n/10 triangular part of the matrix A, and the strictl
-y upper[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 831--831
-[]            \OT1/cmtt/m/n/10 On exit, if INFO = 0, the factor U or L from the
- Cholesky[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 834--834
-[]            \OT1/cmtt/m/n/10 Higher performance is achieved if A is in pinned
- memory,[] 
- []
-
-[21]
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 838--838
-[]            \OT1/cmtt/m/n/10 The leading dimension of the array A.  LDA >= ma
-x(1,N).[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 845--845
-[]            \OT1/cmtt/m/n/10 < 0:  if INFO = -i, the i-th argument had an ill
-egal value[] 
- []
-
-
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 846--846
-[]            \OT1/cmtt/m/n/10 > 0:  if INFO = i, the leading minor of order i 
-is not[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 847--847
-[]                  \OT1/cmtt/m/n/10 positive definite, and the factorization c
-ould not be[] 
- []
-
-
-Overfull \hbox (53.99652pt too wide) in paragraph at lines 850--850
-[]    \OT1/cmtt/m/n/10 ========================================================
-============= */[] 
- []
-
-[22]
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 869--869
-[]    \OT1/cmtt/m/n/10 DGETRF computes an LU factorization of a general M-by-N 
-matrix A[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 874--874
-[]    \OT1/cmtt/m/n/10 where P is a permutation matrix, L is lower triangular w
-ith unit[] 
- []
-
-
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 875--875
-[]    \OT1/cmtt/m/n/10 diagonal elements (lower trapezoidal if m > n), and U is
- upper[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 878--878
-[]    \OT1/cmtt/m/n/10 This is the right-looking Level 3 BLAS version of the al
-gorithm.[] 
- []
-
-
-Overfull \hbox (48.74657pt too wide) in paragraph at lines 889--889
-[]    \OT1/cmtt/m/n/10 A       (input/output) DOUBLE array on the GPU, dimensio
-n (LDA,N) where[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 890--890
-[]            \OT1/cmtt/m/n/10 LDA >= max(M, N)+k1 , k1<32 such that (max(M, N)
-+k1)%32==0.[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 897--897
-[]            \OT1/cmtt/m/n/10 A = P*L*U; the unit diagonal elements of L are n
-ot stored.[] 
- []
-
-
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 898--898
-[]            \OT1/cmtt/m/n/10 The rest of A is considered work space and is ch
-anged.[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 901--901
-[]            \OT1/cmtt/m/n/10 The leading dimension of the array A.  LDA >= ma
-x(1,M).[] 
- []
-
-[23]
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 904--904
-[]            \OT1/cmtt/m/n/10 The pivot indices; for 1 <= i <= min(M,N), row i
- of the[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 908--908
-[]            \OT1/cmtt/m/n/10 where NB can be obtained through magma_get_dgetr
-f_nb(M).[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 910--910
-[]            \OT1/cmtt/m/n/10 Higher performance is achieved if WORK is in pin
-ned memory,[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 915--915
-[]            \OT1/cmtt/m/n/10 < 0:  if INFO = -i, the i-th argument had an ill
-egal value[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 916--916
-[]            \OT1/cmtt/m/n/10 > 0:  if INFO = i, U(i,i) is exactly zero. The f
-actorization[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 918--918
-[]                  \OT1/cmtt/m/n/10 singular, and division by zero will occur 
-if it is used[] 
- []
-
-
-Overfull \hbox (53.99652pt too wide) in paragraph at lines 921--921
-[]    \OT1/cmtt/m/n/10 ========================================================
-============= */[] 
- []
-
-[24]
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 930--930
-[]\OT1/cmtt/m/n/10 magma_dgeqrf_gpu(int *m, int *n, double *a, int  *lda,  doub
-le  *tau,[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 931--931
-[]                 \OT1/cmtt/m/n/10 double *work, int *lwork, double *dwork, in
-t *info )[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 952--952
-[]    \OT1/cmtt/m/n/10 A       (input/output) DOUBLE array on the GPU, dimensio
-n (LDA,N)[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 954--954
-[]            \OT1/cmtt/m/n/10 On exit, the elements on and above the diagonal 
-of the array[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 955--955
-[]            \OT1/cmtt/m/n/10 contain the min(M,N)-by-N upper trapezoidal matr
-ix R (R is[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 956--956
-[]            \OT1/cmtt/m/n/10 upper triangular if m >= n); the elements below 
-the diagonal,[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 957--957
-[]            \OT1/cmtt/m/n/10 with the array TAU, represent the orthogonal mat
-rix Q as a[] 
- []
-
-
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 958--958
-[]            \OT1/cmtt/m/n/10 product of min(m,n) elementary reflectors (see F
-urther[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 962--962
-[]            \OT1/cmtt/m/n/10 The leading dimension of the array A.  LDA >= ma
-x(1,M).[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 965--965
-[]            \OT1/cmtt/m/n/10 The scalar factors of the elementary reflectors 
-(see Further[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 968--968
-[]    \OT1/cmtt/m/n/10 WORK    (workspace/output) DOUBLE array, dimension (MAX(
-1,LWORK))[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 969--969
-[]            \OT1/cmtt/m/n/10 On exit, if INFO = 0, WORK(1) returns the optima
-l LWORK.[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 971--971
-[]            \OT1/cmtt/m/n/10 Higher performance is achieved if A is in pinned
- memory,[] 
- []
-
-[25]
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 976--976
-[]            \OT1/cmtt/m/n/10 where NB can be obtained through magma_get_dgeqr
-f_nb(M).[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 978--978
-[]            \OT1/cmtt/m/n/10 If LWORK = -1, then a workspace query is assumed
-; the routine[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 979--979
-[]            \OT1/cmtt/m/n/10 only calculates the optimal size of the WORK arr
-ay, returns[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 980--980
-[]            \OT1/cmtt/m/n/10 this value as the first entry of the WORK array,
- and no error[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 984--984
-[]            \OT1/cmtt/m/n/10 where NB can be obtained through magma_get_dgeqr
-f_nb(M).[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 988--988
-[]            \OT1/cmtt/m/n/10 < 0:  if INFO = -i, the i-th argument had an ill
-egal value[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 993--993
-[]    \OT1/cmtt/m/n/10 The matrix Q is represented as a product of elementary r
-eflectors[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 1002--1002
-[]    \OT1/cmtt/m/n/10 v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in
- A(i+1:m,i),[] 
- []
-
-
-Overfull \hbox (53.99652pt too wide) in paragraph at lines 1005--1005
-[]    \OT1/cmtt/m/n/10 ========================================================
-============= */[] 
- []
-
-[26]
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 1014--1014
-[]\OT1/cmtt/m/n/10 magma_dpotrf_gpu(char *uplo, int *n, double *a, int *lda, do
-uble *work,[] 
- []
-
-
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 1024--1024
-[]    \OT1/cmtt/m/n/10 DPOTRF computes the Cholesky factorization of a real sym
-metric[] 
- []
-
-
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 1030--1030
-[]    \OT1/cmtt/m/n/10 where U is an upper triangular matrix and L is lower tri
-angular.[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 1032--1032
-[]    \OT1/cmtt/m/n/10 This is the block version of the algorithm, calling Leve
-l 3 BLAS.[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 1044--1044
-[]    \OT1/cmtt/m/n/10 A       (input/output) DOUBLE array on the GPU, dimensio
-n (LDA,N)[] 
- []
-
-
-Overfull \hbox (38.24666pt too wide) in paragraph at lines 1045--1045
-[]            \OT1/cmtt/m/n/10 On entry, the symmetric matrix A.  If UPLO = 'U'
-, the leading[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 1047--1047
-[]            \OT1/cmtt/m/n/10 triangular part of the matrix A, and the strictl
-y lower[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 1048--1048
-[]            \OT1/cmtt/m/n/10 triangular part of A is not referenced.  If UPLO
- = 'L', the[] 
- []
-
-
-Overfull \hbox (32.9967pt too wide) in paragraph at lines 1049--1049
-[]            \OT1/cmtt/m/n/10 leading N-by-N lower triangular part of A contai
-ns the lower[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 1050--1050
-[]            \OT1/cmtt/m/n/10 triangular part of the matrix A, and the strictl
-y upper[] 
- []
-
-
-Overfull \hbox (17.24684pt too wide) in paragraph at lines 1053--1053
-[]            \OT1/cmtt/m/n/10 On exit, if INFO = 0, the factor U or L from the
- Cholesky[] 
- []
-
-
-Overfull \hbox (6.74693pt too wide) in paragraph at lines 1057--1057
-[]            \OT1/cmtt/m/n/10 The leading dimension of the array A.  LDA >= ma
-x(1,N).[] 
- []
-
-[27]
-Overfull \hbox (11.99689pt too wide) in paragraph at lines 1060--1060
-[]            \OT1/cmtt/m/n/10 where nb can be obtained through magma_get_dpotr
-f_nb(*n)[] 
- []
-
-
-Overfull \hbox (22.4968pt too wide) in paragraph at lines 1065--1065
-[]            \OT1/cmtt/m/n/10 < 0:  if INFO = -i, the i-th argument had an ill
-egal value[] 
- []
-
-
-Overfull \hbox (1.49698pt too wide) in paragraph at lines 1066--1066
-[]            \OT1/cmtt/m/n/10 > 0:  if INFO = i, the leading minor of order i 
-is not[] 
- []
-
-
-Overfull \hbox (27.74675pt too wide) in paragraph at lines 1067--1067
-[]                  \OT1/cmtt/m/n/10 positive definite, and the factorization c
-ould not be[] 
- []
-
-
-Overfull \hbox (53.99652pt too wide) in paragraph at lines 1070--1070
-[]    \OT1/cmtt/m/n/10 ========================================================
-============= */[] 
- []
-
-[28]
-Chapter 2.
-[29
-
-] [30]
-Chapter 3.
-LaTeX Font Info:    Try loading font information for OMS+cmtt on input line 118
-1.
-LaTeX Font Info:    No file OMScmtt.fd. on input line 1181.
-
-LaTeX Font Warning: Font shape `OMS/cmtt/m/n' undefined
-(Font)              using `OMS/cmsy/m/n' instead
-(Font)              for symbol `textbraceleft' on input line 1181.
-
-[31
-
-]
-File: sp-cpu.ps Graphic file (type eps)
- <sp-cpu.ps>
-File: sp-gpu.ps Graphic file (type eps)
- <sp-gpu.ps> [32]
-File: dp-cpu.ps Graphic file (type eps)
- <dp-cpu.ps>
-File: dp-gpu.ps Graphic file (type eps)
- <dp-gpu.ps> [33] (./magma.bbl
-[34
-
-]) [35
-
-] (./magma.aux)
-
-LaTeX Font Warning: Some font shapes were not available, defaults substituted.
-
- ) 
+? x
+ 
 Here is how much of TeX's memory you used:
- 2071 strings out of 95087
- 25607 string characters out of 1183278
- 77560 words of memory out of 1500000
- 5188 multiletter control sequences out of 10000+50000
- 18148 words of font info for 76 fonts, out of 1200000 for 2000
+ 2173 strings out of 495061
+ 26611 string characters out of 1182621
+ 79751 words of memory out of 3000000
+ 5345 multiletter control sequences out of 15000+50000
+ 4843 words of font info for 18 fonts, out of 3000000 for 9000
  28 hyphenation exceptions out of 8191
- 32i,8n,23p,223b,280s stack positions out of 5000i,500n,6000p,200000b,5000s
+ 32i,1n,23p,223b,208s stack positions out of 5000i,500n,10000p,200000b,50000s
+No pages of output.
+PDF statistics:
+ 0 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 500000)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
-Output written on magma.dvi (35 pages, 56612 bytes).
