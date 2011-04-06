@@ -315,6 +315,7 @@ subs = {
     ('magma_s','magma_d','magma_c','magma_z'),
     ('magmablas_s','magmablas_d','magmablas_c','magmablas_z'),
     ('magma_get_s','magma_get_d','magma_get_c','magma_get_z'),
+    ('magmaf_s','magmaf_d','magmaf_c','magmaf_z'),
     ('ger','ger','gerc','gerc'),
     ('ger','ger','geru','geru'),
     ('orgtr','orgtr','ungtr','ungtr'),
