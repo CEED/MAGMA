@@ -165,7 +165,7 @@
          integer       :: n
          complex*16    :: a(*)
          integer       :: lda
-         double *s,
+         double precision:: s(*)
          complex*16    :: u(*)
          integer       :: ldu
          complex*16    :: vt(*)
@@ -177,12 +177,12 @@
        end subroutine magmaf_zgesvd
 
        subroutine magmaf_zheevd( jobz, uplo, n, a, lda, w, work, lwork, rwork, lrwork, iwork, liwork, info)
-         character          :: jobz
-         character          :: uplo
+         character     :: jobz
+         character     :: uplo
          integer       :: n
          complex*16    :: a(*)
          integer       :: lda
-         double *w,
+         double precision:: w(*)
          complex*16    :: work(*)
          integer       :: lwork
          double precision:: rwork(*)
@@ -191,8 +191,8 @@
          integer       :: liwork
          integer       :: info
        end subroutine magmaf_zheevd
-#else
 
+#else
        subroutine magmaf_zgeev( jobvl, jobvr, n, a, lda, wr, wi, vl, ldvl, vr, ldvr, work, lwork, info)
          character          :: jobvl
          character          :: jobvr
