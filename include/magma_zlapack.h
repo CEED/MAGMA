@@ -38,6 +38,7 @@ extern "C" {
 #    define blasf77_ztrmm      ztrmm_
 #    define blasf77_ztrmv      ztrmv_
 #    define blasf77_ztrsm      ztrsm_
+#    define blasf77_ztrsv      ztrsv_
 
 #    define lapackf77_zbdsqr   zbdsqr_
 #    define lapackf77_zgebak   zgebak_
@@ -116,6 +117,7 @@ extern "C" {
 #    define blasf77_ztrmm      ztrmm
 #    define blasf77_ztrmv      ztrmv
 #    define blasf77_ztrsm      ztrsm
+#    define blasf77_ztrsv      ztrsv
 
 #    define lapackf77_zbdsqr   zbdsqr
 #    define lapackf77_zgebak   zgebak
@@ -209,8 +211,9 @@ void    blasf77_zsyr2k(const char *, const char *, const int *, const int *, cuD
 void    blasf77_zsyrk( const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *);
 void    blasf77_zswap( int *, cuDoubleComplex *, int *, cuDoubleComplex *, int *);
 void    blasf77_ztrmm( const char *, const char *, const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *,const int *);
-void    blasf77_ztrmv( const char *, const char *, const char*, const int *, cuDoubleComplex*,  const int *, cuDoubleComplex *, const int*);
+void    blasf77_ztrmv( const char *, const char *, const char *, const int *, cuDoubleComplex*,  const int *, cuDoubleComplex *, const int*);
 void    blasf77_ztrsm( const char *, const char *, const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *,const int*);
+void    blasf77_ztrsv( const char *, const char *, const char *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int*);
 
   /*
    * Lapack functions (Alphabetical order)
