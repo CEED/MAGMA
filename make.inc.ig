@@ -30,6 +30,7 @@ ARCHFLAGS = cr
 RANLIB    = ranlib
 
 OPTS      = -O3 -DADD_
+FOPTS     = -O3 -DADD_ -x f95-cpp-input
 NVOPTS    = --compiler-options -fno-strict-aliasing -DUNIX -O3 -DADD_
 LDOPTS    = -fPIC -L/mnt/scratch/sw/intel/11.1.069/lib/intel64 -L/mnt/scratch/sw/intel/11.1.069/mkl/lib/em64t
 

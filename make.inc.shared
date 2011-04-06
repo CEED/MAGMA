@@ -21,6 +21,7 @@
 	RANLIB    = strip
 
 	OPTS      = -DADD_ -O3 -fPIC
+	FOPTS     = -DADD_ -O3 -fPIC -x f95-cpp-input
 	NVOPTS    = -DADD_ --shared --compiler-options '-fPIC' -DUNIX -O3
 	LDOPTS    = -Xlinker -zmuldefs
 
@@ -31,6 +32,6 @@
 	LIBDIR    = -L/home/tomov/intel/mkl/10.0.1.014/lib/em64t \
                     -L$(CUDADIR)/lib64
 	INC       = -I../include -I$(CUDADIR)/include
-	
+
 	LIBMAGMA     = ../lib/libmagma.so
 	LIBMAGMABLAS = ../lib/libmagmablas.so

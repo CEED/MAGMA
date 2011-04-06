@@ -24,6 +24,7 @@
 	RANLIB    = ranlib
 
 	OPTS      = -O3 -DADD_
+	FOPTS     = -O3 -DADD_ -x f95-cpp-input
 	NVOPTS    = -DADD_ --compiler-options -fno-strict-aliasing -DUNIX -O3 
         LDOPTS    = -fPIC
 
@@ -33,6 +34,6 @@
 
 	LIBDIR    = -L/usr/local/cuda/lib 
 	INC       = -I../include -I$(CUDADIR)/include
-	
+
 	LIBMAGMA     = ../lib/libmagma.a
 	LIBMAGMABLAS = ../lib/libmagmablas.a
