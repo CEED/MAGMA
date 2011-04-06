@@ -40,6 +40,7 @@ Included are routines for the following algorithms:
     * Fix problem when __func__ is not present, thanks to Evan Lazar
     * Fix bug with m==n==0 in LU, thanks to Evan Lazar
     * Fix bug on [cz]unmqr, [sd]ormqr functions
+    * Fix error code in testings.h to compile with cuda 4.0
 
  1.0.0RC4 - March 8th, 2011
 
