@@ -1,0 +1,55 @@
+
+             MAGMA Release Notes
+	
+-----------------------------------------------------
+
+MAGMA is intended for a single CUDA enabled NVIDIA GPU.  It supports
+Tesla and Fermi GPUs. For more details see the MAGMA 1.0 presentation.
+
+Included are routines for the following algorithms:
+
+    * LU, QR, and Cholesky factorizations in both real and complex
+      arithmetic (single and double);
+    * Hessenberg, bidiagonal, and tridiagonal reductions in both real
+      and complex arithmetic (single and double);
+    * Linear solvers based on LU, QR, and Cholesky in both real and
+      complex arithmetic (single and double);
+    * Eigen and singular value problem solvers in both real and
+      complex arithmetic (single and double);
+    * Mixed-precision iterative refinement solvers based on LU, QR,
+      and Cholesky in both real and complex arithmetic;
+    * MAGMA BLAS in real arithmetic (single and double), including
+      gemm, gemv, symv, and trsm.
+
+
+ 1.0.0RC5 - April 6th, 2011
+    * Add fortran interface for lapack functions
+    * Add new QR interface on GPU to get the correct A and the T for
+      fast solve
+    * Add [cz]unmtr, [sd]ormtr functions
+    * Add two functions in fortran to compute the offset on device pointers
+          magmaf_[sdcz]off1d( NewPtr, OldPtr, inc, i)
+          magmaf_[sdcz]off2d( NewPtr, OldPtr, lda, i, j)
+        indices are given in Fortran (1 to N)
+    * WARNING: add FOPTS variable to the make.inc to use preprocessing
+      in compilation of Fortran files
+    * WARNING: fix bug with fortran compilers which don;t change the name
+      now fortran prefix is magmaf instead of magma
+    * Small documentation fixes
+    * Fix timing under windows, thanks to Evan Lazar
+    * Fix problem when __func__ is not present, thanks to Evan Lazar
+    * Fix bug with m==n==0 in LU, thanks to Evan Lazar
+    * Fix bug on [cz]unmqr, [sd]ormqr functions
+
+ 1.0.0RC4 - March 8th, 2011
+
+    * Add control directory to group all non computational functions
+    * Integration of the eigenvalues solvers
+    * Clean some f2c code in eigenvalues solvers
+    * Arithmetic consistency: cuDoubleComplex and cuFloatComplex are 
+      the  only types used for complex now.
+    * Consistency of the interface of some functions.
+    * Clean most of the return values in lapack functions
+    * Fix multiple definition of min, max,
+    * Fix headers problem under windows, thanks to Willem Burger
+
