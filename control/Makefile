@@ -42,7 +42,7 @@ $(LIBMAGMA): $(ALLOBJ)
 	$(CC) $(OPTS) $(INC) -c $< -o $@
 
 %.o : %.f90 
-	$(FORT) $(OPTS) $(INC) -c $< -o $@
+	$(FORT) $(FOPTS) $(INC) -c $< -o $@
 
 clean:
 	rm -f *.cu_o *.o *~ *.linkinfo *.mod

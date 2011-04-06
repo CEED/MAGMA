@@ -26,14 +26,14 @@
  * typedef comming from fortran.h file provided in $CUDADIR/src directory
  * it will probably change with future release of cublas when they will use 64bits address
  */
-typedef intptr_t devptr_t;
+typedef int devptr_t;
 
 #define PRECISION_z
 
 #ifdef PGI_FORTRAN
 #define DEVPTR(__ptr) ((cuDoubleComplex*)(__ptr))
 #else
-#define DEVPTR(__ptr) ((cuDoubleComplex*)(*(__ptr)))
+#define DEVPTR(__ptr) ((cuDoubleComplex*)(uintptr_t)(*(__ptr)))
 #endif
 
 
@@ -120,7 +120,7 @@ void MAGMAF_ZGEBRD( magma_int_t *m, magma_int_t *n, cuDoubleComplex *A,
 {
     magma_zgebrd( *m, *n, A, 
                   *lda, d, e,
-                  tauq,  taup, 
+                  tauq, taup, 
                   work, *lwork, info);
 }
     
@@ -133,16 +133,16 @@ void MAGMAF_ZGEHRD2(magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi,
                   work, lwork, info);
 }
     
-void MAGMAF_ZGEHRD( magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi,
-                    cuDoubleComplex *A, magma_int_t *lda, cuDoubleComplex *tau,
-                    cuDoubleComplex *work, magma_int_t *lwork,
-                    cuDoubleComplex *d_T, magma_int_t *info)
-{
-    magma_zgehrd( *n, *ilo, *ihi,
-                  A, *lda, tau,
-                  work, *lwork,
-                  d_T, info);
-}
+// void MAGMAF_ZGEHRD( magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi,
+//                     cuDoubleComplex *A, magma_int_t *lda, cuDoubleComplex *tau,
+//                     cuDoubleComplex *work, magma_int_t *lwork,
+//                     cuDoubleComplex *d_T, magma_int_t *info)
+// {
+//     magma_zgehrd( *n, *ilo, *ihi,
+//                   A, *lda, tau,
+//                   work, *lwork,
+//                   d_T, info);
+// }
 
 void MAGMAF_ZGELQF( magma_int_t *m, magma_int_t *n, 
                     cuDoubleComplex *A,    magma_int_t *lda,   cuDoubleComplex *tau, 
@@ -180,42 +180,43 @@ void MAGMAF_ZGETRF( magma_int_t *m, magma_int_t *n, cuDoubleComplex *A,
                   info);
 }
 
-void MAGMAF_ZLATRD( char *uplo, magma_int_t *n, magma_int_t *nb, cuDoubleComplex *a, 
-                    magma_int_t *lda, double *e, cuDoubleComplex *tau, 
-                    cuDoubleComplex *w, magma_int_t *ldw,
-                    cuDoubleComplex *da, magma_int_t *ldda, 
-                    cuDoubleComplex *dw, magma_int_t *lddw)
-{
-    magma_zlatrd( uplo[0], *n, *nb, a, 
-                  *lda, e, tau, 
-                  w, *ldw,
-                  da, *ldda, 
-                  dw, *lddw);
-}
+// void MAGMAF_ZLATRD( char *uplo, magma_int_t *n, magma_int_t *nb, cuDoubleComplex *a, 
+//                     magma_int_t *lda, double *e, cuDoubleComplex *tau, 
+//                     cuDoubleComplex *w, magma_int_t *ldw,
+//                     cuDoubleComplex *da, magma_int_t *ldda, 
+//                     cuDoubleComplex *dw, magma_int_t *lddw)
+// {
+//     magma_zlatrd( uplo[0], *n, *nb, a, 
+//                   *lda, e, tau, 
+//                   w, *ldw,
+//                   da, *ldda, 
+//                   dw, *lddw);
+// }
 
-void MAGMAF_ZLAHR2( magma_int_t *m, magma_int_t *n, magma_int_t *nb, 
-                    cuDoubleComplex *da, cuDoubleComplex *dv, cuDoubleComplex *a, 
-                    magma_int_t *lda, cuDoubleComplex *tau, cuDoubleComplex *t, 
-                    magma_int_t *ldt, cuDoubleComplex *y, magma_int_t *ldy)
-{
-    magma_zlahr2( *m, *n, *nb, 
-                  da, dv, a, 
-                  *lda, tau, t, 
-                  *ldt, y, *ldy);
-}
+  /* This has nothing to do here, it should be a GPU function */
+// void MAGMAF_ZLAHR2( magma_int_t *m, magma_int_t *n, magma_int_t *nb, 
+//                     cuDoubleComplex *da, cuDoubleComplex *dv, cuDoubleComplex *a, 
+//                     magma_int_t *lda, cuDoubleComplex *tau, cuDoubleComplex *t, 
+//                     magma_int_t *ldt, cuDoubleComplex *y, magma_int_t *ldy)
+// {
+//     magma_zlahr2( *m, *n, *nb, 
+//                   da, dv, a, 
+//                   *lda, tau, t, 
+//                   *ldt, y, *ldy);
+// }
 
-void MAGMAF_ZLAHRU( magma_int_t *m, magma_int_t *n, magma_int_t *nb, 
-                    cuDoubleComplex *a, magma_int_t *lda, 
-                    cuDoubleComplex *da, cuDoubleComplex *y, 
-                    cuDoubleComplex *v, cuDoubleComplex *t, 
-                    cuDoubleComplex *dwork)
-{
-    magma_zlahru( *m, *n, *nb, 
-                  a, *lda, 
-                  da, y, 
-                  v, t, 
-                  dwork);
-}
+// void MAGMAF_ZLAHRU( magma_int_t *m, magma_int_t *n, magma_int_t *nb, 
+//                     cuDoubleComplex *a, magma_int_t *lda, 
+//                     cuDoubleComplex *da, cuDoubleComplex *y, 
+//                     cuDoubleComplex *v, cuDoubleComplex *t, 
+//                     cuDoubleComplex *dwork)
+// {
+//     magma_zlahru( *m, *n, *nb, 
+//                   a, *lda, 
+//                   da, y, 
+//                   v, t, 
+//                   dwork);
+// }
 
 void MAGMAF_ZPOTRF( char *uplo, magma_int_t *n, cuDoubleComplex *A, 
                     magma_int_t *lda, magma_int_t *info)
@@ -235,16 +236,16 @@ void MAGMAF_ZHETRD( char *uplo, magma_int_t *n, cuDoubleComplex *A,
                   info);
 }
 
-void MAGMAF_ZUNGQR( magma_int_t *m, magma_int_t *n, magma_int_t *k,
-                    cuDoubleComplex *a, magma_int_t *lda,
-                    cuDoubleComplex *tau, cuDoubleComplex *dwork,
-                    magma_int_t *nb, magma_int_t *info )
-{
-    magma_zungqr( *m, *n, *k,
-                  a, *lda,
-                  tau, dwork,
-                  *nb, info );
-}
+// void MAGMAF_ZUNGQR( magma_int_t *m, magma_int_t *n, magma_int_t *k,
+//                     cuDoubleComplex *a, magma_int_t *lda,
+//                     cuDoubleComplex *tau, cuDoubleComplex *dwork,
+//                     magma_int_t *nb, magma_int_t *info )
+// {
+//     magma_zungqr( *m, *n, *k,
+//                   a, *lda,
+//                   tau, dwork,
+//                   *nb, info );
+// }
 
 void MAGMAF_ZUNMQR( char *side, char *trans, 
                     magma_int_t *m, magma_int_t *n, magma_int_t *k, 
@@ -276,18 +277,18 @@ void MAGMAF_ZUNMTR( char *side, char *uplo, char *trans,
                   info);
 }
 
-void MAGMAF_ZUNGHR( magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi,
-                    cuDoubleComplex *a, magma_int_t *lda,
-                    cuDoubleComplex *tau,
-                    cuDoubleComplex *dT, magma_int_t *nb,
-                    magma_int_t *info)
-{
-    magma_zunghr( *n, *ilo, *ihi,
-                  a, *lda,
-                  tau,
-                  dT, *nb,
-                  info);
-}
+// void MAGMAF_ZUNGHR( magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi,
+//                     cuDoubleComplex *a, magma_int_t *lda,
+//                     cuDoubleComplex *tau,
+//                     cuDoubleComplex *dT, magma_int_t *nb,
+//                     magma_int_t *info)
+// {
+//     magma_zunghr( *n, *ilo, *ihi,
+//                   a, *lda,
+//                   tau,
+//                   dT, *nb,
+//                   info);
+// }
 
 #if defined(PRECISION_z) || defined(PRECISION_c)
 void MAGMAF_ZGEEV( char *jobvl, char *jobvr, magma_int_t *n,
@@ -323,9 +324,9 @@ void MAGMAF_ZGESVD( char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
 }
     
 void MAGMAF_ZHEEVD( char *jobz, char *uplo, magma_int_t *n,
-                    cuDoubleComplex *a, magma_int_t *lda, double *w,
-                    cuDoubleComplex *work, magma_int_t *lwork,
-                    double *rwork, magma_int_t *lrwork,
+                    cuDoubleComplex *a,     magma_int_t *lda, double *w,
+                    cuDoubleComplex *work,  magma_int_t *lwork,
+                    double          *rwork, magma_int_t *lrwork,
                     magma_int_t *iwork, magma_int_t *liwork, magma_int_t *info)
 {
     magma_zheevd( jobz[0], uplo[0], *n,
@@ -354,7 +355,7 @@ void MAGMAF_ZGEEV( char *jobvl, char *jobvr, magma_int_t *n,
 }
 
 void MAGMAF_ZGESVD( char *jobu, char *jobvt, magma_int_t *m, magma_int_t *n,
-                    cuDoubleComplex *a,    magma_int_t *lda, double *s, 
+                    cuDoubleComplex *a,    magma_int_t *lda, double *s,
                     cuDoubleComplex *u,    magma_int_t *ldu, 
                     cuDoubleComplex *vt,   magma_int_t *ldvt,
                     cuDoubleComplex *work, magma_int_t *lwork,
@@ -452,21 +453,6 @@ void MAGMAF_ZGESV_GPU(  magma_int_t *n, magma_int_t *nrhs,
                       DEVPTR(dB), *lddb, info);
 }
 
-#if defined(MAGMA_WITH_PLASMA)
-void MAGMAF_ZGETRL_GPU( char *storev, magma_int_t *m, magma_int_t *n, magma_int_t *ib,
-                        cuDoubleComplex *hA, magma_int_t *ldha, devptr_t *dA, magma_int_t *ldda,
-                        cuDoubleComplex *hL, magma_int_t *ldhl, devptr_t *dL, magma_int_t *lddl,
-                        magma_int_t *ipiv, 
-                        devptr_t *dwork, magma_int_t *lddwork,
-                        magma_int_t *info)
-{
-    magma_zgetrl_gpu( storev[0], *m, *n, *ib, 
-                      hA, *ldha, DEVPTR(dA), *ldda, 
-                      hL, *ldhl, DEVPTR(dL), *lddl, ipiv,  
-                      DEVPTR(dwork), *lddwork, info);
-}
-#endif
-
 void MAGMAF_ZGETRF_GPU( magma_int_t *m, magma_int_t *n, 
                         devptr_t *dA, magma_int_t *ldda, 
                         magma_int_t *ipiv, magma_int_t *info)
@@ -547,31 +533,13 @@ void MAGMAF_ZSSSSM_GPU( char *storev, magma_int_t *m1, magma_int_t *n1,
                       IPIV, info);
 }
 
-#if defined(MAGMA_WITH_PLASMA)
-void MAGMAF_ZTSTRF_GPU( char *storev, magma_int_t *m, magma_int_t *n, magma_int_t *ib, magma_int_t *nb,
-                        cuDoubleComplex *hU, magma_int_t *ldhu, devptr_t *dU, magma_int_t *lddu, 
-                        cuDoubleComplex *hA, magma_int_t *ldha, devptr_t *dA, magma_int_t *ldda, 
-                        cuDoubleComplex *hL, magma_int_t *ldhl, devptr_t *dL, magma_int_t *lddl,
-                        magma_int_t *ipiv, 
-                        cuDoubleComplex *hwork, magma_int_t *ldhwork, devptr_t *dwork, magma_int_t *lddwork,
-                        magma_int_t *info)
-{
-    magma_ztstrf_gpu( storev[0], *m, *n, *ib, *nb, 
-                      hU,    *ldhu,    DEVPTR(dU),    *lddu,  
-                      hA,    *ldha,    DEVPTR(dA),    *ldda,  
-                      hL,    *ldhl,    DEVPTR(dL),    *lddl, 
-                      ipiv,  
-                      hwork, *ldhwork, DEVPTR(dwork), *lddwork, info);
-}
-#endif
-
 void MAGMAF_ZUNGQR_GPU( magma_int_t *m, magma_int_t *n, magma_int_t *k, 
                         devptr_t *da, magma_int_t *ldda, 
                         cuDoubleComplex *tau, devptr_t *dwork, 
                         magma_int_t *nb, magma_int_t *info )
 {
     magma_zungqr_gpu( *m, *n, *k,  
-                      DEVPTR(da), *ldda,  tau, 
+                      DEVPTR(da), *ldda, tau, 
                       DEVPTR(dwork), *nb, info );
 }
 
