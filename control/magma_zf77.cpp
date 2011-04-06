@@ -26,7 +26,7 @@
  * typedef comming from fortran.h file provided in $CUDADIR/src directory
  * it will probably change with future release of cublas when they will use 64bits address
  */
-typedef int devptr_t;
+typedef size_t devptr_t;
 
 #define PRECISION_z
 

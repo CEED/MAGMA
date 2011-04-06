@@ -12,6 +12,7 @@ include ../Makefile.internal
 ifeq ($(PGIFORTRAN), 0)
 ZSRC := $(ZSRC) 		\
 	magma_zf77.cpp		\
+	magma_param.f90		\
 	magma_zfortran.f90	\
 	magma.f90
 else
