@@ -7,6 +7,7 @@
 !
 !  @precisions normal z -> c d s
 !
+#define magma_devptr_t integer(kind=8)
 
       program testing_zgetrf_gpu_f
 
@@ -14,16 +15,16 @@
 
       external cublas_init, cublas_set_matrix, cublas_get_matrix
       external cublas_shutdown, cublas_alloc
-      external zlange, zgemm, zgesv
+      external zlange, zgemm, zgesv, dlamch
 
-      double precision zlange
+      double precision zlange, dlamch
       integer cublas_alloc
 
-      double precision              :: rnumber(2), Anorm, Bnorm, Rnorm 
+      double precision              :: rnumber(2), Anorm, Bnorm, Rnorm, Xnorm 
       double precision, allocatable :: work(:)
       complex*16, allocatable       :: h_A(:), h_B(:), h_X(:)
       complex*16, allocatable       :: h_A2(:)
-      real, dimension(4)            :: devptrA, devptrB
+      magma_devptr_t                :: devptrA, devptrB
       integer,    allocatable       :: ipiv(:)
 
       complex*16                    :: zone, mzone
@@ -79,8 +80,7 @@
       call cublas_set_matrix(n, n, size_of_elt, h_A, lda, devptrA, ldda)
 
 !---- devPtrB = h_B
-      call cublas_set_matrix(n, nrhs, size_of_elt, h_B, lda, devptrB, 
-     $                       ldda)
+      call cublas_set_matrix(n, nrhs, size_of_elt, h_B, lda, devptrB, ldda)
 
 !---- Call magma LU ----------------
       call magma_gettime_f(tstart)
@@ -92,40 +92,42 @@
       end if
 
 !---- Call magma solve -------------
-      call magmaf_zgetrs_gpu('n', n, nrhs, devptrA, ldda, ipiv, devptrB, 
-     $                      ldda, info)
+      call magmaf_zgetrs_gpu('n', n, nrhs, devptrA, ldda, ipiv, devptrB, ldda, info)
 
       if ( info .ne. 0 )  then
          write(*,*) "Info : ", info
       end if
 
 !---- h_X = devptrB
-      call cublas_get_matrix (n, nrhs, size_of_elt, devptrB, ldda, h_X, 
-     $                        lda)
-
-!---- Solve using LAPACK ----------------------------------------------
-c      call zgesv(n, nrhs, h_A2, lda, ipiv, h_X, lda, info)
+      call cublas_get_matrix (n, nrhs, size_of_elt, devptrB, ldda, h_X, lda)
 
 !---- Compare the two results ------
       Anorm = zlange('I', n, n,    h_A, lda, work)
       Bnorm = zlange('I', n, nrhs, h_B, lda, work)
-
-      call zgemm('n', 'n', n,  nrhs, n, zone, h_A, lda, h_X, lda,
-     $           mzone, h_B, lda)
+      Xnorm = zlange('I', n, nrhs, h_X, lda, work)
+      call zgemm('n', 'n', n,  nrhs, n, zone, h_A, lda, h_X, lda, mzone, h_B, lda)
       Rnorm = zlange('I', n, nrhs, h_B, lda, work)
 
       write(*,*)
       write(*,*  ) 'Solving A x = b using LU factorization:'
       write(*,105) '  || A || = ', Anorm
       write(*,105) '  || b || = ', Bnorm
-      write(*,105) '  || b - A x || / (||A|| ||b||) = ', 
-     $                Rnorm/(Anorm*Bnorm)
+      write(*,105) '  || x || = ', Xnorm
+      write(*,105) '  || b - A x || = ', Rnorm
 
       flops = 2. * n * n * n / 3.  
       call magma_gettimervalue_f(tstart, tend, t)
 
       write(*,*)   '  Gflops  = ',  flops / t / 1e6
       write(*,*)
+
+      Rnorm = Rnorm / ( (Anorm*Xnorm+Bnorm) * n * dlamch('E') )
+
+      if ( Rnorm > 60. ) then
+         write(*,105) '  Solution is suspicious, ', Rnorm
+      else
+         write(*,105) '  Solution is CORRECT' 
+      end if
 
 !---- Free CPU memory
       deallocate(h_A, h_A2, h_X, h_B, work, ipiv)

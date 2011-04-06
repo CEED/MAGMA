@@ -46,7 +46,8 @@ ifeq ($(FORT), pgfortran)
 	ZSRCF = testing_zgetrf_gpu_f.cuf
 else
 	FOBJ := fortran.o
-	ZSRCF = testing_zgetrf_gpu_f.f
+	ZSRCF = testing_zgetrf_gpu_f.f90	\
+		testing_zgetrf_f.f90
 endif
 
 ZSRC += $(ZSRCF) 
@@ -55,7 +56,7 @@ DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
 SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
 
 ALLSRC  = $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
-ALLOBJF  = $(ALLSRC:.f=.o)
+ALLOBJF  = $(ALLSRC:.f90=.o)
 ALLOBJF := $(ALLOBJF:.cuf=.o)
 ALLOBJ   = $(ALLOBJF:.cpp=.o)
 EXE      = $(ALLOBJ:.o=)
@@ -72,10 +73,10 @@ cleanall: clean
 
 ifeq ($(FORT), pgfortran)
 testing_%.o : testing_%.cuf
-	$(FORT) $(OPTS) $(INC) -c $< -o $@ 
+	$(FORT) $(FOPTS) $(INC) -c $< -o $@ 
 else
-testing_%.o : testing_%.f
-	$(FORT) $(OPTS) $(INC) -c $< -o $@ 
+testing_%.o : testing_%.f90
+	$(FORT) $(FOPTS) $(INC) -c $< -o $@ 
 endif
 
 %.o: %.cpp
