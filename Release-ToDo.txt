@@ -121,9 +121,15 @@ Task  Done      Who       What
 23                         magma module describing the interfaces for use 
                            from fortran 
 ---------------------------------------------------------------------------------
-24                         Fix geev in real arithmetic. The interface in real is 
+24    DONE                 Fix geev in real arithmetic. The interface in real is 
                            different; w has to be replaced by a pair of arguments -
                            'wr', and 'wi'.
+---------------------------------------------------------------------------------
+24-1                       Update interfaces from:
+                                latrd
+                                unmtr
+---------------------------------------------------------------------------------
+24-2                       Add dgesvd function                                                       
 ---------------------------------------------------------------------------------
 25   Ignore (for now)
                Stan        Possible bug in zcgeqrsv_gpu at least on Tesla for
