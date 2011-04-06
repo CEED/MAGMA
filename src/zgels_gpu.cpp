@@ -27,7 +27,7 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
     =======
     Solves the least squares problem
            min || A*X - C ||
-    using the QR factorization A = Q*R computed by ZGEQRF_GPU2.
+    using the QR factorization A = Q*R computed by ZGEQRF_GPU.
 
 
     Arguments
@@ -44,7 +44,7 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
     A       (input) COMPLEX_16 array on the GPU, dimension (LDDA,N)
             The i-th column must contain the vector which defines the
             elementary reflector H(i), for i = 1,2,...,n, as returned by
-            ZGEQRF_GPU2 in the first n columns of its array argument A.
+            ZGEQRF_GPU in the first n columns of its array argument A.
 
     LDDA     (input) INTEGER
             The leading dimension of the array A, LDDA >= M.

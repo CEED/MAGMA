@@ -44,7 +44,7 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     A       (input) COMPLEX_16 array on the GPU, dimension (LDDA,N)
             The i-th column must contain the vector which defines the
             elementary reflector H(i), for i = 1,2,...,n, as returned by
-            ZGEQRF_GPU2 in the first n columns of its array argument A.
+            ZGEQRF_GPU in the first n columns of its array argument A.
 
     LDDA    (input) INTEGER
             The leading dimension of the array A, LDDA >= M.
@@ -126,6 +126,7 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
         return MAGMA_SUCCESS;
     }
 
+    /* B := Q' * B */
     ret = magma_zunmqr_gpu( MagmaLeft, MagmaConjTrans, 
 			    m, nrhs, n,
 			    a_ref(0,0), ldda, tau, 
@@ -134,6 +135,7 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
 	return ret;
     }
 
+    /* Solve R*X = B(1:n,:) */
     lddwork= k;
     if (nb < k)
       dwork = dT+2*lddwork*nb;
