@@ -86,7 +86,9 @@ typedef int devptr_t;
 #define MAGMAF_ZGELS_GPU   MAGMA_GPU_FORTRAN_NAME(zgels,   ZGELS  )
 #define MAGMAF_ZGEQRF_GPU  MAGMA_GPU_FORTRAN_NAME(zgeqrf,  ZGEQRF ) 
 #define MAGMAF_ZGEQRF2_GPU MAGMA_GPU_FORTRAN_NAME(zgeqrf2, ZGEQRF2)
+#define MAGMAF_ZGEQRF3_GPU MAGMA_GPU_FORTRAN_NAME(zgeqrf3, ZGEQRF3)
 #define MAGMAF_ZGEQRS_GPU  MAGMA_GPU_FORTRAN_NAME(zgeqrs,  ZGEQRS ) 
+#define MAGMAF_ZGEQRS3_GPU MAGMA_GPU_FORTRAN_NAME(zgeqrs3, ZGEQRS3) 
 #define MAGMAF_ZGESSM_GPU  MAGMA_GPU_FORTRAN_NAME(zgessm,  ZGESSM ) 
 #define MAGMAF_ZGESV_GPU   MAGMA_GPU_FORTRAN_NAME(zgesv,   ZGESV  )  
 #define MAGMAF_ZGETRL_GPU  MAGMA_GPU_FORTRAN_NAME(zgetrl,  ZGETRL ) 
@@ -416,6 +418,16 @@ void MAGMAF_ZGEQRF2_GPU(magma_int_t *m, magma_int_t *n,
                       tau, info); 
 }
 
+void MAGMAF_ZGEQRF3_GPU(magma_int_t *m, magma_int_t *n, 
+                        devptr_t *dA,  magma_int_t *ldda, 
+                        cuDoubleComplex *tau, devptr_t *dT,
+                        magma_int_t *info)
+{
+    magma_zgeqrf3_gpu(*m, *n,  
+                      DEVPTR(dA),  *ldda,  
+                      tau, DEVPTR(dT), info); 
+}
+
 void MAGMAF_ZGEQRS_GPU( magma_int_t *m, magma_int_t *n, magma_int_t *nrhs, 
                         devptr_t *dA,     magma_int_t *ldda, 
                         cuDoubleComplex *tau,   devptr_t *dT,
@@ -424,6 +436,21 @@ void MAGMAF_ZGEQRS_GPU( magma_int_t *m, magma_int_t *n, magma_int_t *nrhs,
                         magma_int_t *info)
 {
     magma_zgeqrs_gpu( *m, *n, *nrhs,  
+                      DEVPTR(dA),     *ldda,  
+                      tau,
+                      DEVPTR(dT), 
+                      DEVPTR(dB),    *lddb, 
+                      hwork, *lhwork,  info);
+}
+
+void MAGMAF_ZGEQRS3_GPU(magma_int_t *m, magma_int_t *n, magma_int_t *nrhs, 
+                        devptr_t *dA,     magma_int_t *ldda, 
+                        cuDoubleComplex *tau,   devptr_t *dT,
+                        devptr_t *dB,    magma_int_t *lddb,
+                        cuDoubleComplex *hwork, magma_int_t *lhwork, 
+                        magma_int_t *info)
+{
+    magma_zgeqrs3_gpu(*m, *n, *nrhs,  
                       DEVPTR(dA),     *ldda,  
                       tau,
                       DEVPTR(dT), 

@@ -274,6 +274,16 @@
          integer       :: info
        end subroutine magmaf_zgeqrf2_gpu
 
+       subroutine magmaf_zgeqrf3_gpu(m, n, dA, ldda, tau, dT, info)
+         integer       :: m
+         integer       :: n
+         magma_devptr_t:: dA
+         integer       :: ldda
+         complex*16    :: tau(*)
+         magma_devptr_t:: dA
+         integer       :: info
+       end subroutine magmaf_zgeqrf3_gpu
+
        subroutine magmaf_zgeqrs_gpu( m, n, nrhs, dA, ldda, tau, dT, dB, lddb, hwork, lhwork, info)
          integer       :: m
          integer       :: n
@@ -288,6 +298,21 @@
          integer       :: lhwork
          integer       :: info
        end subroutine magmaf_zgeqrs_gpu
+
+       subroutine magmaf_zgeqrs3_gpu( m, n, nrhs, dA, ldda, tau, dT, dB, lddb, hwork, lhwork, info)
+         integer       :: m
+         integer       :: n
+         integer       :: nrhs
+         magma_devptr_t:: dA
+         integer       :: ldda
+         complex*16    :: tau
+         magma_devptr_t:: dT
+         magma_devptr_t:: dB
+         integer       :: lddb
+         complex*16    :: hwork(*)
+         integer       :: lhwork
+         integer       :: info
+       end subroutine magmaf_zgeqrs3_gpu
 
        subroutine magmaf_zgessm_gpu( storev, m, n, k, ib, ipiv, dL1, lddl1, dL,  lddl, dA,  ldda, info)
          character          :: storev
