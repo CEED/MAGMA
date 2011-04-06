@@ -21,7 +21,6 @@
       double precision              :: rnumber(2), Anorm, Bnorm, Rnorm, Xnorm 
       double precision, allocatable :: work(:)
       complex*16, allocatable       :: h_A(:), h_B(:), h_X(:)
-      complex*16, allocatable       :: h_A2(:)
       magma_devptr_t                :: devptrA, devptrB
       integer,    allocatable       :: ipiv(:)
 
@@ -42,7 +41,6 @@
  
 !------ Allocate CPU memory
       allocate(h_A(lda*n))
-      allocate(h_A2(n*n))
       allocate(h_B(lda*nrhs))
       allocate(h_X(lda*nrhs))
       allocate(work(n))
@@ -62,17 +60,16 @@
       endif
 
 !---- Initializa the matrix
-      do i=1,n*n
-        call random_number(rnumber)
-        h_A(i) = rnumber(1)
-        h_A2(i) = h_A(i)
+      do i=1,lda*n
+         call random_number(rnumber)
+         h_A(i) = rnumber(1)
       end do
 
-      do i=1,n*nrhs
+      do i=1,lda*nrhs
         call random_number(rnumber)
         h_B(i) = rnumber(1)
-        h_X(i) = h_B(i)
       end do
+      h_X(:) = h_B(:)
 
 !---- devPtrA = h_A
       call cublas_set_matrix(n, n, size_of_elt, h_A, lda, devptrA, ldda)
@@ -128,7 +125,7 @@
       end if
 
 !---- Free CPU memory
-      deallocate(h_A, h_A2, h_X, h_B, work, ipiv)
+      deallocate(h_A, h_X, h_B, work, ipiv)
 
 !---- Free GPU memory
       call cublas_free(devPtrA)
