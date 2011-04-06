@@ -20,7 +20,7 @@
   if( CUDA_SUCCESS != cuCtxCreate( &context, 0, dev ) ) {		\
     fprintf(stderr, "CUDA: Cannot create the context\n"); exit(-1);	\
   }									\
-  if( CUDA_SUCCESS != cublasInit( ) ) {					\
+  if( CUBLAS_STATUS_SUCCESS != cublasInit( ) ) {                        \
     fprintf(stderr, "CUBLAS: Not initialized\n"); exit(-1);		\
   }									\
   printout_devices( );
@@ -31,33 +31,33 @@
   cublasShutdown();
      
 
-#define TESTING_MALLOC(ptr, type, size)					\
-  ptr = (type*)malloc((size) * sizeof(type));				\
-  if (ptr == 0) {							\
-    fprintf (stderr, "!!!! Malloc failed for: %s\n", #ptr );		\
+#define TESTING_MALLOC(__ptr, __type, __size)                           \
+  __ptr = (__type*)malloc((__size) * sizeof(__type));                   \
+  if (__ptr == 0) {							\
+    fprintf (stderr, "!!!! Malloc failed for: %s\n", #__ptr );		\
     exit(-1);								\
   }
 
-#define TESTING_HOSTALLOC(ptr, type, size)				\
-  if( CUBLAS_STATUS_SUCCESS != cudaMallocHost( (void**)&ptr, (size)*sizeof(type) ) ) { \
-    fprintf (stderr, "!!!! cudaMallocHost failed for: %s\n", #ptr );	\
+#define TESTING_HOSTALLOC(__ptr, __type, __size)				\
+  if( cudaSuccess != cudaMallocHost( (void**)&__ptr, (__size)*sizeof(__type) ) ) { \
+    fprintf (stderr, "!!!! cudaMallocHost failed for: %s\n", #__ptr );	\
     exit(-1);								\
   }
 
-#define TESTING_DEVALLOC(ptr, type, size)				\
-  if( CUBLAS_STATUS_SUCCESS != cublasAlloc( size, sizeof(type), (void**)&ptr) ) { \
-    fprintf (stderr, "!!!! cublasAlloc failed for: %s\n", #ptr );	\
+#define TESTING_DEVALLOC(__ptr, __type, __size)				\
+  if( cudaSuccess != cudaMalloc( (void**)&__ptr, (__size)*sizeof(__type) ) ){ \
+    fprintf (stderr, "!!!! cublasAlloc failed for: %s\n", #__ptr );	\
     exit(-1);								\
   }
 
 
-#define TESTING_FREE(ptr)			\
-  free(ptr);
+#define TESTING_FREE(__ptr)			\
+  free(__ptr);
 
-#define TESTING_HOSTFREE(ptr)			\
-  cudaFreeHost( ptr );
+#define TESTING_HOSTFREE(__ptr)			\
+  cudaFreeHost( __ptr );
 
-#define TESTING_DEVFREE(ptr)			\
-  cublasFree( ptr );
+#define TESTING_DEVFREE(__ptr)			\
+  cudaFree( __ptr );
 
 #endif /* _TESTINGS_H_ */
