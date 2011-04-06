@@ -129,8 +129,8 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
 	inc = -1;
 
         /* Solve A' * X = B. */
-        cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb );
-        cublasZtrsm(MagmaLeft, MagmaLower, MagmaConjTrans, MagmaUnit,    n, nrhs, c_one, dA, ldda, dB, lddb );
+        cublasZtrsm(MagmaLeft, MagmaUpper, trans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb );
+        cublasZtrsm(MagmaLeft, MagmaLower, trans, MagmaUnit,    n, nrhs, c_one, dA, ldda, dB, lddb );
 
         cublasGetMatrix( n, nrhs, sizeof(cuDoubleComplex), dB, lddb, work, n );
         lapackf77_zlaswp(&nrhs, work, &n, &i1, &i2, ipiv, &inc);
