@@ -23,6 +23,7 @@ ZSRC  = zauxiliary.cu	\
 	zpermute-v2.cu	\
 	zswap.cu	\
 	zswapblk.cu	\
+	zswapdblk.cu    \
 	zlacpy.cu	\
 	zlange.cu       \
 	zlanhe.cu	\
