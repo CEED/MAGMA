@@ -68,7 +68,6 @@ magma_zposv_gpu( char uplo, magma_int_t n, magma_int_t nrhs,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================   */
 
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
     magma_int_t ret;
     
     *info = 0 ; 

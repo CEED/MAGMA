@@ -17,7 +17,7 @@
       The upper triangular values are stored in work. 
  */
 void zsplit_diag_block3(int ib, cuDoubleComplex *a, int lda, cuDoubleComplex *work){
-    int i, j, info;
+    int i, j;
     cuDoubleComplex *cola, *colw;
     cuDoubleComplex c_zero = MAGMA_Z_ZERO;
     cuDoubleComplex c_one  = MAGMA_Z_ONE;
@@ -32,7 +32,6 @@ void zsplit_diag_block3(int ib, cuDoubleComplex *a, int lda, cuDoubleComplex *wo
         colw[i] = cola[i];
         cola[i] = c_one;
     }
-    //lapackf77_ztrtri( MagmaUpperStr, MagmaNonUnitStr, &ib, work, &ib, &info);
 }
 
 extern "C" magma_int_t
