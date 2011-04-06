@@ -76,6 +76,9 @@ void   magmablas_zswapblk(char storev,
 			  magma_int_t i1, magma_int_t i2, 
 			  magma_int_t *ipiv, magma_int_t inci, 
 			  magma_int_t offset);
+void magmablas_zswapdblk(magma_int_t n, magma_int_t nb,
+			 cuDoubleComplex *dA1, magma_int_t ldda1, magma_int_t inca1,
+			 cuDoubleComplex *dA2, magma_int_t ldda2, magma_int_t inca2 );
 
   /*
    * Level 2 BLAS
