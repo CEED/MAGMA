@@ -8,7 +8,6 @@
   !   @precisions normal z -> c d s
   !
 
-#define magma_devptr_t integer(kind=8)
 #define PRECISION_z
 
   module magma_zfortran

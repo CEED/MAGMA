@@ -7,8 +7,6 @@
 !
 !  @precisions normal z -> c d s
 !
-#define magma_devptr_t integer(kind=8)
-
       program testing_zgetrf_gpu_f
 
       use magma
