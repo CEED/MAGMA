@@ -120,9 +120,14 @@ magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs,
     cublasGetMatrix( n, nrhs, sizeof(cuDoubleComplex), dB, lddb, work, n);
     lapackf77_zlaswp(&nrhs, work, &n, &i1, &i2, ipiv, &inc);
     cublasSetMatrix( n, nrhs, sizeof(cuDoubleComplex), work, n, dB, lddb);
-    
-    cublasZtrsm(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit,    n, nrhs, c_one, dA, ldda, dB, lddb );
-    cublasZtrsm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb );
+
+    if (nrhs == 1) {
+        cublasZtrsv(MagmaLower, MagmaNoTrans, MagmaUnit,    n, dA, ldda, dB, 1 );
+        cublasZtrsv(MagmaUpper, MagmaNoTrans, MagmaNonUnit, n, dA, ldda, dB, 1 );
+    } else {
+        cublasZtrsm(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit,    n, nrhs, c_one, dA, ldda, dB, lddb );
+        cublasZtrsm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb );
+    }
 
     free(work);
 

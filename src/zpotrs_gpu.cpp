@@ -89,12 +89,22 @@ magma_zpotrs_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
         return MAGMA_SUCCESS;
 
     if( (uplo=='U') || (uplo=='u') ){
-        cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb);
-        cublasZtrsm(MagmaLeft, MagmaUpper, MagmaNoTrans,   MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb);
+        if ( nrhs == 1) {
+            cublasZtrsv(MagmaUpper, MagmaConjTrans, MagmaNonUnit, n, dA, ldda, dB, 1 );
+            cublasZtrsv(MagmaUpper, MagmaNoTrans,   MagmaNonUnit, n, dA, ldda, dB, 1 );
+        } else {
+            cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb);
+            cublasZtrsm(MagmaLeft, MagmaUpper, MagmaNoTrans,   MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb);
+        }
     }
     else{
-        cublasZtrsm(MagmaLeft, MagmaLower, MagmaNoTrans,   MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb);
-        cublasZtrsm(MagmaLeft, MagmaLower, MagmaConjTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb);
+        if ( nrhs == 1) {
+            cublasZtrsv(MagmaLower, MagmaNoTrans,   MagmaNonUnit, n, dA, ldda, dB, 1 );
+            cublasZtrsv(MagmaLower, MagmaConjTrans, MagmaNonUnit, n, dA, ldda, dB, 1 );
+        } else {
+            cublasZtrsm(MagmaLeft, MagmaLower, MagmaNoTrans,   MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb);
+            cublasZtrsm(MagmaLeft, MagmaLower, MagmaConjTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb);
+        }
     }
 
     return MAGMA_SUCCESS;

@@ -142,8 +142,13 @@ magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
        3. Restore the data format moving data from R back to d_ref 
     */
     magmablas_zswapdblk(k, nb, a_ref(0,0), ldda, 1, d_ref(0), nb, 0);
-    cublasZtrsm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
-		n, nrhs, c_one, a_ref(0,0), ldda, dB, lddb);
+    if ( nrhs == 1 ) {
+        cublasZtrsv(MagmaUpper, MagmaNoTrans, MagmaNonUnit,
+                    n, a_ref(0,0), ldda, dB, 1);
+    } else {
+        cublasZtrsm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
+                    n, nrhs, c_one, a_ref(0,0), ldda, dB, lddb);
+    }
     magmablas_zswapdblk(k, nb, d_ref(0), nb, 0, a_ref(0,0), ldda, 1);
 
     return MAGMA_SUCCESS;

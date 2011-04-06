@@ -94,13 +94,9 @@ magma_zposv_gpu( char uplo, magma_int_t n, magma_int_t nrhs,
 	return ret;
     }
 
-    if( (uplo=='U') || (uplo=='u') ){
-        cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb);
-        cublasZtrsm(MagmaLeft, MagmaUpper, MagmaNoTrans,   MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb);
-    }
-    else{
-        cublasZtrsm(MagmaLeft, MagmaLower, MagmaNoTrans,   MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb);
-        cublasZtrsm(MagmaLeft, MagmaLower, MagmaConjTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb);
+    ret = magma_zpotrs_gpu(uplo, n, nrhs, dA, ldda, dB, lddb, info);
+    if ( (ret != MAGMA_SUCCESS) || ( *info != 0 ) ) {
+	return ret;
     }
 
     return MAGMA_SUCCESS;

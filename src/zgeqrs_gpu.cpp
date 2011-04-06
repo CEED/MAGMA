@@ -94,6 +94,7 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex *dwork;
     magma_int_t i, k, lddwork, rows, ib, ret;
+    magma_int_t ione = 1;
 
     magma_int_t nb     = magma_get_zgeqrf_nb(m);
     magma_int_t lwkopt = (m-n+nb)*(nrhs+2*nb);
@@ -145,11 +146,17 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     ib   = n-i;
     rows = m-i;
 
-    blasf77_ztrsm( MagmaLeftStr, MagmaUpperStr, MagmaNoTransStr, MagmaNonUnitStr, 
-                   &ib, &nrhs, 
-                   &c_one, hwork,         &rows, 
-                           hwork+rows*ib, &rows);
-
+    if ( nrhs == 1 ) {
+        blasf77_ztrsv( MagmaUpperStr, MagmaNoTransStr, MagmaNonUnitStr, 
+                       &ib, hwork,         &rows, 
+                            hwork+rows*ib, &ione);
+    } else {
+        blasf77_ztrsm( MagmaLeftStr, MagmaUpperStr, MagmaNoTransStr, MagmaNonUnitStr, 
+                       &ib, &nrhs, 
+                       &c_one, hwork,         &rows, 
+                               hwork+rows*ib, &rows);
+    }
+      
     // update the solution vector
     cublasSetMatrix(ib, nrhs, sizeof(cuDoubleComplex),
                     hwork+rows*ib, rows, dwork+i, lddwork);
