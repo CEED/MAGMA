@@ -409,9 +409,28 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 	  /* Compute X(i+1:m,i) */
 	  i__2 = m - i__;
 	  i__3 = n - i__ + 1;
-	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_one,
-		 &a[i__ + 1 + i__ * a_dim1], &lda, &a[i__ + i__ * a_dim1], &lda,
-		 &c_zero, &x[i__ + 1 + i__ * x_dim1], &c__1);
+
+	  // 1. Send the block reflector  A(i,i+1:n) to the GPU ------
+	  cublasSetVector(i__3, sizeof(cuDoubleComplex),
+			  a + i__   + i__   * a_dim1, lda,
+			  da+(i__-1)+(i__-1)* (ldda), ldda);
+
+	  // 2. Multiply ---------------------------------------------
+	  //cublasZcopy(i__3, da+(i__-1)+(i__-1)*(ldda), ldda,
+          //            dy + 1 + lddy, 1);
+	  cublasZgemv(MagmaNoTrans, i__2, i__3, c_one,
+		      da + (i__-1)+1 + (i__-1) * ldda, ldda,
+		      da + (i__-1)   + (i__-1) * ldda, ldda,
+		      // dy + 1 + lddy, 1,
+		      c_zero,
+		      dx + i__ + 1 + i__ * x_dim1, c__1);
+
+	  // 3. Put the result back ----------------------------------
+	  cudaMemcpy2DAsync( x+i__+1+i__*x_dim1, x_dim1*sizeof(cuDoubleComplex),
+			    dx+i__+1+i__*x_dim1, x_dim1*sizeof(cuDoubleComplex),
+			    sizeof(cuDoubleComplex)*i__2, 1,
+			    cudaMemcpyDeviceToHost,stream[1]);
+
 	  i__2 = n - i__ + 1;
 	  i__3 = i__ - 1;
 	  blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_one, &y[i__ + y_dim1],
@@ -420,13 +439,22 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 	  i__2 = m - i__;
 	  i__3 = i__ - 1;
 	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one,
-		 &a[i__ + 1 + a_dim1], &lda, &x[i__ * x_dim1 + 1], &c__1, &c_one,
-		 &x[i__ + 1 + i__ * x_dim1], &c__1);
+			&a[i__ + 1 + a_dim1], &lda, &x[i__ * x_dim1 + 1], &c__1, &c_zero,
+			f, &c__1);
+
 	  i__2 = i__ - 1;
 	  i__3 = n - i__ + 1;
 	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_one,
 		 &a[i__ * a_dim1 + 1], &lda, &a[i__ + i__ * a_dim1], &lda, &c_zero,
 		 &x[i__ * x_dim1 + 1], &c__1);
+
+	  // 4. Synch to make sure the result is back ----------------
+	  cudaStreamSynchronize(stream[1]);
+	  if (i__2!=0){
+	    i__3 = m - i__;
+	    blasf77_zaxpy(&i__3, &c_one, f,&c__1, &x[i__+1+i__*x_dim1],&c__1);
+	  }
+
 	  i__2 = m - i__;
 	  i__3 = i__ - 1;
 	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one, 
@@ -437,6 +465,9 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 	  i__2 = n - i__ + 1;
 #if defined(PRECISION_z) || defined(PRECISION_c)
 	  lapackf77_zlacgv(&i__2, &a[i__ + i__ * a_dim1], &lda);
+	  cublasSetVector(i__2, sizeof(cuDoubleComplex),
+                          a + i__   + (i__  )* a_dim1, lda,
+                          da+(i__-1)+ (i__-1)*(ldda), ldda);
 #endif
 	  
 	  /* Update A(i+1:m,i) */
@@ -458,7 +489,6 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 	  
 	  /* Generate reflection Q(i) to annihilate A(i+2:m,i) */
 	  i__2 = m - i__;
-	  /* Computing MIN */
 	  i__3 = i__ + 2;
           alpha = a[i__ + 1 + i__ * a_dim1];
 	  lapackf77_zlarfg(&i__2, &alpha,
@@ -469,10 +499,23 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 	  /* Compute Y(i+1:n,i) */
 	  i__2 = m - i__;
 	  i__3 = n - i__;
-	  blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_one, 
-		 &a[i__ + 1 + (i__ + 1) * a_dim1], &lda, 
-		 &a[i__ + 1 + i__ * a_dim1], &c__1, 
-		 &c_zero, &y[i__ + 1 + i__ * y_dim1], &c__1);
+
+	  // 1. Send the block reflector  A(i+1:m,i) to the GPU ------
+	  cublasSetVector(i__2, sizeof(cuDoubleComplex),
+			  a + i__   +1+  i__   * a_dim1, 1,
+			  da+(i__-1)+1+ (i__-1)*(ldda), 1);
+	  // 2. Multiply ---------------------------------------------
+	  cublasZgemv(MagmaConjTrans, i__2, i__3, c_one,
+		      da + (i__-1)+1+ ((i__-1)+1) * ldda, ldda,
+		      da + (i__-1)+1+  (i__-1)    * ldda, c__1,
+		      c_zero, dy + i__ + 1 + i__ * y_dim1, c__1);
+
+	  // 3. Put the result back ----------------------------------
+	  cudaMemcpy2DAsync( y+i__+1+i__*y_dim1, y_dim1*sizeof(cuDoubleComplex),
+			    dy+i__+1+i__*y_dim1, y_dim1*sizeof(cuDoubleComplex),
+			    sizeof(cuDoubleComplex)*i__3, 1,
+			    cudaMemcpyDeviceToHost,stream[1]);
+
 	  i__2 = m - i__;
 	  i__3 = i__ - 1;
 	  blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_one, &a[i__ + 1 + a_dim1], 
@@ -480,13 +523,22 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 		 &y[ i__ * y_dim1 + 1], &c__1);
 	  i__2 = n - i__;
 	  i__3 = i__ - 1;
-	  blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one,
+          blasf77_zgemv("No transpose", &i__2, &i__3, &c_neg_one,
 		 &y[i__ + 1 + y_dim1], &ldy, &y[i__ * y_dim1 + 1], &c__1,
-		 &c_one, &y[i__ + 1 + i__ * y_dim1], &c__1);
+		 &c_zero, f, &c__1);
+
 	  i__2 = m - i__;
 	  blasf77_zgemv(MagmaConjTransStr, &i__2, &i__, &c_one, &x[i__ + 1 + x_dim1],
 		 &ldx, &a[i__ + 1 + i__ * a_dim1], &c__1, &c_zero,
 		 &y[i__ * y_dim1 + 1], &c__1);
+
+	  // 4. Synch to make sure the result is back ----------------
+	  cudaStreamSynchronize(stream[1]);
+	  if (i__3!=0){
+	    i__2 = n - i__;
+	    blasf77_zaxpy(&i__2, &c_one, f,&c__1, &y[i__+1+i__*y_dim1],&c__1);
+	  }
+
 	  i__2 = n - i__;
 	  blasf77_zgemv(MagmaConjTransStr, &i__, &i__2, &c_neg_one,
 		 &a[(i__ + 1) * a_dim1 + 1], &lda, &y[i__ * y_dim1 + 1],
@@ -497,6 +549,9 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 	} else {
           i__2 = n - i__ + 1;
           lapackf77_zlacgv(&i__2, &a[i__ + i__ * a_dim1], &lda);
+	  cublasSetVector(i__2, sizeof(cuDoubleComplex),
+			  a + i__   + (i__  )* a_dim1, lda,
+			  da+(i__-1)+ (i__-1)*(ldda), ldda);
 #endif
 	}
       }
@@ -504,9 +559,6 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
     
     free(f);
     
-    return 0;
-
-    /* End of MAGMA_ZLABRD */
-
+    return MAGMA_SUCCESS;
 } /* zlabrd_ */
 
