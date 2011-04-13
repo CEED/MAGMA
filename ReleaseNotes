@@ -24,8 +24,8 @@ Included are routines for the following algorithms:
 
  1.0.0RC5 - April 6th, 2011
     * Add fortran interface for lapack functions
-    * Add new QR interface on GPU to get the correct A and the T for
-      fast solve
+    * Add new QR version on GPU ([zcsd]geqrf3_gpu) and corresponding
+      LS solver ([zcds]geqrs3_gpu)
     * Add [cz]unmtr, [sd]ormtr functions
     * Add two functions in fortran to compute the offset on device pointers
           magmaf_[sdcz]off1d( NewPtr, OldPtr, inc, i)
@@ -40,6 +40,10 @@ Included are routines for the following algorithms:
     * Fix problem when __func__ is not present, thanks to Evan Lazar
     * Fix bug with m==n==0 in LU, thanks to Evan Lazar
     * Fix bug on [cz]unmqr, [sd]ormqr functions
+    * Fix bug in [zcsd]gebrd; fixes bug in SVD for n>m
+    * Fix bug in [zcsd]geqrs_gpu for multiple RHS
+    * Added functionality - zcgesv_gpu and dsgesv_gpu can now solve also 
+      A' X = B using mixed-precision iterative refinement
     * Fix error code in testings.h to compile with cuda 4.0
 
  1.0.0RC4 - March 8th, 2011
