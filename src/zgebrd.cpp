@@ -143,7 +143,6 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     the vector defining G(i).
     =====================================================================    */
 
-
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
     cuDoubleComplex *da, *dwork;
@@ -276,14 +275,14 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     nrow = m - i;
     ncol = n - i;
 
-    if ( 0 < (n-nx) )
+    if ( 0 < (minmn-nx) )
         cublasGetMatrix(nrow, ncol, sizeof(cuDoubleComplex),
                         dA(i, i), ldda,
                         A( i, i), lda);
 
-    lapackf77_zgebd2( &nrow, &ncol, 
+    lapackf77_zgebrd( &nrow, &ncol, 
                       A(i, i), &lda, d+i, e+i,
-                      tauq+i, taup+i, work, &iinfo);
+                      tauq+i, taup+i, work, &lwork, &iinfo);
     work[0] = ws;
 
     cublasFree(da);
