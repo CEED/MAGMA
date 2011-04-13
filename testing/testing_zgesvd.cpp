@@ -29,12 +29,7 @@
 */
 int main( int argc, char** argv) 
 {
-    cuInit( 0 );
-    cublasStatus status = cublasInit();
-    if (status != CUBLAS_STATUS_SUCCESS) {
-      fprintf (stderr, "!!!! CUBLAS initialization error\n");
-    }
-    printout_devices( );
+    TESTING_CUDA_INIT();
 
     cuDoubleComplex *h_A, *h_R, *U, *VT, *h_work;
     double *S1, *S2;
@@ -68,63 +63,35 @@ int main( int argc, char** argv)
                 printf("  testing_zgesvd -M %d -N %d\n\n", 1024, 1024);
 
 		/* Shutdown */
-		status = cublasShutdown();
-		if (status != CUBLAS_STATUS_SUCCESS) {
-		  fprintf (stderr, "!!!! shutdown error (A)\n");
-		}
-
+		TESTING_CUDA_FINALIZE();
                 exit(1);
             }
     }
     else {
         printf("\nUsage: \n");
         printf("  testing_zgesvd -M %d -N %d\n\n", 1024, 1024);
-        N = size[7];
+        M = N = size[7];
     }
 
     n2  = M * N;
     min_mn = min(M, N);
 
     /* Allocate host memory for the matrix */
-    h_A = (cuDoubleComplex*)malloc(n2 * sizeof(h_A[0]));
-    if (h_A == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (A)\n");
-    }
-    VT = (cuDoubleComplex*)malloc(N*N * sizeof(h_A[0]));
-    if (VT == 0) {
-      fprintf (stderr, "!!!! host memory allocation error (VT)\n");
-    }
-    U = (cuDoubleComplex*)malloc(M * M * sizeof(h_A[0]));
-    if (U == 0) {
-      fprintf (stderr, "!!!! host memory allocation error (U)\n");
-    }
-    
-    S1 = (double*)malloc(min_mn * sizeof(double));
-    if (S1 == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (S1)\n");
-    }
-    S2 = (double*)malloc(min_mn * sizeof(double));
-    if (S2 == 0) {
-      fprintf (stderr, "!!!! host memory allocation error (S2)\n");
-    }
+    TESTING_MALLOC(h_A, cuDoubleComplex,  n2);
+    TESTING_MALLOC( VT, cuDoubleComplex, N*N);
+    TESTING_MALLOC(  U, cuDoubleComplex, M*M);
+    TESTING_MALLOC( S1, double,       min_mn);
+    TESTING_MALLOC( S2, double,       min_mn);
+
 #if defined(PRECISION_z) || defined(PRECISION_c)
-    rwork = (double*)malloc(5 * min_mn * sizeof(double));
-    if (rwork == 0) {
-      fprintf (stderr, "!!!! host memory allocation error (rwork)\n");
-    }
+    TESTING_MALLOC(rwork, double,   5*min_mn);
 #endif
-    cudaMallocHost( (void**)&h_R,  n2*sizeof(cuDoubleComplex) );
-    if (h_R == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (R)\n");
-    }
+    TESTING_HOSTALLOC(h_R, cuDoubleComplex, n2);
 
     magma_int_t nb = 128; // magma_get_zgesvd_nb(N);
     magma_int_t lwork = (2*min_mn + max(M,N))*nb;
 
-    cudaMallocHost( (void**)&h_work, lwork*sizeof(cuDoubleComplex) );
-    if (h_work == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (work)\n");
-    }
+    TESTING_HOSTALLOC(h_work, cuDoubleComplex, lwork);
 
     printf("\n\n");
     printf("  N     CPU Time(s)    GPU Time(s)     ||R||_F / ||A||_F\n");
@@ -205,20 +172,17 @@ int main( int argc, char** argv)
     }
 
     /* Memory clean up */
-    free(h_A);
-    free(VT);
-    free(S1);
-    free(S2);
+    TESTING_FREE(       h_A);
+    TESTING_FREE(        VT);
+    TESTING_FREE(        S1);
+    TESTING_FREE(        S2);
 #if defined(PRECISION_z) || defined(PRECISION_c)
-    free(rwork);
+    TESTING_FREE(     rwork);
 #endif
-    free(U);
-    cudaFreeHost(h_work);
-    cudaFreeHost(h_R);
+    TESTING_FREE(         U);
+    TESTING_HOSTFREE(h_work);
+    TESTING_HOSTFREE(   h_R);
 
     /* Shutdown */
-    status = cublasShutdown();
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! shutdown error (A)\n");
-    }
+    TESTING_CUDA_FINALIZE();
 }
