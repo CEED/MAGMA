@@ -215,8 +215,8 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
     
     for(i=0;i<NRHS;i++)
     {
-	j = cublasIzamax( N, dX+i*N, 1) ;
-	cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), dX+i*N+j-1, 1, &Xnrmv, 1);
+	j = cublasIzamax( N, dX+i*lddx, 1) ;
+	cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), dX+i*lddx+j-1, 1, &Xnrmv, 1);
 	Xnrm = lapackf77_zlange( "F", &ione, &ione, &Xnrmv, &ione, NULL );
 	
 	j = cublasIzamax ( N, dworkd+i*N, 1 );
@@ -250,7 +250,7 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
 	/* Add the correction (dworkd) to dX and make dworkd = dB.
            This saves going through dworkd a second time (if done with one more kernel). */
 	for(i=0;i<NRHS;i++){
-	    magmablas_zaxpycp(dworkd+i*N, dX+i*N, N, dB+i*N);
+	    magmablas_zaxpycp(dworkd+i*N, dX+i*lddx, N, dB+i*lddb);
 	}
 	
 	//magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dworkd, N);
@@ -266,8 +266,8 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
 	*/
 	for(i=0;i<NRHS;i++)
 	{
-	    j = cublasIzamax( N, dX+i*N, 1) ;
-	    cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), dX+i*N+j-1, 1, &Xnrmv, 1);
+	    j = cublasIzamax( N, dX+i*lddx, 1) ;
+	    cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), dX+i*lddx+j-1, 1, &Xnrmv, 1);
 	    Xnrm = lapackf77_zlange( "F", &ione, &ione, &Xnrmv, &ione, NULL );
 	    
 	    j = cublasIzamax ( N, dworkd+i*N, 1 );
@@ -309,8 +309,8 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
     if( (ret != MAGMA_SUCCESS) || (*info != 0) ){
 	return ret;
     }
-    magmablas_zlacpy( MagmaUpperLower, N, NRHS, dB, lddb, dX, N );
-    ret = magma_zgetrs_gpu( trans, N, NRHS, dA, ldda, IPIV, dX, N, info );
+    magmablas_zlacpy( MagmaUpperLower, N, NRHS, dB, lddb, dX, lddx );
+    ret = magma_zgetrs_gpu( trans, N, NRHS, dA, ldda, IPIV, dX, lddx, info );
     return ret;
 }
 

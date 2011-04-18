@@ -82,6 +82,7 @@ subs = {
     ('magma_get_z','magma_get_d'),
     ('COMPLEX_16','DOUBLE PRECISION'),
     ('COMPLEX','SINGLE PRECISION'),
+    ('complex','real'),
     ('#define PRECISION_z', '#define PRECISION_d'),
     ('#define PRECISION_c', '#define PRECISION_s'),
     ('#undef PRECISION_z', '#undef PRECISION_d'),
