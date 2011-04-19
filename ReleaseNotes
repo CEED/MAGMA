@@ -21,6 +21,8 @@ Included are routines for the following algorithms:
     * MAGMA BLAS in real arithmetic (single and double), including
       gemm, gemv, symv, and trsm.
 
+ 1.0.0 - 
+    * Fix make.inc.mkl (Thanks to ar1309)
 
  1.0.0RC5 - April 6th, 2011
     * Add fortran interface for lapack functions
