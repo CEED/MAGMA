@@ -187,9 +187,8 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
     }
 
     cuDoubleComplex *f = (cuDoubleComplex *)malloc(max(n,m)*sizeof(cuDoubleComplex ));
-    static cudaStream_t stream[2];
-    cudaStreamCreate(&stream[0]);
-    cudaStreamCreate(&stream[1]);
+    static cudaStream_t stream;
+    cudaStreamCreate(&stream);
 
     if (m >= n) {
 
@@ -240,7 +239,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 		cudaMemcpy2DAsync(y+i__+1+i__*y_dim1, y_dim1*sizeof(cuDoubleComplex),
 				  dy+i__+1+i__*y_dim1, y_dim1*sizeof(cuDoubleComplex),
 				  sizeof(cuDoubleComplex)*i__3, 1,
-				  cudaMemcpyDeviceToHost,stream[1]);
+				  cudaMemcpyDeviceToHost,stream);
 		i__2 = m - i__ + 1;
 		i__3 = i__ - 1;
 		blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_one, &a[i__ + a_dim1], 
@@ -259,7 +258,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 		       &y[i__ * y_dim1 + 1], &c__1);
 		
 		// 4. Synch to make sure the result is back ----------------
-		cudaStreamSynchronize(stream[1]);
+		cudaStreamSynchronize(stream);
 
 		if (i__3!=0){
 		  i__2 = n - i__;
@@ -326,7 +325,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 		cudaMemcpy2DAsync(x+i__+1+i__*x_dim1, x_dim1*sizeof(cuDoubleComplex),
 				  dx+i__+1+i__*x_dim1, x_dim1*sizeof(cuDoubleComplex),
 				  sizeof(cuDoubleComplex)*i__2, 1,
-                                  cudaMemcpyDeviceToHost,stream[1]);
+                                  cudaMemcpyDeviceToHost,stream);
 
 		i__2 = n - i__;
 		blasf77_zgemv(MagmaConjTransStr, &i__2, &i__, &c_one, &y[i__ + 1 + y_dim1],
@@ -343,7 +342,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 		       &c_zero, &x[i__ * x_dim1 + 1], &c__1);
 
 		// 4. Synch to make sure the result is back ----------------
-                cudaStreamSynchronize(stream[1]);
+                cudaStreamSynchronize(stream);
 		if (i__!=0){
                   i__2 = m - i__;
                   blasf77_zaxpy(&i__2, &c_one, f,&c__1, &x[i__+1+i__*x_dim1],&c__1);
@@ -429,7 +428,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 	  cudaMemcpy2DAsync( x+i__+1+i__*x_dim1, x_dim1*sizeof(cuDoubleComplex),
 			    dx+i__+1+i__*x_dim1, x_dim1*sizeof(cuDoubleComplex),
 			    sizeof(cuDoubleComplex)*i__2, 1,
-			    cudaMemcpyDeviceToHost,stream[1]);
+			    cudaMemcpyDeviceToHost,stream);
 
 	  i__2 = n - i__ + 1;
 	  i__3 = i__ - 1;
@@ -449,7 +448,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 		 &x[i__ * x_dim1 + 1], &c__1);
 
 	  // 4. Synch to make sure the result is back ----------------
-	  cudaStreamSynchronize(stream[1]);
+	  cudaStreamSynchronize(stream);
 	  if (i__2!=0){
 	    i__3 = m - i__;
 	    blasf77_zaxpy(&i__3, &c_one, f,&c__1, &x[i__+1+i__*x_dim1],&c__1);
@@ -514,7 +513,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 	  cudaMemcpy2DAsync( y+i__+1+i__*y_dim1, y_dim1*sizeof(cuDoubleComplex),
 			    dy+i__+1+i__*y_dim1, y_dim1*sizeof(cuDoubleComplex),
 			    sizeof(cuDoubleComplex)*i__3, 1,
-			    cudaMemcpyDeviceToHost,stream[1]);
+			    cudaMemcpyDeviceToHost,stream);
 
 	  i__2 = m - i__;
 	  i__3 = i__ - 1;
@@ -533,7 +532,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 		 &y[i__ * y_dim1 + 1], &c__1);
 
 	  // 4. Synch to make sure the result is back ----------------
-	  cudaStreamSynchronize(stream[1]);
+	  cudaStreamSynchronize(stream);
 	  if (i__3!=0){
 	    i__2 = n - i__;
 	    blasf77_zaxpy(&i__2, &c_one, f,&c__1, &y[i__+1+i__*y_dim1],&c__1);
@@ -557,6 +556,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
       }
     }
     
+    cudaStreamDestroy(stream);
     free(f);
     
     return MAGMA_SUCCESS;
