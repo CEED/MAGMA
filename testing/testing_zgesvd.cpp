@@ -38,6 +38,8 @@ int main( int argc, char** argv)
 #endif
     double gpu_time, cpu_time;
 
+    magma_int_t checkres;
+
     magma_timestr_t start, end;
 
     /* Matrix size */
@@ -73,6 +75,8 @@ int main( int argc, char** argv)
         M = N = size[7];
     }
 
+    checkres  = getenv("MAGMA_TESTINGS_CHECK") != NULL;
+
     n2  = M * N;
     min_mn = min(M, N);
 
@@ -89,7 +93,7 @@ int main( int argc, char** argv)
     TESTING_HOSTALLOC(h_R, cuDoubleComplex, n2);
 
     magma_int_t nb = 128; // magma_get_zgesvd_nb(N);
-    magma_int_t lwork = (2*min_mn + max(M,N))*nb;
+    magma_int_t lwork = max(5*min_mn, (3*min_mn + max(M,N)))*nb;
 
     TESTING_HOSTALLOC(h_work, cuDoubleComplex, lwork);
 
@@ -134,6 +138,55 @@ int main( int argc, char** argv)
         end = get_current_time();
 
         gpu_time = GetTimerValue(start,end)/1000.;
+
+	if ( checkres ) {
+	  /* =====================================================================
+	     Check the results following the LAPACK's [zcds]drvbd routine.
+	     A is factored as A = U diag(S) VT and the following 4 tests computed:
+             (1)    | A - U diag(S) VT | / ( |A| max(M,N) )
+             (2)    | I - U'U | / ( M )
+             (3)    | I - VT VT' | / ( N )
+             (4)    S contains MNMIN nonnegative values in decreasing order.
+	            (Return 0 if true, 1/ULP if false.)
+	     =================================================================== */
+	  magma_int_t izero    = 0;
+	  double *E, result[4], zero = 0., eps = lapackf77_dlamch( "E" );
+	  
+          #if defined(PRECISION_z) || defined(PRECISION_c)
+	     lapackf77_zbdt01(&M, &N, &izero, h_A, &M,
+			      U, &M, S1, E, VT, &N, h_work, rwork, &result[0]);
+	     if (M != 0 && N != 0) {
+	       lapackf77_zunt01("Columns",&M,&M, U,&M, h_work,&lwork, rwork, &result[1]);
+	       lapackf77_zunt01(   "Rows",&N,&N,VT,&N, h_work,&lwork, rwork, &result[2]);
+	     }
+          #else
+             lapackf77_zbdt01(&M, &N, &izero, h_A, &M,
+			      U, &M, S1, E, VT, &N, h_work,        &result[0]);
+	     if (M != 0 && N != 0) {
+	       lapackf77_zunt01("Columns",&M,&M, U,&M, h_work,&lwork,        &result[1]);
+	       lapackf77_zunt01(   "Rows",&N,&N,VT,&N, h_work,&lwork,        &result[2]);
+	     }
+          #endif
+	  
+	  result[3] = zero;
+	  for(int j=0; j< min_mn-1; j++){
+	    if ( S1[j] < S1[j+1] )
+	      result[3] = 1./eps;
+	    if ( S1[j] < zero )
+	      result[3] = 1./eps;
+	  }
+
+	  if ( min_mn > 1)
+	    if (S1[min_mn-1] < zero)
+	      result[3] = 1./eps;
+
+	  printf("\n SVD test A = U diag(S) VT for M = %d N = %d:\n", M, N);
+	  printf("(1)    | A - U diag(S) VT | / (|A| max(M,N)) = %e\n", result[0]*eps);
+	  printf("(2)    | I -   U'U  | /  M                   = %e\n", result[1]*eps);
+	  printf("(3)    | I - VT VT' | /  N                   = %e\n", result[2]*eps);
+	  printf("(4)    0 if S contains MNMIN nonnegative \n");
+	  printf("         values in decreasing order          = %e\n", result[3]);
+	}
 
         /* =====================================================================
            Performs operation using LAPACK

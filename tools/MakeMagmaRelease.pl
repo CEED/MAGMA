@@ -11,7 +11,8 @@ my $micro;
 #Options par défaut
 my $DIRNAME;
 my $BASENAME;
-my $svn    = "https://icl.cs.utk.edu/svn/magma/branches/sc_release";
+#my $svn    = "https://icl.cs.utk.edu/svn/magma/branches/sc_release";
+my $svn    = "https://icl.cs.utk.edu/svn/magma/trunk";
 #my $svninst= "https://icl.cs.utk.edu/svn/plasma/plasma-installer";
 my $user   = "";
 my $rc = 0;
