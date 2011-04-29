@@ -68,7 +68,7 @@ install: lib dir
 #	cp $(QUARKDIR)/lib/libquark.a              $(prefix)/lib
 #       pkgconfig
 	cat $(MAGMA_DIR)/lib/pkgconfig/magma.pc | \
-	    sed -e s:\__PREFIX+"$(prefix)":     | \
-	    sed -e s:\__LIBEXT+"$(LIBEXT)":       \
+	    sed -e s:\__PREFIX:"$(prefix)":     | \
+	    sed -e s:\__LIBEXT:"$(LIBEXT)":       \
 	    > $(prefix)/lib/pkgconfig/magma.pc
 
