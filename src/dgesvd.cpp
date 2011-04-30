@@ -212,7 +212,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
 
     maxwrk = (magma_int_t)work[0];
     if ( !lquery && (lwork_ < maxwrk) ) {
-        *info = -13;
+      //  *info = -13;
     }
     
     if (*info != 0) {

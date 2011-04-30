@@ -248,7 +248,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
         cublasFree(dA);
     }
     
-    return 0;
+    return MAGMA_SUCCESS;
 } /* magma_zgetrf */
 
 #undef inAT
