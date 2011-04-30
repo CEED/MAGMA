@@ -39,6 +39,7 @@ extern "C" {
 #    define blasf77_ztrmv      ztrmv_
 #    define blasf77_ztrsm      ztrsm_
 #    define blasf77_ztrsv      ztrsv_
+#    define blasf77_zgeru      zgeru_
 
 #    define lapackf77_zbdsqr   zbdsqr_
 #    define lapackf77_zgebak   zgebak_
@@ -119,6 +120,7 @@ extern "C" {
 #    define blasf77_ztrmv      ztrmv
 #    define blasf77_ztrsm      ztrsm
 #    define blasf77_ztrsv      ztrsv
+#    define blasf77_zgeru      zgeru
 
 #    define lapackf77_zbdsqr   zbdsqr
 #    define lapackf77_zgebak   zgebak
@@ -203,6 +205,7 @@ void    blasf77_zdotc( cuDoubleComplex *, int *, cuDoubleComplex *, int *,
 #endif
 void    blasf77_zgemm( const char *, const char *, const int *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *,cuDoubleComplex *, const int *);
 void    blasf77_zgemv( const char *, const int  *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *);
+void    blasf77_zgeru(int *, int *, cuDoubleComplex *, cuDoubleComplex *, int *, cuDoubleComplex *, int *, cuDoubleComplex *, int *);
 void    blasf77_zhemm( const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *,cuDoubleComplex *, const int *);
 void    blasf77_zhemv( const char *, const int  *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *);
 void    blasf77_zher2k(const char *, const char *, const int *, const int *, cuDoubleComplex *, cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, double *,  cuDoubleComplex *, const int *);
