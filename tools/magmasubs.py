@@ -132,6 +132,7 @@ subs = {
     ('scopy','dcopy','ccopy','zcopy'),
     ('strmv','dtrmv','ctrmv','ztrmv'),
     ('sgemv','dgemv','cgemv','zgemv'),
+    ('sger','dger','cgeru','zgeru'),
     ('ssymv','dsymv','csymv','zsymv'),
     ('sscal','dscal','cscal','zscal'),
     ('sscal','dscal','sscal','dscal'),
