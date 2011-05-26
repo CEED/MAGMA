@@ -208,7 +208,20 @@ other kernels (I remeber there was an issue somewhere)
                             I don't see errors now; this is just a note where to look
                             in case we start seeing. 
 ---------------------------------------------------------------------------------
+32                          Still error in trd in comlex?
+                            To check recent changes and see if it ever worked.
+
+                            [tomov@cumin testing]$ ./testing_chetrd -N 3072
+                            device 0: GeForce GTX 280, 1296.0 MHz clock, 1023.8 MB memory
+                            device 1: Quadro NVS 290, 918.0 MHz clock, 255.3 MB memory
+                            testing_chetrd -L|U -N 3072
+
+                            N    CPU GFlop/s    GPU GFlop/s   |A-QHQ'|/N|A|  |I-QQ'|/N 
+                            =============================================================
+                            3072    32.97         39.31       4.635315e-03 3.982124e-08
+---------------------------------------------------------------------------------
                             
+
 
                            Status of src directory 
                            
