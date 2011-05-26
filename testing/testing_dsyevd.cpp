@@ -132,7 +132,7 @@ int main( int argc, char** argv)
              (2)    | I - U'U | / ( N )
              (3)    | S(with U) - S(w/o U) | / | S |
 	     =================================================================== */
-	  double *tau, temp1, temp2, eps = lapackf77_dlamch( "E" );
+	  double *tau, temp1, temp2;
 
 	  lapackf77_dsyt21(&ione, uplo, &N, &izero,
 			   h_A, &N, 
