@@ -50,7 +50,7 @@ int main( int argc, char** argv)
     magma_int_t M = 0, N = 0, n2, lda, ldda, lhwork;
     magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,9984};
 
-    magma_int_t i, info, min_mn, nb;
+    magma_int_t i, info, min_mn;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
 
@@ -85,7 +85,6 @@ int main( int argc, char** argv)
     ldda   = ((M+31)/32)*32;
     n2     = M * N;
     min_mn = min(M, N);
-    nb     = magma_get_zgetrf_nb(min_mn);
 
     /* Allocate host memory for the matrix */
     TESTING_MALLOC(    tau, cuDoubleComplex, min_mn );
