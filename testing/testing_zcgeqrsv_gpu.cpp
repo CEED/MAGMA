@@ -166,7 +166,7 @@ int main( int argc, char** argv)
                        &mzone, h_A, &lda, 
                                h_X, &ldx, 
                        &zone,  h_R, &ldb);
-        Anorm = lapackf77_zlange("f", &N, &N,    h_A, &lda, work);
+        Anorm = lapackf77_zlange("f", &M, &N,    h_A, &lda, work);
         Rnorm = lapackf77_zlange("f", &N, &NRHS, h_R, &ldb, work);
 
         //=====================================================================
