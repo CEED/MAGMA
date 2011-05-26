@@ -23,6 +23,8 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
+#define absv(v1) ((v1)>0? (v1): -(v1))
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing dsyevd
 */
@@ -42,12 +44,14 @@ int main( int argc, char** argv)
     magma_int_t size[8] = {1024,2048,3072,4032,5184,6016,7040,8064};
 
     magma_int_t i, info;
-    magma_int_t ione     = 1;
+    magma_int_t ione     = 1, izero = 0;
     magma_int_t ISEED[4] = {0,0,0,1};
 
     char *uplo = (char*)MagmaLowerStr;
     char *jobz = (char*)MagmaVectorsStr;
 
+    magma_int_t checkres;
+    double result[3], eps = lapackf77_dlamch( "E" );
 
     if (argc != 1){
         for(i = 1; i<argc; i++){
@@ -69,6 +73,8 @@ int main( int argc, char** argv)
         N = size[7];
     }
 
+    checkres  = getenv("MAGMA_TESTINGS_CHECK") != NULL;
+
     n2  = N * N;
 
     /* Allocate host memory for the matrix */
@@ -85,8 +91,8 @@ int main( int argc, char** argv)
     TESTING_MALLOC(    iwork,     magma_int_t, liwork);
     
     printf("\n\n");
-    printf("  N     CPU Time(s)    GPU Time(s)     ||R||_F / ||A||_F\n");
-    printf("==========================================================\n");
+    printf("  N     CPU Time(s)    GPU Time(s) \n");
+    printf("===================================\n");
     for(i=0; i<8; i++){
         if (argc==1){
             N = size[i];
@@ -118,6 +124,40 @@ int main( int argc, char** argv)
 
         gpu_time = GetTimerValue(start,end)/1000.;
 
+	if ( checkres ) {
+          /* =====================================================================
+             Check the results following the LAPACK's [zcds]drvst routine.
+             A is factored as A = U S U' and the following 3 tests computed:
+             (1)    | A - U S U' | / ( |A| N )
+             (2)    | I - U'U | / ( N )
+             (3)    | S(with U) - S(w/o U) | / | S |
+	     =================================================================== */
+	  double *tau, temp1, temp2, eps = lapackf77_dlamch( "E" );
+
+	  lapackf77_dsyt21(&ione, uplo, &N, &izero,
+			   h_A, &N, 
+			   w1, h_work,  
+			   h_R, &N, 
+			   h_R, &N,
+			   tau, h_work, &result[0]);
+
+	  lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
+	  magma_dsyevd('N', uplo[0],
+		       N, h_R, N, w2,
+		       h_work, lwork,
+		       iwork, liwork,
+		       &info);
+	  
+	  temp1 = temp2 = 0;
+	  for(int j=0; j<N; j++){
+	    temp1 = max(temp1, absv(w1[j]));
+	    temp1 = max(temp1, absv(w2[j]));
+	    temp2 = max(temp2, absv(w1[j]-w2[j]));
+	  }
+	  result[2] = temp2 / temp1;
+        }
+
+
         /* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
@@ -134,21 +174,17 @@ int main( int argc, char** argv)
         cpu_time = GetTimerValue(start,end)/1000.;
 
         /* =====================================================================
-           Check the result compared to LAPACK
+           Print execution time
            =================================================================== */
-        double work[1], matnorm = 1., mone = MAGMA_D_NEG_ONE;
-        magma_int_t one = 1;
-
-        matnorm = lapackf77_dlange("f", &N, &one, w1, &N, work);
-        blasf77_daxpy(&N, &mone, w1, &one, w2, &one);
-
-	blasf77_daxpy(&N, &mone, h_A, &one, h_R, &one);
-
-        printf("%5d     %6.2f         %6.2f         %e %e\n",
-               N, cpu_time, gpu_time,
-               lapackf77_dlange("f", &N, &one, w2, &N, work) / matnorm,
-	       lapackf77_dlange("f", &N, &one, h_R, &N, work));
-
+        printf("%5d     %6.2f         %6.2f\n",
+               N, cpu_time, gpu_time);
+	if ( checkres ){
+	  printf("Testing the factorization A = U S U' for correctness:\n");
+	  printf("(1)    | A - U S U' | / (|A| N) = %e\n", result[0]*eps);
+	  printf("(2)    | I -   U'U  | /  N      = %e\n", result[1]*eps);
+	  printf("(3)    | S(w/ U)-S(w/o U)|/ |S| = %e\n\n", result[2]);
+	}
+	
         if (argc != 1)
             break;
     }
