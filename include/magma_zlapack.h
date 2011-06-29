@@ -23,7 +23,11 @@ extern "C" {
 
 #    define blasf77_zaxpy      zaxpy_
 #    define blasf77_zcopy      zcopy_
+#if  defined(PRECISION_z) || defined(PRECISION_c)
+#    define blasf77_zdotc      zdotc 
+#else
 #    define blasf77_zdotc      zdotc_ 
+#endif
 #    define blasf77_zgemm      zgemm_
 #    define blasf77_zgemv      zgemv_
 #    define blasf77_zhemm      zhemm_
