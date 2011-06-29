@@ -208,7 +208,7 @@ other kernels (I remeber there was an issue somewhere)
                             I don't see errors now; this is just a note where to look
                             in case we start seeing. 
 ---------------------------------------------------------------------------------
-32                          Still error in trd in comlex?
+32   DONE         Stan      Still error in trd in comlex?
                             To check recent changes and see if it ever worked.
 
                             [tomov@cumin testing]$ ./testing_chetrd -N 3072
@@ -219,6 +219,8 @@ other kernels (I remeber there was an issue somewhere)
                             N    CPU GFlop/s    GPU GFlop/s   |A-QHQ'|/N|A|  |I-QQ'|/N 
                             =============================================================
                             3072    32.97         39.31       4.635315e-03 3.982124e-08
+
+    * turned out this was an interface problem on how we call z/cdotc
 ---------------------------------------------------------------------------------
                             
 
