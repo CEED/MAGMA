@@ -97,6 +97,7 @@ extern "C" {
 #    define lapackf77_zunmtr   zunmtr_
 
 #    define lapackf77_zbdt01   zbdt01_
+#    define lapackf77_zget22   zget22_
 #    define lapackf77_zhet21   zhet21_
 #    define lapackf77_zhst01   zhst01_
 #    define lapackf77_zqrt02   zqrt02_
@@ -178,6 +179,7 @@ extern "C" {
 #    define lapackf77_zunmtr   zunmtr
 
 #    define lapackf77_zbdt01   zbdt01
+#    define lapackf77_zget22   zget22
 #    define lapackf77_zhet21   zhet21
 #    define lapackf77_zhst01   zhst01
 #    define lapackf77_zqrt02   zqrt02
@@ -302,6 +304,9 @@ void    lapackf77_zunmtr(const char *side, const char *uplo, const char *trans, 
    */
 #if defined(PRECISION_z) || defined(PRECISION_c)
 void    lapackf77_zbdt01(int *m, int *n, int *kd, cuDoubleComplex *A, int *lda, cuDoubleComplex *Q, int *ldq, double *D, double *E, cuDoubleComplex *PT, int *ldpt, cuDoubleComplex *work, double *rwork, double *resid);
+void    lapackf77_zget22(char *transa, char *transe, char *transw, int *n,
+			 cuDoubleComplex *a, int *lda, cuDoubleComplex *e, int *lde, 
+			 cuDoubleComplex *w, cuDoubleComplex *work, double *rwork, double *result);
 void    lapackf77_zhet21(int *itype, const char *uplo, int *n, int *kband, cuDoubleComplex *A, int *lda, double *D, double *E, cuDoubleComplex *U, int *ldu, cuDoubleComplex *V, int *ldv, cuDoubleComplex *TAU, cuDoubleComplex *work, double *rwork, double *result);
 void    lapackf77_zhst01(int *n, int *ilo, int *ihi, cuDoubleComplex *A, int *lda, cuDoubleComplex *H, int *ldh, cuDoubleComplex *Q, int *ldq, cuDoubleComplex *work, int *lwork, double *rwork, double *result);
 void    lapackf77_zstt21(int *n, int *kband, double *AD, double *AE, double *SD, double *SE, cuDoubleComplex *U, int *ldu, cuDoubleComplex *work, double *rwork, double *result);
