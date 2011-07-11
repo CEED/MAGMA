@@ -9,6 +9,7 @@
 include ../../make.inc
 
 SRC = 	zbdt01.f  \
+	zget22.f  \
 	zhet21.f  \
 	zhst01.f  \
 	zunt01.f  \
@@ -17,6 +18,7 @@ SRC = 	zbdt01.f  \
 	zstt21.f  \
 	\
 	cbdt01.f  \
+	cget22.f  \
 	chet21.f  \
 	chst01.f  \
 	cunt01.f  \
@@ -25,6 +27,7 @@ SRC = 	zbdt01.f  \
 	cstt21.f  \
 	\
 	dbdt01.f  \
+	dget22.f  \
 	dsyt21.f  \
 	dhst01.f  \
 	dort01.f  \
@@ -33,6 +36,7 @@ SRC = 	zbdt01.f  \
         dstt21.f  \
 	\
 	sbdt01.f  \
+	sget22.f  \
 	ssyt21.f  \
 	shst01.f  \
 	sort01.f  \
