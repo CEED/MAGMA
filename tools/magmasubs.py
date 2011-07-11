@@ -139,6 +139,7 @@ subs = {
     ('ssyr2k','dsyr2k','cher2k','zher2k'),
     ('ssyr2k','dsyr2k','csyr2k','zsyr2k'),
     ('sbdt01','dbdt01','cbdt01','zbdt01'),
+    ('sget22','dget22','cget22','zget22'),
     ('sbdsqr','dbdsqr','cbdsqr','zbdsqr'),
     ('saxpy','daxpy','caxpy','zaxpy'),
     ('ssymv','dsymv','chemv','zhemv'),
