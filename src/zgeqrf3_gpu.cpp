@@ -48,7 +48,7 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
 
     Purpose
     =======
-    ZGEQRF computes a QR factorization of a COMPLEX_16 M-by-N matrix A:
+    ZGEQRF3 computes a QR factorization of a COMPLEX_16 M-by-N matrix A:
     A = Q * R. This version stores the triangular matrices T used in
     the block QR factorization so that Q can be applied directly (i.e.,
     without being recomputed) later. As a result, the application
