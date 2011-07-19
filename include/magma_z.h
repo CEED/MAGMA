@@ -130,6 +130,11 @@ magma_int_t magma_zgels_gpu(  char trans, magma_int_t m, magma_int_t n, magma_in
 			      cuDoubleComplex *dB,    magma_int_t lddb, 
 			      cuDoubleComplex *hwork, magma_int_t lwork, 
 			      magma_int_t *info);
+magma_int_t magma_zgels3_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
+			      cuDoubleComplex *dA,    magma_int_t ldda,
+			      cuDoubleComplex *dB,    magma_int_t lddb,
+			      cuDoubleComplex *hwork, magma_int_t lwork,
+			      magma_int_t *info);
 magma_int_t magma_zgeqrf_gpu( magma_int_t m, magma_int_t n, 
 			      cuDoubleComplex *dA,  magma_int_t ldda, 
 			      cuDoubleComplex *tau, cuDoubleComplex *dT, 
