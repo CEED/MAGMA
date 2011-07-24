@@ -119,10 +119,6 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
                   converged.   
     =====================================================================    */
 
-    /* TODO: replace this by magma_get_nb */
-    extern magma_int_t ilaenv_(magma_int_t *, const char *, const char *, magma_int_t *, magma_int_t *, 
-                               magma_int_t *, magma_int_t *, magma_int_t, magma_int_t);
-
     magma_int_t c__1 = 1;
     magma_int_t c__0 = 0;
     magma_int_t c_n1 = -1;
@@ -175,7 +171,6 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
     lapackf77_dgeev(jobvl_, jobvr_, &n, a, &lda, WR, WI,
                     vl, &ldvl, vr, &ldvr, work, &c_n1, info);
 
-
     maxwrk = (magma_int_t)work[0];
 
     if (lwork < maxwrk && ! lquery) {
@@ -222,7 +217,6 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
     bignum = 1. / smlnum;
     lapackf77_dlabad(&smlnum, &bignum);
     smlnum = magma_dsqrt(smlnum) / eps;
-    fprintf(stderr, "smlnum : %e\n", smlnum);
     bignum = 1. / smlnum;
 
     /* Scale A if max element outside range [SMLNUM,BIGNUM] */
@@ -251,21 +245,19 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
     iwrk = itau + n;
     i__1 = lwork - iwrk + 1;
 
-    start = get_current_time();
+    //start = get_current_time();
 #if defined(VERSION1)
     /*
      * Version 1 - LAPACK
      */
     lapackf77_dgehrd(&n, &ilo, &ihi, &a[a_offset], &lda,
                      &work[itau], &work[iwrk], &i__1, &ierr);
-    
 #elif defined(VERSION2)
     /*
      *  Version 2 - LAPACK consistent HRD
      */
     magma_dgehrd2(n, ilo, ihi, &a[a_offset], lda,
                   &work[itau], &work[iwrk], &i__1, &ierr);
-    
 #elif defined(VERSION3)
     /*  
      * Version 3 - LAPACK consistent MAGMA HRD + matrices T stored, 
@@ -273,8 +265,8 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
     magma_dgehrd(n, ilo, ihi, &a[a_offset], lda,
                  &work[itau], &work[iwrk], i__1, dT, &ierr);
 #endif
-    end = get_current_time();
-    printf("    Time for dgehrd = %5.2f sec\n", GetTimerValue(start,end)/1000.);
+    //end = get_current_time();
+    //printf("    Time for dgehrd = %5.2f sec\n", GetTimerValue(start,end)/1000.);
 
     if (wantvl) {
       /*        Want left eigenvectors   
@@ -289,7 +281,7 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
          */
 	i__1 = lwork - iwrk + 1;
 
-	start = get_current_time();
+	//start = get_current_time();
 #if defined(VERSION1) || defined(VERSION2)
 	/*
          * Version 1 & 2 - LAPACK
@@ -303,8 +295,8 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
 	magma_dorghr(n, ilo, ihi, &vl[vl_offset], ldvl, &work[itau], 
 		     dT, nb, &ierr);
 #endif
-	end = get_current_time();
-	printf("    Time for dorghr = %5.2f sec\n", GetTimerValue(start,end)/1000.);
+	//end = get_current_time();
+	//printf("    Time for dorghr = %5.2f sec\n", GetTimerValue(start,end)/1000.);
 
         /*
          * Perform QR iteration, accumulating Schur vectors in VL
@@ -333,7 +325,7 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
          *   (Workspace: need 3*N-1, prefer 2*N+(N-1)*NB) 
          */
 	i__1 = lwork - iwrk + 1;
-	start = get_current_time();
+	//start = get_current_time();
 #if defined(VERSION1) || defined(VERSION2)
 	/*
          * Version 1 & 2 - LAPACK
@@ -347,8 +339,8 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
         magma_dorghr(n, ilo, ihi, &vr[vr_offset], ldvr, 
                      &work[itau], dT, nb, &ierr);
 #endif
-	end = get_current_time();
-	printf("    Time for dorghr = %5.2f sec\n", GetTimerValue(start,end)/1000.);
+	//end = get_current_time();
+	//printf("    Time for dorghr = %5.2f sec\n", GetTimerValue(start,end)/1000.);
 
 	/* 
          * Perform QR iteration, accumulating Schur vectors in VR   
@@ -403,8 +395,6 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
 		d__1 = cblas_dnrm2(n, &vl[ i__      * vl_dim1 + 1], 1);
 		d__2 = cblas_dnrm2(n, &vl[(i__ + 1) * vl_dim1 + 1], 1);
 		scl = lapackf77_dlapy2(&d__1, &d__2);
-                fprintf(stderr, "d1=%e, d2=%e, scl = (%e, %e)\n",
-                        d__1, d__2, scl, 1. / scl);
                 scl = 1. / scl;
 		cblas_dscal(n, (scl), &vl[ i__      * vl_dim1 + 1], 1);
 		cblas_dscal(n, (scl), &vl[(i__ + 1) * vl_dim1 + 1], 1);
@@ -416,9 +406,7 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
                     d__2 = vl[k + (i__ + 1) * vl_dim1];
                     work[iwrk + k - 1] = d__1 * d__1 + d__2 * d__2;
                 }
-		k = cblas_idamax(n, &work[iwrk], 1);
-                fprintf(stderr, "k = %d, i = %d, (%e, %e)\n",
-                        k, i__, vl[k +  i__      * vl_dim1], vl[k + (i__ + 1) * vl_dim1]);
+		k = cblas_idamax(n, &work[iwrk], 1)+1;
                 lapackf77_dlartg(&vl[k +  i__      * vl_dim1], 
                                  &vl[k + (i__ + 1) * vl_dim1], &cs, &sn, &r__);
 		cblas_drot(n, &vl[ i__      * vl_dim1 + 1], 1, 
@@ -457,7 +445,7 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
 		    d__2 = vr[k + (i__ + 1) * vr_dim1];
 		    work[iwrk + k - 1] = d__1 * d__1 + d__2 * d__2;
                 }
-		k = cblas_idamax(n, &work[iwrk], 1);
+		k = cblas_idamax(n, &work[iwrk], 1)+1;
 		lapackf77_dlartg(&vr[k + i__ * vr_dim1], &vr[k + (i__ + 1) * vr_dim1], 
 			&cs, &sn, &r__);
 		cblas_drot(n, &vr[ i__      * vr_dim1 + 1], 1, 

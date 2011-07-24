@@ -118,7 +118,6 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
                   converged.   
     =====================================================================    */
 
-
     magma_int_t c__1 = 1;
     magma_int_t c__0 = 0;
     magma_int_t c_n1 = -1;
@@ -173,15 +172,17 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
     }
 
     /*  Compute workspace   */
-    lapackf77_zgeev(jobvl_, jobvr_, &n, a, &lda, geev_w_array, 
-                    vl, &ldvl, vr, &ldvr, work, &c_n1, rwork, info);
+    if (*info == 0)
+      {
+	lapackf77_zgeev(jobvl_, jobvr_, &n, a, &lda, geev_w_array, 
+			vl, &ldvl, vr, &ldvr, work, &c_n1, rwork, info);
+	
+	maxwrk = (magma_int_t)MAGMA_Z_REAL(work[0]);
 
-
-    maxwrk = (magma_int_t)MAGMA_Z_REAL(work[0]);
-
-    if (lwork < maxwrk && ! lquery) {
-        *info = -12;
-    }
+	if (lwork < maxwrk && ! lquery) {
+	  *info = -12;
+	}
+      }
 
     if (*info != 0) {
 	i__1 = -(*info);
@@ -254,21 +255,19 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
     iwrk = itau + n;
     i__1 = lwork - iwrk + 1;
 
-    start = get_current_time();
+    //start = get_current_time();
 #if defined(VERSION1)
     /*
      * Version 1 - LAPACK
      */
     lapackf77_zgehrd(&n, &ilo, &ihi, &a[a_offset], &lda,
                      &work[itau], &work[iwrk], &i__1, &ierr);
-    
 #elif defined(VERSION2)
     /*
      *  Version 2 - LAPACK consistent HRD
      */
     magma_zgehrd2(n, ilo, ihi, &a[a_offset], lda,
-                  &work[itau], &work[iwrk], &i__1, &ierr);
-    
+                  &work[itau], &work[iwrk], &i__1, &ierr);    
 #elif defined(VERSION3)
     /*  
      * Version 3 - LAPACK consistent MAGMA HRD + matrices T stored, 
@@ -276,13 +275,13 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
     magma_zgehrd(n, ilo, ihi, &a[a_offset], lda,
                  &work[itau], &work[iwrk], i__1, dT, &ierr);
 #endif
-    end = get_current_time();
-    printf("    Time for zgehrd = %5.2f sec\n", GetTimerValue(start,end)/1000.);
+    //end = get_current_time();
+    //printf("    Time for zgehrd = %5.2f sec\n", GetTimerValue(start,end)/1000.);
 
     if (wantvl) {
       /*        Want left eigenvectors   
 		Copy Householder vectors to VL */
-	*(unsigned char *)side = 'L';
+	side[0] = 'L';
 	lapackf77_zlacpy(MagmaLowerStr, &n, &n, 
                          &a[a_offset], &lda, &vl[vl_offset], &ldvl);
 
@@ -291,7 +290,7 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
            (RWorkspace: none) */
 	i__1 = lwork - iwrk + 1;
 
-	start = get_current_time();
+	//start = get_current_time();
 #if defined(VERSION1) || defined(VERSION2)
 	/*
          * Version 1 & 2 - LAPACK
@@ -305,8 +304,8 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
 	magma_zunghr(n, ilo, ihi, &vl[vl_offset], ldvl, &work[itau], 
 		     dT, nb, &ierr);
 #endif
-	end = get_current_time();
-	printf("    Time for zunghr = %5.2f sec\n", GetTimerValue(start,end)/1000.);
+	//end = get_current_time();
+	//printf("    Time for zunghr = %5.2f sec\n", GetTimerValue(start,end)/1000.);
 
 	/* Perform QR iteration, accumulating Schur vectors in VL   
            (CWorkspace: need 1, prefer HSWORK (see comments) )   
@@ -316,24 +315,25 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
 	lapackf77_zhseqr("S", "V", &n, &ilo, &ihi, &a[a_offset], &lda, geev_w_array, &vl[
 		vl_offset], &ldvl, &work[iwrk], &i__1, info);
 
-	if (wantvr) {
-	  /* Want left and right eigenvectors   
-             Copy Schur vectors to VR */
+	if (wantvr) 
+	  {
+	    /* Want left and right eigenvectors   
+	       Copy Schur vectors to VR */
 	    side[0] = 'B';
 	    lapackf77_zlacpy("F", &n, &n, &vl[vl_offset], &ldvl, &vr[vr_offset], &ldvr);
-	}
+	  }
 
     } else if (wantvr) {
         /*  Want right eigenvectors   
             Copy Householder vectors to VR */
-	side[0] = 'R';
+        side[0] = 'R';
 	lapackf77_zlacpy("L", &n, &n, &a[a_offset], &lda, &vr[vr_offset], &ldvr);
 
 	/* Generate unitary matrix in VR   
            (CWorkspace: need 2*N-1, prefer N+(N-1)*NB)   
            (RWorkspace: none) */
 	i__1 = lwork - iwrk + 1;
-	start = get_current_time();
+	//start = get_current_time();
 #if defined(VERSION1) || defined(VERSION2)
 	/*
          * Version 1 & 2 - LAPACK
@@ -347,8 +347,8 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
         magma_zunghr(n, ilo, ihi, &vr[vr_offset], ldvr, 
                      &work[itau], dT, nb, &ierr);
 #endif
-	end = get_current_time();
-	printf("    Time for zunghr = %5.2f sec\n", GetTimerValue(start,end)/1000.);
+	//end = get_current_time();
+	//printf("    Time for zunghr = %5.2f sec\n", GetTimerValue(start,end)/1000.);
 
 	/* Perform QR iteration, accumulating Schur vectors in VR   
            (CWorkspace: need 1, prefer HSWORK (see comments) )   
@@ -404,7 +404,7 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
 		d__2 = MAGMA_Z_IMAG(vl[k + i__ * vl_dim1]);
 		rwork[irwork + k - 1] = d__1 * d__1 + d__2 * d__2;
             }
-	    k = cblas_idamax(n, &rwork[irwork], 1);
+	    k = cblas_idamax(n, &rwork[irwork], 1)+1;
 	    MAGMA_Z_CNJG(z__2, vl[k + i__ * vl_dim1]);
 	    d__1 = magma_dsqrt(rwork[irwork + k - 1]);
 	    MAGMA_Z_DSCALE(z__1, z__2, d__1);
@@ -439,7 +439,7 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
 		d__2 = MAGMA_Z_IMAG(vr[k + i__ * vr_dim1]);
 		rwork[irwork + k - 1] = d__1 * d__1 + d__2 * d__2;
 	    }
-	    k = cblas_idamax(n, &rwork[irwork], 1);
+	    k = cblas_idamax(n, &rwork[irwork], 1)+1;
 	    MAGMA_Z_CNJG(z__2, vr[k + i__ * vr_dim1]);
 	    d__1 = magma_dsqrt(rwork[irwork + k - 1]);
 	    MAGMA_Z_DSCALE(z__1, z__2, d__1);
