@@ -222,8 +222,18 @@ other kernels (I remeber there was an issue somewhere)
 
     * turned out this was an interface problem on how we call z/cdotc
 ---------------------------------------------------------------------------------
-                            
+33   DONE         Stan     There was a problem in zgeev and dgeev (and the c and s
+                           version generated) related to the cblas_idamax. It is 
+                           returning value that is 1 less than the Fortran version 
+                           so in codes that are translated by F2C, if idamax_ is 
+                           replaced by cblas_idamax, one has to add 1 to the result.
 
+                           I am putting it here because this is wierd and it took me 
+                           some time to discover the problem.
+
+                           I really don't like this mixing of cblas with codes that
+                           call fortran blas.
+---------------------------------------------------------------------------------
 
                            Status of src directory 
                            
