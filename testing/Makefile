@@ -31,6 +31,7 @@ ZSRC  = testing_zgemm.cpp	\
         testing_zgehrd.cpp 	\
         testing_zhetrd.cpp 	\
         testing_zgeev.cpp       \
+        testing_dgeev.cpp       \
         testing_zgesvd.cpp      \
         testing_zheevd.cpp      \
         testing_dsyevd.cpp	\
