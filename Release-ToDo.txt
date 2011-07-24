@@ -234,7 +234,17 @@ other kernels (I remeber there was an issue somewhere)
                            I really don't like this mixing of cblas with codes that
                            call fortran blas.
 ---------------------------------------------------------------------------------
+34               Rajib ?   When I run testing_sgeev through error checking mode
+                           sometimes (e.g., when running not at specified sizes)
+                           I get error. If I block the use magmablas_sgemm in
+                           function slahru the error disappears. This is happening
+                           on Tesla (cumin in particular).
+                           I have blocked the use of magma_sgemm for this routine
+                           (on both Fermi and Tesla) until further investigation.
+                           
+                           Stan
 
+---------------------------------------------------------------------------------
                            Status of src directory 
                            
                             CPU  /  GPU  / Remark 
