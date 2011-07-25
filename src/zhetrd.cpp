@@ -14,7 +14,7 @@
 #define PRECISION_z
 
 #if (defined(PRECISION_s))
-     #define cublasSsyr2k magmablas_ssyr2k
+//  #define cublasSsyr2k magmablas_ssyr2k
 #endif
 // === End defining what BLAS to use ======================================
 
