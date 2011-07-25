@@ -404,6 +404,9 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
 		d__2 = MAGMA_Z_IMAG(vl[k + i__ * vl_dim1]);
 		rwork[irwork + k - 1] = d__1 * d__1 + d__2 * d__2;
             }
+	    /* Comment:
+                   Fortran BLAS does not have to add 1
+                   C       BLAS must add one to cblas_idamax */
 	    k = cblas_idamax(n, &rwork[irwork], 1)+1;
 	    MAGMA_Z_CNJG(z__2, vl[k + i__ * vl_dim1]);
 	    d__1 = magma_dsqrt(rwork[irwork + k - 1]);
@@ -439,6 +442,9 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
 		d__2 = MAGMA_Z_IMAG(vr[k + i__ * vr_dim1]);
 		rwork[irwork + k - 1] = d__1 * d__1 + d__2 * d__2;
 	    }
+	    /* Comment:
+                   Fortran BLAS does not have to add 1
+                   C       BLAS must add one to cblas_idamax */
 	    k = cblas_idamax(n, &rwork[irwork], 1)+1;
 	    MAGMA_Z_CNJG(z__2, vr[k + i__ * vr_dim1]);
 	    d__1 = magma_dsqrt(rwork[irwork + k - 1]);

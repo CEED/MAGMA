@@ -406,6 +406,9 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
                     d__2 = vl[k + (i__ + 1) * vl_dim1];
                     work[iwrk + k - 1] = d__1 * d__1 + d__2 * d__2;
                 }
+		/* Comment:
+		   Fortran BLAS does not have to add 1
+		   C       BLAS must add one to cblas_idamax */ 
 		k = cblas_idamax(n, &work[iwrk], 1)+1;
                 lapackf77_dlartg(&vl[k +  i__      * vl_dim1], 
                                  &vl[k + (i__ + 1) * vl_dim1], &cs, &sn, &r__);
@@ -445,6 +448,9 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
 		    d__2 = vr[k + (i__ + 1) * vr_dim1];
 		    work[iwrk + k - 1] = d__1 * d__1 + d__2 * d__2;
                 }
+		/* Comment:
+                   Fortran BLAS does not have to add 1
+                   C       BLAS must add one to cblas_idamax */
 		k = cblas_idamax(n, &work[iwrk], 1)+1;
 		lapackf77_dlartg(&vr[k + i__ * vr_dim1], &vr[k + (i__ + 1) * vr_dim1], 
 			&cs, &sn, &r__);
