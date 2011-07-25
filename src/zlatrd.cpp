@@ -9,6 +9,7 @@
 
 */
 #include "common_magma.h"
+#include <cblas.h> 
 
 #define PRECISION_z
 
@@ -341,15 +342,26 @@ d in
 			    &w[i__ * w_dim1 + 1], &c__1, &c_one, 
 			    &w[i__ + 1 + i__ * w_dim1], &c__1);
 	      blasf77_zscal(&i__2, &tau[i__], &w[i__ + 1 + i__ * w_dim1], &c__1);
+	      
               #if defined(PRECISION_z) || defined(PRECISION_c)
-  	          blasf77_zdotc(&value, &i__2, &w[i__ +1+ i__ * w_dim1], 
-				  &c__1, &a[i__ +1+ i__ * a_dim1], &c__1);
+	             /* Comment:
+			To do - move to cblas in cases like this. The commented
+			out version works with MKL but is not a standard interface
+			for other BLAS zdoc implementations                        
+		     */
+	             /*
+                        cblas_zdotc_sub(i__2, &w[i__ +1+ i__ * w_dim1], c__1,
+                                        &a[i__ +1+ i__ * a_dim1], c__1, &value);
+		     */
+		  blasf77_zdotc(&value, &i__2, &w[i__ +1+ i__ * w_dim1],
+				&c__1, &a[i__ +1+ i__ * a_dim1], &c__1);
 		  alpha = tau[i__]* -.5f * value;
               #else
 	          alpha = tau[i__]* -.5f*blasf77_zdotc(&i__2, &w[i__ +1+ i__ * w_dim1], 
 						     &c__1, &a[i__ +1+ i__ * a_dim1],
 						     &c__1);
               #endif
+	      
 	      blasf77_zaxpy(&i__2, &alpha, &a[i__ + 1 + i__ * a_dim1], &c__1, 
 			    &w[i__ + 1 + i__ * w_dim1], &c__1);
 	    }
