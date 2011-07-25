@@ -140,7 +140,8 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     lddwork= k;
     if (nb < k)
       dwork = dT+2*lddwork*nb;
-    dwork = dT;
+    // To do: Why did we have this line originally; seems to be a bug (Stan)?
+    // dwork = dT;
 
     i    = (k-1)/nb * nb;
     ib   = n-i;
