@@ -120,14 +120,14 @@ magma_zgels3_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
       ldtwork = ( 2*k + ((n+31)/32)*32 )*nrhs;
     if( CUBLAS_STATUS_SUCCESS != cublasAlloc(ldtwork, 
 					     sizeof(cuDoubleComplex), (void**)&dT) ) {
-        magma_xerbla("magma_zgels_gpu", info);
+        magma_xerbla("magma_zgels3_gpu", info);
 	return MAGMA_ERR_CUBLASALLOC;
     }
     
     tau = (cuDoubleComplex*) malloc( k * sizeof(cuDoubleComplex) );
     if( tau == NULL ) {
 	cublasFree(dT);
-        magma_xerbla("magma_zgels_gpu", info);
+        magma_xerbla("magma_zgels3_gpu", info);
 	return MAGMA_ERR_ALLOCATION;
     }
 
@@ -135,7 +135,7 @@ magma_zgels3_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
     if ( (ret != MAGMA_SUCCESS) || (*info != 0) ) {
 	cublasFree(dT);
 	free(tau);
-	magma_xerbla("magma_zgels_gpu", info);
+	magma_xerbla("magma_zgels3_gpu", info);
 	return ret;
     }
 
@@ -145,7 +145,7 @@ magma_zgels3_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
     if ( (ret != MAGMA_SUCCESS) || (*info != 0) ) {
 	cublasFree(dT);
 	free(tau);
-	magma_xerbla("magma_zgels_gpu", info);
+	magma_xerbla("magma_zgels3_gpu", info);
 	return ret;
     }
 
