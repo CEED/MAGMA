@@ -92,7 +92,7 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
     cuDoubleComplex *dAT;
     cuDoubleComplex c_one = MAGMA_Z_ONE;
     magma_int_t maxm, maxn, maxdim, nb;
-    magma_int_t iinfo, ldda;
+    magma_int_t iinfo;
     long int lquery;
 
     *info = 0;
@@ -139,7 +139,7 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
       magmablas_ztranspose2( dAT, ldat, dA, lda, m, n );
     }
     
-    magma_zgeqrf2_gpu(n, m, dAT, ldda, tau, &iinfo);
+    magma_zgeqrf2_gpu(n, m, dAT, lda, tau, &iinfo);
 
     if ((m == n) && (m % 32 == 0) && (lda%32 == 0))
       magmablas_zinplace_transpose( dAT, ldat, lda );
