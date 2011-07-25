@@ -243,6 +243,27 @@ other kernels (I remeber there was an issue somewhere)
                            (on both Fermi and Tesla) until further investigation.
                            
                            Stan
+---------------------------------------------------------------------------------
+35               Rajib?    There seems to be loss of accuracy when using ssyr2k
+                 Tim?      on Fermi when used in ssytrd, e.g.,
+                           using CUBLAS I get
+tomov:disco /mnt/scratch/tomov/magma_1.0.0/testing> ./testing_ssytrd -N 2048               
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 3071.7 MB memory
+device 1: Quadro NVS 290, 918.0 MHz clock, 255.7 MB memory
+  testing_ssytrd -L|U -N 2048
+
+  N    CPU GFlop/s    GPU GFlop/s   |A-QHQ'|/N|A|  |I-QQ'|/N 
+=============================================================
+ 2048    12.11         24.69       1.092290e-08 2.556555e-08
+
+while using magma blas I get
+  N    CPU GFlop/s    GPU GFlop/s   |A-QHQ'|/N|A|  |I-QQ'|/N 
+=============================================================
+ 2048    12.00         24.97       1.978159e-06 2.506212e-08
+
+                           I am taking it out for now until is fixed.
+
+                           Stan
 
 ---------------------------------------------------------------------------------
                            Status of src directory 
