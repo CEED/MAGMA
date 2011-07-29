@@ -86,7 +86,7 @@ magma_zunmqr(const char side, const char trans,
             The leading dimension of the array C. LDC >= max(1,M).   
 
     WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))   
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
+            On exit, if INFO = 0, WORK(0) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
             The dimension of the array WORK.   
@@ -111,41 +111,34 @@ magma_zunmqr(const char side, const char trans,
     char side_[2] = {side, 0};
     char trans_[2] = {trans, 0};
 
-    // TTT --------------------------------------------------------------------
+    /* Allocate work space on the GPU */
     cuDoubleComplex *dwork, *dc;
     cublasAlloc((m)*(n), sizeof(cuDoubleComplex), (void**)&dc);
     cublasAlloc(2*(m+64)*64, sizeof(cuDoubleComplex), (void**)&dwork);
     
+    /* Copy matrix C from the CPU to the GPU */
     cublasSetMatrix( m, n, sizeof(cuDoubleComplex), c, ldc, dc, m);
     dc -= (1 + m);
-    //-------------------------------------------------------------------------
 
-    magma_int_t a_dim1, a_offset, c_dim1, c_offset, i__4, i__5;
-    /* Local variables */
+    magma_int_t a_offset, c_offset, i__4;
     static magma_int_t i__;
     static cuDoubleComplex t[2*4160]	/* was [65][64] */;
-    static magma_int_t i1, i2, i3, ib, ic, jc, nb, mi, ni, nq, nw, iws;
+    static magma_int_t i1, i2, i3, ib, ic, jc, nb, mi, ni, nq, nw;
     long int left, notran, lquery;
-    static magma_int_t nbmin, iinfo;
-    static magma_int_t ldwork, lwkopt;
+    static magma_int_t iinfo, lwkopt;
 
-    a_dim1 = lda;
-    a_offset = 1 + a_dim1;
+    a_offset = 1 + lda;
     a -= a_offset;
     --tau;
-    c_dim1 = ldc;
-    c_offset = 1 + c_dim1;
+    c_offset = 1 + ldc;
     c -= c_offset;
-    --work;
 
-    /* Function Body */
     *info = 0;
     left = lapackf77_lsame(side_, "L");
     notran = lapackf77_lsame(trans_, "N");
     lquery = (lwork == -1);
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
-
     if (left) {
 	nq = m;
 	nw = n;
@@ -177,7 +170,7 @@ magma_zunmqr(const char side, const char trans,
 	   is used to define the local array T.    */
 	nb = 64;
 	lwkopt = max(1,nw) * nb;
-	MAGMA_Z_SET2REAL( work[1], lwkopt );
+	MAGMA_Z_SET2REAL( work[0], lwkopt );
     }
 
     if (*info != 0) {
@@ -187,33 +180,20 @@ magma_zunmqr(const char side, const char trans,
     }
 
     /* Quick return if possible */
-
     if (m == 0 || n == 0 || k == 0) {
-	work[1] = c_one;
+	work[0] = c_one;
 	return 0;
     }
 
-    nbmin = 2;
-    ldwork = nw;
-    if (nb > 1 && nb < k) {
-	iws = nw * nb;
-	if (lwork < iws) {
-	    nb = lwork / ldwork;
-	    nbmin = 64;
-	}
-    } else {
-	iws = nw;
-    }
-
-    if (nb < nbmin || nb >= k) 
+    if (nb >= k) 
       {
-	/* Use unblocked code */
-	lapackf77_zunm2r(side_, trans_, &m, &n, &k, &a[a_offset], &lda, &tau[1], 
-		&c[c_offset], &ldc, &work[1], &iinfo);
+	/* Use CPU code */
+	lapackf77_zunmqr(side_, trans_, &m, &n, &k, &a[a_offset], &lda, &tau[1],
+			 &c[c_offset], &ldc, work, &lwork, &iinfo);
       } 
     else 
       {
-	/* Use blocked code */
+	/* Use hybrid CPU-GPU code */
 	if ( ( left && (! notran) ) ||  ( (! left) && notran ) ) {
 	    i1 = 1;
 	    i2 = k;
@@ -234,23 +214,19 @@ magma_zunmqr(const char side, const char trans,
 	
 	for (i__ = i1; i3 < 0 ? i__ >= i2 : i__ <= i2; i__ += i3) 
 	  {
-	    /* Computing MIN */
-	    i__4 = nb, i__5 = k - i__ + 1;
-	    ib = min(i__4,i__5);
+	    ib = min(nb, k - i__ + 1);
 
 	    /* Form the triangular factor of the block reflector   
 	       H = H(i) H(i+1) . . . H(i+ib-1) */
 	    i__4 = nq - i__ + 1;
-	    lapackf77_zlarft("F", "C", &i__4, &ib, &a[i__ + i__ * a_dim1], &lda, 
+	    lapackf77_zlarft("F", "C", &i__4, &ib, &a[i__ + i__ * lda], &lda, 
 			     &tau[i__], t, &ib);
 
-	    // TTT ------------------------------------------------------------
-	    zpanel_to_q('U', ib, &a[i__ + i__ * a_dim1], lda, t+ib*ib);
+	    zpanel_to_q('U', ib, &a[i__ + i__ * lda], lda, t+ib*ib);
 	    cublasSetMatrix(i__4, ib, sizeof(cuDoubleComplex),
-			    &a[i__ + i__ * a_dim1], lda, 
+			    &a[i__ + i__ * lda], lda, 
 			    dwork, i__4);
-	    zq_to_panel('U', ib, &a[i__ + i__ * a_dim1], lda, t+ib*ib);
-	    //-----------------------------------------------------------------
+	    zq_to_panel('U', ib, &a[i__ + i__ * lda], lda, t+ib*ib);
 
 	    if (left) 
 	      {
@@ -266,31 +242,23 @@ magma_zunmqr(const char side, const char trans,
 	      }
 	    
 	    /* Apply H or H' */
-	    // TTT ------------------------------------------------------------
-	    //printf("%5d %5d %5d\n", mi, ni, ic + 1 + m);
 	    cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), t, ib, dwork+i__4*ib, ib);
 	    magma_zlarfb_gpu( side, trans, MagmaForward, MagmaColumnwise,
 			      mi, ni, ib,
 			      dwork, i__4, dwork+i__4*ib, ib,
 			      &dc[ic + jc * m], m, 
 			      dwork+i__4*ib + ib*ib, ni);
-	    //-----------------------------------------------------------------
-	    /*
-	    lapackf77_zlarfb(side_, trans_, "Forward", "Columnwise", &mi, &ni, &ib, 
-		    &a[i__ + i__ * a_dim1], &lda, t, &ib, 
-		    &c[ic + jc * c_dim1], &ldc, &work[1], &ldwork);
-	    */
 	  }
 
 	cublasGetMatrix(m, n, sizeof(cuDoubleComplex), &dc[1+m], m, &c[c_offset], ldc);
       }
-    MAGMA_Z_SET2REAL( work[1], lwkopt );
+    MAGMA_Z_SET2REAL( work[0], lwkopt );
 
     dc += (1 + m);
     cublasFree(dc);
     cublasFree(dwork);
 
     return MAGMA_SUCCESS;
-} /* zunmqr_ */
+} /* magma_zunmqr */
 
 
