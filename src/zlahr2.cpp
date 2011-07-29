@@ -33,13 +33,13 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
     Purpose   
     =======   
 
-    SLAHR2 reduces the first NB columns of a complex general n-BY-(n-k+1)   
+    ZLAHR2 reduces the first NB columns of a complex general n-BY-(n-k+1)   
     matrix A so that elements below the k-th subdiagonal are zero. The   
     reduction is performed by an orthogonal similarity transformation   
     Q' * A * Q. The routine returns the matrices V and T which determine   
     Q as a block reflector I - V*T*V', and also the matrix Y = A * V.   
 
-    This is an auxiliary routine called by SGEHRD.   
+    This is an auxiliary routine called by ZGEHRD.   
 
     Arguments   
     =========   

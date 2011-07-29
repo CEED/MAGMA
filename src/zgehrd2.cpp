@@ -24,7 +24,7 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 
     Purpose   
     =======   
-    DGEHRD reduces a COMPLEX_16 general matrix A to upper Hessenberg form H by   
+    ZGEHRD2 reduces a COMPLEX_16 general matrix A to upper Hessenberg form H by   
     an orthogonal similarity transformation:  Q' * A * Q = H .   
 
     Arguments   
