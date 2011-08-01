@@ -48,6 +48,7 @@ ZSRC  = zpotrf.cpp	\
         zlatrd.cpp 	\
         zunmtr.cpp 	\
         zunmqr.cpp 	\
+	zunmql.cpp      \
         \
         zgeev.cpp       \
         dgeev.cpp       \
