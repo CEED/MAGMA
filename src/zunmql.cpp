@@ -189,6 +189,8 @@ magma_zunmql(const char side, const char trans,
       return MAGMA_SUCCESS;
     }
 
+    ldwork = nw;
+
     if ( nb >= k ) 
       {
 	/* Use CPU code */
