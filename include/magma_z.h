@@ -66,6 +66,13 @@ magma_int_t magma_zungqr( magma_int_t m, magma_int_t n, magma_int_t k,
 			  cuDoubleComplex *a, magma_int_t lda,
 			  cuDoubleComplex *tau, cuDoubleComplex *dwork,
 			  magma_int_t nb, magma_int_t *info );
+magma_int_t magma_zunmql( const char side, const char trans,
+			  magma_int_t m, magma_int_t n, magma_int_t k,
+			  cuDoubleComplex *a, magma_int_t lda,
+			  cuDoubleComplex *tau,
+			  cuDoubleComplex *c, magma_int_t ldc,
+			  cuDoubleComplex *work, magma_int_t lwork,
+			  magma_int_t *info);
 magma_int_t magma_zunmqr( char side, char trans, 
                           magma_int_t m, magma_int_t n, magma_int_t k, 
                           cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *tau, 
