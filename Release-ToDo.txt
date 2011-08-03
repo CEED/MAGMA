@@ -266,6 +266,14 @@ while using magma blas I get
                            Stan
 
 ---------------------------------------------------------------------------------
+36               Rajib ?   There is another problem with magmablas sgemm (see also
+                 Tim ?     the above). Testing for example
+                           ./testing_ssyevd -N 3072
+                           (and other sizes) gives wrong results. 
+                           Using cublasSgemm is fine. I had to
+                           comment out the use of MAGMABLAS in slarfb_gpu.
+---------------------------------------------------------------------------------
+
                            Status of src directory 
                            
                             CPU  /  GPU  / Remark 
