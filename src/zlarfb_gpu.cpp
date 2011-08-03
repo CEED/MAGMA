@@ -13,7 +13,7 @@
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-  #define cublasZgemm magmablas_zgemm
+//  #define cublasZgemm magmablas_zgemm
 #endif
 // === End defining what BLAS to use =======================================
 
