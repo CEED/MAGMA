@@ -52,6 +52,10 @@ double magmablas_zlanhe( char norm, char uplo,
 double magmablas_zlansy( char norm, char uplo,
 			 magma_int_t n, 
 			 cuDoubleComplex *A, magma_int_t lda, double *WORK);
+void   magmablas_zlascl( char type, int kl, int ku,
+			 double cfrom, double cto,
+			 int m, int n,
+			 cuDoubleComplex *A, int lda, int *info );
 void   magmablas_zlaset( magma_int_t m, magma_int_t n,
 			 cuDoubleComplex *A, magma_int_t lda);
 void   magmablas_zlaswp( magma_int_t N, 
