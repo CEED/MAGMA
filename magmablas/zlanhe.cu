@@ -15,6 +15,8 @@
 //#define num_threads 64
 #define dgemv_bs 32
 
+#define zlanhe_bs 64
+
 #define PRECISION_z
 #if (!defined(PRECISION_z)) || (GPUSHMEM >= 200)
 
@@ -527,9 +529,7 @@ u_zlanhe_generic (int n, cuDoubleComplex* A, int lda, double *y , int m_full_blo
        + MAGMA_Z_REAL( la[tx][3] );
      y[ind] =  res;
    }
-
   }
-
 }
 
 __global__ void
@@ -549,7 +549,6 @@ u_zlanhe_special (int n, cuDoubleComplex* A, int lda, double *y ){
   A+= lda*(n-1) ; 
   __shared__ cuDoubleComplex la   [dgemv_bs][dgemv_bs+1];
 
-
   A += ind;
   A-= ty * lda  ;  
   int break_d  = (n / dgemv_bs -   blockIdx.x-1 )* dgemv_bs ;
@@ -568,9 +567,6 @@ u_zlanhe_special (int n, cuDoubleComplex* A, int lda, double *y ){
     A-=lda* dgemv_bs ;
     __syncthreads(); 
   }
-
-
-
 
   #pragma unroll 8
   for(int j =0; j<dgemv_bs; j+=4)
@@ -600,8 +596,6 @@ u_zlanhe_special (int n, cuDoubleComplex* A, int lda, double *y ){
   break_d  += dgemv_bs ; 
   __syncthreads();
 
-
-
   for(int i=break_d; i<n; i+= dgemv_bs ){
    #pragma unroll 8
     for(int j=0; j<dgemv_bs; j+=4)
@@ -616,7 +610,6 @@ u_zlanhe_special (int n, cuDoubleComplex* A, int lda, double *y ){
       __syncthreads();
   }
 
-
   la[tx][ty]= MAGMA_Z_MAKE( res, 0. );
 
    __syncthreads();
@@ -627,11 +620,7 @@ u_zlanhe_special (int n, cuDoubleComplex* A, int lda, double *y ){
        + MAGMA_Z_REAL( la[tx][3] );
      y[ind] =   res;
    }
-
 }
-
-
-
 
 
 extern "C" void mzlanhe (char uplo , int m ,  cuDoubleComplex *A , int lda ,  double *Y  )
@@ -671,23 +660,103 @@ Note:
     }
 }
 
+#endif /* (!defined(PRECISION_z)) || (GPUSHMEM >= 200) */
 
+__global__ void
+l_zlanhe_max (int m, cuDoubleComplex* A, int lda,  double *y){
+    int tx  = threadIdx.x ;
+    int ind =  blockIdx.x * zlanhe_bs + tx ;
+    double res = 0., res1;
+
+    int break_d = blockIdx.x* zlanhe_bs;
+
+    if (ind < m)
+    {
+       A += ind;
+
+       for(int i=0; i<break_d; i += zlanhe_bs ){
+	  #pragma unroll 8
+          for(int j=0; j< zlanhe_bs; j++){
+             res1 = cuCabs(A[j*lda]);
+	     res = fmax(res,res1);
+          }
+    
+          A += lda*zlanhe_bs;
+       }   
+  
+     
+       for(int j=0; j<=tx; j++){
+          res1 = cuCabs(A[j*lda]);
+	  res = fmax(res,res1);
+       }
+
+       y[ind] = res;
+    }
+}
+
+__global__ void
+u_zlanhe_max (int m, cuDoubleComplex* A, int lda,  double *y){
+    int ind =  blockIdx.x * zlanhe_bs + threadIdx.x ;
+    double res = 0.;
+
+    A += ind;
+    if (ind < m){
+      for(int j=m-1; j>= ind; j--)
+         res = fmax(res, cuCabs(A[j*lda]));
+      
+      y[ind] = res;
+    }
+}
+
+
+extern "C" void zlanhe_max (char uplo, int m, cuDoubleComplex *A , int lda , double *y){
+    int blocks;
+    if (m % zlanhe_bs==0)
+        blocks = m/ zlanhe_bs;
+    else
+        blocks = m/ zlanhe_bs + 1;
+
+    dim3 grid(blocks, 1, 1);
+    dim3 threads(zlanhe_bs, 1, 1);
+
+    if( uplo == 'L' || uplo == 'l'){
+      l_zlanhe_max <<<grid, threads>>> (m, A, lda, y);
+    }
+    else{
+      u_zlanhe_max <<<grid, threads>>> (m, A, lda, y);
+    }
+}
+ 
 extern "C" double 
 magmablas_zlanhe(char norm, char uplo, int n, 
                  cuDoubleComplex *A, int lda, double *WORK )
 {
-	if( norm != 'I' && norm !='i')	{
-                printf("Only normI is available\n");
-		exit(1);
-	}
-        else{
+	if (norm == 'I' || norm =='i')  
+            {
+#if (GPUSHMEM >= 200)
 		mzlanhe ( uplo , n , A , lda , WORK);
 		int val = cublasIdamax(n,WORK,1);
-	        double retVal[1];
-		cublasGetMatrix( 1, 1, sizeof( cuDoubleComplex ), WORK+val-1, 1, retVal, 1 ) ;
-		return retVal[0];
-        }
-
+                double retVal[1];
+		cublasGetMatrix( 1, 1, sizeof( double ), WORK+val-1, 1, retVal, 1 ) ;
+                return retVal[0];
+#else
+                printf("Only normM is available. Exit.\n");
+                exit(1);
+#endif
+	    }
+	else if (norm == 'M' || norm =='m')
+            {  
+                zlanhe_max ( uplo , n , A , lda , WORK);
+                int val = cublasIdamax(n,WORK,1);
+                double retVal[1];
+                cublasGetMatrix( 1, 1, sizeof( double ), WORK+val-1, 1, retVal, 1 ) ;
+                return retVal[0];
+            }
+	else
+	    {
+                printf("Only normI and normM are available. Exit.\n");
+		exit(1);
+	    }
 }
 
-#endif /* (!defined(PRECISION_z)) || (GPUSHMEM >= 200) */
+
