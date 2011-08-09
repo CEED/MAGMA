@@ -1021,14 +1021,14 @@ magmablas_zhemv2_200( char uplo, magma_int_t n,
         cublasZhemv(uplo, n, alpha, A, lda, X, incx, beta, Y, incy);
     else
     {
-        cuDoubleComplex *dC_work;
         magma_int_t blocks    = n / thread_x + (n % thread_x != 0);
         magma_int_t workspace = lda * (blocks + 1);
 
         if (lwork < workspace){
 	   printf("Not enough work space in magmablas_zhemv: passed %d, required %d\n",
                   lwork, workspace);
-
+           exit(1);
+        }
         magmablas_zhemv_200_L(n, alpha, A, lda, X, incx, beta, Y, incy, work);
     }
     return MAGMA_SUCCESS;
