@@ -982,4 +982,56 @@ magmablas_zhemv_200( char uplo, magma_int_t n,
     return MAGMA_SUCCESS;
 }
 
+extern "C"
+magma_int_t
+magmablas_zhemv2_200( char uplo, magma_int_t n,
+                      cuDoubleComplex alpha,
+                      cuDoubleComplex *A, magma_int_t lda,
+                      cuDoubleComplex *X, magma_int_t incx,
+                      cuDoubleComplex beta,
+                      cuDoubleComplex *Y, magma_int_t incy,
+                      cuDoubleComplex *work, int lwork)
+{
+    char      uplo_[2] = {uplo, 0};
+    long int  upper    = lapackf77_lsame(uplo_, "U");
+
+    /*
+     * Test the input parameters.
+     */
+    if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
+        return -1;
+    } else if ( n < 0 ) {
+        return -2;
+    } else if ( lda < max(1,n) ) {
+        return -5;
+    } else if ( incx == 0 ) {
+        return -7;
+    } else if ( incy == 0 ) {
+        return -10;
+    }
+
+    /*
+     * Quick return if possible.
+     */
+    if ( (n == 0) || ( MAGMA_Z_EQUAL(alpha, MAGMA_Z_ZERO) && MAGMA_Z_EQUAL(beta, MAGMA_Z_ONE) ) )
+        return MAGMA_SUCCESS;
+
+    /* TODO: Upper case is not implemented in MAGMA */
+    if ( upper || n < 1622)
+        cublasZhemv(uplo, n, alpha, A, lda, X, incx, beta, Y, incy);
+    else
+    {
+        cuDoubleComplex *dC_work;
+        magma_int_t blocks    = n / thread_x + (n % thread_x != 0);
+        magma_int_t workspace = lda * (blocks + 1);
+
+        if (lwork < workspace){
+	   printf("Not enough work space in magmablas_zhemv: passed %d, required %d\n",
+                  lwork, workspace);
+
+        magmablas_zhemv_200_L(n, alpha, A, lda, X, incx, beta, Y, incy, work);
+    }
+    return MAGMA_SUCCESS;
+}
+
 #endif /* (GPUSHMEM >= 200) */
