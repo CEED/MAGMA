@@ -135,16 +135,16 @@ void MAGMAF_ZGEHRD2(magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi,
                   work, lwork, info);
 }
     
-// void MAGMAF_ZGEHRD( magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi,
-//                     cuDoubleComplex *A, magma_int_t *lda, cuDoubleComplex *tau,
-//                     cuDoubleComplex *work, magma_int_t *lwork,
-//                     cuDoubleComplex *d_T, magma_int_t *info)
-// {
-//     magma_zgehrd( *n, *ilo, *ihi,
-//                   A, *lda, tau,
-//                   work, *lwork,
-//                   d_T, info);
-// }
+void MAGMAF_ZGEHRD( magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi,
+		    cuDoubleComplex *A, magma_int_t *lda, cuDoubleComplex *tau,
+		    cuDoubleComplex *work, magma_int_t *lwork,
+		    cuDoubleComplex *d_T, magma_int_t *info)
+{
+  magma_zgehrd( *n, *ilo, *ihi,
+		A, *lda, tau,
+		work, *lwork,
+		d_T, info);
+}
 
 void MAGMAF_ZGELQF( magma_int_t *m, magma_int_t *n, 
                     cuDoubleComplex *A,    magma_int_t *lda,   cuDoubleComplex *tau, 

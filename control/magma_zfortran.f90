@@ -60,6 +60,19 @@ module magma_zfortran
        integer       :: info
      end subroutine magmaf_zgehrd2
 
+     subroutine magmaf_zgehrd(n, ilo, ihi,A, lda, tau, work, lwork, d_T, info)
+       integer       :: n
+       integer       :: ilo
+       integer       :: ihi
+       complex*16    :: A(*)
+       integer       :: lda
+       complex*16    :: tau(*)
+       complex*16    :: work(*)
+       integer       :: lwork
+       complex*16    :: d_T(*)
+       integer       :: info
+     end subroutine magmaf_zgehrd
+
      subroutine magmaf_zgelqf( m, n, A,    lda,   tau, work, lwork, info)
        integer       :: m
        integer       :: n
