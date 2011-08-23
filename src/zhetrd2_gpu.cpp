@@ -24,14 +24,6 @@
 #define A(i, j) (wa+(j)*ldwa + (i))
 #define dA(i, j) (da+(j)*ldda + (i))
 
-extern "C" magma_int_t
-magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
-              cuDoubleComplex *a,  magma_int_t lda,
-              double *e, cuDoubleComplex *tau,
-              cuDoubleComplex *w,  magma_int_t ldw,
-              cuDoubleComplex *da, magma_int_t ldda,
-              cuDoubleComplex *dw, magma_int_t lddw,
-              cuDoubleComplex *dwork, magma_int_t ldwork);
 
 extern "C" magma_int_t
 magma_zhetrd2_gpu(char uplo, magma_int_t n,               
@@ -119,9 +111,11 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
             this value as the first entry of the WORK array, and no error   
             message related to LWORK is issued by XERBLA.   
 
-    DWORK  
+    DWORK   (workspace/output) COMPLEX_16 array on the GPU, dim (MAX(1,LDWORK))
  
-    LDWORK 
+    LDWORK  (input) INTEGER
+            The dimension of the array DWORK.  LDWORK >= 1.
+            To be done: determine the precise dimension needed
 
     INFO    (output) INTEGER   
             = 0:  successful exit   
@@ -129,7 +123,6 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
 
     Further Details   
     ===============   
-
     If UPLO = 'U', the matrix Q is represented as a product of elementary   
     reflectors   
 

@@ -51,6 +51,7 @@ ZSRC  = zpotrf.cpp	\
         zhetrd_gpu.cpp  \
         zhetrd2_gpu.cpp \
         zlatrd.cpp 	\
+        zlatrd2.cpp     \
         zunmtr.cpp 	\
         zunmqr.cpp 	\
 	zunmql.cpp      \
