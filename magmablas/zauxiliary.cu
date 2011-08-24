@@ -100,3 +100,78 @@ double cpu_gpu_zdiff(int M, int N, cuDoubleComplex * a, int lda, cuDoubleComplex
   return res;
 }
 
+/* ////////////////////////////////////////////////////////////////////////////
+ -- GPU kernel for setting 0 in the nb-1 upper subdiagonals and 1 in the diagonal
+    @author Raffaele Solca
+ */
+__global__ void zsetdiag1subdiag0_L(int k, cuDoubleComplex *A, int lda){
+  
+  int nb = blockDim.x;
+  int ibx = blockIdx.x * nb;
+  
+  int ind = ibx + threadIdx.x + 1;
+  
+  A += ind - nb + __mul24((ibx), lda);
+  
+  cuDoubleComplex tmp = MAGMA_Z_ZERO;
+  if(threadIdx.x == nb-1)
+    tmp = MAGMA_Z_ONE;
+  
+#pragma unroll
+  for(int i=0; i<nb; i++)
+    if (ibx+i < k && ind + i  >= nb){
+      A[i*(lda+1)] = tmp;
+    }
+  
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+ -- GPU kernel for setting 0 in the nb-1 lower subdiagonals and 1 in the diagonal
+    @author Raffaele Solca
+ */
+
+__global__ void zsetdiag1subdiag0_U(int k, cuDoubleComplex *A, int lda){
+
+  int nb = blockDim.x;
+  int ibx = blockIdx.x * nb;
+
+  int ind = ibx + threadIdx.x;
+
+  A += ind + __mul24((ibx), lda);
+
+  cuDoubleComplex tmp = MAGMA_Z_ZERO;
+  if(threadIdx.x == 0)
+    tmp = MAGMA_Z_ONE;
+
+#pragma unroll
+  for(int i=0; i<nb; i++)
+    if (ibx+i < k && ind + i < k){
+      A[i*(lda+1)] = tmp;
+    }
+
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+ -- Set 1s in the diagonal and 0s in the nb-1 lower (UPLO='U') or 
+    upper (UPLO='L') subdiagonals 
+    @author Raffaele Solca
+ */
+extern "C" void
+magmablas_zsetdiag1subdiag0(char uplo, magma_int_t k, magma_int_t nb,
+                 cuDoubleComplex *A, magma_int_t lda)
+{
+  
+  dim3 threads(nb, 1, 1);
+  dim3 grid((k-1)/nb+1);
+  if(k>lda)  
+    fprintf(stderr,"wrong second argument of zsetdiag1subdiag0");
+  if(uplo == MagmaLower)
+    zsetdiag1subdiag0_L<<< grid, threads >>> (k, A, lda);
+  else if(uplo == MagmaUpper){
+    zsetdiag1subdiag0_U<<< grid, threads >>> (k, A, lda);
+  }
+  else 
+    fprintf(stderr,"wrong first argument of zsetdiag1subdiag0");
+
+  return;
+}
