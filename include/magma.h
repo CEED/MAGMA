@@ -104,7 +104,9 @@
 #define MAGMA_Z_ABS(a)            cuCabs((a))
 #define MAGMA_Z_ZERO              make_cuDoubleComplex(0.0, 0.0)
 #define MAGMA_Z_ONE               make_cuDoubleComplex(1.0, 0.0)
+#define MAGMA_Z_HALF              make_cuDoubleComplex(0.5, 0.0)
 #define MAGMA_Z_NEG_ONE           make_cuDoubleComplex(-1.0, 0.0)
+#define MAGMA_Z_NEG_HALF          make_cuDoubleComplex(-0.5, 0.0)
 
 #define MAGMA_C_SET2REAL(v, t)    (v).x = (t); (v).y = 0.0
 #define MAGMA_C_OP_NEG_ASGN(t, z) (t).x = -(z).x; (t).y = -(z).y
@@ -124,7 +126,9 @@
 #define MAGMA_C_ABS(a)            cuCabsf((a))
 #define MAGMA_C_ZERO              make_cuFloatComplex(0.0, 0.0)
 #define MAGMA_C_ONE               make_cuFloatComplex(1.0, 0.0)
+#define MAGMA_C_HALF              make_cuFloatComplex(0.5, 0.0)
 #define MAGMA_C_NEG_ONE           make_cuFloatComplex(-1.0, 0.0)
+#define MAGMA_C_NEG_HALF          make_cuFloatComplex(-0.5, 0.0)
 
 #define MAGMA_D_SET2REAL(v, t)    (v) = (t);
 #define MAGMA_D_OP_NEG_ASGN(t, z) (t) = -(z)
@@ -144,7 +148,9 @@
 #define MAGMA_D_ABS(a)            ((a)>0?(a):-(a))
 #define MAGMA_D_ZERO              (0.0)
 #define MAGMA_D_ONE               (1.0)
+#define MAGMA_D_HALF              (0.5)
 #define MAGMA_D_NEG_ONE           (-1.0)
+#define MAGMA_D_NEG_HALF          (-0.5)
 
 #define MAGMA_S_SET2REAL(v, t)    (v) = (t);
 #define MAGMA_S_OP_NEG_ASGN(t, z) (t) = -(z)
@@ -164,7 +170,9 @@
 #define MAGMA_S_ABS(a)            ((a)>0?(a):-(a))
 #define MAGMA_S_ZERO              (0.0)
 #define MAGMA_S_ONE               (1.0)
+#define MAGMA_S_HALF              (0.5)
 #define MAGMA_S_NEG_ONE           (-1.0)
+#define MAGMA_S_NEG_HALF          (-0.5)
 
 #ifndef CBLAS_SADDR
 #define CBLAS_SADDR(a)  &(a)
