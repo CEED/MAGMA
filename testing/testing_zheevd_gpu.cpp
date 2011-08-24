@@ -5,7 +5,8 @@
        Univ. of Colorado, Denver
        November 2010
 
-    @author Stan Tomov
+    @author Raffaele Solca
+    @author Stan Tomov 
 
     @precisions normal z -> c
 
@@ -28,13 +29,13 @@
 #define absv(v1) ((v1)>0? (v1): -(v1))
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing zheevd
+   -- Testing zheevd_gpu
 */
 int main( int argc, char** argv) 
 {
     TESTING_CUDA_INIT();
 
-    cuDoubleComplex *h_A, *h_R, *h_work;
+    cuDoubleComplex *h_A, *h_R, *d_R, *h_work;
     double *rwork, *w1, *w2;
     magma_int_t *iwork;
     double gpu_time, cpu_time;
@@ -51,6 +52,7 @@ int main( int argc, char** argv)
 
     //const char *uplo = MagmaLowerStr;
     char *uplo = (char*)MagmaLowerStr;
+    //char *uplo = (char*)MagmaUpperStr;
     char *jobz = (char*)MagmaVectorsStr;
 
     magma_int_t checkres;
@@ -62,17 +64,17 @@ int main( int argc, char** argv)
                 N = atoi(argv[++i]);
         }
         if (N>0)
-            printf("  testing_zheevd -N %d\n\n", N);
+            printf("  testing_zheevd_gpu -N %d\n\n", N);
         else
             {
                 printf("\nUsage: \n");
-                printf("  testing_zheevd -N %d\n\n", N);
+                printf("  testing_zheevd_gpu -N %d\n\n", N);
                 exit(1);
             }
     }
     else {
         printf("\nUsage: \n");
-        printf("  testing_zheevd -N %d\n\n", 1024);
+        printf("  testing_zheevd_gpu -N %d\n\n", 1024);
         N = size[7];
     }
 
@@ -85,7 +87,8 @@ int main( int argc, char** argv)
     TESTING_MALLOC(    w1, double         ,  N);
     TESTING_MALLOC(    w2, double         ,  N);
     TESTING_HOSTALLOC(h_R, cuDoubleComplex, n2);
-
+    TESTING_DEVALLOC (d_R, cuDoubleComplex, n2);
+  
     magma_int_t nb = magma_get_zhetrd_nb(N);
     magma_int_t lwork = 2*N*nb + N*N;
     magma_int_t lrwork = 1 + 5*N +2*N*N;
@@ -106,32 +109,36 @@ int main( int argc, char** argv)
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-        lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
+        cublasSetMatrix(N, N, sizeof(cuDoubleComplex), h_A, N, d_R, N);
 
-	magma_zheevd(jobz[0], uplo[0],
-		     N, h_R, N, w1,
-		     h_work, lwork, 
+	magma_zheevd_gpu(jobz[0], uplo[0],
+		     N, d_R, N, w1,
+		     h_R, N,
+                     h_work, lwork, 
 		     rwork, lrwork, 
 		     iwork, liwork, 
 		     &info);
 	
-	lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
+        cublasSetMatrix(N, N, sizeof(cuDoubleComplex), h_A, N, d_R, N);
 
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-	magma_zheevd(jobz[0], uplo[0],
-                     N, h_R, N, w1,
+	magma_zheevd_gpu(jobz[0], uplo[0],
+                     N, d_R, N, w1,
+                     h_R, N,
                      h_work, lwork,
                      rwork, lrwork,
                      iwork, liwork,
                      &info);
+        
         end = get_current_time();
 
         gpu_time = GetTimerValue(start,end)/1000.;
 
 	if ( checkres ) {
+          cublasGetMatrix(N, N, sizeof(cuDoubleComplex), d_R, N, h_R, N);
           /* =====================================================================
              Check the results following the LAPACK's [zcds]drvst routine.
              A is factored as A = U S U' and the following 3 tests computed:
@@ -149,9 +156,10 @@ int main( int argc, char** argv)
                            h_R, &N,
                            tau, h_work, rwork, &result[0]);
 	  
-	  lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
-          magma_zheevd('N', uplo[0],
-                       N, h_R, N, w2,
+          cublasSetMatrix(N, N, sizeof(cuDoubleComplex), h_A, N, d_R, N);
+          magma_zheevd_gpu('N', uplo[0],
+                       N, d_R, N, w2,
+                       h_R, N,
                        h_work, lwork,
 		       rwork, lrwork,
                        iwork, liwork,
@@ -207,7 +215,8 @@ int main( int argc, char** argv)
     TESTING_FREE(     iwork);
     TESTING_HOSTFREE(h_work);
     TESTING_HOSTFREE(   h_R);
-
+    TESTING_DEVFREE(   d_R);
+  
     /* Shutdown */
     TESTING_CUDA_FINALIZE();
 }

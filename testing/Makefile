@@ -39,6 +39,7 @@ ZSRC  = testing_zgemm.cpp	\
         testing_dsyevd.cpp	\
 	\
         testing_zhetrd_gpu.cpp  \
+        testing_zheevd_gpu.cpp  \
         \
 	testing_zcposv_gpu.cpp	\
 	testing_zcgesv_gpu.cpp	\
