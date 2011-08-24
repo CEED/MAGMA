@@ -241,7 +241,9 @@ void    blasf77_zherk( const char *, const char *, const int *, const int *, dou
 		       cuDoubleComplex *, const int *, double *, cuDoubleComplex *, 
 		       const int *);
 void    blasf77_zscal( const int *, cuDoubleComplex *, cuDoubleComplex *, const int *);
+#if defined(PRECISION_z) || defined(PRECISION_c)
 void    blasf77_zdscal( const int *, double *, cuDoubleComplex *, const int *);
+#endif
 void    blasf77_zsymm( const char *, const char *, const int *, const int *, 
 		       cuDoubleComplex *, cuDoubleComplex *, const int *, 
 		       cuDoubleComplex *, const int *, cuDoubleComplex *,
