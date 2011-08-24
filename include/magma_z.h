@@ -141,6 +141,9 @@ magma_int_t magma_zhegvd( magma_int_t itype, char jobz, char uplo, magma_int_t n
 			  double *w, cuDoubleComplex *work, magma_int_t lwork, 
 			  double *rwork, magma_int_t lrwork, magma_int_t *iwork, 
 			  magma_int_t liwork, magma_int_t *info);
+magma_int_t magma_zhegst( magma_int_t itype, char uplo, magma_int_t n,
+			  cuDoubleComplex *a, magma_int_t lda,
+			  cuDoubleComplex *b, magma_int_t ldb, magma_int_t *info);
 
 /* //////////////////////////////////////////////////////////////////////////// 
  -- MAGMA function definitions / Data on GPU
