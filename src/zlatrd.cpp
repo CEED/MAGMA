@@ -95,8 +95,7 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
             the first NB columns of the reduced matrix.   
 
     TAU     (output) COMPLEX_16 array, dimension (N-1)   
-            The scalar factors of the elementary reflectors, store     
-d in   
+            The scalar factors of the elementary reflectors, stored in   
             TAU(n-nb:n-1) if UPLO = 'U', and in TAU(1:nb) if UPLO = 'L'.   
             See Further Details.   
 
