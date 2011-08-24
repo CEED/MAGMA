@@ -232,14 +232,15 @@ magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
           // 1. Send the block reflector  A(0:n-i-1,i) to the GPU
           cublasSetVector(i, sizeof(cuDoubleComplex), A(0, i), 1, dA(0, i), 1);
 
-	  /*          
+#if (GPUSHMEM < 200)
           cublasZhemv(MagmaUpper, i, c_one, dA(0, 0), ldda,
                       dA(0, i), ione, c_zero, dW(0, iw), ione);
-	  */
+#else
 	  magmablas_zhemv2_200(MagmaUpper, i, c_one, dA(0, 0), ldda,
 			       dA(0, i), ione, c_zero, dW(0, iw), ione,
 			       dwork, ldwork);
-          
+#endif
+     
           // 2. Start putting the result back (asynchronously)
           cudaMemcpy2DAsync(W(0, iw) /*test*/, ldw*sizeof(cuDoubleComplex),
                             dW(0, iw), lddw*sizeof(cuDoubleComplex),
@@ -316,14 +317,15 @@ magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
 	      // 1. Send the block reflector  A(i+1:n,i) to the GPU
 	      cublasSetVector(i_n, sizeof(cuDoubleComplex), A(i+1, i), 1, dA(i+1, i), 1);	  
 	  
-	      /*
+#if (GPUSHMEM < 200)
 	      cublasZhemv('L', i_n, c_one, dA(i+1, i+1), ldda, dA(i+1, i), ione, c_zero,
 			  dW(i+1, i), ione);
-	      */
+#else
 	      magmablas_zhemv2_200('L', i_n, c_one, dA(i+1, i+1), ldda, dA(i+1, i), ione, c_zero,
 				   dW(i+1, i), ione,
 				   dwork, ldwork);
-	  
+#endif
+
 	      // 2. Start putting the result back (asynchronously)
 	      cudaMemcpy2DAsync(W(i+1, i), ldw*sizeof(cuDoubleComplex),
 				dW(i+1, i), lddw*sizeof(cuDoubleComplex),
