@@ -35,6 +35,7 @@ extern "C" {
 #    define blasf77_zher2k     zher2k_
 #    define blasf77_zherk      zherk_
 #    define blasf77_zscal      zscal_
+#    define blasf77_zdscal     zdscal_ 
 #    define blasf77_zsymm      zsymm_
 #    define blasf77_zsyr2k     zsyr2k_
 #    define blasf77_zsyrk      zsyrk_
@@ -118,6 +119,7 @@ extern "C" {
 #    define blasf77_zher2k     zher2k
 #    define blasf77_zherk      zherk
 #    define blasf77_zscal      zscal
+#    define blasf77_zdscal     zdscal
 #    define blasf77_zsymm      zsymm
 #    define blasf77_zsyr2k     zsyr2k
 #    define blasf77_zsyrk      zsyrk
@@ -237,6 +239,7 @@ void    blasf77_zherk( const char *, const char *, const int *, const int *, dou
 		       cuDoubleComplex *, const int *, double *, cuDoubleComplex *, 
 		       const int *);
 void    blasf77_zscal( const int *, cuDoubleComplex *, cuDoubleComplex *, const int *);
+void    blasf77_zdscal( const int *, double *, cuDoubleComplex *, const int *);
 void    blasf77_zsymm( const char *, const char *, const int *, const int *, 
 		       cuDoubleComplex *, cuDoubleComplex *, const int *, 
 		       cuDoubleComplex *, const int *, cuDoubleComplex *,
