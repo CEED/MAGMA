@@ -62,6 +62,7 @@ extern "C" {
 #    define lapackf77_zgetrf   zgetrf_
 #    define lapackf77_zheevd   zheevd_
 #    define lapackf77_zhegs2   zhegs2_
+#    define lapackf77_zhegvd   zhegvd_
 #    define lapackf77_zhetd2   zhetd2_
 #    define lapackf77_zhetrd   zhetrd_
 #    define lapackf77_zhseqr   zhseqr_
@@ -146,6 +147,7 @@ extern "C" {
 #    define lapackf77_zgetrf   zgetrf
 #    define lapackf77_zheevd   zheevd
 #    define lapackf77_zhegs2   zhegs2
+#    define lapackf77_zhegvd   zhegvd
 #    define lapackf77_zhetd2   zhetd2
 #    define lapackf77_zhetrd   zhetrd
 #    define lapackf77_zhseqr   zhseqr
@@ -330,6 +332,12 @@ void    lapackf77_zheevd(const char *jobz, const char *uplo, magma_int_t *n,
 void    lapackf77_zhegs2(int *itype, char *uplo, int *n, 
 			 cuDoubleComplex *a, int *lda, 
 			 cuDoubleComplex *b, int *ldb, int *info);
+void    lapackf77_zhegvd(magma_int_t *itype, const char *jobz, const char *uplo, 
+			 magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda,
+			 cuDoubleComplex *b, magma_int_t *ldb, double *w,
+			 cuDoubleComplex *work, magma_int_t *lwork, 
+			 DWORKFORZ_AND_LD magma_int_t *iwork, magma_int_t *liwork,
+			 magma_int_t *info);
 void    lapackf77_zhetd2(const char *uplo, magma_int_t *n, 
 			 cuDoubleComplex *a, magma_int_t *lda, 
 			 double *d, double *e, cuDoubleComplex *tau, magma_int_t *info);
