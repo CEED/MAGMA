@@ -5,6 +5,8 @@
        Univ. of Colorado, Denver
        November 2010
 
+       @author Stan Tomov
+
        @precisions normal z -> c
 
 */
@@ -137,7 +139,6 @@ magma_zheevd(char jobz, char uplo,
     Modified description of INFO. Sven, 16 Feb 05.   
     =====================================================================   */
 
-
     char uplo_[2] = {uplo, 0};
     char jobz_[2] = {jobz, 0};
     static magma_int_t c__1 = 1;
@@ -168,7 +169,6 @@ magma_zheevd(char jobz, char uplo,
     static double smlnum;
     static magma_int_t lquery;
 
-    /* Function Body */
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);
     lower = lapackf77_lsame(uplo_, MagmaLowerStr);
     lquery = lwork == -1 || lrwork == -1 || liwork == -1;

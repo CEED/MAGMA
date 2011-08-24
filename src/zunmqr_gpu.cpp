@@ -5,6 +5,8 @@
        Univ. of Colorado, Denver
        November 2010
 
+       @author Stan Tomov
+
        @precisions normal z -> s d c
 
 */
@@ -28,7 +30,7 @@ magma_zunmqr_gpu(char side, char trans,
 
     Purpose
     =======
-    ZUNMQR overwrites the general complex M-by-N matrix C with
+    ZUNMQR_GPU overwrites the general complex M-by-N matrix C with
 
                     SIDE = 'L'     SIDE = 'R'
     TRANS = 'N':      Q * C          C * Q
@@ -64,14 +66,14 @@ magma_zunmqr_gpu(char side, char trans,
             If SIDE = 'L', M >= K >= 0;
             if SIDE = 'R', N >= K >= 0.
 
-    A       (input) COMPLEX_16 array, dimension (LDDA,K)
+    DA      (input) COMPLEX_16 array on the GPU, dimension (LDDA,K)
             The i-th column must contain the vector which defines the
             elementary reflector H(i), for i = 1,2,...,k, as returned by
-            ZGEQRF in the first k columns of its array argument A.
-            A is modified by the routine but restored on exit.
+            ZGEQRF in the first k columns of its array argument DA.
+            DA is modified by the routine but restored on exit.
 
-    LDDA     (input) INTEGER
-            The leading dimension of the array A.
+    LDDA    (input) INTEGER
+            The leading dimension of the array DA.
             If SIDE = 'L', LDDA >= max(1,M);
             if SIDE = 'R', LDDA >= max(1,N).
 
@@ -79,12 +81,12 @@ magma_zunmqr_gpu(char side, char trans,
             TAU(i) must contain the scalar factor of the elementary
             reflector H(i), as returned by ZGEQRF.
 
-    C       (input/output) COMPLEX_16 array, dimension (LDDC,N)
+    DC      (input/output) COMPLEX_16 array on the GPU, dimension (LDDC,N)
             On entry, the M-by-N matrix C.
             On exit, C is overwritten by Q*C or Q\*\*H*C or C*Q\*\*H or C*Q.
 
     LDDC     (input) INTEGER
-            The leading dimension of the array C. LDDC >= max(1,M).
+            The leading dimension of the array DC. LDDC >= max(1,M).
 
     HWORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))
             On exit, if INFO = 0, HWORK(1) returns the optimal LWORK.
@@ -100,8 +102,8 @@ magma_zunmqr_gpu(char side, char trans,
             this value as the first entry of the HWORK array, and no error
             message related to LWORK is issued by XERBLA.
 
-    DT      (input) COMPLEX_16 array that is the output (the 9th argument)
-            of magma_zgeqrf_gpu.
+    DT      (input) COMPLEX_16 array on the GPU that is the output 
+            (the 9th argument) of magma_zgeqrf_gpu.
 
     NB      (input) INTEGER
             This is the blocking size that was used in pre-computing DT, e.g.,
@@ -128,7 +130,6 @@ magma_zunmqr_gpu(char side, char trans,
     long int left, notran, lquery;
     static magma_int_t lwkopt;
 
-    /* Function Body */
     *info = 0;
     left   = lapackf77_lsame(side_, "L");
     notran = lapackf77_lsame(trans_, "N");

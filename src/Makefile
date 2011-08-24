@@ -53,14 +53,18 @@ ZSRC  = zpotrf.cpp	\
         zlatrd.cpp 	\
         zlatrd2.cpp     \
         zunmtr.cpp 	\
+        zunmtr_gpu.cpp  \
         zunmqr.cpp 	\
+        zunmqr2_gpu.cpp \
 	zunmql.cpp      \
+        zunmql2_gpu.cpp \
         \
         zgeev.cpp       \
         dgeev.cpp       \
         zheevd.cpp      \
         zheevd_gpu.cpp  \
         dsyevd.cpp      \
+        dsyevd_gpu.cpp  \
         zgesvd.cpp	\
 	dgesvd.cpp	\
 	\

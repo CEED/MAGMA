@@ -5,6 +5,8 @@
        Univ. of Colorado, Denver
        November 2010
 
+       @author Stan Tomov
+
        @precisions normal d -> s
 
 */
