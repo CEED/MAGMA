@@ -5,6 +5,9 @@
        Univ. of Colorado, Denver
        November 2010
 
+       @author Stan Tomov
+       @author Raffaele Solca
+
        @precisions normal z -> s d c
 
 */
@@ -182,8 +185,10 @@ magma_zunmtr(char side, char uplo, char trans,
       {
 	/* Q was determined by a call to SSYTRD with UPLO = 'U' */
 	i__2 = nq - 1;
-	lapackf77_zunmql(side_, trans_, &mi, &ni, &i__2, &a[lda], &lda, 
-                         tau, c, &ldc, work, &lwork, &iinfo);
+	//lapackf77_zunmql(side_, trans_, &mi, &ni, &i__2, &a[lda], &lda, 
+        //                 tau, c, &ldc, work, &lwork, &iinfo);
+        magma_zunmql(side, trans, mi, ni, i__2, &a[lda], lda, tau,
+		     c, ldc, work, lwork, &iinfo);
       }
     else 
       {
@@ -201,6 +206,7 @@ magma_zunmtr(char side, char uplo, char trans,
       }
 
     MAGMA_Z_SET2REAL( work[0], lwkopt );
+
     return MAGMA_SUCCESS;
 } /* magma_zunmtr */
 
