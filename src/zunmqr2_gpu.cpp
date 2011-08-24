@@ -4,6 +4,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2010
+  
+       @author Raffaele Solca
+       @author Stan Tomov
 
        @precisions normal z -> s d c
 

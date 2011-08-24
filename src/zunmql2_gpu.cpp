@@ -5,6 +5,8 @@
        Univ. of Colorado, Denver
        November 2010
 
+       @author Raffaele Solca
+
        @precisions normal z -> s d c
 
 */

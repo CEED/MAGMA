@@ -202,5 +202,5 @@ magma_zunmtr(char side, char uplo, char trans,
 
     MAGMA_Z_SET2REAL( work[0], lwkopt );
     return MAGMA_SUCCESS;
-} /* zunmtr_ */
+} /* magma_zunmtr */
 
