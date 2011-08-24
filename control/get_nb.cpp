@@ -359,6 +359,42 @@ int magma_get_zgebrd_nb(int m){
   return 32;
 }
 
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for zhegst based on m;
+      the return value should be a multiple of 32
+*/
+extern "C"
+int magma_get_ssygst_nb(int m){
+  return 64;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for zhegst based on m;
+      the return value should be a multiple of 32
+*/
+extern "C"
+int magma_get_dsygst_nb(int m){
+  return 64;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for zhegst based on m;
+      the return value should be a multiple of 32
+*/
+extern "C"
+int magma_get_chegst_nb(int m){
+  return 64;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for zhegst based on m;
+      the return value should be a multiple of 32
+*/
+extern "C"
+int magma_get_zhegst_nb(int m){
+  return 64;
+}
+
 // ==== End Definition of blocking sizes for Tesla ===========================
 #else
 // ====     Definition of blocking sizes for Fermi ===========================
@@ -737,6 +773,42 @@ int magma_get_zgebrd_nb(int m){
     return 64;
   else
     return 64;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for zhegst based on m;
+      the return value should be a multiple of 32
+*/
+extern "C"
+int magma_get_ssygst_nb(int m){
+  return 64;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for zhegst based on m;
+      the return value should be a multiple of 32
+*/
+extern "C"
+int magma_get_dsygst_nb(int m){
+  return 64;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for zhegst based on m;
+      the return value should be a multiple of 32
+*/
+extern "C"
+int magma_get_chegst_nb(int m){
+  return 64;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for zhegst based on m;
+      the return value should be a multiple of 32
+*/
+extern "C"
+int magma_get_zhegst_nb(int m){
+  return 64;
 }
 
 // ==== End Definition of blocking sizes for Fermi ===========================
