@@ -28,7 +28,7 @@ void Mylapackf77_zstedc(const char *compz, magma_int_t *n,
 
 // === Define what BLAS to use ============================================
 
-#define FAST_HEMV
+//#define FAST_HEMV
 
 // === End defining what BLAS to use ======================================
 
