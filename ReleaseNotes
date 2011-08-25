@@ -16,13 +16,18 @@ Included are routines for the following algorithms:
       complex arithmetic (single and double);
     * Eigen and singular value problem solvers in both real and
       complex arithmetic (single and double);
+    * Generalized Hermitian-definite eigenproblem solver in both
+      real and complex arithmetic (single and double);
     * Mixed-precision iterative refinement solvers based on LU, QR,
       and Cholesky in both real and complex arithmetic;
     * MAGMA BLAS in real arithmetic (single and double), including
       gemm, gemv, symv, and trsm.
 
- 1.0.0 - 
+ 1.0.0 - August 25th, 2011
     * Fix make.inc.mkl (Thanks to ar1309)
+    * Add gpu interfaces to [zcsd]hetrd, [zcsd]heevd
+    * Add all cases for [zcds]unmtr_gpu
+    * Add generalized Hermitian-definite eigenproblem solver ([zcds]hegvd)
 
  1.0.0RC5 - April 6th, 2011
     * Add fortran interface for lapack functions
