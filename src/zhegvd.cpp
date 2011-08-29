@@ -8,9 +8,9 @@
        @author Raffaele Solca
        @author Stan Tomov
 
-       @precisions normal z -> c
+       @precisions normal z -> c 
 
-*/
+*/ 
 #include "common_magma.h"
 
 /* This ztrmm interface is used for TAU profiling */
@@ -36,8 +36,9 @@ void MycublasZtrsm(char side, char uplo, char trans, char unit,
 extern "C" magma_int_t
 magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
              cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *b, magma_int_t ldb, 
-             double *w, cuDoubleComplex *work, magma_int_t lwork, double *rwork,
-             magma_int_t lrwork, magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
+             double *w, cuDoubleComplex *work, magma_int_t lwork, 
+	     double *rwork, magma_int_t lrwork, 
+	     magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -122,7 +123,7 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
             The length of the array WORK.   
             If N <= 1,                LWORK >= 1.   
             If JOBZ  = 'N' and N > 1, LWORK >= N + 1.   
-            If JOBZ  = 'V' and N > 1, LWORK >= 2*N + N**2.   
+            If JOBZ  = 'V' and N > 1, LWORK >= 2*N*nb + N**2.   
 
             If LWORK = -1, then a workspace query is assumed; the routine   
             only calculates the optimal sizes of the WORK, RWORK and   
@@ -193,7 +194,6 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     char jobz_[2] = {jobz, 0};
 
     static cuDoubleComplex zone = MAGMA_Z_ONE;
-    static magma_int_t c_n1 = -1;
     
     cuDoubleComplex *da;
     cuDoubleComplex *db;

@@ -18,6 +18,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
 		 magma_int_t n, 
 		 double *da, magma_int_t ldda, 
 		 double *w, 
+		 double *wa,  magma_int_t ldwa,
 		 double *work, magma_int_t lwork,
 		 magma_int_t *iwork, magma_int_t liwork,
 		 magma_int_t *info)
@@ -72,6 +73,11 @@ magma_dsyevd_gpu(char jobz, char uplo,
 
     W       (output) DOUBLE PRECISION array, dimension (N)   
             If INFO = 0, the eigenvalues in ascending order.
+
+    WA      (workspace) DOUBLE PRECISION array, dimension (LDWA, N)
+
+    LDWA    (input) INTEGER
+            The leading dimension of the array WA.  LDWA >= max(1,N).
 
     WORK    (workspace/output) DOUBLE_PRECISION array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
@@ -258,12 +264,12 @@ magma_dsyevd_gpu(char jobz, char uplo,
   
 #ifdef FAST_SYMV
     magma_dsytrd2_gpu(uplo, n, da, lda, &w[1], &work[inde],
-		      &work[indtau], &work[indwrk], llwork, 
+		      &work[indtau], wa, ldwa, &work[indwrk], llwork, 
 		      dc, lddc*n, &iinfo);
 #else
     magma_dsytrd_gpu(uplo, n, da, ldda, &w[1], &work[inde],
-		     &work[indtau], &work[indwrk], llwork, 
-		     dc, lddc*n, &iinfo);
+		     &work[indtau], wa, ldwa, &work[indwrk], llwork, 
+		     &iinfo);
 #endif
 
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call   
@@ -279,7 +285,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
 	cublasSetMatrix(n, n, sizeof(double), &work[indwrk], n, dc, lddc);
 	
 	magma_dormtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, n, da, ldda, &work[indtau],
-			 &work[indwrk], n, &work[indwk2], llwrk2, &iinfo);
+			 dc, lddc, wa, ldwa, &iinfo);
 	
 	cudaMemcpy2D(da, ldda * sizeof(double), dc, lddc * sizeof(double),
 		     sizeof(double)*n, n, cudaMemcpyDeviceToDevice);
