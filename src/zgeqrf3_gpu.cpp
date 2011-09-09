@@ -111,12 +111,12 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
 
     #define a_ref(a_1,a_2) (dA+(a_2)*(ldda) + (a_1))
     #define t_ref(a_1)     (dT+(a_1)*nb)
-    #define d_ref(a_1)     (dT+(lddwork+(a_1))*nb)
-    #define dd_ref(a_1)    (dT+(2*lddwork+(a_1))*nb)
+    #define d_ref(a_1)     (dT+(minmn+(a_1))*nb)
+    #define dd_ref(a_1)    (dT+(2*minmn+(a_1))*nb)
     #define work_ref(a_1)  ( work + (a_1))
     #define hwork          ( work + (nb)*(m))
 
-    magma_int_t i, k, old_i, old_ib, rows, cols;
+    magma_int_t i, k, minmn, old_i, old_ib, rows, cols;
     magma_int_t ib, nb;
     magma_int_t ldwork, lddwork, lwork, lhwork;
     cuDoubleComplex *work, *ut;
@@ -133,7 +133,7 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
     if (*info != 0)
         return MAGMA_ERR_ILLEGAL_VALUE;
 
-    k = min(m,n);
+    k = minmn = min(m,n);
     if (k == 0)
         return MAGMA_SUCCESS;
 
@@ -156,7 +156,7 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
     cudaStreamCreate(&stream[1]);
 
     ldwork = m;
-    lddwork= k;
+    lddwork= n;
 
     if ( (nb > 1) && (nb < k) ) {
         /* Use blocked code initially */
