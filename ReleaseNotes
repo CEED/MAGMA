@@ -25,6 +25,7 @@ Included are routines for the following algorithms:
 
  1.0.1 - ... 
     * Fix a bug in [zcsd]geqrf_gpu.cpp and [zcsd]geqrf3_gpu.cpp for n>m
+    * Added missing Fortran interfaces
 
  1.0.0 - August 25th, 2011
     * Fix make.inc.mkl (Thanks to ar1309)
