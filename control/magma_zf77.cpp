@@ -79,6 +79,7 @@ typedef size_t devptr_t;
 #define MAGMAF_ZGEEV   MAGMA_FORTRAN_NAME(zgeev,   ZGEEV  )
 #define MAGMAF_ZGESVD  MAGMA_FORTRAN_NAME(zgesvd,  ZGESVD )
 #define MAGMAF_ZHEEVD  MAGMA_FORTRAN_NAME(zheevd,  ZHEEVD )
+#define MAGMAF_ZHEGVD  MAGMA_FORTRAN_NAME(zhegvd,  ZHEGVD )
 
 /* //////////////////////////////////////////////////////////////////////////// 
  -- MAGMA function definitions / Data on GPU
@@ -337,6 +338,20 @@ void MAGMAF_ZHEEVD( char *jobz, char *uplo, magma_int_t *n,
                   rwork, *lrwork,
                   iwork, *liwork, info);
 }
+
+void MAGMAF_ZHEGVD(magma_int_t *itype, char *jobz, char *uplo, magma_int_t *n,
+		   cuDoubleComplex *a, magma_int_t *lda, 
+		   cuDoubleComplex *b, magma_int_t *ldb,
+		   double *w, cuDoubleComplex *work, magma_int_t *lwork,
+		   double *rwork, magma_int_t *lrwork,
+		   magma_int_t *iwork, magma_int_t *liwork, magma_int_t *info)
+{
+  magma_zhegvd( *itype, jobz[0], uplo[0], *n,
+		a, *lda, b, *ldb,
+		w, work, *lwork,
+		rwork, *lrwork,
+		iwork, *liwork, info);
+}
     
 #else
 void MAGMAF_ZGEEV( char *jobvl, char *jobvr, magma_int_t *n,
@@ -381,6 +396,20 @@ void MAGMAF_ZHEEVD( char *jobz, char *uplo, magma_int_t *n,
                   work, *lwork,
                   iwork, *liwork, info);
 }
+
+void MAGMAF_ZHEGVD(magma_int_t *itype, char *jobz, char *uplo, magma_int_t *n,
+                   cuDoubleComplex *a, magma_int_t *lda,
+                   cuDoubleComplex *b, magma_int_t *ldb,
+                   double *w, cuDoubleComplex *work, magma_int_t *lwork,
+                   magma_int_t *iwork, magma_int_t *liwork, magma_int_t *info)
+{
+  magma_zhegvd( *itype, jobz[0], uplo[0], *n,
+                a, *lda, b, *ldb,
+		w, work, *lwork,
+                iwork, *liwork, info);
+}
+
+
 #endif
 
 /* //////////////////////////////////////////////////////////////////////////// 
