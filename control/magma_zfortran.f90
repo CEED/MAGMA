@@ -221,6 +221,25 @@ module magma_zfortran
        integer       :: info
      end subroutine magmaf_zheevd
 
+     subroutine magmaf_zhegvd( itype, jobz, uplo, n, a, lda, b, ldb, w, work, lwork, rwork, lrwork, iwork, liwork, info)
+       integer       :: itype
+       character     :: jobz
+       character     :: uplo
+       integer       :: n
+       complex*16    :: a(*)
+       integer       :: lda
+       complex*16    :: b(*)
+       integer       :: ldb
+       double precision:: w(*)
+       complex*16    :: work(*)
+       integer       :: lwork
+       double precision:: rwork(*)
+       integer       :: lrwork
+       integer       :: iwork(*)
+       integer       :: liwork
+       integer       :: info
+     end subroutine magmaf_zhegvd
+
 #else
      subroutine magmaf_zgeev( jobvl, jobvr, n, a, lda, wr, wi, vl, ldvl, vr, ldvr, work, lwork, info)
        character          :: jobvl
