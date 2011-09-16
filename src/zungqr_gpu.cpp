@@ -58,8 +58,12 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
             TAU(i) must contain the scalar factor of the elementary
             reflector H(i), as returned by ZGEQRF_GPU.
 
-    DT      (input) COMPLEX_16 work space array on the GPU device.
-            This must be the 6th argument of magma_zgeqrf_gpu.
+    DT      (input) COMPLEX_16 work space array on the GPU device,
+            dimension (2*MIN(M, N) + (N+31)/32*32 )*NB.
+            This must be the 6th argument of magma_zgeqrf_gpu
+            [ note that if N here is bigger than N in magma_zgeqrf_gpu,
+              the workspace requirement DT in magma_zgeqrf_gpu must be 
+              as specified in this routine ].
 
     NB      (input) INTEGER
             This is the block size used in ZGEQRF_GPU, and correspondingly
