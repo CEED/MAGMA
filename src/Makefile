@@ -15,6 +15,8 @@ ZSRC  = zpotrf.cpp	\
         zpotrf_gpu.cpp	\
         zpotrs_gpu.cpp	\
         zposv_gpu.cpp	\
+        zpotri.cpp	\
+        zpotri_gpu.cpp	\
 	\
         zgetrf.cpp	\
         zgetrf_gpu.cpp 	\
@@ -38,6 +40,7 @@ ZSRC  = zpotrf.cpp	\
 	zgels3_gpu.cpp  \
 	zlarfb_gpu.cpp	\
         zunmqr_gpu.cpp	\
+        zungtr_gpu.cpp	\
         zungqr_gpu.cpp	\
 	\
 	zgebrd.cpp 	\
@@ -80,7 +83,13 @@ ZSRC  = zpotrf.cpp	\
 	zgessm_gpu.cpp	\
 	zssssm_gpu.cpp  \
 	zgetrl_gpu.cpp	\
-	ztstrf_gpu.cpp
+	ztstrf_gpu.cpp \
+	\
+	ztrtri.cpp	\
+	ztrtri_gpu.cpp	\
+	zlauum.cpp	\
+	zlauum_gpu.cpp
+
 
 CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
 DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")

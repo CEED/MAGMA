@@ -141,13 +141,12 @@ magma_zheevd(char jobz, char uplo,
 
     char uplo_[2] = {uplo, 0};
     char jobz_[2] = {jobz, 0};
-    static magma_int_t c__1 = 1;
-    static magma_int_t c_n1 = -1;
-    static magma_int_t c__0 = 0;
-    static double c_b18 = 1.;
+    static magma_int_t ione = 1;
+    static magma_int_t nione = -1;
+    static magma_int_t izero = 0;
+    static double done = MAGMA_D_ONE;
     
-    magma_int_t a_dim1, a_offset;
-    double d__1;
+    double invsigma;
 
     static double eps;
     static magma_int_t inde;
@@ -185,8 +184,8 @@ magma_zheevd(char jobz, char uplo,
     }
 
     lapackf77_zheevd(jobz_, uplo_, &n, 
-                     a, &lda, w, work, &c_n1, 
-                     rwork, &c_n1, iwork, &c_n1, info);
+                     a, &lda, w, work, &nione, 
+                     rwork, &nione, iwork, &nione, info);
 
     lwmin  = (magma_int_t)MAGMA_Z_REAL(work[0]);
     lrwmin = (magma_int_t)rwork[0];
@@ -220,14 +219,6 @@ magma_zheevd(char jobz, char uplo,
 	return MAGMA_SUCCESS;
     }
 
-    a_dim1 = lda;
-    a_offset = 1 + a_dim1;
-    a -= a_offset;
-    --w;
-    --work;
-    --rwork;
-    --iwork;
-
     /* Get machine constants. */
     safmin = lapackf77_dlamch("Safe minimum");
     eps = lapackf77_dlamch("Precision");
@@ -237,7 +228,7 @@ magma_zheevd(char jobz, char uplo,
     rmax = magma_dsqrt(bignum);
 
     /* Scale matrix to allowable range, if necessary. */
-    anrm = lapackf77_zlanhe("M", uplo_, &n, &a[a_offset], &lda, &rwork[1]);
+    anrm = lapackf77_zlanhe("M", uplo_, &n, a, &lda, rwork);
     iscale = 0;
     if (anrm > 0. && anrm < rmin) {
 	iscale = 1;
@@ -247,7 +238,7 @@ magma_zheevd(char jobz, char uplo,
 	sigma = rmax / anrm;
     }
     if (iscale == 1) {
-	lapackf77_zlascl(uplo_, &c__0, &c__0, &c_b18, &sigma, &n, &n, &a[a_offset], 
+	lapackf77_zlascl(uplo_, &izero, &izero, &done, &sigma, &n, &n, a, 
 		&lda, info);
     }
 
@@ -261,29 +252,29 @@ magma_zheevd(char jobz, char uplo,
     llwrk2 = lwork - indwk2 + 1;
     llrwk = lrwork - indrwk + 1;
     /*
-    lapackf77_zhetrd(uplo_, &n, &a[a_offset], &lda, &w[1], &rwork[inde], 
-		     &work[indtau], &work[indwrk], &llwork, &iinfo);
+    lapackf77_zhetrd(uplo_, &n, a, &lda, w, rwork, 
+		     work, &work[indwrk-1], &llwork, &iinfo);
     */
-    magma_zhetrd(uplo_[0], n, &a[a_offset], lda, &w[1], &rwork[inde],
-		 &work[indtau], &work[indwrk], llwork, &iinfo);
+    magma_zhetrd(uplo_[0], n, a, lda, w, rwork,
+		 work, &work[indwrk-1], llwork, &iinfo);
     
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call   
        ZSTEDC to generate the eigenvector matrix, WORK(INDWRK), of the   
        tridiagonal matrix, then call ZUNMTR to multiply it to the Householder 
        transformations represented as Householder vectors in A. */
     if (! wantz) {
-	lapackf77_dsterf(&n, &w[1], &rwork[inde], info);
+	lapackf77_dsterf(&n, w, rwork, info);
     } else {
-	lapackf77_zstedc("I", &n, &w[1], &rwork[inde], &work[indwrk], &n, &work[indwk2], 
-		&llwrk2, &rwork[indrwk], &llrwk, &iwork[1], &liwork, info);
+	lapackf77_zstedc("I", &n, w, rwork, &work[indwrk-1], &n, &work[indwk2-1], 
+		&llwrk2, &rwork[indrwk-1], &llrwk, iwork, &liwork, info);
 	/*
-	lapackf77_zunmtr("L", uplo_, "N", &n, &n, &a[a_offset], &lda, &work[indtau], 
-		&work[indwrk], &n, &work[indwk2], &llwrk2, &iinfo);
+	lapackf77_zunmtr("L", uplo_, "N", &n, &n, a, &lda, work, 
+		&work[indwrk-1], &n, &work[indwk2-1], &llwrk2, &iinfo);
 	*/
-	magma_zunmtr(MagmaLeft, uplo, MagmaNoTrans, n, n, &a[a_offset], lda, &work[indtau],
-		     &work[indwrk], n, &work[indwk2], llwrk2, &iinfo);
+	magma_zunmtr(MagmaLeft, uplo, MagmaNoTrans, n, n, a, lda, work,
+		     &work[indwrk-1], n, &work[indwk2-1], llwrk2, &iinfo);
 	
-	lapackf77_zlacpy("A", &n, &n, &work[indwrk], &n, &a[a_offset], &lda);
+	lapackf77_zlacpy("A", &n, &n, &work[indwrk-1], &n, a, &lda);
     }
 
     /* If matrix was scaled, then rescale eigenvalues appropriately. */
@@ -293,13 +284,13 @@ magma_zheevd(char jobz, char uplo,
 	} else {
 	    imax = *info - 1;
 	}
-	d__1 = 1. / sigma;
-	blasf77_dscal(&imax, &d__1, &w[1], &c__1);
+	invsigma = 1. / sigma;
+	blasf77_dscal(&imax, &invsigma, w, &ione);
     }
 
-    work[1]  = MAGMA_Z_MAKE((double) lwmin, 0.);
-    rwork[1] = (double) lrwmin;
-    iwork[1] = liwmin;
+    work[0]  = MAGMA_Z_MAKE((double) lwmin, 0.);
+    rwork[0] = (double) lrwmin;
+    iwork[0] = liwmin;
 
     return MAGMA_SUCCESS;
 } /* magma_zheevd */

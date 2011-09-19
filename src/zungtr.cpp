@@ -11,7 +11,7 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
+magma_zungtr(magma_int_t m, magma_int_t n, magma_int_t k,
 	     cuDoubleComplex *a, magma_int_t lda,
 	     cuDoubleComplex *tau, cuDoubleComplex *dT,
 	     magma_int_t nb, magma_int_t *info)
@@ -24,47 +24,43 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
 
     Purpose
     =======
-    ZUNGQR generates an M-by-N COMPLEX_16 matrix Q with orthonormal columns,
-    which is defined as the first N columns of a product of K elementary
-    reflectors of order M
+    ZUNGTR generates an N-by-N COMPLEX_16 matrix Q,
+    which is defined as the product of N-1 elementary
+    reflectors of order N, as returned by MAGMA_ZHETRD:
 
-          Q  =  H(1) H(2) . . . H(k)
-
-    as returned by ZGEQRF.
+    if UPLO = 'U', Q = H(n-1) . . . H(2) H(1),
+    if UPLO = 'L', Q = H(1) H(2) . . . H(n-1).
 
     Arguments
     =========
-    M       (input) INTEGER
-            The number of rows of the matrix Q. M >= 0.
+    UPLO    (input) CHARACTER*1
+            = 'U': Upper triangle of A contains elementary reflectors
+                   from MAGMA_ZHETRD;
+            = 'L': Lower triangle of A contains elementary reflectors
+                 from MAGMA_ZHETRD.
 
     N       (input) INTEGER
-            The number of columns of the matrix Q. M >= N >= 0.
-
-    K       (input) INTEGER
-            The number of elementary reflectors whose product defines the
-            matrix Q. N >= K >= 0.
+            The order of the matrix Q. N >= 0.
 
     A       (input/output) COMPLEX_16 array A, dimension (LDDA,N). 
-            On entry, the i-th column must contain the vector
-            which defines the elementary reflector H(i), for
-            i = 1,2,...,k, as returned by ZGEQRF_GPU in the 
-            first k columns of its array argument A.
-            On exit, the M-by-N matrix Q.
+            On entry, the vectors which define the elementary reflectors,
+            as returned by MAGMA_ZHETRD.
+            On exit, the N-by-N unitary matrix Q.
 
     LDA     (input) INTEGER
-            The first dimension of the array A. LDA >= max(1,M).
+            The first dimension of the array A. LDA >= max(1,N).
 
-    TAU     (input) COMPLEX_16 array, dimension (K)
+    TAU     (input) COMPLEX_16 array, dimension (N-1)
             TAU(i) must contain the scalar factor of the elementary
-            reflector H(i), as returned by ZGEQRF_GPU.
+            reflector H(i), as returned by MAGMA_ZHETRD.
 
     DT      (input) COMPLEX_16 array on the GPU device.
             DT contains the T matrices used in blocking the elementary
             reflectors H(i), e.g., this can be the 6th argument of 
-            magma_zgeqrf_gpu.
+            magma_zhetrd_gpu.
 
     NB      (input) INTEGER
-            This is the block size used in ZGEQRF_GPU, and correspondingly
+            This is the block size used in ZHETRD_GPU, and correspondingly
             the size of the T matrices, used in the factorization, and
             stored in DT.
 
@@ -198,7 +194,7 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
     free(work);
 
     return MAGMA_SUCCESS;
-} /* magma_zungqr */
+} /* magma_zungtr */
 
 #undef da_ref
 #undef a_ref

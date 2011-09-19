@@ -147,7 +147,7 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
     magma_int_t nb = 0;
     cuDoubleComplex *dT = NULL;
 
-    magma_timestr_t start, end;
+    //magma_timestr_t start, end;
 
     char side[2]   = {0, 0};
     char jobvl_[2] = {jobvl, 0};

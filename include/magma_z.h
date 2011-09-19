@@ -65,6 +65,12 @@ magma_int_t magma_zlahru( magma_int_t m, magma_int_t n, magma_int_t nb,
 			  cuDoubleComplex *dwork);
 magma_int_t magma_zpotrf( char uplo, magma_int_t n, cuDoubleComplex *A, 
 			  magma_int_t lda, magma_int_t *info);
+magma_int_t magma_zpotri( char uplo, magma_int_t n, cuDoubleComplex *A,
+		          magma_int_t lda, magma_int_t *info);
+magma_int_t magma_zlauum( char uplo, magma_int_t n, cuDoubleComplex *A,
+		          magma_int_t lda, magma_int_t *info);
+magma_int_t magma_ztrtri( char uplo, char diag, magma_int_t n, cuDoubleComplex *A, 
+		          magma_int_t lda, magma_int_t *info);
 magma_int_t magma_zhetrd( char uplo, magma_int_t n, cuDoubleComplex *A, 
 			  magma_int_t lda, double *d, double *e, 
 			  cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t lwork, 
@@ -97,6 +103,10 @@ magma_int_t magma_zunghr( magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 			  cuDoubleComplex *tau,
 			  cuDoubleComplex *dT, magma_int_t nb,
 			  magma_int_t *info);
+magma_int_t magma_zheev( char jobz, char uplo, magma_int_t n,
+			 cuDoubleComplex *a, magma_int_t lda, double *w,
+			 cuDoubleComplex *work, magma_int_t lwork,
+		         double *rwork, magma_int_t *info);
 #if defined(PRECISION_z) || defined(PRECISION_c)
 magma_int_t  magma_zgeev( char jobvl, char jobvr, magma_int_t n,
 			  cuDoubleComplex *a, magma_int_t lda,
@@ -229,6 +239,12 @@ magma_int_t magma_zposv_gpu(  char uplo, magma_int_t n, magma_int_t nrhs,
 			      cuDoubleComplex *dB, magma_int_t lddb, magma_int_t *info);
 magma_int_t magma_zpotrf_gpu( char uplo,  magma_int_t n, 
 			      cuDoubleComplex *dA, magma_int_t ldda, magma_int_t *info);
+magma_int_t magma_zpotri_gpu( char uplo,  magma_int_t n,
+		              cuDoubleComplex *dA, magma_int_t ldda, magma_int_t *info);
+magma_int_t magma_zlauum_gpu( char uplo,  magma_int_t n,
+		              cuDoubleComplex *dA, magma_int_t ldda, magma_int_t *info);
+magma_int_t magma_ztrtri_gpu( char uplo,  char diag, magma_int_t n,
+		              cuDoubleComplex *dA, magma_int_t ldda, magma_int_t *info);
 magma_int_t magma_zhetrd_gpu( char uplo, magma_int_t n,
 			      cuDoubleComplex *da, magma_int_t ldda,
 			      double *d, double *e, cuDoubleComplex *tau,

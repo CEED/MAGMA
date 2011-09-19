@@ -327,6 +327,7 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
 	      blasf77_zgemv("No transpose", &i_n, &i, &c_neg_one, W(i+1, 0), &ldw, 
 			    W(0, i), &ione, &c_one, W(i+1, i), &ione);
 	      blasf77_zscal(&i_n, &tau[i], W(i+1,i), &ione);
+	      
               #if defined(PRECISION_z) || defined(PRECISION_c)
 	             /* Comment:
 			To do - move to cblas in cases like this. The commented

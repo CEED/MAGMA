@@ -15,12 +15,14 @@ ZSRC  = testing_zgemm.cpp	\
 	testing_zsymv.cpp	\
 	\
 	testing_zpotrf.cpp	\
+	testing_zpotri.cpp	\
 	testing_zgetrf.cpp 	\
 	testing_zgeqrf.cpp 	\
 	testing_zgeqlf.cpp 	\
 	testing_zgelqf.cpp 	\
 	\
 	testing_zpotrf_gpu.cpp 	\
+	testing_zpotri_gpu.cpp 	\
 	testing_zgetrf_gpu.cpp 	\
 	testing_zgesv_gpu.cpp	\
 	testing_zgeqrf_gpu.cpp 	\

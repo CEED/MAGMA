@@ -60,6 +60,7 @@ extern "C" {
 #    define lapackf77_zgeqrf   zgeqrf_
 #    define lapackf77_zgesvd   zgesvd_
 #    define lapackf77_zgetrf   zgetrf_
+#    define lapackf77_zheev    zheev_
 #    define lapackf77_zheevd   zheevd_
 #    define lapackf77_zhegs2   zhegs2_
 #    define lapackf77_zhegvd   zhegvd_
@@ -81,9 +82,12 @@ extern "C" {
 #    define lapackf77_zlaswp   zlaswp_
 #    define lapackf77_zlatrd   zlatrd_
 #    define lapackf77_zlabrd   zlabrd_
+#    define lapackf77_zlauum   zlauum_
 #    define lapackf77_zpotrf   zpotrf_
+#    define lapackf77_zpotri   zpotri_
 #    define lapackf77_ztrevc   ztrevc_
 #    define lapackf77_ztrtri   ztrtri_
+#    define lapackf77_zsteqr   zsteqr_
 #    define lapackf77_zstedc   zstedc_
 #    define lapackf77_zsymv    zsymv_
 #    define lapackf77_zung2r   zung2r_
@@ -145,6 +149,7 @@ extern "C" {
 #    define lapackf77_zgeqrf   zgeqrf
 #    define lapackf77_zgesvd   zgesvd  
 #    define lapackf77_zgetrf   zgetrf
+#    define lapackf77_zheev    zheev
 #    define lapackf77_zheevd   zheevd
 #    define lapackf77_zhegs2   zhegs2
 #    define lapackf77_zhegvd   zhegvd
@@ -166,9 +171,12 @@ extern "C" {
 #    define lapackf77_zlaswp   zlaswp
 #    define lapackf77_zlatrd   zlatrd
 #    define lapackf77_zlabrd   zlabrd
+#    define lapackf77_zlauum   zlauum
 #    define lapackf77_zpotrf   zpotrf
+#    define lapackf77_zpotri   zpotri
 #    define lapackf77_ztrevc   ztrevc
 #    define lapackf77_ztrtri   ztrtri
+#    define lapackf77_zsteqr   zsteqr
 #    define lapackf77_zstedc   zstedc
 #    define lapackf77_zsymv    zsymv
 #    define lapackf77_zung2r   zung2r
@@ -326,6 +334,10 @@ void    lapackf77_zgesvd(const char *jobu, const char *jobvt,
                          cuDoubleComplex *vt, magma_int_t *ldvt, 
 			 cuDoubleComplex *work, magma_int_t *lwork, 
 			 DWORKFORZ magma_int_t *info );
+void    lapackf77_zheev(const char *jobz, const char *uplo, magma_int_t *n, 
+			 cuDoubleComplex *a, magma_int_t *lda, double *w, 
+                         cuDoubleComplex *work, magma_int_t *lwork,
+			 DWORKFORZ_AND_LD magma_int_t *info);
 void    lapackf77_zheevd(const char *jobz, const char *uplo, magma_int_t *n, 
 			 cuDoubleComplex *a, magma_int_t *lda, double *w, 
                          cuDoubleComplex *work, magma_int_t *lwork,
@@ -397,17 +409,24 @@ void    lapackf77_zlabrd(magma_int_t *m, magma_int_t *n, magma_int_t *nb,
 			 cuDoubleComplex *y, magma_int_t *ldy);
 void    lapackf77_zpotrf(const char *uplo, magma_int_t *n, 
 			 cuDoubleComplex *a, magma_int_t *lda, magma_int_t *info);
+void    lapackf77_zpotri(const char *uplo, magma_int_t *n, 
+			 cuDoubleComplex *a, magma_int_t *lda, magma_int_t *info);
+void    lapackf77_zlauum(const char *uplo, magma_int_t *n, 
+			 cuDoubleComplex *a, magma_int_t *lda, magma_int_t *info);
 void    lapackf77_ztrevc(const char *side, const char *howmny, magma_int_t *select, magma_int_t *n, 
                          cuDoubleComplex *T,  magma_int_t *ldt,  cuDoubleComplex *VL, magma_int_t *ldvl,
                          cuDoubleComplex *VR, magma_int_t *ldvr, magma_int_t *MM, magma_int_t *M, 
                          cuDoubleComplex *work, DWORKFORZ magma_int_t *info);
-void    lapackf77_ztrtri(const char *uplo, const char *diag, magma_int_t *n,
-			 cuDoubleComplex *a, magma_int_t *lda, magma_int_t *info);
+void    lapackf77_zsteqr(const char *compz, magma_int_t *n, double *D, double *E, 
+                         cuDoubleComplex *Z, magma_int_t *ldz, 
+                         double *work, magma_int_t *info);
 void    lapackf77_zstedc(const char *compz, magma_int_t *n, double *D, double *E, 
 			 cuDoubleComplex *Z, magma_int_t *ldz, 
                          cuDoubleComplex *work, magma_int_t *ldwork, 
 			 DWORKFORZ_AND_LD magma_int_t *iwork, magma_int_t *liwork,
 			 magma_int_t *info);
+void    lapackf77_ztrtri(const char *uplo, const char *diag, magma_int_t *n,
+			 cuDoubleComplex *a, magma_int_t *lda, magma_int_t *info);
 #if defined(PRECISION_z) || defined(PRECISION_c)
 void    lapackf77_zsymv(const char *uplo, const magma_int_t *N, const cuDoubleComplex *alpha, 
 			const cuDoubleComplex *A, const magma_int_t *lda, 
