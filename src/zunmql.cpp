@@ -5,6 +5,8 @@
        Univ. of Colorado, Denver
        November 2010
 
+       @author Raffaele Solca
+
        @precisions normal z -> s d c
 
 */
@@ -189,6 +191,8 @@ magma_zunmql(const char side, const char trans,
       return MAGMA_SUCCESS;
     }
 
+    ldwork = nw;
+
     if ( nb >= k ) 
       {
 	/* Use CPU code */
@@ -198,7 +202,7 @@ magma_zunmql(const char side, const char trans,
     else 
       {
 	/* Use hybrid CPU-GPU code */
-	if ( (left && notran) || (! left && ! notran) ) {
+	if (left && notran || ! left && ! notran) {
 	    i1 = 1;
 	    i2 = k;
 	    i3 = nb;
