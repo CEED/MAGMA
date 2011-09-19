@@ -26,12 +26,20 @@ Included are routines for the following algorithms:
  1.0.1 - ... 
     * Fix a bug in [zcsd]geqrf_gpu.cpp and [zcsd]geqrf3_gpu.cpp for n>m
     * Added missing Fortran interfaces
+    * Add [zcds]potri in CPU and GPU interfaces 
+       [Hatem Ltaief et al.]
+    * Add [zcds]trtri in CPU and GPU interfaces 
+       [Hatem Ltaief et al.]
+    * Add [zcds]ungtr in CPU and GPU interfaces 
+       [Hatem Ltaief et al.]
 
  1.0.0 - August 25th, 2011
     * Fix make.inc.mkl (Thanks to ar1309)
     * Add gpu interfaces to [zcsd]hetrd, [zcsd]heevd
-    * Add all cases for [zcds]unmtr_gpu
+    * Add all cases for [zcds]unmtr_gpu 
+       [Raffaele Solca et al.]
     * Add generalized Hermitian-definite eigenproblem solver ([zcds]hegvd)
+       [Raffaele Solca et al.]
 
  1.0.0RC5 - April 6th, 2011
     * Add fortran interface for lapack functions
