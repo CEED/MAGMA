@@ -30,7 +30,7 @@ Included are routines for the following algorithms:
        [Hatem Ltaief et al.]
     * Add [zcds]trtri in CPU and GPU interfaces 
        [Hatem Ltaief et al.]
-    * Add [zcds]ungtr in CPU and GPU interfaces 
+    * Add [zcds]lauum in CPU and GPU interfaces 
        [Hatem Ltaief et al.]
 
  1.0.0 - August 25th, 2011
