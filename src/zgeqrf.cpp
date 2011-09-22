@@ -129,10 +129,12 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
     lddwork = ((n+31)/32)*32;
     ldda    = ((m+31)/32)*32;
 
-    if (CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*ldda + nb*lddwork, sizeof(cuDoubleComplex), (void**)&da) ) {
-        *info = -8;
-        return MAGMA_ERR_CUBLASALLOC;
-    }
+    if (CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*ldda + nb*lddwork,
+					     sizeof(cuDoubleComplex), (void**)&da) ) 
+      {
+	/* Switch to the "out-of-core" (out of GPU-memory) version */
+        return magma_zgeqrf_ooc(m, n, a, lda, tau, work, lwork, info);
+      }
 
     static cudaStream_t stream[2];
     cudaStreamCreate(&stream[0]);
