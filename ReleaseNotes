@@ -32,7 +32,8 @@ Included are routines for the following algorithms:
        [Hatem Ltaief et al.]
     * Add [zcds]lauum in CPU and GPU interfaces 
        [Hatem Ltaief et al.]
-
+    * Add zgemm for Fermi obtained using autotuning
+       
  1.0.0 - August 25th, 2011
     * Fix make.inc.mkl (Thanks to ar1309)
     * Add gpu interfaces to [zcsd]hetrd, [zcsd]heevd
