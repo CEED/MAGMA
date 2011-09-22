@@ -21,7 +21,6 @@ typedef int magma_int_t;
 #include "magmablas_zc.h"
 #include "magmablas_ds.h"
 
-#define magmablas_zgemm cublasZgemm
 #define magmablas_cgemm cublasCgemm
 
 #endif
