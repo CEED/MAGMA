@@ -56,6 +56,7 @@ FERMISRC =	sgemv_fermi.cu  \
                 sgemm_fermi80.cu\
                 sgemm_fermi64.cu\
 	        dgemm_fermi.cu 	\
+                zgemm_fermi.cu  \
                 \
                 strsm_tesla.cu 	\
                 dtrsm_tesla.cu	\
