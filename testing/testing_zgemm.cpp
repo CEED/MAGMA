@@ -40,7 +40,7 @@ int main( int argc, char** argv)
     char        transB = MagmaNoTrans;
 
     magma_int_t istart = 1024;
-    magma_int_t iend   = 10240;
+    magma_int_t iend   = 6240;
     magma_int_t M, M0 = 0;
     magma_int_t N, N0 = 0;
     magma_int_t K, K0 = 0;
@@ -135,7 +135,11 @@ int main( int argc, char** argv)
     
     ldda = lddc = ((M+31)/32)*32;
     lddb = ((ldb+31)/32)*32;
-    
+
+    K+=32;
+    M+=32;
+    N +=32;
+
     TESTING_MALLOC( h_A,  cuDoubleComplex, lda*K );
     TESTING_MALLOC( h_B,  cuDoubleComplex, ldb*Bn );
     TESTING_MALLOC( h_C,  cuDoubleComplex, ldc*N );
