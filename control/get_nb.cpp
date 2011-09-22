@@ -655,6 +655,8 @@ int magma_get_zpotrf_nb(int n){
 extern "C"
 int magma_get_zgetrf_nb(int n){
   if (n<=3072)
+    return 32;
+  else if (n<=9024)
     return 64;
   else
     return 128;
