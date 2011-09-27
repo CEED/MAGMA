@@ -20,7 +20,7 @@
 extern "C" magma_int_t
 magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs, 
                  cuDoubleComplex *dA, magma_int_t ldda,
-		 magma_int_t *ipiv, 
+                 magma_int_t *ipiv, 
                  cuDoubleComplex *dB, magma_int_t lddb, 
                  magma_int_t *info)
 {
@@ -34,17 +34,17 @@ magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs,
     =======
 
     Solves a system of linear equations
-      A * X = B  or  A' * X = B
-    with a general N-by-N matrix A using the LU factorization computed by ZGETRF_GPU.
+       A * X = B
+    where A is a general N-by-N matrix and X and B are N-by-NRHS matrices.
+    The LU decomposition with partial pivoting and row interchanges is
+    used to factor A as
+       A = P * L * U,
+    where P is a permutation matrix, L is unit lower triangular, and U is
+    upper triangular.  The factored form of A is then used to solve the
+    system of equations A * X = B.
 
     Arguments
     =========
-
-    TRANS   (input) CHARACTER*1
-            Specifies the form of the system of equations:
-            = 'N':  A * X = B  (No transpose)
-            = 'T':  A'* X = B  (Transpose)
-            = 'C':  A'* X = B  (Conjugate transpose = Transpose)
 
     N       (input) INTEGER
             The order of the matrix A.  N >= 0.
@@ -53,15 +53,16 @@ magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs,
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    A       (input) COMPLEX_16 array on the GPU, dimension (LDA,N)
-            The factors L and U from the factorization A = P*L*U as computed
-            by ZGETRF_GPU.
+    A       (input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N).
+            On entry, the M-by-N matrix to be factored.
+            On exit, the factors L and U from the factorization
+            A = P*L*U; the unit diagonal elements of L are not stored.
 
     LDA     (input) INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    IPIV    (input) INTEGER array, dimension (N)
-            The pivot indices from ZGETRF; for 1<=i<=N, row i of the
+    IPIV    (output) INTEGER array, dimension (min(M,N))
+            The pivot indices; for 1 <= i <= min(M,N), row i of the
             matrix was interchanged with row IPIV(i).
 
     B       (input/output) COMPLEX_16 array on the GPU, dimension (LDB,NRHS)
@@ -74,14 +75,9 @@ magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs,
     INFO    (output) INTEGER
             = 0:  successful exit
             < 0:  if INFO = -i, the i-th argument had an illegal value
-
-    HWORK   (workspace) COMPLEX_16 array, dimension N*NRHS
     =====================================================================    */
 
-
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
-    cuDoubleComplex *work = NULL;
-    magma_int_t i1, i2, inc, ret;
+    magma_int_t ret;
 
     *info = 0;
     if (n < 0) {
@@ -103,34 +99,11 @@ magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs,
     }
 
     ret = magma_zgetrf_gpu( n, n, dA, ldda, ipiv, info);
-    if ( (ret != MAGMA_SUCCESS) || ( *info != 0 ) ) {
-	return ret;
+    if ( (ret != MAGMA_SUCCESS) || (*info != 0) ) {
+        return ret;
     }
 
-    work = (cuDoubleComplex*)malloc(n * nrhs * sizeof(cuDoubleComplex));
-    if ( !work ) {
-        return MAGMA_ERR_ALLOCATION;
-    }
-      
-    /* Solve A * X = B. */
-    i1  = 1;
-    i2  = n;
-    inc = 1;
-
-    cublasGetMatrix( n, nrhs, sizeof(cuDoubleComplex), dB, lddb, work, n);
-    lapackf77_zlaswp(&nrhs, work, &n, &i1, &i2, ipiv, &inc);
-    cublasSetMatrix( n, nrhs, sizeof(cuDoubleComplex), work, n, dB, lddb);
-
-    if (nrhs == 1) {
-        cublasZtrsv(MagmaLower, MagmaNoTrans, MagmaUnit,    n, dA, ldda, dB, 1 );
-        cublasZtrsv(MagmaUpper, MagmaNoTrans, MagmaNonUnit, n, dA, ldda, dB, 1 );
-    } else {
-        cublasZtrsm(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit,    n, nrhs, c_one, dA, ldda, dB, lddb );
-        cublasZtrsm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb );
-    }
-
-    free(work);
-
-    return MAGMA_SUCCESS;
+    ret = magma_zgetrs_gpu( MagmaNoTrans, n, nrhs, dA, ldda, ipiv, dB, lddb, info );
+    
+    return ret;
 }
-
