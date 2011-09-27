@@ -179,8 +179,8 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
 
 		for( I=0; I<K; I+=NB ) {
 		  M = MB;
-		  N = min( NB, n-I ); /* number of columns in this big panel             */
-		  s = min(m,N)/nb;    /* number of small block-columns in this big panel */
+		  N = min( NB, n-I );       /* number of columns in this big panel             */
+		  s = min(max(m-I,0),N)/nb; /* number of small block-columns in this big panel */
 
 		  /* upload the next big panel into GPU, transpose (A->A'), and pivot it */
 		  cublasSetMatrix( M, N, sizeof(cuDoubleComplex), &a[I*lda], lda, da, maxm);
@@ -241,8 +241,8 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
 		  /* download the new panel to CPU */
 		  nb0 = min( nb, n-I );
 		  m0  = M-I;
-		  if( m0 > 0 ) { /* if more rows to be factorized */
-            work = &a[I*lda];      /* using the first nb0 columns as the workspace */
+          work = &a[I*lda];   /* using the first nb0 columns as the workspace */
+		  if( m0 > 0 ) {      /* if more rows to be factorized */
 		    if( I > 0 ) {
 	          cols = maxm - I;    /* the number of columns in At */
 
@@ -379,7 +379,7 @@ magma_zgetrf_piv(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
 	             magma_int_t *ipiv, magma_int_t *info)
 {
     magma_int_t nb;
-    magma_int_t NB, MB, I, k1, k2, incx;
+    magma_int_t NB, MB, I, k1, k2, incx, minmn;
 
     /* Function Body */
     *info = 0;
@@ -414,10 +414,11 @@ magma_zgetrf_piv(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
 	MB = m;                                             /* number of rows in the big panel    */
     NB = (magma_int_t)min((0.8*totalMem/(2*m))-2*nb,n); /* number of columns in the big panel */
 	NB = (NB / nb) * nb;   /* making sure it's devisable by nb   */
+    minmn = min(m,n);
 
-	for( I=0; I<min(n,m)-NB; I+=NB ) {
+	for( I=0; I<minmn-NB; I+=NB ) {
 		k1 = 1+I+NB;
-		k2 = n;
+		k2 = minmn;
 		incx = 1;
 		lapackf77_zlaswp(&NB, &a[I*lda], &lda, &k1, &k2, ipiv, &incx);
 	}
