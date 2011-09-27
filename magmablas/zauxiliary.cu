@@ -75,7 +75,8 @@ magmablas_zlaset(magma_int_t m, magma_int_t n,
    dim3 threads(zlaset_threads, 1, 1);
    dim3 grid(m/zlaset_threads+(m % zlaset_threads != 0), n/32+(n%32!=0));
 
-   zlaset<<< grid, threads >>> (m, n, A, lda);
+   if (m!=0 && n !=0)
+     zlaset<<< grid, threads >>> (m, n, A, lda);
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
