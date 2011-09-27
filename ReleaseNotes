@@ -25,6 +25,7 @@ Included are routines for the following algorithms:
 
  1.0.1 - ... 
     * Fix a bug in [zcsd]geqrf_gpu.cpp and [zcsd]geqrf3_gpu.cpp for n>m
+    * Fix a bug in [zcsd]laset - to call the kernel only when m!=0 && n!=0
     * Added missing Fortran interfaces
     * Add [zcds]potri in CPU and GPU interfaces 
        [Hatem Ltaief et al.]
