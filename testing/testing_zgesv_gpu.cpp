@@ -93,10 +93,11 @@ int main(int argc , char **argv)
 	ldda = ((N+31)/32)*32;
 	lddb = ldda;
 	flops = ( FLOPS_GETRF( (double)N, (double)N ) +
-		  FLOPS_GETRF( (double)N, (double)NRHS ) ) / 1000000;
+	          FLOPS_GETRS( (double)N, (double)NRHS ) ) / 1e6;
 
         /* Initialize the matrices */
-        szeA = lda*N; szeB = ldb*NRHS;
+        szeA = lda*N;
+        szeB = ldb*NRHS;
         lapackf77_zlarnv( &ione, ISEED, &szeA, h_A );
         lapackf77_zlarnv( &ione, ISEED, &szeB, h_B );
 
