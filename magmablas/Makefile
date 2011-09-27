@@ -21,6 +21,7 @@ ALLHDR= $(ZHDR) $(CHDR) $(DHDR) $(SHDR) \
 ZSRC  = zauxiliary.cu	\
 	zpermute.cu	\
 	zpermute-v2.cu	\
+	zpermute-v3.cu	\
 	zswap.cu	\
 	zswapblk.cu	\
 	zswapdblk.cu    \

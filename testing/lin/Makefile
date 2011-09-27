@@ -6,8 +6,7 @@
 #      June 2009
 #//////////////////////////////////////////////////////////////////////////////
 
-MAGMA_DIR = ../..
-include ../../Makefile.internal
+include ../../make.inc
 
 SRC = 	zbdt01.f  \
 	zget22.f  \
