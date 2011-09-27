@@ -19,6 +19,7 @@ ZSRC  = testing_zgemm.cpp	\
 	testing_zpotri.cpp	\
 	testing_zgetrf.cpp 	\
     testing_zgetrf_ooc.cpp  \
+	testing_zgesv.cpp	\
 	testing_zgeqrf.cpp 	\
 	testing_zgeqlf.cpp 	\
 	testing_zgelqf.cpp 	\

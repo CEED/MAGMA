@@ -60,6 +60,7 @@ extern "C" {
 #    define lapackf77_zgeqrf   zgeqrf_
 #    define lapackf77_zgesvd   zgesvd_
 #    define lapackf77_zgetrf   zgetrf_
+#    define lapackf77_zgetrs   zgetrs_
 #    define lapackf77_zheev    zheev_
 #    define lapackf77_zheevd   zheevd_
 #    define lapackf77_zhegs2   zhegs2_
@@ -149,6 +150,7 @@ extern "C" {
 #    define lapackf77_zgeqrf   zgeqrf
 #    define lapackf77_zgesvd   zgesvd  
 #    define lapackf77_zgetrf   zgetrf
+#    define lapackf77_zgetrs   zgetrs
 #    define lapackf77_zheev    zheev
 #    define lapackf77_zheevd   zheevd
 #    define lapackf77_zhegs2   zhegs2
@@ -327,6 +329,10 @@ void    lapackf77_zgeqrf(magma_int_t *m, magma_int_t *n,
 void    lapackf77_zgetrf(magma_int_t *m, magma_int_t *n, 
 			 cuDoubleComplex *a, magma_int_t *lda, 
 			 magma_int_t *ipiv, magma_int_t *info);
+void    lapackf77_zgetrs(const char* trans,
+                         magma_int_t *n, magma_int_t *nrhs,
+                         cuDoubleComplex *a, magma_int_t *lda, magma_int_t *ipiv,
+                         cuDoubleComplex *b, magma_int_t *ldb, magma_int_t *info);
 void    lapackf77_zgesvd(const char *jobu, const char *jobvt, 
 			 magma_int_t *m, magma_int_t *n, 
 			 cuDoubleComplex *a, magma_int_t *lda, 
