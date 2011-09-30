@@ -63,10 +63,8 @@ else
 		testing_zgetrf_f.f90
 endif
 
-ZSRC += $(ZSRCF) 
-CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
-DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
-SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
+ZSRC += $(ZSRCF)
+-include Makefile.src
 
 ALLSRC  = $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 ALLOBJF  = $(ALLSRC:.f90=.o)

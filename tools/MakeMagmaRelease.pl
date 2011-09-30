@@ -8,7 +8,7 @@ my $major;
 my $minor; 
 my $micro; 
 
-#Options par défaut
+# default options
 my $DIRNAME;
 my $BASENAME;
 #my $svn    = "https://icl.cs.utk.edu/svn/magma/branches/sc_release";
@@ -51,8 +51,6 @@ my $RELEASE_PATH;
 my %opts;
 my $NUMREL = "";
 
-my @vars = ( 'SSRC', 'DSRC', 'CSRC', 'SHDR', 'DHDR', 'CHDR' );
-
 sub myCmd {
     my ($cmd) = @_ ;
     my $err = 0;
@@ -65,28 +63,6 @@ sub myCmd {
     	print "Error during execution of the following command:\n$cmd\n";
     	exit;
     }    
-}
-    
-sub CleanMakefile {
-    my ($file) = @_ ;
-    my $str;
-    my $dir;
-
-    # Replace the [SDC]SRC and [SDC]HDR variables by their values
-    print $file;
-    $dir = `dirname $file`; chop $dir;
-
-    foreach my $v (@vars)
-    {
-        # The first command is to be sure that Makefile.gen is
-        # uptodate because we are touching at each step Makefile, so
-        # it will be generated during next cvall otherwise
-        myCmd("cd $dir && make .Makefile.gen");
-        if ( system("cd $dir && grep $v Makefile") == 0 ) {
-            $str = `cd $dir && make print$v`; chop $str;
-            myCmd("sed -i 's/${v}[ ]*=.*/$v = $str/' $file");
-        }
-    }
 }
 
 sub MakeRelease {
@@ -120,11 +96,6 @@ sub MakeRelease {
     print "Generate the different precision\n"; 
     myCmd("touch make.inc");
     myCmd("make generation");
-
-    # Clean the Makefile form the precision generation process
-    foreach my $file (`find $RELEASE_PATH -name Makefile | xargs grep -l "[SCD]SRC"`){
- 	CleanMakefile( $file );
-    }
 
     #Compile the documentation
     #print "Compile the documentation\n"; 

@@ -50,6 +50,26 @@ printSHDR:
 .Makefile.gen: $(CODEGEN) Makefile
 	$(PYTHON) $(CODEGEN) --make -f "$(ZSRC) $(ZHDR)" > $@
 
+# first line creates file, rest append to file
+Makefile.src: $(CODEGEN) Makefile
+	echo "CHDR = \\"                               >  $@
+	$(PYTHON) $(CODEGEN) -o -p "c"    -f "$(ZHDR)" >> $@
+	echo                                           >> $@
+	echo "DHDR = \\"                               >> $@
+	$(PYTHON) $(CODEGEN) -o -p "d ds" -f "$(ZHDR)" >> $@
+	echo                                           >> $@
+	echo "SHDR = \\"                               >> $@
+	$(PYTHON) $(CODEGEN) -o -p "s"    -f "$(ZHDR)" >> $@
+	echo                                           >> $@
+	echo "CSRC = \\"                               >> $@
+	$(PYTHON) $(CODEGEN) -o -p "c"    -f "$(ZSRC)" >> $@
+	echo                                           >> $@
+	echo "DSRC = \\"                               >> $@
+	$(PYTHON) $(CODEGEN) -o -p "d ds" -f "$(ZSRC)" >> $@
+	echo                                           >> $@
+	echo "SSRC = \\"                               >> $@
+	$(PYTHON) $(CODEGEN) -o -p "s"    -f "$(ZSRC)" >> $@
+
 .DEFAULT_GOAL :=
 -include .Makefile.gen
 .DEFAULT_GOAL :=

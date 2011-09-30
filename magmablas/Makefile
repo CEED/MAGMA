@@ -11,12 +11,6 @@ include ../Makefile.internal
 INC += -I$(MAGMA_DIR)/control
 
 ZHDR  = commonblas_z.h
-CHDR  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZHDR)" -o -p c)
-DHDR  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZHDR)" -o -p "d ds")
-SHDR  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZHDR)" -o -p s)
-
-ALLHDR= $(ZHDR) $(CHDR) $(DHDR) $(SHDR) \
-        commonblas.h
 
 ZSRC  = zauxiliary.cu	\
 	zpermute.cu	\
@@ -45,9 +39,13 @@ ZSRC  = zauxiliary.cu	\
 	zhemv_tesla.cu	\
 	chemv_tesla.cu
 
-CSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p c)
-DSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p "d ds")
-SSRC  = $(shell $(PYTHON) $(CODEGEN) -f "$(ZSRC)" -o -p s)
+-include Makefile.src
+
+ALLHDR = $(ZHDR) $(CHDR) $(DHDR) $(SHDR) \
+	commonblas.h
+
+ALLSRC = $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
+	dgemv_MLU.cu
 
 FERMISRC =	sgemv_fermi.cu  \
                 dgemv_fermi.cu  \
@@ -94,9 +92,6 @@ TESLASRC =      sgemv_tesla.cu	\
                 ssyr2k.cu                                       \
 
 # 		zhemv_tesla.cu
-
-ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
-        dgemv_MLU.cu
 
 ifeq (${GPU_TARGET}, 0)
 ALLSRC += $(TESLASRC)

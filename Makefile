@@ -13,8 +13,6 @@ all: lib test
 
 lib: libmagma libmagmablas
 
-clean: cleanall
-
 libmagma:
 	( cd control     && $(MAKE) )
 	( cd src         && $(MAKE) )
@@ -38,14 +36,14 @@ clean:
 	( cd magmablas   && $(MAKE) clean ) 
 #	( cd quark       && $(MAKE) clean )
 
-cleanall:
+cleanall: clean
 	( cd include     && $(MAKE) cleanall )
 	( cd control     && $(MAKE) cleanall )
 	( cd src         && $(MAKE) cleanall )
 	( cd testing     && $(MAKE) cleanall )
 	( cd testing/lin && $(MAKE) cleanall )
 	( cd magmablas   && $(MAKE) cleanall ) 
-	( cd lib && rm -f *.a )
+	( cd lib         && rm -f *.a )
 #	( cd quark       && $(MAKE) cleanall )
 
 

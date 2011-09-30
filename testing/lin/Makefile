@@ -6,7 +6,8 @@
 #      June 2009
 #//////////////////////////////////////////////////////////////////////////////
 
-include ../../make.inc
+MAGMA_DIR = ../..
+include ../../Makefile.internal
 
 SRC = 	zbdt01.f  \
 	zget22.f  \
@@ -54,7 +55,7 @@ liblapacktest.a: $(OBJ)
 	$(RANLIB) $@
 
 clean:
-	rm -f $(OBJ) liblapacktest.a *~
+	rm -f *.o liblapacktest.a *~
 
 cleanall: clean
 	rm -f liblapacktest.a

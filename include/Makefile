@@ -15,9 +15,7 @@ ZHDR =  magma_z.h 	\
 	magmablas_zc.h	\
 	magma_zlapack.h
 
-CHDR = 	$(shell $(PYTHON) $(CODEGEN) -f "$(ZHDR)" -o -p c)
-DHDR = 	$(shell $(PYTHON) $(CODEGEN) -f "$(ZHDR)" -o -p "d ds")
-SHDR = 	$(shell $(PYTHON) $(CODEGEN) -f "$(ZHDR)" -o -p s)
+-include Makefile.src
 
 ALLHDR= magma.h 	\
 	magmablas.h	\

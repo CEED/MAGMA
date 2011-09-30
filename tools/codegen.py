@@ -81,6 +81,7 @@ class Conversion:
   files_in = [];
   """Static. A running list of files that are output."""
   files_out = [];
+  
   def __init__(self, file = None, match = None, content = None):
     """Constructor that takes a file, match, and content.
     @param file The file name of the input.
@@ -278,7 +279,7 @@ def main():
   parser.add_option_group(group);
   group = OptionGroup(parser,"Settings","These options specify how the work should be done.");
   group.add_option("-P", "--prefix",    help='The output directory if different from the input directory.', action='store',      dest='prefix',    default=None);
-  group.add_option("-f", "--file",      help='Specify a file(s) on which to operate.',                      action='store',      dest='fileslst', type='string', default="");
+  group.add_option("-f", "--file",      help='Specify files on which to operate.',                          action='store',      dest='fileslst', type='string', default=None );
   group.add_option("-p", "--prec",      help='Specify a precision(s) on which to operate.',                 action='store',      dest='precslst', type='string', default="");
   group.add_option("-e", "--filetypes", help='Specify file extensions on which to operate when walking.',   action='store',      dest='fileexts', type='string', default="");
   parser.add_option_group(group);
@@ -290,8 +291,9 @@ def main():
     EXTS = options.fileexts.split();
 
   """Fill the 'work' array with files found to be operable."""
-  if options.fileslst:
-    """If files to examine are specified on the command line"""
+  if options.fileslst is not None:
+    # Files to examine are specified on the command line
+    # Note fileslst can be "", indicating no files to process
     for file in options.fileslst.split():
       check_gen(file, work, rex);
   else:
@@ -317,8 +319,6 @@ def main():
     print '## Automatically generated Makefile';
     print 'PYTHON ?= python';
 
-  c = Conversion(); """This initializes the variable for static member access."""
-
   for tuple in work:
     """For each valid conversion file found."""
     try:
@@ -331,20 +331,20 @@ def main():
 
   if options.make:
     """If the program should be GNU Make friendly."""
-    print 'gen = ',' '+' '.join(c.files_out);
+    print 'gen = ',' '+' '.join(Conversion.files_out);
     print 'cleangen:';
     print '\trm -f $(gen)';
     print 'generate: $(gen)';
     print '.PHONY: cleangen generate';
   if options.in_print:
     """Should we print the input files?"""
-    print ' '.join(c.files_in);
+    print ' '.join(Conversion.files_in);
   if options.out_print:
     """Should we print the output files?"""
-    print ' '.join(c.files_out);
+    print ' '.join(Conversion.files_out);
   if options.out_clean:
     """Clean generated files"""
-    for file in c.files_out:
+    for file in Conversion.files_out:
       if not path.exists(file): continue;
       os.remove(file);
 
