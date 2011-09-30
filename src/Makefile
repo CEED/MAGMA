@@ -13,6 +13,7 @@ INC += -I$(MAGMA_DIR)/control
 
 ZSRC  = zpotrf.cpp	\
         zpotrf_gpu.cpp	\
+        zpotrf_ooc.cpp	\
         zpotrs_gpu.cpp	\
         zposv.cpp	\
         zposv_gpu.cpp	\

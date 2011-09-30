@@ -165,6 +165,7 @@ int main( int argc, char** argv)
         /* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
+#define  SKIP_LAPACK
 #ifndef  SKIP_LAPACK
 		/* h_A (instead of h_R) is used since no CUDA */
         start = get_current_time();
@@ -181,6 +182,9 @@ int main( int argc, char** argv)
         if (info < 0) {
             printf("Argument %d of zgetrf had an illegal value.\n", -info);
             break;
+		} else if( info != 0 ) {
+			printf( "LAPACK failed with info=%d\n",info );
+			break;
 		}
 #elif defined(CHECK_TESTING_ZGETRF_OOC)
 		printf( "   2) scalapack is skiped\n" );
@@ -201,6 +205,9 @@ int main( int argc, char** argv)
         if (info < 0) {
             printf("Argument %d of zgetrf_ooc had an illegal value.\n", -info);
             break;
+		} else if (info != 0) {
+			printf("magma_zgetrf_ooc failed with info=%d\n",info );
+			break;
 		}
 		fflush(stdout);
 
@@ -221,12 +228,12 @@ int main( int argc, char** argv)
 #ifndef  SKIP_LAPACK
         printf("%5d %5d  %6.2f         %6.2f         %e         %e\n",
                M, N, cpu_perf, gpu_perf, error, GetTimerValue(start,end)/1000);
-        printf("   with pivoting            %6.2f                             +%e\n",
+        printf("  with pivoting             %6.2f                             +%e\n",
                                gpu_perf2,       GetTimerValue(start2,end2)/1000);
 #else
         printf("%5d %5d   *****         %6.2f         %e         %e\n",
                M, N,           gpu_perf, error, GetTimerValue(start,end)/1000);
-        printf("   with pivoting            %6.2f                             +%e\n",
+        printf("  with pivoting             %6.2f                             +%e\n",
                                gpu_perf2,       GetTimerValue(start2,end2)/1000);
 #endif
 		fflush(stdout);
