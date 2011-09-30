@@ -45,7 +45,7 @@ NVOPTS    = --compiler-options -fno-strict-aliasing -DUNIX -O3 -DADD_
 LDOPTS    = -fPIC
 
 # Sequential version
-LIB       = -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -lpthread -lcublas -lm
+#LIB       = -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -lpthread -lcublas -lm
 # Multi-threaded version
 LIB       = -lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -lpthread -lcublas -lm -fopenmp
 
