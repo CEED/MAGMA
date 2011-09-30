@@ -15,6 +15,7 @@
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
+#include <unistd.h>
 
 #include "flops.h"
 #include "magma.h"
@@ -38,38 +39,63 @@ int main(int argc , char **argv)
 {
     TESTING_CUDA_INIT();
 
-    magma_timestr_t  start, end;
-    double      flops, gpu_perf;
-    double      Rnorm, Anorm, Bnorm, *work;
+    magma_timestr_t start, end;
+    double          flops, gpu_perf;
+    double          Rnorm, Anorm, Bnorm, *work;
     cuDoubleComplex zone  = MAGMA_Z_ONE;
     cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
     cuDoubleComplex *h_A, *h_LU, *h_B, *h_X;
     magma_int_t *ipiv;
-    magma_int_t lda, ldb;
+    magma_int_t lda, ldb, N;
     magma_int_t i, info, szeA, szeB;
-    magma_int_t N        = 0;
     magma_int_t ione     = 1;
     magma_int_t NRHS     = 100;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
-        
-    if (argc != 1){
-        for(i = 1; i<argc; i++){
-            if (strcmp("-N", argv[i])==0)
-                N = atoi(argv[++i]);
-            else if (strcmp("-nrhs", argv[i])==0)
-                NRHS = atoi(argv[++i]);
+    const int MAXTESTS   = 10;
+    magma_int_t size[MAXTESTS] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
+    
+    // process command line arguments
+    printf( "\nUsage:\n" );
+    printf( "  %s -N <matrix size> -R <right hand sides>\n", argv[0] );
+    printf( "  -N can be repeated up to %d times\n", MAXTESTS );
+    int ntest = 0;
+    int ch;
+    while( (ch = getopt( argc, argv, "N:R:" )) != -1 ) {
+        switch( ch ) {
+            case 'N':
+                if ( ntest == MAXTESTS ) {
+                    printf( "error: -N exceeded maximum %d tests\n", MAXTESTS );
+                    exit(1);
+                }
+                else {
+                    size[ntest] = atoi( optarg );
+                    if ( size[ntest] <= 0 ) {
+                        printf( "error: -N value %d <= 0\n", size[ntest] );
+                        exit(1);
+                    }
+                    ntest++;
+                }
+                break;
+            case 'R':
+                NRHS = atoi( optarg );
+                break;
+            case '?':
+            default:
+                exit(1);
         }
-        if ( N > 0 ) 
-            size[0] = size[9] = N;
     }
-    else {
-        printf("\nUsage: \n");
-        printf("  testing_zgesv -nrhs %d -N %d\n\n", NRHS, 1024);
+    argc -= optind;
+    argv += optind;
+    if ( ntest == 0 ) {
+        ntest = MAXTESTS;
     }
-
-    N = size[9];
-    ldb = lda = N ;
+    
+    // allocate maximum amount of memory required
+    N = 0;
+    for( i = 0; i < ntest; ++i ) {
+        N = max( N, size[i] );
+    }
+    lda = ldb = N;
     
     TESTING_MALLOC( h_A,  cuDoubleComplex, lda*N    );
     TESTING_MALLOC( h_LU, cuDoubleComplex, lda*N    );
@@ -79,10 +105,10 @@ int main(int argc , char **argv)
     TESTING_MALLOC( ipiv, magma_int_t,     N        );
 
     printf("\n\n");
-    printf("  N     NRHS       GPU GFlop/s      || b-Ax || / ||A||\n");
+    printf("  N     NRHS       GPU GFlop/s      || b-Ax || / ||A||*||B||\n");
     printf("========================================================\n");
 
-    for(i=0; i<10; i++){
+    for( i = 0; i < ntest; ++i ) {
         N   = size[i];
         lda = ldb = N;
         flops = ( FLOPS_GETRF( (double)N, (double)N ) +
@@ -104,7 +130,7 @@ int main(int argc , char **argv)
         start = get_current_time();
         magma_zgesv( N, NRHS, h_LU, lda, ipiv, h_X, ldb, &info );
         end = get_current_time();
-        if (info < 0)
+        if (info != 0)
             printf("Argument %d of magma_zgesv had an illegal value.\n", -info);
 
         gpu_perf = flops / GetTimerValue(start, end);
@@ -125,9 +151,6 @@ int main(int argc , char **argv)
 
         printf("%5d  %4d             %6.2f        %e\n",
                N, NRHS, gpu_perf, Rnorm/(Anorm*Bnorm) );
-
-        if (argc != 1)
-          break;
     }
 
     /* Memory clean up */
