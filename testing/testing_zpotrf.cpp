@@ -49,7 +49,8 @@ int main( int argc, char** argv)
     cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
     magma_int_t  ione     = 1;
     magma_int_t  ISEED[4] = {0,0,0,1};
-    double       work[1], matnorm;
+    double       work[1];  // not referenced for lange norm 'f'
+    double       matnorm;
 
     if (argc != 1){
         for(i = 1; i<argc; i++){
@@ -70,7 +71,7 @@ int main( int argc, char** argv)
     TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2);
 
     printf("\n\n");
-    printf("  N    CPU GFlop/s    GPU GFlop/s    ||R||_F / ||A||_F\n");
+    printf("  N    CPU GFlop/s    GPU GFlop/s    ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
     printf("========================================================\n");
     for(i=0; i<10; i++){
         N     = size[i];
@@ -102,7 +103,7 @@ int main( int argc, char** argv)
         start = get_current_time();
         magma_zpotrf(uplo[0], N, h_R, lda, &info);
         end = get_current_time();
-        if (info < 0)
+        if (info != 0)
             printf("Argument %d of magma_zpotrf had an illegal value.\n", -info);
 
         gpu_perf = flops / GetTimerValue(start, end);
@@ -113,7 +114,7 @@ int main( int argc, char** argv)
         start = get_current_time();
         lapackf77_zpotrf(uplo, &N, h_A, &lda, &info);
         end = get_current_time();
-        if (info < 0)
+        if (info != 0)
             printf("Argument %d of lapack_zpotrf had an illegal value.\n", -info);
 
         cpu_perf = flops / GetTimerValue(start, end);

@@ -73,7 +73,7 @@ int main( int argc, char** argv)
     TESTING_DEVALLOC(  d_A, cuDoubleComplex, ldda*size[9] );
 
     printf("\n\n");
-    printf("  N    CPU GFlop/s    GPU GFlop/s    ||R||_F / ||A||_F\n");
+    printf("  N    CPU GFlop/s    GPU GFlop/s    ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
     printf("========================================================\n");
     for(i=0; i<10; i++){
 	N   = size[i];
@@ -106,7 +106,7 @@ int main( int argc, char** argv)
       	start = get_current_time();
 	magma_zpotrf_gpu(uplo[0], N, d_A, ldda, &info);
 	end = get_current_time();
-	if (info < 0)
+	if (info != 0)
             printf("Argument %d of magma_zpotrf had an illegal value.\n", -info);
 
         gpu_perf = flops / GetTimerValue(start, end);
@@ -117,7 +117,7 @@ int main( int argc, char** argv)
 	start = get_current_time();
 	lapackf77_zpotrf(uplo, &N, h_A, &lda, &info);
 	end = get_current_time();
-	if (info < 0)  
+	if (info != 0)  
 	    printf("Argument %d of zpotrf had an illegal value.\n", -info);
 	
         cpu_perf = flops / GetTimerValue(start, end);
