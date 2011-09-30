@@ -69,6 +69,9 @@ magma_int_t magma_zlahru( magma_int_t m, magma_int_t n, magma_int_t nb,
 			  cuDoubleComplex *da, cuDoubleComplex *y, 
 			  cuDoubleComplex *v, cuDoubleComplex *t, 
 			  cuDoubleComplex *dwork);
+magma_int_t magma_zposv ( char uplo, magma_int_t n, magma_int_t nrhs, 
+			  cuDoubleComplex *A, magma_int_t lda, 
+			  cuDoubleComplex *B, magma_int_t ldb, magma_int_t *info);
 magma_int_t magma_zpotrf( char uplo, magma_int_t n, cuDoubleComplex *A, 
 			  magma_int_t lda, magma_int_t *info);
 magma_int_t magma_zpotri( char uplo, magma_int_t n, cuDoubleComplex *A,

@@ -17,6 +17,7 @@ ZSRC  = testing_zgemm.cpp	\
 	\
 	testing_zpotrf.cpp	\
 	testing_zpotri.cpp	\
+	testing_zposv.cpp	\
 	testing_zgetrf.cpp 	\
     testing_zgetrf_ooc.cpp  \
 	testing_zgesv.cpp	\
@@ -26,6 +27,7 @@ ZSRC  = testing_zgemm.cpp	\
 	\
 	testing_zpotrf_gpu.cpp 	\
 	testing_zpotri_gpu.cpp 	\
+	testing_zposv_gpu.cpp 	\
 	testing_zgetrf_gpu.cpp 	\
 	testing_zgesv_gpu.cpp	\
 	testing_zgeqrf_gpu.cpp 	\

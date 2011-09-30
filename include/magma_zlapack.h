@@ -85,6 +85,7 @@ extern "C" {
 #    define lapackf77_zlabrd   zlabrd_
 #    define lapackf77_zlauum   zlauum_
 #    define lapackf77_zpotrf   zpotrf_
+#    define lapackf77_zpotrs   zpotrs_
 #    define lapackf77_zpotri   zpotri_
 #    define lapackf77_ztrevc   ztrevc_
 #    define lapackf77_ztrtri   ztrtri_
@@ -175,6 +176,7 @@ extern "C" {
 #    define lapackf77_zlabrd   zlabrd
 #    define lapackf77_zlauum   zlauum
 #    define lapackf77_zpotrf   zpotrf
+#    define lapackf77_zpotrs   zpotrs
 #    define lapackf77_zpotri   zpotri
 #    define lapackf77_ztrevc   ztrevc
 #    define lapackf77_ztrtri   ztrtri
@@ -415,6 +417,9 @@ void    lapackf77_zlabrd(magma_int_t *m, magma_int_t *n, magma_int_t *nb,
 			 cuDoubleComplex *y, magma_int_t *ldy);
 void    lapackf77_zpotrf(const char *uplo, magma_int_t *n, 
 			 cuDoubleComplex *a, magma_int_t *lda, magma_int_t *info);
+void    lapackf77_zpotrs(const char *uplo, magma_int_t *n, magma_int_t *nrhs,
+			 cuDoubleComplex *a, magma_int_t *lda,
+			 cuDoubleComplex *b, magma_int_t *ldb, magma_int_t *info);
 void    lapackf77_zpotri(const char *uplo, magma_int_t *n, 
 			 cuDoubleComplex *a, magma_int_t *lda, magma_int_t *info);
 void    lapackf77_zlauum(const char *uplo, magma_int_t *n, 
