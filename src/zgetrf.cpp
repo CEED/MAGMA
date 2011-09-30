@@ -19,6 +19,18 @@
 // === End defining what BLAS to use =======================================
 
 
+// =========================================================================
+// definitions of non-GPU-resident subroutines
+extern "C" magma_int_t
+magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
+	         magma_int_t *ipiv, magma_int_t *info);
+
+extern "C" magma_int_t
+magma_zgetrf_piv(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
+		                 magma_int_t *ipiv, magma_int_t *info);
+// =========================================================================
+
+
 extern "C" magma_int_t
 magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
 	     magma_int_t *ipiv, magma_int_t *info)
@@ -122,8 +134,10 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
         if (maxdim*maxdim < 2*maxm*maxn)
         {
 	    if (CUBLAS_STATUS_SUCCESS != cublasAlloc(nb*maxm+maxdim*maxdim, sizeof(cuDoubleComplex), (void**)&dA) ) {
-	        *info = -7;
-		return MAGMA_ERR_CUBLASALLOC;
+			/* alloc failed so call non-GPU-resident version */ 
+			magma_int_t rval = magma_zgetrf_ooc(m, n, a, lda, ipiv, info);
+			magma_zgetrf_piv( m, n, a, lda, ipiv, info);
+			return rval;
 	    }
 	    da = dA + nb*maxm;
 	    
@@ -136,16 +150,21 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
         else
         {
 	    if (CUBLAS_STATUS_SUCCESS != cublasAlloc((nb+maxn)*maxm, sizeof(cuDoubleComplex), (void**)&dA) ) {
-	        *info = -7;
-		return MAGMA_ERR_CUBLASALLOC;
+			/* alloc failed so call non-GPU-resident version */
+			magma_int_t rval = magma_zgetrf_ooc(m, n, a, lda, ipiv, info);
+			magma_zgetrf_piv( m, n, a, lda, ipiv, info);
+			return rval;
 	    }
 	    da = dA + nb*maxm;
 	    
 	    cublasSetMatrix( m, n, sizeof(cuDoubleComplex), a, lda, da, maxm);
 	    
 	    if (CUBLAS_STATUS_SUCCESS != cublasAlloc(maxm*maxn, sizeof(cuDoubleComplex), (void**)&dAT) ) {
-		cublasFree(dA);
-		return MAGMA_ERR_CUBLASALLOC;
+			/* alloc failed so call non-GPU-resident version */
+			cublasFree(dA);
+			magma_int_t rval = magma_zgetrf_ooc(m, n, a, lda, ipiv, info);
+			magma_zgetrf_piv( m, n, a, lda, ipiv, info);
+			return rval;
 	    }
 
 	    magmablas_ztranspose2( dAT, ldda, da, maxm, m, n );

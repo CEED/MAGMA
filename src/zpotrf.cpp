@@ -25,6 +25,13 @@
 #endif
 // === End defining what BLAS to use ======================================
 
+// ========================================================================
+// definition of a non-GPU-resident subroutine
+extern "C" magma_int_t 
+magma_zpotrf_ooc(char uplo, magma_int_t n, 
+                cuDoubleComplex *a, magma_int_t lda, magma_int_t *info);
+// ========================================================================
+
 #define A(i, j)  (a   +(j)*lda  + (i))
 #define dA(i, j) (work+(j)*ldda + (i))
 
@@ -121,8 +128,8 @@ magma_zpotrf(char uplo, magma_int_t n,
     ldda = ((n+31)/32)*32;
     
     if (CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*ldda, sizeof(cuDoubleComplex), (void**)&work)) {
-	*info = -6;
-	return MAGMA_ERR_CUBLASALLOC;
+		/* alloc failed so call the non-GPU-resident version */
+		return magma_zpotrf_ooc( uplo, n, a, lda, info);
     }
 
     static cudaStream_t stream[2];
