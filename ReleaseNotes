@@ -34,7 +34,7 @@ Included are routines for the following algorithms:
     * Add [zcds]lauum in CPU and GPU interfaces 
        [Hatem Ltaief et al.]
     * Add zgemm for Fermi obtained using autotuning
-    * Add "out-of-core" (GPU memory) version of [zcds]geqrf
+    * Add non-GPU-resident versions of [zcds]geqrf, [zcds]potrf, and [zcds]getrf
     * Add [zcds]gesv and [zcds]posv in CPU interface. GPU interface was already in 1.0
 
  1.0.0 - August 25th, 2011
