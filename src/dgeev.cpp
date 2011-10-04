@@ -45,8 +45,8 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
                      A * v(j) = lambda(j) * v(j)   
     where lambda(j) is its eigenvalue.   
     The left eigenvector u(j) of A satisfies   
-                  u(j)\*\*T * A = lambda(j) * u(j)\*\*T   
-    where u(j)\*\*T denotes the ugate transpose of u(j).   
+                  u(j)**T * A = lambda(j) * u(j)**T   
+    where u(j)**T denotes the transpose of u(j).   
 
     The computed eigenvectors are normalized to have Euclidean norm   
     equal to 1 and largest component real.   
@@ -64,17 +64,22 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
     N       (input) INTEGER   
             The order of the matrix A. N >= 0.   
 
-    A       (input/output) COMPLEX*16 array, dimension (LDA,N)   
+    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)   
             On entry, the N-by-N matrix A.   
             On exit, A has been overwritten.   
 
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,N).   
 
-    W       (output) COMPLEX*16 array, dimension (N)   
-            W contains the computed eigenvalues.   
+    WR      (output) DOUBLE PRECISION array, dimension (N)   
+    WI      (output) DOUBLE PRECISION array, dimension (N)   
+            WR and WI contain the real and imaginary parts,
+            respectively, of the computed eigenvalues.  Complex
+            conjugate pairs of eigenvalues appear consecutively
+            with the eigenvalue having the positive imaginary part
+            first.
 
-    VL      (output) COMPLEX*16 array, dimension (LDVL,N)   
+    VL      (output) DOUBLE PRECISION array, dimension (LDVL,N)   
             If JOBVL = 'V', the left eigenvectors u(j) are stored one   
             after another in the columns of VL, in the same order   
             as their eigenvalues.   
@@ -85,7 +90,7 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
             The leading dimension of the array VL.  LDVL >= 1; if   
             JOBVL = 'V', LDVL >= N.   
 
-    VR      (output) COMPLEX*16 array, dimension (LDVR,N)   
+    VR      (output) DOUBLE PRECISION array, dimension (LDVR,N)   
             If JOBVR = 'V', the right eigenvectors v(j) are stored one   
             after another in the columns of VR, in the same order   
             as their eigenvalues.   
@@ -96,7 +101,7 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
             The leading dimension of the array VR.  LDVR >= 1; if   
             JOBVR = 'V', LDVR >= N.   
 
-    WORK    (workspace/output) COMPLEX*16 array, dimension (MAX(1,LWORK))   
+    WORK    (workspace/output) DOUBLE PRECISION array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
@@ -107,8 +112,6 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
             only calculates the optimal size of the WORK array, returns   
             this value as the first entry of the WORK array, and no error   
             message related to LWORK is issued by XERBLA.   
-
-    RWORK   (workspace) DOUBLE PRECISION array, dimension (2*N)   
 
     INFO    (output) INTEGER   
             = 0:  successful exit   
@@ -200,6 +203,7 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
     }
 #endif
 
+    // subtract row and col for 1-based indexing
     a_dim1   = lda;
     a_offset = 1 + a_dim1;
     a       -= a_offset;
@@ -492,4 +496,3 @@ L50:
     work[1] = (double) maxwrk;
     return MAGMA_SUCCESS;
 } /* magma_dgeev */
-
