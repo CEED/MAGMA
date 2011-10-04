@@ -158,7 +158,7 @@ int main( int argc, char** argv)
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
-        //lapackf77_zgeqrf(&M, &N, h_A, &M, tau, hwork, &lhwork, &info);
+        lapackf77_zgeqrf(&M, &N, h_A, &M, tau, hwork, &lhwork, &info);
         end = get_current_time();
         if (info < 0)
             printf("Argument %d of lapack_zgeqrf had an illegal value.\n", -info);
@@ -224,13 +224,13 @@ int main( int argc, char** argv)
 	//=================================================================
 
 	
-        //matnorm = lapackf77_zlange("f", &M, &N, h_A, &M, work);
-        //blasf77_zaxpy(&n2, &mzone, h_A, &ione, h_R, &ione);
+        matnorm = lapackf77_zlange("f", &M, &N, h_A, &M, work);
+        blasf77_zaxpy(&n2, &mzone, h_A, &ione, h_R, &ione);
 	
         printf("%5d %5d  %6.2f         %6.2f        %e\n",
                M, N, cpu_perf, gpu_perf,
-               //lapackf77_zlange("f", &M, &N, h_R, &M, work) / matnorm);
-	       0.);
+               lapackf77_zlange("f", &M, &N, h_R, &M, work) / matnorm);
+	//0.);
 	
         if (argc != 1)
 	  break;
