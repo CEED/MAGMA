@@ -93,7 +93,7 @@ int main( int argc, char** argv)
     lwork = N*(1+nb);
 
     // generous workspace - required by zget22
-    lwork = N * ( 5 + 2*N);
+    lwork = max(lwork, N * ( 5 + 2*N));
 
     w1i   = NULL; 
     w2i   = NULL;
