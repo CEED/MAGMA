@@ -100,6 +100,25 @@ int main( int argc, char** argv)
 	   Performs operation using MAGMA 
 	   =================================================================== */
 	cublasSetMatrix( N, N, sizeof(cuDoubleComplex), h_A, lda, d_A, ldda);
+	
+	double *dwork, maxnorm;
+	TESTING_DEVALLOC(  dwork, double, size[9] );
+
+        start = get_current_time();
+        magmablas_zlascl('U', 1, 1, 1., 2., N, N, d_A, ldda, &info);
+        end = get_current_time();
+        printf("zlascl GB/s = %f, time (ms) = %f\n",
+               16.*N*N/(1000000.*GetTimerValue(start, end)),
+               GetTimerValue(start, end));
+
+	start = get_current_time();
+	maxnorm = magmablas_zlanhe('M', 'L',N, d_A, ldda, dwork);
+	end = get_current_time();
+	printf("Norm = %f, GB/s = %f, time (ms) = %f\n",
+	       maxnorm, 16.*N*N/(1000000.*GetTimerValue(start, end)),
+	       GetTimerValue(start, end));
+	TESTING_DEVFREE( dwork );
+	
 	magma_zpotrf_gpu(uplo[0], N, d_A, ldda, &info);
 
 	cublasSetMatrix( N, N, sizeof(cuDoubleComplex), h_A, lda, d_A, ldda);
