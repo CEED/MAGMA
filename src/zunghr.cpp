@@ -99,17 +99,17 @@ magma_zunghr(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
        column to the right, and set the first ilo and the last n-ihi   
        rows and columns to those of the unit matrix */
     for (j = ihi-1; j >= ilo; --j) {
-      for (i = 0; i < j-1; ++i) 
+      for (i = 0; i < j; ++i)
 	*a_ref(i, j) = MAGMA_Z_ZERO;
 	
-      for (i = j; i < ihi; ++i)
+      for (i = j+1; i < ihi; ++i)
 	*a_ref(i, j) = *a_ref(i, j - 1);
 	
       for (i = ihi; i < n; ++i)
 	*a_ref(i, j) = MAGMA_Z_ZERO;
     }
     for (j = 0; j < ilo; ++j) {
-      for (i = 1; i <= n; ++i)
+      for (i = 0; i < n; ++i)
 	*a_ref(i, j) = MAGMA_Z_ZERO;
 	
       *a_ref(j, j) = MAGMA_Z_ONE;
