@@ -108,7 +108,7 @@ int main( int argc, char** argv)
     lwork = N*(2+nb);
 
     // generous workspace - required by dget22
-    lwork = N * ( 5 + 2*N);
+    lwork = max(lwork, N * ( 5 + 2*N));
 
     TESTING_MALLOC( w1,  double, N );
     TESTING_MALLOC( w2,  double, N );
