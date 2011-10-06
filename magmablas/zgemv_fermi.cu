@@ -170,19 +170,16 @@ zgemvt_kernel_fermi(int m, int n, cuDoubleComplex alpha, int n1, cuDoubleComplex
     sdata[tx] = res;
 	__syncthreads();
     
-    /*
-	if(tx < 128) 
-	{
-		sdata[tx] += sdata[tx + 128];
-	}
-    __syncthreads();
-	*/
 
-	if(tx < 64) 
+	for(int s=blockDim.x/2; s>32;s>>=1)
 	{
-		sdata[tx] += sdata[tx + 64];
+		if(tx<s)
+		{
+				sdata[tx] += sdata[tx+s];
+		} 
+		__syncthreads();
 	}
-    __syncthreads();
+
 
 	if(tx < 32) 
 	{

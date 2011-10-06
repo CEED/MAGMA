@@ -143,6 +143,11 @@ dgemvt_kernel_fermi(magma_int_t m, magma_int_t n, double alpha, magma_int_t n1, 
 			__syncthreads();
 	}
 
+	if(tx<32)
+	{
+		sdata[tx] += sdata[tx+32];
+	}
+
     if(tx == 0)
 	{
 		for(int i=1;i<32;i++)
