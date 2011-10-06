@@ -87,7 +87,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
 
   cuDoubleComplex *dwork[4], *dwork0;
     cuDoubleComplex *panel[4];
-    cuDoubleComplex *work;
+    //cuDoubleComplex *work;
     cuDoubleComplex *local_work;
 
     magma_int_t i, j, k, ldwork, lddwork, old_i, old_ib, rows;
@@ -114,14 +114,14 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
     nb = magma_get_zgeqrf_nb(m);
 
     displacement = n * nb;
-    lwork  = (m+n) * nb;
+    lwork  = (m+n+64) * nb;
     lhwork = lwork - (m)*nb;
 
     for(i=0; i<num_gpus; i++){
       #ifdef  MultiGPUs
          cudaSetDevice(i);
       #endif
-      if ( CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*nb+displacement, 
+	 if ( CUBLAS_STATUS_SUCCESS != cublasAlloc((n+ldda)*nb,
 						sizeof(cuDoubleComplex),
 						(void**)&(dwork[i])) ) {
         *info = -9;
@@ -146,7 +146,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
       else if (i == (n/nb)%num_gpus)
         n_local[i] += n%nb;
     }
-
+    /*
     if ( cudaSuccess != cudaMallocHost( (void**)&work, lwork*sizeof(cuDoubleComplex)) ) {
       	*info = -9;
 	for(i=0; i<num_gpus; i++){
@@ -159,7 +159,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
 
         return MAGMA_ERR_HOSTALLOC;
     }
-
+    */
     if ( cudaSuccess != cudaMallocHost( (void**)&local_work, lwork*sizeof(cuDoubleComplex)) ) {
       *info = -9;
       for(i=0; i<num_gpus; i++){
@@ -487,17 +487,21 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
 	#endif
 	cublasGetMatrix(rows, ib, sizeof(cuDoubleComplex),
                         dlA(panel_gpunum, i, i_loc), ldda,
-			hwork,     rows);
+			//hwork,     rows);
+			lhwrk, rows);
+
 	lhwork = lwork - rows*ib;
-	lapackf77_zgeqrf(&rows, &ib, hwork, &rows, tau+i, hwork+ib*rows, &lhwork, info);
+	//lapackf77_zgeqrf(&rows, &ib, hwork, &rows, tau+i, hwork+ib*rows, &lhwork, info);
+	lapackf77_zgeqrf(&rows, &ib, lhwrk, &rows, tau+i, lhwrk+ib*rows, &lhwork, info);
 
 	cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
-                        hwork,     rows,
+                        // hwork,     rows,
+			lhwrk,     rows,
 			dlA(panel_gpunum, i, i_loc), ldda);
 	//=============================
     }
 
-    cudaFreeHost(work);
+    //cudaFreeHost(work);
     for(i=0; i<num_gpus; i++){
       #ifdef  MultiGPUs
          cudaSetDevice(i);
