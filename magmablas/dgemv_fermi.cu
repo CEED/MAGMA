@@ -134,18 +134,15 @@ dgemvt_kernel_fermi(magma_int_t m, magma_int_t n, double alpha, magma_int_t n1, 
 	sdata[tx] = res;
 	 __syncthreads();
 
-
-	if(tx < 64)
+	for(int s=blockDim.x/2; s>32;s>>=1)
 	{
-		sdata[tx] += sdata[tx + 64];
+			if(tx<s)
+			{
+					sdata[tx] += sdata[tx+s];
+			} 
+			__syncthreads();
 	}
-	__syncthreads();
 
-
-	if(tx < 32)
-	{
-		sdata[tx] += sdata[tx + 32];
-	}
     if(tx == 0)
 	{
 		for(int i=1;i<32;i++)
