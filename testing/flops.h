@@ -33,8 +33,8 @@
 #define FMULS_GEMV(__m, __n) ((__m) * (__n) + 2. * (__m))
 #define FADDS_GEMV(__m, __n) ((__m) * (__n)           )
 
-#define FMULS_SYMV(__n) FMULS_GEMV( (__n), (__n) ) )
-#define FADDS_SYMV(__n) FADDS_GEMV( (__n), (__n) ) )
+#define FMULS_SYMV(__n) FMULS_GEMV( (__n), (__n) )
+#define FADDS_SYMV(__n) FADDS_GEMV( (__n), (__n) )
 #define FMULS_HEMV FMULS_SYMV
 #define FADDS_HEMV FADDS_SYMV
 
