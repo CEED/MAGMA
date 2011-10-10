@@ -222,7 +222,7 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
           work = &a[I*lda];   /* using the first nb0 columns as the workspace */
 		  if( m0 > 0 ) {      /* if more rows to be factorized */
 
-		    /* download the new panel to CPU */
+		    /* download the first block-column in this big-panel to CPU */
 		    if( I > 0 ) {
 	          cols = maxm - I;    /* the number of columns in At */
 
