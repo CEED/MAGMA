@@ -111,7 +111,7 @@ int main( int argc, char** argv)
     }
     else {
         printf("\nUsage: \n");
-        printf("  testing_zgetrf_gpu -M %d -N %d\n\n", 1024, 1024);
+        printf("  testing_zgetrf -M %d -N %d\n\n", 1024, 1024);
         M = N = size[9];
     }
     
