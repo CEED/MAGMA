@@ -128,6 +128,7 @@ subs = {
     ('spermute','dpermute','cpermute','zpermute'),
     ('stranspose','dtranspose','ctranspose','ztranspose'),
     ('shtodt','dhtodt','chtodt','zhtodt'),
+    ('sdtoht','ddtoht','cdtoht','zdtoht'),
     ('ssplit','dsplit','csplit','zsplit'),
     ('SSIZE','DSIZE','CSIZE','ZSIZE'),
     ('scopy','dcopy','ccopy','zcopy'),
