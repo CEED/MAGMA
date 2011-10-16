@@ -127,6 +127,7 @@ subs = {
     ('sinplace','dinplace','cinplace','zinplace'),
     ('spermute','dpermute','cpermute','zpermute'),
     ('stranspose','dtranspose','ctranspose','ztranspose'),
+    ('shtodt','dhtodt','chtodt','zhtodt'),
     ('ssplit','dsplit','csplit','zsplit'),
     ('SSIZE','DSIZE','CSIZE','ZSIZE'),
     ('scopy','dcopy','ccopy','zcopy'),
