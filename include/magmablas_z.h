@@ -38,7 +38,11 @@ void magmablas_ztranspose2(       cuDoubleComplex *, magma_int_t,
 void magmablas_zhtodt(            cuDoubleComplex  *ha, int lda,
 		                  cuDoubleComplex *dat, int ldda,
 		                  cuDoubleComplex  *dB, int lddb,
-		                  int m, int n , int nb);
+                                  int m, int n , int nb);
+void magmablas_zdtoht(            cuDoubleComplex *dat, int ldda,
+				  cuDoubleComplex  *ha, int lda,
+			     	  cuDoubleComplex  *dB, int lddb,
+				  int m, int n , int nb);
   
   /*
    * LAPACK auxiliary functions
