@@ -17,7 +17,7 @@
 //             This routine copies the ha matrix from the CPU
 //             to dat on the GPU. In addition, the output matrix
 //             is transposed. The routine uses a buffer of size
-//             2*lddb*nb pointed to by dB (lddb > m). 
+//             2*lddb*nb pointed to by dB (lddb > m) on the GPU. 
 //             Note that lda >= m and lddat >= n.
 //
 extern "C" void 
@@ -33,7 +33,7 @@ magmablas_zhtodt(cuDoubleComplex  *ha, int lda,
         return;
 
     if (lda < m || ldda < n || lddb < m){
-        printf("Wrong arguments in zhotodt.\n");
+        printf("Wrong arguments in zhtodt.\n");
 	return;
     }
 
