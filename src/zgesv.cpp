@@ -10,13 +10,6 @@
 */
 #include "common_magma.h"
 
-// === Define what BLAS to use ============================================
-#define PRECISION_z
-#if (defined(PRECISION_s) || defined(PRECISION_d)) 
-  #define cublasZtrsm magmablas_ztrsm
-#endif
-// === End defining what BLAS to use =======================================
-
 extern "C" magma_int_t
 magma_zgesv(     magma_int_t n, magma_int_t nrhs, 
                  cuDoubleComplex *A, magma_int_t lda,
