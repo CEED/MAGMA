@@ -56,5 +56,5 @@ LIBDIR    = -L${MKLROOT}/lib/intel64 \
 
 INC       = -I$(CUDADIR)/include
 
-#LIBMAGMA     = libmagma.a
-#LIBMAGMABLAS = libmagmablas.a
+#LIBMAGMA     = $(MAGMA_DIR)/lib/magma.a
+#LIBMAGMABLAS = $(MAGMA_DIR)/lib/magmablas.a

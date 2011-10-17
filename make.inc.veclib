@@ -35,5 +35,5 @@
 	LIBDIR    = -L/usr/local/cuda/lib 
 	INC       = -I../include -I$(CUDADIR)/include
 
-	LIBMAGMA     = ../lib/libmagma.a
-	LIBMAGMABLAS = ../lib/libmagmablas.a
+#	LIBMAGMA     = $(MAGMA_DIR)/lib/magma.a
+#	LIBMAGMABLAS = $(MAGMA_DIR)/lib/magmablas.a

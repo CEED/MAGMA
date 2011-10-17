@@ -40,5 +40,5 @@ LIBDIR    = -L/mnt/scratch/sw/intel/F-11.0.083/mkl/lib/em64t \
             -Wl,-rpath,$(CUDADIR)/lib64
 INC       = -I$(CUDADIR)/include
 
-#LIBMAGMA     = libmagma.a
-#LIBMAGMABLAS = libmagmablas.a
+#LIBMAGMA     = $(MAGMA_DIR)/lib/magma.a
+#LIBMAGMABLAS = $(MAGMA_DIR)/lib/magmablas.a

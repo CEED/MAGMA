@@ -33,5 +33,5 @@
                     -L$(CUDADIR)/lib64
 	INC       = -I../include -I$(CUDADIR)/include
 
-	LIBMAGMA     = ../lib/libmagma.so
-	LIBMAGMABLAS = ../lib/libmagmablas.so
+	LIBMAGMA     = $(MAGMA_DIR)/lib/magma.so
+	LIBMAGMABLAS = $(MAGMA_DIR)/lib/magmablas.so

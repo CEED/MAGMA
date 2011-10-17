@@ -33,5 +33,5 @@ LIBDIR    = -L/sw/analysis-x64/acml/4.1.0/sl5_binary/pgi64/lib \
             -L$(CUDADIR)/lib64 
 INC       = -I$(CUDADIR)/include
 
-LIBMAGMA     = ../lib/libmagma.a
-LIBMAGMABLAS = ../lib/libmagmablas.a
+#LIBMAGMA     = $(MAGMA_DIR)/lib/magma.a
+#LIBMAGMABLAS = $(MAGMA_DIR)/lib/magmablas.a

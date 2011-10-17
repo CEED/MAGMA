@@ -35,5 +35,5 @@ CUDADIR   = /usr/local/cuda
 LIBDIR    = -L/bummer/GotoBLAS -L/usr/local/cuda/lib64 -L/usr/lib64
 INC       = -I$(CUDADIR)/include
 
-LIBMAGMA     = ../lib/libmagma.a
-LIBMAGMABLAS = ../lib/libmagmablas.a
+#LIBMAGMA     = $(MAGMA_DIR)/lib/magma.a
+#LIBMAGMABLAS = $(MAGMA_DIR)/lib/magmablas.a

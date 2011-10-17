@@ -36,5 +36,5 @@ LIBDIR    = -L/home/tomov/LIB/ATLAS/lib/Linux_UNKNOWNSSE2 \
             -L$(CUDADIR)/lib64
 INC       = -I$(CUDADIR)/include
 
-LIBMAGMA     = ../lib/libmagma.a
-LIBMAGMABLAS = ../lib/libmagmablas.a
+#LIBMAGMA     = $(MAGMA_DIR)/lib/magma.a
+#LIBMAGMABLAS = $(MAGMA_DIR)/lib/magmablas.a
