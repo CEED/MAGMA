@@ -19,193 +19,103 @@ extern "C" {
 /* ////////////////////////////////////////////////////////////////////////////
    -- LAPACK Externs used in MAGMA
 */
-#if defined(ADD_)
 
-#    define blasf77_zaxpy      zaxpy_
-#    define blasf77_zcopy      zcopy_
-#if  defined(PRECISION_z) || defined(PRECISION_c)
-#    define blasf77_zdotc      zdotc 
+#define blasf77_zaxpy      FORTRAN_NAME( zaxpy,  ZAXPY  )
+#define blasf77_zcopy      FORTRAN_NAME( zcopy,  ZCOPY  )
+
+/* complex versions use C wrapper to return value; no name mangling. */
+#if  defined(PRECISION_z) || defined(PRECISION_c)    
+#define blasf77_zdotc      zdotc
 #else
-#    define blasf77_zdotc      zdotc_ 
+#define blasf77_zdotc      FORTRAN_NAME( zdotc,  ZDOTC  )
 #endif
-#    define blasf77_zgemm      zgemm_
-#    define blasf77_zgemv      zgemv_
-#    define blasf77_zhemm      zhemm_
-#    define blasf77_zhemv      zhemv_
-#    define blasf77_zher2k     zher2k_
-#    define blasf77_zherk      zherk_
-#    define blasf77_zscal      zscal_
-#    define blasf77_zdscal     zdscal_ 
-#    define blasf77_zsymm      zsymm_
-#    define blasf77_zsyr2k     zsyr2k_
-#    define blasf77_zsyrk      zsyrk_
-#    define blasf77_zswap      zswap_
-#    define blasf77_ztrmm      ztrmm_
-#    define blasf77_ztrmv      ztrmv_
-#    define blasf77_ztrsm      ztrsm_
-#    define blasf77_ztrsv      ztrsv_
-#    define blasf77_zgeru      zgeru_
 
-#    define lapackf77_zbdsqr   zbdsqr_
-#    define lapackf77_zgebak   zgebak_
-#    define lapackf77_zgebal   zgebal_
-#    define lapackf77_zgebd2   zgebd2_
-#    define lapackf77_zgebrd   zgebrd_
-#    define lapackf77_zgeev    zgeev_
-#    define lapackf77_zgehd2   zgehd2_
-#    define lapackf77_zgehrd   zgehrd_
-#    define lapackf77_zgelqf   zgelqf_
-#    define lapackf77_zgels    zgels_
-#    define lapackf77_zgeqlf   zgeqlf_
-#    define lapackf77_zgeqrf   zgeqrf_
-#    define lapackf77_zgesvd   zgesvd_
-#    define lapackf77_zgetrf   zgetrf_
-#    define lapackf77_zgetrs   zgetrs_
-#    define lapackf77_zheev    zheev_
-#    define lapackf77_zheevd   zheevd_
-#    define lapackf77_zhegs2   zhegs2_
-#    define lapackf77_zhegvd   zhegvd_
-#    define lapackf77_zhetd2   zhetd2_
-#    define lapackf77_zhetrd   zhetrd_
-#    define lapackf77_zhseqr   zhseqr_
-#    define lapackf77_zlacpy   zlacpy_
-#    define lapackf77_zlacgv   zlacgv_
-#    define lapackf77_zlange   zlange_
-#    define lapackf77_zlanhe   zlanhe_
-#    define lapackf77_zlansy   zlansy_
-#    define lapackf77_zlarfb   zlarfb_
-#    define lapackf77_zlarfg   zlarfg_
-#    define lapackf77_zlarft   zlarft_
-#    define lapackf77_zlarnv   zlarnv_
-#    define lapackf77_zlartg   zlartg_
-#    define lapackf77_zlascl   zlascl_
-#    define lapackf77_zlaset   zlaset_
-#    define lapackf77_zlaswp   zlaswp_
-#    define lapackf77_zlatrd   zlatrd_
-#    define lapackf77_zlabrd   zlabrd_
-#    define lapackf77_zlauum   zlauum_
-#    define lapackf77_zpotrf   zpotrf_
-#    define lapackf77_zpotrs   zpotrs_
-#    define lapackf77_zpotri   zpotri_
-#    define lapackf77_ztrevc   ztrevc_
-#    define lapackf77_ztrtri   ztrtri_
-#    define lapackf77_zsteqr   zsteqr_
-#    define lapackf77_zstedc   zstedc_
-#    define lapackf77_zsymv    zsymv_
-#    define lapackf77_zung2r   zung2r_
-#    define lapackf77_zungbr   zungbr_
-#    define lapackf77_zunghr   zunghr_
-#    define lapackf77_zunglq   zunglq_
-#    define lapackf77_zungqr   zungqr_
-#    define lapackf77_zungtr   zungtr_
-#    define lapackf77_zunm2r   zunm2r_
-#    define lapackf77_zunmbr   zunmbr_
-#    define lapackf77_zunmlq   zunmlq_
-#    define lapackf77_zunmql   zunmql_
-#    define lapackf77_zunmqr   zunmqr_
-#    define lapackf77_zunmtr   zunmtr_
+#define blasf77_zgemm      FORTRAN_NAME( zgemm,  ZGEMM  )
+#define blasf77_zgemv      FORTRAN_NAME( zgemv,  ZGEMV  )
+#define blasf77_zhemm      FORTRAN_NAME( zhemm,  ZHEMM  )
+#define blasf77_zhemv      FORTRAN_NAME( zhemv,  ZHEMV  )
+#define blasf77_zher2k     FORTRAN_NAME( zher2k, ZHER2K )
+#define blasf77_zherk      FORTRAN_NAME( zherk,  ZHERK  )
+#define blasf77_zscal      FORTRAN_NAME( zscal,  ZSCAL  )
+#define blasf77_zdscal     FORTRAN_NAME( zdscal, ZDSCAL ) 
+#define blasf77_zsymm      FORTRAN_NAME( zsymm,  ZSYMM  )
+#define blasf77_zsyr2k     FORTRAN_NAME( zsyr2k, ZSYR2K )
+#define blasf77_zsyrk      FORTRAN_NAME( zsyrk,  ZSYRK  )
+#define blasf77_zswap      FORTRAN_NAME( zswap,  ZSWAP  )
+#define blasf77_ztrmm      FORTRAN_NAME( ztrmm,  ZTRMM  )
+#define blasf77_ztrmv      FORTRAN_NAME( ztrmv,  ZTRMV  )
+#define blasf77_ztrsm      FORTRAN_NAME( ztrsm,  ZTRSM  )
+#define blasf77_ztrsv      FORTRAN_NAME( ztrsv,  ZTRSV  )
+#define blasf77_zgeru      FORTRAN_NAME( zgeru,  ZGERU  )
 
-#    define lapackf77_zbdt01   zbdt01_
-#    define lapackf77_zget22   zget22_
-#    define lapackf77_zhet21   zhet21_
-#    define lapackf77_zhst01   zhst01_
-#    define lapackf77_zqrt02   zqrt02_
-#    define lapackf77_zunt01   zunt01_
-#    define lapackf77_zlarfy   zlarfy_
-#    define lapackf77_zstt21   zstt21_
+#define lapackf77_zbdsqr   FORTRAN_NAME( zbdsqr, ZBDSQR )
+#define lapackf77_zgebak   FORTRAN_NAME( zgebak, ZGEBAK )
+#define lapackf77_zgebal   FORTRAN_NAME( zgebal, ZGEBAL )
+#define lapackf77_zgebd2   FORTRAN_NAME( zgebd2, ZGEBD2 )
+#define lapackf77_zgebrd   FORTRAN_NAME( zgebrd, ZGEBRD )
+#define lapackf77_zgeev    FORTRAN_NAME( zgeev,  ZGEEV  )
+#define lapackf77_zgehd2   FORTRAN_NAME( zgehd2, ZGEHD2 )
+#define lapackf77_zgehrd   FORTRAN_NAME( zgehrd, ZGEHRD )
+#define lapackf77_zgelqf   FORTRAN_NAME( zgelqf, ZGELQF )
+#define lapackf77_zgels    FORTRAN_NAME( zgels,  ZGELS  )
+#define lapackf77_zgeqlf   FORTRAN_NAME( zgeqlf, ZGEQLF )
+#define lapackf77_zgeqrf   FORTRAN_NAME( zgeqrf, ZGEQRF )
+#define lapackf77_zgesvd   FORTRAN_NAME( zgesvd, ZGESVD )
+#define lapackf77_zgetrf   FORTRAN_NAME( zgetrf, ZGETRF )
+#define lapackf77_zgetrs   FORTRAN_NAME( zgetrs, ZGETRS )
+#define lapackf77_zheev    FORTRAN_NAME( zheev,  ZHEEV  )
+#define lapackf77_zheevd   FORTRAN_NAME( zheevd, ZHEEVD )
+#define lapackf77_zhegs2   FORTRAN_NAME( zhegs2, ZHEGS2 )
+#define lapackf77_zhegvd   FORTRAN_NAME( zhegvd, ZHEGVD )
+#define lapackf77_zhetd2   FORTRAN_NAME( zhetd2, ZHETD2 )
+#define lapackf77_zhetrd   FORTRAN_NAME( zhetrd, ZHETRD )
+#define lapackf77_zhseqr   FORTRAN_NAME( zhseqr, ZHSEQR )
+#define lapackf77_zlacpy   FORTRAN_NAME( zlacpy, ZLACPY )
+#define lapackf77_zlacgv   FORTRAN_NAME( zlacgv, ZLACGV )
+#define lapackf77_zlange   FORTRAN_NAME( zlange, ZLANGE )
+#define lapackf77_zlanhe   FORTRAN_NAME( zlanhe, ZLANHE )
+#define lapackf77_zlansy   FORTRAN_NAME( zlansy, ZLANSY )
+#define lapackf77_zlarfb   FORTRAN_NAME( zlarfb, ZLARFB )
+#define lapackf77_zlarfg   FORTRAN_NAME( zlarfg, ZLARFG )
+#define lapackf77_zlarft   FORTRAN_NAME( zlarft, ZLARFT )
+#define lapackf77_zlarnv   FORTRAN_NAME( zlarnv, ZLARNV )
+#define lapackf77_zlartg   FORTRAN_NAME( zlartg, ZLARTG )
+#define lapackf77_zlascl   FORTRAN_NAME( zlascl, ZLASCL )
+#define lapackf77_zlaset   FORTRAN_NAME( zlaset, ZLASET )
+#define lapackf77_zlaswp   FORTRAN_NAME( zlaswp, ZLASWP )
+#define lapackf77_zlatrd   FORTRAN_NAME( zlatrd, ZLATRD )
+#define lapackf77_zlabrd   FORTRAN_NAME( zlabrd, ZLABRD )
+#define lapackf77_zlauum   FORTRAN_NAME( zlauum, ZLAUUM )
+#define lapackf77_zpotrf   FORTRAN_NAME( zpotrf, ZPOTRF )
+#define lapackf77_zpotrs   FORTRAN_NAME( zpotrs, ZPOTRS )
+#define lapackf77_zpotri   FORTRAN_NAME( zpotri, ZPOTRI )
+#define lapackf77_ztrevc   FORTRAN_NAME( ztrevc, ZTREVC )
+#define lapackf77_ztrtri   FORTRAN_NAME( ztrtri, ZTRTRI )
+#define lapackf77_zsteqr   FORTRAN_NAME( zsteqr, ZSTEQR )
+#define lapackf77_zstedc   FORTRAN_NAME( zstedc, ZSTEDC )
+#define lapackf77_zsymv    FORTRAN_NAME( zsymv,  ZSYMV  )
+#define lapackf77_zung2r   FORTRAN_NAME( zung2r, ZUNG2R )
+#define lapackf77_zungbr   FORTRAN_NAME( zungbr, ZUNGBR )
+#define lapackf77_zunghr   FORTRAN_NAME( zunghr, ZUNGHR )
+#define lapackf77_zunglq   FORTRAN_NAME( zunglq, ZUNGLQ )
+#define lapackf77_zungqr   FORTRAN_NAME( zungqr, ZUNGQR )
+#define lapackf77_zungtr   FORTRAN_NAME( zungtr, ZUNGTR )
+#define lapackf77_zunm2r   FORTRAN_NAME( zunm2r, ZUNM2R )
+#define lapackf77_zunmbr   FORTRAN_NAME( zunmbr, ZUNMBR )
+#define lapackf77_zunmlq   FORTRAN_NAME( zunmlq, ZUNMLQ )
+#define lapackf77_zunmql   FORTRAN_NAME( zunmql, ZUNMQL )
+#define lapackf77_zunmqr   FORTRAN_NAME( zunmqr, ZUNMQR )
+#define lapackf77_zunmtr   FORTRAN_NAME( zunmtr, ZUNMTR )
 
-#elif defined(NOCHANGE)
-
-#    define blasf77_zaxpy      zaxpy
-#    define blasf77_zcopy      zcopy
-#    define blasf77_zdotc      zdotc 
-#    define blasf77_zgemm      zgemm
-#    define blasf77_zgemv      zgemv
-#    define blasf77_zhemm      zhemm
-#    define blasf77_zhemv      zhemv
-#    define blasf77_zher2k     zher2k
-#    define blasf77_zherk      zherk
-#    define blasf77_zscal      zscal
-#    define blasf77_zdscal     zdscal
-#    define blasf77_zsymm      zsymm
-#    define blasf77_zsyr2k     zsyr2k
-#    define blasf77_zsyrk      zsyrk
-#    define blasf77_zswap      zswap
-#    define blasf77_ztrmm      ztrmm
-#    define blasf77_ztrmv      ztrmv
-#    define blasf77_ztrsm      ztrsm
-#    define blasf77_ztrsv      ztrsv
-#    define blasf77_zgeru      zgeru
-
-#    define lapackf77_zbdsqr   zbdsqr
-#    define lapackf77_zgebak   zgebak
-#    define lapackf77_zgebal   zgebal
-#    define lapackf77_zgebd2   zgebd2
-#    define lapackf77_zgebrd   zgebrd
-#    define lapackf77_zgeev    zgeev
-#    define lapackf77_zgehd2   zgehd2
-#    define lapackf77_zgehrd   zgehrd
-#    define lapackf77_zgelqf   zgelqf
-#    define lapackf77_zgels    zgels
-#    define lapackf77_zgeqlf   zgeqlf
-#    define lapackf77_zgeqrf   zgeqrf
-#    define lapackf77_zgesvd   zgesvd  
-#    define lapackf77_zgetrf   zgetrf
-#    define lapackf77_zgetrs   zgetrs
-#    define lapackf77_zheev    zheev
-#    define lapackf77_zheevd   zheevd
-#    define lapackf77_zhegs2   zhegs2
-#    define lapackf77_zhegvd   zhegvd
-#    define lapackf77_zhetd2   zhetd2
-#    define lapackf77_zhetrd   zhetrd
-#    define lapackf77_zhseqr   zhseqr
-#    define lapackf77_zlacpy   zlacpy
-#    define lapackf77_zlacgv   zlacgv
-#    define lapackf77_zlange   zlange
-#    define lapackf77_zlanhe   zlanhe
-#    define lapackf77_zlansy   zlansy
-#    define lapackf77_zlarfb   zlarfb
-#    define lapackf77_zlarfg   zlarfg
-#    define lapackf77_zlarft   zlarft
-#    define lapackf77_zlarnv   zlarnv
-#    define lapackf77_zlartg   zlartg
-#    define lapackf77_zlascl   zlascl
-#    define lapackf77_zlaset   zlaset
-#    define lapackf77_zlaswp   zlaswp
-#    define lapackf77_zlatrd   zlatrd
-#    define lapackf77_zlabrd   zlabrd
-#    define lapackf77_zlauum   zlauum
-#    define lapackf77_zpotrf   zpotrf
-#    define lapackf77_zpotrs   zpotrs
-#    define lapackf77_zpotri   zpotri
-#    define lapackf77_ztrevc   ztrevc
-#    define lapackf77_ztrtri   ztrtri
-#    define lapackf77_zsteqr   zsteqr
-#    define lapackf77_zstedc   zstedc
-#    define lapackf77_zsymv    zsymv
-#    define lapackf77_zung2r   zung2r
-#    define lapackf77_zungbr   zungbr
-#    define lapackf77_zunghr   zunghr
-#    define lapackf77_zunglq   zunglq
-#    define lapackf77_zungqr   zungqr
-#    define lapackf77_zungtr   zungtr
-#    define lapackf77_zunm2r   zunm2r
-#    define lapackf77_zunmbr   zunmbr
-#    define lapackf77_zunmlq   zunmlq
-#    define lapackf77_zunmql   zunmql
-#    define lapackf77_zunmqr   zunmqr
-#    define lapackf77_zunmtr   zunmtr
-
-#    define lapackf77_zbdt01   zbdt01
-#    define lapackf77_zget22   zget22
-#    define lapackf77_zhet21   zhet21
-#    define lapackf77_zhst01   zhst01
-#    define lapackf77_zqrt02   zqrt02
-#    define lapackf77_zunt01   zunt01
-#    define lapackf77_zlarfy   zlarfy
-#    define lapackf77_zstt21   zstt21
-
-#endif
+/* testing functions */
+#define lapackf77_zbdt01   FORTRAN_NAME( zbdt01, ZBDT01 )
+#define lapackf77_zget22   FORTRAN_NAME( zget22, ZGET22 )
+#define lapackf77_zhet21   FORTRAN_NAME( zhet21, ZHET21 )
+#define lapackf77_zhst01   FORTRAN_NAME( zhst01, ZHST01 )
+#define lapackf77_zqrt02   FORTRAN_NAME( zqrt02, ZQRT02 )
+#define lapackf77_zunt01   FORTRAN_NAME( zunt01, ZUNT01 )
+#define lapackf77_zlarfy   FORTRAN_NAME( zlarfy, ZLARFY )
+#define lapackf77_zstt21   FORTRAN_NAME( zstt21, ZSTT21 )
 
 
 #if defined(PRECISION_z) || defined(PRECISION_c)

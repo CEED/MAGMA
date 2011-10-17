@@ -1,6 +1,16 @@
 #ifndef MAGMA_LAPACK_H
 #define MAGMA_LAPACK_H
 
+#ifndef FORTRAN_NAME
+#if defined(ADD_)
+#define FORTRAN_NAME(lcname, UCNAME)  lcname##_
+#elif defined(NOCHANGE)               
+#define FORTRAN_NAME(lcname, UCNAME)  lcname
+#elif defined(UPCASE)                 
+#define FORTRAN_NAME(lcname, UCNAME)  UCNAME
+#endif
+#endif
+
 #include "magma_zlapack.h"
 #include "magma_clapack.h"
 #include "magma_dlapack.h"
@@ -10,55 +20,24 @@
 extern "C" {
 #endif
 
-#if defined(ADD_)
-
-#    define lapackf77_lsame  lsame_
-#    define lapackf77_slamch slamch_
-#    define lapackf77_dlamch dlamch_
-#    define lapackf77_slabad slabad_
-#    define lapackf77_dlabad dlabad_
-#    define lapackf77_zcgesv zcgesv_
-#    define lapackf77_dsgesv dsgesv_
-
-#    define lapackf77_dsterf dsterf_
-#    define lapackf77_ssterf ssterf_
-
-#    define lapackf77_zlag2c zlag2c_
-#    define lapackf77_clag2z clag2z_
-#    define lapackf77_dlag2s dlag2s_
-#    define lapackf77_slag2d slag2d_
-
-#    define lapackf77_dlapy2 dlapy2_
-#    define lapackf77_slapy2 slapy2_
-
-#    define blasf77_ddot     ddot_
-#    define blasf77_sdot     sdot_ 
-
-#elif defined(NOCHANGE)
-
-#    define lapackf77_lsame  lsame
-#    define lapackf77_slamch slamch
-#    define lapackf77_dlamch dlamch
-#    define lapackf77_slabad slabad
-#    define lapackf77_dlabad dlabad
-#    define lapackf77_zcgesv zcgesv
-#    define lapackf77_dsgesv dsgesv
-
-#    define lapackf77_dsterf dsterf
-#    define lapackf77_ssterf ssterf
-
-#    define lapackf77_zlag2c zlag2c
-#    define lapackf77_clag2z clag2z
-#    define lapackf77_dlag2s dlag2s
-#    define lapackf77_slag2d slag2d
-
-#    define lapackf77_dlapy2 dlapy2
-#    define lapackf77_slapy2 slapy2
-
-#    define blasf77_ddot     ddot
-#    define blasf77_sdot     sdot
-
-#endif
+#define lapackf77_lsame  FORTRAN_NAME( lsame,  LSAME  )
+#define lapackf77_slamch FORTRAN_NAME( slamch, SLAMCH )
+#define lapackf77_dlamch FORTRAN_NAME( dlamch, DLAMCH )
+#define lapackf77_slabad FORTRAN_NAME( slabad, SLABAD )
+#define lapackf77_dlabad FORTRAN_NAME( dlabad, DLABAD )
+#define lapackf77_zcgesv FORTRAN_NAME( zcgesv, ZCGESV )
+#define lapackf77_dsgesv FORTRAN_NAME( dsgesv, DSGESV )
+                                               
+#define lapackf77_dsterf FORTRAN_NAME( dsterf, DSTERF )
+#define lapackf77_ssterf FORTRAN_NAME( ssterf, SSTERF )
+                                               
+#define lapackf77_zlag2c FORTRAN_NAME( zlag2c, ZLAG2C )
+#define lapackf77_clag2z FORTRAN_NAME( clag2z, CLAG2Z )
+#define lapackf77_dlag2s FORTRAN_NAME( dlag2s, DLAG2S )
+#define lapackf77_slag2d FORTRAN_NAME( slag2d, SLAG2D )
+                                               
+#define lapackf77_dlapy2 FORTRAN_NAME( dlapy2, DLAPY2 )
+#define lapackf77_slapy2 FORTRAN_NAME( slapy2, SLAPY2 )
 
 long int lapackf77_lsame( const char *ca, const char *cb);
 float    lapackf77_slamch(const char *cmach);
@@ -81,6 +60,7 @@ void     lapackf77_slag2d( magma_int_t *m, magma_int_t *n, float           *sa, 
 double   lapackf77_dlapy2( double *x, double *y  );
 float    lapackf77_slapy2( float  *x, float  *y  );
 
+// zdotc has different calling sequence, so define these here
 double   blasf77_ddot( magma_int_t *, double *, magma_int_t *, double *, magma_int_t *);
 float    blasf77_sdot( magma_int_t *, float *,  magma_int_t *, float *,  magma_int_t *);
 
