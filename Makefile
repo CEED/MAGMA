@@ -36,7 +36,7 @@ clean:
 	( cd magmablas   && $(MAKE) clean ) 
 #	( cd quark       && $(MAKE) clean )
 
-cleanall: clean
+cleanall:
 	( cd include     && $(MAKE) cleanall )
 	( cd control     && $(MAKE) cleanall )
 	( cd src         && $(MAKE) cleanall )
@@ -45,7 +45,12 @@ cleanall: clean
 	( cd magmablas   && $(MAKE) cleanall ) 
 	( cd lib         && rm -f *.a )
 #	( cd quark       && $(MAKE) cleanall )
+	$(MAKE) cleanall2
 
+# cleanall2 is a dummy rule to run cleangen at the *end* of make cleanall, so
+# .Makefile.gen files aren't deleted and immediately re-created. see Makefile.gen
+cleanall2:
+	@echo
 
 dir:
 	mkdir -p $(prefix)
@@ -69,4 +74,3 @@ install: lib dir
 	    sed -e s:\__PREFIX:"$(prefix)":     | \
 	    sed -e s:\__LIBEXT:"$(LIBEXT)":       \
 	    > $(prefix)/lib/pkgconfig/magma.pc
-

@@ -7,7 +7,6 @@
 #//////////////////////////////////////////////////////////////////////////////
 
 MAGMA_DIR = ..
-include ../make.inc
 include ../Makefile.internal
 
 ZSRC  = testing_zgemm.cpp	\
@@ -115,4 +114,3 @@ fortran.o : $(CUDADIR)/src/fortran.c
 
 fortran_thunking.o : $(CUDADIR)/src/fortran_thunking.c
 	$(CC) $(OPTS) $(INC) -c $< -o $@
-

@@ -4,15 +4,16 @@
 #      Univ. of California, Berkeley
 #      Univ. of Colorado, Denver
 #      November 2010
-#
 #//////////////////////////////////////////////////////////////////////////////
+
 PYTHON ?= python
 CODEGEN = $(MAGMA_DIR)/tools/codegen.py
 
-cleanall: cleangen cleanmkgen
+cleanall2: cleangen cleanmkgen
 
 cleanmkgen:
-	find . -name .Makefile.gen -exec rm -f {} \;
+	find . -name .Makefile.gen -delete
+	find . -name  Makefile.src -delete
 
 generation:
 	(cd $(MAGMA_DIR)/include   && $(MAKE) generate )
