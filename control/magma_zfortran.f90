@@ -106,6 +106,17 @@ module magma_zfortran
        integer       :: info
      end subroutine magmaf_zgeqrf
 
+     subroutine magmaf_zgesv(  n, nrhs, A, lda, ipiv, B, ldb, info)
+       integer       :: n
+       integer       :: nrhs
+       complex*16    :: A
+       integer       :: lda
+       integer       :: ipiv(*)
+       complex*16    :: B
+       integer       :: ldb
+       integer       :: info
+     end subroutine magmaf_zgesv
+
      subroutine magmaf_zgetrf( m, n, A, lda, ipiv, info)
        integer       :: m
        integer       :: n
@@ -115,7 +126,17 @@ module magma_zfortran
        integer       :: info
      end subroutine magmaf_zgetrf
 
-
+     subroutine magmaf_zposv(  uplo, n, nrhs, dA, ldda, dB, lddb, info)
+       character     :: uplo
+       integer       :: n
+       integer       :: nrhs
+       magma_devptr_t:: dA
+       integer       :: ldda
+       magma_devptr_t:: dB
+       integer       :: lddb
+       integer       :: info
+     end subroutine magmaf_zposv
+     
      subroutine magmaf_zpotrf( uplo, n, A, lda, info)
        character          :: uplo
        integer       :: n

@@ -66,10 +66,12 @@ typedef size_t devptr_t;
 #define MAGMAF_ZGELQF  MAGMA_FORTRAN_NAME(zgelqf,  ZGELQF )
 #define MAGMAF_ZGEQLF  MAGMA_FORTRAN_NAME(zgeqlf,  ZGEQLF )
 #define MAGMAF_ZGEQRF  MAGMA_FORTRAN_NAME(zgeqrf,  ZGEQRF )
+#define MAGMAF_ZGESV   MAGMA_FORTRAN_NAME(zgesv,   ZGESV  )
 #define MAGMAF_ZGETRF  MAGMA_FORTRAN_NAME(zgetrf,  ZGETRF )
 #define MAGMAF_ZLATRD  MAGMA_FORTRAN_NAME(zlatrd,  ZLATRD )
 #define MAGMAF_ZLAHR2  MAGMA_FORTRAN_NAME(zlahr2,  ZLAHR2 )
 #define MAGMAF_ZLAHRU  MAGMA_FORTRAN_NAME(zlahru,  ZLAHRU )
+#define MAGMAF_ZPOSV   MAGMA_FORTRAN_NAME(zposv,   ZPOSV  )
 #define MAGMAF_ZPOTRF  MAGMA_FORTRAN_NAME(zpotrf,  ZPOTRF )
 #define MAGMAF_ZHETRD  MAGMA_FORTRAN_NAME(zhetrd,  ZHETRD )
 #define MAGMAF_ZUNGQR  MAGMA_FORTRAN_NAME(zungqr,  ZUNGQR )
@@ -173,6 +175,16 @@ void MAGMAF_ZGEQRF( magma_int_t *m, magma_int_t *n, cuDoubleComplex *A,
                   *lda, tau, work, 
                   *lwork, info);
 }
+
+void MAGMAF_ZGESV ( magma_int_t *n, magma_int_t *nrhs,
+                    cuDoubleComplex *A, magma_int_t *lda, magma_int_t *ipiv,
+                    cuDoubleComplex *B, magma_int_t *ldb, magma_int_t *info)
+{
+    magma_zgesv(  *n, *nrhs,
+                  A, *lda, ipiv,
+                  B, *ldb,
+                  info);
+}
     
 void MAGMAF_ZGETRF( magma_int_t *m, magma_int_t *n, cuDoubleComplex *A, 
                     magma_int_t *lda, magma_int_t *ipiv, 
@@ -221,13 +233,22 @@ void MAGMAF_ZGETRF( magma_int_t *m, magma_int_t *n, cuDoubleComplex *A,
 //                   dwork);
 // }
 
+void MAGMAF_ZPOSV(  char *uplo, magma_int_t *n, magma_int_t *nrhs,
+                    cuDoubleComplex *A, magma_int_t *lda,
+                    cuDoubleComplex *B, magma_int_t *ldb, magma_int_t *info)
+{
+    magma_zposv(  uplo[0], *n, *nrhs,
+                  A, *lda,
+                  B, *ldb, info);
+}
+
 void MAGMAF_ZPOTRF( char *uplo, magma_int_t *n, cuDoubleComplex *A, 
                     magma_int_t *lda, magma_int_t *info)
 {
     magma_zpotrf( uplo[0], *n, A, 
                   *lda, info);
 }
-    
+
 void MAGMAF_ZHETRD( char *uplo, magma_int_t *n, cuDoubleComplex *A, 
                     magma_int_t *lda, double *d, double *e, 
                     cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t *lwork, 
