@@ -23,6 +23,13 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
+/*
+ * VERSION1 - MAGMA 1.0 (out-of-place transpose)
+ * VERSION2 - MAGMA 1.1 (incremental transpose)
+ */
+#define VERSION2
+
+
 // Flops formula
 #define PRECISION_z
 #if defined(PRECISION_z) || defined(PRECISION_c)
@@ -158,7 +165,11 @@ int main( int argc, char** argv)
            =================================================================== */
         lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_R, &lda, h_A, &lda );
         start = get_current_time();
+#if defined(VERSION1)
         magma_zgetrf( M, N, h_R, lda, ipiv, &info);
+#else
+        magma_zgetrf2( M, N, h_R, lda, ipiv, &info);
+#endif
         end = get_current_time();
         if (info < 0)
             printf("Argument %d of zgetrf had an illegal value.\n", -info);
