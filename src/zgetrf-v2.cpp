@@ -16,6 +16,9 @@
   #define cublasZgemm magmablas_zgemm
   #define cublasZtrsm magmablas_ztrsm
 #endif
+#if (defined(PRECISION_z))
+  #define cublasZgemm magmablas_zgemm
+#endif
 // === End defining what BLAS to use =======================================
 
 
