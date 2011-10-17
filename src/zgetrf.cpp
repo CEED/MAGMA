@@ -97,7 +97,6 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t     iinfo, nb;
 
-    /* Function Body */
     *info = 0;
 
     if (m < 0)

@@ -21,9 +21,10 @@ ZSRC  = zpotrf.cpp	\
         zpotri_gpu.cpp	\
 	\
         zgetrf.cpp	\
+        zgetrf-v2.cpp   \
         zgetrf_gpu.cpp 	\
         zgetrf_nopiv.cpp\
-        zgetrf_ooc.cpp\
+        zgetrf_ooc.cpp  \
 	zgetf2_nopiv.cpp\
         zgetrf_nopiv_gpu.cpp\
         zgetrs_gpu.cpp 	\
@@ -88,7 +89,7 @@ ZSRC  = zpotrf.cpp	\
 	zgessm_gpu.cpp	\
 	zssssm_gpu.cpp  \
 	zgetrl_gpu.cpp	\
-	ztstrf_gpu.cpp \
+	ztstrf_gpu.cpp  \
 	\
 	ztrtri.cpp	\
 	ztrtri_gpu.cpp	\

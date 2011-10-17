@@ -27,7 +27,7 @@ magmablas_zpermute_long3( cuDoubleComplex *dAT, int lda, int *ipiv, int nb, int 
 
 extern "C" magma_int_t
 magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
-	     magma_int_t *ipiv, magma_int_t *info)
+		 magma_int_t *ipiv, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -101,7 +101,6 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
 #endif
     CUdevice dev;
 
-    /* Function Body */
     *info = 0;
 
     if (m < 0)
@@ -118,28 +117,29 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
     if (m == 0 || n == 0)
         return MAGMA_SUCCESS;
 
-	/* initialize nb */
+    /* initialize nb */
     nb = magma_get_zgetrf_nb(m);
 
-	/* figure out NB */
+    /* figure out NB */
     cuDeviceGet( &dev, 0);
     cuDeviceTotalMem( &totalMem, dev );
     totalMem /= sizeof(cuDoubleComplex);
-	/* printf( " max. matrix dimension (%d)\n",(int)sqrt((double)totalMem) ); */
-	MB = m;                                      /* number of rows in the big panel    */
+	
+    /* printf( " max. matrix dimension (%d)\n",(int)sqrt((double)totalMem) ); */
+    MB = m;                                      /* number of rows in the big panel    */
     NB = (magma_int_t)(0.8*totalMem/(2*m))-2*nb; /* number of columns in the big panel */
-	if( NB >= n ) {
+    if( NB >= n ) {
 #ifdef CHECK_ZGETRF_OOC
-	  printf( "      * still fit in GPU memory.\n" );
+      printf( "      * still fit in GPU memory.\n" );
 #endif
-	  NB = n;
-	} 
+      NB = n;
+    } 
 #ifdef CHECK_ZGETRF_OOC
-	  else {
-	  printf( "      * don't fit in GPU memory.\n" );
-	}
+    else {
+      printf( "      * don't fit in GPU memory.\n" );
+    }
 #endif
-	NB = (NB / nb) * nb;   /* making sure it's devisable by nb   */
+    NB = (NB / nb) * nb;   /* making sure it's devisable by nb   */
 
 #ifdef CHECK_ZGETRF_OOC
 	if( NB != n ) printf( "      * running in out-core mode (n=%d, NB=%d, nb=%d).\n",n,NB,nb );
@@ -157,25 +157,24 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
         maxn = ((NB + 31)/32)*32;
         maxdim = max(maxm, maxn);
 
-		/* allocate memory on GPU to store the big panel */
-	    if (CUBLAS_STATUS_SUCCESS != cublasAlloc((2*nb+maxn)*maxm, 
-					                             sizeof(cuDoubleComplex), (void**)&dA) ) {
-	      *info = -7; 
-		  return MAGMA_ERR_CUBLASALLOC;
-	    }
-	    da  = dA + 2*nb*maxm; /* for transposing the next panel to be sent to CPU */
-		dPT = dA +   nb*maxm; /* for storing the previous panel from CPU          */
+	/* allocate memory on GPU to store the big panel */
+	if (CUBLAS_STATUS_SUCCESS != cublasAlloc((2*nb+maxn)*maxm, 
+						 sizeof(cuDoubleComplex), (void**)&dA) ) {
+	  *info = -7; 
+	  return MAGMA_ERR_CUBLASALLOC;
+	}
+	da  = dA + 2*nb*maxm; /* for transposing the next panel to be sent to CPU */
+	dPT = dA +   nb*maxm; /* for storing the previous panel from CPU          */
 
-		/* allocate memory to store the transpose of A */
-	    if (CUBLAS_STATUS_SUCCESS != cublasAlloc(maxm*maxn, 
-					                             sizeof(cuDoubleComplex), (void**)&dAT) ) {
-		  cublasFree(dA);
-	      *info = -7; 
-		  return MAGMA_ERR_CUBLASALLOC;
-	    }
-	
+	/* allocate memory to store the transpose of A */
+	if (CUBLAS_STATUS_SUCCESS != cublasAlloc(maxm*maxn, 
+						 sizeof(cuDoubleComplex), (void**)&dAT) ) {
+	  cublasFree(dA);
+	  *info = -7; 
+	  return MAGMA_ERR_CUBLASALLOC;
+	}
 
-		for( I=0; I<n; I+=NB ) {
+	for( I=0; I<n; I+=NB ) {
 		  M = MB;
 		  N = min( NB, n-I );       /* number of columns in this big panel             */
 		  s = min(max(m-I,0),N)/nb; /* number of small block-columns in this big panel */
@@ -190,41 +189,41 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
 
 			/* applying the pivot from the big-panel */
 			NBk    = min( m-offset, NB );
-	        magmablas_zpermute_long3( dAT, maxn, ipiv, NBk, offset );
+			magmablas_zpermute_long3( dAT, maxn, ipiv, NBk, offset );
 
 			/* == going through each block-column of this big-panel == */
-		    for( jj=0, ib=offset/nb; jj<NBk; jj+=nb, ib++ ) {
+			for( jj=0, ib=offset/nb; jj<NBk; jj+=nb, ib++ ) 
+			  {
+			    nb0  = min(NBk-jj,nb);
+			    ii   = offset+jj;
+			    rows = maxm - ii;
 
-			  nb0  = min(NBk-jj,nb);
-			  ii   = offset+jj;
-			  rows = maxm - ii;
+			    /* upload the previous block-column to GPU */
+			    cublasSetMatrix( M-ii, nb, sizeof(cuDoubleComplex), A(ii, ii), lda, dA, rows);
+			    magmablas_ztranspose2( dPT, nb, dA, rows, M-ii, nb0);
 
-		      /* upload the previous block-column to GPU */
-		      cublasSetMatrix( M-ii, nb, sizeof(cuDoubleComplex), A(ii, ii), lda, dA, rows);
-		      magmablas_ztranspose2( dPT, nb, dA, rows, M-ii, nb0);
-
-			  /* update with the block column */
-		      cuCtxSynchronize();
-		      cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
-			               N, nb0, c_one, inPT(0,0), nb, inAT(ib,0), maxn );
-			  if( M > ii+nb0 ) {
-		        cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
-			                 N, M-(ii+nb0), nb0, c_neg_one, inAT(ib,0), maxn, 
-			                 inPT(1,0), nb, c_one, inAT(ib+1,0), maxn );
-			  }
-
-			} /* end of for each block-columns in a big-panel */
-
+			    /* update with the block column */
+			    cuCtxSynchronize();
+			    cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+					 N, nb0, c_one, inPT(0,0), nb, inAT(ib,0), maxn );
+			    if( M > ii+nb0 ) {
+			      cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+					   N, M-(ii+nb0), nb0, c_neg_one, inAT(ib,0), maxn, 
+					   inPT(1,0), nb, c_one, inAT(ib+1,0), maxn );
+			    }
+			    
+			  } /* end of for each block-columns in a big-panel */
+			
 		  } /* end of for each previous big-panels */
 
 		  nb0 = min( nb, n-I );
 		  m0  = M-I;
-          work = &a[I*lda];   /* using the first nb0 columns as the workspace */
+		  work = &a[I*lda];   /* using the first nb0 columns as the workspace */
 		  if( m0 > 0 ) {      /* if more rows to be factorized */
 
 		    /* download the first block-column in this big-panel to CPU */
 		    if( I > 0 ) {
-	          cols = maxm - I;    /* the number of columns in At */
+		      cols = maxm - I;    /* the number of columns in At */
 
 		      cuCtxSynchronize();
 		      magmablas_ztranspose2( dA, cols, inAT(I/nb,0), maxn, nb0, cols );
