@@ -48,6 +48,8 @@ magma_int_t magma_zgesv ( magma_int_t n, magma_int_t nrhs,
 magma_int_t magma_zgetrf( magma_int_t m, magma_int_t n, cuDoubleComplex *A, 
 			  magma_int_t lda, magma_int_t *ipiv, 
 			  magma_int_t *info);
+magma_int_t magma_zgetrf2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, 
+                          magma_int_t lda, magma_int_t *ipiv, magma_int_t *info);
 magma_int_t magma_zlatrd( char uplo, magma_int_t n, magma_int_t nb, cuDoubleComplex *a, 
                           magma_int_t lda, double *e, cuDoubleComplex *tau, 
 			  cuDoubleComplex *w, magma_int_t ldw,
