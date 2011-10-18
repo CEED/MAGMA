@@ -9,7 +9,9 @@
 PYTHON ?= python
 CODEGEN = $(MAGMA_DIR)/tools/codegen.py
 
-cleanall2: cleangen cleanmkgen
+cleanall:  cleangen
+
+cleanall2: cleanmkgen
 
 cleanmkgen:
 	find . -name .Makefile.gen -delete
