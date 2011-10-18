@@ -51,15 +51,15 @@
 #include "transpose.h"
 
 /** ****************************************************************************
- *  If __func__ is not defined try to use __FUNCTION___, 
- *   otherwise "FUNC" is printed
+ * C99 standard defines __func__. Some older compilers use __FUNCTION__.
+ * Note __func__ is not a macro, so ifndef __func__ doesn't work.
  */
-#ifndef __func__
-#ifdef __FUNCTION___
+#if __STDC_VERSION__ < 199901L
+# if __GNUC__ >= 2 || _MSC_VER >= 1300
 #  define __func__ __FUNCTION__
-#else
-#  define __func__ "Magma function:"
-#endif
+# else
+#  define __func__ "<unknown>"
+# endif
 #endif
 
 /** ****************************************************************************
