@@ -107,13 +107,11 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
     else
       transt = MagmaNoTrans;
 
-    if ( ( side  == 'r' || side  == 'R') ) 
-      {
-        magma_int_t info = -1;
+    if ( ( side  == 'r' || side  == 'R') ) {
         fprintf(stderr, "The case (side == right) is not implemented\n");
-        magma_xerbla(__func__, &info);
+        magma_xerbla( __func__, 1 );
         return MAGMA_ERR_ILLEGAL_VALUE;
-      }
+    }
 
     if ( storev == 'c' || storev == 'C') {
         /*

@@ -85,35 +85,37 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 	===================================================================== */
 
 
-    /* Local variables */
-    char uplo_[2] = {uplo, 0};
-    char diag_[2] = {diag, 0};
-    magma_int_t        ldda, nb, nn;
-    static 		magma_int_t j, jb;
-    cuDoubleComplex    	zone   = MAGMA_Z_ONE;
-    cuDoubleComplex   	mzone  = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex   	*work;
+	/* Local variables */
+	char uplo_[2] = {uplo, 0};
+	char diag_[2] = {diag, 0};
+	magma_int_t        ldda, nb, nn;
+	static magma_int_t j, jb;
+	cuDoubleComplex    zone   = MAGMA_Z_ONE;
+	cuDoubleComplex    mzone  = MAGMA_Z_NEG_ONE;
+	cuDoubleComplex    *work;
+	
+	long int    upper  = lapackf77_lsame(uplo_, "U");
+	long int    nounit = lapackf77_lsame(diag_, "N");
+	
+	*info = 0;
 
-    long int	upper  = lapackf77_lsame(uplo_, "U");
-    long int    nounit = lapackf77_lsame(diag_, "N");
+	if ((! upper) && (! lapackf77_lsame(uplo_, "L")))
+		*info = -1;
+	else if ((! nounit) && (! lapackf77_lsame(diag_, "U")))
+		*info = -2;
+	else if (n < 0)
+		*info = -3;
+	else if (lda < max(1,n))
+		*info = -5;
 
-    *info = 0;
+	if (*info != 0) {
+		magma_xerbla( __func__, -(*info) );
+		return MAGMA_ERR_ILLEGAL_VALUE;
+	}
 
-    if ((! upper) && (! lapackf77_lsame(uplo_, "L")))
-	*info = -1;
-    else if ((! nounit) && (! lapackf77_lsame(diag_, "U")))
-	*info = -2;
-    else if (n < 0)
-	*info = -3;
-    else if (lda < max(1,n))
-	*info = -5;
-
-    if (*info != 0)
-      	return MAGMA_ERR_ILLEGAL_VALUE;
-
-    /* Quick return */
-    if ( n == 0 )
-      	return MAGMA_SUCCESS;
+	/* Quick return */
+	if ( n == 0 )
+		return MAGMA_SUCCESS;
 
 
 	/*  Check for singularity if non-unit */
@@ -129,19 +131,19 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 
 
 	/* Determine the block size for this environment */
-    ldda = ((n+31)/32)*32;
+	ldda = ((n+31)/32)*32;
 
-    if (CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*ldda, sizeof( cuDoubleComplex), (void**)&work))
-    {
-	*info = -6;
-	return MAGMA_ERR_CUBLASALLOC;
-    }  
+	if (CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*ldda, sizeof( cuDoubleComplex), (void**)&work))
+	{
+		*info = -6;
+		return MAGMA_ERR_CUBLASALLOC;
+	}  
 
-    static cudaStream_t stream[2];
-    cudaStreamCreate(&stream[0]);
-    cudaStreamCreate(&stream[1]);
+	static cudaStream_t stream[2];
+	cudaStreamCreate(&stream[0]);
+	cudaStreamCreate(&stream[1]);
 
-    nb = magma_get_zpotrf_nb(n);
+	nb = magma_get_zpotrf_nb(n);
 	
 	if (nb <= 1 || nb >= n)
 		lapackf77_ztrtri(uplo_, diag_, &n, a, &lda, info);
@@ -149,14 +151,14 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 	{
 		if (upper)
 		{
-        		/* Compute inverse of upper triangular matrix */
+			/* Compute inverse of upper triangular matrix */
 			for (j=0; j<n; j =j+ nb)
 			{
-                		jb = min(nb, (n-j));
+				jb = min(nb, (n-j));
 				cublasSetMatrix(jb, (n-j), sizeof( cuDoubleComplex), A(j, j), lda, dA(j, j), ldda);
 
 				/* Compute rows 1:j-1 of current block column */
-                		cublasZtrmm(MagmaLeft, MagmaUpper,
+				cublasZtrmm(MagmaLeft, MagmaUpper,
 							MagmaNoTrans, MagmaNonUnit, j, jb,
 							zone, dA(0,0), ldda, dA(0, j),ldda);
 
@@ -164,21 +166,19 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 							MagmaNoTrans, MagmaNonUnit, j, jb,
 							mzone, dA(j,j), ldda, dA(0, j),ldda);
 
-			
 				//cublasGetMatrix(j ,jb, sizeof( cuDoubleComplex),
-                                                //dA(0, j), ldda, A(0, j), lda);
-                                                
+				//dA(0, j), ldda, A(0, j), lda);
 
-				cudaMemcpy2DAsync(A(j, j), lda *sizeof( cuDoubleComplex),
-								  dA(j, j), ldda*sizeof( cuDoubleComplex),
-                                  				  sizeof( cuDoubleComplex)*jb, jb,
-								  cudaMemcpyDeviceToHost, stream[1]);
+				cudaMemcpy2DAsync( A(j, j), lda *sizeof( cuDoubleComplex),
+				                   dA(j, j), ldda*sizeof( cuDoubleComplex),
+				                   sizeof( cuDoubleComplex)*jb, jb,
+				                   cudaMemcpyDeviceToHost, stream[1]);
 
 
-				cudaMemcpy2DAsync(A(0, j), lda *sizeof( cuDoubleComplex),
-                                                                  dA(0, j), ldda*sizeof( cuDoubleComplex),
-                                                                  sizeof( cuDoubleComplex)*j, jb,
-                                                                  cudaMemcpyDeviceToHost, stream[0]);
+				cudaMemcpy2DAsync( A(0, j), lda *sizeof( cuDoubleComplex),
+				                   dA(0, j), ldda*sizeof( cuDoubleComplex),
+				                   sizeof( cuDoubleComplex)*j, jb,
+				                   cudaMemcpyDeviceToHost, stream[0]);
 
 				cudaStreamSynchronize(stream[1]);
 			
@@ -186,7 +186,7 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 				lapackf77_ztrtri(MagmaUpperStr, diag_, &jb, A(j,j), &lda, info);
 
 				cublasSetMatrix(jb, jb, sizeof( cuDoubleComplex),
-                                                A(j, j), lda, dA(j, j), ldda);
+				                A(j, j), lda, dA(j, j), ldda);
 			}
 
 		}
@@ -202,7 +202,7 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 
 				if((j+jb) < n)
 				{
-				        cublasSetMatrix((n-j), jb, sizeof( cuDoubleComplex),
+					cublasSetMatrix((n-j), jb, sizeof( cuDoubleComplex),
 						A(j, j), lda, dA(j, j), ldda);
 
 					/* Compute rows j+jb:n of current block column */
@@ -214,20 +214,20 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 							MagmaNoTrans, MagmaNonUnit, (n-j-jb), jb,
 							mzone, dA(j,j), ldda, dA(j+jb, j), ldda);
 
-				        //cublasGetMatrix((n-j), jb, sizeof( cuDoub														//leComplex),dA(j, j), ldda, A(j, j), lda);
-                	                /*
-                                */
+					//cublasGetMatrix((n-j), jb, sizeof( cuDoub
+					//leComplex),dA(j, j), ldda, A(j, j), lda);
+
 					cudaMemcpy2DAsync( A(j+jb, j),  lda *sizeof( cuDoubleComplex),
-                                   			dA(j+jb, j), ldda*sizeof( cuDoubleComplex),
-                                   			sizeof( cuDoubleComplex)*(n-j-jb),jb,
-                                   			cudaMemcpyDeviceToHost,stream[1]);	
+					                   dA(j+jb, j), ldda*sizeof( cuDoubleComplex),
+					                   sizeof( cuDoubleComplex)*(n-j-jb),jb,
+					                   cudaMemcpyDeviceToHost,stream[1]);
 
 					cudaMemcpy2DAsync( A(j,j),  lda *sizeof( cuDoubleComplex),
-                                                        dA(j,j), ldda*sizeof( cuDoubleComplex),
-                                                        sizeof( cuDoubleComplex)*jb, jb,
-                                                        cudaMemcpyDeviceToHost,stream[0]);
+					                   dA(j,j), ldda*sizeof( cuDoubleComplex),
+					                   sizeof( cuDoubleComplex)*jb, jb,
+					                   cudaMemcpyDeviceToHost,stream[0]);
 
-	                                cudaStreamSynchronize(stream[0]);
+					cudaStreamSynchronize(stream[0]);
 				}
 
 				/* Compute inverse of current diagonal block */
@@ -240,9 +240,9 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 	}
 
 	cudaStreamDestroy(stream[0]);
-    	cudaStreamDestroy(stream[1]);
+	cudaStreamDestroy(stream[1]);
 
-    	cublasFree(work);
+	cublasFree(work);
 
 	return MAGMA_SUCCESS;
 }

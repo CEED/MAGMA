@@ -96,8 +96,8 @@ magma_zposv    ( char uplo, magma_int_t n, magma_int_t nrhs,
         *info = -5; 
     if ( ldb < max(1, n) )
         *info = -7;
-    if( *info != 0 ){ 
-        magma_xerbla("magma_zposv", info); 
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
         return MAGMA_ERR_ILLEGAL_VALUE;
     }
 
@@ -112,9 +112,6 @@ magma_zposv    ( char uplo, magma_int_t n, magma_int_t nrhs,
     }
 
     lapackf77_zpotrs( &uplo, &n, &nrhs, A, &lda, B, &ldb, info );
-    if ( *info != 0 ) {
-        return MAGMA_ERR_ILLEGAL_VALUE;
-    }
 
     return MAGMA_SUCCESS;
 }

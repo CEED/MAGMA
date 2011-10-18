@@ -218,9 +218,10 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     }
 
     if (*info != 0) {
-	magma_xerbla("magma_dsygvd", info);
-	return MAGMA_ERR_ILLEGAL_VALUE;
-    } else if (lquery) {
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
+    }
+    else if (lquery) {
 	return MAGMA_SUCCESS;
     }
 

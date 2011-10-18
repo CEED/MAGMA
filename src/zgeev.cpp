@@ -185,10 +185,10 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
       }
 
     if (*info != 0) {
-	i__1 = -(*info);
-	magma_xerbla("ZGEEV ", &i__1);
-	return MAGMA_ERR_ILLEGAL_VALUE;
-    } else if (lquery) {
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
+    }
+    else if (lquery) {
 	return MAGMA_SUCCESS;
     }
 

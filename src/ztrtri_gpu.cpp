@@ -19,9 +19,9 @@
 
 #if (GPUSHMEM >= 200)
 	#if (defined(PRECISION_s))
-     		#undef  cublasSgemm
-     		#define cublasSgemm magmablas_sgemm_fermi80
-  	#endif
+		#undef  cublasSgemm
+		#define cublasSgemm magmablas_sgemm_fermi80
+	#endif
 #endif
 // === End defining what BLAS to use ======================================
 
@@ -83,30 +83,32 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
 	===================================================================== */
 
 
-    /* Local variables */
-    char uplo_[2] = {uplo, 0};
-    char diag_[2] = {diag, 0};
-    magma_int_t         nb, nn, j, jb;
-    cuDoubleComplex    	zone   = MAGMA_Z_ONE;
-    cuDoubleComplex   	mzone  = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex   	*work;
+	/* Local variables */
+	char uplo_[2] = {uplo, 0};
+	char diag_[2] = {diag, 0};
+	magma_int_t         nb, nn, j, jb;
+	cuDoubleComplex     zone   = MAGMA_Z_ONE;
+	cuDoubleComplex     mzone  = MAGMA_Z_NEG_ONE;
+	cuDoubleComplex     *work;
 
-    long int	upper  = lapackf77_lsame(uplo_, "U");
-    long int    nounit = lapackf77_lsame(diag_, "N");
+	long int	upper  = lapackf77_lsame(uplo_, "U");
+	long int    nounit = lapackf77_lsame(diag_, "N");
 
-    *info = 0;
+	*info = 0;
 
-    if ((! upper) && (! lapackf77_lsame(uplo_, "L")))
-	*info = -1;
-    else if ((! nounit) && (! lapackf77_lsame(diag_, "U")))
-	*info = -2;
-    else if (n < 0)
-	*info = -3;
-    else if (ldda < max(1,n))
-	*info = -5;
+	if ((! upper) && (! lapackf77_lsame(uplo_, "L")))
+		*info = -1;
+	else if ((! nounit) && (! lapackf77_lsame(diag_, "U")))
+		*info = -2;
+	else if (n < 0)
+		*info = -3;
+	else if (ldda < max(1,n))
+		*info = -5;
 
-    if (*info != 0)
-      	return MAGMA_ERR_ILLEGAL_VALUE;
+	if (*info != 0) {
+		magma_xerbla( __func__, -(*info) );
+		return MAGMA_ERR_ILLEGAL_VALUE;
+	}
 
 
 	/*  Check for singularity if non-unit */
@@ -120,17 +122,17 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
 		*info=0;
 	}
 
-   nb = magma_get_zpotrf_nb(n);
-
-   if (cudaSuccess != cudaMallocHost( (void**)&work, nb*nb*sizeof(cuDoubleComplex) ) ) 
-   {
-        *info = -6;
-        return MAGMA_ERR_HOSTALLOC;
-   }
-
-    static cudaStream_t stream[2];
-    cudaStreamCreate(&stream[0]);
-    cudaStreamCreate(&stream[1]);
+	nb = magma_get_zpotrf_nb(n);
+	
+	if (cudaSuccess != cudaMallocHost( (void**)&work, nb*nb*sizeof(cuDoubleComplex) ) ) 
+	{
+		*info = -6;
+		return MAGMA_ERR_HOSTALLOC;
+	}
+	
+	static cudaStream_t stream[2];
+	cudaStreamCreate(&stream[0]);
+	cudaStreamCreate(&stream[1]);
 
 	
 	if (nb <= 1 || nb >= n)
@@ -143,13 +145,13 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
 	{
 		if (upper)
 		{
-        		/* Compute inverse of upper triangular matrix */
+			/* Compute inverse of upper triangular matrix */
 			for (j=0; j<n; j =j+ nb)
 			{
-                		jb = min(nb, (n-j));
+				jb = min(nb, (n-j));
 
 				/* Compute rows 1:j-1 of current block column */
-                		cublasZtrmm(MagmaLeft, MagmaUpper,
+				cublasZtrmm(MagmaLeft, MagmaUpper,
 							MagmaNoTrans, MagmaNonUnit, j, jb,
 							zone, dA(0,0), ldda, dA(0, j),ldda);
 
@@ -159,26 +161,25 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
 
 			
 				//cublasGetMatrix(jb ,jb, sizeof(cuDoubleComplex),
-                                //                dA(j, j), ldda, work, jb);
-                                  
-				cudaMemcpy2DAsync(work,     jb  *sizeof(cuDoubleComplex),
-                                                dA(j, j), ldda*sizeof(cuDoubleComplex),
-                                                jb*sizeof(cuDoubleComplex), jb,
-                                                cudaMemcpyDeviceToHost,stream[1]);
+				//                dA(j, j), ldda, work, jb);
 
-                                cudaStreamSynchronize(stream[1]);
-              
+				cudaMemcpy2DAsync( work,     jb  *sizeof(cuDoubleComplex),
+				                   dA(j, j), ldda*sizeof(cuDoubleComplex),
+				                   jb*sizeof(cuDoubleComplex), jb,
+				                   cudaMemcpyDeviceToHost,stream[1]);
+
+				cudaStreamSynchronize(stream[1]);
+
 				/* Compute inverse of current diagonal block */
 				lapackf77_ztrtri(MagmaUpperStr, diag_, &jb, work, &jb, info);
 
 				//cublasSetMatrix(jb, jb, sizeof(cuDoubleComplex),
-                                //                work, jb, dA(j, j), ldda);
-                                
-				cudaMemcpy2DAsync( dA(j, j), ldda*sizeof(cuDoubleComplex),
-                                                work,     jb  *sizeof(cuDoubleComplex),
-                                                sizeof(cuDoubleComplex)*jb, jb,
-                                                cudaMemcpyHostToDevice,stream[0]);
+				//                work, jb, dA(j, j), ldda);
 
+				cudaMemcpy2DAsync( dA(j, j), ldda*sizeof(cuDoubleComplex),
+				                   work,     jb  *sizeof(cuDoubleComplex),
+				                   sizeof(cuDoubleComplex)*jb, jb,
+				                   cudaMemcpyHostToDevice,stream[0]);
 			}
 
 		}
@@ -205,12 +206,12 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
 				}
 
 				//cublasGetMatrix(jb, jb, sizeof(cuDoubleComplex),
-                                 //               dA(j, j), ldda, work, jb);
+				//               dA(j, j), ldda, work, jb);
 				
-				cudaMemcpy2DAsync(work,     jb  *sizeof(cuDoubleComplex),
-                                	 	dA(j, j), ldda*sizeof(cuDoubleComplex),
-                                  		jb*sizeof(cuDoubleComplex), jb,
-                                  		cudaMemcpyDeviceToHost,stream[1]);
+				cudaMemcpy2DAsync( work,     jb  *sizeof(cuDoubleComplex),
+				                   dA(j, j), ldda*sizeof(cuDoubleComplex),
+				                   jb*sizeof(cuDoubleComplex), jb,
+				                   cudaMemcpyDeviceToHost,stream[1]);
 
 				cudaStreamSynchronize(stream[1]);
 
@@ -221,17 +222,17 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
 				//		work, jb, dA(j, j), ldda);
 
 				cudaMemcpy2DAsync( dA(j, j), ldda*sizeof(cuDoubleComplex),
-                                	   	work,     jb  *sizeof(cuDoubleComplex),
-                                  	 	sizeof(cuDoubleComplex)*jb, jb,
-                                   		cudaMemcpyHostToDevice,stream[0]);
+				                   work,     jb  *sizeof(cuDoubleComplex),
+				                   sizeof(cuDoubleComplex)*jb, jb,
+				                   cudaMemcpyHostToDevice,stream[0]);
 			}
 		}
 	}
 
 	cudaStreamDestroy(stream[0]);
-    	cudaStreamDestroy(stream[1]);
+	cudaStreamDestroy(stream[1]);
 
-    	cudaFreeHost(work);
+	cudaFreeHost(work);
 
 	return MAGMA_SUCCESS;
 }

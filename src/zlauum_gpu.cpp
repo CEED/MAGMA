@@ -19,9 +19,9 @@
 
 #if (GPUSHMEM >= 200)
 	#if (defined(PRECISION_s))
-     		#undef  cublasSgemm
-     		#define cublasSgemm magmablas_sgemm_fermi80
-  	#endif
+		#undef  cublasSgemm
+		#define cublasSgemm magmablas_sgemm_fermi80
+	#endif
 #endif
 // === End defining what BLAS to use ======================================
 
@@ -82,38 +82,40 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
 
 
 
-    /* Local variables */
-    char uplo_[2] = {uplo, 0};
-    magma_int_t         nb, i, ib;
-    double    	done   = MAGMA_D_ONE;
-    cuDoubleComplex     zone = MAGMA_Z_ONE;
-    cuDoubleComplex   	*work;
+	/* Local variables */
+	char uplo_[2] = {uplo, 0};
+	magma_int_t         nb, i, ib;
+	double              done   = MAGMA_D_ONE;
+	cuDoubleComplex     zone = MAGMA_Z_ONE;
+	cuDoubleComplex     *work;
 
-    long int	upper  = lapackf77_lsame(uplo_, "U");
+	long int upper  = lapackf77_lsame(uplo_, "U");
 
-    *info = 0;
+	*info = 0;
 
-    if ((! upper) && (! lapackf77_lsame(uplo_, "L")))
-	*info = -1;
-    else if (n < 0)
-	*info = -2;
-    else if (ldda < max(1,n))
-	*info = -4;
+	if ((! upper) && (! lapackf77_lsame(uplo_, "L")))
+		*info = -1;
+	else if (n < 0)
+		*info = -2;
+	else if (ldda < max(1,n))
+		*info = -4;
 
-    if (*info != 0)
-      	return MAGMA_ERR_ILLEGAL_VALUE;
+	if (*info != 0) {
+		magma_xerbla( __func__, -(*info) );
+		return MAGMA_ERR_ILLEGAL_VALUE;
+	}
 
-   nb = magma_get_zpotrf_nb(n);
+	nb = magma_get_zpotrf_nb(n);
 
-   if (cudaSuccess != cudaMallocHost( (void**)&work, nb*nb*sizeof(cuDoubleComplex) ) ) 
-   {
-        *info = -6;
-        return MAGMA_ERR_HOSTALLOC;
-   }
-
-    static cudaStream_t stream[2];
-    cudaStreamCreate(&stream[0]);
-    cudaStreamCreate(&stream[1]);
+	if (cudaSuccess != cudaMallocHost( (void**)&work, nb*nb*sizeof(cuDoubleComplex) ) ) 
+	{
+		*info = -6;
+		return MAGMA_ERR_HOSTALLOC;
+	}
+	
+	static cudaStream_t stream[2];
+	cudaStreamCreate(&stream[0]);
+	cudaStreamCreate(&stream[1]);
 
 	
 	if (nb <= 1 || nb >= n)
@@ -126,35 +128,35 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
 	{
 		if (upper)
 		{
-        		/* Compute inverse of upper triangular matrix */
+			/* Compute inverse of upper triangular matrix */
 			for (i=0; i<n; i =i+ nb)
 			{
-                		ib = min(nb, (n-i));
+				ib = min(nb, (n-i));
 
 				/* Compute the product U * U'. */
-                		cublasZtrmm(MagmaRight, MagmaUpper,
-							MagmaConjTrans, MagmaNonUnit, i, ib,
-							zone, dA(i,i), ldda, dA(0, i),ldda);
+				cublasZtrmm( MagmaRight, MagmaUpper,
+				             MagmaConjTrans, MagmaNonUnit, i, ib,
+				             zone, dA(i,i), ldda, dA(0, i),ldda);
 
-				cublasGetMatrix(ib ,ib, sizeof(cuDoubleComplex),
-                                                dA(i, i), ldda, work, ib);
-                                                
+				cublasGetMatrix( ib ,ib, sizeof(cuDoubleComplex),
+				                 dA(i, i), ldda, work, ib);
+				                
 				lapackf77_zlauum(MagmaUpperStr, &ib, work, &ib, info);
 
-				cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex),
-                                                work, ib, dA(i, i), ldda);
+				cublasSetMatrix( ib, ib, sizeof(cuDoubleComplex),
+				                 work, ib, dA(i, i), ldda);
 
 				if(i+ib < n)
 				{
-					cublasZgemm(MagmaNoTrans, MagmaConjTrans,
-                                                        i, ib, (n-i-ib), zone, dA(0,i+ib),
-                                                        ldda, dA(i, i+ib),ldda, zone,
-                                                        dA(0,i), ldda);
+					cublasZgemm( MagmaNoTrans, MagmaConjTrans,
+					             i, ib, (n-i-ib), zone, dA(0,i+ib),
+					             ldda, dA(i, i+ib),ldda, zone,
+					             dA(0,i), ldda);
 
 
-                                        cublasZherk(MagmaUpper, MagmaNoTrans, ib,(n-i-ib),
-                                                        done, dA(i, i+ib), ldda,
-                                                        done,  dA(i, i), ldda);
+					cublasZherk( MagmaUpper, MagmaNoTrans, ib,(n-i-ib),
+					             done, dA(i, i+ib), ldda,
+					             done,  dA(i, i), ldda);
 				}
 			}
 
@@ -166,38 +168,38 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
 			{
 				ib=min(nb,(n-i));
 
-				cublasZtrmm(MagmaLeft, MagmaLower,
-                                	        MagmaConjTrans, MagmaNonUnit, ib,
-                                       		i, zone, dA(i,i), ldda,
-                                        	dA(i, 0),ldda);
+				cublasZtrmm( MagmaLeft, MagmaLower,
+				             MagmaConjTrans, MagmaNonUnit, ib,
+				             i, zone, dA(i,i), ldda,
+				             dA(i, 0),ldda);
 				
-				cublasGetMatrix(ib ,ib, sizeof(cuDoubleComplex),
-                                                dA(i, i), ldda, work, ib);
+				cublasGetMatrix( ib ,ib, sizeof(cuDoubleComplex),
+				                 dA(i, i), ldda, work, ib);
 
-                                lapackf77_zlauum(MagmaLowerStr, &ib, work, &ib, info);
+				lapackf77_zlauum(MagmaLowerStr, &ib, work, &ib, info);
 
-                                cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex),
-                                                work, ib, dA(i, i), ldda);
+				cublasSetMatrix( ib, ib, sizeof(cuDoubleComplex),
+				                 work, ib, dA(i, i), ldda);
 				
 
 				if((i+ib) < n)
 				{
-					cublasZgemm(MagmaConjTrans, MagmaNoTrans,
-                                                        ib, i, (n-i-ib), zone, dA( i+ib,i),
-                                                        ldda, dA(i+ib, 0),ldda, zone,
-                                                        dA(i,0), ldda);
-                                        cublasZherk(MagmaLower, MagmaConjTrans, ib, (n-i-ib),
-                                                        done, dA(i+ib, i), ldda,
-                                                        done,  dA(i, i), ldda);
+					cublasZgemm( MagmaConjTrans, MagmaNoTrans,
+					             ib, i, (n-i-ib), zone, dA( i+ib,i),
+					             ldda, dA(i+ib, 0),ldda, zone,
+					             dA(i,0), ldda);
+					cublasZherk( MagmaLower, MagmaConjTrans, ib, (n-i-ib),
+					             done, dA(i+ib, i), ldda,
+					             done,  dA(i, i), ldda);
 				}
 			}
 		}
 	}
 
 	cudaStreamDestroy(stream[0]);
-    	cudaStreamDestroy(stream[1]);
+	cudaStreamDestroy(stream[1]);
 
-    	cudaFreeHost(work);
+	cudaFreeHost(work);
 
 	return MAGMA_SUCCESS;
 }

@@ -96,8 +96,10 @@ magma_zgessm_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t k, magm
     else if (ldda < max(1,m))
 	*info = -4;
 
-    if (*info != 0)
-        return MAGMA_SUCCESS;
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
+    }
 
     /* Quick return if possible */
     if (m == 0 || n == 0)

@@ -115,8 +115,10 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
 	*info = -7;
     }
     if (*info != 0) {
-	return MAGMA_ERR_ILLEGAL_VALUE;
-    } else if (lquery) {
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
+    }
+    else if (lquery) {
 	return MAGMA_SUCCESS;
     }
 

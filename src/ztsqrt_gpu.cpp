@@ -122,8 +122,10 @@ magma_ztsqrt_gpu(int *m, int *n,
    } else if (*lwork < max(1,*n) && ! lquery) {
      *info = -7;
    }
-   if (*info != 0)
-     return 0;
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
+    }
    else if (lquery)
      return 0;
 

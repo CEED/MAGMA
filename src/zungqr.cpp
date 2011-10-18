@@ -94,8 +94,10 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
     } else if (lda < max(1,m)) {
 	*info = -5;
     }
-    if (*info != 0)
-      return MAGMA_ERR_ILLEGAL_VALUE;
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
+    }
 
     if (n <= 0)
       return MAGMA_SUCCESS;
@@ -116,7 +118,6 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
     work = (cuDoubleComplex *)malloc(lwork*sizeof(cuDoubleComplex));
     if( work == NULL ) {
         cublasFree(da);
-        magma_xerbla(__func__, info);
 	return MAGMA_ERR_ALLOCATION;
     }
 

@@ -124,8 +124,10 @@ magma_zssssm_gpu(char storev, magma_int_t m1, magma_int_t n1,
         *info = -14;
     }
 
-    if (*info != 0)
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
         return MAGMA_ERR_ILLEGAL_VALUE;
+    }
 
     /* Quick return */
     if ((m1 == 0) || (n1 == 0) || (m2 == 0) || (n2 == 0) || (k == 0) || (ib == 0))

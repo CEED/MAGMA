@@ -90,6 +90,7 @@ magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs,
         *info = -7;
     }
     if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
         return MAGMA_ERR_ILLEGAL_VALUE;
     }
 

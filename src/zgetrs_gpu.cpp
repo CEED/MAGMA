@@ -100,6 +100,7 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
         *info = -8;
     }
     if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
         return MAGMA_ERR_ILLEGAL_VALUE;
     }
 

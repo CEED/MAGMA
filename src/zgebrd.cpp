@@ -175,8 +175,10 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     } else if ( (lwork < max( max(1, m), n)) && (! lquery) ) {
         *info = -10;
     }
-    if (*info < 0)
-	return MAGMA_ERR_ILLEGAL_VALUE;
+    if (*info < 0) {
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
+    }
     else if (lquery)
 	return MAGMA_SUCCESS;
 

@@ -161,9 +161,10 @@ magma_zunmtr(char side, char uplo, char trans,
       }
 
     if (*info != 0) {
-	i__2 = -(*info);
-	return MAGMA_ERR_ILLEGAL_VALUE;
-    } else if (lquery) {
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
+    }
+    else if (lquery) {
 	return MAGMA_SUCCESS;
     }
 

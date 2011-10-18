@@ -71,30 +71,32 @@ magma_zpotri_gpu(char uplo, magma_int_t n,
 
   ===================================================================== */
 
-    /* Local variables */
+	/* Local variables */
 	char uplo_[2] = {uplo, 0};
 	magma_int_t ret;
 
 	*info = 0;
-    	if ((! lapackf77_lsame(uplo_, "U")) && (! lapackf77_lsame(uplo_, "L")))
+	if ((! lapackf77_lsame(uplo_, "U")) && (! lapackf77_lsame(uplo_, "L")))
 		*info = -1;
-    	else if (n < 0)
+	else if (n < 0)
 		*info = -2;
-    	else if (lda < max(1,n))
+	else if (lda < max(1,n))
 		*info = -4;
 
-    if (*info != 0)
-	return MAGMA_ERR_ILLEGAL_VALUE;
+	if (*info != 0) {
+		magma_xerbla( __func__, -(*info) );
+		return MAGMA_ERR_ILLEGAL_VALUE;
+	}
 
-    /* Quick return if possible */
-    if ( n == 0 )
-	return MAGMA_SUCCESS;
+	/* Quick return if possible */
+	if ( n == 0 )
+		return MAGMA_SUCCESS;
 	
 	/* Invert the triangular Cholesky factor U or L */
 	ret = magma_ztrtri_gpu( uplo, MagmaNonUnit, n, a, lda, info );
 
 	if ( (ret != MAGMA_SUCCESS) || ( *info < 0 ) ) 
-	        return ret;
+		return ret;
 
 	if (*info > 0)
 		return MAGMA_ERR_ILLEGAL_VALUE;
@@ -104,7 +106,7 @@ magma_zpotri_gpu(char uplo, magma_int_t n,
 
 
 	if ( (ret != MAGMA_SUCCESS) || ( *info != 0 ) ) 
- 	       return ret;
+		return ret;
 
 	return MAGMA_SUCCESS;
 

@@ -199,8 +199,10 @@ magma_zgetrf_mc(magma_context *cntxt,
     } else if (*lda < max(1,*m)) {
       *info = -4;
     }
-    if (*info != 0)
-      return 0;
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
+    }
     
     int k = min(*m,*n);
 

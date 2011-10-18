@@ -189,9 +189,9 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     else if( lddx < max(1,N))
         *info = -9;
 
-    if( *info != 0 ){
-        magma_xerbla("magma_zcgeqrsv_gpu", info);
-	return MAGMA_ERR_ILLEGAL_VALUE;
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
     }
 
     if( N == 0 || NRHS == 0 )
@@ -208,7 +208,6 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
 	+  ( 2*minmn + ((N+31)/32)*32 )*nb;
     if( CUBLAS_STATUS_SUCCESS != cublasAlloc(size, sizeof(cuFloatComplex), (void**)&dworks) ) {
 	fprintf(stderr, "Allocation of dworks failed (%d)\n", size);
-        magma_xerbla("magma_zcgeqrsv_gpu", info);
 	return MAGMA_ERR_CUBLASALLOC;
     }
     dSA = dworks;
@@ -220,7 +219,6 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     if( CUBLAS_STATUS_SUCCESS != cublasAlloc(size, sizeof(cuDoubleComplex), (void**)&dworkd) ) {
 	cublasFree(dworks);
 	fprintf(stderr, "Allocation of dworkd failed\n");
-        magma_xerbla("magma_zcgeqrsv_gpu", info);
 	return MAGMA_ERR_CUBLASALLOC;
     }
     dR = dworkd;
@@ -234,7 +232,6 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
 	cublasFree(dworks);
 	cublasFree(dworkd);
 	fprintf(stderr, "Allocation of hworks failed\n");
-        magma_xerbla("magma_zcgeqrsv_gpu", info);
 	return MAGMA_ERR_ALLOCATION;
     }
     stau = hworks;
@@ -382,7 +379,6 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
 	cublasFree(dworkd);
 	if( CUBLAS_STATUS_SUCCESS != cublasAlloc(size, sizeof(cuDoubleComplex), (void**)&dworkd) ) {
 	    fprintf(stderr, "Allocation of dworkd2 failed\n");
-	    magma_xerbla("magma_zcgeqrsv_gpu", info);
 	    return MAGMA_ERR_CUBLASALLOC;
 	}
     }
@@ -396,7 +392,6 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
 	if( hworks == NULL ) {
 	    cublasFree(dworkd);
 	    fprintf(stderr, "Allocation of hworkd2 failed\n");
-	    magma_xerbla("magma_zcgeqrsv_gpu", info);
 	    return MAGMA_ERR_ALLOCATION;
 	}
     }

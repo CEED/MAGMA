@@ -81,8 +81,8 @@ magma_zpotrs_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
         *info = -5; 
     if ( lddb < max(1, n) )
         *info = -7;
-    if( *info != 0 ){ 
-        magma_xerbla("magma_zpotrs_gpu", info); 
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
         return MAGMA_ERR_ILLEGAL_VALUE;
     }
 

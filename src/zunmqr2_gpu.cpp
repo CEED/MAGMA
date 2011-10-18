@@ -162,8 +162,8 @@ magma_zunmqr2_gpu(const char side, const char trans,
     nb = 64;
   
     if (*info != 0) {
-      magma_xerbla("magma_zunmql2_gpu", info);
-      return MAGMA_ERR_ILLEGAL_VALUE;
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
     }
 
     /* Quick return if possible */

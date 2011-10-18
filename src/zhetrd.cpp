@@ -181,8 +181,10 @@ magma_zhetrd(char uplo, magma_int_t n,
       MAGMA_Z_SET2REAL( work[0], lwkopt );
     }
 
-    if (*info != 0)
-      return 0;
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
+    }
     else if (lquery)
       return 0;
 

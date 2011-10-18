@@ -111,8 +111,10 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
   }else if (lddb < max(1,n)) {
     *info = -7;
   }
-  if (*info != 0)
-    return MAGMA_ERR_ILLEGAL_VALUE;
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
+    }
   
   /* Quick return */
   if ( n == 0 )

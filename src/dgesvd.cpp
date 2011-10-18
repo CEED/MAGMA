@@ -216,10 +216,10 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
     }
     
     if (*info != 0) {
-	i__2 = -(*info);
-	magma_xerbla("magma_dgesvd", &i__2);
-	return MAGMA_ERR_ILLEGAL_VALUE;
-    } else if (lquery) {
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
+    }
+    else if (lquery) {
 	return MAGMA_SUCCESS;
     }
   

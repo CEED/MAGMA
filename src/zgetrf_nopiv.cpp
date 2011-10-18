@@ -91,8 +91,8 @@ magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
 	*info = -4;
     }
     if (*info != 0) {
-	magma_xerbla("magma_zgetrf_nopiv", info);
-	return MAGMA_ERR_ILLEGAL_VALUE;
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
     }
 
     /* Quick return if possible */

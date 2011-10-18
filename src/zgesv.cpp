@@ -83,6 +83,7 @@ magma_zgesv(     magma_int_t n, magma_int_t nrhs,
         *info = -7;
     }
     if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
         return MAGMA_ERR_ILLEGAL_VALUE;
     }
 
@@ -97,9 +98,6 @@ magma_zgesv(     magma_int_t n, magma_int_t nrhs,
     }
     
     lapackf77_zgetrs( MagmaNoTransStr, &n, &nrhs, A, &lda, ipiv, B, &ldb, info );
-    if ( *info != 0 ) {
-        return MAGMA_ERR_ILLEGAL_VALUE;
-    }
 
     return MAGMA_SUCCESS;
 }

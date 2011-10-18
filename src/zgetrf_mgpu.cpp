@@ -106,8 +106,10 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
     else if (ldda < max(1,m))
 	*info = -5;
 
-    if (*info != 0)
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
         return MAGMA_ERR_ILLEGAL_VALUE;
+    }
 
     /* Quick return if possible */
     if (m == 0 || n == 0)

@@ -168,8 +168,10 @@ magma_zunmqr_gpu(char side, char trans,
     hwork[0] = MAGMA_Z_MAKE( lwkopt, 0 );
 
     if (*info != 0) {
-	return MAGMA_ERR_ILLEGAL_VALUE;
-    } else if (lquery) {
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
+    }
+    else if (lquery) {
 	return MAGMA_SUCCESS;
     }
 

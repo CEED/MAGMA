@@ -118,8 +118,10 @@ magma_zpotrf(char uplo, magma_int_t n,
     } else if (lda < max(1,n)) {
       *info = -4;
     }
-    if (*info != 0)
-      return MAGMA_ERR_ILLEGAL_VALUE;
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
+    }
 
     /* Quick return */
     if ( n == 0 )

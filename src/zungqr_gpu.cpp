@@ -95,8 +95,10 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     } else if (ldda < max(1,m)) {
 	*info = -5;
     }
-    if (*info != 0)
-      return MAGMA_ERR_ILLEGAL_VALUE;
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
+    }
 
     if (n <= 0)
       return MAGMA_SUCCESS;

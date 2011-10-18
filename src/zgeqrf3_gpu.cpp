@@ -130,8 +130,10 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
     } else if (ldda < max(1,m)) {
         *info = -4;
     }
-    if (*info != 0)
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
         return MAGMA_ERR_ILLEGAL_VALUE;
+    }
 
     k = minmn = min(m,n);
     if (k == 0)
@@ -144,7 +146,6 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
 
     if ( cudaSuccess != cudaMallocHost((void**)&work, lwork*sizeof(cuDoubleComplex)) ) {
 	*info = -9;
-	magma_xerbla( "magma_zgeqrf_gpu", info );
 	return MAGMA_ERR_HOSTALLOC;
     }
     

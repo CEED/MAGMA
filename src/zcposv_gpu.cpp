@@ -163,9 +163,9 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
     else if( lddx < max(1,n) )
         *info =-9;
    
-    if( *info != 0 ){
-        magma_xerbla("magma_zcposv", info);	
-	return MAGMA_ERR_ILLEGAL_VALUE;
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
     }
 
     if( n == 0 || nrhs == 0 ) 

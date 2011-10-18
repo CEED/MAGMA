@@ -86,9 +86,8 @@ magma_zunghr(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 	*info = -5;
 
     if (*info != 0) {
-	i = -(*info);
-	magma_xerbla("magma_zunghr", &i);
-	return MAGMA_ERR_ILLEGAL_VALUE;
+        magma_xerbla( __func__, -(*info) );
+        return MAGMA_ERR_ILLEGAL_VALUE;
     }
 
     /* Quick return if possible */

@@ -101,8 +101,10 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
     } else if (ldda < max(1,n)) {
         *info = -4;
     }
-    if (*info != 0)
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
         return MAGMA_ERR_ILLEGAL_VALUE;
+    }
 
     nb = magma_get_zpotrf_nb(n);
 
