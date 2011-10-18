@@ -1,9 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "magma.h"
+
+#include "common_magma.h"
 
 extern "C"
-void magma_xerbla(const char *srname , magma_int_t *info)
+void magma_xerbla(const char *srname , magma_int_t info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -14,9 +15,10 @@ void magma_xerbla(const char *srname , magma_int_t *info)
     Purpose
     =======
 
-    XERBLA  is an error handler for the LAPACK routines.
-    It is called by an LAPACK routine if an input parameter has an
-    invalid value.  A message is printed and execution stops.
+    magma_xerbla is an error handler for the MAGMA routines.
+    It is called by a MAGMA routine if an input parameter has an
+    invalid value. It calls the LAPACK XERBLA routine, which by default
+    prints an error message and stops execution.
 
     Installers may consider modifying the STOP statement in order to
     call system-specific exception-handling facilities.
@@ -26,6 +28,7 @@ void magma_xerbla(const char *srname , magma_int_t *info)
 
     SRNAME  (input) CHARACTER*(*)
             The name of the routine which called XERBLA.
+            In C it is convenient to use __func__.
 
     INFO    (input) INTEGER
             The position of the invalid parameter in the parameter list
@@ -33,7 +36,5 @@ void magma_xerbla(const char *srname , magma_int_t *info)
 
     =====================================================================   */
 
-    printf("MAGMA Error: On Routine %s argument number %d had an illegal value\n",
-	   srname , (-1)*(*info));
-    exit(1);
+    lapackf77_xerbla( srname, &info );
 }

@@ -185,7 +185,7 @@ extern "C" {
 /* ------------------------------------------------------------
  *   -- MAGMA function definitions
  * --------------------------------------------------------- */
-void magma_xerbla(const char *name, magma_int_t *info);
+void magma_xerbla( const char *name, magma_int_t info );
 
 #ifdef __cplusplus
 }

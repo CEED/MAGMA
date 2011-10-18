@@ -21,6 +21,8 @@ extern "C" {
 #endif
 
 #define lapackf77_lsame  FORTRAN_NAME( lsame,  LSAME  )
+#define lapackf77_xerbla FORTRAN_NAME( xerbla, XERBLA )
+
 #define lapackf77_slamch FORTRAN_NAME( slamch, SLAMCH )
 #define lapackf77_dlamch FORTRAN_NAME( dlamch, DLAMCH )
 #define lapackf77_slabad FORTRAN_NAME( slabad, SLABAD )
@@ -40,6 +42,8 @@ extern "C" {
 #define lapackf77_slapy2 FORTRAN_NAME( slapy2, SLAPY2 )
 
 long int lapackf77_lsame( const char *ca, const char *cb);
+void     lapackf77_xerbla( const char* name, magma_int_t* info );
+
 float    lapackf77_slamch(const char *cmach);
 double   lapackf77_dlamch(const char *cmach);
 void     lapackf77_slabad(float  *small, float  *large);
