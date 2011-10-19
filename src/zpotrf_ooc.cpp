@@ -188,6 +188,10 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
 	      cublasSetMatrix(jb, (n-j), sizeof(cuDoubleComplex), 
 	                      A(j, j), lda, dAup(jj,j), NB);
 		}
+		/* load the panel in one-shot */
+        //jb = min(nb, (n-J));
+        //cublasSetMatrix(JB, n-J, sizeof(cuDoubleComplex),
+        //                A(J, J), lda, dAup(0,J), NB);
 
 		/* update with the previous big-panels */
 		for( j=0; j<J; j+=nb ) {
