@@ -309,6 +309,23 @@ module magma_zfortran
        integer       :: liwork
        integer       :: info
      end subroutine magmaf_zheevd
+
+     subroutine magmaf_zhegvd( itype, jobz, uplo, n, a, lda, b, ldb, w, work, lwork, iwork, liwork, info)
+       integer       :: itype
+       character     :: jobz
+       character     :: uplo
+       integer       :: n
+       complex*16    :: a(*)
+       integer       :: lda
+       complex*16    :: b(*)
+       integer       :: ldb
+       double precision:: w(*)
+       complex*16    :: work(*)
+       integer       :: lwork
+       integer       :: iwork(*)
+       integer       :: liwork
+       integer       :: info
+     end subroutine magmaf_zhegvd
 #endif
 
      subroutine magmaf_zgels_gpu(  trans, m, n, nrhs, dA, ldda, dB, lddb, hwork, lwork, info)
