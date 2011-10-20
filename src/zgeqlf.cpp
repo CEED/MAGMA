@@ -234,18 +234,17 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
 	}
 	mu = m - k + i + nb;
 	nu = n - k + i + nb;
+
+        cublasGetMatrix(m, nu, sizeof(cuDoubleComplex),
+                        da_ref(0,0), ldda, a_ref(0,0), lda);
     } else {
 	mu = m;
 	nu = n;
     }
 
     /* Use unblocked code to factor the last or only block */
-    if (mu > 0 && nu > 0){
-        cublasGetMatrix(m, nu, sizeof(cuDoubleComplex),
-                        da_ref(0,0), ldda, a_ref(0,0), lda);
-
-        lapackf77_zgeqlf(&mu, &nu, a_ref(0,0), &lda, tau, work, &lwork, &iinfo);
-    }
+    if (mu > 0 && nu > 0)
+      lapackf77_zgeqlf(&mu, &nu, a_ref(0,0), &lda, tau, work, &lwork, &iinfo);
 
     cudaStreamDestroy( stream[0] );
     cudaStreamDestroy( stream[1] );
