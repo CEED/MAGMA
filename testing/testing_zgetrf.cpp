@@ -26,8 +26,15 @@
 /*
  * VERSION1 - MAGMA 1.0 (out-of-place transpose)
  * VERSION2 - MAGMA 1.1 (incremental transpose)
+ * VERSION3 - MAGMA 1.1 (multiGPU with incremental transpose)
  */
-#define VERSION2
+#define VERSION3
+
+extern "C" magma_int_t
+magma_zgetrf3(magma_int_t num_gpus,
+              magma_int_t m, magma_int_t n,
+              cuDoubleComplex *a, magma_int_t lda,
+              magma_int_t *ipiv, magma_int_t *info);
 
 
 // Flops formula
@@ -167,8 +174,10 @@ int main( int argc, char** argv)
         start = get_current_time();
 #if defined(VERSION1)
         magma_zgetrf( M, N, h_R, lda, ipiv, &info);
-#else
+#elif defined(VERSION2)
         magma_zgetrf2( M, N, h_R, lda, ipiv, &info);
+#else
+        magma_zgetrf3(1, M, N, h_R, lda, ipiv, &info);
 #endif
         end = get_current_time();
         if (info < 0)

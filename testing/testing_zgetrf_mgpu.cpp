@@ -93,7 +93,7 @@ int main( int argc, char** argv)
     magma_timestr_t  start, end;
     double           flops, gpu_perf, cpu_perf, error;
     cuDoubleComplex *h_A, *h_R;
-	cuDoubleComplex *d_lA[4];
+    cuDoubleComplex *d_lA[4];
     magma_int_t     *ipiv;
 
     /* Matrix size */
