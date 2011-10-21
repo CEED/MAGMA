@@ -42,7 +42,7 @@ magmablas_zdtoht(cuDoubleComplex *dat, int ldda,
     cudaStreamCreate(&stream[1]);
 
     for(i=0; i<n; i+=nb){
-       /* Move data from GPU to CPU using two buffers; first transpose the data on the GPU */
+       /* Move data from GPU to CPU using 2 buffers; 1st transpose the data on the GPU */
        ib   = min(n-i, nb);
        cudaStreamSynchronize(stream[j%2]);
        magmablas_ztranspose2( dB + (j%2)*nb*lddb, lddb, dat+i, ldda, ib, m);
@@ -55,5 +55,47 @@ magmablas_zdtoht(cuDoubleComplex *dat, int ldda,
 
     cudaStreamDestroy( stream[0] );
     cudaStreamDestroy( stream[1] );
+}
+
+//===========================================================================
+//  This version is similar to the above but for multiGPUs. The distribution
+//  is 1D block cyclic. The input arrays are pointers for the corresponding
+//  GPUs. The streams are passed as argument, in contrast to the single GPU
+//  routine.
+//===========================================================================
+extern "C" void
+magmablas_zdtoht2(int num_gpus, cudaStream_t stream[][2],
+                  cuDoubleComplex **dat, int *ldda,
+                  cuDoubleComplex  *ha, int lda,
+                  cuDoubleComplex  **dB, int lddb,
+                  int m, int n , int nb)
+{
+    int i = 0, j[4] = {0, 0, 0, 0}, ib, k;
+
+    /* Quick return */
+    if ( (m == 0) || (n == 0) )
+        return;
+
+    if (lda < m || lddb < m){
+        printf("Wrong arguments in zdtoht.\n");
+        return;
+    }
+
+    for(i=0; i<n; i+=nb){
+       /* Move data from GPU to CPU using 2 buffers; 1st transpose the data on the GPU */
+       k = (i/nb)%num_gpus;
+       ib   = min(n-i, nb);
+       cudaSetDevice(k);
+
+       cudaStreamSynchronize(stream[k][j[k]%2]);
+       magmablas_ztranspose2( dB[k] + (j[k]%2)*nb*lddb, lddb, 
+                              dat[k]+i/(nb*num_gpus)*nb, ldda[k], ib, m);
+       cudaMemcpy2DAsync(ha+i*lda, lda*sizeof(cuDoubleComplex),
+                         dB[k] + (j[k]%2) * nb * lddb, lddb*sizeof(cuDoubleComplex),
+                         sizeof(cuDoubleComplex)*m, ib,
+                         cudaMemcpyDeviceToHost,
+                         stream[k][j[k]%2]);
+       j[k]++;
+    }
 }
 
