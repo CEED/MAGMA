@@ -24,6 +24,7 @@ ZSRC  = zpotrf.cpp	\
         zgetrf-v2.cpp   \
         zgetrf-v3.cpp   \
         zgetrf_gpu.cpp 	\
+        zgetrf_mgpu.cpp \
         zgetrf_nopiv.cpp\
         zgetrf2_ooc.cpp \
 	zgetf2_nopiv.cpp\

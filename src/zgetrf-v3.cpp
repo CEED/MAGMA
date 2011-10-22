@@ -24,6 +24,11 @@ extern "C" void
 magmablas_zpermute_long3( cuDoubleComplex *dAT, int lda, int *ipiv, int nb, int ind );
 
 extern "C" void
+magmablas_ztranspose2s(cuDoubleComplex *odata, int ldo,
+                       cuDoubleComplex *idata, int ldi,
+                       int m, int n, cudaStream_t *stream );
+
+extern "C" void
 magmablas_zhtodt2(int num_gpus, cudaStream_t **stream,
                   cuDoubleComplex  *ha,  int  lda,
                   cuDoubleComplex **dat, int *ldda,
@@ -147,6 +152,7 @@ magma_zgetrf3(magma_int_t num_gpus,
 
 	  cuDoubleComplex *d_lA[4];
 	  magma_int_t ldda;
+	  magma_timestr_t       start, end;
 
 	  /* allocate workspace for each GPU */
 	  for(i=0; i<num_gpus; i++)
@@ -198,7 +204,8 @@ magma_zgetrf3(magma_int_t num_gpus,
 	  magmablas_zhtodt2(num_gpus, (cudaStream_t **)streaml, 
 			    a, lda, d_lAT, ldat_local, d_lA, maxm, m, n, nb);
 	   
-	  /* cpu workspace */
+	  /* use 'a' as work space */
+	  /*
 	  lddwork = maxm;
 	  if ( cudaSuccess != cudaMallocHost( (void**)&work, 
 					      lddwork*nb*sizeof(cuDoubleComplex) ) ) 
@@ -209,6 +216,11 @@ magma_zgetrf3(magma_int_t num_gpus,
 	      }
 	      return MAGMA_ERR_HOSTALLOC;
 	    }
+	  */
+	  work = a;
+	  lddwork = lda;
+
+	  start = get_current_time();
 
 	  s = mindim / nb;
 	  for( i=0; i<s; i++ )
@@ -223,6 +235,7 @@ magma_zgetrf3(magma_int_t num_gpus,
 	      rows  = m - i*nb;
 	      lddat = ldat_local[id];
 
+	      if ( i>0 ){
 	      /* start sending the panel to cpu */
 	      magmablas_ztranspose( d_lAP[id], cols, inAT(id,i,i_local), lddat, nb, cols );
 	      //cublasGetMatrix( m-i*nb, nb, sizeof(cuDoubleComplex), d_lAP[id], cols, work, lddwork);
@@ -232,10 +245,10 @@ magma_zgetrf3(magma_int_t num_gpus,
 				 cudaMemcpyDeviceToHost, streaml[id][1]);
 
 	      /* make sure that gpu queue is empty */
-	      cuCtxSynchronize();
+	      //cuCtxSynchronize();
 
 	      /* the remaining updates */
-	      if ( i>0 ){
+	      //if ( i>0 ){
 		/* id-th gpu update the remaining matrix */
 		cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
 			     n_local[id] - (i_local+1)*nb, nb, 
@@ -309,9 +322,11 @@ magma_zgetrf3(magma_int_t num_gpus,
 		}
 		
 		/* synchronization */
-		cudaStreamSynchronize(streaml[d][0]);
+		//cudaStreamSynchronize(streaml[d][0]);
 		//cublasSetMatrix(rows, nb, sizeof(cuDoubleComplex), work, lddwork, d_lAP[d], maxm);
-		magmablas_ztranspose2(panel_local[d], ldpan[d], d_lAP[d], maxm, cols, nb);
+		//magmablas_ztranspose2(panel_local[d], ldpan[d], d_lAP[d], maxm, cols, nb);
+		magmablas_ztranspose2s(panel_local[d], ldpan[d], d_lAP[d], maxm, cols, nb, 
+				       &streaml[d][0]);
 		/* gpu updating the trailing matrix */
 		cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
 			     nb1, nb, c_one,
@@ -346,7 +361,7 @@ magma_zgetrf3(magma_int_t num_gpus,
 	    cublasGetMatrix(rows, nb0, sizeof(cuDoubleComplex), d_lAP[id], maxm, work, lddwork);
 	    
 	    /* make sure that gpu queue is empty */
-	    cuCtxSynchronize();
+	    //cuCtxSynchronize();
 
 	    /* factor on cpu */
 	    lapackf77_zgetrf( &rows, &nb0, work, &lddwork, ipiv+s*nb, &iinfo);
@@ -420,17 +435,19 @@ magma_zgetrf3(magma_int_t num_gpus,
 	    }
 	  } /* end of for d=1,..,num_gpus */
 
+	  end = get_current_time();
+	  printf("\n Performance %f GFlop/s\n", (2./3.*n*n*n /1000000.) / GetTimerValue(start, end));
+
 	  /* save on output */
 	  magmablas_zdtoht2(num_gpus, (cudaStream_t **)streaml,
 			    d_lAT, ldat_local, a, lda,  d_lA, maxm, m, n, nb);
 	  for( d=0; d<num_gpus; d++ ) 
 	    {
-	      cuCtxSynchronize();
 	      cublasFree(d_lA[d]);
 	      cudaStreamDestroy(streaml[d][0]);
 	      cudaStreamDestroy(streaml[d][1]);
 	    } /* end of for d=1,..,num_gpus */
-	  cudaFreeHost(work);
+	  //cudaFreeHost(work);
       }
     
     return MAGMA_SUCCESS;
