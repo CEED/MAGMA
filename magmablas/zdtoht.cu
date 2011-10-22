@@ -12,6 +12,12 @@
 #define PRECISION_z
 #include "commonblas.h"
 
+extern "C" void
+magmablas_ztranspose2s(cuDoubleComplex *odata, int ldo,
+		       cuDoubleComplex *idata, int ldi,
+		       int m, int n, cudaStream_t *stream );
+
+
 //
 //	m, n - dimensions in the output (ha) matrix.
 //             This routine copies the dat matrix from the GPU
@@ -44,8 +50,9 @@ magmablas_zdtoht(cuDoubleComplex *dat, int ldda,
     for(i=0; i<n; i+=nb){
        /* Move data from GPU to CPU using 2 buffers; 1st transpose the data on the GPU */
        ib   = min(n-i, nb);
-       cudaStreamSynchronize(stream[j%2]);
-       magmablas_ztranspose2( dB + (j%2)*nb*lddb, lddb, dat+i, ldda, ib, m);
+
+       //magmablas_ztranspose2 ( dB + (j%2)*nb*lddb, lddb, dat+i, ldda, ib, m);
+       magmablas_ztranspose2s( dB + (j%2)*nb*lddb, lddb, dat+i, ldda, ib, m, &stream[j%2]);
        cudaMemcpy2DAsync(ha+i*lda, lda*sizeof(cuDoubleComplex),
                          dB + (j%2) * nb * lddb, lddb*sizeof(cuDoubleComplex),
                          sizeof(cuDoubleComplex)*m, ib, 

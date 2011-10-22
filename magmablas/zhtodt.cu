@@ -12,6 +12,12 @@
 #define PRECISION_z
 #include "commonblas.h"
 
+extern "C" void
+magmablas_ztranspose2s(cuDoubleComplex *odata, int ldo,
+                       cuDoubleComplex *idata, int ldi,
+                       int m, int n, cudaStream_t *stream );
+
+
 //
 //	m, n - dimensions in the source (input) matrix.
 //             This routine copies the ha matrix from the CPU
@@ -58,16 +64,16 @@ magmablas_zhtodt(cuDoubleComplex  *ha, int lda,
                          cudaMemcpyHostToDevice, stream[j%2]);
        j++;
   
-       /* Make sure that the previous panel (i.e., j%2) has arrived 
-          and transpose it directly into the dat matrix                  */
-       cudaStreamSynchronize(stream[j%2]);
-       magmablas_ztranspose2( dat+i-nb, ldda, dB + (j%2)*nb*lddb, lddb, m, nb);
+       /* Note that the previous panel (i.e., j%2) comes through the stream
+          for the kernel so there is no need to synchronize.             */
+       // magmablas_ztranspose2( dat+i-nb, ldda, dB + (j%2)*nb*lddb, lddb, m, nb);
+       magmablas_ztranspose2s( dat+i-nb, ldda, dB + (j%2)*nb*lddb, lddb, m, nb, &stream[j%2]);
     }
 
     /* Transpose the last part of the matrix.                            */
     j++;
-    cudaStreamSynchronize(stream[j%2]);
-    magmablas_ztranspose2( dat+i-nb, ldda, dB + (j%2)*nb*lddb, lddb, m, ib);
+    // magmablas_ztranspose2( dat+i-nb, ldda, dB + (j%2)*nb*lddb, lddb, m, ib);
+    magmablas_ztranspose2s( dat+i-nb, ldda, dB + (j%2)*nb*lddb, lddb, m, ib, &stream[j%2]);
 
     cudaStreamDestroy( stream[0] );
     cudaStreamDestroy( stream[1] );
