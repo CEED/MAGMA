@@ -119,10 +119,11 @@ magmablas_zhtodt2(int num_gpus, cudaStream_t stream[][2],
           cudaSetDevice(k);
 
           ib = min(n-i, nb);
-          cudaStreamSynchronize( stream[k][0]);
-          ib = min(n-i, nb);
-          magmablas_ztranspose2( dat[k]+ i/(nb*num_gpus)*nb, ldda[k],
-                                 dB[k], lddb, m, ib);
+          //cudaStreamSynchronize( stream[k][0]);
+          //magmablas_ztranspose2( dat[k]+ i/(nb*num_gpus)*nb, ldda[k],
+          //                       dB[k], lddb, m, ib);
+          magmablas_ztranspose2s( dat[k]+ i/(nb*num_gpus)*nb, ldda[k],
+                                 dB[k], lddb, m, ib, &stream[k][0]);
        }
     } 
     else
@@ -144,10 +145,13 @@ magmablas_zhtodt2(int num_gpus, cudaStream_t stream[][2],
          if (i> (num_gpus-1)*nb){
             /* Make sure that the previous panel (i.e., j[k]%2) has arrived 
                and transpose it directly into the dat matrix                  */
-            cudaStreamSynchronize( stream[k][ j[k]%2 ]);
+            //cudaStreamSynchronize( stream[k][ j[k]%2 ]);
             ib = min(n - i + num_gpus*nb, nb);
-            magmablas_ztranspose2( dat[k]+ i/(nb*num_gpus)*nb -nb, ldda[k],
-                                   dB[k] +(j[k]%2)*nb*lddb, lddb, m, ib);
+            //magmablas_ztranspose2( dat[k]+ i/(nb*num_gpus)*nb -nb, ldda[k],
+            //                       dB[k] +(j[k]%2)*nb*lddb, lddb, m, ib);
+            magmablas_ztranspose2s( dat[k]+ i/(nb*num_gpus)*nb -nb, ldda[k],
+                                   dB[k] +(j[k]%2)*nb*lddb, lddb, m, ib, &stream[k][j[k]%2]);
+
          }
       }
     }

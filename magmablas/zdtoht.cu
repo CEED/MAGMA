@@ -94,9 +94,12 @@ magmablas_zdtoht2(int num_gpus, cudaStream_t stream[][2],
        ib   = min(n-i, nb);
        cudaSetDevice(k);
 
-       cudaStreamSynchronize(stream[k][j[k]%2]);
-       magmablas_ztranspose2( dB[k] + (j[k]%2)*nb*lddb, lddb, 
-                              dat[k]+i/(nb*num_gpus)*nb, ldda[k], ib, m);
+       //cudaStreamSynchronize(stream[k][j[k]%2]);
+       //magmablas_ztranspose2( dB[k] + (j[k]%2)*nb*lddb, lddb, 
+       //                       dat[k]+i/(nb*num_gpus)*nb, ldda[k], ib, m);
+       magmablas_ztranspose2s(dB[k] + (j[k]%2)*nb*lddb, lddb,
+                              dat[k]+i/(nb*num_gpus)*nb, ldda[k], 
+                              ib, m, &stream[k][j[k]%2]);
        cudaMemcpy2DAsync(ha+i*lda, lda*sizeof(cuDoubleComplex),
                          dB[k] + (j[k]%2) * nb * lddb, lddb*sizeof(cuDoubleComplex),
                          sizeof(cuDoubleComplex)*m, ib,
