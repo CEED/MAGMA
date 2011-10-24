@@ -99,8 +99,7 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
-            The dimension of the array WORK.  LWORK >= max(1,2*N).   
-            For good performance, LWORK must generally be larger.   
+            The dimension of the array WORK.  LWORK >= (1+nb)*N.   
 
             If LWORK = -1, then a workspace query is assumed; the routine   
             only calculates the optimal size of the WORK array, returns   
