@@ -14,7 +14,7 @@
 
 extern "C" magma_int_t
 magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
-		    cuDoubleComplex *dA, cuDoubleComplex **dlA, magma_int_t ldda,
+		    cuDoubleComplex **dlA, magma_int_t ldda,
 		    cuDoubleComplex *tau, 
 		    magma_int_t *info )
 {
@@ -76,7 +76,6 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
     and tau in TAU(i).
     =====================================================================    */
 
-    #define dA(a_1,a_2)      ( dA+(a_2)*(ldda) + (a_1)) 
     #define dlA(gpu,a_1,a_2) ( dlA[gpu]+(a_2)*(ldda) + (a_1))
     #define work_ref(a_1)    ( work + (a_1))
     #define hwork            ( work + (nb)*(m))
@@ -183,7 +182,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
 	       cudaSetDevice(panel_gpunum);
 	    #endif
 	    cudaMemcpy2DAsync( hwrk_ref(i), ldwork*sizeof(cuDoubleComplex),
-                               dlA(panel_gpunum, i, i_local),     ldda  *sizeof(cuDoubleComplex),
+                               dlA(panel_gpunum, i, i_local), ldda*sizeof(cuDoubleComplex),
                                sizeof(cuDoubleComplex)*rows, ib,
                                cudaMemcpyDeviceToHost, streaml[panel_gpunum][1]);
 
@@ -228,7 +227,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
 
             zpanel_to_q( MagmaUpper, ib, hwrk_ref(i), ldwork, lhwrk+ib*ib );
             // Send the current panel back to the GPUs 
-	    // Has to be done with asynchronous copies (or broadcast, if available) 
+	    // Has to be done with asynchronous copies
 	    for(j=0; j<num_gpus; j++)
 	      {  
 		#ifdef  MultiGPUs
