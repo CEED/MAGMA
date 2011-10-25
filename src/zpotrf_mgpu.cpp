@@ -127,169 +127,179 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
       cublasSetMatrix(n, n, sizeof(cuDoubleComplex), work, n, dlA(0,0,0), ldda);
     } else {
 
-	  for( d=0; d<num_gpus; d++ ) {
-		cudaSetDevice(d);
+      for( d=0; d<num_gpus; d++ ) {
+	cudaSetDevice(d);
 
         /* local-n and local-ld */
-		n_local[d] = ((n/nb)/num_gpus)*nb;
-		if (d < (n/nb)%num_gpus)
-		  n_local[d] += nb;
-		else if (d == (n/nb)%num_gpus)
-		  n_local[d] += n%nb;
-		lddat_local[d] = ((n_local[d]+31)/32)*32;
-
-		if ( CUBLAS_STATUS_SUCCESS != cublasAlloc(nb*ldda, sizeof(cuDoubleComplex), (void**)&d_lP[d]) ) {
-			for( j=0; j<d; j++ ) {
-			  cudaSetDevice(j);
-			  cublasFree(d_lP[d]);
-			}
-			return MAGMA_ERR_CUBLASALLOC;
-		}
+	n_local[d] = ((n/nb)/num_gpus)*nb;
+	if (d < (n/nb)%num_gpus)
+	  n_local[d] += nb;
+	else if (d == (n/nb)%num_gpus)
+	  n_local[d] += n%nb;
+	lddat_local[d] = ((n_local[d]+31)/32)*32;
+	
+	if ( CUBLAS_STATUS_SUCCESS != cublasAlloc(nb*ldda, sizeof(cuDoubleComplex), (void**)&d_lP[d]) ) {
+	  for( j=0; j<d; j++ ) {
+	    cudaSetDevice(j);
+	    cublasFree(d_lP[d]);
+	  }
+	  return MAGMA_ERR_CUBLASALLOC;
+	}
         cudaStreamCreate(&stream[d][0]);
         cudaStreamCreate(&stream[d][1]);
         cudaStreamCreate(&stream[d][2]);
         cudaStreamCreate(&stream[d][3]);
-	  }
+      }
 
       /* Use blocked code. */
-	  if (upper) { 
-            
-        /* Compute the Cholesky factorization A = U'*U. */
-	    for (j=0; j<n; j+=nb) {
+      if (upper) 
+	{     
+	  /* Compute the Cholesky factorization A = U'*U. */
+	  for (j=0; j<n; j+=nb) {
 
-	      /* Set the GPU number that holds the current panel */
-	      id = (j/nb)%num_gpus;
-	      cudaSetDevice(id);
+	    /* Set the GPU number that holds the current panel */
+	    id = (j/nb)%num_gpus;
+	    cudaSetDevice(id);
 
-	      /* Set the local index where the current panel is */
-	      j_local = j/(nb*num_gpus);
-	      jb = min(nb, (n-j));
+	    /* Set the local index where the current panel is */
+	    j_local = j/(nb*num_gpus);
+	    jb = min(nb, (n-j));
 	      
-		  if( j>0 && (j+jb)<n) {
-		    /* wait for the off-diagonal column off the current diagonal *
-			 * and send it to gpus                                       */
-	        cudaStreamSynchronize(stream[id][2]);
-            for( d=0; d<num_gpus; d++ ) {
-	          cudaSetDevice(d);
-			  if( d != id )
+	    if( j>0 && (j+jb)<n) {
+	      /* wait for the off-diagonal column off the current diagonal *
+	       * and send it to gpus                                       */
+	      cudaStreamSynchronize(stream[id][2]);
+	      for( d=0; d<num_gpus; d++ ) {
+		cudaSetDevice(d);
+		if( d != id )
 	          cudaMemcpy2DAsync(dlP(d,jb,0), ldda*sizeof(cuDoubleComplex), 
-					            &work[jb],   n   *sizeof(cuDoubleComplex), 
+				    &work[jb],   n   *sizeof(cuDoubleComplex), 
 	                            j*sizeof(cuDoubleComplex), jb, 
 	                            cudaMemcpyHostToDevice,stream[d][3]);
-			}
-		  }
-
-	      /* Update the current diagonal block */
-	      cudaSetDevice(id);
-	      cublasZherk(MagmaUpper, MagmaConjTrans, jb, j, 
-	                  mdone, dlA(id, 0, nb*j_local), ldda, 
-	                  done,  dlA(id, j, nb*j_local), ldda);
-
-		  /* send the diagonal to cpu */
-	      cudaMemcpy2DAsync(work,                    n  *sizeof(cuDoubleComplex), 
-	                        dlA(id, j, nb*j_local), ldda*sizeof(cuDoubleComplex), 
-	                        jb*sizeof(cuDoubleComplex), jb, 
-	                        cudaMemcpyDeviceToHost,stream[id][0]);
-
-	      if ( j>0 && (j+jb)<n) {
-	        /* Compute the local block column of the panel. */
-			for( d=0; d<num_gpus; d++ ) {
-	          cudaSetDevice(d);
-			  j_local2 = j_local+1;
-			  if( d > id ) j_local2 --;
-
-			  /* wait for the off-diagonal */
-	          if( d != id ) {
-				  cudaStreamSynchronize(stream[id][3]);
-				  dlpanel = dlP(d, jb, 0);
-			  } else {
-				  dlpanel = dlA(d, 0, nb*j_local);
-			  }
-
-			  /* update the panel */
-	          cublasZgemm(MagmaConjTrans, MagmaNoTrans, 
-	                      jb, (n_local[d]-nb*(j_local2-1)-jb), j, 
-	                      mzone, dlpanel,                ldda, 
-	                             dlA(d, 0, nb*j_local2), ldda,
-	                      zone,  dlA(d, j, nb*j_local2), ldda);
-			}
 	      }
+	    }
+	    
+	    /* Update the current diagonal block */
+	    cudaSetDevice(id);
+	    cublasZherk(MagmaUpper, MagmaConjTrans, jb, j, 
+			mdone, dlA(id, 0, nb*j_local), ldda, 
+			done,  dlA(id, j, nb*j_local), ldda);
+
+	    /* send the diagonal to cpu */
+	    cudaMemcpy2DAsync(work, n *sizeof(cuDoubleComplex), 
+			      dlA(id, j, nb*j_local), ldda*sizeof(cuDoubleComplex), 
+			      jb*sizeof(cuDoubleComplex), jb, 
+			      cudaMemcpyDeviceToHost,stream[id][0]);
+
+	    if ( j>0 && (j+jb)<n) {
+	      /* Compute the local block column of the panel. */
+	      for( d=0; d<num_gpus; d++ ) {
+		cudaSetDevice(d);
+		j_local2 = j_local+1;
+		if( d > id ) j_local2 --;
+
+		/* wait for the off-diagonal */
+		if( d != id ) {
+		  //cudaStreamSynchronize(stream[id][3]);
+		  dlpanel = dlP(d, jb, 0);
+		} else {
+		  dlpanel = dlA(d, 0, nb*j_local);
+		}
+		
+		/* update the panel */
+		cublasZgemm(MagmaConjTrans, MagmaNoTrans, 
+			    jb, (n_local[d]-nb*(j_local2-1)-jb), j, 
+			    mzone, dlpanel,                ldda, 
+			    dlA(d, 0, nb*j_local2), ldda,
+			    zone,  dlA(d, j, nb*j_local2), ldda);
+	      }
+	    }
           
-		  /* factor the diagonal */
-	      cudaSetDevice(id);
-	      cudaStreamSynchronize(stream[id][0]);
-	      lapackf77_zpotrf(MagmaUpperStr, &jb, work, &n, info);
-	      if (*info != 0) {
-	        *info = *info + j;
-	        break;
+	    /* factor the diagonal */
+	    cudaSetDevice(id);
+	    cudaStreamSynchronize(stream[id][0]);
+	    lapackf77_zpotrf(MagmaUpperStr, &jb, work, &n, info);
+	    if (*info != 0) {
+	      *info = *info + j;
+	      break;
+	    }
+
+	    /* send the diagonal to gpus */
+	    if ( (j+jb) < n) {
+	      for( d=0; d<num_gpus; d++ ) {
+		cudaSetDevice(d);
+		if( d == id ) dlpanel = dlA(d, j, nb*j_local);
+		else          dlpanel = dlP(d, 0, 0);
+		
+		cudaMemcpy2DAsync( dlpanel, ldda*sizeof(cuDoubleComplex), 
+				   work,    n   *sizeof(cuDoubleComplex), 
+				   sizeof(cuDoubleComplex)*jb, jb, 
+				   cudaMemcpyHostToDevice,stream[d][1]);
 	      }
+	    } else {
+	      cudaSetDevice(id);
+	      cudaMemcpy2DAsync( dlA(id, j, nb*j_local), ldda*sizeof(cuDoubleComplex), 
+				 work,                   n   *sizeof(cuDoubleComplex), 
+				 sizeof(cuDoubleComplex)*jb, jb, 
+				 cudaMemcpyHostToDevice,stream[id][1]);
+	    }
 
-		  /* send the diagonal to gpus */
-	      if ( (j+jb) < n) {
-		    for( d=0; d<num_gpus; d++ ) {
-	          cudaSetDevice(d);
-			  if( d == id ) dlpanel = dlA(d, j, nb*j_local);
-			  else          dlpanel = dlP(d, 0, 0);
+	    /* panel-factorize the off-diagonal */
+	    if ( (j+jb) < n) {
+	      for( d=0; d<num_gpus; d++ ) {
+		cudaSetDevice(d);
+		
+		/* next column */
+		j_local2 = j_local+1;
+		if( d > id ) j_local2--;
+		if( d == id ) dlpanel = dlA(d, j, nb*j_local);
+		else          dlpanel = dlP(d, 0, 0);
+		nb0 = min(nb, n_local[d]-nb*j_local2 );
+		
+		cudaStreamSynchronize(stream[d][1]);
+		if( d == (j/nb+1)%num_gpus ) {
+		  /* owns the next column, look-ahead the column */
+		  /*
+		  cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
+			       jb, nb0, zone,
+			       dlpanel,                ldda, 
+			       dlA(d, j, nb*j_local2), ldda);
+		  */
+		  nb2 = n_local[d] - j_local2*nb;
+                  cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
+                               jb, nb2, zone,
+                               dlpanel,                    ldda,
+                               dlA(d, j, nb*j_local2), ldda);
 
-	          cudaMemcpy2DAsync( dlpanel, ldda*sizeof(cuDoubleComplex), 
-	                             work,    n   *sizeof(cuDoubleComplex), 
-	                             sizeof(cuDoubleComplex)*jb, jb, 
-	                             cudaMemcpyHostToDevice,stream[d][1]);
-			}
-		  } else {
-	        cudaSetDevice(id);
-	        cudaMemcpy2DAsync( dlA(id, j, nb*j_local), ldda*sizeof(cuDoubleComplex), 
-	                           work,                   n   *sizeof(cuDoubleComplex), 
-	                           sizeof(cuDoubleComplex)*jb, jb, 
-	                           cudaMemcpyHostToDevice,stream[id][1]);
+		  
+		  /* send the column to cpu */
+		  if( j+jb+nb0 < n ) {
+		    cudaMemcpy2DAsync(&work[nb0],             n   *sizeof(cuDoubleComplex), 
+				      dlA(d, 0, nb*j_local2), ldda*sizeof(cuDoubleComplex), 
+				      (j+jb)*sizeof(cuDoubleComplex), nb0, 
+				      cudaMemcpyDeviceToHost,stream[d][2]);
 		  }
 
-		  /* panel-factorize the off-diagonal */
-	      if ( (j+jb) < n) {
-		    for( d=0; d<num_gpus; d++ ) {
-	          cudaSetDevice(d);
-
-			  /* next column */
-			  j_local2 = j_local+1;
-			  if( d > id ) j_local2--;
-			  if( d == id ) dlpanel = dlA(d, j, nb*j_local);
-			  else          dlpanel = dlP(d, 0, 0);
-			  nb0 = min(nb, n_local[d]-nb*j_local2 );
-
-	          cudaStreamSynchronize(stream[d][1]);
-			  if( d == (j/nb+1)%num_gpus ) {
-			    /* owns the next column, look-ahead the column */
-	            cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
-	                         jb, nb0, zone,
-	                         dlpanel,                ldda, 
-	                         dlA(d, j, nb*j_local2), ldda);
-
-			    /* send the column to cpu */
-				if( j+jb+nb0 < n ) {
-	              cudaMemcpy2DAsync(&work[nb0],             n   *sizeof(cuDoubleComplex), 
-	                                dlA(d, 0, nb*j_local2), ldda*sizeof(cuDoubleComplex), 
-	                                (j+jb)*sizeof(cuDoubleComplex), nb0, 
-	                                cudaMemcpyDeviceToHost,stream[d][2]);
-				}
-
-				/* update the remaining blocks */
-		        nb2 = n_local[d] - j_local2*nb - nb0;
-	            cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
-	                         jb, nb2, zone,
-	                         dlpanel,                    ldda, 
-	                         dlA(d, j, nb*j_local2+nb0), ldda);
-			  } else {
-		        /* update the entire trailing matrix */
-		        nb2 = n_local[d] - j_local2*nb;
-	            cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
-	                         jb, nb2, zone,
-	                         dlpanel,                ldda, 
-	                         dlA(d, j, nb*j_local2), ldda);
-			  }
-			}
-	      } /* end of ztrsm */
-		} /* end of for j=1, .., n */
-	  } else { 
+		  /* update the remaining blocks */
+		  /*
+		  nb2 = n_local[d] - j_local2*nb - nb0;
+		  cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
+			       jb, nb2, zone,
+			       dlpanel,                    ldda, 
+			       dlA(d, j, nb*j_local2+nb0), ldda);
+		  */
+		} else {
+		  /* update the entire trailing matrix */
+		  nb2 = n_local[d] - j_local2*nb;
+		  cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
+			       jb, nb2, zone,
+			       dlpanel,                ldda, 
+			       dlA(d, j, nb*j_local2), ldda);
+		}
+	      }
+	    } /* end of ztrsm */
+	  } /* end of for j=1, .., n */
+	} else { 
 	    /* Compute the Cholesky factorization A = L*L'. */
 
 	    for (j=0; j<n; j+=nb) {
