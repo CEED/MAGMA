@@ -41,7 +41,7 @@
 typedef cuDoubleComplex *pcuDoubleComplex;
 extern "C" magma_int_t
 magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
-                    cuDoubleComplex *dA, cuDoubleComplex **dlA, magma_int_t ldda,
+                    cuDoubleComplex **dlA, magma_int_t ldda,
                     cuDoubleComplex *tau,
                     magma_int_t *info );
 
@@ -55,7 +55,6 @@ int main( int argc, char** argv)
     double           matnorm, work[1];
     cuDoubleComplex  mzone= MAGMA_Z_NEG_ONE;
     cuDoubleComplex *h_A, *h_R, *tau, *hwork, tmp[1];
-    cuDoubleComplex *d_A;
     pcuDoubleComplex d_lA[4];
 
     /* Matrix size */
@@ -115,7 +114,6 @@ int main( int argc, char** argv)
     TESTING_MALLOC(    h_A, cuDoubleComplex, n2     );
     TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2     );
 
-    // TESTING_DEVALLOC(  d_A, cuDoubleComplex, ldda*N );
     for(i=0; i<num_gpus; i++){      
       n_local[i] = ((N/nb)/num_gpus)*nb;
       if (i < (N/nb)%num_gpus)
@@ -168,11 +166,6 @@ int main( int argc, char** argv)
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-        //cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_R, lda, d_A, ldda);
-        //magma_zgeqrf2_gpu( M, N, d_A, ldda, tau, &info);
-
-	// cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_R, lda, d_A, ldda);
-	
 	for(int j=0; j<N; j+=nb){
 	  k = (j/nb)%num_gpus;
 	  #ifdef  MultiGPUs
@@ -181,17 +174,11 @@ int main( int argc, char** argv)
 	  nk = min(nb, N-j);
           cublasSetMatrix( M, nk, sizeof(cuDoubleComplex), h_R+j*lda, lda, 
 			   d_lA[k]+j/(nb*num_gpus)*nb*ldda, ldda);
-	  //printf("From %4d to %4d -> on GPU %d from %4d to %4d\n",
-	  //	 j, j+nk, k, j/(nb*num_gpus)*nb, j/(nb*num_gpus)*nb+nk);
         }
 	cudaSetDevice(0);
 	
-        //magma_zgeqrf2_gpu( M, N, d_A, ldda, tau, &info);
-
-	//cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_R, lda, d_A, ldda);
-
 	start = get_current_time();
-        magma_zgeqrf2_mgpu( num_gpus, M, N, d_A, d_lA, ldda, tau, &info);
+        magma_zgeqrf2_mgpu( num_gpus, M, N, d_lA, ldda, tau, &info);
 	end = get_current_time();
 
 	if (info < 0)
@@ -202,11 +189,6 @@ int main( int argc, char** argv)
         /* =====================================================================
            Check the result compared to LAPACK
            =================================================================== */
-	//        cublasGetMatrix( M, N, sizeof(cuDoubleComplex), d_A, ldda, h_R, M);
-
-	//=================================================================
-	//for(int j=0; j<0; j+=nb){
-	//for(int j=0; j<nb; j+=nb){
 	for(int j=0; j<N; j+=nb){
           k = (j/nb)%num_gpus;
           #ifdef  MultiGPUs
@@ -216,13 +198,7 @@ int main( int argc, char** argv)
 	  cublasGetMatrix( M, nk, sizeof(cuDoubleComplex), 
 			   d_lA[k]+j/(nb*num_gpus)*nb*ldda, ldda,
 			   h_R+j*lda, lda);
-
-          //printf("From %4d to %4d -> on GPU %d from %4d to %4d\n",
-	  //     j, j+nk, k, j/(nb*num_gpus)*nb, j/(nb*num_gpus)*nb+nk);
         }
-        cudaSetDevice(0);
-	//=================================================================
-
 	
         matnorm = lapackf77_zlange("f", &M, &N, h_A, &M, work);
         blasf77_zaxpy(&n2, &mzone, h_A, &ione, h_R, &ione);
@@ -230,7 +206,6 @@ int main( int argc, char** argv)
         printf("%5d %5d  %6.2f         %6.2f        %e\n",
                M, N, cpu_perf, gpu_perf,
                lapackf77_zlange("f", &M, &N, h_R, &M, work) / matnorm);
-	//0.);
 	
         if (argc != 1)
 	  break;
@@ -241,7 +216,6 @@ int main( int argc, char** argv)
     TESTING_FREE( h_A );
     TESTING_FREE( hwork );
     TESTING_HOSTFREE( h_R );
-    //    TESTING_DEVFREE( d_A );
 
     for(i=0; i<num_gpus; i++){
       #ifdef  MultiGPUs
