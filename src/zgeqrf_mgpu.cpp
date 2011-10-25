@@ -26,9 +26,8 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
 
     Purpose
     =======
-
-    ZGEQRF computes a QR factorization of a complex M-by-N matrix A:
-    A = Q * R.
+    ZGEQRF2_MGPU computes a QR factorization of a complex M-by-N matrix A:
+    A = Q * R. This is a GPU interface of the routine.
 
     Arguments
     =========
@@ -85,14 +84,14 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
     #define hwrk_ref(a_1)    ( local_work + (a_1))
     #define lhwrk            ( local_work + (nb)*(m))
 
-  cuDoubleComplex *dwork[4], *dwork0;
-    cuDoubleComplex *panel[4];
-    //cuDoubleComplex *work;
-    cuDoubleComplex *local_work;
+    cuDoubleComplex *dwork[4], *panel[4], *local_work;
 
     magma_int_t i, j, k, ldwork, lddwork, old_i, old_ib, rows;
     magma_int_t nbmin, nx, ib, nb;
     magma_int_t lhwork, lwork;
+
+    magma_int_t cdevice;
+    cudaGetDevice(&cdevice);
 
     int panel_gpunum, i_local, n_local[4], la_gpu, displacement; 
 
@@ -130,15 +129,6 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
         return MAGMA_ERR_CUBLASALLOC;
       }
     }
-    cudaSetDevice(0);
-    /*
-    if ( CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*nb+displacement,
-					      sizeof(cuDoubleComplex),
-					      (void**)&(dwork0)) ) {
-      *info = -9;
-      return MAGMA_ERR_CUBLASALLOC;
-    }
-    */
 
     /* Set the number of local n for each GPU */
     for(i=0; i<num_gpus; i++){
@@ -148,20 +138,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
       else if (i == (n/nb)%num_gpus)
         n_local[i] += n%nb;
     }
-    /*
-    if ( cudaSuccess != cudaMallocHost( (void**)&work, lwork*sizeof(cuDoubleComplex)) ) {
-      	*info = -9;
-	for(i=0; i<num_gpus; i++){
-	  #ifdef  MultiGPUs
-	    cudaSetDevice(i);
-          #endif
-	  cublasFree( dwork[i] );
-	}
-	cudaSetDevice(0);
 
-        return MAGMA_ERR_HOSTALLOC;
-    }
-    */
     if ( cudaSuccess != cudaMallocHost( (void**)&local_work, lwork*sizeof(cuDoubleComplex)) ) {
       *info = -9;
       for(i=0; i<num_gpus; i++){
@@ -170,11 +147,9 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
         #endif
 	cublasFree( dwork[i] );
       }
-      cudaSetDevice(0);
 
       return MAGMA_ERR_HOSTALLOC;
     }
-
 
     static cudaStream_t streaml[4][2];
     for(i=0; i<num_gpus; i++){
@@ -184,7 +159,6 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
       cudaStreamCreate(&streaml[i][0]);
       cudaStreamCreate(&streaml[i][1]);
     }  
-    cudaSetDevice(0);
 
     nbmin = 2;
     nx    = nb;
@@ -205,17 +179,6 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
             ib = min(k-i, nb);
             rows = m -i;
 	    /* Send current panel to the CPU */
-	    /*
-            cudaMemcpy2DAsync( work_ref(i), ldwork*sizeof(cuDoubleComplex),
-                               dA(i,i),     ldda  *sizeof(cuDoubleComplex),
-			       //dlA(panel_gpunum, i, i_local), ldda  *sizeof(cuDoubleComplex),
-                               sizeof(cuDoubleComplex)*rows, ib,
-                               cudaMemcpyDeviceToHost, streaml[0][1]);
-
-	    printf("panel %4d..%4d on GPU %d from %4d..%4d | ",
-		   i, i+ib, panel_gpunum, i_local, i_local+ib);
-	    */
-	    //=============================
 	    #ifdef  MultiGPUs
 	       cudaSetDevice(panel_gpunum);
 	    #endif
@@ -223,30 +186,13 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
                                dlA(panel_gpunum, i, i_local),     ldda  *sizeof(cuDoubleComplex),
                                sizeof(cuDoubleComplex)*rows, ib,
                                cudaMemcpyDeviceToHost, streaml[panel_gpunum][1]);
-	    cudaSetDevice(0);
-	    //=============================
 
             if (i>0){
                 /* Apply H' to A(i:m,i+2*ib:n) from the left; this is the look-ahead
 		   application to the trailing matrix                                     */
-	      /*
-                magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-				  m-old_i, n-old_i-2*old_ib, old_ib,
-				  dA(old_i, old_i         ), ldda, dwork0,      lddwork,
-				  dA(old_i, old_i+2*old_ib), ldda, dwork0+old_ib, lddwork);
-		
-		// Restore the diagonal block on the GPU 
-                cudaMemcpy2DAsync( dA(old_i, old_i), ldda  *sizeof(cuDoubleComplex),
-                                   work_ref(old_i),  ldwork*sizeof(cuDoubleComplex),
-                                   sizeof(cuDoubleComplex)*old_ib, old_ib,
-                                   cudaMemcpyHostToDevice, streaml[0][0]);
-	      */
 		la_gpu = panel_gpunum;
 
-		//printf(" GPU %d la-updates %4d..%4d | ", la_gpu, 
-		//       i_local + old_ib, n_local[la_gpu]);
 		/* only the GPU that has next panel is done look-ahead */
-		//=============================
 		#ifdef  MultiGPUs
 	  	   cudaSetDevice(la_gpu);
 		#endif
@@ -262,38 +208,18 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
 		cudaSetDevice(la_gpu);
                 #endif
 		cudaMemcpy2DAsync( panel[la_gpu], ldda  *sizeof(cuDoubleComplex),
-				   //work_ref(old_i),  ldwork*sizeof(cuDoubleComplex),
 				   hwrk_ref(old_i),  ldwork*sizeof(cuDoubleComplex),
 				   sizeof(cuDoubleComplex)*old_ib, old_ib,
 				   cudaMemcpyHostToDevice, streaml[la_gpu][0]);
-		cudaSetDevice(0);
-		//=============================
 	    }
 	    
-            //cudaStreamSynchronize(streaml[0][1]);
-	    //=============================
 	    #ifdef  MultiGPUs
                cudaSetDevice(panel_gpunum);
 	    #endif
 	    cudaStreamSynchronize(streaml[panel_gpunum][1]);
-	    cudaSetDevice(0);
-	    //=============================
 
-            //lapackf77_zgeqrf(&rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &lhwork, info);
-            /* Form the triangular factor of the block reflector
-               H = H(i) H(i+1) . . . H(i+ib-1) */
-            //lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr, 
-            //                  &rows, &ib, 
-            //                  work_ref(i), &ldwork, tau+i, hwork, &ib);
-
-            //zpanel_to_q( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
-	    /* Send the current panel back to the GPU */
-            //cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
-            //                work_ref(i), ldwork, 
-            //                dA(i,i),     ldda);
-
-	    //=============================
 	    lapackf77_zgeqrf(&rows, &ib, hwrk_ref(i), &ldwork, tau+i, lhwrk, &lhwork, info);
+
             // Form the triangular factor of the block reflector
             // H = H(i) H(i+1) . . . H(i+ib-1) 
             lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr,
@@ -311,10 +237,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
 		if (j == panel_gpunum)
 		  panel[j] = dlA(j, i, i_local);
 		else
-		  panel[j] = dwork[j]+displacement;// displacement; more work ???
-		//cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
-		//		hwrk_ref(i), ldwork,
-		//		panel[j],     ldda);
+		  panel[j] = dwork[j]+displacement;
 		cudaMemcpy2DAsync(panel[j],    ldda  *sizeof(cuDoubleComplex),
 				  hwrk_ref(i), ldwork*sizeof(cuDoubleComplex),
 				  sizeof(cuDoubleComplex)*rows, ib,
@@ -328,73 +251,35 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
 		cudaStreamSynchronize(streaml[j][0]);
 	      }
 
-	    cudaSetDevice(0);
-	    //=============================
-
 	    /* Restore the panel */
-            //zq_to_panel( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
-
-	    //=============================
 	    zq_to_panel( MagmaUpper, ib, hwrk_ref(i), ldwork, lhwrk+ib*ib );
-	    //=============================
 
             if (i + ib < n) 
 	      {
-		/* Send the T matrix to the GPU */ 
-                //cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), 
-		//              hwork, ib, 
-		//              dwork0, lddwork);
-		
-		//=============================
-		// Has to be done with asynchronous copies (or broadcast, if available)
+		/* Send the T matrix to the GPU. 
+		   Has to be done with asynchronous copies */
 		for(j=0; j<num_gpus; j++)
 		  {
 		    #ifdef  MultiGPUs
 		       cudaSetDevice(j);
                     #endif
-		       //cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex),
-		       //    lhwrk, ib,
-		       //    dwork[j], lddwork);
 		       cudaMemcpy2DAsync(dwork[j], lddwork *sizeof(cuDoubleComplex),
 					 lhwrk,    ib      *sizeof(cuDoubleComplex),
 					 sizeof(cuDoubleComplex)*ib, ib,
 					 cudaMemcpyHostToDevice, streaml[j][0]);
-		       //cudaStreamSynchronize(streaml[j][0]);
                   }
-		cudaSetDevice(0);
-		//=============================
 
-                if (i+nb < k-nx){
-                    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left;
-		       This is update for the next panel; part of the look-ahead             */
-                    //magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-		  //	      rows, ib, ib, 
-		  //	      dA(i, i   ), ldda, dwork0,    lddwork, 
-		  //	      dA(i, i+ib), ldda, dwork0+ib, lddwork);
-		    
+                if (i+nb < k-nx)
+		  {
+		    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left;
+		       This is update for the next panel; part of the look-ahead    */
 		    la_gpu = (panel_gpunum+1)%num_gpus;
 		    int i_loc = (i+nb)/(nb*num_gpus)*nb;
-		    /*
-		    for(j=0; j<num_gpus; j++){
-		      if (j==la_gpu)
-			printf(" GPUla %d  %4d..%4d", 
-			       j, i_loc, i_loc + ib);
-		      else if (j<=panel_gpunum)
-			printf(" GPU   %d  %4d..%4d",
-			       j, i_local+ib, n_local[j]);
-		      else
-			printf(" GPU   %d  %4d..%4d",
-                               j, i_local, n_local[j]);
-		    }
-		    printf(" | ");
-		    */
-
-		    //=============================
 		    for(j=0; j<num_gpus; j++){
 		      #ifdef  MultiGPUs
-		         cudaSetDevice(j);
+		      cudaSetDevice(j);
 		      #endif
-			 cudaStreamSynchronize(streaml[j][0]);
+		      cudaStreamSynchronize(streaml[j][0]);
 		      if (j==la_gpu)
 			magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
 					  rows, ib, ib,
@@ -411,25 +296,12 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
 					  panel[j], ldda, dwork[j],    lddwork,
 					  dlA(j, i, i_local), ldda, dwork[j]+ib, lddwork);
 		    }     
-		    cudaSetDevice(0);
-		    //=============================
-		}
+		  }
                 else {
 		  /* do the entire update as we exit and there would be no lookahead */
-		  //magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-		  //	    rows, n-i-ib, ib, 
-		  //	    dA(i, i   ), ldda, dwork0,    lddwork, 
-		  //	    dA(i, i+ib), ldda, dwork0+ib, lddwork);
-		  /* restore the diagonal */
-		  //cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex),
-		  //	  work_ref(i), ldwork,
-		  //	  dA(i,i),     ldda);
-		  
 		  la_gpu = (panel_gpunum+1)%num_gpus;
 		  int i_loc = (i+nb)/(nb*num_gpus)*nb;
-		  //printf(" %d %4d..%4d | ", la_gpu, i_loc, n_local[la_gpu]);
-		  
-		  //=============================
+
 		  #ifdef  MultiGPUs
 		     cudaSetDevice(la_gpu);
                   #endif
@@ -441,69 +313,48 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
 		     cudaSetDevice(panel_gpunum);
 		  #endif
 		  cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex),
-				  //work_ref(i), ldwork,
 				  hwrk_ref(i), ldwork,
 				  dlA(panel_gpunum, i, i_local),     ldda);
-		  cudaSetDevice(0);
-		  //=============================
                 }
                 old_i  = i;
                 old_ib = ib;
 	      }
-	    //printf("\n");
 	  }
     } else {
       i = 0;
     }
-
+    
     for(j=0; j<num_gpus; j++){
       #ifdef  MultiGPUs
-         cudaSetDevice(j);
+      cudaSetDevice(j);
       #endif
       cublasFree(dwork[j]);
     }
-    cudaSetDevice(0);
-    //cublasFree(dwork0);
     
     /* Use unblocked code to factor the last or only block. */
     if (i < k) {
         ib   = n-i;
         rows = m-i;
-        //cublasGetMatrix(rows, ib, sizeof(cuDoubleComplex),
-	//               dA(i, i), ldda, 
-	//              work,     rows);
         lhwork = lwork - rows*ib;
-        //lapackf77_zgeqrf(&rows, &ib, work, &rows, tau+i, work+ib*rows, &lhwork, info);
-        //
-        //cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
-	//              work,     rows, 
-	//              dA(i, i), ldda);
 
 	panel_gpunum = (panel_gpunum+1)%num_gpus;
 	int i_loc = (i)/(nb*num_gpus)*nb;
-	//printf(" %d %4d..%4d \n", panel_gpunum, i_loc, i_loc+ib);
-	
-	//=============================
+
 	#ifdef  MultiGPUs
 	   cudaSetDevice(panel_gpunum);
 	#endif
 	cublasGetMatrix(rows, ib, sizeof(cuDoubleComplex),
                         dlA(panel_gpunum, i, i_loc), ldda,
-			//hwork,     rows);
 			lhwrk, rows);
 
 	lhwork = lwork - rows*ib;
-	//lapackf77_zgeqrf(&rows, &ib, hwork, &rows, tau+i, hwork+ib*rows, &lhwork, info);
 	lapackf77_zgeqrf(&rows, &ib, lhwrk, &rows, tau+i, lhwrk+ib*rows, &lhwork, info);
 
 	cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
-                        // hwork,     rows,
 			lhwrk,     rows,
 			dlA(panel_gpunum, i, i_loc), ldda);
-	//=============================
     }
 
-    //cudaFreeHost(work);
     for(i=0; i<num_gpus; i++){
       #ifdef  MultiGPUs
          cudaSetDevice(i);
@@ -511,7 +362,8 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
       cudaStreamDestroy(streaml[i][0]);
       cudaStreamDestroy(streaml[i][1]);
     }
-    cudaSetDevice(0);
+
+    cudaSetDevice(cdevice);
 
     return MAGMA_SUCCESS;
-} /* magma_zgeqrf2_gpu */
+} /* magma_zgeqrf2_mgpu */
