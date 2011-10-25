@@ -278,7 +278,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
 		      #ifdef  MultiGPUs
 		      cudaSetDevice(j);
 		      #endif
-		      cudaStreamSynchronize(streaml[j][0]);
+		      //cudaStreamSynchronize(streaml[j][0]);
 		      if (j==la_gpu)
 			magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
 					  rows, ib, ib,
