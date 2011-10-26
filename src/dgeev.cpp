@@ -105,8 +105,7 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
-            The dimension of the array WORK.  LWORK >= max(1,2*N).   
-            For good performance, LWORK must generally be larger.   
+            The dimension of the array WORK.  LWORK >= (1+nb)*N.   
 
             If LWORK = -1, then a workspace query is assumed; the routine   
             only calculates the optimal size of the WORK array, returns   
@@ -139,7 +138,7 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
     magma_int_t scalea;
     double cscale;
     double bignum;
-    magma_int_t maxwrk = -1;
+    magma_int_t minwrk;
     magma_int_t wantvl;
     double smlnum;
     magma_int_t lquery, wantvr, select[1];
@@ -171,13 +170,16 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
     }
 
     /*  Compute workspace   */
-    lapackf77_dgeev(jobvl_, jobvr_, &n, a, &lda, WR, WI,
-                    vl, &ldvl, vr, &ldvr, work, &c_n1, info);
+    if (*info == 0) {
 
-    maxwrk = (magma_int_t)work[0];
+        nb = magma_get_zgehrd_nb(n);
+        minwrk = (1+nb)*n;
+        work[1] = (double) minwrk;
+        
+        if (lwork < minwrk && ! lquery) {
+            *info = -13;
+        }
 
-    if (lwork < maxwrk && ! lquery) {
-        *info = -13;
     }
 
     if (*info != 0) {
@@ -195,7 +197,6 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
    
     // if eigenvectors are needed
 #if defined(VERSION3)
-    nb = magma_get_dgehrd_nb(n);
     if (CUBLAS_STATUS_SUCCESS != 
         cublasAlloc( nb*n, sizeof(double), (void**)&dT)) {
 	*info = -6;
@@ -493,6 +494,5 @@ L50:
 #if defined(VERSION3)
     cublasFree( dT );
 #endif
-    work[1] = (double) maxwrk;
     return MAGMA_SUCCESS;
 } /* magma_dgeev */

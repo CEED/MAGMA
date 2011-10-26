@@ -122,8 +122,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
             
     LWORK   (input) INTEGER   
             The dimension of the array WORK.   
-            LWORK >=  MAX(1,3*MIN(M,N)+MAX(M,N), 5*MIN(M,N).   
-            For good performance, LWORK should generally be larger.   
+            LWORK >=  (M+N)*nb+N.   
 
             If LWORK = -1, then a workspace query is assumed; the routine   
             only calculates the optimal size of the WORK array, returns   
@@ -155,6 +154,8 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
     static magma_int_t c_n1 = -1;
     static double c_b421 = 0.;
     static double c_b443 = 1.;
+
+    magma_int_t nb;
     
     /* System generated locals */
     magma_int_t a_dim1, a_offset, u_dim1, u_offset, vt_dim1, vt_offset, 
@@ -170,12 +171,14 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
     magma_int_t wntua, wntva, wntun, wntuo, wntvn, wntvo, wntus, wntvs;
     magma_int_t bdspac;
     double bignum;
-    magma_int_t ldwrkr, ldwrku, maxwrk;
+    magma_int_t ldwrkr, ldwrku, maxwrk, minwrk;
     double smlnum;
     magma_int_t lquery, wntuas, wntvas;
     
     /* Function Body */
     *info = 0;
+    mnthr  = (magma_int_t)( (double)(min( m_, n_ )) * 1.6 );
+    bdspac = 5*n_;
     minmn = min(*m,*n);
     wntua = lsame_(jobu_, "A");
     wntus = lsame_(jobu_, "S");
@@ -206,15 +209,24 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
 	*info = -11;
     }
   
-    /*     Compute workspace   */ 
-    lapackf77_dgesvd(jobu_, jobvt_, m, n, a, lda, s, u, ldu, 
+    /*     Compute workspace   */
+    lapackf77_dgesvd(jobu_, jobvt_, m, n, a, lda, s, u, ldu,
                      vt, ldvt, work, &c_n1, info );
 
     maxwrk = (magma_int_t)work[0];
-    if ( !lquery && (lwork_ < maxwrk) ) {
-      //  *info = -13;
+
+    if (*info == 0) {
+
+        /* Return optimal workspace in WORK(1) */
+        nb = magma_get_dgebrd_nb(*n);
+        minwrk = ((*m)+(*n))*nb+(*n);
+        work[1] = (double)minwrk;
+
+        if ( !lquery && (lwork_ < minwrk) ) {
+            *info = -13;
+        }
     }
-    
+
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
         return MAGMA_ERR_ILLEGAL_VALUE;
@@ -228,8 +240,6 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
   	return MAGMA_SUCCESS;
     }
     
-    mnthr  = (magma_int_t)( (double)(min( m_, n_ )) * 1.6 );
-    bdspac = 5*n_;
     wrkbl  = maxwrk; /* Not optimal */
 
     /* Parameter adjustments */
@@ -3436,9 +3446,6 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                     &minmn, &ierr);
  	}
     }
- 
-    /* Return optimal workspace in WORK(1) */
-    work[1] = (double)maxwrk;
  
     return MAGMA_SUCCESS;
  } /* dgesvd_ */

@@ -119,8 +119,7 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
 
     LWORK   (input) INTEGER   
             The dimension of the array WORK.   
-            LWORK >=  MAX(1,2*MIN(M,N)+MAX(M,N)).   
-            For good performance, LWORK should generally be larger.   
+            LWORK >=  (M+N)*nb+N.   
 
             If LWORK = -1, then a workspace query is assumed; the routine   
             only calculates the optimal size of the WORK array, returns   
@@ -176,13 +175,17 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
     static double bignum;
     static magma_int_t ldwrkr;
     static magma_int_t ldwrku, maxwrk;
+    magma_int_t minwrk;
     static double smlnum;
     static magma_int_t irwork;
     magma_int_t lquery, wntuas, wntvas;
 
+    magma_int_t nb;
+
     *info = 0;
     minmn = min(*m,*n);
     wntua = lapackf77_lsame(jobu_, "A");
+    mnthr  = (magma_int_t)( (double)(min( m_, n_ )) * 1.6 );
     wntus = lapackf77_lsame(jobu_, "S");
     wntuas = wntua || wntus;
     wntuo = lapackf77_lsame(jobu_, "O");
@@ -210,13 +213,22 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
 	*info = -11;
     }
 
-    /*     Compute workspace   */ 
-    lapackf77_zgesvd(jobu_, jobvt_, m, n, a, lda, s, u, ldu, 
+    /*     Compute workspace   */
+    lapackf77_zgesvd(jobu_, jobvt_, m, n, a, lda, s, u, ldu,
                      vt, ldvt, work, &c_n1, rwork, info );
 
     maxwrk = (magma_int_t)MAGMA_Z_REAL(work[0]);
-    if ( !lquery && (lwork_ < maxwrk) ) {
-        *info = -13;
+    if (*info == 0) {
+
+        nb = magma_get_zgebrd_nb(*n);
+
+        minwrk = ((*m)+(*n))*nb+(*n);
+        MAGMA_Z_SET2REAL(work[1], (double) minwrk);
+
+        if ( !lquery && (lwork_ < minwrk) ) {
+            *info = -13;
+        }
+
     }
     
     if (*info != 0) {
@@ -3573,9 +3585,6 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                              &rwork[ie], &minmn, &ierr);
 	}
     }
-
-    /* Return optimal workspace in WORK(1) */
-    MAGMA_Z_SET2REAL(work[1], (double) maxwrk);
 
     return MAGMA_SUCCESS;
 } /* magma_zgesvd */

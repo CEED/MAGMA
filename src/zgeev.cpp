@@ -138,7 +138,7 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
     double cscale;
     magma_int_t select[1];
     static double bignum;
-    static magma_int_t maxwrk;
+    magma_int_t minwrk;
     magma_int_t wantvl;
     static double smlnum;
     static magma_int_t irwork;
@@ -171,17 +171,15 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
     }
 
     /*  Compute workspace   */
-    if (*info == 0)
-      {
-	lapackf77_zgeev(jobvl_, jobvr_, &n, a, &lda, geev_w_array, 
-			vl, &ldvl, vr, &ldvr, work, &c_n1, rwork, info);
-	
-	maxwrk = (magma_int_t)MAGMA_Z_REAL(work[0]);
+    if (*info == 0) {
+        nb = magma_get_zgehrd_nb(n);
+        minwrk = (1+nb)*n;
+        work[1] = MAGMA_Z_MAKE((double) minwrk, 0.);
 
-	if (lwork < maxwrk && ! lquery) {
-	  *info = -12;
-	}
-      }
+        if (lwork < minwrk && ! lquery) {
+            *info = -12;
+        }
+    }   
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
@@ -198,7 +196,6 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
    
     // if eigenvectors are needed
 #if defined(VERSION3)
-    nb = magma_get_zgehrd_nb(n);
     if (CUBLAS_STATUS_SUCCESS != 
         cublasAlloc( nb*n, sizeof(cuDoubleComplex), (void**)&dT)) {
 	*info = -6;
@@ -477,7 +474,6 @@ L50:
 #if defined(VERSION3)
     cublasFree( dT );
 #endif
-    work[1] = MAGMA_Z_MAKE((double) maxwrk, 0.);
     return MAGMA_SUCCESS;
 } /* magma_zgeev */
 
