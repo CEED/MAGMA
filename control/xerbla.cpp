@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "common_magma.h"
 
@@ -36,5 +37,6 @@ void magma_xerbla(const char *srname , magma_int_t info)
 
     =====================================================================   */
 
-    lapackf77_xerbla( srname, &info );
+    int len = strlen( srname );
+    lapackf77_xerbla( srname, &info, len );
 }

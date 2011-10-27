@@ -42,7 +42,7 @@ extern "C" {
 #define lapackf77_slapy2 FORTRAN_NAME( slapy2, SLAPY2 )
 
 long int lapackf77_lsame( const char *ca, const char *cb);
-void     lapackf77_xerbla( const char* name, magma_int_t* info );
+void     lapackf77_xerbla( const char* name, magma_int_t* info, int name_len );
 
 float    lapackf77_slamch(const char *cmach);
 double   lapackf77_dlamch(const char *cmach);
