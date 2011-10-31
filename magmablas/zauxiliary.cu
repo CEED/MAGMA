@@ -37,13 +37,13 @@ __global__ void zset_nbxnb_to_zero(int nb, cuDoubleComplex *A, int lda){
 
 void zzero_32x32_block(cuDoubleComplex *A, int lda)
 {
-  // zset_to_zero<<<16, 32>>>(A, lda);
-  zset_to_zero<<<32, 32>>>(A, lda);
+  // zset_to_zero<<< 16, 32, 0, magma_stream >>>(A, lda);
+  zset_to_zero<<< 32, 32, 0, magma_stream >>>(A, lda);
 }
 
 void zzero_nbxnb_block(int nb, cuDoubleComplex *A, int lda)
 {
-  zset_nbxnb_to_zero<<<32, 32>>>(nb, A, lda);
+  zset_nbxnb_to_zero<<< 32, 32, 0, magma_stream >>>(nb, A, lda);
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -76,7 +76,7 @@ magmablas_zlaset(magma_int_t m, magma_int_t n,
    dim3 grid(m/zlaset_threads+(m % zlaset_threads != 0), n/32+(n%32!=0));
 
    if (m!=0 && n !=0)
-     zlaset<<< grid, threads >>> (m, n, A, lda);
+     zlaset<<< grid, threads, 0, magma_stream >>> (m, n, A, lda);
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -167,9 +167,9 @@ magmablas_zsetdiag1subdiag0(char uplo, magma_int_t k, magma_int_t nb,
   if(k>lda)  
     fprintf(stderr,"wrong second argument of zsetdiag1subdiag0");
   if(uplo == MagmaLower)
-    zsetdiag1subdiag0_L<<< grid, threads >>> (k, A, lda);
+    zsetdiag1subdiag0_L<<< grid, threads, 0, magma_stream >>> (k, A, lda);
   else if(uplo == MagmaUpper){
-    zsetdiag1subdiag0_U<<< grid, threads >>> (k, A, lda);
+    zsetdiag1subdiag0_U<<< grid, threads, 0, magma_stream >>> (k, A, lda);
   }
   else 
     fprintf(stderr,"wrong first argument of zsetdiag1subdiag0");

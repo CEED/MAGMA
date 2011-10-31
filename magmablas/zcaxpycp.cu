@@ -82,10 +82,10 @@ magmablas_zcaxpycp(cuFloatComplex *R, cuDoubleComplex *X, magma_int_t M, cuDoubl
     dim3 threads( 64, 1 );
     dim3 grid(M/64+(M%64!=0),1);
     if( M %64 == 0 ) {
-        zcaxpycp_special <<< grid, threads >>> ( R, X, M, B, W) ;
+        zcaxpycp_special <<< grid, threads, 0, magma_stream >>> ( R, X, M, B, W) ;
     }
     else{
-        zcaxpycp_generic <<< grid, threads >>> ( R, X, M, B, W) ;
+        zcaxpycp_generic <<< grid, threads, 0, magma_stream >>> ( R, X, M, B, W) ;
     }
 }
 
@@ -95,9 +95,9 @@ magmablas_zaxpycp(cuDoubleComplex *R, cuDoubleComplex *X, magma_int_t M, cuDoubl
     dim3 threads( 64, 1 );
     dim3 grid(M/64+(M%64!=0),1);
     if( M %64 == 0 ) {
-        zaxpycp_special <<< grid, threads >>> ( R, X, M, B) ;
+        zaxpycp_special <<< grid, threads, 0, magma_stream >>> ( R, X, M, B) ;
     }
     else{
-        zaxpycp_generic <<< grid, threads >>> ( R, X, M, B) ;
+        zaxpycp_generic <<< grid, threads, 0, magma_stream >>> ( R, X, M, B) ;
     }
 }

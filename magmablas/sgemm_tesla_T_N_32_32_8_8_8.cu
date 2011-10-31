@@ -421,7 +421,7 @@ magmablas_sgemm_kernel_T_N_32_32_8_8_8(float *C,
 {	
         dim3 threads( 8, 8 );
         dim3 grid(m/32+(m%32!=0),n/32+(n%32!=0));
-        sgemm_kernel_T_N_32_32_8_8_8<<< grid, threads >>>(C, A, B,
+        sgemm_kernel_T_N_32_32_8_8_8<<< grid, threads, 0, magma_stream >>>(C, A, B,
                                                           m, n, k, 
                                                           lda, ldb, ldc, 
                                                           alpha , beta ) ;

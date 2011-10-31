@@ -24,6 +24,7 @@ endif
 
 ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
         auxiliary.cpp 	\
+        common.cpp		\
         xerbla.cpp 	\
 	get_nb.cpp
 

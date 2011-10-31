@@ -219,7 +219,7 @@ magmablas_dgemm_kernel_ab_0(double *C, const double *A, const double *B,
 {
         dim3 threads( 16, 4 );
         dim3 grid(m/64+(m%64!=0),n/16+(n%16!=0));
-        dgemm_kernel_ab_0<<< grid, threads >>>(C, A, B, 
+        dgemm_kernel_ab_0<<< grid, threads, 0, magma_stream >>>(C, A, B, 
                                                m, n, k, 
                                                lda, ldb, ldc,
                                                alpha, beta);

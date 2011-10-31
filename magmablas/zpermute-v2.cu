@@ -61,7 +61,7 @@ extern "C" void zlaswpx( zlaswpx_params_t &params )
 {
  	int blocksize = 64;
 	dim3 blocks = (params.n+blocksize-1) / blocksize;
-	myzlaswpx<<< blocks, blocksize >>>( params );
+	myzlaswpx<<< blocks, blocksize, 0, magma_stream >>>( params );
 }
 
 /*
@@ -93,7 +93,7 @@ extern "C" void zlaswp3( zlaswp_params_t2 &params )
 {
  	int blocksize = 64;
 	dim3 blocks = (params.n+blocksize-1) / blocksize;
-	myzlaswp2<<< blocks, blocksize >>>( params );
+	myzlaswp2<<< blocks, blocksize, 0, magma_stream >>>( params );
 }
 
 

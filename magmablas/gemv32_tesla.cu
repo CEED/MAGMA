@@ -7,7 +7,7 @@
 */
 #include <stdio.h>
 #include "cublas.h"
-#include "magma.h"
+#include "common_magma.h"
 
 __global__ void 
 sgemvT32_kernel_tail(int m, int n, float alpha, float* A, int lda, 
@@ -295,18 +295,18 @@ magmablas_sgemv32_tesla(char tran, int m, int n, float alpha,
 	{
 		dim3 threads(32, 2, 1);
 		if (n%32==0)
-			sgemvT32_kernel<<<grid, threads>>>(m, alpha, A, lda, x, y);
+			sgemvT32_kernel<<< grid, threads, 0, magma_stream >>>(m, alpha, A, lda, x, y);
 		else
-			sgemvT32_kernel_tail<<<grid, threads>>>(m, n, alpha, A, lda, x, y);
+			sgemvT32_kernel_tail<<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, y);
 
 	}
 	else 
 	{
 		dim3 threads(32, 1, 1);
 		if (n%32==0)
-			sgemv32_kernel<<<grid, threads>>>(m, alpha, A, lda, x, y);
+			sgemv32_kernel<<< grid, threads, 0, magma_stream >>>(m, alpha, A, lda, x, y);
 		else
-			sgemv32_kernel_tail<<<grid, threads>>>(m, n, alpha, A, lda, x, y);
+			sgemv32_kernel_tail<<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, y);
 	}
 }
 
@@ -342,11 +342,11 @@ magmablas_dgemv32_tesla(char tran, int m, int n, double alpha, double *A,
 
 	if (tran == 'T' || tran == 't'){
 		dim3 threads(32, 2, 1);
-		dgemvT32_kernel<<<grid, threads>>>(m, alpha, A, lda, x, y);
+		dgemvT32_kernel<<< grid, threads, 0, magma_stream >>>(m, alpha, A, lda, x, y);
 	}
 	else
 	{
 		dim3 threads(32, 1, 1);
-		dgemv32_kernel<<<grid, threads>>>(m, alpha, A, lda, x, y);
+		dgemv32_kernel<<< grid, threads, 0, magma_stream >>>(m, alpha, A, lda, x, y);
 	}
 }

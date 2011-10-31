@@ -63,7 +63,7 @@ magmablas_zswapdblk(magma_int_t n, magma_int_t nb,
     magma_int_t blocksize = nb;
     dim3 blocks( (n-1) / blocksize, 1, 1);
 
-    magmagpu_zswapdblk<<< blocks, blocksize >>>( nb, 
+    magmagpu_zswapdblk<<< blocks, blocksize, 0, magma_stream >>>( nb, 
                                                  dA1, ldda1, inca1,
                                                  dA2, ldda2, inca2 );
 }

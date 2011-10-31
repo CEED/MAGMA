@@ -100,9 +100,9 @@ magmablas_zclaswp(int n, cuDoubleComplex *a, int lda, cuFloatComplex *sa, int m,
     dim3 threazc(num_threadzc, 1, 1);
 
     if (incx >=0)
-      zclaswp_kernel<<<grid, threazc>>>(n, a, lda, sa, m, ipiv);
+      zclaswp_kernel<<< grid, threazc, 0, magma_stream >>>(n, a, lda, sa, m, ipiv);
     else
-      zclaswp_inv_kernel<<<grid, threazc>>>(n, a, lda, sa, m, ipiv);
+      zclaswp_inv_kernel<<< grid, threazc, 0, magma_stream >>>(n, a, lda, sa, m, ipiv);
 }
 
 #undef num_threadzc

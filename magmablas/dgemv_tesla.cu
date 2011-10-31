@@ -136,7 +136,7 @@ magmablas_dgemv_tesla(char trans,
               dim3 grid(blocks, 1, 1);
               dim3 threads(num_threads, 1, 1);
  
-              dgemv_kernel<<<grid, threads>>>(m, n, 
+              dgemv_kernel<<< grid, threads, 0, magma_stream >>>(m, n, 
                                               (n/dgemv_bs)*dgemv_bs, 
                                               A, lda, x, z);
           }
@@ -376,7 +376,7 @@ magmablas_dgemvt1_tesla(magma_int_t m, magma_int_t n, double alpha, double *A, m
 
     dim3 grid(blocks, 1, 1);
     dim3 threads(32, 2, 1);
-    dgemvt_kernel1<<<grid, threads>>>(m, n, alpha, (m / dgemv_bs)*dgemv_bs,
+    dgemvt_kernel1<<< grid, threads, 0, magma_stream >>>(m, n, alpha, (m / dgemv_bs)*dgemv_bs,
                                       A, lda, x, z);
 }
 
@@ -422,7 +422,7 @@ magmablas_dgemvt2_tesla(magma_int_t m, magma_int_t n, double alpha, double *A, m
     dim3 grid(blocks, 1, 1);
     dim3 threads(16, 4, 1);
 
-    dgemvt_kernel2<<<grid, threads>>>(m, n, alpha, (m / 32)*32,
+    dgemvt_kernel2<<< grid, threads, 0, magma_stream >>>(m, n, alpha, (m / 32)*32,
                                       A, lda, x, z);
 }
 

@@ -109,6 +109,6 @@ magmablas_zlag2c( int M, int N ,
     dim3 threads( blksize, 1, 1 );
     dim3 grid( (M+blksize-1)/blksize, 1, 1);
     flag = 0;
-    magmaint_zlag2c<<< grid, threads >>>( M, N, A, lda, SA, ldsa, RMAX ) ; 
+    magmaint_zlag2c<<< grid, threads, 0, magma_stream >>>( M, N, A, lda, SA, ldsa, RMAX ) ; 
     *info = flag;
 }

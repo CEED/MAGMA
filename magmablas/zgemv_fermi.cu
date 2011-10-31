@@ -126,10 +126,10 @@ magmablas_zgemvn_fermi(int n, int m, cuDoubleComplex alpha, cuDoubleComplex *A, 
     dim3 grid(blocks, 1, 1);
     dim3 threads(num_threads, 1, 1);
 /*    if(n<=8500) 
-		zgemvn_kernel1_fermi<<<grid, threads>>>(n, m, (m / zgemv_bs)*zgemv_bs, 
+		zgemvn_kernel1_fermi<<< grid, threads, 0, magma_stream >>>(n, m, (m / zgemv_bs)*zgemv_bs, 
 			                           alpha, A, lda, x, y);
     else */
-		zgemvn_kernel2_fermi<<<grid, threads>>>(n, m, (m / num_threads)*num_threads, 
+		zgemvn_kernel2_fermi<<< grid, threads, 0, magma_stream >>>(n, m, (m / num_threads)*num_threads, 
 			                           alpha, A, lda, x, y);
 }
 
@@ -245,7 +245,7 @@ magmablas_zgemvt_fermi(int m, int n, cuDoubleComplex alpha, cuDoubleComplex *A, 
     dim3 grid    ( 1,  n,  1);
     dim3 threads ( threadSize,   1,  1);
 
-    zgemvt_kernel_fermi<<<grid, threads>>>( m, n, alpha, ( m / threadSize) * threadSize,
+    zgemvt_kernel_fermi<<< grid, threads, 0, magma_stream >>>( m, n, alpha, ( m / threadSize) * threadSize,
                                        A, lda, x, y);
 
 }
@@ -365,7 +365,7 @@ magmablas_zgemvc_fermi(int m, int n, cuDoubleComplex alpha, cuDoubleComplex *A, 
     dim3 grid    ( 1,  n,  1);
     dim3 threads ( threadSize,   1,  1);
 
-    zgemvc_kernel_fermi<<<grid, threads>>>( m, n, alpha, ( m / threadSize) * threadSize,
+    zgemvc_kernel_fermi<<< grid, threads, 0, magma_stream >>>( m, n, alpha, ( m / threadSize) * threadSize,
                                        A, lda, x, y);
 
 }

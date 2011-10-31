@@ -241,10 +241,10 @@ magmablas_zsymv_130( char uplo, magma_int_t n,
     }
     else
     {
-        magmablas_zsymv_130_kernel1 <<< grid1, threads1 >>> 
+        magmablas_zsymv_130_kernel1 <<< grid1, threads1, 0, magma_stream >>> 
             (n, alpha, A, lda, X, incx, beta, Y, incy);
 
-        magmablas_zsymv_130_kernel2 <<< grid2, threads2 >>> 
+        magmablas_zsymv_130_kernel2 <<< grid2, threads2, 0, magma_stream >>> 
             (n, alpha, A, lda, X, incx, beta, Y, incy);
     }
 

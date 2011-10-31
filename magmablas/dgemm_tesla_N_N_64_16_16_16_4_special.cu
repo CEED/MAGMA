@@ -127,7 +127,7 @@ magmablas_dgemm_kernel_N_N_64_16_16_16_4_special(double *C,
 {
         dim3 threads( 16, 4 );
         dim3 grid(m/64,n/16);
-        dgemm_kernel_N_N_64_16_16_16_4_special<<< grid, threads >>>(C, A, B,
+        dgemm_kernel_N_N_64_16_16_16_4_special<<< grid, threads, 0, magma_stream >>>(C, A, B,
                                                                     m, n, k,
                                                                     lda, ldb, ldc, 
                                                                     alpha, beta);

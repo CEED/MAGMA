@@ -1342,7 +1342,7 @@ magmablas_ssyr2k(char UPLO, char TRANS, int m , int k, float alpha,
           {
             dim3 grid( in, (in/2+1));
             dim3 threads( thread_x, thread_y );
-            Ssyr2k_v16_ts_odd_special<<< grid, threads >>>(flag,  
+            Ssyr2k_v16_ts_odd_special<<< grid, threads, 0, magma_stream >>>(flag,  
                                                            C, A, B, 
                                                            m, in/2, k,
                                                            lda, ldb, ldc, 
@@ -1352,7 +1352,7 @@ magmablas_ssyr2k(char UPLO, char TRANS, int m , int k, float alpha,
         {
            dim3 grid( in+1, (in/2));
            dim3 threads( thread_x, thread_y );
-           Ssyr2k_v16_ts_even_special<<< grid, threads >>>(flag,  
+           Ssyr2k_v16_ts_even_special<<< grid, threads, 0, magma_stream >>>(flag,  
                                                            C, A, B, 
                                                            m, in/2, k, 
                                                            lda, ldb, ldc,
@@ -1365,7 +1365,7 @@ magmablas_ssyr2k(char UPLO, char TRANS, int m , int k, float alpha,
       {  
          dim3 grid( in, (in/2+1));
          dim3 threads( thread_x, thread_y );
-         Ssyr2k_v16_ts_odd_generic<<< grid, threads >>>(C, A, B,
+         Ssyr2k_v16_ts_odd_generic<<< grid, threads, 0, magma_stream >>>(C, A, B,
                                                         m, in/2, k, 
                                                         lda, ldb, ldc,
                                                         alpha, beta);
@@ -1374,7 +1374,7 @@ magmablas_ssyr2k(char UPLO, char TRANS, int m , int k, float alpha,
       {
          dim3 grid( in+1, (in/2));
          dim3 threads( thread_x, thread_y );
-         Ssyr2k_v16_ts_even_generic<<< grid, threads >>>(C, A, B,
+         Ssyr2k_v16_ts_even_generic<<< grid, threads, 0, magma_stream >>>(C, A, B,
                                                          m, in/2, k, 
                                                          lda, ldb, ldc,
                                                          alpha, beta);

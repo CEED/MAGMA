@@ -14,7 +14,7 @@
 
 #define b_copy();	dim3 dimBlock((M>=MAX_THREAD_PER_BLOCK)?MAX_THREAD_PER_BLOCK:(WARP_SIZE*((M/WARP_SIZE)+(M%WARP_SIZE!=0))), 1);\
 					dim3 dimGrid(M/dimBlock.x+(M%dimBlock.x!=0), N);\
-					b_copy_kernel<<<dimGrid, dimBlock>>>(M, N, b, ldb, d_x, M);\
+					b_copy_kernel<<< dimGrid, dimBlock, 0, magma_stream >>>(M, N, b, ldb, d_x, M);\
 					cudaThreadSynchronize();
 
 #define MAX_THREAD_PER_BLOCK 512
@@ -1733,7 +1733,7 @@ void diag_dtrtri (int M, char uplo, char diag, double *A, double *d_dinvA, int l
 	if (uplo == 'l' || uplo == 'L')
 	{
 		// solve the diagonal blocks
-		diag_dtrtri_kernel_lower<<<nblocks, BLOCK_SIZE>>>(diag, A, d_dinvA, lda);
+		diag_dtrtri_kernel_lower<<< nblocks, BLOCK_SIZE, 0, magma_stream >>>(diag, A, d_dinvA, lda);
 
 		// update the inverse up to the size of BLOCK_SIZE
 		for (int i=BLOCK_SIZE; i<NB; i*=2)
@@ -1745,21 +1745,21 @@ void diag_dtrtri (int M, char uplo, char diag, double *A, double *d_dinvA, int l
 			switch (i)
 			{
 				case 16:
-					triple_dgemm_update_16_part1_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
-					triple_dgemm_update_16_part2_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					triple_dgemm_update_16_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+					triple_dgemm_update_16_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
 					break;
 				case 32:
-					triple_dgemm_update_32_part1_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
-					triple_dgemm_update_32_part2_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					triple_dgemm_update_32_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+					triple_dgemm_update_32_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
 					break;
 				case 64:
-					triple_dgemm_update_64_part1_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
-					triple_dgemm_update_64_part2_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					triple_dgemm_update_64_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+					triple_dgemm_update_64_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
 					break;
 				default:
-					triple_dgemm_update_above64_part1_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
-					triple_dgemm_update_above64_part2_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
-					triple_dgemm_update_above64_part3_L<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					triple_dgemm_update_above64_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+					triple_dgemm_update_above64_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+					triple_dgemm_update_above64_part3_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
 					break;
 			}
 			if (i*2>=M) break;
@@ -1767,7 +1767,7 @@ void diag_dtrtri (int M, char uplo, char diag, double *A, double *d_dinvA, int l
 	}
 	else
 	{
-		diag_dtrtri_kernel_upper<<<nblocks, BLOCK_SIZE>>>(diag, A, d_dinvA, lda);
+		diag_dtrtri_kernel_upper<<< nblocks, BLOCK_SIZE, 0, magma_stream >>>(diag, A, d_dinvA, lda);
 
 		// update the inverse up to the size of BLOCK_SIZE
 		for (int i=BLOCK_SIZE; i<NB; i*=2)
@@ -1779,20 +1779,20 @@ void diag_dtrtri (int M, char uplo, char diag, double *A, double *d_dinvA, int l
 			switch (i)
 			{
 				case 16:
-					triple_dgemm_update_16_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					triple_dgemm_update_16_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
 					break;
 				case 32:
-					triple_dgemm_update_32_part1_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
-					triple_dgemm_update_32_part2_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					triple_dgemm_update_32_part1_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+					triple_dgemm_update_32_part2_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
 					break;
 				case 64:
-					triple_dgemm_update_64_part1_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
-					triple_dgemm_update_64_part2_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					triple_dgemm_update_64_part1_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+					triple_dgemm_update_64_part2_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
 					break;
 				default:
-					triple_dgemm_update_above64_part1_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
-					triple_dgemm_update_above64_part2_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
-					triple_dgemm_update_above64_part3_R<<<dimGrid, dimBlock>>>(A, d_dinvA, i, lda, npages);
+					triple_dgemm_update_above64_part1_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+					triple_dgemm_update_above64_part2_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+					triple_dgemm_update_above64_part3_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
 					break;
 			}
 			if (i*2>=M) break;

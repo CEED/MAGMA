@@ -105,7 +105,7 @@ magmablas_dgemv_MLU(int n, int m, double *A, int lda, double *x, double *z)
     dim3 grid(blocks, 1, 1);
     dim3 threads(num_threads, 1, 1);
  
-    magma_dgemv_MLU <<<grid, threads>>>(n, m, (m / dgemv_bs)*dgemv_bs, 
+    magma_dgemv_MLU <<< grid, threads, 0, magma_stream >>>(n, m, (m / dgemv_bs)*dgemv_bs, 
                                     A, lda, x, z);
 }
 

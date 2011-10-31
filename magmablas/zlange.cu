@@ -161,12 +161,12 @@ magmablas_zlange_64_64_16_4(const cuDoubleComplex *A, double *C,
         dim3 threads( 16, 4 );
         dim3 grid(M/64+(M%64!=0),1);
 	if( M %64 == 0  && N %64 == 0 ){ 
-        	magma_zlange_special<<< grid, threads >>> ( A, C , M , N , lda);
+        	magma_zlange_special<<< grid, threads, 0, magma_stream >>> ( A, C , M , N , lda);
 	}
 	else{
         	int N_mod_4 = N % 4 ;
 		N = N - N_mod_4 ;  
-        	magma_zlange_generic<<< grid, threads >>> ( A, C , M , N , lda , N_mod_4);
+        	magma_zlange_generic<<< grid, threads, 0, magma_stream >>> ( A, C , M , N , lda , N_mod_4);
 	}
 }
 

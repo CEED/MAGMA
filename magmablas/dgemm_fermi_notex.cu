@@ -729,20 +729,20 @@ magmablas_dgemm_fermi( char TRANSA, char TRANSB, int m , int n , int k ,
 
 	if ( TransB ) 
 	   if ( !TransA ) 
-		fermiDgemm_v2_kernel_NT<<< grid, threads>>>(C, A, B, m, n, k, lda, ldb, 
+		fermiDgemm_v2_kernel_NT<<< grid, threads, 0, magma_stream >>>(C, A, B, m, n, k, lda, ldb, 
 					                    ldc, alpha, beta,
                                                             (int)offsetA, (int)offsetB);
 	   else
-		fermiDgemm_v2_kernel_TT<<< grid, threads>>>(C, A, B, m, n, k, lda, ldb, 
+		fermiDgemm_v2_kernel_TT<<< grid, threads, 0, magma_stream >>>(C, A, B, m, n, k, lda, ldb, 
 		                                            ldc, alpha, beta,
                                                             (int)offsetA, (int)offsetB);
 	else
 	   if ( !TransA ) 
-		fermiDgemm_v2_kernel_NN<<< grid, threads>>>(C, A, B, m, n, k, lda, ldb, 
+		fermiDgemm_v2_kernel_NN<<< grid, threads, 0, magma_stream >>>(C, A, B, m, n, k, lda, ldb, 
                                                             ldc, alpha, beta,
                                                             (int)offsetA, (int)offsetB);
 	   else
-		fermiDgemm_v2_kernel_TN<<< grid, threads>>>(C, A, B, m, n, k, lda, ldb, 
+		fermiDgemm_v2_kernel_TN<<< grid, threads, 0, magma_stream >>>(C, A, B, m, n, k, lda, ldb, 
                                                             ldc, alpha, beta,
                                                             (int)offsetA, (int)offsetB);
 

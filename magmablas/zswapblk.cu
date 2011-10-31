@@ -91,7 +91,7 @@ magmablas_zswapblk( char storev, int n,
                 else
                     params.ipiv[j] = im - offset;
             }
-            magmagpu_zswapblkcm<<< blocks, blocksize >>>( params );
+            magmagpu_zswapblkcm<<< blocks, blocksize, 0, magma_stream >>>( params );
         }
     }else {
         for( k=(i1-1); k<i2; k+=BLOCK_SIZE )
@@ -106,7 +106,7 @@ magmablas_zswapblk( char storev, int n,
                 else
                     params.ipiv[j] = im - offset;
             }
-            magmagpu_zswapblkrm<<< blocks, blocksize >>>( params );
+            magmagpu_zswapblkrm<<< blocks, blocksize, 0, magma_stream >>>( params );
         }
     }
 }

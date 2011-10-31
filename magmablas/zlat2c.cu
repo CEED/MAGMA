@@ -626,10 +626,10 @@ mzlat2c(char uplo, int m, cuDoubleComplex *A, int lda, cuFloatComplex *Y, int LD
 
     if( m % dgemv_bs == 0 ) {
         if( uplo == 'L' || uplo == 'l'){
-            l_zlat2c_special <<<grid, threads>>> (m, A, lda, Y ,INFO ,  RMAX , LDSA  );
+            l_zlat2c_special <<< grid, threads, 0, magma_stream >>> (m, A, lda, Y ,INFO ,  RMAX , LDSA  );
         }
         else{
-            u_zlat2c_special <<<grid, threads>>> (m, A, lda,  Y , INFO , RMAX , LDSA  );
+            u_zlat2c_special <<< grid, threads, 0, magma_stream >>> (m, A, lda,  Y , INFO , RMAX , LDSA  );
         }
 
     }
@@ -637,10 +637,10 @@ mzlat2c(char uplo, int m, cuDoubleComplex *A, int lda, cuFloatComplex *Y, int LD
         int  m_full_block = (m - m % 32 ) /32 ;
         int  m_mod_32 = m%32 ;
         if( uplo == 'L' || uplo == 'l'){
-            l_zlat2c_generic <<<grid, threads>>> (m, A, lda, Y , m_full_block , m_mod_32 , INFO , RMAX , LDSA );
+            l_zlat2c_generic <<< grid, threads, 0, magma_stream >>> (m, A, lda, Y , m_full_block , m_mod_32 , INFO , RMAX , LDSA );
         }
         else{
-            u_zlat2c_generic <<<grid, threads>>> (m, A, lda, Y , m_full_block , m_mod_32 , INFO , RMAX , LDSA );
+            u_zlat2c_generic <<< grid, threads, 0, magma_stream >>> (m, A, lda, Y , m_full_block , m_mod_32 , INFO , RMAX , LDSA );
         }
     }
 }
@@ -952,10 +952,10 @@ mzlat2c(char uplo, int m, cuDoubleComplex *A, int lda, cuFloatComplex *Y, int LD
 
     if( m % dgemv_bs == 0 ) {
         if( uplo == 'L' || uplo == 'l'){
-            l_zlat2c_special <<<grid, threads>>> (m, A, lda, Y ,INFO ,  RMAX , LDSA  );
+            l_zlat2c_special <<< grid, threads, 0, magma_stream >>> (m, A, lda, Y ,INFO ,  RMAX , LDSA  );
         }
         else{
-            u_zlat2c_special <<<grid, threads>>> (m, A, lda,  Y , INFO , RMAX , LDSA  );
+            u_zlat2c_special <<< grid, threads, 0, magma_stream >>> (m, A, lda,  Y , INFO , RMAX , LDSA  );
         }
 
     }
@@ -963,10 +963,10 @@ mzlat2c(char uplo, int m, cuDoubleComplex *A, int lda, cuFloatComplex *Y, int LD
         int  m_full_block = (m - m % 32 ) /32 ;
         int  m_mod_32 = m%32 ;
         if( uplo == 'L' || uplo == 'l'){
-            l_zlat2c_generic <<<grid, threads>>> (m, A, lda, Y , m_full_block , m_mod_32 , INFO , RMAX , LDSA );
+            l_zlat2c_generic <<< grid, threads, 0, magma_stream >>> (m, A, lda, Y , m_full_block , m_mod_32 , INFO , RMAX , LDSA );
         }
         else{
-            u_zlat2c_generic <<<grid, threads>>> (m, A, lda, Y , m_full_block , m_mod_32 , INFO , RMAX , LDSA );
+            u_zlat2c_generic <<< grid, threads, 0, magma_stream >>> (m, A, lda, Y , m_full_block , m_mod_32 , INFO , RMAX , LDSA );
         }
     }
 }

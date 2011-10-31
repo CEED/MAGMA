@@ -62,9 +62,9 @@ magmablas_zlacpy_64_64_16_4_v2(int M, int N, cuDoubleComplex *A, int LDA, cuDoub
         dim3 threads( 16, 4 );
         dim3 grid( M/64+(M%64!=0), 1 );
 	if( N == 1 ) 
-            zlacpy_special<<< grid, threads >>> ( M, N, A, LDA, B, LDB ) ;
+            zlacpy_special<<< grid, threads, 0, magma_stream >>> ( M, N, A, LDA, B, LDB ) ;
 	else	
-            zlacpy_generic<<< grid, threads >>> ( M, N, A, LDA, B, LDB ) ;
+            zlacpy_generic<<< grid, threads, 0, magma_stream >>> ( M, N, A, LDA, B, LDB ) ;
 }
 
 extern "C" void 

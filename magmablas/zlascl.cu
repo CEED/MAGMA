@@ -55,9 +55,9 @@ magmablas_zlascl(char type, int kl, int ku,
     double mul = cto / cfrom;
 
     if (type == 'L' || type =='l')  
-       l_zlascl <<<grid, threads>>> (m, n, mul, A, lda);
+       l_zlascl <<< grid, threads, 0, magma_stream >>> (m, n, mul, A, lda);
     else if (type == 'U' || type =='u')
-       u_zlascl <<<grid, threads>>> (m, n, mul, A, lda);  
+       u_zlascl <<< grid, threads, 0, magma_stream >>> (m, n, mul, A, lda);  
     else {
        printf("Only type L and U are available in zlascl. Exit.\n");
        exit(1);

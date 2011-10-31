@@ -72,5 +72,5 @@ magmablas_ztranspose(cuDoubleComplex *odata, int ldo,
 	//assert( (m%32) == 0 && (n%32) == 0, "misaligned transpose" );
 	dim3 threads( ZSIZE_1SHARED, 8, 1 );
 	dim3 grid( m/32, n/32, 1 );
-	ztranspose_32<<< grid, threads >>>( odata, ldo, idata, ldi );
+	ztranspose_32<<< grid, threads, 0, magma_stream >>>( odata, ldo, idata, ldi );
 }

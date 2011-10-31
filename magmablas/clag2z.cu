@@ -77,10 +77,10 @@ magmablas_clag2z_64_64_16_4_v2( int M, int N,
     dim3 threads( 16, 4 );
     dim3 grid(M/64+(M%64!=0),1);
     if( N > 1 ) {
-        clag2z_generic<<< grid, threads >>> (  M, N, SA, LDSA, A, LDA ) ;
+        clag2z_generic<<< grid, threads, 0, magma_stream >>> (  M, N, SA, LDSA, A, LDA ) ;
     }
     else{
-        clag2z_special<<< grid, threads >>> (  M, N, SA, LDSA, A, LDA ) ;
+        clag2z_special<<< grid, threads, 0, magma_stream >>> (  M, N, SA, LDSA, A, LDA ) ;
     }
 }
 

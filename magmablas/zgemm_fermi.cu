@@ -361,21 +361,21 @@ magmablas_zgemm_fermi( char TRANSA, char TRANSB, int m , int n , int k ,
        //dim3 dimGrid(m/BLK_M_nn + (m%BLK_M_nn != 0),
        //             n/BLK_N_nn + (n%BLK_N_nn != 0));
        dim3 dimGrid(m/24 + (m%24 != 0),  n/16 + (n%16 != 0));
-       fermi_gemm_kernel_nn<<<dimGrid, dimBlock>>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
+       fermi_gemm_kernel_nn<<< dimGrid, dimBlock, 0, magma_stream >>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
                                                    (int)offsetA, (int)offsetB);
     } else 
     if (TransA==0 && TransB ==1){
        //dim3 dimGrid(m/BLK_M_nt + (m%BLK_M_nt != 0),
        //             n/BLK_N_nt + (n%BLK_N_nt != 0));
        dim3 dimGrid(m/16 + (m%16 != 0),	 n/24 + (n%24 != 0));
-       fermi_gemm_kernel_nt<<<dimGrid, dimBlock>>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
+       fermi_gemm_kernel_nt<<< dimGrid, dimBlock, 0, magma_stream >>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
                                                    (int)offsetA, (int)offsetB);
     } else
     if (TransA==0 && TransB ==2){
        //dim3 dimGrid(m/BLK_M_nc + (m%BLK_M_nc != 0),
        //             n/BLK_N_nc + (n%BLK_N_nc != 0));
        dim3 dimGrid(m/16 + (m%16 != 0),  n/24 + (n%24 != 0));
-       fermi_gemm_kernel_nc<<<dimGrid, dimBlock>>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
+       fermi_gemm_kernel_nc<<< dimGrid, dimBlock, 0, magma_stream >>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
                                                    (int)offsetA, (int)offsetB);
     } else
     
@@ -383,21 +383,21 @@ magmablas_zgemm_fermi( char TRANSA, char TRANSB, int m , int n , int k ,
        //dim3 dimGrid(m/BLK_M_tn + (m%BLK_M_tn != 0),
        //             n/BLK_N_tn + (n%BLK_N_tn != 0));
        dim3 dimGrid(m/24 + (m%24 != 0),	 n/16 + (n%16 != 0));
-       fermi_gemm_kernel_tn<<<dimGrid, dimBlock>>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
+       fermi_gemm_kernel_tn<<< dimGrid, dimBlock, 0, magma_stream >>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
                                                    (int)offsetA, (int)offsetB);
     } else
     if (TransA==1 && TransB ==1){
        //dim3 dimGrid(m/BLK_M_tt + (m%BLK_M_tt != 0),
        //             n/BLK_N_tt + (n%BLK_N_tt != 0));
        dim3 dimGrid(m/16 + (m%16 != 0), n/24 + (n%24 != 0));
-       fermi_gemm_kernel_tt<<<dimGrid, dimBlock>>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
+       fermi_gemm_kernel_tt<<< dimGrid, dimBlock, 0, magma_stream >>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
                                                    (int)offsetA, (int)offsetB);
     } else
     if (TransA==1 && TransB ==2){
        //dim3 dimGrid(m/BLK_M_tc + (m%BLK_M_tc != 0),
        //             n/BLK_N_tc + (n%BLK_N_tc != 0));
        dim3 dimGrid(m/16 + (m%16 != 0), n/24 + (n%24 != 0));
-       fermi_gemm_kernel_tc<<<dimGrid, dimBlock>>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
+       fermi_gemm_kernel_tc<<< dimGrid, dimBlock, 0, magma_stream >>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
                                                    (int)offsetA, (int)offsetB);
     } else
 
@@ -405,21 +405,21 @@ magmablas_zgemm_fermi( char TRANSA, char TRANSB, int m , int n , int k ,
        //dim3 dimGrid(m/BLK_M_cn + (m%BLK_M_cn != 0),
        //             n/BLK_N_cn + (n%BLK_N_cn != 0));
        dim3 dimGrid(m/24 + (m%24 != 0),  n/16 + (n%16 != 0));
-       fermi_gemm_kernel_cn<<<dimGrid, dimBlock>>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
+       fermi_gemm_kernel_cn<<< dimGrid, dimBlock, 0, magma_stream >>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
                                                    (int)offsetA, (int)offsetB);
     } else
     if (TransA==2 && TransB ==1){
        //dim3 dimGrid(m/BLK_M_ct + (m%BLK_M_ct != 0),
        //             n/BLK_N_ct + (n%BLK_N_ct != 0));
        dim3 dimGrid(m/16 + (m%16 != 0), n/24 + (n%24 != 0));
-       fermi_gemm_kernel_ct<<<dimGrid, dimBlock>>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
+       fermi_gemm_kernel_ct<<< dimGrid, dimBlock, 0, magma_stream >>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
                                                    (int)offsetA, (int)offsetB);
     } else
     if (TransA==2 && TransB ==2){
        //dim3 dimGrid(m/BLK_M_cc + (m%BLK_M_cc != 0),
        //             n/BLK_N_cc + (n%BLK_N_cc != 0));
        dim3 dimGrid(m/16 + (m%16 != 0), n/24 + (n%24 != 0));
-       fermi_gemm_kernel_cc<<<dimGrid, dimBlock>>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
+       fermi_gemm_kernel_cc<<< dimGrid, dimBlock, 0, magma_stream >>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
                                                    (int)offsetA, (int)offsetB);
     }
 

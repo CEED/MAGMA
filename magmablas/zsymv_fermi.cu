@@ -826,16 +826,16 @@ void magmablas_zsymv_200_L(magma_int_t m, cuDoubleComplex alpha,
      * otherwise, we call the generic case.
      */
     if(m % zsymv_bs == 0 ) {
-        magmablas_zsymv_200_L_special <<<grid, threads>>>(
+        magmablas_zsymv_200_L_special <<< grid, threads, 0, magma_stream >>>(
             m, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
     }
     else{
         magma_int_t m_mod_thread_x = m%zsymv_bs - 1;
-        magmablas_zsymv_200_L_generic <<<grid, threads>>> (
+        magmablas_zsymv_200_L_generic <<< grid, threads, 0, magma_stream >>> (
             m, alpha, A, lda, X, incx ,beta, Y, incy, dC_work, m_mod_thread_x);
     }
 
-    magmablas_zsymv_200_L_update<<<grid, threads_u>>>(
+    magmablas_zsymv_200_L_update<<< grid, threads_u, 0, magma_stream >>>(
         m, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
 }
 

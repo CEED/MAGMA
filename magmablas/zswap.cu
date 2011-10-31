@@ -48,6 +48,6 @@ magmablas_zswap( int n, cuDoubleComplex *dA1T, int lda1,
     int  blocksize = 64;
     dim3 blocks( (n+blocksize-1) / blocksize, 1, 1);
     magmagpu_zswap_params_t params = { dA1T, dA2T, n, lda1, lda2 };
-    magmagpu_zswap<<< blocks, blocksize >>>( params );
+    magmagpu_zswap<<< blocks, blocksize, 0, magma_stream >>>( params );
 }
 

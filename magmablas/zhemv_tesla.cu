@@ -236,10 +236,10 @@ magmablas_zhemv_130( char uplo, magma_int_t n,
         cublasZhemv(uplo, n, alpha, A, lda, X, incx, beta, Y, incy);
     else
     {
-        magmablas_zhemv_130_kernel1 <<< grid1, threads1 >>> 
+        magmablas_zhemv_130_kernel1 <<< grid1, threads1, 0, magma_stream >>> 
             (n, alpha, A, lda, X, incx, beta, Y, incy);
 
-        magmablas_zhemv_130_kernel2 <<< grid2, threads2 >>> 
+        magmablas_zhemv_130_kernel2 <<< grid2, threads2, 0, magma_stream >>> 
             (n, alpha, A, lda, X, incx, beta, Y, incy);
     }
 

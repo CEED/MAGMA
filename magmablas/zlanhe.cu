@@ -641,10 +641,10 @@ Note:
 
     if( m % dgemv_bs == 0 ) {
 	    if( uplo == 'L' || uplo == 'l'){	
-		    l_zlanhe_special <<<grid, threads>>> (m, A, lda, Y);
+		    l_zlanhe_special <<< grid, threads, 0, magma_stream >>> (m, A, lda, Y);
 	    }
             else{
-		    u_zlanhe_special <<<grid, threads>>> (m, A, lda,  Y);
+		    u_zlanhe_special <<< grid, threads, 0, magma_stream >>> (m, A, lda,  Y);
 	    } 
 		
     } 
@@ -652,10 +652,10 @@ Note:
 	    int  m_full_block = (m - m % 32 ) /32 ; 
 	    int  m_mod_32 = m%32 ;  
 	    if( uplo == 'L' || uplo == 'l'){
-		    l_zlanhe_generic <<<grid, threads>>> (m, A, lda, Y , m_full_block , m_mod_32);
+		    l_zlanhe_generic <<< grid, threads, 0, magma_stream >>> (m, A, lda, Y , m_full_block , m_mod_32);
 	    }	
 	    else{
-		    u_zlanhe_generic <<<grid, threads>>> (m, A, lda, Y , m_full_block , m_mod_32);
+		    u_zlanhe_generic <<< grid, threads, 0, magma_stream >>> (m, A, lda, Y , m_full_block , m_mod_32);
 	    }	
     }
 }
@@ -720,10 +720,10 @@ extern "C" void zlanhe_max (char uplo, int m, cuDoubleComplex *A , int lda , dou
     dim3 threads(zlanhe_bs, 1, 1);
 
     if( uplo == 'L' || uplo == 'l'){
-      l_zlanhe_max <<<grid, threads>>> (m, A, lda, y);
+      l_zlanhe_max <<< grid, threads, 0, magma_stream >>> (m, A, lda, y);
     }
     else{
-      u_zlanhe_max <<<grid, threads>>> (m, A, lda, y);
+      u_zlanhe_max <<< grid, threads, 0, magma_stream >>> (m, A, lda, y);
     }
 }
  

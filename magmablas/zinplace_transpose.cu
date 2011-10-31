@@ -110,11 +110,11 @@ magmablas_zinplace_transpose( cuDoubleComplex *A, int lda, int n )
 	if( in&1 )
 	{
 		dim3 grid( in, in/2+1 );
-		zinplace_T_odd<<< grid, threads >>>( A, lda, in/2+1 );
+		zinplace_T_odd<<< grid, threads, 0, magma_stream >>>( A, lda, in/2+1 );
 	}
 	else
 	{
 		dim3 grid( in+1, in/2 );
-		zinplace_T_even<<< grid, threads >>>( A, lda, in/2 );
+		zinplace_T_even<<< grid, threads, 0, magma_stream >>>( A, lda, in/2 );
 	}
 }

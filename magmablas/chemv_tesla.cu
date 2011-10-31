@@ -831,16 +831,16 @@ void magmablas_chemv_130_L(magma_int_t m, cuFloatComplex alpha,
      * otherwise, we call the generic case.
      */
     if(m % chemv_bs == 0 ) {
-        magmablas_chemv_130_L_special <<<grid, threads>>>(
+        magmablas_chemv_130_L_special <<< grid, threads, 0, magma_stream >>>(
             m, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
     }
     else{
         magma_int_t m_mod_thread_x = m%chemv_bs - 1;
-        magmablas_chemv_130_L_generic <<<grid, threads>>> (
+        magmablas_chemv_130_L_generic <<< grid, threads, 0, magma_stream >>> (
             m, alpha, A, lda, X, incx ,beta, Y, incy, dC_work, m_mod_thread_x);
     }
 
-    magmablas_chemv_130_L_update<<<grid, threads_u>>>(
+    magmablas_chemv_130_L_update<<< grid, threads_u, 0, magma_stream >>>(
         m, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
 }
 

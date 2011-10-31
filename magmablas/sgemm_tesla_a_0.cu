@@ -220,7 +220,7 @@ magmablas_sgemm_kernel_a_0(float *C, const float *A, const float *B,
 {
         dim3 threads( 16, 4 );
         dim3 grid(m/64+(m%64!=0),n/16+(n%16!=0));
-        sgemm_kernel_a_0<<< grid, threads >>> (C, A, B, m, n, k, 
+        sgemm_kernel_a_0<<< grid, threads, 0, magma_stream >>> (C, A, B, m, n, k, 
                                                lda , ldb , ldc ,
                                                alpha , beta ) ;
 }
