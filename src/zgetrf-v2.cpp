@@ -144,7 +144,7 @@ magma_zgetrf2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
 	  return rval;
 	}
 	dAT = dA + 2*nb*maxm; 
-	magmablas_zhtodt(a+nb*lda, lda, dAT+nb, ldda, dA, maxm, m, n-nb, nb);
+	magmablas_zsetmatrix_transpose( m, n-nb, a+nb*lda, lda, dAT+nb, ldda, dA, maxm, nb);
 	
         lapackf77_zgetrf( &m, &nb, work, &lda, ipiv, &iinfo);
 
@@ -232,7 +232,7 @@ magma_zgetrf2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
 		       c_one, inAT(s, s),     ldda, 
 		       inAT(s, s)+nb0, ldda);
 	  
-	  magmablas_zdtoht(dAT, ldda, a, lda,  dA, maxm, m, n, nb);
+	  magmablas_zgetmatrix_transpose( m, n, dAT, ldda, a, lda, dA, maxm, nb);
 	} else {
 	  magmablas_ztranspose2( dA, maxm, inAT(0,s), ldda, nb0, m);
           cublasGetMatrix(m, nb0, sizeof(cuDoubleComplex), dA, maxm, a+s*nb*lda, lda);
@@ -246,7 +246,7 @@ magma_zgetrf2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
             *info = iinfo + s*nb;
           magmablas_zpermute_long2( dAT, ldda, ipiv, nb0, s*nb );
 	  
-          magmablas_zdtoht(dAT, ldda, a, lda,  dA, maxm, m, n-nb0, nb);
+	  magmablas_zgetmatrix_transpose( m, n-nb0, dAT, ldda, a, lda, dA, maxm, nb);
 	}
 
         cublasFree(dA);

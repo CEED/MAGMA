@@ -27,9 +27,8 @@ ZSRC  = zauxiliary.cu	\
 	ztranspose.cu 	\
 	ztranspose-v2.cu\
 	zinplace_transpose.cu	\
-        zhtodt.cu       \
-        zdtoht.cu       \
-	\
+	zgetmatrix_transpose.cu	\
+	zsetmatrix_transpose.cu	\
 	zclaswp.cu 	\
         zcaxpycp.cu     \
 	zlag2c.cu       \

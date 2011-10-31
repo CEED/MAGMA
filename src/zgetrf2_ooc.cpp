@@ -174,7 +174,7 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
 		  s = min(max(m-I,0),N)/nb; /* number of small block-columns in this big panel */
 
 		  /* upload the next big panel into GPU, transpose (A->A'), and pivot it */
-		  magmablas_zhtodt(A(0,I), lda, dAT, maxn, dA, maxm, M, N, nb);
+		  magmablas_zsetmatrix_transpose( M, N, A(0,I), lda, dAT, maxn, dA, maxm, nb);
 
 		  /* == --------------------------------------------------------------- == */
 		  /* == loop around the previous big-panels to update the new big-panel == */
@@ -326,7 +326,7 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
 		  } /* end if more row to be factorized */
 		  
 		  /* download the current big panel to CPU */
-		  magmablas_zdtoht(dAT, maxn, A(0,I), lda,  dA, maxm, M, N, nb);
+		  magmablas_zgetmatrix_transpose( M, N, dAT, maxn, A(0,I), lda,  dA, maxm, nb);
 	} /* end of for */
 	
         cublasFree(dA); 

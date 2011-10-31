@@ -35,15 +35,26 @@ void magmablas_ztranspose(        cuDoubleComplex *, magma_int_t,
 void magmablas_ztranspose2(       cuDoubleComplex *, magma_int_t, 
 				  cuDoubleComplex *, magma_int_t, 
 				  magma_int_t, magma_int_t);
-void magmablas_zhtodt(            cuDoubleComplex  *ha, int lda,
-		                  cuDoubleComplex *dat, int ldda,
-		                  cuDoubleComplex  *dB, int lddb,
-                                  int m, int n , int nb);
-void magmablas_zdtoht(            cuDoubleComplex *dat, int ldda,
-				  cuDoubleComplex  *ha, int lda,
-			     	  cuDoubleComplex  *dB, int lddb,
-				  int m, int n , int nb);
-  
+
+void magmablas_zgetmatrix_transpose(  int m, int n,
+                                      cuDoubleComplex *dat, int ldda,
+                                      cuDoubleComplex  *ha, int lda,
+                                      cuDoubleComplex  *dB, int lddb, int nb );
+void magmablas_zgetmatrix_transpose2( int m, int n,
+                                      cuDoubleComplex **dat, int *ldda,
+                                      cuDoubleComplex  *ha,  int  lda,
+                                      cuDoubleComplex **dB,  int  lddb, int nb,
+                                      int num_gpus, cudaStream_t stream[][2] );
+void magmablas_zsetmatrix_transpose(  int m, int n,
+                                      cuDoubleComplex  *ha, int lda, 
+                                      cuDoubleComplex *dat, int ldda,
+                                      cuDoubleComplex  *dB, int lddb, int nb );
+void magmablas_zsetmatrix_transpose2( int m, int n,
+                                      cuDoubleComplex  *ha,  int  lda, 
+                                      cuDoubleComplex **dat, int *ldda,
+                                      cuDoubleComplex **dB,  int  lddb, int nb,
+                                      int num_gpus, cudaStream_t stream[][2] );
+
   /*
    * LAPACK auxiliary functions
    */

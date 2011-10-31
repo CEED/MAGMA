@@ -28,19 +28,6 @@ magmablas_ztranspose2s(cuDoubleComplex *odata, int ldo,
                        cuDoubleComplex *idata, int ldi,
                        int m, int n, cudaStream_t *stream );
 
-extern "C" void
-magmablas_zhtodt2(int num_gpus, cudaStream_t **stream,
-                  cuDoubleComplex  *ha,  int  lda,
-                  cuDoubleComplex **dat, int *ldda,
-                  cuDoubleComplex  **dB, int lddb,
-                  int m, int n , int nb);
-extern "C" void
-magmablas_zdtoht2(int num_gpus, cudaStream_t **stream,
-                  cuDoubleComplex **dat, int *ldda,
-                  cuDoubleComplex  *ha, int lda,
-                  cuDoubleComplex  **dB, int lddb,
-                  int m, int n , int nb);
-
 
 extern "C" magma_int_t
 magma_zgetrf3(magma_int_t num_gpus, 
@@ -201,8 +188,8 @@ magma_zgetrf3(magma_int_t num_gpus,
 	    }
       
 	  /* Read incrementally from 'a' and transpose in d_lAT; d_lA is work space */
-	  magmablas_zhtodt2(num_gpus, (cudaStream_t **)streaml, 
-			    a, lda, d_lAT, ldat_local, d_lA, maxm, m, n, nb);
+	  magmablas_zsetmatrix_transpose2( m, n, a, lda, d_lAT, ldat_local,
+	      d_lA, maxm, nb, num_gpus, streaml );
 	   
 	  /* use 'a' as work space */
 	  /*
@@ -439,8 +426,9 @@ magma_zgetrf3(magma_int_t num_gpus,
 	  printf("\n Performance %f GFlop/s\n", (2./3.*n*n*n /1000000.) / GetTimerValue(start, end));
 
 	  /* save on output */
-	  magmablas_zdtoht2(num_gpus, (cudaStream_t **)streaml,
-			    d_lAT, ldat_local, a, lda,  d_lA, maxm, m, n, nb);
+	  magmablas_zgetmatrix_transpose2( m, n, d_lAT, ldat_local, a, lda,
+	      d_lA, maxm, nb, num_gpus, streaml );
+	  
 	  for( d=0; d<num_gpus; d++ ) 
 	    {
 	      cublasFree(d_lA[d]);

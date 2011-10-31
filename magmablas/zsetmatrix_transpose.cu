@@ -19,7 +19,7 @@ magmablas_ztranspose2s(cuDoubleComplex *odata, int ldo,
 
 
 //
-//	m, n - dimensions in the source (input) matrix.
+//      m, n - dimensions in the source (input) matrix.
 //             This routine copies the ha matrix from the CPU
 //             to dat on the GPU. In addition, the output matrix
 //             is transposed. The routine uses a buffer of size
@@ -27,10 +27,10 @@ magmablas_ztranspose2s(cuDoubleComplex *odata, int ldo,
 //             Note that lda >= m and lddat >= n.
 //
 extern "C" void 
-magmablas_zhtodt(cuDoubleComplex  *ha, int lda, 
-                 cuDoubleComplex *dat, int ldda,
-                 cuDoubleComplex  *dB, int lddb,
-                 int m, int n , int nb)
+magmablas_zsetmatrix_transpose( int m, int n,
+                                cuDoubleComplex  *ha, int lda, 
+                                cuDoubleComplex *dat, int ldda,
+                                cuDoubleComplex  *dB, int lddb, int nb )
 {
     int i = 0, j = 0, ib;
 
@@ -40,7 +40,7 @@ magmablas_zhtodt(cuDoubleComplex  *ha, int lda,
 
     if (lda < m || ldda < n || lddb < m){
         printf("Wrong arguments in zhtodt.\n");
-	return;
+        return;
     }
 
     static cudaStream_t stream[2];
@@ -86,11 +86,11 @@ magmablas_zhtodt(cuDoubleComplex  *ha, int lda,
 //  routine.
 //===========================================================================
 extern "C" void 
-magmablas_zhtodt2(int num_gpus, cudaStream_t stream[][2],
-                  cuDoubleComplex  *ha,  int  lda, 
-                  cuDoubleComplex **dat, int *ldda,
-                  cuDoubleComplex  **dB, int lddb,
-                  int m, int n , int nb)
+magmablas_zsetmatrix_transpose2( int m, int n,
+                                 cuDoubleComplex  *ha,  int  lda, 
+                                 cuDoubleComplex **dat, int *ldda,
+                                 cuDoubleComplex **dB,  int  lddb, int nb,
+                                 int num_gpus, cudaStream_t stream[][2] )
 {
     int i = 0, j[4] = {0, 0, 0, 0}, ib, k = 0;
 
@@ -100,7 +100,7 @@ magmablas_zhtodt2(int num_gpus, cudaStream_t stream[][2],
 
     if (lda < m || lddb < m){
         printf("Wrong arguments in zhtodt2.\n");
-	return;
+        return;
     }
 
     if (n<num_gpus*nb){
