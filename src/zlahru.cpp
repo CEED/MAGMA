@@ -19,7 +19,7 @@
 // === End defining what BLAS to use =======================================
 
 extern "C" magma_int_t
-magma_zlahru(magma_int_t n, magma_int_t k, magma_int_t nb, 
+magma_zlahru(magma_int_t n, magma_int_t ihi, magma_int_t k, magma_int_t nb, 
 	     cuDoubleComplex *a, magma_int_t lda,
              cuDoubleComplex *d_a, cuDoubleComplex *y,
              cuDoubleComplex *v, cuDoubleComplex *d_t, 
@@ -42,6 +42,9 @@ magma_zlahru(magma_int_t n, magma_int_t k, magma_int_t nb,
     =========
     N       (input) INTEGER
             The order of the matrix A.  N >= 0.
+
+    IHI     (input) INTEGER
+            Last row to update. Same as IHI in zgehrd.
 
     K       (input) INTEGER
             Number of rows of the matrix M (see details below)
@@ -103,11 +106,11 @@ magma_zlahru(magma_int_t n, magma_int_t k, magma_int_t nb,
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
-    magma_int_t ldda = n;
-    cuDoubleComplex *v0 = v + n - k;
+    magma_int_t ldda = lda;
+    cuDoubleComplex *v0 = v + ihi - k;
 
     /* V0 = M V */
-    cublasZgemm( MagmaNoTrans, MagmaNoTrans, k, nb, n-k,
+    cublasZgemm( MagmaNoTrans, MagmaNoTrans, k, nb, ihi-k,
                  c_one,  d_a, ldda,
                          v,   ldda,
                  c_zero, v0,  ldda);
@@ -115,31 +118,33 @@ magma_zlahru(magma_int_t n, magma_int_t k, magma_int_t nb,
     /* Update matrix M -= V0 T V' through
        1. d_work = T V'
        2. M -= V0 d_work                  */
-    cublasZgemm( MagmaNoTrans, MagmaConjTrans, nb, n-k, nb,
+    cublasZgemm( MagmaNoTrans, MagmaConjTrans, nb, ihi-k, nb,
                  c_one,  d_t,    nb,
                          v,      ldda,
                  c_zero, d_work, nb);
 
-    cublasZgemm( MagmaNoTrans, MagmaNoTrans, k, n-k, nb,
+    cublasZgemm( MagmaNoTrans, MagmaNoTrans, k, ihi-k, nb,
                  c_neg_one, v0,     ldda,
                             d_work, nb,
                  c_one,     d_a,    ldda);
     cublasGetMatrix(k, nb, sizeof(cuDoubleComplex), d_a, ldda, a, lda);
 
     /* Update G -= Y T -= Y d_work */
-    cublasZgemm( MagmaNoTrans, MagmaNoTrans, n-k, n-k-nb, nb,
+    cublasZgemm( MagmaNoTrans, MagmaNoTrans, ihi-k, ihi-k-nb, nb,
                  c_neg_one, y,                ldda,
                             d_work+nb*nb,     nb,
                  c_one,     d_a   +nb*ldda+k, ldda);
 
-    /* Update G = (I - V T V') G = (I - work' V') G through
-       1. Y = V' G
-       2. G -= work' Y                                      */
-    cublasZgemm( MagmaConjTrans, MagmaNoTrans, nb, n-k-nb, n-k,
+    /* Update G2 = (I - V T V') G2 = (I - work' V') G2 through
+       1. Y = V' G2
+       2. G2 -= work' Y
+       Note that G is A(k:ihi, nb+1:ihi-k)
+       while    G2 is A(k:ihi, nb+1: n -k)   */
+    cublasZgemm( MagmaConjTrans, MagmaNoTrans, nb, n-k-nb, ihi-k,
                  c_one,  v,               ldda,
                          d_a + nb*ldda+k, ldda,
                  c_zero, y,               nb);
-    cublasZgemm( MagmaConjTrans, MagmaNoTrans, n-k, n-k-nb, nb,
+    cublasZgemm( MagmaConjTrans, MagmaNoTrans, ihi-k, n-k-nb, nb,
                  c_neg_one, d_work,        nb,
                             y,             nb,
                  c_one,     d_a+nb*ldda+k, ldda);

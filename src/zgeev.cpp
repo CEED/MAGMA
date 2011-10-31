@@ -119,7 +119,6 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
 
     magma_int_t c__1 = 1;
     magma_int_t c__0 = 0;
-    magma_int_t c_n1 = -1;
     
     magma_int_t a_dim1, a_offset, vl_dim1, vl_offset, vr_dim1, vr_offset, i__1, 
 	    i__2, i__3;
@@ -308,8 +307,8 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
            (RWorkspace: none) */
 	iwrk = itau;
 	i__1 = lwork - iwrk + 1;
-	lapackf77_zhseqr("S", "V", &n, &ilo, &ihi, &a[a_offset], &lda, geev_w_array, &vl[
-		vl_offset], &ldvl, &work[iwrk], &i__1, info);
+	lapackf77_zhseqr("S", "V", &n, &ilo, &ihi, &a[a_offset], &lda, geev_w_array,
+	        &vl[vl_offset], &ldvl, &work[iwrk], &i__1, info);
 
 	if (wantvr) 
 	  {
@@ -386,8 +385,7 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
                          &vl[vl_offset], &ldvl, &ierr);
 
 	/* Normalize left eigenvectors and make largest component real */
-	i__1 = n;
-	for (i__ = 1; i__ <= i__1; ++i__) {
+	for (i__ = 1; i__ <= n; ++i__) {
 	    scl = 1. / cblas_dznrm2(n, &vl[i__ * vl_dim1 + 1], 1);
 	    cblas_zdscal(n, scl, &vl[i__ * vl_dim1 + 1], 1);
 	    i__2 = n;
@@ -425,8 +423,7 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
                          &vr[vr_offset], &ldvr, &ierr);
 
 	/* Normalize right eigenvectors and make largest component real */
-	i__1 = n;
-	for (i__ = 1; i__ <= i__1; ++i__) {
+	for (i__ = 1; i__ <= n; ++i__) {
 	    scl = 1. / cblas_dznrm2(n, &vr[i__ * vr_dim1 + 1], 1);
 	    cblas_zdscal(n, scl, &vr[i__ * vr_dim1 + 1], 1);
 	    i__2 = n;

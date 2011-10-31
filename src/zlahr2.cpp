@@ -133,7 +133,7 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
-    magma_int_t ldda = n;
+    magma_int_t ldda = lda;
     magma_int_t c__1 = 1;
     
     magma_int_t a_dim1, a_offset, t_dim1, t_offset, y_dim1, y_offset, i__2, i__3;

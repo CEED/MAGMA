@@ -390,8 +390,7 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
                          &work[ibal], &n, &vl[vl_offset], &ldvl, &ierr);
 
 	/* Normalize left eigenvectors and make largest component real */
-	i__1 = n;
-	for (i__ = 1; i__ <= i__1; ++i__) {
+	for (i__ = 1; i__ <= n; ++i__) {
 	    if ( WI[i__-1] == 0.) {
 		scl = cblas_dnrm2(n, &vl[i__ * vl_dim1 + 1], 1);
                 scl = 1. / scl;
@@ -433,8 +432,7 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
                          &vr[vr_offset], &ldvr, &ierr);
 
 	/* Normalize right eigenvectors and make largest component real */
-	i__1 = n;
-	for (i__ = 1; i__ <= i__1; ++i__) {
+	for (i__ = 1; i__ <= n; ++i__) {
 	    if (WI[i__-1] == 0.) {
 		scl = 1. / cblas_dnrm2(n, &vr[i__ * vr_dim1 + 1], 1);
 		cblas_dscal(n, (scl), &vr[i__ * vr_dim1 + 1], 1);
