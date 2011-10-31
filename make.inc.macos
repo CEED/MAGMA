@@ -23,10 +23,11 @@
 	ARCHFLAGS = cr
 	RANLIB    = ranlib
 
+	# may need to add -m32 or -m64 to OPTS, FOPTS, NVOPTS to compile 32-bit or 64-bit.
 	OPTS      = -O3 -DADD_
 	FOPTS     = -O3 -DADD_ -x f95-cpp-input
 	NVOPTS    = -DADD_ --compiler-options -fno-strict-aliasing -DUNIX -O3 
-        LDOPTS    = -fPIC
+    LDOPTS    = -fPIC
 
 	LIB       = -framework Accelerate -lcublas -lcudart -lm -lstdc++.6
 
