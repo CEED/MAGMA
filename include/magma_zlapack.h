@@ -212,7 +212,7 @@ void    lapackf77_zgebrd(magma_int_t *m, magma_int_t *n,
 			 cuDoubleComplex *a, magma_int_t *lda, double *d, double *e,
 			 cuDoubleComplex *tauq, cuDoubleComplex *taup, 
 			 cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
-void     lapackf77_zgeev(char *jobl, char *jobr, magma_int_t *n, 
+void     lapackf77_zgeev(const char *jobl, const char *jobr, magma_int_t *n, 
 			 cuDoubleComplex *a, magma_int_t *lda, WSPLIT, 
 			 cuDoubleComplex *vl, magma_int_t *ldvl, 
 			 cuDoubleComplex *vr, magma_int_t *ldvr, 
@@ -261,7 +261,7 @@ void    lapackf77_zheevd(const char *jobz, const char *uplo, magma_int_t *n,
                          cuDoubleComplex *work, magma_int_t *lwork,
 			 DWORKFORZ_AND_LD magma_int_t *iwork, 
 			 magma_int_t *liwork, magma_int_t *info);
-void    lapackf77_zhegs2(int *itype, char *uplo, int *n, 
+void    lapackf77_zhegs2(int *itype, const char *uplo, int *n, 
 			 cuDoubleComplex *a, int *lda, 
 			 cuDoubleComplex *b, int *ldb, int *info);
 void    lapackf77_zhegvd(magma_int_t *itype, const char *jobz, const char *uplo, 
@@ -416,7 +416,7 @@ void    lapackf77_zbdt01(int *m, int *n, int *kd, cuDoubleComplex *A, int *lda,
 			 cuDoubleComplex *Q, int *ldq, double *D, double *E, 
 			 cuDoubleComplex *PT, int *ldpt, cuDoubleComplex *work, 
 			 double *rwork, double *resid);
-void    lapackf77_zget22(char *transa, char *transe, char *transw, int *n,
+void    lapackf77_zget22(const char *transa, const char *transe, const char *transw, int *n,
 			 cuDoubleComplex *a, int *lda, cuDoubleComplex *e, int *lde,
 			 cuDoubleComplex *w, cuDoubleComplex *work,
 			 double *rwork, double *result);
@@ -440,7 +440,7 @@ void    lapackf77_zbdt01(int *m, int *n, int *kd, cuDoubleComplex *A, int *lda,
 			 cuDoubleComplex *Q, int *ldq, double *D, double *E, 
 			 cuDoubleComplex *PT, int *ldpt, 
 			 cuDoubleComplex *work, double *resid);
-void    lapackf77_zget22(char *transa, char *transe, char *transw, int *n,
+void    lapackf77_zget22(const char *transa, const char *transe, const char *transw, int *n,
 			 cuDoubleComplex *a, int *lda, cuDoubleComplex *e, int *lde,
 			 cuDoubleComplex *wr, cuDoubleComplex *wi, 
 			 double *work, double *result);
