@@ -66,7 +66,7 @@ magma_int_t magma_zlahr2( magma_int_t m, magma_int_t n, magma_int_t nb,
 			  cuDoubleComplex *da, cuDoubleComplex *dv, cuDoubleComplex *a, 
 			  magma_int_t lda, cuDoubleComplex *tau, cuDoubleComplex *t, 
 			  magma_int_t ldt, cuDoubleComplex *y, magma_int_t ldy);
-magma_int_t magma_zlahru( magma_int_t m, magma_int_t n, magma_int_t nb, 
+magma_int_t magma_zlahru( magma_int_t n, magma_int_t ihi, magma_int_t k, magma_int_t nb, 
 			  cuDoubleComplex *a, magma_int_t lda, 
 			  cuDoubleComplex *da, cuDoubleComplex *y, 
 			  cuDoubleComplex *v, cuDoubleComplex *t, 
