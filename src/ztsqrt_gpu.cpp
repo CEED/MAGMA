@@ -12,9 +12,9 @@
 
 extern "C" int 
 magma_ztsqrt_gpu(int *m, int *n, 
-		 cuDoubleComplex *a1, cuDoubleComplex *a2, int  *lda,
-		 cuDoubleComplex  *tau, cuDoubleComplex *work, 
-		 int *lwork, cuDoubleComplex *dwork, int *info )
+                 cuDoubleComplex *a1, cuDoubleComplex *a2, int  *lda,
+                 cuDoubleComplex  *tau, cuDoubleComplex *work, 
+                 int *lwork, cuDoubleComplex *dwork, int *info )
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -154,69 +154,69 @@ magma_ztsqrt_gpu(int *m, int *n,
      // Send the next panel (diagonal block of A1 & block column of A2) 
      // to the CPU (in work_a1 and work_a2)
      cudaMemcpy2DAsync(  work_a2, ldwork*sizeof(cuDoubleComplex),
-			 a2_ref(0,i), (*lda)*sizeof(cuDoubleComplex),
-			 sizeof(cuDoubleComplex)*rows, ib,
-			 cudaMemcpyDeviceToHost,stream[1]);
+                         a2_ref(0,i), (*lda)*sizeof(cuDoubleComplex),
+                         sizeof(cuDoubleComplex)*rows, ib,
+                         cudaMemcpyDeviceToHost,stream[1]);
      cudaMemcpy2DAsync(  work_a1, ldwork*sizeof(cuDoubleComplex),
-			 // a1_ref(i,i), (*lda)*sizeof(cuDoubleComplex),
-			 // the diagonal of a1 is in d_ref generated and
-			 // passed from magma_zgeqrf_gpu
-			 d_ref(i), ib*sizeof(cuDoubleComplex),
-			 sizeof(cuDoubleComplex)*ib, ib,
-			 cudaMemcpyDeviceToHost,stream[1]);
+                         // a1_ref(i,i), (*lda)*sizeof(cuDoubleComplex),
+                         // the diagonal of a1 is in d_ref generated and
+                         // passed from magma_zgeqrf_gpu
+                         d_ref(i), ib*sizeof(cuDoubleComplex),
+                         sizeof(cuDoubleComplex)*ib, ib,
+                         cudaMemcpyDeviceToHost,stream[1]);
      
-	if (i>0) {
-	  /* Apply H' to A(i:m,i+2*ib:n) from the left */
-	  // update T2
-	  cols = *n-old_i-2*old_ib;
-	  magma_zssrfb(*m, cols, &old_ib,
-		       a2_ref(    0, old_i), lda, t_ref(old_i), &lddwork,
-		       a1_ref(old_i, old_i+2*old_ib), lda, 
+        if (i>0) {
+          /* Apply H' to A(i:m,i+2*ib:n) from the left */
+          // update T2
+          cols = *n-old_i-2*old_ib;
+          magma_zssrfb(*m, cols, &old_ib,
+                       a2_ref(    0, old_i), lda, t_ref(old_i), &lddwork,
+                       a1_ref(old_i, old_i+2*old_ib), lda, 
                        a2_ref(    0, old_i+2*old_ib), lda,
                        dd_ref(0), &lddwork);
-	}
+        }
 
-	cudaStreamSynchronize(stream[1]);
+        cudaStreamSynchronize(stream[1]);
 
-	// TTT - here goes the CPU PLASMA code
-	//       Matrix T has to be put in hwork with lda = ib and 0s
-	//       in the parts that are not used - copied on GPU in t_ref(i) 
-	
-	// Now diag of A1 is updated, send it back asynchronously to the GPU.
+        // TTT - here goes the CPU PLASMA code
+        //       Matrix T has to be put in hwork with lda = ib and 0s
+        //       in the parts that are not used - copied on GPU in t_ref(i) 
+        
+        // Now diag of A1 is updated, send it back asynchronously to the GPU.
         // We have to play interchaning these copies to see which is faster
-	cudaMemcpy2DAsync(d_ref(i), ib * sizeof(cuDoubleComplex),
-			  work_a1 , ib * sizeof(cuDoubleComplex),
-			  sizeof(cuDoubleComplex)*ib, ib,
-			  cudaMemcpyHostToDevice,stream[0]);
-	// Send the panel from A2 back to the GPU
-	cublasSetMatrix(*m, ib, sizeof(cuDoubleComplex),
-			work_a2, ldwork, a2_ref(0,i), *lda);
+        cudaMemcpy2DAsync(d_ref(i), ib * sizeof(cuDoubleComplex),
+                          work_a1 , ib * sizeof(cuDoubleComplex),
+                          sizeof(cuDoubleComplex)*ib, ib,
+                          cudaMemcpyHostToDevice,stream[0]);
+        // Send the panel from A2 back to the GPU
+        cublasSetMatrix(*m, ib, sizeof(cuDoubleComplex),
+                        work_a2, ldwork, a2_ref(0,i), *lda);
 
-	if (i + ib < *n) {
-	  // Send the triangular factor T from hwork to the GPU in t_ref(i)
-	  cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), hwork, ib, t_ref(i), lddwork);
+        if (i + ib < *n) {
+          // Send the triangular factor T from hwork to the GPU in t_ref(i)
+          cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), hwork, ib, t_ref(i), lddwork);
 
-	  if (i+nb < k){
-	    /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
-	    // if we can do one more step, first update T1
-	    magma_zssrfb(*m, ib, &ib, 
-			 a2_ref(    0, i), lda, t_ref(i), &lddwork,
-			 a1_ref(    i, i+ib), lda,
-			 a2_ref(    0, i+ib), lda,
-			 dd_ref(0), &lddwork);
-	  }
-	  else {
-	    cols = *n-i-ib;
-	    // otherwise, update until the end and fix the panel
-	    magma_zssrfb(*m, cols, &ib, 
-			 a2_ref(    0, i), lda, t_ref(i), &lddwork,
-			 a1_ref(    i, i+ib), lda,
+          if (i+nb < k){
+            /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
+            // if we can do one more step, first update T1
+            magma_zssrfb(*m, ib, &ib, 
+                         a2_ref(    0, i), lda, t_ref(i), &lddwork,
+                         a1_ref(    i, i+ib), lda,
                          a2_ref(    0, i+ib), lda,
                          dd_ref(0), &lddwork);
-	  }
-	  old_i = i;
-	  old_ib = ib;
-	}
+          }
+          else {
+            cols = *n-i-ib;
+            // otherwise, update until the end and fix the panel
+            magma_zssrfb(*m, cols, &ib, 
+                         a2_ref(    0, i), lda, t_ref(i), &lddwork,
+                         a1_ref(    i, i+ib), lda,
+                         a2_ref(    0, i+ib), lda,
+                         dd_ref(0), &lddwork);
+          }
+          old_i = i;
+          old_ib = ib;
+        }
    }  
    
    return 0; 

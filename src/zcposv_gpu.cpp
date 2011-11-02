@@ -270,7 +270,7 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
   L40:
     ret = magma_zpotrf_gpu(uplo, n, dA, ldda, info);
     if( (ret != MAGMA_SUCCESS) || (*info != 0) ){
-	return ret;
+        return ret;
     }
     magmablas_zlacpy( MagmaUpperLower, n, nrhs, dB, lddb, dX, lddx);
     ret = magma_zpotrs_gpu(uplo, n, nrhs, dA, ldda, dX, lddx, info);

@@ -20,7 +20,7 @@
 extern "C" magma_int_t
 magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs, 
                  cuDoubleComplex *dA, magma_int_t ldda,
-		 magma_int_t *ipiv, 
+                 magma_int_t *ipiv, 
                  cuDoubleComplex *dB, magma_int_t lddb, 
                  magma_int_t *info)
 {
@@ -117,7 +117,7 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
     i1 = 1;
     i2 = n;
     if (notran) {
-	inc = 1;
+        inc = 1;
 
         /* Solve A * X = B. */
         cublasGetMatrix( n, nrhs, sizeof(cuDoubleComplex), dB, lddb, work, n);
@@ -132,7 +132,7 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
             cublasZtrsm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb );
         }
     } else {
-	inc = -1;
+        inc = -1;
 
         /* Solve A' * X = B. */
         if ( nrhs == 1) {

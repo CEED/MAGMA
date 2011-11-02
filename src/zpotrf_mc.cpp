@@ -132,9 +132,9 @@ void SCHED_ztrsm(Quark* quark)
 
 extern "C" magma_int_t 
 magma_zpotrf_mc(magma_context *cntxt, char *uplo,
-		magma_int_t *n,
-		cuDoubleComplex *a, magma_int_t *lda,
-		magma_int_t *info)
+                magma_int_t *n,
+                cuDoubleComplex *a, magma_int_t *lda,
+                magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -313,7 +313,7 @@ magma_zpotrf_mc(magma_context *cntxt, char *uplo,
 
         // split gemm into tiles
         for (j = i+nb; j < (*n); j += nb){
-	  jj++;
+          jj++;
           kk = -1;
 
           for (k = 0; k < i; k += nb) {

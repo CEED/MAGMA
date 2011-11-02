@@ -54,18 +54,18 @@ int main( int argc, char** argv)
         for(i = 1; i<argc; i++){
             if (strcmp("-N", argv[i])==0)
                 N = atoi(argv[++i]);
-	    else if (strcmp("-M", argv[i])==0)
-	      M = atoi(argv[++i]);
+            else if (strcmp("-M", argv[i])==0)
+              M = atoi(argv[++i]);
         }
         if (M>0 && N>0)
-	  printf("  testing_zgesvd -M %d -N %d\n\n", M, N);
+          printf("  testing_zgesvd -M %d -N %d\n\n", M, N);
         else
             {
                 printf("\nUsage: \n");
                 printf("  testing_zgesvd -M %d -N %d\n\n", 1024, 1024);
 
-		/* Shutdown */
-		TESTING_CUDA_FINALIZE();
+                /* Shutdown */
+                TESTING_CUDA_FINALIZE();
                 exit(1);
             }
     }
@@ -111,13 +111,13 @@ int main( int argc, char** argv)
         lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &M, h_R, &M );
 
 #if defined(PRECISION_z) || defined(PRECISION_c)
-	magma_zgesvd('A', 'A', M, N,
-		     h_R, M, S1, U, M,
-		     VT, N, h_work, lwork, rwork, &info); 
+        magma_zgesvd('A', 'A', M, N,
+                     h_R, M, S1, U, M,
+                     VT, N, h_work, lwork, rwork, &info); 
 #else
-	magma_zgesvd('A', 'A', M, N,
-		     h_R, M, S1, U, M,
-		     VT, N, h_work, lwork, &info); 
+        magma_zgesvd('A', 'A', M, N,
+                     h_R, M, S1, U, M,
+                     VT, N, h_work, lwork, &info); 
 #endif
         for(j=0; j<n2; j++)
             h_R[j] = h_A[j];
@@ -127,79 +127,79 @@ int main( int argc, char** argv)
            =================================================================== */
         start = get_current_time();
 #if defined(PRECISION_z) || defined(PRECISION_c)
-	magma_zgesvd('A', 'A', M, N,
+        magma_zgesvd('A', 'A', M, N,
                      h_R, M, S1, U, M,
                      VT, N, h_work, lwork, rwork, &info);
 #else
-	magma_zgesvd('A', 'A', M, N,
-		     h_R, M, S1, U, M,
-		     VT, N, h_work, lwork, &info); 
+        magma_zgesvd('A', 'A', M, N,
+                     h_R, M, S1, U, M,
+                     VT, N, h_work, lwork, &info); 
 #endif
         end = get_current_time();
 
         gpu_time = GetTimerValue(start,end)/1000.;
 
-	if ( checkres ) {
-	  /* =====================================================================
-	     Check the results following the LAPACK's [zcds]drvbd routine.
-	     A is factored as A = U diag(S) VT and the following 4 tests computed:
+        if ( checkres ) {
+          /* =====================================================================
+             Check the results following the LAPACK's [zcds]drvbd routine.
+             A is factored as A = U diag(S) VT and the following 4 tests computed:
              (1)    | A - U diag(S) VT | / ( |A| max(M,N) )
              (2)    | I - U'U | / ( M )
              (3)    | I - VT VT' | / ( N )
              (4)    S contains MNMIN nonnegative values in decreasing order.
-	            (Return 0 if true, 1/ULP if false.)
-	     =================================================================== */
-	  magma_int_t izero    = 0;
-	  double *E, result[4], zero = 0., eps = lapackf77_dlamch( "E" );
-	  
+                    (Return 0 if true, 1/ULP if false.)
+             =================================================================== */
+          magma_int_t izero    = 0;
+          double *E, result[4], zero = 0., eps = lapackf77_dlamch( "E" );
+          
           #if defined(PRECISION_z) || defined(PRECISION_c)
-	     lapackf77_zbdt01(&M, &N, &izero, h_A, &M,
-			      U, &M, S1, E, VT, &N, h_work, rwork, &result[0]);
-	     if (M != 0 && N != 0) {
-	       lapackf77_zunt01("Columns",&M,&M, U,&M, h_work,&lwork, rwork, &result[1]);
-	       lapackf77_zunt01(   "Rows",&N,&N,VT,&N, h_work,&lwork, rwork, &result[2]);
-	     }
+             lapackf77_zbdt01(&M, &N, &izero, h_A, &M,
+                              U, &M, S1, E, VT, &N, h_work, rwork, &result[0]);
+             if (M != 0 && N != 0) {
+               lapackf77_zunt01("Columns",&M,&M, U,&M, h_work,&lwork, rwork, &result[1]);
+               lapackf77_zunt01(   "Rows",&N,&N,VT,&N, h_work,&lwork, rwork, &result[2]);
+             }
           #else
              lapackf77_zbdt01(&M, &N, &izero, h_A, &M,
-			      U, &M, S1, E, VT, &N, h_work,        &result[0]);
-	     if (M != 0 && N != 0) {
-	       lapackf77_zunt01("Columns",&M,&M, U,&M, h_work,&lwork,        &result[1]);
-	       lapackf77_zunt01(   "Rows",&N,&N,VT,&N, h_work,&lwork,        &result[2]);
-	     }
+                              U, &M, S1, E, VT, &N, h_work,        &result[0]);
+             if (M != 0 && N != 0) {
+               lapackf77_zunt01("Columns",&M,&M, U,&M, h_work,&lwork,        &result[1]);
+               lapackf77_zunt01(   "Rows",&N,&N,VT,&N, h_work,&lwork,        &result[2]);
+             }
           #endif
-	  
-	  result[3] = zero;
-	  for(int j=0; j< min_mn-1; j++){
-	    if ( S1[j] < S1[j+1] )
-	      result[3] = 1./eps;
-	    if ( S1[j] < zero )
-	      result[3] = 1./eps;
-	  }
+          
+          result[3] = zero;
+          for(int j=0; j< min_mn-1; j++){
+            if ( S1[j] < S1[j+1] )
+              result[3] = 1./eps;
+            if ( S1[j] < zero )
+              result[3] = 1./eps;
+          }
 
-	  if ( min_mn > 1)
-	    if (S1[min_mn-1] < zero)
-	      result[3] = 1./eps;
+          if ( min_mn > 1)
+            if (S1[min_mn-1] < zero)
+              result[3] = 1./eps;
 
-	  printf("\n SVD test A = U diag(S) VT for M = %d N = %d:\n", M, N);
-	  printf("(1)    | A - U diag(S) VT | / (|A| max(M,N)) = %e\n", result[0]*eps);
-	  printf("(2)    | I -   U'U  | /  M                   = %e\n", result[1]*eps);
-	  printf("(3)    | I - VT VT' | /  N                   = %e\n", result[2]*eps);
-	  printf("(4)    0 if S contains MNMIN nonnegative \n");
-	  printf("         values in decreasing order          = %e\n", result[3]);
-	}
+          printf("\n SVD test A = U diag(S) VT for M = %d N = %d:\n", M, N);
+          printf("(1)    | A - U diag(S) VT | / (|A| max(M,N)) = %e\n", result[0]*eps);
+          printf("(2)    | I -   U'U  | /  M                   = %e\n", result[1]*eps);
+          printf("(3)    | I - VT VT' | /  N                   = %e\n", result[2]*eps);
+          printf("(4)    0 if S contains MNMIN nonnegative \n");
+          printf("         values in decreasing order          = %e\n", result[3]);
+        }
 
         /* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
 #if defined(PRECISION_z) || defined(PRECISION_c)
-	lapackf77_zgesvd("A", "A", &M, &N,
-			 h_A, &M, S2, U, &M,
-			 VT, &N, h_work, &lwork, rwork, &info);
+        lapackf77_zgesvd("A", "A", &M, &N,
+                         h_A, &M, S2, U, &M,
+                         VT, &N, h_work, &lwork, rwork, &info);
 #else
-	lapackf77_zgesvd("A", "A", &M, &N,
-			 h_A, &M, S2, U, &M,
-			 VT, &N, h_work, &lwork, &info);
+        lapackf77_zgesvd("A", "A", &M, &N,
+                         h_A, &M, S2, U, &M,
+                         VT, &N, h_work, &lwork, &info);
 #endif
         end = get_current_time();
         if (info < 0)

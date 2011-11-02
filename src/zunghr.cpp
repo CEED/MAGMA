@@ -12,10 +12,10 @@
 
 extern "C" magma_int_t
 magma_zunghr(magma_int_t n, magma_int_t ilo, magma_int_t ihi, 
-	     cuDoubleComplex *a, magma_int_t lda, 
-	     cuDoubleComplex *tau,
-	     cuDoubleComplex *dT, magma_int_t nb,
-	     magma_int_t *info)
+             cuDoubleComplex *a, magma_int_t lda, 
+             cuDoubleComplex *tau,
+             cuDoubleComplex *dT, magma_int_t nb,
+             magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -83,7 +83,7 @@ magma_zunghr(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     else if (ihi < min(ilo,n) || ihi > n) 
       *info = -3;
     else if (lda < max(1,n)) 
-	*info = -5;
+        *info = -5;
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
@@ -99,32 +99,32 @@ magma_zunghr(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
        rows and columns to those of the unit matrix */
     for (j = ihi-1; j >= ilo; --j) {
       for (i = 0; i < j; ++i)
-	*a_ref(i, j) = MAGMA_Z_ZERO;
-	
+        *a_ref(i, j) = MAGMA_Z_ZERO;
+        
       for (i = j+1; i < ihi; ++i)
-	*a_ref(i, j) = *a_ref(i, j - 1);
-	
+        *a_ref(i, j) = *a_ref(i, j - 1);
+        
       for (i = ihi; i < n; ++i)
-	*a_ref(i, j) = MAGMA_Z_ZERO;
+        *a_ref(i, j) = MAGMA_Z_ZERO;
     }
     for (j = 0; j < ilo; ++j) {
       for (i = 0; i < n; ++i)
-	*a_ref(i, j) = MAGMA_Z_ZERO;
-	
+        *a_ref(i, j) = MAGMA_Z_ZERO;
+        
       *a_ref(j, j) = MAGMA_Z_ONE;
     }
     for (j = ihi; j < n; ++j) {
       for (i = 0; i < n; ++i)
-	*a_ref(i, j) = MAGMA_Z_ZERO; 
-	
+        *a_ref(i, j) = MAGMA_Z_ZERO; 
+        
       *a_ref(j, j) = MAGMA_Z_ONE;
     }
 
     if (nh > 0)
       /* Generate Q(ilo+1:ihi,ilo+1:ihi) */
       magma_zungqr(nh, nh, nh,
-		   a_ref(ilo, ilo), lda,
-		   tau+ilo-1, dT, nb, &iinfo);
+                   a_ref(ilo, ilo), lda,
+                   tau+ilo-1, dT, nb, &iinfo);
 
     return MAGMA_SUCCESS;
 } /* magma_zunghr */

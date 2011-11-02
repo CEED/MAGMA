@@ -12,9 +12,9 @@
 
 extern "C" magma_int_t
 magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
-		   cuDoubleComplex *dA, magma_int_t ldda,
-		   cuDoubleComplex *tau, 
-		   magma_int_t *info )
+                   cuDoubleComplex *dA, magma_int_t ldda,
+                   cuDoubleComplex *tau, 
+                   magma_int_t *info )
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -109,13 +109,13 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
     lhwork = lwork - (m)*nb;
 
     if ( CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*nb, sizeof(cuDoubleComplex), (void**)&dwork) ) {
-	*info = -9;
+        *info = -9;
         return MAGMA_ERR_CUBLASALLOC;
     }
 
     if ( cudaSuccess != cudaMallocHost( (void**)&work, lwork*sizeof(cuDoubleComplex)) ) {
-      	*info = -9;
-	cublasFree( dwork );
+              *info = -9;
+        cublasFree( dwork );
         return MAGMA_ERR_HOSTALLOC;
     }
 
@@ -141,10 +141,10 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
             if (i>0){
                 /* Apply H' to A(i:m,i+2*ib:n) from the left */
                 magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-				  m-old_i, n-old_i-2*old_ib, old_ib,
-				  dA(old_i, old_i         ), ldda, dwork,        lddwork,
-				  dA(old_i, old_i+2*old_ib), ldda, dwork+old_ib, lddwork);
-		
+                                  m-old_i, n-old_i-2*old_ib, old_ib,
+                                  dA(old_i, old_i         ), ldda, dwork,        lddwork,
+                                  dA(old_i, old_i+2*old_ib), ldda, dwork+old_ib, lddwork);
+                
                 cudaMemcpy2DAsync( dA(old_i, old_i), ldda  *sizeof(cuDoubleComplex),
                                    work_ref(old_i),  ldwork*sizeof(cuDoubleComplex),
                                    sizeof(cuDoubleComplex)*old_ib, old_ib,
@@ -173,14 +173,14 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
                 if (i+nb < k-nx)
                     /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-				      rows, ib, ib, 
-				      dA(i, i   ), ldda, dwork,    lddwork, 
-				      dA(i, i+ib), ldda, dwork+ib, lddwork);
+                                      rows, ib, ib, 
+                                      dA(i, i   ), ldda, dwork,    lddwork, 
+                                      dA(i, i+ib), ldda, dwork+ib, lddwork);
                 else {
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-				      rows, n-i-ib, ib, 
-				      dA(i, i   ), ldda, dwork,    lddwork, 
-				      dA(i, i+ib), ldda, dwork+ib, lddwork);
+                                      rows, n-i-ib, ib, 
+                                      dA(i, i   ), ldda, dwork,    lddwork, 
+                                      dA(i, i+ib), ldda, dwork+ib, lddwork);
                     cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex),
                                     work_ref(i), ldwork,
                                     dA(i,i),     ldda);

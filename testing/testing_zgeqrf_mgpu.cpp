@@ -71,22 +71,22 @@ int main( int argc, char** argv)
                 N = atoi(argv[++i]);
             else if (strcmp("-M", argv[i])==0)
                 M = atoi(argv[++i]);
-	    else if (strcmp("-NGPU", argv[i])==0)
-	      num_gpus = atoi(argv[++i]);
+            else if (strcmp("-NGPU", argv[i])==0)
+              num_gpus = atoi(argv[++i]);
         }
         if ( M == 0 ) {
-	    M = N;
-	}
-	if ( N == 0 ) {
-	    N = M;
-	}
+            M = N;
+        }
+        if ( N == 0 ) {
+            N = M;
+        }
         if (M>0 && N>0)
-	  printf("  testing_zgeqrf_gpu -M %d -N %d -NGPU %d\n\n", M, N, num_gpus);
+          printf("  testing_zgeqrf_gpu -M %d -N %d -NGPU %d\n\n", M, N, num_gpus);
         else
             {
                 printf("\nUsage: \n");
                 printf("  testing_zgeqrf_gpu -M %d -N %d -NGPU %d\n\n", 
-		       1024, 1024, 1);
+                       1024, 1024, 1);
                 exit(1);
             }
     }
@@ -117,9 +117,9 @@ int main( int argc, char** argv)
     for(i=0; i<num_gpus; i++){      
       n_local[i] = ((N/nb)/num_gpus)*nb;
       if (i < (N/nb)%num_gpus)
-	n_local[i] += nb;
+        n_local[i] += nb;
       else if (i == (N/nb)%num_gpus)
-	n_local[i] += N%nb;
+        n_local[i] += N%nb;
       
       #ifdef  MultiGPUs
          cudaSetDevice(i);
@@ -140,19 +140,19 @@ int main( int argc, char** argv)
     printf("==========================================================\n");
     for(i=0; i<10; i++){
         if (argc == 1){
-	    M = N = size[i];
+            M = N = size[i];
         }
-	min_mn= min(M, N);
-	lda   = M;
-	n2    = lda*N;
-	ldda  = ((M+31)/32)*32;
-	flops = FLOPS( (double)M, (double)N ) / 1000000;
+        min_mn= min(M, N);
+        lda   = M;
+        n2    = lda*N;
+        ldda  = ((M+31)/32)*32;
+        flops = FLOPS( (double)M, (double)N ) / 1000000;
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-	lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
+        lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
 
-	/* =====================================================================
+        /* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
@@ -166,49 +166,49 @@ int main( int argc, char** argv)
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-	for(int j=0; j<N; j+=nb){
-	  k = (j/nb)%num_gpus;
-	  #ifdef  MultiGPUs
-             cudaSetDevice(k);
-	  #endif
-	  nk = min(nb, N-j);
-          cublasSetMatrix( M, nk, sizeof(cuDoubleComplex), h_R+j*lda, lda, 
-			   d_lA[k]+j/(nb*num_gpus)*nb*ldda, ldda);
-        }
-	cudaSetDevice(0);
-	
-	start = get_current_time();
-        magma_zgeqrf2_mgpu( num_gpus, M, N, d_lA, ldda, tau, &info);
-	end = get_current_time();
-
-	if (info < 0)
-	  printf("Argument %d of magma_zgeqrf2 had an illegal value.\n", -info);
-	
-	gpu_perf = flops / GetTimerValue(start, end);
-        
-        /* =====================================================================
-           Check the result compared to LAPACK
-           =================================================================== */
-	for(int j=0; j<N; j+=nb){
+        for(int j=0; j<N; j+=nb){
           k = (j/nb)%num_gpus;
           #ifdef  MultiGPUs
              cudaSetDevice(k);
           #endif
           nk = min(nb, N-j);
-	  cublasGetMatrix( M, nk, sizeof(cuDoubleComplex), 
-			   d_lA[k]+j/(nb*num_gpus)*nb*ldda, ldda,
-			   h_R+j*lda, lda);
+          cublasSetMatrix( M, nk, sizeof(cuDoubleComplex), h_R+j*lda, lda, 
+                           d_lA[k]+j/(nb*num_gpus)*nb*ldda, ldda);
         }
-	
+        cudaSetDevice(0);
+        
+        start = get_current_time();
+        magma_zgeqrf2_mgpu( num_gpus, M, N, d_lA, ldda, tau, &info);
+        end = get_current_time();
+
+        if (info < 0)
+          printf("Argument %d of magma_zgeqrf2 had an illegal value.\n", -info);
+        
+        gpu_perf = flops / GetTimerValue(start, end);
+        
+        /* =====================================================================
+           Check the result compared to LAPACK
+           =================================================================== */
+        for(int j=0; j<N; j+=nb){
+          k = (j/nb)%num_gpus;
+          #ifdef  MultiGPUs
+             cudaSetDevice(k);
+          #endif
+          nk = min(nb, N-j);
+          cublasGetMatrix( M, nk, sizeof(cuDoubleComplex), 
+                           d_lA[k]+j/(nb*num_gpus)*nb*ldda, ldda,
+                           h_R+j*lda, lda);
+        }
+        
         matnorm = lapackf77_zlange("f", &M, &N, h_A, &M, work);
         blasf77_zaxpy(&n2, &mzone, h_A, &ione, h_R, &ione);
-	
+        
         printf("%5d %5d  %6.2f         %6.2f        %e\n",
                M, N, cpu_perf, gpu_perf,
                lapackf77_zlange("f", &M, &N, h_R, &M, work) / matnorm);
-	
+        
         if (argc != 1)
-	  break;
+          break;
     }
     
     /* Memory clean up */

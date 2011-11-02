@@ -25,7 +25,7 @@ static void SCHED_zgemm(Quark* quark)
 
   cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
   cuDoubleComplex one = MAGMA_Z_ONE;
-	
+        
   quark_unpack_args_7(quark, M, N, K, A1, LDA, A2, A3);
 
   blasf77_zgemm("n", "n", 
@@ -50,7 +50,7 @@ static void SCHED_panel_update(Quark* quark)
   int ione=1;
   cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
   cuDoubleComplex one = MAGMA_Z_ONE;
-	
+        
   quark_unpack_args_10(quark, N, A1, LDA, K2, IPIV, A2, M, K, A3, A4);
 
   lapackf77_zlaswp(&N, A1, &LDA, &ione, &K2, IPIV, &ione); 
@@ -109,9 +109,9 @@ void SCHED_zlaswp(Quark* quark)
 
 extern "C" magma_int_t 
 magma_zgetrf_mc(magma_context *cntxt,
-		int *m, int *n,
-		cuDoubleComplex *a, int *lda,
-		int *ipiv, int *info)
+                int *m, int *n,
+                cuDoubleComplex *a, int *lda,
+                int *ipiv, int *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -166,8 +166,8 @@ magma_zgetrf_mc(magma_context *cntxt,
 
     if (cntxt->num_cores == 1 && cntxt->num_gpus == 1)
       {
-	int result = magma_zgetrf(*m, *n, a, *lda, ipiv, info);
-	return result;
+        int result = magma_zgetrf(*m, *n, a, *lda, ipiv, info);
+        return result;
       }
     
     int EN_BEE   = cntxt->nb;
@@ -216,94 +216,94 @@ magma_zgetrf_mc(magma_context *cntxt,
     /* Loop across diagonal blocks */
     for (i = 0; i < k; i += nb) 
       {
-	ii++;
+        ii++;
 
-	jj = -1;
+        jj = -1;
 
-	priority = 10000 - ii;
+        priority = 10000 - ii;
 
-	/* Update panels in left looking fashion */
-	for (j = 0; j < i; j += nb) 
-	  { 
-	    jj++;
+        /* Update panels in left looking fashion */
+        for (j = 0; j < i; j += nb) 
+          { 
+            jj++;
 
-	    NN=min(nb,(*n)-i);
-	    MM=min(nb,(*m)-j);
+            NN=min(nb,(*n)-i);
+            MM=min(nb,(*m)-j);
 
-	    l = j + nb;
+            l = j + nb;
 
-	    MMM = min(nb,(*m)-l);
+            MMM = min(nb,(*m)-l);
 
-	    sprintf(label, "UPDATE %d %d", ii, jj);
-	    
-	    QUARK_Insert_Task(quark, SCHED_panel_update, 0,
-			      sizeof(int),             &NN,      VALUE,
-			      sizeof(cuDoubleComplex)*(*m)*(*n), A(j,i),   INOUT,
-			      sizeof(int),             lda,        VALUE,
-			      sizeof(int),             &MM,      VALUE,
-			      sizeof(cuDoubleComplex)*nb,        &ipiv[j], INPUT,
-			      sizeof(cuDoubleComplex)*(*m)*(*n), A(j,j),   INPUT,
-			      sizeof(int),             &MMM,     VALUE,
-			      sizeof(int),             &nb,      VALUE,
-			      sizeof(cuDoubleComplex)*(*m)*(*n), A(l,j),   INPUT,
-			      sizeof(cuDoubleComplex)*(*m)*(*n), A(l,i),   INOUT,
-			      sizeof(int),             &priority,VALUE | TASK_PRIORITY,
-			      sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   OUTPUT,
-			      strlen(label)+1,         label,    VALUE | TASKLABEL,
-			      5,                       "cyan",   VALUE | TASKCOLOR,
-			      0);
-	    
-	    ll = jj + 1;
-	    
-	    /* Split gemm into tiles */
-	    for (l = j + (2*nb); l < (*m); l += nb) 
-	      {
-		ll++;
-		
-		MMM = min(nb,(*m)-l);
-		
-		fakedep = (void *)(intptr_t)(j+1);
-		
-		sprintf(label, "GEMM %d %d %d", ii, jj, ll);
-		
-		QUARK_Insert_Task(quark, SCHED_zgemm, 0,
-				  sizeof(int),             &MMM,     VALUE,
-				  sizeof(int),             &NN,      VALUE,
-				  sizeof(int),             &nb,      VALUE,
-				  sizeof(cuDoubleComplex)*(*m)*(*n), A(l,j),   INPUT,
-				  sizeof(int),             lda,        VALUE,
-				  sizeof(cuDoubleComplex)*(*m)*(*n), A(j,i),   INPUT,
-				  sizeof(cuDoubleComplex)*(*m)*(*n), A(l,i),   INOUT,
-				  sizeof(int),             &priority,VALUE | TASK_PRIORITY,
-				  sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   OUTPUT | GATHERV,
-				  sizeof(void*),           fakedep,  OUTPUT | GATHERV,
-				  strlen(label)+1,         label,    VALUE | TASKLABEL,
-				  5,                       "blue",   VALUE | TASKCOLOR,
-				  0);
-		
-	      }  
-	    
-	  }
-	
-	M=(*m)-i;
-	N=min(nb,(*n)-i);
-	
-	iinfo[0] = i;
-	
-	sprintf(label, "GETRF %d", ii);
-	
-	QUARK_Insert_Task(quark, SCHED_zgetrf, 0,
-			  sizeof(int),             &M,       VALUE,
-			  sizeof(int),             &N,       VALUE,
-			  sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   INOUT,
-			  sizeof(int),             lda,        VALUE,
-			  sizeof(cuDoubleComplex)*nb,        &ipiv[i], OUTPUT,
-			  sizeof(int),             iinfo,    OUTPUT,
-			  sizeof(int),             &priority,VALUE | TASK_PRIORITY,
-			  strlen(label)+1,         label,    VALUE | TASKLABEL,
-			  6,                       "green",  VALUE | TASKCOLOR,
-			  0);
-	
+            sprintf(label, "UPDATE %d %d", ii, jj);
+            
+            QUARK_Insert_Task(quark, SCHED_panel_update, 0,
+                              sizeof(int),             &NN,      VALUE,
+                              sizeof(cuDoubleComplex)*(*m)*(*n), A(j,i),   INOUT,
+                              sizeof(int),             lda,        VALUE,
+                              sizeof(int),             &MM,      VALUE,
+                              sizeof(cuDoubleComplex)*nb,        &ipiv[j], INPUT,
+                              sizeof(cuDoubleComplex)*(*m)*(*n), A(j,j),   INPUT,
+                              sizeof(int),             &MMM,     VALUE,
+                              sizeof(int),             &nb,      VALUE,
+                              sizeof(cuDoubleComplex)*(*m)*(*n), A(l,j),   INPUT,
+                              sizeof(cuDoubleComplex)*(*m)*(*n), A(l,i),   INOUT,
+                              sizeof(int),             &priority,VALUE | TASK_PRIORITY,
+                              sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   OUTPUT,
+                              strlen(label)+1,         label,    VALUE | TASKLABEL,
+                              5,                       "cyan",   VALUE | TASKCOLOR,
+                              0);
+            
+            ll = jj + 1;
+            
+            /* Split gemm into tiles */
+            for (l = j + (2*nb); l < (*m); l += nb) 
+              {
+                ll++;
+                
+                MMM = min(nb,(*m)-l);
+                
+                fakedep = (void *)(intptr_t)(j+1);
+                
+                sprintf(label, "GEMM %d %d %d", ii, jj, ll);
+                
+                QUARK_Insert_Task(quark, SCHED_zgemm, 0,
+                                  sizeof(int),             &MMM,     VALUE,
+                                  sizeof(int),             &NN,      VALUE,
+                                  sizeof(int),             &nb,      VALUE,
+                                  sizeof(cuDoubleComplex)*(*m)*(*n), A(l,j),   INPUT,
+                                  sizeof(int),             lda,        VALUE,
+                                  sizeof(cuDoubleComplex)*(*m)*(*n), A(j,i),   INPUT,
+                                  sizeof(cuDoubleComplex)*(*m)*(*n), A(l,i),   INOUT,
+                                  sizeof(int),             &priority,VALUE | TASK_PRIORITY,
+                                  sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   OUTPUT | GATHERV,
+                                  sizeof(void*),           fakedep,  OUTPUT | GATHERV,
+                                  strlen(label)+1,         label,    VALUE | TASKLABEL,
+                                  5,                       "blue",   VALUE | TASKCOLOR,
+                                  0);
+                
+              }  
+            
+          }
+        
+        M=(*m)-i;
+        N=min(nb,(*n)-i);
+        
+        iinfo[0] = i;
+        
+        sprintf(label, "GETRF %d", ii);
+        
+        QUARK_Insert_Task(quark, SCHED_zgetrf, 0,
+                          sizeof(int),             &M,       VALUE,
+                          sizeof(int),             &N,       VALUE,
+                          sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   INOUT,
+                          sizeof(int),             lda,        VALUE,
+                          sizeof(cuDoubleComplex)*nb,        &ipiv[i], OUTPUT,
+                          sizeof(int),             iinfo,    OUTPUT,
+                          sizeof(int),             &priority,VALUE | TASK_PRIORITY,
+                          strlen(label)+1,         label,    VALUE | TASKLABEL,
+                          6,                       "green",  VALUE | TASKCOLOR,
+                          0);
+        
       }
     
     K = (*m)/nb;
@@ -321,73 +321,73 @@ magma_zgetrf_mc(magma_context *cntxt,
     /* If n > m */
     for (i = K; i < (*n); i += nb) 
       {
-	ii++;
-	
-	jj = -1;
-	
-	/* Update remaining panels in left looking fashion */
-	for (j = 0; j < (*m); j += nb) 
-	  { 
-	    jj++;
+        ii++;
+        
+        jj = -1;
+        
+        /* Update remaining panels in left looking fashion */
+        for (j = 0; j < (*m); j += nb) 
+          { 
+            jj++;
 
-	    NN=min(nb,(*n)-i);
-	    MM=min(nb,(*m)-j);
-	    
-	    l = j + nb;
-	    
-	    MMM = min(nb,(*m)-l);
-	    
-	    sprintf(label, "UPDATE %d %d", ii, jj);
-	    
-	    QUARK_Insert_Task(quark, SCHED_panel_update, 0,
-			      sizeof(int),             &NN,      VALUE,
-			      sizeof(cuDoubleComplex)*(*m)*(*n), A(j,i),   INOUT,
-			      sizeof(int),             lda,        VALUE,
-			      sizeof(int),             &MM,      VALUE,
-			      sizeof(cuDoubleComplex)*nb,        &ipiv[j], INPUT,
-			      sizeof(cuDoubleComplex)*(*m)*(*n), A(j,j),   INPUT,
-			      sizeof(int),             &MMM,     VALUE,
-			      sizeof(int),             &nb,      VALUE,
-			      sizeof(cuDoubleComplex)*(*m)*(*n), A(l,j),   INPUT,
-			      sizeof(cuDoubleComplex)*(*m)*(*n), A(l,i),   INOUT,
-			      sizeof(int),             &priority,VALUE | TASK_PRIORITY,
-			      sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   OUTPUT,
-			      strlen(label)+1,         label,    VALUE | TASKLABEL,
-			      5,                       "cyan",   VALUE | TASKCOLOR,
-			      0);
-	    
-	    ll = jj + 1;
-	    
-	    /* Split gemm into tiles */
-	    for (l = j + (2*nb); l < (*m); l += nb) {
-	      
-	      ll++;
-	      
-	      MMM = min(nb,(*m)-l);
-	      
-	      fakedep = (void *)(intptr_t)(j+1);
-	      
-	      sprintf(label, "GEMM %d %d %d", ii, jj, ll);
-	      
-	      QUARK_Insert_Task(quark, SCHED_zgemm, 0,
-				sizeof(int),             &MMM,     VALUE,
-				sizeof(int),             &NN,      VALUE,
-				sizeof(int),             &nb,      VALUE,
-				sizeof(cuDoubleComplex)*(*m)*(*n), A(l,j),   INPUT,
-				sizeof(int),             lda,        VALUE,
-				sizeof(cuDoubleComplex)*(*m)*(*n), A(j,i),   INPUT,
-				sizeof(cuDoubleComplex)*(*m)*(*n), A(l,i),   INOUT,
-				sizeof(int),             &priority,VALUE | TASK_PRIORITY,
-				sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   OUTPUT | GATHERV,
-				sizeof(void*),           fakedep,  OUTPUT | GATHERV,
-				strlen(label)+1,         label,    VALUE | TASKLABEL,
-				5,                       "blue",   VALUE | TASKCOLOR,
-				0);
-	      
-	    }
-	    
-	  }
-	
+            NN=min(nb,(*n)-i);
+            MM=min(nb,(*m)-j);
+            
+            l = j + nb;
+            
+            MMM = min(nb,(*m)-l);
+            
+            sprintf(label, "UPDATE %d %d", ii, jj);
+            
+            QUARK_Insert_Task(quark, SCHED_panel_update, 0,
+                              sizeof(int),             &NN,      VALUE,
+                              sizeof(cuDoubleComplex)*(*m)*(*n), A(j,i),   INOUT,
+                              sizeof(int),             lda,        VALUE,
+                              sizeof(int),             &MM,      VALUE,
+                              sizeof(cuDoubleComplex)*nb,        &ipiv[j], INPUT,
+                              sizeof(cuDoubleComplex)*(*m)*(*n), A(j,j),   INPUT,
+                              sizeof(int),             &MMM,     VALUE,
+                              sizeof(int),             &nb,      VALUE,
+                              sizeof(cuDoubleComplex)*(*m)*(*n), A(l,j),   INPUT,
+                              sizeof(cuDoubleComplex)*(*m)*(*n), A(l,i),   INOUT,
+                              sizeof(int),             &priority,VALUE | TASK_PRIORITY,
+                              sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   OUTPUT,
+                              strlen(label)+1,         label,    VALUE | TASKLABEL,
+                              5,                       "cyan",   VALUE | TASKCOLOR,
+                              0);
+            
+            ll = jj + 1;
+            
+            /* Split gemm into tiles */
+            for (l = j + (2*nb); l < (*m); l += nb) {
+              
+              ll++;
+              
+              MMM = min(nb,(*m)-l);
+              
+              fakedep = (void *)(intptr_t)(j+1);
+              
+              sprintf(label, "GEMM %d %d %d", ii, jj, ll);
+              
+              QUARK_Insert_Task(quark, SCHED_zgemm, 0,
+                                sizeof(int),             &MMM,     VALUE,
+                                sizeof(int),             &NN,      VALUE,
+                                sizeof(int),             &nb,      VALUE,
+                                sizeof(cuDoubleComplex)*(*m)*(*n), A(l,j),   INPUT,
+                                sizeof(int),             lda,        VALUE,
+                                sizeof(cuDoubleComplex)*(*m)*(*n), A(j,i),   INPUT,
+                                sizeof(cuDoubleComplex)*(*m)*(*n), A(l,i),   INOUT,
+                                sizeof(int),             &priority,VALUE | TASK_PRIORITY,
+                                sizeof(cuDoubleComplex)*(*m)*(*n), A(i,i),   OUTPUT | GATHERV,
+                                sizeof(void*),           fakedep,  OUTPUT | GATHERV,
+                                strlen(label)+1,         label,    VALUE | TASKLABEL,
+                                5,                       "blue",   VALUE | TASKCOLOR,
+                                0);
+              
+            }
+            
+          }
+        
       }
     
     ii = -1;
@@ -403,26 +403,26 @@ magma_zgetrf_mc(magma_context *cntxt,
       MM = min(MM,(*n)-i);
       
       for (j = 0; j < i; j += nb) {
-	
-	jj++;
-	
-	fakedep = (void *)(intptr_t)(j+1);
-	
-	sprintf(label, "LASWPF %d %d", ii, jj);
-	
-	QUARK_Insert_Task(quark, SCHED_zlaswp, 0,
-			  sizeof(int),             &nb,       VALUE,
-			  sizeof(cuDoubleComplex)*(*m)*(*n), A(i,j),    INOUT,
-			  sizeof(int),             lda,         VALUE,
-			  sizeof(int),             &MM,       VALUE,
-			  sizeof(cuDoubleComplex)*nb,        &ipiv[i],  INPUT,
-			  sizeof(int),             &priority, VALUE | TASK_PRIORITY,
-			  sizeof(void*),           fakedep,   INPUT,
-			  sizeof(cuDoubleComplex)*(*m)*(*n), A(i+nb,j), OUTPUT,
-			  strlen(label)+1,         label,     VALUE | TASKLABEL,
-			  7,                       "purple",  VALUE | TASKCOLOR,
-			  0);
-	
+        
+        jj++;
+        
+        fakedep = (void *)(intptr_t)(j+1);
+        
+        sprintf(label, "LASWPF %d %d", ii, jj);
+        
+        QUARK_Insert_Task(quark, SCHED_zlaswp, 0,
+                          sizeof(int),             &nb,       VALUE,
+                          sizeof(cuDoubleComplex)*(*m)*(*n), A(i,j),    INOUT,
+                          sizeof(int),             lda,         VALUE,
+                          sizeof(int),             &MM,       VALUE,
+                          sizeof(cuDoubleComplex)*nb,        &ipiv[i],  INPUT,
+                          sizeof(int),             &priority, VALUE | TASK_PRIORITY,
+                          sizeof(void*),           fakedep,   INPUT,
+                          sizeof(cuDoubleComplex)*(*m)*(*n), A(i+nb,j), OUTPUT,
+                          strlen(label)+1,         label,     VALUE | TASKLABEL,
+                          7,                       "purple",  VALUE | TASKCOLOR,
+                          0);
+        
       }
       
     }
@@ -436,7 +436,7 @@ magma_zgetrf_mc(magma_context *cntxt,
     for (i = 0; i < k; i +=nb) {
       ii++;
       for (j = 0; j < min(nb,(k-i)); j++) {
-	ipiv[ii*nb+j] += ii*nb;
+        ipiv[ii*nb+j] += ii*nb;
       } 
     } 
     

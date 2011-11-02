@@ -12,8 +12,8 @@
 
 extern "C" magma_int_t
 magma_zgelqf_gpu( magma_int_t m, magma_int_t n, 
-		  cuDoubleComplex *dA,    magma_int_t lda,   cuDoubleComplex *tau, 
-		  cuDoubleComplex *work, magma_int_t lwork, magma_int_t *info)
+                  cuDoubleComplex *dA,    magma_int_t lda,   cuDoubleComplex *tau, 
+                  cuDoubleComplex *work, magma_int_t lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -101,26 +101,26 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
     work[0] = MAGMA_Z_MAKE( (double)(m*nb), 0 );
     lquery = (lwork == -1);
     if (m < 0) {
-	*info = -1;
+        *info = -1;
     } else if (n < 0) {
-	*info = -2;
+        *info = -2;
     } else if (lda < max(1,m)) {
-	*info = -4;
+        *info = -4;
     } else if (lwork < max(1,m) && ! lquery) {
-	*info = -7;
+        *info = -7;
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
         return MAGMA_ERR_ILLEGAL_VALUE;
     }
     else if (lquery) {
-	return MAGMA_SUCCESS;
+        return MAGMA_SUCCESS;
     }
 
     /*  Quick return if possible */
     if (min(m, n) == 0) {
-	work[0] = c_one;
-	return MAGMA_SUCCESS;
+        work[0] = c_one;
+        return MAGMA_SUCCESS;
     }
 
     maxm = ((m + 31)/32)*32;
@@ -135,8 +135,8 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
       magmablas_zinplace_transpose( dAT, lda, ldat );
     else {
       if ( CUBLAS_STATUS_SUCCESS != 
-	   cublasAlloc(maxm*maxn, sizeof(cuDoubleComplex), (void**)&dAT) )
-	return MAGMA_ERR_CUBLASALLOC;
+           cublasAlloc(maxm*maxn, sizeof(cuDoubleComplex), (void**)&dAT) )
+        return MAGMA_ERR_CUBLASALLOC;
       
       magmablas_ztranspose2( dAT, ldat, dA, lda, m, n );
     }

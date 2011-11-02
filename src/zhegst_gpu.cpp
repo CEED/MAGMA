@@ -139,98 +139,98 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
   if (itype==1) 
     {
       if (upper) 
-	{
-	  kb = min(n,nb);
+        {
+          kb = min(n,nb);
         
-	  /* Compute inv(U')*A*inv(U) */
-	  cudaMemcpy2DAsync(  B(0, 0), nb *sizeof(cuDoubleComplex),
-			      dB(0, 0), lddb*sizeof(cuDoubleComplex),
-			      sizeof(cuDoubleComplex)*kb, kb,
-			      cudaMemcpyDeviceToHost, stream[2]);
-	  cudaMemcpy2DAsync(  A(0, 0), nb *sizeof(cuDoubleComplex),
-			      dA(0, 0), ldda*sizeof(cuDoubleComplex),
-			      sizeof(cuDoubleComplex)*kb, kb,
-			      cudaMemcpyDeviceToHost, stream[1]);
-	  
-	  for(k = 0; k<n; k+=nb){
-	    kb = min(n-k,nb);
-	    kb2= min(n-k-nb,nb);
-	    
-	    /* Update the upper triangle of A(k:n,k:n) */
-	    
-	    cudaStreamSynchronize(stream[2]);
-	    cudaStreamSynchronize(stream[1]);
-	    
-	    lapackf77_zhegs2( &itype, uplo_, &kb, A(0,0), &lda, B(0,0), &ldb, info);
-	    
-	    cudaMemcpy2DAsync(dA(k, k), ldda * sizeof(cuDoubleComplex),
-			      A(0, 0), lda  * sizeof(cuDoubleComplex),
-			      sizeof(cuDoubleComplex)*kb, kb,
-			      cudaMemcpyHostToDevice, stream[0]);
-	    
-	    if(k+kb<n){
-	      
-	      // Start copying the new B block
-	      cudaMemcpy2DAsync( B(0, 0), nb *sizeof(cuDoubleComplex),
-				 dB(k+kb, k+kb), lddb*sizeof(cuDoubleComplex),
-				 sizeof(cuDoubleComplex)*kb2, kb2,
-				 cudaMemcpyDeviceToHost, stream[2]);
+          /* Compute inv(U')*A*inv(U) */
+          cudaMemcpy2DAsync(  B(0, 0), nb *sizeof(cuDoubleComplex),
+                              dB(0, 0), lddb*sizeof(cuDoubleComplex),
+                              sizeof(cuDoubleComplex)*kb, kb,
+                              cudaMemcpyDeviceToHost, stream[2]);
+          cudaMemcpy2DAsync(  A(0, 0), nb *sizeof(cuDoubleComplex),
+                              dA(0, 0), ldda*sizeof(cuDoubleComplex),
+                              sizeof(cuDoubleComplex)*kb, kb,
+                              cudaMemcpyDeviceToHost, stream[1]);
+          
+          for(k = 0; k<n; k+=nb){
+            kb = min(n-k,nb);
+            kb2= min(n-k-nb,nb);
             
-	      cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
-			  kb, n-k-kb,
-			  zone, dB(k,k), lddb, 
-			  dA(k,k+kb), ldda); 
+            /* Update the upper triangle of A(k:n,k:n) */
             
-	      cudaStreamSynchronize(stream[0]);
+            cudaStreamSynchronize(stream[2]);
+            cudaStreamSynchronize(stream[1]);
             
-	      cublasZhemm(MagmaLeft, MagmaUpper,
-			  kb, n-k-kb,
-			  mzhalf, dA(k,k), ldda,
-			  dB(k,k+kb), lddb,
-			  zone, dA(k, k+kb), ldda);
-	      
-	      cublasZher2k(MagmaUpper, MagmaConjTrans,
-			   n-k-kb, kb,
-			   mzone, dA(k,k+kb), ldda,
-			   dB(k,k+kb), lddb,
-			   done, dA(k+kb,k+kb), ldda);
+            lapackf77_zhegs2( &itype, uplo_, &kb, A(0,0), &lda, B(0,0), &ldb, info);
             
-	      cudaMemcpy2DAsync( A(0, 0), lda*sizeof(cuDoubleComplex),
-				 dA(k+kb, k+kb), ldda*sizeof(cuDoubleComplex),
-				 sizeof(cuDoubleComplex)*kb2, kb2,
-				 cudaMemcpyDeviceToHost, stream[1]);
+            cudaMemcpy2DAsync(dA(k, k), ldda * sizeof(cuDoubleComplex),
+                              A(0, 0), lda  * sizeof(cuDoubleComplex),
+                              sizeof(cuDoubleComplex)*kb, kb,
+                              cudaMemcpyHostToDevice, stream[0]);
             
-	      cublasZhemm(MagmaLeft, MagmaUpper,
-			  kb, n-k-kb,
-			  mzhalf, dA(k,k), ldda,
-			  dB(k,k+kb), lddb,
-			  zone, dA(k, k+kb), ldda);
-	      
-	      cublasZtrsm(MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
-			  kb, n-k-kb,
-			  zone ,dB(k+kb,k+kb), lddb,
-			  dA(k,k+kb), ldda);
-	      
-	    }
-	    
-	  }
-	  
-	  cudaStreamSynchronize(stream[0]);
-	  
-	} else {
+            if(k+kb<n){
+              
+              // Start copying the new B block
+              cudaMemcpy2DAsync( B(0, 0), nb *sizeof(cuDoubleComplex),
+                                 dB(k+kb, k+kb), lddb*sizeof(cuDoubleComplex),
+                                 sizeof(cuDoubleComplex)*kb2, kb2,
+                                 cudaMemcpyDeviceToHost, stream[2]);
+            
+              cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
+                          kb, n-k-kb,
+                          zone, dB(k,k), lddb, 
+                          dA(k,k+kb), ldda); 
+            
+              cudaStreamSynchronize(stream[0]);
+            
+              cublasZhemm(MagmaLeft, MagmaUpper,
+                          kb, n-k-kb,
+                          mzhalf, dA(k,k), ldda,
+                          dB(k,k+kb), lddb,
+                          zone, dA(k, k+kb), ldda);
+              
+              cublasZher2k(MagmaUpper, MagmaConjTrans,
+                           n-k-kb, kb,
+                           mzone, dA(k,k+kb), ldda,
+                           dB(k,k+kb), lddb,
+                           done, dA(k+kb,k+kb), ldda);
+            
+              cudaMemcpy2DAsync( A(0, 0), lda*sizeof(cuDoubleComplex),
+                                 dA(k+kb, k+kb), ldda*sizeof(cuDoubleComplex),
+                                 sizeof(cuDoubleComplex)*kb2, kb2,
+                                 cudaMemcpyDeviceToHost, stream[1]);
+            
+              cublasZhemm(MagmaLeft, MagmaUpper,
+                          kb, n-k-kb,
+                          mzhalf, dA(k,k), ldda,
+                          dB(k,k+kb), lddb,
+                          zone, dA(k, k+kb), ldda);
+              
+              cublasZtrsm(MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
+                          kb, n-k-kb,
+                          zone ,dB(k+kb,k+kb), lddb,
+                          dA(k,k+kb), ldda);
+              
+            }
+            
+          }
+          
+          cudaStreamSynchronize(stream[0]);
+          
+        } else {
         
         kb = min(n,nb);
         
         /* Compute inv(L)*A*inv(L') */
         
         cudaMemcpy2DAsync( B(0, 0), nb *sizeof(cuDoubleComplex),
-			   dB(0, 0), lddb*sizeof(cuDoubleComplex),
-			   sizeof(cuDoubleComplex)*kb, kb,
-			   cudaMemcpyDeviceToHost, stream[2]);
+                           dB(0, 0), lddb*sizeof(cuDoubleComplex),
+                           sizeof(cuDoubleComplex)*kb, kb,
+                           cudaMemcpyDeviceToHost, stream[2]);
         cudaMemcpy2DAsync( A(0, 0), nb *sizeof(cuDoubleComplex),
-			   dA(0, 0), ldda*sizeof(cuDoubleComplex),
-			   sizeof(cuDoubleComplex)*kb, kb,
-			   cudaMemcpyDeviceToHost, stream[1]);
+                           dA(0, 0), ldda*sizeof(cuDoubleComplex),
+                           sizeof(cuDoubleComplex)*kb, kb,
+                           cudaMemcpyDeviceToHost, stream[1]);
         
         for(k = 0; k<n; k+=nb){
           kb= min(n-k,nb);

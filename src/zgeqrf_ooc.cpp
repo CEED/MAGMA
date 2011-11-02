@@ -12,9 +12,9 @@
 
 extern "C" magma_int_t
 magma_zgeqrf_ooc(magma_int_t m, magma_int_t n, 
-		 cuDoubleComplex *a,    magma_int_t lda, cuDoubleComplex *tau, 
-		 cuDoubleComplex *work, magma_int_t lwork,
-		 magma_int_t *info )
+                 cuDoubleComplex *a,    magma_int_t lda, cuDoubleComplex *tau, 
+                 cuDoubleComplex *work, magma_int_t lwork,
+                 magma_int_t *info )
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -61,7 +61,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
     WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
-	    Higher performance is achieved if WORK is in pinned memory, e.g.
+            Higher performance is achieved if WORK is in pinned memory, e.g.
             allocated using cudaMallocHost.
 
     LWORK   (input) INTEGER
@@ -125,9 +125,9 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
 
     /* Check how much memory do we have */
     #if CUDA_VERSION > 3010
-	size_t totalMem;
+        size_t totalMem;
     #else
-	unsigned int totalMem;
+        unsigned int totalMem;
     #endif
 
     CUdevice dev;
@@ -151,7 +151,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
     ldda    = ((m+31)/32)*32;
 
     if (CUBLAS_STATUS_SUCCESS != cublasAlloc((NB + nb)*ldda + nb*lddwork, 
-					     sizeof(cuDoubleComplex), (void**)&da) ) {
+                                             sizeof(cuDoubleComplex), (void**)&da) ) {
         *info = -8;
         return MAGMA_ERR_CUBLASALLOC;
     }
@@ -168,58 +168,58 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
     /* start the main loop over the blocks that fit in the GPU memory */
     for(int i=0; i<n; i+=NB)
       { 
-	IB = min(n-i, NB);
-	//printf("Processing %5d columns -- %5d to %5d ... \n", IB, i, i+IB);
+        IB = min(n-i, NB);
+        //printf("Processing %5d columns -- %5d to %5d ... \n", IB, i, i+IB);
 
-	/* 1. Copy the next part of the matrix to the GPU */
-	cudaMemcpy2DAsync(da_ref(0,0), ldda*sizeof(cuDoubleComplex),
-			  a_ref(0,i), lda *sizeof(cuDoubleComplex),
-			  sizeof(cuDoubleComplex)*(m), IB,
-			  cudaMemcpyHostToDevice,stream[0]);
-	cudaStreamSynchronize(stream[0]);
+        /* 1. Copy the next part of the matrix to the GPU */
+        cudaMemcpy2DAsync(da_ref(0,0), ldda*sizeof(cuDoubleComplex),
+                          a_ref(0,i), lda *sizeof(cuDoubleComplex),
+                          sizeof(cuDoubleComplex)*(m), IB,
+                          cudaMemcpyHostToDevice,stream[0]);
+        cudaStreamSynchronize(stream[0]);
 
-	/* 2. Update it with the previous transformations */
-	for(int j=0; j<min(i,k); j+=nb)
-	  {
-	    magma_int_t ib = min(k-j, nb);
+        /* 2. Update it with the previous transformations */
+        for(int j=0; j<min(i,k); j+=nb)
+          {
+            magma_int_t ib = min(k-j, nb);
 
-	    /* Get a panel in ptr.                                           */
-	    //   1. Form the triangular factor of the block reflector
-	    //   2. Send it to the GPU.
+            /* Get a panel in ptr.                                           */
+            //   1. Form the triangular factor of the block reflector
+            //   2. Send it to the GPU.
             //   3. Put 0s in the upper triangular part of V.
-	    //   4. Send V to the GPU in ptr.
-	    //   5. Update the matrix.
-	    //   6. Restore the upper part of V.
-	    int rows = m-j;
+            //   4. Send V to the GPU in ptr.
+            //   5. Update the matrix.
+            //   6. Restore the upper part of V.
+            int rows = m-j;
             lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr,
                               &rows, &ib, a_ref(j,j), &lda, tau+j, work, &ib);
-	    cudaMemcpy2DAsync(dwork, lddwork *sizeof(cuDoubleComplex),
+            cudaMemcpy2DAsync(dwork, lddwork *sizeof(cuDoubleComplex),
                               work,  ib      *sizeof(cuDoubleComplex),
                               sizeof(cuDoubleComplex)*ib, ib,
                               cudaMemcpyHostToDevice,stream[1]);
 
             zpanel_to_q(MagmaUpper, ib, a_ref(j,j), lda, work+ib*ib);
-	    cudaMemcpy2DAsync(ptr,        rows *sizeof(cuDoubleComplex),
-			      a_ref(j,j), lda  *sizeof(cuDoubleComplex),
-			      sizeof(cuDoubleComplex)*rows, ib, 
-			      cudaMemcpyHostToDevice,stream[1]);
+            cudaMemcpy2DAsync(ptr,        rows *sizeof(cuDoubleComplex),
+                              a_ref(j,j), lda  *sizeof(cuDoubleComplex),
+                              sizeof(cuDoubleComplex)*rows, ib, 
+                              cudaMemcpyHostToDevice,stream[1]);
             cudaStreamSynchronize(stream[1]);
 
-	    magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-			      rows, IB, ib,
-			      ptr, rows, dwork,    lddwork,
-			      da_ref(j, 0), ldda, dwork+ib, lddwork);
+            magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
+                              rows, IB, ib,
+                              ptr, rows, dwork,    lddwork,
+                              da_ref(j, 0), ldda, dwork+ib, lddwork);
 
-	    zq_to_panel(MagmaUpper, ib, a_ref(j,j), lda, work+ib*ib);
-	  }
+            zq_to_panel(MagmaUpper, ib, a_ref(j,j), lda, work+ib*ib);
+          }
 
-	/* 3. Do a QR on the current part */
-	if (i<k)
-	  magma_zgeqrf2_gpu(m-i, IB, da_ref(i,0), ldda, tau+i, info);
+        /* 3. Do a QR on the current part */
+        if (i<k)
+          magma_zgeqrf2_gpu(m-i, IB, da_ref(i,0), ldda, tau+i, info);
 
-	/* 4. Copy the current part back to the CPU */
-	cudaMemcpy2DAsync( a_ref(0,i), lda *sizeof(cuDoubleComplex),
-			  da_ref(0,0), ldda*sizeof(cuDoubleComplex),
+        /* 4. Copy the current part back to the CPU */
+        cudaMemcpy2DAsync( a_ref(0,i), lda *sizeof(cuDoubleComplex),
+                          da_ref(0,0), ldda*sizeof(cuDoubleComplex),
                           sizeof(cuDoubleComplex)*(m), IB,
                           cudaMemcpyDeviceToHost,stream[0]);
       }

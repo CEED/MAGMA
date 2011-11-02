@@ -16,13 +16,13 @@
 /* This interface to zstedc is used for TAU profiling */
 extern"C"{
 void Mylapackf77_zstedc(const char *compz, magma_int_t *n, 
-			double *D, double *E, cuDoubleComplex *Z, magma_int_t *ldz,
+                        double *D, double *E, cuDoubleComplex *Z, magma_int_t *ldz,
                          cuDoubleComplex *work, magma_int_t *ldwork, 
-			double* rwork, magma_int_t *lrwork, 
-			magma_int_t *iwork, magma_int_t *liwork, magma_int_t *info)
+                        double* rwork, magma_int_t *lrwork, 
+                        magma_int_t *iwork, magma_int_t *liwork, magma_int_t *info)
   {
      lapackf77_zstedc(compz, n, D, E, Z, ldz, work, ldwork, 
-		      rwork, lrwork, iwork, liwork, info);
+                      rwork, lrwork, iwork, liwork, info);
   }  
 }
 
@@ -201,13 +201,13 @@ magma_zheevd_gpu(char jobz, char uplo,
 
     *info = 0;
     if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVectorsStr))) {
-	*info = -1;
+        *info = -1;
     } else if (! (lower || lapackf77_lsame(uplo_, MagmaUpperStr))) {
-	*info = -2;
+        *info = -2;
     } else if (n < 0) {
-	*info = -3;
+        *info = -3;
     } else if (ldda < max(1,n)) {
-	*info = -5;
+        *info = -5;
     } else if (ldwa < max(1,n)) {
         *info = -8;
     }
@@ -241,23 +241,23 @@ magma_zheevd_gpu(char jobz, char uplo,
         return MAGMA_ERR_ILLEGAL_VALUE;
     }
     else if (lquery) {
-	return MAGMA_SUCCESS;
+        return MAGMA_SUCCESS;
     }
 
     /* Quick return if possible */
     if (n == 0) {
-	return MAGMA_SUCCESS;
+        return MAGMA_SUCCESS;
     }
 
     if (n == 1) {
         cuDoubleComplex tmp;
-      	cublasGetVector(1, sizeof(cuDoubleComplex), da, 1, &tmp, 1);
-	w[0] = MAGMA_Z_REAL(tmp);
-	if (wantz) {
-	    tmp = MAGMA_Z_ONE;
+              cublasGetVector(1, sizeof(cuDoubleComplex), da, 1, &tmp, 1);
+        w[0] = MAGMA_Z_REAL(tmp);
+        if (wantz) {
+            tmp = MAGMA_Z_ONE;
             cublasSetVector(1, sizeof(cuDoubleComplex), &tmp, 1, da, 1);
-	}
-	return MAGMA_SUCCESS;
+        }
+        return MAGMA_SUCCESS;
     }
 
     static cudaStream_t stream;
@@ -289,15 +289,15 @@ magma_zheevd_gpu(char jobz, char uplo,
     anrm = magmablas_zlanhe('M', uplo, n, da, ldda, dwork);
     iscale = 0;
     if (anrm > 0. && anrm < rmin) {
-	iscale = 1;
-	sigma = rmin / anrm;
+        iscale = 1;
+        sigma = rmin / anrm;
     } else if (anrm > rmax) {
-	iscale = 1;
-	sigma = rmax / anrm;
+        iscale = 1;
+        sigma = rmax / anrm;
     }
     if (iscale == 1) {
-	magmablas_zlascl(uplo, 0, 0, 1., sigma, n, n, da, 
-		ldda, info);
+        magmablas_zlascl(uplo, 0, 0, 1., sigma, n, n, da, 
+                ldda, info);
     }
 
     /* Call ZHETRD to reduce Hermitian matrix to tridiagonal form. */
@@ -324,10 +324,10 @@ magma_zheevd_gpu(char jobz, char uplo,
        tridiagonal matrix, then call ZUNMTR to multiply it to the Householder 
        transformations represented as Householder vectors in A. */
     if (! wantz) {
-	lapackf77_dsterf(&n, &w[1], &rwork[inde], info);
+        lapackf77_dsterf(&n, &w[1], &rwork[inde], info);
     } else {
-	Mylapackf77_zstedc("I", &n, &w[1], &rwork[inde], &work[indwrk], &n, &work[indwk2], 
-		&llwrk2, &rwork[indrwk], &llrwk, &iwork[1], &liwork, info);
+        Mylapackf77_zstedc("I", &n, &w[1], &rwork[inde], &work[indwrk], &n, &work[indwk2], 
+                &llwrk2, &rwork[indrwk], &llrwk, &iwork[1], &liwork, info);
     
         cublasSetMatrix(n, n, sizeof(cuDoubleComplex), &work[indwrk], n, dc, lddc);
       
@@ -340,13 +340,13 @@ magma_zheevd_gpu(char jobz, char uplo,
 
     /* If matrix was scaled, then rescale eigenvalues appropriately. */
     if (iscale == 1) {
-	if (*info == 0) {
-	    imax = n;
-	} else {
-	    imax = *info - 1;
-	}
-	d__1 = 1. / sigma;
-	blasf77_dscal(&imax, &d__1, &w[1], &c__1);
+        if (*info == 0) {
+            imax = n;
+        } else {
+            imax = *info - 1;
+        }
+        d__1 = 1. / sigma;
+        blasf77_dscal(&imax, &d__1, &w[1], &c__1);
     }
 
     work[1]  = MAGMA_Z_MAKE((double) lwmin, 0.);

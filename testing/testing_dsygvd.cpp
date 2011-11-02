@@ -155,13 +155,13 @@ int main( int argc, char** argv)
         lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
         lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
 
-	magma_dsygvd(itype, jobz[0], uplo[0],
-		     N, h_R, N, h_S, N, w1,
-		     h_work, lwork, 
-		     iwork, liwork, 
-		     &info);
-	
-	lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
+        magma_dsygvd(itype, jobz[0], uplo[0],
+                     N, h_R, N, h_S, N, w1,
+                     h_work, lwork, 
+                     iwork, liwork, 
+                     &info);
+        
+        lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
         lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
 
 
@@ -169,7 +169,7 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-	magma_dsygvd(itype, jobz[0], uplo[0],
+        magma_dsygvd(itype, jobz[0], uplo[0],
                      N, h_R, N, h_S, N, w1,
                      h_work, lwork,
                      iwork, liwork,
@@ -178,7 +178,7 @@ int main( int argc, char** argv)
 
         gpu_time = GetTimerValue(start,end)/1000.;
 
-	if ( checkres ) {
+        if ( checkres ) {
           /* =====================================================================
              Check the results following the LAPACK's [zc]hegvd routine.
              A x = lambda B x is solved
@@ -191,46 +191,46 @@ int main( int argc, char** argv)
              (3)    | S(with V) - S(w/o V) | / | S |
              =================================================================== */
           double temp1, temp2;
-	  double *tau;
+          double *tau;
 
           if (itype == 1 || itype == 2){
-	    lapackf77_dlaset( "A", &N, &N, &dzero, &zone, h_S, &N);
-	    blasf77_dgemm("N", "C", &N, &N, &N, &zone, h_R, &N, h_R, &N, &dzero, h_work, &N);
-	    blasf77_dsymm("R", uplo, &N, &N, &mzone, h_B, &N, h_work, &N, &zone, h_S, &N);
-	    result[1]= lapackf77_dlange("1", &N, &N, h_S, &N, h_work) / N;
+            lapackf77_dlaset( "A", &N, &N, &dzero, &zone, h_S, &N);
+            blasf77_dgemm("N", "C", &N, &N, &N, &zone, h_R, &N, h_R, &N, &dzero, h_work, &N);
+            blasf77_dsymm("R", uplo, &N, &N, &mzone, h_B, &N, h_work, &N, &zone, h_S, &N);
+            result[1]= lapackf77_dlange("1", &N, &N, h_S, &N, h_work) / N;
           }
           else if (itype == 3){
-	    lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N);
-	    blasf77_dsyrk(uplo, "N", &N, &N, &mdone, h_R, &N, &done, h_S, &N); 
-	    result[1]= lapackf77_dlansy("1",uplo, &N, h_S, &N, h_work) / N / 
-	      lapackf77_dlansy("1",uplo, &N, h_B, &N, h_work);
-	  }
+            lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N);
+            blasf77_dsyrk(uplo, "N", &N, &N, &mdone, h_R, &N, &done, h_S, &N); 
+            result[1]= lapackf77_dlansy("1",uplo, &N, h_S, &N, h_work) / N / 
+              lapackf77_dlansy("1",uplo, &N, h_B, &N, h_work);
+          }
 
-	  result[0] = 1.;
-	  result[0] /= lapackf77_dlansy("1",uplo, &N, h_A, &N, h_work);
-	  result[0] /= lapackf77_dlange("1",&N , &N, h_R, &N, h_work);
+          result[0] = 1.;
+          result[0] /= lapackf77_dlansy("1",uplo, &N, h_A, &N, h_work);
+          result[0] /= lapackf77_dlange("1",&N , &N, h_R, &N, h_work);
 
           if (itype == 1){
-	    blasf77_dsymm("L", uplo, &N, &N, &zone, h_A, &N, h_R, &N, &dzero, h_work, &N);
-	    for(int i=0; i<N; ++i)
-	      blasf77_ddscal(&N, &w1[i], &h_R[i*N], &ione);
-	    blasf77_dsymm("L", uplo, &N, &N, &mzone, h_B, &N, h_R, &N, &zone, h_work, &N);
-	    result[0] *= lapackf77_dlange("1", &N, &N, h_work, &N, &temp1)/N;
+            blasf77_dsymm("L", uplo, &N, &N, &zone, h_A, &N, h_R, &N, &dzero, h_work, &N);
+            for(int i=0; i<N; ++i)
+              blasf77_ddscal(&N, &w1[i], &h_R[i*N], &ione);
+            blasf77_dsymm("L", uplo, &N, &N, &mzone, h_B, &N, h_R, &N, &zone, h_work, &N);
+            result[0] *= lapackf77_dlange("1", &N, &N, h_work, &N, &temp1)/N;
           }
           else if (itype == 2){
-	    blasf77_dsymm("L", uplo, &N, &N, &zone, h_B, &N, h_R, &N, &dzero, h_work, &N);
-	    for(int i=0; i<N; ++i)
-	      blasf77_ddscal(&N, &w1[i], &h_R[i*N], &ione);
-	    blasf77_dsymm("L", uplo, &N, &N, &zone, h_A, &N, h_work, &N, &mzone, h_R, &N);
-	    result[0] *= lapackf77_dlange("1", &N, &N, h_R, &N, &temp1)/N;
-	  }
+            blasf77_dsymm("L", uplo, &N, &N, &zone, h_B, &N, h_R, &N, &dzero, h_work, &N);
+            for(int i=0; i<N; ++i)
+              blasf77_ddscal(&N, &w1[i], &h_R[i*N], &ione);
+            blasf77_dsymm("L", uplo, &N, &N, &zone, h_A, &N, h_work, &N, &mzone, h_R, &N);
+            result[0] *= lapackf77_dlange("1", &N, &N, h_R, &N, &temp1)/N;
+          }
           else if (itype == 3){
-	    blasf77_dsymm("L", uplo, &N, &N, &zone, h_A, &N, h_R, &N, &dzero, h_work, &N);
-	    for(int i=0; i<N; ++i)
-	      blasf77_ddscal(&N, &w1[i], &h_R[i*N], &ione);
-	    blasf77_dsymm("L", uplo, &N, &N, &zone, h_B, &N, h_work, &N, &mzone, h_R, &N);
-	    result[0] *= lapackf77_dlange("1", &N, &N, h_R, &N, &temp1)/N;
-	  }
+            blasf77_dsymm("L", uplo, &N, &N, &zone, h_A, &N, h_R, &N, &dzero, h_work, &N);
+            for(int i=0; i<N; ++i)
+              blasf77_ddscal(&N, &w1[i], &h_R[i*N], &ione);
+            blasf77_dsymm("L", uplo, &N, &N, &zone, h_B, &N, h_work, &N, &mzone, h_R, &N);
+            result[0] *= lapackf77_dlange("1", &N, &N, h_R, &N, &temp1)/N;
+          }
 
 /*          lapackf77_dsyt21(&ione, uplo, &N, &izero,
                            h_A, &N,
@@ -238,8 +238,8 @@ int main( int argc, char** argv)
                            h_R, &N,
                            h_R, &N,
                            tau, h_work, rwork, &result[0]);
-*/	  
-	  lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
+*/          
+          lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
           lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
  
           magma_dsygvd(itype, 'N', uplo[0],
@@ -257,7 +257,7 @@ int main( int argc, char** argv)
           result[2] = temp2 / temp1;
         }
 
-	/* =====================================================================
+        /* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
@@ -268,7 +268,7 @@ int main( int argc, char** argv)
                          &info);
         end = get_current_time();
         if (info < 0)
-	  printf("Argument %d of dsygvd had an illegal value.\n", -info);
+          printf("Argument %d of dsygvd had an illegal value.\n", -info);
 
         cpu_time = GetTimerValue(start,end)/1000.;
 
@@ -278,7 +278,7 @@ int main( int argc, char** argv)
            =================================================================== */
         printf("%5d     %6.2f         %6.2f\n",
                N, cpu_time, gpu_time);
-	if ( checkres ){
+        if ( checkres ){
           printf("Testing the eigenvalues and eigenvectors for correctness:\n");
           if(itype==1)
              printf("(1)    | A Z - B Z D | / (|A| |Z| N) = %e\n", result[0]);

@@ -62,11 +62,11 @@ int main( int argc, char** argv)
                 M = atoi(argv[++i]);
         }
         if ( M == 0 ) {
-	    M = N;
-	}
-	if ( N == 0 ) {
-	    N = M;
-	}
+            M = N;
+        }
+        if ( N == 0 ) {
+            N = M;
+        }
         if (M>0 && N>0)
             printf("  testing_zgeqrf_gpu -M %d -N %d\n\n", M, N);
         else
@@ -103,19 +103,19 @@ int main( int argc, char** argv)
     printf("==========================================================\n");
     for(i=0; i<10; i++){
         if (argc == 1){
-	    M = N = size[i];
+            M = N = size[i];
         }
-	min_mn= min(M, N);
-	lda   = M;
-	n2    = lda*N;
-	ldda  = ((M+31)/32)*32;
-	flops = FLOPS( (double)M, (double)N ) / 1000000;
+        min_mn= min(M, N);
+        lda   = M;
+        n2    = lda*N;
+        ldda  = ((M+31)/32)*32;
+        flops = FLOPS( (double)M, (double)N ) / 1000000;
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-	lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
+        lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
 
-	/* =====================================================================
+        /* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
@@ -136,25 +136,25 @@ int main( int argc, char** argv)
         start = get_current_time();
         magma_zgeqrf2_gpu( M, N, d_A, ldda, tau, &info);
         end = get_current_time();
-	if (info < 0)
-	  printf("Argument %d of magma_zgeqrf2 had an illegal value.\n", -info);
-	
-	gpu_perf = flops / GetTimerValue(start, end);
+        if (info < 0)
+          printf("Argument %d of magma_zgeqrf2 had an illegal value.\n", -info);
+        
+        gpu_perf = flops / GetTimerValue(start, end);
         
         /* =====================================================================
            Check the result compared to LAPACK
            =================================================================== */
         cublasGetMatrix( M, N, sizeof(cuDoubleComplex), d_A, ldda, h_R, M);
-	
+        
         matnorm = lapackf77_zlange("f", &M, &N, h_A, &M, work);
         blasf77_zaxpy(&n2, &mzone, h_A, &ione, h_R, &ione);
-	
+        
         printf("%5d %5d  %6.2f         %6.2f        %e\n",
                M, N, cpu_perf, gpu_perf,
                lapackf77_zlange("f", &M, &N, h_R, &M, work) / matnorm);
-	
+        
         if (argc != 1)
-	  break;
+          break;
     }
     
     /* Memory clean up */

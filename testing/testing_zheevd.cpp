@@ -108,20 +108,20 @@ int main( int argc, char** argv)
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
 
-	magma_zheevd(jobz[0], uplo[0],
-		     N, h_R, N, w1,
-		     h_work, lwork, 
-		     rwork, lrwork, 
-		     iwork, liwork, 
-		     &info);
-	
-	lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
+        magma_zheevd(jobz[0], uplo[0],
+                     N, h_R, N, w1,
+                     h_work, lwork, 
+                     rwork, lrwork, 
+                     iwork, liwork, 
+                     &info);
+        
+        lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
 
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-	magma_zheevd(jobz[0], uplo[0],
+        magma_zheevd(jobz[0], uplo[0],
                      N, h_R, N, w1,
                      h_work, lwork,
                      rwork, lrwork,
@@ -131,7 +131,7 @@ int main( int argc, char** argv)
 
         gpu_time = GetTimerValue(start,end)/1000.;
 
-	if ( checkres ) {
+        if ( checkres ) {
           /* =====================================================================
              Check the results following the LAPACK's [zcds]drvst routine.
              A is factored as A = U S U' and the following 3 tests computed:
@@ -140,7 +140,7 @@ int main( int argc, char** argv)
              (3)    | S(with U) - S(w/o U) | / | S |
              =================================================================== */
           double temp1, temp2;
-	  cuDoubleComplex *tau;
+          cuDoubleComplex *tau;
 
           lapackf77_zhet21(&ione, uplo, &N, &izero,
                            h_A, &N,
@@ -148,12 +148,12 @@ int main( int argc, char** argv)
                            h_R, &N,
                            h_R, &N,
                            tau, h_work, rwork, &result[0]);
-	  
-	  lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
+          
+          lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
           magma_zheevd('N', uplo[0],
                        N, h_R, N, w2,
                        h_work, lwork,
-		       rwork, lrwork,
+                       rwork, lrwork,
                        iwork, liwork,
                        &info);
 
@@ -166,7 +166,7 @@ int main( int argc, char** argv)
           result[2] = temp2 / temp1;
         }
 
-	/* =====================================================================
+        /* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
@@ -178,7 +178,7 @@ int main( int argc, char** argv)
                          &info);
         end = get_current_time();
         if (info < 0)
-	  printf("Argument %d of zheevd had an illegal value.\n", -info);
+          printf("Argument %d of zheevd had an illegal value.\n", -info);
 
         cpu_time = GetTimerValue(start,end)/1000.;
 
@@ -188,7 +188,7 @@ int main( int argc, char** argv)
            =================================================================== */
         printf("%5d     %6.2f         %6.2f\n",
                N, cpu_time, gpu_time);
-	if ( checkres ){
+        if ( checkres ){
           printf("Testing the factorization A = U S U' for correctness:\n");
           printf("(1)    | A - U S U' | / (|A| N) = %e\n", result[0]*eps);
           printf("(2)    | I -   U'U  | /  N      = %e\n", result[1]*eps);

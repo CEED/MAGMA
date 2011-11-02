@@ -12,10 +12,10 @@
 
 extern "C" magma_int_t
 magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
-		  cuDoubleComplex *dA,    magma_int_t ldda, 
-		  cuDoubleComplex *tau,   cuDoubleComplex *dT, 
+                  cuDoubleComplex *dA,    magma_int_t ldda, 
+                  cuDoubleComplex *tau,   cuDoubleComplex *dT, 
                   cuDoubleComplex *dB,    magma_int_t lddb, 
-		  cuDoubleComplex *hwork, magma_int_t lwork, 
+                  cuDoubleComplex *hwork, magma_int_t lwork, 
                   magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -128,11 +128,11 @@ magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
 
     /* B := Q' * B */
     ret = magma_zunmqr_gpu( MagmaLeft, MagmaConjTrans, 
-			    m, nrhs, n,
-			    a_ref(0,0), ldda, tau, 
-			    dB, lddb, hwork, lwork, dT, nb, info);
+                            m, nrhs, n,
+                            a_ref(0,0), ldda, tau, 
+                            dB, lddb, hwork, lwork, dT, nb, info);
     if ( (ret != MAGMA_SUCCESS) || ( *info != 0 ) ) {
-	return ret;
+        return ret;
     }
 
     /* Solve R*X = B(1:n,:) 

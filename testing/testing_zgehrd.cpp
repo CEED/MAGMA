@@ -122,7 +122,7 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-	magma_zgehrd ( N, ione, N, h_R, lda, tau, h_work, lwork, dT, &info);
+        magma_zgehrd ( N, ione, N, h_R, lda, tau, h_work, lwork, dT, &info);
         end = get_current_time();
         if ( info < 0 )
             printf("Argument %d of magma_zgehrd had an illegal value\n", -info);

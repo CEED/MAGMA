@@ -15,8 +15,8 @@
 #define  W(k,n) &(local_work[(mt)*(n-1)+(k)])
 
 void getro (char *trans, const magma_int_t m, const magma_int_t n, 
-	    const cuDoubleComplex *A, const magma_int_t LDA, 
-	    cuDoubleComplex *B, const magma_int_t LDB) 
+            const cuDoubleComplex *A, const magma_int_t LDA, 
+            cuDoubleComplex *B, const magma_int_t LDB) 
 {
   const cuDoubleComplex *Atmp;
 

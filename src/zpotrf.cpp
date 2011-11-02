@@ -130,8 +130,8 @@ magma_zpotrf(char uplo, magma_int_t n,
     ldda = ((n+31)/32)*32;
     
     if (CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*ldda, sizeof(cuDoubleComplex), (void**)&work)) {
-		/* alloc failed so call the non-GPU-resident version */
-		return magma_zpotrf_ooc( uplo, n, a, lda, info);
+                /* alloc failed so call the non-GPU-resident version */
+                return magma_zpotrf_ooc( uplo, n, a, lda, info);
     }
 
     static cudaStream_t stream[2];
@@ -141,17 +141,17 @@ magma_zpotrf(char uplo, magma_int_t n,
     nb = magma_get_zpotrf_nb(n);
 
     if (nb <= 1 || nb >= n) {
-	lapackf77_zpotrf(uplo_, &n, a, &lda, info);
+        lapackf77_zpotrf(uplo_, &n, a, &lda, info);
     } else {
 
         /* Use hybrid blocked code. */
-	if (upper) {
+        if (upper) {
             /* Compute the Cholesky factorization A = U'*U. */
-	    for (j=0; j<n; j += nb) {
+            for (j=0; j<n; j += nb) {
                 /* Update and factorize the current diagonal block and test   
                    for non-positive-definiteness. Computing MIN */
                 jb = min(nb, (n-j));
-		cublasSetMatrix(jb, (n-j), sizeof(cuDoubleComplex), 
+                cublasSetMatrix(jb, (n-j), sizeof(cuDoubleComplex), 
                                 A(j, j), lda, dA(j, j), ldda);
                 
                 cublasZherk(MagmaUpper, MagmaConjTrans, jb, j, 
@@ -159,59 +159,59 @@ magma_zpotrf(char uplo, magma_int_t n,
                             done,  dA(j, j), ldda);
 
                 cudaMemcpy2DAsync(  A(0, j), lda *sizeof(cuDoubleComplex), 
-				   dA(0, j), ldda*sizeof(cuDoubleComplex), 
+                                   dA(0, j), ldda*sizeof(cuDoubleComplex), 
                                     sizeof(cuDoubleComplex)*(j+jb), jb,
-				    cudaMemcpyDeviceToHost, stream[1]);
-		
-		if ( (j+jb) < n) {
+                                    cudaMemcpyDeviceToHost, stream[1]);
+                
+                if ( (j+jb) < n) {
                     cublasZgemm(MagmaConjTrans, MagmaNoTrans, 
                                 jb, (n-j-jb), j,
                                 mzone, dA(0, j   ), ldda, 
                                            dA(0, j+jb), ldda,
                                 zone,     dA(j, j+jb), ldda);
-		}
+                }
              
-		cudaStreamSynchronize(stream[1]);
-		lapackf77_zpotrf(MagmaUpperStr, &jb, A(j, j), &lda, info);
-		if (*info != 0) {
-		  *info = *info + j;
-		  break;
-		}
-		cudaMemcpy2DAsync(dA(j, j), ldda * sizeof(cuDoubleComplex), 
-				   A(j, j), lda  * sizeof(cuDoubleComplex), 
-				  sizeof(cuDoubleComplex)*jb, jb, 
-				  cudaMemcpyHostToDevice,stream[0]);
-		
-		if ( (j+jb) < n )
+                cudaStreamSynchronize(stream[1]);
+                lapackf77_zpotrf(MagmaUpperStr, &jb, A(j, j), &lda, info);
+                if (*info != 0) {
+                  *info = *info + j;
+                  break;
+                }
+                cudaMemcpy2DAsync(dA(j, j), ldda * sizeof(cuDoubleComplex), 
+                                   A(j, j), lda  * sizeof(cuDoubleComplex), 
+                                  sizeof(cuDoubleComplex)*jb, jb, 
+                                  cudaMemcpyHostToDevice,stream[0]);
+                
+                if ( (j+jb) < n )
                   cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
                               jb, (n-j-jb),
                               zone, dA(j, j   ), ldda, 
                                      dA(j, j+jb), ldda);
-	    }
-	} else {
+            }
+        } else {
             //=========================================================
             // Compute the Cholesky factorization A = L*L'.
-	    for (j=0; j<n; j+=nb) {
+            for (j=0; j<n; j+=nb) {
                 //  Update and factorize the current diagonal block and test   
                 //  for non-positive-definiteness. Computing MIN 
-		jb = min(nb, (n-j));
+                jb = min(nb, (n-j));
                 cublasSetMatrix((n-j), jb, sizeof(cuDoubleComplex), 
-				A(j, j), lda, dA(j, j), ldda);
+                                A(j, j), lda, dA(j, j), ldda);
 
                 cublasZherk(MagmaLower, MagmaNoTrans, jb, j,
                             mdone, dA(j, 0), ldda, 
                             done,  dA(j, j), ldda);
-		/*
-		cudaMemcpy2DAsync( A(j, 0), lda *sizeof(cuDoubleComplex), 
-				   dA(j,0), ldda*sizeof(cuDoubleComplex), 
-				   sizeof(cuDoubleComplex)*jb, j+jb, 
-				   cudaMemcpyDeviceToHost,stream[1]);
-		*/
-		cudaMemcpy2DAsync( A(j,j),  lda *sizeof(cuDoubleComplex),
+                /*
+                cudaMemcpy2DAsync( A(j, 0), lda *sizeof(cuDoubleComplex), 
+                                   dA(j,0), ldda*sizeof(cuDoubleComplex), 
+                                   sizeof(cuDoubleComplex)*jb, j+jb, 
+                                   cudaMemcpyDeviceToHost,stream[1]);
+                */
+                cudaMemcpy2DAsync( A(j,j),  lda *sizeof(cuDoubleComplex),
                                    dA(j,j), ldda*sizeof(cuDoubleComplex),
                                    sizeof(cuDoubleComplex)*jb, jb,
                                    cudaMemcpyDeviceToHost,stream[1]);
-		cudaMemcpy2DAsync( A(j, 0),  lda *sizeof(cuDoubleComplex),
+                cudaMemcpy2DAsync( A(j, 0),  lda *sizeof(cuDoubleComplex),
                                    dA(j, 0), ldda*sizeof(cuDoubleComplex),
                                    sizeof(cuDoubleComplex)*jb, j,
                                    cudaMemcpyDeviceToHost,stream[0]);
@@ -223,25 +223,25 @@ magma_zpotrf(char uplo, magma_int_t n,
                                         dA(j,    0), ldda,
                                  zone,  dA(j+jb, j), ldda);
                 }
-		
+                
                 cudaStreamSynchronize(stream[1]);
-	        lapackf77_zpotrf(MagmaLowerStr, &jb, A(j, j), &lda, info);
-		if (*info != 0){
+                lapackf77_zpotrf(MagmaLowerStr, &jb, A(j, j), &lda, info);
+                if (*info != 0){
                     *info = *info + j;
                     break;
-		}
-	        cudaMemcpy2DAsync( dA(j, j), ldda*sizeof(cuDoubleComplex), 
-				   A(j, j),  lda *sizeof(cuDoubleComplex), 
+                }
+                cudaMemcpy2DAsync( dA(j, j), ldda*sizeof(cuDoubleComplex), 
+                                   A(j, j),  lda *sizeof(cuDoubleComplex), 
                                    sizeof(cuDoubleComplex)*jb, jb, 
                                    cudaMemcpyHostToDevice,stream[0]);
-	        
-		if ( (j+jb) < n)
+                
+                if ( (j+jb) < n)
                     cublasZtrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
                                 (n-j-jb), jb, 
                                 zone, dA(j,    j), ldda, 
                                       dA(j+jb, j), ldda);
-	    }
-	}
+            }
+        }
     }
     
     cudaStreamDestroy(stream[0]);

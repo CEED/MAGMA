@@ -117,7 +117,7 @@ magma_zunmql2_gpu(const char side, const char trans,
     magma_int_t wa_offset, dc_offset, i__4;
     
     static magma_int_t i__;
-    static cuDoubleComplex t[2*4160]	/* was [65][64] */;
+    static cuDoubleComplex t[2*4160]        /* was [65][64] */;
     static magma_int_t i1, i2, i3, ib, nb, mi, ni, nq, nw;
     static magma_int_t ldwork;
     long int left, notran;
@@ -134,24 +134,24 @@ magma_zunmql2_gpu(const char side, const char trans,
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
     if (left) {
-	nq = m;
-	nw = max(1,n);
+        nq = m;
+        nw = max(1,n);
     } else {
-	nq = n;
-	nw = max(1,m);
+        nq = n;
+        nw = max(1,m);
     }
     if (! left && ! lapackf77_lsame(side_, "R")) {
-	*info = -1;
+        *info = -1;
     } else if (! notran && ! lapackf77_lsame(trans_, "C")) {
-	*info = -2;
+        *info = -2;
     } else if (m < 0) {
-	*info = -3;
+        *info = -3;
     } else if (n < 0) {
-	*info = -4;
+        *info = -4;
     } else if (k < 0 || k > nq) {
-	*info = -5;
+        *info = -5;
     } else if (ldda < max(1,nq)) {
-	*info = -7;
+        *info = -7;
     } else if (lddc < max(1,m)) {
         *info = -10;
     } else if (ldwa < max(1,nq)) {
@@ -174,52 +174,52 @@ magma_zunmql2_gpu(const char side, const char trans,
     ldwork = nw;
   
         
-	/* Use hybrid CPU-GPU code */
-	if (left && notran || ! left && ! notran) {
-	    i1 = 1;
-	    i2 = k;
-	    i3 = nb;
-	} else {
-	    i1 = (k - 1) / nb * nb + 1;
-	    i2 = 1;
-	    i3 = -nb;
-	}
+        /* Use hybrid CPU-GPU code */
+        if (left && notran || ! left && ! notran) {
+            i1 = 1;
+            i2 = k;
+            i3 = nb;
+        } else {
+            i1 = (k - 1) / nb * nb + 1;
+            i2 = 1;
+            i3 = -nb;
+        }
 
-	if (left) {
-	    ni = n;
-	} else {
-	    mi = m;
-	}
+        if (left) {
+            ni = n;
+        } else {
+            mi = m;
+        }
 
         magmablas_zsetdiag1subdiag0('U', k, nb, da, ldda);
   
-	for (i__ = i1; i3 < 0 ? i__ >= i2 : i__ <= i2; i__ += i3) {
-	  ib = min(nb, k - i__ + 1);
-	  
-	  /* Form the triangular factor of the block reflector   
-	     H = H(i+ib-1) . . . H(i+1) H(i) */
-	  i__4 = nq - k + i__ + ib - 1;
-	  lapackf77_zlarft("Backward", "Columnwise", &i__4, &ib, 
-			   &wa[i__ * ldwa + 1], &ldwa, &tau[i__], t, &ib);
+        for (i__ = i1; i3 < 0 ? i__ >= i2 : i__ <= i2; i__ += i3) {
+          ib = min(nb, k - i__ + 1);
+          
+          /* Form the triangular factor of the block reflector   
+             H = H(i+ib-1) . . . H(i+1) H(i) */
+          i__4 = nq - k + i__ + ib - 1;
+          lapackf77_zlarft("Backward", "Columnwise", &i__4, &ib, 
+                           &wa[i__ * ldwa + 1], &ldwa, &tau[i__], t, &ib);
     
-	  if (left) 
-	    {	    
-	      /* H or H' is applied to C(1:m-k+i+ib-1,1:n) */
-	      mi = m - k + i__ + ib - 1;
-	    } 
-	  else 
-	    {
-	      /* H or H' is applied to C(1:m,1:n-k+i+ib-1) */
-	      ni = n - k + i__ + ib - 1;
-	    }
-	  
-	  /* Apply H or H'; First copy T to the GPU */
-	  cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), t, ib, dwork+i__4*ib, ib);
-	  magma_zlarfb_gpu(side, trans, MagmaBackward, MagmaColumnwise,
-			   mi, ni, ib, 
-			   &da[(i__-1) * ldda], ldda, dwork+i__4*ib, ib, 
-			   &dc[1+lddc], lddc,
-			   dwork+i__4*ib + ib*ib, ldwork);
+          if (left) 
+            {            
+              /* H or H' is applied to C(1:m-k+i+ib-1,1:n) */
+              mi = m - k + i__ + ib - 1;
+            } 
+          else 
+            {
+              /* H or H' is applied to C(1:m,1:n-k+i+ib-1) */
+              ni = n - k + i__ + ib - 1;
+            }
+          
+          /* Apply H or H'; First copy T to the GPU */
+          cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), t, ib, dwork+i__4*ib, ib);
+          magma_zlarfb_gpu(side, trans, MagmaBackward, MagmaColumnwise,
+                           mi, ni, ib, 
+                           &da[(i__-1) * ldda], ldda, dwork+i__4*ib, ib, 
+                           &dc[1+lddc], lddc,
+                           dwork+i__4*ib + ib*ib, ldwork);
 
     }
 

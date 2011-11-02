@@ -62,11 +62,11 @@ int main( int argc, char** argv)
                 M = atoi(argv[++i]);
         }
         if ( M == 0 ) {
-	    M = N;
-	}
-	if ( N == 0 ) {
-	    N = M;
-	}
+            M = N;
+        }
+        if ( N == 0 ) {
+            N = M;
+        }
         if (N>0 && M>0)
             printf("  testing_zgebrd -M %d -N %d\n\n", M, N);
         else
@@ -150,7 +150,7 @@ int main( int argc, char** argv)
             magma_zgebrd( M, N, h_Q, lda, 
                           diag, offdiag, tauq, taup, 
                           h_work, lhwork, &info);
-	}
+        }
         end = get_current_time();
         if ( info < 0 )
             printf("Argument %d of lapackf77_zgebrd|magma_zgebrd had an illegal value\n", -info);

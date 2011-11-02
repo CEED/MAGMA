@@ -58,7 +58,7 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
     WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
-	    Higher performance is achieved if WORK is in pinned memory, e.g.
+            Higher performance is achieved if WORK is in pinned memory, e.g.
             allocated using cudaMallocHost.
 
     LWORK   (input) INTEGER
@@ -132,9 +132,9 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
     ldda    = ((m+31)/32)*32;
 
     if (CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*ldda + nb*lddwork,
-					     sizeof(cuDoubleComplex), (void**)&da) ) 
+                                             sizeof(cuDoubleComplex), (void**)&da) ) 
       {
-	/* Switch to the "out-of-core" (out of GPU-memory) version */
+        /* Switch to the "out-of-core" (out of GPU-memory) version */
         return magma_zgeqrf_ooc(m, n, a, lda, tau, work, lwork, info);
       }
 
@@ -167,9 +167,9 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
 
                 /* Apply H' to A(i:m,i+2*ib:n) from the left */
                 magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
-				  m-old_i, n-old_i-2*old_ib, old_ib,
-				  da_ref(old_i, old_i),          ldda, dwork,        lddwork,
-				  da_ref(old_i, old_i+2*old_ib), ldda, dwork+old_ib, lddwork);
+                                  m-old_i, n-old_i-2*old_ib, old_ib,
+                                  da_ref(old_i, old_i),          ldda, dwork,        lddwork,
+                                  da_ref(old_i, old_i+2*old_ib), ldda, dwork+old_ib, lddwork);
             }
 
             cudaStreamSynchronize(stream[1]);
@@ -190,14 +190,14 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
                 if (i+ib < k-nb)
                     /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
-				      rows, ib, ib, 
-				      da_ref(i, i   ), ldda, dwork,    lddwork, 
-				      da_ref(i, i+ib), ldda, dwork+ib, lddwork);
+                                      rows, ib, ib, 
+                                      da_ref(i, i   ), ldda, dwork,    lddwork, 
+                                      da_ref(i, i+ib), ldda, dwork+ib, lddwork);
                 else
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
-				      rows, n-i-ib, ib, 
-				      da_ref(i, i   ), ldda, dwork,    lddwork, 
-				      da_ref(i, i+ib), ldda, dwork+ib, lddwork);
+                                      rows, n-i-ib, ib, 
+                                      da_ref(i, i   ), ldda, dwork,    lddwork, 
+                                      da_ref(i, i+ib), ldda, dwork+ib, lddwork);
 
                 old_i  = i;
                 old_ib = ib;

@@ -30,7 +30,7 @@
 #endif
 
 int main(int argc, char **argv)
-{	
+{        
     TESTING_CUDA_INIT();
 
     magma_timestr_t  start, end;
@@ -104,7 +104,7 @@ int main(int argc, char **argv)
                 A[i*LDA+j] = cuConj(A[j*LDA+i]);
         }
     }
-	
+        
     printf( "   n   CUBLAS,Gflop/s   MAGMABLAS,Gflop/s      \"error\"\n" 
             "==============================================================\n");
     fprintf(fp, "   n   CUBLAS,Gflop/s   MAGMABLAS,Gflop/s      \"error\"\n" 
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
     for( i = istart; i<N+1; i = (int)((i+1)*1.1) )
     {
         m = i;
-	lda = ((m+31)/32)*32;
+        lda = ((m+31)/32)*32;
         flops = FLOPS( (double)m ) / 1e6;
 
         printf(      "%5d ", m );
@@ -133,24 +133,24 @@ int main(int argc, char **argv)
 #if defined(PRECISION_z) || defined(PRECISION_c)
 
 #else
-    	blocks    = m / 64 + (m % 64 != 0);
-    	cublasSetMatrix(lda,blocks, sizeof( cuDoubleComplex ), C_work, LDA , dC_work, lda);
+            blocks    = m / 64 + (m % 64 != 0);
+            cublasSetMatrix(lda,blocks, sizeof( cuDoubleComplex ), C_work, LDA , dC_work, lda);
 #endif        
-	start = get_current_time();
+        start = get_current_time();
         cublasZhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
         end = get_current_time();
 
         cublasGetVector( m, sizeof( cuDoubleComplex ), dY, incx, Ycublas, incx );
-	
+        
         
         cuda_perf = flops / GetTimerValue(start,end);
         printf(     "%11.2f", cuda_perf );
         fprintf(fp, "%11.2f", cuda_perf );
-	
+        
         cublasSetVector( m, sizeof( cuDoubleComplex ), Y, incx, dY, incx );
         magmablas_zhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
         cublasSetVector( m, sizeof( cuDoubleComplex ), Y, incx, dY, incx );
-	
+        
         
         start = get_current_time();
         magmablas_zhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
@@ -202,7 +202,7 @@ int main(int argc, char **argv)
     TESTING_DEVFREE( dX );
     TESTING_DEVFREE( dY );
 #if defined(PRECISION_z) || defined(PRECISION_c)
-	
+        
 #else 
     TESTING_FREE( C_work );
     TESTING_DEVFREE( dC_work );
@@ -211,4 +211,4 @@ int main(int argc, char **argv)
     /* Free device */
     TESTING_CUDA_FINALIZE();
     return 0;
-}	
+}        

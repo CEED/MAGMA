@@ -12,9 +12,9 @@
 
 extern "C" magma_int_t
 magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
-		 cuDoubleComplex *dA,    magma_int_t ldda, 
+                 cuDoubleComplex *dA,    magma_int_t ldda, 
                  cuDoubleComplex *dB,    magma_int_t lddb, 
-		 cuDoubleComplex *hwork, magma_int_t lwork, 
+                 cuDoubleComplex *hwork, magma_int_t lwork, 
                  magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -87,7 +87,7 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
     *info = 0;
     /* For now, N is the only case working */
     if ( (trans != 'N') && (trans != 'n' ) )
-	*info = -1;
+        *info = -1;
     else if (m < 0)
         *info = -2;
     else if (n < 0 || m < n) /* LQ is not handle for now*/
@@ -121,30 +121,30 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
     if (nb < nrhs)
       ldtwork = ( 2*k + ((n+31)/32)*32 )*nrhs;
     if( CUBLAS_STATUS_SUCCESS != cublasAlloc(ldtwork, 
-					     sizeof(cuDoubleComplex), (void**)&dT) ) {
-	return MAGMA_ERR_CUBLASALLOC;
+                                             sizeof(cuDoubleComplex), (void**)&dT) ) {
+        return MAGMA_ERR_CUBLASALLOC;
     }
     
     tau = (cuDoubleComplex*) malloc( k * sizeof(cuDoubleComplex) );
     if( tau == NULL ) {
-	cublasFree(dT);
-	return MAGMA_ERR_ALLOCATION;
+        cublasFree(dT);
+        return MAGMA_ERR_ALLOCATION;
     }
 
     ret = magma_zgeqrf_gpu( m, n, dA, ldda, tau, dT, info );
     if ( (ret != MAGMA_SUCCESS) || (*info != 0) ) {
-	cublasFree(dT);
-	free(tau);
-	return ret;
+        cublasFree(dT);
+        free(tau);
+        return ret;
     }
 
     ret = magma_zgeqrs_gpu(m, n, nrhs, 
-			   dA, ldda, tau, dT, 
-			   dB, lddb, hwork, lwork, info);
+                           dA, ldda, tau, dT, 
+                           dB, lddb, hwork, lwork, info);
     if ( (ret != MAGMA_SUCCESS) || (*info != 0) ) {
-	cublasFree(dT);
-	free(tau);
-	return ret;
+        cublasFree(dT);
+        free(tau);
+        return ret;
     }
 
     cublasFree(dT);

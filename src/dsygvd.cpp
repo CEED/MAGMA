@@ -17,7 +17,7 @@ extern "C" magma_int_t
 magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
              double *a, magma_int_t lda, double *b, magma_int_t ldb, 
              double *w, double *work, magma_int_t lwork, 
-	     magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
+             magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -179,17 +179,17 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
 
     *info = 0;
     if (itype < 1 || itype > 3) {
-	*info = -1;
+        *info = -1;
     } else if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVectorsStr))) {
-	*info = -2;
+        *info = -2;
     } else if (! (lower || lapackf77_lsame(uplo_, MagmaUpperStr))) {
-	*info = -3;
+        *info = -3;
     } else if (n < 0) {
-	*info = -4;
+        *info = -4;
     } else if (lda < max(1,n)) {
-	*info = -6;
+        *info = -6;
     } else if (ldb < max(1,n)) {
-	*info = -8;
+        *info = -8;
     }
 
     magma_int_t nb = magma_get_dsytrd_nb(n); 
@@ -222,12 +222,12 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
         return MAGMA_ERR_ILLEGAL_VALUE;
     }
     else if (lquery) {
-	return MAGMA_SUCCESS;
+        return MAGMA_SUCCESS;
     }
 
     /*  Quick return if possible */
     if (n == 0) {
-	return 0;
+        return 0;
     }
 
     if (cudaSuccess != cudaMalloc( (void**)&da, n*ldda*sizeof(double) ) ||
@@ -246,8 +246,8 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
   
     magma_dpotrf_gpu(uplo_[0], n, db, lddb, info);
     if (*info != 0) {
-	*info = n + *info;
-	return 0;
+        *info = n + *info;
+        return 0;
     }
 
     cudaStreamSynchronize(stream);
@@ -261,40 +261,40 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     magma_dsygst_gpu(itype, uplo_[0], n, da, ldda, db, lddb, info);
   
     magma_dsyevd_gpu(jobz_[0], uplo_[0], n, da, ldda, w, a, lda, 
-		     work, lwork, iwork, liwork, info);
+                     work, lwork, iwork, liwork, info);
 
     lopt  = max( lopt, (magma_int_t) work[0]);
     liopt = max(liopt, iwork[0]);
 
     if (wantz && *info == 0) 
       {
-	/* Backtransform eigenvectors to the original problem. */
-	if (itype == 1 || itype == 2) 
-	  {
-	    /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;   
-	       backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
-	    if (lower) {
-		*(unsigned char *)trans = MagmaTrans;
-	    } else {
-		*(unsigned char *)trans = MagmaNoTrans;
-	    }
+        /* Backtransform eigenvectors to the original problem. */
+        if (itype == 1 || itype == 2) 
+          {
+            /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;   
+               backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
+            if (lower) {
+                *(unsigned char *)trans = MagmaTrans;
+            } else {
+                *(unsigned char *)trans = MagmaNoTrans;
+            }
 
             cublasDtrsm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit,
-			n, n, zone, db, lddb, da, ldda);
+                        n, n, zone, db, lddb, da, ldda);
 
-	} else if (itype == 3) 
-	  {
-	    /*  For B*A*x=(lambda)*x;   
-		backtransform eigenvectors: x = L*y or U'*y */
-	    if (lower) {
-		*(unsigned char *)trans = MagmaNoTrans;
-	    } else {
-		*(unsigned char *)trans = MagmaTrans;
-	    }
+        } else if (itype == 3) 
+          {
+            /*  For B*A*x=(lambda)*x;   
+                backtransform eigenvectors: x = L*y or U'*y */
+            if (lower) {
+                *(unsigned char *)trans = MagmaNoTrans;
+            } else {
+                *(unsigned char *)trans = MagmaTrans;
+            }
 
             cublasDtrmm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit, 
-			n, n, zone, db, lddb, da, ldda);
-	}
+                        n, n, zone, db, lddb, da, ldda);
+        }
 
         cublasGetMatrix(n, n, sizeof(double), da, ldda, a, lda);
 

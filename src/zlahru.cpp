@@ -20,10 +20,10 @@
 
 extern "C" magma_int_t
 magma_zlahru(magma_int_t n, magma_int_t ihi, magma_int_t k, magma_int_t nb, 
-	     cuDoubleComplex *a, magma_int_t lda,
+             cuDoubleComplex *a, magma_int_t lda,
              cuDoubleComplex *d_a, cuDoubleComplex *y,
              cuDoubleComplex *v, cuDoubleComplex *d_t, 
-	     cuDoubleComplex *d_work)
+             cuDoubleComplex *d_work)
 {
 /*  -- MAGMA auxiliary routine (version 1.0) --
        Univ. of Tennessee, Knoxville

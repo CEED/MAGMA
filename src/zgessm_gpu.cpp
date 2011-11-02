@@ -90,11 +90,11 @@ magma_zgessm_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t k, magm
     /* Check arguments */
     *info = 0;
     if (m < 0)
-	*info = -1;
+        *info = -1;
     else if (n < 0)
-	*info = -2;
+        *info = -2;
     else if (ldda < max(1,m))
-	*info = -4;
+        *info = -4;
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );

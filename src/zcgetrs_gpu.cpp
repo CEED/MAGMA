@@ -20,10 +20,10 @@
 extern "C" magma_int_t 
 magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs, 
                   cuFloatComplex  *dA, magma_int_t ldda, 
-		  magma_int_t     *ipiv, 
+                  magma_int_t     *ipiv, 
                   cuDoubleComplex *dB, magma_int_t lddb, 
                   cuDoubleComplex  *dX, magma_int_t lddx,
-		  cuFloatComplex  *dSX,
+                  cuFloatComplex  *dSX,
                   magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -98,17 +98,17 @@ magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
          (! lapackf77_lsame(trans_, "C")) ) {
       *info = -1;
     } else if (n < 0) {
-	*info = -2;
+        *info = -2;
     } else if (nrhs < 0) {
-	*info = -3;
+        *info = -3;
     } else if (ldda < n) {
-	*info = -5;
+        *info = -5;
     } else if (lddb < n) {
-	*info = -8;
+        *info = -8;
     } else if (lddx < n) {
-	*info = -10;
+        *info = -10;
     } else if (lddx != lddb) { /* TODO: remove it when zclaswp will have the correct interface */
-	*info = -10;
+        *info = -10;
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
@@ -117,7 +117,7 @@ magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
 
     /* Quick return if possible */
     if (n == 0 || nrhs == 0) {
-	return MAGMA_SUCCESS;
+        return MAGMA_SUCCESS;
     }
     
     if (notran) {  
@@ -132,11 +132,11 @@ magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
 
       /* Solve L*X = B, overwriting B with SX. */
       cublasCtrsm( MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit, 
-		   n, nrhs, cone, dA, ldda, dSX, n);
+                   n, nrhs, cone, dA, ldda, dSX, n);
     
       /* Solve U*X = B, overwriting B with X. */
       cublasCtrsm( MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
-		   n, nrhs, cone, dA, ldda, dSX, n);
+                   n, nrhs, cone, dA, ldda, dSX, n);
 
       magmablas_clag2z(n, nrhs, dSX, n, dX, lddx, info );
     } else {
@@ -147,9 +147,9 @@ magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
 
       /* Solve A' * X = B. */
       cublasCtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
-		  n, nrhs, cone, dA, ldda, dSX, n);
+                  n, nrhs, cone, dA, ldda, dSX, n);
       cublasCtrsm(MagmaLeft, MagmaLower, MagmaConjTrans, MagmaUnit,
-		  n, nrhs, cone, dA, ldda, dSX, n);
+                  n, nrhs, cone, dA, ldda, dSX, n);
       
       magmablas_zclaswp(nrhs, dX, lddx, dSX, n, ipiv, inc);
     }

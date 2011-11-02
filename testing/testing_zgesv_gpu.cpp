@@ -114,12 +114,12 @@ int main(int argc , char **argv)
     printf("========================================================\n");
 
     for( i = 0; i < ntest; ++i ) {
-	N   = size[i];
+        N   = size[i];
         lda = ldb = N;
-	ldda = ((N+31)/32)*32;
-	lddb = ldda;
-	flops = ( FLOPS_GETRF( (double)N, (double)N ) +
-	          FLOPS_GETRS( (double)N, (double)NRHS ) ) / 1e6;
+        ldda = ((N+31)/32)*32;
+        lddb = ldda;
+        flops = ( FLOPS_GETRF( (double)N, (double)N ) +
+                  FLOPS_GETRS( (double)N, (double)NRHS ) ) / 1e6;
 
         /* Initialize the matrices */
         szeA = lda*N;
@@ -139,7 +139,7 @@ int main(int argc , char **argv)
         if (info != 0)
             printf("Argument %d of magma_zgesv had an illegal value.\n", -info);
 
-	gpu_perf = flops / GetTimerValue(start, end);
+        gpu_perf = flops / GetTimerValue(start, end);
 
         //=====================================================================
         // ERROR
@@ -150,14 +150,14 @@ int main(int argc , char **argv)
         Bnorm = lapackf77_zlange("I", &N, &NRHS, h_B, &ldb, work);
 
         blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &N, &NRHS, &N, 
-		       &zone,  h_A, &lda, 
-		               h_X, &ldb, 
-		       &mzone, h_B, &ldb);
-	
+                       &zone,  h_A, &lda, 
+                               h_X, &ldb, 
+                       &mzone, h_B, &ldb);
+        
         Rnorm = lapackf77_zlange("I", &N, &NRHS, h_B, &ldb, work);
 
         printf("%5d  %4d             %6.2f        %e\n",
-	       N, NRHS, gpu_perf, Rnorm/(Anorm*Bnorm) );
+               N, NRHS, gpu_perf, Rnorm/(Anorm*Bnorm) );
     }
 
     /* Memory clean up */

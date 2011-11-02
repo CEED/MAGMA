@@ -15,10 +15,10 @@
 extern "C" magma_int_t
 magma_zunmqr_gpu(char side, char trans,
                  magma_int_t m, magma_int_t n, magma_int_t k,
-		 cuDoubleComplex *dA,    magma_int_t ldda, 
+                 cuDoubleComplex *dA,    magma_int_t ldda, 
                  cuDoubleComplex *tau,
                  cuDoubleComplex *dC,    magma_int_t lddc,
-		 cuDoubleComplex *hwork, magma_int_t lwork,
+                 cuDoubleComplex *hwork, magma_int_t lwork,
                  cuDoubleComplex *dT,    magma_int_t nb, 
                  magma_int_t *info)
 {
@@ -140,28 +140,28 @@ magma_zunmqr_gpu(char side, char trans,
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
     if (left) {
-	nq = m;
-	nw = n;
+        nq = m;
+        nw = n;
     } else {
-	nq = n;
-	nw = m;
+        nq = n;
+        nw = m;
     }
     if ( (!left) && (!lapackf77_lsame(side_, "R")) ) {
-	*info = -1;
+        *info = -1;
     } else if ( (!notran) && (!lapackf77_lsame(trans_, MagmaConjTransStr)) ) {
-	*info = -2;
+        *info = -2;
     } else if (m < 0) {
-	*info = -3;
+        *info = -3;
     } else if (n < 0) {
-	*info = -4;
+        *info = -4;
     } else if (k < 0 || k > nq) {
-	*info = -5;
+        *info = -5;
     } else if (ldda < max(1,nq)) {
-	*info = -7;
+        *info = -7;
     } else if (lddc < max(1,m)) {
-	*info = -10;
+        *info = -10;
     } else if (lwork < max(1,nw) && ! lquery) {
-	*info = -12;
+        *info = -12;
     }
 
     lwkopt = (m-k+nb)*(n+2*nb);
@@ -172,13 +172,13 @@ magma_zunmqr_gpu(char side, char trans,
         return MAGMA_ERR_ILLEGAL_VALUE;
     }
     else if (lquery) {
-	return MAGMA_SUCCESS;
+        return MAGMA_SUCCESS;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0 || k == 0) {
-	hwork[0] = c_one;
-	return MAGMA_SUCCESS;
+        hwork[0] = c_one;
+        return MAGMA_SUCCESS;
     }
 
     lddwork= k;
@@ -216,11 +216,11 @@ magma_zunmqr_gpu(char side, char trans,
                 jc = i;
             }
             ret = magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-				    mi, ni, ib, 
-				    a_ref(i,  i ), ldda, t_ref(i), nb, 
-				    c_ref(ic, jc), lddc, dwork,    nw);
-	    if ( ret != MAGMA_SUCCESS )
-	      return ret;
+                                    mi, ni, ib, 
+                                    a_ref(i,  i ), ldda, t_ref(i), nb, 
+                                    c_ref(ic, jc), lddc, dwork,    nw);
+            if ( ret != MAGMA_SUCCESS )
+              return ret;
         }
     }
     else
@@ -241,9 +241,9 @@ magma_zunmqr_gpu(char side, char trans,
         }
 
         cublasGetMatrix(mi, ib, sizeof(cuDoubleComplex), 
-			a_ref(i,  i ), ldda, hwork, mi);
+                        a_ref(i,  i ), ldda, hwork, mi);
         cublasGetMatrix(mi, ni, sizeof(cuDoubleComplex), 
-			c_ref(ic, jc), lddc, hwork+mi*ib, mi);
+                        c_ref(ic, jc), lddc, hwork+mi*ib, mi);
 
         magma_int_t lhwork = lwork - mi*(ib + ni);
         lapackf77_zunmqr( MagmaLeftStr, MagmaConjTransStr, 

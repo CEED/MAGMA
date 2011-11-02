@@ -62,11 +62,11 @@ int main( int argc, char** argv)
                 M = atoi(argv[++i]);
         }
         if ( M == 0 ) {
-	    M = N;
-	}
-	if ( N == 0 ) {
-	    N = M;
-	}
+            M = N;
+        }
+        if ( N == 0 ) {
+            N = M;
+        }
         if (N>0 && M>0)
             printf("  testing_zgelqf_gpu -M %d -N %d\n\n", M, N);
         else
@@ -105,12 +105,12 @@ int main( int argc, char** argv)
     printf("==========================================================\n");
     for(i=0; i<7; i++){
         if (argc == 1){
-	    M = N = size[i];
+            M = N = size[i];
         }
-	min_mn= min(M, N);
-	lda   = M;
-	n2    = lda*N;
-	flops = FLOPS( (double)M, (double)N ) / 1000000;
+        min_mn= min(M, N);
+        lda   = M;
+        n2    = lda*N;
+        flops = FLOPS( (double)M, (double)N ) / 1000000;
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -119,14 +119,14 @@ int main( int argc, char** argv)
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-	cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_R, lda, d_A, lda);
+        cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_R, lda, d_A, lda);
         start = get_current_time();
         magma_zgelqf_gpu( M, N, d_A, lda, tau, h_work, lwork, &info);
         end = get_current_time();
-	if (info < 0)
-	    printf("Argument %d of magma_zgelqf_gpu had an illegal value.\n", -info);
+        if (info < 0)
+            printf("Argument %d of magma_zgelqf_gpu had an illegal value.\n", -info);
         
-	gpu_perf = flops / GetTimerValue(start, end);
+        gpu_perf = flops / GetTimerValue(start, end);
 
         /* =====================================================================
            Performs operation using LAPACK
@@ -136,13 +136,13 @@ int main( int argc, char** argv)
         end = get_current_time();
         if (info < 0)
             printf("Argument %d of lapack_zgelqf had an illegal value.\n", -info);
-	
+        
         cpu_perf = flops / GetTimerValue(start, end);
 
         /* =====================================================================
            Check the result compared to LAPACK
            =================================================================== */
-	cublasGetMatrix( M, N, sizeof(cuDoubleComplex), d_A, lda, h_R, lda);
+        cublasGetMatrix( M, N, sizeof(cuDoubleComplex), d_A, lda, h_R, lda);
         matnorm = lapackf77_zlange("f", &M, &N, h_A, &lda, work);
         blasf77_zaxpy(&n2, &mzone, h_A, &ione, h_R, &ione);
 

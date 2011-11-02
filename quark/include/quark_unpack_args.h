@@ -23,7 +23,7 @@
     arg1) \
 { \
   void *lastarg = NULL; \
-  void *args_list = (void *)QUARK_Args_List( quark );	\
+  void *args_list = (void *)QUARK_Args_List( quark );        \
   void *arg = QUARK_Args_Pop(args_list, &lastarg); \
   memcpy(&arg1, arg, sizeof(arg1)); \
 }

@@ -192,7 +192,7 @@ int main( int argc, char** argv)
            =================================================================== */
         start = get_current_time();
         lapackf77_zhetrd(uplo, &N, h_A, &lda, diag, offdiag, tau, 
-			 h_work, &lwork, &info);
+                         h_work, &lwork, &info);
         end = get_current_time();
 
         if (info < 0)

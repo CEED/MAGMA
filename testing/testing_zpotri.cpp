@@ -97,17 +97,17 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         magma_zpotrf(uplo[0], N, h_R, lda, &info);
-	magma_zpotri(uplo[0], N, h_R, lda, &info);
+        magma_zpotri(uplo[0], N, h_R, lda, &info);
         lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
 
         start = get_current_time();
         magma_zpotrf(uplo[0], N, h_R, lda, &info);
-	magma_zpotri(uplo[0], N, h_R, lda, &info);
+        magma_zpotri(uplo[0], N, h_R, lda, &info);
 
-//	magma_zlauum(uplo[0], N, h_R, lda, &info);        
-//	magma_ztrtri(uplo[0], MagmaNonUnit, N, h_R, lda, &info);
+//        magma_zlauum(uplo[0], N, h_R, lda, &info);        
+//        magma_ztrtri(uplo[0], MagmaNonUnit, N, h_R, lda, &info);
 
-	end = get_current_time();
+        end = get_current_time();
         if (info < 0)
             printf("Argument %d of magma_zpotri had an illegal value.\n", -info);
 
@@ -118,12 +118,12 @@ int main( int argc, char** argv)
            =================================================================== */
         start = get_current_time();
         lapackf77_zpotrf(uplo, &N, h_A, &lda, &info);
-	lapackf77_zpotri(uplo, &N, h_A, &lda, &info);
+        lapackf77_zpotri(uplo, &N, h_A, &lda, &info);
 
-//	 lapackf77_zlauum(uplo, &N, h_A, &lda, &info);
-//	 lapackf77_ztrtri(uplo,"Non-unit" ,&N, h_A, &lda, &info);
+//         lapackf77_zlauum(uplo, &N, h_A, &lda, &info);
+//         lapackf77_ztrtri(uplo,"Non-unit" ,&N, h_A, &lda, &info);
       
-	end = get_current_time();
+        end = get_current_time();
         if (info < 0)
             printf("Argument %d of lapack_zpotri had an illegal value.\n", -info);
 

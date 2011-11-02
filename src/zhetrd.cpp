@@ -26,10 +26,10 @@
 
 extern "C" magma_int_t
 magma_zhetrd(char uplo, magma_int_t n, 
-	     cuDoubleComplex *a, magma_int_t lda, 
-	     double *d, double *e, cuDoubleComplex *tau,
-	     cuDoubleComplex *work, magma_int_t lwork, 
-	     magma_int_t *info)
+             cuDoubleComplex *a, magma_int_t lda, 
+             double *d, double *e, cuDoubleComplex *tau,
+             cuDoubleComplex *work, magma_int_t lwork, 
+             magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -165,13 +165,13 @@ magma_zhetrd(char uplo, magma_int_t n,
     long int upper = lapackf77_lsame(uplo_, "U");
     lquery = lwork == -1;
     if (! upper && ! lapackf77_lsame(uplo_, "L")) {
-	*info = -1;
+        *info = -1;
     } else if (n < 0) {
-	*info = -2;
+        *info = -2;
     } else if (lda < max(1,n)) {
-	*info = -4;
+        *info = -4;
     } else if (lwork < nb*n && ! lquery) {
-	*info = -9;
+        *info = -9;
     }
 
     if (*info == 0) {
@@ -190,8 +190,8 @@ magma_zhetrd(char uplo, magma_int_t n,
 
     /* Quick return if possible */
     if (n == 0) {
-	work[0] = z_one;
-	return 0;
+        work[0] = z_one;
+        return 0;
     }
 
     cuDoubleComplex *da;
@@ -215,100 +215,100 @@ magma_zhetrd(char uplo, magma_int_t n,
         cublasSetMatrix(n, n, sizeof(cuDoubleComplex), A(0, 0), lda, dA(0, 0), ldda);
 
         /*  Reduce the upper triangle of A.   
-	    Columns 1:kk are handled by the unblocked method. */
+            Columns 1:kk are handled by the unblocked method. */
         kk = n - (n - nx + nb - 1) / nb * nb;
 
-	for (i = n - nb; i >= kk; i -= nb) 
-	  {
-	    /* Reduce columns i:i+nb-1 to tridiagonal form and form the   
-	       matrix W which is needed to update the unreduced part of   
-	       the matrix */
+        for (i = n - nb; i >= kk; i -= nb) 
+          {
+            /* Reduce columns i:i+nb-1 to tridiagonal form and form the   
+               matrix W which is needed to update the unreduced part of   
+               the matrix */
             
             /*   Get the current panel (no need for the 1st iteration) */
-	    if (i!=n-nb)
-	      cublasGetMatrix(i+nb, nb, sizeof(cuDoubleComplex), 
-			      dA(0, i), ldda, A(0, i), lda);
+            if (i!=n-nb)
+              cublasGetMatrix(i+nb, nb, sizeof(cuDoubleComplex), 
+                              dA(0, i), ldda, A(0, i), lda);
             
-	    magma_zlatrd(uplo, i+nb, nb, A(0, 0), lda, e, tau, 
+            magma_zlatrd(uplo, i+nb, nb, A(0, 0), lda, e, tau, 
                          work, ldwork, dA(0, 0), ldda, dwork, lddwork);
 
-	    /* Update the unreduced submatrix A(0:i-2,0:i-2), using an   
-	       update of the form:  A := A - V*W' - W*V' */
+            /* Update the unreduced submatrix A(0:i-2,0:i-2), using an   
+               update of the form:  A := A - V*W' - W*V' */
             cublasSetMatrix(i + nb, nb, sizeof(cuDoubleComplex),
                             work, ldwork,
                             dwork, lddwork);
 
-	    cublasZher2k(uplo, MagmaNoTrans, i, nb, z_neg_one, 
+            cublasZher2k(uplo, MagmaNoTrans, i, nb, z_neg_one, 
                          dA(0, i), ldda, dwork, 
                          lddwork, d_one, dA(0, 0), ldda);
             
             /* Copy superdiagonal elements back into A, and diagonal   
-	       elements into D */
-	    for (j = i; j < i+nb; ++j) {
-		MAGMA_Z_SET2REAL( *A(j-1, j), e[j - 1] );
-		d[j] = MAGMA_Z_GET_X( *A(j, j) );
-	    }
+               elements into D */
+            for (j = i; j < i+nb; ++j) {
+                MAGMA_Z_SET2REAL( *A(j-1, j), e[j - 1] );
+                d[j] = MAGMA_Z_GET_X( *A(j, j) );
+            }
 
-	  }
+          }
       
         cublasGetMatrix(kk, kk, sizeof(cuDoubleComplex), dA(0, 0), ldda,
                         A(0, 0), lda);
       
-	/*  Use unblocked code to reduce the last or only block */
-	lapackf77_zhetd2(uplo_, &kk, A(0, 0), &lda, d, e, tau, &iinfo);
+        /*  Use unblocked code to reduce the last or only block */
+        lapackf77_zhetd2(uplo_, &kk, A(0, 0), &lda, d, e, tau, &iinfo);
     } 
     else 
       {
-	/* Copy the matrix to the GPU */
-	if (1<=n-nx)
-	  cublasSetMatrix(n, n, sizeof(cuDoubleComplex), A(0,0), lda, dA(0,0), ldda);
+        /* Copy the matrix to the GPU */
+        if (1<=n-nx)
+          cublasSetMatrix(n, n, sizeof(cuDoubleComplex), A(0,0), lda, dA(0,0), ldda);
 
-	/* Reduce the lower triangle of A */
-	for (i = 0; i < n-nx; i += nb) 
-	  {
-	    /* Reduce columns i:i+nb-1 to tridiagonal form and form the
+        /* Reduce the lower triangle of A */
+        for (i = 0; i < n-nx; i += nb) 
+          {
+            /* Reduce columns i:i+nb-1 to tridiagonal form and form the
                matrix W which is needed to update the unreduced part of
                the matrix */
 
-	    /*   Get the current panel (no need for the 1st iteration) */
-	    if (i!=0)
-	      cublasGetMatrix(n-i, nb, sizeof(cuDoubleComplex),
-			      dA(i, i), ldda,
-			      A(i, i), lda);
-	    
-	    magma_zlatrd(uplo, n-i, nb, A(i, i), lda, &e[i], 
-			 &tau[i], work, ldwork, 
-			 dA(i, i), ldda,
-			 dwork, lddwork);
-	    
-	    /* Update the unreduced submatrix A(i+ib:n,i+ib:n), using   
-	       an update of the form:  A := A - V*W' - W*V' */
-	    cublasSetMatrix(n-i, nb, sizeof(cuDoubleComplex),
+            /*   Get the current panel (no need for the 1st iteration) */
+            if (i!=0)
+              cublasGetMatrix(n-i, nb, sizeof(cuDoubleComplex),
+                              dA(i, i), ldda,
+                              A(i, i), lda);
+            
+            magma_zlatrd(uplo, n-i, nb, A(i, i), lda, &e[i], 
+                         &tau[i], work, ldwork, 
+                         dA(i, i), ldda,
+                         dwork, lddwork);
+            
+            /* Update the unreduced submatrix A(i+ib:n,i+ib:n), using   
+               an update of the form:  A := A - V*W' - W*V' */
+            cublasSetMatrix(n-i, nb, sizeof(cuDoubleComplex),
                             work, ldwork,
                             dwork, lddwork);
 
-	    cublasZher2k('L', 'N', n-i-nb, nb, z_neg_one, 
-			 dA(i+nb, i), ldda, 
-			 &dwork[nb], lddwork, d_one, 
-			 dA(i+nb, i+nb), ldda);
-	    
-	    /* Copy subdiagonal elements back into A, and diagonal   
-	       elements into D */
-	    for (j = i; j < i+nb; ++j) {
-		MAGMA_Z_SET2REAL( *A(j+1, j), e[j] );
-		d[j] = MAGMA_Z_GET_X( *A(j, j) );
-	    }
-	  }
+            cublasZher2k('L', 'N', n-i-nb, nb, z_neg_one, 
+                         dA(i+nb, i), ldda, 
+                         &dwork[nb], lddwork, d_one, 
+                         dA(i+nb, i+nb), ldda);
+            
+            /* Copy subdiagonal elements back into A, and diagonal   
+               elements into D */
+            for (j = i; j < i+nb; ++j) {
+                MAGMA_Z_SET2REAL( *A(j+1, j), e[j] );
+                d[j] = MAGMA_Z_GET_X( *A(j, j) );
+            }
+          }
 
-	/* Use unblocked code to reduce the last or only block */
-	if (1<=n-nx)
-	  cublasGetMatrix(n-i, n-i, sizeof(cuDoubleComplex),
-			  dA(i, i), ldda,
-			  A(i, i), lda);
-	i_n = n-i;
-	lapackf77_zhetrd(uplo_, &i_n, A(i, i), &lda, &d[i], &e[i],
+        /* Use unblocked code to reduce the last or only block */
+        if (1<=n-nx)
+          cublasGetMatrix(n-i, n-i, sizeof(cuDoubleComplex),
+                          dA(i, i), ldda,
+                          A(i, i), lda);
+        i_n = n-i;
+        lapackf77_zhetrd(uplo_, &i_n, A(i, i), &lda, &d[i], &e[i],
                          &tau[i], work, &lwork, &iinfo);
-	
+        
       }
     
     cublasFree(da);

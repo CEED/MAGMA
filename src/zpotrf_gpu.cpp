@@ -109,8 +109,8 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
     nb = magma_get_zpotrf_nb(n);
 
     if (cudaSuccess != cudaMallocHost( (void**)&work, nb*nb*sizeof(cuDoubleComplex) ) ) {
-	*info = -6;
-	return MAGMA_ERR_HOSTALLOC;
+        *info = -6;
+        return MAGMA_ERR_HOSTALLOC;
     }
 
     static cudaStream_t stream[2];
@@ -125,14 +125,14 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
     } else {
 
         /* Use blocked code. */
-	if (upper) {
+        if (upper) {
             
             /* Compute the Cholesky factorization A = U'*U. */
             for (j=0; j<n; j+=nb) {
                 
                 /* Update and factorize the current diagonal block and test   
                    for non-positive-definiteness. Computing MIN */
-		jb = min(nb, (n-j));
+                jb = min(nb, (n-j));
                 
                 cublasZherk(MagmaUpper, MagmaConjTrans, jb, j, 
                             mdone, dA(0, j), ldda, 
@@ -142,8 +142,8 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                                   dA(j, j), ldda*sizeof(cuDoubleComplex), 
                                   jb*sizeof(cuDoubleComplex), jb, 
                                   cudaMemcpyDeviceToHost,stream[1]);
-		
-		if ( (j+jb) < n) {
+                
+                if ( (j+jb) < n) {
                     /* Compute the current block row. */
                     cublasZgemm(MagmaConjTrans, MagmaNoTrans, 
                                 jb, (n-j-jb), j,
@@ -159,9 +159,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                                    work,     jb  *sizeof(cuDoubleComplex), 
                                    sizeof(cuDoubleComplex)*jb, jb, 
                                    cudaMemcpyHostToDevice,stream[0]);
-		if (*info != 0) {
-		  *info = *info + j;
-		  break;
+                if (*info != 0) {
+                  *info = *info + j;
+                  break;
                 }
 
                 if ( (j+jb) < n)
@@ -169,11 +169,11 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                                  jb, (n-j-jb),
                                  zone, dA(j, j   ), ldda, 
                                        dA(j, j+jb), ldda);
-	    }
-	} else {
+            }
+        } else {
             //=========================================================
             // Compute the Cholesky factorization A = L*L'.
-	    for (j=0; j<n; j+=nb) {
+            for (j=0; j<n; j+=nb) {
 
                 //  Update and factorize the current diagonal block and test   
                 //  for non-positive-definiteness. Computing MIN 
@@ -182,12 +182,12 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                 cublasZherk(MagmaLower, MagmaNoTrans, jb, j,
                             mdone, dA(j, 0), ldda, 
                             done,  dA(j, j), ldda);
-		
+                
                 cudaMemcpy2DAsync( work,     jb  *sizeof(cuDoubleComplex),
                                    dA(j, j), ldda*sizeof(cuDoubleComplex),
                                    sizeof(cuDoubleComplex)*jb, jb,
                                    cudaMemcpyDeviceToHost,stream[1]);
-		
+                
                 if ( (j+jb) < n) {
                     cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
                                  (n-j-jb), jb, j,
@@ -197,24 +197,24 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                 }
 
                 cudaStreamSynchronize(stream[1]);
-	        lapackf77_zpotrf(MagmaLowerStr, &jb, work, &jb, info);
-	        cudaMemcpy2DAsync(dA(j, j), ldda*sizeof(cuDoubleComplex), 
+                lapackf77_zpotrf(MagmaLowerStr, &jb, work, &jb, info);
+                cudaMemcpy2DAsync(dA(j, j), ldda*sizeof(cuDoubleComplex), 
                                   work,     jb  *sizeof(cuDoubleComplex), 
                                   sizeof(cuDoubleComplex)*jb, jb, 
                                   cudaMemcpyHostToDevice,stream[0]);
-		if (*info != 0) {
-		  *info = *info + j;
-		  break;
+                if (*info != 0) {
+                  *info = *info + j;
+                  break;
                 }
-	        
-		if ( (j+jb) < n)
+                
+                if ( (j+jb) < n)
                     cublasZtrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
                                 (n-j-jb), jb, 
                                 zone, dA(j,    j), ldda, 
                                       dA(j+jb, j), ldda);
-	    }
+            }
 
-	}
+        }
     }
 
     cudaStreamDestroy(stream[0]);

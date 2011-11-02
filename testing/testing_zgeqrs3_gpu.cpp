@@ -111,8 +111,8 @@ int main( int argc, char** argv)
     l1 = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
     lhwork = -1;
     lapackf77_zunmqr( MagmaLeftStr, MagmaConjTransStr, 
-		      &M, &nrhs, &min_mn, h_A, &lda, tau,
-		      h_X, &ldb, tmp, &lhwork, &info);
+                      &M, &nrhs, &min_mn, h_A, &lda, tau,
+                      h_X, &ldb, tmp, &lhwork, &info);
     l2 = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
     lhwork = max( max( l1, l2 ), lworkgpu );
 
@@ -124,14 +124,14 @@ int main( int argc, char** argv)
     printf("============================================================\n");
     for(i=0; i<10; i++){
         if (argc == 1){
-	    M = N = size[i];
+            M = N = size[i];
         }
-	min_mn= min(M, N);
-	ldb = lda = M;
-	n2    = lda*N;
-	ldda  = ((M+31)/32)*32;
-	flops = (FLOPS_GEQRF( (double)M, (double)N ) 
-		 + FLOPS_GEQRS( (double)M, (double)N, (double)nrhs )) / 1000000;
+        min_mn= min(M, N);
+        ldb = lda = M;
+        n2    = lda*N;
+        ldda  = ((M+31)/32)*32;
+        flops = (FLOPS_GEQRF( (double)M, (double)N ) 
+                 + FLOPS_GEQRS( (double)M, (double)N, (double)nrhs )) / 1000000;
 
         /* Initialize the matrices */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -148,22 +148,22 @@ int main( int argc, char** argv)
         cublasSetMatrix( M, nrhs, sizeof(cuDoubleComplex), h_B, ldb, d_B, lddb);
 
         start = get_current_time();
-	magma_zgels3_gpu( MagmaNoTrans, M, N, nrhs, d_A, ldda,
-			  d_B, lddb, hwork, lworkgpu, &info);
+        magma_zgels3_gpu( MagmaNoTrans, M, N, nrhs, d_A, ldda,
+                          d_B, lddb, hwork, lworkgpu, &info);
         end = get_current_time();
-	if (info < 0)
-	    printf("Argument %d of magma_zgels had an illegal value.\n", -info);
-	
-	gpu_perf = flops / GetTimerValue(start, end);
+        if (info < 0)
+            printf("Argument %d of magma_zgels had an illegal value.\n", -info);
+        
+        gpu_perf = flops / GetTimerValue(start, end);
 
         // Get the solution in h_X
         cublasGetMatrix(N, nrhs, sizeof(cuDoubleComplex), d_B, lddb, h_X, ldb);
 
         // compute the residual
-	blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &M, &nrhs, &N, 
-		       &mzone, h_A, &lda, 
-		               h_X, &ldb, 
-		       &zone,  h_R, &ldb);
+        blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &M, &nrhs, &N, 
+                       &mzone, h_A, &lda, 
+                               h_X, &ldb, 
+                       &zone,  h_R, &ldb);
         matnorm = lapackf77_zlange("f", &M, &N, h_A, &lda, work);
 
         /* =====================================================================
@@ -172,17 +172,17 @@ int main( int argc, char** argv)
         lapackf77_zlacpy( MagmaUpperLowerStr, &M, &nrhs, h_B, &ldb, h_X, &ldb );
 
         start = get_current_time();
-	lapackf77_zgels( MagmaNoTransStr, &M, &N, &nrhs,
-			 h_A, &lda, h_X, &ldb, hwork, &lhwork, &info);
+        lapackf77_zgels( MagmaNoTransStr, &M, &N, &nrhs,
+                         h_A, &lda, h_X, &ldb, hwork, &lhwork, &info);
         end = get_current_time();
         cpu_perf = flops / GetTimerValue(start, end);
         if (info < 0)
-	  printf("Argument %d of lapackf77_zgels had an illegal value.\n", -info);
+          printf("Argument %d of lapackf77_zgels had an illegal value.\n", -info);
 
-	blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &M, &nrhs, &N, 
-		       &mzone, h_A2, &lda, 
-		               h_X,  &ldb, 
-		       &zone,  h_B,  &ldb);
+        blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &M, &nrhs, &N, 
+                       &mzone, h_A2, &lda, 
+                               h_X,  &ldb, 
+                       &zone,  h_B,  &ldb);
 
         printf("%5d %5d   %6.1f       %6.1f       %7.2e   %7.2e\n",
                M, N, cpu_perf, gpu_perf,

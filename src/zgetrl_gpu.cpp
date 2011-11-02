@@ -108,11 +108,11 @@ magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
     /* Check arguments */
     *info = 0;
     if (m < 0)
-	*info = -1;
+        *info = -1;
     else if (n < 0)
-	*info = -2;
+        *info = -2;
     else if (ldda < max(1,m))
-	*info = -4;
+        *info = -4;
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
@@ -129,7 +129,7 @@ magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
 
     if ( ib >= mindim ) {
         /* Use CPU code. */
-	lapackf77_zgetrf(&m, &n, hA, &ldha, ipiv, info);
+        lapackf77_zgetrf(&m, &n, hA, &ldha, ipiv, info);
 
 #ifndef WITHOUTTRTRI
         CORE_zlacpy(PlasmaUpperLower, mindim, mindim, 
@@ -153,8 +153,8 @@ magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
         }
     }
     else {
-	/* Use hybrid blocked code. */
-	maxm = ((m + 31)/32)*32;
+        /* Use hybrid blocked code. */
+        maxm = ((m + 31)/32)*32;
 
         if ( (storev == 'C') || (storev == 'c') ) {
             magmablas_zgetmo_in( dA, dAT, ldda, m, n );
@@ -162,7 +162,7 @@ magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
             dAT = dA;
         }
             
-	for( i=0; i<s; i++ )
+        for( i=0; i<s; i++ )
         {
             ii = i * ib;
             sb = min(ib, mindim-ii);

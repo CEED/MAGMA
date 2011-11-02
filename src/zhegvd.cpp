@@ -15,9 +15,9 @@
 
 /* This ztrmm interface is used for TAU profiling */
 void MycublasZtrmm(char side, char uplo, char trans, char unit, 
-		   magma_int_t n, magma_int_t m,
+                   magma_int_t n, magma_int_t m,
                    cuDoubleComplex alpha, cuDoubleComplex *db, magma_int_t lddb, 
-		   cuDoubleComplex *dz, magma_int_t lddz)
+                   cuDoubleComplex *dz, magma_int_t lddz)
 {
   cublasZtrmm(side, uplo, trans, unit, n, m, alpha, db, lddb, dz, lddz);
   cudaThreadSynchronize();
@@ -25,9 +25,9 @@ void MycublasZtrmm(char side, char uplo, char trans, char unit,
 
 /* This ztrsm interface is used for TAU profiling */
 void MycublasZtrsm(char side, char uplo, char trans, char unit, 
-		   magma_int_t n, magma_int_t m,
+                   magma_int_t n, magma_int_t m,
                    cuDoubleComplex alpha, cuDoubleComplex *db, magma_int_t lddb,
-		   cuDoubleComplex *dz, magma_int_t lddz)
+                   cuDoubleComplex *dz, magma_int_t lddz)
 {
   cublasZtrsm(side, uplo, trans, unit, n, m, alpha, db, lddb, dz, lddz);
   cudaThreadSynchronize();
@@ -37,8 +37,8 @@ extern "C" magma_int_t
 magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
              cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *b, magma_int_t ldb, 
              double *w, cuDoubleComplex *work, magma_int_t lwork, 
-	     double *rwork, magma_int_t lrwork, 
-	     magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
+             double *rwork, magma_int_t lrwork, 
+             magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -221,17 +221,17 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
 
     *info = 0;
     if (itype < 1 || itype > 3) {
-	*info = -1;
+        *info = -1;
     } else if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVectorsStr))) {
-	*info = -2;
+        *info = -2;
     } else if (! (lower || lapackf77_lsame(uplo_, MagmaUpperStr))) {
-	*info = -3;
+        *info = -3;
     } else if (n < 0) {
-	*info = -4;
+        *info = -4;
     } else if (lda < max(1,n)) {
-	*info = -6;
+        *info = -6;
     } else if (ldb < max(1,n)) {
-	*info = -8;
+        *info = -8;
     }
 
     magma_int_t nb = magma_get_zhetrd_nb(n); 
@@ -263,12 +263,12 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
         return MAGMA_ERR_ILLEGAL_VALUE;
     }
     else if (lquery) {
-	return MAGMA_SUCCESS;
+        return MAGMA_SUCCESS;
     }
 
     /*     Quick return if possible */
     if (n == 0) {
-	return 0;
+        return 0;
     }
 
     if (cudaSuccess != cudaMalloc( (void**)&da, n*ldda*sizeof(cuDoubleComplex) ) ||
@@ -287,8 +287,8 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
   
     magma_zpotrf_gpu(uplo_[0], n, db, lddb, info);
     if (*info != 0) {
-	*info = n + *info;
-	return 0;
+        *info = n + *info;
+        return 0;
     }
 
     cudaStreamSynchronize(stream);
@@ -302,7 +302,7 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     magma_zhegst_gpu(itype, uplo_[0], n, da, ldda, db, lddb, info);
   
     magma_zheevd_gpu(jobz_[0], uplo_[0], n, da, ldda, w, a, lda, 
-		     work, lwork, rwork, lrwork, iwork, liwork, info);
+                     work, lwork, rwork, lrwork, iwork, liwork, info);
     /* Computing MAX */
     //    d__1 = (double) lopt, d__2 = work[1].r;
     //    lopt = (magma_int_t) max(d__1,d__2);
@@ -315,33 +315,33 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
 
     if (wantz && *info == 0) 
       {
-	/* Backtransform eigenvectors to the original problem. */
-	if (itype == 1 || itype == 2) 
-	  {
-	    /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;   
-	       backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
-	    if (lower) {
-		*(unsigned char *)trans = MagmaConjTrans;
-	    } else {
-		*(unsigned char *)trans = MagmaNoTrans;
-	    }
+        /* Backtransform eigenvectors to the original problem. */
+        if (itype == 1 || itype == 2) 
+          {
+            /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;   
+               backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
+            if (lower) {
+                *(unsigned char *)trans = MagmaConjTrans;
+            } else {
+                *(unsigned char *)trans = MagmaNoTrans;
+            }
 
             MycublasZtrsm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit,
-			  n, n, zone, db, lddb, da, ldda);
+                          n, n, zone, db, lddb, da, ldda);
 
-	} else if (itype == 3) 
-	  {
-	    /*  For B*A*x=(lambda)*x;   
-		backtransform eigenvectors: x = L*y or U'*y */
-	    if (lower) {
-		*(unsigned char *)trans = MagmaNoTrans;
-	    } else {
-		*(unsigned char *)trans = MagmaConjTrans;
-	    }
+        } else if (itype == 3) 
+          {
+            /*  For B*A*x=(lambda)*x;   
+                backtransform eigenvectors: x = L*y or U'*y */
+            if (lower) {
+                *(unsigned char *)trans = MagmaNoTrans;
+            } else {
+                *(unsigned char *)trans = MagmaConjTrans;
+            }
 
             MycublasZtrmm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit, 
-			  n, n, zone, db, lddb, da, ldda);
-	}
+                          n, n, zone, db, lddb, da, ldda);
+        }
 
         cublasGetMatrix(n, n, sizeof(cuDoubleComplex), da, ldda, a, lda);
 

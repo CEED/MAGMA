@@ -96,20 +96,20 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
 
 
     /* Local variables */
-    cuDoubleComplex	    zone  = MAGMA_Z_ONE;
-    cuDoubleComplex	    mzone = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex	    *work, *dt;
+    cuDoubleComplex            zone  = MAGMA_Z_ONE;
+    cuDoubleComplex            mzone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex            *work, *dt;
 
-    char	            uplo_[2] = {uplo, 0};
-    magma_int_t	        ldda, nb;
-    static magma_int_t	j, jj, jb, J, JB, NB, MB;
-    double	            done  = (double) 1.0;
-    double	            mdone = (double)-1.0;
-    long int	        upper = lapackf77_lsame(uplo_, "U");
+    char                    uplo_[2] = {uplo, 0};
+    magma_int_t                ldda, nb;
+    static magma_int_t        j, jj, jb, J, JB, NB, MB;
+    double                    done  = (double) 1.0;
+    double                    mdone = (double)-1.0;
+    long int                upper = lapackf77_lsame(uplo_, "U");
 #if CUDA_VERSION > 3010
-	size_t totalMem;
+        size_t totalMem;
 #else
-	unsigned int totalMem;
+        unsigned int totalMem;
 #endif
     CUdevice dev;
     static cudaStream_t stream[3];
@@ -140,246 +140,246 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
     nb = magma_get_dpotrf_nb(n);
     /* figure out NB */
     cuDeviceGet( &dev, 0);
-	cuDeviceTotalMem( &totalMem, dev );
-	totalMem /= sizeof(cuDoubleComplex);
-	MB = n;                                /* number of rows in the big panel    */
-	NB = (magma_int_t)(0.8*totalMem/n-nb); /* number of columns in the big panel */
-	if( NB >= n ) {
+        cuDeviceTotalMem( &totalMem, dev );
+        totalMem /= sizeof(cuDoubleComplex);
+        MB = n;                                /* number of rows in the big panel    */
+        NB = (magma_int_t)(0.8*totalMem/n-nb); /* number of columns in the big panel */
+        if( NB >= n ) {
 #ifdef CHECK_ZPOTRF_OOC
-	  printf( "      * still fit in GPU memory.\n" );
+          printf( "      * still fit in GPU memory.\n" );
 #endif
-	  NB = n;
-	}
+          NB = n;
+        }
 #ifdef CHECK_ZPOTRF_OOC
-	  else {
-	  printf( "      * don't fit in GPU memory.\n" );
-	}
+          else {
+          printf( "      * don't fit in GPU memory.\n" );
+        }
 #endif
-	NB = (NB / nb) * nb;   /* making sure it's devisable by nb   */
+        NB = (NB / nb) * nb;   /* making sure it's devisable by nb   */
     if (CUBLAS_STATUS_SUCCESS != cublasAlloc((NB+nb)*ldda, sizeof(cuDoubleComplex), (void**)&dt)) {
-	  *info = -6;
-	  return MAGMA_ERR_CUBLASALLOC;
+          *info = -6;
+          return MAGMA_ERR_CUBLASALLOC;
     }
-	work = &dt[nb*ldda];
+        work = &dt[nb*ldda];
 #ifdef CHECK_ZPOTRF_OOC
-	if( NB != n ) printf( "      * running in out-core mode (n=%d, NB=%d, nb=%d).\n",n,NB,nb );
-	else          printf( "      * running in in-core mode  (n=%d, NB=%d, nb=%d).\n",n,NB,nb );
-	fflush(stdout);
+        if( NB != n ) printf( "      * running in out-core mode (n=%d, NB=%d, nb=%d).\n",n,NB,nb );
+        else          printf( "      * running in in-core mode  (n=%d, NB=%d, nb=%d).\n",n,NB,nb );
+        fflush(stdout);
 #endif
 
 
     if (nb <= 1 || nb >= n) {
-	  lapackf77_zpotrf(uplo_, &n, a, &lda, info);
+          lapackf77_zpotrf(uplo_, &n, a, &lda, info);
     } else {
 
-	/* Use hybrid blocked code. */
-	if (upper) {
-	  /* ========================================================= *
-	   * Compute the Cholesky factorization A = U'*U.              */
+        /* Use hybrid blocked code. */
+        if (upper) {
+          /* ========================================================= *
+           * Compute the Cholesky factorization A = U'*U.              */
 
-	  /* for each big-panel */
-	  for( J=0; J<n; J+=NB ) {
-		JB = min(NB,n-J);
+          /* for each big-panel */
+          for( J=0; J<n; J+=NB ) {
+                JB = min(NB,n-J);
 
-		/* load the new big-panel by block-rows */
-	    for (jj=0; jj<JB; jj+=nb) {
-		  j  = J+jj;
-		  jb = min(nb, (n-j));
-	      cublasSetMatrix(jb, (n-j), sizeof(cuDoubleComplex), 
-	                      A(j, j), lda, dAup(jj,j), NB);
-		}
-		/* load the panel in one-shot */
+                /* load the new big-panel by block-rows */
+            for (jj=0; jj<JB; jj+=nb) {
+                  j  = J+jj;
+                  jb = min(nb, (n-j));
+              cublasSetMatrix(jb, (n-j), sizeof(cuDoubleComplex), 
+                              A(j, j), lda, dAup(jj,j), NB);
+                }
+                /* load the panel in one-shot */
         //jb = min(nb, (n-J));
         //cublasSetMatrix(JB, n-J, sizeof(cuDoubleComplex),
         //                A(J, J), lda, dAup(0,J), NB);
 
-		/* update with the previous big-panels */
-		for( j=0; j<J; j+=nb ) {
-		  /* upload the block-rows */
-	      cublasSetMatrix(nb, (n-J), sizeof(cuDoubleComplex), 
-	                      A(j, J), lda, dTup(0, J), nb);
+                /* update with the previous big-panels */
+                for( j=0; j<J; j+=nb ) {
+                  /* upload the block-rows */
+              cublasSetMatrix(nb, (n-J), sizeof(cuDoubleComplex), 
+                              A(j, J), lda, dTup(0, J), nb);
 
-		  /* update the current big-panel *
-		   * using the previous block-row */
-	      cublasZherk(MagmaUpper, MagmaConjTrans, JB, nb,
-	                  mdone, dTup(0, J), nb, 
-	                  done,  dAup(0, J), NB);
-		  if( (J+JB) < n ) 
-	      cublasZgemm( MagmaConjTrans, MagmaNoTrans, 
-	                   JB, (n-J-JB), nb, 
-	                   mzone, dTup(0, J   ), nb, 
-	                          dTup(0, J+JB), nb,
-	                   zone,  dAup(0, J+JB), NB);
-		}
+                  /* update the current big-panel *
+                   * using the previous block-row */
+              cublasZherk(MagmaUpper, MagmaConjTrans, JB, nb,
+                          mdone, dTup(0, J), nb, 
+                          done,  dAup(0, J), NB);
+                  if( (J+JB) < n ) 
+              cublasZgemm( MagmaConjTrans, MagmaNoTrans, 
+                           JB, (n-J-JB), nb, 
+                           mzone, dTup(0, J   ), nb, 
+                                  dTup(0, J+JB), nb,
+                           zone,  dAup(0, J+JB), NB);
+                }
 
-		/* for each block-column in the big panel */
-	    for (jj=0; jj<JB; jj+=nb) {
-		  j  = J+jj;
-	      jb = min(nb, (n-j));
+                /* for each block-column in the big panel */
+            for (jj=0; jj<JB; jj+=nb) {
+                  j  = J+jj;
+              jb = min(nb, (n-j));
 
-	      /* Update the current diagonal block */
-	      cublasZherk(MagmaUpper, MagmaConjTrans, jb, jj, 
-	                  mdone, dAup(0,  j), NB, 
-	                  done,  dAup(jj, j), NB);
+              /* Update the current diagonal block */
+              cublasZherk(MagmaUpper, MagmaConjTrans, jb, jj, 
+                          mdone, dAup(0,  j), NB, 
+                          done,  dAup(jj, j), NB);
 
-		  /* send the diagonal-block to CPU */
-	      cudaMemcpy2DAsync(  A  (J, j), lda*sizeof(cuDoubleComplex), 
-	                         dAup(0, j), NB *sizeof(cuDoubleComplex), 
-	                         sizeof(cuDoubleComplex)*(jj+jb), jb,
-	                         cudaMemcpyDeviceToHost, stream[1]);
-	      //cudaMemcpy2DAsync(  A  ( j, j), lda*sizeof(cuDoubleComplex), 
-	      //                   dAup(jj, j), NB *sizeof(cuDoubleComplex), 
-	      //                   sizeof(cuDoubleComplex)*jb, jb,
-	      //                   cudaMemcpyDeviceToHost, stream[1]);
-		
-	      if ( (j+jb) < n) {
-			/* update the current off-diagonal blocks with the previous rows */
-	        cublasZgemm(MagmaConjTrans, MagmaNoTrans, 
-	                    jb, (n-j-jb), jj,
-	                    mzone, dAup(0,  j   ), NB, 
-	                           dAup(0,  j+jb), NB,
-	                    zone,  dAup(jj, j+jb), NB);
-	      }
+                  /* send the diagonal-block to CPU */
+              cudaMemcpy2DAsync(  A  (J, j), lda*sizeof(cuDoubleComplex), 
+                                 dAup(0, j), NB *sizeof(cuDoubleComplex), 
+                                 sizeof(cuDoubleComplex)*(jj+jb), jb,
+                                 cudaMemcpyDeviceToHost, stream[1]);
+              //cudaMemcpy2DAsync(  A  ( j, j), lda*sizeof(cuDoubleComplex), 
+              //                   dAup(jj, j), NB *sizeof(cuDoubleComplex), 
+              //                   sizeof(cuDoubleComplex)*jb, jb,
+              //                   cudaMemcpyDeviceToHost, stream[1]);
+                
+              if ( (j+jb) < n) {
+                        /* update the current off-diagonal blocks with the previous rows */
+                cublasZgemm(MagmaConjTrans, MagmaNoTrans, 
+                            jb, (n-j-jb), jj,
+                            mzone, dAup(0,  j   ), NB, 
+                                   dAup(0,  j+jb), NB,
+                            zone,  dAup(jj, j+jb), NB);
+              }
              
-		  /* factor the diagonal block */
-		  cudaStreamSynchronize(stream[1]);
-		  lapackf77_zpotrf(MagmaUpperStr, &jb, A(j, j), &lda, info);
-		  if (*info != 0) {
-		    *info = *info + j;
-		    break;
-		  }
+                  /* factor the diagonal block */
+                  cudaStreamSynchronize(stream[1]);
+                  lapackf77_zpotrf(MagmaUpperStr, &jb, A(j, j), &lda, info);
+                  if (*info != 0) {
+                    *info = *info + j;
+                    break;
+                  }
 
-	      if ( (j+jb) < n ) {
-		    /* send the diagonal block to GPU */
-		    cudaMemcpy2DAsync(dAup(jj, j), NB  * sizeof(cuDoubleComplex), 
-	                           A  (j,  j), lda * sizeof(cuDoubleComplex), 
-	                           sizeof(cuDoubleComplex)*jb, jb, 
-	                           cudaMemcpyHostToDevice,stream[0]);
+              if ( (j+jb) < n ) {
+                    /* send the diagonal block to GPU */
+                    cudaMemcpy2DAsync(dAup(jj, j), NB  * sizeof(cuDoubleComplex), 
+                                   A  (j,  j), lda * sizeof(cuDoubleComplex), 
+                                   sizeof(cuDoubleComplex)*jb, jb, 
+                                   cudaMemcpyHostToDevice,stream[0]);
 
-			/* do the solves on GPU */
-	        cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
-	                    jb, (n-j-jb),
-	                    zone, dAup(jj, j   ), NB, 
-	                          dAup(jj, j+jb), NB);
+                        /* do the solves on GPU */
+                cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
+                            jb, (n-j-jb),
+                            zone, dAup(jj, j   ), NB, 
+                                  dAup(jj, j+jb), NB);
 
-		    /* send off-diagonal block to CPU */
+                    /* send off-diagonal block to CPU */
             //cudaMemcpy2DAsync(  A  (j,  j+jb), lda*sizeof(cuDoubleComplex),
-		    //                   dAup(jj, j+jb), NB *sizeof(cuDoubleComplex),
-		    //                   sizeof(cuDoubleComplex)*jb, n-j-jb,
-		    //                   cudaMemcpyDeviceToHost, stream[2]);
-		  }
+                    //                   dAup(jj, j+jb), NB *sizeof(cuDoubleComplex),
+                    //                   sizeof(cuDoubleComplex)*jb, n-j-jb,
+                    //                   cudaMemcpyDeviceToHost, stream[2]);
+                  }
 
-		} /* end for jj */
+                } /* end for jj */
 
-		/* upload the off-diagonal big panel */
-		if( J+JB < n )
-	    cudaMemcpy2DAsync(  A  (J, J+JB), lda*sizeof(cuDoubleComplex),
-	                       dAup(0, J+JB), NB *sizeof(cuDoubleComplex),
-	                       sizeof(cuDoubleComplex)*JB, n-J-JB, 
-	                       cudaMemcpyDeviceToHost,stream[2]);
-	  }
-	} else {
-	  /* ========================================================= *
-	   * Compute the Cholesky factorization A = L*L'.              */
+                /* upload the off-diagonal big panel */
+                if( J+JB < n )
+            cudaMemcpy2DAsync(  A  (J, J+JB), lda*sizeof(cuDoubleComplex),
+                               dAup(0, J+JB), NB *sizeof(cuDoubleComplex),
+                               sizeof(cuDoubleComplex)*JB, n-J-JB, 
+                               cudaMemcpyDeviceToHost,stream[2]);
+          }
+        } else {
+          /* ========================================================= *
+           * Compute the Cholesky factorization A = L*L'.              */
 
-	  /* for each big-panel */
-	  for( J=0; J<n; J+=NB ) {
-		JB = min(NB,n-J);
+          /* for each big-panel */
+          for( J=0; J<n; J+=NB ) {
+                JB = min(NB,n-J);
 
-		/* load the new big-panel by block-columns*/
-	    for (jj=0; jj<JB; jj+=nb) {
-		  j  = J+jj;
-		  jb = min(nb, (n-j));
-	      cublasSetMatrix((n-j), jb, sizeof(cuDoubleComplex), 
-	                      A(j, j), lda, dA(j, jj), ldda);
-		}
+                /* load the new big-panel by block-columns*/
+            for (jj=0; jj<JB; jj+=nb) {
+                  j  = J+jj;
+                  jb = min(nb, (n-j));
+              cublasSetMatrix((n-j), jb, sizeof(cuDoubleComplex), 
+                              A(j, j), lda, dA(j, jj), ldda);
+                }
 
-		/* update with the previous big-panels */
-		for( j=0; j<J; j+=nb ) {
+                /* update with the previous big-panels */
+                for( j=0; j<J; j+=nb ) {
 
-		  /* upload the block-column */
-	      cublasSetMatrix((n-J), nb, sizeof(cuDoubleComplex), 
-	                      A(J, j), lda, dT(J, 0), ldda);
+                  /* upload the block-column */
+              cublasSetMatrix((n-J), nb, sizeof(cuDoubleComplex), 
+                              A(J, j), lda, dT(J, 0), ldda);
 
-		  /* update the current big-panel    *
-		   * using the previous block-column */
-	      cublasZherk(MagmaLower, MagmaNoTrans, JB, nb,
-	                  mdone, dT(J, 0), ldda, 
-	                  done,  dA(J, 0), ldda);
-		  if( J+JB < n )
-	      cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
-	                   (n-J-JB), JB, nb,
-	                   mzone, dT(J+JB, 0), ldda, 
-	                          dT(J,    0), ldda,
-	                   zone,  dA(J+JB, 0), ldda);
-		}
+                  /* update the current big-panel    *
+                   * using the previous block-column */
+              cublasZherk(MagmaLower, MagmaNoTrans, JB, nb,
+                          mdone, dT(J, 0), ldda, 
+                          done,  dA(J, 0), ldda);
+                  if( J+JB < n )
+              cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
+                           (n-J-JB), JB, nb,
+                           mzone, dT(J+JB, 0), ldda, 
+                                  dT(J,    0), ldda,
+                           zone,  dA(J+JB, 0), ldda);
+                }
 
-		/* for each block-column in the big panel */
-	    for (jj=0; jj<JB; jj+=nb) {
-		  j  = J+jj;
-		  jb = min(nb, (n-j));
+                /* for each block-column in the big panel */
+            for (jj=0; jj<JB; jj+=nb) {
+                  j  = J+jj;
+                  jb = min(nb, (n-j));
 
-	      /* Update the current diagonal block */
-	      cublasZherk(MagmaLower, MagmaNoTrans, jb, jj,
-	                  mdone, dA(j, 0), ldda, 
-	                  done,  dA(j, jj), ldda);
+              /* Update the current diagonal block */
+              cublasZherk(MagmaLower, MagmaNoTrans, jb, jj,
+                          mdone, dA(j, 0), ldda, 
+                          done,  dA(j, jj), ldda);
 
-		  /* upload the current diagonal block to CPU for factorization *
-		   * this requires the synchronization before factorization     */
-	      cudaMemcpy2DAsync(  A(j,j),  lda *sizeof(cuDoubleComplex),
-	                         dA(j,jj), ldda*sizeof(cuDoubleComplex),
-	                         sizeof(cuDoubleComplex)*jb, jb,
-	                         cudaMemcpyDeviceToHost,stream[1]);
-		  /* upload the corresponding off-diagonal block-row from previous itrs   *
-		   * to CPU. this can wait till end.                                      */
-	      cudaMemcpy2DAsync(  A(j, J), lda *sizeof(cuDoubleComplex),
-	                         dA(j, 0), ldda*sizeof(cuDoubleComplex),
-	                         sizeof(cuDoubleComplex)*jb, jj,
-	                         cudaMemcpyDeviceToHost,stream[0]);
+                  /* upload the current diagonal block to CPU for factorization *
+                   * this requires the synchronization before factorization     */
+              cudaMemcpy2DAsync(  A(j,j),  lda *sizeof(cuDoubleComplex),
+                                 dA(j,jj), ldda*sizeof(cuDoubleComplex),
+                                 sizeof(cuDoubleComplex)*jb, jb,
+                                 cudaMemcpyDeviceToHost,stream[1]);
+                  /* upload the corresponding off-diagonal block-row from previous itrs   *
+                   * to CPU. this can wait till end.                                      */
+              cudaMemcpy2DAsync(  A(j, J), lda *sizeof(cuDoubleComplex),
+                                 dA(j, 0), ldda*sizeof(cuDoubleComplex),
+                                 sizeof(cuDoubleComplex)*jb, jj,
+                                 cudaMemcpyDeviceToHost,stream[0]);
 
-	      if ( (j+jb) < n) {
-			/* update the off-diagonal blocks of the current block-column *
-			 * using the previous columns                                 */
-	        cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
-	                     (n-j-jb), jb, jj,
-	                     mzone, dA(j+jb, 0),  ldda, 
-	                            dA(j,    0),  ldda,
-	                     zone,  dA(j+jb, jj), ldda);
-	      }
-		
-		  /* CPU wait for the diagonal-block and factor */
-	      cudaStreamSynchronize(stream[1]);
-	      lapackf77_zpotrf(MagmaLowerStr, &jb, A(j, j), &lda, info);
-	      if (*info != 0){
-	        *info = *info + j;
-	        break;
-	      }
+              if ( (j+jb) < n) {
+                        /* update the off-diagonal blocks of the current block-column *
+                         * using the previous columns                                 */
+                cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
+                             (n-j-jb), jb, jj,
+                             mzone, dA(j+jb, 0),  ldda, 
+                                    dA(j,    0),  ldda,
+                             zone,  dA(j+jb, jj), ldda);
+              }
+                
+                  /* CPU wait for the diagonal-block and factor */
+              cudaStreamSynchronize(stream[1]);
+              lapackf77_zpotrf(MagmaLowerStr, &jb, A(j, j), &lda, info);
+              if (*info != 0){
+                *info = *info + j;
+                break;
+              }
 
-	      if ( (j+jb) < n) {
-		    /* send the diagonal-block to GPU */
-	        cudaMemcpy2DAsync( dA(j, jj), ldda*sizeof(cuDoubleComplex), 
-	                           A(j,   j), lda *sizeof(cuDoubleComplex), 
-	                           sizeof(cuDoubleComplex)*jb, jb, 
-	                           cudaMemcpyHostToDevice,stream[0]);
-	        
-			/* GPU do the solves with the current diagonal-block */
-	        cublasZtrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
-	                     (n-j-jb), jb, zone, 
-						 dA(j,    jj), ldda, 
-	                     dA(j+jb, jj), ldda);
-		  }
-		} /* end of for jj */
+              if ( (j+jb) < n) {
+                    /* send the diagonal-block to GPU */
+                cudaMemcpy2DAsync( dA(j, jj), ldda*sizeof(cuDoubleComplex), 
+                                   A(j,   j), lda *sizeof(cuDoubleComplex), 
+                                   sizeof(cuDoubleComplex)*jb, jb, 
+                                   cudaMemcpyHostToDevice,stream[0]);
+                
+                        /* GPU do the solves with the current diagonal-block */
+                cublasZtrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
+                             (n-j-jb), jb, zone, 
+                                                 dA(j,    jj), ldda, 
+                             dA(j+jb, jj), ldda);
+                  }
+                } /* end of for jj */
 
-		/* upload the off-diagonal big panel */
-		if( J+JB < n )
-	    cudaMemcpy2DAsync(  A(J+JB, J), lda *sizeof(cuDoubleComplex),
-	                       dA(J+JB, 0), ldda*sizeof(cuDoubleComplex),
-	                       sizeof(cuDoubleComplex)*(n-J-JB), JB,
-	                       cudaMemcpyDeviceToHost,stream[2]);
+                /* upload the off-diagonal big panel */
+                if( J+JB < n )
+            cudaMemcpy2DAsync(  A(J+JB, J), lda *sizeof(cuDoubleComplex),
+                               dA(J+JB, 0), ldda*sizeof(cuDoubleComplex),
+                               sizeof(cuDoubleComplex)*(n-J-JB), JB,
+                               cudaMemcpyDeviceToHost,stream[2]);
 
-	  } /* end of for J */
+          } /* end of for J */
     } /* if upper */
-	} /* if nb */
+        } /* if nb */
     cudaStreamDestroy(stream[0]);
     cudaStreamDestroy(stream[1]);
     cudaStreamDestroy(stream[2]);

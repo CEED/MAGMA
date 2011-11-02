@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        November 2010
 
-	   @precisions normal z -> s d c
+           @precisions normal z -> s d c
 
 */
 
@@ -43,7 +43,7 @@ int main( magma_int_t argc, char** argv)
     cuDoubleComplex *h_A, *h_R, *h_A2, *h_A3, *h_work, *h_work2, *tau, *d_work2;
     cuDoubleComplex *d_A, *d_work;
     float gpu_perf, cpu_perf, cpu2_perf;
-	double flops;
+        double flops;
 
     magma_timestr_t start, end;
 
@@ -129,15 +129,15 @@ int main( magma_int_t argc, char** argv)
         n2 = M*N;
       }
 
-	  flops = FLOPS( (double)M, (double)N ) / 1000000;
+          flops = FLOPS( (double)M, (double)N ) / 1000000;
 
       /* Initialize the matrix */
       lapackf77_zlarnv( &ione, ISEED, &n2, h_A2 );
       lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A2, &M, h_A3, &M );
 
-	  /* =====================================================================
+          /* =====================================================================
          Performs operation using LAPACK 
-	 =================================================================== */
+         =================================================================== */
 
       start = get_current_time();
       lapackf77_zgeqrf(&M, &N, h_A3, &M, tau, h_work2, &lwork, info);
@@ -148,9 +148,9 @@ int main( magma_int_t argc, char** argv)
  
       cpu2_perf = flops / GetTimerValue(start, end);
 
-	  /* =====================================================================
+          /* =====================================================================
          Performs operation using multicore 
-	 =================================================================== */
+         =================================================================== */
 
       start = get_current_time();
       magma_zgeqrf_mc(context, &M, &N, h_A2, &M, tau, h_work2, &lwork, info);
@@ -166,24 +166,24 @@ int main( magma_int_t argc, char** argv)
          =================================================================== */
 
       double work[1], matnorm = 1.;
-	  cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
+          cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
       magma_int_t one = 1;
       matnorm = lapackf77_zlange("f", &M, &N, h_A2, &M, work);
 
       blasf77_zaxpy(&n2, &mone, h_A2, &one, h_A3, &one);
       printf("%5d  %5d       %6.2f               %6.2f           %e\n", 
-	     M,  N, cpu2_perf, cpu_perf,
-	     lapackf77_zlange("f", &M, &N, h_A3, &M, work) / matnorm);
+             M,  N, cpu2_perf, cpu_perf,
+             lapackf77_zlange("f", &M, &N, h_A3, &M, work) / matnorm);
 
       if (loop != 1)
-	break;
+        break;
     }
 
     /* Memory clean up */
     free(h_A2);
     free(tau);
-	free(h_A3);
-	free(h_work2);
+        free(h_A3);
+        free(h_work2);
 
     /* Shut down the MAGMA context */
     magma_finalize(context);

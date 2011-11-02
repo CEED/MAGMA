@@ -173,15 +173,15 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
     long int upper = lapackf77_lsame(uplo_, "U");
     lquery = lwork == -1;
     if (! upper && ! lapackf77_lsame(uplo_, "L")) {
-	*info = -1;
+        *info = -1;
     } else if (n < 0) {
-	*info = -2;
+        *info = -2;
     } else if (ldda < max(1,n)) {
-	*info = -4;
+        *info = -4;
     } else if (ldwa < max(1,n)) {
         *info = -9;
     } else if (lwork < nb*n && ! lquery) { 
-	*info = -11;
+        *info = -11;
     }
 
     if (*info == 0) {
@@ -200,8 +200,8 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
 
     /* Quick return if possible */
     if (n == 0) {
-	work[0] = z_one;
-	return 0;
+        work[0] = z_one;
+        return 0;
     }
 
     cuDoubleComplex *dwork;
@@ -234,7 +234,7 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
                    work, ldw, dA(0, 0), ldda, dwork, lddw);
       
       /* Update the unreduced submatrix A(0:i-2,0:i-2), using an   
-	 update of the form:  A := A - V*W' - W*V' */
+         update of the form:  A := A - V*W' - W*V' */
       
       cublasSetMatrix(i + nb, nb, sizeof(cuDoubleComplex),
                       work, ldw, dwork, lddw);
@@ -244,7 +244,7 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
                    lddw, d_one, dA(0, 0), ldda);
       
       /* Copy superdiagonal elements back into A, and diagonal   
-	 elements into D */
+         elements into D */
       for (j = i; j < i+nb; ++j) {
         MAGMA_Z_SET2REAL( *A(j-1, j), e[j - 1] );
         d[j] = MAGMA_Z_GET_X( *A(j, j) );
@@ -292,7 +292,7 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
                    dA(i+nb, i+nb), ldda);
       
       /* Copy subdiagonal elements back into A, and diagonal   
-	 elements into D */
+         elements into D */
       for (j = i; j < i+nb; ++j) {
         MAGMA_Z_SET2REAL( *A(j+1, j), e[j] );
         d[j] = MAGMA_Z_GET_X( *A(j, j) );

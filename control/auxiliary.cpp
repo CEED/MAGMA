@@ -167,8 +167,8 @@ void spanel_to_q(char uplo, int ib, float *a, int lda, float *work){
     for(i=0; i<ib; i++){
       col = a + i*lda;
       for(j=0; j<i; j++){
-	work[k++] = col[j];
-	col[j] = 0.;
+        work[k++] = col[j];
+        col[j] = 0.;
       }
       work[k++] = col[i];
       col[j] = 1.;
@@ -200,7 +200,7 @@ void sq_to_panel(char uplo, int ib, float *a, int lda, float *work){
     for(i=0; i<ib; i++){
       col = a + i*lda;
       for(j=0; j<=i; j++)
-	col[j] = work[k++];
+        col[j] = work[k++];
     }
   }
   else {
@@ -224,9 +224,9 @@ void cpanel_to_q(char uplo, int ib, float2 *a, int lda, float2 *work){
     for(i=0; i<ib; i++){
       col = a + i*lda;
       for(j=0; j<i; j++){
-	work[k  ].x = col[j].x;
-	work[k++].y = col[j].y;
-	col[j].x = col[j].y = 0.;
+        work[k  ].x = col[j].x;
+        work[k++].y = col[j].y;
+        col[j].x = col[j].y = 0.;
       }
       work[k  ].x = col[i].x;
       work[k++].y = col[i].y;
@@ -243,7 +243,7 @@ void cpanel_to_q(char uplo, int ib, float2 *a, int lda, float2 *work){
       col[i].y = 0.;
       for(j=i+1; j<ib; j++){
         work[k  ].x = col[j].x;
-	work[k++].y = col[j].y;
+        work[k++].y = col[j].y;
         col[j].x = col[j].y = 0.;
       }
     }
@@ -262,8 +262,8 @@ void cq_to_panel(char uplo, int ib, float2 *a, int lda, float2 *work){
     for(i=0; i<ib; i++){
       col = a + i*lda;
       for(j=0; j<=i; j++){
-	col[j].x = work[k  ].x;
-	col[j].y = work[k++].y;
+        col[j].x = work[k  ].x;
+        col[j].y = work[k++].y;
       }
     }
   }
@@ -272,7 +272,7 @@ void cq_to_panel(char uplo, int ib, float2 *a, int lda, float2 *work){
       col = a + i*lda;
       for(j=i; j<ib; j++){
         col[j].x = work[k  ].x;
-	col[j].y = work[k++].y;
+        col[j].y = work[k++].y;
       }
     }
   }
@@ -290,8 +290,8 @@ void dpanel_to_q(char uplo, int ib, double *a, int lda, double *work){
     for(i=0; i<ib; i++){
       col = a + i*lda;
       for(j=0; j<i; j++){
-	work[k++] = col[j];
-	col[j] = 0.;
+        work[k++] = col[j];
+        col[j] = 0.;
       }
       work[k++] = col[i];
       col[j] = 1.;
@@ -304,7 +304,7 @@ void dpanel_to_q(char uplo, int ib, double *a, int lda, double *work){
       col[i] = 1.;
       for(j=i+1; j<ib; j++){
         work[k++] = col[j];
-	col[j] = 0.;
+        col[j] = 0.;
       }
     }
   } 
@@ -322,7 +322,7 @@ void dq_to_panel(char uplo, int ib, double *a, int lda, double *work){
     for(i=0; i<ib; i++){
       col = a + i*lda;
       for(j=0; j<=i; j++)
-	col[j] = work[k++];
+        col[j] = work[k++];
     }
   }
   else {
@@ -346,9 +346,9 @@ void zpanel_to_q(char uplo, int ib, cuDoubleComplex *a, int lda, cuDoubleComplex
     for(i=0; i<ib; i++){
       col = a + i*lda;
       for(j=0; j<i; j++){
-	work[k  ].x = col[j].x;
-	work[k++].y = col[j].y;
-	col[j].x = col[j].y = 0.;
+        work[k  ].x = col[j].x;
+        work[k++].y = col[j].y;
+        col[j].x = col[j].y = 0.;
       }
       work[k  ].x = col[i].x;
       work[k++].y = col[i].y;
@@ -364,9 +364,9 @@ void zpanel_to_q(char uplo, int ib, cuDoubleComplex *a, int lda, cuDoubleComplex
       col[i].x = 1.;
       col[i].y = 0.;
       for(j=i+1; j<ib; j++){
-	work[k  ].x = col[j].x;
-	work[k++].y = col[j].y;
-	col[j].x = col[j].y = 0.;
+        work[k  ].x = col[j].x;
+        work[k++].y = col[j].y;
+        col[j].x = col[j].y = 0.;
       }
     }
   }
@@ -384,8 +384,8 @@ void zq_to_panel(char uplo, int ib, cuDoubleComplex *a, int lda, cuDoubleComplex
     for(i=0; i<ib; i++){
       col = a + i*lda;
       for(j=0; j<=i; j++){
-	col[j].x = work[k  ].x;
-	col[j].y = work[k++].y;
+        col[j].x = work[k  ].x;
+        col[j].y = work[k++].y;
       }
     }
   }
@@ -420,35 +420,35 @@ void swp2pswp(char trans, int n, int *ipiv, int *newipiv){
     for(i=0; i<n; i++){
       newind = ipiv[i] - 1;
       if (newipiv[newind] == -1) {
-	if (newipiv[i]==-1){
-	  newipiv[i] = newind;
-	  if (newind>i)
-	    newipiv[newind]= i;
-	}
-	else
-	  {
-	    ind = newipiv[i];
-	    newipiv[i] = newind;
-	    if (newind>i)
-	      newipiv[newind]= ind;
-	  }
+        if (newipiv[i]==-1){
+          newipiv[i] = newind;
+          if (newind>i)
+            newipiv[newind]= i;
+        }
+        else
+          {
+            ind = newipiv[i];
+            newipiv[i] = newind;
+            if (newind>i)
+              newipiv[newind]= ind;
+          }
       }
       else {
-	if (newipiv[i]==-1){
-	  if (newind>i){
-	    ind = newipiv[newind];
-	    newipiv[newind] = i;
-	    newipiv[i] = ind;
-	  }
-	  else
-	    newipiv[i] = newipiv[newind];
-	}
-	else{
-	  ind = newipiv[i];
-	  newipiv[i] = newipiv[newind];
-	  if (newind > i)
-	    newipiv[newind] = ind;
-	}
+        if (newipiv[i]==-1){
+          if (newind>i){
+            ind = newipiv[newind];
+            newipiv[newind] = i;
+            newipiv[i] = ind;
+          }
+          else
+            newipiv[i] = newipiv[newind];
+        }
+        else{
+          ind = newipiv[i];
+          newipiv[i] = newipiv[newind];
+          if (newind > i)
+            newipiv[newind] = ind;
+        }
       }
     }
   } else {

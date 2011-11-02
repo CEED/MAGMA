@@ -20,7 +20,7 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
                  cuDoubleComplex *dB, magma_int_t lddb, 
                  cuDoubleComplex *dX, magma_int_t lddx, 
                  cuDoubleComplex *dworkd, cuFloatComplex *dworks,
-		 magma_int_t *iter, magma_int_t *info)
+                 magma_int_t *iter, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -153,15 +153,15 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
     */
     *info = *iter = 0 ;
     if ( N <0)
-	*info = -1;
+        *info = -1;
     else if(NRHS<0)
-	*info =-2;
+        *info =-2;
     else if(ldda < max(1,N))
-	*info =-4;
+        *info =-4;
     else if( lddb < max(1,N))
-	*info =-8;
+        *info =-8;
     else if( lddx < max(1,N))
-	*info =-10;
+        *info =-10;
     
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
@@ -169,7 +169,7 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
     }
     
     if( N == 0 || NRHS == 0 )
-	return MAGMA_SUCCESS;
+        return MAGMA_SUCCESS;
     
     eps  = lapackf77_dlamch("Epsilon");
     Anrm = magmablas_zlange('I', N, N, dA, ldda, (double*)dworkd );
@@ -179,53 +179,53 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
     dSA = dworks+N*NRHS;
     
     if(*info !=0){
-	*iter = -2 ;
-	printf("magmablas_zlag2c\n");
-	goto L40;
+        *iter = -2 ;
+        printf("magmablas_zlag2c\n");
+        goto L40;
     }
     magmablas_zlag2c(N, N, dA, ldda, dSA, N, info ); // Merge with DLANGE /
     if(*info !=0){
-	*iter = -2 ;
-	printf("magmablas_zlag2c\n");
-	goto L40;
+        *iter = -2 ;
+        printf("magmablas_zlag2c\n");
+        goto L40;
     }
     
     magma_cgetrf_gpu(N, N, dSA, N, IPIV, info);
     
     // Generate parallel pivots
     {
-	int *newipiv  = (int*)malloc(N * sizeof(int));
-	swp2pswp(trans, N, IPIV, newipiv);
-	cudaMemcpy(dIPIV, newipiv, N*sizeof(int), cudaMemcpyHostToDevice);
-	free(newipiv);
+        int *newipiv  = (int*)malloc(N * sizeof(int));
+        swp2pswp(trans, N, IPIV, newipiv);
+        cudaMemcpy(dIPIV, newipiv, N*sizeof(int), cudaMemcpyHostToDevice);
+        free(newipiv);
     }
     
     if(info[0] !=0){
-	*iter = -3 ;
-	goto L40;
+        *iter = -3 ;
+        goto L40;
     }
     magma_zcgetrs_gpu(trans, N, NRHS, dSA, N, dIPIV, dB, lddb, dX, lddx, dSX, info);
     
     magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dworkd, N);
      /* TODO: update optimisation from gemv_MLU into classic gemv */
     if ( NRHS == 1 ) 
-	cublasZgemv( trans, N, N, mzone, dA, ldda, dX, 1, zone, dworkd, 1);
+        cublasZgemv( trans, N, N, mzone, dA, ldda, dX, 1, zone, dworkd, 1);
     else
-	cublasZgemm( trans, MagmaNoTrans, N, NRHS, N, mzone, dA, ldda, dX, lddx, zone, dworkd, N);
+        cublasZgemm( trans, MagmaNoTrans, N, NRHS, N, mzone, dA, ldda, dX, lddx, zone, dworkd, N);
     
     for(i=0;i<NRHS;i++)
     {
-	j = cublasIzamax( N, dX+i*lddx, 1) ;
-	cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), dX+i*lddx+j-1, 1, &Xnrmv, 1);
-	Xnrm = lapackf77_zlange( "F", &ione, &ione, &Xnrmv, &ione, NULL );
-	
-	j = cublasIzamax ( N, dworkd+i*N, 1 );
-	cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), dworkd+i*N+j-1, 1, &Rnrmv, 1 );
-	Rnrm = lapackf77_zlange( "F", &ione, &ione, &Rnrmv, &ione, NULL );
-	
-	if( Rnrm >  (Xnrm*cte) ){
-	    goto L10;
-	}
+        j = cublasIzamax( N, dX+i*lddx, 1) ;
+        cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), dX+i*lddx+j-1, 1, &Xnrmv, 1);
+        Xnrm = lapackf77_zlange( "F", &ione, &ione, &Xnrmv, &ione, NULL );
+        
+        j = cublasIzamax ( N, dworkd+i*N, 1 );
+        cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), dworkd+i*N+j-1, 1, &Rnrmv, 1 );
+        Rnrm = lapackf77_zlange( "F", &ione, &ione, &Rnrmv, &ione, NULL );
+        
+        if( Rnrm >  (Xnrm*cte) ){
+            goto L10;
+        }
     }
     
     *iter = 0;
@@ -235,58 +235,58 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
     
     for(iiter=1;iiter<ITERMAX;)
     {
-	*info = 0 ;
-	/*
-	  Convert R (in dworkd) from cuDoubleComplex precision to single precision
-	  and store the result in SX.
-	  Solve the system SA * X = dworkd and store the result in dworkd.
-	  -- These two Tasks are merged here. 
-	*/
-	magma_zcgetrs_gpu(trans, N, NRHS, dSA, N, dIPIV, dworkd, lddb, dworkd, N, dSX, info);
-	if(info[0] != 0){
-	    *iter = -3 ;
-	    goto L40;
-	}
-	/* Add the correction (dworkd) to dX and make dworkd = dB.
+        *info = 0 ;
+        /*
+          Convert R (in dworkd) from cuDoubleComplex precision to single precision
+          and store the result in SX.
+          Solve the system SA * X = dworkd and store the result in dworkd.
+          -- These two Tasks are merged here. 
+        */
+        magma_zcgetrs_gpu(trans, N, NRHS, dSA, N, dIPIV, dworkd, lddb, dworkd, N, dSX, info);
+        if(info[0] != 0){
+            *iter = -3 ;
+            goto L40;
+        }
+        /* Add the correction (dworkd) to dX and make dworkd = dB.
            This saves going through dworkd a second time (if done with one more kernel). */
-	for(i=0;i<NRHS;i++){
-	    magmablas_zaxpycp(dworkd+i*N, dX+i*lddx, N, dB+i*lddb);
-	}
-	
-	//magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dworkd, N);
-	if( NRHS == 1 )
-	    /* TODO: update optimisation from gemv_MLU into classic gemv */
-	    cublasZgemv( trans, N, N, mzone, dA, ldda, dX, 1, zone, dworkd, 1);
-	else
-	    cublasZgemm( trans, MagmaNoTrans, N, NRHS, N, mzone, dA, ldda, dX, lddx, zone, dworkd, N);
-	
-	/*
-	  Check whether the NRHS normwise backward errors satisfy the
-	  stopping criterion. If yes, set ITER=IITER>0 and return.
-	*/
-	for(i=0;i<NRHS;i++)
-	{
-	    j = cublasIzamax( N, dX+i*lddx, 1) ;
-	    cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), dX+i*lddx+j-1, 1, &Xnrmv, 1);
-	    Xnrm = lapackf77_zlange( "F", &ione, &ione, &Xnrmv, &ione, NULL );
-	    
-	    j = cublasIzamax ( N, dworkd+i*N, 1 );
-	    cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), dworkd+i*N+j-1, 1, &Rnrmv, 1 );
-	    Rnrm = lapackf77_zlange( "F", &ione, &ione, &Rnrmv, &ione, NULL );
-	    
-	    if( Rnrm >  Xnrm *cte ){
-		goto L20;
-	    }
-	}
-	/*
-	  If we are here, the NRHS normwise backward errors satisfy the
-	  stopping criterion, we are good to exit.
-	*/
-	
-	*iter = iiter ;
-	return MAGMA_SUCCESS;
+        for(i=0;i<NRHS;i++){
+            magmablas_zaxpycp(dworkd+i*N, dX+i*lddx, N, dB+i*lddb);
+        }
+        
+        //magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dworkd, N);
+        if( NRHS == 1 )
+            /* TODO: update optimisation from gemv_MLU into classic gemv */
+            cublasZgemv( trans, N, N, mzone, dA, ldda, dX, 1, zone, dworkd, 1);
+        else
+            cublasZgemm( trans, MagmaNoTrans, N, NRHS, N, mzone, dA, ldda, dX, lddx, zone, dworkd, N);
+        
+        /*
+          Check whether the NRHS normwise backward errors satisfy the
+          stopping criterion. If yes, set ITER=IITER>0 and return.
+        */
+        for(i=0;i<NRHS;i++)
+        {
+            j = cublasIzamax( N, dX+i*lddx, 1) ;
+            cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), dX+i*lddx+j-1, 1, &Xnrmv, 1);
+            Xnrm = lapackf77_zlange( "F", &ione, &ione, &Xnrmv, &ione, NULL );
+            
+            j = cublasIzamax ( N, dworkd+i*N, 1 );
+            cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), dworkd+i*N+j-1, 1, &Rnrmv, 1 );
+            Rnrm = lapackf77_zlange( "F", &ione, &ione, &Rnrmv, &ione, NULL );
+            
+            if( Rnrm >  Xnrm *cte ){
+                goto L20;
+            }
+        }
+        /*
+          If we are here, the NRHS normwise backward errors satisfy the
+          stopping criterion, we are good to exit.
+        */
+        
+        *iter = iiter ;
+        return MAGMA_SUCCESS;
       L20:
-	iiter++ ;
+        iiter++ ;
     }
     /*
       If we are at this place of the code, this is because we have
@@ -302,12 +302,12 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
       satisfactory solution, so we resort to cuDoubleComplex precision.  
     */
     if( *info != 0 ){
-	return MAGMA_SUCCESS;
+        return MAGMA_SUCCESS;
     }
     
     ret = magma_zgetrf_gpu( N, N, dA, ldda, IPIV, info );
     if( (ret != MAGMA_SUCCESS) || (*info != 0) ){
-	return ret;
+        return ret;
     }
     magmablas_zlacpy( MagmaUpperLower, N, NRHS, dB, lddb, dX, lddx );
     ret = magma_zgetrs_gpu( trans, N, NRHS, dA, ldda, IPIV, dX, lddx, info );

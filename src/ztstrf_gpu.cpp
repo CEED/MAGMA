@@ -142,7 +142,7 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
     s      = mindim / ib;
 
     if ( ib >= mindim ) {
-	/* Use CPU code. */
+        /* Use CPU code. */
         CORE_ztstrf(m, n, ib, nb,
                     (PLASMA_Complex64_t*)hU, ldhu,
                     (PLASMA_Complex64_t*)hA, ldha,
@@ -162,7 +162,7 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
         }          
 #endif
 
-	if ( (storev == 'R') || (storev == 'r') ) {
+        if ( (storev == 'R') || (storev == 'r') ) {
             cublasSetMatrix(m, n, sizeof(cuDoubleComplex), hU, ldhu, dwork, lddwork);
             magmablas_ztranspose( dU, lddu, dwork, lddwork, m, n );
 
@@ -172,12 +172,12 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
             cublasSetMatrix(m, n, sizeof(cuDoubleComplex), hU, ldhu, dU, lddu);
             cublasSetMatrix(m, n, sizeof(cuDoubleComplex), hA, ldha, dA, ldda);
         }
-	cublasSetMatrix(p*ib, n, sizeof(cuDoubleComplex), hL, ldhl, dL, lddl);
+        cublasSetMatrix(p*ib, n, sizeof(cuDoubleComplex), hL, ldhl, dL, lddl);
             
     }
     else {
-	/* Use hybrid blocked code. */
-	maxm = ((m + 31)/32)*32;
+        /* Use hybrid blocked code. */
+        maxm = ((m + 31)/32)*32;
 
         if ( (storev == 'C') || (storev == 'c') ) {
             magmablas_zgetmo_in( dU, dUT, lddu, m,  n );
@@ -189,7 +189,7 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
         dUp = dAp + ib*lddwork;
 
         ip = 0;
-	for( i=0; i<s; i++ )
+        for( i=0; i<s; i++ )
         {
             ii = i * ib;
             sb = min(mindim-ii, ib);
@@ -264,7 +264,7 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
 #endif
 
 #ifndef WITHOUTTRTRI
-	    CORE_zlacpy( PlasmaUpperLower, sb, sb, 
+            CORE_zlacpy( PlasmaUpperLower, sb, sb, 
                          (PLASMA_Complex64_t*)hL(i), ldhl, 
                          (PLASMA_Complex64_t*)hL2(i), ldhl );
             CORE_ztrtri( PlasmaLower, PlasmaUnit, sb, 
@@ -322,7 +322,7 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
             }
         }
 
-	if ( (storev == 'C') || (storev == 'c') ) {
+        if ( (storev == 'C') || (storev == 'c') ) {
             magmablas_zgetmo_out( dU, dUT, lddu, m,  n );
             magmablas_zgetmo_out( dA, dAT, ldda, m,  n );
         }

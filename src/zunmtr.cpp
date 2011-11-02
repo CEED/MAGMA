@@ -16,10 +16,10 @@
 extern "C" magma_int_t
 magma_zunmtr(char side, char uplo, char trans,
              magma_int_t m, magma_int_t n, 
-	     cuDoubleComplex *a,    magma_int_t lda, 
+             cuDoubleComplex *a,    magma_int_t lda, 
              cuDoubleComplex *tau, 
              cuDoubleComplex *c,    magma_int_t ldc,
-	     cuDoubleComplex *work, magma_int_t lwork, 
+             cuDoubleComplex *work, magma_int_t lwork, 
              magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -128,36 +128,36 @@ magma_zunmtr(char side, char uplo, char trans,
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
     if (left) {
-	nq = m;
-	nw = n;
+        nq = m;
+        nw = n;
     } else {
-	nq = n;
-	nw = m;
+        nq = n;
+        nw = m;
     }
     if (! left && ! lapackf77_lsame(side_, "R")) {
-	*info = -1;
+        *info = -1;
     } else if (! upper && ! lapackf77_lsame(uplo_, "L")) {
-	*info = -2;
+        *info = -2;
     } else if (! lapackf77_lsame(trans_, "N") && 
                ! lapackf77_lsame(trans_, "C")) {
-	*info = -3;
+        *info = -3;
     } else if (m < 0) {
-	*info = -4;
+        *info = -4;
     } else if (n < 0) {
-	*info = -5;
+        *info = -5;
     } else if (lda < max(1,nq)) {
-	*info = -7;
+        *info = -7;
     } else if (ldc < max(1,m)) {
-	*info = -10;
+        *info = -10;
     } else if (lwork < max(1,nw) && ! lquery) {
-	*info = -12;
+        *info = -12;
     }
 
     if (*info == 0) 
       {
-	nb = 32;
-	lwkopt = max(1,nw) * nb;
-	MAGMA_Z_SET2REAL( work[0], lwkopt );
+        nb = 32;
+        lwkopt = max(1,nw) * nb;
+        MAGMA_Z_SET2REAL( work[0], lwkopt );
       }
 
     if (*info != 0) {
@@ -165,45 +165,45 @@ magma_zunmtr(char side, char uplo, char trans,
         return MAGMA_ERR_ILLEGAL_VALUE;
     }
     else if (lquery) {
-	return MAGMA_SUCCESS;
+        return MAGMA_SUCCESS;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0 || nq == 1) {
-	work[0] = c_one;
-	return MAGMA_SUCCESS;
+        work[0] = c_one;
+        return MAGMA_SUCCESS;
     }
 
     if (left) {
-	mi = m - 1;
-	ni = n;
+        mi = m - 1;
+        ni = n;
     } else {
-	mi = m;
-	ni = n - 1;
+        mi = m;
+        ni = n - 1;
     }
 
     if (upper) 
       {
-	/* Q was determined by a call to SSYTRD with UPLO = 'U' */
-	i__2 = nq - 1;
-	//lapackf77_zunmql(side_, trans_, &mi, &ni, &i__2, &a[lda], &lda, 
+        /* Q was determined by a call to SSYTRD with UPLO = 'U' */
+        i__2 = nq - 1;
+        //lapackf77_zunmql(side_, trans_, &mi, &ni, &i__2, &a[lda], &lda, 
         //                 tau, c, &ldc, work, &lwork, &iinfo);
         magma_zunmql(side, trans, mi, ni, i__2, &a[lda], lda, tau,
-		     c, ldc, work, lwork, &iinfo);
+                     c, ldc, work, lwork, &iinfo);
       }
     else 
       {
-	/* Q was determined by a call to SSYTRD with UPLO = 'L' */
-	if (left) {
-	    i1 = 1;
-	    i2 = 0;
-	} else {
-	    i1 = 0;
-	    i2 = 1;
-	}
-	i__2 = nq - 1;
-	magma_zunmqr(side, trans, mi, ni, i__2, &a[1], lda, tau,
-		     &c[i1 + i2 * ldc], ldc, work, lwork, &iinfo);
+        /* Q was determined by a call to SSYTRD with UPLO = 'L' */
+        if (left) {
+            i1 = 1;
+            i2 = 0;
+        } else {
+            i1 = 0;
+            i2 = 1;
+        }
+        i__2 = nq - 1;
+        magma_zunmqr(side, trans, mi, ni, i__2, &a[1], lda, tau,
+                     &c[i1 + i2 * ldc], ldc, work, lwork, &iinfo);
       }
 
     MAGMA_Z_SET2REAL( work[0], lwkopt );

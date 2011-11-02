@@ -103,19 +103,19 @@ int main( int argc, char** argv)
         lapackf77_dlarnv( &ione, ISEED, &n2, h_A );
         lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
 
-	magma_dsyevd(jobz[0], uplo[0],
-		     N, h_R, N, w1,
-		     h_work, lwork, 
-		     iwork, liwork, 
-		     &info);
-	
-	lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
+        magma_dsyevd(jobz[0], uplo[0],
+                     N, h_R, N, w1,
+                     h_work, lwork, 
+                     iwork, liwork, 
+                     &info);
+        
+        lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
 
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-	magma_dsyevd(jobz[0], uplo[0],
+        magma_dsyevd(jobz[0], uplo[0],
                      N, h_R, N, w1,
                      h_work, lwork,
                      iwork, liwork,
@@ -124,37 +124,37 @@ int main( int argc, char** argv)
 
         gpu_time = GetTimerValue(start,end)/1000.;
 
-	if ( checkres ) {
+        if ( checkres ) {
           /* =====================================================================
              Check the results following the LAPACK's [zcds]drvst routine.
              A is factored as A = U S U' and the following 3 tests computed:
              (1)    | A - U S U' | / ( |A| N )
              (2)    | I - U'U | / ( N )
              (3)    | S(with U) - S(w/o U) | / | S |
-	     =================================================================== */
-	  double *tau, temp1, temp2;
+             =================================================================== */
+          double *tau, temp1, temp2;
 
-	  lapackf77_dsyt21(&ione, uplo, &N, &izero,
-			   h_A, &N, 
-			   w1, h_work,  
-			   h_R, &N, 
-			   h_R, &N,
-			   tau, h_work, &result[0]);
+          lapackf77_dsyt21(&ione, uplo, &N, &izero,
+                           h_A, &N, 
+                           w1, h_work,  
+                           h_R, &N, 
+                           h_R, &N,
+                           tau, h_work, &result[0]);
 
-	  lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
-	  magma_dsyevd('N', uplo[0],
-		       N, h_R, N, w2,
-		       h_work, lwork,
-		       iwork, liwork,
-		       &info);
-	  
-	  temp1 = temp2 = 0;
-	  for(int j=0; j<N; j++){
-	    temp1 = max(temp1, absv(w1[j]));
-	    temp1 = max(temp1, absv(w2[j]));
-	    temp2 = max(temp2, absv(w1[j]-w2[j]));
-	  }
-	  result[2] = temp2 / temp1;
+          lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
+          magma_dsyevd('N', uplo[0],
+                       N, h_R, N, w2,
+                       h_work, lwork,
+                       iwork, liwork,
+                       &info);
+          
+          temp1 = temp2 = 0;
+          for(int j=0; j<N; j++){
+            temp1 = max(temp1, absv(w1[j]));
+            temp1 = max(temp1, absv(w2[j]));
+            temp2 = max(temp2, absv(w1[j]-w2[j]));
+          }
+          result[2] = temp2 / temp1;
         }
 
 
@@ -162,11 +162,11 @@ int main( int argc, char** argv)
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
-	lapackf77_dsyevd(jobz, uplo,
-			 &N, h_A, &N, w2,
-			 h_work, &lwork,
-			 iwork, &liwork,
-			 &info);
+        lapackf77_dsyevd(jobz, uplo,
+                         &N, h_A, &N, w2,
+                         h_work, &lwork,
+                         iwork, &liwork,
+                         &info);
         end = get_current_time();
         if (info < 0)
             printf("Argument %d of dsyevd had an illegal value.\n", -info);
@@ -178,13 +178,13 @@ int main( int argc, char** argv)
            =================================================================== */
         printf("%5d     %6.2f         %6.2f\n",
                N, cpu_time, gpu_time);
-	if ( checkres ){
-	  printf("Testing the factorization A = U S U' for correctness:\n");
-	  printf("(1)    | A - U S U' | / (|A| N) = %e\n", result[0]*eps);
-	  printf("(2)    | I -   U'U  | /  N      = %e\n", result[1]*eps);
-	  printf("(3)    | S(w/ U)-S(w/o U)|/ |S| = %e\n\n", result[2]);
-	}
-	
+        if ( checkres ){
+          printf("Testing the factorization A = U S U' for correctness:\n");
+          printf("(1)    | A - U S U' | / (|A| N) = %e\n", result[0]*eps);
+          printf("(2)    | I -   U'U  | /  N      = %e\n", result[1]*eps);
+          printf("(3)    | S(w/ U)-S(w/o U)|/ |S| = %e\n\n", result[2]);
+        }
+        
         if (argc != 1)
             break;
     }

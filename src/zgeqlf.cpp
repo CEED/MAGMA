@@ -108,22 +108,22 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
     lquery = (lwork == -1);
 
     if (m < 0) {
-	*info = -1;
+        *info = -1;
     } else if (n < 0) {
-	*info = -2;
+        *info = -2;
     } else if (lda < max(1,m)) {
-	*info = -4;
+        *info = -4;
     }
 
     if (*info == 0) {
-	k = min(m,n);
-	if (k == 0)
+        k = min(m,n);
+        if (k == 0)
             work[0] = c_one;
-	else {
+        else {
             work[0] = MAGMA_Z_MAKE( n*nb, 0 );
-	}
+        }
 
-	if (lwork < max(1,n) && ! lquery)
+        if (lwork < max(1,n) && ! lquery)
             *info = -7;
     }
 
@@ -153,19 +153,19 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
 
     if ( (nb > 1) && (nb < k) ) {
         /*  Use blocked code initially.
-	    The last kk columns are handled by the block method.
+            The last kk columns are handled by the block method.
             First, copy the matrix on the GPU except the last kk columns */
         cudaMemcpy2DAsync(da_ref(0, 0), ldda*sizeof(cuDoubleComplex),
-			  a_ref(0, 0),  lda *sizeof(cuDoubleComplex),
-			  sizeof(cuDoubleComplex)*(m), (n-nb),
-			  cudaMemcpyHostToDevice, stream[0]);
+                          a_ref(0, 0),  lda *sizeof(cuDoubleComplex),
+                          sizeof(cuDoubleComplex)*(m), (n-nb),
+                          cudaMemcpyHostToDevice, stream[0]);
 
         ki = ((k - nb - 1) / nb) * nb;
-	kk = min(k, ki + nb);
-	for (i = k - kk + ki; i >= k -kk; i -= nb) {
-	    ib = min(k-i,nb);
+        kk = min(k, ki + nb);
+        for (i = k - kk + ki; i >= k -kk; i -= nb) {
+            ib = min(k-i,nb);
 
-	    if (i< k - kk + ki){
+            if (i< k - kk + ki){
                 /* 1. Copy asynchronously the current panel to the CPU.
                    2. Copy asynchronously the submatrix below the panel
                    to the CPU)                                        */
@@ -186,60 +186,60 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
                 rows = m - k + old_i + old_ib;
                 cols = n - k + old_i - old_ib;
                 magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaBackward, MagmaColumnwise,
-				  rows, cols, old_ib,
-				  da_ref(0, cols+old_ib), ldda, dwork,        lddwork,
-				  da_ref(0, 0          ), ldda, dwork+old_ib, lddwork);
-	    }
+                                  rows, cols, old_ib,
+                                  da_ref(0, cols+old_ib), ldda, dwork,        lddwork,
+                                  da_ref(0, 0          ), ldda, dwork+old_ib, lddwork);
+            }
 
-	    cudaStreamSynchronize(stream[1]);
-	    /* Compute the QL factorization of the current block
-	       A(1:m-k+i+ib-1,n-k+i:n-k+i+ib-1) */
-	    rows = m - k + i + ib;
-	    cols = n - k + i;
-	    lapackf77_zgeqlf(&rows,&ib, a_ref(0,cols), &lda, tau+i, work, &lwork, &iinfo);
+            cudaStreamSynchronize(stream[1]);
+            /* Compute the QL factorization of the current block
+               A(1:m-k+i+ib-1,n-k+i:n-k+i+ib-1) */
+            rows = m - k + i + ib;
+            cols = n - k + i;
+            lapackf77_zgeqlf(&rows,&ib, a_ref(0,cols), &lda, tau+i, work, &lwork, &iinfo);
 
-	    if (cols > 0) {
-	        /* Form the triangular factor of the block reflector
-		   H = H(i+ib-1) . . . H(i+1) H(i) */
-	        lapackf77_zlarft( MagmaBackwardStr, MagmaColumnwiseStr, 
+            if (cols > 0) {
+                /* Form the triangular factor of the block reflector
+                   H = H(i+ib-1) . . . H(i+1) H(i) */
+                lapackf77_zlarft( MagmaBackwardStr, MagmaColumnwiseStr, 
                                   &rows, &ib, 
                                   a_ref(0, cols), &lda, tau + i, work, &ib);
 
-		zpanel_to_q( MagmaLower, ib, a_ref(rows-ib,cols), lda, work+ib*ib);
-		cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
-				a_ref(0,cols), lda, da_ref(0,cols), ldda);
-		zq_to_panel( MagmaLower, ib, a_ref(rows-ib,cols), lda, work+ib*ib);
+                zpanel_to_q( MagmaLower, ib, a_ref(rows-ib,cols), lda, work+ib*ib);
+                cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
+                                a_ref(0,cols), lda, da_ref(0,cols), ldda);
+                zq_to_panel( MagmaLower, ib, a_ref(rows-ib,cols), lda, work+ib*ib);
 
-		// Send the triangular part on the GPU
-		cublasSetMatrix(ib,ib,sizeof(cuDoubleComplex), work, ib, dwork, lddwork);
+                // Send the triangular part on the GPU
+                cublasSetMatrix(ib,ib,sizeof(cuDoubleComplex), work, ib, dwork, lddwork);
 
-		/* Apply H' to A(1:m-k+i+ib-1,1:n-k+i-1) from the left in
-		   two steps - implementing the lookahead techniques.
-		   This is the update of first ib columns.                 */
-		if (i-ib >= k -kk)
+                /* Apply H' to A(1:m-k+i+ib-1,1:n-k+i-1) from the left in
+                   two steps - implementing the lookahead techniques.
+                   This is the update of first ib columns.                 */
+                if (i-ib >= k -kk)
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaBackward, MagmaColumnwise,
-				      rows, ib, ib,
-				      da_ref(0, cols),   ldda, dwork,    lddwork,
-				      da_ref(0,cols-ib), ldda, dwork+ib, lddwork);
-		else{
+                                      rows, ib, ib,
+                                      da_ref(0, cols),   ldda, dwork,    lddwork,
+                                      da_ref(0,cols-ib), ldda, dwork+ib, lddwork);
+                else{
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaBackward, MagmaColumnwise,
-				      rows, cols, ib,
-				      da_ref(0, cols), ldda, dwork,    lddwork,
-				      da_ref(0, 0   ), ldda, dwork+ib, lddwork);
-		}
+                                      rows, cols, ib,
+                                      da_ref(0, cols), ldda, dwork,    lddwork,
+                                      da_ref(0, 0   ), ldda, dwork+ib, lddwork);
+                }
 
-		old_i  = i;
-		old_ib = ib;
-	    }
-	}
-	mu = m - k + i + nb;
-	nu = n - k + i + nb;
+                old_i  = i;
+                old_ib = ib;
+            }
+        }
+        mu = m - k + i + nb;
+        nu = n - k + i + nb;
 
         cublasGetMatrix(m, nu, sizeof(cuDoubleComplex),
                         da_ref(0,0), ldda, a_ref(0,0), lda);
     } else {
-	mu = m;
-	nu = n;
+        mu = m;
+        nu = n;
     }
 
     /* Use unblocked code to factor the last or only block */

@@ -57,7 +57,7 @@ int main( int argc, char** argv)
     magma_int_t ISEED[4] = {0,0,0,1};
 
     if (argc != 1){
-        for(i = 1; i<argc; i++){	
+        for(i = 1; i<argc; i++){        
             if (strcmp("-N", argv[i])==0)
                 N = atoi(argv[++i]);
             else if (strcmp("-M", argv[i])==0)

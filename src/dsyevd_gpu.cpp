@@ -15,13 +15,13 @@
 
 extern "C" magma_int_t 
 magma_dsyevd_gpu(char jobz, char uplo, 
-		 magma_int_t n, 
-		 double *da, magma_int_t ldda, 
-		 double *w, 
-		 double *wa,  magma_int_t ldwa,
-		 double *work, magma_int_t lwork,
-		 magma_int_t *iwork, magma_int_t liwork,
-		 magma_int_t *info)
+                 magma_int_t n, 
+                 double *da, magma_int_t ldda, 
+                 double *w, 
+                 double *wa,  magma_int_t ldwa,
+                 double *work, magma_int_t lwork,
+                 magma_int_t *iwork, magma_int_t liwork,
+                 magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -164,13 +164,13 @@ magma_dsyevd_gpu(char jobz, char uplo,
 
     *info = 0;
     if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVectorsStr))) {
-	*info = -1;
+        *info = -1;
     } else if (! (lower || lapackf77_lsame(uplo_, MagmaUpperStr))) {
-	*info = -2;
+        *info = -2;
     } else if (n < 0) {
-	*info = -3;
+        *info = -3;
     } else if (ldda < max(1,n)) {
-	*info = -5;
+        *info = -5;
     }
 
     magma_int_t nb = magma_get_dsytrd_nb(n);
@@ -199,23 +199,23 @@ magma_dsyevd_gpu(char jobz, char uplo,
         return MAGMA_ERR_ILLEGAL_VALUE;
     }
     else if (lquery) {
-	return MAGMA_SUCCESS;
+        return MAGMA_SUCCESS;
     }
 
     /* Quick return if possible */
     if (n == 0) {
-	return MAGMA_SUCCESS;
+        return MAGMA_SUCCESS;
     }
 
     if (n == 1) {
         double tmp;
-	cublasGetVector(1, sizeof(double), da, 1, &tmp, 1);
+        cublasGetVector(1, sizeof(double), da, 1, &tmp, 1);
         w[0] = tmp;
-	if (wantz) {
+        if (wantz) {
             tmp = 1.;
-	    cublasSetVector(1, sizeof(double), &tmp, 1, da, 1);
-	}
-	return MAGMA_SUCCESS;
+            cublasSetVector(1, sizeof(double), &tmp, 1, da, 1);
+        }
+        return MAGMA_SUCCESS;
     }
 
     static cudaStream_t stream;
@@ -246,11 +246,11 @@ magma_dsyevd_gpu(char jobz, char uplo,
     anrm = magmablas_dlansy('M', uplo, n, da, ldda, dwork);
     iscale = 0;
     if (anrm > 0. && anrm < rmin) {
-	iscale = 1;
-	sigma = rmin / anrm;
+        iscale = 1;
+        sigma = rmin / anrm;
     } else if (anrm > rmax) {
-	iscale = 1;
-	sigma = rmax / anrm;
+        iscale = 1;
+        sigma = rmax / anrm;
     }
     if (iscale == 1)
       magmablas_dlascl(uplo, 0, 0, 1., sigma, n, n, da, ldda, info);
@@ -265,12 +265,12 @@ magma_dsyevd_gpu(char jobz, char uplo,
   
 #ifdef FAST_SYMV
     magma_dsytrd2_gpu(uplo, n, da, lda, &w[1], &work[inde],
-		      &work[indtau], wa, ldwa, &work[indwrk], llwork, 
-		      dc, lddc*n, &iinfo);
+                      &work[indtau], wa, ldwa, &work[indwrk], llwork, 
+                      dc, lddc*n, &iinfo);
 #else
     magma_dsytrd_gpu(uplo, n, da, ldda, &w[1], &work[inde],
-		     &work[indtau], wa, ldwa, &work[indwrk], llwork, 
-		     &iinfo);
+                     &work[indtau], wa, ldwa, &work[indwrk], llwork, 
+                     &iinfo);
 #endif
 
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call   
@@ -278,24 +278,24 @@ magma_dsyevd_gpu(char jobz, char uplo,
        tridiagonal matrix, then call DORMTR to multiply it to the Householder 
        transformations represented as Householder vectors in A. */
     if (! wantz) {
-	lapackf77_dsterf(&n, &w[1], &work[inde], info);
+        lapackf77_dsterf(&n, &w[1], &work[inde], info);
     } else {
-	lapackf77_dstedc("I", &n, &w[1], &work[inde], &work[indwrk], &n, &work[indwk2], 
-		&llwrk2, &iwork[1], &liwork, info);
+        lapackf77_dstedc("I", &n, &w[1], &work[inde], &work[indwrk], &n, &work[indwk2], 
+                &llwrk2, &iwork[1], &liwork, info);
 
-	cublasSetMatrix(n, n, sizeof(double), &work[indwrk], n, dc, lddc);
-	
-	magma_dormtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, n, da, ldda, &work[indtau],
-			 dc, lddc, wa, ldwa, &iinfo);
-	
-	cudaMemcpy2D(da, ldda * sizeof(double), dc, lddc * sizeof(double),
-		     sizeof(double)*n, n, cudaMemcpyDeviceToDevice);
+        cublasSetMatrix(n, n, sizeof(double), &work[indwrk], n, dc, lddc);
+        
+        magma_dormtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, n, da, ldda, &work[indtau],
+                         dc, lddc, wa, ldwa, &iinfo);
+        
+        cudaMemcpy2D(da, ldda * sizeof(double), dc, lddc * sizeof(double),
+                     sizeof(double)*n, n, cudaMemcpyDeviceToDevice);
     }
 
     /* If matrix was scaled, then rescale eigenvalues appropriately. */
     if (iscale == 1) {
-	d__1 = 1. / sigma;
-	blasf77_dscal(&n, &d__1, &w[1], &c__1);
+        d__1 = 1. / sigma;
+        blasf77_dscal(&n, &d__1, &w[1], &c__1);
     }
 
     MAGMA_D_SET2REAL(work[1], (double) lopt);

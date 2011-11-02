@@ -12,9 +12,9 @@
 
 extern "C" magma_int_t 
 magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi, 
-	      cuDoubleComplex *a, magma_int_t lda,
-	      cuDoubleComplex *tau, cuDoubleComplex *work, 
-	      magma_int_t *lwork, magma_int_t *info)
+              cuDoubleComplex *a, magma_int_t lda,
+              cuDoubleComplex *tau, cuDoubleComplex *work, 
+              magma_int_t *lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -133,15 +133,15 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 
     lquery = *lwork == -1;
     if (n < 0) {
-	*info = -1;
+        *info = -1;
     } else if (ilo < 1 || ilo > max(1,n)) {
-	*info = -2;
+        *info = -2;
     } else if (ihi < min(ilo,n) || ihi > n) {
-	*info = -3;
+        *info = -3;
     } else if (lda < max(1,n)) {
-	*info = -5;
+        *info = -5;
     } else if (*lwork < max(1,n) && ! lquery) {
-	*info = -8;
+        *info = -8;
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
@@ -193,19 +193,19 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
           (last block is always handled by unblocked code)              */
       if (nb < nh) {
 
-	/* Determine if workspace is large enough for blocked code      */
-	iws = n * nb;
-	if (*lwork < iws) {
+        /* Determine if workspace is large enough for blocked code      */
+        iws = n * nb;
+        if (*lwork < iws) {
 
-	  /*    Not enough workspace to use optimal NB:  determine the   
+          /*    Not enough workspace to use optimal NB:  determine the   
                 minimum value of NB, and reduce NB or force use of   
                 unblocked code                                          */
-	  nbmin = nb;
-	  if (*lwork >= n * nbmin)
-	    nb = *lwork / n;
-	  else 
-	    nb = 1;
-	}
+          nbmin = nb;
+          if (*lwork >= n * nbmin)
+            nb = *lwork / n;
+          else 
+            nb = 1;
+        }
       }
     }
     ldwork = n;
@@ -221,32 +221,32 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
       cublasSetMatrix(N, N-ilo+1, sizeof(cuDoubleComplex), a+(ilo-1)*(lda), lda, d_A, ldda);
 
       for (i__ = ilo; i__ < ihi - nb; i__ += nb) {
-	/* Computing MIN */
-	ib = min(nb, ihi - i__);
+        /* Computing MIN */
+        ib = min(nb, ihi - i__);
 
-	/*   Reduce columns i:i+ib-1 to Hessenberg form, returning the   
+        /*   Reduce columns i:i+ib-1 to Hessenberg form, returning the   
              matrices V and T of the block reflector H = I - V*T*V'   
              which performs the reduction, and also the matrix Y = A*V*T */
 
-	/*   Get the current panel (no need for the 1st iteration) */
-	cublasGetMatrix(ihi-i__+1, ib, sizeof(cuDoubleComplex), 
-			d_A + (i__ - ilo)*ldda + i__ - 1, ldda,
-			a   + (i__ -  1 )*lda  + i__ - 1, lda);      
-	
-	magma_zlahr2(ihi, i__, ib, 
-		     d_A + (i__ - ilo)*ldda, 
-		     d_A + N*ldda + 1,
-		     a   + (i__ -   1 )*(lda) , lda, 
-		     &tau[i__], t, nb, work, ldwork);
+        /*   Get the current panel (no need for the 1st iteration) */
+        cublasGetMatrix(ihi-i__+1, ib, sizeof(cuDoubleComplex), 
+                        d_A + (i__ - ilo)*ldda + i__ - 1, ldda,
+                        a   + (i__ -  1 )*lda  + i__ - 1, lda);      
+        
+        magma_zlahr2(ihi, i__, ib, 
+                     d_A + (i__ - ilo)*ldda, 
+                     d_A + N*ldda + 1,
+                     a   + (i__ -   1 )*(lda) , lda, 
+                     &tau[i__], t, nb, work, ldwork);
 
-	/* Copy T from the CPU to D_T on the GPU */
-	cublasSetMatrix(nb, nb, sizeof(cuDoubleComplex), t, nb, d_t, nb);
+        /* Copy T from the CPU to D_T on the GPU */
+        cublasSetMatrix(nb, nb, sizeof(cuDoubleComplex), t, nb, d_t, nb);
 
-	magma_zlahru(n, ihi, i__ - 1, ib, 
-		     a   + (i__ -  1 )*(lda), lda,
-		     d_A + (i__ - ilo)*ldda, 
-		     d_A + (i__ - ilo)*ldda + i__ - 1,
-		     d_A + N*ldda, d_t, d_work);
+        magma_zlahru(n, ihi, i__ - 1, ib, 
+                     a   + (i__ -  1 )*(lda), lda,
+                     d_A + (i__ - ilo)*ldda, 
+                     d_A + (i__ - ilo)*ldda + i__ - 1,
+                     d_A + N*ldda, d_t, d_work);
       }
     }
 

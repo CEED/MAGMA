@@ -29,7 +29,7 @@
 #endif
 
 int main(int argc, char **argv)
-{	
+{        
     TESTING_CUDA_INIT();
 
     magma_timestr_t  start, end;
@@ -83,11 +83,11 @@ int main(int argc, char **argv)
     if ( N0 != 0 ) N = N0;
 
     if( trans == MagmaNoTrans ) {
-	Xm = N;
-	Ym = M;
+        Xm = N;
+        Ym = M;
     }  else {
-	Xm = M;
-	Ym = N;
+        Xm = M;
+        Ym = N;
     }
 
     lda = ((M+31)/32)*32;
@@ -124,9 +124,9 @@ int main(int argc, char **argv)
     
     for( i=istart; i < iend; i = (int)((i+1)*1.1) )
     {
-	M = N = i;
-	if ( M0 != 0 ) M = M0;
-	if ( N0 != 0 ) N = N0;
+        M = N = i;
+        if ( M0 != 0 ) M = M0;
+        if ( N0 != 0 ) N = N0;
 
         if( trans == MagmaNoTrans ) {
             Xm = N;
@@ -137,7 +137,7 @@ int main(int argc, char **argv)
         }
          
         lda = ((M+31)/32)*32;
-	flops = FLOPS( (double)M, (double)N ) / 1000000;
+        flops = FLOPS( (double)M, (double)N ) / 1000000;
 
         printf(      "%5d %5d ", M, N );
         fprintf( fp, "%5d %5d ", M, N );
@@ -158,7 +158,7 @@ int main(int argc, char **argv)
         
         cublasGetVector( Ym, sizeof( cuDoubleComplex ), dY, incy, Ycublas, incy );
         
-	cuda_perf = flops / GetTimerValue(start, end);
+        cuda_perf = flops / GetTimerValue(start, end);
         printf(     "%11.2f", cuda_perf );
         fprintf(fp, "%11.2f", cuda_perf );
 
@@ -173,7 +173,7 @@ int main(int argc, char **argv)
         
         cublasGetVector( Ym, sizeof( cuDoubleComplex ), dY, incx, Ymagma, incx );
         
-	magma_perf = flops / GetTimerValue(start, end);
+        magma_perf = flops / GetTimerValue(start, end);
         printf(     "%11.2f", magma_perf );
         fprintf(fp, "%11.2f", magma_perf );
 

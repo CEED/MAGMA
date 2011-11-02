@@ -139,16 +139,16 @@ loop:
     N=mp->ob;
     K=mp->nb;
     if (mp->m >= (mp->n-(mp->nthreads*mp->ob))) {
-	  if (i == (mp->np_gpu - 1)) {
-	    K = mp->n-mp->nthreads*mp->ob-(mp->np_gpu-1)*mp->nb; 
-	  }
+          if (i == (mp->np_gpu - 1)) {
+            K = mp->n-mp->nthreads*mp->ob-(mp->np_gpu-1)*mp->nb; 
+          }
     }
 
     WORK = (cuDoubleComplex*)malloc(sizeof(cuDoubleComplex)*M*N);
       
     lapackf77_zlarfb(MagmaLeftStr, MagmaTransStr, MagmaForwardStr, MagmaColumnwiseStr,
-	          &M,&N,&K,mp->a+i*mp->nb*mp->lda+i*mp->nb,&(mp->lda),mp->t+i*mp->nb*mp->nb,&K,
-		      mp->a+mp->m*mp->n-(mp->nthreads-t)*mp->ob*mp->lda+i*mp->nb,&(mp->lda),WORK,&N);
+                  &M,&N,&K,mp->a+i*mp->nb*mp->lda+i*mp->nb,&(mp->lda),mp->t+i*mp->nb*mp->nb,&K,
+                      mp->a+mp->m*mp->n-(mp->nthreads-t)*mp->ob*mp->lda+i*mp->nb,&(mp->lda),WORK,&N);
       
     free(WORK);
   }
@@ -270,55 +270,55 @@ int main( magma_int_t argc, char** argv)
 
     if (argc != 1)
       {
-	for(i = 1; i<argc; i++){      
-	  if (strcmp("-N", argv[i])==0)
-	    N = atoi(argv[++i]);
-	  else if (strcmp("-M", argv[i])==0)
-	    M = atoi(argv[++i]);
-	  else if (strcmp("-F", argv[i])==0)
-	    mp->fb = atoi(argv[++i]);
-	  else if (strcmp("-O", argv[i])==0)
-	    mp->ob = atoi(argv[++i]);
-	  else if (strcmp("-B", argv[i])==0)
-	    mp->nb = atoi(argv[++i]);
-	  else if (strcmp("-b", argv[i])==0)
-	    mp->ib = atoi(argv[++i]);
-	  else if (strcmp("-A", argv[i])==0)
-	    accuracyflag = atoi(argv[++i]);
-	  else if (strcmp("-P", argv[i])==0)
-	    nthreads = atoi(argv[++i]);
-	  else if (strcmp("-Q", argv[i])==0)
-	    nquarkthreads = atoi(argv[++i]);
-	  else if (strcmp("-nc", argv[i])==0)
-	    nc = atoi(argv[++i]);
-	  else if (strcmp("-ncps", argv[i])==0)
-	    ncps = atoi(argv[++i]);
-	}
-	
-	if ((M>0 && N>0) || (M==0 && N==0)) 
-	  {
-	    printf("  testing_zgeqrf-v2 -M %d -N %d\n\n", M, N);
-	    if (M==0 && N==0) {
-	      M = N = size[9];
-	      loop = 1;
-	    }
-	  } 
-	else 
-	  {
-	    printf("\nUsage: \n");
-	    printf("  Make sure you set the number of BLAS threads to 1, e.g.,\n");
-	    printf("   > setenv MKL_NUM_THREADS 1\n");
-	    printf("   > testing_zgeqrf-v2 -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
-	    exit(1);
-	  }
+        for(i = 1; i<argc; i++){      
+          if (strcmp("-N", argv[i])==0)
+            N = atoi(argv[++i]);
+          else if (strcmp("-M", argv[i])==0)
+            M = atoi(argv[++i]);
+          else if (strcmp("-F", argv[i])==0)
+            mp->fb = atoi(argv[++i]);
+          else if (strcmp("-O", argv[i])==0)
+            mp->ob = atoi(argv[++i]);
+          else if (strcmp("-B", argv[i])==0)
+            mp->nb = atoi(argv[++i]);
+          else if (strcmp("-b", argv[i])==0)
+            mp->ib = atoi(argv[++i]);
+          else if (strcmp("-A", argv[i])==0)
+            accuracyflag = atoi(argv[++i]);
+          else if (strcmp("-P", argv[i])==0)
+            nthreads = atoi(argv[++i]);
+          else if (strcmp("-Q", argv[i])==0)
+            nquarkthreads = atoi(argv[++i]);
+          else if (strcmp("-nc", argv[i])==0)
+            nc = atoi(argv[++i]);
+          else if (strcmp("-ncps", argv[i])==0)
+            ncps = atoi(argv[++i]);
+        }
+        
+        if ((M>0 && N>0) || (M==0 && N==0)) 
+          {
+            printf("  testing_zgeqrf-v2 -M %d -N %d\n\n", M, N);
+            if (M==0 && N==0) {
+              M = N = size[9];
+              loop = 1;
+            }
+          } 
+        else 
+          {
+            printf("\nUsage: \n");
+            printf("  Make sure you set the number of BLAS threads to 1, e.g.,\n");
+            printf("   > setenv MKL_NUM_THREADS 1\n");
+            printf("   > testing_zgeqrf-v2 -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
+            exit(1);
+          }
       } 
     else 
       {
-	printf("\nUsage: \n");
-	printf("  Make sure you set the number of BLAS threads to 1, e.g.,\n");
+        printf("\nUsage: \n");
+        printf("  Make sure you set the number of BLAS threads to 1, e.g.,\n");
         printf("   > setenv MKL_NUM_THREADS 1\n");
-	printf("   > testing_zgeqrf-v2 -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
-	M = N = size[9];
+        printf("   > testing_zgeqrf-v2 -M %d -N %d -B 128 -T 1\n\n", 1024, 1024);
+        M = N = size[9];
       }
 
     /* Auto tune based on number of cores and number of cores per socket if provided */
@@ -383,12 +383,12 @@ fprintf(stderr,"%d %d %d %d %d\n",mp->nb,mp->ob,mp->ib,nquarkthreads,nthreads);
         //magma_zgeqrf(M, N, h_R, M, tau, h_work, lwork, &info);
 
         for(j=0; j<n2; j++)
-	      h_R[j] = h_A[j];
+              h_R[j] = h_A[j];
 
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-	    magma_qr_init(mp, M, N, h_R, nthreads);
+            magma_qr_init(mp, M, N, h_R, nthreads);
 
         start = get_current_time();
         magma_zgeqrf3(context, M, N, h_R, M, tau, h_work, lwork, &info);
@@ -396,7 +396,7 @@ fprintf(stderr,"%d %d %d %d %d\n",mp->nb,mp->ob,mp->ib,nquarkthreads,nthreads);
 
         gpu_perf = flops / GetTimerValue(start, end);
 
-	/* =====================================================================
+        /* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
@@ -404,10 +404,10 @@ fprintf(stderr,"%d %d %d %d %d\n",mp->nb,mp->ob,mp->ib,nquarkthreads,nthreads);
           lapackf77_zgeqrf(&M, &N, h_A, &M, tau, h_work, &lwork, &info);
         end = get_current_time();
         if (info < 0)
-	  printf("Argument %d of zgeqrf had an illegal value.\n", -info);
+          printf("Argument %d of zgeqrf had an illegal value.\n", -info);
 
         cpu_perf = 4.*M*N*min_mn/(3.*1000000*GetTimerValue(start,end));
-	
+        
         /* =====================================================================
            Check the result compared to LAPACK
            =================================================================== */

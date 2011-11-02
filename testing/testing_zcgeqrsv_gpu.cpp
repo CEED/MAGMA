@@ -69,24 +69,24 @@ int main( int argc, char** argv)
     magma_int_t sizetest[10] = {1024,2048,3072,4032,5184,6016,7040,7520,8064,8192};
         
     if (argc != 1){
-	for(i = 1; i<argc; i++){	
-	    if (strcmp("-N", argv[i])==0)
-		N = atoi(argv[++i]);
-	    else if (strcmp("-M", argv[i])==0)
-		M = atoi(argv[++i]);
-	    else if (strcmp("-nrhs", argv[i])==0)
-		NRHS = atoi(argv[++i]);
-	}
-	if (N>0) sizetest[0] = sizetest[9] = N;
-	else exit(1);
+        for(i = 1; i<argc; i++){        
+            if (strcmp("-N", argv[i])==0)
+                N = atoi(argv[++i]);
+            else if (strcmp("-M", argv[i])==0)
+                M = atoi(argv[++i]);
+            else if (strcmp("-nrhs", argv[i])==0)
+                NRHS = atoi(argv[++i]);
+        }
+        if (N>0) sizetest[0] = sizetest[9] = N;
+        else exit(1);
     }
     else {
-	printf("\nUsage: \n");
-	printf("  testing_zcgeqrsv_gpu -M %d -N %d -nrhs %d\n\n", 1024, 1024, NRHS);
+        printf("\nUsage: \n");
+        printf("  testing_zcgeqrsv_gpu -M %d -N %d -nrhs %d\n\n", 1024, 1024, NRHS);
     }
     printf("Epsilon(double): %8.6e\n"
-	   "Epsilon(single): %8.6e\n\n", 
-	   lapackf77_dlamch("Epsilon"), lapackf77_slamch("Epsilon") );
+           "Epsilon(single): %8.6e\n\n", 
+           lapackf77_dlamch("Epsilon"), lapackf77_slamch("Epsilon") );
 
     N = sizetest[9];
     if (M == 0) M = N;
@@ -113,7 +113,7 @@ int main( int argc, char** argv)
 
     lhwork = -1;
     lapackf77_zgels( MagmaNoTransStr, &M, &N, &NRHS,
-		     h_A, &lda, h_B, &ldb, tmp, &lhwork, &info);
+                     h_A, &lda, h_B, &ldb, tmp, &lhwork, &info);
     lhwork = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
     lhwork = max( lhwork, (nb * max((M-N+nb+2*(NRHS)), 1) ) );
 
@@ -127,15 +127,15 @@ int main( int argc, char** argv)
 
     for(i=0; i<8; i++){
         M = N = sizetest[i];
-	lda = ldb = M;
-	ldx = N;
-	ldda = lddb = ((M+31)/32) * 32;
-	lddx = ((N+31)/32) * 32;
+        lda = ldb = M;
+        ldx = N;
+        ldda = lddb = ((M+31)/32) * 32;
+        lddx = ((N+31)/32) * 32;
 
-	flops = ( FLOPS_GEQRF( (double)M, (double)N ) 
-		  + FLOPS_GEQRS( (double)M, (double)N, (double)NRHS ) ) / 1000000;
+        flops = ( FLOPS_GEQRF( (double)M, (double)N ) 
+                  + FLOPS_GEQRS( (double)M, (double)N, (double)NRHS ) ) / 1000000;
 
-	/* Initialize matrices */
+        /* Initialize matrices */
         size = lda*N;
         lapackf77_zlarnv( &ione, ISEED, &size, h_A );
         size = ldb*NRHS;
@@ -151,18 +151,18 @@ int main( int argc, char** argv)
         start = get_current_time();
         magma_zcgeqrsv_gpu( M, N, NRHS, 
                             d_A, ldda, d_B, lddb, 
-			    d_X, lddx, &iter, &info );
+                            d_X, lddx, &iter, &info );
         end = get_current_time();
-	if (info < 0)
-	  printf("Argument %d of magma_zcgeqrsv had an illegal value.\n", -info);
-	gpu_perf = flops / GetTimerValue(start, end);
+        if (info < 0)
+          printf("Argument %d of magma_zcgeqrsv had an illegal value.\n", -info);
+        gpu_perf = flops / GetTimerValue(start, end);
         
         //=====================================================================
         //                 Error Computation
         //=====================================================================
         cublasGetMatrix(N, NRHS, sizeof(cuDoubleComplex), d_X, lddx, h_X, ldx);
         blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr,
-		       &M, &NRHS, &N,
+                       &M, &NRHS, &N,
                        &mzone, h_A, &lda, 
                                h_X, &ldx, 
                        &zone,  h_R, &ldb);
@@ -175,11 +175,11 @@ int main( int argc, char** argv)
         cublasSetMatrix( M, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, ldda );
         cublasSetMatrix( M, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, lddb );
 
-	start = get_current_time();
+        start = get_current_time();
         magma_zgels_gpu( MagmaNoTrans, M, N, NRHS, d_A, ldda, 
-			 d_B, lddb, h_workd, lhwork, &info);
+                         d_B, lddb, h_workd, lhwork, &info);
         end = get_current_time();
-	gpu_perfd = flops / GetTimerValue(start, end);
+        gpu_perfd = flops / GetTimerValue(start, end);
 
 
         //=====================================================================
@@ -188,27 +188,27 @@ int main( int argc, char** argv)
         cublasSetMatrix( M, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, ldda );
         cublasSetMatrix( M, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, lddb );
 
-	/* The allocation of d_SA and d_SB is done here to avoid 
-	   to double the memory used on GPU with zcgeqrsv */
-	TESTING_DEVALLOC( d_SA, cuFloatComplex, ldda*N      );
-	TESTING_DEVALLOC( d_SB, cuFloatComplex, lddb*NRHS   );
-	magmablas_zlag2c(M, N,    d_A, ldda, d_SA, ldda, &info);
-	magmablas_zlag2c(N, NRHS, d_B, lddb, d_SB, lddb, &info);
+        /* The allocation of d_SA and d_SB is done here to avoid 
+           to double the memory used on GPU with zcgeqrsv */
+        TESTING_DEVALLOC( d_SA, cuFloatComplex, ldda*N      );
+        TESTING_DEVALLOC( d_SB, cuFloatComplex, lddb*NRHS   );
+        magmablas_zlag2c(M, N,    d_A, ldda, d_SA, ldda, &info);
+        magmablas_zlag2c(N, NRHS, d_B, lddb, d_SB, lddb, &info);
 
-	start = get_current_time();
+        start = get_current_time();
         magma_cgels_gpu( MagmaNoTrans, M, N, NRHS, d_SA, ldda, 
-			 d_SB, lddb, h_works, lhwork, &info);
+                         d_SB, lddb, h_works, lhwork, &info);
         end = get_current_time();
-	gpu_perfs = flops / GetTimerValue(start, end);
-	TESTING_DEVFREE( d_SA );
-	TESTING_DEVFREE( d_SB );
+        gpu_perfs = flops / GetTimerValue(start, end);
+        TESTING_DEVFREE( d_SA );
+        TESTING_DEVFREE( d_SB );
 
         /* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
         lapackf77_zgels( MagmaNoTransStr, &M, &N, &NRHS,
-			 h_A, &lda, h_B, &ldb, h_workd, &lhwork, &info);
+                         h_A, &lda, h_B, &ldb, h_workd, &lhwork, &info);
         end = get_current_time();
         cpu_perf = flops / GetTimerValue(start, end);
 

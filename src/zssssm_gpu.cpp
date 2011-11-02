@@ -156,20 +156,20 @@ magma_zssssm_gpu(char storev, magma_int_t m1, magma_int_t n1,
                             A2T(0, 0), ldda2,
                             ii+1, ii+ib, IPIV, 1, m1 );
 #else
-	{ 
-	    int im;
-	    for(i=0; i<ib; i++) {
-		im = IPIV[ip]-1;
-		
-		if (im != (ii+i)) {
-		    im = im - m1;
-		    
-		    assert( (im>=0) && (im<m1) && (im<m2) );
-		    magmablas_zswap( n1, A1T(ii+i, 0), 1, A2T(im, 0), 1 );
-		}
-		ip++;
-	    }
-	}
+        { 
+            int im;
+            for(i=0; i<ib; i++) {
+                im = IPIV[ip]-1;
+                
+                if (im != (ii+i)) {
+                    im = im - m1;
+                    
+                    assert( (im>=0) && (im<m1) && (im<m2) );
+                    magmablas_zswap( n1, A1T(ii+i, 0), 1, A2T(im, 0), 1 );
+                }
+                ip++;
+            }
+        }
 #endif
 
 #ifndef WITHOUTTRTRI

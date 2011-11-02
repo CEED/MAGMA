@@ -26,9 +26,9 @@ magmablas_zpermute_long3( cuDoubleComplex *dAT, int lda, int *ipiv, int nb, int 
 
 extern "C" magma_int_t
 magma_zgetrf_mgpu(magma_int_t num_gpus, 
-		 magma_int_t m, magma_int_t n, 
-		 cuDoubleComplex **d_lA, magma_int_t ldda,
-		 magma_int_t *ipiv, magma_int_t *info)
+                 magma_int_t m, magma_int_t n, 
+                 cuDoubleComplex **d_lA, magma_int_t ldda,
+                 magma_int_t *ipiv, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -93,18 +93,18 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
     magma_int_t iinfo, nb, n_local[4], ldat_local[4];
     magma_int_t maxm, mindim;
     magma_int_t i, j, d, rows, cols, s, lddat, lddwork, ldpan[4];
-	magma_int_t id, i_local, i_local2, nb0, nb1;
+        magma_int_t id, i_local, i_local2, nb0, nb1;
     cuDoubleComplex *d_lAT[4], *d_lAP[4], *d_panel[4], *panel_local[4], *work;
     static cudaStream_t streaml[4][2];
 
     /* Check arguments */
     *info = 0;
     if (m < 0)
-	*info = -2;
+        *info = -2;
     else if (n < 0)
-	*info = -3;
+        *info = -3;
     else if (ldda < max(1,m))
-	*info = -5;
+        *info = -5;
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
@@ -119,135 +119,135 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
     mindim = min(m, n);
     nb     = magma_get_zgetrf_nb(m);
     if( num_gpus > ceil((double)n/nb) ) {
-	  printf( " * too many GPUs for the matrix size, using %d GPUs\n",num_gpus );
-	  *info = -1;
-	  return MAGMA_ERR_ILLEGAL_VALUE;
-	}
+          printf( " * too many GPUs for the matrix size, using %d GPUs\n",num_gpus );
+          *info = -1;
+          return MAGMA_ERR_ILLEGAL_VALUE;
+        }
 
-	if (nb <= 1 || nb >= n) {
-	  /* Use CPU code. */
-	  work = (cuDoubleComplex*)malloc(m * n * sizeof(cuDoubleComplex));
-	  cublasGetMatrix(m, n, sizeof(cuDoubleComplex), d_lA[0], ldda, work, m);
-	  lapackf77_zgetrf(&m, &n, work, &m, ipiv, info);
-	  cublasSetMatrix(m, n, sizeof(cuDoubleComplex), work, m, d_lA[0], ldda);
-	  free(work);
+        if (nb <= 1 || nb >= n) {
+          /* Use CPU code. */
+          work = (cuDoubleComplex*)malloc(m * n * sizeof(cuDoubleComplex));
+          cublasGetMatrix(m, n, sizeof(cuDoubleComplex), d_lA[0], ldda, work, m);
+          lapackf77_zgetrf(&m, &n, work, &m, ipiv, info);
+          cublasSetMatrix(m, n, sizeof(cuDoubleComplex), work, m, d_lA[0], ldda);
+          free(work);
     } else {
-	  /* Use hybrid blocked code. */
-	  maxm = ((m + 31)/32)*32;
+          /* Use hybrid blocked code. */
+          maxm = ((m + 31)/32)*32;
 
-	  /* allocate workspace for each GPU */
-	  for(i=0; i<num_gpus; i++){
+          /* allocate workspace for each GPU */
+          for(i=0; i<num_gpus; i++){
         cudaSetDevice(i);
 
-		/* local-n and local-ld */
-		n_local[i] = ((n/nb)/num_gpus)*nb;
-		if (i < (n/nb)%num_gpus)
-		   n_local[i] += nb;
-		else if (i == (n/nb)%num_gpus)
-		   n_local[i] += n%nb;
-		ldat_local[i] = ((n_local[i]+31)/32)*32;
+                /* local-n and local-ld */
+                n_local[i] = ((n/nb)/num_gpus)*nb;
+                if (i < (n/nb)%num_gpus)
+                   n_local[i] += nb;
+                else if (i == (n/nb)%num_gpus)
+                   n_local[i] += n%nb;
+                ldat_local[i] = ((n_local[i]+31)/32)*32;
 
-		/* workspaces */
-	    if ( CUBLAS_STATUS_SUCCESS != cublasAlloc(nb*maxm, sizeof(cuDoubleComplex), (void**)&d_lAP[i]) ) {
-		  for( j=0; j<i; j++ ) {
+                /* workspaces */
+            if ( CUBLAS_STATUS_SUCCESS != cublasAlloc(nb*maxm, sizeof(cuDoubleComplex), (void**)&d_lAP[i]) ) {
+                  for( j=0; j<i; j++ ) {
             cudaSetDevice(j);
-		    cublasFree( d_lAP[j] );
-		    cublasFree( d_panel[j] );
-			cublasFree( d_lAT[j] );
-		  }
-	      return MAGMA_ERR_CUBLASALLOC;
-	    }
-	    if ( CUBLAS_STATUS_SUCCESS != cublasAlloc(nb*maxm, sizeof(cuDoubleComplex), (void**)&d_panel[i]) ) {
-		  for( j=0; j<=i; j++ ) {
+                    cublasFree( d_lAP[j] );
+                    cublasFree( d_panel[j] );
+                        cublasFree( d_lAT[j] );
+                  }
+              return MAGMA_ERR_CUBLASALLOC;
+            }
+            if ( CUBLAS_STATUS_SUCCESS != cublasAlloc(nb*maxm, sizeof(cuDoubleComplex), (void**)&d_panel[i]) ) {
+                  for( j=0; j<=i; j++ ) {
             cudaSetDevice(j);
-		    cublasFree( d_lAP[j] );
-		  }
-		  for( j=0; j<i; j++ ) {
+                    cublasFree( d_lAP[j] );
+                  }
+                  for( j=0; j<i; j++ ) {
             cudaSetDevice(j);
-		    cublasFree( d_panel[j] );
-			cublasFree( d_lAT[j] );
-		  }
-	      return MAGMA_ERR_CUBLASALLOC;
-	    }
+                    cublasFree( d_panel[j] );
+                        cublasFree( d_lAT[j] );
+                  }
+              return MAGMA_ERR_CUBLASALLOC;
+            }
 
-		/* local-matrix storage */
-	    lddat = ldat_local[i];
-	    if ( CUBLAS_STATUS_SUCCESS != cublasAlloc(lddat*maxm, sizeof(cuDoubleComplex), (void**)&d_lAT[i]) ) {
-		  for( j=0; j<=i; j++ ) {
+                /* local-matrix storage */
+            lddat = ldat_local[i];
+            if ( CUBLAS_STATUS_SUCCESS != cublasAlloc(lddat*maxm, sizeof(cuDoubleComplex), (void**)&d_lAT[i]) ) {
+                  for( j=0; j<=i; j++ ) {
             cudaSetDevice(j);
-		    cublasFree( d_lAP[j] );
-		    cublasFree( d_panel[j] );
-		  }
-		  for( j=0; j<i; j++ ) {
+                    cublasFree( d_lAP[j] );
+                    cublasFree( d_panel[j] );
+                  }
+                  for( j=0; j<i; j++ ) {
             cudaSetDevice(j);
-			cublasFree( d_lAT[j] );
-		  }
-		  return MAGMA_ERR_CUBLASALLOC;
-	    }
-	    magmablas_ztranspose2( d_lAT[i], lddat, d_lA[i], ldda, m, n_local[i] );
-		panel_local[i] = inAT(i,0,0);
-		ldpan[i] = lddat;
+                        cublasFree( d_lAT[j] );
+                  }
+                  return MAGMA_ERR_CUBLASALLOC;
+            }
+            magmablas_ztranspose2( d_lAT[i], lddat, d_lA[i], ldda, m, n_local[i] );
+                panel_local[i] = inAT(i,0,0);
+                ldpan[i] = lddat;
 
-		/* create the streams */
-	    if( cudaSuccess != cudaStreamCreate(&streaml[i][0]) ) {
-		  for( j=0; j<=i; j++ ) {
+                /* create the streams */
+            if( cudaSuccess != cudaStreamCreate(&streaml[i][0]) ) {
+                  for( j=0; j<=i; j++ ) {
             cudaSetDevice(j);
-		    cublasFree( d_lAP[j] );
-		    cublasFree( d_panel[j] );
-			cublasFree( d_lAT[j] );
-		  }
-		  return cudaErrorInvalidValue;
-	    }
-	    if( cudaSuccess != cudaStreamCreate(&streaml[i][1]) ) {
-		  for( j=0; j<=i; j++ ) {
+                    cublasFree( d_lAP[j] );
+                    cublasFree( d_panel[j] );
+                        cublasFree( d_lAT[j] );
+                  }
+                  return cudaErrorInvalidValue;
+            }
+            if( cudaSuccess != cudaStreamCreate(&streaml[i][1]) ) {
+                  for( j=0; j<=i; j++ ) {
             cudaSetDevice(j);
-		    cublasFree( d_lAP[j] );
-		    cublasFree( d_panel[j] );
-			cublasFree( d_lAT[j] );
-		  }
-		  return cudaErrorInvalidValue;
-	    }
-	  }
+                    cublasFree( d_lAP[j] );
+                    cublasFree( d_panel[j] );
+                        cublasFree( d_lAT[j] );
+                  }
+                  return cudaErrorInvalidValue;
+            }
+          }
 
-	  /* cpu workspace */
-	  lddwork = maxm;
-	  if ( cudaSuccess != cudaMallocHost( (void**)&work, lddwork*nb*sizeof(cuDoubleComplex) ) ) {
-		for(i=0; i<num_gpus; i++ ) {
+          /* cpu workspace */
+          lddwork = maxm;
+          if ( cudaSuccess != cudaMallocHost( (void**)&work, lddwork*nb*sizeof(cuDoubleComplex) ) ) {
+                for(i=0; i<num_gpus; i++ ) {
           cudaSetDevice(i);
-	      cublasFree( d_lAP[i] );
-		  cublasFree( d_panel[i] );
-		  cublasFree( d_lAT[i] );
-		}
-	    return MAGMA_ERR_HOSTALLOC;
-	  }
+              cublasFree( d_lAP[i] );
+                  cublasFree( d_panel[i] );
+                  cublasFree( d_lAT[i] );
+                }
+            return MAGMA_ERR_HOSTALLOC;
+          }
 
       s = mindim / nb;
-	  for( i=0; i<s; i++ )
+          for( i=0; i<s; i++ )
             {
                 /* Set the GPU number that holds the current panel */
-				id = i%num_gpus;
-				cudaSetDevice(id);
+                                id = i%num_gpus;
+                                cudaSetDevice(id);
 
-			    /* Set the local index where the current panel is */
-			    i_local = i/num_gpus;
+                            /* Set the local index where the current panel is */
+                            i_local = i/num_gpus;
                 cols  = maxm - i*nb;
                 rows  = m - i*nb;
-	            lddat = ldat_local[id];
+                    lddat = ldat_local[id];
 
-				/* start sending the panel to cpu */
+                                /* start sending the panel to cpu */
                 magmablas_ztranspose( d_lAP[id], cols, inAT(id,i,i_local), lddat, nb, cols );
                 //cublasGetMatrix( m-i*nb, nb, sizeof(cuDoubleComplex), d_lAP[id], cols, work, lddwork);
-				cudaMemcpy2DAsync( work,     lddwork*sizeof(cuDoubleComplex),
-				                   d_lAP[id], cols  *sizeof(cuDoubleComplex),
-				                   sizeof(cuDoubleComplex)*rows, nb,
-				                   cudaMemcpyDeviceToHost, streaml[id][1]);
+                                cudaMemcpy2DAsync( work,     lddwork*sizeof(cuDoubleComplex),
+                                                   d_lAP[id], cols  *sizeof(cuDoubleComplex),
+                                                   sizeof(cuDoubleComplex)*rows, nb,
+                                                   cudaMemcpyDeviceToHost, streaml[id][1]);
 
                 /* make sure that gpu queue is empty */
                 cuCtxSynchronize();
 
-				/* the remaining updates */
+                                /* the remaining updates */
                 if ( i>0 ){
-					/* id-th gpu update the remaining matrix */
+                                        /* id-th gpu update the remaining matrix */
                     cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
                                  n_local[id] - (i_local+1)*nb, nb, 
                                  c_one, panel_local[id],        ldpan[id], 
@@ -266,64 +266,64 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
                 lapackf77_zgetrf( &rows, &nb, work, &lddwork, ipiv+i*nb, &iinfo);
                 if ( (*info == 0) && (iinfo > 0) ) {
                     *info = iinfo + i*nb;
-					break;
-				}
+                                        break;
+                                }
 
-				/* start sending the panel to all the gpus */
-				for( d=0; d<num_gpus; d++ ) {
-				  cudaSetDevice(d);
-	              lddat = ldat_local[d];
+                                /* start sending the panel to all the gpus */
+                                for( d=0; d<num_gpus; d++ ) {
+                                  cudaSetDevice(d);
+                      lddat = ldat_local[d];
                   //cublasSetMatrix(rows, nb, sizeof(cuDoubleComplex), work, lddwork, d_lAP[d], maxm);
                   cudaMemcpy2DAsync(d_lAP[d], maxm   *sizeof(cuDoubleComplex),
-				                    work,     lddwork*sizeof(cuDoubleComplex),
-				                    sizeof(cuDoubleComplex)*rows, nb,
-				                    cudaMemcpyHostToDevice, streaml[d][0]);
-				}
+                                                    work,     lddwork*sizeof(cuDoubleComplex),
+                                                    sizeof(cuDoubleComplex)*rows, nb,
+                                                    cudaMemcpyHostToDevice, streaml[d][0]);
+                                }
 
-				for( d=0; d<num_gpus; d++ ) {
-				  cudaSetDevice(d);
-	              lddat = ldat_local[d];
-				  /* apply the pivoting */
-			      if( d == 0 ) 
+                                for( d=0; d<num_gpus; d++ ) {
+                                  cudaSetDevice(d);
+                      lddat = ldat_local[d];
+                                  /* apply the pivoting */
+                              if( d == 0 ) 
                     magmablas_zpermute_long2( d_lAT[d], lddat, ipiv, nb, i*nb );
-				  else
+                                  else
                     magmablas_zpermute_long3( d_lAT[d], lddat, ipiv, nb, i*nb );
 
-				  /* storage for panel */
-				  if( d == id ) {
-					/* the panel belond to this gpu */
-					panel_local[d] = inAT(d,i,i_local);
-					ldpan[d] = lddat;
-					/* next column */
-					i_local2 = i_local+1;
-				  } else {
-					/* the panel belong to another gpu */
-					panel_local[d] = d_panel[d];
-					ldpan[d] = nb;
-					/* next column */
-					i_local2 = i_local;
-				    if( d < id ) i_local2 ++;
-				  }
-				  /* the size of the next column */
+                                  /* storage for panel */
+                                  if( d == id ) {
+                                        /* the panel belond to this gpu */
+                                        panel_local[d] = inAT(d,i,i_local);
+                                        ldpan[d] = lddat;
+                                        /* next column */
+                                        i_local2 = i_local+1;
+                                  } else {
+                                        /* the panel belong to another gpu */
+                                        panel_local[d] = d_panel[d];
+                                        ldpan[d] = nb;
+                                        /* next column */
+                                        i_local2 = i_local;
+                                    if( d < id ) i_local2 ++;
+                                  }
+                                  /* the size of the next column */
                   if ( s > (i+1) ) {
-				    nb0 = nb;
-				  } else {
-				    nb0 = n_local[d]-nb*(s/num_gpus);
-					if( d < s%num_gpus ) nb0 -= nb;
-				  }
-				  if( d == (i+1)%num_gpus) {
-					/* owns the next column, look-ahead the column */
-					nb1 = nb0;
-				  } else {
-				    /* update the entire trailing matrix */
-				    nb1 = n_local[d] - i_local2*nb;
-				  }
+                                    nb0 = nb;
+                                  } else {
+                                    nb0 = n_local[d]-nb*(s/num_gpus);
+                                        if( d < s%num_gpus ) nb0 -= nb;
+                                  }
+                                  if( d == (i+1)%num_gpus) {
+                                        /* owns the next column, look-ahead the column */
+                                        nb1 = nb0;
+                                  } else {
+                                    /* update the entire trailing matrix */
+                                    nb1 = n_local[d] - i_local2*nb;
+                                  }
 
-				  /* synchronization */
-				  cudaStreamSynchronize(streaml[d][0]);
+                                  /* synchronization */
+                                  cudaStreamSynchronize(streaml[d][0]);
                   //cublasSetMatrix(rows, nb, sizeof(cuDoubleComplex), work, lddwork, d_lAP[d], maxm);
                   magmablas_ztranspose2(panel_local[d], ldpan[d], d_lAP[d], maxm, cols, nb);
-				  /* gpu updating the trailing matrix */
+                                  /* gpu updating the trailing matrix */
                   cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
                                nb1, nb, c_one,
                                panel_local[d],       ldpan[d],
@@ -338,108 +338,108 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
              } /* end of for i=1..s */
 
             /* Set the GPU number that holds the last panel */
-			id = s%num_gpus;
+                        id = s%num_gpus;
 
-			/* Set the local index where the last panel is */
-			i_local = s/num_gpus;
+                        /* Set the local index where the last panel is */
+                        i_local = s/num_gpus;
 
-			/* size of the last diagonal-block */
-	        nb0 = min(m - s*nb, n - s*nb);
-	        rows = m    - s*nb;
-	        cols = maxm - s*nb;
-	        lddat = ldat_local[id];
+                        /* size of the last diagonal-block */
+                nb0 = min(m - s*nb, n - s*nb);
+                rows = m    - s*nb;
+                cols = maxm - s*nb;
+                lddat = ldat_local[id];
 
-			if( nb0 > 0 ) {
-			  /* send the last panel to cpu */
-			  cudaSetDevice(id);
+                        if( nb0 > 0 ) {
+                          /* send the last panel to cpu */
+                          cudaSetDevice(id);
               //cudaStreamSynchronize(streaml[id][1]);
-	          magmablas_ztranspose2( d_lAP[id], maxm, inAT(id,s,i_local), lddat, nb0, rows);
-	          cublasGetMatrix(rows, nb0, sizeof(cuDoubleComplex), d_lAP[id], maxm, work, lddwork);
+                  magmablas_ztranspose2( d_lAP[id], maxm, inAT(id,s,i_local), lddat, nb0, rows);
+                  cublasGetMatrix(rows, nb0, sizeof(cuDoubleComplex), d_lAP[id], maxm, work, lddwork);
 
-	          /* make sure that gpu queue is empty */
-	          cuCtxSynchronize();
+                  /* make sure that gpu queue is empty */
+                  cuCtxSynchronize();
 
-	          /* factor on cpu */
-	          lapackf77_zgetrf( &rows, &nb0, work, &lddwork, ipiv+s*nb, &iinfo);
-	          if ( (*info == 0) && (iinfo > 0) )
-	          *info = iinfo + s*nb;
+                  /* factor on cpu */
+                  lapackf77_zgetrf( &rows, &nb0, work, &lddwork, ipiv+s*nb, &iinfo);
+                  if ( (*info == 0) && (iinfo > 0) )
+                  *info = iinfo + s*nb;
 
-			  /* send the factor to gpus */
-	          for( d=0; d<num_gpus; d++ ) {
-			    cudaSetDevice(d);
-	            lddat = ldat_local[d];
-			    i_local2 = i_local;
-			    if( d < id ) i_local2 ++;
+                          /* send the factor to gpus */
+                  for( d=0; d<num_gpus; d++ ) {
+                            cudaSetDevice(d);
+                    lddat = ldat_local[d];
+                            i_local2 = i_local;
+                            if( d < id ) i_local2 ++;
 
-			    if( d == id || n_local[d] > i_local2*nb ) 
-			    {
-	              //cublasSetMatrix(rows, nb0, sizeof(cuDoubleComplex), work, lddwork, d_lAP[d], maxm);
+                            if( d == id || n_local[d] > i_local2*nb ) 
+                            {
+                      //cublasSetMatrix(rows, nb0, sizeof(cuDoubleComplex), work, lddwork, d_lAP[d], maxm);
                   cudaMemcpy2DAsync(d_lAP[d], maxm   *sizeof(cuDoubleComplex),
-			                        work,     lddwork*sizeof(cuDoubleComplex),
-			                        sizeof(cuDoubleComplex)*rows, nb0,
-			                        cudaMemcpyHostToDevice, streaml[d][0]);
-			    }
-			  }
-			}
+                                                work,     lddwork*sizeof(cuDoubleComplex),
+                                                sizeof(cuDoubleComplex)*rows, nb0,
+                                                cudaMemcpyHostToDevice, streaml[d][0]);
+                            }
+                          }
+                        }
 
-			/* clean up */
-	        for( d=0; d<num_gpus; d++ ) {
-			  cudaSetDevice(d);
-	          lddat = ldat_local[d];
+                        /* clean up */
+                for( d=0; d<num_gpus; d++ ) {
+                          cudaSetDevice(d);
+                  lddat = ldat_local[d];
 
-			  if( nb0 > 0 ) {
-			    if( d == 0 ) 
-				  magmablas_zpermute_long2( d_lAT[d], lddat, ipiv, nb0, s*nb );
-			    else
-				  magmablas_zpermute_long3( d_lAT[d], lddat, ipiv, nb0, s*nb );
+                          if( nb0 > 0 ) {
+                            if( d == 0 ) 
+                                  magmablas_zpermute_long2( d_lAT[d], lddat, ipiv, nb0, s*nb );
+                            else
+                                  magmablas_zpermute_long3( d_lAT[d], lddat, ipiv, nb0, s*nb );
 
 
-				i_local2 = i_local;
-				if( d < id ) i_local2++;
-			    if( d == id ) {
-				  /* the panel belond to this gpu */
-				  panel_local[d] = inAT(d,s,i_local);
+                                i_local2 = i_local;
+                                if( d < id ) i_local2++;
+                            if( d == id ) {
+                                  /* the panel belond to this gpu */
+                                  panel_local[d] = inAT(d,s,i_local);
 
-				  /* next column */
-			      nb1 = n_local[d] - i_local*nb-nb0;
+                                  /* next column */
+                              nb1 = n_local[d] - i_local*nb-nb0;
 
-	              //cublasSetMatrix(rows, nb0, sizeof(cuDoubleComplex), work, lddwork, d_lAP[d], maxm);
+                      //cublasSetMatrix(rows, nb0, sizeof(cuDoubleComplex), work, lddwork, d_lAP[d], maxm);
                   cudaStreamSynchronize(streaml[d][0]);
-	              magmablas_ztranspose2( panel_local[d], lddat, d_lAP[d], maxm, rows, nb0);
+                      magmablas_ztranspose2( panel_local[d], lddat, d_lAP[d], maxm, rows, nb0);
 
-				  if( nb1 > 0 )
-	              cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
-	                           nb1, nb0, c_one,
-	                           panel_local[d],        lddat, 
-	                           inAT(d,s,i_local)+nb0, lddat);
-			    } else if( n_local[d] > i_local2*nb ) {
-				  /* the panel belong to another gpu */
-				  panel_local[d] = d_panel[d];
+                                  if( nb1 > 0 )
+                      cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+                                   nb1, nb0, c_one,
+                                   panel_local[d],        lddat, 
+                                   inAT(d,s,i_local)+nb0, lddat);
+                            } else if( n_local[d] > i_local2*nb ) {
+                                  /* the panel belong to another gpu */
+                                  panel_local[d] = d_panel[d];
 
-				  /* next column */
-			      nb1 = n_local[d] - i_local2*nb;
+                                  /* next column */
+                              nb1 = n_local[d] - i_local2*nb;
 
-	              //cublasSetMatrix(rows, nb0, sizeof(cuDoubleComplex), work, lddwork, d_lAP[d], maxm);
+                      //cublasSetMatrix(rows, nb0, sizeof(cuDoubleComplex), work, lddwork, d_lAP[d], maxm);
                   cudaStreamSynchronize(streaml[d][0]);
 
-	              magmablas_ztranspose2( panel_local[d], nb0, d_lAP[d], maxm, rows, nb0);
-	              cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
-	                           nb1, nb0, c_one,
-	                           panel_local[d],     nb0, 
-	                           inAT(d,s,i_local2), lddat);
-				}
-			  }
+                      magmablas_ztranspose2( panel_local[d], nb0, d_lAP[d], maxm, rows, nb0);
+                      cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+                                   nb1, nb0, c_one,
+                                   panel_local[d],     nb0, 
+                                   inAT(d,s,i_local2), lddat);
+                                }
+                          }
 
-	          /* save on output */
-	          magmablas_ztranspose2( d_lA[d], ldda, d_lAT[d], lddat, n_local[d], m );
-	          cuCtxSynchronize();
-	          cublasFree(d_lAT[d]);
-	          cublasFree(d_lAP[d]);
-			  cublasFree(d_panel[d]);
-	          cudaStreamDestroy(streaml[d][0]);
-	          cudaStreamDestroy(streaml[d][1]);
-	        } /* end of for d=1,..,num_gpus */
-	        cudaFreeHost(work);
+                  /* save on output */
+                  magmablas_ztranspose2( d_lA[d], ldda, d_lAT[d], lddat, n_local[d], m );
+                  cuCtxSynchronize();
+                  cublasFree(d_lAT[d]);
+                  cublasFree(d_lAP[d]);
+                          cublasFree(d_panel[d]);
+                  cudaStreamDestroy(streaml[d][0]);
+                  cudaStreamDestroy(streaml[d][1]);
+                } /* end of for d=1,..,num_gpus */
+                cudaFreeHost(work);
     }
 
     return MAGMA_SUCCESS;

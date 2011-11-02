@@ -30,7 +30,7 @@
 #endif
 
 int main(int argc, char **argv)
-{	
+{        
     TESTING_CUDA_INIT();
 
     magma_timestr_t  start, end;
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
                 A[i*LDA+j] = A[j*LDA+i];
         }
     }
-	
+        
     printf( "   n      MAGMABLAS,Gflop/s      \"error\"\n" 
             "==============================================================\n");
     fprintf(fp, "   n      MAGMABLAS,Gflop/s      \"error\"\n" 
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
     for( i = istart; i<N+1; i = (int)((i+1)*1.1) )
     {
         m = i;
-	lda = ((m+31)/32)*32;
+        lda = ((m+31)/32)*32;
         flops = FLOPS( (double)m ) / 1e6;
 
         printf(      "%5d ", m );
@@ -154,4 +154,4 @@ int main(int argc, char **argv)
     /* Free device */
     TESTING_CUDA_FINALIZE();
     return 0;
-}	
+}        

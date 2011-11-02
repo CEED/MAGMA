@@ -40,74 +40,74 @@ magma_zpotri_gpu(char uplo, magma_int_t n,
     Purpose
     =======
 
-	DPOTRI computes the inverse of a real symmetric positive definite
-	matrix A using the Cholesky factorization A = U**T*U or A = L*L**T
-	computed by DPOTRF.
+        DPOTRI computes the inverse of a real symmetric positive definite
+        matrix A using the Cholesky factorization A = U**T*U or A = L*L**T
+        computed by DPOTRF.
 
     Arguments
     =========
 
-	UPLO    (input) CHARACTER*1
-			= 'U':  Upper triangle of A is stored;
-			= 'L':  Lower triangle of A is stored.
+        UPLO    (input) CHARACTER*1
+                        = 'U':  Upper triangle of A is stored;
+                        = 'L':  Lower triangle of A is stored.
 
-	N       (input) INTEGER
-			The order of the matrix A.  N >= 0.
+        N       (input) INTEGER
+                        The order of the matrix A.  N >= 0.
 
-	A       (input/output) COMPLEX_16 array, dimension (LDA,N)
-			On entry, the triangular factor U or L from the Cholesky
-			factorization A = U**T*U or A = L*L**T, as computed by
-			DPOTRF.
-			On exit, the upper or lower triangle of the (symmetric)
-			inverse of A, overwriting the input factor U or L.
+        A       (input/output) COMPLEX_16 array, dimension (LDA,N)
+                        On entry, the triangular factor U or L from the Cholesky
+                        factorization A = U**T*U or A = L*L**T, as computed by
+                        DPOTRF.
+                        On exit, the upper or lower triangle of the (symmetric)
+                        inverse of A, overwriting the input factor U or L.
 
-	LDA     (input) INTEGER
-			The leading dimension of the array A.  LDA >= max(1,N).
-	INFO    (output) INTEGER
-			= 0:  successful exit
-			< 0:  if INFO = -i, the i-th argument had an illegal value
-			> 0:  if INFO = i, the (i,i) element of the factor U or L is
-				  zero, and the inverse could not be computed.
+        LDA     (input) INTEGER
+                        The leading dimension of the array A.  LDA >= max(1,N).
+        INFO    (output) INTEGER
+                        = 0:  successful exit
+                        < 0:  if INFO = -i, the i-th argument had an illegal value
+                        > 0:  if INFO = i, the (i,i) element of the factor U or L is
+                                  zero, and the inverse could not be computed.
 
   ===================================================================== */
 
-	/* Local variables */
-	char uplo_[2] = {uplo, 0};
-	magma_int_t ret;
+        /* Local variables */
+        char uplo_[2] = {uplo, 0};
+        magma_int_t ret;
 
-	*info = 0;
-	if ((! lapackf77_lsame(uplo_, "U")) && (! lapackf77_lsame(uplo_, "L")))
-		*info = -1;
-	else if (n < 0)
-		*info = -2;
-	else if (lda < max(1,n))
-		*info = -4;
+        *info = 0;
+        if ((! lapackf77_lsame(uplo_, "U")) && (! lapackf77_lsame(uplo_, "L")))
+                *info = -1;
+        else if (n < 0)
+                *info = -2;
+        else if (lda < max(1,n))
+                *info = -4;
 
-	if (*info != 0) {
-		magma_xerbla( __func__, -(*info) );
-		return MAGMA_ERR_ILLEGAL_VALUE;
-	}
+        if (*info != 0) {
+                magma_xerbla( __func__, -(*info) );
+                return MAGMA_ERR_ILLEGAL_VALUE;
+        }
 
-	/* Quick return if possible */
-	if ( n == 0 )
-		return MAGMA_SUCCESS;
-	
-	/* Invert the triangular Cholesky factor U or L */
-	ret = magma_ztrtri_gpu( uplo, MagmaNonUnit, n, a, lda, info );
+        /* Quick return if possible */
+        if ( n == 0 )
+                return MAGMA_SUCCESS;
+        
+        /* Invert the triangular Cholesky factor U or L */
+        ret = magma_ztrtri_gpu( uplo, MagmaNonUnit, n, a, lda, info );
 
-	if ( (ret != MAGMA_SUCCESS) || ( *info < 0 ) ) 
-		return ret;
+        if ( (ret != MAGMA_SUCCESS) || ( *info < 0 ) ) 
+                return ret;
 
-	if (*info > 0)
-		return MAGMA_ERR_ILLEGAL_VALUE;
+        if (*info > 0)
+                return MAGMA_ERR_ILLEGAL_VALUE;
 
-	/* Form inv(U) * inv(U)**T or inv(L)**T * inv(L) */
-	ret = magma_zlauum_gpu( uplo, n, a, lda, info );
+        /* Form inv(U) * inv(U)**T or inv(L)**T * inv(L) */
+        ret = magma_zlauum_gpu( uplo, n, a, lda, info );
 
 
-	if ( (ret != MAGMA_SUCCESS) || ( *info != 0 ) ) 
-		return ret;
+        if ( (ret != MAGMA_SUCCESS) || ( *info != 0 ) ) 
+                return ret;
 
-	return MAGMA_SUCCESS;
+        return MAGMA_SUCCESS;
 
 }/* magma_zpotri */

@@ -27,8 +27,8 @@
 static int diffMatrix( cuDoubleComplex *A, cuDoubleComplex *B, int m, int n, int lda){
     int i, j;
     for(i=0; i<m; i++) {
-	for(j=0; j<n; j++)
-	    if ( !(MAGMA_Z_EQUAL( A[lda*j+i], B[lda*j+i] )) )
+        for(j=0; j<n; j++)
+            if ( !(MAGMA_Z_EQUAL( A[lda*j+i], B[lda*j+i] )) )
                 return 1;
     }
     return 0;
@@ -64,9 +64,9 @@ int main( int argc, char** argv)
     int *ipiv;
     
     if (argc != 1){
-      for(i = 1; i<argc; i++){	
-	if (strcmp("-N", argv[i])==0)
-	  N = atoi(argv[++i]);
+      for(i = 1; i<argc; i++){        
+        if (strcmp("-N", argv[i])==0)
+          N = atoi(argv[++i]);
       }
       if (N>0) size[0] = size[9] = N;
       else exit(1);
@@ -112,11 +112,11 @@ int main( int argc, char** argv)
 
 #ifdef CHECK2        
     for(i=0; i<N; i++) {
-	for(j=0; j<N; j++)
+        for(j=0; j<N; j++)
             h_A1[lda*j+i] = MAGMA_Z_MAKE( (double)(i), 0.);
     }
     for(i=0; i<N; i++) {
-	for(j=0; j<N; j++)
+        for(j=0; j<N; j++)
             h_A2[lda*j+i] = MAGMA_Z_MAKE( (double)(n2+i), 0.);
     }
 #else

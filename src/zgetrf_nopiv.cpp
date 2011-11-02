@@ -25,7 +25,7 @@ magma_zgetf2_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
 
 extern "C" magma_int_t
 magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a, 
-		   magma_int_t *lda, magma_int_t *info)
+                   magma_int_t *lda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -84,11 +84,11 @@ magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
     /* Function Body */
     *info = 0;
     if (*m < 0) {
-	*info = -1;
+        *info = -1;
     } else if (*n < 0) {
-	*info = -2;
+        *info = -2;
     } else if (*lda < max(1,*m)) {
-	*info = -4;
+        *info = -4;
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
@@ -97,7 +97,7 @@ magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
 
     /* Quick return if possible */
     if (*m == 0 || *n == 0) {
-	return MAGMA_SUCCESS;
+        return MAGMA_SUCCESS;
     }
 
     /* Determine the block size for this environment. */
@@ -105,52 +105,52 @@ magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
     min_mn = min(*m,*n);
     if (nb <= 1 || nb >= min_mn) 
       {
-	/* Use unblocked code. */
-	magma_zgetf2_nopiv(m, n, &a[a_offset], lda, info);
+        /* Use unblocked code. */
+        magma_zgetf2_nopiv(m, n, &a[a_offset], lda, info);
       }
     else 
       {
-	/* Use blocked code. */
-	for (j = 1; j <= min_mn; j += nb)
-	  {
-	    /* Computing MIN */
-	    i__3 = min_mn - j + 1;
-	    jb = min(i__3,nb);
-	    
-	    /* Factor diagonal and subdiagonal blocks and test for exact   
-	       singularity. */
-	    i__3 = *m - j + 1;
-	    //magma_zgetf2_nopiv(&i__3, &jb, &a[j + j * a_dim1], lda, &iinfo);
+        /* Use blocked code. */
+        for (j = 1; j <= min_mn; j += nb)
+          {
+            /* Computing MIN */
+            i__3 = min_mn - j + 1;
+            jb = min(i__3,nb);
+            
+            /* Factor diagonal and subdiagonal blocks and test for exact   
+               singularity. */
+            i__3 = *m - j + 1;
+            //magma_zgetf2_nopiv(&i__3, &jb, &a[j + j * a_dim1], lda, &iinfo);
 
-	    i__3 -= jb; 
-	    magma_zgetf2_nopiv(&jb, &jb, &a[j + j * a_dim1], lda, &iinfo);
-	    blasf77_ztrsm("R", "U", "N", "N", &i__3, &jb, &c_one, 
-			  &a[j + j * a_dim1], lda,
-			  &a[j + jb + j * a_dim1], lda);
-	    
-	    /* Adjust INFO */
-	    if (*info == 0 && iinfo > 0)
-	      *info = iinfo + j - 1;
+            i__3 -= jb; 
+            magma_zgetf2_nopiv(&jb, &jb, &a[j + j * a_dim1], lda, &iinfo);
+            blasf77_ztrsm("R", "U", "N", "N", &i__3, &jb, &c_one, 
+                          &a[j + j * a_dim1], lda,
+                          &a[j + jb + j * a_dim1], lda);
+            
+            /* Adjust INFO */
+            if (*info == 0 && iinfo > 0)
+              *info = iinfo + j - 1;
 
-	    if (j + jb <= *n) 
-	      {
-		/* Compute block row of U. */
-		i__3 = *n - j - jb + 1;
-		ztrsm_("Left", "Lower", "No transpose", "Unit", &jb, &i__3, &
-		       c_one, &a[j + j * a_dim1], lda, &a[j + (j+jb)*a_dim1], lda);
-		if (j + jb <= *m) 
-		  {
-		    /* Update trailing submatrix. */
-		    i__3 = *m - j - jb + 1;
-		    i__4 = *n - j - jb + 1;
-		    z__1 = MAGMA_Z_NEG_ONE;
-		    zgemm_("No transpose", "No transpose", &i__3, &i__4, &jb, 
-			   &z__1, &a[j + jb + j * a_dim1], lda, 
-			   &a[j + (j + jb) * a_dim1], lda, &c_one, 
-			   &a[j + jb + (j + jb) * a_dim1], lda);
-		  }
-	      }
-	  }
+            if (j + jb <= *n) 
+              {
+                /* Compute block row of U. */
+                i__3 = *n - j - jb + 1;
+                ztrsm_("Left", "Lower", "No transpose", "Unit", &jb, &i__3, &
+                       c_one, &a[j + j * a_dim1], lda, &a[j + (j+jb)*a_dim1], lda);
+                if (j + jb <= *m) 
+                  {
+                    /* Update trailing submatrix. */
+                    i__3 = *m - j - jb + 1;
+                    i__4 = *n - j - jb + 1;
+                    z__1 = MAGMA_Z_NEG_ONE;
+                    zgemm_("No transpose", "No transpose", &i__3, &i__4, &jb, 
+                           &z__1, &a[j + jb + j * a_dim1], lda, 
+                           &a[j + (j + jb) * a_dim1], lda, &c_one, 
+                           &a[j + jb + (j + jb) * a_dim1], lda);
+                  }
+              }
+          }
       }
     
     return MAGMA_SUCCESS;

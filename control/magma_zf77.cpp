@@ -139,14 +139,14 @@ void MAGMAF_ZGEHRD2(magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi,
 }
     
 void MAGMAF_ZGEHRD( magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi,
-		    cuDoubleComplex *A, magma_int_t *lda, cuDoubleComplex *tau,
-		    cuDoubleComplex *work, magma_int_t *lwork,
-		    cuDoubleComplex *d_T, magma_int_t *info)
+                    cuDoubleComplex *A, magma_int_t *lda, cuDoubleComplex *tau,
+                    cuDoubleComplex *work, magma_int_t *lwork,
+                    cuDoubleComplex *d_T, magma_int_t *info)
 {
   magma_zgehrd( *n, *ilo, *ihi,
-		A, *lda, tau,
-		work, *lwork,
-		d_T, info);
+                A, *lda, tau,
+                work, *lwork,
+                d_T, info);
 }
 
 void MAGMAF_ZGELQF( magma_int_t *m, magma_int_t *n, 
@@ -361,17 +361,17 @@ void MAGMAF_ZHEEVD( char *jobz, char *uplo, magma_int_t *n,
 }
 
 void MAGMAF_ZHEGVD(magma_int_t *itype, char *jobz, char *uplo, magma_int_t *n,
-		   cuDoubleComplex *a, magma_int_t *lda, 
-		   cuDoubleComplex *b, magma_int_t *ldb,
-		   double *w, cuDoubleComplex *work, magma_int_t *lwork,
-		   double *rwork, magma_int_t *lrwork,
-		   magma_int_t *iwork, magma_int_t *liwork, magma_int_t *info)
+                   cuDoubleComplex *a, magma_int_t *lda, 
+                   cuDoubleComplex *b, magma_int_t *ldb,
+                   double *w, cuDoubleComplex *work, magma_int_t *lwork,
+                   double *rwork, magma_int_t *lrwork,
+                   magma_int_t *iwork, magma_int_t *liwork, magma_int_t *info)
 {
   magma_zhegvd( *itype, jobz[0], uplo[0], *n,
-		a, *lda, b, *ldb,
-		w, work, *lwork,
-		rwork, *lrwork,
-		iwork, *liwork, info);
+                a, *lda, b, *ldb,
+                w, work, *lwork,
+                rwork, *lrwork,
+                iwork, *liwork, info);
 }
     
 #else
@@ -426,7 +426,7 @@ void MAGMAF_ZHEGVD(magma_int_t *itype, char *jobz, char *uplo, magma_int_t *n,
 {
   magma_zhegvd( *itype, jobz[0], uplo[0], *n,
                 a, *lda, b, *ldb,
-		w, work, *lwork,
+                w, work, *lwork,
                 iwork, *liwork, info);
 }
 

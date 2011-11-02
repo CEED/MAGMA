@@ -25,7 +25,7 @@ typedef struct {
 
 extern "C" magma_context *
 magma_init( void *params, void* (*func)(void *a), magma_int_t nthread, magma_int_t ncpu, magma_int_t ngpu,
-	    magma_int_t argc, char **argv)
+            magma_int_t argc, char **argv)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -60,8 +60,8 @@ magma_init( void *params, void* (*func)(void *a), magma_int_t nthread, magma_int
 
       for (i = 0; i < nthread; i++){
         tp[i] = (t_params*)malloc(sizeof(t_params));
-		tp[i]->params = params;
-		tp[i]->tid = i;
+                tp[i]->params = params;
+                tp[i]->tid = i;
         pthread_create(&thread[i], NULL, func, (void *)tp[i]);
       }
     }
@@ -78,7 +78,7 @@ magma_init( void *params, void* (*func)(void *a), magma_int_t nthread, magma_int
 
     if (ncpu > 1)
       {
-	    /* Initialize the QUARK scheduler */
+            /* Initialize the QUARK scheduler */
         context->quark = QUARK_New(ncpu);
       }
 
@@ -91,33 +91,33 @@ magma_init( void *params, void* (*func)(void *a), magma_int_t nthread, magma_int
     
     if (ngpu == 1)
       {
-	CUdevice  dev;
-	context->gpu_context = (CUcontext *)malloc(ngpu * sizeof(CUcontext));
-	
-	/* For now we use by default device 0, always */
-	if( CUDA_SUCCESS != cuInit( 0 ) ) {
-	  fprintf(stderr, "CUDA: Not initialized\n" ); 
-	  exit(-1);
-	}
-	if( CUDA_SUCCESS != cuDeviceGet( &dev, 0 ) ) {
-	  fprintf(stderr, "CUDA: Cannot get the device\n");
-	  exit(-1);
-	} 
-	if( CUDA_SUCCESS != cuCtxCreate( &context->gpu_context[0], 0, dev ) ) {
-	  fprintf(stderr, "CUDA: Cannot create the context\n");
-	  exit(-1);
-	}
-	if( CUDA_SUCCESS != cublasInit( ) ) {
-	  fprintf(stderr, "CUBLAS: Not initialized\n");
-	  exit(-1);
-	}
-	printout_devices( );
+        CUdevice  dev;
+        context->gpu_context = (CUcontext *)malloc(ngpu * sizeof(CUcontext));
+        
+        /* For now we use by default device 0, always */
+        if( CUDA_SUCCESS != cuInit( 0 ) ) {
+          fprintf(stderr, "CUDA: Not initialized\n" ); 
+          exit(-1);
+        }
+        if( CUDA_SUCCESS != cuDeviceGet( &dev, 0 ) ) {
+          fprintf(stderr, "CUDA: Cannot get the device\n");
+          exit(-1);
+        } 
+        if( CUDA_SUCCESS != cuCtxCreate( &context->gpu_context[0], 0, dev ) ) {
+          fprintf(stderr, "CUDA: Cannot create the context\n");
+          exit(-1);
+        }
+        if( CUDA_SUCCESS != cublasInit( ) ) {
+          fprintf(stderr, "CUBLAS: Not initialized\n");
+          exit(-1);
+        }
+        printout_devices( );
       }
     
     context->nb = -1;
     for(i = 1; i<argc; i++)
       if (strcmp("-b", argv[i])==0)
-	context->nb = atoi(argv[++i]);
+        context->nb = atoi(argv[++i]);
     
     return context;
 }

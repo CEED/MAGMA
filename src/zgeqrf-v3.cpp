@@ -71,9 +71,9 @@ typedef struct {
 
 extern "C" magma_int_t
 magma_zgeqrf3(magma_context *cntxt, magma_int_t m, magma_int_t n, 
-	      cuDoubleComplex *a,    magma_int_t lda, cuDoubleComplex *tau, 
-	      cuDoubleComplex *work, magma_int_t lwork,
-	      magma_int_t *info )
+              cuDoubleComplex *a,    magma_int_t lda, cuDoubleComplex *tau, 
+              cuDoubleComplex *work, magma_int_t lwork,
+              magma_int_t *info )
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -180,7 +180,7 @@ magma_zgeqrf3(magma_context *cntxt, magma_int_t m, magma_int_t n,
     /* Use MAGMA code to factor left portion of matrix, waking up threads 
        along the way to perform updates on the right portion of matrix */
     magma_zgeqrf2(cntxt, m, n - qr_params->nthreads * qr_params->ob, 
-		  a, lda, tau, work, lwork, info);
+                  a, lda, tau, work, lwork, info);
 
     /* Wait for all update threads to finish */
     for (k = 0; k < qr_params->nthreads; k++) {
@@ -193,7 +193,7 @@ magma_zgeqrf3(magma_context *cntxt, magma_int_t m, magma_int_t n,
     for (k = 0; k < qr_params->np_gpu-1; k++){
       ib = min(qr_params->nb,(n-qr_params->nthreads*qr_params->ob)-qr_params->nb*k);
       zq_to_panel(MagmaUpper, ib, a + k*qr_params->nb*lda + k*qr_params->nb, lda, 
-		  qr_params->w+qr_params->nb*qr_params->nb*k);
+                  qr_params->w+qr_params->nb*qr_params->nb*k);
     }
 
     /* Use final blocking size */
@@ -209,10 +209,10 @@ magma_zgeqrf3(magma_context *cntxt, magma_int_t m, magma_int_t n,
         M = qr_params->m-(qr_params->n-(qr_params->ob*qr_params->nthreads));
 
       magma_zgeqrf2(cntxt, M, N,
-		    a + (n-qr_params->nthreads*qr_params->ob)*m+
-		    (n-qr_params->nthreads*qr_params->ob), lda, 
-		    &tau[n-qr_params->nthreads*qr_params->ob],
-		    work, lwork, info);
+                    a + (n-qr_params->nthreads*qr_params->ob)*m+
+                    (n-qr_params->nthreads*qr_params->ob), lda, 
+                    &tau[n-qr_params->nthreads*qr_params->ob],
+                    work, lwork, info);
 
     /* Prepare for next run */
     for (k = 0; k < qr_params->np_gpu; k++) {

@@ -54,7 +54,7 @@ int main( magma_int_t argc, char** argv)
     magma_int_t ISEED[4] = {0,0,0,1};
 
     magma_int_t num_cores = 4;
-	int num_gpus = 0;
+        int num_gpus = 0;
 
     magma_int_t loop = argc;
     
@@ -103,55 +103,55 @@ int main( magma_int_t argc, char** argv)
     printf("=============================================\n");
     for(i=0; i<10; i++)
       {
-	N = lda = size[i];
-	n2 = N*N;
+        N = lda = size[i];
+        n2 = N*N;
 
-	lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-	
-	for(j=0; j<N; j++) 
-	  MAGMA_Z_SET2REAL( h_A[j*lda+j], ( MAGMA_Z_GET_X(h_A[j*lda+j]) + 2000. ) );
+        lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
+        
+        for(j=0; j<N; j++) 
+          MAGMA_Z_SET2REAL( h_A[j*lda+j], ( MAGMA_Z_GET_X(h_A[j*lda+j]) + 2000. ) );
 
-	for(j=0; j<n2; j++)
-	  h_A2[j] = h_A[j];
+        for(j=0; j<n2; j++)
+          h_A2[j] = h_A[j];
 
-	/* =====================================================================
-	   Performs operation using LAPACK 
-	   =================================================================== */
+        /* =====================================================================
+           Performs operation using LAPACK 
+           =================================================================== */
 
-	//lapackf77_zpotrf("L", &N, h_A, &lda, info);
-	lapackf77_zpotrf("U", &N, h_A, &lda, info);
-	
-	if (info[0] < 0)  
-	  printf("Argument %d of zpotrf had an illegal value.\n", -info[0]);     
+        //lapackf77_zpotrf("L", &N, h_A, &lda, info);
+        lapackf77_zpotrf("U", &N, h_A, &lda, info);
+        
+        if (info[0] < 0)  
+          printf("Argument %d of zpotrf had an illegal value.\n", -info[0]);     
 
-	/* =====================================================================
-	   Performs operation using multi-core 
-	   =================================================================== */
-	start = get_current_time();
-	//magma_zpotrf_mc(context, "L", &N, h_A2, &lda, info);
-	magma_zpotrf_mc(context, "U", &N, h_A2, &lda, info);
-	end = get_current_time();
-	
-	if (info[0] < 0)  
-	  printf("Argument %d of magma_zpotrf_mc had an illegal value.\n", -info[0]);     
+        /* =====================================================================
+           Performs operation using multi-core 
+           =================================================================== */
+        start = get_current_time();
+        //magma_zpotrf_mc(context, "L", &N, h_A2, &lda, info);
+        magma_zpotrf_mc(context, "U", &N, h_A2, &lda, info);
+        end = get_current_time();
+        
+        if (info[0] < 0)  
+          printf("Argument %d of magma_zpotrf_mc had an illegal value.\n", -info[0]);     
   
-	cpu_perf2 = FLOPS( (double)N ) / (1000000.*GetTimerValue(start,end));
-	
-	/* =====================================================================
-	   Check the result compared to LAPACK
-	   =================================================================== */
-	double work[1], matnorm = 1.;
-	cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
-	int one = 1;
+        cpu_perf2 = FLOPS( (double)N ) / (1000000.*GetTimerValue(start,end));
+        
+        /* =====================================================================
+           Check the result compared to LAPACK
+           =================================================================== */
+        double work[1], matnorm = 1.;
+        cuDoubleComplex mone = MAGMA_Z_NEG_ONE;
+        int one = 1;
 
-	matnorm = lapackf77_zlange("f", &N, &N, h_A, &N, work);
-	blasf77_zaxpy(&n2, &mone, h_A, &one, h_A2, &one);
-	printf("%5d     %6.2f                %e\n", 
-	       size[i], cpu_perf2,  
-	       lapackf77_zlange("f", &N, &N, h_A2, &N, work) / matnorm);
+        matnorm = lapackf77_zlange("f", &N, &N, h_A, &N, work);
+        blasf77_zaxpy(&n2, &mone, h_A, &one, h_A2, &one);
+        printf("%5d     %6.2f                %e\n", 
+               size[i], cpu_perf2,  
+               lapackf77_zlange("f", &N, &N, h_A2, &N, work) / matnorm);
 
-	if (loop != 1)
-	  break;
+        if (loop != 1)
+          break;
       }
     
     /* Memory clean up */

@@ -137,27 +137,27 @@ magma_zunmtr_gpu(char side, char uplo, char trans,
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
     if (left) {
-	nq = m;
-	nw = n;
+        nq = m;
+        nw = n;
     } else {
-	nq = n;
-	nw = m;
+        nq = n;
+        nw = m;
     }
     if (! left && ! lapackf77_lsame(side_, "R")) {
-	*info = -1;
+        *info = -1;
     } else if (! upper && ! lapackf77_lsame(uplo_, "L")) {
-	*info = -2;
+        *info = -2;
     } else if (! lapackf77_lsame(trans_, "N") && 
                ! lapackf77_lsame(trans_, "C")) {
-	*info = -3;
+        *info = -3;
     } else if (m < 0) {
-	*info = -4;
+        *info = -4;
     } else if (n < 0) {
-	*info = -5;
+        *info = -5;
     } else if (ldda < max(1,nq)) {
-	*info = -7;
+        *info = -7;
     } else if (lddc < max(1,m)) {
-	*info = -10;
+        *info = -10;
     } else if (ldwa < max(1,nq)) {
         *info = -12;
     }
@@ -169,35 +169,35 @@ magma_zunmtr_gpu(char side, char uplo, char trans,
   
     /* Quick return if possible */
     if (m == 0 || n == 0 || nq == 1) {
-	return MAGMA_SUCCESS;
+        return MAGMA_SUCCESS;
     }
 
     if (left) {
-	mi = m - 1;
-	ni = n;
+        mi = m - 1;
+        ni = n;
     } else {
-	mi = m;
-	ni = n - 1;
+        mi = m;
+        ni = n - 1;
     }
 
     if (upper) 
       {
-	i__2 = nq - 1;
+        i__2 = nq - 1;
         magma_zunmql2_gpu(side, trans, mi, ni, i__2, &da[ldda], ldda, tau,
                           dc, lddc, &wa[ldwa], ldwa, &iinfo);
       }
     else 
       {
-	/* Q was determined by a call to SSYTRD with UPLO = 'L' */
-	if (left) {
-	    i1 = 1;
-	    i2 = 0;
-	} else {
-	    i1 = 0;
-	    i2 = 1;
-	}
-	i__2 = nq - 1;
-	magma_zunmqr2_gpu(side, trans, mi, ni, i__2, &da[1], ldda, tau,
+        /* Q was determined by a call to SSYTRD with UPLO = 'L' */
+        if (left) {
+            i1 = 1;
+            i2 = 0;
+        } else {
+            i1 = 0;
+            i2 = 1;
+        }
+        i__2 = nq - 1;
+        magma_zunmqr2_gpu(side, trans, mi, ni, i__2, &da[1], ldda, tau,
                           &dc[i1 + i2 * lddc], lddc, &wa[1], ldwa, &iinfo);
       }
 

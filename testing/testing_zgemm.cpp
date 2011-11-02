@@ -107,7 +107,7 @@ int main( int argc, char** argv)
     }
 
     if ( (M0 != 0) && (N0 != 0) && (K0 != 0) )
-	iend = istart + 1;
+        iend = istart + 1;
     
     M = N = K = iend;
     if ( M0 != 0 ) M = M0;
@@ -115,19 +115,19 @@ int main( int argc, char** argv)
     if ( K0 != 0 ) K = K0;
     
     if( transA == MagmaNoTrans ) {
-	Am = M;
-	An = K;
+        Am = M;
+        An = K;
     }  else {
-	Am = K;
-	An = M;
+        Am = K;
+        An = M;
     }
     
     if( transB == MagmaNoTrans ) {
-	Bm = K;
-	Bn = N;
+        Bm = K;
+        Bn = N;
     }  else {
-	Bm = N;
-	Bn = K;
+        Bm = N;
+        Bn = K;
     }
     
     lda = ldc = M;
@@ -158,81 +158,81 @@ int main( int argc, char** argv)
     printf("==================================================================\n");
     for(i=istart; i<iend; i = (int)(i*1.25) )
     {
-	M = N = K = i;
-	if ( M0 != 0 ) M = M0;
-	if ( N0 != 0 ) N = N0;
-	if ( K0 != 0 ) K = K0;
+        M = N = K = i;
+        if ( M0 != 0 ) M = M0;
+        if ( N0 != 0 ) N = N0;
+        if ( K0 != 0 ) K = K0;
 
-	if( transA == MagmaNoTrans ) {
-	    lda = Am = M;
-	    An = K;
-	}  else {
-	    lda = Am = K;
-	    An = M;
-	}
+        if( transA == MagmaNoTrans ) {
+            lda = Am = M;
+            An = K;
+        }  else {
+            lda = Am = K;
+            An = M;
+        }
 
-	if( transB == MagmaNoTrans ) {
-	    ldb = Bm = K;
-	    Bn = N;
-	}  else {
-	    ldb = Bm = N;
-	    Bn = K;
-	}
-	flops = FLOPS( (double)M, (double)N, (double)K ) / 1000000;
-	ldc = M;
+        if( transB == MagmaNoTrans ) {
+            ldb = Bm = K;
+            Bn = N;
+        }  else {
+            ldb = Bm = N;
+            Bn = K;
+        }
+        flops = FLOPS( (double)M, (double)N, (double)K ) / 1000000;
+        ldc = M;
 
-	ldda = ((lda+31)/32)*32;
-	lddb = ((ldb+31)/32)*32;
-	lddc = ((ldc+31)/32)*32;
+        ldda = ((lda+31)/32)*32;
+        lddb = ((ldb+31)/32)*32;
+        lddc = ((ldc+31)/32)*32;
 
-	szeA = lda * An;
-	szeB = ldb * Bn;
-	szeC = ldc * N;
+        szeA = lda * An;
+        szeB = ldb * Bn;
+        szeC = ldc * N;
 
-	/* Initialize the matrices */
-	lapackf77_zlarnv( &ione, ISEED, &szeA, h_A );
-	lapackf77_zlarnv( &ione, ISEED, &szeB, h_B );
-	lapackf77_zlarnv( &ione, ISEED, &szeC, h_C );
-	
-	/* =====================================================================
-	   Performs operation using MAGMA-BLAS
-	   =================================================================== */
-	cublasSetMatrix( Am, An, sizeof( cuDoubleComplex ), h_A, lda, d_A, ldda );
-	cublasSetMatrix( Bm, Bn, sizeof( cuDoubleComplex ), h_B, ldb, d_B, lddb );
-	cublasSetMatrix( M,  N,  sizeof( cuDoubleComplex ), h_C, ldc, d_C, lddc );
-
-	start = get_current_time();
-	magmablas_zgemm( transA, transB, M, N, K, 
-			 alpha, d_A, ldda,
-                                d_B, lddb,
-			 beta,  d_C, lddc );
-	end = get_current_time();
-	magma_perf = flops / GetTimerValue(start, end);
-	
-	cublasGetMatrix( M, N, sizeof( cuDoubleComplex ), d_C, lddc, h_C2, ldc );
-	
-	/* =====================================================================
-	   Performs operation using CUDA-BLAS
-	   =================================================================== */
-	cublasSetMatrix( M, N, sizeof( cuDoubleComplex ), h_C, ldc, d_C, lddc );
-	
-	start = get_current_time();
-	cublasZgemm( transA, transB, M, N, K, 
-		     alpha, d_A, ldda,
-		            d_B, lddb,
-		     beta,  d_C, lddc );
-	end = get_current_time();
-	cuda_perf = flops / GetTimerValue(start, end);
-	
-	cublasGetMatrix( M, N, sizeof( cuDoubleComplex ), d_C, lddc, h_C, ldc );
-	
+        /* Initialize the matrices */
+        lapackf77_zlarnv( &ione, ISEED, &szeA, h_A );
+        lapackf77_zlarnv( &ione, ISEED, &szeB, h_B );
+        lapackf77_zlarnv( &ione, ISEED, &szeC, h_C );
+        
         /* =====================================================================
-	   Error Computation and Performance Compariosn
-	   =================================================================== */
-	blasf77_zaxpy(&szeC, &mzone, h_C, &ione, h_C2, &ione);
-	error = lapackf77_zlange("M", &M, &N, h_C2, &ldc, work);
-	printf("%5d %5d %5d       %6.2f           %6.2f         %e\n",
-	       M, N, K, magma_perf, cuda_perf, error);
+           Performs operation using MAGMA-BLAS
+           =================================================================== */
+        cublasSetMatrix( Am, An, sizeof( cuDoubleComplex ), h_A, lda, d_A, ldda );
+        cublasSetMatrix( Bm, Bn, sizeof( cuDoubleComplex ), h_B, ldb, d_B, lddb );
+        cublasSetMatrix( M,  N,  sizeof( cuDoubleComplex ), h_C, ldc, d_C, lddc );
+
+        start = get_current_time();
+        magmablas_zgemm( transA, transB, M, N, K, 
+                         alpha, d_A, ldda,
+                                d_B, lddb,
+                         beta,  d_C, lddc );
+        end = get_current_time();
+        magma_perf = flops / GetTimerValue(start, end);
+        
+        cublasGetMatrix( M, N, sizeof( cuDoubleComplex ), d_C, lddc, h_C2, ldc );
+        
+        /* =====================================================================
+           Performs operation using CUDA-BLAS
+           =================================================================== */
+        cublasSetMatrix( M, N, sizeof( cuDoubleComplex ), h_C, ldc, d_C, lddc );
+        
+        start = get_current_time();
+        cublasZgemm( transA, transB, M, N, K, 
+                     alpha, d_A, ldda,
+                            d_B, lddb,
+                     beta,  d_C, lddc );
+        end = get_current_time();
+        cuda_perf = flops / GetTimerValue(start, end);
+        
+        cublasGetMatrix( M, N, sizeof( cuDoubleComplex ), d_C, lddc, h_C, ldc );
+        
+        /* =====================================================================
+           Error Computation and Performance Compariosn
+           =================================================================== */
+        blasf77_zaxpy(&szeC, &mzone, h_C, &ione, h_C2, &ione);
+        error = lapackf77_zlange("M", &M, &N, h_C2, &ldc, work);
+        printf("%5d %5d %5d       %6.2f           %6.2f         %e\n",
+               M, N, K, magma_perf, cuda_perf, error);
     }
 
     /* Memory clean up */

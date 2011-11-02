@@ -24,11 +24,11 @@
 
 extern "C" magma_int_t 
 magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb, 
-	     cuDoubleComplex *a,  magma_int_t lda, 
-	     double *e, cuDoubleComplex *tau, 
-	     cuDoubleComplex *w,  magma_int_t ldw,
-	     cuDoubleComplex *da, magma_int_t ldda, 
-	     cuDoubleComplex *dw, magma_int_t lddw)
+             cuDoubleComplex *a,  magma_int_t lda, 
+             double *e, cuDoubleComplex *tau, 
+             cuDoubleComplex *w,  magma_int_t ldw,
+             cuDoubleComplex *da, magma_int_t ldda, 
+             cuDoubleComplex *dw, magma_int_t lddw)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -268,84 +268,84 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
 
       /*  Reduce first NB columns of lower triangle */
       for (i = 0; i < nb; ++i)
-	{
+        {
 
-	  /* Update A(i:n,i) */
-	  i_n = n - i;
+          /* Update A(i:n,i) */
+          i_n = n - i;
           #if defined(PRECISION_z) || defined(PRECISION_c)
-	      lapackf77_zlacgv(&i, W(i, 0), &ldw);
+              lapackf77_zlacgv(&i, W(i, 0), &ldw);
           #endif
-	  blasf77_zgemv("No transpose", &i_n, &i, &c_neg_one, A(i, 0), &lda, 
-			W(i, 0), &ldw, &c_one, A(i, i), &ione);
+          blasf77_zgemv("No transpose", &i_n, &i, &c_neg_one, A(i, 0), &lda, 
+                        W(i, 0), &ldw, &c_one, A(i, i), &ione);
           #if defined(PRECISION_z) || defined(PRECISION_c)
-	      lapackf77_zlacgv(&i, W(i, 0), &ldw);
-	      lapackf77_zlacgv(&i, A(i ,0), &lda);
+              lapackf77_zlacgv(&i, W(i, 0), &ldw);
+              lapackf77_zlacgv(&i, A(i ,0), &lda);
           #endif
-	  blasf77_zgemv("No transpose", &i_n, &i, &c_neg_one, W(i, 0), &ldw, 
-			A(i, 0), &lda, &c_one, A(i, i), &ione);
+          blasf77_zgemv("No transpose", &i_n, &i, &c_neg_one, W(i, 0), &ldw, 
+                        A(i, 0), &lda, &c_one, A(i, i), &ione);
           #if defined(PRECISION_z) || defined(PRECISION_c)
-	      lapackf77_zlacgv(&i, A(i, 0), &lda);
+              lapackf77_zlacgv(&i, A(i, 0), &lda);
           #endif
 
-	  if (i < n-1) 
-	    {
-	      /* Generate elementary reflector H(i) to annihilate A(i+2:n,i) */
-	      i_n = n - i - 1;
-	      MAGMA_Z_ASSIGN(alpha, *A(i+1, i));
-	      lapackf77_zlarfg(&i_n, &alpha, A(min(i+2,n-1), i), &ione, &tau[i]);
-	      e[i] = MAGMA_Z_GET_X( alpha );
-	      MAGMA_Z_SET2REAL(*A(i+1, i), 1.);
+          if (i < n-1) 
+            {
+              /* Generate elementary reflector H(i) to annihilate A(i+2:n,i) */
+              i_n = n - i - 1;
+              MAGMA_Z_ASSIGN(alpha, *A(i+1, i));
+              lapackf77_zlarfg(&i_n, &alpha, A(min(i+2,n-1), i), &ione, &tau[i]);
+              e[i] = MAGMA_Z_GET_X( alpha );
+              MAGMA_Z_SET2REAL(*A(i+1, i), 1.);
 
-	      /* Compute W(i+1:n,i) */ 
-	      // 1. Send the block reflector  A(i+1:n,i) to the GPU
-	      cublasSetVector(i_n, sizeof(cuDoubleComplex), A(i+1, i), 1, dA(i+1, i), 1);	  
-	  
-	      cublasZhemv('L', i_n, c_one, dA(i+1, i+1), ldda, dA(i+1, i), ione, c_zero,
-			  dW(i+1, i), ione);
-	  
-	      // 2. Start putting the result back (asynchronously)
-	      cudaMemcpy2DAsync(W(i+1, i), ldw*sizeof(cuDoubleComplex),
-				dW(i+1, i), lddw*sizeof(cuDoubleComplex),
-				sizeof(cuDoubleComplex)*i_n, 1,
-				cudaMemcpyDeviceToHost,stream);
+              /* Compute W(i+1:n,i) */ 
+              // 1. Send the block reflector  A(i+1:n,i) to the GPU
+              cublasSetVector(i_n, sizeof(cuDoubleComplex), A(i+1, i), 1, dA(i+1, i), 1);          
+          
+              cublasZhemv('L', i_n, c_one, dA(i+1, i+1), ldda, dA(i+1, i), ione, c_zero,
+                          dW(i+1, i), ione);
+          
+              // 2. Start putting the result back (asynchronously)
+              cudaMemcpy2DAsync(W(i+1, i), ldw*sizeof(cuDoubleComplex),
+                                dW(i+1, i), lddw*sizeof(cuDoubleComplex),
+                                sizeof(cuDoubleComplex)*i_n, 1,
+                                cudaMemcpyDeviceToHost,stream);
 
-	      blasf77_zgemv(MagmaConjTransStr, &i_n, &i, &c_one, W(i+1, 0), &ldw, 
-			    A(i+1, i), &ione, &c_zero, W(0, i), &ione);
+              blasf77_zgemv(MagmaConjTransStr, &i_n, &i, &c_one, W(i+1, 0), &ldw, 
+                            A(i+1, i), &ione, &c_zero, W(0, i), &ione);
 
-	      blasf77_zgemv("No transpose", &i_n, &i, &c_neg_one, A(i+1, 0), &lda, 
-			    W(0, i), &ione, &c_zero, f, &ione);
+              blasf77_zgemv("No transpose", &i_n, &i, &c_neg_one, A(i+1, 0), &lda, 
+                            W(0, i), &ione, &c_zero, f, &ione);
               
-	      blasf77_zgemv(MagmaConjTransStr, &i_n, &i, &c_one, A(i+1, 0), &lda, 
-			    A(i+1, i), &ione, &c_zero, W(0, i), &ione);
+              blasf77_zgemv(MagmaConjTransStr, &i_n, &i, &c_one, A(i+1, 0), &lda, 
+                            A(i+1, i), &ione, &c_zero, W(0, i), &ione);
 
-	      // 3. Here is where we need it
-	      cudaStreamSynchronize(stream);
+              // 3. Here is where we need it
+              cudaStreamSynchronize(stream);
 
-	      if (i!=0)
-		blasf77_zaxpy(&i_n, &c_one, f, &ione, W(i+1, i), &ione);
+              if (i!=0)
+                blasf77_zaxpy(&i_n, &c_one, f, &ione, W(i+1, i), &ione);
      
-	      blasf77_zgemv("No transpose", &i_n, &i, &c_neg_one, W(i+1, 0), &ldw, 
-			    W(0, i), &ione, &c_one, W(i+1, i), &ione);
-	      blasf77_zscal(&i_n, &tau[i], W(i+1,i), &ione);
-	      
+              blasf77_zgemv("No transpose", &i_n, &i, &c_neg_one, W(i+1, 0), &ldw, 
+                            W(0, i), &ione, &c_one, W(i+1, i), &ione);
+              blasf77_zscal(&i_n, &tau[i], W(i+1,i), &ione);
+              
               #if defined(PRECISION_z) || defined(PRECISION_c)
-	             /* Comment:
-			To do - move to cblas in cases like this. The commented
-			out version works with MKL but is not a standard interface
-			for other BLAS zdoc implementations                        
-		     */
-	             /*
+                     /* Comment:
+                        To do - move to cblas in cases like this. The commented
+                        out version works with MKL but is not a standard interface
+                        for other BLAS zdoc implementations                        
+                     */
+                     /*
                         cblas_zdotc_sub(i_n, W(i +1, i), ione,
                                         A(i +1, i), ione, &value);
-		     */
+                     */
                   blasf77_zdotc(&value, &i_n, W(i+1,i), &ione, A(i+1, i), &ione);
-		  alpha = tau[i]* -.5f * value;
+                  alpha = tau[i]* -.5f * value;
               #else
-	          alpha = tau[i]* -.5f* blasf77_zdotc(&i_n, W(i+1,i), &ione, A(i+1, i), &ione);
+                  alpha = tau[i]* -.5f* blasf77_zdotc(&i_n, W(i+1,i), &ione, A(i+1, i), &ione);
               #endif
-	      blasf77_zaxpy(&i_n, &alpha, A(i+1, i), &ione, W(i+1,i), &ione);
-	    }
-	}
+              blasf77_zaxpy(&i_n, &alpha, A(i+1, i), &ione, W(i+1,i), &ione);
+            }
+        }
     }
 
     free(f);

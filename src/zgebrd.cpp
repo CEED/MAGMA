@@ -25,7 +25,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
              cuDoubleComplex *a, magma_int_t lda, double *d, double *e,
              cuDoubleComplex *tauq, cuDoubleComplex *taup, 
              cuDoubleComplex *work, magma_int_t lwork, 
-	     magma_int_t *info)
+             magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -167,11 +167,11 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     /* Check arguments */
     *info = 0;
     if (m < 0) {
-	*info = -1;
+        *info = -1;
     } else if (n < 0) {
-	*info = -2;
+        *info = -2;
     } else if (lda < max(1,m)) {
-	*info = -4;
+        *info = -4;
     } else if ( (lwork < max( max(1, m), n)) && (! lquery) ) {
         *info = -10;
     }
@@ -180,7 +180,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
         return MAGMA_ERR_ILLEGAL_VALUE;
     }
     else if (lquery)
-	return MAGMA_SUCCESS;
+        return MAGMA_SUCCESS;
 
     /* Quick return if possible */
     minmn = min(m,n);
@@ -237,12 +237,12 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
         ncol = n - i - nb;
 
         // Send Y back to the GPU
-	cublasSetMatrix(nrow, nb, sizeof(cuDoubleComplex),
-			work  + nb, ldwrkx,
-			dwork + nb, ldwrkx);
-	cublasSetMatrix(ncol, nb, sizeof(cuDoubleComplex),
-			work  + (ldwrkx+1)*nb, ldwrky,
-			dwork + (ldwrkx+1)*nb, ldwrky);
+        cublasSetMatrix(nrow, nb, sizeof(cuDoubleComplex),
+                        work  + nb, ldwrkx,
+                        dwork + nb, ldwrkx);
+        cublasSetMatrix(ncol, nb, sizeof(cuDoubleComplex),
+                        work  + (ldwrkx+1)*nb, ldwrky,
+                        dwork + (ldwrkx+1)*nb, ldwrky);
 
         cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
                      nrow, ncol, nb, 

@@ -60,12 +60,12 @@ int main( int argc, char** argv)
             else if (strcmp("-M", argv[i])==0)
                 M = atoi(argv[++i]);
         }
-	if ( M == 0 ) {
-	    M = N;
-	}
-	if ( N == 0 ) {
-	    N = M;
-	}
+        if ( M == 0 ) {
+            M = N;
+        }
+        if ( N == 0 ) {
+            N = M;
+        }
         if (N>0 && M>0)
             printf("  testing_zgeqrf -M %d -N %d\n\n", M, N);
         else
@@ -101,12 +101,12 @@ int main( int argc, char** argv)
     printf("==========================================================\n");
     for(i=0; i<10; i++){
          if (argc == 1){
-	    M = N = size[i];
+            M = N = size[i];
         }
-	min_mn= min(M, N);
-	lda   = M;
-	n2    = lda*N;
-	flops = FLOPS( (double)M, (double)N ) / 1000000;
+        min_mn= min(M, N);
+        lda   = M;
+        n2    = lda*N;
+        flops = FLOPS( (double)M, (double)N ) / 1000000;
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -118,10 +118,10 @@ int main( int argc, char** argv)
         start = get_current_time();
         magma_zgeqrf(M, N, h_R, lda, tau, h_work, lwork, &info);
         end = get_current_time();
-	if (info < 0)
-	    printf("Argument %d of magma_zgeqrf had an illegal value.\n", -info);
+        if (info < 0)
+            printf("Argument %d of magma_zgeqrf had an illegal value.\n", -info);
         
-	gpu_perf = flops / GetTimerValue(start, end);
+        gpu_perf = flops / GetTimerValue(start, end);
 
         /* =====================================================================
            Performs operation using LAPACK

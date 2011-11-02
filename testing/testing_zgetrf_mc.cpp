@@ -35,8 +35,8 @@
 #endif
 
 double get_LU_error(magma_int_t M, magma_int_t N, 
-		    cuDoubleComplex *A, magma_int_t lda,
-		    cuDoubleComplex *LU, magma_int_t *IPIV)
+                    cuDoubleComplex *A, magma_int_t lda,
+                    cuDoubleComplex *LU, magma_int_t *IPIV)
 {
   magma_int_t min_mn = min(M,N), intONE = 1, i, j;
 
@@ -114,15 +114,15 @@ int main( int argc, char** argv)
       }
       if ((M>0 && N>0) || (M==0 && N==0)) {
         printf("  testing_zgetrf_mc -M %d -N %d -b %d -C %d\n\n", 
-	       M, N, EN_BEE, num_cores);
+               M, N, EN_BEE, num_cores);
         if (M==0 && N==0) {
           M = N = size[9];
           loop = 1;
         }
       } else {
         printf("\nUsage: \n");
-	printf("  Make sure you set the number of BLAS threads to 1, e.g.,\n");
-	printf("   > setenv MKL_NUM_THREADS 1\n");
+        printf("  Make sure you set the number of BLAS threads to 1, e.g.,\n");
+        printf("   > setenv MKL_NUM_THREADS 1\n");
         printf("   > testing_zgetrf_mc -M %d -N %d -C 4 -b 128\n\n", 1024, 1024);
         exit(1);
       }
@@ -157,7 +157,7 @@ int main( int argc, char** argv)
         n2 = M*N;
       }
 
-	  flops = FLOPS( (double)M, (double)N ) / 1000000;
+          flops = FLOPS( (double)M, (double)N ) / 1000000;
 
       /* Initialize the matrix */
       lapackf77_zlarnv( &ione, ISEED, &n2, h_A2 );

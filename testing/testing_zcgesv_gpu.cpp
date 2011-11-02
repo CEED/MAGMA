@@ -61,22 +61,22 @@ int main(int argc , char **argv)
     char trans_str[2] = {trans, 0};
 
     if (argc != 1){
-	for(i = 1; i<argc; i++){	
-	    if (strcmp("-N", argv[i])==0)
-		N = atoi(argv[++i]);
-	    else if (strcmp("-nrhs", argv[i])==0)
-		NRHS = atoi(argv[++i]);
-	}
-	if (N>0) sizetest[0] = sizetest[9] = N;
-	else exit(1);
+        for(i = 1; i<argc; i++){        
+            if (strcmp("-N", argv[i])==0)
+                N = atoi(argv[++i]);
+            else if (strcmp("-nrhs", argv[i])==0)
+                NRHS = atoi(argv[++i]);
+        }
+        if (N>0) sizetest[0] = sizetest[9] = N;
+        else exit(1);
     }
     else {
-	printf("\nUsage: \n");
-	printf("  testing_zcgesv_gpu -nrhs %d -N %d\n\n", NRHS, 1024);
+        printf("\nUsage: \n");
+        printf("  testing_zcgesv_gpu -nrhs %d -N %d\n\n", NRHS, 1024);
     }
     printf("Epsilon(double): %8.6e\n"
-	   "Epsilon(single): %8.6e\n\n", 
-	   lapackf77_dlamch("Epsilon"), lapackf77_slamch("Epsilon") );
+           "Epsilon(single): %8.6e\n\n", 
+           lapackf77_dlamch("Epsilon"), lapackf77_slamch("Epsilon") );
 
     N = sizetest[9];
     ldb  = ldx = lda = N;
@@ -99,16 +99,16 @@ int main(int argc , char **argv)
     printf("  N   DP-Factor  DP-Solve  SP-Factor  SP-Solve  MP-Solve  ||b-Ax||/||A||  NumIter\n");
     printf("==================================================================================\n");
     for(i=0; i<10; i++){
-	N = sizetest[i] ;
-	
-	flopsF = FLOPS_GETRF( (double)N, (double)N ) / 1000000;
-	flopsS = flopsF + ( FLOPS_GETRS( (double)N, (double)NRHS ) / 1000000 );
+        N = sizetest[i] ;
+        
+        flopsF = FLOPS_GETRF( (double)N, (double)N ) / 1000000;
+        flopsS = flopsF + ( FLOPS_GETRS( (double)N, (double)NRHS ) / 1000000 );
 
-	ldb  = ldx = lda = N;
-	ldda = ((N+31)/32)*32;
-	lddb = lddx = N;//ldda;
+        ldb  = ldx = lda = N;
+        ldda = ((N+31)/32)*32;
+        lddb = lddx = N;//ldda;
 
-	/* Initialize matrices */
+        /* Initialize matrices */
         size = lda * N;
         lapackf77_zlarnv( &ione, ISEED, &size, h_A );
         size = ldb * NRHS;
@@ -125,13 +125,13 @@ int main(int argc , char **argv)
         //=====================================================================
         start = get_current_time();
         magma_zcgesv_gpu( trans, N, NRHS, 
-			  d_A, ldda, h_ipiv, d_ipiv, 
-			  d_B, lddb, d_X, lddx, 
-			  d_WORKD, d_WORKS, &iter, &info);
-	end = get_current_time();
-	if (info < 0)
+                          d_A, ldda, h_ipiv, d_ipiv, 
+                          d_B, lddb, d_X, lddx, 
+                          d_WORKD, d_WORKS, &iter, &info);
+        end = get_current_time();
+        if (info < 0)
             printf("Argument %d of magma_zcgesv had an illegal value.\n", -info);
-	gpu_perf = flopsS / GetTimerValue(start, end);
+        gpu_perf = flopsS / GetTimerValue(start, end);
 
         //=====================================================================
         //              ERROR DP vs MIXED  - GPU
@@ -147,74 +147,74 @@ int main(int argc , char **argv)
         Rnorm = lapackf77_zlange("I", &N, &NRHS, h_B, &ldb, h_workd);
 
         //=====================================================================
-	//                 Double Precision Factor 
-	//=====================================================================
-	cublasSetMatrix( N, N, sizeof(cuDoubleComplex), h_A, lda, d_A, ldda );
+        //                 Double Precision Factor 
+        //=====================================================================
+        cublasSetMatrix( N, N, sizeof(cuDoubleComplex), h_A, lda, d_A, ldda );
         
         start = get_current_time();
         magma_zgetrf_gpu(N, N, d_A, ldda, h_ipiv, &info);
         end = get_current_time();
-	if (info < 0)
-	    printf("Argument %d of magma_zgetrf had an illegal value.\n", -info);
-	gpu_perfdf = flopsF / GetTimerValue(start, end);
+        if (info < 0)
+            printf("Argument %d of magma_zgetrf had an illegal value.\n", -info);
+        gpu_perfdf = flopsF / GetTimerValue(start, end);
 
-	printf("%6.2f    ", gpu_perfdf); fflush(stdout);
+        printf("%6.2f    ", gpu_perfdf); fflush(stdout);
 
         //=====================================================================
-	//                 Double Precision Solve 
-	//=====================================================================
-	cublasSetMatrix( N, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, ldda );
-	cublasSetMatrix( N, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, lddb );
+        //                 Double Precision Solve 
+        //=====================================================================
+        cublasSetMatrix( N, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, ldda );
+        cublasSetMatrix( N, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, lddb );
 
         start = get_current_time();
         magma_zgetrf_gpu(N, N, d_A, ldda, h_ipiv, &info);
         magma_zgetrs_gpu( trans, N, NRHS, d_A, ldda, h_ipiv, d_B, lddb, &info );
         end = get_current_time();
-	if (info < 0)
-	    printf("Argument %d of magma_zgetrs had an illegal value.\n", -info);
+        if (info < 0)
+            printf("Argument %d of magma_zgetrs had an illegal value.\n", -info);
 
-	gpu_perfds = flopsS / GetTimerValue(start, end);
+        gpu_perfds = flopsS / GetTimerValue(start, end);
 
-	printf("%6.2f    ", gpu_perfds); fflush(stdout);
+        printf("%6.2f    ", gpu_perfds); fflush(stdout);
 
         //=====================================================================
-	//                 Single Precision Factor 
-	//=====================================================================
-	d_As = d_WORKS;
-	d_Bs = d_WORKS + ldda*N;
-	cublasSetMatrix( N, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, ldda );
-	cublasSetMatrix( N, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, lddb );
-	magmablas_zlag2c(N, N,    d_A, ldda, d_As, ldda, &info ); 
-	magmablas_zlag2c(N, NRHS, d_B, lddb, d_Bs, lddb, &info );
+        //                 Single Precision Factor 
+        //=====================================================================
+        d_As = d_WORKS;
+        d_Bs = d_WORKS + ldda*N;
+        cublasSetMatrix( N, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, ldda );
+        cublasSetMatrix( N, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, lddb );
+        magmablas_zlag2c(N, N,    d_A, ldda, d_As, ldda, &info ); 
+        magmablas_zlag2c(N, NRHS, d_B, lddb, d_Bs, lddb, &info );
 
         start = get_current_time();
         magma_cgetrf_gpu(N, N, d_As, ldda, h_ipiv, &info);
         end = get_current_time();
-	if (info < 0)
-	    printf("Argument %d of magma_cgetrf had an illegal value.\n", -info);
-	
-	gpu_perfsf = flopsF / GetTimerValue(start, end);
-	printf("%6.2f     ", gpu_perfsf); fflush(stdout);
+        if (info < 0)
+            printf("Argument %d of magma_cgetrf had an illegal value.\n", -info);
+        
+        gpu_perfsf = flopsF / GetTimerValue(start, end);
+        printf("%6.2f     ", gpu_perfsf); fflush(stdout);
 
-	//=====================================================================
-	//                 Single Precision Solve 
-	//=====================================================================
-	magmablas_zlag2c(N, N,    d_A, ldda, d_As, ldda, &info ); 
-	magmablas_zlag2c(N, NRHS, d_B, lddb, d_Bs, lddb, &info );
+        //=====================================================================
+        //                 Single Precision Solve 
+        //=====================================================================
+        magmablas_zlag2c(N, N,    d_A, ldda, d_As, ldda, &info ); 
+        magmablas_zlag2c(N, NRHS, d_B, lddb, d_Bs, lddb, &info );
 
         start = get_current_time();
         magma_cgetrf_gpu( N, N,    d_As, ldda, h_ipiv, &info);
         magma_cgetrs_gpu( trans, N, NRHS, d_As, ldda, h_ipiv, 
-			  d_Bs, lddb, &info);
+                          d_Bs, lddb, &info);
         end = get_current_time();
         if (info < 0)
-	    printf("Argument %d of magma_cgetrs had an illegal value.\n", -info);
+            printf("Argument %d of magma_cgetrs had an illegal value.\n", -info);
 
-	gpu_perfss = flopsS / GetTimerValue(start, end);
-	printf("%6.2f     ", gpu_perfss); fflush(stdout);
+        gpu_perfss = flopsS / GetTimerValue(start, end);
+        printf("%6.2f     ", gpu_perfss); fflush(stdout);
 
-	printf("%6.2f     ", gpu_perf);
-	printf("%e    %3d\n", Rnorm/Anorm, iter); fflush(stdout);
+        printf("%6.2f     ", gpu_perf);
+        printf("%e    %3d\n", Rnorm/Anorm, iter); fflush(stdout);
 
         if( argc != 1 ) break ;        
     }

@@ -46,8 +46,8 @@ magma_zgetrf3(magma_int_t num_gpus,
 #endif
 
 double get_LU_error(magma_int_t M, magma_int_t N, 
-		    cuDoubleComplex *A,  magma_int_t lda, 
-		    cuDoubleComplex *LU, magma_int_t *IPIV)
+                    cuDoubleComplex *A,  magma_int_t lda, 
+                    cuDoubleComplex *LU, magma_int_t *IPIV)
 {
     magma_int_t min_mn = min(M,N);
     magma_int_t ione   = 1;
@@ -77,7 +77,7 @@ double get_LU_error(magma_int_t M, magma_int_t N,
     for( j = 0; j < N; j++ ) {
         for( i = 0; i < M; i++ ) {
             LU[i+j*lda] = MAGMA_Z_SUB( LU[i+j*lda], A[i+j*lda] );
-	}
+        }
     }
     residual = lapackf77_zlange("f", &M, &N, LU, &lda, work);
 
@@ -108,7 +108,7 @@ int main( int argc, char** argv)
     magma_int_t ISEED[4] = {0,0,0,1};
 
     if (argc != 1){
-	for(i = 1; i<argc; i++){
+        for(i = 1; i<argc; i++){
             if (strcmp("-N", argv[i])==0)
                 N = atoi(argv[++i]);
             else if (strcmp("-M", argv[i])==0)
@@ -144,13 +144,13 @@ int main( int argc, char** argv)
     printf("============================================================\n");
     for(i=0; i<10; i++){
         if (argc == 1){
-	    M = N = size[i];
+            M = N = size[i];
         }
-	min_mn= min(M, N);
-	lda   = M;
-	n2    = lda*N;
-	ldda  = ((M+31)/32)*32;
-	flops = FLOPS( (double)M, (double)N ) / 1000000;
+        min_mn= min(M, N);
+        lda   = M;
+        n2    = lda*N;
+        ldda  = ((M+31)/32)*32;
+        flops = FLOPS( (double)M, (double)N ) / 1000000;
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -183,7 +183,7 @@ int main( int argc, char** argv)
         if (info < 0)
             printf("Argument %d of zgetrf had an illegal value.\n", -info);
 
-	gpu_perf = flops / GetTimerValue(start, end);
+        gpu_perf = flops / GetTimerValue(start, end);
 
         /* =====================================================================
            Check the factorization

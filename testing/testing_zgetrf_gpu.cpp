@@ -32,8 +32,8 @@
 #endif
 
 double get_LU_error(magma_int_t M, magma_int_t N, 
-		    cuDoubleComplex *A,  magma_int_t lda, 
-		    cuDoubleComplex *LU, magma_int_t *IPIV)
+                    cuDoubleComplex *A,  magma_int_t lda, 
+                    cuDoubleComplex *LU, magma_int_t *IPIV)
 {
     magma_int_t min_mn = min(M,N);
     magma_int_t ione   = 1;
@@ -63,7 +63,7 @@ double get_LU_error(magma_int_t M, magma_int_t N,
     for( j = 0; j < N; j++ ) {
         for( i = 0; i < M; i++ ) {
             LU[i+j*lda] = MAGMA_Z_SUB( LU[i+j*lda], A[i+j*lda] );
-	}
+        }
     }
     residual = lapackf77_zlange("f", &M, &N, LU, &lda, work);
 
@@ -133,19 +133,19 @@ int main( int argc, char** argv)
     printf("============================================================\n");
     for(i=0; i<10; i++){
         if (argc == 1){
-	    M = N = size[i];
+            M = N = size[i];
         }
-	min_mn= min(M, N);
-	lda   = M;
-	n2    = lda*N;
-	ldda  = ((M+31)/32)*32;
-	flops = FLOPS( (double)M, (double)N ) / 1000000;
+        min_mn= min(M, N);
+        lda   = M;
+        n2    = lda*N;
+        ldda  = ((M+31)/32)*32;
+        flops = FLOPS( (double)M, (double)N ) / 1000000;
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
 
-	/* =====================================================================
+        /* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
@@ -175,7 +175,7 @@ int main( int argc, char** argv)
            =================================================================== */
         cublasGetMatrix( M, N, sizeof(cuDoubleComplex), d_A, ldda, h_A, lda);
         error = get_LU_error(M, N, h_R, lda, h_A, ipiv);
-	
+        
         printf("%5d %5d  %6.2f         %6.2f         %e\n",
                M, N, cpu_perf, gpu_perf, error);
 

@@ -39,9 +39,9 @@ void zsplit_diag_block(int ib, cuDoubleComplex *a, int lda, cuDoubleComplex *wor
 
 extern "C" magma_int_t
 magma_zgeqrf_gpu( magma_int_t m, magma_int_t n, 
-		  cuDoubleComplex *dA,   magma_int_t ldda,
+                  cuDoubleComplex *dA,   magma_int_t ldda,
                   cuDoubleComplex *tau, cuDoubleComplex *dT, 
-		  magma_int_t *info )
+                  magma_int_t *info )
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -146,8 +146,8 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
     lhwork = lwork - m*nb;
 
     if ( cudaSuccess != cudaMallocHost((void**)&work, lwork*sizeof(cuDoubleComplex)) ) {
-	*info = -9;
-	return MAGMA_ERR_HOSTALLOC;
+        *info = -9;
+        return MAGMA_ERR_HOSTALLOC;
     }
     
     ut = hwork+nb*(n);
@@ -174,10 +174,10 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
                 /* Apply H' to A(i:m,i+2*ib:n) from the left */
                 cols = n-old_i-2*old_ib;
                 magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-				  m-old_i, cols, old_ib,
-				  a_ref(old_i, old_i         ), ldda, t_ref(old_i), nb,
-				  a_ref(old_i, old_i+2*old_ib), ldda, dd_ref(0),    lddwork);
-		
+                                  m-old_i, cols, old_ib,
+                                  a_ref(old_i, old_i         ), ldda, t_ref(old_i), nb,
+                                  a_ref(old_i, old_i+2*old_ib), ldda, dd_ref(0),    lddwork);
+                
                 /* store the diagonal */
                 cudaMemcpy2DAsync(d_ref(old_i), old_ib * sizeof(cuDoubleComplex),
                                   ut,           old_ib * sizeof(cuDoubleComplex),
@@ -207,16 +207,16 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
                 if (i+nb < k-nb){
                     /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-				      rows, ib, ib, 
-				      a_ref(i, i   ), ldda, t_ref(i),  nb, 
-				      a_ref(i, i+ib), ldda, dd_ref(0), lddwork);
+                                      rows, ib, ib, 
+                                      a_ref(i, i   ), ldda, t_ref(i),  nb, 
+                                      a_ref(i, i+ib), ldda, dd_ref(0), lddwork);
                 }
                 else {
                     cols = n-i-ib;
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-				      rows, cols, ib, 
-				      a_ref(i, i   ), ldda, t_ref(i),  nb, 
-				      a_ref(i, i+ib), ldda, dd_ref(0), lddwork);
+                                      rows, cols, ib, 
+                                      a_ref(i, i   ), ldda, t_ref(i),  nb, 
+                                      a_ref(i, i+ib), ldda, dd_ref(0), lddwork);
                     /* Fix the diagonal block */
                     cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), ut, ib, d_ref(i), ib);
                 }
