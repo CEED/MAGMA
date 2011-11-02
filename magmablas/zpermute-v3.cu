@@ -49,7 +49,7 @@ magmablas_zpermute_long3( cuDoubleComplex *dAT, int lda, int *ipiv, int nb, int 
                 {
                         params.ipiv[j] = ipiv[ind + k + j] - k - 1 - ind;
                 }
-	            zlaswp3( params );
+                    zlaswp3( params );
         }
 
         int num_pivots = nb - k;

@@ -290,7 +290,7 @@ magmablas_zsymv_200_L_special( magma_int_t n, cuDoubleComplex alpha,
 
         #pragma unroll
         for( magma_int_t k=0;k<4;k++)
-	{
+        {
             #pragma unroll
             for(magma_int_t j=0; j < 4 ; j++)
                 tr[j] = A[j*lda] ;
@@ -723,24 +723,24 @@ magmablas_zsymv_200_L_generic(magma_int_t n, cuDoubleComplex alpha,
 
         #pragma unroll
         for( magma_int_t k=0;k<4;k++){
-	    #pragma unroll
+            #pragma unroll
             for(magma_int_t j=0; j < 4 ; j++)
                 tr[j] = A[j*lda] ;
             #pragma unroll
             for(magma_int_t j=0; j < 4 ; j++){
                 res+=tr[j]*buff2[quarter_thread_x*k + ty*4+(j)];
                 la[( (j)+ty*4)][tx] = tr[j];
-	    }
-	    __syncthreads();
+            }
+            __syncthreads();
 
             MAGMA_Z_SET2REAL(res_, 0) ;
 
-	    #pragma unroll
-	    for(magma_int_t j=0; j < 4 ; j++)
+            #pragma unroll
+            for(magma_int_t j=0; j < 4 ; j++)
                 res_+=la[tx_][ty_*4+j]* b[j] ;
-	    b[4+k] = res_ ;
-	    __syncthreads();
-	    A+=lda* quarter_thread_x ;
+            b[4+k] = res_ ;
+            __syncthreads();
+            A+=lda* quarter_thread_x ;
         }
 
         #pragma unroll
@@ -970,17 +970,17 @@ magmablas_zsymv_200( char uplo, magma_int_t n,
     }
     else
     {
-	cuDoubleComplex *dC_work;
-	magma_int_t blocks    = n / thread_x + (n % thread_x != 0);
-	magma_int_t workspace = lda * (blocks + 1);
+        cuDoubleComplex *dC_work;
+        magma_int_t blocks    = n / thread_x + (n % thread_x != 0);
+        magma_int_t workspace = lda * (blocks + 1);
 
         /* TODO: need to add a MAGMA context to handle workspaces */
-	cublasAlloc( workspace, sizeof(cuDoubleComplex), (void**)&dC_work ) ;
+        cublasAlloc( workspace, sizeof(cuDoubleComplex), (void**)&dC_work ) ;
         cublasGetError( ) ;
 
-	magmablas_zsymv_200_L(n, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
+        magmablas_zsymv_200_L(n, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
 
-	cublasFree(dC_work);
+        cublasFree(dC_work);
         cublasGetError( ) ;
     }
     return MAGMA_SUCCESS;
@@ -1009,7 +1009,7 @@ magmablas_zsymv_200( char uplo, magma_int_t n,
     
     the size of dC_work is
  
-	    lda * (n/thread_x + (n%thread_x !=0)  
+            lda * (n/thread_x + (n%thread_x !=0)  
     where thread_x = 64 
     
     magamblasw_zsymv requires users to explicitly a working space, while magmablas_zsymv is 
@@ -1031,7 +1031,7 @@ magmablasw_zsymv_200( char uplo, magma_int_t n,
                       cuDoubleComplex *X, magma_int_t incx,
                       cuDoubleComplex beta,  
                       cuDoubleComplex *Y, magma_int_t incy,
-		      cuDoubleComplex *dC_work)
+                      cuDoubleComplex *dC_work)
 {
     char      uplo_[2] = {uplo, 0};
     long int  upper    = lapackf77_lsame(uplo_, "U");
@@ -1068,7 +1068,7 @@ magmablasw_zsymv_200( char uplo, magma_int_t n,
     else
     {
 
-	magmablas_zsymv_200_L(n, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
+        magmablas_zsymv_200_L(n, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
 
     }
     return MAGMA_SUCCESS;

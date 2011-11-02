@@ -92,7 +92,7 @@ magmablas_zclaswp(int n, cuDoubleComplex *a, int lda, cuFloatComplex *sa, int m,
 
     int blocks;
     if (m % num_threadzc==0)
-	blocks = m/num_threadzc;
+        blocks = m/num_threadzc;
     else
         blocks = m/num_threadzc + 1;
 

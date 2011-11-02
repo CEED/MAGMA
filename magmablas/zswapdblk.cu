@@ -32,7 +32,7 @@ magmagpu_zswapdblk(magma_int_t nb,
 
     #pragma unroll
     for( magma_int_t i = 0; i < nb; i++ ){
-	tmp = dA1[i*ldda1];
+        tmp = dA1[i*ldda1];
         dA1[i*ldda1] = dA2[i*ldda2];
         dA2[i*ldda2] = tmp;
     }

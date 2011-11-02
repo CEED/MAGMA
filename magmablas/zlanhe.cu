@@ -28,7 +28,7 @@ l_zlanhe_special (int n, cuDoubleComplex* A, int lda,  double *y){
   double res = 0.;
 
   __shared__ cuDoubleComplex la[dgemv_bs][dgemv_bs+1];
-  	
+          
   A += ind;
   A+= ty * lda  ;  
   int break_d  =   blockIdx.x* dgemv_bs ;
@@ -59,10 +59,10 @@ l_zlanhe_special (int n, cuDoubleComplex* A, int lda,  double *y){
   #pragma unroll 8
   for(int  i=ty*8; i<(1+ty)* dgemv_bs/4 ; i++){
          if ( i < tx )   {
-	        la[tx][i] = la[i][tx] ; 
+                la[tx][i] = la[i][tx] ; 
          }
-	 else 
-	        la[tx][i] = la[tx][i]  ;
+         else 
+                la[tx][i] = la[tx][i]  ;
   
   }
   __syncthreads();
@@ -119,63 +119,63 @@ l_zlanhe_generic(int n, cuDoubleComplex* A, int lda,  double *y , int m_full_blo
    -- For sufficiently large matrix the overhead will be very low
   *************************************************************************/
        if  ( tx < m_mod_32 ){
-		A+= ( blockIdx.x * dgemv_bs + tx ) ;
-       } 	 	
+                A+= ( blockIdx.x * dgemv_bs + tx ) ;
+       }                  
        else{
-		A+= ( blockIdx.x * dgemv_bs + m_mod_32 -1) ; 
+                A+= ( blockIdx.x * dgemv_bs + m_mod_32 -1) ; 
        }
        A+= ty * lda  ;  
        int break_d  =   blockIdx.x* dgemv_bs ;
 
-	  /*----------------------------
-		Go Right
-	  -------------------------------*/
+          /*----------------------------
+                Go Right
+          -------------------------------*/
 
-	  for(int  i=0; i<break_d; i += dgemv_bs ){
-	    #pragma unroll 8 
-	    for(int j=0; j < dgemv_bs ; j+=4){
-	        la[tx][ty+j] = A[j*lda] ;
-	    }
-	    __syncthreads();
+          for(int  i=0; i<break_d; i += dgemv_bs ){
+            #pragma unroll 8 
+            for(int j=0; j < dgemv_bs ; j+=4){
+                la[tx][ty+j] = A[j*lda] ;
+            }
+            __syncthreads();
 
-	    #pragma unroll 8 
-	    for(int j=0; j < 8 ; j++){
-	       res+=cuCabs( la[tx][j+ty*8]);
-	    }
-	    A+=lda* dgemv_bs ;
-	    __syncthreads(); 
-	  }
-	  /*
+            #pragma unroll 8 
+            for(int j=0; j < 8 ; j++){
+               res+=cuCabs( la[tx][j+ty*8]);
+            }
+            A+=lda* dgemv_bs ;
+            __syncthreads(); 
+          }
+          /*
            we don't need to make zero, as those computation will be discarded. 
           */
           if( ty==0  ) {
-		/*--------------------------------------------
-			he will compute the triangular parts
-			others will be waiting with values. 
+                /*--------------------------------------------
+                        he will compute the triangular parts
+                        others will be waiting with values. 
                 -----------------------------------------------*/
-		int j ;
+                int j ;
                 int count = 1 ; 
-		if( tx < m_mod_32 ) 
-			count = tx ; 
-		else
-			count = m_mod_32 ;
-		for(j =0;j<=count;j++){
-			res+= cuCabs( A[j*lda]) ;
+                if( tx < m_mod_32 ) 
+                        count = tx ; 
+                else
+                        count = m_mod_32 ;
+                for(j =0;j<=count;j++){
+                        res+= cuCabs( A[j*lda]) ;
                 }
-		A+=(tx)*lda;
-		count = 1 ; 
-		for(;j<m_mod_32;j++){
-			res+=cuCabs( A[count]) ;
-			count++;
-		}
+                A+=(tx)*lda;
+                count = 1 ; 
+                for(;j<m_mod_32;j++){
+                        res+=cuCabs( A[count]) ;
+                        count++;
+                }
           }
           else{
           }
-	  __syncthreads(); 
+          __syncthreads(); 
           la[tx][ty]= MAGMA_Z_MAKE( res, 0. ) ;
           __syncthreads();
          /*--------------------------------------------------------
-	 The leader accumulates all the results from his peer. 
+         The leader accumulates all the results from his peer. 
          ----------------------------------------------------------*/
          if( ty == 0 ) {
            res = res 
@@ -185,7 +185,7 @@ l_zlanhe_generic(int n, cuDoubleComplex* A, int lda,  double *y , int m_full_blo
            if( tx < m_mod_32)
              y[ind] = res;
          }
-	 
+         
   }
 
   else{ 
@@ -199,7 +199,7 @@ l_zlanhe_generic(int n, cuDoubleComplex* A, int lda,  double *y , int m_full_blo
   int break_d  =   blockIdx.x* dgemv_bs ;
 
   /*----------------------------
-	Go Right
+        Go Right
   -------------------------------*/
   for(int  i=0; i<break_d; i += dgemv_bs ){
     #pragma unroll 8 
@@ -218,8 +218,8 @@ l_zlanhe_generic(int n, cuDoubleComplex* A, int lda,  double *y , int m_full_blo
 
  
   /*------------------------------------
-	Diagonal 
-	Copy + Transpose lower triangle
+        Diagonal 
+        Copy + Transpose lower triangle
   --------------------------------------*/
   #pragma unroll 8
   for(int j =0; j<dgemv_bs; j+=4)
@@ -229,20 +229,20 @@ l_zlanhe_generic(int n, cuDoubleComplex* A, int lda,  double *y , int m_full_blo
   A+= dgemv_bs ;
   __syncthreads();
   /*--------------------------------------------
-	Mirror Upper Triangle to Lower triangle
+        Mirror Upper Triangle to Lower triangle
   ---------------------------------------------*/
   #pragma unroll 8
   for(int  i=ty*8; i<(1+ty)* dgemv_bs/4 ; i++){
          if ( i < tx )   {
-	        la[tx][i] = la[i][tx] ; 
+                la[tx][i] = la[i][tx] ; 
          }
-	 else 
-	        la[tx][i] = la[tx][i]  ;
+         else 
+                la[tx][i] = la[tx][i]  ;
   
   }
   __syncthreads();
   /*--------------------------------
-	Do diagonal Computation
+        Do diagonal Computation
   -----------------------------------*/
     #pragma unroll 8
     for(int j=0; j < dgemv_bs/4 ; j++){
@@ -254,7 +254,7 @@ l_zlanhe_generic(int n, cuDoubleComplex* A, int lda,  double *y , int m_full_blo
 
   n -= m_mod_32 ;  // @ 
   /*-----------------------------
-	Go Down 
+        Go Down 
   -------------------------------*/
   for(int i=break_d; i<n; i += dgemv_bs ){
    #pragma unroll 8
@@ -271,15 +271,15 @@ l_zlanhe_generic(int n, cuDoubleComplex* A, int lda,  double *y , int m_full_blo
 
   
   /*---------------------------------------------
-	doing m_mod_32 stuffs here.
-	Symmetric is giving us benefit .. true
+        doing m_mod_32 stuffs here.
+        Symmetric is giving us benefit .. true
   -----------------------------------------------*/
     A-=tx;
     if( tx < m_mod_32){
-	A+=tx;
+        A+=tx;
     }
     else{
-	A+=(m_mod_32-1); /* Same as above*/
+        A+=(m_mod_32-1); /* Same as above*/
     }
 
    #pragma unroll 8
@@ -293,9 +293,9 @@ l_zlanhe_generic(int n, cuDoubleComplex* A, int lda,  double *y , int m_full_blo
     __syncthreads();
 
     /*----------------------------------------
-	What about doing some Zeroing here?
-	instead of zeroing before?
-    -----------------------------------------*/	
+        What about doing some Zeroing here?
+        instead of zeroing before?
+    -----------------------------------------*/        
     #pragma unroll 8
     for(int j=0; j < dgemv_bs/4;j++){
        res+=cuCabs(la[tx][j+ty*8]);
@@ -306,7 +306,7 @@ l_zlanhe_generic(int n, cuDoubleComplex* A, int lda,  double *y , int m_full_blo
     la[tx][ty]= MAGMA_Z_MAKE( res, 0. );
    __syncthreads();
    /*--------------------------------------------------------
-	The leader accumulates all the results from his peer. 
+        The leader accumulates all the results from his peer. 
    ----------------------------------------------------------*/
    if( ty == 0 ) {
      res = res 
@@ -348,63 +348,63 @@ u_zlanhe_generic (int n, cuDoubleComplex* A, int lda, double *y , int m_full_blo
 
 
        if  ( tx < m_mod_32 ){
-		A+= (  tx ) ;
-       } 	 	
+                A+= (  tx ) ;
+       }                  
        else{
-		A+= (  m_mod_32 -1) ; 
+                A+= (  m_mod_32 -1) ; 
        }
        A-= ty * lda  ;  
        int break_d  =   (blockIdx.x)* dgemv_bs ;
 
-	  /*----------------------------
-		Go Right
-	  -------------------------------*/
+          /*----------------------------
+                Go Right
+          -------------------------------*/
 
-	  for(int  i=0; i<break_d; i += dgemv_bs ){
-	    #pragma unroll 8 
-	    for(int j=0; j < dgemv_bs ; j+=4){
-	        la[tx][ty+j] = A[-j*lda] ;
-	    }
-	    __syncthreads();
+          for(int  i=0; i<break_d; i += dgemv_bs ){
+            #pragma unroll 8 
+            for(int j=0; j < dgemv_bs ; j+=4){
+                la[tx][ty+j] = A[-j*lda] ;
+            }
+            __syncthreads();
 
-	    #pragma unroll 8 
-	    for(int j=0; j < 8 ; j++){
-	       res+=cuCabs(la[tx][j+ty*8]);
-	    }
-	    A-=lda* dgemv_bs ;
-	    __syncthreads(); 
-	  }
-	  /*
+            #pragma unroll 8 
+            for(int j=0; j < 8 ; j++){
+               res+=cuCabs(la[tx][j+ty*8]);
+            }
+            A-=lda* dgemv_bs ;
+            __syncthreads(); 
+          }
+          /*
            we don't need to make zero, as those computation will be discarded. 
           */
           if( ty==0  ) {
-		/*--------------------------------------------
-			he will compute the triangular parts
-			others will be waiting with values. 
+                /*--------------------------------------------
+                        he will compute the triangular parts
+                        others will be waiting with values. 
                 -----------------------------------------------*/
-		int j ;
+                int j ;
                 int count = 1 ; 
-		if( tx < m_mod_32 ) 
-			count =m_mod_32- tx ; 
-		else
-			count = m_mod_32 ;
-		for(j =0;j<count;j++){
-			res+= cuCabs( A[-j*lda] );
+                if( tx < m_mod_32 ) 
+                        count =m_mod_32- tx ; 
+                else
+                        count = m_mod_32 ;
+                for(j =0;j<count;j++){
+                        res+= cuCabs( A[-j*lda] );
                 }
-		A-=(count-1)*lda;
-		count = 1 ; 
-		for(;j<m_mod_32;j++){
-			res+= cuCabs( A[-count] );
-			count++;
-		}
+                A-=(count-1)*lda;
+                count = 1 ; 
+                for(;j<m_mod_32;j++){
+                        res+= cuCabs( A[-count] );
+                        count++;
+                }
           }
           else{
           }
-	  __syncthreads(); 
+          __syncthreads(); 
           la[tx][ty]= MAGMA_Z_MAKE( res, 0. );
           __syncthreads();
          /*--------------------------------------------------------
-	 The leader accumulates all the results from his peer. 
+         The leader accumulates all the results from his peer. 
          ----------------------------------------------------------*/
          if( ty == 0 ) {
            res = res 
@@ -414,7 +414,7 @@ u_zlanhe_generic (int n, cuDoubleComplex* A, int lda, double *y , int m_full_blo
            if( tx < m_mod_32)
              y[ind] = res;
          }
-	 
+         
   }
 
   else{ 
@@ -433,7 +433,7 @@ u_zlanhe_generic (int n, cuDoubleComplex* A, int lda, double *y , int m_full_blo
 
   int break_d  = (n / dgemv_bs -   blockIdxx-1 )* dgemv_bs ;
   /*----------------------------
-	Go Left
+        Go Left
   -------------------------------*/
   for(int  i=0; i<break_d; i += dgemv_bs ){
     #pragma unroll 8 
@@ -452,8 +452,8 @@ u_zlanhe_generic (int n, cuDoubleComplex* A, int lda, double *y , int m_full_blo
 
  
   /*------------------------------------
-	Diagonal 
-	Copy + Transpose lower triangle
+        Diagonal 
+        Copy + Transpose lower triangle
   --------------------------------------*/
   #pragma unroll 8
   for(int j =0; j<dgemv_bs; j+=4){
@@ -463,20 +463,20 @@ u_zlanhe_generic (int n, cuDoubleComplex* A, int lda, double *y , int m_full_blo
   A-= dgemv_bs ;
   __syncthreads();
   /*--------------------------------------------
-	Mirror Upper Triangle to Lower triangle
+        Mirror Upper Triangle to Lower triangle
   ---------------------------------------------*/
   #pragma unroll 8
   for(int  i=ty*8; i<(1+ty)* dgemv_bs/4 ; i++){
          if ( i <tx ){
-	        la[tx][i] = la[i][tx]; 
+                la[tx][i] = la[i][tx]; 
          }
-	 else{ 
-	        la[tx][i] = la[tx][i]  ;
-	 }
+         else{ 
+                la[tx][i] = la[tx][i]  ;
+         }
   }
   __syncthreads();
   /*--------------------------------
-	Do diagonal Computation
+        Do diagonal Computation
   -----------------------------------*/
     #pragma unroll 8
     for(int j=0; j < dgemv_bs/4 ; j++){
@@ -488,7 +488,7 @@ u_zlanhe_generic (int n, cuDoubleComplex* A, int lda, double *y , int m_full_blo
 
   n -= m_mod_32 ;  // @ 
   /*-----------------------------
-	Go Up 
+        Go Up 
   -------------------------------*/
   int i ;
   for( i=break_d; i<n; i+= dgemv_bs ){
@@ -505,22 +505,22 @@ u_zlanhe_generic (int n, cuDoubleComplex* A, int lda, double *y , int m_full_blo
       __syncthreads();
   }
   /*---------------------------------------------
-	doing m_mod_32 stuffs here.
-	Symmetric is giving us benefit .. true
-	Do the other way please......
+        doing m_mod_32 stuffs here.
+        Symmetric is giving us benefit .. true
+        Do the other way please......
   -----------------------------------------------*/
    A1 = A1 + m_mod_32 * lda + tx *lda ;  
    if( ty == 0  ) {
-	for( int j = 0 ;  j < m_mod_32 ; j++){
-		res+=  cuCabs (  A1[ j + lda * (blockIdx.x) * 32 ] ) ;
-	}
+        for( int j = 0 ;  j < m_mod_32 ; j++){
+                res+=  cuCabs (  A1[ j + lda * (blockIdx.x) * 32 ] ) ;
+        }
    }
     __syncthreads();
 
     la[tx][ty]= MAGMA_Z_MAKE( res, 0);
    __syncthreads();
    /*--------------------------------------------------------
-	The leader accumulates all the results from his peer. 
+        The leader accumulates all the results from his peer. 
    ----------------------------------------------------------*/
    if( ty == 0 ) {
      res = res 
@@ -540,10 +540,10 @@ u_zlanhe_special (int n, cuDoubleComplex* A, int lda, double *y ){
   double res = 0.;
 
   /*
-	Reverse Computation ... 
-		- Left 
-		- Triangle 
-		- Up 
+        Reverse Computation ... 
+                - Left 
+                - Triangle 
+                - Up 
   */
 
   A+= lda*(n-1) ; 
@@ -572,7 +572,7 @@ u_zlanhe_special (int n, cuDoubleComplex* A, int lda, double *y ){
   for(int j =0; j<dgemv_bs; j+=4)
          la[tx][31-ty-j] = A[ -j * lda];
   /*
-	Look at the indexing changes
+        Look at the indexing changes
   */
 
   A-= dgemv_bs ;
@@ -580,11 +580,11 @@ u_zlanhe_special (int n, cuDoubleComplex* A, int lda, double *y ){
   #pragma unroll 8
   for(int  i=ty*8; i<(1+ty)* dgemv_bs/4 ; i++){
          if ( i <tx ){
-	        la[tx][i] = la[i][tx]; 
+                la[tx][i] = la[i][tx]; 
          }
-	 else{ 
-	        la[tx][i] = la[tx][i]  ;
-	 }
+         else{ 
+                la[tx][i] = la[tx][i]  ;
+         }
   
   }
   __syncthreads();
@@ -627,7 +627,7 @@ extern "C" void mzlanhe (char uplo , int m ,  cuDoubleComplex *A , int lda ,  do
 {
 /*
 Note:
-	The UPLO = 'U' Version can be optimized more.
+        The UPLO = 'U' Version can be optimized more.
         side is not needed........................... 
 */
     int blocks;
@@ -640,23 +640,23 @@ Note:
     dim3 threads(32, 4, 1);
 
     if( m % dgemv_bs == 0 ) {
-	    if( uplo == 'L' || uplo == 'l'){	
-		    l_zlanhe_special <<< grid, threads, 0, magma_stream >>> (m, A, lda, Y);
-	    }
+            if( uplo == 'L' || uplo == 'l'){        
+                    l_zlanhe_special <<< grid, threads, 0, magma_stream >>> (m, A, lda, Y);
+            }
             else{
-		    u_zlanhe_special <<< grid, threads, 0, magma_stream >>> (m, A, lda,  Y);
-	    } 
-		
+                    u_zlanhe_special <<< grid, threads, 0, magma_stream >>> (m, A, lda,  Y);
+            } 
+                
     } 
-    else{	
-	    int  m_full_block = (m - m % 32 ) /32 ; 
-	    int  m_mod_32 = m%32 ;  
-	    if( uplo == 'L' || uplo == 'l'){
-		    l_zlanhe_generic <<< grid, threads, 0, magma_stream >>> (m, A, lda, Y , m_full_block , m_mod_32);
-	    }	
-	    else{
-		    u_zlanhe_generic <<< grid, threads, 0, magma_stream >>> (m, A, lda, Y , m_full_block , m_mod_32);
-	    }	
+    else{        
+            int  m_full_block = (m - m % 32 ) /32 ; 
+            int  m_mod_32 = m%32 ;  
+            if( uplo == 'L' || uplo == 'l'){
+                    l_zlanhe_generic <<< grid, threads, 0, magma_stream >>> (m, A, lda, Y , m_full_block , m_mod_32);
+            }        
+            else{
+                    u_zlanhe_generic <<< grid, threads, 0, magma_stream >>> (m, A, lda, Y , m_full_block , m_mod_32);
+            }        
     }
 }
 
@@ -675,10 +675,10 @@ l_zlanhe_max (int m, cuDoubleComplex* A, int lda,  double *y){
        A += ind;
 
        for(int i=0; i<break_d; i += zlanhe_bs ){
-	  #pragma unroll 8
+          #pragma unroll 8
           for(int j=0; j< zlanhe_bs; j++){
              res1 = cuCabs(A[j*lda]);
-	     res = fmax(res,res1);
+             res = fmax(res,res1);
           }
     
           A += lda*zlanhe_bs;
@@ -687,7 +687,7 @@ l_zlanhe_max (int m, cuDoubleComplex* A, int lda,  double *y){
      
        for(int j=0; j<=tx; j++){
           res1 = cuCabs(A[j*lda]);
-	  res = fmax(res,res1);
+          res = fmax(res,res1);
        }
 
        y[ind] = res;
@@ -731,20 +731,20 @@ extern "C" double
 magmablas_zlanhe(char norm, char uplo, int n, 
                  cuDoubleComplex *A, int lda, double *WORK )
 {
-	if (norm == 'I' || norm =='i')  
+        if (norm == 'I' || norm =='i')  
             {
 #if (GPUSHMEM >= 200)
-		mzlanhe ( uplo , n , A , lda , WORK);
-		int val = cublasIdamax(n,WORK,1);
+                mzlanhe ( uplo , n , A , lda , WORK);
+                int val = cublasIdamax(n,WORK,1);
                 double retVal[1];
-		cublasGetMatrix( 1, 1, sizeof( double ), WORK+val-1, 1, retVal, 1 ) ;
+                cublasGetMatrix( 1, 1, sizeof( double ), WORK+val-1, 1, retVal, 1 ) ;
                 return retVal[0];
 #else
                 printf("Only normM is available. Exit.\n");
                 exit(1);
 #endif
-	    }
-	else if (norm == 'M' || norm =='m')
+            }
+        else if (norm == 'M' || norm =='m')
             {  
                 zlanhe_max ( uplo , n , A , lda , WORK);
                 int val = cublasIdamax(n,WORK,1);
@@ -752,11 +752,11 @@ magmablas_zlanhe(char norm, char uplo, int n,
                 cublasGetMatrix( 1, 1, sizeof( double ), WORK+val-1, 1, retVal, 1 ) ;
                 return retVal[0];
             }
-	else
-	    {
+        else
+            {
                 printf("Only normI and normM are available. Exit.\n");
-		exit(1);
-	    }
+                exit(1);
+            }
 }
 
 

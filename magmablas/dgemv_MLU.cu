@@ -38,17 +38,17 @@ magma_dgemv_MLU(int n, int m, int n1, double* A, int lda, double *x, double *y)
   if (m>n1)
  {
    if( (threadIdx.x + n1 ) >= m ) {
-	x+= ( m - threadIdx.x -1 ) ; 
-   } 	
+        x+= ( m - threadIdx.x -1 ) ; 
+   }         
    else{
-	x+=n1;
-   }	
+        x+=n1;
+   }        
    m = m -n1 ; 
 /*
-	 Note
-	 ====
-	 Stan ............
-	 This is going to give segmentation fault or Error in GPU for illegal memory access. -- I am talking about x index 
+         Note
+         ====
+         Stan ............
+         This is going to give segmentation fault or Error in GPU for illegal memory access. -- I am talking about x index 
          buff[threadIdx.x]  = x[n1];
 */
      buff[threadIdx.x]  = x[0];
@@ -91,7 +91,7 @@ magmablas_dgemv_MLU(int n, int m, double *A, int lda, double *x, double *z)
 
     X      - (input) DOUBLE PRECISION array of dimension m.
      
-    Z      - (output) DOUBLE PRECISION array of	dimension m. 
+    Z      - (output) DOUBLE PRECISION array of        dimension m. 
              On exit Z = A - A X.
 
     ===================================================================== */

@@ -31,7 +31,7 @@ zlacpy_generic(int M, int N, cuDoubleComplex *A, int LDA, cuDoubleComplex *B, in
     do {
         A += LDA;
         B[0] = Ap[0];
-        Ap[0]= A[0];	
+        Ap[0]= A[0];        
         B += LDB;
     } while (A < Aend);
     B[0] = Ap[0];
@@ -61,9 +61,9 @@ magmablas_zlacpy_64_64_16_4_v2(int M, int N, cuDoubleComplex *A, int LDA, cuDoub
 {
         dim3 threads( 16, 4 );
         dim3 grid( M/64+(M%64!=0), 1 );
-	if( N == 1 ) 
+        if( N == 1 ) 
             zlacpy_special<<< grid, threads, 0, magma_stream >>> ( M, N, A, LDA, B, LDB ) ;
-	else	
+        else        
             zlacpy_generic<<< grid, threads, 0, magma_stream >>> ( M, N, A, LDA, B, LDB ) ;
 }
 
@@ -118,6 +118,6 @@ magmablas_zlacpy(char uplo, int M, int N, cuDoubleComplex *A, int LDA, cuDoubleC
     } else if ( (uplo == 'L') || (uplo == 'l') ) {
         fprintf(stderr, "Lacpy lower is not implemented\n");
     } else {
-	magmablas_zlacpy_64_64_16_4_v2(M, N, A, LDA, B, LDB);
+        magmablas_zlacpy_64_64_16_4_v2(M, N, A, LDA, B, LDB);
     }
 }

@@ -222,13 +222,13 @@ magmablas_csymv_130_L_special( magma_int_t n, cuFloatComplex alpha,
 
     WC-=tx ;
     WC+=tx_;
-	
+        
 
 
     #pragma unroll
     for(magma_int_t j=0;j<4;j++)
     {
-	b[j] = buff[ty_*4+j];
+        b[j] = buff[ty_*4+j];
     }
     
         #pragma unroll
@@ -873,19 +873,19 @@ magmablas_csymv_130( char uplo, magma_int_t n,
     }
     else
     {
-	cuFloatComplex *dC_work;
-	magma_int_t blocks    = n / thread_x + (n % thread_x != 0);
-	magma_int_t workspace = lda * (blocks + 1);
+        cuFloatComplex *dC_work;
+        magma_int_t blocks    = n / thread_x + (n % thread_x != 0);
+        magma_int_t workspace = lda * (blocks + 1);
 
         /* TODO: need to add a MAGMA context to handle workspaces */
-	cublasAlloc( workspace, sizeof(cuFloatComplex), (void**)&dC_work ) ;
+        cublasAlloc( workspace, sizeof(cuFloatComplex), (void**)&dC_work ) ;
         cublasGetError( ) ;
 
-	magmablasw_csymv_130( uplo, n, alpha, 
-			      A, lda, X, incx,
-			      beta, Y, incy, dC_work);
+        magmablasw_csymv_130( uplo, n, alpha, 
+                              A, lda, X, incx,
+                              beta, Y, incy, dC_work);
 
-	cublasFree(dC_work);
+        cublasFree(dC_work);
         cublasGetError( ) ;
     }
     return MAGMA_SUCCESS;
@@ -913,7 +913,7 @@ magmablas_csymv_130( char uplo, magma_int_t n,
     
     the size of dC_work is
  
-	    lda * (n/thread_x + (n%thread_x !=0)  
+            lda * (n/thread_x + (n%thread_x !=0)  
     where thread_x = 64 
     
     magamblasw_csymv requires users to explicitly a working space, while magmablas_csymv is 
@@ -929,12 +929,12 @@ magmablas_csymv_130( char uplo, magma_int_t n,
 extern "C"
 magma_int_t
 magmablasw_csymv_130( char uplo, magma_int_t n,
-		      cuFloatComplex alpha, 
-		      cuFloatComplex *A, magma_int_t lda,
-		      cuFloatComplex *X, magma_int_t incx,
-		      cuFloatComplex beta,  
-		      cuFloatComplex *Y, magma_int_t incy,
-		      cuFloatComplex *dC_work)
+                      cuFloatComplex alpha, 
+                      cuFloatComplex *A, magma_int_t lda,
+                      cuFloatComplex *X, magma_int_t incx,
+                      cuFloatComplex beta,  
+                      cuFloatComplex *Y, magma_int_t incy,
+                      cuFloatComplex *dC_work)
 {
 
     char      uplo_[2] = {uplo, 0};
@@ -972,7 +972,7 @@ magmablasw_csymv_130( char uplo, magma_int_t n,
 
     else
     {
-	magmablas_csymv_130_L(n, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
+        magmablas_csymv_130_L(n, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
     }
     return MAGMA_SUCCESS;
 }

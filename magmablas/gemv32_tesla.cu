@@ -37,7 +37,7 @@ sgemvT32_kernel_tail(int m, int n, float alpha, float* A, int lda,
     __shared__ float buff[64];
     __shared__ float la[32][33];
 
-	float sw = (float)(inx<n);
+        float sw = (float)(inx<n);
     buff[ind2]  = sw*x[0];
 
     #pragma unroll
@@ -175,7 +175,7 @@ sgemv32_kernel_tail(int m, int n, float alpha, float* A, int lda, float *x,
 
     This routine computes y = alpha A x where A is single precision
     array of dimension (M, N), N<=32. This routine is used as the cleanup
-	for sgemv32_kernel.
+        for sgemv32_kernel.
     =====================================================================  */
 
     int ind = blockIdx.x*32 + threadIdx.x;
@@ -189,7 +189,7 @@ sgemv32_kernel_tail(int m, int n, float alpha, float* A, int lda, float *x,
     buff[threadIdx.x]  = x[0];
 
     __syncthreads();
-    #pragma unroll	//yeah~right~
+    #pragma unroll        //yeah~right~
     for(int j=0; j < n; j++){
        res+=A[0]*buff[j];
        A+=lda;
@@ -284,30 +284,30 @@ magmablas_sgemv32_tesla(char tran, int m, int n, float alpha,
     tran = 'T' / 't', or of dimension (m, n) otherwise. n<=32.
 */
 
-	int blocks;
-	if (m % 32 == 0)
-		blocks = m/32;
-	else
-		blocks = m/32 + 1;
-	dim3 grid(blocks, 1, 1);
+        int blocks;
+        if (m % 32 == 0)
+                blocks = m/32;
+        else
+                blocks = m/32 + 1;
+        dim3 grid(blocks, 1, 1);
 
-	if (tran == 'T' || tran == 't')
-	{
-		dim3 threads(32, 2, 1);
-		if (n%32==0)
-			sgemvT32_kernel<<< grid, threads, 0, magma_stream >>>(m, alpha, A, lda, x, y);
-		else
-			sgemvT32_kernel_tail<<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, y);
+        if (tran == 'T' || tran == 't')
+        {
+                dim3 threads(32, 2, 1);
+                if (n%32==0)
+                        sgemvT32_kernel<<< grid, threads, 0, magma_stream >>>(m, alpha, A, lda, x, y);
+                else
+                        sgemvT32_kernel_tail<<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, y);
 
-	}
-	else 
-	{
-		dim3 threads(32, 1, 1);
-		if (n%32==0)
-			sgemv32_kernel<<< grid, threads, 0, magma_stream >>>(m, alpha, A, lda, x, y);
-		else
-			sgemv32_kernel_tail<<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, y);
-	}
+        }
+        else 
+        {
+                dim3 threads(32, 1, 1);
+                if (n%32==0)
+                        sgemv32_kernel<<< grid, threads, 0, magma_stream >>>(m, alpha, A, lda, x, y);
+                else
+                        sgemv32_kernel_tail<<< grid, threads, 0, magma_stream >>>(m, n, alpha, A, lda, x, y);
+        }
 }
 
 extern "C" void
@@ -320,33 +320,33 @@ magmablas_dgemv32_tesla(char tran, int m, int n, double alpha, double *A,
     =======
 
     This routine computes
-       y = alpha A^T x 	      	 for tran = 'T' / 't' or
+       y = alpha A^T x                        for tran = 'T' / 't' or
        y = alpha A x
     where A is double precision array of dimension (32, M) for
     tran = 'T' / 't', or of dimension (M, 32) otherwise.
     N is not used in this case (as N == 32).
     =====================================================================  */
 
-	int blocks;
+        int blocks;
 
-	if ( n != 32 ) {
-	  fprintf(stderr, "magmablas_dgemv32_tesla: N has to be 32\n" );
-	  exit(-1);
-	}
-	  
-	if (m % 32==0)
-		blocks = m/32;
-	else
-		blocks = m/32 + 1;
-	dim3 grid(blocks, 1, 1);
+        if ( n != 32 ) {
+          fprintf(stderr, "magmablas_dgemv32_tesla: N has to be 32\n" );
+          exit(-1);
+        }
+          
+        if (m % 32==0)
+                blocks = m/32;
+        else
+                blocks = m/32 + 1;
+        dim3 grid(blocks, 1, 1);
 
-	if (tran == 'T' || tran == 't'){
-		dim3 threads(32, 2, 1);
-		dgemvT32_kernel<<< grid, threads, 0, magma_stream >>>(m, alpha, A, lda, x, y);
-	}
-	else
-	{
-		dim3 threads(32, 1, 1);
-		dgemv32_kernel<<< grid, threads, 0, magma_stream >>>(m, alpha, A, lda, x, y);
-	}
+        if (tran == 'T' || tran == 't'){
+                dim3 threads(32, 2, 1);
+                dgemvT32_kernel<<< grid, threads, 0, magma_stream >>>(m, alpha, A, lda, x, y);
+        }
+        else
+        {
+                dim3 threads(32, 1, 1);
+                dgemv32_kernel<<< grid, threads, 0, magma_stream >>>(m, alpha, A, lda, x, y);
+        }
 }

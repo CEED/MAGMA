@@ -115,7 +115,7 @@ magmablas_dgemv_tesla(char trans,
              supplied as zero then Y need not be set on input.
              Unchanged on exit
 
-    Z      - (output) DOUBLE PRECISION array of	dimension 
+    Z      - (output) DOUBLE PRECISION array of        dimension 
              m if trans == 'n'
              n if trans == 't' 
              
@@ -209,7 +209,7 @@ dgemvt_kernel1(magma_int_t n, magma_int_t m, double alpha, magma_int_t n1, doubl
      __syncthreads();
 
      if (n-n1>16){
-	#pragma unroll
+        #pragma unroll
         for(magma_int_t j=0; j < 16; j++)
            res += la[inx][iny*16+j]*buff[j+iny*16];
 
@@ -218,7 +218,7 @@ dgemvt_kernel1(magma_int_t n, magma_int_t m, double alpha, magma_int_t n1, doubl
         for(magma_int_t j=0; j<16; j++)
           la[iny+__mul24(j,2)][inx] = A[j*__mul24(2,lda)];
 
-	__syncthreads();
+        __syncthreads();
 
         #pragma unroll
         for(magma_int_t j=0; j < 16; j++)
@@ -241,7 +241,7 @@ dgemvt_kernel1(magma_int_t n, magma_int_t m, double alpha, magma_int_t n1, doubl
 
 __global__ void
 dgemvt_kernel2(magma_int_t n, magma_int_t m, double alpha,
-		magma_int_t n1, double* A, magma_int_t lda, double *x, double *y)
+                magma_int_t n1, double* A, magma_int_t lda, double *x, double *y)
 {
   const magma_int_t inx = threadIdx.x;
   const magma_int_t iny = threadIdx.y;
@@ -302,7 +302,7 @@ dgemvt_kernel2(magma_int_t n, magma_int_t m, double alpha,
      __syncthreads();
      if (n-n1>4){
         #pragma unroll
-	for(magma_int_t j=0; j < 4; j++)
+        for(magma_int_t j=0; j < 4; j++)
            res += la[inx][iny*4+j]*buff[j+iny*4];
 
         A += 16;

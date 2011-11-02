@@ -42,7 +42,7 @@ magmablas_zhemv_130_kernel1( magma_int_t m, cuDoubleComplex alpha,
         }
         y[tid] = beta * y[tid] + alpha * res;
     }
-}	
+}        
 
 __global__ void 
 magmablas_zhemv_130_kernel2( magma_int_t m, cuDoubleComplex alpha,
@@ -76,7 +76,7 @@ magmablas_zhemv_130_kernel2( magma_int_t m, cuDoubleComplex alpha,
         {
             res += zero;
         }
-    }	
+    }        
 
     sdata[tx] = res;
     __syncthreads();
@@ -86,7 +86,7 @@ magmablas_zhemv_130_kernel2( magma_int_t m, cuDoubleComplex alpha,
         sdata[tx] += sdata[tx + 64];
     }
     __syncthreads();
-	
+        
     if(tx < 32) 
     {
         sdata[tx] += sdata[tx + 32];

@@ -154,7 +154,7 @@ magmablas_sgemv_tesla(char trans,
              supplied as zero then Y need not be set on input.
              Unchanged on exit.
 
-    Z      - (output) SINGLE PRECISION array of	dimension 
+    Z      - (output) SINGLE PRECISION array of        dimension 
              m if trans == 'n'
              n if trans == 't' 
 
@@ -377,7 +377,7 @@ sgemvt_kernel2(magma_int_t n, magma_int_t m, float alpha,
   __syncthreads(); // 1
   if (n>n1){
      if (ind2>=(n-n1))
-	buff[ind2]=0.;
+        buff[ind2]=0.;
      else
         buff[ind2]  = x[n1];
 
@@ -396,10 +396,10 @@ sgemvt_kernel2(magma_int_t n, magma_int_t m, float alpha,
            ind =  j+iny*4;
            res += la[inx][ind]*buff[ind];
         }
-	A += 16;
+        A += 16;
         __syncthreads();
-	#pragma unroll
-	for(magma_int_t j=0; j<4; j++)
+        #pragma unroll
+        for(magma_int_t j=0; j<4; j++)
           if (inx+16>=(n-n1))
              la[iny+__mul24(j,4)][inx] = 0.f;
           else
@@ -408,13 +408,13 @@ sgemvt_kernel2(magma_int_t n, magma_int_t m, float alpha,
         __syncthreads();
 
         #pragma unroll
-	for(magma_int_t j=0; j < 4; j++){
+        for(magma_int_t j=0; j < 4; j++){
            ind = j+4*iny;
            res += la[inx][ind]*buff[16+ind];
         }
      }
      else {
-	#pragma unroll
+        #pragma unroll
         for(magma_int_t j=0; j < 4; j++){
           ind = j+iny*4;
           res += la[inx][ind]*buff[ind];

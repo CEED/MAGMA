@@ -59,11 +59,11 @@ magmablas_zlag2c( int M, int N ,
 /*
   Note
   ====
-	- We have to provide INFO at the end that zlag2c isn't doable now. 
-	- Transfer a single value TO/FROM CPU/GPU
-	- SLAMCH that's needed is called from underlying BLAS
-	- Only used in iterative refinement
-	- Do we want to provide this in the release?
+        - We have to provide INFO at the end that zlag2c isn't doable now. 
+        - Transfer a single value TO/FROM CPU/GPU
+        - SLAMCH that's needed is called from underlying BLAS
+        - Only used in iterative refinement
+        - Do we want to provide this in the release?
 
   Purpose
   =======

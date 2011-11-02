@@ -106,7 +106,7 @@ magmablas_zlaset(char uplo, magma_int_t m, magma_int_t n,
 
    if (m!=0 && n !=0)
      if (uplo == MagmaLower)
-        zlasetlower<<< grid, threads, 0, magma_stream >>> (m, n, A, lda);	
+        zlasetlower<<< grid, threads, 0, magma_stream >>> (m, n, A, lda);        
      else if (uplo == MagmaUpper)
         zlasetupper<<< grid, threads, 0, magma_stream >>> (m, n, A, lda);
      else

@@ -142,11 +142,11 @@ magmablas_sgemm_tesla( char TRANSA, char TRANSB, int m , int n , int k ,
     if( beta == 0.0){
       magmablas_sgemm_kernel_ab_0( C,A,B, m, n,k,lda,ldb, ldc, alpha, beta);
       return ;
-    }	
+    }        
     else{
       magmablas_sgemm_kernel_a_0( C,A,B, m, n,k,lda,ldb, ldc, alpha, beta);
       return ;
-    }		
+    }                
   }
   int cutoff = 512 ;
   if(ldc < m ) return ;
@@ -155,66 +155,66 @@ magmablas_sgemm_tesla( char TRANSA, char TRANSB, int m , int n , int k ,
   if(TRANSA=='N' ){
     if(TRANSB=='N')
       { 
-	
-	if(lda < m ) return ;
-	if(ldb < k ) return ;
-	/*====================================================================
-	  =============== C = alpha * A * B + beta * C =======================
-	  ===================================================================*/
-	if( m > cutoff && n > cutoff ){
-	  if( m % 64 == 0 && n%16 == 0 && k%16 == 0 ) 
-	    /*
-	    magmablas_sgemm_kernel_N_N_64_16_16_16_4_special( C,A,B, m, n, k,
-							      lda, ldb, ldc, 
-							      alpha, beta);
-	    */
-	    cublasSgemm( TRANSA, TRANSB, m, n, k, alpha, 
-			 A, lda, B, ldb, beta, C, ldc );
-	  else
-	    magmablas_sgemm_kernel_N_N_64_16_16_16_4( C,A,B, m, n, k, 
-						      lda, ldb, ldc, 
-						      alpha, beta);
-	}
-	else{
-	  if( m % 64 == 0 && n%16 == 0 && k%16 == 0 ) 
-	    cublasSgemm( TRANSA, TRANSB, m, n, k, alpha, 
-			 A, lda, B, ldb, beta, C, ldc );
-	  else
-	    magmablas_sgemm_kernel_N_N_64_16_16_16_4( C,A,B, m, n, k,
-						      lda, ldb, ldc, 
-						      alpha, beta);	  
-	}
+        
+        if(lda < m ) return ;
+        if(ldb < k ) return ;
+        /*====================================================================
+          =============== C = alpha * A * B + beta * C =======================
+          ===================================================================*/
+        if( m > cutoff && n > cutoff ){
+          if( m % 64 == 0 && n%16 == 0 && k%16 == 0 ) 
+            /*
+            magmablas_sgemm_kernel_N_N_64_16_16_16_4_special( C,A,B, m, n, k,
+                                                              lda, ldb, ldc, 
+                                                              alpha, beta);
+            */
+            cublasSgemm( TRANSA, TRANSB, m, n, k, alpha, 
+                         A, lda, B, ldb, beta, C, ldc );
+          else
+            magmablas_sgemm_kernel_N_N_64_16_16_16_4( C,A,B, m, n, k, 
+                                                      lda, ldb, ldc, 
+                                                      alpha, beta);
+        }
+        else{
+          if( m % 64 == 0 && n%16 == 0 && k%16 == 0 ) 
+            cublasSgemm( TRANSA, TRANSB, m, n, k, alpha, 
+                         A, lda, B, ldb, beta, C, ldc );
+          else
+            magmablas_sgemm_kernel_N_N_64_16_16_16_4( C,A,B, m, n, k,
+                                                      lda, ldb, ldc, 
+                                                      alpha, beta);          
+        }
       }
     else
       { 
-	if(lda < m ) return ;
-	if(ldb < n ) return ;
+        if(lda < m ) return ;
+        if(ldb < n ) return ;
 
-	/*=====================================================================
-	  ================ C = alpha * A * B^T + beta * C =====================
-	  ===================================================================*/
-	if( m > cutoff && n > cutoff ){
-	  if( m%64 == 0 && n %16 ==0 && k%4==0) 
-	    /*
-	    magmablas_sgemm_kernel_N_T_64_16_4_16_4( C,A,B, m, n,k,
-						     lda, ldb, ldc, 
-						     alpha, beta);
-	    */
-	    cublasSgemm( TRANSA, TRANSB, m, n, k, alpha, 
-			 A, lda, B, ldb, beta, C, ldc );
-	  else 
-	    magmablas_sgemm_kernel_N_T_64_16_4_16_4( C,A,B, m, n, k,
-						     lda,ldb, ldc,
-						     alpha, beta);
-	}
-	else{
-	  if( m%64 == 0 && n %16 ==0 && k%4==0) 
-	    cublasSgemm(TRANSA, TRANSB, m, n, k, alpha, 
-			A, lda, B, ldb, beta, C, ldc );
-	  else 
-	    magmablas_sgemm_kernel_N_T_64_16_4_16_4(C,A,B, m, n, k,
-						    lda,ldb, ldc, alpha, beta);
-	}
+        /*=====================================================================
+          ================ C = alpha * A * B^T + beta * C =====================
+          ===================================================================*/
+        if( m > cutoff && n > cutoff ){
+          if( m%64 == 0 && n %16 ==0 && k%4==0) 
+            /*
+            magmablas_sgemm_kernel_N_T_64_16_4_16_4( C,A,B, m, n,k,
+                                                     lda, ldb, ldc, 
+                                                     alpha, beta);
+            */
+            cublasSgemm( TRANSA, TRANSB, m, n, k, alpha, 
+                         A, lda, B, ldb, beta, C, ldc );
+          else 
+            magmablas_sgemm_kernel_N_T_64_16_4_16_4( C,A,B, m, n, k,
+                                                     lda,ldb, ldc,
+                                                     alpha, beta);
+        }
+        else{
+          if( m%64 == 0 && n %16 ==0 && k%4==0) 
+            cublasSgemm(TRANSA, TRANSB, m, n, k, alpha, 
+                        A, lda, B, ldb, beta, C, ldc );
+          else 
+            magmablas_sgemm_kernel_N_T_64_16_4_16_4(C,A,B, m, n, k,
+                                                    lda,ldb, ldc, alpha, beta);
+        }
       }
   }
   else{
@@ -222,55 +222,55 @@ magmablas_sgemm_tesla( char TRANSA, char TRANSB, int m , int n , int k ,
       if(lda < k ) return ;
       if(ldb < k ) return ;
       /*=======================================================================
-	===================C = alpha * A^T * B + beta * C======================
-	=====================================================================*/
+        ===================C = alpha * A^T * B + beta * C======================
+        =====================================================================*/
       if(m>cutoff && n > cutoff){
-	if( m%32 == 0 && n %32 ==0 && k%8==0) 
-	  /*
-	  magmablas_sgemm_kernel_T_N_32_32_8_8_8( C,A,B, m, n, k, 
-						  lda, ldb, ldc, alpha, beta);
-	  */
-	  cublasSgemm( TRANSA, TRANSB, m, n, k, alpha, 
-			 A, lda, B, ldb, beta, C, ldc );
-	else
-	  magmablas_sgemm_kernel_T_N_32_32_8_8_8( C,A,B, m, n,k,
-						  lda,ldb, ldc, alpha, beta);
+        if( m%32 == 0 && n %32 ==0 && k%8==0) 
+          /*
+          magmablas_sgemm_kernel_T_N_32_32_8_8_8( C,A,B, m, n, k, 
+                                                  lda, ldb, ldc, alpha, beta);
+          */
+          cublasSgemm( TRANSA, TRANSB, m, n, k, alpha, 
+                         A, lda, B, ldb, beta, C, ldc );
+        else
+          magmablas_sgemm_kernel_T_N_32_32_8_8_8( C,A,B, m, n,k,
+                                                  lda,ldb, ldc, alpha, beta);
       }
       else{
-	if( m%32 == 0 && n %32 ==0 && k%8==0) 
-	  cublasSgemm(TRANSA, TRANSB, m, n, k, alpha, 
-		      A, lda, B, ldb, beta, C, ldc );
-	else
-	  magmablas_sgemm_kernel_T_N_32_32_8_8_8( C,A,B, m,n,k,
-						  lda,ldb, ldc, alpha, beta);
-      }	
+        if( m%32 == 0 && n %32 ==0 && k%8==0) 
+          cublasSgemm(TRANSA, TRANSB, m, n, k, alpha, 
+                      A, lda, B, ldb, beta, C, ldc );
+        else
+          magmablas_sgemm_kernel_T_N_32_32_8_8_8( C,A,B, m,n,k,
+                                                  lda,ldb, ldc, alpha, beta);
+      }        
     }
     else{
       if(lda < k) return ;
       if(ldb < n ) return ;
       /*=======================================================================
-	===================C = alpha * A^T* B^T + beta * C=====================
-	=====================================================================*/
+        ===================C = alpha * A^T* B^T + beta * C=====================
+        =====================================================================*/
       if( m > cutoff && n > cutoff ){
-	if( m%64 == 0 && n %16 ==0 && k%16==0)
-	  /* 
-	  magmablas_sgemm_kernel_T_T_64_16_16_16_4_v2( C,B,A, n, m, k,
-						       ldb,lda, ldc, 
-						       alpha, beta);
-	  */
-	  cublasSgemm( TRANSA, TRANSB, m, n, k, alpha, 
-			 A, lda, B, ldb, beta, C, ldc );
-	else 
-	  magmablas_sgemm_kernel_T_T_64_16_16_16_4( C,B,A, n, m, k,
-						    ldb,lda, ldc, alpha, beta);
+        if( m%64 == 0 && n %16 ==0 && k%16==0)
+          /* 
+          magmablas_sgemm_kernel_T_T_64_16_16_16_4_v2( C,B,A, n, m, k,
+                                                       ldb,lda, ldc, 
+                                                       alpha, beta);
+          */
+          cublasSgemm( TRANSA, TRANSB, m, n, k, alpha, 
+                         A, lda, B, ldb, beta, C, ldc );
+        else 
+          magmablas_sgemm_kernel_T_T_64_16_16_16_4( C,B,A, n, m, k,
+                                                    ldb,lda, ldc, alpha, beta);
       }
       else{
-	if( m%64 == 0 && n %16 ==0 && k%16==0) 
-	  cublasSgemm(TRANSA, TRANSB, m, n, k, alpha, 
-		      A, lda, B, ldb, beta, C, ldc );
-	else 
-	  magmablas_sgemm_kernel_T_T_64_16_16_16_4( C,B,A, n, m, k,
-						    ldb,lda, ldc, alpha, beta);
+        if( m%64 == 0 && n %16 ==0 && k%16==0) 
+          cublasSgemm(TRANSA, TRANSB, m, n, k, alpha, 
+                      A, lda, B, ldb, beta, C, ldc );
+        else 
+          magmablas_sgemm_kernel_T_T_64_16_16_16_4( C,B,A, n, m, k,
+                                                    ldb,lda, ldc, alpha, beta);
       }   
     }
   }

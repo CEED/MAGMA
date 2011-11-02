@@ -83,7 +83,7 @@ magmablas_dgemvn_fermi(magma_int_t n, magma_int_t m, double alpha, double *A, ma
 
     X      - (input) DOUBLE PRECISION array of dimension m.
      
-    Y      - (output) DOUBLE PRECISION array of	dimension m. 
+    Y      - (output) DOUBLE PRECISION array of        dimension m. 
              On exit Y = alpha A X.
 
     ===================================================================== */
@@ -106,65 +106,65 @@ __global__ void
 dgemvt_kernel_fermi(magma_int_t m, magma_int_t n, double alpha, magma_int_t n1, double* A, magma_int_t lda,
               double *x, double *y)
 {
-	magma_int_t tx = threadIdx.x;
+        magma_int_t tx = threadIdx.x;
 
-	__shared__ double sdata[threadSize];
+        __shared__ double sdata[threadSize];
 
 
-	double res;
-	res = 0.0;
+        double res;
+        res = 0.0;
 
-	for(magma_int_t i=0; i<n1; i+= threadSize)
-	{
-		res += A[tx + i + lda * blockIdx.y] * x[tx + i];
-	}
+        for(magma_int_t i=0; i<n1; i+= threadSize)
+        {
+                res += A[tx + i + lda * blockIdx.y] * x[tx + i];
+        }
 
-	if(m > n1)
-	{
-		if( tx + n1 <  m )
-		{
-			res  += A[tx + n1 + lda *blockIdx.y] * x[tx + n1];
-		}
-		else
-		{
-			res  = res;
-		}
+        if(m > n1)
+        {
+                if( tx + n1 <  m )
+                {
+                        res  += A[tx + n1 + lda *blockIdx.y] * x[tx + n1];
+                }
+                else
+                {
+                        res  = res;
+                }
     }
 
-	sdata[tx] = res;
-	 __syncthreads();
+        sdata[tx] = res;
+         __syncthreads();
 
-	for(int s=blockDim.x/2; s>32;s>>=1)
-	{
-			if(tx<s)
-			{
-					sdata[tx] += sdata[tx+s];
-			} 
-			__syncthreads();
-	}
+        for(int s=blockDim.x/2; s>32;s>>=1)
+        {
+                        if(tx<s)
+                        {
+                                        sdata[tx] += sdata[tx+s];
+                        } 
+                        __syncthreads();
+        }
 
-	if(tx<32)
-	{
-		sdata[tx] += sdata[tx+32];
-	}
+        if(tx<32)
+        {
+                sdata[tx] += sdata[tx+32];
+        }
 
     if(tx == 0)
-	{
-		for(int i=1;i<32;i++)
-		{
-			sdata[tx] += sdata[tx + i];
-		}
-	}
+        {
+                for(int i=1;i<32;i++)
+                {
+                        sdata[tx] += sdata[tx + i];
+                }
+        }
 
-	if( tx == 0 )
-	{
-		y[blockIdx.y] = sdata[0];
-		
-		if (blockIdx.y < n)
-		{
-			y[blockIdx.y] = y[blockIdx.y] * alpha;
-		}
-	}
+        if( tx == 0 )
+        {
+                y[blockIdx.y] = sdata[0];
+                
+                if (blockIdx.y < n)
+                {
+                        y[blockIdx.y] = y[blockIdx.y] * alpha;
+                }
+        }
 }
 
 
@@ -203,11 +203,11 @@ magmablas_dgemvt_fermi(magma_int_t m, magma_int_t n, double alpha, double *A, ma
 
     ===================================================================== */
 
-	dim3 grid    ( 1,  n,  1);
-	dim3 threads ( threadSize,   1,  1);
+        dim3 grid    ( 1,  n,  1);
+        dim3 threads ( threadSize,   1,  1);
 
-	dgemvt_kernel_fermi<<< grid, threads, 0, magma_stream >>>( m, n, alpha, ( m / threadSize) * threadSize,
-				                                       A, lda, x, y);
+        dgemvt_kernel_fermi<<< grid, threads, 0, magma_stream >>>( m, n, alpha, ( m / threadSize) * threadSize,
+                                                                       A, lda, x, y);
 }
 
 
@@ -272,7 +272,7 @@ void magmablas_dgemv_fermi(char trans,
              supplied as zero then Y need not be set on input.
              Unchanged on exit.
 
-    Z      - (output) DOUBLE PRECISION array of	dimension 
+    Z      - (output) DOUBLE PRECISION array of        dimension 
              m if trans == 'n'
              n if trans == 't' 
 
@@ -282,16 +282,16 @@ void magmablas_dgemv_fermi(char trans,
 
     if (incx == 1 && incz == 1 && beta == 0.) {
        if (trans == 'n' || trans == 'N')
-	   {
-	       if ( m >= 7000 && m <= 8000 )
+           {
+               if ( m >= 7000 && m <= 8000 )
                 cublasDgemv(trans, m, n, alpha, A, lda, x, incx, beta, z, incz);
-		   else 
-				magmablas_dgemvn_fermi(m,  n, alpha, A, lda, x, z);
-	   }
+                   else 
+                                magmablas_dgemvn_fermi(m,  n, alpha, A, lda, x, z);
+           }
        else if (trans == 't' || trans == 'T')
           magmablas_dgemvt_fermi(m,  n, alpha, A, lda, x, z);
        else
-          printf("trans = %c in sgemv_fermi is not available\n", trans);	       
+          printf("trans = %c in sgemv_fermi is not available\n", trans);               
     }
     else
        cublasDgemv(trans, m, n, alpha, A, lda, x, incx, beta, z, incz);

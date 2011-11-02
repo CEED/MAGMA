@@ -59,9 +59,9 @@ __global__ void myzlaswpx( zlaswpx_params_t params )
 
 extern "C" void zlaswpx( zlaswpx_params_t &params )
 {
- 	int blocksize = 64;
-	dim3 blocks = (params.n+blocksize-1) / blocksize;
-	myzlaswpx<<< blocks, blocksize, 0, magma_stream >>>( params );
+         int blocksize = 64;
+        dim3 blocks = (params.n+blocksize-1) / blocksize;
+        myzlaswpx<<< blocks, blocksize, 0, magma_stream >>>( params );
 }
 
 /*
@@ -71,29 +71,29 @@ __global__ void myzlaswp2( zlaswp_params_t2 params )
 {
         unsigned int tid = threadIdx.x + __mul24(blockDim.x, blockIdx.x);
         if( tid < params.n )
-	{
+        {
                 int lda = params.lda;
-		cuDoubleComplex *A = params.A + tid + lda * params.j0;
+                cuDoubleComplex *A = params.A + tid + lda * params.j0;
 
-		for( int i = 0; i < params.npivots; i++ )
-		{
-                 	int j = params.ipiv[i];
-			cuDoubleComplex *p1 = A + i*lda;
-			cuDoubleComplex *p2 = A + j*lda;
-			cuDoubleComplex temp = *p1;
-			*p1 = *p2;
-			*p2 = temp;
-		}
-	}
+                for( int i = 0; i < params.npivots; i++ )
+                {
+                         int j = params.ipiv[i];
+                        cuDoubleComplex *p1 = A + i*lda;
+                        cuDoubleComplex *p2 = A + j*lda;
+                        cuDoubleComplex temp = *p1;
+                        *p1 = *p2;
+                        *p2 = temp;
+                }
+        }
 }
 
 extern "C" void zlaswp2( zlaswp_params_t &params );
 
 extern "C" void zlaswp3( zlaswp_params_t2 &params )
 {
- 	int blocksize = 64;
-	dim3 blocks = (params.n+blocksize-1) / blocksize;
-	myzlaswp2<<< blocks, blocksize, 0, magma_stream >>>( params );
+         int blocksize = 64;
+        dim3 blocks = (params.n+blocksize-1) / blocksize;
+        myzlaswp2<<< blocks, blocksize, 0, magma_stream >>>( params );
 }
 
 
@@ -112,10 +112,10 @@ magmablas_zpermute_long2( cuDoubleComplex *dAT, int lda, int *ipiv, int nb, int 
                         ipiv[ind + k + j] += ind;
                 }
                 //zlaswp2( params );
-	        zlaswp3( params );
+                zlaswp3( params );
         }
 
-	int num_pivots = nb - k;
+        int num_pivots = nb - k;
 
         zlaswp_params_t2 params = { dAT, lda, lda, ind + k, num_pivots};
         for( int j = 0; j < num_pivots; j++ )

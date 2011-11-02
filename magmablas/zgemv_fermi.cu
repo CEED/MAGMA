@@ -30,7 +30,7 @@ zgemvn_kernel1_fermi(int n, int m, int n1, cuDoubleComplex alpha, cuDoubleComple
        res += A[0] * x[j];
        A   += lda;
     }
-	x += zgemv_bs;
+        x += zgemv_bs;
   }
 
   if (m>n1){
@@ -112,7 +112,7 @@ magmablas_zgemvn_fermi(int n, int m, cuDoubleComplex alpha, cuDoubleComplex *A, 
 
     X      - (input) SINGLE PRECISION array of dimension m.
      
-    Y      - (output) SINGLE PRECISION array of	dimension m. 
+    Y      - (output) SINGLE PRECISION array of        dimension m. 
              On exit Y = alpha A X.
 
     ===================================================================== */
@@ -126,11 +126,11 @@ magmablas_zgemvn_fermi(int n, int m, cuDoubleComplex alpha, cuDoubleComplex *A, 
     dim3 grid(blocks, 1, 1);
     dim3 threads(num_threads, 1, 1);
 /*    if(n<=8500) 
-		zgemvn_kernel1_fermi<<< grid, threads, 0, magma_stream >>>(n, m, (m / zgemv_bs)*zgemv_bs, 
-			                           alpha, A, lda, x, y);
+                zgemvn_kernel1_fermi<<< grid, threads, 0, magma_stream >>>(n, m, (m / zgemv_bs)*zgemv_bs, 
+                                                   alpha, A, lda, x, y);
     else */
-		zgemvn_kernel2_fermi<<< grid, threads, 0, magma_stream >>>(n, m, (m / num_threads)*num_threads, 
-			                           alpha, A, lda, x, y);
+                zgemvn_kernel2_fermi<<< grid, threads, 0, magma_stream >>>(n, m, (m / num_threads)*num_threads, 
+                                                   alpha, A, lda, x, y);
 }
 
 
@@ -139,70 +139,70 @@ __global__ void
 zgemvt_kernel_fermi(int m, int n, cuDoubleComplex alpha, int n1, cuDoubleComplex* A, int lda,
               cuDoubleComplex *x, cuDoubleComplex *y)
 {
-	unsigned int tx = threadIdx.x;
+        unsigned int tx = threadIdx.x;
 
-	__shared__ cuDoubleComplex sdata[threadSize];
-	
+        __shared__ cuDoubleComplex sdata[threadSize];
+        
 
-	cuDoubleComplex res;
+        cuDoubleComplex res;
     MAGMA_Z_SET2REAL(res, 0.0);
-	cuDoubleComplex zero;
+        cuDoubleComplex zero;
     MAGMA_Z_SET2REAL(zero, 0.0);
      
-	for(int i=0; i<n1; i+= threadSize)
-	{
-		res += A[tx + i + lda * blockIdx.y] * x[tx + i];
-	}
+        for(int i=0; i<n1; i+= threadSize)
+        {
+                res += A[tx + i + lda * blockIdx.y] * x[tx + i];
+        }
 
-	
-	if(m > n1)
-	{
-		if( tx + n1 <  m )
-		{
-			res  += A[tx + n1 + lda *blockIdx.y] * x[tx + n1];
-		}
-		else 
-		{
-			res  += zero;
-		}
-	}	
+        
+        if(m > n1)
+        {
+                if( tx + n1 <  m )
+                {
+                        res  += A[tx + n1 + lda *blockIdx.y] * x[tx + n1];
+                }
+                else 
+                {
+                        res  += zero;
+                }
+        }        
 
     sdata[tx] = res;
-	__syncthreads();
+        __syncthreads();
     
 
-	for(int s=blockDim.x/2; s>32;s>>=1)
-	{
-		if(tx<s)
-		{
-				sdata[tx] += sdata[tx+s];
-		} 
-		__syncthreads();
-	}
+        for(int s=blockDim.x/2; s>32;s>>=1)
+        {
+                if(tx<s)
+                {
+                                sdata[tx] += sdata[tx+s];
+                } 
+                __syncthreads();
+        }
 
 
-	if(tx < 32) 
-	{
-		sdata[tx] += sdata[tx + 32];
-	}
+        if(tx < 32) 
+        {
+                sdata[tx] += sdata[tx + 32];
+        }
 
     if(tx == 0)
-	{
-		for(int i=1;i<32;i++)
-		{
-			sdata[tx] += sdata[tx + i];
-		}
-	}
+        {
+                for(int i=1;i<32;i++)
+                {
+                        sdata[tx] += sdata[tx + i];
+                }
+        }
 
     if( tx == 0 ) 
-	{
-		y[blockIdx.y] = sdata[0]; 		
+        {
+                y[blockIdx.y] = sdata[0];                 
 
-		if (blockIdx.y < n)
-		{
-			y[blockIdx.y] = y[blockIdx.y] * alpha;
-		}
-	}
+                if (blockIdx.y < n)
+                {
+                        y[blockIdx.y] = y[blockIdx.y] * alpha;
+                }
+        }
 }
 
 
@@ -256,73 +256,73 @@ __global__ void
 zgemvc_kernel_fermi(int m, int n, cuDoubleComplex alpha, int n1, cuDoubleComplex* A, int lda,
               cuDoubleComplex *x, cuDoubleComplex *y)
 {
-	unsigned int tx = threadIdx.x;
+        unsigned int tx = threadIdx.x;
 
-	__shared__ cuDoubleComplex sdata[threadSize];
-	
+        __shared__ cuDoubleComplex sdata[threadSize];
+        
 
-	cuDoubleComplex res;
+        cuDoubleComplex res;
     MAGMA_Z_SET2REAL(res, 0.0);
-	cuDoubleComplex zero;
+        cuDoubleComplex zero;
     MAGMA_Z_SET2REAL(zero, 0.0);
      
-	for(int i=0; i<n1; i+= threadSize)
-	{
-		res += cuConj(A[tx + i + lda * blockIdx.y]) * x[tx + i];
-	}
+        for(int i=0; i<n1; i+= threadSize)
+        {
+                res += cuConj(A[tx + i + lda * blockIdx.y]) * x[tx + i];
+        }
 
-	
-	if(m > n1)
-	{
-		if( tx + n1 <  m )
-		{
-			res  += cuConj(A[tx + n1 + lda *blockIdx.y]) * x[tx + n1];
-		}
-		else 
-		{
-			res  += zero;
-		}
-	}	
+        
+        if(m > n1)
+        {
+                if( tx + n1 <  m )
+                {
+                        res  += cuConj(A[tx + n1 + lda *blockIdx.y]) * x[tx + n1];
+                }
+                else 
+                {
+                        res  += zero;
+                }
+        }        
 
     sdata[tx] = res;
-	__syncthreads();
+        __syncthreads();
     
     /*
-	if(tx < 128) 
-	{
-		sdata[tx] += sdata[tx + 128];
-	}
+        if(tx < 128) 
+        {
+                sdata[tx] += sdata[tx + 128];
+        }
     __syncthreads();
-	*/
+        */
 
-	if(tx < 64) 
-	{
-		sdata[tx] += sdata[tx + 64];
-	}
+        if(tx < 64) 
+        {
+                sdata[tx] += sdata[tx + 64];
+        }
     __syncthreads();
 
-	if(tx < 32) 
-	{
-		sdata[tx] += sdata[tx + 32];
-	}
+        if(tx < 32) 
+        {
+                sdata[tx] += sdata[tx + 32];
+        }
 
     if(tx == 0)
-	{
-		for(int i=1;i<32;i++)
-		{
-			sdata[tx] += sdata[tx + i];
-		}
-	}
+        {
+                for(int i=1;i<32;i++)
+                {
+                        sdata[tx] += sdata[tx + i];
+                }
+        }
 
     if( tx == 0 ) 
-	{
-		y[blockIdx.y] = sdata[0]; 		
+        {
+                y[blockIdx.y] = sdata[0];                 
 
-		if (blockIdx.y < n)
-		{
-			y[blockIdx.y] = y[blockIdx.y] * alpha;
-		}
-	}
+                if (blockIdx.y < n)
+                {
+                        y[blockIdx.y] = y[blockIdx.y] * alpha;
+                }
+        }
 }
 
 
@@ -379,35 +379,35 @@ magmablas_zgemv_fermi(char flag, int m, int n, cuDoubleComplex alpha, cuDoubleCo
 {
 
     if(beta.x==0.0 && beta.y==0.0 && incx ==1 && incy==1)
-	{
-		if (flag == 'N' || flag == 'n')
-		{
-			if(m<7000)
-			{
-				cublasZgemv(flag, m, n, alpha, A, lda, x, incx, beta, y, incy);
-			}
-			else
-			{
-				magmablas_zgemvn_fermi(m,  n, alpha, A, lda, x, y);
-			}
-		}
-		else if(flag == 'T' || flag == 't')
-		{
-			magmablas_zgemvt_fermi(m,  n, alpha, A, lda, x, y);
-		}
-		else if(flag == 'C' || flag == 'c') 
-		{
-			magmablas_zgemvc_fermi(m,  n, alpha, A, lda, x, y);
-		}
-		else 
-		{
-			cublasZgemv(flag, m, n, alpha, A, lda, x, incx, beta, y, incy);
-		}
-	}
-	else
-	{
-		cublasZgemv(flag, m, n, alpha, A, lda, x, incx, beta, y, incy);
-	}
+        {
+                if (flag == 'N' || flag == 'n')
+                {
+                        if(m<7000)
+                        {
+                                cublasZgemv(flag, m, n, alpha, A, lda, x, incx, beta, y, incy);
+                        }
+                        else
+                        {
+                                magmablas_zgemvn_fermi(m,  n, alpha, A, lda, x, y);
+                        }
+                }
+                else if(flag == 'T' || flag == 't')
+                {
+                        magmablas_zgemvt_fermi(m,  n, alpha, A, lda, x, y);
+                }
+                else if(flag == 'C' || flag == 'c') 
+                {
+                        magmablas_zgemvc_fermi(m,  n, alpha, A, lda, x, y);
+                }
+                else 
+                {
+                        cublasZgemv(flag, m, n, alpha, A, lda, x, incx, beta, y, incy);
+                }
+        }
+        else
+        {
+                cublasZgemv(flag, m, n, alpha, A, lda, x, incx, beta, y, incy);
+        }
 }
 
 #undef num_threads

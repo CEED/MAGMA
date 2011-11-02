@@ -17,16 +17,16 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define trans_nn 1
-#define	trans_nt 2
-#define	trans_nc 3
+#define        trans_nt 2
+#define        trans_nc 3
 
-#define	trans_tn 4
-#define	trans_tt 5
-#define	trans_tc 6
+#define        trans_tn 4
+#define        trans_tt 5
+#define        trans_tc 6
 
-#define	trans_cn 7
-#define	trans_ct 8
-#define	trans_cc 9
+#define        trans_cn 7
+#define        trans_ct 8
+#define        trans_cc 9
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -108,7 +108,7 @@
 #define version trans_nt
 #include "gemm_stencil.cu"
 
-#define	version	trans_nc
+#define        version        trans_nc
 #include "gemm_stencil.cu"
 
 #undef BLK_M
@@ -149,7 +149,7 @@
 #define version trans_ct
 #include "gemm_stencil.cu"
 
-#define	version	trans_cc
+#define        version        trans_cc
 #include "gemm_stencil.cu"
 
 #undef BLK_M
@@ -184,14 +184,14 @@
 #define version trans_tn
 #include "gemm_stencil.cu"
 
-#define	version	trans_cn
+#define        version        trans_cn
 #include "gemm_stencil.cu"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern "C" void
 magmablas_zgemm_fermi( char TRANSA, char TRANSB, int m , int n , int k ,
-		       cuDoubleComplex alpha, const cuDoubleComplex *d_A, int lda,
+                       cuDoubleComplex alpha, const cuDoubleComplex *d_A, int lda,
                                      const cuDoubleComplex *d_B, int ldb,
                        cuDoubleComplex beta, cuDoubleComplex *d_C, int ldc )
 {
@@ -314,7 +314,7 @@ magmablas_zgemm_fermi( char TRANSA, char TRANSB, int m , int n , int k ,
     else
        if (TRANSA == 'N' ||  TRANSA == 'n')
           TransA = 0;
-    		
+                    
     if (TRANSB == 'T' ||  TRANSB == 't')
        TransB = 1;
     else
@@ -367,7 +367,7 @@ magmablas_zgemm_fermi( char TRANSA, char TRANSB, int m , int n , int k ,
     if (TransA==0 && TransB ==1){
        //dim3 dimGrid(m/BLK_M_nt + (m%BLK_M_nt != 0),
        //             n/BLK_N_nt + (n%BLK_N_nt != 0));
-       dim3 dimGrid(m/16 + (m%16 != 0),	 n/24 + (n%24 != 0));
+       dim3 dimGrid(m/16 + (m%16 != 0),         n/24 + (n%24 != 0));
        fermi_gemm_kernel_nt<<< dimGrid, dimBlock, 0, magma_stream >>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
                                                    (int)offsetA, (int)offsetB);
     } else
@@ -382,7 +382,7 @@ magmablas_zgemm_fermi( char TRANSA, char TRANSB, int m , int n , int k ,
     if (TransA==1 && TransB ==0){
        //dim3 dimGrid(m/BLK_M_tn + (m%BLK_M_tn != 0),
        //             n/BLK_N_tn + (n%BLK_N_tn != 0));
-       dim3 dimGrid(m/24 + (m%24 != 0),	 n/16 + (n%16 != 0));
+       dim3 dimGrid(m/24 + (m%24 != 0),         n/16 + (n%16 != 0));
        fermi_gemm_kernel_tn<<< dimGrid, dimBlock, 0, magma_stream >>>(m, n, k, d_A, lda, d_B, ldb, d_C, ldc, alpha, beta,
                                                    (int)offsetA, (int)offsetB);
     } else

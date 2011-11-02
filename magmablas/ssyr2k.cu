@@ -14,9 +14,9 @@
 #define unroll_f 16
 
 __device__ void saxpy(float a,float *b, float *c) {
-	#pragma unroll 
+        #pragma unroll 
          for (int i = 0; i < unroll_f; i++) 
-	      c[i] += a * b[i];
+              c[i] += a * b[i];
 }
 
 extern "C" __global__ void 
@@ -25,8 +25,8 @@ Ssyr2k_v16_ts_even_generic(float *C, const float *A, const float *B,
                            int lda, int ldb, int ldc, 
                            float alpha, float beta) 
 {
-	int tx = threadIdx.x;
-	const int ty = threadIdx.y;
+        int tx = threadIdx.x;
+        const int ty = threadIdx.y;
         int ibx = blockIdx.x ;
         int iby = blockIdx.y ;
         iby = (iby+ibx+3 ) % gridDim.y ;
@@ -43,293 +43,293 @@ Ssyr2k_v16_ts_even_generic(float *C, const float *A, const float *B,
 { 
         B+= iby+tx;
         B+= __mul24( ty,ldb);
-	A+= ibx + tx ; 
-	C += ibx +tx +__mul24( iby+ty* unroll_f,ldc);
+        A+= ibx + tx ; 
+        C += ibx +tx +__mul24( iby+ty* unroll_f,ldc);
 
-	float Ap[4];
-	Ap[0]=A[0] ;
-	Ap[1]=A[lda] ;
-	Ap[2]=A[2*lda] ;
-	Ap[3]=A[3*lda] ;
+        float Ap[4];
+        Ap[0]=A[0] ;
+        Ap[1]=A[lda] ;
+        Ap[2]=A[2*lda] ;
+        Ap[3]=A[3*lda] ;
 
-	float b=B[0];
+        float b=B[0];
         float b2=B[2*ldb];
-	const float *Bend = B + ldb*k ;
-	B+=4*ldb;
-	A+=4*lda;
-	__shared__ float Bb[4][block_N];
-	float Cb[unroll_f] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
-	do {
-		float Ab[4] = {Ap[0], Ap[1], Ap[2], Ap[3]};
-		Bb[ty][tx]=b;
-		Bb[ty+2][tx]=b2;
-		 __syncthreads();
-		Ap[0] = A[0];
-		Ap[1] = A[lda];
-		Ap[2] = A[2*lda];
-		Ap[3] = A[3*lda];
-		b=B[0];
-   	        b2=B[2*ldb];
-		saxpy(Ab[0], &Bb[0][ty*unroll_f], Cb);
-		saxpy(Ab[1], &Bb[1][ty*unroll_f], Cb);
-		saxpy(Ab[2], &Bb[2][ty*unroll_f], Cb);
-		saxpy(Ab[3], &Bb[3][ty*unroll_f], Cb);
-		A+=4*lda;
-		B+= 4*ldb;
-		 __syncthreads();
-	} while (B < Bend);
-	 Bb[ty][tx]=b;
-	 Bb[ty+2][tx]=b2;
-	 __syncthreads();
-	 saxpy(Ap[0], &Bb[0][ty*unroll_f], Cb);      
-	 saxpy(Ap[1], &Bb[1][ty*unroll_f], Cb);      
-	 saxpy(Ap[2], &Bb[2][ty*unroll_f], Cb);      
-	 saxpy(Ap[3], &Bb[3][ty*unroll_f], Cb);      
-	 __syncthreads();
+        const float *Bend = B + ldb*k ;
+        B+=4*ldb;
+        A+=4*lda;
+        __shared__ float Bb[4][block_N];
+        float Cb[unroll_f] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
+        do {
+                float Ab[4] = {Ap[0], Ap[1], Ap[2], Ap[3]};
+                Bb[ty][tx]=b;
+                Bb[ty+2][tx]=b2;
+                 __syncthreads();
+                Ap[0] = A[0];
+                Ap[1] = A[lda];
+                Ap[2] = A[2*lda];
+                Ap[3] = A[3*lda];
+                b=B[0];
+                   b2=B[2*ldb];
+                saxpy(Ab[0], &Bb[0][ty*unroll_f], Cb);
+                saxpy(Ab[1], &Bb[1][ty*unroll_f], Cb);
+                saxpy(Ab[2], &Bb[2][ty*unroll_f], Cb);
+                saxpy(Ab[3], &Bb[3][ty*unroll_f], Cb);
+                A+=4*lda;
+                B+= 4*ldb;
+                 __syncthreads();
+        } while (B < Bend);
+         Bb[ty][tx]=b;
+         Bb[ty+2][tx]=b2;
+         __syncthreads();
+         saxpy(Ap[0], &Bb[0][ty*unroll_f], Cb);      
+         saxpy(Ap[1], &Bb[1][ty*unroll_f], Cb);      
+         saxpy(Ap[2], &Bb[2][ty*unroll_f], Cb);      
+         saxpy(Ap[3], &Bb[3][ty*unroll_f], Cb);      
+         __syncthreads();
 // -- 2nd Half            
         B=A1;
         A=B1;
         int tlda = lda ; lda = ldb ; ldb = tlda ; 
-	B+= iby+tx;
-	B+= __mul24( ty,ldb);
-	A+= ibx + tx ; 
-	Ap[0]=A[0] ;
-	Ap[1]=A[lda] ;
-	Ap[2]=A[2*lda] ;
-	Ap[3]=A[3*lda] ;
-	b=B[0];
+        B+= iby+tx;
+        B+= __mul24( ty,ldb);
+        A+= ibx + tx ; 
+        Ap[0]=A[0] ;
+        Ap[1]=A[lda] ;
+        Ap[2]=A[2*lda] ;
+        Ap[3]=A[3*lda] ;
+        b=B[0];
         b2=B[2*ldb];
-	const float *Bend1 = B + ldb*k;
-	B+=4*ldb;
-	A+=4*lda;
-	do {
-		float Ab[4] = {Ap[0], Ap[1], Ap[2], Ap[3]};
-		Bb[ty][tx]=b;
-		Bb[ty+2][tx]=b2;
-		 __syncthreads();
-		Ap[0] = A[0];
-		Ap[1] = A[lda];
-		Ap[2] = A[2*lda];
-		Ap[3] = A[3*lda];
-		b=B[0];
-   	        b2=B[2*ldb];
-		saxpy(Ab[0], &Bb[0][ty*unroll_f], Cb);
-		saxpy(Ab[1], &Bb[1][ty*unroll_f], Cb);
-		saxpy(Ab[2], &Bb[2][ty*unroll_f], Cb);
-		saxpy(Ab[3], &Bb[3][ty*unroll_f], Cb);
-		A+=4*lda;
-		B += 4*ldb;
-		 __syncthreads();
-	} while (B < Bend1);
-	Bb[ty][tx]=b;
-	Bb[ty+2][tx]=b2;
-	__syncthreads();
-	saxpy(Ap[0], &Bb[0][ty*unroll_f], Cb);      
-	saxpy(Ap[1], &Bb[1][ty*unroll_f], Cb);      
-	saxpy(Ap[2], &Bb[2][ty*unroll_f], Cb);      
-	saxpy(Ap[3], &Bb[3][ty*unroll_f], Cb);      
+        const float *Bend1 = B + ldb*k;
+        B+=4*ldb;
+        A+=4*lda;
+        do {
+                float Ab[4] = {Ap[0], Ap[1], Ap[2], Ap[3]};
+                Bb[ty][tx]=b;
+                Bb[ty+2][tx]=b2;
+                 __syncthreads();
+                Ap[0] = A[0];
+                Ap[1] = A[lda];
+                Ap[2] = A[2*lda];
+                Ap[3] = A[3*lda];
+                b=B[0];
+                   b2=B[2*ldb];
+                saxpy(Ab[0], &Bb[0][ty*unroll_f], Cb);
+                saxpy(Ab[1], &Bb[1][ty*unroll_f], Cb);
+                saxpy(Ab[2], &Bb[2][ty*unroll_f], Cb);
+                saxpy(Ab[3], &Bb[3][ty*unroll_f], Cb);
+                A+=4*lda;
+                B += 4*ldb;
+                 __syncthreads();
+        } while (B < Bend1);
+        Bb[ty][tx]=b;
+        Bb[ty+2][tx]=b2;
+        __syncthreads();
+        saxpy(Ap[0], &Bb[0][ty*unroll_f], Cb);      
+        saxpy(Ap[1], &Bb[1][ty*unroll_f], Cb);      
+        saxpy(Ap[2], &Bb[2][ty*unroll_f], Cb);      
+        saxpy(Ap[3], &Bb[3][ty*unroll_f], Cb);      
 
-	lda  = 0 ; 
+        lda  = 0 ; 
 
-	if ( iby < ibx ){
-		tx = 15 ; 
-	}
-	else{
-    		if ( tx > 15 ) {
-        		if ( ty == 0 ){
-		 		lda =  1 ; 
-		  		tx=15;
-			}
-        	else{ 
-           		lda = 1 ; 
-	   		tx-=16;
-        	}
-    	}
-    	else{
-        	if ( ty  == 0 ) {
-			lda = 1 ; 
-		}
-         	else {
-			lda = 2 ;
-			tx = 32  ;  
-		}	
-    	}
-	}
-	if( (ibx + threadIdx.x ) >= m ) 
-   		tx =  -1 ;
-	{
+        if ( iby < ibx ){
+                tx = 15 ; 
+        }
+        else{
+                    if ( tx > 15 ) {
+                        if ( ty == 0 ){
+                                 lda =  1 ; 
+                                  tx=15;
+                        }
+                else{ 
+                           lda = 1 ; 
+                           tx-=16;
+                }
+            }
+            else{
+                if ( ty  == 0 ) {
+                        lda = 1 ; 
+                }
+                 else {
+                        lda = 2 ;
+                        tx = 32  ;  
+                }        
+            }
+        }
+        if( (ibx + threadIdx.x ) >= m ) 
+                   tx =  -1 ;
+        {
          switch(tx){
          case 0:
-  	       C[0] =alpha*Cb[0] + beta * C[0];C+=ldc ; 
-	 break; 
+                 C[0] =alpha*Cb[0] + beta * C[0];C+=ldc ; 
+         break; 
          case 1:
-  	       C[0] =alpha*Cb[0] + beta * C[0];C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta * C[0];C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+         break; 
          case 2:
-  	       C[0] =alpha*Cb[0] + beta * C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta * C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+         break; 
          case 3:
-  	       C[0] =alpha*Cb[0] + beta * C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta * C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+         break; 
          case 4:
-  	       C[0] =alpha*Cb[0] + beta * C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta * C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+         break; 
          case 5:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+         break; 
          case 6:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+         break; 
          case 7:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+         break; 
          case 8:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+         break; 
          case 9:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+         break; 
          case 10:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+         break; 
          case 11:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+         break; 
          case 12:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
+         break; 
          case 13:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
+         break; 
          case 14:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[14] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[14] + beta * C[0];C+=ldc ;
+         break; 
          case 15:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[14] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[15] + beta * C[0];C+=ldc ;
-	 break; 
-	default: 
-		break; 
-	 }
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[14] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[15] + beta * C[0];C+=ldc ;
+         break; 
+        default: 
+                break; 
+         }
 }
 }
 }
@@ -340,8 +340,8 @@ Ssyr2k_v16_ts_odd_generic(float *C, const float *A, const float *B,
                           int lda, int ldb, int ldc,
                           float alpha, float beta)
 {
-	int tx = threadIdx.x;
-	const int ty = threadIdx.y;
+        int tx = threadIdx.x;
+        const int ty = threadIdx.y;
         int ibx = blockIdx.x ;
         int iby = blockIdx.y ;
         iby = (iby+ibx ) % gridDim.y ;
@@ -359,90 +359,90 @@ Ssyr2k_v16_ts_odd_generic(float *C, const float *A, const float *B,
 
 {  
 
-	B+= iby+tx;
-	B+= __mul24( ty,ldb);
-	A += ibx + tx;
-	C += ibx +tx +__mul24( iby+ty* unroll_f,ldc);
-	float Ap[4]={A[0], A[lda], A[2*lda], A[3*lda]};
+        B+= iby+tx;
+        B+= __mul24( ty,ldb);
+        A += ibx + tx;
+        C += ibx +tx +__mul24( iby+ty* unroll_f,ldc);
+        float Ap[4]={A[0], A[lda], A[2*lda], A[3*lda]};
 
-	float b=B[0];
+        float b=B[0];
         float b2=B[2*ldb];
 
-	const float *Bend = B + ldb*k;
-	B+=4*ldb;
-	A+=4*lda;
-	__shared__ float Bb[4][block_N];
-	float Cb[unroll_f] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
-	do {
-		float Ab[4] = {Ap[0], Ap[1], Ap[2], Ap[3]};
-		Bb[ty][tx]=b;
-		Bb[ty+2][tx]=b2;
-		__syncthreads();
-		Ap[0] = A[0];
-		Ap[1] = A[lda];
-		Ap[2] = A[2*lda];
-		Ap[3] = A[3*lda];
-		b=B[0];
-   	        b2=B[2*ldb];
-		saxpy(Ab[0], &Bb[0][ty*unroll_f], Cb);
-		saxpy(Ab[1], &Bb[1][ty*unroll_f], Cb);
-		saxpy(Ab[2], &Bb[2][ty*unroll_f], Cb);
-		saxpy(Ab[3], &Bb[3][ty*unroll_f], Cb);
-		A+=4*lda;
-		B += 4*ldb;
-		__syncthreads();
-	} while (B < Bend);
-	Bb[ty][tx]=b;
-	Bb[ty+2][tx]=b2;
-	__syncthreads();
-	saxpy(Ap[0], &Bb[0][ty*unroll_f], Cb);        
-	saxpy(Ap[1], &Bb[1][ty*unroll_f], Cb);        
-	saxpy(Ap[2], &Bb[2][ty*unroll_f], Cb);       
-	saxpy(Ap[3], &Bb[3][ty*unroll_f], Cb);      
-	__syncthreads();
+        const float *Bend = B + ldb*k;
+        B+=4*ldb;
+        A+=4*lda;
+        __shared__ float Bb[4][block_N];
+        float Cb[unroll_f] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
+        do {
+                float Ab[4] = {Ap[0], Ap[1], Ap[2], Ap[3]};
+                Bb[ty][tx]=b;
+                Bb[ty+2][tx]=b2;
+                __syncthreads();
+                Ap[0] = A[0];
+                Ap[1] = A[lda];
+                Ap[2] = A[2*lda];
+                Ap[3] = A[3*lda];
+                b=B[0];
+                   b2=B[2*ldb];
+                saxpy(Ab[0], &Bb[0][ty*unroll_f], Cb);
+                saxpy(Ab[1], &Bb[1][ty*unroll_f], Cb);
+                saxpy(Ab[2], &Bb[2][ty*unroll_f], Cb);
+                saxpy(Ab[3], &Bb[3][ty*unroll_f], Cb);
+                A+=4*lda;
+                B += 4*ldb;
+                __syncthreads();
+        } while (B < Bend);
+        Bb[ty][tx]=b;
+        Bb[ty+2][tx]=b2;
+        __syncthreads();
+        saxpy(Ap[0], &Bb[0][ty*unroll_f], Cb);        
+        saxpy(Ap[1], &Bb[1][ty*unroll_f], Cb);        
+        saxpy(Ap[2], &Bb[2][ty*unroll_f], Cb);       
+        saxpy(Ap[3], &Bb[3][ty*unroll_f], Cb);      
+        __syncthreads();
 
         B=A1;
         A=B1;
         int tlda = lda ; lda = ldb ; ldb = tlda ; 
-	B+= iby+tx;
-	B+= __mul24( ty,ldb);
-	A += ibx + tx;
-	Ap[0]=A[0] ;
-	Ap[1]=A[lda] ;
-	Ap[2]=A[2*lda] ;
-	Ap[3]=A[3*lda] ;
-	b=B[0];
+        B+= iby+tx;
+        B+= __mul24( ty,ldb);
+        A += ibx + tx;
+        Ap[0]=A[0] ;
+        Ap[1]=A[lda] ;
+        Ap[2]=A[2*lda] ;
+        Ap[3]=A[3*lda] ;
+        b=B[0];
         b2=B[2*ldb];
-	const float *Bend1 = B + ldb*k;
-	B+=4*ldb;
-	A+=4*lda;
-	do {
-		float Ab[4] = {Ap[0], Ap[1], Ap[2], Ap[3]};
-		Bb[ty][tx]=b;
-		Bb[ty+2][tx]=b2;
-		__syncthreads();
-		Ap[0] = A[0];
-		Ap[1] = A[lda];
-		Ap[2] = A[2*lda];
-		Ap[3] = A[3*lda];
-		b=B[0];
-   	        b2=B[2*ldb];
-		saxpy(Ab[0], &Bb[0][ty*unroll_f], Cb);
-		saxpy(Ab[1], &Bb[1][ty*unroll_f], Cb);
-		saxpy(Ab[2], &Bb[2][ty*unroll_f], Cb);
-		saxpy(Ab[3], &Bb[3][ty*unroll_f], Cb);
-		A+=4*lda;
-		B += 4*ldb;
-		__syncthreads();
-	} while (B < Bend1);
-	Bb[ty][tx]=b;
-	Bb[ty+2][tx]=b2;
-	__syncthreads();
-	saxpy(Ap[0], &Bb[0][ty*unroll_f], Cb);        
-	saxpy(Ap[1], &Bb[1][ty*unroll_f], Cb);        
-	saxpy(Ap[2], &Bb[2][ty*unroll_f], Cb);       
-	saxpy(Ap[3], &Bb[3][ty*unroll_f], Cb);      
-	__syncthreads();
+        const float *Bend1 = B + ldb*k;
+        B+=4*ldb;
+        A+=4*lda;
+        do {
+                float Ab[4] = {Ap[0], Ap[1], Ap[2], Ap[3]};
+                Bb[ty][tx]=b;
+                Bb[ty+2][tx]=b2;
+                __syncthreads();
+                Ap[0] = A[0];
+                Ap[1] = A[lda];
+                Ap[2] = A[2*lda];
+                Ap[3] = A[3*lda];
+                b=B[0];
+                   b2=B[2*ldb];
+                saxpy(Ab[0], &Bb[0][ty*unroll_f], Cb);
+                saxpy(Ab[1], &Bb[1][ty*unroll_f], Cb);
+                saxpy(Ab[2], &Bb[2][ty*unroll_f], Cb);
+                saxpy(Ab[3], &Bb[3][ty*unroll_f], Cb);
+                A+=4*lda;
+                B += 4*ldb;
+                __syncthreads();
+        } while (B < Bend1);
+        Bb[ty][tx]=b;
+        Bb[ty+2][tx]=b2;
+        __syncthreads();
+        saxpy(Ap[0], &Bb[0][ty*unroll_f], Cb);        
+        saxpy(Ap[1], &Bb[1][ty*unroll_f], Cb);        
+        saxpy(Ap[2], &Bb[2][ty*unroll_f], Cb);       
+        saxpy(Ap[3], &Bb[3][ty*unroll_f], Cb);      
+        __syncthreads();
 
 lda  = 0 ; 
 
@@ -452,22 +452,22 @@ tx = 15 ;
 else{
     if ( tx > 15 ) {
         if ( ty == 0 ){
-		 lda =  1 ; 
-		  tx=15;
-	}
+                 lda =  1 ; 
+                  tx=15;
+        }
         else{ 
            lda = 1 ; 
-	   tx-=16;
+           tx-=16;
         }
     }
     else{
          if ( ty  == 0 ) {
-		lda = 1 ; 
-	}
+                lda = 1 ; 
+        }
          else {
-		lda = 2 ;
-		tx = 32  ;  
-	}	
+                lda = 2 ;
+                tx = 32  ;  
+        }        
     }
 }
 if( (ibx + threadIdx.x ) >= m ) 
@@ -475,181 +475,181 @@ if( (ibx + threadIdx.x ) >= m )
 {
          switch(tx){
          case 0:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+         break; 
 
          case 1:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+         break; 
 
          case 2:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+         break; 
 
          case 3:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+         break; 
 
          case 4:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+         break; 
 
          case 5:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+         break; 
          case 6:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+         break; 
          case 7:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+         break; 
          case 8:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+         break; 
          case 9:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+         break; 
          case 10:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+         break; 
          case 11:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+         break; 
          case 12:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
+         break; 
          case 13:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
+         break; 
          case 14:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[14] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[14] + beta * C[0];C+=ldc ;
+         break; 
          case 15:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[14] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[15] + beta * C[0];C+=ldc ;
-	 break; 
-	default: 
-		break; 
-	 }
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[14] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[15] + beta * C[0];C+=ldc ;
+         break; 
+        default: 
+                break; 
+         }
 }
 
 }
@@ -662,8 +662,8 @@ Ssyr2k_v16_ts_even_special(int flag ,
                            int lda, int ldb, int ldc, 
                            float alpha, float beta) 
 {
-	int tx = threadIdx.x;
-	const int ty = threadIdx.y;
+        int tx = threadIdx.x;
+        const int ty = threadIdx.y;
         int ibx = blockIdx.x ;
         int iby = blockIdx.y ;
         if ( flag ==1  )
@@ -680,292 +680,292 @@ Ssyr2k_v16_ts_even_special(int flag ,
         const float *B1 = B ; 
 {  
 
-	B+= iby+tx;
-	B+= __mul24( ty,ldb);
-	A += ibx + tx;
-	C += ibx +tx +__mul24( iby+ty* unroll_f,ldc);
-	float Ap[4]={A[0], A[lda], A[2*lda], A[3*lda]};
-	float b=B[0];
+        B+= iby+tx;
+        B+= __mul24( ty,ldb);
+        A += ibx + tx;
+        C += ibx +tx +__mul24( iby+ty* unroll_f,ldc);
+        float Ap[4]={A[0], A[lda], A[2*lda], A[3*lda]};
+        float b=B[0];
         float b2=B[2*ldb];
-	const float *Bend = B + ldb*k;
-	B+=4*ldb;
-	A+=4*lda;
-	__shared__ float Bb[4][block_N];
-	float Cb[unroll_f] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
-	do {
-		float Ab[4] = {Ap[0], Ap[1], Ap[2], Ap[3]};
-		Bb[ty][tx]=b;
-		Bb[ty+2][tx]=b2;
-		 __syncthreads();
-		Ap[0] = A[0];
-		Ap[1] = A[lda];
-		Ap[2] = A[2*lda];
-		Ap[3] = A[3*lda];
-		b=B[0];
-   	        b2=B[2*ldb];
-		saxpy(Ab[0], &Bb[0][ty*unroll_f], Cb);
-		saxpy(Ab[1], &Bb[1][ty*unroll_f], Cb);
-		saxpy(Ab[2], &Bb[2][ty*unroll_f], Cb);
-		saxpy(Ab[3], &Bb[3][ty*unroll_f], Cb);
-		A+=4*lda;
-		B += 4*ldb;
-		 __syncthreads();
-	} while (B < Bend);
-	Bb[ty][tx]=b;
-	Bb[ty+2][tx]=b2;
-	__syncthreads();
-	saxpy(Ap[0], &Bb[0][ty*unroll_f], Cb);        
-	saxpy(Ap[1], &Bb[1][ty*unroll_f], Cb);        
-	saxpy(Ap[2], &Bb[2][ty*unroll_f], Cb);       
-	saxpy(Ap[3], &Bb[3][ty*unroll_f], Cb);      
+        const float *Bend = B + ldb*k;
+        B+=4*ldb;
+        A+=4*lda;
+        __shared__ float Bb[4][block_N];
+        float Cb[unroll_f] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
+        do {
+                float Ab[4] = {Ap[0], Ap[1], Ap[2], Ap[3]};
+                Bb[ty][tx]=b;
+                Bb[ty+2][tx]=b2;
+                 __syncthreads();
+                Ap[0] = A[0];
+                Ap[1] = A[lda];
+                Ap[2] = A[2*lda];
+                Ap[3] = A[3*lda];
+                b=B[0];
+                   b2=B[2*ldb];
+                saxpy(Ab[0], &Bb[0][ty*unroll_f], Cb);
+                saxpy(Ab[1], &Bb[1][ty*unroll_f], Cb);
+                saxpy(Ab[2], &Bb[2][ty*unroll_f], Cb);
+                saxpy(Ab[3], &Bb[3][ty*unroll_f], Cb);
+                A+=4*lda;
+                B += 4*ldb;
+                 __syncthreads();
+        } while (B < Bend);
+        Bb[ty][tx]=b;
+        Bb[ty+2][tx]=b2;
+        __syncthreads();
+        saxpy(Ap[0], &Bb[0][ty*unroll_f], Cb);        
+        saxpy(Ap[1], &Bb[1][ty*unroll_f], Cb);        
+        saxpy(Ap[2], &Bb[2][ty*unroll_f], Cb);       
+        saxpy(Ap[3], &Bb[3][ty*unroll_f], Cb);      
 
 // -- 2nd Half            
         B=A1;
         A=B1;
         int tlda = lda ; lda = ldb ; ldb = tlda ; 
 
-	B+= iby+tx;
-	B+= __mul24( ty,ldb);
-	A += ibx + tx;
-	Ap[0]=A[0] ;
-	Ap[1]=A[lda] ;
-	Ap[2]=A[2*lda] ;
-	Ap[3]=A[3*lda] ;
-	b=B[0];
+        B+= iby+tx;
+        B+= __mul24( ty,ldb);
+        A += ibx + tx;
+        Ap[0]=A[0] ;
+        Ap[1]=A[lda] ;
+        Ap[2]=A[2*lda] ;
+        Ap[3]=A[3*lda] ;
+        b=B[0];
         b2=B[2*ldb];
-	const float *Bend1 = B + ldb*k;
-	B+=4*ldb;
-	A+=4*lda;
-	do {
-		float Ab[4] = {Ap[0], Ap[1], Ap[2], Ap[3]};
-		Bb[ty][tx]=b;
-		Bb[ty+2][tx]=b2;
-		 __syncthreads();
-		Ap[0] = A[0];
-		Ap[1] = A[lda];
-		Ap[2] = A[2*lda];
-		Ap[3] = A[3*lda];
-		b=B[0];
-   	        b2=B[2*ldb];
-		saxpy(Ab[0], &Bb[0][ty*unroll_f], Cb);
-		saxpy(Ab[1], &Bb[1][ty*unroll_f], Cb);
-		saxpy(Ab[2], &Bb[2][ty*unroll_f], Cb);
-		saxpy(Ab[3], &Bb[3][ty*unroll_f], Cb);
-		A+=4*lda;
-		B += 4*ldb;
-		 __syncthreads();
-	} while (B < Bend1);
-	Bb[ty][tx]=b;
-	Bb[ty+2][tx]=b2;
-	__syncthreads();
-	saxpy(Ap[0], &Bb[0][ty*unroll_f], Cb);        
-	saxpy(Ap[1], &Bb[1][ty*unroll_f], Cb);        
-	saxpy(Ap[2], &Bb[2][ty*unroll_f], Cb);       
-	saxpy(Ap[3], &Bb[3][ty*unroll_f], Cb);      
+        const float *Bend1 = B + ldb*k;
+        B+=4*ldb;
+        A+=4*lda;
+        do {
+                float Ab[4] = {Ap[0], Ap[1], Ap[2], Ap[3]};
+                Bb[ty][tx]=b;
+                Bb[ty+2][tx]=b2;
+                 __syncthreads();
+                Ap[0] = A[0];
+                Ap[1] = A[lda];
+                Ap[2] = A[2*lda];
+                Ap[3] = A[3*lda];
+                b=B[0];
+                   b2=B[2*ldb];
+                saxpy(Ab[0], &Bb[0][ty*unroll_f], Cb);
+                saxpy(Ab[1], &Bb[1][ty*unroll_f], Cb);
+                saxpy(Ab[2], &Bb[2][ty*unroll_f], Cb);
+                saxpy(Ab[3], &Bb[3][ty*unroll_f], Cb);
+                A+=4*lda;
+                B += 4*ldb;
+                 __syncthreads();
+        } while (B < Bend1);
+        Bb[ty][tx]=b;
+        Bb[ty+2][tx]=b2;
+        __syncthreads();
+        saxpy(Ap[0], &Bb[0][ty*unroll_f], Cb);        
+        saxpy(Ap[1], &Bb[1][ty*unroll_f], Cb);        
+        saxpy(Ap[2], &Bb[2][ty*unroll_f], Cb);       
+        saxpy(Ap[3], &Bb[3][ty*unroll_f], Cb);      
 
 lda  = 0 ; 
 
 if ( iby < ibx ){
-/*	#pragma unroll 16 
+/*        #pragma unroll 16 
          for (int i = 0; i < unroll_f; i++, C += ldc) 
-  	       C[0] =alpha*Cb[i] + beta * C[0];
+                 C[0] =alpha*Cb[i] + beta * C[0];
 */
 tx = 15 ; 
 }
 else{
     if ( tx > 15 ) {
         if ( ty == 0 ){
-		 lda =  1 ; 
-		  tx=15;
-	}
+                 lda =  1 ; 
+                  tx=15;
+        }
         else{ 
            lda = 1 ; 
-	   tx-=16;
+           tx-=16;
         }
     }
     else{
          if ( ty  == 0 ) {
-		lda = 1 ; 
-	}
+                lda = 1 ; 
+        }
          else {
-		lda = 2 ;
-		tx = 32  ;  
-	}	
+                lda = 2 ;
+                tx = 32  ;  
+        }        
     }
 }
 {
          switch(tx){
          case 0:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+         break; 
          case 1:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+         break; 
          case 2:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+         break; 
          case 3:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+         break; 
          case 4:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+         break; 
          case 5:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+         break; 
          case 6:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+         break; 
          case 7:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+         break; 
          case 8:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+         break; 
          case 9:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+         break; 
          case 10:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+         break; 
          case 11:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+         break; 
          case 12:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
+         break; 
          case 13:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
+         break; 
          case 14:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[14] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[14] + beta * C[0];C+=ldc ;
+         break; 
          case 15:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[14] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[15] + beta * C[0];C+=ldc ;
-	 break; 
-	default: 
-		break; 
-	 }
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[14] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[15] + beta * C[0];C+=ldc ;
+         break; 
+        default: 
+                break; 
+         }
 }
 
 }
@@ -978,8 +978,8 @@ Ssyr2k_v16_ts_odd_special(int flag,
                           int lda, int ldb, int ldc,
                           float alpha, float beta) 
 {
-	int tx = threadIdx.x;
-	const int ty = threadIdx.y;
+        int tx = threadIdx.x;
+        const int ty = threadIdx.y;
         int ibx = blockIdx.x ;
         int iby = blockIdx.y ;
         if ( flag ==1  )
@@ -1001,297 +1001,297 @@ if( iby > ibx) {
 }
 else{  
 
-	B+= iby+tx;
-	B+= __mul24( ty,ldb);
-	A += ibx + tx;
-	C += ibx +tx +__mul24( iby+ty* unroll_f,ldc);
-	float Ap[4]={A[0], A[lda], A[2*lda], A[3*lda]};
+        B+= iby+tx;
+        B+= __mul24( ty,ldb);
+        A += ibx + tx;
+        C += ibx +tx +__mul24( iby+ty* unroll_f,ldc);
+        float Ap[4]={A[0], A[lda], A[2*lda], A[3*lda]};
 
-	float b=B[0];
+        float b=B[0];
         float b2=B[2*ldb];
 
-	const float *Bend = B + ldb*k;
-	B+=4*ldb;
-	A+=4*lda;
-	__shared__ float Bb[4][block_N];
-	float Cb[unroll_f] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
-	do {
-		float Ab[4] = {Ap[0], Ap[1], Ap[2], Ap[3]};
-		Bb[ty][tx]=b;
-		Bb[ty+2][tx]=b2;
-		__syncthreads();
-		Ap[0] = A[0];
-		Ap[1] = A[lda];
-		Ap[2] = A[2*lda];
-		Ap[3] = A[3*lda];
-		b=B[0];
-   	        b2=B[2*ldb];
-		saxpy(Ab[0], &Bb[0][ty*unroll_f], Cb);
-		saxpy(Ab[1], &Bb[1][ty*unroll_f], Cb);
-		saxpy(Ab[2], &Bb[2][ty*unroll_f], Cb);
-		saxpy(Ab[3], &Bb[3][ty*unroll_f], Cb);
-		A+=4*lda;
-		B += 4*ldb;
-		__syncthreads();
-	} while (B < Bend);
-	Bb[ty][tx]=b;
-	Bb[ty+2][tx]=b2;
-	__syncthreads();
-	saxpy(Ap[0], &Bb[0][ty*unroll_f], Cb);        
-	saxpy(Ap[1], &Bb[1][ty*unroll_f], Cb);        
-	saxpy(Ap[2], &Bb[2][ty*unroll_f], Cb);       
-	saxpy(Ap[3], &Bb[3][ty*unroll_f], Cb);      
+        const float *Bend = B + ldb*k;
+        B+=4*ldb;
+        A+=4*lda;
+        __shared__ float Bb[4][block_N];
+        float Cb[unroll_f] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
+        do {
+                float Ab[4] = {Ap[0], Ap[1], Ap[2], Ap[3]};
+                Bb[ty][tx]=b;
+                Bb[ty+2][tx]=b2;
+                __syncthreads();
+                Ap[0] = A[0];
+                Ap[1] = A[lda];
+                Ap[2] = A[2*lda];
+                Ap[3] = A[3*lda];
+                b=B[0];
+                   b2=B[2*ldb];
+                saxpy(Ab[0], &Bb[0][ty*unroll_f], Cb);
+                saxpy(Ab[1], &Bb[1][ty*unroll_f], Cb);
+                saxpy(Ab[2], &Bb[2][ty*unroll_f], Cb);
+                saxpy(Ab[3], &Bb[3][ty*unroll_f], Cb);
+                A+=4*lda;
+                B += 4*ldb;
+                __syncthreads();
+        } while (B < Bend);
+        Bb[ty][tx]=b;
+        Bb[ty+2][tx]=b2;
+        __syncthreads();
+        saxpy(Ap[0], &Bb[0][ty*unroll_f], Cb);        
+        saxpy(Ap[1], &Bb[1][ty*unroll_f], Cb);        
+        saxpy(Ap[2], &Bb[2][ty*unroll_f], Cb);       
+        saxpy(Ap[3], &Bb[3][ty*unroll_f], Cb);      
         B=A1;
         A=B1;
         int tlda = lda ; lda = ldb ; ldb = tlda ; 
-	B+= iby+tx;
-	B+= __mul24( ty,ldb);
-	A += ibx + tx;
-	Ap[0]=A[0] ;
-	Ap[1]=A[lda] ;
-	Ap[2]=A[2*lda] ;
-	Ap[3]=A[3*lda] ;
-	b=B[0];
+        B+= iby+tx;
+        B+= __mul24( ty,ldb);
+        A += ibx + tx;
+        Ap[0]=A[0] ;
+        Ap[1]=A[lda] ;
+        Ap[2]=A[2*lda] ;
+        Ap[3]=A[3*lda] ;
+        b=B[0];
         b2=B[2*ldb];
-	const float *Bend1 = B + ldb*k;
-	B+=4*ldb;
-	A+=4*lda;
-	do {
-		float Ab[4] = {Ap[0], Ap[1], Ap[2], Ap[3]};
-		Bb[ty][tx]=b;
-		Bb[ty+2][tx]=b2;
-		__syncthreads();
-		Ap[0] = A[0];
-		Ap[1] = A[lda];
-		Ap[2] = A[2*lda];
-		Ap[3] = A[3*lda];
-		b=B[0];
-   	        b2=B[2*ldb];
-		saxpy(Ab[0], &Bb[0][ty*unroll_f], Cb);
-		saxpy(Ab[1], &Bb[1][ty*unroll_f], Cb);
-		saxpy(Ab[2], &Bb[2][ty*unroll_f], Cb);
-		saxpy(Ab[3], &Bb[3][ty*unroll_f], Cb);
-		A+=4*lda;
-		B += 4*ldb;
-		__syncthreads();
-	} while (B < Bend1);
-	Bb[ty][tx]=b;
-	Bb[ty+2][tx]=b2;
-	__syncthreads();
-	saxpy(Ap[0], &Bb[0][ty*unroll_f], Cb);        
-	saxpy(Ap[1], &Bb[1][ty*unroll_f], Cb);        
-	saxpy(Ap[2], &Bb[2][ty*unroll_f], Cb);       
-	saxpy(Ap[3], &Bb[3][ty*unroll_f], Cb);      
+        const float *Bend1 = B + ldb*k;
+        B+=4*ldb;
+        A+=4*lda;
+        do {
+                float Ab[4] = {Ap[0], Ap[1], Ap[2], Ap[3]};
+                Bb[ty][tx]=b;
+                Bb[ty+2][tx]=b2;
+                __syncthreads();
+                Ap[0] = A[0];
+                Ap[1] = A[lda];
+                Ap[2] = A[2*lda];
+                Ap[3] = A[3*lda];
+                b=B[0];
+                   b2=B[2*ldb];
+                saxpy(Ab[0], &Bb[0][ty*unroll_f], Cb);
+                saxpy(Ab[1], &Bb[1][ty*unroll_f], Cb);
+                saxpy(Ab[2], &Bb[2][ty*unroll_f], Cb);
+                saxpy(Ab[3], &Bb[3][ty*unroll_f], Cb);
+                A+=4*lda;
+                B += 4*ldb;
+                __syncthreads();
+        } while (B < Bend1);
+        Bb[ty][tx]=b;
+        Bb[ty+2][tx]=b2;
+        __syncthreads();
+        saxpy(Ap[0], &Bb[0][ty*unroll_f], Cb);        
+        saxpy(Ap[1], &Bb[1][ty*unroll_f], Cb);        
+        saxpy(Ap[2], &Bb[2][ty*unroll_f], Cb);       
+        saxpy(Ap[3], &Bb[3][ty*unroll_f], Cb);      
 
 lda  = 0 ; 
 
 if ( iby < ibx ){
-/*	#pragma unroll 16 
+/*        #pragma unroll 16 
          for (int i = 0; i < unroll_f; i++, C += ldc) 
-  	       C[0] =alpha*Cb[i] + beta * C[0];
+                 C[0] =alpha*Cb[i] + beta * C[0];
 */
 tx = 15 ; 
 }
 else{
     if ( tx > 15 ) {
         if ( ty == 0 ){
-		 lda =  1 ; 
-		  tx=15;
-	}
+                 lda =  1 ; 
+                  tx=15;
+        }
         else{ 
            lda = 1 ; 
-	   tx-=16;
+           tx-=16;
         }
     }
     else{
          if ( ty  == 0 ) {
-		lda = 1 ; 
-	}
+                lda = 1 ; 
+        }
          else {
-		lda = 2 ;
-		tx = 32  ;  
-	}	
+                lda = 2 ;
+                tx = 32  ;  
+        }        
     }
 }
 
 {
          switch(tx){
          case 0:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+         break; 
 
          case 1:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+         break; 
 
          case 2:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+         break; 
 
          case 3:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+         break; 
 
          case 4:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+         break; 
 
          case 5:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+         break; 
          case 6:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+         break; 
          case 7:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+         break; 
          case 8:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+         break; 
          case 9:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+         break; 
          case 10:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+         break; 
          case 11:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+         break; 
          case 12:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
+         break; 
          case 13:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
+         break; 
          case 14:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[14] + beta * C[0];C+=ldc ;
-	 break; 
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[14] + beta * C[0];C+=ldc ;
+         break; 
          case 15:
-  	       C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
-  	       C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[14] + beta * C[0];C+=ldc ;
-  	       C[0] =alpha*Cb[15] + beta * C[0];C+=ldc ;
-	 break; 
-	default: 
-		break; 
-	 }
+                 C[0] =alpha*Cb[0] + beta*C[0]; C+=ldc ; 
+                 C[0] =alpha*Cb[1] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[2] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[3] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[4] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[5] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[6] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[7] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[8] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[9] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[10] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[11] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[12] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[13] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[14] + beta * C[0];C+=ldc ;
+                 C[0] =alpha*Cb[15] + beta * C[0];C+=ldc ;
+         break; 
+        default: 
+                break; 
+         }
 }
 
 }
@@ -1331,7 +1331,7 @@ magmablas_ssyr2k(char UPLO, char TRANS, int m , int k, float alpha,
    We always request the blocking size to be divisible by at least 16.
 
    This kernel goes to about 300 GFlop/s on the GTX280.
-   ====================================================================== */	
+   ====================================================================== */        
 
     int in = m / block_M;
     int flag = 1 ;

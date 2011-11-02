@@ -20,7 +20,7 @@ clag2z_generic(int M, int N,
     int tx = threadIdx.x;
     int ty = threadIdx.y;
     int idt = ty * 16 + tx;
-	
+        
     if( (ibx+idt) >= M ){
         SA += (M-1);
         A  += (M-1);
@@ -52,7 +52,7 @@ clag2z_special(int M, int N,
     int tx = threadIdx.x;
     int ty = threadIdx.y;
     int idt = ty * 16 + tx;
-	
+        
     if( (ibx+idt) >= M ){
         SA += (M-1);
         A  += (M-1);
@@ -127,4 +127,4 @@ magmablas_clag2z(int M, int N, cuFloatComplex *SA, int LDSA, cuDoubleComplex *A,
 */
     *INFO = 0;
     magmablas_clag2z_64_64_16_4_v2( M, N, SA, LDSA, A, LDA ) ;
-}	
+}        

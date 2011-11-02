@@ -20,12 +20,12 @@ texture<float,1>  tex_x_float_B;
 
 static __inline__ __device__ float fetch_x_A(const int& i, const float * x)
 {
-	return tex1Dfetch(tex_x_float_A, i);
+        return tex1Dfetch(tex_x_float_A, i);
 }
 
 static __inline__ __device__ float fetch_x_B(const int& i, const float * x)
 {
-	return tex1Dfetch(tex_x_float_B, i);
+        return tex1Dfetch(tex_x_float_B, i);
 }
 
 extern "C" __global__ void 
@@ -34,173 +34,173 @@ fermiSgemm_v2_kernel_NN(float *C, const float *A, const float *B,
                         float alpha, float beta,
                         int offsetA, int offsetB) 
 {
-	const  int tx = threadIdx.x;
-	const  int ty = threadIdx.y;
+        const  int tx = threadIdx.x;
+        const  int ty = threadIdx.y;
 
-	const int iby = blockIdx.y * 96;
-	const int ibx = blockIdx.x * 96;
-	const int idt = ty * 64 + tx;
+        const int iby = blockIdx.y * 96;
+        const int ibx = blockIdx.x * 96;
+        const int idt = ty * 64 + tx;
 
-	const int tx2= idt%16;	// idx2
-	const int ty2= idt/16;	// idy2
+        const int tx2= idt%16;        // idx2
+        const int ty2= idt/16;        // idy2
 
-	__shared__ float Bb[16][97];
-	__shared__ float Abs[96][17];
+        __shared__ float Bb[16][97];
+        __shared__ float Abs[96][17];
 
-	float xxA[6];
-	float xxB[6];
-	
-	int trackA = offsetA + ibx + tx2 + __mul24(ty2, lda);
-	int trackB = offsetB + tx2 + __mul24(iby+ty2*6, ldb);
+        float xxA[6];
+        float xxB[6];
+        
+        int trackA = offsetA + ibx + tx2 + __mul24(ty2, lda);
+        int trackB = offsetB + tx2 + __mul24(iby+ty2*6, ldb);
 
-	int tll = ty2;
-	A += trackA; 
-	B += trackB; 
+        int tll = ty2;
+        A += trackA; 
+        B += trackB; 
 
-	// read a block of 96x16 to A and 16x96 to B
-	// each thread reads 6 data point, 1 point in each 16x16 subblock
-	#pragma unroll
-	for(int y=0; y<6; y++)
-		Abs[tx2+y*16][ty2] = /* (tll<k)* */ fetch_x_A(trackA + y*16, A);
+        // read a block of 96x16 to A and 16x96 to B
+        // each thread reads 6 data point, 1 point in each 16x16 subblock
+        #pragma unroll
+        for(int y=0; y<6; y++)
+                Abs[tx2+y*16][ty2] = /* (tll<k)* */ fetch_x_A(trackA + y*16, A);
 
-	#pragma unroll
-	for(int y=0; y<6; y++)
-		Bb[tx2][ty2*6+y] = fetch_x_B( trackB + y*ldb, B) ;
+        #pragma unroll
+        for(int y=0; y<6; y++)
+                Bb[tx2][ty2*6+y] = fetch_x_B( trackB + y*ldb, B) ;
 
-	__syncthreads();
+        __syncthreads();
 
-	const float *Bend = B + k-16;
+        const float *Bend = B + k-16;
 
-	float Axs[6];
-	float Bxp[6];
+        float Axs[6];
+        float Bxp[6];
 
-	float Cb[36] = {0,0,0,0,0,0, 0,0,0,0,0,0,  0,0,0,0,0,0, 0,0,0,0,0,0,
-		0,0,0,0,0,0, 0,0,0,0,0,0};
+        float Cb[36] = {0,0,0,0,0,0, 0,0,0,0,0,0,  0,0,0,0,0,0, 0,0,0,0,0,0,
+                0,0,0,0,0,0, 0,0,0,0,0,0};
 
-	do 
-	{
-		tll += 16;
-		A += lda*16;
-		B += 16;
-		trackA+=16*lda ; 
-		trackB+=16;
+        do 
+        {
+                tll += 16;
+                A += lda*16;
+                B += 16;
+                trackA+=16*lda ; 
+                trackB+=16;
 
-		// calculate part of C using the first 96x8 of A and 8x96 of B
-		#pragma unroll 
-		for( int j1=0;j1<8;j1++)
-		{
-			#pragma unroll
-			for( int y=0; y<6; y++)
-				Axs[y] = Abs[tx2+y*16][j1];
+                // calculate part of C using the first 96x8 of A and 8x96 of B
+                #pragma unroll 
+                for( int j1=0;j1<8;j1++)
+                {
+                        #pragma unroll
+                        for( int y=0; y<6; y++)
+                                Axs[y] = Abs[tx2+y*16][j1];
 
-			#pragma unroll
-			for( int y=0; y<6; y++)
-				Bxp[y]= Bb[j1][ty2+y*16];
+                        #pragma unroll
+                        for( int y=0; y<6; y++)
+                                Bxp[y]= Bb[j1][ty2+y*16];
 
-			#pragma unroll 
-			for( int x=0; x<6; x++)
-			{
-				#pragma unroll 
-				for( int y=0; y<6; y++)
-				{
-					Cb[x*6 + y] += Axs[x]*Bxp[y];
-				}
-			}
-		}
+                        #pragma unroll 
+                        for( int x=0; x<6; x++)
+                        {
+                                #pragma unroll 
+                                for( int y=0; y<6; y++)
+                                {
+                                        Cb[x*6 + y] += Axs[x]*Bxp[y];
+                                }
+                        }
+                }
 
-		// pre-read the next A and B
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			xxA[y] = /* (tll<k)* */ fetch_x_A(trackA + y*16, A);	
-			// without going through texture and tll protection, 
-			// nonzeros are fetched
-			// texture boundary control seems to be providing
-			// safety here but officially tex1Dfetch is not suppoted
-			// by clamping or filtering (programming guide B.8.1)
+                // pre-read the next A and B
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        xxA[y] = /* (tll<k)* */ fetch_x_A(trackA + y*16, A);        
+                        // without going through texture and tll protection, 
+                        // nonzeros are fetched
+                        // texture boundary control seems to be providing
+                        // safety here but officially tex1Dfetch is not suppoted
+                        // by clamping or filtering (programming guide B.8.1)
 
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			xxB[y] = fetch_x_B( trackB + y*ldb, B);
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        xxB[y] = fetch_x_B( trackB + y*ldb, B);
 
-		// calculate another part of C using the 2nd 96x8 of A and 8x96 of B
-		#pragma unroll 
-		for( int j1=8;j1<16;j1++)
-		{
-			#pragma unroll
-			for( int y=0;y<6;y++)
-				Axs[y] = Abs[tx2+y*16][j1] ;
+                // calculate another part of C using the 2nd 96x8 of A and 8x96 of B
+                #pragma unroll 
+                for( int j1=8;j1<16;j1++)
+                {
+                        #pragma unroll
+                        for( int y=0;y<6;y++)
+                                Axs[y] = Abs[tx2+y*16][j1] ;
 
-			#pragma unroll
-			for( int y=0;y<6;y++)
-				Bxp[y]= Bb[j1][ty2+y*16];
+                        #pragma unroll
+                        for( int y=0;y<6;y++)
+                                Bxp[y]= Bb[j1][ty2+y*16];
 
-			#pragma unroll 
-			for( int x=0;x<6;x++)
-			{
-				#pragma unroll 
-				for( int y=0; y<6; y++)
-				{
-					Cb[x*6+y] += Axs[x]*Bxp[y];
-				}
-			}
-		}
+                        #pragma unroll 
+                        for( int x=0;x<6;x++)
+                        {
+                                #pragma unroll 
+                                for( int y=0; y<6; y++)
+                                {
+                                        Cb[x*6+y] += Axs[x]*Bxp[y];
+                                }
+                        }
+                }
 
-		__syncthreads();
+                __syncthreads();
 
-		// put the next A and B into position
-		#pragma unroll
-		for(int y=0;y<6;y++)
-			Abs[tx2+y*16][ty2] =xxA[y];
+                // put the next A and B into position
+                #pragma unroll
+                for(int y=0;y<6;y++)
+                        Abs[tx2+y*16][ty2] =xxA[y];
 
-		#pragma unroll
-		for(int y=0; y<6; y++)
-			Bb[tx2][ty2*6 + y] =xxB[y];
+                #pragma unroll
+                for(int y=0; y<6; y++)
+                        Bb[tx2][ty2*6 + y] =xxB[y];
 
-		__syncthreads();
-	} 
-	while (B < Bend);
+                __syncthreads();
+        } 
+        while (B < Bend);
 
-	// C += ty2 + ibx  + __mul24 (tx2 +  iby ,ldc);
-	C += tx2 + ibx  + __mul24 (ty2 +  iby ,ldc);
+        // C += ty2 + ibx  + __mul24 (tx2 +  iby ,ldc);
+        C += tx2 + ibx  + __mul24 (ty2 +  iby ,ldc);
 
-	// tail case
-	#pragma unroll 
-	for( int j1=0;j1<16;j1++)
-	{
+        // tail case
+        #pragma unroll 
+        for( int j1=0;j1<16;j1++)
+        {
 
-		#pragma unroll
-		for( int y=0;y<6;y++)
-			Bxp[y]= Bb[j1][ty2+y*16];
+                #pragma unroll
+                for( int y=0;y<6;y++)
+                        Bxp[y]= Bb[j1][ty2+y*16];
 
-		#pragma unroll
-		for( int y=0;y<6;y++)
-			Axs[y] = Abs[tx2+y*16][j1] ;
+                #pragma unroll
+                for( int y=0;y<6;y++)
+                        Axs[y] = Abs[tx2+y*16][j1] ;
 
-		#pragma unroll 
-		for( int x=0;x<6;x++)
-			#pragma unroll 
-			for( int y=0; y<6; y++)
-				Cb[x*6+y]  += Axs[x]*Bxp[y];	
-	}
+                #pragma unroll 
+                for( int x=0;x<6;x++)
+                        #pragma unroll 
+                        for( int y=0; y<6; y++)
+                                Cb[x*6+y]  += Axs[x]*Bxp[y];        
+        }
 
-	// __syncthreads();
+        // __syncthreads();
 
-	// C += ty2 + ibx  + __mul24 (tx2 +  iby ,ldc);
-	int gy = iby + ty2;
-	// writing C
-	#pragma unroll
-	for( int y=0; y<6; y++, gy+=16)
-	{
-		int gx = ibx + tx2; 
-		#pragma unroll
-		for(int x=0; x<6; x++, gx+=16)
-		{
-			if (gx < m && gy < n)
-				C[x*16] = alpha*Cb[y+x*6] + beta * C[x*16];
-		}
+        // C += ty2 + ibx  + __mul24 (tx2 +  iby ,ldc);
+        int gy = iby + ty2;
+        // writing C
+        #pragma unroll
+        for( int y=0; y<6; y++, gy+=16)
+        {
+                int gx = ibx + tx2; 
+                #pragma unroll
+                for(int x=0; x<6; x++, gx+=16)
+                {
+                        if (gx < m && gy < n)
+                                C[x*16] = alpha*Cb[y+x*6] + beta * C[x*16];
+                }
 
-		C+=ldc*16;
-	}
+                C+=ldc*16;
+        }
 }
 
 //========================================================================
@@ -211,129 +211,129 @@ fermiSgemm_v2_kernel_TN(float *C, const float *A, const float *B,
                         int ldc, float alpha, float beta,
                         int offsetA, int offsetB) 
 {
-	const  int tx = threadIdx.x;
-	const  int ty = threadIdx.y;
+        const  int tx = threadIdx.x;
+        const  int ty = threadIdx.y;
 
-	const int iby = blockIdx.y * 96;
-	const int ibx = blockIdx.x * 96;
-	const int idt = ty * 64 + tx;
+        const int iby = blockIdx.y * 96;
+        const int ibx = blockIdx.x * 96;
+        const int idt = ty * 64 + tx;
 
-	const int tx2 = idt%16;
-	const int ty2 = idt/16;
+        const int tx2 = idt%16;
+        const int ty2 = idt/16;
 
-	__shared__ float Bb[16][97];
-	__shared__ float Abs[96][17];
+        __shared__ float Bb[16][97];
+        __shared__ float Abs[96][17];
 
-	float xxA[6];
-	float xxB[6];
-	
-	int trackA = offsetA + tx2+ __mul24(ibx + ty2*6, lda );
-	int trackB = offsetB + tx2+ __mul24(iby + ty2*6, ldb );
-	
-	A+= trackA; 
-	B+= trackB; 
+        float xxA[6];
+        float xxB[6];
+        
+        int trackA = offsetA + tx2+ __mul24(ibx + ty2*6, lda );
+        int trackB = offsetB + tx2+ __mul24(iby + ty2*6, ldb );
+        
+        A+= trackA; 
+        B+= trackB; 
 
-	int tll = tx2;
+        int tll = tx2;
 
-	#pragma unroll
-	for(int y=0; y<6; y++)
-		Abs[ty2*6+y][tx2] = (tll<k)*fetch_x_A(trackA + y*lda, A);
+        #pragma unroll
+        for(int y=0; y<6; y++)
+                Abs[ty2*6+y][tx2] = (tll<k)*fetch_x_A(trackA + y*lda, A);
 
-	#pragma unroll
-	for(int y=0; y<6; y++)
-		Bb[tx2][ty2*6+y] = /* (tll<k)* */ fetch_x_B(trackB + y*ldb, B ) ;
+        #pragma unroll
+        for(int y=0; y<6; y++)
+                Bb[tx2][ty2*6+y] = /* (tll<k)* */ fetch_x_B(trackB + y*ldb, B ) ;
 
-	__syncthreads();
+        __syncthreads();
 
-	const float *Bend = B + k-16;
+        const float *Bend = B + k-16;
 
-	float Axs[6];
-	float Bxp[6];
+        float Axs[6];
+        float Bxp[6];
 
-	float Cb[36] = {0,0,0,0,0,0, 0,0,0,0,0,0,  0,0,0,0,0,0, 0,0,0,0,0,0,
-		0,0,0,0,0,0, 0,0,0,0,0,0};
-	do 
-	{
-		tll += 16;
-		A += 16;
-		B += 16;
-		trackA += 16; 
-		trackB += 16;
+        float Cb[36] = {0,0,0,0,0,0, 0,0,0,0,0,0,  0,0,0,0,0,0, 0,0,0,0,0,0,
+                0,0,0,0,0,0, 0,0,0,0,0,0};
+        do 
+        {
+                tll += 16;
+                A += 16;
+                B += 16;
+                trackA += 16; 
+                trackB += 16;
 
-		// pre-read the next strip of A and B
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			xxA[y] = (tll<k)*fetch_x_A(trackA + y*lda, A);
+                // pre-read the next strip of A and B
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        xxA[y] = (tll<k)*fetch_x_A(trackA + y*lda, A);
 
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			xxB[y] = /* (tll<k)* */ fetch_x_B(trackB + y*ldb, B);
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        xxB[y] = /* (tll<k)* */ fetch_x_B(trackB + y*ldb, B);
 
-		// computing
-		#pragma unroll 
-		for( int j1=0; j1<16; j1++)
-		{
-			#pragma unroll
-			for( int y=0; y<6; y++)
-				Axs[y] = Abs[tx2 + y*16][j1];
+                // computing
+                #pragma unroll 
+                for( int j1=0; j1<16; j1++)
+                {
+                        #pragma unroll
+                        for( int y=0; y<6; y++)
+                                Axs[y] = Abs[tx2 + y*16][j1];
 
-			#pragma unroll
-			for( int y=0; y<6; y++)
-				Bxp[y]= Bb[j1][ty2 + y*16];
+                        #pragma unroll
+                        for( int y=0; y<6; y++)
+                                Bxp[y]= Bb[j1][ty2 + y*16];
 
-			#pragma unroll 
-			for( int x=0;x<6; x++)
-				#pragma unroll 
-				for(int y=0; y<6; y++)
-					Cb[x*6 + y] += Axs[x]*Bxp[y];
-		}
-		__syncthreads();
-		
-		#pragma unroll
-		for(int y=0; y<6; y++)
-			Abs[ty2*6 + y][tx2] = xxA[y]; 
+                        #pragma unroll 
+                        for( int x=0;x<6; x++)
+                                #pragma unroll 
+                                for(int y=0; y<6; y++)
+                                        Cb[x*6 + y] += Axs[x]*Bxp[y];
+                }
+                __syncthreads();
+                
+                #pragma unroll
+                for(int y=0; y<6; y++)
+                        Abs[ty2*6 + y][tx2] = xxA[y]; 
 
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			Bb[tx2][ty2*6 + y] = xxB[y];
-		__syncthreads();
-	} 
-	while (B < Bend);
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        Bb[tx2][ty2*6 + y] = xxB[y];
+                __syncthreads();
+        } 
+        while (B < Bend);
 
-	C += tx2 + ibx  + __mul24 (ty2 + iby, ldc);
+        C += tx2 + ibx  + __mul24 (ty2 + iby, ldc);
 
-	#pragma unroll 
-	for( int j1=0; j1<16; j1++)
-	{
+        #pragma unroll 
+        for( int j1=0; j1<16; j1++)
+        {
 
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			Axs[y] =  Abs[tx2 + y*16][j1] ;
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        Axs[y] =  Abs[tx2 + y*16][j1] ;
 
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			Bxp[y] = Bb[j1][ty2 + y*16];
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        Bxp[y] = Bb[j1][ty2 + y*16];
 
-		#pragma unroll 
-		for( int x=0; x<6; x++)
-			#pragma unroll 
-			for( int y=0; y<6; y++)
-				Cb[x*6 + y]  += Axs[x]*Bxp[y];
-	}
+                #pragma unroll 
+                for( int x=0; x<6; x++)
+                        #pragma unroll 
+                        for( int y=0; y<6; y++)
+                                Cb[x*6 + y]  += Axs[x]*Bxp[y];
+        }
 
-	int gy = iby+ty2;
-	#pragma unroll
-	for(int y=0; y<6; y++, gy+=16)
-	{
-		int gx = ibx+tx2;
-		#pragma unroll
-		for(int x=0; x<6; x++, gx+=16)
-		{
-			if (gx < m && gy < n)
-				C[x*16] = alpha*Cb[y+x*6] + beta * C[x*16];
-		}
-		C+=ldc*16;
-	}
+        int gy = iby+ty2;
+        #pragma unroll
+        for(int y=0; y<6; y++, gy+=16)
+        {
+                int gx = ibx+tx2;
+                #pragma unroll
+                for(int x=0; x<6; x++, gx+=16)
+                {
+                        if (gx < m && gy < n)
+                                C[x*16] = alpha*Cb[y+x*6] + beta * C[x*16];
+                }
+                C+=ldc*16;
+        }
 }
 
 //========================================================================
@@ -344,128 +344,128 @@ fermiSgemm_v2_kernel_TT(float *C, const float *A, const float *B,
                         int ldc, float alpha, float beta,
                         int offsetA, int offsetB) 
 {
-	const  int tx = threadIdx.x;
-	const  int ty = threadIdx.y;
+        const  int tx = threadIdx.x;
+        const  int ty = threadIdx.y;
 
-	const int iby = blockIdx.y * 96;
-	const int ibx = blockIdx.x * 96;
-	const int idt = ty * 64 + tx;
+        const int iby = blockIdx.y * 96;
+        const int ibx = blockIdx.x * 96;
+        const int idt = ty * 64 + tx;
 
-	const int tx2 = idt%16;
-	const int ty2 = idt/16;
+        const int tx2 = idt%16;
+        const int ty2 = idt/16;
 
-	__shared__ float Bb[16][97];
-	__shared__ float Abs[96][17];
+        __shared__ float Bb[16][97];
+        __shared__ float Abs[96][17];
 
-	float xxA[6];
-	float xxB[6];
+        float xxA[6];
+        float xxB[6];
 
-	int trackA = offsetA + __mul24( ibx + ty2, lda) + tx2;
-	int trackB = offsetB + iby+ tx2 + __mul24(ty2, ldb);
+        int trackA = offsetA + __mul24( ibx + ty2, lda) + tx2;
+        int trackB = offsetB + iby+ tx2 + __mul24(ty2, ldb);
 
-	A += trackA; 
-	B += trackB; 
+        A += trackA; 
+        B += trackB; 
 
-	int tll = tx2; 
+        int tll = tx2; 
 
-	#pragma unroll
-	for(int y=0; y<6; y++)
-		Abs[ty2+16*y][tx2] = /* (tll<k)* */ fetch_x_A(trackA +  lda*16*y, A);
+        #pragma unroll
+        for(int y=0; y<6; y++)
+                Abs[ty2+16*y][tx2] = /* (tll<k)* */ fetch_x_A(trackA +  lda*16*y, A);
 
-	#pragma unroll
-	for(int y=0; y<6; y++)
-		Bb[ty2][tx2+16*y] = fetch_x_B(trackB+16*y, B);
+        #pragma unroll
+        for(int y=0; y<6; y++)
+                Bb[ty2][tx2+16*y] = fetch_x_B(trackB+16*y, B);
 
-	__syncthreads();
+        __syncthreads();
 
-	const float *Bend = B + k*ldb - 16*ldb;
+        const float *Bend = B + k*ldb - 16*ldb;
 
-	float Axs[6];
-	float Bxp[6];
+        float Axs[6];
+        float Bxp[6];
 
-	float Cb[36] = {0,0,0,0,0,0, 0,0,0,0,0,0,  0,0,0,0,0,0, 0,0,0,0,0,0,
-		0,0,0,0,0,0, 0,0,0,0,0,0};
-	do 
-	{
-		tll+=16;
-		A += 16;
-		B += 16*ldb;
-		trackA+=16; 
-		trackB+=16*ldb;
-		
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			xxA[y] = /* (tll<k)* */ fetch_x_A(trackA + lda*y*16, A);
+        float Cb[36] = {0,0,0,0,0,0, 0,0,0,0,0,0,  0,0,0,0,0,0, 0,0,0,0,0,0,
+                0,0,0,0,0,0, 0,0,0,0,0,0};
+        do 
+        {
+                tll+=16;
+                A += 16;
+                B += 16*ldb;
+                trackA+=16; 
+                trackB+=16*ldb;
+                
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        xxA[y] = /* (tll<k)* */ fetch_x_A(trackA + lda*y*16, A);
 
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			xxB[y] = fetch_x_B(trackB + 16*y, B);
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        xxB[y] = fetch_x_B(trackB + 16*y, B);
 
-		#pragma unroll 
-		for( int j1=0;j1<16;j1++)
-		{
-			#pragma unroll
-			for( int y=0; y<6; y++)
-				Axs[y] =  Abs[tx2 + y*16][j1];
+                #pragma unroll 
+                for( int j1=0;j1<16;j1++)
+                {
+                        #pragma unroll
+                        for( int y=0; y<6; y++)
+                                Axs[y] =  Abs[tx2 + y*16][j1];
 
-			#pragma unroll
-			for( int y=0; y<6; y++)
-				Bxp[y]= Bb[j1][ty2 + y*16];
+                        #pragma unroll
+                        for( int y=0; y<6; y++)
+                                Bxp[y]= Bb[j1][ty2 + y*16];
 
-			#pragma unroll 
-			for( int x=0; x<6; x++)
-				#pragma unroll 
-				for( int y=0;y<6;y++)
-					Cb[x*6+y] += Axs[x]*Bxp[y];
-		}
-		__syncthreads();
+                        #pragma unroll 
+                        for( int x=0; x<6; x++)
+                                #pragma unroll 
+                                for( int y=0;y<6;y++)
+                                        Cb[x*6+y] += Axs[x]*Bxp[y];
+                }
+                __syncthreads();
 
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			Abs[ty2 + 16*y][tx2] = xxA[y];
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        Abs[ty2 + 16*y][tx2] = xxA[y];
 
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			Bb[ty2][tx2+y*16] = xxB[y];
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        Bb[ty2][tx2+y*16] = xxB[y];
 
-		__syncthreads();
-	} 
-	while (B < Bend);
+                __syncthreads();
+        } 
+        while (B < Bend);
 
-	C += tx2 + ibx  + __mul24 (ty2 +  iby ,ldc);
+        C += tx2 + ibx  + __mul24 (ty2 +  iby ,ldc);
 
-	#pragma unroll 
-	for( int j1=0; j1<16; j1++)
-	{
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			Axs[y] =  Abs[tx2 + y*16][j1];
+        #pragma unroll 
+        for( int j1=0; j1<16; j1++)
+        {
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        Axs[y] =  Abs[tx2 + y*16][j1];
 
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			Bxp[y]= Bb[j1][ty2 + y*16];
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        Bxp[y]= Bb[j1][ty2 + y*16];
 
-		#pragma unroll 
-		for( int x=0; x<6; x++)
-			#pragma unroll 
-			for( int y=0; y<6; y++)
-				Cb[x*6+y]  += Axs[x]*Bxp[y];
-	}
+                #pragma unroll 
+                for( int x=0; x<6; x++)
+                        #pragma unroll 
+                        for( int y=0; y<6; y++)
+                                Cb[x*6+y]  += Axs[x]*Bxp[y];
+        }
 
-	int gy = iby + ty2;
-	#pragma unroll
-	for( int y=0; y<6; y++, gy+=16)
-	{
-		int gx = ibx + tx2; 
-		#pragma unroll
-		for(int x=0; x<6; x++, gx+=16)
-		{
-			if (gx < m && gy < n)
-				C[x*16] = alpha*Cb[y+x*6] + beta * C[x*16];
-		}
+        int gy = iby + ty2;
+        #pragma unroll
+        for( int y=0; y<6; y++, gy+=16)
+        {
+                int gx = ibx + tx2; 
+                #pragma unroll
+                for(int x=0; x<6; x++, gx+=16)
+                {
+                        if (gx < m && gy < n)
+                                C[x*16] = alpha*Cb[y+x*6] + beta * C[x*16];
+                }
 
-		C+=ldc*16;
-	}
+                C+=ldc*16;
+        }
 }
 
 
@@ -477,128 +477,128 @@ fermiSgemm_v2_kernel_NT(float *C, const float *A, const float *B,
                         int ldc, float alpha, float beta,
                         int offsetA, int offsetB) 
 {
-	const  int tx = threadIdx.x;
-	const  int ty = threadIdx.y;
+        const  int tx = threadIdx.x;
+        const  int ty = threadIdx.y;
 
-	const int iby = blockIdx.y * 96;
-	const int ibx = blockIdx.x * 96;
-	const int idt = ty * 64 + tx;
+        const int iby = blockIdx.y * 96;
+        const int ibx = blockIdx.x * 96;
+        const int idt = ty * 64 + tx;
 
-	const int tx2= idt%16;
-	const int ty2= idt/16;
+        const int tx2= idt%16;
+        const int ty2= idt/16;
 
-	__shared__ float Bb[16][97];
-	__shared__ float Abs[96][17];
+        __shared__ float Bb[16][97];
+        __shared__ float Abs[96][17];
 
-	float xxA[6];
-	float xxB[6];
+        float xxA[6];
+        float xxB[6];
 
-	int trackA = offsetA + ibx +__mul24(ty2, lda) + tx2 ;
-	int trackB = offsetB + iby + tx2 + __mul24(ty2, ldb);	
-	
-	A+= trackA; 
-	B += trackB; 
+        int trackA = offsetA + ibx +__mul24(ty2, lda) + tx2 ;
+        int trackB = offsetB + iby + tx2 + __mul24(ty2, ldb);        
+        
+        A+= trackA; 
+        B += trackB; 
 
-	int tll = ty2;
+        int tll = ty2;
 
-	#pragma unroll
-	for(int y=0; y<6; y++)
-		Abs[tx2+ y*16][ty2] = /* (tll<k)* */ fetch_x_A(trackA + y*16, A);
+        #pragma unroll
+        for(int y=0; y<6; y++)
+                Abs[tx2+ y*16][ty2] = /* (tll<k)* */ fetch_x_A(trackA + y*16, A);
 
-	#pragma unroll
-	for(int y=0; y<6; y++)
-		Bb[ty2][tx2+16*y] = /* (tll<k)* */ fetch_x_B(trackB+16*y, B);
+        #pragma unroll
+        for(int y=0; y<6; y++)
+                Bb[ty2][tx2+16*y] = /* (tll<k)* */ fetch_x_B(trackB+16*y, B);
 
-	__syncthreads();
+        __syncthreads();
 
-	const float *Bend = B + k*ldb - 16*ldb;
+        const float *Bend = B + k*ldb - 16*ldb;
 
-	float Axs[6];
-	float Bxp[6];
+        float Axs[6];
+        float Bxp[6];
 
-	float Cb[36] = {0,0,0,0,0,0, 0,0,0,0,0,0,  0,0,0,0,0,0, 0,0,0,0,0,0,
-		0,0,0,0,0,0, 0,0,0,0,0,0};
-	do 
-	{
-		tll += 16;
-		A += lda *16  ;
-		B += 16*ldb;
-		trackA+=16*lda ; 
-		trackB+=16*ldb;
+        float Cb[36] = {0,0,0,0,0,0, 0,0,0,0,0,0,  0,0,0,0,0,0, 0,0,0,0,0,0,
+                0,0,0,0,0,0, 0,0,0,0,0,0};
+        do 
+        {
+                tll += 16;
+                A += lda *16  ;
+                B += 16*ldb;
+                trackA+=16*lda ; 
+                trackB+=16*ldb;
 
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			xxA[y] = /* (tll<k)* */ fetch_x_A(trackA + y*16, A);	
-			// tll same in the NN case
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        xxA[y] = /* (tll<k)* */ fetch_x_A(trackA + y*16, A);        
+                        // tll same in the NN case
 
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			xxB[y] = /* (tll<k)* */ fetch_x_B( trackB + 16*y, B);
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        xxB[y] = /* (tll<k)* */ fetch_x_B( trackB + 16*y, B);
 
-		#pragma unroll 
-		for( int j1=0;j1<16;j1++)
-		{
-			#pragma unroll
-			for( int y=0; y<6; y++)
-				Bxp[y]= Bb[j1][ty2 + y*16];
-			#pragma unroll
-			for( int y=0; y<6; y++)
-				Axs[y] =  Abs[tx2 + y*16][j1] ;
+                #pragma unroll 
+                for( int j1=0;j1<16;j1++)
+                {
+                        #pragma unroll
+                        for( int y=0; y<6; y++)
+                                Bxp[y]= Bb[j1][ty2 + y*16];
+                        #pragma unroll
+                        for( int y=0; y<6; y++)
+                                Axs[y] =  Abs[tx2 + y*16][j1] ;
 
-			#pragma unroll 
-			for( int x=0; x<6; x++)
-				#pragma unroll 
-				for( int y=0; y<6; y++)
-					Cb[x*6+y] += Axs[x]*Bxp[y];
-		}
-		__syncthreads();
+                        #pragma unroll 
+                        for( int x=0; x<6; x++)
+                                #pragma unroll 
+                                for( int y=0; y<6; y++)
+                                        Cb[x*6+y] += Axs[x]*Bxp[y];
+                }
+                __syncthreads();
 
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			Abs[tx2 + y*16][ty2] = xxA[y]; 
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        Abs[tx2 + y*16][ty2] = xxA[y]; 
 
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			Bb[ty2][tx2+y*16] = xxB[y];
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        Bb[ty2][tx2+y*16] = xxB[y];
 
-		__syncthreads();
-	} 
-	while (B < Bend);
+                __syncthreads();
+        } 
+        while (B < Bend);
 
-	C += tx2 + ibx + __mul24(ty2 + iby ,ldc);
+        C += tx2 + ibx + __mul24(ty2 + iby ,ldc);
 
-	#pragma unroll 
-	for(int j1=0; j1<16; j1++)
-	{
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			Bxp[y] = Bb[j1][ty2 + y*16];
+        #pragma unroll 
+        for(int j1=0; j1<16; j1++)
+        {
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        Bxp[y] = Bb[j1][ty2 + y*16];
 
-		#pragma unroll
-		for( int y=0; y<6; y++)
-			Axs[y] =  Abs[tx2 + y*16][j1] ;
+                #pragma unroll
+                for( int y=0; y<6; y++)
+                        Axs[y] =  Abs[tx2 + y*16][j1] ;
 
-		#pragma unroll 
-		for( int x=0; x<6; x++)
-			#pragma unroll 
-			for( int y=0;y<6;y++)
-				Cb[x*6+y]  += Axs[x]*Bxp[y];
-	}
+                #pragma unroll 
+                for( int x=0; x<6; x++)
+                        #pragma unroll 
+                        for( int y=0;y<6;y++)
+                                Cb[x*6+y]  += Axs[x]*Bxp[y];
+        }
 
-	int gy = iby + ty2;
-	#pragma unroll
-	for( int y=0; y<6; y++, gy+=16)
-	{
-		int gx = ibx + tx2; 
-		#pragma unroll
-		for(int x=0; x<6; x++, gx+=16)
-		{
-			if (gx < m && gy < n)
-				C[x*16] = alpha*Cb[y + x*6] + beta * C[x*16];
-		}
+        int gy = iby + ty2;
+        #pragma unroll
+        for( int y=0; y<6; y++, gy+=16)
+        {
+                int gx = ibx + tx2; 
+                #pragma unroll
+                for(int x=0; x<6; x++, gx+=16)
+                {
+                        if (gx < m && gy < n)
+                                C[x*16] = alpha*Cb[y + x*6] + beta * C[x*16];
+                }
 
-		C+=ldc*16;
-	}
+                C+=ldc*16;
+        }
 }
 
 //=================================================================================
@@ -717,66 +717,66 @@ magmablas_sgemm_fermi( char TRANSA, char TRANSB, int m , int n , int k ,
             Unchanged on exit.
    =====================================================================    */
 
-	if (m<=0 || n<=0 || k<=0)
-	   return;
+        if (m<=0 || n<=0 || k<=0)
+           return;
 
-	size_t offsetA = 0;
-	size_t offsetB = 0;
+        size_t offsetA = 0;
+        size_t offsetB = 0;
 
-	int TransA = 1, TransB = 1;
-	if (TRANSA == 'N' ||  TRANSA == 'n')
-	   TransA = 0;
-	if (TRANSB == 'N' ||  TRANSB == 'n')
-	   TransB = 0;
+        int TransA = 1, TransB = 1;
+        if (TRANSA == 'N' ||  TRANSA == 'n')
+           TransA = 0;
+        if (TRANSB == 'N' ||  TRANSB == 'n')
+           TransB = 0;
 
-	size_t sizeA = (size_t) lda * (size_t) (!TransA ? k : m);
-	size_t sizeB = (size_t) ldb * (size_t) (!TransB ? n : k);
+        size_t sizeA = (size_t) lda * (size_t) (!TransA ? k : m);
+        size_t sizeB = (size_t) ldb * (size_t) (!TransB ? n : k);
 
- 	size_t CUBLAS_MAX_1DBUF_SIZE = (1 << 27) - 512;
-	if (sizeA>=CUBLAS_MAX_1DBUF_SIZE ||
-			sizeB>=CUBLAS_MAX_1DBUF_SIZE )
-	{
-		//printf("Exceeding texuture limit (CUBLAS_MAX_1DBUF_SIZE=%ld), using cublasSgemm\n", CUBLAS_MAX_1DBUF_SIZE);
-		cublasSgemm(TRANSA, TRANSB, m, n, k, alpha,
-				A, lda, B, ldb,
-				beta, C, ldc);
-		return;
-	}
+         size_t CUBLAS_MAX_1DBUF_SIZE = (1 << 27) - 512;
+        if (sizeA>=CUBLAS_MAX_1DBUF_SIZE ||
+                        sizeB>=CUBLAS_MAX_1DBUF_SIZE )
+        {
+                //printf("Exceeding texuture limit (CUBLAS_MAX_1DBUF_SIZE=%ld), using cublasSgemm\n", CUBLAS_MAX_1DBUF_SIZE);
+                cublasSgemm(TRANSA, TRANSB, m, n, k, alpha,
+                                A, lda, B, ldb,
+                                beta, C, ldc);
+                return;
+        }
 
-	cudaError_t errt;
-	errt = cudaBindTexture(&offsetA, tex_x_float_A, (int2 *)A, 
-			sizeA * sizeof(A[0]));
-	if( errt != cudaSuccess) printf("can not bind to texture \n");
+        cudaError_t errt;
+        errt = cudaBindTexture(&offsetA, tex_x_float_A, (int2 *)A, 
+                        sizeA * sizeof(A[0]));
+        if( errt != cudaSuccess) printf("can not bind to texture \n");
 
-	errt = cudaBindTexture(&offsetB, tex_x_float_B, (int2 *)B, 
-			sizeB * sizeof(B[0]));
-	if( errt != cudaSuccess) printf("can not bind to texture \n");
+        errt = cudaBindTexture(&offsetB, tex_x_float_B, (int2 *)B, 
+                        sizeB * sizeof(B[0]));
+        if( errt != cudaSuccess) printf("can not bind to texture \n");
 
-	dim3 threads( 64, 4 );
-	dim3 grid(m/(96)+(m%(96)!=0),n/(96)+(n%(96)!=0));
+        dim3 threads( 64, 4 );
+        dim3 grid(m/(96)+(m%(96)!=0),n/(96)+(n%(96)!=0));
 
-	offsetA = offsetA/sizeof(A[0]);
-	offsetB = offsetB/sizeof(B[0]);
+        offsetA = offsetA/sizeof(A[0]);
+        offsetB = offsetB/sizeof(B[0]);
 
-	if ( TransB ) 
-	   if( !TransA ) 
-		fermiSgemm_v2_kernel_NT<<< grid, threads, 0, magma_stream >>>(C, A, B, m, n, k, lda, ldb, 
-					                    ldc, alpha, beta,
+        if ( TransB ) 
+           if( !TransA ) 
+                fermiSgemm_v2_kernel_NT<<< grid, threads, 0, magma_stream >>>(C, A, B, m, n, k, lda, ldb, 
+                                                            ldc, alpha, beta,
                                                             (int)offsetA, (int)offsetB);
-	   else
-		fermiSgemm_v2_kernel_TT<<< grid, threads, 0, magma_stream >>>(C, A, B, m, n, k, lda, ldb, 
-					                    ldc, alpha, beta,
+           else
+                fermiSgemm_v2_kernel_TT<<< grid, threads, 0, magma_stream >>>(C, A, B, m, n, k, lda, ldb, 
+                                                            ldc, alpha, beta,
                                                             (int)offsetA, (int)offsetB);
-	else
-	   if( !TransA ) 
-		fermiSgemm_v2_kernel_NN<<< grid, threads, 0, magma_stream >>>(C, A, B, m, n, k, lda, ldb, 
-					                    ldc, alpha, beta,
+        else
+           if( !TransA ) 
+                fermiSgemm_v2_kernel_NN<<< grid, threads, 0, magma_stream >>>(C, A, B, m, n, k, lda, ldb, 
+                                                            ldc, alpha, beta,
                                                             (int)offsetA, (int)offsetB);
-	   else
-		fermiSgemm_v2_kernel_TN<<< grid, threads, 0, magma_stream >>>(C, A, B, m, n, k, lda, ldb, 
-					                    ldc, alpha, beta,
+           else
+                fermiSgemm_v2_kernel_TN<<< grid, threads, 0, magma_stream >>>(C, A, B, m, n, k, lda, ldb, 
+                                                            ldc, alpha, beta,
                                                             (int)offsetA, (int)offsetB);
 
-	cudaUnbindTexture ( tex_x_float_A ) ;
-	cudaUnbindTexture ( tex_x_float_B ) ;
+        cudaUnbindTexture ( tex_x_float_A ) ;
+        cudaUnbindTexture ( tex_x_float_B ) ;
 }

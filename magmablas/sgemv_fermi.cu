@@ -30,7 +30,7 @@ sgemvn_kernel1_fermi(magma_int_t n, magma_int_t m, magma_int_t n1, float alpha, 
        res += A[0] * x[j];
        A   += lda;
     }
-	x += sgemv_bs;
+        x += sgemv_bs;
   }
 
   if (m>n1){
@@ -111,7 +111,7 @@ magmablas_sgemvn_fermi(magma_int_t n, magma_int_t m, float alpha, float *A, magm
 
     X      - (input) SINGLE PRECISION array of dimension m.
      
-    Y      - (output) SINGLE PRECISION array of	dimension m. 
+    Y      - (output) SINGLE PRECISION array of        dimension m. 
              On exit Y = alpha A X.
 
     ===================================================================== */
@@ -125,11 +125,11 @@ magmablas_sgemvn_fermi(magma_int_t n, magma_int_t m, float alpha, float *A, magm
     dim3 grid(blocks, 1, 1);
     dim3 threads(num_threads, 1, 1);
     if(n<=8500) 
-		sgemvn_kernel1_fermi<<< grid, threads, 0, magma_stream >>>(n, m, (m / sgemv_bs)*sgemv_bs, 
-			                           alpha, A, lda, x, y);
+                sgemvn_kernel1_fermi<<< grid, threads, 0, magma_stream >>>(n, m, (m / sgemv_bs)*sgemv_bs, 
+                                                   alpha, A, lda, x, y);
     else
-		sgemvn_kernel2_fermi<<< grid, threads, 0, magma_stream >>>(n, m, (m / num_threads)*num_threads, 
-			                           alpha, A, lda, x, y);
+                sgemvn_kernel2_fermi<<< grid, threads, 0, magma_stream >>>(n, m, (m / num_threads)*num_threads, 
+                                                   alpha, A, lda, x, y);
 }
 
 
@@ -138,70 +138,70 @@ __global__ void
 sgemvt_kernel1_fermi(magma_int_t m, magma_int_t n, float alpha, magma_int_t n1, float* A, magma_int_t lda,
               float *x, float *y)
 {
-	magma_int_t tx = threadIdx.x;
+        magma_int_t tx = threadIdx.x;
 
-	__shared__ float sdata[threadSize];
-	
-	volatile float *smem;
+        __shared__ float sdata[threadSize];
+        
+        volatile float *smem;
 
-	float res;
-	res = 0.0f;
+        float res;
+        res = 0.0f;
      
-	for(magma_int_t i=0; i<n1; i+= threadSize)
-	{
-		res += A[tx + i + lda * blockIdx.y] * x[tx + i];
-	}
+        for(magma_int_t i=0; i<n1; i+= threadSize)
+        {
+                res += A[tx + i + lda * blockIdx.y] * x[tx + i];
+        }
 
-	
-	if(m > n1)
-	{
-		if( tx + n1 <  m )
-		{
-			res  += A[tx + n1 + lda *blockIdx.y] * x[tx + n1];
-		}
-		else 
-		{
-			res  += 0.0f;
-		}
-	}	
+        
+        if(m > n1)
+        {
+                if( tx + n1 <  m )
+                {
+                        res  += A[tx + n1 + lda *blockIdx.y] * x[tx + n1];
+                }
+                else 
+                {
+                        res  += 0.0f;
+                }
+        }        
 
     sdata[tx] = res;
-	__syncthreads();
+        __syncthreads();
     
     /*
-	if(tx < 128) 
-	{
-		sdata[tx] += sdata[tx + 128];
-	}
+        if(tx < 128) 
+        {
+                sdata[tx] += sdata[tx + 128];
+        }
     __syncthreads();
-	*/
+        */
 
-	if(tx < 64) 
-	{
-		sdata[tx] += sdata[tx + 64];
-	}
+        if(tx < 64) 
+        {
+                sdata[tx] += sdata[tx + 64];
+        }
     __syncthreads();
 
-	if(tx < 32)
-	{
-		smem = sdata;
-		smem[tx] += smem[tx + 32];
-		smem[tx] += smem[tx + 16];
-		smem[tx] += smem[tx +  8];
-		smem[tx] += smem[tx +  4];
-		smem[tx] += smem[tx +  2];
-		smem[tx] += smem[tx +  1];
-	}
+        if(tx < 32)
+        {
+                smem = sdata;
+                smem[tx] += smem[tx + 32];
+                smem[tx] += smem[tx + 16];
+                smem[tx] += smem[tx +  8];
+                smem[tx] += smem[tx +  4];
+                smem[tx] += smem[tx +  2];
+                smem[tx] += smem[tx +  1];
+        }
 
     if( tx == 0 ) 
-	{
-		y[blockIdx.y] = sdata[0]; 		
+        {
+                y[blockIdx.y] = sdata[0];                 
 
-		if (blockIdx.y < n)
-		{
-			y[blockIdx.y] = y[blockIdx.y] * alpha;
-		}
-	}
+                if (blockIdx.y < n)
+                {
+                        y[blockIdx.y] = y[blockIdx.y] * alpha;
+                }
+        }
 }
 
 
@@ -256,7 +256,7 @@ sgemvt_kernel2_fermi(magma_int_t m, magma_int_t n, float alpha,
   __syncthreads(); // 1
   if (n>n1){
      if (ind2>=(n-n1))
-	buff[ind2]=0.;
+        buff[ind2]=0.;
      else
         buff[ind2]  = x[n1];
 
@@ -275,10 +275,10 @@ sgemvt_kernel2_fermi(magma_int_t m, magma_int_t n, float alpha,
            ind =  j+iny*4;
            res += la[inx][ind]*buff[ind];
         }
-	A += 16;
+        A += 16;
         __syncthreads();
-	#pragma unroll
-	for(magma_int_t j=0; j<4; j++)
+        #pragma unroll
+        for(magma_int_t j=0; j<4; j++)
           if (inx+16>=(n-n1))
              la[iny+ j * 4][inx] = 0.f;
           else
@@ -287,13 +287,13 @@ sgemvt_kernel2_fermi(magma_int_t m, magma_int_t n, float alpha,
         __syncthreads();
 
         #pragma unroll
-	for(magma_int_t j=0; j < 4; j++){
+        for(magma_int_t j=0; j < 4; j++){
            ind = j+4*iny;
            res += la[inx][ind]*buff[16+ind];
         }
      }
      else {
-	#pragma unroll
+        #pragma unroll
         for(magma_int_t j=0; j < 4; j++){
           ind = j+iny*4;
           res += la[inx][ind]*buff[ind];
@@ -323,7 +323,7 @@ magmablas_sgemvt1_fermi(magma_int_t m, magma_int_t n, float alpha, float *A, mag
     sgemvt_kernel1_fermi<<< grid, threads, 0, magma_stream >>>( m, n, alpha, ( m / threadSize) * threadSize,
                                        A, lda, x, y);
 
-									  
+                                                                          
 }
 
 extern "C" void
@@ -447,7 +447,7 @@ magmablas_sgemv_fermi(char trans,
              supplied as zero then Y need not be set on input.
              Unchanged on exit.
 
-    Z      - (output) SINGLE PRECISION array of	dimension 
+    Z      - (output) SINGLE PRECISION array of        dimension 
              m if trans == 'n'
              n if trans == 't' 
 
@@ -461,7 +461,7 @@ magmablas_sgemv_fermi(char trans,
        else if (trans == 't' || trans == 'T')
           magmablas_sgemvt_fermi(m,  n, alpha, A, lda, x, z);
        else
-          printf("trans = %c in sgemv_fermi is not available\n", trans);	       
+          printf("trans = %c in sgemv_fermi is not available\n", trans);               
     }
     else
        cublasSgemv(trans, m, n, alpha, A, lda, x, incx, beta, z, incz);
