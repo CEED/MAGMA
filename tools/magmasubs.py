@@ -276,6 +276,7 @@ subs = {
     ('slarnv','dlarnv','slarnv','dlarnv'),
     ('slauum','dlauum','clauum','zlauum'),
     ('spotri','dpotri','cpotri','zpotri'),
+    ('sgetri','dgetri','cgetri','zgetri'),
     ('strtri','dtrtri','ctrtri','ztrtri'),
     ('slatrd','dlatrd','clatrd','zlatrd'),
     ('SLATRD','DLATRD','CLATRD','ZLATRD'),
@@ -369,6 +370,7 @@ subs = {
 	('SCHED_s','SCHED_d','SCHED_c','SCHED_z'),
 	('QUARK_Insert_Task_s','QUARK_Insert_Task_d','QUARK_Insert_Task_c','QUARK_Insert_Task_z'),
 	('%f', '%lf', '%f', '%lf'),  # for scanf
+	('sprint', 'dprint', 'cprint', 'zprint' ),
   ],
   'tracing' : [
     ['plain','tau'],

@@ -233,6 +233,9 @@ magma_int_t
 magma_zgetrf_nopiv_gpu      ( magma_int_t m, magma_int_t n,
                               cuDoubleComplex *dA, magma_int_t ldda,
                               magma_int_t *info);
+magma_int_t magma_zgetri_gpu( magma_int_t n, 
+                              cuDoubleComplex *dA, magma_int_t ldda, magma_int_t *ipiv, 
+                              magma_int_t *info);
 magma_int_t magma_zgetrs_gpu( char trans, magma_int_t n, magma_int_t nrhs, 
                               cuDoubleComplex *dA, magma_int_t ldda, magma_int_t *ipiv, 
                               cuDoubleComplex *dB, magma_int_t lddb, magma_int_t *info);
