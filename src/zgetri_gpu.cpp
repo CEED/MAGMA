@@ -14,20 +14,21 @@
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
   #define cublasZgemm magmablas_zgemm
-  //#define cublasZtrsm magmablas_ztrsm  // doesn't work? Nov 2011
+  #define cublasZtrsm magmablas_ztrsm
 #endif
 
 #if (GPUSHMEM >= 200)
 #if (defined(PRECISION_s))
-     #undef  cublasSgemm
-     #define cublasSgemm magmablas_sgemm_fermi80
-  #endif
+    #undef  cublasSgemm
+    #define cublasSgemm magmablas_sgemm_fermi80
+#endif
 #endif
 // === End defining what BLAS to use ======================================
 
 extern "C" magma_int_t
 magma_zgetri_gpu( magma_int_t n, cuDoubleComplex *dA, magma_int_t lda,
-                  magma_int_t* ipiv, magma_int_t *info )
+                  magma_int_t *ipiv, cuDoubleComplex *dwork, magma_int_t lwork,
+                  magma_int_t *info )
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -41,6 +42,11 @@ magma_zgetri_gpu( magma_int_t n, cuDoubleComplex *dA, magma_int_t lda,
         ZGETRI computes the inverse of a matrix using the LU factorization
         computed by ZGETRF. This method inverts U and then computes inv(A) by
         solving the system inv(A)*L = inv(U) for inv(A).
+        
+        Note that it is generally both faster and more accurate to use ZGESV,
+        or ZGETRF and ZGETRS, to solve the system AX = B, rather than inverting
+        the matrix and multiplying to form X = inv(A)*B. Only in special
+        instances should an explicit inverse be computed with this routine.
 
     Arguments
     =========
@@ -60,6 +66,15 @@ magma_zgetri_gpu( magma_int_t n, cuDoubleComplex *dA, magma_int_t lda,
                 The pivot indices from ZGETRF; for 1<=i<=N, row i of the
                 matrix was interchanged with row IPIV(i).
 
+        DWORK    (workspace/output) COMPLEX*16 array on the GPU, dimension (MAX(1,LWORK))
+      
+        LWORK   (input) INTEGER
+                The dimension of the array DWORK.  LWORK >= N*NB, where NB is
+                the optimal blocksize returned by magma_get_zgetri_nb(n).
+                
+                Unlike LAPACK, this version does not currently support a
+                workspace query, because the workspace is on the GPU.
+
         INFO    (output) INTEGER
                 = 0:  successful exit
                 < 0:  if INFO = -i, the i-th argument had an illegal value
@@ -70,15 +85,20 @@ magma_zgetri_gpu( magma_int_t n, cuDoubleComplex *dA, magma_int_t lda,
 
     /* Local variables */
     magma_int_t ret;
-    magma_int_t nb;
     cuDoubleComplex c_one = MAGMA_Z_ONE;
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex *dL = dwork;
+    magma_int_t     ldl = n;
+    magma_int_t      nb = magma_get_zgetri_nb(n);
+    magma_int_t j, jmax, jb, jp;
     
     *info = 0;
     if (n < 0)
         *info = -1;
     else if (lda < max(1,n))
         *info = -3;
+    else if ( lwork < n*nb )
+        *info = -6;
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
@@ -89,46 +109,27 @@ magma_zgetri_gpu( magma_int_t n, cuDoubleComplex *dA, magma_int_t lda,
     if ( n == 0 )
         return MAGMA_SUCCESS;
     
-    nb = 32;
-    cuDoubleComplex* dL;
-    magma_int_t ldl = lda;
-    if ( cudaSuccess != cudaMalloc( &dL, ldl*nb*sizeof(cuDoubleComplex))) {
-        fprintf( stderr, "device memory allocation error in %s\n", __func__ );
-        return MAGMA_ERR_CUBLASALLOC;
-    }
-    
-    //printf( "before trtri, A=" );
-    //zprint_gpu( n, n, dA, lda );
-
     /* Invert the triangular factor U */
     ret = magma_ztrtri_gpu( MagmaUpper, MagmaNonUnit, n, dA, lda, info );
     if ( *info != 0 )
         return ret;
     
-    //printf( "after trtri, A=" );
-    //zprint_gpu( n, n, dA, lda );
-
-    magma_int_t jmax = ((n-1) / nb)*nb;
-    for( int j = jmax; j >= 0; j -= nb ) {
-        int jb = min( nb, n-j );
-        //printf( "j %d, jb %d, nb %d\n", j, jb, nb );
+    jmax = ((n-1) / nb)*nb;
+    for( j = jmax; j >= 0; j -= nb ) {
+        jb = min( nb, n-j );
         
-        // copy current block column of L to work space, then replace with zeros in A.
+        // copy current block column of L to work space,
+        // then replace with zeros in A.
         magmablas_zlacpy( MagmaUpperLower, n-j, jb,
                           &dA[j + j*lda], lda,
                           &dL[j        ], ldl );
         magmablas_zlaset( MagmaLower, n-j, jb, &dA[j + j*lda], lda );
         
-        //printf( "after copy & zero, A=" );
-        //zprint_gpu( n, n, dA, lda );
-        //
-        //printf( "and L=" );
-        //zprint_gpu( n, jb, dL, ldl );
-        
         // compute current block column of Ainv
         // Ainv(:, j:j+jb-1)
         //   = ( U(:, j:j+jb-1) - Ainv(:, j+jb:n) L(j+jb:n, j:j+jb-1) )
         //   * L(j:j+jb-1, j:j+jb-1)^{-1}
+        // where L(:, j:j+jb-1) is stored in dL.
         if ( j+jb < n ) {
             cublasZgemm( MagmaNoTrans, MagmaNoTrans, n, jb, n-j-jb,
                          c_neg_one, &dA[(j+jb)*lda], lda,
@@ -140,23 +141,14 @@ magma_zgetri_gpu( magma_int_t n, cuDoubleComplex *dA, magma_int_t lda,
                      &dL[j    ], ldl,
                      &dA[j*lda], lda );
     }
-    
-    //printf( "before pivoting, A=" );
-    //zprint_gpu( n, n, dA, lda );
 
     // Apply column interchanges
-    // TODO replace with magmablas_zswapblk?
-    for( int j = n-2; j >= 0; --j ) {
-        int jp = ipiv[j] - 1;
+    for( j = n-2; j >= 0; --j ) {
+        jp = ipiv[j] - 1;
         if ( jp != j ) {
             magmablas_zswap( n, &dA[ j*lda ], 1, &dA[ jp*lda ], 1 );
         }
     }
     
-    //printf( "after pivoting, A=" );
-    //zprint_gpu( n, n, dA, lda );
-
-    cublasFree( dL );
-
     return MAGMA_SUCCESS;
 }

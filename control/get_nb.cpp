@@ -395,6 +395,29 @@ int magma_get_zhegst_nb(int m){
   return 64;
 }
 
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for getri based on m
+*/
+extern "C"
+int magma_get_sgetri_nb(int m){
+  return 64;
+}
+
+extern "C"
+int magma_get_dgetri_nb(int m){
+  return 64;
+}
+
+extern "C"
+int magma_get_cgetri_nb(int m){
+  return 64;
+}
+
+extern "C"
+int magma_get_zgetri_nb(int m){
+  return 64;
+}
+
 // ==== End Definition of blocking sizes for Tesla ===========================
 #else
 // ====     Definition of blocking sizes for Fermi ===========================
@@ -810,6 +833,29 @@ int magma_get_chegst_nb(int m){
 */
 extern "C"
 int magma_get_zhegst_nb(int m){
+  return 64;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for getri based on m
+*/
+extern "C"
+int magma_get_sgetri_nb(int m){
+  return 64;
+}
+
+extern "C"
+int magma_get_dgetri_nb(int m){
+  return 64;
+}
+
+extern "C"
+int magma_get_cgetri_nb(int m){
+  return 64;
+}
+
+extern "C"
+int magma_get_zgetri_nb(int m){
   return 64;
 }
 
