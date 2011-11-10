@@ -91,11 +91,14 @@ $(ZMATGEN): $(FRC)
 FRC:
 	@FRC=$(FRC)
 
-clean: ; \
-        rm -f *.o
+clean:
+	rm -f *.o
 
-.f.o: ; $(FORT) $(OPTS) -c $< -o $@
+.f.o:
+	$(FORT) $(FOPTS) -c $< -o $@
 
-slaran.o: slaran.f ; $(FORT) $(NOOPT) -c $<
-dlaran.o: dlaran.f ; $(FORT) $(NOOPT) -c $<
-
+#slaran.o: slaran.f
+#	$(FORT) $(NOOPT) -c $<
+#
+#dlaran.o: dlaran.f
+#	$(FORT) $(NOOPT) -c $<

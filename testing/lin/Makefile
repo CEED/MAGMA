@@ -258,7 +258,7 @@ liblapacktest.a: $(OBJ)
 	$(RANLIB) $@
 
 xlintsts : $(ALINTST) $(SLINTST) $(SCLNTST) ../fortran.o
-	$(FORT) $(LOADOPTS)  $(ALINTST) $(SCLNTST) $(SLINTST) \
+	$(FORT) $(FOPTS)  $(ALINTST) $(SCLNTST) $(SLINTST) \
         ../matgen/$(TMGLIB) -o xlintsts \
 	../fortran.o \
 	$(LDOPTS) -L../../lib \
@@ -266,7 +266,7 @@ xlintsts : $(ALINTST) $(SLINTST) $(SCLNTST) ../fortran.o
         $(LIBDIR) $(LIB) 
 
 xlintstc : $(ALINTST) $(CLINTST) $(SCLNTST) ../fortran.o
-	$(FORT) $(LOADOPTS)  $(ALINTST) $(SCLNTST) $(CLINTST) \
+	$(FORT) $(FOPTS)  $(ALINTST) $(SCLNTST) $(CLINTST) \
         ../matgen/$(TMGLIB) -o xlintstc \
 	../fortran.o \
 	$(LDOPTS) -L../../lib \
@@ -274,7 +274,7 @@ xlintstc : $(ALINTST) $(CLINTST) $(SCLNTST) ../fortran.o
         $(LIBDIR) $(LIB) 
  
 xlintstd : $(ALINTST) $(DLINTST) $(DZLNTST) ../fortran.o
-	$(FORT) $(LOADOPTS) $(ALINTST) $(DLINTST) $(DZLNTST) \
+	$(FORT) $(FOPTS) $(ALINTST) $(DLINTST) $(DZLNTST) \
         ../matgen/$(TMGLIB) -o xlintstd -lmagma \
 	../fortran.o \
 	$(LDOPTS) -L../../lib \
@@ -282,7 +282,7 @@ xlintstd : $(ALINTST) $(DLINTST) $(DZLNTST) ../fortran.o
         $(LIBDIR) $(LIB) 
  
 xlintstz : $(ALINTST) $(ZLINTST) $(DZLNTST) ../fortran.o
-	$(FORT) $(LOADOPTS)  $(ALINTST) $(DZLNTST) $(ZLINTST) \
+	$(FORT) $(FOPTS)  $(ALINTST) $(DZLNTST) $(ZLINTST) \
         ../matgen/$(TMGLIB) -o xlintstz \
 	../fortran.o \
 	$(LDOPTS) -L../../lib \
@@ -308,20 +308,19 @@ cleanall: clean
 
 schkaa.o: schkaa.f
 	cp ../../control/magma.mod . 
-	$(FORT) $(DRVOPTS) -c $< -o $@
+	$(FORT) $(FOPTS) -c $< -o $@
+
 dchkaa.o: dchkaa.f
-	$(FORT) $(DRVOPTS) -c $< -o $@
+	$(FORT) $(FOPTS) -c $< -o $@
+
 cchkaa.o: cchkaa.f
-	$(FORT) $(DRVOPTS) -c $< -o $@
+	$(FORT) $(FOPTS) -c $< -o $@
+
 zchkaa.o: zchkaa.f
-	$(FORT) $(DRVOPTS) -c $< -o $@
+	$(FORT) $(FOPTS) -c $< -o $@
  
 .f.o: 
-	$(FORT) $(OPTS) $(INC) -c $< -o $@
+	$(FORT) $(FOPTS) $(INC) -c $< -o $@
 
 ../fortran.o : $(CUDADIR)/src/fortran.c
 	$(CC) $(OPTS) $(INC) -c $< -o $@
-
-
-
-
