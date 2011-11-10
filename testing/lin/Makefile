@@ -274,7 +274,7 @@ xlintstc : $(ALINTST) $(CLINTST) $(SCLNTST) ../fortran.o
         $(LIBDIR) $(LIB) 
  
 xlintstd : $(ALINTST) $(DLINTST) $(DZLNTST) ../fortran.o
-	$(FORT) $(LOADOPTS) $^ \
+	$(FORT) $(LOADOPTS) $(ALINTST) $(DLINTST) $(DZLNTST) \
         ../matgen/$(TMGLIB) -o xlintstd -lmagma \
 	../fortran.o \
 	$(LDOPTS) -L../../lib \
