@@ -26,10 +26,15 @@
 // === End defining what BLAS to use ======================================
 
 // ========================================================================
-// definition of a non-GPU-resident subroutine
+// definition of a non-GPU-resident interface to a single GPU
 extern "C" magma_int_t 
 magma_zpotrf_ooc(char uplo, magma_int_t n, 
                 cuDoubleComplex *a, magma_int_t lda, magma_int_t *info);
+
+// definition of a non-GPU-resident interface to multiple GPUs
+extern "C" magma_int_t
+magma_zpotrf2_ooc(magma_int_t num_gpus, char uplo, magma_int_t n,
+                  cuDoubleComplex *a, magma_int_t lda, magma_int_t *info);
 // ========================================================================
 
 #define A(i, j)  (a   +(j)*lda  + (i))
@@ -127,11 +132,22 @@ magma_zpotrf(char uplo, magma_int_t n,
     if ( n == 0 )
       return MAGMA_SUCCESS;
 
+    char * num_gpus_char = getenv("MAGMA_NUM_GPUS");
+    magma_int_t num_gpus = 1;
+
+    if( num_gpus_char != NULL ) {
+      num_gpus = atoi(num_gpus_char);
+    }
+    if( num_gpus > 1 ) {
+      /* call multiple-GPU interface  */
+      return magma_zpotrf2_ooc(num_gpus, uplo, n, a, lda, info);
+    }
+
     ldda = ((n+31)/32)*32;
     
     if (CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*ldda, sizeof(cuDoubleComplex), (void**)&work)) {
-                /* alloc failed so call the non-GPU-resident version */
-                return magma_zpotrf_ooc( uplo, n, a, lda, info);
+        /* alloc failed so call the non-GPU-resident version */
+        return magma_zpotrf_ooc( uplo, n, a, lda, info);
     }
 
     static cudaStream_t stream[2];
@@ -143,6 +159,7 @@ magma_zpotrf(char uplo, magma_int_t n,
     if (nb <= 1 || nb >= n) {
         lapackf77_zpotrf(uplo_, &n, a, &lda, info);
     } else {
+
 
         /* Use hybrid blocked code. */
         if (upper) {

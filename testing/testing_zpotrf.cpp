@@ -42,9 +42,10 @@ int main( int argc, char** argv)
     double           flops, gpu_perf, cpu_perf;
     cuDoubleComplex *h_A, *h_R;
     magma_int_t      N=0, n2, lda;
-    magma_int_t      size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10240};
+    magma_int_t      size[13] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10240,20000,30000,40000};
+    magma_int_t      size_n = 13;
 
-    magma_int_t  i, info;
+    magma_int_t  i, info, flag = 0;
     const char  *uplo     = MagmaLowerStr;
     cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
     magma_int_t  ione     = 1;
@@ -54,26 +55,34 @@ int main( int argc, char** argv)
 
     if (argc != 1){
         for(i = 1; i<argc; i++){
-            if (strcmp("-N", argv[i])==0)
-                N = atoi(argv[++i]);
+            if (strcmp("-N", argv[i])==0) {
+                flag = 1;
+                size[0] = size[size_n-1] = atoi(argv[++i]);
+             } if (strcmp("-UPLO", argv[i])==0)
+              if (strcmp("U", argv[++i])) uplo = MagmaUpperStr;
         }
-        if (N>0) size[0] = size[9] = N;
-        else exit(1);
     }
-    else {
+    N = size[size_n-1];
+    if (N<=0) {
+      printf( "N=%d\n",N );
+      exit(1);
+    } else {
         printf("\nUsage: \n");
-        printf("  testing_zpotrf -N %d\n\n", 1024);
+        if (strcmp(MagmaLowerStr,uplo) )
+        printf("  testing_zpotrf -UPLO L -N %d:%d\n\n", size[0],size[size_n-1]);
+        else
+        printf("  testing_zpotrf -UPLO U -N %d:%d\n\n", size[0],size[size_n-1]);
     }
 
     /* Allocate host memory for the matrix */
-    n2 = size[9] * size[9];
+    n2 = N * N;
     TESTING_MALLOC(    h_A, cuDoubleComplex, n2);
     TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2);
 
     printf("\n\n");
     printf("  N    CPU GFlop/s    GPU GFlop/s    ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
     printf("========================================================\n");
-    for(i=0; i<10; i++){
+    for(i=0; i<size_n; i++){
         N     = size[i];
         lda   = N;
         n2    = lda*N;
@@ -97,8 +106,8 @@ int main( int argc, char** argv)
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-        magma_zpotrf(uplo[0], N, h_R, lda, &info);
-        lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
+        //magma_zpotrf(uplo[0], N, h_R, lda, &info);
+        //lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
 
         start = get_current_time();
         magma_zpotrf(uplo[0], N, h_R, lda, &info);
@@ -128,7 +137,7 @@ int main( int argc, char** argv)
                size[i], cpu_perf, gpu_perf,
                lapackf77_zlange("f", &N, &N, h_R, &N, work) / matnorm );
 
-        if (argc != 1)
+        if (flag == 1)
             break;
     }
 
