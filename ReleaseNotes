@@ -36,6 +36,7 @@ Included are routines for the following algorithms:
     * Add zgemm for Fermi obtained using autotuning
     * Add non-GPU-resident versions of [zcds]geqrf, [zcds]potrf, and [zcds]getrf
     * Add [zcds]gesv and [zcds]posv in CPU interface. GPU interface was already in 1.0
+    * Add LAPACK linear equation testing code 
 
  1.0.0 - August 25th, 2011
     * Fix make.inc.mkl (Thanks to ar1309)
