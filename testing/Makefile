@@ -78,7 +78,12 @@ EXE      = $(ALLOBJ:.o=)
 
 all: $(EXE)
 
-$(EXE): $(LIBMAGMA) $(LIBMAGMABLAS)
+LIBLAPACKTEST = lin/liblapacktest.a
+
+$(LIBLAPACKTEST):
+	cd lin && make liblapacktest.a
+
+$(EXE): $(LIBMAGMA) $(LIBMAGMABLAS) $(LIBLAPACKTEST)
 
 clean:
 	rm -f *.o *~
