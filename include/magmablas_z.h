@@ -29,12 +29,17 @@ void magmablas_zpermute_long(     cuDoubleComplex *, magma_int_t,
                   magma_int_t *, magma_int_t, magma_int_t);
 void magmablas_zpermute_long2(    cuDoubleComplex *, magma_int_t, 
                   magma_int_t *, magma_int_t, magma_int_t);
+void magmablas_zpermute_long3( cuDoubleComplex *dAT, int lda, 
+                               int *ipiv, int nb, int ind );
 void magmablas_ztranspose(        cuDoubleComplex *, magma_int_t, 
                   cuDoubleComplex *, magma_int_t, 
                   magma_int_t, magma_int_t);
 void magmablas_ztranspose2(       cuDoubleComplex *, magma_int_t, 
                   cuDoubleComplex *, magma_int_t, 
                   magma_int_t, magma_int_t);
+void magmablas_ztranspose2s(cuDoubleComplex *odata, int ldo,
+                       cuDoubleComplex *idata, int ldi,
+                       int m, int n, cudaStream_t *stream );
 
 void magmablas_zgetmatrix_transpose(  int m, int n,
                                       cuDoubleComplex *dat, int ldda,

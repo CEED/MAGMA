@@ -19,16 +19,6 @@
 #endif
 // === End defining what BLAS to use =======================================
 
-/* to appy pivoting from the previous big-panel: need some index-adjusting */
-extern "C" void
-magmablas_zpermute_long3( cuDoubleComplex *dAT, int lda, int *ipiv, int nb, int ind );
-
-extern "C" void
-magmablas_ztranspose2s(cuDoubleComplex *odata, int ldo,
-                       cuDoubleComplex *idata, int ldi,
-                       int m, int n, cudaStream_t *stream );
-
-
 extern "C" magma_int_t
 magma_zgetrf3(magma_int_t num_gpus, 
               magma_int_t m, magma_int_t n, 
@@ -66,13 +56,13 @@ magma_zgetrf3(magma_int_t num_gpus,
     N       (input) INTEGER
             The number of columns of the matrix A.  N >= 0.
 
-    A       (input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N).
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N).
             On entry, the M-by-N matrix to be factored.
             On exit, the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
 
-    LDDA     (input) INTEGER
-            The leading dimension of the array A.  LDDA >= max(1,M).
+    LDA     (input) INTEGER
+            The leading dimension of the array A.  LDA >= max(1,M).
 
     IPIV    (output) INTEGER array, dimension (min(M,N))
             The pivot indices; for 1 <= i <= min(M,N), row i of the
@@ -137,7 +127,6 @@ magma_zgetrf3(magma_int_t num_gpus,
           }
 
           cuDoubleComplex *d_lA[4];
-          magma_int_t ldda;
 
           /* allocate workspace for each GPU */
           for(i=0; i<num_gpus; i++)
