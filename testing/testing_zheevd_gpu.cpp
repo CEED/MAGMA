@@ -109,6 +109,10 @@ int main( int argc, char** argv)
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
+        for(int k=0;k<N;k++)
+        {
+            h_A[k+k*N].y = 0.0;
+        }
         cublasSetMatrix(N, N, sizeof(cuDoubleComplex), h_A, N, d_R, N);
 
         magma_zheevd_gpu(jobz[0], uplo[0],
