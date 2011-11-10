@@ -118,11 +118,6 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
     /* Function Body */
     mindim = min(m, n);
     nb     = magma_get_zgetrf_nb(m);
-    if( num_gpus > ceil((double)n/nb) ) {
-          printf( " * too many GPUs for the matrix size, using %d GPUs\n",num_gpus );
-          *info = -1;
-          return MAGMA_ERR_ILLEGAL_VALUE;
-        }
 
         if (nb <= 1 || nb >= n) {
           /* Use CPU code. */
@@ -134,6 +129,11 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
     } else {
           /* Use hybrid blocked code. */
           maxm = ((m + 31)/32)*32;
+          if( num_gpus > ceil((double)n/nb) ) {
+            printf( " * too many GPUs for the matrix size, using %d GPUs\n",num_gpus );
+            *info = -1;
+            return MAGMA_ERR_ILLEGAL_VALUE;
+          }
 
           /* allocate workspace for each GPU */
           for(i=0; i<num_gpus; i++){

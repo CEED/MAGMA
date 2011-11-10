@@ -121,12 +121,6 @@ magma_zgetrf3(magma_int_t num_gpus,
     mindim = min(m, n);
     nb     = magma_get_zgetrf_nb(m);
 
-    if( num_gpus > ceil((double)n/nb) ) {
-      printf( " * too many GPUs for the matrix size, using %d GPUs\n",num_gpus );
-      *info = -1;
-      return MAGMA_ERR_ILLEGAL_VALUE;
-    }
-
     if (nb <= 1 || nb >= n) 
       {
         /* Use CPU code. */
@@ -136,10 +130,14 @@ magma_zgetrf3(magma_int_t num_gpus,
       {
           /* Use hybrid blocked code. */
           maxm = ((m + 31)/32)*32;
+          if( num_gpus > ceil((double)n/nb) ) {
+            printf( " * too many GPUs for the matrix size, using %d GPUs\n",num_gpus );
+            *info = -1;
+            return MAGMA_ERR_ILLEGAL_VALUE;
+          }
 
           cuDoubleComplex *d_lA[4];
           magma_int_t ldda;
-          magma_timestr_t       start, end;
 
           /* allocate workspace for each GPU */
           for(i=0; i<num_gpus; i++)
@@ -207,8 +205,10 @@ magma_zgetrf3(magma_int_t num_gpus,
           work = a;
           lddwork = lda;
 
+#ifdef ROW_MAJOR_PROFILE
+          magma_timestr_t       start, end;
           start = get_current_time();
-
+#endif
           s = mindim / nb;
           for( i=0; i<s; i++ )
             {
@@ -422,9 +422,10 @@ magma_zgetrf3(magma_int_t num_gpus,
             }
           } /* end of for d=1,..,num_gpus */
 
+#ifdef ROW_MAJOR_PROFILE
           end = get_current_time();
           printf("\n Performance %f GFlop/s\n", (2./3.*n*n*n /1000000.) / GetTimerValue(start, end));
-
+#endif
           /* save on output */
           magmablas_zgetmatrix_transpose2( m, n, d_lAT, ldat_local, a, lda,
               d_lA, maxm, nb, num_gpus, streaml );

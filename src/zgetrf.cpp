@@ -28,6 +28,13 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
 extern "C" magma_int_t
 magma_zgetrf_piv(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
                                  magma_int_t *ipiv, magma_int_t *info);
+
+// definitions of multiple-GPU subroutine
+extern "C" magma_int_t
+magma_zgetrf3(magma_int_t num_gpus,
+              magma_int_t m, magma_int_t n,
+              cuDoubleComplex *a, magma_int_t lda,
+              magma_int_t *ipiv, magma_int_t *info);
 // =========================================================================
 
 
@@ -124,6 +131,14 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
         /* Use hybrid blocked code. */
         magma_int_t maxm, maxn, ldda, maxdim;
         magma_int_t i, rows, cols, s = min(m, n)/nb;
+        char * num_gpus_char = getenv("MAGMA_NUM_GPUS");
+        magma_int_t num_gpus = 1;
+
+        if( num_gpus_char != NULL ) num_gpus = atoi(num_gpus_char);
+        if( num_gpus > 1 ) {
+          /* call multiple-GPU interface  */
+          return magma_zgetrf3(num_gpus, m, n, a, lda, ipiv, info);
+        }
 
         maxm = ((m + 31)/32)*32;
         maxn = ((n + 31)/32)*32;
