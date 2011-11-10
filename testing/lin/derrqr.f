@@ -92,19 +92,20 @@
 *
 *     DGEQRFP
 *
-      SRNAMT = 'DGEQRFP'
-      INFOT = 1
-      CALL DGEQRFP( -1, 0, A, 1, B, W, 1, INFO )
-      CALL CHKXER( 'DGEQRFP', INFOT, NOUT, LERR, OK )
-      INFOT = 2
-      CALL DGEQRFP( 0, -1, A, 1, B, W, 1, INFO )
-      CALL CHKXER( 'DGEQRFP', INFOT, NOUT, LERR, OK )
-      INFOT = 4
-      CALL DGEQRFP( 2, 1, A, 1, B, W, 1, INFO )
-      CALL CHKXER( 'DGEQRFP', INFOT, NOUT, LERR, OK )
-      INFOT = 7
-      CALL DGEQRFP( 1, 2, A, 1, B, W, 1, INFO )
-      CALL CHKXER( 'DGEQRFP', INFOT, NOUT, LERR, OK )
+* GEQRFP doesn't exist in slightly older MKL; comment out [mgates]
+*      SRNAMT = 'DGEQRFP'
+*      INFOT = 1
+*      CALL DGEQRFP( -1, 0, A, 1, B, W, 1, INFO )
+*      CALL CHKXER( 'DGEQRFP', INFOT, NOUT, LERR, OK )
+*      INFOT = 2
+*      CALL DGEQRFP( 0, -1, A, 1, B, W, 1, INFO )
+*      CALL CHKXER( 'DGEQRFP', INFOT, NOUT, LERR, OK )
+*      INFOT = 4
+*      CALL DGEQRFP( 2, 1, A, 1, B, W, 1, INFO )
+*      CALL CHKXER( 'DGEQRFP', INFOT, NOUT, LERR, OK )
+*      INFOT = 7
+*      CALL DGEQRFP( 1, 2, A, 1, B, W, 1, INFO )
+*      CALL CHKXER( 'DGEQRFP', INFOT, NOUT, LERR, OK )
 *
 *     DGEQR2
 *
@@ -121,16 +122,17 @@
 *
 *     DGEQR2P
 *
-      SRNAMT = 'DGEQR2P'
-      INFOT = 1
-      CALL DGEQR2P( -1, 0, A, 1, B, W, INFO )
-      CALL CHKXER( 'DGEQR2P', INFOT, NOUT, LERR, OK )
-      INFOT = 2
-      CALL DGEQR2P( 0, -1, A, 1, B, W, INFO )
-      CALL CHKXER( 'DGEQR2P', INFOT, NOUT, LERR, OK )
-      INFOT = 4
-      CALL DGEQR2P( 2, 1, A, 1, B, W, INFO )
-      CALL CHKXER( 'DGEQR2P', INFOT, NOUT, LERR, OK )
+* GEQR2P doesn't exist in slightly older MKL; comment out [mgates]
+*      SRNAMT = 'DGEQR2P'
+*      INFOT = 1
+*      CALL DGEQR2P( -1, 0, A, 1, B, W, INFO )
+*      CALL CHKXER( 'DGEQR2P', INFOT, NOUT, LERR, OK )
+*      INFOT = 2
+*      CALL DGEQR2P( 0, -1, A, 1, B, W, INFO )
+*      CALL CHKXER( 'DGEQR2P', INFOT, NOUT, LERR, OK )
+*      INFOT = 4
+*      CALL DGEQR2P( 2, 1, A, 1, B, W, INFO )
+*      CALL CHKXER( 'DGEQR2P', INFOT, NOUT, LERR, OK )
 *
 *     DGEQRS
 *

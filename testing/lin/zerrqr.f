@@ -94,19 +94,20 @@
 *
 *     ZGEQRFP
 *
-      SRNAMT = 'ZGEQRFP'
-      INFOT = 1
-      CALL ZGEQRFP( -1, 0, A, 1, B, W, 1, INFO )
-      CALL CHKXER( 'ZGEQRFP', INFOT, NOUT, LERR, OK )
-      INFOT = 2
-      CALL ZGEQRFP( 0, -1, A, 1, B, W, 1, INFO )
-      CALL CHKXER( 'ZGEQRFP', INFOT, NOUT, LERR, OK )
-      INFOT = 4
-      CALL ZGEQRFP( 2, 1, A, 1, B, W, 1, INFO )
-      CALL CHKXER( 'ZGEQRFP', INFOT, NOUT, LERR, OK )
-      INFOT = 7
-      CALL ZGEQRFP( 1, 2, A, 1, B, W, 1, INFO )
-      CALL CHKXER( 'ZGEQRFP', INFOT, NOUT, LERR, OK )
+* GEQRFP doesn't exist in slightly older MKL; comment out [mgates]
+*      SRNAMT = 'ZGEQRFP'
+*      INFOT = 1
+*      CALL ZGEQRFP( -1, 0, A, 1, B, W, 1, INFO )
+*      CALL CHKXER( 'ZGEQRFP', INFOT, NOUT, LERR, OK )
+*      INFOT = 2
+*      CALL ZGEQRFP( 0, -1, A, 1, B, W, 1, INFO )
+*      CALL CHKXER( 'ZGEQRFP', INFOT, NOUT, LERR, OK )
+*      INFOT = 4
+*      CALL ZGEQRFP( 2, 1, A, 1, B, W, 1, INFO )
+*      CALL CHKXER( 'ZGEQRFP', INFOT, NOUT, LERR, OK )
+*      INFOT = 7
+*      CALL ZGEQRFP( 1, 2, A, 1, B, W, 1, INFO )
+*      CALL CHKXER( 'ZGEQRFP', INFOT, NOUT, LERR, OK )
 *
 *     ZGEQR2
 *
@@ -123,16 +124,17 @@
 *
 *     ZGEQR2P
 *
-      SRNAMT = 'ZGEQR2P'
-      INFOT = 1
-      CALL ZGEQR2P( -1, 0, A, 1, B, W, INFO )
-      CALL CHKXER( 'ZGEQR2P', INFOT, NOUT, LERR, OK )
-      INFOT = 2
-      CALL ZGEQR2P( 0, -1, A, 1, B, W, INFO )
-      CALL CHKXER( 'ZGEQR2P', INFOT, NOUT, LERR, OK )
-      INFOT = 4
-      CALL ZGEQR2P( 2, 1, A, 1, B, W, INFO )
-      CALL CHKXER( 'ZGEQR2P', INFOT, NOUT, LERR, OK )
+* GEQR2P doesn't exist in slightly older MKL; comment out [mgates]
+*      SRNAMT = 'ZGEQR2P'
+*      INFOT = 1
+*      CALL ZGEQR2P( -1, 0, A, 1, B, W, INFO )
+*      CALL CHKXER( 'ZGEQR2P', INFOT, NOUT, LERR, OK )
+*      INFOT = 2
+*      CALL ZGEQR2P( 0, -1, A, 1, B, W, INFO )
+*      CALL CHKXER( 'ZGEQR2P', INFOT, NOUT, LERR, OK )
+*      INFOT = 4
+*      CALL ZGEQR2P( 2, 1, A, 1, B, W, INFO )
+*      CALL CHKXER( 'ZGEQR2P', INFOT, NOUT, LERR, OK )
 *
 *     ZGEQRS
 *

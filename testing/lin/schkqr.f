@@ -247,8 +247,9 @@
 *
 *                       Test SGEQRFP
 *
-                        CALL SQRT01P( M, N, A, AF, AQ, AR, LDA, TAU,
-     $                               WORK, LWORK, RWORK, RESULT( 8 ) )
+** GEQRFP, called by QRT01P, doesn't exist in slightly older MKL; comment out [mgates]
+**                        CALL SQRT01P( M, N, A, AF, AQ, AR, LDA, TAU,
+**     $                               WORK, LWORK, RWORK, RESULT( 8 ) )
 
                          IF( .NOT. SGENND( M, N, AF, LDA ) )
      $                       RESULT( 9 ) = 2*THRESH

@@ -92,19 +92,20 @@
 *
 *     SGEQRFP
 *
-      SRNAMT = 'SGEQRFP'
-      INFOT = 1
-      CALL SGEQRFP( -1, 0, A, 1, B, W, 1, INFO )
-      CALL CHKXER( 'SGEQRFP', INFOT, NOUT, LERR, OK )
-      INFOT = 2
-      CALL SGEQRFP( 0, -1, A, 1, B, W, 1, INFO )
-      CALL CHKXER( 'SGEQRFP', INFOT, NOUT, LERR, OK )
-      INFOT = 4
-      CALL SGEQRFP( 2, 1, A, 1, B, W, 1, INFO )
-      CALL CHKXER( 'SGEQRFP', INFOT, NOUT, LERR, OK )
-      INFOT = 7
-      CALL SGEQRFP( 1, 2, A, 1, B, W, 1, INFO )
-      CALL CHKXER( 'SGEQRFP', INFOT, NOUT, LERR, OK )
+* GEQRFP doesn't exist in slightly older MKL; comment out [mgates]
+*      SRNAMT = 'SGEQRFP'
+*      INFOT = 1
+*      CALL SGEQRFP( -1, 0, A, 1, B, W, 1, INFO )
+*      CALL CHKXER( 'SGEQRFP', INFOT, NOUT, LERR, OK )
+*      INFOT = 2
+*      CALL SGEQRFP( 0, -1, A, 1, B, W, 1, INFO )
+*      CALL CHKXER( 'SGEQRFP', INFOT, NOUT, LERR, OK )
+*      INFOT = 4
+*      CALL SGEQRFP( 2, 1, A, 1, B, W, 1, INFO )
+*      CALL CHKXER( 'SGEQRFP', INFOT, NOUT, LERR, OK )
+*      INFOT = 7
+*      CALL SGEQRFP( 1, 2, A, 1, B, W, 1, INFO )
+*      CALL CHKXER( 'SGEQRFP', INFOT, NOUT, LERR, OK )
 *
 *     SGEQR2
 *
@@ -121,16 +122,17 @@
 *
 *     SGEQR2P
 *
-      SRNAMT = 'SGEQR2P'
-      INFOT = 1
-      CALL SGEQR2P( -1, 0, A, 1, B, W, INFO )
-      CALL CHKXER( 'SGEQR2P', INFOT, NOUT, LERR, OK )
-      INFOT = 2
-      CALL SGEQR2P( 0, -1, A, 1, B, W, INFO )
-      CALL CHKXER( 'SGEQR2P', INFOT, NOUT, LERR, OK )
-      INFOT = 4
-      CALL SGEQR2P( 2, 1, A, 1, B, W, INFO )
-      CALL CHKXER( 'SGEQR2P', INFOT, NOUT, LERR, OK )
+* GEQR2P doesn't exist in slightly older MKL; comment out [mgates]
+*      SRNAMT = 'SGEQR2P'
+*      INFOT = 1
+*      CALL SGEQR2P( -1, 0, A, 1, B, W, INFO )
+*      CALL CHKXER( 'SGEQR2P', INFOT, NOUT, LERR, OK )
+*      INFOT = 2
+*      CALL SGEQR2P( 0, -1, A, 1, B, W, INFO )
+*      CALL CHKXER( 'SGEQR2P', INFOT, NOUT, LERR, OK )
+*      INFOT = 4
+*      CALL SGEQR2P( 2, 1, A, 1, B, W, INFO )
+*      CALL CHKXER( 'SGEQR2P', INFOT, NOUT, LERR, OK )
 *
 *     SGEQRS
 *
