@@ -14,37 +14,38 @@ all: lib test
 lib: libmagma libmagmablas
 
 libmagma:
-	( cd control     && $(MAKE) )
-	( cd src         && $(MAKE) )
+	( cd control        && $(MAKE) )
+	( cd src            && $(MAKE) )
 
 libmagmablas:
-	( cd magmablas   && $(MAKE) )
+	( cd magmablas      && $(MAKE) )
 
 libquark:
-	( cd quark       && $(MAKE) )
+	( cd quark          && $(MAKE) )
 
 test:
-	( cd testing/lin && $(MAKE) )
-	( cd testing     && $(MAKE) )
+	( cd testing/matgen && $(MAKE) )
+	( cd testing/lin    && $(MAKE) )
+	( cd testing        && $(MAKE) )
 
 clean:
-	( cd include     && $(MAKE) clean )
-	( cd control     && $(MAKE) clean )
-	( cd src         && $(MAKE) clean )
-	( cd testing     && $(MAKE) clean )
-	( cd testing/lin && $(MAKE) clean )
-	( cd magmablas   && $(MAKE) clean ) 
-#	( cd quark       && $(MAKE) clean )
+	( cd include        && $(MAKE) clean )
+	( cd control        && $(MAKE) clean )
+	( cd src            && $(MAKE) clean )
+	( cd testing        && $(MAKE) clean )
+	( cd testing/lin    && $(MAKE) clean )
+	( cd magmablas      && $(MAKE) clean ) 
+#	( cd quark          && $(MAKE) clean )
 
 cleanall:
-	( cd include     && $(MAKE) cleanall )
-	( cd control     && $(MAKE) cleanall )
-	( cd src         && $(MAKE) cleanall )
-	( cd testing     && $(MAKE) cleanall )
-	( cd testing/lin && $(MAKE) cleanall )
-	( cd magmablas   && $(MAKE) cleanall ) 
-	( cd lib         && rm -f *.a )
-#	( cd quark       && $(MAKE) cleanall )
+	( cd include        && $(MAKE) cleanall )
+	( cd control        && $(MAKE) cleanall )
+	( cd src            && $(MAKE) cleanall )
+	( cd testing        && $(MAKE) cleanall )
+	( cd testing/lin    && $(MAKE) cleanall )
+	( cd magmablas      && $(MAKE) cleanall ) 
+	( cd lib            && rm -f *.a )
+#	( cd quark          && $(MAKE) cleanall )
 	$(MAKE) cleanall2
 
 # cleanall2 is a dummy rule to run cleangen at the *end* of make cleanall, so
