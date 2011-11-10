@@ -165,22 +165,18 @@ sgemvt_kernel1_fermi(magma_int_t m, magma_int_t n, float alpha, magma_int_t n1, 
                 }
         }        
 
-    sdata[tx] = res;
+        sdata[tx] = res;
         __syncthreads();
     
-    /*
-        if(tx < 128) 
+        
+        for(int s=blockDim.x/2;s>32;s>>=1) 
         {
-                sdata[tx] += sdata[tx + 128];
+                if(tx<s)
+                {
+                    sdata[tx] += sdata[tx + s];
+                }
+                 __syncthreads();
         }
-    __syncthreads();
-        */
-
-        if(tx < 64) 
-        {
-                sdata[tx] += sdata[tx + 64];
-        }
-    __syncthreads();
 
         if(tx < 32)
         {
@@ -378,9 +374,6 @@ magmablas_sgemvt_fermi(magma_int_t m, magma_int_t n, float alpha, float *A, magm
 
     ===================================================================== */
 
-    if (n<=128)
-      magmablas_sgemvt2_fermi(m, n, alpha, A, lda, x, y);
-    else
       magmablas_sgemvt1_fermi(m, n, alpha, A, lda, x, y);
     
 
