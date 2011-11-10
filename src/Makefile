@@ -15,6 +15,8 @@ ZSRC  = zpotrf.cpp	\
         zpotrf_gpu.cpp	\
         zpotrf_ooc.cpp	\
         zpotrf_mgpu.cpp \
+        zpotrf2_ooc.cpp \
+        zpotrf2_mgpu.cpp \
         zpotrs_gpu.cpp	\
         zposv.cpp	\
         zposv_gpu.cpp	\
@@ -25,7 +27,7 @@ ZSRC  = zpotrf.cpp	\
         zgetrf-v2.cpp   \
         zgetrf-v3.cpp   \
         zgetrf_gpu.cpp 	\
-        zgetrf_mgpu.cpp \
+        zgetrf_mgpu-trace.cpp \
         zgetrf_nopiv.cpp\
         zgetrf2_ooc.cpp \
 	zgetf2_nopiv.cpp\
@@ -42,7 +44,7 @@ ZSRC  = zpotrf.cpp	\
         zgelqf_gpu.cpp  \
         zungqr.cpp	\
 	zgeqrf_gpu.cpp  \
-        zgeqrf_mgpu.cpp \
+        zgeqrf_mgpu-trace.cpp \
 	zgeqrf2_gpu.cpp	\
 	zgeqrf3_gpu.cpp \
 	zgeqrs_gpu.cpp	\
