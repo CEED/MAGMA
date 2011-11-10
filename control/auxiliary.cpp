@@ -139,15 +139,17 @@ void printout_devices( )
 #endif
 
       int clock;
+      int major, minor;
       CUdevice dev;
 
       cuDeviceGet( &dev, idevice );
       cuDeviceGetName( name, sizeof(name), dev );
+      cuDeviceComputeCapability( &major, &minor, dev );
       cuDeviceTotalMem( &totalMem, dev );
       cuDeviceGetAttribute( &clock,
                             CU_DEVICE_ATTRIBUTE_CLOCK_RATE, dev );
-      printf( "device %d: %s, %.1f MHz clock, %.1f MB memory\n",
-              idevice, name, clock/1000.f, totalMem/1024.f/1024.f );
+      printf( "device %d: %s, %.1f MHz clock, %.1f MB memory, capability %d.%d\n",
+              idevice, name, clock/1000.f, totalMem/1024.f/1024.f, major, minor );
     }
 }
 
