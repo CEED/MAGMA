@@ -173,6 +173,7 @@ subs = {
     ('ssyevd','dsyevd','cheevd','zheevd'),
     ('SSYEVD','DSYEVD','CHEEVD','ZHEEVD'),
     ('ssygvd','dsygvd','chegvd','zhegvd'),
+    ('ssygvx','dsygvx','chegvx','zhegvx'),
     ('SSYGVD','DSYGVD','CHEGVD','ZHEGVD'),
     ('ssygst','dsygst','chegst','zhegst'),
     ('SSYGST','DSYGST','CHEGST','ZHEGST'),
