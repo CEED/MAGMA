@@ -70,7 +70,7 @@ magma_zunghr(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
             < 0:  if INFO = -i, the i-th argument had an illegal value   
     ===================================================================== */
 
-    #define a_ref(i,j)( a + (j)*lda+ (i))
+    #define a_ref(i,j) (a + (j)*lda+ (i))
 
     magma_int_t i, j, nh, iinfo;
 
