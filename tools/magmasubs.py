@@ -268,6 +268,7 @@ subs = {
     ('SORGLQ','DORGLQ','CUNGLQ','ZUNGLQ'),
     ('sorg2r','dorg2r','cung2r','zung2r'),
     ('sorgqr','dorgqr','cungqr','zungqr'),
+    ('sorgql','dorgql','cungql','zungql'),
     ('SORGQR','DORGQR','CUNGQR','ZUNGQR'),
     ('sorgtr','dorgtr','cungtr','zungtr'),
     ('sorgbr','dorgbr','cungbr','zungbr'),
