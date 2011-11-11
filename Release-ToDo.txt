@@ -273,13 +273,30 @@ while using magma blas I get
                            Using cublasSgemm is fine. I had to
                            comment out the use of MAGMABLAS in slarfb_gpu.
 ---------------------------------------------------------------------------------
-37               Tim?      The fast chemv in cheevd_gpu gives me bugs in 
+37  Done          Tim?      The fast chemv in cheevd_gpu gives me bugs in 
                            ./testing_chegvd -N 2048 
                            If error checking is on and we don't want eigenvectors
                            the code aborts at line 326 of file cheevd_gpu.cpp
 
+Usage: 
+testing_chegvd -L/U -N 1024 -itype 1
+
+N     CPU Time(s)    GPU Time(s) 				
+===================================
+2048       5.33           1.53
+Testing the eigenvalues and eigenvectors for correctness:
+(1)    | A Z - B Z D | / (|A| |Z| N) = 2.519331e-10
+(2)    | I -   Z Z' B | /  N      = 1.145142e-07
+(3)    | D(w/ Z)-D(w/o Z)|/ |D| = 9.957464e-07
+
+4100      42.12           8.68
+Testing the eigenvalues and eigenvectors for correctness:
+(1)    | A Z - B Z D | / (|A| |Z| N) = 9.128681e-11
+(2)    | I -   Z Z' B | /  N      = 9.378431e-08
+(3)    | D(w/ Z)-D(w/o Z)|/ |D| = 3.279687e-07
 
 
+---------------------------------------------------------------------------------
 
                            Status of src directory 
                            
