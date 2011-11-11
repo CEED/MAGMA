@@ -79,6 +79,7 @@ ZSRC  = zpotrf.cpp	\
         dgeev.cpp       \
         zheevd.cpp      \
         zheevd_gpu.cpp  \
+	zheevdx_gpu.cpp \
 	zheevr.cpp      \
 	zheevr_gpu.cpp  \
 	zheevx.cpp      \
