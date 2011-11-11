@@ -91,9 +91,12 @@ extern "C" {
 #define lapackf77_zpotrs   FORTRAN_NAME( zpotrs, ZPOTRS )
 #define lapackf77_zpotri   FORTRAN_NAME( zpotri, ZPOTRI )
 #define lapackf77_ztrevc   FORTRAN_NAME( ztrevc, ZTREVC )
+#define lapackf77_dstebz   FORTRAN_NAME( dstebz, DSTEBZ )
 #define lapackf77_ztrtri   FORTRAN_NAME( ztrtri, ZTRTRI )
 #define lapackf77_zsteqr   FORTRAN_NAME( zsteqr, ZSTEQR )
 #define lapackf77_zstedc   FORTRAN_NAME( zstedc, ZSTEDC )
+#define lapackf77_zstein   FORTRAN_NAME( zstein, ZSTEIN )
+#define lapackf77_zstemr   FORTRAN_NAME( zstemr, ZSTEMR )
 #define lapackf77_zsymv    FORTRAN_NAME( zsymv,  ZSYMV  )
 #define lapackf77_zung2r   FORTRAN_NAME( zung2r, ZUNG2R )
 #define lapackf77_zungbr   FORTRAN_NAME( zungbr, ZUNGBR )
@@ -342,6 +345,11 @@ void    lapackf77_ztrevc(const char *side, const char *howmny, magma_int_t *sele
                          cuDoubleComplex *T,  magma_int_t *ldt,  cuDoubleComplex *VL, magma_int_t *ldvl,
                          cuDoubleComplex *VR, magma_int_t *ldvr, magma_int_t *MM, magma_int_t *M, 
                          cuDoubleComplex *work, DWORKFORZ magma_int_t *info);
+void    lapackf77_dstebz(char *range, char *order, magma_int_t *n, double *vl, double *vu,
+                         magma_int_t *il, magma_int_t *iu, double *abstol,
+                         double *d__, double *e, magma_int_t *m, magma_int_t *nsplit,
+                         double *w, magma_int_t *iblock, magma_int_t *isplit, double *work,
+                         magma_int_t *iwork, magma_int_t *info);
 void    lapackf77_zsteqr(const char *compz, magma_int_t *n, double *D, double *E, 
                          cuDoubleComplex *Z, magma_int_t *ldz, 
                          double *work, magma_int_t *info);
@@ -350,6 +358,15 @@ void    lapackf77_zstedc(const char *compz, magma_int_t *n, double *D, double *E
                          cuDoubleComplex *work, magma_int_t *ldwork, 
                          DWORKFORZ_AND_LD magma_int_t *iwork, magma_int_t *liwork,
                          magma_int_t *info);
+void    lapackf77_zstein(magma_int_t *n, double *d__, double *e, 
+                         magma_int_t *m, double *w, magma_int_t *iblock, magma_int_t *isplit, 
+                         cuDoubleComplex *z__, magma_int_t *ldz, double *work, magma_int_t *iwork, 
+                         magma_int_t *ifail, magma_int_t *info);
+void    lapackf77_zstemr(char *jobz, char *range, magma_int_t *n, double *d__, double *e, 
+                         double *vl, double *vu, magma_int_t *il, magma_int_t *iu, magma_int_t *m,
+                         double *w, cuDoubleComplex *z__, magma_int_t *ldz, magma_int_t *nzc, 
+                         magma_int_t *isuppz, magma_int_t *tryrac, double *work, magma_int_t *lwork, 
+                         magma_int_t *iwork, magma_int_t *liwork, magma_int_t *info);
 void    lapackf77_ztrtri(const char *uplo, const char *diag, magma_int_t *n,
                          cuDoubleComplex *a, magma_int_t *lda, magma_int_t *info);
 #if defined(PRECISION_z) || defined(PRECISION_c)
