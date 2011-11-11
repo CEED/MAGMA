@@ -68,8 +68,7 @@ magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
     November 2010
    
     Purpose   
-    =======   
-
+    =======
     ZHEEVR computes selected eigenvalues and, optionally, eigenvectors   
     of a complex Hermitian matrix T.  Eigenvalues and eigenvectors can   
     be selected by specifying either a range of values or a range of   
