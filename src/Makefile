@@ -38,6 +38,7 @@ ZSRC  = zpotrf.cpp	\
         zgetri_gpu.cpp 	\
 	\
 	zgeqrf.cpp	\
+	zgeqrf-v4.cpp   \
         zgeqrf_ooc.cpp  \
 	zgeqlf.cpp	\
 	zgelqf.cpp	\
