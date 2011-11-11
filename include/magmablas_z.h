@@ -59,6 +59,14 @@ void magmablas_zsetmatrix_transpose2( int m, int n,
                                       cuDoubleComplex **dat, int *ldda,
                                       cuDoubleComplex **dB,  int  lddb, int nb,
                                       int num_gpus, cudaStream_t stream[][2] );
+void magmablas_zgetmatrix_1D_bcyclic( int m, int n,
+                                      cuDoubleComplex  *da[], int ldda,
+                                      cuDoubleComplex  *ha, int lda,
+                                      int num_gpus, int nb );
+void magmablas_zsetmatrix_1D_bcyclic( int m, int n,
+                                      cuDoubleComplex  *ha, int lda,
+                                      cuDoubleComplex  *da[], int ldda,
+                                      int num_gpus, int nb );
 
   /*
    * LAPACK auxiliary functions
