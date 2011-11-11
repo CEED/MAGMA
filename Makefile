@@ -23,9 +23,11 @@ libmagmablas:
 libquark:
 	( cd quark          && $(MAKE) )
 
-test:
+lapacktest:
 	( cd testing/matgen && $(MAKE) )
 	( cd testing/lin    && $(MAKE) )
+
+test:
 	( cd testing        && $(MAKE) )
 
 clean:

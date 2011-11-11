@@ -44,6 +44,7 @@ ZSRC  = zpotrf.cpp	\
 	zgelqf.cpp	\
         zgelqf_gpu.cpp  \
         zungqr.cpp	\
+        zungtr.cpp      \
 	zungtr_gpu.cpp  \
 	zgeqrf_gpu.cpp  \
         zgeqrf_mgpu-trace.cpp \
