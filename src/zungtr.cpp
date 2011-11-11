@@ -13,7 +13,7 @@
 extern "C" magma_int_t
 magma_zungtr(char uplo, magma_int_t n, cuDoubleComplex *a, 
              magma_int_t lda, cuDoubleComplex *tau, 
-             cuDoubleComplex *work, magma_int_t *lwork,
+             cuDoubleComplex *work, magma_int_t lwork,
              cuDoubleComplex *dT, magma_int_t nb, 
              magma_int_t *info)
 {
@@ -87,16 +87,13 @@ magma_zungtr(char uplo, magma_int_t n, cuDoubleComplex *a,
 
     char uplo_[2]  = {uplo, 0};
     
-    magma_int_t a_offset, i__1;
+    magma_int_t i__1;
     static magma_int_t i, j;
     static magma_int_t iinfo;
     magma_int_t upper, lwkopt, lquery;
 
-    a_offset = 1 + lda;
-    a -= a_offset;
-
     *info = 0;
-    lquery = *lwork == -1;
+    lquery = lwork == -1;
     upper = lapackf77_lsame(uplo_, "U");
     if (! upper && ! lapackf77_lsame(uplo_, "L")) {
         *info = -1;
@@ -106,7 +103,7 @@ magma_zungtr(char uplo, magma_int_t n, cuDoubleComplex *a,
         *info = -4;
     } else /* if(complicated condition) */ {
         /* Computing MAX */
-        if (*lwork < max(1, n-1) && ! lquery) {
+        if (lwork < max(1, n-1) && ! lquery) {
             *info = -7;
         }
     }
@@ -134,40 +131,40 @@ magma_zungtr(char uplo, magma_int_t n, cuDoubleComplex *a,
             Shift the vectors which define the elementary reflectors one   
             column to the left, and set the last row and column of Q to   
             those of the unit matrix                                    */
-        for (j = 1; j < n; ++j) {
-            for (i = 1; i < j; ++i)
+        for (j = 0; j < n-1; ++j) {
+            for (i = 0; i < j-1; ++i)
                 *a_ref(i, j) = *a_ref(i, j + 1);
 
-            *a_ref(n, j) = MAGMA_Z_ZERO;
+            *a_ref(n-1, j) = MAGMA_Z_ZERO;
         }
-        for (i = 1; i < n; ++i) {
-            *a_ref(i, n) = MAGMA_Z_ZERO;
+        for (i = 0; i < n-1; ++i) {
+            *a_ref(i, n-1) = MAGMA_Z_ZERO;
         }
-        *a_ref(n, n) = MAGMA_Z_ONE;
+        *a_ref(n-1, n-1) = MAGMA_Z_ONE;
         
         /* Generate Q(1:n-1,1:n-1) */
         i__1 = n - 1;
-        lapackf77_zungql(&i__1, &i__1, &i__1, &a[a_offset], &lda, tau, work, 
-                         lwork, &iinfo);
+        lapackf77_zungql(&i__1, &i__1, &i__1, a_ref(0,0), &lda, tau, work, 
+                         &lwork, &iinfo);
     } else {
         
         /*  Q was determined by a call to ZHETRD with UPLO = 'L'.   
             Shift the vectors which define the elementary reflectors one   
             column to the right, and set the first row and column of Q to   
             those of the unit matrix                                      */
-        for (j = n; j > 1; --j) {
-            *a_ref(1, j) = MAGMA_Z_ZERO;
-            for (i = j + 1; i < n; ++i) 
+        for (j = n-1; j > 0; --j) {
+            *a_ref(0, j) = MAGMA_Z_ZERO;
+            for (i = j; i < n-1; ++i) 
                 *a_ref(i, j) = *a_ref(i, j - 1);
         }
 
-        *a_ref(1, 1) = MAGMA_Z_ONE; 
-        for (i = 2; i < n; ++i) 
-            *a_ref(i, 1) = MAGMA_Z_ZERO; 
+        *a_ref(0, 0) = MAGMA_Z_ONE; 
+        for (i = 1; i < n-1; ++i) 
+            *a_ref(i, 0) = MAGMA_Z_ZERO; 
         
         if (n > 1) {
             /* Generate Q(2:n,2:n) */
-            magma_zungqr(n-1, n-1, n-1, a_ref(2, 2), lda, tau, dT, nb, &iinfo);
+            magma_zungqr(n-1, n-1, n-1, a_ref(1, 1), lda, tau, dT, nb, &iinfo);
         }
     }
     
