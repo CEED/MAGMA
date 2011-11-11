@@ -25,13 +25,18 @@ magma_zgels3_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
 
     Purpose
     =======
-    Solves the least squares problem
+    Solves the overdetermined, least squares problem
            min || A*X - C ||
-    using the QR factorization A = Q*R computed by ZGEQRF3_GPU.
+    using the QR factorization A.
+    The underdetermined problem (m < n) is not currently handled.
 
 
     Arguments
     =========
+    TRANS   (input) CHARACTER*1
+            = 'N': the linear system involves A.
+            Only trans='N' is currently handled.
+
     M       (input) INTEGER
             The number of rows of the matrix A. M >= 0.
 
@@ -41,32 +46,32 @@ magma_zgels3_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
     NRHS    (input) INTEGER
             The number of columns of the matrix C. NRHS >= 0.
 
-    A       (input) COMPLEX_16 array on the GPU, dimension (LDDA,N)
-            The i-th column must contain the vector which defines the
-            elementary reflector H(i), for i = 1,2,...,n, as returned by
-            ZGEQRF_GPU in the first n columns of its array argument A.
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N)
+            On entry, the M-by-N matrix A.
+            On exit, A is overwritten by details of its QR
+            factorization as returned by ZGEQRF3.
 
-    LDDA     (input) INTEGER
+    LDDA    (input) INTEGER
             The leading dimension of the array A, LDDA >= M.
 
-    DB       (input/output) COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
+    DB      (input/output) COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
             On entry, the M-by-NRHS matrix C.
             On exit, the N-by-NRHS solution matrix X.
 
-    LDDB     (input) INTEGER
+    LDDB    (input) INTEGER
             The leading dimension of the array DB. LDDB >= M.
 
-    HWORK    (workspace/output) COMPLEX_16 array, dimension (LWORK)
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
+    HWORK   (workspace/output) COMPLEX_16 array, dimension MAX(1,LWORK).
+            On exit, if INFO = 0, HWORK(1) returns the optimal LWORK.
 
     LWORK   (input) INTEGER
-            The dimension of the array WORK, LWORK >= max(1,NRHS).
+            The dimension of the array HWORK, LWORK >= max(1,NRHS).
             For optimum performance LWORK >= (M-N+NB)*(NRHS + 2*NB), where 
             NB is the blocksize given by magma_get_zgeqrf_nb( M ).
 
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the HWORK array, returns
-            this value as the first entry of the WORK array.
+            this value as the first entry of the HWORK array.
 
     INFO    (output) INTEGER
             = 0:  successful exit
