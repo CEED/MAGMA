@@ -20,7 +20,7 @@ dtypes = (
 ("s", "d", "c", "z"),
 ("Single", "Double", "Complex", "Double Complex"),
 )
-for dtype in range(4):
+for dtype in range( len( dtypes[0] )):
   letter = dtypes[0][dtype]
   name = dtypes[1][dtype]
   print " "
