@@ -130,6 +130,7 @@ subs = {
     ('stranspose','dtranspose','ctranspose','ztranspose'),
     ('ssetmatrix','dsetmatrix','csetmatrix','zsetmatrix'),
     ('sgetmatrix','dgetmatrix','cgetmatrix','zgetmatrix'),
+    ('sbcyclic','dbcyclic','cbcyclic','zbcyclic'),
     ('ssplit','dsplit','csplit','zsplit'),
     ('SSIZE','DSIZE','CSIZE','ZSIZE'),
     ('scopy','dcopy','ccopy','zcopy'),
