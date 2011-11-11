@@ -251,9 +251,9 @@
 ** GEQRFP, called by QRT01P, doesn't exist in slightly older MKL; comment out [mgates]
 **                        CALL DQRT01P( M, N, A, AF, AQ, AR, LDA, TAU,
 **     $                               WORK, LWORK, RWORK, RESULT( 8 ) )
-
-                         IF( .NOT. DGENND( M, N, AF, LDA ) )
-     $                       RESULT( 9 ) = 2*THRESH
+**
+**                         IF( .NOT. DGENND( M, N, AF, LDA ) )
+**     $                       RESULT( 9 ) = 2*THRESH
                         NT = NT + 1
                     ELSE IF( M.GE.N ) THEN
 *
