@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 1.0) --
+    -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2011
 
        @precisions normal z -> s d c
 
@@ -16,11 +16,11 @@ magma_ztsqrt_gpu(int *m, int *n,
                  cuDoubleComplex  *tau, cuDoubleComplex *work, 
                  int *lwork, cuDoubleComplex *dwork, int *info )
 {
-/*  -- MAGMA (version 1.0) --
+/*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2011
 
     Purpose   
     =======   

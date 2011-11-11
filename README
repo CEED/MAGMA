@@ -3,8 +3,9 @@ MAGMA README FILE
 ==================
 
 VERSION 0.1  :  September 2009
-VERSION 0.2  :   November 2009
-VERSION 1.0  :   November 2010 
+VERSION 0.2  :  November  2009
+VERSION 1.0  :  August    2011
+VERSION 1.1  :  November  2011
 
 * To INSTALL MAGMA, modify the make.inc file to indicate where 
   CUDA, CPU BLAS, and LAPACK are installed on your system. Examples

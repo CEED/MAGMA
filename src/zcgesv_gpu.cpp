@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 1.0) --
+    -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2011
 
        @precisions mixed zc -> ds
 
@@ -22,11 +22,11 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
                  cuDoubleComplex *dworkd, cuFloatComplex *dworks,
                  magma_int_t *iter, magma_int_t *info)
 {
-/*  -- MAGMA (version 1.0) --
+/*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2011
 
     Purpose
     =======

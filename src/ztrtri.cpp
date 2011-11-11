@@ -1,5 +1,5 @@
 /*
-    -- MAGMA (version 1.0) --
+    -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -33,7 +33,7 @@ extern "C" magma_int_t
 magma_ztrtri(char uplo, char diag, magma_int_t n,
               cuDoubleComplex *a, magma_int_t lda, magma_int_t *info)
 {
-/*  -- MAGMA (version 1.0) --
+/*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver

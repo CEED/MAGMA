@@ -145,7 +145,7 @@
 *     .. Executable Statements ..
 *
       call cublas_init()
-      S1 = SECOND( )
+**      S1 = SECOND( )
       LDA = NMAX
       FATAL = .FALSE.
 *
@@ -815,7 +815,7 @@
 *
   140 CONTINUE
       CLOSE ( NIN )
-      S2 = SECOND( )
+**      S2 = SECOND( )
       WRITE( NOUT, FMT = 9998 )
       WRITE( NOUT, FMT = 9997 )S2 - S1
 *

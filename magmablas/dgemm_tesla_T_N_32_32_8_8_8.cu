@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 1.0) --
+    -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2011
 */
 #include "common_magma.h"
 #include "commonblas_d.h"
@@ -33,11 +33,11 @@ dgemm_kernel_T_N_32_32_8_8_8(double *C, const double *A, const double *B,
                              int lda, int ldb, int ldc,
                              double alpha, double beta) 
 {
-/*  -- MAGMA (version 1.0) --
+/*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2011
 
     Purpose:
     ========

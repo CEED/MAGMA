@@ -375,10 +375,10 @@ subs = {
     ('stile','dtile','ctile','ztile'),
     ('szero','dzero','czero','zzero'),
     ('sset','dset','cset','zset'),
-	('SCHED_s','SCHED_d','SCHED_c','SCHED_z'),
-	('QUARK_Insert_Task_s','QUARK_Insert_Task_d','QUARK_Insert_Task_c','QUARK_Insert_Task_z'),
-	('%f', '%lf', '%f', '%lf'),  # for scanf
-	('sprint', 'dprint', 'cprint', 'zprint' ),
+    ('SCHED_s','SCHED_d','SCHED_c','SCHED_z'),
+    ('QUARK_Insert_Task_s','QUARK_Insert_Task_d','QUARK_Insert_Task_c','QUARK_Insert_Task_z'),
+    ('%f', '%lf', '%f', '%lf'),  # for scanf
+    ('sprint', 'dprint', 'cprint', 'zprint' ),
   ],
   'tracing' : [
     ['plain','tau'],

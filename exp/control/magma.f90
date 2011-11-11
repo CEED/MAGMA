@@ -1,9 +1,9 @@
 !
-!   -- MAGMA (version 1.0) --
+!   -- MAGMA (version 1.1) --
 !      Univ. of Tennessee, Knoxville
 !      Univ. of California, Berkeley
 !      Univ. of Colorado, Denver
-!      November 2010
+!      November 2011
 !
 
 module magma

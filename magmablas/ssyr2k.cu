@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 1.0) --
+    -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2011
 */
 #include "common_magma.h"
 
@@ -1304,11 +1304,11 @@ magmablas_ssyr2k(char UPLO, char TRANS, int m , int k, float alpha,
                  const float *A, int lda , const float *B, int ldb, 
                  float beta, float *C, int ldc)
 {
-/* -- MAGMA (version 1.0) --
+/* -- MAGMA (version 1.1) --
       Univ. of Tennessee, Knoxville
       Univ. of California, Berkeley
       Univ. of Colorado, Denver
-      November 2010
+      November 2011
 
    Purpose
    =======

@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 1.0) --
+    -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2011
 
        @precisions normal z -> c
 
@@ -29,11 +29,11 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
             cuDoubleComplex *work, magma_int_t lwork,
             double *rwork, magma_int_t *info)
 {
-/*  -- MAGMA (version 1.0) --
+/*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2011
 
     Purpose   
     =======   

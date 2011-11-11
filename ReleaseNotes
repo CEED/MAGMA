@@ -23,7 +23,7 @@ Included are routines for the following algorithms:
     * MAGMA BLAS in real arithmetic (single and double), including
       gemm, gemv, symv, and trsm.
 
- 1.1.0 - November 11, 2011
+ 1.1.0 - 11-11-11
     * Fix a bug in [zcsd]geqrf_gpu.cpp and [zcsd]geqrf3_gpu.cpp for n>m
     * Fix a bug in [zcsd]laset - to call the kernel only when m!=0 && n!=0
     * Fix a bug in [zcsd]gehrd for ilo > 1 or ihi < n.

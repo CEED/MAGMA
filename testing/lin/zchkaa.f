@@ -146,7 +146,7 @@
 *     ..
 *     .. Executable Statements ..
 *
-      S1 = DSECND( )
+**      S1 = DSECND( )
       LDA = NMAX
       FATAL = .FALSE.
 *
@@ -864,7 +864,7 @@
 *
   140 CONTINUE
       CLOSE ( NIN )
-      S2 = DSECND( )
+**      S2 = DSECND( )
       WRITE( NOUT, FMT = 9998 )
       WRITE( NOUT, FMT = 9997 )S2 - S1
 *

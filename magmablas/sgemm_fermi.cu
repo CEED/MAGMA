@@ -1,9 +1,9 @@
 /*
-    -- MAGMA (version 1.0) --
+    -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2011
 */
 
 
@@ -609,11 +609,11 @@ magmablas_sgemm_fermi( char TRANSA, char TRANSB, int m , int n , int k ,
                                     const float *B, int ldb, 
                        float beta,        float *C, int ldc ) 
 {
-/*  -- MAGMA (version 1.0) --
+/*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       November 2010
+       November 2011
 
    Purpose
    =======

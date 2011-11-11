@@ -60,8 +60,8 @@ sub myCmd {
     print "---------------------------------------------------------------\n";
     $err = system($cmd);
     if ($err != 0) {
-    	print "Error during execution of the following command:\n$cmd\n";
-    	exit;
+        print "Error during execution of the following command:\n$cmd\n";
+        exit;
     }    
 }
 
@@ -71,7 +71,7 @@ sub MakeRelease {
     my $cmd;
 
     if ( $rc > 0 ) {
-	$numversion = $numversion."-rc".$rc;
+        $numversion = $numversion."-rc".$rc;
     }
 
     $RELEASE_PATH = $ENV{ PWD}."/magma_".$numversion;
@@ -104,8 +104,8 @@ sub MakeRelease {
     
     #Remove non required files (Makefile.gen)
     foreach my $file (@file2delete){
-	print "Remove $file\n";
- 	myCmd("rm -rf $RELEASE_PATH/$file");
+        print "Remove $file\n";
+        myCmd("rm -rf $RELEASE_PATH/$file");
     }
  
     # Remove 'include Makefile.gen from Makefile'
