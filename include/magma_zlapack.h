@@ -102,6 +102,7 @@ extern "C" {
 #define lapackf77_zungbr   FORTRAN_NAME( zungbr, ZUNGBR )
 #define lapackf77_zunghr   FORTRAN_NAME( zunghr, ZUNGHR )
 #define lapackf77_zunglq   FORTRAN_NAME( zunglq, ZUNGLQ )
+#define lapackf77_zungql   FORTRAN_NAME( zungql, ZUNGQL )
 #define lapackf77_zungqr   FORTRAN_NAME( zungqr, ZUNGQR )
 #define lapackf77_zungtr   FORTRAN_NAME( zungtr, ZUNGTR )
 #define lapackf77_zunm2r   FORTRAN_NAME( zunm2r, ZUNM2R )
@@ -389,6 +390,9 @@ void    lapackf77_zunghr(magma_int_t *n, magma_int_t *ilo, magma_int_t *ihi,
 void    lapackf77_zunglq(magma_int_t *m, magma_int_t *n, magma_int_t *k, 
                          cuDoubleComplex *a, magma_int_t *lda, const cuDoubleComplex *tau, 
                          cuDoubleComplex *work, magma_int_t *ldwork, magma_int_t *info);
+void    lapackf77_zungql(magma_int_t *, magma_int_t *, magma_int_t *,
+                         cuDoubleComplex *, magma_int_t *, cuDoubleComplex *, 
+                         cuDoubleComplex *, magma_int_t *, magma_int_t *);
 void    lapackf77_zungqr(magma_int_t *m, magma_int_t *n, magma_int_t *k, 
                          cuDoubleComplex *a, magma_int_t *lda, const cuDoubleComplex *tau, 
                          cuDoubleComplex *work, magma_int_t *ldwork, magma_int_t *info);
