@@ -161,6 +161,14 @@ magma_int_t magma_zhegvdx(magma_int_t itype, char jobz, char range, char uplo,
                           magma_int_t lwork, double *rwork,
                           magma_int_t lrwork, magma_int_t *iwork,
                           magma_int_t liwork, magma_int_t *info);
+magma_int_t magma_zhegvx( magma_int_t itype, char jobz, char range, char uplo, 
+                          magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
+                          cuDoubleComplex *b, magma_int_t ldb,
+                          double vl, double vu, magma_int_t il, magma_int_t iu,
+                          double abstol, magma_int_t *m, double *w, 
+                          cuDoubleComplex *z, magma_int_t ldz,
+                          cuDoubleComplex *work, magma_int_t lwork, double *rwork,
+                          magma_int_t *iwork, magma_int_t *ifail, magma_int_t *info);
 #else
 magma_int_t  magma_zgeev( char jobvl, char jobvr, magma_int_t n,
                           cuDoubleComplex *a,    magma_int_t lda,
