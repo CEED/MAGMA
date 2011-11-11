@@ -11,7 +11,7 @@ include ./Makefile.internal
 
 all: lib test
 
-lib: libmagma libmagmablas
+lib: libmagma libquark
 
 libmagma:
 	( cd control     && $(MAKE) )
