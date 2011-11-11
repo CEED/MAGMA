@@ -23,13 +23,6 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-/*
- * VERSION1 - MAGMA 1.0 (out-of-place transpose)
- * VERSION2 - MAGMA 1.1 (incremental transpose)
- * VERSION3 - MAGMA 1.1 (multiGPU with incremental transpose)
- */
-#define VERSION3
-
 extern "C" magma_int_t
 magma_zgetrf3(magma_int_t num_gpus,
               magma_int_t m, magma_int_t n,
