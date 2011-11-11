@@ -38,13 +38,6 @@
    -- Testing zgeqrf
 */
 
-typedef cuDoubleComplex *pcuDoubleComplex;
-extern "C" magma_int_t
-magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
-                    cuDoubleComplex **dlA, magma_int_t ldda,
-                    cuDoubleComplex *tau,
-                    magma_int_t *info );
-
 int main( int argc, char** argv)
 {
     TESTING_CUDA_INIT();
@@ -55,7 +48,7 @@ int main( int argc, char** argv)
     double           matnorm, work[1];
     cuDoubleComplex  mzone= MAGMA_Z_NEG_ONE;
     cuDoubleComplex *h_A, *h_R, *tau, *hwork, tmp[1];
-    pcuDoubleComplex d_lA[4];
+    cuDoubleComplex *d_lA[4];
 
     /* Matrix size */
     magma_int_t M = 0, N = 0, n2, n_local[4], lda, ldda, lhwork;
@@ -105,7 +98,7 @@ int main( int argc, char** argv)
     cudaGetDeviceCount(&max_num_gpus);
     if (num_gpus > max_num_gpus){
       printf("More GPUs requested than available. Have to change it.\n");
-      //num_gpus = max_num_gpus;
+      num_gpus = max_num_gpus;
     }
     printf("Number of GPUs to be used = %d\n", num_gpus);
 
@@ -166,16 +159,7 @@ int main( int argc, char** argv)
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-        for(int j=0; j<N; j+=nb){
-          k = (j/nb)%num_gpus;
-          #ifdef  MultiGPUs
-             cudaSetDevice(k);
-          #endif
-          nk = min(nb, N-j);
-          cublasSetMatrix( M, nk, sizeof(cuDoubleComplex), h_R+j*lda, lda, 
-                           d_lA[k]+j/(nb*num_gpus)*nb*ldda, ldda);
-        }
-        cudaSetDevice(0);
+        magmablas_zsetmatrix_1D_bcyclic(M, N, h_R, lda, d_lA, ldda, num_gpus, nb);
         
         start = get_current_time();
         magma_zgeqrf2_mgpu( num_gpus, M, N, d_lA, ldda, tau, &info);
@@ -189,16 +173,7 @@ int main( int argc, char** argv)
         /* =====================================================================
            Check the result compared to LAPACK
            =================================================================== */
-        for(int j=0; j<N; j+=nb){
-          k = (j/nb)%num_gpus;
-          #ifdef  MultiGPUs
-             cudaSetDevice(k);
-          #endif
-          nk = min(nb, N-j);
-          cublasGetMatrix( M, nk, sizeof(cuDoubleComplex), 
-                           d_lA[k]+j/(nb*num_gpus)*nb*ldda, ldda,
-                           h_R+j*lda, lda);
-        }
+        magmablas_zgetmatrix_1D_bcyclic(M, N, d_lA, ldda, h_R, lda, num_gpus, nb);
         
         matnorm = lapackf77_zlange("f", &M, &N, h_A, &M, work);
         blasf77_zaxpy(&n2, &mzone, h_A, &ione, h_R, &ione);
