@@ -37,11 +37,16 @@ Included are routines for the following algorithms:
        [Hatem Ltaief et al.]
     * Add zgemm for Fermi obtained using autotuning
     * Add non-GPU-resident versions of [zcds]geqrf, [zcds]potrf, and [zcds]getrf
+    * Add multi-GPU LU, QR, and Cholesky factorizations
+    * Add tile algorithms for multicore and multi-GPUs using the StarPU
+      runtime system (in directory 'multi-gpu-dynamic')
     * Add [zcds]gesv and [zcds]posv in CPU interface. GPU interface was already in 1.0
-    * Add LAPACK linear equation testing code 
-    * Add experimental directory:
+    * Add LAPACK linear equation testing code (in 'testing/lin')
+    * Add experimental directory ('exp') with algorithms for:
       (1) Multi-core QR, LU, Cholskey
       (2) Single GPU, all available CPU cores QR
+    * Add eigenvalue solver driver routines for the standard and generalized 
+      symmetric/Hermitian eigenvalue problems [Raffaele Solca et al.].
 
  1.0.0 - August 25th, 2011
     * Fix make.inc.mkl (Thanks to ar1309)
