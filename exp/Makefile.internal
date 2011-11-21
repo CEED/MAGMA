@@ -6,7 +6,7 @@
 #      November 2011
 #//////////////////////////////////////////////////////////////////////////////
 
-include $(MAGMA_DIR)/make.inc
+include ../$(MAGMA_DIR)/make.inc
 -include $(MAGMA_DIR)/make.inc.${MACHINE}
 
 #
