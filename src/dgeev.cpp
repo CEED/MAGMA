@@ -172,7 +172,7 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
     /*  Compute workspace   */
     if (*info == 0) {
 
-        nb = magma_get_zgehrd_nb(n);
+        nb = magma_get_dgehrd_nb(n);
         minwrk = (1+nb)*n;
         work[1] = (double) minwrk;
         
