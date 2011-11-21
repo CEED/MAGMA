@@ -21,6 +21,7 @@ libquark:
 	( cd quark       && $(MAKE) )
 
 test:
+	cp ../lib/libmagmablas.a lib/libmagmablas.a
 	( cd testing     && $(MAKE) )
 
 clean:
