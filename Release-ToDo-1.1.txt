@@ -1,0 +1,360 @@
+We have to finish the release by Wednesday. As we go, here is where
+we would put tasks to be done. Column 'Who' shows who is doing it -
+if it is empty and you start doing it put your name there, if your
+name is there it is suggested that you do it. As you go and discover 
+problems and other tasks you can add them to the list. 
+Here is what I started and will keep adding. Thanks.
+
+
+To do list for MAGMA 1.0 release (Wednesday, November 24):
+
+Task  Done      Who       What
+=================================================================================
+1.    DONE      Mathieu     Moving sorgqr_gpu.cpp and dependancies to complex, 
+                          testing it
+                          [to be moved to zungqr_gpu.cpp] 
+---------------------------------------------------------------------------------
+2.    DONE    Piotr       Bug in gebrd.cpp due to code clean up and conversion
+---------------------------------------------------------------------------------
+3.    DONE                Bug in gehrd.cpp due to code clean up and conversion
+---------------------------------------------------------------------------------
+4.    CONSIDER DONE       Move int to magma_int_t everywhere (if you do it ask me for 
+                          an emai from Jill.Reese@MathWorks with some comments)
+---------------------------------------------------------------------------------
+5.    CONSIDER DONE (for now) 
+               Stan       Add the basic symmetric and nonsymmetric eigensolvers
+                          and svd and testing for them - this will be just as an
+                          example of accelerating LAPACK by accelerating only
+                          the components currently available - 2-sided in this
+                          case. Hatem, please generate a list of the orthogonal
+                          routines needed - they may be easy to port and have
+                          a lot of flops to easily accelerate with GPU
+                          (I am adding the lapack zgeev.cpp zheevd.cpp zgesvd.cpp
+                           to the repository).
+---------------------------------------------------------------------------------
+6.    DONE    Mathieu     Update the Makefile to the same comportement as PLASMA, 
+                          to use the same MakeRelease  script or at least close
+---------------------------------------------------------------------------------
+7.   DONE                 Move some macros from magma.h to another file in src, 
+                          not use on the user side.
+                          [Stan: Matheieu, I would like a user to be able to 
+                           copy a file and be able to easily modify and incorporate
+                           in their stuff; concern here is not to increase number
+                           of dependancies, h files, etc, just something to 
+                           think about ...]
+                           For now, we should let it like this for the first shot.
+---------------------------------------------------------------------------------
+8.   DONE                  Don't include automatically magma_lapack.h in magma.h =>
+                           add this line of include to amost all files
+---------------------------------------------------------------------------------
+9.   DONE                  Multi-cores files have to be: moved to complex, updated 
+                           to the last release of PLASMA, and cleaned.
+                          [Stan: if this turne out to be too much work we can take
+                           it out of the release and put a check mark on this task.
+                           I thought originally to take it out but since Mathieu
+                           is mentioning it, now it sounds as a possibility]
+                           Move to next release.
+---------------------------------------------------------------------------------
+10.   DONE                 Check all mixed-precision files:
+                               - zcposv_gpu.cpp
+                               - zcgesv_gpu.cpp
+                               - zcgetrs_gpu.cpp
+                               - zcgeqrsv_gpu.cpp), 
+                           some files are missing in magmablas.
+---------------------------------------------------------------------------------
+11.   DONE                 auxiliary.cpp
+                           zgehrd.cpp, zlahr2.cpp, zlahru.cpp
+                           zhetrd.cpp, zlatrd.cpp
+                           ztsqrt_gpu.cpp
+                           zunmqr.cpp
+                           zunmtr.cpp
+                           Clean all these files: - Move from double2 to cuDoubleComplex
+                           - Check interface, has to be the same than LAPACK, if they 
+                             are workspace, they are allocated inside the function.
+                           - Clean the char parameters to use the define Magma...[Str]
+                           [Stan: this is a big one ...]
+---------------------------------------------------------------------------------
+12.  DONE      Mathieu     Clean zungqr.cpp, it should be updated regarding the 
+                           conversion of sorgqr_gpu.cpp (File has been removed by someone)
+---------------------------------------------------------------------------------
+13.  DONE      Stan        Create a MAGMA_Init function
+                           [Stan: this is in case we add threads handling in magma
+                            either through QUARK or our own or for future integration
+                            with other packages]
+---------------------------------------------------------------------------------
+14.                        Find another way to set all the nb, inside this MAGMA_init 
+                           another one and provide the user a way to change it.
+                           Partially done: get_nb has been moved to src andit's ok 
+                           for tomorrow.
+                           But we should create a set of functions: 
+                                  magma_zgetib( int func, int M  )
+                                  magma_zsetib( int func, int ib )
+---------------------------------------------------------------------------------
+15.  DONE      Peng        Fix a bug in gemm on Fermi for big matrices
+---------------------------------------------------------------------------------
+16.  DONE      Stan        Fix a bug in clean up with trd
+---------------------------------------------------------------------------------
+18.  DONE for some         The number of flops has to be adjusted for the complex
+                           versions in testing for measuring performance.
+---------------------------------------------------------------------------------
+19   CONSIDER DONE (for now)
+               Stan        Mixed precision files doesn't work in zc on tesla 
+                           because of the amount of shared memory used in norme 
+                           function and zlat2c
+                           Stan suggest to move to norms in single precision:
+                               - zcposv_gpu.cpp
+                               - zcgesv_gpu.cpp
+                               - zcgetrs_gpu.cpp
+                               - zcgeqrsv_gpu.cpp), 
+---------------------------------------------------------------------------------
+20   DONE                  Clean the norm computations and zlat2c files to 
+                           make them work on tesla:
+                              - zlanhe.cu
+                              - zlange.cu
+                              - zlat2c.cu
+---------------------------------------------------------------------------------
+21                         Add zlansy.cu functions (Relies on task 20)
+---------------------------------------------------------------------------------
+22                         zclaswp interface should be:	
+			   ZCLASWP( N, A, LDA, SA, LDSA, K1, K2, IPIV, INCX ) 
+---------------------------------------------------------------------------------
+23                         magma module describing the interfaces for use 
+                           from fortran 
+---------------------------------------------------------------------------------
+24    DONE                 Fix geev in real arithmetic. The interface in real is 
+                           different; w has to be replaced by a pair of arguments -
+                           'wr', and 'wi'.
+---------------------------------------------------------------------------------
+24-1                       Update interfaces from:
+                                latrd
+                                unmtr
+---------------------------------------------------------------------------------
+24-2                       Add dgesvd function                                                       
+---------------------------------------------------------------------------------
+25   Ignore (for now)
+               Stan        Possible bug in zcgeqrsv_gpu at least on Tesla for
+                           sizes not divisible by 32, e.g.,
+
+[tomov@cumin testing]$ ./testing_dsgeqrsv_gpu -N 1025 -nrhs 1
+device 0: GeForce GTX 280, 1296.0 MHz clock, 1023.8 MB memory
+device 1: Quadro NVS 290, 918.0 MHz clock, 255.3 MB memory
+Epsilon(double): 1.110223e-16
+Epsilon(single): 5.960464e-08
+
+        CPU GFlop/s         G P U  GFlop/s   
+  N         DP          DP       SP       MP    ||b-Ax||/||A||  NumIter
+=======================================================================
+ 1025     20.80       20.31    35.93    28.18    0.000000e+00     0
+
+   * this is a problem on Tesla. Apparently comes from sgemms used in slarfb.
+     I can not reproduce the problem with just QR factorization or solver.
+     Even here somethimes runs correctly but sometimes the card goes into
+     a "weird" state and gives these results.
+    
+     Any ideas on this are welcome. Obviously it would require more testing.
+
+---------------------------------------------------------------------------------
+26             Stan         Bug in zcgesv_gpu when N is not multiple of 32,
+                            nrhs > 1, and ld for X and RHS > N.
+---------------------------------------------------------------------------------
+27             Peng         Bug in dtrsm for tesla
+     
+[tomov@cumin testing]$ ./testing_dgetrf_gpu -M 287 -N 579                                        device 0: GeForce GTX 280, 1296.0 MHz clock, 1023.8 MB memory
+device 1: Quadro NVS 290, 918.0 MHz clock, 255.3 MB memory
+  testing_dgetrf -M 287 -N 579
+
+
+
+  M     N   CPU GFlop/s    GPU GFlop/s   ||PA-LU||/(||A||*N)
+============================================================
+  287   579    1.91         4418.97         3.925370e-04
+
+If I use cublasDtrsm in dgetrf_gpu I don't get the error.
+---------------------------------------------------------------------------------
+28             Peng         Bug in strsm on Fermi, e.g.,
+
+tomov:disco /mnt/scratch/tomov/sc_release/testing> ./testing_sgetrf_gpu -M 1024 -N 2048    <-  1:59AM
+device 0: Tesla C2050, 1147.0 MHz clock, 3071.7 MB memory
+device 1: Quadro NVS 290, 918.0 MHz clock, 255.7 MB memory
+  testing_sgetrf -M 1024 -N 2048
+
+
+
+  M     N   CPU GFlop/s    GPU GFlop/s   ||PA-LU||/(||A||*N)
+============================================================
+ 1024  2048   31.81          97.18         1.544789e-04
+ 
+
+---------------------------------------------------------------------------------
+29             Peng         To check if this bug is related to the dtrsm bug.
+ 
+http://icl.cs.utk.edu/magma/forum/viewtopic.php?f=2&t=127&sid=d2479bd1fcd4f88d39111f9611810a8e
+
+*** Also looking in the code dX (and probably dB) are used sometimes with lddx
+equal to N and sometimes lddx. In the tester lddx is passed as N so we can not
+detect the bug. I (Stan) am not fixing it now as the problem may involve some
+other kernels (I remeber there was an issue somewhere)
+---------------------------------------------------------------------------------
+30                          Remove DA from the description of function zhetrd
+                            after we pass all tests (the work space is now allocated
+                            in the routine itself).
+---------------------------------------------------------------------------------
+31                          There could be a bug in zgeqrf2_gpu. There is a call to 
+                            zlarfb that uses V with 0s in the upper triangular
+                            part, and immediately after this we call asynchronously
+                            (in another stream) a kernel that will fix V to be in 
+                            LAPACK layout. 
+ 
+                            I don't see errors now; this is just a note where to look
+                            in case we start seeing. 
+---------------------------------------------------------------------------------
+32   DONE         Stan      Still error in trd in comlex?
+                            To check recent changes and see if it ever worked.
+
+                            [tomov@cumin testing]$ ./testing_chetrd -N 3072
+                            device 0: GeForce GTX 280, 1296.0 MHz clock, 1023.8 MB memory
+                            device 1: Quadro NVS 290, 918.0 MHz clock, 255.3 MB memory
+                            testing_chetrd -L|U -N 3072
+
+                            N    CPU GFlop/s    GPU GFlop/s   |A-QHQ'|/N|A|  |I-QQ'|/N 
+                            =============================================================
+                            3072    32.97         39.31       4.635315e-03 3.982124e-08
+
+    * turned out this was an interface problem on how we call z/cdotc
+---------------------------------------------------------------------------------
+33   DONE         Stan     There was a problem in zgeev and dgeev (and the c and s
+                           version generated) related to the cblas_idamax. It is 
+                           returning value that is 1 less than the Fortran version 
+                           so in codes that are translated by F2C, if idamax_ is 
+                           replaced by cblas_idamax, one has to add 1 to the result.
+
+                           I am putting it here because this is wierd and it took me 
+                           some time to discover the problem.
+
+                           I really don't like this mixing of cblas with codes that
+                           call fortran blas.
+---------------------------------------------------------------------------------
+34               Rajib ?   When I run testing_sgeev through error checking mode
+                           sometimes (e.g., when running not at specified sizes)
+                           I get error. If I block the use magmablas_sgemm in
+                           function slahru the error disappears. This is happening
+                           on Tesla (cumin in particular).
+                           I have blocked the use of magma_sgemm for this routine
+                           (on both Fermi and Tesla) until further investigation.
+                           
+                           Stan
+---------------------------------------------------------------------------------
+35               Rajib?    There seems to be loss of accuracy when using ssyr2k
+                 Tim?      on Fermi when used in ssytrd, e.g.,
+                           using CUBLAS I get
+tomov:disco /mnt/scratch/tomov/magma_1.0.0/testing> ./testing_ssytrd -N 2048               
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 3071.7 MB memory
+device 1: Quadro NVS 290, 918.0 MHz clock, 255.7 MB memory
+  testing_ssytrd -L|U -N 2048
+
+  N    CPU GFlop/s    GPU GFlop/s   |A-QHQ'|/N|A|  |I-QQ'|/N 
+=============================================================
+ 2048    12.11         24.69       1.092290e-08 2.556555e-08
+
+while using magma blas I get
+  N    CPU GFlop/s    GPU GFlop/s   |A-QHQ'|/N|A|  |I-QQ'|/N 
+=============================================================
+ 2048    12.00         24.97       1.978159e-06 2.506212e-08
+
+                           I am taking it out for now until is fixed.
+
+                           Stan
+
+---------------------------------------------------------------------------------
+36               Rajib ?   There is another problem with magmablas sgemm (see also
+                 Tim ?     the above). Testing for example
+                           ./testing_ssyevd -N 3072
+                           (and other sizes) gives wrong results. 
+                           Using cublasSgemm is fine. I had to
+                           comment out the use of MAGMABLAS in slarfb_gpu.
+---------------------------------------------------------------------------------
+37  Done          Tim?      The fast chemv in cheevd_gpu gives me bugs in 
+                           ./testing_chegvd -N 2048 
+                           If error checking is on and we don't want eigenvectors
+                           the code aborts at line 326 of file cheevd_gpu.cpp
+
+Usage: 
+testing_chegvd -L/U -N 1024 -itype 1
+
+N     CPU Time(s)    GPU Time(s) 				
+===================================
+2048       5.33           1.53
+Testing the eigenvalues and eigenvectors for correctness:
+(1)    | A Z - B Z D | / (|A| |Z| N) = 2.519331e-10
+(2)    | I -   Z Z' B | /  N      = 1.145142e-07
+(3)    | D(w/ Z)-D(w/o Z)|/ |D| = 9.957464e-07
+
+4100      42.12           8.68
+Testing the eigenvalues and eigenvectors for correctness:
+(1)    | A Z - B Z D | / (|A| |Z| N) = 9.128681e-11
+(2)    | I -   Z Z' B | /  N      = 9.378431e-08
+(3)    | D(w/ Z)-D(w/o Z)|/ |D| = 3.279687e-07
+
+
+---------------------------------------------------------------------------------
+
+                           Status of src directory 
+                           
+                            CPU  /  GPU  / Remark 
+     One sided
+                 zpotrf   -  ok  /  ok 
+                 zpotrs   -  -   /  ok
+                 zposv    -  -   /  ok
+
+                 zgetrf   -  ok  /  ok
+                 zgetrs   -  -   /  ok
+                 zgesv    -  -   /  ok
+
+		 /* New interface on GPU with dT */
+                 zgeqrf   -  -   /  ok  
+                 zgeqrs   -  -   /  ok  
+		 zgels    -  -   /  ok  (Works only for QR)
+		 zlarfb   -  -   /  ok
+		 zunmqr   -  -   /  ok
+                 zungqr   -  ok  /  ok 
+
+		 /* Lapack interface on CPU */
+		 zgeqrf   -  ok  / (zgeqrf2, only for code factorization)
+		 zgeqlf   -  ok  /  -
+		 zgelqf   -  ok  /  -
+
+                 zgebrd   -  -   /  ok
+
+     Mix precision
+                 zcposv   -  -   /  ok
+                 zcgesv   -  -   /  ok
+                 zcgetrs  -  -   /  ok
+		 zcgeqrsv -  -   /  ok  
+     -----------------------
+
+               	 zgeev    - No GPU interface
+                            Still F2c
+                            Need to use lapackf77/blasf77 macros
+                 zgehrd   - No GPU interface
+                            Still F2C
+                 zgeqrf-v2  - Need to be cleaned, doesn't do the same thing than _gpu-v2 ???
+                 zgeqrf-v3       - 
+                 zgesvd      - No comments
+                 zheevd      - No comments
+                 zhetrd      - No GPU interface /  CPU  in F2C
+                 zlabrd      - Interface needs to be clean because it's a CPU file with device pointers in the interface.
+                               Still F2C, maybe we can take release 479 and add changes from Piotr
+                 zlahr2      - Interface needs to be clean because it's a CPU file with device pointers in the interface.
+                               Still F2C
+                 zlahru      - Should be called _gpu or change the interface because of the mix between cpu and gpu buffer
+                 zlatrd      - Stil in F2C, a lot to do
+                 ztsqrt_gpu  - No CPU interface / still fortran interface
+                 zunmqr      - F2C code
+                 zunmtr      - F2C code with fortran interface
+
+      Multi-cores:
+                 zgeqrf_mc   -
+                 zgetrf_mc   - 
+                 zpotrf_mc   -
+
+
