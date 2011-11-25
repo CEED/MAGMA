@@ -28,6 +28,7 @@ my @file2delete = (
     "make.inc.ig",
     "make.inc.ig.pgi",
     "Release-ToDo.txt",
+    "Release-ToDo-1.1.txt"
     "BugsToFix.txt",
     #"src/magma_zf77.cpp",
     #"src/magma_zf77pgi.cpp",
