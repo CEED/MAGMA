@@ -244,8 +244,8 @@ other kernels (I remeber there was an issue somewhere)
                            
                            Stan
 ---------------------------------------------------------------------------------
-35               Rajib?    There seems to be loss of accuracy when using ssyr2k
-                 Tim?      on Fermi when used in ssytrd, e.g.,
+35               Rajib    There seems to be loss of accuracy when using ssyr2k
+                 Tim      on Fermi when used in ssytrd, e.g.,
                            using CUBLAS I get
 tomov:disco /mnt/scratch/tomov/magma_1.0.0/testing> ./testing_ssytrd -N 2048               
 device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 3071.7 MB memory
@@ -265,19 +265,24 @@ while using magma blas I get
 
                            Stan
 
----------------------------------------------------------------------------------
-36               Rajib ?   There is another problem with magmablas sgemm (see also
-                 Tim ?     the above). Testing for example
-                           ./testing_ssyevd -N 3072
+(36) Done       Rajib     There is another problem with magmablas sgemm (see also
+                 Tim       the above). Testing for example
+                           ./testing_ssyevd (call ssytrd)-N 3072
                            (and other sizes) gives wrong results. 
                            Using cublasSgemm is fine. I had to
-                           comment out the use of MAGMABLAS in slarfb_gpu.
+                           comment out the use of MAGMABLAS in slarfb_gpu (called by ssyevd).
+
+Done: magmablas_sgmm is fine. The bug is caused by magma ssyr2k in ssytrd
+so, i merge the two reported bugs in one 
+
 ---------------------------------------------------------------------------------
-37  Done          Tim?      The fast chemv in cheevd_gpu gives me bugs in 
+37  Done          Tim      The fast chemv in cheevd_gpu (zheevd,dsyevd,ssyevd) gives me bugs in 
                            ./testing_chegvd -N 2048 
                            If error checking is on and we don't want eigenvectors
                            the code aborts at line 326 of file cheevd_gpu.cpp
 
+
+Done: 
 Usage: 
 testing_chegvd -L/U -N 1024 -itype 1
 
