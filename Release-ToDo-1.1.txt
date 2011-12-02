@@ -244,7 +244,7 @@ other kernels (I remeber there was an issue somewhere)
                            
                            Stan
 ---------------------------------------------------------------------------------
-35               Rajib    There seems to be loss of accuracy when using ssyr2k
+35    Done       Rajib    There seems to be loss of accuracy when using ssyr2k
                  Tim      on Fermi when used in ssytrd, e.g.,
                            using CUBLAS I get
 tomov:disco /mnt/scratch/tomov/magma_1.0.0/testing> ./testing_ssytrd -N 2048               
@@ -272,8 +272,14 @@ while using magma blas I get
                            Using cublasSgemm is fine. I had to
                            comment out the use of MAGMABLAS in slarfb_gpu (called by ssyevd).
 
-Done: magmablas_sgmm is fine. The bug is caused by magma ssyr2k in ssytrd
+Done: 
+
+magmablas_sgmm is fine. The bug is caused by magma ssyr2k in ssytrd
 so, i merge the two reported bugs in one 
+
+previously bugs are reported on cumin(GT280 card, everything is fine on Fermi), when calling magmablas_sgemm in
+slarfb_gpu (which is a further called by ssyevd). Now the bugs in
+sgemm_tesla is cleared. 
 
 ---------------------------------------------------------------------------------
 37  Done          Tim      The fast chemv in cheevd_gpu (zheevd,dsyevd,ssyevd) gives me bugs in 
