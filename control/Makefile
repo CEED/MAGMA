@@ -9,6 +9,8 @@
 MAGMA_DIR = ..
 include ../Makefile.internal
 
+ZSRC := zprint.cpp
+
 ifeq ($(PGIFORTRAN), 0)
 ZSRC := $(ZSRC) 		\
 	magma_zf77.cpp		\

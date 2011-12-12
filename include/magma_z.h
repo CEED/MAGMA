@@ -424,10 +424,16 @@ magma_int_t magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                              cuDoubleComplex *db, magma_int_t lddb, magma_int_t *info);
 
 
+/* //////////////////////////////////////////////////////////////////////////// 
+ -- MAGMA utility function definitions
+*/
+
+void magma_zprint    ( int m, int n, cuDoubleComplex  *A, int lda  );
+void magma_zprint_gpu( int m, int n, cuDoubleComplex *dA, int ldda );
+
 #ifdef __cplusplus
 }
 #endif
 
 #undef PRECISION_z
 #endif /* _MAGMA_Z_H_ */
-
