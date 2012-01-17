@@ -82,7 +82,7 @@ magma_timestr_t get_current_time(void)
 
   magma_timestr_t time;
 
-  cudaThreadSynchronize();
+  cudaDeviceSynchronize();
   gettimeofday(&time_val, NULL);
 
   time.sec  = time_val.tv_sec;

@@ -20,7 +20,7 @@ void MycublasZtrmm(char side, char uplo, char trans, char unit,
                    cuDoubleComplex *dz, magma_int_t lddz)
 {
   cublasZtrmm(side, uplo, trans, unit, n, m, alpha, db, lddb, dz, lddz);
-  cudaThreadSynchronize();
+  cudaDeviceSynchronize();
 }
 
 /* This ztrsm interface is used for TAU profiling */
@@ -30,7 +30,7 @@ void MycublasZtrsm(char side, char uplo, char trans, char unit,
                    cuDoubleComplex *dz, magma_int_t lddz)
 {
   cublasZtrsm(side, uplo, trans, unit, n, m, alpha, db, lddb, dz, lddz);
-  cudaThreadSynchronize();
+  cudaDeviceSynchronize();
 }
 
 extern "C" magma_int_t

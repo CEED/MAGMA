@@ -287,7 +287,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
       cudaSetDevice(j);
       cudaEventRecord(stop[j][0], 0);
       cudaEventRecord(stop[j][1], 0);
-      cudaThreadSynchronize();
+      cudaDeviceSynchronize();
       core_gpu_event_start(j, start[j], stop[j][0]);
       core_gpu_event_end(j, start[j], stop[j][1]);
       core_log_event(0x666666, j);
