@@ -311,10 +311,6 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                             dB(k, k), lddb*sizeof(cuDoubleComplex),
                             sizeof(cuDoubleComplex)*kb, kb,
                             cudaMemcpyDeviceToHost, stream[2]);
-          cudaMemcpy2DAsync( A(0, 0), lda *sizeof(cuDoubleComplex),
-                            dA(k, k), ldda*sizeof(cuDoubleComplex),
-                            sizeof(cuDoubleComplex)*kb, kb,
-                            cudaMemcpyDeviceToHost, stream[0]);
           
           /* Update the upper triangle of A(1:k+kb-1,1:k+kb-1) */
           if(k>0){
@@ -331,6 +327,15 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                         zone, dA(0, k), ldda);
             
             cudaStreamSynchronize(stream[1]);
+            
+          }
+          
+          cudaMemcpy2DAsync( A(0, 0), lda *sizeof(cuDoubleComplex),
+                            dA(k, k), ldda*sizeof(cuDoubleComplex),
+                            sizeof(cuDoubleComplex)*kb, kb,
+                            cudaMemcpyDeviceToHost, stream[0]);
+          
+          if(k>0){
             
             cublasZher2k(MagmaUpper, MagmaNoTrans,
                          k, kb,
@@ -376,10 +381,6 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                             dB(k, k), lddb*sizeof(cuDoubleComplex),
                             sizeof(cuDoubleComplex)*kb, kb,
                             cudaMemcpyDeviceToHost, stream[2]);
-          cudaMemcpy2DAsync( A(0, 0), lda *sizeof(cuDoubleComplex),
-                            dA(k, k), ldda*sizeof(cuDoubleComplex),
-                            sizeof(cuDoubleComplex)*kb, kb,
-                            cudaMemcpyDeviceToHost, stream[0]);
           
           /* Update the lower triangle of A(1:k+kb-1,1:k+kb-1) */
           if(k>0){ 
@@ -396,6 +397,15 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                         zone, dA(k, 0), ldda);
             
             cudaStreamSynchronize(stream[1]);
+            
+          }
+          
+          cudaMemcpy2DAsync( A(0, 0), lda *sizeof(cuDoubleComplex),
+                            dA(k, k), ldda*sizeof(cuDoubleComplex),
+                            sizeof(cuDoubleComplex)*kb, kb,
+                            cudaMemcpyDeviceToHost, stream[0]);
+          
+          if(k>0){
             
             cublasZher2k(MagmaLower, MagmaConjTrans,
                          k, kb,

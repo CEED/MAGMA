@@ -199,12 +199,12 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
                         W(i, iw+1), &ldw, &c_one, A(0, i), &ione);
           #if defined(PRECISION_z) || defined(PRECISION_c)
               lapackf77_zlacgv(&i_n, W(i, iw+1), &ldw);
-              lapackf77_zlacgv(&i_n, A(i, i+1), &ldw);
+              lapackf77_zlacgv(&i_n, A(i, i+1), &lda);
           #endif
           blasf77_zgemv("No transpose", &i_1, &i_n, &c_neg_one, W(0, iw+1), &ldw,
                         A(i, i+1), &lda, &c_one, A(0, i), &ione);
           #if defined(PRECISION_z) || defined(PRECISION_c)
-              lapackf77_zlacgv(&i_n, A(i, i+1), &ldw);
+              lapackf77_zlacgv(&i_n, A(i, i+1), &lda);
           #endif
         }
         if (i > 0) {
@@ -254,7 +254,9 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
           blasf77_zscal(&i, &tau[i - 1], W(0, iw), &ione);
 
 #if defined(PRECISION_z) || defined(PRECISION_c)
-          blasf77_zdotc(&value, &i, W(0, iw), &ione, A(0, i), &ione);
+          cblas_zdotc_sub(i, W(0, iw), ione, A(0, i), ione, &value);
+
+//          blasf77_zdotc(&value, &i, W(0, iw), &ione, A(0, i), &ione);
           alpha = tau[i - 1] * -.5f * value;
 #else
           alpha = tau[i - 1] * -.5f * blasf77_zdotc(&i, W(0, iw), &ione, A(0, i), &ione);
@@ -334,11 +336,11 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
                         out version works with MKL but is not a standard interface
                         for other BLAS zdoc implementations                        
                      */
-                     /*
+                     
                         cblas_zdotc_sub(i_n, W(i +1, i), ione,
                                         A(i +1, i), ione, &value);
-                     */
-                  blasf77_zdotc(&value, &i_n, W(i+1,i), &ione, A(i+1, i), &ione);
+                    
+                  //blasf77_zdotc(&value, &i_n, W(i+1,i), &ione, A(i+1, i), &ione);
                   alpha = tau[i]* -.5f * value;
               #else
                   alpha = tau[i]* -.5f* blasf77_zdotc(&i_n, W(i+1,i), &ione, A(i+1, i), &ione);
