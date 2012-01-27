@@ -110,9 +110,9 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
     *info = -2;
   } else if (n < 0) {
     *info = -3;
-  } else if (ldda < max(1,n)) {
+  } else if (lda < max(1,n)) {
     *info = -5;
-  }else if (lddb < max(1,n)) {
+  }else if (ldb < max(1,n)) {
     *info = -7;
   }
     if (*info != 0) {
@@ -394,7 +394,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
   cudaStreamDestroy(stream[0]);
   cudaStreamDestroy(stream[1]); 
   
-  cublasFree(dw);
+  cudaFree(dw);
   
   return MAGMA_SUCCESS;
 } /* magma_zhegst_gpu */
