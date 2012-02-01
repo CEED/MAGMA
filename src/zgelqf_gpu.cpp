@@ -141,7 +141,7 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
       magmablas_ztranspose2( dAT, ldat, dA, lda, m, n );
     }
     
-    magma_zgeqrf2_gpu(n, m, dAT, lda, tau, &iinfo);
+    magma_zgeqrf2_gpu(n, m, dAT, ldat, tau, &iinfo);
 
     if ((m == n) && (m % 32 == 0) && (lda%32 == 0))
       magmablas_zinplace_transpose( dAT, ldat, lda );
