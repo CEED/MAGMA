@@ -70,11 +70,11 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     LDA     (input) INTEGER
             The leading dimension of the array A.  LDA >= max(1,M).
 
-    D       (output) COMPLEX_16 array, dimension (min(M,N))
+    D       (output) double precision array, dimension (min(M,N))
             The diagonal elements of the bidiagonal matrix B:
             D(i) = A(i,i).
 
-    E       (output) COMPLEX_16 array, dimension (min(M,N)-1)
+    E       (output) double precision array, dimension (min(M,N)-1)
             The off-diagonal elements of the bidiagonal matrix B:
             if m >= n, E(i) = A(i,i+1) for i = 1,2,...,n-1;
             if m < n, E(i) = A(i+1,i) for i = 1,2,...,m-1.
