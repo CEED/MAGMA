@@ -54,7 +54,9 @@ ZSRC  = testing_zgemm.cpp	\
         \
 	testing_zcposv_gpu.cpp	\
 	testing_zcgesv_gpu.cpp	\
-	testing_zcgeqrsv_gpu.cpp
+	testing_zcgeqrsv_gpu.cpp \
+	\
+	testing_zlacpy.cpp \
 
 #testing_zswap.cpp
 
