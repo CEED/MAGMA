@@ -177,7 +177,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
 
     char uplo_[2] = {uplo, 0};
 
-    magma_int_t ln, ldda = lda;
+    magma_int_t ln, ldda;
     magma_int_t nb = magma_get_zhetrd_nb(n), ib; 
 
     cuDoubleComplex z_neg_one = MAGMA_Z_NEG_ONE;
@@ -233,8 +233,11 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
 
     cuDoubleComplex *da[4];
     cuDoubleComplex *dwork[4]; 
+
+    /* need to be multiple of 128 and set to be zeros for gemvt? */
+    ldda = lda;
     ln = ((nb*(1+n/(nb*num_gpus))+31)/32)*32;
-    ldwork2 = (1+ n / 64 + (n % 64 != 0)) * ldda;
+    ldwork2 = (1+ n / nb + (n % nb != 0)) * ldda;
     for( did=0; did<num_gpus; did++ ) {
       cudaSetDevice(did);
       if ( CUBLAS_STATUS_SUCCESS != cublasAlloc(ln*ldda+3*lddwork*nb, sizeof(cuDoubleComplex), (void**)&da[did]) ||
@@ -242,6 +245,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
            CUBLAS_STATUS_SUCCESS != cublasAlloc(k*n,     sizeof(cuDoubleComplex), (void**)&dy[did]) ||
            CUBLAS_STATUS_SUCCESS != cublasAlloc(ldwork2, sizeof(cuDoubleComplex), (void**)&dwork2[did] ) ) {
         for( i=0; i<did; i++ ) {
+            cudaSetDevice(i);
             cublasFree(da[i]);
             cublasFree(dx[i]);
             cublasFree(dy[i]);
@@ -255,6 +259,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
     }
     if( cudaSuccess != cudaMallocHost( (void**)&hwork, k*num_gpus*n*sizeof(cuDoubleComplex) ) ) {
       for( i=0; i<num_gpus; i++ ) {
+        cudaSetDevice(i);
         cublasFree(da[i]);
         cublasFree(dx[i]);
         cublasFree(dy[i]);
@@ -267,7 +272,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
       nx = n;
     else
       nx = 512;
-    nx = 0;
+    //nx = 0;
 
     if (upper) {
 
@@ -306,7 +311,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
             /* Copy superdiagonal elements back into A, and diagonal   
                elements into D */
             for (j = i; j < i+nb; ++j) {
-                if( j > 0 ) MAGMA_Z_SET2REAL( *A(j-1, j), e[j - 1] );
+                if( j > 0 ) { MAGMA_Z_SET2REAL( *A(j-1, j), e[j - 1] ); }
                 d[j] = MAGMA_Z_GET_X( *A(j, j) );
             }
 
@@ -421,7 +426,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
             /* Copy subdiagonal elements back into A, and diagonal   
                elements into D */
             for (j = i; j < i+ib; ++j) {
-                if( j+1 < n ) MAGMA_Z_SET2REAL( *A(j+1, j), e[j] );
+                if( j+1 < n ) { MAGMA_Z_SET2REAL( *A(j+1, j), e[j] ); }
                 d[j] = MAGMA_Z_GET_X( *A(j, j) );
             }
           }
@@ -465,12 +470,12 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
  
     trace_finalize( "zhetrd.svg","trace.css" );
     for( did=0; did<num_gpus; did++ ) {
+      for( kk=0; kk<k; kk++ ) cudaStreamDestroy(stream[did][kk]);
       cudaSetDevice(did);
       cublasFree(da[did]);
       cublasFree(dx[did]);
       cublasFree(dy[did]);
-      cublasFree(dwork[did]);
-      for( kk=0; kk<k; kk++ ) cudaStreamDestroy(stream[did][kk]);
+      cublasFree(dwork2[did]);
     }
     cudaFreeHost(hwork);
     MAGMA_Z_SET2REAL( work[0], lwkopt );

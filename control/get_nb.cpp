@@ -187,8 +187,8 @@ int magma_get_dgebrd_nb(int m){
 */
 extern "C"
 int magma_get_dsytrd_nb(int m){
-  //return 32;
-  return 64;
+  return 32;
+  //return 64;
 }
 
 
@@ -339,8 +339,8 @@ int magma_get_chetrd_nb(int m){
 */
 extern "C"
 int magma_get_zhetrd_nb(int m){
-  //return 32;
-  return 64;
+  return 32;
+  //return 64;
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -599,8 +599,8 @@ int magma_get_dgebrd_nb(int m){
 extern "C"
 int magma_get_dsytrd_nb(int m){
   //return 24;
-  //return 32;
-  return 64;
+  return 32;
+  //return 64;
   if (m <= 1024)
     return 64;
   else
@@ -768,8 +768,8 @@ int magma_get_chetrd_nb(int m){
 extern "C"
 int magma_get_zhetrd_nb(int m){
   //return 24;
-  //return 32;
-  return 64;
+  return 32;
+  //return 64;
   if (m <= 1024)
     return 64;
   else

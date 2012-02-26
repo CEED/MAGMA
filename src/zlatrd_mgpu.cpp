@@ -358,7 +358,6 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
       }
 
     } else {
-
       /*  Reduce first NB columns of lower triangle */
 //#define PROFILE_SYMV
 #ifdef  PROFILE_SYMV
@@ -375,7 +374,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
           i_n = n - i;
           idw = ((offset+i)/nb)%num_gpus;
 #define ONGPU
-#ifdef  ONGPU
+#if defined(ONGPU) && !defined(PRECISION_z) && !defined(PRECISION_c)
           //blasf77_zgemv("No transpose", &i_n, &i, &c_neg_one, A(i, 0), &lda, 
           //              W(i, 0), &ldw, &c_one, A(i, i), &ione);
           if( i > 0 ) {
@@ -401,8 +400,6 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
                       ii   = i + id*nlocal;
 
                       trace_gpu_start( id, 0, stream[id][0], "gemv", "gemv1" );
-                      //cublasSetVector(i_n, sizeof(cuDoubleComplex), A(i, i-1), 1, dW1(id, i, i-1), 1);          
-                      //cublasSetVector(i_n, sizeof(cuDoubleComplex), W(i, i-1), 1,  dW(id, i, i-1), 1);          
                       #if defined(PRECISION_z) || defined(PRECISION_c)
                         magmablas_zgemvt('N', i_ni, i, c_neg_one, dW1(id, ii, 0), lddw, 
                                            dW(id, i, 0), lddw, c_one, dW1(id, ii, i), ione);
@@ -512,7 +509,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
               /* mat-vec on multiple GPUs */
 #ifdef PROFILE_SYMV
               cudaSetDevice(0);
-              cudaEventRecord(start, 0);
+              cudaEventRecord(start, stream[0][0]);
 #endif
               magmablas_zhemv_mgpu(num_gpus, k, 'L', i_n, nb0, c_one, da, ldda, offset+i+1, 
                                      dx, ione, c_zero, dy, ione, dwork, ldwork,
@@ -526,7 +523,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
               //cudaStreamSynchronize(stream[0][0]);
 #ifdef PROFILE_SYMV
               cudaSetDevice(0);
-              cudaEventRecord(stop, 0);
+              cudaEventRecord(stop, stream[0][0]);
 #endif
               trace_cpu_start( 0, "gemv", "gemv2" );
               blasf77_zgemv(MagmaConjTransStr, &i_n, &i, &c_one, W(i+1, 0), &ldw, 
@@ -651,8 +648,8 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
     }
     for( id=0; id<num_gpus; id++ ) {
         cudaSetDevice(id);
-        magmablasSetKernelStream(NULL);
         trace_gpu_end( id, 0, stream[id][0] );
+        magmablasSetKernelStream(NULL);
     }
     //cudaSetDevice(0);
     //magmablasSetKernelStream(stream[0][0]);
