@@ -19,6 +19,7 @@
 
 #include "flops.h"
 #include "magma.h"
+#include "magmablas.h"
 #include "magma_lapack.h"
 #include "testings.h"
 
@@ -50,12 +51,12 @@ int main(int argc, char **argv)
     cuDoubleComplex beta  = MAGMA_Z_MAKE(0., 0.); // MAGMA_Z_MAKE( -0.6,  0.8 );
     cuDoubleComplex *A, *X, *Y, *Ycublas, *Ymagma;
     cuDoubleComplex *dA, *dX, *dY;
-#if defined(PRECISION_z) || defined(PRECISION_c)
+    int nb = 64;
+//#if defined(PRECISION_z) || defined(PRECISION_c)
 
-#else
      cuDoubleComplex *C_work;
      cuDoubleComplex *dC_work;
-#endif
+//#endif
     
     fp = fopen ("results_zhemv.txt", "w") ;
     if( fp == NULL ){ printf("Couldn't open output file\n"); exit(1);}
@@ -84,14 +85,13 @@ int main(int argc, char **argv)
     TESTING_DEVALLOC( dX, cuDoubleComplex, vecsize );
     TESTING_DEVALLOC( dY, cuDoubleComplex, vecsize );
 
-#if defined(PRECISION_z) || defined(PRECISION_c)
+//#if defined(PRECISION_z) || defined(PRECISION_c)
 
-#else
-    int blocks    = N / 64 + (N % 64 != 0);
+    int blocks    = N / nb + (N % nb != 0);
     int workspace = LDA * (blocks + 1);
     TESTING_MALLOC(    C_work, cuDoubleComplex, workspace );
     TESTING_DEVALLOC( dC_work, cuDoubleComplex, workspace );
-#endif        
+//#endif        
 
     /* Initialize the matrix */
     lapackf77_zlarnv( &ione, ISEED, &matsize, A );
@@ -130,12 +130,11 @@ int main(int argc, char **argv)
         cublasSetVector( m,    sizeof( cuDoubleComplex ), X, incx, dX, incx );
         cublasSetVector( m,    sizeof( cuDoubleComplex ), Y, incx, dY, incx );
 
-#if defined(PRECISION_z) || defined(PRECISION_c)
+//#if defined(PRECISION_z) || defined(PRECISION_c)
 
-#else
-            blocks    = m / 64 + (m % 64 != 0);
+            blocks    = m / nb + (m % nb != 0);
             cublasSetMatrix(lda,blocks, sizeof( cuDoubleComplex ), C_work, LDA , dC_work, lda);
-#endif        
+//#endif        
         start = get_current_time();
         cublasZhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
         end = get_current_time();
@@ -153,7 +152,8 @@ int main(int argc, char **argv)
         
         
         start = get_current_time();
-        magmablas_zhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
+      //  magmablas_zhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
+        magmablas_zhemv2( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx, dC_work, workspace );
         end = get_current_time();
         
         cublasGetVector( m, sizeof( cuDoubleComplex ), dY, incx, Ymagma, incx );
@@ -201,12 +201,11 @@ int main(int argc, char **argv)
     TESTING_DEVFREE( dA );
     TESTING_DEVFREE( dX );
     TESTING_DEVFREE( dY );
-#if defined(PRECISION_z) || defined(PRECISION_c)
+//#if defined(PRECISION_z) || defined(PRECISION_c)
         
-#else 
     TESTING_FREE( C_work );
     TESTING_DEVFREE( dC_work );
-#endif        
+//#endif        
 
     /* Free device */
     TESTING_CUDA_FINALIZE();
