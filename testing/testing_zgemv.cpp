@@ -117,9 +117,9 @@ int main(int argc, char **argv)
     printf("\nUsage: \n");
     printf("  testing_zgemv [-N|T|C] [-m %d] [-n %d]\n\n", 1024, 1024);
 
-    printf( "   m    n   CUBLAS,Gflop/s   MAGMABLAS0.2,Gflop/s   \"error\"\n" 
+    printf( "   m    n   CUBLAS,Gflop/s   MAGMABLAS Gflop/s   \"error\"\n" 
             "==============================================================\n");
-    fprintf(fp, "   m    n   CUBLAS,Gflop/s   MAGMABLAS0.2,Gflop/s   \"error\"\n" 
+    fprintf(fp, "   m    n   CUBLAS,Gflop/s   MAGMABLAS Gflop/s   \"error\"\n" 
             "==============================================================\n");
     
     for( i=istart; i < iend; i = (int)((i+1)*1.1) )
