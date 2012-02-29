@@ -38,10 +38,10 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
     =========
     SIDE    (input) CHARACTER
             = 'L': apply H or H' from the Left
-            = 'R': apply H or H' from the Right (Not implemented)
+            = 'R': apply H or H' from the Right
 
     TRANS   (input) CHARACTER
-            = 'N': apply H  (No transpose)      (Not implemented)
+            = 'N': apply H  (No transpose)
             = 'C': apply H' (Conjugate transpose)
 
     DIRECT  (input) CHARACTER
@@ -89,7 +89,9 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
     WORK    (workspace) COMPLEX_16 array, dimension (LDWORK,K)
 
     LDWORK  (input) INTEGER
-            The leading dimension of the array WORK. LDWORK >= max(1,N);
+            The leading dimension of the array WORK. 
+            If SIDE == 'L', LDWORK >= max(1,N);
+            if SIDE == 'R', LDWORK >= max(1,M); 
     ===================================================================      */
 
     cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
@@ -107,11 +109,7 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
     else
       transt = MagmaNoTrans;
 
-    if ( ( side  == 'r' || side  == 'R') ) {
-        fprintf(stderr, "The case (side == right) is not implemented\n");
-        magma_xerbla( __func__, 1 );
-        return MAGMA_ERR_ILLEGAL_VALUE;
-    }
+    if ( ( side  == 'l' || side  == 'L') ) {
 
     if ( storev == 'c' || storev == 'C') {
         /*
@@ -163,5 +161,54 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
                                 dV,    ldv,
                      c_one,     dC,    ldc);
     }
+    }
+    
+    else {
+
+        /* Case side == 'R' */
+        if ( storev == 'c' || storev == 'C') {
+            cublasZgemm( MagmaNoTrans, MagmaNoTrans,
+                         m, k, n,
+                         c_one,  dC,    ldc,
+                         dV,    ldv,
+                         c_zero, dwork, ldwork);// ??? ldwork replaced by k for case n < k
+
+            if (direct == 'F' || direct =='f')
+                cublasZtrmm( MagmaRight, MagmaUpper, transt, MagmaNonUnit,
+                             m, k,
+                             c_one, dT,    ldt,
+                             dwork, ldwork);
+            else
+                cublasZtrmm( MagmaRight, MagmaLower, transt, MagmaNonUnit,
+                             m, k,
+                             c_one, dT,    ldt,
+                             dwork, ldwork);
+
+            cublasZgemm( MagmaNoTrans, MagmaConjTrans,
+                         m, n, k,
+                         c_neg_one, dwork, ldwork, 
+                         dV,    ldv,
+                         c_one,     dC,    ldc);
+        }
+        else {
+            cublasZgemm( MagmaNoTrans, MagmaConjTrans,
+                         m, k, n,
+                         c_one,  dC,    ldc,
+                         dV,    ldv,
+                         c_zero, dwork, ldwork);
+
+            cublasZtrmm( MagmaRight, MagmaUpper, transt, MagmaNonUnit,
+                         m, k,
+                         c_one, dT,    ldt,
+                         dwork, ldwork);
+
+            cublasZgemm( MagmaNoTrans, MagmaNoTrans,
+                         m, n, k,
+                         c_neg_one, dwork, ldwork,
+                         dV,    ldv,
+                         c_one,     dC,    ldc);
+        }
+    }
+
     return MAGMA_SUCCESS;
 } /* magma_zlarfb */
