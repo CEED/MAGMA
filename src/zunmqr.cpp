@@ -116,13 +116,13 @@ magma_zunmqr(const char side, const char trans,
     /* Allocate work space on the GPU */
     cuDoubleComplex *dwork, *dc;
     cublasAlloc((m)*(n), sizeof(cuDoubleComplex), (void**)&dc);
-    cublasAlloc(2*(m+64)*64, sizeof(cuDoubleComplex), (void**)&dwork);
+    cublasAlloc((m+n+64)*64, sizeof(cuDoubleComplex), (void**)&dwork);
     
     /* Copy matrix C from the CPU to the GPU */
     cublasSetMatrix( m, n, sizeof(cuDoubleComplex), c, ldc, dc, m);
     dc -= (1 + m);
 
-    magma_int_t a_offset, c_offset, i__4;
+    magma_int_t a_offset, c_offset, i__4, lddwork;
     static magma_int_t i__;
     static cuDoubleComplex t[2*4160]        /* was [65][64] */;
     static magma_int_t i1, i2, i3, ib, ic, jc, nb, mi, ni, nq, nw;
@@ -248,13 +248,18 @@ magma_zunmqr(const char side, const char trans,
                 jc = i__;
               }
             
+            if (left)
+              lddwork = ni;
+            else
+              lddwork = mi;
+
             /* Apply H or H'; First copy T to the GPU */
             cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), t, ib, dwork+i__4*ib, ib);
             magma_zlarfb_gpu( side, trans, MagmaForward, MagmaColumnwise,
                               mi, ni, ib,
                               dwork, i__4, dwork+i__4*ib, ib,
                               &dc[ic + jc * m], m, 
-                              dwork+i__4*ib + ib*ib, ni);
+                              dwork+i__4*ib + ib*ib, lddwork);
           }
 
         cublasGetMatrix(m, n, sizeof(cuDoubleComplex), &dc[1+m], m, &c[c_offset], ldc);
