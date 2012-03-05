@@ -32,6 +32,8 @@ Included are routines for the following algorithms:
       [ds]ormqr2_gpu.cpp
     * Fix memory allocation bugs in [zc]unmqr2_gpu.cpp, [ds]ormqr2_gpu.cpp,
       [zc]unmqr.cpp, and [ds]ormqr.cpp (thanks to Azzam Haidar).
+    * Add reduction to band-diagonal for symmetric/Hermitian definite matrices
+      in [zc]hebbd.cpp and [ds]sybbd.cpp
 
  1.1.0 - 11-11-11
     * Fix a bug in [zcsd]geqrf_gpu.cpp and [zcsd]geqrf3_gpu.cpp for n>m
