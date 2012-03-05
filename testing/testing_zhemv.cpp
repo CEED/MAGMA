@@ -152,8 +152,7 @@ int main(int argc, char **argv)
         
         
         start = get_current_time();
-      //  magmablas_zhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
-        magmablas_zhemv2( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx, dC_work, workspace );
+        magmablas_zhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
         end = get_current_time();
         
         cublasGetVector( m, sizeof( cuDoubleComplex ), dY, incx, Ymagma, incx );
