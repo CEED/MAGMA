@@ -50,7 +50,6 @@ int main( int argc, char** argv)
     double           eps, flops, gpu_perf, gpu_time;
     cuDoubleComplex *h_A, *h_R, *h_work;
     cuDoubleComplex *tau;
-    double           result[2] = {0., 0.};
 
     /* Matrix size */
     magma_int_t N = 0, n2, lda, lwork;
@@ -58,8 +57,6 @@ int main( int argc, char** argv)
 
     magma_int_t i, j, k, info, nb, checkres, once = 0;
     magma_int_t ione     = 1;
-    magma_int_t itwo     = 2;
-    magma_int_t ithree   = 3;
     magma_int_t ISEED[4] = {0,0,0,1};
     char *uplo = (char *)MagmaLowerStr;
 
