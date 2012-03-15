@@ -174,7 +174,7 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
 
         nb = magma_get_dgehrd_nb(n);
         minwrk = (1+nb)*n;
-        work[1] = (double) minwrk;
+        work[0] = (double) minwrk;
         
         if (lwork < minwrk && ! lquery) {
             *info = -13;

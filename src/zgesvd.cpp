@@ -223,7 +223,7 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
         nb = magma_get_zgebrd_nb(*n);
 
         minwrk = ((*m)+(*n))*nb+(*n);
-        MAGMA_Z_SET2REAL(work[1], (double) minwrk);
+        MAGMA_Z_SET2REAL(work[0], (double) minwrk);
 
         if ( !lquery && (lwork_ < minwrk) ) {
             *info = -13;

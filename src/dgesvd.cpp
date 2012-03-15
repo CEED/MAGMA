@@ -220,7 +220,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
         /* Return optimal workspace in WORK(1) */
         nb = magma_get_dgebrd_nb(*n);
         minwrk = ((*m)+(*n))*nb+(*n);
-        work[1] = (double)minwrk;
+        work[0] = (double)minwrk;
 
         if ( !lquery && (lwork_ < minwrk) ) {
             *info = -13;

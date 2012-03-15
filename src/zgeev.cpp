@@ -173,7 +173,7 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
     if (*info == 0) {
         nb = magma_get_zgehrd_nb(n);
         minwrk = (1+nb)*n;
-        work[1] = MAGMA_Z_MAKE((double) minwrk, 0.);
+        work[0] = MAGMA_Z_MAKE((double) minwrk, 0.);
 
         if (lwork < minwrk && ! lquery) {
             *info = -12;
