@@ -39,6 +39,11 @@ magma_zhebbd(char uplo, magma_int_t n,
              cuDoubleComplex *work, magma_int_t lwork,
              magma_int_t *info);
 
+extern "C" magma_int_t
+magma_dsbtrd( int THREADS, char uplo, int n, int nb, 
+                   double *A, int LDA, double *D, double *E);
+extern "C" void cmp_vals(int n, double *wr1, double *wr2, double *nrmI, double *nrm1, double *nrm2);
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhebbd
 */
@@ -48,23 +53,27 @@ int main( int argc, char** argv)
 
     magma_timestr_t       start, end;
     double           eps, flops, gpu_perf, gpu_time;
-    cuDoubleComplex *h_A, *h_R, *h_work;
+    cuDoubleComplex *h_A, *h_R, *h_work, *D, *E;
     cuDoubleComplex *tau;
 
     /* Matrix size */
     magma_int_t N = 0, n2, lda, lwork;
     magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
 
-    magma_int_t i, j, k, info, nb, checkres, once = 0;
+    magma_int_t i, j, k, info, nb, THREADS, checkres, once = 0;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     char *uplo = (char *)MagmaLowerStr;
 
+    THREADS=1;
     if (argc != 1){
         for(i = 1; i<argc; i++){
             if (strcmp("-N", argv[i])==0) {
                 N = atoi(argv[++i]);
                 once = 1;
+            }
+            else if (strcmp("-threads", argv[i])==0) {
+                THREADS = atoi(argv[++i]);
             }
             else if (strcmp("-U", argv[i])==0)
                 uplo = (char *)MagmaUpperStr;
@@ -85,13 +94,13 @@ int main( int argc, char** argv)
         printf("  testing_zhebbd -L|U -N %d\n\n", 1024);
         N = size[9];
     }
-
+        
     checkres  = 0;//getenv("MAGMA_TESTINGS_CHECK") != NULL;
  
     eps = lapackf77_dlamch( "E" );
     lda = N;
     n2  = lda * N; 
-    nb  = 32; //magma_get_zhebbd_nb(N);
+    nb  = 64; //magma_get_zhebbd_nb(N);
     /* We suppose the magma nb is bigger than lapack nb */
     lwork = N*nb; 
 
@@ -100,6 +109,8 @@ int main( int argc, char** argv)
     TESTING_HOSTALLOC( h_R,    cuDoubleComplex, lda*N );
     TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork );
     TESTING_MALLOC(    tau,    cuDoubleComplex, N-1   );
+    TESTING_HOSTALLOC( D,    cuDoubleComplex, N );
+    TESTING_HOSTALLOC( E,    cuDoubleComplex, N );
 
     printf("\n\n");
     printf("  N    GPU GFlop/s   \n");
@@ -132,6 +143,8 @@ int main( int argc, char** argv)
            =================================================================== */
         start = get_current_time();
         magma_zhebbd(uplo[0], N, h_R, lda, tau, h_work, lwork, &info);
+        magma_dsbtrd(THREADS, uplo[0], N, nb, h_R, lda, D, E);
+
         end = get_current_time();
         if ( info < 0 )
             printf("Argument %d of magma_zhebbd had an illegal value\n", -info);
@@ -142,6 +155,7 @@ int main( int argc, char** argv)
         /* =====================================================================
            Check the factorization
            =================================================================== */
+        /*
         if ( checkres ) {
             FILE        *fp ;
 
@@ -177,17 +191,29 @@ int main( int argc, char** argv)
               } 
           fclose( fp ) ;
 
-        }
+        }*/
 
         /* =====================================================================
            Print performance and error.
            =================================================================== */
         if ( checkres ) {
-            printf("%5d   %6.2f  %6.2f seconds\n",
-                   N, gpu_perf, gpu_time );
+            printf("%5d   %6.2f  %6.2f seconds\n", N, gpu_perf, gpu_time );
+            double nrmI=0.0, nrm1=0.0, nrm2=0.0;
+            int    lwork2 = 256*N;
+            double *work2     = (double *) malloc (lwork2*sizeof(double));
+            double *D2          = (double *) malloc (N*sizeof(double));
+            dsyev_( "N", "L", &N, h_A, &lda, D2, work2, &lwork2, &info );
+            /* call eigensolver for our tridiag */
+            dsterf_( &N, D, E, &info); 
+            /* compare result */
+            cmp_vals(N, D2, D, &nrmI, &nrm1, &nrm2);
+            printf("===================================================================================================================\n");
+            printf(" Hello here are the norm  Infinite (max)=%e  norm one (sum)=%e   norm2(sqrt)=%e \n",nrmI, nrm1, nrm2);
+            printf("===================================================================================================================\n");
+
+
         } else {
-            printf("%5d   %6.2f  %6.2f seconds\n",
-                   N, gpu_perf, gpu_time );
+            printf("%5d   %6.2f  %6.2f seconds\n", N, gpu_perf, gpu_time );
         }
 
         if ( once )
