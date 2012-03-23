@@ -149,12 +149,12 @@ magma_zhebbd2(char uplo, magma_int_t n,
     #define a_ref(a_1,a_2) ( a+((a_2)-1)*( lda) + (a_1)-1)
     #define da_ref(a_1,a_2) (da+((a_2)-1)*(ldda) + (a_1)-1)
     #define tau_ref(a_1)    (tau + (a_1)-1)
-    #define t_ref(a_1)      (dT  + (a_1)*(nb))
+    #define t_ref(a_1)      (dT  + ((a_1)-1)*(lddt))
 
     char uplo_[2] = {uplo, 0};
 
     int ldda = ((n+31)/32)*32, nb = 64; // magma_get_zhebbd_nb(n); 
-    int lddt = ldda;
+    int lddt = nb;
    
     cuDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE, c_neg_half;
     MAGMA_Z_DSCALE(c_neg_half, c_neg_one, 2.);
