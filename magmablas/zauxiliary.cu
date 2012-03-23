@@ -79,7 +79,7 @@ __global__ void zlaset_identity(int m, int n, cuDoubleComplex *A, int lda){
         if (ind != i+iby)
            A[i*lda] = MAGMA_Z_ZERO;
         else
-           A[i*lda] = MAGMA_Z_ZERO;
+           A[i*lda] = MAGMA_Z_ONE;
      }
 }
 
