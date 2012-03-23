@@ -65,6 +65,25 @@ __global__ void zlaset(int m, int n, cuDoubleComplex *A, int lda){
         A[i*lda] = MAGMA_Z_ZERO;
 }
 
+__global__ void zlaset_identity(int m, int n, cuDoubleComplex *A, int lda){
+   int ibx = blockIdx.x * zlaset_threads;
+   int iby = blockIdx.y * 32;
+
+   int ind = ibx + threadIdx.x;
+
+   A += ind + __mul24(iby, lda);
+
+   #pragma unroll
+   for(int i=0; i<32; i++)
+     if (iby+i < n && ind < m) {
+        if (ind != i+iby)
+           A[i*lda] = MAGMA_Z_ZERO;
+        else
+           A[i*lda] = MAGMA_Z_ZERO;
+     }
+}
+
+
 __global__ void zlasetlower(int m, int n, cuDoubleComplex *A, int lda){
    int ibx = blockIdx.x * zlaset_threads;
    int iby = blockIdx.y * 32;
@@ -111,6 +130,20 @@ magmablas_zlaset(char uplo, magma_int_t m, magma_int_t n,
         zlasetupper<<< grid, threads, 0, magma_stream >>> (m, n, A, lda);
      else
         zlaset<<< grid, threads, 0, magma_stream >>> (m, n, A, lda);
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Set the m x n matrix pointed by A to I on the GPU.
+*/
+extern "C" void
+magmablas_zlaset_itentity(magma_int_t m, magma_int_t n,
+                          cuDoubleComplex *A, magma_int_t lda)
+{
+   dim3 threads(zlaset_threads, 1, 1);
+   dim3 grid(m/zlaset_threads+(m % zlaset_threads != 0), n/32+(n%32!=0));
+
+   if (m!=0 && n !=0)
+      zlaset_identity<<< grid, threads, 0, magma_stream >>> (m, n, A, lda);
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
