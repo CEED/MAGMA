@@ -136,7 +136,7 @@ magmablas_zlaset(char uplo, magma_int_t m, magma_int_t n,
    -- Set the m x n matrix pointed by A to I on the GPU.
 */
 extern "C" void
-magmablas_zlaset_itentity(magma_int_t m, magma_int_t n,
+magmablas_zlaset_identity(magma_int_t m, magma_int_t n,
                           cuDoubleComplex *A, magma_int_t lda)
 {
    dim3 threads(zlaset_threads, 1, 1);
