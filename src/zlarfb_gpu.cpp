@@ -120,6 +120,10 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
           }
           else
         */
+
+        /*
+         *  Form  H * C  or  H' * C  
+         */
         cublasZgemm( MagmaConjTrans, MagmaNoTrans,
                      n, k, m,
                      c_one,  dC,    ldc,
@@ -167,6 +171,7 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
 
         /* Case side == 'R' */
         if ( storev == 'c' || storev == 'C') {
+            /* W = C * V */
             cublasZgemm( MagmaNoTrans, MagmaNoTrans,
                          m, k, n,
                          c_one,  dC,    ldc,
@@ -174,12 +179,13 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
                          c_zero, dwork, ldwork);// ??? ldwork replaced by k for case n < k
 
             if (direct == 'F' || direct =='f')
-                cublasZtrmm( MagmaRight, MagmaUpper, transt, MagmaNonUnit,
+                /* W = W * T or W * T' */    
+                cublasZtrmm( MagmaRight, MagmaUpper, trans, MagmaNonUnit,
                              m, k,
                              c_one, dT,    ldt,
                              dwork, ldwork);
             else
-                cublasZtrmm( MagmaRight, MagmaLower, transt, MagmaNonUnit,
+                cublasZtrmm( MagmaRight, MagmaLower, trans, MagmaNonUnit,
                              m, k,
                              c_one, dT,    ldt,
                              dwork, ldwork);
@@ -196,7 +202,7 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
                          c_one,  dC,    ldc,
                          dV,    ldv,
                          c_zero, dwork, ldwork);
-
+            /*Azzam: I think transt need to be trans in TRMM */
             cublasZtrmm( MagmaRight, MagmaUpper, transt, MagmaNonUnit,
                          m, k,
                          c_one, dT,    ldt,
