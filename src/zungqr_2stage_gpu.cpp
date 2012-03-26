@@ -87,7 +87,8 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     static magma_int_t i, ib, ki, kk, iinfo;
     magma_int_t lddwork = min(m, n);
     cuDoubleComplex *work, *panel;
-    static cudaStream_t stream[2];
+    //static cudaStream_t stream[2];
+    magma_int_t ldt=nb; // need to be an input parameter
 
     *info = 0;
     if (m < 0) {
@@ -106,6 +107,10 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 
     if (n <= 0)
       return MAGMA_SUCCESS;
+
+
+
+
 
     if ( (nb > 1) && (nb < k) )
       {
@@ -137,7 +142,6 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 
     //cudaStreamCreate(&stream[0]);
     //cudaStreamCreate(&stream[1]);
-
     /* Use unblocked code for the last or only block. */
     if (kk < n)
       {
@@ -155,33 +159,38 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
         
         magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise,
                           i__1, i__2, i__3,
-                          da_ref(kk, kk-nb), ldda, t_ref(kk-nb),          nb,
+                          da_ref(kk, kk-nb), ldda, t_ref(kk-nb),          ldt,
                                   da_ref(kk, kk), ldda, dT + 2*lddwork*nb, lddwork);
-
+      
+        //magmablas_zlaset(MagmaUpperLower, kk-nb, nb, da_ref(0,kk-nb), ldda);
+        //magmablas_zlaset_identity(m-(kk-nb), nb, da_ref(kk-nb,kk-nb), ldda);
       }
 
     if (kk > 0)
       {
         /* Use blocked code */
-        for (i = ki; i >= 0; i-=nb)
+        for (i = ki; i >= nb; i-=nb)
           {
             ib = min(nb, k - i);
-
             /* Send current panel to the CPU for update */
             i__2 = m - i;
             //cudaMemcpy2DAsync(panel,       i__2 * sizeof(cuDoubleComplex),
             //                  da_ref(i,i), ldda * sizeof(cuDoubleComplex),
             //                  sizeof(cuDoubleComplex)*i__2, ib,
             //                  cudaMemcpyDeviceToHost,stream[0]);
-
             if (i + ib < n)
               {
                 /* Apply H to A(i:m,i+ib:n) from the left */
-                i__3 = n - i - ib;
+                i__3 = n - i;
+
+                magmablas_zlaset(MagmaUpperLower, i, ib, da_ref(0,i), ldda);
+                magmablas_zlaset_identity(m-i, ib, da_ref(i,i), ldda);
+
                 magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise,
                                   i__2, i__3, ib,
-                                  da_ref(i, i-nb), ldda, t_ref(i-nb),             nb,
+                                  da_ref(i, i-nb), ldda, t_ref(i-nb),             ldt,
                                   da_ref(i, i), ldda, dT + 2*lddwork*nb, lddwork);
+                                  
               }
 
             /* Apply H to rows i:m of current block on the CPU */
@@ -195,14 +204,21 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 
             /* Set rows 1:i-1 of current block to zero */
             i__2 = i + ib;
-            magmablas_zlaset(MagmaUpperLower, i, ib, da_ref(0,i), ldda);
-            magmablas_zlaset_identity(m-i, ib, da_ref(i,i), ldda);
+            //magmablas_zlaset(MagmaUpperLower, i-ib, ib, da_ref(0,i-ib), ldda);
+            //magmablas_zlaset_identity(m-(i-ib), ib, da_ref(i-ib,i-ib), ldda);
           }
       }
 
+                magmablas_zlaset_identity(m, nb, da_ref(0,0), ldda);
+
+
+
+
+
+
     cudaFreeHost(work);
-    cudaStreamDestroy(stream[0]);
-    cudaStreamDestroy(stream[1]);
+    //cudaStreamDestroy(stream[0]);
+    //cudaStreamDestroy(stream[1]);
 
     return MAGMA_SUCCESS;
 } /* magma_zungqr_gpu */
