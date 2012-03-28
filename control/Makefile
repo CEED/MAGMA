@@ -28,7 +28,8 @@ ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
         auxiliary.cpp 	\
         common.cpp		\
         xerbla.cpp 	\
-	get_nb.cpp
+	get_nb.cpp \
+	bulge_auxiliary.cpp
 
 ALLOBJ  = $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f90=.o)
