@@ -35,6 +35,7 @@ extern "C" {
 #define blasf77_zhemm      FORTRAN_NAME( zhemm,  ZHEMM  )
 #define blasf77_zhemv      FORTRAN_NAME( zhemv,  ZHEMV  )
 #define blasf77_zher2k     FORTRAN_NAME( zher2k, ZHER2K )
+#define blasf77_zher2      FORTRAN_NAME( zher2,  ZHER2  )
 #define blasf77_zherk      FORTRAN_NAME( zherk,  ZHERK  )
 #define blasf77_zscal      FORTRAN_NAME( zscal,  ZSCAL  )
 #define blasf77_zdscal     FORTRAN_NAME( zdscal, ZDSCAL ) 
@@ -92,6 +93,9 @@ extern "C" {
 #define lapackf77_zpotri   FORTRAN_NAME( zpotri, ZPOTRI )
 #define lapackf77_ztrevc   FORTRAN_NAME( ztrevc, ZTREVC )
 #define lapackf77_dstebz   FORTRAN_NAME( dstebz, DSTEBZ )
+#define lapackf77_dlamc3   FORTRAN_NAME( dlamc3, DLAMC3 )
+#define lapackf77_dlaed4   FORTRAN_NAME( dlaed4, DLAED4 )
+#define lapackf77_dlamrg   FORTRAN_NAME( dlamrg, DLAMRG )
 #define lapackf77_ztrtri   FORTRAN_NAME( ztrtri, ZTRTRI )
 #define lapackf77_zsteqr   FORTRAN_NAME( zsteqr, ZSTEQR )
 #define lapackf77_zstedc   FORTRAN_NAME( zstedc, ZSTEDC )
@@ -120,6 +124,7 @@ extern "C" {
 #define lapackf77_zqrt02   FORTRAN_NAME( zqrt02, ZQRT02 )
 #define lapackf77_zunt01   FORTRAN_NAME( zunt01, ZUNT01 )
 #define lapackf77_zlarfy   FORTRAN_NAME( zlarfy, ZLARFY )
+#define lapackf77_zlarfx   FORTRAN_NAME( zlarfx, ZLARFX )
 #define lapackf77_zstt21   FORTRAN_NAME( zstt21, ZSTT21 )
 
 
@@ -164,6 +169,9 @@ void    blasf77_zher2k(const char *, const char *, const int *, const int *,
                        cuDoubleComplex *, cuDoubleComplex *, const int *, 
                        cuDoubleComplex *, const int *, double *, 
                        cuDoubleComplex *, const int *);
+void     blasf77_zher2(char *, int *, cuDoubleComplex *, 
+                       cuDoubleComplex *, int *, cuDoubleComplex *, int *, 
+                       cuDoubleComplex *, int *);
 void    blasf77_zherk( const char *, const char *, const int *, const int *, double *, 
                        cuDoubleComplex *, const int *, double *, cuDoubleComplex *, 
                        const int *);
@@ -351,6 +359,11 @@ void    lapackf77_dstebz(char *range, char *order, magma_int_t *n, double *vl, d
                          double *d__, double *e, magma_int_t *m, magma_int_t *nsplit,
                          double *w, magma_int_t *iblock, magma_int_t *isplit, double *work,
                          magma_int_t *iwork, magma_int_t *info);
+double  lapackf77_dlamc3(double* a, double* b);
+void    lapackf77_dlamrg(magma_int_t* n1, magma_int_t* n2, double* a, 
+                         magma_int_t* dtrd1, magma_int_t* dtrd2, magma_int_t* index);
+void    lapackf77_dlaed4(magma_int_t* n, magma_int_t* i, double* d, double* z,
+                         double* delta, double* rho, double* dlam, magma_int_t* info);
 void    lapackf77_zsteqr(const char *compz, magma_int_t *n, double *D, double *E, 
                          cuDoubleComplex *Z, magma_int_t *ldz, 
                          double *work, magma_int_t *info);
@@ -486,6 +499,9 @@ void    lapackf77_zunt01(const char *rowcol, int *m, int *n, cuDoubleComplex *U,
 void    lapackf77_zlarfy(const char *uplo, int *N, cuDoubleComplex *V, int *incv, 
                          cuDoubleComplex *tau, cuDoubleComplex *C, int *ldc, 
                          cuDoubleComplex *work);
+void    lapackf77_zlarfx(char *, int *, int *, 
+                         cuDoubleComplex *, cuDoubleComplex *, 
+                         cuDoubleComplex *, int *, cuDoubleComplex *);
 void    lapackf77_zqrt02(int *m, int *n, int *k, cuDoubleComplex *A, cuDoubleComplex *AF,
                          cuDoubleComplex *Q, cuDoubleComplex *R, int *lda, 
                          cuDoubleComplex *TAU, cuDoubleComplex *work, int *lwork,
