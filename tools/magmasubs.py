@@ -303,6 +303,7 @@ subs = {
     ('stsqrt','dtsqrt','ctsqrt','ztsqrt'),
     ('sqrt02','dqrt02','cqrt02','zqrt02'),
     ('ssytrd','dsytrd','chetrd','zhetrd'),
+    ('sbulge','dbulge','cbulge','zbulge'),
     ('SSYTRD','DSYTRD','CHETRD','ZHETRD'),
     ('ssybbd','dsybbd','chebbd','zhebbd'),
     ('SSYBBD','DSYBBD','CHEBBD','ZHEBBD'),
