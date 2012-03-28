@@ -63,7 +63,7 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
             reflector H(i), as returned by ZGEQRF_GPU.
 
     DT      (input) COMPLEX_16 work space array on the GPU device,
-            dimension (2*MIN(M, N) + (N+31)/32*32 )*NB.
+            dimension (MIN(M, N) )*NB. 
             This must be the 6th argument of magma_zgeqrf_gpu
             [ note that if N here is bigger than N in magma_zgeqrf_gpu,
               the workspace requirement DT in magma_zgeqrf_gpu must be 
@@ -87,8 +87,15 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     static magma_int_t i, ib, ki, kk, iinfo;
     magma_int_t lddwork = min(m, n);
     cuDoubleComplex *work, *panel;
+    cuDoubleComplex *dwork;
     //static cudaStream_t stream[2];
     magma_int_t ldt=nb; // need to be an input parameter
+
+    if( CUBLAS_STATUS_SUCCESS != cublasAlloc( n*nb, sizeof(double), (void**)&dwork) ) { 
+       printf ("!!!! cublasAlloc failed for: dE\n" );       
+       exit(-1);                                                           
+    }
+
 
     *info = 0;
     if (m < 0) {
@@ -160,7 +167,7 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
         magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise,
                           i__1, i__2, i__3,
                           da_ref(kk, kk-nb), ldda, t_ref(kk-nb),          ldt,
-                                  da_ref(kk, kk), ldda, dT + 2*lddwork*nb, lddwork);
+                                  da_ref(kk, kk), ldda, dwork, i__2);
       
         //magmablas_zlaset(MagmaUpperLower, kk-nb, nb, da_ref(0,kk-nb), ldda);
         //magmablas_zlaset_identity(m-(kk-nb), nb, da_ref(kk-nb,kk-nb), ldda);
@@ -189,7 +196,7 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
                 magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise,
                                   i__2, i__3, ib,
                                   da_ref(i, i-nb), ldda, t_ref(i-nb),             ldt,
-                                  da_ref(i, i), ldda, dT + 2*lddwork*nb, lddwork);
+                                  da_ref(i, i), ldda, dwork, i__3);
                                   
               }
 
@@ -217,6 +224,7 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 
 
     cudaFreeHost(work);
+    cudaFree(dwork);
     //cudaStreamDestroy(stream[0]);
     //cudaStreamDestroy(stream[1]);
 

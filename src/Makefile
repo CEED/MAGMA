@@ -113,12 +113,17 @@ ZSRC  = zpotrf.cpp	\
 	ztrtri.cpp	\
 	ztrtri_gpu.cpp	\
 	zlauum.cpp	\
-	zlauum_gpu.cpp
+	zlauum_gpu.cpp \
+        zhebbd-v2.cpp \
+        zungqr_2stage_gpu.cpp	\
+	zbulge_kernel.cpp \
+	zbulge_applyQ.cpp \
+	dbulge_aux.cpp
 
 
 -include Makefile.src
 
-ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
+ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)    
 ALLOBJ  = $(ALLSRC:.cpp=.o)
 
 all: $(LIBMAGMA)

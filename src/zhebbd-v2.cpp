@@ -23,7 +23,7 @@
 
 
 extern "C" magma_int_t
-magma_zhebbd2(char uplo, magma_int_t n, 
+magma_zhebbd2(char uplo, magma_int_t n, magma_int_t nb,
               cuDoubleComplex *a, magma_int_t lda, 
               cuDoubleComplex *tau,
               cuDoubleComplex *work, magma_int_t lwork,
@@ -153,7 +153,7 @@ magma_zhebbd2(char uplo, magma_int_t n,
 
     char uplo_[2] = {uplo, 0};
 
-    int ldda = ((n+31)/32)*32, nb = 64; // magma_get_zhebbd_nb(n); 
+    int ldda = ((n+31)/32)*32; // magma_get_zhebbd_nb(n); 
     int lddt = nb;
    
     cuDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE, c_neg_half;
