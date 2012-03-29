@@ -71,6 +71,7 @@ extern "C" {
 #define lapackf77_zhegvd   FORTRAN_NAME( zhegvd, ZHEGVD )
 #define lapackf77_zhetd2   FORTRAN_NAME( zhetd2, ZHETD2 )
 #define lapackf77_zhetrd   FORTRAN_NAME( zhetrd, ZHETRD )
+#define lapackf77_zhbtrd   FORTRAN_NAME( zhbtrd, ZHBTRD )
 #define lapackf77_zhseqr   FORTRAN_NAME( zhseqr, ZHSEQR )
 #define lapackf77_zlacpy   FORTRAN_NAME( zlacpy, ZLACPY )
 #define lapackf77_zlacgv   FORTRAN_NAME( zlacgv, ZLACGV )
@@ -293,6 +294,10 @@ void    lapackf77_zhetrd(const char *uplo, magma_int_t *n,
                          cuDoubleComplex *a, magma_int_t *lda, 
                          double *d, double *e, cuDoubleComplex *tau, 
                          cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
+void    lapackf77_zhbtrd(char *vect, char *uplo, magma_int_t *n, magma_int_t *kd, 
+                         cuDoubleComplex *ab, magma_int_t *ldab, double *d__, double *e, 
+                         cuDoubleComplex *q, magma_int_t *ldq, cuDoubleComplex *work, 
+                         magma_int_t *info);
 void    lapackf77_zhseqr(const char *job, const char *compz, magma_int_t *n, 
                          magma_int_t *ilo, magma_int_t *ihi, 
                          cuDoubleComplex *H, magma_int_t *ldh, WSPLIT, 
