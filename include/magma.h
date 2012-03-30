@@ -84,6 +84,11 @@
 #define MAGMA_ERR_CUBLASALLOC    -7
 
 /* ------------------------------------------------------------
+ *   Define new type that will not be changed by the generator
+ * --------------------------------------------------------- */
+typedef double real_Double_t;
+
+/* ------------------------------------------------------------
  *   Macros to deal with cuda complex
  * --------------------------------------------------------- */
 #define MAGMA_Z_SET2REAL(v, t)    (v).x = (t); (v).y = 0.0
