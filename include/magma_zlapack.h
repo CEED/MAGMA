@@ -272,7 +272,7 @@ void    lapackf77_zgesvd(const char *jobu, const char *jobvt,
 void    lapackf77_zheev(const char *jobz, const char *uplo, magma_int_t *n, 
                          cuDoubleComplex *a, magma_int_t *lda, double *w, 
                          cuDoubleComplex *work, magma_int_t *lwork,
-                         DWORKFORZ_AND_LD magma_int_t *info);
+                         DWORKFORZ magma_int_t *info);
 void    lapackf77_zheevd(const char *jobz, const char *uplo, magma_int_t *n, 
                          cuDoubleComplex *a, magma_int_t *lda, double *w, 
                          cuDoubleComplex *work, magma_int_t *lwork,
