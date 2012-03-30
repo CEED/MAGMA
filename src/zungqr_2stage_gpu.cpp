@@ -91,7 +91,7 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     //static cudaStream_t stream[2];
     magma_int_t ldt=nb; // need to be an input parameter
 
-    if( CUBLAS_STATUS_SUCCESS != cublasAlloc( n*nb, sizeof(double), (void**)&dwork) ) { 
+    if( CUBLAS_STATUS_SUCCESS != cublasAlloc( n*nb, sizeof(cuDoubleComplex), (void**)&dwork) ) { 
        printf ("!!!! cublasAlloc failed for: dE\n" );       
        exit(-1);                                                           
     }
@@ -221,10 +221,8 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 
 
 
-
-
-    cudaFreeHost(work);
-    cudaFree(dwork);
+    cublasFree(dwork);
+    //cudaFreeHost(work);
     //cudaStreamDestroy(stream[0]);
     //cudaStreamDestroy(stream[1]);
 
