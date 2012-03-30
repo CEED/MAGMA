@@ -91,7 +91,6 @@
 #define MAGMA_Z_EQUAL(u,v)        (((u).x == (v).x) && ((u).y == (v).y))
 #define MAGMA_Z_GET_X(u)          ((u).x)
 #define MAGMA_Z_ASSIGN(v, t)      (v).x = (t).x; (v).y = (t).y
-#define MAGMA_Z_CNJG(v, t)        (v).x = (t).x; (v).y = -(t).y
 #define MAGMA_Z_DSCALE(v, t, s)   (v).x = (t).x/(s); (v).y = (t).y/(s)      
 #define MAGMA_Z_OP_NEG(a, b, c)   (a).x = (b).x-(c).x; (a).y = (b).y-(c).y
 #define MAGMA_Z_MAKE(r, i)        make_cuDoubleComplex((r), (i))
@@ -102,6 +101,7 @@
 #define MAGMA_Z_MUL(a, b)         cuCmul((a), (b))
 #define MAGMA_Z_DIV(a, b)         cuCdiv((a), (b))
 #define MAGMA_Z_ABS(a)            cuCabs((a))
+#define MAGMA_Z_CNJG(a)           cuConj(a)
 #define MAGMA_Z_ZERO              make_cuDoubleComplex(0.0, 0.0)
 #define MAGMA_Z_ONE               make_cuDoubleComplex(1.0, 0.0)
 #define MAGMA_Z_HALF              make_cuDoubleComplex(0.5, 0.0)
@@ -113,7 +113,6 @@
 #define MAGMA_C_EQUAL(u,v)        (((u).x == (v).x) && ((u).y == (v).y))
 #define MAGMA_C_GET_X(u)          ((u).x)
 #define MAGMA_C_ASSIGN(v, t)      (v).x = (t).x; (v).y = (t).y
-#define MAGMA_C_CNJG(v, t)        (v).x= (t).x; (v).y = -(t).y
 #define MAGMA_C_DSCALE(v, t, s)   (v).x = (t).x/(s); (v).y = (t).y/(s)
 #define MAGMA_C_OP_NEG(a, b, c)   (a).x = (b).x-(c).x; (a).y = (b).y-(c).y
 #define MAGMA_C_MAKE(r, i)        make_cuFloatComplex((r), (i))
@@ -124,6 +123,7 @@
 #define MAGMA_C_MUL(a, b)         cuCmulf((a), (b))
 #define MAGMA_C_DIV(a, b)         cuCdivf((a), (b))
 #define MAGMA_C_ABS(a)            cuCabsf((a))
+#define MAGMA_C_CNJG(a)           cuConjf(a)
 #define MAGMA_C_ZERO              make_cuFloatComplex(0.0, 0.0)
 #define MAGMA_C_ONE               make_cuFloatComplex(1.0, 0.0)
 #define MAGMA_C_HALF              make_cuFloatComplex(0.5, 0.0)
@@ -135,7 +135,6 @@
 #define MAGMA_D_EQUAL(u,v)        ((u) == (v))
 #define MAGMA_D_GET_X(u)          (u)
 #define MAGMA_D_ASSIGN(v, t)      (v) = (t)
-#define MAGMA_D_CNJG(v, t)        (v) = (t)
 #define MAGMA_D_DSCALE(v, t, s)   (v) = (t)/(s)
 #define MAGMA_D_OP_NEG(a, b, c)   (a) = (b) - (c)
 #define MAGMA_D_MAKE(r, i)        (r)
@@ -146,6 +145,7 @@
 #define MAGMA_D_MUL(a, b)         ( (a) * (b) )
 #define MAGMA_D_DIV(a, b)         ( (a) / (b) )
 #define MAGMA_D_ABS(a)            ((a)>0?(a):-(a))
+#define MAGMA_D_CNJG(a)           (a)
 #define MAGMA_D_ZERO              (0.0)
 #define MAGMA_D_ONE               (1.0)
 #define MAGMA_D_HALF              (0.5)
@@ -157,7 +157,6 @@
 #define MAGMA_S_EQUAL(u,v)        ((u) == (v))
 #define MAGMA_S_GET_X(u)          (u)
 #define MAGMA_S_ASSIGN(v, t)      (v) = (t)
-#define MAGMA_S_CNJG(v, t)        (v) = (t)
 #define MAGMA_S_DSCALE(v, t, s)   (v) = (t)/(s)
 #define MAGMA_S_OP_NEG(a, b, c)   (a) = (b) - (c)
 #define MAGMA_S_MAKE(r, i)        (r)
@@ -168,6 +167,7 @@
 #define MAGMA_S_MUL(a, b)         ( (a) * (b) )
 #define MAGMA_S_DIV(a, b)         ( (a) / (b) )
 #define MAGMA_S_ABS(a)            ((a)>0?(a):-(a))
+#define MAGMA_S_CNJG(a)           (a)
 #define MAGMA_S_ZERO              (0.0)
 #define MAGMA_S_ONE               (1.0)
 #define MAGMA_S_HALF              (0.5)
