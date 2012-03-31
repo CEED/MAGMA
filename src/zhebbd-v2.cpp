@@ -308,7 +308,7 @@ magma_zhebbd2(char uplo, magma_int_t n, magma_int_t nb,
             zq_to_panel(MagmaUpper, pn, a_ref(indi, indj), lda, work);
 
             /* dwork + pm*nb = (T' * (V' * X) = dwork' * X = dwork' * W */
-            cublasZgemm(MagmaTrans, MagmaNoTrans, pn, pn, pm,
+            cublasZgemm(MagmaConjTrans, MagmaNoTrans, pn, pn, pm,
                         c_one, dwork, pm, 
                         dW, pm,
                         c_zero, dwork + pm*nb, nb);
