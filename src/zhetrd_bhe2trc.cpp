@@ -628,17 +628,20 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 */
 
                cudaDeviceSynchronize();
-               timegemm = get_time_azz();
+              // timegemm = get_time_azz();
                // copy the eigenvectors to GPU
                cublasSetMatrix(N, LDZ, sizeof(cuDoubleComplex), Z, LDZ, dZ, N);
                // make GEMM Q2 * Z --> dV2 = da * dZ
+               timegemm = get_time_azz();
                cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, N, N, c_one, da, N, dZ, N, c_zero, dV2, N);
+               cudaDeviceSynchronize();
+               timegemm = get_time_azz()-timegemm;
                // copy Q1 to GPU --> dZ
                cublasSetMatrix(N, LDA1, sizeof(cuDoubleComplex), A1, LDA1, dZ, N);
                // make GEMM Q1 * (Q2 * Z) --> da = dZ * dV2
                cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, N, N, c_one, dZ, N, dV2, N, c_zero, da, N);
                cublasGetMatrix(N, LDA1, sizeof(cuDoubleComplex), da, N, A1, LDA1);
-               timegemm = get_time_azz()-timegemm;
+               //timegemm = get_time_azz()-timegemm;
            }
            if(WANTZ==2){
                cublasFree(dT1);
