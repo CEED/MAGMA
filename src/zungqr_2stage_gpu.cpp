@@ -135,9 +135,9 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
       kk = 0;
 
     /* Allocate work space on CPU in pinned memory */
-    lwork = (n+m) * nb;
-    if (kk < n)
-      lwork = max(lwork, n * nb + (m-kk)*(n-kk));
+    //lwork = (n+m) * nb;
+    //if (kk < n)
+    //  lwork = max(lwork, n * nb + (m-kk)*(n-kk));
 
     //if ( cudaSuccess != 
     //     cudaMallocHost( (void**)&work, (lwork)*sizeof(cuDoubleComplex) ) )
