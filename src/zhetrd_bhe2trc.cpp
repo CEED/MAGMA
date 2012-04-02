@@ -602,7 +602,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                //
                // way 2 is implemented because of Raffaele
                timeaplQ2 = get_time_azz();
-               cudaFree(dT1);
+               cublasFree(dT1);
                // copy Q1 to CPU
                cublasGetMatrix(N, LDA1, sizeof(cuDoubleComplex), da, N, A1, LDA1);
                // compute Q2 by applying V2 to Identity and put it into da           
@@ -610,7 +610,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                // free dT2 and allocate dZ and copy Z to dZ
                cudaDeviceSynchronize();
                timeaplQ2 = get_time_azz()-timeaplQ2;
-               cudaFree(dT2);
+               cublasFree(dT2);
                if( CUBLAS_STATUS_SUCCESS != cublasAlloc(N*N, sizeof(cuDoubleComplex), (void**)&dZ) ) { 
                   printf ("!!!! cublasAlloc failed for: dZ\n" );       
                   exit(-1);                                                           
@@ -627,7 +627,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                 fclose(trace_file);
 */
 
-
+               cudaDeviceSynchronize();
                timegemm = get_time_azz();
                // copy the eigenvectors to GPU
                cublasSetMatrix(N, LDZ, sizeof(cuDoubleComplex), Z, LDZ, dZ, N);
@@ -641,7 +641,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                timegemm = get_time_azz()-timegemm;
            }
            if(WANTZ==2){
-               cudaFree(dT1);
+               cublasFree(dT1);
                if( CUBLAS_STATUS_SUCCESS != cublasAlloc(N*N, sizeof(cuDoubleComplex), (void**)&dZ) ) { 
                   printf ("!!!! cublasAlloc failed for: dZ\n" );       
                   exit(-1);                                                           
@@ -650,7 +650,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                timeaplQ2 = get_time_azz();
                magma_zbulge_applyQ(WANTZ, 'R', N, NB, Vblksiz, A1, LDA1, V, TAU, T, &INFO, dV2, dT2, da, 2);
                cudaDeviceSynchronize();
-               cudaFree(dT2);
+               cublasFree(dT2);
                timeaplQ2 = get_time_azz()-timeaplQ2;
                timegemm = get_time_azz();
                // copy the eigenvectors to GPU
@@ -663,14 +663,14 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
            if(WANTZ==3){
                timeaplQ2 = get_time_azz();
-               cudaFree(dT1);
+               cublasFree(dT1);
                if( CUBLAS_STATUS_SUCCESS != cublasAlloc(N*N, sizeof(cuDoubleComplex), (void**)&dZ) ) { 
                   printf ("!!!! cublasAlloc failed for: dZ\n" );       
                   exit(-1);                                                           
                }
                // apply V2 from left to the eigenvectors Z. dZ = (I-V2*T2*V2')*Z
                magma_zbulge_applyQ(WANTZ, 'L', N, NB, Vblksiz, Z, LDZ, V, TAU, T, &INFO, dV2, dT2, dZ, 3);
-               cudaFree(dT2);
+               cublasFree(dT2);
                cudaDeviceSynchronize();
                timeaplQ2 = get_time_azz()-timeaplQ2;
                timegemm = get_time_azz();
@@ -862,6 +862,9 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
     }
 #endif
 
+
+    cublasFree(dV2);
+    cublasFree(da);
     free(A2);
     free(TAU);
     free(V);
