@@ -52,7 +52,7 @@ magma_zhebbd2(char uplo, magma_int_t n, magma_int_t nb,
              magma_int_t *info);
 
 extern "C" magma_int_t
-magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int n, int nb, 
+magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int n, int nb, 
                    cuDoubleComplex *A, int LDA, double *D, double *E, cuDoubleComplex *dT1, int ldt1);
 
 
@@ -87,6 +87,7 @@ int main( int argc, char** argv)
 
     int WANTZ=0;
     THREADS=1;
+    int NE=N;
     if (argc != 1){
         for(i = 1; i<argc; i++){
             if (strcmp("-N", argv[i])==0) {
@@ -98,6 +99,9 @@ int main( int argc, char** argv)
             }
             else if (strcmp("-wantz", argv[i])==0) {
                 WANTZ = atoi(argv[++i]);
+            }
+            else if (strcmp("-NE", argv[i])==0) {
+                NE = atoi(argv[++i]);
             }
             else if (strcmp("-U", argv[i])==0)
                 uplo = (char *)MagmaUpperStr;
@@ -119,7 +123,7 @@ int main( int argc, char** argv)
         N = size[9];
     }
         
-    checkres  = 1; //getenv("MAGMA_TESTINGS_CHECK") != NULL;
+    checkres  = 0; //getenv("MAGMA_TESTINGS_CHECK") != NULL;
  
     eps = lapackf77_dlamch( "E" );
     lda = N;
@@ -282,7 +286,7 @@ return 0;
 */        
         
         //        dsytrd_bsy2trc(THREADS, uplo[0], N, nb, h_R, lda, D, E);
-        magma_zhetrd_bhe2trc(THREADS, WANTZ, uplo[0], N, nb, h_R, lda, D, E, dT1, ldt);
+        magma_zhetrd_bhe2trc(THREADS, WANTZ, uplo[0], NE, N, nb, h_R, lda, D, E, dT1, ldt);
         end = get_current_time();
         if ( info < 0 )
             printf("Argument %d of magma_zhebbd had an illegal value\n", -info);

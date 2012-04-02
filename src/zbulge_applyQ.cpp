@@ -44,7 +44,7 @@ void  magmablas_zlaset_identity(magma_int_t m, magma_int_t n,
 #define V(m)     &(V[(m)])
 #define TAU(m)   &(TAU[(m)])
 #define T(m)     &(T[(m)])
-extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, cuDoubleComplex *E, magma_int_t LDE, cuDoubleComplex *V, cuDoubleComplex *TAU, cuDoubleComplex *T, magma_int_t *INFO, cuDoubleComplex *dV, cuDoubleComplex *dT, cuDoubleComplex *dE, magma_int_t copytype )
+extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE, magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, cuDoubleComplex *E, magma_int_t LDE, cuDoubleComplex *V, cuDoubleComplex *TAU, cuDoubleComplex *T, magma_int_t *INFO, cuDoubleComplex *dV, cuDoubleComplex *dT, cuDoubleComplex *dE, magma_int_t copytype )
 {
 
     //%===========================
@@ -66,7 +66,6 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t N,
     LDV     = NB+Vblksiz-1;
     blklen  = LDV*Vblksiz;
     nbGblk  = plasma_ceildiv((N-2),Vblksiz);
-    LWORK   = 2*N*max(Vblksiz,64);
     //WORK    = (cuDoubleComplex *) malloc (LWORK*sizeof(cuDoubleComplex));
 
 #if defined(USEMAGMA)
@@ -80,15 +79,17 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t N,
      * */
     if(copytype>0)cublasSetMatrix( LDV, blkcnt*Vblksiz, sizeof(cuDoubleComplex), V, LDV, dV, LDV);
     if(copytype>1)cublasSetMatrix( LDT, blkcnt*Vblksiz, sizeof(cuDoubleComplex), T, LDT, dT, LDT);
-    if(copytype>2)cublasSetMatrix( N, N, sizeof(cuDoubleComplex), E, N, dE, N);
+    if(copytype>2)cublasSetMatrix( N, NE, sizeof(cuDoubleComplex), E, N, dE, N);
     cuDoubleComplex *dwork;
     magma_int_t ldwork;
-    ldwork=N;
+    ldwork  = NE;
+    LWORK   = 2*N*max(Vblksiz,64);
     if( CUBLAS_STATUS_SUCCESS != cublasAlloc( LWORK, sizeof(cuDoubleComplex), (void**)&dwork) ) { 
        printf ("!!!!  magma_zbulge_applyQ cublasAlloc failed for: dwork\n" );       
        exit(-1);                                                           
     }
 #else
+    LWORK   = 2*N*max(Vblksiz,64);
     WORK    = (cuDoubleComplex *) malloc (LWORK*sizeof(cuDoubleComplex));
 #endif
 
@@ -155,7 +156,7 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t N,
                           len =  N-colst;    
                           magma_zlarfb_gpu( 'L', 'N', 'F', 'C', vlen, len, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(fst,colst), LDE, dwork, len);
                        }else{
-                          magma_zlarfb_gpu( 'L', 'N', 'F', 'C', vlen, N, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(fst,0), LDE, dwork, N);
+                          magma_zlarfb_gpu( 'L', 'N', 'F', 'C', vlen, NE, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(fst,0), LDE, dwork, NE);
                        }
                           // magma_zormqr2_gpu('L', 'N', vlen, N, vnb, dV(vpos), LDV, TAU(taupos), dE(fst,0), LDE, V(vpos), LDV, INFO );
 #else
@@ -163,7 +164,7 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t N,
                           len =  N-colst;    
                           lapackf77_zlarfb( "L", "N", "F", "C", &vlen, &len, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(fst,colst), &LDE,  WORK, &len); 
                        }else{
-                          lapackf77_zlarfb( "L", "N", "F", "C", &vlen, &N, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(fst,0), &LDE,  WORK, &N); 
+                          lapackf77_zlarfb( "L", "N", "F", "C", &vlen, &NE, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(fst,0), &LDE,  WORK, &NE); 
                        }
                            //DORMQR( "L", "N", &vlen, &N, &vnb, V(vpos), &LDV, TAU(taupos), E(fst,0), &LDE,  WORK, &LWORK, INFO );
                        //DORMQR_BLG( "L", "N", &vlen, &N, &vnb, &NB, V(vpos), &LDV, TAU(taupos), E(fst,0), &LDE,  WORK, &LWORK, INFO );
@@ -200,7 +201,7 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t N,
                //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colj,vpos+1,taupos+1);
                if((vlen>0)&&(vnb>0))
                    //DORMQR( "L", "N", &vlen, &N, &vnb, V(vpos), &LDV, TAU(taupos), E(fst,0), &LDE,  WORK, &LWORK, INFO );
-                   lapackf77_zlarfb( "L", "N", "F", "C", &vlen, &N, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(fst,0), &LDE,  WORK, &N);       
+                   lapackf77_zlarfb( "L", "N", "F", "C", &vlen, &NE, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(fst,0), &LDE,  WORK, &NE);       
                if(*INFO!=0) 
                        printf("ERROR DORMQR INFO %d \n",*INFO);
        
@@ -239,12 +240,12 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t N,
                    magmablasSetKernelStream(stream[1]);        
                    magma_zlarfb_gpu( 'R', 'N', 'F', 'C', N2, vlen, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(N1, fst), LDE, &dwork[N1*Vblksiz], N2);
                 #else
-                   magma_zlarfb_gpu( 'R', 'N', 'F', 'C', N, vlen, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(0, fst), LDE, dwork, N);
+                   magma_zlarfb_gpu( 'R', 'N', 'F', 'C', NE, vlen, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(0, fst), LDE, dwork, NE);
                 #endif
                    //magma_zormqr2_gpu('R', 'N',N, vlen, vnb, dV(vpos), LDV, TAU(tpos), dE(0, fst), LDE, V(vpos), LDV, INFO );
 #else                       
                    //DORMQR( "R", "N", &N, &vlen, &vnb, V(vpos), &LDV, TAU(taupos), E(0,fst), &LDE,  WORK, &LWORK, INFO );
-                   lapackf77_zlarfb( "R", "N", "F", "C", &N, &vlen, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(0, fst), &LDE,  WORK, &N);       
+                   lapackf77_zlarfb( "R", "N", "F", "C", &NE, &vlen, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(0, fst), &LDE,  WORK, &NE);       
 #endif
                }
                if(*INFO!=0) 

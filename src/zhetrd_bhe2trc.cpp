@@ -68,7 +68,7 @@ extern "C" void TRD_type3cHLsym_withQ(int N, int NB, cuDoubleComplex *A, int LDA
 extern "C" void magma_ztrdtype1cbHLsym_withQ(int N, int NB, cuDoubleComplex *A, int LDA, cuDoubleComplex *V, cuDoubleComplex *TAU, int st, int ed, int sweep, int Vblksiz);
 extern "C" void magma_ztrdtype2cbHLsym_withQ(int N, int NB, cuDoubleComplex *A, int LDA, cuDoubleComplex *V, cuDoubleComplex *TAU, int st, int ed, int sweep, int Vblksiz);
 extern "C" void magma_ztrdtype3cbHLsym_withQ(int N, int NB, cuDoubleComplex *A, int LDA, cuDoubleComplex *V, cuDoubleComplex *TAU, int st, int ed, int sweep, int Vblksiz);
-extern "C" void magma_zbulge_applyQ(int WANTZ, char SIDE, int N, int NB, int Vblksiz, cuDoubleComplex *E, int LDE, cuDoubleComplex *V, cuDoubleComplex *TAU, cuDoubleComplex *T, int *INFO, cuDoubleComplex *dV, cuDoubleComplex *dT, cuDoubleComplex *dE, int copytype );
+extern "C" void magma_zbulge_applyQ(int WANTZ, char SIDE, int NE, int N, int NB, int Vblksiz, cuDoubleComplex *E, int LDE, cuDoubleComplex *V, cuDoubleComplex *TAU, cuDoubleComplex *T, int *INFO, cuDoubleComplex *dV, cuDoubleComplex *dT, cuDoubleComplex *dE, int copytype );
 extern "C" void  magma_zstedc_withZ(char JOBZ, int N, double *D, double * E, cuDoubleComplex *Z, int LDZ);
 
 
@@ -111,7 +111,7 @@ static void barrier(magma_int_t my_core_id, magma_int_t cores_num)
 ////////////////////////////////////////////////////////////////////////////////////////////////////          
 
 /* START CODE */
-extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int N, int NB, cuDoubleComplex *A1, int LDA1, double *D2, double *E2, cuDoubleComplex *dT1, int LDT1)
+extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int N, int NB, cuDoubleComplex *A1, int LDA1, double *D2, double *E2, cuDoubleComplex *dT1, int LDT1)
 {
     char uplo_[2] = {uplo, 0};
     real_Double_t timelpk=0.0,tconvert=0.0,timeaplQ1=0.0,timeaplQ2=0.0,timeblg=0.0, timeaplQ=0.0, timeeigen=0.0, timegemm=0.0;
@@ -601,12 +601,13 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                //          copy the result to CPU, da-->A1  
                //
                // way 2 is implemented because of Raffaele
+               // NE is the number of eigenvectors we want.
                timeaplQ2 = get_time_azz();
                cublasFree(dT1);
                // copy Q1 to CPU
                cublasGetMatrix(N, LDA1, sizeof(cuDoubleComplex), da, N, A1, LDA1);
                // compute Q2 by applying V2 to Identity and put it into da           
-               magma_zbulge_applyQ(WANTZ, 'L', N, NB, Vblksiz, Q2, N, V, TAU, T, &INFO, dV2, dT2, da, 2);
+               magma_zbulge_applyQ(WANTZ, 'L', NE, N, NB, Vblksiz, Q2, N, V, TAU, T, &INFO, dV2, dT2, da, 2);
                // free dT2 and allocate dZ and copy Z to dZ
                cudaDeviceSynchronize();
                timeaplQ2 = get_time_azz()-timeaplQ2;
@@ -627,21 +628,17 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                 fclose(trace_file);
 */
 
-               cudaDeviceSynchronize();
-              // timegemm = get_time_azz();
+               timegemm = get_time_azz();
                // copy the eigenvectors to GPU
                cublasSetMatrix(N, LDZ, sizeof(cuDoubleComplex), Z, LDZ, dZ, N);
                // make GEMM Q2 * Z --> dV2 = da * dZ
-               timegemm = get_time_azz();
-               cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, N, N, c_one, da, N, dZ, N, c_zero, dV2, N);
-               cudaDeviceSynchronize();
-               timegemm = get_time_azz()-timegemm;
+               cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, da, N, dZ, N, c_zero, dV2, N);
                // copy Q1 to GPU --> dZ
                cublasSetMatrix(N, LDA1, sizeof(cuDoubleComplex), A1, LDA1, dZ, N);
                // make GEMM Q1 * (Q2 * Z) --> da = dZ * dV2
-               cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, N, N, c_one, dZ, N, dV2, N, c_zero, da, N);
-               cublasGetMatrix(N, LDA1, sizeof(cuDoubleComplex), da, N, A1, LDA1);
-               //timegemm = get_time_azz()-timegemm;
+               cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, dZ, N, dV2, N, c_zero, da, N);
+               cublasGetMatrix(N, NE, sizeof(cuDoubleComplex), da, N, A1, LDA1);
+               timegemm = get_time_azz()-timegemm;
            }
            if(WANTZ==2){
                cublasFree(dT1);
@@ -651,15 +648,15 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                }
                // apply V2 from Right to Q1. da = da*(I-V2*T2*V2')
                timeaplQ2 = get_time_azz();
-               magma_zbulge_applyQ(WANTZ, 'R', N, NB, Vblksiz, A1, LDA1, V, TAU, T, &INFO, dV2, dT2, da, 2);
+               magma_zbulge_applyQ(WANTZ, 'R', NE, N, NB, Vblksiz, A1, LDA1, V, TAU, T, &INFO, dV2, dT2, da, 2);
                cudaDeviceSynchronize();
                cublasFree(dT2);
                timeaplQ2 = get_time_azz()-timeaplQ2;
                timegemm = get_time_azz();
                // copy the eigenvectors to GPU
-               cublasSetMatrix(N, LDZ, sizeof(cuDoubleComplex), Z, LDZ, dZ, N);
+               cublasSetMatrix(N, NE, sizeof(cuDoubleComplex), Z, LDZ, dZ, N);
                //make a gemm of (Q1 * Q2) * Z = da * dZ --> dV2
-               cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, N, N, c_one, da, N, dZ, N, c_zero, dV2, N);
+               cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, da, N, dZ, N, c_zero, dV2, N);
                cublasGetMatrix(N, LDA1, sizeof(cuDoubleComplex), dV2, N, A1, LDA1);
                timegemm = get_time_azz()-timegemm;
            }
@@ -672,20 +669,24 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                   exit(-1);                                                           
                }
                // apply V2 from left to the eigenvectors Z. dZ = (I-V2*T2*V2')*Z
-               magma_zbulge_applyQ(WANTZ, 'L', N, NB, Vblksiz, Z, LDZ, V, TAU, T, &INFO, dV2, dT2, dZ, 3);
+               magma_zbulge_applyQ(WANTZ, 'L', NE, N, NB, Vblksiz, Z, LDZ, V, TAU, T, &INFO, dV2, dT2, dZ, 3);
                cublasFree(dT2);
                cudaDeviceSynchronize();
                timeaplQ2 = get_time_azz()-timeaplQ2;
                timegemm = get_time_azz();
                //make a gemm of Q1 * (Q2 * Z) = Q1 * ((I-V2T2V2')*Z) = da * dZ --> dV2
-               cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, N, N, c_one, da, N, dZ, N, c_zero, dV2, N);
-               cublasGetMatrix(N, LDA1, sizeof(cuDoubleComplex), dV2, N, A1, LDA1);
+               cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, da, N, dZ, N, c_zero, dV2, N);
+               cublasGetMatrix(N, NE, sizeof(cuDoubleComplex), dV2, N, A1, LDA1);
                timegemm = get_time_azz()-timegemm;
            }
 
            if(WANTZ==5){
+               if(NE!=N){
+                   printf("WANTZ=5 is not supported with NE=%d it compute all the eigenvectors meaning that NE=N\n");
+                   exit(-2);
+               }
                timeaplQ2 = get_time_azz();
-               magma_zbulge_applyQ(WANTZ, 'R', N, NB, Vblksiz, A1, LDA1, V, TAU, T, &INFO, dV2, dT2, da, 2);
+               magma_zbulge_applyQ(WANTZ, 'R', NE, N, NB, Vblksiz, A1, LDA1, V, TAU, T, &INFO, dV2, dT2, da, 2);
                cublasGetMatrix(N, LDA1, sizeof(cuDoubleComplex), da, N, A1, LDA1);
                timeaplQ2 = get_time_azz()-timeaplQ2;
                timelpk = get_time_azz();
@@ -751,9 +752,9 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
        printf("  Finish WANTZ %d  computing Q2       timing= %lf \n" ,WANTZ, timeaplQ2);
        if(WANTZ!=5){
            printf("  Finish WANTZ %d  making gemm        timing= %lf \n" ,WANTZ, timegemm);
-           printf("  Finish WANTZ %d  eigensolver 'I'    timing= %lf  threads %d \n" ,WANTZ, timelpk, mklth);
+           printf("  Finish WANTZ %d  eigensolver 'I'    timing= %lf  threads %d   N %d    NE %d\n" ,WANTZ, timelpk, mklth, N, NE);
        }else{
-           printf("  Finish WANTZ %d  eigensolver 'V'    timing= %lf  threads %d \n" ,WANTZ, timelpk, mklth);
+           printf("  Finish WANTZ %d  eigensolver 'V'    timing= %lf  threads %d   N %d    NE %d \n" ,WANTZ, timelpk, mklth, N, NE);
        }
        printf("  Finish WANTZ %d  full Eigenvectros  timing= %lf  \n",WANTZ, timeeigen);
        printf("============================================================================\n");
