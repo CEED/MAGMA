@@ -17,14 +17,43 @@
 extern "C" {
 #endif
 
-#ifdef __cplusplus
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        
+////////////////////////////////////////////////////////////////////////////////////////////////////
+ magma_int_t plasma_ceildiv(magma_int_t a, magma_int_t b)
+{
+  real_Double_t r = (real_Double_t)a/(real_Double_t)b;
+  r = (r-(magma_int_t)r)==0? (magma_int_t)r:(magma_int_t)r+1;
+  return (magma_int_t) r;
 }
-#endif////////////////////////////////////////////////////////////////////////////////////////////////////
-extern "C"  magma_int_t plasma_ceildiv(magma_int_t a, magma_int_t b);
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+ void cmp_vals(int n, double *wr1, double *wr2, double *nrmI, double *nrm1, double *nrm2) {
+  int i;
+  double curv, maxv, sumv;
+
+  maxv = 0.0;
+  sumv = 0.0;
+  for (i = 0; i < n; ++i) {
+
+    curv = fabs( wr1[i] - wr2[i]);
+    sumv += curv;
+    if (maxv < curv) maxv = curv;
+  }
+
+    *nrmI = maxv;
+    *nrm1 = sumv;
+    *nrm2 = sqrt( sumv );
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////// 
+
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-extern "C" void findVTpos(magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, magma_int_t sweep, magma_int_t st, magma_int_t *Vpos, magma_int_t *TAUpos, magma_int_t *Tpos, magma_int_t *myblkid)
+ void findVTpos(magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, magma_int_t sweep, magma_int_t st, magma_int_t *Vpos, magma_int_t *TAUpos, magma_int_t *Tpos, magma_int_t *myblkid)
 {
   magma_int_t prevcolblknb, prevblkcnt, prevcolblkid;
   magma_int_t curcolblknb, nbprevcolblk, mastersweep;
@@ -53,7 +82,7 @@ extern "C" void findVTpos(magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, ma
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-extern "C" void findVTsiz(magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, magma_int_t *blkcnt, magma_int_t *LDV)
+ void findVTsiz(magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, magma_int_t *blkcnt, magma_int_t *LDV)
 {
   magma_int_t colblk, nbcolblk;
   magma_int_t curcolblknb, mastersweep;
@@ -70,6 +99,8 @@ extern "C" void findVTsiz(magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, ma
   *LDV= NB+Vblksiz-1;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+#ifdef __cplusplus
+}
+#endif
 
 
