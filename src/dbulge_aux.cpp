@@ -12,7 +12,7 @@
  */
 
 #include "common_magma.h"
-#include "bulge_aux.h"
+#include "magma_dbulgeinc.h"
 // === Define what BLAS to use ============================================
 
 // === End defining what BLAS to use ======================================
@@ -23,30 +23,26 @@
 //////////////////////////////////////////////////////////////
 extern "C" void  magma_dstedc_withZ(char JOBZ, magma_int_t N, double *D, double * E, double *Z, magma_int_t LDZ) {
   double *WORK;
-  double WORK_SIZE;
   magma_int_t *IWORK;
-  magma_int_t LWORK, LIWORK, IWORK_SIZE;
+  magma_int_t LWORK, LIWORK;
   magma_int_t INFO;
   magma_int_t NxN=N*N;
    
   if(JOBZ=='V'){
-        WORK_SIZE  = 1 + 3*N + 3*N*((magma_int_t)log2(N)+1) + 4*N*N+ 256*N; 
-        IWORK_SIZE =  6 + 6*N + 6*N*((magma_int_t)log2(N)+1) + 256*N;
+        LWORK  = 1 + 3*N + 3*N*((magma_int_t)log2(N)+1) + 4*N*N+ 256*N; 
+        LIWORK =  6 + 6*N + 6*N*((magma_int_t)log2(N)+1) + 256*N;
   }else if(JOBZ=='I'){
-        WORK_SIZE  = 2*N*N+256*N+1; 
-          IWORK_SIZE = 256*N;
+        LWORK  = 2*N*N+256*N+1; 
+          LIWORK = 256*N;
   }else if(JOBZ=='N'){
-        WORK_SIZE  = 256*N+1; 
-          IWORK_SIZE = 256*N;  
+        LWORK  = 256*N+1; 
+          LIWORK = 256*N;  
   }else{
           printf("ERROR JOBZ %c\n",JOBZ);
           exit(-1);
   }
 
-  LWORK = (magma_int_t)WORK_SIZE;
   WORK = (double*) malloc( LWORK*sizeof( double) );
-
-  LIWORK = IWORK_SIZE;
   IWORK = (magma_int_t*) malloc( LIWORK*sizeof( magma_int_t) );
 
   lapackf77_dstedc(&JOBZ, &N, D, E, Z, &LDZ, WORK,&LWORK,IWORK,&LIWORK,&INFO);

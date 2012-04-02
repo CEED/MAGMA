@@ -12,7 +12,7 @@
  */
 
 #include "common_magma.h"
-#include "bulge_aux.h"
+#include "magma_zbulgeinc.h"
 #include <cblas.h>
 // === Define what BLAS to use ============================================
 #define PRECISION_z
@@ -68,7 +68,6 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t N,
     nbGblk  = plasma_ceildiv((N-2),Vblksiz);
     LWORK   = 2*N*max(Vblksiz,64);
     //WORK    = (cuDoubleComplex *) malloc (LWORK*sizeof(cuDoubleComplex));
-    printf("  APPLY Q_v115 GPU with  N %d   NB %d   Vblksiz %d SIDE %c version %d WANTZ %d \n",N,NB,Vblksiz,SIDE,version,WANTZ);
 
 #if defined(USEMAGMA)
     /* find the size of the matrix T V*/
@@ -114,6 +113,7 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t N,
     
 
 
+    printf("  APPLY Q_v115 GPU with  N %d   NB %d   Vblksiz %d SIDE %c version %d WANTZ %d \n",N,NB,Vblksiz,SIDE,version,WANTZ);
 
 
     magma_int_t N2=N/2;

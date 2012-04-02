@@ -12,8 +12,7 @@
  */
 
 #include "common_magma.h"
-#include "bulge_aux.h"
-#include <cblas.h>
+#include "magma_zbulgeinc.h"
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 
@@ -57,16 +56,21 @@ magma_zlarfxsym(magma_int_t N, cuDoubleComplex *A, magma_int_t LDA, cuDoubleComp
   /* X = AVtau */
   blasf77_zhemv("L",&N, TAU, A, &LDA, V, &IONE, &Z_ZERO, WORK, &IONE);
   /* je calcul dtmp= X'*V */
-#if defined(PRECISION_z) || defined(PRECISION_c)  
-  cblas_zdotc_sub(N, WORK, IONE, V, IONE, &dtmp);
+#if defined(PRECISION_z) || defined(PRECISION_c)
+   dtmp = Z_ZERO; 
+   for (j = 0; j < N ; j++)
+      dtmp = dtmp + MAGMA_Z_CNJG(WORK[j]) * V[j];  
+   // cblas_zdotc_sub(N, WORK, IONE, V, IONE, &dtmp);
 #else
   dtmp = blasf77_zdotc(&N,WORK,&IONE,V,&IONE);
 #endif  
   /* je calcul 1/2 X'*V*t = 1/2*dtmp*tau  */
-  dtmp = dtmp * Z_HALF * (*TAU);
+  dtmp = -dtmp * Z_HALF * (*TAU);
   /* je calcul W=X-1/2VX'Vt = X - dtmp*V */
+  /*
   for (j = 0; j < N ; j++)
-      WORK[j] = WORK[j] - (dtmp*V[j]);
+      WORK[j] = WORK[j] + (dtmp*V[j]); */
+  blasf77_zaxpy(&N, &dtmp, V, &IONE, WORK, &IONE);
   /* performs the symmetric rank 2 operation A := alpha*x*y' + alpha*y*x' + A */
   blasf77_zher2("L",&N,&Z_MONE,WORK,&IONE,V,&IONE,A,&LDA);
   
@@ -98,7 +102,7 @@ extern "C" void magma_ztrdtype1cbHLsym_withQ(magma_int_t N, magma_int_t NB, cuDo
   lapackf77_zlarfg( &len, A(st, st-1), V(vpos+1), &IONE, TAU(taupos) );
   /* apply left and right on A(st:ed,st:ed)*/
   //magma_zlarfxsym(len,A(st,st),LDX,V(vpos),TAU(taupos));
-  lapackf77_zlarfy("L", &len, V(vpos), &IONE, TAU(taupos), A(st,st), &LDX, WORK);
+  lapackf77_zlarfy("L", &len, V(vpos), &IONE, &(MAGMA_Z_CNJG(*TAU(taupos))), A(st,st), &LDX, WORK); //&(MAGMA_Z_CNJG(*TAU(taupos)))
   free(WORK);
 }
 #undef A
@@ -142,7 +146,7 @@ extern "C" void magma_ztrdtype2cbHLsym_withQ(magma_int_t N, magma_int_t NB, cuDo
      lapackf77_zlarfg( &lem, A(J1, st), V(vpos+1), &IONE, TAU(taupos) );
      /* apply left on A(J1:J2,st+1:ed) */
      len = len-1; /* because we start at col st+1 instead of st. col st is the col that has been revomved;*/
-     lapackf77_zlarfx("L", &lem, &len, V(vpos), TAU(taupos), A(J1, st+1), &LDX, WORK);
+     lapackf77_zlarfx("L", &lem, &len, V(vpos),  &(MAGMA_Z_CNJG(*TAU(taupos))), A(J1, st+1), &LDX, WORK);
   }
   free (WORK);
 }
@@ -170,8 +174,8 @@ extern "C" void magma_ztrdtype3cbHLsym_withQ(magma_int_t N, magma_int_t NB, cuDo
   len    = ed-st+1;
 
   /* apply left and right on A(st:ed,st:ed)*/
-  //magma_zlarfxsym(len,A(st,st),LDX,V(vpos),TAU(taupos));
-  lapackf77_zlarfy("L", &len, V(vpos), &IONE, TAU(taupos), A(st,st), &LDX, WORK);
+  magma_zlarfxsym(len,A(st,st),LDX,V(vpos),TAU(taupos));
+  //lapackf77_zlarfy("L", &len, V(vpos), &IONE,  &(MAGMA_Z_CNJG(*TAU(taupos))), A(st,st), &LDX, WORK);
   free(WORK);
 }
 #undef A
