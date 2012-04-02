@@ -91,7 +91,7 @@ typedef double real_Double_t;
 /* ------------------------------------------------------------
  *   Macros to deal with cuda complex
  * --------------------------------------------------------- */
-#define MAGMA_Z_SET2REAL(v, t)    (v).x = (t); (v).y = 0.0
+#define MAGMA_Z_SET2REAL(v, t)    {(v).x = (t); (v).y = 0.0;}
 #define MAGMA_Z_OP_NEG_ASGN(t, z) (t).x = -(z).x; (t).y = -(z).y
 #define MAGMA_Z_EQUAL(u,v)        (((u).x == (v).x) && ((u).y == (v).y))
 #define MAGMA_Z_GET_X(u)          ((u).x)
@@ -113,7 +113,7 @@ typedef double real_Double_t;
 #define MAGMA_Z_NEG_ONE           make_cuDoubleComplex(-1.0, 0.0)
 #define MAGMA_Z_NEG_HALF          make_cuDoubleComplex(-0.5, 0.0)
 
-#define MAGMA_C_SET2REAL(v, t)    (v).x = (t); (v).y = 0.0
+#define MAGMA_C_SET2REAL(v, t)    {(v).x = (t); (v).y = 0.0;}
 #define MAGMA_C_OP_NEG_ASGN(t, z) (t).x = -(z).x; (t).y = -(z).y
 #define MAGMA_C_EQUAL(u,v)        (((u).x == (v).x) && ((u).y == (v).y))
 #define MAGMA_C_GET_X(u)          ((u).x)
