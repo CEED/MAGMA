@@ -44,7 +44,7 @@ magma_zhebbd(char uplo, magma_int_t n,
              magma_int_t *info);
 
 extern "C" magma_int_t
-magma_zhebbd2(char uplo, magma_int_t n, magma_int_t nb,
+magma_zhebbd2(char uplo, magma_int_t n, magma_int_t NB,
              cuDoubleComplex *a, magma_int_t lda,
              cuDoubleComplex *tau,
              cuDoubleComplex *work, magma_int_t lwork,
@@ -52,7 +52,7 @@ magma_zhebbd2(char uplo, magma_int_t n, magma_int_t nb,
              magma_int_t *info);
 
 extern "C" magma_int_t
-magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int n, int nb, 
+magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int n, int NB, 
                    cuDoubleComplex *A, int LDA, double *D, double *E, cuDoubleComplex *dT1, int ldt1);
 
 
@@ -80,19 +80,23 @@ int main( int argc, char** argv)
     magma_int_t N = 0, n2, lda, lwork,ldt;
     magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
 
-    magma_int_t i, j, k, info, nb, THREADS, checkres, once = 0;
+    magma_int_t i, j, k, info, checkres, once = 0;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     char *uplo = (char *)MagmaLowerStr;
 
-    int WANTZ=0;
-    THREADS=1;
-    int NE=N;
+    magma_int_t WANTZ=0;
+    magma_int_t THREADS=1;
+    magma_int_t NE = 0;
+    magma_int_t NB = 0;
     if (argc != 1){
         for(i = 1; i<argc; i++){
             if (strcmp("-N", argv[i])==0) {
                 N = atoi(argv[++i]);
                 once = 1;
+            }
+            else if (strcmp("-NB", argv[i])==0) {
+                NB = atoi(argv[++i]);
             }
             else if (strcmp("-threads", argv[i])==0) {
                 THREADS = atoi(argv[++i]);
@@ -129,9 +133,14 @@ int main( int argc, char** argv)
     lda = N;
     ldt = N;
     n2  = lda * N; 
-    nb  = 64; //64; //magma_get_zhebbd_nb(N);
-    /* We suppose the magma nb is bigger than lapack nb */
-    lwork = N*nb; 
+    if(NB<1)
+        NB  = 64; //64; //magma_get_zhebbd_nb(N);
+
+    if(NE<1)
+        NE  = N; //64; //magma_get_zhebbd_nb(N);
+
+    /* We suppose the magma NB is bigger than lapack NB */
+    lwork = N*NB; 
 
     /* Allocate host memory for the matrix */
     TESTING_MALLOC(    h_A,    cuDoubleComplex, lda*N );
@@ -140,8 +149,8 @@ int main( int argc, char** argv)
     TESTING_MALLOC(    tau,    cuDoubleComplex, N-1   );
     TESTING_HOSTALLOC( D,    double, N );
     TESTING_HOSTALLOC( E,    double, N );
-    //TESTING_DEVALLOC( dT1,  cuDoubleComplex, (2*min(N,N)+(N+31)/32*32)*nb );
-    TESTING_DEVALLOC( dT1,  cuDoubleComplex, (N*nb) );
+    //TESTING_DEVALLOC( dT1,  cuDoubleComplex, (2*min(N,N)+(N+31)/32*32)*NB );
+    TESTING_DEVALLOC( dT1,  cuDoubleComplex, (N*NB) );
 
     printf("\n\n");
     printf("  N    GPU GFlop/s   \n");
@@ -214,19 +223,19 @@ return 0;
     /*
     int pm,pn,indi,indj,n=N;
     i=1;
-                      indi = i+nb;
+                      indi = i+NB;
                   indj = i;
-                  pm   = n - i - nb + 1;
-                  pn   = min(i+nb-1, n-nb) -i + 1;
+                  pm   = n - i - NB + 1;
+                  pn   = min(i+NB-1, n-NB) -i + 1;
 */
                   /*
                   printf("voici pm pn %d %d \n",pm,pn);
-              lapackf77_zgeqrf(&pm, &pn, &h_R[nb], &lda, 
+              lapackf77_zgeqrf(&pm, &pn, &h_R[NB], &lda, 
                              tau, h_work, &lwork, &info);
               printf("TOTOTOTO INFO %d\n",info);
               memset(h_work, 0, lwork*sizeof(cuDoubleComplex));
             lapackf77_zlarft( "F", "C",
-                              &pm, &pn, &h_R[nb], &lda,
+                              &pm, &pn, &h_R[NB], &lda,
                               tau, h_work, &pn);
 
 */
@@ -237,12 +246,12 @@ return 0;
            =================================================================== */
         start = get_current_time();
        //magma_zhebbd(uplo[0], N, h_R, lda, tau, h_work, lwork, &info);
-        magma_zhebbd2(uplo[0], N, nb, h_R, lda, tau, h_work, lwork, dT1, &info);
+        magma_zhebbd2(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, dT1, &info);
         end = get_current_time();
         printf("  Finish BAND    timing= %lf \n" ,GetTimerValue(start,end) / 1000.);
 
 /*        
-    int  NB=nb, Vblksiz=-1, blkcnt=-1, LDV=-1, LDT =-1, INgrsiz=1, LDE=-1, BAND=6;
+    int   Vblksiz=-1, blkcnt=-1, LDV=-1, LDT =-1, INgrsiz=1, LDE=-1, BAND=6;
     Vblksiz = NB; //min(NB,64);
     LDT     = Vblksiz;
     findVTsiz(N, NB, Vblksiz, &blkcnt, &LDV);
@@ -285,8 +294,8 @@ return 0;
     fclose(trace_file);
 */        
         
-        //        dsytrd_bsy2trc(THREADS, uplo[0], N, nb, h_R, lda, D, E);
-        magma_zhetrd_bhe2trc(THREADS, WANTZ, uplo[0], NE, N, nb, h_R, lda, D, E, dT1, ldt);
+        //        dsytrd_bsy2trc(THREADS, uplo[0], N, NB, h_R, lda, D, E);
+        magma_zhetrd_bhe2trc(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1, ldt);
         end = get_current_time();
         if ( info < 0 )
             printf("Argument %d of magma_zhebbd had an illegal value\n", -info);
@@ -405,14 +414,14 @@ return 0;
            start = get_current_time();
            // check results
            printf("---------1--------\n");
-           zcheck_eig_(&JOBZ, &MATYPE, &N, &nb, AINIT, &lda, &NOTHING, &NOTHING, D2 , D, h_R, &lda, WORKAJETER, RWORKAJETER, RESU );
+           zcheck_eig_(&JOBZ, &MATYPE, &N, &NB, AINIT, &lda, &NOTHING, &NOTHING, D2 , D, h_R, &lda, WORKAJETER, RWORKAJETER, RESU );
            printf("---------2--------\n");
            end = get_current_time();
            printf("  Finish CHECK - results timing= %lf \n" ,GetTimerValue(start,end) / 1000.);
 
            printf("\n");
            printf(" ================================================================================================================\n");
-           printf("   ==> INFO voici  threads=%d    N=%d    NB=%d   WANTZ=%d\n",THREADS,N, nb, WANTZ);
+           printf("   ==> INFO voici  threads=%d    N=%d    NB=%d   WANTZ=%d\n",THREADS,N, NB, WANTZ);
            printf(" ================================================================================================================\n");
            printf("            DSBTRD                : %15s \n", "STATblgv9withQ    ");
            printf(" ================================================================================================================\n");
