@@ -1243,8 +1243,13 @@ static void tile_bulge_computeT_parallel(int my_core_id)
     int bg, nbGblk,rownbm, k, m, n;
     int st,ed,fst,vlen,vnb,colj;
     int blkid,vpos,taupos,tpos;
-    int  cur_blksiz,avai_blksiz, ncolinvolvd;
-    int  nbgr, colst, coled, version;
+    int cur_blksiz,avai_blksiz, ncolinvolvd;
+    int nbgr, colst, coled, version;
+    int blkpercore,blkcnt, myid;
+
+
+    findVTsiz(N, NB, Vblksiz, &blkcnt, &LDV);
+    blkpercore = blkcnt/cores_num;
 
     LDT     = Vblksiz;    
     LDV     = NB+Vblksiz-1;
@@ -1274,7 +1279,8 @@ static void tile_bulge_computeT_parallel(int my_core_id)
                }        
                colj     = (bg-1)*Vblksiz;
                findVTpos(N,NB,Vblksiz,colj,fst, &vpos, &taupos, &tpos, &blkid);
-               if(my_core_id==(blkid%cores_num)){
+               myid = blkid/blkpercore;
+               if(my_core_id==(myid%cores_num)){
                   if((vlen>0)&&(vnb>0))
                      lapackf77_zlarft( "F", "C", &vlen, &vnb, V(vpos), &LDV, TAU(taupos), T(tpos), &LDT);
                }
