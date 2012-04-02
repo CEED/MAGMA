@@ -234,9 +234,9 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
              for (i = 0; i < N ; i++) 
                         //fprintf(trace_file,"%10d%10d%40.30e\n",i+1,j+1,A1[j*LDA1+i]);
                          fprintf(trace_file,"%10d %10d %25.15e %25.15e\n",i+1,j+1,MAGMA_Z_REAL(A1[j*LDA1+i]) ,  MAGMA_Z_IMAG(A1[j*LDA1+i])  );
-       fclose(trace_file);
+       fclose(trace_file);*/
        
-    }*/
+    }
     /***********************************************/
     
 
