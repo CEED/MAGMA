@@ -13,10 +13,10 @@
 */
 #include "common_magma.h"
 #include "magma_zbulgeinc.h"
-#include <mkl_service.h>
 #include "checkdiag.h"
-
-
+#if defined(USEMKL)
+#include <mkl_service.h>
+#endif
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
@@ -487,8 +487,9 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 #endif
         timelpk = get_time_azz()-timelpk;
         printf("  Finish WANTZ %d  eigensolver 'N'    timing= %lf  threads %d \n" ,WANTZ, timelpk, i);
+        /*
         for(i=0;i<10;i++)
-                printf(" voici D[%d] %e\n",i,D2[i]);
+                printf(" voici D[%d] %e\n",i,D2[i]);*/
     }
     if(WANTZ>0){
         if(WANTZ==1){
