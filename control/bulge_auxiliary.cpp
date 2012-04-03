@@ -88,7 +88,7 @@ extern "C" {
   magma_int_t curcolblknb, mastersweep;
 
   *blkcnt   = 0;
-  nbcolblk = plasma_ceildiv((N-2),Vblksiz);
+  nbcolblk = plasma_ceildiv((N-1),Vblksiz);
   for (colblk = 0; colblk<nbcolblk; colblk++)
   {
         mastersweep = colblk * Vblksiz;
@@ -96,6 +96,7 @@ extern "C" {
         *blkcnt      = *blkcnt + curcolblknb;
         //printf("voici  nbcolblk %d    master sweep %d     blkcnt %d \n",nbcolblk, mastersweep,*blkcnt); 
   }
+  *blkcnt = *blkcnt +1;
   *LDV= NB+Vblksiz-1;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
