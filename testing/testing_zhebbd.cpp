@@ -36,15 +36,9 @@
 #define FLOPS(n) (      FMULS_HETRD(n) +      FADDS_HETRD(n))
 #endif
 
-extern "C" magma_int_t
-magma_zhebbd(char uplo, magma_int_t n,
-             cuDoubleComplex *a, magma_int_t lda,
-             cuDoubleComplex *tau,
-             cuDoubleComplex *work, magma_int_t lwork,
-             magma_int_t *info);
 
 extern "C" magma_int_t
-magma_zhebbd2(char uplo, magma_int_t n, magma_int_t NB,
+magma_zhebbd(char uplo, magma_int_t n, magma_int_t NB,
              cuDoubleComplex *a, magma_int_t lda,
              cuDoubleComplex *tau,
              cuDoubleComplex *work, magma_int_t lwork,
@@ -246,7 +240,7 @@ return 0;
            =================================================================== */
         start = get_current_time();
        //magma_zhebbd(uplo[0], N, h_R, lda, tau, h_work, lwork, &info);
-        magma_zhebbd2(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, dT1, &info);
+        magma_zhebbd(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, dT1, &info);
         end = get_current_time();
         printf("  Finish BAND    timing= %lf \n" ,GetTimerValue(start,end) / 1000.);
 
@@ -349,6 +343,7 @@ return 0;
         /* =====================================================================
            Print performance and error.
            =================================================================== */
+#if defined(CHECKEIG)
 #if defined(PRECISION_z)  || defined(PRECISION_d)
         if ( checkres ) {
             printf("  Total N %5d  flops %6.2f  timing %6.2f seconds\n", N, gpu_perf, gpu_time );
@@ -413,9 +408,7 @@ return 0;
            double NOTHING=0.0;
            start = get_current_time();
            // check results
-           printf("---------1--------\n");
            zcheck_eig_(&JOBZ, &MATYPE, &N, &NB, AINIT, &lda, &NOTHING, &NOTHING, D2 , D, h_R, &lda, WORKAJETER, RWORKAJETER, RESU );
-           printf("---------2--------\n");
            end = get_current_time();
            printf("  Finish CHECK - results timing= %lf \n" ,GetTimerValue(start,end) / 1000.);
 
@@ -439,11 +432,13 @@ return 0;
 
         } 
 #endif         
-        printf("  Total N %5d  flops %6.2f        timing %6.2f seconds\n", N, 0.0, gpu_time );
-        printf("============================================================================\n\n\n");
+#endif  
 
-        if ( once )
-            break;
+      printf("  Total N %5d  flops %6.2f        timing %6.2f seconds\n", N, 0.0, gpu_time );
+      printf("============================================================================\n\n\n");
+
+      if ( once )
+          break;
     }
 
     /* Memory clean up */
