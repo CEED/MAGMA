@@ -13,7 +13,8 @@ ZHDR =  magma_z.h 	\
 	magma_zc.h 	\
 	magmablas_z.h	\
 	magmablas_zc.h	\
-	magma_zlapack.h
+	magma_zlapack.h \
+	magma_zbulgeinc.h
 
 -include Makefile.src
 
