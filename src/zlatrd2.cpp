@@ -221,11 +221,11 @@ magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
         if (i > 0) {
           /* Generate elementary reflector H(i) to annihilate A(1:i-2,i) */
           
-          MAGMA_Z_ASSIGN(alpha, *A(i-1, i));
+          alpha = *A(i-1, i);
           
           lapackf77_zlarfg(&i, &alpha, A(0, i), &ione, &tau[i - 1]);
           
-          e[i-1] = MAGMA_Z_GET_X( alpha );
+          e[i-1] = MAGMA_Z_REAL( alpha );
           MAGMA_Z_SET2REAL(*A(i-1, i), 1.);
           
           /* Compute W(1:i-1,i) */
@@ -308,9 +308,9 @@ magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
             {
               /* Generate elementary reflector H(i) to annihilate A(i+2:n,i) */
               i_n = n - i - 1;
-              MAGMA_Z_ASSIGN(alpha, *A(i+1, i));
+              alpha = *A(i+1, i);
               lapackf77_zlarfg(&i_n, &alpha, A(min(i+2,n-1), i), &ione, &tau[i]);
-              e[i] = MAGMA_Z_GET_X( alpha );
+              e[i] = MAGMA_Z_REAL( alpha );
               MAGMA_Z_SET2REAL(*A(i+1, i), 1.);
 
               /* Compute W(i+1:n,i) */ 

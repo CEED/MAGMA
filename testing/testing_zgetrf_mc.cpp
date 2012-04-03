@@ -64,7 +64,7 @@ double get_LU_error(magma_int_t M, magma_int_t N,
 
   for( j = 0; j < N; j++ ) {
     for( i = 0; i < M; i++ ) {
-      MAGMA_Z_OP_NEG( LU[i+j*lda], LU[i+j*lda], A[i+j*lda]);
+      LU[i+j*lda] = MAGMA_Z_SUB(LU[i+j*lda], A[i+j*lda]);
     }
   }
   double residual = lapackf77_zlange("f", &M, &N, LU, &lda, work);

@@ -312,7 +312,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
                elements into D */
             for (j = i; j < i+nb; ++j) {
                 if( j > 0 ) { MAGMA_Z_SET2REAL( *A(j-1, j), e[j - 1] ); }
-                d[j] = MAGMA_Z_GET_X( *A(j, j) );
+                d[j] = MAGMA_Z_REAL( *A(j, j) );
             }
 
           }
@@ -427,7 +427,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
                elements into D */
             for (j = i; j < i+ib; ++j) {
                 if( j+1 < n ) { MAGMA_Z_SET2REAL( *A(j+1, j), e[j] ); }
-                d[j] = MAGMA_Z_GET_X( *A(j, j) );
+                d[j] = MAGMA_Z_REAL( *A(j, j) );
             }
           }
 #ifdef PROFILE_SY2RK

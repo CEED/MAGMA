@@ -217,7 +217,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
             i__3 = i__ + 1;
             lapackf77_zlarfg(&i__2, &alpha, 
                     &a[min(i__3,m) + i__ * a_dim1], &c__1, &tauq[i__]);
-            d[i__] = MAGMA_Z_GET_X( alpha );
+            d[i__] = MAGMA_Z_REAL( alpha );
             if (i__ < n) {
                 a[i__ + i__ * a_dim1] = c_one;
 
@@ -302,7 +302,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                 alpha = a[i__ + (i__ + 1) * a_dim1];
                 lapackf77_zlarfg(&i__2, &alpha, &a[i__ + min(
                         i__3,n) * a_dim1], &lda, &taup[i__]);
-                e[i__] = MAGMA_Z_GET_X ( alpha );
+                e[i__] = MAGMA_Z_REAL( alpha );
                 a[i__ + (i__ + 1) * a_dim1] = c_one;
 
                 /* Compute X(i+1:m,i) */
@@ -401,7 +401,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
         alpha = a[i__ + i__ * a_dim1];
         lapackf77_zlarfg(&i__2, &alpha, 
                 &a[i__ + min(i__3,n) * a_dim1], &lda, &taup[i__]);
-        d[i__] = MAGMA_Z_GET_X( alpha );
+        d[i__] = MAGMA_Z_REAL( alpha );
         if (i__ < m) {
           a[i__ + i__ * a_dim1] = c_one;
           
@@ -492,7 +492,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
           alpha = a[i__ + 1 + i__ * a_dim1];
           lapackf77_zlarfg(&i__2, &alpha,
                   &a[min(i__3,m) + i__ * a_dim1], &c__1, &tauq[i__]);
-          e[i__] = MAGMA_Z_GET_X( alpha );
+          e[i__] = MAGMA_Z_REAL( alpha );
           a[i__ + 1 + i__ * a_dim1] = c_one;
           
           /* Compute Y(i+1:n,i) */

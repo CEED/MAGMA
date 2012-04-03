@@ -173,7 +173,7 @@ int main( int argc, char** argv)
         {
             magma_int_t i, j;
             for(i=0; i<N; i++) {
-                MAGMA_Z_SET2REAL( h_A[i*lda+i], ( MAGMA_Z_GET_X(h_A[i*lda+i]) ) );
+                MAGMA_Z_SET2REAL( h_A[i*lda+i], ( MAGMA_Z_REAL(h_A[i*lda+i]) ) );
                 for(j=0; j<i; j++)
                     h_A[i*lda+j] = cuConj(h_A[j*lda+i]);
             }
@@ -181,7 +181,7 @@ int main( int argc, char** argv)
 /*
             for(i=0; i<N; i++){ 
                 for(j=0; j<N; j++){
-                MAGMA_Z_SET2REAL( h_A[i*lda+j], ( MAGMA_Z_GET_X(h_A[i*lda+j]) ) );
+                MAGMA_Z_SET2REAL( h_A[i*lda+j], ( MAGMA_Z_REAL(h_A[i*lda+j]) ) );
                 }
             }
 */

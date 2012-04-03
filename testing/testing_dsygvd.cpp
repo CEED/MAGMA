@@ -149,7 +149,7 @@ int main( int argc, char** argv)
         {
           magma_int_t i, j;
           for(i=0; i<N; i++) {
-            MAGMA_D_SET2REAL( h_B[i*N+i], ( MAGMA_D_GET_X(h_B[i*N+i]) + 1.*N ) );
+            MAGMA_D_SET2REAL( h_B[i*N+i], ( MAGMA_D_REAL(h_B[i*N+i]) + 1.*N ) );
           }
         }
         lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );

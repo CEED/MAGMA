@@ -111,7 +111,7 @@ int main( int argc, char** argv)
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         for(int k=0;k<N;k++)
         {
-            MAGMA_Z_SET2REAL(h_A[k*N+k],  MAGMA_Z_GET_X(h_A[k*N+k]));
+            MAGMA_Z_SET2REAL(h_A[k*N+k],  MAGMA_Z_REAL(h_A[k*N+k]));
         }
         cublasSetMatrix(N, N, sizeof(cuDoubleComplex), h_A, N, d_R, N);
 

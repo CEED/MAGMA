@@ -243,7 +243,7 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
 
         /* Compute T(1:I,I) */
         i__2 = i__ - 1;
-        MAGMA_Z_OP_NEG_ASGN( d__1, tau[i__] );
+        d__1 = MAGMA_Z_NEGATE( tau[i__] );
         blasf77_zscal(&i__2, &d__1, &t[i__ * t_dim1 + 1], &c__1);
         blasf77_ztrmv("U","N","N", &i__2, &t[t_offset], &ldt, &t[i__*t_dim1+1], &c__1);
         t[i__ + i__ * t_dim1] = tau[i__];

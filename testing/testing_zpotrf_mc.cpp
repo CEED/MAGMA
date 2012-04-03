@@ -109,7 +109,7 @@ int main( magma_int_t argc, char** argv)
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         
         for(j=0; j<N; j++) 
-          MAGMA_Z_SET2REAL( h_A[j*lda+j], ( MAGMA_Z_GET_X(h_A[j*lda+j]) + 2000. ) );
+          MAGMA_Z_SET2REAL( h_A[j*lda+j], ( MAGMA_Z_REAL(h_A[j*lda+j]) + 2000. ) );
 
         for(j=0; j<n2; j++)
           h_A2[j] = h_A[j];

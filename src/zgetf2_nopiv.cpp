@@ -111,7 +111,7 @@ magma_zgetf2_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
             if (MAGMA_Z_ABS(a[j + j * a_dim1]) >= sfmin) 
               {
                 i__2 = *m - j;
-                MAGMA_Z_ASSIGN(z__1, MAGMA_Z_DIV(c_one, a[j + j * a_dim1]));
+                z__1 = MAGMA_Z_DIV(c_one, a[j + j * a_dim1]);
                 blasf77_zscal(&i__2, &z__1, &a[j + 1 + j * a_dim1], &c__1);
               } 
             else 
@@ -119,7 +119,7 @@ magma_zgetf2_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
                 i__2 = *m - j;
                 for (i__ = 1; i__ <= i__2; ++i__) {
                   i__3 = j + i__ + j * a_dim1;
-                  MAGMA_Z_ASSIGN(a[i__3], MAGMA_Z_DIV(a[j + i__ + j * a_dim1], a[j + j*a_dim1]));
+                  a[i__3] = MAGMA_Z_DIV(a[j + i__ + j * a_dim1], a[j + j*a_dim1]);
                 }
               }
           }

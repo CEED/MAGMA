@@ -247,7 +247,7 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
          elements into D */
       for (j = i; j < i+nb; ++j) {
         MAGMA_Z_SET2REAL( *A(j-1, j), e[j - 1] );
-        d[j] = MAGMA_Z_GET_X( *A(j, j) );
+        d[j] = MAGMA_Z_REAL( *A(j, j) );
       }
       
     }
@@ -295,7 +295,7 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
          elements into D */
       for (j = i; j < i+nb; ++j) {
         MAGMA_Z_SET2REAL( *A(j+1, j), e[j] );
-        d[j] = MAGMA_Z_GET_X( *A(j, j) );
+        d[j] = MAGMA_Z_REAL( *A(j, j) );
       }
     }
     /* Use unblocked code to reduce the last or only block */
