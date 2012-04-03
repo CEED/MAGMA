@@ -71,6 +71,7 @@ else
 endif
 
 ZSRC += $(ZSRCF)
+-include Makefile.local
 -include Makefile.src
 
 ALLSRC  = $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
@@ -125,3 +126,6 @@ fortran.o : $(CUDADIR)/src/fortran.c
 
 fortran_thunking.o : $(CUDADIR)/src/fortran_thunking.c
 	$(CC) $(OPTS) $(INC) -c $< -o $@
+
+# keep intermediate object files, to speed up re-compiling when library changes
+.SECONDARY: $(ALLOBJ)
