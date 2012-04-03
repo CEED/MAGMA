@@ -65,7 +65,7 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
     LDT     = Vblksiz;
     LDV     = NB+Vblksiz-1;
     blklen  = LDV*Vblksiz;
-    nbGblk  = plasma_ceildiv((N-2),Vblksiz);
+    nbGblk  = plasma_ceildiv((N-1),Vblksiz);
     //WORK    = (cuDoubleComplex *) malloc (LWORK*sizeof(cuDoubleComplex));
 
 #if defined(USEMAGMA)
@@ -132,6 +132,7 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
         {
            firstcolj = (bg-1)*Vblksiz + 1;
            rownbm    = plasma_ceildiv((N-(firstcolj+1)),NB);
+           if(bg==nbGblk) rownbm    = plasma_ceildiv((N-(firstcolj)),NB);  // last blk has size=1 used for complex to handle A(N,N-1)
            for (m = rownbm; m>0; m--)
            {
                vlen = 0;
@@ -143,13 +144,14 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
                    colj     = (bg-1)*Vblksiz + k;
                    st       = (rownbm -m)*NB+colj +1;
                    ed       = min(st+NB-1,N-1);
-                   if(st==ed)break;
+                   if(st>ed)break;
+                   if((st==ed)&&(colj!=N-2))break;
                    vlen=ed-fst+1;
                    vnb=k+1;
                }        
                colst     = (bg-1)*Vblksiz;
                findVTpos(N,NB,Vblksiz,colst,fst, &vpos, &taupos, &tpos, &blkid);
-               //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colst,vpos+1,taupos+1);
+               //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colst+1,vpos+1,taupos+1);
                if((vlen>0)&&(vnb>0)){
 #if defined(USEMAGMA)
                        if(WANTZ==1){
@@ -175,10 +177,10 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
            }
         }
     }else if(version==114){
-        rownbm    = plasma_ceildiv((N-2),NB);
+        rownbm    = plasma_ceildiv((N-1),NB);
         for (m = rownbm; m>0; m--)
         {
-           ncolinvolvd = min(N-2, m*NB);
+           ncolinvolvd = min(N-1, m*NB);
            avai_blksiz=min(Vblksiz,ncolinvolvd);
            nbgr = plasma_ceildiv(ncolinvolvd,avai_blksiz);
            for (n = nbgr; n>0; n--)
@@ -193,12 +195,13 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
                {
                    st       = (rownbm -m)*NB+colj +1;
                    ed       = min(st+NB-1,N-1);
-                   if(st>=ed)break;
+                   if(st>ed)break;
+                   if((st==ed)&&(colj!=N-2))break;
                    vlen=ed-fst+1;
                    vnb=vnb+1;
                }        
                findVTpos(N,NB,Vblksiz,colst,fst, &vpos, &taupos, &tpos, &blkid);
-               //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colj,vpos+1,taupos+1);
+               //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colst+1,vpos+1,taupos+1);
                if((vlen>0)&&(vnb>0))
                    //DORMQR( "L", "N", &vlen, &N, &vnb, V(vpos), &LDV, TAU(taupos), E(fst,0), &LDE,  WORK, &LWORK, INFO );
                    lapackf77_zlarfb( "L", "N", "F", "C", &vlen, &NE, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(fst,0), &LDE,  WORK, &NE);       
@@ -213,6 +216,7 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
         {
            firstcolj = (bg-1)*Vblksiz + 1;
            rownbm    = plasma_ceildiv((N-(firstcolj+1)),NB);
+           if(bg==nbGblk) rownbm    = plasma_ceildiv((N-(firstcolj)),NB);  // last blk has size=1 used for complex to handle A(N,N-1)
            for (m = 1; m<=rownbm; m++)
            {
                vlen = 0;
@@ -225,7 +229,8 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
                    colj     = (bg-1)*Vblksiz + k;
                    st       = (rownbm -m)*NB+colj +1;
                    ed       = min(st+NB-1,N-1);
-                   if(st==ed)break;
+                   if(st>ed)break;
+                   if((st==ed)&&(colj!=N-2))break;
                    vlen=ed-fst+1;
                    vnb=k+1;
                }        

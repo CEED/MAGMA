@@ -167,8 +167,8 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
 
        fclose(trace_file);
-
 */
+
 
 
 
@@ -227,15 +227,15 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
        cublasGetMatrix( N, LDA1, sizeof(cuDoubleComplex), da, LDA1, A1, LDA1);
        timeaplQ1 = get_time_azz()-timeaplQ1;
        printf("  Finish applyQ1 timing= %lf \n" ,timeaplQ1); 
-       
-       /*
+
+       /*            
        trace_file = fopen("AJETE/Q1", "w");
        for (j = 0; j < N ; j++) 
              for (i = 0; i < N ; i++) 
                         //fprintf(trace_file,"%10d%10d%40.30e\n",i+1,j+1,A1[j*LDA1+i]);
                          fprintf(trace_file,"%10d %10d %25.15e %25.15e\n",i+1,j+1,MAGMA_Z_REAL(A1[j*LDA1+i]) ,  MAGMA_Z_IMAG(A1[j*LDA1+i])  );
-       fclose(trace_file);*/
-       
+       fclose(trace_file);
+       */
     }
     /***********************************************/
     
@@ -386,32 +386,14 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
        for (i=0; i < N-1 ; i++)
        {
           D2[i] = MAGMA_Z_REAL( A2[i*LDA2]);               
-          /*
-           * for Householder case, all off-diag
-           * are real except the last off-diag, where we
-           * have to take the abs
-           */
-          if(i<(N-2)){
-              E2[i] = MAGMA_Z_REAL(A2[i*LDA2+1]);
-          }else{
-              E2[i] = MAGMA_Z_ABS(A2[i*LDA2+1]);
-          }
+          E2[i] = MAGMA_Z_REAL(A2[i*LDA2+1]);
        }
        D2[N-1] = MAGMA_Z_REAL(A2[(N-1)*LDA2]);
     } else { /* MagmaUpper not tested yet */
         for (i=0; i<N-1; i++)
         {
             D2[i]  =  MAGMA_Z_REAL(A2[i*LDA2+NB]);               
-            /*
-             * for Householder case, all off-diag
-             * are real except the last off-diag, where we
-             * have to take the abs
-             */
-            if( i < (N-2) ){
-                E2[i] = MAGMA_Z_REAL(A2[i*LDA2+NB-1]);
-            }else{
-                E2[i] = MAGMA_Z_ABS(A2[i*LDA2+NB-1]);
-            }
+            E2[i] = MAGMA_Z_REAL(A2[i*LDA2+NB-1]);
         }
         D2[N-1] = MAGMA_Z_REAL(A2[(N-1)*LDA2+NB]);
     } /* end MagmaUpper */
@@ -555,8 +537,8 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                         //fprintf(trace_file,"%10d%10d%40.30e\n",i+1,j+1,A1[j*LDA1+i]);
                          fprintf(trace_file,"%10d %10d %25.15e %25.15e\n",i+1,j+1,MAGMA_Z_REAL(Z[j*LDA1+i]) ,  MAGMA_Z_IMAG(Z[j*LDA1+i])  );
        fclose(trace_file);
+       */
 
-*/
 
 
         // ************************************************
@@ -617,7 +599,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                   exit(-1);                                                           
                }
 
-        /*
+                /*
                 Q2    = (cuDoubleComplex *) malloc (N*N*sizeof(cuDoubleComplex));
                 memset(Q2 , 0, N*N*sizeof(cuDoubleComplex));       
                 cublasGetMatrix( N, LDA1, sizeof(cuDoubleComplex), da, N, Q2, N);
@@ -626,7 +608,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                       for (i = 0; i < N ; i++) 
                                   fprintf(trace_file,"%10d %10d %25.15e %25.15e\n",i+1,j+1,MAGMA_Z_REAL(Q2[j*N+i]) ,  MAGMA_Z_IMAG(Q2[j*N+i])  );
                 fclose(trace_file);
-*/
+                */
 
                timegemm = get_time_azz();
                // copy the eigenvectors to GPU
@@ -763,8 +745,8 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
              
 
 
-/*
 
+       /*
        trace_file = fopen("AJETE/U", "w");
        for (j = 0; j < N ; j++) 
              for (i = 0; i < N ; i++) 
@@ -776,7 +758,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
        for (j = 0; j < N ; j++) 
                 fprintf(trace_file,"%10d%10d%40.30e\n",j+1,1,D2[j]);
        fclose(trace_file);
-*/
+       */
 
 
 
@@ -1085,13 +1067,13 @@ static void tile_bulge_parallel(int my_core_id)
   i = shift/grsiz;
   stepercol =  i*grsiz == shift ? i:i+1;
 
-  i       = (N-2)/thgrsiz;
-  thgrnb  = i*thgrsiz == (N-2) ? i:i+1;
+  i       = (N-1)/thgrsiz;
+  thgrnb  = i*thgrsiz == (N-1) ? i:i+1;
 
   for (thgrid = 1; thgrid<=thgrnb; thgrid++){
      stt  = (thgrid-1)*thgrsiz+1;
-     thed = min( (stt + thgrsiz -1), (N-2));
-     for (i = stt; i <= N-2; i++){
+     thed = min( (stt + thgrsiz -1), (N-1));
+     for (i = stt; i <= N-1; i++){
         ed=min(i,thed);
         if(stt>ed)break;
         for (m = 1; m <=stepercol; m++){ 
@@ -1117,7 +1099,7 @@ static void tile_bulge_parallel(int my_core_id)
                              blklastind=N;
                          else
                              blklastind=0;
-                         if(stind>=edind){
+                         if(stind>edind){
                              printf("ERROR---------> st>=ed  %d  %d \n\n",stind, edind);
                              exit(-10);
                          }
@@ -1210,13 +1192,17 @@ static void tile_bulge_parallel(int my_core_id)
                 }   // END for k=1:grsiz
                } // END for sweepid=st:ed
         } // END for m=1:stepercol
-     } // END for i=1:N-2
+     } // END for i=1:N-1
 //barrier(my_core_id, cores_num);   
   } // END for thgrid=1:thgrnb
 
+
+
+
 // momentary solution for complex version when A(N,N-1) is complex and to avoid making it real out of this function 
 // which will require to multiply the col/row of the Eigenvectors or Q by the scalar that make A(N,N-1) to real.
-//magma_ztrdtype1cbHLsym_withQ(N, NB, A, LDA, V, TAU, N, N, N-1, Vblksiz);
+//       barrier(my_core_id, cores_num);
+//       if(my_core_id == 0)magma_ztrdtype1cbHLsym_withQ(N, NB, A, LDA, V, TAU, N, N, N-1, Vblksiz);
 
 } // END FUNCTION
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1255,14 +1241,15 @@ static void tile_bulge_computeT_parallel(int my_core_id)
     LDT     = Vblksiz;    
     LDV     = NB+Vblksiz-1;
     blklen  = LDV*Vblksiz;
-    nbGblk  = plasma_ceildiv((N-2),Vblksiz);
+    nbGblk  = plasma_ceildiv((N-1),Vblksiz);
 
-    if(my_core_id==0) printf("  COMPUTE T parallel threads %d with  N %d   NB %d   Vblksiz %d version %d \n",cores_num,N,NB,Vblksiz,version);
+    if(my_core_id==0) printf("  COMPUTE T parallel threads %d with  N %d   NB %d   Vblksiz %d \n",cores_num,N,NB,Vblksiz);
     
         for (bg = nbGblk; bg>0; bg--)
         {
            firstcolj = (bg-1)*Vblksiz + 1;
            rownbm    = plasma_ceildiv((N-(firstcolj+1)),NB);
+           if(bg==nbGblk) rownbm    = plasma_ceildiv((N-(firstcolj)),NB);  // last blk has size=1 used for complex to handle A(N,N-1)
            for (m = rownbm; m>0; m--)
            {
                vlen = 0;
@@ -1274,7 +1261,8 @@ static void tile_bulge_computeT_parallel(int my_core_id)
                    colj     = (bg-1)*Vblksiz + k;
                    st       = (rownbm -m)*NB+colj +1;
                    ed       = min(st+NB-1,N-1);
-                   if(st==ed)break;
+                   if(st>ed)break;
+                   if((st==ed)&&(colj!=N-2))break;
                    vlen=ed-fst+1;
                    vnb=k+1;
                }        
@@ -1334,7 +1322,7 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
     LDT     = Vblksiz;
     LDV     = NB+Vblksiz-1;    
     blklen  = LDV*Vblksiz;
-    nbGblk  = plasma_ceildiv((N-2),Vblksiz);
+    nbGblk  = plasma_ceildiv((N-1),Vblksiz);
     //LWORK   = 2*N*max(Vblksiz,64);
     //WORK    = (cuDoubleComplex *) malloc (LWORK*sizeof(cuDoubleComplex));
 
@@ -1434,6 +1422,7 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
                 {
                    firstcolj = (bg-1)*Vblksiz + 1;
                    rownbm    = plasma_ceildiv((N-(firstcolj+1)),NB);
+                   if(bg==nbGblk) rownbm    = plasma_ceildiv((N-(firstcolj)),NB);  // last blk has size=1 used for complex to handle A(N,N-1)
                    for (m = rownbm; m>0; m--)
                    {
                        vlen = 0;
@@ -1445,13 +1434,14 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
                            colj     = (bg-1)*Vblksiz + k;
                            st       = (rownbm -m)*NB+colj +1;
                            ed       = min(st+NB-1,N-1);
-                           if(st==ed)break;
+                           if(st>ed)break;
+                           if((st==ed)&&(colj!=N-2))break;
                            vlen=ed-fst+1;
                            vnb=k+1;
                        }        
                        colst     = (bg-1)*Vblksiz;
                        findVTpos(N,NB,Vblksiz,colst,fst, &vpos, &taupos, &tpos, &blkid);
-                       //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colst,vpos+1,taupos+1);
+                       //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colst+1,vpos+1,taupos+1);
                        
                        if(LOGQ) core_event_startblg(my_core_id);
                        if((vlen>0)&&(vnb>0)){
@@ -1474,10 +1464,10 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
                    }
                 }
             }else if(version==114){
-                rownbm    = plasma_ceildiv((N-2),NB);
+                rownbm    = plasma_ceildiv((N-1),NB);
                 for (m = rownbm; m>0; m--)
                 {
-                   ncolinvolvd = min(N-2, m*NB);
+                   ncolinvolvd = min(N-1, m*NB);
                    avai_blksiz=min(Vblksiz,ncolinvolvd);
                    nbgr = plasma_ceildiv(ncolinvolvd,avai_blksiz);
                    for (n = nbgr; n>0; n--)
@@ -1492,12 +1482,13 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
                        {
                            st       = (rownbm -m)*NB+colj +1;
                            ed       = min(st+NB-1,N-1);
-                           if(st>=ed)break;
+                           if(st>ed)break;
+                           if((st==ed)&&(colj!=N-2))break;
                            vlen=ed-fst+1;
                            vnb=vnb+1;
                        }        
                        findVTpos(N,NB,Vblksiz,colst,fst, &vpos, &taupos, &tpos, &blkid);
-                       //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colj,vpos+1,taupos+1);
+                       //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colst+1,vpos+1,taupos+1);
                        if((vlen>0)&&(vnb>0))
                            //lapackf77_zungqr( "L", "N", &vlen, &corelen, &vnb, V(vpos), &LDV, TAU(taupos), E(fst,corest), &LDE,  WORK, &LWORK, &INFO );
                            lapackf77_zlarfb( "L", "N", "F", "C", &vlen, &corelen, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(fst,corest), &LDE,  WORK, &colpercore);       
@@ -1511,6 +1502,7 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
                 {
                    firstcolj = (bg-1)*Vblksiz + 1;
                    rownbm    = plasma_ceildiv((N-(firstcolj+1)),NB);
+                   if(bg==nbGblk) rownbm    = plasma_ceildiv((N-(firstcolj)),NB);  // last blk has size=1 used for complex to handle A(N,N-1)
                    for (m = 1; m<=rownbm; m++)
                    {
                        vlen = 0;
@@ -1523,7 +1515,8 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
                            colj     = (bg-1)*Vblksiz + k;
                            st       = (rownbm -m)*NB+colj +1;
                            ed       = min(st+NB-1,N-1);
-                           if(st==ed)break;
+                           if(st>ed)break;
+                           if((st==ed)&&(colj!=N-2))break;
                            vlen=ed-fst+1;
                            vnb=k+1;
                        }        
@@ -1593,7 +1586,7 @@ void tile_bulge_applyQ_parallel2(int my_core_id)
     LDT     = Vblksiz;
     LDV     = NB+Vblksiz-1;    
     blklen  = LDV*Vblksiz;
-    nbGblk  = plasma_ceildiv((N-2),Vblksiz);
+    nbGblk  = plasma_ceildiv((N-1),Vblksiz);
     //LWORK   = 2*N*max(Vblksiz,64);
     //WORK    = (cuDoubleComplex *) malloc (LWORK*sizeof(cuDoubleComplex));
 
@@ -1688,6 +1681,7 @@ void tile_bulge_applyQ_parallel2(int my_core_id)
             {
                firstcolj = (bg-1)*Vblksiz + 1;
                rownbm    = plasma_ceildiv((N-(firstcolj+1)),NB);
+               if(bg==nbGblk) rownbm    = plasma_ceildiv((N-(firstcolj)),NB);  // last blk has size=1 used for complex to handle A(N,N-1)
                for (m = rownbm; m>0; m--)
                {
                    vlen = 0;
@@ -1699,13 +1693,14 @@ void tile_bulge_applyQ_parallel2(int my_core_id)
                        colj     = (bg-1)*Vblksiz + k;
                        st       = (rownbm -m)*NB+colj +1;
                        ed       = min(st+NB-1,N-1);
-                       if(st==ed)break;
+                       if(st>ed)break;
+                       if((st==ed)&&(colj!=N-2))break;
                        vlen=ed-fst+1;
                        vnb=k+1;
                    }        
                    colst     = (bg-1)*Vblksiz;
                    findVTpos(N,NB,Vblksiz,colst,fst, &vpos, &taupos, &tpos, &blkid);
-                   //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colst,vpos+1,taupos+1);
+                   //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colst+1,vpos+1,taupos+1);
        
                    if((vlen>0)&&(vnb>0)){
                        if(LOGQ) core_event_startblg(my_core_id);
@@ -1733,10 +1728,10 @@ void tile_bulge_applyQ_parallel2(int my_core_id)
                } // end for m:rowmnb
             } // end for bg 
         }else if(version==114){
-            rownbm    = plasma_ceildiv((N-2),NB);
+            rownbm    = plasma_ceildiv((N-1),NB);
             for (m = rownbm; m>0; m--)
             {
-                ncolinvolvd = min(N-2, m*NB);
+                ncolinvolvd = min(N-1, m*NB);
                 avai_blksiz=min(Vblksiz,ncolinvolvd);
                 nbgr = plasma_ceildiv(ncolinvolvd,avai_blksiz);
                 for (n = nbgr; n>0; n--)
@@ -1751,12 +1746,13 @@ void tile_bulge_applyQ_parallel2(int my_core_id)
                     {
                         st       = (rownbm -m)*NB+colj +1;
                         ed       = min(st+NB-1,N-1);
-                        if(st>=ed)break;
+                        if(st>ed)break;
+                        if((st==ed)&&(colj!=N-2))break;
                         vlen=ed-fst+1;
                         vnb=vnb+1;
                     }        
                     findVTpos(N,NB,Vblksiz,colst,fst, &vpos, &taupos, &tpos, &blkid);
-                    //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colj,vpos+1,taupos+1);
+                    //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colst+1,vpos+1,taupos+1);
                     if((vlen>0)&&(vnb>0)){
                         for (chunkid = 0; chunkid<nbchunk; chunkid++)
                         {
@@ -1777,6 +1773,7 @@ void tile_bulge_applyQ_parallel2(int my_core_id)
         {
            firstcolj = (bg-1)*Vblksiz + 1;
            rownbm    = plasma_ceildiv((N-(firstcolj+1)),NB);
+           if(bg==nbGblk) rownbm    = plasma_ceildiv((N-(firstcolj)),NB);  // last blk has size=1 used for complex to handle A(N,N-1)
            for (m = 1; m<=rownbm; m++)
            {
                vlen = 0;
@@ -1789,14 +1786,15 @@ void tile_bulge_applyQ_parallel2(int my_core_id)
                    colj     = (bg-1)*Vblksiz + k;
                    st       = (rownbm -m)*NB+colj +1;
                    ed       = min(st+NB-1,N-1);
-                   if(st==ed)break;
+                   if(st>ed)break;
+                   if((st==ed)&&(colj!=N-2))break;
                    vlen=ed-fst+1;
                    vnb=k+1;
                }        
                colj     = (bg-1)*Vblksiz;
                findVTpos(N,NB,Vblksiz,colj,fst, &vpos, &taupos, &tpos, &blkid);
-               //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colj,vpos,taupos);
-                if((vlen>0)&&(vnb>0)){
+               //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colst+1,vpos+1,taupos+1);
+               if((vlen>0)&&(vnb>0)){
                     for (chunkid = 0; chunkid<nbchunk; chunkid++)
                     {
                         coreid  = chunkid%allcoresnb;
