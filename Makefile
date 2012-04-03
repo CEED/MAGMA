@@ -38,6 +38,7 @@ clean:
 	( cd testing/lin    && $(MAKE) clean )
 	( cd magmablas      && $(MAKE) clean ) 
 #	( cd quark          && $(MAKE) clean )
+	-rm -f $(LIBMAGMA) $(LIBMAGMABLAS)
 
 cleanall:
 	( cd include        && $(MAKE) cleanall )
