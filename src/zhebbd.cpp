@@ -23,11 +23,12 @@
 
 
 extern "C" magma_int_t
-magma_zhebbd(char uplo, magma_int_t n, 
-             cuDoubleComplex *a, magma_int_t lda, 
-             cuDoubleComplex *tau,
-             cuDoubleComplex *work, magma_int_t lwork, 
-             magma_int_t *info)
+magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
+              cuDoubleComplex *a, magma_int_t lda, 
+              cuDoubleComplex *tau,
+              cuDoubleComplex *work, magma_int_t lwork,
+              cuDoubleComplex *dT,
+              magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -40,6 +41,8 @@ magma_zhebbd(char uplo, magma_int_t n,
     ZHEBBD reduces a complex Hermitian matrix A to real symmetric   
     band-diagonal form T by an orthogonal similarity transformation:   
     Q\*\*H * A * Q = T.   
+    This version stores the triangular matrices T used in the accumulated
+    Householder transformations (I - V T V').
 
     Arguments   
     =========   
@@ -89,6 +92,13 @@ magma_zhebbd(char uplo, magma_int_t n,
             this value as the first entry of the WORK array, and no error   
             message related to LWORK is issued by XERBLA.   
 
+    dT      (output) COMPLEX_16 array on the GPU, dimension N*NB, 
+            where NB is the optimal blocksize.
+            On exit dT holds the upper triangular matrices T from the 
+            accumulated Householder transformations (I - V T V') used
+            in the factorization. The nb x nb matrices T are ordered 
+            consecutively in memory one after another.
+
     INFO    (output) INTEGER   
             = 0:  successful exit   
             < 0:  if INFO = -i, the i-th argument had an illegal value   
@@ -136,15 +146,15 @@ magma_zhebbd(char uplo, magma_int_t n,
     denotes an element of the vector defining H(i).   
     =====================================================================    */
 
-    #define  a_ref(a_1,a_2) ( a+((a_2)-1)*( lda) + (a_1)-1)
+    #define a_ref(a_1,a_2) ( a+((a_2)-1)*( lda) + (a_1)-1)
     #define da_ref(a_1,a_2) (da+((a_2)-1)*(ldda) + (a_1)-1)
     #define tau_ref(a_1)    (tau + (a_1)-1)
-    #define t_ref(i)        (da)
+    #define t_ref(a_1)      (dT  + ((a_1)-1)*(lddt))
 
     char uplo_[2] = {uplo, 0};
 
-    int ldda = ((n+31)/32)*32, nb = 64; // magma_get_zhebbd_nb(n); 
-    int lddt = ldda;
+    int ldda = ((n+31)/32)*32; // magma_get_zhebbd_nb(n); 
+    int lddt = nb;
    
     cuDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE, c_neg_half;
     MAGMA_Z_DSCALE(c_neg_half, c_neg_one, 2.);
@@ -152,8 +162,8 @@ magma_zhebbd(char uplo, magma_int_t n,
     cuDoubleComplex c_zero = MAGMA_Z_ZERO;
     double  d_one = MAGMA_D_ONE;
 
-    magma_int_t pm, pn, indi, indj;
-    magma_int_t pm_old, pn_old, indi_old, indj_old;
+    magma_int_t pm, pn, indi, indj, pk;
+    magma_int_t pm_old=0, pn_old=0, indi_old=0, indj_old=0;
 
     static int i;
     static int lwkopt;
@@ -209,144 +219,154 @@ magma_zhebbd(char uplo, magma_int_t n,
     lwork -= nb*nb;
     memset( hT, 0, nb*nb*sizeof(cuDoubleComplex));
 
+
     if (upper) {
 
       printf("ZHEBBD is not yet implemented for upper matrix storage. Exit.\n");
       exit(1);
 
-    } 
-    else 
-      {
-          /* Copy the matrix to the GPU */
-          if (1 <= n-nb)
-              cudaMemcpy2DAsync(da_ref(nb+1, nb+1), ldda*sizeof(cuDoubleComplex),
+    }else {
+        /* Copy the matrix to the GPU */
+        if (1 <= n-nb){
+            cudaMemcpy2DAsync(da_ref(nb+1, nb+1), ldda*sizeof(cuDoubleComplex),
                                 a_ref(nb+1, nb+1), lda*sizeof(cuDoubleComplex),
                                 sizeof(cuDoubleComplex)*(n-nb), (n-nb),
                                 cudaMemcpyHostToDevice,stream[0]);
+        }
 
-          /* Reduce the lower triangle of A */
-          for (i = 1; i <= n-nb; i += nb) 
-              {
-                  indi = i+nb;
-                  indj = i;
-                  pm   = n - i - nb + 1;
-                  pn   = min(i+nb-1, n-nb) -i + 1;
-                  
-                  /*   Get the current panel (no need for the 1st iteration) */
-                  if (i > 1 ){
-                      zpanel_to_q(MagmaUpper, pn-1, a_ref(i, i+1), lda, work);
-                      cudaMemcpy2DAsync( a_ref ( i, i),  lda*sizeof(cuDoubleComplex),
-                                 da_ref( i, i), ldda*sizeof(cuDoubleComplex),
-                                 sizeof(cuDoubleComplex)*(pm+pn), pn,
-                                 cudaMemcpyDeviceToHost,stream[1]);
+        /* Reduce the lower triangle of A */
+        for (i = 1; i <= n-nb; i += nb) 
+        {
+             indi = i+nb;
+             indj = i;
+             pm   = n - i - nb + 1;
+             //pn   = min(i+nb-1, n-nb) -i + 1;
+             pn   = nb;
+             
+             /*   Get the current panel (no need for the 1st iteration) */
+             if (i > 1 ){
+                 // zpanel_to_q copy the upper oof diagonal part of 
+                 // the matrix to work to be restored later. acctually
+                 //  the zero's and one's putted are not used this is only
+                 //   because we don't have a function that copy only the
+                 //    upper part of A to be restored after copying the 
+                 //    lookahead panel that has been computted from GPU to CPU. 
+                 zpanel_to_q(MagmaUpper, pn-1, a_ref(i, i+1), lda, work);
+                 cudaMemcpy2DAsync( a_ref ( i, i),  lda*sizeof(cuDoubleComplex),
+                            da_ref( i, i), ldda*sizeof(cuDoubleComplex),
+                            sizeof(cuDoubleComplex)*(pm+pn), pn,
+                            cudaMemcpyDeviceToHost,stream[1]);
 
-                      cublasZher2k('L', 'N', pm_old-pn_old, pn_old, c_neg_one,
-                           da_ref(indi_old+pn_old, indj_old), ldda,
-                           dW + pn_old           , pm_old, d_one,
-                           da_ref(indi_old+pn_old, indi_old+pn_old), ldda);
+                 cublasZher2k('L', 'N', pm_old-pn_old, pn_old, c_neg_one,
+                      da_ref(indi_old+pn_old, indj_old), ldda,
+                      dW + pn_old           , pm_old, d_one,
+                      da_ref(indi_old+pn_old, indi_old+pn_old), ldda);
 
-                      cudaStreamSynchronize(stream[1]);
-                      zq_to_panel(MagmaUpper, pn-1, a_ref(i, i+1), lda, work);
-                  }
+                 cudaStreamSynchronize(stream[1]);
+                 zq_to_panel(MagmaUpper, pn-1, a_ref(i, i+1), lda, work);
+             }
 
-                  /* ==========================================================
-                     QR factorization on a panel starting nb off of the diagonal.
-                     Prepare the V and T matrices. 
-                     ==========================================================  */
-                  lapackf77_zgeqrf(&pm, &pn, a_ref(indi, indj), &lda, 
-                             tau_ref(i), work, &lwork, info);
-                  
-                  /* Form the matrix T */
-            lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr,
-                              &pm, &pn, a_ref(indi, indj), &lda,
-                              tau_ref(i), hT, &pn);
+             /* ==========================================================
+                QR factorization on a panel starting nb off of the diagonal.
+                Prepare the V and T matrices. 
+                ==========================================================  */
+             lapackf77_zgeqrf(&pm, &pn, a_ref(indi, indj), &lda, 
+                        tau_ref(i), work, &lwork, info);
+             
+             /* Form the matrix T */
+                         pk=min(pm,pn);
+             lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr,
+                           &pm, &pk, a_ref(indi, indj), &lda,
+                           tau_ref(i), hT, &nb);
 
-            /* Prepare V - put 0s in the upper triangular part of the panel
-               (and 1s on the diagonal), temporaly storing the original in work */
-            zpanel_to_q(MagmaUpper, pn, a_ref(indi, indj), lda, work);
+             /* Prepare V - put 0s in the upper triangular part of the panel
+                (and 1s on the diagonal), temporaly storing the original in work */
+             zpanel_to_q(MagmaUpper, pk, a_ref(indi, indj), lda, work);
 
-            /* Send V from the CPU to the GPU */
-            cudaMemcpy2DAsync(da_ref(indi, indj), ldda*sizeof(cuDoubleComplex),
-                              a_ref(indi, indj), lda*sizeof(cuDoubleComplex),
-                              sizeof(cuDoubleComplex)*pm, pn,
-                              cudaMemcpyHostToDevice,stream[0]);
+             /* Send V from the CPU to the GPU */
+             cudaMemcpy2DAsync(da_ref(indi, indj), ldda*sizeof(cuDoubleComplex),
+                           a_ref(indi, indj), lda*sizeof(cuDoubleComplex),
+                           sizeof(cuDoubleComplex)*pm, pk,
+                           cudaMemcpyHostToDevice,stream[0]);
 
-            /* Send the triangular factor T to the GPU */
-            cudaMemcpy2DAsync(t_ref(i), lddt*sizeof(cuDoubleComplex),
-                              hT, pn*sizeof(cuDoubleComplex),
-                              sizeof(cuDoubleComplex)*pn, pn,
-                              cudaMemcpyHostToDevice,stream[0]);
-
-            /* ==========================================================
-               Compute W:
-               1. X = A (V T)
-               2. W = X - 0.5* V * (T' * (V' * X)) 
-               ==========================================================  */
-            /* dwork = V T */
-            cudaStreamSynchronize(stream[0]);
-            cublasZgemm(MagmaNoTrans, MagmaNoTrans, pm, pn, pn,
-                        c_one, da_ref(indi, indj), ldda, 
-                        t_ref(i), lddt,
-                        c_zero, dwork, pm);
-            /* W = X = A*V*T = A dwork */ 
-            cublasZhemm(MagmaLeft, uplo, pm, pn,
-                        c_one, da_ref(indi, indi), ldda,
-                        dwork, pm,
-                        c_zero, dW, pm);
-
-            /* restore the panel */
-            zq_to_panel(MagmaUpper, pn, a_ref(indi, indj), lda, work);
-
-            /* dwork + pm*nb = (T' * (V' * X) = dwork' * X = dwork' * W */
-            cublasZgemm(MagmaConjTrans, MagmaNoTrans, pn, pn, pm,
-                        c_one, dwork, pm, 
-                        dW, pm,
-                        c_zero, dwork + pm*nb, nb);
-            /* W = X - 0.5* V * (dwork + pm*nb) = W - 0.5 * V * (dwork + pm*nb) */
-            cublasZgemm(MagmaNoTrans, MagmaNoTrans, pm, pn, pn,
-                        c_neg_half, da_ref(indi, indj), ldda,
-                        dwork + pm*nb, nb, 
-                        c_one,     dW, pm);
-
-            /* ==========================================================
-               Update the unreduced submatrix A(i+ib:n,i+ib:n), using   
-               an update of the form:  A := A - V*W' - W*V' 
-               ==========================================================  */
-            if (i + nb <= n-nb){
-              /* There would be next iteration;
-                 do lookahead - update the next panel */
-                cublasZgemm(MagmaNoTrans, MagmaConjTrans, pm, pn, pn, c_neg_one,
-                            da_ref(indi, indj), ldda,
-                            dW                , pm, c_one,
-                            da_ref(indi, indi), ldda);
-                cublasZgemm(MagmaNoTrans, MagmaConjTrans, pm, pn, pn, c_neg_one,
-                            dW                , pm,
-                            da_ref(indi, indj), ldda, c_one,
-                            da_ref(indi, indi), ldda);
-            }
-            else {
-                /* no look-ahead as this is last iteration */
-                cublasZher2k('L', 'N', pm, pn, c_neg_one,
+             /* Send the triangular factor T to the GPU */
+             cudaMemcpy2DAsync(t_ref(i), lddt*sizeof(cuDoubleComplex),
+                           hT, nb*sizeof(cuDoubleComplex),
+                           sizeof(cuDoubleComplex)*pk, pk,
+                           cudaMemcpyHostToDevice,stream[0]);
+             /* ==========================================================
+                Compute W:
+                1. X = A (V T)
+                2. W = X - 0.5* V * (T' * (V' * X)) 
+                ==========================================================  */
+             /* dwork = V T */
+             cudaStreamSynchronize(stream[0]);
+             cublasZgemm(MagmaNoTrans, MagmaNoTrans, pm, pk, pk,
+                         c_one, da_ref(indi, indj), ldda, 
+                         t_ref(i), lddt,
+                         c_zero, dwork, pm);
+             /* W = X = A*V*T = A dwork */ 
+             cublasZhemm(MagmaLeft, uplo, pm, pk,
+                         c_one, da_ref(indi, indi), ldda,
+                         dwork, pm,
+                         c_zero, dW, pm);
+             /* restore the panel */
+             zq_to_panel(MagmaUpper, pk, a_ref(indi, indj), lda, work);
+             
+             /* dwork = V*T already ==> dwork' =V'*T'
+              * compute T'*V'*X ==> dwork'*W ==>
+              * dwork + pm*nb = ((T' * V') * X) = dwork' * X = dwork' * W */
+             cublasZgemm(MagmaConjTrans, MagmaNoTrans, pk, pk, pm,
+                         c_one, dwork, pm, 
+                         dW, pm,
+                         c_zero, dwork + pm*nb, nb);
+             /* W = X - 0.5 * V * T'*V'*X
+              *   = X - 0.5 * V * (dwork + pm*nb) = W - 0.5 * V * (dwork + pm*nb) */
+             cublasZgemm(MagmaNoTrans, MagmaNoTrans, pm, pk, pk,
+                         c_neg_half, da_ref(indi, indj), ldda,
+                         dwork + pm*nb, nb, 
+                         c_one,     dW, pm);
+             
+             /* ==========================================================
+                Update the unreduced submatrix A(i+ib:n,i+ib:n), using   
+                an update of the form:  A := A - V*W' - W*V' 
+                ==========================================================  */
+             if (i + nb <= n-nb){
+                 /* There would be next iteration;
+                    do lookahead - update the next panel */
+                 cublasZgemm(MagmaNoTrans, MagmaConjTrans, pm, pn, pn, c_neg_one,
                              da_ref(indi, indj), ldda,
-                             dW                , pm, d_one,
+                             dW                , pm, c_one,
                              da_ref(indi, indi), ldda);
-            }
+                 cublasZgemm(MagmaNoTrans, MagmaConjTrans, pm, pn, pn, c_neg_one,
+                             dW                , pm,
+                             da_ref(indi, indj), ldda, c_one,
+                             da_ref(indi, indi), ldda);
+             }
+             else {
+                 /* no look-ahead as this is last iteration */
+                 cublasZher2k('L', 'N', pk, pk, c_neg_one,
+                              da_ref(indi, indj), ldda,
+                              dW                , pm, d_one,
+                              da_ref(indi, indi), ldda);
+             }
+             
+             indi_old = indi;
+             indj_old = indj;
+             pm_old   = pm;
+             pn_old   = pn;
+        }  // end loop for(i)
 
-            indi_old = indi;
-            indj_old = indj;
-            pm_old   = pm;
-            pn_old   = pn;
-              }
- 
-          /* Send the last block to the CPU */
-          if (1 <= n-nb){
-              zpanel_to_q(MagmaUpper, nb-1, a_ref(n-nb+1, n-nb+2), lda, work);
-              cublasGetMatrix(nb, nb, sizeof(cuDoubleComplex),
-                          da_ref(n-nb+1, n-nb+1), ldda,
-                          a_ref(n-nb+1, n-nb+1), lda);
-              zq_to_panel(MagmaUpper, nb-1, a_ref(n-nb+1, n-nb+2), lda, work);
-          }
-      }
+        /* Send the last block to the CPU */
+        pk = min(pm,pn);
+        if (1 <= n-nb){
+            zpanel_to_q(MagmaUpper, pk-1, a_ref(n-pk+1, n-pk+2), lda, work);
+            cublasGetMatrix(pk, pk, sizeof(cuDoubleComplex),
+                          da_ref(n-pk+1, n-pk+1), ldda,
+                          a_ref(n-pk+1, n-pk+1), lda);
+            zq_to_panel(MagmaUpper, pk-1, a_ref(n-pk+1, n-pk+2), lda, work);
+        }
+    }// end of LOWER
 
     cudaStreamDestroy( stream[0] );
     cudaStreamDestroy( stream[1] );
