@@ -102,8 +102,8 @@ extern "C" void magma_ztrdtype1cbHLsym_withQ(magma_int_t N, magma_int_t NB, cuDo
   /* Eliminate the col  at st-1 */
   lapackf77_zlarfg( &len, A(st, st-1), V(vpos+1), &IONE, TAU(taupos) );
   /* apply left and right on A(st:ed,st:ed)*/
-  //magma_zlarfxsym(len,A(st,st),LDX,V(vpos),TAU(taupos));
-  lapackf77_zlarfy("L", &len, V(vpos), &IONE, &(MAGMA_Z_CNJG(*TAU(taupos))), A(st,st), &LDX, WORK); //&(MAGMA_Z_CNJG(*TAU(taupos)))
+  magma_zlarfxsym(len,A(st,st),LDX,V(vpos),TAU(taupos));
+  //lapackf77_zlarfy("L", &len, V(vpos), &IONE, &(MAGMA_Z_CNJG(*TAU(taupos))), A(st,st), &LDX, WORK); //&(MAGMA_Z_CNJG(*TAU(taupos)))
   free(WORK);
 }
 #undef A

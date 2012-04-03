@@ -13,7 +13,6 @@
 */
 #include "common_magma.h"
 #include "magma_zbulgeinc.h"
-#include "checkdiag.h"
 #if defined(USEMKL)
 #include <mkl_service.h>
 #endif
@@ -31,11 +30,12 @@
 #define LOGQ 0
 #define LOG 0
 
-#if (defined(PRECISION_d))
+
+#if defined(PRECISION_z) || defined(PRECISION_d)
 extern "C" void cmp_vals(int n, double *wr1, double *wr2, double *nrmI, double *nrm1, double *nrm2);
-extern "C" void checkdiag_(char *JOBZ, int  *MATYPE, int  *N, int  *NB,
-                       double* A, int  *LDA, double *AD, double *AE, double *D1, double *EIG,
-                double *Z, int  *LDZ, double *WORK, double *RESU);
+extern "C" void zcheck_eig_(char *JOBZ, int  *MATYPE, int  *N, int  *NB,
+                       cuDoubleComplex* A, int  *LDA, double *AD, double *AE, double *D1, double *EIG,
+                    cuDoubleComplex *Z, int  *LDZ, cuDoubleComplex *WORK, double *RWORK, double *RESU);
 #endif
 
 
@@ -789,6 +789,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
 
 #if defined(PRECISION_d)  
+#if defined(CHECKEIG)
     if(CHECK)
     {
         /************************************************* 
@@ -814,17 +815,24 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
        //magma_zstedc_withZ(JOBZ, N, D2, E2, Q1, LDQ1);
        // compare result 
        cmp_vals(N, D1, D2, &nrmI, &nrm1, &nrm2);
-       cuDoubleComplex *WORKAJETER, *RESU;
-       WORKAJETER = (cuDoubleComplex *) malloc( (2* N * N + 256 * N) * sizeof(cuDoubleComplex) );
-       RESU       = (cuDoubleComplex *) malloc(10*sizeof(cuDoubleComplex));
+
+       cuDoubleComplex *WORKAJETER;
+       double *RWORKAJETER, *RESU;
+       WORKAJETER  = (cuDoubleComplex *) malloc( (2* N * N + N) * sizeof(cuDoubleComplex) );
+       RWORKAJETER = (double *) malloc( N * sizeof(double) );
+       RESU        = (double *) malloc(10*sizeof(double));
        int MATYPE;
-       memset(RESU,0,10*sizeof(cuDoubleComplex));
+       memset(RESU,0,10*sizeof(double));
 
  
        MATYPE=2;
        cuDoubleComplex NOTHING=c_zero;
-       checkdiag_(&JOBZ, &MATYPE, &N, &NB, AINIT, &LDAINIT, &NOTHING, &NOTHING, D2 , D1, Q2, &LDQ2, WORKAJETER, RESU );
-       //checkdiag_(&JOBZ, &MATYPE, &N, &NB, AINIT, &LDAINIT, &NOTHING, &NOTHING, D2 , D1, A1, &LDA1, WORKAJETER, RESU );
+       zcheck_eig_(&JOBZ, &MATYPE, &N, &NB, AINIT, &lda, &NOTHING, &NOTHING, D2 , D, h_R, &lda, WORKAJETER, RWORKAJETER, RESU );
+
+
+ 
+
+
 
         printf("\n");
         printf(" ================================================================================================================================== \n");
@@ -846,6 +854,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
 
     }
+#endif
 #endif
 
 
