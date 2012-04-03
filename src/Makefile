@@ -121,6 +121,7 @@ ZSRC  = zpotrf.cpp	\
 	dbulge_aux.cpp
 
 
+-include Makefile.local
 -include Makefile.src
 
 ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)    
