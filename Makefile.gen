@@ -24,31 +24,11 @@ generation:
 	(cd $(MAGMA_DIR)/magmablas && $(MAKE) generate )
 	(cd $(MAGMA_DIR)/testing   && $(MAKE) generate )
 
-headers: 
-	(cd include && $(MAKE) )
+headers:
+	( cd include && $(MAKE) )
 
-libmagma    : headers
+libmagma:     headers
 libmagmablas: headers
-
-# These 6 trules are used by the MakePlasmaRelease.pl script to set correctly 
-# [SDC]SRC and [SDC]HDR variable in the release
-printCSRC: 
-	@$(PYTHON) $(CODEGEN) --out -f "$(ZSRC)" -p "c"
-
-printDSRC: 
-	@$(PYTHON) $(CODEGEN) --out -f "$(ZSRC)" -p "d ds"
-
-printSSRC: 
-	@$(PYTHON) $(CODEGEN) --out -f "$(ZSRC)" -p "s"
-
-printCHDR: 
-	@$(PYTHON) $(CODEGEN) --out -f "$(ZHDR)" -p "c"
-
-printDHDR: 
-	@$(PYTHON) $(CODEGEN) --out -f "$(ZHDR)" -p "d ds"
-
-printSHDR: 
-	@$(PYTHON) $(CODEGEN) --out -f "$(ZHDR)" -p "s"
 
 .Makefile.gen: $(CODEGEN) Makefile
 	$(PYTHON) $(CODEGEN) --make -f "$(ZSRC) $(ZHDR)" > $@
