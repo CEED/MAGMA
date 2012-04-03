@@ -12,6 +12,7 @@
  */
 #include "common_magma.h"
 
+/* These interfaces are used for TAU profiling */
 extern"C"{
     void Mylapackf77_zstein(magma_int_t *n, double *d, double *e, magma_int_t *m, 
                             double *w, magma_int_t *iblock, magma_int_t *isplit,

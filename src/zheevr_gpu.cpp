@@ -12,6 +12,7 @@
 */
 #include "common_magma.h"
 
+/* These interfaces are used for TAU profiling */
 extern "C" {
     void Mylapackf77_zstemr(char *jobz, char *range, magma_int_t *n, double *d, double *e,
                             double *vl, double *vu, magma_int_t *il, magma_int_t *iu, 

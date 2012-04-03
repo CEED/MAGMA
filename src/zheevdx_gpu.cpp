@@ -12,6 +12,7 @@
 */
 #include "common_magma.h"
 
+/* This interface to zstedc is used for TAU profiling */
 extern"C"{
     void Mylapackf77_zstedc(char *compz, magma_int_t *n, double *D, double *E, 
                             cuDoubleComplex *Z, magma_int_t *ldz,
