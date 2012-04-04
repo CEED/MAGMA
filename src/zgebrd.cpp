@@ -36,7 +36,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     Purpose
     =======
     ZGEBRD reduces a general complex M-by-N matrix A to upper or lower
-    bidiagonal form B by an orthogonal transformation: Q\*\*H * A * P = B.
+    bidiagonal form B by an orthogonal transformation: Q**H * A * P = B.
 
     If m >= n, B is upper bidiagonal; if m < n, B is lower bidiagonal.
 

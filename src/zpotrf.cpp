@@ -59,8 +59,8 @@ magma_zpotrf(char uplo, magma_int_t n,
     routine.
 
     The factorization has the form   
-       A = U\*\*H * U,  if UPLO = 'U', or   
-       A = L  * L\*\*H, if UPLO = 'L',   
+       A = U**H * U,  if UPLO = 'U', or   
+       A = L  * L**H, if UPLO = 'L',   
     where U is an upper triangular matrix and L is lower triangular.   
 
     This is the block version of the algorithm, calling Level 3 BLAS.   
@@ -85,7 +85,7 @@ magma_zpotrf(char uplo, magma_int_t n,
             triangular part of A is not referenced.   
 
             On exit, if INFO = 0, the factor U or L from the Cholesky   
-            factorization A = U\*\*H*U or A = L*L\*\*H.   
+            factorization A = U**H * U or A = L * L**H.   
 
             Higher performance is achieved if A is in pinned memory, e.g.
             allocated using cudaMallocHost.

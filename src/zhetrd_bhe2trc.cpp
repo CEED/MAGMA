@@ -664,7 +664,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
            if(WANTZ==5){
                if(NE!=N){
-                   printf("WANTZ=5 is not supported with NE=%d it compute all the eigenvectors meaning that NE=N\n");
+                   printf("WANTZ=5 is not supported with NE=%d it compute all the eigenvectors meaning that NE=N\n", NE);
                    exit(-2);
                }
                timeaplQ2 = get_time_azz();

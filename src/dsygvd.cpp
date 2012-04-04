@@ -69,8 +69,8 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
             On exit, if JOBZ = 'V', then if INFO = 0, A contains the   
             matrix Z of eigenvectors.  The eigenvectors are normalized   
             as follows:   
-            if ITYPE = 1 or 2, Z\*\*T*B*Z = I;   
-            if ITYPE = 3, Z\*\*T*inv(B)*Z = I.   
+            if ITYPE = 1 or 2, Z**T *   B    * Z = I;   
+            if ITYPE = 3,      Z**T * inv(B) * Z = I.   
             If JOBZ = 'N', then on exit the upper triangle (if UPLO='U')   
             or the lower triangle (if UPLO='L') of A, including the   
             diagonal, is destroyed.   
@@ -87,7 +87,7 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
 
             On exit, if INFO <= N, the part of B containing the matrix is   
             overwritten by the triangular factor U or L from the Cholesky   
-            factorization B = U\*\*T*U or B = L*L\*\*T.   
+            factorization B = U**T * U or B = L * L**T.   
 
     LDB     (input) INTEGER   
             The leading dimension of the array B.  LDB >= max(1,N).   

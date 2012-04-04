@@ -42,7 +42,7 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
     =======   
     ZHETRD_GPU reduces a complex Hermitian matrix A to real symmetric   
     tridiagonal form T by an orthogonal similarity transformation:   
-    Q\*\*H * A * Q = T.   
+    Q**H * A * Q = T.   
 
     Arguments   
     =========   

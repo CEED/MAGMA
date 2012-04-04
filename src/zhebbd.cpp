@@ -40,7 +40,7 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
     =======   
     ZHEBBD reduces a complex Hermitian matrix A to real symmetric   
     band-diagonal form T by an orthogonal similarity transformation:   
-    Q\*\*H * A * Q = T.   
+    Q**H * A * Q = T.   
     This version stores the triangular matrices T used in the accumulated
     Householder transformations (I - V T V').
 

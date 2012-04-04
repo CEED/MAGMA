@@ -34,7 +34,7 @@ magma_zunmqr_gpu(char side, char trans,
 
                     SIDE = 'L'     SIDE = 'R'
     TRANS = 'N':      Q * C          C * Q
-    TRANS = 'T':      Q\*\*H * C       C * Q\*\*H
+    TRANS = 'T':      Q**H * C       C * Q**H
 
     where Q is a complex orthogonal matrix defined as the product of k
     elementary reflectors
@@ -47,12 +47,12 @@ magma_zunmqr_gpu(char side, char trans,
     Arguments
     =========
     SIDE    (input) CHARACTER*1
-            = 'L': apply Q or Q\*\*H from the Left;
-            = 'R': apply Q or Q\*\*H from the Right.
+            = 'L': apply Q or Q**H from the Left;
+            = 'R': apply Q or Q**H from the Right.
 
     TRANS   (input) CHARACTER*1
             = 'N':  No transpose, apply Q;
-            = 'T':  Transpose, apply Q\*\*H.
+            = 'T':  Transpose, apply Q**H.
 
     M       (input) INTEGER
             The number of rows of the matrix C. M >= 0.
@@ -83,7 +83,7 @@ magma_zunmqr_gpu(char side, char trans,
 
     DC      (input/output) COMPLEX_16 array on the GPU, dimension (LDDC,N)
             On entry, the M-by-N matrix C.
-            On exit, C is overwritten by Q*C or Q\*\*H*C or C*Q\*\*H or C*Q.
+            On exit, C is overwritten by Q*C or Q**H * C or C * Q**H or C*Q.
 
     LDDC     (input) INTEGER
             The leading dimension of the array DC. LDDC >= max(1,M).
