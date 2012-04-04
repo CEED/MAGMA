@@ -20,7 +20,6 @@ extern "C" {
 /***************************************************************************//**
  *  Configuration
  **/
-#include <sys/time.h>
 
  // maximum contexts
 #define MAX_THREADS_BLG         256
@@ -83,15 +82,6 @@ struct gbstrct_blg core_in_all;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
- real_Double_t get_time_azz(void)
-{
-    struct timeval  time_val;
-    struct timezone time_zone;
-
-    gettimeofday(&time_val, &time_zone);
-
-    return (real_Double_t)(time_val.tv_sec) + (real_Double_t)(time_val.tv_usec) / 1000000.0;
-}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #define MAX_EVENTSBLG 163840
 //#define MAX_EVENTSBLG 1048576

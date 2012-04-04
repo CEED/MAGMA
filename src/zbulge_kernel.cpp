@@ -88,6 +88,7 @@ extern "C" void magma_ztrdtype1cbHLsym_withQ(magma_int_t N, magma_int_t NB, cuDo
   magma_int_t    J1, J2, J3, len, LDX;
   magma_int_t    i, j, IONE=1;
   magma_int_t    blkid, vpos, taupos, tpos; 
+  cuDoubleComplex conjtmp;
   cuDoubleComplex Z_ONE  =  MAGMA_Z_ONE;
   cuDoubleComplex *WORK  = (cuDoubleComplex *) malloc( N * sizeof(cuDoubleComplex) );
 
@@ -103,7 +104,8 @@ extern "C" void magma_ztrdtype1cbHLsym_withQ(magma_int_t N, magma_int_t NB, cuDo
   lapackf77_zlarfg( &len, A(st, st-1), V(vpos+1), &IONE, TAU(taupos) );
   /* apply left and right on A(st:ed,st:ed)*/
   magma_zlarfxsym(len,A(st,st),LDX,V(vpos),TAU(taupos));
-  //lapackf77_zlarfy("L", &len, V(vpos), &IONE, &(MAGMA_Z_CNJG(*TAU(taupos))), A(st,st), &LDX, WORK); //&(MAGMA_Z_CNJG(*TAU(taupos)))
+  //conjtmp = MAGMA_Z_CNJG(*TAU(taupos));
+  //lapackf77_zlarfy("L", &len, V(vpos), &IONE, &conjtmp, A(st,st), &LDX, WORK); //&(MAGMA_Z_CNJG(*TAU(taupos)))
   free(WORK);
 }
 #undef A
@@ -122,6 +124,7 @@ extern "C" void magma_ztrdtype2cbHLsym_withQ(magma_int_t N, magma_int_t NB, cuDo
   magma_int_t    J1, J2, len, lem, LDX;
   magma_int_t    i, j, IONE=1;
   magma_int_t    blkid, vpos, taupos, tpos; 
+  cuDoubleComplex conjtmp;
   cuDoubleComplex Z_ONE  =  MAGMA_Z_ONE;
   //cuDoubleComplex WORK[NB];
   cuDoubleComplex *WORK  = (cuDoubleComplex *) malloc( NB * sizeof(cuDoubleComplex) );
@@ -147,7 +150,8 @@ extern "C" void magma_ztrdtype2cbHLsym_withQ(magma_int_t N, magma_int_t NB, cuDo
      lapackf77_zlarfg( &lem, A(J1, st), V(vpos+1), &IONE, TAU(taupos) );
      /* apply left on A(J1:J2,st+1:ed) */
      len = len-1; /* because we start at col st+1 instead of st. col st is the col that has been revomved;*/
-     lapackf77_zlarfx("L", &lem, &len, V(vpos),  &(MAGMA_Z_CNJG(*TAU(taupos))), A(J1, st+1), &LDX, WORK);
+     conjtmp = MAGMA_Z_CNJG(*TAU(taupos));
+     lapackf77_zlarfx("L", &lem, &len, V(vpos),  &conjtmp, A(J1, st+1), &LDX, WORK);
   }
   free (WORK);
 }
@@ -167,6 +171,7 @@ extern "C" void magma_ztrdtype3cbHLsym_withQ(magma_int_t N, magma_int_t NB, cuDo
   magma_int_t    J1, J2, J3, len, LDX;
   magma_int_t    i, j, IONE=1;
   magma_int_t    blkid, vpos, taupos, tpos; 
+  cuDoubleComplex conjtmp;
   cuDoubleComplex *WORK  = (cuDoubleComplex *) malloc( N * sizeof(cuDoubleComplex) );
 
 
@@ -176,6 +181,7 @@ extern "C" void magma_ztrdtype3cbHLsym_withQ(magma_int_t N, magma_int_t NB, cuDo
 
   /* apply left and right on A(st:ed,st:ed)*/
   magma_zlarfxsym(len,A(st,st),LDX,V(vpos),TAU(taupos));
+  //conjtmp = MAGMA_Z_CNJG(*TAU(taupos));
   //lapackf77_zlarfy("L", &len, V(vpos), &IONE,  &(MAGMA_Z_CNJG(*TAU(taupos))), A(st,st), &LDX, WORK);
   free(WORK);
 }
