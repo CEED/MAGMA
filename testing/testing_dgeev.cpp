@@ -180,9 +180,9 @@ int main( int argc, char** argv)
                *       Here VR is the matrix of unit right eigenvectors.
                *       W is a diagonal matrix with diagonal entries W(j).
                *
-               *     (2)     | A\*\*T * VL - VL * W\*\*T | / ( n |A| )
+               *     (2)     | A**T * VL - VL * W**T | / ( n |A| )
                *
-               *       Here VL is the matrix of unit left eigenvectors, A\*\*T is the
+               *       Here VL is the matrix of unit left eigenvectors, A**T is the
                *       ugate-transpose of A, and W is as above.
                *
                *     (3)     | |VR(i)| - 1 |   and whether largest component real
