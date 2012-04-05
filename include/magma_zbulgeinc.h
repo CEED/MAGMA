@@ -54,18 +54,27 @@ extern volatile magma_int_t *ss_prog;
 
 
  struct gbstrct_blg {
-    int cores_num;
-    int blgcores_num;
     cuDoubleComplex *dQ1;
     cuDoubleComplex *dT1;
+    cuDoubleComplex *dT2;
+    cuDoubleComplex *dV2;
+    cuDoubleComplex *dE;
     cuDoubleComplex *T;
     cuDoubleComplex *A;
     cuDoubleComplex *V;
     cuDoubleComplex *TAU;
     cuDoubleComplex *E;
+    cuDoubleComplex *E_CPU;
+    int cores_num;
+    int locores_num;
+    int overlapQ1;
+    int usemulticpu;
     int NB;
     int NBTILES;
     int N;
+    int NE;
+    int N_CPU;
+    int N_GPU;
     int LDA;
     int LDE;
     int BAND;
