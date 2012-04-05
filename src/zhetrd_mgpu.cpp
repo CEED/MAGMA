@@ -354,7 +354,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
             if (i!=0) {
               cudaSetDevice(did);
               //magmablasSetKernelStream(stream[did][0]);
-              trace_gpu_start( did, 0, stream[did][0], "comm", "get" );
+              trace_gpu_start( did, 0, "comm", "get" );
               //cublasGetMatrix(n-i, ib, sizeof(cuDoubleComplex),
               //                dA(did, i, ii), ldda,
               //                A(i, i), lda);
@@ -362,7 +362,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
                                   dA(did, i, ii), ldda*sizeof(cuDoubleComplex),
                                   sizeof(cuDoubleComplex)*(n-i), ib,
                                   cudaMemcpyDeviceToHost,stream[did][0]);
-              trace_gpu_end( did, 0, stream[did][0] );
+              trace_gpu_end( did, 0 );
             }
             mv_time += 
             magma_zlatrd_mgpu(num_gpus, uplo, n-i, ib, nb,
@@ -400,7 +400,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
                   //                  A(i,i),                lda   *sizeof(cuDoubleComplex),
                   //                  sizeof(cuDoubleComplex)*(n-i), ib,
                   //                  cudaMemcpyHostToDevice, stream[did][0]);
-                  //trace_gpu_end( did, 0, stream[did][0] );
+                  //trace_gpu_end( did, 0 );
             }*/
 
 #ifdef PROFILE_SY2RK
@@ -614,12 +614,12 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
         ii = nb*((i+offset)/(nb*num_gpus));
 
         /* zher2k on diagonal block */
-        trace_gpu_start( id, kk, stream[id][kk], "syr2k", "syr2k" );
+        trace_gpu_start( id, kk, "syr2k", "syr2k" );
         cublasZher2k(uplo, trans, ib, k, 
               alpha, dB1(id, i+k,        0 ), lddb, 
                      dB(id,  i+k,        0 ), lddb,
               beta,  dC(id,  i+offset,   ii), lddc);
-        trace_gpu_end( id, kk, stream[id][kk] );
+        trace_gpu_end( id, kk );
     }
 
     /* off-diagonal update */
@@ -680,13 +680,13 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
             n1 = n-i-ib;
         }
         // zgemm on off-diagonal blocks 
-        trace_gpu_start( id, kk, stream[id][kk], "gemm", "gemm" );
+        trace_gpu_start( id, kk, "gemm", "gemm" );
         //printf( " 2(%d): zgemm(%d,%d,%d, %dx%dx%d), %d, %d\n",id,i+k+ib,i+k,i+offset+ib,n1,ib,k,lddb,lddc );
         cublasZgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k, 
                     alpha, dB1(id, i+k+ib,      0 ), lddb,
                            dB(id,  i+k,         0 ), lddb, 
                     z_one, dC(id,  i+offset+ib, ii), lddc);
-        trace_gpu_end( id, kk, stream[id][kk] );
+        trace_gpu_end( id, kk );
     }
 
 #ifdef MERGE_SYR2K
@@ -743,13 +743,13 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
             n1 = n-i-ib;
         }
         /* zgemm on off-diagonal blocks */
-        trace_gpu_start( id, kk, stream[id][kk], "gemm", "gemm" );
+        trace_gpu_start( id, kk, "gemm", "gemm" );
         //printf( " 4(%d): zgemm(%d,%d,%d, %dx%dx%d), %d, %d\n",id,i+k+ib,i+k,i+offset+ib,n1,ib,k,lddb,lddc );
         cublasZgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k, 
                     alpha, dB(id,  i+k+ib,        0), lddb,
                            dB1(id, i+k,           0), lddb, 
                     z_one, dC(id,  i+offset+ib,  ii), lddc);
-        trace_gpu_end( id, kk, stream[id][kk] );
+        trace_gpu_end( id, kk );
     }
 
     for( id=0; id<num_gpus; id++ ) {

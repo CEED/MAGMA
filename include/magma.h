@@ -28,6 +28,9 @@
 #include "magma_zc.h"
 #include "magma_ds.h"
 
+/* ------------------------------------------------------------
+ * MAGMA constants
+ * --------------------------------------------------------- */
 #define MagmaNoTrans       'N'
 #define MagmaTrans         'T'
 #define MagmaConjTrans     'C'
@@ -73,6 +76,8 @@
 
 #define MagmaNoVectorsStr  "NoVectors"
 #define MagmaVectorsStr    "Vectors"
+
+#define MagmaMaxGPUs       8
 
 /* ------------------------------------------------------------
  *   Return codes

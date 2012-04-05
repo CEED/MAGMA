@@ -25,10 +25,12 @@ endif
 -include Makefile.src
 
 ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
-        auxiliary.cpp 	\
-        common.cpp		\
-        xerbla.cpp 	\
-	get_nb.cpp \
+	auxiliary.cpp	\
+	common.cpp	\
+	xerbla.cpp 	\
+	get_nb.cpp	\
+	trace.cpp	\
+	strlcpy.cpp	\
 	bulge_auxiliary.cpp
 
 ALLOBJ  = $(ALLSRC:.cpp=.o)
