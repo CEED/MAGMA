@@ -132,6 +132,15 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
     i = N/NB;
     NBTILES = i*NB==N ? i:i+1;
 
+    int overlapQ1   = 1;
+    int usemulticpu = 1;
+    int N_CPU=0,N_GPU=N;
+
+    //if(N<4000)
+     //       usemulticpu =0;
+
+    core_in_all.usemulticpu = usemulticpu;
+    core_in_all.overlapQ1   = overlapQ1;
     /************************************************* 
      *     INITIALIZING MATRICES 
      * ***********************************************/
@@ -216,13 +225,14 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
        
        cudaDeviceSynchronize();
        cublasSetMatrix( N, LDA1, sizeof(cuDoubleComplex), A1, LDA1, da, LDA1);
-       /*
-       magma_zungqr_2stage_gpu(N, N, N, da, LDA1, NOTUSED, dT1, NB, &INFO);
-       cudaDeviceSynchronize();
-       //cublasGetMatrix( N, LDA1, sizeof(cuDoubleComplex), da, LDA1, A1, LDA1);
-       timeaplQ1 = get_time_azz()-timeaplQ1;
-       printf("  Finish applyQ1 timing= %lf \n" ,timeaplQ1); 
-       */
+       if(overlapQ1==0){
+           timeaplQ1 = get_time_azz();
+           magma_zungqr_2stage_gpu(N, N, N, da, LDA1, NOTUSED, dT1, NB, &INFO);
+           cudaDeviceSynchronize();
+           //cublasGetMatrix( N, LDA1, sizeof(cuDoubleComplex), da, LDA1, A1, LDA1);
+           timeaplQ1 = get_time_azz()-timeaplQ1;
+           printf("  Finish applyQ1 timing= %lf \n" ,timeaplQ1); 
+       }
        /*            
        trace_file = fopen("AJETE/Q1", "w");
        for (j = 0; j < N ; j++) 
@@ -297,8 +307,15 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
     core_in_all.WANTZ     = WANTZ;
     core_in_all.SIDE      = 'R';
     core_in_all.E         = A1;
+    core_in_all.E_CPU     = A1;
     core_in_all.LDE       = LDA1;
     core_in_all.Vblksiz   = Vblksiz;
+
+    if(overlapQ1==1){
+       core_in_all.locores_num = THREADS-1;
+    }else{
+       core_in_all.locores_num = THREADS;
+    }
 
 
     // Set one thread per core
@@ -420,13 +437,20 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
     int dVsize, LDQ2=N,LDZ=N;
     int parallel=0;
 
+
+    if(usemulticpu==1){
+       core_in_all.locores_num = THREADS-1;
+    }else{
+       core_in_all.locores_num = THREADS;
+    }
+
     //========================
     //  WANTZ =1 : compute Q1 and Q2 and the eigenvectors Z 
     //             then make 2 GEMM's Q1*Q2*Z 
     //  WANTZ =2 : compute Q1 then apply V2 to Q1 from right 
     //             generating the global Q, then compute
     //             eigenvectors Z and make GEMM with Z==> Q*Z on GPU
-    //             WANTZ=5 is similar, but the GEMM is done 
+    //             WANTZ=5 is similar, where the GEMM is done 
     //             implicitly during the eigenvectors computation. 
     //             assumed to be bad in perf.
     //  WANTZ =3 : compute Q1, then compute the eigenvectors Z,
@@ -620,38 +644,130 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                timegemm = get_time_azz()-timegemm;
            }
            if(WANTZ==2){
+               /****************************************************
+                * apply V2 from Right to Q1. da = da*(I-V2*T2*V2')
+                * **************************************************/
+               /*============================
+                *  use GPU+CPU's
+                *==========================*/             
+               if(usemulticpu==1)
+               {
+                       printf("NEED MORE WORK\n");
+                       return 0;;
+               /*============================
+                *  use only GPU
+                *==========================*/  
+               }else{
+                   timeaplQ2 = get_time_azz();
+                   magma_zbulge_applyQ(WANTZ, 'R', N, N, NB, Vblksiz, A1, LDA1, V, TAU, T, &INFO, dV2, dT2, da, 2);
+                   cudaDeviceSynchronize();
+                   cublasFree(dT2);
+                   timeaplQ2 = get_time_azz()-timeaplQ2;
+               }
+
+               /****************************************************
+                * compute the GEMM of Q*Z
+                * **************************************************/
                cublasFree(dT1);
                if( CUBLAS_STATUS_SUCCESS != cublasAlloc(N*N, sizeof(cuDoubleComplex), (void**)&dZ) ) { 
                   printf ("!!!! cublasAlloc failed for: dZ\n" );       
                   exit(-1);                                                           
                }
-               // apply V2 from Right to Q1. da = da*(I-V2*T2*V2')
-               timeaplQ2 = get_time_azz();
-               magma_zbulge_applyQ(WANTZ, 'R', NE, N, NB, Vblksiz, A1, LDA1, V, TAU, T, &INFO, dV2, dT2, da, 2);
-               cudaDeviceSynchronize();
-               cublasFree(dT2);
-               timeaplQ2 = get_time_azz()-timeaplQ2;
                timegemm = get_time_azz();
                // copy the eigenvectors to GPU
-               cublasSetMatrix(N, NE, sizeof(cuDoubleComplex), Z, LDZ, dZ, N);
+               cublasSetMatrix(N, N, sizeof(cuDoubleComplex), Z, LDZ, dZ, N);
                //make a gemm of (Q1 * Q2) * Z = da * dZ --> dV2
-               cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, da, N, dZ, N, c_zero, dV2, N);
-               cublasGetMatrix(N, LDA1, sizeof(cuDoubleComplex), dV2, N, A1, LDA1);
+               cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, N, N, c_one, da, N, dZ, N, c_zero, dV2, N);
+               cublasGetMatrix(N, N, sizeof(cuDoubleComplex), dV2, N, A1, LDA1);
                timegemm = get_time_azz()-timegemm;
            }
 
            if(WANTZ==3){
-               timeaplQ2 = get_time_azz();
+               /****************************************************
+                *  apply V2 from left to the eigenvectors Z. dZ = (I-V2*T2*V2')*Z
+                * **************************************************/
                cublasFree(dT1);
-               if( CUBLAS_STATUS_SUCCESS != cublasAlloc(N*N, sizeof(cuDoubleComplex), (void**)&dZ) ) { 
+               if( CUBLAS_STATUS_SUCCESS != cublasAlloc(N*NE, sizeof(cuDoubleComplex), (void**)&dZ) ) { 
                   printf ("!!!! cublasAlloc failed for: dZ\n" );       
                   exit(-1);                                                           
                }
-               // apply V2 from left to the eigenvectors Z. dZ = (I-V2*T2*V2')*Z
-               magma_zbulge_applyQ(WANTZ, 'L', NE, N, NB, Vblksiz, Z, LDZ, V, TAU, T, &INFO, dV2, dT2, dZ, 3);
-               cublasFree(dT2);
-               cudaDeviceSynchronize();
+               timeaplQ2 = get_time_azz();
+               /*============================
+                *  use GPU+CPU's
+                *==========================*/             
+               if((usemulticpu==1)&&(THREADS>1))
+               {
+                   // define the size of Q to be done on CPU's and the size on GPU's
+                   // note that GPU use Q(1:N_GPU) and CPU use Q(N_GPU+1:N)
+                   if(THREADS>10){
+                           N_GPU = (int) (0.6*(double)NE);
+                           N_GPU = (N_GPU/64)*64;
+                           N_CPU = NE-N_GPU;
+                   }else{
+                           N_GPU = NE;
+                           N_CPU = 0;
+                   }
+                   printf("---> calling GPU + CPU(if N_CPU>0) to apply V2 to Z with NE %d     N_GPU %d   N_CPU %d\n",NE, N_GPU, N_CPU); 
+                   core_in_all.SIDE      = 'L';
+                   core_in_all.E         = Z;
+                   core_in_all.E_CPU     = Z+(N_GPU*LDZ);
+                   core_in_all.LDE       = LDZ;
+                   core_in_all.dE        = dZ;
+                   core_in_all.dT2       = dT2;
+                   core_in_all.dV2       = dV2;
+                   core_in_all.N_CPU     = N_CPU;
+                   core_in_all.N_GPU     = N_GPU;
+                   core_in_all.NE        = NE;
+                   core_in_all.T         = T;
+                   core_in_all.TAU       = TAU;
+                   core_in_all.V         = V;
+
+
+                   // ===============================
+                   // relaunch thread to apply Q
+                   // ===============================
+                   // Set one thread per core
+                   pthread_attr_init(&thread_attr);
+                   pthread_attr_setscope(&thread_attr, PTHREAD_SCOPE_SYSTEM);
+                   pthread_setconcurrency(THREADS);
+                  
+                   // Initializations
+                   for (thread = 0; thread < THREADS; thread++)
+                   {
+                       barrier_in[thread] = 0;
+                       barrier_out[thread] = 0;
+                       event_numblg[thread] = 0;
+                   }
+                   // Launch threads
+                   for (thread = 1; thread < THREADS; thread++)
+                   {
+                       thread_num[thread] = thread;
+                       pthread_create(&thread_id[thread], &thread_attr, applyQ_parallel_section, &thread_num[thread]);
+                   }
+                   thread_num[0] = 0;
+                   applyQ_parallel_section(&thread_num[0]);
+          
+                   // Wait for completion
+                   for (thread = 1; thread < THREADS; thread++)
+                   {
+                       void *exitcodep;
+                       pthread_join(thread_id[thread], &exitcodep);
+                   }
+                   
+               /*============================
+                *  use only GPU
+                *==========================*/  
+               }else{
+                   magma_zbulge_applyQ(WANTZ, 'L', NE, N, NB, Vblksiz, Z, LDZ, V, TAU, T, &INFO, dV2, dT2, dZ, 3);
+                   cudaDeviceSynchronize();
+               }
+
                timeaplQ2 = get_time_azz()-timeaplQ2;
+               /****************************************************
+                * compute the GEMM of Q1 * (Q2*Z)
+                * **************************************************/
+               cublasFree(dT2);
+               printf("calling dgemm\n");
                timegemm = get_time_azz();
                //make a gemm of Q1 * (Q2 * Z) = Q1 * ((I-V2T2V2')*Z) = da * dZ --> dV2
                cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, da, N, dZ, N, c_zero, dV2, N);
@@ -661,7 +777,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
            if(WANTZ==5){
                if(NE!=N){
-                   printf("WANTZ=5 is not supported with NE=%d it compute all the eigenvectors meaning that NE=N\n");
+                   printf("WANTZ=5 is not supported with NE=%d it compute all the eigenvectors meaning that NE=N\n", NE);
                    exit(-2);
                }
                timeaplQ2 = get_time_azz();
@@ -828,6 +944,10 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
 
 
+ 
+
+
+
         printf("\n");
         printf(" ================================================================================================================================== \n");
         printf("   ==> INFO voici  threads=%d    N=%d    NB=%d   BAND=%d WANTZ=%d\n",thread,N, NB, BAND, WANTZ);
@@ -871,14 +991,19 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 //##################################################################################################
 static void *parallel_section(void *thread_id)
 {
-    int my_core_id = *((int*)thread_id);
-    int cores_num = core_in_all.cores_num;
-    int blgcores_num = core_in_all.blgcores_num;
+    int my_core_id       = *((int*)thread_id);
+    int allcores_num     = core_in_all.cores_num;
+    int locores_num      = core_in_all.locores_num;
+    int overlapQ1        = core_in_all.overlapQ1;
+    cuDoubleComplex *dQ1 = core_in_all.dQ1;
+    cuDoubleComplex *dT1 = core_in_all.dT1;
+    int N                = core_in_all.N;
+    int NB               = core_in_all.NB;
     int WANTZ = core_in_all.WANTZ;
-    real_Double_t timeB=0.0, timeT=0.0,timeall=0.0;
     static volatile int sys_corenbr = 1;
-    int i;
-
+    int INFO, i, my_newcore_id, lastcoreid;
+    cuDoubleComplex *NOTUSED;
+    real_Double_t timeB=0.0, timeT=0.0, timeall=0.0, timeaplQ1=0.0;
 
 #if defined(SETAFFINITY)    
     // bind threads 
@@ -891,50 +1016,177 @@ static void *parallel_section(void *thread_id)
 
     log_eventsblg = 1;
     core_event_startblg(my_core_id);
-    barrier(my_core_id, cores_num);
+    barrier(my_core_id, allcores_num);
     core_event_endblg(my_core_id);
     core_log_eventblg(0x000000, my_core_id);
 
-
+    if((my_core_id == 0)&&(overlapQ1==0)){
+            if(locores_num!=allcores_num)
+                    printf("\n\n\n WARNING **** not all cpu used on a version where overlapQ1 is disabled\n\n\n"); 
+    }
 
     // timing
     if (my_core_id == 0){
        timeall = get_time_azz();
     }
-    // bulge chasing
-    tile_bulge_parallel(my_core_id);
 
 
-    // activate this barrier if we want that the computation 
-    // of T's does not start before the Q1 has been completed.
-    // otherwise the barrier for core[1:cores_num-1] 
-    // which are the core working for bulge is done inside 
-    // bulge function so here I am sure that the bulge has been finished.
-    // Now if I want that T are computed with all cores I have to wait 
-    // Q1 and thus putting a global barrier here.
-    // if i want that T start to be computed overlapped with Q1, then no need for 
-    // a global barrier between the bulge and T but there are a need to it at the 
-    // end to be sure that both bulge+T and Q has been done. NOTE that 
-    // there are a need to have a barrier[1:cores_num-1] for the bulge 
-    // inside the bulge function and inside the function for T I should specify 
-    // to run on also cores_num-1.
-    //barrier(my_core_id, cores_num);
+    /*################################################
+     *   WANTZ > 0 
+     *################################################*/
+    if((WANTZ>0))
+    {
+        /* compute the Q1 overlapped with the bulge chasing+T.
+         * if cores_cum=1 meaning that only one thread is working 
+         * meaning the whole code is sequential so nothing special 
+         * to be done, i will call GPU then i will call bulgechasing.
+         * if not the GPU is choosed to run on last coreid to avoid change 
+         * in the barrier and the original bulge code. However we discover 
+         * that the performance of GPU when going to last core is bad.  
+         * it look like the cuda is reinitializing the GPU with the new core.
+         * so we want to keep the GPU with the main core =0 and try to change id's.
+         * However to avoid a lot of change in the code because the bulge 
+         * and the T and the barrier are also based on core number "0" 
+         * so we will cheat giving the bulge the remaining cores[2-allcores_num] 
+         * saying that they start at core "0" which is core "1" so making shift
+         * and give the GPU the main original core "0" saying that this is last_core.
+         * so I will create a newcoreid and give original core "0" and id=allcores_num
+         * and shift the remaining cores[2-allcores_num] back by one. 
+         * */ 
+         /************************************************
+          *  only one core is running ==> code is sequential
+          ************************************************/   
+         if(allcores_num==1)
+         {
+             my_newcore_id = my_core_id;
+             //=========================
+             //    compute Q1
+             //=========================
+             if(overlapQ1==1){
+                 cudaDeviceSynchronize();
+                 timeaplQ1 = get_time_azz();
+                 magma_zungqr_2stage_gpu(N, N, N, dQ1, N, NOTUSED, dT1, NB, &INFO);
+                 cudaDeviceSynchronize();
+                 //cublasGetMatrix( N, LDA1, sizeof(cuDoubleComplex), da, LDA1, A1, LDA1);
+                 timeaplQ1 = get_time_azz()-timeaplQ1;
+                 printf("  Finish applyQ1 timing= %lf \n" ,timeaplQ1); 
+             }
+           
+             //=========================
+             //    bulge chasing
+             //=========================
+             if(my_newcore_id == 0)timeB = get_time_azz();
+             tile_bulge_parallel(my_newcore_id);
+             barrier(my_newcore_id, locores_num);
+             if(my_newcore_id == 0){
+                 timeB = get_time_azz()-timeB;
+                 printf("  Finish BULGE   timing= %lf \n" ,timeB);
+             }
+           
+             //=========================
+             // compute the T's to be used when applying Q2
+             //=========================
+             if(my_newcore_id == 0)timeT = get_time_azz();
+             tile_bulge_computeT_parallel(my_newcore_id);
+             barrier(my_newcore_id, locores_num);
+             // timing
+             if (my_newcore_id == 0){
+                timeT = get_time_azz()-timeT;
+                printf("  Finish T's     timing= %lf \n" ,timeT);
+             }
+         /************************************************
+          *   more than one core
+          ************************************************/   
+         }else{
+            if(overlapQ1==1)
+            {
+                lastcoreid =  allcores_num-1;
+                // the the coreid "0" becomes last_one allcores_num-1
+                // and "1" becomes "0" and so on            
+                if(my_core_id==0){
+                    my_newcore_id = lastcoreid; // giving it last core id
+                }else{
+                    my_newcore_id = my_core_id-1;
+                }
+            }else{
+                lastcoreid = -1;
+                my_newcore_id = my_core_id;
+            }
+       
+       
+            /* I am the last core in the new indexing and the original core=0 */
+            if(my_newcore_id==lastcoreid)
+            {
+                //=============================================
+                //    compute Q1 on last newcoreid
+                //=============================================
+                cudaDeviceSynchronize();
+                timeaplQ1 = get_time_azz();
+                magma_zungqr_2stage_gpu(N, N, N, dQ1, N, NOTUSED, dT1, NB, &INFO);
+                cudaDeviceSynchronize();
+                //cublasGetMatrix( N, LDA1, sizeof(cuDoubleComplex), da, LDA1, A1, LDA1);
+                timeaplQ1 = get_time_azz()-timeaplQ1;
+                printf("  Finish applyQ1 timing= %lf \n" ,timeaplQ1); 
+            /* I am one of the remaining cores*/
+            }else{
+                //=========================
+                //    bulge chasing
+                //=========================
+                if(my_newcore_id == 0)timeB = get_time_azz();
+                tile_bulge_parallel(my_newcore_id);
+                barrier(my_newcore_id, locores_num);
+                if(my_newcore_id == 0){
+                    timeB = get_time_azz()-timeB;
+                    printf("  Finish BULGE   timing= %lf \n" ,timeB);
+                }
+               
+                //=========================
+                // compute the T's to be used when applying Q2
+                //=========================
+                if(my_newcore_id == 0)timeT = get_time_azz();
+                tile_bulge_computeT_parallel(my_newcore_id);
+                barrier(my_newcore_id, locores_num);
+                // timing
+                if (my_newcore_id == 0){
+                   timeT = get_time_azz()-timeT;
+                   printf("  Finish T's     timing= %lf \n" ,timeT);
+                }
+            } // END if my_newcore_id==allcores_num-1
+       
+         } // END of more than one core
 
-
-
-    // compute the T's to be used when applying Q2
-    if(WANTZ>0){
-       tile_bulge_computeT_parallel(my_core_id);
+    /*################################################
+     *   WANTZ = 0  
+     *################################################*/
+    }else{
+        my_newcore_id = my_core_id;
+        //=========================
+        //    bulge chasing
+        //=========================
+        if(my_newcore_id == 0)timeB = get_time_azz();
+        tile_bulge_parallel(my_newcore_id);
+        barrier(my_newcore_id, locores_num);
+        if(my_newcore_id == 0){
+            timeB = get_time_azz()-timeB;
+            printf("  Finish BULGE   timing= %lf \n" ,timeB);
+        }
     }
-        
+    /*################################################
+     *   END of WANTZ  
+     *################################################*/
+
+
+
+
     // put a barrier on all the cores to be sure that 
     // both [1:cores_num-1] working for bulge+T and cores_num
     // working for Q1 have finish.
-    barrier(my_core_id, cores_num);
+    barrier(my_core_id, allcores_num);
+
 
     // timing
     if (my_core_id == 0){
-          timeall = get_time_azz()-timeall;
+        timeall = get_time_azz()-timeall;
         *(core_in_all.timeblg) = timeall;     
     }
 
@@ -954,12 +1206,35 @@ static void *parallel_section(void *thread_id)
 //##################################################################################################
 static void *applyQ_parallel_section(void *thread_id)
 {
-    int my_core_id = *((int*)thread_id);
-    int cores_num = core_in_all.cores_num;
-    int WANTZ = core_in_all.WANTZ;
-    real_Double_t *timeaplQ = core_in_all.timeaplQ;
+    int my_core_id       = *((int*)thread_id);
+    int allcores_num     = core_in_all.cores_num;
+    int locores_num      = core_in_all.locores_num;
+    int usemulticpu      = core_in_all.usemulticpu;
+    cuDoubleComplex *dZ  = core_in_all.dE;
+    cuDoubleComplex *dT2 = core_in_all.dT2;
+    cuDoubleComplex *dV2 = core_in_all.dV2;
+    cuDoubleComplex *Z   = core_in_all.E;
+    cuDoubleComplex *T2  = core_in_all.T;
+    cuDoubleComplex *V2  = core_in_all.V;
+    cuDoubleComplex *TAU2= core_in_all.TAU;
+    int LDZ              = core_in_all.LDE;
+    int NE               = core_in_all.NE;
+    int N_CPU            = core_in_all.N_CPU;
+    int N_GPU            = core_in_all.N_GPU;
+    int N                = core_in_all.N;
+    int NB               = core_in_all.NB;
+    int Vblksiz          = core_in_all.Vblksiz;
+    int WANTZ            = core_in_all.WANTZ;
     static volatile int sys_corenbr = 1;
-    int i;
+    int INFO, i, my_newcore_id, lastcoreid;
+
+    real_Double_t timeQcpu=0.0, timeQgpu=0.0;
+    cuDoubleComplex *NOTUSED;
+
+
+    if(WANTZ<=0) 
+            return 0;
+
 
 #if defined(SETAFFINITY)    
     cpu_set_t set;
@@ -971,56 +1246,91 @@ static void *applyQ_parallel_section(void *thread_id)
 
     log_eventsblg = 1;
     core_event_startblg(my_core_id);
-    barrier(my_core_id, cores_num);
+    barrier(my_core_id, allcores_num);
     core_event_endblg(my_core_id);
     core_log_eventblg(0x000000, my_core_id);
 
-    if(WANTQ<=0) 
-            return;
-
-    if (my_core_id == 0)
-       *timeaplQ = get_time_azz();
 
 
-    if(cores_num==1)
+
+    /*################################################
+     *   WANTZ > 0 
+     *################################################*/
+    if((WANTZ==3))
     {
-       allcoresnb = 0;
-
-       cudaDeviceSynchronize();
-       timeaplQ1 = get_time_azz();
-       magma_zungqr_2stage_gpu(N, N, N, dQ1, N, NOTUSED, dT1, NB, &INFO);
-       cudaDeviceSynchronize();
-       //cublasGetMatrix( N, LDA1, sizeof(cuDoubleComplex), da, LDA1, A1, LDA1);
-       timeaplQ1 = get_time_azz()-timeaplQ1;
-       printf("  Finish applyQ1 timing= %lf \n" ,timeaplQ1); 
-    }else{
-       allcoresnb = cores_num-1;
-
-       if(my_core_id==cores_num-1)
-       {
-           //timeaplQ1 = get_time_azz();
-           // I am the last core
-           cudaDeviceSynchronize();
-           timeaplQ1 = get_time_azz();
-           magma_zungqr_2stage_gpu(N, N, N, dQ1, N, NOTUSED, dT1, NB, &INFO);
-           cudaDeviceSynchronize();
-           //cublasGetMatrix( N, LDA1, sizeof(cuDoubleComplex), da, LDA1, A1, LDA1);
-           timeaplQ1 = get_time_azz()-timeaplQ1;
-           printf("  Finish applyQ1 timing= %lf \n" ,timeaplQ1);
-       }else{
-           tile_bulge_applyQ_parallel(my_core_id);
-       }
-    }
+         /************************************************
+          *  only one core is running ==> code is sequential
+          *  usually code should not come here it is better 
+          *  when we have only 1 cpu to just run the gpu 
+          *  from the main function
+          ************************************************/   
+         if(allcores_num==1)
+         {
+             my_newcore_id = my_core_id;
+             //=========================
+             //    apply Q2
+             //=========================
+             if(usemulticpu==1){
+                 timeQgpu = get_time_azz();
+                 magma_zbulge_applyQ(WANTZ, 'L', NE, N, NB, Vblksiz, Z, LDZ, V2, TAU2, T2, &INFO, dV2, dT2, dZ, 3);
+                 cudaDeviceSynchronize();
+                 timeQgpu = get_time_azz()-timeQgpu;
+                 printf("  Finish Q2_GPU GGG timing= %lf \n" ,timeQgpu);
+             }
+         /************************************************
+          *   more than one core
+          ************************************************/   
+         }else if(usemulticpu==1){
+            lastcoreid =  allcores_num-1;
+            // the the coreid "0" becomes last_one allcores_num-1
+            // and "1" becomes "0" and so on            
+            if(my_core_id==0){
+                my_newcore_id = lastcoreid; // giving it last core id
+            }else{
+                my_newcore_id = my_core_id-1;
+            }
        
+       
+            /* I am the last core in the new indexing and the original core=0 */
+            if(my_newcore_id==lastcoreid)
+            {
+                //=============================================
+                //   on GPU on last_newcoreid:
+                //    - apply V2*Z(:,1:N_GPU)
+                //=============================================
+                 timeQgpu = get_time_azz();
+                 magma_zbulge_applyQ(WANTZ, 'L', N_GPU, N, NB, Vblksiz, Z, LDZ, V2, TAU2, T2, &INFO, dV2, dT2, dZ, 3);
+                 cudaDeviceSynchronize();
+                 timeQgpu = get_time_azz()-timeQgpu;
+                 printf("  Finish Q2_GPU GGG timing= %lf \n" ,timeQgpu);
+            /* I am one of the remaining cores*/
+            }else if(N_CPU>0){
+                //=============================================
+                //   on CPU on core 1:last_newcoreid-1
+                //    - apply V2*Z(:,N_GPU+1:N)
+                //=============================================
+                if(my_newcore_id == 0)timeQcpu = get_time_azz();
+                tile_bulge_applyQ_parallel(my_newcore_id);
+                barrier(my_newcore_id, locores_num);
+                if(my_newcore_id == 0){
+                    timeQcpu = get_time_azz()-timeQcpu;
+                    printf("  Finish Q2_CPU CCC timing= %lf \n" ,timeQcpu);
+                }
+
+            } // END if my_newcore_id==allcores_num-1
+       
+         } // END of more than one core
+
+    }// END of WANTZ==3
 
 
 
+    // put a barrier on all the cores to be sure that 
+    // both [1:cores_num-1] working with CPU_code and 
+    // last_cores_num working with GPU have finish.
+    barrier(my_core_id, allcores_num);
 
 
-    barrier(my_core_id, cores_num);
-    
-    if (my_core_id == 0)
-        *timeaplQ = get_time_azz()-(*timeaplQ);
 
 #if defined(SETAFFINITY)    
     // unbind threads 
@@ -1044,10 +1354,9 @@ static void tile_bulge_parallel(int my_core_id)
 {
     int core;
     int INFO;
-
-    int cores_num = core_in_all.cores_num;
-    cuDoubleComplex *dQ1 = core_in_all.dQ1;
-    cuDoubleComplex *dT1 = core_in_all.dT1;
+    /* CHANGE HERE to SWITCH FROM local_cores_num to cores_num
+     * or do it at the startup by putting core_in_all.es_num=cores_num*/
+    int cores_num = core_in_all.locores_num;
     cuDoubleComplex *A = core_in_all.A;
     cuDoubleComplex *V = core_in_all.V;
     cuDoubleComplex *TAU = core_in_all.TAU;
@@ -1068,11 +1377,12 @@ static void tile_bulge_parallel(int my_core_id)
     int i,j,m,k;
     int thgrsiz, thgrnb, thgrid, thed;
     int coreinit,loopfirsttask,coreid;
-    int colblktile,maxrequiredcores,colpercore,allcoresnb;
+    int colblktile,maxrequiredcores,colpercore,mycoresnb;
     int fin;
-    real_Double_t timeB=0.0;
-    real_Double_t timeaplQ1=0.0;
-    cuDoubleComplex *NOTUSED;
+
+
+    if(N<=0)
+        return ;
 
 
     //printf("=================> my core id %d of %d \n",my_core_id, cores_num);
@@ -1083,59 +1393,6 @@ static void tile_bulge_parallel(int my_core_id)
        if(my_core_id==0)printf(" ===============================================================================\n");
        return;
     }
-
-
-   /* compute the Q1 overlapped with the bulge chasing.
-    * if cores_cum=1 meaning that only one thread is working 
-    * meaning the whole code is sequential so nothing special 
-    * to be done, i will call GPU then i will call bulgechasing.
-    * if not the GPU is choosed to run on the last core to make
-    * the code simple and readable and to avoid to much change 
-    * inside the main loop and for the BARRIER. so core[1-num_cores-1] are 
-    * for the bulgechasing and core[num_cores] is for GPU for Q1.
-    * */ 
-    if(cores_num==1)
-    {
-       allcoresnb = cores_num;
-       core_in_all.blgcores_num = allcoresnb;
-       cudaDeviceSynchronize();
-       timeaplQ1 = get_time_azz();
-       magma_zungqr_2stage_gpu(N, N, N, dQ1, N, NOTUSED, dT1, NB, &INFO);
-       cudaDeviceSynchronize();
-       //cublasGetMatrix( N, LDA1, sizeof(cuDoubleComplex), da, LDA1, A1, LDA1);
-       timeaplQ1 = get_time_azz()-timeaplQ1;
-       printf("  Finish applyQ1 timing= %lf \n" ,timeaplQ1); 
-    }else{
-       allcoresnb = cores_num-1;
-       if(my_core_id==0) core_in_all.blgcores_num = allcoresnb;
-       if(my_core_id==cores_num-1)
-       {
-           //timeaplQ1 = get_time_azz();
-           // I am the last core
-           cudaDeviceSynchronize();
-           timeaplQ1 = get_time_azz();
-           magma_zungqr_2stage_gpu(N, N, N, dQ1, N, NOTUSED, dT1, NB, &INFO);
-           cudaDeviceSynchronize();
-           //cublasGetMatrix( N, LDA1, sizeof(cuDoubleComplex), da, LDA1, A1, LDA1);
-           timeaplQ1 = get_time_azz()-timeaplQ1;
-           printf("  Finish applyQ1 timing= %lf \n" ,timeaplQ1);
-       }
-    } 
- 
- 
-  // timing
-  if (my_core_id == 0)
-       timeB = get_time_azz();
-
-/*================================================
- *  START LOOP OVER THE REMAINING CORES FOR BULGE 
- *================================================*/
-  // ALL REMAINING CORES DO THE BULGE CHASING. 
-  // in case of only runing with 1 thread it go through here.
-  if(my_core_id<allcoresnb)
-  {          
-
-
   /* As I store V in the V vector there are overlap between 
    * tasks so shift is now 4 where group need to be always 
    * multiple of 2, because as example if grs=1 task 2 from 
@@ -1146,6 +1403,7 @@ static void tile_bulge_parallel(int my_core_id)
    * However, when storing V in A, shift could be back to 3.
    * */ 
 
+    mycoresnb = cores_num;
     //grsiz   = 2;
     shift   = 5;
     if(grsiz==1) 
@@ -1156,16 +1414,16 @@ static void tile_bulge_parallel(int my_core_id)
     maxrequiredcores = NBTILES/colblktile;
     if(maxrequiredcores<1)maxrequiredcores=1;
     colpercore  = colblktile*NB;
-    if(allcoresnb > maxrequiredcores)
+    if(mycoresnb > maxrequiredcores)
     {
         if(my_core_id==0)printf("==================================================================================\n");
         if(my_core_id==0)printf("  WARNING only %3d threads are required to run this test optimizing cache reuse\n",maxrequiredcores);
         if(my_core_id==0)printf("==================================================================================\n");
-        allcoresnb = maxrequiredcores;
+        mycoresnb = maxrequiredcores;
     }
-    thgrsiz = N;//allcoresnb;
+    thgrsiz = N;//mycoresnb;
 
-  if(my_core_id==0) printf("  Static bulgechasing version v9_9col threads  %4d      N %5d      NB %5d    grs %4d thgrsiz %4d  BAND %4d\n",allcoresnb, N, NB, grsiz,thgrsiz,BAND);
+  if(my_core_id==0) printf("  Static bulgechasing version v9_9col threads  %4d      N %5d      NB %5d    grs %4d thgrsiz %4d  BAND %4d\n",cores_num, N, NB, grsiz,thgrsiz,BAND);
 
 
 
@@ -1212,7 +1470,7 @@ static void tile_bulge_parallel(int my_core_id)
                          }
                     }
 
-                    coreid = (stind/colpercore)%allcoresnb;
+                    coreid = (stind/colpercore)%mycoresnb;
 
 
    //printf("    current col %3d sweep %3d myid %3d  coreid %7d my_core_id %3d ---------------------- st %2d  ed %2d \n",i,sweepid, myid, coreid,my_core_id, stind, edind); 
@@ -1282,7 +1540,7 @@ static void tile_bulge_parallel(int my_core_id)
                                     prog[myid]= sweepid;
                                     if(blklastind >= (N-1))
                                     {
-                                        for (j = 1; j <= shift+allcoresnb; j++) 
+                                        for (j = 1; j <= shift+mycoresnb; j++) 
                                             prog[myid+j]=sweepid;
                                     }                                
                                     } // END progress condition
@@ -1300,25 +1558,16 @@ static void tile_bulge_parallel(int my_core_id)
                } // END for sweepid=st:ed
         } // END for m=1:stepercol
      } // END for i=1:N-1
-//barrier(my_core_id, allcoresnb);   
+//barrier(my_core_id, cores_num);   
   } // END for thgrid=1:thgrnb
 
-  // momentary solution for complex version when A(N,N-1) is complex and to avoid making it real out of this function 
-  // which will require to multiply the col/row of the Eigenvectors or Q by the scalar that make A(N,N-1) to real.
-  //       barrier(my_core_id, allcoresnb);
-  //       if(my_core_id == 0)magma_ztrdtype1cbHLsym_withQ(N, NB, A, LDA, V, TAU, N, N, N-1, Vblksiz);
-    barrier(my_core_id, allcoresnb);
 
-  }// END OF LOOP OVER THE CORES FOR BULGE CHASING
-/*================================================
- *  END LOOP OVER THE REMAINING CORES FOR BULGE 
- *================================================*/
- // timing
- if (my_core_id == 0){
-    timeB = get_time_azz()-timeB;
-    printf("  Finish BULGE   timing= %lf \n" ,timeB);
- }
 
+
+// momentary solution for complex version when A(N,N-1) is complex and to avoid making it real out of this function 
+// which will require to multiply the col/row of the Eigenvectors or Q by the scalar that make A(N,N-1) to real.
+//       barrier(my_core_id, cores_num);
+//       if(my_core_id == 0)magma_ztrdtype1cbHLsym_withQ(N, NB, A, LDA, V, TAU, N, N, N-1, Vblksiz);
 
 } // END FUNCTION
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1331,8 +1580,9 @@ static void tile_bulge_parallel(int my_core_id)
 static void tile_bulge_computeT_parallel(int my_core_id)
 {
     int INFO;
-    int cores_num = core_in_all.cores_num;
-    int blgcores_num = core_in_all.blgcores_num;
+    /* CHANGE HERE to SWITCH FROM local_cores_num to cores_num
+     * or do it at the startup by putting core_in_all.es_num=cores_num*/
+    int cores_num = core_in_all.locores_num;
     cuDoubleComplex *T     = core_in_all.T;
     cuDoubleComplex *V     = core_in_all.V;
     cuDoubleComplex *TAU   = core_in_all.TAU;
@@ -1350,30 +1600,20 @@ static void tile_bulge_computeT_parallel(int my_core_id)
     int cur_blksiz,avai_blksiz, ncolinvolvd;
     int nbgr, colst, coled, version;
     int blkpercore,blkcnt, myid;
-    int allcoresnb;
-    real_Double_t timeT=0.0;
+
+
+    if(N<=0)
+        return ;
 
     findVTsiz(N, NB, Vblksiz, &blkcnt, &LDV);
-    allcoresnb = blgcores_num;
-    blkpercore = blkcnt/allcoresnb;
+    blkpercore = blkcnt/cores_num;
 
     LDT     = Vblksiz;    
     LDV     = NB+Vblksiz-1;
     blklen  = LDV*Vblksiz;
     nbGblk  = plasma_ceildiv((N-1),Vblksiz);
 
-    if(my_core_id==0) printf("  COMPUTE T parallel threads %d with  N %d   NB %d   Vblksiz %d \n",allcoresnb,N,NB,Vblksiz);
-    // timing
-    if(my_core_id == 0)
-            timeT = get_time_azz();
-/*================================================
- *  START LOOP OVER THE REMAINING CORES FOR BULGE 
- *================================================*/
-  // ALL REMAINING CORES DO THE BULGE CHASING. 
-  // in case of only runing with 1 thread it go through here.
-  if(my_core_id<allcoresnb)
-  {          
-
+    if(my_core_id==0) printf("  COMPUTE T parallel threads %d with  N %d   NB %d   Vblksiz %d \n",cores_num,N,NB,Vblksiz);
     
         for (bg = nbGblk; bg>0; bg--)
         {
@@ -1399,30 +1639,12 @@ static void tile_bulge_computeT_parallel(int my_core_id)
                colj     = (bg-1)*Vblksiz;
                findVTpos(N,NB,Vblksiz,colj,fst, &vpos, &taupos, &tpos, &blkid);
                myid = blkid/blkpercore;
-               if(my_core_id==(myid%allcoresnb)){
+               if(my_core_id==(myid%cores_num)){
                   if((vlen>0)&&(vnb>0))
                      lapackf77_zlarft( "F", "C", &vlen, &vnb, V(vpos), &LDV, TAU(taupos), T(tpos), &LDT);
                }
            }
         }
-     barrier(my_core_id, allcoresnb);
-  }  // END OF LOOP OVER THE CORES FOR BULGE CHASING
-  /*================================================
-   *  END LOOP OVER THE REMAINING CORES FOR BULGE 
-   *================================================*/
-    // timing
-    if (my_core_id == 0){
-       timeT = get_time_azz()-timeT;
-       printf("  Finish T's     timing= %lf \n" ,timeT);
-    }
-
-    // put a barrier on all the cores to be sure that 
-    // both [1:cores_num-1] working for bulge+T and cores_num
-    // working for Q1 have finish.
-    // commented now just to be able to time the computation
-    // of T
-    barrier(my_core_id, cores_num);
-
 }
 #undef V
 #undef TAU
@@ -1439,11 +1661,16 @@ static void tile_bulge_computeT_parallel(int my_core_id)
 static void tile_bulge_applyQ_parallel(int my_core_id)
 {
     int INFO;
-    int cores_num  = core_in_all.cores_num;
+    /* CHANGE HERE to SWITCH FROM local_cores_num to cores_num
+     * or do it at the startup by putting core_in_all.es_num=cores_num*/
+    int cores_num = core_in_all.locores_num;
+    cuDoubleComplex *E      = core_in_all.E_CPU;
+
     cuDoubleComplex *T      = core_in_all.T;
-    cuDoubleComplex *E      = core_in_all.E;
     cuDoubleComplex *V      = core_in_all.V;
     cuDoubleComplex *TAU    = core_in_all.TAU;
+    int  N_CPU     = core_in_all.N_CPU;
+    int  NE        = core_in_all.NE;
     int  N         = core_in_all.N;
     int  NB        = core_in_all.NB;
     int  Vblksiz   = core_in_all.Vblksiz;
@@ -1463,7 +1690,17 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
     int  cur_blksiz,avai_blksiz, ncolinvolvd;
     int  nbgr, colst, coled, version;
     int chunkid,nbchunk,colpercore,corest,corelen;
-    int coreid,allcoresnb,maxrequiredcores;
+    int coreid,mycoresnb,maxrequiredcores;
+
+
+    if(N<=0)
+        return ;
+    if(NE<=0)
+        return ;
+    if(N_CPU<=0)
+        return ;
+
+
 
     INFO=0;    
     version = 113;
@@ -1503,7 +1740,7 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
     colpercore = min(NB,120); //colpercore = N make the code sequential running on thread=0;
     //colpercore =  N/cores_num; 
 
-    colpercore =  plasma_ceildiv(N,cores_num);
+    colpercore =  plasma_ceildiv(N_CPU,cores_num);
     if(colpercore>1000)
         colpercore =  plasma_ceildiv(colpercore,10);
     else if(colpercore>800)
@@ -1517,28 +1754,32 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
     if(colpercore>200)colpercore=120;
 
     LWORK   = 2*colpercore*max(Vblksiz,64);
-    //LWORK   = 2*N*max(Vblksiz,64);
+    //LWORK   = 2*N_CPU*max(Vblksiz,64);
     WORK    = (cuDoubleComplex *) malloc (LWORK*sizeof(cuDoubleComplex));
 
 
-    nbchunk    =  plasma_ceildiv(N,colpercore);
+    nbchunk    =  plasma_ceildiv(N_CPU,colpercore);
 
-    allcoresnb = cores_num;
+    mycoresnb = cores_num;
     maxrequiredcores = nbchunk;
     if(maxrequiredcores<1)maxrequiredcores=1;
-    if(allcoresnb > maxrequiredcores)
+    if(mycoresnb > maxrequiredcores)
     {
         if(my_core_id==0)printf("==================================================================================\n");
         if(my_core_id==0)printf("  WARNING only %3d threads are required to run this test optimizing cache reuse\n",maxrequiredcores);
         if(my_core_id==0)printf("==================================================================================\n");
-        allcoresnb = maxrequiredcores;
+        mycoresnb = maxrequiredcores;
     }
 
 
     /* SIDE LEFT  meaning apply E = Q*E = (q_1*q_2*.....*q_n) * E ==> so traverse Vs in reverse order (forward) from q_n to q_1
-     *            Also E is splitten by row meaning each apply consist in a block of row (horizontal block) */
+     *            each q_i consist of applying V to a block of row E(row_i,:) and applies are overlapped meaning 
+     *            that q_i+1 overlap a portion of the E(row_i, :).
+     *            IN parallel E is splitten in vertical block over the threads  */
     /* SIDE RIGHT meaning apply E = E*Q = E * (q_1*q_2*.....*q_n) ==> so tarverse Vs in normal  order (forward) from q_1 to q_n 
-     *            Also E is splitten by col meaning each apply consist in a block of col (vertical block) */
+     *            each q_i consist of applying V to a block of col E(:, col_i,:) and the applies are overlapped meaning 
+     *            that q_i+1 overlap a portion of the E(:, col_i).
+     *            IN parallel E is splitten in horizontal block over the threads  */
 
      /* WANTZ = 1 meaning E is IDENTITY so form Q using optimized update. 
       *         So we use the reverse order from small q to large one, 
@@ -1550,22 +1791,22 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
     {
         version=113;
         SIDE='L';
+        printf("\n\n\nWARNING THIS OPTION CUOLD NOT RUN ON BOTH GPU AND CPU. PROG WILL EXIT\n\n\n");
     }
 
     //printf("  ENTERING FUNCTION APPLY Q_v115: same as 113(L) or 114(L) or 93(R)"\n);
-    if(my_core_id==0)printf("  APPLY Q_v1   parallel with threads %d   nbchunk %d  colpercore %d  N %d   NB %d   Vblksiz %d SIDE %c version %d WANTZ %d \n",cores_num,nbchunk,colpercore,N,NB,Vblksiz,SIDE,version, WANTZ);
+    if(my_core_id==0)printf("  APPLY Q_v1   parallel with threads %d   nbchunk %d  colpercore %d  N %d  N_CPU %d   NB %d   Vblksiz %d SIDE %c version %d WANTZ %d \n",cores_num,nbchunk,colpercore,N,N_CPU,NB,Vblksiz,SIDE,version, WANTZ);
 
     for (chunkid = 0; chunkid<nbchunk; chunkid++)
     {
-        coreid  = chunkid%allcoresnb;
+        coreid  = chunkid%mycoresnb;
         corest  = chunkid*colpercore;
-        corelen = min(colpercore, (N-(chunkid*colpercore)));
+        corelen = min(colpercore, (N_CPU-(chunkid*colpercore)));
 
         if(my_core_id==coreid)
         {
             //printf("mycore id %d voici nbchunk %d  chunkid %d  coreid %d, corest %d, corelen %d\n",my_core_id,nbchunk, chunkid, coreid, corest, corelen);
             if(SIDE=='L'){
-            if(version==113){            
                 for (bg = nbGblk; bg>0; bg--)
                 {
                    firstcolj = (bg-1)*Vblksiz + 1;
@@ -1611,40 +1852,6 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
                        }                
                    }
                 }
-            }else if(version==114){
-                rownbm    = plasma_ceildiv((N-1),NB);
-                for (m = rownbm; m>0; m--)
-                {
-                   ncolinvolvd = min(N-1, m*NB);
-                   avai_blksiz=min(Vblksiz,ncolinvolvd);
-                   nbgr = plasma_ceildiv(ncolinvolvd,avai_blksiz);
-                   for (n = nbgr; n>0; n--)
-                   {
-                       vlen = 0;
-                       vnb  = 0;
-                       cur_blksiz = min(ncolinvolvd-(n-1)*avai_blksiz, avai_blksiz);
-                       colst = (n-1)*avai_blksiz;
-                       coled = colst + cur_blksiz -1;
-                       fst   = (rownbm -m)*NB+colst +1;
-                       for (colj=colst; colj<=coled; colj++)
-                       {
-                           st       = (rownbm -m)*NB+colj +1;
-                           ed       = min(st+NB-1,N-1);
-                           if(st>ed)break;
-                           if((st==ed)&&(colj!=N-2))break;
-                           vlen=ed-fst+1;
-                           vnb=vnb+1;
-                       }        
-                       findVTpos(N,NB,Vblksiz,colst,fst, &vpos, &taupos, &tpos, &blkid);
-                       //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colst+1,vpos+1,taupos+1);
-                       if((vlen>0)&&(vnb>0))
-                           //lapackf77_zungqr( "L", "N", &vlen, &corelen, &vnb, V(vpos), &LDV, TAU(taupos), E(fst,corest), &LDE,  WORK, &LWORK, &INFO );
-                           lapackf77_zlarfb( "L", "N", "F", "C", &vlen, &corelen, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(fst,corest), &LDE,  WORK, &colpercore);       
-                       if(INFO!=0) 
-                               printf("ERROR DORMQR INFO %d \n",INFO);
-                   }
-                }
-            }
             }else if (SIDE=='R'){
                 for (bg =1; bg<=nbGblk; bg++)
                 {
@@ -1727,7 +1934,7 @@ void tile_bulge_applyQ_parallel2(int my_core_id)
     int  cur_blksiz,avai_blksiz, ncolinvolvd;
     int  nbgr, colst, coled, version;
     int chunkid,nbchunk,colpercore,corest,corelen;
-    int coreid,allcoresnb,maxrequiredcores;
+    int coreid,mycoresnb,maxrequiredcores;
 
     INFO=0;    
     version = 113;
@@ -1791,15 +1998,15 @@ void tile_bulge_applyQ_parallel2(int my_core_id)
 
     nbchunk    =  plasma_ceildiv(N,colpercore);
 
-    allcoresnb = cores_num;
+    mycoresnb = cores_num;
     maxrequiredcores = nbchunk;
     if(maxrequiredcores<1)maxrequiredcores=1;
-    if(allcoresnb > maxrequiredcores)
+    if(mycoresnb > maxrequiredcores)
     {
         if(my_core_id==0)printf("==================================================================================\n");
         if(my_core_id==0)printf("  WARNING only %3d threads are required to run this test optimizing cache reuse\n",maxrequiredcores);
         if(my_core_id==0)printf("==================================================================================\n");
-        allcoresnb = maxrequiredcores;
+        mycoresnb = maxrequiredcores;
     }
 
     /* SIDE LEFT  meaning apply E = Q*E = (q_1*q_2*.....*q_n) * E ==> so traverse Vs in reverse order (forward) from q_n to q_1
@@ -1854,7 +2061,7 @@ void tile_bulge_applyQ_parallel2(int my_core_id)
                        if(LOGQ) core_event_startblg(my_core_id);
                        for (chunkid = 0; chunkid<nbchunk; chunkid++)
                        {
-                           coreid  = chunkid%allcoresnb;
+                           coreid  = chunkid%mycoresnb;
                            corest  = chunkid*colpercore;
                            corelen = min(colpercore, (N-(chunkid*colpercore)));
                            if(my_core_id==coreid)
@@ -1904,7 +2111,7 @@ void tile_bulge_applyQ_parallel2(int my_core_id)
                     if((vlen>0)&&(vnb>0)){
                         for (chunkid = 0; chunkid<nbchunk; chunkid++)
                         {
-                            coreid  = chunkid%allcoresnb;
+                            coreid  = chunkid%mycoresnb;
                             corest  = chunkid*colpercore;
                             corelen = min(colpercore, (N-(chunkid*colpercore)));
                             if(my_core_id==coreid)
@@ -1945,7 +2152,7 @@ void tile_bulge_applyQ_parallel2(int my_core_id)
                if((vlen>0)&&(vnb>0)){
                     for (chunkid = 0; chunkid<nbchunk; chunkid++)
                     {
-                        coreid  = chunkid%allcoresnb;
+                        coreid  = chunkid%mycoresnb;
                         corest  = chunkid*colpercore;
                         corelen = min(colpercore, (N-(chunkid*colpercore)));
                         if(my_core_id==coreid)
