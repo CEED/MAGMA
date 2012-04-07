@@ -30,6 +30,11 @@
 #define LOGQ 0
 #define LOG 0
 
+#if defined(PRECISION_d)
+extern "C" void    mydlarft_(const char *direct, const char *storev, magma_int_t *n, magma_int_t *k, 
+                         double *v, magma_int_t *ldv, const double *tau, 
+                         double *t, magma_int_t *ldt);
+#endif
 
 #if defined(PRECISION_z) || defined(PRECISION_d)
 extern "C" void cmp_vals(int n, double *wr1, double *wr2, double *nrmI, double *nrm1, double *nrm2);
@@ -138,6 +143,9 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
     //if(N<4000)
      //       usemulticpu =0;
+
+    if(WANTZ!=3)
+           usemulticpu =0;
 
     core_in_all.usemulticpu = usemulticpu;
     core_in_all.overlapQ1   = overlapQ1;
@@ -286,7 +294,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
     //goto ed;
     
 #if defined(LIBMKL)
-  //  mkl_set_num_threads( 1 );
+    mkl_set_num_threads( 1 );
 #endif
     core_in_all.cores_num = THREADS;
     core_in_all.dQ1       = da;
@@ -699,7 +707,11 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                {
                    // define the size of Q to be done on CPU's and the size on GPU's
                    // note that GPU use Q(1:N_GPU) and CPU use Q(N_GPU+1:N)
-                   if(THREADS>10){
+                   if(THREADS>40){
+                           N_GPU = (int) (0.5*(double)NE);
+                           N_GPU = (N_GPU/64)*64;
+                           N_CPU = NE-N_GPU;
+                   }else if(THREADS>10){
                            N_GPU = (int) (0.6*(double)NE);
                            N_GPU = (N_GPU/64)*64;
                            N_CPU = NE-N_GPU;
@@ -1641,7 +1653,7 @@ static void tile_bulge_computeT_parallel(int my_core_id)
                myid = blkid/blkpercore;
                if(my_core_id==(myid%cores_num)){
                   if((vlen>0)&&(vnb>0))
-                     lapackf77_zlarft( "F", "C", &vlen, &vnb, V(vpos), &LDV, TAU(taupos), T(tpos), &LDT);
+                      lapackf77_zlarft( "F", "C", &vlen, &vnb, V(vpos), &LDV, TAU(taupos), T(tpos), &LDT);
                }
            }
         }
