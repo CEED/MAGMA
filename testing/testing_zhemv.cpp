@@ -52,11 +52,9 @@ int main(int argc, char **argv)
     cuDoubleComplex *A, *X, *Y, *Ycublas, *Ymagma;
     cuDoubleComplex *dA, *dX, *dY;
     int nb = 64;
-#if defined(PRECISION_z) || defined(PRECISION_c)
 
      cuDoubleComplex *C_work;
      cuDoubleComplex *dC_work;
-#endif
     
     fp = fopen ("results_zhemv.txt", "w") ;
     if( fp == NULL ){ printf("Couldn't open output file\n"); exit(1);}
@@ -85,13 +83,11 @@ int main(int argc, char **argv)
     TESTING_DEVALLOC( dX, cuDoubleComplex, vecsize );
     TESTING_DEVALLOC( dY, cuDoubleComplex, vecsize );
 
-#if defined(PRECISION_z) || defined(PRECISION_c)
 
     int blocks    = N / nb + (N % nb != 0);
     int workspace = LDA * (blocks + 1);
     TESTING_MALLOC(    C_work, cuDoubleComplex, workspace );
     TESTING_DEVALLOC( dC_work, cuDoubleComplex, workspace );
-#endif        
 
     /* Initialize the matrix */
     lapackf77_zlarnv( &ione, ISEED, &matsize, A );
@@ -130,11 +126,9 @@ int main(int argc, char **argv)
         cublasSetVector( m,    sizeof( cuDoubleComplex ), X, incx, dX, incx );
         cublasSetVector( m,    sizeof( cuDoubleComplex ), Y, incx, dY, incx );
 
-#if defined(PRECISION_z) || defined(PRECISION_c)
 
             blocks    = m / nb + (m % nb != 0);
             cublasSetMatrix(lda,blocks, sizeof( cuDoubleComplex ), C_work, LDA , dC_work, lda);
-#endif        
         start = get_current_time();
         cublasZhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
         end = get_current_time();
@@ -200,11 +194,8 @@ int main(int argc, char **argv)
     TESTING_DEVFREE( dA );
     TESTING_DEVFREE( dX );
     TESTING_DEVFREE( dY );
-#if defined(PRECISION_z) || defined(PRECISION_c)
-        
     TESTING_FREE( C_work );
     TESTING_DEVFREE( dC_work );
-#endif        
 
     /* Free device */
     TESTING_CUDA_FINALIZE();
