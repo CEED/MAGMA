@@ -15,6 +15,7 @@
 #if (GPUSHMEM >= 200)
 
 #define magmablas_zhemv_200_mgpu_offset magmablas_zhemv_mgpu_offset
+#define magmablas_zhemv2_200_mgpu_offset magmablas_zhemv2_mgpu_offset
 
 #define zhemv_bs         64
 #define thread_x         64
@@ -1052,6 +1053,97 @@ magmablas_zhemv_200_mgpu_offset( char uplo, magma_int_t n,
         {
              cudaSetDevice(i);
              magmablasSetKernelStream(stream[i][0]);
+
+             
+             magma_int_t the_chosen_block_id = offset / 64; 
+         magma_int_t the_chosen_gpu_id = the_chosen_block_id % num_gpus; 
+
+        magma_int_t  num_blocks_skipped = the_chosen_block_id / num_gpus;
+
+        if(i < the_chosen_gpu_id)     
+            {
+        num_blocks_skipped += 1;
+            }
+              
+             int new_gpu_id = ( i + num_gpus - the_chosen_gpu_id ) % num_gpus;
+
+
+
+             magmablas_zhemv_200_L_mgpu_offset(n, alpha, A[i], lda, X[i], incx, beta, Y[i], incy, work[i],
+                                         new_gpu_id, num_gpus, nb, offset, num_blocks_skipped);     
+
+        }
+    }
+    return MAGMA_SUCCESS;
+}
+
+extern "C"
+magma_int_t
+magmablas_zhemv2_200_mgpu_offset( char uplo, magma_int_t n,
+                      cuDoubleComplex alpha,
+                      cuDoubleComplex **A, magma_int_t lda,
+                      cuDoubleComplex **X, magma_int_t incx,
+                      cuDoubleComplex beta,
+                      cuDoubleComplex **Y, magma_int_t incy,
+                      cuDoubleComplex **work, magma_int_t lwork,
+              magma_int_t num_gpus, 
+              magma_int_t nb,
+              magma_int_t offset)
+
+{
+    char      uplo_[2] = {uplo, 0};
+    long int  upper    = lapackf77_lsame(uplo_, "U");
+
+
+
+    /*
+     * Test the input parameters.
+     */
+    if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
+        return -1;
+    } else if ( n < 0 ) {
+        return -2;
+    } else if ( lda < max(1,n) ) {
+        return -5;
+    } else if ( incx == 0 ) {
+        return -7;
+    } else if ( incy == 0 ) {
+        return -10;
+    }
+
+    /*
+     * Quick return if possible.
+     */
+    if ( (n == 0) || ( MAGMA_Z_EQUAL(alpha, MAGMA_Z_ZERO) && MAGMA_Z_EQUAL(beta, MAGMA_Z_ONE) ) )
+        return MAGMA_SUCCESS;
+
+    /* TODO: Upper case is not implemented in MAGMA */
+    if ( upper)
+    {
+       printf("Upper case is not implemented on multi GPUs\n");
+       exit(0);
+    }
+    else
+    {
+        magma_int_t blocks    = n / thread_x + (n % thread_x != 0);
+        magma_int_t workspace = lda * (blocks + 1);
+        
+
+        if (lwork < workspace){
+           printf("Not enough work space in magmablas_zhemv: passed %d, required %d\n",
+                  lwork, workspace);
+           exit(1);
+        }
+        if(nb != 64)
+        {
+        printf("Error in magmablas_zsymv_200_mgpu_offset: nb != 64, program will exit! please reallocate your matrix among GPUs\n");
+        exit(0);
+        }
+        magma_int_t i = 0;
+        for(i=0; i<num_gpus; i++)
+        {
+             cudaSetDevice(i);
+             
 
              
              magma_int_t the_chosen_block_id = offset / 64; 
