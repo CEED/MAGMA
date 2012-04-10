@@ -77,6 +77,18 @@ magmablas_zhemv_mgpu_32( char uplo, magma_int_t n,
               magma_int_t num_gpus, 
               magma_int_t nb);
 
+extern "C"
+magma_int_t
+magmablas_zhemv_mgpu_64( char uplo, magma_int_t n,
+                      cuDoubleComplex alpha,
+                      cuDoubleComplex **A, magma_int_t lda,
+                      cuDoubleComplex **X, magma_int_t incx,
+                      cuDoubleComplex beta,
+                      cuDoubleComplex **Y, magma_int_t incy,
+                      cuDoubleComplex **work, magma_int_t lwork,
+              magma_int_t num_gpus, 
+              magma_int_t nb);
+
 
 
 
@@ -175,8 +187,8 @@ int main(int argc, char **argv)
     LDA = ((N+31)/32)*32;
     matsize = N*LDA;
     vecsize = N*incx;
-    nb = 32;
-//    nb = 64;
+//    nb = 32;
+    nb = 64;
 
     printf("block size = %d\n", nb);
    
@@ -327,15 +339,17 @@ int main(int argc, char **argv)
                 dC_work, workspace, num_gpus, nb);
         
     else
-/*        
-        magmablas_zhemv_mgpu( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
+        {
+    
+            magmablas_zhemv_mgpu_64( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
                 dC_work, workspace, num_gpus, nb);
-*/
-
+         
+/*
  magmablas_zhemv2_mgpu_offset( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
                 dC_work, workspace, num_gpus, nb, offset);
-      
+*/      
 
+         }
         /*
         
         for(i=0; i<num_gpus; i++)
