@@ -64,6 +64,22 @@ magmablas_zhemv2_mgpu_32_offset( char uplo, magma_int_t n,
 
 
 
+
+extern "C"
+magma_int_t
+magmablas_zhemv_mgpu_32( char uplo, magma_int_t n,
+                      cuDoubleComplex alpha,
+                      cuDoubleComplex **A, magma_int_t lda,
+                      cuDoubleComplex **X, magma_int_t incx,
+                      cuDoubleComplex beta,
+                      cuDoubleComplex **Y, magma_int_t incy,
+                      cuDoubleComplex **work, magma_int_t lwork,
+              magma_int_t num_gpus, 
+              magma_int_t nb);
+
+
+
+
 int main(int argc, char **argv)
 {        
     TESTING_CUDA_INIT();
@@ -134,11 +150,11 @@ int main(int argc, char **argv)
     }
     else {
 #if defined(PRECISION_z)
-        //M = N = 8000;
-        M = N = 4000;
-#else
-        //M = N = 12480;
         M = N = 8000;
+      
+#else
+        M = N = 12480;
+
 #endif 
         num_gpus = 1;
         offset = 0;
@@ -160,7 +176,7 @@ int main(int argc, char **argv)
     matsize = N*LDA;
     vecsize = N*incx;
     nb = 32;
-//   nb = 64;
+//    nb = 64;
 
     printf("block size = %d\n", nb);
    
@@ -302,21 +318,25 @@ int main(int argc, char **argv)
         start = get_current_time();
         
 
-        if( nb == 32)           
+        if( nb == 32)    
+/*            
         magmablas_zhemv2_mgpu_32_offset( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
                      dC_work, workspace, num_gpus, nb, offset);
-/*       magmablas_zhemv_mgpu_32( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
+ */ 
+        magmablas_zhemv_mgpu_32( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
                 dC_work, workspace, num_gpus, nb);
-*/        
+        
     else
 /*        
-        magmablas_zhemv_mgpu_64( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
+        magmablas_zhemv_mgpu( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
                 dC_work, workspace, num_gpus, nb);
-*/       
+*/
+
  magmablas_zhemv2_mgpu_offset( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
                 dC_work, workspace, num_gpus, nb, offset);
       
-/*
+
+        /*
         
         for(i=0; i<num_gpus; i++)
         {
