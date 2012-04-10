@@ -99,6 +99,11 @@ ZSRC  = zpotrf.cpp	\
         zhegst_gpu.cpp  \
         zgesvd.cpp	\
 	dgesvd.cpp	\
+	dstedx.cpp	\
+	zstedx.cpp	\
+	dlaex0.cpp	\
+	dlaex1.cpp	\
+	dlaex3.cpp	\
 	\
 	zcposv_gpu.cpp	\
 	zcgesv_gpu.cpp	\
@@ -125,8 +130,11 @@ ZSRC  = zpotrf.cpp	\
 -include Makefile.local
 -include Makefile.src
 
+ALLSRC_F = dlaed2.f \
+           slaed2.f
+
 ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC) #dsbtrd.cpp
-ALLOBJ  = $(ALLSRC:.cpp=.o)
+ALLOBJ  = $(ALLSRC:.cpp=.o) $(ALLSRC_F:.f=.o)
 
 all: $(LIBMAGMA)
 
@@ -136,6 +144,9 @@ $(LIBMAGMA): $(ALLOBJ)
 
 .cpp.o:
 	$(CC) $(OPTS) $(INC) -c $< -o $@
+
+.f.o: 
+	$(FORT) $(OPTS) $(INC) -c $< -o $@
 
 clean:
 	rm -f *.o *~ *.linkinfo
