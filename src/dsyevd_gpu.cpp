@@ -154,6 +154,8 @@ magma_dsyevd_gpu(char jobz, char uplo,
     static double smlnum;
     static magma_int_t lquery;
 
+    bool dc_freed = false;
+
     double *dwork;
     double *dc;
     magma_int_t lddc = ldda;
@@ -244,6 +246,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
 
     /* Scale matrix to allowable range, if necessary. */
     anrm = magmablas_dlansy('M', uplo, n, da, ldda, dwork);
+    cudaFree(dwork);
     iscale = 0;
     if (anrm > 0. && anrm < rmin) {
         iscale = 1;
@@ -263,8 +266,15 @@ magma_dsyevd_gpu(char jobz, char uplo,
     indwk2 = indwrk + n * n;
     llwrk2 = lwork - indwk2 + 1;
   
+#define ENABLE_TIMER
+#ifdef ENABLE_TIMER 
+    magma_timestr_t start, end;
+    
+    start = get_current_time();
+#endif
+
 #ifdef FAST_SYMV
-    magma_dsytrd2_gpu(uplo, n, da, lda, &w[1], &work[inde],
+    magma_dsytrd2_gpu(uplo, n, da, ldda, &w[1], &work[inde],
                       &work[indtau], wa, ldwa, &work[indwrk], llwork, 
                       dc, lddc*n, &iinfo);
 #else
@@ -273,6 +283,12 @@ magma_dsyevd_gpu(char jobz, char uplo,
                      &iinfo);
 #endif
 
+#ifdef ENABLE_TIMER    
+    end = get_current_time();
+    
+    printf("time dsytrd = %6.2f\n", GetTimerValue(start,end)/1000.);
+#endif        
+
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call   
        ZSTEDC to generate the eigenvector matrix, WORK(INDWRK), of the   
        tridiagonal matrix, then call DORMTR to multiply it to the Householder 
@@ -280,16 +296,61 @@ magma_dsyevd_gpu(char jobz, char uplo,
     if (! wantz) {
         lapackf77_dsterf(&n, &w[1], &work[inde], info);
     } else {
-        lapackf77_dstedc("I", &n, &w[1], &work[inde], &work[indwrk], &n, &work[indwk2], 
-                &llwrk2, &iwork[1], &liwork, info);
+
+#ifdef ENABLE_TIMER
+        start = get_current_time();
+#endif
+        
+        if (cudaSuccess != cudaMalloc( (void**)&dwork, 3*n*(n/2+1)*sizeof(double) ) ) {
+            cudaFree(dc);  // if not enough memory is available free dc to be able do allocate dwork
+            dc_freed=true;
+#ifdef ENABLE_TIMER
+            printf("dc deallocated\n");
+#endif
+            if (cudaSuccess != cudaMalloc( (void**)&dwork, 3*n*(n/2+1)*sizeof(double) ) ) {
+                fprintf (stderr, "!!!! device memory allocation error (magma_dsyevd_gpu)\n");
+                return MAGMA_ERR_CUBLASALLOC;
+            }
+        }
+        
+        magma_dstedx('A', n, 0., 0., 0, 0, &w[1], &work[inde],
+                     &work[indwrk], n, &work[indwk2],
+                     llwrk2, &iwork[1], liwork, dwork, info);
+        
+        cudaFree(dwork);
+
+#ifdef ENABLE_TIMER  
+        end = get_current_time();
+        
+        printf("time dstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
+#endif
+
+        if(dc_freed){
+            dc_freed = false;
+            if (cudaSuccess != cudaMalloc((void**)&dc, n*lddc*sizeof(double))) {
+                fprintf (stderr, "!!!! device memory allocation error (magma_dsyevd_gpu)\n");
+                return MAGMA_ERR_CUBLASALLOC;
+            }
+        }
 
         cublasSetMatrix(n, n, sizeof(double), &work[indwrk], n, dc, lddc);
         
+#ifdef ENABLE_TIMER  
+        start = get_current_time();
+#endif
+
         magma_dormtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, n, da, ldda, &work[indtau],
                          dc, lddc, wa, ldwa, &iinfo);
         
         cudaMemcpy2D(da, ldda * sizeof(double), dc, lddc * sizeof(double),
                      sizeof(double)*n, n, cudaMemcpyDeviceToDevice);
+
+#ifdef ENABLE_TIMER    
+        end = get_current_time();
+        
+        printf("time dormtr + copy = %6.2f\n", GetTimerValue(start,end)/1000.);
+#endif        
+
     }
 
     /* If matrix was scaled, then rescale eigenvalues appropriately. */
@@ -302,8 +363,8 @@ magma_dsyevd_gpu(char jobz, char uplo,
     iwork[1] = liopt;
 
     cudaStreamDestroy(stream);
-    cudaFree(dc);
-    cudaFree(dwork);
+    if (!dc_freed)
+        cudaFree(dc);
 
     return MAGMA_SUCCESS;
 } /* magma_dsyevd_gpu */
