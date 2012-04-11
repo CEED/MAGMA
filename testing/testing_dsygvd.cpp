@@ -5,10 +5,10 @@
        Univ. of Colorado, Denver
        November 2011
 
+    @precisions normal d -> s
+
     @author Stan Tomov
     @author Raffaele Solca
-
-    @precision normal d -> s
 
 */
 
