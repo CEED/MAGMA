@@ -266,7 +266,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
     indwk2 = indwrk + n * n;
     llwrk2 = lwork - indwk2 + 1;
   
-#define ENABLE_TIMER
+//#define ENABLE_TIMER
 #ifdef ENABLE_TIMER 
     magma_timestr_t start, end;
     
