@@ -46,6 +46,7 @@ magmablas_zsymv_200_L_special( magma_int_t n, cuDoubleComplex alpha,
 
     __shared__ cuDoubleComplex la   [quarter_thread_x][thread_x+2];
     __shared__ cuDoubleComplex buff [thread_x];
+    __shared__ cuDoubleComplex buff2 [thread_x];
 
     cuDoubleComplex tr[4];
     cuDoubleComplex b[4];
@@ -209,7 +210,7 @@ magmablas_zsymv_200_L_special( magma_int_t n, cuDoubleComplex alpha,
     A= A - lda * blkc * thread_x;
     x= x - blkc * thread_x  *incx  ;
 
-    x= x- tx*incx;
+    //x= x- tx*incx;
 
     A+=4 * ty* lda  ;
     A+=tx;
@@ -229,6 +230,11 @@ magmablas_zsymv_200_L_special( magma_int_t n, cuDoubleComplex alpha,
         {
             MAGMA_Z_SET2REAL(res_,0);
             count++;
+            
+            if( ty== 0 ) {
+                buff2[tx]  = x[i*incx];
+            }
+            __syncthreads();
 
             #pragma unroll
             for( magma_int_t k=0;k<4;k++)
@@ -241,7 +247,7 @@ magmablas_zsymv_200_L_special( magma_int_t n, cuDoubleComplex alpha,
                 #pragma unroll
                 for(magma_int_t j=0; j < 4 ; j++)
                 {
-                    res += tr[j] * x[ quarter_thread_x * k + ty * 4 + j];
+                    res += tr[j] * buff2[ quarter_thread_x * k + ty * 4 + j];
                     la[( j + ty * 4)][tx] = tr[j] * buff[tx];
                 }
                 __syncthreads();
@@ -287,6 +293,10 @@ magmablas_zsymv_200_L_special( magma_int_t n, cuDoubleComplex alpha,
     {
         MAGMA_Z_SET2REAL(res_,0);
         count++;
+        if( ty== 0 ) {
+            buff2[tx]  = x[i*incx];
+        }
+        __syncthreads();
 
         #pragma unroll
         for( magma_int_t k=0;k<4;k++)
@@ -298,7 +308,7 @@ magmablas_zsymv_200_L_special( magma_int_t n, cuDoubleComplex alpha,
             #pragma unroll
             for(magma_int_t j=0; j < 4 ; j++)
             {
-                res += tr[j] * x[ i + quarter_thread_x*k + ty*4+(j)];
+                res += tr[j] * buff2[ quarter_thread_x*k + ty*4+(j)];
                 la[( j + ty * 4)][tx] = tr[j] * buff[tx];
             }
             __syncthreads();
@@ -1025,13 +1035,14 @@ magmablas_zsymv_200( char uplo, magma_int_t n,
 
 extern "C"
 magma_int_t
-magmablasw_zsymv_200( char uplo, magma_int_t n,
+magmablas_zsymv2_200( char uplo, magma_int_t n,
                       cuDoubleComplex alpha, 
                       cuDoubleComplex *A, magma_int_t lda,
                       cuDoubleComplex *X, magma_int_t incx,
                       cuDoubleComplex beta,  
                       cuDoubleComplex *Y, magma_int_t incy,
-                      cuDoubleComplex *dC_work)
+                      cuDoubleComplex *dC_work,
+                      magma_int_t lwork)
 {
     char      uplo_[2] = {uplo, 0};
     long int  upper    = lapackf77_lsame(uplo_, "U");
