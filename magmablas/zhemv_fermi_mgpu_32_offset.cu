@@ -401,7 +401,7 @@ magmablas_zhemv_200_L_special_mgpu_32_offset( magma_int_t n, cuDoubleComplex alp
     cuDoubleComplex res1 = MAGMA_Z_ZERO;// tem for res
     cuDoubleComplex res2 = MAGMA_Z_ZERO;// tem for res_
 
-    __shared__ cuDoubleComplex la   [32][66];
+    __shared__ cuDoubleComplex la   [16][64+2];
     __shared__ cuDoubleComplex buff [32];
     __shared__ cuDoubleComplex buff2 [32];
 
@@ -420,7 +420,7 @@ magmablas_zhemv_200_L_special_mgpu_32_offset( magma_int_t n, cuDoubleComplex alp
              MAGMA_Z_SET2REAL(buff[tx], 0.0);
         }
     } // obtain the vector x store in buff;
-    __syncthreads();
+    
 
     magma_int_t flag = 0;
     
@@ -444,14 +444,15 @@ magmablas_zhemv_200_L_special_mgpu_32_offset( magma_int_t n, cuDoubleComplex alp
         #pragma unroll
         for(magma_int_t j=0; j < 4 ; j++)
             res += cuConj( la[0][bank_shift * tx + j + ty * 4] ) * buff[j + ty * 4];
-    
             __syncthreads();
+            
 
              A -= lda * (blkc/num_gpus) * 32; 
     
               flag = 1;
         }
 
+        
 
         x -= blkc * 32  *incx  ;
 
@@ -489,7 +490,7 @@ magmablas_zhemv_200_L_special_mgpu_32_offset( magma_int_t n, cuDoubleComplex alp
                 {
                      MAGMA_Z_SET2REAL(buff2[tx], 0.0);
                 }
-            } // obtain the vector x store in buff;
+            } // obtain the vector x store in buff2;
             __syncthreads();
 
             #pragma unroll
@@ -834,7 +835,7 @@ magmablas_zhemv_200_L_generic_mgpu_32_offset(magma_int_t n, cuDoubleComplex alph
           flag = 1;
     }
 
-    __syncthreads();
+    //__syncthreads();
 
 
     x= x - break_d *incx  ;
