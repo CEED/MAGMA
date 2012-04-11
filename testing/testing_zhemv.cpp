@@ -30,6 +30,17 @@
 #define FLOPS(n) (      FMULS_SYMV(n) +      FADDS_SYMV(n))
 #endif
 
+extern "C"
+magma_int_t
+magmablas_zhemv2_200( char uplo, magma_int_t n,
+                      cuDoubleComplex alpha,
+                      cuDoubleComplex *A, magma_int_t lda,
+                      cuDoubleComplex *X, magma_int_t incx,
+                      cuDoubleComplex beta,
+                      cuDoubleComplex *Y, magma_int_t incy,
+                      cuDoubleComplex *work, int lwork);
+
+
 int main(int argc, char **argv)
 {        
     TESTING_CUDA_INIT();
@@ -62,7 +73,7 @@ int main(int argc, char **argv)
     printf("HEMV cuDoubleComplex Precision\n\n"
            "Usage\n\t\t testing_zhemv U|L N\n\n");
 
-    N = 8*1024+64;
+    N = 15*1024+64;
     if( argc > 1 ) {
       uplo = argv[1][0];
     }
@@ -146,7 +157,7 @@ int main(int argc, char **argv)
         
         
         start = get_current_time();
-        magmablas_zhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
+        magmablas_zhemv2_200( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx, dC_work, lda * (blocks + 1));
         end = get_current_time();
         
         cublasGetVector( m, sizeof( cuDoubleComplex ), dY, incx, Ymagma, incx );
