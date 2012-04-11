@@ -567,7 +567,7 @@ magmablas_zhemv_200_U_special_mgpu_32_offset( magma_int_t n, cuDoubleComplex alp
     cuDoubleComplex res1 = MAGMA_Z_ZERO;// tem for res
     cuDoubleComplex res2 = MAGMA_Z_ZERO;// tem for res_
 
-    __shared__ cuDoubleComplex la   [32][66];
+    __shared__ cuDoubleComplex la   [16][66];
     __shared__ cuDoubleComplex buff [32];
     __shared__ cuDoubleComplex buff2 [32];
 
