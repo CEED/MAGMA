@@ -208,7 +208,7 @@ magmablas_zhemv_200_L_special_mgpu_32( magma_int_t n, cuDoubleComplex alpha,
     {
         buff[tx] = x[0];
     } // obtain the vector x store in buff;
-    __syncthreads();
+
 
     magma_int_t flag = 0;
     
