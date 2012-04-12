@@ -35,6 +35,9 @@
 #define FLOPS(n) (      FMULS_HETRD(n) +      FADDS_HETRD(n))
 #endif
 
+// This version uses much faster ZHEMV (from MAGMA BLAS) but requires extra space 
+#define USE_ZHETRD2
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhetrd_gpu
 */
@@ -44,7 +47,7 @@ int main( int argc, char** argv)
 
     magma_timestr_t       start, end;
     double           eps, flops, gpu_perf, cpu_perf;
-    cuDoubleComplex *h_A, *h_R, *d_R, *h_Q, *h_work, *work;
+    cuDoubleComplex *h_A, *h_R, *d_R, *h_Q, *h_work, *work, *dwork;
     cuDoubleComplex *tau;
     double          *diag, *offdiag, *rwork;
     double           result[2] = {0., 0.};
@@ -95,9 +98,14 @@ int main( int argc, char** argv)
     /* We suppose the magma nb is bigger than lapack nb */
     lwork = N*nb; 
 
+    magma_int_t ldwork = lda*N/16+32;
+
     /* Allocate host memory for the matrix */
     TESTING_MALLOC(    h_A,    cuDoubleComplex, lda*N );
     TESTING_DEVALLOC(  d_R,    cuDoubleComplex, lda*N );
+#ifdef USE_ZHETRD2
+    TESTING_DEVALLOC(dwork,    cuDoubleComplex, lda*N );
+#endif
     TESTING_HOSTALLOC( h_R,    cuDoubleComplex, lda*N );
     TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork );
     TESTING_MALLOC(    tau,    cuDoubleComplex, N     );
@@ -118,8 +126,8 @@ int main( int argc, char** argv)
     }
 
     printf("\n\n");
-    printf("  N    CPU GFlop/s    GPU GFlop/s   |A-QHQ'|/N|A|  |I-QQ'|/N \n");
-    printf("=============================================================\n");
+    printf("  N    CPU GFlop/s    GPU GFlop/s (sec)  |A-QHQ'|/N|A|  |I-QQ'|/N \n");
+    printf("===================================================================\n");
     for(i=0; i<10; i++){
         if ( !once ) {
             N = size[i];
@@ -147,8 +155,13 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-        magma_zhetrd_gpu(uplo[0], N, d_R, lda, diag, offdiag, 
+#ifdef USE_ZHETRD2
+        magma_zhetrd2_gpu(uplo[0], N, d_R, lda, diag, offdiag,
+                         tau, h_R, lda, h_work, lwork, dwork , ldwork, &info);
+#else
+        magma_zhetrd_gpu(uplo[0], N, d_R, lda, diag, offdiag,
                          tau, h_R, lda, h_work, lwork, &info);
+#endif
         end = get_current_time();
         if ( info < 0 )
             printf("Argument %d of magma_zhetrd_gpu had an illegal value\n", -info);
@@ -207,14 +220,14 @@ int main( int argc, char** argv)
            Print performance and error.
            =================================================================== */
         if ( checkres ) {
-            printf("%5d   %6.2f        %6.2f       %e %e\n",
-                   N, cpu_perf, gpu_perf,
+            printf("%5d   %6.2f        %6.2f (%6.2f)     %e %e\n",
+                   N, cpu_perf, gpu_perf, flops/(1e3*gpu_perf),
                    result[0]*eps, result[1]*eps );
         } else {
-            printf("%5d   %6.2f        %6.2f\n",
-                   N, cpu_perf, gpu_perf );
+            printf("%5d   %6.2f        %6.2f (%6.2f)\n",
+                   N, cpu_perf, gpu_perf, flops/(1e3*gpu_perf));
         }
-
+ 
         if ( once )
             break;
     }
@@ -226,8 +239,11 @@ int main( int argc, char** argv)
     TESTING_FREE( offdiag );
     TESTING_HOSTFREE( h_R );
     TESTING_HOSTFREE( h_work );
-    TESTING_DEVFREE ( d_R );  
-  
+    TESTING_DEVFREE ( d_R ); 
+#ifdef USE_ZHETRD2 
+    TESTING_DEVFREE ( dwork );
+#endif
+
     if ( checkres ) {
         TESTING_FREE( h_Q );
         TESTING_FREE( work );
