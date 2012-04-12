@@ -30,8 +30,8 @@
 #define FLOPS(n) (      FMULS_SYMV(n) +      FADDS_SYMV(n))
 #endif
 
-extern "C"
-magma_int_t
+#if (GPUSHMEM == 200)
+extern "C" magma_int_t
 magmablas_zhemv2_200( char uplo, magma_int_t n,
                       cuDoubleComplex alpha,
                       cuDoubleComplex *A, magma_int_t lda,
@@ -39,7 +39,7 @@ magmablas_zhemv2_200( char uplo, magma_int_t n,
                       cuDoubleComplex beta,
                       cuDoubleComplex *Y, magma_int_t incy,
                       cuDoubleComplex *work, int lwork);
-
+#endif
 
 int main(int argc, char **argv)
 {        
@@ -157,7 +157,11 @@ int main(int argc, char **argv)
         
         
         start = get_current_time();
+#if (GPUSHMEM == 200)
         magmablas_zhemv2_200( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx, dC_work, lda * (blocks + 1));
+#else
+        magmablas_zhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
+#endif
         end = get_current_time();
         
         cublasGetVector( m, sizeof( cuDoubleComplex ), dY, incx, Ymagma, incx );
