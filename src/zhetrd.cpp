@@ -14,6 +14,10 @@
 #include "common_magma.h"
 
 // === Define what BLAS to use ============================================
+
+//#define FAST_HEMV
+
+// === End defining what BLAS to use ======================================
 #define PRECISION_z
 
 #if (defined(PRECISION_s))
@@ -263,6 +267,12 @@ magma_zhetrd(char uplo, magma_int_t n,
         if (1<=n-nx)
           cublasSetMatrix(n, n, sizeof(cuDoubleComplex), A(0,0), lda, dA(0,0), ldda);
 
+        #ifdef FAST_HEMV
+        cuDoubleComplex *dwork2;
+        if (cudaSuccess != cudaMalloc( (void**)&dwork2, n*n*sizeof(cuDoubleComplex) ) ) {
+            return MAGMA_ERR_CUBLASALLOC;
+        }
+        #endif
         /* Reduce the lower triangle of A */
         for (i = 0; i < n-nx; i += nb) 
           {
@@ -275,12 +285,17 @@ magma_zhetrd(char uplo, magma_int_t n,
               cublasGetMatrix(n-i, nb, sizeof(cuDoubleComplex),
                               dA(i, i), ldda,
                               A(i, i), lda);
-            
+            #ifdef FAST_HEMV
+            magma_zlatrd2(uplo, n-i, nb, A(i, i), lda, &e[i], 
+                         &tau[i], work, ldwork, 
+                         dA(i, i), ldda,
+                         dwork, lddwork, dwork2, n*n);
+            #else
             magma_zlatrd(uplo, n-i, nb, A(i, i), lda, &e[i], 
                          &tau[i], work, ldwork, 
                          dA(i, i), ldda,
                          dwork, lddwork);
-            
+            #endif
             /* Update the unreduced submatrix A(i+ib:n,i+ib:n), using   
                an update of the form:  A := A - V*W' - W*V' */
             cublasSetMatrix(n-i, nb, sizeof(cuDoubleComplex),
@@ -299,6 +314,10 @@ magma_zhetrd(char uplo, magma_int_t n,
                 d[j] = MAGMA_Z_REAL( *A(j, j) );
             }
           }
+
+        #ifdef FAST_HEMV
+        cudaFree(dwork2);
+        #endif
 
         /* Use unblocked code to reduce the last or only block */
         if (1<=n-nx)
