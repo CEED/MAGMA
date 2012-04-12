@@ -94,6 +94,7 @@ magmablas_zhemv_mgpu_64( char uplo, magma_int_t n,
 
 int main(int argc, char **argv)
 {        
+#if (GPUSHMEM >= 200)
     TESTING_CUDA_INIT();
     cudaSetDevice(0);
 
@@ -483,5 +484,6 @@ int main(int argc, char **argv)
 
     /* Free device */
     TESTING_CUDA_FINALIZE();
+#endif
     return 0;
 }        
