@@ -32,13 +32,13 @@
 
 #if (GPUSHMEM == 200)
 extern "C" magma_int_t
-magmablas_zhemv2_200( char uplo, magma_int_t n,
+magmablas_zhemv2( char uplo, magma_int_t n,
                       cuDoubleComplex alpha,
                       cuDoubleComplex *A, magma_int_t lda,
                       cuDoubleComplex *X, magma_int_t incx,
                       cuDoubleComplex beta,
                       cuDoubleComplex *Y, magma_int_t incy,
-                      cuDoubleComplex *work, int lwork);
+                      cuDoubleComplex *work, magma_int_t lwork);
 #endif
 
 int main(int argc, char **argv)
@@ -73,7 +73,12 @@ int main(int argc, char **argv)
     printf("HEMV cuDoubleComplex Precision\n\n"
            "Usage\n\t\t testing_zhemv U|L N\n\n");
 
+#ifdef PRECISION_z
+    N = 8*1024+64;
+#else
     N = 15*1024+64;
+#endif 
+
     if( argc > 1 ) {
       uplo = argv[1][0];
     }
@@ -158,7 +163,7 @@ int main(int argc, char **argv)
         
         start = get_current_time();
 #if (GPUSHMEM == 200)
-        magmablas_zhemv2_200( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx, dC_work, lda * (blocks + 1));
+        magmablas_zhemv2( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx, dC_work, lda * (blocks + 1));
 #else
         magmablas_zhemv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
 #endif
