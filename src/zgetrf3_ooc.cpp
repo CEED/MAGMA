@@ -174,7 +174,11 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
     cuDeviceTotalMem( &totalMem, dev );
     totalMem /= sizeof(cuDoubleComplex);
     
-    NB = (magma_int_t)(0.8*totalMem/maxm-h*nb); /* number of columns in the big panel */
+    /* number of columns in the big panel */
+    NB = (magma_int_t)(0.8*totalMem/maxm-h*nb); 
+    char * ngr_nb_char = getenv("MAGMA_NGR_NB");
+    if( ngr_nb_char != NULL ) NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
+
     if( num_gpus0 > ceil((double)NB/nb) ) {
       num_gpus = (int)ceil((double)NB/nb);
     } else {
@@ -413,9 +417,14 @@ magma_zgetrf2_piv(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
     cuDeviceGet( &dev, 0);
     cuDeviceTotalMem( &totalMem, dev );
     totalMem /= sizeof(cuDoubleComplex);
-    NB = (magma_int_t)(0.8*totalMem/maxm-h*nb); /* number of columns in the big panel */
-    //NB = (magma_int_t)min(n,num_gpus*(0.8*totalMem/maxm-h*nb)); /* number of columns in the big panel */
-    //NB = (magma_int_t)min(n,(num_gpus*0.8*totalMem/(maxm))-2*nb); /* number of columns in the big panel */
+
+    /* number of columns in the big panel */
+    NB = (magma_int_t)(0.8*totalMem/maxm-h*nb); 
+    //NB = (magma_int_t)min(n,num_gpus*(0.8*totalMem/maxm-h*nb)); 
+    //NB = (magma_int_t)min(n,(num_gpus*0.8*totalMem/(maxm))-2*nb); 
+    char * ngr_nb_char = getenv("MAGMA_NGR_NB");
+    if( ngr_nb_char != NULL ) NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
+
     if( num_gpus0 > ceil((double)NB/nb) ) {
       num_gpus = (int)ceil((double)NB/nb);
     } else {

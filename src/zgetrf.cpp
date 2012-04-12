@@ -145,10 +145,10 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
         magma_int_t num_gpus = 1;
 
         if( num_gpus_char != NULL ) num_gpus = atoi(num_gpus_char);
-        if( num_gpus >= 1 ) {
+        if( num_gpus_char != NULL && num_gpus >= 1 ) {
           /* call multi-GPU non-GPU-resident interface  */
           int rval = magma_zgetrf3_ooc(num_gpus, m, n, a, lda, ipiv, info);
-          if( info == 0 ) magma_zgetrf2_piv( num_gpus, m, n, a, lda, ipiv, info);
+          if( *info == 0 ) magma_zgetrf2_piv( num_gpus, m, n, a, lda, ipiv, info);
           return rval;
           //return magma_zgetrf3(num_gpus, m, n, a, lda, ipiv, info);
         }
