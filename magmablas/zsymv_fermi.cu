@@ -15,7 +15,7 @@
 #if (GPUSHMEM >= 200)
 
 #define magmablas_zsymv_200 magmablas_zsymv
-#define magmablasw_zsymv_200 magmablasw_zsymv
+#define magmablas_zsymv2_200 magmablas_zsymv2
 
 #define zsymv_bs         64
 #define thread_x         64
@@ -1002,14 +1002,14 @@ magmablas_zsymv_200( char uplo, magma_int_t n,
     Purpose
     =======
 
-    magmablasw_zsymv  performs the matrix-vector operation on fermi:
+    magmablas_zsymv2  performs the matrix-vector operation on fermi:
 
        y := alpha*A*x + beta*y,
 
     where alpha and beta are scalars, x and y are n element vectors and
     A is an n by n hermitian matrix.
 
-    the interface of magmablasw_zsymv is different from magmablas_zsymv in
+    the interface of magmablas_zsymv2 is different from magmablas_zsymv in
     the last argument dC_work
 
     As magma implements zsymv through two steps:
@@ -1026,7 +1026,7 @@ magmablas_zsymv_200( char uplo, magma_int_t n,
     a wrapper routine of magmabalsw_zsymv allocating the working space inside the routine 
     and provides the same interface with cublas. 
     
-    If users need to call zsymv frequently, we suggest to use magmablasw_zsymv instead of magmablas_zsymv.
+    If users need to call zsymv frequently, we suggest to use magmablas_zsymv2 instead of magmablas_zsymv.
     As the overhead of allocating and free in device memory in magmablas_zsymv would hurt performance.
     Our tests show that this penalty is about 10Gflop/s when matrix size is around 10000.
     
