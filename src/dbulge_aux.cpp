@@ -60,3 +60,41 @@ extern "C" void  magma_dstedc_withZ(char JOBZ, magma_int_t N, double *D, double 
 }
 //////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////
+//          DSTEDX          Divide and Conquer for tridiag
+//////////////////////////////////////////////////////////////
+extern "C" void  magma_dstedx_withZ(magma_int_t N, magma_int_t NE, double *D, double * E, double *Z, magma_int_t LDZ) {
+  double *WORK;
+  double *dwork;
+  magma_int_t *IWORK;
+  magma_int_t LWORK, LIWORK;
+  magma_int_t INFO;
+   
+  LWORK  = N*N+4*N+1; 
+  LIWORK = 3 + 5*N;
+
+  WORK = (double*) malloc( LWORK*sizeof( double) );
+  IWORK = (magma_int_t*) malloc( LIWORK*sizeof( magma_int_t) );
+
+  if (cudaSuccess != cudaMalloc( (void**)&dwork, 3*N*(N/2+1)*sizeof(double) ) ) {
+     printf("=================================================\n");
+     printf("DSTEDC ERROR OCCURED IN CUDAMALLOC\n");
+     printf("=================================================\n");
+     return;
+  }
+  printf("using magma_dstedx\n");
+
+  magma_dstedx('I', N, 0., 0., 1, NE, D, E, Z, LDZ, WORK,LWORK,IWORK,LIWORK,dwork,&INFO);
+
+  if(INFO!=0){
+        printf("=================================================\n");
+        printf("DSTEDC ERROR OCCURED. HERE IS INFO %d \n ",INFO);
+        printf("=================================================\n");
+          //assert(INFO==0);
+  }
+
+  cudaFree(dwork);
+  free( IWORK );
+  free( WORK );
+}
+//////////////////////////////////////////////////////////////

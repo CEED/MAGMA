@@ -70,6 +70,7 @@ extern "C" void magma_ztrdtype2cbHLsym_withQ(int N, int NB, cuDoubleComplex *A, 
 extern "C" void magma_ztrdtype3cbHLsym_withQ(int N, int NB, cuDoubleComplex *A, int LDA, cuDoubleComplex *V, cuDoubleComplex *TAU, int st, int ed, int sweep, int Vblksiz);
 extern "C" void magma_zbulge_applyQ(int WANTZ, char SIDE, int NE, int N, int NB, int Vblksiz, cuDoubleComplex *E, int LDE, cuDoubleComplex *V, cuDoubleComplex *TAU, cuDoubleComplex *T, int *INFO, cuDoubleComplex *dV, cuDoubleComplex *dT, cuDoubleComplex *dE, int copytype );
 extern "C" void  magma_zstedc_withZ(char JOBZ, int N, double *D, double * E, cuDoubleComplex *Z, int LDZ);
+extern "C" void  magma_zstedx_withZ(int N, int NE, double *D, double * E, cuDoubleComplex *Z, int LDZ);
 
 
 extern "C" magma_int_t
@@ -523,7 +524,8 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
             mkl_set_num_threads(mklth);
 #endif
             // call eigensolver for our resulting tridiag [D E] and form E=Q*Z
-            magma_zstedc_withZ('I', N, D2, E2, Z, LDZ);
+            //magma_zstedc_withZ('I', N, D2, E2, Z, LDZ);
+            magma_zstedx_withZ(N, NE, D2, E2, Z, LDZ);
 #if defined(USEMKL)
             mkl_set_num_threads( 1 );
 #endif
