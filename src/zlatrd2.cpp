@@ -23,13 +23,13 @@
 
 extern "C"
 magma_int_t
-magmablas_zhemv2_200( char uplo, magma_int_t n,
+magmablas_zhemv2( char uplo, magma_int_t n,
                       cuDoubleComplex alpha,
                       cuDoubleComplex *A, magma_int_t lda,
                       cuDoubleComplex *X, magma_int_t incx,
                       cuDoubleComplex beta,
                       cuDoubleComplex *Y, magma_int_t incy,
-                      cuDoubleComplex *work, int lwork);
+                      cuDoubleComplex *work, magma_int_t lwork);
 
 extern "C" magma_int_t 
 magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb, 
