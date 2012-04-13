@@ -293,6 +293,10 @@ magmablas_zhemv_200_L_special( magma_int_t n, cuDoubleComplex alpha,
     {
         MAGMA_Z_SET2REAL(res_,0);
         count++;
+        if( ty== 0 ) {
+            buff2[tx]  = x[i*incx];
+        }
+        __syncthreads();
 
         #pragma unroll
         for( magma_int_t k=0;k<4;k++)
@@ -301,10 +305,6 @@ magmablas_zhemv_200_L_special( magma_int_t n, cuDoubleComplex alpha,
             for(magma_int_t j=0; j < 4 ; j++)
                 tr[j] = A[j*lda] ;
             
-            if( ty== 0 ) {
-                buff2[tx]  = x[i*incx];
-            }
-            __syncthreads();
 
             #pragma unroll
             for(magma_int_t j=0; j < 4 ; j++)
