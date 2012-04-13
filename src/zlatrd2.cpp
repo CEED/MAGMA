@@ -236,7 +236,7 @@ magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
           cublasZhemv(MagmaUpper, i, c_one, dA(0, 0), ldda,
                       dA(0, i), ione, c_zero, dW(0, iw), ione);
 #else
-          magmablas_zhemv2_200(MagmaUpper, i, c_one, dA(0, 0), ldda,
+          magmablas_zhemv2(MagmaUpper, i, c_one, dA(0, 0), ldda,
                                dA(0, i), ione, c_zero, dW(0, iw), ione,
                                dwork, ldwork);
 #endif
@@ -321,7 +321,7 @@ magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
               cublasZhemv('L', i_n, c_one, dA(i+1, i+1), ldda, dA(i+1, i), ione, c_zero,
                           dW(i+1, i), ione);
 #else
-              magmablas_zhemv2_200('L', i_n, c_one, dA(i+1, i+1), ldda, dA(i+1, i), ione, c_zero,
+              magmablas_zhemv2('L', i_n, c_one, dA(i+1, i+1), ldda, dA(i+1, i), ione, c_zero,
                                    dW(i+1, i), ione,
                                    dwork, ldwork);
 #endif
