@@ -80,10 +80,13 @@ ZSRC  = zpotrf.cpp	\
         zunmqr2_gpu.cpp \
 	zunmql.cpp      \
         zunmql2_gpu.cpp \
+        zunmtr_m.cpp 	\
+        zunmqr_m.cpp 	\
         \
         zgeev.cpp       \
         dgeev.cpp       \
         zheevd.cpp      \
+        zheevdx.cpp     \
         zheevd_gpu.cpp  \
 	zheevdx_gpu.cpp \
 	zheevr.cpp      \
@@ -91,6 +94,7 @@ ZSRC  = zpotrf.cpp	\
 	zheevx.cpp      \
 	zheevx_gpu.cpp  \
         dsyevd.cpp      \
+        dsyevdx.cpp     \
         dsyevd_gpu.cpp  \
         zhegvd.cpp      \
 	zhegvdx.cpp     \
@@ -106,6 +110,15 @@ ZSRC  = zpotrf.cpp	\
 	dlaex0.cpp	\
 	dlaex1.cpp	\
 	dlaex3.cpp	\
+        zheevd_m.cpp    \
+        zhegvd_m.cpp    \
+        zhegst_m.cpp    \
+        ztrsm_m.cpp     \
+	dstedx_m.cpp	\
+	zstedx_m.cpp	\
+	dlaex0_m.cpp	\
+	dlaex1_m.cpp	\
+	dlaex3_m.cpp	\
 	\
 	zcposv_gpu.cpp	\
 	zcgesv_gpu.cpp	\
@@ -126,7 +139,7 @@ ZSRC  = zpotrf.cpp	\
 	zbulge_applyQ.cpp \
 	dbulge_aux.cpp \
 	zbulge_aux.cpp \
-	zhetrd_bhe2trc.cpp
+	zhetrd_bhe2trc_v3.cpp
 
 
 -include Makefile.local
