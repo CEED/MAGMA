@@ -231,7 +231,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
          fprintf (stderr, "!!!! device memory allocation error (magma_dsytrd_bsy2trc)\n");
          return 0;
        }
-       
+        
        cudaDeviceSynchronize();
        cublasSetMatrix( N, LDA1, sizeof(cuDoubleComplex), A1, LDA1, da, LDA1);
        if(overlapQ1==0){
@@ -320,7 +320,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
     core_in_all.LDE       = LDA1;
     core_in_all.Vblksiz   = Vblksiz;
 
-    if(overlapQ1==1){
+    if((overlapQ1==1)&&(THREADS>1)){
        core_in_all.locores_num = THREADS-1;
     }else{
        core_in_all.locores_num = THREADS;
@@ -447,7 +447,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
     int parallel=0;
 
 
-    if(usemulticpu==1){
+    if((usemulticpu==1)&&(THREADS>1)){
        core_in_all.locores_num = THREADS-1;
     }else{
        core_in_all.locores_num = THREADS;
@@ -707,6 +707,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                 *==========================*/             
                if((usemulticpu==1)&&(THREADS>1))
                {
+
                    // define the size of Q to be done on CPU's and the size on GPU's
                    // note that GPU use Q(1:N_GPU) and CPU use Q(N_GPU+1:N)
                    if(THREADS>40){
@@ -767,6 +768,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                        void *exitcodep;
                        pthread_join(thread_id[thread], &exitcodep);
                    }
+                   cublasSetMatrix(LDZ, N_CPU, sizeof(cuDoubleComplex), Z+(N_GPU*LDZ), LDZ, dZ+(N_GPU*LDZ), N);
                    
                /*============================
                 *  use only GPU
@@ -1489,7 +1491,7 @@ static void tile_bulge_parallel(int my_core_id)
 
    //printf("    current col %3d sweep %3d myid %3d  coreid %7d my_core_id %3d ---------------------- st %2d  ed %2d \n",i,sweepid, myid, coreid,my_core_id, stind, edind); 
  //printf("MYID %2d prog  %3d %3d %3d %3d %3d %3d %3d \n",my_core_id,prog[0],prog[1],prog[2],prog[3],prog[4],prog[5],prog[6]);
-                    
+
                     if(my_core_id==coreid)
                     {
                         //printf("--> current col %3d sweep %3d myid %3d  my_core_id %3d   prog[myid-1] %3d    prog[myid+shiftd] %3d\n",i,sweepid, myid,my_core_id,prog[myid-1], prog[myid+shift]);
