@@ -272,16 +272,16 @@ magmablas_zhemv_200_L_special_mgpu( magma_int_t n, cuDoubleComplex alpha,
         {
             MAGMA_Z_SET2REAL(res_,0);
             count++;
+            if(ty == 0)
+            {
+                buff2[tx] = x[0];
+            }    
+             __syncthreads();
 
             #pragma unroll
             for( magma_int_t k=0;k<4;k++)
             {
 
-                if(ty == 0)
-                {
-                    buff2[tx] = x[0];
-                }    
-                __syncthreads();
 
                 #pragma unroll
                 for(magma_int_t j=0; j < 4 ; j++)
