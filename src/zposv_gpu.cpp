@@ -98,12 +98,12 @@ magma_zposv_gpu( char uplo, magma_int_t n, magma_int_t nrhs,
         *info = -7;
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if ( (n == 0) || (nrhs == 0) ) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     ret = magma_zpotrf_gpu(uplo, n, dA, ldda, info);
@@ -116,5 +116,5 @@ magma_zposv_gpu( char uplo, magma_int_t n, magma_int_t nrhs,
         return ret;
     }
 
-    return MAGMA_SUCCESS;
+    return *info;
 }

@@ -89,12 +89,12 @@ magma_zgetf2_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if (*m == 0 || *n == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     /* Compute machine safe minimum */
     sfmin = lapackf77_dlamch("S");
@@ -137,5 +137,5 @@ magma_zgetf2_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
         }
       }
     
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zgetf2_nopiv */

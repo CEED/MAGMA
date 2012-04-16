@@ -112,12 +112,12 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     /* initialize nb */
     nb = magma_get_zgetrf_nb(m);
@@ -162,8 +162,8 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
         /* allocate memory on GPU to store the big panel */
         if (CUBLAS_STATUS_SUCCESS != cublasAlloc((2*nb+maxn)*maxm, 
                                                  sizeof(cuDoubleComplex), (void**)&dA) ) {
-          *info = -7; 
-          return MAGMA_ERR_CUBLASALLOC;
+          *info = MAGMA_ERR_CUBLASALLOC;
+          return *info;
         }
         da  = dA + 2*nb*maxm; /* for transposing the next panel to be sent to CPU */
         dPT = dA +   nb*maxm; /* for storing the previous panel from CPU          */
@@ -172,8 +172,8 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
         if (CUBLAS_STATUS_SUCCESS != cublasAlloc(maxm*maxn, 
                                                  sizeof(cuDoubleComplex), (void**)&dAT) ) {
           cublasFree(dA);
-          *info = -7; 
-          return MAGMA_ERR_CUBLASALLOC;
+          *info = MAGMA_ERR_CUBLASALLOC;
+          return *info;
         }
 
         for( I=0; I<n; I+=NB ) {
@@ -346,7 +346,7 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
         cublasFree(dA); 
     }
     
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zgetrf_ooc */
 
 
@@ -370,11 +370,11 @@ magma_zgetrf_piv(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
         *info = -4;
 
     if (*info != 0)
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
         /* initialize nb */
     nb = magma_get_zgetrf_nb(m);
@@ -401,7 +401,7 @@ magma_zgetrf_piv(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
                 lapackf77_zlaswp(&NB, &a[I*lda], &lda, &k1, &k2, ipiv, &incx);
         }
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zgetrf_piv */
 
 #undef inAT

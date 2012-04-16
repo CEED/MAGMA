@@ -118,15 +118,15 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery)
-        return MAGMA_SUCCESS;
+        return *info;
 
     k = min(m,n);
     if (k == 0) {
         hwork[0] = c_one;
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     /* B := Q' * B */
@@ -216,7 +216,7 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
                  dwork, lddwork*sizeof(cuDoubleComplex),
                  (n)*sizeof(cuDoubleComplex), nrhs, cudaMemcpyDeviceToDevice);
     
-    return MAGMA_SUCCESS;
+    return *info;
 }
 
 #undef a_ref

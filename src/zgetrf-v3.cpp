@@ -101,12 +101,12 @@ magma_zgetrf3(magma_int_t num_gpus,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     mindim = min(m, n);
     nb     = magma_get_zgetrf_nb(m);
@@ -123,7 +123,7 @@ magma_zgetrf3(magma_int_t num_gpus,
           if( num_gpus > ceil((double)n/nb) ) {
             printf( " * too many GPUs for the matrix size, using %d GPUs\n",num_gpus );
             *info = -1;
-            return MAGMA_ERR_ILLEGAL_VALUE;
+            return *info;
           }
 
           cuDoubleComplex *d_lA[4];
@@ -149,7 +149,8 @@ magma_zgetrf3(magma_int_t num_gpus,
                     cudaSetDevice(j);
                     cublasFree( d_lA[j] );
                   }
-                  return MAGMA_ERR_CUBLASALLOC;
+                  *info = MAGMA_ERR_CUBLASALLOC;
+                  return *info;
                 }
 
               d_lAP[i]   = d_lA[i];              /* a panel workspace of size nb * maxm */
@@ -170,7 +171,8 @@ magma_zgetrf3(magma_int_t num_gpus,
                     cudaSetDevice(j);
                     cublasFree( d_lA[j] );
                   }
-                  return cudaErrorInvalidValue;
+                  *info = MAGMA_ERR_CUDASTREAM;
+                  return *info;
                 }
             }
       
@@ -188,7 +190,8 @@ magma_zgetrf3(magma_int_t num_gpus,
                 cudaSetDevice(i);
                 cublasFree( d_lA[i] );
               }
-              return MAGMA_ERR_HOSTALLOC;
+              *info = MAGMA_ERR_HOSTALLOC;
+              return *info;
             }
           */
           work = a;
@@ -428,7 +431,7 @@ magma_zgetrf3(magma_int_t num_gpus,
           //cudaFreeHost(work);
       }
     
-    return MAGMA_SUCCESS;
+    return *info;
     
     /* End of MAGMA_ZGETRF3 */
 }

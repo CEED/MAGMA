@@ -85,12 +85,12 @@ magma_zpotri_gpu(char uplo, magma_int_t n,
 
         if (*info != 0) {
                 magma_xerbla( __func__, -(*info) );
-                return MAGMA_ERR_ILLEGAL_VALUE;
+                return *info;
         }
 
         /* Quick return if possible */
         if ( n == 0 )
-                return MAGMA_SUCCESS;
+                return *info;
         
         /* Invert the triangular Cholesky factor U or L */
         ret = magma_ztrtri_gpu( uplo, MagmaNonUnit, n, a, lda, info );
@@ -99,7 +99,7 @@ magma_zpotri_gpu(char uplo, magma_int_t n,
                 return ret;
 
         if (*info > 0)
-                return MAGMA_ERR_ILLEGAL_VALUE;
+                return *info;
 
         /* Form inv(U) * inv(U)**T or inv(L)**T * inv(L) */
         ret = magma_zlauum_gpu( uplo, n, a, lda, info );
@@ -108,6 +108,6 @@ magma_zpotri_gpu(char uplo, magma_int_t n,
         if ( (ret != MAGMA_SUCCESS) || ( *info != 0 ) ) 
                 return ret;
 
-        return MAGMA_SUCCESS;
+        return *info;
 
 }/* magma_zpotri */

@@ -107,7 +107,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
 
         if (*info != 0) {
                 magma_xerbla( __func__, -(*info) );
-                return MAGMA_ERR_ILLEGAL_VALUE;
+                return *info;
         }
 
 
@@ -117,7 +117,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
                 for (*info=0; *info < n; *info=*info+1)
                 {
                         if(dA(*info,*info)==0)
-                                return MAGMA_ERR_ILLEGAL_VALUE;
+                                return *info;
                 }
                 *info=0;
         }
@@ -126,8 +126,8 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
         
         if (cudaSuccess != cudaMallocHost( (void**)&work, nb*nb*sizeof(cuDoubleComplex) ) ) 
         {
-                *info = -6;
-                return MAGMA_ERR_HOSTALLOC;
+                *info = MAGMA_ERR_HOSTALLOC;
+                return *info;
         }
         
         static cudaStream_t stream[2];
@@ -234,5 +234,5 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
 
         cudaFreeHost(work);
 
-        return MAGMA_SUCCESS;
+        return *info;
 }

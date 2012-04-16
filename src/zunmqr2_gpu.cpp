@@ -164,12 +164,12 @@ magma_zunmqr2_gpu(const char side, const char trans,
   
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0 || k == 0) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
         
         /* Use hybrid CPU-GPU code */
@@ -234,7 +234,7 @@ magma_zunmqr2_gpu(const char side, const char trans,
 
     cublasFree(dwork);
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zunmqr */
 
 

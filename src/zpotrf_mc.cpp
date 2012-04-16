@@ -207,7 +207,7 @@ magma_zpotrf_mc(magma_context *cntxt, char *uplo,
   }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
   Quark* quark = cntxt->quark;

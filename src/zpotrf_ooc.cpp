@@ -124,12 +124,12 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return */
     if ( n == 0 )
-      return MAGMA_SUCCESS;
+      return *info;
 
     ldda = ((n+31)/32)*32;
     
@@ -157,8 +157,8 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
 #endif
         NB = (NB / nb) * nb;   /* making sure it's devisable by nb   */
     if (CUBLAS_STATUS_SUCCESS != cublasAlloc((NB+nb)*ldda, sizeof(cuDoubleComplex), (void**)&dt)) {
-          *info = -6;
-          return MAGMA_ERR_CUBLASALLOC;
+          *info = MAGMA_ERR_CUBLASALLOC;
+          return *info;
     }
         work = &dt[nb*ldda];
 #ifdef CHECK_ZPOTRF_OOC
@@ -386,6 +386,6 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
 
     cublasFree(dt);
     
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zpotrf_ooc */
 

@@ -111,16 +111,16 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     /*  Quick return if possible */
     if (min(m, n) == 0) {
         work[0] = c_one;
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     maxm = ((m + 31)/32)*32;
@@ -135,8 +135,10 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
       magmablas_zinplace_transpose( dAT, lda, ldat );
     else {
       if ( CUBLAS_STATUS_SUCCESS != 
-           cublasAlloc(maxm*maxn, sizeof(cuDoubleComplex), (void**)&dAT) )
-        return MAGMA_ERR_CUBLASALLOC;
+           cublasAlloc(maxm*maxn, sizeof(cuDoubleComplex), (void**)&dAT) ){
+        *info = MAGMA_ERR_CUBLASALLOC;
+        return *info;
+      }
       
       magmablas_ztranspose2( dAT, ldat, dA, lda, m, n );
     }
@@ -150,7 +152,7 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
       cublasFree(dAT);
     }
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zgelqf_gpu */
 
 #undef  a_ref

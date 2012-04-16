@@ -117,16 +117,16 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
   }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
   
   /* Quick return */
   if ( n == 0 )
-    return MAGMA_SUCCESS;
+    return *info;
   
   if (cudaSuccess != cudaMalloc( (void**)&dw, 2*n*n*sizeof(cuDoubleComplex) ) ) {
-    *info = -6;
-    return MAGMA_ERR_CUBLASALLOC;
+    *info = MAGMA_ERR_CUBLASALLOC;
+    return *info;
   }
   
   nb = magma_get_zhegst_nb(n);
@@ -396,5 +396,5 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
   
   cudaFree(dw);
   
-  return MAGMA_SUCCESS;
+  return *info;
 } /* magma_zhegst_gpu */

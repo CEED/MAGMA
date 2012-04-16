@@ -184,23 +184,23 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     /* Quick return if possible */
     if (n == 0) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
    
     // if eigenvectors are needed
 #if defined(VERSION3)
     if (CUBLAS_STATUS_SUCCESS != 
         cublasAlloc( nb*n, sizeof(double), (void**)&dT)) {
-        *info = -6;
-        return MAGMA_ERR_CUBLASALLOC;
+        *info = MAGMA_ERR_CUBLASALLOC;
+        return *info;
     }
 #endif
 
@@ -492,5 +492,5 @@ L50:
 #if defined(VERSION3)
     cublasFree( dT );
 #endif
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_dgeev */

@@ -236,15 +236,15 @@ magma_zheevx(char jobz, char range, char uplo, magma_int_t n,
   
   if (*info != 0) {
       magma_xerbla( __func__, -(*info));
-      return MAGMA_ERR_ILLEGAL_VALUE;
+      return *info;
   } else if (lquery) {
-      return MAGMA_SUCCESS;
+      return *info;
   }
   
   /* Quick return if possible */
   *m = 0;
   if (n == 0) {
-    return MAGMA_SUCCESS;
+    return *info;
   }
   
   if (n == 1) {
@@ -259,7 +259,7 @@ magma_zheevx(char jobz, char range, char uplo, magma_int_t n,
     if (wantz) {
       z[0]=MAGMA_Z_ONE;
     }
-    return MAGMA_SUCCESS;
+    return *info;
   }
 
   --w;
@@ -413,7 +413,7 @@ magma_zheevx(char jobz, char range, char uplo, magma_int_t n,
   
   work[1] = MAGMA_Z_MAKE((double) lopt, 0.);
   
-  return MAGMA_SUCCESS;
+  return *info;
   
 } /* magma_zheevx_ */
 

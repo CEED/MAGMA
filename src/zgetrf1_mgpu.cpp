@@ -113,12 +113,12 @@ magma_zgetrf1_mgpu(magma_int_t num_gpus,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     /* Function Body */
     mindim = min(m, n);
@@ -126,7 +126,7 @@ magma_zgetrf1_mgpu(magma_int_t num_gpus,
     if( num_gpus > ceil((double)n/nb) ) {
       printf( " * too many GPUs for the matrix size, using %d GPUs\n",num_gpus );
       *info = -1;
-      return MAGMA_ERR_ILLEGAL_VALUE;
+      return *info;
     }
 
     {
@@ -149,7 +149,8 @@ magma_zgetrf1_mgpu(magma_int_t num_gpus,
         /* streams */
         if( cudaSuccess != cudaStreamCreate(&streaml[i][0]) ||
             cudaSuccess != cudaStreamCreate(&streaml[i][1]) ) {
-          return cudaErrorInvalidValue;
+          *info = MAGMA_ERR_CUDASTREAM;
+          return *info;
         }
       }
 
@@ -354,7 +355,7 @@ magma_zgetrf1_mgpu(magma_int_t num_gpus,
             } /* end of for d=1,..,num_gpus */
     }
 
-    return MAGMA_SUCCESS;
+    return *info;
 
     /* End of MAGMA_ZGETRF_MGPU */
 }

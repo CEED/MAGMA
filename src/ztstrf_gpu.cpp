@@ -128,12 +128,12 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* quick return */
     if ((m == 0) || (n == 0) || (ib == 0))
-        return MAGMA_SUCCESS;
+        return *info;
 
     ip = 0;
 
@@ -327,7 +327,7 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
             magmablas_zgetmo_out( dA, dAT, ldda, m,  n );
         }
     }
-    return MAGMA_SUCCESS;
+    return *info;
 }
 
 #endif

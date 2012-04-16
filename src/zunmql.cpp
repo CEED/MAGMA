@@ -182,15 +182,15 @@ magma_zunmql(const char side, const char trans,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery) {
-      return MAGMA_SUCCESS;
+      return *info;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0) {
-      return MAGMA_SUCCESS;
+      return *info;
     }
 
     ldwork = nw;
@@ -266,5 +266,5 @@ magma_zunmql(const char side, const char trans,
     cublasFree(dc);
     cublasFree(dwork);
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zunmql */

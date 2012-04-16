@@ -169,16 +169,16 @@ magma_zunmqr_gpu(char side, char trans,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0 || k == 0) {
         hwork[0] = c_one;
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     lddwork= k;
@@ -257,6 +257,6 @@ magma_zunmqr_gpu(char side, char trans,
                         hwork+mi*ib, mi, c_ref(ic, jc), lddc);
     }
 
-    return MAGMA_SUCCESS;
+    return *info;
     /* End of MAGMA_ZUNMQR_GPU */
 }

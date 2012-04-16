@@ -102,12 +102,12 @@ magma_zgetri_gpu( magma_int_t n, cuDoubleComplex *dA, magma_int_t lda,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if ( n == 0 )
-        return MAGMA_SUCCESS;
+        return *info;
     
     /* Invert the triangular factor U */
     ret = magma_ztrtri_gpu( MagmaUpper, MagmaNonUnit, n, dA, lda, info );
@@ -150,5 +150,5 @@ magma_zgetri_gpu( magma_int_t n, cuDoubleComplex *dA, magma_int_t lda,
         }
     }
     
-    return MAGMA_SUCCESS;
+    return *info;
 }

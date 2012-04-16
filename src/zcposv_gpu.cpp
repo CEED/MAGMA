@@ -165,11 +165,11 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
    
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     if( n == 0 || nrhs == 0 ) 
-        return MAGMA_SUCCESS;
+        return *info;
 
     eps = lapackf77_dlamch("Epsilon");
 
@@ -223,7 +223,7 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
         }
     }
     *iter =0; 
-    return MAGMA_SUCCESS;
+    return *info;
   
   L10:
     ;
@@ -261,7 +261,7 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
         }  
 
         *iter = iiter;
-        return MAGMA_SUCCESS;
+        return *info;
       L20:
         iiter++ ;
     }

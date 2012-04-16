@@ -126,12 +126,12 @@ magma_zssssm_gpu(char storev, magma_int_t m1, magma_int_t n1,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return */
     if ((m1 == 0) || (n1 == 0) || (m2 == 0) || (n2 == 0) || (k == 0) || (ib == 0))
-        return MAGMA_SUCCESS;
+        return *info;
 
     if ( (storev == 'C') || (storev == 'c') ) {
         magmablas_zgetmo_in( dA1, dA1T, ldda1, m1, n1 );
@@ -198,6 +198,6 @@ magma_zssssm_gpu(char storev, magma_int_t m1, magma_int_t n1,
         magmablas_zgetmo_out( dA1, dA1T, ldda1, m1, n1 );
         magmablas_zgetmo_out( dA2, dA2T, ldda2, m2, n2 );
     }
-    return MAGMA_SUCCESS;
+    return *info;
 }
 

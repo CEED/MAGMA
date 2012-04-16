@@ -116,12 +116,12 @@ magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     /* Function Body */
     mindim = min(m, n);
@@ -269,7 +269,7 @@ magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
             magmablas_zgetmo_out( dA, dAT, ldda, m, n );
         }
     }
-    return MAGMA_SUCCESS;
+    return *info;
 }
 
 #endif

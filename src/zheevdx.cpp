@@ -261,15 +261,15 @@ magma_zheevdx(char jobz, char range, char uplo,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     /* Quick return if possible */
     if (n == 0) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     if (n == 1) {
@@ -277,7 +277,7 @@ magma_zheevdx(char jobz, char range, char uplo,
         if (wantz) {
             a[0] = MAGMA_Z_ONE;
         }
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     /* Get machine constants. */
@@ -342,8 +342,8 @@ magma_zheevdx(char jobz, char range, char uplo,
 #endif
 
         if (cudaSuccess != cudaMalloc( (void**)&dwork, 3*n*(n/2+1)*sizeof(double) ) ) {
-            *info = -14;
-            return MAGMA_ERR_CUBLASALLOC;
+            *info = MAGMA_ERR_CUBLASALLOC;
+            return *info;
         }
 
         magma_zstedx(range, n, vl, vu, il, iu, w, &rwork[inde],
@@ -390,5 +390,5 @@ magma_zheevdx(char jobz, char range, char uplo,
     rwork[0] = (double) lrwmin;
     iwork[0] = liwmin;
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zheevdx */

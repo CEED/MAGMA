@@ -227,15 +227,15 @@ magma_zheevd_gpu(char jobz, char uplo,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     /* Quick return if possible */
     if (n == 0) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     if (n == 1) {
@@ -246,7 +246,7 @@ magma_zheevd_gpu(char jobz, char uplo,
             tmp = MAGMA_Z_ONE;
             cublasSetVector(1, sizeof(cuDoubleComplex), &tmp, 1, da, 1);
         }
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     cudaStream_t stream;
@@ -254,11 +254,13 @@ magma_zheevd_gpu(char jobz, char uplo,
 
     if (cudaSuccess != cudaMalloc((void**)&dc, n*lddc*sizeof(cuDoubleComplex))) {
       fprintf (stderr, "!!!! device memory allocation error (magma_zheevd_gpu)\n");
-      return MAGMA_ERR_CUBLASALLOC;
+      *info = MAGMA_ERR_CUBLASALLOC;
+      return *info;
     }
     if (cudaSuccess != cudaMalloc((void**)&dwork, n*sizeof(double))) {
       fprintf (stderr, "!!!! device memory allocation error (magma_zheevd_gpu)\n");
-      return MAGMA_ERR_CUBLASALLOC;
+      *info = MAGMA_ERR_CUBLASALLOC;
+      return *info;
     }
 
     /* Get machine constants. */
@@ -337,7 +339,8 @@ magma_zheevd_gpu(char jobz, char uplo,
 #endif
             if (cudaSuccess != cudaMalloc( (void**)&dwork, 3*n*(n/2+1)*sizeof(double) ) ) {
                 fprintf (stderr, "!!!! device memory allocation error (magma_zheevd_gpu)\n");
-                return MAGMA_ERR_CUBLASALLOC;
+                *info = MAGMA_ERR_CUBLASALLOC;
+                return *info;
             }
         }
 
@@ -357,7 +360,8 @@ magma_zheevd_gpu(char jobz, char uplo,
             dc_freed = false;
             if (cudaSuccess != cudaMalloc((void**)&dc, n*lddc*sizeof(cuDoubleComplex))) {
                 fprintf (stderr, "!!!! device memory allocation error (magma_zheevd_gpu)\n");
-                return MAGMA_ERR_CUBLASALLOC;
+                *info = MAGMA_ERR_CUBLASALLOC;
+                return *info;
             }
         }
 
@@ -398,5 +402,5 @@ magma_zheevd_gpu(char jobz, char uplo,
     if (!dc_freed)
         cudaFree(dc);
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zheevd_gpu */

@@ -118,15 +118,15 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery)
-        return MAGMA_SUCCESS;
+        return *info;
 
     k = min(m,n);
     if (k == 0) {
         work[0] = c_one;
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     ldda    = ((m+31)/32)*32;
@@ -160,6 +160,6 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
         cudaFree( da[i] );
     }
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zgeqrf4 */
 

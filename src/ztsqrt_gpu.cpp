@@ -124,15 +124,15 @@ magma_ztsqrt_gpu(int *m, int *n,
    }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
    else if (lquery)
-     return 0;
+     return *info;
 
    k = min(*m,*n);
    if (k == 0) {
      work[0] = 1.f;
-     return 0;
+     return *info;
    }
 
    int lhwork = *lwork - (*m)*nb;
@@ -219,7 +219,7 @@ magma_ztsqrt_gpu(int *m, int *n,
         }
    }  
    
-   return 0; 
+   return *info; 
    
    /* End of MAGMA_ZTSQRT_GPU */
 

@@ -260,21 +260,21 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     /*     Quick return if possible */
     if (n == 0) {
-        return 0;
+        return *info;
     }
 
     if (cudaSuccess != cudaMalloc( (void**)&da, n*ldda*sizeof(cuDoubleComplex) ) ||
         cudaSuccess != cudaMalloc( (void**)&db, n*lddb*sizeof(cuDoubleComplex) ) ) {
-      *info = -17;
-      return MAGMA_ERR_CUBLASALLOC;
+      *info = MAGMA_ERR_CUBLASALLOC;
+      return *info;
     }
 
     /*     Form a Cholesky factorization of B. */
@@ -288,7 +288,7 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     magma_zpotrf_gpu(uplo_[0], n, db, lddb, info);
     if (*info != 0) {
         *info = n + *info;
-        return 0;
+        return *info;
     }
 
     cudaStreamSynchronize(stream);
@@ -357,5 +357,5 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     cublasFree(da);
     cublasFree(db);
 
-    return 0;
+    return *info;
 } /* magma_zhegvd */

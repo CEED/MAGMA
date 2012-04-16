@@ -177,22 +177,23 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     }
     if (*info < 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery)
-        return MAGMA_SUCCESS;
+        return *info;
 
     /* Quick return if possible */
     minmn = min(m,n);
     if (minmn == 0) {
         work[0] = c_one;
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     if ( CUBLAS_STATUS_SUCCESS 
          != cublasAlloc(n*ldda+(m+n)*nb, sizeof(cuDoubleComplex), (void**)&da) ) {
         fprintf (stderr, "!!!! device memory allocation error in zgebrd\n" );
-        return MAGMA_ERR_CUBLASALLOC; 
+        *info = MAGMA_ERR_CUBLASALLOC;
+        return *info; 
     }
     dwork = da + (n)*ldda;
 
@@ -288,6 +289,6 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     work[0] = ws;
 
     cublasFree(da);
-    return MAGMA_SUCCESS;
+    return *info;
 } /* zgebrd_ */
 

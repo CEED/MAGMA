@@ -202,15 +202,15 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery)
-      return 0;
+      return *info;
 
     /* Quick return if possible */
     if (n == 0) {
         work[0] = z_one;
-        return 0;
+        return *info;
     }
 
     if (n < 1024)
@@ -317,5 +317,5 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
   }  
     
     MAGMA_Z_SET2REAL( work[0], lwkopt );
-    return 0;
+    return *info;
 } /* zhetrd2_gpu */

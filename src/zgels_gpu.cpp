@@ -108,15 +108,15 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery)
-        return MAGMA_SUCCESS;
+        return *info;
 
     k = min(m,n);
     if (k == 0) {
         hwork[0] = MAGMA_Z_ONE;
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     /*
@@ -127,13 +127,15 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
       ldtwork = ( 2*k + ((n+31)/32)*32 )*nrhs;
     if( CUBLAS_STATUS_SUCCESS != cublasAlloc(ldtwork, 
                                              sizeof(cuDoubleComplex), (void**)&dT) ) {
-        return MAGMA_ERR_CUBLASALLOC;
+        *info = MAGMA_ERR_CUBLASALLOC;
+        return *info;
     }
     
     tau = (cuDoubleComplex*) malloc( k * sizeof(cuDoubleComplex) );
     if( tau == NULL ) {
         cublasFree(dT);
-        return MAGMA_ERR_ALLOCATION;
+        *info = MAGMA_ERR_ALLOCATION;
+        return *info;
     }
 
     ret = magma_zgeqrf_gpu( m, n, dA, ldda, tau, dT, info );
@@ -154,7 +156,7 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
 
     cublasFree(dT);
     free(tau);
-    return MAGMA_SUCCESS;
+    return *info;
 }
 
 #undef a_ref

@@ -363,15 +363,15 @@ magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
   
   if (*info != 0) {
       magma_xerbla( __func__, -(*info));
-      return MAGMA_ERR_ILLEGAL_VALUE;
+      return *info;
   } else if (lquery) {
-      return MAGMA_SUCCESS;
+      return *info;
   }
   
   /* Quick return if possible */
   *m = 0;
   if (n == 0) {
-    return MAGMA_SUCCESS;
+    return *info;
   }
   
   if (n == 1) {
@@ -389,12 +389,13 @@ magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
       tmp = MAGMA_Z_ONE;
       cublasSetVector(1, sizeof(cuDoubleComplex), &tmp, 1, da, 1);
     }
-    return MAGMA_SUCCESS;
+    return *info;
   }
   
   if (cudaSuccess != cudaMalloc((void**)&dwork, n*sizeof(double))) {
     fprintf (stderr, "!!!! device memory allocation error (magma_zheevr_gpu)\n");
-    return MAGMA_ERR_CUBLASALLOC;
+    *info = MAGMA_ERR_CUBLASALLOC;
+    return *info;
   }
   
   --w;
@@ -566,7 +567,7 @@ magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
   rwork[1] = (double) lrwmin;
   iwork[1] = liwmin;
   
-  return MAGMA_SUCCESS;
+  return *info;
   
 } /* magma_zheevr_gpu */
 

@@ -171,16 +171,16 @@ magma_zunmtr_m(magma_int_t nrgpu, char side, char uplo, char trans,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0 || nq == 1) {
         work[0] = c_one;
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     if (left) {
@@ -219,6 +219,6 @@ magma_zunmtr_m(magma_int_t nrgpu, char side, char uplo, char trans,
 
     MAGMA_Z_SET2REAL( work[0], lwkopt );
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zunmtr */
 

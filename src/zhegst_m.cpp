@@ -129,12 +129,12 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return */
     if ( n == 0 )
-        return MAGMA_SUCCESS;
+        return *info;
 
     magma_int_t nbl = (n-1)/nb+1; // number of blocks
 
@@ -150,8 +150,8 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
     for (igpu = 0; igpu < nrgpu; ++igpu){
         cudaSetDevice(igpu);
         if (cudaSuccess != cudaMalloc( (void**)&dw[igpu], (dima*ldda + lddbc*lddbr)*sizeof(cuDoubleComplex) ) ) {
-            *info = -6;
-            return MAGMA_ERR_CUBLASALLOC;
+            *info = MAGMA_ERR_CUBLASALLOC;
+            return *info;
         }
         cudaStreamCreate(&stream[igpu][0]);
         cudaStreamCreate(&stream[igpu][1]);
@@ -830,5 +830,5 @@ printf("hegs2%d\n", k);
 
     cudaSetDevice(gpu_b);
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zhegst_gpu */

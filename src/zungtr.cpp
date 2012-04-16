@@ -115,15 +115,15 @@ magma_zungtr(char uplo, magma_int_t n, cuDoubleComplex *a,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info));
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     } else if (lquery) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     /* Quick return if possible */
     if (n == 0) {
         work[0] = MAGMA_Z_ONE;
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     if (upper) {
@@ -170,7 +170,7 @@ magma_zungtr(char uplo, magma_int_t n, cuDoubleComplex *a,
     
     MAGMA_Z_SET2REAL( work[0], lwkopt);
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zungtr */
 
 #undef a_ref

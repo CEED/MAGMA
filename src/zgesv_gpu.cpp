@@ -91,12 +91,12 @@ magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs,
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if (n == 0 || nrhs == 0) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     ret = magma_zgetrf_gpu( n, n, dA, ldda, ipiv, info);

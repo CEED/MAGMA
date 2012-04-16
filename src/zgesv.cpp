@@ -84,12 +84,12 @@ magma_zgesv(     magma_int_t n, magma_int_t nrhs,
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if (n == 0 || nrhs == 0) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     ret = magma_zgetrf( n, n, A, lda, ipiv, info );
@@ -99,5 +99,5 @@ magma_zgesv(     magma_int_t n, magma_int_t nrhs,
     
     lapackf77_zgetrs( MagmaNoTransStr, &n, &nrhs, A, &lda, ipiv, B, &ldb, info );
 
-    return MAGMA_SUCCESS;
+    return *info;
 }

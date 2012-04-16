@@ -180,15 +180,15 @@ magma_zgeqrf2(magma_context *cntxt, magma_int_t m, magma_int_t n,
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery)
-      return MAGMA_SUCCESS;
+      return *info;
 
     k = min(m,n);
     if (k == 0) {
         work[0] = c_one;
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     cublasStatus status;
@@ -206,7 +206,7 @@ magma_zgeqrf2(magma_context *cntxt, magma_int_t m, magma_int_t n,
     status = cublasAlloc((n)*ldda + nb*lddwork, sizeof(cuDoubleComplex), (void**)&da);
     if (status != CUBLAS_STATUS_SUCCESS) {
         *info = -8;
-        return 0;
+        return *info;
     }
     cuDoubleComplex *dwork = da + ldda*(n);
 
@@ -309,6 +309,6 @@ magma_zgeqrf2(magma_context *cntxt, magma_int_t m, magma_int_t n,
     cudaStreamDestroy( stream[0] );
     cudaStreamDestroy( stream[1] );
     cublasFree(da);
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zgeqrf */
 

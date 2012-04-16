@@ -164,12 +164,12 @@ magma_zunmtr_gpu(char side, char uplo, char trans,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
   
     /* Quick return if possible */
     if (m == 0 || n == 0 || nq == 1) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     if (left) {
@@ -201,6 +201,6 @@ magma_zunmtr_gpu(char side, char uplo, char trans,
                           &dc[i1 + i2 * lddc], lddc, &wa[1], ldwa, &iinfo);
       }
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* zunmtr_ */
 

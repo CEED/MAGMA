@@ -206,18 +206,18 @@ magma_zstedx(char range, magma_int_t n, double vl, double vu,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info));
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     } else if (lquery) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     // Quick return if possible
 
     if(n==0)
-        return MAGMA_SUCCESS;
+        return *info;
     if(n==1){
         MAGMA_Z_SET2REAL(*z,1.);
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     // If N is smaller than the minimum divide size (SMLSIZ+1), then
@@ -242,6 +242,6 @@ magma_zstedx(char range, magma_int_t n, double vl, double vu,
     rwork[0] = lrwmin;
     iwork[0] = liwmin;
 
-    return MAGMA_SUCCESS;
+    return *info;
 
 } /* zstedx */

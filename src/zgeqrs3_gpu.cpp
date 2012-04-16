@@ -114,15 +114,15 @@ magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery)
-        return MAGMA_SUCCESS;
+        return *info;
 
     k = min(m,n);
     if (k == 0) {
         hwork[0] = c_one;
-        return MAGMA_SUCCESS;
+        return *info;
     }
     lddwork= k;
 
@@ -150,7 +150,7 @@ magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     }
     magmablas_zswapdblk(k, nb, d_ref(0), nb, 0, a_ref(0,0), ldda, 1);
 
-    return MAGMA_SUCCESS;
+    return *info;
 }
 
 #undef a_ref

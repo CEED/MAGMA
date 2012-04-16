@@ -113,12 +113,12 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
   }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
   
   /* Quick return */
   if ( n == 0 )
-    return MAGMA_SUCCESS;
+    return *info;
   
   nb = magma_get_zhegst_nb(n);
   
@@ -126,8 +126,8 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
   ldb = nb;
   
   if (cudaSuccess != cudaMallocHost( (void**)&w, 2*nb*nb*sizeof(cuDoubleComplex) ) ) {
-    *info = -6;
-    return MAGMA_ERR_CUBLASALLOC;
+    *info = MAGMA_ERR_CUBLASALLOC;
+    return *info;
   }
   
   static cudaStream_t stream[3];
@@ -446,5 +446,5 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
   
   cudaFreeHost(w);
   
-  return MAGMA_SUCCESS;
+  return *info;
 } /* magma_zhegst_gpu */

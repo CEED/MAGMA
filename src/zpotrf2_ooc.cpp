@@ -151,12 +151,12 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return */
     if ( n == 0 )
-      return MAGMA_SUCCESS;
+      return *info;
 
     nb = magma_get_dpotrf_nb(n);
     if( num_gpus0 > n/nb ) {
@@ -196,15 +196,15 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
     for (d=0; d<num_gpus; d++ ) {
       cudaSetDevice(d);
       if (CUBLAS_STATUS_SUCCESS != cublasAlloc(NB*lddla+2*nb*ldda, sizeof(cuDoubleComplex), (void**)&dt[d])) {
-        *info = -6;
-        return MAGMA_ERR_CUBLASALLOC;
+        *info = MAGMA_ERR_CUBLASALLOC;
+        return *info;
       }
       dwork[d] = &dt[d][2*nb*ldda];
       if ( (cudaSuccess != cudaStreamCreate(&stream[d][0])) ||
            (cudaSuccess != cudaStreamCreate(&stream[d][1])) ||
            (cudaSuccess != cudaStreamCreate(&stream[d][2])) ) {
-        *info = -6;
-        return cudaErrorInvalidValue;
+        *info = MAGMA_ERR_CUDASTREAM;
+        return *info;
       }
     }
 #ifdef  ROW_MAJOR_PROFILE
@@ -213,8 +213,8 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
     cudaSetDevice(0);
     ldwrk = n;
     if (cudaSuccess != cudaMallocHost( (void**)&work, ldwrk*nb*sizeof(cuDoubleComplex) ) ) {
-      *info = -6;
-      return MAGMA_ERR_HOSTALLOC;
+      *info = MAGMA_ERR_HOSTALLOC;
+      return *info;
     }
 
     if (nb <= 1 || nb >= n) {
@@ -468,7 +468,7 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
                                                     FLOPS((double)n)/(1000000*GetTimerValue(start0, end0)));
     printf(" Performance %f / %f = %f GFlop/s\n", FLOPS((double)n)/1000000, chol_time, FLOPS( (double)n ) / (1000000*chol_time));
 #endif
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zpotrf_ooc */
 
 #undef A

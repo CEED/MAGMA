@@ -100,19 +100,19 @@ magma_zlauum(char uplo, magma_int_t n,
 
         if (*info != 0) {
                 magma_xerbla( __func__, -(*info) );
-                return MAGMA_ERR_ILLEGAL_VALUE;
+                return *info;
         }
 
         /* Quick return */
         if ( n == 0 )
-                return MAGMA_SUCCESS;
+                return *info;
 
         ldda = ((n+31)/32)*32;
 
         if (CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*ldda, sizeof(cuDoubleComplex), (void**)&work))
         {
-                *info = -6;
-                return MAGMA_ERR_CUBLASALLOC;
+                *info = MAGMA_ERR_CUBLASALLOC;
+                return *info;
         }
 
         static cudaStream_t stream[2];
@@ -236,6 +236,6 @@ magma_zlauum(char uplo, magma_int_t n,
 
         cublasFree(work);
 
-        return MAGMA_SUCCESS;
+        return *info;
 
 }

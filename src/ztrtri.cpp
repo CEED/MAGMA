@@ -110,12 +110,12 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 
         if (*info != 0) {
                 magma_xerbla( __func__, -(*info) );
-                return MAGMA_ERR_ILLEGAL_VALUE;
+                return *info;
         }
 
         /* Quick return */
         if ( n == 0 )
-                return MAGMA_SUCCESS;
+                return *info;
 
 
         /*  Check for singularity if non-unit */
@@ -124,7 +124,7 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
                 for (*info=0; *info < n; *info=*info+1)
                 {
                         if(A(*info,*info)==0)
-                                return MAGMA_ERR_ILLEGAL_VALUE;
+                                return *info;
                 }
                 *info=0;
         }
@@ -135,8 +135,8 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 
         if (CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*ldda, sizeof( cuDoubleComplex), (void**)&work))
         {
-                *info = -6;
-                return MAGMA_ERR_CUBLASALLOC;
+                *info = MAGMA_ERR_CUBLASALLOC;
+                return *info;
         }  
 
         static cudaStream_t stream[2];
@@ -244,5 +244,5 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 
         cublasFree(work);
 
-        return MAGMA_SUCCESS;
+        return *info;
 }

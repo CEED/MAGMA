@@ -165,11 +165,11 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
     
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     
     if( N == 0 || NRHS == 0 )
-        return MAGMA_SUCCESS;
+        return *info;
     
     eps  = lapackf77_dlamch("Epsilon");
     Anrm = magmablas_zlange('I', N, N, dA, ldda, (double*)dworkd );
@@ -229,7 +229,7 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
     }
     
     *iter = 0;
-    return MAGMA_SUCCESS;
+    return *info;
   L10:
     ;
     
@@ -284,7 +284,7 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
         */
         
         *iter = iiter ;
-        return MAGMA_SUCCESS;
+        return *info;
       L20:
         iiter++ ;
     }
@@ -302,7 +302,7 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
       satisfactory solution, so we resort to cuDoubleComplex precision.  
     */
     if( *info != 0 ){
-        return MAGMA_SUCCESS;
+        return *info;
     }
     
     ret = magma_zgetrf_gpu( N, N, dA, ldda, IPIV, info );

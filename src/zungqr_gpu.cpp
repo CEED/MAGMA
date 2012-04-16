@@ -97,11 +97,11 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     if (n <= 0)
-      return MAGMA_SUCCESS;
+      return *info;
 
     if ( (nb > 1) && (nb < k) )
       {
@@ -124,8 +124,8 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     if ( cudaSuccess != 
          cudaMallocHost( (void**)&work, (lwork)*sizeof(cuDoubleComplex) ) )
       {
-        *info = -11;
-        return MAGMA_ERR_HOSTALLOC;
+        *info = MAGMA_ERR_HOSTALLOC;
+        return *info;
       }
     panel = work + n * nb;
 
@@ -190,7 +190,7 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     cudaStreamDestroy(stream[0]);
     cudaStreamDestroy(stream[1]);
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zungqr_gpu */
 
 #undef da_ref

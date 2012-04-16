@@ -83,12 +83,12 @@ magma_zpotrs_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
         *info = -7;
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if ( (n == 0) || (nrhs == 0) ) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     if( (uplo=='U') || (uplo=='u') ){
@@ -110,5 +110,5 @@ magma_zpotrs_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
         }
     }
 
-    return MAGMA_SUCCESS;
+    return *info;
 }

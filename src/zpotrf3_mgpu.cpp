@@ -120,7 +120,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* initialization */
@@ -562,7 +562,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
     }
     cudaSetDevice(0);
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zpotrf_mgpu */
 
 #undef A                     
@@ -617,7 +617,7 @@ magma_zhtodpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_
       }
       cudaSetDevice(0);
 
-      return MAGMA_SUCCESS;
+      return *info;
 }
 
 extern "C" magma_int_t
@@ -668,7 +668,7 @@ magma_zdtohpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_
       }
       cudaSetDevice(0);
 
-      return MAGMA_SUCCESS;
+      return *info;
 }
 
 #undef A

@@ -158,12 +158,12 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     /* initialize nb */
     nb = magma_get_zgetrf_nb(m);
@@ -222,8 +222,8 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
       cudaSetDevice(d);
       if (CUBLAS_STATUS_SUCCESS != cublasAlloc((h*nb+ldn_local)*maxm, 
                              sizeof(cuDoubleComplex), (void**)&dA[d]) ) {
-        *info = -7; 
-        return MAGMA_ERR_CUBLASALLOC;
+        *info = MAGMA_ERR_CUBLASALLOC;
+        return *info;
       }
       dPT[d] = dA[d] + nb*maxm; /* for storing the previous panel from CPU          */
       dAT[d] = dA[d] + h*nb*maxm;
@@ -374,7 +374,7 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
     }
     }
     
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zgetrf_ooc */
 
 
@@ -397,11 +397,11 @@ magma_zgetrf2_piv(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
         *info = -4;
 
     if (*info != 0)
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     /* initialize nb */
     nb = magma_get_zgetrf_nb(m);
@@ -451,7 +451,7 @@ magma_zgetrf2_piv(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
       lapackf77_zlaswp(&NB, &a[I*lda], &lda, &k1, &k2, ipiv, &incx);
     }
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zgetrf_piv */
 
 #undef inAT

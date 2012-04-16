@@ -216,13 +216,13 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
 
     if (info != 0) {
         magma_xerbla( __func__, -info );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return info;
     }
 
     //Quick return if possible.
 
     if (n == 0) {
-        return 0;
+        return info;
     }
 
     magma_int_t nbl = (n-1)/nb+1; // number of blocks in a row
@@ -253,8 +253,8 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
     for (igpu = 0; igpu < nrgpu; ++igpu){
         cudaSetDevice(igpu);
         if (cudaSuccess != cudaMalloc( (void**)&dw[igpu], (dimb*lddb + dima*ldda)*sizeof(cuDoubleComplex) ) ) {
-            info = -6;
-            return MAGMA_ERR_CUBLASALLOC;
+            info = MAGMA_ERR_CUBLASALLOC;
+            return info;
         }
         cudaStreamCreate(&stream[igpu][0]);
         cudaStreamCreate(&stream[igpu][1]);
@@ -267,7 +267,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
         printf("ztrsm_m: alpha = 0 not implemented\n");
         exit(-1);
 
-        return MAGMA_SUCCESS;
+        return info;
     }
 
     if (lside) {
@@ -926,7 +926,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
 
     cudaSetDevice(gpu_b);
 
-    return 0;
+    return info;
 
 } /* magma_ztrsm_m */
 

@@ -220,15 +220,15 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery)
-      return 0;
+      return *info;
 
     /* Quick return if possible */
     if (n == 0) {
         work[0] = z_one;
-        return 0;
+        return *info;
     }
 
     cuDoubleComplex *da[4];
@@ -250,8 +250,8 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
             cublasFree(dx[i]);
             cublasFree(dy[i]);
         }
-        *info = -13;
-        return MAGMA_ERR_CUBLASALLOC;
+        *info = MAGMA_ERR_CUBLASALLOC;
+        return *info;
       }
       dwork[did] = da[did] + ln*ldda;
 
@@ -264,8 +264,8 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
         cublasFree(dx[i]);
         cublasFree(dy[i]);
       }
-      *info = -14;
-      return MAGMA_ERR_CUBLASALLOC;
+      *info = MAGMA_ERR_CUBLASALLOC;
+      return *info;
     }
 
     if (n < 2048)
@@ -485,7 +485,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
     printf( " Time in ZHEMV : %.2e seconds\n",mv_time );
     printf( " Time in ZHER2K: %.2e seconds\n",up_time );
 #endif
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zhetrd */
 
 extern "C" magma_int_t
@@ -535,7 +535,7 @@ magma_zhtodhe(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_
       }
       cudaSetDevice(0);
 
-      return MAGMA_SUCCESS;
+      return *info;
 }
 
 
@@ -586,7 +586,7 @@ magma_zdtohhe(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_
       }
       cudaSetDevice(0);
 
-      return MAGMA_SUCCESS;
+      return *info;
 }
 
 void

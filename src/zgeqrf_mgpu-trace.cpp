@@ -215,12 +215,12 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     k = min(m,n);
     if (k == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     nb = magma_get_zgeqrf_nb(m);
 
@@ -235,8 +235,8 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
          if ( CUBLAS_STATUS_SUCCESS != cublasAlloc((n+ldda)*nb,
                                                 sizeof(cuDoubleComplex),
                                                 (void**)&(dwork[i])) ) {
-        *info = -9;
-        return MAGMA_ERR_CUBLASALLOC;
+        *info = MAGMA_ERR_CUBLASALLOC;
+        return *info;
       }
     }
 
@@ -250,7 +250,6 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
     }
 
     if ( cudaSuccess != cudaMallocHost( (void**)&local_work, lwork*sizeof(cuDoubleComplex)) ) {
-      *info = -9;
       for(i=0; i<num_gpus; i++){
         #ifdef  MultiGPUs
           cudaSetDevice(i);
@@ -258,7 +257,8 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
         cublasFree( dwork[i] );
       }
 
-      return MAGMA_ERR_HOSTALLOC;
+      *info = MAGMA_ERR_HOSTALLOC;
+      return *info;
     }
 
     static cudaStream_t streaml[4][2];
@@ -535,5 +535,5 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
     cudaSetDevice(cdevice);
     dump_trace(num_gpus+1);
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zgeqrf2_mgpu */

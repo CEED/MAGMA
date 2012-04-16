@@ -125,12 +125,12 @@ magma_zpotrf(char uplo, magma_int_t n,
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return */
     if ( n == 0 )
-      return MAGMA_SUCCESS;
+      return *info;
 
     char * num_gpus_char = getenv("MAGMA_NUM_GPUS");
     magma_int_t num_gpus = 1;
@@ -266,6 +266,6 @@ magma_zpotrf(char uplo, magma_int_t n,
 
     cublasFree(work);
     
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zpotrf */
 

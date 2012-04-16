@@ -201,7 +201,7 @@ magma_zgetrf_mc(magma_context *cntxt,
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     
     int k = min(*m,*n);

@@ -108,12 +108,12 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     /* Function Body */
     mindim = min(m, n);
@@ -132,7 +132,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
           if( num_gpus > ceil((double)n/nb) ) {
             printf( " * too many GPUs for the matrix size, using %d GPUs\n",num_gpus );
             *info = -1;
-            return MAGMA_ERR_ILLEGAL_VALUE;
+            return *info;
           }
 
           /* allocate workspace for each GPU */
@@ -155,7 +155,8 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
                     cublasFree( d_panel[j] );
                         cublasFree( d_lAT[j] );
                   }
-              return MAGMA_ERR_CUBLASALLOC;
+              *info = MAGMA_ERR_CUBLASALLOC;
+              return *info;
             }
             if ( CUBLAS_STATUS_SUCCESS != cublasAlloc(nb*maxm, sizeof(cuDoubleComplex), (void**)&d_panel[i]) ) {
                   for( j=0; j<=i; j++ ) {
@@ -167,7 +168,8 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
                     cublasFree( d_panel[j] );
                         cublasFree( d_lAT[j] );
                   }
-              return MAGMA_ERR_CUBLASALLOC;
+              *info = MAGMA_ERR_CUBLASALLOC;
+              return *info;
             }
 
                 /* local-matrix storage */
@@ -182,7 +184,8 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
             cudaSetDevice(j);
                         cublasFree( d_lAT[j] );
                   }
-                  return MAGMA_ERR_CUBLASALLOC;
+                  *info = MAGMA_ERR_CUBLASALLOC;
+                  return *info;
             }
             magmablas_ztranspose2( d_lAT[i], lddat, d_lA[i], ldda, m, n_local[i] );
                 panel_local[i] = inAT(i,0,0);
@@ -196,7 +199,8 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
                     cublasFree( d_panel[j] );
                         cublasFree( d_lAT[j] );
                   }
-                  return cudaErrorInvalidValue;
+                  *info = MAGMA_ERR_CUDASTREAM;
+                  return *info;
             }
             if( cudaSuccess != cudaStreamCreate(&streaml[i][1]) ) {
                   for( j=0; j<=i; j++ ) {
@@ -205,7 +209,8 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
                     cublasFree( d_panel[j] );
                         cublasFree( d_lAT[j] );
                   }
-                  return cudaErrorInvalidValue;
+                  *info = MAGMA_ERR_CUDASTREAM;
+                  return *info;
             }
           }
 
@@ -218,7 +223,8 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
                   cublasFree( d_panel[i] );
                   cublasFree( d_lAT[i] );
                 }
-            return MAGMA_ERR_HOSTALLOC;
+            *info = MAGMA_ERR_HOSTALLOC;
+            return *info;
           }
 
       s = mindim / nb;
@@ -442,7 +448,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
                 cudaFreeHost(work);
     }
 
-    return MAGMA_SUCCESS;
+    return *info;
 
     /* End of MAGMA_ZGETRF_MGPU */
 }

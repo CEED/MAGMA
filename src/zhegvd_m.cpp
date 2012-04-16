@@ -256,15 +256,15 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
     
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
     
     /*     Quick return if possible */
     if (n == 0) {
-        return 0;
+        return *info;
     }
 
 #define ENABLE_TIMER
@@ -277,7 +277,7 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
     magma_zpotrf2_ooc(nrgpu, uplo_[0], n, b, ldb, info);
     if (*info != 0) {
         *info = n + *info;
-        return 0;
+        return *info;
     }
     
 #ifdef ENABLE_TIMER 
@@ -355,5 +355,5 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
      iwork[0] = liopt;*/
     
     
-    return 0;
+    return *info;
 } /* magma_zhegvd_m */

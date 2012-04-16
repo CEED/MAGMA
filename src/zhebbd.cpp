@@ -189,14 +189,14 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
     }
 
     if (*info != 0)
-      return 0;
+      return *info;
     else if (lquery)
-      return 0;
+      return *info;
 
     /* Quick return if possible */
     if (n == 0) {
         work[0] = c_one;
-        return 0;
+        return *info;
     }
 
     cuDoubleComplex *da;
@@ -204,7 +204,7 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
     status = cublasAlloc((n+2*nb)*ldda, sizeof(cuDoubleComplex), (void**)&da);
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (magma_zhebbd)\n");
-      return 0;
+      return *info;
     }
 
     /* Use the first panel of da as work space */
@@ -372,5 +372,5 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
     cudaStreamDestroy( stream[1] );
     cublasFree(da);
     MAGMA_Z_SET2REAL( work[0], lwkopt );
-    return 0;
+    return *info;
 } /* zhebbd_ */

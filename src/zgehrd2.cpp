@@ -145,16 +145,16 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery)
-      return 0;
+      return *info;
 
     /* Quick return if possible */
     nh = ihi - ilo + 1;
     if (nh <= 1) {
       work[0] = c_one;
-      return 0;
+      return *info;
     }
 
     cuDoubleComplex *da;
@@ -261,6 +261,6 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     cublasFree(da);
     free(t);
  
-    return 0;
+    return *info;
 } /* magma_zgehrd2 */
 

@@ -95,12 +95,12 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     /* Function Body */
     mindim = min(m, n);
@@ -126,7 +126,8 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
         dAT = dA;
 
         if ( CUBLAS_STATUS_SUCCESS != cublasAlloc(nb*maxm, sizeof(cuDoubleComplex), (void**)&dAP) ) {
-            return MAGMA_ERR_CUBLASALLOC;
+            *info = MAGMA_ERR_CUBLASALLOC;
+            return *info;
         }
 
         if ((m == n) && (m % 32 == 0) && (ldda%32 == 0))
@@ -134,7 +135,8 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
         else {
             if ( CUBLAS_STATUS_SUCCESS != cublasAlloc(maxm*maxn, sizeof(cuDoubleComplex), (void**)&dAT) ) {
                 cublasFree( dAP );
-                return MAGMA_ERR_CUBLASALLOC;
+                *info = MAGMA_ERR_CUBLASALLOC;
+                return *info;
             }
             magmablas_ztranspose2( dAT, lddat, dA, ldda, m, n );
         }
@@ -143,7 +145,8 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
             cublasFree( dAP );
             if (! ((m == n) && (m % 32 == 0) && (ldda%32 == 0)) )
                 cublasFree( dAT );
-            return MAGMA_ERR_HOSTALLOC;
+            *info = MAGMA_ERR_HOSTALLOC;
+            return *info;
         }
 
         for( i=0; i<s; i++ )
@@ -240,7 +243,7 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
         cublasFree(dAP);
         cudaFreeHost(work);
     }
-    return MAGMA_SUCCESS;
+    return *info;
 
     /* End of MAGMA_ZGETRF_GPU */
 }

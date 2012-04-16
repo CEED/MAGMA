@@ -187,15 +187,15 @@ magma_zhetrd(char uplo, magma_int_t n,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery)
-      return 0;
+      return *info;
 
     /* Quick return if possible */
     if (n == 0) {
         work[0] = z_one;
-        return 0;
+        return *info;
     }
 
     cuDoubleComplex *da;
@@ -203,7 +203,7 @@ magma_zhetrd(char uplo, magma_int_t n,
     status = cublasAlloc(n*ldda+2*n*nb, sizeof(cuDoubleComplex), (void**)&da);
     if (status != CUBLAS_STATUS_SUCCESS) {
       fprintf (stderr, "!!!! device memory allocation error (magma_zhetrd)\n");
-      return 0;
+      return *info;
     }
 
     cuDoubleComplex *dwork = da + (n)*ldda;
@@ -270,7 +270,8 @@ magma_zhetrd(char uplo, magma_int_t n,
         #ifdef FAST_HEMV
         cuDoubleComplex *dwork2;
         if (cudaSuccess != cudaMalloc( (void**)&dwork2, n*n*sizeof(cuDoubleComplex) ) ) {
-            return MAGMA_ERR_CUBLASALLOC;
+            *info = MAGMA_ERR_CUBLASALLOC;
+            return *info;
         }
         #endif
         /* Reduce the lower triangle of A */
@@ -333,5 +334,5 @@ magma_zhetrd(char uplo, magma_int_t n,
     cublasFree(da);
     MAGMA_Z_SET2REAL( work[0], lwkopt );
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zhetrd */

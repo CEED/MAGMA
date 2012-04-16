@@ -229,15 +229,15 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
   
     /* Quick return if possible */
     if (*m == 0 || *n == 0) {
-          return MAGMA_SUCCESS;
+          return *info;
     }
     
     wrkbl  = maxwrk; /* Not optimal */
@@ -3447,5 +3447,5 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
          }
     }
  
-    return MAGMA_SUCCESS;
+    return *info;
  } /* dgesvd_ */

@@ -474,15 +474,15 @@ magma_zgeqrf_mc( magma_context *cntxt, magma_int_t *m, magma_int_t *n,
   }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
   else if (lquery)
-    return 0;
+    return *info;
 
   magma_int_t k = min(*m,*n);
   if (k == 0) {
     work[0] = c_one;
-    return 0;
+    return *info;
   }
 
   magma_int_t nt = (((*n)%nb) == 0) ? (*n)/nb : (*n)/nb + 1;

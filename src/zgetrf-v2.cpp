@@ -111,12 +111,12 @@ magma_zgetrf2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     nb = magma_get_zgetrf_nb(m);
 
@@ -140,8 +140,8 @@ magma_zgetrf2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
                                                   sizeof(cuDoubleComplex), (void**)&dA) ) {
           /* alloc failed so call non-GPU-resident version */
           magma_int_t rval = magma_zgetrf_ooc(m, n, a, lda, ipiv, info);
-          magma_zgetrf_piv( m, n, a, lda, ipiv, info);
-          return rval;
+          if (*info == 0) magma_zgetrf_piv( m, n, a, lda, ipiv, info);
+          return *info;
         }
         dAT = dA + 2*nb*maxm; 
         magmablas_zsetmatrix_transpose( m, n-nb, a+nb*lda, lda, dAT+nb, ldda, dA, maxm, nb);
@@ -252,7 +252,7 @@ magma_zgetrf2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
         cublasFree(dA);
     }
     
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zgetrf */
 
 #undef inAT

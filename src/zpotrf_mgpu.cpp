@@ -110,13 +110,13 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
     }
     if (*info != 0) {
                 magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
         }
     nb = magma_get_zpotrf_nb(n);
 
     if (cudaSuccess != cudaMallocHost( (void**)&work, n*nb*sizeof(cuDoubleComplex) ) ) {
-          *info = -6;
-          return MAGMA_ERR_HOSTALLOC;
+          *info = MAGMA_ERR_HOSTALLOC;
+          return *info;
     }
 
     if ((nb <= 1) || (nb >= n)) {
@@ -143,7 +143,8 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
             cudaSetDevice(j);
             cublasFree(d_lP[d]);
           }
-          return MAGMA_ERR_CUBLASALLOC;
+          *info = MAGMA_ERR_CUBLASALLOC;
+          return *info;
         }
         cudaStreamCreate(&stream[d][0]);
         cudaStreamCreate(&stream[d][1]);
@@ -466,5 +467,5 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
         /* free workspace */
         cudaFreeHost(work);
 
-        return MAGMA_SUCCESS;
+        return *info;
 } /* magma_zpotrf_mgpu */

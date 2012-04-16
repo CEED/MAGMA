@@ -160,15 +160,15 @@ magma_zgeqrf3(magma_context *cntxt, magma_int_t m, magma_int_t n,
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery)
-      return MAGMA_SUCCESS;
+      return *info;
 
     k = min(m,n);
     if (k == 0) {
       work[0] = c_one;
-      return MAGMA_SUCCESS;
+      return *info;
     }
     
     int M=qr_params->nthreads*qr_params->ob;

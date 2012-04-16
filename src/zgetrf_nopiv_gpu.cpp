@@ -93,12 +93,12 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     /* Function Body */
     mindim = min(m, n);
@@ -121,8 +121,10 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
         lddwork = maxm;
 
         if ( cudaSuccess != cudaMallocHost( (void**)&work, 
-                                            maxm*nb*sizeof(cuDoubleComplex) ) )
-            return MAGMA_ERR_HOSTALLOC;
+                                            maxm*nb*sizeof(cuDoubleComplex) ) ) {
+            *info = MAGMA_ERR_HOSTALLOC;
+            return *info;
+        }
 
         for( i=0; i<s; i++ )
           {
@@ -202,7 +204,7 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
         cudaFreeHost(work);
     }
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zgetrf_nopiv_gpu */
 
 #undef inA

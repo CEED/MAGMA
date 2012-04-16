@@ -118,10 +118,10 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery)
-        return MAGMA_SUCCESS;
+        return *info;
 
     /* Check how much memory do we have */
     #if CUDA_VERSION > 3010
@@ -144,7 +144,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
     k = min(m,n);
     if (k == 0) {
         work[0] = c_one;
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     lddwork = ((NB+31)/32)*32+nb;
@@ -152,8 +152,8 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
 
     if (CUBLAS_STATUS_SUCCESS != cublasAlloc((NB + nb)*ldda + nb*lddwork, 
                                              sizeof(cuDoubleComplex), (void**)&da) ) {
-        *info = -8;
-        return MAGMA_ERR_CUBLASALLOC;
+        *info = MAGMA_ERR_CUBLASALLOC;
+        return *info;
     }
 
     static cudaStream_t stream[2];
@@ -230,6 +230,6 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
     cudaStreamDestroy( stream[1] );
     cublasFree( da );
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zgeqrf_ooc */
 

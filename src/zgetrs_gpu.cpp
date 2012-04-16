@@ -101,17 +101,18 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
     }
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if (n == 0 || nrhs == 0) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     work = (cuDoubleComplex*)malloc(n * nrhs * sizeof(cuDoubleComplex));
     if ( !work ) {
-        return MAGMA_ERR_ALLOCATION;
+        *info = MAGMA_ERR_ALLOCATION;
+        return *info;
     }
       
     i1 = 1;
@@ -149,6 +150,6 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
     }
     free(work);
 
-    return MAGMA_SUCCESS;
+    return *info;
 }
 

@@ -185,16 +185,16 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery) {
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0 || k == 0) {
         work[0] = c_one;
-        return MAGMA_SUCCESS;
+        return *info;
     }
 
     magma_int_t lddc = m;
@@ -208,9 +208,9 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
         cudaSetDevice(igpu);
         if (cudaSuccess != cudaMalloc( (void**)&dw[igpu], (n_l*lddc + 2*lddac*lddar + 2*(nb+1+lddwork)*nb)*sizeof(cuDoubleComplex))) {
             printf("%d: size: %d\n", igpu, (n_l*lddc + 2*lddac*lddar + (nb+1+lddwork)*nb)*sizeof(cuDoubleComplex));
-            *info = -14;
             magma_xerbla( __func__, -(*info) );
-            return MAGMA_ERR_CUBLASALLOC;
+            *info = MAGMA_ERR_CUBLASALLOC;
+            return *info;
         }
         cudaStreamCreate(&stream[igpu][0]);
         cudaStreamCreate(&stream[igpu][1]);
@@ -324,7 +324,7 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
 
             fprintf(stderr, "The case (side == right) is not implemented\n");
             magma_xerbla( __func__, 1 );
-            return MAGMA_ERR_ILLEGAL_VALUE;
+            return *info;
 
             /*if ( notran ) {
                 i1 = 0;
@@ -385,7 +385,7 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
 
     cudaSetDevice(gpu_b);
 
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zunmqr */
 
 

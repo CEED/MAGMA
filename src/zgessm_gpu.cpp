@@ -98,12 +98,12 @@ magma_zgessm_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t k, magm
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
 
     /* Quick return if possible */
     if (m == 0 || n == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     if ( (storev == 'C') || (storev == 'c') ) {
         magmablas_zgetmo_in( dA, dAT, ldda, m, n );
@@ -142,6 +142,6 @@ magma_zgessm_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t k, magm
         magmablas_zgetmo_in( dA, dAT, ldda, m, n );
     }
 
-    return MAGMA_SUCCESS;
+    return *info;
     /* End of MAGMA_ZGETRF_GPU */
 }

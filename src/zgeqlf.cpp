@@ -129,21 +129,21 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return MAGMA_ERR_ILLEGAL_VALUE;
+        return *info;
     }
     else if (lquery)
-        return MAGMA_SUCCESS;
+        return *info;
 
     /* Quick return if possible */
     if (k == 0)
-        return MAGMA_SUCCESS;
+        return *info;
 
     lddwork = ((n+31)/32)*32;
     ldda    = ((m+31)/32)*32;
 
     if (CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*ldda + nb*lddwork, sizeof(cuDoubleComplex), (void**)&da)) {
-        *info = -9;
-        return MAGMA_ERR_CUBLASALLOC;
+        *info = MAGMA_ERR_CUBLASALLOC;
+        return *info;
     }
     dwork = da + ldda*(n);
 
@@ -249,7 +249,7 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
     cudaStreamDestroy( stream[0] );
     cudaStreamDestroy( stream[1] );
     cublasFree( da );
-    return MAGMA_SUCCESS;
+    return *info;
 } /* magma_zgeqlf */
 
 #undef  a_ref
