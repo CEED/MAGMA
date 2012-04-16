@@ -28,7 +28,7 @@
  *     Functions for each specific cases - Lower case
  */
 
-#define SWITCH  2000
+#define SWITCH  1400
 
 
 
@@ -616,7 +616,7 @@ magmablas_zhemv_200_U_special_mgpu_32_offset( magma_int_t n, cuDoubleComplex alp
     
               
         }
-
+        __syncthreads();
 
     
         x  -= (break_d + tx ) * incx;// return to the beginning
@@ -835,7 +835,7 @@ magmablas_zhemv_200_L_generic_mgpu_32_offset(magma_int_t n, cuDoubleComplex alph
           flag = 1;
     }
 
-    //__syncthreads();
+    __syncthreads();
 
 
     x= x - break_d *incx  ;
@@ -1311,7 +1311,7 @@ void magmablas_zhemv_200_L_mgpu_32_offset(magma_int_t m, cuDoubleComplex alpha,
          */
       if(m % zhemv_bs == 0 ) 
       {
-           if( (m / num_gpus) < SWITCH)
+           if( m < SWITCH)
         magmablas_zhemv_200_L_special_mgpu_32_offset_s <<< grid_s, threads, 0, magma_stream >>>(
             m, alpha, A, lda, X, incx, beta, Y, incy, dC_work, my_gpu_id, num_gpus, nb, kstan);
            else
@@ -1321,14 +1321,14 @@ void magmablas_zhemv_200_L_mgpu_32_offset(magma_int_t m, cuDoubleComplex alpha,
     else
         {
          magma_int_t m_mod_thread_x = m%zhemv_bs - 1;
-           if( (m / num_gpus) < SWITCH)
+           if( m  < SWITCH)
         magmablas_zhemv_200_L_generic_mgpu_32_offset_s <<< grid_s, threads, 0, magma_stream >>> (
             m, alpha, A, lda, X, incx ,beta, Y, incy, dC_work, m_mod_thread_x, my_gpu_id, num_gpus, nb, kstan);
            else
         magmablas_zhemv_200_L_generic_mgpu_32_offset <<< grid, threads, 0, magma_stream >>> (
             m, alpha, A, lda, X, incx ,beta, Y, incy, dC_work, m_mod_thread_x, my_gpu_id, num_gpus, nb, kstan);
         }
-       if( (m / num_gpus) < SWITCH)
+       if( m < SWITCH)
         magmablas_zhemv_200_L_update_mgpu_32_offset_s<<< grid, threads_u, 0, magma_stream >>>(
         m, alpha, A, lda, X, incx, beta, Y, incy, dC_work, my_gpu_id, num_gpus, nb, kstan);
        else
