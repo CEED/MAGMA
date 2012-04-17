@@ -49,9 +49,9 @@ int main( int argc, char** argv)
     magma_int_t ione = 1, izero = 0;
     magma_int_t five = 5;
 
-    cuDoubleComplex zzero = MAGMA_Z_ZERO;
-    cuDoubleComplex zone  = MAGMA_Z_ONE;
-    cuDoubleComplex mzone  = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     double done = 1.;
     double mdone = -1.;
@@ -146,7 +146,7 @@ int main( int argc, char** argv)
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         //lapackf77_zlatms( &N, &N, "U", ISEED, "P", w1, &five, &dten,
         //                 &done, &N, &N, uplo, h_B, &N, h_work, &info);
-        //lapackf77_zlaset( "A", &N, &N, &zzero, &zone, h_B, &N);
+        //lapackf77_zlaset( "A", &N, &N, &c_zero, &c_one, h_B, &N);
         lapackf77_zlarnv( &ione, ISEED, &n2, h_B );
         /* increase the diagonal */
         {
@@ -200,9 +200,9 @@ int main( int argc, char** argv)
           cuDoubleComplex *tau;
 
           if (itype == 1 || itype == 2){
-            lapackf77_zlaset( "A", &N, &N, &zzero, &zone, h_S, &N);
-            blasf77_zgemm("N", "C", &N, &N, &N, &zone, h_R, &N, h_R, &N, &zzero, h_work, &N);
-            blasf77_zhemm("R", uplo, &N, &N, &mzone, h_B, &N, h_work, &N, &zone, h_S, &N);
+            lapackf77_zlaset( "A", &N, &N, &c_zero, &c_one, h_S, &N);
+            blasf77_zgemm("N", "C", &N, &N, &N, &c_one, h_R, &N, h_R, &N, &c_zero, h_work, &N);
+            blasf77_zhemm("R", uplo, &N, &N, &c_neg_one, h_B, &N, h_work, &N, &c_one, h_S, &N);
             result[1]= lapackf77_zlange("1", &N, &N, h_S, &N, rwork) / N;
           }
           else if (itype == 3){
@@ -216,24 +216,24 @@ int main( int argc, char** argv)
           result[0] /= lapackf77_zlange("1",&N , &N, h_R, &N, rwork);
 
           if (itype == 1){
-            blasf77_zhemm("L", uplo, &N, &N, &zone, h_A, &N, h_R, &N, &zzero, h_work, &N);
+            blasf77_zhemm("L", uplo, &N, &N, &c_one, h_A, &N, h_R, &N, &c_zero, h_work, &N);
             for(int i=0; i<N; ++i)
               blasf77_zdscal(&N, &w1[i], &h_R[i*N], &ione);
-            blasf77_zhemm("L", uplo, &N, &N, &mzone, h_B, &N, h_R, &N, &zone, h_work, &N);
+            blasf77_zhemm("L", uplo, &N, &N, &c_neg_one, h_B, &N, h_R, &N, &c_one, h_work, &N);
             result[0] *= lapackf77_zlange("1", &N, &N, h_work, &N, rwork)/N;
           }
           else if (itype == 2){
-            blasf77_zhemm("L", uplo, &N, &N, &zone, h_B, &N, h_R, &N, &zzero, h_work, &N);
+            blasf77_zhemm("L", uplo, &N, &N, &c_one, h_B, &N, h_R, &N, &c_zero, h_work, &N);
             for(int i=0; i<N; ++i)
               blasf77_zdscal(&N, &w1[i], &h_R[i*N], &ione);
-            blasf77_zhemm("L", uplo, &N, &N, &zone, h_A, &N, h_work, &N, &mzone, h_R, &N);
+            blasf77_zhemm("L", uplo, &N, &N, &c_one, h_A, &N, h_work, &N, &c_neg_one, h_R, &N);
             result[0] *= lapackf77_zlange("1", &N, &N, h_R, &N, rwork)/N;
           }
           else if (itype == 3){
-            blasf77_zhemm("L", uplo, &N, &N, &zone, h_A, &N, h_R, &N, &zzero, h_work, &N);
+            blasf77_zhemm("L", uplo, &N, &N, &c_one, h_A, &N, h_R, &N, &c_zero, h_work, &N);
             for(int i=0; i<N; ++i)
               blasf77_zdscal(&N, &w1[i], &h_R[i*N], &ione);
-            blasf77_zhemm("L", uplo, &N, &N, &zone, h_B, &N, h_work, &N, &mzone, h_R, &N);
+            blasf77_zhemm("L", uplo, &N, &N, &c_one, h_B, &N, h_work, &N, &c_neg_one, h_R, &N);
             result[0] *= lapackf77_zlange("1", &N, &N, h_R, &N, rwork)/N;
           }
 

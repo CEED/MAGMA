@@ -17,12 +17,12 @@
 extern "C"
 void magma_zprint( int m, int n, cuDoubleComplex *A, int lda )
 {
-    cuDoubleComplex zero = MAGMA_Z_ZERO;
+    cuDoubleComplex c_zero = MAGMA_Z_ZERO;
     
     printf( "[\n" );
     for( int i = 0; i < m; ++i ) {
         for( int j = 0; j < n; ++j ) {
-            if ( MAGMA_Z_EQUAL( *A(i,j), zero )) {
+            if ( MAGMA_Z_EQUAL( *A(i,j), c_zero )) {
                 printf( "   0.    " );
             }
             else {
