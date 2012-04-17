@@ -123,8 +123,8 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
     real_Double_t timelpk=0.0,tconvert=0.0,timeaplQ1=0.0,timeaplQ2=0.0,timeblg=0.0, timeaplQ=0.0, timeeigen=0.0, timegemm=0.0;
     double nrmI=0.0, nrm1=0.0, nrm2=0.0;
     FILE *trace_file;
-    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    cuDoubleComplex c_zero = MAGMA_Z_ZERO;
+    cuDoubleComplex c_one  = MAGMA_Z_ONE;
 
     
     int mklth, thread, INFO;
@@ -208,7 +208,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
         for (i = 0; i < NB-j; i++)
         {
             A2[i+(N-NB+j)*LDA2] = A1[i+(N-NB+j)*LDA1+(N-NB+j)]; 
-            A1[i+(N-NB+j)*LDA1+(N-NB+j)] =c_zero;
+            A1[i+(N-NB+j)*LDA1+(N-NB+j)] = c_zero;
         }
     }
 
@@ -514,7 +514,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                 // no need to set the matrix to identity if we are using the GPU because it is done inside bulge_applyQ
                 memset(Q2 , 0, N*N*sizeof(cuDoubleComplex));        
                 for (j = 0; j < N; j++)
-                    Q2[j+j*LDQ2]=c_one;
+                    Q2[j+j*LDQ2] = c_one;
             }
             core_in_all.SIDE      = 'L';
             core_in_all.E         = Q2;

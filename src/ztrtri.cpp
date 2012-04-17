@@ -90,8 +90,8 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
         char diag_[2] = {diag, 0};
         magma_int_t        ldda, nb, nn;
         static magma_int_t j, jb;
-        cuDoubleComplex    zone   = MAGMA_Z_ONE;
-        cuDoubleComplex    mzone  = MAGMA_Z_NEG_ONE;
+        cuDoubleComplex    c_one      = MAGMA_Z_ONE;
+        cuDoubleComplex    c_neg_one  = MAGMA_Z_NEG_ONE;
         cuDoubleComplex    *work;
         
         long int    upper  = lapackf77_lsame(uplo_, "U");
@@ -160,11 +160,11 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
                                 /* Compute rows 1:j-1 of current block column */
                                 cublasZtrmm(MagmaLeft, MagmaUpper,
                                                         MagmaNoTrans, MagmaNonUnit, j, jb,
-                                                        zone, dA(0,0), ldda, dA(0, j),ldda);
+                                                        c_one, dA(0,0), ldda, dA(0, j),ldda);
 
                                 cublasZtrsm(MagmaRight, MagmaUpper,
                                                         MagmaNoTrans, MagmaNonUnit, j, jb,
-                                                        mzone, dA(j,j), ldda, dA(0, j),ldda);
+                                                        c_neg_one, dA(j,j), ldda, dA(0, j),ldda);
 
                                 //cublasGetMatrix(j ,jb, sizeof( cuDoubleComplex),
                                 //dA(0, j), ldda, A(0, j), lda);
@@ -208,11 +208,11 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
                                         /* Compute rows j+jb:n of current block column */
                                         cublasZtrmm(MagmaLeft, MagmaLower,
                                                         MagmaNoTrans, MagmaNonUnit, (n-j-jb), jb,
-                                                        zone, dA(j+jb,j+jb), ldda, dA(j+jb, j), ldda);
+                                                        c_one, dA(j+jb,j+jb), ldda, dA(j+jb, j), ldda);
 
                                         cublasZtrsm(MagmaRight, MagmaLower,
                                                         MagmaNoTrans, MagmaNonUnit, (n-j-jb), jb,
-                                                        mzone, dA(j,j), ldda, dA(j+jb, j), ldda);
+                                                        c_neg_one, dA(j,j), ldda, dA(j+jb, j), ldda);
 
                                         //cublasGetMatrix((n-j), jb, sizeof( cuDoub
                                         //leComplex),dA(j, j), ldda, A(j, j), lda);

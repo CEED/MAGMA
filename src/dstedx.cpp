@@ -152,8 +152,8 @@ magma_dstedx(char range, magma_int_t n, double vl, double vu,
 */
     char range_[2] = {range, 0};
 
-    double dzero = 0.;
-    double done = 1.;
+    double d_zero = 0.;
+    double d_one  = 1.;
     magma_int_t izero = 0;
     magma_int_t ione = 1;
 
@@ -239,7 +239,7 @@ magma_dstedx(char range, magma_int_t n, double vl, double vu,
         lapackf77_dsteqr(char_I, &n, d, e, z, &ldz, work, info);
     } else {
         char char_F[]= {'F', 0};
-        lapackf77_dlaset(char_F, &n, &n, &dzero, &done, z, &ldz);
+        lapackf77_dlaset(char_F, &n, &n, &d_zero, &d_one, z, &ldz);
 
         //Scale.
         char char_M[]= {'M', 0};
@@ -282,9 +282,9 @@ magma_dstedx(char range, magma_int_t n, double vl, double vu,
                     // Scale
                     char char_G[] = {'G', 0};
                     orgnrm = lapackf77_dlanst(char_M, &m, &d[start], &e[start]);
-                    lapackf77_dlascl(char_G, &izero, &izero, &orgnrm, &done, &m, &ione, &d[start], &m, info);
+                    lapackf77_dlascl(char_G, &izero, &izero, &orgnrm, &d_one, &m, &ione, &d[start], &m, info);
                     magma_int_t mm = m-1;
-                    lapackf77_dlascl(char_G, &izero, &izero, &orgnrm, &done, &mm, &ione, &e[start], &mm, info);
+                    lapackf77_dlascl(char_G, &izero, &izero, &orgnrm, &d_one, &mm, &ione, &e[start], &mm, info);
 
                     magma_dlaex0( m, &d[start], &e[start], Z(start, start), ldz, work, iwork, dwork, 'A', vl, vu, il, iu, info);
 
@@ -293,7 +293,7 @@ magma_dstedx(char range, magma_int_t n, double vl, double vu,
                     }
 
                     // Scale Back
-                    lapackf77_dlascl(char_G, &izero, &izero, &done, &orgnrm, &m, &ione, &d[start], &m, info);
+                    lapackf77_dlascl(char_G, &izero, &izero, &d_one, &orgnrm, &m, &ione, &d[start], &m, info);
 
                 } else {
 
@@ -336,9 +336,9 @@ magma_dstedx(char range, magma_int_t n, double vl, double vu,
 
             // Scale
             char char_G[] = {'G', 0};
-            lapackf77_dlascl(char_G, &izero, &izero, &orgnrm, &done, &n, &ione, d, &n, info);
+            lapackf77_dlascl(char_G, &izero, &izero, &orgnrm, &d_one, &n, &ione, d, &n, info);
             magma_int_t nm = n-1;
-            lapackf77_dlascl(char_G, &izero, &izero, &orgnrm, &done, &nm, &ione, e, &nm, info);
+            lapackf77_dlascl(char_G, &izero, &izero, &orgnrm, &d_one, &nm, &ione, e, &nm, info);
 
             magma_dlaex0( n, d, e, z, ldz, work, iwork, dwork, range, vl, vu, il, iu, info);
 
@@ -347,7 +347,7 @@ magma_dstedx(char range, magma_int_t n, double vl, double vu,
             }
 
             // Scale Back
-            lapackf77_dlascl(char_G, &izero, &izero, &done, &orgnrm, &n, &ione, d, &n, info);
+            lapackf77_dlascl(char_G, &izero, &izero, &d_one, &orgnrm, &n, &ione, d, &n, info);
 
         }
     }

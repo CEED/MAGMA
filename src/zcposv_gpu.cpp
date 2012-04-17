@@ -141,8 +141,8 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
     =====================================================================    */
 
 
-    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex zone  = MAGMA_Z_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_one     = MAGMA_Z_ONE;
     magma_int_t     ione  = 1;
     cuFloatComplex *dSA, *dSX;
     cuDoubleComplex Xnrmv, Rnrmv; 
@@ -205,9 +205,9 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
     magmablas_zlacpy( MagmaUpperLower, n, nrhs, dB, lddb, dworkd, n);
     
     if( nrhs == 1 )
-        cublasZhemv(uplo, n, mzone, dA, ldda, dX, 1, zone, dworkd, 1);
+        cublasZhemv(uplo, n, c_neg_one, dA, ldda, dX, 1, c_one, dworkd, 1);
     else
-        cublasZhemm(MagmaLeft, uplo, n, nrhs, mzone, dA, ldda, dX, lddx, zone, dworkd, n);
+        cublasZhemm(MagmaLeft, uplo, n, nrhs, c_neg_one, dA, ldda, dX, lddx, c_one, dworkd, n);
   
     for(i=0; i<nrhs; i++){
         j = cublasIzamax( n, dX+i*n, 1) ;
@@ -242,9 +242,9 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
         }
       
         if( nrhs == 1 )
-            cublasZhemv(uplo, n, mzone, dA, ldda, dX, 1, zone, dworkd, 1);
+            cublasZhemv(uplo, n, c_neg_one, dA, ldda, dX, 1, c_one, dworkd, 1);
         else 
-            cublasZhemm(MagmaLeft, uplo, n, nrhs, mzone, dA, ldda, dX, lddx, zone, dworkd, n);
+            cublasZhemm(MagmaLeft, uplo, n, nrhs, c_neg_one, dA, ldda, dX, lddx, c_one, dworkd, n);
       
         for(i=0; i<nrhs; i++){
             j = cublasIzamax( n, dX+i*n, 1) ;

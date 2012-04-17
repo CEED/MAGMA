@@ -162,8 +162,8 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
 
     =====================================================================    */
 
-    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex zone  = MAGMA_Z_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_one     = MAGMA_Z_ONE;
     magma_int_t     ione  = 1;
     cuDoubleComplex *dworkd, *hworkd;
     cuFloatComplex  *dworks, *hworks;
@@ -274,14 +274,14 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     // dR = dB - dA * dX
     if( NRHS == 1 )
         cublasZgemv( MagmaNoTrans, N, N, 
-                     mzone, dA, ldda, 
-                            dX, 1, 
-                     zone,  dR, 1);
+                     c_neg_one, dA, ldda, 
+                                dX, 1, 
+                     c_one,     dR, 1);
     else
         cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, NRHS, N, 
-                     mzone, dA, ldda, 
-                            dX, lddx, 
-                     zone,  dR, N );
+                     c_neg_one, dA, ldda, 
+                                dX, lddx, 
+                     c_one,     dR, N );
 
     for(i=0; i<NRHS; i++){
         j = cublasIzamax( N, dX+i*N, 1);
@@ -326,14 +326,14 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
         magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dR, N);
         if( NRHS == 1 )
             cublasZgemv( MagmaNoTrans, N, N, 
-                         mzone, dA, ldda,
-                                dX, 1,
-                         zone,  dR, 1);
+                         c_neg_one, dA, ldda,
+                                    dX, 1,
+                         c_one,     dR, 1);
         else
             cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, NRHS, N, 
-                         mzone, dA, ldda,
-                                dX, lddx,
-                         zone,  dR, N);
+                         c_neg_one, dA, ldda,
+                                    dX, lddx,
+                         c_one,     dR, N);
 
         /*  Check whether the NRHS normwise backward errors satisfy the
             stopping criterion. If yes, set ITER=IITER>0 and return.     */

@@ -191,7 +191,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
         for (i = 0; i < NB-j; i++)
         {
             A2[i+(N-NB+j)*LDA2] = A1[i+(N-NB+j)*LDA1+(N-NB+j)]; 
-            A1[i+(N-NB+j)*LDA1+(N-NB+j)] =c_zero;
+            A1[i+(N-NB+j)*LDA1+(N-NB+j)] = c_zero;
         }
     }
 
@@ -485,7 +485,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                 // no need to set the matrix to identity if we are using the GPU because it is done inside bulge_applyQ
                 memset(Q2 , 0, N*N*sizeof(cuDoubleComplex));        
                 for (j = 0; j < N; j++)
-                    Q2[j+j*LDQ2]=c_one;
+                    Q2[j+j*LDQ2] = c_one;
             }
             core_in_all.SIDE      = 'L';
             core_in_all.E         = Q2;

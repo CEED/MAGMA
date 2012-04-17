@@ -85,8 +85,8 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
         /* Local variables */
         char uplo_[2] = {uplo, 0};
         magma_int_t         nb, i, ib;
-        double              done   = MAGMA_D_ONE;
-        cuDoubleComplex     zone = MAGMA_Z_ONE;
+        double              d_one = MAGMA_D_ONE;
+        cuDoubleComplex     c_one = MAGMA_Z_ONE;
         cuDoubleComplex     *work;
 
         long int upper  = lapackf77_lsame(uplo_, "U");
@@ -136,7 +136,7 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
                                 /* Compute the product U * U'. */
                                 cublasZtrmm( MagmaRight, MagmaUpper,
                                              MagmaConjTrans, MagmaNonUnit, i, ib,
-                                             zone, dA(i,i), ldda, dA(0, i),ldda);
+                                             c_one, dA(i,i), ldda, dA(0, i),ldda);
 
                                 cublasGetMatrix( ib ,ib, sizeof(cuDoubleComplex),
                                                  dA(i, i), ldda, work, ib);
@@ -149,14 +149,14 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
                                 if(i+ib < n)
                                 {
                                         cublasZgemm( MagmaNoTrans, MagmaConjTrans,
-                                                     i, ib, (n-i-ib), zone, dA(0,i+ib),
-                                                     ldda, dA(i, i+ib),ldda, zone,
+                                                     i, ib, (n-i-ib), c_one, dA(0,i+ib),
+                                                     ldda, dA(i, i+ib), ldda, c_one,
                                                      dA(0,i), ldda);
 
 
                                         cublasZherk( MagmaUpper, MagmaNoTrans, ib,(n-i-ib),
-                                                     done, dA(i, i+ib), ldda,
-                                                     done,  dA(i, i), ldda);
+                                                     d_one, dA(i, i+ib), ldda,
+                                                     d_one, dA(i, i),    ldda);
                                 }
                         }
 
@@ -170,7 +170,7 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
 
                                 cublasZtrmm( MagmaLeft, MagmaLower,
                                              MagmaConjTrans, MagmaNonUnit, ib,
-                                             i, zone, dA(i,i), ldda,
+                                             i, c_one, dA(i,i), ldda,
                                              dA(i, 0),ldda);
                                 
                                 cublasGetMatrix( ib ,ib, sizeof(cuDoubleComplex),
@@ -185,12 +185,12 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
                                 if((i+ib) < n)
                                 {
                                         cublasZgemm( MagmaConjTrans, MagmaNoTrans,
-                                                     ib, i, (n-i-ib), zone, dA( i+ib,i),
-                                                     ldda, dA(i+ib, 0),ldda, zone,
+                                                     ib, i, (n-i-ib), c_one, dA( i+ib,i),
+                                                     ldda, dA(i+ib, 0),ldda, c_one,
                                                      dA(i,0), ldda);
                                         cublasZherk( MagmaLower, MagmaConjTrans, ib, (n-i-ib),
-                                                     done, dA(i+ib, i), ldda,
-                                                     done,  dA(i, i), ldda);
+                                                     d_one, dA(i+ib, i), ldda,
+                                                     d_one, dA(i, i),    ldda);
                                 }
                         }
                 }

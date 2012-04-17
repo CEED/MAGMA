@@ -88,14 +88,14 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
   char uplo_[2] = {uplo, 0};
   magma_int_t        nb;
   magma_int_t        k, kb, kb2;
-  cuDoubleComplex    zone  = MAGMA_Z_ONE;
-  cuDoubleComplex    mzone  = MAGMA_Z_NEG_ONE;
-  cuDoubleComplex    zhalf  = MAGMA_Z_HALF;
-  cuDoubleComplex    mzhalf  = MAGMA_Z_NEG_HALF;
+  cuDoubleComplex    c_one      = MAGMA_Z_ONE;
+  cuDoubleComplex    c_neg_one  = MAGMA_Z_NEG_ONE;
+  cuDoubleComplex    c_half     = MAGMA_Z_HALF;
+  cuDoubleComplex    c_neg_half = MAGMA_Z_NEG_HALF;
   cuDoubleComplex   *w;
   magma_int_t        lda;
   magma_int_t        ldb;
-  double             done  = (double) 1.0;
+  double             d_one = 1.0;
   long int           upper = lapackf77_lsame(uplo_, "U");
   
   /* Test the input parameters. */
@@ -178,22 +178,22 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
             
               cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
                           kb, n-k-kb,
-                          zone, dB(k,k), lddb, 
+                          c_one, dB(k,k), lddb, 
                           dA(k,k+kb), ldda); 
             
               cudaStreamSynchronize(stream[0]);
             
               cublasZhemm(MagmaLeft, MagmaUpper,
                           kb, n-k-kb,
-                          mzhalf, dA(k,k), ldda,
+                          c_neg_half, dA(k,k), ldda,
                           dB(k,k+kb), lddb,
-                          zone, dA(k, k+kb), ldda);
+                          c_one, dA(k, k+kb), ldda);
               
               cublasZher2k(MagmaUpper, MagmaConjTrans,
                            n-k-kb, kb,
-                           mzone, dA(k,k+kb), ldda,
+                           c_neg_one, dA(k,k+kb), ldda,
                            dB(k,k+kb), lddb,
-                           done, dA(k+kb,k+kb), ldda);
+                           d_one, dA(k+kb,k+kb), ldda);
             
               cudaMemcpy2DAsync( A(0, 0), lda*sizeof(cuDoubleComplex),
                                  dA(k+kb, k+kb), ldda*sizeof(cuDoubleComplex),
@@ -202,13 +202,13 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
             
               cublasZhemm(MagmaLeft, MagmaUpper,
                           kb, n-k-kb,
-                          mzhalf, dA(k,k), ldda,
+                          c_neg_half, dA(k,k), ldda,
                           dB(k,k+kb), lddb,
-                          zone, dA(k, k+kb), ldda);
+                          c_one, dA(k, k+kb), ldda);
               
               cublasZtrsm(MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
                           kb, n-k-kb,
-                          zone ,dB(k+kb,k+kb), lddb,
+                          c_one ,dB(k+kb,k+kb), lddb,
                           dA(k,k+kb), ldda);
               
             }
@@ -258,22 +258,22 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
             
             cublasZtrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit,
                         n-k-kb, kb,
-                        zone, dB(k,k), lddb, 
+                        c_one, dB(k,k), lddb, 
                         dA(k+kb,k), ldda);
             
             cudaStreamSynchronize(stream[0]);
             
             cublasZhemm(MagmaRight, MagmaLower,
                         n-k-kb, kb,
-                        mzhalf, dA(k,k), ldda,
+                        c_neg_half, dA(k,k), ldda,
                         dB(k+kb,k), lddb,
-                        zone, dA(k+kb, k), ldda);
+                        c_one, dA(k+kb, k), ldda);
             
             cublasZher2k(MagmaLower, MagmaNoTrans,
                          n-k-kb, kb,
-                         mzone, dA(k+kb,k), ldda,
+                         c_neg_one, dA(k+kb,k), ldda,
                          dB(k+kb,k), lddb,
-                         done, dA(k+kb,k+kb), ldda);
+                         d_one, dA(k+kb,k+kb), ldda);
             
             cudaMemcpy2DAsync( A(0, 0), lda *sizeof(cuDoubleComplex),
                               dA(k+kb, k+kb), ldda*sizeof(cuDoubleComplex),
@@ -282,13 +282,13 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
             
             cublasZhemm(MagmaRight, MagmaLower,
                         n-k-kb, kb,
-                        mzhalf, dA(k,k), ldda,
+                        c_neg_half, dA(k,k), ldda,
                         dB(k+kb,k), lddb,
-                        zone, dA(k+kb, k), ldda);
+                        c_one, dA(k+kb, k), ldda);
             
             cublasZtrsm(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaNonUnit,
                         n-k-kb, kb,
-                        zone, dB(k+kb,k+kb), lddb, 
+                        c_one, dB(k+kb,k+kb), lddb, 
                         dA(k+kb,k), ldda);            
           }
           
@@ -317,14 +317,14 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
             
             cublasZtrmm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
                         k, kb,
-                        zone ,dB(0,0), lddb,
+                        c_one ,dB(0,0), lddb,
                         dA(0,k), ldda);
             
             cublasZhemm(MagmaRight, MagmaUpper,
                         k, kb,
-                        zhalf, dA(k,k), ldda,
+                        c_half, dA(k,k), ldda,
                         dB(0,k), lddb,
-                        zone, dA(0, k), ldda);
+                        c_one, dA(0, k), ldda);
             
             cudaStreamSynchronize(stream[1]);
             
@@ -339,19 +339,19 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
             
             cublasZher2k(MagmaUpper, MagmaNoTrans,
                          k, kb,
-                         zone, dA(0,k), ldda,
+                         c_one, dA(0,k), ldda,
                          dB(0,k), lddb,
-                         done, dA(0,0), ldda);
+                         d_one, dA(0,0), ldda);
             
             cublasZhemm(MagmaRight, MagmaUpper,
                         k, kb,
-                        zhalf, dA(k,k), ldda,
+                        c_half, dA(k,k), ldda,
                         dB(0,k), lddb,
-                        zone, dA(0, k), ldda);
+                        c_one, dA(0, k), ldda);
             
             cublasZtrmm(MagmaRight, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
                         k, kb,
-                        zone, dB(k,k), lddb, 
+                        c_one, dB(k,k), lddb, 
                         dA(0,k), ldda);
             
           }
@@ -387,14 +387,14 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
             
             cublasZtrmm(MagmaRight, MagmaLower, MagmaNoTrans, MagmaNonUnit,
                         kb, k,
-                        zone ,dB(0,0), lddb,
+                        c_one ,dB(0,0), lddb,
                         dA(k,0), ldda);
             
             cublasZhemm(MagmaLeft, MagmaLower,
                         kb, k,
-                        zhalf, dA(k,k), ldda,
+                        c_half, dA(k,k), ldda,
                         dB(k,0), lddb,
-                        zone, dA(k, 0), ldda);
+                        c_one, dA(k, 0), ldda);
             
             cudaStreamSynchronize(stream[1]);
             
@@ -409,19 +409,19 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
             
             cublasZher2k(MagmaLower, MagmaConjTrans,
                          k, kb,
-                         zone, dA(k,0), ldda,
+                         c_one, dA(k,0), ldda,
                          dB(k,0), lddb,
-                         done, dA(0,0), ldda);
+                         d_one, dA(0,0), ldda);
             
             cublasZhemm(MagmaLeft, MagmaLower,
                         kb, k,
-                        zhalf, dA(k,k), ldda,
+                        c_half, dA(k,k), ldda,
                         dB(k,0), lddb,
-                        zone, dA(k, 0), ldda);
+                        c_one, dA(k, 0), ldda);
             
             cublasZtrmm(MagmaLeft, MagmaLower, MagmaConjTrans, MagmaNonUnit,
                         kb, k,
-                        zone, dB(k,k), lddb, 
+                        c_one, dB(k,k), lddb, 
                         dA(k,0), ldda);
           }
           

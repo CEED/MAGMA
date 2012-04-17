@@ -207,8 +207,8 @@ magma_dlaex3_m(magma_int_t nrgpu,
                      *dwork, range, vl, vu, il, iu, info );
         return MAGMA_SUCCESS;
     }
-    double done  = 1.;
-    double dzero = 0.;
+    double d_one  = 1.;
+    double d_zero = 0.;
     magma_int_t ione = 1;
     magma_int_t imone = -1;
     char range_[] = {range, 0};
@@ -455,19 +455,19 @@ magma_dlaex3_m(magma_int_t nrgpu,
             // stay on the CPU
             if( n23 != 0 ){
                 lapackf77_dlacpy("A", &n23, &rk, Q(ctot[0],iil-1), &ldq, s, &n23);
-                blasf77_dgemm("N", "N", &n2, &rk, &n23, &done, &q2[iq2], &n2,
-                              s, &n23, &dzero, Q(n1,iil-1), &ldq );
+                blasf77_dgemm("N", "N", &n2, &rk, &n23, &d_one, &q2[iq2], &n2,
+                              s, &n23, &d_zero, Q(n1,iil-1), &ldq );
             }
             else
-                lapackf77_dlaset("A", &n2, &rk, &dzero, &dzero, Q(n1,iil-1), &ldq);
+                lapackf77_dlaset("A", &n2, &rk, &d_zero, &d_zero, Q(n1,iil-1), &ldq);
 
             if( n12 != 0 ) {
                 lapackf77_dlacpy("A", &n12, &rk, Q(0,iil-1), &ldq, s, &n12);
-                blasf77_dgemm("N", "N", &n1, &rk, &n12, &done, q2, &n1,
-                              s, &n12, &dzero, Q(0,iil-1), &ldq);
+                blasf77_dgemm("N", "N", &n1, &rk, &n12, &d_one, q2, &n1,
+                              s, &n12, &d_zero, Q(0,iil-1), &ldq);
             }
             else
-                lapackf77_dlaset("A", &n1, &rk, &dzero, &dzero, Q(0,iil-1), &ldq);
+                lapackf77_dlaset("A", &n1, &rk, &d_zero, &d_zero, Q(0,iil-1), &ldq);
         }
         else {
             //use the gpus
@@ -529,26 +529,26 @@ magma_dlaex3_m(magma_int_t nrgpu,
                 for (igpu = 0; igpu < nrgpu-1; igpu += 2){
                     if (n23 != 0) {
 #ifdef CHECK_CPU
-                        blasf77_dgemm("N", "N", &ni_loc[igpu+1], &ib, &n23, &done, hQ2(igpu+1), &n2_loc,
-                                      hS(igpu+1,ind), &n23, &dzero, hQ(igpu+1, ind), &n2_loc);
+                        blasf77_dgemm("N", "N", &ni_loc[igpu+1], &ib, &n23, &d_one, hQ2(igpu+1), &n2_loc,
+                                      hS(igpu+1,ind), &n23, &d_zero, hQ(igpu+1, ind), &n2_loc);
 #endif
                         cudaSetDevice(igpu+1);
                         cublasSetKernelStream(stream[igpu+1][ind]);
-                        cublasDgemm('N', 'N', ni_loc[igpu+1], ib, n23, done, dQ2(igpu+1), n2_loc,
-                                    dS(igpu+1, ind), n23, dzero, dQ(igpu+1, ind), n2_loc);
+                        cublasDgemm('N', 'N', ni_loc[igpu+1], ib, n23, d_one, dQ2(igpu+1), n2_loc,
+                                    dS(igpu+1, ind), n23, d_zero, dQ(igpu+1, ind), n2_loc);
 #ifdef CHECK_CPU
                         printf("norm Q %d: %f\n", igpu+1, cpu_gpu_ddiff(ni_loc[igpu+1], ib, hQ(igpu+1, ind), n2_loc, dQ(igpu+1, ind), n2_loc));
 #endif
                     }
                     if (n12 != 0) {
 #ifdef CHECK_CPU
-                        blasf77_dgemm("N", "N", &ni_loc[igpu], &ib, &n12, &done, hQ2(igpu), &n1_loc,
-                                      hS(igpu,ind%2), &n12, &dzero, hQ(igpu, ind%2), &n1_loc);
+                        blasf77_dgemm("N", "N", &ni_loc[igpu], &ib, &n12, &d_one, hQ2(igpu), &n1_loc,
+                                      hS(igpu,ind%2), &n12, &d_zero, hQ(igpu, ind%2), &n1_loc);
 #endif
                         cudaSetDevice(igpu);
                         cublasSetKernelStream(stream[igpu][ind]);
-                        cublasDgemm('N', 'N', ni_loc[igpu], ib, n12, done, dQ2(igpu), n1_loc,
-                                    dS(igpu, ind), n12, dzero, dQ(igpu, ind), n1_loc);
+                        cublasDgemm('N', 'N', ni_loc[igpu], ib, n12, d_one, dQ2(igpu), n1_loc,
+                                    dS(igpu, ind), n12, d_zero, dQ(igpu, ind), n1_loc);
 #ifdef CHECK_CPU
                         printf("norm Q %d: %f\n", igpu, cpu_gpu_ddiff(ni_loc[igpu], ib, hQ(igpu, ind), n1_loc, dQ(igpu, ind), n1_loc));
 #endif
@@ -588,10 +588,10 @@ magma_dlaex3_m(magma_int_t nrgpu,
                 cudaFree(dwQ[1][igpu]);
 */            }
             if( n23 == 0 )
-                lapackf77_dlaset("A", &n2, &rk, &dzero, &dzero, Q(n1,iil-1), &ldq);
+                lapackf77_dlaset("A", &n2, &rk, &d_zero, &d_zero, Q(n1,iil-1), &ldq);
 
             if( n12 == 0 )
-                lapackf77_dlaset("A", &n1, &rk, &dzero, &dzero, Q(0,iil-1), &ldq);
+                lapackf77_dlaset("A", &n1, &rk, &d_zero, &d_zero, Q(0,iil-1), &ldq);
         }
     }
 #ifdef ENABLE_TIMER

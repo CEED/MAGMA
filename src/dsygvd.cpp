@@ -157,7 +157,7 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     char uplo_[2] = {uplo, 0};
     char jobz_[2] = {jobz, 0};
 
-    static double zone = MAGMA_D_ONE;
+    double d_one = MAGMA_D_ONE;
     
     double *da;
     double *db;
@@ -280,7 +280,7 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
             }
 
             cublasDtrsm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit,
-                        n, n, zone, db, lddb, da, ldda);
+                        n, n, d_one, db, lddb, da, ldda);
 
         } else if (itype == 3) 
           {
@@ -293,7 +293,7 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
             }
 
             cublasDtrmm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit, 
-                        n, n, zone, db, lddb, da, ldda);
+                        n, n, d_one, db, lddb, da, ldda);
         }
 
         cublasGetMatrix(n, n, sizeof(double), da, ldda, a, lda);

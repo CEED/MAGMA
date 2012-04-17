@@ -168,9 +168,9 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
 
     magma_int_t nb = magma_get_zhetrd_nb(n); 
 
-    cuDoubleComplex z_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex z_one = MAGMA_Z_ONE;
-    double  d_one = MAGMA_D_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    double          d_one     = MAGMA_D_ONE;
     
     static magma_int_t kk, nx;
     static magma_int_t i, j, i_n;
@@ -209,7 +209,7 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
 
     /* Quick return if possible */
     if (n == 0) {
-        work[0] = z_one;
+        work[0] = c_one;
         return *info;
     }
 
@@ -246,7 +246,7 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
       cublasSetMatrix(i + nb, nb, sizeof(cuDoubleComplex),
                       work, ldw, dwork, lddw);
       
-      cublasZher2k(uplo, MagmaNoTrans, i, nb, z_neg_one, 
+      cublasZher2k(uplo, MagmaNoTrans, i, nb, c_neg_one, 
                    dA(0, i), ldda, dwork, 
                    lddw, d_one, dA(0, 0), ldda);
       
@@ -292,7 +292,7 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
                       work, ldw,
                       dwork, lddw);
       
-      cublasZher2k('L', 'N', n-i-nb, nb, z_neg_one, 
+      cublasZher2k('L', 'N', n-i-nb, nb, c_neg_one, 
                    dA(i+nb, i), ldda, 
                    &dwork[nb], lddw, d_one, 
                    dA(i+nb, i+nb), ldda);

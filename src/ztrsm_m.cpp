@@ -168,8 +168,8 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
     char uplo_[2] = {uplo, 0};
     char transa_[2] = {transa, 0};
     char diag_[2] = {diag, 0};
-    cuDoubleComplex  zone  = MAGMA_Z_ONE;
-    cuDoubleComplex  mzone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex  c_one     = MAGMA_Z_ONE;
+    cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex  alpha_;
     cuDoubleComplex* dw[N_MAX_GPU];
     cudaStream_t stream [N_MAX_GPU][3];
@@ -316,7 +316,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     if (j==mbl-1)
                         alpha_=alpha;
                     else
-                        alpha_= zone;
+                        alpha_= c_one;
 
                     jb = min(nb, m-j*nb);
 
@@ -331,7 +331,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][j%2]);
-                            cublasZgemm(transa, 'N', j*nb, nloc[igpu], jb, mzone, dA(igpu, 0, j%2), ldda,
+                            cublasZgemm(transa, 'N', j*nb, nloc[igpu], jb, c_neg_one, dA(igpu, 0, j%2), ldda,
                                         dB(igpu, j, 0), lddb, alpha_, dB(igpu, 0, 0), lddb );
                         }
                     }
@@ -395,7 +395,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     if (j==0)
                         alpha_=alpha;
                     else
-                        alpha_= zone;
+                        alpha_= c_one;
 
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
@@ -409,7 +409,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][j%2]);
-                            cublasZgemm(transa, 'N', m-(j+1)*nb, nloc[igpu], nb, mzone, dA(igpu, j+1, j%2), ldda,
+                            cublasZgemm(transa, 'N', m-(j+1)*nb, nloc[igpu], nb, c_neg_one, dA(igpu, j+1, j%2), ldda,
                                         dB(igpu, j, 0), lddb, alpha_, dB(igpu, j+1, 0), lddb );
                         }
                     }
@@ -479,7 +479,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     if (j==0)
                         alpha_=alpha;
                     else
-                        alpha_= zone;
+                        alpha_= c_one;
 
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
@@ -493,7 +493,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][j%2]);
-                            cublasZgemm(transa, 'N', m-(j+1)*nb, nloc[igpu], nb, mzone, dA(igpu, j%2, j+1), ldda,
+                            cublasZgemm(transa, 'N', m-(j+1)*nb, nloc[igpu], nb, c_neg_one, dA(igpu, j%2, j+1), ldda,
                                         dB(igpu, j, 0), lddb, alpha_, dB(igpu, j+1, 0), lddb );
                         }
                     }
@@ -555,7 +555,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     if (j==mbl-1)
                         alpha_=alpha;
                     else
-                        alpha_= zone;
+                        alpha_= c_one;
 
                     jb = min(nb, m-j*nb);
 
@@ -570,7 +570,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][j%2]);
-                            cublasZgemm(transa, 'N', j*nb, nloc[igpu], jb, mzone, dA(igpu, j%2, 0), ldda,
+                            cublasZgemm(transa, 'N', j*nb, nloc[igpu], jb, c_neg_one, dA(igpu, j%2, 0), ldda,
                                         dB(igpu, j, 0), lddb, alpha_, dB(igpu, 0, 0), lddb );
                         }
                     }
@@ -641,7 +641,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     if (k==0)
                         alpha_=alpha;
                     else
-                        alpha_= zone;
+                        alpha_= c_one;
 
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
@@ -655,7 +655,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][k%2]);
-                            cublasZgemm('N', transa, mloc[igpu], n-(k+1)*nb, nb, mzone, dB(igpu, 0, k), lddb,
+                            cublasZgemm('N', transa, mloc[igpu], n-(k+1)*nb, nb, c_neg_one, dB(igpu, 0, k), lddb,
                                         dA(igpu, k%2, k+1), ldda, alpha_, dB(igpu, 0, k+1), lddb );
                         }
                     }
@@ -716,7 +716,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     if (k==nbl-1)
                         alpha_=alpha;
                     else
-                        alpha_= zone;
+                        alpha_= c_one;
 
                     kb = min(nb, n-k*nb);
 
@@ -731,7 +731,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][k%2]);
-                            cublasZgemm('N', transa, mloc[igpu], k*nb, kb, mzone, dB(igpu, 0, k), lddb,
+                            cublasZgemm('N', transa, mloc[igpu], k*nb, kb, c_neg_one, dB(igpu, 0, k), lddb,
                                         dA(igpu, k%2, 0), ldda, alpha_, dB(igpu, 0, 0), lddb );
                         }
                     }
@@ -797,7 +797,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     if (k==nbl-1)
                         alpha_=alpha;
                     else
-                        alpha_= zone;
+                        alpha_= c_one;
 
                     kb = min(nb, n-k*nb);
 
@@ -812,7 +812,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][k%2]);
-                            cublasZgemm('N', transa, mloc[igpu], k*nb, kb, mzone, dB(igpu, 0, k), lddb,
+                            cublasZgemm('N', transa, mloc[igpu], k*nb, kb, c_neg_one, dB(igpu, 0, k), lddb,
                                         dA(igpu, 0, k%2), ldda, alpha_, dB(igpu, 0, 0), lddb );
                         }
                     }
@@ -875,7 +875,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     if (k==0)
                         alpha_=alpha;
                     else
-                        alpha_= zone;
+                        alpha_= c_one;
 
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
@@ -889,7 +889,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][k%2]);
-                            cublasZgemm('N', transa, mloc[igpu], n-(k+1)*nb, nb, mzone, dB(igpu, 0, k), lddb,
+                            cublasZgemm('N', transa, mloc[igpu], n-(k+1)*nb, nb, c_neg_one, dB(igpu, 0, k), lddb,
                                         dA(igpu, k+1, k%2), ldda, alpha_, dB(igpu, 0, k+1), lddb );
                         }
                     }

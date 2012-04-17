@@ -85,8 +85,8 @@ magma_zlauum(char uplo, magma_int_t n,
         char uplo_[2] = {uplo, 0};
         magma_int_t     ldda, nb;
         static magma_int_t i, ib;
-        cuDoubleComplex    zone  = MAGMA_Z_ONE;
-        double             done  = MAGMA_D_ONE;
+        cuDoubleComplex    c_one = MAGMA_Z_ONE;
+        double             d_one = MAGMA_D_ONE;
         cuDoubleComplex    *work;
         long int           upper = lapackf77_lsame(uplo_, "U");
 
@@ -148,7 +148,7 @@ magma_zlauum(char uplo, magma_int_t n,
 
                                 cublasZtrmm( MagmaRight, MagmaUpper,
                                              MagmaConjTrans, MagmaNonUnit, i, ib,
-                                             zone, dA(i,i), ldda, dA(0, i),ldda);
+                                             c_one, dA(i,i), ldda, dA(0, i),ldda);
 
 
                                 lapackf77_zlauum(MagmaUpperStr, &ib, A(i,i), &lda, info);
@@ -161,15 +161,15 @@ magma_zlauum(char uplo, magma_int_t n,
                                 if (i+ib < n)
                                 {
                                         cublasZgemm( MagmaNoTrans, MagmaConjTrans,
-                                                     i, ib, (n-i-ib), zone, dA(0,i+ib),
-                                                     ldda, dA(i, i+ib),ldda, zone,
+                                                     i, ib, (n-i-ib), c_one, dA(0,i+ib),
+                                                     ldda, dA(i, i+ib),ldda, c_one,
                                                      dA(0,i), ldda);
 
                                         cudaStreamSynchronize(stream[0]);
 
                                         cublasZherk( MagmaUpper, MagmaNoTrans, ib,(n-i-ib),
-                                                     done, dA(i, i+ib), ldda,
-                                                     done,  dA(i, i), ldda);
+                                                     d_one, dA(i, i+ib), ldda,
+                                                     d_one, dA(i, i), ldda);
                                 }
                                 
                                 cublasGetMatrix( i+ib,ib, sizeof(cuDoubleComplex),
@@ -199,7 +199,7 @@ magma_zlauum(char uplo, magma_int_t n,
 
                                 cublasZtrmm( MagmaLeft, MagmaLower,
                                              MagmaConjTrans, MagmaNonUnit, ib,
-                                             i, zone, dA(i,i), ldda,
+                                             i, c_one, dA(i,i), ldda,
                                              dA(i, 0),ldda);
 
 
@@ -216,15 +216,15 @@ magma_zlauum(char uplo, magma_int_t n,
                                 if (i+ib < n)
                                 {
                                         cublasZgemm(MagmaConjTrans, MagmaNoTrans,
-                                                        ib, i, (n-i-ib), zone, dA( i+ib,i),
-                                                        ldda, dA(i+ib, 0),ldda, zone,
+                                                        ib, i, (n-i-ib), c_one, dA( i+ib,i),
+                                                        ldda, dA(i+ib, 0),ldda, c_one,
                                                         dA(i,0), ldda);
 
                                         cudaStreamSynchronize(stream[0]);
                                         
                                         cublasZherk(MagmaLower, MagmaConjTrans, ib, (n-i-ib),
-                                                        done, dA(i+ib, i), ldda,
-                                                        done,  dA(i, i), ldda);
+                                                        d_one, dA(i+ib, i), ldda,
+                                                        d_one, dA(i, i), ldda);
                                 }
                                 cublasGetMatrix(ib, i+ib, sizeof(cuDoubleComplex),
                                         dA(i, 0), ldda, A(i, 0), lda);

@@ -175,8 +175,8 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
      =====================================================================
      */
 
-    double done  = 1.;
-    double dzero = 0.;
+    double d_one  = 1.;
+    double d_zero = 0.;
     magma_int_t ione = 1;
     magma_int_t imone = -1;
     char range_[] = {range, 0};
@@ -390,28 +390,28 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
         if( n23 != 0 ){
             if (rk < magma_get_dlaed3_k()){
                 lapackf77_dlacpy("A", &n23, &rk, Q(ctot[0],iil-1), &ldq, s, &n23);
-                blasf77_dgemm("N", "N", &n2, &rk, &n23, &done, &q2[iq2], &n2,
-                              s, &n23, &dzero, Q(n1,iil-1), &ldq );
+                blasf77_dgemm("N", "N", &n2, &rk, &n23, &d_one, &q2[iq2], &n2,
+                              s, &n23, &d_zero, Q(n1,iil-1), &ldq );
             } else {
                 cublasSetMatrix(n23, rk, sizeof(double), Q(ctot[0],iil-1), ldq, ds, n23);
-                cublasDgemm('N', 'N', n2, rk, n23, done, &dq2[iq2], n2, ds, n23, dzero, dq, lddq);
+                cublasDgemm('N', 'N', n2, rk, n23, d_one, &dq2[iq2], n2, ds, n23, d_zero, dq, lddq);
                 cublasGetMatrix(n2, rk, sizeof(double), dq, lddq, Q(n1,iil-1), ldq);
             }
         } else
-            lapackf77_dlaset("A", &n2, &rk, &dzero, &dzero, Q(n1,iil-1), &ldq);
+            lapackf77_dlaset("A", &n2, &rk, &d_zero, &d_zero, Q(n1,iil-1), &ldq);
 
         if( n12 != 0 ) {
             if (rk < magma_get_dlaed3_k()){
                 lapackf77_dlacpy("A", &n12, &rk, Q(0,iil-1), &ldq, s, &n12);
-                blasf77_dgemm("N", "N", &n1, &rk, &n12, &done, q2, &n1,
-                              s, &n12, &dzero, Q(0,iil-1), &ldq);
+                blasf77_dgemm("N", "N", &n1, &rk, &n12, &d_one, q2, &n1,
+                              s, &n12, &d_zero, Q(0,iil-1), &ldq);
             } else {
                 cublasSetMatrix(n12, rk, sizeof(double), Q(0,iil-1), ldq, ds, n12);
-                cublasDgemm('N', 'N', n1, rk, n12, done, dq2, n1, ds, n12, dzero, dq, lddq);
+                cublasDgemm('N', 'N', n1, rk, n12, d_one, dq2, n1, ds, n12, d_zero, dq, lddq);
                 cublasGetMatrix(n1, rk, sizeof(double), dq, lddq, Q(0,iil-1), ldq);
             }
         } else
-            lapackf77_dlaset("A", &n1, &rk, &dzero, &dzero, Q(0,iil-1), &ldq);
+            lapackf77_dlaset("A", &n1, &rk, &d_zero, &d_zero, Q(0,iil-1), &ldq);
     }
 #ifdef ENABLE_TIMER
     end = get_current_time();

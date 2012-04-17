@@ -119,15 +119,15 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
 
 
     /* Local variables */
-    cuDoubleComplex        zone  = MAGMA_Z_ONE;
-    cuDoubleComplex        mzone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex        c_one     = MAGMA_Z_ONE;
+    cuDoubleComplex        c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex        *dwork[4], *dt[4], *work;
 
     char                uplo_[2] = {uplo, 0};
     magma_int_t            ldda, lddla, ldwrk, nb, iinfo, n_local[4], J2, d, num_gpus;
     static magma_int_t    j, jj, jb, jb1, jb2, jb3, J, JB, NB, MB;
-    double                done  = (double) 1.0;
-    double                mdone = (double)-1.0;
+    double                d_one     =  1.0;
+    double                d_neg_one = -1.0;
     long int            upper = lapackf77_lsame(uplo_, "U");
 #if CUDA_VERSION > 3010
     size_t totalMem;
@@ -282,13 +282,13 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
             jb  = jj; //jb1-jb2;       // number of columns in the off-diagona blocks (jj)
             cublasZgemm( MagmaConjTrans, MagmaNoTrans, 
                          jb, jb2, nb, 
-                         mzone, dTup(d, 0, J   ),  nb, 
-                                dTup(d, 0, J+jb),  nb,
-                         zone,  dAup(d, 0, J2), NB);
+                         c_neg_one, dTup(d, 0, J   ),  nb, 
+                                    dTup(d, 0, J+jb),  nb,
+                         c_one,     dAup(d, 0, J2), NB);
 
             cublasZherk(MagmaUpper, MagmaConjTrans, jb2, jb3,
-                        mdone, dTup(d, 0,  J+jb),  nb,
-                        done,  dAup(d, jb, J2), NB);
+                        d_neg_one, dTup(d, 0,  J+jb),  nb,
+                        d_one,     dAup(d, jb, J2), NB);
           }
 
           if( n > J+JB ) { /* off-diagonal */
@@ -311,9 +311,9 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
 
               cublasZgemm( MagmaConjTrans, MagmaNoTrans, 
                            JB, n_local[d], nb, 
-                           mzone, dTup(d, 0, J   ),  nb, 
-                                  dTup(d, 0, J+JB),  nb,
-                           zone,  dAup(d, 0, J2), NB);
+                           c_neg_one, dTup(d, 0, J   ),  nb, 
+                                      dTup(d, 0, J+JB),  nb,
+                           c_one,     dAup(d, 0, J2), NB);
             }
           } 
         } /* end of updates with previous rows */
@@ -390,13 +390,13 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
             jb  = jj; //jb1-jb2;
             cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
                          jb2, jb, nb, 
-                         mzone, dT(d, J+jb, 0), ldda, 
-                                dT(d, J,    0), ldda,
-                         zone,  dA(d, J2,   0), lddla);
+                         c_neg_one, dT(d, J+jb, 0), ldda, 
+                                    dT(d, J,    0), ldda,
+                         c_one,     dA(d, J2,   0), lddla);
 
             cublasZherk(MagmaLower, MagmaNoTrans, jb2, jb3,
-                        mdone, dT(d, J+jb, 0),  ldda,
-                        done,  dA(d, J2,  jb ), lddla);
+                        d_neg_one, dT(d, J+jb, 0),  ldda,
+                        d_one,     dA(d, J2,  jb ), lddla);
           }
 
           if( n > J+JB ) { /* off-diagonal */
@@ -419,9 +419,9 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
 
               cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
                            n_local[d], JB, nb, 
-                           mzone, dT(d, J+JB, 0), ldda, 
-                                  dT(d, J,    0), ldda,
-                           zone,  dA(d, J2,   0), lddla);
+                           c_neg_one, dT(d, J+JB, 0), ldda, 
+                                      dT(d, J,    0), ldda,
+                           c_one,     dA(d, J2,   0), lddla);
             }
           }
         }

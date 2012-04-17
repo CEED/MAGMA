@@ -201,7 +201,7 @@ magma_zhegvx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
   char jobz_[2] = {jobz, 0};
   char range_[2] = {range, 0};
   
-  static cuDoubleComplex zone = MAGMA_Z_ONE;
+  cuDoubleComplex c_one = MAGMA_Z_ONE;
   
   cuDoubleComplex *da;
   cuDoubleComplex *db;
@@ -332,7 +332,7 @@ magma_zhegvx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
         *(unsigned char *)trans = MagmaNoTrans;
       }
       
-      MycublasZtrsm(MagmaLeft, uplo, *trans, MagmaNonUnit, n, *m, zone, db, lddb, dz, lddz);
+      MycublasZtrsm(MagmaLeft, uplo, *trans, MagmaNonUnit, n, *m, c_one, db, lddb, dz, lddz);
       
     } else if (itype == 3) {
       
@@ -345,7 +345,7 @@ magma_zhegvx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
         *(unsigned char *)trans = MagmaConjTrans;
       }
       
-      MycublasZtrmm(MagmaLeft, uplo, *trans, MagmaNonUnit, n, *m, zone, db, lddb, dz, lddz);
+      MycublasZtrmm(MagmaLeft, uplo, *trans, MagmaNonUnit, n, *m, c_one, db, lddb, dz, lddz);
       
     }
     

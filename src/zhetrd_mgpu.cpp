@@ -180,9 +180,9 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
     magma_int_t ln, ldda;
     magma_int_t nb = magma_get_zhetrd_nb(n), ib; 
 
-    cuDoubleComplex z_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex z_one = MAGMA_Z_ONE;
-    double  d_one = MAGMA_D_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    double  d_one  = MAGMA_D_ONE;
     double mv_time = 0.0;
     double up_time = 0.0;
     
@@ -227,7 +227,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
 
     /* Quick return if possible */
     if (n == 0) {
-        work[0] = z_one;
+        work[0] = c_one;
         return *info;
     }
 
@@ -304,7 +304,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
                             work, ldwork,
                             dwork[did], lddwork);
 
-            cublasZher2k(uplo, MagmaNoTrans, i, nb, z_neg_one, 
+            cublasZher2k(uplo, MagmaNoTrans, i, nb, c_neg_one, 
                          dA(did, 0, i), ldda, dwork[did], 
                          lddwork, d_one, dA(did, 0, 0), ldda);
             
@@ -412,13 +412,13 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
             cudaEventRecord(start, 0);
 #endif
             magma_zher2k_mgpu(num_gpus, 'L', 'N', nb, n-i-ib, ib, 
-                         z_neg_one, dwork, n-i, 
-                         d_one, da, ldda, i+ib, k, stream);
+                         c_neg_one, dwork, n-i, 
+                         d_one,     da, ldda, i+ib, k, stream);
 #ifdef PROFILE_SY2RK
             cudaSetDevice(0);
             cudaEventRecord(stop, 0);
 #endif
-            /*cublasZher2k('L', 'N', n-i-nb, nb, z_neg_one, 
+            /*cublasZher2k('L', 'N', n-i-nb, nb, c_neg_one, 
                          dA(0, i+nb, i), ldda, 
                          &dwork[0][nb], lddwork, d_one, 
                          dA(0, i+nb, i+nb), ldda);*/
@@ -600,7 +600,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
 #define dC(id, i, j)  (dc[(id)]+(j)*lddc + (i))
 
     int i, id, ib, ii, kk;
-    cuDoubleComplex z_one = MAGMA_Z_ONE;
+    cuDoubleComplex c_one = MAGMA_Z_ONE;
 
     //printf( "\n ==== zher2k ====\n" );
     /* diagonal update */
@@ -650,7 +650,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
                 cublasZgemm(MagmaNoTrans, MagmaConjTrans, n-i2, j2, k, 
                             alpha, dB1(id, i2+k,     0 ), lddb,
                                    dB( id, i*nb+k,        0 ), lddb, 
-                            z_one, dC( id, i2+offset, offset), lddc);
+                            c_one, dC( id, i2+offset, offset), lddc);
             }
         }
     }
@@ -685,7 +685,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
         cublasZgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k, 
                     alpha, dB1(id, i+k+ib,      0 ), lddb,
                            dB(id,  i+k,         0 ), lddb, 
-                    z_one, dC(id,  i+offset+ib, ii), lddc);
+                    c_one, dC(id,  i+offset+ib, ii), lddc);
         trace_gpu_end( id, kk );
     }
 
@@ -712,7 +712,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
                 cublasZgemm(MagmaNoTrans, MagmaConjTrans, n-i2, j2, k, 
                             alpha, dB( id, i2+k,     0 ), lddb,
                                    dB1(id, i*nb+k,        0 ), lddb, 
-                            z_one, dC( id, i2+offset, offset), lddc);
+                            c_one, dC( id, i2+offset, offset), lddc);
             }
         }
     }
@@ -748,7 +748,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
         cublasZgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k, 
                     alpha, dB(id,  i+k+ib,        0), lddb,
                            dB1(id, i+k,           0), lddb, 
-                    z_one, dC(id,  i+offset+ib,  ii), lddc);
+                    c_one, dC(id,  i+offset+ib,  ii), lddc);
         trace_gpu_end( id, kk );
     }
 

@@ -86,11 +86,11 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
 
     magma_int_t     j, jb, nb;
     char            uplo_[2] = {uplo, 0};
-    cuDoubleComplex zone  = MAGMA_Z_ONE;
-    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex *work;
-    double          done  = (double) 1.0;
-    double          mdone = (double)-1.0;
+    double          d_one     =  1.0;
+    double          d_neg_one = -1.0;
     long int        upper = lapackf77_lsame(uplo_, "U");
 
     *info = 0;
@@ -135,8 +135,8 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                 jb = min(nb, (n-j));
                 
                 cublasZherk(MagmaUpper, MagmaConjTrans, jb, j, 
-                            mdone, dA(0, j), ldda, 
-                            done,  dA(j, j), ldda);
+                            d_neg_one, dA(0, j), ldda, 
+                            d_one,     dA(j, j), ldda);
 
                 cudaMemcpy2DAsync(work,     jb  *sizeof(cuDoubleComplex), 
                                   dA(j, j), ldda*sizeof(cuDoubleComplex), 
@@ -147,9 +147,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                     /* Compute the current block row. */
                     cublasZgemm(MagmaConjTrans, MagmaNoTrans, 
                                 jb, (n-j-jb), j,
-                                mzone, dA(0, j   ), ldda, 
-                                       dA(0, j+jb), ldda,
-                                zone,  dA(j, j+jb), ldda);
+                                c_neg_one, dA(0, j   ), ldda, 
+                                           dA(0, j+jb), ldda,
+                                c_one,     dA(j, j+jb), ldda);
                 }
                 
                 cudaStreamSynchronize(stream[1]);
@@ -167,8 +167,8 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                 if ( (j+jb) < n)
                     cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
                                  jb, (n-j-jb),
-                                 zone, dA(j, j   ), ldda, 
-                                       dA(j, j+jb), ldda);
+                                 c_one, dA(j, j   ), ldda, 
+                                        dA(j, j+jb), ldda);
             }
         } else {
             //=========================================================
@@ -180,8 +180,8 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                 jb = min(nb, (n-j));
 
                 cublasZherk(MagmaLower, MagmaNoTrans, jb, j,
-                            mdone, dA(j, 0), ldda, 
-                            done,  dA(j, j), ldda);
+                            d_neg_one, dA(j, 0), ldda, 
+                            d_one,     dA(j, j), ldda);
                 
                 cudaMemcpy2DAsync( work,     jb  *sizeof(cuDoubleComplex),
                                    dA(j, j), ldda*sizeof(cuDoubleComplex),
@@ -191,9 +191,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                 if ( (j+jb) < n) {
                     cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
                                  (n-j-jb), jb, j,
-                                 mzone, dA(j+jb, 0), ldda, 
-                                        dA(j,    0), ldda,
-                                 zone,  dA(j+jb, j), ldda);
+                                 c_neg_one, dA(j+jb, 0), ldda, 
+                                            dA(j,    0), ldda,
+                                 c_one,     dA(j+jb, j), ldda);
                 }
 
                 cudaStreamSynchronize(stream[1]);
@@ -210,8 +210,8 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                 if ( (j+jb) < n)
                     cublasZtrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
                                 (n-j-jb), jb, 
-                                zone, dA(j,    j), ldda, 
-                                      dA(j+jb, j), ldda);
+                                c_one, dA(j,    j), ldda, 
+                                       dA(j+jb, j), ldda);
             }
 
         }

@@ -96,15 +96,15 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
 
 
     /* Local variables */
-    cuDoubleComplex            zone  = MAGMA_Z_ONE;
-    cuDoubleComplex            mzone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex            c_one     = MAGMA_Z_ONE;
+    cuDoubleComplex            c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex            *work, *dt;
 
     char                    uplo_[2] = {uplo, 0};
     magma_int_t                ldda, nb;
     static magma_int_t        j, jj, jb, J, JB, NB, MB;
-    double                    done  = (double) 1.0;
-    double                    mdone = (double)-1.0;
+    double                    d_one     =  1.0;
+    double                    d_neg_one = -1.0;
     long int                upper = lapackf77_lsame(uplo_, "U");
 #if CUDA_VERSION > 3010
         size_t totalMem;
@@ -202,14 +202,14 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
                   /* update the current big-panel *
                    * using the previous block-row */
               cublasZherk(MagmaUpper, MagmaConjTrans, JB, nb,
-                          mdone, dTup(0, J), nb, 
-                          done,  dAup(0, J), NB);
+                          d_neg_one, dTup(0, J), nb, 
+                          d_one,     dAup(0, J), NB);
                   if( (J+JB) < n ) 
               cublasZgemm( MagmaConjTrans, MagmaNoTrans, 
                            JB, (n-J-JB), nb, 
-                           mzone, dTup(0, J   ), nb, 
-                                  dTup(0, J+JB), nb,
-                           zone,  dAup(0, J+JB), NB);
+                           c_neg_one, dTup(0, J   ), nb, 
+                                      dTup(0, J+JB), nb,
+                           c_one,     dAup(0, J+JB), NB);
                 }
 
                 /* for each block-column in the big panel */
@@ -219,8 +219,8 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
 
               /* Update the current diagonal block */
               cublasZherk(MagmaUpper, MagmaConjTrans, jb, jj, 
-                          mdone, dAup(0,  j), NB, 
-                          done,  dAup(jj, j), NB);
+                          d_neg_one, dAup(0,  j), NB, 
+                          d_one,     dAup(jj, j), NB);
 
                   /* send the diagonal-block to CPU */
               cudaMemcpy2DAsync(  A  (J, j), lda*sizeof(cuDoubleComplex), 
@@ -236,9 +236,9 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
                         /* update the current off-diagonal blocks with the previous rows */
                 cublasZgemm(MagmaConjTrans, MagmaNoTrans, 
                             jb, (n-j-jb), jj,
-                            mzone, dAup(0,  j   ), NB, 
-                                   dAup(0,  j+jb), NB,
-                            zone,  dAup(jj, j+jb), NB);
+                            c_neg_one, dAup(0,  j   ), NB, 
+                                       dAup(0,  j+jb), NB,
+                            c_one,     dAup(jj, j+jb), NB);
               }
              
                   /* factor the diagonal block */
@@ -259,8 +259,8 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
                         /* do the solves on GPU */
                 cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
                             jb, (n-j-jb),
-                            zone, dAup(jj, j   ), NB, 
-                                  dAup(jj, j+jb), NB);
+                            c_one, dAup(jj, j   ), NB, 
+                                   dAup(jj, j+jb), NB);
 
                     /* send off-diagonal block to CPU */
             //cudaMemcpy2DAsync(  A  (j,  j+jb), lda*sizeof(cuDoubleComplex),
@@ -304,14 +304,14 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
                   /* update the current big-panel    *
                    * using the previous block-column */
               cublasZherk(MagmaLower, MagmaNoTrans, JB, nb,
-                          mdone, dT(J, 0), ldda, 
-                          done,  dA(J, 0), ldda);
+                          d_neg_one, dT(J, 0), ldda, 
+                          d_one,     dA(J, 0), ldda);
                   if( J+JB < n )
               cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
                            (n-J-JB), JB, nb,
-                           mzone, dT(J+JB, 0), ldda, 
-                                  dT(J,    0), ldda,
-                           zone,  dA(J+JB, 0), ldda);
+                           c_neg_one, dT(J+JB, 0), ldda, 
+                                      dT(J,    0), ldda,
+                           c_one,     dA(J+JB, 0), ldda);
                 }
 
                 /* for each block-column in the big panel */
@@ -321,8 +321,8 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
 
               /* Update the current diagonal block */
               cublasZherk(MagmaLower, MagmaNoTrans, jb, jj,
-                          mdone, dA(j, 0), ldda, 
-                          done,  dA(j, jj), ldda);
+                          d_neg_one, dA(j, 0),  ldda, 
+                          d_one,     dA(j, jj), ldda);
 
                   /* upload the current diagonal block to CPU for factorization *
                    * this requires the synchronization before factorization     */
@@ -342,9 +342,9 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
                          * using the previous columns                                 */
                 cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
                              (n-j-jb), jb, jj,
-                             mzone, dA(j+jb, 0),  ldda, 
-                                    dA(j,    0),  ldda,
-                             zone,  dA(j+jb, jj), ldda);
+                             c_neg_one, dA(j+jb, 0),  ldda, 
+                                        dA(j,    0),  ldda,
+                             c_one,     dA(j+jb, jj), ldda);
               }
                 
                   /* CPU wait for the diagonal-block and factor */
@@ -364,8 +364,8 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
                 
                         /* GPU do the solves with the current diagonal-block */
                 cublasZtrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
-                             (n-j-jb), jb, zone, 
-                                                 dA(j,    jj), ldda, 
+                             (n-j-jb), jb, c_one, 
+                             dA(j,    jj), ldda, 
                              dA(j+jb, jj), ldda);
                   }
                 } /* end of for jj */

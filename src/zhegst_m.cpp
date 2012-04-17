@@ -97,11 +97,11 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
 
     char uplo_[2] = {uplo, 0};
     magma_int_t        k, kb, j, jb, kb2;
-    magma_int_t        ldda, dima ,lddbr, lddbc;
-    cuDoubleComplex    zone  = MAGMA_Z_ONE;
-    cuDoubleComplex    mzone  = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex    zhalf  = MAGMA_Z_HALF;
-    cuDoubleComplex    mzhalf  = MAGMA_Z_NEG_HALF;
+    magma_int_t        ldda, dima, lddbr, lddbc;
+    cuDoubleComplex    c_one      = MAGMA_Z_ONE;
+    cuDoubleComplex    c_neg_one  = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex    c_half     = MAGMA_Z_HALF;
+    cuDoubleComplex    c_neg_half = MAGMA_Z_NEG_HALF;
     cuDoubleComplex* dw[N_MAX_GPU];
     cudaStream_t stream [N_MAX_GPU][3];
     magma_int_t igpu = 0;
@@ -109,7 +109,7 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
     int gpu_b;
     cudaGetDevice(&gpu_b);
 
-    double             done  = (double) 1.0;
+    double             d_one = 1.0;
     long int           upper = lapackf77_lsame(uplo_, "U");
 
     magma_int_t nb = magma_get_zhegst_m_nb();
@@ -210,7 +210,7 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
                     // dB_r(0,0) stores B(k,k)
                     cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
                                 kb, n-(k+1)*nb,
-                                zone, dB_r(igpu, 0, 0), lddbr,
+                                c_one, dB_r(igpu, 0, 0), lddbr,
                                 dA(igpu, k/nrgpu, k+1), ldda);
                 }
 
@@ -227,9 +227,9 @@ printf("hegs2%d\n", k);
 
                     cublasZhemm(MagmaLeft, MagmaUpper,
                                 kb, n-(k+1)*nb,
-                                mzhalf, dA(igpu, k/nrgpu, k), ldda,
+                                c_neg_half, dA(igpu, k/nrgpu, k), ldda,
                                 dB_r(igpu, 0, k+1), lddbr,
-                                zone, dA(igpu, k/nrgpu, k+1), ldda);
+                                c_one, dA(igpu, k/nrgpu, k+1), ldda);
 
                     cudaStreamSynchronize(stream[igpu][0]);
 
@@ -252,9 +252,9 @@ printf("hegs2%d\n", k);
 
                     cublasZhemm(MagmaLeft, MagmaUpper,
                                 kb, n-(k+1)*nb,
-                                mzhalf, dA(igpu, k/nrgpu, k), ldda,
+                                c_neg_half, dA(igpu, k/nrgpu, k), ldda,
                                 dB_r(igpu, 0, k+1), lddbr,
-                                zone, dA(igpu, k/nrgpu, k+1), ldda);
+                                c_one, dA(igpu, k/nrgpu, k+1), ldda);
 
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaStreamSynchronize(stream[igpu][0]);
@@ -267,9 +267,9 @@ printf("hegs2%d\n", k);
                         cublasSetKernelStream(stream[igpu][(j/nrgpu)%3]);
                         cublasZher2k(MagmaUpper, MagmaConjTrans,
                                      jb, nb,
-                                     mzone, dB_r(igpu, 1, j), lddbr,
+                                     c_neg_one, dB_r(igpu, 1, j), lddbr,
                                      dB_r(igpu, 0, j), lddbr,
-                                     done, dA(igpu, j/nrgpu, j), ldda);
+                                     d_one, dA(igpu, j/nrgpu, j), ldda);
                         cudaStreamSynchronize(stream[igpu][((j)/nrgpu)%3]); // Needed for correctness. Why?
                         if (j == k+1){
                             cudaStreamSynchronize(stream[igpu][(j/nrgpu)%3]);
@@ -288,11 +288,11 @@ printf("hegs2%d\n", k);
                         igpu = j%nrgpu;
                         cudaSetDevice(igpu);
                         cublasSetKernelStream(stream[igpu][0]);
-                        cublasZgemm('C', 'N', nb, n-(j+1)*nb, nb, mzone, dB_r(igpu, 0, j), lddbr,
-                                    dB_r(igpu, 1, j+1), lddbr, zone, dA(igpu, j/nrgpu, j+1), ldda );
+                        cublasZgemm('C', 'N', nb, n-(j+1)*nb, nb, c_neg_one, dB_r(igpu, 0, j), lddbr,
+                                    dB_r(igpu, 1, j+1), lddbr, c_one, dA(igpu, j/nrgpu, j+1), ldda );
 
-                        cublasZgemm('C', 'N', nb, n-(j+1)*nb, nb, mzone, dB_r(igpu, 1, j), lddbr,
-                                    dB_r(igpu, 0, j+1), lddbr, zone, dA(igpu, j/nrgpu, j+1), ldda );
+                        cublasZgemm('C', 'N', nb, n-(j+1)*nb, nb, c_neg_one, dB_r(igpu, 1, j), lddbr,
+                                    dB_r(igpu, 0, j+1), lddbr, c_one, dA(igpu, j/nrgpu, j+1), ldda );
                     }
                 }
             }
@@ -332,7 +332,7 @@ printf("hegs2%d\n", k);
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
                         cublasSetKernelStream(stream[igpu][j%2]);
-                        cublasZtrsm('R', uplo, 'N', 'N', nloc[igpu], jb, zone, dB_r(igpu, j%2, j), lddbr,
+                        cublasZtrsm('R', uplo, 'N', 'N', nloc[igpu], jb, c_one, dB_r(igpu, j%2, j), lddbr,
                                     dA(igpu, 0, j), ldda );
                     }
 
@@ -341,8 +341,8 @@ printf("hegs2%d\n", k);
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][j%2]);
-                            cublasZgemm('N', 'N', nloc[igpu], n-(j+1)*nb, nb, mzone, dA(igpu, 0, j), ldda,
-                                        dB_r(igpu, j%2, j+1), lddbr, zone, dA(igpu, 0, j+1), ldda );
+                            cublasZgemm('N', 'N', nloc[igpu], n-(j+1)*nb, nb, c_neg_one, dA(igpu, 0, j), ldda,
+                                        dB_r(igpu, j%2, j+1), lddbr, c_one, dA(igpu, 0, j+1), ldda );
                         }
                     }
 
@@ -410,7 +410,7 @@ printf("hegs2%d\n", k);
                     // dB_c(0,0) stores B(k,k)
                     cublasZtrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit,
                                 n-(k+1)*nb, kb,
-                                zone, dB_c(igpu, 0, 0), lddbc,
+                                c_one, dB_c(igpu, 0, 0), lddbc,
                                 dA(igpu, k+1, k/nrgpu), ldda);
                 }
 
@@ -427,9 +427,9 @@ printf("hegs2%d\n", k);
 
                     cublasZhemm(MagmaRight, MagmaLower,
                                 n-(k+1)*nb, kb,
-                                mzhalf, dA(igpu, k, k/nrgpu), ldda,
+                                c_neg_half, dA(igpu, k, k/nrgpu), ldda,
                                 dB_c(igpu, k+1, 0), lddbc,
-                                zone, dA(igpu, k+1, k/nrgpu), ldda);
+                                c_one, dA(igpu, k+1, k/nrgpu), ldda);
 
                     cudaStreamSynchronize(stream[igpu][0]);
 
@@ -452,9 +452,9 @@ printf("hegs2%d\n", k);
 
                     cublasZhemm(MagmaRight, MagmaLower,
                                 n-(k+1)*nb, kb,
-                                mzhalf, dA(igpu, k, k/nrgpu), ldda,
+                                c_neg_half, dA(igpu, k, k/nrgpu), ldda,
                                 dB_c(igpu, k+1, 0), lddbc,
-                                zone, dA(igpu, k+1, k/nrgpu), ldda);
+                                c_one, dA(igpu, k+1, k/nrgpu), ldda);
 
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaStreamSynchronize(stream[igpu][0]);
@@ -467,9 +467,9 @@ printf("hegs2%d\n", k);
                         cublasSetKernelStream(stream[igpu][(j/nrgpu)%3]);
                         cublasZher2k(MagmaLower, MagmaNoTrans,
                                      jb, nb,
-                                     mzone, dB_c(igpu, j, 1), lddbc,
+                                     c_neg_one, dB_c(igpu, j, 1), lddbc,
                                      dB_c(igpu, j, 0), lddbc,
-                                     done, dA(igpu, j, j/nrgpu), ldda);
+                                     d_one, dA(igpu, j, j/nrgpu), ldda);
                         cudaStreamSynchronize(stream[igpu][((j)/nrgpu)%3]); // Needed for correctness. Why?
                         if (j == k+1){
                             cudaStreamSynchronize(stream[igpu][(j/nrgpu)%3]);
@@ -488,11 +488,11 @@ printf("hegs2%d\n", k);
                         igpu = j%nrgpu;
                         cudaSetDevice(igpu);
                         cublasSetKernelStream(stream[igpu][0]);
-                        cublasZgemm('N', 'C', n-(j+1)*nb, nb, nb, mzone, dB_c(igpu, j+1, 1), lddbc,
-                                    dB_c(igpu, j, 0), lddbc, zone, dA(igpu, j+1, j/nrgpu), ldda );
+                        cublasZgemm('N', 'C', n-(j+1)*nb, nb, nb, c_neg_one, dB_c(igpu, j+1, 1), lddbc,
+                                    dB_c(igpu, j, 0), lddbc, c_one, dA(igpu, j+1, j/nrgpu), ldda );
 
-                        cublasZgemm('N', 'C', n-(j+1)*nb, nb, nb, mzone, dB_c(igpu, j+1, 0), lddbc,
-                                    dB_c(igpu, j, 1), lddbc, zone, dA(igpu, j+1, j/nrgpu), ldda );
+                        cublasZgemm('N', 'C', n-(j+1)*nb, nb, nb, c_neg_one, dB_c(igpu, j+1, 0), lddbc,
+                                    dB_c(igpu, j, 1), lddbc, c_one, dA(igpu, j+1, j/nrgpu), ldda );
                     }
                 }
             }
@@ -532,7 +532,7 @@ printf("hegs2%d\n", k);
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
                         cublasSetKernelStream(stream[igpu][j%2]);
-                        cublasZtrsm('L', uplo, 'N', 'N', jb, nloc[igpu], zone, dB_c(igpu, j, j%2), lddbc,
+                        cublasZtrsm('L', uplo, 'N', 'N', jb, nloc[igpu], c_one, dB_c(igpu, j, j%2), lddbc,
                                     dA(igpu, j, 0), ldda );
                     }
 
@@ -541,8 +541,8 @@ printf("hegs2%d\n", k);
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][j%2]);
-                            cublasZgemm('N', 'N', n-(j+1)*nb, nloc[igpu], nb, mzone, dB_c(igpu, j+1, j%2), lddbc,
-                                        dA(igpu, j, 0), ldda, zone, dA(igpu, j+1, 0), ldda );
+                            cublasZgemm('N', 'N', n-(j+1)*nb, nloc[igpu], nb, c_neg_one, dB_c(igpu, j+1, j%2), lddbc,
+                                        dA(igpu, j, 0), ldda, c_one, dA(igpu, j+1, 0), ldda );
                         }
                     }
 
@@ -586,32 +586,32 @@ printf("hegs2%d\n", k);
 
                     cublasZtrmm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
                                 k, kb,
-                                zone ,dB(0,0), lddb,
+                                c_one ,dB(0,0), lddb,
                                 dA(0,k), ldda);
 
                     cublasZhemm(MagmaRight, MagmaUpper,
                                 k, kb,
-                                zhalf, dA(k,k), ldda,
+                                c_half, dA(k,k), ldda,
                                 dB(0,k), lddb,
-                                zone, dA(0, k), ldda);
+                                c_one, dA(0, k), ldda);
 
                     cudaStreamSynchronize(stream[1]);
 
                     cublasZher2k(MagmaUpper, MagmaNoTrans,
                                  k, kb,
-                                 zone, dA(0,k), ldda,
+                                 c_one, dA(0,k), ldda,
                                  dB(0,k), lddb,
-                                 done, dA(0,0), ldda);
+                                 d_one, dA(0,0), ldda);
 
                     cublasZhemm(MagmaRight, MagmaUpper,
                                 k, kb,
-                                zhalf, dA(k,k), ldda,
+                                c_half, dA(k,k), ldda,
                                 dB(0,k), lddb,
-                                zone, dA(0, k), ldda);
+                                c_one, dA(0, k), ldda);
 
                     cublasZtrmm(MagmaRight, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
                                 k, kb,
-                                zone, dB(k,k), lddb,
+                                c_one, dB(k,k), lddb,
                                 dA(0,k), ldda);
 
                 }
@@ -688,15 +688,15 @@ printf("hegs2%d\n", k);
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
                         cublasSetKernelStream(stream[igpu][k%2]);
-                        cublasZgemm('N', 'N', nloc[igpu], k*nb, kb, zone, dA(igpu, n-nloc[igpu], k), ldda,
-                                    dB_r(igpu, k%2, 0), lddbr, zone, dA(igpu, n-nloc[igpu], 0), ldda );
+                        cublasZgemm('N', 'N', nloc[igpu], k*nb, kb, c_one, dA(igpu, n-nloc[igpu], k), ldda,
+                                    dB_r(igpu, k%2, 0), lddbr, c_one, dA(igpu, n-nloc[igpu], 0), ldda );
                     }
                 }
 
                 for (igpu = 0; igpu < nrgpu; ++igpu){
                     cudaSetDevice(igpu);
                     cublasSetKernelStream(stream[igpu][k%2]);
-                    cublasZtrmm('R', uplo, 'N', 'N', nloc[igpu], kb, zone, dB_r(igpu, k%2, k), lddbr,
+                    cublasZtrmm('R', uplo, 'N', 'N', nloc[igpu], kb, c_one, dB_r(igpu, k%2, k), lddbr,
                                 dA(igpu, n-nloc[igpu], k), ldda );
                 }
 
@@ -716,9 +716,9 @@ printf("hegs2%d\n", k);
 
             cublasZhemm(MagmaRight, MagmaLower,
                         kb, k*nb,
-                        zhalf, dA(igpu, k/nrgpu, 0), ldda,
+                        c_half, dA(igpu, k/nrgpu, 0), ldda,
                         dB_r(igpu, 0, 0), lddbr,
-                        zone, dA(igpu, k/nrgpu, 0), ldda);
+                        c_one, dA(igpu, k/nrgpu, 0), ldda);
 
             cudaStreamSynchronize(stream[igpu][0]);
 
@@ -741,9 +741,9 @@ printf("hegs2%d\n", k);
 
             cublasZhemm(MagmaRight, MagmaLower,
                         n-(k+1)*nb, kb,
-                        mzhalf, dA(igpu, k, k/nrgpu), ldda,
+                        c_neg_half, dA(igpu, k, k/nrgpu), ldda,
                         dB_c(igpu, k+1, 0), lddbc,
-                        zone, dA(igpu, k+1, k/nrgpu), ldda);
+                        c_one, dA(igpu, k+1, k/nrgpu), ldda);
 
             for (igpu = 0; igpu < nrgpu; ++igpu){
                 cudaStreamSynchronize(stream[igpu][0]);
@@ -774,32 +774,32 @@ printf("hegs2%d\n", k);
 
                     cublasZtrmm(MagmaRight, MagmaLower, MagmaNoTrans, MagmaNonUnit,
                                 kb, k,
-                                zone ,dB(0,0), lddb,
+                                c_one ,dB(0,0), lddb,
                                 dA(k,0), ldda);
 
                     cublasZhemm(MagmaLeft, MagmaLower,
                                 kb, k,
-                                zhalf, dA(k,k), ldda,
+                                c_half, dA(k,k), ldda,
                                 dB(k,0), lddb,
-                                zone, dA(k, 0), ldda);
+                                c_one, dA(k, 0), ldda);
 
                     cudaStreamSynchronize(stream[1]);
 
                     cublasZher2k(MagmaLower, MagmaConjTrans,
                                  k, kb,
-                                 zone, dA(k,0), ldda,
+                                 c_one, dA(k,0), ldda,
                                  dB(k,0), lddb,
-                                 done, dA(0,0), ldda);
+                                 d_one, dA(0,0), ldda);
 
                     cublasZhemm(MagmaLeft, MagmaLower,
                                 kb, k,
-                                zhalf, dA(k,k), ldda,
+                                c_half, dA(k,k), ldda,
                                 dB(k,0), lddb,
-                                zone, dA(k, 0), ldda);
+                                c_one, dA(k, 0), ldda);
 
                     cublasZtrmm(MagmaLeft, MagmaLower, MagmaConjTrans, MagmaNonUnit,
                                 kb, k,
-                                zone, dB(k,k), lddb,
+                                c_one, dB(k,k), lddb,
                                 dA(k,0), ldda);
                 }
 

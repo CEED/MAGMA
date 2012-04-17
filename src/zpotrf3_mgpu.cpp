@@ -96,10 +96,10 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
 
     magma_int_t     j, jb, nb0, nb2, d, id, j_local, j_local2, buf;
     char            uplo_[2] = {uplo, 0};
-    cuDoubleComplex zone  = MAGMA_Z_ONE;
-    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
-    double          done  = (double) 1.0;
-    double          mdone = (double)-1.0;
+    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    double          d_one     =  1.0;
+    double          d_neg_one = -1.0;
     long int        upper = lapackf77_lsame(uplo_, "U");
     cuDoubleComplex *dlpanel;
     magma_int_t n_local[4], ldpanel;
@@ -166,8 +166,8 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
         //trace_gpu_start( id, 0, stream[id][0], "syrk", "syrk" );
         magmablasSetKernelStream(stream[id][stream1]);
         cublasZherk(MagmaUpper, MagmaConjTrans, jb, j, 
-                    mdone, dlA(id, 0, nb*j_local), ldda, 
-                    done,  dlA(id, j, nb*j_local), ldda);
+                    d_neg_one, dlA(id, 0, nb*j_local), ldda, 
+                    d_one,     dlA(id, j, nb*j_local), ldda);
         //trace_gpu_end( id, 0, stream[id][0] );
 
         /* send the diagonal to cpu on stream1 (GPU interface: fist block is on gpu)*/
@@ -217,9 +217,9 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
             //trace_gpu_start( d, 0, stream[d][0], "gemm", "gemm" );
             cublasZgemm(MagmaConjTrans, MagmaNoTrans, 
                         jb, (n_local[d]-nb*(j_local2-1)-jb), j, 
-                        mzone, dlpanel,                ldpanel, 
-                               dlA(d, 0, nb*j_local2), ldda,
-                        zone,  dlA(d, j, nb*j_local2), ldda);
+                        c_neg_one, dlpanel,                ldpanel, 
+                                   dlA(d, 0, nb*j_local2), ldda,
+                        c_one,     dlA(d, j, nb*j_local2), ldda);
             cudaEventRecord( event2[d], stream[d][stream2] );
             //trace_gpu_end( d, 0, stream[d][0] );
           }
@@ -289,7 +289,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
               cudaStreamWaitEvent( stream[d][stream1], event2[d], 0 ); //update done
               //trace_gpu_start( d, 1, stream[d][1], "trsm", "trsm" );
               cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
-                           jb, nb0, zone,
+                           jb, nb0, c_one,
                            dlpanel,                ldpanel, 
                            dlA(d, j, nb*j_local2), ldda);
               cudaEventRecord( event0[d], stream[d][stream1] );
@@ -315,7 +315,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
               cudaStreamWaitEvent( stream[d][stream2], event1[d], 0 ); // panel received
               //trace_gpu_start( d, 0, stream[d][0], "trsm", "trsm" );
               cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
-                           jb, nb2, zone,
+                           jb, nb2, c_one,
                            dlpanel,                ldpanel, 
                            dlA(d, j, nb*j_local2), ldda);
               //trace_gpu_end( d, 0, stream[d][0] );
@@ -345,7 +345,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
             cudaStreamWaitEvent( stream[d][stream2], event1[d], 0 ); // panel received
             //trace_gpu_start( d, 0, stream[d][0], "trsm", "trsm" );
             cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
-                         jb, nb2, zone,
+                         jb, nb2, c_one,
                          dlpanel,                    ldpanel, 
                          dlA(d, j, nb*j_local2+nb0), ldda);
             //trace_gpu_end( d, 0, stream[d][0] );
@@ -369,8 +369,8 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
         magmablasSetKernelStream(stream[id][stream1]);
         //trace_gpu_start( id, 0, stream[id][0], "syrk", "syrk" );
         cublasZherk(MagmaLower, MagmaNoTrans, jb, j,
-                    mdone, dlAT(id, nb*j_local, 0), ldda,
-                    done,  dlAT(id, nb*j_local, j), ldda);
+                    d_neg_one, dlAT(id, nb*j_local, 0), ldda,
+                    d_one,     dlAT(id, nb*j_local, j), ldda);
         //trace_gpu_end( id, 0, stream[id][0] );
 
         /* send the diagonal to cpu on stream1 */
@@ -419,9 +419,9 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
             //trace_gpu_start( d, 0, stream[d][0], "gemm", "gemm" );
             cublasZgemm( MagmaNoTrans, MagmaConjTrans,
                          n_local[d]-nb*j_local2, jb, j,
-                         mzone, dlAT(d, nb*j_local2, 0), ldda,
-                                dlpanel,                 ldpanel,
-                         zone,  dlAT(d, nb*j_local2, j), ldda);
+                         c_neg_one, dlAT(d, nb*j_local2, 0), ldda,
+                                    dlpanel,                 ldpanel,
+                         c_one,     dlAT(d, nb*j_local2, j), ldda);
             //trace_gpu_end( d, 0, stream[d][0] );
             cudaEventRecord( event2[d], stream[d][stream2] );
           }
@@ -486,7 +486,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
               magmablasSetKernelStream(stream[d][stream1]);
               cudaStreamWaitEvent( stream[d][stream1], event2[d], 0 ); // update done
               cublasZtrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
-                           nb0, jb, zone,
+                           nb0, jb, c_one,
                            dlpanel,                 ldpanel, 
                            dlAT(d, nb*j_local2, j), ldda);
               //trace_gpu_end( d, 0, stream[d][0] );
@@ -512,7 +512,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
               cudaStreamWaitEvent( stream[d][stream2], event1[d], 0 ); // panel received
               //trace_gpu_start( d, 0, stream[d][0], "trsm", "trsm" );
               cublasZtrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
-                           nb2, jb, zone,
+                           nb2, jb, c_one,
                            dlpanel,                 ldpanel, 
                            dlAT(d, nb*j_local2, j), ldda);
               //trace_gpu_end( d, 0, stream[d][0] );
@@ -542,7 +542,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
             cudaStreamWaitEvent( stream[d][stream2], event1[d], 0 ); // panel received
             //trace_gpu_start( d, 1, stream[d][1], "trsm", "trsm" );
             cublasZtrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
-                         nb2, jb, zone,
+                         nb2, jb, c_one,
                          dlpanel,                     ldpanel, 
                          dlAT(d, nb*j_local2+nb0, j), ldda);
             //trace_gpu_end( d, 1, stream[d][1] );
