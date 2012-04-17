@@ -458,6 +458,9 @@ magma_int_t magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
 void magma_zprint    ( int m, int n, cuDoubleComplex  *A, int lda  );
 void magma_zprint_gpu( int m, int n, cuDoubleComplex *dA, int ldda );
 
+void zpanel_to_q(char uplo, int ib, cuDoubleComplex *A, int lda, cuDoubleComplex *work);
+void zq_to_panel(char uplo, int ib, cuDoubleComplex *A, int lda, cuDoubleComplex *work);
+
 #ifdef __cplusplus
 }
 #endif

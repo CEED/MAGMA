@@ -5,6 +5,7 @@
        Univ. of Colorado, Denver
        November 2011
 
+       @author Mark Gates
        @precisions normal z -> s d c
 
 */
