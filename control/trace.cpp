@@ -47,15 +47,6 @@ struct event_log glog;
 
 
 // ----------------------------------------
-double get_time( void )
-{
-    struct timeval time_val;
-    gettimeofday( &time_val, NULL );
-    return time_val.tv_sec + time_val.tv_usec*1e-6;
-}
-
-
-// ----------------------------------------
 void trace_init( int ncore, int ngpu, int nstream, cudaStream_t* streams )
 {
     if ( ncore > MAX_CORES ) {
@@ -101,7 +92,7 @@ void trace_init( int ncore, int ngpu, int nstream, cudaStream_t* streams )
         cudaSetDevice( dev );
         cudaDeviceSynchronize();
     }
-    glog.cpu_first = get_time();
+    glog.cpu_first = magma_wtime();
 }
 
 
@@ -109,7 +100,7 @@ void trace_init( int ncore, int ngpu, int nstream, cudaStream_t* streams )
 void trace_cpu_start( int core, const char* tag, const char* lbl )
 {
     int id = glog.cpu_id[core];
-    glog.cpu_start[core][id] = get_time();
+    glog.cpu_start[core][id] = magma_wtime();
     magma_strlcpy( glog.cpu_tag  [core][id], tag, MAX_LABEL_LEN );
     magma_strlcpy( glog.cpu_label[core][id], lbl, MAX_LABEL_LEN );
 }
@@ -119,7 +110,7 @@ void trace_cpu_start( int core, const char* tag, const char* lbl )
 void trace_cpu_end( int core )
 {
     int id = glog.cpu_id[core];
-    glog.cpu_end[core][id] = get_time();
+    glog.cpu_end[core][id] = magma_wtime();
     if ( id+1 < MAX_EVENTS ) {
         glog.cpu_id[core] = id+1;
     }
@@ -132,7 +123,7 @@ void trace_gpu_start( int dev, int s, const char* tag, const char* lbl )
     int t = dev*glog.nstream + s;
     int id = glog.gpu_id[t];
 #if TRACE_METHOD == 2
-    glog.gpu_start[t][id] = get_time();
+    glog.gpu_start[t][id] = magma_wtime();
 #else
     cudaEventCreate( &glog.gpu_start[t][id] );
     cudaEventRecord(  glog.gpu_start[t][id], glog.streams[t] );
@@ -179,7 +170,7 @@ void trace_finalize( const char* filename, const char* cssfile )
     fprintf( stderr, "writing trace to '%s'\n", filename );
     
     int h = (int)( (glog.ncore + glog.ngpu*glog.nstream)*(height + space) - space + 2*margin );
-    int w = (int)( (get_time() - glog.cpu_first) * xscale + 2*margin );
+    int w = (int)( (magma_wtime() - glog.cpu_first) * xscale + 2*margin );
     fprintf( trace_file,
              "<?xml version=\"1.0\" standalone=\"no\"?>\n"
              "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n"

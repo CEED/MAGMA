@@ -66,6 +66,8 @@ int magma_get_zhegst_nb(int m);
 magma_timestr_t get_current_time(void);
 double GetTimerValue(magma_timestr_t time_1, magma_timestr_t time_2);
 
+double magma_wtime( void );
+
 void printout_devices();
 
 void swp2pswp(char trans, int n, int *ipiv, int *newipiv);

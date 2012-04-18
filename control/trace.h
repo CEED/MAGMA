@@ -34,6 +34,4 @@ void trace_finalize ( const char* filename, const char* cssfile );
 
 #endif
 
-double get_time( void );
-
 #endif        //  #ifndef TRACE_H
