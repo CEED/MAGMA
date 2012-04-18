@@ -72,6 +72,8 @@ void swp2pswp(char trans, int n, int *ipiv, int *newipiv);
 
 float getv(float *da);
 
+size_t magma_strlcpy(char *dst, const char *src, size_t siz);
+
 #ifdef __cplusplus
 }
 #endif
