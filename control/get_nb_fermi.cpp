@@ -7,7 +7,7 @@
 */
 
 // ==== Definition of blocking sizes for Nvidia Fermi cards
-#if defined(HAVE_CUBLAS) and (GPUSHMEM >= 200)
+#if (GPUSHMEM >= 200)
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Return nb for potrf based on n

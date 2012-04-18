@@ -7,7 +7,7 @@
 */
 
 // ==== Definition of blocking sizes for Nvidia Tesla (pre-Fermi) cards
-#if defined(HAVE_CUBLAS) and (GPUSHMEM < 200)
+#if (GPUSHMEM < 200)
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Return nb for potrf based on n
