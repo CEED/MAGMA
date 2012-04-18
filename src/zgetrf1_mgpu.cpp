@@ -197,7 +197,7 @@ magma_zgetrf1_mgpu(magma_int_t num_gpus,
                 lapackf77_zgetrf( &rows, &nb, work, &lddwork, ipiv+i*nb, &iinfo);
                 if ( (*info == 0) && (iinfo > 0) ) {
                     *info = iinfo + i*nb;
-                    break;
+                    //break;
                 }
 
                 /* start sending the panel to all the gpus */

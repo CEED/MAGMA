@@ -332,8 +332,8 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
               *info = iinfo;
               break;
             } else if( iinfo != 0 ) {
-              *info = iinfo + i*nb;
-              break;
+              *info = iinfo + I * NB;		
+              //break;
             }
             /* adjust pivots */
             for( ii=I; ii<min(I+N,m); ii++ ) ipiv[ii] += I;
