@@ -203,7 +203,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
 
     float ctime, dtime;
 
-    int panel_gpunum, i_local, n_local[4], la_gpu, displacement; 
+    int panel_gpunum=-1, i_local, n_local[4], la_gpu, displacement; 
 
     *info = 0;
     if (m < 0) {
