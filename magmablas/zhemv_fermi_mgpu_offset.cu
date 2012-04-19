@@ -892,7 +892,7 @@ void magmablas_zhemv_200_L_mgpu_offset(magma_int_t m, cuDoubleComplex alpha,
 
     magmablas_zhemv_200_L_update_mgpu_offset<<< grid, threads_u, 0, magma_stream >>>(
         m, alpha, A, lda, X, incx, beta, Y, incy, dC_work, my_gpu_id, num_gpus, nb,
-              the_chosen_block_id, the_chosen_gpu_id, offset);
+              the_chosen_block_id, the_chosen_gpu_id, kstan);
 }
 
 /*************************************************************************
