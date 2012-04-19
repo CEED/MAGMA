@@ -871,8 +871,7 @@ void magmablas_zhemv_200_L_mgpu_offset(magma_int_t m, cuDoubleComplex alpha,
 
     the_chosen_block_id = 0;
     the_chosen_gpu_id = 0;
-    offset = kstan;
-
+  
 
     /*
      * If matrix size is multiple of zhemv_bs, we use a specific code.
