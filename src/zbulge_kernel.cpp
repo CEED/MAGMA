@@ -12,7 +12,7 @@
  */
 
 #include "common_magma.h"
-#include "magma_zbulgeinc.h"
+//#include "magma_zbulgeinc.h"
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 
@@ -23,6 +23,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+ void findVTpos(int N, int NB, int Vblksiz, int sweep, int st, int *Vpos, int *TAUpos, int *Tpos, int *myblkid);
+ void findVTsiz(int N, int NB, int Vblksiz, int *blkcnt, int *LDV);
+  magma_int_t plasma_ceildiv(magma_int_t a, magma_int_t b);
 
 void magma_ztrdtype1cbHLsym_withQ(magma_int_t N, magma_int_t NB, 
                                 cuDoubleComplex *A, magma_int_t LDA, cuDoubleComplex *V, cuDoubleComplex *TAU, 
