@@ -61,6 +61,7 @@ ZSRC  = testing_zgemm.cpp	\
 	\
 	testing_zlacpy.cpp \
 	testing_zhemv_mgpu.cpp	\
+	testing_auxiliary.cpp
 
 
 #testing_zswap.cpp
@@ -83,6 +84,9 @@ ALLOBJF  = $(ALLSRC:.f90=.o)
 ALLOBJF := $(ALLOBJF:.cuf=.o)
 ALLOBJ   = $(ALLOBJF:.cpp=.o)
 EXE      = $(ALLOBJ:.o=)
+
+# only testing_auxiliary needs control
+INC += -I../control
 
 all: $(EXE)
 

@@ -7,6 +7,37 @@
 */
 
 #include "common_magma.h"
+#include <assert.h>
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Get number of GPUs to use from $MAGMA_NUM_GPUS environment variable.
+   @author Mark Gates
+*/
+extern "C"
+int magma_num_gpus( void )
+{
+    const char *ngpu_str = getenv("MAGMA_NUM_GPUS");
+    int ngpu = 1;
+    if ( ngpu_str != NULL ) {
+        char* endptr;
+        ngpu = strtol( ngpu_str, &endptr, 10 );
+        int ndevices;
+        cudaGetDeviceCount( &ndevices );
+        // if *endptr == '\0' then entire string was valid number (or empty)
+        if ( ngpu < 1 or *endptr != '\0' ) {
+            ngpu = 1;
+            fprintf( stderr, "$MAGMA_NUM_GPUS=%s is an invalid number; using %d GPU.\n",
+                     ngpu_str, ngpu );
+        }
+        else if ( ngpu > MagmaMaxGPUs or ngpu > ndevices ) {
+            ngpu = min( ndevices, MagmaMaxGPUs );
+            fprintf( stderr, "$MAGMA_NUM_GPUS=%s exceeds MagmaMaxGPUs=%d or available GPUs=%d; using %d GPUs.\n",
+                     ngpu_str, MagmaMaxGPUs, ndevices, ngpu );
+        }
+        assert( 1 <= ngpu and ngpu <= ndevices );
+    }
+    return ngpu;
+}
 
 
 /* ////////////////////////////////////////////////////////////////////////////

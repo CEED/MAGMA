@@ -76,6 +76,8 @@ float getv(float *da);
 
 size_t magma_strlcpy(char *dst, const char *src, size_t siz);
 
+int magma_num_gpus( void );
+
 #ifdef __cplusplus
 }
 #endif
