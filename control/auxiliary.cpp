@@ -11,33 +11,23 @@
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Print the available GPU devices
+   @author Mark Gates
 */
 extern "C"
 void printout_devices( )
 {
-  int ndevices;
-  cuDeviceGetCount( &ndevices );
-  for( int idevice = 0; idevice < ndevices; idevice++ )
-    {
-      char name[200];
-#if CUDA_VERSION > 3010 
-      size_t totalMem;
-#else
-      unsigned int totalMem;
-#endif
-
-      int clock;
-      int major, minor;
-      CUdevice dev;
-
-      cuDeviceGet( &dev, idevice );
-      cuDeviceGetName( name, sizeof(name), dev );
-      cuDeviceComputeCapability( &major, &minor, dev );
-      cuDeviceTotalMem( &totalMem, dev );
-      cuDeviceGetAttribute( &clock,
-                            CU_DEVICE_ATTRIBUTE_CLOCK_RATE, dev );
-      printf( "device %d: %s, %.1f MHz clock, %.1f MB memory, capability %d.%d\n",
-              idevice, name, clock/1000.f, totalMem/1024.f/1024.f, major, minor );
+    int ndevices;
+    cudaGetDeviceCount( &ndevices );
+    for( int idevice = 0; idevice < ndevices; idevice++ ) {
+        cudaDeviceProp prop;
+        cudaGetDeviceProperties( &prop, idevice );
+        printf( "device %d: %s, %.1f MHz clock, %.1f MB memory, capability %d.%d\n",
+                idevice,
+                prop.name,
+                prop.clockRate / 1000.,
+                prop.totalGlobalMem / (1024.*1024.),
+                prop.major,
+                prop.minor );
     }
 }
 
