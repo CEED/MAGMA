@@ -87,7 +87,7 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
     INFO    (output) INTEGER   
             = 0:  successful exit   
             < 0:  if INFO = -i, the i-th argument had an illegal value 
-                  if INFO = -6, the GPU memory allocation failed 
+                  or another error occured, such as memory allocation failed.
             > 0:  if INFO = i, the leading minor of order i is not   
                   positive definite, and the factorization could not be   
                   completed.   

@@ -93,7 +93,7 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
     INFO    (output) INTEGER
             = 0:  successful exit
             < 0:  if INFO = -i, the i-th argument had an illegal value
-                  if INFO = -9, internal GPU memory allocation failed.
+                  or another error occured, such as memory allocation failed.
 
     Further Details
     ===============
