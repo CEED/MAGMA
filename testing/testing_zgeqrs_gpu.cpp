@@ -44,8 +44,8 @@ int main( int argc, char** argv)
     magma_timestr_t       start, end;
     double           flops, gpu_perf, cpu_perf;
     double           matnorm, work[1];
-    cuDoubleComplex  mzone = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex  zone  = MAGMA_Z_ONE;
+    cuDoubleComplex  c_one     = MAGMA_Z_ONE;
+    cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex *h_A, *h_A2, *h_B, *h_X, *h_R, *tau, *hwork, tmp[1];
     cuDoubleComplex *d_A, *d_B;
 
@@ -161,9 +161,9 @@ int main( int argc, char** argv)
 
         // compute the residual
         blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &M, &nrhs, &N, 
-                       &mzone, h_A, &lda, 
-                               h_X, &ldb, 
-                       &zone,  h_R, &ldb);
+                       &c_neg_one, h_A, &lda, 
+                                   h_X, &ldb, 
+                       &c_one,     h_R, &ldb);
         matnorm = lapackf77_zlange("f", &M, &N, h_A, &lda, work);
 
         /* =====================================================================
@@ -180,9 +180,9 @@ int main( int argc, char** argv)
           printf("Argument %d of lapackf77_zgels had an illegal value.\n", -info);
 
         blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &M, &nrhs, &N, 
-                       &mzone, h_A2, &lda, 
-                               h_X,  &ldb, 
-                       &zone,  h_B,  &ldb);
+                       &c_neg_one, h_A2, &lda, 
+                                   h_X,  &ldb, 
+                       &c_one,     h_B,  &ldb);
 
         printf("%5d %5d   %6.1f       %6.1f       %7.2e   %7.2e\n",
                M, N, cpu_perf, gpu_perf,

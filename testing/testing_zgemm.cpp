@@ -53,7 +53,7 @@ int main( int argc, char** argv)
     
     cuDoubleComplex *h_A, *h_B, *h_C, *h_C2;
     cuDoubleComplex *d_A, *d_B, *d_C;
-    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex alpha = MAGMA_Z_MAKE(  0.29, -0.86 );
     cuDoubleComplex beta  = MAGMA_Z_MAKE( -0.48,  0.38 );
 
@@ -229,7 +229,7 @@ int main( int argc, char** argv)
         /* =====================================================================
            Error Computation and Performance Compariosn
            =================================================================== */
-        blasf77_zaxpy(&szeC, &mzone, h_C, &ione, h_C2, &ione);
+        blasf77_zaxpy(&szeC, &c_neg_one, h_C, &ione, h_C2, &ione);
         error = lapackf77_zlange("M", &M, &N, h_C2, &ldc, work);
         printf("%5d %5d %5d       %6.2f           %6.2f         %e\n",
                M, N, K, magma_perf, cuda_perf, error);

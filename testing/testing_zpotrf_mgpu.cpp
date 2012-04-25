@@ -54,7 +54,7 @@ int main( int argc, char** argv)
     
     magma_int_t i, j, k, info, num_gpus0 = 1, num_gpus;
     const char *uplo     = MagmaLowerStr;
-    cuDoubleComplex mzone= MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     double      work[1], matnorm;
@@ -231,7 +231,7 @@ int main( int argc, char** argv)
            Check the result compared to LAPACK
            =================================================================== */
           matnorm = lapackf77_zlange("f", &N, &N, h_A, &lda, work);
-          blasf77_zaxpy(&n2, &mzone, h_A, &ione, h_R, &ione);
+          blasf77_zaxpy(&n2, &c_neg_one, h_A, &ione, h_R, &ione);
           printf("%5d    %6.2f         %6.2f        %e\n", 
                  size[i], cpu_perf, gpu_perf,
                  lapackf77_zlange("f", &N, &N, h_R, &lda, work) / matnorm);

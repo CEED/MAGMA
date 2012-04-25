@@ -37,7 +37,7 @@ int main(int argc, char **argv)
     double      flops, magma_perf, error, work[1];
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     FILE        *fp ; 
     magma_int_t N, m, i, lda, LDA;
@@ -131,7 +131,7 @@ int main(int argc, char **argv)
         blasf77_zcopy( &m, Y, &incx, Ycublas, &incx );
         lapackf77_zsymv( MagmaLowerStr, &m, &alpha, A, &LDA, X, &incx, &beta, Ycublas, &incx );
 
-        blasf77_zaxpy( &m, &mzone, Ymagma, &incx, Ycublas, &incx);
+        blasf77_zaxpy( &m, &c_neg_one, Ymagma, &incx, Ycublas, &incx);
         error = lapackf77_zlange( "M", &m, &ione, Ycublas, &m, work );
 
         printf(      "\t\t %8.6e\n", error / m );

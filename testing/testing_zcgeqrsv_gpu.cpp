@@ -51,8 +51,8 @@ int main( int argc, char** argv)
     double      flops, gpu_perf, cpu_perf;
     double      gpu_perfd, gpu_perfs;
     double      Rnorm, Anorm, work[1];
-    cuDoubleComplex zone  = MAGMA_Z_ONE;
-    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex *h_A, *h_B, *h_X, *h_R;
     cuDoubleComplex *d_A, *d_B, *d_X, *d_T;
     cuFloatComplex  *d_SA, *d_SB, *d_ST;
@@ -163,9 +163,9 @@ int main( int argc, char** argv)
         cublasGetMatrix(N, NRHS, sizeof(cuDoubleComplex), d_X, lddx, h_X, ldx);
         blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr,
                        &M, &NRHS, &N,
-                       &mzone, h_A, &lda, 
-                               h_X, &ldx, 
-                       &zone,  h_R, &ldb);
+                       &c_neg_one, h_A, &lda, 
+                                   h_X, &ldx, 
+                       &c_one,     h_R, &ldb);
         Anorm = lapackf77_zlange("f", &M, &N,    h_A, &lda, work);
         Rnorm = lapackf77_zlange("f", &N, &NRHS, h_R, &ldb, work);
 

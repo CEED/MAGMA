@@ -53,9 +53,9 @@ int main( int argc, char** argv)
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
-    double done = 1.;
-    double mdone = -1.;
-    double dten = 10.;
+    double d_one     =  1.;
+    double d_neg_one = -1.;
+    double d_ten     = 10.;
     magma_int_t ISEED[4] = {0,0,0,1};
 
     //const char *uplo = MagmaLowerStr;
@@ -144,8 +144,8 @@ int main( int argc, char** argv)
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-        //lapackf77_zlatms( &N, &N, "U", ISEED, "P", w1, &five, &dten,
-        //                 &done, &N, &N, uplo, h_B, &N, h_work, &info);
+        //lapackf77_zlatms( &N, &N, "U", ISEED, "P", w1, &five, &d_ten,
+        //                 &d_one, &N, &N, uplo, h_B, &N, h_work, &info);
         //lapackf77_zlaset( "A", &N, &N, &c_zero, &c_one, h_B, &N);
         lapackf77_zlarnv( &ione, ISEED, &n2, h_B );
         /* increase the diagonal */
@@ -207,7 +207,7 @@ int main( int argc, char** argv)
           }
           else if (itype == 3){
             lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N);
-            blasf77_zherk(uplo, "N", &N, &N, &mdone, h_R, &N, &done, h_S, &N); 
+            blasf77_zherk(uplo, "N", &N, &N, &d_neg_one, h_R, &N, &d_one, h_S, &N); 
             result[1]= lapackf77_zlanhe("1",uplo, &N, h_S, &N, rwork) / N / lapackf77_zlanhe("1",uplo, &N, h_B, &N, rwork);
           }
 

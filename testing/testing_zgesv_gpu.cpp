@@ -42,8 +42,8 @@ int main(int argc , char **argv)
     magma_timestr_t start, end;
     double          flops, gpu_perf;
     double          Rnorm, Anorm, Bnorm, *work;
-    cuDoubleComplex zone  = MAGMA_Z_ONE;
-    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex *h_A, *h_B, *h_X;
     cuDoubleComplex *d_A, *d_B;
     magma_int_t *ipiv;
@@ -150,9 +150,9 @@ int main(int argc , char **argv)
         Bnorm = lapackf77_zlange("I", &N, &NRHS, h_B, &ldb, work);
 
         blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &N, &NRHS, &N, 
-                       &zone,  h_A, &lda, 
-                               h_X, &ldb, 
-                       &mzone, h_B, &ldb);
+                       &c_one,     h_A, &lda, 
+                                   h_X, &ldb, 
+                       &c_neg_one, h_B, &ldb);
         
         Rnorm = lapackf77_zlange("I", &N, &NRHS, h_B, &ldb, work);
 

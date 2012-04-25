@@ -55,8 +55,8 @@ int main( int argc, char** argv)
     magma_timestr_t       start, end;
     double *h_A, *h_R, *VL, *VR, *h_work, *w1, *w2;
     double *w1i, *w2i;
-    double  mzone = MAGMA_D_NEG_ONE;
-    double           gpu_time, cpu_time, matnorm, tnrm, result[8];
+    double c_neg_one = MAGMA_D_NEG_ONE;
+    double gpu_time, cpu_time, matnorm, tnrm, result[8];
 
     /* Matrix size */
     magma_int_t N=0, n2, lda, nb, lwork;
@@ -396,7 +396,7 @@ int main( int argc, char** argv)
             //====================================================================
 
             matnorm = lapackf77_dlange("f", &N, &ione, w1, &N, h_work);
-            blasf77_daxpy(&N, &mzone, w1, &ione, w2, &ione);
+            blasf77_daxpy(&N, &c_neg_one, w1, &ione, w2, &ione);
 
             result[7] = lapackf77_dlange("f", &N, &ione, w2, &N, h_work) / matnorm;
 

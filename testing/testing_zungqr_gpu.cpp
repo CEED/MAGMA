@@ -43,7 +43,7 @@ int main( int argc, char** argv)
     magma_timestr_t       start, end;
     double           flops, gpu_perf, cpu_perf;
     double           matnorm, work[1];
-    cuDoubleComplex  mzone= MAGMA_Z_NEG_ONE;
+    cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex *h_A, *h_R, *tau, *h_work;
     cuDoubleComplex *d_A, *d_T;
 
@@ -152,7 +152,7 @@ int main( int argc, char** argv)
         
         cpu_perf = flops / GetTimerValue(start,end);
 
-        blasf77_zaxpy(&n2, &mzone, h_A, &ione, h_R, &ione);
+        blasf77_zaxpy(&n2, &c_neg_one, h_A, &ione, h_R, &ione);
         printf("%5d %5d   %6.1f       %6.1f         %7.2e \n",
                M, N, cpu_perf, gpu_perf,
                lapackf77_zlange("f", &M, &N, h_R, &lda, work) / matnorm );

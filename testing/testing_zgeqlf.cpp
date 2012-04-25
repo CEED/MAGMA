@@ -42,7 +42,7 @@ int main( int argc, char** argv)
     magma_timestr_t       start, end;
     double           flops, gpu_perf, cpu_perf;
     double           matnorm, work[1];
-    cuDoubleComplex  mzone= MAGMA_Z_NEG_ONE;
+    cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex *h_A, *h_R, *tau, *h_work, tmp[1];
 
     /* Matrix size */
@@ -139,7 +139,7 @@ int main( int argc, char** argv)
            Check the result compared to LAPACK
            =================================================================== */
         matnorm = lapackf77_zlange("f", &M, &N, h_A, &lda, work);
-        blasf77_zaxpy(&n2, &mzone, h_A, &ione, h_R, &ione);
+        blasf77_zaxpy(&n2, &c_neg_one, h_A, &ione, h_R, &ione);
 
         printf("%5d %5d  %6.2f         %6.2f        %e\n",
                M, N, cpu_perf, gpu_perf,

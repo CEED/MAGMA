@@ -40,8 +40,8 @@ int main(int argc , char **argv)
     double      gpu_perfdf, gpu_perfds;
     double      gpu_perfsf, gpu_perfss;
     double      Rnorm, Anorm;
-    cuDoubleComplex zone  = MAGMA_Z_ONE;
-    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex *h_A, *h_B, *h_X;
     cuDoubleComplex *d_A, *d_B, *d_X, *d_WORKD;
     cuFloatComplex  *d_As, *d_Bs, *d_WORKS;
@@ -141,9 +141,9 @@ int main(int argc , char **argv)
         Anorm = lapackf77_zlange("I", &N, &N, h_A, &lda, h_workd);
         blasf77_zgemm( trans_str, MagmaNoTransStr, 
                        &N, &NRHS, &N, 
-                       &zone,  h_A, &lda,
-                               h_X, &ldx,
-                       &mzone, h_B, &ldb);
+                       &c_one,     h_A, &lda,
+                                   h_X, &ldx,
+                       &c_neg_one, h_B, &ldb);
         Rnorm = lapackf77_zlange("I", &N, &NRHS, h_B, &ldb, h_workd);
 
         //=====================================================================

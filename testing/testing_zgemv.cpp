@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     double      flops, magma_perf, cuda_perf, error, work[1];
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    cuDoubleComplex mzone = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     FILE        *fp ; 
     magma_int_t i, lda, Xm, Ym;
@@ -181,7 +181,7 @@ int main(int argc, char **argv)
            Computing the Difference Cublas VS Magma
            =================================================================== */
         
-        blasf77_zaxpy( &Ym, &mzone, Ymagma, &incy, Ycublas, &incy);
+        blasf77_zaxpy( &Ym, &c_neg_one, Ymagma, &incy, Ycublas, &incy);
         error = lapackf77_zlange( "M", &Ym, &ione, Ycublas, &Ym, work );
 
 #if 0
@@ -204,7 +204,7 @@ int main(int argc, char **argv)
                                    X,       &incx, 
                            &beta,  Ycublas, &incy );
             
-            blasf77_zaxpy( &Ym, &mzone, Ymagma, &incy, Ycublas, &incy);
+            blasf77_zaxpy( &Ym, &c_neg_one, Ymagma, &incy, Ycublas, &incy);
             error = lapackf77_zlange( "M", &Ym, &ione, Ycublas, &Ym, work );
         }
 #endif
