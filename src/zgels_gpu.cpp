@@ -81,7 +81,7 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
    #define a_ref(a_1,a_2) (dA+(a_2)*(ldda) + (a_1))
 
     cuDoubleComplex *dT, *tau;
-    magma_int_t k, ret;
+    magma_int_t k;
 
     magma_int_t nb     = magma_get_zgeqrf_nb(m);
     magma_int_t lwkopt = (m-n+nb)*(nrhs+2*nb);
@@ -138,22 +138,14 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
         return *info;
     }
 
-    ret = magma_zgeqrf_gpu( m, n, dA, ldda, tau, dT, info );
-    if ( (ret != MAGMA_SUCCESS) || (*info != 0) ) {
-        cublasFree(dT);
-        free(tau);
-        return ret;
-    }
+    magma_zgeqrf_gpu( m, n, dA, ldda, tau, dT, info );
 
-    ret = magma_zgeqrs_gpu(m, n, nrhs, 
-                           dA, ldda, tau, dT, 
-                           dB, lddb, hwork, lwork, info);
-    if ( (ret != MAGMA_SUCCESS) || (*info != 0) ) {
-        cublasFree(dT);
-        free(tau);
-        return ret;
+    if ( *info == 0 ) {
+        magma_zgeqrs_gpu( m, n, nrhs, 
+                          dA, ldda, tau, dT, 
+                          dB, lddb, hwork, lwork, info );
     }
-
+    
     cublasFree(dT);
     free(tau);
     return *info;

@@ -71,43 +71,32 @@ magma_zpotri(char uplo, magma_int_t n,
 
   ===================================================================== */
 
-        /* Local variables */
-        char uplo_[2] = {uplo, 0};
-        magma_int_t ret;
+    /* Local variables */
+    char uplo_[2] = {uplo, 0};
 
-        *info = 0;
-        if ((! lapackf77_lsame(uplo_, "U")) && (! lapackf77_lsame(uplo_, "L")))
-                *info = -1;
-        else if (n < 0)
-                *info = -2;
-        else if (lda < max(1,n))
-                *info = -4;
+    *info = 0;
+    if ((! lapackf77_lsame(uplo_, "U")) && (! lapackf77_lsame(uplo_, "L")))
+        *info = -1;
+    else if (n < 0)
+        *info = -2;
+    else if (lda < max(1,n))
+        *info = -4;
 
-        if (*info != 0) {
-                magma_xerbla( __func__, -(*info) );
-                return *info;
-        }
-
-        /* Quick return if possible */
-        if ( n == 0 )
-                return *info;
-        
-        /* Invert the triangular Cholesky factor U or L */
-        ret = magma_ztrtri( uplo, MagmaNonUnit, n, a, lda, info );
-
-        if ( (ret != MAGMA_SUCCESS) || ( *info < 0 ) ) 
-                return ret;
-
-        if (*info > 0)
-                return *info;
-
-        /* Form inv(U) * inv(U)**T or inv(L)**T * inv(L) */
-        ret = magma_zlauum( uplo, n, a, lda, info );
-
-
-        if ( (ret != MAGMA_SUCCESS) || ( *info != 0 ) ) 
-                return ret;
-
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
         return *info;
+    }
 
-}/* magma_zpotri */
+    /* Quick return if possible */
+    if ( n == 0 )
+        return *info;
+    
+    /* Invert the triangular Cholesky factor U or L */
+    magma_ztrtri( uplo, MagmaNonUnit, n, a, lda, info );
+    if ( *info == 0 ) {
+        /* Form inv(U) * inv(U)**T or inv(L)**T * inv(L) */
+        magma_zlauum( uplo, n, a, lda, info );
+    }
+    
+    return *info;
+} /* magma_zpotri */

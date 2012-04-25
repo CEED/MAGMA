@@ -84,8 +84,7 @@ magma_zgetri_gpu( magma_int_t n, cuDoubleComplex *dA, magma_int_t lda,
   ===================================================================== */
 
     /* Local variables */
-    magma_int_t ret;
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    cuDoubleComplex c_one     = MAGMA_Z_ONE;
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex *dL = dwork;
     magma_int_t     ldl = n;
@@ -110,9 +109,9 @@ magma_zgetri_gpu( magma_int_t n, cuDoubleComplex *dA, magma_int_t lda,
         return *info;
     
     /* Invert the triangular factor U */
-    ret = magma_ztrtri_gpu( MagmaUpper, MagmaNonUnit, n, dA, lda, info );
+    magma_ztrtri_gpu( MagmaUpper, MagmaNonUnit, n, dA, lda, info );
     if ( *info != 0 )
-        return ret;
+        return *info;
     
     jmax = ((n-1) / nb)*nb;
     for( j = jmax; j >= 0; j -= nb ) {

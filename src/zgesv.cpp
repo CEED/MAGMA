@@ -70,8 +70,6 @@ magma_zgesv(     magma_int_t n, magma_int_t nrhs,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================    */
 
-    magma_int_t ret;
-
     *info = 0;
     if (n < 0) {
         *info = -1;
@@ -92,12 +90,10 @@ magma_zgesv(     magma_int_t n, magma_int_t nrhs,
         return *info;
     }
 
-    ret = magma_zgetrf( n, n, A, lda, ipiv, info );
-    if ( (ret != MAGMA_SUCCESS) || (*info != 0) ) {
-        return ret;
+    magma_zgetrf( n, n, A, lda, ipiv, info );
+    if ( *info == 0 ) {
+        lapackf77_zgetrs( MagmaNoTransStr, &n, &nrhs, A, &lda, ipiv, B, &ldb, info );
     }
     
-    lapackf77_zgetrs( MagmaNoTransStr, &n, &nrhs, A, &lda, ipiv, B, &ldb, info );
-
     return *info;
 }

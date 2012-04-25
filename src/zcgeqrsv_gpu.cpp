@@ -171,7 +171,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     cuFloatComplex  *dSA, *dSX, *dST, *stau;
     cuDoubleComplex Xnrmv, Rnrmv; 
     double          Anrm, Xnrm, Rnrm, cte, eps; 
-    magma_int_t     i, j, iiter, nb, lhwork, minmn, size, ret;
+    magma_int_t     i, j, iiter, nb, lhwork, minmn, size;
     
     /*
       Check The Parameters. 
@@ -404,16 +404,14 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
 
     /* Single-precision iterative refinement failed to converge to a
        satisfactory solution, so we resort to double precision.           */
-    ret = magma_zgeqrf_gpu(M, N, dA, ldda, tau, dT, info);
-    if( (ret != MAGMA_SUCCESS) || (*info != 0) ){
-        cublasFree(dworkd);
-        free(hworkd);
-        return ret;
+    magma_zgeqrf_gpu(M, N, dA, ldda, tau, dT, info);
+    if ( *info == 0 ) {
+        magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dX, lddx);
+        magma_zgeqrs_gpu(M, N, NRHS, dA, ldda, tau, dT, dX, lddx, hworkd, lhwork, info);
     }
-    magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dX, lddx);
-    ret = magma_zgeqrs_gpu(M, N, NRHS, dA, ldda, tau, dT, dX, lddx, hworkd, lhwork, info);
+    
     cublasFree(dworkd);
     free(hworkd);
-    return ret;
+    return *info;
 }
 

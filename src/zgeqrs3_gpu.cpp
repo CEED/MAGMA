@@ -90,7 +90,7 @@ magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
    #define d_ref(a_1)     (dT+(lddwork+(a_1))*nb)
 
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    magma_int_t k, lddwork, ret;
+    magma_int_t k, lddwork;
 
     magma_int_t nb     = magma_get_zgeqrf_nb(m);
     magma_int_t lwkopt = (m-n+nb)*(nrhs+2*nb);
@@ -127,12 +127,12 @@ magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     lddwork= k;
 
     /* B := Q' * B */
-    ret = magma_zunmqr_gpu( MagmaLeft, MagmaConjTrans, 
-                            m, nrhs, n,
-                            a_ref(0,0), ldda, tau, 
-                            dB, lddb, hwork, lwork, dT, nb, info);
-    if ( (ret != MAGMA_SUCCESS) || ( *info != 0 ) ) {
-        return ret;
+    magma_zunmqr_gpu( MagmaLeft, MagmaConjTrans, 
+                      m, nrhs, n,
+                      a_ref(0,0), ldda, tau, 
+                      dB, lddb, hwork, lwork, dT, nb, info );
+    if ( *info != 0 ) {
+        return *info;
     }
 
     /* Solve R*X = B(1:n,:) 

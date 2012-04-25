@@ -146,7 +146,7 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
     cuDoubleComplex Xnrmv, Rnrmv;
     cuFloatComplex  *dSA, *dSX;
     double          Anrm, Xnrm, Rnrm;
-    magma_int_t     i, j, iiter, ret;
+    magma_int_t     i, j, iiter;
     
     /*
       Check The Parameters. 
@@ -305,12 +305,12 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
         return *info;
     }
     
-    ret = magma_zgetrf_gpu( N, N, dA, ldda, IPIV, info );
-    if( (ret != MAGMA_SUCCESS) || (*info != 0) ){
-        return ret;
+    magma_zgetrf_gpu( N, N, dA, ldda, IPIV, info );
+    if( *info == 0 ){
+        magmablas_zlacpy( MagmaUpperLower, N, NRHS, dB, lddb, dX, lddx );
+        magma_zgetrs_gpu( trans, N, NRHS, dA, ldda, IPIV, dX, lddx, info );
     }
-    magmablas_zlacpy( MagmaUpperLower, N, NRHS, dB, lddb, dX, lddx );
-    ret = magma_zgetrs_gpu( trans, N, NRHS, dA, ldda, IPIV, dX, lddx, info );
-    return ret;
+    
+    return *info;
 }
 

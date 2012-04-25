@@ -77,8 +77,6 @@ magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================    */
 
-    magma_int_t ret;
-
     *info = 0;
     if (n < 0) {
         *info = -1;
@@ -99,12 +97,10 @@ magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs,
         return *info;
     }
 
-    ret = magma_zgetrf_gpu( n, n, dA, ldda, ipiv, info);
-    if ( (ret != MAGMA_SUCCESS) || (*info != 0) ) {
-        return ret;
+    magma_zgetrf_gpu( n, n, dA, ldda, ipiv, info );
+    if ( *info == 0 ) {
+        magma_zgetrs_gpu( MagmaNoTrans, n, nrhs, dA, ldda, ipiv, dB, lddb, info );
     }
-
-    ret = magma_zgetrs_gpu( MagmaNoTrans, n, nrhs, dA, ldda, ipiv, dB, lddb, info );
     
-    return ret;
+    return *info;
 }
