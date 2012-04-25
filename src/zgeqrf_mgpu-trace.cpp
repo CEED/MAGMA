@@ -225,7 +225,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
     nb = magma_get_zgeqrf_nb(m);
 
     displacement = n * nb;
-    lwork  = (m+n+64) * nb;
+    lwork = max((m+n+64) * nb,n*m+n*nb);
     lhwork = lwork - (m)*nb;
 
     for(i=0; i<num_gpus; i++){
@@ -512,16 +512,25 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
         #ifdef  MultiGPUs
            cudaSetDevice(panel_gpunum);
         #endif
-        cublasGetMatrix(rows, ib, sizeof(cuDoubleComplex),
-                        dlA(panel_gpunum, i, i_loc), ldda,
-                        lhwrk, rows);
+
+        if (i == 0) {
+            magmablas_zgetmatrix_1D_bcyclic(m, n, dlA, ldda, lhwrk, m, num_gpus, nb);
+        } else {
+            cublasGetMatrix(rows, ib, sizeof(cuDoubleComplex),
+                            dlA(panel_gpunum, i, i_loc), ldda,
+                            lhwrk, rows);
+        }
 
         lhwork = lwork - rows*ib;
         lapackf77_zgeqrf(&rows, &ib, lhwrk, &rows, tau+i, lhwrk+ib*rows, &lhwork, info);
 
-        cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
-                        lhwrk,     rows,
-                        dlA(panel_gpunum, i, i_loc), ldda);
+        if (i == 0) {
+            magmablas_zsetmatrix_1D_bcyclic(m, n, lhwrk, m, dlA, ldda, num_gpus, nb);
+        } else {
+            cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
+                            lhwrk,     rows,
+                            dlA(panel_gpunum, i, i_loc), ldda);
+        }
     }
 
     for(i=0; i<num_gpus; i++){
