@@ -402,6 +402,7 @@ magmablas_zhemv_200_L_special_mgpu_32_offset( magma_int_t n, cuDoubleComplex alp
     cuDoubleComplex res2 = MAGMA_Z_ZERO;// tem for res_
 
     __shared__ cuDoubleComplex la   [16][64+2];
+    __shared__ cuDoubleComplex sdata   [32][9];
     __shared__ cuDoubleComplex buff [32];
     __shared__ cuDoubleComplex buff2 [32];
 
@@ -499,11 +500,12 @@ magmablas_zhemv_200_L_special_mgpu_32_offset( magma_int_t n, cuDoubleComplex alp
                         res += (la[0][bank_shift * (ty + j * 8) + tx] )* buff2[ ty + j * 8];
                         res_ += cuConj( la[0][bank_shift * tx + j + ty * 4] ) * buff[j + ty * 4]; //iterate colum
                 }
-                     __syncthreads();
+                     //__syncthreads();
 
-                    la[0][bank_shift*tx+ty]= res_ ;
+                    //la[0][bank_shift*tx+ty]= res_ ;
+                    sdata[tx][ty]= res_ ;
             __syncthreads();
-
+/*
             if( ty== 0 )
             {
               res2 = la[0][tx*bank_shift+0]+la[0][tx*bank_shift+1]
@@ -513,9 +515,18 @@ magmablas_zhemv_200_L_special_mgpu_32_offset( magma_int_t n, cuDoubleComplex alp
                         
                 WC[wc_c*lda ] =   res2;
             }
-
- 
             __syncthreads();
+
+*/ 
+            if( ty== 1 )
+            {
+              res2 = sdata[tx][0]+sdata[tx][1]
+              + sdata[tx][2]+sdata[tx][3]
+              + sdata[tx][4]+sdata[tx][5]
+              + sdata[tx][6]+sdata[tx][7];
+                        
+                WC[wc_c*lda ] =   res2;
+            }
 
 
                     wc_c += num_gpus;
