@@ -212,6 +212,7 @@ magmablas_zhemv_200_L_special_mgpu_offset( magma_int_t n, cuDoubleComplex alpha,
         {
             MAGMA_Z_SET2REAL(res1,0);
         }
+    __syncthreads();
     A-=half_thread_x;
 
       A -= lda * (blkc/num_gpus) * thread_x; 
@@ -219,7 +220,7 @@ magmablas_zhemv_200_L_special_mgpu_offset( magma_int_t n, cuDoubleComplex alpha,
       flag = 1;
     }
 
-    __syncthreads();
+    
     tx = threadIdx.x ;
     ty = threadIdx.y ;
 
@@ -895,6 +896,17 @@ void magmablas_zhemv_200_L_mgpu_offset(magma_int_t m, cuDoubleComplex alpha,
               the_chosen_block_id, the_chosen_gpu_id, kstan);
 }
 
+extern "C"
+magma_int_t
+magmablas_zhemv2( char uplo, magma_int_t n,
+                      cuDoubleComplex alpha,
+                      cuDoubleComplex *A, magma_int_t lda,
+                      cuDoubleComplex *X, magma_int_t incx,
+                      cuDoubleComplex beta,
+                      cuDoubleComplex *Y, magma_int_t incy,
+                      cuDoubleComplex *work, magma_int_t lwork);
+
+
 /*************************************************************************
 
     Purpose
@@ -1047,6 +1059,13 @@ magmablas_zhemv_200_mgpu_offset( char uplo, magma_int_t n,
         printf("Error in magmablas_zsymv_200_mgpu_offset: nb != 64, program will exit! please reallocate your matrix among GPUs\n");
         exit(0);
         }
+
+        if(num_gpus == 1)
+        {
+            magmablas_zhemv2(uplo, n-offset, alpha, A[0] + offset + lda * offset, lda, X[0] + offset, incx, beta, Y[0] + offset, incy, work[0], workspace); 
+        }
+        else
+        {
         magma_int_t i = 0;
         for(i=0; i<num_gpus; i++)
         {
@@ -1071,6 +1090,7 @@ magmablas_zhemv_200_mgpu_offset( char uplo, magma_int_t n,
              magmablas_zhemv_200_L_mgpu_offset(n, alpha, A[i], lda, X[i], incx, beta, Y[i], incy, work[i],
                                          new_gpu_id, num_gpus, nb, offset, num_blocks_skipped);     
 
+        }
         }
     }
     return MAGMA_SUCCESS;
@@ -1138,7 +1158,15 @@ magmablas_zhemv2_200_mgpu_offset( char uplo, magma_int_t n,
         printf("Error in magmablas_zsymv_200_mgpu_offset: nb != 64, program will exit! please reallocate your matrix among GPUs\n");
         exit(0);
         }
-        magma_int_t i = 0;
+
+        if(num_gpus == 1)
+        {
+            magmablas_zhemv2(uplo, n-offset, alpha, A[0] + offset + lda * offset, lda, X[0] + offset, incx, beta, Y[0] + offset, incy, work[0], workspace); 
+        }
+        else
+        {
+          
+        magma_int_t i = 0; 
         for(i=0; i<num_gpus; i++)
         {
              cudaSetDevice(i);
@@ -1162,6 +1190,7 @@ magmablas_zhemv2_200_mgpu_offset( char uplo, magma_int_t n,
              magmablas_zhemv_200_L_mgpu_offset(n, alpha, A[i], lda, X[i], incx, beta, Y[i], incy, work[i],
                                          new_gpu_id, num_gpus, nb, offset, num_blocks_skipped);     
 
+        }
         }
     }
     return MAGMA_SUCCESS;
