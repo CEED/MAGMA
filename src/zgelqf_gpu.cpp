@@ -131,8 +131,10 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
 
     dAT = dA;
     
-    if ((m == n) && (m % 32 == 0) && (lda%32 == 0))
-      magmablas_zinplace_transpose( dAT, lda, ldat );
+    if ((m == n) && (m % 32 == 0) && (lda%32 == 0)){
+        ldat = lda;
+        magmablas_zinplace_transpose( dAT, lda, maxm );
+    }
     else {
       if ( CUBLAS_STATUS_SUCCESS != 
            cublasAlloc(maxm*maxn, sizeof(cuDoubleComplex), (void**)&dAT) ){
@@ -145,8 +147,9 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
     
     magma_zgeqrf2_gpu(n, m, dAT, ldat, tau, &iinfo);
 
-    if ((m == n) && (m % 32 == 0) && (lda%32 == 0))
-      magmablas_zinplace_transpose( dAT, ldat, lda );
+    if ((m == n) && (m % 32 == 0) && (lda%32 == 0)){
+      magmablas_zinplace_transpose( dAT, ldat, maxm );
+    }
     else {
       magmablas_ztranspose2( dA, lda, dAT, ldat, n, m );
       cublasFree(dAT);
