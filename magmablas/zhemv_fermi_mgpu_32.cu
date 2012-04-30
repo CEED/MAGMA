@@ -27,7 +27,7 @@
 /*******************************************************************************
  *     Functions for each specific cases - Lower case
  */
-#define SWITCH  2000
+#define SWITCH  1400
 
 __global__ void
 magmablas_zhemv_200_L_special_mgpu_32_s( magma_int_t n, cuDoubleComplex alpha,
@@ -796,7 +796,7 @@ void magmablas_zhemv_200_L_mgpu_32(magma_int_t m, cuDoubleComplex alpha,
      * otherwise, we call the generic case.
      */
     if(m % zhemv_bs == 0 ) {
-    if(m < SWITCH)
+    if((m / num_gpus) < SWITCH)
         magmablas_zhemv_200_L_special_mgpu_32_s <<< grid_s, threads, 0, magma_stream >>>(
             m, alpha, A, lda, X, incx, beta, Y, incy, dC_work, my_gpu_id, num_gpus, nb);
         else
@@ -806,14 +806,14 @@ void magmablas_zhemv_200_L_mgpu_32(magma_int_t m, cuDoubleComplex alpha,
     }
     else{
         magma_int_t m_mod_thread_x = m%zhemv_bs - 1;
-    if(m < SWITCH)
+    if((m / num_gpus) < SWITCH )
         magmablas_zhemv_200_L_generic_mgpu_32_s <<< grid_s, threads, 0, magma_stream >>> (
             m, alpha, A, lda, X, incx ,beta, Y, incy, dC_work, m_mod_thread_x, my_gpu_id, num_gpus, nb);
     else
     magmablas_zhemv_200_L_generic_mgpu_32 <<< grid, threads, 0, magma_stream >>> (
             m, alpha, A, lda, X, incx ,beta, Y, incy, dC_work, m_mod_thread_x, my_gpu_id, num_gpus, nb);
     }
-    if(m < SWITCH)
+    if((m / num_gpus) < SWITCH )
     magmablas_zhemv_200_L_update_mgpu_32_s<<< grid, threads_u, 0, magma_stream >>>(
         m, alpha, A, lda, X, incx, beta, Y, incy, dC_work, my_gpu_id, num_gpus, nb);
     else
@@ -955,7 +955,7 @@ magmablas_zhemv_200_mgpu_32( char uplo, magma_int_t n,
     }
     else
     {
-        magma_int_t blocks    = n / thread_x + (n % thread_x != 0);
+        magma_int_t blocks    = n / zhemv_bs + (n % zhemv_bs != 0);
         magma_int_t workspace = lda * (blocks + 1);
 
         if (lwork < workspace){
