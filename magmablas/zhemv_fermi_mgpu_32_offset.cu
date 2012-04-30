@@ -1548,7 +1548,7 @@ magmablas_zhemv_200_mgpu_32_offset( char uplo, magma_int_t n,
     if ( (n == 0) || ( MAGMA_Z_EQUAL(alpha, MAGMA_Z_ZERO) && MAGMA_Z_EQUAL(beta, MAGMA_Z_ONE) ) )
         return MAGMA_SUCCESS;
 
-        magma_int_t blocks    = n / thread_x + (n % thread_x != 0);
+        magma_int_t blocks    = n / zhemv_bs + (n % zhemv_bs != 0);
         magma_int_t workspace = lda * (blocks + 1);
 
         if (lwork < workspace){
