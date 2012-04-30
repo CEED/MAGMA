@@ -46,7 +46,7 @@ int main( int argc, char** argv)
     cuDoubleComplex *h_A, *h_R, *tau, *h_work, tmp[1];
 
     /* Matrix size */
-    magma_int_t M = 0, N = 0, n2, lda, ldda, lwork;
+    magma_int_t M = 0, N = 0, n2, lda, lwork;
     magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,9984};
 
     magma_int_t i, info, min_mn, nb;
@@ -106,7 +106,6 @@ int main( int argc, char** argv)
         min_mn= min(M, N);
         lda   = M;
         n2    = lda*N;
-        ldda  = ((M+31)/32)*32;
         flops = FLOPS( (double)M, (double)N ) / 1000000;
 
         /* Initialize the matrix */
