@@ -78,7 +78,7 @@ magma_timestr_t get_current_time(void)
     struct timeval  time_val;
     magma_timestr_t time;
     
-    //cudaDeviceSynchronize();
+    cudaDeviceSynchronize();
     gettimeofday(&time_val, NULL);
     
     time.sec  = time_val.tv_sec;
