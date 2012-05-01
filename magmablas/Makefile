@@ -41,10 +41,6 @@ ZSRC  = zauxiliary.cu	\
 	zsymv_tesla.cu	\
 	csymv_tesla.cu	\
 	zhemv_fermi.cu	\
-	zhemv_fermi_mgpu_32_offset.cu \
-	zhemv_fermi_mgpu_offset.cu \
-	zhemv_fermi_mgpu_32.cu \
-	zhemv_fermi_mgpu.cu \
 	zhemv_tesla.cu	\
 	chemv_tesla.cu
 
