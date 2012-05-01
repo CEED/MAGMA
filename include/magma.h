@@ -84,7 +84,6 @@
  * --------------------------------------------------------- */
 #define MAGMA_SUCCESS               0
 #define MAGMA_ERR_ILLEGAL_VALUE    -100
-#define MAGMA_ERR_ALLOCATION       -101
 #define MAGMA_ERR_HOSTALLOC        -102
 #define MAGMA_ERR_CUBLASALLOC      -103
 #define MAGMA_ERR_CUDASTREAM       -104

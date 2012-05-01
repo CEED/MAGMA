@@ -118,7 +118,7 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
     work = (cuDoubleComplex *)malloc(lwork*sizeof(cuDoubleComplex));
     if( work == NULL ) {
         cublasFree(da);
-        *info = MAGMA_ERR_ALLOCATION;
+        *info = MAGMA_ERR_HOSTALLOC;
         return *info;
     }
 

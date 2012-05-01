@@ -234,7 +234,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
         cublasFree(dworks);
         cublasFree(dworkd);
         fprintf(stderr, "Allocation of hworks failed\n");
-        *info = MAGMA_ERR_ALLOCATION;
+        *info = MAGMA_ERR_HOSTALLOC;
         return *info;
     }
     stau = hworks;
@@ -396,7 +396,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
         if( hworks == NULL ) {
             cublasFree(dworkd);
             fprintf(stderr, "Allocation of hworkd2 failed\n");
-            *info = MAGMA_ERR_ALLOCATION;
+            *info = MAGMA_ERR_HOSTALLOC;
             return *info;
         }
     }

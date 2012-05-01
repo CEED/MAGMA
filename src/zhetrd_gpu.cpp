@@ -213,7 +213,7 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
   
     if (cudaSuccess != cudaMalloc((void**)&dwork, (ldw*nb)*sizeof(cuDoubleComplex))) {
       fprintf (stderr, "!!!! device memory allocation error (magma_zhetrd_gpu)\n");
-      *info = MAGMA_ERR_ALLOCATION;
+      *info = MAGMA_ERR_CUBLASALLOC;
       return *info;
     }
 

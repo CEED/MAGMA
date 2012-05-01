@@ -111,7 +111,7 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
 
     work = (cuDoubleComplex*)malloc(n * nrhs * sizeof(cuDoubleComplex));
     if ( !work ) {
-        *info = MAGMA_ERR_ALLOCATION;
+        *info = MAGMA_ERR_HOSTALLOC;
         return *info;
     }
       

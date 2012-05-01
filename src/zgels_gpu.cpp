@@ -134,7 +134,7 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
     tau = (cuDoubleComplex*) malloc( k * sizeof(cuDoubleComplex) );
     if( tau == NULL ) {
         cublasFree(dT);
-        *info = MAGMA_ERR_ALLOCATION;
+        *info = MAGMA_ERR_HOSTALLOC;
         return *info;
     }
 
