@@ -87,11 +87,14 @@ magmablas_zhemv_200_L_special_mgpu_offset( magma_int_t n, cuDoubleComplex alpha,
 
     magma_int_t flag = 0;
     
-    if ( (blkc % num_gpus) == my_gpu_id) 
-    {
     A += lda * (blkc/num_gpus) * thread_x; // change
+   
 
-    #pragma unroll
+    if ( (blkc % num_gpus) != my_gpu_id)
+   {   
+        A -= lda * (blkc/num_gpus) * thread_x; // change
+   }
+   #pragma unroll
     for(magma_int_t j =0; j<half_thread_x; j +=8)
         la[0][ bank_shift * (ty_+j) + tx_] =  A[ j * lda];
     __syncthreads();
@@ -215,11 +218,20 @@ magmablas_zhemv_200_L_special_mgpu_offset( magma_int_t n, cuDoubleComplex alpha,
     __syncthreads();
     A-=half_thread_x;
 
-      A -= lda * (blkc/num_gpus) * thread_x; 
+    flag = 1;
+   
+   if ( (blkc % num_gpus) != my_gpu_id)
+   {
+      A -= 0;
+        MAGMA_Z_SET2REAL(res1,0);
+        MAGMA_Z_SET2REAL(res2,0);
+        flag = 0;
+   }
+   else 
+   { 
+    A -= lda * (blkc/num_gpus) * thread_x; 
+   }
     
-      flag = 1;
-    }
-
     
     tx = threadIdx.x ;
     ty = threadIdx.y ;
@@ -1059,12 +1071,13 @@ magmablas_zhemv_200_mgpu_offset( char uplo, magma_int_t n,
         printf("Error in magmablas_zsymv_200_mgpu_offset: nb != 64, program will exit! please reallocate your matrix among GPUs\n");
         exit(0);
         }
-
+        /*
         if(num_gpus == 1)
         {
             magmablas_zhemv2(uplo, n-offset, alpha, A[0] + offset + lda * offset, lda, X[0] + offset, incx, beta, Y[0] + offset, incy, work[0], workspace); 
         }
         else
+      */
         {
         magma_int_t i = 0;
         for(i=0; i<num_gpus; i++)
@@ -1158,12 +1171,13 @@ magmablas_zhemv2_200_mgpu_offset( char uplo, magma_int_t n,
         printf("Error in magmablas_zsymv_200_mgpu_offset: nb != 64, program will exit! please reallocate your matrix among GPUs\n");
         exit(0);
         }
-
+        /*
         if(num_gpus == 1)
         {
             magmablas_zhemv2(uplo, n-offset, alpha, A[0] + offset + lda * offset, lda, X[0] + offset, incx, beta, Y[0] + offset, incy, work[0], workspace); 
         }
         else
+      */
         {
           
         magma_int_t i = 0; 
