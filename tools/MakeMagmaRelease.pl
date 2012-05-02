@@ -34,6 +34,7 @@ my @files2delete = qw(
     src/zgeqrf-v3.cpp
     src/zgetrf_mc.cpp
     src/zpotrf_mc.cpp
+    src/obsolete
     testing/fortran2.cpp
     testing/*.txt
     testing/testing_zgetrf_f.f
