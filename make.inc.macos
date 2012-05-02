@@ -34,4 +34,4 @@ LIB       = -framework Accelerate -lcublas -lcudart -lm -lstdc++.6
 CUDADIR   = /usr/local/cuda
 
 LIBDIR    = -L$(CUDADIR)/lib 
-INC       = -I../include -I$(CUDADIR)/include
+INC       = -I$(CUDADIR)/include
