@@ -4,13 +4,15 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        February 2011
+       
+       @author Peng Du
 */
 #include "common_magma.h"
 
-#define magmablas_strsm_tesla magmablas_strsm
+#define magmablas_dtrsm_tesla magmablas_dtrsm
 
 #define qmod(a,b) ((a)-(__mul24((b),(a)/(b))))
-//#define cublasSgemm magmablas_sgemm_fermi64
+#define cublasDgemm magmablas_dgemm
 
 #define b_copy();        dim3 dimBlock((M>=MAX_THREAD_PER_BLOCK)?MAX_THREAD_PER_BLOCK:(WARP_SIZE*((M/WARP_SIZE)+(M%WARP_SIZE!=0))), 1);\
                                         dim3 dimGrid(M/dimBlock.x+(M%dimBlock.x!=0), N);\
@@ -24,11 +26,11 @@
 #define NB 128// outer blocking size, >BLOCK_SIZE 
 
 __global__ void
-diag_strtri_kernel_upper (char diag, float *A, float *d_dinvA, int lda)
+diag_dtrtri_kernel_upper (char diag, double *A, double *d_dinvA, int lda)
 {
         int i,j;
-        float Ystx=0;
-        float *y=NULL, *Aoff=NULL;
+        double Ystx=0;
+        double *y=NULL, *Aoff=NULL;
         int switcher=0;
 
         // Thread index
@@ -41,13 +43,13 @@ diag_strtri_kernel_upper (char diag, float *A, float *d_dinvA, int lda)
         int NumBLperNB = NB/BLOCK_SIZE;
         d_dinvA += bx/NumBLperNB*NB*NB+(bx%NumBLperNB)*(NB*BLOCK_SIZE+BLOCK_SIZE);
 
-        __shared__ float Bs[BLOCK_SIZE*BLOCK_SIZE];
-        __shared__ float workspace[BLOCK_SIZE]; // workspace used to store the current working column
+        __shared__ double Bs[BLOCK_SIZE*BLOCK_SIZE];
+        __shared__ double workspace[BLOCK_SIZE]; // workspace used to store the current working column
 
         // load A
         #pragma unroll
         for (i=0; i<BLOCK_SIZE; i++)
-                Bs[i*BLOCK_SIZE+tx] = ((float)(tx<=i))*(*(Aoff+i*lda+tx));        // read in the whole square block of my A and zero out the non data triangular
+                Bs[i*BLOCK_SIZE+tx] = ((double)(tx<=i))*(*(Aoff+i*lda+tx));        // read in the whole square block of my A and zero out the non data triangular
 
         // Synchronize to make sure the matrices are loaded
         __syncthreads();
@@ -60,9 +62,9 @@ diag_strtri_kernel_upper (char diag, float *A, float *d_dinvA, int lda)
         for (i=0; i<BLOCK_SIZE; i++)
         {
                 Ystx = 0;
-                switcher = (float)(tx<i);
+                switcher = (double)(tx<i);
 
-                //strmv
+                //dtrmv
                 workspace[tx] = *(Bs+i*BLOCK_SIZE+tx);
                 y = Bs+i*BLOCK_SIZE;
 
@@ -85,11 +87,11 @@ diag_strtri_kernel_upper (char diag, float *A, float *d_dinvA, int lda)
 
 }
 __global__ void
-diag_strtri_kernel_lower (char diag, float *A, float *d_dinvA, int lda)
+diag_dtrtri_kernel_lower (char diag, double *A, double *d_dinvA, int lda)
 {
         int i,j;
-        float Ystx=0;
-        float *Bw=NULL, *x=NULL, *y=NULL, *Aoff=NULL;
+        double Ystx=0;
+        double *Bw=NULL, *x=NULL, *y=NULL, *Aoff=NULL;
         int switcher=0;
 
         // Thread index
@@ -103,13 +105,13 @@ diag_strtri_kernel_lower (char diag, float *A, float *d_dinvA, int lda)
         int NumBLperNB = NB/BLOCK_SIZE;
         d_dinvA += bx/NumBLperNB*NB*NB+(bx%NumBLperNB)*(NB*BLOCK_SIZE+BLOCK_SIZE);
 
-        __shared__ float Bs[BLOCK_SIZE*BLOCK_SIZE];
-        __shared__ float workspace[BLOCK_SIZE]; // workspace used to store the current working column
+        __shared__ double Bs[BLOCK_SIZE*BLOCK_SIZE];
+        __shared__ double workspace[BLOCK_SIZE]; // workspace used to store the current working column
 
         // load A
         #pragma unroll
         for (i=0; i<BLOCK_SIZE; i++)
-                Bs[i*BLOCK_SIZE+tx] = ((float)(tx>=i))*(*(Aoff+i*lda+tx));        // read in the whole square block of my A and zero out the non data triangular
+                Bs[i*BLOCK_SIZE+tx] = ((double)(tx>=i))*(*(Aoff+i*lda+tx));        // read in the whole square block of my A and zero out the non data triangular
                                                                                                 // not the upper or lower diagonal
         // Synchronize to make sure the matrices are loaded
         __syncthreads();
@@ -123,14 +125,14 @@ diag_strtri_kernel_lower (char diag, float *A, float *d_dinvA, int lda)
          */
 
         switcher = !(tx<BLOCK_SIZE-1);
-        Bs[(BLOCK_SIZE-1)*BLOCK_SIZE+tx] = (float)switcher*Bs[(BLOCK_SIZE-1)*BLOCK_SIZE+tx];        //zero out the last column, except the diagonal element
+        Bs[(BLOCK_SIZE-1)*BLOCK_SIZE+tx] = (double)switcher*Bs[(BLOCK_SIZE-1)*BLOCK_SIZE+tx];        //zero out the last column, except the diagonal element
 
         for (i=BLOCK_SIZE-2; i>=0; i--)
         {
                 Ystx = 0;
                 switcher = (tx>i);
 
-                //strmv
+                //dtrmv
                 Bw = Bs+(i+1)*BLOCK_SIZE+i+1;
                 workspace[tx] = *(Bs+i*BLOCK_SIZE+tx);
                 x = workspace+i+1;
@@ -140,11 +142,11 @@ diag_strtri_kernel_lower (char diag, float *A, float *d_dinvA, int lda)
 
                 #pragma unroll
                 for (j=0; j<BLOCK_SIZE-i-1; j++)
-                        Ystx += (float)switcher*(*(Bw+j*BLOCK_SIZE+txw)*x[j]);
+                        Ystx += (double)switcher*(*(Bw+j*BLOCK_SIZE+txw)*x[j]);
 
                 //sscal
                 switcher = (tx != i); 
-                y[tx] = (float)switcher*Ystx*(-Bs[i*BLOCK_SIZE+i])+(float)(!switcher)*y[tx];
+                y[tx] = (double)switcher*Ystx*(-Bs[i*BLOCK_SIZE+i])+(double)(!switcher)*y[tx];
 
                 __syncthreads();
         }
@@ -155,7 +157,7 @@ diag_strtri_kernel_lower (char diag, float *A, float *d_dinvA, int lda)
                 *(d_dinvA+i*NB+tx) = Bs[i*BLOCK_SIZE+tx];
 }
 
-__device__ void ssaxpy( float a, float *b, float *c )
+__device__ void ssaxpy( double a, double *b, double *c )
 {
         c[0] += a*b[0];
         c[1] += a*b[1];
@@ -175,16 +177,16 @@ __device__ void ssaxpy( float a, float *b, float *c )
         c[15] += a*b[15];
 }
 
-__device__ void sgemm_kernel_16 (float *A, int lda, float *B, int ldb, float * C, int ldc, float alpha, int blk, int inx, int iny, float *c)
+__device__ void dgemm_kernel_16 (double *A, int lda, double *B, int ldb, double * C, int ldc, double alpha, int blk, int inx, int iny, double *c)
 {
 
-        const float *Blast = B + blk;
-        __shared__ float bs[16][17];
+        const double *Blast = B + blk;
+        __shared__ double bs[16][17];
 
 
         do
         {
-                float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+                double a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
 
                 bs[inx][iny]    = B[0*ldb];
                 bs[inx][iny+4]  = B[4*ldb];
@@ -241,7 +243,7 @@ __device__ void sgemm_kernel_16 (float *A, int lda, float *B, int ldb, float * C
  */
 #define qmod(a,b) ((a)-(__mul24((b),(a)/(b))))
 __global__ void
-triple_sgemm_update_16_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+triple_dgemm_update_16_R (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
         const int bIdy = blockIdx.y/npages;
 //        const int page = (blockIdx.y)%(npages);
@@ -251,14 +253,14 @@ triple_sgemm_update_16_R (float * Ain, float *d_dinvA, int blk, int lda, int npa
         const int ibx = blockIdx.x * (blockDim.x*blockDim.y);
         const int iby = bIdy * 16;
         const int id = inx + iny*blockDim.x;
-        __shared__ float bs[16][17];
+        __shared__ double bs[16][17];
 
         int PagesPerNB = NB/(blk*2);
         //--------------------------part one---------------------------//
         {
                 // A12*inv(A22) -> A12
                 // A=A12, B=inv(A22), C=A12(d_dinvA)
-                float *A, *B, *C;
+                double *A, *B, *C;
                 int ldb = NB;
                 int ldc = NB;
 
@@ -274,13 +276,13 @@ triple_sgemm_update_16_R (float * Ain, float *d_dinvA, int blk, int lda, int npa
                 B += inx + __mul24( iby + iny, ldb );
                 C += ibx + id  + __mul24( iby, ldc );
 
-                const float *Blast = B + blk;
+                const double *Blast = B + blk;
 
-                float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                double c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
                 do
                 {
-                        float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+                        double a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
 
                         bs[inx][iny]    = B[0*ldb];
                         bs[inx][iny+4]  = B[4*ldb];
@@ -338,7 +340,7 @@ triple_sgemm_update_16_R (float * Ain, float *d_dinvA, int blk, int lda, int npa
         {
                 // -inv(A11)*A12 -> A12
                 // A=inv(A11), B=A12, C=A12
-                float *A, *B, *C;
+                double *A, *B, *C;
                 int lda = NB;
                 int ldb = NB;
                 int ldc = NB;
@@ -350,13 +352,13 @@ triple_sgemm_update_16_R (float * Ain, float *d_dinvA, int blk, int lda, int npa
                 B += inx + __mul24( iby + iny, ldb );
                 C += ibx + id  + __mul24( iby, ldc );
 
-                const float *Blast = B + blk;
+                const double *Blast = B + blk;
 
-                float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                double c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
                 do
                 {
-                        float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+                        double a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
 
                         bs[inx][iny]    = B[0*ldb];
                         bs[inx][iny+4]  = B[4*ldb];
@@ -414,7 +416,7 @@ triple_sgemm_update_16_R (float * Ain, float *d_dinvA, int blk, int lda, int npa
  */
 #define qmod(a,b) ((a)-(__mul24((b),(a)/(b))))
 __global__ void
-triple_sgemm_update_16_part1_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+triple_dgemm_update_16_part1_L (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
         const int bIdy = blockIdx.y/npages;
 //        const int page = (blockIdx.y)%(npages);
@@ -424,13 +426,13 @@ triple_sgemm_update_16_part1_L (float * Ain, float *d_dinvA, int blk, int lda, i
         const int ibx = blockIdx.x * (blockDim.x*blockDim.y);
         const int iby = bIdy * 16;
         const int id = inx + iny*blockDim.x;
-        __shared__ float bs[16][17];
+        __shared__ double bs[16][17];
 
         //--------------------------part one---------------------------//
         {
                 // A21*inv(A11) -> A21
                 // A=A21, B=inv(A11), C=A21
-                float *A, *B, *C;
+                double *A, *B, *C;
                 int ldb = NB;
                 int ldc = NB;
 
@@ -448,13 +450,13 @@ triple_sgemm_update_16_part1_L (float * Ain, float *d_dinvA, int blk, int lda, i
                 B += inx + __mul24( iby + iny, ldb );
                 C += ibx + id  + __mul24( iby, ldc );
 
-                const float *Blast = B + blk;
+                const double *Blast = B + blk;
 
-                float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                double c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
                 do
                 {
-                        float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+                        double a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
 
                         bs[inx][iny]    = B[0*ldb];
                         bs[inx][iny+4]  = B[4*ldb];
@@ -515,7 +517,7 @@ triple_sgemm_update_16_part1_L (float * Ain, float *d_dinvA, int blk, int lda, i
  */
 #define qmod(a,b) ((a)-(__mul24((b),(a)/(b))))
 __global__ void
-triple_sgemm_update_16_part2_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+triple_dgemm_update_16_part2_L (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
         const int bIdy = blockIdx.y/npages;
         const int page = qmod(blockIdx.y, npages);
@@ -524,13 +526,13 @@ triple_sgemm_update_16_part2_L (float * Ain, float *d_dinvA, int blk, int lda, i
         const int ibx = blockIdx.x * (blockDim.x*blockDim.y);
         const int iby = bIdy * 16;
         const int id = inx + iny*blockDim.x;
-        __shared__ float bs[16][17];
+        __shared__ double bs[16][17];
         
         //--------------------------part two---------------------------//
         {
                 // -inv(A22)*A21 -> A21
                 // A=inv(A22), B=A21, C=A21
-                float *A, *B, *C;
+                double *A, *B, *C;
                 int lda = NB;
                 int ldb = NB;
                 int ldc = NB;
@@ -547,13 +549,13 @@ triple_sgemm_update_16_part2_L (float * Ain, float *d_dinvA, int blk, int lda, i
                 B += inx + __mul24( iby + iny, ldb );
                 C += ibx + id  + __mul24( iby, ldc );
 
-                const float *Blast = B + blk;
+                const double *Blast = B + blk;
 
-                float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                double c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
                 do
                 {
-                        float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+                        double a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
 
                         bs[inx][iny]    = B[0*ldb];
                         bs[inx][iny+4]  = B[4*ldb];
@@ -611,7 +613,7 @@ triple_sgemm_update_16_part2_L (float * Ain, float *d_dinvA, int blk, int lda, i
  * B21 = -inv(A11)*A12*inv(A22)
  */
 __global__ void
-triple_sgemm_update_32_part1_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+triple_dgemm_update_32_part1_R (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
         const int bIdy = blockIdx.y/npages;
         const int page = qmod(blockIdx.y, npages);
@@ -620,14 +622,14 @@ triple_sgemm_update_32_part1_R (float * Ain, float *d_dinvA, int blk, int lda, i
         const int ibx = blockIdx.x * (blockDim.x*blockDim.y);
         const int iby = bIdy * 16;
         const int id = inx + iny*blockDim.x;
-        __shared__ float bs[16][17];
+        __shared__ double bs[16][17];
 
         int PagesPerNB = NB/(blk*2);
         //--------------------------part one---------------------------//
         {
                 // A12*inv(A22) -> A21
                 // A=A12, B=inv(A22), C=A12(d_dinvA)
-                float *A, *B, *C;
+                double *A, *B, *C;
                 int ldb = NB;
                 int ldc = NB;
 
@@ -643,13 +645,13 @@ triple_sgemm_update_32_part1_R (float * Ain, float *d_dinvA, int blk, int lda, i
                 B += inx + __mul24( iby + iny, ldb );
                 C += ibx + id  + __mul24( iby, ldc );
 
-                const float *Blast = B + blk;
+                const double *Blast = B + blk;
 
-                float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                double c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
                 do
                 {
-                        float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+                        double a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
 
                         bs[inx][iny]    = B[0*ldb];
                         bs[inx][iny+4]  = B[4*ldb];
@@ -699,7 +701,7 @@ triple_sgemm_update_32_part1_R (float * Ain, float *d_dinvA, int blk, int lda, i
  * B21 = -inv(A11)*A12*inv(A22)
  */
 __global__ void
-triple_sgemm_update_32_part2_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+triple_dgemm_update_32_part2_R (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
         const int bIdy = blockIdx.y/npages;
         const int page = qmod(blockIdx.y, npages);
@@ -708,7 +710,7 @@ triple_sgemm_update_32_part2_R (float * Ain, float *d_dinvA, int blk, int lda, i
         const int ibx = blockIdx.x * (blockDim.x*blockDim.y);
         const int iby = bIdy * 16;
         const int id = inx + iny*blockDim.x;
-        __shared__ float bs[16][17];
+        __shared__ double bs[16][17];
 
         int PagesPerNB = NB/(blk*2);
         
@@ -716,7 +718,7 @@ triple_sgemm_update_32_part2_R (float * Ain, float *d_dinvA, int blk, int lda, i
         {
                 // -inv(A11)*A12 -> A12
                 // A=inv(A11), B=A12, C=A12
-                float *A, *B, *C;
+                double *A, *B, *C;
                 int lda = NB;
                 int ldb = NB;
                 int ldc = NB;
@@ -732,13 +734,13 @@ triple_sgemm_update_32_part2_R (float * Ain, float *d_dinvA, int blk, int lda, i
                 B += inx + __mul24( iby + iny, ldb );
                 C += ibx + id  + __mul24( iby, ldc );
 
-                const float *Blast = B + blk;
+                const double *Blast = B + blk;
 
-                float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                double c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
                 do
                 {
-                        float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+                        double a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
 
                         bs[inx][iny]    = B[0*ldb];
                         bs[inx][iny+4]  = B[4*ldb];
@@ -786,7 +788,7 @@ triple_sgemm_update_32_part2_R (float * Ain, float *d_dinvA, int blk, int lda, i
  * B21 = -inv(A22)*A21*inv(A11)
  */
 __global__ void
-triple_sgemm_update_32_part1_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+triple_dgemm_update_32_part1_L (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
         const int bIdy = blockIdx.y/npages;
         const int page = qmod(blockIdx.y, npages);
@@ -795,14 +797,14 @@ triple_sgemm_update_32_part1_L (float * Ain, float *d_dinvA, int blk, int lda, i
         const int ibx = blockIdx.x * (blockDim.x*blockDim.y);
         const int iby = bIdy * 16;
         const int id = inx + iny*blockDim.x;
-        __shared__ float bs[16][17];
+        __shared__ double bs[16][17];
 
         int PagesPerNB = NB/(blk*2);
         //--------------------------part one---------------------------//
         {
                 // A21*inv(A11) -> A21
                 // A=A21, B=inv(A11), C=A21
-                float *A, *B, *C;
+                double *A, *B, *C;
                 int ldb = NB;
                 int ldc = NB;
 
@@ -818,13 +820,13 @@ triple_sgemm_update_32_part1_L (float * Ain, float *d_dinvA, int blk, int lda, i
                 B += inx + __mul24( iby + iny, ldb );
                 C += ibx + id  + __mul24( iby, ldc );
 
-                const float *Blast = B + blk;
+                const double *Blast = B + blk;
 
-                float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                double c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
                 do
                 {
-                        float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+                        double a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
 
                         bs[inx][iny]    = B[0*ldb];
                         bs[inx][iny+4]  = B[4*ldb];
@@ -874,7 +876,7 @@ triple_sgemm_update_32_part1_L (float * Ain, float *d_dinvA, int blk, int lda, i
  * B21 = -inv(A22)*A21*inv(A11)
  */
 __global__ void
-triple_sgemm_update_32_part2_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+triple_dgemm_update_32_part2_L (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
         const int bIdy = blockIdx.y/npages;
         const int page = qmod(blockIdx.y, npages);
@@ -883,14 +885,14 @@ triple_sgemm_update_32_part2_L (float * Ain, float *d_dinvA, int blk, int lda, i
         const int ibx = blockIdx.x * (blockDim.x*blockDim.y);
         const int iby = bIdy * 16;
         const int id = inx + iny*blockDim.x;
-        __shared__ float bs[16][17];
+        __shared__ double bs[16][17];
 
         int PagesPerNB = NB/(blk*2);
         //--------------------------part two---------------------------//
         {
                 // -inv(A22)*A21 -> A21
                 // A=inv(A22), B=A21, C=A21
-                float *A, *B, *C;
+                double *A, *B, *C;
                 int lda = NB;
                 int ldb = NB;
                 int ldc = NB;
@@ -906,13 +908,13 @@ triple_sgemm_update_32_part2_L (float * Ain, float *d_dinvA, int blk, int lda, i
                 B += inx + __mul24( iby + iny, ldb );
                 C += ibx + id  + __mul24( iby, ldc );
 
-                const float *Blast = B + blk;
+                const double *Blast = B + blk;
 
-                float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                double c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
                 do
                 {
-                        float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+                        double a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
 
                         bs[inx][iny]    = B[0*ldb];
                         bs[inx][iny+4]  = B[4*ldb];
@@ -961,7 +963,7 @@ triple_sgemm_update_32_part2_L (float * Ain, float *d_dinvA, int blk, int lda, i
  * B21 = -inv(A11)*A12*inv(A22)
  */
 __global__ void
-triple_sgemm_update_64_part1_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+triple_dgemm_update_64_part1_R (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
         const int bIdy = blockIdx.y/npages;
         const int page = qmod(blockIdx.y, npages);
@@ -970,14 +972,14 @@ triple_sgemm_update_64_part1_R (float * Ain, float *d_dinvA, int blk, int lda, i
         const int ibx = blockIdx.x*64;
         const int iby = bIdy*16;
         const int id = inx + iny*16;
-        __shared__ float bs[16][17];
+        __shared__ double bs[16][17];
 
         int PagesPerNB = NB/(blk*2);
         //--------------------------part one---------------------------//
         {
                 // A12*inv(A22) -> A12(d_dinvA)
                 // A=A12, B=inv(A22), C=A12
-                float *A, *B, *C;
+                double *A, *B, *C;
                 int ldb = NB;
                 int ldc = NB;
 
@@ -993,13 +995,13 @@ triple_sgemm_update_64_part1_R (float * Ain, float *d_dinvA, int blk, int lda, i
                 B += inx + __mul24( iby + iny, ldb );
                 C += ibx + id  + __mul24( iby, ldc );
 
-                const float *Blast = B + blk;
+                const double *Blast = B + blk;
 
-                float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                double c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
                 do
                 {
-                        float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+                        double a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
 
                         bs[inx][iny]    = B[0*ldb];
                         bs[inx][iny+4]  = B[4*ldb];
@@ -1044,7 +1046,7 @@ triple_sgemm_update_64_part1_R (float * Ain, float *d_dinvA, int blk, int lda, i
  * B21 = -inv(A11)*A12*inv(A22)
  */
 __global__ void
-triple_sgemm_update_64_part2_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+triple_dgemm_update_64_part2_R (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
         const int bIdy = blockIdx.y/npages;
         const int page = qmod(blockIdx.y, npages);
@@ -1053,7 +1055,7 @@ triple_sgemm_update_64_part2_R (float * Ain, float *d_dinvA, int blk, int lda, i
         const int ibx = blockIdx.x*64;
         const int iby = bIdy*16;
         const int id = inx + iny*16;
-        __shared__ float bs[16][17];
+        __shared__ double bs[16][17];
 
         int PagesPerNB = NB/(blk*2);
                         
@@ -1061,7 +1063,7 @@ triple_sgemm_update_64_part2_R (float * Ain, float *d_dinvA, int blk, int lda, i
         {
                 // -inv(A11)*A12 -> A12
                 // A=inv(A11), B=A12, C=A12
-                float *A, *B, *C;
+                double *A, *B, *C;
                 int lda = NB;
                 int ldb = NB;
                 int ldc = NB;
@@ -1077,13 +1079,13 @@ triple_sgemm_update_64_part2_R (float * Ain, float *d_dinvA, int blk, int lda, i
                 B += inx + __mul24( iby + iny, ldb );
                 C += ibx + id  + __mul24( iby, ldc );
 
-                const float *Blast = B + blk;
+                const double *Blast = B + blk;
 
-                float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                double c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
                 do
                 {
-                        float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+                        double a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
 
                         bs[inx][iny]    = B[0*ldb];
                         bs[inx][iny+4]  = B[4*ldb];
@@ -1127,7 +1129,7 @@ triple_sgemm_update_64_part2_R (float * Ain, float *d_dinvA, int blk, int lda, i
  * B21 = -inv(A22)*A21*inv(A11)
  */
 __global__ void
-triple_sgemm_update_64_part1_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+triple_dgemm_update_64_part1_L (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
         const int bIdy = blockIdx.y/npages;
         const int page = qmod(blockIdx.y, npages);
@@ -1136,14 +1138,14 @@ triple_sgemm_update_64_part1_L (float * Ain, float *d_dinvA, int blk, int lda, i
         const int ibx = blockIdx.x*64;
         const int iby = bIdy*16;
         const int id = inx + iny*16;
-        __shared__ float bs[16][17];
+        __shared__ double bs[16][17];
 
         int PagesPerNB = NB/(blk*2);
         //--------------------------part one---------------------------//
         {
                 // A21*inv(A11) -> A21
                 // A=A21, B=inv(A11), C=A21
-                float *A, *B, *C;
+                double *A, *B, *C;
                 int ldb = NB;
                 int ldc = NB;
 
@@ -1159,13 +1161,13 @@ triple_sgemm_update_64_part1_L (float * Ain, float *d_dinvA, int blk, int lda, i
                 B += inx + __mul24( iby + iny, ldb );
                 C += ibx + id  + __mul24( iby, ldc );
 
-                const float *Blast = B + blk;
+                const double *Blast = B + blk;
 
-                float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                double c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
                 do
                 {
-                        float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+                        double a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
 
                         bs[inx][iny]    = B[0*ldb];
                         bs[inx][iny+4]  = B[4*ldb];
@@ -1209,7 +1211,7 @@ triple_sgemm_update_64_part1_L (float * Ain, float *d_dinvA, int blk, int lda, i
  * B21 = -inv(A22)*A21*inv(A11)
  */
 __global__ void
-triple_sgemm_update_64_part2_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+triple_dgemm_update_64_part2_L (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
         const int bIdy = blockIdx.y/npages;
         const int page = qmod(blockIdx.y, npages);
@@ -1218,7 +1220,7 @@ triple_sgemm_update_64_part2_L (float * Ain, float *d_dinvA, int blk, int lda, i
         const int ibx = blockIdx.x*64;
         const int iby = bIdy*16;
         const int id = inx + iny*16;
-        __shared__ float bs[16][17];
+        __shared__ double bs[16][17];
 
         int PagesPerNB = NB/(blk*2);
                         
@@ -1226,7 +1228,7 @@ triple_sgemm_update_64_part2_L (float * Ain, float *d_dinvA, int blk, int lda, i
         {
                 // -inv(A22)*A21 -> A21
                 // A=inv(A22), B=A21, C=A21
-                float *A, *B, *C;
+                double *A, *B, *C;
                 int lda = NB;
                 int ldb = NB;
                 int ldc = NB;
@@ -1242,13 +1244,13 @@ triple_sgemm_update_64_part2_L (float * Ain, float *d_dinvA, int blk, int lda, i
                 B += inx + __mul24( iby + iny, ldb );
                 C += ibx + id  + __mul24( iby, ldc );
 
-                const float *Blast = B + blk;
+                const double *Blast = B + blk;
 
-                float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                double c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
                 do
                 {
-                        float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+                        double a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
 
                         bs[inx][iny]    = B[0*ldb];
                         bs[inx][iny+4]  = B[4*ldb];
@@ -1293,7 +1295,7 @@ triple_sgemm_update_64_part2_L (float * Ain, float *d_dinvA, int blk, int lda, i
  * B21 = -inv(A11)*A12*inv(A22)
  */
 __global__ void
-triple_sgemm_update_above64_part1_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+triple_dgemm_update_above64_part1_R (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
         const int bIdy = blockIdx.y/npages;
         const int page = qmod(blockIdx.y, npages);
@@ -1302,14 +1304,14 @@ triple_sgemm_update_above64_part1_R (float * Ain, float *d_dinvA, int blk, int l
         const int ibx = blockIdx.x*64;
         const int iby = bIdy*16;
         const int id = inx + iny*16;
-        __shared__ float bs[16][17];
+        __shared__ double bs[16][17];
 
         int PagesPerNB = NB/(blk*2);
         //--------------------------part one---------------------------//
         {
                 // A12*inv(A22) -> A12(d_dinvA)
                 // A=A12, B=inv(A22), C=A12
-                float *A, *B, *C;
+                double *A, *B, *C;
                 int ldb = NB;
                 int ldc = NB;
 
@@ -1325,13 +1327,13 @@ triple_sgemm_update_above64_part1_R (float * Ain, float *d_dinvA, int blk, int l
                 B += inx + __mul24( iby + iny, ldb );
                 C += ibx + id  + __mul24( iby, ldc );
 
-                const float *Blast = B + blk;
+                const double *Blast = B + blk;
 
-                float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                double c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
                 do
                 {
-                        float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+                        double a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
 
                         bs[inx][iny]    = B[0*ldb];
                         bs[inx][iny+4]  = B[4*ldb];
@@ -1376,7 +1378,7 @@ triple_sgemm_update_above64_part1_R (float * Ain, float *d_dinvA, int blk, int l
  * B21 = -inv(A22)*A21*inv(A11)
  */
 __global__ void
-triple_sgemm_update_above64_part1_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+triple_dgemm_update_above64_part1_L (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
         const int bIdy = blockIdx.y/npages;
         const int page = qmod(blockIdx.y, npages);
@@ -1385,14 +1387,14 @@ triple_sgemm_update_above64_part1_L (float * Ain, float *d_dinvA, int blk, int l
         const int ibx = blockIdx.x*64;
         const int iby = bIdy*16;
         const int id = inx + iny*16;
-        __shared__ float bs[16][17];
+        __shared__ double bs[16][17];
 
         int PagesPerNB = NB/(blk*2);
         //--------------------------part one---------------------------//
         {
                 // A21*inv(A11) -> A21
                 // A=A21, B=inv(A11), C=A21
-                float *A, *B, *C;
+                double *A, *B, *C;
                 int ldb = NB;
                 int ldc = NB;
 
@@ -1408,13 +1410,13 @@ triple_sgemm_update_above64_part1_L (float * Ain, float *d_dinvA, int blk, int l
                 B += inx + __mul24( iby + iny, ldb );
                 C += ibx + id  + __mul24( iby, ldc );
 
-                const float *Blast = B + blk;
+                const double *Blast = B + blk;
 
-                float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                double c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
                 do
                 {
-                        float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+                        double a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
 
                         bs[inx][iny]    = B[0*ldb];
                         bs[inx][iny+4]  = B[4*ldb];
@@ -1460,7 +1462,7 @@ triple_sgemm_update_above64_part1_L (float * Ain, float *d_dinvA, int blk, int l
  * B21 = -inv(A11)*A12*inv(A22)
  */
 __global__ void
-triple_sgemm_update_above64_part2_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+triple_dgemm_update_above64_part2_R (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
         const int bIdy = blockIdx.y/npages;
         const int page = qmod(blockIdx.y, npages);
@@ -1469,7 +1471,7 @@ triple_sgemm_update_above64_part2_R (float * Ain, float *d_dinvA, int blk, int l
         const int ibx = blockIdx.x*64;
         const int iby = bIdy*16;
         const int id = inx + iny*16;
-        __shared__ float bs[16][17];
+        __shared__ double bs[16][17];
 
         int PagesPerNB = NB/(blk*2);
         
@@ -1477,7 +1479,7 @@ triple_sgemm_update_above64_part2_R (float * Ain, float *d_dinvA, int blk, int l
         {
                 // -inv(A11)*A12 -> A12
                 // A=inv(A11), B=A12, C=A12
-                float *A, *B, *C;
+                double *A, *B, *C;
                 int lda = NB;
                 int ldb = NB;
                 int ldc = NB;
@@ -1494,13 +1496,13 @@ triple_sgemm_update_above64_part2_R (float * Ain, float *d_dinvA, int blk, int l
                 B += inx + __mul24( iby + iny, ldb );
                 C += ibx + id  + __mul24( iby, ldc );
 
-                const float *Blast = B + blk;
+                const double *Blast = B + blk;
 
-                float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                double c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
                 do
                 {
-                        float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+                        double a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
 
                         bs[inx][iny]    = B[0*ldb];
                         bs[inx][iny+4]  = B[4*ldb];
@@ -1544,7 +1546,7 @@ triple_sgemm_update_above64_part2_R (float * Ain, float *d_dinvA, int blk, int l
  * part 3, copy data into position 
  */
 __global__ void
-triple_sgemm_update_above64_part3_R (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+triple_dgemm_update_above64_part3_R (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
         const int bIdy = blockIdx.y/npages;
         const int page = qmod(blockIdx.y, npages);
@@ -1560,7 +1562,7 @@ triple_sgemm_update_above64_part3_R (float * Ain, float *d_dinvA, int blk, int l
         {
                 // -inv(A11)*A12 -> A12
                 // A=inv(A11), B=A12, C=A12
-                float *C_temp, *C_real;
+                double *C_temp, *C_real;
                 int ldc = NB;
 
                 C_temp = d_dinvA + NB*NB*(page/PagesPerNB) + 
@@ -1589,7 +1591,7 @@ triple_sgemm_update_above64_part3_R (float * Ain, float *d_dinvA, int blk, int l
  * part 3: copy data back to position 
  */
 __global__ void
-triple_sgemm_update_above64_part3_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+triple_dgemm_update_above64_part3_L (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
         const int bIdy = blockIdx.y/npages;
         const int page = qmod(blockIdx.y, npages);
@@ -1605,7 +1607,7 @@ triple_sgemm_update_above64_part3_L (float * Ain, float *d_dinvA, int blk, int l
         {
                 // -inv(A22)*A21 -> A21
                 // A=inv(A22), B=A21, C=A21
-                float *C_temp, *C_real;
+                double *C_temp, *C_real;
                 int ldc = NB;
 
                 d_dinvA += NB*NB*(page/PagesPerNB) + 
@@ -1631,7 +1633,7 @@ triple_sgemm_update_above64_part3_L (float * Ain, float *d_dinvA, int blk, int l
  * B21 = -inv(A22)*A21*inv(A11)
  */
 __global__ void
-triple_sgemm_update_above64_part2_L (float * Ain, float *d_dinvA, int blk, int lda, int npages)
+triple_dgemm_update_above64_part2_L (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
         const int bIdy = blockIdx.y/npages;
         const int page = qmod(blockIdx.y, npages);
@@ -1640,7 +1642,7 @@ triple_sgemm_update_above64_part2_L (float * Ain, float *d_dinvA, int blk, int l
         const int ibx = blockIdx.x*64;
         const int iby = bIdy*16;
         const int id = inx + iny*16;
-        __shared__ float bs[16][17];
+        __shared__ double bs[16][17];
 
         int PagesPerNB = NB/(blk*2);
         
@@ -1648,7 +1650,7 @@ triple_sgemm_update_above64_part2_L (float * Ain, float *d_dinvA, int blk, int l
         {
                 // -inv(A22)*A21 -> A21
                 // A=inv(A22), B=A21, C=A21
-                float *A, *B, *C;
+                double *A, *B, *C;
                 int lda = NB;
                 int ldb = NB;
                 int ldc = NB;
@@ -1666,13 +1668,13 @@ triple_sgemm_update_above64_part2_L (float * Ain, float *d_dinvA, int blk, int l
                 B += inx + __mul24( iby + iny, ldb );
                 C += ibx + id  + __mul24( iby, ldc );
 
-                const float *Blast = B + blk;
+                const double *Blast = B + blk;
 
-                float c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                double c[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
                 do
                 {
-                        float a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
+                        double a[4] = { A[0*lda], A[1*lda], A[2*lda], A[3*lda] };
 
                         bs[inx][iny]    = B[0*ldb];
                         bs[inx][iny+4]  = B[4*ldb];
@@ -1714,7 +1716,7 @@ triple_sgemm_update_above64_part2_L (float * Ain, float *d_dinvA, int blk, int l
 }
 
 __global__ void
-b_copy_kernel (int M, int N, float *b, int ldb, float *d_x, int ldx)
+b_copy_kernel (int M, int N, double *b, int ldb, double *d_x, int ldx)
 {
         int by = blockIdx.y;
 
@@ -1726,14 +1728,14 @@ b_copy_kernel (int M, int N, float *b, int ldb, float *d_x, int ldx)
 
 
 extern "C"
-void diag_strtri (int M, char uplo, char diag, float *A, float *d_dinvA, int lda)
+void diag_dtrtri (int M, char uplo, char diag, double *A, double *d_dinvA, int lda)
 {
         int nblocks = M/BLOCK_SIZE+(M%BLOCK_SIZE!=0);
 
         if (uplo == 'l' || uplo == 'L')
         {
                 // solve the diagonal blocks
-                diag_strtri_kernel_lower<<< nblocks, BLOCK_SIZE, 0, magma_stream >>>(diag, A, d_dinvA, lda);
+                diag_dtrtri_kernel_lower<<< nblocks, BLOCK_SIZE, 0, magma_stream >>>(diag, A, d_dinvA, lda);
 
                 // update the inverse up to the size of BLOCK_SIZE
                 for (int i=BLOCK_SIZE; i<NB; i*=2)
@@ -1745,21 +1747,21 @@ void diag_strtri (int M, char uplo, char diag, float *A, float *d_dinvA, int lda
                         switch (i)
                         {
                                 case 16:
-                                        triple_sgemm_update_16_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                                        triple_sgemm_update_16_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                                        triple_dgemm_update_16_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                                        triple_dgemm_update_16_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
                                         break;
                                 case 32:
-                                        triple_sgemm_update_32_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                                        triple_sgemm_update_32_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                                        triple_dgemm_update_32_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                                        triple_dgemm_update_32_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
                                         break;
                                 case 64:
-                                        triple_sgemm_update_64_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                                        triple_sgemm_update_64_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                                        triple_dgemm_update_64_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                                        triple_dgemm_update_64_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
                                         break;
                                 default:
-                                        triple_sgemm_update_above64_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                                        triple_sgemm_update_above64_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                                        triple_sgemm_update_above64_part3_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                                        triple_dgemm_update_above64_part1_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                                        triple_dgemm_update_above64_part2_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                                        triple_dgemm_update_above64_part3_L<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
                                         break;
                         }
                         if (i*2>=M) break;
@@ -1767,7 +1769,7 @@ void diag_strtri (int M, char uplo, char diag, float *A, float *d_dinvA, int lda
         }
         else
         {
-                diag_strtri_kernel_upper<<< nblocks, BLOCK_SIZE, 0, magma_stream >>>(diag, A, d_dinvA, lda);
+                diag_dtrtri_kernel_upper<<< nblocks, BLOCK_SIZE, 0, magma_stream >>>(diag, A, d_dinvA, lda);
 
                 // update the inverse up to the size of BLOCK_SIZE
                 for (int i=BLOCK_SIZE; i<NB; i*=2)
@@ -1779,20 +1781,20 @@ void diag_strtri (int M, char uplo, char diag, float *A, float *d_dinvA, int lda
                         switch (i)
                         {
                                 case 16:
-                                        triple_sgemm_update_16_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                                        triple_dgemm_update_16_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
                                         break;
                                 case 32:
-                                        triple_sgemm_update_32_part1_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                                        triple_sgemm_update_32_part2_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                                        triple_dgemm_update_32_part1_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                                        triple_dgemm_update_32_part2_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
                                         break;
                                 case 64:
-                                        triple_sgemm_update_64_part1_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                                        triple_sgemm_update_64_part2_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                                        triple_dgemm_update_64_part1_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                                        triple_dgemm_update_64_part2_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
                                         break;
                                 default:
-                                        triple_sgemm_update_above64_part1_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                                        triple_sgemm_update_above64_part2_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
-                                        triple_sgemm_update_above64_part3_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                                        triple_dgemm_update_above64_part1_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                                        triple_dgemm_update_above64_part2_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
+                                        triple_dgemm_update_above64_part3_R<<< dimGrid, dimBlock, 0, magma_stream >>>(A, d_dinvA, i, lda, npages);
                                         break;
                         }
                         if (i*2>=M) break;
@@ -1802,11 +1804,11 @@ void diag_strtri (int M, char uplo, char diag, float *A, float *d_dinvA, int lda
 }
 
 /*
- * magmablas_strsm
+ * magmablas_dtrsm
  */
 extern "C"
-void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, int N, 
-                            float alpha, /*const*/ float* A, int lda, float* b, int ldb)
+void magmablas_dtrsm_tesla( char side, char uplo, char tran, char diag, int M, int N, 
+                            double alpha, /*const*/ double* A, int lda, double* b, int ldb)
 {
         /*  -- magma (version 0.1) --
                 univ. of tennessee, knoxville
@@ -1817,7 +1819,7 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                 purpose
                 =======
 
-                strsm  solves one of the matrix equations on gpu
+                dtrsm  solves one of the matrix equations on gpu
 
                 op( a )*x = alpha*b,   or   x*op( a ) = alpha*b,
 
@@ -1828,7 +1830,7 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
 
                 The matrix X is overwritten on B.
 
-                When M or N is not a multiple of blocking size, which is 32 for now, cublasStrsm will
+                When M or N is not a multiple of blocking size, which is 32 for now, cublasDtrsm will
                 be called instead. There soon will not be this limitation both for arbitrary problem 
                 size and blocking size.
            
@@ -1933,7 +1935,7 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
     ===================================================================== */
 
         int i;
-        float *d_dinvA, *d_x;
+        double *d_dinvA, *d_x;
 
         /* quick return on wrong size */
         if (M<=0 || N<=0)
@@ -1944,11 +1946,11 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                 /* inverse the diagonals
                  * Allocate device memory for the inversed diagonal blocks, size=m*NB
                  */
-                cudaMalloc((void**)&d_dinvA, NB*((M/NB)+(M%NB!=0))*NB*sizeof(float));
-                cudaMalloc((void**)&d_x, N*M*sizeof(float));
-                cudaMemset (d_x, 0, N*M*sizeof(float));
-                cudaMemset (d_dinvA, 0, NB*((M/NB)+(M%NB!=0))*NB*sizeof(float));
-                diag_strtri (M, uplo, diag, A, d_dinvA, lda);
+                cudaMalloc((void**)&d_dinvA, NB*((M/NB)+(M%NB!=0))*NB*sizeof(double));
+                cudaMalloc((void**)&d_x, N*M*sizeof(double));
+                cudaMemset(d_x, 0, N*M*sizeof(double));
+                cudaMemset (d_dinvA, 0, NB*((M/NB)+(M%NB!=0))*NB*sizeof(double));
+                diag_dtrtri (M, uplo, diag, A, d_dinvA, lda);
 
                 if (tran == 'N' || tran == 'n')
                 /* the non-transpose case */
@@ -1960,7 +1962,7 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                                 /* handle the first block seperately with alpha */
 
                                 int MM = min (NB, M); 
-                                cublasSgemm ('N', 'N', MM, N, MM, alpha, d_dinvA, NB, b, ldb, 0, d_x, M);  
+                                cublasDgemm ('N', 'N', MM, N, MM, alpha, d_dinvA, NB, b, ldb, 0, d_x, M);  
 
                                 if (NB>=M)
                                 {
@@ -1970,18 +1972,18 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                                         return;
                                 }
 
-                                cublasSgemm ('N', 'N', M-NB, N, NB, -1.0, A+NB, lda, d_x, M, alpha, b+NB, ldb);
+                                cublasDgemm ('N', 'N', M-NB, N, NB, -1.0, A+NB, lda, d_x, M, alpha, b+NB, ldb);
 
                                 /* the rest blocks */
                                 for (i=NB; i<M; i+=NB)
                                 {
                                         MM = min (M-i, NB);
-                                        cublasSgemm ('N', 'N', MM, N, MM, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);  
+                                        cublasDgemm ('N', 'N', MM, N, MM, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);  
                                         
                                         if (i+NB>=M)
                                                 break;
 
-                                        cublasSgemm ('N', 'N', M-i-NB, N, NB, -1.0, A+i*lda+i+NB, lda, d_x+i, M, 1.0, b+i+NB, ldb);
+                                        cublasDgemm ('N', 'N', M-i-NB, N, NB, -1.0, A+i*lda+i+NB, lda, d_x+i, M, 1.0, b+i+NB, ldb);
                                 }
                         }
                         else
@@ -1991,7 +1993,7 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                                 /* handle the first block seperately with alpha */
                                 int MM = (M%NB==0)?NB:(M%NB); 
                                 i = M-MM;
-                                cublasSgemm ('N', 'N', MM, N, MM, alpha, d_dinvA+i*NB, NB, b+i, ldb, 0.0, d_x+i, M); 
+                                cublasDgemm ('N', 'N', MM, N, MM, alpha, d_dinvA+i*NB, NB, b+i, ldb, 0.0, d_x+i, M); 
                                         
                                 if (i-NB<0)
                                 {
@@ -2001,17 +2003,17 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                                         return;
                                 }
 
-                                cublasSgemm ('N', 'N', i, N, MM, -1.0, A+i*lda, lda, d_x+i, M, alpha, b, ldb);
+                                cublasDgemm ('N', 'N', i, N, MM, -1.0, A+i*lda, lda, d_x+i, M, alpha, b, ldb);
 
                                 /* the rest blocks */
                                 for (i=M-MM-NB; i>=0; i-=NB)
                                 {
-                                        cublasSgemm ('N', 'N', NB, N, NB, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0.0, d_x+i, M);
+                                        cublasDgemm ('N', 'N', NB, N, NB, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0.0, d_x+i, M);
 
                                         if (i-NB<0)
                                                 break;
 
-                                        cublasSgemm ('N', 'N', i, N, NB, -1.0, A+i*lda, lda, d_x+i, M, 1.0, b, ldb);
+                                        cublasDgemm ('N', 'N', i, N, NB, -1.0, A+i*lda, lda, d_x+i, M, 1.0, b, ldb);
                                 }
 
                         }
@@ -2026,7 +2028,7 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                                 /* handle the first block seperately with alpha */
                                 int MM = (M%NB==0)?NB:(M%NB); 
                                 i=M-MM; 
-                                cublasSgemm ('T', 'N', MM, N, MM, alpha, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);  
+                                cublasDgemm ('T', 'N', MM, N, MM, alpha, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);  
 
                                 if (i-NB<0)
                                 {
@@ -2036,17 +2038,17 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                                         return;
                                 }
 
-                                cublasSgemm ('T', 'N', i, N, MM, -1.0, A+i, lda, d_x+i, M, alpha, b, ldb);
+                                cublasDgemm ('T', 'N', i, N, MM, -1.0, A+i, lda, d_x+i, M, alpha, b, ldb);
 
                                 /* the rest blocks */
                                 for (i=M-MM-NB; i>=0; i-=NB)
                                 {
-                                        cublasSgemm ('T', 'N', NB, N, NB, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);  
+                                        cublasDgemm ('T', 'N', NB, N, NB, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);  
 
                                         if (i-NB<0)
                                                 break;
 
-                                        cublasSgemm ('T', 'N', i, N, NB, -1.0, A+i, lda, d_x+i, M, 1.0, b, ldb);
+                                        cublasDgemm ('T', 'N', i, N, NB, -1.0, A+i, lda, d_x+i, M, 1.0, b, ldb);
                                 }
                         }
                         else
@@ -2055,7 +2057,7 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                                         
                                 /* handle the first block seperately with alpha */
                                 int MM = min (NB, M); 
-                                cublasSgemm ('T', 'N', MM, N, MM, alpha, d_dinvA, NB, b, ldb, 0, d_x, M);  
+                                cublasDgemm ('T', 'N', MM, N, MM, alpha, d_dinvA, NB, b, ldb, 0, d_x, M);  
 
                                 if (NB>=M)
                                 {
@@ -2065,18 +2067,18 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                                         return;
                                 }
 
-                                cublasSgemm ('T', 'N', M-NB, N, NB, -1.0, A+(NB)*lda, lda, d_x, M, alpha, b+NB, ldb);
+                                cublasDgemm ('T', 'N', M-NB, N, NB, -1.0, A+(NB)*lda, lda, d_x, M, alpha, b+NB, ldb);
 
                                 /* the rest blocks */
                                 for (i=NB; i<M; i+=NB)
                                 {
                                         MM = min (M-i, NB);
-                                        cublasSgemm ('T', 'N', MM, N, MM, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);  
+                                        cublasDgemm ('T', 'N', MM, N, MM, 1.0, d_dinvA+i*NB, NB, b+i, ldb, 0, d_x+i, M);  
                                         
                                         if (i+NB>=M)
                                                 break;
 
-                                        cublasSgemm ('T', 'N', M-i-NB, N, NB, -1.0, A+(i+NB)*lda+i, lda, d_x+i, M, 1.0, b+i+NB, ldb);
+                                        cublasDgemm ('T', 'N', M-i-NB, N, NB, -1.0, A+(i+NB)*lda+i, lda, d_x+i, M, 1.0, b+i+NB, ldb);
                                 }
                         }
                 }
@@ -2087,11 +2089,11 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                 /* inverse the diagonals
                  * Allocate device memory for the inversed diagonal blocks, size=N*BLOCK_SIZE 
                  */
-                cudaMalloc((void**)&d_dinvA, NB*((N/NB)+(N%NB!=0))*NB*sizeof(float));
-                cudaMalloc((void**)&d_x, N*M*sizeof(float));
-                cudaMemset (d_x, 0, N*M*sizeof(float));
-                cudaMemset (d_dinvA, 0, NB*((N/NB)+(N%NB!=0))*NB*sizeof(float));
-                diag_strtri (N, uplo, diag, A, d_dinvA, lda);
+                cudaMalloc((void**)&d_dinvA, NB*((N/NB)+(N%NB!=0))*NB*sizeof(double));
+                cudaMalloc((void**)&d_x, N*M*sizeof(double));
+                cudaMemset(d_x, 0, N*M*sizeof(double));
+                cudaMemset (d_dinvA, 0, NB*((N/NB)+(N%NB!=0))*NB*sizeof(double));
+                diag_dtrtri (N, uplo, diag, A, d_dinvA, lda);
 
                 if (tran == 'N' || tran == 'n')
                 /* the non-transpose case */
@@ -2103,7 +2105,7 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                                 /* handle the first block seperately with alpha */
                                 int NN = (N%NB==0)?NB:(N%NB);
                                 i=N-NN;
-                                cublasSgemm ('N', 'N', M, NN, NN, alpha, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M); 
+                                cublasDgemm ('N', 'N', M, NN, NN, alpha, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M); 
 
                                 if (i-NB<0)
                                 {
@@ -2113,17 +2115,17 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                                         return;
                                 }
 
-                                cublasSgemm ('N', 'N', M, i, NN, -1.0, d_x+i*M, M, A+i, lda, alpha, b, ldb);
+                                cublasDgemm ('N', 'N', M, i, NN, -1.0, d_x+i*M, M, A+i, lda, alpha, b, ldb);
 
                                 /* the rest blocks */
                                 for (i=N-NN-NB; i>=0; i-=NB)
                                 {
-                                        cublasSgemm ('N', 'N', M, NB, NB, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M); 
+                                        cublasDgemm ('N', 'N', M, NB, NB, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M); 
                                         
                                         if (i-NB<0)
                                                 break;
 
-                                        cublasSgemm ('N', 'N', M, i, NB, -1.0, d_x+i*M, M, A+i, lda, 1.0, b, ldb);
+                                        cublasDgemm ('N', 'N', M, i, NB, -1.0, d_x+i*M, M, A+i, lda, 1.0, b, ldb);
                                 }
                         }
                         else
@@ -2132,7 +2134,7 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                                 
                                 /* handle the first block seperately with alpha */
                                 int NN = min(NB, N); 
-                                cublasSgemm ('N', 'N', M, NN, NN, alpha, b, ldb, d_dinvA, NB, 0, d_x, M);  
+                                cublasDgemm ('N', 'N', M, NN, NN, alpha, b, ldb, d_dinvA, NB, 0, d_x, M);  
 
                                 if (NB>=N)
                                 {
@@ -2142,18 +2144,18 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                                         return;
                                 }
 
-                                cublasSgemm ('N', 'N', M, N-NB, NB, -1.0, d_x, M, A+NB*lda, lda, alpha, b+NB*ldb, ldb);
+                                cublasDgemm ('N', 'N', M, N-NB, NB, -1.0, d_x, M, A+NB*lda, lda, alpha, b+NB*ldb, ldb);
                                 
                                 /* the rest blocks */
                                 for (i=NB; i<N; i+=NB)
                                 {
                                         NN = min(NB, N-i); 
-                                        cublasSgemm ('N', 'N', M, NN, NN, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0, d_x+i*M, M);  
+                                        cublasDgemm ('N', 'N', M, NN, NN, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0, d_x+i*M, M);  
 
                                         if (i+NB>=N)
                                                 break;
 
-                                        cublasSgemm ('N', 'N', M, N-i-NB, NB, -1.0, d_x+i*M, M,   A+(i+NB)*lda+i, lda, 1.0, b+(i+NB)*ldb, ldb);
+                                        cublasDgemm ('N', 'N', M, N-i-NB, NB, -1.0, d_x+i*M, M,   A+(i+NB)*lda+i, lda, 1.0, b+(i+NB)*ldb, ldb);
                                 }
                         }
                 }
@@ -2166,7 +2168,7 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                                 
                                 /* handle the first block seperately with alpha */
                                 int NN = min(NB, N); 
-                                cublasSgemm ('N', 'T', M, NN, NN, alpha, b, ldb, d_dinvA, NB, 0, d_x, M);  
+                                cublasDgemm ('N', 'T', M, NN, NN, alpha, b, ldb, d_dinvA, NB, 0, d_x, M);  
 
                                 if (NB>=N)
                                 {
@@ -2176,18 +2178,18 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                                         return;
                                 }
 
-                                cublasSgemm ('N', 'T', M, N-NB, NB, -1.0, d_x, M, A+NB, lda, alpha, b+NB*ldb, ldb);
+                                cublasDgemm ('N', 'T', M, N-NB, NB, -1.0, d_x, M, A+NB, lda, alpha, b+NB*ldb, ldb);
 
                                 /* the rest blocks */
                                 for (i=NB; i<N; i+=NB)
                                 {
                                         NN = min(NB, N-i); 
-                                        cublasSgemm ('N', 'T', M, NN, NN, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0, d_x+i*M, M);  
+                                        cublasDgemm ('N', 'T', M, NN, NN, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0, d_x+i*M, M);  
 
                                         if (i+NB>=N)
                                                 break;
 
-                                        cublasSgemm ('N', 'T', M, N-i-NB, NB, -1.0, d_x+i*M, M,   A+i*lda+NB+i, lda, 1.0, b+(i+NB)*ldb, ldb);
+                                        cublasDgemm ('N', 'T', M, N-i-NB, NB, -1.0, d_x+i*M, M,   A+i*lda+NB+i, lda, 1.0, b+(i+NB)*ldb, ldb);
                                 }
                         }
                         else
@@ -2197,7 +2199,7 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                                 /* handle the first block seperately with alpha */
                                 int NN = (N%NB==0)?NB:(N%NB);
                                 i=N-NN;
-                                cublasSgemm ('N', 'T', M, NN, NN, alpha, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M); 
+                                cublasDgemm ('N', 'T', M, NN, NN, alpha, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M); 
 
                                 if (i-NB<0)
                                 {
@@ -2207,17 +2209,17 @@ void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, i
                                         return;
                                 }
 
-                                cublasSgemm ('N', 'T', M, i, NN, -1.0, d_x+i*M, M, A+i*lda, lda, alpha, b, ldb);
+                                cublasDgemm ('N', 'T', M, i, NN, -1.0, d_x+i*M, M, A+i*lda, lda, alpha, b, ldb);
                                 
                                 /* the rest blocks */
                                 for (i=N-NN-NB; i>=0; i-=NB)
                                 {
-                                        cublasSgemm ('N', 'T', M, NB, NB, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M); 
+                                        cublasDgemm ('N', 'T', M, NB, NB, 1.0, b+ldb*i, ldb, d_dinvA+i*NB, NB, 0.0, d_x+i*M, M); 
 
                                         if (i-NB<0)
                                                 break;
 
-                                        cublasSgemm ('N', 'T', M, i, NB, -1.0, d_x+i*M, M, A+i*lda, lda, 1.0, b, ldb);
+                                        cublasDgemm ('N', 'T', M, i, NB, -1.0, d_x+i*M, M, A+i*lda, lda, 1.0, b, ldb);
                                 }
                         }
                 }
