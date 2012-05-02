@@ -23,9 +23,9 @@ prefix ?= ./install
 #
 # Quark
 #
-QUARKDIR ?= $(MAGMA_DIR)/quark
-INCQUARK  = -I$(QUARKDIR)/include
-#LIBQUARK  = -L$(QUARKDIR)/lib -lquark
+#QUARKDIR ?= $(MAGMA_DIR)/quark
+#INC += -I$(QUARKDIR)/include
+#LIB += -L$(QUARKDIR)/lib -lquark
 
 #
 # NVCC options for the different cards
@@ -45,8 +45,7 @@ ifeq (${GPU_TARGET}, 1)
 	LDOPTS += -DGPUSHMEM=200
 endif
 
-LIB := $(LIBQUARK) $(LIB)
-INC += -I../include $(INCQUARK)
+INC += -I../include
 
 LIBEXT = $(LIBDIR) $(LIB)
 
