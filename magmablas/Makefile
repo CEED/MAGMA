@@ -42,6 +42,14 @@ ZSRC  = \
 	dtrsm.cu	\
 	ssyr2k.cu	\
 
+# Add card-specific versions that need precisions generated
+ifeq (${GPU_TARGET}, 0)
+ZSRC += csymv_tesla.cu
+else ifeq (${GPU_TARGET}, 1)
+ZSRC += zhemv_fermi.cu \
+	zsymv_fermi.cu
+endif
+
 -include Makefile.src
 
 FERMISRC = \
@@ -50,8 +58,6 @@ FERMISRC = \
 	cgemv_fermi.cu	\
 	zgemv_fermi.cu	\
 	zgemvt_fermi.cu	\
-	zsymv_fermi.cu	\
-	zhemv_fermi.cu	\
 	\
 	sgemm_fermi.cu	\
 	sgemm_fermi80.cu\
@@ -66,7 +72,6 @@ TESLASRC = \
 	zgemv_tesla.cu	\
 	gemv32_tesla.cu	\
 	zsymv_tesla.cu	\
-	csymv_tesla.cu	\
 	zhemv_tesla.cu	\
 	chemv_tesla.cu	\
 	\
@@ -96,13 +101,11 @@ ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
 	dgemv_MLU.cu
 
 ifeq (${GPU_TARGET}, 0)
-ALLSRC += $(TESLASRC)
-GPUOPT  = ${TESLAOPT}
-endif
-
-ifeq (${GPU_TARGET}, 1)
-ALLSRC += $(FERMISRC)
-GPUOPT  = ${FERMIOPT}
+    ALLSRC += $(TESLASRC)
+    GPUOPT  = ${TESLAOPT}
+else ifeq (${GPU_TARGET}, 1)
+    ALLSRC += $(FERMISRC)
+    GPUOPT  = ${FERMIOPT}
 endif
 
 ALLOBJ := $(ALLSRC:.cu=.cu_o) 
