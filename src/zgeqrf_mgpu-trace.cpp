@@ -232,10 +232,8 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
       #ifdef  MultiGPUs
          cudaSetDevice(i);
       #endif
-         if ( CUBLAS_STATUS_SUCCESS != cublasAlloc((n+ldda)*nb,
-                                                sizeof(cuDoubleComplex),
-                                                (void**)&(dwork[i])) ) {
-        *info = MAGMA_ERR_CUBLASALLOC;
+         if (MAGMA_SUCCESS != magma_zmalloc( &(dwork[i]), (n + ldda)*nb )) {
+        *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
       }
     }
@@ -249,15 +247,15 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
         n_local[i] += n%nb;
     }
 
-    if ( cudaSuccess != cudaMallocHost( (void**)&local_work, lwork*sizeof(cuDoubleComplex)) ) {
+    if (MAGMA_SUCCESS != magma_zmalloc_host( &local_work, lwork )) {
       for(i=0; i<num_gpus; i++){
         #ifdef  MultiGPUs
           cudaSetDevice(i);
         #endif
-        cublasFree( dwork[i] );
+        magma_free( dwork[i] );
       }
 
-      *info = MAGMA_ERR_HOSTALLOC;
+      *info = MAGMA_ERR_HOST_ALLOC;
       return *info;
     }
 
@@ -497,7 +495,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
       #ifdef  MultiGPUs
       cudaSetDevice(j);
       #endif
-      cublasFree(dwork[j]);
+      magma_free( dwork[j] );
     }
     
     /* Use unblocked code to factor the last or only block. */

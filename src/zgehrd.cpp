@@ -168,10 +168,9 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     }
 
     cuDoubleComplex *da;
-    cublasStatus status;
-    status = cublasAlloc(N*ldda+2*N*nb+nb*nb, sizeof(cuDoubleComplex), (void**)&da);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-      fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
+    if (MAGMA_SUCCESS != magma_zmalloc( &da, N*ldda + 2*N*nb + nb*nb )) {
+        *info = MAGMA_ERR_DEVICE_ALLOC;
+        return *info;
     }
     
     cuDoubleComplex *d_A    = da;
@@ -180,7 +179,12 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     magma_int_t i__;
 
     cuDoubleComplex *t, *d_t;
-    t   = (cuDoubleComplex *)malloc(nb*nb*sizeof(cuDoubleComplex));
+    t = (cuDoubleComplex*) malloc(nb*nb*sizeof(cuDoubleComplex));
+    if ( t == NULL ) {
+        magma_free( da );
+        *info = MAGMA_ERR_HOST_ALLOC;
+        return *info;
+    }
     d_t = d_work + nb * ldda;
 
     zzero_nbxnb_block(nb, d_A+N*ldda, ldda);
@@ -269,7 +273,7 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     lapackf77_zgehd2(&n, &i__, &ihi, a, &lda, &tau[1], work, &iinfo);
     MAGMA_Z_SET2REAL( work[0], (double) iws );
     
-    cublasFree(da);
+    magma_free( da );
     free(t);
  
     return *info;

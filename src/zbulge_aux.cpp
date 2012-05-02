@@ -84,7 +84,7 @@ extern "C" void  magma_zstedx_withZ(magma_int_t N, magma_int_t NE, double *D, do
   RWORK  = (double*) malloc( LRWORK*sizeof( double) );
   IWORK  = (magma_int_t*) malloc( LIWORK*sizeof( magma_int_t) );
 
-  if (cudaSuccess != cudaMalloc( (void**)&dwork, 3*N*(N/2+1)*sizeof(double) ) ) {
+  if (MAGMA_SUCCESS != magma_dmalloc( &dwork, 3*N*(N/2 + 1) )) {
      printf("=================================================\n");
      printf("ZSTEDC ERROR OCCURED IN CUDAMALLOC\n");
      printf("=================================================\n");
@@ -101,7 +101,7 @@ extern "C" void  magma_zstedx_withZ(magma_int_t N, magma_int_t NE, double *D, do
           //assert(INFO==0);
   }
 
-  cudaFree(dwork);
+  magma_free( dwork );
   free( IWORK );
   free( RWORK );
 }

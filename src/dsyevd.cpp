@@ -267,16 +267,16 @@ magma_dsyevd(char jobz, char uplo,
         start = get_current_time();
 #endif
         
-        if (cudaSuccess != cudaMalloc( (void**)&dwork, 3*n*(n/2+1)*sizeof(double) ) ) {
+        if (MAGMA_SUCCESS != magma_dmalloc( &dwork, 3*n*(n/2 + 1) )) {
             *info = -14;
-            return MAGMA_ERR_CUBLASALLOC;
+            return MAGMA_ERR_DEVICE_ALLOC;
         }
         
         magma_dstedx('A', n, 0., 0., 0, 0, &w[1], &work[inde],
                      &work[indwrk], n, &work[indwk2],
                      llwrk2, &iwork[1], liwork, dwork, info);
         
-        cudaFree(dwork);
+        magma_free( dwork );
         
 #ifdef ENABLE_TIMER  
         end = get_current_time();

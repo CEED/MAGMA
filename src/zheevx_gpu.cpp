@@ -300,9 +300,9 @@ magma_zheevx_gpu(char jobz, char range, char uplo, magma_int_t n,
     return *info;
   }
 
-  if (cudaSuccess != cudaMalloc((void**)&dwork, n*sizeof(double))) {
+  if (MAGMA_SUCCESS != magma_dmalloc( &dwork, n )) {
     fprintf (stderr, "!!!! device memory allocation error (magma_zheevx_gpu)\n");
-    *info = MAGMA_ERR_CUBLASALLOC;
+    *info = MAGMA_ERR_DEVICE_ALLOC;
     return *info;
   }
     

@@ -199,11 +199,9 @@ magma_zhetrd(char uplo, magma_int_t n,
     }
 
     cuDoubleComplex *da;
-    cublasStatus status;
-    status = cublasAlloc(n*ldda+2*n*nb, sizeof(cuDoubleComplex), (void**)&da);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-      fprintf (stderr, "!!!! device memory allocation error (magma_zhetrd)\n");
-      return *info;
+    if (MAGMA_SUCCESS != magma_zmalloc( &da, n*ldda + 2*n*nb )) {
+        *info = MAGMA_ERR_DEVICE_ALLOC;
+        return *info;
     }
 
     cuDoubleComplex *dwork = da + (n)*ldda;
@@ -268,9 +266,10 @@ magma_zhetrd(char uplo, magma_int_t n,
           cublasSetMatrix(n, n, sizeof(cuDoubleComplex), A(0,0), lda, dA(0,0), ldda);
 
         #ifdef FAST_HEMV
+        // TODO this leaks memory from da, above
         cuDoubleComplex *dwork2;
-        if (cudaSuccess != cudaMalloc( (void**)&dwork2, n*n*sizeof(cuDoubleComplex) ) ) {
-            *info = MAGMA_ERR_CUBLASALLOC;
+        if (MAGMA_SUCCESS != magma_zmalloc( &dwork2, n*n )) {
+            *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;
         }
         #endif
@@ -317,7 +316,7 @@ magma_zhetrd(char uplo, magma_int_t n,
           }
 
         #ifdef FAST_HEMV
-        cudaFree(dwork2);
+        magma_free( dwork2 );
         #endif
 
         /* Use unblocked code to reduce the last or only block */
@@ -331,7 +330,7 @@ magma_zhetrd(char uplo, magma_int_t n,
         
       }
     
-    cublasFree(da);
+    magma_free( da );
     MAGMA_Z_SET2REAL( work[0], lwkopt );
 
     return *info;

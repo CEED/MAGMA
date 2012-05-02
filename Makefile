@@ -16,6 +16,7 @@ lib: libmagma libmagmablas
 libmagma:
 	( cd control        && $(MAKE) )
 	( cd src            && $(MAKE) )
+	( cd interface_cuda && $(MAKE) )
 
 libmagmablas:
 	( cd magmablas      && $(MAKE) )

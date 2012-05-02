@@ -191,8 +191,7 @@ magma_zgeqrf2(magma_context *cntxt, magma_int_t m, magma_int_t n,
         return *info;
     }
 
-    cublasStatus status;
-    static cudaStream_t stream[2];
+    cudaStream_t stream[2];
     cudaStreamCreate(&stream[0]);
     cudaStreamCreate(&stream[1]);
 
@@ -203,9 +202,8 @@ magma_zgeqrf2(magma_context *cntxt, magma_int_t m, magma_int_t n,
     ldda    = ((m+31)/32)*32;
 
     cuDoubleComplex *da;
-    status = cublasAlloc((n)*ldda + nb*lddwork, sizeof(cuDoubleComplex), (void**)&da);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        *info = -8;
+    if (MAGMA_SUCCESS != magma_zmalloc( &da, (n)*ldda + nb*lddwork )) {
+        *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
     cuDoubleComplex *dwork = da + ldda*(n);
@@ -308,7 +306,7 @@ magma_zgeqrf2(magma_context *cntxt, magma_int_t m, magma_int_t n,
     
     cudaStreamDestroy( stream[0] );
     cudaStreamDestroy( stream[1] );
-    cublasFree(da);
+    magma_free( da );
     return *info;
 } /* magma_zgeqrf */
 

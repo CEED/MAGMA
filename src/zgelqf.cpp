@@ -136,8 +136,8 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
         {
             ldda = maxdim;
 
-            if (CUBLAS_STATUS_SUCCESS != cublasAlloc(maxdim*maxdim, sizeof(cuDoubleComplex), (void**)&dA)) {
-                *info = MAGMA_ERR_CUBLASALLOC;
+            if (MAGMA_SUCCESS != magma_zmalloc( &dA, maxdim*maxdim )) {
+                *info = MAGMA_ERR_DEVICE_ALLOC;
                 return *info;
             }
 
@@ -149,8 +149,8 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
         {
             ldda = maxn;
 
-            if (CUBLAS_STATUS_SUCCESS != cublasAlloc(2*maxn*maxm, sizeof(cuDoubleComplex), (void**)&dA)) {
-                *info = MAGMA_ERR_CUBLASALLOC;
+            if (MAGMA_SUCCESS != magma_zmalloc( &dA, 2*maxn*maxm )) {
+                *info = MAGMA_ERR_DEVICE_ALLOC;
                 return *info;
             }
 
@@ -170,7 +170,7 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
         cublasGetMatrix( m, n, sizeof(cuDoubleComplex), dA, maxm, a, lda);
     }
 
-    cublasFree(dA);
+    magma_free( dA );
 
     return *info;
 } /* magma_zgelqf */

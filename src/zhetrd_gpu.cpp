@@ -211,9 +211,9 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
     else
       nx = 512;
   
-    if (cudaSuccess != cudaMalloc((void**)&dwork, (ldw*nb)*sizeof(cuDoubleComplex))) {
+    if (MAGMA_SUCCESS != magma_zmalloc( &dwork, (ldw*nb) )) {
       fprintf (stderr, "!!!! device memory allocation error (magma_zhetrd_gpu)\n");
-      *info = MAGMA_ERR_CUBLASALLOC;
+      *info = MAGMA_ERR_DEVICE_ALLOC;
       return *info;
     }
 
@@ -312,7 +312,7 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
                     A(i, i), ldwa, dA(i, i), ldda);
   }  
     
-    cudaFree(dwork);
+    magma_free( dwork );
     MAGMA_Z_SET2REAL( work[0], lwkopt );
     return *info;
 } /* zhetrd_gpu */

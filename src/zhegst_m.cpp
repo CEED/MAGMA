@@ -149,8 +149,8 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
     lddbc = n;
     for (igpu = 0; igpu < nrgpu; ++igpu){
         cudaSetDevice(igpu);
-        if (cudaSuccess != cudaMalloc( (void**)&dw[igpu], (dima*ldda + lddbc*lddbr)*sizeof(cuDoubleComplex) ) ) {
-            *info = MAGMA_ERR_CUBLASALLOC;
+        if (MAGMA_SUCCESS != magma_zmalloc( &dw[igpu], (dima*ldda + lddbc*lddbr) )) {
+            *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;
         }
         cudaStreamCreate(&stream[igpu][0]);
@@ -825,7 +825,7 @@ printf("hegs2%d\n", k);
         cudaStreamDestroy(stream[igpu][0]);
         cudaStreamDestroy(stream[igpu][1]);
         cudaStreamDestroy(stream[igpu][2]);
-        cudaFree(dw[igpu]);
+        magma_free( dw[igpu] );
     }
 
     cudaSetDevice(gpu_b);

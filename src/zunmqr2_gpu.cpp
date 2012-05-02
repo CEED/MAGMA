@@ -135,11 +135,11 @@ magma_zunmqr2_gpu(const char side, const char trans,
     if (left) {
         nq = m;
         nw = n;
-        cublasAlloc((n+64)*64, sizeof(cuDoubleComplex), (void**)&dwork);
+        magma_zmalloc( &dwork, (n + 64)*64 );
     } else {
         nq = n;
         nw = m;
-        cublasAlloc((m+64)*64, sizeof(cuDoubleComplex), (void**)&dwork);
+        magma_zmalloc( &dwork, (m + 64)*64 );
     }
     if (! left && ! lapackf77_lsame(side_, "R")) {
         *info = -1;
@@ -232,7 +232,7 @@ magma_zunmqr2_gpu(const char side, const char trans,
                               dwork + ib*ib, lddwork);
           }
 
-    cublasFree(dwork);
+    magma_free( dwork );
 
     return *info;
 } /* magma_zunmqr */

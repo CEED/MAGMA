@@ -252,8 +252,8 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
 
     for (igpu = 0; igpu < nrgpu; ++igpu){
         cudaSetDevice(igpu);
-        if (cudaSuccess != cudaMalloc( (void**)&dw[igpu], (dimb*lddb + dima*ldda)*sizeof(cuDoubleComplex) ) ) {
-            info = MAGMA_ERR_CUBLASALLOC;
+        if (MAGMA_SUCCESS != magma_zmalloc( &dw[igpu], (dimb*lddb + dima*ldda) )) {
+            info = MAGMA_ERR_DEVICE_ALLOC;
             return info;
         }
         cudaStreamCreate(&stream[igpu][0]);
@@ -921,7 +921,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
         cudaStreamDestroy(stream[igpu][0]);
         cudaStreamDestroy(stream[igpu][1]);
         cudaStreamDestroy(stream[igpu][2]);
-        cudaFree(dw[igpu]);
+        magma_free( dw[igpu] );
     }
 
     cudaSetDevice(gpu_b);

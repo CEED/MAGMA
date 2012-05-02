@@ -136,8 +136,7 @@ magma_zgetrf2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
         work = a;
 
         /* Allocate space on the GPU; copy the matrix from the CPU and traspose it */
-        if (CUBLAS_STATUS_SUCCESS != cublasAlloc((2*nb+maxn)*maxm, 
-                                                  sizeof(cuDoubleComplex), (void**)&dA) ) {
+        if (MAGMA_SUCCESS != magma_zmalloc( &dA, (2*nb + maxn)*maxm )) {
           /* alloc failed so call non-GPU-resident version */
           magma_int_t rval = magma_zgetrf_ooc(m, n, a, lda, ipiv, info);
           if (*info == 0) magma_zgetrf_piv( m, n, a, lda, ipiv, info);
@@ -249,7 +248,7 @@ magma_zgetrf2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
           magmablas_zgetmatrix_transpose( m, n-nb0, dAT, ldda, a, lda, dA, maxm, nb);
         }
 
-        cublasFree(dA);
+        magma_free( dA );
     }
     
     return *info;

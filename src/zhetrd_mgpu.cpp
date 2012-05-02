@@ -240,31 +240,31 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
     ldwork2 = (1+ n / nb + (n % nb != 0)) * ldda;
     for( did=0; did<num_gpus; did++ ) {
       cudaSetDevice(did);
-      if ( CUBLAS_STATUS_SUCCESS != cublasAlloc(ln*ldda+3*lddwork*nb, sizeof(cuDoubleComplex), (void**)&da[did]) ||
-           CUBLAS_STATUS_SUCCESS != cublasAlloc(k*n,     sizeof(cuDoubleComplex), (void**)&dx[did]) ||
-           CUBLAS_STATUS_SUCCESS != cublasAlloc(k*n,     sizeof(cuDoubleComplex), (void**)&dy[did]) ||
-           CUBLAS_STATUS_SUCCESS != cublasAlloc(ldwork2, sizeof(cuDoubleComplex), (void**)&dwork2[did] ) ) {
+      if (MAGMA_SUCCESS != magma_zmalloc( &da[did], ln*ldda + 3*lddwork*nb ) ||
+           MAGMA_SUCCESS != magma_zmalloc( &dx[did], k*n ) ||
+           MAGMA_SUCCESS != magma_zmalloc( &dy[did], k*n ) ||
+           MAGMA_SUCCESS != magma_zmalloc( &dwork2[did] , ldwork2 )) {
         for( i=0; i<did; i++ ) {
             cudaSetDevice(i);
-            cublasFree(da[i]);
-            cublasFree(dx[i]);
-            cublasFree(dy[i]);
+            magma_free( da[i] );
+            magma_free( dx[i] );
+            magma_free( dy[i] );
         }
-        *info = MAGMA_ERR_CUBLASALLOC;
+        *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
       }
       dwork[did] = da[did] + ln*ldda;
 
       for( kk=0; kk<k; kk++ ) cudaStreamCreate(&stream[did][kk]);
     }
-    if( cudaSuccess != cudaMallocHost( (void**)&hwork, k*num_gpus*n*sizeof(cuDoubleComplex) ) ) {
+    if (MAGMA_SUCCESS != magma_zmalloc_host( &hwork, k*num_gpus*n )) {
       for( i=0; i<num_gpus; i++ ) {
         cudaSetDevice(i);
-        cublasFree(da[i]);
-        cublasFree(dx[i]);
-        cublasFree(dy[i]);
+        magma_free( da[i] );
+        magma_free( dx[i] );
+        magma_free( dy[i] );
       }
-      *info = MAGMA_ERR_CUBLASALLOC;
+      *info = MAGMA_ERR_DEVICE_ALLOC;
       return *info;
     }
 
@@ -472,12 +472,12 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
     for( did=0; did<num_gpus; did++ ) {
       for( kk=0; kk<k; kk++ ) cudaStreamDestroy(stream[did][kk]);
       cudaSetDevice(did);
-      cublasFree(da[did]);
-      cublasFree(dx[did]);
-      cublasFree(dy[did]);
-      cublasFree(dwork2[did]);
+      magma_free( da[did] );
+      magma_free( dx[did] );
+      magma_free( dy[did] );
+      magma_free( dwork2[did] );
     }
-    cudaFreeHost(hwork);
+    magma_free_host( hwork );
     MAGMA_Z_SET2REAL( work[0], lwkopt );
 
 #ifdef PROFILE_SY2RK

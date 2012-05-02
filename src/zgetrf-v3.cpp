@@ -142,16 +142,14 @@ magma_zgetrf3(magma_int_t num_gpus,
               ldat_local[i] = ((n_local[i]+31)/32)*32;
 
               /* workspaces */
-              if ( CUBLAS_STATUS_SUCCESS != cublasAlloc((2*nb + ldat_local[i])*maxm,
-                                                        sizeof(cuDoubleComplex), (void**)&d_lA[i]))
-                {
+              if (MAGMA_SUCCESS != magma_zmalloc( &d_lA[i], (2*nb + ldat_local[i])*maxm )) {
                   for( j=0; j<i; j++ ) {
-                    cudaSetDevice(j);
-                    cublasFree( d_lA[j] );
+                      cudaSetDevice(j);
+                      magma_free( d_lA[j] );
                   }
-                  *info = MAGMA_ERR_CUBLASALLOC;
+                  *info = MAGMA_ERR_DEVICE_ALLOC;
                   return *info;
-                }
+              }
 
               d_lAP[i]   = d_lA[i];              /* a panel workspace of size nb * maxm */
               d_panel[i] = d_lA[i] +   nb*maxm;  /* another panel of size nb * maxm     */
@@ -169,7 +167,7 @@ magma_zgetrf3(magma_int_t num_gpus,
                 {
                   for( j=0; j<=i; j++ ) {
                     cudaSetDevice(j);
-                    cublasFree( d_lA[j] );
+                    magma_free( d_lA[j] );
                   }
                   *info = MAGMA_ERR_CUDASTREAM;
                   return *info;
@@ -183,16 +181,14 @@ magma_zgetrf3(magma_int_t num_gpus,
           /* use 'a' as work space */
           /*
           lddwork = maxm;
-          if ( cudaSuccess != cudaMallocHost( (void**)&work, 
-                                              lddwork*nb*sizeof(cuDoubleComplex) ) ) 
-            {
+          if (MAGMA_SUCCESS != magma_zmalloc_host( &work, lddwork*nb )) {
               for(i=0; i<num_gpus; i++ ) {
-                cudaSetDevice(i);
-                cublasFree( d_lA[i] );
+                  cudaSetDevice(i);
+                  magma_free( d_lA[i] );
               }
-              *info = MAGMA_ERR_HOSTALLOC;
+              *info = MAGMA_ERR_HOST_ALLOC;
               return *info;
-            }
+          }
           */
           work = a;
           lddwork = lda;
@@ -424,11 +420,11 @@ magma_zgetrf3(magma_int_t num_gpus,
           
           for( d=0; d<num_gpus; d++ ) 
             {
-              cublasFree(d_lA[d]);
+              magma_free( d_lA[d] );
               cudaStreamDestroy(streaml[d][0]);
               cudaStreamDestroy(streaml[d][1]);
             } /* end of for d=1,..,num_gpus */
-          //cudaFreeHost(work);
+          //magma_free_host( work );
       }
     
     return *info;

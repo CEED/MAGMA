@@ -268,11 +268,11 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
     /*static cudaStream_t stream[4][10];
     for( id=0; id<num_gpus; id++ ) {
         cudaSetDevice(id);
-        //cublasAlloc(k*n, sizeof(cuDoubleComplex), (void**)&dx[id]);
-        //cublasAlloc(k*n, sizeof(cuDoubleComplex), (void**)&dy[id]);
+        //magma_zmalloc( &dx[id], k*n );
+        //magma_zmalloc( &dy[id], k*n );
         for( kk=0; kk<k; kk++ ) cudaStreamCreate(&stream[id][kk]);
     }*/
-    //cudaMallocHost( (void**)&work, k*num_gpus*n*sizeof(cuDoubleComplex) );
+    //magma_zmalloc_host( &work, k*num_gpus*n );
 
     if (lapackf77_lsame(uplo_, "U")) {
 
@@ -580,7 +580,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
     }
 
     free(f);
-    //cudaFreeHost(work);
+    //magma_free_host( work );
 
     return mv_time;
 } /* zlatrd_ */
@@ -611,7 +611,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
         int ii, jj;
         cuDoubleComplex *a;
         cudaSetDevice(0);
-        cudaMallocHost( (void**)&a, sizeof(cuDoubleComplex)*(n+offset)*ldda     );
+        magma_zmalloc_host( &a, (n + offset)*ldda );
         cublasGetMatrix( n+offset, n+offset, sizeof(cuDoubleComplex), da[0], ldda, a, ldda);
         for( ii=0; ii<n+offset; ii++ ) {
             for( jj=0; jj<n+offset; jj++ ) printf( "%.16e ",a[ii+jj*ldda] );
@@ -621,7 +621,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
         cublasGetMatrix( n+offset, 1, sizeof(cuDoubleComplex), dx[0], ldda, a, ldda);
         for( ii=0; ii<n+offset; ii++ ) printf( "%.16e\n",a[ii] );
         printf( "\n" );
-        cudaFreeHost( a );
+        magma_free_host( a );
     }*/
     for( id=0; id<num_gpus; id++ ) {
         cudaSetDevice(id);
@@ -660,14 +660,14 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
         int ii, jj;
         cuDoubleComplex *a;
         cudaSetDevice(0);
-        cudaMallocHost( (void**)&a, sizeof(cuDoubleComplex)*(offset+n)*ldda     );
+        magma_zmalloc_host( &a, (offset + n)*ldda );
         printf( ">>>\n" );
         cublasGetMatrix( (offset+n), 1, sizeof(cuDoubleComplex), dy[0], ldda, a, ldda);
         //for( ii=0; ii<offset+n; ii++ ) printf( "%d: %e\n",ii,a[ii] );
         for( ii=offset; ii<offset+n; ii++ ) printf( "%.16e\n",ii,a[ii] );
         printf( ">>>\n" );
         printf( "\n" );
-        cudaFreeHost( a );
+        magma_free_host( a );
     }*/
 
     /* send to CPU */

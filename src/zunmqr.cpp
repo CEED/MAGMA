@@ -115,8 +115,8 @@ magma_zunmqr(const char side, const char trans,
 
     /* Allocate work space on the GPU */
     cuDoubleComplex *dwork, *dc;
-    cublasAlloc((m)*(n), sizeof(cuDoubleComplex), (void**)&dc);
-    cublasAlloc((m+n+64)*64, sizeof(cuDoubleComplex), (void**)&dwork);
+    magma_zmalloc( &dc, (m)*(n) );
+    magma_zmalloc( &dwork, (m + n + 64)*64 );
     
     /* Copy matrix C from the CPU to the GPU */
     cublasSetMatrix( m, n, sizeof(cuDoubleComplex), c, ldc, dc, m);
@@ -267,8 +267,8 @@ magma_zunmqr(const char side, const char trans,
     MAGMA_Z_SET2REAL( work[0], lwkopt );
 
     dc += (1 + m);
-    cublasFree(dc);
-    cublasFree(dwork);
+    magma_free( dc );
+    magma_free( dwork );
 
     return *info;
 } /* magma_zunmqr */

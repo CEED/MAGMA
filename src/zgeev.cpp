@@ -195,9 +195,8 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
    
     // if eigenvectors are needed
 #if defined(VERSION3)
-    if (CUBLAS_STATUS_SUCCESS != 
-        cublasAlloc( nb*n, sizeof(cuDoubleComplex), (void**)&dT)) {
-        *info = MAGMA_ERR_CUBLASALLOC;
+    if (MAGMA_SUCCESS != magma_zmalloc( &dT, nb*n )) {
+        *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
 #endif
@@ -469,7 +468,7 @@ L50:
     }
 
 #if defined(VERSION3)
-    cublasFree( dT );
+    magma_free( dT );
 #endif
     return *info;
 } /* magma_zgeev */

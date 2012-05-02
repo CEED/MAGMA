@@ -230,10 +230,10 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
         return 0;
     }
 
-    if (cudaSuccess != cudaMalloc( (void**)&da, n*ldda*sizeof(double) ) ||
-        cudaSuccess != cudaMalloc( (void**)&db, n*lddb*sizeof(double) ) ) {
+    if (MAGMA_SUCCESS != magma_dmalloc( &da, n*ldda ) ||
+        MAGMA_SUCCESS != magma_dmalloc( &db, n*lddb )) {
       *info = -17;
-      return MAGMA_ERR_CUBLASALLOC;
+      return MAGMA_ERR_DEVICE_ALLOC;
     }
   
     /* Form a Cholesky factorization of B. */
@@ -306,8 +306,8 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     work[0] = (double) lopt;
     iwork[0] = liopt;
 
-    cublasFree(da);
-    cublasFree(db);
+    magma_free( da );
+    magma_free( db );
   
     return MAGMA_SUCCESS;
 } /* magma_dsygvd */

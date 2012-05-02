@@ -14,7 +14,7 @@
 
 /* These interfaces are used for TAU profiling */
 extern "C" {
-    void Mylapackf77_zstemr(char *jobz, char *range, magma_int_t *n, double *d, double *e,
+    void Mylapackf77_zstemr(const char *jobz, const char *range, magma_int_t *n, double *d, double *e,
                             double *vl, double *vu, magma_int_t *il, magma_int_t *iu, 
                             magma_int_t *m, double *w, cuDoubleComplex *z, magma_int_t *ldz,
                             magma_int_t *nzc, magma_int_t *isuppz, magma_int_t *tryrac,
@@ -32,7 +32,7 @@ extern "C" {
         lapackf77_zstein(n, d, e, m, w, iblock, isplit, z, ldz, work, iwork, ifail, info);
     }
   
-    void Mylapackf77_dstebz(char *range, char *order, int *n, double *vl, 
+    void Mylapackf77_dstebz(const char *range, const char *order, int *n, double *vl, 
                             double *vu, int *il, int *iu, double *abstol,
                             double *d, double *e, int *m, int *nsplit, double *w, 
                             int *iblock, int *isplit, double *work, int *iwork, int *info)
@@ -392,9 +392,9 @@ magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
     return *info;
   }
   
-  if (cudaSuccess != cudaMalloc((void**)&dwork, n*sizeof(double))) {
+  if (MAGMA_SUCCESS != magma_dmalloc( &dwork, n )) {
     fprintf (stderr, "!!!! device memory allocation error (magma_zheevr_gpu)\n");
-    *info = MAGMA_ERR_CUBLASALLOC;
+    *info = MAGMA_ERR_DEVICE_ALLOC;
     return *info;
   }
   

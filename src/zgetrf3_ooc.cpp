@@ -220,9 +220,8 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
 
     for( d=0; d<num_gpus; d++ ) {
       cudaSetDevice(d);
-      if (CUBLAS_STATUS_SUCCESS != cublasAlloc((h*nb+ldn_local)*maxm, 
-                             sizeof(cuDoubleComplex), (void**)&dA[d]) ) {
-        *info = MAGMA_ERR_CUBLASALLOC;
+      if (MAGMA_SUCCESS != magma_zmalloc( &dA[d], (h*nb + ldn_local)*maxm )) {
+        *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
       }
       dPT[d] = dA[d] + nb*maxm; /* for storing the previous panel from CPU          */
@@ -367,7 +366,7 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
 
     for( d=0; d<num_gpus0; d++ ) {
       cudaSetDevice(d);
-      cublasFree(dA[d]); 
+      magma_free( dA[d] ); 
       for( ii=0; ii<h; ii++ ) {
         cudaStreamDestroy(stream[d][ii]);
       }

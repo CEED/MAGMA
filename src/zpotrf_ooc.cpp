@@ -156,8 +156,8 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
         }
 #endif
         NB = (NB / nb) * nb;   /* making sure it's devisable by nb   */
-    if (CUBLAS_STATUS_SUCCESS != cublasAlloc((NB+nb)*ldda, sizeof(cuDoubleComplex), (void**)&dt)) {
-          *info = MAGMA_ERR_CUBLASALLOC;
+    if (MAGMA_SUCCESS != magma_zmalloc( &dt, (NB + nb)*ldda )) {
+          *info = MAGMA_ERR_DEVICE_ALLOC;
           return *info;
     }
         work = &dt[nb*ldda];
@@ -384,7 +384,7 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
     cudaStreamDestroy(stream[1]);
     cudaStreamDestroy(stream[2]);
 
-    cublasFree(dt);
+    magma_free( dt );
     
     return *info;
 } /* magma_zpotrf_ooc */

@@ -112,7 +112,7 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 
 
 
-    if( CUBLAS_STATUS_SUCCESS != cublasAlloc( n*nb, sizeof(cuDoubleComplex), (void**)&dwork) ) { 
+    if(MAGMA_SUCCESS != magma_zmalloc( &dwork, n*nb )) { 
        printf ("!!!! zungqr_2stage cublasAlloc failed for: dwork\n" );       
        exit(-1);                                                           
     }
@@ -139,13 +139,10 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     //if (kk < n)
     //  lwork = max(lwork, n * nb + (m-kk)*(n-kk));
 
-    //if ( cudaSuccess != 
-    //     cudaMallocHost( (void**)&work, (lwork)*sizeof(cuDoubleComplex) ) )
-    //  {
-    //    *info = -11;
-    //    *info = MAGMA_ERR_HOSTALLOC;
-    // return *info;
-    //  }
+    //if (MAGMA_SUCCESS != magma_zmalloc_host( &work, (lwork) )) {
+    //    *info = MAGMA_ERR_HOST_ALLOC;
+    //    return *info;
+    //}
     panel = work + n * nb;
 
     //cudaStreamCreate(&stream[0]);
@@ -222,8 +219,8 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 
 
 
-    cublasFree(dwork);
-    //cudaFreeHost(work);
+    magma_free( dwork );
+    //magma_free_host( work );
     //cudaStreamDestroy(stream[0]);
     //cudaStreamDestroy(stream[1]);
 

@@ -271,9 +271,9 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
         return *info;
     }
 
-    if (cudaSuccess != cudaMalloc( (void**)&da, n*ldda*sizeof(cuDoubleComplex) ) ||
-        cudaSuccess != cudaMalloc( (void**)&db, n*lddb*sizeof(cuDoubleComplex) ) ) {
-      *info = MAGMA_ERR_CUBLASALLOC;
+    if (MAGMA_SUCCESS != magma_zmalloc( &da, n*ldda ) ||
+        MAGMA_SUCCESS != magma_zmalloc( &db, n*lddb )) {
+      *info = MAGMA_ERR_DEVICE_ALLOC;
       return *info;
     }
 
@@ -354,8 +354,8 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     rwork[0] = (doublereal) lropt;
     iwork[0] = liopt;*/
 
-    cublasFree(da);
-    cublasFree(db);
+    magma_free( da );
+    magma_free( db );
 
     return *info;
 } /* magma_zhegvd */

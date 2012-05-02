@@ -333,8 +333,8 @@ magma_zheevd_m(magma_int_t nrgpu, char jobz, char uplo,
 #endif
         
 #ifdef USE_SINGLE_GPU
-        if (cudaSuccess != cudaMalloc( (void**)&dwork, 3*n*(n/2+1)*sizeof(double) ) ) {
-            *info = MAGMA_ERR_CUBLASALLOC;
+        if (MAGMA_SUCCESS != magma_dmalloc( &dwork, 3*n*(n/2 + 1) )) {
+            *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;
         }
         
@@ -352,7 +352,7 @@ magma_zheevd_m(magma_int_t nrgpu, char jobz, char uplo,
                      &work[indwrk], n, &rwork[indrwk],
                      llrwk, iwork, liwork, dwork, info);
         
-        cublasFree(dwork);
+        magma_free( dwork );
 #else
        magma_zstedx_m(nrgpu, 'A', n, 0, 0, 0, 0, w, &rwork[inde],
                       &work[indwrk], n, &rwork[indrwk],

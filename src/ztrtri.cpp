@@ -133,9 +133,8 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
         /* Determine the block size for this environment */
         ldda = ((n+31)/32)*32;
 
-        if (CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*ldda, sizeof( cuDoubleComplex), (void**)&work))
-        {
-                *info = MAGMA_ERR_CUBLASALLOC;
+        if (MAGMA_SUCCESS != magma_zmalloc( &work, (n)*ldda )) {
+                *info = MAGMA_ERR_DEVICE_ALLOC;
                 return *info;
         }  
 
@@ -242,7 +241,7 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
         cudaStreamDestroy(stream[0]);
         cudaStreamDestroy(stream[1]);
 
-        cublasFree(work);
+        magma_free( work );
 
         return *info;
 }

@@ -398,6 +398,8 @@ subs = {
     ('QUARK_Insert_Task_s','QUARK_Insert_Task_d','QUARK_Insert_Task_c','QUARK_Insert_Task_z'),
     ('%f', '%lf', '%f', '%lf'),  # for scanf
     ('sprint', 'dprint', 'cprint', 'zprint' ),
+    ('smalloc', 'dmalloc', 'cmalloc', 'zmalloc'),
+    ('smalloc', 'dmalloc', 'smalloc', 'dmalloc'),
   ],
   'tracing' : [
     ['plain','tau'],

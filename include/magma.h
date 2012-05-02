@@ -84,9 +84,10 @@
  * --------------------------------------------------------- */
 #define MAGMA_SUCCESS               0
 #define MAGMA_ERR_ILLEGAL_VALUE    -100
-#define MAGMA_ERR_HOSTALLOC        -102
-#define MAGMA_ERR_CUBLASALLOC      -103
+#define MAGMA_ERR_HOST_ALLOC       -102
+#define MAGMA_ERR_DEVICE_ALLOC     -103
 #define MAGMA_ERR_CUDASTREAM       -104
+#define MAGMA_ERR_INVALID_PTR      -105
 
 /* ------------------------------------------------------------
  *   Define new type that will not be changed by the generator
@@ -177,6 +178,24 @@ typedef double real_Double_t;
 #ifndef CBLAS_SADDR
 #define CBLAS_SADDR(a)  &(a)
 #endif
+
+magma_err_t magma_malloc( magma_devptr *ptrPtr, size_t bytes );
+magma_err_t magma_free  ( magma_devptr ptr );
+
+magma_err_t magma_malloc_host( void **ptrPtr, size_t bytes );
+magma_err_t magma_free_host  ( void *ptr );
+
+// type-safe convenience functions to avoid using (void**) cast and sizeof(...)
+// here n is the number of elements (floats, doubles, etc.) not the number of bytes.
+inline magma_err_t magma_smalloc( float           **ptrPtr, size_t n ) { return magma_malloc( (void**) ptrPtr, n*sizeof(float)           ); }
+inline magma_err_t magma_dmalloc( double          **ptrPtr, size_t n ) { return magma_malloc( (void**) ptrPtr, n*sizeof(double)          ); }
+inline magma_err_t magma_cmalloc( cuFloatComplex  **ptrPtr, size_t n ) { return magma_malloc( (void**) ptrPtr, n*sizeof(cuFloatComplex)  ); }
+inline magma_err_t magma_zmalloc( cuDoubleComplex **ptrPtr, size_t n ) { return magma_malloc( (void**) ptrPtr, n*sizeof(cuDoubleComplex) ); }
+
+inline magma_err_t magma_smalloc_host( float           **ptrPtr, size_t n ) { return magma_malloc_host( (void**) ptrPtr, n*sizeof(float)           ); }
+inline magma_err_t magma_dmalloc_host( double          **ptrPtr, size_t n ) { return magma_malloc_host( (void**) ptrPtr, n*sizeof(double)          ); }
+inline magma_err_t magma_cmalloc_host( cuFloatComplex  **ptrPtr, size_t n ) { return magma_malloc_host( (void**) ptrPtr, n*sizeof(cuFloatComplex)  ); }
+inline magma_err_t magma_zmalloc_host( cuDoubleComplex **ptrPtr, size_t n ) { return magma_malloc_host( (void**) ptrPtr, n*sizeof(cuDoubleComplex) ); }
 
 #ifdef __cplusplus
 extern "C" {

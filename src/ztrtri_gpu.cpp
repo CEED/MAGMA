@@ -124,9 +124,8 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
 
         nb = magma_get_zpotrf_nb(n);
         
-        if (cudaSuccess != cudaMallocHost( (void**)&work, nb*nb*sizeof(cuDoubleComplex) ) ) 
-        {
-                *info = MAGMA_ERR_HOSTALLOC;
+        if (MAGMA_SUCCESS != magma_zmalloc_host( &work, nb*nb )) {
+                *info = MAGMA_ERR_HOST_ALLOC;
                 return *info;
         }
         
@@ -232,7 +231,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
         cudaStreamDestroy(stream[0]);
         cudaStreamDestroy(stream[1]);
 
-        cudaFreeHost(work);
+        magma_free_host( work );
 
         return *info;
 }

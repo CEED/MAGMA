@@ -105,20 +105,18 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
     /* Allocate GPU work space */
     ldda = ((m+31)/32)*32;
     lddwork = ((lddwork+31)/32)*32;
-    if (CUBLAS_STATUS_SUCCESS != 
-        cublasAlloc((n)*ldda + nb*lddwork, sizeof(cuDoubleComplex), (void**)&da)) 
-      {
-        *info = MAGMA_ERR_CUBLASALLOC;
+    if (MAGMA_SUCCESS != magma_zmalloc( &da, (n)*ldda + nb*lddwork )) {
+        *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
-      }
+    }
     dwork = da + (n)*ldda;
 
     /* Allocate CPU work space */
     lwork = n * nb;
     work = (cuDoubleComplex *)malloc(lwork*sizeof(cuDoubleComplex));
     if( work == NULL ) {
-        cublasFree(da);
-        *info = MAGMA_ERR_HOSTALLOC;
+        magma_free( da );
+        *info = MAGMA_ERR_HOST_ALLOC;
         return *info;
     }
 
@@ -196,7 +194,7 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
 
     
     cudaStreamDestroy(stream);
-    cublasFree(da);
+    magma_free( da );
     free(work);
 
     return *info;

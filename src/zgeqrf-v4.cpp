@@ -141,8 +141,11 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
 
         cudaSetDevice(i);
         
-        if( cudaSuccess != cudaMalloc( (void**)&da[i], ldda*n_local[i]*sizeof(cuDoubleComplex)))
-            fprintf (stderr, "!!!! cudaMallocHost failed for: d_lA[%d]\n", i);
+        // TODO on failure, free previously allocated memory
+        if (MAGMA_SUCCESS != magma_zmalloc( &da[i], ldda*n_local[i] )) {
+            *info = MAGMA_ERR_DEVICE_ALLOC;
+            return *info;
+        }
     }
 
     if (m > nb && n > nb) {
@@ -166,7 +169,7 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
     /* Free the allocated GPU memory */
     for(i=0; i<num_gpus; i++){
         cudaSetDevice(i);
-        cudaFree( da[i] );
+        magma_free( da[i] );
     }
 
     return *info;

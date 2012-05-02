@@ -223,13 +223,13 @@ magma_dsyevd_gpu(char jobz, char uplo,
     static cudaStream_t stream;
     cudaStreamCreate(&stream);
 
-    if (cudaSuccess != cudaMalloc((void**)&dc, n*lddc*sizeof(double))) {
+    if (MAGMA_SUCCESS != magma_dmalloc( &dc, n*lddc )) {
       fprintf(stderr, "!!!! device memory allocation error (magma_dsyevd_gpu)\n");
-      return MAGMA_ERR_CUBLASALLOC;
+      return MAGMA_ERR_DEVICE_ALLOC;
     }
-    if (cudaSuccess != cudaMalloc((void**)&dwork, n*sizeof(double))) {
+    if (MAGMA_SUCCESS != magma_dmalloc( &dwork, n )) {
       fprintf(stderr, "!!!! device memory allocation error (magma_dsyevd_gpu)\n");
-      return MAGMA_ERR_CUBLASALLOC;
+      return MAGMA_ERR_DEVICE_ALLOC;
     }
 
     --w;
@@ -246,7 +246,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
 
     /* Scale matrix to allowable range, if necessary. */
     anrm = magmablas_dlansy('M', uplo, n, da, ldda, dwork);
-    cudaFree(dwork);
+    magma_free( dwork );
     iscale = 0;
     if (anrm > 0. && anrm < rmin) {
         iscale = 1;
@@ -301,15 +301,15 @@ magma_dsyevd_gpu(char jobz, char uplo,
         start = get_current_time();
 #endif
         
-        if (cudaSuccess != cudaMalloc( (void**)&dwork, 3*n*(n/2+1)*sizeof(double) ) ) {
-            cudaFree(dc);  // if not enough memory is available free dc to be able do allocate dwork
+        if (MAGMA_SUCCESS != magma_dmalloc( &dwork, 3*n*(n/2 + 1) )) {
+            magma_free( dc );  // if not enough memory is available free dc to be able do allocate dwork
             dc_freed=true;
 #ifdef ENABLE_TIMER
             printf("dc deallocated\n");
 #endif
-            if (cudaSuccess != cudaMalloc( (void**)&dwork, 3*n*(n/2+1)*sizeof(double) ) ) {
+            if (MAGMA_SUCCESS != magma_dmalloc( &dwork, 3*n*(n/2 + 1) )) {
                 fprintf (stderr, "!!!! device memory allocation error (magma_dsyevd_gpu)\n");
-                return MAGMA_ERR_CUBLASALLOC;
+                return MAGMA_ERR_DEVICE_ALLOC;
             }
         }
         
@@ -317,7 +317,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
                      &work[indwrk], n, &work[indwk2],
                      llwrk2, &iwork[1], liwork, dwork, info);
         
-        cudaFree(dwork);
+        magma_free( dwork );
 
 #ifdef ENABLE_TIMER  
         end = get_current_time();
@@ -327,9 +327,9 @@ magma_dsyevd_gpu(char jobz, char uplo,
 
         if(dc_freed){
             dc_freed = false;
-            if (cudaSuccess != cudaMalloc((void**)&dc, n*lddc*sizeof(double))) {
+            if (MAGMA_SUCCESS != magma_dmalloc( &dc, n*lddc )) {
                 fprintf (stderr, "!!!! device memory allocation error (magma_dsyevd_gpu)\n");
-                return MAGMA_ERR_CUBLASALLOC;
+                return MAGMA_ERR_DEVICE_ALLOC;
             }
         }
 
@@ -364,7 +364,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
 
     cudaStreamDestroy(stream);
     if (!dc_freed)
-        cudaFree(dc);
+        magma_free( dc );
 
     return MAGMA_SUCCESS;
 } /* magma_dsyevd_gpu */

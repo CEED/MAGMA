@@ -204,11 +204,10 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
      * Allocate temporary buffers
      */
     /* dworks(dSA + dSX + dST) */
-    size = ldda*N +  N*NRHS 
-        +  ( 2*minmn + ((N+31)/32)*32 )*nb;
-    if( CUBLAS_STATUS_SUCCESS != cublasAlloc(size, sizeof(cuFloatComplex), (void**)&dworks) ) {
+    size = ldda*N + N*NRHS + ( 2*minmn + ((N+31)/32)*32 )*nb;
+    if (MAGMA_SUCCESS != magma_cmalloc( &dworks, size )) {
         fprintf(stderr, "Allocation of dworks failed (%d)\n", size);
-        *info = MAGMA_ERR_CUBLASALLOC;
+        *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
     dSA = dworks;
@@ -217,10 +216,10 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     
     /* dworkd(dR) = N*NRHS */
     size = N*NRHS;
-    if( CUBLAS_STATUS_SUCCESS != cublasAlloc(size, sizeof(cuDoubleComplex), (void**)&dworkd) ) {
-        cublasFree(dworks);
+    if (MAGMA_SUCCESS != magma_zmalloc( &dworkd, size )) {
+        magma_free( dworks );
         fprintf(stderr, "Allocation of dworkd failed\n");
-        *info = MAGMA_ERR_CUBLASALLOC;
+        *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
     dR = dworkd;
@@ -231,10 +230,10 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     size = minmn + lhwork;
     hworks = (cuFloatComplex*) malloc( size * sizeof(cuFloatComplex) );
     if( hworks == NULL ) {
-        cublasFree(dworks);
-        cublasFree(dworkd);
+        magma_free( dworks );
+        magma_free( dworkd );
         fprintf(stderr, "Allocation of hworks failed\n");
-        *info = MAGMA_ERR_HOSTALLOC;
+        *info = MAGMA_ERR_HOST_ALLOC;
         return *info;
     }
     stau = hworks;
@@ -298,8 +297,8 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     *iter = 0;
 
     /* Free workspaces */
-    cublasFree(dworks);
-    cublasFree(dworkd);
+    magma_free( dworks );
+    magma_free( dworkd );
     free(stau);
     return *info;
 
@@ -355,8 +354,8 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
         *iter = iiter ;
 
         /* Free workspaces */
-        cublasFree(dworks);
-        cublasFree(dworkd);
+        magma_free( dworks );
+        magma_free( dworkd );
         free(stau);
         return *info;
       L20:
@@ -370,7 +369,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     *iter = -ITERMAX - 1 ;
 
   L40:
-    cublasFree(dworks);
+    magma_free( dworks );
 
     /*
      * Allocate temporary buffers
@@ -379,10 +378,10 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     nb   = magma_get_zgeqrf_nb(M);
     size = minmn * (3 * nb + 1);
     if ( size > (N*NRHS) ) {
-        cublasFree(dworkd);
-        if( CUBLAS_STATUS_SUCCESS != cublasAlloc(size, sizeof(cuDoubleComplex), (void**)&dworkd) ) {
+        magma_free( dworkd );
+        if (MAGMA_SUCCESS != magma_zmalloc( &dworkd, size )) {
             fprintf(stderr, "Allocation of dworkd2 failed\n");
-            *info = MAGMA_ERR_CUBLASALLOC;
+            *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;
         }
     }
@@ -394,9 +393,9 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
         free(stau);
         hworks = (cuFloatComplex*) malloc( lhwork * sizeof(cuDoubleComplex) );
         if( hworks == NULL ) {
-            cublasFree(dworkd);
+            magma_free( dworkd );
             fprintf(stderr, "Allocation of hworkd2 failed\n");
-            *info = MAGMA_ERR_HOSTALLOC;
+            *info = MAGMA_ERR_HOST_ALLOC;
             return *info;
         }
     }
@@ -410,7 +409,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
         magma_zgeqrs_gpu(M, N, NRHS, dA, ldda, tau, dT, dX, lddx, hworkd, lhwork, info);
     }
     
-    cublasFree(dworkd);
+    magma_free( dworkd );
     free(hworkd);
     return *info;
 }

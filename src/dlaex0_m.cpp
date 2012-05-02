@@ -161,15 +161,15 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
     for (igpu = 0; igpu < nrgpu; ++igpu){
         cudaSetDevice(igpu);
         if(nrgpu==1){
-            if (cudaSuccess != cudaMalloc( (void**)&dw[igpu], 3*n*(n/2+1)*sizeof(double) ) ) {
+            if (MAGMA_SUCCESS != magma_dmalloc( &dw[igpu], 3*n*(n/2 + 1) )) {
                 *info = -15;
-                return MAGMA_ERR_CUBLASALLOC;
+                return MAGMA_ERR_DEVICE_ALLOC;
             }
         }
         else {
-            if (cudaSuccess != cudaMalloc( (void**)&dw[igpu], tmp*sizeof(double) ) ) {
+            if (MAGMA_SUCCESS != magma_dmalloc( &dw[igpu], tmp )) {
                 *info = -15;
-                return MAGMA_ERR_CUBLASALLOC;
+                return MAGMA_ERR_DEVICE_ALLOC;
             }
         }
         cudaStreamCreate(&stream[igpu][0]);
@@ -315,7 +315,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
         cudaStreamDestroy(stream[igpu][0]);
         cudaStreamDestroy(stream[igpu][1]);
 /*if(nrgpu==1)*/
-        cudaFree(dw[igpu]);
+        magma_free( dw[igpu] );
     }
 
     cudaSetDevice(gpu_b);

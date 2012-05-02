@@ -10,6 +10,8 @@
 #define _MAGMABLAS_
 
 typedef int magma_int_t;
+typedef int magma_err_t;
+typedef void* magma_devptr;
 
 #include <cublas.h>
 #include <cuda.h>

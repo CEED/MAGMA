@@ -295,18 +295,18 @@ magma_dlaex3_m(magma_int_t nrgpu,
     if (n1 >= magma_get_dlaex3_m_k()){
         for (igpu = 0; igpu < nrgpu; ++igpu){
 #ifdef CHECK_CPU
-            cudaMallocHost(&(hwS[0][igpu]),n2*nb*sizeof(double) );
-            cudaMallocHost(&(hwS[1][igpu]),n2*nb*sizeof(double) );
-            cudaMallocHost(&(hwQ2[igpu]),n2*n2_loc*sizeof(double) );
-            cudaMallocHost(&(hwQ[0][igpu]),n2_loc*nb*sizeof(double) );
-            cudaMallocHost(&(hwQ[1][igpu]),n2_loc*nb*sizeof(double) );
+            magma_malloc_host( &(hwS[0][igpu]), n2*nb, sizeof(double) );
+            magma_malloc_host( &(hwS[1][igpu]), n2*nb, sizeof(double) );
+            magma_malloc_host( &(hwQ2[igpu]), n2*n2_loc, sizeof(double) );
+            magma_malloc_host( &(hwQ[0][igpu]), n2_loc*nb, sizeof(double) );
+            magma_malloc_host( &(hwQ[1][igpu]), n2_loc*nb, sizeof(double) );
 #endif
 /*            cudaSetDevice(igpu);
-            cudaMalloc(&(dwS[0][igpu]),n2*nb*sizeof(double) );
-            cudaMalloc(&(dwS[1][igpu]),n2*nb*sizeof(double) );
-            cudaMalloc(&(dwQ2[igpu]),n2*n2_loc*sizeof(double) );
-            cudaMalloc(&(dwQ[0][igpu]),n2_loc*nb*sizeof(double) );
-            cudaMalloc(&(dwQ[1][igpu]),n2_loc*nb*sizeof(double) );
+            magma_malloc( &(dwS[0][igpu]), n2*nb, sizeof(double) );
+            magma_malloc( &(dwS[1][igpu]), n2*nb, sizeof(double) );
+            magma_malloc( &(dwQ2[igpu]), n2*n2_loc, sizeof(double) );
+            magma_malloc( &(dwQ[0][igpu]), n2_loc*nb, sizeof(double) );
+            magma_malloc( &(dwQ[1][igpu]), n2_loc*nb, sizeof(double) );
 */        }
         for (igpu = 0; igpu < nrgpu-1; igpu += 2){
             ni_loc[igpu] = min(n1_loc, n1 - igpu/2 * n1_loc);
@@ -571,21 +571,21 @@ magma_dlaex3_m(magma_int_t nrgpu,
             }
             for (igpu = 0; igpu < nrgpu; ++igpu){
 #ifdef CHECK_CPU
-                cudaFreeHost(hwS[1][igpu]);
-                cudaFreeHost(hwS[0][igpu]);
-                cudaFreeHost(hwQ2[igpu]);
-                cudaFreeHost(hwQ[1][igpu]);
-                cudaFreeHost(hwQ[0][igpu]);
+                magma_free_host( hwS[1][igpu] );
+                magma_free_host( hwS[0][igpu] );
+                magma_free_host( hwQ2[igpu] );
+                magma_free_host( hwQ[1][igpu] );
+                magma_free_host( hwQ[0][igpu] );
 #endif
                 cudaSetDevice(igpu);
                 cublasSetKernelStream(NULL);
                 cudaStreamSynchronize(stream[igpu][0]);
                 cudaStreamSynchronize(stream[igpu][1]);
-/*                cudaFree(dwS[0][igpu]);
-                cudaFree(dwS[1][igpu]);
-                cudaFree(dwQ2[igpu]);
-                cudaFree(dwQ[0][igpu]);
-                cudaFree(dwQ[1][igpu]);
+/*                magma_free( dwS[0][igpu] );
+                magma_free( dwS[1][igpu] );
+                magma_free( dwQ2[igpu] );
+                magma_free( dwQ[0][igpu] );
+                magma_free( dwQ[1][igpu] );
 */            }
             if( n23 == 0 )
                 lapackf77_dlaset("A", &n2, &rk, &d_zero, &d_zero, Q(n1,iil-1), &ldq);

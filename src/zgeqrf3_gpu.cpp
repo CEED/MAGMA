@@ -144,8 +144,8 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
     lwork  = (m + n + nb)*nb;
     lhwork = lwork - m*nb;
 
-    if ( cudaSuccess != cudaMallocHost((void**)&work, lwork*sizeof(cuDoubleComplex)) ) {
-        *info = MAGMA_ERR_HOSTALLOC;
+    if (MAGMA_SUCCESS != magma_zmalloc_host( &work, lwork )) {
+        *info = MAGMA_ERR_HOST_ALLOC;
         return *info;
     }
     
@@ -244,7 +244,7 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
 
     cudaStreamDestroy(stream[0]);
     cudaStreamDestroy(stream[1]);
-    cudaFreeHost(work);
+    magma_free_host( work );
     return *info;
 
 /*     End of MAGMA_ZGEQRF */

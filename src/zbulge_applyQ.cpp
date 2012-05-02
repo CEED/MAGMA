@@ -87,7 +87,7 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
     magma_int_t ldwork;
     ldwork  = NE;
     LWORK   = 2*N*max(Vblksiz,64);
-    if( CUBLAS_STATUS_SUCCESS != cublasAlloc( LWORK, sizeof(cuDoubleComplex), (void**)&dwork) ) { 
+    if(MAGMA_SUCCESS != magma_zmalloc( &dwork, LWORK )) { 
        printf ("!!!!  magma_zbulge_applyQ cublasAlloc failed for: dwork\n" );       
        exit(-1);                                                           
     }

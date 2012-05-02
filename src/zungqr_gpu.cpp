@@ -121,12 +121,10 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     if (kk < n)
       lwork = max(lwork, n * nb + (m-kk)*(n-kk));
 
-    if ( cudaSuccess != 
-         cudaMallocHost( (void**)&work, (lwork)*sizeof(cuDoubleComplex) ) )
-      {
-        *info = MAGMA_ERR_HOSTALLOC;
+    if (MAGMA_SUCCESS != magma_zmalloc_host( &work, (lwork) )) {
+        *info = MAGMA_ERR_HOST_ALLOC;
         return *info;
-      }
+    }
     panel = work + n * nb;
 
     cudaStreamCreate(&stream[0]);
@@ -186,7 +184,7 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
           }
       }
 
-    cudaFreeHost(work);
+    magma_free_host( work );
     cudaStreamDestroy(stream[0]);
     cudaStreamDestroy(stream[1]);
 

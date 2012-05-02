@@ -160,9 +160,8 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
         maxdim = max(maxm, maxn);
 
         /* allocate memory on GPU to store the big panel */
-        if (CUBLAS_STATUS_SUCCESS != cublasAlloc((2*nb+maxn)*maxm, 
-                                                 sizeof(cuDoubleComplex), (void**)&dA) ) {
-          *info = MAGMA_ERR_CUBLASALLOC;
+        if (MAGMA_SUCCESS != magma_zmalloc( &dA, (2*nb + maxn)*maxm )) {
+          *info = MAGMA_ERR_DEVICE_ALLOC;
           return *info;
         }
         dAT = dA + 2*nb*maxm;
@@ -329,7 +328,7 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
                   magmablas_zgetmatrix_transpose( M, N, dAT, maxn, A(0,I), lda,  dA, maxm, nb);
         } /* end of for */
         
-        cublasFree(dA); 
+        magma_free( dA ); 
     }
     
     return *info;

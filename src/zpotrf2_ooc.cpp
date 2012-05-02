@@ -195,8 +195,8 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
     lddla = ((nb*(1+n/(nb*num_gpus))+31)/32)*32;
     for (d=0; d<num_gpus; d++ ) {
       cudaSetDevice(d);
-      if (CUBLAS_STATUS_SUCCESS != cublasAlloc(NB*lddla+2*nb*ldda, sizeof(cuDoubleComplex), (void**)&dt[d])) {
-        *info = MAGMA_ERR_CUBLASALLOC;
+      if (MAGMA_SUCCESS != magma_zmalloc( &dt[d], NB*lddla + 2*nb*ldda )) {
+        *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
       }
       dwork[d] = &dt[d][2*nb*ldda];
@@ -212,8 +212,8 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
 #endif
     cudaSetDevice(0);
     ldwrk = n;
-    if (cudaSuccess != cudaMallocHost( (void**)&work, ldwrk*nb*sizeof(cuDoubleComplex) ) ) {
-      *info = MAGMA_ERR_HOSTALLOC;
+    if (MAGMA_SUCCESS != magma_zmalloc_host( &work, ldwrk*nb )) {
+      *info = MAGMA_ERR_HOST_ALLOC;
       return *info;
     }
 
@@ -454,13 +454,13 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
     for (d=0; d<num_gpus; d++ ) {
         cudaSetDevice(d);
 
-        cublasFree(dt[d]);
+        magma_free( dt[d] );
         cudaStreamDestroy(stream[d][0]);
         cudaStreamDestroy(stream[d][1]);
         cudaStreamDestroy(stream[d][2]);
     }
     cudaSetDevice(0);
-    cudaFreeHost(work);
+    magma_free_host( work );
 
 #ifdef  ROW_MAJOR_PROFILE
     printf("\n n=%d NB=%d nb=%d\n",n,NB,nb);

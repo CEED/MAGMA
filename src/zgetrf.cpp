@@ -162,7 +162,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
 
         if (maxdim*maxdim < 2*maxm*maxn)
         {
-            if (CUBLAS_STATUS_SUCCESS != cublasAlloc(nb*maxm+maxdim*maxdim, sizeof(cuDoubleComplex), (void**)&dA) ) {
+            if (MAGMA_SUCCESS != magma_zmalloc( &dA, nb*maxm + maxdim*maxdim )) {
                         /* alloc failed so call non-GPU-resident version */ 
                         magma_int_t rval = magma_zgetrf_ooc(m, n, a, lda, ipiv, info);
                         if( *info == 0 ) magma_zgetrf_piv( m, n, a, lda, ipiv, info);
@@ -178,7 +178,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
         }
         else
         {
-            if (CUBLAS_STATUS_SUCCESS != cublasAlloc((nb+maxn)*maxm, sizeof(cuDoubleComplex), (void**)&dA) ) {
+            if (MAGMA_SUCCESS != magma_zmalloc( &dA, (nb + maxn)*maxm )) {
                         /* alloc failed so call non-GPU-resident version */
                         magma_int_t rval = magma_zgetrf_ooc(m, n, a, lda, ipiv, info);
                         if( *info == 0 )magma_zgetrf_piv( m, n, a, lda, ipiv, info);
@@ -188,9 +188,9 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
             
             cublasSetMatrix( m, n, sizeof(cuDoubleComplex), a, lda, da, maxm);
             
-            if (CUBLAS_STATUS_SUCCESS != cublasAlloc(maxm*maxn, sizeof(cuDoubleComplex), (void**)&dAT) ) {
+            if (MAGMA_SUCCESS != magma_zmalloc( &dAT, maxm*maxn )) {
                         /* alloc failed so call non-GPU-resident version */
-                        cublasFree(dA);
+                        magma_free( dA );
                         magma_int_t rval = magma_zgetrf_ooc(m, n, a, lda, ipiv, info);
                         magma_zgetrf_piv( m, n, a, lda, ipiv, info);
                         return *info;
@@ -290,10 +290,10 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
         } else {
             magmablas_ztranspose2( da, maxm, dAT, ldda, n, m );
             cublasGetMatrix( m, n, sizeof(cuDoubleComplex), da, maxm, a, lda);
-            cublasFree(dAT);
+            magma_free( dAT );
         }
 
-        cublasFree(dA);
+        magma_free( dA );
     }
     
     return *info;

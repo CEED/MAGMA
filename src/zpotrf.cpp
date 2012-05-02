@@ -145,7 +145,7 @@ magma_zpotrf(char uplo, magma_int_t n,
 
     ldda = ((n+31)/32)*32;
     
-    if (CUBLAS_STATUS_SUCCESS != cublasAlloc((n)*ldda, sizeof(cuDoubleComplex), (void**)&work)) {
+    if (MAGMA_SUCCESS != magma_zmalloc( &work, (n)*ldda )) {
         /* alloc failed so call the non-GPU-resident version */
         return magma_zpotrf_ooc( uplo, n, a, lda, info);
     }
@@ -264,7 +264,7 @@ magma_zpotrf(char uplo, magma_int_t n,
     cudaStreamDestroy(stream[0]);
     cudaStreamDestroy(stream[1]);
 
-    cublasFree(work);
+    magma_free( work );
     
     return *info;
 } /* magma_zpotrf */

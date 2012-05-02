@@ -189,10 +189,9 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
         return *info;
     }
 
-    if ( CUBLAS_STATUS_SUCCESS 
-         != cublasAlloc(n*ldda+(m+n)*nb, sizeof(cuDoubleComplex), (void**)&da) ) {
+    if (MAGMA_SUCCESS != magma_zmalloc( &da, n*ldda + (m + n)*nb )) {
         fprintf (stderr, "!!!! device memory allocation error in zgebrd\n" );
-        *info = MAGMA_ERR_CUBLASALLOC;
+        *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info; 
     }
     dwork = da + (n)*ldda;
@@ -288,7 +287,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
                       tauq+i, taup+i, work, &lwork, &iinfo);
     work[0] = ws;
 
-    cublasFree(da);
+    magma_free( da );
     return *info;
 } /* zgebrd_ */
 

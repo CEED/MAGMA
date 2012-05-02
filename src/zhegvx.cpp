@@ -282,10 +282,10 @@ magma_zhegvx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
     return *info;
   }
   
-  if (cudaSuccess != cudaMalloc( (void**)&da, n*ldda*sizeof(cuDoubleComplex) ) ||
-      cudaSuccess != cudaMalloc( (void**)&db, n*lddb*sizeof(cuDoubleComplex) ) ||
-      cudaSuccess != cudaMalloc( (void**)&dz, n*lddz*sizeof(cuDoubleComplex) ) ) {
-    *info = MAGMA_ERR_CUBLASALLOC;
+  if (MAGMA_SUCCESS != magma_zmalloc( &da, n*ldda ) ||
+      MAGMA_SUCCESS != magma_zmalloc( &db, n*lddb ) ||
+      MAGMA_SUCCESS != magma_zmalloc( &dz, n*lddz )) {
+    *info = MAGMA_ERR_DEVICE_ALLOC;
     return *info;
   }
   
@@ -357,9 +357,9 @@ magma_zhegvx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
   
   cudaStreamDestroy(stream);
   
-  cublasFree(da);
-  cublasFree(db);
-  cublasFree(dz);
+  magma_free( da );
+  magma_free( db );
+  magma_free( dz );
   
   return *info;
   

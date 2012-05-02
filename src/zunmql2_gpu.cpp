@@ -112,7 +112,7 @@ magma_zunmql2_gpu(const char side, const char trans,
 
     /* Allocate work space on the GPU */
     cuDoubleComplex *dwork;
-    cublasAlloc(2*(m+64)*64, sizeof(cuDoubleComplex), (void**)&dwork);
+    magma_zmalloc( &dwork, 2*(m + 64)*64 );
 
     magma_int_t wa_offset, dc_offset, i__4;
     
@@ -223,7 +223,7 @@ magma_zunmql2_gpu(const char side, const char trans,
 
     }
 
-    cublasFree(dwork);
+    magma_free( dwork );
 
     return *info;
 } /* magma_zunmql */

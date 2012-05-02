@@ -136,9 +136,8 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
         magmablas_zinplace_transpose( dAT, lda, maxm );
     }
     else {
-      if ( CUBLAS_STATUS_SUCCESS != 
-           cublasAlloc(maxm*maxn, sizeof(cuDoubleComplex), (void**)&dAT) ){
-        *info = MAGMA_ERR_CUBLASALLOC;
+      if (MAGMA_SUCCESS != magma_zmalloc( &dAT, maxm*maxn ) ){
+        *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
       }
       
@@ -152,7 +151,7 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
     }
     else {
       magmablas_ztranspose2( dA, lda, dAT, ldat, n, m );
-      cublasFree(dAT);
+      magma_free( dAT );
     }
 
     return *info;
