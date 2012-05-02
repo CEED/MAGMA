@@ -46,18 +46,13 @@ ZSRC  = zauxiliary.cu	\
 
 -include Makefile.src
 
-ALLHDR = $(ZHDR) $(CHDR) $(DHDR) $(SHDR) \
-	commonblas.h
-
-ALLSRC = $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
-	dgemv_MLU.cu
 
 FERMISRC =	sgemv_fermi.cu  \
                 dgemv_fermi.cu  \
                 sgemm_fermi.cu 	\
                 cgemv_fermi.cu 	\
                 zgemv_fermi.cu 	\
-				zgemvt_fermi.cu \
+		zgemvt_fermi.cu \
                 sgemm_fermi80.cu\
                 sgemm_fermi64.cu\
 	        dgemm_fermi.cu 	\
@@ -99,17 +94,23 @@ TESLASRC =      sgemv_tesla.cu	\
 
 # 		zhemv_tesla.cu
 
+ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR) \
+	commonblas.h
+
+ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
+	dgemv_MLU.cu
+
 ifeq (${GPU_TARGET}, 0)
 ALLSRC += $(TESLASRC)
-GPUOPT = ${TESLAOPT}
+GPUOPT  = ${TESLAOPT}
 endif
 
 ifeq (${GPU_TARGET}, 1)
 ALLSRC += $(FERMISRC)
-GPUOPT = ${FERMIOPT}
+GPUOPT  = ${FERMIOPT}
 endif
 
-ALLOBJ = $(ALLSRC:.cu=.cu_o) 
+ALLOBJ := $(ALLSRC:.cu=.cu_o) 
 
 all: $(LIBMAGMABLAS) 
 
@@ -117,7 +118,7 @@ $(LIBMAGMABLAS): $(ALLHDR) $(ALLOBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
 
-%.o : %.cpp 
+%.o: %.cpp 
 	$(CC) $(OPTS) $(INC) -c $< -o $@
 
 %.cu_o: %.cu

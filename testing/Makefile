@@ -67,10 +67,10 @@ ZSRC  = testing_zgemm.cpp	\
 #testing_zswap.cpp
 
 ifeq ($(FORT), pgfortran)
-	FOBJ := fortran_thunking.o
+	FOBJ  = fortran_thunking.o
 	ZSRCF = testing_zgetrf_gpu_f.cuf
 else
-	FOBJ := fortran.o
+	FOBJ  = fortran.o
 	ZSRCF = testing_zgetrf_gpu_f.f90	\
 		testing_zgetrf_f.f90
 endif
@@ -79,11 +79,11 @@ ZSRC += $(ZSRCF)
 -include Makefile.local
 -include Makefile.src
 
-ALLSRC  = $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
-ALLOBJF  = $(ALLSRC:.f90=.o)
-ALLOBJF := $(ALLOBJF:.cuf=.o)
-ALLOBJ   = $(ALLOBJF:.cpp=.o)
-EXE      = $(ALLOBJ:.o=)
+ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
+ALLOBJ := $(ALLSRC:.f90=.o)
+ALLOBJ := $(ALLOBJ:.cuf=.o)
+ALLOBJ := $(ALLOBJ:.cpp=.o)
+EXE    := $(ALLOBJ:.o=)
 
 # only testing_auxiliary needs control
 INC += -I../control

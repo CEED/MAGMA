@@ -26,7 +26,7 @@ endif
 
 -include Makefile.src
 
-ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
+ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
 	auxiliary.cpp	\
 	common.cpp	\
 	xerbla.cpp 	\
@@ -37,7 +37,7 @@ ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
 	strlcpy.cpp	\
 	bulge_auxiliary.cpp
 
-ALLOBJ  = $(ALLSRC:.cpp=.o)
+ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f90=.o)
 
 all: $(LIBMAGMA)

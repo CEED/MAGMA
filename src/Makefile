@@ -148,8 +148,8 @@ ZSRC  = zpotrf.cpp	\
 ALLSRC_F = dlaed2.f \
            slaed2.f
 
-ALLSRC= $(ZSRC) $(CSRC) $(DSRC) $(SSRC) #dsbtrd.cpp
-ALLOBJ  = $(ALLSRC:.cpp=.o) $(ALLSRC_F:.f=.o)
+ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) #dsbtrd.cpp
+ALLOBJ := $(ALLSRC:.cpp=.o) $(ALLSRC_F:.f=.o)
 
 all: $(LIBMAGMA)
 
