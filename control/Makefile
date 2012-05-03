@@ -40,17 +40,20 @@ ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
 ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f90=.o)
 
-all: $(LIBMAGMA)
+all: $(LIBMAGMA) $(PTREXEC)
 
 $(LIBMAGMA): $(ALLOBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
 	cp *.mod ../include
 
-.cpp.o:
+$(PTREXEC): $(PTRFILE)
+	$(CC) $(OPTS) -o $@ $<
+
+%.o: %.cpp
 	$(CC) $(OPTS) $(INC) -c $< -o $@
 
-%.o : %.f90 
+%.o: %.f90 $(PTREXEC)
 	$(FORT) $(FOPTS) $(INC) -c $< -o $@
 
 clean:

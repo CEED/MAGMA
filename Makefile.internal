@@ -59,10 +59,10 @@ ifeq (1, $(words $(findstring plasma, $(PLASMA))))
 endif
 
 # Define the pointer size for fortran compilation
-PTRFILE=$(MAGMA_DIR)/control/sizeptr.c
-PTREXEC=$(MAGMA_DIR)/sizeptr
-PTRSIZE=$(shell ($(CC) -o $(PTREXEC) $(PTRFILE) 2>&1 > /dev/null && $(PTREXEC) && rm -f $(PTREXEC)))
-PTROPT=-Dmagma_devptr_t="integer(kind=$(PTRSIZE))"
+PTRFILE = $(MAGMA_DIR)/control/sizeptr.c
+PTREXEC = $(MAGMA_DIR)/control/sizeptr
+PTRSIZE = $(shell $(PTREXEC))
+PTROPT  = -Dmagma_devptr_t="integer(kind=$(PTRSIZE))"
 
 FOPTS += $(PTROPT)
 
