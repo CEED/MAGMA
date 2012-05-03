@@ -1,9 +1,29 @@
-#include "blaswrap.h"
-#include "f2c.h"
+//#include "blaswrap.h"
+#include "common_magma.h"
+#include <cblas.h>
+//#include "f2c.h"
 
-/* Subroutine */ int zgeqp3_(magma_int_t *m, magma_int_t *n, doublecomplex *a, 
-                         magma_int_t *lda, magma_int_t *jpvt, doublecomplex *tau, doublecomplex *work, 
-                         magma_int_t *lwork, doublereal *rwork, magma_int_t *info)
+#define lapackf77_zlaqps   FORTRAN_NAME( zlaqps, ZLAQPS)
+#define lapackf77_zlaqp2   FORTRAN_NAME( zlaqp2, ZLAQP2)
+
+extern "C" int lapackf77_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
+                 *nb, magma_int_t *kb, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *jpvt,
+                 cuDoubleComplex *tau, double *vn1, double *vn2, cuDoubleComplex *
+                 auxv, cuDoubleComplex *f, magma_int_t *ldf);
+
+
+extern "C" void lapackf77_zlaqp2(magma_int_t *m, magma_int_t *n, magma_int_t *offset, 
+                     cuDoubleComplex *a, magma_int_t *lda, magma_int_t *jpvt, cuDoubleComplex *tau,
+                     double *vn1, double *vn2, cuDoubleComplex *work);
+
+extern "C" /* Subroutine */ int magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
+                                             *nb, magma_int_t *kb, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *jpvt,
+                                             cuDoubleComplex *tau, double *vn1, double *vn2, cuDoubleComplex *
+                                             auxv, cuDoubleComplex *f, magma_int_t *ldf);
+
+extern "C" /* Subroutine */ int magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a, 
+                         magma_int_t *lda, magma_int_t *jpvt, cuDoubleComplex *tau, cuDoubleComplex *work, 
+                         magma_int_t *lwork, double *rwork, magma_int_t *info)
 {
     /*  -- LAPACK routine (version 3.1) --   
        Univ. of Tennessee, Univ. of California Berkeley and NAG Ltd..   
@@ -102,26 +122,26 @@
     /* Local variables */
     static magma_int_t j, jb, na, nb, sm, sn, nx, fjb, iws, nfxd, nbmin, minmn, 
        minws;
-    extern /* Subroutine */ int zswap_(magma_int_t *, doublecomplex *, magma_int_t *, 
-                                  doublecomplex *, magma_int_t *), zlaqp2_(magma_int_t *, magma_int_t *, 
-                                                                     magma_int_t *, doublecomplex *, magma_int_t *, magma_int_t *, doublecomplex *,
-                                                                     doublereal *, doublereal *, doublecomplex *);
-    extern doublereal dznrm2_(magma_int_t *, doublecomplex *, magma_int_t *);
-    extern /* Subroutine */ int xerbla_(char *, magma_int_t *);
-    extern magma_int_t ilaenv_(magma_int_t *, char *, char *, magma_int_t *, magma_int_t *, 
-                           magma_int_t *, magma_int_t *, ftnlen, ftnlen);
-    extern /* Subroutine */ int zgeqrf_(magma_int_t *, magma_int_t *, doublecomplex *,
-                                   magma_int_t *, doublecomplex *, doublecomplex *, magma_int_t *, magma_int_t * );
+    //extern /* Subroutine */ int zswap_(magma_int_t *, cuDoubleComplex *, magma_int_t *, 
+                                  //cuDoubleComplex *, magma_int_t *), zlaqp2_(magma_int_t *, magma_int_t *, 
+                                                                     //magma_int_t *, cuDoubleComplex *, magma_int_t *, magma_int_t *, cuDoubleComplex *,
+                                                                     //double *, double *, cuDoubleComplex *);
+    //extern double dznrm2_(magma_int_t *, cuDoubleComplex *, magma_int_t *);
+    //extern /* Subroutine */ int xerbla_(char *, magma_int_t *);
+    //extern magma_int_t ilaenv_(magma_int_t *, char *, char *, magma_int_t *, magma_int_t *, 
+                           //magma_int_t *, magma_int_t *, ftnlen, ftnlen);
+    //extern /* Subroutine */ int zgeqrf_(magma_int_t *, magma_int_t *, cuDoubleComplex *,
+                                   //magma_int_t *, cuDoubleComplex *, cuDoubleComplex *, magma_int_t *, magma_int_t * );
     static magma_int_t topbmn, sminmn;
-    extern /* Subroutine */ int zlaqps_(magma_int_t *, magma_int_t *, magma_int_t *, 
-                                   magma_int_t *, magma_int_t *, doublecomplex *, magma_int_t *, magma_int_t *, 
-                                   doublecomplex *, doublereal *, doublereal *, doublecomplex *, 
-                                   doublecomplex *, magma_int_t *);
+    //extern /* Subroutine */ int zlaqps_(magma_int_t *, magma_int_t *, magma_int_t *, 
+                                   //magma_int_t *, magma_int_t *, cuDoubleComplex *, magma_int_t *, magma_int_t *, 
+                                   //cuDoubleComplex *, double *, double *, cuDoubleComplex *, 
+                                   //cuDoubleComplex *, magma_int_t *);
     static magma_int_t lwkopt;
-    static logical lquery;
-    extern /* Subroutine */ int zunmqr_(char *, char *, magma_int_t *, magma_int_t *, 
-                                   magma_int_t *, doublecomplex *, magma_int_t *, doublecomplex *, 
-                                   doublecomplex *, magma_int_t *, doublecomplex *, magma_int_t *, magma_int_t *);
+    static magma_int_t lquery;
+    //extern /* Subroutine */ int zunmqr_(char *, char *, magma_int_t *, magma_int_t *, 
+                                   //magma_int_t *, cuDoubleComplex *, magma_int_t *, cuDoubleComplex *, 
+                                   //cuDoubleComplex *, magma_int_t *, cuDoubleComplex *, magma_int_t *, magma_int_t *);
     
     
     a_dim1 = *lda;
@@ -150,11 +170,12 @@
            lwkopt = 1;
        } else {
             iws = *n + 1;
-            nb = ilaenv_(&c__1, "ZGEQRF", " ", m, n, &c_n1, &c_n1, (ftnlen)6, 
-                         (ftnlen)1);
+nb = magma_get_zgeqrf_nb(min(*m, *n));
+            //nb = ilaenv_(&c__1, "ZGEQRF", " ", m, n, &c_n1, &c_n1, (ftnlen)6, 
+                         //(ftnlen)1);
            lwkopt = (*n + 1) * nb;
         }
-        work[1].r = (doublereal) lwkopt, work[1].i = 0.;
+MAGMA_Z_SET2REAL(work[0],(double)lwkopt);
 
         if (*lwork < iws && ! lquery) {
            *info = -8;
@@ -163,7 +184,8 @@
 
     if (*info != 0) {
        i__1 = -(*info);
-       xerbla_("ZGEQP3", &i__1);
+   magma_xerbla( __func__, -(*info) );
+       //xerbla_("ZGEQP3", &i__1);
        return 0;
     } else if (lquery) {
         return 0;
@@ -182,8 +204,8 @@
     for (j = 1; j <= i__1; ++j) {
         if (jpvt[j] != 0) {
            if (j != nfxd) {
-               zswap_(m, &a[j * a_dim1 + 1], &c__1, &a[nfxd * a_dim1 + 1], &
-                      c__1);
+               //zswap_(m, &a[j * a_dim1 + 1], &c__1, &a[nfxd * a_dim1 + 1], &c__1);
+               blasf77_zswap(m, &a[j * a_dim1 + 1], &c__1, &a[nfxd * a_dim1 + 1], &c__1);
                jpvt[j] = jpvt[nfxd];
                jpvt[nfxd] = j;
            } else {
@@ -206,20 +228,22 @@
     if (nfxd > 0) {
         na = min(*m,nfxd);
 /* CC      CALL ZGEQR2( M, NA, A, LDA, TAU, WORK, INFO ) */
-       zgeqrf_(m, &na, &a[a_offset], lda, &tau[1], &work[1], lwork, info);
+       // // // zgeqrf_(m, &na, &a[a_offset], lda, &tau[1], &work[1], lwork, info);
 /* Computing MAX */
-       i__1 = iws, i__2 = (magma_int_t) work[1].r;
+       //i__1 = iws, i__2 = (magma_int_t) work[1].r;
+       i__1 = iws, i__2 = (magma_int_t) cuCreal(work[1]);
        iws = max(i__1,i__2);
        if (na < *n) {
 /* CC        CALL ZUNM2R( 'Left', 'Conjugate Transpose', M, N-NA,   
    CC  $                 NA, A, LDA, TAU, A( 1, NA+1 ), LDA, WORK,   
    CC  $                 INFO ) */
            i__1 = *n - na;
-           zunmqr_("Left", "Conjugate Transpose", m, &i__1, &na, &a[a_offset]
-                   , lda, &tau[1], &a[(na + 1) * a_dim1 + 1], lda, &work[1], 
-                   lwork, info);
+           // // // zunmqr_("Left", "Conjugate Transpose", m, &i__1, &na, &a[a_offset]
+                   // // // , lda, &tau[1], &a[(na + 1) * a_dim1 + 1], lda, &work[1], 
+                   // // // lwork, info);
 /* Computing MAX */
-           i__1 = iws, i__2 = (magma_int_t  ) work[1].r;
+           //i__1 = iws, i__2 = (magma_int_t  ) work[1].r;
+           i__1 = iws, i__2 = (magma_int_t  ) cuCreal(work[1]);
            iws = max(i__1,i__2);
        }
     }
@@ -235,8 +259,9 @@
 
 /*       Determine the block size. */
 
-       nb = ilaenv_(&c__1, "ZGEQRF", " ", &sm, &sn, &c_n1, &c_n1, (ftnlen)6, 
-                    (ftnlen)1);
+   int nb = magma_get_zgeqrf_nb(min(*m, *n));
+       //nb = ilaenv_(&c__1, "ZGEQRF", " ", &sm, &sn, &c_n1, &c_n1, (ftnlen)6, 
+                    //(ftnlen)1);
        nbmin = 2;
        nx = 0;
 
@@ -245,9 +270,10 @@
 /*          Determine when to cross over from blocked to unblocked code.   
 
    Computing MAX */
-           i__1 = 0, i__2 = ilaenv_(&c__3, "ZGEQRF", " ", &sm, &sn, &c_n1, &
-                                    c_n1, (ftnlen)6, (ftnlen)1);
-           nx = max(i__1,i__2);
+           //i__1 = 0, i__2 = ilaenv_(&c__3, "ZGEQRF", " ", &sm, &sn, &c_n1, &
+                                    //c_n1, (ftnlen)6, (ftnlen)1);
+           //nx = max(i__1,i__2);
+           nx = nb;
 
 
            if (nx < sminmn) {
@@ -263,8 +289,8 @@
                    
                    nb = *lwork / (sn + 1);
                    /* Computing MAX */
-                   i__1 = 2, i__2 = ilaenv_(&c__2, "ZGEQRF", " ", &sm, &sn, &
-                                            c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
+                   //i__1 = 2, i__2 = ilaenv_(&c__2, "ZGEQRF", " ", &sm, &sn, &
+                                            //c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
                    nbmin = max(i__1,i__2);
                    
                }
@@ -276,7 +302,8 @@
        
        i__1 = *n;
        for (j = nfxd + 1; j <= i__1; ++j) {
-           rwork[j] = dznrm2_(&sm, &a[nfxd + 1 + j * a_dim1], &c__1);
+           //rwork[j] = dznrm2_(&sm, &a[nfxd + 1 + j * a_dim1], &c__1);
+           rwork[j] = cblas_dznrm2(sm, &a[nfxd + 1 + j * a_dim1], c__1);
            rwork[*n + j] = rwork[j];
            /* L20: */
        }
@@ -302,8 +329,10 @@
                i__1 = *n - j + 1;
                i__2 = j - 1;
                i__3 = *n - j + 1;
-               zlaqps_(m, &i__1, &i__2, &jb, &fjb, &a[j * a_dim1 + 1], lda, &
-                       jpvt[j], &tau[j], &rwork[j], &rwork[*n + j], &work[1],
+               //zlaqps_(m, &i__1, &i__2, &jb, &fjb, &a[j * a_dim1 + 1], lda, &
+               //lapackf77_zlaqps(m, &i__1, &i__2, &jb, &fjb, &a[j * a_dim1 + 1], lda, &
+               magma_zlaqps(m, &i__1, &i__2, &jb, &fjb, &a[j * a_dim1 + 1], lda, 
+                       &jpvt[j], &tau[j], &rwork[j], &rwork[*n + j], &work[1],
                        &work[jb + 1], &i__3);
                
                j += fjb;
@@ -319,13 +348,13 @@
        if (j <= minmn) {
            i__1 = *n - j + 1;
            i__2 = j - 1;
-           zlaqp2_(m, &i__1, &i__2, &a[j * a_dim1 + 1], lda, &jpvt[j], &tau[
-                                                                            j], &rwork[j], &rwork[*n + j], &work[1]);
+           //zlaqp2_(m, &i__1, &i__2, &a[j * a_dim1 + 1], lda, &jpvt[j], &tau[j], &rwork[j], &rwork[*n + j], &work[1]);
+           lapackf77_zlaqp2(m, &i__1, &i__2, &a[j * a_dim1 + 1], lda, &jpvt[j], &tau[j], &rwork[j], &rwork[*n + j], &work[1]);
        }
        
     }
-    
-    work[1].r = (doublereal) iws, work[1].i = 0.;
+
+work[1] = MAGMA_Z_MAKE((double) iws, 0.);
     return 0;
     
     /*     End of ZGEQP3 */

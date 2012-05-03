@@ -1,10 +1,16 @@
-#include "blaswrap.h"
-#include "f2c.h"
+//#include "blaswrap.h"
+#include "common_magma.h"
+#include <cblas.h>
+//#include "f2c.h"
 
-/* Subroutine */ int zlaqps_(integer *m, integer *n, integer *offset, integer 
-                             *nb, integer *kb, doublecomplex *a, integer *lda, integer *jpvt, 
-                             doublecomplex *tau, doublereal *vn1, doublereal *vn2, doublecomplex *
-                             auxv, doublecomplex *f, integer *ldf)
+
+extern "C" magma_int_t idamax_(magma_int_t *n, double *v, magma_int_t *incr);
+
+extern "C" double dznrm2_(magma_int_t *, cuDoubleComplex *, magma_int_t *);
+
+extern "C" /* Subroutine */ int magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t 
+                             *nb, magma_int_t *kb, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *jpvt, 
+                             cuDoubleComplex *tau, double *vn1, double *vn2, cuDoubleComplex *auxv, cuDoubleComplex *f, magma_int_t *ldf)
 {
 /*  -- LAPACK auxiliary routine (version 3.1) --   
        Univ. of Tennessee, Univ. of California Berkeley and NAG Ltd..   
@@ -89,40 +95,39 @@
 
        Parameter adjustments */
     /* Table of constant values */
-    static doublecomplex c_b1 = {0.,0.};
-    static doublecomplex c_b2 = {1.,0.};
-    static integer c__1 = 1;
+    static cuDoubleComplex c_b1 = MAGMA_Z_MAKE(0.,0.);
+    static cuDoubleComplex c_b2 = MAGMA_Z_MAKE(1.,0.);
+    static magma_int_t c__1 = 1;
     
     /* System generated locals */
-    integer a_dim1, a_offset, f_dim1, f_offset, i__1, i__2, i__3;
-    doublereal d__1, d__2;
-    doublecomplex z__1;
+    magma_int_t a_dim1, a_offset, f_dim1, f_offset, i__1, i__2, i__3;
+    double d__1, d__2;
+    cuDoubleComplex z__1;
     /* Builtin functions */
-    double sqrt(doublereal);
-    void d_cnjg(doublecomplex *, doublecomplex *);
-    double z_abs(doublecomplex *);
-    integer i_dnnt(doublereal *);
+    double sqrt(double);
+    void d_cnjg(cuDoubleComplex *, cuDoubleComplex *);
+    double z_abs(cuDoubleComplex *);
+    magma_int_t i_dnnt(double *);
     /* Local variables */
-    static integer j, k, rk;
-    static doublecomplex akk;
-    static integer pvt;
-    static doublereal temp, temp2, tol3z;
-    static integer itemp;
-    extern /* Subroutine */ int zgemm_(char *, char *, integer *, integer *, 
-                                       integer *, doublecomplex *, doublecomplex *, integer *, 
-                                       doublecomplex *, integer *, doublecomplex *, doublecomplex *, 
-                                       integer *), zgemv_(char *, integer *, integer *, 
-                                                          doublecomplex *, doublecomplex *, integer *, doublecomplex *, 
-                                                          integer *, doublecomplex *, doublecomplex *, integer *), 
-        zswap_(integer *, doublecomplex *, integer *, doublecomplex *, 
-               integer *);
-    extern doublereal dznrm2_(integer *, doublecomplex *, integer *), dlamch_(
-                                                                              char *);
-    extern integer idamax_(integer *, doublereal *, integer *);
-    static integer lsticc;
-    extern /* Subroutine */ int zlarfg_(integer *, doublecomplex *, 
-                                        doublecomplex *, integer *, doublecomplex *);
-    static integer lastrk;
+    static magma_int_t j, k, rk;
+    static cuDoubleComplex akk;
+    static magma_int_t pvt;
+    static double temp, temp2, tol3z;
+    static magma_int_t itemp;
+    //extern /* Subroutine */ int zgemm_(char *, char *, magma_int_t *, magma_int_t *, 
+    //                                   magma_int_t *, cuDoubleComplex *, cuDoubleComplex *, magma_int_t *, 
+    //                                   cuDoubleComplex *, magma_int_t *, cuDoubleComplex *, cuDoubleComplex *, 
+    //                                   magma_int_t *), zgemv_(char *, magma_int_t *, magma_int_t *, 
+    //                                                      cuDoubleComplex *, cuDoubleComplex *, magma_int_t *, cuDoubleComplex *, 
+    //                                                      magma_int_t *, cuDoubleComplex *, cuDoubleComplex *, magma_int_t *), 
+    //    zswap_(magma_int_t *, cuDoubleComplex *, magma_int_t *, cuDoubleComplex *, 
+    //           magma_int_t *);
+    //extern double dznrm2_(magma_int_t *, cuDoubleComplex *, magma_int_t *), dlamch_(
+    //                                                                          char *);
+    static magma_int_t lsticc;
+    //extern /* Subroutine */ int zlarfg_(magma_int_t *, cuDoubleComplex *, 
+    //                                    cuDoubleComplex *, magma_int_t *, cuDoubleComplex *);
+    static magma_int_t lastrk;
     
     
     a_dim1 = *lda;
@@ -155,11 +160,15 @@ L10:
 /*        Determine ith pivot column and swap if necessary */
 
         i__1 = *n - k + 1;
+
+        //pvt = k - 1 + idamax_(&i__1, &vn1[k], &c__1);
         pvt = k - 1 + idamax_(&i__1, &vn1[k], &c__1);
         if (pvt != k) {
-            zswap_(m, &a[pvt * a_dim1 + 1], &c__1, &a[k * a_dim1 + 1], &c__1);
+            //zswap_(m, &a[pvt * a_dim1 + 1], &c__1, &a[k * a_dim1 + 1], &c__1);
+            blasf77_zswap(m, &a[pvt * a_dim1 + 1], &c__1, &a[k * a_dim1 + 1], &c__1);
             i__1 = k - 1;
-            zswap_(&i__1, &f[pvt + f_dim1], ldf, &f[k + f_dim1], ldf);
+            //zswap_(&i__1, &f[pvt + f_dim1], ldf, &f[k + f_dim1], ldf);
+            blasf77_zswap(&i__1, &f[pvt + f_dim1], ldf, &f[k + f_dim1], ldf);
             itemp = jpvt[pvt];
             jpvt[pvt] = jpvt[k];
             jpvt[k] = itemp;
@@ -174,20 +183,27 @@ L10:
            i__1 = k - 1;
            for (j = 1; j <= i__1; ++j) {
                 i__2 = k + j * f_dim1;
-                d_cnjg(&z__1, &f[k + j * f_dim1]);
-                f[i__2].r = z__1.r, f[i__2].i = z__1.i;
+                //d_cnjg(&z__1, &f[k + j * f_dim1]);
+                double temporary = MAGMA_Z_IMAG(f[k + j * f_dim1]);
+                z__1 = MAGMA_Z_MAKE(MAGMA_Z_REAL(f[k + j * f_dim1]), -temporary);
+                //f[i__2].r = z__1.r, f[i__2].i = z__1.i;
+                f[i__2] = MAGMA_Z_MAKE(MAGMA_Z_REAL(z__1),  MAGMA_Z_IMAG(z__1));
 /* L20: */
            }
            i__1 = *m - rk + 1;
            i__2 = k - 1;
-           z__1.r = -1., z__1.i = -0.;
+   //z__1.r = -1., z__1.i = -0.;
+           z__1 = MAGMA_Z_MAKE(-1., -0.);
            zgemv_("No transpose", &i__1, &i__2, &z__1, &a[rk + a_dim1], lda, 
                   &f[k + f_dim1], ldf, &c_b2, &a[rk + k * a_dim1], &c__1);
            i__1 = k - 1;
            for (j = 1; j <= i__1; ++j) {
                i__2 = k + j * f_dim1;
-               d_cnjg(&z__1, &f[k + j * f_dim1]);
-               f[i__2].r = z__1.r, f[i__2].i = z__1.i;
+               //d_cnjg(&z__1, &f[k + j * f_dim1]);
+               double temporary = MAGMA_Z_IMAG(f[k + j * f_dim1]);
+               z__1 = MAGMA_Z_MAKE(MAGMA_Z_REAL(f[k + j * f_dim1]), -temporary);
+               //f[i__2].r = z__1.r, f[i__2].i = z__1.i; 
+               f[i__2] = MAGMA_Z_MAKE(MAGMA_Z_REAL(z__1), MAGMA_Z_IMAG(z__1));
                /* L30: */
            }
         }
@@ -204,9 +220,11 @@ L10:
        }
 
         i__1 = rk + k * a_dim1;
-       akk.r = a[i__1].r, akk.i = a[i__1].i;
+       //akk.r = a[i__1].r, akk.i = a[i__1].i;
+       akk = MAGMA_Z_MAKE(MAGMA_Z_REAL(a[i__1]), MAGMA_Z_IMAG(a[i__1]));
        i__1 = rk + k * a_dim1;
-       a[i__1].r = 1., a[i__1].i = 0.;
+       //a[i__1].r = 1., a[i__1].i = 0.;
+       a[i__1] = MAGMA_Z_MAKE(1., 0.);
 
        /*        Compute Kth column of F:   
 
@@ -216,8 +234,8 @@ L10:
            i__1 = *m - rk + 1;
            i__2 = *n - k;
            zgemv_("Conjugate transpose", &i__1, &i__2, &tau[k], &a[rk + (k + 
-                                                                         1) * a_dim1], lda, &a[rk + k * a_dim1], &c__1, &c_b1, &f[
-                                                                                                                                  k + 1 + k * f_dim1], &c__1);
+                  1) * a_dim1], lda, &a[rk + k * a_dim1], &c__1, &c_b1, &f[
+                  k + 1 + k * f_dim1], &c__1);
        }
        
        /*        Padding F(1:K,K) with zeros. */
@@ -225,7 +243,8 @@ L10:
        i__1 = k;
        for (j = 1; j <= i__1; ++j) {
            i__2 = j + k * f_dim1;
-           f[i__2].r = 0., f[i__2].i = 0.;
+           //f[i__2].r = 0., f[i__2].i = 0.;
+           f[i__2] = MAGMA_Z_MAKE(0., 0.);
            /* L40: */
        }
        
@@ -237,7 +256,10 @@ L10:
            i__1 = *m - rk + 1;
            i__2 = k - 1;
            i__3 = k;
-           z__1.r = -tau[i__3].r, z__1.i = -tau[i__3].i;
+           //z__1.r = -tau[i__3].r, z__1.i = -tau[i__3].i;
+           double temporary1 = MAGMA_Z_REAL(tau[i__3]);
+           double temporary2 = MAGMA_Z_IMAG(tau[i__3]);
+           z__1 = MAGMA_Z_MAKE(-temporary1, -temporary2);
            zgemv_("Conjugate transpose", &i__1, &i__2, &z__1, &a[rk + a_dim1]
                   , lda, &a[rk + k * a_dim1], &c__1, &c_b1, &auxv[1], &c__1);
            
@@ -251,8 +273,13 @@ L10:
        
        if (k < *n) {
            i__1 = *n - k;
-           z__1.r = -1., z__1.i = -0.;
-           zgemm_("No transpose", "Conjugate transpose", &c__1, &i__1, &k, &
+           //z__1.r = -1., z__1.i = -0.;
+           z__1 = MAGMA_Z_MAKE(-1., -0.);
+
+           //zgemm_("No transpose", "Conjugate transpose", &c__1, &i__1, &k, &
+                  //z__1, &a[rk + a_dim1], lda, &f[k + 1 + f_dim1], ldf, &
+                  //c_b2, &a[rk + (k + 1) * a_dim1], lda);
+           blasf77_zgemm("No transpose", "Conjugate transpose", &c__1, &i__1, &k, &
                   z__1, &a[rk + a_dim1], lda, &f[k + 1 + f_dim1], ldf, &
                   c_b2, &a[rk + (k + 1) * a_dim1], lda);
        }
@@ -267,7 +294,34 @@ L10:
                    /*                 NOTE: The following 4 lines follow from the analysis in   
                                       Lapack Working Note 176. */
                    
-                   temp = z_abs(&a[rk + j * a_dim1]) / vn1[j];
+                   //temp = z_abs(&a[rk + j * a_dim1]) / vn1[j];
+
+
+double real,imag,temporary3;
+real = MAGMA_Z_REAL(a[rk + j * a_dim1]);
+imag = MAGMA_Z_IMAG(a[rk + j * a_dim1]);
+
+if(real < 0)
+    real = -real;
+if(imag < 0)
+    imag = -imag;
+if(imag > real){
+    temporary3 = real;
+    real = imag;
+    imag = temporary3;
+}
+if((real+imag) == real) {
+    temp = real;
+} else {
+
+  temporary3 = imag/real;
+  temporary3 = real*sqrt(1.0 + temporary3*temporary3);  /*overflow!!*/
+  temp = temporary3;
+}
+temp = temp / vn1[j];
+
+
+
                    /* Computing MAX */
                    d__1 = 0., d__2 = (temp + 1.) * (1. - temp);
                    temp = max(d__1,d__2);
@@ -275,7 +329,7 @@ L10:
                    d__1 = vn1[j] / vn2[j];
                    temp2 = temp * (d__1 * d__1);
                    if (temp2 <= tol3z) {
-                       vn2[j] = (doublereal) lsticc;
+                       vn2[j] = (double) lsticc;
                        lsticc = j;
                    } else {
                        vn1[j] *= sqrt(temp);
@@ -286,7 +340,8 @@ L10:
        }
        
        i__1 = rk + k * a_dim1;
-       a[i__1].r = akk.r, a[i__1].i = akk.i;
+       //a[i__1].r = akk.r, a[i__1].i = akk.i;
+       a[i__1] = MAGMA_Z_MAKE(MAGMA_Z_REAL(akk), MAGMA_Z_IMAG(akk));
        
        /*        End of while loop. */
        
@@ -304,8 +359,12 @@ L10:
     if (*kb < min(i__1,i__2)) {
        i__1 = *m - rk;
        i__2 = *n - *kb;
-       z__1.r = -1., z__1.i = -0.;
-       zgemm_("No transpose", "Conjugate transpose", &i__1, &i__2, kb, &z__1, 
+       //z__1.r = -1., z__1.i = -0.;
+       z__1 = MAGMA_Z_MAKE(-1., -0.);
+       //zgemm_("No transpose", "Conjugate transpose", &i__1, &i__2, kb, &z__1, 
+       //       &a[rk + 1 + a_dim1], lda, &f[*kb + 1 + f_dim1], ldf, &c_b2, &
+       //       a[rk + 1 + (*kb + 1) * a_dim1], lda);
+       blasf77_zgemm("No transpose", "Conjugate transpose", &i__1, &i__2, kb, &z__1, 
               &a[rk + 1 + a_dim1], lda, &f[*kb + 1 + f_dim1], ldf, &c_b2, &
               a[rk + 1 + (*kb + 1) * a_dim1], lda);
     }
@@ -314,8 +373,10 @@ L10:
     
  L60:
     if (lsticc > 0) {
-       itemp = i_dnnt(&vn2[lsticc]);
+       //itemp = i_dnnt(&vn2[lsticc]);
+       itemp = (magma_int_t)(vn2[lsticc] >= 0. ? floor(vn2[lsticc] + .5) : -floor(.5 - vn2[lsticc]));  
        i__1 = *m - rk;
+       //vn1[lsticc] = dznrm2_(&i__1, &a[rk + 1 + lsticc * a_dim1], &c__1);
        vn1[lsticc] = dznrm2_(&i__1, &a[rk + 1 + lsticc * a_dim1], &c__1);
        
        /*        NOTE: The computation of VN1( LSTICC ) relies on the fact that   
