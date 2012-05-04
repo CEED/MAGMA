@@ -129,7 +129,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
     
     int mklth, thread, INFO;
     int Vblksiz=-1, blkcnt=-1, LDV=-1, LDT =-1, INgrsiz=1, LDE=-1, BAND=6;
-    Vblksiz = NB; //min(NB,64);
+    Vblksiz = min(NB,64); //NB; //min(NB,64);
     LDT     = Vblksiz;
     findVTsiz(N, NB, Vblksiz, &blkcnt, &LDV);
 
@@ -145,7 +145,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
     //if(N<4000)
      //       usemulticpu =0;
 
-    if(WANTZ!=3)
+    if((WANTZ!=3)&(WANTZ!=2))
            usemulticpu =0;
 
     core_in_all.usemulticpu = usemulticpu;
@@ -548,7 +548,8 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
             // compute the eigenvalues using lapack routine to be able to compare to it and used as ref 
 #if defined(USEMKL)
             mklth=THREADS; //;
-            mkl_set_num_threads(mklth);
+            //mkl_set_num_threads(mklth);
+            mkl_set_num_threads( 1 );
 #endif
             // call eigensolver for our resulting tridiag [D E] and form E=Q*Z
             //magma_zstedc_withZ('I', N, D2, E2, Z, LDZ);
@@ -655,23 +656,91 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                /****************************************************
                 * apply V2 from Right to Q1. da = da*(I-V2*T2*V2')
                 * **************************************************/
+               timeaplQ2 = get_time_azz();
                /*============================
                 *  use GPU+CPU's
                 *==========================*/             
-               if(usemulticpu==1)
+               if((usemulticpu==1)&&(THREADS>1))
                {
-                       printf("NEED MORE WORK\n");
-                       return 0;;
+                    
+                   // define the size of Q to be done on CPU's and the size on GPU's
+                   // note that GPU use Q(1:N_GPU) and CPU use Q(N_GPU+1:N)
+                   if(THREADS>40){
+                           N_GPU = (int) (0.5*(double)NE);
+                           N_GPU = (N_GPU/64)*64;
+                           N_CPU = NE-N_GPU;
+                   }else if(THREADS>10){
+                           N_GPU = (int) (0.6*(double)NE);
+                           N_GPU = (N_GPU/64)*64;
+                           N_CPU = NE-N_GPU;
+                   }else{
+                           N_GPU = NE;
+                           N_CPU = 0;
+                   }
+
+                   cublasGetMatrix( N_CPU, LDA1, sizeof(cuDoubleComplex), da+(N_GPU), LDA1, A1+(N_GPU), LDA1);
+                   printf("---> calling GPU + CPU(if N_CPU>0) to apply V2 to Z with NE %d     N_GPU %d   N_CPU %d\n",NE, N_GPU, N_CPU); 
+                   core_in_all.SIDE      = 'R';
+                   core_in_all.E         = A1;
+                   core_in_all.E_CPU     = A1+(N_GPU);
+                   core_in_all.LDE       = LDA1;
+                   core_in_all.dE        = da;
+                   core_in_all.dT2       = dT2;
+                   core_in_all.dV2       = dV2;
+                   core_in_all.N_CPU     = N_CPU;
+                   core_in_all.N_GPU     = N_GPU;
+                   core_in_all.NE        = NE;
+                   core_in_all.T         = T;
+                   core_in_all.TAU       = TAU;
+                   core_in_all.V         = V;
+
+
+                   // ===============================
+                   // relaunch thread to apply Q
+                   // ===============================
+                   // Set one thread per core
+                   pthread_attr_init(&thread_attr);
+                   pthread_attr_setscope(&thread_attr, PTHREAD_SCOPE_SYSTEM);
+                   pthread_setconcurrency(THREADS);
+                  
+                   // Initializations
+                   for (thread = 0; thread < THREADS; thread++)
+                   {
+                       barrier_in[thread] = 0;
+                       barrier_out[thread] = 0;
+                       event_numblg[thread] = 0;
+                   }
+                   // Launch threads
+                   for (thread = 1; thread < THREADS; thread++)
+                   {
+                       thread_num[thread] = thread;
+                       pthread_create(&thread_id[thread], &thread_attr, applyQ_parallel_section, &thread_num[thread]);
+                   }
+                   thread_num[0] = 0;
+                   applyQ_parallel_section(&thread_num[0]);
+          
+                   // Wait for completion
+                   for (thread = 1; thread < THREADS; thread++)
+                   {
+                       void *exitcodep;
+                       pthread_join(thread_id[thread], &exitcodep);
+                   }
+                   cublasSetMatrix(N_CPU, LDA1, sizeof(cuDoubleComplex), A1+(N_GPU), LDA1, da+(N_GPU), LDA1);
+                   
+
+
+
+
+
                /*============================
                 *  use only GPU
                 *==========================*/  
                }else{
-                   timeaplQ2 = get_time_azz();
                    magma_zbulge_applyQ(WANTZ, 'R', N, N, NB, Vblksiz, A1, LDA1, V, TAU, T, &INFO, dV2, dT2, da, 2);
                    cudaDeviceSynchronize();
                    magma_free( dT2 );
-                   timeaplQ2 = get_time_azz()-timeaplQ2;
                }
+               timeaplQ2 = get_time_azz()-timeaplQ2;
 
                /****************************************************
                 * compute the GEMM of Q*Z
@@ -1244,6 +1313,7 @@ static void *applyQ_parallel_section(void *thread_id)
 
     real_Double_t timeQcpu=0.0, timeQgpu=0.0;
     cuDoubleComplex *NOTUSED;
+    int INOTUSED=0;
 
 
     if(WANTZ<=0) 
@@ -1265,6 +1335,76 @@ static void *applyQ_parallel_section(void *thread_id)
     core_log_eventblg(0x000000, my_core_id);
 
 
+/*################################################
+     *   WANTZ == 2
+     *################################################*/
+    if((WANTZ==2))
+    {
+         /************************************************
+          *  only one core is running ==> code is sequential
+          *  usually code should not come here it is better 
+          *  when we have only 1 cpu to just run the gpu 
+          *  from the main function
+          ************************************************/   
+         if(allcores_num==1)
+         {
+             my_newcore_id = my_core_id;
+             //=========================
+             //    apply Q2
+             //=========================
+             if(usemulticpu==1){
+                 timeQgpu = get_time_azz();
+                 // here dZ is da and Z=Q1
+                 magma_zbulge_applyQ(WANTZ, 'R', NE, N, NB, Vblksiz, NOTUSED, N, V2, TAU2, T2, &INFO, dV2, dT2, dZ, 2);
+                 cudaDeviceSynchronize();
+                 timeQgpu = get_time_azz()-timeQgpu;
+                 printf("  Finish Q2_GPU GGG timing= %lf \n" ,timeQgpu);
+             }
+         /************************************************
+          *   more than one core
+          ************************************************/   
+         }else if(usemulticpu==1){
+            lastcoreid =  allcores_num-1;
+            // the the coreid "0" becomes last_one allcores_num-1
+            // and "1" becomes "0" and so on            
+            if(my_core_id==0){
+                my_newcore_id = lastcoreid; // giving it last core id
+            }else{
+                my_newcore_id = my_core_id-1;
+            }
+       
+       
+            /* I am the last core in the new indexing and the original core=0 */
+            if(my_newcore_id==lastcoreid)
+            {
+                //=============================================
+                //   on GPU on last_newcoreid:
+                //    - apply V2*Z(:,1:N_GPU)
+                //=============================================
+                 timeQgpu = get_time_azz();
+                 magma_zbulge_applyQ(WANTZ, 'R', N_GPU, N, NB, Vblksiz, NOTUSED, N, V2, TAU2, T2, &INFO, dV2, dT2, dZ, 2);
+                 cudaDeviceSynchronize();
+                 timeQgpu = get_time_azz()-timeQgpu;
+                 printf("  Finish Q2_GPU GGG timing= %lf \n" ,timeQgpu);
+            /* I am one of the remaining cores*/
+            }else if(N_CPU>0){
+                //=============================================
+                //   on CPU on core 1:last_newcoreid-1
+                //    - apply V2*Z(:,N_GPU+1:N)
+                //=============================================
+                if(my_newcore_id == 0)timeQcpu = get_time_azz();
+                tile_bulge_applyQ_parallel(my_newcore_id);
+                barrier(my_newcore_id, locores_num);
+                if(my_newcore_id == 0){
+                    timeQcpu = get_time_azz()-timeQcpu;
+                    printf("  Finish Q2_CPU CCC timing= %lf \n" ,timeQcpu);
+                }
+
+            } // END if my_newcore_id==allcores_num-1
+       
+         } // END of more than one core
+
+    }// END of WANTZ==3
 
 
     /*################################################
