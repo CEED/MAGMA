@@ -129,7 +129,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
     
     int mklth, thread, INFO;
     int Vblksiz=-1, blkcnt=-1, LDV=-1, LDT =-1, INgrsiz=1, LDE=-1, BAND=6;
-    Vblksiz = min(NB,64); //NB; //min(NB,64);
+    Vblksiz = min(NB,48); //NB; //min(NB,64);
     LDT     = Vblksiz;
     findVTsiz(N, NB, Vblksiz, &blkcnt, &LDV);
 
@@ -746,16 +746,16 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                 * compute the GEMM of Q*Z
                 * **************************************************/
                magma_free( dT1 );
-               if(MAGMA_SUCCESS != magma_zmalloc( &dZ, N*N )) { 
+               if(MAGMA_SUCCESS != magma_zmalloc( &dZ, N*NE )) { 
                   printf ("!!!! cublasAlloc failed for: dZ\n" );       
                   exit(-1);                                                           
                }
                timegemm = get_time_azz();
                // copy the eigenvectors to GPU
-               cublasSetMatrix(N, N, sizeof(cuDoubleComplex), Z, LDZ, dZ, N);
+               cublasSetMatrix(N, NE, sizeof(cuDoubleComplex), Z, LDZ, dZ, N);
                //make a gemm of (Q1 * Q2) * Z = da * dZ --> dV2
-               cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, N, N, c_one, da, N, dZ, N, c_zero, dV2, N);
-               cublasGetMatrix(N, N, sizeof(cuDoubleComplex), dV2, N, A1, LDA1);
+               cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, da, N, dZ, N, c_zero, dV2, N);
+               cublasGetMatrix(N, NE, sizeof(cuDoubleComplex), dV2, N, A1, LDA1);
                timegemm = get_time_azz()-timegemm;
            }
 
