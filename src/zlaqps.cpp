@@ -1,12 +1,20 @@
+/*
+   -- MAGMA (version 1.1) --
+   Univ. of Tennessee, Knoxville
+   Univ. of California, Berkeley
+   Univ. of Colorado, Denver
+   November 2011
+
+   @precisions normal z -> s d c
+
+*/
+
+
 //#include "blaswrap.h"
 #include "common_magma.h"
 #include <cblas.h>
 //#include "f2c.h"
 
-
-extern "C" magma_int_t idamax_(magma_int_t *n, double *v, magma_int_t *incr);
-
-extern "C" double dznrm2_(magma_int_t *, cuDoubleComplex *, magma_int_t *);
 
 extern "C" /* Subroutine */ int magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t 
                              *nb, magma_int_t *kb, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *jpvt, 
@@ -104,10 +112,10 @@ extern "C" /* Subroutine */ int magma_zlaqps(magma_int_t *m, magma_int_t *n, mag
     double d__1, d__2;
     cuDoubleComplex z__1;
     /* Builtin functions */
-    double sqrt(double);
-    void d_cnjg(cuDoubleComplex *, cuDoubleComplex *);
-    double z_abs(cuDoubleComplex *);
-    magma_int_t i_dnnt(double *);
+    //double sqrt(double);
+    //void d_cnjg(cuDoubleComplex *, cuDoubleComplex *);
+    //double z_abs(cuDoubleComplex *);
+    //magma_int_t i_dnnt(double *);
     /* Local variables */
     static magma_int_t j, k, rk;
     static cuDoubleComplex akk;
@@ -162,7 +170,11 @@ L10:
         i__1 = *n - k + 1;
 
         //pvt = k - 1 + idamax_(&i__1, &vn1[k], &c__1);
-        pvt = k - 1 + idamax_(&i__1, &vn1[k], &c__1);
+
+        /* Comment:
+           Fortran BLAS does not have to add 1
+           C       BLAS must add one to cblas_idamax */
+        pvt = k - 1 + cblas_idamax(i__1, &vn1[k], c__1) +1;
         if (pvt != k) {
             //zswap_(m, &a[pvt * a_dim1 + 1], &c__1, &a[k * a_dim1 + 1], &c__1);
             blasf77_zswap(m, &a[pvt * a_dim1 + 1], &c__1, &a[k * a_dim1 + 1], &c__1);
@@ -377,7 +389,7 @@ temp = temp / vn1[j];
        itemp = (magma_int_t)(vn2[lsticc] >= 0. ? floor(vn2[lsticc] + .5) : -floor(.5 - vn2[lsticc]));  
        i__1 = *m - rk;
        //vn1[lsticc] = dznrm2_(&i__1, &a[rk + 1 + lsticc * a_dim1], &c__1);
-       vn1[lsticc] = dznrm2_(&i__1, &a[rk + 1 + lsticc * a_dim1], &c__1);
+       vn1[lsticc] = cblas_dznrm2(i__1, &a[rk + 1 + lsticc * a_dim1], c__1);
        
        /*        NOTE: The computation of VN1( LSTICC ) relies on the fact that   
                  SNRM2 does not fail on vectors with norm below the value of   
