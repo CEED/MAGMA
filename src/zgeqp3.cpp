@@ -48,51 +48,51 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
 
     Arguments   
     =========   
-    M      (input) INTEGER
-           The number of rows of the matrix A. M >= 0.   
+    M       (input) INTEGER
+            The number of rows of the matrix A. M >= 0.   
 
-    N      (input) INTEGER   
-           The number of columns of the matrix A.  N >= 0.   
+    N       (input) INTEGER   
+            The number of columns of the matrix A.  N >= 0.   
 
-    A      (input/output) COMPLEX*16 array, dimension (LDA,N)   
-           On entry, the M-by-N matrix A.   
-           On exit, the upper triangle of the array contains the   
-           min(M,N)-by-N upper trapezoidal matrix R; the elements below   
-           the diagonal, together with the array TAU, represent the   
-           unitary matrix Q as a product of min(M,N) elementary   
-           reflectors.   
+    A       (input/output) COMPLEX*16 array, dimension (LDA,N)   
+            On entry, the M-by-N matrix A.   
+            On exit, the upper triangle of the array contains the   
+            min(M,N)-by-N upper trapezoidal matrix R; the elements below   
+            the diagonal, together with the array TAU, represent the   
+            unitary matrix Q as a product of min(M,N) elementary   
+            reflectors.   
 
     LDA     (input) INTEGER   
-           The leading dimension of the array A. LDA >= max(1,M).   
+            The leading dimension of the array A. LDA >= max(1,M).   
 
     JPVT    (input/output) INTEGER array, dimension (N)   
-           On entry, if JPVT(J).ne.0, the J-th column of A is permuted   
-           to the front of A*P (a leading column); if JPVT(J)=0,   
-           the J-th column of A is a free column.   
-           On exit, if JPVT(J)=K, then the J-th column of A*P was the   
-           the K-th column of A.   
+            On entry, if JPVT(J).ne.0, the J-th column of A is permuted   
+            to the front of A*P (a leading column); if JPVT(J)=0,   
+            the J-th column of A is a free column.   
+            On exit, if JPVT(J)=K, then the J-th column of A*P was the   
+            the K-th column of A.   
 
     TAU     (output) COMPLEX*16 array, dimension (min(M,N))   
-           The scalar factors of the elementary reflectors.   
+            The scalar factors of the elementary reflectors.   
 
     WORK    (workspace/output) COMPLEX*16 array, dimension (MAX(1,LWORK))   
-           On exit, if INFO=0, WORK(1) returns the optimal LWORK.   
+            On exit, if INFO=0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
-           The dimension of the array WORK. LWORK >= N+1.   
-           For optimal performance LWORK >= ( N+1 )*NB, where NB   
-           is the optimal blocksize.   
+            The dimension of the array WORK. LWORK >= N+1.   
+            For optimal performance LWORK >= ( N+1 )*NB, where NB   
+            is the optimal blocksize.   
 
-           If LWORK = -1, then a workspace query is assumed; the routine   
-           only calculates the optimal size of the WORK array, returns   
-           this value as the first entry of the WORK array, and no error   
-           message related to LWORK is issued by XERBLA.   
+            If LWORK = -1, then a workspace query is assumed; the routine   
+            only calculates the optimal size of the WORK array, returns   
+            this value as the first entry of the WORK array, and no error   
+            message related to LWORK is issued by XERBLA.   
 
     RWORK   (workspace) DOUBLE PRECISION array, dimension (2*N)   
 
     INFO    (output) INTEGER   
-           = 0: successful exit.   
-           < 0: if INFO = -i, the i-th argument had an illegal value.   
+            = 0: successful exit.   
+            < 0: if INFO = -i, the i-th argument had an illegal value.   
 
     Further Details   
     ===============   
@@ -116,7 +116,6 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
     static magma_int_t c__1 = 1;
     static magma_int_t c_n1 = -1;
     static magma_int_t c__3 = 3;
-    static magma_int_t c__2 = 2;
     
     magma_int_t a_dim1, a_offset, i__1, i__2, i__3;
     static magma_int_t j, jb, na, nb, sm, sn, nx, fjb, iws, nfxd, nbmin, minmn, minws;
@@ -214,17 +213,13 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
         }
     }
     
-    /*  Factorize free columns   
-        ====================== */
+    /*  Factorize free columns */
     if (nfxd < minmn) {
        sm = *m - nfxd;
        sn = *n - nfxd;
        sminmn = minmn - nfxd;
 
        /* Determine the block size. */
-       int nb = magma_get_zgeqrf_nb(min(*m, *n));
-       //nb = ilaenv_(&c__1, "ZGEQRF", " ", &sm, &sn, &c_n1, &c_n1, (ftnlen)6, 
-       //(ftnlen)1);
        nbmin = 2;
        nx = 0;
 
@@ -241,11 +236,7 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
        
                    /* Not enough workspace to use optimal NB: Reduce NB and   
                       determine the minimum value of NB. */
-                   
                    nb = *lwork / (sn + 1);
-                   /* Computing MAX */
-                   //i__1 = 2, i__2 = ilaenv_(&c__2, "ZGEQRF", " ", &sm, &sn, &
-                                            //c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
                    nbmin = max(i__1,i__2);
                }
            }
@@ -288,7 +279,7 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
        } else {
            j = nfxd + 1;
        }
-       
+        
        /* Use unblocked code to factor the last or only block. */
        if (j <= minmn) {
            i__1 = *n - j + 1;

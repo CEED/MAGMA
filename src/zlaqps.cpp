@@ -105,9 +105,6 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
     double d__1, d__2;
     cuDoubleComplex z__1;
     
-    //void d_cnjg(cuDoubleComplex *, cuDoubleComplex *);
-    //double z_abs(cuDoubleComplex *);
-    //magma_int_t i_dnnt(double *);
     static magma_int_t j, k, rk;
     static cuDoubleComplex akk;
     static magma_int_t pvt;
@@ -167,9 +164,7 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
            i__1 = k - 1;
            for (j = 1; j <= i__1; ++j) {
                 i__2 = k + j * f_dim1;
-                //d_cnjg(&z__1, &f[k + j * f_dim1]);
-                double temporary = MAGMA_Z_IMAG(f[k + j * f_dim1]);
-                z__1 = MAGMA_Z_MAKE(MAGMA_Z_REAL(f[k + j * f_dim1]), -temporary);
+                z__1 = MAGMA_Z_CNJG(f[k + j * f_dim1]); 
                 f[i__2] = MAGMA_Z_MAKE(MAGMA_Z_REAL(z__1),  MAGMA_Z_IMAG(z__1));
            }
            i__1 = *m - rk + 1;
@@ -180,10 +175,7 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
            i__1 = k - 1;
            for (j = 1; j <= i__1; ++j) {
                i__2 = k + j * f_dim1;
-               //d_cnjg(&z__1, &f[k + j * f_dim1]);
-               double temporary = MAGMA_Z_IMAG(f[k + j * f_dim1]);
-               z__1 = MAGMA_Z_MAKE(MAGMA_Z_REAL(f[k + j * f_dim1]), -temporary);
-               //f[i__2].r = z__1.r, f[i__2].i = z__1.i; 
+               z__1 = MAGMA_Z_CNJG( f[k + j * f_dim1] ); 
                f[i__2] = MAGMA_Z_MAKE(MAGMA_Z_REAL(z__1), MAGMA_Z_IMAG(z__1));
            }
         }
@@ -259,31 +251,8 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
                    
                    /*                 NOTE: The following 4 lines follow from the analysis in   
                                       Lapack Working Note 176. */
-                   //temp = z_abs(&a[rk + j * a_dim1]) / vn1[j];
+                   temp = MAGMA_Z_ABS(a[rk + j * a_dim1]) / vn1[j];
 
-                   double real,imag,temporary3;
-                   real = MAGMA_Z_REAL(a[rk + j * a_dim1]);
-                   imag = MAGMA_Z_IMAG(a[rk + j * a_dim1]);
-
-                   if(real < 0)
-                       real = -real;
-                   if(imag < 0)
-                       imag = -imag;
-                   if(imag > real){
-                       temporary3 = real;
-                       real = imag;
-                       imag = temporary3;
-                   }
-                   if((real+imag) == real) {
-                       temp = real;
-                   } else {
-                       
-                       temporary3 = imag/real;
-                       temporary3 = real * magma_dsqrt(1.0 + temporary3*temporary3);  /*overflow!!*/
-                       temp = temporary3;
-                   }
-                   temp = temp / vn1[j];
-                   
                    /* Computing MAX */
                    d__1 = 0., d__2 = (temp + 1.) * (1. - temp);
                    temp = max(d__1,d__2);
@@ -326,7 +295,6 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
     /*     Recomputation of difficult columns. */
  L60:
     if (lsticc > 0) {
-       //itemp = i_dnnt(&vn2[lsticc]);
        itemp = (magma_int_t)(vn2[lsticc] >= 0. ? floor(vn2[lsticc] + .5) : -floor(.5 - vn2[lsticc]));  
        i__1 = *m - rk;
        vn1[lsticc] = cblas_dznrm2(i__1, &a[rk + 1 + lsticc * a_dim1], c__1);
