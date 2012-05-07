@@ -53,9 +53,8 @@ int main( int argc, char** argv)
     cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex *h_A, *h_R, *tau, *h_work, tmp[1];
 
-double *rwork;
-
-magma_int_t *jpvt;
+    double *rwork;
+    magma_int_t *jpvt;
 
     /* Matrix size */
     magma_int_t M = 0, N = 0, n2, lda, lwork;
@@ -99,18 +98,18 @@ magma_int_t *jpvt;
 
     TESTING_MALLOC(    jpvt, magma_int_t,     N );
 
-    TESTING_MALLOC(    tau,  cuDoubleComplex, min_mn );
-    TESTING_MALLOC(    rwork,double, 2*N );
-    TESTING_MALLOC(    h_A,  cuDoubleComplex, n2     );
-    //TESTING_HOSTALLOC( h_R,  cuDoubleComplex, n2     );
-    TESTING_MALLOC( h_R,  cuDoubleComplex, n2     );
+    TESTING_MALLOC(    tau,  cuDoubleComplex, min_mn);
+    TESTING_MALLOC(    rwork,double, 2*N);
+    TESTING_MALLOC(    h_A,  cuDoubleComplex, n2 );
+    //TESTING_HOSTALLOC( h_R,  cuDoubleComplex, n2 );
+    TESTING_MALLOC( h_R,  cuDoubleComplex, n2   );
 
     lwork = -1;
     //lapackf77_zgeqp3(&M, &N, h_A, &M, jpvt, tau, tmp, &lwork, &info);
     //lwork = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
     //lwork = max( lwork, N*nb);
 
-lwork = 2*N+( N+1 )*nb;
+    lwork = 2*N+( N+1 )*nb;
 
     TESTING_MALLOC( h_work, cuDoubleComplex, lwork );
 
@@ -134,9 +133,9 @@ lwork = 2*N+( N+1 )*nb;
            Performs operation using MAGMA
            =================================================================== */
 
-    for (j = 0; j < N; j++) {
-      jpvt[j] = 0;
-}
+        for (j = 0; j < N; j++) {
+            jpvt[j] = 0;
+        }
 
         start = get_current_time();
         //magma_zgeqrf(M, N, h_R, lda, tau, h_work, lwork, &info);
@@ -151,9 +150,9 @@ lwork = 2*N+( N+1 )*nb;
            Performs operation using LAPACK
            =================================================================== */
 
-    for (j = 0; j < N; j++) {
-      jpvt[j] = 0;
-}
+        for (j = 0; j < N; j++) {
+            jpvt[j] = 0;
+        }
 
         start = get_current_time();
         //lapackf77_zgeqrf(&M, &N, h_A, &lda, tau, h_work, &lwork, &info);
@@ -180,12 +179,13 @@ lwork = 2*N+( N+1 )*nb;
     }
 
     /* Memory clean up */
-    ////TESTING_FREE( tau );
-    ////TESTING_FREE( jpvt );
-    ////TESTING_FREE( h_A );
+    TESTING_FREE( jpvt );
+    TESTING_FREE( tau );
+    TESTING_FREE( rwork );
+    TESTING_FREE( h_A );
     //TESTING_HOSTFREE( h_R );
-    ////TESTING_FREE( h_R );
-    ////TESTING_FREE( h_work );
+    TESTING_FREE( h_R );
+    TESTING_FREE( h_work );
 
     /* Shutdown */
     TESTING_CUDA_FINALIZE();
