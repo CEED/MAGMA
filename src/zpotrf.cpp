@@ -175,10 +175,9 @@ magma_zpotrf(char uplo, magma_int_t n,
                             d_neg_one, dA(0, j), ldda, 
                             d_one,     dA(j, j), ldda);
 
-                cudaMemcpy2DAsync(  A(0, j), lda *sizeof(cuDoubleComplex), 
-                                   dA(0, j), ldda*sizeof(cuDoubleComplex), 
-                                    sizeof(cuDoubleComplex)*(j+jb), jb,
-                                    cudaMemcpyDeviceToHost, stream[1]);
+                magma_zgetmatrix_async( (j+jb), jb,
+                                        dA(0, j), ldda,
+                                        A(0, j),  lda, stream[1] );
                 
                 if ( (j+jb) < n) {
                     magma_zgemm(MagmaConjTrans, MagmaNoTrans, 
@@ -194,10 +193,9 @@ magma_zpotrf(char uplo, magma_int_t n,
                   *info = *info + j;
                   break;
                 }
-                cudaMemcpy2DAsync(dA(j, j), ldda * sizeof(cuDoubleComplex), 
-                                   A(j, j), lda  * sizeof(cuDoubleComplex), 
-                                  sizeof(cuDoubleComplex)*jb, jb, 
-                                  cudaMemcpyHostToDevice,stream[0]);
+                magma_zsetmatrix_async( jb, jb,
+                                        A(j, j),  lda,
+                                        dA(j, j), ldda, stream[0] );
                 
                 if ( (j+jb) < n )
                   magma_ztrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
@@ -219,19 +217,16 @@ magma_zpotrf(char uplo, magma_int_t n,
                             d_neg_one, dA(j, 0), ldda, 
                             d_one,     dA(j, j), ldda);
                 /*
-                cudaMemcpy2DAsync( A(j, 0), lda *sizeof(cuDoubleComplex), 
-                                   dA(j,0), ldda*sizeof(cuDoubleComplex), 
-                                   sizeof(cuDoubleComplex)*jb, j+jb, 
-                                   cudaMemcpyDeviceToHost,stream[1]);
+                magma_zgetmatrix_async( jb, j+jb,
+                                        dA(j,0), ldda,
+                                        A(j, 0), lda, stream[1] );
                 */
-                cudaMemcpy2DAsync( A(j,j),  lda *sizeof(cuDoubleComplex),
-                                   dA(j,j), ldda*sizeof(cuDoubleComplex),
-                                   sizeof(cuDoubleComplex)*jb, jb,
-                                   cudaMemcpyDeviceToHost,stream[1]);
-                cudaMemcpy2DAsync( A(j, 0),  lda *sizeof(cuDoubleComplex),
-                                   dA(j, 0), ldda*sizeof(cuDoubleComplex),
-                                   sizeof(cuDoubleComplex)*jb, j,
-                                   cudaMemcpyDeviceToHost,stream[0]);
+                magma_zgetmatrix_async( jb, jb,
+                                        dA(j,j), ldda,
+                                        A(j,j),  lda, stream[1] );
+                magma_zgetmatrix_async( jb, j,
+                                        dA(j, 0), ldda,
+                                        A(j, 0),  lda, stream[0] );
 
                 if ( (j+jb) < n) {
                     magma_zgemm( MagmaNoTrans, MagmaConjTrans, 
@@ -247,10 +242,9 @@ magma_zpotrf(char uplo, magma_int_t n,
                     *info = *info + j;
                     break;
                 }
-                cudaMemcpy2DAsync( dA(j, j), ldda*sizeof(cuDoubleComplex), 
-                                   A(j, j),  lda *sizeof(cuDoubleComplex), 
-                                   sizeof(cuDoubleComplex)*jb, jb, 
-                                   cudaMemcpyHostToDevice,stream[0]);
+                magma_zsetmatrix_async( jb, jb,
+                                        A(j, j),  lda,
+                                        dA(j, j), ldda, stream[0] );
                 
                 if ( (j+jb) < n)
                     magma_ztrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 

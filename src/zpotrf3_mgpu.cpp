@@ -172,10 +172,9 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
 
         /* send the diagonal to cpu on stream1 (GPU interface: fist block is on gpu)*/
         //trace_gpu_start( id, 0, stream[id][0], "comm", "D to CPU" );
-        cudaMemcpy2DAsync(A(j,j),                 lda  *sizeof(cuDoubleComplex), 
-                          dlA(id, j, nb*j_local), ldda *sizeof(cuDoubleComplex), 
-                          jb*sizeof(cuDoubleComplex), jb, 
-                          cudaMemcpyDeviceToHost,stream[id][stream1]);
+        magma_zgetmatrix_async( jb, jb,
+                                dlA(id, j, nb*j_local), ldda,
+                                A(j,j),                 lda, stream[id][stream1] );
         //trace_gpu_end( id, 0, stream[id][0] );
 
         /* updating the remaing blocks in this column */
@@ -188,10 +187,9 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
               if( d != id ) {
                 cudaSetDevice(d);
                 //trace_gpu_start( d, 0, stream[d][0], "comm", "row to GPUs" );
-                cudaMemcpy2DAsync(dlP(d,jb,0,buf), lddp *sizeof(cuDoubleComplex), 
-                                  A(0,j),          lda  *sizeof(cuDoubleComplex), 
-                                  j*sizeof(cuDoubleComplex), jb, 
-                                  cudaMemcpyHostToDevice,stream[d][stream2]);
+                magma_zsetmatrix_async( j, jb,
+                                        A(0,j),          lda,
+                                        dlP(d,jb,0,buf), lddp, stream[d][stream2] );
                 //trace_gpu_end( d, 0, stream[d][0] );
                 //cudaEventRecord( event2[d], stream[d][stream2] );
               }
@@ -249,20 +247,18 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
             }
             cudaSetDevice(d);
             //trace_gpu_start( d, 0, stream[d][0], "comm", "comm" );
-            cudaMemcpy2DAsync( dlpanel, ldpanel*sizeof(cuDoubleComplex), 
-                               A(j,j),  lda    *sizeof(cuDoubleComplex), 
-                               sizeof(cuDoubleComplex)*jb, jb, 
-                               cudaMemcpyHostToDevice,stream[d][stream1]);
+            magma_zsetmatrix_async( jb, jb,
+                                    A(j,j),  lda,
+                                    dlpanel, ldpanel, stream[d][stream1] );
             //trace_gpu_end( d, 0, stream[d][0] );
             cudaEventRecord( event1[d], stream[d][stream1] );
           }
         } else {
           cudaSetDevice(id);
           //trace_gpu_start( id, 0, stream[id][0], "comm", "comm" );
-          cudaMemcpy2DAsync( dlA(id, j, nb*j_local), ldda *sizeof(cuDoubleComplex), 
-                             A(j,j),                 lda  *sizeof(cuDoubleComplex), 
-                             sizeof(cuDoubleComplex)*jb, jb, 
-                             cudaMemcpyHostToDevice,stream[id][stream1]);
+          magma_zsetmatrix_async( jb, jb,
+                                  A(j,j),                 lda,
+                                  dlA(id, j, nb*j_local), ldda, stream[id][stream1] );
           //trace_gpu_end( id, 0, stream[id][0] );
         }
 
@@ -302,10 +298,9 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
                 /* so even on 1gpu, we need to copy to cpu, but don't have to wait for it. */     
                 cudaStreamWaitEvent( stream[d][stream3], event0[d], 0 ); // look-ahead done
                 //trace_gpu_start( d, 1, stream[d][1], "comm", "row to CPU" );
-                cudaMemcpy2DAsync(A(0,j+jb),              lda  *sizeof(cuDoubleComplex), 
-                                  dlA(d, 0, nb*j_local2), ldda *sizeof(cuDoubleComplex), 
-                                  (j+jb)*sizeof(cuDoubleComplex), nb0, 
-                                  cudaMemcpyDeviceToHost,stream[d][stream3]);
+                magma_zgetmatrix_async( (j+jb), nb0,
+                                        dlA(d, 0, nb*j_local2), ldda,
+                                        A(0,j+jb),              lda, stream[d][stream3] );
                 //trace_gpu_end( d, 1, stream[d][1] );
               }
             } else {
@@ -375,10 +370,9 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
 
         /* send the diagonal to cpu on stream1 */
         //trace_gpu_start( id, 1, stream[id][1], "comm", "D to CPU" );
-        cudaMemcpy2DAsync(A(j,j),                  lda *sizeof(cuDoubleComplex), 
-                          dlAT(id, nb*j_local, j), ldda*sizeof(cuDoubleComplex), 
-                          jb*sizeof(cuDoubleComplex), jb, 
-                          cudaMemcpyDeviceToHost,stream[id][stream1]);
+        magma_zgetmatrix_async( jb, jb,
+                                dlAT(id, nb*j_local, j), ldda,
+                                A(j,j),                  lda, stream[id][stream1] );
         //trace_gpu_end( id, 1, stream[id][0] );
 
         if( j>0 && (j+jb)<m ) {
@@ -390,10 +384,9 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
               if( d != id ) {
                 cudaSetDevice(d);
                 //trace_gpu_start( d, 0, stream[d][0], "comm", "row to GPU" );
-                cudaMemcpy2DAsync(dlPT(d,0,jb,buf), nb *sizeof(cuDoubleComplex), 
-                                  A(j,0),           lda*sizeof(cuDoubleComplex), 
-                                  jb*sizeof(cuDoubleComplex), j, 
-                                  cudaMemcpyHostToDevice,stream[d][stream2]);
+                magma_zsetmatrix_async( jb, j,
+                                        A(j,0),           lda,
+                                        dlPT(d,0,jb,buf), nb, stream[d][stream2] );
                 //trace_gpu_end( d, 0, stream[d][0] );
                 //cudaEventRecord( event2[d], stream[d][stream2] );
               }
@@ -451,20 +444,18 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
             }
             cudaSetDevice(d);
             //trace_gpu_start( d, 0, stream[d][0], "comm", "D to GPU" );
-            cudaMemcpy2DAsync(dlpanel,  ldpanel*sizeof(cuDoubleComplex),
-                              A(j,j),   lda    *sizeof(cuDoubleComplex),
-                              sizeof(cuDoubleComplex)*jb, jb,
-                              cudaMemcpyHostToDevice,stream[d][stream1]);
+            magma_zsetmatrix_async( jb, jb,
+                                    A(j,j),  lda,
+                                    dlpanel, ldpanel, stream[d][stream1] );
             //trace_gpu_end( d, 0, stream[d][0] );
             cudaEventRecord( event1[d], stream[d][stream1] );
           }
         } else {
           cudaSetDevice(id);
           //trace_gpu_start( id, 0, stream[id][0], "comm", "D to GPU" );
-          cudaMemcpy2DAsync(dlAT(id, nb*j_local, j), ldda*sizeof(cuDoubleComplex),
-                            A(j,j),                  lda *sizeof(cuDoubleComplex),
-                            sizeof(cuDoubleComplex)*jb, jb,
-                            cudaMemcpyHostToDevice,stream[id][stream1]);
+          magma_zsetmatrix_async( jb, jb,
+                                  A(j,j),                  lda,
+                                  dlAT(id, nb*j_local, j), ldda, stream[id][stream1] );
           //trace_gpu_end( id, 0, stream[id][0] );
         }
         if ( (j+jb) < m) {
@@ -499,10 +490,9 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
                 /* so even on 1gpu, we need to copy to cpu, but don't have to wait for it.*/     
                 cudaStreamWaitEvent( stream[d][stream3], event0[d], 0 ); // lookahead done
                 //trace_gpu_start( d, 0, stream[d][0], "comm", "row to CPU" );
-                cudaMemcpy2DAsync(A(j+jb,0),               lda *sizeof(cuDoubleComplex), 
-                                  dlAT(d, nb*j_local2, 0), ldda*sizeof(cuDoubleComplex), 
-                                  nb0*sizeof(cuDoubleComplex), j+jb,
-                                  cudaMemcpyDeviceToHost,stream[d][stream3]);
+                magma_zgetmatrix_async( nb0, j+jb,
+                                        dlAT(d, nb*j_local2, 0), ldda,
+                                        A(j+jb,0),               lda, stream[d][stream3] );
                 //trace_gpu_end( d, 0, stream[d][0] );
               }
             } else { /* other gpus updating all the blocks on stream2 */
@@ -587,10 +577,9 @@ magma_zhtodpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_
           jb = min(nb, (n-j));
           if(j+jb < off_j+m) mj = (j-off_i)+jb;
           else mj = m;
-          cudaMemcpy2DAsync( dA(k, 0, jj*nb), ldda*sizeof(cuDoubleComplex),
-                             A(off_i, j), lda *sizeof(cuDoubleComplex),
-                             sizeof(cuDoubleComplex)*mj, jb,
-                             cudaMemcpyHostToDevice, stream[k][0]);
+          magma_zsetmatrix_async( mj, jb,
+                                  A(off_i, j),     lda,
+                                  dA(k, 0, jj*nb), ldda, stream[k][0] );
           }
       } else {
         magma_int_t i, ii, ib, ni;
@@ -605,10 +594,9 @@ magma_zhtodpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_
           if(i+ib < off_i+n) ni = (i-off_i)+ib;
           else ni = n;
           
-          cudaMemcpy2DAsync( dA(k, ii*nb, 0), ldda *sizeof(cuDoubleComplex),
-                             A(i, off_j),      lda *sizeof(cuDoubleComplex),
-                             sizeof(cuDoubleComplex)*ib, ni,
-                             cudaMemcpyHostToDevice, stream[k][0]);
+          magma_zsetmatrix_async( ib, ni,
+                                  A(i, off_j),     lda,
+                                  dA(k, ii*nb, 0), ldda, stream[k][0] );
           }
       }
       for( k=0; k<num_gpus; k++ ) {
@@ -638,10 +626,9 @@ magma_zdtohpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_
           jb = min(nb, (n-j));
           if(j+jb < off_j+m) mj = (j-off_i)+jb;
           else mj = m;
-          cudaMemcpy2DAsync( A(off_i, j),     lda *sizeof(cuDoubleComplex),
-                             dA(k, 0, jj*nb), ldda*sizeof(cuDoubleComplex),
-                             sizeof(cuDoubleComplex)*mj, jb,
-                             cudaMemcpyDeviceToHost,stream[k][stream_id]);
+          magma_zgetmatrix_async( mj, jb,
+                                  dA(k, 0, jj*nb), ldda,
+                                  A(off_i, j),     lda, stream[k][stream_id] );
         }
       } else {
         magma_int_t i, ii, ib, ni;
@@ -656,10 +643,9 @@ magma_zdtohpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_
           if(i+ib < off_i+n) ni = (i-off_i)+ib;
           else ni = n;
 
-          cudaMemcpy2DAsync( A(i, off_j),      lda *sizeof(cuDoubleComplex),
-                             dA(k, ii*nb, 0), ldda *sizeof(cuDoubleComplex),
-                             sizeof(cuDoubleComplex)*ib, ni,
-                             cudaMemcpyDeviceToHost, stream[k][stream_id]);
+          magma_zgetmatrix_async( ib, ni,
+                                  dA(k, ii*nb, 0), ldda,
+                                  A(i, off_j),     lda, stream[k][stream_id] );
         }
       }
       for( k=0; k<num_gpus; k++ ) {

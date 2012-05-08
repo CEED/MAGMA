@@ -178,10 +178,9 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
             lapackf77_zungqr(&i__2, &ib, &ib, 
                              a_ref(i, i), &lda, 
                              &tau[i], work, &lwork, &iinfo);
-            cudaMemcpy2DAsync(da_ref(i,i), ldda * sizeof(cuDoubleComplex),
-                               a_ref(i,i), lda * sizeof(cuDoubleComplex),
-                              sizeof(cuDoubleComplex)*i__2, ib,
-                              cudaMemcpyHostToDevice, stream);
+            magma_zsetmatrix_async( i__2, ib,
+                                    a_ref(i,i),  lda,
+                                    da_ref(i,i), ldda, stream );
 
             /* Set rows 1:i-1 of current block to zero */
             i__2 = i + ib;

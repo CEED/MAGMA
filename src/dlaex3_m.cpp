@@ -314,15 +314,17 @@ magma_dlaex3_m(magma_int_t nrgpu,
             lapackf77_dlacpy("A", &ni_loc[igpu], &n12, q2+n1_loc*(igpu/2), &n1, hQ2(igpu), &n1_loc);
 #endif
             cudaSetDevice(igpu);
-            cudaMemcpy2DAsync(dQ2(igpu), sizeof(double)*n1_loc, q2+n1_loc*(igpu/2), sizeof(double)*n1,
-                              sizeof(double)*ni_loc[igpu], n12, cudaMemcpyHostToDevice, stream[igpu][0]);
+            magma_dsetmatrix_async( ni_loc[igpu], n12,
+                                    q2+n1_loc*(igpu/2), n1,
+                                    dQ2(igpu),          n1_loc, stream[igpu][0] );
             ni_loc[igpu+1] = min(n2_loc, n2 - igpu/2 * n2_loc);
 #ifdef CHECK_CPU
             lapackf77_dlacpy("A", &ni_loc[igpu+1], &n23, q2+iq2+n2_loc*(igpu/2), &n2, hQ2(igpu+1), &n2_loc);
 #endif
             cudaSetDevice(igpu+1);
-            cudaMemcpy2DAsync(dQ2(igpu+1), sizeof(double)*n2_loc, q2+iq2+n2_loc*(igpu/2), sizeof(double)*n2,
-                              sizeof(double)*ni_loc[igpu+1], n23, cudaMemcpyHostToDevice, stream[igpu+1][0]);
+            magma_dsetmatrix_async( ni_loc[igpu+1], n23,
+                                    q2+iq2+n2_loc*(igpu/2), n2,
+                                    dQ2(igpu+1),            n2_loc, stream[igpu+1][0] );
         }
     }
 
@@ -475,13 +477,15 @@ magma_dlaex3_m(magma_int_t nrgpu,
             for (igpu = 0; igpu < nrgpu-1; igpu += 2){
                 if (n23 != 0) {
                     cudaSetDevice(igpu+1);
-                    cudaMemcpy2DAsync(dS(igpu+1,0), sizeof(double)*n23, Q(ctot[0],iil-1), sizeof(double)*ldq,
-                                      sizeof(double)*n23, ib, cudaMemcpyHostToDevice, stream[igpu+1][0]);
+                    magma_dsetmatrix_async( n23, ib,
+                                            Q(ctot[0],iil-1), ldq,
+                                            dS(igpu+1,0),     n23, stream[igpu+1][0] );
                 }
                 if (n12 != 0) {
                     cudaSetDevice(igpu);
-                    cudaMemcpy2DAsync(dS(igpu,0), sizeof(double)*n12, Q(0,iil-1), sizeof(double)*ldq,
-                                      sizeof(double)*n12, ib, cudaMemcpyHostToDevice, stream[igpu][0]);
+                    magma_dsetmatrix_async( n12, ib,
+                                            Q(0,iil-1), ldq,
+                                            dS(igpu,0), n12, stream[igpu][0] );
                 }
             }
 
@@ -493,13 +497,15 @@ magma_dlaex3_m(magma_int_t nrgpu,
                     for (igpu = 0; igpu < nrgpu-1; igpu += 2){
                         if (n23 != 0) {
                             cudaSetDevice(igpu+1);
-                            cudaMemcpy2DAsync(dS(igpu+1,(ind+1)%2), sizeof(double)*n23, Q(ctot[0],iil-1+i+nb), sizeof(double)*ldq,
-                                              sizeof(double)*n23, ib2, cudaMemcpyHostToDevice, stream[igpu+1][(ind+1)%2]);
+                            magma_dsetmatrix_async( n23, ib2,
+                                                    Q(ctot[0],iil-1+i+nb), ldq,
+                                                    dS(igpu+1,(ind+1)%2),  n23, stream[igpu+1][(ind+1)%2] );
                         }
                         if (n12 != 0) {
                             cudaSetDevice(igpu);
-                            cudaMemcpy2DAsync(dS(igpu,(ind+1)%2), sizeof(double)*n12, Q(0,iil-1+i+nb), sizeof(double)*ldq,
-                                              sizeof(double)*n12, ib2, cudaMemcpyHostToDevice, stream[igpu][(ind+1)%2]);
+                            magma_dsetmatrix_async( n12, ib2,
+                                                    Q(0,iil-1+i+nb),    ldq,
+                                                    dS(igpu,(ind+1)%2), n12, stream[igpu][(ind+1)%2] );
                         }
                     }
                 }
@@ -557,14 +563,16 @@ magma_dlaex3_m(magma_int_t nrgpu,
                 for (igpu = 0; igpu < nrgpu-1; igpu += 2){
                     if (n23 != 0) {
                         cudaSetDevice(igpu+1);
-                        cudaMemcpy2DAsync(Q(n1+n2_loc*(igpu/2),iil-1+i), sizeof(double)*ldq, dQ(igpu+1, ind), sizeof(double)*n2_loc,
-                                          sizeof(double)*ni_loc[igpu+1], ib, cudaMemcpyDeviceToHost, stream[igpu+1][ind]);
+                        magma_dgetmatrix_async( ni_loc[igpu+1], ib,
+                                                dQ(igpu+1, ind),               n2_loc,
+                                                Q(n1+n2_loc*(igpu/2),iil-1+i), ldq, stream[igpu+1][ind] );
 //                        lapackf77_dlacpy("A", &ni_loc[igpu+1], &ib, hQ(igpu+1, ind%2), &n2_loc, Q(n1+n2_loc*(igpu/2),iil-1+i), &ldq);
                     }
                     if (n12 != 0) {
                         cudaSetDevice(igpu);
-                        cudaMemcpy2DAsync(Q(n1_loc*(igpu/2),iil-1+i), sizeof(double)*ldq, dQ(igpu, ind), sizeof(double)*n1_loc,
-                                          sizeof(double)*ni_loc[igpu], ib, cudaMemcpyDeviceToHost, stream[igpu][ind]);
+                        magma_dgetmatrix_async( ni_loc[igpu], ib,
+                                                dQ(igpu, ind),              n1_loc,
+                                                Q(n1_loc*(igpu/2),iil-1+i), ldq, stream[igpu][ind] );
 //                        lapackf77_dlacpy("A", &ni_loc[igpu], &ib, hQ(igpu, ind%2), &n1_loc, Q(n1_loc*(igpu/2),iil-1+i), &ldq);
                     }
                 }

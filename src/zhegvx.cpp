@@ -293,10 +293,9 @@ magma_zhegvx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
   
   cublasSetMatrix(n, n, sizeof(cuDoubleComplex), b, ldb, db, lddb);
   
-  cudaMemcpy2DAsync(da, ldda*sizeof(cuDoubleComplex),
-                    a,  lda*sizeof(cuDoubleComplex),
-                    sizeof(cuDoubleComplex)*n, n,
-                    cudaMemcpyHostToDevice, stream);  
+  magma_zsetmatrix_async( n, n,
+                          a,  lda,
+                          da, ldda, stream );  
   
   magma_zpotrf_gpu(uplo_[0], n, db, lddb, info);
   if (*info != 0) {
@@ -306,10 +305,9 @@ magma_zhegvx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
   
   cudaStreamSynchronize(stream);
   
-  cudaMemcpy2DAsync( b,  ldb*sizeof(cuDoubleComplex),
-                    db, lddb*sizeof(cuDoubleComplex),
-                    sizeof(cuDoubleComplex)*n, n,
-                    cudaMemcpyDeviceToHost, stream);
+  magma_zgetmatrix_async( n, n,
+                          db, lddb,
+                          b,  ldb, stream );
   
   /*     Transform problem to standard eigenvalue problem and solve. */
   

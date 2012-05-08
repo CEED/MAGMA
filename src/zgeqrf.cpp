@@ -152,24 +152,21 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
 
     if ( (nb > 1) && (nb < k) ) {
         /* Use blocked code initially */
-        cudaMemcpy2DAsync(da_ref(0,nb), ldda*sizeof(cuDoubleComplex),
-                           a_ref(0,nb), lda *sizeof(cuDoubleComplex),
-                          sizeof(cuDoubleComplex)*(m), (n-nb),
-                          cudaMemcpyHostToDevice,stream[0]);
+        magma_zsetmatrix_async( (m), (n-nb),
+                                a_ref(0,nb),  lda,
+                                da_ref(0,nb), ldda, stream[0] );
 
         old_i = 0; old_ib = nb;
         for (i = 0; i < k-nb; i += nb) {
             ib = min(k-i, nb);
             if (i>0){
-                cudaMemcpy2DAsync( a_ref(i,i),  lda *sizeof(cuDoubleComplex),
-                                   da_ref(i,i), ldda*sizeof(cuDoubleComplex),
-                                   sizeof(cuDoubleComplex)*(m-i), ib,
-                                   cudaMemcpyDeviceToHost,stream[1]);
+                magma_zgetmatrix_async( (m-i), ib,
+                                        da_ref(i,i), ldda,
+                                        a_ref(i,i),  lda, stream[1] );
 
-                cudaMemcpy2DAsync( a_ref(0,i),  lda *sizeof(cuDoubleComplex),
-                                   da_ref(0,i), ldda*sizeof(cuDoubleComplex),
-                                   sizeof(cuDoubleComplex)*i, ib,
-                                   cudaMemcpyDeviceToHost,stream[0]);
+                magma_zgetmatrix_async( i, ib,
+                                        da_ref(0,i), ldda,
+                                        a_ref(0,i),  lda, stream[0] );
 
                 /* Apply H' to A(i:m,i+2*ib:n) from the left */
                 magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 

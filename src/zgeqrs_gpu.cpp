@@ -212,9 +212,9 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
         }
     }
 
-    cudaMemcpy2D(dB,    lddb*sizeof(cuDoubleComplex),
-                 dwork, lddwork*sizeof(cuDoubleComplex),
-                 (n)*sizeof(cuDoubleComplex), nrhs, cudaMemcpyDeviceToDevice);
+    magma_zcopymatrix( (n), nrhs,
+                       dwork, lddwork,
+                       dB,    lddb );
     
     return *info;
 }

@@ -459,8 +459,9 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
         magma_zunmtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, *m, da, ldda, &work[indtau],
                          dc, lddc, wa, ldwa, &iinfo);
 
-        cudaMemcpy2D(da, ldda * sizeof(cuDoubleComplex), dc, lddc * sizeof(cuDoubleComplex),
-                     sizeof(cuDoubleComplex) * n, *m, cudaMemcpyDeviceToDevice);
+        magma_zcopymatrix( n, *m,
+                           dc, lddc,
+                           da, ldda );
 
 #ifdef ENABLE_TIMER
         end = get_current_time();

@@ -153,10 +153,9 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
           
           lapackf77_zhegs2( &itype, uplo_, &kb, A(k,k), &lda, B(k,k), &ldb, info);
           
-          cudaMemcpy2DAsync(dA(k, k), ldda * sizeof(cuDoubleComplex),
-                             A(k, k), lda  * sizeof(cuDoubleComplex),
-                            sizeof(cuDoubleComplex)*kb, kb,
-                            cudaMemcpyHostToDevice, stream[0]);
+          magma_zsetmatrix_async( kb, kb,
+                                  A(k, k),  lda,
+                                  dA(k, k), ldda, stream[0] );
           
           if(k+kb<n){
             
@@ -179,10 +178,9 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
                          dB(k,k+kb), lddb,
                          d_one, dA(k+kb,k+kb), ldda);
             
-            cudaMemcpy2DAsync(  A(k+kb, k+kb), lda*sizeof(cuDoubleComplex),
-                              dA(k+kb, k+kb), ldda*sizeof(cuDoubleComplex),
-                              sizeof(cuDoubleComplex)*kb2, kb2,
-                              cudaMemcpyDeviceToHost, stream[1]);
+            magma_zgetmatrix_async( kb2, kb2,
+                                    dA(k+kb, k+kb), ldda,
+                                    A(k+kb, k+kb),  lda, stream[1] );
             
             magma_zhemm(MagmaLeft, MagmaUpper,
                         kb, n-k-kb,
@@ -215,10 +213,9 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
           
           lapackf77_zhegs2( &itype, uplo_, &kb, A(k,k), &lda, B(k,k), &ldb, info);
           
-          cudaMemcpy2DAsync(dA(k, k), ldda * sizeof(cuDoubleComplex),
-                            A(k, k), lda  * sizeof(cuDoubleComplex),
-                            sizeof(cuDoubleComplex)*kb, kb,
-                            cudaMemcpyHostToDevice, stream[0]);
+          magma_zsetmatrix_async( kb, kb,
+                                  A(k, k),  lda,
+                                  dA(k, k), ldda, stream[0] );
           
           if(k+kb<n){
             
@@ -241,10 +238,9 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
                          dB(k+kb,k), lddb,
                          d_one, dA(k+kb,k+kb), ldda);
             
-            cudaMemcpy2DAsync( A(k+kb, k+kb), lda *sizeof(cuDoubleComplex),
-                              dA(k+kb, k+kb), ldda*sizeof(cuDoubleComplex),
-                              sizeof(cuDoubleComplex)*kb2, kb2,
-                              cudaMemcpyDeviceToHost, stream[1]);
+            magma_zgetmatrix_async( kb2, kb2,
+                                    dA(k+kb, k+kb), ldda,
+                                    A(k+kb, k+kb),  lda, stream[1] );
             
             magma_zhemm(MagmaRight, MagmaLower,
                         n-k-kb, kb,
@@ -275,10 +271,9 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
         for(k = 0; k<n; k+=nb){
           kb= min(n-k,nb);
           
-          cudaMemcpy2DAsync( A(k, k), lda *sizeof(cuDoubleComplex),
-                            dA(k, k), ldda*sizeof(cuDoubleComplex),
-                            sizeof(cuDoubleComplex)*kb, kb,
-                            cudaMemcpyDeviceToHost, stream[0]);
+          magma_zgetmatrix_async( kb, kb,
+                                  dA(k, k), ldda,
+                                  A(k, k),  lda, stream[0] );
           
           /* Update the upper triangle of A(1:k+kb-1,1:k+kb-1) */
           if(k>0){
@@ -319,10 +314,9 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
           
           lapackf77_zhegs2( &itype, uplo_, &kb, A(k, k), &lda, B(k, k), &ldb, info);
           
-          cudaMemcpy2DAsync(dA(k, k), ldda * sizeof(cuDoubleComplex),
-                             A(k, k), lda  * sizeof(cuDoubleComplex),
-                            sizeof(cuDoubleComplex)*kb, kb,
-                            cudaMemcpyHostToDevice, stream[1]);
+          magma_zsetmatrix_async( kb, kb,
+                                  A(k, k),  lda,
+                                  dA(k, k), ldda, stream[1] );
           
         }
         
@@ -335,10 +329,9 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
         for(k = 0; k<n; k+=nb){
           kb= min(n-k,nb);
           
-          cudaMemcpy2DAsync( A(k, k), lda *sizeof(cuDoubleComplex),
-                            dA(k, k), ldda*sizeof(cuDoubleComplex),
-                            sizeof(cuDoubleComplex)*kb, kb,
-                            cudaMemcpyDeviceToHost, stream[0]);
+          magma_zgetmatrix_async( kb, kb,
+                                  dA(k, k), ldda,
+                                  A(k, k),  lda, stream[0] );
           
           /* Update the lower triangle of A(1:k+kb-1,1:k+kb-1) */
           if(k>0){ 
@@ -378,10 +371,9 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
           
           lapackf77_zhegs2( &itype, uplo_, &kb, A(k,k), &lda, B(k,k), &ldb, info);
           
-          cudaMemcpy2DAsync(dA(k, k), ldda * sizeof(cuDoubleComplex),
-                             A(k, k), lda  * sizeof(cuDoubleComplex),
-                            sizeof(cuDoubleComplex)*kb, kb,
-                            cudaMemcpyHostToDevice, stream[1]);
+          magma_zsetmatrix_async( kb, kb,
+                                  A(k, k),  lda,
+                                  dA(k, k), ldda, stream[1] );
         }
         
         cudaStreamSynchronize(stream[1]);

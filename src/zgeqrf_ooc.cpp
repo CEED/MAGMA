@@ -171,10 +171,9 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
         //printf("Processing %5d columns -- %5d to %5d ... \n", IB, i, i+IB);
 
         /* 1. Copy the next part of the matrix to the GPU */
-        cudaMemcpy2DAsync(da_ref(0,0), ldda*sizeof(cuDoubleComplex),
-                          a_ref(0,i), lda *sizeof(cuDoubleComplex),
-                          sizeof(cuDoubleComplex)*(m), IB,
-                          cudaMemcpyHostToDevice,stream[0]);
+        magma_zsetmatrix_async( (m), IB,
+                                a_ref(0,i),  lda,
+                                da_ref(0,0), ldda, stream[0] );
         cudaStreamSynchronize(stream[0]);
 
         /* 2. Update it with the previous transformations */
@@ -192,16 +191,14 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
             int rows = m-j;
             lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr,
                               &rows, &ib, a_ref(j,j), &lda, tau+j, work, &ib);
-            cudaMemcpy2DAsync(dwork, lddwork *sizeof(cuDoubleComplex),
-                              work,  ib      *sizeof(cuDoubleComplex),
-                              sizeof(cuDoubleComplex)*ib, ib,
-                              cudaMemcpyHostToDevice,stream[1]);
+            magma_zsetmatrix_async( ib, ib,
+                                    work,  ib,
+                                    dwork, lddwork, stream[1] );
 
             zpanel_to_q(MagmaUpper, ib, a_ref(j,j), lda, work+ib*ib);
-            cudaMemcpy2DAsync(ptr,        rows *sizeof(cuDoubleComplex),
-                              a_ref(j,j), lda  *sizeof(cuDoubleComplex),
-                              sizeof(cuDoubleComplex)*rows, ib, 
-                              cudaMemcpyHostToDevice,stream[1]);
+            magma_zsetmatrix_async( rows, ib,
+                                    a_ref(j,j), lda,
+                                    ptr,        rows, stream[1] );
             cudaStreamSynchronize(stream[1]);
 
             magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
@@ -217,10 +214,9 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
           magma_zgeqrf2_gpu(m-i, IB, da_ref(i,0), ldda, tau+i, info);
 
         /* 4. Copy the current part back to the CPU */
-        cudaMemcpy2DAsync( a_ref(0,i), lda *sizeof(cuDoubleComplex),
-                          da_ref(0,0), ldda*sizeof(cuDoubleComplex),
-                          sizeof(cuDoubleComplex)*(m), IB,
-                          cudaMemcpyDeviceToHost,stream[0]);
+        magma_zgetmatrix_async( (m), IB,
+                                da_ref(0,0), ldda,
+                                a_ref(0,i),  lda, stream[0] );
       }
 
     cudaStreamSynchronize(stream[0]);

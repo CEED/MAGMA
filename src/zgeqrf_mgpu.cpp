@@ -180,10 +180,9 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
             #ifdef  MultiGPUs
                cudaSetDevice(panel_gpunum);
             #endif
-            cudaMemcpy2DAsync( hwrk_ref(i), ldwork*sizeof(cuDoubleComplex),
-                               dlA(panel_gpunum, i, i_local), ldda*sizeof(cuDoubleComplex),
-                               sizeof(cuDoubleComplex)*rows, ib,
-                               cudaMemcpyDeviceToHost, streaml[panel_gpunum][1]);
+            magma_zgetmatrix_async( rows, ib,
+                                    dlA(panel_gpunum, i, i_local), ldda,
+                                    hwrk_ref(i),                   ldwork, streaml[panel_gpunum][1] );
 
             if (i>0){
                 /* Apply H' to A(i:m,i+2*ib:n) from the left; this is the look-ahead
@@ -205,10 +204,9 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
                 #ifdef  MultiGPUs
                 cudaSetDevice(la_gpu);
                 #endif
-                cudaMemcpy2DAsync( panel[la_gpu], ldda  *sizeof(cuDoubleComplex),
-                                   hwrk_ref(old_i),  ldwork*sizeof(cuDoubleComplex),
-                                   sizeof(cuDoubleComplex)*old_ib, old_ib,
-                                   cudaMemcpyHostToDevice, streaml[la_gpu][0]);
+                magma_zsetmatrix_async( old_ib, old_ib,
+                                        hwrk_ref(old_i), ldwork,
+                                        panel[la_gpu],   ldda, streaml[la_gpu][0] );
             }
             
             #ifdef  MultiGPUs
@@ -236,10 +234,9 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
                   panel[j] = dlA(j, i, i_local);
                 else
                   panel[j] = dwork[j]+displacement;
-                cudaMemcpy2DAsync(panel[j],    ldda  *sizeof(cuDoubleComplex),
-                                  hwrk_ref(i), ldwork*sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*rows, ib,
-                                  cudaMemcpyHostToDevice, streaml[j][0]);
+                magma_zsetmatrix_async( rows, ib,
+                                        hwrk_ref(i), ldwork,
+                                        panel[j],    ldda, streaml[j][0] );
               }
             for(j=0; j<num_gpus; j++)
               {
@@ -261,10 +258,9 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
                     #ifdef  MultiGPUs
                        cudaSetDevice(j);
                     #endif
-                       cudaMemcpy2DAsync(dwork[j], lddwork *sizeof(cuDoubleComplex),
-                                         lhwrk,    ib      *sizeof(cuDoubleComplex),
-                                         sizeof(cuDoubleComplex)*ib, ib,
-                                         cudaMemcpyHostToDevice, streaml[j][0]);
+                       magma_zsetmatrix_async( ib, ib,
+                                               lhwrk,    ib,
+                                               dwork[j], lddwork, streaml[j][0] );
                   }
 
                 if (i+nb < k-nx)

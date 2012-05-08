@@ -153,17 +153,16 @@ magma_ztsqrt_gpu(int *m, int *n,
      rows = *m;
      // Send the next panel (diagonal block of A1 & block column of A2) 
      // to the CPU (in work_a1 and work_a2)
-     cudaMemcpy2DAsync(  work_a2, ldwork*sizeof(cuDoubleComplex),
-                         a2_ref(0,i), (*lda)*sizeof(cuDoubleComplex),
-                         sizeof(cuDoubleComplex)*rows, ib,
-                         cudaMemcpyDeviceToHost,stream[1]);
-     cudaMemcpy2DAsync(  work_a1, ldwork*sizeof(cuDoubleComplex),
+     magma_zgetmatrix_async( rows, ib,
+                             a2_ref(0,i), (*lda),
+                             work_a2,     ldwork, stream[1] );
+
                          // a1_ref(i,i), (*lda)*sizeof(cuDoubleComplex),
                          // the diagonal of a1 is in d_ref generated and
                          // passed from magma_zgeqrf_gpu
-                         d_ref(i), ib*sizeof(cuDoubleComplex),
-                         sizeof(cuDoubleComplex)*ib, ib,
-                         cudaMemcpyDeviceToHost,stream[1]);
+     magma_zgetmatrix_async( ib, ib,
+                             d_ref(i), ib,
+                             work_a1,  ldwork, stream[1] );
      
         if (i>0) {
           /* Apply H' to A(i:m,i+2*ib:n) from the left */
@@ -184,10 +183,9 @@ magma_ztsqrt_gpu(int *m, int *n,
         
         // Now diag of A1 is updated, send it back asynchronously to the GPU.
         // We have to play interchaning these copies to see which is faster
-        cudaMemcpy2DAsync(d_ref(i), ib * sizeof(cuDoubleComplex),
-                          work_a1 , ib * sizeof(cuDoubleComplex),
-                          sizeof(cuDoubleComplex)*ib, ib,
-                          cudaMemcpyHostToDevice,stream[0]);
+        magma_zsetmatrix_async( ib, ib,
+                                work_a1,  ib,
+                                d_ref(i), ib, stream[0] );
         // Send the panel from A2 back to the GPU
         cublasSetMatrix(*m, ib, sizeof(cuDoubleComplex),
                         work_a2, ldwork, a2_ref(0,i), *lda);

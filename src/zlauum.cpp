@@ -133,15 +133,13 @@ magma_zlauum(char uplo, magma_int_t n,
 
                                 //cublasSetMatrix(ib, (n-i), sizeof(cuDoubleComplex), A(i, i), lda, dA(i, i), ldda);
                                 
-                                cudaMemcpy2DAsync( dA(i, i), ldda *sizeof(cuDoubleComplex),
-                                                   A(i,i), lda*sizeof(cuDoubleComplex),
-                                                   sizeof(cuDoubleComplex)*ib, ib,
-                                                   cudaMemcpyHostToDevice,stream[1]);
+                                magma_zsetmatrix_async( ib, ib,
+                                                        A(i,i),   lda,
+                                                        dA(i, i), ldda, stream[1] );
 
-                                cudaMemcpy2DAsync( dA(i,i+ib),  ldda *sizeof(cuDoubleComplex),
-                                                   A(i,i+ib), lda*sizeof(cuDoubleComplex),
-                                                   sizeof(cuDoubleComplex)*ib, (n-i-ib),
-                                                   cudaMemcpyHostToDevice,stream[0]);
+                                magma_zsetmatrix_async( ib, (n-i-ib),
+                                                        A(i,i+ib),  lda,
+                                                        dA(i,i+ib), ldda, stream[0] );
 
                                 cudaStreamSynchronize(stream[1]);
 
@@ -152,10 +150,9 @@ magma_zlauum(char uplo, magma_int_t n,
 
                                 lapackf77_zlauum(MagmaUpperStr, &ib, A(i,i), &lda, info);
 
-                                cudaMemcpy2DAsync( dA(i, i), ldda * sizeof(cuDoubleComplex),
-                                                   A(i, i), lda  * sizeof(cuDoubleComplex),
-                                                   sizeof(cuDoubleComplex)*ib, ib,
-                                                   cudaMemcpyHostToDevice,stream[0]);
+                                magma_zsetmatrix_async( ib, ib,
+                                                        A(i, i),  lda,
+                                                        dA(i, i), ldda, stream[0] );
 
                                 if (i+ib < n)
                                 {
@@ -184,15 +181,13 @@ magma_zlauum(char uplo, magma_int_t n,
                                 //cublasSetMatrix((n-i), ib, sizeof(cuDoubleComplex),
                                 //                A(i, i), lda, dA(i, i), ldda);
 
-                                cudaMemcpy2DAsync( dA(i, i), ldda *sizeof(cuDoubleComplex),
-                                                   A(i,i), lda*sizeof(cuDoubleComplex),
-                                                   sizeof(cuDoubleComplex)*ib, ib,
-                                                   cudaMemcpyHostToDevice,stream[1]);
+                                magma_zsetmatrix_async( ib, ib,
+                                                        A(i,i),   lda,
+                                                        dA(i, i), ldda, stream[1] );
 
-                                cudaMemcpy2DAsync( dA(i+ib, i),  ldda *sizeof(cuDoubleComplex),
-                                                   A(i+ib, i), lda*sizeof(cuDoubleComplex),
-                                                   sizeof(cuDoubleComplex)*(n-i-ib), ib,
-                                                   cudaMemcpyHostToDevice,stream[0]);
+                                magma_zsetmatrix_async( (n-i-ib), ib,
+                                                        A(i+ib, i),  lda,
+                                                        dA(i+ib, i), ldda, stream[0] );
 
                                 cudaStreamSynchronize(stream[1]);
 
@@ -207,10 +202,9 @@ magma_zlauum(char uplo, magma_int_t n,
                                 //cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex),
                                 //                A(i, i), lda, dA(i, i), ldda);
 
-                                cudaMemcpy2DAsync( dA(i, i), ldda * sizeof(cuDoubleComplex),
-                                                   A(i, i), lda  * sizeof(cuDoubleComplex),
-                                                   sizeof(cuDoubleComplex)*ib, ib,
-                                                   cudaMemcpyHostToDevice,stream[0]);
+                                magma_zsetmatrix_async( ib, ib,
+                                                        A(i, i),  lda,
+                                                        dA(i, i), ldda, stream[0] );
 
                                 if (i+ib < n)
                                 {

@@ -243,10 +243,9 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
                                 /* start sending the panel to cpu */
                 magmablas_ztranspose( d_lAP[id], cols, inAT(id,i,i_local), lddat, nb, cols );
                 //cublasGetMatrix( m-i*nb, nb, sizeof(cuDoubleComplex), d_lAP[id], cols, work, lddwork);
-                                cudaMemcpy2DAsync( work,     lddwork*sizeof(cuDoubleComplex),
-                                                   d_lAP[id], cols  *sizeof(cuDoubleComplex),
-                                                   sizeof(cuDoubleComplex)*rows, nb,
-                                                   cudaMemcpyDeviceToHost, streaml[id][1]);
+                                magma_zgetmatrix_async( rows, nb,
+                                                        d_lAP[id], cols,
+                                                        work,      lddwork, streaml[id][1] );
 
                 /* make sure that gpu queue is empty */
                 cuCtxSynchronize();
@@ -280,10 +279,9 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
                                   cudaSetDevice(d);
                       lddat = ldat_local[d];
                   //cublasSetMatrix(rows, nb, sizeof(cuDoubleComplex), work, lddwork, d_lAP[d], maxm);
-                  cudaMemcpy2DAsync(d_lAP[d], maxm   *sizeof(cuDoubleComplex),
-                                                    work,     lddwork*sizeof(cuDoubleComplex),
-                                                    sizeof(cuDoubleComplex)*rows, nb,
-                                                    cudaMemcpyHostToDevice, streaml[d][0]);
+                  magma_zsetmatrix_async( rows, nb,
+                                          work,     lddwork,
+                                          d_lAP[d], maxm, streaml[d][0] );
                                 }
 
                                 for( d=0; d<num_gpus; d++ ) {
@@ -380,10 +378,9 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
                             if( d == id || n_local[d] > i_local2*nb ) 
                             {
                       //cublasSetMatrix(rows, nb0, sizeof(cuDoubleComplex), work, lddwork, d_lAP[d], maxm);
-                  cudaMemcpy2DAsync(d_lAP[d], maxm   *sizeof(cuDoubleComplex),
-                                                work,     lddwork*sizeof(cuDoubleComplex),
-                                                sizeof(cuDoubleComplex)*rows, nb0,
-                                                cudaMemcpyHostToDevice, streaml[d][0]);
+                  magma_zsetmatrix_async( rows, nb0,
+                                          work,     lddwork,
+                                          d_lAP[d], maxm, streaml[d][0] );
                             }
                           }
                         }

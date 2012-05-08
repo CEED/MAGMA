@@ -236,10 +236,9 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                             dy + i__ + 1 + i__ * y_dim1, c__1);
                 
                 // 3. Put the result back ----------------------------------
-                cudaMemcpy2DAsync(y+i__+1+i__*y_dim1, y_dim1*sizeof(cuDoubleComplex),
-                                  dy+i__+1+i__*y_dim1, y_dim1*sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*i__3, 1,
-                                  cudaMemcpyDeviceToHost,stream);
+                magma_zgetmatrix_async( i__3, 1,
+                                        dy+i__+1+i__*y_dim1, y_dim1,
+                                        y+i__+1+i__*y_dim1,  y_dim1, stream );
                 i__2 = m - i__ + 1;
                 i__3 = i__ - 1;
                 blasf77_zgemv(MagmaConjTransStr, &i__2, &i__3, &c_one, &a[i__ + a_dim1], 
@@ -322,10 +321,9 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                             c_zero, dx + i__ + 1 + i__ * x_dim1, c__1);
 
                 // 3. Put the result back ----------------------------------
-                cudaMemcpy2DAsync(x+i__+1+i__*x_dim1, x_dim1*sizeof(cuDoubleComplex),
-                                  dx+i__+1+i__*x_dim1, x_dim1*sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*i__2, 1,
-                                  cudaMemcpyDeviceToHost,stream);
+                magma_zgetmatrix_async( i__2, 1,
+                                        dx+i__+1+i__*x_dim1, x_dim1,
+                                        x+i__+1+i__*x_dim1,  x_dim1, stream );
 
                 i__2 = n - i__;
                 blasf77_zgemv(MagmaConjTransStr, &i__2, &i__, &c_one, &y[i__ + 1 + y_dim1],
@@ -425,10 +423,9 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                       dx + i__ + 1 + i__ * x_dim1, c__1);
 
           // 3. Put the result back ----------------------------------
-          cudaMemcpy2DAsync( x+i__+1+i__*x_dim1, x_dim1*sizeof(cuDoubleComplex),
-                            dx+i__+1+i__*x_dim1, x_dim1*sizeof(cuDoubleComplex),
-                            sizeof(cuDoubleComplex)*i__2, 1,
-                            cudaMemcpyDeviceToHost,stream);
+          magma_zgetmatrix_async( i__2, 1,
+                                  dx+i__+1+i__*x_dim1, x_dim1,
+                                  x+i__+1+i__*x_dim1,  x_dim1, stream );
 
           i__2 = n - i__ + 1;
           i__3 = i__ - 1;
@@ -510,10 +507,9 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                       c_zero, dy + i__ + 1 + i__ * y_dim1, c__1);
 
           // 3. Put the result back ----------------------------------
-          cudaMemcpy2DAsync( y+i__+1+i__*y_dim1, y_dim1*sizeof(cuDoubleComplex),
-                            dy+i__+1+i__*y_dim1, y_dim1*sizeof(cuDoubleComplex),
-                            sizeof(cuDoubleComplex)*i__3, 1,
-                            cudaMemcpyDeviceToHost,stream);
+          magma_zgetmatrix_async( i__3, 1,
+                                  dy+i__+1+i__*y_dim1, y_dim1,
+                                  y+i__+1+i__*y_dim1,  y_dim1, stream );
 
           i__2 = m - i__;
           i__3 = i__ - 1;

@@ -319,10 +319,9 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
           }
           
           // 2. Start putting the result back (asynchronously)
-          cudaMemcpy2DAsync(W(0, iw) /*test*/, ldw*sizeof(cuDoubleComplex),
-                            dW(id, 0, iw), lddw*sizeof(cuDoubleComplex),
-                            sizeof(cuDoubleComplex)*i, 1,
-                            cudaMemcpyDeviceToHost,stream[idw][0]);
+          magma_zgetmatrix_async( i, 1,
+                                  dW(id, 0, iw),     lddw,
+                                  W(0, iw) /*test*/, ldw, stream[idw][0] );
           
           if (i < n-1) {
             blasf77_zgemv(MagmaConjTransStr, &i, &i_n, &c_one, W(0, iw+1), &ldw,

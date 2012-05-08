@@ -342,8 +342,9 @@ magma_dsyevd_gpu(char jobz, char uplo,
         magma_dormtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, n, da, ldda, &work[indtau],
                          dc, lddc, wa, ldwa, &iinfo);
         
-        cudaMemcpy2D(da, ldda * sizeof(double), dc, lddc * sizeof(double),
-                     sizeof(double)*n, n, cudaMemcpyDeviceToDevice);
+        magma_dcopymatrix( n, n,
+                           dc, lddc,
+                           da, ldda );
 
 #ifdef ENABLE_TIMER    
         end = get_current_time();

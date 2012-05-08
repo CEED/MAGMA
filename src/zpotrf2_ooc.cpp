@@ -250,10 +250,9 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
           /* upload the diagonal of big panel */
           for( d=0; d<num_gpus; d++ ) {
             cudaSetDevice(d);
-            cudaMemcpy2DAsync( dTup(d, 0, J), nb *sizeof(cuDoubleComplex), 
-                               A(j, J),       lda*sizeof(cuDoubleComplex), 
-                               sizeof(cuDoubleComplex)*nb, JB, 
-                               cudaMemcpyHostToDevice,stream[d][0]);
+            magma_zsetmatrix_async( nb, JB,
+                                    A(j, J),       lda,
+                                    dTup(d, 0, J), nb, stream[d][0] );
             n_local[d] = 0;
           }
 
@@ -263,10 +262,9 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
             cudaSetDevice(d);
 
             jb2 = min(nb, n-jj);
-            cudaMemcpy2DAsync( dTup(d, 0, J+JB+n_local[d]), nb *sizeof(cuDoubleComplex), 
-                               A(j, jj),                    lda*sizeof(cuDoubleComplex), 
-                               sizeof(cuDoubleComplex)*nb, jb2, 
-                               cudaMemcpyHostToDevice,stream[d][0]);
+            magma_zsetmatrix_async( nb, jb2,
+                                    A(j, jj),                    lda,
+                                    dTup(d, 0, J+JB+n_local[d]), nb, stream[d][0] );
             n_local[d] += jb2;
           }
 
@@ -358,10 +356,9 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
           /* upload the diagonal of big panel */
           for( d=0; d<num_gpus; d++ ) {
             cudaSetDevice(d);
-            cudaMemcpy2DAsync( dT(d, J, 0), ldda *sizeof(cuDoubleComplex), 
-                               A(J, j),     lda  *sizeof(cuDoubleComplex), 
-                               sizeof(cuDoubleComplex)*JB, nb, 
-                               cudaMemcpyHostToDevice,stream[d][0]);
+            magma_zsetmatrix_async( JB, nb,
+                                    A(J, j),     lda,
+                                    dT(d, J, 0), ldda, stream[d][0] );
             n_local[d] = 0;
           }
 
@@ -371,10 +368,9 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
             cudaSetDevice(d);
 
             jb2 = min(nb, n-jj);
-            cudaMemcpy2DAsync( dT(d, J+JB+n_local[d], 0), ldda *sizeof(cuDoubleComplex), 
-                               A(jj, j),                  lda*sizeof(cuDoubleComplex), 
-                               sizeof(cuDoubleComplex)*jb2, nb, 
-                               cudaMemcpyHostToDevice,stream[d][0]);
+            magma_zsetmatrix_async( jb2, nb,
+                                    A(jj, j),                  lda,
+                                    dT(d, J+JB+n_local[d], 0), ldda, stream[d][0] );
             n_local[d] += jb2;
           }
 

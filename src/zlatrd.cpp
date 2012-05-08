@@ -225,10 +225,9 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
                       dA(0, i), ione, c_zero, dW(0, iw), ione);
           
           // 2. Start putting the result back (asynchronously)
-          cudaMemcpy2DAsync(W(0, iw) /*test*/, ldw*sizeof(cuDoubleComplex),
-                            dW(0, iw), lddw*sizeof(cuDoubleComplex),
-                            sizeof(cuDoubleComplex)*i, 1,
-                            cudaMemcpyDeviceToHost,stream);
+          magma_zgetmatrix_async( i, 1,
+                                  dW(0, iw),         lddw,
+                                  W(0, iw) /*test*/, ldw, stream );
           
           if (i < n-1) {
 
@@ -306,10 +305,9 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
                           dW(i+1, i), ione);
           
               // 2. Start putting the result back (asynchronously)
-              cudaMemcpy2DAsync(W(i+1, i), ldw*sizeof(cuDoubleComplex),
-                                dW(i+1, i), lddw*sizeof(cuDoubleComplex),
-                                sizeof(cuDoubleComplex)*i_n, 1,
-                                cudaMemcpyDeviceToHost,stream);
+              magma_zgetmatrix_async( i_n, 1,
+                                      dW(i+1, i), lddw,
+                                      W(i+1, i),  ldw, stream );
 
               blasf77_zgemv(MagmaConjTransStr, &i_n, &i, &c_one, W(i+1, 0), &ldw, 
                             A(i+1, i), &ione, &c_zero, W(0, i), &ione);

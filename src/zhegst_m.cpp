@@ -170,19 +170,17 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
                 igpu = k%nrgpu;
                 cudaSetDevice(igpu);
                 kb = min(nb, n-k*nb);
-                cudaMemcpy2DAsync(dA(igpu, k/nrgpu, k), ldda * sizeof(cuDoubleComplex),
-                                  A(k, k), lda  * sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*kb, n-k*nb,
-                                  cudaMemcpyHostToDevice, stream[igpu][0]);
+                magma_zsetmatrix_async( kb, n-k*nb,
+                                        A(k, k),              lda,
+                                        dA(igpu, k/nrgpu, k), ldda, stream[igpu][0] );
             }
             kb= min(n,nb);
             igpu = 0;
             cudaSetDevice(igpu);
             // dB_r(0,0) is used to store B(k,k)
-            cudaMemcpy2DAsync(dB_r(igpu, 0, 0), lddbr * sizeof(cuDoubleComplex),
-                              B(0, 0), ldb * sizeof(cuDoubleComplex),
-                              sizeof(cuDoubleComplex)*kb, kb,
-                              cudaMemcpyHostToDevice, stream[igpu][1]);
+            magma_zsetmatrix_async( kb, kb,
+                                    B(0, 0),          ldb,
+                                    dB_r(igpu, 0, 0), lddbr, stream[igpu][1] );
 
             for(k = 0; k<nbl; ++k){
                 kb= min(n-k*nb,nb);
@@ -192,10 +190,9 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
                         cudaStreamSynchronize(stream[igpu][0]);
-                        cudaMemcpy2DAsync(dB_r(igpu, 0, k+1), lddbr * sizeof(cuDoubleComplex),
-                                          B(k, k+1), ldb * sizeof(cuDoubleComplex),
-                                          sizeof(cuDoubleComplex)*kb, n-(k+1)*nb,
-                                          cudaMemcpyHostToDevice, stream[igpu][0]);
+                        magma_zsetmatrix_async( kb, n-(k+1)*nb,
+                                                B(k, k+1),          ldb,
+                                                dB_r(igpu, 0, k+1), lddbr, stream[igpu][0] );
                     }
                 }
 
@@ -217,10 +214,9 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
                 lapackf77_zhegs2( &itype, uplo_, &kb, A(k,k), &lda, B(k,k), &ldb, info);
 printf("hegs2%d\n", k);
                 if (k+1<nbl) {
-                    cudaMemcpy2DAsync(dA(igpu, k/nrgpu, k), ldda * sizeof(cuDoubleComplex),
-                                      A(k, k), lda * sizeof(cuDoubleComplex),
-                                      sizeof(cuDoubleComplex)*kb, kb,
-                                      cudaMemcpyHostToDevice, stream[igpu][0]);
+                    magma_zsetmatrix_async( kb, kb,
+                                            A(k, k),              lda,
+                                            dA(igpu, k/nrgpu, k), ldda, stream[igpu][0] );
 
                     cudaStreamSynchronize(stream[igpu][1]);
                     cublasSetKernelStream(stream[igpu][0]);
@@ -240,10 +236,9 @@ printf("hegs2%d\n", k);
 
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
-                        cudaMemcpy2DAsync(dB_r(igpu, 1, k+1), lddbr * sizeof(cuDoubleComplex),
-                                          A(k, k+1), lda * sizeof(cuDoubleComplex),
-                                          sizeof(cuDoubleComplex)*kb, n-(k+1)*nb,
-                                          cudaMemcpyHostToDevice, stream[igpu][0]);
+                        magma_zsetmatrix_async( kb, n-(k+1)*nb,
+                                                A(k, k+1),          lda,
+                                                dB_r(igpu, 1, k+1), lddbr, stream[igpu][0] );
                     }
 
                     igpu = k%nrgpu;
@@ -273,15 +268,13 @@ printf("hegs2%d\n", k);
                         cudaStreamSynchronize(stream[igpu][((j)/nrgpu)%3]); // Needed for correctness. Why?
                         if (j == k+1){
                             cudaStreamSynchronize(stream[igpu][(j/nrgpu)%3]);
-                            cudaMemcpy2DAsync( A(k+1, k+1), lda *sizeof(cuDoubleComplex),
-                                              dA(igpu, (k+1)/nrgpu, k+1), ldda*sizeof(cuDoubleComplex),
-                                              sizeof(cuDoubleComplex)*kb2, kb2,
-                                              cudaMemcpyDeviceToHost, stream[igpu][2]);
+                            magma_zgetmatrix_async( kb2, kb2,
+                                                    dA(igpu, (k+1)/nrgpu, k+1), ldda,
+                                                    A(k+1, k+1),                lda, stream[igpu][2] );
                             // dB_r(0,0) is used to store B(k,k)
-                            cudaMemcpy2DAsync(dB_r(igpu, 0, 0), lddbr * sizeof(cuDoubleComplex),
-                                              B(k+1, k+1), ldb * sizeof(cuDoubleComplex),
-                                              sizeof(cuDoubleComplex)*kb2, kb2,
-                                              cudaMemcpyHostToDevice, stream[igpu][1]);
+                            magma_zsetmatrix_async( kb2, kb2,
+                                                    B(k+1, k+1),      ldb,
+                                                    dB_r(igpu, 0, 0), lddbr, stream[igpu][1] );
                         }
                     }
                     for (j = k+1; j < nbl-1; ++j){
@@ -310,20 +303,18 @@ printf("hegs2%d\n", k);
                 for (igpu = 0; igpu < nrgpu; ++igpu){
                     nloc[igpu]=0;
                     cudaSetDevice(igpu);
-                    cudaMemcpy2DAsync(dB_r(igpu, 1, 1), lddbr * sizeof(cuDoubleComplex),
-                                      B(1, 1), ldb * sizeof(cuDoubleComplex),
-                                      sizeof(cuDoubleComplex)*jb, n-nb,
-                                      cudaMemcpyHostToDevice, stream[igpu][1]);
+                    magma_zsetmatrix_async( jb, n-nb,
+                                            B(1, 1),          ldb,
+                                            dB_r(igpu, 1, 1), lddbr, stream[igpu][1] );
                 }
                 for (j = 1; j < nbl; ++j){
                     if ((j+1)*nb < n){
                         jb = min(nb, n-(j+1)*nb);
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
-                            cudaMemcpy2DAsync(dB_r(igpu, (j+1)%2, j+1), lddbr * sizeof(cuDoubleComplex),
-                                              B(j+1, j+1), ldb * sizeof(cuDoubleComplex),
-                                              sizeof(cuDoubleComplex)*jb, n-(j+1)*nb,
-                                              cudaMemcpyHostToDevice, stream[igpu][(j+1)%2]);
+                            magma_zsetmatrix_async( jb, n-(j+1)*nb,
+                                                    B(j+1, j+1),              ldb,
+                                                    dB_r(igpu, (j+1)%2, j+1), lddbr, stream[igpu][(j+1)%2] );
                         }
                     }
                     jb = min(nb, n-j*nb);
@@ -354,10 +345,9 @@ printf("hegs2%d\n", k);
                         igpu = k%nrgpu;
                         cudaSetDevice(igpu);
                         kb = min(nb, n-k*nb);
-                        cudaMemcpy2DAsync(A(k, j), lda * sizeof(cuDoubleComplex),
-                                          dA(igpu, k/nrgpu, j), ldda  * sizeof(cuDoubleComplex),
-                                          sizeof(cuDoubleComplex)*kb, jb,
-                                          cudaMemcpyDeviceToHost, stream[igpu][2]);
+                        magma_zgetmatrix_async( kb, jb,
+                                                dA(igpu, k/nrgpu, j), ldda,
+                                                A(k, j),              lda, stream[igpu][2] );
                     }
                 }
             }
@@ -370,19 +360,17 @@ printf("hegs2%d\n", k);
                 igpu = k%nrgpu;
                 cudaSetDevice(igpu);
                 kb = min(nb, n-k*nb);
-                cudaMemcpy2DAsync(dA(igpu, k, k/nrgpu), ldda * sizeof(cuDoubleComplex),
-                                  A(k, k), lda  * sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*(n-k*nb), kb,
-                                  cudaMemcpyHostToDevice, stream[igpu][0]);
+                magma_zsetmatrix_async( (n-k*nb), kb,
+                                        A(k, k),              lda,
+                                        dA(igpu, k, k/nrgpu), ldda, stream[igpu][0] );
             }
             kb= min(n,nb);
             igpu = 0;
             cudaSetDevice(igpu);
             // dB_c(0,0) is used to store B(k,k)
-            cudaMemcpy2DAsync(dB_c(igpu, 0, 0), lddbc * sizeof(cuDoubleComplex),
-                              B(0, 0), ldb * sizeof(cuDoubleComplex),
-                              sizeof(cuDoubleComplex)*kb, kb,
-                              cudaMemcpyHostToDevice, stream[igpu][1]);
+            magma_zsetmatrix_async( kb, kb,
+                                    B(0, 0),          ldb,
+                                    dB_c(igpu, 0, 0), lddbc, stream[igpu][1] );
 
             for(k = 0; k<nbl; ++k){
                 kb= min(n-k*nb,nb);
@@ -392,10 +380,9 @@ printf("hegs2%d\n", k);
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
                         cudaStreamSynchronize(stream[igpu][0]);
-                        cudaMemcpy2DAsync(dB_c(igpu, k+1, 0), lddbc * sizeof(cuDoubleComplex),
-                                          B(k+1, k), ldb * sizeof(cuDoubleComplex),
-                                          sizeof(cuDoubleComplex)*(n-(k+1)*nb), kb,
-                                          cudaMemcpyHostToDevice, stream[igpu][0]);
+                        magma_zsetmatrix_async( (n-(k+1)*nb), kb,
+                                                B(k+1, k),          ldb,
+                                                dB_c(igpu, k+1, 0), lddbc, stream[igpu][0] );
                     }
                 }
 
@@ -417,10 +404,9 @@ printf("hegs2%d\n", k);
                 lapackf77_zhegs2( &itype, uplo_, &kb, A(k,k), &lda, B(k,k), &ldb, info);
 
                 if (k+1<nbl) {
-                    cudaMemcpy2DAsync(dA(igpu, k , k/nrgpu), ldda * sizeof(cuDoubleComplex),
-                                      A(k, k), lda * sizeof(cuDoubleComplex),
-                                      sizeof(cuDoubleComplex)*kb, kb,
-                                      cudaMemcpyHostToDevice, stream[igpu][0]);
+                    magma_zsetmatrix_async( kb, kb,
+                                            A(k, k),               lda,
+                                            dA(igpu, k , k/nrgpu), ldda, stream[igpu][0] );
 
                     cudaStreamSynchronize(stream[igpu][1]);
                     cublasSetKernelStream(stream[igpu][0]);
@@ -440,10 +426,9 @@ printf("hegs2%d\n", k);
 
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
-                        cudaMemcpy2DAsync(dB_c(igpu, k+1, 1), lddbc * sizeof(cuDoubleComplex),
-                                          A(k+1, k), lda * sizeof(cuDoubleComplex),
-                                          sizeof(cuDoubleComplex)*(n-(k+1)*nb), kb,
-                                          cudaMemcpyHostToDevice, stream[igpu][0]);
+                        magma_zsetmatrix_async( (n-(k+1)*nb), kb,
+                                                A(k+1, k),          lda,
+                                                dB_c(igpu, k+1, 1), lddbc, stream[igpu][0] );
                     }
 
                     igpu = k%nrgpu;
@@ -473,15 +458,13 @@ printf("hegs2%d\n", k);
                         cudaStreamSynchronize(stream[igpu][((j)/nrgpu)%3]); // Needed for correctness. Why?
                         if (j == k+1){
                             cudaStreamSynchronize(stream[igpu][(j/nrgpu)%3]);
-                            cudaMemcpy2DAsync( A(k+1, k+1), lda *sizeof(cuDoubleComplex),
-                                              dA(igpu, k+1, (k+1)/nrgpu), ldda*sizeof(cuDoubleComplex),
-                                              sizeof(cuDoubleComplex)*kb2, kb2,
-                                              cudaMemcpyDeviceToHost, stream[igpu][2]);
+                            magma_zgetmatrix_async( kb2, kb2,
+                                                    dA(igpu, k+1, (k+1)/nrgpu), ldda,
+                                                    A(k+1, k+1),                lda, stream[igpu][2] );
                             // dB_c(0,0) is used to store B(k,k)
-                            cudaMemcpy2DAsync(dB_c(igpu, 0, 0), lddbc * sizeof(cuDoubleComplex),
-                                              B(k+1, k+1), ldb * sizeof(cuDoubleComplex),
-                                              sizeof(cuDoubleComplex)*kb2, kb2,
-                                              cudaMemcpyHostToDevice, stream[igpu][1]);
+                            magma_zsetmatrix_async( kb2, kb2,
+                                                    B(k+1, k+1),      ldb,
+                                                    dB_c(igpu, 0, 0), lddbc, stream[igpu][1] );
                         }
                     }
                     for (j = k+1; j < nbl-1; ++j){
@@ -510,20 +493,18 @@ printf("hegs2%d\n", k);
                 for (igpu = 0; igpu < nrgpu; ++igpu){
                     nloc[igpu]=0;
                     cudaSetDevice(igpu);
-                    cudaMemcpy2DAsync(dB_c(igpu, 1, 1), lddbc * sizeof(cuDoubleComplex),
-                                      B(1, 1), ldb * sizeof(cuDoubleComplex),
-                                      sizeof(cuDoubleComplex)*(n-nb), jb,
-                                      cudaMemcpyHostToDevice, stream[igpu][1]);
+                    magma_zsetmatrix_async( (n-nb), jb,
+                                            B(1, 1),          ldb,
+                                            dB_c(igpu, 1, 1), lddbc, stream[igpu][1] );
                 }
                 for (j = 1; j < nbl; ++j){
                     if ((j+1)*nb < n){
                         jb = min(nb, n-(j+1)*nb);
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
-                            cudaMemcpy2DAsync(dB_c(igpu, j+1, (j+1)%2), lddbc * sizeof(cuDoubleComplex),
-                                              B(j+1, j+1), ldb * sizeof(cuDoubleComplex),
-                                              sizeof(cuDoubleComplex)*(n-(j+1)*nb), jb,
-                                              cudaMemcpyHostToDevice, stream[igpu][(j+1)%2]);
+                            magma_zsetmatrix_async( (n-(j+1)*nb), jb,
+                                                    B(j+1, j+1),              ldb,
+                                                    dB_c(igpu, j+1, (j+1)%2), lddbc, stream[igpu][(j+1)%2] );
                         }
                     }
                     jb = min(nb, n-j*nb);
@@ -554,10 +535,9 @@ printf("hegs2%d\n", k);
                         igpu = k%nrgpu;
                         cudaSetDevice(igpu);
                         kb = min(nb, n-k*nb);
-                        cudaMemcpy2DAsync(A(j, k), lda * sizeof(cuDoubleComplex),
-                                          dA(igpu, j, k/nrgpu), ldda  * sizeof(cuDoubleComplex),
-                                          sizeof(cuDoubleComplex)*jb, kb,
-                                          cudaMemcpyDeviceToHost, stream[igpu][2]);
+                        magma_zgetmatrix_async( jb, kb,
+                                                dA(igpu, j, k/nrgpu), ldda,
+                                                A(j, k),              lda, stream[igpu][2] );
                     }
                 }
             }
@@ -576,10 +556,9 @@ printf("hegs2%d\n", k);
 /*            for(k = 0; k<n; k+=nb){
                 kb= min(n-k,nb);
 
-                cudaMemcpy2DAsync( A(k, k), lda *sizeof(cuDoubleComplex),
-                                  dA(k, k), ldda*sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*kb, kb,
-                                  cudaMemcpyDeviceToHost, stream[0]);
+                magma_zgetmatrix_async( kb, kb,
+                                        dA(k, k), ldda,
+                                        A(k, k),  lda, stream[0] );
 
                 // Update the upper triangle of A(1:k+kb-1,1:k+kb-1)
                 if(k>0){
@@ -620,10 +599,9 @@ printf("hegs2%d\n", k);
 
                 lapackf77_zhegs2( &itype, uplo_, &kb, A(k, k), &lda, B(k, k), &ldb, info);
 
-                cudaMemcpy2DAsync(dA(k, k), ldda * sizeof(cuDoubleComplex),
-                                  A(k, k), lda  * sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*kb, kb,
-                                  cudaMemcpyHostToDevice, stream[1]);
+                magma_zsetmatrix_async( kb, kb,
+                                        A(k, k),  lda,
+                                        dA(k, k), ldda, stream[1] );
 
             }
 
@@ -648,17 +626,15 @@ printf("hegs2%d\n", k);
                 cudaSetDevice(igpu);
                 jb = min(nb, n-j*nb);
                 nloc[igpu] += jb;
-                cudaMemcpy2DAsync(dA(igpu, j/nrgpu, 0), ldda * sizeof(cuDoubleComplex),
-                                  A(j, 0), lda  * sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*jb, kb,
-                                  cudaMemcpyHostToDevice, stream[igpu][0]);
+                magma_zsetmatrix_async( jb, kb,
+                                        A(j, 0),              lda,
+                                        dA(igpu, j/nrgpu, 0), ldda, stream[igpu][0] );
             }
             for (igpu = 0; igpu < nrgpu; ++igpu){
                 cudaSetDevice(igpu);
-                cudaMemcpy2DAsync(dB_r(igpu, 0, 0), lddbr * sizeof(cuDoubleComplex),
-                                  B(0, 0), ldb * sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*kb, kb,
-                                  cudaMemcpyHostToDevice, stream[igpu][0]);
+                magma_zsetmatrix_async( kb, kb,
+                                        B(0, 0),          ldb,
+                                        dB_r(igpu, 0, 0), lddbr, stream[igpu][0] );
             }
             for (k = 0; k < nbl-1; ++k){
                 nloc[k%nrgpu] -= nb;
@@ -668,17 +644,15 @@ printf("hegs2%d\n", k);
                         igpu = j%nrgpu;
                         cudaSetDevice(igpu);
                         jb = min(nb, n-j*nb);
-                        cudaMemcpy2DAsync(dA(igpu, j/nrgpu, k+1), ldda * sizeof(cuDoubleComplex),
-                                          A(j, k+1), lda  * sizeof(cuDoubleComplex),
-                                          sizeof(cuDoubleComplex)*jb, kb,
-                                          cudaMemcpyHostToDevice, stream[igpu][(k+1)%2]);
+                        magma_zsetmatrix_async( jb, kb,
+                                                A(j, k+1),              lda,
+                                                dA(igpu, j/nrgpu, k+1), ldda, stream[igpu][(k+1)%2] );
                     }
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
-                        cudaMemcpy2DAsync(dB_r(igpu, (k+1)%2, 0), lddbr * sizeof(cuDoubleComplex),
-                                          B(k+1, 0), ldb * sizeof(cuDoubleComplex),
-                                          sizeof(cuDoubleComplex)*kb, (k+1)*nb + kb,
-                                          cudaMemcpyHostToDevice, stream[igpu][(k+1)%2]);
+                        magma_zsetmatrix_async( kb, (k+1)*nb + kb,
+                                                B(k+1, 0),              ldb,
+                                                dB_r(igpu, (k+1)%2, 0), lddbr, stream[igpu][(k+1)%2] );
                     }
                 }
 
@@ -729,10 +703,9 @@ printf("hegs2%d\n", k);
 
             for (igpu = 0; igpu < nrgpu; ++igpu){
                 cudaSetDevice(igpu);
-                cudaMemcpy2DAsync(dB_r(igpu, 1, 0), lddbr * sizeof(cuDoubleComplex),
-                                  A(k, 0), lda * sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*kb, /*ERROR*/,
-                                  cudaMemcpyHostToDevice, stream[igpu][0]);
+                magma_zsetmatrix_async( kb, // ERROR: missing dimension,
+                                        A(k, 0),          lda,
+                                        dB_r(igpu, 1, 0), lddbr, stream[igpu][0] );
             }
 
             igpu = k%nrgpu;
@@ -755,19 +728,17 @@ printf("hegs2%d\n", k);
                 igpu = j%nrgpu;
                 cudaSetDevice(igpu);
                 jb = min(nb, n-j*nb);
-                cudaMemcpy2DAsync(A(j, 0), lda  * sizeof(cuDoubleComplex),
-                                  dA(igpu, j/nrgpu, 0), ldda * sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*jb, n,
-                                  cudaMemcpyDeviceToHost, stream[igpu][0]);
+                magma_zgetmatrix_async( jb, n,
+                                        dA(igpu, j/nrgpu, 0), ldda,
+                                        A(j, 0),              lda, stream[igpu][0] );
             }
 
 *//*            for(k = 0; k<n; k+=nb){
                 kb= min(n-k,nb);
 
-                cudaMemcpy2DAsync( A(k, k), lda *sizeof(cuDoubleComplex),
-                                  dA(k, k), ldda*sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*kb, kb,
-                                  cudaMemcpyDeviceToHost, stream[0]);
+                magma_zgetmatrix_async( kb, kb,
+                                        dA(k, k), ldda,
+                                        A(k, k),  lda, stream[0] );
 
                 // Update the lower triangle of A(1:k+kb-1,1:k+kb-1)
                 if(k>0){
@@ -807,10 +778,9 @@ printf("hegs2%d\n", k);
 
                 lapackf77_zhegs2( &itype, uplo_, &kb, A(k,k), &lda, B(k,k), &ldb, info);
 
-                cudaMemcpy2DAsync(dA(k, k), ldda * sizeof(cuDoubleComplex),
-                                  A(k, k), lda  * sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*kb, kb,
-                                  cudaMemcpyHostToDevice, stream[1]);
+                magma_zsetmatrix_async( kb, kb,
+                                        A(k, k),  lda,
+                                        dA(k, k), ldda, stream[1] );
             }
 
             cudaStreamSynchronize(stream[1]);

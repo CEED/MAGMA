@@ -134,10 +134,9 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
         for (i = 0; i < k-nx; i += nb) {
             ib = min(k-i, nb);
             rows = m -i;
-            cudaMemcpy2DAsync( work_ref(i), ldwork*sizeof(cuDoubleComplex),
-                               dA(i,i),     ldda  *sizeof(cuDoubleComplex),
-                               sizeof(cuDoubleComplex)*rows, ib,
-                               cudaMemcpyDeviceToHost, stream[1]);
+            magma_zgetmatrix_async( rows, ib,
+                                    dA(i,i),     ldda,
+                                    work_ref(i), ldwork, stream[1] );
             if (i>0){
                 /* Apply H' to A(i:m,i+2*ib:n) from the left */
                 magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
@@ -145,10 +144,9 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
                                   dA(old_i, old_i         ), ldda, dwork,        lddwork,
                                   dA(old_i, old_i+2*old_ib), ldda, dwork+old_ib, lddwork);
                 
-                cudaMemcpy2DAsync( dA(old_i, old_i), ldda  *sizeof(cuDoubleComplex),
-                                   work_ref(old_i),  ldwork*sizeof(cuDoubleComplex),
-                                   sizeof(cuDoubleComplex)*old_ib, old_ib,
-                                   cudaMemcpyHostToDevice, stream[0]);
+                magma_zsetmatrix_async( old_ib, old_ib,
+                                        work_ref(old_i),  ldwork,
+                                        dA(old_i, old_i), ldda, stream[0] );
             }
 
             cudaStreamSynchronize(stream[1]);

@@ -231,10 +231,9 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
             for (igpu = 0; igpu < nrgpu; ++igpu){
                 cudaSetDevice(igpu);
                 kb = min(n_l, n-igpu*n_l);
-                cudaMemcpy2DAsync(dC(igpu, 0, 0), lddc * sizeof(cuDoubleComplex),
-                                  C(0, igpu*n_l), ldc  * sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*m, kb,
-                                  cudaMemcpyHostToDevice, stream[igpu][0]);
+                magma_zsetmatrix_async( m, kb,
+                                        C(0, igpu*n_l), ldc,
+                                        dC(igpu, 0, 0), lddc, stream[igpu][0] );
             }
 
             if ( !notran ) {
@@ -250,10 +249,9 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
             kb = min(nb, k-i1);
             for (igpu = 0; igpu < nrgpu; ++igpu){
                 cudaSetDevice(igpu);
-                cudaMemcpy2DAsync(dA_c(igpu, 0, i1, 0), lddac * sizeof(cuDoubleComplex),
-                                  A(i1, i1), lda * sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*(nq-i1), kb,
-                                  cudaMemcpyHostToDevice, stream[igpu][0]);
+                magma_zsetmatrix_async( (nq-i1), kb,
+                                        A(i1, i1),            lda,
+                                        dA_c(igpu, 0, i1, 0), lddac, stream[igpu][0] );
             }
             ind_c = 0;
 
@@ -271,10 +269,9 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
                 /* Apply H or H'; First copy T to the GPU */
                 for (igpu = 0; igpu < nrgpu; ++igpu){
                     cudaSetDevice(igpu);
-                    cudaMemcpy2DAsync(dt(igpu, ind_c), ib * sizeof(cuDoubleComplex),
-                                      t, ib * sizeof(cuDoubleComplex),
-                                      sizeof(cuDoubleComplex)*ib, ib,
-                                      cudaMemcpyHostToDevice, stream[igpu][ind_c]);
+                    magma_zsetmatrix_async( ib, ib,
+                                            t,               ib,
+                                            dt(igpu, ind_c), ib, stream[igpu][ind_c] );
 
                     cudaStreamSynchronize(stream[igpu][ind_c]); // Makes sure that we can change t next iteration.
                 }
@@ -284,10 +281,9 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
                 if (kb > 0 && i+i3 >= 0){
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
-                        cudaMemcpy2DAsync(dA_c(igpu, (ind_c+1)%2, i+i3, 0), lddac * sizeof(cuDoubleComplex),
-                                          A(i+i3, i+i3), lda * sizeof(cuDoubleComplex),
-                                          sizeof(cuDoubleComplex)*(i__4-i3), kb,
-                                          cudaMemcpyHostToDevice, stream[igpu][(ind_c+1)%2]);
+                        magma_zsetmatrix_async( (i__4-i3), kb,
+                                                A(i+i3, i+i3),                    lda,
+                                                dA_c(igpu, (ind_c+1)%2, i+i3, 0), lddac, stream[igpu][(ind_c+1)%2] );
                     }
                 }
 
@@ -314,10 +310,9 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
                 cudaStreamSynchronize(stream[igpu][0]);
                 cudaStreamSynchronize(stream[igpu][1]);
                 kb = min(n_l, n-igpu*n_l);
-                cudaMemcpy2DAsync(C(0, igpu*n_l), ldc * sizeof(cuDoubleComplex),
-                                  dC(igpu, 0, 0), lddc  * sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*m, kb,
-                                  cudaMemcpyDeviceToHost, stream[igpu][0]);
+                magma_zgetmatrix_async( m, kb,
+                                        dC(igpu, 0, 0), lddc,
+                                        C(0, igpu*n_l), ldc, stream[igpu][0] );
             }
 
         } else {

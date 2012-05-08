@@ -155,10 +155,9 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
         /*  Use blocked code initially.
             The last kk columns are handled by the block method.
             First, copy the matrix on the GPU except the last kk columns */
-        cudaMemcpy2DAsync(da_ref(0, 0), ldda*sizeof(cuDoubleComplex),
-                          a_ref(0, 0),  lda *sizeof(cuDoubleComplex),
-                          sizeof(cuDoubleComplex)*(m), (n-nb),
-                          cudaMemcpyHostToDevice, stream[0]);
+        magma_zsetmatrix_async( (m), (n-nb),
+                                a_ref(0, 0),  lda,
+                                da_ref(0, 0), ldda, stream[0] );
 
         ki = ((k - nb - 1) / nb) * nb;
         kk = min(k, ki + nb);
@@ -170,15 +169,13 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
                    2. Copy asynchronously the submatrix below the panel
                    to the CPU)                                        */
                 rows = m - k + i + ib;
-                cudaMemcpy2DAsync( a_ref(0, n-k+i),  lda *sizeof(cuDoubleComplex),
-                                   da_ref(0, n-k+i), ldda*sizeof(cuDoubleComplex),
-                                   sizeof(cuDoubleComplex)*rows, ib,
-                                   cudaMemcpyDeviceToHost, stream[1]);
+                magma_zgetmatrix_async( rows, ib,
+                                        da_ref(0, n-k+i), ldda,
+                                        a_ref(0, n-k+i),  lda, stream[1] );
 
-                cudaMemcpy2DAsync( a_ref(rows, n-k+i),  lda *sizeof(cuDoubleComplex),
-                                   da_ref(rows, n-k+i), ldda*sizeof(cuDoubleComplex),
-                                   sizeof(cuDoubleComplex)*(m-rows), ib,
-                                   cudaMemcpyDeviceToHost, stream[0]);
+                magma_zgetmatrix_async( (m-rows), ib,
+                                        da_ref(rows, n-k+i), ldda,
+                                        a_ref(rows, n-k+i),  lda, stream[0] );
 
                 /* Apply H' to A(1:m-k+i+ib-1,1:n-k+i-1) from the left in
                    two steps - implementing the lookahead techniques.

@@ -223,10 +223,9 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
                           d_one,     dAup(jj, j), NB);
 
                   /* send the diagonal-block to CPU */
-              cudaMemcpy2DAsync(  A  (J, j), lda*sizeof(cuDoubleComplex), 
-                                 dAup(0, j), NB *sizeof(cuDoubleComplex), 
-                                 sizeof(cuDoubleComplex)*(jj+jb), jb,
-                                 cudaMemcpyDeviceToHost, stream[1]);
+              magma_zgetmatrix_async( (jj+jb), jb,
+                                      dAup(0, j), NB,
+                                      A  (J, j),  lda, stream[1] );
               //cudaMemcpy2DAsync(  A  ( j, j), lda*sizeof(cuDoubleComplex), 
               //                   dAup(jj, j), NB *sizeof(cuDoubleComplex), 
               //                   sizeof(cuDoubleComplex)*jb, jb,
@@ -251,10 +250,9 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
 
               if ( (j+jb) < n ) {
                     /* send the diagonal block to GPU */
-                    cudaMemcpy2DAsync(dAup(jj, j), NB  * sizeof(cuDoubleComplex), 
-                                   A  (j,  j), lda * sizeof(cuDoubleComplex), 
-                                   sizeof(cuDoubleComplex)*jb, jb, 
-                                   cudaMemcpyHostToDevice,stream[0]);
+                    magma_zsetmatrix_async( jb, jb,
+                                            A  (j,  j),  lda,
+                                            dAup(jj, j), NB, stream[0] );
 
                         /* do the solves on GPU */
                 magma_ztrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
@@ -273,10 +271,9 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
 
                 /* upload the off-diagonal big panel */
                 if( J+JB < n )
-            cudaMemcpy2DAsync(  A  (J, J+JB), lda*sizeof(cuDoubleComplex),
-                               dAup(0, J+JB), NB *sizeof(cuDoubleComplex),
-                               sizeof(cuDoubleComplex)*JB, n-J-JB, 
-                               cudaMemcpyDeviceToHost,stream[2]);
+            magma_zgetmatrix_async( JB, n-J-JB,
+                                    dAup(0, J+JB), NB,
+                                    A  (J, J+JB),  lda, stream[2] );
           }
         } else {
           /* ========================================================= *
@@ -326,16 +323,14 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
 
                   /* upload the current diagonal block to CPU for factorization *
                    * this requires the synchronization before factorization     */
-              cudaMemcpy2DAsync(  A(j,j),  lda *sizeof(cuDoubleComplex),
-                                 dA(j,jj), ldda*sizeof(cuDoubleComplex),
-                                 sizeof(cuDoubleComplex)*jb, jb,
-                                 cudaMemcpyDeviceToHost,stream[1]);
+              magma_zgetmatrix_async( jb, jb,
+                                      dA(j,jj), ldda,
+                                      A(j,j),   lda, stream[1] );
                   /* upload the corresponding off-diagonal block-row from previous itrs   *
                    * to CPU. this can wait till end.                                      */
-              cudaMemcpy2DAsync(  A(j, J), lda *sizeof(cuDoubleComplex),
-                                 dA(j, 0), ldda*sizeof(cuDoubleComplex),
-                                 sizeof(cuDoubleComplex)*jb, jj,
-                                 cudaMemcpyDeviceToHost,stream[0]);
+              magma_zgetmatrix_async( jb, jj,
+                                      dA(j, 0), ldda,
+                                      A(j, J),  lda, stream[0] );
 
               if ( (j+jb) < n) {
                         /* update the off-diagonal blocks of the current block-column *
@@ -357,10 +352,9 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
 
               if ( (j+jb) < n) {
                     /* send the diagonal-block to GPU */
-                cudaMemcpy2DAsync( dA(j, jj), ldda*sizeof(cuDoubleComplex), 
-                                   A(j,   j), lda *sizeof(cuDoubleComplex), 
-                                   sizeof(cuDoubleComplex)*jb, jb, 
-                                   cudaMemcpyHostToDevice,stream[0]);
+                magma_zsetmatrix_async( jb, jb,
+                                        A(j,   j), lda,
+                                        dA(j, jj), ldda, stream[0] );
                 
                         /* GPU do the solves with the current diagonal-block */
                 magma_ztrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
@@ -372,10 +366,9 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
 
                 /* upload the off-diagonal big panel */
                 if( J+JB < n )
-            cudaMemcpy2DAsync(  A(J+JB, J), lda *sizeof(cuDoubleComplex),
-                               dA(J+JB, 0), ldda*sizeof(cuDoubleComplex),
-                               sizeof(cuDoubleComplex)*(n-J-JB), JB,
-                               cudaMemcpyDeviceToHost,stream[2]);
+            magma_zgetmatrix_async( (n-J-JB), JB,
+                                    dA(J+JB, 0), ldda,
+                                    A(J+JB, J),  lda, stream[2] );
 
           } /* end of for J */
     } /* if upper */

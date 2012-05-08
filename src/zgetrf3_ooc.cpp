@@ -278,10 +278,9 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
             /* start sending the first tile from the previous big-panels to gpus */
             for( d=0; d<num_gpus; d++ ) {
               cudaSetDevice(d);
-              cudaMemcpy2DAsync(dA[d],            (maxm-offset)*sizeof(cuDoubleComplex),
-                                A(offset,offset), lda          *sizeof(cuDoubleComplex),
-                                sizeof(cuDoubleComplex)*(M-offset), nb,
-                                cudaMemcpyHostToDevice, stream[d][0]);
+              magma_zsetmatrix_async( (M-offset), nb,
+                                      A(offset,offset), lda,
+                                      dA[d],            (maxm-offset), stream[d][0] );
             }
 
             /* applying the pivot from the previous big-panel */
@@ -306,10 +305,9 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
 
                 /* start sending the next column */
                 if( jj+nb < NBk )
-                cudaMemcpy2DAsync(dA[d],     (rows-nb)*sizeof(cuDoubleComplex),
-                                  A(ii+nb,ii+nb), lda *sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*(M-ii-nb), min(nb,NBk-jj-nb),
-                                  cudaMemcpyHostToDevice, stream[d][0]);
+                magma_zsetmatrix_async( (M-ii-nb), min(nb,NBk-jj-nb),
+                                        A(ii+nb,ii+nb), lda,
+                                        dA[d],          (rows-nb), stream[d][0] );
 
                 /* update with the block column */
                 magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 

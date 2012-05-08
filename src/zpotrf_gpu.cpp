@@ -138,10 +138,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                             d_neg_one, dA(0, j), ldda, 
                             d_one,     dA(j, j), ldda);
 
-                cudaMemcpy2DAsync(work,     jb  *sizeof(cuDoubleComplex), 
-                                  dA(j, j), ldda*sizeof(cuDoubleComplex), 
-                                  jb*sizeof(cuDoubleComplex), jb, 
-                                  cudaMemcpyDeviceToHost,stream[1]);
+                magma_zgetmatrix_async( jb, jb,
+                                        dA(j, j), ldda,
+                                        work,     jb, stream[1] );
                 
                 if ( (j+jb) < n) {
                     /* Compute the current block row. */
@@ -155,10 +154,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                 cudaStreamSynchronize(stream[1]);
 
                 lapackf77_zpotrf(MagmaUpperStr, &jb, work, &jb, info);
-                cudaMemcpy2DAsync( dA(j, j), ldda*sizeof(cuDoubleComplex), 
-                                   work,     jb  *sizeof(cuDoubleComplex), 
-                                   sizeof(cuDoubleComplex)*jb, jb, 
-                                   cudaMemcpyHostToDevice,stream[0]);
+                magma_zsetmatrix_async( jb, jb,
+                                        work,     jb,
+                                        dA(j, j), ldda, stream[0] );
                 if (*info != 0) {
                   *info = *info + j;
                   break;
@@ -183,10 +181,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                             d_neg_one, dA(j, 0), ldda, 
                             d_one,     dA(j, j), ldda);
                 
-                cudaMemcpy2DAsync( work,     jb  *sizeof(cuDoubleComplex),
-                                   dA(j, j), ldda*sizeof(cuDoubleComplex),
-                                   sizeof(cuDoubleComplex)*jb, jb,
-                                   cudaMemcpyDeviceToHost,stream[1]);
+                magma_zgetmatrix_async( jb, jb,
+                                        dA(j, j), ldda,
+                                        work,     jb, stream[1] );
                 
                 if ( (j+jb) < n) {
                     magma_zgemm( MagmaNoTrans, MagmaConjTrans, 
@@ -198,10 +195,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
 
                 cudaStreamSynchronize(stream[1]);
                 lapackf77_zpotrf(MagmaLowerStr, &jb, work, &jb, info);
-                cudaMemcpy2DAsync(dA(j, j), ldda*sizeof(cuDoubleComplex), 
-                                  work,     jb  *sizeof(cuDoubleComplex), 
-                                  sizeof(cuDoubleComplex)*jb, jb, 
-                                  cudaMemcpyHostToDevice,stream[0]);
+                magma_zsetmatrix_async( jb, jb,
+                                        work,     jb,
+                                        dA(j, j), ldda, stream[0] );
                 if (*info != 0) {
                   *info = *info + j;
                   break;

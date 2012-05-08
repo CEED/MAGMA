@@ -154,10 +154,9 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 
             /* Send current panel to the CPU for update */
             i__2 = m - i;
-            cudaMemcpy2DAsync(panel,       i__2 * sizeof(cuDoubleComplex),
-                              da_ref(i,i), ldda * sizeof(cuDoubleComplex),
-                              sizeof(cuDoubleComplex)*i__2, ib,
-                              cudaMemcpyDeviceToHost,stream[0]);
+            magma_zgetmatrix_async( i__2, ib,
+                                    da_ref(i,i), ldda,
+                                    panel,       i__2, stream[0] );
 
             if (i + ib < n)
               {
@@ -173,10 +172,9 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
             cudaStreamSynchronize(stream[0]);
             lapackf77_zungqr(&i__2, &ib, &ib, panel, &i__2, &tau[i], 
                              work, &lwork, &iinfo);
-            cudaMemcpy2DAsync(da_ref(i,i), ldda * sizeof(cuDoubleComplex),
-                              panel,       i__2 * sizeof(cuDoubleComplex),
-                              sizeof(cuDoubleComplex)*i__2, ib,
-                              cudaMemcpyHostToDevice,stream[1]);
+            magma_zsetmatrix_async( i__2, ib,
+                                    panel,       i__2,
+                                    da_ref(i,i), ldda, stream[1] );
 
             /* Set rows 1:i-1 of current block to zero */
             i__2 = i + ib;

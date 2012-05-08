@@ -239,10 +239,9 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     /* Form a Cholesky factorization of B. */
     cublasSetMatrix(n, n, sizeof(double), b, ldb, db, lddb);
 
-    cudaMemcpy2DAsync(da, ldda*sizeof(double),
-                       a,  lda*sizeof(double),
-                      sizeof(double)*n, n,
-                      cudaMemcpyHostToDevice, stream);  
+    magma_dsetmatrix_async( n, n,
+                            a,  lda,
+                            da, ldda, stream );  
   
     magma_dpotrf_gpu(uplo_[0], n, db, lddb, info);
     if (*info != 0) {
@@ -252,10 +251,9 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
 
     cudaStreamSynchronize(stream);
   
-    cudaMemcpy2DAsync( b,  ldb*sizeof(double),
-                      db, lddb*sizeof(double),
-                      sizeof(double)*n, n,
-                      cudaMemcpyDeviceToHost, stream);
+    magma_dgetmatrix_async( n, n,
+                            db, lddb,
+                            b,  ldb, stream );
 
     /*  Transform problem to standard eigenvalue problem and solve. */
     magma_dsygst_gpu(itype, uplo_[0], n, da, ldda, db, lddb, info);

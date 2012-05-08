@@ -165,10 +165,9 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
         for (i = 0; i < k-nb; i += nb) {
             ib = min(k-i, nb);
             rows = m -i;
-            cudaMemcpy2DAsync( work_ref(i), ldwork*sizeof(cuDoubleComplex),
-                               a_ref(i,i),  ldda   *sizeof(cuDoubleComplex),
-                               sizeof(cuDoubleComplex)*rows, ib,
-                               cudaMemcpyDeviceToHost, stream[1]);
+            magma_zgetmatrix_async( rows, ib,
+                                    a_ref(i,i),  ldda,
+                                    work_ref(i), ldwork, stream[1] );
             if (i>0){
                 /* Apply H' to A(i:m,i+2*ib:n) from the left */
                 cols = n-old_i-2*old_ib;
@@ -178,10 +177,9 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
                                   a_ref(old_i, old_i+2*old_ib), ldda, dd_ref(0),    lddwork);
                 
                 /* store the diagonal */
-                cudaMemcpy2DAsync(d_ref(old_i), old_ib * sizeof(cuDoubleComplex),
-                                  ut,           old_ib * sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*old_ib, old_ib,
-                                  cudaMemcpyHostToDevice, stream[0]);
+                magma_zsetmatrix_async( old_ib, old_ib,
+                                        ut,           old_ib,
+                                        d_ref(old_i), old_ib, stream[0] );
             }
 
             cudaStreamSynchronize(stream[1]);

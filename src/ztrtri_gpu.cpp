@@ -162,10 +162,9 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
                                 //cublasGetMatrix(jb ,jb, sizeof(cuDoubleComplex),
                                 //                dA(j, j), ldda, work, jb);
 
-                                cudaMemcpy2DAsync( work,     jb  *sizeof(cuDoubleComplex),
-                                                   dA(j, j), ldda*sizeof(cuDoubleComplex),
-                                                   jb*sizeof(cuDoubleComplex), jb,
-                                                   cudaMemcpyDeviceToHost,stream[1]);
+                                magma_zgetmatrix_async( jb, jb,
+                                                        dA(j, j), ldda,
+                                                        work,     jb, stream[1] );
 
                                 cudaStreamSynchronize(stream[1]);
 
@@ -175,10 +174,9 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
                                 //cublasSetMatrix(jb, jb, sizeof(cuDoubleComplex),
                                 //                work, jb, dA(j, j), ldda);
 
-                                cudaMemcpy2DAsync( dA(j, j), ldda*sizeof(cuDoubleComplex),
-                                                   work,     jb  *sizeof(cuDoubleComplex),
-                                                   sizeof(cuDoubleComplex)*jb, jb,
-                                                   cudaMemcpyHostToDevice,stream[0]);
+                                magma_zsetmatrix_async( jb, jb,
+                                                        work,     jb,
+                                                        dA(j, j), ldda, stream[0] );
                         }
 
                 }
@@ -207,10 +205,9 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
                                 //cublasGetMatrix(jb, jb, sizeof(cuDoubleComplex),
                                 //               dA(j, j), ldda, work, jb);
                                 
-                                cudaMemcpy2DAsync( work,     jb  *sizeof(cuDoubleComplex),
-                                                   dA(j, j), ldda*sizeof(cuDoubleComplex),
-                                                   jb*sizeof(cuDoubleComplex), jb,
-                                                   cudaMemcpyDeviceToHost,stream[1]);
+                                magma_zgetmatrix_async( jb, jb,
+                                                        dA(j, j), ldda,
+                                                        work,     jb, stream[1] );
 
                                 cudaStreamSynchronize(stream[1]);
 
@@ -220,10 +217,9 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
                                 //cublasSetMatrix(jb, jb, sizeof(cuDoubleComplex),
                                 //                work, jb, dA(j, j), ldda);
 
-                                cudaMemcpy2DAsync( dA(j, j), ldda*sizeof(cuDoubleComplex),
-                                                   work,     jb  *sizeof(cuDoubleComplex),
-                                                   sizeof(cuDoubleComplex)*jb, jb,
-                                                   cudaMemcpyHostToDevice,stream[0]);
+                                magma_zsetmatrix_async( jb, jb,
+                                                        work,     jb,
+                                                        dA(j, j), ldda, stream[0] );
                         }
                 }
         }

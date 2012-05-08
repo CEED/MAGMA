@@ -226,10 +226,9 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
     }else {
         /* Copy the matrix to the GPU */
         if (1 <= n-nb){
-            cudaMemcpy2DAsync(da_ref(nb+1, nb+1), ldda*sizeof(cuDoubleComplex),
-                                a_ref(nb+1, nb+1), lda*sizeof(cuDoubleComplex),
-                                sizeof(cuDoubleComplex)*(n-nb), (n-nb),
-                                cudaMemcpyHostToDevice,stream[0]);
+            magma_zsetmatrix_async( (n-nb), (n-nb),
+                                    a_ref(nb+1, nb+1),  lda,
+                                    da_ref(nb+1, nb+1), ldda, stream[0] );
         }
 
         /* Reduce the lower triangle of A */
@@ -250,10 +249,9 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
                  //    upper part of A to be restored after copying the 
                  //    lookahead panel that has been computted from GPU to CPU. 
                  zpanel_to_q(MagmaUpper, pn-1, a_ref(i, i+1), lda, work);
-                 cudaMemcpy2DAsync( a_ref ( i, i),  lda*sizeof(cuDoubleComplex),
-                            da_ref( i, i), ldda*sizeof(cuDoubleComplex),
-                            sizeof(cuDoubleComplex)*(pm+pn), pn,
-                            cudaMemcpyDeviceToHost,stream[1]);
+                 magma_zgetmatrix_async( (pm+pn), pn,
+                                         da_ref( i, i), ldda,
+                                         a_ref ( i, i), lda, stream[1] );
 
                  magma_zher2k(MagmaLower, MagmaNoTrans, pm_old-pn_old, pn_old, c_neg_one,
                       da_ref(indi_old+pn_old, indj_old), ldda,
@@ -282,16 +280,14 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
              zpanel_to_q(MagmaUpper, pk, a_ref(indi, indj), lda, work);
 
              /* Send V from the CPU to the GPU */
-             cudaMemcpy2DAsync(da_ref(indi, indj), ldda*sizeof(cuDoubleComplex),
-                           a_ref(indi, indj), lda*sizeof(cuDoubleComplex),
-                           sizeof(cuDoubleComplex)*pm, pk,
-                           cudaMemcpyHostToDevice,stream[0]);
+             magma_zsetmatrix_async( pm, pk,
+                                     a_ref(indi, indj),  lda,
+                                     da_ref(indi, indj), ldda, stream[0] );
 
              /* Send the triangular factor T to the GPU */
-             cudaMemcpy2DAsync(t_ref(i), lddt*sizeof(cuDoubleComplex),
-                           hT, nb*sizeof(cuDoubleComplex),
-                           sizeof(cuDoubleComplex)*pk, pk,
-                           cudaMemcpyHostToDevice,stream[0]);
+             magma_zsetmatrix_async( pk, pk,
+                                     hT,       nb,
+                                     t_ref(i), lddt, stream[0] );
              /* ==========================================================
                 Compute W:
                 1. X = A (V T)

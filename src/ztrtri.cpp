@@ -168,16 +168,14 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
                                 //cublasGetMatrix(j ,jb, sizeof( cuDoubleComplex),
                                 //dA(0, j), ldda, A(0, j), lda);
 
-                                cudaMemcpy2DAsync( A(j, j), lda *sizeof( cuDoubleComplex),
-                                                   dA(j, j), ldda*sizeof( cuDoubleComplex),
-                                                   sizeof( cuDoubleComplex)*jb, jb,
-                                                   cudaMemcpyDeviceToHost, stream[1]);
+                                magma_zgetmatrix_async( jb, jb,
+                                                        dA(j, j), ldda,
+                                                        A(j, j),  lda, stream[1] );
 
 
-                                cudaMemcpy2DAsync( A(0, j), lda *sizeof( cuDoubleComplex),
-                                                   dA(0, j), ldda*sizeof( cuDoubleComplex),
-                                                   sizeof( cuDoubleComplex)*j, jb,
-                                                   cudaMemcpyDeviceToHost, stream[0]);
+                                magma_zgetmatrix_async( j, jb,
+                                                        dA(0, j), ldda,
+                                                        A(0, j),  lda, stream[0] );
 
                                 cudaStreamSynchronize(stream[1]);
                         
@@ -216,15 +214,13 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
                                         //cublasGetMatrix((n-j), jb, sizeof( cuDoub
                                         //leComplex),dA(j, j), ldda, A(j, j), lda);
 
-                                        cudaMemcpy2DAsync( A(j+jb, j),  lda *sizeof( cuDoubleComplex),
-                                                           dA(j+jb, j), ldda*sizeof( cuDoubleComplex),
-                                                           sizeof( cuDoubleComplex)*(n-j-jb),jb,
-                                                           cudaMemcpyDeviceToHost,stream[1]);
+                                        magma_zgetmatrix_async( (n-j-jb), jb,
+                                                                dA(j+jb, j), ldda,
+                                                                A(j+jb, j),  lda, stream[1] );
 
-                                        cudaMemcpy2DAsync( A(j,j),  lda *sizeof( cuDoubleComplex),
-                                                           dA(j,j), ldda*sizeof( cuDoubleComplex),
-                                                           sizeof( cuDoubleComplex)*jb, jb,
-                                                           cudaMemcpyDeviceToHost,stream[0]);
+                                        magma_zgetmatrix_async( jb, jb,
+                                                                dA(j,j), ldda,
+                                                                A(j,j),  lda, stream[0] );
 
                                         cudaStreamSynchronize(stream[0]);
                                 }
