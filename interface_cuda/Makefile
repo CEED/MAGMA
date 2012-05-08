@@ -11,12 +11,15 @@ include ../Makefile.internal
 
 INC += -I$(MAGMA_DIR)/control
 
-ZSRC  = #magmablas_z.cpp
+ZSRC  = blas_z.cpp	\
+	copy_z.cpp	\
 
 -include Makefile.src
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
-	interface.cpp
+	alloc.cpp	\
+	copy.cpp	\
+	init.cpp	\
 
 ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f=.o)

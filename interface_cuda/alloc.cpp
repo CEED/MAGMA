@@ -13,23 +13,7 @@
 
 #include "magma.h"
 
-//#ifdef HAVE_CUBLAS
-
-// ========================================
-// initialization
-magma_err_t
-magma_init()
-{
-    return MAGMA_SUCCESS;
-}
-
-// --------------------
-magma_err_t
-magma_finalize()
-{
-    return MAGMA_SUCCESS;
-}
-
+#ifdef HAVE_CUBLAS
 
 // ========================================
 // memory allocation
@@ -76,4 +60,4 @@ magma_free_host( void* ptr )
     return MAGMA_SUCCESS;
 }
 
-//#endif // HAVE_CUBLAS
+#endif // HAVE_CUBLAS

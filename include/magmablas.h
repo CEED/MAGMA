@@ -9,12 +9,21 @@
 #ifndef _MAGMABLAS_
 #define _MAGMABLAS_
 
+#include <cublas.h>
+#include <cuda.h>
+
 typedef int magma_int_t;
 typedef int magma_err_t;
 typedef void* magma_devptr;
 
-#include <cublas.h>
-#include <cuda.h>
+// For now, make these compatible with old cublas v1 prototypes.
+// In the future, we will redefine these data types and
+// add queues (opencl queues, cublas handles).
+typedef char magma_trans_t;
+typedef char magma_side_t ;
+typedef char magma_uplo_t ;
+typedef char magma_diag_t ;
+typedef cudaStream_t magma_stream_t;
 
 #include "magmablas_z.h"
 #include "magmablas_c.h"
