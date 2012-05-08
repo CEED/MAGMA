@@ -5,10 +5,9 @@
      Univ. of Colorado, Denver
      November 2011
 
-     @precisions normal z -> s d c
+     @precisions normal z -> c
 
 */
-
 
 #include "common_magma.h"
 #include <cblas.h>
@@ -16,19 +15,22 @@
 #define lapackf77_zlaqps   FORTRAN_NAME( zlaqps, ZLAQPS)
 #define lapackf77_zlaqp2   FORTRAN_NAME( zlaqp2, ZLAQP2)
 
-extern "C" int lapackf77_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
-                                *nb, magma_int_t *kb, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *jpvt,
-                                cuDoubleComplex *tau, double *vn1, double *vn2, cuDoubleComplex *
-                                auxv, cuDoubleComplex *f, magma_int_t *ldf);
+extern "C" int 
+lapackf77_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
+                 *nb, magma_int_t *kb, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *jpvt,
+                 cuDoubleComplex *tau, double *vn1, double *vn2, cuDoubleComplex *
+                 auxv, cuDoubleComplex *f, magma_int_t *ldf);
 
-extern "C" void lapackf77_zlaqp2(magma_int_t *m, magma_int_t *n, magma_int_t *offset, 
-                                 cuDoubleComplex *a, magma_int_t *lda, magma_int_t *jpvt, cuDoubleComplex *tau,
-                                 double *vn1, double *vn2, cuDoubleComplex *work);
+extern "C" void 
+lapackf77_zlaqp2(magma_int_t *m, magma_int_t *n, magma_int_t *offset, 
+                 cuDoubleComplex *a, magma_int_t *lda, magma_int_t *jpvt, cuDoubleComplex *tau,
+                 double *vn1, double *vn2, cuDoubleComplex *work);
 
-extern "C" int magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
-                            *nb, magma_int_t *kb, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *jpvt,
-                            cuDoubleComplex *tau, double *vn1, double *vn2, cuDoubleComplex *
-                            auxv, cuDoubleComplex *f, magma_int_t *ldf);
+extern "C" int 
+magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
+             *nb, magma_int_t *kb, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *jpvt,
+             cuDoubleComplex *tau, double *vn1, double *vn2, cuDoubleComplex *
+             auxv, cuDoubleComplex *f, magma_int_t *ldf);
 
 extern "C" magma_int_t 
 magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a, 
