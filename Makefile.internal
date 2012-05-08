@@ -9,6 +9,8 @@
 include $(MAGMA_DIR)/make.inc
 -include $(MAGMA_DIR)/make.inc.${MACHINE}
 
+OPTS += -DHAVE_CUBLAS
+
 #
 # Set default values if they are not set in make.inc
 #
@@ -45,7 +47,7 @@ ifeq (${GPU_TARGET}, 1)
 	LDOPTS += -DGPUSHMEM=200
 endif
 
-INC += -I../include
+INC += -I$(MAGMA_DIR)/include
 
 LIBEXT = $(LIBDIR) $(LIB)
 
