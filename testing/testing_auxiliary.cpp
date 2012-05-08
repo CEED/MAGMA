@@ -1,10 +1,23 @@
+/*
+ *  -- MAGMA (version 1.1) --
+ *     Univ. of Tennessee, Knoxville
+ *     Univ. of California, Berkeley
+ *     Univ. of Colorado, Denver
+ *     November 2011
+ *
+ * @author Mark Gates
+ *
+ **/
 #include <stdio.h>
+
+// make sure that asserts are enabled
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #include <assert.h>
 
 #include "common_magma.h"
 
-// test magma_num_gpus()
-// 
 void test_num_gpus()
 {
     int ngpu;

@@ -60,7 +60,8 @@ ZSRC  = testing_zgemm.cpp	\
 	testing_zcgeqrsv_gpu.cpp \
 	\
 	testing_zlacpy.cpp \
-	testing_auxiliary.cpp
+	testing_auxiliary.cpp	\
+	testing_zblas.cpp	\
 
 
 #testing_zswap.cpp
