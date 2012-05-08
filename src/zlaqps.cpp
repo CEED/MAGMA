@@ -12,11 +12,16 @@
 #include "common_magma.h"
 #include <cblas.h>
 
+#define PRECISION_z
+
+
 extern "C" magma_int_t 
-magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t 
-             *nb, magma_int_t *kb, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *jpvt, 
-             cuDoubleComplex *tau, double *vn1, double *vn2, cuDoubleComplex *auxv, cuDoubleComplex *f, 
-             magma_int_t *ldf)
+magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, 
+             magma_int_t *nb, magma_int_t *kb, 
+             cuDoubleComplex *a, magma_int_t *lda, 
+             magma_int_t *jpvt, cuDoubleComplex *tau, double *vn1, double *vn2, 
+             cuDoubleComplex *auxv, 
+             cuDoubleComplex *f, magma_int_t *ldf)
 {
 /*
     -- MAGMA (version 1.1) --
@@ -157,27 +162,30 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
             vn2[pvt] = vn2[k];
         }
 
-        /*        Apply previous Householder reflectors to column K:   
-                  A(RK:M,K) := A(RK:M,K) - A(RK:M,1:K-1)*F(K,1:K-1)'. */
-
+        /* Apply previous Householder reflectors to column K:   
+           A(RK:M,K) := A(RK:M,K) - A(RK:M,1:K-1)*F(K,1:K-1)'. */
         if (k > 1) {
-           i__1 = k - 1;
-           for (j = 1; j <= i__1; ++j) {
+           #if (defined(PRECISION_c) || defined(PRECISION_z))
+           for (j = 1; j < k; ++j) {
                 i__2 = k + j * f_dim1;
                 z__1 = MAGMA_Z_CNJG(f[k + j * f_dim1]); 
                 f[i__2] = MAGMA_Z_MAKE(MAGMA_Z_REAL(z__1),  MAGMA_Z_IMAG(z__1));
            }
+           #endif
+
            i__1 = *m - rk + 1;
            i__2 = k - 1;
            z__1 = MAGMA_Z_MAKE(-1., -0.);
            zgemv_(MagmaNoTransStr, &i__1, &i__2, &z__1, &a[rk + a_dim1], lda, 
                   &f[k + f_dim1], ldf, &c_b2, &a[rk + k * a_dim1], &c__1);
-           i__1 = k - 1;
-           for (j = 1; j <= i__1; ++j) {
+
+           #if (defined(PRECISION_c) || defined(PRECISION_z))
+           for (j = 1; j < k; ++j) {
                i__2 = k + j * f_dim1;
                z__1 = MAGMA_Z_CNJG( f[k + j * f_dim1] ); 
                f[i__2] = MAGMA_Z_MAKE(MAGMA_Z_REAL(z__1), MAGMA_Z_IMAG(z__1));
            }
+           #endif
         }
         
         /*  Generate elementary reflector H(k). */
