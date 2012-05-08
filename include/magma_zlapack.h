@@ -60,6 +60,7 @@ extern "C" {
 #define lapackf77_zgelqf   FORTRAN_NAME( zgelqf, ZGELQF )
 #define lapackf77_zgels    FORTRAN_NAME( zgels,  ZGELS  )
 #define lapackf77_zgeqlf   FORTRAN_NAME( zgeqlf, ZGEQLF )
+#define lapackf77_zgeqp3   FORTRAN_NAME( zgeqp3, ZGEQP3 )
 #define lapackf77_zgeqrf   FORTRAN_NAME( zgeqrf, ZGEQRF )
 #define lapackf77_zgesvd   FORTRAN_NAME( zgesvd, ZGESVD )
 #define lapackf77_zgetrf   FORTRAN_NAME( zgetrf, ZGETRF )
@@ -120,6 +121,7 @@ extern "C" {
 /* testing functions */
 #define lapackf77_zbdt01   FORTRAN_NAME( zbdt01, ZBDT01 )
 #define lapackf77_zget22   FORTRAN_NAME( zget22, ZGET22 )
+#define lapackf77_zqpt01   FORTRAN_NAME( zqpt01, ZQPT01 )
 #define lapackf77_zhet21   FORTRAN_NAME( zhet21, ZHET21 )
 #define lapackf77_zhst01   FORTRAN_NAME( zhst01, ZHST01 )
 #define lapackf77_zqrt02   FORTRAN_NAME( zqrt02, ZQRT02 )
@@ -249,6 +251,10 @@ void     lapackf77_zgels(const char *trans,
 void    lapackf77_zgeqlf(magma_int_t *m, magma_int_t *n,
                          cuDoubleComplex *a, magma_int_t *lda, cuDoubleComplex *tau, 
                          cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
+void    lapackf77_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a, magma_int_t *lda,
+                         magma_int_t *jpvt, cuDoubleComplex *tau,
+                         cuDoubleComplex *work, magma_int_t *lwork, 
+                         DWORKFORZ magma_int_t *info);
 void    lapackf77_zgeqrf(magma_int_t *m, magma_int_t *n,
                          cuDoubleComplex *a, magma_int_t *lda, cuDoubleComplex *tau,
                          cuDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
@@ -507,6 +513,9 @@ void    lapackf77_zlarfy(const char *uplo, int *N, cuDoubleComplex *V, int *incv
 void    lapackf77_zlarfx(const char *, int *, int *, 
                          cuDoubleComplex *, cuDoubleComplex *, 
                          cuDoubleComplex *, int *, cuDoubleComplex *);
+double  lapackf77_zqpt01(int *m, int *n, int *k, cuDoubleComplex *a,
+                         cuDoubleComplex *af, int *lda, cuDoubleComplex *tau, int *jpvt,
+                         cuDoubleComplex *work, int *lwork);
 void    lapackf77_zqrt02(int *m, int *n, int *k, cuDoubleComplex *A, cuDoubleComplex *AF,
                          cuDoubleComplex *Q, cuDoubleComplex *R, int *lda, 
                          cuDoubleComplex *TAU, cuDoubleComplex *work, int *lwork,
