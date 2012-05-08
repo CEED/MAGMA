@@ -179,6 +179,14 @@ typedef double real_Double_t;
 #define CBLAS_SADDR(a)  &(a)
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* ------------------------------------------------------------
+ *   -- MAGMA function definitions
+ * --------------------------------------------------------- */
+
 void magma_setstream( cudaStream_t stream );
 //void magma_setdevice( int dev );
 
@@ -201,7 +209,7 @@ inline magma_err_t magma_cmalloc_host( cuFloatComplex  **ptrPtr, size_t n ) { re
 inline magma_err_t magma_zmalloc_host( cuDoubleComplex **ptrPtr, size_t n ) { return magma_malloc_host( (void**) ptrPtr, n*sizeof(cuDoubleComplex) ); }
 
 // generic, type-independent routines to copy data.
-// type-safe versions which avoid sizeof(...) are in magmablas_[sdcz].h
+// type-safe versions which avoid the user needing sizeof(...) are in copy_[sdcz].cpp
 void magma_setvector(
     magma_int_t n, size_t elemSize,
     void const *hx_src, magma_int_t inchx,
@@ -224,13 +232,6 @@ void magma_getvector_async(
     void       *hx_dst, magma_int_t inchx,
     magma_stream_t stream );
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* ------------------------------------------------------------
- *   -- MAGMA function definitions
- * --------------------------------------------------------- */
 void magma_xerbla( const char *name, magma_int_t info );
 
 #ifdef __cplusplus

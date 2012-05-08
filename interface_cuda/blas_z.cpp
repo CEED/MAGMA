@@ -25,129 +25,10 @@
 #define cublas_diag_const(  x )  (x)
 
 // ========================================
-// copying vectors
-void magma_zsetvector(
-    magma_int_t n,
-    cuDoubleComplex const* hx_src, magma_int_t inchx,
-    cuDoubleComplex*       dx_dst, magma_int_t incdx )
-{
-    cublasStatus_t status;
-    status = cublasSetVector(
-        n, sizeof(cuDoubleComplex),
-        hx_src, inchx,
-        dx_dst, incdx );
-    assert( status == CUBLAS_STATUS_SUCCESS );
-}
-
-// --------------------
-void magma_zgetvector(
-    magma_int_t n,
-    cuDoubleComplex const* dx_src, magma_int_t incdx,
-    cuDoubleComplex*       hx_dst, magma_int_t inchx )
-{
-    cublasStatus_t status;
-    status = cublasGetVector(
-        n, sizeof(cuDoubleComplex),
-        dx_src, incdx,
-        hx_dst, inchx );
-    assert( status == CUBLAS_STATUS_SUCCESS );
-}
-
-// --------------------
-void magma_zsetvector_async(
-    magma_int_t n,
-    cuDoubleComplex const* hx_src, magma_int_t inchx,
-    cuDoubleComplex*       dx_dst, magma_int_t incdx,
-    cudaStream_t stream )
-{
-    cublasStatus_t status;
-    status = cublasSetVectorAsync(
-        n, sizeof(cuDoubleComplex),
-        hx_src, inchx,
-        dx_dst, incdx, stream );
-    assert( status == CUBLAS_STATUS_SUCCESS );
-}
-
-// --------------------
-void magma_zgetvector_async(
-    magma_int_t n,
-    cuDoubleComplex const* dx_src, magma_int_t incdx,
-    cuDoubleComplex*       hx_dst, magma_int_t inchx,
-    cudaStream_t stream )
-{
-    cublasStatus_t status;
-    status = cublasGetVectorAsync(
-        n, sizeof(cuDoubleComplex),
-        dx_src, incdx,
-        hx_dst, inchx, stream );
-    assert( status == CUBLAS_STATUS_SUCCESS );
-}
-
-
-// ========================================
-// copying sub-matrices (contiguous columns)
-void magma_zsetmatrix(
-    magma_int_t m, magma_int_t n,
-    cuDoubleComplex const* hA_src, magma_int_t ldha,
-    cuDoubleComplex*       dA_dst, magma_int_t ldda )
-{
-    cublasStatus_t status;
-    status = cublasSetMatrix(
-        m, n, sizeof(cuDoubleComplex),
-        hA_src, ldha,
-        dA_dst, ldda );
-    assert( status == CUBLAS_STATUS_SUCCESS );
-}
-
-// --------------------
-void magma_zgetmatrix(
-    magma_int_t m, magma_int_t n,
-    cuDoubleComplex const* dA_src, magma_int_t ldda,
-    cuDoubleComplex*       hA_dst, magma_int_t ldha )
-{
-    cublasStatus_t status;
-    status = cublasGetMatrix(
-        m, n, sizeof(cuDoubleComplex),
-        dA_src, ldda,
-        hA_dst, ldha );
-    assert( status == CUBLAS_STATUS_SUCCESS );
-}
-
-// --------------------
-void magma_zsetmatrix_async(
-    magma_int_t m, magma_int_t n,
-    cuDoubleComplex const* hA_src, magma_int_t ldha,
-    cuDoubleComplex*       dA_dst, magma_int_t ldda,
-    cudaStream_t stream )
-{
-    cublasStatus_t status;
-    status = cublasSetMatrixAsync(
-        m, n, sizeof(cuDoubleComplex),
-        hA_src, ldha,
-        dA_dst, ldda, stream );
-    assert( status == CUBLAS_STATUS_SUCCESS );
-}
-
-// --------------------
-void magma_zgetmatrix_async(
-    magma_int_t m, magma_int_t n,
-    cuDoubleComplex const* dA_src, magma_int_t ldda,
-    cuDoubleComplex*       hA_dst, magma_int_t ldha,
-    cudaStream_t stream )
-{
-    cublasStatus_t status;
-    status = cublasGetMatrixAsync(
-        m, n, sizeof(cuDoubleComplex),
-        dA_src, ldda,
-        hA_dst, ldha, stream );
-    assert( status == CUBLAS_STATUS_SUCCESS );
-}
-
-
-// ========================================
 // Level 1 BLAS
 
 // --------------------
+extern "C"
 void magma_zswap(
     magma_int_t n,
     cuDoubleComplex *dx, magma_int_t incx,
@@ -157,6 +38,7 @@ void magma_zswap(
 }
 
 // --------------------
+extern "C"
 magma_int_t magma_izamax(
     magma_int_t n,
     cuDoubleComplex *dx, magma_int_t incx )
@@ -168,6 +50,7 @@ magma_int_t magma_izamax(
 // Level 2 BLAS
 
 // --------------------
+extern "C"
 void magma_zgemv(
     magma_trans_t transA,
     magma_int_t m, magma_int_t n,
@@ -184,6 +67,7 @@ void magma_zgemv(
 }
 
 // --------------------
+extern "C"
 void magma_zhemv(
     magma_uplo_t uplo,
     magma_int_t n,
@@ -200,6 +84,7 @@ void magma_zhemv(
 }
 
 // --------------------
+extern "C"
 void magma_ztrsv(
     magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag, 
     magma_int_t n, 
@@ -219,6 +104,7 @@ void magma_ztrsv(
 // Level 3 BLAS
 
 // --------------------
+extern "C"
 void magma_zgemm(
     magma_trans_t transA, magma_trans_t transB,
     magma_int_t m, magma_int_t n, magma_int_t k,
@@ -236,6 +122,7 @@ void magma_zgemm(
 }
 
 // --------------------
+extern "C"
 void magma_zhemm(
     magma_side_t side, magma_uplo_t uplo,
     magma_int_t m, magma_int_t n,
@@ -253,6 +140,7 @@ void magma_zhemm(
 }
 
 // --------------------
+extern "C"
 void magma_zherk(
     magma_uplo_t uplo, magma_trans_t trans,
     magma_int_t n, magma_int_t k,
@@ -268,6 +156,7 @@ void magma_zherk(
 }
 
 // --------------------
+extern "C"
 void magma_zher2k(
     magma_uplo_t uplo, magma_trans_t trans,
     magma_int_t n, magma_int_t k,
@@ -285,6 +174,7 @@ void magma_zher2k(
 }
 
 // --------------------
+extern "C"
 void magma_ztrmm(
     magma_side_t side, magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
     magma_int_t m, magma_int_t n,
@@ -302,6 +192,7 @@ void magma_ztrmm(
 }
 
 // --------------------
+extern "C"
 void magma_ztrsm(
     magma_side_t side, magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
     magma_int_t m, magma_int_t n,

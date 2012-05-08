@@ -17,15 +17,15 @@
 
 // ========================================
 // initialization
-magma_err_t
-magma_init()
+extern "C"
+magma_err_t magma_init()
 {
     return MAGMA_SUCCESS;
 }
 
 // --------------------
-magma_err_t
-magma_finalize()
+extern "C"
+magma_err_t magma_finalize()
 {
     return MAGMA_SUCCESS;
 }

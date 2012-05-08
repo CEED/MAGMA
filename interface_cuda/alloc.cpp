@@ -18,8 +18,8 @@
 // ========================================
 // memory allocation
 // Allocate size bytes on GPU, returning pointer in ptrPtr.
-magma_err_t
-magma_malloc( magma_devptr* ptrPtr, size_t size )
+extern "C"
+magma_err_t magma_malloc( magma_devptr* ptrPtr, size_t size )
 {
     if ( cudaSuccess != cudaMalloc( ptrPtr, size )) {
         return MAGMA_ERR_DEVICE_ALLOC;
@@ -29,8 +29,8 @@ magma_malloc( magma_devptr* ptrPtr, size_t size )
 
 // --------------------
 // Free GPU memory allocated by magma_malloc.
-magma_err_t
-magma_free( magma_devptr ptr )
+extern "C"
+magma_err_t magma_free( magma_devptr ptr )
 {
     if ( cudaSuccess != cudaFree( ptr )) {
         return MAGMA_ERR_INVALID_PTR;
@@ -40,8 +40,8 @@ magma_free( magma_devptr ptr )
 
 // --------------------
 // Allocate size bytes on CPU in pinned memory, returning pointer in ptrPtr.
-magma_err_t
-magma_malloc_host( void** ptrPtr, size_t size )
+extern "C"
+magma_err_t magma_malloc_host( void** ptrPtr, size_t size )
 {
     if ( cudaSuccess != cudaMallocHost( ptrPtr, size )) {
         return MAGMA_ERR_HOST_ALLOC;
@@ -51,8 +51,8 @@ magma_malloc_host( void** ptrPtr, size_t size )
 
 // --------------------
 // Free CPU pinned memory previously allocated by magma_malloc_host.
-magma_err_t
-magma_free_host( void* ptr )
+extern "C"
+magma_err_t magma_free_host( void* ptr )
 {
     if ( cudaSuccess != cudaFree( ptr )) {
         return MAGMA_ERR_INVALID_PTR;

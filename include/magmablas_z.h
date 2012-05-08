@@ -229,24 +229,24 @@ void magmablas_ztrsm(char s, char u, char t, char d,
 
 void magma_zsetvector(
     magma_int_t n,
-    cuDoubleComplex const *hx_src, magma_int_t inchx,
-    cuDoubleComplex       *dx_dst, magma_int_t incdx );
+    cuDoubleComplex const *hx_src, magma_int_t incx,
+    cuDoubleComplex       *dy_dst, magma_int_t incy );
 
 void magma_zgetvector(
     magma_int_t n,
-    cuDoubleComplex const *dx_src, magma_int_t incdx,
-    cuDoubleComplex       *hx_dst, magma_int_t inchx );
+    cuDoubleComplex const *dx_src, magma_int_t incx,
+    cuDoubleComplex       *hy_dst, magma_int_t incy );
 
 void magma_zsetvector_async(
     magma_int_t n,
-    cuDoubleComplex const *hx_src, magma_int_t inchx,
-    cuDoubleComplex       *dx_dst, magma_int_t incdx,
+    cuDoubleComplex const *hx_src, magma_int_t incx,
+    cuDoubleComplex       *dy_dst, magma_int_t incy,
     magma_stream_t stream );
 
 void magma_zgetvector_async(
     magma_int_t n,
-    cuDoubleComplex const *dx_src, magma_int_t incdx,
-    cuDoubleComplex       *hx_dst, magma_int_t inchx,
+    cuDoubleComplex const *dx_src, magma_int_t incx,
+    cuDoubleComplex       *hy_dst, magma_int_t incy,
     magma_stream_t stream );
 
 
@@ -254,27 +254,39 @@ void magma_zgetvector_async(
 // copying sub-matrices (contiguous columns)
 // set copies host to device
 // get copies device to host
+// cpy copies device to device (with CUDA unified addressing, can be same or different devices)
 
 void magma_zsetmatrix(
     magma_int_t m, magma_int_t n,
-    cuDoubleComplex const *hA_src, magma_int_t ldha,
-    cuDoubleComplex       *dA_dst, magma_int_t ldda );
+    cuDoubleComplex const *hA_src, magma_int_t lda,
+    cuDoubleComplex       *dB_dst, magma_int_t ldb );
 
 void magma_zgetmatrix(
     magma_int_t m, magma_int_t n,
-    cuDoubleComplex const *dA_src, magma_int_t ldda,
-    cuDoubleComplex       *hA_dst, magma_int_t ldha );
+    cuDoubleComplex const *dA_src, magma_int_t lda,
+    cuDoubleComplex       *hB_dst, magma_int_t ldb );
 
 void magma_zsetmatrix_async(
     magma_int_t m, magma_int_t n,
-    cuDoubleComplex const *hA_src, magma_int_t ldha,
-    cuDoubleComplex       *dA_dst, magma_int_t ldda,
+    cuDoubleComplex const *hA_src, magma_int_t lda,
+    cuDoubleComplex       *dB_dst, magma_int_t ldb,
     magma_stream_t stream );
 
 void magma_zgetmatrix_async(
     magma_int_t m, magma_int_t n,
-    cuDoubleComplex const *dA_src, magma_int_t ldda,
-    cuDoubleComplex       *hA_dst, magma_int_t ldha,
+    cuDoubleComplex const *dA_src, magma_int_t lda,
+    cuDoubleComplex       *hB_dst, magma_int_t ldb,
+    magma_stream_t stream );
+
+void magma_zcopymatrix(
+    magma_int_t m, magma_int_t n,
+    cuDoubleComplex const *dA_src, magma_int_t lda,
+    cuDoubleComplex       *dB_dst, magma_int_t ldb );
+
+void magma_zcopymatrix_async(
+    magma_int_t m, magma_int_t n,
+    cuDoubleComplex const *dA_src, magma_int_t lda,
+    cuDoubleComplex       *dB_dst, magma_int_t ldb,
     magma_stream_t stream );
 
 
