@@ -731,7 +731,7 @@ printf("hegs2%d\n", k);
                 cudaSetDevice(igpu);
                 cudaMemcpy2DAsync(dB_r(igpu, 1, 0), lddbr * sizeof(cuDoubleComplex),
                                   A(k, 0), lda * sizeof(cuDoubleComplex),
-                                  sizeof(cuDoubleComplex)*kb,
+                                  sizeof(cuDoubleComplex)*kb, /*ERROR*/,
                                   cudaMemcpyHostToDevice, stream[igpu][0]);
             }
 
