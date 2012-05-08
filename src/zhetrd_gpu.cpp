@@ -17,7 +17,7 @@
 #define PRECISION_z
 
 #if (defined(PRECISION_s))
-     #define cublasSsyr2k magmablas_ssyr2k
+     #define magma_ssyr2k magmablas_ssyr2k
 #endif
 // === End defining what BLAS to use ======================================
 
@@ -240,7 +240,7 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
       cublasSetMatrix(i + nb, nb, sizeof(cuDoubleComplex),
                       work, ldw, dwork, lddw);
       
-      cublasZher2k(uplo, MagmaNoTrans, i, nb, c_neg_one, 
+      magma_zher2k(uplo, MagmaNoTrans, i, nb, c_neg_one, 
                    dA(0, i), ldda, dwork, 
                    lddw, d_one, dA(0, 0), ldda);
       
@@ -287,7 +287,7 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
                       work, ldw,
                       dwork, lddw);
       
-      cublasZher2k('L', 'N', n-i-nb, nb, c_neg_one, 
+      magma_zher2k(MagmaLower, MagmaNoTrans, n-i-nb, nb, c_neg_one, 
                    dA(i+nb, i), ldda, 
                    &dwork[nb], lddw, d_one, 
                    dA(i+nb, i+nb), ldda);

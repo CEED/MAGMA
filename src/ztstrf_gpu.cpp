@@ -17,9 +17,9 @@
 #include <core_blas.h>
 #include "common_magma.h"
 
-#define cublasZgemm magmablas_zgemm
-//#define cublasZtrsm magmablas_ztrsm
-//#define cublasZtrmm magmablas_ztrmm
+#define magma_zgemm magmablas_zgemm
+//#define magma_ztrsm magmablas_ztrsm
+//#define magma_ztrmm magmablas_ztrmm
 
 extern "C" magma_int_t
 magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, magma_int_t nb,
@@ -206,17 +206,17 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
                 //cuCtxSynchronize();
                 
 #ifndef WITHOUTTRTRI
-                cublasZtrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
+                magma_ztrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
                              n-(ii+sb), ib, 
                              c_one, L2(i-1),      lddl,
                                     UT(i-1, i+1), lddu);
 #else
-                cublasZtrsm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
+                magma_ztrsm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
                              n-(ii+sb), ib, 
                              c_one, L(i-1),       lddl,
                                     UT(i-1, i+1), lddu);
 #endif
-                cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
                              n-(ii+sb), m, ib,
                              c_neg_one, UT(i-1, i+1), lddu, 
                                         AT(0,   i-1), ldda,
@@ -286,17 +286,17 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
             // do the small non-parallel computations
             if ( s > (i+1) ) {
 #ifndef WITHOUTTRTRI
-                 cublasZtrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
+                 magma_ztrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
                               sb, sb, 
                               c_one, L2(i),      lddl,
                                      UT(i, i+1), lddu);
 #else
-                 cublasZtrsm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
+                 magma_ztrsm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
                               sb, sb, 
                               c_one, L(i),      lddl,
                                      UT(i, i+1), lddu);
 #endif
-                cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
                              sb, m, sb,
                              c_neg_one, UT(i, i+1), lddu, 
                                         AT(0, i  ), ldda,
@@ -304,17 +304,17 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
             }
             else {
 #ifndef WITHOUTTRTRI
-                cublasZtrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
+                magma_ztrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
                              n-mindim, sb, 
                              c_one, L2(i),      lddl,
                                     UT(i, i+1), lddu);
 #else
-                cublasZtrsm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
+                magma_ztrsm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
                              n-mindim, sb, 
                              c_one, L(i),      lddl,
                                     UT(i, i+1), lddu);
 #endif
-                cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
                              n-mindim, m, sb,
                              c_neg_one, UT(i, i+1), lddu, 
                                         AT(0, i  ), ldda,

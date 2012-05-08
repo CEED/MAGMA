@@ -13,14 +13,14 @@
 /* === Define what BLAS to use ============================================ */
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d)) 
-  #define cublasZgemm magmablas_zgemm
-  #define cublasZtrsm magmablas_ztrsm
+  #define magma_zgemm magmablas_zgemm
+  #define magma_ztrsm magmablas_ztrsm
 #endif
 
 #if (GPUSHMEM >= 200)
   #if (defined(PRECISION_s))
-     #undef  cublasSgemm
-     #define cublasSgemm magmablas_sgemm_fermi80
+     #undef  magma_sgemm
+     #define magma_sgemm magmablas_sgemm_fermi80
   #endif
 #endif
 /* === End defining what BLAS to use ======================================= */
@@ -170,7 +170,7 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
 
         /* Update the current diagonal block */
         cudaSetDevice(id);
-        cublasZherk(MagmaUpper, MagmaConjTrans, jb, j, 
+        magma_zherk(MagmaUpper, MagmaConjTrans, jb, j, 
                     d_neg_one, dlA(id, 0, nb*j_local), ldda, 
                     d_one,     dlA(id, j, nb*j_local), ldda);
 
@@ -198,7 +198,7 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
             }
         
             /* update the panel */
-            cublasZgemm(MagmaConjTrans, MagmaNoTrans, 
+            magma_zgemm(MagmaConjTrans, MagmaNoTrans, 
                         jb, (n_local[d]-nb*(j_local2-1)-jb), j, 
                         c_neg_one, dlpanel,                ldpanel, 
                                    dlA(d, 0, nb*j_local2), ldda,
@@ -245,7 +245,7 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
             }
         
             /* update the panel */
-            cublasZgemm(MagmaConjTrans, MagmaNoTrans, 
+            magma_zgemm(MagmaConjTrans, MagmaNoTrans, 
                         jb, (n_local[d]-nb*(j_local2-1)-jb), j, 
                         c_neg_one, dlpanel,                ldpanel, 
                                    dlA(d, 0, nb*j_local2), ldda,
@@ -305,7 +305,7 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
             if( d == (j/nb+1)%num_gpus ) {
               /* owns the next column, look-ahead the column */
 #ifdef  VERSION1
-              cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
+              magma_ztrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
                            jb, nb0, c_one,
                            dlpanel,                ldpanel, 
                            dlA(d, j, nb*j_local2), ldda);
@@ -321,13 +321,13 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
 
               /* update the remaining blocks */
               nb2 = n_local[d] - j_local2*nb - nb0;
-              cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
+              magma_ztrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
                            jb, nb2, c_one,
                            dlpanel,                    ldpanel, 
                            dlA(d, j, nb*j_local2+nb0), ldda);
 #elif defined (VERSION2)
               nb2 = n_local[d] - j_local2*nb;
-              cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
+              magma_ztrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
                            jb, nb2, c_one,
                            dlpanel,                ldpanel,
                            dlA(d, j, nb*j_local2), ldda);
@@ -342,7 +342,7 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
               }
 #elif defined (VERSION3)
               nb2 = n_local[d] - j_local2*nb;
-              cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
+              magma_ztrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
                            jb, nb2, c_one,
                            dlpanel,                ldpanel,
                            dlA(d, j, nb*j_local2), ldda);
@@ -351,7 +351,7 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
             } else {
               /* update the entire trailing matrix */
               nb2 = n_local[d] - j_local2*nb;
-              cublasZtrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
+              magma_ztrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
                            jb, nb2, c_one,
                            dlpanel,                ldpanel, 
                            dlA(d, j, nb*j_local2), ldda);
@@ -392,7 +392,7 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
 
           /* Update the current diagonal block */
           cudaSetDevice(id);
-          cublasZherk(MagmaLower, MagmaNoTrans, jb, j,
+          magma_zherk(MagmaLower, MagmaNoTrans, jb, j,
                       d_neg_one, dlAT(id, nb*j_local, 0), ldda,
                       d_one,     dlAT(id, nb*j_local, j), ldda);
 
@@ -421,7 +421,7 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
               }
 
               /* update the panel */
-              cublasZgemm( MagmaNoTrans, MagmaConjTrans,
+              magma_zgemm( MagmaNoTrans, MagmaConjTrans,
                            n_local[d]-nb*j_local2, jb, j,
                            c_neg_one, dlAT(d, nb*j_local2, 0), ldda,
                                       dlpanel,                 ldpanel,
@@ -468,7 +468,7 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
               }
 
               /* update the panel */
-              cublasZgemm( MagmaNoTrans, MagmaConjTrans,
+              magma_zgemm( MagmaNoTrans, MagmaConjTrans,
                            n_local[d]-nb*j_local2, jb, j,
                            c_neg_one, dlAT(d, nb*j_local2, 0), ldda,
                                       dlpanel,                 ldpanel,
@@ -527,7 +527,7 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
               if( d == (j/nb+1)%num_gpus ) {
 #ifdef VERSION1
                 /* owns the next column, look-ahead the column */
-                cublasZtrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
+                magma_ztrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
                              nb0, jb, c_one,
                              dlpanel,                 ldpanel, 
                              dlAT(d, nb*j_local2, j), ldda);
@@ -543,13 +543,13 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
 
                 /* update the remaining blocks */
                 nb2 = n_local[d] - j_local2*nb - nb0;
-                cublasZtrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
+                magma_ztrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
                              nb2, jb, c_one,
                              dlpanel,                     ldpanel, 
                              dlAT(d, nb*j_local2+nb0, j), ldda);
 #elif defined (VERSION2)
                 nb2 = n_local[d] - j_local2*nb;
-                cublasZtrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
+                magma_ztrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
                              nb2, jb, c_one,
                              dlpanel,                 ldpanel, 
                              dlAT(d, nb*j_local2, j), ldda);
@@ -564,7 +564,7 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
                 }
 #elif defined (VERSION3)
                 nb2 = n_local[d] - j_local2*nb;
-                cublasZtrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
+                magma_ztrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
                              nb2, jb, c_one,
                              dlpanel,                 ldpanel, 
                              dlAT(d, nb*j_local2, j), ldda);
@@ -572,7 +572,7 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
               } else {
                 /* update the entire trailing matrix */
                 nb2 = n_local[d] - j_local2*nb;
-                cublasZtrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
+                magma_ztrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
                              nb2, jb, c_one,
                              dlpanel,                 ldpanel, 
                              dlAT(d, nb*j_local2, j), ldda);

@@ -88,8 +88,8 @@ extern "C" {
                      cuDoubleComplex *X, magma_int_t incx,
                      cuDoubleComplex beta,
                      cuDoubleComplex *Y, magma_int_t incy);
-#define cublasZhemv magmablas_zhemv
-#define    cublasZgemv magmablas_zgemv
+#define magma_zhemv magmablas_zhemv
+#define magma_zgemv magmablas_zgemv
 #ifdef __cplusplus
 }
 #endif
@@ -314,7 +314,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
           for( id=0; id<num_gpus; id++ ) {
               cudaSetDevice(id);
               cublasSetVector(i, sizeof(cuDoubleComplex), A(0, i), 1, dA(id, 0, i), 1);
-              cublasZhemv(MagmaUpper, i, c_one, dA(id, 0, 0), ldda,
+              magma_zhemv(MagmaUpper, i, c_one, dA(id, 0, 0), ldda,
                           dA(id, 0, i), ione, c_zero, dW(id, 0, iw), ione);
           }
           
@@ -406,9 +406,9 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
                         magmablas_zgemvt('N', i_ni, i, c_neg_one, dW(id, ii, 0), lddw, 
                                            dW1(id, i, 0), lddw, c_one, dW1(id, ii, i), ione);
                       #else
-                        cublasZgemv('N', i_ni, i, c_neg_one, dW1(id, ii, 0), lddw, 
+                        magma_zgemv(MagmaNoTrans, i_ni, i, c_neg_one, dW1(id, ii, 0), lddw, 
                                       dW(id, i, 0), lddw, c_one, dW1(id, ii, i), ione);
-                        cublasZgemv('N', i_ni, i, c_neg_one, dW(id, ii, 0), lddw, 
+                        magma_zgemv(MagmaNoTrans, i_ni, i, c_neg_one, dW(id, ii, 0), lddw, 
                                       dW1(id, i, 0), lddw, c_one, dW1(id, ii, i), ione);
                       #endif
                       //cublasGetVector(i_n, sizeof(cuDoubleComplex), dW1(id, i, i), 1, A(i, i), 1);          
@@ -514,7 +514,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
               magmablas_zhemv_mgpu(num_gpus, k, 'L', i_n, nb0, c_one, da, ldda, offset+i+1, 
                                      dx, ione, c_zero, dy, ione, dwork, ldwork,
                                      work, W(i+1,i), stream );
-              //cublasZhemv('L', i_n, c_one, dA(0, i+1, i+1), ldda, dA(0, i+1, i), ione, c_zero,
+              //magma_zhemv(MagmaLower, i_n, c_one, dA(0, i+1, i+1), ldda, dA(0, i+1, i), ione, c_zero,
               //            dW(0, i+1, i), ione);
               //cudaMemcpy2DAsync(W(i+1, i), ldw*sizeof(cuDoubleComplex),
               //                  dW(0, i+1, i), lddw*sizeof(cuDoubleComplex),
@@ -653,7 +653,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
     }
     //cudaSetDevice(0);
     //magmablasSetKernelStream(stream[0][0]);
-    //cublasZhemv('L', n, alpha, &da[0][offset+offset*ldda], ldda, &dx[0][offset], incx, beta, &dy[0][offset], incy );
+    //magma_zhemv(MagmaLower, n, alpha, &da[0][offset+offset*ldda], ldda, &dx[0][offset], incx, beta, &dy[0][offset], incy );
     //magmablasSetKernelStream(NULL);
 
     /*if( offset == 64 ) {
@@ -687,7 +687,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
         magmablasSetKernelStream(NULL);
     }
 #else
-    //cublasZhemv(uplo, n, alpha, da, ldda, dx, incx, beta, dy, incy );
+    //magma_zhemv(uplo, n, alpha, da, ldda, dx, incx, beta, dy, incy );
     
     idw = (offset/nb)%num_gpus;
 
@@ -708,16 +708,16 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
       loffset = loffset0+loffset1;
       ib0 = min(nb-loffset1,n);
       // diagonal
-      cublasZhemv(MagmaLower, ib0, c_one, dA(id, 0, 0 ), ldda,
+      magma_zhemv(MagmaLower, ib0, c_one, dA(id, 0, 0 ), ldda,
                   dX(id, 0), incx, c_one, dY(id, 0, kk), incy);
       // off-diagonl
       if( ib0 < n ) {
         //i_1 = n - ib0;
         for( j=ib0; j<n; j+= i_0 ) {
           i_1 = min(i_0, n-j);
-          cublasZgemv(MagmaNoTrans, i_1, ib0, c_one, dA(id, j, 0), ldda,
+          magma_zgemv(MagmaNoTrans, i_1, ib0, c_one, dA(id, j, 0), ldda,
                       dX(id, 0), incx, c_one, dY(id, j, kk), incy);
-          cublasZgemv(MagmaConjTrans, i_1, ib0, c_one, dA(id, j, 0), ldda,
+          magma_zgemv(MagmaConjTrans, i_1, ib0, c_one, dA(id, j, 0), ldda,
                       dX(id, j), incx, c_one, dY(id, 0, kk), incy);
         }
       }
@@ -741,7 +741,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
 
         loffset = loffset0;
         if( id < idw ) loffset += nb;
-        cublasZhemv(MagmaLower,  ib, c_one, dA(id, i, ii), ldda,
+        magma_zhemv(MagmaLower,  ib, c_one, dA(id, i, ii), ldda,
                     dX(id, i), incx, c_one, dY(id, i, kk), incy);
     }
 
@@ -762,9 +762,9 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
         //i_0 = n - (i+ib);
         for( j=i+ib; j<n; j+= i_0 ) {
           i_1 = min(i_0, n-j);
-          cublasZgemv(MagmaNoTrans, i_1, ib, c_one, dA(id, j, ii), ldda,
+          magma_zgemv(MagmaNoTrans, i_1, ib, c_one, dA(id, j, ii), ldda,
                       dX(id, i), incx, c_one, dY(id, j, kk), incy);
-          cublasZgemv(MagmaConjTrans, i_1, ib, c_one, dA(id, j, ii), ldda,
+          magma_zgemv(MagmaConjTrans, i_1, ib, c_one, dA(id, j, ii), ldda,
                       dX(id, j), incx, c_one, dY(id, i, kk), incy);
         }
     }

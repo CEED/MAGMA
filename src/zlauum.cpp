@@ -13,14 +13,14 @@
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-        #define cublasZgemm magmablas_zgemm
-        #define cublasZtrsm magmablas_ztrsm
+        #define magma_zgemm magmablas_zgemm
+        #define magma_ztrsm magmablas_ztrsm
 #endif
 
 #if (GPUSHMEM >= 200)
         #if (defined(PRECISION_s))
-                #undef  cublasSgemm
-                #define cublasSgemm magmablas_sgemm_fermi80
+                #undef  magma_sgemm
+                #define magma_sgemm magmablas_sgemm_fermi80
         #endif
 #endif
 // === End defining what BLAS to use ======================================
@@ -145,7 +145,7 @@ magma_zlauum(char uplo, magma_int_t n,
 
                                 cudaStreamSynchronize(stream[1]);
 
-                                cublasZtrmm( MagmaRight, MagmaUpper,
+                                magma_ztrmm( MagmaRight, MagmaUpper,
                                              MagmaConjTrans, MagmaNonUnit, i, ib,
                                              c_one, dA(i,i), ldda, dA(0, i),ldda);
 
@@ -159,14 +159,14 @@ magma_zlauum(char uplo, magma_int_t n,
 
                                 if (i+ib < n)
                                 {
-                                        cublasZgemm( MagmaNoTrans, MagmaConjTrans,
+                                        magma_zgemm( MagmaNoTrans, MagmaConjTrans,
                                                      i, ib, (n-i-ib), c_one, dA(0,i+ib),
                                                      ldda, dA(i, i+ib),ldda, c_one,
                                                      dA(0,i), ldda);
 
                                         cudaStreamSynchronize(stream[0]);
 
-                                        cublasZherk( MagmaUpper, MagmaNoTrans, ib,(n-i-ib),
+                                        magma_zherk( MagmaUpper, MagmaNoTrans, ib,(n-i-ib),
                                                      d_one, dA(i, i+ib), ldda,
                                                      d_one, dA(i, i), ldda);
                                 }
@@ -196,7 +196,7 @@ magma_zlauum(char uplo, magma_int_t n,
 
                                 cudaStreamSynchronize(stream[1]);
 
-                                cublasZtrmm( MagmaLeft, MagmaLower,
+                                magma_ztrmm( MagmaLeft, MagmaLower,
                                              MagmaConjTrans, MagmaNonUnit, ib,
                                              i, c_one, dA(i,i), ldda,
                                              dA(i, 0),ldda);
@@ -214,14 +214,14 @@ magma_zlauum(char uplo, magma_int_t n,
 
                                 if (i+ib < n)
                                 {
-                                        cublasZgemm(MagmaConjTrans, MagmaNoTrans,
+                                        magma_zgemm(MagmaConjTrans, MagmaNoTrans,
                                                         ib, i, (n-i-ib), c_one, dA( i+ib,i),
                                                         ldda, dA(i+ib, 0),ldda, c_one,
                                                         dA(i,0), ldda);
 
                                         cudaStreamSynchronize(stream[0]);
                                         
-                                        cublasZherk(MagmaLower, MagmaConjTrans, ib, (n-i-ib),
+                                        magma_zherk(MagmaLower, MagmaConjTrans, ib, (n-i-ib),
                                                         d_one, dA(i+ib, i), ldda,
                                                         d_one, dA(i, i), ldda);
                                 }

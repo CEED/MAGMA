@@ -12,21 +12,21 @@
  */
 #include "common_magma.h"
 
-void MycublasZtrmm(char side, char uplo, char trans, char unit, 
+void Mymagma_ztrmm(char side, char uplo, char trans, char unit, 
                    magma_int_t n, magma_int_t m,
                    cuDoubleComplex alpha, cuDoubleComplex *db, magma_int_t lddb, 
                    cuDoubleComplex *dz, magma_int_t lddz)
 {
-    cublasZtrmm(side, uplo, trans, unit, n, m, alpha, db, lddb, dz, lddz);
+    magma_ztrmm(side, uplo, trans, unit, n, m, alpha, db, lddb, dz, lddz);
     cudaDeviceSynchronize();
 }
 
-void MycublasZtrsm(char side, char uplo, char trans, char unit, 
+void Mymagma_ztrsm(char side, char uplo, char trans, char unit, 
                    magma_int_t n, magma_int_t m,
                    cuDoubleComplex alpha, cuDoubleComplex *db, magma_int_t lddb,
                    cuDoubleComplex *dz, magma_int_t lddz)
 {
-    cublasZtrsm(side, uplo, trans, unit, n, m, alpha, db, lddb, dz, lddz);
+    magma_ztrsm(side, uplo, trans, unit, n, m, alpha, db, lddb, dz, lddz);
     cudaDeviceSynchronize();
 }
 
@@ -410,7 +410,7 @@ magma_zhegvr(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
                 *(unsigned char *)trans = MagmaNoTrans;
             }
             
-            MycublasZtrsm(MagmaLeft, uplo, *trans, MagmaNonUnit, n, *m, c_one, 
+            Mymagma_ztrsm(MagmaLeft, uplo, *trans, MagmaNonUnit, n, *m, c_one, 
                           db, lddb, dz, lddz);
       
         } else if (itype == 3) {
@@ -423,7 +423,7 @@ magma_zhegvr(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
                 *(unsigned char *)trans = MagmaConjTrans;
             }
             
-            MycublasZtrmm(MagmaLeft, uplo, *trans, MagmaNonUnit, n, *m, c_one, 
+            Mymagma_ztrmm(MagmaLeft, uplo, *trans, MagmaNonUnit, n, *m, c_one, 
                           db, lddb, dz, lddz);
         }
         

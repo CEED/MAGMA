@@ -13,14 +13,14 @@
 /* === Define what BLAS to use ============================================ */
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-  #define cublasDgemm magmablas_dgemm
-  #define cublasDtrsm magmablas_dtrsm
+  #define magma_dgemm magmablas_dgemm
+  #define magma_dtrsm magmablas_dtrsm
 #endif
 
 #if (GPUSHMEM >= 200)
 #if (defined(PRECISION_s))
-     #undef  cublasSgemm
-     #define cublasSgemm magmablas_sgemm_fermi80
+     #undef  magma_sgemm
+     #define magma_sgemm magmablas_sgemm_fermi80
   #endif
 #endif
 /* === End defining what BLAS to use ====================================== */
@@ -280,13 +280,13 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
             jb1 = min(JB,jj+nb); // first row in the next block-row
             jb2 = min(nb,JB-jj); // number of rows in this current block-row
             jb  = jj; //jb1-jb2;       // number of columns in the off-diagona blocks (jj)
-            cublasZgemm( MagmaConjTrans, MagmaNoTrans, 
+            magma_zgemm( MagmaConjTrans, MagmaNoTrans, 
                          jb, jb2, nb, 
                          c_neg_one, dTup(d, 0, J   ),  nb, 
                                     dTup(d, 0, J+jb),  nb,
                          c_one,     dAup(d, 0, J2), NB);
 
-            cublasZherk(MagmaUpper, MagmaConjTrans, jb2, jb3,
+            magma_zherk(MagmaUpper, MagmaConjTrans, jb2, jb3,
                         d_neg_one, dTup(d, 0,  J+jb),  nb,
                         d_one,     dAup(d, jb, J2), NB);
           }
@@ -309,7 +309,7 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
               J2 = nb*(JB/(nb*num_gpus));
               if( d < (JB/nb)%num_gpus ) J2+=nb;
 
-              cublasZgemm( MagmaConjTrans, MagmaNoTrans, 
+              magma_zgemm( MagmaConjTrans, MagmaNoTrans, 
                            JB, n_local[d], nb, 
                            c_neg_one, dTup(d, 0, J   ),  nb, 
                                       dTup(d, 0, J+JB),  nb,
@@ -388,13 +388,13 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
             jb1 = min(JB,jj+nb); 
             jb2 = min(nb,JB-jj); 
             jb  = jj; //jb1-jb2;
-            cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
+            magma_zgemm( MagmaNoTrans, MagmaConjTrans, 
                          jb2, jb, nb, 
                          c_neg_one, dT(d, J+jb, 0), ldda, 
                                     dT(d, J,    0), ldda,
                          c_one,     dA(d, J2,   0), lddla);
 
-            cublasZherk(MagmaLower, MagmaNoTrans, jb2, jb3,
+            magma_zherk(MagmaLower, MagmaNoTrans, jb2, jb3,
                         d_neg_one, dT(d, J+jb, 0),  ldda,
                         d_one,     dA(d, J2,  jb ), lddla);
           }
@@ -417,7 +417,7 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
               J2 = nb*(JB/(nb*num_gpus));
               if( d < (JB/nb)%num_gpus ) J2+=nb;
 
-              cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
+              magma_zgemm( MagmaNoTrans, MagmaConjTrans, 
                            n_local[d], JB, nb, 
                            c_neg_one, dT(d, J+JB, 0), ldda, 
                                       dT(d, J,    0), ldda,

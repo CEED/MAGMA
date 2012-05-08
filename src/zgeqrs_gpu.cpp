@@ -166,12 +166,12 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
 
     // update c
     if (nrhs == 1)
-        cublasZgemv( MagmaNoTrans, i, ib, 
+        magma_zgemv( MagmaNoTrans, i, ib, 
                      c_neg_one, a_ref(0, i), ldda,
                                 dwork + i,   1, 
                      c_one,     dB,           1);
     else
-        cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+        magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
                      i, nrhs, ib, 
                      c_neg_one, a_ref(0, i), ldda,
                                 dwork + i,   lddwork, 
@@ -186,23 +186,23 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
             if (i + ib < n) {
                 if (nrhs == 1)
                     {
-                        cublasZgemv( MagmaNoTrans, ib, ib, 
+                        magma_zgemv( MagmaNoTrans, ib, ib, 
                                      c_one,  d_ref(i), ib,
                                              dB+i,      1, 
                                      c_zero, dwork+i,  1);
-                        cublasZgemv( MagmaNoTrans, i, ib, 
+                        magma_zgemv( MagmaNoTrans, i, ib, 
                                      c_neg_one, a_ref(0, i), ldda,
                                                 dwork + i,   1, 
                                      c_one,     dB,           1);
                     }
                 else
                     {
-                        cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
                                      ib, nrhs, ib, 
                                      c_one,  d_ref(i), ib,
                                              dB+i,      lddb, 
                                      c_zero, dwork+i,  lddwork);
-                        cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
                                      i, nrhs, ib, 
                                      c_neg_one, a_ref(0, i), ldda,
                                                 dwork + i,   lddwork, 

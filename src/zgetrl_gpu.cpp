@@ -17,9 +17,9 @@
 #include <core_blas.h>
 #include "common_magma.h"
 
-#define cublasZgemm magmablas_zgemm
-//#define cublasZtrsm magmablas_ztrsm
-//#define cublasZtrmm magmablas_ztrmm
+#define magma_zgemm magmablas_zgemm
+//#define magma_ztrsm magmablas_ztrsm
+//#define magma_ztrmm magmablas_ztrmm
 
 extern "C" magma_int_t
 magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
@@ -176,17 +176,17 @@ magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
                 // make sure that gpu queue is empty
                 //cuCtxSynchronize();
 #ifndef WITHOUTTRTRI
-                cublasZtrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
+                magma_ztrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
                              n - (ii+sb), ib, 
                              c_one, dL2(i-1),    lddl, 
                                     AT(i-1,i+1), ldda );
 #else
-                cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
                              n - (ii+sb), ib, 
                              c_one, AT(i-1,i-1), ldda, 
                                     AT(i-1,i+1), ldda );
 #endif
-                cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
                              n-(ii+sb), m-ii, ib, 
                              c_neg_one, AT(i-1,i+1), ldda, 
                                         AT(i,  i-1), ldda, 
@@ -227,17 +227,17 @@ magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
             // do the small non-parallel computations
             if ( s > (i+1) ) {
 #ifndef WITHOUTTRTRI
-                cublasZtrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
+                magma_ztrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
                              sb, sb, 
                              c_one, dL2(i),     lddl,
                                     AT(i, i+1), ldda);
 #else
-                cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
                              sb, sb, 
                              c_one, AT(i, i  ), ldda,
                                     AT(i, i+1), ldda);
 #endif
-                cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
                              sb, m-(ii+sb), sb, 
                              c_neg_one, AT(i,   i+1), ldda,
                                         AT(i+1, i  ), ldda, 
@@ -246,18 +246,18 @@ magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
             else {
                 /* Update of the last panel */
 #ifndef WITHOUTTRTRI
-                cublasZtrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
+                magma_ztrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
                              n-mindim, sb, 
                              c_one, dL2(i),     lddl,
                                     AT(i, i+1), ldda);
 #else
-                cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
                              n-mindim, sb, 
                              c_one, AT(i, i  ), ldda,
                                     AT(i, i+1), ldda);
 #endif
                 /* m-(ii+sb) should be always 0 */
-                cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
                              n-mindim, m-(ii+sb), sb,
                              c_neg_one, AT(i,   i+1), ldda,
                                         AT(i+1, i  ), ldda, 

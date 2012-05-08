@@ -394,7 +394,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
                               s, &n23, &d_zero, Q(n1,iil-1), &ldq );
             } else {
                 cublasSetMatrix(n23, rk, sizeof(double), Q(ctot[0],iil-1), ldq, ds, n23);
-                cublasDgemm('N', 'N', n2, rk, n23, d_one, &dq2[iq2], n2, ds, n23, d_zero, dq, lddq);
+                magma_dgemm('N', 'N', n2, rk, n23, d_one, &dq2[iq2], n2, ds, n23, d_zero, dq, lddq);
                 cublasGetMatrix(n2, rk, sizeof(double), dq, lddq, Q(n1,iil-1), ldq);
             }
         } else
@@ -407,7 +407,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
                               s, &n12, &d_zero, Q(0,iil-1), &ldq);
             } else {
                 cublasSetMatrix(n12, rk, sizeof(double), Q(0,iil-1), ldq, ds, n12);
-                cublasDgemm('N', 'N', n1, rk, n12, d_one, dq2, n1, ds, n12, d_zero, dq, lddq);
+                magma_dgemm('N', 'N', n1, rk, n12, d_one, dq2, n1, ds, n12, d_zero, dq, lddq);
                 cublasGetMatrix(n1, rk, sizeof(double), dq, lddq, Q(0,iil-1), ldq);
             }
         } else

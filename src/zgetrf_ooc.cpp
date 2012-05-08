@@ -14,8 +14,8 @@
 /* === Define what BLAS to use ============================================ */
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-  #define cublasZgemm magmablas_zgemm
-  #define cublasZtrsm magmablas_ztrsm
+  #define magma_zgemm magmablas_zgemm
+  #define magma_ztrsm magmablas_ztrsm
 #endif
 /* === End defining what BLAS to use ======================================= */
 
@@ -204,10 +204,10 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
 
                             /* update with the block column */
                             cuCtxSynchronize();
-                            cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+                            magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
                                          N, nb0, c_one, inPT(0,0), nb, inAT(ib,0), maxn );
                             if( M > ii+nb0 ) {
-                              cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+                              magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
                                            N, M-(ii+nb0), nb0, c_neg_one, inAT(ib,0), maxn, 
                                            inPT(1,0), nb, c_one, inAT(ib+1,0), maxn );
                             }
@@ -254,11 +254,11 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
                         cuCtxSynchronize();
                 
                             /* update the remaining matrix with (i-1)-th panel */
-                        cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+                        magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
                                          N - (ii+1)*nb, nb, 
                                          c_one, inAT(i-1,ii-1), maxn, 
                                          inAT(i-1,ii+1), maxn );
-                        cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
                                          N-(ii+1)*nb, M-i*nb, nb, 
                                          c_neg_one, inAT(i-1,ii+1), maxn, 
                                          inAT(i,  ii-1), maxn, 
@@ -282,18 +282,18 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
                   /* do the small non-parallel computations;              */
                           /* i.e., update the (i+1)-th column with the i-th panel */
                   if (s > (ii+1)) {
-                            cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, nb, nb, 
+                            magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, nb, nb, 
                                          c_one, inAT(i, ii  ), maxn,   /* diagonal of i-th panel         */
                                     inAT(i, ii+1), maxn);  /* upper-block in (i+1)-th column */
-                        cublasZgemm( MagmaNoTrans, MagmaNoTrans, nb, M-(i+1)*nb, nb, 
+                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, nb, M-(i+1)*nb, nb, 
                                          c_neg_one, inAT(i,   ii+1), maxn,    /* upper-block of (i+1)-th column      */
                                         inAT(i+1, ii  ), maxn,    /* off-diagonal blocks from i-th panel */
                                          c_one,     inAT(i+1, ii+1), maxn );  /* blocks to be updated                */
                   } else {
-                            cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, N-s*nb, nb,
+                            magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, N-s*nb, nb,
                              c_one, inAT(i, ii  ), maxn,
                                     inAT(i, ii+1), maxn);
-                        cublasZgemm( MagmaNoTrans, MagmaNoTrans, N-s*nb, M-(i+1)*nb, nb,
+                        magma_zgemm( MagmaNoTrans, MagmaNoTrans, N-s*nb, M-(i+1)*nb, nb,
                              c_neg_one, inAT(i,   ii+1), maxn,
                                         inAT(i+1, ii  ), maxn, 
                              c_one,     inAT(i+1, ii+1), maxn );
@@ -327,7 +327,7 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
               magmablas_ztranspose2( inAT(i,s), maxn, dA, cols, rows, nb0);
 
                       /* update with the last (in case the matrix is wide; i.e., n > m). */
-              cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+              magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
                            N-s*nb-nb0, nb0,
                            c_one, inAT(i, s),     maxn, 
                                   inAT(i, s)+nb0, maxn);

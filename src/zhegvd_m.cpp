@@ -339,7 +339,7 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
                 *(unsigned char *)trans = MagmaConjTrans;
             }
             
-            //cublasZtrmm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit, 
+            //magma_ztrmm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit, 
             //            n, n, c_one, db, lddb, da, ldda);
         }
         

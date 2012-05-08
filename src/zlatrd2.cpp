@@ -233,7 +233,7 @@ magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
           cublasSetVector(i, sizeof(cuDoubleComplex), A(0, i), 1, dA(0, i), 1);
 
 #if (GPUSHMEM < 200)
-          cublasZhemv(MagmaUpper, i, c_one, dA(0, 0), ldda,
+          magma_zhemv(MagmaUpper, i, c_one, dA(0, 0), ldda,
                       dA(0, i), ione, c_zero, dW(0, iw), ione);
 #else
           magmablas_zhemv2(MagmaUpper, i, c_one, dA(0, 0), ldda,
@@ -318,7 +318,7 @@ magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
               cublasSetVector(i_n, sizeof(cuDoubleComplex), A(i+1, i), 1, dA(i+1, i), 1);          
           
 #if (GPUSHMEM < 200)
-              cublasZhemv('L', i_n, c_one, dA(i+1, i+1), ldda, dA(i+1, i), ione, c_zero,
+              magma_zhemv(MagmaLower, i_n, c_one, dA(i+1, i+1), ldda, dA(i+1, i), ione, c_zero,
                           dW(i+1, i), ione);
 #else
               magmablas_zhemv2('L', i_n, c_one, dA(i+1, i+1), ldda, dA(i+1, i), ione, c_zero,

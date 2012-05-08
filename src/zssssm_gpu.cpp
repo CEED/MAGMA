@@ -13,9 +13,9 @@
 */
 #include "common_magma.h"
 
-#define cublasZgemm magmablas_zgemm
-//#define cublasZtrsm magmablas_ztrsm
-//#define cublasZtrmm magmablas_ztrmm
+#define magma_zgemm magmablas_zgemm
+//#define magma_ztrsm magmablas_ztrsm
+//#define magma_ztrmm magmablas_ztrmm
 
 extern "C" magma_int_t
 magma_zssssm_gpu(char storev, magma_int_t m1, magma_int_t n1, 
@@ -174,20 +174,20 @@ magma_zssssm_gpu(char storev, magma_int_t m1, magma_int_t n1,
 
 #ifndef WITHOUTTRTRI
         /* Lower, Trans, because L1 is not transposed */
-        cublasZtrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
+        magma_ztrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
                      n1, sb, 
                      c_one, L1( ii),    lddl1,
                             A1T(ii, 0), ldda1);
 #else
         /* Lower, Trans, because L1 is not transposed */
-        cublasZtrsm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
+        magma_ztrsm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
                      n1, sb, 
                      c_one, L1( ii),    lddl1,
                             A1T(ii, 0), ldda1);
 #endif
 
         /* Second parameter is trans because L2 is not transposed */
-        cublasZgemm( MagmaNoTrans, transL, 
+        magma_zgemm( MagmaNoTrans, transL, 
                      n2, m2, sb, 
                      c_neg_one, A1T(ii, 0), ldda1,
                                 L2( 0, ii), lddl2, 

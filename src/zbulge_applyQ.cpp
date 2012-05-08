@@ -88,7 +88,7 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
     ldwork  = NE;
     LWORK   = 2*N*max(Vblksiz,64);
     if(MAGMA_SUCCESS != magma_zmalloc( &dwork, LWORK )) { 
-       printf ("!!!!  magma_zbulge_applyQ cublasAlloc failed for: dwork\n" );       
+       printf ("!!!!  magma_zbulge_applyQ magma_alloc failed for: dwork\n" );       
        exit(-1);                                                           
     }
 #else
@@ -159,11 +159,11 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
 #if defined(USEMAGMA)
                        if(WANTZ==1){
                           len =  N-colst;    
-                          magma_zlarfb_gpu( 'L', 'N', 'F', 'C', vlen, len, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(fst,colst), LDE, dwork, len);
+                          magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, vlen, len, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(fst,colst), LDE, dwork, len);
                        }else{
-                          magma_zlarfb_gpu( 'L', 'N', 'F', 'C', vlen, NE, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(fst,0), LDE, dwork, NE);
+                          magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, vlen, NE, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(fst,0), LDE, dwork, NE);
                        }
-                          // magma_zormqr2_gpu('L', 'N', vlen, N, vnb, dV(vpos), LDV, TAU(taupos), dE(fst,0), LDE, V(vpos), LDV, INFO );
+                          // magma_zormqr2_gpu(MagmaLeft, MagmaNoTrans, vlen, N, vnb, dV(vpos), LDV, TAU(taupos), dE(fst,0), LDE, V(vpos), LDV, INFO );
 #else
                        if(WANTZ==1){
                           len =  N-colst;    
@@ -244,13 +244,13 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
 #if defined(USEMAGMA)
                 #if defined(USESTREAM)
                    magmablasSetKernelStream(stream[0]);                       
-                   magma_zlarfb_gpu( 'R', 'N', 'F', 'C', N1, vlen, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(0, fst), LDE, dwork, N1);
+                   magma_zlarfb_gpu( MagmaRight, MagmaNoTrans, MagmaForward, MagmaColumnwise, N1, vlen, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(0, fst), LDE, dwork, N1);
                    magmablasSetKernelStream(stream[1]);        
-                   magma_zlarfb_gpu( 'R', 'N', 'F', 'C', N2, vlen, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(N1, fst), LDE, &dwork[N1*Vblksiz], N2);
+                   magma_zlarfb_gpu( MagmaRight, MagmaNoTrans, MagmaForward, MagmaColumnwise, N2, vlen, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(N1, fst), LDE, &dwork[N1*Vblksiz], N2);
                 #else
-                   magma_zlarfb_gpu( 'R', 'N', 'F', 'C', NE, vlen, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(0, fst), LDE, dwork, NE);
+                   magma_zlarfb_gpu( MagmaRight, MagmaNoTrans, MagmaForward, MagmaColumnwise, NE, vlen, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(0, fst), LDE, dwork, NE);
                 #endif
-                   //magma_zormqr2_gpu('R', 'N',N, vlen, vnb, dV(vpos), LDV, TAU(tpos), dE(0, fst), LDE, V(vpos), LDV, INFO );
+                   //magma_zormqr2_gpu( MagmaRight, MagmaNoTrans, N, vlen, vnb, dV(vpos), LDV, TAU(tpos), dE(0, fst), LDE, V(vpos), LDV, INFO );
 #else                       
                    //DORMQR( "R", "N", &N, &vlen, &vnb, V(vpos), &LDV, TAU(taupos), E(0,fst), &LDE,  WORK, &LWORK, INFO );
                    lapackf77_zlarfb( "R", "N", "F", "C", &NE, &vlen, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(0, fst), &LDE,  WORK, &NE);       

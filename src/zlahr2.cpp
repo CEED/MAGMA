@@ -13,7 +13,7 @@
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-// #define cublasZgemv magmablas_zgemv
+// #define magma_zgemv magmablas_zgemv
 #endif
 // === End defining what BLAS to use =======================================
 
@@ -230,7 +230,7 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
         cublasSetVector(i__3, sizeof(cuDoubleComplex), 
                         &a[k + i__ + i__*a_dim1], 1, dv+(i__-1)*(ldda+1), 1);
 
-        cublasZgemv('N', i__2+1, i__3, c_one, 
+        magma_zgemv(MagmaNoTrans, i__2+1, i__3, c_one, 
                     da -1 + k + i__ * ldda, ldda, 
                     dv+(i__-1)*(ldda+1), c__1, c_zero, 
                     da-1 + k + (i__-1)*ldda, c__1);     

@@ -279,7 +279,7 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
                 *(unsigned char *)trans = MagmaNoTrans;
             }
 
-            cublasDtrsm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit,
+            magma_dtrsm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit,
                         n, n, d_one, db, lddb, da, ldda);
 
         } else if (itype == 3) 
@@ -292,7 +292,7 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
                 *(unsigned char *)trans = MagmaTrans;
             }
 
-            cublasDtrmm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit, 
+            magma_dtrmm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit, 
                         n, n, d_one, db, lddb, da, ldda);
         }
 

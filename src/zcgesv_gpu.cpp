@@ -209,17 +209,17 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
     magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dworkd, N);
      /* TODO: update optimisation from gemv_MLU into classic gemv */
     if ( NRHS == 1 ) 
-        cublasZgemv( trans, N, N, c_neg_one, dA, ldda, dX, 1, c_one, dworkd, 1);
+        magma_zgemv( trans, N, N, c_neg_one, dA, ldda, dX, 1, c_one, dworkd, 1);
     else
-        cublasZgemm( trans, MagmaNoTrans, N, NRHS, N, c_neg_one, dA, ldda, dX, lddx, c_one, dworkd, N);
+        magma_zgemm( trans, MagmaNoTrans, N, NRHS, N, c_neg_one, dA, ldda, dX, lddx, c_one, dworkd, N);
     
     for(i=0;i<NRHS;i++)
     {
-        j = cublasIzamax( N, dX+i*lddx, 1) ;
+        j = magma_izamax( N, dX+i*lddx, 1) ;
         cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), dX+i*lddx+j-1, 1, &Xnrmv, 1);
         Xnrm = lapackf77_zlange( "F", &ione, &ione, &Xnrmv, &ione, NULL );
         
-        j = cublasIzamax ( N, dworkd+i*N, 1 );
+        j = magma_izamax ( N, dworkd+i*N, 1 );
         cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), dworkd+i*N+j-1, 1, &Rnrmv, 1 );
         Rnrm = lapackf77_zlange( "F", &ione, &ione, &Rnrmv, &ione, NULL );
         
@@ -256,9 +256,9 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
         //magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dworkd, N);
         if( NRHS == 1 )
             /* TODO: update optimisation from gemv_MLU into classic gemv */
-            cublasZgemv( trans, N, N, c_neg_one, dA, ldda, dX, 1, c_one, dworkd, 1);
+            magma_zgemv( trans, N, N, c_neg_one, dA, ldda, dX, 1, c_one, dworkd, 1);
         else
-            cublasZgemm( trans, MagmaNoTrans, N, NRHS, N, c_neg_one, dA, ldda, dX, lddx, c_one, dworkd, N);
+            magma_zgemm( trans, MagmaNoTrans, N, NRHS, N, c_neg_one, dA, ldda, dX, lddx, c_one, dworkd, N);
         
         /*
           Check whether the NRHS normwise backward errors satisfy the
@@ -266,11 +266,11 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
         */
         for(i=0;i<NRHS;i++)
         {
-            j = cublasIzamax( N, dX+i*lddx, 1) ;
+            j = magma_izamax( N, dX+i*lddx, 1) ;
             cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), dX+i*lddx+j-1, 1, &Xnrmv, 1);
             Xnrm = lapackf77_zlange( "F", &ione, &ione, &Xnrmv, &ione, NULL );
             
-            j = cublasIzamax ( N, dworkd+i*N, 1 );
+            j = magma_izamax ( N, dworkd+i*N, 1 );
             cublasGetMatrix( 1, 1, sizeof(cuDoubleComplex), dworkd+i*N+j-1, 1, &Rnrmv, 1 );
             Rnrm = lapackf77_zlange( "F", &ione, &ione, &Rnrmv, &ione, NULL );
             

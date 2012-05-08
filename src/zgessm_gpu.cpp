@@ -13,9 +13,9 @@
 */
 #include "common_magma.h"
 
-#define cublasZgemm magmablas_zgemm
-//#define cublasZtrsm magmablas_ztrsm
-//#define cublasZtrmm magmablas_ztrmm
+#define magma_zgemm magmablas_zgemm
+//#define magma_ztrsm magmablas_ztrsm
+//#define magma_ztrmm magmablas_ztrmm
 
 extern "C" magma_int_t
 magma_zgessm_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t k, magma_int_t ib, 
@@ -118,19 +118,19 @@ magma_zgessm_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t k, magm
         magmablas_zlaswp( n, dAT, ldda, i+1, i+sb, ipiv, 1 );
 
 #ifndef WITHOUTTRTRI
-        cublasZtrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
+        magma_ztrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
                      n, sb, 
                      c_one, dL1(i),   lddl1,
                             AT(i, 0), ldda);
 #else
-        cublasZtrsm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
+        magma_ztrsm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
                      n, sb, 
                      c_one, L( i, i), lddl,
                             AT(i, 0), ldda);
 #endif
 
         if ( (i+sb) < m) {
-            cublasZgemm( MagmaNoTrans, MagmaTrans, 
+            magma_zgemm( MagmaNoTrans, MagmaTrans, 
                          n, m-(i+sb), sb, 
                          c_neg_one, AT(i,    0), ldda,
                                     L( i+sb, i), lddl, 

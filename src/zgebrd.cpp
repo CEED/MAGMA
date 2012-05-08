@@ -16,7 +16,7 @@
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-  #define cublasZgemm magmablas_zgemm
+  #define magma_zgemm magmablas_zgemm
 #endif
 // === End defining what BLAS to use ======================================
 
@@ -244,13 +244,13 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
                         work  + (ldwrkx+1)*nb, ldwrky,
                         dwork + (ldwrkx+1)*nb, ldwrky);
 
-        cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
+        magma_zgemm( MagmaNoTrans, MagmaConjTrans, 
                      nrow, ncol, nb, 
                      c_neg_one, dA(i+nb, i   ),      ldda,
                                 dwork+(ldwrkx+1)*nb, ldwrky,
                      c_one,     dA(i+nb, i+nb),      ldda);
 
-        cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+        magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
                      nrow, ncol, nb, 
                      c_neg_one, dwork+nb,         ldwrkx,
                                 dA( i,    i+nb ), ldda,

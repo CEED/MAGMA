@@ -323,7 +323,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
                         cublasSetKernelStream(stream[igpu][j%2]);
-                        cublasZtrsm(side, uplo, transa, diag, jb, nloc[igpu], alpha_, dA(igpu, j, j%2), ldda,
+                        magma_ztrsm(side, uplo, transa, diag, jb, nloc[igpu], alpha_, dA(igpu, j, j%2), ldda,
                                     dB(igpu, j, 0), lddb );
                     }
 
@@ -331,7 +331,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][j%2]);
-                            cublasZgemm(transa, 'N', j*nb, nloc[igpu], jb, c_neg_one, dA(igpu, 0, j%2), ldda,
+                            magma_zgemm(transa, MagmaNoTrans, j*nb, nloc[igpu], jb, c_neg_one, dA(igpu, 0, j%2), ldda,
                                         dB(igpu, j, 0), lddb, alpha_, dB(igpu, 0, 0), lddb );
                         }
                     }
@@ -400,7 +400,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
                         cublasSetKernelStream(stream[igpu][j%2]);
-                        cublasZtrsm(side, uplo, transa, diag, jb, nloc[igpu], alpha_, dA(igpu, j, j%2), ldda,
+                        magma_ztrsm(side, uplo, transa, diag, jb, nloc[igpu], alpha_, dA(igpu, j, j%2), ldda,
                                     dB(igpu, j, 0), lddb );
                     }
 
@@ -409,7 +409,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][j%2]);
-                            cublasZgemm(transa, 'N', m-(j+1)*nb, nloc[igpu], nb, c_neg_one, dA(igpu, j+1, j%2), ldda,
+                            magma_zgemm(transa, MagmaNoTrans, m-(j+1)*nb, nloc[igpu], nb, c_neg_one, dA(igpu, j+1, j%2), ldda,
                                         dB(igpu, j, 0), lddb, alpha_, dB(igpu, j+1, 0), lddb );
                         }
                     }
@@ -484,7 +484,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
                         cublasSetKernelStream(stream[igpu][j%2]);
-                        cublasZtrsm(side, uplo, transa, diag, jb, nloc[igpu], alpha_, dA(igpu, j%2, j), ldda,
+                        magma_ztrsm(side, uplo, transa, diag, jb, nloc[igpu], alpha_, dA(igpu, j%2, j), ldda,
                                     dB(igpu, j, 0), lddb );
                     }
 
@@ -493,7 +493,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][j%2]);
-                            cublasZgemm(transa, 'N', m-(j+1)*nb, nloc[igpu], nb, c_neg_one, dA(igpu, j%2, j+1), ldda,
+                            magma_zgemm(transa, MagmaNoTrans, m-(j+1)*nb, nloc[igpu], nb, c_neg_one, dA(igpu, j%2, j+1), ldda,
                                         dB(igpu, j, 0), lddb, alpha_, dB(igpu, j+1, 0), lddb );
                         }
                     }
@@ -562,7 +562,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
                         cublasSetKernelStream(stream[igpu][j%2]);
-                        cublasZtrsm(side, uplo, transa, diag, jb, nloc[igpu], alpha_, dA(igpu, j%2, j), ldda,
+                        magma_ztrsm(side, uplo, transa, diag, jb, nloc[igpu], alpha_, dA(igpu, j%2, j), ldda,
                                     dB(igpu, j, 0), lddb );
                     }
 
@@ -570,7 +570,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][j%2]);
-                            cublasZgemm(transa, 'N', j*nb, nloc[igpu], jb, c_neg_one, dA(igpu, j%2, 0), ldda,
+                            magma_zgemm(transa, MagmaNoTrans, j*nb, nloc[igpu], jb, c_neg_one, dA(igpu, j%2, 0), ldda,
                                         dB(igpu, j, 0), lddb, alpha_, dB(igpu, 0, 0), lddb );
                         }
                     }
@@ -646,7 +646,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
                         cublasSetKernelStream(stream[igpu][k%2]);
-                        cublasZtrsm(side, uplo, transa, diag, mloc[igpu], kb, alpha_, dA(igpu, k%2, k), ldda,
+                        magma_ztrsm(side, uplo, transa, diag, mloc[igpu], kb, alpha_, dA(igpu, k%2, k), ldda,
                                     dB(igpu, 0, k), lddb );
                     }
 
@@ -655,7 +655,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][k%2]);
-                            cublasZgemm('N', transa, mloc[igpu], n-(k+1)*nb, nb, c_neg_one, dB(igpu, 0, k), lddb,
+                            magma_zgemm(MagmaNoTrans, transa, mloc[igpu], n-(k+1)*nb, nb, c_neg_one, dB(igpu, 0, k), lddb,
                                         dA(igpu, k%2, k+1), ldda, alpha_, dB(igpu, 0, k+1), lddb );
                         }
                     }
@@ -723,7 +723,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
                         cublasSetKernelStream(stream[igpu][k%2]);
-                        cublasZtrsm(side, uplo, transa, diag, mloc[igpu], kb, alpha_, dA(igpu, k%2, k), ldda,
+                        magma_ztrsm(side, uplo, transa, diag, mloc[igpu], kb, alpha_, dA(igpu, k%2, k), ldda,
                                     dB(igpu, 0, k), lddb );
                     }
 
@@ -731,7 +731,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][k%2]);
-                            cublasZgemm('N', transa, mloc[igpu], k*nb, kb, c_neg_one, dB(igpu, 0, k), lddb,
+                            magma_zgemm(MagmaNoTrans, transa, mloc[igpu], k*nb, kb, c_neg_one, dB(igpu, 0, k), lddb,
                                         dA(igpu, k%2, 0), ldda, alpha_, dB(igpu, 0, 0), lddb );
                         }
                     }
@@ -804,7 +804,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
                         cublasSetKernelStream(stream[igpu][k%2]);
-                        cublasZtrsm(side, uplo, transa, diag, mloc[igpu], kb, alpha_, dA(igpu, k, k%2), ldda,
+                        magma_ztrsm(side, uplo, transa, diag, mloc[igpu], kb, alpha_, dA(igpu, k, k%2), ldda,
                                     dB(igpu, 0, k), lddb );
                     }
 
@@ -812,7 +812,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][k%2]);
-                            cublasZgemm('N', transa, mloc[igpu], k*nb, kb, c_neg_one, dB(igpu, 0, k), lddb,
+                            magma_zgemm(MagmaNoTrans, transa, mloc[igpu], k*nb, kb, c_neg_one, dB(igpu, 0, k), lddb,
                                         dA(igpu, 0, k%2), ldda, alpha_, dB(igpu, 0, 0), lddb );
                         }
                     }
@@ -880,7 +880,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     for (igpu = 0; igpu < nrgpu; ++igpu){
                         cudaSetDevice(igpu);
                         cublasSetKernelStream(stream[igpu][k%2]);
-                        cublasZtrsm(side, uplo, transa, diag, mloc[igpu], kb, alpha_, dA(igpu, k, k%2), ldda,
+                        magma_ztrsm(side, uplo, transa, diag, mloc[igpu], kb, alpha_, dA(igpu, k, k%2), ldda,
                                     dB(igpu, 0, k), lddb );
                     }
 
@@ -889,7 +889,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         for (igpu = 0; igpu < nrgpu; ++igpu){
                             cudaSetDevice(igpu);
                             cublasSetKernelStream(stream[igpu][k%2]);
-                            cublasZgemm('N', transa, mloc[igpu], n-(k+1)*nb, nb, c_neg_one, dB(igpu, 0, k), lddb,
+                            magma_zgemm(MagmaNoTrans, transa, mloc[igpu], n-(k+1)*nb, nb, c_neg_one, dB(igpu, 0, k), lddb,
                                         dA(igpu, k+1, k%2), ldda, alpha_, dB(igpu, 0, k+1), lddb );
                         }
                     }

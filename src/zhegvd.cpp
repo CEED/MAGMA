@@ -14,22 +14,22 @@
 #include "common_magma.h"
 
 /* This ztrmm interface is used for TAU profiling */
-void MycublasZtrmm(char side, char uplo, char trans, char unit,
+void Mymagma_ztrmm(char side, char uplo, char trans, char unit,
                    magma_int_t n, magma_int_t m,
                    cuDoubleComplex alpha, cuDoubleComplex *db, magma_int_t lddb,
                    cuDoubleComplex *dz, magma_int_t lddz)
 {
-  cublasZtrmm(side, uplo, trans, unit, n, m, alpha, db, lddb, dz, lddz);
+  magma_ztrmm(side, uplo, trans, unit, n, m, alpha, db, lddb, dz, lddz);
   cudaDeviceSynchronize();
 }
 
 /* This ztrsm interface is used for TAU profiling */
-void MycublasZtrsm(char side, char uplo, char trans, char unit,
+void Mymagma_ztrsm(char side, char uplo, char trans, char unit,
                    magma_int_t n, magma_int_t m,
                    cuDoubleComplex alpha, cuDoubleComplex *db, magma_int_t lddb,
                    cuDoubleComplex *dz, magma_int_t lddz)
 {
-  cublasZtrsm(side, uplo, trans, unit, n, m, alpha, db, lddb, dz, lddz);
+  magma_ztrsm(side, uplo, trans, unit, n, m, alpha, db, lddb, dz, lddz);
   cudaDeviceSynchronize();
 }
 
@@ -326,7 +326,7 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
                 *(unsigned char *)trans = MagmaNoTrans;
             }
 
-            MycublasZtrsm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit,
+            Mymagma_ztrsm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit,
                           n, n, c_one, db, lddb, da, ldda);
 
         } else if (itype == 3)
@@ -339,7 +339,7 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
                 *(unsigned char *)trans = MagmaConjTrans;
             }
 
-            MycublasZtrmm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit,
+            Mymagma_ztrmm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit,
                           n, n, c_one, db, lddb, da, ldda);
         }
 

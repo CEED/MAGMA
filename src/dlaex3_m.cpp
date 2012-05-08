@@ -534,7 +534,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
 #endif
                         cudaSetDevice(igpu+1);
                         cublasSetKernelStream(stream[igpu+1][ind]);
-                        cublasDgemm('N', 'N', ni_loc[igpu+1], ib, n23, d_one, dQ2(igpu+1), n2_loc,
+                        magma_dgemm(MagmaNoTrans, MagmaNoTrans, ni_loc[igpu+1], ib, n23, d_one, dQ2(igpu+1), n2_loc,
                                     dS(igpu+1, ind), n23, d_zero, dQ(igpu+1, ind), n2_loc);
 #ifdef CHECK_CPU
                         printf("norm Q %d: %f\n", igpu+1, cpu_gpu_ddiff(ni_loc[igpu+1], ib, hQ(igpu+1, ind), n2_loc, dQ(igpu+1, ind), n2_loc));
@@ -547,7 +547,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
 #endif
                         cudaSetDevice(igpu);
                         cublasSetKernelStream(stream[igpu][ind]);
-                        cublasDgemm('N', 'N', ni_loc[igpu], ib, n12, d_one, dQ2(igpu), n1_loc,
+                        magma_dgemm(MagmaNoTrans, MagmaNoTrans, ni_loc[igpu], ib, n12, d_one, dQ2(igpu), n1_loc,
                                     dS(igpu, ind), n12, d_zero, dQ(igpu, ind), n1_loc);
 #ifdef CHECK_CPU
                         printf("norm Q %d: %f\n", igpu, cpu_gpu_ddiff(ni_loc[igpu], ib, hQ(igpu, ind), n1_loc, dQ(igpu, ind), n1_loc));

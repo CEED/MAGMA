@@ -19,7 +19,7 @@
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-  #define cublasZgemm magmablas_zgemm
+  #define magma_zgemm magmablas_zgemm
 #endif
 // === End defining what BLAS to use =======================================
 
@@ -67,7 +67,7 @@ extern "C" void TRD_type3cHLsym_withQ(int N, int NB, cuDoubleComplex *A, int LDA
 #define magma_ztrdtype3cbHLsym_withQ                magma_dtrdtype3cbHLsym_withQ
 #define magma_zbulge_applyQ                           magma_dbulge_applyQ
 #define magma_zstedc_withZ                        magma_dstedc_withZ
-#define cublasZgemm                                 magmablas_dgemm
+#define magma_zgemm                                 magmablas_dgemm
 */
 
 extern "C" void magma_ztrdtype1cbHLsym_withQ(int N, int NB, cuDoubleComplex *A, int LDA, cuDoubleComplex *V, cuDoubleComplex *TAU, int st, int ed, int sweep, int Vblksiz);
@@ -491,7 +491,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
         mkl_set_num_threads(mklth);
 #endif
         // call eigensolver for our resulting tridiag [D E] and form E=Q*Z
-        magma_zstedc_withZ('N', N, D2, E2, Z, LDZ);
+        magma_zstedc_withZ(MagmaNoVectors, N, D2, E2, Z, LDZ);
 #if defined(USEMKL)
         mkl_set_num_threads( 1 );
 #endif
@@ -579,12 +579,12 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
            dVsize = max(N*N,blkcnt*LDV*Vblksiz);
            //printf("dvsize %lf \n",(16.0*(real_Double_t)dVsize)*1e-9);
            if(MAGMA_SUCCESS != magma_zmalloc( &dV2, dVsize )) { 
-               printf ("!!!! cublasAlloc failed for: dV2\n" );       
+               printf ("!!!! magma_alloc failed for: dV2\n" );       
                exit(-1);                                                           
            }
     
            if(MAGMA_SUCCESS != magma_zmalloc( &dT2, blkcnt*LDT*Vblksiz )) { 
-              printf ("!!!! cublasAlloc failed for: dT2\n" );       
+              printf ("!!!! magma_alloc failed for: dT2\n" );       
               exit(-1);                                                           
            }
 
@@ -625,7 +625,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                timeaplQ2 = get_time_azz()-timeaplQ2;
                magma_free( dT2 );
                if(MAGMA_SUCCESS != magma_zmalloc( &dZ, N*N )) { 
-                  printf ("!!!! cublasAlloc failed for: dZ\n" );       
+                  printf ("!!!! magma_alloc failed for: dZ\n" );       
                   exit(-1);                                                           
                }
 
@@ -644,11 +644,11 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                // copy the eigenvectors to GPU
                cublasSetMatrix(N, LDZ, sizeof(cuDoubleComplex), Z, LDZ, dZ, N);
                // make GEMM Q2 * Z --> dV2 = da * dZ
-               cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, da, N, dZ, N, c_zero, dV2, N);
+               magma_zgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, da, N, dZ, N, c_zero, dV2, N);
                // copy Q1 to GPU --> dZ
                cublasSetMatrix(N, LDA1, sizeof(cuDoubleComplex), A1, LDA1, dZ, N);
                // make GEMM Q1 * (Q2 * Z) --> da = dZ * dV2
-               cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, dZ, N, dV2, N, c_zero, da, N);
+               magma_zgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, dZ, N, dV2, N, c_zero, da, N);
                cublasGetMatrix(N, NE, sizeof(cuDoubleComplex), da, N, A1, LDA1);
                timegemm = get_time_azz()-timegemm;
            }
@@ -747,14 +747,14 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                 * **************************************************/
                magma_free( dT1 );
                if(MAGMA_SUCCESS != magma_zmalloc( &dZ, N*NE )) { 
-                  printf ("!!!! cublasAlloc failed for: dZ\n" );       
+                  printf ("!!!! magma_alloc failed for: dZ\n" );       
                   exit(-1);                                                           
                }
                timegemm = get_time_azz();
                // copy the eigenvectors to GPU
                cublasSetMatrix(N, NE, sizeof(cuDoubleComplex), Z, LDZ, dZ, N);
                //make a gemm of (Q1 * Q2) * Z = da * dZ --> dV2
-               cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, da, N, dZ, N, c_zero, dV2, N);
+               magma_zgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, da, N, dZ, N, c_zero, dV2, N);
                cublasGetMatrix(N, NE, sizeof(cuDoubleComplex), dV2, N, A1, LDA1);
                timegemm = get_time_azz()-timegemm;
            }
@@ -765,7 +765,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                 * **************************************************/
                magma_free( dT1 );
                if(MAGMA_SUCCESS != magma_zmalloc( &dZ, N*NE )) { 
-                  printf ("!!!! cublasAlloc failed for: dZ\n" );       
+                  printf ("!!!! magma_alloc failed for: dZ\n" );       
                   exit(-1);                                                           
                }
                timeaplQ2 = get_time_azz();
@@ -853,7 +853,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                printf("calling dgemm\n");
                timegemm = get_time_azz();
                //make a gemm of Q1 * (Q2 * Z) = Q1 * ((I-V2T2V2')*Z) = da * dZ --> dV2
-               cublasZgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, da, N, dZ, N, c_zero, dV2, N);
+               magma_zgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, da, N, dZ, N, c_zero, dV2, N);
                cublasGetMatrix(N, NE, sizeof(cuDoubleComplex), dV2, N, A1, LDA1);
                timegemm = get_time_azz()-timegemm;
            }
@@ -874,7 +874,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                mkl_set_num_threads(mklth);
                #endif
                // call eigensolver for our resulting tridiag [D E] and form E=Q*Z
-               magma_zstedc_withZ('V', N, D2, E2, A1, LDA1);
+               magma_zstedc_withZ(MagmaVectors, N, D2, E2, A1, LDA1);
                #if defined(USEMKL)
                mkl_set_num_threads( 1 );
                #endif
@@ -978,7 +978,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
        if(WANTZ!=1) JOBZ='N';
        if(WANTZ==1) JOBZ='V';
        magma_zstedc_withZ(JOBZ, N, D2, E2, Q2, LDQ2);            
-       //magma_zstedc_withZ('N', N, D2, E2, Q1, LDQ1);            
+       //magma_zstedc_withZ(MagmaNoVectors, N, D2, E2, Q1, LDQ1);            
     }
     
 

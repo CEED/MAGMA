@@ -13,7 +13,7 @@
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-//  #define cublasZgemv magmablas_zgemv
+//  #define magma_zgemv magmablas_zgemv
 #endif
 // === End defining what BLAS to use ======================================
 
@@ -230,7 +230,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                                 a + i__   + i__   * a_dim1, 1,
                                 da+(i__-1)+(i__-1)* (ldda), 1);
                 // 2. Multiply ---------------------------------------------
-                cublasZgemv(MagmaConjTrans, i__2, i__3, c_one, 
+                magma_zgemv(MagmaConjTrans, i__2, i__3, c_one, 
                             da + (i__-1) + ((i__-1) + 1) * (ldda), ldda, 
                             da + (i__-1) + (i__-1) * (ldda), c__1, c_zero, 
                             dy + i__ + 1 + i__ * y_dim1, c__1);
@@ -313,9 +313,9 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                                 a + i__   + (i__   +1)* a_dim1, lda,
                                 da+(i__-1)+((i__-1)+1)*(ldda), ldda);
                 // 2. Multiply ---------------------------------------------
-                //cublasZcopy(i__3, da+(i__-1)+((i__-1)+1)*(ldda), ldda,
+                //magma_zcopy(i__3, da+(i__-1)+((i__-1)+1)*(ldda), ldda,
                 //            dy + 1 + lddy, 1);
-                cublasZgemv('N', i__2, i__3, c_one,
+                magma_zgemv(MagmaNoTrans, i__2, i__3, c_one,
                             da + (i__-1)+1+ ((i__-1)+1) * (ldda), ldda,
                             da + (i__-1) +  ((i__-1)+1) * (ldda), ldda,
                             //dy + 1 + lddy, 1,
@@ -415,9 +415,9 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                           da+(i__-1)+(i__-1)* (ldda), ldda);
 
           // 2. Multiply ---------------------------------------------
-          //cublasZcopy(i__3, da+(i__-1)+(i__-1)*(ldda), ldda,
+          //magma_zcopy(i__3, da+(i__-1)+(i__-1)*(ldda), ldda,
           //            dy + 1 + lddy, 1);
-          cublasZgemv(MagmaNoTrans, i__2, i__3, c_one,
+          magma_zgemv(MagmaNoTrans, i__2, i__3, c_one,
                       da + (i__-1)+1 + (i__-1) * ldda, ldda,
                       da + (i__-1)   + (i__-1) * ldda, ldda,
                       // dy + 1 + lddy, 1,
@@ -504,7 +504,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                           a + i__   +1+  i__   * a_dim1, 1,
                           da+(i__-1)+1+ (i__-1)*(ldda), 1);
           // 2. Multiply ---------------------------------------------
-          cublasZgemv(MagmaConjTrans, i__2, i__3, c_one,
+          magma_zgemv(MagmaConjTrans, i__2, i__3, c_one,
                       da + (i__-1)+1+ ((i__-1)+1) * ldda, ldda,
                       da + (i__-1)+1+  (i__-1)    * ldda, c__1,
                       c_zero, dy + i__ + 1 + i__ * y_dim1, c__1);

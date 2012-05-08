@@ -14,11 +14,11 @@
 /* === Define what BLAS to use ============================================ */
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-  #define cublasZgemm magmablas_zgemm
-  #define cublasZtrsm magmablas_ztrsm
+  #define magma_zgemm magmablas_zgemm
+  #define magma_ztrsm magmablas_ztrsm
 #endif
 #if (defined(PRECISION_z))
-  #define cublasZgemm magmablas_zgemm
+  #define magma_zgemm magmablas_zgemm
 #endif
 /* === End defining what BLAS to use ======================================= */
 
@@ -312,10 +312,10 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
                                   cudaMemcpyHostToDevice, stream[d][0]);
 
                 /* update with the block column */
-                cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
                          n_local[d], nb, c_one, inPT(d,0,0), nb, inAT(d,ib,0), ldn_local );
                 if( M > ii+nb ) {
-                  cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+                  magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
                       n_local[d], M-(ii+nb), nb, c_neg_one, inAT(d,ib,0), ldn_local, 
                       inPT(d,1,0), nb, c_one, inAT(d,ib+1,0), ldn_local );
                 }  

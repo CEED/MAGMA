@@ -557,7 +557,7 @@ magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
         iwork[indibl + i - 1] = iwork[indibl + j - 1];
         w[j] = tmp1;
         iwork[indibl + j - 1] = itmp1;
-        cublasZswap(n, dz + (i-1)*lddz, ione, dz + (j-1)*lddz, ione);
+        magma_zswap(n, dz + (i-1)*lddz, ione, dz + (j-1)*lddz, ione);
       }
     }
   }

@@ -17,7 +17,7 @@
 #define PRECISION_z
 
 #if (defined(PRECISION_s))
-     #define cublasSsyr2k magmablas_ssyr2k
+     #define magma_ssyr2k magmablas_ssyr2k
 #endif
 // === End defining what BLAS to use ======================================
 
@@ -255,7 +255,7 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
                             sizeof(cuDoubleComplex)*(pm+pn), pn,
                             cudaMemcpyDeviceToHost,stream[1]);
 
-                 cublasZher2k('L', 'N', pm_old-pn_old, pn_old, c_neg_one,
+                 magma_zher2k(MagmaLower, MagmaNoTrans, pm_old-pn_old, pn_old, c_neg_one,
                       da_ref(indi_old+pn_old, indj_old), ldda,
                       dW + pn_old           , pm_old, d_one,
                       da_ref(indi_old+pn_old, indi_old+pn_old), ldda);
@@ -299,12 +299,12 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
                 ==========================================================  */
              /* dwork = V T */
              cudaStreamSynchronize(stream[0]);
-             cublasZgemm(MagmaNoTrans, MagmaNoTrans, pm, pk, pk,
+             magma_zgemm(MagmaNoTrans, MagmaNoTrans, pm, pk, pk,
                          c_one, da_ref(indi, indj), ldda, 
                          t_ref(i), lddt,
                          c_zero, dwork, pm);
              /* W = X = A*V*T = A dwork */ 
-             cublasZhemm(MagmaLeft, uplo, pm, pk,
+             magma_zhemm(MagmaLeft, uplo, pm, pk,
                          c_one, da_ref(indi, indi), ldda,
                          dwork, pm,
                          c_zero, dW, pm);
@@ -314,13 +314,13 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
              /* dwork = V*T already ==> dwork' =V'*T'
               * compute T'*V'*X ==> dwork'*W ==>
               * dwork + pm*nb = ((T' * V') * X) = dwork' * X = dwork' * W */
-             cublasZgemm(MagmaConjTrans, MagmaNoTrans, pk, pk, pm,
+             magma_zgemm(MagmaConjTrans, MagmaNoTrans, pk, pk, pm,
                          c_one, dwork, pm, 
                          dW, pm,
                          c_zero, dwork + pm*nb, nb);
              /* W = X - 0.5 * V * T'*V'*X
               *   = X - 0.5 * V * (dwork + pm*nb) = W - 0.5 * V * (dwork + pm*nb) */
-             cublasZgemm(MagmaNoTrans, MagmaNoTrans, pm, pk, pk,
+             magma_zgemm(MagmaNoTrans, MagmaNoTrans, pm, pk, pk,
                          c_neg_half, da_ref(indi, indj), ldda,
                          dwork + pm*nb, nb, 
                          c_one,     dW, pm);
@@ -332,18 +332,18 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
              if (i + nb <= n-nb){
                  /* There would be next iteration;
                     do lookahead - update the next panel */
-                 cublasZgemm(MagmaNoTrans, MagmaConjTrans, pm, pn, pn, c_neg_one,
+                 magma_zgemm(MagmaNoTrans, MagmaConjTrans, pm, pn, pn, c_neg_one,
                              da_ref(indi, indj), ldda,
                              dW                , pm, c_one,
                              da_ref(indi, indi), ldda);
-                 cublasZgemm(MagmaNoTrans, MagmaConjTrans, pm, pn, pn, c_neg_one,
+                 magma_zgemm(MagmaNoTrans, MagmaConjTrans, pm, pn, pn, c_neg_one,
                              dW                , pm,
                              da_ref(indi, indj), ldda, c_one,
                              da_ref(indi, indi), ldda);
              }
              else {
                  /* no look-ahead as this is last iteration */
-                 cublasZher2k('L', 'N', pk, pk, c_neg_one,
+                 magma_zher2k(MagmaLower, MagmaNoTrans, pk, pk, c_neg_one,
                               da_ref(indi, indj), ldda,
                               dW                , pm, d_one,
                               da_ref(indi, indi), ldda);

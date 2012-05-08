@@ -13,11 +13,11 @@
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-  #define cublasZgemm magmablas_zgemm
-  #define cublasZtrsm magmablas_ztrsm
+  #define magma_zgemm magmablas_zgemm
+  #define magma_ztrsm magmablas_ztrsm
 #endif
 #if (defined(PRECISION_z))
-  #define cublasZgemm magmablas_zgemm
+  #define magma_zgemm magmablas_zgemm
 #endif
 // === End defining what BLAS to use =======================================
 
@@ -159,11 +159,11 @@ magma_zgetrf2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
                 // make sure that gpu queue is empty
                 cuCtxSynchronize();
                 
-                cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
                              n - (i+1)*nb, nb, 
                              c_one, inAT(i-1,i-1), ldda, 
                                     inAT(i-1,i+1), ldda );
-                cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
                              n-(i+1)*nb, m-i*nb, nb, 
                              c_neg_one, inAT(i-1,i+1), ldda, 
                                         inAT(i,  i-1), ldda, 
@@ -183,22 +183,22 @@ magma_zgetrf2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
 
             // do the small non-parallel computations
             if (s > (i+1)){
-                cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
                              nb, nb, 
                              c_one, inAT(i, i  ), ldda,
                                     inAT(i, i+1), ldda);
-                cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
                              nb, m-(i+1)*nb, nb, 
                              c_neg_one, inAT(i,   i+1), ldda,
                                         inAT(i+1, i  ), ldda, 
                              c_one,     inAT(i+1, i+1), ldda );
             }
             else{
-                cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
                              n-s*nb, nb,
                              c_one, inAT(i, i  ), ldda,
                                     inAT(i, i+1), ldda);
-                cublasZgemm( MagmaNoTrans, MagmaNoTrans, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
                              n-(i+1)*nb, m-(i+1)*nb, nb,
                              c_neg_one, inAT(i,   i+1), ldda,
                                         inAT(i+1, i  ), ldda, 
@@ -226,7 +226,7 @@ magma_zgetrf2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
           cublasSetMatrix(rows, nb0, sizeof(cuDoubleComplex), work, lda, dA, cols);
           magmablas_ztranspose2( inAT(s,s), ldda, dA, cols, rows, nb0);
           
-          cublasZtrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+          magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
                        n-s*nb-nb0, nb0,
                        c_one, inAT(s, s),     ldda, 
                        inAT(s, s)+nb0, ldda);

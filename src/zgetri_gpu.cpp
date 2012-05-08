@@ -13,14 +13,14 @@
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-  #define cublasZgemm magmablas_zgemm
-  #define cublasZtrsm magmablas_ztrsm
+  #define magma_zgemm magmablas_zgemm
+  #define magma_ztrsm magmablas_ztrsm
 #endif
 
 #if (GPUSHMEM >= 200)
 #if (defined(PRECISION_s))
-    #undef  cublasSgemm
-    #define cublasSgemm magmablas_sgemm_fermi80
+    #undef  magma_sgemm
+    #define magma_sgemm magmablas_sgemm_fermi80
 #endif
 #endif
 // === End defining what BLAS to use ======================================
@@ -130,12 +130,12 @@ magma_zgetri_gpu( magma_int_t n, cuDoubleComplex *dA, magma_int_t lda,
         //   * L(j:j+jb-1, j:j+jb-1)^{-1}
         // where L(:, j:j+jb-1) is stored in dL.
         if ( j+jb < n ) {
-            cublasZgemm( MagmaNoTrans, MagmaNoTrans, n, jb, n-j-jb,
+            magma_zgemm( MagmaNoTrans, MagmaNoTrans, n, jb, n-j-jb,
                          c_neg_one, &dA[(j+jb)*lda], lda,
                                     &dL[ j+jb     ], ldl,
                          c_one,     &dA[     j*lda], lda );
         }
-        cublasZtrsm( MagmaRight, MagmaLower, MagmaNoTrans, MagmaUnit,
+        magma_ztrsm( MagmaRight, MagmaLower, MagmaNoTrans, MagmaUnit,
                      n, jb, c_one,
                      &dL[j    ], ldl,
                      &dA[j*lda], lda );

@@ -176,20 +176,20 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                                  sizeof(cuDoubleComplex)*kb2, kb2,
                                  cudaMemcpyDeviceToHost, stream[2]);
             
-              cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
+              magma_ztrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
                           kb, n-k-kb,
                           c_one, dB(k,k), lddb, 
                           dA(k,k+kb), ldda); 
             
               cudaStreamSynchronize(stream[0]);
             
-              cublasZhemm(MagmaLeft, MagmaUpper,
+              magma_zhemm(MagmaLeft, MagmaUpper,
                           kb, n-k-kb,
                           c_neg_half, dA(k,k), ldda,
                           dB(k,k+kb), lddb,
                           c_one, dA(k, k+kb), ldda);
               
-              cublasZher2k(MagmaUpper, MagmaConjTrans,
+              magma_zher2k(MagmaUpper, MagmaConjTrans,
                            n-k-kb, kb,
                            c_neg_one, dA(k,k+kb), ldda,
                            dB(k,k+kb), lddb,
@@ -200,13 +200,13 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                                  sizeof(cuDoubleComplex)*kb2, kb2,
                                  cudaMemcpyDeviceToHost, stream[1]);
             
-              cublasZhemm(MagmaLeft, MagmaUpper,
+              magma_zhemm(MagmaLeft, MagmaUpper,
                           kb, n-k-kb,
                           c_neg_half, dA(k,k), ldda,
                           dB(k,k+kb), lddb,
                           c_one, dA(k, k+kb), ldda);
               
-              cublasZtrsm(MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
+              magma_ztrsm(MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
                           kb, n-k-kb,
                           c_one ,dB(k+kb,k+kb), lddb,
                           dA(k,k+kb), ldda);
@@ -256,20 +256,20 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                               sizeof(cuDoubleComplex)*kb2, kb2,
                               cudaMemcpyDeviceToHost, stream[2]);
             
-            cublasZtrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit,
+            magma_ztrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit,
                         n-k-kb, kb,
                         c_one, dB(k,k), lddb, 
                         dA(k+kb,k), ldda);
             
             cudaStreamSynchronize(stream[0]);
             
-            cublasZhemm(MagmaRight, MagmaLower,
+            magma_zhemm(MagmaRight, MagmaLower,
                         n-k-kb, kb,
                         c_neg_half, dA(k,k), ldda,
                         dB(k+kb,k), lddb,
                         c_one, dA(k+kb, k), ldda);
             
-            cublasZher2k(MagmaLower, MagmaNoTrans,
+            magma_zher2k(MagmaLower, MagmaNoTrans,
                          n-k-kb, kb,
                          c_neg_one, dA(k+kb,k), ldda,
                          dB(k+kb,k), lddb,
@@ -280,13 +280,13 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                               sizeof(cuDoubleComplex)*kb2, kb2,
                               cudaMemcpyDeviceToHost, stream[1]);
             
-            cublasZhemm(MagmaRight, MagmaLower,
+            magma_zhemm(MagmaRight, MagmaLower,
                         n-k-kb, kb,
                         c_neg_half, dA(k,k), ldda,
                         dB(k+kb,k), lddb,
                         c_one, dA(k+kb, k), ldda);
             
-            cublasZtrsm(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaNonUnit,
+            magma_ztrsm(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaNonUnit,
                         n-k-kb, kb,
                         c_one, dB(k+kb,k+kb), lddb, 
                         dA(k+kb,k), ldda);            
@@ -315,12 +315,12 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
           /* Update the upper triangle of A(1:k+kb-1,1:k+kb-1) */
           if(k>0){
             
-            cublasZtrmm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
+            magma_ztrmm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
                         k, kb,
                         c_one ,dB(0,0), lddb,
                         dA(0,k), ldda);
             
-            cublasZhemm(MagmaRight, MagmaUpper,
+            magma_zhemm(MagmaRight, MagmaUpper,
                         k, kb,
                         c_half, dA(k,k), ldda,
                         dB(0,k), lddb,
@@ -337,19 +337,19 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
           
           if(k>0){
             
-            cublasZher2k(MagmaUpper, MagmaNoTrans,
+            magma_zher2k(MagmaUpper, MagmaNoTrans,
                          k, kb,
                          c_one, dA(0,k), ldda,
                          dB(0,k), lddb,
                          d_one, dA(0,0), ldda);
             
-            cublasZhemm(MagmaRight, MagmaUpper,
+            magma_zhemm(MagmaRight, MagmaUpper,
                         k, kb,
                         c_half, dA(k,k), ldda,
                         dB(0,k), lddb,
                         c_one, dA(0, k), ldda);
             
-            cublasZtrmm(MagmaRight, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
+            magma_ztrmm(MagmaRight, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
                         k, kb,
                         c_one, dB(k,k), lddb, 
                         dA(0,k), ldda);
@@ -385,12 +385,12 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
           /* Update the lower triangle of A(1:k+kb-1,1:k+kb-1) */
           if(k>0){ 
             
-            cublasZtrmm(MagmaRight, MagmaLower, MagmaNoTrans, MagmaNonUnit,
+            magma_ztrmm(MagmaRight, MagmaLower, MagmaNoTrans, MagmaNonUnit,
                         kb, k,
                         c_one ,dB(0,0), lddb,
                         dA(k,0), ldda);
             
-            cublasZhemm(MagmaLeft, MagmaLower,
+            magma_zhemm(MagmaLeft, MagmaLower,
                         kb, k,
                         c_half, dA(k,k), ldda,
                         dB(k,0), lddb,
@@ -407,19 +407,19 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
           
           if(k>0){
             
-            cublasZher2k(MagmaLower, MagmaConjTrans,
+            magma_zher2k(MagmaLower, MagmaConjTrans,
                          k, kb,
                          c_one, dA(k,0), ldda,
                          dB(k,0), lddb,
                          d_one, dA(0,0), ldda);
             
-            cublasZhemm(MagmaLeft, MagmaLower,
+            magma_zhemm(MagmaLeft, MagmaLower,
                         kb, k,
                         c_half, dA(k,k), ldda,
                         dB(k,0), lddb,
                         c_one, dA(k, 0), ldda);
             
-            cublasZtrmm(MagmaLeft, MagmaLower, MagmaConjTrans, MagmaNonUnit,
+            magma_ztrmm(MagmaLeft, MagmaLower, MagmaConjTrans, MagmaNonUnit,
                         kb, k,
                         c_one, dB(k,k), lddb, 
                         dA(k,0), ldda);

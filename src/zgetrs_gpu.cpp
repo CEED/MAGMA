@@ -13,7 +13,7 @@
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d)) 
-  #define cublasZtrsm magmablas_ztrsm
+  #define magma_ztrsm magmablas_ztrsm
 #endif
 // === End defining what BLAS to use =======================================
 
@@ -126,22 +126,22 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
         cublasSetMatrix( n, nrhs, sizeof(cuDoubleComplex), work, n, dB, lddb);
 
         if ( nrhs == 1) {
-            cublasZtrsv(MagmaLower, MagmaNoTrans, MagmaUnit,    n, dA, ldda, dB, 1 );
-            cublasZtrsv(MagmaUpper, MagmaNoTrans, MagmaNonUnit, n, dA, ldda, dB, 1 );
+            magma_ztrsv(MagmaLower, MagmaNoTrans, MagmaUnit,    n, dA, ldda, dB, 1 );
+            magma_ztrsv(MagmaUpper, MagmaNoTrans, MagmaNonUnit, n, dA, ldda, dB, 1 );
         } else {
-            cublasZtrsm(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit,    n, nrhs, c_one, dA, ldda, dB, lddb );
-            cublasZtrsm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb );
+            magma_ztrsm(MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit,    n, nrhs, c_one, dA, ldda, dB, lddb );
+            magma_ztrsm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb );
         }
     } else {
         inc = -1;
 
         /* Solve A' * X = B. */
         if ( nrhs == 1) {
-            cublasZtrsv(MagmaUpper, trans, MagmaNonUnit, n, dA, ldda, dB, 1 );
-            cublasZtrsv(MagmaLower, trans, MagmaUnit,    n, dA, ldda, dB, 1 );
+            magma_ztrsv(MagmaUpper, trans, MagmaNonUnit, n, dA, ldda, dB, 1 );
+            magma_ztrsv(MagmaLower, trans, MagmaUnit,    n, dA, ldda, dB, 1 );
         } else {
-            cublasZtrsm(MagmaLeft, MagmaUpper, trans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb );
-            cublasZtrsm(MagmaLeft, MagmaLower, trans, MagmaUnit,    n, nrhs, c_one, dA, ldda, dB, lddb );
+            magma_ztrsm(MagmaLeft, MagmaUpper, trans, MagmaNonUnit, n, nrhs, c_one, dA, ldda, dB, lddb );
+            magma_ztrsm(MagmaLeft, MagmaLower, trans, MagmaUnit,    n, nrhs, c_one, dA, ldda, dB, lddb );
         }
 
         cublasGetMatrix( n, nrhs, sizeof(cuDoubleComplex), dB, lddb, work, n );

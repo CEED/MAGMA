@@ -113,7 +113,7 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 
 
     if(MAGMA_SUCCESS != magma_zmalloc( &dwork, n*nb )) { 
-       printf ("!!!! zungqr_2stage cublasAlloc failed for: dwork\n" );       
+       printf ("!!!! zungqr_2stage magma_alloc failed for: dwork\n" );       
        exit(-1);                                                           
     }
 

@@ -13,7 +13,7 @@
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-//  #define cublasZgemm magmablas_zgemm
+//  #define magma_zgemm magmablas_zgemm
 #endif
 // === End defining what BLAS to use =======================================
 
@@ -164,20 +164,20 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
         // Comments assume H C. When forming H^H C, T gets transposed via transt.
         
         // W = C^H V
-        cublasZgemm( MagmaConjTrans, notransV,
+        magma_zgemm( MagmaConjTrans, notransV,
                      n, k, m,
                      c_one,  dC,    ldc,
                              dV,    ldv,
                      c_zero, dwork, ldwork);
 
         // W = W T^H = C^H V T^H
-        cublasZtrmm( MagmaRight, uplo, transt, MagmaNonUnit,
+        magma_ztrmm( MagmaRight, uplo, transt, MagmaNonUnit,
                      n, k,
                      c_one, dT,    ldt,
                             dwork, ldwork);
 
         // C = C - V W^H = C - V T V^H C = (I - V T V^H) C = H C
-        cublasZgemm( notransV, MagmaConjTrans,
+        magma_zgemm( notransV, MagmaConjTrans,
                      m, n, k,
                      c_neg_one, dV,    ldv,
                                 dwork, ldwork,
@@ -188,20 +188,20 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
         // Comments assume C H. When forming C H^H, T gets transposed via trans.
         
         // W = C V
-        cublasZgemm( MagmaNoTrans, notransV,
+        magma_zgemm( MagmaNoTrans, notransV,
                      m, k, n,
                      c_one,  dC,    ldc,
                              dV,    ldv,
                      c_zero, dwork, ldwork);
 
         // W = W T = C V T
-        cublasZtrmm( MagmaRight, uplo, trans, MagmaNonUnit,
+        magma_ztrmm( MagmaRight, uplo, trans, MagmaNonUnit,
                      m, k,
                      c_one, dT,    ldt,
                             dwork, ldwork);
 
         // C = C - W V^H = C - C V T V^H = C (I - V T V^H) = C H
-        cublasZgemm( MagmaNoTrans, transV,
+        magma_zgemm( MagmaNoTrans, transV,
                      m, n, k,
                      c_neg_one, dwork, ldwork,
                                 dV,    ldv,

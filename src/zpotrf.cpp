@@ -13,14 +13,14 @@
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-  #define cublasZgemm magmablas_zgemm
-  #define cublasZtrsm magmablas_ztrsm
+  #define magma_zgemm magmablas_zgemm
+  #define magma_ztrsm magmablas_ztrsm
 #endif
 
 #if (GPUSHMEM >= 200)
 #if (defined(PRECISION_s))
-     #undef  cublasSgemm
-     #define cublasSgemm magmablas_sgemm_fermi80
+     #undef  magma_sgemm
+     #define magma_sgemm magmablas_sgemm_fermi80
   #endif
 #endif
 // === End defining what BLAS to use ======================================
@@ -171,7 +171,7 @@ magma_zpotrf(char uplo, magma_int_t n,
                 cublasSetMatrix(jb, (n-j), sizeof(cuDoubleComplex), 
                                 A(j, j), lda, dA(j, j), ldda);
                 
-                cublasZherk(MagmaUpper, MagmaConjTrans, jb, j, 
+                magma_zherk(MagmaUpper, MagmaConjTrans, jb, j, 
                             d_neg_one, dA(0, j), ldda, 
                             d_one,     dA(j, j), ldda);
 
@@ -181,7 +181,7 @@ magma_zpotrf(char uplo, magma_int_t n,
                                     cudaMemcpyDeviceToHost, stream[1]);
                 
                 if ( (j+jb) < n) {
-                    cublasZgemm(MagmaConjTrans, MagmaNoTrans, 
+                    magma_zgemm(MagmaConjTrans, MagmaNoTrans, 
                                 jb, (n-j-jb), j,
                                 c_neg_one, dA(0, j   ), ldda, 
                                            dA(0, j+jb), ldda,
@@ -200,7 +200,7 @@ magma_zpotrf(char uplo, magma_int_t n,
                                   cudaMemcpyHostToDevice,stream[0]);
                 
                 if ( (j+jb) < n )
-                  cublasZtrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
+                  magma_ztrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
                               jb, (n-j-jb),
                               c_one, dA(j, j   ), ldda, 
                                      dA(j, j+jb), ldda);
@@ -215,7 +215,7 @@ magma_zpotrf(char uplo, magma_int_t n,
                 cublasSetMatrix((n-j), jb, sizeof(cuDoubleComplex), 
                                 A(j, j), lda, dA(j, j), ldda);
 
-                cublasZherk(MagmaLower, MagmaNoTrans, jb, j,
+                magma_zherk(MagmaLower, MagmaNoTrans, jb, j,
                             d_neg_one, dA(j, 0), ldda, 
                             d_one,     dA(j, j), ldda);
                 /*
@@ -234,7 +234,7 @@ magma_zpotrf(char uplo, magma_int_t n,
                                    cudaMemcpyDeviceToHost,stream[0]);
 
                 if ( (j+jb) < n) {
-                    cublasZgemm( MagmaNoTrans, MagmaConjTrans, 
+                    magma_zgemm( MagmaNoTrans, MagmaConjTrans, 
                                  (n-j-jb), jb, j,
                                  c_neg_one, dA(j+jb, 0), ldda, 
                                             dA(j,    0), ldda,
@@ -253,7 +253,7 @@ magma_zpotrf(char uplo, magma_int_t n,
                                    cudaMemcpyHostToDevice,stream[0]);
                 
                 if ( (j+jb) < n)
-                    cublasZtrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
+                    magma_ztrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
                                 (n-j-jb), jb, 
                                 c_one, dA(j,    j), ldda, 
                                        dA(j+jb, j), ldda);

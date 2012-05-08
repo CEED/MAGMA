@@ -45,7 +45,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
 #define PRECISION_z
 
 #if (defined(PRECISION_s))
-//  #define cublasSsyr2k magmablas_ssyr2k
+//  #define magma_ssyr2k magmablas_ssyr2k
 #endif
 // === End defining what BLAS to use ======================================
 
@@ -304,7 +304,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
                             work, ldwork,
                             dwork[did], lddwork);
 
-            cublasZher2k(uplo, MagmaNoTrans, i, nb, c_neg_one, 
+            magma_zher2k(uplo, MagmaNoTrans, i, nb, c_neg_one, 
                          dA(did, 0, i), ldda, dwork[did], 
                          lddwork, d_one, dA(did, 0, 0), ldda);
             
@@ -411,14 +411,14 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
             } 
             cudaEventRecord(start, 0);
 #endif
-            magma_zher2k_mgpu(num_gpus, 'L', 'N', nb, n-i-ib, ib, 
+            magma_zher2k_mgpu(num_gpus, MagmaLower, MagmaNoTrans, nb, n-i-ib, ib, 
                          c_neg_one, dwork, n-i, 
                          d_one,     da, ldda, i+ib, k, stream);
 #ifdef PROFILE_SY2RK
             cudaSetDevice(0);
             cudaEventRecord(stop, 0);
 #endif
-            /*cublasZher2k('L', 'N', n-i-nb, nb, c_neg_one, 
+            /*magma_zher2k(MagmaLower, MagmaNoTrans, n-i-nb, nb, c_neg_one, 
                          dA(0, i+nb, i), ldda, 
                          &dwork[0][nb], lddwork, d_one, 
                          dA(0, i+nb, i+nb), ldda);*/
@@ -615,7 +615,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
 
         /* zher2k on diagonal block */
         trace_gpu_start( id, kk, "syr2k", "syr2k" );
-        cublasZher2k(uplo, trans, ib, k, 
+        magma_zher2k(uplo, trans, ib, k, 
               alpha, dB1(id, i+k,        0 ), lddb, 
                      dB(id,  i+k,        0 ), lddb,
               beta,  dC(id,  i+offset,   ii), lddc);
@@ -647,7 +647,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
                 cudaSetDevice(id);
                 magmablasSetKernelStream(stream[id][kk]);
                 //printf( " 1(%d): zgemm(%d,%d,%d, %dx%dx%d), %d, %d\n",id,i2+k,i*nb+k,i2+offset,n-i2,j2,k,lddb,lddc );
-                cublasZgemm(MagmaNoTrans, MagmaConjTrans, n-i2, j2, k, 
+                magma_zgemm(MagmaNoTrans, MagmaConjTrans, n-i2, j2, k, 
                             alpha, dB1(id, i2+k,     0 ), lddb,
                                    dB( id, i*nb+k,        0 ), lddb, 
                             c_one, dC( id, i2+offset, offset), lddc);
@@ -682,7 +682,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
         // zgemm on off-diagonal blocks 
         trace_gpu_start( id, kk, "gemm", "gemm" );
         //printf( " 2(%d): zgemm(%d,%d,%d, %dx%dx%d), %d, %d\n",id,i+k+ib,i+k,i+offset+ib,n1,ib,k,lddb,lddc );
-        cublasZgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k, 
+        magma_zgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k, 
                     alpha, dB1(id, i+k+ib,      0 ), lddb,
                            dB(id,  i+k,         0 ), lddb, 
                     c_one, dC(id,  i+offset+ib, ii), lddc);
@@ -709,7 +709,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
                 cudaSetDevice(id);
                 magmablasSetKernelStream(stream[id][kk]);
                 //printf( " 3(%d): zgemm(%d,%d,%d, %dx%dx%d), %d, %d\n",id,i2+k,i*nb+k,i2+offset,n-i2,j2,k,lddb,lddc );
-                cublasZgemm(MagmaNoTrans, MagmaConjTrans, n-i2, j2, k, 
+                magma_zgemm(MagmaNoTrans, MagmaConjTrans, n-i2, j2, k, 
                             alpha, dB( id, i2+k,     0 ), lddb,
                                    dB1(id, i*nb+k,        0 ), lddb, 
                             c_one, dC( id, i2+offset, offset), lddc);
@@ -745,7 +745,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
         /* zgemm on off-diagonal blocks */
         trace_gpu_start( id, kk, "gemm", "gemm" );
         //printf( " 4(%d): zgemm(%d,%d,%d, %dx%dx%d), %d, %d\n",id,i+k+ib,i+k,i+offset+ib,n1,ib,k,lddb,lddc );
-        cublasZgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k, 
+        magma_zgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k, 
                     alpha, dB(id,  i+k+ib,        0), lddb,
                            dB1(id, i+k,           0), lddb, 
                     c_one, dC(id,  i+offset+ib,  ii), lddc);

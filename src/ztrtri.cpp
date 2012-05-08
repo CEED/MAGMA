@@ -13,14 +13,14 @@
 // === Define what BLAS to use ============================================
  #define PRECISION_z
  #if (defined(PRECISION_s) || defined(PRECISION_d))
-   #define cublasZgemm magmablas_zgemm
-     #define cublasZtrsm magmablas_ztrsm
+   #define magma_zgemm magmablas_zgemm
+     #define magma_ztrsm magmablas_ztrsm
      #endif
 
      #if (GPUSHMEM >= 200)
      #if (defined(PRECISION_s))
-          #undef  cublasSgemm
-               #define cublasSgemm magmablas_sgemm_fermi80
+          #undef  magma_sgemm
+               #define magma_sgemm magmablas_sgemm_fermi80
                  #endif
                  #endif
 // === End defining what BLAS to use ======================================
@@ -157,11 +157,11 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
                                 cublasSetMatrix(jb, (n-j), sizeof( cuDoubleComplex), A(j, j), lda, dA(j, j), ldda);
 
                                 /* Compute rows 1:j-1 of current block column */
-                                cublasZtrmm(MagmaLeft, MagmaUpper,
+                                magma_ztrmm(MagmaLeft, MagmaUpper,
                                                         MagmaNoTrans, MagmaNonUnit, j, jb,
                                                         c_one, dA(0,0), ldda, dA(0, j),ldda);
 
-                                cublasZtrsm(MagmaRight, MagmaUpper,
+                                magma_ztrsm(MagmaRight, MagmaUpper,
                                                         MagmaNoTrans, MagmaNonUnit, j, jb,
                                                         c_neg_one, dA(j,j), ldda, dA(0, j),ldda);
 
@@ -205,11 +205,11 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
                                                 A(j, j), lda, dA(j, j), ldda);
 
                                         /* Compute rows j+jb:n of current block column */
-                                        cublasZtrmm(MagmaLeft, MagmaLower,
+                                        magma_ztrmm(MagmaLeft, MagmaLower,
                                                         MagmaNoTrans, MagmaNonUnit, (n-j-jb), jb,
                                                         c_one, dA(j+jb,j+jb), ldda, dA(j+jb, j), ldda);
 
-                                        cublasZtrsm(MagmaRight, MagmaLower,
+                                        magma_ztrsm(MagmaRight, MagmaLower,
                                                         MagmaNoTrans, MagmaNonUnit, (n-j-jb), jb,
                                                         c_neg_one, dA(j,j), ldda, dA(j+jb, j), ldda);
 
