@@ -119,6 +119,7 @@ subs = {
     ('cpu_gpu_s','cpu_gpu_d','cpu_gpu_c','cpu_gpu_z'),
     ('spanel_to_q','dpanel_to_q','cpanel_to_q','zpanel_to_q'),
     ('sq_to_panel','dq_to_panel','cq_to_panel','zq_to_panel'),
+    ('sqpt01','dqpt01','cqpt01','zqpt01'),
     ('cblas_sasum','cblas_dasum','cblas_scasum','cblas_dzasum'),
     ('cblas_snrm2','cblas_dnrm2','cblas_scnrm2','cblas_dznrm2'),
     ('CORE_sasum','CORE_dasum','CORE_scasum','CORE_dzasum'),
