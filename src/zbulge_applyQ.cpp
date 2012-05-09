@@ -80,9 +80,9 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
      * 2: mean copy V and T
      * 3: mean copy V, T and E
      * */
-    if(copytype>0)cublasSetMatrix( LDV, blkcnt*Vblksiz, sizeof(cuDoubleComplex), V, LDV, dV, LDV);
-    if(copytype>1)cublasSetMatrix( LDT, blkcnt*Vblksiz, sizeof(cuDoubleComplex), T, LDT, dT, LDT);
-    if(copytype>2)cublasSetMatrix( N, NE, sizeof(cuDoubleComplex), E, N, dE, N);
+    if(copytype>0) magma_zsetmatrix( LDV, blkcnt*Vblksiz, V, LDV, dV, LDV );
+    if(copytype>1) magma_zsetmatrix( LDT, blkcnt*Vblksiz, T, LDT, dT, LDT );
+    if(copytype>2) magma_zsetmatrix( N, NE, E, N, dE, N );
     cuDoubleComplex *dwork;
     magma_int_t ldwork;
     ldwork  = NE;

@@ -694,8 +694,10 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
         // need to be continued for Z
         // ************************************************
         if(parallel==1){
-            // copy the matrix Q1 generated up from GPU to CPU because we are using the CPU's.        
-            if(WANTZ==2)cublasGetMatrix( N, LDA1, sizeof(cuDoubleComplex), da, LDA1, A1, LDA1);
+           // copy the matrix Q1 generated up from GPU to CPU because we are using the CPU's.        
+           if(WANTZ==2) {
+               magma_zgetmatrix( N, LDA1, da, LDA1, A1, LDA1);
+           }
            // ===============================
            // relaunch thread to apply Q
            // ===============================
