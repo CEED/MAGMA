@@ -115,7 +115,7 @@ static void barrier(magma_int_t my_core_id, magma_int_t cores_num)
     }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////          
-
+struct gbstrct_blg core_in_all;
 /* START CODE */
 extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int N, int NB, cuDoubleComplex *A1, int LDA1, double *D2, double *E2, cuDoubleComplex *dT1, int LDT1)
 {
@@ -318,7 +318,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
     core_in_all.LDE       = LDA1;
     core_in_all.Vblksiz   = Vblksiz;
 
-    if((overlapQ1==1)&&(THREADS>1)){
+    if((overlapQ1==1)&&(THREADS>1)&&(WANTZ>0)){
        core_in_all.locores_num = THREADS-1;
     }else{
        core_in_all.locores_num = THREADS;

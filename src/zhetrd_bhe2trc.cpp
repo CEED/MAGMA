@@ -110,7 +110,7 @@ static void barrier(magma_int_t my_core_id, magma_int_t cores_num)
     }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////          
-
+struct gbstrct_blg core_in_all;
 /* START CODE */
 extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int N, int NB, cuDoubleComplex *A1, int LDA1, double *D2, double *E2, cuDoubleComplex *dT1, int LDT1)
 {
@@ -124,7 +124,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
     
     int mklth, thread, INFO;
     int Vblksiz=-1, blkcnt=-1, LDV=-1, LDT =-1, INgrsiz=1, LDE=-1, BAND=6;
-    Vblksiz = NB; //min(NB,64);
+    Vblksiz = min(NB,48);
     LDT     = Vblksiz;
     findVTsiz(N, NB, Vblksiz, &blkcnt, &LDV);
 

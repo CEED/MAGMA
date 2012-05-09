@@ -86,7 +86,7 @@ extern volatile magma_int_t *ss_prog;
     real_Double_t *timeaplQ;
     volatile int *ss_prog;
 } ;
-struct gbstrct_blg core_in_all;
+extern struct gbstrct_blg core_in_all;
 
 
 
