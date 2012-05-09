@@ -98,7 +98,8 @@ ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR) \
 	commonblas.h
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
-	dgemv_MLU.cu
+	dgemv_MLU.cu	\
+	stream.cu	\
 
 ifeq (${GPU_TARGET}, 0)
     ALLSRC += $(TESLASRC)

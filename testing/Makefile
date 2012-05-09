@@ -120,11 +120,11 @@ endif
 #
 testing_%_f : testing_%_f.o $(FOBJ)
 	$(FORT) $(OPTS) $(LDOPTS) $< $(FOBJ) -o $@ lin/liblapacktest.a -L../lib \
-          -lcuda -lmagma -lmagmablas -lmagma $(LIBDIR) $(LIB) 
+          -lcuda -lmagma -lmagmablas $(LIBDIR) $(LIB) 
 
 testing_% : testing_%.o
 	$(CC) $(OPTS) $(LDOPTS) $(NOMAIN) $< $(OBJ) -o $@ lin/liblapacktest.a -L../lib \
-          -lcuda -lmagma -lmagmablas -lmagma $(LIBDIR) $(LIB) 
+          -lcuda -lmagma -lmagmablas $(LIBDIR) $(LIB) 
 
 #
 # These two files are provided by cuda

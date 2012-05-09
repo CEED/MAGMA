@@ -92,22 +92,4 @@
 #define magma_dsqrt sqrt
 #define magma_ssqrt sqrt
 
-
-/** ****************************************************************************
- *  Define magma streams
- */
-
-extern cudaStream_t magma_stream;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-cublasStatus_t magmablasSetKernelStream( cudaStream_t stream );
-cublasStatus_t magmablasGetKernelStream( cudaStream_t *stream );
-
-#ifdef __cplusplus
-}
-#endif
-
 #endif /* _MAGMA_COMMON_H_ */

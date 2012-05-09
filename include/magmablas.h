@@ -37,4 +37,21 @@ typedef cudaStream_t magma_stream_t;
 #endif
 #define magmablas_cgemm cublasCgemm
 
+/** ****************************************************************************
+ *  Define magma streams
+ */
+
+extern cudaStream_t magma_stream;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+cublasStatus_t magmablasSetKernelStream( cudaStream_t stream );
+cublasStatus_t magmablasGetKernelStream( cudaStream_t *stream );
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif
