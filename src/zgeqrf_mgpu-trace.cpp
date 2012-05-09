@@ -199,7 +199,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
     magma_int_t lhwork, lwork;
 
     magma_int_t cdevice;
-    cudaGetDevice(&cdevice);
+    magma_getdevice(&cdevice);
 
     float ctime, dtime;
 
@@ -230,7 +230,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
 
     for(i=0; i<num_gpus; i++){
       #ifdef  MultiGPUs
-         cudaSetDevice(i);
+         magma_setdevice(i);
       #endif
          if (MAGMA_SUCCESS != magma_zmalloc( &(dwork[i]), (n + ldda)*nb )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
@@ -250,7 +250,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
     if (MAGMA_SUCCESS != magma_zmalloc_host( &local_work, lwork )) {
       for(i=0; i<num_gpus; i++){
         #ifdef  MultiGPUs
-          cudaSetDevice(i);
+          magma_setdevice(i);
         #endif
         magma_free( dwork[i] );
       }
@@ -263,16 +263,16 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
     cudaEvent_t start[4], stop[4][10];
     for(i=0; i<num_gpus; i++){
       #ifdef  MultiGPUs
-         cudaSetDevice(i);
+         magma_setdevice(i);
       #endif
-      cudaStreamCreate(&streaml[i][0]);
-      cudaStreamCreate(&streaml[i][1]);
+      magma_queue_create( &streaml[i][0] );
+      magma_queue_create( &streaml[i][1] );
 
-      cudaEventCreate( &start[i] );
+      magma_event_create( &start[i] );
       for(j=0; j<10; j++)
-        cudaEventCreate( &stop[i][j]  );
+        magma_event_create( &stop[i][j]  );
 
-      cudaEventRecord( start[i], 0 );
+      magma_event_record( start[i], 0 );
     }  
 
     core_cpu_event_start(num_gpus);
@@ -282,10 +282,10 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
     dtime = get_current_cpu_time();
 
     for(j=0; j<num_gpus; j++){
-      cudaSetDevice(j);
-      cudaEventRecord(stop[j][0], 0);
-      cudaEventRecord(stop[j][1], 0);
-      cudaDeviceSynchronize();
+      magma_setdevice(j);
+      magma_event_record(stop[j][0], 0);
+      magma_event_record(stop[j][1], 0);
+      magma_device_sync();
       core_gpu_event_start(j, start[j], stop[j][0]);
       core_gpu_event_end(j, start[j], stop[j][1]);
       core_log_event(0x666666, j);
@@ -313,7 +313,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
             rows = m -i;
             /* Send current panel to the CPU */ 
             #ifdef  MultiGPUs
-               cudaSetDevice(panel_gpunum);
+               magma_setdevice(panel_gpunum);
             #endif
             magma_zgetmatrix_async( rows, ib,
                                     dlA(panel_gpunum, i, i_local), ldda,
@@ -326,19 +326,19 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
 
                 /* only the GPU that has next panel is done look-ahead */
                 #ifdef  MultiGPUs
-                     cudaSetDevice(la_gpu);
+                     magma_setdevice(la_gpu);
                 #endif
-                cudaEventRecord(stop[la_gpu][0], 0);
+                magma_event_record(stop[la_gpu][0], 0);
                 magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                                   m-old_i, n_local[la_gpu]-i_local-old_ib, old_ib,
                                   panel[la_gpu], ldda, dwork[la_gpu],      lddwork,
                                   dlA(la_gpu, old_i, i_local+old_ib), ldda, 
                                   dwork[la_gpu]+old_ib, lddwork);
-                cudaEventRecord(stop[la_gpu][1], 0);
+                magma_event_record(stop[la_gpu][1], 0);
 
                 la_gpu = ((i-nb)/nb)%num_gpus;
                 #ifdef  MultiGPUs
-                cudaSetDevice(la_gpu);
+                magma_setdevice(la_gpu);
                 #endif
                 magma_zsetmatrix_async( old_ib, old_ib,
                                         hwrk_ref(old_i), ldwork,
@@ -346,10 +346,10 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
             }
             
             #ifdef  MultiGPUs
-               cudaSetDevice(panel_gpunum);
+               magma_setdevice(panel_gpunum);
             #endif
 
-            cudaStreamSynchronize(streaml[panel_gpunum][1]);
+            magma_queue_sync( streaml[panel_gpunum][1] );
             core_cpu_event_start(num_gpus);
             lapackf77_zgeqrf(&rows, &ib, hwrk_ref(i), &ldwork, tau+i, lhwrk, &lhwork, info);
 
@@ -369,7 +369,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
             for(j=0; j<num_gpus; j++)
               {  
                 #ifdef  MultiGPUs
-                   cudaSetDevice(j);
+                   magma_setdevice(j);
                 #endif
                 if (j == panel_gpunum)
                   panel[j] = dlA(j, i, i_local);
@@ -382,9 +382,9 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
             for(j=0; j<num_gpus; j++)
               {
                 #ifdef  MultiGPUs
-                cudaSetDevice(j);
+                magma_setdevice(j);
                 #endif
-                cudaStreamSynchronize(streaml[j][0]);
+                magma_queue_sync( streaml[j][0] );
               }
             core_cpu_event_end(num_gpus);
             core_log_event(0xDD0000, num_gpus);
@@ -398,7 +398,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
             
             if (i>0){
               for(j=0; j<num_gpus; j++){
-                cudaSetDevice(j);
+                magma_setdevice(j);
                 core_gpu_event_start(j, start[j], stop[j][2]);
                 core_gpu_event_end(j, start[j], stop[j][3]);
                 core_log_event(0x880000, j);
@@ -408,7 +408,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
                 core_log_event(0xDD0000, j);
               }
             }
-            cudaSetDevice(panel_gpunum);
+            magma_setdevice(panel_gpunum);
             core_gpu_event_start(panel_gpunum, start[panel_gpunum], stop[panel_gpunum][0]);
             core_gpu_event_end(panel_gpunum, start[panel_gpunum], stop[panel_gpunum][1]);
             core_log_event(0x660000, panel_gpunum);
@@ -421,7 +421,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
                 for(j=0; j<num_gpus; j++)
                   {
                     #ifdef  MultiGPUs
-                       cudaSetDevice(j);
+                       magma_setdevice(j);
                     #endif
                        magma_zsetmatrix_async( ib, ib,
                                                lhwrk,    ib,
@@ -436,12 +436,12 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
                     int i_loc = (i+nb)/(nb*num_gpus)*nb;
                     for(j=0; j<num_gpus; j++){
                       #ifdef  MultiGPUs
-                      cudaSetDevice(j);
+                      magma_setdevice(j);
                       #endif
-                      //cudaStreamSynchronize(streaml[j][0]);
-                      cuCtxSynchronize();
+                      //magma_queue_sync( streaml[j][0] );
+                      magma_device_sync();
 
-                      cudaEventRecord(stop[j][2], 0);
+                      magma_event_record(stop[j][2], 0);
                       if (j==la_gpu)
                         magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                                           rows, ib, ib,
@@ -457,7 +457,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
                                           rows, n_local[j]-i_local, ib,
                                           panel[j], ldda, dwork[j],    lddwork,
                                           dlA(j, i, i_local), ldda, dwork[j]+ib, lddwork);
-                      cudaEventRecord(stop[j][3], 0);
+                      magma_event_record(stop[j][3], 0);
                     }     
                   }
                 else {
@@ -466,14 +466,14 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
                   int i_loc = (i+nb)/(nb*num_gpus)*nb;
 
                   #ifdef  MultiGPUs
-                     cudaSetDevice(la_gpu);
+                     magma_setdevice(la_gpu);
                   #endif
                   magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                                     rows, n_local[la_gpu]-i_loc, ib,
                                     panel[la_gpu], ldda, dwork[la_gpu],    lddwork,
                                     dlA(la_gpu, i, i_loc), ldda, dwork[la_gpu]+ib, lddwork);
                   #ifdef  MultiGPUs
-                     cudaSetDevice(panel_gpunum);
+                     magma_setdevice(panel_gpunum);
                   #endif
                   magma_zsetmatrix( ib, ib,
                                     hwrk_ref(i),                   ldwork,
@@ -489,7 +489,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
     
     for(j=0; j<num_gpus; j++){
       #ifdef  MultiGPUs
-      cudaSetDevice(j);
+      magma_setdevice(j);
       #endif
       magma_free( dwork[j] );
     }
@@ -504,7 +504,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
         int i_loc = (i)/(nb*num_gpus)*nb;
 
         #ifdef  MultiGPUs
-           cudaSetDevice(panel_gpunum);
+           magma_setdevice(panel_gpunum);
         #endif
 
         if (i == 0) {
@@ -529,13 +529,13 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
 
     for(i=0; i<num_gpus; i++){
       #ifdef  MultiGPUs
-         cudaSetDevice(i);
+         magma_setdevice(i);
       #endif
-      cudaStreamDestroy(streaml[i][0]);
-      cudaStreamDestroy(streaml[i][1]);
+      magma_queue_destroy( streaml[i][0] );
+      magma_queue_destroy( streaml[i][1] );
     }
 
-    cudaSetDevice(cdevice);
+    magma_setdevice(cdevice);
     dump_trace(num_gpus+1);
 
     return *info;

@@ -239,13 +239,13 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
     ln = ((nb*(1+n/(nb*num_gpus))+31)/32)*32;
     ldwork2 = (1+ n / nb + (n % nb != 0)) * ldda;
     for( did=0; did<num_gpus; did++ ) {
-      cudaSetDevice(did);
+      magma_setdevice(did);
       if (MAGMA_SUCCESS != magma_zmalloc( &da[did], ln*ldda + 3*lddwork*nb ) ||
            MAGMA_SUCCESS != magma_zmalloc( &dx[did], k*n ) ||
            MAGMA_SUCCESS != magma_zmalloc( &dy[did], k*n ) ||
            MAGMA_SUCCESS != magma_zmalloc( &dwork2[did] , ldwork2 )) {
         for( i=0; i<did; i++ ) {
-            cudaSetDevice(i);
+            magma_setdevice(i);
             magma_free( da[i] );
             magma_free( dx[i] );
             magma_free( dy[i] );
@@ -255,11 +255,11 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
       }
       dwork[did] = da[did] + ln*ldda;
 
-      for( kk=0; kk<k; kk++ ) cudaStreamCreate(&stream[did][kk]);
+      for( kk=0; kk<k; kk++ ) magma_queue_create( &stream[did][kk] );
     }
     if (MAGMA_SUCCESS != magma_zmalloc_host( &hwork, k*num_gpus*n )) {
       for( i=0; i<num_gpus; i++ ) {
-        cudaSetDevice(i);
+        magma_setdevice(i);
         magma_free( da[i] );
         magma_free( dx[i] );
         magma_free( dy[i] );
@@ -330,9 +330,9 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
 #ifdef  PROFILE_SY2RK
         cudaEvent_t start, stop;
         float etime;
-        cudaSetDevice(0);
-        cudaEventCreate( &start );
-        cudaEventCreate( &stop  );
+        magma_setdevice(0);
+        magma_event_create( &start );
+        magma_event_create( &stop  );
 #endif
         /* Reduce the lower triangle of A */
         for (i = 0; i < n-nx; i += nb) 
@@ -348,7 +348,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
 
             /*   Get the current panel (no need for the 1st iteration) */
             if (i!=0) {
-              cudaSetDevice(did);
+              magma_setdevice(did);
               //magmablasSetKernelStream(stream[did][0]);
               trace_gpu_start( did, 0, "comm", "get" );
               //cublasGetMatrix(n-i, ib, sizeof(cuDoubleComplex),
@@ -378,7 +378,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
 
             /*for( did=0; did<num_gpus; did++ )  
             {
-                  cudaSetDevice(did);
+                  magma_setdevice(did);
                   //magmablasSetKernelStream(stream[did][0]);
                   //trace_gpu_start( did, 0, stream[did][0], "comm", "set" );
                   magma_zsetmatrix( n-i, ib, work, ldwork, dwork[did], n-i );
@@ -399,19 +399,19 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
             }*/
 
 #ifdef PROFILE_SY2RK
-            cudaSetDevice(0);
+            magma_setdevice(0);
             if( i > 0 ) {
               cudaEventElapsedTime(&etime, start, stop);
               up_time += (etime/1000.0);
             } 
-            cudaEventRecord(start, 0);
+            magma_event_record(start, 0);
 #endif
             magma_zher2k_mgpu(num_gpus, MagmaLower, MagmaNoTrans, nb, n-i-ib, ib, 
                          c_neg_one, dwork, n-i, 
                          d_one,     da, ldda, i+ib, k, stream);
 #ifdef PROFILE_SY2RK
-            cudaSetDevice(0);
-            cudaEventRecord(stop, 0);
+            magma_setdevice(0);
+            magma_event_record(stop, 0);
 #endif
             /*magma_zher2k(MagmaLower, MagmaNoTrans, n-i-nb, nb, c_neg_one, 
                          dA(0, i+nb, i), ldda, 
@@ -426,13 +426,13 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
             }
           }
 #ifdef PROFILE_SY2RK
-          cudaSetDevice(0);
+          magma_setdevice(0);
           if( n > nx ) {
             cudaEventElapsedTime(&etime, start, stop);
             up_time += (etime/1000.0);
           } 
-          cudaEventDestroy( start );
-          cudaEventDestroy( stop  );
+          magma_event_destroy( start );
+          magma_event_destroy( stop  );
 #endif
         /* Use unblocked code to reduce the last or only block */
         if ( i < n ) {
@@ -444,7 +444,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
                 ii  = nb*(i/(nb*num_gpus));
                 did = (i/nb)%num_gpus;
 
-                cudaSetDevice(did);
+                magma_setdevice(did);
                 //cublasGetMatrix(i_n, i_n, sizeof(cuDoubleComplex),
                 //                dA(did, i, ii), ldda,
                 //                A(i, i), lda);
@@ -453,8 +453,8 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
                                         A(iii, i),        lda, stream[did][0] );
             }
             for( did=0; did<num_gpus; did++ ) {
-                cudaSetDevice(did);
-                cudaStreamSynchronize(stream[did][0]);
+                magma_setdevice(did);
+                magma_queue_sync( stream[did][0] );
             }
           }
           lapackf77_zhetrd(uplo_, &i_n, A(iii, iii), &lda, &d[iii], &e[iii],
@@ -464,8 +464,8 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
  
     trace_finalize( "zhetrd.svg","trace.css" );
     for( did=0; did<num_gpus; did++ ) {
-      for( kk=0; kk<k; kk++ ) cudaStreamDestroy(stream[did][kk]);
-      cudaSetDevice(did);
+      for( kk=0; kk<k; kk++ ) magma_queue_destroy( stream[did][kk] );
+      magma_setdevice(did);
       magma_free( da[did] );
       magma_free( dx[did] );
       magma_free( dy[did] );
@@ -496,7 +496,7 @@ magma_zhtodhe(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_
         for (j=off_j; j<n; j+=nb) {
           jj =  (j-off_j)/(nb*num_gpus);
           k  = ((j-off_j)/nb)%num_gpus;
-          cudaSetDevice(k);
+          magma_setdevice(k);
           jb = min(nb, (n-j));
           mj = m-(j-off_j);
           magma_zsetmatrix_async( mj, jb,
@@ -510,7 +510,7 @@ magma_zhtodhe(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_
         for(i=off_i; i<m; i+=nb){
           ii = (i-off_i)/(nb*num_gpus);
           k  = ((i-off_i)/nb)%num_gpus;
-          cudaSetDevice(k);
+          magma_setdevice(k);
 
           ib = min(nb, (m-i));
           if(i+ib < off_i+n) ni = (i-off_i)+ib;
@@ -522,10 +522,10 @@ magma_zhtodhe(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_
         }
       }
       for( k=0; k<num_gpus; k++ ) {
-        cudaSetDevice(k);
-        cudaStreamSynchronize(stream[k][0]);
+        magma_setdevice(k);
+        magma_queue_sync( stream[k][0] );
       }
-      cudaSetDevice(0);
+      magma_setdevice(0);
 
       return *info;
 }
@@ -544,7 +544,7 @@ magma_zdtohhe(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_
         for (j=off_j; j<n; j+=nb) {
           jj = (j-off_j)/(nb*num_gpus);
           k  = ((j-off_j)/nb)%num_gpus;
-          cudaSetDevice(k);
+          magma_setdevice(k);
 
           jb = min(nb, (n-j));
           mj = m-(j-off_i);
@@ -559,7 +559,7 @@ magma_zdtohhe(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_
         for(i=off_i; i<m; i+=nb){
           ii = (i-off_i)/(nb*num_gpus);
           k  = ((i-off_i)/nb)%num_gpus;
-          cudaSetDevice(k);
+          magma_setdevice(k);
 
           ib = min(nb, (m-i));
           if(i+ib < off_i+n) ni = (i-off_i)+ib;
@@ -571,10 +571,10 @@ magma_zdtohhe(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_
         }
       }
       for( k=0; k<num_gpus; k++ ) {
-        cudaSetDevice(k);
-        cudaStreamSynchronize(stream[k][0]);
+        magma_setdevice(k);
+        magma_queue_sync( stream[k][0] );
       }
-      cudaSetDevice(0);
+      magma_setdevice(0);
 
       return *info;
 }
@@ -597,7 +597,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
     for( i=0; i<n; i+=nb ) {
         id = ((i+offset)/nb)%num_gpus;
         kk = (i/(nb*num_gpus))%num_streams;
-        cudaSetDevice(id);
+        magma_setdevice(id);
         magmablasSetKernelStream(stream[id][kk]);
 
         ib = min(nb, n-i);
@@ -634,7 +634,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
 
             if( i2 < n ) {
                 kk = 0;
-                cudaSetDevice(id);
+                magma_setdevice(id);
                 magmablasSetKernelStream(stream[id][kk]);
                 //printf( " 1(%d): zgemm(%d,%d,%d, %dx%dx%d), %d, %d\n",id,i2+k,i*nb+k,i2+offset,n-i2,j2,k,lddb,lddc );
                 magma_zgemm(MagmaNoTrans, MagmaConjTrans, n-i2, j2, k, 
@@ -648,7 +648,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
     for( i=0; i<n-nb; i+=nb ) {
         id = ((i+offset)/nb)%num_gpus;
         kk = (i/(nb*num_gpus))%num_streams;
-        cudaSetDevice(id);
+        magma_setdevice(id);
         magmablasSetKernelStream(stream[id][kk]);
 
         ib = min(nb, n-i);
@@ -696,7 +696,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
 
             if( i2 < n ) {
                 kk = 0;
-                cudaSetDevice(id);
+                magma_setdevice(id);
                 magmablasSetKernelStream(stream[id][kk]);
                 //printf( " 3(%d): zgemm(%d,%d,%d, %dx%dx%d), %d, %d\n",id,i2+k,i*nb+k,i2+offset,n-i2,j2,k,lddb,lddc );
                 magma_zgemm(MagmaNoTrans, MagmaConjTrans, n-i2, j2, k, 
@@ -710,7 +710,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
     for( i=0; i<n-nb; i+=nb ) {
         id = ((i+offset)/nb)%num_gpus;
         kk = (i/(nb*num_gpus))%num_streams;
-        cudaSetDevice(id);
+        magma_setdevice(id);
         magmablasSetKernelStream(stream[id][kk]);
 
         ib = min(nb, n-i);
@@ -743,8 +743,8 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
     }
 
     for( id=0; id<num_gpus; id++ ) {
-        cudaSetDevice(id);
-        for( kk=0; kk<num_streams; kk++ ) cudaStreamSynchronize(stream[id][kk]);
+        magma_setdevice(id);
+        for( kk=0; kk<num_streams; kk++ ) magma_queue_sync( stream[id][kk] );
         magmablasSetKernelStream(NULL);
     }
 }

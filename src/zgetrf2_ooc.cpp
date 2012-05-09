@@ -65,7 +65,7 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
             A = P*L*U; the unit diagonal elements of L are not stored.
 
             Higher performance is achieved if A is in pinned memory, e.g.
-            allocated using cudaMallocHost.
+            allocated using magma_malloc_host.
 
     LDA     (input) INTEGER
             The leading dimension of the array A.  LDA >= max(1,M).
@@ -197,7 +197,7 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
                           magmablas_ztranspose2( dPT, nb, dA, rows, M-ii, nb0);
 
                           /* update with the block column */
-                          cuCtxSynchronize();
+                          magma_device_sync();
                           magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
                                        N, nb0, c_one, inPT(0,0), nb, inAT(ib,0), maxn );
                           if( M > ii+nb0 ) {
@@ -217,7 +217,7 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
                     if( I > 0 ) {
                       cols = maxm - I;    /* the number of columns in At */
 
-                      cuCtxSynchronize();
+                      magma_device_sync();
                       magmablas_ztranspose2( dA, cols, inAT(I/nb,0), maxn, nb0, cols );
                       magma_zgetmatrix( M-I, nb0, dA, cols, work, lda );
                     }
@@ -243,7 +243,7 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
                           magma_zgetmatrix( m-i*nb, nb, dA, cols, work, lda );
                           
                           /* make sure that gpu queue is empty */
-                          cuCtxSynchronize();
+                          magma_device_sync();
                           
                           /* update the remaining matrix with (i-1)-th panel */
                           magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
@@ -304,7 +304,7 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
                       magma_zgetmatrix( rows, nb0, dA, cols, work, lda );
 
                       /* make sure that gpu queue is empty */
-                      cuCtxSynchronize();
+                      magma_device_sync();
                       
                       /* do the cpu part; factorize the last column  */
                       lapackf77_zgetrf( &rows, &nb0, work, &lda, ipiv+i*nb, &iinfo);

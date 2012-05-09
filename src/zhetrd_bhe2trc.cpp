@@ -218,11 +218,11 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
 
 
-       cudaDeviceSynchronize();
+       magma_device_sync();
        timeaplQ1 = get_time_azz();
        magma_zsetmatrix( N, LDA1, A1, LDA1, da, LDA1 );
        magma_zungqr_2stage_gpu(N, N, N, da, LDA1, NOTUSED, dT1, NB, &INFO);
-       cudaDeviceSynchronize();
+       magma_device_sync();
        magma_zgetmatrix( N, LDA1, da, LDA1, A1, LDA1 );
        timeaplQ1 = get_time_azz()-timeaplQ1;
        printf("  Finish applyQ1 timing= %lf \n" ,timeaplQ1); 
@@ -591,7 +591,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                // compute Q2 by applying V2 to Identity and put it into da           
                magma_zbulge_applyQ(WANTZ, 'L', NE, N, NB, Vblksiz, Q2, N, V, TAU, T, &INFO, dV2, dT2, da, 2);
                // free dT2 and allocate dZ and copy Z to dZ
-               cudaDeviceSynchronize();
+               magma_device_sync();
                timeaplQ2 = get_time_azz()-timeaplQ2;
                magma_free( dT2 );
                if(MAGMA_SUCCESS != magma_zmalloc( &dZ, N*N )) { 
@@ -631,7 +631,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                // apply V2 from Right to Q1. da = da*(I-V2*T2*V2')
                timeaplQ2 = get_time_azz();
                magma_zbulge_applyQ(WANTZ, 'R', NE, N, NB, Vblksiz, A1, LDA1, V, TAU, T, &INFO, dV2, dT2, da, 2);
-               cudaDeviceSynchronize();
+               magma_device_sync();
                magma_free( dT2 );
                timeaplQ2 = get_time_azz()-timeaplQ2;
                timegemm = get_time_azz();
@@ -653,7 +653,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                // apply V2 from left to the eigenvectors Z. dZ = (I-V2*T2*V2')*Z
                magma_zbulge_applyQ(WANTZ, 'L', NE, N, NB, Vblksiz, Z, LDZ, V, TAU, T, &INFO, dV2, dT2, dZ, 3);
                magma_free( dT2 );
-               cudaDeviceSynchronize();
+               magma_device_sync();
                timeaplQ2 = get_time_azz()-timeaplQ2;
                timegemm = get_time_azz();
                //make a gemm of Q1 * (Q2 * Z) = Q1 * ((I-V2T2V2')*Z) = da * dZ --> dV2

@@ -50,7 +50,7 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
             Details).
 
             Higher performance is achieved if A is in pinned memory, e.g.
-            allocated using cudaMallocHost.
+            allocated using magma_malloc_host.
 
     LDA     (input) INTEGER
             The leading dimension of the array A.  LDA >= max(1,M).
@@ -63,7 +63,7 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
             Higher performance is achieved if WORK is in pinned memory, e.g.
-            allocated using cudaMallocHost.
+            allocated using magma_malloc_host.
 
     LWORK   (input) INTEGER
             The dimension of the array WORK.  LWORK >= N*NB,
@@ -139,7 +139,7 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
         else if (i == (n/nb)%num_gpus)
             n_local[i] += n%nb;
 
-        cudaSetDevice(i);
+        magma_setdevice(i);
         
         // TODO on failure, free previously allocated memory
         if (MAGMA_SUCCESS != magma_zmalloc( &da[i], ldda*n_local[i] )) {
@@ -168,7 +168,7 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
 
     /* Free the allocated GPU memory */
     for(i=0; i<num_gpus; i++){
-        cudaSetDevice(i);
+        magma_setdevice(i);
         magma_free( da[i] );
     }
 

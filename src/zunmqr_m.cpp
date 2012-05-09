@@ -141,7 +141,7 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
     magma_int_t igpu = 0;
 
     int gpu_b;
-    cudaGetDevice(&gpu_b);
+    magma_getdevice(&gpu_b);
 
     *info = 0;
     left = lapackf77_lsame(side_, "L");
@@ -205,15 +205,15 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
     magma_int_t n_l = (n-1)/nrgpu+1; // local n
 
     for (igpu = 0; igpu < nrgpu; ++igpu){
-        cudaSetDevice(igpu);
+        magma_setdevice(igpu);
         if (MAGMA_SUCCESS != magma_zmalloc( &dw[igpu], (n_l*lddc + 2*lddac*lddar + 2*(nb + 1 + lddwork)*nb) )) {
             printf("%d: size: %ld\n", igpu, (n_l*lddc + 2*lddac*lddar + (nb+1+lddwork)*nb)*sizeof(cuDoubleComplex));
             magma_xerbla( __func__, -(*info) );
             *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;
         }
-        cudaStreamCreate(&stream[igpu][0]);
-        cudaStreamCreate(&stream[igpu][1]);
+        magma_queue_create( &stream[igpu][0] );
+        magma_queue_create( &stream[igpu][1] );
     }
 
     if (nb >= k)
@@ -229,7 +229,7 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
 
             //copy C to mgpus
             for (igpu = 0; igpu < nrgpu; ++igpu){
-                cudaSetDevice(igpu);
+                magma_setdevice(igpu);
                 kb = min(n_l, n-igpu*n_l);
                 magma_zsetmatrix_async( m, kb,
                                         C(0, igpu*n_l), ldc,
@@ -248,7 +248,7 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
 
             kb = min(nb, k-i1);
             for (igpu = 0; igpu < nrgpu; ++igpu){
-                cudaSetDevice(igpu);
+                magma_setdevice(igpu);
                 magma_zsetmatrix_async( (nq-i1), kb,
                                         A(i1, i1),            lda,
                                         dA_c(igpu, 0, i1, 0), lddac, stream[igpu][0] );
@@ -268,19 +268,19 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
 
                 /* Apply H or H'; First copy T to the GPU */
                 for (igpu = 0; igpu < nrgpu; ++igpu){
-                    cudaSetDevice(igpu);
+                    magma_setdevice(igpu);
                     magma_zsetmatrix_async( ib, ib,
                                             t,               ib,
                                             dt(igpu, ind_c), ib, stream[igpu][ind_c] );
 
-                    cudaStreamSynchronize(stream[igpu][ind_c]); // Makes sure that we can change t next iteration.
+                    magma_queue_sync( stream[igpu][ind_c] ); // Makes sure that we can change t next iteration.
                 }
 
                 // start the copy of next A panel
                 kb = min(nb, k - i - i3);
                 if (kb > 0 && i+i3 >= 0){
                     for (igpu = 0; igpu < nrgpu; ++igpu){
-                        cudaSetDevice(igpu);
+                        magma_setdevice(igpu);
                         magma_zsetmatrix_async( (i__4-i3), kb,
                                                 A(i+i3, i+i3),                    lda,
                                                 dA_c(igpu, (ind_c+1)%2, i+i3, 0), lddac, stream[igpu][(ind_c+1)%2] );
@@ -288,7 +288,7 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
                 }
 
                 for (igpu = 0; igpu < nrgpu; ++igpu){
-                    cudaSetDevice(igpu);
+                    magma_setdevice(igpu);
 
                     // Put 0s in the upper triangular part of dA;
                     magmablas_zsetdiag1subdiag0_stream('L', ib, ib, dA_c(igpu, ind_c, i, 0), lddac, stream[igpu][ind_c]);
@@ -306,9 +306,9 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
 
             //copy C from mgpus
             for (igpu = 0; igpu < nrgpu; ++igpu){
-                cudaSetDevice(igpu);
-                cudaStreamSynchronize(stream[igpu][0]);
-                cudaStreamSynchronize(stream[igpu][1]);
+                magma_setdevice(igpu);
+                magma_queue_sync( stream[igpu][0] );
+                magma_queue_sync( stream[igpu][1] );
                 kb = min(n_l, n-igpu*n_l);
                 magma_zgetmatrix_async( m, kb,
                                         dC(igpu, 0, 0), lddc,
@@ -368,15 +368,15 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
     MAGMA_Z_SET2REAL( work[0], lwkopt );
 
     for (igpu = 0; igpu < nrgpu; ++igpu){
-        cudaSetDevice(igpu);
+        magma_setdevice(igpu);
         magmablasSetKernelStream(NULL);
-        cudaStreamSynchronize(stream[igpu][0]);
-        cudaStreamDestroy(stream[igpu][0]);
-        cudaStreamDestroy(stream[igpu][1]);
+        magma_queue_sync( stream[igpu][0] );
+        magma_queue_destroy( stream[igpu][0] );
+        magma_queue_destroy( stream[igpu][1] );
         magma_free( dw[igpu] );
     }
 
-    cudaSetDevice(gpu_b);
+    magma_setdevice(gpu_b);
 
     return *info;
 } /* magma_zunmqr */

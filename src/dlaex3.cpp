@@ -247,7 +247,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
      2*DLAMBDA(I) to prevent optimizing compilers from eliminating
      this code.*/
 
-//    cudaStreamCreate(&stream);
+//    magma_queue_create( &stream );
 
     n2 = n - n1;
 
@@ -383,8 +383,8 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
 #ifdef ENABLE_TIMER
     start = get_current_time();
 #endif
-//    cudaStreamSynchronize(stream);
-    cudaStreamSynchronize(NULL);
+//    magma_queue_sync( stream );
+    magma_queue_sync( NULL );
 
     if (rk != 0){
         if( n23 != 0 ){
@@ -418,7 +418,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
 
     printf("gemms = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
-//    cudaStreamDestroy(stream);
+//    magma_queue_destroy( stream );
 
     return MAGMA_SUCCESS;
 } /*magma_dlaed3*/

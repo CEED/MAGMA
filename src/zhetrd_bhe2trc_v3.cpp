@@ -230,12 +230,12 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
            return MAGMA_ERR_DEVICE_ALLOC;
        }
         
-       cudaDeviceSynchronize();
+       magma_device_sync();
        magma_zsetmatrix( N, LDA1, A1, LDA1, da, LDA1 );
        if(overlapQ1==0){
            timeaplQ1 = get_time_azz();
            magma_zungqr_2stage_gpu(N, N, N, da, LDA1, NOTUSED, dT1, NB, &INFO);
-           cudaDeviceSynchronize();
+           magma_device_sync();
            //cublasGetMatrix( N, LDA1, sizeof(cuDoubleComplex), da, LDA1, A1, LDA1);
            timeaplQ1 = get_time_azz()-timeaplQ1;
            printf("  Finish applyQ1 timing= %lf \n" ,timeaplQ1); 
@@ -621,7 +621,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                // compute Q2 by applying V2 to Identity and put it into da           
                magma_zbulge_applyQ(WANTZ, 'L', NE, N, NB, Vblksiz, Q2, N, V, TAU, T, &INFO, dV2, dT2, da, 2);
                // free dT2 and allocate dZ and copy Z to dZ
-               cudaDeviceSynchronize();
+               magma_device_sync();
                timeaplQ2 = get_time_azz()-timeaplQ2;
                magma_free( dT2 );
                if(MAGMA_SUCCESS != magma_zmalloc( &dZ, N*N )) { 
@@ -741,7 +741,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                 *==========================*/  
                }else{
                    magma_zbulge_applyQ(WANTZ, 'R', N, N, NB, Vblksiz, A1, LDA1, V, TAU, T, &INFO, dV2, dT2, da, 2);
-                   cudaDeviceSynchronize();
+                   magma_device_sync();
                    magma_free( dT2 );
                }
                timeaplQ2 = get_time_azz()-timeaplQ2;
@@ -848,7 +848,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                 *==========================*/  
                }else{
                    magma_zbulge_applyQ(WANTZ, 'L', NE, N, NB, Vblksiz, Z, LDZ, V, TAU, T, &INFO, dV2, dT2, dZ, 3);
-                   cudaDeviceSynchronize();
+                   magma_device_sync();
                }
 
                timeaplQ2 = get_time_azz()-timeaplQ2;
@@ -1154,10 +1154,10 @@ static void *parallel_section(void *thread_id)
              //    compute Q1
              //=========================
              if(overlapQ1==1){
-                 cudaDeviceSynchronize();
+                 magma_device_sync();
                  timeaplQ1 = get_time_azz();
                  magma_zungqr_2stage_gpu(N, N, N, dQ1, N, NOTUSED, dT1, NB, &INFO);
-                 cudaDeviceSynchronize();
+                 magma_device_sync();
                  //cublasGetMatrix( N, LDA1, sizeof(cuDoubleComplex), da, LDA1, A1, LDA1);
                  timeaplQ1 = get_time_azz()-timeaplQ1;
                  printf("  Finish applyQ1 timing= %lf \n" ,timeaplQ1); 
@@ -1211,10 +1211,10 @@ static void *parallel_section(void *thread_id)
                 //=============================================
                 //    compute Q1 on last newcoreid
                 //=============================================
-                cudaDeviceSynchronize();
+                magma_device_sync();
                 timeaplQ1 = get_time_azz();
                 magma_zungqr_2stage_gpu(N, N, N, dQ1, N, NOTUSED, dT1, NB, &INFO);
-                cudaDeviceSynchronize();
+                magma_device_sync();
                 //cublasGetMatrix( N, LDA1, sizeof(cuDoubleComplex), da, LDA1, A1, LDA1);
                 timeaplQ1 = get_time_azz()-timeaplQ1;
                 printf("  Finish applyQ1 timing= %lf \n" ,timeaplQ1); 
@@ -1364,7 +1364,7 @@ static void *applyQ_parallel_section(void *thread_id)
                  timeQgpu = get_time_azz();
                  // here dZ is da and Z=Q1
                  magma_zbulge_applyQ(WANTZ, 'R', NE, N, NB, Vblksiz, NOTUSED, N, V2, TAU2, T2, &INFO, dV2, dT2, dZ, 2);
-                 cudaDeviceSynchronize();
+                 magma_device_sync();
                  timeQgpu = get_time_azz()-timeQgpu;
                  printf("  Finish Q2_GPU GGG timing= %lf \n" ,timeQgpu);
              }
@@ -1391,7 +1391,7 @@ static void *applyQ_parallel_section(void *thread_id)
                 //=============================================
                  timeQgpu = get_time_azz();
                  magma_zbulge_applyQ(WANTZ, 'R', N_GPU, N, NB, Vblksiz, NOTUSED, N, V2, TAU2, T2, &INFO, dV2, dT2, dZ, 2);
-                 cudaDeviceSynchronize();
+                 magma_device_sync();
                  timeQgpu = get_time_azz()-timeQgpu;
                  printf("  Finish Q2_GPU GGG timing= %lf \n" ,timeQgpu);
             /* I am one of the remaining cores*/
@@ -1435,7 +1435,7 @@ static void *applyQ_parallel_section(void *thread_id)
              if(usemulticpu==1){
                  timeQgpu = get_time_azz();
                  magma_zbulge_applyQ(WANTZ, 'L', NE, N, NB, Vblksiz, Z, LDZ, V2, TAU2, T2, &INFO, dV2, dT2, dZ, 3);
-                 cudaDeviceSynchronize();
+                 magma_device_sync();
                  timeQgpu = get_time_azz()-timeQgpu;
                  printf("  Finish Q2_GPU GGG timing= %lf \n" ,timeQgpu);
              }
@@ -1462,7 +1462,7 @@ static void *applyQ_parallel_section(void *thread_id)
                 //=============================================
                  timeQgpu = get_time_azz();
                  magma_zbulge_applyQ(WANTZ, 'L', N_GPU, N, NB, Vblksiz, Z, LDZ, V2, TAU2, T2, &INFO, dV2, dT2, dZ, 3);
-                 cudaDeviceSynchronize();
+                 magma_device_sync();
                  timeQgpu = get_time_azz()-timeQgpu;
                  printf("  Finish Q2_GPU GGG timing= %lf \n" ,timeQgpu);
             /* I am one of the remaining cores*/

@@ -20,7 +20,7 @@ void Mymagma_ztrmm(char side, char uplo, char trans, char unit,
                    cuDoubleComplex *dz, magma_int_t lddz)
 {
   magma_ztrmm(side, uplo, trans, unit, n, m, alpha, db, lddb, dz, lddz);
-  cudaDeviceSynchronize();
+  magma_device_sync();
 }
 
 /* This ztrsm interface is used for TAU profiling */
@@ -30,7 +30,7 @@ void Mymagma_ztrsm(char side, char uplo, char trans, char unit,
                    cuDoubleComplex *dz, magma_int_t lddz)
 {
   magma_ztrsm(side, uplo, trans, unit, n, m, alpha, db, lddb, dz, lddz);
-  cudaDeviceSynchronize();
+  magma_device_sync();
 }
 
 extern "C" magma_int_t
@@ -213,7 +213,7 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     static magma_int_t lrwmin;
 
     static cudaStream_t stream;
-    cudaStreamCreate(&stream);
+    magma_queue_create( &stream );
 
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);
     lower = lapackf77_lsame(uplo_, MagmaLowerStr);
@@ -290,7 +290,7 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
         return *info;
     }
 
-    cudaStreamSynchronize(stream);
+    magma_queue_sync( stream );
 
     magma_zgetmatrix_async( n, n,
                             db, lddb,
@@ -345,8 +345,8 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
 
     }
 
-    cudaStreamSynchronize(stream);
-    cudaStreamDestroy(stream);
+    magma_queue_sync( stream );
+    magma_queue_destroy( stream );
 
     /*work[0].r = (doublereal) lopt, work[0].i = 0.;
     rwork[0] = (doublereal) lropt;

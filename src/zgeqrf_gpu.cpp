@@ -154,8 +154,8 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
     memset( ut, 0, nb*nb*sizeof(cuDoubleComplex));
 
     static cudaStream_t stream[2];
-    cudaStreamCreate(&stream[0]);
-    cudaStreamCreate(&stream[1]);
+    magma_queue_create( &stream[0] );
+    magma_queue_create( &stream[1] );
 
     ldwork = m;
     lddwork= n;
@@ -183,7 +183,7 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
                                         d_ref(old_i), old_ib, stream[0] );
             }
 
-            cudaStreamSynchronize(stream[1]);
+            magma_queue_sync( stream[1] );
             lapackf77_zgeqrf(&rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &lhwork, info);
             /* Form the triangular factor of the block reflector
                H = H(i) H(i+1) . . . H(i+ib-1) */
@@ -193,7 +193,7 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
 
             /* Put 0s in the upper triangular part of a panel (and 1s on the
                diagonal); copy the upper triangular in ut and invert it     */
-            cudaStreamSynchronize(stream[0]);
+            magma_queue_sync( stream[0] );
             zsplit_diag_block(ib, work_ref(i), ldwork, ut);
             magma_zsetmatrix( rows, ib, work_ref(i), ldwork, a_ref(i,i), ldda );
 
@@ -236,8 +236,8 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
         magma_zsetmatrix( rows, ib, work, rows, a_ref(i, i), ldda );
     }
 
-    cudaStreamDestroy(stream[0]);
-    cudaStreamDestroy(stream[1]);
+    magma_queue_destroy( stream[0] );
+    magma_queue_destroy( stream[1] );
     magma_free_host( work );
     return *info;
 

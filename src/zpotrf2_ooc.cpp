@@ -102,7 +102,7 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
             factorization A = U**H * U or A = L * L**H.   
 
             Higher performance is achieved if A is in pinned memory, e.g.
-            allocated using cudaMallocHost.
+            allocated using magma_malloc_host.
 
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,N).   
@@ -194,23 +194,20 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
     ldda  = ((n+31)/32)*32;
     lddla = ((nb*(1+n/(nb*num_gpus))+31)/32)*32;
     for (d=0; d<num_gpus; d++ ) {
-      cudaSetDevice(d);
+      magma_setdevice(d);
       if (MAGMA_SUCCESS != magma_zmalloc( &dt[d], NB*lddla + 2*nb*ldda )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
       }
       dwork[d] = &dt[d][2*nb*ldda];
-      if ( (cudaSuccess != cudaStreamCreate(&stream[d][0])) ||
-           (cudaSuccess != cudaStreamCreate(&stream[d][1])) ||
-           (cudaSuccess != cudaStreamCreate(&stream[d][2])) ) {
-        *info = MAGMA_ERR_CUDASTREAM;
-        return *info;
-      }
+      magma_queue_create( &stream[d][0] );
+      magma_queue_create( &stream[d][1] );
+      magma_queue_create( &stream[d][2] );
     }
 #ifdef  ROW_MAJOR_PROFILE
     start0 = get_current_time();
 #endif
-    cudaSetDevice(0);
+    magma_setdevice(0);
     ldwrk = n;
     if (MAGMA_SUCCESS != magma_zmalloc_host( &work, ldwrk*nb )) {
       *info = MAGMA_ERR_HOST_ALLOC;
@@ -249,7 +246,7 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
         for( j=0; j<J; j+=nb ) {
           /* upload the diagonal of big panel */
           for( d=0; d<num_gpus; d++ ) {
-            cudaSetDevice(d);
+            magma_setdevice(d);
             magma_zsetmatrix_async( nb, JB,
                                     A(j, J),       lda,
                                     dTup(d, 0, J), nb, stream[d][0] );
@@ -259,7 +256,7 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
           /* upload off-diagonals */
           for( jj=J+JB; jj<n; jj+=nb ) {
             d  = ((jj-J)/nb)%num_gpus;
-            cudaSetDevice(d);
+            magma_setdevice(d);
 
             jb2 = min(nb, n-jj);
             magma_zsetmatrix_async( nb, jb2,
@@ -272,7 +269,7 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
           jb3 = nb; //min(nb,J-j); // number of columns in this previous block-column (nb)
           for( jj=0; jj<JB; jj+=nb ) { /* diagonal */
             d = (jj/nb)%num_gpus;
-            cudaSetDevice(d);
+            magma_setdevice(d);
 
             J2 = (jj/(nb*num_gpus))*nb;
             jb1 = min(JB,jj+nb); // first row in the next block-row
@@ -291,7 +288,7 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
 
           if( n > J+JB ) { /* off-diagonal */
             for( d=0; d<num_gpus; d++ ) {
-              cudaSetDevice(d);
+              magma_setdevice(d);
               /* local number of columns in the big panel */
               n_local[d] = (((n-J)/nb)/num_gpus)*nb;
               if (d < ((n-J)/nb)%num_gpus)
@@ -355,7 +352,7 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
         for( j=0; j<J; j+=nb ) {
           /* upload the diagonal of big panel */
           for( d=0; d<num_gpus; d++ ) {
-            cudaSetDevice(d);
+            magma_setdevice(d);
             magma_zsetmatrix_async( JB, nb,
                                     A(J, j),     lda,
                                     dT(d, J, 0), ldda, stream[d][0] );
@@ -365,7 +362,7 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
           /* upload off-diagonals */
           for( jj=J+JB; jj<n; jj+=nb ) {
             d  = ((jj-J)/nb)%num_gpus;
-            cudaSetDevice(d);
+            magma_setdevice(d);
 
             jb2 = min(nb, n-jj);
             magma_zsetmatrix_async( jb2, nb,
@@ -378,7 +375,7 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
           jb3 = nb; //min(nb,J-j);
           for( jj=0; jj<JB; jj+=nb ) { /* diagonal */
             d = (jj/nb)%num_gpus;
-            cudaSetDevice(d);
+            magma_setdevice(d);
 
             J2 = (jj/(nb*num_gpus))*nb;
             jb1 = min(JB,jj+nb); 
@@ -397,7 +394,7 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
 
           if( n > J+JB ) { /* off-diagonal */
             for( d=0; d<num_gpus; d++ ) {
-              cudaSetDevice(d);
+              magma_setdevice(d);
               /* local number of columns in the big panel */
               n_local[d] = (((n-J)/nb)/num_gpus)*nb;
               if (d < ((n-J)/nb)%num_gpus)
@@ -448,14 +445,14 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
       num_gpus = num_gpus0;
     }
     for (d=0; d<num_gpus; d++ ) {
-        cudaSetDevice(d);
+        magma_setdevice(d);
 
         magma_free( dt[d] );
-        cudaStreamDestroy(stream[d][0]);
-        cudaStreamDestroy(stream[d][1]);
-        cudaStreamDestroy(stream[d][2]);
+        magma_queue_destroy( stream[d][0] );
+        magma_queue_destroy( stream[d][1] );
+        magma_queue_destroy( stream[d][2] );
     }
-    cudaSetDevice(0);
+    magma_setdevice(0);
     magma_free_host( work );
 
 #ifdef  ROW_MAJOR_PROFILE

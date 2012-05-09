@@ -47,7 +47,7 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
             (see Further Details).
 
             Higher performance is achieved if A is in pinned memory, e.g.
-            allocated using cudaMallocHost.
+            allocated using magma_malloc_host.
 
     LDA     (input) INTEGER
             The leading dimension of the array A.  LDA >= max(1,M).
@@ -60,7 +60,7 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
             Higher performance is achieved if WORK is in pinned memory, e.g.
-            allocated using cudaMallocHost.
+            allocated using magma_malloc_host.
 
     LWORK   (input) INTEGER
             The dimension of the array WORK.  LWORK >= max(1,N).
@@ -148,8 +148,8 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
     dwork = da + ldda*(n);
 
     static cudaStream_t stream[2];
-    cudaStreamCreate(&stream[0]);
-    cudaStreamCreate(&stream[1]);
+    magma_queue_create( &stream[0] );
+    magma_queue_create( &stream[1] );
 
     if ( (nb > 1) && (nb < k) ) {
         /*  Use blocked code initially.
@@ -188,7 +188,7 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
                                   da_ref(0, 0          ), ldda, dwork+old_ib, lddwork);
             }
 
-            cudaStreamSynchronize(stream[1]);
+            magma_queue_sync( stream[1] );
             /* Compute the QL factorization of the current block
                A(1:m-k+i+ib-1,n-k+i:n-k+i+ib-1) */
             rows = m - k + i + ib;
@@ -243,8 +243,8 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
     if (mu > 0 && nu > 0)
       lapackf77_zgeqlf(&mu, &nu, a_ref(0,0), &lda, tau, work, &lwork, &iinfo);
 
-    cudaStreamDestroy( stream[0] );
-    cudaStreamDestroy( stream[1] );
+    magma_queue_destroy( stream[0] );
+    magma_queue_destroy( stream[1] );
     magma_free( da );
     return *info;
 } /* magma_zgeqlf */

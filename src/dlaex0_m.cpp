@@ -132,7 +132,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
     double* dw[N_MAX_GPU];
     cudaStream_t stream [N_MAX_GPU][2];
     int gpu_b;
-    cudaGetDevice(&gpu_b);
+    magma_getdevice(&gpu_b);
 
     // Test the input parameters.
 
@@ -159,7 +159,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
     }
 
     for (igpu = 0; igpu < nrgpu; ++igpu){
-        cudaSetDevice(igpu);
+        magma_setdevice(igpu);
         if(nrgpu==1){
             if (MAGMA_SUCCESS != magma_dmalloc( &dw[igpu], 3*n*(n/2 + 1) )) {
                 *info = -15;
@@ -172,8 +172,8 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
                 return MAGMA_ERR_DEVICE_ALLOC;
             }
         }
-        cudaStreamCreate(&stream[igpu][0]);
-        cudaStreamCreate(&stream[igpu][1]);
+        magma_queue_create( &stream[igpu][0] );
+        magma_queue_create( &stream[igpu][1] );
     }
 
     smlsiz = get_dlaex0_smlsize();
@@ -311,14 +311,14 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
     lapackf77_dlacpy ( char_A, &n, &n, &work[n], &n, q, &ldq );
 
     for (igpu = 0; igpu < nrgpu; ++igpu){
-        cudaSetDevice(igpu);
-        cudaStreamDestroy(stream[igpu][0]);
-        cudaStreamDestroy(stream[igpu][1]);
+        magma_setdevice(igpu);
+        magma_queue_destroy( stream[igpu][0] );
+        magma_queue_destroy( stream[igpu][1] );
 /*if(nrgpu==1)*/
         magma_free( dw[igpu] );
     }
 
-    cudaSetDevice(gpu_b);
+    magma_setdevice(gpu_b);
 
     return MAGMA_SUCCESS;
 

@@ -79,7 +79,7 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
             factorization A = U**H * U or A = L * L**H.   
 
             Higher performance is achieved if A is in pinned memory, e.g.
-            allocated using cudaMallocHost.
+            allocated using magma_malloc_host.
 
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,N).   
@@ -133,9 +133,9 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
 
     ldda = ((n+31)/32)*32;
     
-    cudaStreamCreate(&stream[0]);
-    cudaStreamCreate(&stream[1]);
-    cudaStreamCreate(&stream[2]);
+    magma_queue_create( &stream[0] );
+    magma_queue_create( &stream[1] );
+    magma_queue_create( &stream[2] );
 
     nb = magma_get_dpotrf_nb(n);
     /* figure out NB */
@@ -239,7 +239,7 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
               }
              
                   /* factor the diagonal block */
-                  cudaStreamSynchronize(stream[1]);
+                  magma_queue_sync( stream[1] );
                   lapackf77_zpotrf(MagmaUpperStr, &jb, A(j, j), &lda, info);
                   if (*info != 0) {
                     *info = *info + j;
@@ -339,7 +339,7 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
               }
                 
                   /* CPU wait for the diagonal-block and factor */
-              cudaStreamSynchronize(stream[1]);
+              magma_queue_sync( stream[1] );
               lapackf77_zpotrf(MagmaLowerStr, &jb, A(j, j), &lda, info);
               if (*info != 0){
                 *info = *info + j;
@@ -369,9 +369,9 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
           } /* end of for J */
     } /* if upper */
         } /* if nb */
-    cudaStreamDestroy(stream[0]);
-    cudaStreamDestroy(stream[1]);
-    cudaStreamDestroy(stream[2]);
+    magma_queue_destroy( stream[0] );
+    magma_queue_destroy( stream[1] );
+    magma_queue_destroy( stream[2] );
 
     magma_free( dt );
     

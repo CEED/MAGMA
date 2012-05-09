@@ -49,7 +49,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
             Details).
 
             Higher performance is achieved if A is in pinned memory, e.g.
-            allocated using cudaMallocHost.
+            allocated using magma_malloc_host.
 
     LDA     (input) INTEGER
             The leading dimension of the array A.  LDA >= max(1,M).
@@ -62,7 +62,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
             Higher performance is achieved if WORK is in pinned memory, e.g.
-            allocated using cudaMallocHost.
+            allocated using magma_malloc_host.
 
     LWORK   (input) INTEGER
             The dimension of the array WORK.  LWORK >= N*NB,
@@ -156,8 +156,8 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
     }
 
     static cudaStream_t stream[2];
-    cudaStreamCreate(&stream[0]);
-    cudaStreamCreate(&stream[1]);
+    magma_queue_create( &stream[0] );
+    magma_queue_create( &stream[1] );
 
     //   magmablasSetKernelStream(stream[1]);
 
@@ -174,7 +174,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
         magma_zsetmatrix_async( (m), IB,
                                 a_ref(0,i),  lda,
                                 da_ref(0,0), ldda, stream[0] );
-        cudaStreamSynchronize(stream[0]);
+        magma_queue_sync( stream[0] );
 
         /* 2. Update it with the previous transformations */
         for(int j=0; j<min(i,k); j+=nb)
@@ -199,7 +199,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
             magma_zsetmatrix_async( rows, ib,
                                     a_ref(j,j), lda,
                                     ptr,        rows, stream[1] );
-            cudaStreamSynchronize(stream[1]);
+            magma_queue_sync( stream[1] );
 
             magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                               rows, IB, ib,
@@ -219,10 +219,10 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
                                 a_ref(0,i),  lda, stream[0] );
       }
 
-    cudaStreamSynchronize(stream[0]);
+    magma_queue_sync( stream[0] );
 
-    cudaStreamDestroy( stream[0] );
-    cudaStreamDestroy( stream[1] );
+    magma_queue_destroy( stream[0] );
+    magma_queue_destroy( stream[1] );
     magma_free( da );
 
     return *info;

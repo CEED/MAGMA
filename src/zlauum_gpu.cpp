@@ -113,8 +113,8 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
         }
         
         static cudaStream_t stream[2];
-        cudaStreamCreate(&stream[0]);
-        cudaStreamCreate(&stream[1]);
+        magma_queue_create( &stream[0] );
+        magma_queue_create( &stream[1] );
 
         
         if (nb <= 1 || nb >= n)
@@ -199,8 +199,8 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
                 }
         }
 
-        cudaStreamDestroy(stream[0]);
-        cudaStreamDestroy(stream[1]);
+        magma_queue_destroy( stream[0] );
+        magma_queue_destroy( stream[1] );
 
         magma_free_host( work );
 

@@ -18,7 +18,7 @@ void Mymagma_ztrmm(char side, char uplo, char trans, char unit,
                    cuDoubleComplex *dz, magma_int_t lddz)
 {
     magma_ztrmm(side, uplo, trans, unit, n, m, alpha, db, lddb, dz, lddz);
-    cudaDeviceSynchronize();
+    magma_device_sync();
 }
 
 void Mymagma_ztrsm(char side, char uplo, char trans, char unit, 
@@ -27,7 +27,7 @@ void Mymagma_ztrsm(char side, char uplo, char trans, char unit,
                    cuDoubleComplex *dz, magma_int_t lddz)
 {
     magma_ztrsm(side, uplo, trans, unit, n, m, alpha, db, lddb, dz, lddz);
-    cudaDeviceSynchronize();
+    magma_device_sync();
 }
 
 extern "C" magma_int_t
@@ -291,7 +291,7 @@ magma_zhegvr(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
     static magma_int_t lwmin, lrwmin, liwmin;
     
     static cudaStream_t stream;
-    cudaStreamCreate(&stream);
+    magma_queue_create( &stream );
     
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);
     lower = lapackf77_lsame(uplo_, MagmaLowerStr);
@@ -381,7 +381,7 @@ magma_zhegvr(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
         return *info;
     }
     
-    cudaStreamSynchronize(stream);
+    magma_queue_sync( stream );
     
     magma_zgetmatrix_async( n, n,
                             db, lddb,
@@ -429,9 +429,9 @@ magma_zhegvr(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
         
     }
   
-    cudaStreamSynchronize(stream);
+    magma_queue_sync( stream );
     
-    cudaStreamDestroy(stream);
+    magma_queue_destroy( stream );
     
     magma_free( da );
     magma_free( db );

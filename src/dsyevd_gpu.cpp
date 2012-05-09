@@ -221,7 +221,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
     }
 
     static cudaStream_t stream;
-    cudaStreamCreate(&stream);
+    magma_queue_create( &stream );
 
     if (MAGMA_SUCCESS != magma_dmalloc( &dc, n*lddc )) {
       fprintf(stderr, "!!!! device memory allocation error (magma_dsyevd_gpu)\n");
@@ -363,7 +363,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
     MAGMA_D_SET2REAL(work[1], (double) lopt);
     iwork[1] = liopt;
 
-    cudaStreamDestroy(stream);
+    magma_queue_destroy( stream );
     if (!dc_freed)
         magma_free( dc );
 

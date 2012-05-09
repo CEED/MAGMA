@@ -201,7 +201,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
      =====================================================================
      */
     if (nrgpu==1){
-        cudaSetDevice(0);
+        magma_setdevice(0);
         magma_dlaex3(k, n, n1, d, q, ldq, rho,
                      dlamda, q2, indx, ctot, w, s, indxq,
                      *dwork, range, vl, vu, il, iu, info );
@@ -301,7 +301,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
             magma_malloc_host( &(hwQ[0][igpu]), n2_loc*nb, sizeof(double) );
             magma_malloc_host( &(hwQ[1][igpu]), n2_loc*nb, sizeof(double) );
 #endif
-/*            cudaSetDevice(igpu);
+/*            magma_setdevice(igpu);
             magma_malloc( &(dwS[0][igpu]), n2*nb, sizeof(double) );
             magma_malloc( &(dwS[1][igpu]), n2*nb, sizeof(double) );
             magma_malloc( &(dwQ2[igpu]), n2*n2_loc, sizeof(double) );
@@ -313,7 +313,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
 #ifdef CHECK_CPU
             lapackf77_dlacpy("A", &ni_loc[igpu], &n12, q2+n1_loc*(igpu/2), &n1, hQ2(igpu), &n1_loc);
 #endif
-            cudaSetDevice(igpu);
+            magma_setdevice(igpu);
             magma_dsetmatrix_async( ni_loc[igpu], n12,
                                     q2+n1_loc*(igpu/2), n1,
                                     dQ2(igpu),          n1_loc, stream[igpu][0] );
@@ -321,7 +321,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
 #ifdef CHECK_CPU
             lapackf77_dlacpy("A", &ni_loc[igpu+1], &n23, q2+iq2+n2_loc*(igpu/2), &n2, hQ2(igpu+1), &n2_loc);
 #endif
-            cudaSetDevice(igpu+1);
+            magma_setdevice(igpu+1);
             magma_dsetmatrix_async( ni_loc[igpu+1], n23,
                                     q2+iq2+n2_loc*(igpu/2), n2,
                                     dQ2(igpu+1),            n2_loc, stream[igpu+1][0] );
@@ -476,13 +476,13 @@ magma_dlaex3_m(magma_int_t nrgpu,
             ib = min(nb, rk);
             for (igpu = 0; igpu < nrgpu-1; igpu += 2){
                 if (n23 != 0) {
-                    cudaSetDevice(igpu+1);
+                    magma_setdevice(igpu+1);
                     magma_dsetmatrix_async( n23, ib,
                                             Q(ctot[0],iil-1), ldq,
                                             dS(igpu+1,0),     n23, stream[igpu+1][0] );
                 }
                 if (n12 != 0) {
-                    cudaSetDevice(igpu);
+                    magma_setdevice(igpu);
                     magma_dsetmatrix_async( n12, ib,
                                             Q(0,iil-1), ldq,
                                             dS(igpu,0), n12, stream[igpu][0] );
@@ -496,13 +496,13 @@ magma_dlaex3_m(magma_int_t nrgpu,
                     ib2 = min(nb, rk - i - nb);
                     for (igpu = 0; igpu < nrgpu-1; igpu += 2){
                         if (n23 != 0) {
-                            cudaSetDevice(igpu+1);
+                            magma_setdevice(igpu+1);
                             magma_dsetmatrix_async( n23, ib2,
                                                     Q(ctot[0],iil-1+i+nb), ldq,
                                                     dS(igpu+1,(ind+1)%2),  n23, stream[igpu+1][(ind+1)%2] );
                         }
                         if (n12 != 0) {
-                            cudaSetDevice(igpu);
+                            magma_setdevice(igpu);
                             magma_dsetmatrix_async( n12, ib2,
                                                     Q(0,iil-1+i+nb),    ldq,
                                                     dS(igpu,(ind+1)%2), n12, stream[igpu][(ind+1)%2] );
@@ -516,19 +516,19 @@ magma_dlaex3_m(magma_int_t nrgpu,
 #ifdef CHECK_CPU
                         lapackf77_dlacpy("A", &n23, &ib, Q(ctot[0],iil-1+i), &ldq, hS(igpu+1,ind), &n23);
 #endif
-                        cudaSetDevice(igpu+1);
+                        magma_setdevice(igpu+1);
                         //cudaMemcpy2DAsync(dS(igpu+1,ind), sizeof(double)*n23, Q(ctot[0],iil-1+i), sizeof(double)*ldq,
                         //                  sizeof(double)*n23, ib, cudaMemcpyHostToDevice, stream[igpu+1][ind]);
-                        cudaStreamSynchronize(stream[igpu+1][ind]);
+                        magma_queue_sync( stream[igpu+1][ind] );
                     }
                     if (n12 != 0) {
 #ifdef CHECK_CPU
                         lapackf77_dlacpy("A", &n12, &ib, Q(0,iil-1+i), &ldq, hS(igpu,ind), &n12);
 #endif
-                        cudaSetDevice(igpu);
+                        magma_setdevice(igpu);
                         //cudaMemcpy2DAsync(dS(igpu,ind), sizeof(double)*n12, Q(0,iil-1+i), sizeof(double)*ldq,
                         //                  sizeof(double)*n12, ib, cudaMemcpyHostToDevice, stream[igpu][ind]);
-                        cudaStreamSynchronize(stream[igpu][ind]);
+                        magma_queue_sync( stream[igpu][ind] );
                     }
 
                 }
@@ -538,7 +538,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
                         blasf77_dgemm("N", "N", &ni_loc[igpu+1], &ib, &n23, &d_one, hQ2(igpu+1), &n2_loc,
                                       hS(igpu+1,ind), &n23, &d_zero, hQ(igpu+1, ind), &n2_loc);
 #endif
-                        cudaSetDevice(igpu+1);
+                        magma_setdevice(igpu+1);
                         magmablasSetKernelStream(stream[igpu+1][ind]);
                         magma_dgemm(MagmaNoTrans, MagmaNoTrans, ni_loc[igpu+1], ib, n23, d_one, dQ2(igpu+1), n2_loc,
                                     dS(igpu+1, ind), n23, d_zero, dQ(igpu+1, ind), n2_loc);
@@ -551,7 +551,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
                         blasf77_dgemm("N", "N", &ni_loc[igpu], &ib, &n12, &d_one, hQ2(igpu), &n1_loc,
                                       hS(igpu,ind%2), &n12, &d_zero, hQ(igpu, ind%2), &n1_loc);
 #endif
-                        cudaSetDevice(igpu);
+                        magma_setdevice(igpu);
                         magmablasSetKernelStream(stream[igpu][ind]);
                         magma_dgemm(MagmaNoTrans, MagmaNoTrans, ni_loc[igpu], ib, n12, d_one, dQ2(igpu), n1_loc,
                                     dS(igpu, ind), n12, d_zero, dQ(igpu, ind), n1_loc);
@@ -562,14 +562,14 @@ magma_dlaex3_m(magma_int_t nrgpu,
                 }
                 for (igpu = 0; igpu < nrgpu-1; igpu += 2){
                     if (n23 != 0) {
-                        cudaSetDevice(igpu+1);
+                        magma_setdevice(igpu+1);
                         magma_dgetmatrix_async( ni_loc[igpu+1], ib,
                                                 dQ(igpu+1, ind),               n2_loc,
                                                 Q(n1+n2_loc*(igpu/2),iil-1+i), ldq, stream[igpu+1][ind] );
 //                        lapackf77_dlacpy("A", &ni_loc[igpu+1], &ib, hQ(igpu+1, ind%2), &n2_loc, Q(n1+n2_loc*(igpu/2),iil-1+i), &ldq);
                     }
                     if (n12 != 0) {
-                        cudaSetDevice(igpu);
+                        magma_setdevice(igpu);
                         magma_dgetmatrix_async( ni_loc[igpu], ib,
                                                 dQ(igpu, ind),              n1_loc,
                                                 Q(n1_loc*(igpu/2),iil-1+i), ldq, stream[igpu][ind] );
@@ -585,10 +585,10 @@ magma_dlaex3_m(magma_int_t nrgpu,
                 magma_free_host( hwQ[1][igpu] );
                 magma_free_host( hwQ[0][igpu] );
 #endif
-                cudaSetDevice(igpu);
+                magma_setdevice(igpu);
                 magmablasSetKernelStream(NULL);
-                cudaStreamSynchronize(stream[igpu][0]);
-                cudaStreamSynchronize(stream[igpu][1]);
+                magma_queue_sync( stream[igpu][0] );
+                magma_queue_sync( stream[igpu][1] );
 /*                magma_free( dwS[0][igpu] );
                 magma_free( dwS[1][igpu] );
                 magma_free( dwQ2[igpu] );

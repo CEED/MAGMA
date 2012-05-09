@@ -203,7 +203,7 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
                 magma_zgetmatrix( m, sb, dAp, ldda, hA(0, i), ldha );
                 
                 // make sure that gpu queue is empty
-                //cuCtxSynchronize();
+                //magma_device_sync();
                 
 #ifndef WITHOUTTRTRI
                 magma_ztrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
@@ -281,7 +281,7 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
             magmablas_ztranspose( AT(0, i), ldda, dAp, ldda, m,  sb);
             
             // make sure that gpu queue is empty
-            //cuCtxSynchronize();
+            //magma_device_sync();
             
             // do the small non-parallel computations
             if ( s > (i+1) ) {

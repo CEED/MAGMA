@@ -120,7 +120,7 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
         return *info;
     }
 
-    cudaStreamCreate(&stream);
+    magma_queue_create( &stream );
 
     if ( (nb > 1) && (nb < k) )
       {
@@ -189,7 +189,7 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
     magma_zgetmatrix( m, n, da_ref(0, 0), ldda, a_ref(0, 0), lda );
 
     
-    cudaStreamDestroy(stream);
+    magma_queue_destroy( stream );
     magma_free( da );
     free(work);
 

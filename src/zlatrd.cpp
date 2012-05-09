@@ -180,7 +180,7 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
     }
 
     static cudaStream_t stream;
-    cudaStreamCreate(&stream);
+    magma_queue_create( &stream );
 
     if (lapackf77_lsame(uplo_, "U")) {
 
@@ -236,7 +236,7 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
           }
           
             // 3. Here is where we need it // TODO find the right place
-            cudaStreamSynchronize(stream);
+            magma_queue_sync( stream );
 
           if (i < n-1) {
           
@@ -319,7 +319,7 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
                             A(i+1, i), &ione, &c_zero, W(0, i), &ione);
 
               // 3. Here is where we need it
-              cudaStreamSynchronize(stream);
+              magma_queue_sync( stream );
 
               if (i!=0)
                 blasf77_zaxpy(&i_n, &c_one, f, &ione, W(i+1, i), &ione);
@@ -349,7 +349,7 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
     }
 
     free(f);
-    cudaStreamDestroy(stream);
+    magma_queue_destroy( stream );
 
     return 0;
 } /* zlatrd_ */

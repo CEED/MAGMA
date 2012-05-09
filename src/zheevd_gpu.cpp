@@ -250,7 +250,7 @@ magma_zheevd_gpu(char jobz, char uplo,
     }
 
     cudaStream_t stream;
-    cudaStreamCreate(&stream);
+    magma_queue_create( &stream );
 
     if (MAGMA_SUCCESS != magma_zmalloc( &dc, n*lddc )) {
       fprintf (stderr, "!!!! device memory allocation error (magma_zheevd_gpu)\n");
@@ -399,7 +399,7 @@ magma_zheevd_gpu(char jobz, char uplo,
     rwork[0] = (double) lrwmin;
     iwork[0] = liwmin;
 
-    cudaStreamDestroy(stream);
+    magma_queue_destroy( stream );
     if (!dc_freed)
         magma_free( dc );
 

@@ -121,14 +121,14 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
 
     if ((nb <= 1) || (nb >= n)) {
       /*  Use unblocked code. */
-          cudaSetDevice(0);
+          magma_setdevice(0);
       magma_zgetmatrix( n, n, dlA(0,0,0), ldda, work, n );
       lapackf77_zpotrf(uplo_, &n, work, &n, info);
       magma_zsetmatrix( n, n, work, n, dlA(0,0,0), ldda );
     } else {
 
       for( d=0; d<num_gpus; d++ ) {
-        cudaSetDevice(d);
+        magma_setdevice(d);
 
         /* local-n and local-ld */
         n_local[d] = ((n/nb)/num_gpus)*nb;
@@ -140,16 +140,16 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
         
         if (MAGMA_SUCCESS != magma_zmalloc( &d_lP[d], nb*ldda )) {
           for( j=0; j<d; j++ ) {
-            cudaSetDevice(j);
+            magma_setdevice(j);
             magma_free( d_lP[d] );
           }
           *info = MAGMA_ERR_DEVICE_ALLOC;
           return *info;
         }
-        cudaStreamCreate(&stream[d][0]);
-        cudaStreamCreate(&stream[d][1]);
-        cudaStreamCreate(&stream[d][2]);
-        cudaStreamCreate(&stream[d][3]);
+        magma_queue_create( &stream[d][0] );
+        magma_queue_create( &stream[d][1] );
+        magma_queue_create( &stream[d][2] );
+        magma_queue_create( &stream[d][3] );
       }
 
       /* Use blocked code. */
@@ -160,7 +160,7 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
 
             /* Set the GPU number that holds the current panel */
             id = (j/nb)%num_gpus;
-            cudaSetDevice(id);
+            magma_setdevice(id);
 
             /* Set the local index where the current panel is */
             j_local = j/(nb*num_gpus);
@@ -169,9 +169,9 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
             if( j>0 && (j+jb)<n) {
               /* wait for the off-diagonal column off the current diagonal *
                * and send it to gpus                                       */
-              cudaStreamSynchronize(stream[id][2]);
+              magma_queue_sync( stream[id][2] );
               for( d=0; d<num_gpus; d++ ) {
-                cudaSetDevice(d);
+                magma_setdevice(d);
                 if( d != id )
                   magma_zsetmatrix_async( j, jb,
                                           &work[jb],   n,
@@ -180,7 +180,7 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
             }
             
             /* Update the current diagonal block */
-            cudaSetDevice(id);
+            magma_setdevice(id);
             magma_zherk(MagmaUpper, MagmaConjTrans, jb, j, 
                         d_neg_one, dlA(id, 0, nb*j_local), ldda, 
                         d_one,     dlA(id, j, nb*j_local), ldda);
@@ -193,13 +193,13 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
             if ( j>0 && (j+jb)<n) {
               /* Compute the local block column of the panel. */
               for( d=0; d<num_gpus; d++ ) {
-                cudaSetDevice(d);
+                magma_setdevice(d);
                 j_local2 = j_local+1;
                 if( d > id ) j_local2 --;
 
                 /* wait for the off-diagonal */
                 if( d != id ) {
-                  //cudaStreamSynchronize(stream[id][3]);
+                  //magma_queue_sync( stream[id][3] );
                   dlpanel = dlP(d, jb, 0);
                 } else {
                   dlpanel = dlA(d, 0, nb*j_local);
@@ -215,8 +215,8 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
             }
           
             /* factor the diagonal */
-            cudaSetDevice(id);
-            cudaStreamSynchronize(stream[id][0]);
+            magma_setdevice(id);
+            magma_queue_sync( stream[id][0] );
             lapackf77_zpotrf(MagmaUpperStr, &jb, work, &n, info);
             if (*info != 0) {
               *info = *info + j;
@@ -226,7 +226,7 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
             /* send the diagonal to gpus */
             if ( (j+jb) < n) {
               for( d=0; d<num_gpus; d++ ) {
-                cudaSetDevice(d);
+                magma_setdevice(d);
                 if( d == id ) dlpanel = dlA(d, j, nb*j_local);
                 else          dlpanel = dlP(d, 0, 0);
                 
@@ -235,7 +235,7 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
                                         dlpanel, ldda, stream[d][1] );
               }
             } else {
-              cudaSetDevice(id);
+              magma_setdevice(id);
               magma_zsetmatrix_async( jb, jb,
                                       work,                   n,
                                       dlA(id, j, nb*j_local), ldda, stream[id][1] );
@@ -244,7 +244,7 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
             /* panel-factorize the off-diagonal */
             if ( (j+jb) < n) {
               for( d=0; d<num_gpus; d++ ) {
-                cudaSetDevice(d);
+                magma_setdevice(d);
                 
                 /* next column */
                 j_local2 = j_local+1;
@@ -253,7 +253,7 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
                 else          dlpanel = dlP(d, 0, 0);
                 nb0 = min(nb, n_local[d]-nb*j_local2 );
                 
-                cudaStreamSynchronize(stream[d][1]);
+                magma_queue_sync( stream[d][1] );
                 if( d == (j/nb+1)%num_gpus ) {
                   /* owns the next column, look-ahead the column */
                   /*
@@ -302,7 +302,7 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
 
               /* Set the GPU number that holds the current panel */
               id = (j/nb)%num_gpus;
-              cudaSetDevice(id);
+              magma_setdevice(id);
 
               /* Set the local index where the current panel is */
               j_local = j/(nb*num_gpus);
@@ -311,9 +311,9 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
                   if( j>0 && (j+jb)<n) {
                     /* wait for the off-diagonal row off the current diagonal *
                          * and send it to gpus                                    */
-                cudaStreamSynchronize(stream[id][2]);
+                magma_queue_sync( stream[id][2] );
             for( d=0; d<num_gpus; d++ ) {
-                  cudaSetDevice(d);
+                  magma_setdevice(d);
                       lddat = lddat_local[d];
                           if( d != id ) 
                   magma_zsetmatrix_async( jb, j,
@@ -323,7 +323,7 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
                   }
 
               /* Update the current diagonal block */
-              cudaSetDevice(id);
+              magma_setdevice(id);
                   lddat = lddat_local[id];
                   magma_zherk(MagmaLower, MagmaNoTrans, jb, j,
                               d_neg_one, dlAT(id, nb*j_local, 0), lddat,
@@ -337,14 +337,14 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
                   if ( j > 0 && (j+jb) < n) {
                         /* compute the block-rows of the panel */
                         for( d=0; d<num_gpus; d++ ) {
-                  cudaSetDevice(d);
+                  magma_setdevice(d);
                           lddat = lddat_local[d];
                           j_local2 = j_local+1;
                           if( d > id ) j_local2 --;
 
                           /* wait for the off-diagonal */
                   if( d != id ) {
-                                  cudaStreamSynchronize(stream[id][3]);
+                                  magma_queue_sync( stream[id][3] );
                                   dlpanel = dlPT(d, 0, jb);
                                   ldpanel = nb;
                           } else {
@@ -362,8 +362,8 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
                   }
 
                   /* factor the diagonal */
-              cudaSetDevice(id);
-                  cudaStreamSynchronize(stream[id][0]);
+              magma_setdevice(id);
+                  magma_queue_sync( stream[id][0] );
                   lapackf77_zpotrf(MagmaLowerStr, &jb, work, &jb, info);
                   if (*info != 0) {
                      *info = *info + j;
@@ -373,7 +373,7 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
                   /* send the diagonal to gpus */
               if ( (j+jb) < n) {
                     for( d=0; d<num_gpus; d++ ) {
-                  cudaSetDevice(d);
+                  magma_setdevice(d);
                           lddat = lddat_local[d];
                           if( d == id ) {
                                   dlpanel = dlAT(d, nb*j_local, j);
@@ -393,7 +393,7 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
                   }
               if ( (j+jb) < n) {
                     for( d=0; d<num_gpus; d++ ) {
-                  cudaSetDevice(d);
+                  magma_setdevice(d);
                           lddat = lddat_local[d];
 
                           /* next column */
@@ -409,7 +409,7 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
                           nb0 = min(nb, n_local[d]-nb*j_local2 );
                           nb0 = min(nb, lddat-nb*j_local2 );
 
-                  cudaStreamSynchronize(stream[d][1]);
+                  magma_queue_sync( stream[d][1] );
                           if( d == (j/nb+1)%num_gpus ) {
                             /* owns the next column, look-ahead the column */
                     magma_ztrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
@@ -446,10 +446,10 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
           /* clean up */
           for( d=0; d<num_gpus; d++ ) {
             magma_free( d_lP[d] );
-            cudaStreamDestroy(stream[d][0]);
-            cudaStreamDestroy(stream[d][1]);
-            cudaStreamDestroy(stream[d][2]);
-            cudaStreamDestroy(stream[d][3]);
+            magma_queue_destroy( stream[d][0] );
+            magma_queue_destroy( stream[d][1] );
+            magma_queue_destroy( stream[d][2] );
+            magma_queue_destroy( stream[d][3] );
           }
 
     } /* end of not lapack */

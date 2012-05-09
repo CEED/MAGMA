@@ -171,7 +171,7 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     static magma_int_t lopt, lwmin, liopt, liwmin;
   
     static cudaStream_t stream;
-    cudaStreamCreate(&stream);
+    magma_queue_create( &stream );
 
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);
     lower = lapackf77_lsame(uplo_, MagmaLowerStr);
@@ -249,7 +249,7 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
         return 0;
     }
 
-    cudaStreamSynchronize(stream);
+    magma_queue_sync( stream );
   
     magma_dgetmatrix_async( n, n,
                             db, lddb,
@@ -298,8 +298,8 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
 
     }
 
-    cudaStreamSynchronize(stream);
-    cudaStreamDestroy(stream);
+    magma_queue_sync( stream );
+    magma_queue_destroy( stream );
   
     work[0] = (double) lopt;
     iwork[0] = liopt;

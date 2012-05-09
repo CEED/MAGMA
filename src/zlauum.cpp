@@ -115,8 +115,8 @@ magma_zlauum(char uplo, magma_int_t n,
         }
 
         static cudaStream_t stream[2];
-        cudaStreamCreate(&stream[0]);
-        cudaStreamCreate(&stream[1]);
+        magma_queue_create( &stream[0] );
+        magma_queue_create( &stream[1] );
 
         nb = magma_get_zpotrf_nb(n);
 
@@ -141,7 +141,7 @@ magma_zlauum(char uplo, magma_int_t n,
                                                         A(i,i+ib),  lda,
                                                         dA(i,i+ib), ldda, stream[0] );
 
-                                cudaStreamSynchronize(stream[1]);
+                                magma_queue_sync( stream[1] );
 
                                 magma_ztrmm( MagmaRight, MagmaUpper,
                                              MagmaConjTrans, MagmaNonUnit, i, ib,
@@ -161,7 +161,7 @@ magma_zlauum(char uplo, magma_int_t n,
                                                      ldda, dA(i, i+ib),ldda, c_one,
                                                      dA(0,i), ldda);
 
-                                        cudaStreamSynchronize(stream[0]);
+                                        magma_queue_sync( stream[0] );
 
                                         magma_zherk( MagmaUpper, MagmaNoTrans, ib,(n-i-ib),
                                                      d_one, dA(i, i+ib), ldda,
@@ -190,7 +190,7 @@ magma_zlauum(char uplo, magma_int_t n,
                                                         A(i+ib, i),  lda,
                                                         dA(i+ib, i), ldda, stream[0] );
 
-                                cudaStreamSynchronize(stream[1]);
+                                magma_queue_sync( stream[1] );
 
                                 magma_ztrmm( MagmaLeft, MagmaLower,
                                              MagmaConjTrans, MagmaNonUnit, ib,
@@ -214,7 +214,7 @@ magma_zlauum(char uplo, magma_int_t n,
                                                         ldda, dA(i+ib, 0),ldda, c_one,
                                                         dA(i,0), ldda);
 
-                                        cudaStreamSynchronize(stream[0]);
+                                        magma_queue_sync( stream[0] );
                                         
                                         magma_zherk(MagmaLower, MagmaConjTrans, ib, (n-i-ib),
                                                         d_one, dA(i+ib, i), ldda,
@@ -226,8 +226,8 @@ magma_zlauum(char uplo, magma_int_t n,
                         }
                 }
         }
-        cudaStreamDestroy(stream[0]);
-        cudaStreamDestroy(stream[1]);
+        magma_queue_destroy( stream[0] );
+        magma_queue_destroy( stream[1] );
 
         magma_free( work );
 

@@ -174,7 +174,7 @@ magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
                 magma_zgetmatrix( m, sb, dwork, maxm, hA(0, i), ldha );
                 
                 // make sure that gpu queue is empty
-                //cuCtxSynchronize();
+                //magma_device_sync();
 #ifndef WITHOUTTRTRI
                 magma_ztrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
                              n - (ii+sb), ib, 

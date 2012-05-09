@@ -74,7 +74,7 @@ magma_zgetrf2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
             A = P*L*U; the unit diagonal elements of L are not stored.
 
             Higher performance is achieved if A is in pinned memory, e.g.
-            allocated using cudaMallocHost.
+            allocated using magma_malloc_host.
 
     LDA     (input) INTEGER
             The leading dimension of the array A.  LDA >= max(1,M).
@@ -157,7 +157,7 @@ magma_zgetrf2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
                 magma_zgetmatrix( m-i*nb, nb, dA, cols, work, lda );
                 
                 // make sure that gpu queue is empty
-                cuCtxSynchronize();
+                magma_device_sync();
                 
                 magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
                              n - (i+1)*nb, nb, 
@@ -215,7 +215,7 @@ magma_zgetrf2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
           magma_zgetmatrix( rows, nb0, dA, cols, work, lda );
           
           // make sure that gpu queue is empty
-          cuCtxSynchronize();
+          magma_device_sync();
           
           // do the cpu part
           lapackf77_zgetrf( &rows, &nb0, work, &lda, ipiv+s*nb, &iinfo);
@@ -237,7 +237,7 @@ magma_zgetrf2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
           magma_zgetmatrix( m, nb0, dA, maxm, a+s*nb*lda, lda );
           
           // make sure that gpu queue is empty
-          cuCtxSynchronize();
+          magma_device_sync();
           
           // do the cpu part
           lapackf77_zgetrf( &rows, &nb0, a+s*nb+s*nb*lda, &lda, ipiv+s*nb, &iinfo);

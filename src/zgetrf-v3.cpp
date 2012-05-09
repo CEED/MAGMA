@@ -129,9 +129,8 @@ magma_zgetrf3(magma_int_t num_gpus,
           cuDoubleComplex *d_lA[4];
 
           /* allocate workspace for each GPU */
-          for(i=0; i<num_gpus; i++)
-            {
-              cudaSetDevice(i);
+          for(i=0; i<num_gpus; i++) {
+              magma_setdevice(i);
 
               /* local-n and local-ld */
               n_local[i] = ((n/nb)/num_gpus)*nb;
@@ -144,7 +143,7 @@ magma_zgetrf3(magma_int_t num_gpus,
               /* workspaces */
               if (MAGMA_SUCCESS != magma_zmalloc( &d_lA[i], (2*nb + ldat_local[i])*maxm )) {
                   for( j=0; j<i; j++ ) {
-                      cudaSetDevice(j);
+                      magma_setdevice(j);
                       magma_free( d_lA[j] );
                   }
                   *info = MAGMA_ERR_DEVICE_ALLOC;
@@ -162,17 +161,9 @@ magma_zgetrf3(magma_int_t num_gpus,
               ldpan[i] = lddat;
               
               /* create the streams */
-              if( cudaSuccess != cudaStreamCreate(&streaml[i][0]) ||
-                  cudaSuccess != cudaStreamCreate(&streaml[i][1])   ) 
-                {
-                  for( j=0; j<=i; j++ ) {
-                    cudaSetDevice(j);
-                    magma_free( d_lA[j] );
-                  }
-                  *info = MAGMA_ERR_CUDASTREAM;
-                  return *info;
-                }
-            }
+              magma_queue_create( &streaml[i][0] );
+              magma_queue_create( &streaml[i][1] );
+          }
       
           /* Read incrementally from 'a' and transpose in d_lAT; d_lA is work space */
           magmablas_zsetmatrix_transpose2( m, n, a, lda, d_lAT, ldat_local,
@@ -183,7 +174,7 @@ magma_zgetrf3(magma_int_t num_gpus,
           lddwork = maxm;
           if (MAGMA_SUCCESS != magma_zmalloc_host( &work, lddwork*nb )) {
               for(i=0; i<num_gpus; i++ ) {
-                  cudaSetDevice(i);
+                  magma_setdevice(i);
                   magma_free( d_lA[i] );
               }
               *info = MAGMA_ERR_HOST_ALLOC;
@@ -202,7 +193,7 @@ magma_zgetrf3(magma_int_t num_gpus,
             {
               /* Set the GPU number that holds the current panel */
               id = i%num_gpus;
-              cudaSetDevice(id);
+              magma_setdevice(id);
 
               /* Set the local index where the current panel is */
               i_local = i/num_gpus;
@@ -219,7 +210,7 @@ magma_zgetrf3(magma_int_t num_gpus,
                                       work,      lddwork, streaml[id][1] );
 
               /* make sure that gpu queue is empty */
-              //cuCtxSynchronize();
+              //magma_device_sync();
 
               /* the remaining updates */
               //if ( i>0 ){
@@ -236,7 +227,7 @@ magma_zgetrf3(magma_int_t num_gpus,
               }
 
               /* synchronize i-th panel from id-th gpu into work */
-              cudaStreamSynchronize(streaml[id][1]);
+              magma_queue_sync( streaml[id][1] );
                 
               /* i-th panel factorization */
               lapackf77_zgetrf( &rows, &nb, work, &lddwork, ipiv+i*nb, &iinfo);
@@ -247,7 +238,7 @@ magma_zgetrf3(magma_int_t num_gpus,
 
               /* start sending the panel to all the gpus */
               for( d=0; d<num_gpus; d++ ) {
-                cudaSetDevice(d);
+                magma_setdevice(d);
                 lddat = ldat_local[d];
                 //cublasSetMatrix(rows, nb, sizeof(cuDoubleComplex), work, lddwork, d_lAP[d], maxm);
                 magma_zsetmatrix_async( rows, nb,
@@ -256,7 +247,7 @@ magma_zgetrf3(magma_int_t num_gpus,
               }
               
               for( d=0; d<num_gpus; d++ ) {
-                cudaSetDevice(d);
+                magma_setdevice(d);
                 lddat = ldat_local[d];
                 /* apply the pivoting */
                 if( d == 0 ) 
@@ -295,7 +286,7 @@ magma_zgetrf3(magma_int_t num_gpus,
                 }
                 
                 /* synchronization */
-                //cudaStreamSynchronize(streaml[d][0]);
+                //magma_queue_sync( streaml[d][0] );
                 //cublasSetMatrix(rows, nb, sizeof(cuDoubleComplex), work, lddwork, d_lAP[d], maxm);
                 //magmablas_ztranspose2(panel_local[d], ldpan[d], d_lAP[d], maxm, cols, nb);
                 magmablas_ztranspose2s(panel_local[d], ldpan[d], d_lAP[d], maxm, cols, nb, 
@@ -328,13 +319,13 @@ magma_zgetrf3(magma_int_t num_gpus,
           
           if( nb0 > 0 ) {
             /* send the last panel to cpu */
-            cudaSetDevice(id);
-            //cudaStreamSynchronize(streaml[id][1]);
+            magma_setdevice(id);
+            //magma_queue_sync( streaml[id][1] );
             magmablas_ztranspose2( d_lAP[id], maxm, inAT(id,s,i_local), lddat, nb0, rows);
             magma_zgetmatrix( rows, nb0, d_lAP[id], maxm, work, lddwork );
             
             /* make sure that gpu queue is empty */
-            //cuCtxSynchronize();
+            //magma_device_sync();
 
             /* factor on cpu */
             lapackf77_zgetrf( &rows, &nb0, work, &lddwork, ipiv+s*nb, &iinfo);
@@ -343,7 +334,7 @@ magma_zgetrf3(magma_int_t num_gpus,
 
             /* send the factor to gpus */
             for( d=0; d<num_gpus; d++ ) {
-              cudaSetDevice(d);
+              magma_setdevice(d);
               lddat = ldat_local[d];
               i_local2 = i_local;
               if( d < id ) i_local2 ++;
@@ -360,7 +351,7 @@ magma_zgetrf3(magma_int_t num_gpus,
           
           /* clean up */
           for( d=0; d<num_gpus; d++ ) {
-            cudaSetDevice(d);
+            magma_setdevice(d);
             lddat = ldat_local[d];
             
             if( nb0 > 0 ) {
@@ -380,7 +371,7 @@ magma_zgetrf3(magma_int_t num_gpus,
                 nb1 = n_local[d] - i_local*nb-nb0;
                 
                 //cublasSetMatrix(rows, nb0, sizeof(cuDoubleComplex), work, lddwork, d_lAP[d], maxm);
-                cudaStreamSynchronize(streaml[d][0]);
+                magma_queue_sync( streaml[d][0] );
                 magmablas_ztranspose2( panel_local[d], lddat, d_lAP[d], maxm, rows, nb0);
                 
                 if( nb1 > 0 )
@@ -396,7 +387,7 @@ magma_zgetrf3(magma_int_t num_gpus,
                 nb1 = n_local[d] - i_local2*nb;
                 
                 //cublasSetMatrix(rows, nb0, sizeof(cuDoubleComplex), work, lddwork, d_lAP[d], maxm);
-                cudaStreamSynchronize(streaml[d][0]);
+                magma_queue_sync( streaml[d][0] );
                 
                 magmablas_ztranspose2( panel_local[d], nb0, d_lAP[d], maxm, rows, nb0);
                 magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
@@ -418,8 +409,8 @@ magma_zgetrf3(magma_int_t num_gpus,
           for( d=0; d<num_gpus; d++ ) 
             {
               magma_free( d_lA[d] );
-              cudaStreamDestroy(streaml[d][0]);
-              cudaStreamDestroy(streaml[d][1]);
+              magma_queue_destroy( streaml[d][0] );
+              magma_queue_destroy( streaml[d][1] );
             } /* end of for d=1,..,num_gpus */
           //magma_free_host( work );
       }

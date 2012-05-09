@@ -130,8 +130,8 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
         }
         
         static cudaStream_t stream[2];
-        cudaStreamCreate(&stream[0]);
-        cudaStreamCreate(&stream[1]);
+        magma_queue_create( &stream[0] );
+        magma_queue_create( &stream[1] );
 
         
         if (nb <= 1 || nb >= n)
@@ -166,7 +166,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
                                                         dA(j, j), ldda,
                                                         work,     jb, stream[1] );
 
-                                cudaStreamSynchronize(stream[1]);
+                                magma_queue_sync( stream[1] );
 
                                 /* Compute inverse of current diagonal block */
                                 lapackf77_ztrtri(MagmaUpperStr, diag_, &jb, work, &jb, info);
@@ -209,7 +209,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
                                                         dA(j, j), ldda,
                                                         work,     jb, stream[1] );
 
-                                cudaStreamSynchronize(stream[1]);
+                                magma_queue_sync( stream[1] );
 
                                 /* Compute inverse of current diagonal block */
                                 lapackf77_ztrtri(MagmaLowerStr, diag_, &jb, work, &jb, info);
@@ -224,8 +224,8 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
                 }
         }
 
-        cudaStreamDestroy(stream[0]);
-        cudaStreamDestroy(stream[1]);
+        magma_queue_destroy( stream[0] );
+        magma_queue_destroy( stream[1] );
 
         magma_free_host( work );
 

@@ -57,7 +57,7 @@ magma_ztsqrt_gpu(int *m, int *n,
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
             Higher performance is achieved if WORK is in pinned memory, e.g.
-            allocated using cudaMallocHost.
+            allocated using magma_malloc_host.
 
     LWORK   (input) INTEGER   
             The dimension of the array WORK.  LWORK >= (M+N+NB)*NB,   
@@ -138,8 +138,8 @@ magma_ztsqrt_gpu(int *m, int *n,
    int lhwork = *lwork - (*m)*nb;
 
    static cudaStream_t stream[2];
-   cudaStreamCreate(&stream[0]);
-   cudaStreamCreate(&stream[1]);
+   magma_queue_create( &stream[0] );
+   magma_queue_create( &stream[1] );
 
    ldda = *m;
    nbmin = 2;
@@ -175,7 +175,7 @@ magma_ztsqrt_gpu(int *m, int *n,
                        dd_ref(0), &lddwork);
         }
 
-        cudaStreamSynchronize(stream[1]);
+        magma_queue_sync( stream[1] );
 
         // TTT - here goes the CPU PLASMA code
         //       Matrix T has to be put in hwork with lda = ib and 0s

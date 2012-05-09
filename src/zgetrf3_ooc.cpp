@@ -94,7 +94,7 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
             A = P*L*U; the unit diagonal elements of L are not stored.
 
             Higher performance is achieved if A is in pinned memory, e.g.
-            allocated using cudaMallocHost.
+            allocated using magma_malloc_host.
 
     LDA     (input) INTEGER
             The leading dimension of the array A.  LDA >= max(1,M).
@@ -219,7 +219,7 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
     ldn_local = ((n_local[0]+31)/32)*32;
 
     for( d=0; d<num_gpus; d++ ) {
-      cudaSetDevice(d);
+      magma_setdevice(d);
       if (MAGMA_SUCCESS != magma_zmalloc( &dA[d], (h*nb + ldn_local)*maxm )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
@@ -227,7 +227,7 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
       dPT[d] = dA[d] + nb*maxm; /* for storing the previous panel from CPU          */
       dAT[d] = dA[d] + h*nb*maxm;
       for( ii=0; ii<h; ii++ ) {
-        cudaStreamCreate(&stream[d][ii]);
+        magma_queue_create( &stream[d][ii] );
       }
     }
 #ifdef PROFILE
@@ -277,7 +277,7 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
             NBk = min( m-offset, NB );
             /* start sending the first tile from the previous big-panels to gpus */
             for( d=0; d<num_gpus; d++ ) {
-              cudaSetDevice(d);
+              magma_setdevice(d);
               magma_zsetmatrix_async( (M-offset), nb,
                                       A(offset,offset), lda,
                                       dA[d],            (maxm-offset), stream[d][0] );
@@ -285,7 +285,7 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
 
             /* applying the pivot from the previous big-panel */
             for( d=0; d<num_gpus; d++ ) {
-              cudaSetDevice(d);
+              magma_setdevice(d);
               magmablas_zpermute_long3( inAT(d,0,0), ldn_local, ipiv, NBk, offset );
             }
 
@@ -295,10 +295,10 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
               ii   = offset+jj;
               rows = maxm - ii;
               for( d=0; d<num_gpus; d++ ) {
-                cudaSetDevice(d);
+                magma_setdevice(d);
 
                 /* upload the previous block-column to GPU */
-                cudaStreamSynchronize(stream[d][0]);
+                magma_queue_sync( stream[d][0] );
 
                 /* transpose the previous column */
                 magmablas_ztranspose2( inPT(d,0,0), nb, dA[d], rows, M-ii, nb);
@@ -363,10 +363,10 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
 #endif
 
     for( d=0; d<num_gpus0; d++ ) {
-      cudaSetDevice(d);
+      magma_setdevice(d);
       magma_free( dA[d] ); 
       for( ii=0; ii<h; ii++ ) {
-        cudaStreamDestroy(stream[d][ii]);
+        magma_queue_destroy( stream[d][ii] );
       }
     }
     }

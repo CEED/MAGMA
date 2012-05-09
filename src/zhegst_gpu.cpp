@@ -131,9 +131,9 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
   }
   
   static cudaStream_t stream[3];
-  cudaStreamCreate(&stream[0]);
-  cudaStreamCreate(&stream[1]);
-  cudaStreamCreate(&stream[2]);
+  magma_queue_create( &stream[0] );
+  magma_queue_create( &stream[1] );
+  magma_queue_create( &stream[2] );
   
   /* Use hybrid blocked code */    
   if (itype==1) 
@@ -156,8 +156,8 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
             
             /* Update the upper triangle of A(k:n,k:n) */
             
-            cudaStreamSynchronize(stream[2]);
-            cudaStreamSynchronize(stream[1]);
+            magma_queue_sync( stream[2] );
+            magma_queue_sync( stream[1] );
             
             lapackf77_zhegs2( &itype, uplo_, &kb, A(0,0), &lda, B(0,0), &ldb, info);
             
@@ -177,7 +177,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                           c_one, dB(k,k), lddb, 
                           dA(k,k+kb), ldda); 
             
-              cudaStreamSynchronize(stream[0]);
+              magma_queue_sync( stream[0] );
             
               magma_zhemm(MagmaLeft, MagmaUpper,
                           kb, n-k-kb,
@@ -210,7 +210,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
             
           }
           
-          cudaStreamSynchronize(stream[0]);
+          magma_queue_sync( stream[0] );
           
         } else {
         
@@ -231,8 +231,8 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
           
           /* Update the lower triangle of A(k:n,k:n) */
           
-          cudaStreamSynchronize(stream[2]);
-          cudaStreamSynchronize(stream[1]);
+          magma_queue_sync( stream[2] );
+          magma_queue_sync( stream[1] );
           
           lapackf77_zhegs2( &itype, uplo_, &kb, A(0, 0), &lda, B(0, 0), &ldb, info);
           
@@ -252,7 +252,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                         c_one, dB(k,k), lddb, 
                         dA(k+kb,k), ldda);
             
-            cudaStreamSynchronize(stream[0]);
+            magma_queue_sync( stream[0] );
             
             magma_zhemm(MagmaRight, MagmaLower,
                         n-k-kb, kb,
@@ -286,7 +286,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
         
       }
       
-      cudaStreamSynchronize(stream[0]);
+      magma_queue_sync( stream[0] );
       
     } else {
       
@@ -315,7 +315,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                         dB(0,k), lddb,
                         c_one, dA(0, k), ldda);
             
-            cudaStreamSynchronize(stream[1]);
+            magma_queue_sync( stream[1] );
             
           }
           
@@ -344,8 +344,8 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
             
           }
 
-          cudaStreamSynchronize(stream[2]);
-          cudaStreamSynchronize(stream[0]);
+          magma_queue_sync( stream[2] );
+          magma_queue_sync( stream[0] );
           
           lapackf77_zhegs2( &itype, uplo_, &kb, A(0, 0), &lda, B(0, 0), &ldb, info);
           
@@ -355,7 +355,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
           
         }
         
-        cudaStreamSynchronize(stream[1]);
+        magma_queue_sync( stream[1] );
         
       } else {
         
@@ -382,7 +382,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                         dB(k,0), lddb,
                         c_one, dA(k, 0), ldda);
             
-            cudaStreamSynchronize(stream[1]);
+            magma_queue_sync( stream[1] );
             
           }
           
@@ -410,8 +410,8 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                         dA(k,0), ldda);
           }
           
-          cudaStreamSynchronize(stream[2]);
-          cudaStreamSynchronize(stream[0]);
+          magma_queue_sync( stream[2] );
+          magma_queue_sync( stream[0] );
           
           lapackf77_zhegs2( &itype, uplo_, &kb, A(0, 0), &lda, B(0, 0), &ldb, info);
           
@@ -420,13 +420,13 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                                   dA(k, k), ldda, stream[1] );
         }
         
-        cudaStreamSynchronize(stream[1]);
+        magma_queue_sync( stream[1] );
         
       }
   }
-  cudaStreamDestroy(stream[0]);
-  cudaStreamDestroy(stream[1]); 
-  cudaStreamDestroy(stream[2]);
+  magma_queue_destroy( stream[0] );
+  magma_queue_destroy( stream[1] ); 
+  magma_queue_destroy( stream[2] );
   
   magma_free_host( w );
   

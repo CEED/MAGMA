@@ -132,7 +132,7 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
             magma_zgetmatrix( m-i*nb, nb, inA(i,i), ldda, work, lddwork );
             
             // make sure that gpu queue is empty
-            cuCtxSynchronize();
+            magma_device_sync();
             
             if ( i>0 ){
               magma_ztrsm( MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit, 
@@ -183,7 +183,7 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
         magma_zgetmatrix( rows, nb0, inA(s,s), ldda, work, lddwork );
 
         // make sure that gpu queue is empty
-        cuCtxSynchronize();
+        magma_device_sync();
 
         // do the cpu part
         magma_zgetrf_nopiv( &rows, &nb0, work, &lddwork, &iinfo);

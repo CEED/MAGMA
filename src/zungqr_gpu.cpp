@@ -127,8 +127,8 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     }
     panel = work + n * nb;
 
-    cudaStreamCreate(&stream[0]);
-    cudaStreamCreate(&stream[1]);
+    magma_queue_create( &stream[0] );
+    magma_queue_create( &stream[1] );
 
     /* Use unblocked code for the last or only block. */
     if (kk < n)
@@ -167,7 +167,7 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
               }
 
             /* Apply H to rows i:m of current block on the CPU */
-            cudaStreamSynchronize(stream[0]);
+            magma_queue_sync( stream[0] );
             lapackf77_zungqr(&i__2, &ib, &ib, panel, &i__2, &tau[i], 
                              work, &lwork, &iinfo);
             magma_zsetmatrix_async( i__2, ib,
@@ -181,8 +181,8 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
       }
 
     magma_free_host( work );
-    cudaStreamDestroy(stream[0]);
-    cudaStreamDestroy(stream[1]);
+    magma_queue_destroy( stream[0] );
+    magma_queue_destroy( stream[1] );
 
     return *info;
 } /* magma_zungqr_gpu */

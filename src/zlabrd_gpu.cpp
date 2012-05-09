@@ -188,7 +188,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 
     cuDoubleComplex *f = (cuDoubleComplex *)malloc(max(n,m)*sizeof(cuDoubleComplex ));
     static cudaStream_t stream;
-    cudaStreamCreate(&stream);
+    magma_queue_create( &stream );
 
     if (m >= n) {
 
@@ -257,7 +257,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                        &y[i__ * y_dim1 + 1], &c__1);
                 
                 // 4. Synch to make sure the result is back ----------------
-                cudaStreamSynchronize(stream);
+                magma_queue_sync( stream );
 
                 if (i__3!=0){
                   i__2 = n - i__;
@@ -340,7 +340,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                        &c_zero, &x[i__ * x_dim1 + 1], &c__1);
 
                 // 4. Synch to make sure the result is back ----------------
-                cudaStreamSynchronize(stream);
+                magma_queue_sync( stream );
                 if (i__!=0){
                   i__2 = m - i__;
                   blasf77_zaxpy(&i__2, &c_one, f,&c__1, &x[i__+1+i__*x_dim1],&c__1);
@@ -445,7 +445,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                  &x[i__ * x_dim1 + 1], &c__1);
 
           // 4. Synch to make sure the result is back ----------------
-          cudaStreamSynchronize(stream);
+          magma_queue_sync( stream );
           if (i__2!=0){
             i__3 = m - i__;
             blasf77_zaxpy(&i__3, &c_one, f,&c__1, &x[i__+1+i__*x_dim1],&c__1);
@@ -528,7 +528,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                  &y[i__ * y_dim1 + 1], &c__1);
 
           // 4. Synch to make sure the result is back ----------------
-          cudaStreamSynchronize(stream);
+          magma_queue_sync( stream );
           if (i__3!=0){
             i__2 = n - i__;
             blasf77_zaxpy(&i__2, &c_one, f,&c__1, &y[i__+1+i__*y_dim1],&c__1);
@@ -552,7 +552,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
       }
     }
     
-    cudaStreamDestroy(stream);
+    magma_queue_destroy( stream );
     free(f);
     
     return MAGMA_SUCCESS;

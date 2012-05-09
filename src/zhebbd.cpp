@@ -210,8 +210,8 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
     cuDoubleComplex *dW    = dwork + nb*ldda;
 
     static cudaStream_t stream[2];
-    cudaStreamCreate(&stream[0]);
-    cudaStreamCreate(&stream[1]);
+    magma_queue_create( &stream[0] );
+    magma_queue_create( &stream[1] );
 
     cuDoubleComplex *hT = work + lwork - nb*nb;
     lwork -= nb*nb;
@@ -258,7 +258,7 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
                       dW + pn_old           , pm_old, d_one,
                       da_ref(indi_old+pn_old, indi_old+pn_old), ldda);
 
-                 cudaStreamSynchronize(stream[1]);
+                 magma_queue_sync( stream[1] );
                  zq_to_panel(MagmaUpper, pn-1, a_ref(i, i+1), lda, work);
              }
 
@@ -294,7 +294,7 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
                 2. W = X - 0.5* V * (T' * (V' * X)) 
                 ==========================================================  */
              /* dwork = V T */
-             cudaStreamSynchronize(stream[0]);
+             magma_queue_sync( stream[0] );
              magma_zgemm(MagmaNoTrans, MagmaNoTrans, pm, pk, pk,
                          c_one, da_ref(indi, indj), ldda, 
                          t_ref(i), lddt,
@@ -362,8 +362,8 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
         }
     }// end of LOWER
 
-    cudaStreamDestroy( stream[0] );
-    cudaStreamDestroy( stream[1] );
+    magma_queue_destroy( stream[0] );
+    magma_queue_destroy( stream[1] );
     magma_free( da );
     MAGMA_Z_SET2REAL( work[0], lwkopt );
     return *info;

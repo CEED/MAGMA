@@ -132,8 +132,8 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
   nb = magma_get_zhegst_nb(n);
   
   static cudaStream_t stream[2];
-  cudaStreamCreate(&stream[0]);
-  cudaStreamCreate(&stream[1]);
+  magma_queue_create( &stream[0] );
+  magma_queue_create( &stream[1] );
 
   magma_zsetmatrix( n, n, A(0, 0), lda, dA(0, 0), ldda );
   magma_zsetmatrix( n, n, B(0, 0), ldb, dB(0, 0), lddb );
@@ -164,7 +164,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
                         c_one, dB(k,k), lddb, 
                         dA(k,k+kb), ldda); 
             
-            cudaStreamSynchronize(stream[0]);
+            magma_queue_sync( stream[0] );
             
             magma_zhemm(MagmaLeft, MagmaUpper,
                         kb, n-k-kb,
@@ -193,13 +193,13 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
                         c_one ,dB(k+kb,k+kb), lddb,
                         dA(k,k+kb), ldda);
           
-            cudaStreamSynchronize(stream[1]);
+            magma_queue_sync( stream[1] );
             
           }
         
         }
         
-        cudaStreamSynchronize(stream[0]);
+        magma_queue_sync( stream[0] );
         
       } else {
         
@@ -224,7 +224,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
                         c_one, dB(k,k), lddb, 
                         dA(k+kb,k), ldda);
             
-            cudaStreamSynchronize(stream[0]);
+            magma_queue_sync( stream[0] );
             
             magma_zhemm(MagmaRight, MagmaLower,
                         n-k-kb, kb,
@@ -254,13 +254,13 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
                         dA(k+kb,k), ldda);            
           }
 
-          cudaStreamSynchronize(stream[1]);
+          magma_queue_sync( stream[1] );
           
         }
         
       }
       
-      cudaStreamSynchronize(stream[0]);
+      magma_queue_sync( stream[0] );
       
     } else {
       
@@ -289,7 +289,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
                         dB(0,k), lddb,
                         c_one, dA(0, k), ldda);
             
-            cudaStreamSynchronize(stream[1]);
+            magma_queue_sync( stream[1] );
             
             magma_zher2k(MagmaUpper, MagmaNoTrans,
                          k, kb,
@@ -310,7 +310,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
             
           }
           
-          cudaStreamSynchronize(stream[0]);
+          magma_queue_sync( stream[0] );
           
           lapackf77_zhegs2( &itype, uplo_, &kb, A(k, k), &lda, B(k, k), &ldb, info);
           
@@ -320,7 +320,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
           
         }
         
-        cudaStreamSynchronize(stream[1]);
+        magma_queue_sync( stream[1] );
         
       } else {
         
@@ -347,7 +347,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
                         dB(k,0), lddb,
                         c_one, dA(k, 0), ldda);
             
-            cudaStreamSynchronize(stream[1]);
+            magma_queue_sync( stream[1] );
             
             magma_zher2k(MagmaLower, MagmaConjTrans,
                          k, kb,
@@ -367,7 +367,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
                         dA(k,0), ldda);
           }
           
-          cudaStreamSynchronize(stream[0]);
+          magma_queue_sync( stream[0] );
           
           lapackf77_zhegs2( &itype, uplo_, &kb, A(k,k), &lda, B(k,k), &ldb, info);
           
@@ -376,15 +376,15 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
                                   dA(k, k), ldda, stream[1] );
         }
         
-        cudaStreamSynchronize(stream[1]);
+        magma_queue_sync( stream[1] );
         
       }
   }
   
   magma_zgetmatrix( n, n, dA(0, 0), ldda, A(0, 0), lda );
 
-  cudaStreamDestroy(stream[0]);
-  cudaStreamDestroy(stream[1]); 
+  magma_queue_destroy( stream[0] );
+  magma_queue_destroy( stream[1] ); 
   
   magma_free( dw );
   
