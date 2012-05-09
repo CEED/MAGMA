@@ -187,9 +187,15 @@ extern "C" {
  *   -- MAGMA function definitions
  * --------------------------------------------------------- */
 
-void magma_setstream( cudaStream_t stream );
-//void magma_setdevice( int dev );
+// ========================================
+// initialization
+void magma_init( void );
 
+void magma_finalize( void );
+
+
+// ========================================
+// memory allocation
 magma_err_t magma_malloc( magma_devptr *ptrPtr, size_t bytes );
 magma_err_t magma_free  ( magma_devptr ptr );
 
@@ -208,30 +214,73 @@ inline magma_err_t magma_dmalloc_host( double          **ptrPtr, size_t n ) { re
 inline magma_err_t magma_cmalloc_host( cuFloatComplex  **ptrPtr, size_t n ) { return magma_malloc_host( (void**) ptrPtr, n*sizeof(cuFloatComplex)  ); }
 inline magma_err_t magma_zmalloc_host( cuDoubleComplex **ptrPtr, size_t n ) { return magma_malloc_host( (void**) ptrPtr, n*sizeof(cuDoubleComplex) ); }
 
+
+// ========================================
+// device & queue support
+void magma_getdevices(
+    magma_device_t* devices,
+    magma_int_t     size,
+    magma_int_t*    numPtr );
+
+void magma_getdevice( magma_device_t* dev );
+
+void magma_setdevice( magma_device_t dev );
+
+void magma_device_sync();
+
+
+// ========================================
+// queue support
+void magma_queue_create( /*magma_device_t device,*/ magma_queue_t* queuePtr );
+
+void magma_queue_destroy( magma_queue_t queue );
+
+void magma_queue_sync( magma_queue_t queue );
+
+
+// ========================================
+// event support
+void magma_event_create( magma_event_t* eventPtr );
+
+void magma_event_destroy( magma_event_t event );
+
+void magma_event_record( magma_event_t event, magma_queue_t queue );
+
+// blocks CPU until event occurs
+void magma_event_sync( magma_event_t event );
+
+// blocks queue (but not CPU) until event occurs
+void magma_queue_wait_event( magma_queue_t queue, magma_event_t event );
+
+
+// ========================================
 // generic, type-independent routines to copy data.
-// type-safe versions which avoid the user needing sizeof(...) are in copy_[sdcz].cpp
+// type-safe versions which avoid the user needing sizeof(...) are in [sdcz]set_get.cpp
 void magma_setvector(
     magma_int_t n, size_t elemSize,
-    void const *hx_src, magma_int_t inchx,
-    void       *dx_dst, magma_int_t incdx );
+    void const *hx_src, magma_int_t incx,
+    void       *dy_dst, magma_int_t incy );
 
 void magma_getvector(
     magma_int_t n, size_t elemSize,
-    void const *dx_src, magma_int_t incdx,
-    void       *hx_dst, magma_int_t inchx );
+    void const *dx_src, magma_int_t incx,
+    void       *hy_dst, magma_int_t incy );
 
 void magma_setvector_async(
     magma_int_t n, size_t elemSize,
-    void const *hx_src, magma_int_t inchx,
-    void       *dx_dst, magma_int_t incdx,
+    void const *hx_src, magma_int_t incx,
+    void       *dy_dst, magma_int_t incy,
     magma_stream_t stream );
 
 void magma_getvector_async(
     magma_int_t n, size_t elemSize,
-    void const *dx_src, magma_int_t incdx,
-    void       *hx_dst, magma_int_t inchx,
+    void const *dx_src, magma_int_t incx,
+    void       *hy_dst, magma_int_t incy,
     magma_stream_t stream );
 
+
+// ========================================
+// error handler
 void magma_xerbla( const char *name, magma_int_t info );
 
 #ifdef __cplusplus

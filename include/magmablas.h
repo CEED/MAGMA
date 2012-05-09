@@ -23,7 +23,11 @@ typedef char magma_trans_t;
 typedef char magma_side_t ;
 typedef char magma_uplo_t ;
 typedef char magma_diag_t ;
+
 typedef cudaStream_t magma_stream_t;
+typedef cudaStream_t magma_queue_t;
+typedef cudaEvent_t  magma_event_t;
+typedef int          magma_device_t;
 
 #include "magmablas_z.h"
 #include "magmablas_c.h"

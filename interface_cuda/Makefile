@@ -19,7 +19,7 @@ ZSRC  = blas_z.cpp	\
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
 	alloc.cpp	\
 	set_get.cpp	\
-	init.cpp	\
+	interface.cpp	\
 
 ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f=.o)
