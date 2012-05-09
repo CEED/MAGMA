@@ -214,7 +214,7 @@ magma_zunmql2_gpu(const char side, const char trans,
             }
           
           /* Apply H or H'; First copy T to the GPU */
-          cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), t, ib, dwork+i__4*ib, ib);
+          magma_zsetmatrix( ib, ib, t, ib, dwork+i__4*ib, ib );
           magma_zlarfb_gpu(side, trans, MagmaBackward, MagmaColumnwise,
                            mi, ni, ib, 
                            &da[(i__-1) * ldda], ldda, dwork+i__4*ib, ib, 

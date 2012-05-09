@@ -168,8 +168,7 @@ magma_zpotrf(char uplo, magma_int_t n,
                 /* Update and factorize the current diagonal block and test   
                    for non-positive-definiteness. Computing MIN */
                 jb = min(nb, (n-j));
-                cublasSetMatrix(jb, (n-j), sizeof(cuDoubleComplex), 
-                                A(j, j), lda, dA(j, j), ldda);
+                magma_zsetmatrix( jb, (n-j), A(j, j), lda, dA(j, j), ldda );
                 
                 magma_zherk(MagmaUpper, MagmaConjTrans, jb, j, 
                             d_neg_one, dA(0, j), ldda, 
@@ -210,8 +209,7 @@ magma_zpotrf(char uplo, magma_int_t n,
                 //  Update and factorize the current diagonal block and test   
                 //  for non-positive-definiteness. Computing MIN 
                 jb = min(nb, (n-j));
-                cublasSetMatrix((n-j), jb, sizeof(cuDoubleComplex), 
-                                A(j, j), lda, dA(j, j), ldda);
+                magma_zsetmatrix( (n-j), jb, A(j, j), lda, dA(j, j), ldda );
 
                 magma_zherk(MagmaLower, MagmaNoTrans, jb, j,
                             d_neg_one, dA(j, 0), ldda, 

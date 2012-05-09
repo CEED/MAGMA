@@ -119,7 +119,7 @@ magma_zunmqr(const char side, const char trans,
     magma_zmalloc( &dwork, (m + n + 64)*64 );
     
     /* Copy matrix C from the CPU to the GPU */
-    cublasSetMatrix( m, n, sizeof(cuDoubleComplex), c, ldc, dc, m);
+    magma_zsetmatrix( m, n, c, ldc, dc, m );
     dc -= (1 + m);
 
     magma_int_t a_offset, c_offset, i__4, lddwork;
@@ -230,9 +230,7 @@ magma_zunmqr(const char side, const char trans,
                2) copy the panel from A to the GPU, and
                3) restore A                                      */
             zpanel_to_q('U', ib, &a[i__ + i__ * lda], lda, t+ib*ib);
-            cublasSetMatrix(i__4, ib, sizeof(cuDoubleComplex),
-                            &a[i__ + i__ * lda], lda, 
-                            dwork, i__4);
+            magma_zsetmatrix( i__4, ib, &a[i__ + i__ * lda], lda, dwork, i__4 );
             zq_to_panel('U', ib, &a[i__ + i__ * lda], lda, t+ib*ib);
 
             if (left) 
@@ -254,7 +252,7 @@ magma_zunmqr(const char side, const char trans,
               lddwork = mi;
 
             /* Apply H or H'; First copy T to the GPU */
-            cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), t, ib, dwork+i__4*ib, ib);
+            magma_zsetmatrix( ib, ib, t, ib, dwork+i__4*ib, ib );
             magma_zlarfb_gpu( side, trans, MagmaForward, MagmaColumnwise,
                               mi, ni, ib,
                               dwork, i__4, dwork+i__4*ib, ib,
@@ -262,7 +260,7 @@ magma_zunmqr(const char side, const char trans,
                               dwork+i__4*ib + ib*ib, lddwork);
           }
 
-        cublasGetMatrix(m, n, sizeof(cuDoubleComplex), &dc[1+m], m, &c[c_offset], ldc);
+        magma_zgetmatrix( m, n, &dc[1+m], m, &c[c_offset], ldc );
       }
     MAGMA_Z_SET2REAL( work[0], lwkopt );
 

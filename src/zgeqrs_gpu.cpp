@@ -161,8 +161,7 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     }
       
     // update the solution vector
-    cublasSetMatrix(ib, nrhs, sizeof(cuDoubleComplex),
-                    hwork+rows*ib, rows, dwork+i, lddwork);
+    magma_zsetmatrix( ib, nrhs, hwork+rows*ib, rows, dwork+i, lddwork );
 
     // update c
     if (nrhs == 1)

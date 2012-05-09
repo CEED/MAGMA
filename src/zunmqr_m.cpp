@@ -346,9 +346,7 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
 
                 // 1) copy the panel from A to the GPU, and
                 // 2) Put 0s in the upper triangular part of dA;
-                cublasSetMatrix(i__4, ib, sizeof(cuDoubleComplex),
-                                A(i, i), lda,
-                                dA(i, 0), ldda);
+                magma_zsetmatrix( i__4, ib, A(i, i), lda, dA(i, 0), ldda );
                 magmablas_zsetdiag1subdiag0('L', ib, ib, dA(i, 0), ldda);
 
 
@@ -357,7 +355,7 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
                 jc = i;
 
                 // Apply H or H'; First copy T to the GPU
-                cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), t, ib, dt, ib);
+                magma_zsetmatrix( ib, ib, t, ib, dt, ib );
                 magma_zlarfb_gpu( side, trans, MagmaForward, MagmaColumnwise,
                                  mi, ni, ib,
                                  dA(i, 0), ldda, dt, ib,

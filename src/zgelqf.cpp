@@ -141,7 +141,7 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
                 return *info;
             }
 
-            cublasSetMatrix( m, n, sizeof(cuDoubleComplex), a, lda, dA, ldda);
+            magma_zsetmatrix( m, n, a, lda, dA, ldda );
             dAT = dA;
             magmablas_zinplace_transpose( dAT, ldda, ldda );
         }
@@ -154,7 +154,7 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
                 return *info;
             }
 
-            cublasSetMatrix( m, n, sizeof(cuDoubleComplex), a, lda, dA, maxm);
+            magma_zsetmatrix( m, n, a, lda, dA, maxm );
 
             dAT = dA + maxn * maxm;
             magmablas_ztranspose2( dAT, ldda, dA, maxm, m, n );
@@ -164,10 +164,10 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
 
     if (maxdim*maxdim< 2*maxm*maxn){
         magmablas_zinplace_transpose( dAT, ldda, ldda );
-        cublasGetMatrix( m, n, sizeof(cuDoubleComplex), dA, ldda, a, lda);
+        magma_zgetmatrix( m, n, dA, ldda, a, lda );
     } else {
         magmablas_ztranspose2( dA, maxm, dAT, ldda, n, m );
-        cublasGetMatrix( m, n, sizeof(cuDoubleComplex), dA, maxm, a, lda);
+        magma_zgetmatrix( m, n, dA, maxm, a, lda );
     }
 
     magma_free( dA );

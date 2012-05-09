@@ -191,7 +191,9 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
                           rows = maxm - ii;
                           
                           /* upload the previous block-column to GPU */
-                          cublasSetMatrix( M-ii, nb, sizeof(cuDoubleComplex), A(ii, ii), lda, dA, rows);
+                          magma_zsetmatrix( M-ii, nb,
+                                            A(ii, ii), lda,
+                                            dA,        rows );
                           magmablas_ztranspose2( dPT, nb, dA, rows, M-ii, nb0);
 
                           /* update with the block column */
@@ -217,7 +219,7 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
 
                       cuCtxSynchronize();
                       magmablas_ztranspose2( dA, cols, inAT(I/nb,0), maxn, nb0, cols );
-                      cublasGetMatrix( M-I, nb0, sizeof(cuDoubleComplex), dA, cols, work, lda);
+                      magma_zgetmatrix( M-I, nb0, dA, cols, work, lda );
                     }
                     
                     /* factorize the first diagonal block of this big panel; ipiv is 1-base */
@@ -238,7 +240,7 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
                           /* download i-th panel to CPU (into work)                                     */
                           /* dtranspose makes the assumption of the matrix size being a multiple of 32. */
                           magmablas_ztranspose( dA, cols, inAT(i,ii), maxn, nb, cols );
-                          cublasGetMatrix( m-i*nb, nb, sizeof(cuDoubleComplex), dA, cols, work, lda);
+                          magma_zgetmatrix( m-i*nb, nb, dA, cols, work, lda );
                           
                           /* make sure that gpu queue is empty */
                           cuCtxSynchronize();
@@ -266,7 +268,7 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
                         magmablas_zpermute_long2( dAT, maxn, ipiv, nb, i*nb );
 
                         /* upload i-th panel to GPU, and transpose it */
-                        cublasSetMatrix( m-i*nb, nb, sizeof(cuDoubleComplex), work, lda, dA, cols);
+                        magma_zsetmatrix( m-i*nb, nb, work, lda, dA, cols );
                         magmablas_ztranspose( inAT(i,ii), maxn, dA, cols, cols, nb);
 
                         /* do the small non-parallel computations;              */
@@ -299,7 +301,7 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
                     if( nb0 > 0 ) {
                       /* download the last columns to CPU */
                       magmablas_ztranspose2( dA, cols, inAT(i,s), maxn, nb0, rows);
-                      cublasGetMatrix(rows, nb0, sizeof(cuDoubleComplex), dA, cols, work, lda);
+                      magma_zgetmatrix( rows, nb0, dA, cols, work, lda );
 
                       /* make sure that gpu queue is empty */
                       cuCtxSynchronize();
@@ -313,7 +315,7 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
                       magmablas_zpermute_long2( dAT, maxn, ipiv, nb0, i*nb );
 
                       /* upload the last panel to GPU, and transpose it */
-                      cublasSetMatrix(rows, nb0, sizeof(cuDoubleComplex), work, lda, dA, cols);
+                      magma_zsetmatrix( rows, nb0, work, lda, dA, cols );
                       magmablas_ztranspose2( inAT(i,s), maxn, dA, cols, rows, nb0);
                       
                       /* update with the last (in case the matrix is wide; i.e., n > m). */

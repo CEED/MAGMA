@@ -194,12 +194,11 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
                diagonal); copy the upper triangular in ut.     */
             cudaStreamSynchronize(stream[0]);
             zsplit_diag_block3(ib, work_ref(i), ldwork, ut);
-            cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
-                            work_ref(i), ldwork, a_ref(i,i), ldda);
+            magma_zsetmatrix( rows, ib, work_ref(i), ldwork, a_ref(i,i), ldda );
 
             if (i + ib < n) {
                 /* Send the triangular factor T to the GPU */
-                cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), hwork, ib, t_ref(i), nb);
+                magma_zsetmatrix( ib, ib, hwork, ib, t_ref(i), nb );
 
                 if (i+nb < k-nb){
                     /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
@@ -215,7 +214,7 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
                                       a_ref(i, i   ), ldda, t_ref(i),  nb, 
                                       a_ref(i, i+ib), ldda, dd_ref(0), lddwork);
                     /* Fix the diagonal block */
-                    cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), ut, ib, d_ref(i), ib);
+                    magma_zsetmatrix( ib, ib, ut, ib, d_ref(i), ib );
                 }
                 old_i  = i;
                 old_ib = ib;
@@ -229,15 +228,11 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
     if (i < k) {
         ib   = n-i;
         rows = m-i;
-        cublasGetMatrix(rows, ib, sizeof(cuDoubleComplex),
-                        a_ref(i, i), ldda, 
-                        work,        rows);
+        magma_zgetmatrix( rows, ib, a_ref(i, i), ldda, work, rows );
         lhwork = lwork - rows*ib;
         lapackf77_zgeqrf(&rows, &ib, work, &rows, tau+i, work+ib*rows, &lhwork, info);
         
-        cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
-                        work,        rows, 
-                        a_ref(i, i), ldda);
+        magma_zsetmatrix( rows, ib, work, rows, a_ref(i, i), ldda );
     }
 
     cudaStreamDestroy(stream[0]);

@@ -119,9 +119,9 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
         
         if (nb <= 1 || nb >= n)
         {
-                cublasGetMatrix(n, n, sizeof(cuDoubleComplex), dA, ldda, work, n);
+                magma_zgetmatrix( n, n, dA, ldda, work, n );
                 lapackf77_zlauum(uplo_, &n, work, &n, info);
-                cublasSetMatrix(n, n, sizeof(cuDoubleComplex), work, n, dA, ldda);
+                magma_zsetmatrix( n, n, work, n, dA, ldda );
         }
         else
         {
@@ -137,13 +137,15 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
                                              MagmaConjTrans, MagmaNonUnit, i, ib,
                                              c_one, dA(i,i), ldda, dA(0, i),ldda);
 
-                                cublasGetMatrix( ib ,ib, sizeof(cuDoubleComplex),
-                                                 dA(i, i), ldda, work, ib);
+                                magma_zgetmatrix( ib, ib,
+                                                  dA(i, i), ldda,
+                                                  work,     ib );
                                                 
                                 lapackf77_zlauum(MagmaUpperStr, &ib, work, &ib, info);
 
-                                cublasSetMatrix( ib, ib, sizeof(cuDoubleComplex),
-                                                 work, ib, dA(i, i), ldda);
+                                magma_zsetmatrix( ib, ib,
+                                                  work,     ib,
+                                                  dA(i, i), ldda );
 
                                 if(i+ib < n)
                                 {
@@ -172,13 +174,15 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
                                              i, c_one, dA(i,i), ldda,
                                              dA(i, 0),ldda);
                                 
-                                cublasGetMatrix( ib ,ib, sizeof(cuDoubleComplex),
-                                                 dA(i, i), ldda, work, ib);
+                                magma_zgetmatrix( ib, ib,
+                                                  dA(i, i), ldda,
+                                                  work,     ib );
 
                                 lapackf77_zlauum(MagmaLowerStr, &ib, work, &ib, info);
 
-                                cublasSetMatrix( ib, ib, sizeof(cuDoubleComplex),
-                                                 work, ib, dA(i, i), ldda);
+                                magma_zsetmatrix( ib, ib,
+                                                  work,     ib,
+                                                  dA(i, i), ldda );
                                 
 
                                 if((i+ib) < n)

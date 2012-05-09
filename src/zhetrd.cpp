@@ -214,7 +214,7 @@ magma_zhetrd(char uplo, magma_int_t n,
     if (upper) {
 
         /* Copy the matrix to the GPU */ 
-        cublasSetMatrix(n, n, sizeof(cuDoubleComplex), A(0, 0), lda, dA(0, 0), ldda);
+        magma_zsetmatrix( n, n, A(0, 0), lda, dA(0, 0), ldda );
 
         /*  Reduce the upper triangle of A.   
             Columns 1:kk are handled by the unblocked method. */
@@ -228,17 +228,14 @@ magma_zhetrd(char uplo, magma_int_t n,
             
             /*   Get the current panel (no need for the 1st iteration) */
             if (i!=n-nb)
-              cublasGetMatrix(i+nb, nb, sizeof(cuDoubleComplex), 
-                              dA(0, i), ldda, A(0, i), lda);
+              magma_zgetmatrix( i+nb, nb, dA(0, i), ldda, A(0, i), lda );
             
             magma_zlatrd(uplo, i+nb, nb, A(0, 0), lda, e, tau, 
                          work, ldwork, dA(0, 0), ldda, dwork, lddwork);
 
             /* Update the unreduced submatrix A(0:i-2,0:i-2), using an   
                update of the form:  A := A - V*W' - W*V' */
-            cublasSetMatrix(i + nb, nb, sizeof(cuDoubleComplex),
-                            work, ldwork,
-                            dwork, lddwork);
+            magma_zsetmatrix( i + nb, nb, work, ldwork, dwork, lddwork );
 
             magma_zher2k(uplo, MagmaNoTrans, i, nb, c_neg_one, 
                          dA(0, i), ldda, dwork, 
@@ -253,8 +250,7 @@ magma_zhetrd(char uplo, magma_int_t n,
 
           }
       
-        cublasGetMatrix(kk, kk, sizeof(cuDoubleComplex), dA(0, 0), ldda,
-                        A(0, 0), lda);
+        magma_zgetmatrix( kk, kk, dA(0, 0), ldda, A(0, 0), lda );
       
         /*  Use unblocked code to reduce the last or only block */
         lapackf77_zhetd2(uplo_, &kk, A(0, 0), &lda, d, e, tau, &iinfo);
@@ -263,7 +259,7 @@ magma_zhetrd(char uplo, magma_int_t n,
       {
         /* Copy the matrix to the GPU */
         if (1<=n-nx)
-          cublasSetMatrix(n, n, sizeof(cuDoubleComplex), A(0,0), lda, dA(0,0), ldda);
+          magma_zsetmatrix( n, n, A(0,0), lda, dA(0,0), ldda );
 
         #ifdef FAST_HEMV
         // TODO this leaks memory from da, above
@@ -282,9 +278,7 @@ magma_zhetrd(char uplo, magma_int_t n,
 
             /*   Get the current panel (no need for the 1st iteration) */
             if (i!=0)
-              cublasGetMatrix(n-i, nb, sizeof(cuDoubleComplex),
-                              dA(i, i), ldda,
-                              A(i, i), lda);
+              magma_zgetmatrix( n-i, nb, dA(i, i), ldda, A(i, i), lda );
             #ifdef FAST_HEMV
             magma_zlatrd2(uplo, n-i, nb, A(i, i), lda, &e[i], 
                          &tau[i], work, ldwork, 
@@ -298,9 +292,7 @@ magma_zhetrd(char uplo, magma_int_t n,
             #endif
             /* Update the unreduced submatrix A(i+ib:n,i+ib:n), using   
                an update of the form:  A := A - V*W' - W*V' */
-            cublasSetMatrix(n-i, nb, sizeof(cuDoubleComplex),
-                            work, ldwork,
-                            dwork, lddwork);
+            magma_zsetmatrix( n-i, nb, work, ldwork, dwork, lddwork );
 
             magma_zher2k(MagmaLower, MagmaNoTrans, n-i-nb, nb, c_neg_one, 
                          dA(i+nb, i), ldda, 
@@ -321,9 +313,7 @@ magma_zhetrd(char uplo, magma_int_t n,
 
         /* Use unblocked code to reduce the last or only block */
         if (1<=n-nx)
-          cublasGetMatrix(n-i, n-i, sizeof(cuDoubleComplex),
-                          dA(i, i), ldda,
-                          A(i, i), lda);
+          magma_zgetmatrix( n-i, n-i, dA(i, i), ldda, A(i, i), lda );
         i_n = n-i;
         lapackf77_zhetrd(uplo_, &i_n, A(i, i), &lda, &d[i], &e[i],
                          &tau[i], work, &lwork, &iinfo);

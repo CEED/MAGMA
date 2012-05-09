@@ -278,7 +278,7 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     }
 
     /*     Form a Cholesky factorization of B. */
-    cublasSetMatrix(n, n, sizeof(cuDoubleComplex), b, ldb, db, lddb);
+    magma_zsetmatrix( n, n, b, ldb, db, lddb );
 
     magma_zsetmatrix_async( n, n,
                             a,  lda,
@@ -341,7 +341,7 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
                           n, n, c_one, db, lddb, da, ldda);
         }
 
-        cublasGetMatrix(n, n, sizeof(cuDoubleComplex), da, ldda, a, lda);
+        magma_zgetmatrix( n, n, da, ldda, a, lda );
 
     }
 

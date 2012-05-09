@@ -384,7 +384,7 @@ magma_zheevx_gpu(char jobz, char range, char uplo, magma_int_t n,
         for (i = 1; i <= n; ++i) {
           ifail[i] = 0;
         }
-        cublasSetMatrix(n, n, sizeof(cuDoubleComplex), wz, ldwz, dz, lddz);
+        magma_zsetmatrix( n, n, wz, ldwz, dz, lddz );
       }
 
     }
@@ -412,7 +412,7 @@ magma_zheevx_gpu(char jobz, char range, char uplo, magma_int_t n,
       Mylapackf77_zstein(&n, &rwork[indd], &rwork[inde], m, &w[1], &iwork[indibl], &iwork[indisp],
                        wz, &ldwz, &rwork[indrwk], &iwork[indiwk], &ifail[1], info);
       
-      cublasSetMatrix(n, *m, sizeof(cuDoubleComplex), wz, ldwz, dz, lddz);
+      magma_zsetmatrix( n, *m, wz, ldwz, dz, lddz );
       
       /*        Apply unitary matrix used in reduction to tridiagonal   
        form to eigenvectors returned by ZSTEIN. */

@@ -121,9 +121,9 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
         inc = 1;
 
         /* Solve A * X = B. */
-        cublasGetMatrix( n, nrhs, sizeof(cuDoubleComplex), dB, lddb, work, n);
+        magma_zgetmatrix( n, nrhs, dB, lddb, work, n );
         lapackf77_zlaswp(&nrhs, work, &n, &i1, &i2, ipiv, &inc);
-        cublasSetMatrix( n, nrhs, sizeof(cuDoubleComplex), work, n, dB, lddb);
+        magma_zsetmatrix( n, nrhs, work, n, dB, lddb );
 
         if ( nrhs == 1) {
             magma_ztrsv(MagmaLower, MagmaNoTrans, MagmaUnit,    n, dA, ldda, dB, 1 );
@@ -144,9 +144,9 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
             magma_ztrsm(MagmaLeft, MagmaLower, trans, MagmaUnit,    n, nrhs, c_one, dA, ldda, dB, lddb );
         }
 
-        cublasGetMatrix( n, nrhs, sizeof(cuDoubleComplex), dB, lddb, work, n );
+        magma_zgetmatrix( n, nrhs, dB, lddb, work, n );
         lapackf77_zlaswp(&nrhs, work, &n, &i1, &i2, ipiv, &inc);
-        cublasSetMatrix( n, nrhs, sizeof(cuDoubleComplex), work, n, dB, lddb);
+        magma_zsetmatrix( n, nrhs, work, n, dB, lddb );
     }
     free(work);
 

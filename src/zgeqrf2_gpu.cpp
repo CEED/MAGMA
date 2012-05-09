@@ -158,15 +158,11 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
                               work_ref(i), &ldwork, tau+i, hwork, &ib);
 
             zpanel_to_q( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
-            cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
-                            work_ref(i), ldwork, 
-                            dA(i,i),     ldda);
+            magma_zsetmatrix( rows, ib, work_ref(i), ldwork, dA(i,i), ldda );
             zq_to_panel( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
 
             if (i + ib < n) {
-                cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), 
-                                hwork, ib, 
-                                dwork, lddwork);
+                magma_zsetmatrix( ib, ib, hwork, ib, dwork, lddwork );
 
                 if (i+nb < k-nx)
                     /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
@@ -179,9 +175,9 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
                                       rows, n-i-ib, ib, 
                                       dA(i, i   ), ldda, dwork,    lddwork, 
                                       dA(i, i+ib), ldda, dwork+ib, lddwork);
-                    cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex),
-                                    work_ref(i), ldwork,
-                                    dA(i,i),     ldda);
+                    magma_zsetmatrix( ib, ib,
+                                      work_ref(i), ldwork,
+                                      dA(i,i),     ldda );
                 }
                 old_i  = i;
                 old_ib = ib;
@@ -197,15 +193,11 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
     if (i < k) {
         ib   = n-i;
         rows = m-i;
-        cublasGetMatrix(rows, ib, sizeof(cuDoubleComplex),
-                        dA(i, i), ldda, 
-                        work,     rows);
+        magma_zgetmatrix( rows, ib, dA(i, i), ldda, work, rows );
         lhwork = lwork - rows*ib;
         lapackf77_zgeqrf(&rows, &ib, work, &rows, tau+i, work+ib*rows, &lhwork, info);
         
-        cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
-                        work,     rows, 
-                        dA(i, i), ldda);
+        magma_zsetmatrix( rows, ib, work, rows, dA(i, i), ldda );
     }
 
     magma_free_host( work );

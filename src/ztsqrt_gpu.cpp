@@ -187,12 +187,11 @@ magma_ztsqrt_gpu(int *m, int *n,
                                 work_a1,  ib,
                                 d_ref(i), ib, stream[0] );
         // Send the panel from A2 back to the GPU
-        cublasSetMatrix(*m, ib, sizeof(cuDoubleComplex),
-                        work_a2, ldwork, a2_ref(0,i), *lda);
+        magma_zsetmatrix( *m, ib, work_a2, ldwork, a2_ref(0,i), *lda );
 
         if (i + ib < *n) {
           // Send the triangular factor T from hwork to the GPU in t_ref(i)
-          cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), hwork, ib, t_ref(i), lddwork);
+          magma_zsetmatrix( ib, ib, hwork, ib, t_ref(i), lddwork );
 
           if (i+nb < k){
             /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */

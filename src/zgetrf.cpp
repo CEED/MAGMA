@@ -171,7 +171,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
             da = dA + nb*maxm;
             
             ldda = maxdim;
-            cublasSetMatrix( m, n, sizeof(cuDoubleComplex), a, lda, da, ldda);
+            magma_zsetmatrix( m, n, a, lda, da, ldda );
             
             dAT = da;
             magmablas_zinplace_transpose( dAT, ldda, ldda );
@@ -186,7 +186,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
             }
             da = dA + nb*maxm;
             
-            cublasSetMatrix( m, n, sizeof(cuDoubleComplex), a, lda, da, maxm);
+            magma_zsetmatrix( m, n, a, lda, da, maxm );
             
             if (MAGMA_SUCCESS != magma_zmalloc( &dAT, maxm*maxn )) {
                         /* alloc failed so call non-GPU-resident version */
@@ -208,7 +208,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
             
             if (i>0){
                 magmablas_ztranspose( dA, cols, inAT(i,i), ldda, nb, cols );
-                cublasGetMatrix( m-i*nb, nb, sizeof(cuDoubleComplex), dA, cols, work, lda);
+                magma_zgetmatrix( m-i*nb, nb, dA, cols, work, lda );
                 
                 // make sure that gpu queue is empty
                 cuCtxSynchronize();
@@ -232,7 +232,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
             magmablas_zpermute_long2( dAT, ldda, ipiv, nb, i*nb );
 
             // upload i-th panel
-            cublasSetMatrix( m-i*nb, nb, sizeof(cuDoubleComplex), work, lda, dA, cols);
+            magma_zsetmatrix( m-i*nb, nb, work, lda, dA, cols );
             magmablas_ztranspose( inAT(i,i), ldda, dA, cols, cols, nb);
 
             // do the small non-parallel computations
@@ -265,7 +265,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
         cols = maxm - s*nb;
 
         magmablas_ztranspose2( dA, cols, inAT(s,s), ldda, nb0, rows);
-        cublasGetMatrix(rows, nb0, sizeof(cuDoubleComplex), dA, cols, work, lda);
+        magma_zgetmatrix( rows, nb0, dA, cols, work, lda );
 
         // make sure that gpu queue is empty
         cuCtxSynchronize();
@@ -276,7 +276,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
             *info = iinfo + s*nb;
         magmablas_zpermute_long2( dAT, ldda, ipiv, nb0, s*nb );
 
-        cublasSetMatrix(rows, nb0, sizeof(cuDoubleComplex), work, lda, dA, cols);
+        magma_zsetmatrix( rows, nb0, work, lda, dA, cols );
         magmablas_ztranspose2( inAT(s,s), ldda, dA, cols, rows, nb0);
 
         magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
@@ -286,10 +286,10 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
 
         if (maxdim*maxdim< 2*maxm*maxn){
             magmablas_zinplace_transpose( dAT, ldda, ldda );
-            cublasGetMatrix( m, n, sizeof(cuDoubleComplex), da, ldda, a, lda);
+            magma_zgetmatrix( m, n, da, ldda, a, lda );
         } else {
             magmablas_ztranspose2( da, maxm, dAT, ldda, n, m );
-            cublasGetMatrix( m, n, sizeof(cuDoubleComplex), da, maxm, a, lda);
+            magma_zgetmatrix( m, n, da, maxm, a, lda );
             magma_free( dAT );
         }
 

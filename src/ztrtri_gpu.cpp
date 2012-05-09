@@ -136,9 +136,9 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
         
         if (nb <= 1 || nb >= n)
         {
-                cublasGetMatrix(n, n, sizeof(cuDoubleComplex), dA, ldda, work, n);
+                magma_zgetmatrix( n, n, dA, ldda, work, n );
                 lapackf77_ztrtri(uplo_, diag_, &n, work, &n, info);
-                cublasSetMatrix(n, n, sizeof(cuDoubleComplex), work, n, dA, ldda);
+                magma_zsetmatrix( n, n, work, n, dA, ldda );
         }
         else
         {

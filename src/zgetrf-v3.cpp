@@ -331,7 +331,7 @@ magma_zgetrf3(magma_int_t num_gpus,
             cudaSetDevice(id);
             //cudaStreamSynchronize(streaml[id][1]);
             magmablas_ztranspose2( d_lAP[id], maxm, inAT(id,s,i_local), lddat, nb0, rows);
-            cublasGetMatrix(rows, nb0, sizeof(cuDoubleComplex), d_lAP[id], maxm, work, lddwork);
+            magma_zgetmatrix( rows, nb0, d_lAP[id], maxm, work, lddwork );
             
             /* make sure that gpu queue is empty */
             //cuCtxSynchronize();

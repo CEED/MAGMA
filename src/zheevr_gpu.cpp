@@ -502,7 +502,7 @@ magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
                      &llrwork, &iwork[1], &liwork, info);
     
     if (*info == 0 && wantz) {
-      cublasSetMatrix(n, *m, sizeof(cuDoubleComplex), wz, ldwz, dz, lddz);
+      magma_zsetmatrix( n, *m, wz, ldwz, dz, lddz );
       magma_zunmtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, *m, da, ldda, &work[indtau],
                        dz, lddz, wa, ldwa, &iinfo);
     }
@@ -522,7 +522,7 @@ magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
       
       /*        Apply unitary matrix used in reduction to tridiagonal   
        form to eigenvectors returned by ZSTEIN. */
-    cublasSetMatrix(n, *m, sizeof(cuDoubleComplex), wz, ldwz, dz, lddz);
+    magma_zsetmatrix( n, *m, wz, ldwz, dz, lddz );
     magma_zunmtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, *m, da, ldda, &work[indtau],
                      dz, lddz, wa, ldwa, &iinfo);
   }

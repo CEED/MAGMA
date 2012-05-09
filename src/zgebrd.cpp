@@ -205,7 +205,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
 
     /* Copy the matrix to the GPU */
     if (minmn-nx>=1)
-        cublasSetMatrix(m, n, sizeof(cuDoubleComplex), a, lda, da, ldda);
+        magma_zsetmatrix( m, n, a, lda, da, ldda );
 
     for (i=0; i< (minmn - nx); i += nb) {
 
@@ -217,12 +217,10 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
 
         /*   Get the current panel (no need for the 1st iteration) */
         if ( i > 0 ) {
-            cublasGetMatrix(nrow, nb, sizeof(cuDoubleComplex),
-                            dA(i, i), ldda, 
-                            A( i, i), lda );
-            cublasGetMatrix(nb, ncol - nb, sizeof(cuDoubleComplex),
-                            dA(i, i+nb), ldda,
-                            A( i, i+nb), lda);
+            magma_zgetmatrix( nrow, nb, dA(i, i), ldda, A( i, i), lda );
+            magma_zgetmatrix( nb, ncol - nb,
+                              dA(i, i+nb), ldda,
+                              A( i, i+nb), lda );
         }
 
         magma_zlabrd_gpu(nrow, ncol, nb,
@@ -237,12 +235,10 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
         ncol = n - i - nb;
 
         // Send Y back to the GPU
-        cublasSetMatrix(nrow, nb, sizeof(cuDoubleComplex),
-                        work  + nb, ldwrkx,
-                        dwork + nb, ldwrkx);
-        cublasSetMatrix(ncol, nb, sizeof(cuDoubleComplex),
-                        work  + (ldwrkx+1)*nb, ldwrky,
-                        dwork + (ldwrkx+1)*nb, ldwrky);
+        magma_zsetmatrix( nrow, nb, work  + nb, ldwrkx, dwork + nb, ldwrkx );
+        magma_zsetmatrix( ncol, nb,
+                          work  + (ldwrkx+1)*nb, ldwrky,
+                          dwork + (ldwrkx+1)*nb, ldwrky );
 
         magma_zgemm( MagmaNoTrans, MagmaConjTrans, 
                      nrow, ncol, nb, 
@@ -278,9 +274,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     ncol = n - i;
 
     if ( 0 < (minmn-nx) )
-        cublasGetMatrix(nrow, ncol, sizeof(cuDoubleComplex),
-                        dA(i, i), ldda,
-                        A( i, i), lda);
+        magma_zgetmatrix( nrow, ncol, dA(i, i), ldda, A( i, i), lda );
 
     lapackf77_zgebrd( &nrow, &ncol, 
                       A(i, i), &lda, d+i, e+i,

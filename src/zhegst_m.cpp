@@ -229,7 +229,9 @@ printf("hegs2%d\n", k);
 
                     cudaStreamSynchronize(stream[igpu][0]);
 
-                    cublasGetMatrix(kb, n-(k+1)*nb, sizeof(cuDoubleComplex), dA(igpu, k/nrgpu, k+1), ldda, A(k, k+1), lda);
+                    magma_zgetmatrix( kb, n-(k+1)*nb,
+                                      dA(igpu, k/nrgpu, k+1), ldda,
+                                      A(k, k+1),              lda );
 
                     // send the partially updated panel of dA to each gpu in the second dB block
                     // to overlap hemm computation
@@ -419,7 +421,9 @@ printf("hegs2%d\n", k);
 
                     cudaStreamSynchronize(stream[igpu][0]);
 
-                    cublasGetMatrix(n-(k+1)*nb, kb, sizeof(cuDoubleComplex), dA(igpu, k+1, k/nrgpu), ldda, A(k+1, k), lda);
+                    magma_zgetmatrix( n-(k+1)*nb, kb,
+                                      dA(igpu, k+1, k/nrgpu), ldda,
+                                      A(k+1, k),              lda );
 
                     // send the partially updated panel of dA to each gpu in the second dB block
                     // to overlap hemm computation
@@ -696,7 +700,9 @@ printf("hegs2%d\n", k);
 
             cudaStreamSynchronize(stream[igpu][0]);
 
-            cublasGetMatrix(kb, k*nb, sizeof(cuDoubleComplex), dA(igpu, k/nrgpu, 0), ldda, A(k, 0), lda);
+            magma_zgetmatrix( kb, k*nb,
+                              dA(igpu, k/nrgpu, 0), ldda,
+                              A(k, 0),              lda );
 
             // send the partially updated panel of dA to each gpu in the second dB block
             // to overlap hemm computation

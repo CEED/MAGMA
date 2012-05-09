@@ -168,8 +168,9 @@ magma_zlauum(char uplo, magma_int_t n,
                                                      d_one, dA(i, i), ldda);
                                 }
                                 
-                                cublasGetMatrix( i+ib,ib, sizeof(cuDoubleComplex),
-                                                 dA(0, i), ldda, A(0, i), lda);
+                                magma_zgetmatrix( i+ib, ib,
+                                                  dA(0, i), ldda,
+                                                  A(0, i),  lda );
                         }
                 }
                 else
@@ -219,8 +220,9 @@ magma_zlauum(char uplo, magma_int_t n,
                                                         d_one, dA(i+ib, i), ldda,
                                                         d_one, dA(i, i), ldda);
                                 }
-                                cublasGetMatrix(ib, i+ib, sizeof(cuDoubleComplex),
-                                        dA(i, 0), ldda, A(i, 0), lda);
+                                magma_zgetmatrix( ib, i+ib,
+                                                  dA(i, 0), ldda,
+                                                  A(i, 0),  lda );
                         }
                 }
         }

@@ -333,7 +333,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
             }
         }
 
-        cublasSetMatrix(n, n, sizeof(double), &work[indwrk], n, dc, lddc);
+        magma_dsetmatrix( n, n, &work[indwrk], n, dc, lddc );
         
 #ifdef ENABLE_TIMER  
         start = get_current_time();

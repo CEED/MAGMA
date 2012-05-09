@@ -365,7 +365,7 @@ magma_zheevd_gpu(char jobz, char uplo,
             }
         }
 
-        cublasSetMatrix(n, n, sizeof(cuDoubleComplex), &work[indwrk], n, dc, lddc);
+        magma_zsetmatrix( n, n, &work[indwrk], n, dc, lddc );
 
 #ifdef ENABLE_TIMER
         start = get_current_time();

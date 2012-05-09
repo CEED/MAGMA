@@ -122,9 +122,9 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
     if ((nb <= 1) || (nb >= n)) {
       /*  Use unblocked code. */
           cudaSetDevice(0);
-      cublasGetMatrix(n, n, sizeof(cuDoubleComplex), dlA(0,0,0), ldda, work, n);
+      magma_zgetmatrix( n, n, dlA(0,0,0), ldda, work, n );
       lapackf77_zpotrf(uplo_, &n, work, &n, info);
-      cublasSetMatrix(n, n, sizeof(cuDoubleComplex), work, n, dlA(0,0,0), ldda);
+      magma_zsetmatrix( n, n, work, n, dlA(0,0,0), ldda );
     } else {
 
       for( d=0; d<num_gpus; d++ ) {

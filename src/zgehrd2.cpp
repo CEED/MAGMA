@@ -222,7 +222,7 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
       /* Use blocked code */
 
       /* Copy the matrix to the GPU */
-      cublasSetMatrix(N, N-ilo+1, sizeof(cuDoubleComplex), a+(ilo-1)*(lda), lda, d_A, ldda);
+      magma_zsetmatrix( N, N-ilo+1, a+(ilo-1)*(lda), lda, d_A, ldda );
 
       for (i__ = ilo; i__ < ihi - nb; i__ += nb) {
         /* Computing MIN */
@@ -233,9 +233,9 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
              which performs the reduction, and also the matrix Y = A*V*T */
 
         /*   Get the current panel (no need for the 1st iteration) */
-        cublasGetMatrix(ihi-i__+1, ib, sizeof(cuDoubleComplex), 
-                        d_A + (i__ - ilo)*ldda + i__ - 1, ldda,
-                        a   + (i__ -  1 )*lda  + i__ - 1, lda);      
+        magma_zgetmatrix( ihi-i__+1, ib,
+                          d_A + (i__ - ilo)*ldda + i__ - 1, ldda,
+                          a   + (i__ -  1 )*lda  + i__ - 1, lda );      
         
         magma_zlahr2(ihi, i__, ib, 
                      d_A + (i__ - ilo)*ldda, 
@@ -244,7 +244,7 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
                      &tau[i__], t, nb, work, ldwork);
 
         /* Copy T from the CPU to D_T on the GPU */
-        cublasSetMatrix(nb, nb, sizeof(cuDoubleComplex), t, nb, d_t, nb);
+        magma_zsetmatrix( nb, nb, t, nb, d_t, nb );
 
         magma_zlahru(n, ihi, i__ - 1, ib, 
                      a   + (i__ -  1 )*(lda), lda,
@@ -256,9 +256,9 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 
     /* Use unblocked code to reduce the rest of the matrix */
     if (!(nb < nbmin || nb >= nh))
-        cublasGetMatrix( n, n-i__+1, sizeof(cuDoubleComplex), 
-                         d_A+ (i__-ilo)*ldda, ldda, 
-                         a  + (i__-1)*(lda), lda);
+        magma_zgetmatrix( n, n-i__+1,
+                          d_A+ (i__-ilo)*ldda, ldda,
+                          a  + (i__-1)*(lda),  lda );
     lapackf77_zgehd2(&n, &i__, &ihi, a, &lda, &tau[1], work, &iinfo);
     MAGMA_Z_SET2REAL( work[0], (double) iws );
     

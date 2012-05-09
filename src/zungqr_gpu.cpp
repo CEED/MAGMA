@@ -136,13 +136,11 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
         i__1 = m - kk;
         i__2 = n - kk;
         i__3 = k - kk;
-        cublasGetMatrix(i__1, i__2, sizeof(cuDoubleComplex),
-                        da_ref(kk, kk), ldda, panel, i__1);
+        magma_zgetmatrix( i__1, i__2, da_ref(kk, kk), ldda, panel, i__1 );
         lapackf77_zungqr(&i__1, &i__2, &i__3, panel, &i__1, &tau[kk], 
                          work, &lwork, &iinfo);
 
-        cublasSetMatrix(i__1, i__2, sizeof(cuDoubleComplex),
-                        panel, i__1, da_ref(kk, kk), ldda);
+        magma_zsetmatrix( i__1, i__2, panel, i__1, da_ref(kk, kk), ldda );
       }
 
     if (kk > 0)

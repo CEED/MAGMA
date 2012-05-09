@@ -240,10 +240,8 @@ magma_zunmqr_gpu(char side, char trans,
             jc = i;
         }
 
-        cublasGetMatrix(mi, ib, sizeof(cuDoubleComplex), 
-                        a_ref(i,  i ), ldda, hwork, mi);
-        cublasGetMatrix(mi, ni, sizeof(cuDoubleComplex), 
-                        c_ref(ic, jc), lddc, hwork+mi*ib, mi);
+        magma_zgetmatrix( mi, ib, a_ref(i,  i ), ldda, hwork, mi );
+        magma_zgetmatrix( mi, ni, c_ref(ic, jc), lddc, hwork+mi*ib, mi );
 
         magma_int_t lhwork = lwork - mi*(ib + ni);
         lapackf77_zunmqr( MagmaLeftStr, MagmaConjTransStr, 
@@ -253,8 +251,7 @@ magma_zunmqr_gpu(char side, char trans,
                           hwork+mi*(ib+ni), &lhwork, info);
 
         // send the updated part of c back to the GPU
-        cublasSetMatrix(mi, ni, sizeof(cuDoubleComplex),
-                        hwork+mi*ib, mi, c_ref(ic, jc), lddc);
+        magma_zsetmatrix( mi, ni, hwork+mi*ib, mi, c_ref(ic, jc), lddc );
     }
 
     return *info;

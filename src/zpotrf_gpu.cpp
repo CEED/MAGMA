@@ -119,9 +119,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
 
     if ((nb <= 1) || (nb >= n)) {
         /*  Use unblocked code. */
-        cublasGetMatrix(n, n, sizeof(cuDoubleComplex), dA, ldda, work, n);
+        magma_zgetmatrix( n, n, dA, ldda, work, n );
         lapackf77_zpotrf(uplo_, &n, work, &n, info);
-        cublasSetMatrix(n, n, sizeof(cuDoubleComplex), work, n, dA, ldda);
+        magma_zsetmatrix( n, n, work, n, dA, ldda );
     } else {
 
         /* Use blocked code. */

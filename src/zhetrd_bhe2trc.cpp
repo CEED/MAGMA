@@ -220,10 +220,10 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
        cudaDeviceSynchronize();
        timeaplQ1 = get_time_azz();
-       cublasSetMatrix( N, LDA1, sizeof(cuDoubleComplex), A1, LDA1, da, LDA1);
+       magma_zsetmatrix( N, LDA1, A1, LDA1, da, LDA1 );
        magma_zungqr_2stage_gpu(N, N, N, da, LDA1, NOTUSED, dT1, NB, &INFO);
        cudaDeviceSynchronize();
-       cublasGetMatrix( N, LDA1, sizeof(cuDoubleComplex), da, LDA1, A1, LDA1);
+       magma_zgetmatrix( N, LDA1, da, LDA1, A1, LDA1 );
        timeaplQ1 = get_time_azz()-timeaplQ1;
        printf("  Finish applyQ1 timing= %lf \n" ,timeaplQ1); 
 
@@ -587,7 +587,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                timeaplQ2 = get_time_azz();
                magma_free( dT1 );
                // copy Q1 to CPU
-               cublasGetMatrix(N, LDA1, sizeof(cuDoubleComplex), da, N, A1, LDA1);
+               magma_zgetmatrix( N, LDA1, da, N, A1, LDA1 );
                // compute Q2 by applying V2 to Identity and put it into da           
                magma_zbulge_applyQ(WANTZ, 'L', NE, N, NB, Vblksiz, Q2, N, V, TAU, T, &INFO, dV2, dT2, da, 2);
                // free dT2 and allocate dZ and copy Z to dZ
@@ -602,7 +602,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                 /*
                 Q2    = (cuDoubleComplex *) malloc (N*N*sizeof(cuDoubleComplex));
                 memset(Q2 , 0, N*N*sizeof(cuDoubleComplex));       
-                cublasGetMatrix( N, LDA1, sizeof(cuDoubleComplex), da, N, Q2, N);
+                magma_zgetmatrix( N, LDA1, da, N, Q2, N );
                 trace_file = fopen("AJETE/Q2", "w");
                 for (j = 0; j < N ; j++) 
                       for (i = 0; i < N ; i++) 
@@ -612,14 +612,14 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
                timegemm = get_time_azz();
                // copy the eigenvectors to GPU
-               cublasSetMatrix(N, LDZ, sizeof(cuDoubleComplex), Z, LDZ, dZ, N);
+               magma_zsetmatrix( N, LDZ, Z, LDZ, dZ, N );
                // make GEMM Q2 * Z --> dV2 = da * dZ
                magma_zgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, da, N, dZ, N, c_zero, dV2, N);
                // copy Q1 to GPU --> dZ
-               cublasSetMatrix(N, LDA1, sizeof(cuDoubleComplex), A1, LDA1, dZ, N);
+               magma_zsetmatrix( N, LDA1, A1, LDA1, dZ, N );
                // make GEMM Q1 * (Q2 * Z) --> da = dZ * dV2
                magma_zgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, dZ, N, dV2, N, c_zero, da, N);
-               cublasGetMatrix(N, NE, sizeof(cuDoubleComplex), da, N, A1, LDA1);
+               magma_zgetmatrix( N, NE, da, N, A1, LDA1 );
                timegemm = get_time_azz()-timegemm;
            }
            if(WANTZ==2){
@@ -636,10 +636,10 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                timeaplQ2 = get_time_azz()-timeaplQ2;
                timegemm = get_time_azz();
                // copy the eigenvectors to GPU
-               cublasSetMatrix(N, NE, sizeof(cuDoubleComplex), Z, LDZ, dZ, N);
+               magma_zsetmatrix( N, NE, Z, LDZ, dZ, N );
                //make a gemm of (Q1 * Q2) * Z = da * dZ --> dV2
                magma_zgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, da, N, dZ, N, c_zero, dV2, N);
-               cublasGetMatrix(N, LDA1, sizeof(cuDoubleComplex), dV2, N, A1, LDA1);
+               magma_zgetmatrix( N, LDA1, dV2, N, A1, LDA1 );
                timegemm = get_time_azz()-timegemm;
            }
 
@@ -658,7 +658,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                timegemm = get_time_azz();
                //make a gemm of Q1 * (Q2 * Z) = Q1 * ((I-V2T2V2')*Z) = da * dZ --> dV2
                magma_zgemm( MagmaNoTrans, MagmaNoTrans, N, NE, N, c_one, da, N, dZ, N, c_zero, dV2, N);
-               cublasGetMatrix(N, NE, sizeof(cuDoubleComplex), dV2, N, A1, LDA1);
+               magma_zgetmatrix( N, NE, dV2, N, A1, LDA1 );
                timegemm = get_time_azz()-timegemm;
            }
 
@@ -669,7 +669,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
                }
                timeaplQ2 = get_time_azz();
                magma_zbulge_applyQ(WANTZ, 'R', NE, N, NB, Vblksiz, A1, LDA1, V, TAU, T, &INFO, dV2, dT2, da, 2);
-               cublasGetMatrix(N, LDA1, sizeof(cuDoubleComplex), da, N, A1, LDA1);
+               magma_zgetmatrix( N, LDA1, da, N, A1, LDA1 );
                timeaplQ2 = get_time_azz()-timeaplQ2;
                timelpk = get_time_azz();
                // compute the eigenvalues using lapack routine to be able to compare to it and used as ref 

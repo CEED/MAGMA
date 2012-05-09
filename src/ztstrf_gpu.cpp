@@ -163,16 +163,16 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
 #endif
 
         if ( (storev == 'R') || (storev == 'r') ) {
-            cublasSetMatrix(m, n, sizeof(cuDoubleComplex), hU, ldhu, dwork, lddwork);
+            magma_zsetmatrix( m, n, hU, ldhu, dwork, lddwork );
             magmablas_ztranspose( dU, lddu, dwork, lddwork, m, n );
 
-            cublasSetMatrix(m, n, sizeof(cuDoubleComplex), hA, ldha, dwork, lddwork);
+            magma_zsetmatrix( m, n, hA, ldha, dwork, lddwork );
             magmablas_ztranspose( dA, ldda, dwork, lddwork, m, n );
         } else {
-            cublasSetMatrix(m, n, sizeof(cuDoubleComplex), hU, ldhu, dU, lddu);
-            cublasSetMatrix(m, n, sizeof(cuDoubleComplex), hA, ldha, dA, ldda);
+            magma_zsetmatrix( m, n, hU, ldhu, dU, lddu );
+            magma_zsetmatrix( m, n, hA, ldha, dA, ldda );
         }
-        cublasSetMatrix(p*ib, n, sizeof(cuDoubleComplex), hL, ldhl, dL, lddl);
+        magma_zsetmatrix( p*ib, n, hL, ldhl, dL, lddl );
             
     }
     else {
@@ -199,8 +199,8 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
                 magmablas_ztranspose( dUp, lddu, UT(0, i), lddu, sb, ii );
                 magmablas_ztranspose( dAp, ldda, AT(0, i), ldda, sb, m  );
                 
-                cublasGetMatrix( ii, sb, sizeof(cuDoubleComplex), dUp, lddu, hU(0, i), ldhu);
-                cublasGetMatrix( m,  sb, sizeof(cuDoubleComplex), dAp, ldda, hA(0, i), ldha);
+                magma_zgetmatrix( ii, sb, dUp, lddu, hU(0, i), ldhu );
+                magma_zgetmatrix( m, sb, dAp, ldda, hA(0, i), ldha );
                 
                 // make sure that gpu queue is empty
                 //cuCtxSynchronize();
@@ -274,9 +274,9 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
             }   
 #endif
             // upload i-th panel
-            cublasSetMatrix( sb,   sb, sizeof(cuDoubleComplex), hU(i, i), ldhu, dUp,  lddu);
-            cublasSetMatrix( m,    sb, sizeof(cuDoubleComplex), hA(0, i), ldha, dAp,  ldda);
-            cublasSetMatrix( p*ib, sb, sizeof(cuDoubleComplex), hL(i),    ldhl, L(i), lddl);
+            magma_zsetmatrix( sb, sb, hU(i, i), ldhu, dUp, lddu );
+            magma_zsetmatrix( m, sb, hA(0, i), ldha, dAp, ldda );
+            magma_zsetmatrix( p*ib, sb, hL(i), ldhl, L(i), lddl );
             magmablas_ztranspose( UT(i, i), lddu, dUp, lddu, sb, sb);
             magmablas_ztranspose( AT(0, i), ldda, dAp, ldda, m,  sb);
             

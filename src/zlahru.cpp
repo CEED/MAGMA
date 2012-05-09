@@ -127,7 +127,7 @@ magma_zlahru(magma_int_t n, magma_int_t ihi, magma_int_t k, magma_int_t nb,
                  c_neg_one, v0,     ldda,
                             d_work, nb,
                  c_one,     d_a,    ldda);
-    cublasGetMatrix(k, nb, sizeof(cuDoubleComplex), d_a, ldda, a, lda);
+    magma_zgetmatrix( k, nb, d_a, ldda, a, lda );
 
     /* Update G -= Y T -= Y d_work */
     magma_zgemm( MagmaNoTrans, MagmaNoTrans, ihi-k, ihi-k-nb, nb,

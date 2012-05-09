@@ -355,9 +355,9 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
         pk = min(pm,pn);
         if (1 <= n-nb){
             zpanel_to_q(MagmaUpper, pk-1, a_ref(n-pk+1, n-pk+2), lda, work);
-            cublasGetMatrix(pk, pk, sizeof(cuDoubleComplex),
-                          da_ref(n-pk+1, n-pk+1), ldda,
-                          a_ref(n-pk+1, n-pk+1), lda);
+            magma_zgetmatrix( pk, pk,
+                              da_ref(n-pk+1, n-pk+1), ldda,
+                              a_ref(n-pk+1, n-pk+1),  lda );
             zq_to_panel(MagmaUpper, pk-1, a_ref(n-pk+1, n-pk+2), lda, work);
         }
     }// end of LOWER

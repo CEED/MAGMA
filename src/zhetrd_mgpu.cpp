@@ -277,7 +277,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
     if (upper) {
 
         /* Copy the matrix to the GPU */ 
-        cublasSetMatrix(n, n, sizeof(cuDoubleComplex), A(0, 0), lda, dA(did, 0, 0), ldda);
+        magma_zsetmatrix( n, n, A(0, 0), lda, dA(did, 0, 0), ldda );
 
         /*  Reduce the upper triangle of A.   
             Columns 1:kk are handled by the unblocked method. */
@@ -291,8 +291,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
             
             /*   Get the current panel (no need for the 1st iteration) */
             if (i!=n-nb)
-              cublasGetMatrix(i+nb, nb, sizeof(cuDoubleComplex), 
-                              dA(did, 0, i), ldda, A(0, i), lda);
+              magma_zgetmatrix( i+nb, nb, dA(did, 0, i), ldda, A(0, i), lda );
             
             magma_zlatrd_mgpu(num_gpus, uplo, i+nb, nb, nb, A(0, 0), lda, e, tau, 
                               work, ldwork, da, ldda, i, dwork, lddwork, dwork2, ldwork2, 
@@ -300,9 +299,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
 
             /* Update the unreduced submatrix A(0:i-2,0:i-2), using an   
                update of the form:  A := A - V*W' - W*V' */
-            cublasSetMatrix(i + nb, nb, sizeof(cuDoubleComplex),
-                            work, ldwork,
-                            dwork[did], lddwork);
+            magma_zsetmatrix( i + nb, nb, work, ldwork, dwork[did], lddwork );
 
             magma_zher2k(uplo, MagmaNoTrans, i, nb, c_neg_one, 
                          dA(did, 0, i), ldda, dwork[did], 
@@ -317,8 +314,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
 
           }
       
-        cublasGetMatrix(kk, kk, sizeof(cuDoubleComplex), dA(did, 0, 0), ldda,
-                        A(0, 0), lda);
+        magma_zgetmatrix( kk, kk, dA(did, 0, 0), ldda, A(0, 0), lda );
       
         /*  Use unblocked code to reduce the last or only block */
         lapackf77_zhetd2(uplo_, &kk, A(0, 0), &lda, d, e, tau, &iinfo);
@@ -385,10 +381,10 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
                   cudaSetDevice(did);
                   //magmablasSetKernelStream(stream[did][0]);
                   //trace_gpu_start( did, 0, stream[did][0], "comm", "set" );
-                  cublasSetMatrix(n-i, ib, sizeof(cuDoubleComplex),
-                                  work, ldwork, dwork[did], n-i);
-                  cublasSetMatrix(n-i, ib, sizeof(cuDoubleComplex),
-                                  A(i,i), lda, &dwork[did][ib*(n-i)], n-i);
+                  magma_zsetmatrix( n-i, ib, work, ldwork, dwork[did], n-i );
+                  magma_zsetmatrix( n-i, ib,
+                                    A(i,i),                lda,
+                                    &dwork[did][ib*(n-i)], n-i );
 
                   // moved inside zlatrd
                   //cudaMemcpy2DAsync(dwork[did], (n-i)  *sizeof(cuDoubleComplex),

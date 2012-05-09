@@ -135,8 +135,8 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
   cudaStreamCreate(&stream[0]);
   cudaStreamCreate(&stream[1]);
 
-  cublasSetMatrix(n, n, sizeof(cuDoubleComplex), A(0, 0), lda, dA(0, 0), ldda);
-  cublasSetMatrix(n, n, sizeof(cuDoubleComplex), B(0, 0), ldb, dB(0, 0), lddb);
+  magma_zsetmatrix( n, n, A(0, 0), lda, dA(0, 0), ldda );
+  magma_zsetmatrix( n, n, B(0, 0), ldb, dB(0, 0), lddb );
   
   /* Use hybrid blocked code */
     
@@ -381,7 +381,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
       }
   }
   
-  cublasGetMatrix(n, n, sizeof(cuDoubleComplex), dA(0, 0), ldda, A(0, 0), lda);
+  magma_zgetmatrix( n, n, dA(0, 0), ldda, A(0, 0), lda );
 
   cudaStreamDestroy(stream[0]);
   cudaStreamDestroy(stream[1]); 

@@ -235,7 +235,7 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
        the matrix */
       
       /*   Get the current panel */
-      cublasGetMatrix(i+nb, nb, sizeof(cuDoubleComplex), dA(0, i), ldda, A(0, i), ldwa);
+      magma_zgetmatrix( i+nb, nb, dA(0, i), ldda, A(0, i), ldwa );
       
       magma_zlatrd2(uplo, i+nb, nb, A(0, 0), ldwa, e, tau, 
                     work, ldw, dA(0, 0), ldda, dwork, lddw, dwork + 2*ldw*nb, ldwork - 2*ldw*nb);
@@ -243,8 +243,7 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
       /* Update the unreduced submatrix A(0:i-2,0:i-2), using an   
        update of the form:  A := A - V*W' - W*V' */
       
-      cublasSetMatrix(i + nb, nb, sizeof(cuDoubleComplex),
-                      work, ldw, dwork, lddw);
+      magma_zsetmatrix( i + nb, nb, work, ldw, dwork, lddw );
       
       magma_zher2k(uplo, MagmaNoTrans, i, nb, c_neg_one, 
                    dA(0, i), ldda, dwork, 
@@ -258,13 +257,12 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
       }      
     }
     
-    cublasGetMatrix(kk, kk, sizeof(cuDoubleComplex), dA(0, 0), ldda,
-                    A(0, 0), ldwa);
+    magma_zgetmatrix( kk, kk, dA(0, 0), ldda, A(0, 0), ldwa );
     
     /*  Use CPU code to reduce the last or only block */
     lapackf77_zhetrd(uplo_, &kk, A(0, 0), &ldwa, d, e, tau, work, &lwork, &iinfo);
     
-    cublasSetMatrix(kk, kk, sizeof(cuDoubleComplex), A(0, 0), ldwa, dA(0, 0), ldda);
+    magma_zsetmatrix( kk, kk, A(0, 0), ldwa, dA(0, 0), ldda );
   } 
   else 
   {
@@ -276,9 +274,7 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
        the matrix */
       
       /*   Get the current panel */
-      cublasGetMatrix(n-i, nb, sizeof(cuDoubleComplex),
-                        dA(i, i), ldda,
-                        A(i, i), ldwa);
+      magma_zgetmatrix( n-i, nb, dA(i, i), ldda, A(i, i), ldwa );
       
       magma_zlatrd2(uplo, n-i, nb, A(i, i), ldwa, &e[i], 
                     &tau[i], work, ldw, 
@@ -288,9 +284,7 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
       
       /* Update the unreduced submatrix A(i+ib:n,i+ib:n), using   
        an update of the form:  A := A - V*W' - W*V' */      
-      cublasSetMatrix(n-i, nb, sizeof(cuDoubleComplex),
-                      work, ldw,
-                      dwork, lddw);
+      magma_zsetmatrix( n-i, nb, work, ldw, dwork, lddw );
       
       magma_zher2k(MagmaLower, MagmaNoTrans, n-i-nb, nb, c_neg_one, 
                    dA(i+nb, i), ldda, 
@@ -305,15 +299,13 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
       }
     }
     /* Use unblocked code to reduce the last or only block */
-    cublasGetMatrix(n-i, n-i, sizeof(cuDoubleComplex),
-                    dA(i, i), ldda, A(i, i), ldwa);
+    magma_zgetmatrix( n-i, n-i, dA(i, i), ldda, A(i, i), ldwa );
     
     i_n = n-i;
     lapackf77_zhetrd(uplo_, &i_n, A(i, i), &ldwa, &d[i], &e[i],
                      &tau[i], work, &lwork, &iinfo);
     
-    cublasSetMatrix(n-i, n-i, sizeof(cuDoubleComplex),
-                    A(i, i), ldwa, dA(i, i), ldda);
+    magma_zsetmatrix( n-i, n-i, A(i, i), ldwa, dA(i, i), ldda );
   }  
     
     MAGMA_Z_SET2REAL( work[0], lwkopt );

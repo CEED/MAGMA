@@ -145,9 +145,9 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
                          a_ref(kk, kk), &lda,
                          &tau[kk], work, &lwork, &iinfo);
 
-        cublasSetMatrix(i__1, i__2, sizeof(cuDoubleComplex),
-                          a_ref(kk, kk), lda, 
-                        da_ref(kk, kk), ldda);
+        magma_zsetmatrix( i__1, i__2,
+                          a_ref(kk, kk),  lda,
+                          da_ref(kk, kk), ldda );
       }
 
     if (kk > 0)
@@ -160,9 +160,7 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
             /* Send the current panel to the GPU */
             i__2 = m - i;
             zpanel_to_q(MagmaUpper, ib, a_ref(i,i), lda, work);
-            cublasSetMatrix( i__2, ib, sizeof(cuDoubleComplex),
-                              a_ref(i, i), lda,
-                             da_ref(i, i), ldda);
+            magma_zsetmatrix( i__2, ib, a_ref(i, i), lda, da_ref(i, i), ldda );
                              
             if (i + ib < n)
               {
@@ -188,8 +186,7 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
           }
       }
 
-    cublasGetMatrix(m, n, sizeof(cuDoubleComplex),
-                    da_ref(0, 0), ldda, a_ref(0, 0), lda);
+    magma_zgetmatrix( m, n, da_ref(0, 0), ldda, a_ref(0, 0), lda );
 
     
     cudaStreamDestroy(stream);

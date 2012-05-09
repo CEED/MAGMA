@@ -183,12 +183,11 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
             lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr, 
                               &rows, &ib, a_ref(i,i), &lda, tau+i, work, &ib);
             zpanel_to_q(MagmaUpper, ib, a_ref(i,i), lda, work+ib*ib);
-            cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
-                            a_ref(i,i), lda, da_ref(i,i), ldda);
+            magma_zsetmatrix( rows, ib, a_ref(i,i), lda, da_ref(i,i), ldda );
             zq_to_panel(MagmaUpper, ib, a_ref(i,i), lda, work+ib*ib);
 
             if (i + ib < n) {
-                cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex), work, ib, dwork, lddwork);
+                magma_zsetmatrix( ib, ib, work, ib, dwork, lddwork );
 
                 if (i+ib < k-nb)
                     /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
@@ -214,8 +213,7 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
     if (i < k) {
         ib = n-i;
         if (i!=0)
-            cublasGetMatrix(m, ib, sizeof(cuDoubleComplex),
-                            da_ref(0,i), ldda, a_ref(0,i), lda);
+            magma_zgetmatrix( m, ib, da_ref(0,i), ldda, a_ref(0,i), lda );
         int rows = m-i;
         lapackf77_zgeqrf(&rows, &ib, a_ref(i,i), &lda, tau+i, work, &lwork, info);
     }

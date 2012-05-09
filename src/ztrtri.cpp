@@ -154,7 +154,9 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
                         for (j=0; j<n; j =j+ nb)
                         {
                                 jb = min(nb, (n-j));
-                                cublasSetMatrix(jb, (n-j), sizeof( cuDoubleComplex), A(j, j), lda, dA(j, j), ldda);
+                                magma_zsetmatrix( jb, (n-j),
+                                                  A(j, j),  lda,
+                                                  dA(j, j), ldda );
 
                                 /* Compute rows 1:j-1 of current block column */
                                 magma_ztrmm(MagmaLeft, MagmaUpper,
@@ -182,8 +184,9 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
                                 /* Compute inverse of current diagonal block */
                                 lapackf77_ztrtri(MagmaUpperStr, diag_, &jb, A(j,j), &lda, info);
 
-                                cublasSetMatrix(jb, jb, sizeof( cuDoubleComplex),
-                                                A(j, j), lda, dA(j, j), ldda);
+                                magma_zsetmatrix( jb, jb,
+                                                  A(j, j),  lda,
+                                                  dA(j, j), ldda );
                         }
 
                 }
@@ -199,8 +202,9 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 
                                 if((j+jb) < n)
                                 {
-                                        cublasSetMatrix((n-j), jb, sizeof( cuDoubleComplex),
-                                                A(j, j), lda, dA(j, j), ldda);
+                                        magma_zsetmatrix( (n-j), jb,
+                                                          A(j, j),  lda,
+                                                          dA(j, j), ldda );
 
                                         /* Compute rows j+jb:n of current block column */
                                         magma_ztrmm(MagmaLeft, MagmaLower,
@@ -228,8 +232,9 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
                                 /* Compute inverse of current diagonal block */
                                 lapackf77_ztrtri(MagmaLowerStr, diag_, &jb, A(j,j), &lda, info);
 
-                                cublasSetMatrix(jb, jb, sizeof( cuDoubleComplex),
-                                                A(j, j), lda, dA(j, j), ldda);
+                                magma_zsetmatrix( jb, jb,
+                                                  A(j, j),  lda,
+                                                  dA(j, j), ldda );
                         }
                 }
         }

@@ -606,13 +606,13 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
         cuDoubleComplex *a;
         cudaSetDevice(0);
         magma_zmalloc_host( &a, (n + offset)*ldda );
-        cublasGetMatrix( n+offset, n+offset, sizeof(cuDoubleComplex), da[0], ldda, a, ldda);
+        magma_zgetmatrix( n+offset, n+offset, da[0], ldda, a, ldda );
         for( ii=0; ii<n+offset; ii++ ) {
             for( jj=0; jj<n+offset; jj++ ) printf( "%.16e ",a[ii+jj*ldda] );
             printf( "\n" );
         }
         printf( "\n" );
-        cublasGetMatrix( n+offset, 1, sizeof(cuDoubleComplex), dx[0], ldda, a, ldda);
+        magma_zgetmatrix( n+offset, 1, dx[0], ldda, a, ldda );
         for( ii=0; ii<n+offset; ii++ ) printf( "%.16e\n",a[ii] );
         printf( "\n" );
         magma_free_host( a );
@@ -656,7 +656,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
         cudaSetDevice(0);
         magma_zmalloc_host( &a, (offset + n)*ldda );
         printf( ">>>\n" );
-        cublasGetMatrix( (offset+n), 1, sizeof(cuDoubleComplex), dy[0], ldda, a, ldda);
+        magma_zgetmatrix( (offset+n), 1, dy[0], ldda, a, ldda );
         //for( ii=0; ii<offset+n; ii++ ) printf( "%d: %e\n",ii,a[ii] );
         for( ii=offset; ii<offset+n; ii++ ) printf( "%.16e\n",ii,a[ii] );
         printf( ">>>\n" );

@@ -454,7 +454,7 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
 
         magma_zmove_eig(range, n, w, &il, &iu, vl, vu, m);
 
-        cublasSetMatrix(n, *m, sizeof(cuDoubleComplex), &work[indwrk + n * (il-1) ], n, dc, lddc);
+        magma_zsetmatrix( n, *m, &work[indwrk + n * (il-1) ], n, dc, lddc );
 
         magma_zunmtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, *m, da, ldda, &work[indtau],
                          dc, lddc, wa, ldwa, &iinfo);

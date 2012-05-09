@@ -203,12 +203,13 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
                                   a_ref(0, cols), &lda, tau + i, work, &ib);
 
                 zpanel_to_q( MagmaLower, ib, a_ref(rows-ib,cols), lda, work+ib*ib);
-                cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
-                                a_ref(0,cols), lda, da_ref(0,cols), ldda);
+                magma_zsetmatrix( rows, ib,
+                                  a_ref(0,cols),  lda,
+                                  da_ref(0,cols), ldda );
                 zq_to_panel( MagmaLower, ib, a_ref(rows-ib,cols), lda, work+ib*ib);
 
                 // Send the triangular part on the GPU
-                cublasSetMatrix(ib,ib,sizeof(cuDoubleComplex), work, ib, dwork, lddwork);
+                magma_zsetmatrix( ib, ib, work, ib, dwork, lddwork );
 
                 /* Apply H' to A(1:m-k+i+ib-1,1:n-k+i-1) from the left in
                    two steps - implementing the lookahead techniques.
@@ -232,8 +233,7 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
         mu = m - k + i + nb;
         nu = n - k + i + nb;
 
-        cublasGetMatrix(m, nu, sizeof(cuDoubleComplex),
-                        da_ref(0,0), ldda, a_ref(0,0), lda);
+        magma_zgetmatrix( m, nu, da_ref(0,0), ldda, a_ref(0,0), lda );
     } else {
         mu = m;
         nu = n;

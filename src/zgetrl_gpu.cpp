@@ -142,14 +142,14 @@ magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
           fprintf(stderr, "ERROR, trtri returned with info = %d\n", *info);
         }          
 
-        cublasSetMatrix(mindim, mindim, sizeof(cuDoubleComplex), hL2, ldhl, dL2, lddl);
+        magma_zsetmatrix( mindim, mindim, hL2, ldhl, dL2, lddl );
 #endif
             
         if ( (storev == 'R') || (storev == 'r') ) {
-            cublasSetMatrix(m, n, sizeof(cuDoubleComplex), hA, ldha, dwork, lddwork);
+            magma_zsetmatrix( m, n, hA, ldha, dwork, lddwork );
             magmablas_ztranspose( dA, ldda, dwork, lddwork, m, n );
         } else {
-            cublasSetMatrix(m, n, sizeof(cuDoubleComplex), hA, ldha, dA, ldda);
+            magma_zsetmatrix( m, n, hA, ldha, dA, ldda );
         }
     }
     else {
@@ -171,7 +171,7 @@ magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
             if ( i>0 ){
                 // download i-th panel
                 magmablas_ztranspose( dwork, maxm, AT(0, i), ldda, sb, m );
-                cublasGetMatrix( m, sb, sizeof(cuDoubleComplex), dwork, maxm, hA(0, i), ldha );
+                magma_zgetmatrix( m, sb, dwork, maxm, hA(0, i), ldha );
                 
                 // make sure that gpu queue is empty
                 //cuCtxSynchronize();
@@ -218,10 +218,10 @@ magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
             if (*info != 0 ) {
               fprintf(stderr, "ERROR, trtri returned with info = %d\n", *info);
             }
-            cublasSetMatrix(sb, sb, sizeof(cuDoubleComplex), hL2(i), ldhl, dL2(i), lddl);
+            magma_zsetmatrix( sb, sb, hL2(i), ldhl, dL2(i), lddl );
 #endif
             // upload i-th panel
-            cublasSetMatrix( rows, sb, sizeof(cuDoubleComplex), hA(i, i), ldha, dwork, cols);
+            magma_zsetmatrix( rows, sb, hA(i, i), ldha, dwork, cols );
             magmablas_ztranspose( AT(i,i), ldda, dwork, cols, rows, sb);
 
             // do the small non-parallel computations

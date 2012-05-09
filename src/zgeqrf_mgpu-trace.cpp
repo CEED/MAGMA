@@ -475,9 +475,9 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
                   #ifdef  MultiGPUs
                      cudaSetDevice(panel_gpunum);
                   #endif
-                  cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex),
-                                  hwrk_ref(i), ldwork,
-                                  dlA(panel_gpunum, i, i_local),     ldda);
+                  magma_zsetmatrix( ib, ib,
+                                    hwrk_ref(i),                   ldwork,
+                                    dlA(panel_gpunum, i, i_local), ldda );
                 }
                 old_i  = i;
                 old_ib = ib;
@@ -510,9 +510,9 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
         if (i == 0) {
             magmablas_zgetmatrix_1D_bcyclic(m, n, dlA, ldda, lhwrk, m, num_gpus, nb);
         } else {
-            cublasGetMatrix(rows, ib, sizeof(cuDoubleComplex),
-                            dlA(panel_gpunum, i, i_loc), ldda,
-                            lhwrk, rows);
+            magma_zgetmatrix( rows, ib,
+                              dlA(panel_gpunum, i, i_loc), ldda,
+                              lhwrk,                       rows );
         }
 
         lhwork = lwork - rows*ib;
@@ -521,9 +521,9 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
         if (i == 0) {
             magmablas_zsetmatrix_1D_bcyclic(m, n, lhwrk, m, dlA, ldda, num_gpus, nb);
         } else {
-            cublasSetMatrix(rows, ib, sizeof(cuDoubleComplex),
-                            lhwrk,     rows,
-                            dlA(panel_gpunum, i, i_loc), ldda);
+            magma_zsetmatrix( rows, ib,
+                              lhwrk,                       rows,
+                              dlA(panel_gpunum, i, i_loc), ldda );
         }
     }
 

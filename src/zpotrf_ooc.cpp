@@ -185,8 +185,7 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
             for (jj=0; jj<JB; jj+=nb) {
                   j  = J+jj;
                   jb = min(nb, (n-j));
-              cublasSetMatrix(jb, (n-j), sizeof(cuDoubleComplex), 
-                              A(j, j), lda, dAup(jj,j), NB);
+              magma_zsetmatrix( jb, (n-j), A(j, j), lda, dAup(jj,j), NB );
                 }
                 /* load the panel in one-shot */
         //jb = min(nb, (n-J));
@@ -196,8 +195,7 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
                 /* update with the previous big-panels */
                 for( j=0; j<J; j+=nb ) {
                   /* upload the block-rows */
-              cublasSetMatrix(nb, (n-J), sizeof(cuDoubleComplex), 
-                              A(j, J), lda, dTup(0, J), nb);
+              magma_zsetmatrix( nb, (n-J), A(j, J), lda, dTup(0, J), nb );
 
                   /* update the current big-panel *
                    * using the previous block-row */
@@ -287,16 +285,14 @@ magma_zpotrf_ooc(char uplo, magma_int_t n,
             for (jj=0; jj<JB; jj+=nb) {
                   j  = J+jj;
                   jb = min(nb, (n-j));
-              cublasSetMatrix((n-j), jb, sizeof(cuDoubleComplex), 
-                              A(j, j), lda, dA(j, jj), ldda);
+              magma_zsetmatrix( (n-j), jb, A(j, j), lda, dA(j, jj), ldda );
                 }
 
                 /* update with the previous big-panels */
                 for( j=0; j<J; j+=nb ) {
 
                   /* upload the block-column */
-              cublasSetMatrix((n-J), nb, sizeof(cuDoubleComplex), 
-                              A(J, j), lda, dT(J, 0), ldda);
+              magma_zsetmatrix( (n-J), nb, A(J, j), lda, dT(J, 0), ldda );
 
                   /* update the current big-panel    *
                    * using the previous block-column */

@@ -108,9 +108,9 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
     if (nb <= 1 || nb >= min(m,n)) {
         /* Use CPU code. */
         work = (cuDoubleComplex*)malloc(m * n * sizeof(cuDoubleComplex));
-        cublasGetMatrix(m, n, sizeof(cuDoubleComplex), dA, ldda, work, m);
+        magma_zgetmatrix( m, n, dA, ldda, work, m );
         magma_zgetrf_nopiv(&m, &n, work, &m, info);
-        cublasSetMatrix(m, n, sizeof(cuDoubleComplex), work, m, dA, ldda);
+        magma_zsetmatrix( m, n, work, m, dA, ldda );
         free(work);
     }
     else {
@@ -129,8 +129,7 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
           {
             // download i-th panel
             cols = maxm - i*nb;
-            cublasGetMatrix( m-i*nb, nb, sizeof(cuDoubleComplex),
-                             inA(i,i), ldda, work, lddwork);
+            magma_zgetmatrix( m-i*nb, nb, inA(i,i), ldda, work, lddwork );
             
             // make sure that gpu queue is empty
             cuCtxSynchronize();
@@ -153,8 +152,7 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
               *info = iinfo + i*nb;
 
             // upload i-th panel
-            cublasSetMatrix(m-i*nb, nb, sizeof(cuDoubleComplex), work, lddwork, 
-                            inA(i, i), ldda);
+            magma_zsetmatrix( m-i*nb, nb, work, lddwork, inA(i, i), ldda );
             
             // do the small non-parallel computations
             if ( s > (i+1) ) {
@@ -182,7 +180,7 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
         magma_int_t nb0 = min(m - s*nb, n - s*nb);
         rows = m - s*nb;
         cols = maxm - s*nb;
-        cublasGetMatrix(rows, nb0, sizeof(cuDoubleComplex), inA(s,s), ldda, work, lddwork);
+        magma_zgetmatrix( rows, nb0, inA(s,s), ldda, work, lddwork );
 
         // make sure that gpu queue is empty
         cuCtxSynchronize();
@@ -193,7 +191,7 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
             *info = iinfo + s*nb;
 
         // upload i-th panel
-        cublasSetMatrix(rows, nb0, sizeof(cuDoubleComplex), work, lddwork, inA(s,s), ldda);
+        magma_zsetmatrix( rows, nb0, work, lddwork, inA(s,s), ldda );
 
         magma_ztrsm( MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit, 
                      nb0, n-s*nb-nb0, 
