@@ -1842,7 +1842,7 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
     cuDoubleComplex *WORK;
     int LWORK;
     int  cur_blksiz,avai_blksiz, ncolinvolvd;
-    int  nbgr, colst, coled, version;
+    int  nbgr, colst, coled, versionL,versionR;
     int chunkid,nbchunk,colpercore,corest,corelen;
     int coreid,mycoresnb,maxrequiredcores;
 
@@ -1857,11 +1857,12 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
 
 
     INFO=0;    
-    version = 113;
-    LDT     = Vblksiz;
-    LDV     = NB+Vblksiz-1;    
-    blklen  = LDV*Vblksiz;
-    nbGblk  = plasma_ceildiv((N-1),Vblksiz);
+    versionL = 114;
+    versionR = 92;
+    LDT      = Vblksiz;
+    LDV      = NB+Vblksiz-1;    
+    blklen   = LDV*Vblksiz;
+    nbGblk   = plasma_ceildiv((N-1),Vblksiz);
     //LWORK   = 2*N*max(Vblksiz,64);
     //WORK    = (cuDoubleComplex *) malloc (LWORK*sizeof(cuDoubleComplex));
 
@@ -1938,18 +1939,18 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
      /* WANTZ = 1 meaning E is IDENTITY so form Q using optimized update. 
       *         So we use the reverse order from small q to large one, 
       *         so from q_n to q_1 so Left update to Identity.
-      *         Use version 113 because in 114 we need to update the whole matrix and not in icreasing order.
+      *         Use versionL 113 because in 114 we need to update the whole matrix and not in icreasing order.
       * WANTZ = 2 meaning E is a full matrix and need to be updated from Left or Right so use normal update
       * */
     if(WANTZ==1) 
     {
-        version=113;
+        versionL=113;
         SIDE='L';
         printf("\n\n\nWARNING THIS OPTION CUOLD NOT RUN ON BOTH GPU AND CPU. PROG WILL EXIT\n\n\n");
     }
 
     //printf("  ENTERING FUNCTION APPLY Q_v115: same as 113(L) or 114(L) or 93(R)"\n);
-    if(my_core_id==0)printf("  APPLY Q_v1   parallel with threads %d   nbchunk %d  colpercore %d  N %d  N_CPU %d   NB %d   Vblksiz %d SIDE %c version %d WANTZ %d \n",cores_num,nbchunk,colpercore,N,N_CPU,NB,Vblksiz,SIDE,version, WANTZ);
+    if(my_core_id==0)printf("  APPLY Q_v1   parallel with threads %d   nbchunk %d  colpercore %d  N %d  N_CPU %d   NB %d   Vblksiz %d SIDE %c versionL %d versionR %d WANTZ %d \n",cores_num,nbchunk,colpercore,N,N_CPU,NB,Vblksiz,SIDE,versionL,versionR, WANTZ);
 
     for (chunkid = 0; chunkid<nbchunk; chunkid++)
     {
@@ -2007,6 +2008,7 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
                    }
                 }
             }else if (SIDE=='R'){
+            if(versionR==91){		    
                 for (bg =1; bg<=nbGblk; bg++)
                 {
                    firstcolj = (bg-1)*Vblksiz + 1;
@@ -2033,12 +2035,40 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
                        findVTpos(N,NB,Vblksiz,colj,fst, &vpos, &taupos, &tpos, &blkid);
                        //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colj,vpos,taupos);
                        if((vlen>0)&&(vnb>0))
-                           //lapackf77_zungqr( "R", "N", &corelen, &vlen, &vnb, V(vpos), &LDV, TAU(taupos), E(corest,fst), &LDE,  WORK, &LWORK, &INFO );
-                           lapackf77_zlarfb( "R", "N", "F", "C", &corelen, &vlen, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(corest,fst), &LDE,  WORK, &corelen); //colpercore);       
-                       if(INFO!=0) 
-                               printf("Right ERROR DORMQR INFO %d \n",INFO);
+                           lapackf77_zlarfb( "R", "N", "F", "C", &corelen, &vlen, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(corest,fst), &LDE,  WORK, &corelen);       
                    }
                 }
+                }else if(versionR==92){
+                 rownbm    = plasma_ceildiv((N-1),NB);
+                 for (m = 1; m<=rownbm; m++)
+                 {
+                    ncolinvolvd = min(N-1, m*NB);
+                    avai_blksiz=min(Vblksiz,ncolinvolvd);
+                    nbgr = plasma_ceildiv(ncolinvolvd,avai_blksiz);
+                    for (n = 1; n<=nbgr; n++)
+                    {
+                        vlen = 0;
+                        vnb  = 0;
+                        cur_blksiz = min(ncolinvolvd-(n-1)*avai_blksiz, avai_blksiz);
+                        colst = (n-1)*avai_blksiz;
+                        coled = colst + cur_blksiz -1;
+                        fst   = (rownbm -m)*NB+colst +1;
+                        for (colj=colst; colj<=coled; colj++)
+                        {
+                            st       = (rownbm -m)*NB+colj +1;
+                            ed       = min(st+NB-1,N-1);
+                            if(st>ed)break;
+                            if((st==ed)&&(colj!=N-2))break;
+                            vlen=ed-fst+1;
+                            vnb=vnb+1;
+                        }    
+                        findVTpos(N,NB,Vblksiz,colst,fst, &vpos, &taupos, &tpos, &blkid);
+                        if((vlen>0)&&(vnb>0)){
+                                   lapackf77_zlarfb( "R", "N", "F", "C", &corelen, &vlen, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(corest,fst), &LDE,  WORK, &corelen);       
+                       }  
+                    }
+                 }
+            }
             }else{
                     printf("ERROR SIDE %d \n",SIDE);
             }
@@ -2086,12 +2116,12 @@ void tile_bulge_applyQ_parallel2(int my_core_id)
     cuDoubleComplex *WORK;
     int LWORK;
     int  cur_blksiz,avai_blksiz, ncolinvolvd;
-    int  nbgr, colst, coled, version;
+    int  nbgr, colst, coled, versionL;
     int chunkid,nbchunk,colpercore,corest,corelen;
     int coreid,mycoresnb,maxrequiredcores;
 
     INFO=0;    
-    version = 113;
+    versionL = 113;
     LDT     = Vblksiz;
     LDV     = NB+Vblksiz-1;    
     blklen  = LDV*Vblksiz;
@@ -2171,21 +2201,21 @@ void tile_bulge_applyQ_parallel2(int my_core_id)
      /* WANTZ = 1 meaning E is IDENTITY so form Q using optimized update. 
       *         So we use the reverse order from small q to large one, 
       *         so from q_n to q_1 so Left update to Identity.
-      *         Use version 113 because in 114 we need to update the whole matrix and not in icreasing order.
+      *         Use versionL 113 because in 114 we need to update the whole matrix and not in icreasing order.
       * WANTZ = 2 meaning E is a full matrix and need to be updated from Left or Right so use normal update
       * */
     if(WANTZ==1) 
     {
-        version=113;
+        versionL=113;
         SIDE='L';
     }
 
     //printf("  ENTERING FUNCTION APPLY Q_v115: same as 113(L) or 114(L) or 93(R)"\n);
-    if(my_core_id==0)printf("  APPLY Q_v2   parallel with threads %d   nbchunk %d  colpercore %d  N %d   NB %d   Vblksiz %d SIDE %c version %d \n",cores_num,nbchunk,colpercore,N,NB,Vblksiz,SIDE,version);
+    if(my_core_id==0)printf("  APPLY Q_v2   parallel with threads %d   nbchunk %d  colpercore %d  N %d   NB %d   Vblksiz %d SIDE %c versionL %d \n",cores_num,nbchunk,colpercore,N,NB,Vblksiz,SIDE,versionL);
 
     //printf("mycore id %d voici nbchunk %d  chunkid %d  coreid %d, corest %d, corelen %d\n",my_core_id,nbchunk, chunkid, coreid, corest, corelen);
     if(SIDE=='L'){
-        if(version==113){            
+        if(versionL==113){            
             for (bg = nbGblk; bg>0; bg--)
             {
                firstcolj = (bg-1)*Vblksiz + 1;
@@ -2236,7 +2266,7 @@ void tile_bulge_applyQ_parallel2(int my_core_id)
                    } // end if vlen and vnb
                } // end for m:rowmnb
             } // end for bg 
-        }else if(version==114){
+        }else if(versionL==114){
             rownbm    = plasma_ceildiv((N-1),NB);
             for (m = rownbm; m>0; m--)
             {
