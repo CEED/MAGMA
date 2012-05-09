@@ -159,7 +159,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
     cudaStreamCreate(&stream[0]);
     cudaStreamCreate(&stream[1]);
 
-    //   cublasSetKernelStream(stream[1]);
+    //   magmablasSetKernelStream(stream[1]);
 
     cuDoubleComplex *ptr = da + ldda * NB;
     dwork = da + ldda*(NB + nb);

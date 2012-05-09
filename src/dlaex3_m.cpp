@@ -539,7 +539,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
                                       hS(igpu+1,ind), &n23, &d_zero, hQ(igpu+1, ind), &n2_loc);
 #endif
                         cudaSetDevice(igpu+1);
-                        cublasSetKernelStream(stream[igpu+1][ind]);
+                        magmablasSetKernelStream(stream[igpu+1][ind]);
                         magma_dgemm(MagmaNoTrans, MagmaNoTrans, ni_loc[igpu+1], ib, n23, d_one, dQ2(igpu+1), n2_loc,
                                     dS(igpu+1, ind), n23, d_zero, dQ(igpu+1, ind), n2_loc);
 #ifdef CHECK_CPU
@@ -552,7 +552,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
                                       hS(igpu,ind%2), &n12, &d_zero, hQ(igpu, ind%2), &n1_loc);
 #endif
                         cudaSetDevice(igpu);
-                        cublasSetKernelStream(stream[igpu][ind]);
+                        magmablasSetKernelStream(stream[igpu][ind]);
                         magma_dgemm(MagmaNoTrans, MagmaNoTrans, ni_loc[igpu], ib, n12, d_one, dQ2(igpu), n1_loc,
                                     dS(igpu, ind), n12, d_zero, dQ(igpu, ind), n1_loc);
 #ifdef CHECK_CPU
@@ -586,7 +586,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
                 magma_free_host( hwQ[0][igpu] );
 #endif
                 cudaSetDevice(igpu);
-                cublasSetKernelStream(NULL);
+                magmablasSetKernelStream(NULL);
                 cudaStreamSynchronize(stream[igpu][0]);
                 cudaStreamSynchronize(stream[igpu][1]);
 /*                magma_free( dwS[0][igpu] );

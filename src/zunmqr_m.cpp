@@ -293,7 +293,7 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
                     // Put 0s in the upper triangular part of dA;
                     magmablas_zsetdiag1subdiag0_stream('L', ib, ib, dA_c(igpu, ind_c, i, 0), lddac, stream[igpu][ind_c]);
 
-                    cublasSetKernelStream(stream[igpu][ind_c]);
+                    magmablasSetKernelStream(stream[igpu][ind_c]);
                     magma_zlarfb_gpu( side, trans, MagmaForward, MagmaColumnwise,
                                      m-i, n_l, ib,
                                      dA_c(igpu, ind_c, i, 0), lddac, dt(igpu, ind_c), ib,
@@ -369,7 +369,7 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
 
     for (igpu = 0; igpu < nrgpu; ++igpu){
         cudaSetDevice(igpu);
-        cublasSetKernelStream(NULL);
+        magmablasSetKernelStream(NULL);
         cudaStreamSynchronize(stream[igpu][0]);
         cudaStreamDestroy(stream[igpu][0]);
         cudaStreamDestroy(stream[igpu][1]);

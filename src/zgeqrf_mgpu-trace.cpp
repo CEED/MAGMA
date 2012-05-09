@@ -296,7 +296,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
     ldwork = m;
     lddwork= n;
 
-    // cublasSetKernelStream(streaml[0][0]);
+    // magmablasSetKernelStream(streaml[0][0]);
 
     if (nb >= nbmin && nb < k && nx < k) {
         /* Use blocked code initially */
