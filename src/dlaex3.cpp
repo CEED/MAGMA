@@ -258,7 +258,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
     lq2 = iq2 + n2 * n23;
 
 //    cudaMemcpyAsync(dq2, q2, sizeof(double)*lq2, cudaMemcpyHostToDevice, stream);
-    cudaMemcpyAsync(dq2, q2, sizeof(double)*lq2, cudaMemcpyHostToDevice, NULL);
+    magma_dsetvector_async( lq2, q2, 1, dq2, 1, NULL );
 
 //#define ENABLE_TIMER
 #ifdef ENABLE_TIMER

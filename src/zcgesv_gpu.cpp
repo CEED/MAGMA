@@ -196,7 +196,7 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
     {
         int *newipiv  = (int*)malloc(N * sizeof(int));
         swp2pswp(trans, N, IPIV, newipiv);
-        cudaMemcpy(dIPIV, newipiv, N*sizeof(int), cudaMemcpyHostToDevice);
+        magma_setvector( N, sizeof(int), newipiv, 1, dIPIV, 1 );
         free(newipiv);
     }
     
