@@ -284,7 +284,7 @@ magma_zheevx_gpu(char jobz, char range, char uplo, magma_int_t n,
   
   if (n == 1) {
     cuDoubleComplex tmp;
-    cublasGetVector(1, sizeof(cuDoubleComplex), da, 1, &tmp, 1);
+    magma_zgetvector( 1, da, 1, &tmp, 1 );
     w[0] = MAGMA_Z_REAL(tmp);
     if (alleig || indeig) {
       *m = 1;
@@ -295,7 +295,7 @@ magma_zheevx_gpu(char jobz, char range, char uplo, magma_int_t n,
     }
     if (wantz) {
       tmp = MAGMA_Z_ONE;
-      cublasSetVector(1, sizeof(cuDoubleComplex), &tmp, 1, da, 1);
+      magma_zsetvector( 1, &tmp, 1, da, 1 );
     }
     return *info;
   }

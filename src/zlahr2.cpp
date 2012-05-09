@@ -227,8 +227,9 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
         /* Compute  Y(K+1:N,I) */
         i__2 = n - k;
         i__3 = n - k - i__ + 1;
-        cublasSetVector(i__3, sizeof(cuDoubleComplex), 
-                        &a[k + i__ + i__*a_dim1], 1, dv+(i__-1)*(ldda+1), 1);
+        magma_zsetvector( i__3,
+                          &a[k + i__ + i__*a_dim1], 1,
+                          dv+(i__-1)*(ldda+1),      1 );
 
         magma_zgemv(MagmaNoTrans, i__2+1, i__3, c_one, 
                     da -1 + k + i__ * ldda, ldda, 
@@ -248,8 +249,9 @@ magma_zlahr2(magma_int_t n, magma_int_t k, magma_int_t nb,
         blasf77_ztrmv("U","N","N", &i__2, &t[t_offset], &ldt, &t[i__*t_dim1+1], &c__1);
         t[i__ + i__ * t_dim1] = tau[i__];
 
-        cublasGetVector(n - k + 1, sizeof(cuDoubleComplex),
-                        da-1+ k+(i__-1)*ldda, 1, y+ k + i__*y_dim1, 1);
+        magma_zgetvector( n - k + 1,
+                          da-1+ k+(i__-1)*ldda, 1,
+                          y+ k + i__*y_dim1,    1 );
     }
     a[k + nb + nb * a_dim1] = ei;
 

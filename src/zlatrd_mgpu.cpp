@@ -313,7 +313,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
           // 1. Send the block reflector  A(0:n-i-1,i) to the GPU
           for( id=0; id<num_gpus; id++ ) {
               cudaSetDevice(id);
-              cublasSetVector(i, sizeof(cuDoubleComplex), A(0, i), 1, dA(id, 0, i), 1);
+              magma_zsetvector( i, A(0, i), 1, dA(id, 0, i), 1 );
               magma_zhemv(MagmaUpper, i, c_one, dA(id, 0, 0), ldda,
                           dA(id, 0, i), ione, c_zero, dW(id, 0, iw), ione);
           }
@@ -488,7 +488,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
 #ifndef  MAGMABLAS_ZHEMV_MGPU
               cudaSetDevice(idw);
               //magmablasSetKernelStream(stream[idw][0]);
-              cublasSetVector(i_n, sizeof(cuDoubleComplex), A(i+1, i), 1, dA(idw, i+1, i), 1);          
+              magma_zsetvector( i_n, A(i+1, i), 1, dA(idw, i+1, i), 1 );          
 #endif
               //trace_gpu_end( idw, 0 );
               for( id=0; id<num_gpus; id++ ) {
@@ -498,7 +498,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
                   //cublasSetVector(i_n, sizeof(cuDoubleComplex), A(i+1, i), 1, &dx[id][offset+i+1], 1);          
                   magma_zsetvector_async( i_n, A(i+1, i), 1, &dx[id][offset+i+1], 1, stream[id][0] );
 #else
-                  cublasSetVector(i_n, sizeof(cuDoubleComplex), A(i+1, i), 1, dx[id], 1);          
+                  magma_zsetvector( i_n, A(i+1, i), 1, dx[id], 1 );          
 #endif
               }
               /* mat-vec on multiple GPUs */

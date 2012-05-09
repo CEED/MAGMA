@@ -230,7 +230,7 @@ magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
           
           /* Compute W(1:i-1,i) */
           // 1. Send the block reflector  A(0:n-i-1,i) to the GPU
-          cublasSetVector(i, sizeof(cuDoubleComplex), A(0, i), 1, dA(0, i), 1);
+          magma_zsetvector( i, A(0, i), 1, dA(0, i), 1 );
 
 #if (GPUSHMEM < 200)
           magma_zhemv(MagmaUpper, i, c_one, dA(0, 0), ldda,
@@ -314,7 +314,7 @@ magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
 
               /* Compute W(i+1:n,i) */ 
               // 1. Send the block reflector  A(i+1:n,i) to the GPU
-              cublasSetVector(i_n, sizeof(cuDoubleComplex), A(i+1, i), 1, dA(i+1, i), 1);          
+              magma_zsetvector( i_n, A(i+1, i), 1, dA(i+1, i), 1 );          
           
 #if (GPUSHMEM < 200)
               magma_zhemv(MagmaLower, i_n, c_one, dA(i+1, i+1), ldda, dA(i+1, i), ione, c_zero,

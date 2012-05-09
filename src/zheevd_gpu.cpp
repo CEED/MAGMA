@@ -240,11 +240,11 @@ magma_zheevd_gpu(char jobz, char uplo,
 
     if (n == 1) {
         cuDoubleComplex tmp;
-        cublasGetVector(1, sizeof(cuDoubleComplex), da, 1, &tmp, 1);
+        magma_zgetvector( 1, da, 1, &tmp, 1 );
         w[0] = MAGMA_Z_REAL(tmp);
         if (wantz) {
             tmp = MAGMA_Z_ONE;
-            cublasSetVector(1, sizeof(cuDoubleComplex), &tmp, 1, da, 1);
+            magma_zsetvector( 1, &tmp, 1, da, 1 );
         }
         return *info;
     }

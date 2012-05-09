@@ -211,11 +211,11 @@ magma_dsyevd_gpu(char jobz, char uplo,
 
     if (n == 1) {
         double tmp;
-        cublasGetVector(1, sizeof(double), da, 1, &tmp, 1);
+        magma_dgetvector( 1, da, 1, &tmp, 1 );
         w[0] = tmp;
         if (wantz) {
             tmp = 1.;
-            cublasSetVector(1, sizeof(double), &tmp, 1, da, 1);
+            magma_dsetvector( 1, &tmp, 1, da, 1 );
         }
         return MAGMA_SUCCESS;
     }

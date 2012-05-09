@@ -226,9 +226,9 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                 i__3 = n - i__;
 
                 // 1. Send the block reflector  A(i+1:m,i) to the GPU ------
-                cublasSetVector(i__2, sizeof(cuDoubleComplex),
-                                a + i__   + i__   * a_dim1, 1,
-                                da+(i__-1)+(i__-1)* (ldda), 1);
+                magma_zsetvector( i__2,
+                                  a + i__   + i__   * a_dim1, 1,
+                                  da+(i__-1)+(i__-1)* (ldda), 1 );
                 // 2. Multiply ---------------------------------------------
                 magma_zgemv(MagmaConjTrans, i__2, i__3, c_one, 
                             da + (i__-1) + ((i__-1) + 1) * (ldda), ldda, 
@@ -308,9 +308,9 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                 i__2 = m - i__;
                 i__3 = n - i__;
                 // 1. Send the block reflector  A(i+1:m,i) to the GPU ------
-                cublasSetVector(i__3, sizeof(cuDoubleComplex),
-                                a + i__   + (i__   +1)* a_dim1, lda,
-                                da+(i__-1)+((i__-1)+1)*(ldda), ldda);
+                magma_zsetvector( i__3,
+                                  a + i__   + (i__   +1)* a_dim1, lda,
+                                  da+(i__-1)+((i__-1)+1)*(ldda),  ldda );
                 // 2. Multiply ---------------------------------------------
                 //magma_zcopy(i__3, da+(i__-1)+((i__-1)+1)*(ldda), ldda,
                 //            dy + 1 + lddy, 1);
@@ -359,9 +359,9 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                 i__2 = n - i__;
                 lapackf77_zlacgv( &i__2,  &a[i__+(i__+1)*a_dim1], &lda );
                 // 4. Send the block reflector  A(i+1:m,i) to the GPU after ZLACGV()
-                cublasSetVector(i__2, sizeof(cuDoubleComplex),
-                                a + i__   + (i__   +1)* a_dim1, lda,
-                                da+(i__-1)+((i__-1)+1)*(ldda), ldda);
+                magma_zsetvector( i__2,
+                                  a + i__   + (i__   +1)* a_dim1, lda,
+                                  da+(i__-1)+((i__-1)+1)*(ldda),  ldda );
 #endif
             }
         }
@@ -408,9 +408,9 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
           i__3 = n - i__ + 1;
 
           // 1. Send the block reflector  A(i,i+1:n) to the GPU ------
-          cublasSetVector(i__3, sizeof(cuDoubleComplex),
-                          a + i__   + i__   * a_dim1, lda,
-                          da+(i__-1)+(i__-1)* (ldda), ldda);
+          magma_zsetvector( i__3,
+                            a + i__   + i__   * a_dim1, lda,
+                            da+(i__-1)+(i__-1)* (ldda), ldda );
 
           // 2. Multiply ---------------------------------------------
           //magma_zcopy(i__3, da+(i__-1)+(i__-1)*(ldda), ldda,
@@ -461,9 +461,9 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
           i__2 = n - i__ + 1;
 #if defined(PRECISION_z) || defined(PRECISION_c)
           lapackf77_zlacgv(&i__2, &a[i__ + i__ * a_dim1], &lda);
-          cublasSetVector(i__2, sizeof(cuDoubleComplex),
-                          a + i__   + (i__  )* a_dim1, lda,
-                          da+(i__-1)+ (i__-1)*(ldda), ldda);
+          magma_zsetvector( i__2,
+                            a + i__   + (i__  )* a_dim1, lda,
+                            da+(i__-1)+ (i__-1)*(ldda),  ldda );
 #endif
           
           /* Update A(i+1:m,i) */
@@ -497,9 +497,9 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
           i__3 = n - i__;
 
           // 1. Send the block reflector  A(i+1:m,i) to the GPU ------
-          cublasSetVector(i__2, sizeof(cuDoubleComplex),
-                          a + i__   +1+  i__   * a_dim1, 1,
-                          da+(i__-1)+1+ (i__-1)*(ldda), 1);
+          magma_zsetvector( i__2,
+                            a + i__   +1+  i__   * a_dim1, 1,
+                            da+(i__-1)+1+ (i__-1)*(ldda),  1 );
           // 2. Multiply ---------------------------------------------
           magma_zgemv(MagmaConjTrans, i__2, i__3, c_one,
                       da + (i__-1)+1+ ((i__-1)+1) * ldda, ldda,
@@ -544,9 +544,9 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
         } else {
           i__2 = n - i__ + 1;
           lapackf77_zlacgv(&i__2, &a[i__ + i__ * a_dim1], &lda);
-          cublasSetVector(i__2, sizeof(cuDoubleComplex),
-                          a + i__   + (i__  )* a_dim1, lda,
-                          da+(i__-1)+ (i__-1)*(ldda), ldda);
+          magma_zsetvector( i__2,
+                            a + i__   + (i__  )* a_dim1, lda,
+                            da+(i__-1)+ (i__-1)*(ldda),  ldda );
 #endif
         }
       }
