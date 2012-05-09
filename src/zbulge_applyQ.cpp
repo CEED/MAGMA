@@ -72,7 +72,6 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
     nbGblk   = plasma_ceildiv((N-1),Vblksiz);
     //WORK    = (cuDoubleComplex *) malloc (LWORK*sizeof(cuDoubleComplex));
 
-#if defined(USEMAGMA)
     /* find the size of the matrix T V*/
     findVTsiz(N, NB, Vblksiz, &blkcnt, &LDV);
     /* Copy E & V & T to the GPU in dE and dV and dT 
@@ -92,10 +91,6 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
        printf ("!!!!  magma_zbulge_applyQ magma_alloc failed for: dwork\n" );       
        exit(-1);                                                           
     }
-#else
-    LWORK   = 2*N*max(Vblksiz,64);
-    WORK    = (cuDoubleComplex *) malloc (LWORK*sizeof(cuDoubleComplex));
-#endif
 
     /* SIDE LEFT  meaning apply E = Q*E = (q_1*q_2*.....*q_n) * E ==> so traverse Vs in reverse order (forward) from q_n to q_1
      *            Also E is splitten by row meaning each apply consist in a block of row (horizontal block) */
@@ -262,14 +257,14 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
                 }    
                 findVTpos(N,NB,Vblksiz,colst,fst, &vpos, &taupos, &tpos, &blkid);
                 if((vlen>0)&&(vnb>0)){
-             #if defined(USESTREAM)
+                #if defined(USESTREAM)
                    magmablasSetKernelStream(stream[0]);                       
                    magma_zlarfb_gpu( MagmaRight, MagmaNoTrans, MagmaForward, MagmaColumnwise, N1, vlen, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(0, fst), LDE, dwork, N1);
                    magmablasSetKernelStream(stream[1]);        
                    magma_zlarfb_gpu( MagmaRight, MagmaNoTrans, MagmaForward, MagmaColumnwise, N2, vlen, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(N1, fst), LDE, &dwork[N1*Vblksiz], N2);
-             #else
+                #else
                    magma_zlarfb_gpu( MagmaRight, MagmaNoTrans, MagmaForward, MagmaColumnwise, NE, vlen, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(0, fst), LDE, dwork, NE);
-             #endif
+               #endif
                }  
             }
          }
@@ -284,11 +279,7 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
     cudaStreamDestroy( stream[1] );
 #endif
 
-#if defined(USEMAGMA)
-        //printf("difference  =  %e\n", cpu_gpu_ddiff(N, N, E, N, dE, N));
-        // no need to send it if WANTZ=3 or 4 because I will use the GPU to make the GEMM with Q1 or the apply with V1.
-        //if(WANTZ==5) cublasGetMatrix( N, N, sizeof(cuDoubleComplex), dE, N, E, N);
-#endif        
+      
 }
 #undef E
 #undef V
