@@ -60,15 +60,16 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
     cuDoubleComplex *WORK;
     magma_int_t LWORK;
     magma_int_t  cur_blksiz,avai_blksiz, ncolinvolvd;
-    magma_int_t  nbgr, colst, coled, version;
+    magma_int_t  nbgr, colst, coled, versionL,versionR;
     magma_int_t blkcnt=-1;
 
     *INFO=0;
-    version = 113;
-    LDT     = Vblksiz;
-    LDV     = NB+Vblksiz-1;
-    blklen  = LDV*Vblksiz;
-    nbGblk  = plasma_ceildiv((N-1),Vblksiz);
+    versionL = 114;
+    versionR = 92;
+    LDT      = Vblksiz;
+    LDV      = NB+Vblksiz-1;
+    blklen   = LDV*Vblksiz;
+    nbGblk   = plasma_ceildiv((N-1),Vblksiz);
     //WORK    = (cuDoubleComplex *) malloc (LWORK*sizeof(cuDoubleComplex));
 
 #if defined(USEMAGMA)
@@ -104,12 +105,12 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
      /* WANTZ = 1 meaning E is IDENTITY so form Q using optimized update. 
       *         So we use the reverse order from small q to large one, 
       *         so from q_n to q_1 so Left update to Identity.
-      *         Use version 113 because in 114 we need to update the whole matrix and not in icreasing order.
+      *         Use versionL 113 because in 114 we need to update the whole matrix and not in icreasing order.
       * WANTZ = 2 meaning E is a full matrix and need to be updated from Left or Right so use normal update
       * */
     if(WANTZ==1) 
     {
-        version=113;
+        versionL=113;
         SIDE='L';
         //set the matrix to Identity here to avoid copying it from the CPU
         magmablas_zlaset_identity(N, N, dE, N);        
@@ -117,20 +118,20 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
     
 
 
-    printf("  APPLY Q_v115 GPU with  N %d   NB %d   Vblksiz %d SIDE %c version %d WANTZ %d \n",N,NB,Vblksiz,SIDE,version,WANTZ);
+    printf("  APPLY Q_v115 GPU with  N %d   NB %d   Vblksiz %d SIDE %c versionL %d versionR %d WANTZ %d \n",N,NB,Vblksiz,SIDE,versionL,versionR,WANTZ);
 
 
     magma_int_t N2=N/2;
     magma_int_t N1=N-N2;   
 #if defined(USESTREAM)
-    //static cudaStream_t stream[2];
-    //cudaStreamCreate(&stream[0]);
-    //cudaStreamCreate(&stream[1]);
+    static cudaStream_t stream[2];
+    cudaStreamCreate(&stream[0]);
+    cudaStreamCreate(&stream[1]);
 #endif
     
 
     if(SIDE=='L'){
-    if(version==113){            
+    if(versionL==113){            
         for (bg = nbGblk; bg>0; bg--)
         {
            firstcolj = (bg-1)*Vblksiz + 1;
@@ -156,30 +157,16 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
                findVTpos(N,NB,Vblksiz,colst,fst, &vpos, &taupos, &tpos, &blkid);
                //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colst+1,vpos+1,taupos+1);
                if((vlen>0)&&(vnb>0)){
-#if defined(USEMAGMA)
-                       if(WANTZ==1){
-                          len =  N-colst;    
-                          magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, vlen, len, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(fst,colst), LDE, dwork, len);
-                       }else{
-                          magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, vlen, NE, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(fst,0), LDE, dwork, NE);
-                       }
-                          // magma_zormqr2_gpu(MagmaLeft, MagmaNoTrans, vlen, N, vnb, dV(vpos), LDV, TAU(taupos), dE(fst,0), LDE, V(vpos), LDV, INFO );
-#else
-                       if(WANTZ==1){
-                          len =  N-colst;    
-                          lapackf77_zlarfb( "L", "N", "F", "C", &vlen, &len, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(fst,colst), &LDE,  WORK, &len); 
-                       }else{
-                          lapackf77_zlarfb( "L", "N", "F", "C", &vlen, &NE, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(fst,0), &LDE,  WORK, &NE); 
-                       }
-                           //DORMQR( "L", "N", &vlen, &N, &vnb, V(vpos), &LDV, TAU(taupos), E(fst,0), &LDE,  WORK, &LWORK, INFO );
-                       //DORMQR_BLG( "L", "N", &vlen, &N, &vnb, &NB, V(vpos), &LDV, TAU(taupos), E(fst,0), &LDE,  WORK, &LWORK, INFO );
-#endif           
+                   if(WANTZ==1){
+                      len =  N-colst;    
+                      magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, vlen, len, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(fst,colst), LDE, dwork, len);
+                   }else{
+                      magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, vlen, NE, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(fst,0), LDE, dwork, NE);
+                   }
                }           
-               if(*INFO!=0) 
-                       printf("ERROR DORMQR INFO %d \n",*INFO);
            }
         }
-    }else if(version==114){
+    }else if(versionL==114){
         rownbm    = plasma_ceildiv((N-1),NB);
         for (m = rownbm; m>0; m--)
         {
@@ -206,15 +193,12 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
                findVTpos(N,NB,Vblksiz,colst,fst, &vpos, &taupos, &tpos, &blkid);
                //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colst+1,vpos+1,taupos+1);
                if((vlen>0)&&(vnb>0))
-                   //DORMQR( "L", "N", &vlen, &N, &vnb, V(vpos), &LDV, TAU(taupos), E(fst,0), &LDE,  WORK, &LWORK, INFO );
-                   lapackf77_zlarfb( "L", "N", "F", "C", &vlen, &NE, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(fst,0), &LDE,  WORK, &NE);       
-               if(*INFO!=0) 
-                       printf("ERROR DORMQR INFO %d \n",*INFO);
-       
+                   magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, vlen, NE, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(fst,0), LDE, dwork, NE);
            }
         }
     }
     }else if (SIDE=='R'){
+    if(versionR==91){
         for (bg =1; bg<=nbGblk; bg++)
         {
            firstcolj = (bg-1)*Vblksiz + 1;
@@ -241,7 +225,6 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
                findVTpos(N,NB,Vblksiz,colj,fst, &vpos, &taupos, &tpos, &blkid);
                //printf("voici bg %d m %d  vlen %d  vnb %d fcolj %d vpos %d taupos %d \n",bg,m,vlen, vnb,colj,vpos,taupos);
                if((vlen>0)&&(vnb>0)){
-#if defined(USEMAGMA)
                 #if defined(USESTREAM)
                    magmablasSetKernelStream(stream[0]);                       
                    magma_zlarfb_gpu( MagmaRight, MagmaNoTrans, MagmaForward, MagmaColumnwise, N1, vlen, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(0, fst), LDE, dwork, N1);
@@ -250,17 +233,47 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
                 #else
                    magma_zlarfb_gpu( MagmaRight, MagmaNoTrans, MagmaForward, MagmaColumnwise, NE, vlen, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(0, fst), LDE, dwork, NE);
                 #endif
-                   //magma_zormqr2_gpu( MagmaRight, MagmaNoTrans, N, vlen, vnb, dV(vpos), LDV, TAU(tpos), dE(0, fst), LDE, V(vpos), LDV, INFO );
-#else                       
-                   //DORMQR( "R", "N", &N, &vlen, &vnb, V(vpos), &LDV, TAU(taupos), E(0,fst), &LDE,  WORK, &LWORK, INFO );
-                   lapackf77_zlarfb( "R", "N", "F", "C", &NE, &vlen, &vnb, V(vpos), &LDV, T(tpos), &LDT, E(0, fst), &LDE,  WORK, &NE);       
-#endif
-               }
-               if(*INFO!=0) 
-                   printf("Right ERROR DORMQR INFO %d \n",*INFO);
-       
+               } 
            }
         }
+        }else if(versionR==92){
+         rownbm    = plasma_ceildiv((N-1),NB);
+         for (m = 1; m<=rownbm; m++)
+         {
+            ncolinvolvd = min(N-1, m*NB);
+            avai_blksiz=min(Vblksiz,ncolinvolvd);
+            nbgr = plasma_ceildiv(ncolinvolvd,avai_blksiz);
+            for (n = 1; n<=nbgr; n++)
+            {
+                vlen = 0;
+                vnb  = 0;
+                cur_blksiz = min(ncolinvolvd-(n-1)*avai_blksiz, avai_blksiz);
+                colst = (n-1)*avai_blksiz;
+                coled = colst + cur_blksiz -1;
+                fst   = (rownbm -m)*NB+colst +1;
+                for (colj=colst; colj<=coled; colj++)
+                {
+                    st       = (rownbm -m)*NB+colj +1;
+                    ed       = min(st+NB-1,N-1);
+                    if(st>ed)break;
+                    if((st==ed)&&(colj!=N-2))break;
+                    vlen=ed-fst+1;
+                    vnb=vnb+1;
+                }    
+                findVTpos(N,NB,Vblksiz,colst,fst, &vpos, &taupos, &tpos, &blkid);
+                if((vlen>0)&&(vnb>0)){
+             #if defined(USESTREAM)
+                   magmablasSetKernelStream(stream[0]);                       
+                   magma_zlarfb_gpu( MagmaRight, MagmaNoTrans, MagmaForward, MagmaColumnwise, N1, vlen, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(0, fst), LDE, dwork, N1);
+                   magmablasSetKernelStream(stream[1]);        
+                   magma_zlarfb_gpu( MagmaRight, MagmaNoTrans, MagmaForward, MagmaColumnwise, N2, vlen, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(N1, fst), LDE, &dwork[N1*Vblksiz], N2);
+             #else
+                   magma_zlarfb_gpu( MagmaRight, MagmaNoTrans, MagmaForward, MagmaColumnwise, NE, vlen, vnb, dV(vpos), LDV, dT(tpos), LDT, dE(0, fst), LDE, dwork, NE);
+             #endif
+               }  
+            }
+         }
+    }
     }else{
             printf("ERROR SIDE %d \n",SIDE);
     }
