@@ -24,15 +24,13 @@ ZSRC  = zpotrf.cpp	\
         zpotri_gpu.cpp	\
 	\
         zgetrf.cpp	\
-        zgetrf-v2.cpp   \
-        zgetrf-v3.cpp   \
         zgetrf_gpu.cpp 	\
         zgetrf_mgpu.cpp	\
-        zgetrf1_mgpu.cpp \
-        zgetrf_nopiv.cpp\
-        zgetrf2_ooc.cpp \
         zgetrf3_ooc.cpp \
+        zgetrf1_mgpu.cpp \
+		\
 	zgetf2_nopiv.cpp\
+        zgetrf_nopiv.cpp\
         zgetrf_nopiv_gpu.cpp\
         zgetrs_gpu.cpp 	\
         zgesv.cpp       \

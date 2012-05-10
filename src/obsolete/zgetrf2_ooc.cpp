@@ -38,6 +38,9 @@ magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t l
 
     Purpose
     =======
+    non-GPU-resident on a single GPU. This is replaced by non-GPU-resident
+    on multiple GPUs (magma_zgetrf3_ooc).
+
     ZGETRF_OOC computes an LU factorization of a general M-by-N matrix A
     using partial pivoting with row interchanges.  This version does not
     require work space on the GPU passed as input. GPU memory is allocated

@@ -20,22 +20,7 @@
 
 
 // =========================================================================
-// definitions of non-GPU-resident subroutines
-extern "C" magma_int_t
-magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
-                 magma_int_t *ipiv, magma_int_t *info);
-
-extern "C" magma_int_t
-magma_zgetrf_piv(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
-                                 magma_int_t *ipiv, magma_int_t *info);
-
-// definitions of multiple-GPU subroutine
-extern "C" magma_int_t
-magma_zgetrf3(magma_int_t num_gpus,
-              magma_int_t m, magma_int_t n,
-              cuDoubleComplex *a, magma_int_t lda,
-              magma_int_t *ipiv, magma_int_t *info);
-
+// definitions of non-GPU-resident multi-GPU subroutines
 /* non-gpu-resident interface to multiple GPUs */
 extern "C" magma_int_t
 magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
@@ -147,7 +132,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
         if( num_gpus_char != NULL ) num_gpus = atoi(num_gpus_char);
         if( num_gpus_char != NULL && num_gpus >= 1 ) {
           /* call multi-GPU non-GPU-resident interface  */
-          int rval = magma_zgetrf3_ooc(num_gpus, m, n, a, lda, ipiv, info);
+          magma_int_t rval = magma_zgetrf3_ooc(num_gpus, m, n, a, lda, ipiv, info);
           if( *info >= 0 ) magma_zgetrf2_piv( num_gpus, m, n, a, lda, ipiv, info);
           return *info;
           //return magma_zgetrf3(num_gpus, m, n, a, lda, ipiv, info);
@@ -164,9 +149,12 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
         {
             if (MAGMA_SUCCESS != magma_zmalloc( &dA, nb*maxm + maxdim*maxdim )) {
                         /* alloc failed so call non-GPU-resident version */ 
-                        magma_int_t rval = magma_zgetrf_ooc(m, n, a, lda, ipiv, info);
-                        if( *info == 0 ) magma_zgetrf_piv( m, n, a, lda, ipiv, info);
+                        magma_int_t rval = magma_zgetrf3_ooc(num_gpus, m, n, a, lda, ipiv, info);
+                        if( *info >= 0 ) magma_zgetrf2_piv( num_gpus, m, n, a, lda, ipiv, info);
                         return *info;
+                        //magma_int_t rval = magma_zgetrf_ooc(m, n, a, lda, ipiv, info);
+                        //if( *info == 0 ) magma_zgetrf_piv( m, n, a, lda, ipiv, info);
+                        //return *info;
             }
             da = dA + nb*maxm;
             
@@ -180,9 +168,12 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
         {
             if (MAGMA_SUCCESS != magma_zmalloc( &dA, (nb + maxn)*maxm )) {
                         /* alloc failed so call non-GPU-resident version */
-                        magma_int_t rval = magma_zgetrf_ooc(m, n, a, lda, ipiv, info);
-                        if( *info == 0 )magma_zgetrf_piv( m, n, a, lda, ipiv, info);
+                        magma_int_t rval = magma_zgetrf3_ooc(num_gpus, m, n, a, lda, ipiv, info);
+                        if( *info >= 0 ) magma_zgetrf2_piv( num_gpus, m, n, a, lda, ipiv, info);
                         return *info;
+                        //magma_int_t rval = magma_zgetrf_ooc(m, n, a, lda, ipiv, info);
+                        //if( *info == 0 )magma_zgetrf_piv( m, n, a, lda, ipiv, info);
+                        //return *info;
             }
             da = dA + nb*maxm;
             
@@ -191,9 +182,12 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
             if (MAGMA_SUCCESS != magma_zmalloc( &dAT, maxm*maxn )) {
                         /* alloc failed so call non-GPU-resident version */
                         magma_free( dA );
-                        magma_int_t rval = magma_zgetrf_ooc(m, n, a, lda, ipiv, info);
-                        magma_zgetrf_piv( m, n, a, lda, ipiv, info);
+                        magma_int_t rval = magma_zgetrf3_ooc(num_gpus, m, n, a, lda, ipiv, info);
+                        if( *info >= 0 ) magma_zgetrf2_piv( num_gpus, m, n, a, lda, ipiv, info);
                         return *info;
+                        //magma_int_t rval = magma_zgetrf_ooc(m, n, a, lda, ipiv, info);
+                        //magma_zgetrf_piv( m, n, a, lda, ipiv, info);
+                        //return *info;
             }
 
             magmablas_ztranspose2( dAT, ldda, da, maxm, m, n );

@@ -33,6 +33,10 @@ magma_zgetrf3(magma_int_t num_gpus,
 
     Purpose
     =======
+    multi-GPU factorization without non-GPU-resident capability.
+    It is now replaced with non-GPU-resident multi-GPU routine
+    (magma_zgetrf3_ooc).
+
     ZGETRF3 computes an LU factorization of a general M-by-N matrix A
     using partial pivoting with row interchanges.
 
