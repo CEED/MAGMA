@@ -261,29 +261,31 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
         }
         
         magma_int_t nb0 = min(m - s*nb, n - s*nb);
-        rows = m - s*nb;
-        cols = maxm - s*nb;
-
-        magmablas_ztranspose2( dA, cols, inAT(s,s), ldda, nb0, rows);
-        magma_zgetmatrix( rows, nb0, dA, cols, work, lda );
-
-        // make sure that gpu queue is empty
-        magma_device_sync();
-
-        // do the cpu part
-        lapackf77_zgetrf( &rows, &nb0, work, &lda, ipiv+s*nb, &iinfo);
-        if (*info == 0 && iinfo > 0)
-            *info = iinfo + s*nb;
-        magmablas_zpermute_long2( dAT, ldda, ipiv, nb0, s*nb );
-
-        magma_zsetmatrix( rows, nb0, work, lda, dA, cols );
-        magmablas_ztranspose2( inAT(s,s), ldda, dA, cols, rows, nb0);
-
-        magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
-                     n-s*nb-nb0, nb0,
-                     c_one, inAT(s, s),     ldda, 
-                            inAT(s, s)+nb0, ldda);
-
+        if ( nb0 > 0 ) {
+            rows = m - s*nb;
+            cols = maxm - s*nb;
+    
+            magmablas_ztranspose2( dA, cols, inAT(s,s), ldda, nb0, rows);
+            magma_zgetmatrix( rows, nb0, dA, cols, work, lda );
+    
+            // make sure that gpu queue is empty
+            magma_device_sync();
+    
+            // do the cpu part
+            lapackf77_zgetrf( &rows, &nb0, work, &lda, ipiv+s*nb, &iinfo);
+            if (*info == 0 && iinfo > 0)
+                *info = iinfo + s*nb;
+            magmablas_zpermute_long2( dAT, ldda, ipiv, nb0, s*nb );
+    
+            magma_zsetmatrix( rows, nb0, work, lda, dA, cols );
+            magmablas_ztranspose2( inAT(s,s), ldda, dA, cols, rows, nb0);
+    
+            magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+                         n-s*nb-nb0, nb0,
+                         c_one, inAT(s, s),     ldda, 
+                                inAT(s, s)+nb0, ldda);
+        }
+        
         if (maxdim*maxdim< 2*maxm*maxn){
             magmablas_zinplace_transpose( dAT, ldda, ldda );
             magma_zgetmatrix( m, n, da, ldda, a, lda );
