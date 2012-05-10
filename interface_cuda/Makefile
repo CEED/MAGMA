@@ -18,6 +18,7 @@ ZSRC  = blas_z.cpp	\
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
 	alloc.cpp	\
+	error.cpp	\
 	set_get.cpp	\
 	interface.cpp	\
 

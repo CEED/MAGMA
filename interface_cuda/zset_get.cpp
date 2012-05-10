@@ -14,6 +14,7 @@
 #include <assert.h>
 
 #include "magma.h"
+#include "error.h"
 
 #ifdef HAVE_CUBLAS
 
@@ -30,7 +31,7 @@ void magma_zsetvector(
         n, sizeof(cuDoubleComplex),
         hx_src, incx,
         dy_dst, incy );
-    assert( status == CUBLAS_STATUS_SUCCESS );
+    check_error( status );
 }
 
 // --------------------
@@ -45,7 +46,7 @@ void magma_zgetvector(
         n, sizeof(cuDoubleComplex),
         dx_src, incx,
         hy_dst, incy );
-    assert( status == CUBLAS_STATUS_SUCCESS );
+    check_error( status );
 }
 
 // --------------------
@@ -61,7 +62,7 @@ void magma_zsetvector_async(
         n, sizeof(cuDoubleComplex),
         hx_src, incx,
         dy_dst, incy, stream );
-    assert( status == CUBLAS_STATUS_SUCCESS );
+    check_error( status );
 }
 
 // --------------------
@@ -77,7 +78,7 @@ void magma_zgetvector_async(
         n, sizeof(cuDoubleComplex),
         dx_src, incx,
         hy_dst, incy, stream );
-    assert( status == CUBLAS_STATUS_SUCCESS );
+    check_error( status );
 }
 
 
@@ -94,7 +95,7 @@ void magma_zsetmatrix(
         m, n, sizeof(cuDoubleComplex),
         hA_src, lda,
         dB_dst, ldb );
-    assert( status == CUBLAS_STATUS_SUCCESS );
+    check_error( status );
 }
 
 // --------------------
@@ -109,7 +110,7 @@ void magma_zgetmatrix(
         m, n, sizeof(cuDoubleComplex),
         dA_src, lda,
         hB_dst, ldb );
-    assert( status == CUBLAS_STATUS_SUCCESS );
+    check_error( status );
 }
 
 // --------------------
@@ -125,7 +126,7 @@ void magma_zsetmatrix_async(
         m, n, sizeof(cuDoubleComplex),
         hA_src, lda,
         dB_dst, ldb, stream );
-    assert( status == CUBLAS_STATUS_SUCCESS );
+    check_error( status );
 }
 
 // --------------------
@@ -141,7 +142,7 @@ void magma_zgetmatrix_async(
         m, n, sizeof(cuDoubleComplex),
         dA_src, lda,
         hB_dst, ldb, stream );
-    assert( status == CUBLAS_STATUS_SUCCESS );
+    check_error( status );
 }
 
 // --------------------

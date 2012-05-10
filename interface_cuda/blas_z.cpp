@@ -14,6 +14,7 @@
 #include <assert.h>
 
 #include "magma.h"
+#include "error.h"
 
 #ifdef HAVE_CUBLAS
 

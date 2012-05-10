@@ -13,6 +13,7 @@
 #include <assert.h>
 
 #include "common_magma.h"
+#include "error.h"
 
 #ifdef HAVE_CUBLAS
 
@@ -43,7 +44,8 @@ void magma_getdevices(
     cudaError_t err;
     int cnt;
     err = cudaGetDeviceCount( &cnt );
-    assert( err == cudaSuccess );
+    check_error( err );
+    
     cnt = min( cnt, size );
     for( int i = 0; i < cnt; ++i ) {
         devices[i] = i;
@@ -57,7 +59,7 @@ void magma_getdevice( magma_device_t* device )
 {
     cudaError_t err;
     err = cudaGetDevice( device );
-    assert( err == cudaSuccess );
+    check_error( err );
 }
 
 // --------------------
@@ -66,7 +68,7 @@ void magma_setdevice( magma_device_t device )
 {
     cudaError_t err;
     err = cudaSetDevice( device );
-    assert( err == cudaSuccess );
+    check_error( err );
 }
 
 // --------------------
@@ -75,7 +77,7 @@ void magma_device_sync()
 {
     cudaError_t err;
     err = cudaDeviceSynchronize();
-    assert( err == cudaSuccess );
+    check_error( err );
 }
 
 
@@ -94,7 +96,7 @@ void magma_queue_create( /*magma_device_t device,*/ magma_queue_t* queuePtr )
     //stat = cublasCreate( queuePtr );
     err  = cudaStreamCreate( queuePtr );  //&stream );
     //stat = cublasSetStream( *queuePtr, stream );
-    assert( err == cudaSuccess );
+    check_error( err );
 }
 
 // --------------------
@@ -107,7 +109,7 @@ void magma_queue_destroy( magma_queue_t queue )
     //stat = cublasGetStream( queue, &stream );
     err  = cudaStreamDestroy( queue );  //stream );
     //stat = cublasDestroy( queue );
-    assert( err == cudaSuccess );
+    check_error( err );
 }
 
 // --------------------
@@ -119,7 +121,7 @@ void magma_queue_sync( magma_queue_t queue )
     cudaError_t    err;
     //stat = cublasGetStream( queue, &stream );
     err  = cudaStreamSynchronize( queue );  //stream );
-    assert( err == cudaSuccess );
+    check_error( err );
 }
 
 
@@ -131,7 +133,7 @@ void magma_event_create( magma_event_t* event )
 {
     cudaError_t err;
     err = cudaEventCreate( event );
-    assert( err == cudaSuccess );
+    check_error( err );
 }
 
 // --------------------
@@ -140,7 +142,7 @@ void magma_event_destroy( magma_event_t event )
 {
     cudaError_t err;
     err = cudaEventDestroy( event );
-    assert( err == cudaSuccess );
+    check_error( err );
 }
 
 // --------------------
@@ -149,7 +151,7 @@ void magma_event_record( magma_event_t event, magma_queue_t queue )
 {
     cudaError_t err;
     err = cudaEventRecord( event );
-    assert( err == cudaSuccess );
+    check_error( err );
 }
 
 // --------------------
@@ -159,7 +161,7 @@ void magma_event_sync( magma_event_t event )
 {
     cudaError_t err;
     err = cudaEventSynchronize( event );
-    assert( err == cudaSuccess );
+    check_error( err );
 }
 
 // --------------------
@@ -169,7 +171,7 @@ void magma_queue_wait_event( magma_queue_t queue, magma_event_t event )
 {
     cudaError_t err;
     err = cudaStreamWaitEvent( queue, event, 0 );
-    assert( err == cudaSuccess );
+    check_error( err );
 }
 
 #endif // HAVE_CUBLAS
