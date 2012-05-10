@@ -44,8 +44,8 @@ magmablas_zgetmatrix_transpose( int m, int n,
     }
 
     static cudaStream_t stream[2];
-    cudaStreamCreate(&stream[0]);
-    cudaStreamCreate(&stream[1]);
+    magma_queue_create( &stream[0] );
+    magma_queue_create( &stream[1] );
 
     for(i=0; i<n; i+=nb){
        /* Move data from GPU to CPU using 2 buffers; 1st transpose the data on the GPU */
@@ -59,8 +59,8 @@ magmablas_zgetmatrix_transpose( int m, int n,
        j++;
     }
 
-    cudaStreamDestroy( stream[0] );
-    cudaStreamDestroy( stream[1] );
+    magma_queue_destroy( stream[0] );
+    magma_queue_destroy( stream[1] );
 }
 
 //===========================================================================
@@ -91,9 +91,9 @@ magmablas_zgetmatrix_transpose2( int m, int n,
        /* Move data from GPU to CPU using 2 buffers; 1st transpose the data on the GPU */
        k = (i/nb)%num_gpus;
        ib   = min(n-i, nb);
-       cudaSetDevice(k);
+       magma_setdevice(k);
 
-       //cudaStreamSynchronize(stream[k][j[k]%2]);
+       //magma_queue_sync( stream[k][j[k]%2] );
        //magmablas_ztranspose2( dB[k] + (j[k]%2)*nb*lddb, lddb, 
        //                       dat[k]+i/(nb*num_gpus)*nb, ldda[k], ib, m);
        magmablas_ztranspose2s(dB[k] + (j[k]%2)*nb*lddb, lddb,

@@ -1564,7 +1564,7 @@ magmablas_zhemv_200_mgpu_32_offset( char uplo, magma_int_t n,
         magma_int_t i = 0;
         for(i=0; i<num_gpus; i++)
         {
-             cudaSetDevice(i);
+             magma_setdevice(i);
              magmablasSetKernelStream(stream[i][0]);
 
              magma_int_t the_chosen_block_id = offset / 32; 
@@ -1658,7 +1658,7 @@ magmablas_zhemv2_200_mgpu_32_offset( char uplo, magma_int_t n,
         magma_int_t i = 0;
         for(i=0; i<num_gpus; i++)
         {
-             cudaSetDevice(i);
+             magma_setdevice(i);
             // magmablasSetKernelStream(stream[i][0]);
 
              magma_int_t the_chosen_block_id = offset / 32; 

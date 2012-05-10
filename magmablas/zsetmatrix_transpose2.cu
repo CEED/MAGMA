@@ -41,14 +41,14 @@ magmablas_zsetmatrix_transpose3(
     }
     
     for( d=0; d<num_gpus; d++ ) {
-      cudaSetDevice(d);
-      cudaStreamCreate(&stream[d][0]);
-      cudaStreamCreate(&stream[d][1]);
+      magma_setdevice(d);
+      magma_queue_create( &stream[d][0] );
+      magma_queue_create( &stream[d][1] );
     }
 
     /* Move data from CPU to GPU in the first panel in the dB buffer */
     for( d=0; d<num_gpus; d++ ) {
-      cudaSetDevice(d);
+      magma_setdevice(d);
       i  = d * nb;
       ib = min(n-i, nb);
 
@@ -63,7 +63,7 @@ magmablas_zsetmatrix_transpose3(
        /* Move data from CPU to GPU in the second panel in the dB buffer */
        d       = j%num_gpus;
        j_local = j/num_gpus;
-       cudaSetDevice(d);
+       magma_setdevice(d);
 
 
        ib = min(n-i, nb);
@@ -76,7 +76,7 @@ magmablas_zsetmatrix_transpose3(
           and transpose it directly into the dat matrix                  */
        j_local = (j-num_gpus)/num_gpus;
        //printf( " wait for %d-th panel of %d gpu and store in %d:%d\n\n",j_local%2,d,nb*(starti+j_local),nb*(starti+j_local)+nb-1 );
-       cudaStreamSynchronize(stream[d][j_local%2]);
+       magma_queue_sync( stream[d][j_local%2] );
        magmablas_ztranspose2(dat[d]+nb*(starti+j_local), ldda, 
                              dB[d] +(j_local%2)*nb*lddb, lddb, 
                              m, nb);
@@ -90,10 +90,10 @@ magmablas_zsetmatrix_transpose3(
       j_local = (j-num_gpus)/num_gpus;
       ib      = min(n-offset, nb);
 
-      cudaSetDevice(d);
+      magma_setdevice(d);
 
       //printf( " wait for %d-th panel of %d gpu and store in %d:%d ((%d+%d)*%d)\n\n",j_local%2,d,nb*(starti+j_local),nb*(starti+j_local)+ib-1,starti,j_local,nb );
-      cudaStreamSynchronize(stream[d][j_local%2]);
+      magma_queue_sync( stream[d][j_local%2] );
       magmablas_ztranspose2(dat[d]+nb*(starti+j_local), ldda, 
                             dB[d] +(j_local%2)*nb*lddb, lddb, 
                             m, ib);
@@ -103,9 +103,9 @@ magmablas_zsetmatrix_transpose3(
 
     
     for( d=0; d<num_gpus; d++ ) {
-      cudaSetDevice(d);
-      cudaStreamDestroy( stream[d][0] );
-      cudaStreamDestroy( stream[d][1] );
+      magma_setdevice(d);
+      magma_queue_destroy( stream[d][0] );
+      magma_queue_destroy( stream[d][1] );
     }
     
 }

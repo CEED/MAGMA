@@ -41,14 +41,14 @@ magmablas_zgetmatrix_transpose3(
     }
     
     for( d=0; d<num_gpus; d++ ) {
-      cudaSetDevice(d);
-      cudaStreamCreate(&stream[d][0]);
-      cudaStreamCreate(&stream[d][1]);
+      magma_setdevice(d);
+      magma_queue_create( &stream[d][0] );
+      magma_queue_create( &stream[d][1] );
     }
     
 
     for(d=0; d<num_gpus; d++ ) {
-       cudaSetDevice(d);
+       magma_setdevice(d);
        i  = nb*d;
        ib = min(n-i, nb);
 
@@ -63,7 +63,7 @@ magmablas_zgetmatrix_transpose3(
 
     for(i=num_gpus*nb; i<n; i+=nb){
        d = j%num_gpus;
-       cudaSetDevice(d);
+       magma_setdevice(d);
 
        ib = min(n-i, nb);
 
@@ -79,24 +79,24 @@ magmablas_zgetmatrix_transpose3(
 
        /* wait for the previous tile */
        j_local = (j-num_gpus)/num_gpus;
-       cudaStreamSynchronize(stream[d][j_local%2]);
+       magma_queue_sync( stream[d][j_local%2] );
        j++;
     }
 
     for( i=0; i<num_gpus; i++ ) {
        d = j%num_gpus;
-       cudaSetDevice(d);
+       magma_setdevice(d);
 
        j_local = (j-num_gpus)/num_gpus;
-       cudaStreamSynchronize(stream[d][j_local%2]);
+       magma_queue_sync( stream[d][j_local%2] );
        j++;
     }
 
     
     for( d=0; d<num_gpus; d++ ) {
-      cudaSetDevice(d);
-      cudaStreamDestroy( stream[d][0] );
-      cudaStreamDestroy( stream[d][1] );
+      magma_setdevice(d);
+      magma_queue_destroy( stream[d][0] );
+      magma_queue_destroy( stream[d][1] );
     }
     
 }

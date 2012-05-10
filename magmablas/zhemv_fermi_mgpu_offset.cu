@@ -1082,7 +1082,7 @@ magmablas_zhemv_200_mgpu_offset( char uplo, magma_int_t n,
         magma_int_t i = 0;
         for(i=0; i<num_gpus; i++)
         {
-             cudaSetDevice(i);
+             magma_setdevice(i);
              magmablasSetKernelStream(stream[i][0]);
 
              
@@ -1183,7 +1183,7 @@ magmablas_zhemv2_200_mgpu_offset( char uplo, magma_int_t n,
         magma_int_t i = 0; 
         for(i=0; i<num_gpus; i++)
         {
-             cudaSetDevice(i);
+             magma_setdevice(i);
              
 
              

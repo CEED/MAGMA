@@ -971,7 +971,7 @@ magmablas_zhemv_200_mgpu_32( char uplo, magma_int_t n,
         magma_int_t i = 0;
         for(i=0; i<num_gpus; i++)
         {
-             cudaSetDevice(i);
+             magma_setdevice(i);
              magmablas_zhemv_200_L_mgpu_32(n, alpha, A[i], lda, X[i], incx, beta, Y[i], incy, work[i], i, num_gpus, nb);     
         }
     }

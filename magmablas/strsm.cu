@@ -17,7 +17,7 @@
 #define b_copy();        dim3 dimBlock((M>=MAX_THREAD_PER_BLOCK)?MAX_THREAD_PER_BLOCK:(WARP_SIZE*((M/WARP_SIZE)+(M%WARP_SIZE!=0))), 1);\
                                         dim3 dimGrid(M/dimBlock.x+(M%dimBlock.x!=0), N);\
                                         b_copy_kernel<<< dimGrid, dimBlock, 0, magma_stream >>>(M, N, b, ldb, d_x, M);\
-                                        cudaDeviceSynchronize();
+                                        magma_device_sync();
 
 #define MAX_THREAD_PER_BLOCK 512
 #define WARP_SIZE 32
