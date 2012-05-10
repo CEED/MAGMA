@@ -103,6 +103,10 @@ sub MakeRelease
     $script .= " s/November 2011/$date/;";
     myCmd("find . -type f -exec perl -pi -e '$script' {} \\;");
     
+    # Change version in pkgconfig
+    $script = "s/Version: [0-9.]+/Version: $numversion/;";
+    myCmd("perl -pi -e '$script' lib/pkgconfig/magma.pc");
+    
     # Precision Generation
     print "Generate the different precisions\n";
     myCmd("touch make.inc");
