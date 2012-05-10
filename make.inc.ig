@@ -2,7 +2,7 @@
 #   -- MAGMA (version 1.1) --
 #      Univ. of Tennessee, Knoxville
 #      Univ. of California, Berkeley
-#      Univ. of	Colorado, Denver
+#      Univ. of Colorado, Denver
 #      November 2011
 #//////////////////////////////////////////////////////////////////////////////
 
@@ -25,11 +25,12 @@
 # numactl --interleave=0-7 ./testing_sgetrf
 
 #
-# GPU_TARGET specifies for which GPU you want to compile MAGMA
-#      0: Tesla Family
-#      1: Fermi Family
-#
-GPU_TARGET = 1
+# GPU_TARGET specifies for which GPU you want to compile MAGMA:
+#     "Tesla" (NVIDIA compute capability 1.x cards)
+#     "Fermi" (NVIDIA compute capability 2.x cards)
+# See http://developer.nvidia.com/cuda-gpus
+
+GPU_TARGET = Fermi
 
 CC        = gcc
 NVCC      = nvcc

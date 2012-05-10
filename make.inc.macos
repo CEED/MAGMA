@@ -2,18 +2,19 @@
 #   -- MAGMA (version 1.1) --
 #      Univ. of Tennessee, Knoxville
 #      Univ. of California, Berkeley
-#      Univ. of	Colorado, Denver
+#      Univ. of Colorado, Denver
 #      November 2011
 #
 #      Contributed by: Massimiliano Fatica (NVIDIA)
 #//////////////////////////////////////////////////////////////////////////////
 
 #
-# GPU_TARGET specifies for which GPU you want to compile MAGMA
-#      0: Tesla family
-#      1: Fermi Family
-#
-GPU_TARGET = 0
+# GPU_TARGET specifies for which GPU you want to compile MAGMA:
+#     "Tesla" (NVIDIA compute capability 1.x cards)
+#     "Fermi" (NVIDIA compute capability 2.x cards)
+# See http://developer.nvidia.com/cuda-gpus
+
+GPU_TARGET = Tesla
 
 CC        = gcc
 NVCC      = nvcc
@@ -24,6 +25,7 @@ ARCHFLAGS = cr
 RANLIB    = ranlib
 
 # add -m32 to compile 32-bit.
+# add -DNDEBUG to disable asserts and certain error checks.
 OPTS      = -m32 -O3 -DADD_
 FOPTS     = -m32 -O3 -DADD_ -x f95-cpp-input
 NVOPTS    = -m32 -DADD_ --compiler-options -fno-strict-aliasing -DUNIX -O3 

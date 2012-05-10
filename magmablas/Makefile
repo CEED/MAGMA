@@ -43,9 +43,9 @@ ZSRC  = \
 	ssyr2k.cu	\
 
 # Add card-specific versions that need precisions generated
-ifeq (${GPU_TARGET}, 0)
+ifeq (${GPU_TARGET}, Tesla)
 ZSRC += csymv_tesla.cu
-else ifeq (${GPU_TARGET}, 1)
+else ifeq (${GPU_TARGET}, Fermi)
 ZSRC += zhemv_fermi.cu \
 	zsymv_fermi.cu
 endif
@@ -101,10 +101,10 @@ ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
 	dgemv_MLU.cu	\
 	stream.cu	\
 
-ifeq (${GPU_TARGET}, 0)
+ifeq (${GPU_TARGET}, Telsa)
     ALLSRC += $(TESLASRC)
     GPUOPT  = ${TESLAOPT}
-else ifeq (${GPU_TARGET}, 1)
+else ifeq (${GPU_TARGET}, Fermi)
     ALLSRC += $(FERMISRC)
     GPUOPT  = ${FERMIOPT}
 endif
