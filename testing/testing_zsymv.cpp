@@ -110,15 +110,15 @@ int main(int argc, char **argv)
         /* =====================================================================
            Performs operation using MAGMA
            =================================================================== */
-        cublasSetMatrix( m, m, sizeof( cuDoubleComplex ), A, LDA,  dA, lda  );
-        cublasSetVector( m,    sizeof( cuDoubleComplex ), X, incx, dX, incx );
-        cublasSetVector( m,    sizeof( cuDoubleComplex ), Y, incx, dY, incx );
+        magma_zsetmatrix( m, m, A, LDA, dA, lda );
+        magma_zsetvector( m, X, incx, dX, incx );
+        magma_zsetvector( m, Y, incx, dY, incx );
 
         start = get_current_time();
         magmablas_zsymv( uplo, m, alpha, dA, lda, dX, incx, beta, dY, incx );
         end = get_current_time();
         
-        cublasGetVector( m, sizeof( cuDoubleComplex ), dY, incx, Ymagma, incx );
+        magma_zgetvector( m, dY, incx, Ymagma, incx );
         
         magma_perf = flops /  GetTimerValue(start,end);
         printf(     "%11.2f", magma_perf );

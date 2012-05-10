@@ -73,8 +73,8 @@ int main( int argc, char** argv)
     printf( "\nNote: ranges use Python notation,\n"
             "i.e., A[i:j] is A[ i, i+1, ..., j-1 ], excluding A[j].\n\n" );
     for( int t = 0; t < ntest; ++t ) {
-        cublasSetMatrix( n, n, sizeof(cuDoubleComplex), hA, lda, dA, lda );
-        cublasSetMatrix( n, n, sizeof(cuDoubleComplex), hB, lda, dB, lda );
+        magma_zsetmatrix( n, n, hA, lda, dA, lda );
+        magma_zsetmatrix( n, n, hB, lda, dB, lda );
         
         // copy submatrix
         int i1 = TESTS_I1[ t ];
@@ -88,7 +88,7 @@ int main( int argc, char** argv)
         // verify result
         int bad_copies = 0;
         int overwrites = 0;
-        cublasGetMatrix( n, n, sizeof(cuDoubleComplex), dB, lda, hR, lda );
+        magma_zgetmatrix( n, n, dB, lda, hR, lda );
         
         for( int j = 0; j < n; ++j ) {
             for( int i = 0; i < n; ++i ) {
@@ -150,7 +150,7 @@ int main( int argc, char** argv)
         int n2 = lda*n;
         lapackf77_zlarnv( &ione, ISEED, &n2, hA );
         lapackf77_zlaset( "F", &n, &n, &c_zero, &c_zero, hB, &lda );
-        cublasSetMatrix( n, n, sizeof(cuDoubleComplex), hA, lda, dA, lda );
+        magma_zsetmatrix( n, n, hA, lda, dA, lda );
         magmablas_zlaset( 'F', n, n, /*c_zero,*/ dB, lda );
         
         start = get_current_time();
@@ -158,7 +158,7 @@ int main( int argc, char** argv)
         end = get_current_time();
         
         // verify copy
-        cublasGetMatrix( n, n, sizeof(cuDoubleComplex), dB, lda, hB, lda );
+        magma_zgetmatrix( n, n, dB, lda, hB, lda );
         for( int j = 0; j < n; ++j ) {
             for( int i = 0; i < n; ++i ) {
                 if ( not MAGMA_Z_EQUAL( hA[i + j*lda], hB[i + j*lda] )) {

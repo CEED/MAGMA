@@ -110,8 +110,8 @@ int main(int argc, char **argv)
         size = ldb * NRHS ;
         lapackf77_zlarnv( &ione, ISEED, &size, h_B );
       
-        cublasSetMatrix( N, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, lda );
-        cublasSetMatrix( N, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, ldb );
+        magma_zsetmatrix( N, N,    h_A, lda, d_A, lda );
+        magma_zsetmatrix( N, NRHS, h_B, ldb, d_B, ldb );
     
         printf("%5d  ", N); fflush(stdout);
 
@@ -129,7 +129,7 @@ int main(int argc, char **argv)
         //=====================================================================
         //                 Error Computation 
         //=====================================================================
-        cublasGetMatrix( N, NRHS, sizeof(cuDoubleComplex), d_X, ldx, h_X, ldx ) ;
+        magma_zgetmatrix( N, NRHS, d_X, ldx, h_X, ldx ) ;
 
         Anorm = lapackf77_zlanhe( "I", uplo, &N, h_A, &N, h_workd);
         blasf77_zhemm( "L", uplo, &N, &NRHS, 
@@ -141,7 +141,7 @@ int main(int argc, char **argv)
         //=====================================================================
         //                 Double Precision Factor 
         //=====================================================================
-        cublasSetMatrix( N, N, sizeof(cuDoubleComplex), h_A, lda, d_A, lda );
+        magma_zsetmatrix( N, N, h_A, lda, d_A, lda );
 
         start = get_current_time();
         magma_zpotrf_gpu(uplo[0], N, d_A, lda, &info);
@@ -155,8 +155,8 @@ int main(int argc, char **argv)
         //=====================================================================
         //                 Double Precision Solve 
         //=====================================================================
-        cublasSetMatrix( N, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, lda );
-        cublasSetMatrix( N, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, ldb );
+        magma_zsetmatrix( N, N,    h_A, lda, d_A, lda );
+        magma_zsetmatrix( N, NRHS, h_B, ldb, d_B, ldb );
     
         start = get_current_time();
         magma_zpotrf_gpu(uplo[0], N, d_A, lda, &info);
@@ -174,10 +174,10 @@ int main(int argc, char **argv)
         //=====================================================================
         d_As = d_WORKS;
         d_Bs = d_WORKS + lda*N;
-        cublasSetMatrix( N, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, lda );
-        cublasSetMatrix( N, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, ldb );
-        magmablas_zlag2c(N, N,    d_A, lda, d_As, N, &info ); 
-        magmablas_zlag2c(N, NRHS, d_B, ldb, d_Bs, N, &info );
+        magma_zsetmatrix( N, N,    h_A, lda, d_A, lda );
+        magma_zsetmatrix( N, NRHS, h_B, ldb, d_B, ldb );
+        magmablas_zlag2c( N, N,    d_A, lda, d_As, N, &info ); 
+        magmablas_zlag2c( N, NRHS, d_B, ldb, d_Bs, N, &info );
 
         start = get_current_time();
         magma_cpotrf_gpu(uplo[0], N, d_As, N, &info);

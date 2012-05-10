@@ -215,8 +215,9 @@ int main( int argc, char** argv)
                   k = (j/nb)%num_gpus;
                   cudaSetDevice(k);
                   nk = min(nb, N-j);
-                  cublasSetMatrix( M, nk, sizeof(cuDoubleComplex), h_R+j*lda, lda,
-                                   d_lA[k]+j/(nb*num_gpus)*nb*ldda, ldda);
+                  magma_zsetmatrix( M, nk,
+                                    h_R+j*lda,                       lda,
+                                    d_lA[k]+j/(nb*num_gpus)*nb*ldda, ldda );
                 }
                 cudaSetDevice(0);
 
@@ -243,9 +244,9 @@ int main( int argc, char** argv)
                   k = (j/nb)%num_gpus;
                   cudaSetDevice(k);
                   nk = min(nb, N-j);
-                  cublasGetMatrix( M, nk, sizeof(cuDoubleComplex),
-                                   d_lA[k]+j/(nb*num_gpus)*nb*ldda, ldda,
-                                   h_R+j*lda, lda);
+                  magma_zgetmatrix( M, nk,
+                                    d_lA[k]+j/(nb*num_gpus)*nb*ldda, ldda,
+                                    h_R+j*lda,                       lda );
                 }
                 cudaSetDevice(0);
 

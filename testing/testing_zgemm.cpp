@@ -197,9 +197,9 @@ int main( int argc, char** argv)
         /* =====================================================================
            Performs operation using MAGMA-BLAS
            =================================================================== */
-        cublasSetMatrix( Am, An, sizeof( cuDoubleComplex ), h_A, lda, d_A, ldda );
-        cublasSetMatrix( Bm, Bn, sizeof( cuDoubleComplex ), h_B, ldb, d_B, lddb );
-        cublasSetMatrix( M,  N,  sizeof( cuDoubleComplex ), h_C, ldc, d_C, lddc );
+        magma_zsetmatrix( Am, An, h_A, lda, d_A, ldda );
+        magma_zsetmatrix( Bm, Bn, h_B, ldb, d_B, lddb );
+        magma_zsetmatrix( M, N, h_C, ldc, d_C, lddc );
 
         start = get_current_time();
         magmablas_zgemm( transA, transB, M, N, K, 
@@ -209,12 +209,12 @@ int main( int argc, char** argv)
         end = get_current_time();
         magma_perf = flops / GetTimerValue(start, end);
         
-        cublasGetMatrix( M, N, sizeof( cuDoubleComplex ), d_C, lddc, h_C2, ldc );
+        magma_zgetmatrix( M, N, d_C, lddc, h_C2, ldc );
         
         /* =====================================================================
            Performs operation using CUDA-BLAS
            =================================================================== */
-        cublasSetMatrix( M, N, sizeof( cuDoubleComplex ), h_C, ldc, d_C, lddc );
+        magma_zsetmatrix( M, N, h_C, ldc, d_C, lddc );
         
         start = get_current_time();
         cublasZgemm( transA, transB, M, N, K, 
@@ -224,7 +224,7 @@ int main( int argc, char** argv)
         end = get_current_time();
         cuda_perf = flops / GetTimerValue(start, end);
         
-        cublasGetMatrix( M, N, sizeof( cuDoubleComplex ), d_C, lddc, h_C, ldc );
+        magma_zgetmatrix( M, N, d_C, lddc, h_C, ldc );
         
         /* =====================================================================
            Error Computation and Performance Compariosn

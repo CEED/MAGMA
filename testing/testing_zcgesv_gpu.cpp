@@ -117,8 +117,8 @@ int main(int argc , char **argv)
 
         printf("%5d  ",N);
 
-        cublasSetMatrix( N, N,    sizeof( cuDoubleComplex ), h_A, lda, d_A, ldda );
-        cublasSetMatrix( N, NRHS, sizeof( cuDoubleComplex ), h_B, ldb, d_B, lddb );
+        magma_zsetmatrix( N, N,    h_A, lda, d_A, ldda );
+        magma_zsetmatrix( N, NRHS, h_B, ldb, d_B, lddb );
 
         //=====================================================================
         //              MIXED - GPU
@@ -136,7 +136,7 @@ int main(int argc , char **argv)
         //=====================================================================
         //              ERROR DP vs MIXED  - GPU
         //=====================================================================
-        cublasGetMatrix( N, NRHS, sizeof( cuDoubleComplex ), d_X, lddx, h_X, ldx );
+        magma_zgetmatrix( N, NRHS, d_X, lddx, h_X, ldx );
 
         Anorm = lapackf77_zlange("I", &N, &N, h_A, &lda, h_workd);
         blasf77_zgemm( trans_str, MagmaNoTransStr, 
@@ -149,7 +149,7 @@ int main(int argc , char **argv)
         //=====================================================================
         //                 Double Precision Factor 
         //=====================================================================
-        cublasSetMatrix( N, N, sizeof(cuDoubleComplex), h_A, lda, d_A, ldda );
+        magma_zsetmatrix( N, N, h_A, lda, d_A, ldda );
         
         start = get_current_time();
         magma_zgetrf_gpu(N, N, d_A, ldda, h_ipiv, &info);
@@ -163,8 +163,8 @@ int main(int argc , char **argv)
         //=====================================================================
         //                 Double Precision Solve 
         //=====================================================================
-        cublasSetMatrix( N, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, ldda );
-        cublasSetMatrix( N, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, lddb );
+        magma_zsetmatrix( N, N,    h_A, lda, d_A, ldda );
+        magma_zsetmatrix( N, NRHS, h_B, ldb, d_B, lddb );
 
         start = get_current_time();
         magma_zgetrf_gpu(N, N, d_A, ldda, h_ipiv, &info);
@@ -182,10 +182,10 @@ int main(int argc , char **argv)
         //=====================================================================
         d_As = d_WORKS;
         d_Bs = d_WORKS + ldda*N;
-        cublasSetMatrix( N, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, ldda );
-        cublasSetMatrix( N, NRHS, sizeof(cuDoubleComplex), h_B, ldb, d_B, lddb );
-        magmablas_zlag2c(N, N,    d_A, ldda, d_As, ldda, &info ); 
-        magmablas_zlag2c(N, NRHS, d_B, lddb, d_Bs, lddb, &info );
+        magma_zsetmatrix( N, N,    h_A, lda,  d_A,  ldda );
+        magma_zsetmatrix( N, NRHS, h_B, ldb,  d_B,  lddb );
+        magmablas_zlag2c( N, N,    d_A, ldda, d_As, ldda, &info ); 
+        magmablas_zlag2c( N, NRHS, d_B, lddb, d_Bs, lddb, &info );
 
         start = get_current_time();
         magma_cgetrf_gpu(N, N, d_As, ldda, h_ipiv, &info);

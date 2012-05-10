@@ -144,8 +144,8 @@ int main( int argc, char** argv)
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-        cublasSetMatrix( M, N,    sizeof(cuDoubleComplex), h_A, lda, d_A, ldda);
-        cublasSetMatrix( M, nrhs, sizeof(cuDoubleComplex), h_B, ldb, d_B, lddb);
+        magma_zsetmatrix( M, N,    h_A, lda, d_A, ldda );
+        magma_zsetmatrix( M, nrhs, h_B, ldb, d_B, lddb );
 
         start = get_current_time();
         magma_zgels_gpu( MagmaNoTrans, M, N, nrhs, d_A, ldda, 
@@ -157,7 +157,7 @@ int main( int argc, char** argv)
         gpu_perf = flops / GetTimerValue(start, end);
 
         // Get the solution in h_X
-        cublasGetMatrix(N, nrhs, sizeof(cuDoubleComplex), d_B, lddb, h_X, ldb);
+        magma_zgetmatrix( N, nrhs, d_B, lddb, h_X, ldb );
 
         // compute the residual
         blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &M, &nrhs, &N, 

@@ -149,8 +149,9 @@ int main( int argc, char** argv)
               k = (j/nb)%num_gpus;
               cudaSetDevice(k);
               nk = min(nb, N-j);
-              cublasSetMatrix( N, nk, sizeof(cuDoubleComplex), h_A+j*lda, lda,
-                               d_lA[k]+j/(nb*num_gpus)*nb*ldda, ldda);
+              magma_zsetmatrix( N, nk,
+                                h_A+j*lda,                       lda,
+                                d_lA[k]+j/(nb*num_gpus)*nb*ldda, ldda );
             }
           } else {
             for(j=0; j<N; j+=nb){
@@ -164,8 +165,9 @@ int main( int argc, char** argv)
 
               cudaSetDevice(k);
               nk = min(nb, N-j);
-              cublasSetMatrix( nk, N, sizeof(cuDoubleComplex), h_A+j, lda,
-                               d_lA[k]+j/(nb*num_gpus)*nb, ldn_local);
+              magma_zsetmatrix( nk, N,
+                                h_A+j,                      lda,
+                                d_lA[k]+j/(nb*num_gpus)*nb, ldn_local );
             }
           }
           cudaSetDevice(0);
@@ -189,9 +191,9 @@ int main( int argc, char** argv)
               k = (j/nb)%num_gpus;
               cudaSetDevice(k);
               nk = min(nb, N-j);
-              cublasGetMatrix( N, nk, sizeof(cuDoubleComplex),
-                               d_lA[k]+j/(nb*num_gpus)*nb*ldda, ldda,
-                               h_R+j*lda, lda);
+              magma_zgetmatrix( N, nk,
+                                d_lA[k]+j/(nb*num_gpus)*nb*ldda, ldda,
+                                h_R+j*lda,                       lda );
                 }
           } else {
             for(j=0; j<N; j+=nb){
@@ -205,9 +207,9 @@ int main( int argc, char** argv)
 
               cudaSetDevice(k);
               nk = min(nb, N-j);
-              cublasGetMatrix( nk, N, sizeof(cuDoubleComplex), 
-                               d_lA[k]+j/(nb*num_gpus)*nb, ldn_local,
-                                           h_R+j, lda );
+              magma_zgetmatrix( nk, N,
+                                d_lA[k]+j/(nb*num_gpus)*nb, ldn_local,
+                                h_R+j,                      lda );
             }
           }
           cudaSetDevice(0);

@@ -119,7 +119,7 @@ int main( int argc, char** argv)
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-        cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_R, lda, d_A, lda);
+        magma_zsetmatrix( M, N, h_R, lda, d_A, lda );
         start = get_current_time();
         magma_zgelqf_gpu( M, N, d_A, lda, tau, h_work, lwork, &info);
         end = get_current_time();
@@ -142,7 +142,7 @@ int main( int argc, char** argv)
         /* =====================================================================
            Check the result compared to LAPACK
            =================================================================== */
-        cublasGetMatrix( M, N, sizeof(cuDoubleComplex), d_A, lda, h_R, lda);
+        magma_zgetmatrix( M, N, d_A, lda, h_R, lda );
         matnorm = lapackf77_zlange("f", &M, &N, h_A, &lda, work);
         blasf77_zaxpy(&n2, &c_neg_one, h_A, &ione, h_R, &ione);
 

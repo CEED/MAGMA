@@ -145,9 +145,9 @@ int main(int argc, char **argv)
         /* =====================================================================
            Performs operation using CUDA-BLAS
            =================================================================== */
-        cublasSetMatrix( M,  N, sizeof( cuDoubleComplex ), A, lda,  dA, lda  );
-        cublasSetVector( Xm,    sizeof( cuDoubleComplex ), X, incx, dX, incx );
-        cublasSetVector( Ym,    sizeof( cuDoubleComplex ), Y, incy, dY, incy );
+        magma_zsetmatrix( M, N, A, lda, dA, lda );
+        magma_zsetvector( Xm, X, incx, dX, incx );
+        magma_zsetvector( Ym, Y, incy, dY, incy );
 
         /*
          * Cublas Version
@@ -156,7 +156,7 @@ int main(int argc, char **argv)
         cublasZgemv( trans, M, N, alpha, dA, lda, dX, incx, beta, dY, incy );
         end = get_current_time();
         
-        cublasGetVector( Ym, sizeof( cuDoubleComplex ), dY, incy, Ycublas, incy );
+        magma_zgetvector( Ym, dY, incy, Ycublas, incy );
         
         cuda_perf = flops / GetTimerValue(start, end);
         printf(     "%11.2f", cuda_perf );
@@ -165,13 +165,13 @@ int main(int argc, char **argv)
         /*
          * Magma Version
          */
-        cublasSetVector( Ym, sizeof( cuDoubleComplex ), Y, incy, dY, incy );
+        magma_zsetvector( Ym, Y, incy, dY, incy );
         
         start = get_current_time();
         magmablas_zgemv( trans, M, N, alpha, dA, lda, dX, incx, beta, dY, incy );
         end = get_current_time();
         
-        cublasGetVector( Ym, sizeof( cuDoubleComplex ), dY, incx, Ymagma, incx );
+        magma_zgetvector( Ym, dY, incx, Ymagma, incx );
         
         magma_perf = flops / GetTimerValue(start, end);
         printf(     "%11.2f", magma_perf );

@@ -149,7 +149,7 @@ int main( int argc, char** argv)
                     h_A[i*lda+j] = cuConj(h_A[j*lda+i]);
             }
         }
-        cublasSetMatrix(N, N, sizeof(cuDoubleComplex), h_A, lda, d_R, lda);
+        magma_zsetmatrix( N, N, h_A, lda, d_R, lda );
 
         /* ====================================================================
            Performs operation using MAGMA
@@ -173,8 +173,8 @@ int main( int argc, char** argv)
            =================================================================== */
         if ( checkres ) {
 
-            cublasGetMatrix(N, N, sizeof(cuDoubleComplex), d_R, lda, h_R, lda);
-            cublasGetMatrix(N, N, sizeof(cuDoubleComplex), d_R, lda, h_Q, lda);
+            magma_zgetmatrix( N, N, d_R, lda, h_R, lda );
+            magma_zgetmatrix( N, N, d_R, lda, h_Q, lda );
             lapackf77_zungtr(uplo, &N, h_Q, &lda, tau, h_work, &lwork, &info);
 
 #if defined(PRECISION_z) || defined(PRECISION_c) 

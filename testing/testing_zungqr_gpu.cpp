@@ -113,9 +113,9 @@ int main( int argc, char** argv)
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
         
-        cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_A, lda, d_A, ldda);
+        magma_zsetmatrix( M, N, h_A, lda, d_A, ldda );
         magma_zgeqrf2_gpu(M, N, d_A, ldda, tau, &info);
-        cublasSetMatrix( M, N, sizeof(cuDoubleComplex), h_A, lda, d_A, ldda);
+        magma_zsetmatrix( M, N, h_A, lda, d_A, ldda );
         
         /* ====================================================================
            Performs operation using MAGMA
@@ -131,7 +131,7 @@ int main( int argc, char** argv)
             printf("Argument %d of magma_zungqr_gpu had an illegal value.\n", -info);
         
         // Get d_A back to the CPU to compare with the CPU result.
-        cublasGetMatrix(M, N, sizeof(cuDoubleComplex), d_A, ldda, h_R, lda);
+        magma_zgetmatrix( M, N, d_A, ldda, h_R, lda );
         
         gpu_perf = flops / GetTimerValue(start,end);
         matnorm = lapackf77_zlange("f", &M, &N, h_A, &lda, work);

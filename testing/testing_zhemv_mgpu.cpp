@@ -307,17 +307,17 @@ int main(int argc, char **argv)
 
     
     
-    cublasSetMatrix( m, m, sizeof( cuDoubleComplex ), A, LDA ,  dA, lda  );
-        cublasSetVector( m,    sizeof( cuDoubleComplex ), Y[0], incx, dYcublas, incx );
+    magma_zsetmatrix( m, m, A, LDA, dA, lda );
+        magma_zsetvector( m, Y[0], incx, dYcublas, incx );
         
         for(i=0; i<num_gpus; i++){
             cudaSetDevice(i);
-            cublasSetVector( m,    sizeof( cuDoubleComplex ), X, incx, dX[i], incx );
-            cublasSetVector( m,    sizeof( cuDoubleComplex ), Y[0], incx, dY[i], incx );
+            magma_zsetvector( m, X, incx, dX[i], incx );
+            magma_zsetvector( m, Y[0], incx, dY[i], incx );
 
 
             blocks    = m / nb + (m % nb != 0);
-            cublasSetMatrix(lda, blocks, sizeof( cuDoubleComplex ), C_work, LDA , dC_work[i], lda);
+            magma_zsetmatrix( lda, blocks, C_work, LDA, dC_work[i], lda );
             
                 fillZero(dC_work[i], lda * blocks);
             //cudaMemset(dC_work[i], 0, sizeof( cuDoubleComplex) * lda * blocks);
@@ -336,7 +336,7 @@ int main(int argc, char **argv)
 
         end = get_current_time();
 
-        cublasGetVector( m, sizeof( cuDoubleComplex ), dYcublas, incx, Ycublas, incx );
+        magma_zgetvector( m, dYcublas, incx, Ycublas, incx );
         
         cuda_perf = flops / GetTimerValue(start,end);
         printf(     "%11.2f", cuda_perf );
@@ -403,7 +403,7 @@ int main(int argc, char **argv)
         for(i=0; i<num_gpus; i++)
         {        
             cudaSetDevice(i);
-            cublasGetVector( m, sizeof( cuDoubleComplex ), dY[i], incx, Y[i], incx );
+            magma_zgetvector( m, dY[i], incx, Y[i], incx );
         }
         cudaSetDevice(0);
 

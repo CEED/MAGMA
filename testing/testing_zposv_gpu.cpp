@@ -128,8 +128,8 @@ int main( int argc, char** argv)
             }
         }
         
-        cublasSetMatrix( N, N,    sizeof( cuDoubleComplex ), h_A, N, d_A, ldda );
-        cublasSetMatrix( N, NRHS, sizeof( cuDoubleComplex ), h_B, N, d_B, lddb );
+        magma_zsetmatrix( N, N,    h_A, N, d_A, ldda );
+        magma_zsetmatrix( N, NRHS, h_B, N, d_B, lddb );
 
         /* ====================================================================
            Performs operation using MAGMA
@@ -145,7 +145,7 @@ int main( int argc, char** argv)
         /* =====================================================================
            Residual
            =================================================================== */
-        cublasGetMatrix( N, NRHS, sizeof( cuDoubleComplex ), d_B, lddb, h_X, ldb );
+        magma_zgetmatrix( N, NRHS, d_B, lddb, h_X, ldb );
         
         Anorm = lapackf77_zlange("I", &N, &N,    h_A, &lda, work);
         Xnorm = lapackf77_zlange("I", &N, &NRHS, h_X, &ldb, work);

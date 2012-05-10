@@ -99,7 +99,7 @@ int main( int argc, char** argv)
         /* ====================================================================
            Performs operation using MAGMA 
            =================================================================== */
-        cublasSetMatrix( N, N, sizeof(cuDoubleComplex), h_A, lda, d_A, ldda);
+        magma_zsetmatrix( N, N, h_A, lda, d_A, ldda );
         
         double *dwork, maxnorm;
         TESTING_DEVALLOC(  dwork, double, size[9] );
@@ -121,7 +121,7 @@ int main( int argc, char** argv)
         
         magma_zpotrf_gpu(uplo[0], N, d_A, ldda, &info);
 
-        cublasSetMatrix( N, N, sizeof(cuDoubleComplex), h_A, lda, d_A, ldda);
+        magma_zsetmatrix( N, N, h_A, lda, d_A, ldda );
               start = get_current_time();
         magma_zpotrf_gpu(uplo[0], N, d_A, ldda, &info);
         end = get_current_time();
@@ -144,7 +144,7 @@ int main( int argc, char** argv)
         /* =====================================================================
            Check the result compared to LAPACK
            =================================================================== */
-        cublasGetMatrix( N, N, sizeof(cuDoubleComplex), d_A, ldda, h_R, lda);
+        magma_zgetmatrix( N, N, d_A, ldda, h_R, lda );
         matnorm = lapackf77_zlange("f", &N, &N, h_A, &lda, work);
         blasf77_zaxpy(&n2, &c_neg_one, h_A, &ione, h_R, &ione);
         printf("%5d    %6.2f         %6.2f        %e\n", 

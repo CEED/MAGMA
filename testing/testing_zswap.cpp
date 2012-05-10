@@ -106,8 +106,8 @@ int main( int argc, char** argv)
     memcpy(h_A4, h_A2, n2 * sizeof(cuDoubleComplex));
 
     /* Initialize the matrix */
-    cublasSetMatrix( N, N, sizeof(cuDoubleComplex), h_A1, lda, d_A1, lda);
-    cublasSetMatrix( N, N, sizeof(cuDoubleComplex), h_A2, lda, d_A2, lda);
+    magma_zsetmatrix( N, N, h_A1, lda, d_A1, lda );
+    magma_zsetmatrix( N, N, h_A2, lda, d_A2, lda );
     
     printf("\n\n");
     printf("  N         CM V1     RM V1    CM V2     RM V2      CM LAP RM      OLD LAP  GFlop/s    \n");
@@ -143,14 +143,14 @@ int main( int argc, char** argv)
               blasf77_zswap( &N, h_A1+lda*j, &ione, h_A2+lda*(ipiv[j]-1), &ione);
             }
         }
-        cublasGetMatrix( N, N, sizeof(cuDoubleComplex), d_A1, N, h_A2, N);
+        magma_zgetmatrix( N, N, d_A1, N, h_A2, N );
         check += diffMatrix( h_A1, h_A2, N, N, N )*1;
 
         /* Column Major */
         memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(cuDoubleComplex));
         memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(cuDoubleComplex));
-        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A3, size[9], d_A1, size[9]);
-        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A4, size[9], d_A2, size[9]);
+        magma_zsetmatrix( size[9], size[9], h_A3, size[9], d_A1, size[9] );
+        magma_zsetmatrix( size[9], size[9], h_A4, size[9], d_A2, size[9] );
 
         start = get_current_time();
         for ( j=0; j<N; j++) {
@@ -166,7 +166,7 @@ int main( int argc, char** argv)
               blasf77_zswap( &N, h_A1+j, &lda, h_A2+(ipiv[j]-1), &lda);
             }
         }
-        cublasGetMatrix( N, N, sizeof(cuDoubleComplex), d_A1, N, h_A2, N);
+        magma_zgetmatrix( N, N, d_A1, N, h_A2, N );
         check += diffMatrix( h_A1, h_A2, N, N, N )*2;
 
         /*
@@ -176,8 +176,8 @@ int main( int argc, char** argv)
         /* Row Major */
         memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(cuDoubleComplex));
         memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(cuDoubleComplex));
-        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A3, size[9], d_A1, size[9]);
-        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A4, size[9], d_A2, size[9]);
+        magma_zsetmatrix( size[9], size[9], h_A3, size[9], d_A1, size[9] );
+        magma_zsetmatrix( size[9], size[9], h_A4, size[9], d_A2, size[9] );
 
         start = get_current_time();
         magmablas_zswapblk( 'R', N, d_A1, lda, d_A2, lda, 1, N, ipiv, 1, 0);
@@ -189,14 +189,14 @@ int main( int argc, char** argv)
               blasf77_zswap( &N, h_A1+lda*j, &ione, h_A2+lda*(ipiv[j]-1), &ione);
             }
         }
-        cublasGetMatrix( N, N, sizeof(cuDoubleComplex), d_A1, N, h_A2, N);
+        magma_zgetmatrix( N, N, d_A1, N, h_A2, N );
         check += diffMatrix( h_A1, h_A2, N, N, N )*4;
 
         /* Column Major */
         memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(cuDoubleComplex));
         memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(cuDoubleComplex));
-        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A3, size[9], d_A1, size[9]);
-        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A4, size[9], d_A2, size[9]);
+        magma_zsetmatrix( size[9], size[9], h_A3, size[9], d_A1, size[9] );
+        magma_zsetmatrix( size[9], size[9], h_A4, size[9], d_A2, size[9] );
 
         start = get_current_time();
         magmablas_zswapblk( 'C', N, d_A1, lda, d_A2, lda, 1, N, ipiv, 1, 0);
@@ -208,7 +208,7 @@ int main( int argc, char** argv)
               blasf77_zswap( &N, h_A1+j, &lda, h_A2+(ipiv[j]-1), &lda);
             }
         }
-        cublasGetMatrix( N, N, sizeof(cuDoubleComplex), d_A1, N, h_A2, N);
+        magma_zgetmatrix( N, N, d_A1, N, h_A2, N );
         check += diffMatrix( h_A1, h_A2, N, N, N )*8;
 
         /*
@@ -217,8 +217,8 @@ int main( int argc, char** argv)
 
         memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(cuDoubleComplex));
         memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(cuDoubleComplex));
-        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A3, size[9], d_A1, size[9]);
-        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A4, size[9], d_A2, size[9]);
+        magma_zsetmatrix( size[9], size[9], h_A3, size[9], d_A1, size[9] );
+        magma_zsetmatrix( size[9], size[9], h_A4, size[9], d_A2, size[9] );
 
         start = get_current_time();
         magmablas_zlaswp( N, d_A1, N, 1, N, ipiv, 1);
@@ -230,14 +230,14 @@ int main( int argc, char** argv)
               blasf77_zswap( &N, h_A1+lda*j, &ione, h_A1+lda*(ipiv[j]-1), &ione);
             }
         }
-        cublasGetMatrix( N, N, sizeof(cuDoubleComplex), d_A1, N, h_A2, N);
+        magma_zgetmatrix( N, N, d_A1, N, h_A2, N );
         check += diffMatrix( h_A1, h_A2, N, N, N )*16;
 
         /* Row Major */
         memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(cuDoubleComplex));
         memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(cuDoubleComplex));
-        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A3, size[9], d_A1, size[9]);
-        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A4, size[9], d_A2, size[9]);
+        magma_zsetmatrix( size[9], size[9], h_A3, size[9], d_A1, size[9] );
+        magma_zsetmatrix( size[9], size[9], h_A4, size[9], d_A2, size[9] );
 
         start = get_current_time();
         magmablas_zlaswpx( N, d_A1, N, 1, 1, N, ipiv, 1);
@@ -249,14 +249,14 @@ int main( int argc, char** argv)
               blasf77_zswap( &N, h_A1+lda*j, &ione, h_A1+lda*(ipiv[j]-1), &ione);
             }
         }
-        cublasGetMatrix( N, N, sizeof(cuDoubleComplex), d_A1, N, h_A2, N);
+        magma_zgetmatrix( N, N, d_A1, N, h_A2, N );
         check += diffMatrix( h_A1, h_A2, N, N, N )*32;
 
         /* Col Major */
         memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(cuDoubleComplex));
         memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(cuDoubleComplex));
-        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A3, size[9], d_A1, size[9]);
-        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A4, size[9], d_A2, size[9]);
+        magma_zsetmatrix( size[9], size[9], h_A3, size[9], d_A1, size[9] );
+        magma_zsetmatrix( size[9], size[9], h_A4, size[9], d_A2, size[9] );
 
         start = get_current_time();
         magmablas_zlaswpx( N, d_A1, lda, N, 1, N, ipiv, 1);
@@ -264,7 +264,7 @@ int main( int argc, char** argv)
         cpu_perf3 = 1.*N*N/(1000000.*GetTimerValue(start,end));
 
         lapackf77_zlaswp( &N, h_A1, &N, &ione, &N, ipiv, &ione);
-        cublasGetMatrix( N, N, sizeof(cuDoubleComplex), d_A1, N, h_A2, N);
+        magma_zgetmatrix( N, N, d_A1, N, h_A2, N );
         check += diffMatrix( h_A1, h_A2, N, N, N )*64;
 
         printf("%5d      %6.2f / %6.2f    %6.2f / %6.2f   %6.2f / %6.2f   %6.2f (%s: %d)\n", 
@@ -276,8 +276,8 @@ int main( int argc, char** argv)
 
         memcpy(h_A1, h_A3, size[9]*size[9] * sizeof(cuDoubleComplex));
         memcpy(h_A2, h_A4, size[9]*size[9] * sizeof(cuDoubleComplex));
-        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A3, size[9], d_A1, size[9]);
-        cublasSetMatrix( size[9], size[9], sizeof(cuDoubleComplex), h_A4, size[9], d_A2, size[9]);
+        magma_zsetmatrix( size[9], size[9], h_A3, size[9], d_A1, size[9] );
+        magma_zsetmatrix( size[9], size[9], h_A4, size[9], d_A2, size[9] );
     }
     
     /* Memory clean up */

@@ -280,7 +280,7 @@ return 0;
 */
  /*
         memset(h_work, 0, lwork*sizeof(cuDoubleComplex));
-        cublasGetMatrix( pn, pn, sizeof(cuDoubleComplex), dT1, ldt, h_work, pn);
+        magma_zgetmatrix( pn, pn, dT1, ldt, h_work, pn );
    trace_file = fopen("AJETE/T", "w");
     for (j = 0; j < pn ; j++) 
           for (i = 0; i < pn ; i++) 

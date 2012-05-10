@@ -151,9 +151,9 @@ int main( int argc, char** argv )
         }
         //printf( "T=" );  magma_zprint( k, k, T, ldt );
         
-        cublasSetMatrix( m,   n,  sizeof(cuDoubleComplex), C, ldc, dC, ldc );
-        cublasSetMatrix( ldv, nv, sizeof(cuDoubleComplex), V, ldv, dV, ldv );
-        cublasSetMatrix( k,   k,  sizeof(cuDoubleComplex), T, ldt, dT, ldt );
+        magma_zsetmatrix( m, n, C, ldc, dC, ldc );
+        magma_zsetmatrix( ldv, nv, V, ldv, dV, ldv );
+        magma_zsetmatrix( k, k, T, ldt, dT, ldt );
         
         lapackf77_zlarfb( side[is], trans[it], direct[id], storev[iv],
                           &m, &n, &k,
@@ -163,7 +163,7 @@ int main( int argc, char** argv )
         magma_zlarfb_gpu( *side[is], *trans[it], *direct[id], *storev[iv],
                           m, n, k,
                           dV, ldv, dT, ldt, dC, ldc, dW, ldw );
-        cublasGetMatrix( m, n, sizeof(cuDoubleComplex), dC, ldc, R, ldc );
+        magma_zgetmatrix( m, n, dC, ldc, R, ldc );
         //printf( "dHC=" );  magma_zprint( m, n, R, ldc );
         
         // compute relative error |HC_magma - HC_lapack| / |HC_lapack|
