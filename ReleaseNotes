@@ -45,6 +45,7 @@ Included are routines for the following algorithms:
     * Add matrix print functions.
     * Make info and return codes consistent.
     * Change GPU_TARGET in make.inc to descriptive name (e.g., Fermi).
+    * Move magma_stream to -lmagmablas to eliminate dependency on -lmagma.
 
  1.1.0 - 11-11-11
     * Fix a bug in [zcsd]geqrf_gpu.cpp and [zcsd]geqrf3_gpu.cpp for n>m
