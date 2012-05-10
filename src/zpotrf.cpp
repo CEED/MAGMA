@@ -27,9 +27,9 @@
 
 // ========================================================================
 // definition of a non-GPU-resident interface to a single GPU
-extern "C" magma_int_t 
-magma_zpotrf_ooc(char uplo, magma_int_t n, 
-                cuDoubleComplex *a, magma_int_t lda, magma_int_t *info);
+//extern "C" magma_int_t 
+//magma_zpotrf_ooc(char uplo, magma_int_t n, 
+//                cuDoubleComplex *a, magma_int_t lda, magma_int_t *info);
 
 // definition of a non-GPU-resident interface to multiple GPUs
 extern "C" magma_int_t
@@ -147,7 +147,8 @@ magma_zpotrf(char uplo, magma_int_t n,
     
     if (MAGMA_SUCCESS != magma_zmalloc( &work, (n)*ldda )) {
         /* alloc failed so call the non-GPU-resident version */
-        return magma_zpotrf_ooc( uplo, n, a, lda, info);
+        return magma_zpotrf2_ooc(num_gpus, uplo, n, a, lda, info);
+        //return magma_zpotrf_ooc( uplo, n, a, lda, info);
     }
 
     static cudaStream_t stream[2];
