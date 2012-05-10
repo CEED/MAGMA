@@ -39,9 +39,7 @@ static int diffMatrix( cuDoubleComplex *A, cuDoubleComplex *B, int m, int n, int
 */
 int main( int argc, char** argv) 
 {
-    cuInit( 0 );
-    cublasInit( );
-    printout_devices( );
+    TESTING_CUDA_INIT();
 
     cuDoubleComplex *h_A1, *h_A2;
     cuDoubleComplex *d_A1, *d_A2;
@@ -76,39 +74,18 @@ int main( int argc, char** argv)
       printf("  testing_zswap -N %d\n\n", 1024);
     }
 
-    /* Initialize CUBLAS */
-    status = cublasInit();
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! CUBLAS initialization error\n");
-    }
-
     N = lda = size[9];
     n2 = N*N;
 
     /* Allocate host memory for the matrix */
-    cudaMallocHost((void**)(&h_A1), n2 * sizeof(cuDoubleComplex));
-    if (h_A1 == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (A)\n");
-    }
-    
-    cudaMallocHost((void**)(&h_A2), n2 * sizeof(cuDoubleComplex));
-    if (h_A2 == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (A)\n");
-    }
-  
-    ipiv = (int*)malloc(N * sizeof(int));
-    if (ipiv == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (ipiv)\n");
-    }
-  
-    status = cublasAlloc(n2+32*N, sizeof(cuDoubleComplex), (void**)&d_A1);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-      fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
-    }
-    status = cublasAlloc(n2+32*N, sizeof(cuDoubleComplex), (void**)&d_A2);
-    if (status != CUBLAS_STATUS_SUCCESS) {
-      fprintf (stderr, "!!!! device memory allocation error (d_A)\n");
-    }
+    TESTING_HOSTALLOC( h_A1, cuDoubleComplex, n2 );
+    TESTING_HOSTALLOC( h_A2, cuDoubleComplex, n2 );
+    TESTING_HOSTALLOC( h_A3, cuDoubleComplex, n2 );
+    TESTING_HOSTALLOC( h_A4, cuDoubleComplex, n2 );
+
+    TESTING_MALLOC( ipiv, int, N );
+    TESTING_DEVALLOC( d_A1, cuDoubleComplex, n2+32*N );
+    TESTING_DEVALLOC( d_A2, cuDoubleComplex, n2+32*N );
 
 #ifdef CHECK2        
     for(i=0; i<N; i++) {
@@ -124,15 +101,6 @@ int main( int argc, char** argv)
      lapackf77_zlarnv( &ione, ISEED, &n2, h_A2 );
 #endif
 
-    cudaMallocHost((void**)(&h_A3), n2 * sizeof(cuDoubleComplex));
-    if (h_A3 == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (A)\n");
-    }
-    
-    cudaMallocHost((void**)(&h_A4), n2 * sizeof(cuDoubleComplex));
-    if (h_A4 == 0) {
-        fprintf (stderr, "!!!! host memory allocation error (A)\n");
-    }
 
     memcpy(h_A3, h_A1, n2 * sizeof(cuDoubleComplex));
     memcpy(h_A4, h_A2, n2 * sizeof(cuDoubleComplex));
@@ -313,16 +281,14 @@ int main( int argc, char** argv)
     }
     
     /* Memory clean up */
-    cudaFreeHost(h_A1);
-    cudaFreeHost(h_A2);
-    cudaFreeHost(h_A3);
-    cudaFreeHost(h_A4);
-    cublasFree(d_A1);
-    cublasFree(d_A2);
+    TESTING_HOSTFREE( h_A1 );
+    TESTING_HOSTFREE( h_A2 );
+    TESTING_HOSTFREE( h_A3 );
+    TESTING_HOSTFREE( h_A4 );
+    TESTING_DEVFREE(  d_A1 );
+    TESTING_DEVFREE(  d_A2 );
+    TESTING_FREE( ipiv );
 
     /* Shutdown */
-    status = cublasShutdown();
-    if (status != CUBLAS_STATUS_SUCCESS) {
-        fprintf (stderr, "!!!! shutdown error (A)\n");
-    }
+    TESTING_CUDA_FINALIZE();
 }
