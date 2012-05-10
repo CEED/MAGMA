@@ -1948,8 +1948,8 @@ void magmablas_dtrsm_tesla( char side, char uplo, char tran, char diag, int M, i
                  */
                 cudaMalloc((void**)&d_dinvA, NB*((M/NB)+(M%NB!=0))*NB*sizeof(double));
                 cudaMalloc((void**)&d_x, N*M*sizeof(double));
-                cudaMemset(d_x, 0, N*M*sizeof(double));
-                cudaMemset (d_dinvA, 0, NB*((M/NB)+(M%NB!=0))*NB*sizeof(double));
+                cudaMemset(d_x,     0, N*M*sizeof(double));
+                cudaMemset(d_dinvA, 0, NB*((M/NB)+(M%NB!=0))*NB*sizeof(double));
                 diag_dtrtri (M, uplo, diag, A, d_dinvA, lda);
 
                 if (tran == 'N' || tran == 'n')

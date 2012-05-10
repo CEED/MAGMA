@@ -53,10 +53,9 @@ magmablas_zgetmatrix_transpose( int m, int n,
 
        //magmablas_ztranspose2 ( dB + (j%2)*nb*lddb, lddb, dat+i, ldda, ib, m);
        magmablas_ztranspose2s( dB + (j%2)*nb*lddb, lddb, dat+i, ldda, ib, m, &stream[j%2]);
-       cudaMemcpy2DAsync(ha+i*lda, lda*sizeof(cuDoubleComplex),
-                         dB + (j%2) * nb * lddb, lddb*sizeof(cuDoubleComplex),
-                         sizeof(cuDoubleComplex)*m, ib, 
-                         cudaMemcpyDeviceToHost, stream[j%2]);
+       magma_zgetmatrix_async( m, ib,
+                               dB + (j%2) * nb * lddb, lddb,
+                               ha+i*lda,               lda, stream[j%2] );
        j++;
     }
 
@@ -100,11 +99,9 @@ magmablas_zgetmatrix_transpose2( int m, int n,
        magmablas_ztranspose2s(dB[k] + (j[k]%2)*nb*lddb, lddb,
                               dat[k]+i/(nb*num_gpus)*nb, ldda[k], 
                               ib, m, &stream[k][j[k]%2]);
-       cudaMemcpy2DAsync(ha+i*lda, lda*sizeof(cuDoubleComplex),
-                         dB[k] + (j[k]%2) * nb * lddb, lddb*sizeof(cuDoubleComplex),
-                         sizeof(cuDoubleComplex)*m, ib,
-                         cudaMemcpyDeviceToHost,
-                         stream[k][j[k]%2]);
+       magma_zgetmatrix_async( m, ib,
+                               dB[k] + (j[k]%2) * nb * lddb, lddb,
+                               ha+i*lda,                     lda, stream[k][j[k]%2] );
        j[k]++;
     }
 }

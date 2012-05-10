@@ -49,19 +49,17 @@ magmablas_zsetmatrix_transpose( int m, int n,
    
     /* Move data from CPU to GPU in the first panel in the dB buffer */
     ib   = min(n-i, nb);
-    cudaMemcpy2DAsync(dB + (j%2) * nb * lddb, lddb*sizeof(cuDoubleComplex),
-                      ha + i*lda, lda*sizeof(cuDoubleComplex),
-                      sizeof(cuDoubleComplex)*m, ib,
-                      cudaMemcpyHostToDevice, stream[j%2]);
+    magma_zsetmatrix_async( m, ib,
+                            ha + i*lda,             lda,
+                            dB + (j%2) * nb * lddb, lddb, stream[j%2] );
     j++;
 
     for(i=nb; i<n; i+=nb){
        /* Move data from CPU to GPU in the second panel in the dB buffer */
        ib   = min(n-i, nb);
-       cudaMemcpy2DAsync(dB + (j%2) * nb * lddb, lddb*sizeof(cuDoubleComplex),
-                         ha+i*lda, lda*sizeof(cuDoubleComplex),
-                         sizeof(cuDoubleComplex)*m, ib, 
-                         cudaMemcpyHostToDevice, stream[j%2]);
+       magma_zsetmatrix_async( m, ib,
+                               ha+i*lda,               lda,
+                               dB + (j%2) * nb * lddb, lddb, stream[j%2] );
        j++;
   
        /* Note that the previous panel (i.e., j%2) comes through the stream
@@ -109,10 +107,9 @@ magmablas_zsetmatrix_transpose2( int m, int n,
           cudaSetDevice(k);
 
           ib = min(n-i, nb);
-          cudaMemcpy2DAsync(dB[k], lddb*sizeof(cuDoubleComplex),
-                            ha+i*lda, lda*sizeof(cuDoubleComplex),
-                            sizeof(cuDoubleComplex)*m, ib,
-                            cudaMemcpyHostToDevice, stream[k][0]);
+          magma_zsetmatrix_async( m, ib,
+                                  ha+i*lda, lda,
+                                  dB[k],    lddb, stream[k][0] );
        }
        for(i=0; i<n; i+=nb){
           k = (i/nb)%num_gpus;
@@ -135,10 +132,9 @@ magmablas_zsetmatrix_transpose2( int m, int n,
          if (i<n){
             /* Move data from CPU to GPU in the second panel in the dB buffer */
             ib = min(n-i, nb);
-            cudaMemcpy2DAsync(dB[k] + (j[k]%2)*nb*lddb, lddb*sizeof(cuDoubleComplex),
-                         ha+i*lda, lda*sizeof(cuDoubleComplex),
-                         sizeof(cuDoubleComplex)*m, ib, 
-                         cudaMemcpyHostToDevice, stream[k][j[k]%2]);
+            magma_zsetmatrix_async( m, ib,
+                                    ha+i*lda,                 lda,
+                                    dB[k] + (j[k]%2)*nb*lddb, lddb, stream[k][j[k]%2] );
          }
          j[k]++;
   

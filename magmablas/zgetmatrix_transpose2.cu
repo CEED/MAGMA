@@ -55,10 +55,9 @@ magmablas_zgetmatrix_transpose3(
        /* transpose and send the first tile */
        magmablas_ztranspose2( dB[d], lddb, dat[d], ldda, ib, m);
        //printf( " (%dx%d) (%d,%d)->(%d,%d) (%d,%d)\n",m,ib,0,i,0,0,lda,lddb );
-       cudaMemcpy2DAsync(ha+i*lda, lda*sizeof(cuDoubleComplex),
-                         dB[d], lddb*sizeof(cuDoubleComplex),
-                         sizeof(cuDoubleComplex)*m, ib, 
-                         cudaMemcpyDeviceToHost, stream[d][0]);
+       magma_zgetmatrix_async( m, ib,
+                               dB[d],    lddb,
+                               ha+i*lda, lda, stream[d][0] );
        j++;
     }
 
@@ -74,10 +73,9 @@ magmablas_zgetmatrix_transpose3(
                               dat[d]+nb*j_local,          ldda, 
                               ib, m);
        //printf( " (%dx%d) (%d,%d)->(%d,%d) (%d,%d)\n",m,ib,0,i,0,(j_local%2)*nb,lda,lddb );
-       cudaMemcpy2DAsync(ha+i*lda,                    lda *sizeof(cuDoubleComplex),
-                         dB[d] + (j_local%2)*nb*lddb, lddb*sizeof(cuDoubleComplex),
-                         sizeof(cuDoubleComplex)*m, ib, 
-                         cudaMemcpyDeviceToHost, stream[d][j_local%2]);
+       magma_zgetmatrix_async( m, ib,
+                               dB[d] + (j_local%2)*nb*lddb, lddb,
+                               ha+i*lda,                    lda, stream[d][j_local%2] );
 
        /* wait for the previous tile */
        j_local = (j-num_gpus)/num_gpus;

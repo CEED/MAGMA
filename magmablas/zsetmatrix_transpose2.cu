@@ -53,10 +53,9 @@ magmablas_zsetmatrix_transpose3(
       ib = min(n-i, nb);
 
       //printf( " sent A(:,%d:%d) to %d-th panel of %d gpu\n",i,i+ib-1,0,d );
-      cudaMemcpy2DAsync(dB[d],     lddb*sizeof(cuDoubleComplex),
-                        ha + i*lda, lda*sizeof(cuDoubleComplex),
-                        sizeof(cuDoubleComplex)*m, ib,
-                        cudaMemcpyHostToDevice, stream[d][0]);
+      magma_zsetmatrix_async( m, ib,
+                              ha + i*lda, lda,
+                              dB[d],      lddb, stream[d][0] );
       j++;
     }
 
@@ -69,10 +68,9 @@ magmablas_zsetmatrix_transpose3(
 
        ib = min(n-i, nb);
        //printf( " sent A(:,%d:%d) to %d-th panel of %d gpu (%d,%d)\n",i,i+ib-1,j_local%2,d,m,ib );
-       cudaMemcpy2DAsync(dB[d] + (j_local%2) * nb * lddb, lddb*sizeof(cuDoubleComplex),
-                         ha+i*lda, lda*sizeof(cuDoubleComplex),
-                         sizeof(cuDoubleComplex)*m, ib, 
-                         cudaMemcpyHostToDevice, stream[d][j_local%2]);
+       magma_zsetmatrix_async( m, ib,
+                               ha+i*lda,                        lda,
+                               dB[d] + (j_local%2) * nb * lddb, lddb, stream[d][j_local%2] );
   
        /* Make sure that the previous panel (i.e., j%2) has arrived 
           and transpose it directly into the dat matrix                  */
