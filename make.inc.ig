@@ -51,7 +51,7 @@ LDOPTS    = -fPIC
 # Multi-threaded version
 LIB       = -lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -lpthread -lcublas -lm -fopenmp
 
-CUDADIR   = /mnt/scratch/cuda/
+CUDADIR   = /mnt/scratch/cuda
 
 LIBDIR    = -L${MKLROOT}/lib/intel64 \
             -L$(CUDADIR)/lib64
