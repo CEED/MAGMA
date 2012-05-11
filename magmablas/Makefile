@@ -101,7 +101,7 @@ ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
 	dgemv_MLU.cu	\
 	stream.cu	\
 
-ifeq (${GPU_TARGET}, Telsa)
+ifeq (${GPU_TARGET}, Tesla)
     ALLSRC += $(TESLASRC)
     GPUOPT  = ${TESLAOPT}
 else ifeq (${GPU_TARGET}, Fermi)
