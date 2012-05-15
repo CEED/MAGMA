@@ -18,11 +18,12 @@ cleanmkgen:
 	find . -name  Makefile.src -delete
 
 generation:
-	(cd $(MAGMA_DIR)/include   && $(MAKE) generate )
-	(cd $(MAGMA_DIR)/control   && $(MAKE) generate )
-	(cd $(MAGMA_DIR)/src       && $(MAKE) generate )
-	(cd $(MAGMA_DIR)/magmablas && $(MAKE) generate )
-	(cd $(MAGMA_DIR)/testing   && $(MAKE) generate )
+	(cd $(MAGMA_DIR)/include        && $(MAKE) generate )
+	(cd $(MAGMA_DIR)/control        && $(MAKE) generate )
+	(cd $(MAGMA_DIR)/src            && $(MAKE) generate )
+	(cd $(MAGMA_DIR)/interface_cuda && $(MAKE) generate )
+	(cd $(MAGMA_DIR)/magmablas      && $(MAKE) generate )
+	(cd $(MAGMA_DIR)/testing        && $(MAKE) generate )
 
 headers:
 	( cd include && $(MAKE) )
