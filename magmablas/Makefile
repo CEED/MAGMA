@@ -41,14 +41,13 @@ ZSRC  = \
 	strsm.cu	\
 	dtrsm.cu	\
 	ssyr2k.cu	\
+	csymv_tesla.cu	\
+	zhemv_fermi.cu	\
+	zsymv_fermi.cu	\
 
-# Add card-specific versions that need precisions generated
-ifeq (${GPU_TARGET}, Tesla)
-ZSRC += csymv_tesla.cu
-else ifeq (${GPU_TARGET}, Fermi)
-ZSRC += zhemv_fermi.cu \
-	zsymv_fermi.cu
-endif
+# Card-specific versions that need precisions generated must be above in ZSRC,
+# so they are all put into Makefile.src in the release. The code is #ifdef'd
+# for the correct card.
 
 -include Makefile.src
 
