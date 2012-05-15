@@ -87,10 +87,23 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
          
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////          
-
- volatile magma_int_t barrier_in[MAX_THREADS_BLG];
- volatile magma_int_t barrier_out[MAX_THREADS_BLG];
- volatile magma_int_t *ss_prog;
+// define globals ONLY in the z file, and declare them extern in [sdc] files.
+#if defined(PRECISION_z)
+    volatile magma_int_t barrier_in[MAX_THREADS_BLG];
+    volatile magma_int_t barrier_out[MAX_THREADS_BLG];
+    volatile magma_int_t *ss_prog;
+    // rest are declared extern in [sdcz]bulge_inc.h header; define them here.
+    struct gbstrct_blg core_in_all;
+    int           event_numblg        [MAX_THREADS_BLG]                 __attribute__ ((aligned (128)));
+    real_Double_t event_start_timeblg [MAX_THREADS_BLG]                 __attribute__ ((aligned (128)));
+    real_Double_t event_end_timeblg   [MAX_THREADS_BLG]                 __attribute__ ((aligned (128)));
+    real_Double_t event_logblg        [MAX_THREADS_BLG][MAX_EVENTSBLG]  __attribute__ ((aligned (128)));
+    int           log_eventsblg;
+#else
+    extern volatile magma_int_t barrier_in[MAX_THREADS_BLG];
+    extern volatile magma_int_t barrier_out[MAX_THREADS_BLG];
+    extern volatile magma_int_t *ss_prog;
+#endif
 
 static void barrier(magma_int_t my_core_id, magma_int_t cores_num);
 static void barrier(magma_int_t my_core_id, magma_int_t cores_num)
@@ -115,7 +128,6 @@ static void barrier(magma_int_t my_core_id, magma_int_t cores_num)
     }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////          
-struct gbstrct_blg core_in_all;
 /* START CODE */
 extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int N, int NB, cuDoubleComplex *A1, int LDA1, double *D2, double *E2, cuDoubleComplex *dT1, int LDT1)
 {

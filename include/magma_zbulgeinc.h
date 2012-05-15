@@ -86,6 +86,8 @@ extern volatile magma_int_t *ss_prog;
     real_Double_t *timeaplQ;
     volatile int *ss_prog;
 } ;
+
+// declare globals here; defined in zhetrd_bhe2trc.cpp
 extern struct gbstrct_blg core_in_all;
 
 
@@ -98,11 +100,12 @@ extern struct gbstrct_blg core_in_all;
 #define MAX_EVENTSBLG 163840
 //#define MAX_EVENTSBLG 1048576
 
-int    event_numblg        [MAX_THREADS_BLG]               __attribute__ ((aligned (128)));
-real_Double_t event_start_timeblg [MAX_THREADS_BLG]               __attribute__ ((aligned (128)));
-real_Double_t event_end_timeblg   [MAX_THREADS_BLG]               __attribute__ ((aligned (128)));
-real_Double_t event_logblg        [MAX_THREADS_BLG][MAX_EVENTSBLG]   __attribute__ ((aligned (128)));
-int log_eventsblg = 0;
+// declare globals here; defined in zhetrd_bhe2trc.cpp
+extern int           event_numblg        [MAX_THREADS_BLG]                 __attribute__ ((aligned (128)));
+extern real_Double_t event_start_timeblg [MAX_THREADS_BLG]                 __attribute__ ((aligned (128)));
+extern real_Double_t event_end_timeblg   [MAX_THREADS_BLG]                 __attribute__ ((aligned (128)));
+extern real_Double_t event_logblg        [MAX_THREADS_BLG][MAX_EVENTSBLG]  __attribute__ ((aligned (128)));
+extern int           log_eventsblg;
 
 #define core_event_startblg(my_core_id)\
     event_start_timeblg[my_core_id] = get_time_azz();\
