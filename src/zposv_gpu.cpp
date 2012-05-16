@@ -22,7 +22,7 @@ magma_zposv_gpu( char uplo, magma_int_t n, magma_int_t nrhs,
                  cuDoubleComplex *dA, magma_int_t ldda, 
                  cuDoubleComplex *dB, magma_int_t lddb, magma_int_t *info )
 {
-/*  -- magma (version 1.0) --
+/*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver

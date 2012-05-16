@@ -22,7 +22,7 @@ magma_zposv    ( char uplo, magma_int_t n, magma_int_t nrhs,
                  cuDoubleComplex *A, magma_int_t lda, 
                  cuDoubleComplex *B, magma_int_t ldb, magma_int_t *info )
 {
-/*  -- magma (version 1.0) --
+/*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
