@@ -91,6 +91,9 @@ void   magmablas_zlascl( char type, int kl, int ku,
              cuDoubleComplex *A, int lda, int *info );
 void   magmablas_zlaset( char uplo, magma_int_t m, magma_int_t n,
              cuDoubleComplex *A, magma_int_t lda);
+void   magmablas_zlaset_identity(
+             magma_int_t m, magma_int_t n,
+             cuDoubleComplex *A, magma_int_t lda);
 void   magmablas_zlaswp( magma_int_t N, 
              cuDoubleComplex *dAT, magma_int_t lda, 
              magma_int_t i1,  magma_int_t i2, 

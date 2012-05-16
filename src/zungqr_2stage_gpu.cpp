@@ -10,10 +10,6 @@
 */
 #include "common_magma.h"
 
-extern "C" void
-magmablas_zlaset_identity(magma_int_t m, magma_int_t n,
-                          cuDoubleComplex *A, magma_int_t lda);
-
 extern "C" magma_int_t
 magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
                  cuDoubleComplex *da, magma_int_t ldda,

@@ -24,8 +24,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-void  magmablas_zlaset_identity(magma_int_t m, magma_int_t n,
-                          cuDoubleComplex *A, magma_int_t lda);
  void findVTpos(int N, int NB, int Vblksiz, int sweep, int st, int *Vpos, int *TAUpos, int *Tpos, int *myblkid);
  void findVTsiz(int N, int NB, int Vblksiz, int *blkcnt, int *LDV);
   magma_int_t plasma_ceildiv(magma_int_t a, magma_int_t b);
