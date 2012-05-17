@@ -40,9 +40,9 @@ magma_zpotri_gpu(char uplo, magma_int_t n,
     Purpose
     =======
 
-        DPOTRI computes the inverse of a real symmetric positive definite
+        ZPOTRI computes the inverse of a real symmetric positive definite
         matrix A using the Cholesky factorization A = U**T*U or A = L*L**T
-        computed by DPOTRF.
+        computed by ZPOTRF.
 
     Arguments
     =========
@@ -57,7 +57,7 @@ magma_zpotri_gpu(char uplo, magma_int_t n,
         A       (input/output) COMPLEX_16 array, dimension (LDA,N)
                         On entry, the triangular factor U or L from the Cholesky
                         factorization A = U**T*U or A = L*L**T, as computed by
-                        DPOTRF.
+                        ZPOTRF.
                         On exit, the upper or lower triangle of the (symmetric)
                         inverse of A, overwriting the input factor U or L.
 

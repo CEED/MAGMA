@@ -42,7 +42,7 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
         Purpose
         =======
 
-        DLAUUM computes the product U * U' or L' * L, where the triangular
+        ZLAUUM computes the product U * U' or L' * L, where the triangular
         factor U or L is stored in the upper or lower triangular part of
         the array dA.
 

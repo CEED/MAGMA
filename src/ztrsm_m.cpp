@@ -41,7 +41,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
     non-unit,  upper or lower triangular matrix  and  op( A )  is one  of
 
 
-       op( A ) = A   or   op( A ) = A'   or   op( A ) = conjg( A' ).
+       op( A ) = A   or   op( A ) = A'   or   op( A ) = conj( A' ).
 
     The matrix X is overwritten on B.
 
@@ -79,7 +79,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
 
                 TRANSA = 'T' or 't'   op( A ) = A'.
 
-                TRANSA = 'C' or 'c'   op( A ) = conjg( A' ).
+                TRANSA = 'C' or 'c'   op( A ) = conj( A' ).
 
              Unchanged on exit.
 
@@ -430,7 +430,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
 
             if (upper) {
 
-                //left upper transpose or conjtranspose
+                //left upper transpose or conj transpose
 
                 magma_int_t nloc[N_MAX_GPU];
                 for(igpu = 0; igpu < nrgpu; ++igpu)
@@ -504,7 +504,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
             else
             {
 
-                //left lower transpose or conjtranspose
+                //left lower transpose or conj transpose
 
                 magma_int_t nloc[N_MAX_GPU];
                 for(igpu = 0; igpu < nrgpu; ++igpu)
@@ -735,7 +735,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
 
             if (upper) {
 
-                //right upper transpose or conjtranspose
+                //right upper transpose or conj transpose
                 magma_int_t mloc[N_MAX_GPU];
                 for(igpu = 0; igpu < nrgpu; ++igpu)
                     mloc[igpu] = 0;
@@ -807,7 +807,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
             else
             {
 
-                //right lower transpose or conjtranspose
+                //right lower transpose or conj transpose
                 magma_int_t mloc[N_MAX_GPU];
                 for(igpu = 0; igpu < nrgpu; ++igpu)
                     mloc[igpu] = 0;

@@ -1022,7 +1022,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
         lapackf77_zhbtrd("N", "L", &N, &NB, ALPK, &LDAINIT, D1, E1, WORK, &N, WORK, &INFO); 
         timelpk = get_time_azz() - timelpk;
         printf("\n");                
-        printf("  Time DSBTRD-MKL-LAPACK                      :   %lf    N : %10d    NB : %10d \n\n\n",timelpk, N, NB );
+        printf("  Time ZHBTRD-MKL-LAPACK                      :   %lf    N : %10d    NB : %10d \n\n\n",timelpk, N, NB );
         /* call eigensolver */
         lapackf77_dsterf(&N, D1, E1, &INFO);             
        /* ***********************************************/ 
@@ -1055,7 +1055,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
         printf(" ================================================================================================================================== \n");
         printf("   ==> INFO voici  threads=%d    N=%d    NB=%d   BAND=%d WANTZ=%d\n",thread,N, NB, BAND, WANTZ);
         printf(" ================================================================================================================================== \n");
-        printf("            DSBTRD                : %15s \n", "STATblgv9withQ    ");
+        printf("            ZHBTRD                : %15s \n", "STATblgv9withQ    ");
         printf(" ================================================================================================================================== \n");
         if(WANTZ==1)
            printf(" | A - U S U' | / ( |A| n ulp )   : %15.3E   \n",        RESU[0]); 
@@ -2010,7 +2010,7 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
                        if(LOGQ) core_event_startblg(my_core_id);
                        if((vlen>0)&&(vnb>0)){
                            //lapackf77_zungqr( "L", "N", &vlen, &corelen, &vnb, V(vpos), &LDV, TAU(taupos), E(fst,corest), &LDE,  WORK, &LWORK, &INFO );
-                           //DORMQR_BLG( "L", "N", &vlen, &corelen, &vnb, &NB, V(vpos), &LDV, TAU(taupos), E(fst,corest), &LDE,  WORK, &LWORK, &INFO );
+                           //ZUNMQR_BLG( "L", "N", &vlen, &corelen, &vnb, &NB, V(vpos), &LDV, TAU(taupos), E(fst,corest), &LDE,  WORK, &LWORK, &INFO );
                            if(WANTZ==1){ 
                                st  = max(colst,corest);           
                                len = corelen - (st-corest);    
@@ -2020,7 +2020,7 @@ static void tile_bulge_applyQ_parallel(int my_core_id)
                            }
                        }
                        if(INFO!=0) 
-                               printf("ERROR DORMQR INFO %d \n",INFO);
+                               printf("ERROR ZUNMQR INFO %d \n",INFO);
                        if(LOGQ) {
                            core_event_endblg(my_core_id);
                            core_log_eventblg(0xff0000, my_core_id);

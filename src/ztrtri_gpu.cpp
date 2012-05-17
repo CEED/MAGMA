@@ -40,7 +40,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
     Purpose
     =======
 
-        DTRTRI computes the inverse of a real upper or lower triangular
+        ZTRTRI computes the inverse of a real upper or lower triangular
         matrix dA.
 
         This is the Level 3 BLAS version of the algorithm.

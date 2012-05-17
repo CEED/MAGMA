@@ -41,7 +41,7 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     IHI     (input) INTEGER   
             It is assumed that A is already upper triangular in rows   
             and columns 1:ILO-1 and IHI+1:N. ILO and IHI are normally   
-            set by a previous call to DGEBAL; otherwise they should be   
+            set by a previous call to ZGEBAL; otherwise they should be   
             set to 1 and N respectively. See Further Details.   
             1 <= ILO <= IHI <= N, if N > 0; ILO=1 and IHI=0, if N=0.   
 

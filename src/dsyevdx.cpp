@@ -341,7 +341,7 @@ magma_dsyevdx(char jobz, char range, char uplo,
 #endif
 
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call
-       ZSTEDC to generate the eigenvector matrix, WORK(INDWRK), of the
+       DSTEDC to generate the eigenvector matrix, WORK(INDWRK), of the
        tridiagonal matrix, then call DORMTR to multiply it to the Householder
        transformations represented as Householder vectors in A. */
     if (! wantz) {
