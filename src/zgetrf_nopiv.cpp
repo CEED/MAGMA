@@ -136,15 +136,15 @@ magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
               {
                 /* Compute block row of U. */
                 i__3 = *n - j - jb + 1;
-                ztrsm_("Left", "Lower", "No transpose", "Unit", &jb, &i__3, &
-                       c_one, &a[j + j * a_dim1], lda, &a[j + (j+jb)*a_dim1], lda);
+                blasf77_ztrsm("Left", "Lower", "No transpose", "Unit", &jb, &i__3,
+                       &c_one, &a[j + j * a_dim1], lda, &a[j + (j+jb)*a_dim1], lda);
                 if (j + jb <= *m) 
                   {
                     /* Update trailing submatrix. */
                     i__3 = *m - j - jb + 1;
                     i__4 = *n - j - jb + 1;
                     z__1 = MAGMA_Z_NEG_ONE;
-                    zgemm_("No transpose", "No transpose", &i__3, &i__4, &jb, 
+                    blasf77_zgemm("No transpose", "No transpose", &i__3, &i__4, &jb, 
                            &z__1, &a[j + jb + j * a_dim1], lda, 
                            &a[j + (j + jb) * a_dim1], lda, &c_one, 
                            &a[j + jb + (j + jb) * a_dim1], lda);

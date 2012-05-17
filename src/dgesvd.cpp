@@ -180,16 +180,16 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
     mnthr  = (magma_int_t)( (double)(min( m_, n_ )) * 1.6 );
     bdspac = 5*n_;
     minmn = min(*m,*n);
-    wntua = lsame_(jobu_, "A");
-    wntus = lsame_(jobu_, "S");
+    wntua = lapackf77_lsame(jobu_, "A");
+    wntus = lapackf77_lsame(jobu_, "S");
     wntuas = wntua || wntus;
-    wntuo = lsame_(jobu_, "O");
-    wntun = lsame_(jobu_, "N");
-    wntva = lsame_(jobvt_, "A");
-    wntvs = lsame_(jobvt_, "S");
+    wntuo = lapackf77_lsame(jobu_, "O");
+    wntun = lapackf77_lsame(jobu_, "N");
+    wntva = lapackf77_lsame(jobvt_, "A");
+    wntvs = lapackf77_lsame(jobvt_, "S");
     wntvas = wntva || wntvs;
-    wntvo = lsame_(jobvt_, "O");
-    wntvn = lsame_(jobvt_, "N");
+    wntvo = lapackf77_lsame(jobvt_, "O");
+    wntvn = lapackf77_lsame(jobvt_, "N");
     lquery = *lwork == -1;
   
     /* Test the input arguments */

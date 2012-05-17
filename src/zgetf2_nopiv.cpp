@@ -132,8 +132,10 @@ magma_zgetf2_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
           i__2 = *m - j;
           i__3 = *n - j;
           z__1 = MAGMA_Z_NEG_ONE; 
-          zgeru_(&i__2, &i__3, &z__1, &a[j + 1 + j * a_dim1], &c__1,
-                 &a[j + (j+1) * a_dim1], lda, &a[j + 1 + (j+1) * a_dim1], lda);
+          blasf77_zgeru( &i__2, &i__3, &z__1,
+                         &a[j + 1 + j * a_dim1], &c__1,
+                         &a[j + (j+1) * a_dim1], lda,
+                         &a[j + 1 + (j+1) * a_dim1], lda);
         }
       }
     

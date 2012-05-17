@@ -196,9 +196,9 @@ magma_zpotrf_mc(magma_context *cntxt, char *uplo,
   }
 
   // check arguments
-  magma_int_t upper = (magma_int_t) lsame_(uplo, "U");                                          
+  magma_int_t upper = (magma_int_t) lapackf77_lsame(uplo, "U");                                          
   *info = 0;
-  if (! upper && ! lsame_(uplo, "L")) {
+  if (! upper && ! lapackf77_lsame(uplo, "L")) {
     *info = -1;
   } else if (*n < 0) {
     *info = -2;

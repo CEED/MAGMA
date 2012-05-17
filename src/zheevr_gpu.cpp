@@ -535,7 +535,7 @@ magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
       imax = *info - 1;
     }
     d__1 = 1. / sigma;
-    dscal_(&imax, &d__1, &w[1], &ione);
+    blasf77_dscal(&imax, &d__1, &w[1], &ione);
   }
   
   /*     If eigenvalues are not in order, then sort them, along with   
