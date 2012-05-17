@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       February 2011
+       November 2011
        
        @author Peng Du
 */
@@ -1810,13 +1810,13 @@ extern "C"
 void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, int M, int N, 
                             float alpha, /*const*/ float* A, int lda, float* b, int ldb)
 {
-        /*  -- magma (version 0.1) --
-                univ. of tennessee, knoxville
-                univ. of california, berkeley
-                univ. of colorado, denver
-                october 2009
+        /*  -- MAGMA (version 1.1) --
+                Univ. of Tennessee, Knoxville
+                Univ. of California, Berkeley
+                Univ. of Colorado, Denver
+                November 2011
 
-                purpose
+                Purpose
                 =======
 
                 strsm  solves one of the matrix equations on gpu
