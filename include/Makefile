@@ -16,6 +16,7 @@ ZHDR =  magma_z.h 	\
 	magma_zlapack.h \
 	magma_zbulgeinc.h
 
+-include Makefile.local
 -include Makefile.src
 
 ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR) \

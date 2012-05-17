@@ -24,6 +24,7 @@ ZSRC := $(ZSRC) 		\
 	magma_zf77pgi.cpp
 endif
 
+-include Makefile.local
 -include Makefile.src
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\

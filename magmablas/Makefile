@@ -49,6 +49,7 @@ ZSRC  = \
 # so they are all put into Makefile.src in the release. The code is #ifdef'd
 # for the correct card.
 
+-include Makefile.local
 -include Makefile.src
 
 FERMISRC = \
