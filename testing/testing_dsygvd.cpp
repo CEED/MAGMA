@@ -261,7 +261,7 @@ int main( int argc, char** argv)
            Performs operation using LAPACK
            =================================================================== */
         start = get_current_time();
-        lapackf77_dhegvd(&itype, jobz, uplo,
+        lapackf77_dsygvd(&itype, jobz, uplo,
                          &N, h_A, &N, h_B, &N, w2,
                          h_work, &lwork,
                          iwork, &liwork,
