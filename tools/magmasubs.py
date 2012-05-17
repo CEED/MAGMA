@@ -16,14 +16,14 @@ subs = {
   # ------------------------------------------------------------
   # replacements applied to ALL files.
   'all' : [
-    (None, None)
+    [None, None]
   ],
   
   # ------------------------------------------------------------
   # replacements applied to mixed precision files.
   'mixed' : [
     # ----- Special line indicating column types
-    ('ds',                        'zc'                      ),
+    ['ds',                        'zc'                      ],
     
     # ----- Mixed precisions
     ('DS',                        'ZC'                      ),
@@ -189,7 +189,8 @@ subs = {
   # replacements applied to most files.
   'normal' : [
     # ----- Special line indicating column types
-    ('s',              'd',              'c',              'z'               ),
+    # old python (2.4) requires this line to be list [] rather than tuple () to use index() function.
+    ['s',              'd',              'c',              'z'               ],
     
     # ----- Preprocessor
     ('#define PRECISION_s', '#define PRECISION_d', '#define PRECISION_c', '#define PRECISION_z' ),
@@ -714,7 +715,7 @@ subs = {
   # replacements applied for profiling with tau
   'tracing' :[
     # ----- Special line indicating column types
-    ('plain','tau'),
+    ['plain', 'tau'],
     
     # ----- Replacements
     ('(\w+\*?)\s+(\w+)\s*\(([a-z* ,A-Z_0-9]*)\)\s*{\s+(.*)\s*#pragma tracing_start\s+(.*)\s+#pragma tracing_end\s+(.*)\s+}',
