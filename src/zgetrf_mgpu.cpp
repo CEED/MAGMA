@@ -90,12 +90,13 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
-    magma_int_t iinfo, nb, n_local[4], ldat_local[4];
+    magma_int_t iinfo, nb, n_local[MagmaMaxGPUs], ldat_local[MagmaMaxGPUs];
     magma_int_t maxm, mindim;
-    magma_int_t i, j, d, rows, cols, s, lddat, lddwork, ldpan[4];
-        magma_int_t id, i_local, i_local2, nb0, nb1;
-    cuDoubleComplex *d_lAT[4], *d_lAP[4], *d_panel[4], *panel_local[4], *work;
-    static cudaStream_t streaml[4][2];
+    magma_int_t i, j, d, rows, cols, s, lddat, lddwork, ldpan[MagmaMaxGPUs];
+    magma_int_t id, i_local, i_local2, nb0, nb1;
+    cuDoubleComplex *d_lAT[MagmaMaxGPUs], *d_lAP[MagmaMaxGPUs];
+    cuDoubleComplex *d_panel[MagmaMaxGPUs], *panel_local[MagmaMaxGPUs], *work;
+    cudaStream_t streaml[MagmaMaxGPUs][2];
 
     /* Check arguments */
     *info = 0;

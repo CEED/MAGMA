@@ -9,8 +9,6 @@
 
        @precisions normal z -> s d c
 */
-#define N_MAX_GPU 8
-
 #include "common_magma.h"
 #include "cblas.h"
 
@@ -102,8 +100,8 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
     cuDoubleComplex    c_neg_one  = MAGMA_Z_NEG_ONE;
     cuDoubleComplex    c_half     = MAGMA_Z_HALF;
     cuDoubleComplex    c_neg_half = MAGMA_Z_NEG_HALF;
-    cuDoubleComplex* dw[N_MAX_GPU];
-    cudaStream_t stream [N_MAX_GPU][3];
+    cuDoubleComplex* dw[MagmaMaxGPUs];
+    cudaStream_t stream [MagmaMaxGPUs][3];
     magma_int_t igpu = 0;
 
     int gpu_b;
@@ -299,7 +297,7 @@ printf("hegs2%d\n", k);
 
             if (n > nb){
 
-                magma_int_t nloc[N_MAX_GPU];
+                magma_int_t nloc[MagmaMaxGPUs];
 
                 jb = min(nb, n-nb);
                 for (igpu = 0; igpu < nrgpu; ++igpu){
@@ -491,7 +489,7 @@ printf("hegs2%d\n", k);
 
             if (n > nb){
 
-                magma_int_t nloc[N_MAX_GPU];
+                magma_int_t nloc[MagmaMaxGPUs];
 
                 jb = min(nb, n-nb);
                 for (igpu = 0; igpu < nrgpu; ++igpu){
@@ -620,7 +618,7 @@ printf("hegs2%d\n", k);
 
 /*                        if (n > nb){
 
-            magma_int_t nloc[N_MAX_GPU];
+            magma_int_t nloc[MagmaMaxGPUs];
             for(igpu = 0; igpu < nrgpu; ++igpu)
                 nloc[igpu] = 0;
 

@@ -14,7 +14,7 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
+magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
                magma_int_t m, magma_int_t n, magma_int_t k,
                cuDoubleComplex *a,    magma_int_t lda,
                cuDoubleComplex *tau,
@@ -93,7 +93,7 @@ magma_zunmtr_m(magma_int_t nrgpu, char side, char uplo, char trans,
 
     C       (input/output) COMPLEX_16 array, dimension (LDC,N)
             On entry, the M-by-N matrix C.
-            On exit, C is overwritten by Q*C or Q\*\*H*C or C*Q\*\*H or C*Q.
+            On exit, C is overwritten by Q*C or Q**H*C or C*Q**H or C*Q.
 
     LDC     (input) INTEGER
             The leading dimension of the array C. LDC >= max(1,M).

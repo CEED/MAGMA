@@ -7,8 +7,6 @@
     @author Raffaele Solca
     @precisions normal d -> s
 */
-#define N_MAX_GPU 8
-
 #include "common_magma.h"
 #include <cblas.h>
 
@@ -79,7 +77,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
                double* q, magma_int_t ldq, double rho,
                double* dlamda, double* q2, magma_int_t* indx,
                magma_int_t* ctot, double* w, double* s, magma_int_t* indxq,
-               double** dwork, cudaStream_t stream[N_MAX_GPU][2],
+               double** dwork, cudaStream_t stream[MagmaMaxGPUs][2],
                char range, double vl, double vu, magma_int_t il, magma_int_t iu,
                magma_int_t* info )
 {
@@ -183,7 +181,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
      NB * ((N-N1) + (N-N1) / floor(nrgpu/2))
 
      STREAM (device stream) cudaStream_t array,
-     dimension (N_MAX_GPU,2)
+     dimension (MagmaMaxGPUs,2)
 
      INFO    (output) INTEGER
      = 0:  successful exit.
@@ -215,7 +213,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
 
     magma_int_t iil, iiu, rk;
     magma_int_t n1_loc, n2_loc, ib, nb, ib2, igpu;
-    magma_int_t ni_loc[N_MAX_GPU];
+    magma_int_t ni_loc[MagmaMaxGPUs];
 
     magma_int_t i,ind,iq2,j,n12,n2,n23,tmp,lq2;
     double temp;
@@ -274,10 +272,10 @@ magma_dlaex3_m(magma_int_t nrgpu,
      (we know of none). We use a subroutine call to compute
      2*DLAMBDA(I) to prevent optimizing compilers from eliminating
      this code.*/
-    double *dwS[2][N_MAX_GPU], *dwQ[2][N_MAX_GPU], *dwQ2[N_MAX_GPU];
+    double *dwS[2][MagmaMaxGPUs], *dwQ[2][MagmaMaxGPUs], *dwQ2[MagmaMaxGPUs];
 //#define CHECK_CPU
 #ifdef CHECK_CPU
-    double *hwS[2][N_MAX_GPU], *hwQ[2][N_MAX_GPU], *hwQ2[N_MAX_GPU];
+    double *hwS[2][MagmaMaxGPUs], *hwQ[2][MagmaMaxGPUs], *hwQ2[MagmaMaxGPUs];
 #endif
     n2 = n - n1;
 

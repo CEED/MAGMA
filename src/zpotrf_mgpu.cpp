@@ -96,9 +96,9 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
     double          d_one     =  1.0;
     double          d_neg_one = -1.0;
     long int        upper = lapackf77_lsame(uplo_, "U");
-    cuDoubleComplex *d_lP[4], *dlpanel;
-        magma_int_t n_local[4], lddat_local[4], lddat, ldpanel;
-    static cudaStream_t stream[4][4];
+    cuDoubleComplex *d_lP[MagmaMaxGPUs], *dlpanel;
+    magma_int_t n_local[MagmaMaxGPUs], lddat_local[MagmaMaxGPUs], lddat, ldpanel;
+    cudaStream_t stream[MagmaMaxGPUs][4];
 
     *info = 0;
     if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
@@ -109,14 +109,14 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
         *info = -4;
     }
     if (*info != 0) {
-                magma_xerbla( __func__, -(*info) );
+        magma_xerbla( __func__, -(*info) );
         return *info;
-        }
+    }
     nb = magma_get_zpotrf_nb(n);
 
     if (MAGMA_SUCCESS != magma_zmalloc_host( &work, n*nb )) {
-          *info = MAGMA_ERR_HOST_ALLOC;
-          return *info;
+        *info = MAGMA_ERR_HOST_ALLOC;
+        return *info;
     }
 
     if ((nb <= 1) || (nb >= n)) {

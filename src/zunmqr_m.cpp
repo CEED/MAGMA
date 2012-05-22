@@ -10,8 +10,6 @@
        @precisions normal z -> s d c
 
 */
-#define N_MAX_GPU 8
-
 #include "common_magma.h"
 
 #define  A(i, j) ( a+(j)*lda  + (i))
@@ -28,7 +26,7 @@ extern"C"{
 }
 
 extern "C" magma_int_t
-magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
+magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
                magma_int_t m, magma_int_t n, magma_int_t k,
                cuDoubleComplex *a,    magma_int_t lda,
                cuDoubleComplex *tau,
@@ -126,8 +124,8 @@ magma_zunmqr_m(magma_int_t nrgpu, const char side, const char trans,
     char side_[2] = {side, 0};
     char trans_[2] = {trans, 0};
 
-    cuDoubleComplex* dw[N_MAX_GPU];
-    cudaStream_t stream [N_MAX_GPU][2];
+    cuDoubleComplex* dw[MagmaMaxGPUs];
+    cudaStream_t stream [MagmaMaxGPUs][2];
 
     magma_int_t ind_c, kb;
 
