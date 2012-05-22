@@ -33,5 +33,5 @@ LIBDIR    = -L/home/tomov/intel/mkl/10.0.1.014/lib/em64t \
             -L$(CUDADIR)/lib64
 INC       = -I$(CUDADIR)/include
 
-LIBMAGMA     = $(MAGMA_DIR)/lib/magma.so
-LIBMAGMABLAS = $(MAGMA_DIR)/lib/magmablas.so
+LIBMAGMA     = $(MAGMA_DIR)/lib/libmagma.so
+LIBMAGMABLAS = $(MAGMA_DIR)/lib/libmagmablas.so

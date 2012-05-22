@@ -49,11 +49,3 @@ LIBDIR    = -L/mnt/scratch/sw/intel/11.1.069/mkl/lib/em64t \
 
 INC       =  -I$(CUDADIR)/include -I/mnt/scratch/sw/intel/11.1.069/mkl/include 
 #INC       =  -I$(CUDADIR)/include -I/mnt/scratch/sw/intel/11.1.069/mkl/include -I/home/haidar/magma/trunk/testing/checkdiag/include
-
-
-LIBMAGMA     = ../lib/libmagma.a
-LIBMAGMABLAS = ../lib/libmagmablas.a
-
-
-
-

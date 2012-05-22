@@ -36,6 +36,3 @@ LIBDIR    = -L/home/tomov/LIB/ATLAS/lib/Linux_UNKNOWNSSE2 \
             -L/home/tomov/LIB/CLAPACK-3.1.1/F2CLIBS/ \
             -L$(CUDADIR)/lib64
 INC       = -I$(CUDADIR)/include
-
-#LIBMAGMA     = $(MAGMA_DIR)/lib/magma.a
-#LIBMAGMABLAS = $(MAGMA_DIR)/lib/magmablas.a
