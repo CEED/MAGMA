@@ -273,6 +273,7 @@ subs = {
     # ----- CUDA
     ('cublasIsamax',   'cublasIdamax',   'cublasIcamax',   'cublasIzamax'    ),
     ('cublasIsamax',   'cublasIdamax',   'cublasIsamax',   'cublasIdamax'    ),
+    ('cublasSnrm2',    'cublasDnrm2',    'cublasScnrm2',   'cublasDznrm2'    ),
     
     # ----- PLASMA / MAGMA
     ('bsy2trc',        'bsy2trc',        'bhe2trc',        'bhe2trc'         ),
