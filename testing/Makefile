@@ -62,6 +62,8 @@ ZSRC  = testing_zgemm.cpp	\
 	testing_zlacpy.cpp \
 	testing_auxiliary.cpp	\
 	testing_zblas.cpp	\
+	testing_zher2k_mgpu.cpp	\
+	testing_zsymmetrize.cpp	\
 
 
 #testing_zswap.cpp

@@ -44,6 +44,7 @@ ZSRC  = \
 	csymv_tesla.cu	\
 	zhemv_fermi.cu	\
 	zsymv_fermi.cu	\
+	zsymmetrize.cu	\
 
 # Card-specific versions that need precisions generated must be above in ZSRC,
 # so they are all put into Makefile.src in the release. The code is #ifdef'd
