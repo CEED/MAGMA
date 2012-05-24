@@ -137,6 +137,7 @@ ZSRC  = zpotrf.cpp	\
 	zbulge_aux.cpp \
 	zhetrd_bhe2trc_v3.cpp	\
 	zher2k_mgpu.cpp	\
+	zhemm_mgpu.cpp	\
 
 
 -include Makefile.local

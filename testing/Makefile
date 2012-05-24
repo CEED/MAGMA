@@ -63,10 +63,8 @@ ZSRC  = testing_zgemm.cpp	\
 	testing_auxiliary.cpp	\
 	testing_zblas.cpp	\
 	testing_zher2k_mgpu.cpp	\
+	testing_zhemm_mgpu.cpp	\
 	testing_zsymmetrize.cpp	\
-
-
-#testing_zswap.cpp
 
 ifeq ($(FORT), pgfortran)
 	FOBJ  = fortran_thunking.o

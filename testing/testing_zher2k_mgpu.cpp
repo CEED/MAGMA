@@ -107,7 +107,7 @@ int main( int argc, char** argv)
         if ( strcmp("-N", argv[i]) == 0 and i+1 < argc ) {
             ensure( ntest < MAXTESTS, "error: -N repeated more than maximum %d tests\n", MAXTESTS );
             nsize[ntest] = atoi( argv[++i] );
-            ensure( nsize[ntest] >= 0, "error: -N %s is invalid; ensure n > 0.\n", argv[i] );
+            ensure( nsize[ntest] > 0, "error: -N %s is invalid; must be > 0.\n", argv[i] );
             nmax = max( nmax, nsize[ntest] );
             ntest++;
         }
@@ -140,7 +140,7 @@ int main( int argc, char** argv)
             exit(1);
         }
     }
-    if ( nmax == 0 ) {
+    if ( ntest == 0 ) {
         ntest = MAXTESTS;
         nmax = nsize[ntest-1];
     }

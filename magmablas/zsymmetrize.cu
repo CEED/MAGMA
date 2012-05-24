@@ -10,12 +10,6 @@
 */
 #include "common_magma.h"
 
-__global__ void
-zsymmetrize_kernel_lower( int m, cuDoubleComplex *A, int lda );
-
-__global__ void
-zsymmetrize_kernel_upper( int m, cuDoubleComplex *A, int lda );
-
 /*
     Matrix is divided into 64 x m block rows.
     Each block has 64 threads.
