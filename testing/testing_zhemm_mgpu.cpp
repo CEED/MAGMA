@@ -32,10 +32,11 @@
 extern "C"
 void magma_zhemm_mgpu(
     char side, char uplo, magma_int_t m, magma_int_t n,
-    cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t lda,  magma_int_t offset,
-                           cuDoubleComplex *dB[], magma_int_t ldb,
-    cuDoubleComplex beta,  cuDoubleComplex *C,    magma_int_t ldc,
-    magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][10], magma_int_t nstream );
+    cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
+                           cuDoubleComplex *dB[], magma_int_t lddb,
+    cuDoubleComplex beta,  cuDoubleComplex *dC[], magma_int_t lddc,
+                           cuDoubleComplex *C,    magma_int_t ldc,
+    magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][20], magma_int_t nstream );
 
 
 /* //////////////////////////////////////////////////////////////////////////// */
@@ -65,8 +66,9 @@ int main( int argc, char** argv)
     real_Double_t    gpu_perf2, gpu_time2;
     double           error=0., error2=0., work[1];
     cuDoubleComplex *hA, *hX, *hB, *hR;
-    cuDoubleComplex *dA[MagmaMaxGPUs], *dX[MagmaMaxGPUs];  //, *dB[MagmaMaxGPUs];
-
+    cuDoubleComplex *dA[MagmaMaxGPUs], *dX[MagmaMaxGPUs], *dB[MagmaMaxGPUs];
+    cuDoubleComplex *dA2;
+    
     /* Matrix size */
     magma_int_t m, size, lda, ldda;
     const int MAXTESTS = 10;
@@ -115,8 +117,8 @@ int main( int argc, char** argv)
         }
         else if ( strcmp("-nstream", argv[i]) == 0 and i+1 < argc ) {
             nstream = atoi( argv[++i] );
-            ensure( nstream > 0 and nstream <= 10,
-                    "error: -nstream %s is invalid; must be > 0 and <= 10.\n", argv[i] );
+            ensure( nstream > 0 and nstream <= 20,
+                    "error: -nstream %s is invalid; must be > 0 and <= 20.\n", argv[i] );
         }
         else if ( strcmp("-ngpu", argv[i]) == 0 and i+1 < argc ) {
             ngpu = atoi( argv[++i] );
@@ -144,24 +146,28 @@ int main( int argc, char** argv)
     TESTING_MALLOC( hA, cuDoubleComplex, lda*m );
     TESTING_MALLOC( hX, cuDoubleComplex, lda*n );
     TESTING_MALLOC( hB, cuDoubleComplex, lda*n );
-    TESTING_MALLOC( hR, cuDoubleComplex, lda*n );
+    TESTING_MALLOC( hR, cuDoubleComplex, lda*n*2 );
     
-    cudaStream_t streams[MagmaMaxGPUs][10];    
+    cudaStream_t streams[MagmaMaxGPUs][20];    
     for( int d = 0; d < ngpu; ++d ) {
         magma_int_t mlocal = ((m / nb) / ngpu + 1) * nb;
         cudaSetDevice( d );
         TESTING_DEVALLOC( dA[d], cuDoubleComplex, ldda*mlocal );
         TESTING_DEVALLOC( dX[d], cuDoubleComplex, ldda*n      );
-        //TESTING_DEVALLOC( dB[d], cuDoubleComplex, ldda*n      );
+        TESTING_DEVALLOC( dB[d], cuDoubleComplex, ldda*n      );
         for( int i = 0; i < nstream; ++i ) {
             cudaStreamCreate( &streams[d][i] );
         }
     }
+    if ( checkres ) {
+    cudaSetDevice( 0 );
+    TESTING_DEVALLOC( dA2, cuDoubleComplex, ldda*m );
+    }
     
     printf("\n");
     printf( "nb %d, ngpu %d, nstream %d\n", nb, ngpu, nstream );
-    printf("    m     n    CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R|| / ||A||*||X||\n");
-    printf("==========================================================================\n");
+    printf("    m     n    CPU GFlop/s (sec)   GPU GFlop/s (sec)   CUBLAS hemm (sec)   ||R|| / ||A||*||X||\n");
+    printf("==============================================================================================\n");
     for( int i = 0; i < ntest; ++i ) {
     for( int j = 0; j < count; ++j ) {
         m = msize[i];
@@ -173,6 +179,10 @@ int main( int argc, char** argv)
 
         size = lda*m;
         lapackf77_zlarnv( &ione, iseed, &size, hA );
+        // make diagonal real
+        for( int i = 0; i < m; ++i ) {
+            hA[i + i*lda] = MAGMA_Z_MAKE( MAGMA_Z_REAL( hA[i+i*lda] ), 0. );
+        }
         size = lda*n;
         lapackf77_zlarnv( &ione, iseed, &size, hX );
         lapackf77_zlarnv( &ione, iseed, &size, hB );
@@ -194,12 +204,35 @@ int main( int argc, char** argv)
             MagmaLeft, MagmaLower, m, n,
             c_neg_one, dA, ldda, 0,
                        dX, ldda,
-            c_one,     hR, lda,
+            c_one,     dB, ldda, hR, lda,
             ngpu, nb, streams, nstream );
         cudaDeviceSynchronize();
         gpu_time = magma_wtime() - gpu_time;
                 
         gpu_perf = gflops / gpu_time;
+        
+        /* ====================================================================
+           Performs operation using CUBLAS
+           =================================================================== */
+        if ( checkres ) {
+            magma_setdevice( 0 );
+            magma_zsetmatrix( m, m, hA, lda, dA2, ldda );
+            magma_zsetmatrix( m, n, hX, lda, dX[0], ldda );
+            magma_zsetmatrix( m, n, hB, lda, dB[0], ldda );
+            
+            real_Double_t gpu_time2, gpu_perf2;
+            cudaDeviceSynchronize();
+            gpu_time2 = magma_wtime();
+            magma_zhemm(
+                MagmaLeft, MagmaLower, m, n,
+                c_neg_one, dA2,   ldda,
+                           dX[0], ldda,
+                c_one,     dB[0], ldda );
+            cudaDeviceSynchronize();
+            gpu_time2 = magma_wtime() - gpu_time2;
+            
+            gpu_perf2 = gflops / gpu_time2;
+        }
         
         /* =====================================================================
            Performs operation using LAPACK
@@ -232,12 +265,12 @@ int main( int argc, char** argv)
             
             //printf( "R ="  ); magma_zprint( m, n, hR, lda );
             
-            printf( "%5d %5d   %7.1f (%7.4f)   %7.1f (%7.4f)   %8.2e\n",
-                    m, n, cpu_perf, cpu_time, gpu_perf, gpu_time, error );
+            printf( "%5d %5d   %7.1f (%7.4f)   %7.1f (%7.4f)   %7.1f (%7.4f)   %8.2e\n",
+                    m, n, cpu_perf, cpu_time, gpu_perf, gpu_time, gpu_perf2, gpu_time2, error );
         }
         else {
-            printf( "%5d %5d     ---   (  ---  )   %7.1f (%7.4f)   ---\n",
-                    m, n, /*cpu_perf, cpu_time,*/ gpu_perf, gpu_time /*, error*/ );
+            printf( "%5d %5d     ---   (  ---  )   %7.1f (%7.4f)   %7.1f (%7.4f)   ---\n",
+                    m, n, /*cpu_perf, cpu_time,*/ gpu_perf, gpu_time, gpu_perf2, gpu_time2 /*, error*/ );
         }
     }}
     
