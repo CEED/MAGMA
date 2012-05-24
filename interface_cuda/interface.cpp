@@ -150,7 +150,7 @@ extern "C"
 void magma_event_record( magma_event_t event, magma_queue_t queue )
 {
     cudaError_t err;
-    err = cudaEventRecord( event );
+    err = cudaEventRecord( event, queue );
     check_error( err );
 }
 
