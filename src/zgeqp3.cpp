@@ -32,8 +32,9 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
              cuDoubleComplex *a, magma_int_t *lda, 
              cuDoubleComplex *da, magma_int_t *ldda,
              magma_int_t *jpvt,
-             cuDoubleComplex *tau, double *vn1, double *vn2, cuDoubleComplex *
-             auxv, cuDoubleComplex *f, magma_int_t *ldf);
+             cuDoubleComplex *tau, double *vn1, double *vn2, cuDoubleComplex *auxv, 
+             cuDoubleComplex *f, magma_int_t *ldf,
+             cuDoubleComplex *df, magma_int_t *lddf);
 
 extern "C" magma_int_t 
 magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a, 
@@ -121,7 +122,7 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
 #define  A(i, j) (a    +(j)*(*lda) + (i))
 #define dA(i, j) (dwork+(j)* ldda  + (i))
 
-    cuDoubleComplex   *dwork;
+    cuDoubleComplex   *dwork, *df;
 
     static magma_int_t c__1 = 1;
     magma_int_t  i__1, i__2, ldda;
@@ -173,11 +174,13 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
         return *info;
 
     ldda = ((*n+31)/32)*32;
-    if (MAGMA_SUCCESS != magma_zmalloc( &dwork, (*m)*ldda )) {
+    if (MAGMA_SUCCESS != magma_zmalloc( &dwork, (*m)*ldda + (*n+1)*nb)) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
+    df     = dwork + (*m)*ldda; 
     dwork -= 1 + ldda;
+    
 
     /* Move initial columns up front. */
     nfxd = 1;
@@ -260,28 +263,28 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
        L30:
            if (j <= topbmn) {
                jb = min(nb, topbmn - j + 1);
-               
+              
                /* Factorize JB columns among columns J:N. */               
                i__1 = *n - j + 1;
                i__2 = j - 1;
-
-               /*
+               
                // Get panel to the CPU
-               magma_zgetmatrix( m, jb,
-                                 dA(1,j), ldda,
-                                 A (1,j), *lda );
-               // Get the rows
+               magma_zgetmatrix( *m-j+1, jb,
+                                 dA(j,j), ldda,
+                                 A (j,j), *lda );
+
+               // Get the rows 
                magma_zgetmatrix( jb, i__1 - jb, 
                                  dA(j,j + jb), ldda,
                                  A (j,j + jb), *lda );
-               */
-
+               
                //lapackf77_zlaqps(m, &i__1, &i__2, &jb, &fjb, A(1, j), lda, 
                magma_zlaqps(m, &i__1, &i__2, &jb, &fjb, 
                             A(1, j), lda,
                             dA(1, j), &ldda,
                             &jpvt[j], &tau[j], &rwork[j], &rwork[*n + j], work,
-                            &work[jb], &i__1);
+                            &work[ jb], &i__1,
+                            &df  [ jb], &i__1);
                
                j += fjb;
                goto L30;
@@ -294,11 +297,11 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
        if (j <= minmn) {
            i__1 = *n - j + 1;
            i__2 = j - 1;
-           /*
-           magma_zgetmatrix( m, i__1,
-                             dA(1,j), ldda,
-                             A (1,j), *lda );
-           */
+           
+           magma_zgetmatrix( *m-j+1, i__1,
+                             dA(j,j), ldda,
+                             A (j,j), *lda );
+           
            lapackf77_zlaqp2(m, &i__1, &i__2, A(1, j), lda, 
                             &jpvt[j], &tau[j], &rwork[j], &rwork[*n+j], work);
        }

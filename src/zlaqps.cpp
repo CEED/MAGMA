@@ -22,7 +22,8 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset,
              cuDoubleComplex *da, magma_int_t *ldda,
              magma_int_t *jpvt, cuDoubleComplex *tau, double *vn1, double *vn2, 
              cuDoubleComplex *auxv, 
-             cuDoubleComplex *f, magma_int_t *ldf)
+             cuDoubleComplex *f, magma_int_t *ldf,
+             cuDoubleComplex *df, magma_int_t *lddf)
 {
 /*
     -- MAGMA (version 1.1) --
@@ -103,6 +104,9 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset,
       X. Sun, Computer Science Dept., Duke University, USA   
     =====================================================================    */
     
+#define  A(i, j) (a    +(j)*(*lda)  + (i))
+#define dA(i, j) (da   +(j)*(*ldda) + (i))
+
     static cuDoubleComplex zero = MAGMA_Z_MAKE(0.,0.);
     static cuDoubleComplex one  = MAGMA_Z_MAKE(1.,0.);
     static cuDoubleComplex mone = MAGMA_Z_MAKE(-1.,0.);
@@ -138,7 +142,25 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset,
     lsticc = 0;
     k = 0;
     tol3z = magma_dsqrt(dlamch_("Epsilon"));
-    
+
+    da -= 1 + *ldda;
+    df -= 1 + *lddf;
+
+    static cudaStream_t stream;
+    magma_queue_create( &stream );
+
+    // TTT =========================================================
+    /*
+    rk = *offset + *kb;
+    i__1 = *m - rk;
+    i__2 = *n - *kb;
+    if (*kb < min(*n, *m - *offset))
+        fprintf(stderr,"%e ", 
+                cpu_gpu_zdiff(i__1, i__2, &a[rk + 1 + (*kb + 1) * a_dim1], *lda,
+                              &da[rk + 1 + (*kb + 1) * a_dim1], *ldda));
+    */
+    // TTT =========================================================
+
  L10:
     if (k < *nb && lsticc == 0) {
         ++k;
@@ -155,27 +177,27 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset,
 
         if (pvt != k) {
             
-            blasf77_zswap(m, &a[pvt * a_dim1 + 1], &c__1, &a[k * a_dim1 + 1], &c__1);
-            /*
-            if (pvt < *nb){
+            //blasf77_zswap(m, &a[pvt * a_dim1 + 1], &c__1, &a[k * a_dim1 + 1], &c__1);
+            if (pvt <= *nb){
                 // TTT - no need of transfer if pivot is within the panel 
                 blasf77_zswap(m, &a[pvt * a_dim1 + 1], &c__1, &a[k * a_dim1 + 1], &c__1);
             }
             else {
                 // TTT - first start copy from GPU
-                magma_zgetmatrix( m - *offset - *nb, 1,
-                                  dA(*offset + *nb,pvt), ldda,
-                                  A (*offset + *nb,pvt), *lda );
+                magma_zgetmatrix( *m - *offset - *nb, 1,
+                                  dA(*offset + *nb+1,pvt), *ldda,
+                                  A (*offset + *nb+1,pvt), *lda );
+                
                 // TTT - swap as usual on CPU
                 blasf77_zswap(m, &a[pvt * a_dim1 + 1], &c__1, &a[k * a_dim1 + 1], &c__1);
                 // TTT - restore the GPU
-                magma_zsetmatrix( m - *offset - *nb, 1,
-                                  A (*offset + *nb,pvt), *lda,
-                                  dA(*offset + *nb,pvt), ldda);
+                magma_zsetmatrix_async( *m - *offset - *nb, 1,
+                                        A (*offset + *nb+1,pvt), *lda,
+                                        dA(*offset + *nb+1,pvt), *ldda, stream);
             }
-            */
 
             i__1 = k - 1;
+
             /* TTT - this forces us to send F at the end to GPU       */
             blasf77_zswap(&i__1, &f[pvt + f_dim1], ldf, &f[k + f_dim1], ldf);
             itemp = jpvt[pvt];
@@ -226,23 +248,41 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset,
        if (k < *n) {
            i__1 = *m - rk + 1;
            i__2 = *n - k;
-           blasf77_zgemv(MagmaConjTransStr, &i__1, &i__2, &tau[k], 
-                         &a[rk + (k + 1) * a_dim1], lda, &a[rk + k * a_dim1], 
-                         &c__1, &zero, &f[k + 1 + k * f_dim1], &c__1);
            /*
-           // TTT - Send the vector to the GPU
-           magma_zsetmatrix( i__1, 1,
-                             A(rk, k),  *lda,
-                             dA(rk,k), ldda );
-           // TTT - multiply on GPU
-           magma_zgemv(MagmaConjTrans, i__1, i__2, tau[k],
-                       dA(rk, k+1), ldda, dA(rk, k),
-                       c__1, zero, &df[k + 1 + k * f_dim1], c__1);
-           // TTT - Send the result back
-           magma_zgetmatrix(i__2, 1,
-                            &df[k + 1 + k * f_dim1], i__2,
-                            & f[k + 1 + k * f_dim1], i__2);
+           blasf77_zgemv(MagmaConjTransStr, &i__1, &i__2, &tau[k], 
+                         A(rk, k + 1), lda, A(rk, k), 
+                         &c__1, &zero, &f[k + 1 + k * f_dim1], &c__1);
            */
+           
+           // TTT - Send the vector to the GPU
+           magma_zsetmatrix( i__1, 1, A(rk, k), *lda, dA(rk,k), *ldda );
+
+           // TTT - multiply on GPU
+           int i__3 = *nb-k;
+           int i__4 = i__2 -i__3, i__5 = *nb-k+1;
+
+           magma_zgemv(MagmaConjTrans, i__1 - i__5, i__2 - i__3, tau[k],
+                       dA(rk+i__5, k+1+i__3), *ldda, dA(rk+i__5, k),
+                       c__1, zero, &df[k + 1 +i__3 + k * f_dim1], c__1);
+
+           magma_zgetmatrix_async(i__2-i__3, 1,
+                                  &df[k + 1 +i__3+k * f_dim1], i__2,
+                                  & f[k + 1 +i__3+k * f_dim1], i__2, stream);
+
+           blasf77_zgemv(MagmaConjTransStr, &i__1, &i__3, &tau[k],
+                         A(rk, k + 1), lda, A(rk, k),
+                         &c__1, &zero, &f[k + 1 + k * f_dim1], &c__1);
+
+           magma_queue_sync( stream );
+           blasf77_zgemv(MagmaConjTransStr, &i__5, &i__4, &tau[k],
+                         A(rk, k+1 +i__3), lda, A(rk, k),
+                         &c__1, &one, &f[k + 1 + i__3 + k * f_dim1], &c__1);
+
+           //fprintf(stderr,"||e|| = %e\n", cpu_gpu_zdiff(i__1 + (k-*nb)-1, i__2 +(k-*nb), 
+           //                                           A(rk-(k-*nb)+1, k+1-(k-*nb)), *lda,
+           //                                           dA(rk-(k-*nb)+1, k+1-(k-*nb)), *ldda));
+
+           
        }
        
        /* Padding F(1:K,K) with zeros. */
@@ -288,7 +328,6 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset,
 
                    temp = max(0., ((temp + 1.) * (1. - temp)));
 
-                   /* Computing 2nd power */
                    d__1 = vn1[j] / vn2[j];
                    temp2 = temp * (d__1 * d__1);
                    if (temp2 <= tol3z) {
@@ -314,19 +353,29 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset,
     if (*kb < min(*n, *m - *offset)) {
        i__1 = *m - rk;
        i__2 = *n - *kb;
-       blasf77_zgemm(MagmaNoTransStr, MagmaConjTransStr, &i__1, &i__2, kb, &mone, 
-                     &a[rk + 1 + a_dim1], lda, &f[*kb + 1 + f_dim1], ldf, &one,
-                     &a[rk + 1 + (*kb + 1) * a_dim1], lda);
+       //fprintf(stderr,"difference %3d %3d %e", i__1, i__2,
+       //      cpu_gpu_zdiff(i__1, i__2, &a[rk + 1 + (*kb + 1) * a_dim1], *lda,
+       //                    &da[rk + 1 + (*kb + 1) * a_dim1], *ldda));
        
-       /*
+       //blasf77_zgemm(MagmaNoTransStr, MagmaConjTransStr, &i__1, &i__2, kb, &mone, 
+       //              &a[rk + 1 + a_dim1], lda, &f[*kb + 1 + f_dim1], ldf, &one,
+       //              &a[rk + 1 + (*kb + 1) * a_dim1], lda);
+       
        // TTT - send f to the GPU
        magma_zsetmatrix( i__2, *kb,
-                         &f[*kb + 1 + f_dim1], ldf,
-                         &d[*kb + 1 + f_dim1], i__2);
+                         &f [*kb + 1 + f_dim1], *ldf,
+                         &df[*kb + 1 + f_dim1], i__2);
+       // TTT - send V to the GPU (is it there or was it modified, i.e., is this needed?
+       magma_zsetmatrix( i__1, *kb,
+                         &a [rk + 1 + a_dim1], *lda,
+                         &da[rk + 1 + a_dim1], *ldda);
+
        magma_zgemm(MagmaNoTrans, MagmaConjTrans, i__1, i__2, *kb, mone,
-                   &da[rk + 1 + a_dim1], ldda, &f[*kb + 1 + f_dim1], i__2, one,
-                   &da[rk + 1 + (*kb + 1) * a_dim1], ldda);
-       */
+                   &da[rk + 1 + a_dim1], *ldda, &df[*kb + 1 + f_dim1], i__2, one,
+                   &da[rk + 1 + (*kb + 1) * a_dim1], *ldda);
+       //fprintf(stderr," %e\n", 
+       //        cpu_gpu_zdiff(i__1, i__2, &a[rk + 1 + (*kb + 1) * a_dim1], *lda,
+       //                      &da[rk + 1 + (*kb + 1) * a_dim1], *ldda));
     }
     
     /* Recomputation of difficult columns. */
@@ -335,13 +384,18 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset,
        itemp = (magma_int_t)(vn2[lsticc] >= 0. ? floor(vn2[lsticc] + .5) : -floor(.5 - vn2[lsticc]));  
        i__1 = *m - rk;
        vn1[lsticc] = cblas_dznrm2(i__1, &a[rk + 1 + lsticc * a_dim1], c__1);
-       
+
+       // TTT (where is the data, CPU or GPU ?)
+       vn1[lsticc] = cublasDznrm2(i__1, &da[rk + 1 + lsticc * a_dim1], c__1);
+       printf("lsticc = %d\n", lsticc);
        /* NOTE: The computation of VN1( LSTICC ) relies on the fact that   
           SNRM2 does not fail on vectors with norm below the value of SQRT(DLAMCH('S')) */       
        vn2[lsticc] = vn1[lsticc];
        lsticc = itemp;
        goto L60;
     }
+    
+    magma_queue_destroy( stream );
 
-    return 0;
+    return MAGMA_SUCCESS;
 } /* magma_zlaqps */
