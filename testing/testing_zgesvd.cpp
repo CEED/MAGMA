@@ -92,9 +92,9 @@ int main( int argc, char** argv)
 #endif
     TESTING_HOSTALLOC(h_R, cuDoubleComplex, n2);
 
-    magma_int_t nb = 128; // magma_get_zgesvd_nb(N);
-    magma_int_t lwork = max(5*min_mn, (3*min_mn + max(M,N)))*nb;
-
+    magma_int_t nb = magma_get_zgesvd_nb(N);
+    magma_int_t lwork = (M+N)*nb+2*N;
+    
     TESTING_HOSTALLOC(h_work, cuDoubleComplex, lwork);
 
     printf("\n\n");
@@ -151,20 +151,24 @@ int main( int argc, char** argv)
              =================================================================== */
           magma_int_t izero    = 0;
           double *E, result[4], zero = 0., eps = lapackf77_dlamch( "E" );
+
+          cuDoubleComplex *h_work_err;
+          magma_int_t lwork_err = max(5*min_mn, (3*min_mn + max(M,N)))*128;
+          TESTING_MALLOC(h_work_err, cuDoubleComplex, lwork_err);
           
           #if defined(PRECISION_z) || defined(PRECISION_c)
              lapackf77_zbdt01(&M, &N, &izero, h_A, &M,
-                              U, &M, S1, E, VT, &N, h_work, rwork, &result[0]);
+                              U, &M, S1, E, VT, &N, h_work_err, rwork, &result[0]);
              if (M != 0 && N != 0) {
-               lapackf77_zunt01("Columns",&M,&M, U,&M, h_work,&lwork, rwork, &result[1]);
-               lapackf77_zunt01(   "Rows",&N,&N,VT,&N, h_work,&lwork, rwork, &result[2]);
+               lapackf77_zunt01("Columns",&M,&M, U,&M, h_work_err,&lwork_err, rwork, &result[1]);
+               lapackf77_zunt01(   "Rows",&N,&N,VT,&N, h_work_err,&lwork_err, rwork, &result[2]);
              }
           #else
              lapackf77_zbdt01(&M, &N, &izero, h_A, &M,
-                              U, &M, S1, E, VT, &N, h_work,        &result[0]);
+                              U, &M, S1, E, VT, &N, h_work_err, &result[0]);
              if (M != 0 && N != 0) {
-               lapackf77_zunt01("Columns",&M,&M, U,&M, h_work,&lwork,        &result[1]);
-               lapackf77_zunt01(   "Rows",&N,&N,VT,&N, h_work,&lwork,        &result[2]);
+               lapackf77_zunt01("Columns",&M,&M, U,&M, h_work_err, &lwork_err, &result[1]);
+               lapackf77_zunt01(   "Rows",&N,&N,VT,&N, h_work_err, &lwork_err, &result[2]);
              }
           #endif
           
@@ -186,6 +190,8 @@ int main( int argc, char** argv)
           printf("(3)    | I - VT VT' | /  N                   = %e\n", result[2]*eps);
           printf("(4)    0 if S contains MNMIN nonnegative \n");
           printf("         values in decreasing order          = %e\n", result[3]);
+
+          TESTING_FREE( h_work_err );
         }
 
         /* =====================================================================
