@@ -344,4 +344,28 @@ int magma_get_zgetri_nb(int m) {
     return 64;
 }
 
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for gesvd based on m
+*/
+
+extern "C"
+int magma_get_sgesvd_nb(int m){
+    return 32;
+}
+
+extern "C"
+int magma_get_dgesvd_nb(int m){
+    return 32;
+}
+
+extern "C"
+int magma_get_cgesvd_nb(int m){
+    return 32;
+}
+
+extern "C"
+int magma_get_zgesvd_nb(int m){
+    return 32;
+}
+
 #endif  // HAVE_CUBLAS
