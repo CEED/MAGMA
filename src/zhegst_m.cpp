@@ -10,7 +10,7 @@
        @precisions normal z -> s d c
 */
 #include "common_magma.h"
-#include "cblas.h"
+#include <cblas.h>
 
 extern "C"
 magma_int_t magma_get_zhegst_m_nb() { return 256;}

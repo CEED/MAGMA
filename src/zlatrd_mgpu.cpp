@@ -248,9 +248,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
     magma_int_t id, idw;
     //cuDoubleComplex *work;
 
-    #if defined(PRECISION_z) || defined(PRECISION_c)
-       cuDoubleComplex value = MAGMA_Z_ZERO;
-    #endif
+    cuDoubleComplex value = MAGMA_Z_ZERO;
     
     static magma_int_t kk;  
     static magma_int_t ione = 1;
@@ -345,12 +343,12 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
 
           blasf77_zscal(&i, &tau[i - 1], W(0, iw), &ione);
 
-#if defined(PRECISION_z) || defined(PRECISION_c)
-          blasf77_zdotc(&value, &i, W(0, iw), &ione, A(0, i), &ione);
-          alpha = tau[i - 1] * -.5f * value;
-#else
-          alpha = tau[i - 1] * -.5f * blasf77_zdotc(&i, W(0, iw), &ione, A(0, i), &ione);
-#endif
+          #if defined(PRECISION_z) || defined(PRECISION_c)
+          cblas_zdotc_sub( i, W(0,iw), ione, A(0,i), ione, &value );
+          #else
+          value = cblas_zdotc( i, W(0,iw), ione, A(0,i), ione );
+          #endif
+          alpha = tau[i - 1] * -0.5f * value;
           blasf77_zaxpy(&i, &alpha, A(0, i), &ione,
                         W(0, iw), &ione);
         }
@@ -544,20 +542,11 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
               blasf77_zscal(&i_n, &tau[i], W(i+1,i), &ione);
               
               #if defined(PRECISION_z) || defined(PRECISION_c)
-                     /* Comment:
-                        To do - move to cblas in cases like this. The commented
-                        out version works with MKL but is not a standard interface
-                        for other BLAS zdoc implementations                        
-                     */
-                     /*
-                        cblas_zdotc_sub(i_n, W(i +1, i), ione,
-                                        A(i +1, i), ione, &value);
-                     */
-                  blasf77_zdotc(&value, &i_n, W(i+1,i), &ione, A(i+1, i), &ione);
-                  alpha = tau[i]* -.5f * value;
+              cblas_zdotc_sub( i_n, W(i+1,i), ione, A(i+1,i), ione, &value );
               #else
-                  alpha = tau[i]* -.5f* blasf77_zdotc(&i_n, W(i+1,i), &ione, A(i+1, i), &ione);
+              value = cblas_zdotc( i_n, W(i+1,i), ione, A(i+1,i), ione );
               #endif
+              alpha = tau[i] * -0.5f * value;
               blasf77_zaxpy(&i_n, &alpha, A(i+1, i), &ione, W(i+1,i), &ione);
               trace_cpu_end( 0 );
               for( id=0; id<num_gpus; id++ ) {

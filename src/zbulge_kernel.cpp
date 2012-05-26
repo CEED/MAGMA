@@ -12,6 +12,8 @@
  */
 
 #include "common_magma.h"
+#include <cblas.h>
+
 //#include "magma_zbulgeinc.h"
 // === Define what BLAS to use ============================================
 #define PRECISION_z
@@ -60,13 +62,13 @@ magma_zlarfxsym(magma_int_t N, cuDoubleComplex *A, magma_int_t LDA, cuDoubleComp
   blasf77_zhemv("L",&N, TAU, A, &LDA, V, &IONE, &Z_ZERO, WORK, &IONE);
   /* je calcul dtmp= X'*V */
 #if defined(PRECISION_z) || defined(PRECISION_c)
-   dtmp = Z_ZERO; 
-   for (j = 0; j < N ; j++)
-      dtmp = dtmp + MAGMA_Z_CNJG(WORK[j]) * V[j];  
-   // cblas_zdotc_sub(N, WORK, IONE, V, IONE, &dtmp);
+   //dtmp = Z_ZERO;
+   //for (j = 0; j < N ; j++)
+   //   dtmp = dtmp + MAGMA_Z_CNJG(WORK[j]) * V[j];
+   cblas_zdotc_sub(N, WORK, IONE, V, IONE, &dtmp);
 #else
-  dtmp = blasf77_zdotc(&N,WORK,&IONE,V,&IONE);
-#endif  
+  dtmp = cblas_zdotc(N, WORK, IONE, V, IONE);
+#endif
   /* je calcul 1/2 X'*V*t = 1/2*dtmp*tau  */
   dtmp = -dtmp * Z_HALF * (*TAU);
   /* je calcul W=X-1/2VX'Vt = X - dtmp*V */
