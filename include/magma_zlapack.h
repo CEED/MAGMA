@@ -17,37 +17,30 @@ extern "C" {
 #endif
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- LAPACK Externs used in MAGMA
+   -- BLAS and LAPACK functions (alphabetical order)
 */
 
 #define blasf77_zaxpy      FORTRAN_NAME( zaxpy,  ZAXPY  )
 #define blasf77_zcopy      FORTRAN_NAME( zcopy,  ZCOPY  )
-
-/* complex versions use C wrapper to return value; no name mangling. */
-#if  defined(PRECISION_z) || defined(PRECISION_c)    
-#define blasf77_zdotc      zdotc
-#else
-#define blasf77_zdotc      FORTRAN_NAME( zdotc,  ZDOTC  )
-#endif
-
 #define blasf77_zgemm      FORTRAN_NAME( zgemm,  ZGEMM  )
 #define blasf77_zgemv      FORTRAN_NAME( zgemv,  ZGEMV  )
+#define blasf77_zgerc      FORTRAN_NAME( zgerc,  ZGERC  )
+#define blasf77_zgeru      FORTRAN_NAME( zgeru,  ZGERU  )
 #define blasf77_zhemm      FORTRAN_NAME( zhemm,  ZHEMM  )
 #define blasf77_zhemv      FORTRAN_NAME( zhemv,  ZHEMV  )
-#define blasf77_zher2k     FORTRAN_NAME( zher2k, ZHER2K )
 #define blasf77_zher2      FORTRAN_NAME( zher2,  ZHER2  )
+#define blasf77_zher2k     FORTRAN_NAME( zher2k, ZHER2K )
 #define blasf77_zherk      FORTRAN_NAME( zherk,  ZHERK  )
 #define blasf77_zscal      FORTRAN_NAME( zscal,  ZSCAL  )
-#define blasf77_zdscal     FORTRAN_NAME( zdscal, ZDSCAL ) 
+#define blasf77_zdscal     FORTRAN_NAME( zdscal, ZDSCAL )
+#define blasf77_zswap      FORTRAN_NAME( zswap,  ZSWAP  )
 #define blasf77_zsymm      FORTRAN_NAME( zsymm,  ZSYMM  )
 #define blasf77_zsyr2k     FORTRAN_NAME( zsyr2k, ZSYR2K )
 #define blasf77_zsyrk      FORTRAN_NAME( zsyrk,  ZSYRK  )
-#define blasf77_zswap      FORTRAN_NAME( zswap,  ZSWAP  )
 #define blasf77_ztrmm      FORTRAN_NAME( ztrmm,  ZTRMM  )
 #define blasf77_ztrmv      FORTRAN_NAME( ztrmv,  ZTRMV  )
 #define blasf77_ztrsm      FORTRAN_NAME( ztrsm,  ZTRSM  )
 #define blasf77_ztrsv      FORTRAN_NAME( ztrsv,  ZTRSV  )
-#define blasf77_zgeru      FORTRAN_NAME( zgeru,  ZGERU  )
 
 #define lapackf77_zbdsqr   FORTRAN_NAME( zbdsqr, ZBDSQR )
 #define lapackf77_zgebak   FORTRAN_NAME( zgebak, ZGEBAK )
@@ -130,80 +123,155 @@ extern "C" {
 #define lapackf77_zlarfx   FORTRAN_NAME( zlarfx, ZLARFX )
 #define lapackf77_zstt21   FORTRAN_NAME( zstt21, ZSTT21 )
 
-
+// macros to handle differences in arguments between complex and real versions of routines.
 #if defined(PRECISION_z) || defined(PRECISION_c)
 #define DWORKFORZ        double *rwork,
 #define DWORKFORZ_AND_LD double *rwork, magma_int_t *ldrwork,
 #define WSPLIT           cuDoubleComplex *w
 #else
-#define DWORKFORZ 
+#define DWORKFORZ
 #define DWORKFORZ_AND_LD
 #define WSPLIT           double *wr, double *wi
 #endif
 
-  /*
-   * BLAS functions (Alphabetical order)
-   */
-void     blasf77_zaxpy(const int *, cuDoubleComplex *, cuDoubleComplex *, 
-                       const int *, cuDoubleComplex *, const int *);
-void     blasf77_zcopy(const int *, cuDoubleComplex *, const int *,
-                       cuDoubleComplex *, const int *);
+/*
+ * BLAS functions (alphabetical order)
+ */
+void blasf77_zaxpy(  const magma_int_t *n,
+                     const cuDoubleComplex *alpha,
+                     const cuDoubleComplex *x, const magma_int_t *incx,
+                           cuDoubleComplex *y, const magma_int_t *incy );
+
+void blasf77_zcopy(  const magma_int_t *n,
+                     const cuDoubleComplex *x, const magma_int_t *incx,
+                           cuDoubleComplex *y, const magma_int_t *incy );
+
+void blasf77_zgemm(  const char *transa, const char *transb,
+                     const magma_int_t *m, const magma_int_t *n, const magma_int_t *k,
+                     const cuDoubleComplex *alpha,
+                     const cuDoubleComplex *A, const magma_int_t *lda,
+                     const cuDoubleComplex *B, const magma_int_t *ldb,
+                     const cuDoubleComplex *beta,
+                           cuDoubleComplex *C, const magma_int_t *ldc );
+
+void blasf77_zgemv(  const char *transa,
+                     const magma_int_t *m, const magma_int_t *n,
+                     const cuDoubleComplex *alpha,
+                     const cuDoubleComplex *A, const magma_int_t *lda,
+                     const cuDoubleComplex *x, const magma_int_t *incx,
+                     const cuDoubleComplex *beta,
+                           cuDoubleComplex *y, const magma_int_t *incy );
+
+void blasf77_zgerc(  const magma_int_t *m, const magma_int_t *n,
+                     const cuDoubleComplex *alpha,
+                     const cuDoubleComplex *x, const magma_int_t *incx,
+                     const cuDoubleComplex *y, const magma_int_t *incy,
+                           cuDoubleComplex *A, const magma_int_t *lda );
+
 #if defined(PRECISION_z) || defined(PRECISION_c)
-void     blasf77_zdotc(cuDoubleComplex *, int *, cuDoubleComplex *, int *, 
-                       cuDoubleComplex *, int *);
+void blasf77_zgeru(  const magma_int_t *m, const magma_int_t *n,
+                     const cuDoubleComplex *alpha,
+                     const cuDoubleComplex *x, const magma_int_t *incx,
+                     const cuDoubleComplex *y, const magma_int_t *incy,
+                           cuDoubleComplex *A, const magma_int_t *lda );
 #endif
-void     blasf77_zgemm(const char *, const char *, const int *, const int *, const int *,
-                       cuDoubleComplex *, cuDoubleComplex *, const int *, 
-                       cuDoubleComplex *, const int *, cuDoubleComplex *,
-                       cuDoubleComplex *, const int *);
-void     blasf77_zgemv(const char *, const int  *, const int *, cuDoubleComplex *, 
-                       cuDoubleComplex *, const int *, cuDoubleComplex *, const int *, 
-                       cuDoubleComplex *, cuDoubleComplex *, const int *);
-void     blasf77_zgeru(int *, int *, cuDoubleComplex *, cuDoubleComplex *, int *, 
-                       cuDoubleComplex *, int *, cuDoubleComplex *, int *);
-void     blasf77_zhemm(const char *, const char *, const int *, const int *, 
-                       cuDoubleComplex *, cuDoubleComplex *, const int *, 
-                       cuDoubleComplex *, const int *, cuDoubleComplex *,
-                       cuDoubleComplex *, const int *);
-void     blasf77_zhemv(const char *, const int  *, cuDoubleComplex *, cuDoubleComplex *,
-                       const int *, cuDoubleComplex *, const int *, cuDoubleComplex *,
-                       cuDoubleComplex *, const int *);
-void    blasf77_zher2k(const char *, const char *, const int *, const int *, 
-                       cuDoubleComplex *, cuDoubleComplex *, const int *, 
-                       cuDoubleComplex *, const int *, double *, 
-                       cuDoubleComplex *, const int *);
-void     blasf77_zher2(const char *, int *, cuDoubleComplex *, 
-                       cuDoubleComplex *, int *, cuDoubleComplex *, int *, 
-                       cuDoubleComplex *, int *);
-void    blasf77_zherk( const char *, const char *, const int *, const int *, double *, 
-                       cuDoubleComplex *, const int *, double *, cuDoubleComplex *, 
-                       const int *);
-void    blasf77_zscal( const int *, cuDoubleComplex *, cuDoubleComplex *, const int *);
+
+void blasf77_zhemm(  const char *side, const char *uplo,
+                     const magma_int_t *m, const magma_int_t *n,
+                     const cuDoubleComplex *alpha,
+                     const cuDoubleComplex *A, const magma_int_t *lda,
+                     const cuDoubleComplex *B, const magma_int_t *ldb,
+                     const cuDoubleComplex *beta,
+                           cuDoubleComplex *C, const magma_int_t *ldc );
+
+void blasf77_zhemv(  const char *uplo,
+                     const magma_int_t *n,
+                     const cuDoubleComplex *alpha,
+                     const cuDoubleComplex *A, const magma_int_t *lda,
+                     const cuDoubleComplex *x, const magma_int_t *incx,
+                     const cuDoubleComplex *beta,
+                           cuDoubleComplex *y, const magma_int_t *incy );
+
+void blasf77_zher2(  const char *uplo,
+                     const magma_int_t *n,
+                     const cuDoubleComplex *alpha,
+                     const cuDoubleComplex *x, const magma_int_t *incx,
+                     const cuDoubleComplex *y, const magma_int_t *incy,
+                           cuDoubleComplex *A, const magma_int_t *lda );
+
+void blasf77_zher2k(  const char *uplo, const char *trans,
+                     const magma_int_t *n, const magma_int_t *k,
+                     const cuDoubleComplex *alpha,
+                     const cuDoubleComplex *A, const magma_int_t *lda,
+                     const cuDoubleComplex *B, const magma_int_t *ldb,
+                     const double *beta,
+                           cuDoubleComplex *C, const magma_int_t *ldc );
+
+void blasf77_zherk(  const char *uplo, const char *trans,
+                     const magma_int_t *n, const magma_int_t *k,
+                     const double *alpha,
+                     const cuDoubleComplex *A, const magma_int_t *lda,
+                     const double *beta,
+                           cuDoubleComplex *C, const magma_int_t *ldc );
+
+void blasf77_zscal(  const magma_int_t *n,
+                     const cuDoubleComplex *alpha,
+                           cuDoubleComplex *x, const magma_int_t *incx );
+
 #if defined(PRECISION_z) || defined(PRECISION_c)
-void    blasf77_zdscal( const int *, double *, cuDoubleComplex *, const int *);
+void blasf77_zdscal( const magma_int_t *n,
+                     const double *alpha,
+                           cuDoubleComplex *x, const magma_int_t *incx );
 #endif
-void    blasf77_zsymm( const char *, const char *, const int *, const int *, 
-                       cuDoubleComplex *, cuDoubleComplex *, const int *, 
-                       cuDoubleComplex *, const int *, cuDoubleComplex *,
-                       cuDoubleComplex *, const int *);
-void    blasf77_zsyr2k(const char *, const char *, const int *, const int *, 
-                       cuDoubleComplex *, cuDoubleComplex *, const int *, 
-                       cuDoubleComplex *, const int *, cuDoubleComplex *, 
-                       cuDoubleComplex *, const int *);
-void    blasf77_zsyrk( const char *, const char *, const int *, const int *, 
-                       cuDoubleComplex *, cuDoubleComplex *, const int *, 
-                       cuDoubleComplex *, cuDoubleComplex *, const int *);
-void    blasf77_zswap( int *, cuDoubleComplex *, int *, cuDoubleComplex *, int *);
-void    blasf77_ztrmm( const char *, const char *, const char *, const char *, 
-                       const int *, const int *, cuDoubleComplex *,
-                       cuDoubleComplex *, const int *, cuDoubleComplex *,const int *);
-void    blasf77_ztrmv( const char *, const char *, const char *, const int *, 
-                       cuDoubleComplex*,  const int *, cuDoubleComplex *, const int*);
-void    blasf77_ztrsm( const char *, const char *, const char *, const char *, 
-                       const int *, const int *, cuDoubleComplex *, 
-                       cuDoubleComplex *, const int *, cuDoubleComplex *,const int*);
-void    blasf77_ztrsv( const char *, const char *, const char *, const int *, 
-                       cuDoubleComplex *, const int *, cuDoubleComplex *, const int*);
+
+void blasf77_zswap(  const magma_int_t *n,
+                     cuDoubleComplex *x, const magma_int_t *incx,
+                     cuDoubleComplex *y, const magma_int_t *incy );
+
+void blasf77_zsymm(  const char *side, const char *uplo,
+                     const magma_int_t *m, const magma_int_t *n,
+                     const cuDoubleComplex *alpha,
+                     const cuDoubleComplex *A, const magma_int_t *lda,
+                     const cuDoubleComplex *B, const magma_int_t *ldb,
+                     const cuDoubleComplex *beta,
+                           cuDoubleComplex *C, const magma_int_t *ldc );
+
+void blasf77_zsyr2k( const char *uplo, const char *trans,
+                     const magma_int_t *n, const magma_int_t *k,
+                     const cuDoubleComplex *alpha,
+                     const cuDoubleComplex *A, const magma_int_t *lda,
+                     const cuDoubleComplex *B, const magma_int_t *ldb,
+                     const cuDoubleComplex *beta,
+                           cuDoubleComplex *C, const magma_int_t *ldc );
+
+void blasf77_zsyrk(  const char *uplo, const char *trans,
+                     const magma_int_t *n, const magma_int_t *k,
+                     const cuDoubleComplex *alpha,
+                     const cuDoubleComplex *A, const magma_int_t *lda,
+                     const cuDoubleComplex *beta,
+                           cuDoubleComplex *C, const magma_int_t *ldc );
+
+void blasf77_ztrmm(  const char *side, const char *uplo, const char *transa, const char *diag,
+                     const magma_int_t *m, const magma_int_t *n,
+                     const cuDoubleComplex *alpha,
+                     const cuDoubleComplex *A, const magma_int_t *lda,
+                           cuDoubleComplex *B, const magma_int_t *ldb );
+
+void blasf77_ztrmv(  const char *uplo, const char *transa, const char *diag,
+                     const magma_int_t *n,
+                     const cuDoubleComplex *A, const magma_int_t *lda,
+                           cuDoubleComplex *x, const magma_int_t *incx );
+
+void blasf77_ztrsm(  const char *side, const char *uplo, const char *transa, const char *diag,
+                     const magma_int_t *m, const magma_int_t *n,
+                     const cuDoubleComplex *alpha,
+                     const cuDoubleComplex *A, const magma_int_t *lda,
+                           cuDoubleComplex *B, const magma_int_t *ldb );
+
+void blasf77_ztrsv(  const char *uplo, const char *transa, const char *diag,
+                     const magma_int_t *n,
+                     const cuDoubleComplex *A, const magma_int_t *lda,
+                           cuDoubleComplex *x, const magma_int_t *incx );
 
   /*
    * Lapack functions (Alphabetical order)

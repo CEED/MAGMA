@@ -66,10 +66,6 @@ void     lapackf77_slag2d( magma_int_t *m, magma_int_t *n, float           *sa, 
 double   lapackf77_dlapy2( double *x, double *y  );
 float    lapackf77_slapy2( float  *x, float  *y  );
 
-// zdotc has different calling sequence, so define these here
-double   blasf77_ddot( magma_int_t *, double *, magma_int_t *, double *, magma_int_t *);
-float    blasf77_sdot( magma_int_t *, float *,  magma_int_t *, float *,  magma_int_t *);
-
 #ifdef __cplusplus
 }
 #endif
