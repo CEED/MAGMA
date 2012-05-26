@@ -119,7 +119,7 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
 
     LWORK   (input) INTEGER   
             The dimension of the array WORK.   
-            LWORK >=  (M+N)*nb+N.   
+            LWORK >=  (M+N)*nb + 2*N.   
 
             If LWORK = -1, then a workspace query is assumed; the routine   
             only calculates the optimal size of the WORK array, returns   
