@@ -179,7 +179,7 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
                 if ( (*info == 0) && (iinfo > 0) )
                     *info = iinfo + i*nb;
 
-                magmablas_zpermute_long2( dAT, lddat, ipiv, nb, i*nb );
+                magmablas_zpermute_long2( n, dAT, lddat, ipiv, nb, i*nb );
 
                 // upload i-th panel
                 magma_zsetmatrix( m-i*nb, nb, work, lddwork, dAP, maxm );
@@ -224,7 +224,7 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
         lapackf77_zgetrf( &rows, &nb0, work, &lddwork, ipiv+s*nb, &iinfo);
         if ( (*info == 0) && (iinfo > 0) )
             *info = iinfo + s*nb;
-        magmablas_zpermute_long2( dAT, lddat, ipiv, nb0, s*nb );
+        magmablas_zpermute_long2( n, dAT, lddat, ipiv, nb0, s*nb );
 
         // upload i-th panel
         magma_zsetmatrix( rows, nb0, work, lddwork, dAP, maxm );
