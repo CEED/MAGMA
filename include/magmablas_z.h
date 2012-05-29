@@ -28,7 +28,7 @@ void zzero_nbxnb_block(           magma_int_t, cuDoubleComplex *, magma_int_t);
 void magmablas_zinplace_transpose(cuDoubleComplex *, magma_int_t, magma_int_t);
 void magmablas_zpermute_long(     cuDoubleComplex *, magma_int_t, 
                   magma_int_t *, magma_int_t, magma_int_t);
-void magmablas_zpermute_long2(    cuDoubleComplex *, magma_int_t, 
+void magmablas_zpermute_long2(int n, cuDoubleComplex *, magma_int_t, 
                   magma_int_t *, magma_int_t, magma_int_t);
 void magmablas_zpermute_long3( cuDoubleComplex *dAT, int lda, 
                                int *ipiv, int nb, int ind );
