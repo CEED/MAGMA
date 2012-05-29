@@ -23,6 +23,9 @@ Included are routines for the following algorithms:
     * MAGMA BLAS in real arithmetic (single and double), including
       gemm, gemv, symv, and trsm.
 
+ 1.x.x
+    * Fix bug in [zcsd]getrf_gpu.cpp
+
  1.2.0
     * Fix bugs in [zcsd]hegst[_gpu].cpp
     * Fix a bug in [zcsd]latrd.cpp
@@ -39,9 +42,12 @@ Included are routines for the following algorithms:
     * Fix warning in *getrf.cpp when nb0 is zero.
     * Add reduction to band-diagonal for symmetric/Hermitian definite matrices
       in [zc]hebbd.cpp and [ds]sybbd.cpp
+    * Updated eigensolvers for standard and generalized eigenproblems for
+      symmetric/Hermitian definite matrices 
     * Add wrappers around CUDA and CUBLAS functions,
       for portability and error checking.
     * Add tracing functions.
+    * Add two-stage reduction to tridiabonal form
     * Add matrix print functions.
     * Make info and return codes consistent.
     * Change GPU_TARGET in make.inc to descriptive name (e.g., Fermi).
