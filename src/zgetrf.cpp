@@ -223,7 +223,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
             }
             if (*info == 0 && iinfo > 0)
                 *info = iinfo + i*nb;
-            magmablas_zpermute_long2( dAT, ldda, ipiv, nb, i*nb );
+            magmablas_zpermute_long2( ldda, dAT, ldda, ipiv, nb, i*nb );
 
             // upload i-th panel
             magma_zsetmatrix( m-i*nb, nb, work, lda, dA, cols );
@@ -269,7 +269,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
             lapackf77_zgetrf( &rows, &nb0, work, &lda, ipiv+s*nb, &iinfo);
             if (*info == 0 && iinfo > 0)
                 *info = iinfo + s*nb;
-            magmablas_zpermute_long2( dAT, ldda, ipiv, nb0, s*nb );
+            magmablas_zpermute_long2( ldda, dAT, ldda, ipiv, nb0, s*nb );
     
             magma_zsetmatrix( rows, nb0, work, lda, dA, cols );
             magmablas_ztranspose2( inAT(s,s), ldda, dA, cols, rows, nb0);
