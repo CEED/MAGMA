@@ -98,14 +98,14 @@ extern "C" void zlaswp3( zlaswp_params_t2 &params )
 
 
 extern "C" void 
-magmablas_zpermute_long2( cuDoubleComplex *dAT, int lda, int *ipiv, int nb, int ind )
+magmablas_zpermute_long2( int n, cuDoubleComplex *dAT, int lda, int *ipiv, int nb, int ind )
 {
         int k;
 
         for( k = 0; k < nb-BLOCK_SIZE; k += BLOCK_SIZE )
         {
                 //zlaswp_params_t params = { dAT, lda, lda, ind + k };
-                zlaswp_params_t2 params = { dAT, lda, lda, ind + k, BLOCK_SIZE };
+                zlaswp_params_t2 params = { dAT, n, lda, ind + k, BLOCK_SIZE };
                 for( int j = 0; j < BLOCK_SIZE; j++ )
                 {
                         params.ipiv[j] = ipiv[ind + k + j] - k - 1;
@@ -117,7 +117,7 @@ magmablas_zpermute_long2( cuDoubleComplex *dAT, int lda, int *ipiv, int nb, int 
 
         int num_pivots = nb - k;
 
-        zlaswp_params_t2 params = { dAT, lda, lda, ind + k, num_pivots};
+        zlaswp_params_t2 params = { dAT, n, lda, ind + k, num_pivots};
         for( int j = 0; j < num_pivots; j++ )
         {
             params.ipiv[j] = ipiv[ind + k + j] - k - 1;
