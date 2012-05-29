@@ -43,7 +43,6 @@ magma_zgetrf1_mgpu(magma_int_t num_gpus,
 
     Purpose
     =======
-
     ZGETRF computes an LU factorization of a general M-by-N matrix A
     using partial pivoting with row interchanges.
 
@@ -57,7 +56,6 @@ magma_zgetrf1_mgpu(magma_int_t num_gpus,
 
     Arguments
     =========
-
     NUM_GPUS 
             (input) INTEGER
             The number of GPUS to be used for the factorization.
@@ -208,9 +206,9 @@ magma_zgetrf1_mgpu(magma_int_t num_gpus,
                   magma_setdevice(d);
                   /* apply the pivoting */
                   if( d == 0 ) 
-                    magmablas_zpermute_long2( inAT(d,0,0), lddat, ipiv, nb, i*nb );
+                      magmablas_zpermute_long2( lddat, inAT(d,0,0), lddat, ipiv, nb, i*nb );
                   else
-                    magmablas_zpermute_long3( inAT(d,0,0), lddat, ipiv, nb, i*nb );
+                      magmablas_zpermute_long3( inAT(d,0,0), lddat, ipiv, nb, i*nb );
 
                   /* storage for panel */
                   if( d == id ) {
@@ -305,9 +303,9 @@ magma_zgetrf1_mgpu(magma_int_t num_gpus,
               magma_setdevice(d);
               if( nb0 > 0 ) {
                 if( d == 0 ) 
-                  magmablas_zpermute_long2( inAT(d,0,0), lddat, ipiv, nb0, s*nb );
+                    magmablas_zpermute_long2( lddat, inAT(d,0,0), lddat, ipiv, nb0, s*nb );
                 else
-                  magmablas_zpermute_long3( inAT(d,0,0), lddat, ipiv, nb0, s*nb );
+                    magmablas_zpermute_long3( inAT(d,0,0), lddat, ipiv, nb0, s*nb );
 
                 i_local2 = i_local;
                 if( d < id ) i_local2++;
