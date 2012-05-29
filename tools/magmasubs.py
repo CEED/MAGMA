@@ -427,7 +427,9 @@ subs = {
     # LAPACK, with precision
     ('slag2d',         'dlag2s',         'clag2z',         'zlag2c'          ),
     ('slagsy',         'dlagsy',         'claghe',         'zlaghe'          ),
+    ('slasyf',         'dlasyf',         'clahef',         'zlahef'          ),
     ('slansy',         'dlansy',         'clanhe',         'zlanhe'          ),
+    ('slavsy',         'dlavsy',         'clavhe',         'zlavhe'          ),
     ('sorg2r',         'dorg2r',         'cung2r',         'zung2r'          ),
     ('sorgbr',         'dorgbr',         'cungbr',         'zungbr'          ),
     ('sorghr',         'dorghr',         'cunghr',         'zunghr'          ),
@@ -456,6 +458,7 @@ subs = {
     ('ssyt21',         'dsyt21',         'chet21',         'zhet21'          ),
     ('ssytd2',         'dsytd2',         'chetd2',         'zhetd2'          ),
     ('ssytrd',         'dsytrd',         'chetrd',         'zhetrd'          ),
+    ('ssytrf',         'dsytrf',         'chetrf',         'zhetrf'          ),
     
     # BLAS, without precision
     # must be after BLAS with precision
@@ -475,7 +478,9 @@ subs = {
     # LAPACK, without precision
     ('lag2d',          'lag2s',          'lag2z',          'lag2c'           ),
     ('lagsy',          'lagsy',          'laghe',          'laghe'           ),
+    ('lasyf',          'lasyf',          'lahef',          'lahef'           ),
     ('lansy',          'lansy',          'lanhe',          'lanhe'           ),
+    ('lavsy',          'lavsy',          'lavhe',          'lavhe'           ),
     ('org2r',          'org2r',          'ung2r',          'ung2r'           ),
     ('orgbr',          'orgbr',          'ungbr',          'ungbr'           ),
     ('orghr',          'orghr',          'unghr',          'unghr'           ),
@@ -504,6 +509,7 @@ subs = {
     ('syt21',          'syt21',          'het21',          'het21'           ),
     ('sytd2',          'sytd2',          'hetd2',          'hetd2'           ),
     ('sytrd',          'sytrd',          'hetrd',          'hetrd'           ),
+    ('sytrf',          'sytrf',          'hetrf',          'hetrf'           ),
     
     # ----- BLAS AND LAPACK, UPPERCASE, ALPHABETIC ORDER
     # COPY & PASTE THESE TO UPPERCASE BELOW AND FIX CASE.
@@ -629,7 +635,9 @@ subs = {
     # LAPACK, WITH PRECISION
     ('SLAG2D',         'DLAG2S',         'CLAG2Z',         'ZLAG2C'          ),
     ('SLAGSY',         'DLAGSY',         'CLAGHE',         'ZLAGHE'          ),
+    ('SLASYF',         'DLASYF',         'CLAHEF',         'ZLAHEF'          ),
     ('SLANSY',         'DLANSY',         'CLANHE',         'ZLANHE'          ),
+    ('SLAVSY',         'DLAVSY',         'CLAVHE',         'ZLAVHE'          ),
     ('SORG2R',         'DORG2R',         'CUNG2R',         'ZUNG2R'          ),
     ('SORGBR',         'DORGBR',         'CUNGBR',         'ZUNGBR'          ),
     ('SORGHR',         'DORGHR',         'CUNGHR',         'ZUNGHR'          ),
@@ -658,6 +666,7 @@ subs = {
     ('SSYT21',         'DSYT21',         'CHET21',         'ZHET21'          ),
     ('SSYTD2',         'DSYTD2',         'CHETD2',         'ZHETD2'          ),
     ('SSYTRD',         'DSYTRD',         'CHETRD',         'ZHETRD'          ),
+    ('SSYTRF',         'DSYTRF',         'CHETRF',         'ZHETRF'          ),
     
     # BLAS, WITHOUT PRECISION
     # MUST BE AFTER BLAS WITH PRECISION
@@ -677,7 +686,9 @@ subs = {
     # LAPACK, WITHOUT PRECISION
     ('LAG2D',          'LAG2S',          'LAG2Z',          'LAG2C'           ),
     ('LAGSY',          'LAGSY',          'LAGHE',          'LAGHE'           ),
+    ('LASYF',          'LASYF',          'LAHEF',          'LAHEF'           ),
     ('LANSY',          'LANSY',          'LANHE',          'LANHE'           ),
+    ('LAVSY',          'LAVSY',          'LAVHE',          'LAVHE'           ),
     ('ORG2R',          'ORG2R',          'UNG2R',          'UNG2R'           ),
     ('ORGBR',          'ORGBR',          'UNGBR',          'UNGBR'           ),
     ('ORGHR',          'ORGHR',          'UNGHR',          'UNGHR'           ),
@@ -706,6 +717,7 @@ subs = {
     ('SYT21',          'SYT21',          'HET21',          'HET21'           ),
     ('SYTD2',          'SYTD2',          'HETD2',          'HETD2'           ),
     ('SYTRD',          'SYTRD',          'HETRD',          'HETRD'           ),
+    ('SYTRF',          'SYTRF',          'HETRF',          'HETRF'           ),
     
     # ----- unused?
     #('stesting',       'dtesting',       'ctesting',       'ztesting'        ),
