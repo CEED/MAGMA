@@ -101,7 +101,7 @@ void   lapackf77_slag2d( magma_int_t *m, magma_int_t *n,
 
 double lapackf77_dlapy2( const double *x, const double *y );
 float  lapackf77_slapy2( const float  *x, const float  *y );
-                                          
+
 #ifdef __cplusplus
 }
 #endif
