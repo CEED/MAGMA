@@ -142,7 +142,9 @@ extern "C" {
 /*
  * BLAS functions (alphabetical order)
  */
-int blasf77_izamax(  const int *n, cuDoubleComplex *X, const int *incX);
+magma_int_t blasf77_izamax(
+                     const magma_int_t *n,
+                     const cuDoubleComplex *x, const magma_int_t *incx);
 
 void blasf77_zaxpy(  const magma_int_t *n,
                      const cuDoubleComplex *alpha,
