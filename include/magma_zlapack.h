@@ -20,7 +20,7 @@ extern "C" {
 /* ////////////////////////////////////////////////////////////////////////////
    -- BLAS and LAPACK functions (alphabetical order)
 */
-
+#define blasf77_izamax     FORTRAN_NAME( izamax, IZAMAX )
 #define blasf77_zaxpy      FORTRAN_NAME( zaxpy,  ZAXPY  )
 #define blasf77_zcopy      FORTRAN_NAME( zcopy,  ZCOPY  )
 #define blasf77_zgemm      FORTRAN_NAME( zgemm,  ZGEMM  )
@@ -142,6 +142,8 @@ extern "C" {
 /*
  * BLAS functions (alphabetical order)
  */
+int blasf77_izamax(  const int *n, cuDoubleComplex *X, const int *incX);
+
 void blasf77_zaxpy(  const magma_int_t *n,
                      const cuDoubleComplex *alpha,
                      const cuDoubleComplex *x, const magma_int_t *incx,
