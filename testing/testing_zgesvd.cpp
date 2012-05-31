@@ -93,8 +93,14 @@ int main( int argc, char** argv)
     TESTING_HOSTALLOC(h_R, cuDoubleComplex, n2);
 
     magma_int_t nb = magma_get_zgesvd_nb(N);
-    magma_int_t lwork = (M+N)*nb+2*N;
-    
+    magma_int_t lwork;
+
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    lwork = (M+N)*nb+2*N;
+#else
+    lwork = (M+N)*nb+3*N;
+#endif    
+
     TESTING_HOSTALLOC(h_work, cuDoubleComplex, lwork);
 
     printf("\n\n");
