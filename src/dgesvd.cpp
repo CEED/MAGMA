@@ -122,7 +122,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
             
     LWORK   (input) INTEGER   
             The dimension of the array WORK.   
-            LWORK >=  (M+N)*nb + 2*N.   
+            LWORK >=  (M+N)*nb + 3*N.   
 
             If LWORK = -1, then a workspace query is assumed; the routine   
             only calculates the optimal size of the WORK array, returns   
@@ -218,8 +218,8 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
     if (*info == 0) {
 
         /* Return optimal workspace in WORK(1) */
-        nb = magma_get_dgebrd_nb(*n);
-        minwrk = ((*m)+(*n))*nb+(*n);
+        nb = magma_get_dgesvd_nb(*n);
+        minwrk = ((*m)+(*n))*nb+3*(*n);
         work[0] = (double)minwrk;
 
         if ( !lquery && (lwork_ < minwrk) ) {
