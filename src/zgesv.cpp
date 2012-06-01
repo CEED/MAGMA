@@ -46,7 +46,7 @@ magma_zgesv(     magma_int_t n, magma_int_t nrhs,
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    A       (input/output) COMPLEX_16 array on the GPU, dimension (LDA,N).
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N).
             On entry, the M-by-N matrix to be factored.
             On exit, the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
@@ -58,7 +58,7 @@ magma_zgesv(     magma_int_t n, magma_int_t nrhs,
             The pivot indices; for 1 <= i <= min(M,N), row i of the
             matrix was interchanged with row IPIV(i).
 
-    B       (input/output) COMPLEX_16 array on the GPU, dimension (LDB,NRHS)
+    B       (input/output) COMPLEX_16 array, dimension (LDB,NRHS)
             On entry, the right hand side matrix B.
             On exit, the solution matrix X.
 
