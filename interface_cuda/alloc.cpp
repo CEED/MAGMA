@@ -54,7 +54,7 @@ magma_err_t magma_malloc_host( void** ptrPtr, size_t size )
 extern "C"
 magma_err_t magma_free_host( void* ptr )
 {
-    if ( cudaSuccess != cudaFree( ptr )) {
+    if ( cudaSuccess != cudaFreeHost( ptr )) {
         return MAGMA_ERR_INVALID_PTR;
     }
     return MAGMA_SUCCESS;
