@@ -26,6 +26,7 @@ Included are routines for the following algorithms:
  1.x.x
     * Fix bug in [zcsd]getrf_gpu.cpp
     * Fix workspace requirement for SVD in [zcsd]gesvd.cpp
+    * Fix a bug in freeing pinned memory (in interface_cuda/alloc.cpp)
 
  1.2.0
     * Fix bugs in [zcsd]hegst[_gpu].cpp
