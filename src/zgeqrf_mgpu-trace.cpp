@@ -537,6 +537,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
 
     magma_setdevice(cdevice);
     dump_trace(num_gpus+1);
+    magma_free_host( local_work );
 
     return *info;
 } /* magma_zgeqrf2_mgpu */
