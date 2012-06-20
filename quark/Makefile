@@ -16,9 +16,6 @@ clean:
 cleanall: clean
 	rm -f ${LIBQUARK}
 
-.c.o:
-	$(CC) $(OPTS) -Iinclude $(INC) -c $< -o $@
-
 ${LIBQUARK}: icl_hash.o icl_list.o quarkos.o quark.o
 	$(ARCH) $(ARCHFLAGS) $@ $^
 	$(RANLIB) $@

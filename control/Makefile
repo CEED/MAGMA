@@ -50,12 +50,6 @@ $(LIBMAGMA): $(ALLOBJ)
 $(PTREXEC): $(PTRFILE)
 	$(CC) $(OPTS) -o $@ $<
 
-%.o: %.cpp
-	$(CC) $(OPTS) $(INC) -c $< -o $@
-
-%.o: %.f90 $(PTREXEC)
-	$(FORT) $(FOPTS) $(INC) -c $< -o $@
-
 clean:
 	rm -f *.cu_o *.o *~ *.linkinfo *.mod
 

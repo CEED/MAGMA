@@ -155,12 +155,6 @@ $(LIBMAGMA): $(ALLOBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
 
-.cpp.o:
-	$(CC) $(OPTS) $(INC) -c $< -o $@
-
-.f.o: 
-	$(FORT) $(OPTS) $(INC) -c $< -o $@
-
 clean:
 	rm -f *.o *~ *.linkinfo
 

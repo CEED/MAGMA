@@ -22,8 +22,11 @@ ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
 
-OPTS      = -O0 -DADD_ -m64
 NOMAIN    = -Mnomain
+
+OPTS      = -O0 -DADD_ -m64
+F77OPTS   = -O0 -DADD_ -m64
+FOPTS     = -O0 -DADD_ -m64
 NVOPTS    = --compiler-options -fno-strict-aliasing -DUNIX -DADD_
 LDOPTS    = -fPIC
 

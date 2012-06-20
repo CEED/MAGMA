@@ -21,8 +21,9 @@ ARCHFLAGS = -shared -o
 RANLIB    = strip
 
 OPTS      = -DADD_ -O3 -fPIC
+F77OPTS   = -DADD_ -O3 -fPIC
 FOPTS     = -DADD_ -O3 -fPIC -x f95-cpp-input
-NVOPTS    = -DADD_ --shared --compiler-options '-fPIC' -DUNIX -O3
+NVOPTS    = -DADD_ -O3 -fPIC --shared --compiler-options  -DUNIX
 LDOPTS    = -Xlinker -zmuldefs
 
 LIB       = -lmkl_em64t -lguide -lpthread -lcublas -lm 

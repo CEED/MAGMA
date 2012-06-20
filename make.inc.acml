@@ -22,8 +22,10 @@ ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
 
-OPTS      = -O3 -DADD_ -fPIC 
-NVOPTS    = --compiler-options -fno-strict-aliasing -DUNIX -O3 -DADD_
+OPTS      = -O3 -DADD_ -fPIC
+F77OPTS   = -O3 -DADD_
+FOPTS     = -O3 -DADD_
+NVOPTS    = -O3 -DADD_ --compiler-options -fno-strict-aliasing -DUNIX
 LDOPTS    = -fPIC -Xlinker -zmuldefs
 
 LIB       = -lacml -lpthread -lcublas -lm 

@@ -104,10 +104,8 @@ ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
 
 ifeq (${GPU_TARGET}, Tesla)
     ALLSRC += $(TESLASRC)
-    GPUOPT  = ${TESLAOPT}
 else ifeq (${GPU_TARGET}, Fermi)
     ALLSRC += $(FERMISRC)
-    GPUOPT  = ${FERMIOPT}
 endif
 
 ALLOBJ := $(ALLSRC:.cu=.cu_o) 
@@ -117,12 +115,6 @@ all: $(LIBMAGMABLAS)
 $(LIBMAGMABLAS): $(ALLHDR) $(ALLOBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
-
-%.o: %.cpp 
-	$(CC) $(OPTS) $(INC) -c $< -o $@
-
-%.cu_o: %.cu
-	$(NVCC) $(NVOPTS) $(GPUOPT) $(INC) -c $< -o $@
 
 clean:
 	rm -f *.cu_o *.o *~ *.linkinfo

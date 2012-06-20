@@ -94,9 +94,6 @@ FRC:
 clean:
 	rm -f *.o
 
-.f.o:
-	$(FORT) $(OPTS) -c $< -o $@
-
 #slaran.o: slaran.f
 #	$(FORT) $(NOOPT) -c $<
 #

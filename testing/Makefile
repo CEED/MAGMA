@@ -111,19 +111,12 @@ testing_%.o : testing_%.f90
 	$(FORT) $(FOPTS) $(INC) -c $< -o $@ 
 endif
 
-%.o: %.cpp
-	$(CC) $(OPTS) $(INC) -c $< -o $@
-
-#
-# MAGMA Fortran module. Once finalized, the generated magma.mod
-# has to be moved in the include directory
-#
 testing_%_f : testing_%_f.o $(FOBJ)
-	$(FORT) $(OPTS) $(LDOPTS) $< $(FOBJ) -o $@ lin/liblapacktest.a -L../lib \
+	$(FORT) $(LDOPTS) $< $(FOBJ) -o $@ lin/liblapacktest.a -L../lib \
           -lcuda -lmagma -lmagmablas -lmagma $(LIBDIR) $(LIB) 
 
 testing_% : testing_%.o
-	$(CC) $(OPTS) $(LDOPTS) $(NOMAIN) $< $(OBJ) -o $@ lin/liblapacktest.a -L../lib \
+	$(CC) $(LDOPTS) $(NOMAIN) $< $(OBJ) -o $@ lin/liblapacktest.a -L../lib \
           -lcuda -lmagma -lmagmablas -lmagma $(LIBDIR) $(LIB) 
 
 #

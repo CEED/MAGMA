@@ -23,6 +23,7 @@ ARCHFLAGS = cr
 RANLIB    = ranlib
 
 OPTS      = -O3 -DADD_
+F77OPTS   = -O3 -DADD_ -cpp
 FOPTS     = -O3 -DADD_ -cpp
 NVOPTS    = --compiler-options -fno-strict-aliasing -DUNIX -O3 -DADD_
 LDOPTS    = -fPIC -nofor_main -Xlinker -zmuldefs

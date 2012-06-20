@@ -23,9 +23,9 @@ ARCHFLAGS = cr
 RANLIB    = ranlib
 
 OPTS      = -O3 -DADD_ -g
+F77OPTS   = -O3 -DADD_ -g
 FOPTS     = -O3 -DADD_ -g -x f95-cpp-input
-#NVOPTS    = -DADD_ --compiler-options -fno-strict-aliasing -DUNIX -O3 -g -G
-NVOPTS    = -DADD_ --compiler-options -fno-strict-aliasing -DUNIX -O3
+NVOPTS    = -O3 -DADD_ --compiler-options -fno-strict-aliasing -DUNIX
 LDOPTS    = -fPIC -Xlinker -zmuldefs
 
 LIB       = -lmkl_em64t -lguide -lpthread -lcublas -lcudart -lm 
