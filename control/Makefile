@@ -51,7 +51,7 @@ $(PTREXEC): $(PTRFILE)
 	$(CC) $(OPTS) -o $@ $<
 
 clean:
-	rm -f *.cu_o *.o *~ *.linkinfo *.mod
+	rm -f *.cu_o *.o *~ *.linkinfo *.mod sizeptr
 
 cleanall: clean
 	rm -f *.a
