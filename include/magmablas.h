@@ -12,7 +12,7 @@
 #include <cublas.h>
 #include <cuda.h>
 
-typedef long magma_int_t;
+typedef int  magma_int_t;
 typedef int  magma_err_t;
 typedef void* magma_devptr;
 
