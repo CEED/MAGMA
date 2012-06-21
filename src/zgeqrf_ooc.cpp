@@ -124,18 +124,11 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
         return *info;
 
     /* Check how much memory do we have */
-    #if CUDA_VERSION > 3010
-        size_t totalMem;
-    #else
-        unsigned int totalMem;
-    #endif
-
-    CUdevice dev;
-    cuDeviceGet( &dev, 0);
-    cuDeviceTotalMem( &totalMem, dev );
-    totalMem /= sizeof(cuDoubleComplex);
-
-    magma_int_t IB, NB = (magma_int_t)(0.8*totalMem/m);
+    size_t freeMem, totalMem;
+    cudaMemGetInfo( &freeMem, &totalMem );
+    freeMem /= sizeof(cuDoubleComplex);
+    
+    magma_int_t IB, NB = (magma_int_t)(0.8*freeMem/m);
     NB = (NB / nb) * nb;
 
     if (NB >= n)

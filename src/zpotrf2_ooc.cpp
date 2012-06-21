@@ -129,12 +129,6 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
     double                d_one     =  1.0;
     double                d_neg_one = -1.0;
     int upper = lapackf77_lsame(uplo_, "U");
-#if CUDA_VERSION > 3010
-    size_t totalMem;
-#else
-    unsigned int totalMem;
-#endif
-    CUdevice dev;
     cudaStream_t stream[4][3];
 //#define ROW_MAJOR_PROFILE
 #ifdef  ROW_MAJOR_PROFILE
@@ -170,11 +164,12 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
     ldda = num_gpus*((nb*ldda+31)/32)*32;
 
     /* figure out NB */
-    cuDeviceGet( &dev, 0);
-    cuDeviceTotalMem( &totalMem, dev );
-    totalMem /= sizeof(cuDoubleComplex);
+    size_t freeMem, totalMem;
+    cudaMemGetInfo( &freeMem, &totalMem );
+    freeMem /= sizeof(cuDoubleComplex);
+    
     MB = n;  /* number of rows in the big panel    */
-    NB = (magma_int_t)(num_gpus*(0.8*totalMem/ldda-2*nb)); /* number of columns in the big panel */
+    NB = (magma_int_t)(num_gpus*(0.8*freeMem/ldda-2*nb)); /* number of columns in the big panel */
     if( NB >= n ) {
 #ifdef CHECK_ZPOTRF_OOC
       printf( "      * still fit in GPU memory.\n" );

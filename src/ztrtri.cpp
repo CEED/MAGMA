@@ -215,8 +215,7 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
                                                         MagmaNoTrans, MagmaNonUnit, (n-j-jb), jb,
                                                         c_neg_one, dA(j,j), ldda, dA(j+jb, j), ldda);
 
-                                        //cublasGetMatrix((n-j), jb, sizeof( cuDoub
-                                        //leComplex),dA(j, j), ldda, A(j, j), lda);
+                                        //cublasGetMatrix((n-j), jb, sizeof( cuDoubleComplex),dA(j, j), ldda, A(j, j), lda);
 
                                         magma_zgetmatrix_async( (n-j-jb), jb,
                                                                 dA(j+jb, j), ldda,

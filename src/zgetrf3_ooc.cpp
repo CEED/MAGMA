@@ -135,12 +135,7 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
     magma_int_t        iinfo = 0, nb, maxm, n_local[4], ldn_local;
     magma_int_t        N, M, NB, NBk, I, d, num_gpus;
     magma_int_t        i, ii, jj, h = 2, offset, ib, rows, s;
-#if CUDA_VERSION > 3010
-    size_t totalMem;
-#else
-    unsigned int totalMem;
-#endif
-    CUdevice dev;
+        
     cudaStream_t stream[4][2];
 
     *info = 0;
@@ -166,12 +161,12 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
     maxm = ((m  + 31)/32)*32;
 
     /* figure out NB */
-    cuDeviceGet( &dev, 0);
-    cuDeviceTotalMem( &totalMem, dev );
-    totalMem /= sizeof(cuDoubleComplex);
+    size_t freeMem, totalMem;
+    cudaMemGetInfo( &freeMem, &totalMem );
+    freeMem /= sizeof(cuDoubleComplex);
     
     /* number of columns in the big panel */
-    NB = (magma_int_t)(0.8*totalMem/maxm-h*nb); 
+    NB = (magma_int_t)(0.8*freeMem/maxm-h*nb); 
     char * ngr_nb_char = getenv("MAGMA_NGR_NB");
     if( ngr_nb_char != NULL ) NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
 
@@ -401,20 +396,14 @@ magma_zgetrf2_piv(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
     maxm = ((m  + 31)/32)*32;
 
     /* figure out NB */
-#if CUDA_VERSION > 3010
-    size_t totalMem;
-#else
-    unsigned int totalMem;
-#endif
-    CUdevice dev;
-    cuDeviceGet( &dev, 0);
-    cuDeviceTotalMem( &totalMem, dev );
-    totalMem /= sizeof(cuDoubleComplex);
+    size_t freeMem, totalMem;
+    cudaMemGetInfo( &freeMem, &totalMem );
+    freeMem /= sizeof(cuDoubleComplex);
 
     /* number of columns in the big panel */
-    NB = (magma_int_t)(0.8*totalMem/maxm-h*nb); 
-    //NB = (magma_int_t)min(n,num_gpus*(0.8*totalMem/maxm-h*nb)); 
-    //NB = (magma_int_t)min(n,(num_gpus*0.8*totalMem/(maxm))-2*nb); 
+    NB = (magma_int_t)(0.8*freeMem/maxm-h*nb); 
+    //NB = (magma_int_t)min(n,num_gpus*(0.8*freeMem/maxm-h*nb)); 
+    //NB = (magma_int_t)min(n,(num_gpus*0.8*freeMem/(maxm))-2*nb); 
     char * ngr_nb_char = getenv("MAGMA_NGR_NB");
     if( ngr_nb_char != NULL ) NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
 
