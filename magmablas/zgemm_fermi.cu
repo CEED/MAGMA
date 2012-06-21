@@ -190,10 +190,10 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern "C" void
-magmablas_zgemm_fermi( char TRANSA, char TRANSB, int m , int n , int k ,
-                       cuDoubleComplex alpha, const cuDoubleComplex *d_A, int lda,
-                                     const cuDoubleComplex *d_B, int ldb,
-                       cuDoubleComplex beta, cuDoubleComplex *d_C, int ldc )
+magmablas_zgemm_fermi( char TRANSA, char TRANSB, magma_int_t m, magma_int_t n, magma_int_t k,
+                       cuDoubleComplex alpha, const cuDoubleComplex *d_A, magma_int_t lda,
+                                              const cuDoubleComplex *d_B, magma_int_t ldb,
+                       cuDoubleComplex beta,        cuDoubleComplex *d_C, magma_int_t ldc )
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville

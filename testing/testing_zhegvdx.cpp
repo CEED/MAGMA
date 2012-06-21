@@ -80,23 +80,23 @@ int main( int argc, char** argv)
             if (strcmp("-N", argv[i])==0){
                 N = atoi(argv[++i]);
                 if (N>0){
-                   printf("  testing_zhegvdx -N %d\n\n", N);
+                   printf("  testing_zhegvdx -N %d\n\n", (int) N);
                    flagN=1;
                 }
                 else {
                    printf("\nUsage: \n");
-                   printf("  testing_zhegvdx -N %d\n\n", N);
+                   printf("  testing_zhegvdx -N %d\n\n", (int) N);
                    exit(1);
                 }
             }
             if (strcmp("-itype", argv[i])==0){
                 itype = atoi(argv[++i]);
                 if (itype>0 && itype <= 3){
-                   printf("  testing_zhegvdx -itype %d\n\n", itype);
+                   printf("  testing_zhegvdx -itype %d\n\n", (int) itype);
                 }
                 else {
                    printf("\nUsage: \n");
-                   printf("  testing_zhegvdx -itype %d\n\n", itype);
+                   printf("  testing_zhegvdx -itype %d\n\n", (int) itype);
                    exit(1);
                 }
             }
@@ -149,7 +149,6 @@ int main( int argc, char** argv)
     TESTING_MALLOC(    rwork,          double, lrwork);
     TESTING_MALLOC(    iwork,     magma_int_t, liwork);
 
-    printf("\n\n");
     printf("  N     M     GPU Time(s) \n");
     printf("==========================\n");
     for(i=0; i<4; i++){
@@ -272,7 +271,7 @@ int main( int argc, char** argv)
            Print execution time
            =================================================================== */
         printf("%5d %5d     %6.2f\n",
-               N, m1, gpu_time);
+               (int) N, (int) m1, gpu_time);
         if ( checkres ){
           printf("Testing the eigenvalues and eigenvectors for correctness:\n");
           if(itype==1)

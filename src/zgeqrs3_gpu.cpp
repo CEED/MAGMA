@@ -94,7 +94,7 @@ magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
 
     magma_int_t nb     = magma_get_zgeqrf_nb(m);
     magma_int_t lwkopt = (m-n+nb)*(nrhs+2*nb);
-    long int lquery = (lwork == -1);
+    int lquery = (lwork == -1);
 
     hwork[0] = MAGMA_Z_MAKE( (double)lwkopt, 0. );
 

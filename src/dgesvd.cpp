@@ -149,11 +149,11 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
     magma_int_t *ldvt  = &ldvt_;
     magma_int_t *lwork = &lwork_;
     
-    static magma_int_t c__0 = 0;
-    static magma_int_t c__1 = 1;
-    static magma_int_t c_n1 = -1;
-    static double c_b421 = 0.;
-    static double c_b443 = 1.;
+    magma_int_t c__0 = 0;
+    magma_int_t c__1 = 1;
+    magma_int_t c_n1 = -1;
+    double c_b421 = 0.;
+    double c_b443 = 1.;
 
     magma_int_t nb;
     

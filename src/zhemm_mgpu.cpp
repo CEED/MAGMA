@@ -34,9 +34,9 @@ void magma_zhemm_mgpu(
     
     cuDoubleComplex c_one  = MAGMA_Z_ONE;
     cuDoubleComplex c_zero = MAGMA_Z_ZERO;
-    int ione = 1;
+    magma_int_t ione = 1;
     
-    int cdev;
+    magma_device_t cdev;
     magma_getdevice( &cdev );
 
     // create events for sync
@@ -118,7 +118,7 @@ void magma_zhemm_mgpu(
     }
     
     // wait and reduce results
-    int size = ldc*n;
+    magma_int_t size = ldc*n;
     cuDoubleComplex *Ctmp = C(0,n);
     for( int d = 0; d < ngpu; ++d ) {
         magma_setdevice( d );

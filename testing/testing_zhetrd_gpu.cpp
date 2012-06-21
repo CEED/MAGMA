@@ -75,7 +75,7 @@ int main( int argc, char** argv)
                 uplo = (char *)MagmaLowerStr;
         }
         if ( N > 0 )
-            printf("  testing_zhetrd_gpu -L|U -N %d\n\n", N);
+            printf("  testing_zhetrd_gpu -L|U -N %d\n\n", (int) N);
         else
         {
             printf("\nUsage: \n");
@@ -125,7 +125,6 @@ int main( int argc, char** argv)
 #endif
     }
 
-    printf("\n\n");
     printf("  N    CPU GFlop/s    GPU GFlop/s (sec)  |A-QHQ'|/N|A|  |I-QQ'|/N \n");
     printf("===================================================================\n");
     for(i=0; i<10; i++){
@@ -164,7 +163,7 @@ int main( int argc, char** argv)
 #endif
         end = get_current_time();
         if ( info < 0 )
-            printf("Argument %d of magma_zhetrd_gpu had an illegal value\n", -info);
+            printf("Argument %d of magma_zhetrd_gpu had an illegal value\n", (int) -info);
 
         gpu_perf = flops / GetTimerValue(start,end);
 
@@ -212,7 +211,7 @@ int main( int argc, char** argv)
         end = get_current_time();
 
         if (info < 0)
-            printf("Argument %d of lapackf77_zhetrd had an illegal value.\n", -info);
+            printf("Argument %d of lapackf77_zhetrd had an illegal value.\n", (int) -info);
 
         cpu_perf = flops / GetTimerValue(start,end);
 
@@ -221,11 +220,11 @@ int main( int argc, char** argv)
            =================================================================== */
         if ( checkres ) {
             printf("%5d   %6.2f        %6.2f (%6.2f)     %e %e\n",
-                   N, cpu_perf, gpu_perf, flops/(1e3*gpu_perf),
+                   (int) N, cpu_perf, gpu_perf, flops/(1e3*gpu_perf),
                    result[0]*eps, result[1]*eps );
         } else {
             printf("%5d   %6.2f        %6.2f (%6.2f)\n",
-                   N, cpu_perf, gpu_perf, flops/(1e3*gpu_perf));
+                   (int) N, cpu_perf, gpu_perf, flops/(1e3*gpu_perf));
         }
  
         if ( once )

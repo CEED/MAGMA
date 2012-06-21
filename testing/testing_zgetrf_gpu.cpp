@@ -90,7 +90,7 @@ int main( int argc, char** argv)
     magma_int_t M = 0, N = 0, n2, lda, ldda;
     magma_int_t size[10] = {960,1920,3072,4032,4992,5952,7104,8064,9024,9984};
 
-    magma_int_t i, info, min_mn, nb, maxn, ret;
+    magma_int_t i, info, min_mn, nb, maxn;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
 
@@ -102,7 +102,7 @@ int main( int argc, char** argv)
                 M = atoi(argv[++i]);
         }
         if (M>0 && N>0)
-            printf("  testing_zgetrf -M %d -N %d\n\n", M, N);
+            printf("  testing_zgetrf -M %d -N %d\n\n", (int) M, (int) N);
         else
             {
                 printf("\nUsage: \n");
@@ -128,7 +128,6 @@ int main( int argc, char** argv)
     TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2     );
     TESTING_DEVALLOC(  d_A, cuDoubleComplex, ldda*N );
 
-    printf("\n\n");
     printf("  M     N   CPU GFlop/s    GPU GFlop/s   ||PA-LU||/(||A||*N)\n");
     printf("============================================================\n");
     for(i=0; i<10; i++){
@@ -152,7 +151,7 @@ int main( int argc, char** argv)
         lapackf77_zgetrf(&M, &N, h_A, &lda, ipiv, &info);
         end = get_current_time();
         if (info < 0)
-            printf("Argument %d of zgetrf had an illegal value.\n", -info);
+            printf("Argument %d of zgetrf had an illegal value.\n", (int) -info);
 
         cpu_perf = flops / GetTimerValue(start, end);
 
@@ -161,12 +160,10 @@ int main( int argc, char** argv)
            =================================================================== */
         magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
         start = get_current_time();
-        ret = magma_zgetrf_gpu( M, N, d_A, ldda, ipiv, &info);
+        magma_zgetrf_gpu( M, N, d_A, ldda, ipiv, &info);
         end = get_current_time();
         if (info < 0)
-            printf("Argument %d of zgetrf had an illegal value.\n", -info);
-        if (ret != MAGMA_SUCCESS)
-            printf("magma_zgetrf_gpu returned with error code %d\n", ret);
+            printf("Argument %d of zgetrf had an illegal value.\n", (int) -info);
 
         gpu_perf = flops / GetTimerValue(start, end);
 
@@ -177,7 +174,7 @@ int main( int argc, char** argv)
         error = get_LU_error(M, N, h_R, lda, h_A, ipiv);
         
         printf("%5d %5d  %6.2f         %6.2f         %e\n",
-               M, N, cpu_perf, gpu_perf, error);
+               (int) M, (int) N, cpu_perf, gpu_perf, error);
 
         if (argc != 1)
             break;

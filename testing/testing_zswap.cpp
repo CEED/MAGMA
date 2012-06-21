@@ -109,7 +109,6 @@ int main( int argc, char** argv)
     magma_zsetmatrix( N, N, h_A1, lda, d_A1, lda );
     magma_zsetmatrix( N, N, h_A2, lda, d_A2, lda );
     
-    printf("\n\n");
     printf("  N         CM V1     RM V1    CM V2     RM V2      CM LAP RM      OLD LAP  GFlop/s    \n");
     printf("=======================================================================================\n");
     for(i=0; i<10; i++) {

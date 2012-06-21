@@ -172,7 +172,7 @@ int main( int argc, char** argv )
         blasf77_zaxpy( &size, &c_neg_one, C, &ione, R, &ione );
         error = lapackf77_zlange( "Fro", &m, &n, R, &ldc, work ) / error;
         printf( "%5d %5d %5d  %-10s %-10s %-10s %-10s  %8.2e\n",
-                m, n, k, storev[iv], side[is], direct[id], trans[it], error );
+                (int) m, (int) n, (int) k, storev[iv], side[is], direct[id], trans[it], error );
     }}}}
     
     // Memory clean up

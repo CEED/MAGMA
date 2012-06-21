@@ -28,7 +28,7 @@ static __device__ void daxpy(double a,double *b, double *c) {
 }
 
 
-extern "C" __global__ void  
+__global__ void  
 dgemm_kernel_N_N_64_16_16_16_4(double *C, const double *A, const double *B,
                                int m, int n, int k, 
                                int lda, int ldb, int ldc,
@@ -376,8 +376,8 @@ extern "C" void
 magmablas_dgemm_kernel_N_N_64_16_16_16_4(double *C, 
                                          const double *A, 
                                          const double *B, 
-                                         int m, int n, int k, 
-                                         int lda, int ldb, int ldc, 
+                                         magma_int_t m, magma_int_t n, magma_int_t k, 
+                                         magma_int_t lda, magma_int_t ldb, magma_int_t ldc, 
                                          double alpha, double beta)
 {
         dim3 threads( 16, 4 );

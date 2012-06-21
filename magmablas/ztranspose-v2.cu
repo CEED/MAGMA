@@ -176,9 +176,9 @@ __global__ void ztranspose2_32( cuDoubleComplex *B, int ldb,
 //             Note that ldi >= m and ldo >= n.
 //
 extern "C" void 
-magmablas_ztranspose2(cuDoubleComplex *odata, int ldo, 
-                      cuDoubleComplex *idata, int ldi, 
-                      int m, int n )
+magmablas_ztranspose2(cuDoubleComplex *odata, magma_int_t ldo, 
+                      cuDoubleComplex *idata, magma_int_t ldi, 
+                      magma_int_t m, magma_int_t n )
 {
     /* Quick return */
     if ( (m == 0) || (n == 0) )
@@ -192,9 +192,9 @@ magmablas_ztranspose2(cuDoubleComplex *odata, int ldo,
 }
 
 extern "C" void
-magmablas_ztranspose2s(cuDoubleComplex *odata, int ldo,
-                       cuDoubleComplex *idata, int ldi,
-                       int m, int n, cudaStream_t *stream )
+magmablas_ztranspose2s(cuDoubleComplex *odata, magma_int_t ldo,
+                       cuDoubleComplex *idata, magma_int_t ldi,
+                       magma_int_t m, magma_int_t n, cudaStream_t *stream )
 {
     /* Quick return */
     if ( (m == 0) || (n == 0) )

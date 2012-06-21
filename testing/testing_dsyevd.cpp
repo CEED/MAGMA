@@ -59,11 +59,11 @@ int main( int argc, char** argv)
                 N = atoi(argv[++i]);
         }
         if (N>0)
-            printf("  testing_dsyevd -N %d\n\n", N);
+            printf("  testing_dsyevd -N %d\n\n", (int) N);
         else
             {
                 printf("\nUsage: \n");
-                printf("  testing_dsyevd -N %d\n\n", N);
+                printf("  testing_dsyevd -N %d\n\n", (int) N);
                 exit(1);
             }
     }
@@ -90,7 +90,6 @@ int main( int argc, char** argv)
     TESTING_HOSTALLOC(h_work, double,  lwork);
     TESTING_MALLOC(    iwork,     magma_int_t, liwork);
     
-    printf("\n\n");
     printf("  N     CPU Time(s)    GPU Time(s) \n");
     printf("===================================\n");
     for(i=0; i<8; i++){
@@ -169,7 +168,7 @@ int main( int argc, char** argv)
                          &info);
         end = get_current_time();
         if (info < 0)
-            printf("Argument %d of dsyevd had an illegal value.\n", -info);
+            printf("Argument %d of dsyevd had an illegal value.\n", (int) -info);
 
         cpu_time = GetTimerValue(start,end)/1000.;
 
@@ -177,7 +176,7 @@ int main( int argc, char** argv)
            Print execution time
            =================================================================== */
         printf("%5d     %6.2f         %6.2f\n",
-               N, cpu_time, gpu_time);
+               (int) N, cpu_time, gpu_time);
         if ( checkres ){
           printf("Testing the factorization A = U S U' for correctness:\n");
           printf("(1)    | A - U S U' | / (|A| N) = %e\n", result[0]*eps);

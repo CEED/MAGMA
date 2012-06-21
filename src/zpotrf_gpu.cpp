@@ -91,7 +91,7 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
     cuDoubleComplex *work;
     double          d_one     =  1.0;
     double          d_neg_one = -1.0;
-    long int        upper = lapackf77_lsame(uplo_, "U");
+    int upper = lapackf77_lsame(uplo_, "U");
 
     *info = 0;
     if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
@@ -113,7 +113,7 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
         return *info;
     }
 
-    static cudaStream_t stream[2];
+    cudaStream_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 

@@ -25,13 +25,17 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
- void findVTpos(int N, int NB, int Vblksiz, int sweep, int st, int *Vpos, int *TAUpos, int *Tpos, int *myblkid);
- void findVTsiz(int N, int NB, int Vblksiz, int *blkcnt, int *LDV);
-  magma_int_t plasma_ceildiv(magma_int_t a, magma_int_t b);
+
+void findVTpos(magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, magma_int_t sweep, magma_int_t st, magma_int_t *Vpos, magma_int_t *TAUpos, magma_int_t *Tpos, magma_int_t *myblkid);
+
+void findVTsiz(magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, magma_int_t *blkcnt, magma_int_t *LDV);
+
+magma_int_t plasma_ceildiv(magma_int_t a, magma_int_t b);
 
 void magma_ztrdtype1cbHLsym_withQ(magma_int_t N, magma_int_t NB, 
                                 cuDoubleComplex *A, magma_int_t LDA, cuDoubleComplex *V, cuDoubleComplex *TAU, 
                                 magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz);
+
 void magma_ztrdtype2cbHLsym_withQ(magma_int_t N, magma_int_t NB, cuDoubleComplex *A, magma_int_t LDA, cuDoubleComplex *V, cuDoubleComplex *TAU, magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz);
    
 void magma_ztrdtype3cbHLsym_withQ(magma_int_t N, magma_int_t NB, cuDoubleComplex *A, magma_int_t LDA, cuDoubleComplex *V, cuDoubleComplex *TAU, magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz);

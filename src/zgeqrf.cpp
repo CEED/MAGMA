@@ -96,16 +96,16 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
     cuDoubleComplex *da, *dwork;
     cuDoubleComplex c_one = MAGMA_Z_ONE;
 
-    int i, k, lddwork, old_i, old_ib;
-    int ib, ldda;
+    magma_int_t i, k, lddwork, old_i, old_ib;
+    magma_int_t ib, ldda;
 
     /* Function Body */
     *info = 0;
-    int nb = magma_get_zgeqrf_nb(min(m, n));
+    magma_int_t nb = magma_get_zgeqrf_nb(min(m, n));
 
-    int lwkopt = n * nb;
+    magma_int_t lwkopt = n * nb;
     work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );
-    long int lquery = (lwork == -1);
+    int lquery = (lwork == -1);
     if (m < 0) {
         *info = -1;
     } else if (n < 0) {
@@ -144,7 +144,7 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
         return magma_zgeqrf_ooc(m, n, a, lda, tau, work, lwork, info);
     }
 
-    static cudaStream_t stream[2];
+    cudaStream_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 
@@ -176,7 +176,7 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
             }
 
             magma_queue_sync( stream[1] );
-            int rows = m-i;
+            magma_int_t rows = m-i;
             lapackf77_zgeqrf(&rows, &ib, a_ref(i,i), &lda, tau+i, work, &lwork, info);
             /* Form the triangular factor of the block reflector
                H = H(i) H(i+1) . . . H(i+ib-1) */
@@ -214,7 +214,7 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
         ib = n-i;
         if (i!=0)
             magma_zgetmatrix( m, ib, da_ref(0,i), ldda, a_ref(0,i), lda );
-        int rows = m-i;
+        magma_int_t rows = m-i;
         lapackf77_zgeqrf(&rows, &ib, a_ref(i,i), &lda, tau+i, work, &lwork, info);
     }
 

@@ -71,10 +71,10 @@ void printout_devices( )
       has to be done sequentially.
 */
 extern "C"
-void swp2pswp(char trans, int n, int *ipiv, int *newipiv){
+void swp2pswp(char trans, magma_int_t n, magma_int_t *ipiv, magma_int_t *newipiv){
   int i, newind, ind;
   char            trans_[2] = {trans, 0};
-  long int    notran = lapackf77_lsame(trans_, "N");
+  int    notran = lapackf77_lsame(trans_, "N");
 
   for(i=0; i<n; i++)
     newipiv[i] = -1;

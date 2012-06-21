@@ -89,7 +89,7 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
         cuDoubleComplex     c_one = MAGMA_Z_ONE;
         cuDoubleComplex     *work;
 
-        long int upper  = lapackf77_lsame(uplo_, "U");
+        int upper  = lapackf77_lsame(uplo_, "U");
 
         *info = 0;
 
@@ -112,7 +112,7 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
                 return *info;
         }
         
-        static cudaStream_t stream[2];
+        cudaStream_t stream[2];
         magma_queue_create( &stream[0] );
         magma_queue_create( &stream[1] );
 

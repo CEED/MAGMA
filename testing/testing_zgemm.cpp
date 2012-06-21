@@ -82,7 +82,7 @@ int main( int argc, char** argv)
                 transA = MagmaTrans;
                 transB = MagmaNoTrans;
             }
-#if defined(PRECISION_z) || defined(PRECISION_c)
+//#if defined(PRECISION_z) || defined(PRECISION_c)
             else if (strcmp("-NC", argv[i])==0){
                 transA = MagmaNoTrans;
                 transB = MagmaConjTrans;
@@ -102,7 +102,7 @@ int main( int argc, char** argv)
             else if (strcmp("-CC", argv[i])==0){
                 transA = transB = MagmaConjTrans;
             }
-#endif
+//#endif
         }
     }
 
@@ -152,7 +152,6 @@ int main( int argc, char** argv)
     printf("\nUsage: \n");
     printf("  testing_zgemm [-NN|NT|TN|TT] [-N %d] \n\n", 1024);
 
-    printf("\n");
     printf("Testing transA = %c  transB = %c\n", transA, transB);
     printf("    M    N    K     MAGMA GFLop/s    CUBLAS GFlop/s       error\n");
     printf("==================================================================\n");
@@ -232,7 +231,7 @@ int main( int argc, char** argv)
         blasf77_zaxpy(&szeC, &c_neg_one, h_C, &ione, h_C2, &ione);
         error = lapackf77_zlange("M", &M, &N, h_C2, &ldc, work);
         printf("%5d %5d %5d       %6.2f           %6.2f         %e\n",
-               M, N, K, magma_perf, cuda_perf, error);
+               (int) M, (int) N, (int) K, magma_perf, cuda_perf, error);
     }
 
     /* Memory clean up */

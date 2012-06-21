@@ -96,7 +96,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
   magma_int_t        lda;
   magma_int_t        ldb;
   double             d_one = 1.0;
-  long int           upper = lapackf77_lsame(uplo_, "U");
+  int upper = lapackf77_lsame(uplo_, "U");
   
   /* Test the input parameters. */
   *info = 0;
@@ -130,7 +130,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
     return *info;
   }
   
-  static cudaStream_t stream[3];
+  cudaStream_t stream[3];
   magma_queue_create( &stream[0] );
   magma_queue_create( &stream[1] );
   magma_queue_create( &stream[2] );

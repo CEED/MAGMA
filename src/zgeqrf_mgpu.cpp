@@ -149,7 +149,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
       return *info;
     }
 
-    static cudaStream_t streaml[4][2];
+    cudaStream_t streaml[4][2];
     for(i=0; i<num_gpus; i++){
       #ifdef  MultiGPUs
          magma_setdevice(i);

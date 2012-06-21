@@ -82,7 +82,7 @@ int main( int argc, char** argv)
     }
     else {
         printf("\nUsage: \n");
-        printf("  testing_zcgeqrsv_gpu -M %d -N %d -nrhs %d\n\n", 1024, 1024, NRHS);
+        printf("  testing_zcgeqrsv_gpu -M %d -N %d -nrhs %d\n\n", 1024, 1024, (int) NRHS);
     }
     printf("Epsilon(double): %8.6e\n"
            "Epsilon(single): %8.6e\n\n", 
@@ -120,7 +120,6 @@ int main( int argc, char** argv)
     TESTING_MALLOC( h_workd, cuDoubleComplex, lhwork );
     h_works = (cuFloatComplex*)h_workd;
 
-    printf("\n\n");
     printf("        CPU GFlop/s         G P U  GFlop/s   \n");
     printf("  N         DP          DP       SP       MP    ||b-Ax||/||A||  NumIter\n");
     printf("=======================================================================\n");
@@ -154,7 +153,7 @@ int main( int argc, char** argv)
                             d_X, lddx, &iter, &info );
         end = get_current_time();
         if (info < 0)
-          printf("Argument %d of magma_zcgeqrsv had an illegal value.\n", -info);
+          printf("Argument %d of magma_zcgeqrsv had an illegal value.\n", (int) -info);
         gpu_perf = flops / GetTimerValue(start, end);
         
         //=====================================================================
@@ -213,7 +212,7 @@ int main( int argc, char** argv)
         cpu_perf = flops / GetTimerValue(start, end);
 
         printf("%5d  %8.2f   %9.2f   %6.2f   %6.2f    %e    %2d\n",
-               sizetest[i], cpu_perf, gpu_perfd, gpu_perfs, gpu_perf, Rnorm / Anorm, iter );
+               (int) sizetest[i], cpu_perf, gpu_perfd, gpu_perfs, gpu_perf, Rnorm / Anorm, (int) iter );
 
         if (argc != 1)
             break;

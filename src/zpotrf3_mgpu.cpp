@@ -100,7 +100,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     double          d_one     =  1.0;
     double          d_neg_one = -1.0;
-    long int        upper = lapackf77_lsame(uplo_, "U");
+    int upper = lapackf77_lsame(uplo_, "U");
     cuDoubleComplex *dlpanel;
     magma_int_t n_local[4], ldpanel;
     cudaEvent_t event0[4], /* compute next block -> zherk     */

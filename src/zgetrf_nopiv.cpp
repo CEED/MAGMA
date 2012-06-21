@@ -75,7 +75,7 @@ magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
     
     magma_int_t a_dim1, a_offset, min_mn, i__3, i__4;
     cuDoubleComplex z__1;
-    static magma_int_t j, jb, nb, iinfo;
+    magma_int_t j, jb, nb, iinfo;
 
     a_dim1 = *lda;
     a_offset = 1 + a_dim1;

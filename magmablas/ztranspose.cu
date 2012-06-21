@@ -65,9 +65,9 @@ __global__ void ztranspose_32( cuDoubleComplex *B, int ldb, cuDoubleComplex *A, 
 //             This version works when m and n are divisible by 32.
 //
 extern "C" void 
-magmablas_ztranspose(cuDoubleComplex *odata, int ldo, 
-                     cuDoubleComplex *idata, int ldi, 
-                     int m, int n )
+magmablas_ztranspose(cuDoubleComplex *odata, magma_int_t ldo, 
+                     cuDoubleComplex *idata, magma_int_t ldi, 
+                     magma_int_t m, magma_int_t n )
 {
         //assert( (m%32) == 0 && (n%32) == 0, "misaligned transpose" );
         dim3 threads( ZSIZE_1SHARED, 8, 1 );

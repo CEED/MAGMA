@@ -99,7 +99,6 @@ int main( int argc, char** argv)
         lwork = max(lwork, M * N + N);
     TESTING_MALLOC( h_work, double, lwork );
 
-    printf("\n\n");
     printf("  M     N   CPU GFlop/s   GPU GFlop/s    ||R||_F / ||A||_F\n");
     printf("==========================================================\n");
     for(i=0; i<10; i++){

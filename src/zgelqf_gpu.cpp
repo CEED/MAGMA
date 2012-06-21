@@ -93,7 +93,7 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
     cuDoubleComplex c_one = MAGMA_Z_ONE;
     magma_int_t maxm, maxn, maxdim, nb;
     magma_int_t iinfo;
-    long int lquery;
+    int lquery;
 
     *info = 0;
     nb = magma_get_zgelqf_nb(m);

@@ -13,9 +13,9 @@
 #include "commonblas.h"
 
 extern "C" void
-magmablas_ztranspose2s(cuDoubleComplex *odata, int ldo,
-                       cuDoubleComplex *idata, int ldi,
-                       int m, int n, cudaStream_t *stream );
+magmablas_ztranspose2s(cuDoubleComplex *odata, magma_int_t ldo,
+                       cuDoubleComplex *idata, magma_int_t ldi,
+                       magma_int_t m, magma_int_t n, cudaStream_t *stream );
 
 
 //
@@ -27,12 +27,12 @@ magmablas_ztranspose2s(cuDoubleComplex *odata, int ldo,
 //             Note that lda >= m and lddat >= n.
 //
 extern "C" void 
-magmablas_zsetmatrix_transpose( int m, int n,
-                                cuDoubleComplex  *ha, int lda, 
-                                cuDoubleComplex *dat, int ldda,
-                                cuDoubleComplex  *dB, int lddb, int nb )
+magmablas_zsetmatrix_transpose( magma_int_t m, magma_int_t n,
+                                cuDoubleComplex  *ha, magma_int_t lda, 
+                                cuDoubleComplex *dat, magma_int_t ldda,
+                                cuDoubleComplex  *dB, magma_int_t lddb, magma_int_t nb )
 {
-    int i = 0, j = 0, ib;
+    magma_int_t i = 0, j = 0, ib;
 
     /* Quick return */
     if ( (m == 0) || (n == 0) )
@@ -43,7 +43,7 @@ magmablas_zsetmatrix_transpose( int m, int n,
         return;
     }
 
-    static cudaStream_t stream[2];
+    cudaStream_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
    
@@ -84,13 +84,13 @@ magmablas_zsetmatrix_transpose( int m, int n,
 //  routine.
 //===========================================================================
 extern "C" void 
-magmablas_zsetmatrix_transpose2( int m, int n,
-                                 cuDoubleComplex  *ha,  int  lda, 
-                                 cuDoubleComplex **dat, int *ldda,
-                                 cuDoubleComplex **dB,  int  lddb, int nb,
-                                 int num_gpus, cudaStream_t stream[][2] )
+magmablas_zsetmatrix_transpose2( magma_int_t m, magma_int_t n,
+                                 cuDoubleComplex  *ha,  magma_int_t  lda, 
+                                 cuDoubleComplex **dat, magma_int_t *ldda,
+                                 cuDoubleComplex **dB,  magma_int_t  lddb, magma_int_t nb,
+                                 magma_int_t num_gpus, cudaStream_t stream[][2] )
 {
-    int i = 0, j[4] = {0, 0, 0, 0}, ib, k = 0;
+    magma_int_t i = 0, j[4] = {0, 0, 0, 0}, ib, k = 0;
 
     /* Quick return */
     if ( (m == 0) || (n == 0) )

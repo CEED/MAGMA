@@ -12,8 +12,8 @@
 #include <cublas.h>
 #include <cuda.h>
 
-typedef int magma_int_t;
-typedef int magma_err_t;
+typedef long magma_int_t;
+typedef int  magma_err_t;
 typedef void* magma_devptr;
 
 // For now, make these compatible with old cublas v1 prototypes.

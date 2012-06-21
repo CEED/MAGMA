@@ -205,7 +205,7 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
     for (igpu = 0; igpu < nrgpu; ++igpu){
         magma_setdevice(igpu);
         if (MAGMA_SUCCESS != magma_zmalloc( &dw[igpu], (n_l*lddc + 2*lddac*lddar + 2*(nb + 1 + lddwork)*nb) )) {
-            printf("%d: size: %ld\n", igpu, (n_l*lddc + 2*lddac*lddar + (nb+1+lddwork)*nb)*sizeof(cuDoubleComplex));
+            printf("%d: size: %ld\n", (int) igpu, (n_l*lddc + 2*lddac*lddar + (nb+1+lddwork)*nb)*sizeof(cuDoubleComplex));
             magma_xerbla( __func__, -(*info) );
             *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;

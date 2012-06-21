@@ -789,8 +789,8 @@ magmablas_csymv2_130( char uplo, magma_int_t n,
                       magma_int_t workspace)
 {
 
-    char      uplo_[2] = {uplo, 0};
-    long int  upper    = lapackf77_lsame(uplo_, "U");
+    char uplo_[2] = {uplo, 0};
+    int  upper    = lapackf77_lsame(uplo_, "U");
 
     /*
      * Test the input parameters.
@@ -927,8 +927,8 @@ magmablas_csymv_130( char uplo, magma_int_t n,
                      cuFloatComplex beta,  
                      cuFloatComplex *Y, magma_int_t incy)
 {
-    char      uplo_[2] = {uplo, 0};
-    long int  upper    = lapackf77_lsame(uplo_, "U");
+    char uplo_[2] = {uplo, 0};
+    int  upper    = lapackf77_lsame(uplo_, "U");
 
     /*
      * Test the input parameters.

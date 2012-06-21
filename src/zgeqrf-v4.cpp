@@ -104,7 +104,7 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
 
     int lwkopt = n * nb;
     work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );
-    long int lquery = (lwork == -1);
+    int lquery = (lwork == -1);
     if (num_gpus <0 || num_gpus > 4) {
         *info = -1;
     } else if (m < 0) {

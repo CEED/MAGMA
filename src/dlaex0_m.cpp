@@ -227,9 +227,9 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
         lapackf77_dsteqr(char_I , &matsiz, &d[submat], &e[submat],
                          Q(submat, submat), &ldq, work, info);  // change to edc?
         if(*info != 0){
-            printf("info: %d\n, submat: %d\n", *info, submat);
+            printf("info: %d\n, submat: %d\n", (int) *info, (int) submat);
             *info = (submat+1)*(n+1) + submat + matsiz;
-            printf("info: %d\n", *info);
+            printf("info: %d\n", (int) *info);
             return MAGMA_SUCCESS;
         }
         k = 1;

@@ -367,7 +367,7 @@ magma_dgeev(char jobvl, char jobvr, magma_int_t n,
 
     /* If INFO > 0 from DHSEQR, then quit */
     if (*info > 0) {
-        fprintf(stderr, "DHSEQR returned with info = %d\n", *info);
+        fprintf(stderr, "DHSEQR returned with info = %d\n", (int) *info);
         goto L50;
     }
 

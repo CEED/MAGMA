@@ -125,17 +125,17 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
 
     char                uplo_[2] = {uplo, 0};
     magma_int_t            ldda, lddla, ldwrk, nb, iinfo, n_local[4], J2, d, num_gpus;
-    static magma_int_t    j, jj, jb, jb1, jb2, jb3, J, JB, NB, MB;
+    magma_int_t    j, jj, jb, jb1, jb2, jb3, J, JB, NB, MB;
     double                d_one     =  1.0;
     double                d_neg_one = -1.0;
-    long int            upper = lapackf77_lsame(uplo_, "U");
+    int upper = lapackf77_lsame(uplo_, "U");
 #if CUDA_VERSION > 3010
     size_t totalMem;
 #else
     unsigned int totalMem;
 #endif
     CUdevice dev;
-    static cudaStream_t stream[4][3];
+    cudaStream_t stream[4][3];
 //#define ROW_MAJOR_PROFILE
 #ifdef  ROW_MAJOR_PROFILE
     magma_timestr_t start, end, start0, end0;

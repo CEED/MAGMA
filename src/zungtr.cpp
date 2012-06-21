@@ -88,8 +88,8 @@ magma_zungtr(char uplo, magma_int_t n, cuDoubleComplex *a,
     char uplo_[2]  = {uplo, 0};
     
     magma_int_t i__1;
-    static magma_int_t i, j;
-    static magma_int_t iinfo;
+    magma_int_t i, j;
+    magma_int_t iinfo;
     magma_int_t upper, lwkopt, lquery;
 
     *info = 0;

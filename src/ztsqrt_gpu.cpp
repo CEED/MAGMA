@@ -112,7 +112,7 @@ magma_ztsqrt_gpu(int *m, int *n,
 
    int lwkopt = (*n+*m) * nb;
    work[0] = (cuDoubleComplex) lwkopt;
-   long int lquery = *lwork == -1;
+   int lquery = *lwork == -1;
    if (*m < 0) {
      *info = -1;
    } else if (*n < 0) {
@@ -137,7 +137,7 @@ magma_ztsqrt_gpu(int *m, int *n,
 
    int lhwork = *lwork - (*m)*nb;
 
-   static cudaStream_t stream[2];
+   cudaStream_t stream[2];
    magma_queue_create( &stream[0] );
    magma_queue_create( &stream[1] );
 

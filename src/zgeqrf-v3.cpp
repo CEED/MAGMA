@@ -148,7 +148,7 @@ magma_zgeqrf3(magma_context *cntxt, magma_int_t m, magma_int_t n,
 
     int lwkopt = n * qr_params->nb;
     work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );
-    long int lquery = (lwork == -1);
+    int lquery = (lwork == -1);
     if (m < 0) {
       *info = -1;
     } else if (n < 0) {

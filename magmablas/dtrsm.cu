@@ -242,6 +242,7 @@ __device__ void dgemm_kernel_16 (double *A, int lda, double *B, int ldb, double 
  * B21 = -inv(A11)*A12*inv(A22)
  */
 #define qmod(a,b) ((a)-(__mul24((b),(a)/(b))))
+
 __global__ void
 triple_dgemm_update_16_R (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
@@ -415,6 +416,7 @@ triple_dgemm_update_16_R (double * Ain, double *d_dinvA, int blk, int lda, int n
  * B21 = -inv(A22)*A21*inv(A11)
  */
 #define qmod(a,b) ((a)-(__mul24((b),(a)/(b))))
+
 __global__ void
 triple_dgemm_update_16_part1_L (double * Ain, double *d_dinvA, int blk, int lda, int npages)
 {
@@ -697,6 +699,7 @@ triple_dgemm_update_32_part1_R (double * Ain, double *d_dinvA, int blk, int lda,
                         
         __syncthreads();
 }
+
 /*
  * B21 = -inv(A11)*A12*inv(A22)
  */
@@ -784,6 +787,7 @@ triple_dgemm_update_32_part2_R (double * Ain, double *d_dinvA, int blk, int lda,
                         C[0] = (-1)*c[i];
         }
 }
+
 /*
  * B21 = -inv(A22)*A21*inv(A11)
  */
@@ -872,6 +876,7 @@ triple_dgemm_update_32_part1_L (double * Ain, double *d_dinvA, int blk, int lda,
                         
         __syncthreads();
 }
+
 /*
  * B21 = -inv(A22)*A21*inv(A11)
  */
@@ -1042,6 +1047,7 @@ triple_dgemm_update_64_part1_R (double * Ain, double *d_dinvA, int blk, int lda,
         }
                         
 }
+
 /*
  * B21 = -inv(A11)*A12*inv(A22)
  */
@@ -1125,6 +1131,7 @@ triple_dgemm_update_64_part2_R (double * Ain, double *d_dinvA, int blk, int lda,
                         C[0] = (-1)*c[i];
         }
 }
+
 /*
  * B21 = -inv(A22)*A21*inv(A11)
  */
@@ -1207,6 +1214,7 @@ triple_dgemm_update_64_part1_L (double * Ain, double *d_dinvA, int blk, int lda,
                         C[0] = c[i];
         }
 }
+
 /*
  * B21 = -inv(A22)*A21*inv(A11)
  */
@@ -1374,6 +1382,7 @@ triple_dgemm_update_above64_part1_R (double * Ain, double *d_dinvA, int blk, int
         }
                         
 }
+
 /*
  * B21 = -inv(A22)*A21*inv(A11)
  */
@@ -1542,6 +1551,7 @@ triple_dgemm_update_above64_part2_R (double * Ain, double *d_dinvA, int blk, int
                         C[0] = (-1)*c[i];
         }
 }
+
 /*
  * part 3, copy data into position 
  */
@@ -1629,6 +1639,7 @@ triple_dgemm_update_above64_part3_L (double * Ain, double *d_dinvA, int blk, int
         }
         __syncthreads();
 }
+
 /*
  * B21 = -inv(A22)*A21*inv(A11)
  */
@@ -1728,7 +1739,7 @@ b_copy_kernel (int M, int N, double *b, int ldb, double *d_x, int ldx)
 
 
 extern "C"
-void diag_dtrtri (int M, char uplo, char diag, double *A, double *d_dinvA, int lda)
+void diag_dtrtri (magma_int_t M, char uplo, char diag, double *A, double *d_dinvA, magma_int_t lda)
 {
         int nblocks = M/BLOCK_SIZE+(M%BLOCK_SIZE!=0);
 
@@ -1807,8 +1818,8 @@ void diag_dtrtri (int M, char uplo, char diag, double *A, double *d_dinvA, int l
  * magmablas_dtrsm
  */
 extern "C"
-void magmablas_dtrsm_tesla( char side, char uplo, char tran, char diag, int M, int N, 
-                            double alpha, /*const*/ double* A, int lda, double* b, int ldb)
+void magmablas_dtrsm_tesla( char side, char uplo, char tran, char diag, magma_int_t M, magma_int_t N, 
+                            double alpha, /*const*/ double* A, magma_int_t lda, double* b, magma_int_t ldb)
 {
         /*  -- MAGMA (version 1.1) --
                 Univ. of Tennessee, Knoxville
@@ -1943,7 +1954,7 @@ void magmablas_dtrsm_tesla( char side, char uplo, char tran, char diag, int M, i
 
         if (side == 'l' || side == 'L')
         {
-                /* inverse the diagonals
+                /* invert the diagonals
                  * Allocate device memory for the inversed diagonal blocks, size=m*NB
                  */
                 cudaMalloc((void**)&d_dinvA, NB*((M/NB)+(M%NB!=0))*NB*sizeof(double));
@@ -2086,7 +2097,7 @@ void magmablas_dtrsm_tesla( char side, char uplo, char tran, char diag, int M, i
         else
         {        // side=R
 
-                /* inverse the diagonals
+                /* invert the diagonals
                  * Allocate device memory for the inversed diagonal blocks, size=N*BLOCK_SIZE 
                  */
                 cudaMalloc((void**)&d_dinvA, NB*((N/NB)+(N%NB!=0))*NB*sizeof(double));

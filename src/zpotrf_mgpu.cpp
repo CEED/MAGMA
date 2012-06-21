@@ -95,7 +95,7 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
     cuDoubleComplex *work;
     double          d_one     =  1.0;
     double          d_neg_one = -1.0;
-    long int        upper = lapackf77_lsame(uplo_, "U");
+    int upper = lapackf77_lsame(uplo_, "U");
     cuDoubleComplex *d_lP[MagmaMaxGPUs], *dlpanel;
     magma_int_t n_local[MagmaMaxGPUs], lddat_local[MagmaMaxGPUs], lddat, ldpanel;
     cudaStream_t stream[MagmaMaxGPUs][4];

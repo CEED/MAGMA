@@ -19,10 +19,6 @@
 #endif
 // === End defining what BLAS to use =======================================
 
-/* to appy pivoting from the previous big-panel: need some index-adjusting */
-extern "C" void
-magmablas_zpermute_long3( cuDoubleComplex *dAT, int lda, int *ipiv, int nb, int ind );
-
 
 extern "C" magma_int_t
 magma_zgetrf_mgpu(magma_int_t num_gpus, 
@@ -131,7 +127,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
           /* Use hybrid blocked code. */
           maxm = ((m + 31)/32)*32;
           if( num_gpus > ceil((double)n/nb) ) {
-            printf( " * too many GPUs for the matrix size, using %d GPUs\n",num_gpus );
+            printf( " * too many GPUs for the matrix size, using %d GPUs\n", (int) num_gpus );
             *info = -1;
             return *info;
           }

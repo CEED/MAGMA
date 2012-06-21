@@ -127,8 +127,8 @@ magma_zunmqr_gpu(char side, char trans,
     magma_int_t i, lddwork;
 
     magma_int_t i1, i2, i3, ib, ic, jc, mi, ni, nq, nw, ret;
-    long int left, notran, lquery;
-    static magma_int_t lwkopt;
+    int left, notran, lquery;
+    magma_int_t lwkopt;
 
     *info = 0;
     left   = lapackf77_lsame(side_, "L");

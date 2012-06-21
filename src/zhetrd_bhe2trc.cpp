@@ -42,7 +42,7 @@ extern "C" void zcheck_eig_(char *JOBZ, int  *MATYPE, int  *N, int  *NB,
 extern "C"  magma_int_t plasma_ceildiv(magma_int_t a, magma_int_t b);
 extern "C"  void tile_bulge_applyQ_cpu(int WANTZ, char SIDE, int N, int NB, int Vblksiz, cuDoubleComplex *E, int LDE, cuDoubleComplex *V, cuDoubleComplex *TAU, cuDoubleComplex *T, int *INFO);
 
-static void barrier(magma_int_t my_core_id, magma_int_t cores_num);
+static void barrier(int my_core_id, int cores_num);
 static void  *parallel_section(void *thread_id);
 static void *applyQ_parallel_section(void *thread_id);
 static void tile_bulge_parallel(int my_core_id);
@@ -87,10 +87,10 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
  volatile magma_int_t barrier_out[MAX_THREADS_BLG];
  volatile magma_int_t *ss_prog;
 
-static void barrier(magma_int_t my_core_id, magma_int_t cores_num);
-static void barrier(magma_int_t my_core_id, magma_int_t cores_num)
+static void barrier(int my_core_id, int cores_num);
+static void barrier(int my_core_id, int cores_num)
 {
-    magma_int_t core;
+    int core;
     
     if (my_core_id == 0)    {
         for (core = 1; core < cores_num; core++)

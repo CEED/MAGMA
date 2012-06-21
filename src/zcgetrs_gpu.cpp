@@ -89,7 +89,7 @@ magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
 
     cuFloatComplex cone = MAGMA_C_ONE;
     char            trans_[2] = {trans, 0};
-    long int    notran = lapackf77_lsame(trans_, "N");
+    int notran = lapackf77_lsame(trans_, "N");
     magma_int_t inc;
 
     *info = 0;

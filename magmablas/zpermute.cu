@@ -47,7 +47,8 @@ extern "C" void zlaswp2( zlaswp_params_t &params )
 
 
 extern "C" void 
-magmablas_zpermute_long( cuDoubleComplex *dAT, int lda, int *ipiv, int nb, int ind )
+magmablas_zpermute_long( cuDoubleComplex *dAT, magma_int_t lda,
+                         magma_int_t *ipiv, magma_int_t nb, magma_int_t ind )
 {
         // assert( (nb % BLOCK_SIZE) == 0 );
         for( int k = 0; k < nb; k += BLOCK_SIZE )

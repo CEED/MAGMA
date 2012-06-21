@@ -186,17 +186,17 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
     double mv_time = 0.0;
     double up_time = 0.0;
     
-    static magma_int_t kk, nx;
-    static magma_int_t i = 0, ii, j, did, i_n;
-    static magma_int_t iinfo;
-    static magma_int_t ldwork, lddwork, lwkopt, ldwork2;
-    static magma_int_t lquery;
-    static cudaStream_t stream[4][10];
+    magma_int_t kk, nx;
+    magma_int_t i = 0, ii, j, did, i_n;
+    magma_int_t iinfo;
+    magma_int_t ldwork, lddwork, lwkopt, ldwork2;
+    magma_int_t lquery;
+    cudaStream_t stream[4][10];
     cuDoubleComplex *dx[4], *dy[4], *hwork;
     cuDoubleComplex *dwork2[4]; 
 
     *info = 0;
-    long int upper = lapackf77_lsame(uplo_, "U");
+    int upper = lapackf77_lsame(uplo_, "U");
     lquery = lwork == -1;
     if ( upper ) {
         printf( " Upper-triangular form not implemented, yet\n" );

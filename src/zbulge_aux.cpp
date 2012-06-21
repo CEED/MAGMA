@@ -54,7 +54,7 @@ extern "C" void  magma_zstedc_withZ(char JOBZ, magma_int_t N, double *D, double 
 
   if(INFO!=0){
         printf("=================================================\n");
-        printf("ZSTEDC ERROR OCCURED. HERE IS INFO %d \n ",INFO);
+        printf("ZSTEDC ERROR OCCURED. HERE IS INFO %d \n ", (int) INFO);
         printf("=================================================\n");
           //assert(INFO==0);
   }
@@ -96,7 +96,7 @@ extern "C" void  magma_zstedx_withZ(magma_int_t N, magma_int_t NE, double *D, do
 
   if(INFO!=0){
         printf("=================================================\n");
-        printf("ZSTEDC ERROR OCCURED. HERE IS INFO %d \n ",INFO);
+        printf("ZSTEDC ERROR OCCURED. HERE IS INFO %d \n ", (int) INFO);
         printf("=================================================\n");
           //assert(INFO==0);
   }

@@ -80,10 +80,10 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 
     magma_int_t  i__1, i__2, i__3;
     magma_int_t lwork;
-    static magma_int_t i, ib, ki, kk, iinfo;
+    magma_int_t i, ib, ki, kk, iinfo;
     magma_int_t lddwork = min(m, n);
     cuDoubleComplex *work, *panel;
-    static cudaStream_t stream[2];
+    cudaStream_t stream[2];
 
     *info = 0;
     if (m < 0) {

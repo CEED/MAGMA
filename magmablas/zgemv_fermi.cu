@@ -375,7 +375,7 @@ magmablas_zgemvc_fermi(int m, int n, cuDoubleComplex alpha, cuDoubleComplex *A, 
 
 
 extern "C" void
-magmablas_zgemv_fermi(char flag, int m, int n, cuDoubleComplex alpha, cuDoubleComplex *A, int lda, cuDoubleComplex *x, int incx, cuDoubleComplex beta, cuDoubleComplex *y, int incy) 
+magmablas_zgemv_fermi(char flag, magma_int_t m, magma_int_t n, cuDoubleComplex alpha, cuDoubleComplex *A, magma_int_t lda, cuDoubleComplex *x, magma_int_t incx, cuDoubleComplex beta, cuDoubleComplex *y, magma_int_t incy) 
 {
 
     if(beta.x==0.0 && beta.y==0.0 && incx ==1 && incy==1)

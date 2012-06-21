@@ -239,7 +239,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
     char uplo_[2]  = {uplo, 0};
 
     double mv_time = 0.0;
-    static magma_int_t i;
+    magma_int_t i;
     magma_int_t loffset = nb0*((offset/nb0)/num_gpus);
   
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -250,12 +250,12 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
 
     cuDoubleComplex value = MAGMA_Z_ZERO;
     
-    static magma_int_t kk;  
-    static magma_int_t ione = 1;
+    magma_int_t kk;  
+    magma_int_t ione = 1;
 
-    static magma_int_t i_n, i_1, iw;
+    magma_int_t i_n, i_1, iw;
   
-    static cuDoubleComplex alpha;
+    cuDoubleComplex alpha;
 
     cuDoubleComplex *f = (cuDoubleComplex *)malloc(n*sizeof(cuDoubleComplex ));
 
@@ -263,7 +263,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
       return 0;
     }
 
-    /*static cudaStream_t stream[4][10];
+    /*cudaStream_t stream[4][10];
     for( id=0; id<num_gpus; id++ ) {
         magma_setdevice(id);
         //magma_zmalloc( &dx[id], k*n );

@@ -67,7 +67,7 @@ int main(int argc, char **argv)
     }
     else {
         printf("\nUsage: \n");
-        printf("  testing_zcposv_gpu -nrhs %d -N %d\n\n", NRHS, 1024);
+        printf("  testing_zcposv_gpu -nrhs %d -N %d\n\n", (int) NRHS, 1024);
     }
     printf("Epsilon(double): %8.6e\n"
            "Epsilon(single): %8.6e\n\n", 
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
         magma_zsetmatrix( N, N,    h_A, lda, d_A, lda );
         magma_zsetmatrix( N, NRHS, h_B, ldb, d_B, ldb );
     
-        printf("%5d  ", N); fflush(stdout);
+        printf("%5d  ", (int) N); fflush(stdout);
 
         //=====================================================================
         //              Mixed Precision Iterative Refinement - GPU 
@@ -123,7 +123,7 @@ int main(int argc, char **argv)
                          d_WORKD, d_WORKS, &iter, &info);
         end = get_current_time();
         if (info < 0)
-            printf("Argument %d of magma_zcposv had an illegal value.\n", -info);
+            printf("Argument %d of magma_zcposv had an illegal value.\n", (int) -info);
         gpu_perf = flopsS / GetTimerValue(start, end);
 
         //=====================================================================
@@ -147,7 +147,7 @@ int main(int argc, char **argv)
         magma_zpotrf_gpu(uplo[0], N, d_A, lda, &info);
         end = get_current_time();
         if (info < 0)
-            printf("Argument %d of magma_zpotrf had an illegal value.\n", -info);
+            printf("Argument %d of magma_zpotrf had an illegal value.\n", (int) -info);
         gpu_perfdf = flopsF / GetTimerValue(start, end);
 
         printf("%6.2f    ", gpu_perfdf); fflush(stdout);
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
         magma_zpotrs_gpu(uplo[0], N, NRHS, d_A, lda, d_B, ldb, &info);
         end = get_current_time();
         if (info < 0)
-            printf("Argument %d of magma_zpotrs had an illegal value.\n", -info);
+            printf("Argument %d of magma_zpotrs had an illegal value.\n", (int) -info);
 
         gpu_perfds = flopsS / GetTimerValue(start, end);
 
@@ -183,7 +183,7 @@ int main(int argc, char **argv)
         magma_cpotrf_gpu(uplo[0], N, d_As, N, &info);
         end = get_current_time();
         if (info < 0)
-            printf("Argument %d of magma_cpotrf had an illegal value.\n", -info);
+            printf("Argument %d of magma_cpotrf had an illegal value.\n", (int) -info);
 
         gpu_perfsf = flopsF / GetTimerValue(start, end);
         printf("%6.2f     ", gpu_perfsf); fflush(stdout);
@@ -199,13 +199,13 @@ int main(int argc, char **argv)
         magma_cpotrs_gpu(uplo[0], N, NRHS, d_As, N, d_Bs, N, &info);
         end = get_current_time();
         if (info < 0)
-            printf("Argument %d of magma_cpotrs had an illegal value.\n", -info);
+            printf("Argument %d of magma_cpotrs had an illegal value.\n", (int) -info);
 
         gpu_perfss = flopsS / GetTimerValue(start, end);
         printf("%6.2f     ", gpu_perfss); fflush(stdout);
 
         printf("%6.2f     ", gpu_perf);
-        printf("%e    %3d\n", Rnorm/Anorm, iter); fflush(stdout);
+        printf("%e    %3d\n", Rnorm/Anorm, (int) iter); fflush(stdout);
 
         if( argc != 1 ){
             break;

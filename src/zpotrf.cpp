@@ -107,13 +107,13 @@ magma_zpotrf(char uplo, magma_int_t n,
     /* Local variables */
     char uplo_[2] = {uplo, 0};
     magma_int_t        ldda, nb;
-    static magma_int_t j, jb;
+    magma_int_t j, jb;
     cuDoubleComplex    c_one     = MAGMA_Z_ONE;
     cuDoubleComplex    c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex   *work;
     double             d_one     =  1.0;
     double             d_neg_one = -1.0;
-    long int           upper = lapackf77_lsame(uplo_, "U");
+    int upper = lapackf77_lsame(uplo_, "U");
 
     *info = 0;
     if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
@@ -151,7 +151,7 @@ magma_zpotrf(char uplo, magma_int_t n,
         //return magma_zpotrf_ooc( uplo, n, a, lda, info);
     }
 
-    static cudaStream_t stream[2];
+    cudaStream_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 

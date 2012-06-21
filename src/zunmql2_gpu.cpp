@@ -116,11 +116,11 @@ magma_zunmql2_gpu(const char side, const char trans,
 
     magma_int_t wa_offset, dc_offset, i__4;
     
-    static magma_int_t i__;
-    static cuDoubleComplex t[2*4160]        /* was [65][64] */;
-    static magma_int_t i1, i2, i3, ib, nb, mi, ni, nq, nw;
-    static magma_int_t ldwork;
-    long int left, notran;
+    magma_int_t i__;
+    cuDoubleComplex t[2*4160]        /* was [65][64] */;
+    magma_int_t i1, i2, i3, ib, nb, mi, ni, nq, nw;
+    magma_int_t ldwork;
+    int left, notran;
 
     wa_offset = 1 + ldwa;
     wa -= wa_offset;

@@ -42,8 +42,8 @@ __global__ void magmagpu_zswap( magmagpu_zswap_params_t params )
 }
 
 extern "C" void 
-magmablas_zswap( int n, cuDoubleComplex *dA1T, int lda1, 
-                 cuDoubleComplex *dA2T, int lda2)
+magmablas_zswap( magma_int_t n, cuDoubleComplex *dA1T, magma_int_t lda1, 
+                 cuDoubleComplex *dA2T, magma_int_t lda2)
 {
     int  blocksize = 64;
     dim3 blocks( (n+blocksize-1) / blocksize, 1, 1);

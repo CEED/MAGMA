@@ -159,14 +159,14 @@ magma_zhetrd(char uplo, magma_int_t n,
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
     double          d_one     = MAGMA_D_ONE;
     
-    static magma_int_t kk, nx;
-    static magma_int_t i, j, i_n;
-    static magma_int_t iinfo;
-    static magma_int_t ldwork, lddwork, lwkopt;
-    static magma_int_t lquery;
+    magma_int_t kk, nx;
+    magma_int_t i, j, i_n;
+    magma_int_t iinfo;
+    magma_int_t ldwork, lddwork, lwkopt;
+    magma_int_t lquery;
 
     *info = 0;
-    long int upper = lapackf77_lsame(uplo_, "U");
+    int upper = lapackf77_lsame(uplo_, "U");
     lquery = lwork == -1;
     if (! upper && ! lapackf77_lsame(uplo_, "L")) {
         *info = -1;

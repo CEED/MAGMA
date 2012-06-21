@@ -112,12 +112,16 @@ testing_%.o : testing_%.f90
 endif
 
 testing_%_f : testing_%_f.o $(FOBJ)
-	$(FORT) $(LDOPTS) $< $(FOBJ) -o $@ lin/liblapacktest.a -L../lib \
-          -lcuda -lmagma -lmagmablas -lmagma $(LIBDIR) $(LIB) 
+	$(FORT) $(LDOPTS) $< $(FOBJ) -o $@ \
+	lin/liblapacktest.a -L../lib -lcuda -lmagma -lmagmablas -lmagma \
+	$(LIBDIR) \
+	$(LIB) 
 
 testing_% : testing_%.o
-	$(CC) $(LDOPTS) $(NOMAIN) $< $(OBJ) -o $@ lin/liblapacktest.a -L../lib \
-          -lcuda -lmagma -lmagmablas -lmagma $(LIBDIR) $(LIB) 
+	$(CC) $(LDOPTS) $(NOMAIN) $< $(OBJ) -o $@ \
+	lin/liblapacktest.a -L../lib -lcuda -lmagma -lmagmablas -lmagma \
+	$(LIBDIR) \
+	$(LIB) 
 
 #
 # These two files are provided by cuda

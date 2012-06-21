@@ -100,8 +100,8 @@ int main(int argc, char **argv)
         lda = ((m+31)/32)*32;
         flops = FLOPS( (double)m ) / 1e6;
 
-        printf(      "%5d ", m );
-        fprintf( fp, "%5d ", m );
+        printf(      "%5d ", (int) m );
+        fprintf( fp, "%5d ", (int) m );
 
         vecsize = m * incx;
         lapackf77_zlarnv( &ione, ISEED, &vecsize, X );

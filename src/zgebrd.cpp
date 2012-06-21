@@ -149,9 +149,9 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
 
     magma_int_t ncol, nrow, jmax, nb, ldda;
 
-    static magma_int_t i, j, nx;
-    static cuDoubleComplex ws;
-    static magma_int_t iinfo;
+    magma_int_t i, j, nx;
+    cuDoubleComplex ws;
+    magma_int_t iinfo;
 
     magma_int_t minmn;
     magma_int_t ldwrkx, ldwrky, lwkopt;

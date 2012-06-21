@@ -39,7 +39,8 @@ typedef struct {
 extern "C" void zlaswp3( zlaswp_params_t2 &params );
 
 extern "C" void 
-magmablas_zpermute_long3( cuDoubleComplex *dAT, int lda, int *ipiv, int nb, int ind )
+magmablas_zpermute_long3( cuDoubleComplex *dAT, magma_int_t lda,
+                          magma_int_t *ipiv, magma_int_t nb, magma_int_t ind )
 {
         int k;
         for( k = 0; k < nb-BLOCK_SIZE; k += BLOCK_SIZE )

@@ -82,7 +82,7 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
     cuDoubleComplex c_one = MAGMA_Z_ONE;
     cuDoubleComplex *work = NULL;
     char            trans_[2] = {trans, 0};
-    long int    notran = lapackf77_lsame(trans_, "N");
+    int notran = lapackf77_lsame(trans_, "N");
     magma_int_t i1, i2, inc;
 
     *info = 0;

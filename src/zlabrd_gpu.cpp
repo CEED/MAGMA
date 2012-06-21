@@ -153,14 +153,13 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
     /* Table of constant values */
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex c_one = MAGMA_Z_ONE;
-    static int c__1 = 1;
     cuDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magma_int_t c__1 = 1;
     
     /* System generated locals */
-    int a_dim1, a_offset, x_dim1, x_offset, y_dim1, y_offset, i__2, 
-            i__3;
+    magma_int_t a_dim1, a_offset, x_dim1, x_offset, y_dim1, y_offset, i__2, i__3;
     /* Local variables */
-    static int i__;
+    magma_int_t i__;
     cuDoubleComplex alpha;
 
     a_dim1 = lda;
@@ -187,7 +186,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
     }
 
     cuDoubleComplex *f = (cuDoubleComplex *)malloc(max(n,m)*sizeof(cuDoubleComplex ));
-    static cudaStream_t stream;
+    cudaStream_t stream;
     magma_queue_create( &stream );
 
     if (m >= n) {

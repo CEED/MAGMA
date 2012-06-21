@@ -29,14 +29,15 @@ magmablas_zsetmatrix_transpose3(
                   int m, int n , int nb)
 {
     int d, i = 0, offset = 0, j = 0, j_local, ib;
-    static cudaStream_t stream[4][2];
+    cudaStream_t stream[4][2];
 
     /* Quick return */
     if ( (m == 0) || (n == 0) )
         return;
 
     if (lda < m || num_gpus*ldda < n || lddb < m){
-        printf("Wrong arguments in zhtodt2 (%d<%d), (%d*%d<%d), or (%d<%d).\n",lda,m,num_gpus,ldda,n,lddb,m);
+        printf( "Wrong arguments in zhtodt2 (%d<%d), (%d*%d<%d), or (%d<%d).\n",
+                (int) lda, (int) m, (int) num_gpus, (int) ldda, (int) n, (int) lddb, (int) m );
         return;
     }
     

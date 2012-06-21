@@ -194,28 +194,28 @@ magma_zheevx_gpu(char jobz, char range, char uplo, magma_int_t n,
   char jobz_[2] = {jobz, 0};
   char range_[2] = {range, 0};
 
-  static magma_int_t ione = 1;
+  magma_int_t ione = 1;
   
-  static char order[1];
-  static magma_int_t indd, inde;
-  static magma_int_t imax;
-  static magma_int_t lopt, itmp1, indee;
-  static magma_int_t lower, wantz;
-  static magma_int_t i, j, jj, i__1;
-  static magma_int_t alleig, valeig, indeig;
-  static magma_int_t iscale, indibl;
-  static magma_int_t indiwk, indisp, indtau;
-  static magma_int_t indrwk, indwrk;
-  static magma_int_t llwork, nsplit;
-  static magma_int_t lquery;
-  static magma_int_t iinfo;
-  static double safmin;
-  static double bignum;
-  static double smlnum;
-  static double eps, tmp1;
-  static double anrm;
-  static double sigma, d__1;
-  static double rmin, rmax;
+  char order[1];
+  magma_int_t indd, inde;
+  magma_int_t imax;
+  magma_int_t lopt, itmp1, indee;
+  magma_int_t lower, wantz;
+  magma_int_t i, j, jj, i__1;
+  magma_int_t alleig, valeig, indeig;
+  magma_int_t iscale, indibl;
+  magma_int_t indiwk, indisp, indtau;
+  magma_int_t indrwk, indwrk;
+  magma_int_t llwork, nsplit;
+  magma_int_t lquery;
+  magma_int_t iinfo;
+  double safmin;
+  double bignum;
+  double smlnum;
+  double eps, tmp1;
+  double anrm;
+  double sigma, d__1;
+  double rmin, rmax;
 
   double *dwork;
   

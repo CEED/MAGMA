@@ -77,9 +77,9 @@ int main( int argc, char** argv)
         { 992, 2016, 3040, 4064, 5088, 6112, 7136, 8160, 9184, 10208 };
     magma_int_t n       = 64;
     magma_int_t nb      = 64;
-    magma_int_t nstream = 2;
-    magma_int_t count   = 3;
-    magma_int_t ngpu    = magma_num_gpus();
+    int nstream = 2;
+    int count   = 3;
+    int ngpu    = magma_num_gpus();
     
     magma_int_t info;
     magma_int_t ione     = 1;
@@ -165,7 +165,7 @@ int main( int argc, char** argv)
     }
     
     printf("\n");
-    printf( "nb %d, ngpu %d, nstream %d\n", nb, ngpu, nstream );
+    printf( "nb %d, ngpu %d, nstream %d\n", (int) nb, ngpu, nstream );
     printf("    m     n    CPU GFlop/s (sec)   GPU GFlop/s (sec)   CUBLAS hemm (sec)   ||R|| / ||A||*||X||\n");
     printf("==============================================================================================\n");
     for( int i = 0; i < ntest; ++i ) {
@@ -266,11 +266,11 @@ int main( int argc, char** argv)
             //printf( "R ="  ); magma_zprint( m, n, hR, lda );
             
             printf( "%5d %5d   %7.1f (%7.4f)   %7.1f (%7.4f)   %7.1f (%7.4f)   %8.2e\n",
-                    m, n, cpu_perf, cpu_time, gpu_perf, gpu_time, gpu_perf2, gpu_time2, error );
+                    (int) m, (int) n, cpu_perf, cpu_time, gpu_perf, gpu_time, gpu_perf2, gpu_time2, error );
         }
         else {
             printf( "%5d %5d     ---   (  ---  )   %7.1f (%7.4f)   %7.1f (%7.4f)   ---\n",
-                    m, n, /*cpu_perf, cpu_time,*/ gpu_perf, gpu_time, gpu_perf2, gpu_time2 /*, error*/ );
+                    (int) m, (int) n, /*cpu_perf, cpu_time,*/ gpu_perf, gpu_time, gpu_perf2, gpu_time2 /*, error*/ );
         }
     }}
     

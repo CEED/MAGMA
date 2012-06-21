@@ -465,11 +465,11 @@ magma_int_t magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
  -- MAGMA utility function definitions
 */
 
-void magma_zprint    ( int m, int n, cuDoubleComplex  *A, int lda  );
-void magma_zprint_gpu( int m, int n, cuDoubleComplex *dA, int ldda );
+void magma_zprint    ( magma_int_t m, magma_int_t n, cuDoubleComplex  *A, magma_int_t lda  );
+void magma_zprint_gpu( magma_int_t m, magma_int_t n, cuDoubleComplex *dA, magma_int_t ldda );
 
-void zpanel_to_q(char uplo, int ib, cuDoubleComplex *A, int lda, cuDoubleComplex *work);
-void zq_to_panel(char uplo, int ib, cuDoubleComplex *A, int lda, cuDoubleComplex *work);
+void zpanel_to_q( char uplo, magma_int_t ib, cuDoubleComplex *A, magma_int_t lda, cuDoubleComplex *work );
+void zq_to_panel( char uplo, magma_int_t ib, cuDoubleComplex *A, magma_int_t lda, cuDoubleComplex *work );
 
 #ifdef __cplusplus
 }

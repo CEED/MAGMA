@@ -98,7 +98,6 @@ int main( magma_int_t argc, char** argv)
     context = magma_init(NULL, NULL, 0, num_cores, num_gpus, argc, argv);
 
     
-    printf("\n\n");
     printf("  N    Multicore GFlop/s    ||R||_F / ||A||_F\n");
     printf("=============================================\n");
     for(i=0; i<10; i++)

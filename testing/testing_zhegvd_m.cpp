@@ -141,7 +141,6 @@ int main( int argc, char** argv)
     TESTING_MALLOC(    rwork,          double, lrwork);
     TESTING_MALLOC(    iwork,     magma_int_t, liwork);
     
-    printf("\n\n");
     printf("  N     CPU Time(s)    GPU Time(s)   MGPU Time(s) \n");
     printf("==================================================\n");
     for(i=0; i<4; i++){

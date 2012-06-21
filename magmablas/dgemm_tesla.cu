@@ -11,10 +11,10 @@
 #define magmablas_dgemm_tesla magmablas_dgemm
 
 extern "C" void 
-magmablas_dgemm_tesla( char TRANSA, char TRANSB, int m , int n , int k , 
-                       double alpha, const double *A, int lda, 
-                                     const double *B, int ldb,
-                       double beta,        double *C, int ldc)
+magmablas_dgemm_tesla( char TRANSA, char TRANSB, magma_int_t m, magma_int_t n, magma_int_t k, 
+                       double alpha, const double *A, magma_int_t lda, 
+                                     const double *B, magma_int_t ldb,
+                       double beta,        double *C, magma_int_t ldc)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville

@@ -48,7 +48,7 @@ int main(int argc , char **argv)
     // process command line arguments
     printf( "\nUsage:\n" );
     printf( "  %s -N <matrix size> -R <right hand sides>\n", argv[0] );
-    printf( "  -N can be repeated up to %d times\n", MAXTESTS );
+    printf( "  -N can be repeated up to %d times\n\n", MAXTESTS );
     int ntest = 0;
     int ch;
     while( (ch = getopt( argc, argv, "N:R:" )) != -1 ) {
@@ -61,7 +61,7 @@ int main(int argc , char **argv)
                 else {
                     size[ntest] = atoi( optarg );
                     if ( size[ntest] <= 0 ) {
-                        printf( "error: -N value %d <= 0\n", size[ntest] );
+                        printf( "error: -N value %d <= 0\n", (int) size[ntest] );
                         exit(1);
                     }
                     ntest++;
@@ -95,7 +95,6 @@ int main(int argc , char **argv)
     TESTING_MALLOC( work, double,          N        );
     TESTING_MALLOC( ipiv, magma_int_t,     N        );
 
-    printf("\n");
     printf("    N   NRHS   GPU GFlop/s (sec)   ||B - AX|| / ||A||*||X||\n");
     printf("===========================================================\n");
 
@@ -122,7 +121,7 @@ int main(int argc , char **argv)
         magma_zgesv( N, NRHS, h_LU, lda, ipiv, h_X, ldb, &info );
         gpu_time = magma_wtime() - gpu_time;
         if (info != 0)
-            printf("magma_zgesv returned error %d.\n", info);
+            printf("magma_zgesv returned error %d.\n", (int) info);
 
         gpu_perf = gflops / gpu_time;
 
@@ -140,7 +139,7 @@ int main(int argc , char **argv)
         Rnorm = lapackf77_zlange("I", &N, &NRHS, h_B, &ldb, work);
 
         printf( "%5d  %5d   %7.2f (%7.2f)   %8.2e\n",
-                N, NRHS, gpu_perf, gpu_time, Rnorm/(Anorm*Xnorm) );
+                (int) N, (int) NRHS, gpu_perf, gpu_time, Rnorm/(Anorm*Xnorm) );
     }
 
     /* Memory clean up */

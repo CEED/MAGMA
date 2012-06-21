@@ -67,12 +67,12 @@ magma_zgetf2_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
     =====================================================================   */
     
   cuDoubleComplex c_one = MAGMA_Z_ONE, c_zero = MAGMA_Z_ZERO;
-    static magma_int_t c__1 = 1;
+    magma_int_t c__1 = 1;
     
     magma_int_t a_dim1, a_offset, i__1, i__2, i__3;
     cuDoubleComplex z__1;
-    static magma_int_t i__, j;
-    static double sfmin;
+    magma_int_t i__, j;
+    double sfmin;
 
     a_dim1 = *lda;
     a_offset = 1 + a_dim1;

@@ -81,9 +81,9 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
 
     cuDoubleComplex *dwork;
     cuDoubleComplex *work;
-    int i, k, ldwork, lddwork, old_i, old_ib, rows;
-    int nbmin, nx, ib, nb;
-    int lhwork, lwork;
+    magma_int_t i, k, ldwork, lddwork, old_i, old_ib, rows;
+    magma_int_t nbmin, nx, ib, nb;
+    magma_int_t lhwork, lwork;
 
     /* Function Body */
     *info = 0;
@@ -119,7 +119,7 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
         return *info;
     }
 
-    static cudaStream_t stream[2];
+    cudaStream_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 

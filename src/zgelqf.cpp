@@ -97,7 +97,7 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
     cuDoubleComplex c_one = MAGMA_Z_ONE;
     magma_int_t maxm, maxn, maxdim, nb;
     magma_int_t iinfo, ldda;
-    long int lquery;
+    int lquery;
 
     /* Function Body */
     *info = 0;

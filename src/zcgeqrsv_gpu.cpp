@@ -206,7 +206,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     /* dworks(dSA + dSX + dST) */
     size = ldda*N + N*NRHS + ( 2*minmn + ((N+31)/32)*32 )*nb;
     if (MAGMA_SUCCESS != magma_cmalloc( &dworks, size )) {
-        fprintf(stderr, "Allocation of dworks failed (%d)\n", size);
+        fprintf(stderr, "Allocation of dworks failed (%d)\n", (int) size);
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }

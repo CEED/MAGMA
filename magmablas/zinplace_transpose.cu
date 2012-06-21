@@ -103,7 +103,7 @@ __global__ void zinplace_T_odd( cuDoubleComplex *matrix, int lda, int half )
 } 
 
 extern "C" void 
-magmablas_zinplace_transpose( cuDoubleComplex *A, int lda, int n )
+magmablas_zinplace_transpose( cuDoubleComplex *A, magma_int_t lda, magma_int_t n )
 {
         dim3 threads( ZSIZE_2SHARED, 16 );
         int in = n / ZSIZE_2SHARED;

@@ -212,7 +212,8 @@ sgemm_kernel_ab_0(float *C, const float *A, const float *B,
 
 extern "C" void
 magmablas_sgemm_kernel_ab_0(float *C, const float *A, const float *B, 
-                            int m,int n, int k, int lda, int ldb, int ldc, 
+                            magma_int_t m, magma_int_t n, magma_int_t k,
+                            magma_int_t lda, magma_int_t ldb, magma_int_t ldc, 
                             float alpha, float beta)
 {
         dim3 threads( 16, 4 );

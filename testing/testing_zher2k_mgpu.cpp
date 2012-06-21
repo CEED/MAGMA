@@ -171,7 +171,7 @@ int main( int argc, char** argv)
     }
     
     printf("\n");
-    printf( "k %d, nb %d, ngpu %d, nstream %d\n", k, nb, ngpu, nstream );
+    printf( "k %d, nb %d, ngpu %d, nstream %d\n", (int) k, (int) nb, (int) ngpu, (int) nstream );
     printf("    n    CPU GFlop/s (sec)   GPU GFlop/s (sec)   Ichi's code (sec)   ||R|| / ||A||\n");
     printf("=========================================================================\n");
     for( int i = 0; i < ntest; ++i ) {
@@ -279,11 +279,11 @@ int main( int argc, char** argv)
             error2 = lapackf77_zlanhe("fro", "Lower", &n, hR2, &lda, work) / error2;
             
             printf( "%5d   %7.1f (%7.4f)   %7.1f (%7.4f)   %7.1f (%7.4f)   %8.2e   %8.2e\n",
-                    n, cpu_perf, cpu_time, gpu_perf, gpu_time, gpu_perf2, gpu_time2, error, error2 );
+                    (int) n, cpu_perf, cpu_time, gpu_perf, gpu_time, gpu_perf2, gpu_time2, error, error2 );
         }
         else {
             printf( "%5d     ---   (  ---  )   %7.1f (%7.4f)   %7.1f (%7.4f)     ---        ---\n",
-                    n, /*cpu_perf, cpu_time,*/ gpu_perf, gpu_time, gpu_perf2, gpu_time2 /*, error, error2*/ );
+                    (int) n, /*cpu_perf, cpu_time,*/ gpu_perf, gpu_time, gpu_perf2, gpu_time2 /*, error, error2*/ );
         }
     }}
     

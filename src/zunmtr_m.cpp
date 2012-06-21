@@ -125,10 +125,10 @@ magma_zunmtr_m(magma_int_t nrgpu, char side, char uplo, char trans,
     char uplo_[2]  = {uplo, 0};
     char trans_[2] = {trans, 0};
     magma_int_t  i__2;
-    static magma_int_t i1, i2, nb, mi, ni, nq, nw;
-    long int left, upper, lquery;
-    static magma_int_t iinfo;
-    static magma_int_t lwkopt;
+    magma_int_t i1, i2, nb, mi, ni, nq, nw;
+    int left, upper, lquery;
+    magma_int_t iinfo;
+    magma_int_t lwkopt;
 
     *info = 0;
     left   = lapackf77_lsame(side_, "L");

@@ -164,13 +164,13 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     magma_int_t ldda = n;
     magma_int_t lddb = n;
 
-    static magma_int_t lower;
-    static char trans[1];
-    static magma_int_t wantz, lquery;
+    magma_int_t lower;
+    char trans[1];
+    magma_int_t wantz, lquery;
 
-    static magma_int_t lopt, lwmin, liopt, liwmin;
+    magma_int_t lopt, lwmin, liopt, liwmin;
   
-    static cudaStream_t stream;
+    cudaStream_t stream;
     magma_queue_create( &stream );
 
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);

@@ -79,10 +79,10 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
 
     magma_int_t  i__1, i__2, i__3;
     magma_int_t lwork, ldda;
-    static magma_int_t i, ib, ki, kk, iinfo;
+    magma_int_t i, ib, ki, kk, iinfo;
     magma_int_t lddwork = min(m, n);
     cuDoubleComplex *da, *work, *dwork;
-    static cudaStream_t stream;
+    cudaStream_t stream;
 
     *info = 0;
     if (m < 0) {

@@ -923,8 +923,8 @@ magmablas_zhemv_200_mgpu_32( char uplo, magma_int_t n,
               magma_int_t nb)
 
 {
-    char      uplo_[2] = {uplo, 0};
-    long int  upper    = lapackf77_lsame(uplo_, "U");
+    char uplo_[2] = {uplo, 0};
+    int  upper    = lapackf77_lsame(uplo_, "U");
 
     /*
      * Test the input parameters.

@@ -101,7 +101,7 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
     magma_int_t i, k, lddwork, old_i, old_ib, nb;
     magma_int_t rows, cols;
     magma_int_t ib, ki, kk, mu, nu, iinfo, ldda;
-    long int lquery;
+    int lquery;
 
     nb = magma_get_zgeqlf_nb(m);
     *info = 0;
@@ -147,7 +147,7 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
     }
     dwork = da + ldda*(n);
 
-    static cudaStream_t stream[2];
+    cudaStream_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 

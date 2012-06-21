@@ -74,7 +74,7 @@ double magma_wtime( void );
 
 void printout_devices();
 
-void swp2pswp(char trans, int n, int *ipiv, int *newipiv);
+void swp2pswp(char trans, magma_int_t n, magma_int_t *ipiv, magma_int_t *newipiv);
 
 float getv(float *da);
 

@@ -728,8 +728,8 @@ extern "C" void zlanhe_max (char uplo, int m, cuDoubleComplex *A , int lda , dou
 }
  
 extern "C" double 
-magmablas_zlanhe(char norm, char uplo, int n, 
-                 cuDoubleComplex *A, int lda, double *WORK )
+magmablas_zlanhe(char norm, char uplo, magma_int_t n, 
+                 cuDoubleComplex *A, magma_int_t lda, double *WORK )
 {
         if (norm == 'I' || norm =='i')  
             {

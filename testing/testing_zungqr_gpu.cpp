@@ -66,11 +66,11 @@ int main( int argc, char** argv)
                 K = atoi(argv[++i]);
         }
         if (N>0 && M>0 && M >= N && K >0 && K <= N)
-            printf("  testing_zungqr_gpu -M %d -N %d -K %d\n\n", M, N, K);
+            printf("  testing_zungqr_gpu -M %d -N %d -K %d\n\n", (int) M, (int) N, (int) K);
         else
             {
                 printf("\nUsage: \n");
-                printf("  testing_zungqr_gpu  -M %d  -N %d  -K %d\n\n", M, N, K);
+                printf("  testing_zungqr_gpu  -M %d  -N %d  -K %d\n\n", (int) M, (int) N, (int) K);
                 printf("  M, N, and K have to to be K <= N <= M, exit.\n");
                 exit(1);
             }
@@ -96,7 +96,6 @@ int main( int argc, char** argv)
     TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*N      );
     TESTING_DEVALLOC( d_T, cuDoubleComplex, ( 2*min_mn+ (N+31)/32*32 )*nb );
 
-    printf("\n");
     printf("  M     N    CPU GFlop/s   GPU GFlop/s   ||R|| / ||A||\n");
     printf("=======================================================\n");
     for(i=0; i<10; i++){
@@ -122,13 +121,13 @@ int main( int argc, char** argv)
            =================================================================== */
         magma_zgeqrf_gpu(M, N, d_A, ldda, tau, d_T, &info);
         if ( info < 0)  
-            printf("Argument %d of magma_zgeqrf_gpu had an illegal value.\n", -info);
+            printf("Argument %d of magma_zgeqrf_gpu had an illegal value.\n", (int) -info);
         
         start = get_current_time();
         magma_zungqr_gpu(M, N, K, d_A, ldda, tau, d_T, nb, &info);
         end = get_current_time();
         if ( info < 0)  
-            printf("Argument %d of magma_zungqr_gpu had an illegal value.\n", -info);
+            printf("Argument %d of magma_zungqr_gpu had an illegal value.\n", (int) -info);
         
         // Get d_A back to the CPU to compare with the CPU result.
         magma_zgetmatrix( M, N, d_A, ldda, h_R, lda );
@@ -141,20 +140,20 @@ int main( int argc, char** argv)
            =================================================================== */
         lapackf77_zgeqrf(&M, &N, h_A, &lda, tau, h_work, &lwork, &info);
         if ( info < 0)  
-            printf("Argument %d of lapackf77_zgeqrf had an illegal value.\n", -info);
+            printf("Argument %d of lapackf77_zgeqrf had an illegal value.\n", (int) -info);
         
         start = get_current_time();
         //lapackf77_zungqr(&M, &N, &K, h_A, &lda, tau, h_work, &lwork, info);
         magma_zungqr(M, N, K, h_A, lda, tau, d_T, nb, &info);
         end = get_current_time();
         if ( info < 0)  
-            printf("Argument %d of magma_zungqr had an illegal value.\n", -info);
+            printf("Argument %d of magma_zungqr had an illegal value.\n", (int) -info);
         
         cpu_perf = flops / GetTimerValue(start,end);
 
         blasf77_zaxpy(&n2, &c_neg_one, h_A, &ione, h_R, &ione);
         printf("%5d %5d   %6.1f       %6.1f         %7.2e \n",
-               M, N, cpu_perf, gpu_perf,
+               (int) M, (int) N, cpu_perf, gpu_perf,
                lapackf77_zlange("f", &M, &N, h_R, &lda, work) / matnorm );
         
         if (argc != 1)

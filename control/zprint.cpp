@@ -49,7 +49,7 @@ static int is_devptr( void* A )
 // -------------------------
 // Prints a matrix that is on the CPU host.
 extern "C"
-void magma_zprint( int m, int n, cuDoubleComplex *A, int lda )
+void magma_zprint( magma_int_t m, magma_int_t n, cuDoubleComplex *A, magma_int_t lda )
 {
     if ( is_devptr( A ) == 1 ) {
         fprintf( stderr, "ERROR: zprint called with device pointer.\n" );
@@ -78,7 +78,7 @@ void magma_zprint( int m, int n, cuDoubleComplex *A, int lda )
 // Internally allocates memory on host, copies it to the host, prints it,
 // and de-allocates host memory.
 extern "C"
-void magma_zprint_gpu( int m, int n, cuDoubleComplex *dA, int ldda )
+void magma_zprint_gpu( magma_int_t m, magma_int_t n, cuDoubleComplex *dA, magma_int_t ldda )
 {
     if ( is_devptr( dA ) == 0 ) {
         fprintf( stderr, "ERROR: zprint_gpu called with host pointer.\n" );

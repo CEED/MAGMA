@@ -152,7 +152,7 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
     ut = hwork+nb*(n);
     memset( ut, 0, nb*nb*sizeof(cuDoubleComplex));
 
-    static cudaStream_t stream[2];
+    cudaStream_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 

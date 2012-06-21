@@ -108,7 +108,7 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
     magma_getdevice(&gpu_b);
 
     double             d_one = 1.0;
-    long int           upper = lapackf77_lsame(uplo_, "U");
+    int upper = lapackf77_lsame(uplo_, "U");
 
     magma_int_t nb = magma_get_zhegst_m_nb();
 
@@ -210,7 +210,7 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
                 }
 
                 lapackf77_zhegs2( &itype, uplo_, &kb, A(k,k), &lda, B(k,k), &ldb, info);
-printf("hegs2%d\n", k);
+printf("hegs2%d\n", (int) k);
                 if (k+1<nbl) {
                     magma_zsetmatrix_async( kb, kb,
                                             A(k, k),              lda,

@@ -91,8 +91,8 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
         cuDoubleComplex     c_neg_one  = MAGMA_Z_NEG_ONE;
         cuDoubleComplex     *work;
 
-        long int        upper  = lapackf77_lsame(uplo_, "U");
-        long int    nounit = lapackf77_lsame(diag_, "N");
+        int upper  = lapackf77_lsame(uplo_, "U");
+        int nounit = lapackf77_lsame(diag_, "N");
 
         *info = 0;
 
@@ -129,7 +129,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
                 return *info;
         }
         
-        static cudaStream_t stream[2];
+        cudaStream_t stream[2];
         magma_queue_create( &stream[0] );
         magma_queue_create( &stream[1] );
 

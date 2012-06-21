@@ -106,7 +106,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
 
     int lwkopt = n * nb;
     work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );
-    long int lquery = (lwork == -1);
+    int lquery = (lwork == -1);
     if (m < 0) {
         *info = -1;
     } else if (n < 0) {
@@ -155,7 +155,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
         return *info;
     }
 
-    static cudaStream_t stream[2];
+    cudaStream_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 
@@ -188,7 +188,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
             //   4. Send V to the GPU in ptr.
             //   5. Update the matrix.
             //   6. Restore the upper part of V.
-            int rows = m-j;
+            magma_int_t rows = m-j;
             lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr,
                               &rows, &ib, a_ref(j,j), &lda, tau+j, work, &ib);
             magma_zsetmatrix_async( ib, ib,

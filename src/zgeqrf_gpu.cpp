@@ -18,8 +18,9 @@
       calculated in place in work, so as final result work holds the inverse
       of the upper triangular diagonal block.
  */
-void zsplit_diag_block(int ib, cuDoubleComplex *a, int lda, cuDoubleComplex *work){
-    int i, j, info;
+void zsplit_diag_block(magma_int_t ib, cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *work)
+{
+    magma_int_t i, j, info;
     cuDoubleComplex *cola, *colw;
     cuDoubleComplex c_zero = MAGMA_Z_ZERO;
     cuDoubleComplex c_one  = MAGMA_Z_ONE;
@@ -153,7 +154,7 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
     ut = hwork+nb*(n);
     memset( ut, 0, nb*nb*sizeof(cuDoubleComplex));
 
-    static cudaStream_t stream[2];
+    cudaStream_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 

@@ -1698,8 +1698,8 @@ magmablas_zhemv_200( char uplo, magma_int_t n,
                      cuDoubleComplex beta,  
                      cuDoubleComplex *Y, magma_int_t incy)
 {
-    char      uplo_[2] = {uplo, 0};
-    long int  upper    = lapackf77_lsame(uplo_, "U");
+    char uplo_[2] = {uplo, 0};
+    int  upper    = lapackf77_lsame(uplo_, "U");
 
     /*
      * Test the input parameters.
@@ -1760,8 +1760,8 @@ magmablas_zhemv2_200( char uplo, magma_int_t n,
                       cuDoubleComplex *Y, magma_int_t incy,
                       cuDoubleComplex *work, int lwork)
 {
-    char      uplo_[2] = {uplo, 0};
-    long int  upper    = lapackf77_lsame(uplo_, "U");
+    char uplo_[2] = {uplo, 0};
+    int  upper    = lapackf77_lsame(uplo_, "U");
 
     /*
      * Test the input parameters.

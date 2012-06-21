@@ -58,7 +58,7 @@ int main( int argc, char** argv)
               M = atoi(argv[++i]);
         }
         if (M>0 && N>0)
-          printf("  testing_zgesvd -M %d -N %d\n\n", M, N);
+          printf("  testing_zgesvd -M %d -N %d\n\n", (int) M, (int) N);
         else
             {
                 printf("\nUsage: \n");
@@ -103,7 +103,6 @@ int main( int argc, char** argv)
 
     TESTING_HOSTALLOC(h_work, cuDoubleComplex, lwork);
 
-    printf("\n\n");
     printf("  N     CPU Time(s)    GPU Time(s)     ||R||_F / ||A||_F\n");
     printf("==========================================================\n");
     for(i=0; i<8; i++){
@@ -190,7 +189,7 @@ int main( int argc, char** argv)
             if (S1[min_mn-1] < zero)
               result[3] = 1./eps;
 
-          printf("\n SVD test A = U diag(S) VT for M = %d N = %d:\n", M, N);
+          printf("\n SVD test A = U diag(S) VT for M = %d N = %d:\n", (int) M, (int) N);
           printf("(1)    | A - U diag(S) VT | / (|A| max(M,N)) = %e\n", result[0]*eps);
           printf("(2)    | I -   U'U  | /  M                   = %e\n", result[1]*eps);
           printf("(3)    | I - VT VT' | /  N                   = %e\n", result[2]*eps);
@@ -215,7 +214,7 @@ int main( int argc, char** argv)
 #endif
         end = get_current_time();
         if (info < 0)
-            printf("Argument %d of zgesvd had an illegal value.\n", -info);
+            printf("Argument %d of zgesvd had an illegal value.\n", (int) -info);
 
         cpu_time = GetTimerValue(start,end)/1000.;
 
@@ -229,7 +228,7 @@ int main( int argc, char** argv)
         blasf77_daxpy(&min_mn, &mone, S1, &one, S2, &one);
 
         printf("%5d     %6.2f         %6.2f         %e\n",
-               N, cpu_time, gpu_time,
+               (int) N, cpu_time, gpu_time,
                lapackf77_dlange("f", &min_mn, &one, S2, &min_mn, work) / matnorm);
 
         if (argc != 1)

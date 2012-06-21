@@ -157,7 +157,7 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
   
     char uplo_[2]  = {uplo, 0};
 
-    static magma_int_t i;
+    magma_int_t i;
   
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
@@ -165,11 +165,11 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
 
     cuDoubleComplex value = MAGMA_Z_ZERO;
     
-    static magma_int_t ione = 1;
+    magma_int_t ione = 1;
 
-    static magma_int_t i_n, i_1, iw;
+    magma_int_t i_n, i_1, iw;
   
-    static cuDoubleComplex alpha;
+    cuDoubleComplex alpha;
 
     cuDoubleComplex *f = (cuDoubleComplex *)malloc(n*sizeof(cuDoubleComplex ));
 
@@ -177,7 +177,7 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
       return 0;
     }
 
-    static cudaStream_t stream;
+    cudaStream_t stream;
     magma_queue_create( &stream );
 
     if (lapackf77_lsame(uplo_, "U")) {

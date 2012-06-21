@@ -139,8 +139,8 @@ int main(int argc, char **argv)
         lda = ((M+31)/32)*32;
         flops = FLOPS( (double)M, (double)N ) / 1000000;
 
-        printf(      "%5d %5d ", M, N );
-        fprintf( fp, "%5d %5d ", M, N );
+        printf(      "%5d %5d ", (int) M, (int) N );
+        fprintf( fp, "%5d %5d ", (int) M, (int) N );
 
         /* =====================================================================
            Performs operation using CUDA-BLAS

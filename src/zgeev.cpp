@@ -136,11 +136,11 @@ magma_zgeev(char jobvl, char jobvr, magma_int_t n,
     magma_int_t scalea;
     double cscale;
     magma_int_t select[1];
-    static double bignum;
+    double bignum;
     magma_int_t minwrk;
     magma_int_t wantvl;
-    static double smlnum;
-    static magma_int_t irwork;
+    double smlnum;
+    magma_int_t irwork;
     magma_int_t lquery, wantvr;
     magma_int_t nb = 0;
     cuDoubleComplex *dT = NULL;

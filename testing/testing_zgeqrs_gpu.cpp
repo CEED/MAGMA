@@ -69,18 +69,18 @@ int main( int argc, char** argv)
                 nrhs = atoi(argv[++i]);
         }
         if (N>0 && M>0 && M >= N)
-            printf("  testing_zgeqrs_gpu -nrhs %d -M %d -N %d\n\n", nrhs, M, N);
+            printf("  testing_zgeqrs_gpu -nrhs %d -M %d -N %d\n\n", (int) nrhs, (int) M, (int) N);
         else
             {
                 printf("\nUsage: \n");
-                printf("  testing_zgeqrs_gpu -nrhs %d  -M %d  -N %d\n\n", nrhs, M, N);
+                printf("  testing_zgeqrs_gpu -nrhs %d  -M %d  -N %d\n\n", (int) nrhs, (int) M, (int) N);
                 printf("  M has to be >= N, exit.\n");
                 exit(1);
             }
     }
     else {
         printf("\nUsage: \n");
-        printf("  testing_zgeqrs_gpu -nrhs %d  -M %d  -N %d\n\n", nrhs, 1024, 1024);
+        printf("  testing_zgeqrs_gpu -nrhs %d  -M %d  -N %d\n\n", (int) nrhs, 1024, 1024);
         M = N = size[9];
     }
 
@@ -118,7 +118,6 @@ int main( int argc, char** argv)
 
     TESTING_MALLOC( hwork, cuDoubleComplex, lhwork );
 
-    printf("\n");
     printf("                                         ||b-Ax|| / (N||A||)\n");
     printf("  M     N    CPU GFlop/s   GPU GFlop/s      CPU      GPU    \n");
     printf("============================================================\n");
@@ -152,7 +151,7 @@ int main( int argc, char** argv)
                          d_B, lddb, hwork, lworkgpu, &info);
         end = get_current_time();
         if (info < 0)
-            printf("Argument %d of magma_zgels had an illegal value.\n", -info);
+            printf("Argument %d of magma_zgels had an illegal value.\n", (int) -info);
         
         gpu_perf = flops / GetTimerValue(start, end);
 
@@ -177,7 +176,7 @@ int main( int argc, char** argv)
         end = get_current_time();
         cpu_perf = flops / GetTimerValue(start, end);
         if (info < 0)
-          printf("Argument %d of lapackf77_zgels had an illegal value.\n", -info);
+          printf("Argument %d of lapackf77_zgels had an illegal value.\n", (int) -info);
 
         blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &M, &nrhs, &N, 
                        &c_neg_one, h_A2, &lda, 
@@ -185,7 +184,7 @@ int main( int argc, char** argv)
                        &c_one,     h_B,  &ldb);
 
         printf("%5d %5d   %6.1f       %6.1f       %7.2e   %7.2e\n",
-               M, N, cpu_perf, gpu_perf,
+               (int) M, (int) N, cpu_perf, gpu_perf,
                lapackf77_zlange("f", &M, &nrhs, h_B, &M, work)/(min_mn*matnorm),
                lapackf77_zlange("f", &M, &nrhs, h_R, &M, work)/(min_mn*matnorm) );
 

@@ -23,20 +23,21 @@
 extern "C" void 
 magmablas_zgetmatrix_transpose3(
                   magma_int_t num_gpus, cudaStream_t **stream0,
-                  cuDoubleComplex **dat, int ldda,
-                  cuDoubleComplex   *ha, int lda,
-                  cuDoubleComplex  **dB, int lddb,
-                  int m, int n , int nb)
+                  cuDoubleComplex **dat, magma_int_t ldda,
+                  cuDoubleComplex   *ha, magma_int_t lda,
+                  cuDoubleComplex  **dB, magma_int_t lddb,
+                  magma_int_t m, magma_int_t n , magma_int_t nb)
 {
     int i = 0, j = 0, j_local, d, ib;
-    static cudaStream_t stream[4][2];
+    cudaStream_t stream[4][2];
 
     /* Quick return */
     if ( (m == 0) || (n == 0) )
         return;
 
     if (lda < m || num_gpus*ldda < n || lddb < m){
-        printf("Wrong arguments in zdtoht (%d<%d), (%d*%d<%d), or (%d<%d).\n",lda,m,num_gpus,ldda,n,lddb,m);
+        printf( "Wrong arguments in zdtoht (%d<%d), (%d*%d<%d), or (%d<%d).\n",
+                lda, m, num_gpus, ldda, n, lddb, m );
         return;
     }
     

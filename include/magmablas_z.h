@@ -20,54 +20,54 @@ extern "C" {
   /*
    * Interface to clean
    */
-double cpu_gpu_zdiff(             int M, int N, 
-                  cuDoubleComplex * a, int lda, 
-                  cuDoubleComplex *da, int ldda);
+double cpu_gpu_zdiff(             magma_int_t M, magma_int_t N, 
+                  cuDoubleComplex * a, magma_int_t lda, 
+                  cuDoubleComplex *da, magma_int_t ldda);
 void zzero_32x32_block(           cuDoubleComplex *, magma_int_t);
 void zzero_nbxnb_block(           magma_int_t, cuDoubleComplex *, magma_int_t);
 void magmablas_zinplace_transpose(cuDoubleComplex *, magma_int_t, magma_int_t);
 void magmablas_zpermute_long(     cuDoubleComplex *, magma_int_t, 
                   magma_int_t *, magma_int_t, magma_int_t);
-void magmablas_zpermute_long2(int n, cuDoubleComplex *, magma_int_t, 
+void magmablas_zpermute_long2(magma_int_t n, cuDoubleComplex *, magma_int_t, 
                   magma_int_t *, magma_int_t, magma_int_t);
-void magmablas_zpermute_long3( cuDoubleComplex *dAT, int lda, 
-                               int *ipiv, int nb, int ind );
+void magmablas_zpermute_long3( cuDoubleComplex *dAT, magma_int_t lda, 
+                               magma_int_t *ipiv, magma_int_t nb, magma_int_t ind );
 void magmablas_ztranspose(        cuDoubleComplex *, magma_int_t, 
                   cuDoubleComplex *, magma_int_t, 
                   magma_int_t, magma_int_t);
 void magmablas_ztranspose2(       cuDoubleComplex *, magma_int_t, 
                   cuDoubleComplex *, magma_int_t, 
                   magma_int_t, magma_int_t);
-void magmablas_ztranspose2s(cuDoubleComplex *odata, int ldo,
-                       cuDoubleComplex *idata, int ldi,
-                       int m, int n, cudaStream_t *stream );
+void magmablas_ztranspose2s(cuDoubleComplex *odata, magma_int_t ldo,
+                       cuDoubleComplex *idata, magma_int_t ldi,
+                       magma_int_t m, magma_int_t n, cudaStream_t *stream );
 
-void magmablas_zgetmatrix_transpose(  int m, int n,
-                                      cuDoubleComplex *dat, int ldda,
-                                      cuDoubleComplex  *ha, int lda,
-                                      cuDoubleComplex  *dB, int lddb, int nb );
-void magmablas_zgetmatrix_transpose2( int m, int n,
-                                      cuDoubleComplex **dat, int *ldda,
-                                      cuDoubleComplex  *ha,  int  lda,
-                                      cuDoubleComplex **dB,  int  lddb, int nb,
-                                      int num_gpus, cudaStream_t stream[][2] );
-void magmablas_zsetmatrix_transpose(  int m, int n,
-                                      cuDoubleComplex  *ha, int lda, 
-                                      cuDoubleComplex *dat, int ldda,
-                                      cuDoubleComplex  *dB, int lddb, int nb );
-void magmablas_zsetmatrix_transpose2( int m, int n,
-                                      cuDoubleComplex  *ha,  int  lda, 
-                                      cuDoubleComplex **dat, int *ldda,
-                                      cuDoubleComplex **dB,  int  lddb, int nb,
-                                      int num_gpus, cudaStream_t stream[][2] );
-void magmablas_zgetmatrix_1D_bcyclic( int m, int n,
-                                      cuDoubleComplex  *da[], int ldda,
-                                      cuDoubleComplex  *ha, int lda,
-                                      int num_gpus, int nb );
-void magmablas_zsetmatrix_1D_bcyclic( int m, int n,
-                                      cuDoubleComplex  *ha, int lda,
-                                      cuDoubleComplex  *da[], int ldda,
-                                      int num_gpus, int nb );
+void magmablas_zgetmatrix_transpose(  magma_int_t m, magma_int_t n,
+                                      cuDoubleComplex *dat, magma_int_t ldda,
+                                      cuDoubleComplex  *ha, magma_int_t lda,
+                                      cuDoubleComplex  *dB, magma_int_t lddb, magma_int_t nb );
+void magmablas_zgetmatrix_transpose2( magma_int_t m, magma_int_t n,
+                                      cuDoubleComplex **dat, magma_int_t *ldda,
+                                      cuDoubleComplex  *ha,  magma_int_t  lda,
+                                      cuDoubleComplex **dB,  magma_int_t  lddb, magma_int_t nb,
+                                      magma_int_t num_gpus, cudaStream_t stream[][2] );
+void magmablas_zsetmatrix_transpose(  magma_int_t m, magma_int_t n,
+                                      cuDoubleComplex  *ha, magma_int_t lda, 
+                                      cuDoubleComplex *dat, magma_int_t ldda,
+                                      cuDoubleComplex  *dB, magma_int_t lddb, magma_int_t nb );
+void magmablas_zsetmatrix_transpose2( magma_int_t m, magma_int_t n,
+                                      cuDoubleComplex  *ha,  magma_int_t  lda, 
+                                      cuDoubleComplex **dat, magma_int_t *ldda,
+                                      cuDoubleComplex **dB,  magma_int_t  lddb, magma_int_t nb,
+                                      magma_int_t num_gpus, cudaStream_t stream[][2] );
+void magmablas_zgetmatrix_1D_bcyclic( magma_int_t m, magma_int_t n,
+                                      cuDoubleComplex  *da[], magma_int_t ldda,
+                                      cuDoubleComplex  *ha, magma_int_t lda,
+                                      magma_int_t num_gpus, magma_int_t nb );
+void magmablas_zsetmatrix_1D_bcyclic( magma_int_t m, magma_int_t n,
+                                      cuDoubleComplex  *ha, magma_int_t lda,
+                                      cuDoubleComplex  *da[], magma_int_t ldda,
+                                      magma_int_t num_gpus, magma_int_t nb );
 
   /*
    * LAPACK auxiliary functions
@@ -85,10 +85,10 @@ double magmablas_zlanhe( char norm, char uplo,
 double magmablas_zlansy( char norm, char uplo,
              magma_int_t n, 
              cuDoubleComplex *A, magma_int_t lda, double *WORK);
-void   magmablas_zlascl( char type, int kl, int ku,
+void   magmablas_zlascl( char type, magma_int_t kl, magma_int_t ku,
              double cfrom, double cto,
-             int m, int n,
-             cuDoubleComplex *A, int lda, int *info );
+             magma_int_t m, magma_int_t n,
+             cuDoubleComplex *A, magma_int_t lda, magma_int_t *info );
 void   magmablas_zlaset( char uplo, magma_int_t m, magma_int_t n,
              cuDoubleComplex *A, magma_int_t lda);
 void   magmablas_zlaset_identity(

@@ -22,10 +22,6 @@
 #endif
 /* === End defining what BLAS to use ======================================= */
 
-/* to appy pivoting from the previous big-panel: need some index-adjusting */
-extern "C" void
-magmablas_zpermute_long3( cuDoubleComplex *dAT, int lda, int *ipiv, int nb, int ind );
-
 extern "C" magma_int_t
 magma_zgetrf1_gpu(magma_int_t m, magma_int_t n,
                   cuDoubleComplex *dAT, magma_int_t ldda,
@@ -40,17 +36,17 @@ magma_zgetrf1_mgpu(magma_int_t num_gpus,
 
 extern "C" void
 magmablas_zgetmatrix_transpose3(magma_int_t num_gpus, cudaStream_t **stream,
-                  cuDoubleComplex **dat, int ldda,
-                  cuDoubleComplex   *ha, int lda,
-                  cuDoubleComplex  **dB, int lddb,
-                  int m, int n , int nb);
+                  cuDoubleComplex **dat, magma_int_t ldda,
+                  cuDoubleComplex   *ha, magma_int_t lda,
+                  cuDoubleComplex  **dB, magma_int_t lddb,
+                  magma_int_t m, magma_int_t n , magma_int_t nb);
 
 extern "C" void
 magmablas_zsetmatrix_transpose3(magma_int_t num_gpus, cudaStream_t** stream,
-                  cuDoubleComplex  *ha,  int lda,
-                  cuDoubleComplex **dat, int ldda, int starti,
-                  cuDoubleComplex **dB,  int lddb,
-                  int m, int n , int nb);
+                  cuDoubleComplex  *ha,  magma_int_t lda,
+                  cuDoubleComplex **dat, magma_int_t ldda, magma_int_t starti,
+                  cuDoubleComplex **dB,  magma_int_t lddb,
+                  magma_int_t m, magma_int_t n , magma_int_t nb);
 
 extern "C" magma_int_t
 magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
@@ -145,7 +141,7 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
     unsigned int totalMem;
 #endif
     CUdevice dev;
-    static cudaStream_t stream[4][2];
+    cudaStream_t stream[4][2];
 
     *info = 0;
 

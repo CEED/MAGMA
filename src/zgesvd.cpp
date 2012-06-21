@@ -153,31 +153,31 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
     magma_int_t *ldvt  = &ldvt_;
     magma_int_t *lwork = &lwork_;
 
-    static cuDoubleComplex c_b1 = MAGMA_Z_ZERO;
-    static cuDoubleComplex c_b2 = MAGMA_Z_ONE;
-    static magma_int_t c__0 = 0;
-    static magma_int_t c__1 = 1;
-    static magma_int_t c_n1 = -1;
+    cuDoubleComplex c_b1 = MAGMA_Z_ZERO;
+    cuDoubleComplex c_b2 = MAGMA_Z_ONE;
+    magma_int_t c__0 = 0;
+    magma_int_t c__1 = 1;
+    magma_int_t c_n1 = -1;
     
     magma_int_t a_dim1, a_offset, u_dim1, u_offset, vt_dim1, vt_offset, 
         i__2, i__3, i__4;
 
-    static magma_int_t i__, ie, ir, iu, blk, ncu;
-    static double dum[1], eps;
-    static magma_int_t nru;
-    static cuDoubleComplex cdum[1];
-    static magma_int_t iscl;
-    static double anrm;
-    static magma_int_t ierr, itau, ncvt, nrvt;
-    static magma_int_t chunk, minmn;
-    static magma_int_t wrkbl, itaup, itauq, mnthr, iwork;
+    magma_int_t i__, ie, ir, iu, blk, ncu;
+    double dum[1], eps;
+    magma_int_t nru;
+    cuDoubleComplex cdum[1];
+    magma_int_t iscl;
+    double anrm;
+    magma_int_t ierr, itau, ncvt, nrvt;
+    magma_int_t chunk, minmn;
+    magma_int_t wrkbl, itaup, itauq, mnthr, iwork;
     magma_int_t wntua, wntva, wntun, wntuo, wntvn, wntvo, wntus, wntvs;
-    static double bignum;
-    static magma_int_t ldwrkr;
-    static magma_int_t ldwrku, maxwrk;
+    double bignum;
+    magma_int_t ldwrkr;
+    magma_int_t ldwrku, maxwrk;
     magma_int_t minwrk;
-    static double smlnum;
-    static magma_int_t irwork;
+    double smlnum;
+    magma_int_t irwork;
     magma_int_t lquery, wntuas, wntvas;
 
     magma_int_t nb;
