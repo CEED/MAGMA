@@ -22,13 +22,14 @@
 #ifndef _MAGMA_COMMON_H_
 #define _MAGMA_COMMON_H_
 
+#include <stdlib.h>
 #include <stdio.h>
-#include <cuda.h>
-#include <cuda_runtime_api.h>
 #include <cublas.h>
 #include <math.h>
 #include <string.h>
 #include <ctype.h>
+
+#include <cuda_runtime_api.h>
 
 #if defined( _WIN32 ) || defined( _WIN64 )
 

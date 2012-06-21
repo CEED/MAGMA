@@ -48,9 +48,9 @@
 #include <stdint.h>
 #endif /* __GNUC__ */
 
-#include "cublas.h"   /* CUBLAS public header file  */
-#include "cuda_runtime_api.h"
-#include "cuda.h"
+#include <cublas.h>   /* CUBLAS public header file  */
+#include <cuda_runtime_api.h>
+#include <cuda.h>
 
 #define imin(a,b) (((a)<(b))?(a):(b))
 #define imax(a,b) (((a)<(b))?(b):(a))

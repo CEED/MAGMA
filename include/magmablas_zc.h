@@ -11,9 +11,6 @@
 #ifndef _MAGMABLAS_ZC_H_
 #define _MAGMABLAS_ZC_H_
 
-#include "cublas.h"
-#include "cuda.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

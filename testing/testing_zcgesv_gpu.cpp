@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
 

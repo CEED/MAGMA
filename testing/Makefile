@@ -113,13 +113,13 @@ endif
 
 testing_%_f : testing_%_f.o $(FOBJ)
 	$(FORT) $(LDOPTS) $< $(FOBJ) -o $@ \
-	lin/liblapacktest.a -L../lib -lcuda -lmagma -lmagmablas -lmagma \
+	lin/liblapacktest.a -L../lib -lmagma -lmagmablas -lmagma \
 	$(LIBDIR) \
 	$(LIB) 
 
 testing_% : testing_%.o
 	$(CC) $(LDOPTS) $(NOMAIN) $< $(OBJ) -o $@ \
-	lin/liblapacktest.a -L../lib -lcuda -lmagma -lmagmablas -lmagma \
+	lin/liblapacktest.a -L../lib -lmagma -lmagmablas -lmagma \
 	$(LIBDIR) \
 	$(LIB) 
 

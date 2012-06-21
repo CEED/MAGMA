@@ -9,18 +9,7 @@
 
 */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <string.h>
-#include <stddef.h>
-#include <stdlib.h>
-#if defined(__GNUC__)
-#include <stdint.h>
-#endif /* __GNUC__ */
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-#include <cublas.h>
-#include "magma.h"
+#include "common_magma.h"
 
 /* 
  * typedef comming from fortran.h file provided in $CUDADIR/src directory
