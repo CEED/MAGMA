@@ -28,6 +28,11 @@ Included are routines for the following algorithms:
     * Fix workspace requirement for SVD in [zcsd]gesvd.cpp
     * Fix a bug in freeing pinned memory (in interface_cuda/alloc.cpp)
     * Fix a bug in [zcsd]geqrf_mgpu.cpp 
+    * Fix zdotc to use cblas for portability
+    * Fix uppercase entries in blas/lapack headers
+    * Use magma_int_t in blas/lapack headers, and fix sources accordingly
+    * Fix magma_is_devptr error handling
+    * Remove dependency on CUDA device driver
 
  1.2.0
     * Fix bugs in [zcsd]hegst[_gpu].cpp
