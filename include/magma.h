@@ -283,6 +283,11 @@ void magma_getvector_async(
 // error handler
 void magma_xerbla( const char *name, magma_int_t info );
 
+
+// ========================================
+// auxiliary functions
+int magma_is_devptr( void* A );
+
 #ifdef __cplusplus
 }
 #endif

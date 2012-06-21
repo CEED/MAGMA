@@ -11,39 +11,6 @@
 */
 #include "common_magma.h"
 
-// -------------------------
-// Returns:
-//  1 if A is a device pointer (definitely),
-//  0 if A is a host   pointer (definitely or inferred from error),
-// -1 if unknown.
-// On 2.0 cards with unified addressing, CUDA can tell if this is a device pointer.
-// For malloc'd host pointers, cudaPointerGetAttributes returns error.
-static int is_devptr( void* A )
-{
-    cudaError_t err;
-    cudaDeviceProp prop;
-    cudaPointerAttributes attr;
-    int dev;
-    err = cudaGetDevice( &dev );
-    if ( ! err ) {
-        err = cudaGetDeviceProperties( &prop, dev );
-        if ( ! err and prop.unifiedAddressing ) {
-            err = cudaPointerGetAttributes( &attr, A );
-            if ( ! err ) {
-                // definitely know type
-                return (attr.memoryType == cudaMemoryTypeDevice);
-            }
-            else if ( err == cudaErrorInvalidValue ) {
-                // infer as host pointer
-                return 0;
-            }
-        }
-    }
-    // unknown, e.g., device doesn't support unified addressing
-    return -1;
-}
-
-
 #define A(i,j) (A + i + j*lda)
 
 // -------------------------
@@ -51,7 +18,7 @@ static int is_devptr( void* A )
 extern "C"
 void magma_zprint( magma_int_t m, magma_int_t n, cuDoubleComplex *A, magma_int_t lda )
 {
-    if ( is_devptr( A ) == 1 ) {
+    if ( magma_is_devptr( A ) == 1 ) {
         fprintf( stderr, "ERROR: zprint called with device pointer.\n" );
         exit(1);
     }
@@ -80,7 +47,7 @@ void magma_zprint( magma_int_t m, magma_int_t n, cuDoubleComplex *A, magma_int_t
 extern "C"
 void magma_zprint_gpu( magma_int_t m, magma_int_t n, cuDoubleComplex *dA, magma_int_t ldda )
 {
-    if ( is_devptr( dA ) == 0 ) {
+    if ( magma_is_devptr( dA ) == 0 ) {
         fprintf( stderr, "ERROR: zprint_gpu called with host pointer.\n" );
         exit(1);
     }
