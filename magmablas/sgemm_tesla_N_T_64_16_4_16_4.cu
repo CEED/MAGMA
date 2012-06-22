@@ -3,6 +3,9 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2011
+
+       @precisions normal s
+
 */
 #include "common_magma.h"
 #include "commonblas_s.h"

@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        November 2011
 
-       @precisions normal c
+       @precisions normal c -> c
 
 */
 #include "common_magma.h"

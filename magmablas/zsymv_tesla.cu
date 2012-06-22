@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        November 2011
 
-       @precisions normal z 
+       @precisions normal z -> z
 
        WARNING: this version has really poor performance 
        and cublas is prefered to this implementation. 

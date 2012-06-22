@@ -17,7 +17,9 @@
 #endif
 #include <assert.h>
 
-#include "common_magma.h"
+// includes, project
+#include "magma.h"
+#include "magma_lapack.h"
 #include "testings.h"
 
 #define A(i,j)  &A[  (i) + (j)*ld ]

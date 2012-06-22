@@ -4,6 +4,8 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2011
+
+       @precisions normal d -> d
        
        @author Peng Du
 */

@@ -36,7 +36,7 @@ typedef int          magma_device_t;
 #include "magmablas_ds.h"
 
 #if (GPUSHMEM < 200)  
-  #define magmablas_zgemm cublasZgemm
+#define magmablas_zgemm cublasZgemm
 #endif
 #define magmablas_cgemm cublasCgemm
 

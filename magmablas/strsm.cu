@@ -5,6 +5,8 @@
        Univ. of Colorado, Denver
        November 2011
        
+       @precisions normal s -> s
+
        @author Peng Du
 */
 #include "common_magma.h"

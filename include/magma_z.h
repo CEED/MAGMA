@@ -17,6 +17,24 @@ extern "C" {
 #endif
 
 /* ////////////////////////////////////////////////////////////////////////////
+   -- MAGMA Auxiliary functions to get the NB used
+*/
+int magma_get_zpotrf_nb(int m);
+int magma_get_zgetrf_nb(int m);
+int magma_get_zgetri_nb(int m);
+int magma_get_zgeqrf_nb(int m);
+int magma_get_zgeqlf_nb(int m);
+int magma_get_zgehrd_nb(int m);
+int magma_get_zhetrd_nb(int m);
+int magma_get_zgelqf_nb(int m);
+int magma_get_zgebrd_nb(int m);
+int magma_get_zhegst_nb(int m);
+int magma_get_zgesvd_nb(int m);
+
+void zpanel_to_q(char uplo, int ib, cuDoubleComplex *a, int lda, cuDoubleComplex *work);
+void zq_to_panel(char uplo, int ib, cuDoubleComplex *a, int lda, cuDoubleComplex *work);
+
+/* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA function definitions / Data on CPU
 */
 magma_int_t magma_zgebrd( magma_int_t m, magma_int_t n, cuDoubleComplex *A, 
