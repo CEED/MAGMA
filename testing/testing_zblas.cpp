@@ -9,6 +9,7 @@
  * @precisions normal z -> c d s
  *
  **/
+#include <stdlib.h>
 #include <stdio.h>
 
 // make sure that asserts are enabled
