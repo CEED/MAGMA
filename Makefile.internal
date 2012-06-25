@@ -83,6 +83,9 @@ FOPTS += $(PTROPT)
 %.o: %.f90  $(PTREXEC)
 	$(FORT) $(FOPTS) $(INC) -c $< -o $@
 
+%.o: %.F90  $(PTREXEC)
+	$(FORT) $(FOPTS) $(INC) -c $< -o $@
+
 %.o: %.f    $(PTREXEC)
 	$(FORT) $(F77OPTS) $(INC) -c $< -o $@
 
