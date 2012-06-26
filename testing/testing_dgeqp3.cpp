@@ -36,7 +36,7 @@ int main( int argc, char** argv)
 
     magma_timestr_t       start, end;
     magma_int_t      checkres;
-    double           flops, gpu_perf, cpu_perf;
+    double           flops, gpu_perf, cpu_perf, gpu_time, cpu_time;
     double           matnorm, work[1];
     double  c_neg_one = MAGMA_D_NEG_ONE;
     double *h_A, *h_R, *tau, *h_work, tmp[1];
@@ -84,21 +84,21 @@ int main( int argc, char** argv)
 
     n2  = M * N;
     min_mn = min(M, N);
-    nb = magma_get_dgeqrf_nb(M);
+    nb = 64;// magma_get_dgeqrf_nb(M);
 
     TESTING_MALLOC(    jpvt, magma_int_t,     N );
 
     TESTING_MALLOC(    tau,  double, min_mn);
     TESTING_MALLOC(    h_A,  double, n2 );
-    //TESTING_HOSTALLOC( h_R,  double, n2 );
-    TESTING_MALLOC( h_R,  double, n2   );
+    TESTING_HOSTALLOC( h_R,  double, n2 );
+    //TESTING_MALLOC( h_R,  double, n2   );
 
     lwork = 2*N + ( N+1 )*nb;
     if ( checkres )
         lwork = max(lwork, M * N + N);
     TESTING_MALLOC( h_work, double, lwork );
 
-    printf("  M     N   CPU GFlop/s   GPU GFlop/s    ||R||_F / ||A||_F\n");
+    printf("  M     N   CPU Time(s)   GPU Time(s)    ||A*P - Q*R||_F  \n");
     printf("==========================================================\n");
     for(i=0; i<10; i++){
          if (argc == 1){
@@ -113,10 +113,25 @@ int main( int argc, char** argv)
         lapackf77_dlarnv( &ione, ISEED, &n2, h_A );
         lapackf77_dlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
 
+        /* =====================================================================
+           Performs operation using LAPACK
+           =================================================================== */
+        for (j = 0; j < N; j++)
+            jpvt[j] = 0;
+
+        start = get_current_time();
+        lapackf77_dgeqp3(&M, &N, h_R, &lda, jpvt, tau, h_work, &lwork, &info);
+        end = get_current_time();
+        if (info < 0)
+            printf("Argument %d of lapack_dgeqp3 had an illegal value.\n", -info);
+
+        cpu_perf = flops / GetTimerValue(start, end);
+        cpu_time = GetTimerValue(start, end) * 1e-3;
+
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-
+        lapackf77_dlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
         for (j = 0; j < N; j++) {
             jpvt[j] = 0 ;
         }
@@ -128,35 +143,8 @@ int main( int argc, char** argv)
             printf("Argument %d of magma_dgeqp3 had an illegal value.\n", -info);
         
         gpu_perf = flops / GetTimerValue(start, end);
-        printf("%d %d %d\n", jpvt[0], jpvt[1], jpvt[2]);
-        /* =====================================================================
-           Performs operation using LAPACK
-           =================================================================== */
-        /*
-        for (j = 0; j < N; j++) {
-            jpvt[j] = 0;
-        }
+        gpu_time = GetTimerValue(start, end) * 1e-3;
 
-        start = get_current_time();
-        lapackf77_dgeqp3(&M, &N, h_A, &lda, jpvt, tau, h_work, &lwork, &info);
-        end = get_current_time();
-        if (info < 0)
-            printf("Argument %d of lapack_dgeqp3 had an illegal value.\n", -info);
-
-        cpu_perf = flops / GetTimerValue(start, end);
-        printf("%d %d %d\n", jpvt[0], jpvt[1], jpvt[2]);
-        */
-        /* =====================================================================
-           Check the result compared to LAPACK
-           =================================================================== */
-        /*
-        matnorm = lapackf77_dlange("f", &M, &N, h_A, &lda, work);
-        blasf77_daxpy(&n2, &c_neg_one, h_A, &ione, h_R, &ione);
-
-        printf("%5d %5d  %6.2f         %6.2f        %e\n",
-               M, N, cpu_perf, gpu_perf,
-               lapackf77_dlange("f", &M, &N, h_R, &lda, work) / matnorm);
-        */
         /* =====================================================================
            Check the result 
            =================================================================== */
@@ -171,8 +159,12 @@ int main( int argc, char** argv)
                 result[0] = lapackf77_dqpt01(&M, &N, &minmn, h_A, h_R, &lda, tau, jpvt, h_work, &lwork);
                 result[0] *= ulp;
 
-                printf("res = %e\n", result[0]);
+                printf("%5d %5d  %6.2f         %6.2f        %e\n",
+                       M, N, cpu_time, gpu_time, result[0]);
             }
+        else
+            printf("%5d %5d  %6.2f         %6.2f\n",
+                   M, N, cpu_time, gpu_time);
 
         if (argc != 1)
             break;
@@ -182,8 +174,8 @@ int main( int argc, char** argv)
     TESTING_FREE( jpvt );
     TESTING_FREE( tau );
     TESTING_FREE( h_A );
-    //TESTING_HOSTFREE( h_R );
-    TESTING_FREE( h_R );
+    TESTING_HOSTFREE( h_R );
+    //TESTING_FREE( h_R );
     TESTING_FREE( h_work );
 
     /* Shutdown */
