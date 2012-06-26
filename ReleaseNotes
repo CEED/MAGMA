@@ -33,6 +33,7 @@ Included are routines for the following algorithms:
     * Use magma_int_t in blas/lapack headers, and fix sources accordingly
     * Fix magma_is_devptr error handling
     * Remove dependency on CUDA device driver
+    * Add QR with pivoting in CPU interface (functions [zcsd]geqp3)
 
  1.2.0
     * Fix bugs in [zcsd]hegst[_gpu].cpp
