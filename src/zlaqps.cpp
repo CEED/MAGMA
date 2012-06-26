@@ -105,7 +105,7 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset,
     static cuDoubleComplex mone = MAGMA_Z_MAKE(-1.,0.);
     static magma_int_t c__1 = 1;
     
-    magma_int_t f_dim1, f_offset, i__1, i__2;
+    magma_int_t f_dim1, i__1, i__2;
     double d__1;
     cuDoubleComplex z__1;
     
@@ -125,8 +125,7 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset,
     --vn2;
     --auxv;
     f_dim1 = *ldf;
-    f_offset = 1 + f_dim1;
-    f -= f_offset;
+    f -= 1 + f_dim1;
 
     i__1 = *m, i__2 = *n + *offset;
     lastrk = min(i__1,i__2);
@@ -319,11 +318,6 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset,
        magma_zsetmatrix( i__2, *kb,
                          &f [*kb + 1 + f_dim1], *ldf,
                          &df[*kb + 1 + f_dim1], i__2);
-
-       /* Send V to the GPU ( is this needed? )         */
-       magma_zsetmatrix( i__1, *kb,
-                         A( rk + 1,1), *lda,
-                         dA(rk + 1,1), *ldda);
 
        magma_zgemm(MagmaNoTrans, MagmaConjTrans, i__1, i__2, *kb, mone,
                    dA(rk+1,1), *ldda, &df[*kb + 1 + f_dim1], i__2, one,

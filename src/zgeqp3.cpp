@@ -126,7 +126,7 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
             lwkopt = 1;
         } else {
             iws = *n + 1;
-            nb = 64; // magma_get_zgeqrf_nb(min(*m, *n));
+            nb = magma_get_zgeqp3_nb(min(*m, *n));
             lwkopt = (*n + 1) * nb;
         }
         MAGMA_Z_SET2REAL(work[0],(double)lwkopt);

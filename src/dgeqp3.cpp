@@ -123,7 +123,7 @@ magma_dgeqp3(magma_int_t *m, magma_int_t *n, double *a,
             lwkopt = 1;
         } else {
             iws = *n + 1;
-            nb = 64; //magma_get_dgeqrf_nb(min(*m, *n));
+            nb = magma_get_dgeqp3_nb(min(*m, *n));
             lwkopt = 2*(*n) + (*n + 1) * nb;
         }
         MAGMA_D_SET2REAL(work[1],(double)lwkopt);
