@@ -13,39 +13,40 @@ INC += -I$(MAGMA_DIR)/control
 
 ZHDR  = commonblas_z.h
 
-ZSRC  = \
-	zauxiliary.cu	\
-	zpermute.cu	\
-	zpermute-v2.cu	\
-	zpermute-v3.cu	\
-	zswap.cu	\
-	zswapblk.cu	\
-	zswapdblk.cu	\
-	zlacpy.cu	\
-	zlange.cu	\
-	zlanhe.cu	\
-	zlascl.cu	\
-	ztranspose.cu	\
-	ztranspose-v2.cu\
+# mostly alphabetic order
+ZSRC := \
+	zauxiliary.cu		\
+	zcaxpycp.cu		\
+	zclaswp.cu		\
+	zhemv_fermi.cu		\
+	zlacpy.cu		\
+	zlag2c.cu		\
+	clag2z.cu		\
+	zlange.cu		\
+	zlanhe.cu		\
+	zlascl.cu		\
+	zlat2c.cu		\
+	zpermute.cu		\
+	zpermute-v2.cu		\
+	zpermute-v3.cu		\
+	zswap.cu		\
+	zswapblk.cu		\
+	zswapdblk.cu		\
+	zsymmetrize.cu		\
+	zsymv_fermi.cu		\
+	csymv_tesla.cu		\
+	ssyr2k.cu		\
+	ztranspose.cu		\
+	ztranspose-v2.cu	\
 	zinplace_transpose.cu	\
 	zgetmatrix_transpose.cu	\
 	zsetmatrix_transpose.cu	\
-	zclaswp.cu	\
-	zcaxpycp.cu	\
-	zlag2c.cu	\
-	clag2z.cu	\
-	zlat2c.cu	\
-	strsm.cu	\
-	dtrsm.cu	\
-	ssyr2k.cu	\
-	csymv_tesla.cu	\
-	zhemv_fermi.cu	\
-	zsymv_fermi.cu	\
-	zsymmetrize.cu	\
+	dtrsm.cu		\
+	strsm.cu		\
 
 # multi-GPU
 ZSRC += \
-	zbcyclic.cu	\
+	zbcyclic.cu		\
 	zhemm_mgpu.cpp		\
 	zher2k_mgpu.cpp		\
 	zgetmatrix_transpose_mgpu.cu	\
