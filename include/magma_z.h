@@ -22,6 +22,7 @@ extern "C" {
 int magma_get_zpotrf_nb(int m);
 int magma_get_zgetrf_nb(int m);
 int magma_get_zgetri_nb(int m);
+int magma_get_zgeqp3_nb(int m);
 int magma_get_zgeqrf_nb(int m);
 int magma_get_zgeqlf_nb(int m);
 int magma_get_zgehrd_nb(int m);
