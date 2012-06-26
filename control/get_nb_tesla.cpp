@@ -43,6 +43,29 @@ int magma_get_zpotrf_nb(int n) {
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for geqp3 based on m
+*/
+extern "C"
+int magma_get_sgeqp3_nb(int m) {
+    return 64;
+}
+
+extern "C"
+int magma_get_dgeqp3_nb(int m) {
+    return 64;
+}
+
+extern "C"
+int magma_get_cgeqp3_nb(int m) {
+    return 64;
+}
+
+extern "C"
+int magma_get_zgeqp3_nb(int m) {
+    return 64;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////
    -- Return nb for geqrf based on m
 */
 extern "C"
@@ -330,22 +353,22 @@ int magma_get_zgetri_nb(int m) {
 
 extern "C"
 int magma_get_sgesvd_nb(int m){
-    return 32;
+    return magma_get_sgebrd_nb(m);
 }
 
 extern "C"
 int magma_get_dgesvd_nb(int m){
-    return 32;
+    return magma_get_dgebrd_nb(m);
 }
 
 extern "C"
 int magma_get_cgesvd_nb(int m){
-    return 32;
+    return magma_get_cgebrd_nb(m);
 }
 
 extern "C"
 int magma_get_zgesvd_nb(int m){
-    return 32;
+    return magma_get_zgebrd_nb(m);
 }
 
 #endif  // HAVE_CUBLAS
