@@ -39,6 +39,7 @@ ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
 
 ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f90=.o)
+ALLOBJ := $(ALLOBJ:.F90=.o)
 
 all: $(LIBMAGMA) $(PTREXEC)
 
