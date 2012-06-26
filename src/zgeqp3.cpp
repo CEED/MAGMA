@@ -11,35 +11,13 @@
 
 #include "common_magma.h"
 #include <cblas.h>
-
-#define lapackf77_zlaqps   FORTRAN_NAME( zlaqps, ZLAQPS)
-#define lapackf77_zlaqp2   FORTRAN_NAME( zlaqp2, ZLAQP2)
-
-extern "C" int 
-lapackf77_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
-                 *nb, magma_int_t *kb, cuDoubleComplex *a, magma_int_t *lda, magma_int_t *jpvt,
-                 cuDoubleComplex *tau, double *vn1, double *vn2, cuDoubleComplex *
-                 auxv, cuDoubleComplex *f, magma_int_t *ldf);
-
-extern "C" void 
-lapackf77_zlaqp2(magma_int_t *m, magma_int_t *n, magma_int_t *offset, 
-                 cuDoubleComplex *a, magma_int_t *lda, magma_int_t *jpvt, cuDoubleComplex *tau,
-                 double *vn1, double *vn2, cuDoubleComplex *work);
-
-extern "C" int 
-magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
-             *nb, magma_int_t *kb, 
-             cuDoubleComplex *a, magma_int_t *lda, 
-             cuDoubleComplex *da, magma_int_t *ldda,
-             magma_int_t *jpvt,
-             cuDoubleComplex *tau, double *vn1, double *vn2, cuDoubleComplex *auxv, 
-             cuDoubleComplex *f, magma_int_t *ldf,
-             cuDoubleComplex *df, magma_int_t *lddf);
+ 
 
 extern "C" magma_int_t 
 magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a, 
-             magma_int_t *lda, magma_int_t *jpvt, cuDoubleComplex *tau, cuDoubleComplex *work, 
-             magma_int_t *lwork, double *rwork, magma_int_t *info)
+             magma_int_t *lda, magma_int_t *jpvt, cuDoubleComplex *tau,
+             cuDoubleComplex *work, magma_int_t *lwork, double *rwork, 
+             magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -85,9 +63,8 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
             On exit, if INFO=0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
-            The dimension of the array WORK. LWORK >= N+1.   
-            For optimal performance LWORK >= ( N+1 )*NB, where NB   
-            is the optimal blocksize.   
+            The dimension of the array WORK, LWORK >= ( N+1 )*NB, 
+            where NB is the optimal blocksize.   
 
             If LWORK = -1, then a workspace query is assumed; the routine   
             only calculates the optimal size of the WORK array, returns   
@@ -110,13 +87,9 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
 
       H(i) = I - tau * v * v'   
 
-    where tau is a real/complex scalar, and v is a real/complex vector   
+    where tau is a complex scalar, and v is a complex vector   
     with v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in   
     A(i+1:m,i), and tau in TAU(i).   
-
-    Based on contributions by   
-      G. Quintana-Orti, Depto. de Informatica, Universidad Jaime I, Spain   
-      X. Sun, Computer Science Dept., Duke University, USA   
     =====================================================================   */
 
 #define  A(i, j) (a    +(j)*(*lda) + (i))
@@ -125,6 +98,7 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
     cuDoubleComplex   *dwork, *df;
 
     static magma_int_t c__1 = 1;
+
     magma_int_t  i__1, i__2, ldda;
     static magma_int_t j, jb, na, nb, sm, sn, nx, fjb, iws, nfxd, nbmin, minmn, minws;
 
@@ -152,7 +126,7 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
             lwkopt = 1;
         } else {
             iws = *n + 1;
-            nb = magma_get_zgeqrf_nb(min(*m, *n));
+            nb = 64; // magma_get_zgeqrf_nb(min(*m, *n));
             lwkopt = (*n + 1) * nb;
         }
         MAGMA_Z_SET2REAL(work[0],(double)lwkopt);
@@ -173,12 +147,12 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
     if (minmn == 0)
         return *info;
 
-    ldda = ((*n+31)/32)*32;
-    if (MAGMA_SUCCESS != magma_zmalloc( &dwork, (*m)*ldda + (*n+1)*nb)) {
+    ldda = ((*m+31)/32)*32;
+    if (MAGMA_SUCCESS != magma_zmalloc( &dwork, (*n)*ldda + (*n+1)*nb)) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-    df     = dwork + (*m)*ldda; 
+    df     = dwork + (*n)*ldda; 
     dwork -= 1 + ldda;
     
 
@@ -198,8 +172,10 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
     }
     --nfxd;
 
-    /*  Factorize fixed columns:
-        Compute the QR factorization of fixed columns and update remaining columns. */
+    /*     Factorize fixed columns   
+           =======================   
+           Compute the QR factorization of fixed columns and update   
+           remaining columns. */
     if (nfxd > 0) {
         na = min(*m,nfxd);
         lapackf77_zgeqrf(m, &na, A(1, 1), lda, &tau[1], work, lwork, info);
@@ -277,8 +253,7 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
                magma_zgetmatrix( jb, i__1 - jb, 
                                  dA(j,j + jb), ldda,
                                  A (j,j + jb), *lda );
-               
-               //lapackf77_zlaqps(m, &i__1, &i__2, &jb, &fjb, A(1, j), lda, 
+
                magma_zlaqps(m, &i__1, &i__2, &jb, &fjb, 
                             A(1, j), lda,
                             dA(1, j), &ldda,
@@ -298,9 +273,10 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
            i__1 = *n - j + 1;
            i__2 = j - 1;
            
-           magma_zgetmatrix( *m-j+1, i__1,
-                             dA(j,j), ldda,
-                             A (j,j), *lda );
+           if (j > nfxd + 1)
+               magma_zgetmatrix( *m-j+1, i__1,
+                                 dA(j,j), ldda,
+                                 A (j,j), *lda );
            
            lapackf77_zlaqp2(m, &i__1, &i__2, A(1, j), lda, 
                             &jpvt[j], &tau[j], &rwork[j], &rwork[*n+j], work);

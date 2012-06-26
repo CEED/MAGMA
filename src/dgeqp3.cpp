@@ -12,25 +12,6 @@
 #include "common_magma.h"
 #include <cblas.h>
 
-#define lapackf77_dlaqps   FORTRAN_NAME( dlaqps, DLAQPS)
-#define lapackf77_dlaqp2   FORTRAN_NAME( zlaqp2, ZLAQP2)
-
-extern "C" int 
-lapackf77_dlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
-                 *nb, magma_int_t *kb, double *a, magma_int_t *lda, magma_int_t *jpvt,
-                 double *tau, double *vn1, double *vn2, double *
-                 auxv, double *f, magma_int_t *ldf);
-
-extern "C" void 
-lapackf77_dlaqp2(magma_int_t *m, magma_int_t *n, magma_int_t *offset, 
-                 double *a, magma_int_t *lda, magma_int_t *jpvt, double *tau,
-                 double *vn1, double *vn2, double *work);
-
-extern "C" int 
-magma_dlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
-             *nb, magma_int_t *kb, double *a, magma_int_t *lda, magma_int_t *jpvt,
-             double *tau, double *vn1, double *vn2, double *
-             auxv, double *f, magma_int_t *ldf);
 
 extern "C" magma_int_t 
 magma_dgeqp3(magma_int_t *m, magma_int_t *n, double *a, 
@@ -56,7 +37,7 @@ magma_dgeqp3(magma_int_t *m, magma_int_t *n, double *a,
     N       (input) INTEGER   
             The number of columns of the matrix A.  N >= 0.   
 
-    A       (input/output) COMPLEX*16 array, dimension (LDA,N)   
+    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)   
             On entry, the M-by-N matrix A.   
             On exit, the upper triangle of the array contains the   
             min(M,N)-by-N upper trapezoidal matrix R; the elements below   
@@ -74,16 +55,15 @@ magma_dgeqp3(magma_int_t *m, magma_int_t *n, double *a,
             On exit, if JPVT(J)=K, then the J-th column of A*P was the   
             the K-th column of A.   
 
-    TAU     (output) COMPLEX*16 array, dimension (min(M,N))   
+    TAU     (output) DOUBLE PRECISION array, dimension (min(M,N))   
             The scalar factors of the elementary reflectors.   
 
-    WORK    (workspace/output) COMPLEX*16 array, dimension (MAX(1,LWORK))   
+    WORK    (workspace/output) DOUBLE PRECISION array, dimension (MAX(1,LWORK))   
             On exit, if INFO=0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
-            The dimension of the array WORK. LWORK >= 3*N+1.   
-            For optimal performance LWORK >= 2*N + ( N+1 )*NB, where NB   
-            is the optimal blocksize.   
+            The dimension of the array WORK, LWORK >= 2*N + ( N+1 )*NB, 
+            where NB is the optimal blocksize.   
 
             If LWORK = -1, then a workspace query is assumed; the routine   
             only calculates the optimal size of the WORK array, returns   
@@ -104,29 +84,24 @@ magma_dgeqp3(magma_int_t *m, magma_int_t *n, double *a,
 
       H(i) = I - tau * v * v'   
 
-    where tau is a real/real scalar, and v is a real/real vector   
+    where tau is a real scalar, and v is a real vector   
     with v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in   
     A(i+1:m,i), and tau in TAU(i).   
-
-    Based on contributions by   
-      G. Quintana-Orti, Depto. de Informatica, Universidad Jaime I, Spain   
-      X. Sun, Computer Science Dept., Duke University, USA   
     =====================================================================   */
 
+#define  A(i, j) (a    +(j)*(*lda) + (i))
+#define dA(i, j) (dwork+(j)* ldda  + (i))
+
+    double   *dwork, *df;
+
     static magma_int_t c__1 = 1;
-    static magma_int_t c_n1 = -1;
-    static magma_int_t c__3 = 3;
     
-    magma_int_t a_dim1, a_offset, i__1, i__2, i__3;
+    magma_int_t i__1, i__2, ldda;
     static magma_int_t j, jb, na, nb, sm, sn, nx, fjb, iws, nfxd, nbmin, minmn, minws;
 
-    static magma_int_t topbmn, sminmn;
-    static magma_int_t lwkopt;
-    static magma_int_t lquery;
+    static magma_int_t topbmn, sminmn, lwkopt, lquery;
     
-    a_dim1 = *lda;
-    a_offset = 1 + a_dim1;
-    a -= a_offset;
+    a -= 1 + *lda;
     --jpvt;
     --tau;
     --work;
@@ -148,7 +123,7 @@ magma_dgeqp3(magma_int_t *m, magma_int_t *n, double *a,
             lwkopt = 1;
         } else {
             iws = *n + 1;
-            nb = magma_get_dgeqrf_nb(min(*m, *n));
+            nb = 64; //magma_get_dgeqrf_nb(min(*m, *n));
             lwkopt = 2*(*n) + (*n + 1) * nb;
         }
         MAGMA_D_SET2REAL(work[1],(double)lwkopt);
@@ -166,27 +141,32 @@ magma_dgeqp3(magma_int_t *m, magma_int_t *n, double *a,
         return *info;
     }
 
-    /* Quick return if possible. */
-    if (minmn == 0) {
+    if (minmn == 0)
+        return *info;
+
+    ldda = ((*m+31)/32)*32;
+    if (MAGMA_SUCCESS != magma_dmalloc( &dwork, (*n)*ldda +2*(*n)+(*n+1)*nb)){
+        *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
+    df     = dwork + (*n)*ldda + 2*(*n); 
+    dwork -= 1 + ldda;
+    
 
     /* Move initial columns up front. */
     nfxd = 1;
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) {
         if (jpvt[j] != 0) {
            if (j != nfxd) {
-               blasf77_dswap(m, &a[j * a_dim1 + 1], &c__1, &a[nfxd * a_dim1 + 1], &c__1);
+               blasf77_dswap(m, A(1, j), &c__1, A(1, nfxd), &c__1);
                jpvt[j] = jpvt[nfxd];
                jpvt[nfxd] = j;
            } else {
                jpvt[j] = j;
            }
            ++nfxd;
-        } else {
+        } else
             jpvt[j] = j;
-        }
     }
     --nfxd;
 
@@ -196,19 +176,15 @@ magma_dgeqp3(magma_int_t *m, magma_int_t *n, double *a,
            remaining columns. */
     if (nfxd > 0) {
         na = min(*m,nfxd);
-        lapackf77_dgeqrf(m, &na, &a[a_offset], lda, &tau[1], &work[1], lwork, info);
+        lapackf77_dgeqrf(m, &na, A(1, 1), lda, &tau[1], &work[1], lwork, info);
 
-        /* Computing MAX */
-        i__1 = iws, i__2 = (magma_int_t) (work[1]);
-        iws = max(i__1,i__2);
+        iws = max(iws, (magma_int_t)work[1]);
         if (na < *n) {
             i__1 = *n - na;
-            lapackf77_dormqr(MagmaLeftStr, MagmaTransStr, m, &i__1, &na, &a[a_offset],
-                             lda, &tau[1], &a[(na + 1) * a_dim1 + 1], lda, &work[1], 
+            lapackf77_dormqr(MagmaLeftStr, MagmaTransStr, m, &i__1, &na, A(1,1),
+                             lda, &tau[1], A(1, na + 1), lda, &work[1], 
                              lwork, info);
-            /* Computing MAX */
-            i__1 = iws, i__2 = (magma_int_t  ) (work[1]);
-            iws = max(i__1,i__2);
+            iws = max(iws, (magma_int_t) work[1]);
         }
     }
     
@@ -223,7 +199,6 @@ magma_dgeqp3(magma_int_t *m, magma_int_t *n, double *a,
        nx = 0;
 
        if (nb > 1 && nb < sminmn) {
-
            /* Determine when to cross over from blocked to unblocked code */
            nx = nb;
 
@@ -243,35 +218,47 @@ magma_dgeqp3(magma_int_t *m, magma_int_t *n, double *a,
 
        /*       Initialize partial column norms. The first N elements of work   
                 store the exact column norms. */
-       i__1 = *n;
-       for (j = nfxd + 1; j <= i__1; ++j) {
-           work[j] = cblas_dnrm2(sm, &a[nfxd + 1 + j * a_dim1], c__1);
+       for (j = nfxd + 1; j <= *n; ++j) {
+           work[j] = cblas_dnrm2(sm, A(nfxd + 1, j), c__1);
            work[*n + j] = work[j];
        }
        
        if (nb >= nbmin && nb < sminmn && nx < sminmn) {
-           
            /* Use blocked code initially. */   
            j = nfxd + 1;
+           
+           // Set the original matrix to the GPU
+           magma_dsetmatrix( *m, sn,
+                             A(1,j),  *lda,
+                             dA(1,j), ldda );
            
            /* Compute factorization: while loop. */
            topbmn = minmn - nx;
        L30:
            if (j <= topbmn) {
-               /* Computing MIN */
-               i__1 = nb, i__2 = topbmn - j + 1;
-               jb = min(i__1,i__2);
-               
-               /*            Factorize JB columns among columns J:N. */
-               
+               jb = min(nb, topbmn - j + 1);
+              
+               /* Factorize JB columns among columns J:N. */               
                i__1 = *n - j + 1;
                i__2 = j - 1;
-               i__3 = *n - j + 1;
-               //lapackf77_dlaqps(m, &i__1, &i__2, &jb, &fjb, &a[j * a_dim1 + 1], lda, 
-               magma_dlaqps(m, &i__1, &i__2, &jb, &fjb, &a[j * a_dim1 + 1], lda, 
-                            &jpvt[j], &tau[j], &work[j], &work[*n + j], &work[2*(*n)+1],
-                            &work[2*(*n) + jb + 1], &i__3);
                
+               // Get panel to the CPU
+               magma_dgetmatrix( *m-j+1, jb,
+                                 dA(j,j), ldda,
+                                 A (j,j), *lda );
+ 
+               // Get the rows 
+               magma_dgetmatrix( jb, i__1 - jb, 
+                                 dA(j,j + jb), ldda,
+                                 A (j,j + jb), *lda );
+               
+               magma_dlaqps(m, &i__1, &i__2, &jb, &fjb, 
+                            A(1, j), lda,
+                            dA(1, j), &ldda,  
+                            &jpvt[j], &tau[j], &work[j], &work[*n + j], 
+                            &work[2*(*n)+1], &work[2*(*n)+1+jb], &i__1,
+                            &df[jb], &i__1);
+
                j += fjb;
                goto L30;
            }
@@ -283,11 +270,19 @@ magma_dgeqp3(magma_int_t *m, magma_int_t *n, double *a,
        if (j <= minmn) {
            i__1 = *n - j + 1;
            i__2 = j - 1;
-           lapackf77_dlaqp2(m, &i__1, &i__2, &a[j * a_dim1 + 1], lda, &jpvt[j], 
+           
+           if (j > nfxd + 1)
+               magma_dgetmatrix( *m-j+1, i__1,
+                                 dA(j,j), ldda,
+                                 A (j,j), *lda );
+           
+           lapackf77_dlaqp2(m, &i__1, &i__2, A(1, j), lda, &jpvt[j], 
                             &tau[j], &work[j], &work[*n + j], &work[2*(*n) + 1]);
        }
     }
 
     work[1] = MAGMA_D_MAKE((double) iws, 0.);
+    magma_free( dA(1,1) );
+
     return *info;
 } /* dgeqp3_ */
