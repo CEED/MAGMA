@@ -24,8 +24,12 @@
 #include "testings.h"
 
 // Flops formula
+#define PRECISION_z
+#if defined(PRECISION_z) || defined(PRECISION_c)
+#define FLOPS(m, n) ( 6.*FMULS_GEQRF(m, n) + 2.*FADDS_GEQRF(m, n) )
+#else
 #define FLOPS(m, n) (    FMULS_GEQRF(m, n) +    FADDS_GEQRF(m, n) )
-
+#endif
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing dgeqp3
@@ -84,7 +88,7 @@ int main( int argc, char** argv)
 
     n2  = M * N;
     min_mn = min(M, N);
-    nb = 64;// magma_get_dgeqrf_nb(M);
+    nb = magma_get_dgeqp3_nb(min_mn);
 
     TESTING_MALLOC(    jpvt, magma_int_t,     N );
 
@@ -98,8 +102,8 @@ int main( int argc, char** argv)
         lwork = max(lwork, M * N + N);
     TESTING_MALLOC( h_work, double, lwork );
 
-    printf("  M     N   CPU Time(s)   GPU Time(s)    ||A*P - Q*R||_F  \n");
-    printf("==========================================================\n");
+    printf("  M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)  ||A*P - Q*R||_F  \n");
+    printf("==================================================================\n");
     for(i=0; i<10; i++){
          if (argc == 1){
             M = N = size[i];
@@ -159,13 +163,13 @@ int main( int argc, char** argv)
                 result[0] = lapackf77_dqpt01(&M, &N, &minmn, h_A, h_R, &lda, tau, jpvt, h_work, &lwork);
                 result[0] *= ulp;
 
-                printf("%5d %5d  %6.2f         %6.2f        %e\n",
-                       M, N, cpu_time, gpu_time, result[0]);
+                printf("%5d %5d  %6.2f (%6.2f)    %6.2f (%6.2f)     %e\n",
+                       M, N, cpu_perf, cpu_time, gpu_perf, gpu_time, result[0]);
             }
         else
-            printf("%5d %5d  %6.2f         %6.2f\n",
-                   M, N, cpu_time, gpu_time);
-
+            printf("%5d %5d  %6.2f (%6.2f)    %6.2f (%6.2f)\n",
+                   M, N, cpu_perf, cpu_time, gpu_perf, gpu_time);
+        
         if (argc != 1)
             break;
     }
