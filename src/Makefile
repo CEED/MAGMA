@@ -46,7 +46,7 @@ ZSRC  = zpotrf.cpp	\
         zungqr.cpp	\
         zungtr.cpp      \
 	zgeqrf_gpu.cpp  \
-        zgeqrf_mgpu-trace.cpp \
+        zgeqrf_mgpu.cpp \
 	zgeqrf2_gpu.cpp	\
 	zgeqrf3_gpu.cpp \
 	zgeqrs_gpu.cpp	\
@@ -146,7 +146,7 @@ ZSRC  = zpotrf.cpp	\
 ALLSRC_F = dlaed2.f \
            slaed2.f
 
-ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) #dsbtrd.cpp
+ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 ALLOBJ := $(ALLSRC:.cpp=.o) $(ALLSRC_F:.f=.o)
 
 all: $(LIBMAGMA)
