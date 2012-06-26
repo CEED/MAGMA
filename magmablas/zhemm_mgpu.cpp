@@ -7,15 +7,17 @@
 
        @precisions normal z -> s d c
        @author Mark Gates
+       
+       This still has poor performance. Work in progress.
 */
 #include "common_magma.h"
 #include <assert.h>
 
 extern "C" void
-magmablas_zsymmetrize( char uplo, int m, cuDoubleComplex *dA, int ldda );
+magmablas_zsymmetrize( char uplo, magma_int_t m, cuDoubleComplex *dA, magma_int_t ldda );
 
 extern "C"
-void magma_zhemm_mgpu(
+void magmablas_zhemm_mgpu(
     char side, char uplo, magma_int_t m, magma_int_t n,
     cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
                            cuDoubleComplex *dB[], magma_int_t lddb,
@@ -41,10 +43,10 @@ void magma_zhemm_mgpu(
 
     // create events for sync
     magma_event_t event[ MagmaMaxGPUs ][ 20 ];
-    for( int d = 0; d < ngpu; ++d ) {
+    for( magma_int_t d = 0; d < ngpu; ++d ) {
         magma_setdevice( d );
         cudaMemset( dC[d], 0, lddc*n*sizeof(cuDoubleComplex) );
-        for( int s = 0; s < nstream; ++s ) {
+        for( magma_int_t s = 0; s < nstream; ++s ) {
             cudaEventCreateWithFlags( &event[d][s], cudaEventDisableTiming );
         }
     }
@@ -54,29 +56,29 @@ void magma_zhemm_mgpu(
     // first  symmetrizes A[i,i]
     // second does C[i]      = A[i:m,  i]'*B[i:m]
     // third  does C[i+1:m] += A[i+1:m,i] *B[i]
-    for( int i = 0; i < m; i += nb ) {
-        int ib     = min( nb, m-i );      // block size
-        int ioff   = i + offset;          // start global index in parent matrix
-        int iblock = (ioff / nb) / ngpu;  // local block id
-        int dev    = (ioff / nb) % ngpu;
-        int di     = iblock*nb;           // local index in parent matrix
+    for( magma_int_t i = 0; i < m; i += nb ) {
+        magma_int_t ib     = min( nb, m-i );      // block size
+        magma_int_t ioff   = i + offset;          // start global index in parent matrix
+        magma_int_t iblock = (ioff / nb) / ngpu;  // local block id
+        magma_int_t dev    = (ioff / nb) % ngpu;
+        magma_int_t di     = iblock*nb;           // local index in parent matrix
         
         magma_setdevice( dev );
-        int s = iblock % nstream;
+        magma_int_t s = iblock % nstream;
         magmablasSetKernelStream( streams[ dev ][ s ] );
         
         // make diagonal block symmetric
         magmablas_zsymmetrize( MagmaLower, ib, dA(dev,ioff,di), ldda );
     }
-    for( int i = 0; i < m; i += nb ) {
-        int ib     = min( nb, m-i );      // block size
-        int ioff   = i + offset;          // start global index in parent matrix
-        int iblock = (ioff / nb) / ngpu;  // local block id
-        int dev    = (ioff / nb) % ngpu;
-        int di     = iblock*nb;           // local index in parent matrix
+    for( magma_int_t i = 0; i < m; i += nb ) {
+        magma_int_t ib     = min( nb, m-i );      // block size
+        magma_int_t ioff   = i + offset;          // start global index in parent matrix
+        magma_int_t iblock = (ioff / nb) / ngpu;  // local block id
+        magma_int_t dev    = (ioff / nb) % ngpu;
+        magma_int_t di     = iblock*nb;           // local index in parent matrix
         
         magma_setdevice( dev );
-        int s = iblock % nstream;
+        magma_int_t s = iblock % nstream;
         magmablasSetKernelStream( streams[ dev ][ s ] );
 
         // C[i] = A[i:m,i]' * B[i:m0]
@@ -88,18 +90,18 @@ void magma_zhemm_mgpu(
                      c_zero, dC(dev,i,0),     lddc );
         magma_event_record( event[dev][s], streams[dev][s] );
     }
-    for( int i = 0; i < m; i += nb ) {
-        int ib     = min( nb, m-i );      // block size
-        int ioff   = i + offset;          // start global index in parent matrix
-        int iblock = (ioff / nb) / ngpu;  // local block id
-        int dev    = (ioff / nb) % ngpu;
-        int di     = iblock*nb;           // local index in parent matrix
+    for( magma_int_t i = 0; i < m; i += nb ) {
+        magma_int_t ib     = min( nb, m-i );      // block size
+        magma_int_t ioff   = i + offset;          // start global index in parent matrix
+        magma_int_t iblock = (ioff / nb) / ngpu;  // local block id
+        magma_int_t dev    = (ioff / nb) % ngpu;
+        magma_int_t di     = iblock*nb;           // local index in parent matrix
         
         // these have to be on same stream, since they write into same block,
         // unless we used separate C workspace for each stream
         magma_setdevice( dev );
         magmablasSetKernelStream( streams[dev][0] );
-        for( int s = 0; s < nstream; ++s ) {
+        for( magma_int_t s = 0; s < nstream; ++s ) {
             magma_queue_wait_event( streams[dev][0], event[dev][s] );
         }
         
@@ -113,14 +115,14 @@ void magma_zhemm_mgpu(
     }
     
     // meanwhile on CPU, scale C := beta*C
-    for( int j = 0; j < n; ++j ) {
+    for( magma_int_t j = 0; j < n; ++j ) {
         blasf77_zscal( &m, &beta, C(0,j), &ione );
     }
     
     // wait and reduce results
     magma_int_t size = ldc*n;
     cuDoubleComplex *Ctmp = C(0,n);
-    for( int d = 0; d < ngpu; ++d ) {
+    for( magma_int_t d = 0; d < ngpu; ++d ) {
         magma_setdevice( d );
         magma_zgetmatrix( m, n, dC[d], lddc, Ctmp, ldc );
         blasf77_zaxpy( &size, &c_one, Ctmp, &ione, C, &ione );

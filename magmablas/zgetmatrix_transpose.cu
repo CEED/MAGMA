@@ -68,6 +68,7 @@ magmablas_zgetmatrix_transpose( magma_int_t m, magma_int_t n,
 //  is 1D block cyclic. The input arrays are pointers for the corresponding
 //  GPUs. The streams are passed as argument, in contrast to the single GPU
 //  routine.
+//  NOTE: see magmablas_zgetmatrix_transpose_mgpu.
 //===========================================================================
 extern "C" void
 magmablas_zgetmatrix_transpose2( magma_int_t m, magma_int_t n,

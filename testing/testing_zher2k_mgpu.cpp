@@ -26,15 +26,7 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-extern "C"
-extern "C"
-void magma_zher2k_mgpu_mark1(
-    char uplo, char trans, magma_int_t n, magma_int_t k,
-    cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t lda,
-                           cuDoubleComplex *dB[], magma_int_t ldb,
-    double beta,           cuDoubleComplex *dC[], magma_int_t ldc,  magma_int_t offset,
-    magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][10], magma_int_t nstream );
-
+// version from zhetrd_mgpu.cpp
 extern "C" void
 magma_zher2k_mgpu(
     int num_gpus, char uplo, char trans, int nb, int n, int k,
@@ -42,14 +34,8 @@ magma_zher2k_mgpu(
     double beta,           cuDoubleComplex **dc, int lddc, int offset,
     int num_streams, cudaStream_t stream[][10]);
 
-// extern "C" void
-// magma_zher2k_mgpu(
-//     int num_gpus, char uplo, char trans, int nb, int n, int k,
-//     cuDoubleComplex alpha, cuDoubleComplex **da, int ldda, 
-//                            cuDoubleComplex **db, int lddb, 
-//     double beta,           cuDoubleComplex **dc, int lddc, int offset,
-//     int num_streams, cudaStream_t stream[][10] );
 
+// --------------------
 void ensure( bool condition, const char* msg, ... )
 {
     if ( not condition ) {
@@ -202,7 +188,7 @@ int main( int argc, char** argv)
         
         cudaDeviceSynchronize();
         gpu_time = magma_wtime();
-        magma_zher2k_mgpu_mark1(
+        magmablas_zher2k_mgpu2(
             MagmaLower, MagmaNoTrans, n, k,
             c_neg_one, dV, ldda,
                        dW, ldda,

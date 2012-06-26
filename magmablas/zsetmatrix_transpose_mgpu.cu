@@ -6,7 +6,7 @@
        November 2011
 
        @precisions normal z -> s d c
-
+       @author Ichitaro Yamazaki
 */
 #include "common_magma.h"
 #define PRECISION_z
@@ -21,12 +21,12 @@
 //             Note that lda >= m and lddat >= n.
 //
 extern "C" void 
-magmablas_zsetmatrix_transpose3(
+magmablas_zsetmatrix_transpose_mgpu(
                   magma_int_t num_gpus, cudaStream_t **stream0,
-                  cuDoubleComplex  *ha,  int lda, 
-                  cuDoubleComplex **dat, int ldda, int starti,
-                  cuDoubleComplex **dB,  int lddb,
-                  int m, int n , int nb)
+                  cuDoubleComplex  *ha,  magma_int_t lda, 
+                  cuDoubleComplex **dat, magma_int_t ldda, magma_int_t starti,
+                  cuDoubleComplex **dB,  magma_int_t lddb,
+                  magma_int_t m, magma_int_t n, magma_int_t nb)
 {
     int d, i = 0, offset = 0, j = 0, j_local, ib;
     cudaStream_t stream[4][2];

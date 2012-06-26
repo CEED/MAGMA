@@ -29,10 +29,7 @@ ZSRC  = \
 	ztranspose-v2.cu\
 	zinplace_transpose.cu	\
 	zgetmatrix_transpose.cu	\
-	zgetmatrix_transpose2.cu\
 	zsetmatrix_transpose.cu	\
-	zsetmatrix_transpose2.cu\
-	zbcyclic.cu	\
 	zclaswp.cu	\
 	zcaxpycp.cu	\
 	zlag2c.cu	\
@@ -45,6 +42,14 @@ ZSRC  = \
 	zhemv_fermi.cu	\
 	zsymv_fermi.cu	\
 	zsymmetrize.cu	\
+
+# multi-GPU
+ZSRC += \
+	zbcyclic.cu	\
+	zhemm_mgpu.cpp		\
+	zher2k_mgpu.cpp		\
+	zgetmatrix_transpose_mgpu.cu	\
+	zsetmatrix_transpose_mgpu.cu	\
 
 # Card-specific versions that need precisions generated must be above in ZSRC,
 # so they are all put into Makefile.src in the release. The code is #ifdef'd
@@ -109,6 +114,7 @@ else ifeq (${GPU_TARGET}, Fermi)
 endif
 
 ALLOBJ := $(ALLSRC:.cu=.cu_o) 
+ALLOBJ := $(ALLOBJ:.cpp=.o)
 
 all: $(LIBMAGMABLAS) 
 

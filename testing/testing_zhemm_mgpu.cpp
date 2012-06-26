@@ -27,18 +27,7 @@
 #include "testings.h"
 
 
-// C = A*B, where A symmetric
-extern "C"
-void magma_zhemm_mgpu(
-    char side, char uplo, magma_int_t m, magma_int_t n,
-    cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
-                           cuDoubleComplex *dB[], magma_int_t lddb,
-    cuDoubleComplex beta,  cuDoubleComplex *dC[], magma_int_t lddc,
-                           cuDoubleComplex *C,    magma_int_t ldc,
-    magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][20], magma_int_t nstream );
-
-
-/* //////////////////////////////////////////////////////////////////////////// */
+// --------------------
 void ensure( bool condition, const char* msg, ... )
 {
     if ( not condition ) {
@@ -199,7 +188,7 @@ int main( int argc, char** argv)
         
         cudaDeviceSynchronize();
         gpu_time = magma_wtime();
-        magma_zhemm_mgpu(
+        magmablas_zhemm_mgpu(
             MagmaLeft, MagmaLower, m, n,
             c_neg_one, dA, ldda, 0,
                        dX, ldda,

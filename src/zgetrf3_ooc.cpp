@@ -34,20 +34,6 @@ magma_zgetrf1_mgpu(magma_int_t num_gpus,
                    cuDoubleComplex **d_lAP, cuDoubleComplex *work, magma_int_t lddwork, 
                    cudaStream_t **stream, magma_int_t *info);
 
-extern "C" void
-magmablas_zgetmatrix_transpose3(magma_int_t num_gpus, cudaStream_t **stream,
-                  cuDoubleComplex **dat, magma_int_t ldda,
-                  cuDoubleComplex   *ha, magma_int_t lda,
-                  cuDoubleComplex  **dB, magma_int_t lddb,
-                  magma_int_t m, magma_int_t n , magma_int_t nb);
-
-extern "C" void
-magmablas_zsetmatrix_transpose3(magma_int_t num_gpus, cudaStream_t** stream,
-                  cuDoubleComplex  *ha,  magma_int_t lda,
-                  cuDoubleComplex **dat, magma_int_t ldda, magma_int_t starti,
-                  cuDoubleComplex **dB,  magma_int_t lddb,
-                  magma_int_t m, magma_int_t n , magma_int_t nb);
-
 extern "C" magma_int_t
 magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
          magma_int_t *ipiv, magma_int_t *info)
@@ -251,7 +237,7 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
           start2 = get_current_time();
 #endif
           /* upload the next big panel into GPU, transpose (A->A'), and pivot it */
-          magmablas_zsetmatrix_transpose3(num_gpus, (cudaStream_t **)stream, A(0,I), lda, 
+          magmablas_zsetmatrix_transpose_mgpu(num_gpus, (cudaStream_t **)stream, A(0,I), lda, 
                               dAT, ldn_local, 0, dA, maxm, M, N, nb);
           //magmablas_zhtodt3(num_gpus, (cudaStream_t **)stream, A(0,I), lda, 
           //                    dAT, ldn_local, dA, maxm, M, N, nb, h);
@@ -333,7 +319,7 @@ magma_zgetrf3_ooc(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleC
           time_mem += (GetTimerValue(start2, end1)-GetTimerValue(start1, end1))/1000.0;
 #endif      
           /* download the current big panel to CPU */
-          magmablas_zgetmatrix_transpose3(num_gpus, (cudaStream_t **)stream, dAT, ldn_local, A(0,I), lda,  dA, maxm, M, N, nb);
+          magmablas_zgetmatrix_transpose_mgpu(num_gpus, (cudaStream_t **)stream, dAT, ldn_local, A(0,I), lda,  dA, maxm, M, N, nb);
 #ifdef PROFILE
           end1 = get_current_time();
           time_rmajor2 += GetTimerValue(start1, end1);
