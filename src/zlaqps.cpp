@@ -100,23 +100,23 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset,
 #define  A(i, j) (a    +(j)*(*lda)  + (i))
 #define dA(i, j) (da   +(j)*(*ldda) + (i))
 
-    static cuDoubleComplex zero = MAGMA_Z_MAKE(0.,0.);
-    static cuDoubleComplex one  = MAGMA_Z_MAKE(1.,0.);
-    static cuDoubleComplex mone = MAGMA_Z_MAKE(-1.,0.);
-    static magma_int_t c__1 = 1;
+    cuDoubleComplex zero = MAGMA_Z_MAKE(0.,0.);
+    cuDoubleComplex one  = MAGMA_Z_MAKE(1.,0.);
+    cuDoubleComplex mone = MAGMA_Z_MAKE(-1.,0.);
+    magma_int_t c__1 = 1;
     
     magma_int_t f_dim1, i__1, i__2;
     double d__1;
     cuDoubleComplex z__1;
     
-    static magma_int_t j, k, rk;
-    static cuDoubleComplex akk;
-    static magma_int_t pvt;
-    static double temp, temp2, tol3z;
-    static magma_int_t itemp;
+    magma_int_t j, k, rk;
+    cuDoubleComplex akk;
+    magma_int_t pvt;
+    double temp, temp2, tol3z;
+    magma_int_t itemp;
 
-    static magma_int_t lsticc;
-    static magma_int_t lastrk;    
+    magma_int_t lsticc;
+    magma_int_t lastrk;    
     
     a -= 1 + *lda;
     --jpvt;
@@ -136,7 +136,7 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset,
     da -= 1 + *ldda;
     df -= 1 + *lddf;
 
-    static cudaStream_t stream;
+    cudaStream_t stream;
     magma_queue_create( &stream );
 
  L10:
@@ -227,8 +227,8 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset,
            magma_zsetmatrix( i__1, 1, A(rk, k), *lda, dA(rk,k), *ldda );
 
            /* Multiply on GPU                                               */
-           int i__3 = *nb-k;
-           int i__4 = i__2 -i__3, i__5 = *nb-k+1;
+           magma_int_t i__3 = *nb-k;
+           magma_int_t i__4 = i__2 -i__3, i__5 = *nb-k+1;
            magma_zgemv(MagmaConjTrans, i__1 - i__5, i__2 - i__3, tau[k],
                        dA(rk+i__5, k+1+i__3), *ldda, dA(rk+i__5, k),
                        c__1, zero, &df[k + 1 +i__3 + k * f_dim1], c__1);
