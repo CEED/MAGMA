@@ -10,6 +10,8 @@
 */
 #include "common_magma.h"
 
+#include <assert.h>
+
 extern "C" magma_int_t
 magma_zgesv(     magma_int_t n, magma_int_t nrhs, 
                  cuDoubleComplex *A, magma_int_t lda,
@@ -70,6 +72,8 @@ magma_zgesv(     magma_int_t n, magma_int_t nrhs,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================    */
 
+    magma_int_t num_gpus, ldda, lddb;
+    
     *info = 0;
     if (n < 0) {
         *info = -1;
@@ -89,11 +93,42 @@ magma_zgesv(     magma_int_t n, magma_int_t nrhs,
     if (n == 0 || nrhs == 0) {
         return *info;
     }
+    
+    /* If single-GPU and allocation suceeds, use GPU interface. */
+    num_gpus = magma_num_gpus();
+    cuDoubleComplex *dA, *dB;
+    if ( num_gpus > 1 ) {
+        goto CPU_INTERFACE;
+    }
+    ldda = ((n+31)/32)*32;
+    lddb = ldda;
+    if ( MAGMA_SUCCESS != magma_zmalloc( &dA, ldda*n )) {
+        goto CPU_INTERFACE;
+    }
+    if ( MAGMA_SUCCESS != magma_zmalloc( &dB, lddb*nrhs )) {
+        magma_free( dA );
+        dA = NULL;
+        goto CPU_INTERFACE;
+    }
+    assert( num_gpus == 1 and dA != NULL and dB != NULL );
+    magma_zsetmatrix( n, n, A, lda, dA, ldda );
+    magma_zgetrf_gpu( n, n, dA, ldda, ipiv, info );
+    magma_zgetmatrix( n, n, dA, ldda, A, lda );
+    if ( *info == 0 ) {
+        magma_zsetmatrix( n, nrhs, B, ldb, dB, lddb );
+        magma_zgetrs_gpu( MagmaNoTrans, n, nrhs, dA, ldda, ipiv, dB, lddb, info );
+        magma_zgetmatrix( n, nrhs, dB, lddb, B, ldb );
+    }
+    magma_free( dA );
+    magma_free( dB );
+    return *info;
 
+CPU_INTERFACE:
+    /* If multi-GPU or allocation failed, use CPU interface and LAPACK.
+     * Faster to use LAPACK for getrs than to copy A to GPU. */
     magma_zgetrf( n, n, A, lda, ipiv, info );
     if ( *info == 0 ) {
         lapackf77_zgetrs( MagmaNoTransStr, &n, &nrhs, A, &lda, ipiv, B, &ldb, info );
     }
-    
     return *info;
 }
