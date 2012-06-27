@@ -94,12 +94,12 @@ magma_dgeqp3(magma_int_t *m, magma_int_t *n, double *a,
 
     double   *dwork, *df;
 
-    static magma_int_t c__1 = 1;
+    magma_int_t c__1 = 1;
     
     magma_int_t i__1, i__2, ldda;
-    static magma_int_t j, jb, na, nb, sm, sn, nx, fjb, iws, nfxd, nbmin, minmn, minws;
+    magma_int_t j, jb, na, nb, sm, sn, nx, fjb, iws, nfxd, nbmin, minmn, minws;
 
-    static magma_int_t topbmn, sminmn, lwkopt, lquery;
+    magma_int_t topbmn, sminmn, lwkopt, lquery;
     
     a -= 1 + *lda;
     --jpvt;
