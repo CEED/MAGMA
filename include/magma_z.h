@@ -70,10 +70,6 @@ magma_int_t magma_zgetrf( magma_int_t m, magma_int_t n, cuDoubleComplex *A,
 magma_int_t magma_zgetrf2(magma_int_t m, magma_int_t n, cuDoubleComplex *a, 
                           magma_int_t lda, magma_int_t *ipiv, magma_int_t *info);
 #if defined(PRECISION_z) || defined(PRECISION_c)
-magma_int_t magma_zgeqp3 (magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
-                          magma_int_t *lda, magma_int_t *jpvt, cuDoubleComplex *tau,
-                          cuDoubleComplex *work, magma_int_t *lwork, double *rwork,
-                          magma_int_t *info);
 magma_int_t magma_zlaqps( magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
                           *nb, magma_int_t *kb,
                           cuDoubleComplex *a, magma_int_t *lda,
@@ -83,9 +79,6 @@ magma_int_t magma_zlaqps( magma_int_t *m, magma_int_t *n, magma_int_t *offset, m
                           cuDoubleComplex *f, magma_int_t *ldf,
                           cuDoubleComplex *df, magma_int_t *lddf);
 #else
-magma_int_t magma_zgeqp3( magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
-                          magma_int_t *lda, magma_int_t *jpvt, cuDoubleComplex *tau, double *work,
-                          magma_int_t *lwork, magma_int_t *info);
 magma_int_t magma_zlaqps( magma_int_t *m, magma_int_t *n, magma_int_t *offset, magma_int_t
                           *nb, magma_int_t *kb,
                           double *a, magma_int_t *lda,
@@ -178,10 +171,10 @@ magma_int_t  magma_zgeev( char jobvl, char jobvr, magma_int_t n,
                           cuDoubleComplex *vr, magma_int_t ldvr,
                           cuDoubleComplex *work, magma_int_t lwork,
                           double *rwork, magma_int_t *info);
-magma_int_t magma_zgeqp3( magma_int_t *m, magma_int_t *n,
-                          cuDoubleComplex *a, magma_int_t *lda, 
+magma_int_t magma_zgeqp3( magma_int_t m, magma_int_t n,
+                          cuDoubleComplex *a, magma_int_t lda, 
                           magma_int_t *jpvt, cuDoubleComplex *tau,
-                          cuDoubleComplex *work, magma_int_t *lwork, 
+                          cuDoubleComplex *work, magma_int_t lwork, 
                           double *rwork, magma_int_t *info);
 magma_int_t magma_zgesvd( char jobu, char jobvt, magma_int_t m, magma_int_t n,
                           cuDoubleComplex *a,    magma_int_t lda, double *s, 
@@ -246,10 +239,10 @@ magma_int_t  magma_zgeev( char jobvl, char jobvr, magma_int_t n,
                           cuDoubleComplex *vr,   magma_int_t ldvr,
                           cuDoubleComplex *work, magma_int_t lwork,
                           magma_int_t *info);
-magma_int_t magma_zgeqp3( magma_int_t *m, magma_int_t *n,
-                          cuDoubleComplex *a, magma_int_t *lda, 
+magma_int_t magma_zgeqp3( magma_int_t m, magma_int_t n,
+                          cuDoubleComplex *a, magma_int_t lda, 
                           magma_int_t *jpvt, cuDoubleComplex *tau,
-                          cuDoubleComplex *work, magma_int_t *lwork, 
+                          cuDoubleComplex *work, magma_int_t lwork, 
                           magma_int_t *info);
 magma_int_t magma_zgesvd( char jobu, char jobvt, magma_int_t m, magma_int_t n,
                           cuDoubleComplex *a,    magma_int_t lda, double *s, 
