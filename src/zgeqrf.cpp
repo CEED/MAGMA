@@ -131,9 +131,7 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
     lddwork = ((n+31)/32)*32;
     ldda    = ((m+31)/32)*32;
 
-    magma_int_t num_gpus = 1;
-    char * num_gpus_char = getenv("MAGMA_NUM_GPUS");
-    if (num_gpus_char != NULL ) num_gpus = atoi(num_gpus_char);
+    magma_int_t num_gpus = magma_num_gpus();
     if( num_gpus > 1 ) {
         /* call multiple-GPU interface  */
         return magma_zgeqrf4(num_gpus, m, n, a, lda, tau, work, lwork, info);

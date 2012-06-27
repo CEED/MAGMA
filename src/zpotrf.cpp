@@ -132,12 +132,7 @@ magma_zpotrf(char uplo, magma_int_t n,
     if ( n == 0 )
       return *info;
 
-    char * num_gpus_char = getenv("MAGMA_NUM_GPUS");
-    magma_int_t num_gpus = 1;
-
-    if( num_gpus_char != NULL ) {
-      num_gpus = atoi(num_gpus_char);
-    }
+    magma_int_t num_gpus = magma_num_gpus();
     if( num_gpus > 1 ) {
       /* call multiple-GPU interface  */
       return magma_zpotrf2_ooc(num_gpus, uplo, n, a, lda, info);
