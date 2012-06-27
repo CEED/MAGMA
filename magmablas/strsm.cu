@@ -11,8 +11,6 @@
 */
 #include "common_magma.h"
 
-#define magmablas_strsm_tesla magmablas_strsm
-
 #define qmod(a,b) ((a)-(__mul24((b),(a)/(b))))
 //#define cublasSgemm magmablas_sgemm_fermi64
 
@@ -1812,8 +1810,8 @@ void diag_strtri (magma_int_t M, char uplo, char diag, float *A, float *d_dinvA,
  * magmablas_strsm
  */
 extern "C"
-void magmablas_strsm_tesla( char side, char uplo, char tran, char diag, magma_int_t M, magma_int_t N, 
-                            float alpha, /*const*/ float* A, magma_int_t lda, float* b, magma_int_t ldb)
+void magmablas_strsm( char side, char uplo, char tran, char diag, magma_int_t M, magma_int_t N, 
+                      float alpha, /*const*/ float* A, magma_int_t lda, float* b, magma_int_t ldb)
 {
         /*  -- MAGMA (version 1.1) --
                 Univ. of Tennessee, Knoxville

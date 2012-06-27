@@ -11,8 +11,6 @@
 */
 #include "common_magma.h"
 
-#define magmablas_dtrsm_tesla magmablas_dtrsm
-
 #define qmod(a,b) ((a)-(__mul24((b),(a)/(b))))
 #define cublasDgemm magmablas_dgemm
 
@@ -1820,8 +1818,8 @@ void diag_dtrtri (magma_int_t M, char uplo, char diag, double *A, double *d_dinv
  * magmablas_dtrsm
  */
 extern "C"
-void magmablas_dtrsm_tesla( char side, char uplo, char tran, char diag, magma_int_t M, magma_int_t N, 
-                            double alpha, /*const*/ double* A, magma_int_t lda, double* b, magma_int_t ldb)
+void magmablas_dtrsm( char side, char uplo, char tran, char diag, magma_int_t M, magma_int_t N, 
+                      double alpha, /*const*/ double* A, magma_int_t lda, double* b, magma_int_t ldb)
 {
         /*  -- MAGMA (version 1.1) --
                 Univ. of Tennessee, Knoxville
