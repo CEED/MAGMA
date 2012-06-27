@@ -13,7 +13,7 @@
 #define MultiGPUs
 
 extern "C" magma_int_t
-magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
+magma_zgeqrf2_mgpu( magma_int_t num_gpus, magma_int_t m, magma_int_t n,
                     cuDoubleComplex **dlA, magma_int_t ldda,
                     cuDoubleComplex *tau, 
                     magma_int_t *info )
@@ -89,7 +89,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
     magma_int_t nbmin, nx, ib, nb;
     magma_int_t lhwork, lwork;
 
-    magma_int_t cdevice;
+    magma_device_t cdevice;
     magma_getdevice(&cdevice);
 
     int panel_gpunum, i_local, n_local[4], la_gpu, displacement; 
