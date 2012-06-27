@@ -113,8 +113,8 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
 
     /* Allocate CPU work space */
     lwork = n * nb;
-    work = (cuDoubleComplex *)malloc(lwork*sizeof(cuDoubleComplex));
-    if( work == NULL ) {
+    magma_zmalloc_cpu( &work, lwork );
+    if ( work == NULL ) {
         magma_free( da );
         *info = MAGMA_ERR_HOST_ALLOC;
         return *info;

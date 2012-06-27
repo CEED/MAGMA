@@ -194,7 +194,11 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
     
     // Generate parallel pivots
     {
-        magma_int_t *newipiv  = (magma_int_t*)malloc(N * sizeof(magma_int_t));
+        magma_int_t *newipiv;
+        magma_malloc_cpu( (void**) &newipiv, N * sizeof(magma_int_t) );
+        if ( newipiv == NULL ) {
+            goto L40;
+        }
         swp2pswp(trans, N, IPIV, newipiv);
         magma_setvector( N, sizeof(magma_int_t), newipiv, 1, dIPIV, 1 );
         free(newipiv);

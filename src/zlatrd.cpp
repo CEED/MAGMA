@@ -12,7 +12,9 @@
 
 */
 #include "common_magma.h"
-#include <cblas.h> 
+
+#include <cblas.h>
+#include <assert.h>
 
 #define PRECISION_z
 
@@ -170,8 +172,7 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
     magma_int_t i_n, i_1, iw;
   
     cuDoubleComplex alpha;
-
-    cuDoubleComplex *f = (cuDoubleComplex *)malloc(n*sizeof(cuDoubleComplex ));
+    cuDoubleComplex *f;
 
     if (n <= 0) {
       return 0;
@@ -179,6 +180,8 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
 
     cudaStream_t stream;
     magma_queue_create( &stream );
+    magma_zmalloc_cpu( &f, n );
+    assert( f != NULL );  // TODO return error, or allocate outside zlatrd
 
     if (lapackf77_lsame(uplo_, "U")) {
 

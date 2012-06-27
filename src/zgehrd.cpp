@@ -179,7 +179,7 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     magma_int_t i__;
 
     cuDoubleComplex *t, *d_t;
-    t = (cuDoubleComplex*) malloc(nb*nb*sizeof(cuDoubleComplex));
+    magma_zmalloc_cpu( &t, nb*nb );
     if ( t == NULL ) {
         magma_free( da );
         *info = MAGMA_ERR_HOST_ALLOC;

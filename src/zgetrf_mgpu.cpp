@@ -116,9 +116,13 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
     mindim = min(m, n);
     nb     = magma_get_zgetrf_nb(m);
 
-        if (nb <= 1 || nb >= n) {
+    if (nb <= 1 || nb >= n) {
           /* Use CPU code. */
-          work = (cuDoubleComplex*)malloc(m * n * sizeof(cuDoubleComplex));
+          magma_zmalloc_cpu( &work, m * n );
+          if ( work == NULL ) {
+              *info = MAGMA_ERR_HOST_ALLOC;
+              return *info;
+          }
           magma_zgetmatrix( m, n, d_lA[0], ldda, work, m );
           lapackf77_zgetrf(&m, &n, work, &m, ipiv, info);
           magma_zsetmatrix( m, n, work, m, d_lA[0], ldda );

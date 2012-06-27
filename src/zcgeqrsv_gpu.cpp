@@ -228,16 +228,15 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     lhwork = nb*max((M-N+nb+2*(NRHS)), 1);
     lhwork = max(lhwork, N*nb); /* We hope that magma nb is bigger than lapack nb to have enough memory in workspace */
     size = minmn + lhwork;
-    hworks = (cuFloatComplex*) malloc( size * sizeof(cuFloatComplex) );
-    if( hworks == NULL ) {
+    magma_cmalloc_cpu( &hworks, size );
+    if ( hworks == NULL ) {
         magma_free( dworks );
         magma_free( dworkd );
         fprintf(stderr, "Allocation of hworks failed\n");
         *info = MAGMA_ERR_HOST_ALLOC;
         return *info;
     }
-    stau = hworks;
-    hworks += minmn;
+    stau = hworks + lhwork;
 
     eps  = lapackf77_dlamch("Epsilon");
     Anrm = magmablas_zlange('I', M, N, dA, ldda, (double*)dworkd );
@@ -299,7 +298,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     /* Free workspaces */
     magma_free( dworks );
     magma_free( dworkd );
-    free(stau);
+    free( hworks );
     return *info;
 
   L10:
@@ -356,7 +355,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
         /* Free workspaces */
         magma_free( dworks );
         magma_free( dworkd );
-        free(stau);
+        free( hworks );
         return *info;
       L20:
         iiter++;
@@ -389,17 +388,20 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     dT  = tau + minmn;
 
     /* hworks(stau + workspace for cgeqrs) = min(M,N) + lhworks */
-    if ( (2*lhwork) > (minmn+lhwork) ) {
-        free(stau);
-        hworks = (cuFloatComplex*) malloc( lhwork * sizeof(cuDoubleComplex) );
-        if( hworks == NULL ) {
+    /* re-use hworks memory for hworkd if possible, else re-allocate. */
+    if ( (2*lhwork) <= (minmn+lhwork) ) {
+        hworkd = (cuDoubleComplex*) hworks;
+    }
+    else {
+        free( hworks );
+        magma_zmalloc_cpu( &hworkd, lhwork );
+        if ( hworkd == NULL ) {
             magma_free( dworkd );
             fprintf(stderr, "Allocation of hworkd2 failed\n");
             *info = MAGMA_ERR_HOST_ALLOC;
             return *info;
         }
     }
-    hworkd = (cuDoubleComplex*) hworks;
 
     /* Single-precision iterative refinement failed to converge to a
        satisfactory solution, so we resort to double precision.           */
@@ -410,7 +412,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     }
     
     magma_free( dworkd );
-    free(hworkd);
+    free( hworkd );
     return *info;
 }
 

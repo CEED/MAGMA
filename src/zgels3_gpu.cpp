@@ -130,8 +130,8 @@ magma_zgels3_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
         return *info;
     }
     
-    tau = (cuDoubleComplex*) malloc( k * sizeof(cuDoubleComplex) );
-    if( tau == NULL ) {
+    magma_zmalloc_cpu( &tau, k );
+    if ( tau == NULL ) {
         magma_free( dT );
         *info = MAGMA_ERR_HOST_ALLOC;
         return *info;

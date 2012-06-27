@@ -10,6 +10,8 @@
 */
 #include "common_magma.h"
 
+#include <assert.h>
+
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
@@ -185,10 +187,12 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
         return 0;
     }
 
-    cuDoubleComplex *f = (cuDoubleComplex *)malloc(max(n,m)*sizeof(cuDoubleComplex ));
+    cuDoubleComplex *f;
     cudaStream_t stream;
     magma_queue_create( &stream );
-
+    magma_zmalloc_cpu( &f, max(n,m) );
+    assert( f != NULL );  // TODO return error, or allocate outside zlatrd
+    
     if (m >= n) {
 
         /* Reduce to upper bidiagonal form */

@@ -107,7 +107,11 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
 
     if (nb <= 1 || nb >= min(m,n)) {
         /* Use CPU code. */
-        work = (cuDoubleComplex*)malloc(m * n * sizeof(cuDoubleComplex));
+        magma_zmalloc_cpu( &work, m * n );
+        if ( work == NULL ) {
+            *info = MAGMA_ERR_HOST_ALLOC;
+            return *info;
+        }
         magma_zgetmatrix( m, n, dA, ldda, work, m );
         magma_zgetrf_nopiv(&m, &n, work, &m, info);
         magma_zsetmatrix( m, n, work, m, dA, ldda );

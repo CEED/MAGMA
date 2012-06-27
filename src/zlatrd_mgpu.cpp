@@ -14,7 +14,8 @@
 #include "common_magma.h"
 #include "trace.h"
 
-#include <cblas.h> 
+#include <cblas.h>
+#include <assert.h>
 
 #define PRECISION_z
 
@@ -256,13 +257,15 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
     magma_int_t i_n, i_1, iw;
   
     cuDoubleComplex alpha;
-
-    cuDoubleComplex *f = (cuDoubleComplex *)malloc(n*sizeof(cuDoubleComplex ));
+    cuDoubleComplex *f;
 
     if (n <= 0) {
       return 0;
     }
 
+    magma_zmalloc_cpu( &f, n );
+    assert( f != NULL );  // TODO return error, or allocate outside zlatrd
+    
     /*cudaStream_t stream[4][10];
     for( id=0; id<num_gpus; id++ ) {
         magma_setdevice(id);
