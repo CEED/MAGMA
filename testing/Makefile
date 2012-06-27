@@ -26,6 +26,7 @@ ZSRC := \
 	testing_zgelqf.cpp 	\
         testing_zgeqp3.cpp      \
         testing_dgeqp3.cpp      \
+	testing_zungqr.cpp	\
 	\
 	testing_zpotrf_gpu.cpp 	\
 	testing_zpotri_gpu.cpp 	\

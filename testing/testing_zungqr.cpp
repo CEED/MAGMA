@@ -6,7 +6,7 @@
        November 2011
 
        @precisions normal z -> s d c
-       
+
        @author Stan Tomov
        @author Mathieu Faverge
        @author Mark Gates
@@ -28,9 +28,9 @@
 #include "testings.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing zungqr_gpu
+   -- Testing zungqr
 */
-int main( int argc, char** argv)
+int main( int argc, char** argv )
 {
     TESTING_CUDA_INIT();
 
@@ -153,19 +153,17 @@ int main( int argc, char** argv)
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-        magma_zsetmatrix(  m, n, hA, lda, dA, ldda );
+        magma_zsetmatrix( m, n, hA, lda, dA, ldda );
         magma_zgeqrf_gpu( m, n, dA, ldda, tau, dT, &info );
         if ( info != 0 )
             printf("magma_zgeqrf_gpu return error %d\n", info );
+        magma_zgetmatrix( m, n, dA, ldda, hR, lda );
         
         gpu_time = magma_wtime();
-        magma_zungqr_gpu( m, n, k, dA, ldda, tau, dT, nb, &info );
+        magma_zungqr( m, n, k, hR, lda, tau, dT, nb, &info );
         gpu_time = magma_wtime() - gpu_time;
         if ( info != 0 )
             printf("magma_zungqr_gpu return error %d\n", info );
-        
-        // Get dA back to the CPU to compare with the CPU result.
-        magma_zgetmatrix( m, n, dA, ldda, hR, lda );
         
         gpu_perf = gflops / gpu_time;
         
@@ -186,7 +184,7 @@ int main( int argc, char** argv)
                 printf("lapackf77_zungqr return error %d\n", info );
             
             cpu_perf = gflops / cpu_time;
-    
+
             // compute relative error |R|/|A| := |Q_magma - Q_lapack|/|A|
             blasf77_zaxpy( &n2, &c_neg_one, hA, &ione, hR, &ione );
             error = lapackf77_zlange("f", &m, &n, hR, &lda, work) / error;
