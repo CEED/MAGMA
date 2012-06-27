@@ -566,6 +566,7 @@ subs = {
     ('SGEMV',          'DGEMV',          'CGEMV',          'ZGEMV'           ),
     ('SSCAL',          'DSCAL',          'CSCAL',          'ZSCAL'           ),
     ('SSCAL',          'DSCAL',          'CSSCAL',         'ZDSCAL'          ),
+    ('SSCAL',          'DSCAL',          'SSCAL',          'DSCAL'           ),  # ZDSCAL -> CSSCAL
     ('SSWAP',          'DSWAP',          'CSWAP',          'ZSWAP'           ),
     ('SSYMM',          'DSYMM',          'CSYMM',          'ZSYMM'           ),
     ('SSYMV',          'DSYMV',          'CSYMV',          'ZSYMV'           ),

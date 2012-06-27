@@ -127,7 +127,7 @@ typedef double real_Double_t;
 
 #define MAGMA_C_SET2REAL(v, t)    {(v).x = (t); (v).y = 0.0;}
 #define MAGMA_C_EQUAL(u,v)        (((u).x == (v).x) && ((u).y == (v).y))
-#define MAGMA_C_DSCALE(v, t, s)   {(v).x = (t).x/(s); (v).y = (t).y/(s);}
+#define MAGMA_C_SSCALE(v, t, s)   {(v).x = (t).x/(s); (v).y = (t).y/(s);}
 #define MAGMA_C_MAKE(r, i)        make_cuFloatComplex((r), (i))
 #define MAGMA_C_REAL(a)           cuCrealf(a)
 #define MAGMA_C_IMAG(a)           cuCimagf(a)
@@ -167,7 +167,7 @@ typedef double real_Double_t;
 #define MAGMA_S_SET2REAL(v, t)    (v) = (t)
 #define MAGMA_S_OP_NEG_ASGN(t, z) (t) = -(z)
 #define MAGMA_S_EQUAL(u,v)        ((u) == (v))
-#define MAGMA_S_DSCALE(v, t, s)   (v) = (t)/(s)
+#define MAGMA_S_SSCALE(v, t, s)   (v) = (t)/(s)
 #define MAGMA_S_MAKE(r, i)        (r)
 #define MAGMA_S_REAL(a)           (a)
 #define MAGMA_S_IMAG(a)           (a)
