@@ -141,7 +141,7 @@ int main( int argc, char** argv)
         }
 
         start = get_current_time();
-        magma_dgeqp3(&M, &N, h_R, &lda, jpvt, tau, h_work, &lwork, &info);
+        magma_dgeqp3(M, N, h_R, lda, jpvt, tau, h_work, lwork, &info);
         end = get_current_time();
         if (info < 0)
             printf("Argument %d of magma_dgeqp3 had an illegal value.\n", -info);

@@ -142,7 +142,7 @@ int main( int argc, char** argv)
             jpvt[j] = 0 ;
 
         start = get_current_time();
-        magma_zgeqp3(&M, &N, h_R, &lda, jpvt, tau, h_work, &lwork, rwork, &info);
+        magma_zgeqp3(M, N, h_R, lda, jpvt, tau, h_work, lwork, rwork, &info);
         end = get_current_time();
         if (info < 0)
             printf("Argument %d of magma_zgeqp3 had an illegal value.\n", -info);
