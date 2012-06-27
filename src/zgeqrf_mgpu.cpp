@@ -136,7 +136,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
         n_local[i] += n%nb;
     }
 
-    if (MAGMA_SUCCESS != magma_zmalloc_host( &local_work, lwork )) {
+    if (MAGMA_SUCCESS != magma_zmalloc_pinned( &local_work, lwork )) {
       *info = -9;
       for(i=0; i<num_gpus; i++){
         #ifdef  MultiGPUs
@@ -358,7 +358,7 @@ magma_zgeqrf2_mgpu( int num_gpus, magma_int_t m, magma_int_t n,
     }
 
     magma_setdevice(cdevice);
-    magma_free_host( local_work );
+    magma_free_pinned( local_work );
 
     return *info;
 } /* magma_zgeqrf2_mgpu */

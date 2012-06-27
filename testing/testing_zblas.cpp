@@ -62,10 +62,10 @@ int main( int argc, char** argv )
     size = maxn*maxn;
     piv = (magma_int_t*) malloc( maxn * sizeof(magma_int_t) );
     assert( piv != NULL );
-    err = magma_zmalloc_host( &A , size );  assert( err == 0 );
-    err = magma_zmalloc_host( &B , size );  assert( err == 0 );
-    err = magma_zmalloc_host( &C , size );  assert( err == 0 );
-    err = magma_zmalloc_host( &C2, size );  assert( err == 0 );
+    err = magma_zmalloc_pinned( &A , size );  assert( err == 0 );
+    err = magma_zmalloc_pinned( &B , size );  assert( err == 0 );
+    err = magma_zmalloc_pinned( &C , size );  assert( err == 0 );
+    err = magma_zmalloc_pinned( &C2, size );  assert( err == 0 );
     err = magma_zmalloc( &dA,  size );      assert( err == 0 );
     err = magma_zmalloc( &dB,  size );      assert( err == 0 );
     err = magma_zmalloc( &dC1, size );      assert( err == 0 );
@@ -303,10 +303,10 @@ int main( int argc, char** argv )
     }}}}
     
     // cleanup
-    magma_free_host( A  );
-    magma_free_host( B  );
-    magma_free_host( C  );
-    magma_free_host( C2 );
+    magma_free_pinned( A  );
+    magma_free_pinned( B  );
+    magma_free_pinned( C  );
+    magma_free_pinned( C2 );
     magma_free( dA  );
     magma_free( dB  );
     magma_free( dC1 );

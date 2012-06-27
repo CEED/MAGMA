@@ -257,7 +257,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
 
       for( kk=0; kk<k; kk++ ) magma_queue_create( &stream[did][kk] );
     }
-    if (MAGMA_SUCCESS != magma_zmalloc_host( &hwork, k*num_gpus*n )) {
+    if (MAGMA_SUCCESS != magma_zmalloc_pinned( &hwork, k*num_gpus*n )) {
       for( i=0; i<num_gpus; i++ ) {
         magma_setdevice(i);
         magma_free( da[i] );
@@ -471,7 +471,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
       magma_free( dy[did] );
       magma_free( dwork2[did] );
     }
-    magma_free_host( hwork );
+    magma_free_pinned( hwork );
     MAGMA_Z_SET2REAL( work[0], lwkopt );
 
 #ifdef PROFILE_SY2RK

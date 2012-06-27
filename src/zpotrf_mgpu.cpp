@@ -114,7 +114,7 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
     }
     nb = magma_get_zpotrf_nb(n);
 
-    if (MAGMA_SUCCESS != magma_zmalloc_host( &work, n*nb )) {
+    if (MAGMA_SUCCESS != magma_zmalloc_pinned( &work, n*nb )) {
         *info = MAGMA_ERR_HOST_ALLOC;
         return *info;
     }
@@ -455,7 +455,7 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
     } /* end of not lapack */
 
         /* free workspace */
-        magma_free_host( work );
+        magma_free_pinned( work );
 
         return *info;
 } /* magma_zpotrf_mgpu */

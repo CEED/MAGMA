@@ -57,7 +57,7 @@ magma_ztsqrt_gpu(int *m, int *n,
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
             Higher performance is achieved if WORK is in pinned memory, e.g.
-            allocated using magma_malloc_host.
+            allocated using magma_malloc_pinned.
 
     LWORK   (input) INTEGER   
             The dimension of the array WORK.  LWORK >= (M+N+NB)*NB,   

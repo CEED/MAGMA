@@ -102,7 +102,7 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
             factorization A = U**H * U or A = L * L**H.   
 
             Higher performance is achieved if A is in pinned memory, e.g.
-            allocated using magma_malloc_host.
+            allocated using magma_malloc_pinned.
 
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,N).   
@@ -204,7 +204,7 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
 #endif
     magma_setdevice(0);
     ldwrk = n;
-    if (MAGMA_SUCCESS != magma_zmalloc_host( &work, ldwrk*nb )) {
+    if (MAGMA_SUCCESS != magma_zmalloc_pinned( &work, ldwrk*nb )) {
       *info = MAGMA_ERR_HOST_ALLOC;
       return *info;
     }
@@ -448,7 +448,7 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
         magma_queue_destroy( stream[d][2] );
     }
     magma_setdevice(0);
-    magma_free_host( work );
+    magma_free_pinned( work );
 
 #ifdef  ROW_MAJOR_PROFILE
     printf("\n n=%d NB=%d nb=%d\n",n,NB,nb);

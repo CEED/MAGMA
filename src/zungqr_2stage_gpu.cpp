@@ -135,7 +135,7 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     //if (kk < n)
     //  lwork = max(lwork, n * nb + (m-kk)*(n-kk));
 
-    //if (MAGMA_SUCCESS != magma_zmalloc_host( &work, (lwork) )) {
+    //if (MAGMA_SUCCESS != magma_zmalloc_pinned( &work, (lwork) )) {
     //    *info = MAGMA_ERR_HOST_ALLOC;
     //    return *info;
     //}
@@ -216,7 +216,7 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 
 
     magma_free( dwork );
-    //magma_free_host( work );
+    //magma_free_pinned( work );
     //magma_queue_destroy( stream[0] );
     //magma_queue_destroy( stream[1] );
 

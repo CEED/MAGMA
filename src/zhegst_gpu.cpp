@@ -125,7 +125,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
   lda = nb;
   ldb = nb;
   
-  if (MAGMA_SUCCESS != magma_zmalloc_host( &w, 2*nb*nb )) {
+  if (MAGMA_SUCCESS != magma_zmalloc_pinned( &w, 2*nb*nb )) {
     *info = MAGMA_ERR_DEVICE_ALLOC;
     return *info;
   }
@@ -428,7 +428,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
   magma_queue_destroy( stream[1] ); 
   magma_queue_destroy( stream[2] );
   
-  magma_free_host( w );
+  magma_free_pinned( w );
   
   return *info;
 } /* magma_zhegst_gpu */

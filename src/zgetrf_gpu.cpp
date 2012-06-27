@@ -143,7 +143,7 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
             magmablas_ztranspose2( dAT, lddat, dA, ldda, m, n );
         }
 
-        if (MAGMA_SUCCESS != magma_zmalloc_host( &work, maxm*nb )) {
+        if (MAGMA_SUCCESS != magma_zmalloc_pinned( &work, maxm*nb )) {
             magma_free( dAP );
             if (! ((m == n) && (m % 32 == 0) && (ldda%32 == 0)) )
                 magma_free( dAT );
@@ -244,7 +244,7 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
         }
 
         magma_free( dAP );
-        magma_free_host( work );
+        magma_free_pinned( work );
     }
     return *info;
 

@@ -124,7 +124,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
 
         nb = magma_get_zpotrf_nb(n);
         
-        if (MAGMA_SUCCESS != magma_zmalloc_host( &work, nb*nb )) {
+        if (MAGMA_SUCCESS != magma_zmalloc_pinned( &work, nb*nb )) {
                 *info = MAGMA_ERR_HOST_ALLOC;
                 return *info;
         }
@@ -227,7 +227,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
         magma_queue_destroy( stream[0] );
         magma_queue_destroy( stream[1] );
 
-        magma_free_host( work );
+        magma_free_pinned( work );
 
         return *info;
 }

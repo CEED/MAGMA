@@ -146,7 +146,7 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
     lwork  = (m + n + nb)*nb;
     lhwork = lwork - m*nb;
 
-    if (MAGMA_SUCCESS != magma_zmalloc_host( &work, lwork )) {
+    if (MAGMA_SUCCESS != magma_zmalloc_pinned( &work, lwork )) {
         *info = MAGMA_ERR_HOST_ALLOC;
         return *info;
     }
@@ -239,7 +239,7 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
 
     magma_queue_destroy( stream[0] );
     magma_queue_destroy( stream[1] );
-    magma_free_host( work );
+    magma_free_pinned( work );
     return *info;
 
 /*     End of MAGMA_ZGEQRF */

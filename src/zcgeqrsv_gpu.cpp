@@ -129,7 +129,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
 
     H_WORK  (workspace/output) REAL array, dimension (MAX(1,LWORK))   
             Higher performance is achieved if H_WORK is in pinned memory, e.g.
-            allocated using magma_malloc_host.
+            allocated using magma_malloc_pinned.
 
     D_WORK  (workspace/output)  REAL array on the GPU, dimension 2*N*NB,
             where NB can be obtained through magma_get_sgeqrf_nb(M).
@@ -150,7 +150,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
             This memory is unattached if the iterative refinement worked, 
             otherwise it is used as workspace to factor the matrix in
             double precision. Higher performance is achieved if H_WORK_D is 
-            in pinned memory, e.g. allocated using magma_malloc_host. 
+            in pinned memory, e.g. allocated using magma_malloc_pinned. 
 
     D_WORK_D (workspace/output) DOUBLE REAL array on the GPU, dimension 2*N*NB,
             where NB can be obtained through magma_get_dgeqrf_nb(M).

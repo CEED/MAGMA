@@ -270,7 +270,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
         //magma_zmalloc( &dy[id], k*n );
         for( kk=0; kk<k; kk++ ) magma_queue_create( &stream[id][kk] );
     }*/
-    //magma_zmalloc_host( &work, k*num_gpus*n );
+    //magma_zmalloc_pinned( &work, k*num_gpus*n );
 
     if (lapackf77_lsame(uplo_, "U")) {
 
@@ -563,7 +563,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
     }
 
     free(f);
-    //magma_free_host( work );
+    //magma_free_pinned( work );
 
     return mv_time;
 } /* zlatrd_ */
@@ -594,7 +594,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
         int ii, jj;
         cuDoubleComplex *a;
         magma_setdevice(0);
-        magma_zmalloc_host( &a, (n + offset)*ldda );
+        magma_zmalloc_pinned( &a, (n + offset)*ldda );
         magma_zgetmatrix( n+offset, n+offset, da[0], ldda, a, ldda );
         for( ii=0; ii<n+offset; ii++ ) {
             for( jj=0; jj<n+offset; jj++ ) printf( "%.16e ",a[ii+jj*ldda] );
@@ -604,7 +604,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
         magma_zgetmatrix( n+offset, 1, dx[0], ldda, a, ldda );
         for( ii=0; ii<n+offset; ii++ ) printf( "%.16e\n",a[ii] );
         printf( "\n" );
-        magma_free_host( a );
+        magma_free_pinned( a );
     }*/
     for( id=0; id<num_gpus; id++ ) {
         magma_setdevice(id);
@@ -643,14 +643,14 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
         int ii, jj;
         cuDoubleComplex *a;
         magma_setdevice(0);
-        magma_zmalloc_host( &a, (offset + n)*ldda );
+        magma_zmalloc_pinned( &a, (offset + n)*ldda );
         printf( ">>>\n" );
         magma_zgetmatrix( (offset+n), 1, dy[0], ldda, a, ldda );
         //for( ii=0; ii<offset+n; ii++ ) printf( "%d: %e\n",ii,a[ii] );
         for( ii=offset; ii<offset+n; ii++ ) printf( "%.16e\n",ii,a[ii] );
         printf( ">>>\n" );
         printf( "\n" );
-        magma_free_host( a );
+        magma_free_pinned( a );
     }*/
 
     /* send to CPU */

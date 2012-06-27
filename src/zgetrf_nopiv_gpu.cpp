@@ -120,7 +120,7 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
 
         lddwork = maxm;
 
-        if (MAGMA_SUCCESS != magma_zmalloc_host( &work, maxm*nb )) {
+        if (MAGMA_SUCCESS != magma_zmalloc_pinned( &work, maxm*nb )) {
             *info = MAGMA_ERR_HOST_ALLOC;
             return *info;
         }
@@ -198,7 +198,7 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
                      c_one, inA(s,s),     ldda, 
                             inA(s,s)+nb0, ldda);
 
-        magma_free_host( work );
+        magma_free_pinned( work );
     }
 
     return *info;

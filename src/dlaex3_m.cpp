@@ -293,18 +293,18 @@ magma_dlaex3_m(magma_int_t nrgpu,
     if (n1 >= magma_get_dlaex3_m_k()){
         for (igpu = 0; igpu < nrgpu; ++igpu){
 #ifdef CHECK_CPU
-            magma_malloc_host( &(hwS[0][igpu]), n2*nb, sizeof(double) );
-            magma_malloc_host( &(hwS[1][igpu]), n2*nb, sizeof(double) );
-            magma_malloc_host( &(hwQ2[igpu]), n2*n2_loc, sizeof(double) );
-            magma_malloc_host( &(hwQ[0][igpu]), n2_loc*nb, sizeof(double) );
-            magma_malloc_host( &(hwQ[1][igpu]), n2_loc*nb, sizeof(double) );
+            magma_dmalloc_pinned( &(hwS[0][igpu]), n2*nb );
+            magma_dmalloc_pinned( &(hwS[1][igpu]), n2*nb );
+            magma_dmalloc_pinned( &(hwQ2[igpu]), n2*n2_loc );
+            magma_dmalloc_pinned( &(hwQ[0][igpu]), n2_loc*nb );
+            magma_dmalloc_pinned( &(hwQ[1][igpu]), n2_loc*nb );
 #endif
 /*            magma_setdevice(igpu);
-            magma_malloc( &(dwS[0][igpu]), n2*nb, sizeof(double) );
-            magma_malloc( &(dwS[1][igpu]), n2*nb, sizeof(double) );
-            magma_malloc( &(dwQ2[igpu]), n2*n2_loc, sizeof(double) );
-            magma_malloc( &(dwQ[0][igpu]), n2_loc*nb, sizeof(double) );
-            magma_malloc( &(dwQ[1][igpu]), n2_loc*nb, sizeof(double) );
+            magma_dmalloc( &(dwS[0][igpu]), n2*nb );
+            magma_dmalloc( &(dwS[1][igpu]), n2*nb );
+            magma_dmalloc( &(dwQ2[igpu]), n2*n2_loc );
+            magma_dmalloc( &(dwQ[0][igpu]), n2_loc*nb );
+            magma_dmalloc( &(dwQ[1][igpu]), n2_loc*nb );
 */        }
         for (igpu = 0; igpu < nrgpu-1; igpu += 2){
             ni_loc[igpu] = min(n1_loc, n1 - igpu/2 * n1_loc);
@@ -577,11 +577,11 @@ magma_dlaex3_m(magma_int_t nrgpu,
             }
             for (igpu = 0; igpu < nrgpu; ++igpu){
 #ifdef CHECK_CPU
-                magma_free_host( hwS[1][igpu] );
-                magma_free_host( hwS[0][igpu] );
-                magma_free_host( hwQ2[igpu] );
-                magma_free_host( hwQ[1][igpu] );
-                magma_free_host( hwQ[0][igpu] );
+                magma_free_pinned( hwS[1][igpu] );
+                magma_free_pinned( hwS[0][igpu] );
+                magma_free_pinned( hwQ2[igpu] );
+                magma_free_pinned( hwQ[1][igpu] );
+                magma_free_pinned( hwQ[0][igpu] );
 #endif
                 magma_setdevice(igpu);
                 magmablasSetKernelStream(NULL);

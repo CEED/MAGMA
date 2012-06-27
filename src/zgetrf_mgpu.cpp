@@ -195,7 +195,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
 
           /* cpu workspace */
           lddwork = maxm;
-          if (MAGMA_SUCCESS != magma_zmalloc_host( &work, lddwork*nb )) {
+          if (MAGMA_SUCCESS != magma_zmalloc_pinned( &work, lddwork*nb )) {
               for(i=0; i<num_gpus; i++ ) {
                   magma_setdevice(i);
                   magma_free( d_lAP[i]   );
@@ -421,7 +421,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
               magma_queue_destroy( streaml[d][0] );
               magma_queue_destroy( streaml[d][1] );
           } /* end of for d=1,..,num_gpus */
-          magma_free_host( work );
+          magma_free_pinned( work );
         }
         
         return *info;       

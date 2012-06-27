@@ -12,6 +12,7 @@
 #include <stdio.h>
 
 #include "magma.h"
+#include "error.h"
 
 #ifdef HAVE_CUBLAS
 
@@ -32,8 +33,25 @@ magma_err_t magma_malloc( magma_devptr* ptrPtr, size_t size )
 extern "C"
 magma_err_t magma_free( magma_devptr ptr )
 {
-    if ( cudaSuccess != cudaFree( ptr )) {
+    cudaError_t err = cudaFree( ptr );
+    check_error( err );
+    if ( err != cudaSuccess ) {
         return MAGMA_ERR_INVALID_PTR;
+    }
+    return MAGMA_SUCCESS;
+}
+
+// --------------------
+// Allocate size bytes on CPU, returning pointer in ptrPtr.
+// The purpose of using this instead of malloc() is to properly align arrays
+// for vector (SSE) instructions.
+// This memory can be freed by free().
+extern "C"
+magma_err_t magma_malloc_cpu( void** ptrPtr, size_t size )
+{
+    *ptrPtr = malloc( size );
+    if ( ptrPtr == NULL ) {
+        return MAGMA_ERR_HOST_ALLOC;
     }
     return MAGMA_SUCCESS;
 }
@@ -41,7 +59,7 @@ magma_err_t magma_free( magma_devptr ptr )
 // --------------------
 // Allocate size bytes on CPU in pinned memory, returning pointer in ptrPtr.
 extern "C"
-magma_err_t magma_malloc_host( void** ptrPtr, size_t size )
+magma_err_t magma_malloc_pinned( void** ptrPtr, size_t size )
 {
     if ( cudaSuccess != cudaMallocHost( ptrPtr, size )) {
         return MAGMA_ERR_HOST_ALLOC;
@@ -50,11 +68,13 @@ magma_err_t magma_malloc_host( void** ptrPtr, size_t size )
 }
 
 // --------------------
-// Free CPU pinned memory previously allocated by magma_malloc_host.
+// Free CPU pinned memory previously allocated by magma_malloc_pinned.
 extern "C"
-magma_err_t magma_free_host( void* ptr )
+magma_err_t magma_free_pinned( void* ptr )
 {
-    if ( cudaSuccess != cudaFreeHost( ptr )) {
+    cudaError_t err = cudaFreeHost( ptr );
+    check_error( err );
+    if ( cudaSuccess != err ) {
         return MAGMA_ERR_INVALID_PTR;
     }
     return MAGMA_SUCCESS;
