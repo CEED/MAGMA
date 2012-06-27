@@ -32,9 +32,6 @@ int magma_get_zgebrd_nb(int m);
 int magma_get_zhegst_nb(int m);
 int magma_get_zgesvd_nb(int m);
 
-void zpanel_to_q(char uplo, int ib, cuDoubleComplex *a, int lda, cuDoubleComplex *work);
-void zq_to_panel(char uplo, int ib, cuDoubleComplex *a, int lda, cuDoubleComplex *work);
-
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA function definitions / Data on CPU
 */
