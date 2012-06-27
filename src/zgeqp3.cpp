@@ -14,9 +14,9 @@
  
 
 extern "C" magma_int_t 
-magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a, 
-             magma_int_t *lda, magma_int_t *jpvt, cuDoubleComplex *tau,
-             cuDoubleComplex *work, magma_int_t *lwork, double *rwork, 
+magma_zgeqp3(magma_int_t m_, magma_int_t n_, cuDoubleComplex *a, 
+             magma_int_t lda_, magma_int_t *jpvt, cuDoubleComplex *tau,
+             cuDoubleComplex *work, magma_int_t lwork_, double *rwork, 
              magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -94,6 +94,11 @@ magma_zgeqp3(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
 
 #define  A(i, j) (a    +(j)*(*lda) + (i))
 #define dA(i, j) (dwork+(j)* ldda  + (i))
+
+    magma_int_t *m     = &m_;
+    magma_int_t *n     = &n_;
+    magma_int_t *lda   = &lda_;
+    magma_int_t *lwork = &lwork_;
 
     cuDoubleComplex   *dwork, *df;
 
