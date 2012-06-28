@@ -32,8 +32,15 @@ Included are routines for the following algorithms:
     * Fix uppercase entries in blas/lapack headers
     * Use magma_int_t in blas/lapack headers, and fix sources accordingly
     * Fix magma_is_devptr error handling
+    * Add magma_malloc_cpu to allocate CPU memory aligned to 32-byte boundary
+      for performance and reproducibility
+    * Fix memory leaks in latrd* and zcgeqrsv_gpu
     * Remove dependency on CUDA device driver
     * Add QR with pivoting in CPU interface (functions [zcsd]geqp3)
+    * Add hegst/sygst Fortran interface
+    * Improve performance of gesv CPU interface by 30%
+    * Improve performance of ungqr/orgqr CPU and GPU interfaces by 30%;
+      more for small matrices
 
  1.2.0
     * Fix bugs in [zcsd]hegst[_gpu].cpp
