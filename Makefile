@@ -28,7 +28,7 @@ lapacktest:
 	( cd testing/matgen && $(MAKE) )
 	( cd testing/lin    && $(MAKE) )
 
-test:
+test: lib
 	( cd testing        && $(MAKE) )
 
 clean:
