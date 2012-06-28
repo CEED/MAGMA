@@ -50,25 +50,25 @@
 
 
 #define TESTING_MALLOC( ptr, type, size )                                  \
-    ptr = (type*) malloc((size) * sizeof(type));                           \
-    if ( ptr == 0 ) {                                                      \
-        fprintf( stderr, "!!!! Malloc failed for: %s\n", #ptr );           \
+    if ( MAGMA_SUCCESS !=                                                  \
+            magma_malloc_cpu( (void**) &ptr, (size)*sizeof(type) )) {      \
+        fprintf( stderr, "!!!! malloc failed for: %s\n", #ptr );           \
         exit(-1);                                                          \
     }
 
 
-#define TESTING_HOSTALLOC( ptr, type, size )                               \
-    if ( cudaSuccess !=                                                    \
-         cudaMallocHost( (void**)&ptr, (size)*sizeof(type) )) {            \
-        fprintf( stderr, "!!!! cudaMallocHost failed for: %s\n", #ptr );   \
-        exit(-1);                                                          \
+#define TESTING_HOSTALLOC( ptr, type, size )                                  \
+    if ( MAGMA_SUCCESS !=                                                     \
+            magma_malloc_pinned( (void**) &ptr, (size)*sizeof(type) )) {      \
+        fprintf( stderr, "!!!! magma_malloc_pinned failed for: %s\n", #ptr ); \
+        exit(-1);                                                             \
     }
 
 
 #define TESTING_DEVALLOC( ptr, type, size )                                \
-    if ( cudaSuccess !=                                                    \
-         cudaMalloc( (void**)&ptr, (size)*sizeof(type) ) ) {               \
-        fprintf( stderr, "!!!! cublasAlloc failed for: %s\n", #ptr );      \
+    if ( MAGMA_SUCCESS !=                                                  \
+            magma_malloc( (void**) &ptr, (size)*sizeof(type) )) {          \
+        fprintf( stderr, "!!!! magma_malloc failed for: %s\n", #ptr );     \
         exit(-1);                                                          \
     }
 
@@ -78,10 +78,10 @@
 
 
 #define TESTING_HOSTFREE(ptr)                                              \
-    cudaFreeHost( ptr );
+    magma_free_pinned( ptr );
 
 
 #define TESTING_DEVFREE(ptr)                                               \
-    cudaFree( ptr );
+    magma_free( ptr );
 
 #endif /* TESTINGS_H */
