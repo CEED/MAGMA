@@ -21,7 +21,6 @@ my @files2delete = qw(
     tools
     quark
     docs
-    include/Makefile
     make.inc.cumin
     make.inc.disco
     make.inc.ig
@@ -29,6 +28,9 @@ my @files2delete = qw(
     Release-ToDo.txt
     Release-ToDo-1.1.txt
     BugsToFix.txt
+    
+    control/sizeptr
+    include/Makefile
     src/zgeqrf_mc.cpp
     src/zgeqrf-v2.cpp
     src/zgeqrf-v3.cpp
@@ -38,7 +40,6 @@ my @files2delete = qw(
     src/zlatrd_mgpu.cpp
     src/zhetrd_bhe2trc.cpp
     src/obsolete
-    
     magmablas/obsolete
     testing/fortran2.cpp
     testing/*.txt
