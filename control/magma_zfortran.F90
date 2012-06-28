@@ -126,6 +126,17 @@ module magma_zfortran
        integer       :: info
      end subroutine magmaf_zgetrf
 
+     subroutine magmaf_zhegst( itype, uplo, n, A, lda, B, ldb, info)
+       integer       :: itype
+       character     :: uplo
+       integer       :: n
+       complex*16    :: A(*)
+       integer       :: lda
+       complex*16    :: B(*)
+       integer       :: ldb
+       integer       :: info
+     end subroutine magmaf_zhegst
+
      subroutine magmaf_zposv(  uplo, n, nrhs, dA, ldda, dB, lddb, info)
        character     :: uplo
        integer       :: n
@@ -448,6 +459,17 @@ module magma_zfortran
        integer       :: lddb
        integer       :: info
      end subroutine magmaf_zgetrs_gpu
+
+     subroutine magmaf_zhegst_gpu( itype, uplo, n, dA, ldda, dB, lddb, info)
+       integer       :: itype
+       character     :: uplo
+       integer       :: n
+       magma_devptr_t:: dA(*)
+       integer       :: ldda
+       magma_devptr_t:: dB(*)
+       integer       :: lddb
+       integer       :: info
+     end subroutine magmaf_zhegst_gpu
 
      subroutine magmaf_zlabrd_gpu( m, n, nb, a, lda, da, ldda, d, e, tauq, taup, x, ldx, dx, lddx, y, ldy, dy, lddy)
        integer       :: m
