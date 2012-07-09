@@ -178,10 +178,10 @@ magma_dsyevd_gpu(char jobz, char uplo,
     magma_int_t nb = magma_get_dsytrd_nb(n);
     
     if (wantz) {
-      lwmin = 2 *n + n*n;
+      lwmin  = 1 + 6*n + 2*n*n;
       liwmin = 5 * n + 3;
     } else {
-      lwmin = n * (nb + 1);
+      lwmin  = n * (nb + 1);
       liwmin = 1;
     }
 
