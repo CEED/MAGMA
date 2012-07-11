@@ -16,13 +16,17 @@ MACRO(FXT_INFO_INSTALL)
     # ----------------------
     IF(NOT DEFINED FXT_URL)
         SET(FXT_URL     "http://download.savannah.gnu.org/releases/fkt/fxt-0.2.5.tar.gz")
-        SET(FXT_MD5SUM  "0ea5a93ff69dbb94bb0b99714df4a004")
     ENDIF()
 
     # Define tarball of fxt
     # ---------------------
     IF(NOT DEFINED FXT_TARBALL)
         SET(FXT_TARBALL "fxt-0.2.5.tar.gz")
+    ENDIF()
+
+    # Define md5sum of fxt
+    # --------------------
+    IF(DEFINED FXT_URL OR DEFINED FXT_TARBALL)
         SET(FXT_MD5SUM  "0ea5a93ff69dbb94bb0b99714df4a004")
     ENDIF()
 
@@ -43,12 +47,15 @@ ENDMACRO(FXT_INFO_INSTALL)
 MACRO(FXT_INFO_FIND)
     # Define parameters for FIND_MY_PACKAGE
     # -------------------------------------
+    SET(FXT_type_library        "C"                               )
     SET(FXT_name_library        "fxt"                             )
     SET(FXT_name_pkgconfig      "fxt"                             )
     SET(FXT_name_include        "fxt.h"                           )
     SET(FXT_name_include_suffix "FXT_name_include_suffix-NOTFOUND")
     SET(FXT_name_fct_test       "fxt_infos"                       )
-    SET(FXT_name_binary         "fxt_print"                       )
+    SET(FXT_name_binary         "FXT_name_binary-NOTFOUND"        )
+    #SET(FXT_name_binary        "fxt_print"                       )
+
 ENDMACRO(FXT_INFO_FIND)
 
 ###

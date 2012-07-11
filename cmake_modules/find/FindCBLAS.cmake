@@ -52,7 +52,6 @@ CBLAS_INFO_FIND()
 
 # Search for the library
 FIND_MY_PACKAGE("CBLAS"
-                FALSE TRUE TRUE FALSE
                 TRUE FALSE)
 
 # Begin section - Looking for CBLAS

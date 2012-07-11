@@ -104,9 +104,9 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 # Add library
 # -----------
 ADD_LIBRARY(morse_starpu ${MORSE_SRCS})
-ADD_DEPENDENCIES(morse_starpu magma_mgpu)
 SET_PROPERTY(TARGET morse_starpu PROPERTY LINKER_LANGUAGE Fortran)
 
+ADD_DEPENDENCIES(morse_starpu magma_mgpu)
 ADD_DEPENDENCIES(morse_starpu morse_include)
 ADD_DEPENDENCIES(morse_starpu morse_common_include)
 ADD_DEPENDENCIES(morse_starpu morse_starpu_codelets)

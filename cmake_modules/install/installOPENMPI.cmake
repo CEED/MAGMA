@@ -12,7 +12,7 @@
 ###
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-INCLUDE(installPACKAGE)
+INCLUDE(installExternalPACKAGE)
 INCLUDE(downloadPACKAGE)
 INCLUDE(infoOPENMPI)
 
@@ -44,7 +44,7 @@ MACRO(INSTALL_OPENMPI _MODE)
     # ----------------------------
     # ----------------------------
     DEFINE_DOWNLOAD_PACKAGE("mpi" "${_MODE}")
-    INSTALL_PACKAGE("mpi" "${MPI_BUILD_MODE}")
+    INSTALL_EXTERNAL_PACKAGE("mpi" "${MPI_BUILD_MODE}")
 
     # Set linker flags
     # ----------------

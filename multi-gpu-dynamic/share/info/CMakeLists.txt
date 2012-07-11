@@ -19,6 +19,9 @@ INCLUDE(VersionMORSE)
 CONFIGURE_FILE("version.texi.in"
                "version.texi"
                @ONLY)
+CONFIGURE_FILE("morse.texi.in"
+               "morse.texi"
+               @ONLY)
 
 # Looking for makeinfo
 # --------------------
@@ -29,7 +32,7 @@ IF(MAKEINFO_COMPILER)
     ADD_CUSTOM_TARGET(info ALL 
                       COMMAND ${MAKEINFO_COMPILER} morse.texi)
     ADD_CUSTOM_TARGET(html ALL
-                      COMMAND ${MAKEINFO_COMPILER} --html --no-split morse.texi --css-include=morse.css)
+                      COMMAND ${MAKEINFO_COMPILER} --html --no-split morse.texi --css-include=${CMAKE_CURRENT_SOURCE_DIR}/morse.css)
 
     # Installation
     # ------------
@@ -47,7 +50,8 @@ FIND_PROGRAM(TEXI2DVI_COMPILER texi2dvi)
 IF(TEXI2DVI_COMPILER)
     # Add target
     # ----------
-    ADD_CUSTOM_TARGET(pdf ALL COMMAND ${TEXI2DVI_COMPILER} --pdf --batch morse.texi)
+    ADD_CUSTOM_TARGET(pdf ALL
+                      COMMAND ${TEXI2DVI_COMPILER} --pdf --batch morse.texi)
 
     # Installation
     # ------------

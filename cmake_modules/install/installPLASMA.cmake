@@ -14,7 +14,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 INCLUDE(definePACKAGE)
 INCLUDE(downloadPACKAGE)
-INCLUDE(installPACKAGE)
+INCLUDE(installExternalPACKAGE)
 INCLUDE(infoPLASMA)
 
 MACRO(INSTALL_PLASMA _MODE)
@@ -74,7 +74,7 @@ MACRO(INSTALL_PLASMA _MODE)
     # Install the external package
     # ----------------------------
     DEFINE_DOWNLOAD_PACKAGE("plasma" "${_MODE}")
-    INSTALL_PACKAGE("plasma" "${PLASMA_BUILD_MODE}")
+    INSTALL_EXTERNAL_PACKAGE("plasma" "${PLASMA_BUILD_MODE}")
 
     # Set linker flags
     # ----------------

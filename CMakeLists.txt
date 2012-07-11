@@ -42,10 +42,12 @@ PROJECT(MAGMA Fortran C CXX)
 # ----------------------------------------------
 SET(CMAKE_MODULE_PATH
     ${CMAKE_SOURCE_DIR}/cmake_modules
+    ${CMAKE_SOURCE_DIR}/cmake_modules/cmake-2.8-8
     ${CMAKE_SOURCE_DIR}/cmake_modules/info
     ${CMAKE_SOURCE_DIR}/cmake_modules/find
     ${CMAKE_SOURCE_DIR}/cmake_modules/install
-    ${CMAKE_SOURCE_DIR}/cmake_modules/generic)
+    ${CMAKE_SOURCE_DIR}/cmake_modules/generic
+   )
 
 # Set the version of this project
 # -------------------------------
@@ -82,7 +84,7 @@ SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${MAGMA_BINARY_DIR}/lib)
 # Set the build type
 # ------------------
 IF(NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE Release 
+    SET(CMAKE_BUILD_TYPE RelWithDebInfo
         CACHE STRING "Choose the type of build, options are None, Debug, Release, RelWithDebInfo and MinSizeRel." FORCE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
@@ -96,8 +98,6 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 # ------------
 OPTION(BUILD_SHARED_LIBS
        "Build shared libraries" OFF)
-OPTION(BUILD_64bits
-       "Build 64 bits mode" ON)
 
 # Versions of MAGMA which need to be compiled
 # -------------------------------------------
@@ -113,8 +113,8 @@ OPTION(MAGMA_USE_FERMI
 
 # MORSE options
 # -------------
-OPTION(MORSE_USE_MPI
-       "Enable/Disable distributed version of MORSE" OFF)
+#OPTION(MORSE_USE_MPI
+#       "Enable/Disable distributed version of MORSE" OFF)
 #OPTION(MORSE_USE_MULTICORE
 #  "Enable/Disable multi-threaded kernels in MORSE" OFF)
 #MARK_AS_ADVANCED(MORSE_USE_MULTICORE)
@@ -128,6 +128,9 @@ OPTION(MORSE_SCHED_QUARK
 # -------------
 OPTION(MORSE_SEPARATE_PROJECTS
        "Enable/disable the separation of different projects in the installation tree" OFF)
+
+OPTION(MORSE_DEBUG_CMAKE
+       "Enable/disable the verbosity of cmake step" OFF)
 
 #############################################
 #                                           #

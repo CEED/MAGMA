@@ -12,7 +12,7 @@
 ###
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-INCLUDE(installPACKAGE)
+INCLUDE(installExternalPACKAGE)
 INCLUDE(downloadPACKAGE)
 INCLUDE(infoFXT)
 
@@ -43,7 +43,7 @@ MACRO(INSTALL_FXT _MODE)
     # Install the external package
     # -----------------------------
     DEFINE_DOWNLOAD_PACKAGE("fxt" "${_MODE}")
-    INSTALL_PACKAGE("fxt" "${FXT_BUILD_MODE}")
+    INSTALL_EXTERNAL_PACKAGE("fxt" "${FXT_BUILD_MODE}")
 
     # Set linker flags
     # ----------------

@@ -48,6 +48,7 @@ ENDMACRO(REFBLAS_INFO_INSTALL)
 MACRO(REFBLAS_INFO_FIND)
     # Define parameters for FIND_MY_PACKAGE
     # -------------------------------------
+    SET(REFBLAS_type_library        "Fortran"                          )
     SET(REFBLAS_name_library        "BLAS_name_library-NOTFOUND"       )
     SET(REFBLAS_name_pkgconfig      "BLAS_name_pkgconfig-NOTFOUND"     )
     SET(REFBLAS_name_include        "BLAS_name_include-NOTFOUND"       )

@@ -20,7 +20,7 @@ INCLUDE(RulesPrecisions)
 SET(MAGMA_CTRL_GENERATED "")
 SET(MAGMA_CTRLF_GENERATED "")
 SET(ZSRCF "")
-SET(ZSRC 
+SET(ZSRC
          ../control/zprint.cpp
          ../control/zpanel_to_q.cpp
          ../interface_cuda/blas_z.cpp
@@ -30,7 +30,7 @@ IF(HAVE_PGI)
     SET(ZSRC ${ZSRC}
              ../control/magma_zf77pgi.cpp
              )
-ELSE() 
+ELSE()
     SET(ZSRCF ${ZSRCF}
               ../control/magma_zfortran.F90
               )
@@ -38,7 +38,7 @@ ELSE()
              ../control/magma_zf77.cpp
              )
 
-    SET(MAGMA_CTRLF 
+    SET(MAGMA_CTRLF
                     ../control/magma_param.f90
                     ../control/magma.f90
                     )
@@ -77,128 +77,151 @@ SET(MAGMA_CTRL ${MAGMA_CTRLF}
 # ------------------------------------------------------
 SET(MAGMA_SRCS "")
 SET(MAGMA_SRCS_GENERATED "")
-SET(ZSRC 
-###
-     zpotrf.cpp
-     zpotrf_gpu.cpp
-     zpotrf_mgpu.cpp
-     zpotrf2_ooc.cpp
-     zpotrf3_mgpu.cpp
-     zpotrs_gpu.cpp
-     zposv.cpp
-     zposv_gpu.cpp
-     zpotri.cpp
-     zpotri_gpu.cpp
-###
-     zgetrf.cpp
-     zgetrf_gpu.cpp
-     zgetrf_mgpu.cpp
-     zgetrf3_ooc.cpp
-     zgetrf1_mgpu.cpp
-     zgetf2_nopiv.cpp
-     zgetrf_nopiv.cpp
-     zgetrf_nopiv_gpu.cpp
-     zgetrs_gpu.cpp
-     zgesv.cpp
-     zgesv_gpu.cpp
-     zgetri_gpu.cpp
-###
-     zgeqrf.cpp
-     zgeqrf-v4.cpp
-     zgeqrf_ooc.cpp
-     zgeqlf.cpp
-     zgelqf.cpp
-     zgelqf_gpu.cpp
-     zungqr.cpp
-     zungtr.cpp
-     zgeqrf_gpu.cpp
-     zgeqrf_mgpu-trace.cpp
-     zgeqrf2_gpu.cpp
-     zgeqrf3_gpu.cpp
-     zgeqrs_gpu.cpp
-     zgeqrs3_gpu.cpp
-     zgels_gpu.cpp
-     zgels3_gpu.cpp
-     zlarfb_gpu.cpp
-     zunmqr_gpu.cpp
-     zungqr_gpu.cpp
-###
-     zgebrd.cpp
-     zlabrd_gpu.cpp
-     zgehrd.cpp
-     zgehrd2.cpp
-     zlahru.cpp
-     zlahr2.cpp
-     zunghr.cpp
-     zhetrd.cpp
-     zhetrd_gpu.cpp
-     zhetrd2_gpu.cpp
-     zhebbd.cpp
-     zlatrd.cpp
-     zlatrd2.cpp
-     zunmtr.cpp
-     zunmtr_gpu.cpp
-     zunmqr.cpp
-     zunmqr2_gpu.cpp
-     zunmql.cpp
-     zunmql2_gpu.cpp
-     zunmtr_m.cpp
-     zunmqr_m.cpp
-###
-     zgeev.cpp
-     dgeev.cpp
-     zheevd.cpp
-     zheevdx.cpp
-     zheevd_gpu.cpp
-     zheevdx_gpu.cpp
-     zheevr.cpp
-     zheevr_gpu.cpp
-     zheevx.cpp
-     zheevx_gpu.cpp
-     dsyevd.cpp
-     dsyevdx.cpp
-     dsyevd_gpu.cpp
-     zhegvd.cpp
-     zhegvdx.cpp
-     zhegvx.cpp
-     zhegvr.cpp
-     dsygvd.cpp
-     zhegst.cpp
-     zhegst_gpu.cpp
-     zgesvd.cpp
-     dgesvd.cpp
-     dstedx.cpp
-     zstedx.cpp
-     dlaex0.cpp
-     dlaex1.cpp
-     dlaex3.cpp
-     zheevd_m.cpp
-     zhegvd_m.cpp
-     zhegst_m.cpp
-     ztrsm_m.cpp
-     dstedx_m.cpp
-     zstedx_m.cpp
-     dlaex0_m.cpp
-     dlaex1_m.cpp
-     dlaex3_m.cpp
-###
-     zcposv_gpu.cpp
-     zcgesv_gpu.cpp
-     zcgetrs_gpu.cpp
-     zcgeqrsv_gpu.cpp
-###
-     ztrtri.cpp
-     ztrtri_gpu.cpp
-     zlauum.cpp
-     zlauum_gpu.cpp
-     zungqr_2stage_gpu.cpp
-     zbulge_kernel.cpp
-     zbulge_applyQ.cpp
-     dbulge_aux.cpp
-     zbulge_aux.cpp
-     zhetrd_bhe2trc_v3.cpp
-     zher2k_mgpu.cpp
-     zhemm_mgpu.cpp
+
+# ------------------------------------------------------------
+# Loosely, the order is alphabetic in each section, but mixed precision,
+# driver, and multi-GPU routines are separated where it made sense.
+# Double precision "d" files that generate "s" files must also be listed
+# in ZSRC, despite the name.
+SET(ZSRC
+### Cholesky, GPU interface
+    zcposv_gpu.cpp
+    zposv_gpu.cpp
+    zpotrf_gpu.cpp
+    zpotri_gpu.cpp
+    zpotrs_gpu.cpp
+    zlauum_gpu.cpp
+    ztrtri_gpu.cpp
+    zpotrf_mgpu.cpp
+
+### Cholesky, CPU interface
+    zposv.cpp
+    zpotrf.cpp
+    zpotrf2_ooc.cpp
+    zpotrf3_mgpu.cpp
+    zpotri.cpp
+    zlauum.cpp
+    ztrtri.cpp
+
+### LU, GPU interface
+    zcgesv_gpu.cpp
+    zcgetrs_gpu.cpp
+    zgesv_gpu.cpp
+    zgetrf_gpu.cpp
+    zgetrf_nopiv_gpu.cpp
+    zgetri_gpu.cpp
+    zgetrs_gpu.cpp
+    zgetrf_mgpu.cpp
+
+### LU, CPU interface
+    zgesv.cpp
+    zgetrf.cpp
+    zgetrf3_ooc.cpp
+    zgetrf1_mgpu.cpp
+    zgetf2_nopiv.cpp
+    zgetrf_nopiv.cpp
+
+### QR and least squares, GPU interface
+    zcgeqrsv_gpu.cpp
+    zgelqf_gpu.cpp
+    zgels3_gpu.cpp
+    zgels_gpu.cpp
+    zgeqrf2_gpu.cpp
+    zgeqrf3_gpu.cpp
+    zgeqrf_gpu.cpp
+    zgeqrs3_gpu.cpp
+    zgeqrs_gpu.cpp
+    zlarfb_gpu.cpp
+    zungqr_gpu.cpp
+    zunmql2_gpu.cpp
+    zunmqr2_gpu.cpp
+    zunmqr_gpu.cpp
+    zgeqp3.cpp
+    dgeqp3.cpp
+    zlaqps.cpp
+    zgeqrf_mgpu.cpp
+
+# QR, CPU interface
+    zgelqf.cpp
+    zgeqlf.cpp
+    zgeqrf-v4.cpp
+    zgeqrf.cpp
+    zgeqrf_ooc.cpp
+    zungqr.cpp
+    zunmql.cpp
+    zunmqr.cpp
+    zunmqr_m.cpp
+
+# symmetric eigenvalue, GPU interface
+    dsyevd_gpu.cpp
+    zheevd_gpu.cpp
+    zheevdx_gpu.cpp
+    zheevr_gpu.cpp
+    zheevx_gpu.cpp
+    zhetrd2_gpu.cpp
+    zhetrd_gpu.cpp
+    zunmtr_gpu.cpp
+
+# symmetric eigenvalues, CPU interface
+    dsyevd.cpp
+    dsyevdx.cpp
+    zheevd.cpp
+    zheevdx.cpp
+    zheevr.cpp
+    zheevx.cpp
+    dlaex0.cpp
+    dlaex1.cpp
+    dlaex3.cpp
+    dstedx.cpp
+    zhetrd.cpp
+    zlatrd.cpp
+    zlatrd2.cpp
+    zstedx.cpp
+    zungtr.cpp
+    zunmtr.cpp
+    zheevd_m.cpp
+    dlaex0_m.cpp
+    dlaex1_m.cpp
+    dlaex3_m.cpp
+    dstedx_m.cpp
+    zstedx_m.cpp
+    zunmtr_m.cpp
+
+# symmetric eigenvalues 2-stage
+    dbulge_aux.cpp
+    zbulge_applyQ.cpp
+    zbulge_aux.cpp
+    zbulge_kernel.cpp
+    zhebbd.cpp
+    zhetrd_bhe2trc_v3.cpp
+    zungqr_2stage_gpu.cpp
+
+# generalized symmetric eigenvalues
+    dsygvd.cpp
+    zhegst.cpp
+    zhegvd.cpp
+    zhegvdx.cpp
+    zhegvr.cpp
+    zhegvx.cpp
+    zhegst_gpu.cpp
+    zhegst_m.cpp
+    zhegvd_m.cpp
+    ztrsm_m.cpp
+
+# non-symmetric eigenvalues
+    dgeev.cpp
+    zgeev.cpp
+    zgehrd.cpp
+    zgehrd2.cpp
+    zlahr2.cpp
+    zlahru.cpp
+    zunghr.cpp
+
+# SVD
+    dgesvd.cpp
+    zgebrd.cpp
+    zgesvd.cpp
+    zlabrd_gpu.cpp
      )
 
 IF(MAGMA_USE_PLASMA)

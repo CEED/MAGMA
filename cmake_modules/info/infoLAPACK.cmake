@@ -16,13 +16,17 @@ MACRO(LAPACK_INFO_INSTALL)
     # -------------------------
     IF(NOT DEFINED LAPACK_URL)
         SET(LAPACK_URL     "http://www.netlib.org/lapack/lapack.tgz")
-        SET(LAPACK_MD5SUM  "44c3869c38c8335c2b9c2a8bb276eb55"       )
     ENDIF()
 
     # Define tarball of lapack
     # ------------------------
     IF(NOT DEFINED LAPACK_TARBALL)
         SET(LAPACK_TARBALL "lapack.tgz"                      )
+    ENDIF()
+
+    # Define md5sum of lapack
+    # -----------------------
+    IF(DEFINED LAPACK_URL OR DEFINED LAPACK_TARBALL)
         SET(LAPACK_MD5SUM  "44c3869c38c8335c2b9c2a8bb276eb55")
     ENDIF()
 
@@ -44,12 +48,14 @@ ENDMACRO(LAPACK_INFO_INSTALL)
 MACRO(LAPACK_INFO_FIND)
     # Define parameters for FIND_MY_PACKAGE
     # -------------------------------------
+    SET(LAPACK_type_library        "C;Fortran"                          )
     SET(LAPACK_name_library        "LAPACK_name_library-NOTFOUND"       )
     SET(LAPACK_name_pkgconfig      "LAPACK_name_pkgconfig-NOTFOUND"     )
     SET(LAPACK_name_include        "LAPACK_name_include-NOTFOUND"       )
     SET(LAPACK_name_include_suffix "LAPACK_name_include_suffix-NOTFOUND")
     SET(LAPACK_name_fct_test       "cheev"                              )
     SET(LAPACK_name_binary         "LAPACK_name_binary-NOTFOUND"        )
+
 ENDMACRO(LAPACK_INFO_FIND)
 
 ###

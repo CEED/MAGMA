@@ -16,13 +16,17 @@ MACRO(HWLOC_INFO_INSTALL)
     # ------------------------
     IF(NOT DEFINED HWLOC_URL)
         SET(HWLOC_URL     "http://www.open-mpi.org/software/hwloc/v1.4/downloads/hwloc-1.4.1.tar.gz")
-        SET(HWLOC_MD5SUM  "d8b28f45d6a841087a6094a2183f4673")
     ENDIF()
 
     # Define tarball of hwloc
     # -----------------------
     IF(NOT DEFINED HWLOC_TARBALL)
         SET(HWLOC_TARBALL "hwloc-1.4.1.tar.gz")
+    ENDIF()
+
+    # Define md5sum of hwloc
+    # ----------------------
+    IF(DEFINED HWLOC_URL OR DEFINED HWLOC_TARBALL)
         SET(HWLOC_MD5SUM  "d8b28f45d6a841087a6094a2183f4673")
     ENDIF()
 
@@ -44,12 +48,15 @@ ENDMACRO(HWLOC_INFO_INSTALL)
 MACRO(HWLOC_INFO_FIND)
     # Define parameters for FIND_MY_PACKAGE
     # -------------------------------------
+    SET(HWLOC_type_library        "C"                                 )
     SET(HWLOC_name_library        "hwloc"                             )
     SET(HWLOC_name_pkgconfig      "hwloc"                             )
     SET(HWLOC_name_include        "hwloc.h"                           )
     SET(HWLOC_name_include_suffix "HWLOC_name_include_suffix-NOTFOUND")
     SET(HWLOC_name_fct_test       "hwloc_set_cpubind"                 )
-    SET(HWLOC_name_binary         "hwloc-ls"                          )
+    SET(HWLOC_name_binary         "HWLOC_name_binary-NOTFOUND"        )
+    #SET(HWLOC_name_binary        "hwloc-ls"                          )
+
 ENDMACRO(HWLOC_INFO_FIND)
 
 ###

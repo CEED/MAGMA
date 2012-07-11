@@ -69,7 +69,7 @@ int MAGMA_ztrsmpl(int N, int NRHS,
                    magma_desc_t *L, int *IPIV,
                    PLASMA_Complex64_t *B, int LDB)
 {
-    int NB, IB, IBNB, NT;
+    int NB;
     int status;
     magma_context_t *magma;
     magma_sequence_t *sequence = NULL;
@@ -110,10 +110,7 @@ int MAGMA_ztrsmpl(int N, int NRHS,
     /* } */
 
     /* Set Mt, NT && NTRHS */
-    NB    = MAGMA_NB;
-    IB    = MAGMA_IB;
-    IBNB  = IB*NB;
-    NT    = (N%NB==0) ? (N/NB) : (N/NB+1);
+    NB = MAGMA_NB;
 
     magma_sequence_create(magma, &sequence);
 

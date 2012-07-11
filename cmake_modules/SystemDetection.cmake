@@ -7,7 +7,7 @@
 # @version       : 
 # @created by    : Innovative Computing Laboratory
 # @creation date : 19-01-2012
-# @last modified : mar. 17 avril 2012 15:52:28 CEST
+# @last modified : Tue 10 Jul 2012 09:40:05 AM CEST
 #
 ###
 #
@@ -19,17 +19,20 @@
 #
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
+INCLUDE(CheckCCompilerFlag)
+INCLUDE(CheckCSourceCompiles)
+INCLUDE(CheckFunctionExists)
+INCLUDE(CheckLibraryExists)
+INCLUDE(CheckIncludeFiles)
+INCLUDE(CheckStructHasMember)
+INCLUDE(CheckTypeSize)
+
 #########################################
 #                                       #
 #    Check the capabilities of the      #
 #      system we are building for       #
 #                                       #
 #########################################
-
-# Looking for architecture parameters
-# -----------------------------------
-INCLUDE(CheckTypeSize)
-check_type_size(void* SIZEOF_VOID_PTR)
 
 # Check the you have GNU Compiler
 # -------------------------------
@@ -54,6 +57,15 @@ IF(CMAKE_Fortran_COMPILER_ID STREQUAL "PGI")
 ELSE()
     SET(HAVE_PGI OFF)
 ENDIF()
+
+# Check if library stdc++ is available
+# ------------------------------------
+CHECK_C_COMPILER_FLAG("-lstdc++" HAVE_STDCPP)
+IF(HAVE_STDCPP)
+    MESSAGE(STATUS "Looking for libstdc++ - found")
+ELSE(HAVE_STDCPP)
+    MESSAGE(STATUS "Looking for libstdc++ - not found")
+ENDIF(HAVE_STDCPP)
 
 # Intel tricks
 # ------------
@@ -86,7 +98,6 @@ ENDIF (_match_ftn)
 STRING(REGEX MATCH ".*xlc$" _match_xlc ${CMAKE_C_COMPILER})
 IF (_match_xlc)
      MESSAGE(ERROR "Please use the thread-safe version of the xlc compiler (xlc_r)")
-     SET(CMAKE_EXTRA_CFLAGS "-qstrict -qthreaded")
 ENDIF (_match_xlc)
 STRING(REGEX MATCH ".*xlc_r$" _match_xlc ${CMAKE_C_COMPILER})
 IF (_match_xlc)
@@ -100,13 +111,13 @@ ENDIF (_match_xlc)
 STRING(REGEX MATCH ".*xlf$" _match_xlf ${CMAKE_Fortran_COMPILER})
 IF (_match_xlf)
      MESSAGE(ERROR "Please use the thread-safe version of the xlf compiler (xlf_r)")
-     SET(CMAKE_EXTRA_FFLAGS "-qstrict -qthreaded")
 ENDIF (_match_xlf)
 STRING(REGEX MATCH ".*xlf_r$" _match_xlf ${CMAKE_Fortran_COMPILER})
 IF (_match_xlf)
-  SET(arch_flags "-q32")
   IF(BUILD_64bits)
      SET(arch_flags "-q64")
+  ELSE(BUILD_64bits)
+     SET(arch_flags "-q32")
   ENDIF(BUILD_64bits)
   MESSAGE(STATUS "Add ${arch_flags} and -nofor_main to the Fortran linker.")
   SET(LOCAL_FORTRAN_LINK_FLAGS "${LOCAL_FORTRAN_LINK_FLAGS} ${arch_flags} -nofor_main")
@@ -165,7 +176,7 @@ else (BUILD_64bits)
 endif (BUILD_64bits)
 
 set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${ARCH_BUILD}")
-check_c_compiler_flag(${ARCH_BUILD} C_M32or64)
+CHECK_C_COMPILER_FLAG(${ARCH_BUILD} C_M32or64)
 
 if (C_M32or64)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ARCH_BUILD}")
@@ -221,37 +232,36 @@ SET( CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} ${C_WFLAGS}" 
 find_package(Threads)
 if(Threads_FOUND)
   set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES};${CMAKE_THREAD_LIBS_INIT}")
-  check_function_exists(pthread_create HAVE_PTHREAD)
+  CHECK_FUNCTION_EXISTS(pthread_create HAVE_PTHREAD)
   if(HAVE_PTHREAD)
     set(EXTRA_LIBS "${EXTRA_LIBS};${CMAKE_THREAD_LIBS_INIT}")
   endif(HAVE_PTHREAD)
 endif(Threads_FOUND)
 
-check_function_exists(sched_setaffinity HAVE_SCHED_SETAFFINITY)
+CHECK_FUNCTION_EXISTS(sched_setaffinity HAVE_SCHED_SETAFFINITY)
 if( NOT HAVE_SCHED_SETAFFINITY )
-  check_library_exists(rt sched_setaffinity "" HAVE_SCHED_SETAFFINITY)
+  CHECK_LIBRARY_EXISTS(rt sched_setaffinity "" HAVE_SCHED_SETAFFINITY)
 endif( NOT HAVE_SCHED_SETAFFINITY )
 
 # Timeval, timespec, realtime clocks, etc
 # ---------------------------------------
-include(CheckStructHasMember)
-check_struct_has_member("struct timespec" tv_nsec time.h HAVE_TIMESPEC_TV_NSEC)
+CHECK_STRUCT_HAS_MEMBER("struct timespec" tv_nsec time.h HAVE_TIMESPEC_TV_NSEC)
 if( NOT HAVE_TIMESPEC_TV_NSEC )
   add_definitions(-D_GNU_SOURCE)
-  check_struct_has_member("struct timespec" tv_nsec time.h HAVE_TIMESPEC_TV_NSEC)
+  CHECK_STRUCT_HAS_MEMBER("struct timespec" tv_nsec time.h HAVE_TIMESPEC_TV_NSEC)
 endif( NOT HAVE_TIMESPEC_TV_NSEC )
-check_library_exists(rt clock_gettime "" HAVE_CLOCK_GETTIME)
+CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_CLOCK_GETTIME)
 if( HAVE_CLOCK_GETTIME )
   set(EXTRA_LIBS "${EXTRA_LIBS};rt")
 endif( HAVE_CLOCK_GETTIME )
 
 # stdlib, stdio, string, getopt, etc
 # ----------------------------------
-check_include_files(stdarg.h HAVE_STDARG_H)
+CHECK_INCLUDE_FILES(stdarg.h HAVE_STDARG_H)
 
 # va_copy is special as it is not required to be a function.
-if (HAVE_STDARG_H)
-  check_c_source_compiles("
+IF (HAVE_STDARG_H)
+  CHECK_C_SOURCE_COMPILES("
       #include <stdarg.h>
       int main(void) {
       va_list a, b;
@@ -261,8 +271,8 @@ if (HAVE_STDARG_H)
       HAVE_VA_COPY
       )
  
-  if (NOT HAVE_VA_COPY)
-    check_c_source_compiles("
+  IF (NOT HAVE_VA_COPY)
+    CHECK_C_SOURCE_COMPILES("
     #include <stdarg.h>
     int main(void) {
         va_list a, b;
@@ -274,13 +284,17 @@ if (HAVE_STDARG_H)
   endif (NOT HAVE_VA_COPY)
 endif (HAVE_STDARG_H)
 
-check_function_exists(asprintf HAVE_ASPRINTF)
-check_function_exists(vasprintf HAVE_VASPRINTF)
-check_include_files(getopt.h HAVE_GETOPT_H)
-check_include_files(unistd.h HAVE_UNISTD_H)
-check_function_exists(getopt_long HAVE_GETOPT_LONG)
-check_include_files(errno.h HAVE_ERRNO_H)
-check_include_files(stddef.h HAVE_STDDEF_H)
-check_function_exists(getrusage HAVE_GETRUSAGE)
-check_include_files(limits.h HAVE_LIMITS_H)
-check_include_files(string.h HAVE_STRING_H)
+CHECK_FUNCTION_EXISTS(asprintf HAVE_ASPRINTF)
+CHECK_FUNCTION_EXISTS(vasprintf HAVE_VASPRINTF)
+CHECK_INCLUDE_FILES(getopt.h HAVE_GETOPT_H)
+CHECK_INCLUDE_FILES(unistd.h HAVE_UNISTD_H)
+CHECK_FUNCTION_EXISTS(getopt_long HAVE_GETOPT_LONG)
+CHECK_INCLUDE_FILES(errno.h HAVE_ERRNO_H)
+CHECK_INCLUDE_FILES(stddef.h HAVE_STDDEF_H)
+CHECK_FUNCTION_EXISTS(getrusage HAVE_GETRUSAGE)
+CHECK_INCLUDE_FILES(limits.h HAVE_LIMITS_H)
+CHECK_INCLUDE_FILES(string.h HAVE_STRING_H)
+
+# Looking for architecture parameters
+# -----------------------------------
+CHECK_TYPE_SIZE(void* SIZEOF_VOID_PTR)

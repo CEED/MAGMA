@@ -52,7 +52,6 @@ PLASMA_INFO_FIND()
 
 # Search for the library
 FIND_MY_PACKAGE("PLASMA"
-                FALSE TRUE TRUE TRUE
                 TRUE TRUE)
 
 IF(PLASMA_FOUND)

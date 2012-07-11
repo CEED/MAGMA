@@ -54,7 +54,6 @@ HWLOC_INFO_FIND()
 
 # Search for the library
 FIND_MY_PACKAGE("HWLOC"
-                TRUE TRUE TRUE TRUE
                 TRUE FALSE)
 
 # Begin section - Looking for HWLOC

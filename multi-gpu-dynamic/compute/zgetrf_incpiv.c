@@ -69,7 +69,7 @@ int MAGMA_zgetrf_incpiv(int M, int N,
                   PLASMA_Complex64_t *A, int LDA,
                   magma_desc_t *L, int *IPIV)
 {
-    int NB, IB, IBNB, MT, NT;
+    int NB;
     int status;
     magma_context_t *magma;
     magma_sequence_t *sequence = NULL;
@@ -107,10 +107,6 @@ int MAGMA_zgetrf_incpiv(int M, int N,
 
     /* Set NT && NTRHS */
     NB   = MAGMA_NB;
-    IB   = MAGMA_IB;
-    IBNB = IB*NB;
-    MT   = (M%NB==0) ? (M/NB) : (M/NB+1);
-    NT   = (N%NB==0) ? (N/NB) : (N/NB+1);
 
     magma_sequence_create(magma, &sequence);
 
@@ -267,13 +263,14 @@ int MAGMA_zgetrf_incpiv_Tile_Async(magma_desc_t *A, magma_desc_t *L, int *IPIV,
         return magma_request_fail(sequence, request, MAGMA_ERR_ILLEGAL_VALUE);
     }
     /* Quick return */
-/*
-    if (min(M, N) == 0)
-        return MAGMA_SUCCESS;
-*/
+    /*
+      if (min(M, N) == 0)
+      return MAGMA_SUCCESS;
+    */
+
     /* Clear IPIV and Lbdl */
-    plasma_memzero(IPIV,      A->mt*A->nt*A->nb, PlasmaInteger);
-    plasma_memzero(L->mat, L->lm*L->ln,          PlasmaComplexDouble);
+    plasma_memzero(IPIV,   A->mt*A->nt*A->nb, PlasmaInteger);
+    plasma_memzero(L->mat, L->lm*L->ln,       PlasmaComplexDouble);
 
     magma_pzgetrf_incpiv( A, L, IPIV, sequence, request);
 

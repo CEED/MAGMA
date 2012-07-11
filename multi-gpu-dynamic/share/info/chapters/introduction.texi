@@ -49,5 +49,5 @@ Because of its central position in HPC and of the well understood structure of i
 
 Research papers about MORSE can be found at
 
-@indicateurl{http://icl.cs.utk.edu/projectsdev/morse/pubs/index.html}
+@uref{http://icl.cs.utk.edu/projectsdev/morse/pubs/index.html}
 

@@ -55,6 +55,9 @@ RunTest(int *iparam, double *dparam, morse_time_t *t_)
                                            &(dparam[IPARAM_ANORM]), 
                                            &(dparam[IPARAM_BNORM]), 
                                            &(dparam[IPARAM_XNORM]));
+        free(A);
+        free(B);
+        free(C);
         free(C2);
     }
 

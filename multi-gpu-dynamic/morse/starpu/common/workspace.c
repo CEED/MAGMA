@@ -18,14 +18,14 @@
 static void allocate_workspace_on_workers(void *arg)
 {
     struct morse_starpu_ws_s *workspace = arg;
-  
-    int id;
     enum starpu_archtype type;
-    
+    int id;
+    (void)type;
+
     id = starpu_worker_get_id();
-    type = starpu_worker_get_type(id);
     
 #ifdef MORSE_USE_CUDA
+    type = starpu_worker_get_type(id);
     if (type == STARPU_CUDA_WORKER)
     {
         int memory_location = workspace->memory_location;
@@ -57,14 +57,13 @@ static void allocate_workspace_on_workers(void *arg)
 static void free_workspace_on_workers(void *arg)
 {
     struct morse_starpu_ws_s *workspace = arg;
-    
+    enum starpu_archtype type;    
     int id;
-    enum starpu_archtype type;
-    
+    (void)type;
     id = starpu_worker_get_id();
-    type = starpu_worker_get_type(id);
-    
+
 #ifdef MORSE_USE_CUDA
+    type = starpu_worker_get_type(id);
     if (type == STARPU_CUDA_WORKER)
     {
         int memory_location = workspace->memory_location;

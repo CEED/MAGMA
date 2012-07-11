@@ -36,11 +36,12 @@ int magma_desc_mat_free (magma_desc_t *desc);
 extern int plasma_element_size(int type);
 
 inline static int magma_get_blkldd_ccrb(const magma_desc_t *A, int m) {
-  return ( ( (m) + (A)->i/(A)->mb) < (A)->lm1 ? (A)->mb : (A)->lm%(A)->mb );
+    return ( ( (m) + (A)->i/(A)->mb) < (A)->lm1 ? (A)->mb : (A)->lm%(A)->mb );
 }
 
 inline static int magma_get_blkldd_cm(const magma_desc_t *A, int m) {
-  return A->lm;
+    (void)m;
+    return A->lm;
 }
 
 #define BLKLDD(A, k) A->get_blkldd( A, k )

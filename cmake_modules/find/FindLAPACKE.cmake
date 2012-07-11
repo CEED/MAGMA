@@ -52,7 +52,6 @@ LAPACKE_INFO_FIND()
 
 # Search for the library
 FIND_MY_PACKAGE("LAPACKE"
-                FALSE TRUE TRUE FALSE
                 TRUE FALSE)
 
 # Begin section - Looking for LAPACKE

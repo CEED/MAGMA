@@ -16,13 +16,17 @@ MACRO(PLASMA_INFO_INSTALL)
     # -------------------------
     IF(NOT DEFINED PLASMA_URL)
         SET(PLASMA_URL     "http://icl.cs.utk.edu/projectsfiles/plasma/pubs/plasma_2.4.5.tar.gz")
-        SET(PLASMA_MD5SUM  "077ce8df88d48e3c2be115b459bb0231"                                   )
     ENDIF()
 
     # Define tarball of plasma
     # ------------------------
     IF(NOT DEFINED PLASMA_TARBALL)
         SET(PLASMA_TARBALL "plasma_2.4.5.tar.gz"             )
+    ENDIF()
+
+    # Define md5sum of plasma
+    # -----------------------
+    IF(DEFINED PLASMA_URL OR DEFINED PLASMA_TARBALL)
         SET(PLASMA_MD5SUM  "077ce8df88d48e3c2be115b459bb0231")
     ENDIF()
 
@@ -44,12 +48,16 @@ ENDMACRO(PLASMA_INFO_INSTALL)
 MACRO(PLASMA_INFO_FIND)
     # Define parameters for FIND_MY_PACKAGE
     # -------------------------------------
+    SET(PLASMA_type_library        "C;Fortran"                          )
     SET(PLASMA_name_library        "plasma;coreblas;quark"              )
     SET(PLASMA_name_pkgconfig      "plasma"                             )
-    SET(PLASMA_name_include        "plasma.h;core_blas.h;quark.h"       )
+    # Problem with core_blas.h ==> plasma.h need to be included in core_blas.h (type PLASMA_Complex64_t not defined)
+    # SET(PLASMA_name_include        "plasma.h;core_blas.h;quark.h"       )
+    SET(PLASMA_name_include        "plasma.h;quark.h"       )
     SET(PLASMA_name_include_suffix "PLASMA_name_include_suffix-NOTFOUND")
     SET(PLASMA_name_fct_test       "PLASMA_dgetrf"                      )
     SET(PLASMA_name_binary         "PLASMA_name_binary-NOTFOUND"        )
+
 ENDMACRO(PLASMA_INFO_FIND)
 
 ###

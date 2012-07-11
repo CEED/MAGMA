@@ -48,6 +48,7 @@ ENDMACRO(EIGEN_INFO_INSTALL)
 MACRO(EIGEN_INFO_FIND)
     # Define parameters for FIND_MY_PACKAGE
     # -------------------------------------
+    SET(EIGEN_type_library        "BLAS_type_library-NOTFOUND"       )
     SET(EIGEN_name_library        "BLAS_name_library-NOTFOUND"       )
     SET(EIGEN_name_pkgconfig      "BLAS_name_pkgconfig-NOTFOUND"     )
     SET(EIGEN_name_include        "BLAS_name_include-NOTFOUND"       )

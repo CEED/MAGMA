@@ -12,7 +12,7 @@
 ###
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-INCLUDE(installPACKAGE)
+INCLUDE(installExternalPACKAGE)
 INCLUDE(downloadPACKAGE)
 
 MACRO(INSTALL_REFBLAS _MODE)
@@ -65,7 +65,7 @@ MACRO(INSTALL_REFBLAS _MODE)
     # Install the external package
     # ----------------------------
     DEFINE_DOWNLOAD_PACKAGE("blas" "${_MODE}")
-    INSTALL_PACKAGE("blas" "${BLAS_BUILD_MODE}")
+    INSTALL_EXTERNAL_PACKAGE("blas" "${BLAS_BUILD_MODE}")
     MESSAGE(STATUS "Installing BLAS - refblas version")
     MESSAGE(STATUS "Installing BLAS - do not expect high performance from this reference library!")
 

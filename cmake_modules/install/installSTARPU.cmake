@@ -7,12 +7,12 @@
 # @version       :
 # @created by    : Cedric Castagnede
 # @creation date : 19-01-2012
-# @last modified : mer. 16 mai 2012 10:20:54 CEST
+# @last modified : Tue 10 Jul 2012 09:46:10 AM CEST
 #
 ###
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-INCLUDE(installPACKAGE)
+INCLUDE(installExternalPACKAGE)
 INCLUDE(downloadPACKAGE)
 INCLUDE(update_env)
 INCLUDE(infoSTARPU)
@@ -40,36 +40,44 @@ MACRO(INSTALL_STARPU _MODE)
         LIST(APPEND _starpu_list_flags "starpumpi")
         LIST(APPEND _starpu_list_flags "starpu")
         SET(_starpu_string_flags "-lstarpumpi -lstarpu")
-    ELSE()
+    ELSE(HAVE_MPI)
         SET(STARPU_OPTIONS ${STARPU_OPTIONS} --without-mpicc)
         LIST(APPEND _starpu_list_flags "starpu")
         SET(_starpu_string_flags "-lstarpu")
-    ENDIF()
+    ENDIF(HAVE_MPI)
 
     IF(HAVE_CUDA)
         SET(STARPU_OPTIONS ${STARPU_OPTIONS} --with-cuda-dir=${CUDA_TOOLKIT_ROOT_DIR})
         IF(${ARCH_X86_64})
             SET(STARPU_OPTIONS ${STARPU_OPTIONS} --with-cuda-lib-dir=${CUDA_TOOLKIT_ROOT_DIR}/lib64)
-        ELSE()
+        ELSE(${ARCH_X86_64})
             SET(STARPU_OPTIONS ${STARPU_OPTIONS} --with-cuda-lib-dir=${CUDA_TOOLKIT_ROOT_DIR}/lib)
-        ENDIF()
-        LIST(APPEND _starpu_list_flags "cudart" "cublas" "cuda" "stdc++")
-        SET(_starpu_string_flags "${_starpu_string_flags} -lcudart -lcublas -lcuda -lstdc++")
-    ELSE()
+        ENDIF(${ARCH_X86_64})
+        
+        IF(${HAVE_STDCPP})
+            LIST(APPEND _starpu_list_flags "cudart" "cublas" "cuda" "stdc++")
+            SET(_starpu_string_flags "${_starpu_string_flags} -lcudart -lcublas -lcuda -lstdc++")
+        ELSE(${HAVE_STDCPP})
+            LIST(APPEND _starpu_list_flags "cudart" "cublas" "cuda")
+            SET(_starpu_string_flags "${_starpu_string_flags} -lcudart -lcublas -lcuda")
+        ENDIF(${HAVE_STDCPP})
+
+    ELSE(HAVE_CUDA)
         SET(STARPU_OPTIONS ${STARPU_OPTIONS} --disable-cuda)
-    ENDIF()
+    ENDIF(HAVE_CUDA)
 
     IF(HAVE_FXT)
         UPDATE_ENV(PKG_CONFIG_PATH ${FXT_LIBRARY_PATH}/pkgconfig)
         SET(STARPU_OPTIONS ${STARPU_OPTIONS} --with-fxt=${FXT_PATH})
-    ENDIF()
+    ENDIF(HAVE_FXT)
 
     IF(HAVE_HWLOC)
         UPDATE_ENV(PKG_CONFIG_PATH ${HWLOC_LIBRARY_PATH}/pkgconfig)
         SET(STARPU_OPTIONS ${STARPU_OPTIONS} --with-hwloc=${HWLOC_PATH})
         LIST(APPEND _starpu_list_flags "hwloc")
         SET(_starpu_string_flags "${_starpu_string_flags} -lhwloc")
-    ENDIF()
+    ENDIF(HAVE_HWLOC)
+
     SET(_ADD_PARAMETERS "PKG_CONFIG_PATH=$ENV{PKG_CONFIG_PATH}")
 
     # Define steps of installation
@@ -81,7 +89,7 @@ MACRO(INSTALL_STARPU _MODE)
     # Install the external package
     # ----------------------------
     DEFINE_DOWNLOAD_PACKAGE("starpu" "${_MODE}")
-    INSTALL_PACKAGE("starpu" "${STARPU_BUILD_MODE}")
+    INSTALL_EXTERNAL_PACKAGE("starpu" "${STARPU_BUILD_MODE}")
 
     # Info of STARPU version:
     # -----------------------

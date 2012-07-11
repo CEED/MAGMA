@@ -285,38 +285,3 @@ int MAGMA_Desc_Destroy( magma_desc_t **desc )
     *desc = NULL;
     return MAGMA_SUCCESS;
 }
-
-// *******************************************************************************
-// *
-// * @ingroup Auxiliary
-// *
-// *  morse_desc_internalprint - morse_desc_internalprint.
-// *
-// *******************************************************************************
-int morse_desc_internalprint( magma_desc_t *desc )
-{
-    int lmt = desc->lmt;
-    int lnt = desc->lnt;
-    int lda = desc->lm;
-    int mb = desc->nb;
-    int size = desc->n;
-    int  m, n;
-    int64_t block_ind = 0;
-
-    for (int i=0; i<size; i++){//rows
-      if(i%mb==0)
-    printf("\n");
-      for (int j=0; j<size; j++){//columns
-    printf("%lf\t" , *(double*)magma_geteltaddr(desc,i, j, sizeof(PLASMA_Complex64_t)));
-    if((j+1)%mb==0 && j+1 < size){
-      if(j+1==i || j+2==i)
-        printf(">|");
-      else
-        printf("|");
-    }
-      }
-      printf("\n");
-
-    }
-    return MAGMA_SUCCESS;
-}

@@ -54,7 +54,6 @@ STARPU_INFO_FIND()
 
 # Search for the library
 FIND_MY_PACKAGE("STARPU"
-                TRUE TRUE TRUE TRUE
                 TRUE FALSE)
 
 # Begin section - Looking for STARPU

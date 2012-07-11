@@ -12,7 +12,7 @@
 ###
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-INCLUDE(installPACKAGE)
+INCLUDE(installExternalPACKAGE)
 INCLUDE(downloadPACKAGE)
 INCLUDE(infoCBLAS)
 
@@ -81,7 +81,7 @@ MACRO(INSTALL_CBLAS _MODE)
     # Install the external package
     # ----------------------------
     DEFINE_DOWNLOAD_PACKAGE("cblas" "${_MODE}")
-    INSTALL_PACKAGE("cblas" "${CBLAS_BUILD_MODE}")
+    INSTALL_EXTERNAL_PACKAGE("cblas" "${CBLAS_BUILD_MODE}")
 
     # Set linker flags
     # ----------------

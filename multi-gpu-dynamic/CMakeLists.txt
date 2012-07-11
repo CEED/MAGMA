@@ -57,7 +57,7 @@ ENDIF(MORSE_SCHED_QUARK)
 
 # Generate documentation
 # ----------------------
-INCLUDE(share/info)
+ADD_SUBDIRECTORY(share/info)
 
 ###
 ### END CMakeLists.txt

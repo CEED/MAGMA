@@ -87,6 +87,7 @@ MACRO(BLAS_INFO_FIND)
 
     # Define parameters for FIND_MY_PACKAGE
     # -------------------------------------
+    SET(BLAS_type_library        "${${VALUE_MORSE_USE_BLAS}_type_library}"       )
     SET(BLAS_name_library        "${${VALUE_MORSE_USE_BLAS}_name_library}"       )
     SET(BLAS_name_pkgconfig      "${${VALUE_MORSE_USE_BLAS}_name_pkgconfig}"     )
     SET(BLAS_name_include        "${${VALUE_MORSE_USE_BLAS}_name_include}"       )

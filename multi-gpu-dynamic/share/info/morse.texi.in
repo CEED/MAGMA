@@ -82,7 +82,7 @@ was last updated on @value{UPDATED}.
 
 @node Introduction
 @chapter Introduction to MORSE
-@include chapters/introduction.texi
+@include @CMAKE_CURRENT_SOURCE_DIR@/chapters/introduction.texi
 
 @c ---------------------------------------------------------------------
 @c Installing MORSE
@@ -90,7 +90,7 @@ was last updated on @value{UPDATED}.
 
 @node Installing MORSE
 @chapter Installing MORSE
-@include chapters/installing.texi
+@include @CMAKE_CURRENT_SOURCE_DIR@/chapters/installing.texi
 
 @c ---------------------------------------------------------------------
 @c Configuration options
@@ -98,7 +98,7 @@ was last updated on @value{UPDATED}.
 
 @node Configuring MORSE
 @chapter Configuring MORSE
-@include chapters/configuration.texi
+@include @CMAKE_CURRENT_SOURCE_DIR@/chapters/configuration.texi
 
 @c ---------------------------------------------------------------------
 @c Using MORSE
@@ -106,6 +106,6 @@ was last updated on @value{UPDATED}.
 
 @node Using MORSE
 @chapter Using MORSE
-@include chapters/using.texi
+@include @CMAKE_CURRENT_SOURCE_DIR@/chapters/using.texi
 
 @bye

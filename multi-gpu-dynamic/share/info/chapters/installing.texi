@@ -12,8 +12,8 @@
 * Building and Installing MORSE::
 @end menu
 
-MORSE can be built and installed by the standard means of CMake (@indicateurl{http://www.cmake.org/}).
-General information about CMake, as well as installation binaries and CMake source code are available from @indicateurl{http://www.cmake.org/cmake/resources/software.html}.
+MORSE can be built and installed by the standard means of CMake (@uref{http://www.cmake.org/}).
+General information about CMake, as well as installation binaries and CMake source code are available from @uref{http://www.cmake.org/cmake/resources/software.html}.
 The following chapter is intended to briefly remind how these tools can be used to install MORSE.
 
 @node Downloading MORSE
@@ -28,9 +28,9 @@ The following chapter is intended to briefly remind how these tools can be used 
 @node Getting Sources
 @subsection Getting Sources
 
-The latest official release tarballs of MORSE sources are available for download from @indicateurl{http://icl.cs.utk.edu/projectsdev/morse/software/index.html}.
+The latest official release tarballs of MORSE sources are available for download from @uref{http://icl.cs.utk.edu/projectsdev/morse/software/index.html}.
 
-The latest development snapshot is available from @indicateurl{http://hydra.bordeaux.inria.fr/job/hiepacs/morse-cmake/tarball/latest/download-by-type/file/source-dist}.
+The latest development snapshot is available from @uref{http://hydra.bordeaux.inria.fr/job/hiepacs/morse-cmake/tarball/latest/download-by-type/file/source-dist}.
 
 @example
 % wget http://hydra.bordeaux.inria.fr/job/hiepacs/morse-cmake/tarball/latest/download-by-type/file/source-dist -O morse.tar.gz 
@@ -65,7 +65,7 @@ TODO
 @subsubsection hwloc
 
 The topology discovery library, @code{hwloc}, is not mandatory to use StarPU but strongly recommended. It allows to increase performance, and to perform some topology aware scheduling.
-@code{hwloc} is available in major distributions and for most OSes and can be downloaded from @indicateurl{http://www.open-mpi.org/software/hwloc}.
+@code{hwloc} is available in major distributions and for most OSes and can be downloaded from @uref{http://www.open-mpi.org/software/hwloc}.
 
 @node Optional dependencies
 @subsection Optional dependencies

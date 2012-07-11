@@ -70,7 +70,11 @@ static void cl_zlacpy_cuda_func(void *descr[], void *cl_arg)
 
     if ( M != LDA || M != LDB )
       fprintf( stderr, "WARNING: lacpy on GPU doesn;t support leading dimension different form M\n");
-    cudaMemcpy( B, A, M*N*sizeof(cuDoubleComplex), cudaMemcpyDeviceToDevice );
+    cudaMemcpy2D( B, LDB*sizeof(cuDoubleComplex), 
+                  A, LDA*sizeof(cuDoubleComplex),
+                  M*sizeof(cuDoubleComplex),
+                  N*sizeof(cuDoubleComplex)
+                  cudaMemcpyDeviceToDevice );
 
     /* Not implemented for now, and for LU, we can cpy all the matrix */
     /* magma_zlacpy( lapack_const(uplo)[0], m, n, */

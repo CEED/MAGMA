@@ -16,13 +16,17 @@ MACRO(LAPACKE_INFO_INSTALL)
     # --------------------------
     IF(NOT DEFINED LAPACKE_URL)
         SET(LAPACKE_URL     "http://icl.cs.utk.edu/projectsfiles/plasma/pubs/lapacke-3.3.0.tgz")
-        SET(LAPACKE_MD5SUM  "1e2c8764f41f75bf14919b105513fd25"                                 )
     ENDIF()
 
     # Define tarball of lapacke
     # -------------------------
     IF(NOT DEFINED LAPACKE_TARBALL)
         SET(LAPACKE_TARBALL "lapacke-3.3.0.tgz"               )
+    ENDIF()
+
+    # Define md5sum of lapacke
+    # ------------------------
+    IF(DEFINED LAPACKE_URL OR DEFINED LAPACKE_TARBALL)
         SET(LAPACKE_MD5SUM  "1e2c8764f41f75bf14919b105513fd25")
     ENDIF()
 
@@ -44,12 +48,14 @@ ENDMACRO(LAPACKE_INFO_INSTALL)
 MACRO(LAPACKE_INFO_FIND)
     # Define parameters for FIND_MY_PACKAGE
     # -------------------------------------
+    SET(LAPACKE_type_library        "C"                                   )
     SET(LAPACKE_name_library        "lapacke"                             )
     SET(LAPACKE_name_pkgconfig      "LAPACKE_name_pkgconfig-NOTFOUND"     )
     SET(LAPACKE_name_include        "lapacke.h"                           )
     SET(LAPACKE_name_include_suffix "LAPACKE_name_include_suffix-NOTFOUND")
     SET(LAPACKE_name_fct_test       "LAPACKE_cheev"                       )
     SET(LAPACKE_name_binary         "LAPACKE_name_binary-NOTFOUND"        )
+
 ENDMACRO(LAPACKE_INFO_FIND)
 
 ###

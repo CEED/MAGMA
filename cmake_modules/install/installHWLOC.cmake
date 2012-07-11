@@ -12,7 +12,7 @@
 ###
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-INCLUDE(installPACKAGE)
+INCLUDE(installExternalPACKAGE)
 INCLUDE(downloadPACKAGE)
 INCLUDE(infoHWLOC)
 
@@ -43,7 +43,7 @@ MACRO(INSTALL_HWLOC _MODE)
     # Install the external package
     # ----------------------------
     DEFINE_DOWNLOAD_PACKAGE("hwloc" "${_MODE}")
-    INSTALL_PACKAGE("hwloc" "${HWLOC_BUILD_MODE}")
+    INSTALL_EXTERNAL_PACKAGE("hwloc" "${HWLOC_BUILD_MODE}")
 
     # Set linker flags
     # ----------------

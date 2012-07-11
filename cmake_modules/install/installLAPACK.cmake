@@ -14,7 +14,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 INCLUDE(definePACKAGE)
 INCLUDE(downloadPACKAGE)
-INCLUDE(installPACKAGE)
+INCLUDE(installExternalPACKAGE)
 INCLUDE(infoLAPACK)
 
 MACRO(INSTALL_LAPACK _MODE)
@@ -88,7 +88,7 @@ MACRO(INSTALL_LAPACK _MODE)
     # Install the external package
     # ----------------------------
     DEFINE_DOWNLOAD_PACKAGE("lapack" "${_MODE}")
-    INSTALL_PACKAGE("lapack" "${LAPACK_BUILD_MODE}")
+    INSTALL_EXTERNAL_PACKAGE("lapack" "${LAPACK_BUILD_MODE}")
 
     # Set linker flags
     # ----------------

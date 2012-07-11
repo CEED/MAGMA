@@ -62,7 +62,7 @@ int MAGMA_zgeqrf(int M, int N,
                   PLASMA_Complex64_t *A, int LDA,
                   magma_desc_t *T)
 {
-    int NB, IB, IBNB, MT, NT;
+    int NB;
     int status;
     magma_context_t *magma;
     magma_sequence_t *sequence = NULL;
@@ -99,11 +99,7 @@ int MAGMA_zgeqrf(int M, int N,
     /* } */
 
     /* Set MT && NT */
-    NB   = MAGMA_NB;
-    IB   = MAGMA_IB;
-    IBNB = IB*NB;
-    MT   = (M%NB==0) ? (M/NB) : (M/NB+1);
-    NT   = (N%NB==0) ? (N/NB) : (N/NB+1);
+    NB = MAGMA_NB;
 
     magma_sequence_create(magma, &sequence);
  

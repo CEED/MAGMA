@@ -14,6 +14,427 @@
 @node Compilation configuration
 @section Compilation configuration
 
+The following arguments can be given to the @code{cmake <path to source directory>} script.
+
+In this chapter, the following convention is used:
+@itemize @bullet
+@item
+@var{path} is a path in your filesystem,
+@item
+@var{var} is a string and the correct value or an exemple will be given,
+@item
+@var{trigger} is an CMake option and the correct value is @code{ON} or @code{OFF}.
+@end itemize
+
+@menu
+* Common CMake configuration::
+* Common MORSE configuration::
+* Configuring dependency management::
+* Advanced configuration::
+@end menu
+
+@node Common CMake configuration
+@subsection Common CMake configuration
+
+@table @code
+
+@item -D CMAKE_INSTALL_PREFIX=@var{path} (default: @var{path=$BUILD_DIR/install})
+Install directory used by @code{make install}.
+If MORSE build system needs to compiled one of its dependency, you need to have the permission to write onto @var{path} during @code{make} step. 
+
+@item -D CMAKE_BUILD_TYPE==@var{var} (default: @var{type=Release})
+Define the build type.
+The possible values for @var{var} are: 
+@table @code
+@item empty
+@item Debug
+@item Release
+@item RelWithDebInfo
+@item MinSizeRel
+@end table
+
+@item -D BUILD_SHARED_LIBS=@var{trigger} (default: @var{trigger=OFF})
+Build shared libraries.
+
+@item -D BUILD_64bits=@var{trigger} (default: @var{trigger=OFF} on 32-bit plaform and @var{trigger=ON} on 64-bit plaform)
+Build 64-bit library.
+
+@item -D BUILD_TESTING=@var{trigger} (default: @var{trigger=ON})
+Build test suite.
+
+@item -D CMAKE_VERBOSE_MAKEFILE=@var{trigger} (default: @var{trigger=OFF})
+Enable verbose makefile.
+
+@end table
+
+@node Common MORSE configuration
+@subsection Common MORSE configuration
+
+@table @code
+
+@item -D MAGMA_1GPU=@var{trigger} (default: @var{trigger=OFF})
+Build the MAGMA library.
+
+@item -D MAGMA_MORSE=@var{trigger} (default: @var{trigger=ON})
+Build the MORSE library.
+
+@item -D MAGMA_USE_PLASMA=@var{trigger} (default: @var{trigger=ON})
+Enable kernels using plasma-like kernels in MAGMA.
+
+@item -D MAGMA_USE_FERMI=@var{trigger} (default: @var{trigger=ON})
+Build optimized kernels for NVIDIA Fermi artitecture.
+
+@item -D MORSE_SCHED_STARPU=@var{trigger} (default: @var{trigger=ON})
+Enable StarPU scheduler in MORSE.
+
+@item -D MORSE_SCHED_QUARK=@var{trigger} (default: @var{trigger=OFF})
+Enable Quark scheduler in MORSE.
+
+@item -D MORSE_DEBUG_CMAKE=@var{trigger} (default: @var{trigger=OFF})
+Enable the verbosity of cmake step.
+
+@item -D MORSE_SEPARATE_PROJECTS=@var{trigger} (default: @var{trigger=OFF})
+Enable the separation of the different dependencies in the installation tree.
+
+@end table
+
+@node Configuring dependency management
+@subsection Configuring dependency management
+
+@table @code
+
+@item -D MORSE_USE_@code{<PACKAGE>}=@var{trigger} 
+Force @code{<PACKAGE>} to be installed and/or to be used in MORSE. Default value depends on value of options defined in @ref{Common MORSE configuration}.
+MORSE build system automatically determines if @code{<PACKAGE>} is necessary for the project.
+Then if it is true, MORSE build system tries to detect @code{<PACKAGE>} and gives an error if the detection failed.
+This is applicable to following options:
+@itemize @bullet
+@item -D MORSE_USE_CUDA=@var{trigger} 
+@item -D MORSE_USE_OPENCL=@var{trigger} 
+@end itemize
+
+@item -D MORSE_USE_@code{<PACKAGE>}=@var{trigger}
+Force @code{<PACKAGE>} to be installed and/or to be used in MORSE. Default value depends on value of options defined in @ref{Common MORSE configuration}.
+MORSE build system automatically determines if @code{<PACKAGE>} is necessary for the project.
+Then if it is true, MORSE build system tries to detect @code{<PACKAGE>} first and installs @code{<PACKAGE>} if the detection failed.
+This is applicable to following options:
+@itemize @bullet
+@item -D MORSE_USE_CBLAS=@var{trigger} 
+@item -D MORSE_USE_LAPACK=@var{trigger} 
+@item -D MORSE_USE_LAPACKE=@var{trigger} 
+@item -D MORSE_USE_PLASMA=@var{trigger} 
+@item -D MORSE_USE_MPI=@var{trigger}
+@item -D MORSE_USE_FXT=@var{trigger} 
+@item -D MORSE_USE_HWLOC=@var{trigger} 
+@item -D MORSE_USE_STARPU=@var{trigger} 
+@end itemize
+
+@item -D MORSE_USE_BLAS=@var{var} (default: @var{trigger=empty})
+Force an BLAS implementation to be installed and/or to be used in MORSE.
+The possible values for @var{var} are:
+@table @code
+@item empty
+MORSE build system automatically determines if a BLAS implementation is necessary.
+Then if it is true, MORSE build system tries to detect a BLAS implementation first and installs refblas implementation if the detection failed.
+@item ON
+MORSE build system tries to detect a BLAS implementation first and installs refblas implementation if the detection failed.
+@item OFF
+No BLAS implementation is used in the project (here the option have no sense excepted to respect a defined formalism). 
+@item refblas
+MORSE build system installs refblas (@uref{http://www.netlib.org/blas})implementation.
+@item eigen
+MORSE build system installs Eigen (@uref{http://eigen.tuxfamily.org}) implementation.
+@end table
+
+@item -D @code{<PACKAGE>}_USE_AUTO=@var{trigger} (default: @var{trigger=ON})
+MORSE build system tries to detect @code{<PACKAGE>} first.
+If the detection failed, it installs @code{<PACKAGE>} by using a recommended tarball in @var{path=$SOURCE_DIR/externals} first.
+If this tarball is missing, the build system tries to download the tarball form the web and puts it in @var{path=$SOURCE_DIR/externals}.
+This is applicable to following options:
+@itemize @bullet
+@item -D BLAS_USE_AUTO=@var{trigger}
+@item -D CBLAS_USE_AUTO=@var{trigger}
+@item -D LAPACK_USE_AUTO=@var{trigger}
+@item -D LAPACKE_USE_AUTO=@var{trigger}
+@item -D PLASMA_USE_AUTO=@var{trigger}
+@item -D MPI_USE_AUTO=@var{trigger}
+@item -D FXT_USE_AUTO=@var{trigger}
+@item -D HWLOC_USE_AUTO=@var{trigger}
+@item -D STARPU_USE_AUTO=@var{trigger}
+@end itemize
+
+@item -D @code{<PACKAGE>}_USE_LIB=@var{trigger} (default: @var{trigger=OFF})
+MORSE build system only tries to use @code{<PACKAGE>} defined by the user with @code{<PACKAGE>_LIB} (and @code{<PACKAGE>_INC}).
+If this option is true, @code{<PACKAGE>_USE_AUTO} is setted to @code{OFF}.
+This is applicable to following options:
+@itemize @bullet
+@item -D BLAS_USE_LIB=@var{trigger}
+@item -D CBLAS_USE_LIB=@var{trigger}
+@item -D LAPACK_USE_LIB=@var{trigger}
+@item -D LAPACKE_USE_LIB=@var{trigger}
+@item -D PLASMA_USE_LIB=@var{trigger}
+@item -D MPI_USE_LIB=@var{trigger}
+@item -D FXT_USE_LIB=@var{trigger}
+@item -D HWLOC_USE_LIB=@var{trigger}
+@item -D STARPU_USE_LIB=@var{trigger}
+@end itemize
+
+@item -D @code{<PACKAGE>}_USE_SVN=@var{trigger} (default: @var{trigger=OFF})
+MORSE build system only tries to use @code{<PACKAGE>} got form the repository
+The address to another repository can be defined by @code{<PACKAGE>_SVN_REP}.
+The type of repository can be defined by @code{<PACKAGE>_REPO_MODE}.
+The login used to connect to another repository can be defined by @code{<PACKAGE>_SVN_ID}.
+The password used to connect to another repository can be defined by @code{<PACKAGE>_SVN_PWD}.
+If this option is true, @code{<PACKAGE>_USE_AUTO} is setted to @code{OFF}.
+This is applicable to following options:
+@itemize @bullet
+@item -D BLAS_USE_SVN=@var{trigger}
+@item -D CBLAS_USE_SVN=@var{trigger}
+@item -D LAPACK_USE_SVN=@var{trigger}
+@item -D LAPACKE_USE_SVN=@var{trigger}
+@item -D PLASMA_USE_SVN=@var{trigger}
+@item -D MPI_USE_SVN=@var{trigger}
+@item -D FXT_USE_SVN=@var{trigger}
+@item -D HWLOC_USE_SVN=@var{trigger}
+@item -D STARPU_USE_SVN=@var{trigger}
+@end itemize
+
+@item -D @code{<PACKAGE>}_USE_SYSTEM=@var{trigger} (default: @var{trigger=OFF})
+MORSE build system only tries to detect @code{<PACKAGE>} in the user's system.
+The user can help to find @code{<PACKAGE>} by setting @code{<PACKAGE>_DIR}.
+The option @code{<PACKAGE>}If this option is true, @code{<PACKAGE>_USE_AUTO} is setted to @code{OFF}.
+This is applicable to following options:
+@itemize @bullet
+@item -D BLAS_USE_SVN=@var{trigger}
+@item -D CBLAS_USE_SVN=@var{trigger}
+@item -D LAPACK_USE_SVN=@var{trigger}
+@item -D LAPACKE_USE_SVN=@var{trigger}
+@item -D PLASMA_USE_SVN=@var{trigger}
+@item -D MPI_USE_SVN=@var{trigger}
+@item -D FXT_USE_SVN=@var{trigger}
+@item -D HWLOC_USE_SVN=@var{trigger}
+@item -D STARPU_USE_SVN=@var{trigger}
+@end itemize
+
+@item -D @code{<PACKAGE>}_USE_TARBALL=@var{trigger} (default: @var{trigger=OFF})
+MORSE build system only tries to install @code{<PACKAGE>} by using a recommended tarball in @var{path=$SOURCE_DIR/externals}.
+The absolute path to another tarball can be defined by @code{<PACKAGE>_TARBALL}.
+If this option is true, @code{<PACKAGE>}_USE_AUTO is setted to @code{OFF}.
+This is applicable to following options:
+@itemize @bullet
+@item -D BLAS_USE_TARBALL=@var{trigger}
+@item -D CBLAS_USE_TARBALL=@var{trigger}
+@item -D LAPACK_USE_TARBALL=@var{trigger}
+@item -D LAPACKE_USE_TARBALL=@var{trigger}
+@item -D PLASMA_USE_TARBALL=@var{trigger}
+@item -D MPI_USE_TARBALL=@var{trigger}
+@item -D FXT_USE_TARBALL=@var{trigger}
+@item -D HWLOC_USE_TARBALL=@var{trigger}
+@item -D STARPU_USE_TARBALL=@var{trigger}
+@end itemize
+
+@item -D @code{<PACKAGE>}_USE_WEB=@var{trigger} (default: @var{trigger=OFF})
+MORSE build system only tries to install @code{<PACKAGE>} by using a recommended tarball got form the web.
+The web address to another tarball can be defined by @code{<PACKAGE>_URL}.
+If this option is true, @code{<PACKAGE>}_USE_AUTO is setted to @code{OFF}.
+This is applicable to following options:
+@itemize @bullet
+@item -D BLAS_USE_WEB=@var{trigger}
+@item -D CBLAS_USE_WEB=@var{trigger}
+@item -D LAPACK_USE_WEB=@var{trigger}
+@item -D LAPACKE_USE_WEB=@var{trigger}
+@item -D PLASMA_USE_WEB=@var{trigger}
+@item -D MPI_USE_WEB=@var{trigger}
+@item -D FXT_USE_WEB=@var{trigger}
+@item -D HWLOC_USE_WEB=@var{trigger}
+@item -D STARPU_USE_WEB=@var{trigger}
+@end itemize
+
+
+@end table
+
+@node Advanced configuration 
+@subsection Advanced configuration
+
+@table @code
+
+@item -D @code{<PACKAGE>}_LIB=@var{var}
+Define how to link with @code{<PACKAGE>}.
+By defining @code{<PACKAGE>_LIB}, @code{<PACKAGE>_USE_LIB} will be setted to @code{ON}
+This is applicable to following options:
+@itemize @bullet
+@item -D BLAS_LIB=@var{trigger}
+@item -D CBLAS_LIB=@var{trigger}
+@item -D LAPACK_LIB=@var{trigger}
+@item -D LAPACKE_LIB=@var{trigger}
+@item -D PLASMA_LIB=@var{trigger}
+@item -D MPI_LIB=@var{trigger}
+@item -D FXT_LIB=@var{trigger}
+@item -D HWLOC_LIB=@var{trigger}
+@item -D STARPU_LIB=@var{trigger}
+@end itemize
+
+@example
+cmake ../ -D BLAS_LIB="-L$(MKLROOT)/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm"
+@end example
+
+@item -D @code{<PACKAGE>}_INC=@var{path}
+Define the path to the include directory of @code{<PACKAGE>}.
+By defining @code{<PACKAGE>_INC}, @code{<PACKAGE>_USE_LIB} will be setted to @code{ON}
+This is applicable to following options:
+@itemize @bullet
+@item -D CBLAS_INC=@var{trigger}
+@item -D LAPACKE_INC=@var{trigger}
+@item -D PLASMA_INC=@var{trigger}
+@item -D MPI_INC=@var{trigger}
+@item -D FXT_INC=@var{trigger}
+@item -D HWLOC_INC=@var{trigger}
+@item -D STARPU_INC=@var{trigger}
+@end itemize
+
+@example
+cmake ../ -D BLAS_INC="$(MKLROOT)/include"
+@end example
+
+@item -D @code{<PACKAGE>}_DIR=@var{path}
+Define the path to the top directory of @code{<PACKAGE>}.
+By defining @code{<PACKAGE>_DIR}, @code{<PACKAGE>_USE_SYSTEM} will be setted to @code{ON}
+This is applicable to following options:
+@itemize @bullet
+@item -D BLAS_DIR=@var{trigger}
+@item -D CBLAS_DIR=@var{trigger}
+@item -D LAPACK_DIR=@var{trigger}
+@item -D LAPACKE_DIR=@var{trigger}
+@item -D PLASMA_DIR=@var{trigger}
+@item -D MPI_DIR=@var{trigger}
+@item -D FXT_DIR=@var{trigger}
+@item -D HWLOC_DIR=@var{trigger}
+@item -D STARPU_DIR=@var{trigger}
+@end itemize
+
+@example
+cmake ../ -D BLAS_DIR="$(MKLROOT)"
+@end example
+
+@item -D @code{<PACKAGE>}_URL=@var{var}
+Define the web address to the tarball of @code{<PACKAGE>}.
+By defining @code{<PACKAGE>_URL}, @code{<PACKAGE>_USE_WEB} will be setted to @code{ON}
+This is applicable to following options:
+@itemize @bullet
+@item -D BLAS_URL=@var{trigger}
+@item -D CBLAS_URL=@var{trigger}
+@item -D LAPACK_URL=@var{trigger}
+@item -D LAPACKE_URL=@var{trigger}
+@item -D PLASMA_URL=@var{trigger}
+@item -D MPI_URL=@var{trigger}
+@item -D FXT_URL=@var{trigger}
+@item -D HWLOC_URL=@var{trigger}
+@item -D STARPU_URL=@var{trigger}
+@end itemize
+
+@example
+cmake ../ -D BLAS_URL="http://www.netlib.org/blas/blas.tgz"
+@end example
+
+@item -D @code{<PACKAGE>}_TARBALL=@var{var}
+Define the path to the tarball of @code{<PACKAGE>}.
+By defining @code{<PACKAGE>_TARBALL}, @code{<PACKAGE>_USE_TARBALL} will be setted to @code{ON}
+This is applicable to following options:
+@itemize @bullet
+@item -D BLAS_TARBALL=@var{trigger}
+@item -D CBLAS_TARBALL=@var{trigger}
+@item -D LAPACK_TARBALL=@var{trigger}
+@item -D LAPACKE_TARBALL=@var{trigger}
+@item -D PLASMA_TARBALL=@var{trigger}
+@item -D MPI_TARBALL=@var{trigger}
+@item -D FXT_TARBALL=@var{trigger}
+@item -D HWLOC_TARBALL=@var{trigger}
+@item -D STARPU_TARBALL=@var{trigger}
+@end itemize
+
+@example
+cmake ../ -D BLAS_TARBALL="$(HOME)/download/blas.tgz"
+@end example
+
+@item -D @code{<PACKAGE>}_SVN_REP=@var{var}
+Define the address to the repository of @code{<PACKAGE>}.
+This is applicable to following options:
+@itemize @bullet
+@item -D BLAS_SVN_REP=@var{trigger}
+@item -D CBLAS_SVN_REP=@var{trigger}
+@item -D LAPACK_SVN_REP=@var{trigger}
+@item -D LAPACKE_SVN_REP=@var{trigger}
+@item -D PLASMA_SVN_REP=@var{trigger}
+@item -D MPI_SVN_REP=@var{trigger}
+@item -D FXT_SVN_REP=@var{trigger}
+@item -D HWLOC_SVN_REP=@var{trigger}
+@item -D STARPU_SVN_REP=@var{trigger}
+@end itemize
+
+@example
+cmake ../ -D STARPU_SVN_REP="https://scm.gforge.inria.fr/svn/starpu/trunk"
+@end example
+
+@item -D @code{<PACKAGE>}_REPO_MODE=@var{var}
+Define the type of the repository for @code{<PACKAGE>}.
+This is applicable to following options:
+@itemize @bullet
+@item -D BLAS_REPO_MODE=@var{trigger}
+@item -D CBLAS_REPO_MODE=@var{trigger}
+@item -D LAPACK_REPO_MODE=@var{trigger}
+@item -D LAPACKE_REPO_MODE=@var{trigger}
+@item -D PLASMA_REPO_MODE=@var{trigger}
+@item -D MPI_REPO_MODE=@var{trigger}
+@item -D FXT_REPO_MODE=@var{trigger}
+@item -D HWLOC_REPO_MODE=@var{trigger}
+@item -D STARPU_REPO_MODE=@var{trigger}
+@end itemize
+
+@example
+cmake ../ -D STARPU_REPO_MODE="SVN"
+cmake ../ -D STARPU_REPO_MODE="CVS"
+@end example
+
+@item -D @code{<PACKAGE>}_SVN_ID=@var{var}
+Deifne the login to access to the repository.
+This is applicable to following options:
+@itemize @bullet
+@item -D BLAS_SVN_ID=@var{trigger}
+@item -D CBLAS_SVN_ID=@var{trigger}
+@item -D LAPACK_SVN_ID=@var{trigger}
+@item -D LAPACKE_SVN_ID=@var{trigger}
+@item -D PLASMA_SVN_ID=@var{trigger}
+@item -D MPI_SVN_ID=@var{trigger}
+@item -D FXT_SVN_ID=@var{trigger}
+@item -D HWLOC_SVN_ID=@var{trigger}
+@item -D STARPU_SVN_ID=@var{trigger}
+@end itemize
+
+@example
+cmake ../ -D STARPU_SVN_ID="anonsvn"
+@end example
+
+@item -D @code{<PACKAGE>}_SVN_PWD=@var{var}
+Deifne the password to access to the repository.
+This is applicable to following options:
+@itemize @bullet
+@item -D BLAS_SVN_PWD=@var{trigger}
+@item -D CBLAS_SVN_PWD=@var{trigger}
+@item -D LAPACK_SVN_PWD=@var{trigger}
+@item -D LAPACKE_SVN_PWD=@var{trigger}
+@item -D PLASMA_SVN_PWD=@var{trigger}
+@item -D MPI_SVN_PWD=@var{trigger}
+@item -D FXT_SVN_PWD=@var{trigger}
+@item -D HWLOC_SVN_PWD=@var{trigger}
+@item -D STARPU_SVN_PWD=@var{trigger}
+@end itemize
+
+@example
+cmake ../ -D STARPU_SVN_PWD="my-password"
+@end example
+
+@end table
+
 @node Execution configuration through environment variables
 @section Execution configuration through environment variables
 
