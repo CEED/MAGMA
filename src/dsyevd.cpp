@@ -72,13 +72,14 @@ magma_dsyevd(char jobz, char uplo,
             If INFO = 0, the eigenvalues in ascending order.   
 
     WORK    (workspace/output) DOUBLE_PRECISION array, dimension (MAX(1,LWORK))   
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
+            On exit, if INFO = 0, WORK[0] returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
             The length of the array WORK.   
             If N <= 1,                LWORK must be at least 1.   
-            If JOBZ  = 'N' and N > 1, LWORK must be at least 2*N + 1.   
-            If JOBZ  = 'V' and N > 1, LWORK must be at least 1 + 6*N + 2*N**2.   
+            If JOBZ  = 'N' and N > 1, LWORK must be at least 2*N + N*NB.
+            If JOBZ  = 'V' and N > 1, LWORK must be at least 1 + 6*N + 2*N**2.
+            NB can be obtained through magma_get_dsytrd_nb(N).
 
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal sizes of the WORK and IWORK
@@ -87,7 +88,7 @@ magma_dsyevd(char jobz, char uplo,
             LIWORK is issued by XERBLA.
 
     IWORK   (workspace/output) INTEGER array, dimension (MAX(1,LIWORK))   
-            On exit, if INFO = 0, IWORK(1) returns the optimal LIWORK.   
+            On exit, if INFO = 0, IWORK[0] returns the optimal LIWORK.   
 
     LIWORK  (input) INTEGER   
             The dimension of the array IWORK.   
@@ -123,10 +124,10 @@ magma_dsyevd(char jobz, char uplo,
 
     char uplo_[2] = {uplo, 0};
     char jobz_[2] = {jobz, 0};
-    magma_int_t c__1 = 1;
-    magma_int_t c_n1 = -1;
-    magma_int_t c__0 = 0;
-    double c_b18 = 1.;
+    magma_int_t ione = 1;
+    magma_int_t imone = -1;
+    magma_int_t izero = 0;
+    double d_one = 1.;
     
     magma_int_t a_dim1, a_offset;
     double d__1;
@@ -135,9 +136,8 @@ magma_dsyevd(char jobz, char uplo,
     magma_int_t inde;
     double anrm;
     double rmin, rmax;
-    magma_int_t lopt;
     double sigma;
-    magma_int_t iinfo, lwmin, liopt;
+    magma_int_t iinfo, lwmin;
     magma_int_t lower;
     magma_int_t wantz;
     magma_int_t indwk2, llwrk2;
@@ -167,12 +167,23 @@ magma_dsyevd(char jobz, char uplo,
         *info = -5;
     }
 
-    lapackf77_dsyevd(jobz_, uplo_, &n, 
-                     a, &lda, w, work, &c_n1, 
-                     iwork, &c_n1, info);
-
-    lwmin  = (magma_int_t)work[0];
-    liwmin = (magma_int_t)iwork[0];
+    magma_int_t nb = magma_get_dsytrd_nb( n );
+    if ( n <= 1 ) {
+        lwmin  = 1;
+        liwmin = 1;
+    }
+    else if ( wantz ) {
+        lwmin  = 1 + 6*n + 2*n*n;
+        liwmin = 3 + 5*n;
+    }
+    else {
+        lwmin  = 2*n + n*nb;
+        liwmin = 1;
+    }
+    // multiply by 1+eps to ensure length gets rounded up,
+    // if it cannot be exactly represented in floating point.
+    work[0]  = lwmin * (1. + dlamch_("Epsilon"));
+    iwork[0] = liwmin;
 
     if ((lwork < lwmin) && !lquery) {
         *info = -8;
@@ -227,7 +238,7 @@ magma_dsyevd(char jobz, char uplo,
         sigma = rmax / anrm;
     }
     if (iscale == 1) {
-        lapackf77_dlascl(uplo_, &c__0, &c__0, &c_b18, &sigma, &n, &n, &a[a_offset], 
+        lapackf77_dlascl(uplo_, &izero, &izero, &d_one, &sigma, &n, &n, &a[a_offset], 
                 &lda, info);
     }
 
@@ -302,11 +313,11 @@ magma_dsyevd(char jobz, char uplo,
     /* If matrix was scaled, then rescale eigenvalues appropriately. */
     if (iscale == 1) {
         d__1 = 1. / sigma;
-        blasf77_dscal(&n, &d__1, &w[1], &c__1);
+        blasf77_dscal(&n, &d__1, &w[1], &ione);
     }
 
-    MAGMA_D_SET2REAL(work[1], (double) lopt);
-    iwork[1] = liopt;
+    work[1]  = lwmin * (1. + dlamch_("Epsilon"));  // round up
+    iwork[1] = liwmin;
 
     return MAGMA_SUCCESS;
 } /* magma_dsyevd */
