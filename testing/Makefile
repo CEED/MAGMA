@@ -51,6 +51,7 @@ ZSRC := \
         testing_zgesvd.cpp      \
         testing_zheevd.cpp      \
         testing_dsyevd.cpp	\
+        testing_dsyevd_gpu.cpp	\
         testing_zhegvd.cpp      \
         testing_dsygvd.cpp      \
         testing_zhegvdx.cpp     \

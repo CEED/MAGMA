@@ -31,7 +31,7 @@ int main( int argc, char** argv)
 {
     TESTING_CUDA_INIT();
 
-    double *h_A, *h_R, *h_work;
+    double *d_A, *h_A, *h_R, *h_work;
     double *w1, *w2;
     magma_int_t *iwork;
     double gpu_time, cpu_time;
@@ -97,6 +97,8 @@ int main( int argc, char** argv)
     liwork = aux_iwork[0];
 
     /* Allocate host memory for the matrix */
+    magma_int_t ldda = ((N + 31)/32)*32;
+    TESTING_DEVALLOC(  d_A, double, N*ldda );
     TESTING_MALLOC(    h_A, double, N*N );
     TESTING_MALLOC(    w1,  double, N   );
     TESTING_MALLOC(    w2,  double, N   );
@@ -114,23 +116,25 @@ int main( int argc, char** argv)
 
         /* Initialize the matrix */
         lapackf77_dlarnv( &ione, ISEED, &n2, h_A );
-        lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
+        magma_dsetmatrix( N, N, h_A, N, d_A, ldda );
 
         /* warm up run */
-        magma_dsyevd(jobz[0], uplo[0],
-                     N, h_R, N, w1,
-                     h_work, lwork, 
-                     iwork, liwork, 
-                     &info);
+        magma_dsyevd_gpu( jobz[0], uplo[0],
+                          N, d_A, ldda, w1,
+                          h_R, N,
+                          h_work, lwork, 
+                          iwork, liwork, 
+                          &info );
         
-        lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
+        magma_dsetmatrix( N, N, h_A, N, d_A, ldda );
 
         /* query for optimal workspace sizes */
-        magma_dsyevd(jobz[0], uplo[0],
-                     N, h_R, N, w1,
-                     h_work, -1,
-                     iwork,  -1,
-                     &info);
+        magma_dsyevd_gpu( jobz[0], uplo[0],
+                          N, d_A, ldda, w1,
+                          h_R, N,
+                          h_work, -1,
+                          iwork,  -1,
+                          &info );
         int lwork_save  = lwork;
         int liwork_save = liwork;
         lwork  = min( lwork,  (magma_int_t) h_work[0] );
@@ -143,14 +147,17 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-        magma_dsyevd(jobz[0], uplo[0],
-                     N, h_R, N, w1,
-                     h_work, lwork,
-                     iwork, liwork,
-                     &info);
+        magma_dsyevd_gpu( jobz[0], uplo[0],
+                          N, d_A, ldda, w1,
+                          h_R, N,
+                          h_work, lwork,
+                          iwork, liwork,
+                          &info );
         end = get_current_time();
 
         gpu_time = GetTimerValue(start,end)/1000.;
+        
+        magma_dgetmatrix( N, N, d_A, ldda, h_R, N );
 
         lwork  = lwork_save;
         liwork = liwork_save;
@@ -221,6 +228,7 @@ int main( int argc, char** argv)
     }
  
     /* Memory clean up */
+    TESTING_DEVFREE(  d_A    );
     TESTING_FREE(     h_A    );
     TESTING_FREE(     w1     );
     TESTING_FREE(     w2     );
