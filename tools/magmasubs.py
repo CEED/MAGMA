@@ -281,7 +281,6 @@ subs = {
     ('SCHED_s',        'SCHED_d',        'SCHED_c',        'SCHED_z'         ),
     ('starpu_s',       'starpu_d',       'starpu_c',       'starpu_z'        ),
     ('testing_ds',     'testing_ds',     'testing_zc',     'testing_zc'      ),
-    ('TESTING_S',      'TESTING_D',      'TESTING_C',      'TESTING_Z'       ),
     ('testing_s',      'testing_d',      'testing_c',      'testing_z'       ),
     ('time_s',         'time_d',         'time_c',         'time_z'          ),
     ('WRAPPER_S',      'WRAPPER_D',      'WRAPPER_C',      'WRAPPER_Z'       ),
