@@ -98,13 +98,12 @@ magma_zstedx(char range, magma_int_t n, double vl, double vu,
     LDZ     (input) INTEGER
             The leading dimension of the array Z. LDZ >= max(1,N).
 
-    RWORK   (workspace/output) DOUBLE PRECISION array,
-                                           dimension (LRWORK)
+    RWORK   (workspace/output) DOUBLE PRECISION array, dimension (LRWORK)
             On exit, if INFO = 0, RWORK(1) returns the optimal LRWORK.
 
     LRWORK  (input) INTEGER
             The dimension of the array RWORK.
-            LRWORK must be at least 1 + 4*N + 2*N**2 .
+            LRWORK must be at least 1 + 4*N + 2*N**2.
             Note that if N is less than or
             equal to the minimum divide size, usually 25, then LRWORK
             need only be max(1,2*(N-1)).
