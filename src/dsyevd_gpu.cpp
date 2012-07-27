@@ -155,10 +155,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
     double smlnum;
     magma_int_t lquery;
 
-    bool dc_freed = false;
-
     double *dwork;
-    double *dc;
     magma_int_t lddc = ldda;
 
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);
@@ -182,13 +179,10 @@ magma_dsyevd_gpu(char jobz, char uplo,
         liwmin = 1;
     }
     else if ( wantz ) {
-        // for sytrd: e (n), tau (n), work (n*nb)
-        // for stedx: e (n),   ...  , z (n^2), work (1 + 4n + n^2)
         lwmin  = 1 + 6*n + 2*n*n;
         liwmin = 3 + 5*n;
     }
     else {
-        // for sytrd: e (n), tau (n), work (n*nb)
         lwmin  = 2*n + n*nb;
         liwmin = 1;
     }
@@ -230,11 +224,14 @@ magma_dsyevd_gpu(char jobz, char uplo,
     cudaStream_t stream;
     magma_queue_create( &stream );
 
-    if (MAGMA_SUCCESS != magma_dmalloc( &dc, n*lddc )) {
-        *info = MAGMA_ERR_DEVICE_ALLOC;
-        return *info;
+    // n*lddc for dsytrd2_gpu
+    // n for dlansy
+    magma_int_t ldwork = n*lddc;
+    if ( wantz ) {
+        // need 3n^2/2 for dstedx
+        ldwork = max( ldwork, 3*n*(n/2 + 1));
     }
-    if (MAGMA_SUCCESS != magma_dmalloc( &dwork, n )) {
+    if (MAGMA_SUCCESS != magma_dmalloc( &dwork, ldwork )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
@@ -249,7 +246,6 @@ magma_dsyevd_gpu(char jobz, char uplo,
 
     /* Scale matrix to allowable range, if necessary. */
     anrm = magmablas_dlansy('M', uplo, n, da, ldda, dwork);
-    magma_free( dwork );
     iscale = 0;
     if (anrm > 0. && anrm < rmin) {
         iscale = 1;
@@ -263,13 +259,15 @@ magma_dsyevd_gpu(char jobz, char uplo,
     }
     
     /* Call DSYTRD to reduce symmetric matrix to tridiagonal form. */
+    // dsytrd work: e (n) + tau (n) + llwork (n*nb)  ==>  2n + n*nb
+    // dstedx work: e (n) + tau (n) + z (n*n) + llwrk2 (1 + 4*n + n^2)  ==>  1 + 6n + 2n^2
     inde   = 0;
     indtau = inde   + n;
     indwrk = indtau + n;
-    llwork = lwork - indwrk + 1;
     indwk2 = indwrk + n*n;
-    llwrk2 = lwork - indwk2 + 1;
-  
+    llwork = lwork - indwrk;
+    llwrk2 = lwork - indwk2;
+
 //#define ENABLE_TIMER
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
@@ -279,7 +277,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
 #ifdef FAST_SYMV
     magma_dsytrd2_gpu(uplo, n, da, ldda, w, &work[inde],
                       &work[indtau], wa, ldwa, &work[indwrk], llwork,
-                      dc, lddc*n, &iinfo);
+                      dwork, n*lddc, &iinfo);
 #else
     magma_dsytrd_gpu(uplo, n, da, ldda, w, &work[inde],
                      &work[indtau], wa, ldwa, &work[indwrk], llwork,
@@ -303,53 +301,30 @@ magma_dsyevd_gpu(char jobz, char uplo,
         start = get_current_time();
 #endif
         
-        if (MAGMA_SUCCESS != magma_dmalloc( &dwork, 3*n*(n/2 + 1) )) {
-            magma_free( dc );  // if not enough memory is available, free dc to be able do allocate dwork
-            dc_freed=true;
-#ifdef ENABLE_TIMER
-            printf("dc deallocated\n");
-#endif
-            if (MAGMA_SUCCESS != magma_dmalloc( &dwork, 3*n*(n/2 + 1) )) {
-                *info = MAGMA_ERR_DEVICE_ALLOC;
-                return *info;
-            }
-        }
-        
         magma_dstedx('A', n, 0., 0., 0, 0, w, &work[inde],
                      &work[indwrk], n, &work[indwk2],
                      llwrk2, iwork, liwork, dwork, info);
-        
-        magma_free( dwork );
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
         printf("time dstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
-        if(dc_freed){
-            dc_freed = false;
-            if (MAGMA_SUCCESS != magma_dmalloc( &dc, n*lddc )) {
-                *info = MAGMA_ERR_DEVICE_ALLOC;
-                return *info;
-            }
-        }
-
-        magma_dsetmatrix( n, n, &work[indwrk], n, dc, lddc );
+        magma_dsetmatrix( n, n, &work[indwrk], n, dwork, lddc );
         
 #ifdef ENABLE_TIMER
         start = get_current_time();
 #endif
 
         magma_dormtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, n, da, ldda, &work[indtau],
-                         dc, lddc, wa, ldwa, &iinfo);
+                         dwork, lddc, wa, ldwa, &iinfo);
         
-        magma_dcopymatrix( n, n, dc, lddc, da, ldda );
+        magma_dcopymatrix( n, n, dwork, lddc, da, ldda );
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
         printf("time dormtr + copy = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
-
     }
 
     /* If matrix was scaled, then rescale eigenvalues appropriately. */
@@ -362,8 +337,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
     iwork[0] = liwmin;
 
     magma_queue_destroy( stream );
-    if (!dc_freed)
-        magma_free( dc );
-
+    magma_free( dwork );
+    
     return *info;
 } /* magma_dsyevd_gpu */

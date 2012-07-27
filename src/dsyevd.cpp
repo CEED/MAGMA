@@ -173,13 +173,10 @@ magma_dsyevd(char jobz, char uplo,
         liwmin = 1;
     }
     else if ( wantz ) {
-        // for sytrd: e (n), tau (n), work (n*nb)
-        // for stedx: e (n),   ...  , z (n^2), work (1 + 4n + n^2)
         lwmin  = 1 + 6*n + 2*n*n;
         liwmin = 3 + 5*n;
     }
     else {
-        // for sytrd: e (n), tau (n), work (n*nb)
         lwmin  = 2*n + n*nb;
         liwmin = 1;
     }
@@ -239,13 +236,15 @@ magma_dsyevd(char jobz, char uplo,
     }
 
     /* Call DSYTRD to reduce symmetric matrix to tridiagonal form. */
+    // dsytrd work: e (n) + tau (n) + llwork (n*nb)  ==>  2n + n*nb
+    // dstedx work: e (n) + tau (n) + z (n*n) + llwrk2 (1 + 4*n + n^2)  ==>  1 + 6n + 2n^2
     inde   = 0;
-    indtau = inde + n;
+    indtau = inde   + n;
     indwrk = indtau + n;
-    llwork = lwork - indwrk + 1;
-    indwk2 = indwrk + n * n;
-    llwrk2 = lwork - indwk2 + 1;
-  
+    indwk2 = indwrk + n*n;
+    llwork = lwork - indwrk;
+    llwrk2 = lwork - indwk2;
+
 //#define ENABLE_TIMER
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
@@ -299,7 +298,6 @@ magma_dsyevd(char jobz, char uplo,
         end = get_current_time();
         printf("time dormtr + copy = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
-
     }
 
     /* If matrix was scaled, then rescale eigenvalues appropriately. */
