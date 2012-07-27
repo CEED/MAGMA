@@ -3,7 +3,7 @@
 
 -----------------------------------------------------
 
-MAGMA is intended for a single CUDA enabled NVIDIA GPU.  It supports
+MAGMA is intended for CUDA enabled NVIDIA GPUs.  It supports
 Tesla and Fermi GPUs. For more details see the MAGMA 1.0 presentation.
 
 Included are routines for the following algorithms:
