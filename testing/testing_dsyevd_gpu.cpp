@@ -31,7 +31,7 @@ int main( int argc, char** argv)
 {
     TESTING_CUDA_INIT();
 
-    double *d_A, *h_A, *h_R, *h_work;
+    double *h_A, *h_R, *d_R, *h_work;
     double *w1, *w2;
     magma_int_t *iwork;
     double gpu_time, cpu_time;
@@ -87,22 +87,23 @@ int main( int argc, char** argv)
     /* Query for workspace sizes */
     double aux_work[1];
     magma_int_t aux_iwork[1];
-    magma_dsyevd( jobz[0], uplo[0],
-                  N, h_R, N, w1,
-                  aux_work,  -1,
-                  aux_iwork, -1,
-                  &info );
+    magma_dsyevd_gpu( jobz[0], uplo[0],
+                      N, d_R, N, w1,
+                      h_R, N,
+                      aux_work,  -1,
+                      aux_iwork, -1,
+                      &info );
     magma_int_t lwork, liwork;
     lwork  = (magma_int_t) aux_work[0];
     liwork = aux_iwork[0];
 
     /* Allocate host memory for the matrix */
     magma_int_t ldda = ((N + 31)/32)*32;
-    TESTING_DEVALLOC(  d_A, double, N*ldda );
     TESTING_MALLOC(    h_A, double, N*N );
     TESTING_MALLOC(    w1,  double, N   );
     TESTING_MALLOC(    w2,  double, N   );
     TESTING_HOSTALLOC( h_R, double, N*N );
+    TESTING_DEVALLOC(  d_R, double, N*ldda );
     TESTING_HOSTALLOC( h_work, double,      lwork  );
     TESTING_MALLOC(    iwork,  magma_int_t, liwork );
     
@@ -116,21 +117,21 @@ int main( int argc, char** argv)
 
         /* Initialize the matrix */
         lapackf77_dlarnv( &ione, ISEED, &n2, h_A );
-        magma_dsetmatrix( N, N, h_A, N, d_A, ldda );
+        magma_dsetmatrix( N, N, h_A, N, d_R, ldda );
 
         /* warm up run */
         magma_dsyevd_gpu( jobz[0], uplo[0],
-                          N, d_A, ldda, w1,
+                          N, d_R, ldda, w1,
                           h_R, N,
                           h_work, lwork, 
                           iwork, liwork, 
                           &info );
         
-        magma_dsetmatrix( N, N, h_A, N, d_A, ldda );
+        magma_dsetmatrix( N, N, h_A, N, d_R, ldda );
 
         /* query for optimal workspace sizes */
         magma_dsyevd_gpu( jobz[0], uplo[0],
-                          N, d_A, ldda, w1,
+                          N, d_R, ldda, w1,
                           h_R, N,
                           h_work, -1,
                           iwork,  -1,
@@ -148,7 +149,7 @@ int main( int argc, char** argv)
            =================================================================== */
         start = get_current_time();
         magma_dsyevd_gpu( jobz[0], uplo[0],
-                          N, d_A, ldda, w1,
+                          N, d_R, ldda, w1,
                           h_R, N,
                           h_work, lwork,
                           iwork, liwork,
@@ -156,8 +157,6 @@ int main( int argc, char** argv)
         end = get_current_time();
 
         gpu_time = GetTimerValue(start,end)/1000.;
-        
-        magma_dgetmatrix( N, N, d_A, ldda, h_R, N );
 
         lwork  = lwork_save;
         liwork = liwork_save;
@@ -172,6 +171,7 @@ int main( int argc, char** argv)
              =================================================================== */
           double *tau, temp1, temp2;
 
+          magma_dgetmatrix( N, N, d_R, ldda, h_R, N );
           lapackf77_dsyt21(&ione, uplo, &N, &izero,
                            h_A, &N, 
                            w1, h_work,  
@@ -179,12 +179,13 @@ int main( int argc, char** argv)
                            h_R, &N,
                            tau, h_work, &result[0]);
 
-          lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
-          magma_dsyevd('N', uplo[0],
-                       N, h_R, N, w2,
-                       h_work, lwork,
-                       iwork, liwork,
-                       &info);
+          magma_dsetmatrix( N, N, h_A, N, d_R, ldda );
+          magma_dsyevd_gpu( 'N', uplo[0],
+                            N, d_R, ldda, w2,
+                            h_R, N,
+                            h_work, lwork,
+                            iwork, liwork,
+                            &info);
           
           temp1 = temp2 = 0;
           for(int j=0; j<N; j++){
@@ -194,7 +195,6 @@ int main( int argc, char** argv)
           }
           result[2] = temp2 / temp1;
         }
-
 
         /* =====================================================================
            Performs operation using LAPACK
@@ -228,13 +228,13 @@ int main( int argc, char** argv)
     }
  
     /* Memory clean up */
-    TESTING_DEVFREE(  d_A    );
     TESTING_FREE(     h_A    );
     TESTING_FREE(     w1     );
     TESTING_FREE(     w2     );
     TESTING_FREE(     iwork  );
     TESTING_HOSTFREE( h_work );
     TESTING_HOSTFREE( h_R    );
+    TESTING_DEVFREE(  d_R    );
 
     /* Shutdown */
     TESTING_CUDA_FINALIZE();

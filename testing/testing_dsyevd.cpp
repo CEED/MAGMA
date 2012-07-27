@@ -85,7 +85,7 @@ int main( int argc, char** argv)
     }
 
     /* Query for workspace sizes */
-    double aux_work[1];
+    double      aux_work[1];
     magma_int_t aux_iwork[1];
     magma_dsyevd( jobz[0], uplo[0],
                   N, h_R, N, w1,
@@ -187,7 +187,6 @@ int main( int argc, char** argv)
           }
           result[2] = temp2 / temp1;
         }
-
 
         /* =====================================================================
            Performs operation using LAPACK
