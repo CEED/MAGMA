@@ -29,6 +29,10 @@
 /* ------------------------------------------------------------
  * MAGMA constants
  * --------------------------------------------------------- */
+#define MAGMA_VERSION_MAJOR 1
+#define MAGMA_VERSION_MINOR 2
+#define MAGMA_VERSION_MICRO 1
+
 #define MagmaNoTrans       'N'
 #define MagmaTrans         'T'
 #define MagmaConjTrans     'C'
@@ -200,6 +204,7 @@ extern "C" {
 // initialization
 void magma_init( void );
 void magma_finalize( void );
+void magma_version( int* major, int* minor, int* micro );
 
 // ========================================
 // memory allocation

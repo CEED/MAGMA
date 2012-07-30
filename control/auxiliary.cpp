@@ -10,6 +10,19 @@
 #include <assert.h>
 
 // -------------------------
+// Returns version of MAGMA, as defined by
+// MAGMA_VERSION_MAJOR, MAGMA_VERSION_MINOR, MAGMA_VERSION_MICRO constants.
+void magma_version( int* major, int* minor, int* micro )
+{
+    if ( major != NULL and minor != NULL and micro != NULL ) {
+        *major = MAGMA_VERSION_MAJOR;
+        *minor = MAGMA_VERSION_MINOR;
+        *micro = MAGMA_VERSION_MICRO;
+    }
+}
+
+
+// -------------------------
 // Returns:
 //  1 if A is a device pointer (definitely),
 //  0 if A is a host   pointer (definitely or inferred from error),
@@ -85,6 +98,10 @@ int magma_num_gpus( void )
 extern "C"
 void printout_devices( )
 {
+    int major, minor, micro;
+    magma_version( &major, &minor, &micro );
+    printf( "MAGMA %d.%d.%d\n", major, minor, micro );
+    
     int ndevices;
     cudaGetDeviceCount( &ndevices );
     for( int idevice = 0; idevice < ndevices; idevice++ ) {

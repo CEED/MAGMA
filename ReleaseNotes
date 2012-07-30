@@ -24,6 +24,11 @@ Included are routines for the following algorithms:
       gemm, gemv, symv, and trsm.
 
  1.x.x
+    * Add MAGMA_VERSION constants and magma_version() in magma.h.
+    * Fix printing complex matrices.
+    * Fix documentation and query for heevd/syevd workspace sizes.
+
+ 1.2.1 - June 29, 2012
     * Fix bug in [zcsd]getrf_gpu.cpp
     * Fix workspace requirement for SVD in [zcsd]gesvd.cpp
     * Fix a bug in freeing pinned memory (in interface_cuda/alloc.cpp)
@@ -42,7 +47,7 @@ Included are routines for the following algorithms:
     * Improve performance of ungqr/orgqr CPU and GPU interfaces by 30%;
       more for small matrices
 
- 1.2.0
+ 1.2.0 - May 10, 2012
     * Fix bugs in [zcsd]hegst[_gpu].cpp
     * Fix a bug in [zcsd]latrd.cpp
     * Fix a bug in [zcsd]gelqf_gpu.cpp
