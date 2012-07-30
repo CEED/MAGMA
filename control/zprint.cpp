@@ -11,6 +11,8 @@
 */
 #include "common_magma.h"
 
+#define PRECISION_z
+
 #define A(i,j) (A + i + j*lda)
 
 // -------------------------
@@ -32,7 +34,11 @@ void magma_zprint( magma_int_t m, magma_int_t n, cuDoubleComplex *A, magma_int_t
                 printf( "   0.    " );
             }
             else {
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                printf( " %8.4f+%8.4fi", MAGMA_Z_REAL( *A(i,j) ), MAGMA_Z_IMAG( *A(i,j) ));
+#else
                 printf( " %8.4f", MAGMA_Z_REAL( *A(i,j) ));
+#endif
             }
         }
         printf( "\n" );
