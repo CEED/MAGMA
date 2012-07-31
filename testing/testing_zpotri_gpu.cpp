@@ -22,14 +22,6 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-#define PRECISION_z
-// Flops formula
-#if defined(PRECISION_z) || defined(PRECISION_c)
-#define FLOPS(n) ( 6. * FMULS_POTRF(n) + 2. * FADDS_POTRF(n) + FMULS_POTRI(n) +      FADDS_POTRI(n) )
-#else
-#define FLOPS(n) (      FMULS_POTRF(n) +      FADDS_POTRF(n) + FMULS_POTRF(n) +      FADDS_POTRF(n) )
-#endif
-
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zpotrf
 */
@@ -77,7 +69,7 @@ int main( int argc, char** argv)
         N   = size[i];
         lda = N; 
         n2  = lda*N;
-        flops = FLOPS( (double)N ) / 1000000;
+        flops = FLOPS_ZPOTRI( (double)N ) / 1000000;
         
         ldda = ((N+31)/32)*32;
 
@@ -100,25 +92,33 @@ int main( int argc, char** argv)
         //cublasSetMatrix( N, N, sizeof(cuDoubleComplex), h_A, lda, d_A, ldda);
         //magma_zpotrf_gpu(uplo[0], N, d_A, ldda, &info);
 
+        /* factorize matrix */
         magma_zsetmatrix( N, N, h_A, lda, d_A, ldda );
-              start = get_current_time();
         magma_zpotrf_gpu(uplo[0], N, d_A, ldda, &info);
+        
+        // check for exact singularity
+        //magma_zgetmatrix( N, N, d_A, ldda, h_R, lda );
+        //h_R[ 10 + 10*lda ] = MAGMA_Z_MAKE( 0.0, 0.0 );
+        //magma_zsetmatrix( N, N, h_R, lda, d_A, ldda );
+        
+        start = get_current_time();
         magma_zpotri_gpu(uplo[0], N, d_A, ldda, &info);
         end = get_current_time();
-        if (info < 0)
-            printf("Argument %d of magma_zpotri had an illegal value.\n", (int) -info);
+        if (info != 0)
+            printf( "An error occured in magma_zpotri_gpu, info=%d\n", (int) info );
 
         gpu_perf = flops / GetTimerValue(start, end);
         
         /* =====================================================================
            Performs operation using LAPACK 
            =================================================================== */
-        start = get_current_time();
         lapackf77_zpotrf(uplo, &N, h_A, &lda, &info);
+        
+        start = get_current_time();
         lapackf77_zpotri(uplo, &N, h_A, &lda, &info);
         end = get_current_time();
-        if (info < 0)  
-            printf("Argument %d of zpotri had an illegal value.\n", (int) -info);
+        if (info != 0)
+            printf( "An error occured in lapackf77_zpotri, info=%d\n", (int) info );
         
         cpu_perf = flops / GetTimerValue(start, end);
       

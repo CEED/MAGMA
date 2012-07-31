@@ -22,14 +22,6 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-// Flops formula
-#define PRECISION_z
-#if defined(PRECISION_z) || defined(PRECISION_c)
-#define FLOPS(n) ( 6.*FMULS_GETRI(n) + 2.*FADDS_GETRI(n))
-#else
-#define FLOPS(n) (    FMULS_GETRI(n) +    FADDS_GETRI(n))
-#endif
-
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgetrf
 */
@@ -98,7 +90,7 @@ int main( int argc, char** argv)
         N   = size[i];
         lda = N;
         n2  = lda*N;
-        flops = FLOPS( (double)N ) / 1000000;
+        flops = FLOPS_ZGETRI( (double)N ) / 1000000;
         
         ldda = ((N+31)/32)*32;
 
@@ -110,6 +102,10 @@ int main( int argc, char** argv)
         magma_zsetmatrix( N, N, h_A, lda, d_A, ldda );
         magma_zgetrf_gpu( N, N, d_A, ldda, ipiv, &info );
         magma_zgetmatrix( N, N, d_A, ldda, h_A, lda );
+        
+        // check for exact singularity
+        //h_A[ 10 + 10*lda ] = MAGMA_Z_MAKE( 0.0, 0.0 );
+        //magma_zsetmatrix( N, N, h_A, lda, d_A, ldda );
 
         /* ====================================================================
            Performs operation using MAGMA
@@ -131,7 +127,7 @@ int main( int argc, char** argv)
         lapackf77_zgetri( &N,     h_A, &lda, ipiv, work, &lwork, &info );
         end = get_current_time();
         if (info != 0)
-            printf( "An error occured in zgetri, info=%d\n", (int) info );
+            printf( "An error occured in lapackf77_zgetri, info=%d\n", (int) info );
         
         cpu_perf = flops / GetTimerValue(start, end);
         
