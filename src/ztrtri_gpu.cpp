@@ -78,7 +78,8 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
             = 0: successful exit
             < 0: if INFO = -i, the i-th argument had an illegal value
             > 0: if INFO = i, dA(i,i) is exactly zero.  The triangular
-                    matrix is singular and its inverse can not be computed.
+                    matrix is singular and its inverse cannot be computed.
+                 (Singularity check is currently disabled.)
 
     ===================================================================== */
 
@@ -86,6 +87,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
     char uplo_[2] = {uplo, 0};
     char diag_[2] = {diag, 0};
     magma_int_t     nb, nn, j, jb;
+    cuDoubleComplex c_zero     = MAGMA_Z_ZERO;
     cuDoubleComplex c_one      = MAGMA_Z_ONE;
     cuDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
     cuDoubleComplex *work;
@@ -109,14 +111,18 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
         return *info;
     }
 
-    /*  Check for singularity if non-unit */
-    if (nounit) { 
-        for (*info=0; *info < n; *info=*info+1) {
-            if(dA(*info,*info)==0)
+    /* Check for singularity if non-unit */
+    /* cannot do here with matrix dA on GPU -- need kernel */
+    /*
+    if (nounit) {
+        for ( j=0; j<n; ++j ) {
+            if ( MAGMA_Z_EQUAL( *dA(j,j), c_zero )) {
+                *info = j+1;  // Fortran index
                 return *info;
+            }
         }
-        *info=0;
     }
+    */
 
     /* Determine the block size for this environment */
     nb = magma_get_zpotrf_nb(n);

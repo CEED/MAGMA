@@ -79,18 +79,18 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
             = 0: successful exit
             < 0: if INFO = -i, the i-th argument had an illegal value
             > 0: if INFO = i, A(i,i) is exactly zero.  The triangular
-                    matrix is singular and its inverse can not be computed.
+                    matrix is singular and its inverse cannot be computed.
 
     ===================================================================== */
 
     /* Local variables */
     char uplo_[2] = {uplo, 0};
     char diag_[2] = {diag, 0};
-    magma_int_t        ldda, nb, nn;
-    magma_int_t j, jb;
-    cuDoubleComplex    c_one      = MAGMA_Z_ONE;
-    cuDoubleComplex    c_neg_one  = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex    *work;
+    magma_int_t     ldda, nb, nn, j, jb;
+    cuDoubleComplex c_zero     = MAGMA_Z_ZERO;
+    cuDoubleComplex c_one      = MAGMA_Z_ONE;
+    cuDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex *work;
 
     int upper  = lapackf77_lsame(uplo_, "U");
     int nounit = lapackf77_lsame(diag_, "N");
@@ -117,11 +117,12 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 
     /* Check for singularity if non-unit */
     if (nounit) {
-        for (*info=0; *info < n; *info=*info+1) {
-            if(A(*info,*info)==0)
+        for ( j=0; j<n; ++j ) {
+            if ( MAGMA_Z_EQUAL( *A(j,j), c_zero )) {
+                *info = j+1;  // Fortran index
                 return *info;
+            }
         }
-        *info=0;
     }
 
     /* Determine the block size for this environment */
@@ -142,7 +143,7 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
     else {
         if (upper) {
             /* Compute inverse of upper triangular matrix */
-            for (j=0; j<n; j =j+ nb) {
+            for (j=0; j<n; j=j+nb) {
                 jb = min(nb, (n-j));
                 magma_zsetmatrix( jb, (n-j),
                                   A(j, j),  lda,
