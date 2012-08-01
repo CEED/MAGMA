@@ -84,7 +84,7 @@ def main():
   if options.make:
     """If the program should be GNU Make friendly."""
     print '## Automatically generated Makefile';
-    print 'PYTHON ?= python';
+    print 'PYTHON ?= python\n';
 
   c = Conversion(); """This initializes the variable for static member access."""
 
@@ -100,10 +100,11 @@ def main():
 
   if options.make:
     """If the program should be GNU Make friendly."""
-    print 'gen = ',' '+' '.join(c.files_out);
+    print
+    print 'gen = ' + ' '.join(c.files_out) + '\n'
     print 'cleangen:';
-    print '\trm -f $(gen)';
-    print 'generate: $(gen)';
+    print '\trm -f $(gen)\n';
+    print 'generate: $(gen)\n';
     print '.PHONY: cleangen generate';
   if options.in_print:
     """Should we print the input files?"""
