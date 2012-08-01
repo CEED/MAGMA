@@ -18,26 +18,12 @@
 #include <cuda_runtime_api.h>
 #include <cublas.h>
 #include <assert.h>
-#include <stdarg.h>  // va_start
 
 // includes, project
 #include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
-
-
-// --------------------
-void ensure( bool condition, const char* msg, ... )
-{
-    if ( not condition ) {
-        va_list va;
-        va_start( va, msg );
-        vprintf( msg, va );
-        exit(1);
-    }
-}
-
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing magma_zhemm_mgpu
@@ -61,8 +47,7 @@ int main( int argc, char** argv)
     magma_int_t m, size, lda, ldda;
     const int MAXTESTS = 10;
     // sizes are 1024*N - 32
-    magma_int_t msize[MAXTESTS] =
-        { 992, 2016, 3040, 4064, 5088, 6112, 7136, 8160, 9184, 10208 };
+    magma_int_t msize[MAXTESTS] = { 1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 10112 };
     magma_int_t n       = 64;
     magma_int_t nb      = 64;
     int nstream = 2;
@@ -76,7 +61,7 @@ int main( int argc, char** argv)
     printf( "Usage: %s -M m -N n -nb nb -nstream nstream -ngpu ngpu -count count -c\n"
             "    -M can be repeated %d times.\n"
             "    -ngpu or setting $MAGMA_NUM_GPUS sets number of GPUs to use.\n"
-            "    -c or setting $MAGMA_TESTINGS_CHECK runs LAPACK and checks result.\n",
+            "    -c or setting $MAGMA_TESTINGS_CHECK runs LAPACK and checks result.\n\n",
             argv[0], MAXTESTS );
 
     int checkres = (getenv("MAGMA_TESTINGS_CHECK") != NULL);
@@ -85,32 +70,32 @@ int main( int argc, char** argv)
     int mmax = 0;
     for( int i = 1; i < argc; i++ ) {
         if ( strcmp("-M", argv[i]) == 0 and i+1 < argc ) {
-            ensure( ntest < MAXTESTS, "error: -M repeated more than maximum %d tests\n", MAXTESTS );
+            magma_assert( ntest < MAXTESTS, "error: -M repeated more than maximum %d tests\n", MAXTESTS );
             msize[ntest] = atoi( argv[++i] );
-            ensure( msize[ntest] > 0, "error: -M %s is invalid; must be > 0.\n", argv[i] );
+            magma_assert( msize[ntest] > 0, "error: -M %s is invalid; must be > 0.\n", argv[i] );
             mmax = max( mmax, msize[ntest] );
             ntest++;
         }
         else if ( strcmp("-N", argv[i]) == 0 and i+1 < argc ) {
             n = atoi( argv[++i] );
-            ensure( n > 0, "error: -N %s is invalid; must be > 0.\n", argv[i] );
+            magma_assert( n > 0, "error: -N %s is invalid; must be > 0.\n", argv[i] );
         }
         else if ( strcmp("-nb", argv[i]) == 0 and i+1 < argc ) {
             nb = atoi( argv[++i] );
-            ensure( nb > 0, "error: -nb %s is invalid; must be > 0.\n", argv[i] );
+            magma_assert( nb > 0, "error: -nb %s is invalid; must be > 0.\n", argv[i] );
         }
         else if ( strcmp("-count", argv[i]) == 0 and i+1 < argc ) {
             count = atoi( argv[++i] );
-            ensure( count > 0, "error: -count %s is invalid; must be > 0.\n", argv[i] );
+            magma_assert( count > 0, "error: -count %s is invalid; must be > 0.\n", argv[i] );
         }
         else if ( strcmp("-nstream", argv[i]) == 0 and i+1 < argc ) {
             nstream = atoi( argv[++i] );
-            ensure( nstream > 0 and nstream <= 20,
+            magma_assert( nstream > 0 and nstream <= 20,
                     "error: -nstream %s is invalid; must be > 0 and <= 20.\n", argv[i] );
         }
         else if ( strcmp("-ngpu", argv[i]) == 0 and i+1 < argc ) {
             ngpu = atoi( argv[++i] );
-            ensure( ngpu > 0, "error: -ngpu %s is invalid; must be > 0.\n", argv[i] );
+            magma_assert( ngpu > 0, "error: -ngpu %s is invalid; must be > 0.\n", argv[i] );
         }
         else if ( strcmp("-c", argv[i]) == 0 ) {
             checkres = true;
@@ -152,7 +137,6 @@ int main( int argc, char** argv)
     TESTING_DEVALLOC( dA2, cuDoubleComplex, ldda*m );
     }
     
-    printf("\n");
     printf( "nb %d, ngpu %d, nstream %d\n", (int) nb, ngpu, nstream );
     printf("    m     n    CPU GFlop/s (sec)   GPU GFlop/s (sec)   CUBLAS hemm (sec)   ||R|| / ||A||*||X||\n");
     printf("==============================================================================================\n");

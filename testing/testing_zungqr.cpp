@@ -44,9 +44,9 @@ int main( int argc, char** argv )
     magma_int_t m=0, n=0, k=0;
     magma_int_t n2, lda, ldda, lwork, min_mn, nb;
     const int MAXTESTS = 10;
-    magma_int_t msize[MAXTESTS] = { 1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 9984 };
-    magma_int_t nsize[MAXTESTS] = { 1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 9984 };
-    magma_int_t ksize[MAXTESTS] = { 1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 9984 };
+    magma_int_t msize[MAXTESTS] = { 1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 10112 };
+    magma_int_t nsize[MAXTESTS] = { 1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 10112 };
+    magma_int_t ksize[MAXTESTS] = { 1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 10112 };
     
     magma_int_t info;
     magma_int_t ione     = 1;
@@ -55,7 +55,7 @@ int main( int argc, char** argv )
     printf( "Usage: %s -N m,n,k -c\n"
             "    -N can be repeated %d times. m >= n >= k is required.\n"
             "    If only m,n is given, then n=k. If only m is given, then m=n=k.\n"
-            "    -c or setting $MAGMA_TESTINGS_CHECK runs LAPACK and checks result.\n",
+            "    -c or setting $MAGMA_TESTINGS_CHECK runs LAPACK and checks result.\n\n",
             argv[0], MAXTESTS );
 
     int checkres = (getenv("MAGMA_TESTINGS_CHECK") != NULL);
@@ -65,41 +65,32 @@ int main( int argc, char** argv )
     magma_int_t mmax = 0;
     magma_int_t kmax = 0;
     for( int i = 1; i < argc; i++ ) {
-        if ( strcmp("-N", argv[i]) == 0 ) {
-            if ( ++i >= argc ) {
-                printf( "error: -N requires an argument\n" );
-                exit(1);
+        if ( strcmp("-N", argv[i]) == 0 and i+1 < argc ) {
+            magma_assert( ntest < MAXTESTS, "error: -N repeated more than maximum %d tests\n", MAXTESTS );
+            info = sscanf( argv[++i], "%d,%d,%d", &m, &n, &k );
+            if ( info == 3 and m >= n and n >= k and k > 0 ) {
+                msize[ ntest ] = m;
+                nsize[ ntest ] = n;
+                ksize[ ntest ] = k;
             }
-            else if ( ntest == MAXTESTS ) {
-                printf( "error: -N exceeded maximum %d tests\n", MAXTESTS );
-                exit(1);
+            else if ( info == 2 and m >= n and n > 0 ) {
+                msize[ ntest ] = m;
+                nsize[ ntest ] = n;
+                ksize[ ntest ] = n;  // implicitly
+            }
+            else if ( info == 1 and m > 0 ) {
+                msize[ ntest ] = m;
+                nsize[ ntest ] = m;  // implicitly
+                ksize[ ntest ] = m;  // implicitly
             }
             else {
-                info = sscanf( argv[i], "%d,%d,%d", &m, &n, &k );
-                if ( info == 3 and m >= n and n >= k and k > 0 ) {
-                    msize[ ntest ] = m;
-                    nsize[ ntest ] = n;
-                    ksize[ ntest ] = k;
-                }
-                else if ( info == 2 and m >= n and n > 0 ) {
-                    msize[ ntest ] = m;
-                    nsize[ ntest ] = n;
-                    ksize[ ntest ] = n;  // implicitly
-                }
-                else if ( info == 1 and m > 0 ) {
-                    msize[ ntest ] = m;
-                    nsize[ ntest ] = m;  // implicitly
-                    ksize[ ntest ] = m;  // implicitly
-                }
-                else {
-                    printf( "error: -N %s is invalid; ensure m >= n >= k.\n", argv[i] );
-                    exit(1);
-                }
-                mmax = max( mmax, msize[ntest] );
-                nmax = max( nmax, nsize[ntest] );
-                kmax = max( kmax, ksize[ntest] );
-                ntest++;
+                printf( "error: -N %s is invalid; ensure m >= n >= k.\n", argv[i] );
+                exit(1);
             }
+            mmax = max( mmax, msize[ntest] );
+            nmax = max( nmax, nsize[ntest] );
+            kmax = max( kmax, ksize[ntest] );
+            ntest++;
         }
         else if ( strcmp("-c", argv[i]) == 0 ) {
             checkres = true;
@@ -132,7 +123,6 @@ int main( int argc, char** argv )
     TESTING_DEVALLOC(  dA,    cuDoubleComplex, ldda*nmax );
     TESTING_DEVALLOC(  dT,    cuDoubleComplex, ( 2*min_mn + ((nmax + 31)/32)*32 )*nb );
     
-    printf("\n");
     printf("    m     n     k   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R|| / ||A||\n");
     printf("=========================================================================\n");
     for( int i = 0; i < ntest; ++i ){
@@ -156,14 +146,14 @@ int main( int argc, char** argv )
         magma_zsetmatrix( m, n, hA, lda, dA, ldda );
         magma_zgeqrf_gpu( m, n, dA, ldda, tau, dT, &info );
         if ( info != 0 )
-            printf("magma_zgeqrf_gpu return error %d\n", info );
+            printf("magma_zgeqrf_gpu returned error %d\n", info);
         magma_zgetmatrix( m, n, dA, ldda, hR, lda );
         
         gpu_time = magma_wtime();
         magma_zungqr( m, n, k, hR, lda, tau, dT, nb, &info );
         gpu_time = magma_wtime() - gpu_time;
         if ( info != 0 )
-            printf("magma_zungqr_gpu return error %d\n", info );
+            printf("magma_zungqr_gpu returned error %d\n", info);
         
         gpu_perf = gflops / gpu_time;
         
@@ -175,13 +165,13 @@ int main( int argc, char** argv )
             
             lapackf77_zgeqrf( &m, &n, hA, &lda, tau, hwork, &lwork, &info );
             if ( info != 0 )
-                printf("lapackf77_zgeqrf return error %d\n", info );
+                printf("lapackf77_zgeqrf returned error %d\n", info);
             
             cpu_time = magma_wtime();
             lapackf77_zungqr( &m, &n, &k, hA, &lda, tau, hwork, &lwork, &info );
             cpu_time = magma_wtime() - cpu_time;
             if ( info != 0 )
-                printf("lapackf77_zungqr return error %d\n", info );
+                printf("lapackf77_zungqr returned error %d\n", info);
             
             cpu_perf = gflops / cpu_time;
 
@@ -190,8 +180,14 @@ int main( int argc, char** argv )
             error = lapackf77_zlange("f", &m, &n, hR, &lda, work) / error;
         }
         
-        printf("%5d %5d %5d   %7.1f (%7.2f)   %7.1f (%7.2f)   %8.2e\n",
-               m, n, k, cpu_perf, cpu_time, gpu_perf, gpu_time, error );
+        if ( checkres ) {
+            printf("%5d %5d %5d   %7.1f (%7.2f)   %7.1f (%7.2f)   %8.2e\n",
+                   m, n, k, cpu_perf, cpu_time, gpu_perf, gpu_time, error );
+        }
+        else {
+            printf("%5d %5d %5d     ---   (  ---  )   %7.1f (%7.2f)     ---  \n",
+                   m, n, k, gpu_perf, gpu_time );
+        }
     }
     
     /* Memory clean up */

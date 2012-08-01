@@ -18,7 +18,6 @@
 #include <cuda_runtime_api.h>
 #include <cublas.h>
 #include <assert.h>
-#include <stdarg.h>  // va_start
 
 // includes, project
 #include "flops.h"
@@ -34,17 +33,6 @@ magma_zher2k_mgpu(
     double beta,           cuDoubleComplex **dc, int lddc, int offset,
     int num_streams, cudaStream_t stream[][10]);
 
-
-// --------------------
-void ensure( bool condition, const char* msg, ... )
-{
-    if ( not condition ) {
-        va_list va;
-        va_start( va, msg );
-        vprintf( msg, va );
-        exit(1);
-    }
-}
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing magma_zher2k_mgpu
@@ -67,7 +55,7 @@ int main( int argc, char** argv)
     magma_int_t n, size, lda, ldda;
     const int MAXTESTS = 10;
     // sizes are 1024*N - 32
-    magma_int_t nsize[MAXTESTS] = { 992, 2016, 3040, 4064, 5088, 6112, 7136, 8160, 9184, 10208 };
+    magma_int_t nsize[MAXTESTS] = { 1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 10112 };
     magma_int_t k       = 64;
     magma_int_t nb      = 64;
     magma_int_t nstream = 2;
@@ -81,7 +69,7 @@ int main( int argc, char** argv)
     printf( "Usage: %s -N n -K k -nb nb -nstream nstream -ngpu ngpu -count count -c\n"
             "    -N can be repeated %d times.\n"
             "    -ngpu or setting $MAGMA_NUM_GPUS sets number of GPUs to use.\n"
-            "    -c or setting $MAGMA_TESTINGS_CHECK runs LAPACK and checks result.\n",
+            "    -c or setting $MAGMA_TESTINGS_CHECK runs LAPACK and checks result.\n\n",
             argv[0], MAXTESTS );
 
     int checkres = (getenv("MAGMA_TESTINGS_CHECK") != NULL);
@@ -90,32 +78,32 @@ int main( int argc, char** argv)
     int nmax = 0;
     for( int i = 1; i < argc; i++ ) {
         if ( strcmp("-N", argv[i]) == 0 and i+1 < argc ) {
-            ensure( ntest < MAXTESTS, "error: -N repeated more than maximum %d tests\n", MAXTESTS );
+            magma_assert( ntest < MAXTESTS, "error: -N repeated more than maximum %d tests\n", MAXTESTS );
             nsize[ntest] = atoi( argv[++i] );
-            ensure( nsize[ntest] > 0, "error: -N %s is invalid; must be > 0.\n", argv[i] );
+            magma_assert( nsize[ntest] > 0, "error: -N %s is invalid; must be > 0.\n", argv[i] );
             nmax = max( nmax, nsize[ntest] );
             ntest++;
         }
         else if ( strcmp("-K", argv[i]) == 0 and i+1 < argc ) {
             k = atoi( argv[++i] );
-            ensure( k > 0, "error: -K %s is invalid; must be > 0.\n", argv[i] );
+            magma_assert( k > 0, "error: -K %s is invalid; must be > 0.\n", argv[i] );
         }
         else if ( strcmp("-nb", argv[i]) == 0 and i+1 < argc ) {
             nb = atoi( argv[++i] );
-            ensure( nb > 0, "error: -nb %s is invalid; must be > 0.\n", argv[i] );
+            magma_assert( nb > 0, "error: -nb %s is invalid; must be > 0.\n", argv[i] );
         }
         else if ( strcmp("-count", argv[i]) == 0 and i+1 < argc ) {
             count = atoi( argv[++i] );
-            ensure( count > 0, "error: -count %s is invalid; must be > 0.\n", argv[i] );
+            magma_assert( count > 0, "error: -count %s is invalid; must be > 0.\n", argv[i] );
         }
         else if ( strcmp("-nstream", argv[i]) == 0 and i+1 < argc ) {
             nstream = atoi( argv[++i] );
-            ensure( nstream > 0 and nstream <= 10,
+            magma_assert( nstream > 0 and nstream <= 10,
                     "error: -nstream %s is invalid; must be > 0 and <= 10.\n", argv[i] );
         }
         else if ( strcmp("-ngpu", argv[i]) == 0 and i+1 < argc ) {
             ngpu = atoi( argv[++i] );
-            ensure( ngpu > 0, "error: -ngpu %s is invalid; must be > 0.\n", argv[i] );
+            magma_assert( ngpu > 0, "error: -ngpu %s is invalid; must be > 0.\n", argv[i] );
         }
         else if ( strcmp("-c", argv[i]) == 0 ) {
             checkres = true;
@@ -155,7 +143,6 @@ int main( int argc, char** argv)
         }
     }
     
-    printf("\n");
     printf( "k %d, nb %d, ngpu %d, nstream %d\n", (int) k, (int) nb, (int) ngpu, (int) nstream );
     printf("    n    CPU GFlop/s (sec)   GPU GFlop/s (sec)   Ichi's code (sec)   ||R|| / ||A||\n");
     printf("=========================================================================\n");
