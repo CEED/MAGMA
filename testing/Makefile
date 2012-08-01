@@ -70,6 +70,8 @@ ZSRC := \
 	testing_zher2k_mgpu.cpp	\
 	testing_zhemm_mgpu.cpp	\
 	testing_zsymmetrize.cpp	\
+	\
+	testing_z.cpp		\
 
 ifeq ($(FORT), pgfortran)
 	FOBJ  = fortran_thunking.o
@@ -90,17 +92,29 @@ ALLOBJ := $(ALLOBJ:.cuf=.o)
 ALLOBJ := $(ALLOBJ:.cpp=.o)
 EXE    := $(ALLOBJ:.o=)
 
+LIBTEST := libtest.a
+LIBSRC  := testing_z.o testing_c.o testing_d.o testing_s.o testing.o
+LIBOBJ  := $(LIBSRC:.cpp=.o)
+LIBEXE  := $(LIBOBJ:.o=)
+
+# strip out fake exe files generated from LIBSRC
+EXE := $(filter-out $(LIBEXE), $(EXE))
+
 # only testing_auxiliary needs control
 INC += -I../control
 
 all: $(EXE)
+
+$(LIBTEST): $(LIBOBJ)
+	$(ARCH) $(ARCHFLAGS) $@ $^
+	$(RANLIB) $@
 
 LIBLAPACKTEST = lin/liblapacktest.a
 
 $(LIBLAPACKTEST):
 	cd lin && make liblapacktest.a
 
-$(EXE): $(LIBMAGMA) $(LIBMAGMABLAS) $(LIBLAPACKTEST)
+$(EXE): $(LIBMAGMA) $(LIBMAGMABLAS) $(LIBLAPACKTEST) $(LIBTEST)
 
 clean:
 	rm -f *.o *~
@@ -118,13 +132,13 @@ endif
 
 testing_%_f : testing_%_f.o $(FOBJ)
 	$(FORT) $(LDOPTS) $< $(FOBJ) -o $@ \
-	lin/liblapacktest.a -L../lib -lmagma -lmagmablas -lmagma \
+	$(LIBTEST) $(LIBLAPACKTEST) -L../lib -lmagma -lmagmablas -lmagma \
 	$(LIBDIR) \
 	$(LIB) 
 
 testing_% : testing_%.o
 	$(CC) $(LDOPTS) $(NOMAIN) $< $(OBJ) -o $@ \
-	lin/liblapacktest.a -L../lib -lmagma -lmagmablas -lmagma \
+	$(LIBTEST) $(LIBLAPACKTEST) -L../lib -lmagma -lmagmablas -lmagma \
 	$(LIBDIR) \
 	$(LIB) 
 
