@@ -47,7 +47,7 @@ int main( int argc, char** argv)
 
     /* Matrix size */
     magma_int_t M = 0, N = 0, n2, lda, ldda, lhwork;
-    magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,9984};
+    magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
 
     magma_int_t i, info, min_mn;
     magma_int_t ione     = 1;

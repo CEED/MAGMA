@@ -42,7 +42,7 @@ int main( int argc, char** argv)
     cuDoubleComplex *h_A, *h_R;
     cuDoubleComplex *d_A;
     magma_int_t N = 0, n2, lda, ldda;
-    magma_int_t size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10240};
+    magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
     
     magma_int_t i, info;
     const char *uplo     = MagmaUpperStr;
@@ -124,7 +124,7 @@ int main( int argc, char** argv)
         magma_zpotrf_gpu(uplo[0], N, d_A, ldda, &info);
         end = get_current_time();
         if (info != 0)
-            printf("Argument %d of magma_zpotrf had an illegal value.\n", (int) -info);
+            printf("magma_zpotrf_gpu returned error %d.\n", (int) info);
 
         gpu_perf = flops / GetTimerValue(start, end);
         
@@ -135,7 +135,7 @@ int main( int argc, char** argv)
         lapackf77_zpotrf(uplo, &N, h_A, &lda, &info);
         end = get_current_time();
         if (info != 0)  
-            printf("Argument %d of zpotrf had an illegal value.\n", (int) -info);
+            printf("lapackf77_zpotrf returned error %d.\n", (int) info);
         
         cpu_perf = flops / GetTimerValue(start, end);
       

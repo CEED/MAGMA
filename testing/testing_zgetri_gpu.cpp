@@ -34,7 +34,7 @@ int main( int argc, char** argv)
     cuDoubleComplex *h_A, *h_R;
     cuDoubleComplex *d_A, *dwork;
     magma_int_t N = 0, n2, lda, ldda;
-    magma_int_t size[10] = { 1024, 2048, 3072, 4032, 5184, 6048, 7200, 8064, 8928, 10240 };
+    magma_int_t size[10] = { 1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 10112 };
     magma_int_t ntest = 10;
     
     magma_int_t i, info;
@@ -68,7 +68,7 @@ int main( int argc, char** argv)
     lwork = -1;
     lapackf77_zgetri( &N, h_A, &lda, ipiv, work, &lwork, &info );
     if (info != 0)
-        printf( "An error occured in magma_zgetri, info=%d\n", (int) info );
+        printf("lapackf77_zgetri returned error %d\n", (int) info);
     lwork = int( MAGMA_Z_REAL( *work ));
 
     /* query for Magma workspace size */
@@ -114,7 +114,7 @@ int main( int argc, char** argv)
         magma_zgetri_gpu( N,    d_A, ldda, ipiv, dwork, ldwork, &info );
         end = get_current_time();
         if (info != 0)
-            printf( "An error occured in magma_zgetri, info=%d\n", (int) info );
+            printf("magma_zgetri_gpu returned error %d\n", (int) info);
 
         gpu_perf = flops / GetTimerValue(start, end);
         
@@ -127,7 +127,7 @@ int main( int argc, char** argv)
         lapackf77_zgetri( &N,     h_A, &lda, ipiv, work, &lwork, &info );
         end = get_current_time();
         if (info != 0)
-            printf( "An error occured in lapackf77_zgetri, info=%d\n", (int) info );
+            printf("lapackf77_zgetri returned error %d\n", (int) info);
         
         cpu_perf = flops / GetTimerValue(start, end);
         

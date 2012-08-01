@@ -48,7 +48,7 @@ int main( int argc, char** argv)
     cuDoubleComplex *h_A, *h_R;
     cuDoubleComplex *d_lA[4];
     magma_int_t N = 0, n2, nb, nk, lda, ldda, n_local, ldn_local;
-    magma_int_t size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10240};
+    magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
         magma_int_t n_sizes = 10, flag = 0;
     
     magma_int_t i, j, k, info, num_gpus0 = 1, num_gpus;

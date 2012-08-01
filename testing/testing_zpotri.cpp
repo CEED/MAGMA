@@ -33,7 +33,7 @@ int main( int argc, char** argv)
     double           flops, gpu_perf, cpu_perf;
     cuDoubleComplex *h_A, *h_R;
     magma_int_t      N=0, n2, lda;
-    magma_int_t      size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10240};
+    magma_int_t      size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
 
     magma_int_t  i, info;
     const char  *uplo     = MagmaLowerStr;
@@ -101,7 +101,7 @@ int main( int argc, char** argv)
         magma_zpotri(uplo[0], N, h_R, lda, &info);
         end = get_current_time();
         if (info != 0)
-            printf( "An error occured in magma_zpotri, info=%d\n", (int) info );
+            printf("magma_zpotri returned error %d\n", (int) info);
 
         gpu_perf = flops / GetTimerValue(start, end);
 
@@ -114,7 +114,7 @@ int main( int argc, char** argv)
         lapackf77_zpotri(uplo, &N, h_A, &lda, &info);
         end = get_current_time();
         if (info != 0)
-            printf( "An error occured in lapackf77_zpotri, info=%d\n", (int) info );
+            printf("lapackf77_zpotri returned error %d\n", (int) info);
 
         cpu_perf = flops / GetTimerValue(start, end);
 
