@@ -320,6 +320,7 @@ subs = {
     ('spanel_to_q',    'dpanel_to_q',    'cpanel_to_q',    'zpanel_to_q'     ),
     ('spermute',       'dpermute',       'cpermute',       'zpermute'        ),
     ('sprint',         'dprint',         'cprint',         'zprint'          ),
+    ('sprint',         'dprint',         'sprint',         'dprint'          ),
     ('sprofiling',     'dprofiling',     'cprofiling',     'zprofiling'      ),
     ('sq_to_panel',    'dq_to_panel',    'cq_to_panel',    'zq_to_panel'     ),
     ('sset',           'dset',           'cset',           'zset'            ),
