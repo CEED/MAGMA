@@ -97,16 +97,14 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
     WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
-    LWORK   (input) INTEGER   
-            The dimension of the array WORK.  LWORK >= 1.   
-            For optimum performance LWORK >= N*NB, where NB is the   
-            optimal blocksize.   
+    LWORK   (input) INTEGER
+            The dimension of the array WORK.  LWORK >= N*NB, where NB is the
+            optimal blocksize given by magma_get_zhetrd_nb().
 
             If LWORK = -1, then a workspace query is assumed; the routine   
             only calculates the optimal size of the WORK array, returns   
             this value as the first entry of the WORK array, and no error   
             message related to LWORK is issued by XERBLA.   
-
 
     INFO    (output) INTEGER   
             = 0:  successful exit   
