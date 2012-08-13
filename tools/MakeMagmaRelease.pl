@@ -50,6 +50,8 @@ my @files2delete = qw(
     testing/testing_zpotrf_mc.cpp
     testing/testing_zgetrf_mc.cpp
     testing/testing_zswap.cpp
+ 
+    sparse-iter
 );
 # Using qw() avoids need for "quotes", but comments aren't recognized inside qw()
 #src/magma_zf77.cpp
