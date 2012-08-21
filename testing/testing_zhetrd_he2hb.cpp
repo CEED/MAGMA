@@ -37,12 +37,12 @@
 
 
 extern "C" magma_int_t
-magma_zhebbd(char uplo, magma_int_t n, magma_int_t NB,
-             cuDoubleComplex *a, magma_int_t lda,
-             cuDoubleComplex *tau,
-             cuDoubleComplex *work, magma_int_t lwork,
-             cuDoubleComplex *dT,  
-             magma_int_t *info);
+magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t NB,
+                    cuDoubleComplex *a, magma_int_t lda,
+                    cuDoubleComplex *tau,
+                    cuDoubleComplex *work, magma_int_t lwork,
+                    cuDoubleComplex *dT,  
+                    magma_int_t *info);
 
 extern "C" magma_int_t
 magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int n, int NB, 
@@ -57,7 +57,7 @@ extern "C" void zcheck_eig_(char *JOBZ, int  *MATYPE, int  *N, int  *NB,
 #endif
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing zhebbd
+   -- Testing zhetrd_he2hb
 */
 int main( int argc, char** argv)
 {
@@ -106,17 +106,17 @@ int main( int argc, char** argv)
                 uplo = (char *)MagmaLowerStr;
         }
         if ( N > 0 )
-            printf("  testing_zhebbd -L|U -N %d\n\n", (int) N);
+            printf("  testing_zhetrd_he2hb -L|U -N %d\n\n", (int) N);
         else
         {
             printf("\nUsage: \n");
-            printf("  testing_zhebbd -L|U -N %d\n\n", 1024);
+            printf("  testing_zhetrd_he2hb -L|U -N %d\n\n", 1024);
             exit(1);
         }
     }
     else {
         printf("\nUsage: \n");
-        printf("  testing_zhebbd -L|U -N %d\n\n", 1024);
+        printf("  testing_zhetrd_he2hb -L|U -N %d\n\n", 1024);
         N = size[9];
     }
         
@@ -127,10 +127,10 @@ int main( int argc, char** argv)
     ldt = N;
     n2  = lda * N; 
     if(NB<1)
-        NB  = 64; //64; //magma_get_zhebbd_nb(N);
+        NB  = 64; //64; //magma_get_zhetrd_he2hb_nb(N);
 
     if(NE<1)
-        NE  = N; //64; //magma_get_zhebbd_nb(N);
+        NE  = N; //64; //magma_get_zhetrd_he2hb_nb(N);
 
     /* We suppose the magma NB is bigger than lapack NB */
     lwork = N*NB; 
@@ -237,8 +237,8 @@ return 0;
            Performs operation using MAGMA
            =================================================================== */
         start = get_current_time();
-       //magma_zhebbd(uplo[0], N, h_R, lda, tau, h_work, lwork, &info);
-        magma_zhebbd(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, dT1, &info);
+        //magma_zhetrd_he2hb(uplo[0], N, h_R, lda, tau, h_work, lwork, &info);
+        magma_zhetrd_he2hb(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, dT1, &info);
         end = get_current_time();
         printf("  Finish BAND    timing= %lf \n" ,GetTimerValue(start,end) / 1000.);
 
@@ -290,7 +290,7 @@ return 0;
         magma_zhetrd_bhe2trc(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1, ldt);
         end = get_current_time();
         if ( info < 0 )
-            printf("Argument %d of magma_zhebbd had an illegal value\n", (int) -info);
+            printf("Argument %d of magma_zhetrd_he2hb had an illegal value\n", (int) -info);
 
         gpu_perf = flops / GetTimerValue(start,end);
         gpu_time = GetTimerValue(start,end) / 1000.;
