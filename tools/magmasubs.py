@@ -330,6 +330,7 @@ subs = {
     ('stile',          'dtile',          'ctile',          'ztile'           ),
     ('stranspose',     'dtranspose',     'ctranspose',     'ztranspose'      ),
     ('szero',          'dzero',          'czero',          'zzero'           ),
+    ('sy2sb',          'sy2sb',          'he2hb',          'he2hb'           ),
     
     # ----- Constants
     ('CblasTrans',     'CblasTrans',     'CblasConjTrans', 'CblasConjTrans'  ),
@@ -492,7 +493,6 @@ subs = {
     ('sort01',         'dort01',         'cunt01',         'zunt01'          ),
     ('splgsy',         'dplgsy',         'cplghe',         'zplghe'          ),
     ('ssbtrd',         'dsbtrd',         'chbtrd',         'zhbtrd'          ),
-    ('ssybbd',         'dsybbd',         'chebbd',         'zhebbd'          ),
     ('ssyev',          'dsyev',          'cheev',          'zheev'           ),
     ('ssyevd',         'dsyevd',         'cheevd',         'zheevd'          ),
     ('ssygs2',         'dsygs2',         'chegs2',         'zhegs2'          ),
@@ -702,7 +702,6 @@ subs = {
     ('SORT01',         'DORT01',         'CUNT01',         'ZUNT01'          ),
     ('SPLGSY',         'DPLGSY',         'CPLGHE',         'ZPLGHE'          ),
     ('SSBTRD',         'DSBTRD',         'CHBTRD',         'ZHBTRD'          ),
-    ('SSYBBD',         'DSYBBD',         'CHEBBD',         'ZHEBBD'          ),
     ('SSYEV',          'DSYEV',          'CHEEV',          'ZHEEV'           ),
     ('SSYEVD',         'DSYEVD',         'CHEEVD',         'ZHEEVD'          ),
     ('SSYGS2',         'DSYGS2',         'CHEGS2',         'ZHEGS2'          ),

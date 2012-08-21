@@ -23,12 +23,12 @@
 
 
 extern "C" magma_int_t
-magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
-              cuDoubleComplex *a, magma_int_t lda, 
-              cuDoubleComplex *tau,
-              cuDoubleComplex *work, magma_int_t lwork,
-              cuDoubleComplex *dT,
-              magma_int_t *info)
+magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
+                    cuDoubleComplex *a, magma_int_t lda, 
+                    cuDoubleComplex *tau,
+                    cuDoubleComplex *work, magma_int_t lwork,
+                    cuDoubleComplex *dT,
+                    magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -38,7 +38,7 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
 
     Purpose   
     =======   
-    ZHEBBD reduces a complex Hermitian matrix A to real symmetric   
+    ZHETRD_HE2HB reduces a complex Hermitian matrix A to real symmetric   
     band-diagonal form T by an orthogonal similarity transformation:   
     Q**H * A * Q = T.   
     This version stores the triangular matrices T used in the accumulated
@@ -153,7 +153,7 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
 
     char uplo_[2] = {uplo, 0};
 
-    int ldda = ((n+31)/32)*32; // magma_get_zhebbd_nb(n); 
+    int ldda = ((n+31)/32)*32;
     int lddt = nb;
    
     cuDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE, c_neg_half;
@@ -220,7 +220,7 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
 
     if (upper) {
 
-      printf("ZHEBBD is not yet implemented for upper matrix storage. Exit.\n");
+      printf("ZHETRD_HE2HB is not yet implemented for upper matrix storage. Exit.\n");
       exit(1);
 
     }else {
@@ -367,4 +367,4 @@ magma_zhebbd(char uplo, magma_int_t n, magma_int_t nb,
     magma_free( da );
     MAGMA_Z_SET2REAL( work[0], lwkopt );
     return *info;
-} /* zhebbd_ */
+} /* zhetrd_he2hb_ */

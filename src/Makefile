@@ -150,7 +150,7 @@ ZSRC += \
 	zbulge_applyQ.cpp	\
 	zbulge_aux.cpp		\
 	zbulge_kernel.cpp	\
-	zhebbd.cpp		\
+	zhetrd_he2hb.cpp	\
 	zhetrd_bhe2trc_v3.cpp	\
 	zungqr_2stage_gpu.cpp	\
 
