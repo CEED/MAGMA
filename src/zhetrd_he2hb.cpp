@@ -263,7 +263,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
                                          a_ref ( i, i), lda, stream[1] );
                  trace_gpu_end( 0, 1 );
 
-                 trace_gpu_start( 0, 2, "zher2k", "zher2k" );
+                 trace_gpu_start( 0, 2, "her2k", "her2k" );
                  magma_zher2k(MagmaLower, MagmaNoTrans, pm_old-pn_old, pn_old, c_neg_one,
                       da_ref(indi_old+pn_old, indj_old), ldda,
                       dW + pn_old           , pm_old, d_one,
@@ -283,7 +283,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
              #ifdef TRACING
              snprintf( buf, sizeof(buf), "panel %d", i );
              #endif
-             trace_cpu_start( 0, "zgeqrf", buf );
+             trace_cpu_start( 0, "geqrf", buf );
              lapackf77_zgeqrf(&pm, &pn, a_ref(indi, indj), &lda, 
                         tau_ref(i), work, &lwork, info);
              
@@ -320,7 +320,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
              magma_queue_sync( stream[0] );
              trace_cpu_end( 0 );
              
-             trace_gpu_start( 0, 2, "zgemm", "work = V*T" );
+             trace_gpu_start( 0, 2, "gemm", "work = V*T" );
              magma_zgemm(MagmaNoTrans, MagmaNoTrans, pm, pk, pk,
                          c_one, da_ref(indi, indj), ldda, 
                          t_ref(i), lddt,
@@ -328,7 +328,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
              trace_gpu_end( 0, 2 );
              
              /* W = X = A*V*T = A dwork */ 
-             trace_gpu_start( 0, 2, "zhemm", "X = A*work" );
+             trace_gpu_start( 0, 2, "hemm", "X = A*work" );
              magma_zhemm(MagmaLeft, uplo, pm, pk,
                          c_one, da_ref(indi, indi), ldda,
                          dwork, pm,
@@ -340,7 +340,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
              /* dwork = V*T already ==> dwork' = T'*V'
               * compute T'*V'*X ==> dwork'*W ==>
               * dwork + pm*nb = ((T' * V') * X) = dwork' * X = dwork' * W */
-             trace_gpu_start( 0, 2, "zgemm", "work = T'*V'*X" );
+             trace_gpu_start( 0, 2, "gemm", "work = T'*V'*X" );
              magma_zgemm(MagmaConjTrans, MagmaNoTrans, pk, pk, pm,
                          c_one, dwork, pm, 
                          dW, pm,
@@ -349,7 +349,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
              
              /* W = X - 0.5 * V * T'*V'*X
               *   = X - 0.5 * V * (dwork + pm*nb) = W - 0.5 * V * (dwork + pm*nb) */
-             trace_gpu_start( 0, 2, "zgemm", "W = X - 0.5*V*(T'*V'*X)" );
+             trace_gpu_start( 0, 2, "gemm", "W = X - 0.5*V*(T'*V'*X)" );
              magma_zgemm(MagmaNoTrans, MagmaNoTrans, pm, pk, pk,
                          c_neg_half, da_ref(indi, indj), ldda,
                          dwork + pm*nb, nb, 
@@ -363,14 +363,14 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
              if (i + nb <= n-nb){
                  /* There would be next iteration;
                     do lookahead - update the next panel */
-                 trace_gpu_start( 0, 2, "zgemm", "zgemm 4 next panel left" );
+                 trace_gpu_start( 0, 2, "gemm", "gemm 4 next panel left" );
                  magma_zgemm(MagmaNoTrans, MagmaConjTrans, pm, pn, pn, c_neg_one,
                              da_ref(indi, indj), ldda,
                              dW                , pm, c_one,
                              da_ref(indi, indi), ldda);
                  trace_gpu_end( 0, 2 );
              
-                 trace_gpu_start( 0, 2, "zgemm", "zgemm 5 next panel right" );
+                 trace_gpu_start( 0, 2, "gemm", "gemm 5 next panel right" );
                  magma_zgemm(MagmaNoTrans, MagmaConjTrans, pm, pn, pn, c_neg_one,
                              dW                , pm,
                              da_ref(indi, indj), ldda, c_one,
@@ -379,7 +379,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
              }
              else {
                  /* no look-ahead as this is last iteration */
-                 trace_gpu_start( 0, 2, "zher2k", "zher2k last iteration" );
+                 trace_gpu_start( 0, 2, "her2k", "her2k last iteration" );
                  magma_zher2k(MagmaLower, MagmaNoTrans, pk, pk, c_neg_one,
                               da_ref(indi, indj), ldda,
                               dW                , pm, d_one,
