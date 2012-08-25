@@ -34,11 +34,10 @@ int main( int argc, char** argv)
 
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    double d_one = 1.0;
     
     real_Double_t    gflops, gpu_perf=0., cpu_perf=0., gpu_time=0., cpu_time=0.;
-    real_Double_t    gpu_perf2, gpu_time2;
-    double           error=0., error2=0., work[1];
+    real_Double_t    gpu_perf2=0., gpu_time2=0.;
+    double           error=0., work[1];
     cuDoubleComplex *hA, *hX, *hB, *hR;
     cuDoubleComplex *dA[MagmaMaxGPUs], *dX[MagmaMaxGPUs], *dB[MagmaMaxGPUs];
     cuDoubleComplex *dA2;
@@ -54,7 +53,6 @@ int main( int argc, char** argv)
     int count   = 3;
     int ngpu    = magma_num_gpus();
     
-    magma_int_t info;
     magma_int_t ione     = 1;
     magma_int_t iseed[4] = {0,0,0,1};
         
@@ -69,31 +67,31 @@ int main( int argc, char** argv)
     int ntest = 0;
     int mmax = 0;
     for( int i = 1; i < argc; i++ ) {
-        if ( strcmp("-M", argv[i]) == 0 and i+1 < argc ) {
+        if ( strcmp("-M", argv[i]) == 0 && i+1 < argc ) {
             magma_assert( ntest < MAXTESTS, "error: -M repeated more than maximum %d tests\n", MAXTESTS );
             msize[ntest] = atoi( argv[++i] );
             magma_assert( msize[ntest] > 0, "error: -M %s is invalid; must be > 0.\n", argv[i] );
             mmax = max( mmax, msize[ntest] );
             ntest++;
         }
-        else if ( strcmp("-N", argv[i]) == 0 and i+1 < argc ) {
+        else if ( strcmp("-N", argv[i]) == 0 && i+1 < argc ) {
             n = atoi( argv[++i] );
             magma_assert( n > 0, "error: -N %s is invalid; must be > 0.\n", argv[i] );
         }
-        else if ( strcmp("-nb", argv[i]) == 0 and i+1 < argc ) {
+        else if ( strcmp("-nb", argv[i]) == 0 && i+1 < argc ) {
             nb = atoi( argv[++i] );
             magma_assert( nb > 0, "error: -nb %s is invalid; must be > 0.\n", argv[i] );
         }
-        else if ( strcmp("-count", argv[i]) == 0 and i+1 < argc ) {
+        else if ( strcmp("-count", argv[i]) == 0 && i+1 < argc ) {
             count = atoi( argv[++i] );
             magma_assert( count > 0, "error: -count %s is invalid; must be > 0.\n", argv[i] );
         }
-        else if ( strcmp("-nstream", argv[i]) == 0 and i+1 < argc ) {
+        else if ( strcmp("-nstream", argv[i]) == 0 && i+1 < argc ) {
             nstream = atoi( argv[++i] );
-            magma_assert( nstream > 0 and nstream <= 20,
+            magma_assert( nstream > 0 && nstream <= 20,
                     "error: -nstream %s is invalid; must be > 0 and <= 20.\n", argv[i] );
         }
-        else if ( strcmp("-ngpu", argv[i]) == 0 and i+1 < argc ) {
+        else if ( strcmp("-ngpu", argv[i]) == 0 && i+1 < argc ) {
             ngpu = atoi( argv[++i] );
             magma_assert( ngpu > 0, "error: -ngpu %s is invalid; must be > 0.\n", argv[i] );
         }
@@ -109,7 +107,7 @@ int main( int argc, char** argv)
         ntest = MAXTESTS;
         mmax = msize[ntest-1];
     }
-    assert( mmax > 0 and n > 0 );
+    assert( mmax > 0 && n > 0 );
     
     // allocate memory for largest problem
     m = mmax;
@@ -143,7 +141,7 @@ int main( int argc, char** argv)
     for( int i = 0; i < ntest; ++i ) {
     for( int j = 0; j < count; ++j ) {
         m = msize[i];
-        assert( m > 0 and n > 0 );
+        assert( m > 0 && n > 0 );
         
         lda  = m;
         ldda = ((m + 31)/32)*32;
@@ -192,7 +190,6 @@ int main( int argc, char** argv)
             magma_zsetmatrix( m, n, hX, lda, dX[0], ldda );
             magma_zsetmatrix( m, n, hB, lda, dB[0], ldda );
             
-            real_Double_t gpu_time2, gpu_perf2;
             cudaDeviceSynchronize();
             gpu_time2 = magma_wtime();
             magma_zhemm(
@@ -241,8 +238,8 @@ int main( int argc, char** argv)
                     (int) m, (int) n, cpu_perf, cpu_time, gpu_perf, gpu_time, gpu_perf2, gpu_time2, error );
         }
         else {
-            printf( "%5d %5d     ---   (  ---  )   %7.1f (%7.4f)   %7.1f (%7.4f)   ---\n",
-                    (int) m, (int) n, /*cpu_perf, cpu_time,*/ gpu_perf, gpu_time, gpu_perf2, gpu_time2 /*, error*/ );
+            printf( "%5d %5d     ---   (  ---  )   %7.1f (%7.4f)     ---   (  ---  )   ---\n",
+                    (int) m, (int) n, /*cpu_perf, cpu_time,*/ gpu_perf, gpu_time /*, gpu_perf2, gpu_time2, error*/ );
         }
     }}
     
