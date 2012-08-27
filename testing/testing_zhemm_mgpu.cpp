@@ -25,6 +25,8 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
+#include "trace.h"
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing magma_zhemm_mgpu
 */
@@ -107,10 +109,10 @@ int main( int argc, char** argv)
         ntest = MAXTESTS;
         mmax = msize[ntest-1];
     }
-    assert( mmax > 0 && n > 0 );
+    m = mmax;
+    assert( m > 0 && n > 0 );
     
     // allocate memory for largest problem
-    m = mmax;
     lda  = m;
     ldda = ((m + 31)/32)*32;
 
@@ -168,7 +170,7 @@ int main( int argc, char** argv)
             //magma_zsetmatrix( m, n, hB, lda, dB[d], ldda );
         }
         
-        cudaDeviceSynchronize();
+        trace_init( 1, ngpu, nstream, (cudaStream_t*) streams );
         gpu_time = magma_wtime();
         magmablas_zhemm_mgpu(
             MagmaLeft, MagmaLower, m, n,
@@ -176,10 +178,12 @@ int main( int argc, char** argv)
                        dX, ldda,
             c_one,     dB, ldda, hR, lda,
             ngpu, nb, streams, nstream );
-        cudaDeviceSynchronize();
         gpu_time = magma_wtime() - gpu_time;
-                
         gpu_perf = gflops / gpu_time;
+        
+        char buf[80];
+        snprintf( buf, sizeof(buf), "zhemm-m%d-n%d-nb%d-stream%d-ngpu%d-run%d.svg", m, n, nb, nstream, ngpu, j );
+        trace_finalize( buf, "trace.css" );
         
         /* ====================================================================
            Performs operation using CUBLAS
@@ -199,7 +203,6 @@ int main( int argc, char** argv)
                 c_one,     dB[0], ldda );
             cudaDeviceSynchronize();
             gpu_time2 = magma_wtime() - gpu_time2;
-            
             gpu_perf2 = gflops / gpu_time2;
         }
         
@@ -221,12 +224,11 @@ int main( int argc, char** argv)
                                         hX, &lda,
                             &c_one,     hB, &lda );
             cpu_time = magma_wtime() - cpu_time;
+            cpu_perf = gflops / cpu_time;
             
             //printf( "B  =" ); magma_zprint( m, n, hB, lda );
             //printf( "dB =" ); magma_zprint( m, n, hR, lda );
             
-            cpu_perf = gflops / cpu_time;
-    
             // compute relative error ||R||/||A||*||X||, where R := B_magma - B_lapack = R - B
             size = lda*n;
             blasf77_zaxpy( &size, &c_neg_one, hB, &ione, hR, &ione );

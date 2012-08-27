@@ -13,6 +13,9 @@
     .geqrf         { fill: #cc6600; /* red-orange */ }
     
     /* BLAS */
+    .symmetrize    { fill: #999999; /* gray       */ }
+    .axpy          { fill: #B587FF; /* purple  lt */ }
+    .scal          { fill: #9c51ff; /* purple     */ }
     .trsm          { fill: #b7b7ff; /* blue       */ }
     .symm          { fill: #00cc00; /* green      */ }
     .gemm          { fill: #288400; /* green   dk */ }

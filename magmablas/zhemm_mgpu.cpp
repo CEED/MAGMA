@@ -11,6 +11,7 @@
        This still has poor performance. Work in progress.
 */
 #include "common_magma.h"
+#include "trace.h"
 #include <assert.h>
 
 extern "C" void
@@ -38,24 +39,27 @@ void magmablas_zhemm_mgpu(
     cuDoubleComplex c_zero = MAGMA_Z_ZERO;
     magma_int_t ione = 1;
     
+    // put init/finalize into testing_zhemm_mgpu,
+    // so Gflop/s doesn't include writing file.
+    //trace_init( 1, ngpu, nstream, (cudaStream_t*) streams );
+        
     magma_device_t cdev;
     magma_getdevice( &cdev );
-
-    // create events for sync
-    magma_event_t event[ MagmaMaxGPUs ][ 20 ];
-    for( magma_int_t d = 0; d < ngpu; ++d ) {
-        magma_setdevice( d );
-        cudaMemset( dC[d], 0, lddc*n*sizeof(cuDoubleComplex) );
-        for( magma_int_t s = 0; s < nstream; ++s ) {
-            cudaEventCreateWithFlags( &event[d][s], cudaEventDisableTiming );
-        }
-    }
     
     // loop over all blocks
     // Faster to have several loops:
     // first  symmetrizes A[i,i]
     // second does C[i]      = A[i:m,  i]'*B[i:m]
     // third  does C[i+1:m] += A[i+1:m,i] *B[i]
+    
+    // tracing
+    for( int dev = 0; dev < ngpu; ++dev ) {
+        magma_setdevice( dev );
+        for( int s = 0; s < nstream; ++s ) {
+            trace_gpu_start( dev, s, "symmetrize", "symmetrize" );
+        }
+    }
+    // 1. symmetrize
     for( magma_int_t i = 0; i < m; i += nb ) {
         magma_int_t ib     = min( nb, m-i );      // block size
         magma_int_t ioff   = i + offset;          // start global index in parent matrix
@@ -70,6 +74,15 @@ void magmablas_zhemm_mgpu(
         // make diagonal block symmetric
         magmablas_zsymmetrize( MagmaLower, ib, dA(dev,ioff,di), ldda );
     }
+    // tracing
+    for( int dev = 0; dev < ngpu; ++dev ) {
+        magma_setdevice( dev );
+        for( int s = 0; s < nstream; ++s ) {
+            trace_gpu_end( dev, s );
+            trace_gpu_start( dev, s, "gemm", "C[i] = A[i:m,i]'*B[i:m]" );
+        }
+    }
+    // 2. row gemms
     for( magma_int_t i = 0; i < m; i += nb ) {
         magma_int_t ib     = min( nb, m-i );      // block size
         magma_int_t ioff   = i + offset;          // start global index in parent matrix
@@ -88,8 +101,30 @@ void magmablas_zhemm_mgpu(
                      alpha,  dA(dev,ioff,di), ldda,
                              dB(dev,i,0),     lddb,
                      c_zero, dC(dev,i,0),     lddc );
-        magma_event_record( event[dev][s], streams[dev][s] );
     }
+    // tracing
+    for( int dev = 0; dev < ngpu; ++dev ) {
+        magma_setdevice( dev );
+        for( int s = 0; s < nstream; ++s ) {
+            trace_gpu_end( dev, s );
+            trace_gpu_start( dev, s, "sync", "sync C[i]" );
+        }
+    }
+    // 2b. sync
+    for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
+        for( magma_int_t s = 0; s < nstream; ++s ) {
+            magma_setdevice( dev );
+            magma_queue_sync( streams[ dev ][ s ] );
+        }
+    }
+    // tracing
+    for( int dev = 0; dev < ngpu; ++dev ) {
+        magma_setdevice( dev );
+        for( int s = 0; s < nstream; ++s ) {
+            trace_gpu_end( dev, s );
+        }
+    }
+    // 3. column gemms
     for( magma_int_t i = 0; i < m; i += nb ) {
         magma_int_t ib     = min( nb, m-i );      // block size
         magma_int_t ioff   = i + offset;          // start global index in parent matrix
@@ -101,32 +136,40 @@ void magmablas_zhemm_mgpu(
         // unless we used separate C workspace for each stream
         magma_setdevice( dev );
         magmablasSetKernelStream( streams[dev][0] );
-        for( magma_int_t s = 0; s < nstream; ++s ) {
-            magma_queue_wait_event( streams[dev][0], event[dev][s] );
-        }
         
         // C[i+1:n] += A[i+1:n,i] * B[i]
         //printf( "gemm2: A[%4d,%4d]*B[%4d] -> C[%4d] m-i-ib %4d, n %4d, ib  %4d\n",
         //        ioff+ib, di, i, i+ib, m-i-ib, n, ib );
+        trace_gpu_start( dev, 0, "gemm2", "C[i+1:m] += A[i+1:m,i]*B[i]" );
         magma_zgemm( MagmaNoTrans, MagmaNoTrans, m-i-ib, n, ib,
                      alpha, dA(dev,ioff+ib,di), ldda,
                             dB(dev,i,0),        lddb,
                      c_one, dC(dev,i+ib,0),     lddc );
+        trace_gpu_end( dev, 0 );
     }
     
     // meanwhile on CPU, scale C := beta*C
+    trace_cpu_start( 0, "scal", "C = beta*C" );
     for( magma_int_t j = 0; j < n; ++j ) {
         blasf77_zscal( &m, &beta, C(0,j), &ione );
     }
+    trace_cpu_end( 0 );
     
     // wait and reduce results
     magma_int_t size = ldc*n;
     cuDoubleComplex *Ctmp = C(0,n);
-    for( magma_int_t d = 0; d < ngpu; ++d ) {
-        magma_setdevice( d );
-        magma_zgetmatrix( m, n, dC[d], lddc, Ctmp, ldc );
+    for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
+        magma_setdevice( dev );
+        trace_gpu_start( dev, 0, "get", "get C_dev" );
+        magma_zgetmatrix( m, n, dC[dev], lddc, Ctmp, ldc );
+        trace_gpu_end( dev, 0 );
+        
+        trace_cpu_start( 0, "axpy", "C += C_dev" );
         blasf77_zaxpy( &size, &c_one, Ctmp, &ione, C, &ione );
+        trace_cpu_end( 0 );
     }
     
     magma_setdevice( cdev );
+    
+    //trace_finalize( "zhemm.svg", "trace.css" );
 }
