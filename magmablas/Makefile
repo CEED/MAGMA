@@ -33,6 +33,7 @@ ZSRC := \
 	zswapblk.cu		\
 	zswapdblk.cu		\
 	zsymmetrize.cu		\
+	zsymmetrize_tiles.cu	\
 	zsymv_fermi.cu		\
 	csymv_tesla.cu		\
 	ssyr2k.cu		\

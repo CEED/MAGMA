@@ -14,7 +14,6 @@ ZSRC := \
 	testing_zhemv.cpp	\
 	testing_zgemv.cpp	\
 	testing_zsymv.cpp	\
-	testing_dsymv2.cpp	\
 	\
 	testing_zpotrf.cpp	\
         testing_zpotrf_mgpu.cpp \
