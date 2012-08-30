@@ -41,7 +41,6 @@ ZSRC := \
         testing_zgeqrs_gpu.cpp 	\
         testing_zgeqrs3_gpu.cpp \
 	testing_zungqr_gpu.cpp	\
-	testing_zunmqr_gpu.cpp	\
 	testing_zlarfb_gpu.cpp	\
 	\
 	testing_zgebrd.cpp	\
