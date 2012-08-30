@@ -52,7 +52,7 @@ int main( int argc, char** argv)
     printf( "  -c or setting $MAGMA_TESTINGS_CHECK runs LAPACK and checks result.\n\n" );
     int ntest = 0;
     for( int i = 1; i < argc; ++i ) {
-        if ( strcmp("-N", argv[i]) == 0 and i+1 < argc ) {
+        if ( strcmp("-N", argv[i]) == 0 && i+1 < argc ) {
             magma_assert( ntest < MAXTESTS, "error: -N repeated more than maximum %d tests\n", MAXTESTS );
             size[ ntest ] = atoi( argv[++i] );
             magma_assert( size[ ntest ] > 0, "error: -N %s is invalid; must be > 0.\n", argv[i] );
@@ -91,7 +91,7 @@ int main( int argc, char** argv)
         N   = size[i];
         lda = N;
         n2  = lda*N;
-        gflops = FLOPS_ZPOTRF( (double)N ) / 1e9;
+        gflops = FLOPS_ZPOTRF( N ) / 1e9;
         
         ldda = ((N+31)/32)*32;
 

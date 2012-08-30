@@ -97,15 +97,15 @@ int main( int argc, char** argv)
     printf( "  -c or setting $MAGMA_TESTINGS_CHECK runs LAPACK and checks result.\n\n" );
     int ntest = 0;
     for( int i = 1; i < argc; ++i ) {
-        if ( strcmp("-N", argv[i]) == 0 and i+1 < argc ) {
+        if ( strcmp("-N", argv[i]) == 0 && i+1 < argc ) {
             magma_assert( ntest < MAXTESTS, "error: -N repeated more than maximum %d tests\n", MAXTESTS );
             int m, n;
             info = sscanf( argv[++i], "%d,%d", &m, &n );
-            if ( info == 2 and m > 0 and n > 0 ) {
+            if ( info == 2 && m > 0 && n > 0 ) {
                 msize[ ntest ] = m;
                 nsize[ ntest ] = n;
             }
-            else if ( info == 1 and m > 0 ) {
+            else if ( info == 1 && m > 0 ) {
                 msize[ ntest ] = m;
                 nsize[ ntest ] = m;  // implicitly
             }
@@ -155,7 +155,7 @@ int main( int argc, char** argv)
         lda   = M;
         n2    = lda*N;
         ldda  = ((M+31)/32)*32;
-        gflops = FLOPS_ZGETRF( (double)M, (double)N ) / 1e9;
+        gflops = FLOPS_ZGETRF( M, N ) / 1e9;
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -210,4 +210,5 @@ int main( int argc, char** argv)
 
     /* Shutdown */
     TESTING_CUDA_FINALIZE();
+    return 0;
 }
