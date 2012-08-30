@@ -14,6 +14,7 @@ ZSRC := \
 	testing_zhemv.cpp	\
 	testing_zgemv.cpp	\
 	testing_zsymv.cpp	\
+	testing_dsymv2.cpp	\
 	\
 	testing_zpotrf.cpp	\
         testing_zpotrf_mgpu.cpp \
@@ -41,6 +42,7 @@ ZSRC := \
         testing_zgeqrs_gpu.cpp 	\
         testing_zgeqrs3_gpu.cpp \
 	testing_zungqr_gpu.cpp	\
+	testing_zunmqr_gpu.cpp	\
 	testing_zlarfb_gpu.cpp	\
 	\
 	testing_zgebrd.cpp	\
@@ -87,6 +89,7 @@ ZSRC += $(ZSRCF)
 -include Makefile.src
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
+ALLSRC := $(CSRC) $(SSRC)
 ALLOBJ := $(ALLSRC:.f90=.o)
 ALLOBJ := $(ALLOBJ:.cuf=.o)
 ALLOBJ := $(ALLOBJ:.cpp=.o)
@@ -104,6 +107,8 @@ EXE := $(filter-out $(LIBEXE), $(EXE))
 INC += -I../control
 
 all: $(EXE)
+
+lib: $(LIBMAGMA) $(LIBMAGMABLAS)
 
 $(LIBTEST): $(LIBOBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $^

@@ -147,6 +147,13 @@ void   magmablas_zlaswpx(magma_int_t N,
              magma_int_t i1, magma_int_t i2,
              magma_int_t *ipiv, magma_int_t inci );
 
+void   magmablas_zsymmetrize(
+             char uplo, int m, cuDoubleComplex *dA, int ldda );
+
+void   magmablas_zsymmetrize_tiles(
+             char uplo, int m, cuDoubleComplex *dA, int ldda,
+             int ntile, int mstride, int nstride );
+
   /*
    * Level 1 BLAS
    */
