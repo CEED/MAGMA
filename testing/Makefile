@@ -87,7 +87,6 @@ ZSRC += $(ZSRCF)
 -include Makefile.src
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
-ALLSRC := $(CSRC) $(SSRC)
 ALLOBJ := $(ALLSRC:.f90=.o)
 ALLOBJ := $(ALLOBJ:.cuf=.o)
 ALLOBJ := $(ALLOBJ:.cpp=.o)
