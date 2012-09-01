@@ -48,6 +48,8 @@ ZSRC := \
 # multi-GPU
 ZSRC += \
 	zbcyclic.cu		\
+	zhemm_1gpu.cpp		\
+	zhemm_1gpu_old.cpp	\
 	zhemm_mgpu.cpp		\
 	zher2k_mgpu.cpp		\
 	zgetmatrix_transpose_mgpu.cu	\
