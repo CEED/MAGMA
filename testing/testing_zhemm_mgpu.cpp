@@ -41,7 +41,7 @@ int main( int argc, char** argv)
     real_Double_t    gpu_perf2=0., gpu_time2=0.;
     double           error=0., work[1];
     cuDoubleComplex *hA, *hX, *hB, *hR;
-    cuDoubleComplex *dA[MagmaMaxGPUs], *dX[MagmaMaxGPUs], *dB[MagmaMaxGPUs];
+    cuDoubleComplex *dA[MagmaMaxGPUs], *dX[MagmaMaxGPUs], *dB[MagmaMaxGPUs], *dwork[MagmaMaxGPUs];
     cuDoubleComplex *dA2;
     
     /* Matrix size */
@@ -119,7 +119,7 @@ int main( int argc, char** argv)
     TESTING_MALLOC( hA, cuDoubleComplex, lda*m );
     TESTING_MALLOC( hX, cuDoubleComplex, lda*n );
     TESTING_MALLOC( hB, cuDoubleComplex, lda*n );
-    TESTING_MALLOC( hR, cuDoubleComplex, lda*n*2 );
+    TESTING_HOSTALLOC( hR, cuDoubleComplex, lda*n*2 );
     
     cudaStream_t streams[MagmaMaxGPUs][20];    
     for( int d = 0; d < ngpu; ++d ) {
@@ -128,6 +128,7 @@ int main( int argc, char** argv)
         TESTING_DEVALLOC( dA[d], cuDoubleComplex, ldda*mlocal );
         TESTING_DEVALLOC( dX[d], cuDoubleComplex, ldda*n      );
         TESTING_DEVALLOC( dB[d], cuDoubleComplex, ldda*n      );
+        TESTING_DEVALLOC( dwork[d], cuDoubleComplex, ldda*n      );
         for( int i = 0; i < nstream; ++i ) {
             cudaStreamCreate( &streams[d][i] );
         }
@@ -171,15 +172,32 @@ int main( int argc, char** argv)
         }
         
         trace_init( 1, ngpu, nstream, (cudaStream_t*) streams );
+
+
+        cudaDeviceSynchronize();
         gpu_time = magma_wtime();
-        magmablas_zhemm_mgpu(
+        // 1GPU version light
+        /*
+        magmablas_zhemm_1gpu(
             MagmaLeft, MagmaLower, m, n,
             c_neg_one, dA, ldda, 0,
                        dX, ldda,
             c_one,     dB, ldda, hR, lda,
             ngpu, nb, streams, nstream );
+           */
+        // multi gpu version
+        
+        magmablas_zhemm_mgpu(
+            MagmaLeft, MagmaLower, m, n,
+            c_neg_one, dA, ldda, 0,
+                       dX, ldda,
+            c_one,     dB, ldda, dwork, ldda, hR, lda,
+            ngpu, nb, streams, nstream );
+       
+        cudaDeviceSynchronize();
         gpu_time = magma_wtime() - gpu_time;
         gpu_perf = gflops / gpu_time;
+            
         
         char buf[80];
         snprintf( buf, sizeof(buf), "zhemm-m%d-n%d-nb%d-stream%d-ngpu%d-run%d.svg", m, n, nb, nstream, ngpu, j );
@@ -256,7 +274,7 @@ int main( int argc, char** argv)
     TESTING_FREE( hA );
     TESTING_FREE( hX );
     TESTING_FREE( hB );
-    TESTING_FREE( hR );
+    TESTING_HOSTFREE( hR );
     
     /* Shutdown */
     TESTING_CUDA_FINALIZE();
