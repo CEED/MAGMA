@@ -90,11 +90,27 @@ void magmablas_zsetmatrix_1D_bcyclic( magma_int_t m, magma_int_t n,
                                       cuDoubleComplex  *da[], magma_int_t ldda,
                                       magma_int_t num_gpus, magma_int_t nb );
 
+
+void magmablas_zhemm_1gpu_old(
+    char side, char uplo, magma_int_t m, magma_int_t n,
+    cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
+                           cuDoubleComplex *dB[], magma_int_t lddb,
+    cuDoubleComplex beta,  cuDoubleComplex *dC[], magma_int_t lddc,
+                           cuDoubleComplex *C,    magma_int_t ldc,
+    magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][20], magma_int_t nstream );
+void magmablas_zhemm_1gpu(
+    char side, char uplo, magma_int_t m, magma_int_t n,
+    cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
+                           cuDoubleComplex *dB[], magma_int_t lddb,
+    cuDoubleComplex beta,  cuDoubleComplex *dC[], magma_int_t lddc,
+                           cuDoubleComplex *C,    magma_int_t ldc,
+    magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][20], magma_int_t nstream );
 void magmablas_zhemm_mgpu(
     char side, char uplo, magma_int_t m, magma_int_t n,
     cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
                            cuDoubleComplex *dB[], magma_int_t lddb,
     cuDoubleComplex beta,  cuDoubleComplex *dC[], magma_int_t lddc,
+                           cuDoubleComplex *dwork[],    magma_int_t lddwork,
                            cuDoubleComplex *C,    magma_int_t ldc,
     magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][20], magma_int_t nstream );
 
