@@ -29,15 +29,18 @@ my @files2delete = qw(
     Release-ToDo-1.1.txt
     BugsToFix.txt
     
-    control/sizeptr
-    include/Makefile
-    src/zgeqrf_mc.cpp
-    src/zgeqrf-v2.cpp
-    src/zgeqrf-v3.cpp
-    src/zgetrf_mc.cpp
-    src/zpotrf_mc.cpp
+    src/zheevd_m.cpp
+    src/dlaex0_m.cpp
+    src/dlaex1_m.cpp
+    src/dlaex3_m.cpp
+    src/dstedx_m.cpp
+    src/zstedx_m.cpp
+    src/zunmtr_m.cpp
     src/zhetrd_mgpu.cpp
     src/zlatrd_mgpu.cpp
+    
+    control/sizeptr
+    include/Makefile
     src/zhetrd_bhe2trc.cpp
     src/obsolete
     magmablas/obsolete

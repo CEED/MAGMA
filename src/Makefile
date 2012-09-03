@@ -17,6 +17,7 @@ INC += -I$(MAGMA_DIR)/control
 # Double precision "d" files that generate "s" files must also be listed
 # in ZSRC, despite the name.
 
+# ----------
 # Cholesky, GPU interface
 ZSRC += \
 	zcposv_gpu.cpp		\
@@ -40,6 +41,7 @@ ZSRC += \
 	zlauum.cpp		\
 	ztrtri.cpp		\
 
+# ----------
 # LU, GPU interface
 ZSRC += \
 	zcgesv_gpu.cpp		\
@@ -53,13 +55,6 @@ ZSRC += \
 	\
 	zgetrf_mgpu.cpp		\
 
-# LU, auxiliary for multi-gpu-dynamic
-ZSRC += \
-	zgetrl_gpu.cpp		\
-	zgessm_gpu.cpp		\
-	zssssm_gpu.cpp		\
-	ztstrf_gpu.cpp		\
-
 # LU, CPU interface
 ZSRC += \
 	zgesv.cpp		\
@@ -69,6 +64,14 @@ ZSRC += \
 	zgetf2_nopiv.cpp	\
 	zgetrf_nopiv.cpp	\
 
+# LU, auxiliary for multi-gpu-dynamic
+ZSRC += \
+	zgetrl_gpu.cpp		\
+	zgessm_gpu.cpp		\
+	zssssm_gpu.cpp		\
+	ztstrf_gpu.cpp		\
+
+# ----------
 # QR and least squares, GPU interface
 ZSRC += \
 	zcgeqrsv_gpu.cpp	\
@@ -105,6 +108,7 @@ ZSRC += \
 	zunmqr.cpp		\
 	zunmqr_m.cpp		\
 
+# ----------
 # symmetric eigenvalue, GPU interface
 ZSRC += \
 	dsyevd_gpu.cpp		\
@@ -135,14 +139,18 @@ ZSRC += \
 	zstedx.cpp		\
 	zungtr.cpp		\
 	zunmtr.cpp		\
-	\
-	zheevd_m.cpp		\
-	dlaex0_m.cpp		\
-	dlaex1_m.cpp		\
-	dlaex3_m.cpp		\
-	dstedx_m.cpp		\
-	zstedx_m.cpp		\
-	zunmtr_m.cpp		\
+
+# symmetric eigenvalues, multi-GPU (not yet released)
+#ZSRC += \
+#	zheevd_m.cpp		\
+#	dlaex0_m.cpp		\
+#	dlaex1_m.cpp		\
+#	dlaex3_m.cpp		\
+#	dstedx_m.cpp		\
+#	zstedx_m.cpp		\
+#	zunmtr_m.cpp		\
+#	zhetrd_mgpu.cpp		\
+#	zlatrd_mgpu.cpp		\
 
 # symmetric eigenvalues 2-stage
 ZSRC += \
@@ -168,6 +176,7 @@ ZSRC += \
 	zhegvd_m.cpp		\
 	ztrsm_m.cpp		\
 
+# ----------
 # non-symmetric eigenvalues
 ZSRC += \
 	dgeev.cpp		\
@@ -178,6 +187,7 @@ ZSRC += \
 	zlahru.cpp		\
 	zunghr.cpp		\
 
+# ----------
 # SVD
 ZSRC += \
 	dgesvd.cpp		\
