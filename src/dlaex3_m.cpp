@@ -208,7 +208,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
     double d_one  = 1.;
     double d_zero = 0.;
     magma_int_t ione = 1;
-    magma_int_t imone = -1;
+    magma_int_t ineg_one = -1;
     char range_[] = {range, 0};
 
     magma_int_t iil, iiu, rk;
@@ -358,7 +358,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
 
     //Prepare the INDXQ sorting permutation.
     magma_int_t nk = n - k;
-    lapackf77_dlamrg( &k, &nk, d, &ione , &imone, indxq);
+    lapackf77_dlamrg( &k, &nk, d, &ione , &ineg_one, indxq);
 
     //compute the lower and upper bound of the non-deflated eigenvectors
     if (valeig)

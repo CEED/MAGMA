@@ -126,7 +126,6 @@ magma_dsyevd(char jobz, char uplo,
     char uplo_[2] = {uplo, 0};
     char jobz_[2] = {jobz, 0};
     magma_int_t ione = 1;
-    magma_int_t imone = -1;
     magma_int_t izero = 0;
     double d_one = 1.;
     

@@ -117,7 +117,7 @@ magma_zposv    ( char uplo, magma_int_t n, magma_int_t nrhs,
         dA = NULL;
         goto CPU_INTERFACE;
     }
-    assert( num_gpus == 1 and dA != NULL and dB != NULL );
+    assert( num_gpus == 1 && dA != NULL && dB != NULL );
     magma_zsetmatrix( n, n, A, lda, dA, ldda );
     magma_zpotrf_gpu( uplo, n, dA, ldda, info );
     magma_zgetmatrix( n, n, dA, ldda, A, lda );
