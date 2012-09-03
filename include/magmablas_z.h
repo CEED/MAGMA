@@ -310,68 +310,110 @@ void magmablas_ztrsm(char s, char u, char t, char d,
 // copying vectors
 // set copies host to device
 // get copies device to host
+// Add the function, file, and line for error-reporting purposes.
 
-void magma_zsetvector(
-    magma_int_t n,
-    cuDoubleComplex const *hx_src, magma_int_t incx,
-    cuDoubleComplex       *dy_dst, magma_int_t incy );
+#define magma_zsetvector(           n, hx_src, incx, dy_dst, incy ) \
+        magma_zsetvector_internal(  n, hx_src, incx, dy_dst, incy, __func__, __FILE__, __LINE__ )
+                           
+#define magma_zgetvector(           n, dx_src, incx, hy_dst, incy ) \
+        magma_zgetvector_internal(  n, dx_src, incx, hy_dst, incy, __func__, __FILE__, __LINE__ )
 
-void magma_zgetvector(
-    magma_int_t n,
-    cuDoubleComplex const *dx_src, magma_int_t incx,
-    cuDoubleComplex       *hy_dst, magma_int_t incy );
+#define magma_zsetvector_async(           n, hx_src, incx, dy_dst, incy, stream ) \
+        magma_zsetvector_async_internal(  n, hx_src, incx, dy_dst, incy, stream, __func__, __FILE__, __LINE__ )
+                                 
+#define magma_zgetvector_async(           n, dx_src, incx, hy_dst, incy, stream ) \
+        magma_zgetvector_async_internal(  n, dx_src, incx, hy_dst, incy, stream, __func__, __FILE__, __LINE__ )
 
-void magma_zsetvector_async(
+void magma_zsetvector_internal(
     magma_int_t n,
     cuDoubleComplex const *hx_src, magma_int_t incx,
     cuDoubleComplex       *dy_dst, magma_int_t incy,
-    magma_stream_t stream );
+    const char* func, const char* file, int line );
 
-void magma_zgetvector_async(
+void magma_zgetvector_internal(
     magma_int_t n,
     cuDoubleComplex const *dx_src, magma_int_t incx,
     cuDoubleComplex       *hy_dst, magma_int_t incy,
-    magma_stream_t stream );
+    const char* func, const char* file, int line );
+
+void magma_zsetvector_async_internal(
+    magma_int_t n,
+    cuDoubleComplex const *hx_src, magma_int_t incx,
+    cuDoubleComplex       *dy_dst, magma_int_t incy,
+    magma_stream_t stream,
+    const char* func, const char* file, int line );
+
+void magma_zgetvector_async_internal(
+    magma_int_t n,
+    cuDoubleComplex const *dx_src, magma_int_t incx,
+    cuDoubleComplex       *hy_dst, magma_int_t incy,
+    magma_stream_t stream,
+    const char* func, const char* file, int line );
 
 
 // ========================================
 // copying sub-matrices (contiguous columns)
-// set copies host to device
-// get copies device to host
-// cpy copies device to device (with CUDA unified addressing, can be same or different devices)
+// set  copies host to device
+// get  copies device to host
+// copy copies device to device (with CUDA unified addressing, can be same or different devices)
+// Add the function, file, and line for error-reporting purposes.
 
-void magma_zsetmatrix(
-    magma_int_t m, magma_int_t n,
-    cuDoubleComplex const *hA_src, magma_int_t lda,
-    cuDoubleComplex       *dB_dst, magma_int_t ldb );
+#define magma_zsetmatrix(           m, n, hA_src, lda, dB_dst, ldb ) \
+        magma_zsetmatrix_internal(  m, n, hA_src, lda, dB_dst, ldb, __func__, __FILE__, __LINE__ )
 
-void magma_zgetmatrix(
-    magma_int_t m, magma_int_t n,
-    cuDoubleComplex const *dA_src, magma_int_t lda,
-    cuDoubleComplex       *hB_dst, magma_int_t ldb );
+#define magma_zgetmatrix(           m, n, dA_src, lda, hB_dst, ldb ) \
+        magma_zgetmatrix_internal(  m, n, dA_src, lda, hB_dst, ldb, __func__, __FILE__, __LINE__ )
 
-void magma_zsetmatrix_async(
+#define magma_zcopymatrix(          m, n, dA_src, lda, dB_dst, ldb ) \
+        magma_zcopymatrix_internal( m, n, dA_src, lda, dB_dst, ldb, __func__, __FILE__, __LINE__ )
+
+#define magma_zsetmatrix_async(           m, n, hA_src, lda, dB_dst, ldb, stream ) \
+        magma_zsetmatrix_async_internal(  m, n, hA_src, lda, dB_dst, ldb, stream, __func__, __FILE__, __LINE__ )
+                                 
+#define magma_zgetmatrix_async(           m, n, dA_src, lda, hB_dst, ldb, stream ) \
+        magma_zgetmatrix_async_internal(  m, n, dA_src, lda, hB_dst, ldb, stream, __func__, __FILE__, __LINE__ )
+                                 
+#define magma_zcopymatrix_async(          m, n, dA_src, lda, dB_dst, ldb, stream ) \
+        magma_zcopymatrix_async_internal( m, n, dA_src, lda, dB_dst, ldb, stream, __func__, __FILE__, __LINE__ )
+
+void magma_zsetmatrix_internal(
     magma_int_t m, magma_int_t n,
     cuDoubleComplex const *hA_src, magma_int_t lda,
     cuDoubleComplex       *dB_dst, magma_int_t ldb,
-    magma_stream_t stream );
+    const char* func, const char* file, int line );
 
-void magma_zgetmatrix_async(
+void magma_zgetmatrix_internal(
     magma_int_t m, magma_int_t n,
     cuDoubleComplex const *dA_src, magma_int_t lda,
     cuDoubleComplex       *hB_dst, magma_int_t ldb,
-    magma_stream_t stream );
+    const char* func, const char* file, int line );
 
-void magma_zcopymatrix(
-    magma_int_t m, magma_int_t n,
-    cuDoubleComplex const *dA_src, magma_int_t lda,
-    cuDoubleComplex       *dB_dst, magma_int_t ldb );
-
-void magma_zcopymatrix_async(
+void magma_zcopymatrix_internal(
     magma_int_t m, magma_int_t n,
     cuDoubleComplex const *dA_src, magma_int_t lda,
     cuDoubleComplex       *dB_dst, magma_int_t ldb,
-    magma_stream_t stream );
+    const char* func, const char* file, int line );
+
+void magma_zsetmatrix_async_internal(
+    magma_int_t m, magma_int_t n,
+    cuDoubleComplex const *hA_src, magma_int_t lda,
+    cuDoubleComplex       *dB_dst, magma_int_t ldb,
+    magma_stream_t stream,
+    const char* func, const char* file, int line );
+
+void magma_zgetmatrix_async_internal(
+    magma_int_t m, magma_int_t n,
+    cuDoubleComplex const *dA_src, magma_int_t lda,
+    cuDoubleComplex       *hB_dst, magma_int_t ldb,
+    magma_stream_t stream,
+    const char* func, const char* file, int line );
+
+void magma_zcopymatrix_async_internal(
+    magma_int_t m, magma_int_t n,
+    cuDoubleComplex const *dA_src, magma_int_t lda,
+    cuDoubleComplex       *dB_dst, magma_int_t ldb,
+    magma_stream_t stream,
+    const char* func, const char* file, int line );
 
 
 // ========================================
