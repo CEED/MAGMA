@@ -82,9 +82,12 @@
 #define MagmaMaxGPUs       8
 
 /* ------------------------------------------------------------
- *   Return codes
+ * Return codes
+ * LAPACK argument errors are < 0 but > MAGMA_ERR.
+ * MAGMA errors are < MAGMA_ERR.
  * --------------------------------------------------------- */
 #define MAGMA_SUCCESS                 0
+#define MAGMA_ERR                  -100
 #define MAGMA_ERR_NOT_INITIALIZED  -101
 #define MAGMA_ERR_REINITIALIZED    -102
 #define MAGMA_ERR_NOT_SUPPORTED    -103
