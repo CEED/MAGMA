@@ -18,57 +18,12 @@
 
 
 extern "C"{
-    int magma_get_dlaex3_m_k() { return 512;}
-    int magma_get_dlaex3_m_nb() { return 1024;}
-    double lapackf77_dlamc3(double* a,double* b);
-    void lapackf77_dlamrg(magma_int_t* n1, magma_int_t* n2, double* a, magma_int_t* dtrd1, magma_int_t* dtrd2, magma_int_t* index);
-    void lapackf77_dlaed4(magma_int_t* n, magma_int_t* i, double* d, double* z,
-                          double* delta, double* rho, double* dlam, magma_int_t* info);
-    magma_int_t magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
-                             double* q, magma_int_t ldq, double rho,
-                             double* dlamda, double* q2, magma_int_t* indx,
-                             magma_int_t* ctot, double* w, double* s, magma_int_t* indxq,
-                             double* dwork,
-                             char range, double vl, double vu, magma_int_t il, magma_int_t iu,
-                             magma_int_t* info );
-}
-
-extern"C"{
-    void dvrange(magma_int_t k, double *d, magma_int_t *il, magma_int_t *iu, double vl, double vu)
-    {
-        magma_int_t i;
-
-        *il=1;
-        *iu=k;
-        for (i = 0; i < k; ++i){
-            if (d[i] > vu){
-                *iu = i;
-                break;
-            }
-            else if (d[i] < vl)
-                ++il;
-        }
-        return;
-    }
-
-    void dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_int_t *iiu, magma_int_t il, magma_int_t iu)
-    {
-        magma_int_t i;
-
-        *iil = 1;
-        *iiu = 0;
-        for (i = il; i<=iu; ++i)
-            if (indxq[i-1]<=k){
-                *iil = indxq[i-1];
-                break;
-            }
-        for (i = iu; i>=il; --i)
-            if (indxq[i-1]<=k){
-                *iiu = indxq[i-1];
-                break;
-            }
-        return;
-    }
+    int magma_get_dlaex3_m_k()  { return  512; }
+    int magma_get_dlaex3_m_nb() { return 1024; }
+    
+    // defined in dlaex3.cpp
+    void magma_dvrange(magma_int_t k, double *d, magma_int_t *il, magma_int_t *iu, double vl, double vu);
+    void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_int_t *iiu, magma_int_t il, magma_int_t iu);
 }
 
 extern "C" magma_int_t
@@ -362,9 +317,9 @@ magma_dlaex3_m(magma_int_t nrgpu,
 
     //compute the lower and upper bound of the non-deflated eigenvectors
     if (valeig)
-        dvrange(k, d, &iil, &iiu, vl, vu);
+        magma_dvrange(k, d, &iil, &iiu, vl, vu);
     else if (indeig)
-        dirange(k, indxq, &iil, &iiu, il, iu);
+        magma_dirange(k, indxq, &iil, &iiu, il, iu);
     else {
         iil = 1;
         iiu = k;

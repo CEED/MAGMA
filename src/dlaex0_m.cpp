@@ -20,12 +20,9 @@ extern "C" {
                                char range, double vl, double vu,
                                magma_int_t il, magma_int_t iu, magma_int_t* info);
 
-    int magma_get_dlaex3_m_nb();
+    int magma_get_dlaex3_m_nb();       // defined in dlaex3_m.cpp
 
-    magma_int_t get_dlaex0_smlsize()
-    {
-        return 25;
-    }
+    magma_int_t get_dlaex0_smlsize();  // defined in dlaex0.cpp
 }
 
 extern "C" magma_int_t

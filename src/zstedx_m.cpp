@@ -16,10 +16,7 @@ extern "C"{
                                double* work, magma_int_t lwork, magma_int_t* iwork, magma_int_t liwork,
                                magma_int_t* info);
 
-    magma_int_t get_zstedx_smlsize()
-    {
-        return 25;
-    }
+    magma_int_t get_zstedx_smlsize();  // defined in zstedx.cpp
 }
 
 extern "C" magma_int_t

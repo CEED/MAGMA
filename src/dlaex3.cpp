@@ -16,9 +16,7 @@
 
 extern "C"{
     int magma_get_dlaed3_k() { return 512;}
-}
-
-extern"C"{
+    
     void magma_dvrange(magma_int_t k, double *d, magma_int_t *il, magma_int_t *iu, double vl, double vu)
     {
         magma_int_t i;
