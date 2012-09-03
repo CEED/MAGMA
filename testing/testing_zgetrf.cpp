@@ -139,7 +139,7 @@ int main( int argc, char** argv)
     min_mn = min(M, N);
     nb     = magma_get_zgetrf_nb(min_mn);
 
-    /* Allocate host memory for the matrix */
+    /* Allocate memory for the matrix */
     TESTING_MALLOC(ipiv, magma_int_t, min_mn);
     TESTING_MALLOC(    h_A, cuDoubleComplex, n2     );
     TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2     );
@@ -162,34 +162,33 @@ int main( int argc, char** argv)
         /* =====================================================================
            Performs operation using LAPACK
            =================================================================== */
-        if ( checkres ) {
+        if ( checkres ) {            
             cpu_time = magma_wtime();
             lapackf77_zgetrf(&M, &N, h_A, &lda, ipiv, &info);
             cpu_time = magma_wtime() - cpu_time;
+            cpu_perf = gflops / cpu_time;
             if (info != 0)
                 printf("lapackf77_zgetrf returned error %d.\n", (int) info);
-    
-            cpu_perf = gflops / cpu_time;
+            
+            lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
         }
 
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-        lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_R, &lda, h_A, &lda );
         gpu_time = magma_wtime();
         magma_zgetrf( M, N, h_R, lda, ipiv, &info);
         gpu_time = magma_wtime() - gpu_time;
+        gpu_perf = gflops / gpu_time;
         if (info != 0)
             printf("magma_zgetrf returned error %d.\n", (int) info);
-
-        gpu_perf = gflops / gpu_time;
 
         /* =====================================================================
            Check the factorization
            =================================================================== */
         if ( checkres ) {
             error = get_LU_error(M, N, h_A, lda, h_R, ipiv);
-    
+            
             printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e\n",
                    (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, error);
         }
@@ -204,7 +203,6 @@ int main( int argc, char** argv)
     TESTING_FREE( h_A );
     TESTING_HOSTFREE( h_R );
 
-    /* Shutdown */
     TESTING_CUDA_FINALIZE();
     return 0;
 }
