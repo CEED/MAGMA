@@ -46,7 +46,6 @@ magma_err_t magma_free( magma_devptr ptr )
 // The purpose of using this instead of malloc() is to properly align arrays
 // for vector (SSE) instructions. The default implementation uses
 // posix_memalign to align memory to a 32 byte boundary.
-// This memory can be freed by free().
 extern "C"
 magma_err_t magma_malloc_cpu( void** ptrPtr, size_t size )
 {
@@ -62,6 +61,17 @@ magma_err_t magma_malloc_cpu( void** ptrPtr, size_t size )
         return MAGMA_ERR_HOST_ALLOC;
     }
 #endif
+    return MAGMA_SUCCESS;
+}
+
+// --------------------
+// Free CPU pinned memory previously allocated by magma_malloc_pinned.
+// The default implementation uses free(), which works for both malloc and posix_memalign.
+// Windows will require a different function.
+extern "C"
+magma_err_t magma_free_cpu( void* ptr )
+{
+    free( ptr );
     return MAGMA_SUCCESS;
 }
 
