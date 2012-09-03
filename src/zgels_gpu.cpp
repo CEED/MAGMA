@@ -146,7 +146,7 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
     }
     
     magma_free( dT );
-    free(tau);
+    magma_free_cpu(tau);
     return *info;
 }
 

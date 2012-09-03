@@ -274,7 +274,7 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     MAGMA_Z_SET2REAL( work[0], (double) iws );
     
     magma_free( da );
-    free(t);
+    magma_free_cpu(t);
  
     return *info;
 } /* magma_zgehrd */

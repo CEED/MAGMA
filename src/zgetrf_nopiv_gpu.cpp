@@ -115,7 +115,7 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
         magma_zgetmatrix( m, n, dA, ldda, work, m );
         magma_zgetrf_nopiv(&m, &n, work, &m, info);
         magma_zsetmatrix( m, n, work, m, dA, ldda );
-        free(work);
+        magma_free_cpu(work);
     }
     else {
         /* Use hybrid blocked code. */

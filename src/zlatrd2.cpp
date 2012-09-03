@@ -361,7 +361,7 @@ magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
         }
     }
 
-    free(f);
+    magma_free_cpu(f);
     magma_queue_destroy( stream );
 
     return 0;

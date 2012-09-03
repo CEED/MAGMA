@@ -454,8 +454,8 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
 
     } /* end of not lapack */
 
-        /* free workspace */
-        magma_free_pinned( work );
+    /* free workspace */
+    magma_free_pinned( work );
 
-        return *info;
+    return *info;
 } /* magma_zpotrf_mgpu */

@@ -565,7 +565,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
 #endif
     }
 
-    free(f);
+    magma_free_cpu(f);
     //magma_free_pinned( work );
 
     return mv_time;

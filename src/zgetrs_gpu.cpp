@@ -148,7 +148,7 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
         lapackf77_zlaswp(&nrhs, work, &n, &i1, &i2, ipiv, &inc);
         magma_zsetmatrix( n, nrhs, work, n, dB, lddb );
     }
-    free(work);
+    magma_free_cpu(work);
 
     return *info;
 }

@@ -131,7 +131,7 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     
     // Allocate work space on GPU
     if (MAGMA_SUCCESS != magma_zmalloc( &dV, ldda*nb )) {
-        free( work );
+        magma_free_cpu( work );
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
@@ -196,7 +196,7 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 
     magmablasSetKernelStream( NULL );
     magma_free( dV );
-    free( work );
+    magma_free_cpu( work );
     magma_queue_destroy( stream );
 
     return *info;

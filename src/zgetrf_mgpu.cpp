@@ -126,7 +126,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
           magma_zgetmatrix( m, n, d_lA[0], ldda, work, m );
           lapackf77_zgetrf(&m, &n, work, &m, ipiv, info);
           magma_zsetmatrix( m, n, work, m, d_lA[0], ldda );
-          free(work);
+          magma_free_cpu(work);
     } else {
           /* Use hybrid blocked code. */
           maxm = ((m + 31)/32)*32;
