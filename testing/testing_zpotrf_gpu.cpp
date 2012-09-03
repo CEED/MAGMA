@@ -32,6 +32,8 @@ int main( int argc, char** argv)
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     cuDoubleComplex *h_A, *h_R;
     cuDoubleComplex *d_A;
+    
+    /* Matrix size */
     magma_int_t N = 0, n2, lda, ldda;
     const int MAXTESTS = 10;
     magma_int_t size[MAXTESTS] = { 1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 10112 };
@@ -78,7 +80,7 @@ int main( int argc, char** argv)
         N = size[ntest-1];
     }
 
-    /* Allocate host memory for the matrix */
+    /* Allocate memory for the matrix */
     n2   = N*N;
     ldda = ((N+31)/32) * 32;
     TESTING_MALLOC(    h_A, cuDoubleComplex, n2);
@@ -91,46 +93,24 @@ int main( int argc, char** argv)
         N   = size[i];
         lda = N;
         n2  = lda*N;
-        gflops = FLOPS_ZPOTRF( N ) / 1e9;
-        
         ldda = ((N+31)/32)*32;
+        gflops = FLOPS_ZPOTRF( N ) / 1e9;
 
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         magma_zhpd( N, h_A, lda );
         lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
-
+        magma_zsetmatrix( N, N, h_A, lda, d_A, ldda );
+    
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-        // magma_zsetmatrix( N, N, h_A, lda, d_A, ldda );
-        // 
-        // double *dwork, maxnorm;
-        // TESTING_DEVALLOC(  dwork, double, N );
-        // 
-        // gpu_time = magma_wtime();
-        // magmablas_zlascl('U', 1, 1, 1., 2., N, N, d_A, ldda, &info);
-        // gpu_time = magma_wtime() - gpu_time;
-        // printf("zlascl GB/s = %f, time (ms) = %f\n",
-        //        16.*N*N/(1e9*gpu_time), gpu_time*1000. );
-        // 
-        // gpu_time = magma_wtime();
-        // maxnorm = magmablas_zlanhe('M', 'L',N, d_A, ldda, dwork);
-        // gpu_time = magma_wtime() - gpu_time;
-        // printf("Norm = %f, GB/s = %f, time (ms) = %f\n",
-        //        maxnorm, 16.*N*N/(1e9*gpu_time), gpu_time*1000. );
-        // TESTING_DEVFREE( dwork );
-        // 
-        // magma_zpotrf_gpu(uplo[0], N, d_A, ldda, &info);
-
-        magma_zsetmatrix( N, N, h_A, lda, d_A, ldda );
         gpu_time = magma_wtime();
         magma_zpotrf_gpu(uplo[0], N, d_A, ldda, &info);
         gpu_time = magma_wtime() - gpu_time;
+        gpu_perf = gflops / gpu_time;
         if (info != 0)
             printf("magma_zpotrf_gpu returned error %d.\n", (int) info);
-
-        gpu_perf = gflops / gpu_time;
         
         if ( checkres ) {
             /* =====================================================================
@@ -139,10 +119,9 @@ int main( int argc, char** argv)
             cpu_time = magma_wtime();
             lapackf77_zpotrf(uplo, &N, h_A, &lda, &info);
             cpu_time = magma_wtime() - cpu_time;
+            cpu_perf = gflops / cpu_time;
             if (info != 0)
                 printf("lapackf77_zpotrf returned error %d.\n", (int) info);
-            
-            cpu_perf = gflops / cpu_time;
             
             /* =====================================================================
                Check the result compared to LAPACK
@@ -151,6 +130,7 @@ int main( int argc, char** argv)
             error = lapackf77_zlange("f", &N, &N, h_A, &lda, work);
             blasf77_zaxpy(&n2, &c_neg_one, h_A, &ione, h_R, &ione);
             error = lapackf77_zlange("f", &N, &N, h_R, &lda, work) / error;
+            
             printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e\n",
                    (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, error );
         }
@@ -166,4 +146,5 @@ int main( int argc, char** argv)
     TESTING_DEVFREE( d_A );
 
     TESTING_CUDA_FINALIZE();
+    return 0;
 }
