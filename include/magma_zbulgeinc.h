@@ -8,10 +8,11 @@
  * @precisions normal z -> s d c
  */
 
-#ifndef _MAGMA_ZBULGEINC_H_
-#define _MAGMA_ZBULGEINC_H_
+#ifndef MAGMA_ZBULGEINC_H
+#define MAGMA_ZBULGEINC_H
 
 #define PRECISION_z
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -99,12 +100,21 @@ extern struct gbstrct_blg core_in_all;
 #define MAX_EVENTSBLG 163840
 //#define MAX_EVENTSBLG 1048576
 
+// If we're not using GNU C, elide __attribute__
+#ifndef __GNUC__
+#define __attribute__(x)  /*NOTHING*/
+#endif
+
 // declare globals here; defined in zhetrd_bhe2trc.cpp
 extern int           event_numblg        [MAX_THREADS_BLG]                 __attribute__ ((aligned (128)));
 extern real_Double_t event_start_timeblg [MAX_THREADS_BLG]                 __attribute__ ((aligned (128)));
 extern real_Double_t event_end_timeblg   [MAX_THREADS_BLG]                 __attribute__ ((aligned (128)));
 extern real_Double_t event_logblg        [MAX_THREADS_BLG][MAX_EVENTSBLG]  __attribute__ ((aligned (128)));
 extern int           log_eventsblg;
+
+#ifndef __GNUC__
+#undef  __attribute__
+#endif
 
 #define core_event_startblg(my_core_id)\
     event_start_timeblg[my_core_id] = magma_wtime();
@@ -127,8 +137,5 @@ extern int           log_eventsblg;
 #endif
 
 #undef PRECISION_z
-#endif
 
-
-
-
+#endif /* MAGMA_ZBULGEINC_H */
