@@ -19,7 +19,7 @@
 extern "C"
 void magma_assert( bool condition, const char* msg, ... )
 {
-    if ( not condition ) {
+    if ( ! condition ) {
         va_list va;
         va_start( va, msg );
         vprintf( msg, va );

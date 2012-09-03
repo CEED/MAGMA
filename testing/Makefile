@@ -9,70 +9,118 @@
 MAGMA_DIR = ..
 include ../Makefile.internal
 
-ZSRC := \
+# ----------
+# BLAS
+ZSRC += \
 	testing_zgemm.cpp	\
-	testing_zhemv.cpp	\
 	testing_zgemv.cpp	\
+	testing_zhemv.cpp	\
 	testing_zsymv.cpp	\
 	\
-	testing_zpotrf.cpp	\
-        testing_zpotrf_mgpu.cpp \
-	testing_zpotri.cpp	\
-	testing_zposv.cpp	\
-	testing_zgetrf.cpp 	\
-	testing_zgesv.cpp	\
-	testing_zgeqrf.cpp 	\
-	testing_zgeqlf.cpp 	\
-	testing_zgelqf.cpp 	\
-        testing_zgeqp3.cpp      \
-        testing_dgeqp3.cpp      \
-	testing_zungqr.cpp	\
+	testing_zhemm_mgpu.cpp	\
+	testing_zher2k_mgpu.cpp	\
 	\
-	testing_zpotrf_gpu.cpp 	\
-	testing_zpotri_gpu.cpp 	\
-	testing_zposv_gpu.cpp 	\
-	testing_zgetrf_gpu.cpp 	\
-        testing_zgetrf_mgpu.cpp \
-	testing_zgetri_gpu.cpp 	\
-	testing_zgesv_gpu.cpp	\
-	testing_zgeqrf_gpu.cpp 	\
-        testing_zgeqrf_mgpu.cpp \
-        testing_zgelqf_gpu.cpp  \
-        testing_zgeqrs_gpu.cpp 	\
-        testing_zgeqrs3_gpu.cpp \
-	testing_zungqr_gpu.cpp	\
-	testing_zlarfb_gpu.cpp	\
-	\
-	testing_zgebrd.cpp	\
-        testing_zgehrd.cpp 	\
-        testing_zhetrd.cpp 	\
-        testing_zgeev.cpp       \
-        testing_dgeev.cpp       \
-        testing_zgesvd.cpp      \
-        testing_zheevd.cpp      \
-        testing_dsyevd.cpp	\
-        testing_dsyevd_gpu.cpp	\
-        testing_zhegvd.cpp      \
-        testing_dsygvd.cpp      \
-        testing_zhegvdx.cpp     \
-        testing_zhetrd_he2hb.cpp \
-	\
-        testing_zhetrd_gpu.cpp  \
-        testing_zheevd_gpu.cpp  \
-        \
-	testing_zcposv_gpu.cpp	\
-	testing_zcgesv_gpu.cpp	\
-	testing_zcgeqrsv_gpu.cpp \
-	\
-	testing_zlacpy.cpp \
 	testing_auxiliary.cpp	\
 	testing_zblas.cpp	\
-	testing_zher2k_mgpu.cpp	\
-	testing_zhemm_mgpu.cpp	\
+	testing_zlacpy.cpp	\
 	testing_zsymmetrize.cpp	\
-	\
-	testing_z.cpp		\
+	testing_zutil.cpp	\
 
+# ----------
+# Cholesky, GPU interface
+ZSRC += \
+	testing_zcposv_gpu.cpp	\
+	\
+	testing_zposv_gpu.cpp	\
+	testing_zpotrf_gpu.cpp	\
+	testing_zpotri_gpu.cpp	\
+	\
+	testing_zpotrf_mgpu.cpp	\
+
+# Cholesky, CPU interface
+ZSRC += \
+	testing_zposv.cpp	\
+	testing_zpotrf.cpp	\
+	testing_zpotri.cpp	\
+
+# ----------
+# LU, GPU interface
+ZSRC += \
+	testing_zcgesv_gpu.cpp	\
+	\
+	testing_zgesv_gpu.cpp	\
+	testing_zgetrf_gpu.cpp	\
+	testing_zgetri_gpu.cpp	\
+	\
+	testing_zgetrf_mgpu.cpp	\
+
+# LU, CPU interface
+ZSRC += \
+	testing_zgesv.cpp	\
+	testing_zgetrf.cpp	\
+
+# ----------
+# QR and least squares, GPU interface
+ZSRC += \
+	testing_zcgeqrsv_gpu.cpp	\
+	\
+	testing_zgelqf_gpu.cpp	\
+	testing_zgeqrf_gpu.cpp	\
+	testing_zgeqrs3_gpu.cpp	\
+	testing_zgeqrs_gpu.cpp	\
+	testing_zlarfb_gpu.cpp	\
+	testing_zungqr_gpu.cpp	\
+	testing_zunmqr_gpu.cpp	\
+	\
+	testing_zgeqrf_mgpu.cpp	\
+
+# QR, CPU interface
+ZSRC += \
+	testing_zgelqf.cpp	\
+	testing_zgeqlf.cpp	\
+	testing_zgeqrf.cpp	\
+	testing_zungqr.cpp	\
+	\
+	testing_dgeqp3.cpp	\
+	testing_zgeqp3.cpp	\
+
+# ----------
+# symmetric eigenvalues, GPU interface
+ZSRC += \
+	testing_dsyevd_gpu.cpp	\
+	testing_zheevd_gpu.cpp	\
+	testing_zhetrd_gpu.cpp	\
+
+# symmetric eigenvalues, CPU interface
+ZSRC += \
+	testing_dsyevd.cpp	\
+	testing_zheevd.cpp	\
+	testing_zhetrd.cpp	\
+
+# symmetric eigenvalues, 2-stage
+ZSRC += \
+	testing_zhetrd_he2hb.cpp	\
+
+# generalized symmetric eigenvalues
+ZSRC += \
+	testing_dsygvd.cpp	\
+	testing_zhegvd.cpp	\
+	testing_zhegvdx.cpp	\
+
+# ----------
+# non-symmetric eigenvalues
+ZSRC += \
+	testing_dgeev.cpp	\
+	testing_zgeev.cpp	\
+	testing_zgehrd.cpp	\
+
+# ----------
+# SVD
+ZSRC += \
+	testing_zgesvd.cpp	\
+	testing_zgebrd.cpp	\
+
+# ----------
 ifeq ($(FORT), pgfortran)
 	FOBJ  = fortran_thunking.o
 	ZSRCF = testing_zgetrf_gpu_f.cuf
@@ -83,6 +131,9 @@ else
 endif
 
 ZSRC += $(ZSRCF)
+
+
+# ------------------------------------------------------------
 -include Makefile.local
 -include Makefile.src
 
@@ -93,7 +144,7 @@ ALLOBJ := $(ALLOBJ:.cpp=.o)
 EXE    := $(ALLOBJ:.o=)
 
 LIBTEST := libtest.a
-LIBSRC  := testing_z.o testing_c.o testing_d.o testing_s.o testing.o
+LIBSRC  := testing_zutil.o testing_cutil.o testing_dutil.o testing_sutil.o testing_util.o
 LIBOBJ  := $(LIBSRC:.cpp=.o)
 LIBEXE  := $(LIBOBJ:.o=)
 
