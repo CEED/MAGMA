@@ -11,7 +11,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <assert.h>
 
 #include "magma.h"
 #include "error.h"
