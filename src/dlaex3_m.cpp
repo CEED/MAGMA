@@ -7,6 +7,11 @@
     @author Raffaele Solca
     @precisions normal d -> s
 */
+
+#ifdef _OPENMP
+#include<omp.h>
+#endif
+
 #include "common_magma.h"
 #include <cblas.h>
 
@@ -227,7 +232,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
      (we know of none). We use a subroutine call to compute
      2*DLAMBDA(I) to prevent optimizing compilers from eliminating
      this code.*/
-    double *dwS[2][MagmaMaxGPUs], *dwQ[2][MagmaMaxGPUs], *dwQ2[MagmaMaxGPUs];
+
 //#define CHECK_CPU
 #ifdef CHECK_CPU
     double *hwS[2][MagmaMaxGPUs], *hwQ[2][MagmaMaxGPUs], *hwQ2[MagmaMaxGPUs];
@@ -254,13 +259,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
             magma_dmalloc_pinned( &(hwQ[0][igpu]), n2_loc*nb );
             magma_dmalloc_pinned( &(hwQ[1][igpu]), n2_loc*nb );
 #endif
-/*            magma_setdevice(igpu);
-            magma_dmalloc( &(dwS[0][igpu]), n2*nb );
-            magma_dmalloc( &(dwS[1][igpu]), n2*nb );
-            magma_dmalloc( &(dwQ2[igpu]), n2*n2_loc );
-            magma_dmalloc( &(dwQ[0][igpu]), n2_loc*nb );
-            magma_dmalloc( &(dwQ[1][igpu]), n2_loc*nb );
-*/        }
+        }
         for (igpu = 0; igpu < nrgpu-1; igpu += 2){
             ni_loc[igpu] = min(n1_loc, n1 - igpu/2 * n1_loc);
 #ifdef CHECK_CPU
@@ -282,18 +281,150 @@ magma_dlaex3_m(magma_int_t nrgpu,
     }
 
     //#define ENABLE_TIMER
+
+#ifdef _OPENMP
+    /////////////////////////////////////////////////////////////////////////////////
+    //openmp implementation
+    /////////////////////////////////////////////////////////////////////////////////
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
+
+    start = get_current_time();
+#endif
+
+#pragma omp parallel private(i, j, tmp, temp)
+    {
+        magma_int_t id = omp_get_thread_num();
+        magma_int_t tot = omp_get_num_threads();
+
+        magma_int_t ib = (  id   * k) / tot; //start index of local loop
+        magma_int_t ie = ((id+1) * k) / tot; //end index of local loop
+        magma_int_t ik = ie - ib;           //number of local indices
+
+        for(i = ib; i < ie; ++i)
+            dlamda[i]=lapackf77_dlamc3(&dlamda[i], &dlamda[i]) - dlamda[i];
+
+        for(j = ib; j < ie; ++j){
+            magma_int_t tmpp=j+1;
+            magma_int_t iinfo = 0;
+            lapackf77_dlaed4(&k, &tmpp, dlamda, w, Q(0,j), &rho, &d[j], &iinfo);
+            // If the zero finder fails, the computation is terminated.
+            if(iinfo != 0){
+#pragma omp critical (info)
+                *info=iinfo;
+                break;
+            }
+        }
+
+#pragma omp barrier
+
+        if(*info == 0){
+
+#pragma omp single
+            {
+                //Prepare the INDXQ sorting permutation.
+                magma_int_t nk = n - k;
+                lapackf77_dlamrg( &k, &nk, d, &ione , &ineg_one, indxq);
+
+                //compute the lower and upper bound of the non-deflated eigenvectors
+                if (valeig)
+                    magma_dvrange(k, d, &iil, &iiu, vl, vu);
+                else if (indeig)
+                    magma_dirange(k, indxq, &iil, &iiu, il, iu);
+                else {
+                    iil = 1;
+                    iiu = k;
+                }
+                rk = iiu - iil + 1;
+            }
+
+            if (k == 2){
+#pragma omp single
+                {
+                    for(j = 0; j < k; ++j){
+                        w[0] = *Q(0,j);
+                        w[1] = *Q(1,j);
+
+                        i = indx[0] - 1;
+                        *Q(0,j) = w[i];
+                        i = indx[1] - 1;
+                        *Q(1,j) = w[i];
+                    }
+                }
+
+            }
+            else if(k != 1){
+
+                // Compute updated W.
+                blasf77_dcopy( &ik, &w[ib], &ione, &s[ib], &ione);
+
+                // Initialize W(I) = Q(I,I)
+                tmp = ldq + 1;
+                blasf77_dcopy( &ik, Q(ib,ib), &tmp, &w[ib], &ione);
+
+                for(j = 0; j < k; ++j){
+                    magma_int_t i_tmp = min(j, ie);
+                    for(i = ib; i < i_tmp; ++i)
+                        w[i] = w[i] * ( *Q(i, j) / ( dlamda[i] - dlamda[j] ) );
+                    i_tmp = max(j+1, ib);
+                    for(i = i_tmp; i < ie; ++i)
+                        w[i] = w[i] * ( *Q(i, j) / ( dlamda[i] - dlamda[j] ) );
+                }
+
+                for(i = ib; i < ie; ++i)
+                    w[i] = copysign( sqrt( -w[i] ), s[i]);
+
+#pragma omp barrier
+
+                //reduce the number of used threads to have enough S workspace
+                tot = min(n1, omp_get_num_threads());
+
+                if(id < tot){
+                    ib = (  id   * rk) / tot + iil - 1;
+                    ie = ((id+1) * rk) / tot + iil - 1;
+                    ik = ie - ib;
+                }
+                else{
+                    ib = -1;
+                    ie = -1;
+                    ik = -1;
+                }
+
+                // Compute eigenvectors of the modified rank-1 modification.
+                for(j = ib; j < ie; ++j){
+                    for(i = 0; i < k; ++i)
+                        s[id*k + i] = w[i] / *Q(i,j);
+                    temp = cblas_dnrm2( k, s+id*k, 1);
+                    for(i = 0; i < k; ++i){
+                        magma_int_t iii = indx[i] - 1;
+                        *Q(i,j) = s[id*k + iii] / temp;
+                    }
+                }
+            }
+        }
+    }
+    if (*info != 0)
+        return MAGMA_SUCCESS; //??????
+
+#ifdef ENABLE_TIMER
+    end = get_current_time();
+
+    printf("eigenvalues/vector D+zzT = %6.2f\n", GetTimerValue(start,end)/1000.);
+#endif
+
+#else
+    /////////////////////////////////////////////////////////////////////////////////
+    // Non openmp implementation
+    /////////////////////////////////////////////////////////////////////////////////
+#ifdef ENABLE_TIMER
+    magma_timestr_t start, end;
+
+    start = get_current_time();
 #endif
 
     for(i = 0; i < k; ++i)
         dlamda[i]=lapackf77_dlamc3(&dlamda[i], &dlamda[i]) - dlamda[i];
 
-#ifdef ENABLE_TIMER
-    start = get_current_time();
-#endif
-
-#pragma omp parallel for
     for(j = 0; j < k; ++j){
         magma_int_t tmpp=j+1;
         magma_int_t iinfo = 0;
@@ -304,12 +435,6 @@ magma_dlaex3_m(magma_int_t nrgpu,
     }
     if(*info != 0)
         return MAGMA_SUCCESS;
-
-#ifdef ENABLE_TIMER
-    end = get_current_time();
-
-    printf("for dlaed4 = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
 
     //Prepare the INDXQ sorting permutation.
     magma_int_t nk = n - k;
@@ -347,58 +472,37 @@ magma_dlaex3_m(magma_int_t nrgpu,
         // Initialize W(I) = Q(I,I)
         tmp = ldq + 1;
         blasf77_dcopy( &k, q, &tmp, w, &ione);
-#ifdef ENABLE_TIMER
-        start = get_current_time();
-#endif
-#pragma omp parallel for
-        for(magma_int_t ii = 0; ii < k; ++ii)
-            for(magma_int_t jj = 0; jj < k; ++jj){
-                if(ii != jj)
-                    w[ii] = w[ii] * ( *Q(ii, jj) / ( dlamda[ii] - dlamda[jj] ) );
-            }
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-
-        printf("for j for i divided in two parts = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+        for(j = 0; j < k; ++j){
+            for(i = 0; i < j; ++i)
+                w[i] = w[i] * ( *Q(i, j) / ( dlamda[i] - dlamda[j] ) );
+            for(i = j+1; i < k; ++i)
+                w[i] = w[i] * ( *Q(i, j) / ( dlamda[i] - dlamda[j] ) );
+        }
 
         for(i = 0; i < k; ++i)
             w[i] = copysign( sqrt( -w[i] ), s[i]);
 
-#ifdef ENABLE_TIMER
-        start = get_current_time();
-#endif
-
         // Compute eigenvectors of the modified rank-1 modification.
-        if (k > 256)
-            for(j = iil-1; j < iiu; ++j){
-#pragma omp parallel for
-                for(magma_int_t ii = 0; ii < k; ++ii)
-                    s[ii] = w[ii] / *Q(ii,j);
-                temp = cblas_dnrm2( k, s, 1);
-#pragma omp parallel for
-                for(magma_int_t ii = 0; ii < k; ++ii){
-                    magma_int_t iii = indx[ii] - 1;
-                    *Q(ii,j) = s[iii] / temp;
-                }
+        for(j = iil-1; j < iiu; ++j){
+            for(i = 0; i < k; ++i)
+                s[i] = w[i] / *Q(i,j);
+            temp = cblas_dnrm2( k, s, 1);
+            for(i = 0; i < k; ++i){
+                magma_int_t iii = indx[i] - 1;
+                *Q(i,j) = s[iii] / temp;
             }
-        else
-            for(j = iil-1; j < iiu; ++j){
-                for(i = 0; i < k; ++i)
-                    s[i] = w[i] / *Q(i,j);
-                temp = cblas_dnrm2( k, s, 1);
-                for(i = 0; i < k; ++i){
-                    magma_int_t iii = indx[i] - 1;
-                    *Q(i,j) = s[iii] / temp;
-                }
-            }
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-
-        printf("for j (2*for i) = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+        }
     }
+
+#ifdef ENABLE_TIMER
+    end = get_current_time();
+
+    printf("eigenvalues/vector D+zzT = %6.2f\n", GetTimerValue(start,end)/1000.);
+#endif
+
+#endif //_OPENMP
+
     // Compute the updated eigenvectors.
 
 #ifdef ENABLE_TIMER
@@ -470,8 +574,6 @@ magma_dlaex3_m(magma_int_t nrgpu,
                         lapackf77_dlacpy("A", &n23, &ib, Q(ctot[0],iil-1+i), &ldq, hS(igpu+1,ind), &n23);
 #endif
                         magma_setdevice(igpu+1);
-                        //cudaMemcpy2DAsync(dS(igpu+1,ind), sizeof(double)*n23, Q(ctot[0],iil-1+i), sizeof(double)*ldq,
-                        //                  sizeof(double)*n23, ib, cudaMemcpyHostToDevice, stream[igpu+1][ind]);
                         magma_queue_sync( stream[igpu+1][ind] );
                     }
                     if (n12 != 0) {
@@ -479,8 +581,6 @@ magma_dlaex3_m(magma_int_t nrgpu,
                         lapackf77_dlacpy("A", &n12, &ib, Q(0,iil-1+i), &ldq, hS(igpu,ind), &n12);
 #endif
                         magma_setdevice(igpu);
-                        //cudaMemcpy2DAsync(dS(igpu,ind), sizeof(double)*n12, Q(0,iil-1+i), sizeof(double)*ldq,
-                        //                  sizeof(double)*n12, ib, cudaMemcpyHostToDevice, stream[igpu][ind]);
                         magma_queue_sync( stream[igpu][ind] );
                     }
 
@@ -516,17 +616,13 @@ magma_dlaex3_m(magma_int_t nrgpu,
                 for (igpu = 0; igpu < nrgpu-1; igpu += 2){
                     if (n23 != 0) {
                         magma_setdevice(igpu+1);
-                        magma_dgetmatrix_async( ni_loc[igpu+1], ib,
-                                                dQ(igpu+1, ind),               n2_loc,
+                        magma_dgetmatrix_async( ni_loc[igpu+1], ib, dQ(igpu+1, ind), n2_loc,
                                                 Q(n1+n2_loc*(igpu/2),iil-1+i), ldq, stream[igpu+1][ind] );
-//                        lapackf77_dlacpy("A", &ni_loc[igpu+1], &ib, hQ(igpu+1, ind%2), &n2_loc, Q(n1+n2_loc*(igpu/2),iil-1+i), &ldq);
                     }
                     if (n12 != 0) {
                         magma_setdevice(igpu);
-                        magma_dgetmatrix_async( ni_loc[igpu], ib,
-                                                dQ(igpu, ind),              n1_loc,
+                        magma_dgetmatrix_async( ni_loc[igpu], ib, dQ(igpu, ind), n1_loc,
                                                 Q(n1_loc*(igpu/2),iil-1+i), ldq, stream[igpu][ind] );
-//                        lapackf77_dlacpy("A", &ni_loc[igpu], &ib, hQ(igpu, ind%2), &n1_loc, Q(n1_loc*(igpu/2),iil-1+i), &ldq);
                     }
                 }
             }
@@ -542,12 +638,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
                 magmablasSetKernelStream(NULL);
                 magma_queue_sync( stream[igpu][0] );
                 magma_queue_sync( stream[igpu][1] );
-/*                magma_free( dwS[0][igpu] );
-                magma_free( dwS[1][igpu] );
-                magma_free( dwQ2[igpu] );
-                magma_free( dwQ[0][igpu] );
-                magma_free( dwQ[1][igpu] );
-*/            }
+            }
             if( n23 == 0 )
                 lapackf77_dlaset("A", &n2, &rk, &d_zero, &d_zero, Q(n1,iil-1), &ldq);
 
