@@ -569,7 +569,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_
     //magma_free_pinned( work );
 
     return mv_time;
-} /* zlatrd_ */
+} /* zlatrd */
 
 extern "C"
 magma_int_t

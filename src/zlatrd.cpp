@@ -342,5 +342,5 @@ magma_zlatrd(char uplo, magma_int_t n, magma_int_t nb,
     magma_queue_destroy( stream );
 
     return 0;
-} /* zlatrd_ */
+} /* zlatrd */
 

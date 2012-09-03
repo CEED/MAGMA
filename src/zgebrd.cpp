@@ -283,5 +283,5 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
 
     magma_free( da );
     return *info;
-} /* zgebrd_ */
+} /* zgebrd */
 

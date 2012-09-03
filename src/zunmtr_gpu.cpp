@@ -202,5 +202,5 @@ magma_zunmtr_gpu(char side, char uplo, char trans,
       }
 
     return *info;
-} /* zunmtr_ */
+} /* zunmtr */
 

@@ -559,5 +559,5 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
     magma_free_cpu(f);
     
     return MAGMA_SUCCESS;
-} /* zlabrd_ */
+} /* zlabrd */
 
