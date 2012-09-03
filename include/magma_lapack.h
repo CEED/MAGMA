@@ -53,8 +53,9 @@ void   lapackf77_xerbla( const char *name, magma_int_t *info, magma_int_t name_l
 float  lapackf77_slamch( const char *cmach );
 double lapackf77_dlamch( const char *cmach );
 
-void   lapackf77_slabad( float  *small, float  *large );
-void   lapackf77_dlabad( double *small, double *large );
+// "small" (lowercase) defined as char on Windows (reported by MathWorks)
+void   lapackf77_slabad( float  *Small, float  *large );
+void   lapackf77_dlabad( double *Small, double *large );
 
 void   lapackf77_zcgesv( const magma_int_t *n, const magma_int_t *nrhs,
                          cuDoubleComplex *A, const magma_int_t *lda,
