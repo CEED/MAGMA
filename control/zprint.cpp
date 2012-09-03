@@ -69,10 +69,9 @@ void magma_zprint_gpu( magma_int_t m, magma_int_t n, const cuDoubleComplex *dA, 
     }
     
     int lda = m;
-    cuDoubleComplex* A = (cuDoubleComplex*) malloc( lda*n*sizeof(cuDoubleComplex) );
-    cublasGetMatrix( m, n, sizeof(cuDoubleComplex), dA, ldda, A, lda );
-    
+    cuDoubleComplex* A;
+    magma_zmalloc_cpu( &A, lda*n );
+    magma_zgetmatrix( m, n, dA, ldda, A, lda );
     magma_zprint( m, n, A, lda );
-    
-    free( A );
+    magma_free_cpu( A );
 }
