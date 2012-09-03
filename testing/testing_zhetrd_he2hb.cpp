@@ -48,6 +48,10 @@ extern "C" magma_int_t
 magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int n, int NB, 
                    cuDoubleComplex *A, int LDA, double *D, double *E, cuDoubleComplex *dT1, int ldt1);
 
+extern "C" magma_int_t
+magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t wantz, char uplo, magma_int_t ne, magma_int_t n, magma_int_t nb,
+                        cuDoubleComplex *A, magma_int_t lda, double *D, double *E,
+                        cuDoubleComplex *dT1, magma_int_t ldt1);
 
 #if defined(PRECISION_z) || defined(PRECISION_d)
 extern "C" void cmp_vals(int n, double *wr1, double *wr2, double *nrmI, double *nrm1, double *nrm2);
@@ -287,7 +291,7 @@ return 0;
 */        
         
         //        dsytrd_bsy2trc(THREADS, uplo[0], N, NB, h_R, lda, D, E);
-        magma_zhetrd_bhe2trc(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1, ldt);
+        magma_zhetrd_bhe2trc_v5(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1, ldt);
         end = get_current_time();
         if ( info < 0 )
             printf("Argument %d of magma_zhetrd_he2hb had an illegal value\n", (int) -info);

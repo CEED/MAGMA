@@ -156,11 +156,15 @@ ZSRC += \
 ZSRC += \
 	dbulge_aux.cpp		\
 	zbulge_applyQ.cpp	\
+	zbulge_applyQ_v2.cpp	\
 	zbulge_aux.cpp		\
 	zbulge_kernel.cpp	\
+	zbulge_kernel_v2.cpp	\
 	zhetrd_he2hb.cpp	\
 	zhetrd_bhe2trc_v3.cpp	\
+	zhetrd_bhe2trc_v5.cpp	\
 	zungqr_2stage_gpu.cpp	\
+	zunmqr_gpu_2stage.cpp	\
 
 # generalized symmetric eigenvalues
 ZSRC += \
