@@ -33,11 +33,11 @@ int main( int argc, char** argv)
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double           error, work[1];
     cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *h_A, *h_R, *tau, *hwork, tmp[1];
+    cuDoubleComplex *h_A, *h_R, *tau, *h_work, tmp[1];
     cuDoubleComplex *d_A;
 
     /* Matrix size */
-    magma_int_t M = 0, N = 0, n2, lda, ldda, lhwork;
+    magma_int_t M = 0, N = 0, n2, lda, ldda, lwork;
     const int MAXTESTS = 10;
     magma_int_t msize[MAXTESTS] = { 1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 10112 };
     magma_int_t nsize[MAXTESTS] = { 1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 10112 };
@@ -97,17 +97,17 @@ int main( int argc, char** argv)
     n2     = M * N;
     min_mn = min(M, N);
 
-    /* Allocate host memory for the matrix */
+    /* Allocate memory for the matrix */
     TESTING_MALLOC(    tau, cuDoubleComplex, min_mn );
     TESTING_MALLOC(    h_A, cuDoubleComplex, n2     );
     TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2     );
     TESTING_DEVALLOC(  d_A, cuDoubleComplex, ldda*N );
 
-    lhwork = -1;
-    lapackf77_zgeqrf(&M, &N, h_A, &M, tau, tmp, &lhwork, &info);
-    lhwork = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
+    lwork = -1;
+    lapackf77_zgeqrf(&M, &N, h_A, &M, tau, tmp, &lwork, &info);
+    lwork = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
 
-    TESTING_MALLOC( hwork, cuDoubleComplex, lhwork );
+    TESTING_MALLOC( h_work, cuDoubleComplex, lwork );
 
     printf("  M     N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / ||A||_F\n");
     printf("=======================================================================\n");
@@ -123,28 +123,24 @@ int main( int argc, char** argv)
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
+        magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
 
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-        magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
-        magma_zgeqrf2_gpu( M, N, d_A, ldda, tau, &info);
-        magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
-
         gpu_time = magma_wtime();
         magma_zgeqrf2_gpu( M, N, d_A, ldda, tau, &info);
         gpu_time = magma_wtime() - gpu_time;
         gpu_perf = gflops / gpu_time;
         if (info != 0)
-          printf("magma_zgeqrf returned error %d.\n", (int) info);
-        
+            printf("magma_zgeqrf returned error %d.\n", (int) info);
         
         if ( checkres ) {
             /* =====================================================================
                Performs operation using LAPACK
                =================================================================== */
             cpu_time = magma_wtime();
-            lapackf77_zgeqrf(&M, &N, h_A, &M, tau, hwork, &lhwork, &info);
+            lapackf77_zgeqrf(&M, &N, h_A, &lda, tau, h_work, &lwork, &info);
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gflops / cpu_time;
             if (info != 0)
@@ -153,11 +149,10 @@ int main( int argc, char** argv)
             /* =====================================================================
                Check the result compared to LAPACK
                =================================================================== */
-            magma_zgetmatrix( M, N, d_A, ldda, h_R, M );
-            
-            error = lapackf77_zlange("f", &M, &N, h_A, &M, work);
+            magma_zgetmatrix( M, N, d_A, ldda, h_R, M );            
+            error = lapackf77_zlange("f", &M, &N, h_A, &lda, work);
             blasf77_zaxpy(&n2, &c_neg_one, h_A, &ione, h_R, &ione);
-            error = lapackf77_zlange("f", &M, &N, h_R, &M, work) / error;
+            error = lapackf77_zlange("f", &M, &N, h_R, &lda, work) / error;
         
             printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e\n",
                    (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, error );
@@ -171,11 +166,10 @@ int main( int argc, char** argv)
     /* Memory clean up */
     TESTING_FREE( tau );
     TESTING_FREE( h_A );
-    TESTING_FREE( hwork );
+    TESTING_FREE( h_work );
     TESTING_HOSTFREE( h_R );
     TESTING_DEVFREE( d_A );
 
-    /* Shutdown */
     TESTING_CUDA_FINALIZE();
     return 0;
 }
