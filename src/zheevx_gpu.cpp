@@ -12,27 +12,6 @@
  */
 #include "common_magma.h"
 
-/* These interfaces are used for TAU profiling */
-extern"C"{
-    void Mylapackf77_zstein(magma_int_t *n, double *d, double *e, magma_int_t *m, 
-                            double *w, magma_int_t *iblock, magma_int_t *isplit,
-                            cuDoubleComplex *z, magma_int_t *ldz, double *work, 
-                            magma_int_t *iwork, magma_int_t *ifail, magma_int_t *info)
-    {
-        lapackf77_zstein(n, d, e, m, w, iblock, isplit, z, ldz, work, iwork, ifail, info);
-    }
-
-    void Mylapackf77_dstebz(char *range, char *order, magma_int_t *n, double *vl,
-                            double *vu, magma_int_t *il, magma_int_t *iu, double *abstol,
-                            double *d, double *e, magma_int_t *m, magma_int_t *nsplit, 
-                            double *w, magma_int_t *iblock, magma_int_t *isplit, 
-                            double *work, magma_int_t *iwork, magma_int_t *info)
-    {
-        lapackf77_dstebz(range, order, n, vl, vu, il, iu, abstol, 
-                         d, e, m, nsplit, w, iblock, isplit, work, iwork,info);
-    }
-}
-
 extern "C" magma_int_t 
 magma_zheevx_gpu(char jobz, char range, char uplo, magma_int_t n, 
                  cuDoubleComplex *da, magma_int_t ldda, double vl, double vu, 
@@ -404,12 +383,12 @@ magma_zheevx_gpu(char jobz, char range, char uplo, magma_int_t n,
     indisp = indibl + n;
     indiwk = indisp + n;
 
-    Mylapackf77_dstebz(range_, order, &n, &vl, &vu, &il, &iu, &abstol, &rwork[indd], &rwork[inde], m,
+    lapackf77_dstebz(range_, order, &n, &vl, &vu, &il, &iu, &abstol, &rwork[indd], &rwork[inde], m,
                      &nsplit, &w[1], &iwork[indibl], &iwork[indisp], &rwork[indrwk], &iwork[indiwk], info);
     
     if (wantz) {
       
-      Mylapackf77_zstein(&n, &rwork[indd], &rwork[inde], m, &w[1], &iwork[indibl], &iwork[indisp],
+      lapackf77_zstein(&n, &rwork[indd], &rwork[inde], m, &w[1], &iwork[indibl], &iwork[indisp],
                        wz, &ldwz, &rwork[indrwk], &iwork[indiwk], &ifail[1], info);
       
       magma_zsetmatrix( n, *m, wz, ldwz, dz, lddz );

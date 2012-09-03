@@ -12,19 +12,11 @@
 
 #define Z(ix, iy) (z + (ix) + ldz * (iy))
 
-#ifdef ADD_
-#define lapackf77_dlanst dlanst_
-#else
-#define lapackf77_dlanst dlanst
-#endif
-
 extern "C"{
     magma_int_t magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
                                double* work, magma_int_t* iwork,
                                char range, double vl, double vu,
                                magma_int_t il, magma_int_t iu, magma_int_t* info);
-
-    double lapackf77_dlanst( char* norm, magma_int_t* n, double* d, double* e);
 
     magma_int_t get_dstedx_smlsize()
     {

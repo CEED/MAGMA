@@ -12,15 +12,6 @@
 */
 #include "common_magma.h"
 
-extern "C" {
-#ifdef ADD_
-#    define lapackf77_ieeeck   ieeeck_
-#elif defined NOCHANGE
-#    define lapackf77_ieeeck   ieeeck
-#endif
-  magma_int_t lapackf77_ieeeck(magma_int_t* ispec, float* zero, float* one);
-}
-
 extern "C" magma_int_t 
 magma_zheevr(char jobz, char range, char uplo, magma_int_t n, 
              cuDoubleComplex *a, magma_int_t lda, double vl, double vu, 
