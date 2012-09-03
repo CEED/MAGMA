@@ -525,6 +525,7 @@ subs = {
     ('lagsy',          'lagsy',          'laghe',          'laghe'           ),
     ('lasyf',          'lasyf',          'lahef',          'lahef'           ),
     ('lansy',          'lansy',          'lanhe',          'lanhe'           ),
+    ('lanst',          'lanst',          'lanht',          'lanht'           ),
     ('lavsy',          'lavsy',          'lavhe',          'lavhe'           ),
     ('org2r',          'org2r',          'ung2r',          'ung2r'           ),
     ('orgbr',          'orgbr',          'ungbr',          'ungbr'           ),
