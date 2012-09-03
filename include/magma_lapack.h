@@ -22,6 +22,7 @@
 extern "C" {
 #endif
 
+#define lapackf77_ieeeck FORTRAN_NAME( ieeeck, IEEECK )
 #define lapackf77_lsame  FORTRAN_NAME( lsame,  LSAME  )
 #define lapackf77_xerbla FORTRAN_NAME( xerbla, XERBLA )
 
@@ -42,6 +43,8 @@ extern "C" {
 
 #define lapackf77_dlapy2 FORTRAN_NAME( dlapy2, DLAPY2 )
 #define lapackf77_slapy2 FORTRAN_NAME( slapy2, SLAPY2 )
+
+magma_int_t lapackf77_ieeeck( magma_int_t* ispec, float* zero, float* one );
 
 long   lapackf77_lsame(  const char *ca, const char *cb );
 

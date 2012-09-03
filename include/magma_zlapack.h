@@ -80,6 +80,7 @@ extern "C" {
 #define lapackf77_zlahef   FORTRAN_NAME( zlahef, ZLAHEF )
 #define lapackf77_zlange   FORTRAN_NAME( zlange, ZLANGE )
 #define lapackf77_zlanhe   FORTRAN_NAME( zlanhe, ZLANHE )
+#define lapackf77_zlanht   FORTRAN_NAME( zlanht, ZLANHT )
 #define lapackf77_zlansy   FORTRAN_NAME( zlansy, ZLANSY )
 #define lapackf77_zlaqp2   FORTRAN_NAME( zlaqp2, ZLAQP2 )
 #define lapackf77_zlarfb   FORTRAN_NAME( zlarfb, ZLARFB )
@@ -515,6 +516,9 @@ double lapackf77_zlanhe( const char *norm, const char *uplo,
                          const magma_int_t *n,
                          const cuDoubleComplex *A, const magma_int_t *lda,
                          double * work );
+
+double lapackf77_zlanht( char* norm, magma_int_t* n,
+                         const double* d, const cuDoubleComplex* e );
 
 double lapackf77_zlansy( const char *norm, const char *uplo,
                          const magma_int_t *n,
