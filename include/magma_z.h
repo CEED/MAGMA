@@ -367,7 +367,7 @@ magma_int_t magma_zlarfb_gpu( char side, char trans, char direct, char storev,
                               const cuDoubleComplex *dv, magma_int_t ldv,
                               const cuDoubleComplex *dt, magma_int_t ldt, 
                               cuDoubleComplex *dc,       magma_int_t ldc,
-                              cuDoubleComplex *dowrk,    magma_int_t ldwork );
+                              cuDoubleComplex *dwork,    magma_int_t ldwork );
 magma_int_t magma_zposv_gpu(  char uplo, magma_int_t n, magma_int_t nrhs, 
                               cuDoubleComplex *dA, magma_int_t ldda, 
                               cuDoubleComplex *dB, magma_int_t lddb, magma_int_t *info);
