@@ -60,7 +60,7 @@ int main( int argc, char** argv)
     printf( "  -c or setting $MAGMA_TESTINGS_CHECK checks result.\n\n" );
     int ntest = 0;
     for( int i = 1; i < argc; ++i ) {
-        if ( strcmp("-N", argv[i]) == 0 and i+1 < argc ) {
+        if ( strcmp("-N", argv[i]) == 0 && i+1 < argc ) {
             magma_assert( ntest < MAXTESTS, "error: -N repeated more than maximum %d tests\n", MAXTESTS );
             size[ntest] = atoi( argv[++i] );
             magma_assert( size[ntest] > 0, "error: -N %s is invalid; must be > 0.\n", argv[i] );

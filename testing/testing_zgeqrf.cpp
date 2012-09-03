@@ -96,6 +96,7 @@ int main( int argc, char** argv)
     min_mn = min(M, N);
     nb = magma_get_zgeqrf_nb(M);
 
+    /* Allocate memory for the matrix */
     TESTING_MALLOC(    tau, cuDoubleComplex, min_mn );
     TESTING_MALLOC(    h_A, cuDoubleComplex, n2     );
     TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2     );
@@ -103,7 +104,7 @@ int main( int argc, char** argv)
     lwork = -1;
     lapackf77_zgeqrf(&M, &N, h_A, &M, tau, tmp, &lwork, &info);
     lwork = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
-    lwork = max( lwork, N*nb);
+    lwork = max( lwork, N*nb );
 
     TESTING_MALLOC( h_work, cuDoubleComplex, lwork );
 
@@ -164,7 +165,6 @@ int main( int argc, char** argv)
     TESTING_FREE( h_work );
     TESTING_HOSTFREE( h_R );
 
-    /* Shutdown */
     TESTING_CUDA_FINALIZE();
     return 0;
 }

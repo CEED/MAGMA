@@ -51,14 +51,14 @@ int main( int argc, char** argv)
     printf( "  -N can be repeated up to %d times\n\n", MAXTESTS );
     int ntest = 0;
     for( int i = 1; i < argc; ++i ) {
-        if ( strcmp("-N", argv[i]) == 0 and i+1 < argc ) {
+        if ( strcmp("-N", argv[i]) == 0 && i+1 < argc ) {
             magma_assert( ntest < MAXTESTS, "error: -N repeated more than maximum %d tests\n", MAXTESTS );
             size[ntest] = atoi( argv[++i] );
             magma_assert( size[ntest] > 0, "error: -N %s is invalid; must be > 0.\n", argv[i] );
             N = max( N, size[ntest] );
             ntest++;
         }
-        else if ( strcmp("-R", argv[i]) == 0 and i+1 < argc ) {
+        else if ( strcmp("-R", argv[i]) == 0 && i+1 < argc ) {
             NRHS = atoi( argv[++i] );
             magma_assert( NRHS > 0, "error: -R %is is invalid; must be > 0.\n", argv[i] );
         }

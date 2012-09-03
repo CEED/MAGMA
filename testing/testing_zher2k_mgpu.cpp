@@ -77,31 +77,31 @@ int main( int argc, char** argv)
     int ntest = 0;
     int nmax = 0;
     for( int i = 1; i < argc; i++ ) {
-        if ( strcmp("-N", argv[i]) == 0 and i+1 < argc ) {
+        if ( strcmp("-N", argv[i]) == 0 && i+1 < argc ) {
             magma_assert( ntest < MAXTESTS, "error: -N repeated more than maximum %d tests\n", MAXTESTS );
             nsize[ntest] = atoi( argv[++i] );
             magma_assert( nsize[ntest] > 0, "error: -N %s is invalid; must be > 0.\n", argv[i] );
             nmax = max( nmax, nsize[ntest] );
             ntest++;
         }
-        else if ( strcmp("-K", argv[i]) == 0 and i+1 < argc ) {
+        else if ( strcmp("-K", argv[i]) == 0 && i+1 < argc ) {
             k = atoi( argv[++i] );
             magma_assert( k > 0, "error: -K %s is invalid; must be > 0.\n", argv[i] );
         }
-        else if ( strcmp("-nb", argv[i]) == 0 and i+1 < argc ) {
+        else if ( strcmp("-nb", argv[i]) == 0 && i+1 < argc ) {
             nb = atoi( argv[++i] );
             magma_assert( nb > 0, "error: -nb %s is invalid; must be > 0.\n", argv[i] );
         }
-        else if ( strcmp("-count", argv[i]) == 0 and i+1 < argc ) {
+        else if ( strcmp("-count", argv[i]) == 0 && i+1 < argc ) {
             count = atoi( argv[++i] );
             magma_assert( count > 0, "error: -count %s is invalid; must be > 0.\n", argv[i] );
         }
-        else if ( strcmp("-nstream", argv[i]) == 0 and i+1 < argc ) {
+        else if ( strcmp("-nstream", argv[i]) == 0 && i+1 < argc ) {
             nstream = atoi( argv[++i] );
-            magma_assert( nstream > 0 and nstream <= 10,
+            magma_assert( nstream > 0 && nstream <= 10,
                     "error: -nstream %s is invalid; must be > 0 and <= 10.\n", argv[i] );
         }
-        else if ( strcmp("-ngpu", argv[i]) == 0 and i+1 < argc ) {
+        else if ( strcmp("-ngpu", argv[i]) == 0 && i+1 < argc ) {
             ngpu = atoi( argv[++i] );
             magma_assert( ngpu > 0, "error: -ngpu %s is invalid; must be > 0.\n", argv[i] );
         }
@@ -149,7 +149,7 @@ int main( int argc, char** argv)
     for( int i = 0; i < ntest; ++i ) {
     for( int j = 0; j < count; ++j ) {
         n = nsize[i];
-        assert( n > 0 and k > 0 );
+        assert( n > 0 && k > 0 );
         
         lda  = n;
         ldda = ((n + 31)/32)*32;

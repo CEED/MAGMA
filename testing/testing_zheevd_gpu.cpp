@@ -82,7 +82,7 @@ int main( int argc, char** argv)
     }
 
     checkres = getenv("MAGMA_TESTINGS_CHECK") != NULL;
-    if ( checkres and jobz[0] == MagmaNoVectors ) {
+    if ( checkres && jobz[0] == MagmaNoVectors ) {
         printf( "Cannot check results when vectors are not computed (jobz='N')\n" );
         checkres = false;
     }
