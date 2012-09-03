@@ -24,7 +24,6 @@ extern "C" {
  // maximum contexts
 #define MAX_THREADS_BLG         256
 
-real_Double_t get_time_azz(void);
 void findVTpos(magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, magma_int_t sweep, magma_int_t st, magma_int_t *Vpos, magma_int_t *TAUpos, magma_int_t *Tpos, magma_int_t *myblkid);
 void findVTsiz(magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, magma_int_t *blkcnt, magma_int_t *LDV);
 magma_int_t plasma_ceildiv(magma_int_t a, magma_int_t b);
@@ -108,10 +107,10 @@ extern real_Double_t event_logblg        [MAX_THREADS_BLG][MAX_EVENTSBLG]  __att
 extern int           log_eventsblg;
 
 #define core_event_startblg(my_core_id)\
-    event_start_timeblg[my_core_id] = get_time_azz();\
+    event_start_timeblg[my_core_id] = magma_wtime();
 
 #define core_event_endblg(my_core_id)\
-    event_end_timeblg[my_core_id] = get_time_azz();\
+    event_end_timeblg[my_core_id] = magma_wtime();
 
 #define core_log_eventblg(event, my_core_id)\
     event_logblg[my_core_id][event_numblg[my_core_id]+0] = my_core_id;\
