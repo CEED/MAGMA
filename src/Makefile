@@ -90,10 +90,6 @@ ZSRC += \
 	zunmqr2_gpu.cpp		\
 	zunmqr_gpu.cpp		\
 	\
-	zgeqp3.cpp		\
-	dgeqp3.cpp		\
-	zlaqps.cpp		\
-	\
 	zgeqrf_mgpu.cpp		\
 
 # QR, CPU interface
@@ -107,9 +103,13 @@ ZSRC += \
 	zunmql.cpp		\
 	zunmqr.cpp		\
 	zunmqr_m.cpp		\
+	\
+	dgeqp3.cpp		\
+	zgeqp3.cpp		\
+	zlaqps.cpp		\
 
 # ----------
-# symmetric eigenvalue, GPU interface
+# symmetric eigenvalues, GPU interface
 ZSRC += \
 	dsyevd_gpu.cpp		\
 	zheevd_gpu.cpp		\
@@ -191,8 +191,8 @@ ZSRC += \
 # SVD
 ZSRC += \
 	dgesvd.cpp		\
-	zgebrd.cpp		\
 	zgesvd.cpp		\
+	zgebrd.cpp		\
 	zlabrd_gpu.cpp		\
 
 
