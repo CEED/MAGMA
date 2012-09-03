@@ -9,6 +9,20 @@
 #include "common_magma.h"
 #include <assert.h>
 
+
+#if defined( _WIN32 ) || defined( _WIN64 )
+
+// -------------------------
+// Return log base 2 of x, per C99 standard. Not provided by Microsoft.
+double log2( double x )
+{
+    const double log_2 = 0.6931471805599453;
+    return log( x ) / log_2;
+}
+
+#endif
+
+
 // -------------------------
 // Returns version of MAGMA, as defined by
 // MAGMA_VERSION_MAJOR, MAGMA_VERSION_MINOR, MAGMA_VERSION_MICRO constants.
