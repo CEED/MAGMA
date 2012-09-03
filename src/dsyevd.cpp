@@ -181,7 +181,7 @@ magma_dsyevd(char jobz, char uplo,
     }
     // multiply by 1+eps to ensure length gets rounded up,
     // if it cannot be exactly represented in floating point.
-    work[0]  = lwmin * (1. + dlamch_("Epsilon"));
+    work[0]  = lwmin * (1. + lapackf77_dlamch("Epsilon"));
     iwork[0] = liwmin;
 
     if ((lwork < lwmin) && !lquery) {
@@ -305,7 +305,7 @@ magma_dsyevd(char jobz, char uplo,
         blasf77_dscal(&n, &d__1, w, &ione);
     }
 
-    work[0]  = lwmin * (1. + dlamch_("Epsilon"));  // round up
+    work[0]  = lwmin * (1. + lapackf77_dlamch("Epsilon"));  // round up
     iwork[0] = liwmin;
 
     return *info;

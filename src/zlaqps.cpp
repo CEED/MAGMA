@@ -131,7 +131,7 @@ magma_zlaqps(magma_int_t *m, magma_int_t *n, magma_int_t *offset,
     lastrk = min(i__1,i__2);
     lsticc = 0;
     k = 0;
-    tol3z = magma_dsqrt(dlamch_("Epsilon"));
+    tol3z = magma_dsqrt( lapackf77_dlamch("Epsilon"));
 
     da -= 1 + *ldda;
     df -= 1 + *lddf;
