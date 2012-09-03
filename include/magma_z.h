@@ -364,8 +364,10 @@ magma_int_t magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                               cuDoubleComplex *y, magma_int_t ldy, cuDoubleComplex *dy, magma_int_t lddy);
 magma_int_t magma_zlarfb_gpu( char side, char trans, char direct, char storev, 
                               magma_int_t m, magma_int_t n, magma_int_t k,
-                              cuDoubleComplex *dv, magma_int_t ldv, cuDoubleComplex *dt,    magma_int_t ldt, 
-                              cuDoubleComplex *dc, magma_int_t ldc, cuDoubleComplex *dowrk, magma_int_t ldwork );
+                              const cuDoubleComplex *dv, magma_int_t ldv,
+                              const cuDoubleComplex *dt, magma_int_t ldt, 
+                              cuDoubleComplex *dc,       magma_int_t ldc,
+                              cuDoubleComplex *dowrk,    magma_int_t ldwork );
 magma_int_t magma_zposv_gpu(  char uplo, magma_int_t n, magma_int_t nrhs, 
                               cuDoubleComplex *dA, magma_int_t ldda, 
                               cuDoubleComplex *dB, magma_int_t lddb, magma_int_t *info);
@@ -500,8 +502,8 @@ magma_int_t magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
  -- MAGMA utility function definitions
 */
 
-void magma_zprint    ( magma_int_t m, magma_int_t n, cuDoubleComplex  *A, magma_int_t lda  );
-void magma_zprint_gpu( magma_int_t m, magma_int_t n, cuDoubleComplex *dA, magma_int_t ldda );
+void magma_zprint    ( magma_int_t m, magma_int_t n, const cuDoubleComplex  *A, magma_int_t lda  );
+void magma_zprint_gpu( magma_int_t m, magma_int_t n, const cuDoubleComplex *dA, magma_int_t ldda );
 
 void zpanel_to_q( char uplo, magma_int_t ib, cuDoubleComplex *A, magma_int_t lda, cuDoubleComplex *work );
 void zq_to_panel( char uplo, magma_int_t ib, cuDoubleComplex *A, magma_int_t lda, cuDoubleComplex *work );

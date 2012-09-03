@@ -321,7 +321,7 @@ float getv(float *da);
 double magma_wtime( void );
 size_t magma_strlcpy(char *dst, const char *src, size_t siz);
 int magma_num_gpus( void );
-int magma_is_devptr( void* A );
+int magma_is_devptr( const void* A );
 
 #ifdef __cplusplus
 }
