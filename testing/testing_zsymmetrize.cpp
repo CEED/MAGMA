@@ -125,6 +125,7 @@ int main( int argc, char** argv)
         ntile = n / nb;
         magma_zsetmatrix( n, n, hA, lda, dA, lda );
         magmablas_zsymmetrize_tiles( MagmaLower, nb, dA, lda, ntile, nb, nb );
+        magmablas_zsymmetrize( MagmaLower, n%nb, &dA[ ntile*nb*(1+lda) ], lda );  // last partial block
         magma_zgetmatrix( n, n, dA, lda, hR, lda );
         printf( "L%d_%d = ", n, nb );
         magma_zprint( n, n, hR, lda );
