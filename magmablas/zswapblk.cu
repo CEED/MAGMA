@@ -78,7 +78,11 @@ magmablas_zswapblk( char storev, magma_int_t n,
     int  blocksize = 64;
     dim3 blocks( (n+blocksize-1) / blocksize, 1, 1);
     int  k, im;
-
+    
+    /* Quick return */
+    if ( n == 0 )
+        return;
+    
     if ( (storev == 'C') || (storev == 'c') ) {
         for( k=(i1-1); k<i2; k+=BLOCK_SIZE )
         {
