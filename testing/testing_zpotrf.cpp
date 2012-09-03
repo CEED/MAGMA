@@ -31,9 +31,11 @@ int main( int argc, char** argv)
 
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     cuDoubleComplex *h_A, *h_R;
-    magma_int_t      N=0, n2, lda;
-    const int MAXTESTS = 13;
-    magma_int_t size[MAXTESTS] = { 1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 10112, 20000, 30000, 40000 };
+    
+    /* Matrix size */
+    magma_int_t N = 0, n2, lda;
+    const int MAXTESTS = 10;
+    magma_int_t size[MAXTESTS] = { 1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 10112 };
 
     magma_int_t  i, info;
     const char  *uplo     = MagmaLowerStr;
@@ -77,7 +79,7 @@ int main( int argc, char** argv)
         N = size[ntest-1];
     }
 
-    /* Allocate host memory for the matrix */
+    /* Allocate memory for the matrix */
     n2 = N * N;
     TESTING_MALLOC(    h_A, cuDoubleComplex, n2);
     TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2);
@@ -101,10 +103,9 @@ int main( int argc, char** argv)
         gpu_time = magma_wtime();
         magma_zpotrf(uplo[0], N, h_R, lda, &info);
         gpu_time = magma_wtime() - gpu_time;
+        gpu_perf = gflops / gpu_time;
         if (info != 0)
             printf("magma_zpotrf returned error %d.\n", (int) info);
-
-        gpu_perf = gflops / gpu_time;
 
         if ( checkres ) {
             /* =====================================================================
@@ -113,17 +114,17 @@ int main( int argc, char** argv)
             cpu_time = magma_wtime();
             lapackf77_zpotrf(uplo, &N, h_A, &lda, &info);
             cpu_time = magma_wtime() - cpu_time;
+            cpu_perf = gflops / cpu_time;
             if (info != 0)
                 printf("lapackf77_zpotrf returned error %d.\n", (int) info);
-    
-            cpu_perf = gflops / cpu_time;
 
             /* =====================================================================
                Check the result compared to LAPACK
                =================================================================== */
-            error = lapackf77_zlange("f", &N, &N, h_A, &N, work);
+            error = lapackf77_zlange("f", &N, &N, h_A, &lda, work);
             blasf77_zaxpy(&n2, &c_neg_one, h_A, &ione, h_R, &ione);
-            error = lapackf77_zlange("f", &N, &N, h_R, &N, work) / error;
+            error = lapackf77_zlange("f", &N, &N, h_R, &lda, work) / error;
+            
             printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e\n",
                    (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, error );
         }
@@ -138,4 +139,5 @@ int main( int argc, char** argv)
     TESTING_HOSTFREE( h_R );
 
     TESTING_CUDA_FINALIZE();
+    return 0;
 }
