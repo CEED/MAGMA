@@ -80,7 +80,7 @@
 
 
 #define TESTING_FREE(ptr)                                                  \
-    free(ptr);
+    magma_free_cpu(ptr);
 
 
 #define TESTING_HOSTFREE(ptr)                                              \
