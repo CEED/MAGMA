@@ -141,7 +141,11 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( magma_int_t THREADS, magma_int_t WA
     
     magma_int_t mklth, thread, INFO;
     magma_int_t Vblksiz=-1, blkcnt=-1, LDV=-1, LDT =-1, INgrsiz=1, LDE=-1, BAND=6;
-    Vblksiz = min(NB,48); //NB; //min(NB,64);
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+    Vblksiz = min(NB,48);
+#else
+    Vblksiz = min(NB,32);
+#endif
     LDT     = Vblksiz;
     findVTsiz(N, NB, Vblksiz, &blkcnt, &LDV);
 
@@ -304,7 +308,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( magma_int_t THREADS, magma_int_t WA
 
     //goto ed;
     
-#if defined(LIBMKL)
+#if defined(USEMKL)
     mkl_set_num_threads( 1 );
 #endif
     core_in_all.cores_num = THREADS;
@@ -560,8 +564,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( magma_int_t THREADS, magma_int_t WA
             // compute the eigenvalues using lapack routine to be able to compare to it and used as ref 
 #if defined(USEMKL)
             mklth=THREADS; //;
-            //mkl_set_num_threads(mklth);
-            mkl_set_num_threads( 1 );
+            mkl_set_num_threads(mklth);
 #endif
             // call eigensolver for our resulting tridiag [D E] and form E=Q*Z
             //magma_zstedc_withZ('I', N, D2, E2, Z, LDZ);
@@ -682,7 +685,19 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( magma_int_t THREADS, magma_int_t WA
                            N_GPU = (N_GPU/64)*64;
                            N_CPU = NE-N_GPU;
                    }else if(THREADS>10){
-                           N_GPU = (int) (0.6*(double)NE);
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+                           N_GPU = (int) (0.68*(double)NE);
+#else
+                           N_GPU = (int) (0.72*(double)NE);
+#endif
+                           N_GPU = (N_GPU/64)*64;
+                           N_CPU = NE-N_GPU;
+                   }else if(THREADS>5){
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+                           N_GPU = (int) (0.84*(double)NE);
+#else
+                           N_GPU = (int) (0.86*(double)NE);
+#endif
                            N_GPU = (N_GPU/64)*64;
                            N_CPU = NE-N_GPU;
                    }else{
@@ -798,7 +813,19 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( magma_int_t THREADS, magma_int_t WA
                            N_GPU = (N_GPU/64)*64;
                            N_CPU = NE-N_GPU;
                    }else if(THREADS>10){
-                           N_GPU = (int) (0.6*(double)NE);
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+                           N_GPU = (int) (0.68*(double)NE);
+#else
+                           N_GPU = (int) (0.72*(double)NE);
+#endif
+                           N_GPU = (N_GPU/64)*64;
+                           N_CPU = NE-N_GPU;
+                   }else if(THREADS>5){
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+                           N_GPU = (int) (0.82*(double)NE);
+#else
+                           N_GPU = (int) (0.84*(double)NE);
+#endif
                            N_GPU = (N_GPU/64)*64;
                            N_CPU = NE-N_GPU;
                    }else{
@@ -1077,10 +1104,10 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( magma_int_t THREADS, magma_int_t WA
 
     magma_free( dV2 );
     magma_free( da );
-    free(A2);
-    free(TAU);
-    free(V);
-    free(T);
+    magma_free_cpu(A2);
+    magma_free_cpu(TAU);
+    magma_free_cpu(V);
+    magma_free_cpu(T);
 
     return 0;
 } /* END ZHETRD_BHE2TRC */

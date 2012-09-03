@@ -279,7 +279,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
     //goto ed;
     
-#if defined(LIBMKL)
+#if defined(USEMKL)
   //  mkl_set_num_threads( 1 );
 #endif
     core_in_all.cores_num = THREADS;
@@ -863,10 +863,10 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
     magma_free( dV2 );
     magma_free( da );
-    free(A2);
-    free(TAU);
-    free(V);
-    free(T);
+    magma_free_cpu(A2);
+    magma_free_cpu(TAU);
+    magma_free_cpu(V);
+    magma_free_cpu(T);
 
     return 0;
 } /* END ZHETRD_BHE2TRC */
