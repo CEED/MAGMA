@@ -54,7 +54,7 @@ int main( int argc, char** argv)
     int N=64, n2, lda;
     int size[10] = {1024,2048,3072,4032,5184,6048,7200,8064,8928,10080};
     //int size[10] = {32, 64, 128, 150, 200, 256, 300, 412, 512, 600};
-    cublasStatus status;
+    cublasStatus_t status;
     int i, j;
     int ione     = 1;
     int ISEED[4] = {0,0,0,1};
