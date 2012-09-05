@@ -34,6 +34,8 @@ LIBPLASMA = `pkg-config --libs plasma`
 
 INCSTARPU = `pkg-config --cflags libstarpu`
 LIBSTARPU = `pkg-config --libs libstarpu`
+INCSTARPUMPI = `pkg-config --cflags libstarpumpi`
+LIBSTARPUMPI = `pkg-config --libs libstarpumpi`
 
 # Define the folowing lines if MORSE_USE_CUDA=1
 #CUDADIR  = /opt/cuda
