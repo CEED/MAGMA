@@ -42,7 +42,6 @@ int main( int argc, char** argv)
     TESTING_CUDA_INIT();
 
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
     double d_one = 1.0;
     
     real_Double_t    gflops, gpu_perf=0., cpu_perf=0., gpu_time=0., cpu_time=0.;
@@ -62,7 +61,6 @@ int main( int argc, char** argv)
     magma_int_t count   = 3;
     magma_int_t ngpu    = magma_num_gpus();
     
-    magma_int_t info;
     magma_int_t ione     = 1;
     magma_int_t iseed[4] = {0,0,0,1};
         
@@ -144,8 +142,8 @@ int main( int argc, char** argv)
     }
     
     printf( "k %d, nb %d, ngpu %d, nstream %d\n", (int) k, (int) nb, (int) ngpu, (int) nstream );
-    printf("    n    CPU GFlop/s (sec)   GPU GFlop/s (sec)   Ichi's code (sec)   ||R|| / ||A||\n");
-    printf("=========================================================================\n");
+    printf("    n    CPU GFlop/s (sec)   GPU GFlop/s (sec)   Ichi's code (sec)  |R|/|A|   Ichi |R|/|A|\n");
+    printf("==========================================================================================\n");
     for( int i = 0; i < ntest; ++i ) {
     for( int j = 0; j < count; ++j ) {
         n = nsize[i];
@@ -223,7 +221,6 @@ int main( int argc, char** argv)
         if ( checkres ) {
             // store ||A||
             error = lapackf77_zlange("f", &n, &n, hA, &lda, work );
-            error2 = error;
             
             //printf( "A=" ); magma_zprint( n, n, hA, lda );
             //printf( "V=" ); magma_zprint( n, k, hV, lda );
@@ -244,11 +241,13 @@ int main( int argc, char** argv)
     
             // compute relative error ||R||/||A||, where R := A_magma - A_lapack = R - A
             size = lda*n;
+#if 0
+            blasf77_zaxpy( &size, &c_neg_one, hA, &ione, hR2, &ione );
+            error2 = lapackf77_zlanhe("fro", "Lower", &n, hR2, &lda, work) / error;
+#endif
+            
             blasf77_zaxpy( &size, &c_neg_one, hA, &ione, hR, &ione );
             error = lapackf77_zlanhe("fro", "Lower", &n, hR, &lda, work) / error;
-            
-            blasf77_zaxpy( &size, &c_neg_one, hA, &ione, hR2, &ione );
-            error2 = lapackf77_zlanhe("fro", "Lower", &n, hR2, &lda, work) / error2;
             
             printf( "%5d   %7.1f (%7.4f)   %7.1f (%7.4f)   %7.1f (%7.4f)   %8.2e   %8.2e\n",
                     (int) n, cpu_perf, cpu_time, gpu_perf, gpu_time, gpu_perf2, gpu_time2, error, error2 );
