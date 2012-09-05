@@ -25,7 +25,9 @@ void magmablas_zher2k_mgpu2(
     cuDoubleComplex b = MAGMA_Z_MAKE( beta, 0. );
     
     magma_device_t cdev;
-    cudaGetDevice( &cdev );
+    magma_queue_t cqueue;
+    magma_getdevice( &cdev );
+    magmablasGetKernelStream( &cqueue );
     
     // loop over all blocks
     // Faster to have two loops: first does A*B', second does B*A'
@@ -36,7 +38,7 @@ void magmablas_zher2k_mgpu2(
         magma_int_t dev    = (ioff / nb) % ngpu;
         magma_int_t di     = iblock*nb;           // local index in parent matrix
         
-        cudaSetDevice( dev );
+        magma_setdevice( dev );
         magma_int_t s = iblock % nstream;
         magmablasSetKernelStream( streams[ dev ][ s ] );
         
@@ -54,7 +56,7 @@ void magmablas_zher2k_mgpu2(
         magma_int_t dev    = (ioff / nb) % ngpu;
         magma_int_t di     = iblock*nb;           // local index in parent matrix
         
-        cudaSetDevice( dev );
+        magma_setdevice( dev );
         magma_int_t s = iblock % nstream;
         magmablasSetKernelStream( streams[ dev ][ s ] );
         
@@ -66,5 +68,6 @@ void magmablas_zher2k_mgpu2(
                      b,     dC(dev,ioff,di), ldc );
     }
     
-    cudaSetDevice( cdev );
+    magma_setdevice( cdev );
+    magmablasSetKernelStream( cqueue );
 }
