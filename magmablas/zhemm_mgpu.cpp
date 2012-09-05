@@ -11,7 +11,7 @@
        This still has poor performance. Work in progress.
 */
 #include "common_magma.h"
-#include "trace.h"
+//#include "trace.h"
 #include <assert.h>
 
 extern "C" void
@@ -65,13 +65,16 @@ void magmablas_zhemm_mgpu(
         magma_setdevice( dev );
         trace_gpu_start( dev, 0, "init", "initialize" );
     }
- */   
+*/    
     
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
-        //magmablas_zlaset( MagmaUpperLower, m, n, dC(dev,0,0), lddc );
-        cudaMemset(dC(dev,0,0), 0, (lddc)*(n)*sizeof(cuDoubleComplex) );
         cudaMemset(dwork(dev,0,0), 0, (lddwork)*(n)*sizeof(cuDoubleComplex) );
+        // put all dC on all dev to 0 except the one which
+        // hold i==0 because this one has to multiply by beta.
+        if(dev!=0){
+           cudaMemset(dC(dev,0,0), 0, (lddc)*(n)*sizeof(cuDoubleComplex) );
+        }
     }
     
 /*
@@ -82,6 +85,7 @@ void magmablas_zhemm_mgpu(
         trace_gpu_start( dev, 0, "symmetrize", "symmetrize" );
     }
 */
+
     // 1. symmetrize
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
@@ -118,8 +122,8 @@ void magmablas_zhemm_mgpu(
             magma_queue_sync( streams[ dev ][ s ] );
         }
     }
-
-  */
+*/
+  
     magma_int_t gemmstream=1;
 /*
     // tracing
@@ -129,6 +133,8 @@ void magmablas_zhemm_mgpu(
         trace_gpu_start( dev, 1, "gemm", "ROW gemm" );
     }
 */
+
+
     // ROW GEMM transpose a row and make a gemm with a block
     // if only 1 GPU used the ROW GEMM is integrated with the 
     // COL GEMM (better accuracy observed) and better perf
@@ -146,8 +152,8 @@ void magmablas_zhemm_mgpu(
                 magma_setdevice( dev );
                 magma_int_t s = iblock % gemmstream;
                 //printf("ROW GEMM, dev %d   nblk %d   myblk %d   myrowsize %d  B(%d)  A(%d,%d)\n",dev,nbblk,myblk, myrowsize,i,ioff,dev*nb);
+                magmablasSetKernelStream( streams[ dev ][ 1 ] );    
                 if(myrowsize>0){
-                        magmablasSetKernelStream( streams[ dev ][ 1 ] );    
                         magma_zgemm( MagmaConjTrans, MagmaNoTrans, myrowsize, n, ib,
                                  alpha, dA(dev,ioff,0), ldda,
                                         dB(dev,i,0),    lddb,
@@ -156,13 +162,18 @@ void magmablas_zhemm_mgpu(
             }
         }
     }
-/*
+    
+    for( int dev = 0; dev < ngpu; ++dev ) {
+               magma_queue_sync( streams[ dev ][ 1 ] );
+    } 
+    
+ /*    
     // tracing
     for( int dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
         trace_gpu_end( dev, 1 );
         trace_gpu_start( dev, 0, "gemm", "COL gemm" );
-        if(ngpu==1) trace_gpu_start( dev, 1, "gemm", "ROW gemm" );        
+        //if(ngpu==1) trace_gpu_start( dev, 1, "gemm", "ROW gemm" );        
     }
 */
     // COL GEMM
@@ -178,10 +189,17 @@ void magmablas_zhemm_mgpu(
         magma_int_t s = iblock % gemmstream;
         magmablasSetKernelStream( streams[ dev ][ 0 ] );
         // printf("COL GEMM, dev %d   iblock %d   m %d n %d k %d A(%d,%d) B(%d,0) C(%d,0) \n",dev,iblock,m-i,n,ib,ioff,di,i,i);
-          magma_zgemm( MagmaNoTrans, MagmaNoTrans, m-i, n, ib,
-                         alpha, dA(dev,ioff,di), ldda,
-                                dB(dev,i,0),        lddb,
-                         c_one, dC(dev,i,0),     lddc );
+        if(i==0){
+           magma_zgemm( MagmaNoTrans, MagmaNoTrans, m-i, n, ib,
+                        alpha, dA(dev,ioff,di), ldda,
+                               dB(dev,i,0),     lddb,
+                        beta,  dC(dev,i,0),     lddc );
+        }else{
+           magma_zgemm( MagmaNoTrans, MagmaNoTrans, m-i, n, ib,
+                        alpha, dA(dev,ioff,di), ldda,
+                               dB(dev,i,0),        lddb,
+                        c_one, dC(dev,i,0),     lddc );
+        }
         // if only 1 GPU is used do the ROW GEMM
         if(ngpu==100){
             // NOTE THAT because the COL gemm write dC below the diagonal (i) 
@@ -196,13 +214,12 @@ void magmablas_zhemm_mgpu(
     }
 
 
-
 /*
     // tracing
     for( int dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
         trace_gpu_end( dev, 0 );
-        if(ngpu==1) trace_gpu_end( dev, 1 );        
+        //if(ngpu==1) trace_gpu_end( dev, 1 );        
     }
 */
     /*
@@ -217,14 +234,15 @@ void magmablas_zhemm_mgpu(
     }
     */
 
- /*   
+    /*
     // meanwhile on CPU, scale C := beta*C
-    // trace_cpu_start( 0, "scal", "C = beta*C" );
+    //trace_cpu_start( 0, "scal", "C = beta*C" );
     for( magma_int_t j = 0; j < n; ++j ) {
         blasf77_zscal( &m, &beta, C(0,j), &ione );
     }
-    // trace_cpu_end( 0 );
-   */ 
+    //trace_cpu_end( 0 );
+    */
+
     // wait and reduce results
     cuDoubleComplex *Ctmp = C(0,n);
     // receive and put on its placment the row block
@@ -235,7 +253,7 @@ void magmablas_zhemm_mgpu(
             magma_int_t myblk = (nbblk/ngpu) + (nbblk%ngpu > dev ?  1:0 );
             magma_int_t myrowsize = myblk * nb;
             if(myrowsize>0){
-                // trace_gpu_start( dev, 1, "get", "get C_row" );
+                //trace_gpu_start( dev, 1, "get", "get C_row" );
                      /*
                      magma_zgetmatrix_async( myrowsize, n,
                                              dwork[dev], lddwork,
@@ -244,39 +262,37 @@ void magmablas_zhemm_mgpu(
                      magma_zcopymatrix_async( myrowsize, n,
                                              dwork[dev], lddwork,
                                              Ctmp, ldc, streams[dev][1] );
-            */                                 
+                     */                                 
                 cudaMemcpy2DAsync(Ctmp, ldc*sizeof(cuDoubleComplex),
                                   dwork[dev], lddwork*sizeof(cuDoubleComplex),
                                   myrowsize*sizeof(cuDoubleComplex), n,
                                   cudaMemcpyDeviceToHost, streams[ dev ][ 1 ]);
                 
                 magma_queue_sync( streams[ dev ][ 1 ] );
-                // trace_gpu_end( dev, 1 );
+                //trace_gpu_end( dev, 1 );
                 // for each dev put the received block each on its placment
-                // trace_cpu_start( 0, "axpy", "C += C_row" );
+                //trace_cpu_start( 0, "axpy", "C += C_row" );
                 for( magma_int_t blki = 0; blki < myblk; ++blki){
                     magma_int_t gbblki = (blki*ngpu + dev)*nb;
                     magma_int_t ib     = nb;// min(nb,m-gbblki);
-                    for( magma_int_t j = 0; j < n; ++j ) {
-                        blasf77_zaxpy( &ib, &c_one, &Ctmp[blki*nb+j*ldc], &ione, &C[gbblki+j*ldc], &ione );
-                    }
+                    lapackf77_zlacpy("A", &ib, &n, &Ctmp[blki*nb], &ldc, &C[gbblki], &ldc);
                 }
-                // trace_cpu_end( 0 );
+                //trace_cpu_end( 0 );
             }        
         }
    // }
     magma_int_t size = ldc*n;
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
-        // trace_gpu_start( dev, 0, "get", "get C_dev" );
-        if(ngpu==1) magma_queue_sync( streams[ dev ][ 1 ] );
+        //trace_gpu_start( dev, 0, "get", "get C_dev" );
+        //if(ngpu==1) magma_queue_sync( streams[ dev ][ 1 ] );
         magma_queue_sync( streams[ dev ][ 0 ] );
         magma_zgetmatrix( m, n, dC[dev], lddc, Ctmp, ldc );
-        // trace_gpu_end( dev, 0 );
+        //trace_gpu_end( dev, 0 );
         
-        // trace_cpu_start( 0, "axpy", "C += C_dev" );
+        //trace_cpu_start( 0, "axpy", "C += C_dev" );
         blasf77_zaxpy( &size, &c_one, Ctmp, &ione, C, &ione );
-        // trace_cpu_end( 0 );
+        //trace_cpu_end( 0 );
     }
     
         

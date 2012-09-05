@@ -25,7 +25,7 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-#include "trace.h"
+//#include "trace.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing magma_zhemm_mgpu
@@ -168,10 +168,12 @@ int main( int argc, char** argv)
         for( int d = 0; d < ngpu; ++d ) {
             cudaSetDevice( d );
             magma_zsetmatrix( m, n, hX, lda, dX[d], ldda );
-            //magma_zsetmatrix( m, n, hB, lda, dB[d], ldda );
+            if(d==0) magma_zsetmatrix( m, n, hB, lda, dB[d], ldda );
         }
         
-        trace_init( 1, ngpu, nstream, (cudaStream_t*) streams );
+        memset(hR,0,lda*n*sizeof(cuDoubleComplex));
+
+        //trace_init( 1, ngpu, nstream, (cudaStream_t*) streams );
 
 
         cudaDeviceSynchronize();
@@ -201,7 +203,7 @@ int main( int argc, char** argv)
         
         char buf[80];
         snprintf( buf, sizeof(buf), "zhemm-m%d-n%d-nb%d-stream%d-ngpu%d-run%d.svg", m, n, nb, nstream, ngpu, j );
-        trace_finalize( buf, "trace.css" );
+        //trace_finalize( buf, "trace.css" );
         
         /* ====================================================================
            Performs operation using CUBLAS
