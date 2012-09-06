@@ -114,7 +114,7 @@ int main( int argc, char** argv)
                 exit(1);
             }
             M = max( M, msize[ ntest ] );
-            N = max( N, msize[ ntest ] );
+            N = max( N, nsize[ ntest ] );
             ntest++;
         }
         else if ( strcmp("-M", argv[i]) == 0 ) {
