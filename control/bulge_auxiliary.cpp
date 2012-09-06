@@ -16,6 +16,11 @@
 
 extern "C" {
 
+    magma_int_t magma_bulge_get_nb(magma_int_t n)
+    {
+        return 64;
+    }
+
     void cmp_vals(int n, double *wr1, double *wr2, double *nrmI, double *nrm1, double *nrm2)
     {
         int i;
