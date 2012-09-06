@@ -100,6 +100,7 @@ ZSRC += \
 # symmetric eigenvalues, 2-stage
 ZSRC += \
 	testing_zhetrd_he2hb.cpp	\
+	testing_zhegvdx_2stage.cpp	\
 
 # generalized symmetric eigenvalues
 ZSRC += \
