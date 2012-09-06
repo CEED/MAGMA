@@ -494,7 +494,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
         magma_zbulge_back(threads, uplo, n, nb, *m, Vblksiz, &work[indwrk + n * (il-1)], n, dZ, lddz,
                           &work[indV2], ldv, &work[indTAU2], &work[indT2], ldt, info);
 
-        magma_zgetmatrix( n, n, dZ, lddz, &work[indwrk], n);
+        magma_zgetmatrix( n, *m, dZ, lddz, &work[indwrk], n);
 
 #ifdef ENABLE_TIMER
         st1 = get_current_time();

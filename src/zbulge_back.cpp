@@ -214,14 +214,14 @@ extern "C" magma_int_t magma_zbulge_back(magma_int_t threads, char uplo, magma_i
                 delete[] thread_id;
                 delete[] arg;
                 
-                magma_zsetmatrix(n, ne-n_gpu, Z + n_gpu*ldz, ldz, dZ + n_gpu*ldz, n);
+                magma_zsetmatrix(n, ne-n_gpu, Z + n_gpu*ldz, ldz, dZ + n_gpu*ldz, lddz);
                 
                 /*============================
                  *  use only GPU
                  *==========================*/  
             }else{
-                magma_zsetmatrix(n, ne, Z, ldz, dZ, n);
-                magma_zbulge_applyQ_v2('L', ne, n, nb, Vblksiz, dZ, n, V, ldv, T, ldt, info);
+                magma_zsetmatrix(n, ne, Z, ldz, dZ, lddz);
+                magma_zbulge_applyQ_v2('L', ne, n, nb, Vblksiz, dZ, lddz, V, ldv, T, ldt, info);
                 magma_device_sync();
             }
 
