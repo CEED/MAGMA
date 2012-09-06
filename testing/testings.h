@@ -18,7 +18,7 @@
 
 #define TESTING_CUDA_INIT()                                                \
     if( CUBLAS_STATUS_SUCCESS != cublasInit() ) {                          \
-        fprintf(stderr, "CUBLAS: Not initialized\n");                      \
+        fprintf(stderr, "ERROR: cublasInit failed\n");                     \
         exit(-1);                                                          \
     }                                                                      \
     printout_devices();
@@ -35,7 +35,7 @@
     for( int idevice = 0; idevice < ndevices; ++idevice ) {                \
         cudaSetDevice(idevice);                                            \
         if( CUBLAS_STATUS_SUCCESS != cublasInit() ) {                      \
-            fprintf(stderr, "CUBLAS: Not initialized\n");                  \
+            fprintf(stderr, "ERROR: cublasInit failed\n");                 \
             exit(-1);                                                      \
         }                                                                  \
     }                                                                      \
