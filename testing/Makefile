@@ -81,7 +81,6 @@ ZSRC += \
 	testing_zgeqrf.cpp	\
 	testing_zungqr.cpp	\
 	\
-	testing_dgeqp3.cpp	\
 	testing_zgeqp3.cpp	\
 
 # ----------
