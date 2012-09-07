@@ -440,6 +440,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
     mkl_set_num_threads(mklth);
 #endif
 
+    timeeigen = magma_wtime();
     if(wantz==0){
         timelpk = magma_wtime();
 
@@ -621,7 +622,6 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
                 printf ("!!!! magma_alloc failed for: dZ\n" );
                 exit(-1);
             }
-            timeeigen = magma_wtime();
             timeaplQ2 = magma_wtime();
 
             /*============================
