@@ -45,7 +45,7 @@ int main( int argc, char** argv)
     double d_one = 1.0;
     
     real_Double_t    gflops, gpu_perf=0., cpu_perf=0., gpu_time=0., cpu_time=0.;
-    real_Double_t    gpu_perf2, gpu_time2;
+    real_Double_t    gpu_perf2=0., gpu_time2=0.;
     double           error=0., error2=0., work[1];
     cuDoubleComplex *hA, *hR, *hR2, *hV, *hW;
     cuDoubleComplex *dV[MagmaMaxGPUs], *dW[MagmaMaxGPUs], *dA[MagmaMaxGPUs];
@@ -58,7 +58,7 @@ int main( int argc, char** argv)
     magma_int_t k       = 64;
     magma_int_t nb      = 64;
     magma_int_t nstream = 2;
-    magma_int_t count   = 3;
+    magma_int_t count   = 1;
     magma_int_t ngpu    = magma_num_gpus();
     
     magma_int_t ione     = 1;
@@ -142,121 +142,126 @@ int main( int argc, char** argv)
     }
     
     printf( "k %d, nb %d, ngpu %d, nstream %d\n", (int) k, (int) nb, (int) ngpu, (int) nstream );
-    printf("    n    CPU GFlop/s (sec)   GPU GFlop/s (sec)   Ichi's code (sec)  |R|/|A|   Ichi |R|/|A|\n");
+    printf("    n     k    nb offset  CPU GFlop/s (sec)   GPU GFlop/s (sec)   Ichi's code (sec)  |R|/|A|   Ichi |R|/|A|\n");
     printf("==========================================================================================\n");
     for( int i = 0; i < ntest; ++i ) {
-    for( int j = 0; j < count; ++j ) {
-        n = nsize[i];
-        assert( n > 0 && k > 0 );
-        
-        lda  = n;
-        ldda = ((n + 31)/32)*32;
-        gflops = FLOPS_ZHER2K( (double)k, (double)n ) / 1e9;
-
-        size = lda*n;
-        lapackf77_zlarnv( &ione, iseed, &size, hA );
-        size = lda*k*2;
-        lapackf77_zlarnv( &ione, iseed, &size, hV );
-        hW = hV + lda*k;
-        //lapackf77_zlarnv( &ione, iseed, &size, hW );
-        
-        /* ====================================================================
-           Performs operation using MAGMA
-           =================================================================== */
-        magmablas_zsetmatrix_1D_bcyclic( n, n, hA, lda, dA, ldda, ngpu, nb );
-        for( int d = 0; d < ngpu; ++d ) {
-            cudaSetDevice( d );
-            dW[d] = dV[d] + ldda*k;
-            magma_zsetmatrix( n, k, hV, lda, dV[d], ldda );
-            magma_zsetmatrix( n, k, hW, lda, dW[d], ldda );
-        }
-        
-        cudaDeviceSynchronize();
-        gpu_time = magma_wtime();
-        magmablas_zher2k_mgpu2(
-            MagmaLower, MagmaNoTrans, n, k,
-            c_neg_one, dV, ldda,
-                       dW, ldda,
-            d_one,     dA, ldda, 0,
-            ngpu, nb, streams, nstream );
-        cudaDeviceSynchronize();
-        gpu_time = magma_wtime() - gpu_time;
-        
-        // Get dA back to the CPU to compare with the CPU result.
-        magmablas_zgetmatrix_1D_bcyclic( n, n, dA, ldda, hR, lda, ngpu, nb );
+        for( int offset = 0; offset < n; offset += nb ) {
+            for( int cnt = 0; cnt < count; ++cnt ) {
+                n = nsize[i];
+                assert( n > 0 && k > 0 );
                 
-        gpu_perf = gflops / gpu_time;
+                lda  = n;
+                ldda = ((n + 31)/32)*32;
+                gflops = FLOPS_ZHER2K( (double)k, (double)n-offset ) / 1e9;
         
-        /* ====================================================================
-           Performs operation using MAGMA (Ichi's code)
-           =================================================================== */
-#if 0
-        magmablas_zsetmatrix_1D_bcyclic( n, n, hA, lda, dA, ldda, ngpu, nb );
-        for( int d = 0; d < ngpu; ++d ) {
-            cudaSetDevice( d );
-            magma_zsetmatrix( n, k, hV, lda, dV[d], ldda );
-            magma_zsetmatrix( n, k, hW, lda, dW[d], ldda );
-        }
-        
-        cudaDeviceSynchronize();
-        gpu_time2 = magma_wtime();
-        magma_zher2k_mgpu(
-            ngpu, MagmaLower, MagmaNoTrans, nb, n, k,
-            c_neg_one, dV, ldda,
-                     //dW, ldda,
-            d_one,     dA, ldda, 0,
-            nstream, streams );
-        cudaDeviceSynchronize();
-        gpu_time2 = magma_wtime() - gpu_time2;
-        
-        // Get dA back to the CPU to compare with the CPU result.
-        magmablas_zgetmatrix_1D_bcyclic( n, n, dA, ldda, hR2, lda, ngpu, nb );
+                size = lda*n;
+                lapackf77_zlarnv( &ione, iseed, &size, hA );
+                size = lda*k*2;
+                lapackf77_zlarnv( &ione, iseed, &size, hV );
+                hW = hV + lda*k;
+                //lapackf77_zlarnv( &ione, iseed, &size, hW );
                 
-        gpu_perf2 = gflops / gpu_time2;
-#endif
-
-        /* =====================================================================
-           Performs operation using LAPACK
-           =================================================================== */
-        if ( checkres ) {
-            // store ||A||
-            error = lapackf77_zlange("f", &n, &n, hA, &lda, work );
-            
-            //printf( "A=" ); magma_zprint( n, n, hA, lda );
-            //printf( "V=" ); magma_zprint( n, k, hV, lda );
-            //printf( "W=" ); magma_zprint( n, k, hW, lda );
-            
-            cpu_time = magma_wtime();
-            blasf77_zher2k( "Lower", "NoTrans", &n, &k,
-                            &c_neg_one, hV, &lda,
-                                        hW, &lda,
-                            &d_one,     hA, &lda );
-            cpu_time = magma_wtime() - cpu_time;
-            
-            //printf( "Ahat ="   );  magma_zprint( n, n, hA,  lda );
-            //printf( "dAhat ="  );  magma_zprint( n, n, hR,  lda );
-            //printf( "dAhat2 =" );  magma_zprint( n, n, hR2, lda );
-            
-            cpu_perf = gflops / cpu_time;
-    
-            // compute relative error ||R||/||A||, where R := A_magma - A_lapack = R - A
-            size = lda*n;
+                /* ====================================================================
+                   Performs operation using MAGMA
+                   =================================================================== */
+                magmablas_zsetmatrix_1D_bcyclic( n, n, hA, lda, dA, ldda, ngpu, nb );
+                for( int d = 0; d < ngpu; ++d ) {
+                    cudaSetDevice( d );
+                    dW[d] = dV[d] + ldda*k;
+                    magma_zsetmatrix( n, k, hV, lda, dV[d], ldda );
+                    magma_zsetmatrix( n, k, hW, lda, dW[d], ldda );
+                }
+                
+                cudaDeviceSynchronize();
+                gpu_time = magma_wtime();
+                magmablas_zher2k_mgpu2(
+                    MagmaLower, MagmaNoTrans, n-offset, k,
+                    c_neg_one, dV, ldda,
+                               dW, ldda,
+                    d_one,     dA, ldda, offset,
+                    ngpu, nb, streams, nstream );
+                cudaDeviceSynchronize();
+                gpu_time = magma_wtime() - gpu_time;
+                gpu_perf = gflops / gpu_time;
+                
+                // Get dA back to the CPU to compare with the CPU result.
+                magmablas_zgetmatrix_1D_bcyclic( n, n, dA, ldda, hR, lda, ngpu, nb );
+                
+                /* ====================================================================
+                   Performs operation using MAGMA (Ichi's code)
+                   =================================================================== */
 #if 0
-            blasf77_zaxpy( &size, &c_neg_one, hA, &ione, hR2, &ione );
-            error2 = lapackf77_zlanhe("fro", "Lower", &n, hR2, &lda, work) / error;
+                magmablas_zsetmatrix_1D_bcyclic( n, n, hA, lda, dA, ldda, ngpu, nb );
+                for( int d = 0; d < ngpu; ++d ) {
+                    cudaSetDevice( d );
+                    magma_zsetmatrix( n, k, hV, lda, dV[d], ldda );
+                    magma_zsetmatrix( n, k, hW, lda, dW[d], ldda );
+                }
+                
+                cudaDeviceSynchronize();
+                gpu_time2 = magma_wtime();
+                magma_zher2k_mgpu(
+                    ngpu, MagmaLower, MagmaNoTrans, nb, n-offset, k,
+                    c_neg_one, dV, ldda,
+                             //dW, ldda,
+                    d_one,     dA, ldda, offset,
+                    nstream, streams );
+                cudaDeviceSynchronize();
+                gpu_time2 = magma_wtime() - gpu_time2;
+                gpu_perf2 = gflops / gpu_time2;
+                
+                // Get dA back to the CPU to compare with the CPU result.
+                magmablas_zgetmatrix_1D_bcyclic( n, n, dA, ldda, hR2, lda, ngpu, nb );
 #endif
+        
+                /* =====================================================================
+                   Performs operation using LAPACK
+                   =================================================================== */
+                if ( checkres ) {
+                    // store ||A||
+                    error = lapackf77_zlange("f", &n, &n, hA, &lda, work );
+                    
+                    //printf( "A=" ); magma_zprint( n, n, hA, lda );
+                    //printf( "V=" ); magma_zprint( n, k, hV, lda );
+                    //printf( "W=" ); magma_zprint( n, k, hW, lda );
+                    
+                    cpu_time = magma_wtime();
+                    n -= offset;
+                    blasf77_zher2k( "Lower", "NoTrans", &n, &k,
+                                    &c_neg_one, hV, &lda,
+                                                hW, &lda,
+                                    &d_one,     &hA[ offset + offset*lda ], &lda );
+                    n += offset;
+                    cpu_time = magma_wtime() - cpu_time;
+                    cpu_perf = gflops / cpu_time;
+                    
+                    //printf( "Ahat ="   );  magma_zprint( n, n, hA,  lda );
+                    //printf( "dAhat ="  );  magma_zprint( n, n, hR,  lda );
+                    //printf( "dAhat2 =" );  magma_zprint( n, n, hR2, lda );
             
-            blasf77_zaxpy( &size, &c_neg_one, hA, &ione, hR, &ione );
-            error = lapackf77_zlanhe("fro", "Lower", &n, hR, &lda, work) / error;
-            
-            printf( "%5d   %7.1f (%7.4f)   %7.1f (%7.4f)   %7.1f (%7.4f)   %8.2e   %8.2e\n",
-                    (int) n, cpu_perf, cpu_time, gpu_perf, gpu_time, gpu_perf2, gpu_time2, error, error2 );
-        }
-        else {
-            printf( "%5d     ---   (  ---  )   %7.1f (%7.4f)   %7.1f (%7.4f)     ---        ---\n",
-                    (int) n, /*cpu_perf, cpu_time,*/ gpu_perf, gpu_time, gpu_perf2, gpu_time2 /*, error, error2*/ );
-        }
-    }}
+                    // compute relative error ||R||/||A||, where R := A_magma - A_lapack = R - A
+                    size = lda*n;
+#if 0
+                    blasf77_zaxpy( &size, &c_neg_one, hA, &ione, hR2, &ione );
+                    error2 = lapackf77_zlanhe("fro", "Lower", &n, hR2, &lda, work) / error;
+#endif
+                    
+                    blasf77_zaxpy( &size, &c_neg_one, hA, &ione, hR, &ione );
+                    error = lapackf77_zlanhe("fro", "Lower", &n, hR, &lda, work) / error;
+                    
+                    printf( "%5d %5d %5d %5d   %7.1f (%7.4f)   %7.1f (%7.4f)   %7.1f (%7.4f)   %8.2e   %8.2e\n",
+                            (int) n, (int) k, (int) nb, (int) offset,
+                            cpu_perf, cpu_time, gpu_perf, gpu_time, gpu_perf2, gpu_time2, error, error2 );
+                }
+                else {
+                    printf( "%5d %5d %5d %5d     ---   (  ---  )   %7.1f (%7.4f)   %7.1f (%7.4f)     ---        ---\n",
+                            (int) n, (int) k, (int) nb, (int) offset,
+                            /*cpu_perf, cpu_time,*/ gpu_perf, gpu_time, gpu_perf2, gpu_time2 /*, error, error2*/ );
+                }
+            } // count
+        } // offset
+        printf( "\n" );
+    }
     
     /* Memory clean up */
     for( int d = 0; d < ngpu; ++d ) {
