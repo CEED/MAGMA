@@ -119,7 +119,7 @@ void magmablas_zher2k_mgpu2(
     cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t lda,
                            cuDoubleComplex *dB[], magma_int_t ldb,
     double beta,           cuDoubleComplex *dC[], magma_int_t ldc,  magma_int_t offset,
-    magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][10], magma_int_t nstream );
+    magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][20], magma_int_t nstream );
 
   /*
    * LAPACK auxiliary functions

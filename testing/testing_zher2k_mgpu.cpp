@@ -25,13 +25,14 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-// version from zhetrd_mgpu.cpp
+// version from zhetrd_mgpu.cpp (i.e., Ichi's code)
+// FIX DIMENSION of streams there before changing this -- otherwise it will segfault.
 extern "C" void
 magma_zher2k_mgpu(
     int num_gpus, char uplo, char trans, int nb, int n, int k,
     cuDoubleComplex alpha, cuDoubleComplex **db, int lddb, 
     double beta,           cuDoubleComplex **dc, int lddc, int offset,
-    int num_streams, cudaStream_t stream[][10]);
+    int num_streams, cudaStream_t streams[][10]);
 
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -128,7 +129,7 @@ int main( int argc, char** argv)
     TESTING_MALLOC( hV,  cuDoubleComplex, lda*k*2 );
     //TESTING_MALLOC( hW,  cuDoubleComplex, lda*k );
     
-    cudaStream_t streams[MagmaMaxGPUs][10];
+    cudaStream_t streams[MagmaMaxGPUs][20];
     
     for( int d = 0; d < ngpu; ++d ) {
         magma_int_t nlocal = ((n / k) / ngpu + 1) * k;
