@@ -146,7 +146,7 @@ int main( int argc, char** argv)
     printf("    n     k    nb offset  CPU GFlop/s (sec)   GPU GFlop/s (sec)   Ichi's code (sec)  |R|/|A|   Ichi |R|/|A|\n");
     printf("==========================================================================================\n");
     for( int i = 0; i < ntest; ++i ) {
-        for( int offset = 0; offset < n; offset += nb ) {
+        for( int offset = 0; offset < n; offset += min(k,nb) ) {
             for( int cnt = 0; cnt < count; ++cnt ) {
                 n = nsize[i];
                 assert( n > 0 && k > 0 );
