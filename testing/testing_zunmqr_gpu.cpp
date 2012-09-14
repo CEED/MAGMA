@@ -115,8 +115,9 @@ int main( int argc, char** argv )
     
     // Allocate memory for matrices
     cuDoubleComplex *C, *R, *A, *W, *tau;
-    magma_int_t lwork = max( (m - k + nb)*(n + 2*nb),    // side = left
-                             (n - k + nb)*(m + 2*nb) )*2;  // side = right
+    magma_int_t lwork = max( (m - k + nb)*(n + nb) + n*nb,    // side = left
+                             (n - k + nb)*(m + nb) + m*nb );  // side = right
+    magma_int_t lwork_max = lwork;
     TESTING_MALLOC( C, cuDoubleComplex, ldc*n );
     TESTING_MALLOC( R, cuDoubleComplex, ldc*n );
     TESTING_MALLOC( A, cuDoubleComplex, lda*k );
@@ -162,25 +163,46 @@ int main( int argc, char** argv )
             if ( info != 0 )
                 printf("magma_zgeqrf_gpu returned error %d\n", info);
             
+            /* =====================================================================
+               Performs operation using LAPACK
+               =================================================================== */
             cpu_time = magma_wtime();
             lapackf77_zunmqr( side[iside], trans[itran],
                               &m, &n, &k,
                               A, &lda, tau, C, &ldc, W, &lwork, &info );
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gflops / cpu_time;
+            if (info != 0)
+                printf("lapackf77_zunmqr returned error %d.\n", (int) info);
             
-            magma_device_sync();
+            /* ====================================================================
+               Performs operation using MAGMA
+               =================================================================== */
+            // query for work size
+            lwork = -1;
+            magma_zunmqr_gpu( *side[iside], *trans[itran],
+                              m, n, k,
+                              dA, lda, tau, dC, ldc, W, lwork, dT, nb, &info );
+            if (info != 0)
+                printf("magma_zunmqr_gpu returned error %d (lwork query).\n", (int) info);
+            lwork = (magma_int_t) MAGMA_Z_REAL( W[0] );
+            if ( lwork < 0 || lwork > lwork_max )
+                printf("invalid lwork %d, lwork_max %d\n", lwork, lwork_max );
+            
             gpu_time = magma_wtime();
             magma_zunmqr_gpu( *side[iside], *trans[itran],
                               m, n, k,
                               dA, lda, tau, dC, ldc, W, lwork, dT, nb, &info );
-            magma_device_sync();
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
+            if (info != 0)
+                printf("magma_zunmqr_gpu returned error %d.\n", (int) info);
             
             magma_zgetmatrix( m, n, dC, ldc, R, ldc );
             
-            // compute relative error |QC_magma - QC_lapack| / |QC_lapack|
+            /* =====================================================================
+               compute relative error |QC_magma - QC_lapack| / |QC_lapack|
+               =================================================================== */
             error = lapackf77_zlange( "Fro", &m, &n, C, &ldc, work );
             size = ldc*n;
             blasf77_zaxpy( &size, &c_neg_one, C, &ione, R, &ione );
