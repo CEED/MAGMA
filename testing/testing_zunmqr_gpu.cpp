@@ -113,15 +113,29 @@ int main( int argc, char** argv )
     ldc = ((ldc+31)/32)*32;
     lda = ((lda+31)/32)*32;
     
+    // if k < m, the max workspace may not occur for max m, so check all sizes
+    magma_int_t lwork, lwork_max = 0;
+    for( int i = 0; i < ntest; ++i ) {
+        m = msize[i];
+        n = nsize[i];
+        k = ksize[i];
+        nb = magma_get_zgeqrf_nb( m );
+        lwork = max( (m - k + nb)*(n + nb) + n*nb,    // side = left
+                     (n - k + nb)*(m + nb) + m*nb );  // side = right
+        lwork_max = max( lwork_max, lwork );
+    }
+    // reset to max size
+    m = mmax;
+    n = nmax;
+    k = kmax;
+    nb = magma_get_zgeqrf_nb( m );
+    
     // Allocate memory for matrices
     cuDoubleComplex *C, *R, *A, *W, *tau;
-    magma_int_t lwork = max( (m - k + nb)*(n + nb) + n*nb,    // side = left
-                             (n - k + nb)*(m + nb) + m*nb );  // side = right
-    magma_int_t lwork_max = lwork;
     TESTING_MALLOC( C, cuDoubleComplex, ldc*n );
     TESTING_MALLOC( R, cuDoubleComplex, ldc*n );
     TESTING_MALLOC( A, cuDoubleComplex, lda*k );
-    TESTING_MALLOC( W, cuDoubleComplex, lwork );
+    TESTING_MALLOC( W, cuDoubleComplex, lwork_max );
     TESTING_MALLOC( tau, cuDoubleComplex, k   );
     
     magma_int_t min_mn = min(m,n);
@@ -143,6 +157,7 @@ int main( int argc, char** argv )
             m = msize[i];
             n = nsize[i];
             k = ksize[i];
+            nb  = magma_get_zgeqrf_nb( m );
             
             gflops = FLOPS_ZUNMQR( m, n, k, *side[iside] ) / 1e9;
             
@@ -169,7 +184,7 @@ int main( int argc, char** argv )
             cpu_time = magma_wtime();
             lapackf77_zunmqr( side[iside], trans[itran],
                               &m, &n, &k,
-                              A, &lda, tau, C, &ldc, W, &lwork, &info );
+                              A, &lda, tau, C, &ldc, W, &lwork_max, &info );
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gflops / cpu_time;
             if (info != 0)
@@ -189,10 +204,12 @@ int main( int argc, char** argv )
             if ( lwork < 0 || lwork > lwork_max )
                 printf("invalid lwork %d, lwork_max %d\n", lwork, lwork_max );
             
+            magma_device_sync();  // sync needed for L,N and R,T cases
             gpu_time = magma_wtime();
             magma_zunmqr_gpu( *side[iside], *trans[itran],
                               m, n, k,
                               dA, lda, tau, dC, ldc, W, lwork, dT, nb, &info );
+            magma_device_sync();
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)

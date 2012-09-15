@@ -126,13 +126,12 @@ magma_zunmqr_gpu(char side, char trans,
 
     cuDoubleComplex *dwork;
     magma_int_t i, lddwork;
-
     magma_int_t i1, i2, step, ib, ic, jc, ma, mi, ni, nq, nw;
     int left, notran, lquery;
     magma_int_t lwkopt;
 
     *info = 0;
-    left   = lapackf77_lsame(side_, "L");
+    left   = lapackf77_lsame(side_,  "L");
     notran = lapackf77_lsame(trans_, "N");
     lquery = (lwork == -1);
 
@@ -182,7 +181,7 @@ magma_zunmqr_gpu(char side, char trans,
     lddwork = k;
     dwork = dT(2*lddwork);
 
-    if ( (left && (! notran)) || ( (!left) && notran ) ) {
+    if ( (left && (! notran)) || ((! left) && notran) ) {
         // left  trans:    Q^T C
         // right notrans:  C Q
         // multiply from first block, i = 0, to next-to-last block, i < k-nb
@@ -305,6 +304,9 @@ magma_zunmqr_gpu(char side, char trans,
         // send the updated part of C back to the GPU
         magma_zsetmatrix( mi, ni, hC, mi, dC(ic, jc), lddc );
     }
+    
+    // TODO sync. For cases Q*C and C*Q^T, last call is magma_zlarfb_gpu,
+    // which is async magma_gemm calls, so zunmqr can be unfinished.
 
     hwork[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     return *info;
