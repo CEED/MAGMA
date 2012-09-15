@@ -80,6 +80,7 @@ ZSRC += \
 	testing_zgeqlf.cpp	\
 	testing_zgeqrf.cpp	\
 	testing_zungqr.cpp	\
+	testing_zunmqr.cpp	\
 	\
 	testing_zgeqp3.cpp	\
 
