@@ -7,6 +7,7 @@
 
        @precisions normal z -> s d c
        @author Mark Gates
+       @author Azzam Haidar 
 */
 #include "common_magma.h"
 
@@ -143,13 +144,13 @@
 extern "C"
 void magmablas_zher2k_mgpu2(
     char uplo, char trans, magma_int_t n, magma_int_t k,
-    cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t lda,
-                           cuDoubleComplex *dB[], magma_int_t ldb,
+    cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t lda, magma_int_t aoff,
+                           cuDoubleComplex *dB[], magma_int_t ldb, magma_int_t boff,
     double beta,           cuDoubleComplex *dC[], magma_int_t ldc,  magma_int_t offset,
     magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][20], magma_int_t nstream )
 {
-    #define dA(dev, i, j) (dA[dev] + (i) + (j)*lda)
-    #define dB(dev, i, j) (dB[dev] + (i) + (j)*ldb)
+    #define dA(dev, i, j) (dA[dev] + (i) + (j)*lda + (aoff) )
+    #define dB(dev, i, j) (dB[dev] + (i) + (j)*ldb + (boff) )
     #define dC(dev, i, j) (dC[dev] + (i) + (j)*ldc)
     
     cuDoubleComplex cbeta = MAGMA_Z_MAKE( beta, 0. );
