@@ -138,7 +138,8 @@
              Only up to NSTREAM streams are used on each GPU.
 
     NSTREAM- (input) INTEGER.
-             Number of streams to use on each device.
+             Number of streams to use on each device
+             
 */
 
 extern "C"
