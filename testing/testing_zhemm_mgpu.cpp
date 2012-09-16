@@ -36,6 +36,7 @@ int main( int argc, char** argv)
 
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    cuDoubleComplex cbeta     = MAGMA_Z_ONE;
     
     real_Double_t    gflops, gpu_perf=0., cpu_perf=0., gpu_time=0., cpu_time=0.;
     real_Double_t    gpu_perf2=0., gpu_time2=0.;
@@ -168,32 +169,48 @@ int main( int argc, char** argv)
         for( int d = 0; d < ngpu; ++d ) {
             cudaSetDevice( d );
             magma_zsetmatrix( m, n, hX, lda, dX[d], ldda );
-            if(d==0) magma_zsetmatrix( m, n, hB, lda, dB[d], ldda );
+            //if(d==0) magma_zsetmatrix( m, n, hB, lda, dB[d], ldda );// this is wrong coz when offset !=0 the gpu who do the beta*C may be not 0 so this should be related to stdev(starting device who own i=0 first col)
+            magma_zsetmatrix( m, n, hB, lda, dB[d], ldda );
         }
         
-        memset(hR,0,lda*n*sizeof(cuDoubleComplex));
+//        memset(hR,0,lda*n*sizeof(cuDoubleComplex));
 
         //trace_init( 1, ngpu, nstream, (cudaStream_t*) streams );
 
-
+        magma_int_t offst =0;//nb;
+       magma_int_t msiz = m-offst;
         cudaDeviceSynchronize();
         gpu_time = magma_wtime();
         // 1GPU version light
         /*
         magmablas_zhemm_1gpu(
-            MagmaLeft, MagmaLower, m, n,
-            c_neg_one, dA, ldda, 0,
+            MagmaLeft, MagmaLower, msiz, n,
+            c_neg_one, dA, ldda, ioffst,
                        dX, ldda,
-            c_one,     dB, ldda, hR, lda,
+            cbeta,     dB, ldda, hR, lda,
             ngpu, nb, streams, nstream );
-           */
+       */  
         // multi gpu version
-        
+       
+    /*          
+    magma_int_t siz = m;
+    cuDoubleComplex *R=(cuDoubleComplex *) malloc(siz*siz*sizeof(cuDoubleComplex));
+    magma_zgetmatrix( siz, n, dX[0], ldda, R,siz );
+    FILE *trace_file;
+    trace_file = fopen("AJETE/DB", "w");
+    for (int j = 0; j < n ; j++) 
+          for (int i = 0; i < siz ; i++) 
+                         fprintf(trace_file,"%10d%10d%40.30e\n",i+1,j+1,R[j*siz+i]);
+    fclose(trace_file);
+*/
+
+
+       
         magmablas_zhemm_mgpu(
-            MagmaLeft, MagmaLower, m, n,
-            c_neg_one, dA, ldda, 0,
+            MagmaLeft, MagmaLower, msiz, n,
+            c_neg_one, dA, ldda, offst,
                        dX, ldda,
-            c_one,     dB, ldda, dwork, ldda, hR, lda,
+            cbeta,     dB, ldda, dwork, ldda, hR, lda,
             ngpu, nb, streams, nstream );
        
         cudaDeviceSynchronize();
@@ -217,10 +234,10 @@ int main( int argc, char** argv)
             cudaDeviceSynchronize();
             gpu_time2 = magma_wtime();
             magma_zhemm(
-                MagmaLeft, MagmaLower, m, n,
-                c_neg_one, dA2,   ldda,
+                MagmaLeft, MagmaLower, msiz, n,
+                c_neg_one, dA2+offst*ldda+offst,   ldda,
                            dX[0], ldda,
-                c_one,     dB[0], ldda );
+                cbeta,     dB[0], ldda );
             cudaDeviceSynchronize();
             gpu_time2 = magma_wtime() - gpu_time2;
             gpu_perf2 = gflops / gpu_time2;
@@ -231,20 +248,31 @@ int main( int argc, char** argv)
            =================================================================== */
         if ( checkres ) {
             // store ||A||*||X||
-            error  = lapackf77_zlange("fro", &m, &m, hA, &lda, work );
-            error *= lapackf77_zlange("fro", &m, &n, hX, &lda, work );
+            error  = lapackf77_zlange("fro", &msiz, &msiz, hA+offst*lda+offst, &lda, work );
+            error *= lapackf77_zlange("fro", &msiz, &n, hX, &lda, work );
             
             //printf( "A =" ); magma_zprint( m, m, hA, lda );
             //printf( "X =" ); magma_zprint( m, n, hX, lda );
             //printf( "B =" ); magma_zprint( m, n, hB, lda );
             
             cpu_time = magma_wtime();
-            blasf77_zhemm( "Left", "Lower", &m, &n,
-                            &c_neg_one, hA, &lda,
+            blasf77_zhemm( "Left", "Lower", &msiz, &n,
+                            &c_neg_one, hA+offst*lda+offst, &lda,
                                         hX, &lda,
-                            &c_one,     hB, &lda );
+                            &cbeta,     hB, &lda );
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gflops / cpu_time;
+    
+          
+
+/*
+
+    trace_file = fopen("AJETE/C", "w");
+    for (int j = 0; j < n ; j++) 
+          for (int i = 0; i < siz ; i++) 
+                         fprintf(trace_file,"%10d%10d%40.30e\n",i+1,j+1,hB[j*lda+i]);
+    fclose(trace_file);
+*/
             
             //printf( "B  =" ); magma_zprint( m, n, hB, lda );
             //printf( "dB =" ); magma_zprint( m, n, hR, lda );
@@ -252,7 +280,7 @@ int main( int argc, char** argv)
             // compute relative error ||R||/||A||*||X||, where R := B_magma - B_lapack = R - B
             size = lda*n;
             blasf77_zaxpy( &size, &c_neg_one, hB, &ione, hR, &ione );
-            error = lapackf77_zlange("fro", &m, &n, hR, &lda, work) / error;
+            error = lapackf77_zlange("fro", &msiz, &n, hR, &lda, work) / error;
             
             //printf( "R ="  ); magma_zprint( m, n, hR, lda );
             
