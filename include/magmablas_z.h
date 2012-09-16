@@ -116,8 +116,8 @@ void magmablas_zhemm_mgpu(
 
 void magmablas_zher2k_mgpu2(
     char uplo, char trans, magma_int_t n, magma_int_t k,
-    cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t lda,
-                           cuDoubleComplex *dB[], magma_int_t ldb,
+    cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t lda, magma_int_t aoff,
+                           cuDoubleComplex *dB[], magma_int_t ldb, magma_int_t boff,
     double beta,           cuDoubleComplex *dC[], magma_int_t ldc,  magma_int_t offset,
     magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][20], magma_int_t nstream );
 
