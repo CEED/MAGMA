@@ -177,8 +177,8 @@ int main( int argc, char** argv)
                 gpu_time = magma_wtime();
                 magmablas_zher2k_mgpu2(
                     MagmaLower, MagmaNoTrans, n-offset, k,
-                    c_neg_one, dV, ldda,
-                               dW, ldda,
+                    c_neg_one, dV, ldda,0,
+                               dW, ldda,0,
                     d_one,     dA, ldda, offset,
                     ngpu, nb, streams, nstream );
                 cudaDeviceSynchronize();
