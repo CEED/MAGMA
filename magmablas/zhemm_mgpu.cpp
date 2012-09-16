@@ -272,6 +272,7 @@ return;
 
 
     // wait and reduce results
+    memset(C,0,m*n*sizeof(cuDoubleComplex));
     cuDoubleComplex *Ctmp = C(0,n);
 //    memset(C,0,n*nb*sizeof(cuDoubleComplex));
     // receive and put on its placment the row block
