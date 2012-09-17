@@ -543,7 +543,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
 
     }// end of LOWER
     //cudaSetDevice( 0 );
-printf("--- 2 ---  \n\n");
+
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         cudaSetDevice( dev );
         magma_free( dvtest[dev]);
@@ -553,7 +553,7 @@ printf("--- 2 ---  \n\n");
     }
     magma_setdevice( cdev );
     free(worktest);
-printf("--- 3 ---  \n\n");
+
 
     trace_finalize( "zhetrd_he2hb.svg", "trace.css" );
     
