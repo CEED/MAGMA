@@ -261,7 +261,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
 //    cuDoubleComplex *Atest = (cuDoubleComplex *) malloc(n*lda*sizeof(cuDoubleComplex));
 //    cuDoubleComplex *Vtest = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
 //    cuDoubleComplex *Wtest = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
-    cuDoubleComplex *worktest = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
+    cuDoubleComplex *worktest = (cuDoubleComplex *) malloc(2*n*nb*sizeof(cuDoubleComplex));
 
 
 
@@ -550,6 +550,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
         magma_free( dwtest[dev] );
         magma_free( dworktest[dev]);
         magma_free( dworktestbis[dev]);
+        free(worktest);
     }
    magma_setdevice( cdev );
 
