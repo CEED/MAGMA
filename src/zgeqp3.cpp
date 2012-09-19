@@ -254,7 +254,7 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
         /* Use unblocked code to factor the last or only block. */
         if (j < minmn) {
             n_j = n - j;
-            if (j > nfxd + 1) {
+            if (j > nfxd) {
                 magma_zgetmatrix( m-j, n_j,
                                   dA(j,j), ldda,
                                   A (j,j), lda );
