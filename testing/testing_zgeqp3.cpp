@@ -34,12 +34,7 @@ int main( int argc, char** argv)
 
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     magma_int_t      checkres;
-    cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex *h_A, *h_R, *tau, *h_work;
-
-#if defined(PRECISION_z) || defined(PRECISION_c)
-    double *rwork;
-#endif
     magma_int_t *jpvt;
 
     /* Matrix size */
@@ -78,7 +73,6 @@ int main( int argc, char** argv)
             M = max( M, msize[ ntest ] );
             N = max( N, nsize[ ntest ] );
             ntest++;
-            printf( "M %d, N %d, ntest %d\n", M, N, ntest );
         }
         else if ( strcmp("-M", argv[i]) == 0 ) {
             printf( "-M has been replaced in favor of -N m,n to allow -N to be repeated.\n\n" );
@@ -103,6 +97,7 @@ int main( int argc, char** argv)
     nb = magma_get_zgeqp3_nb(min_mn);
 
 #if defined(PRECISION_z) || defined(PRECISION_c)
+    double *rwork;
     TESTING_MALLOC(   rwork, double, 2*N );
 #endif
     TESTING_MALLOC(    jpvt, magma_int_t,     N );
@@ -111,6 +106,9 @@ int main( int argc, char** argv)
     TESTING_HOSTALLOC( h_R,  cuDoubleComplex, n2 );
 
     lwork = ( N+1 )*nb;
+#if defined(PRECISION_d) || defined(PRECISION_s)
+    lwork += 2*N;
+#endif
     if ( checkres )
         lwork = max(lwork, M * N + N);
     TESTING_MALLOC( h_work, cuDoubleComplex, lwork );

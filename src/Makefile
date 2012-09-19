@@ -104,7 +104,6 @@ ZSRC += \
 	zunmqr.cpp		\
 	zunmqr_m.cpp		\
 	\
-	dgeqp3.cpp		\
 	zgeqp3.cpp		\
 	zlaqps.cpp		\
 
