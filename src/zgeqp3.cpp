@@ -107,21 +107,10 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
 
     magma_int_t ione = 1;
 
-    magma_int_t  i__1, i__2, ldda, ldwork;
-    magma_int_t j, jb, na, nb, sm, sn, nx, fjb, nfxd, nbmin, minmn, minws;
-
+    magma_int_t n_j, ldda, ldwork;
+    magma_int_t j, jb, na, nb, sm, sn, fjb, nfxd, nbmin, minmn;
     magma_int_t topbmn, sminmn, lwkopt, lquery;
     
-    A -= 1 + lda;
-    --jpvt;
-    --tau;
-    
-#if defined(PRECISION_d) || defined(PRECISION_s)
-    double *rwork = work;
-    work += 2*n;
-#endif
-    --rwork;
-
     *info = 0;
     lquery = (lwork == -1);
     if (m < 0) {
@@ -160,34 +149,38 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
     if (minmn == 0)
         return *info;
 
+#if defined(PRECISION_d) || defined(PRECISION_s)
+    double *rwork = work + (n + 1)*nb;
+#endif
+
     ldda = ((m+31)/32)*32;
     ldwork = n*ldda + (n+1)*nb;
     if (MAGMA_SUCCESS != magma_zmalloc( &dwork, ldwork )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-    df     = dwork + n*ldda;
-    dwork -= 1 + ldda;  // used for dA
+    df = dwork + n*ldda;
+    // dwork used for dA
 
-    /* Move initial columns up front. */
-    nfxd = 1;
-    for (j = 1; j <= n; ++j) {
+    /* Move initial columns up front.
+     * Note jpvt uses 1-based indices for historical compatibility. */
+    nfxd = 0;
+    for (j = 0; j < n; ++j) {
         if (jpvt[j] != 0) {
            if (j != nfxd) {
-               blasf77_zswap(&m, A(1, j), &ione, A(1, nfxd), &ione);
-               jpvt[j] = jpvt[nfxd];
-               jpvt[nfxd] = j;
+               blasf77_zswap(&m, A(0, j), &ione, A(0, nfxd), &ione);
+               jpvt[j]    = jpvt[nfxd];
+               jpvt[nfxd] = j + 1;
            }
            else {
-               jpvt[j] = j;
+               jpvt[j] = j + 1;
            }
            ++nfxd;
         }
         else {
-            jpvt[j] = j;
+            jpvt[j] = j + 1;
         }
     }
-    --nfxd;
 
     /*     Factorize fixed columns
            =======================
@@ -195,11 +188,11 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
            remaining columns. */
     if (nfxd > 0) {
         na = min(m,nfxd);
-        lapackf77_zgeqrf(&m, &na, A(1, 1), &lda, &tau[1], work, &lwork, info);
+        lapackf77_zgeqrf(&m, &na, A, &lda, tau, work, &lwork, info);
         if (na < n) {
-            i__1 = n - na;
-            lapackf77_zunmqr( MagmaLeftStr, MagmaConjTransStr, &m, &i__1, &na,
-                              A(1,1), &lda, &tau[1], A(1, na + 1), &lda,
+            n_j = n - na;
+            lapackf77_zunmqr( MagmaLeftStr, MagmaConjTransStr, &m, &n_j, &na,
+                              A, &lda, tau, A(0, na), &lda,
                               work, &lwork, info );
         }
     }
@@ -210,95 +203,69 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
         sn = n - nfxd;
         sminmn = minmn - nfxd;
         
-        /* Determine the block size. */
-        nbmin = 2;
-        nx = 0;
-        
-        if (nb > 1 && nb < sminmn) {
-            /* Determine when to cross over from blocked to unblocked code */
-            nx = nb;
-            
-            if (nx < sminmn) {
-                /* Determine if workspace is large enough for blocked code. */
-                minws = (sn + 1) * nb;
-                //iws = max(iws,minws);
-                if (lwork < minws) {
-                    
-                    /* Not enough workspace to use optimal NB: Reduce NB and
-                       determine the minimum value of NB. */
-                    nb = lwork / (sn + 1);
-                    nbmin = max(i__1,i__2);
-                }
-            }
-        }
-        
-        /* Initialize partial column norms.
-           rwork stores the exact column norms. */
-        for (j = nfxd + 1; j <= n; ++j) {
-            rwork[j] = cblas_dznrm2(sm, A(nfxd + 1, j), ione);
+        /* Initialize partial column norms. */
+        for (j = nfxd; j < n; ++j) {
+            rwork[j] = cblas_dznrm2(sm, A(nfxd, j), ione);
             rwork[n + j] = rwork[j];
         }
         
-        if (nb >= nbmin && nb < sminmn && nx < sminmn) {
+        if (nb >= nbmin && nb < sminmn && nb < sminmn) {
             /* Use blocked code initially. */
-            j = nfxd + 1;
+            j = nfxd;
             
             // Set the original matrix to the GPU
             magma_zsetmatrix( m, sn,
-                              A (1,j), lda,
-                              dA(1,j), ldda );
+                              A (0,j), lda,
+                              dA(0,j), ldda );
             
             /* Compute factorization: while loop. */
-            topbmn = minmn - nx;
-            while(j <= topbmn) {
-                jb = min(nb, topbmn - j + 1);
+            topbmn = minmn - nb;
+            while(j < topbmn) {
+                jb = min(nb, topbmn - j);
                 
                 /* Factorize JB columns among columns J:N. */
-                i__1 = n - j + 1;
-                i__2 = j - 1;
+                n_j = n - j;
                 
                 // Get panel to the CPU
-                magma_zgetmatrix( m-j+1, jb,
+                magma_zgetmatrix( m-j, jb,
                                   dA(j,j), ldda,
                                   A (j,j), lda );
                 
                 // Get the rows
-                magma_zgetmatrix( jb, i__1 - jb,
+                magma_zgetmatrix( jb, n_j - jb,
                                   dA(j,j + jb), ldda,
                                   A (j,j + jb), lda );
                 
-                magma_zlaqps( m, i__1, i__2, jb, &fjb,
-                              A (1, j), lda,
-                              dA(1, j), ldda,
+                magma_zlaqps( m, n_j, j, jb, &fjb,
+                              A (0, j), lda,
+                              dA(0, j), ldda,
                               &jpvt[j], &tau[j], &rwork[j], &rwork[n + j],
                               work,
-                              &work[jb], i__1,
-                              &df[jb],   i__1 );
+                              &work[jb], n_j,
+                              &df[jb],   n_j );
                 
                 j += fjb;  /* fjb is actual number of columns factored */
             }
         }
         else {
-            j = nfxd + 1;
+            j = nfxd;
         }
         
         /* Use unblocked code to factor the last or only block. */
-        if (j <= minmn) {
-            i__1 = n - j + 1;
-            i__2 = j - 1;
-            
-            if (j > nfxd + 1)
-                magma_zgetmatrix( m-j+1, i__1,
+        if (j < minmn) {
+            n_j = n - j;
+            if (j > nfxd + 1) {
+                magma_zgetmatrix( m-j, n_j,
                                   dA(j,j), ldda,
                                   A (j,j), lda );
-            
-            lapackf77_zlaqp2(&m, &i__1, &i__2, A(1, j), &lda, &jpvt[j],
+            }
+            lapackf77_zlaqp2(&m, &n_j, &j, A(0, j), &lda, &jpvt[j],
                              &tau[j], &rwork[j], &rwork[n+j], work );
         }
     }
 
     work[0] = MAGMA_Z_MAKE( lwkopt, 0. );
-    magma_free( dA(1,1) );
+    magma_free( dwork );
 
     return *info;
 } /* zgeqp3 */
