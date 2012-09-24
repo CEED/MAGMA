@@ -111,7 +111,7 @@ int main( int argc, char** argv)
 #endif
     if ( checkres )
         lwork = max(lwork, M * N + N);
-    TESTING_MALLOC( h_work, cuDoubleComplex, lwork );
+    TESTING_HOSTALLOC(h_work, cuDoubleComplex, lwork ); 
 
     printf("  M     N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||A*P - Q*R||_F\n");
     printf("=====================================================================\n");
@@ -195,7 +195,7 @@ int main( int argc, char** argv)
     TESTING_FREE( tau );
     TESTING_FREE( h_A );
     TESTING_HOSTFREE( h_R );
-    TESTING_FREE( h_work );
+    TESTING_HOSTFREE( h_work );
 
     /* Shutdown */
     TESTING_CUDA_FINALIZE();
