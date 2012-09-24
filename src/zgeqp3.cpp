@@ -206,7 +206,7 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
         sn = n - nfxd;
         sminmn = minmn - nfxd;
         
-        if (nb >= nbmin && nb < sminmn && nb < sminmn) {
+        if (nb < sminmn) {
           j = nfxd;
 
           // Set the original matrix to the GPU
@@ -224,7 +224,6 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
         j = nfxd;
         if (nb < sminmn) {
             /* Use blocked code initially. */
-            j = nfxd;
             magma_queue_sync( stream );
             
             /* Compute factorization: while loop. */
