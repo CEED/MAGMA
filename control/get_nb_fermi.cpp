@@ -43,22 +43,22 @@ int magma_get_zpotrf_nb(int n) {
 */
 extern "C"
 int magma_get_sgeqp3_nb(int m) {
-    return 64;
+    return 32;
 }
 
 extern "C"
 int magma_get_dgeqp3_nb(int m) {
-    return 64;
+    return 32;
 }
 
 extern "C"
 int magma_get_cgeqp3_nb(int m) {
-    return 64;
+    return 32;
 }
 
 extern "C"
 int magma_get_zgeqp3_nb(int m) {
-    return 64;
+    return 32;
 }
 
 /* ////////////////////////////////////////////////////////////////////////////
