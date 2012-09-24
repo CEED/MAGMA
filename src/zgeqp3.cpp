@@ -162,6 +162,9 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
     df = dwork + n*ldda;
     // dwork used for dA
 
+    cudaStream_t stream;
+    magma_queue_create( &stream );
+
     /* Move initial columns up front.
      * Note jpvt uses 1-based indices for historical compatibility. */
     nfxd = 0;
@@ -203,6 +206,15 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
         sn = n - nfxd;
         sminmn = minmn - nfxd;
         
+        if (nb >= nbmin && nb < sminmn && nb < sminmn) {
+          j = nfxd;
+
+          // Set the original matrix to the GPU
+          magma_zsetmatrix_async( m, sn,
+                                  A (0,j), lda,
+                                  dA(0,j), ldda, stream );
+        }
+
         /* Initialize partial column norms. */
         for (j = nfxd; j < n; ++j) {
             rwork[j] = cblas_dznrm2(sm, A(nfxd, j), ione);
@@ -212,10 +224,8 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
         j = nfxd;
         if (nb < sminmn) {
             /* Use blocked code initially. */
-            // Set the original matrix to the GPU
-            magma_zsetmatrix( m, sn,
-                              A (0,j), lda,
-                              dA(0,j), ldda );
+            j = nfxd;
+            magma_queue_sync( stream );
             
             /* Compute factorization: while loop. */
             topbmn = minmn - nb;
@@ -225,16 +235,18 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
                 /* Factorize JB columns among columns J:N. */
                 n_j = n - j;
                 
-                // Get panel to the CPU
-                magma_zgetmatrix( m-j, jb,
-                                  dA(j,j), ldda,
-                                  A (j,j), lda );
+                if (j>nfxd) {
+                  // Get panel to the CPU
+                  magma_zgetmatrix( m-j, jb,
+                                    dA(j,j), ldda,
+                                    A (j,j), lda );
                 
-                // Get the rows
-                magma_zgetmatrix( jb, n_j - jb,
-                                  dA(j,j + jb), ldda,
-                                  A (j,j + jb), lda );
-                
+                  // Get the rows
+                  magma_zgetmatrix( jb, n_j - jb,
+                                    dA(j,j + jb), ldda,
+                                    A (j,j + jb), lda );
+                }
+
                 magma_zlaqps( m, n_j, j, jb, &fjb,
                               A (0, j), lda,
                               dA(0, j), ldda,
@@ -262,6 +274,8 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
 
     work[0] = MAGMA_Z_MAKE( lwkopt, 0. );
     magma_free( dwork );
+
+    magma_queue_destroy( stream );
 
     return *info;
 } /* zgeqp3 */
