@@ -108,7 +108,7 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
     magma_int_t ione = 1;
 
     magma_int_t n_j, ldda, ldwork;
-    magma_int_t j, jb, na, nb, sm, sn, fjb, nfxd, nbmin, minmn;
+    magma_int_t j, jb, na, nb, sm, sn, fjb, nfxd, minmn;
     magma_int_t topbmn, sminmn, lwkopt, lquery;
     
     *info = 0;
@@ -209,10 +209,9 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
             rwork[n + j] = rwork[j];
         }
         
-        if (nb >= nbmin && nb < sminmn && nb < sminmn) {
+        j = nfxd;
+        if (nb < sminmn) {
             /* Use blocked code initially. */
-            j = nfxd;
-            
             // Set the original matrix to the GPU
             magma_zsetmatrix( m, sn,
                               A (0,j), lda,
@@ -246,9 +245,6 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
                 
                 j += fjb;  /* fjb is actual number of columns factored */
             }
-        }
-        else {
-            j = nfxd;
         }
         
         /* Use unblocked code to factor the last or only block. */
