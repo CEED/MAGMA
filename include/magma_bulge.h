@@ -9,7 +9,9 @@
 #ifndef _MAGMA_BULGE_H_
 #define _MAGMA_BULGE_H_
 
+#ifdef __cplusplus
 extern "C"{
+#endif
 
     inline magma_int_t magma_ceildiv(magma_int_t a, magma_int_t b)
     {
@@ -30,6 +32,9 @@ extern "C"{
                                   magma_int_t *Vpos, magma_int_t *TAUpos, magma_int_t *Tpos, magma_int_t *blkid);
 
     magma_int_t magma_bulge_get_blkcnt(magma_int_t n, magma_int_t nb, magma_int_t Vblksiz);
+
+#ifdef __cplusplus
 }
+#endif
 
 #endif
