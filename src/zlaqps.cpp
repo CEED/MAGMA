@@ -138,25 +138,14 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
         pvt = k + cblas_idamax( n-k, &vn1[k], ione );
         
         if (pvt != k) {
-            if (pvt < nb){
-                /* no need of transfer if pivot is within the panel */
-                blasf77_zswap( &m, A(0, pvt), &ione, A(0, k), &ione );
-            }
-            else {
-                /* 1. Start copy from GPU                           */
-                magma_zgetmatrix( m - offset - nb, 1,
-                                  dA(offset + nb, pvt), ldda,
-                                  A (offset + nb, pvt), lda );
-                
-                /* 2. Swap as usual on CPU                          */
-                blasf77_zswap(&m, A(0, pvt), &ione, A(0, k), &ione);
 
-                /* 3. Restore the GPU                               */
-                magma_zsetmatrix_async( m - offset - nb, 1,
-                                        A (offset + nb, pvt), lda,
-                                        dA(offset + nb, pvt), ldda, stream);
+            if (pvt >= nb) {
+                /* 1. Start copy from GPU                           */
+                magma_zgetmatrix_async( m - offset - nb, 1,
+                                        dA(offset + nb, pvt), ldda,
+                                        A (offset + nb, pvt), lda, stream );
             }
-            
+
             /* F gets swapped so F must be sent at the end to GPU   */
             i__1 = k;
             blasf77_zswap( &i__1, F(pvt,0), &ldf, F(k,0), &ldf );
@@ -165,6 +154,23 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
             jpvt[k]   = itemp;
             vn1[pvt] = vn1[k];
             vn2[pvt] = vn2[k];
+
+            if (pvt < nb){
+                /* no need of transfer if pivot is within the panel */ 
+                blasf77_zswap( &m, A(0, pvt), &ione, A(0, k), &ione );
+            }
+            else {
+                /* 1. Finish copy from GPU                          */
+                magma_queue_sync( stream );
+
+                /* 2. Swap as usual on CPU                          */
+                blasf77_zswap(&m, A(0, pvt), &ione, A(0, k), &ione);
+
+                /* 3. Restore the GPU                               */
+                magma_zsetmatrix_async( m - offset - nb, 1,
+                                        A (offset + nb, pvt), lda,
+                                        dA(offset + nb, pvt), ldda, stream);
+            }
         }
 
         /* Apply previous Householder reflectors to column K:
