@@ -158,8 +158,12 @@ int main( int argc, char** argv)
         gflops = FLOPS_ZGETRF( M, N ) / 1e9;
 
         /* Initialize the matrix */
-        lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-        lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
+        if ( checkres ) {
+            lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
+            lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
+        }
+        else
+            lapackf77_zlarnv( &ione, ISEED, &n2, h_R );
         magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
 
         /* =====================================================================
