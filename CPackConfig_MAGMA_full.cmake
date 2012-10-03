@@ -7,7 +7,7 @@
 # @version       :
 # @created by    : Cedric Castagnede
 # @creation date : 22-03-2012
-# @last modified : jeu. 05 avril 2012 15:30:20 CEST
+# @last modified : mar. 12 juin 2012 15:40:21 CEST
 #
 ###
 # This file will be configured to contain variables for CPack. These variables
@@ -31,18 +31,37 @@
 #   CPACK_PACKAGE_VERSION_MINOR         - Package project version (minor)
 #   CPACK_PACKAGE_VERSION_PATCH         - Package project version (patch)
 ###
-#
-# cpack --config CPackConfig_MAGMA.cmake
-#
-###
 
+# Allow to add a suffix frr the package version 
 SET(SUFFIX_VERSION "")
 
+# Get the top directory of the project
 EXECUTE_PROCESS(COMMAND pwd
                 OUTPUT_VARIABLE SOURCE_DIRECTORY
                 OUTPUT_STRIP_TRAILING_WHITESPACE
                 )
 
+# The following lines can be modify by hydra to generate the package
+#SET(REFBLAS_URL    "")
+#SET(CBLAS_URL      "")
+#SET(LAPACK_URL     "")
+#SET(LAPACKE_URL    "")
+#SET(PLASMA_URL     "")
+
+# Include info of package dependencies
+SET(CMAKE_MODULE_PATH ${SOURCE_DIRECTORY}/cmake_modules/info)
+include(infoREFBLAS)
+REFBLAS_INFO_INSTALL()
+include(infoCBLAS)
+CBLAS_INFO_INSTALL()
+include(infoLAPACK)
+LAPACK_INFO_INSTALL()
+include(infoLAPACKE)
+LAPACKE_INFO_INSTALL()
+include(infoPLASMA)
+PLASMA_INFO_INSTALL()
+
+# Remove all stuff in externals
 EXECUTE_PROCESS(COMMAND ls ${SOURCE_DIRECTORY}/externals OUTPUT_VARIABLE LIST_FILE_TO_REMOVE OUTPUT_STRIP_TRAILING_WHITESPACE)
 STRING(REPLACE "\n" ";" LIST_FILE_TO_REMOVE "${LIST_FILE_TO_REMOVE}")
 FOREACH(_file ${LIST_FILE_TO_REMOVE})
@@ -52,7 +71,37 @@ FOREACH(_file ${LIST_FILE_TO_REMOVE})
         EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E remove -f ${SOURCE_DIRECTORY}/externals/${_file})
     ENDIF()
 ENDFOREACH()
+
+# Write a file in externals to force cpack to add this folder
 FILE(WRITE ${SOURCE_DIRECTORY}/externals/info "Put all tarballs in this directory.\n")
+
+# Get and put all packages in externals
+FOREACH(_prefix REFBLAS CBLAS LAPACK LAPACKE PLASMA)
+    IF(EXISTS ${${_prefix}_URL})
+        EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy ${${_prefix}_URL} ${SOURCE_DIRECTORY}/externals/${${_prefix}_TARBALL})
+        EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E md5sum ${SOURCE_DIRECTORY}/externals/${${_prefix}_TARBALL}
+                        OUTPUT_VARIABLE ${_prefix}_MD5SUM_FOUND
+                        OUTPUT_STRIP_TRAILING_WHITESPACE
+                       )
+        IF(NOT "${${_prefix}_MD5SUM_FOUND}" MATCHES "${${_prefix}_MD5SUM}")
+            MESSAGE(FATAL_ERROR "${_prefix} tarball -- not copied")
+        ENDIF()
+    ELSE(EXISTS ${${_prefix}_URL})
+        FILE(DOWNLOAD ${${_prefix}_URL}
+                      ${SOURCE_DIRECTORY}/externals/${${_prefix}_TARBALL}
+                      EXPECTED_MD5 ${${_prefix}_MD5SUM}
+                      STATUS IS_GOT
+                      SHOW_PROGRESS
+            )
+        LIST(GET IS_GOT 0 IS_GOT_CODE)
+        LIST(GET IS_GOT 1 IS_GOT_MSG)
+        IF(IS_GOT_CODE)
+            MESSAGE(FATAL_ERROR "${_prefix} tarball -- not downloaded")
+        ENDIF(IS_GOT_CODE) 
+    ENDIF(EXISTS ${${_prefix}_URL})
+ENDFOREACH()
+
+# Generate PACKAGE
 SET(CPACK_GENERATOR                   "TGZ")
 SET(CPACK_PACKAGE_NAME                "MAGMA")
 SET(CPACK_PACKAGE_VERSION_MAJOR       "1")
@@ -63,12 +112,12 @@ SET(CPACK_PACKAGE_DESCRIPTION_FILE    "${SOURCE_DIRECTORY}/COPYRIGHT")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MAGMA - Matrix Algebra on GPU and Multicore Architectures")
 SET(CPACK_INSTALLED_DIRECTORIES       "${SOURCE_DIRECTORY};/")
 SET(CPACK_INSTALL_CMAKE_PROJECTS      "")
-SET(CPACK_PACKAGE_FILE_NAME           "magma-1gpu-${MAGMA_VERSION}${SUFFIX_VERSION}")
-LIST(APPEND CPACK_IGNORE_FILES        "/\\.svn/;\\.swp$;\\.#;/#;~$;.DS_Store;\\.old;\\.tar$;\\.tar.gz$;\\.tgz$")
+SET(CPACK_PACKAGE_FILE_NAME           "magma-full-${MAGMA_VERSION}${SUFFIX_VERSION}")
+LIST(APPEND CPACK_IGNORE_FILES        "/\\.svn/;\\.swp$;\\.#;/#;~$;.DS_Store;\\.old")
 LIST(APPEND CPACK_IGNORE_FILES        "/exp/;/build/;/multi-gpu-dynamic/")
 LIST(APPEND CPACK_IGNORE_FILES        "CPackConfig_MAGMA.cmake;CPackConfig_MORSE_full.cmake;CPackConfig_MORSE_light.cmake")
-LIST(APPEND CPACK_IGNORE_FILES        "magma-morse-light-${MORSE_VERSION}${SUFFIX_VERSION}.tar.gz")
-LIST(APPEND CPACK_IGNORE_FILES        "magma-morse-full-${MORSE_VERSION}${SUFFIX_VERSION}.tar.gz")
+LIST(APPEND CPACK_IGNORE_FILES        "magma-1gpu-${MAGMA_VERSION}${SUFFIX_VERSION}.tar.gz")
+LIST(APPEND CPACK_IGNORE_FILES        "magma-morse-light-${MAGMA_VERSION}${SUFFIX_VERSION}.tar.gz")
 SET(CPACK_PACKAGE_VENDOR
 "University of Tennessee,
 Inria Bordeaux - Sud-Ouest,

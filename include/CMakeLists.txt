@@ -22,6 +22,7 @@ SET(ZHDR magma_z.h
          magmablas_z.h
          magmablas_zc.h
          magma_zlapack.h
+         magma_zbulge.h
          magma_zbulgeinc.h
      )
 
@@ -32,7 +33,6 @@ precisions_rules_py(MAGMA_HEADERS_GENERATED
 # Define the list of headers
 # --------------------------
 SET(MAGMA_HEADERS 
-    cblas.h
     magma.h
     magmablas.h
     magma_lapack.h

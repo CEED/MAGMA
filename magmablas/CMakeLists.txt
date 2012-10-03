@@ -40,6 +40,7 @@ SET(ZSRC
 	zswapblk.cu
 	zswapdblk.cu
 	zsymmetrize.cu
+	zsymmetrize_tiles.cu
 	zsymv_fermi.cu
 	csymv_tesla.cu
 	ssyr2k.cu
@@ -52,6 +53,8 @@ SET(ZSRC
 	strsm.cu
 # Multi-gpus
          zbcyclic.cu
+         zhemm_1mgpu.cpp
+         zhemm_1mgpu_old.cpp
          zhemm_mgpu.cpp
          zher2k_mgpu.cpp
          zgetmatrix_transpose_mgpu.cu

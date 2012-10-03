@@ -15,19 +15,19 @@ MACRO(PLASMA_INFO_INSTALL)
     # Define web link of plasma
     # -------------------------
     IF(NOT DEFINED PLASMA_URL)
-        SET(PLASMA_URL     "http://icl.cs.utk.edu/projectsfiles/plasma/pubs/plasma_2.4.5.tar.gz")
+        SET(PLASMA_URL     "http://icl.cs.utk.edu/projectsfiles/plasma/pubs/plasma_2.4.6.tar.gz")
     ENDIF()
 
     # Define tarball of plasma
     # ------------------------
     IF(NOT DEFINED PLASMA_TARBALL)
-        SET(PLASMA_TARBALL "plasma_2.4.5.tar.gz"             )
+        SET(PLASMA_TARBALL "plasma_2.4.6.tar.gz")
     ENDIF()
 
     # Define md5sum of plasma
     # -----------------------
     IF(DEFINED PLASMA_URL OR DEFINED PLASMA_TARBALL)
-        SET(PLASMA_MD5SUM  "077ce8df88d48e3c2be115b459bb0231")
+        SET(PLASMA_MD5SUM  "95c6e145636bbbdabf6b9c4ecb5ca2a7")
     ENDIF()
 
     # Define repository of plasma

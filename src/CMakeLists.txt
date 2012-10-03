@@ -39,9 +39,9 @@ ELSE()
              )
 
     SET(MAGMA_CTRLF
-                    ../control/magma_param.f90
-                    ../control/magma.f90
-                    )
+             ../control/magma_param.f90
+             ../control/magma.f90
+             )
 ENDIF()
 
 precisions_rules_py(MAGMA_CTRL_GENERATED
@@ -136,9 +136,6 @@ SET(ZSRC
     zunmql2_gpu.cpp
     zunmqr2_gpu.cpp
     zunmqr_gpu.cpp
-    zgeqp3.cpp
-    dgeqp3.cpp
-    zlaqps.cpp
     zgeqrf_mgpu.cpp
 
 # QR, CPU interface
@@ -151,6 +148,8 @@ SET(ZSRC
     zunmql.cpp
     zunmqr.cpp
     zunmqr_m.cpp
+    zgeqp3.cpp
+    zlaqps.cpp
 
 # symmetric eigenvalue, GPU interface
     dsyevd_gpu.cpp
@@ -179,22 +178,33 @@ SET(ZSRC
     zstedx.cpp
     zungtr.cpp
     zunmtr.cpp
-    zheevd_m.cpp
-    dlaex0_m.cpp
-    dlaex1_m.cpp
-    dlaex3_m.cpp
-    dstedx_m.cpp
-    zstedx_m.cpp
-    zunmtr_m.cpp
+
+# symmetric eigenvalues, multi-GPU (not yet released)
+#    zheevd_m.cpp
+#    dlaex0_m.cpp
+#    dlaex1_m.cpp
+#    dlaex3_m.cpp
+#    dstedx_m.cpp
+#    zstedx_m.cpp
+#    zunmtr_m.cpp
 
 # symmetric eigenvalues 2-stage
     dbulge_aux.cpp
     zbulge_applyQ.cpp
+    zbulge_applyQ_v2.cpp
     zbulge_aux.cpp
     zbulge_kernel.cpp
-    zhebbd.cpp
+    zbulge_kernel_v2.cpp
+    zhetrd_he2hb.cpp
+    zhetrd_he2hb_mgpu.cpp
+    zhetrd_hb2st.cpp
+    zbulge_back.cpp
     zhetrd_bhe2trc_v3.cpp
+    zhetrd_bhe2trc_v5.cpp
     zungqr_2stage_gpu.cpp
+    zunmqr_gpu_2stage.cpp
+    zheevdx_2stage.cpp
+    zhegvdx_2stage.cpp
 
 # generalized symmetric eigenvalues
     dsygvd.cpp
