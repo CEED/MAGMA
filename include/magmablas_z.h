@@ -28,9 +28,6 @@ void zzero_32x32_block(           cuDoubleComplex *, magma_int_t);
 
 void zzero_nbxnb_block(           magma_int_t, cuDoubleComplex *, magma_int_t);
 
-void magmablas_zpermute_long(     cuDoubleComplex *, magma_int_t, 
-                  magma_int_t *, magma_int_t, magma_int_t);
-
 void magmablas_zpermute_long2(magma_int_t n, cuDoubleComplex *, magma_int_t, 
                   magma_int_t *, magma_int_t, magma_int_t);
 

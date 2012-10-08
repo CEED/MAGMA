@@ -26,7 +26,6 @@ ZSRC := \
 	zlanhe.cu		\
 	zlascl.cu		\
 	zlat2c.cu		\
-	zpermute.cu		\
 	zpermute-v2.cu		\
 	zpermute-v3.cu		\
 	zswap.cu		\
