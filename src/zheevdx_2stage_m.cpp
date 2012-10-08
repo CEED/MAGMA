@@ -39,6 +39,16 @@ extern"C" {
         magma_int_t ldt = Vblksiz;
         return magma_bulge_get_blkcnt(n, nb, Vblksiz) * Vblksiz * (ldt + ldv + 1);
     }
+    
+    magma_int_t magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
+                                        cuDoubleComplex *a, magma_int_t lda, 
+                                        cuDoubleComplex *tau,
+                                        cuDoubleComplex *work, magma_int_t lwork,
+                                        cuDoubleComplex *dAmgpu[], magma_int_t ldda,
+                                        cuDoubleComplex *dTmgpu[], magma_int_t lddt,
+                                        magma_int_t ngpu, magma_int_t distblk, 
+                                        cudaStream_t streams[][20], magma_int_t nstream, 
+                                        magma_int_t *info);
 
     magma_int_t magma_zstedx_m(magma_int_t nrgpu,
                                char range, magma_int_t n, double vl, double vu,
@@ -46,6 +56,10 @@ extern"C" {
                                cuDoubleComplex *Z, magma_int_t ldz,
                                double *rwork, magma_int_t ldrwork, magma_int_t *iwork,
                                magma_int_t liwork, magma_int_t *info);
+
+    magma_int_t magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t threads, char uplo, magma_int_t n, magma_int_t nb, magma_int_t ne, magma_int_t Vblksiz,
+                                    cuDoubleComplex *Z, magma_int_t ldz,
+                                    cuDoubleComplex *V, magma_int_t ldv, cuDoubleComplex *TAU, cuDoubleComplex *T, magma_int_t ldt, magma_int_t* info);
 }
 
 extern "C" magma_int_t
@@ -401,6 +415,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     start = get_current_time();
 #endif
 
+#ifdef HE2HB_SINGLEGPU
     cuDoubleComplex *dT1;
 
     if (MAGMA_SUCCESS != magma_zmalloc( &dT1, n*nb)) {
@@ -411,6 +426,36 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     magma_zhetrd_he2hb(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, dT1, info);
 
     magma_free(dT1);
+#else
+    magma_int_t nstream = 3;
+    cudaStream_t streams[MagmaMaxGPUs][20];    
+    cuDoubleComplex *da[MagmaMaxGPUs],*dT1[MagmaMaxGPUs];
+    magma_int_t ldda = ((n+31)/32)*32;
+
+    for( magma_int_t dev = 0; dev < nrgpu; ++dev ) {
+        magma_int_t mlocal = ((n / nb) / nrgpu + 1) * nb;
+        magma_setdevice( dev );
+        magma_zmalloc(&da[dev], ldda*mlocal );
+        magma_zmalloc(&dT1[dev], (n*nb) );
+        for( int i = 0; i < nstream; ++i ) {
+            magma_queue_create( &streams[dev][i] );
+        }
+    }
+
+    magmablas_zsetmatrix_1D_bcyclic( n, n, a, lda, da, ldda, nrgpu, nb);
+
+    magma_setdevice(0);
+
+    magma_zhetrd_he2hb_mgpu(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, da, ldda, dT1, nb, nrgpu, nb, streams, nstream, info);
+    for( magma_int_t dev = 0; dev < nrgpu; ++dev ) {
+        magma_setdevice( dev );
+        magma_free( da[dev] );
+        magma_free( dT1[dev] );
+        for( int i = 0; i < nstream; ++i ) {
+            magma_queue_destroy( streams[dev][i] );
+        }
+    }
+#endif
     
 #ifdef ENABLE_TIMER
     st1 = get_current_time();
@@ -481,10 +526,11 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
         start = get_current_time();
 #endif
-        cuDoubleComplex *dZ;
-        magma_int_t lddz = n;
 
         magma_zmove_eig(range, n, w, &il, &iu, vl, vu, m);
+/*
+        cuDoubleComplex *dZ;
+        magma_int_t lddz = n;
 
         if (MAGMA_SUCCESS != magma_zmalloc( &dZ, *m*lddz)) {
             *info = MAGMA_ERR_DEVICE_ALLOC;
@@ -496,6 +542,11 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
         magma_zgetmatrix( n, *m, dZ, lddz, &work[indwrk], n);
 
+        magma_free(dZ);
+*/
+        magma_zbulge_back_m(nrgpu, threads, uplo, n, nb, *m, Vblksiz, &work[indwrk + n * (il-1)], n,
+                            &work[indV2], ldv, &work[indTAU2], &work[indT2], ldt, info);
+
 #ifdef ENABLE_TIMER
         st1 = get_current_time();
 
@@ -503,12 +554,10 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 #endif
 
         magma_zunmqr_m(nrgpu, MagmaLeft, MagmaNoTrans, n-nb, *m, n-nb, a+nb, lda, &work[indtau1],
-                       &work[indwrk+nb], n, &work[indwk2], llwrk2, info);
+                       &work[indwrk + n * (il-1) + nb], n, &work[indwk2], llwrk2, info);
 
-        lapackf77_zlacpy("A", &n, m, &work[indwrk], &n, a, &lda);
+        lapackf77_zlacpy("A", &n, m, &work[indwrk  + n * (il-1)], &n, a, &lda);
         
-        magma_free(dZ);
-
 #ifdef ENABLE_TIMER
         end = get_current_time();
 
