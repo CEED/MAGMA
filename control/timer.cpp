@@ -114,6 +114,14 @@ double magma_wtime( void )
     return t.tv_sec + t.tv_usec*1e-6;
 }
 
+// synchronize before getting time, e.g., to time asynchronous cublas calls
+extern "C"
+double magma_sync_wtime( magma_queue_t queue )
+{
+    magma_queue_sync( queue );
+    return magma_wtime();
+}
+
 // version callable from Fortran stores seconds in time.
 extern "C"
 void magma_wtime_f(double *time)

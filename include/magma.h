@@ -322,6 +322,7 @@ void swp2pswp(char trans, magma_int_t n, magma_int_t *ipiv, magma_int_t *newipiv
 float getv(float *da);
 
 double magma_wtime( void );
+double magma_sync_wtime( magma_queue_t queue );
 size_t magma_strlcpy(char *dst, const char *src, size_t siz);
 int magma_num_gpus( void );
 int magma_is_devptr( const void* A );
