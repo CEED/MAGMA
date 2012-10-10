@@ -178,7 +178,7 @@ return;
     // ROW GEMM transpose a row and make a gemm with a block
     // if only 1 GPU used the ROW GEMM is integrated with the 
     // COL GEMM (better accuracy observed) and better perf
-    if(ngpu>0){
+    if(ngpu>1){
         for( magma_int_t i = nb; i < m; i += nb ) {
             magma_int_t ib     = min( nb, m-i );      // block size
             magma_int_t ioff   = i + offset;          // start global index in parent matrix
@@ -245,11 +245,14 @@ return;
                         c_one, dC(dev,i,0),     lddc );
         }
         // if only 1 GPU is used, do the ROW GEMM
-        if(ngpu==100){
+        if(ngpu==1){
             // NOTE THAT because the COL gemm write dC below the diagonal (i) 
             // and the ROW GEMM write dC from 0 to diag-1, so they could 
             // run in parallel on diferent stream.        
-//            magmablasSetKernelStream( streams[ dev ][ 1 ] );
+            // 
+            // NO NO NO because
+            // it might happen that col finished i and strated i+1 while row still at i    
+            // magmablasSetKernelStream( streams[ dev ][ 1 ] );
             magma_zgemm( MagmaConjTrans, MagmaNoTrans, i, n, ib,
                          alpha, dA(dev,ioff,offset), ldda,
                                 dB(dev,i,0),    lddb,
@@ -272,11 +275,11 @@ return;
 
 
     // wait and reduce results
-    memset(C,0,m*n*sizeof(cuDoubleComplex));
+    memset(C,0,ldc*n*sizeof(cuDoubleComplex));
     cuDoubleComplex *Ctmp = C(0,n);
 //    memset(C,0,n*nb*sizeof(cuDoubleComplex));
     // receive and put on its placment the row block
-    if(ngpu>0){
+    if(ngpu>1){
         for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
             magma_setdevice( dev );
             magma_int_t nbblk = magma_ceildiv((m-nb),nb);
