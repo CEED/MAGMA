@@ -109,7 +109,8 @@ magmablas_zlag2c( magma_int_t M, magma_int_t N ,
 
     dim3 threads( blksize, 1, 1 );
     dim3 grid( (M+blksize-1)/blksize, 1, 1);
-    flag = 0;
+    *info = 0;
+    cudaMemcpyToSymbol( flag, info, sizeof(flag) );    // flag = 0
     magmaint_zlag2c<<< grid, threads, 0, magma_stream >>>( M, N, A, lda, SA, ldsa, RMAX ) ; 
-    *info = flag;
+    cudaMemcpyFromSymbol( info, flag, sizeof(flag) );  // info = flag
 }
