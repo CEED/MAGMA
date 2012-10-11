@@ -14,12 +14,6 @@
 #include "trace.h"
 #include <assert.h>
 
-extern "C" void
-magmablas_zsymmetrize( char uplo, magma_int_t m, cuDoubleComplex *dA, magma_int_t ldda );
-extern "C" void 
-magmablas_zsymmetrize_tiles(
-                            char uplo, int m, cuDoubleComplex *dA, int ldda,
-                                        int ntile, int mstride, int nstride );
 extern "C"
 void magmablas_zhemm_1gpu(
     char side, char uplo, magma_int_t m, magma_int_t n,
