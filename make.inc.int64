@@ -29,7 +29,7 @@ LDOPTS    = -fPIC -Xlinker -zmuldefs
 
 # see MKL Link Advisor at http://software.intel.com/sites/products/mkl/
 # gcc with MKL 10.3, GNU threads, 64-bit int
-# change magma_int_t typedef to long in include/magma.h
+# change magma_int_t typedef to long in include/magmablas.h
 LIB       = -lmkl_gf_ilp64 -lmkl_gnu_thread -lmkl_core -lpthread -lcublas -lm -fopenmp
 
 # define these in your environment
