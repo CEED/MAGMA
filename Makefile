@@ -13,9 +13,15 @@ all: lib test
 
 lib: libmagma libmagmablas
 
-libmagma:
-	( cd control        && $(MAKE) )
+# add dependencies so src, control, and interface_cuda directories
+# don't all update libmagma.a at the same time
+libmagma: libmagma_control libmagma_interface
 	( cd src            && $(MAKE) )
+
+libmagma_control:
+	( cd control        && $(MAKE) )
+
+libmagma_interface: libmagma_control
 	( cd interface_cuda && $(MAKE) )
 
 libmagmablas:
