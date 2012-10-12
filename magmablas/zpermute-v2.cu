@@ -10,18 +10,18 @@
 */
 #include "common_magma.h"
 
-#define BLOCK_SIZE 64
+#define BLOCK_SIZE 32
 
 typedef struct {
         cuDoubleComplex *A;
         int n, lda, j0;
-        short ipiv[BLOCK_SIZE];
+        int ipiv[BLOCK_SIZE];
 } zlaswp_params_t;
 
 typedef struct {
         cuDoubleComplex *A;
         int n, lda, j0, npivots;
-        short ipiv[BLOCK_SIZE];
+        int ipiv[BLOCK_SIZE];
 } zlaswp_params_t2;
 
 /*********************************************************
@@ -32,7 +32,7 @@ typedef struct {
 typedef struct {
     cuDoubleComplex *A;
     int n, ldx, ldy, j0, npivots;
-    short ipiv[BLOCK_SIZE];
+    int ipiv[BLOCK_SIZE];
 } zlaswpx_params_t;
 
 __global__ void myzlaswpx( zlaswpx_params_t params )
