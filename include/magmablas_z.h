@@ -160,6 +160,11 @@ void   magmablas_zlaswpx(magma_int_t N,
              magma_int_t i1, magma_int_t i2,
              magma_int_t *ipiv, magma_int_t inci );
 
+void   magmablas_zlaswp2( magma_int_t n,
+                          cuDoubleComplex* dAT, magma_int_t lda,
+                          magma_int_t i1, magma_int_t i2,
+                          magma_int_t *ipiv );
+
 void   magmablas_zsymmetrize(
              char uplo, magma_int_t m, cuDoubleComplex *dA, magma_int_t ldda );
 
