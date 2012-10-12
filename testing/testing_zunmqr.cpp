@@ -145,7 +145,7 @@ int main( int argc, char** argv )
             //magma_zsetmatrix( m,   n, C, ldc, dC, ldc );
             
             // A is m x k (left) or n x k (right)
-            int lda = (*side[iside] == 'L' ? m : n);
+            lda = (*side[iside] == 'L' ? m : n);
             size = lda*k;
             lapackf77_zlarnv( &ione, iseed, &size, A );
             
