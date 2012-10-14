@@ -301,7 +301,6 @@ return;
                 //trace_gpu_end( dev, 1 );
                 // for each dev put the received block each on its placment
                 //trace_cpu_start( 0, "axpy", "C += C_row" );
-                magma_zgetmatrix_async( m, n, dC[dev], lddc, work[dev], ldwork, streams[ dev ][ 0 ] );
                 for( magma_int_t blki = 0; blki < myblk; ++blki){
                     magma_int_t gbblki = (blki*ngpu + devperm)*nb;
                     magma_int_t ib     = nb;// min(nb,m-gbblki);
@@ -310,17 +309,9 @@ return;
          
                 }
                 //trace_cpu_end( 0 );
-            }else{
-                magma_zgetmatrix_async( m, n, dC[dev], lddc, work[dev], ldwork, streams[ dev ][ 0 ] );
-            }            
+            }          
         }
-    }else{    
-       for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-           magma_setdevice( dev );
-           magma_zgetmatrix_async( m, n, dC[dev], lddc, work[dev], ldwork, streams[ dev ][ 0 ] );
-       }
-    }
-    
+    }    
 
     magma_int_t size = ldc*n;
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
@@ -328,7 +319,12 @@ return;
         //trace_gpu_start( dev, 0, "get", "get C_dev" );
         //if(ngpu==1) magma_queue_sync( streams[ dev ][ 1 ] );
         magma_queue_sync( streams[ dev ][ 0 ] );
-        //magma_zgetmatrix( m, n, dC[dev], lddc, work[0], ldwork );
+        if(dev==0) magma_zgetmatrix( m, n, dC[dev], lddc, work[dev], ldwork );
+        if(dev<ngpu-1){
+           magma_setdevice( dev+1 );
+           magma_zgetmatrix_async( m, n, dC[dev+1], lddc, work[dev+1], ldwork, streams[ dev+1 ][ 0 ] );
+        }
+        //magma_zgetmatrix( m, n, dC[dev], lddc, work[dev], ldwork );
         //trace_gpu_end( dev, 0 );
         
         //trace_cpu_start( 0, "axpy", "C += C_dev" );
