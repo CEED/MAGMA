@@ -261,7 +261,8 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
 //    cuDoubleComplex *Atest = (cuDoubleComplex *) malloc(n*lda*sizeof(cuDoubleComplex));
 //    cuDoubleComplex *Vtest = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
 //    cuDoubleComplex *Wtest = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
-    cuDoubleComplex *worktest = (cuDoubleComplex *) malloc(2*n*nb*sizeof(cuDoubleComplex));
+    cuDoubleComplex *worktest = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
+    cuDoubleComplex *worktest2 = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
 
 
 
@@ -438,7 +439,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                        MagmaLeft, uplo, pm, pk,
                        c_one, dAmgpu, ldda, indi-1,
                                    dworktest, pm,
-                       c_zero,     dwtest, pm, dworktestbis, pm, worktest, pm,
+                       c_zero,     dwtest, pm, dworktestbis, pm, worktest, pm, worktest2, pm,
                        ngpu, distblk, streams, nstream );
 
 
