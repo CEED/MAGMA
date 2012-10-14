@@ -257,12 +257,13 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
 //    cuDoubleComplex *datest[MagmaMaxGPUs];
     cuDoubleComplex *dworktest[MagmaMaxGPUs], *dworktestbis[MagmaMaxGPUs];
     cuDoubleComplex *dvtest[MagmaMaxGPUs], *dwtest[MagmaMaxGPUs];
+    cuDoubleComplex *workngpu[MagmaMaxGPUs+1];
+
 //    cuDoubleComplex *dttest[MagmaMaxGPUs];
 //    cuDoubleComplex *Atest = (cuDoubleComplex *) malloc(n*lda*sizeof(cuDoubleComplex));
 //    cuDoubleComplex *Vtest = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
 //    cuDoubleComplex *Wtest = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
     cuDoubleComplex *worktest = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
-    cuDoubleComplex *worktest2 = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
 
 
 
@@ -276,8 +277,9 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
         magma_zmalloc( &dwtest[dev], nb*ldda );
         magma_zmalloc( &dworktest[dev], nb*ldda );
         magma_zmalloc( &dworktestbis[dev], nb*ldda );
-
+        workngpu[dev] = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
     }
+    workngpu[ngpu] = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));    
     cudaSetDevice(0  );
     // ======================
         magma_int_t mlocal = ((n / distblk) / ngpu + 1) * distblk;
@@ -439,7 +441,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                        MagmaLeft, uplo, pm, pk,
                        c_one, dAmgpu, ldda, indi-1,
                                    dworktest, pm,
-                       c_zero,     dwtest, pm, dworktestbis, pm, worktest, pm, worktest2, pm,
+                       c_zero,     dwtest, pm, dworktestbis, pm, worktest, pm, workngpu, pm,
                        ngpu, distblk, streams, nstream );
 
 
