@@ -15,7 +15,7 @@
 
 extern "C" {
     magma_int_t magma_zhetrd_he2hb(char uplo, magma_int_t n, magma_int_t NB, cuDoubleComplex *a, magma_int_t lda,
-                                   cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t lwork, cuDoubleComplex *dT, magma_int_t *info);
+                                   cuDoubleComplex *tau, cuDoubleComplex *work, magma_int_t lwork, cuDoubleComplex *dT, magma_int_t threads, magma_int_t *info);
 
     magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
                                    cuDoubleComplex *A, magma_int_t lda, double *D, double *E,
