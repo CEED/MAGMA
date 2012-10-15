@@ -51,9 +51,9 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                     cuDoubleComplex *work, magma_int_t lwork,
                     cuDoubleComplex *dAmgpu[], magma_int_t ldda,
                     cuDoubleComplex *dTmgpu[], magma_int_t lddt,
-                  magma_int_t ngpu, magma_int_t distblk, 
+                    magma_int_t ngpu, magma_int_t distblk, 
                     cudaStream_t streams[][20], magma_int_t nstream, 
-                    magma_int_t *info);
+                    magma_int_t threads, magma_int_t *info);
 
 extern "C" magma_int_t
 magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int n, int NB, 
@@ -178,7 +178,7 @@ int main( int argc, char** argv)
     cuDoubleComplex *da[MagmaMaxGPUs],*dT1[MagmaMaxGPUs];
     magma_int_t ldda = ((N+31)/32)*32;
     magma_int_t distblk = 64;//max(128,NB);
-//    printf("voici distblk %d NB %d\n ",distblk,NB);
+    printf("voici distblk %d NB %d\n ",distblk,NB);
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_int_t mlocal = ((N / distblk) / ngpu + 1) * distblk;
         cudaSetDevice( dev );
@@ -225,17 +225,18 @@ int main( int argc, char** argv)
 //       TESTING_DEVALLOC( dabis,  cuDoubleComplex, ldda*N );
 //       magma_zsetmatrix(N,N,h_R,lda,dabis,ldda);       
        
-
+for (int count=0; count<1;++count){
        cudaSetDevice(0);
         start = get_current_time();
 //    printf("voici distblk %d NB %d\n ",distblk,NB);
 
-       magma_zhetrd_he2hb_mgpu(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, da, ldda, dT1, NB, ngpu, distblk, streams, nstream, &info);
+       magma_zhetrd_he2hb_mgpu(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, da, ldda, dT1, NB, ngpu, distblk, streams, nstream, THREADS, &info);
 
        // magma_zhetrd_he2hb(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, dT1[0], &info);
         end = get_current_time();
         printf("  Finish BAND    timing= %lf \n" ,GetTimerValue(start,end) / 1000.);
-
+}
+//return 0;
 
 
         magma_zhetrd_bhe2trc_v5(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1[0], ldt);

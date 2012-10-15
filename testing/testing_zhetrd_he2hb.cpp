@@ -41,7 +41,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t NB,
                     cuDoubleComplex *a, magma_int_t lda,
                     cuDoubleComplex *tau,
                     cuDoubleComplex *work, magma_int_t lwork,
-                    cuDoubleComplex *dT,  
+                    cuDoubleComplex *dT, magma_int_t threads,  
                     magma_int_t *info);
 
 extern "C" magma_int_t
@@ -247,7 +247,7 @@ return 0;
            =================================================================== */
         start = get_current_time();
         //magma_zhetrd_he2hb(uplo[0], N, h_R, lda, tau, h_work, lwork, &info);
-        magma_zhetrd_he2hb(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, dT1, &info);
+        magma_zhetrd_he2hb(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, dT1, THREADS, &info);
         end = get_current_time();
         printf("  Finish BAND    timing= %lf \n" ,GetTimerValue(start,end) / 1000.);
 
