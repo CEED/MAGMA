@@ -19,6 +19,11 @@
 
 #define PRECISION_z
 
+// === Define what BLAS to use ============================================
+#define magma_zhemv magmablas_zhemv
+#define magma_zgemv magmablas_zgemv
+// === End defining what BLAS to use =======================================
+
 #define MAGMABLAS_ZHEMV_MGPU
 #ifdef  MAGMABLAS_ZHEMV_MGPU
 #define magmablas_zhemv_200_mgpu_offset magmablas_zhemv_mgpu_offset
@@ -79,21 +84,6 @@ magmablas_zhemv_synch( magma_int_t num_gpus, magma_int_t k, char uplo,
 
 #define dW1(id, i, j) (dw[(id)]+ ((j)+nb0) *lddw + (i))
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    magma_int_t
-    magmablas_zhemv( char uplo, magma_int_t n,
-                     cuDoubleComplex alpha,
-                     cuDoubleComplex *A, magma_int_t lda,
-                     cuDoubleComplex *X, magma_int_t incx,
-                     cuDoubleComplex beta,
-                     cuDoubleComplex *Y, magma_int_t incy);
-#define magma_zhemv magmablas_zhemv
-#define magma_zgemv magmablas_zgemv
-#ifdef __cplusplus
-}
-#endif
 extern "C" void
 magmablas_zgemvt(char flag, int m, int n, cuDoubleComplex alpha,
                  cuDoubleComplex *A, int lda, cuDoubleComplex *x, int incx, cuDoubleComplex beta, cuDoubleComplex *y, int incy);
