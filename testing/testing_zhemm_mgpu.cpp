@@ -150,7 +150,7 @@ int main( int argc, char** argv)
 //	    if(nb==192) nb=256;
 //	    printf("\n\n\n\n\n");
     for( int i = 0; i < ntest; ++i ) {
-    for( int offst = 0; offst < 65; offst += min(n,nb) ) {
+    for( int offst = 0; offst < m; offst += min(n,nb) ) {
     for( int j = 0; j < count; ++j ) {
         m = msize[i];
         assert( m > 0 && n > 0 );

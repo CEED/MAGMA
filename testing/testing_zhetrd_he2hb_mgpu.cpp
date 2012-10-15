@@ -177,7 +177,7 @@ int main( int argc, char** argv)
     cudaStream_t streams[MagmaMaxGPUs][20];    
     cuDoubleComplex *da[MagmaMaxGPUs],*dT1[MagmaMaxGPUs];
     magma_int_t ldda = ((N+31)/32)*32;
-    magma_int_t distblk=NB;
+    magma_int_t distblk = 64;//max(128,NB);
 //    printf("voici distblk %d NB %d\n ",distblk,NB);
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_int_t mlocal = ((N / distblk) / ngpu + 1) * distblk;
