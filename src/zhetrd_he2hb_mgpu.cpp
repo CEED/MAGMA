@@ -279,7 +279,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
         workngpu[dev] = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
     }
     workngpu[ngpu] = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));    
-    cudaSetDevice(0  );
+    //cudaSetDevice(0  );
     // ======================
 
 
@@ -348,11 +348,10 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                                   cudaMemcpyDeviceToHost, streams[ idev ][ 2 ]);
 
                  */
-
                  trace_gpu_end( idev, 1 );
-                 cudaSetDevice( 0 );
-                 trace_gpu_start( 0, 2, "her2k", "her2k" );
 
+                 //cudaSetDevice( 0 );
+                 trace_gpu_start( 0, 2, "her2k", "her2k" );
                  //printf("updating zher2k on A(%d,%d) of size %d %d \n",indi_old+pn_old-1,indi_old+pn_old-1,pm_old-pn_old,pn_old); 
                 // compute ZHER2K_MGPU
                  magmablas_zher2k_mgpu2(
@@ -361,13 +360,13 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                                  dwtest, pm_old, pn_old,
                       d_one,     dAmgpu, ldda, indi_old+pn_old-1,
                       ngpu, distblk, streams, nstream );
-                 cudaSetDevice( 0 );
+                 //cudaSetDevice( 0 );
 
                  trace_gpu_end( 0, 2 );
                  trace_cpu_start( 0, "sync", "sync on 1" );
                  cudaSetDevice( idev );
                  magma_queue_sync( streams[idev][2] );
-                 cudaSetDevice( 0 );
+                 //cudaSetDevice( 0 );
                  trace_cpu_end( 0 );
                  zq_to_panel(MagmaUpper, pn-1, a_ref(i, i+1), lda, work);
              }
@@ -435,7 +434,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                  trace_gpu_start( 0, 2, "hemm", "X = A*work" );
              }
 
-                 cudaSetDevice( 0 );
+                 //cudaSetDevice( 0 );
                 // compute ZHEMM_MGPU
                  magmablas_zhemm_mgpu(
                        MagmaLeft, uplo, pm, pk,
@@ -480,7 +479,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                              c_one,     dwtest[dev], pm);
                  trace_gpu_end( dev, 2 );
              }
-                 cudaSetDevice( 0 );
+             //cudaSetDevice( 0 );
 
              /* ==========================================================
                 Update the unreduced submatrix A(i+ib:n,i+ib:n), using   
