@@ -22,14 +22,13 @@
 //
 extern "C" void 
 magmablas_zgetmatrix_transpose_mgpu(
-                  magma_int_t num_gpus, cudaStream_t **stream0,
+                  magma_int_t num_gpus, cudaStream_t stream[][2],
                   cuDoubleComplex **dat, magma_int_t ldda,
                   cuDoubleComplex   *ha, magma_int_t lda,
                   cuDoubleComplex  **dB, magma_int_t lddb,
                   magma_int_t m, magma_int_t n, magma_int_t nb)
 {
     int i = 0, j = 0, j_local, d, ib;
-    cudaStream_t stream[4][2];
 
     /* Quick return */
     if ( (m == 0) || (n == 0) )
@@ -41,13 +40,6 @@ magmablas_zgetmatrix_transpose_mgpu(
         return;
     }
     
-    for( d=0; d<num_gpus; d++ ) {
-      magma_setdevice(d);
-      magma_queue_create( &stream[d][0] );
-      magma_queue_create( &stream[d][1] );
-    }
-    
-
     for(d=0; d<num_gpus; d++ ) {
        magma_setdevice(d);
        i  = nb*d;
@@ -92,14 +84,6 @@ magmablas_zgetmatrix_transpose_mgpu(
        magma_queue_sync( stream[d][j_local%2] );
        j++;
     }
-
-    
-    for( d=0; d<num_gpus; d++ ) {
-      magma_setdevice(d);
-      magma_queue_destroy( stream[d][0] );
-      magma_queue_destroy( stream[d][1] );
-    }
-    
 }
 
 

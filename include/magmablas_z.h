@@ -79,14 +79,14 @@ void magmablas_zsetmatrix_transpose(
    * Multi-GPU functions
    */
 void magmablas_zgetmatrix_transpose_mgpu(
-    magma_int_t ngpu, cudaStream_t **stream0,
+    magma_int_t ngpu, cudaStream_t stream[][2],
     cuDoubleComplex **dAT, magma_int_t ldda,
     cuDoubleComplex  *hA,  magma_int_t lda,
     cuDoubleComplex **dB,  magma_int_t lddb,
     magma_int_t m, magma_int_t n, magma_int_t nb );
 
 void magmablas_zsetmatrix_transpose_mgpu(
-    magma_int_t ngpu, cudaStream_t **stream0,
+    magma_int_t ngpu, cudaStream_t stream[][2],
     const cuDoubleComplex  *hA,  magma_int_t lda,
     cuDoubleComplex       **dAT, magma_int_t ldda, magma_int_t starti,
     cuDoubleComplex       **dB,  magma_int_t lddb,
