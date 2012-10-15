@@ -347,7 +347,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                                          datest(idev, i, di+1), ldda,
                                          a_ref ( i, i), lda);
                  */
-                 //magma_device_sync();
+                 magma_device_sync();
                  magma_zgetmatrix_async( (pm+pn), pn,
                                          datest(idev, i, di+1), ldda,
                                          a_ref ( i, i), lda, streams[ idev ][ nstream-1 ] );
