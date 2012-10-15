@@ -20,11 +20,6 @@
 /* === End defining what BLAS to use ======================================= */
 
 
-/* to appy pivoting from the previous big-panel: need some index-adjusting */
-extern "C" void
-magmablas_zpermute_long3( cuDoubleComplex *dAT, int lda, int *ipiv, int nb, int ind );
-
-
 extern "C" magma_int_t
 magma_zgetrf_ooc(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
                  magma_int_t *ipiv, magma_int_t *info)
