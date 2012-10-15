@@ -73,7 +73,7 @@ magmablas_zswapblk( char storev, magma_int_t n,
                     cuDoubleComplex *dA1T, magma_int_t lda1,
                     cuDoubleComplex *dA2T, magma_int_t lda2,
                     magma_int_t i1, magma_int_t i2,
-                    magma_int_t *ipiv, magma_int_t inci, magma_int_t offset )
+                    const magma_int_t *ipiv, magma_int_t inci, magma_int_t offset )
 {
     int  blocksize = 64;
     dim3 blocks( (n+blocksize-1) / blocksize, 1, 1);

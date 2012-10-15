@@ -19,7 +19,11 @@
 
 
 __global__ void 
-dgemvn_kernel_fermi(magma_int_t n, magma_int_t m, magma_int_t n1, double alpha,  double* A, magma_int_t lda, double *x, double *y)
+dgemvn_kernel_fermi(
+    magma_int_t n, magma_int_t m, magma_int_t n1, double alpha,
+    const double *A, magma_int_t lda,
+    const double *x,
+    double *y)
 {
   magma_int_t ind = blockIdx.x*num_threads + threadIdx.x;
 
@@ -59,7 +63,11 @@ dgemvn_kernel_fermi(magma_int_t n, magma_int_t m, magma_int_t n1, double alpha, 
 
 
 extern "C" void
-magmablas_dgemvn_fermi(magma_int_t n, magma_int_t m, double alpha, double *A, magma_int_t lda, double *x, double *y)
+magmablas_dgemvn_fermi(
+    magma_int_t n, magma_int_t m, double alpha,
+    const double *A, magma_int_t lda,
+    const double *x,
+    double *y)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -105,8 +113,11 @@ magmablas_dgemvn_fermi(magma_int_t n, magma_int_t m, double alpha, double *A, ma
 
 
 __global__ void
-dgemvt_kernel_fermi(magma_int_t m, magma_int_t n, double alpha, magma_int_t n1, double* A, magma_int_t lda,
-              double *x, double *y)
+dgemvt_kernel_fermi(
+    magma_int_t m, magma_int_t n, double alpha, magma_int_t n1,
+    const double *A, magma_int_t lda,
+    const double *x,
+    double *y)
 {
         magma_int_t tx = threadIdx.x;
 
@@ -173,8 +184,11 @@ dgemvt_kernel_fermi(magma_int_t m, magma_int_t n, double alpha, magma_int_t n1, 
 
 
 extern "C" void
-magmablas_dgemvt_fermi(magma_int_t m, magma_int_t n, double alpha, double *A, magma_int_t lda,
-                 double *x, double *y)
+magmablas_dgemvt_fermi(
+    magma_int_t m, magma_int_t n, double alpha,
+    const double *A, magma_int_t lda,
+    const double *x,
+    double *y)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -218,8 +232,8 @@ extern "C"
 void magmablas_dgemv_fermi(char trans,
                            magma_int_t m, magma_int_t n,
                            double alpha, 
-                           double *A, magma_int_t lda, 
-                           double *x, magma_int_t incx,
+                           const double *A, magma_int_t lda, 
+                           const double *x, magma_int_t incx,
                            double beta,
                            double *z, magma_int_t incz)
 {

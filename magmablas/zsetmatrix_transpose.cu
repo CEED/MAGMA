@@ -12,11 +12,6 @@
 #define PRECISION_z
 #include "commonblas.h"
 
-extern "C" void
-magmablas_ztranspose2s(cuDoubleComplex *odata, magma_int_t ldo,
-                       cuDoubleComplex *idata, magma_int_t ldi,
-                       magma_int_t m, magma_int_t n, cudaStream_t *stream );
-
 
 //
 //      m, n - dimensions in the source (input) matrix.
@@ -28,9 +23,9 @@ magmablas_ztranspose2s(cuDoubleComplex *odata, magma_int_t ldo,
 //
 extern "C" void 
 magmablas_zsetmatrix_transpose( magma_int_t m, magma_int_t n,
-                                cuDoubleComplex  *ha, magma_int_t lda, 
-                                cuDoubleComplex *dat, magma_int_t ldda,
-                                cuDoubleComplex  *dB, magma_int_t lddb, magma_int_t nb )
+                                const cuDoubleComplex  *ha, magma_int_t lda, 
+                                cuDoubleComplex       *dat, magma_int_t ldda,
+                                cuDoubleComplex        *dB, magma_int_t lddb, magma_int_t nb )
 {
     magma_int_t i = 0, j = 0, ib;
 
@@ -86,9 +81,9 @@ magmablas_zsetmatrix_transpose( magma_int_t m, magma_int_t n,
 //===========================================================================
 extern "C" void 
 magmablas_zsetmatrix_transpose2( magma_int_t m, magma_int_t n,
-                                 cuDoubleComplex  *ha,  magma_int_t  lda, 
-                                 cuDoubleComplex **dat, magma_int_t *ldda,
-                                 cuDoubleComplex **dB,  magma_int_t  lddb, magma_int_t nb,
+                                 const cuDoubleComplex  *ha,  magma_int_t  lda, 
+                                 cuDoubleComplex       **dat, magma_int_t *ldda,
+                                 cuDoubleComplex       **dB,  magma_int_t  lddb, magma_int_t nb,
                                  magma_int_t num_gpus, cudaStream_t stream[][2] )
 {
     magma_int_t i = 0, j[4] = {0, 0, 0, 0}, ib, k = 0;

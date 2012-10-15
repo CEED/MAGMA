@@ -171,7 +171,9 @@ magmablas_zlange_64_64_16_4(const cuDoubleComplex *A, double *C,
 }
 
 extern "C" double  
-magmablas_zlange(char norm, magma_int_t M, magma_int_t N , cuDoubleComplex *A, magma_int_t LDA , double *WORK)
+magmablas_zlange(
+    char norm, magma_int_t M, magma_int_t N,
+    const cuDoubleComplex *A, magma_int_t LDA , double *WORK)
 {
 /*
   !!!!!!!!!!!!!!                

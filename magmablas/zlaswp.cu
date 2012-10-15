@@ -83,7 +83,7 @@ magmablas_zpermute_long2( magma_int_t n, cuDoubleComplex *dAT, magma_int_t lda,
 // It is used in zgetrf_mgpu, zgetrf_ooc.
 extern "C" void
 magmablas_zpermute_long3( cuDoubleComplex *dAT, magma_int_t lda,
-                          magma_int_t *ipiv, magma_int_t nb, magma_int_t ind )
+                          const magma_int_t *ipiv, magma_int_t nb, magma_int_t ind )
 {
     for( int k = 0; k < nb-MAX_PIVOTS; k += MAX_PIVOTS ) {
         int npivots = min( MAX_PIVOTS, nb-k );
@@ -102,7 +102,8 @@ magmablas_zpermute_long3( cuDoubleComplex *dAT, magma_int_t lda,
 // It is used in zgessm, zgetrl.
 extern "C" void
 magmablas_zlaswp( magma_int_t n, cuDoubleComplex *dAT, magma_int_t lda,
-                  magma_int_t i1, magma_int_t i2, magma_int_t *ipiv, magma_int_t inci )
+                  magma_int_t i1, magma_int_t i2,
+                  const magma_int_t *ipiv, magma_int_t inci )
 {
     for( int k = i1-1; k < i2; k += MAX_PIVOTS ) {
         int npivots = min( MAX_PIVOTS, i2-k );
@@ -166,7 +167,8 @@ extern "C" void zlaswpx( zlaswpx_params_t &params )
 // Otherwise, this interface is identical to LAPACK's laswp interface.
 extern "C" void
 magmablas_zlaswpx( magma_int_t n, cuDoubleComplex *dA, magma_int_t ldx, magma_int_t ldy,
-                   magma_int_t i1, magma_int_t i2, magma_int_t *ipiv, magma_int_t inci )
+                   magma_int_t i1, magma_int_t i2,
+                   const magma_int_t *ipiv, magma_int_t inci )
 {
     for( int k = i1-1; k < i2; k += MAX_PIVOTS ) {
         int npivots = min( MAX_PIVOTS, i2-k );
@@ -188,7 +190,7 @@ magmablas_zlaswpx( magma_int_t n, cuDoubleComplex *dA, magma_int_t ldx, magma_in
 // batches of pivots. On Fermi, it is faster than magmablas_zlaswp
 // (including copying pivots to the GPU).
 
-__global__ void zlaswp2_kernel( int n, cuDoubleComplex *dAT, int lda, int npivots, magma_int_t* d_ipiv )
+__global__ void zlaswp2_kernel( int n, cuDoubleComplex *dAT, int lda, int npivots, const magma_int_t* d_ipiv )
 {
     unsigned int tid = threadIdx.x + blockDim.x*blockIdx.x;
     if( tid < n ) {
@@ -212,7 +214,8 @@ __global__ void zlaswp2_kernel( int n, cuDoubleComplex *dAT, int lda, int npivot
 // This interface is identical to LAPACK's laswp interface.
 extern "C" void
 magmablas_zlaswp2( magma_int_t n, cuDoubleComplex* dAT, magma_int_t lda,
-                   magma_int_t i1, magma_int_t i2, magma_int_t *d_ipiv )
+                   magma_int_t i1, magma_int_t i2,
+                   const magma_int_t *d_ipiv )
 {
     int blocks = (n + NTHREADS - 1) / NTHREADS;
     zlaswp2_kernel<<< blocks, NTHREADS, 0, magma_stream >>>(
