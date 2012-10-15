@@ -48,7 +48,7 @@ extern"C" {
                                         cuDoubleComplex *dTmgpu[], magma_int_t lddt,
                                         magma_int_t ngpu, magma_int_t distblk, 
                                         cudaStream_t streams[][20], magma_int_t nstream, 
-                                        magma_int_t *info);
+                                        magma_int_t threads, magma_int_t *info);
 
     magma_int_t magma_zstedx_m(magma_int_t nrgpu,
                                char range, magma_int_t n, double vl, double vu,
@@ -423,7 +423,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
         return *info;
     }
 
-    magma_zhetrd_he2hb(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, dT1, info);
+    magma_zhetrd_he2hb(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, dT1, threads, info);
 
     magma_free(dT1);
 #else
@@ -446,7 +446,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
     magma_setdevice(0);
 
-    magma_zhetrd_he2hb_mgpu(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, da, ldda, dT1, nb, nrgpu, nb, streams, nstream, info);
+    magma_zhetrd_he2hb_mgpu(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, da, ldda, dT1, nb, nrgpu, nb, streams, nstream, threads, info);
     for( magma_int_t dev = 0; dev < nrgpu; ++dev ) {
         magma_setdevice( dev );
         magma_free( da[dev] );

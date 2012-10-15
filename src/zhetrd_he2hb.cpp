@@ -13,6 +13,9 @@
 */
 #include "common_magma.h"
 #include "trace.h"
+#if defined(USEMKL)
+#include <mkl_service.h>
+#endif
 
 // === Define what BLAS to use ============================================
 #define PRECISION_z
@@ -29,7 +32,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
                     cuDoubleComplex *tau,
                     cuDoubleComplex *work, magma_int_t lwork,
                     cuDoubleComplex *dT,
-                    magma_int_t *info)
+                    magma_int_t threads, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -205,6 +208,12 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
+
+#if defined(USEMKL)
+    magma_int_t mklth = min(threads,12);
+    mkl_set_num_threads(mklth);
+#endif
+
 
     /* Use the first panel of da as work space */
     cuDoubleComplex *dwork = da+n*ldda;
@@ -412,5 +421,8 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
     magma_queue_destroy( stream[1] );
     magma_free( da );
     MAGMA_Z_SET2REAL( work[0], lwkopt );
+#if defined(USEMKL)
+    mkl_set_num_threads(1);
+#endif
     return *info;
 } /* zhetrd_he2hb_ */

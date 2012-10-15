@@ -14,6 +14,9 @@
 #include "common_magma.h"
 #include "trace.h"
 #include <assert.h>
+#if defined(USEMKL)
+#include <mkl_service.h>
+#endif
 
 // === Define what BLAS to use ============================================
 #define PRECISION_z
@@ -33,7 +36,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                     cuDoubleComplex *dTmgpu[], magma_int_t lddt,
                     magma_int_t ngpu, magma_int_t distblk, 
                     cudaStream_t streams[][20], magma_int_t nstream, 
-                    magma_int_t *info)
+                    magma_int_t threads, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -185,7 +188,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
     int lwkopt;
     int lquery;
 
-    assert (nstream>1);
+    assert (nstream>=3);
 
 
     *info = 0;
@@ -218,6 +221,12 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
         work[0] = c_one;
         return *info;
     }
+
+#if defined(USEMKL)
+    magma_int_t mklth = min(threads,12);
+    mkl_set_num_threads(mklth);
+#endif
+
 
     magma_device_t cdev;
     magma_getdevice( &cdev );
@@ -332,20 +341,24 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
 
                  trace_gpu_start( idev, 1, "get", "get panel" );
                  cudaSetDevice( idev );
-               
+
+                 /*
                  magma_zgetmatrix( (pm+pn), pn,
                                          datest(idev, i, di+1), ldda,
                                          a_ref ( i, i), lda);
-                /*
+                 */
+                 //magma_device_sync();
                  magma_zgetmatrix_async( (pm+pn), pn,
                                          datest(idev, i, di+1), ldda,
-                                         a_ref ( i, i), lda, streams[idev][2] );
+                                         a_ref ( i, i), lda, streams[ idev ][ nstream-1 ] );
                
-                 *//*
+                 
+                 /*
+                 magma_device_sync();
                  cudaMemcpy2DAsync(a_ref(i,i), lda*sizeof(cuDoubleComplex),
                                   datest(idev,i,di+1), ldda*sizeof(cuDoubleComplex),
                                   (pm+pn)*sizeof(cuDoubleComplex), pn,
-                                  cudaMemcpyDeviceToHost, streams[ idev ][ 2 ]);
+                                  cudaMemcpyDeviceToHost, streams[ idev ][ nstream-1 ]);
 
                  */
                  trace_gpu_end( idev, 1 );
@@ -359,13 +372,13 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                       c_neg_one, dvtest, ldda, pn_old,
                                  dwtest, pm_old, pn_old,
                       d_one,     dAmgpu, ldda, indi_old+pn_old-1,
-                      ngpu, distblk, streams, nstream );
+                      ngpu, distblk, streams, nstream-1 );
                  //cudaSetDevice( 0 );
 
                  trace_gpu_end( 0, 2 );
                  trace_cpu_start( 0, "sync", "sync on 1" );
                  cudaSetDevice( idev );
-                 magma_queue_sync( streams[idev][2] );
+                 magma_queue_sync( streams[idev][ nstream-1 ] );
                  //cudaSetDevice( 0 );
                  trace_cpu_end( 0 );
                  zq_to_panel(MagmaUpper, pn-1, a_ref(i, i+1), lda, work);
@@ -494,7 +507,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                  idev   = ((indi-1) / distblk) % ngpu;          // device with this block
                  cudaSetDevice( idev );
 
-//              magmablasSetKernelStream( streams[ idev ][ 2 ] );
+//              magmablasSetKernelStream( streams[ idev ][  nstream-1 ] );
                  trace_gpu_start( idev, 2, "gemm", "gemm 4 next panel left" );
                  magma_zgemm(MagmaNoTrans, MagmaConjTrans, pm, pn, pn, c_neg_one,
                              dvtest[idev], ldda,
@@ -560,5 +573,10 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
     trace_finalize( "zhetrd_he2hb.svg", "trace.css" );
     
     MAGMA_Z_SET2REAL( work[0], lwkopt );
+#if defined(USEMKL)
+    mkl_set_num_threads(1);
+#endif
+
+
     return *info;
 } /* zhetrd_he2hb_ */

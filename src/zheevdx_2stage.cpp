@@ -392,7 +392,7 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
         return *info;
     }
 
-    magma_zhetrd_he2hb(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, dT1, info);
+    magma_zhetrd_he2hb(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, dT1, threads, info);
 
 #ifdef ENABLE_TIMER
     st1 = get_current_time();
