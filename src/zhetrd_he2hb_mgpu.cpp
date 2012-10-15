@@ -31,7 +31,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                     cuDoubleComplex *work, magma_int_t lwork,
                     cuDoubleComplex *dAmgpu[], magma_int_t ldda,
                     cuDoubleComplex *dTmgpu[], magma_int_t lddt,
-                   magma_int_t ngpu, magma_int_t distblk, 
+                    magma_int_t ngpu, magma_int_t distblk, 
                     cudaStream_t streams[][20], magma_int_t nstream, 
                     magma_int_t *info)
 {
@@ -267,10 +267,9 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
 
 
 
+    //magma_int_t mlocal = ((n / distblk) / ngpu + 1) * distblk;
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         cudaSetDevice( dev );
-    
-        magma_int_t mlocal = ((n / distblk) / ngpu + 1) * distblk;
         //magma_zmalloc( &datest[dev], mlocal*ldda );
         //magma_zmalloc( &dttest[dev], mlocal*ldda );
         magma_zmalloc( &dvtest[dev], nb*ldda );
@@ -282,7 +281,6 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
     workngpu[ngpu] = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));    
     cudaSetDevice(0  );
     // ======================
-        magma_int_t mlocal = ((n / distblk) / ngpu + 1) * distblk;
 
 
 
@@ -326,10 +324,11 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                  // find the device who own the panel then send it to the CPU.
                 // below a -1 was added and then a -1 was done on di because of the fortran indexing
                  iblock = ((i-1) / distblk) / ngpu;          // local block id
+                 di     = iblock*distblk + (i-1)%distblk;     // local index in parent matrix
                  idev   = ((i-1) / distblk) % ngpu;          // device with this block
-                 di     = iblock*distblk;     // local index in parent matrix
 
 
+                 //printf("Receiving panel ofsize %d %d from idev %d A(%d,%d) \n",(pm+pn), pn,idev,i-1,di); 
 
                  trace_gpu_start( idev, 1, "get", "get panel" );
                  cudaSetDevice( idev );
@@ -354,6 +353,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                  cudaSetDevice( 0 );
                  trace_gpu_start( 0, 2, "her2k", "her2k" );
 
+                 //printf("updating zher2k on A(%d,%d) of size %d %d \n",indi_old+pn_old-1,indi_old+pn_old-1,pm_old-pn_old,pn_old); 
                 // compute ZHER2K_MGPU
                  magmablas_zher2k_mgpu2(
                       MagmaLower, MagmaNoTrans, pm_old-pn_old, pn_old,
@@ -491,8 +491,8 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                     do lookahead - update the next panel */
                  // below a -1 was added and then a -1 was done on di because of the fortran indexing
                  iblock = ((indi-1) / distblk) / ngpu;          // local block id
+                 di     = iblock*distblk + (indi-1)%distblk;     // local index in parent matrix
                  idev   = ((indi-1) / distblk) % ngpu;          // device with this block
-                 di     = iblock*distblk;     // local index in parent matrix
                  cudaSetDevice( idev );
 
 //              magmablasSetKernelStream( streams[ idev ][ 2 ] );
@@ -509,16 +509,16 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                              dvtest[idev], ldda, c_one,
                              datest(idev, indi, di+1), ldda);
                  trace_gpu_end( idev, 2 );
-//                printf("COUCOU indi %d   indj %d  iblock %d  idev %d   di %d \n",indi,indj,iblock,idev,di); 
+                 //printf("updating next panel distblk %d  idev %d  on A(%d,%d) of size %d %d %d \n",distblk,idev,indi-1,di,pm,pn,pn); 
              }
              else {
                  /* no look-ahead as this is last iteration */
                  // below a -1 was added and then a -1 was done on di because of the fortran indexing
                  iblock = ((indi-1) / distblk) / ngpu;          // local block id
+                 di     = iblock*distblk + (indi-1)%distblk;     // local index in parent matrix
                  idev   = ((indi-1) / distblk) % ngpu;          // device with this block
-                 di     = iblock*distblk;     // local index in parent matrix
                  cudaSetDevice( idev );
-//                printf("LAST   indi %d   indj %d  iblock %d  idev %d   di %d \n",indi,indj,iblock,idev,di); 
+                 //printf("LAST ZHER2K idev %d on A(%d,%d) of size %d \n",idev, indi-1,di,pk); 
 
                  trace_gpu_start( idev, 2, "her2k", "her2k last iteration" );
                  magma_zher2k(MagmaLower, MagmaNoTrans, pk, pk, c_neg_one,
