@@ -233,6 +233,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
     lwork -= nb*nb;
     memset( hT, 0, nb*nb*sizeof(cuDoubleComplex));
 
+    magmablasSetKernelStream( stream[0] );
     if (upper) {
 
       printf("ZHETRD_HE2HB is not yet implemented for upper matrix storage. Exit.\n");
@@ -266,7 +267,9 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
                  //    upper part of A to be restored after copying the 
                  //    lookahead panel that has been computted from GPU to CPU. 
                  zpanel_to_q(MagmaUpper, pn-1, a_ref(i, i+1), lda, work);
+
                  trace_gpu_start( 0, 1, "get", "get panel" );
+                 magma_queue_sync( stream[0] );
                  magma_zgetmatrix_async( (pm+pn), pn,
                                          da_ref( i, i), ldda,
                                          a_ref ( i, i), lda, stream[1] );
@@ -326,6 +329,10 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
                 ==========================================================  */
              /* dwork = V T */
              trace_cpu_start( 0, "sync", "sync on 0" );
+             // this sync is done here to be sure that the copy has been finished
+             // because below we made a restore zq_to_panel and this restore need
+             // to ensure that the copy has been finished. we did it here to allow
+             // overlapp of restore with next gemm and symm.
              magma_queue_sync( stream[0] );
              trace_cpu_end( 0 );
              
@@ -364,7 +371,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
                          dwork + pm*nb, nb, 
                          c_one,     dW, pm);
              trace_gpu_end( 0, 2 );
-             
+
              /* ==========================================================
                 Update the unreduced submatrix A(i+ib:n,i+ib:n), using   
                 an update of the form:  A := A - V*W' - W*V' 
@@ -424,5 +431,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
 #if defined(USEMKL)
     mkl_set_num_threads(1);
 #endif
+    magmablasSetKernelStream( 0 );
+
     return *info;
 } /* zhetrd_he2hb_ */
