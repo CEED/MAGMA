@@ -31,18 +31,14 @@ prefix ?= ./install
 #
 # NVCC options for the different cards
 #
-TESLAOPT = -arch sm_13 -DGPUSHMEM=130 \
-           -gencode arch=compute_13,code=compute_13 \
-           -gencode arch=compute_10,code=compute_10
-
-FERMIOPT = -arch sm_20 -DGPUSHMEM=200
-
 ifeq (${GPU_TARGET}, Tesla)
-	NVOPTS += ${TESLAOPT}
+	NVOPTS += -DGPUSHMEM=130 -arch sm_13 \
+	          -gencode arch=compute_13,code=compute_13 \
+	          -gencode arch=compute_10,code=compute_10
 	OPTS   += -DGPUSHMEM=130
 	LDOPTS += -DGPUSHMEM=130
 else ifeq (${GPU_TARGET}, Fermi)
-	NVOPTS += ${FERMIOPT}
+	NVOPTS += -DGPUSHMEM=200 -arch sm_20
 	OPTS   += -DGPUSHMEM=200
 	LDOPTS += -DGPUSHMEM=200
 else
@@ -74,6 +70,9 @@ FOPTS += $(PTROPT)
 # Rules to compile object files
 #
 %.o: %.cpp
+	$(CC) $(OPTS) $(INC) -c $< -o $@
+
+%.o: %.c
 	$(CC) $(OPTS) $(INC) -c $< -o $@
 
 %.cu_o: %.cu
