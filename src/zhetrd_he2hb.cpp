@@ -234,8 +234,12 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
     memset( hT, 0, nb*nb*sizeof(cuDoubleComplex));
 
     magmablasSetKernelStream( stream[0] );
-    if (upper) {
+    cudaEvent_t Pupdate_event;
+    cudaEventCreateWithFlags(&Pupdate_event,cudaEventDisableTiming);
+    //cudaEventCreate(&Pupdate_event);
 
+
+    if (upper) {
       printf("ZHETRD_HE2HB is not yet implemented for upper matrix storage. Exit.\n");
       exit(1);
 
@@ -269,7 +273,8 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
                  zpanel_to_q(MagmaUpper, pn-1, a_ref(i, i+1), lda, work);
 
                  trace_gpu_start( 0, 1, "get", "get panel" );
-                 magma_queue_sync( stream[0] );
+                 //magma_queue_sync( stream[0] );
+                 cudaStreamWaitEvent(stream[1], Pupdate_event, 0);
                  magma_zgetmatrix_async( (pm+pn), pn,
                                          da_ref( i, i), ldda,
                                          a_ref ( i, i), lda, stream[1] );
@@ -392,6 +397,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
                              da_ref(indi, indj), ldda, c_one,
                              da_ref(indi, indi), ldda);
                  trace_gpu_end( 0, 2 );
+                 cudaEventRecord(Pupdate_event, stream[0]);
              }
              else {
                  /* no look-ahead as this is last iteration */
