@@ -80,7 +80,7 @@ int main( int argc, char** argv)
     magma_int_t i, j, k, info, checkres, once = 0;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    char *uplo = (char *)MagmaLowerStr;
+    const char *uplo = MagmaLowerStr;
 
     magma_int_t WANTZ=0;
     magma_int_t THREADS=1;
@@ -110,9 +110,9 @@ int main( int argc, char** argv)
                 checkres = 1;
             }
             else if (strcmp("-U", argv[i])==0)
-                uplo = (char *)MagmaUpperStr;
+                uplo = MagmaUpperStr;
             else if (strcmp("-L", argv[i])==0)
-                uplo = (char *)MagmaLowerStr;
+                uplo = MagmaLowerStr;
         }
         if ( N > 0 )
             printf("  testing_zhetrd_he2hb -L|U -N %d -NB %d   -wantz %d   -threads %d    check %d \n\n", N, NB, WANTZ, THREADS, checkres);
