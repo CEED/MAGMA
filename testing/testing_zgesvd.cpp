@@ -53,14 +53,16 @@ int main( int argc, char** argv)
     int checkres = getenv("MAGMA_TESTINGS_CHECK") != NULL;
     int lapack   = getenv("MAGMA_RUN_LAPACK")     != NULL;
     int test_all = false;
+    int workspace = 1;
     
     // process command line arguments
-    printf( "\nUsage: %s -N <m,n> -U[ASON] -V[ASON] -all -c -l\n"
+    printf( "\nUsage: %s -N <m,n> -U[ASON] -V[ASON] -all -c -l -w[123]\n"
             "  -N can be repeated up to %d times. If only m is given, then m=n.\n"
             "  -c or setting $MAGMA_TESTINGS_CHECK checks result.\n"
             "  -l or setting $MAGMA_RUN_LAPACK runs LAPACK and checks singular values.\n"
             "  -U* and -V* set jobu and jobv.\n"
-            "  -all tests all 15 combinations of jobu and jobv.\n\n",
+            "  -all tests all 15 combinations of jobu and jobv.\n"
+            "  -w* sets workspace size, from default min (1) to max (3).\n\n",
             argv[0], MAXTESTS );
     
     int ntest = 0;
@@ -107,15 +109,18 @@ int main( int argc, char** argv)
         else if ( strcmp("-VN", argv[i]) == 0 )
             jobv = "N";
         
-        else if ( strcmp("-all", argv[i]) == 0 ) {
+        else if ( strcmp("-all", argv[i]) == 0 )
             test_all = true;
-        }
-        else if ( strcmp("-c", argv[i]) == 0 ) {
+        else if ( strcmp("-c", argv[i]) == 0 )
             checkres = true;
-        }
-        else if ( strcmp("-l", argv[i]) == 0 ) {
+        else if ( strcmp("-l", argv[i]) == 0 )
             lapack = true;
-        }
+        else if ( strcmp("-w1", argv[i]) == 0 )
+            workspace = 1;
+        else if ( strcmp("-w2", argv[i]) == 0 )
+            workspace = 2;
+        else if ( strcmp("-w3", argv[i]) == 0 )
+            workspace = 3;
         else {
             printf( "invalid argument: %s\n", argv[i] );
             exit(1);
@@ -145,18 +150,26 @@ int main( int argc, char** argv)
     magma_int_t nb = magma_get_zgesvd_nb(N);
     magma_int_t lwork;
 
+    switch( workspace ) {
+        default:
 #if defined(PRECISION_z) || defined(PRECISION_c)
-    lwork = (M+N)*nb + 2*N;
+        case 1: lwork = (M+N)*nb + 2*min_mn;                   break;  // minimum
+        case 2: lwork = (M+N)*nb + 2*min_mn +   min_mn*min_mn; break;  // optimal for some paths
+        case 3: lwork = (M+N)*nb + 2*min_mn + 2*min_mn*min_mn; break;  // optimal for all paths
 #else
-    lwork = (M+N)*nb + 3*N;
+        case 1: lwork = (M+N)*nb + 3*min_mn;                   break;  // minimum
+        case 2: lwork = (M+N)*nb + 3*min_mn +   min_mn*min_mn; break;  // optimal for some paths
+        case 3: lwork = (M+N)*nb + 3*min_mn + 2*min_mn*min_mn; break;  // optimal for all paths
 #endif
+    }
 
     TESTING_HOSTALLOC(h_work, cuDoubleComplex, lwork);
     
     const char* jobs[] = { "None", "Some", "Over", "All" };
 
-    printf("jobu jobv     M     N   CPU time (sec)   GPU time (sec)  |S_magma - S_lapack| / |S|\n");
-    printf("===================================================================================\n");
+    printf("-1.00 indicates non-applicable test that was skipped. See code for norm formulas.\n");
+    printf("jobu jobv     M     N  CPU time (sec)  GPU time (sec)  |S1-S2|/.  |A-USV'|/. |I-UU'|/M  |I-VV'|/N  S (0=okay)\n");
+    printf("===============================================================================================================\n");
     for( int i = 0; i < ntest; ++i ) {
         for( int ijobu = 0; ijobu < 4; ++ijobu ) {
         for( int ijobv = 0; ijobv < 4; ++ijobv ) {
@@ -199,6 +212,8 @@ int main( int argc, char** argv)
             if (info != 0)
                 printf("magma_zgesvd returned error %d.\n", (int) info);
             
+            double eps = lapackf77_dlamch( "E" );
+            double result[4] = { -1/eps, -1/eps, -1/eps, -1/eps };
             if ( checkres ) {
                 /* =====================================================================
                    Check the results following the LAPACK's [zcds]drvbd routine.
@@ -210,9 +225,7 @@ int main( int argc, char** argv)
                           (Return 0 if true, 1/ULP if false.)
                    =================================================================== */
                 magma_int_t izero = 0;
-                double *E, eps = lapackf77_dlamch( "E" );
-                double result[4] = { -1, -1, -1, -1 };
-                
+                double *E;
                 cuDoubleComplex *h_work_err;
                 magma_int_t lwork_err = max(5*min_mn, (3*min_mn + max(M,N)))*128;
                 TESTING_MALLOC(h_work_err, cuDoubleComplex, lwork_err);
@@ -253,9 +266,10 @@ int main( int argc, char** argv)
                                      U2, &ldu, S1, E, VT2, &ldv, h_work_err, &result[0]);
                 }
                 if ( U2 != NULL ) {
-                    lapackf77_zunt01("Columns", &M, &M2, U2,  &ldu,  h_work_err, &lwork_err, &result[1]);
+                    lapackf77_zunt01("Columns", &M, &M2, U2,  &ldu, h_work_err, &lwork_err, &result[1]);
                 }
                 if ( VT2 != NULL ) {
+                    // this step may be really slow for large N
                     lapackf77_zunt01(   "Rows", &N2, &N, VT2, &ldv, h_work_err, &lwork_err, &result[2]);
                 }
                 #endif
@@ -270,18 +284,9 @@ int main( int argc, char** argv)
                 if (min_mn > 1 && S1[min_mn-1] < 0.)
                     result[3] = 1.;
                 
-                printf("\nSVD test for M=%d, N=%d, jobu=%c, jobv=%c (non-applicable tests omitted)\n",
-                       (int) M, (int) N, jobu[0], jobv[0] );
-                if ( U2 != NULL && VT2 != NULL ) {
-                    printf("(1)    | A - U diag(S) VT | / (|A| max(M,N))           = %8.2e\n", result[0]*eps);
-                }                                                                  
-                if ( U2 != NULL ) {                                                
-                    printf("(2)    | I -   U'U  | /  M                             = %8.2e\n", result[1]*eps);
-                }                                                                  
-                if ( VT2 != NULL ) {                                               
-                    printf("(3)    | I - VT VT' | /  N                             = %8.2e\n", result[2]*eps);
-                }
-                printf("(4) zero if S has min(M,N) nonnegative, sorted values  = %1g\n", result[3]);
+                result[0] *= eps;
+                result[1] *= eps;
+                result[2] *= eps;
                 
                 TESTING_FREE( h_work_err );
             }
@@ -295,7 +300,7 @@ int main( int argc, char** argv)
                 lapackf77_zgesvd( jobu, jobv, &M, &N,
                                   h_A, &M, S2, U, &M,
                                   VT, &N, h_work, &lwork, rwork, &info);
-                #else       
+                #else
                 lapackf77_zgesvd( jobu, jobv, &M, &N,
                                   h_A, &M, S2, U, &M,
                                   VT, &N, h_work, &lwork, &info);
@@ -314,16 +319,23 @@ int main( int argc, char** argv)
                 blasf77_daxpy(&min_mn, &mone, S1, &one, S2, &one);
                 error = lapackf77_dlange("f", &min_mn, &one, S2, &min_mn, work) / error;
                 
-                printf("   %c    %c %5d %5d   %7.2f          %7.2f         %8.2e\n",
+                printf("   %c    %c %5d %5d  %7.2f         %7.2f         %8.2e",
                        jobu[0], jobv[0], (int) M, (int) N, cpu_time, gpu_time, error );
             }
             else {
-                printf("   %c    %c %5d %5d     ---            %7.2f         ---\n",
+                printf("   %c    %c %5d %5d    ---           %7.2f         ---",
                        jobu[0], jobv[0], (int) M, (int) N, gpu_time );
+            }
+            if ( checkres ) {
+                printf("  %#9.3g  %#9.3g  %#9.3g   %1.0f\n",
+                       result[0], result[1], result[2], result[3] );
+            }
+            else {
+                printf("\n");
             }
         }}
         if ( test_all ) {
-            printf("==================================================================================\n");
+            printf("\n");
         }
     }
 
