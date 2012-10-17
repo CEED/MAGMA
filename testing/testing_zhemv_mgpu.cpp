@@ -37,6 +37,15 @@
 void fillZero(cuDoubleComplex *A, int size);
 extern "C"
 magma_int_t
+magmablas_zhemv2( char uplo, magma_int_t n,
+                      cuDoubleComplex alpha,
+                      cuDoubleComplex *A, magma_int_t lda,
+                      cuDoubleComplex *X, magma_int_t incx,
+                      cuDoubleComplex beta,
+                      cuDoubleComplex *Y, magma_int_t incy,
+                      cuDoubleComplex *work, magma_int_t lwork);
+extern "C"
+magma_int_t
 magmablas_zhemv2_mgpu_offset( char uplo, magma_int_t n,
                       cuDoubleComplex alpha,
                       cuDoubleComplex **A, magma_int_t lda,
@@ -50,7 +59,7 @@ magmablas_zhemv2_mgpu_offset( char uplo, magma_int_t n,
 
 extern "C"
 magma_int_t
-magmablas_zhemv2_mgpu_32_offset( char uplo, magma_int_t n,
+magmablas_zhemv_mgpu_offset( char uplo, magma_int_t n,
                       cuDoubleComplex alpha,
                       cuDoubleComplex **A, magma_int_t lda,
                       cuDoubleComplex **X, magma_int_t incx,
@@ -59,47 +68,11 @@ magmablas_zhemv2_mgpu_32_offset( char uplo, magma_int_t n,
                       cuDoubleComplex **work, magma_int_t lwork,
               magma_int_t num_gpus, 
               magma_int_t nb,
-                      magma_int_t offset);
+                      magma_int_t offset,
+                      cudaStream_t stream[][10]);
 
 
 
-
-extern "C"
-magma_int_t
-magmablas_zhemv_mgpu_32( char uplo, magma_int_t n,
-                      cuDoubleComplex alpha,
-                      cuDoubleComplex **A, magma_int_t lda,
-                      cuDoubleComplex **X, magma_int_t incx,
-                      cuDoubleComplex beta,
-                      cuDoubleComplex **Y, magma_int_t incy,
-                      cuDoubleComplex **work, magma_int_t lwork,
-              magma_int_t num_gpus, 
-              magma_int_t nb);
-
-extern "C"
-magma_int_t
-magmablas_zhemv_mgpu_64( char uplo, magma_int_t n,
-                      cuDoubleComplex alpha,
-                      cuDoubleComplex **A, magma_int_t lda,
-                      cuDoubleComplex **X, magma_int_t incx,
-                      cuDoubleComplex beta,
-                      cuDoubleComplex **Y, magma_int_t incy,
-                      cuDoubleComplex **work, magma_int_t lwork,
-              magma_int_t num_gpus, 
-              magma_int_t nb);
-
-
-extern "C"
-magma_int_t
-magmablas_zhemv_mgpu_template( char uplo, magma_int_t n,
-                      cuDoubleComplex alpha,
-                      cuDoubleComplex **A, magma_int_t lda,
-                      cuDoubleComplex **X, magma_int_t incx,
-                      cuDoubleComplex beta,
-                      cuDoubleComplex **Y, magma_int_t incy,
-                      cuDoubleComplex **work, magma_int_t lwork,
-              magma_int_t num_gpus, 
-              magma_int_t nb);
 
 
 
@@ -129,8 +102,7 @@ int main(int argc, char **argv)
     cuDoubleComplex *A, *X, *Y[4], *Ycublas, *Ymagma;
     cuDoubleComplex *dA, *dX[4], *dY[4], *d_lA[4], *dYcublas ;
 
-
-
+    cudaStream_t stream[4][10];
     cuDoubleComplex *C_work;
     cuDoubleComplex *dC_work[4];
 
@@ -180,7 +152,7 @@ int main(int argc, char **argv)
         M = N = 12480;
 
 #endif 
-        num_gpus = 1;
+        num_gpus = 2;
         offset = 0;
         printf("\nUsage: \n");
         printf("  testing_zhemv_mgpu -M %d -N %d -NGPU %d\n\n", M, N, num_gpus);
@@ -194,14 +166,17 @@ int main(int argc, char **argv)
       num_gpus = max_num_gpus;
     }
     printf("Number of GPUs to be used = %d\n", num_gpus);
+    for(int i=0; i< num_gpus; i++)
+    {
+      cudaStreamCreate(&stream[i][0]);
+    }
     
 
     LDA = ((N+31)/32)*32;
     matsize = N*LDA;
     vecsize = N*incx;
     nb = 32;
-//    nb = 16; // only used in double precision non-recusive algorithm
- //   nb = 64;
+//    nb = 64;
 
     printf("block size = %d\n", nb);
    
@@ -279,18 +254,18 @@ int main(int argc, char **argv)
             "==============================================================\n");
 
 
-//    for( offset = 1; offset< N; offset ++ )
+    for( offset = 0; offset< N; offset ++ )
     
-    for(int size = istart; size <= N ; size += 128)
+    //for(int size = istart ; size <= N ; size += 128)
     {
-        //printf("offset = %d", offset);
-        m = size ;
-      //  m = N;
+        printf("offset = %d ", offset);
+    //    m = size ;
+        m = N;
         // lda = ((m+31)/32)*32;// 
         lda = LDA; 
         flops = FLOPS( (double)m ) / 1e6;
 
-        printf(      "%5d ", m );
+        printf(      "N %5d ", m );
         fprintf( fp, "%5d, ", m );
 
         vecsize = m * incx;
@@ -328,76 +303,52 @@ int main(int argc, char **argv)
         cudaSetDevice(0);
         start = get_current_time();
         cublasZhemv( uplo, m-offset, alpha, dA + offset + offset * lda, lda, dX[0] + offset, incx, beta, dYcublas + offset, incx );
-        // magmablas_zhemv( uplo, m-offset, alpha, dA + offset + offset * lda, lda, dX[0] + offset, incx, beta, dYcublas + offset, incx );
-        //magmablas_zhemv2( uplo, m, alpha, dA, lda, dX[0], incx, beta, dYcublas, incx, dC_work[0], workspace );
-//        magmablas_zhemv2_mgpu_32_offset( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
+//        magmablas_zhemv2( uplo, m, alpha, dA, lda, dX[0], incx, beta, dYcublas, incx, dC_work[0], workspace );
 //                     dC_work, workspace, num_gpus, nb, offset);
 
+        //magmablas_zhemv2( uplo, m, alpha, d_lA[0], lda, dX[0], incx, beta, dYcublas, incx, 
+        //        dC_work[0], workspace);
+         
         end = get_current_time();
 
         magma_zgetvector( m, dYcublas, incx, Ycublas, incx );
+                
+       //fillZero(dC_work[0], lda * blocks);
         
         cuda_perf = flops / GetTimerValue(start,end);
         printf(     "%11.2f", cuda_perf );
         fprintf(fp, "%11.2f,", cuda_perf );
        
         
-  //      for(i=0; i<num_gpus; i++)
-
-    //            fillZero(dC_work[i], lda * blocks);
-
         cudaSetDevice(0);
-
 
         
         start = get_current_time();
         
 
-        if(nb == 32)    
-           
-        magmablas_zhemv2_mgpu_32_offset( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
-                     dC_work, workspace, num_gpus, nb, offset);
+        if(nb == 32)
+       { 
 
-//        magmablas_zhemv_mgpu_32( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
-//                dC_work, workspace, num_gpus, nb);
+//        magmablas_zhemv_mgpu_32_offset( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
+//                     dC_work, workspace, num_gpus, nb, offset, stream);
+
+        magmablas_zhemv2_mgpu_offset( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
+                dC_work, workspace, num_gpus, nb, offset);
  
-//        magmablas_zhemv_mgpu_template( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
-//                dC_work, workspace, num_gpus, nb);
-
-        else if( nb == 64 )
-        {
+        }
     
-            magmablas_zhemv_mgpu_64( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
-                dC_work, workspace, num_gpus, nb);
-         
-//            magmablas_zhemv2_mgpu_offset( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
-//                dC_work, workspace, num_gpus, nb, offset);
-      
-//           magmablas_zhemv_mgpu_template( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
-//               dC_work, workspace, num_gpus, nb);
-
-         }
-
-        else
-
-            magmablas_zhemv_mgpu_template( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
-                dC_work, workspace, num_gpus, nb);
-
-
-        /*
-        
-        for(i=0; i<num_gpus; i++)
+            
+        for(i=1; i<num_gpus; i++)
         {
            cudaSetDevice(i);
            cudaDeviceSynchronize();
         }
-*/        
+      
         end = get_current_time();
         magma_perf = flops / GetTimerValue(start,end); 
         printf(     "%11.2f", magma_perf );
         fprintf(fp, "%11.2f,", magma_perf );
        
-
 
         for(i=0; i<num_gpus; i++)
         {        
