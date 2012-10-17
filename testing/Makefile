@@ -173,7 +173,7 @@ $(LIBLAPACKTEST):
 $(EXE): $(LIBMAGMA) $(LIBMAGMABLAS) $(LIBLAPACKTEST) $(LIBTEST)
 
 clean:
-	rm -f *.o *~
+	rm -f *.o *~ $(LIBTEST)
 
 cleanall: clean
 	rm -f $(EXE)
