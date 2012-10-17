@@ -38,7 +38,7 @@ int main( int argc, char** argv)
 #endif
 
     /* Matrix size */
-    magma_int_t M, N, n2, min_mn;
+    magma_int_t M=0, N=0, n2, min_mn;
     const int MAXTESTS = 10;
     magma_int_t msize[MAXTESTS] = { 1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 10112 };
     magma_int_t nsize[MAXTESTS] = { 1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 10112 };
