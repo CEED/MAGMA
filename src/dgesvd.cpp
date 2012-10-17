@@ -122,7 +122,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
             
     LWORK   (input) INTEGER   
             The dimension of the array WORK.   
-            LWORK >=  (M+N)*nb + 3*N.   
+            LWORK >= (M+N)*nb + 3*min(M,N).
 
             If LWORK = -1, then a workspace query is assumed; the routine   
             only calculates the optimal size of the WORK array, returns   
@@ -167,7 +167,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
     magma_int_t nru, iscl;
     double anrm;
     magma_int_t ierr, itau, ncvt, nrvt;
-    magma_int_t chunk, minmn, wrkbl, itaup, itauq, mnthr, iwork;
+    magma_int_t chunk, minmn, itaup, itauq, mnthr, iwork, wrkbl, wrkbrd;
     magma_int_t wntua, wntva, wntun, wntuo, wntvn, wntvo, wntus, wntvs;
     magma_int_t bdspac;
     double bignum;
@@ -216,7 +216,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
     if (*info == 0) {
         /* Return optimal workspace in WORK(1) */
         nb = magma_get_dgesvd_nb(*n);
-        minwrk = ((*m)+(*n))*nb + 3*(*n);
+        minwrk = ((*m)+(*n))*nb + 3*minmn;
         // multiply by 1+eps to ensure length gets rounded up,
         // if it cannot be exactly represented in floating point.
         work[0] = minwrk * (1. + lapackf77_dlamch("Epsilon"));
@@ -239,6 +239,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
     }
     
     wrkbl  = maxwrk; /* Not optimal */
+    wrkbrd = ((*m)+(*n))*nb + 3*minmn;  /* minimum workspace for zgebrd here */
 
     /* Parameter adjustments */
     a_dim1 = *lda;
@@ -346,9 +347,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                 /* N left singular vectors to be overwritten on A and */
                 /* no right singular vectors to be computed */
   
-                /* Computing MAX */
-                  i__2 = *n << 2;
-                  if (*lwork >= *n * *n + max(i__2,bdspac)) {
+                  if (*lwork >= *n * *n + max(wrkbrd, bdspac)) {
   
                     /* Sufficient workspace for a fast algorithm */
   
@@ -492,9 +491,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                 /* N left singular vectors to be overwritten on A and */
                 /* N right singular vectors to be computed in VT */
   
-                /* Computing MAX */
-                  i__3 = *n << 2;
-                  if (*lwork >= *n * *n + max(i__3,bdspac)) {
+                  if (*lwork >= *n * *n + max(wrkbrd, bdspac)) {
   
                     /* Sufficient workspace for a fast algorithm */
   
@@ -689,9 +686,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                     /* N left singular vectors to be computed in U and */
                     /* no right singular vectors to be computed */
   
-                    /* Computing MAX */
-                      i__2 = *n << 2;
-                      if (*lwork >= *n * *n + max(i__2,bdspac)) {
+                      if (*lwork >= *n * *n + max(wrkbrd, bdspac)) {
   
                         /* Sufficient workspace for a fast algorithm */
   
@@ -837,9 +832,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                     /* N left singular vectors to be computed in U and */
                     /* N right singular vectors to be overwritten on A */
   
-                    /* Computing MAX */
-                      i__2 = *n << 2;
-                      if (*lwork >= (*n << 1) * *n + max(i__2,bdspac)) {
+                      if (*lwork >= (*n << 1) * *n + max(wrkbrd, bdspac)) {
   
                         /* Sufficient workspace for a fast algorithm */
   
@@ -1024,9 +1017,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                     /* N left singular vectors to be computed in U and */
                     /* N right singular vectors to be computed in VT */
   
-                    /* Computing MAX */
-                      i__2 = *n << 2;
-                      if (*lwork >= *n * *n + max(i__2,bdspac)) {
+                      if (*lwork >= *n * *n + max(wrkbrd, bdspac)) {
   
                         /* Sufficient workspace for a fast algorithm */
   
@@ -1201,8 +1192,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                     /* M left singular vectors to be computed in U and */
                     /* no right singular vectors to be computed */
   
-                    /* Computing MAX */
-                      i__2 = *n + *m, i__3 = *n << 2, i__2 = max(i__2,i__3);
+                      i__2 = *n + *m, i__2 = max(i__2, wrkbrd);
                       if (*lwork >= *n * *n + max(i__2,bdspac)) {
   
                         /* Sufficient workspace for a fast algorithm */
@@ -1357,8 +1347,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                     /* M left singular vectors to be computed in U and */
                     /* N right singular vectors to be overwritten on A */
   
-                    /* Computing MAX */
-                      i__2 = *n + *m, i__3 = *n << 2, i__2 = max(i__2,i__3);
+                      i__2 = *n + *m, i__2 = max(i__2, wrkbrd);
                       if (*lwork >= (*n << 1) * *n + max(i__2,bdspac)) {
   
                         /* Sufficient workspace for a fast algorithm */
@@ -1552,7 +1541,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                     /* N right singular vectors to be computed in VT */
  
                     /* Computing MAX */
-                     i__2 = *n + *m, i__3 = *n << 2, i__2 = max(i__2,i__3);
+                     i__2 = *n + *m, i__2 = max(i__2, wrkbrd);
                      if (*lwork >= *n * *n + max(i__2,bdspac)) {
  
                         /* Sufficient workspace for a fast algorithm */
@@ -1918,9 +1907,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                 /* M right singular vectors to be overwritten on A and */
                 /* no left singular vectors to be computed */
  
-                /* Computing MAX */
-                 i__2 = *m << 2;
-                 if (*lwork >= *m * *m + max(i__2,bdspac)) {
+                 if (*lwork >= *m * *m + max(wrkbrd, bdspac)) {
  
                     /* Sufficient workspace for a fast algorithm */
  
@@ -2065,9 +2052,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                 /* M right singular vectors to be overwritten on A and */
                 /* M left singular vectors to be computed in U */
  
-                /* Computing MAX */
-                 i__3 = *m << 2;
-                 if (*lwork >= *m * *m + max(i__3,bdspac)) {
+                 if (*lwork >= *m * *m + max(wrkbrd, bdspac)) {
  
                     /* Sufficient workspace for a fast algorithm */
  
@@ -2256,9 +2241,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                     /* M right singular vectors to be computed in VT and */
                     /* no left singular vectors to be computed */
  
-                    /* Computing MAX */
-                     i__2 = *m << 2;
-                     if (*lwork >= *m * *m + max(i__2,bdspac)) {
+                     if (*lwork >= *m * *m + max(wrkbrd, bdspac)) {
  
                         /* Sufficient workspace for a fast algorithm */
  
@@ -2407,9 +2390,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                     /* M right singular vectors to be computed in VT and */
                     /* M left singular vectors to be overwritten on A */
  
-                    /* Computing MAX */
-                     i__2 = *m << 2;
-                     if (*lwork >= (*m << 1) * *m + max(i__2,bdspac)) {
+                     if (*lwork >= (*m << 1) * *m + max(wrkbrd, bdspac)) {
  
                         /* Sufficient workspace for a fast algorithm */
  
@@ -2593,9 +2574,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                     /* M right singular vectors to be computed in VT and */
                     /* M left singular vectors to be computed in U */
  
-                    /* Computing MAX */
-                     i__2 = *m << 2;
-                     if (*lwork >= *m * *m + max(i__2,bdspac)) {
+                     if (*lwork >= *m * *m + max(wrkbrd, bdspac)) {
  
                         /* Sufficient workspace for a fast algorithm */
  
@@ -2766,8 +2745,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                     /* N right singular vectors to be computed in VT and */
                     /* no left singular vectors to be computed */
  
-                    /* Computing MAX */
-                     i__2 = *n + *m, i__3 = *m << 2, i__2 = max(i__2,i__3);
+                     i__2 = *n + *m, i__2 = max(i__2, wrkbrd);
                      if (*lwork >= *m * *m + max(i__2,bdspac)) {
  
                         /* Sufficient workspace for a fast algorithm */
@@ -2923,7 +2901,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                     /* M left singular vectors to be overwritten on A */
  
                     /* Computing MAX */
-                     i__2 = *n + *m, i__3 = *m << 2, i__2 = max(i__2,i__3);
+                     i__2 = *n + *m, i__2 = max(i__2, wrkbrd);
                      if (*lwork >= (*m << 1) * *m + max(i__2,bdspac)) {
  
                         /* Sufficient workspace for a fast algorithm */
@@ -3116,7 +3094,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m_, magma_int_t n_,
                     /* M left singular vectors to be computed in U */
  
                     /* Computing MAX */
-                     i__2 = *n + *m, i__3 = *m << 2, i__2 = max(i__2,i__3);
+                     i__2 = *n + *m, i__2 = max(i__2, wrkbrd);
                      if (*lwork >= *m * *m + max(i__2,bdspac)) {
  
                         /* Sufficient workspace for a fast algorithm */
