@@ -429,7 +429,8 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
     }// end of LOWER
     
     trace_finalize( "zhetrd_he2hb.svg", "trace.css" );
-    
+
+    cudaEventDestroy(Pupdate_event);
     magma_queue_destroy( stream[0] );
     magma_queue_destroy( stream[1] );
     magma_free( da );
