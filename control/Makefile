@@ -53,11 +53,15 @@ $(PTREXEC): $(PTRFILE)
 	$(CC) $(OPTS) -o $@ $<
 
 clean:
-	rm -f *.cu_o *.o *~ *.linkinfo *.mod sizeptr
+	rm -f *.cu_o *.o *~ *.linkinfo *.mod include/*.mod sizeptr
 
 cleanall: clean
 	rm -f *.a
 	rm -f $(LIBMAGMA)
 
-# Extra dependencies
+# Extra dependencies for .mod files
 magma.o: magma_zfortran.o magma_cfortran.o magma_dfortran.o magma_sfortran.o 
+magma_zfortran.o: magma_param.o
+magma_cfortran.o: magma_param.o
+magma_dfortran.o: magma_param.o
+magma_sfortran.o: magma_param.o
