@@ -121,15 +121,15 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
     /* Local variables */
     cuDoubleComplex        c_one     = MAGMA_Z_ONE;
     cuDoubleComplex        c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex        *dwork[4], *dt[4], *work;
+    cuDoubleComplex        *dwork[MagmaMaxGPUs], *dt[MagmaMaxGPUs], *work;
 
     char                uplo_[2] = {uplo, 0};
-    magma_int_t            ldda, lddla, ldwrk, nb, iinfo, n_local[4], J2, d, num_gpus;
+    magma_int_t            ldda, lddla, ldwrk, nb, iinfo, n_local[MagmaMaxGPUs], J2, d, num_gpus;
     magma_int_t    j, jj, jb, jb1, jb2, jb3, J, JB, NB, MB;
     double                d_one     =  1.0;
     double                d_neg_one = -1.0;
     int upper = lapackf77_lsame(uplo_, "U");
-    cudaStream_t stream[4][3];
+    cudaStream_t stream[MagmaMaxGPUs][3];
 //#define ROW_MAJOR_PROFILE
 #ifdef  ROW_MAJOR_PROFILE
     magma_timestr_t start, end, start0, end0;

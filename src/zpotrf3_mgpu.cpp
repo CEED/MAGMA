@@ -102,10 +102,10 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
     double          d_neg_one = -1.0;
     int upper = lapackf77_lsame(uplo_, "U");
     cuDoubleComplex *dlpanel;
-    magma_int_t n_local[4], ldpanel;
-    cudaEvent_t event0[4], /* compute next block -> zherk     */
-                event1[4], /* send panel to GPU -> update     */
-                event2[4]; /* send block-row to GPU -> update */
+    magma_int_t n_local[MagmaMaxGPUs], ldpanel;
+    cudaEvent_t event0[MagmaMaxGPUs], /* compute next block -> zherk     */
+                event1[MagmaMaxGPUs], /* send panel to GPU -> update     */
+                event2[MagmaMaxGPUs]; /* send block-row to GPU -> update */
     magma_int_t stream1 = 0, stream2 = 1, stream3 = 2;
 
     *info = 0;
