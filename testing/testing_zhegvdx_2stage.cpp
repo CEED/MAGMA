@@ -49,11 +49,11 @@ int main( int argc, char** argv)
 
 //#define USE_MGPU
 #ifdef USE_MGPU
-    magma_int_t nrgpu = 2;
     TESTING_CUDA_INIT_MGPU();
 #else
     TESTING_CUDA_INIT();
 #endif
+    magma_int_t nrgpu =1;
 
     cuDoubleComplex *h_A, *h_R, *h_B, *h_S, *h_work;
     double *rwork, *w1, *w2;
@@ -107,6 +107,17 @@ int main( int argc, char** argv)
                 else {
                    printf("\nUsage: \n");
                    printf("  testing_zhegvdx -N %d\n\n", (int) N);
+                   exit(1);
+                }
+            }
+            if (strcmp("-ngpu", argv[i])==0){
+                nrgpu = atoi(argv[++i]);
+                if (nrgpu>0){
+                   printf("  testing_zhegvdx -ngpu %d\n\n", (int) nrgpu);
+                }
+                else {
+                   printf("\nUsage: \n");
+                   printf("  testing_zhegvdx -ngpu %d\n\n", (int) nrgpu);
                    exit(1);
                 }
             }
@@ -167,7 +178,7 @@ int main( int argc, char** argv)
     magma_int_t liwork = 3 + 5*N;
 
     TESTING_HOSTALLOC(h_work, cuDoubleComplex,  lwork);
-    TESTING_MALLOC(    rwork,          double, lrwork);
+    TESTING_HOSTALLOC( rwork,          double, lrwork);
     TESTING_MALLOC(    iwork,     magma_int_t, liwork);
 
     printf("  N     M     GPU Time(s) \n");
@@ -332,7 +343,7 @@ int main( int argc, char** argv)
     TESTING_FREE(       h_B);
     TESTING_FREE(        w1);
     TESTING_FREE(        w2);
-    TESTING_FREE(     rwork);
+    TESTING_HOSTFREE( rwork);
     TESTING_FREE(     iwork);
     TESTING_HOSTFREE(h_work);
     TESTING_HOSTFREE(   h_R);
