@@ -41,8 +41,12 @@ else ifeq (${GPU_TARGET}, Fermi)
 	NVOPTS += -DGPUSHMEM=200 -arch sm_20
 	OPTS   += -DGPUSHMEM=200
 	LDOPTS += -DGPUSHMEM=200
+else ifeq (${GPU_TARGET}, Kepler)
+        NVOPTS += -DGPUSHMEM=300 -arch sm_30
+	OPTS   += -DGPUSHMEM=300
+        LDOPTS += -DGPUSHMEM=300
 else
-$(error GPU_TARGET, currently ${GPU_TARGET}, must be one of Tesla or Fermi. Please edit your make.inc file)
+$(error GPU_TARGET, currently ${GPU_TARGET}, must be one of Tesla, Fermi, or Kepler. Please edit your make.inc file)
 endif
 
 INC += -I$(MAGMA_DIR)/include
