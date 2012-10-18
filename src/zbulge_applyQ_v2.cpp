@@ -59,8 +59,8 @@ extern "C" void magma_zbulge_applyQ_v2(char side, magma_int_t NE, magma_int_t N,
      *            Also E is splitten by col meaning each apply consist in a block of col (vertical block) */
 
 
-    printf("  APPLY Q_v2 GPU with  N %d   NB %d   Vblksiz %d SIDE %c\n",
-           (int) N, (int) NB, (int) Vblksiz, (int) side);
+    printf("  APPLY Q_v2 GPU with  N %d, NE %d,  NB %d, Vblksiz %d, SIDE %c\n",
+           N, NE, NB, Vblksiz, side);
 
     if(side=='L'){
         rownbm    = magma_ceildiv((N-1),NB);

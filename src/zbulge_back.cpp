@@ -153,7 +153,7 @@ extern "C" magma_int_t magma_zbulge_back(magma_int_t threads, char uplo, magma_i
 #endif
                 n_gpu = (magma_int_t)(f*ne)/64*64;
             }            
-            else {
+            else if(threads>1){
 #if (defined(PRECISION_s) || defined(PRECISION_d))
                 f = 0.96;
 #else
