@@ -6,8 +6,8 @@
        November 2011
 */
 
-// ==== Definition of blocking sizes for Nvidia Fermi cards
-#if (GPUSHMEM >= 200 && GPUSHMEM < 300)
+// ==== Definition of blocking sizes for Nvidia Kepler cards
+#if (GPUSHMEM >= 300)
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Return nb for potrf based on n

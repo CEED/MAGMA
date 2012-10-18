@@ -32,6 +32,7 @@ ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
 	xerbla.cpp 	\
 	get_nb_tesla.cpp	\
 	get_nb_fermi.cpp	\
+	get_nb_kepler.cpp       \
 	timer.cpp	\
 	trace.cpp	\
 	strlcpy.cpp	\
