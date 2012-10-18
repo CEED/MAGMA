@@ -18,9 +18,8 @@
 #define Q(ix, iy) (q + (ix) + ldq * (iy))
 
 #define dQ2(id) (dwork[id])
-#define dS(id, ii) (dwork[id] + n2*n2_loc + ii * n2*nb)
-#define dQ(id, ii) (dwork[id] + n2*n2_loc + 2 * n2*nb + ii * n2_loc*nb)
-
+#define dS(id, ii) (dwork[id] + n2*n2_loc +(ii)* (n2*nb))
+#define dQ(id, ii) (dwork[id] + n2*n2_loc + 2  * (n2*nb) +(ii)* (n2_loc*nb))
 
 extern "C"{
     int magma_get_dlaex3_m_k()  { return  512; }
@@ -236,6 +235,9 @@ magma_dlaex3_m(magma_int_t nrgpu,
 //#define CHECK_CPU
 #ifdef CHECK_CPU
     double *hwS[2][MagmaMaxGPUs], *hwQ[2][MagmaMaxGPUs], *hwQ2[MagmaMaxGPUs];
+    #define hQ2(id) (hwQ2[id])
+    #define hS(id, ii) (hwS[ii][id])
+    #define hQ(id, ii) (hwQ[ii][id])
 #endif
     n2 = n - n1;
 
@@ -251,15 +253,15 @@ magma_dlaex3_m(magma_int_t nrgpu,
     nb = magma_get_dlaex3_m_nb();
 
     if (n1 >= magma_get_dlaex3_m_k()){
-        for (igpu = 0; igpu < nrgpu; ++igpu){
 #ifdef CHECK_CPU
+        for (igpu = 0; igpu < nrgpu; ++igpu){
             magma_dmalloc_pinned( &(hwS[0][igpu]), n2*nb );
             magma_dmalloc_pinned( &(hwS[1][igpu]), n2*nb );
             magma_dmalloc_pinned( &(hwQ2[igpu]), n2*n2_loc );
             magma_dmalloc_pinned( &(hwQ[0][igpu]), n2_loc*nb );
             magma_dmalloc_pinned( &(hwQ[1][igpu]), n2_loc*nb );
-#endif
         }
+#endif
         for (igpu = 0; igpu < nrgpu-1; igpu += 2){
             ni_loc[igpu] = min(n1_loc, n1 - igpu/2 * n1_loc);
 #ifdef CHECK_CPU
@@ -616,13 +618,17 @@ magma_dlaex3_m(magma_int_t nrgpu,
                 for (igpu = 0; igpu < nrgpu-1; igpu += 2){
                     if (n23 != 0) {
                         magma_setdevice(igpu+1);
-                        magma_dgetmatrix_async( ni_loc[igpu+1], ib, dQ(igpu+1, ind), n2_loc,
-                                                Q(n1+n2_loc*(igpu/2),iil-1+i), ldq, stream[igpu+1][ind] );
+                        magma_dgetmatrix( ni_loc[igpu+1], ib, dQ(igpu+1, ind), n2_loc,
+                                          Q(n1+n2_loc*(igpu/2),iil-1+i), ldq );
+//                        magma_dgetmatrix_async( ni_loc[igpu+1], ib, dQ(igpu+1, ind), n2_loc,
+//                                                Q(n1+n2_loc*(igpu/2),iil-1+i), ldq, stream[igpu+1][ind] );
                     }
                     if (n12 != 0) {
                         magma_setdevice(igpu);
-                        magma_dgetmatrix_async( ni_loc[igpu], ib, dQ(igpu, ind), n1_loc,
-                                                Q(n1_loc*(igpu/2),iil-1+i), ldq, stream[igpu][ind] );
+                        magma_dgetmatrix( ni_loc[igpu], ib, dQ(igpu, ind), n1_loc,
+                                          Q(n1_loc*(igpu/2),iil-1+i), ldq );
+//                        magma_dgetmatrix_async( ni_loc[igpu], ib, dQ(igpu, ind), n1_loc,
+//                                                Q(n1_loc*(igpu/2),iil-1+i), ldq, stream[igpu][ind] );
                     }
                 }
             }
