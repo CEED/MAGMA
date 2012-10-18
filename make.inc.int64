@@ -23,7 +23,7 @@ RANLIB    = ranlib
 
 OPTS      = -O3 -DADD_
 F77OPTS   = -O3 -DADD_ -fdefault-integer-8
-FOPTS     = -O3 -DADD_ -fdefault-integer-8
+FOPTS     = -O3 -DADD_ -fdefault-integer-8 -x f95-cpp-input
 NVOPTS    = -O3 -DADD_ --compiler-options -fno-strict-aliasing -DUNIX
 LDOPTS    = -fPIC -Xlinker -zmuldefs
 
