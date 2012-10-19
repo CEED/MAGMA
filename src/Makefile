@@ -54,13 +54,13 @@ ZSRC += \
 	zgetrs_gpu.cpp		\
 	\
 	zgetrf_mgpu.cpp		\
+	zgetrf2_mgpu.cpp		\
 
 # LU, CPU interface
 ZSRC += \
 	zgesv.cpp		\
 	zgetrf.cpp		\
-	zgetrf3_ooc.cpp		\
-	zgetrf1_mgpu.cpp	\
+	zgetrf_m.cpp		\
 	zgetf2_nopiv.cpp	\
 	zgetrf_nopiv.cpp	\
 
