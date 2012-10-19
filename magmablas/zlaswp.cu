@@ -85,7 +85,7 @@ extern "C" void
 magmablas_zpermute_long3( cuDoubleComplex *dAT, magma_int_t lda,
                           const magma_int_t *ipiv, magma_int_t nb, magma_int_t ind )
 {
-    for( int k = 0; k < nb-MAX_PIVOTS; k += MAX_PIVOTS ) {
+    for( int k = 0; k < nb; k += MAX_PIVOTS ) {
         int npivots = min( MAX_PIVOTS, nb-k );
         // fields are:             dAT  n    lda  j0       npivots
         zlaswp_params_t params = { dAT, lda, lda, ind + k, npivots };
