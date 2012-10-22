@@ -44,7 +44,7 @@ magma_zdtohpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_
               magma_int_t *info);
 
 extern "C" magma_int_t
-magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
+magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
                    cuDoubleComplex **d_lA, magma_int_t ldda, cuDoubleComplex **d_lP, magma_int_t lddlp, 
                    cuDoubleComplex *work, magma_int_t ldwrk, cudaStream_t **streaml, magma_int_t *info);
 
@@ -55,8 +55,8 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, magma_
 #define dTup(d, i, j) (dt[(d)]   +(j)*nb + (i))
 
 extern "C" magma_int_t 
-magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n, 
-                  cuDoubleComplex *a, magma_int_t lda, magma_int_t *info)
+magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n, 
+               cuDoubleComplex *a, magma_int_t lda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -309,7 +309,7 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
         } /* end of updates with previous rows */
 
         /* factor the big panel */
-        magma_zpotrf3_mgpu(num_gpus, uplo, JB, n-J, J, J, nb, dwork, NB, dt, ldda, a, lda, (cudaStream_t **)stream, &iinfo);
+        magma_zpotrf2_mgpu(num_gpus, uplo, JB, n-J, J, J, nb, dwork, NB, dt, ldda, a, lda, (cudaStream_t **)stream, &iinfo);
         if( iinfo != 0 ) {
             *info = J+iinfo;
             break;
@@ -414,7 +414,7 @@ magma_zpotrf2_ooc(magma_int_t num_gpus0, char uplo, magma_int_t n,
           }
         }
         /* factor the big panel */
-        magma_zpotrf3_mgpu(num_gpus, uplo, n-J, JB, J, J, nb, dwork, lddla, dt, ldda, a, lda, (cudaStream_t **)stream, &iinfo);
+        magma_zpotrf2_mgpu(num_gpus, uplo, n-J, JB, J, J, nb, dwork, lddla, dt, ldda, a, lda, (cudaStream_t **)stream, &iinfo);
         if( iinfo != 0 ) {
             *info = J+iinfo;
             break;
