@@ -27,7 +27,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
                    magma_int_t m, magma_int_t n, magma_int_t nb, magma_int_t offset,
                    cuDoubleComplex **d_lAT, magma_int_t lddat, magma_int_t *ipiv,
                    cuDoubleComplex **d_lAP, cuDoubleComplex *a, magma_int_t lda,
-                   cudaStream_t **streaml0, magma_int_t *info);
+                   cudaStream_t streaml[][2], magma_int_t *info);
 
 extern "C" magma_int_t
 magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
@@ -118,7 +118,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleComp
     magma_int_t        i, ii, jj, h = 3, offset, ib, rows, s;
         
     cudaStream_t stream[4][2];
-    cudaEvent_t event[4][2];
+    cudaEvent_t  event[4][2];
 
     *info = 0;
 
@@ -238,7 +238,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleComp
 #endif
           /* upload the next big panel into GPU, transpose (A->A'), and pivot it */
           magmablas_zsetmatrix_transpose_mgpu(num_gpus, stream, A(0,I), lda, 
-                                              dAT, ldn_local, 0, dA, maxm, M, N, nb);
+                                              dAT, ldn_local, dA, maxm, M, N, nb);
           for( d=0; d<num_gpus; d++ ) {
             magma_setdevice(d);
             magma_queue_sync( stream[d][0] ); 
@@ -331,7 +331,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleComp
             //magma_zgetrf1_mgpu(num_gpus, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, &a[I*lda], lda,
             //                   (cudaStream_t **)stream, &iinfo);
             magma_zgetrf2_mgpu(num_gpus, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, &a[I*lda], lda,
-                               (cudaStream_t **)stream, &iinfo);
+                               stream, &iinfo);
             if( iinfo < 0 ) {
               *info = iinfo;
               break;

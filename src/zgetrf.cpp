@@ -165,9 +165,6 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
                         magma_int_t rval = magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
                         if( *info >= 0 ) magma_zgetrf_piv(num_gpus, m, n, a, lda, ipiv, info);
                         return *info;
-                        //magma_int_t rval = magma_zgetrf_ooc(m, n, a, lda, ipiv, info);
-                        //if( *info == 0 )magma_zgetrf_piv( m, n, a, lda, ipiv, info);
-                        //return *info;
             }
             da = dA + nb*maxm;
             
@@ -179,9 +176,6 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
                         magma_int_t rval = magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
                         if( *info >= 0 ) magma_zgetrf_piv(num_gpus, m, n, a, lda, ipiv, info);
                         return *info;
-                        //magma_int_t rval = magma_zgetrf_ooc(m, n, a, lda, ipiv, info);
-                        //magma_zgetrf_piv( m, n, a, lda, ipiv, info);
-                        //return *info;
             }
 
             magmablas_ztranspose2( dAT, ldda, da, maxm, m, n );

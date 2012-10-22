@@ -88,7 +88,7 @@ void magmablas_zgetmatrix_transpose_mgpu(
 void magmablas_zsetmatrix_transpose_mgpu(
     magma_int_t ngpu, cudaStream_t stream[][2],
     const cuDoubleComplex  *hA,  magma_int_t lda,
-    cuDoubleComplex       **dAT, magma_int_t ldda, magma_int_t starti,
+    cuDoubleComplex       **dAT, magma_int_t ldda,
     cuDoubleComplex       **dB,  magma_int_t lddb,
     magma_int_t m, magma_int_t n, magma_int_t nb );
 
