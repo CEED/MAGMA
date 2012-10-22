@@ -16,7 +16,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
          magma_int_t m, magma_int_t n, magma_int_t nb, magma_int_t offset,
          cuDoubleComplex **d_lAT, magma_int_t lddat, magma_int_t *ipiv,
          cuDoubleComplex **d_lAP, cuDoubleComplex *a, magma_int_t lda,
-         cudaStream_t **streaml0, magma_int_t *info);
+         cudaStream_t streaml[][2], magma_int_t *info);
 
 
 // === Define what BLAS to use ============================================
@@ -218,7 +218,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
           //magma_zgetrf1_mgpu( num_gpus, m, n, nb, 0, d_lAT, lddat, ipiv, d_panel, work, maxm,
           //                   (cudaStream_t **)streaml, info );
           magma_zgetrf2_mgpu(num_gpus, m, n, nb, 0, d_lAT, lddat, ipiv, d_panel, work, maxm,
-                         (cudaStream_t **)streaml, info);
+                             streaml, info);
 
           /* clean up */
           for( d=0; d<num_gpus; d++ ) {

@@ -87,14 +87,14 @@ magma_zgetrf2_mgpu(magma_context *cntxt, magma_int_t num_gpus,
                    magma_int_t m, magma_int_t n, magma_int_t nb, magma_int_t offset,
                    cuDoubleComplex **d_lAT, magma_int_t lddat, magma_int_t *ipiv,
                    cuDoubleComplex *d_lAP[4], cuDoubleComplex *a, magma_int_t lda,
-                   cudaStream_t **stream, magma_int_t *info)
+                   cudaStream_t stream[][2], magma_int_t *info)
 #else
 extern "C" magma_int_t
 magma_zgetrf2_mgpu(magma_int_t num_gpus, 
          magma_int_t m, magma_int_t n, magma_int_t nb, magma_int_t offset,
          cuDoubleComplex **d_lAT, magma_int_t lddat, magma_int_t *ipiv,
          cuDoubleComplex **d_lAP, cuDoubleComplex *w, magma_int_t ldw,
-         cudaStream_t **streaml0, magma_int_t *info)
+         cudaStream_t streaml[][2], magma_int_t *info)
 #endif
 {
 /*  -- MAGMA (version 1.0) --
@@ -165,7 +165,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
     magma_int_t i, ii, d, dd, rows, cols, s, ldpan[4];
     magma_int_t id, i_local, i_local2, nb0, nb1;
     cuDoubleComplex *d_panel[4], *panel_local[4];
-    cudaStream_t streaml[4][2];
+    //cudaStream_t streaml[4][2];
 
     /* Check arguments */
     *info = 0;
@@ -211,8 +211,8 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
         d_panel[i] = &(d_lAP[i][nb*maxm]);   /* temporary panel storage */
 
         /* create local streams */
-        magma_queue_create(&streaml[i][0]);
-        magma_queue_create(&streaml[i][1]);
+        //magma_queue_create(&streaml[i][0]);
+        //magma_queue_create(&streaml[i][1]);
       }
       trace_init( 1, num_gpus, 2, (CUstream_st**)streaml );
 
@@ -498,8 +498,10 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
             trace_finalize( "zgetrf_mgpu.svg","trace.css" );
             for( d=0; d<num_gpus; d++ ) {
               magmaSetDevice(d);
-              magma_queue_destroy(streaml[d][0]);
-              magma_queue_destroy(streaml[d][1]);
+              magma_queue_sync( streaml[d][0] );
+              magma_queue_sync( streaml[d][1] );
+              //magma_queue_destroy(streaml[d][0]);
+              //magma_queue_destroy(streaml[d][1]);
               magmablasSetKernelStream(NULL);
             } 
             magmaSetDevice(0);
