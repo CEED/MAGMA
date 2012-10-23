@@ -314,6 +314,7 @@ subs = {
     ('SCODELETS',      'DCODELETS',      'CCODELETS',      'ZCODELETS'       ),
     ('sgetmatrix',     'dgetmatrix',     'cgetmatrix',     'zgetmatrix'      ),
     ('sinplace',       'dinplace',       'cinplace',       'zinplace'        ),
+    ('slaadd',         'dlaadd',         'claadd',         'zlaadd'          ),
     ('slocality',      'dlocality',      'clocality',      'zlocality'       ),
     ('smalloc',        'dmalloc',        'cmalloc',        'zmalloc'         ),
     ('smalloc',        'dmalloc',        'smalloc',        'dmalloc'         ),

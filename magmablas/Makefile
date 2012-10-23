@@ -22,6 +22,7 @@ ZSRC := \
 	zlacpy.cu		\
 	zlag2c.cu		\
 	clag2z.cu		\
+	zlaadd.cu		\
 	zlange.cu		\
 	zlanhe.cu		\
 	zlascl.cu		\
