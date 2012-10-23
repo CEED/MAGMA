@@ -149,7 +149,7 @@ void magmablas_zher2k_mgpu2(
   /*
    * LAPACK auxiliary functions
    */
-void magmablas_zlaadd(
+void magmablas_zgeadd(
     magma_int_t m, magma_int_t n,
     cuDoubleComplex alpha,
     const cuDoubleComplex *dA, magma_int_t ldda,

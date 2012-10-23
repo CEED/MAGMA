@@ -18,11 +18,11 @@ ZSRC := \
 	zauxiliary.cu		\
 	zcaxpycp.cu		\
 	zclaswp.cu		\
+	zgeadd.cu		\
 	zhemv_fermi.cu		\
 	zlacpy.cu		\
 	zlag2c.cu		\
 	clag2z.cu		\
-	zlaadd.cu		\
 	zlange.cu		\
 	zlanhe.cu		\
 	zlascl.cu		\

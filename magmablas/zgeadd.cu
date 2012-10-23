@@ -24,7 +24,7 @@
     E.g., each block does 64x64 tile, instead of 64xN tile.
 */
 __global__ void
-zlaadd_kernel(
+zgeadd_kernel(
     int m, int n,
     cuDoubleComplex alpha,
     const cuDoubleComplex *dA, int ldda,
@@ -46,7 +46,7 @@ zlaadd_kernel(
 
 
 extern "C" void
-magmablas_zlaadd(
+magmablas_zgeadd(
     magma_int_t m, magma_int_t n,
     cuDoubleComplex alpha,
     const cuDoubleComplex *dA, magma_int_t ldda,
@@ -56,7 +56,7 @@ magmablas_zlaadd(
     Purpose
     =======
     
-    ZLAADD adds two matrices, B = alpha*A + B.
+    ZGEADD adds two matrices, B = alpha*A + B.
     
     Arguments
     =========
@@ -96,6 +96,6 @@ magmablas_zlaadd(
     dim3 threads( NB );
     dim3 grid( (m + NB - 1)/NB );
     
-    zlaadd_kernel<<< grid, threads, 0, magma_stream >>>
+    zgeadd_kernel<<< grid, threads, 0, magma_stream >>>
         ( m, n, alpha, dA, ldda, dB, lddb );
 }

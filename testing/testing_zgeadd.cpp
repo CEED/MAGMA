@@ -25,7 +25,7 @@
 
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing zlaadd
+   -- Testing zgeadd
 */
 int main( int argc, char** argv)
 {
@@ -119,7 +119,7 @@ int main( int argc, char** argv)
         magma_zsetmatrix( M, N, h_B, lda, d_B, ldda );
         
         gpu_time = magma_wtime();
-        magmablas_zlaadd( M, N, alpha, d_A, ldda, d_B, ldda );
+        magmablas_zgeadd( M, N, alpha, d_A, ldda, d_B, ldda );
         gpu_time = magma_wtime() - gpu_time;
         gpu_perf = gflops / gpu_time;
 

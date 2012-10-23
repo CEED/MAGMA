@@ -22,7 +22,7 @@ ZSRC += \
 	\
 	testing_auxiliary.cpp	\
 	testing_zblas.cpp	\
-	testing_zlaadd.cpp	\
+	testing_zgeadd.cpp	\
 	testing_zlacpy.cpp	\
 	testing_zsymmetrize.cpp	\
 	testing_zswap.cpp	\
