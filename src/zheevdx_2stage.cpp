@@ -131,12 +131,14 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
 
     LWORK   (input) INTEGER
             The length of the array WORK.
-            If N <= 1,                LWORK must be at least 1.
-            If JOBZ  = 'N' and N > 1, LWORK must be at least LQ2 + N * (NB + 1).
-            If JOBZ  = 'V' and N > 1, LWORK must be at least LQ2 + 2*N + N**2.
+            If N <= 1,                LWORK >= 1.
+            If JOBZ  = 'N' and N > 1, LWORK >= LQ2 + N * (NB + 1).
+            If JOBZ  = 'V' and N > 1, LWORK >= LQ2 + 2*N + N**2.
                                       where LQ2 is the size needed to store
-                                      the Q2 matrix and is returned by
-                                      MAGMA_BULGE_GET_LQ2.
+                                      the Q2 matrix and is given by
+                                      lq2 = blkcnt * Vblksiz * (ldt + ldv + 1)
+                                      where
+                                      blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz)
 
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal sizes of the WORK, RWORK and
@@ -321,11 +323,11 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
     if (env != NULL)
         threads = atoi(env);
 #endif
-    // Second check OMP_NUM_THREADS 
+    // Second check OMP_NUM_THREADS
     if (threads < 1){
         env = getenv("OMP_NUM_THREADS");
         if (env != NULL)
-            threads = atoi(env); 
+            threads = atoi(env);
     }
     // Third use the number of CPUs
     if (threads < 1)
