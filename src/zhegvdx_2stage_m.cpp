@@ -18,15 +18,15 @@ extern "C" {
                                        magma_int_t *m, double *w, cuDoubleComplex *work, magma_int_t lwork,
                                        double *rwork, magma_int_t lrwork, magma_int_t *iwork, magma_int_t liwork, magma_int_t *info);
 
-    magma_int_t magma_zpotrf2_ooc(magma_int_t num_gpus, char uplo, magma_int_t n,
+    magma_int_t magma_zpotrf_m(magma_int_t num_gpus, char uplo, magma_int_t n,
                                   cuDoubleComplex *a, magma_int_t lda, magma_int_t *info);
 
     magma_int_t magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
                                cuDoubleComplex *a, magma_int_t lda,
                                cuDoubleComplex *b, magma_int_t ldb, magma_int_t *info);
 
-    magma_int_t magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag, 
-                               magma_int_t m, magma_int_t n, cuDoubleComplex alpha, cuDoubleComplex *a, 
+    magma_int_t magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
+                               magma_int_t m, magma_int_t n, cuDoubleComplex alpha, cuDoubleComplex *a,
                                magma_int_t lda, cuDoubleComplex *b, magma_int_t ldb);
 }
 
@@ -140,11 +140,16 @@ magma_zhegvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
     WORK    (workspace/output) COMPLEX*16 array, dimension (MAX(1,LWORK))
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
-????????????    LWORK   (input) INTEGER
+    LWORK   (input) INTEGER
             The length of the array WORK.
             If N <= 1,                LWORK >= 1.
-            If JOBZ  = 'N' and N > 1, LWORK >= N + 1.
-            If JOBZ  = 'V' and N > 1, LWORK >= 2*N + N**2.
+            If JOBZ  = 'N' and N > 1, LWORK >= LQ2 + N * (NB + 1).
+            If JOBZ  = 'V' and N > 1, LWORK >= LQ2 + 2*N + N**2.
+                                      where LQ2 is the size needed to store
+                                      the Q2 matrix and is given by
+                                      lq2 = blkcnt * Vblksiz * (ldt + ldv + 1)
+                                      where
+                                      blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz)
 
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal sizes of the WORK, RWORK and
@@ -155,7 +160,7 @@ magma_zhegvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
     RWORK   (workspace/output) DOUBLE PRECISION array, dimension (MAX(1,LRWORK))
             On exit, if INFO = 0, RWORK(1) returns the optimal LRWORK.
 
-????????????    LRWORK  (input) INTEGER
+    LRWORK  (input) INTEGER
             The dimension of the array RWORK.
             If N <= 1,                LRWORK >= 1.
             If JOBZ  = 'N' and N > 1, LRWORK >= N.
@@ -170,7 +175,7 @@ magma_zhegvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
     IWORK   (workspace/output) INTEGER array, dimension (MAX(1,LIWORK))
             On exit, if INFO = 0, IWORK(1) returns the optimal LIWORK.
 
-?????????????    LIWORK  (input) INTEGER
+    LIWORK  (input) INTEGER
             The dimension of the array IWORK.
             If N <= 1,                LIWORK >= 1.
             If JOBZ  = 'N' and N > 1, LIWORK >= 1.
@@ -269,14 +274,21 @@ magma_zhegvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
       }
     }
 
-    magma_int_t nb = magma_get_zhetrd_nb(n);
+    magma_int_t nb = magma_bulge_get_nb(n);
+    magma_int_t Vblksiz = magma_zbulge_get_Vblksiz(n, nb);
+
+    magma_int_t ldt = Vblksiz;
+    magma_int_t ldv = nb + Vblksiz + 1;
+    magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
+
+    magma_int_t lq2 = blkcnt * Vblksiz * (ldt + ldv + 1);
 
     if (wantz) {
-        lwmin = 2 * n + n * n;
+        lwmin = lq2 + 2 * n + n * n;
         lrwmin = 1 + 5 * n + 2 * n * n;
         liwmin = 5 * n + 3;
     } else {
-        lwmin = n * (nb + 1);
+        lwmin = lq2 + n * (nb + 1);
         lrwmin = n;
         liwmin = 1;
     }
@@ -314,7 +326,7 @@ magma_zhegvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
     start = get_current_time();
 #endif
 
-    magma_zpotrf2_ooc(nrgpu, uplo_[0], n, b, ldb, info);
+    magma_zpotrf_m(nrgpu, uplo_[0], n, b, ldb, info);
     if (*info != 0) {
         *info = n + *info;
         return *info;
@@ -323,7 +335,7 @@ magma_zhegvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
 #ifdef ENABLE_TIMER
     end = get_current_time();
 
-    printf("time zpotrf2_ooc = %6.2f\n", GetTimerValue(start,end)/1000.);
+    printf("time zpotrf_m = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
 #ifdef ENABLE_TIMER

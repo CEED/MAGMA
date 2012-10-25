@@ -39,15 +39,15 @@ extern"C" {
         magma_int_t ldt = Vblksiz;
         return magma_bulge_get_blkcnt(n, nb, Vblksiz) * Vblksiz * (ldt + ldv + 1);
     }
-    
+
     magma_int_t magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
-                                        cuDoubleComplex *a, magma_int_t lda, 
+                                        cuDoubleComplex *a, magma_int_t lda,
                                         cuDoubleComplex *tau,
                                         cuDoubleComplex *work, magma_int_t lwork,
                                         cuDoubleComplex *dAmgpu[], magma_int_t ldda,
                                         cuDoubleComplex *dTmgpu[], magma_int_t lddt,
-                                        magma_int_t ngpu, magma_int_t distblk, 
-                                        cudaStream_t streams[][20], magma_int_t nstream, 
+                                        magma_int_t ngpu, magma_int_t distblk,
+                                        cudaStream_t streams[][20], magma_int_t nstream,
                                         magma_int_t threads, magma_int_t *info);
 
     magma_int_t magma_zstedx_m(magma_int_t nrgpu,
@@ -161,12 +161,14 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
     LWORK   (input) INTEGER
             The length of the array WORK.
-            If N <= 1,                LWORK must be at least 1.
-            If JOBZ  = 'N' and N > 1, LWORK must be at least LQ2 + N * (NB + 1).
-            If JOBZ  = 'V' and N > 1, LWORK must be at least LQ2 + 2*N + N**2.
+            If N <= 1,                LWORK >= 1.
+            If JOBZ  = 'N' and N > 1, LWORK >= LQ2 + N * (NB + 1).
+            If JOBZ  = 'V' and N > 1, LWORK >= LQ2 + 2*N + N**2.
                                       where LQ2 is the size needed to store
-                                      the Q2 matrix and is returned by
-                                      MAGMA_BULGE_GET_LQ2.
+                                      the Q2 matrix and is given by
+                                      lq2 = blkcnt * Vblksiz * (ldt + ldv + 1)
+                                      where
+                                      blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz)
 
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal sizes of the WORK, RWORK and
@@ -351,11 +353,11 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     if (env != NULL)
         threads = atoi(env);
 #endif
-    // Second check OMP_NUM_THREADS 
+    // Second check OMP_NUM_THREADS
     if (threads < 1){
         env = getenv("OMP_NUM_THREADS");
         if (env != NULL)
-            threads = atoi(env); 
+            threads = atoi(env);
     }
     // Third use the number of CPUs
     if (threads < 1)
@@ -428,7 +430,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     magma_free(dT1);
 #else
     magma_int_t nstream = 3;
-    cudaStream_t streams[MagmaMaxGPUs][20];    
+    cudaStream_t streams[MagmaMaxGPUs][20];
     cuDoubleComplex *da[MagmaMaxGPUs],*dT1[MagmaMaxGPUs];
     magma_int_t ldda = ((n+31)/32)*32;
 
@@ -456,7 +458,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
         }
     }
 #endif
-    
+
 #ifdef ENABLE_TIMER
     st1 = get_current_time();
 
@@ -557,7 +559,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
                        &work[indwrk + n * (il-1) + nb], n, &work[indwk2], llwrk2, info);
 
         lapackf77_zlacpy("A", &n, m, &work[indwrk  + n * (il-1)], &n, a, &lda);
-        
+
 #ifdef ENABLE_TIMER
         end = get_current_time();
 
