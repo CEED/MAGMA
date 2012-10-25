@@ -11,6 +11,8 @@
 
 */
 #include "common_magma.h"
+#include "magma_bulge.h"
+#include "magma_zbulge.h"
 
 extern "C" {
     magma_int_t magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo, magma_int_t n,
@@ -146,10 +148,8 @@ magma_zhegvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
             If JOBZ  = 'N' and N > 1, LWORK >= LQ2 + N * (NB + 1).
             If JOBZ  = 'V' and N > 1, LWORK >= LQ2 + 2*N + N**2.
                                       where LQ2 is the size needed to store
-                                      the Q2 matrix and is given by
-                                      lq2 = blkcnt * Vblksiz * (ldt + ldv + 1)
-                                      where
-                                      blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz)
+                                      the Q2 matrix and is returned by
+                                      MAGMA_BULGE_GET_LQ2.
 
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal sizes of the WORK, RWORK and
@@ -275,13 +275,7 @@ magma_zhegvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
     }
 
     magma_int_t nb = magma_bulge_get_nb(n);
-    magma_int_t Vblksiz = magma_zbulge_get_Vblksiz(n, nb);
-
-    magma_int_t ldt = Vblksiz;
-    magma_int_t ldv = nb + Vblksiz + 1;
-    magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
-
-    magma_int_t lq2 = blkcnt * Vblksiz * (ldt + ldv + 1);
+    magma_int_t lq2 = magma_zbulge_get_lq2(n);
 
     if (wantz) {
         lwmin = lq2 + 2 * n + n * n;

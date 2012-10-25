@@ -27,5 +27,9 @@ extern "C" {
 
     magma_int_t magma_zunmqr_gpu_2stages(char side, char trans, magma_int_t m, magma_int_t n, magma_int_t k, cuDoubleComplex *dA, magma_int_t ldda,
                                          cuDoubleComplex *dC, magma_int_t lddc, cuDoubleComplex *dT, magma_int_t nb, magma_int_t *info);
+
+    magma_int_t magma_zbulge_get_lq2(magma_int_t n);
+
+    magma_int_t magma_zbulge_get_Vblksiz(magma_int_t n, magma_int_t nb);
 }
 #endif

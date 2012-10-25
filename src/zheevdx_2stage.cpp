@@ -135,10 +135,8 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
             If JOBZ  = 'N' and N > 1, LWORK >= LQ2 + N * (NB + 1).
             If JOBZ  = 'V' and N > 1, LWORK >= LQ2 + 2*N + N**2.
                                       where LQ2 is the size needed to store
-                                      the Q2 matrix and is given by
-                                      lq2 = blkcnt * Vblksiz * (ldt + ldv + 1)
-                                      where
-                                      blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz)
+                                      the Q2 matrix and is returned by
+                                      MAGMA_BULGE_GET_LQ2.
 
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal sizes of the WORK, RWORK and
