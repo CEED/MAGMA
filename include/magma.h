@@ -273,6 +273,10 @@ void magma_event_sync( magma_event_t event );
 // blocks queue (but not CPU) until event occurs
 void magma_queue_wait_event( magma_queue_t queue, magma_event_t event );
 
+// magma GPU-complex connection
+int magma_buildconnection_mgpu(  magma_int_t gnode[MagmaMaxGPUs+2][MagmaMaxGPUs+2], magma_int_t *nbcmplx, magma_int_t ngpu);
+
+
 
 // ========================================
 // generic, type-independent routines to copy data.

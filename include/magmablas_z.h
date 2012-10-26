@@ -126,6 +126,7 @@ void magmablas_zhemm_1gpu(
     magma_int_t ngpu, magma_int_t nb,
     cudaStream_t streams[][20], magma_int_t nstream );
 
+
 void magmablas_zhemm_mgpu(
     char side, char uplo, magma_int_t m, magma_int_t n,
     cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
@@ -133,8 +134,23 @@ void magmablas_zhemm_mgpu(
     cuDoubleComplex beta,  cuDoubleComplex *dC[], magma_int_t lddc,
                            cuDoubleComplex *dwork[],    magma_int_t lddwork,
                            cuDoubleComplex *C,    magma_int_t ldc,
-                           cuDoubleComplex *work[],    magma_int_t ldwork,
-    magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][20], magma_int_t nstream );
+                           cuDoubleComplex *work[], magma_int_t ldwork,
+                           magma_int_t ngpu, magma_int_t nb, 
+                           cudaStream_t streams[][20], magma_int_t nstream, 
+                           cudaEvent_t redevents[][20],magma_int_t nbevents );
+
+void magmablas_zhemm_mgpu_com(
+    char side, char uplo, magma_int_t m, magma_int_t n,
+    cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
+                           cuDoubleComplex *dB[], magma_int_t lddb,
+    cuDoubleComplex beta,  cuDoubleComplex *dC[], magma_int_t lddc,
+                           cuDoubleComplex *dwork[],    magma_int_t lddwork,
+                           cuDoubleComplex *C,    magma_int_t ldc,
+                           cuDoubleComplex *work[], magma_int_t ldwork,
+                           magma_int_t ngpu, magma_int_t nb, 
+                           cudaStream_t streams[][20], magma_int_t nstream, 
+                           cudaEvent_t redevents[][20],magma_int_t nbevents, 
+                           magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2], magma_int_t nbcmplx );
 
 void magmablas_zher2k_mgpu2(
     char uplo, char trans, magma_int_t n, magma_int_t k,
