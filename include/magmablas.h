@@ -28,6 +28,9 @@ typedef cudaStream_t magma_queue_t;
 typedef cudaEvent_t  magma_event_t;
 typedef int          magma_device_t;
 
+// needed by magmablas*.h, but should eventually go in magma_types.h (see clMAGMA)
+#define MagmaMaxGPUs       8
+
 #include "magmablas_z.h"
 #include "magmablas_c.h"
 #include "magmablas_d.h"

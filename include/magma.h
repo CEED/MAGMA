@@ -79,8 +79,6 @@
 #define MagmaNoVectorsStr  "NoVectors"
 #define MagmaVectorsStr    "Vectors"
 
-#define MagmaMaxGPUs       8
-
 /* ------------------------------------------------------------
  * Return codes
  * LAPACK argument errors are < 0 but > MAGMA_ERR.
