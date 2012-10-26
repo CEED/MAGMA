@@ -517,7 +517,7 @@ double lapackf77_zlanhe( const char *norm, const char *uplo,
                          const cuDoubleComplex *A, const magma_int_t *lda,
                          double * work );
 
-double lapackf77_zlanht( char* norm, magma_int_t* n,
+double lapackf77_zlanht( const char* norm, const magma_int_t* n,
                          const double* d, const cuDoubleComplex* e );
 
 double lapackf77_zlansy( const char *norm, const char *uplo,
