@@ -620,12 +620,13 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
         magma_free( dwtest[dev] );
         magma_free( dworktest[dev]);
         magma_free( dworktestbis[dev]);
+        for( magma_int_t e = 0; e < nbevents; ++e ) {
+             cudaEventDestroy(redevents[dev][e]);
+        }
     }
     magma_setdevice( cdev );
 
-   for( magma_int_t e = 0; e < nbevents; ++e ) {
-        cudaEventDestroy(redevents[dev][e]);
-   }
+
 
 
     free(worktest);
