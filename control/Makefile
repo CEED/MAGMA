@@ -36,7 +36,8 @@ ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
 	timer.cpp	\
 	trace.cpp	\
 	strlcpy.cpp	\
-	bulge_auxiliary.cpp
+	bulge_auxiliary.cpp \
+	connection_mgpu.cpp
 
 ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f90=.o)
