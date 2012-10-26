@@ -52,7 +52,7 @@ int main( int argc, char** argv)
     magma_int_t msize[MAXTESTS] = { 1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 10112 };
     magma_int_t n       = 64;
     magma_int_t nb      = 64;
-    int nstream = 2;
+    int nstream = 3;
     int count   = 3;
     int ngpu    = magma_num_gpus();
     
@@ -103,7 +103,7 @@ int main( int argc, char** argv)
         }
         else {
             printf( "invalid argument: %s\n", argv[i] );
-            exit(1);
+            //exit(1);
         }
     }
     if ( ntest == 0 ) {
@@ -117,25 +117,40 @@ int main( int argc, char** argv)
     lda  = m;
     ldda = ((m + 31)/32)*32;
 
+    
+    magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2];
+    magma_int_t nbcmplx=0;
+    magma_buildconnection_mgpu(gnode, &nbcmplx,  ngpu);
+    printf(" Initializin communication pattern.... GPU-ncmplx %d\n\n" , nbcmplx);
+
     TESTING_MALLOC( hA, cuDoubleComplex, lda*m );
     TESTING_MALLOC( hX, cuDoubleComplex, lda*n );
     TESTING_MALLOC( hB, cuDoubleComplex, lda*n );
     TESTING_HOSTALLOC( hR, cuDoubleComplex, lda*n );
-    
+
+    magma_int_t  nbevents =2;
     cudaStream_t streams[MagmaMaxGPUs][20];    
+    cudaEvent_t  redevents[MagmaMaxGPUs][20]; 
     for( int d = 0; d < ngpu; ++d ) {
         magma_int_t mlocal = ((m / nb) / ngpu + 1) * nb;
         cudaSetDevice( d );
         TESTING_DEVALLOC( dA[d], cuDoubleComplex, ldda*mlocal );
         TESTING_DEVALLOC( dX[d], cuDoubleComplex, ldda*n      );
         TESTING_DEVALLOC( dB[d], cuDoubleComplex, ldda*n      );
-        TESTING_DEVALLOC( dwork[d], cuDoubleComplex, ldda*n      );
+        TESTING_DEVALLOC( dwork[d], cuDoubleComplex, ldda*n*3  );
         TESTING_HOSTALLOC( hwork[d], cuDoubleComplex, lda*n );
-        for( int i = 0; i < nstream; ++i ) {
+        for( magma_int_t i = 0; i < nstream; ++i ) {
             cudaStreamCreate( &streams[d][i] );
         }
+        for( magma_int_t i = 0; i < nbevents; ++i ) {
+            cudaEventCreateWithFlags(&redevents[d][i],cudaEventDisableTiming);
+        }
+
+
     }
     TESTING_HOSTALLOC( hwork[ngpu], cuDoubleComplex, lda*n );
+
+
 
     if ( checkres ) {
     cudaSetDevice( 0 );
@@ -147,10 +162,10 @@ int main( int argc, char** argv)
     printf("==============================================================================================\n");
 
 //    for( int nb = 64; nb < 256; nb+=64 ) {
-//	    if(nb==192) nb=256;
-//	    printf("\n\n\n\n\n");
+//            if(nb==192) nb=256;
+//            printf("\n\n\n\n\n");
     for( int i = 0; i < ntest; ++i ) {
-    for( int offst = 0; offst < m; offst += min(n,nb) ) {
+    for( int offst = 0; offst < 1; offst += min(n,nb) ) {
     for( int j = 0; j < count; ++j ) {
         m = msize[i];
         assert( m > 0 && n > 0 );
@@ -158,7 +173,7 @@ int main( int argc, char** argv)
 
         lda  = m;
         ldda = ((m + 31)/32)*32;
-        gflops = FLOPS_ZHEMM( MagmaLeft, (double)m, (double)n ) / 1e9;
+        gflops = FLOPS_ZHEMM( MagmaLeft, (double)msiz, (double)n ) / 1e9;
 
         size = lda*m;
         lapackf77_zlarnv( &ione, iseed, &size, hA );
@@ -177,18 +192,22 @@ int main( int argc, char** argv)
         magmablas_zsetmatrix_1D_bcyclic( m, m, hA, lda, dA, ldda, ngpu, nb );
         for( int d = 0; d < ngpu; ++d ) {
             cudaSetDevice( d );
+            //magmablasSetKernelStream( streams[ d ][  0 ] );
             magma_zsetmatrix( m, n, hX, lda, dX[d], ldda );
             //if(d==0) magma_zsetmatrix( m, n, hB, lda, dB[d], ldda );// this is wrong coz when offset !=0 the gpu who do the beta*C may be not 0 so this should be related to stdev(starting device who own i=0 first col)
             magma_zsetmatrix( m, n, hB, lda, dB[d], ldda );
         }
-        
+    
+
+
+
 //        memset(hR,0,lda*n*sizeof(cuDoubleComplex));
 
         //trace_init( 1, ngpu, nstream, (cudaStream_t*) streams );
 
         //magma_int_t offst =0;//nb;
 
-        cudaDeviceSynchronize();
+        //cudaDeviceSynchronize();
         gpu_time = magma_wtime();
         // 1GPU version light
         /*
@@ -201,26 +220,24 @@ int main( int argc, char** argv)
        */  
         // multi gpu version
        
-    /*          
-    magma_int_t siz = m;
-    cuDoubleComplex *R=(cuDoubleComplex *) malloc(siz*siz*sizeof(cuDoubleComplex));
-    magma_zgetmatrix( siz, n, dX[0], ldda, R,siz );
-    FILE *trace_file;
-    trace_file = fopen("AJETE/DB", "w");
-    for (int j = 0; j < n ; j++) 
-          for (int i = 0; i < siz ; i++) 
-                         fprintf(trace_file,"%10d%10d%40.30e\n",i+1,j+1,R[j*siz+i]);
-    fclose(trace_file);
-*/
-
-
-       
+       /*
         magmablas_zhemm_mgpu(
             MagmaLeft, MagmaLower, msiz, n,
             c_neg_one, dA, ldda, offst,
                        dX, ldda,
             cbeta,     dB, ldda, dwork, ldda, hR, lda, hwork,lda,
-            ngpu, nb, streams, nstream );
+            ngpu, nb, streams, nstream, redevents, nbevents );
+        */
+
+
+        magmablas_zhemm_mgpu_com(
+            MagmaLeft, MagmaLower, msiz, n,
+            c_neg_one, dA, ldda, offst,
+                       dX, ldda,
+            cbeta,     dB, ldda, dwork, ldda, hR, lda, hwork,lda,
+            ngpu, nb, streams, nstream, redevents, nbevents,gnode,nbcmplx);
+
+
        
         cudaDeviceSynchronize();
         gpu_time = magma_wtime() - gpu_time;
@@ -236,6 +253,7 @@ int main( int argc, char** argv)
            =================================================================== */
         if ( checkres ) {
             magma_setdevice( 0 );
+            magmablasSetKernelStream(  0  );
             magma_zsetmatrix( m, m, hA, lda, dA2, ldda );
             magma_zsetmatrix( m, n, hX, lda, dX[0], ldda );
             magma_zsetmatrix( m, n, hB, lda, dB[0], ldda );
@@ -298,6 +316,7 @@ int main( int argc, char** argv)
     /* Memory clean up */
     for( int d = 0; d < ngpu; ++d ) {
         cudaSetDevice( d );
+        magmablasSetKernelStream(  0  );
         TESTING_DEVFREE( dA[d] );
         TESTING_DEVFREE( dX[d] );
         //TESTING_DEVFREE( dB[d] );

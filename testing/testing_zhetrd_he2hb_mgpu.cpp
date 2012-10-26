@@ -99,6 +99,7 @@ int main( int argc, char** argv)
     magma_int_t THREADS=1;
     magma_int_t NE = 0;
     magma_int_t NB = 0;
+    magma_int_t distblk =0;
     checkres  = 0; //getenv("MAGMA_TESTINGS_CHECK") != NULL;
 
     if (argc != 1){
@@ -109,6 +110,9 @@ int main( int argc, char** argv)
             }
             else if (strcmp("-NB", argv[i])==0) {
                 NB = atoi(argv[++i]);
+            }
+            else if (strcmp("-D", argv[i])==0) {
+                distblk = atoi(argv[++i]);
             }
             else if (strcmp("-threads", argv[i])==0) {
                 THREADS = atoi(argv[++i]);
@@ -177,7 +181,7 @@ int main( int argc, char** argv)
     cudaStream_t streams[MagmaMaxGPUs][20];    
     cuDoubleComplex *da[MagmaMaxGPUs],*dT1[MagmaMaxGPUs];
     magma_int_t ldda = ((N+31)/32)*32;
-    magma_int_t distblk = 64;//max(128,NB);
+    if((distblk==0)||(distblk<NB))distblk = max(64,NB);
     printf("voici distblk %d NB %d\n ",distblk,NB);
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_int_t mlocal = ((N / distblk) / ngpu + 1) * distblk;
@@ -202,15 +206,9 @@ int main( int argc, char** argv)
            Initialize the matrix
            =================================================================== */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-
-        // Make the matrix hermitian 
-        {
-            magma_int_t i, j;
-            for(i=0; i<N; i++) {
-                MAGMA_Z_SET2REAL( h_A[i*lda+i], ( MAGMA_Z_REAL(h_A[i*lda+i]) ) );
-                for(j=0; j<i; j++)
-                    h_A[i*lda+j] = cuConj(h_A[j*lda+i]);
-            }
+        // make diagonal real
+        for( i = 0; i < N; ++i ) {
+            h_A[i + i*lda] = MAGMA_Z_MAKE( MAGMA_Z_REAL( h_A[i+i*lda] ), 0. );
         }
         lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
 
