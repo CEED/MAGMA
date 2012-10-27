@@ -490,8 +490,16 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                        c_one, dAmgpu, ldda, indi-1,
                                    dworktest, pm,
                        c_zero,     dwtest, pm, dworktestbis, pm, worktest, pm, workngpu, pm,
-                       ngpu, distblk, streams, nstream-1, redevents,nbevents);
-
+                       ngpu, distblk, streams, nstream-1, redevents, nbevents);
+                 /*
+                 magmablas_zhemm_mgpu_com(
+                       MagmaLeft, uplo, pm, pk,
+                       c_one, dAmgpu, ldda, indi-1,
+                                   dworktest, pm,
+                       c_zero,     dwtest, pm, dworktestbis, pm, worktest, pm, workngpu, pm,
+                       ngpu, distblk, streams, nstream-1, redevents, nbevents, gnode, nbcmplx);
+                 */
+                 /*
                  // send X=AVT stored in dW to all GPUs 
                  for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
                      cudaSetDevice( dev );
@@ -500,7 +508,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                               dwtest[dev],  pm, streams[dev][0] );
 
                  }
-                 
+                */               
              }
              trace_gpu_end( 0, 2 );
 
