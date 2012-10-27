@@ -337,16 +337,21 @@ return;
         }
     }
 */
-/*
-    // send X=AVT stored in dW to all GPUs 
+    // Synchronous send X=AVT from CPU to all active GPUs 
+    // because async is the same by cutting the bandwidth
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-        cudaSetDevice( dev );
-        magma_zsetmatrix_async( m, n,
-                 work, ldwork,
-                 dC[dev],  lddc, streams[dev][0] );
-
+        magma_int_t nbblk   = magma_ceildiv(m+blockoffset,nb);
+        magma_int_t stdev   = (offset/nb)%ngpu;
+        magma_int_t devperm = (dev-stdev+ngpu)%ngpu;
+        magma_int_t myblk   = (nbblk/ngpu) + (nbblk%ngpu > devperm ?  1:0 );
+        if(myblk>0){
+           cudaSetDevice( dev );  
+           magma_zsetmatrix( m, n,
+                 C, ldc,
+                 dC[dev],  lddc );
+        }
     }
-*/
+
     
     cudaSetDevice( cdev );
     magmablasSetKernelStream( cstream );
