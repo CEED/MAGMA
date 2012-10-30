@@ -57,9 +57,10 @@ magmablas_zhemv2_mgpu_offset( char uplo, magma_int_t n,
               magma_int_t nb,
               magma_int_t offset);
 
+
 extern "C"
 magma_int_t
-magmablas_zhemv_mgpu_offset( char uplo, magma_int_t n,
+magmablas_zhemv2_mgpu_32_offset( char uplo, magma_int_t n,
                       cuDoubleComplex alpha,
                       cuDoubleComplex **A, magma_int_t lda,
                       cuDoubleComplex **X, magma_int_t incx,
@@ -68,9 +69,7 @@ magmablas_zhemv_mgpu_offset( char uplo, magma_int_t n,
                       cuDoubleComplex **work, magma_int_t lwork,
               magma_int_t num_gpus, 
               magma_int_t nb,
-                      magma_int_t offset,
-                      cudaStream_t stream[][10]);
-
+              magma_int_t offset);
 
 
 
@@ -96,7 +95,7 @@ int main(int argc, char **argv)
     magma_int_t istart = 64;
     magma_int_t incx = 1;
     char        uplo = MagmaLower;
-//    char        uplo = MagmaUpper;
+
     cuDoubleComplex alpha = MAGMA_Z_MAKE(1., 0.); // MAGMA_Z_MAKE(  1.5, -2.3 );
     cuDoubleComplex beta  = MAGMA_Z_MAKE(0., 0.); // MAGMA_Z_MAKE( -0.6,  0.8 );
     cuDoubleComplex *A, *X, *Y[4], *Ycublas, *Ymagma;
@@ -176,7 +175,7 @@ int main(int argc, char **argv)
     matsize = N*LDA;
     vecsize = N*incx;
     nb = 32;
-//    nb = 64;
+    //nb = 64;
 
     printf("block size = %d\n", nb);
    
@@ -293,27 +292,18 @@ int main(int argc, char **argv)
             blocks    = m / nb + (m % nb != 0);
             magma_zsetmatrix( lda, blocks, C_work, LDA, dC_work[i], lda );
             
-                fillZero(dC_work[i], lda * blocks);
             //cudaMemset(dC_work[i], 0, sizeof( cuDoubleComplex) * lda * blocks);
-            
-
-
+           
        }
 
         cudaSetDevice(0);
         start = get_current_time();
         cublasZhemv( uplo, m-offset, alpha, dA + offset + offset * lda, lda, dX[0] + offset, incx, beta, dYcublas + offset, incx );
-//        magmablas_zhemv2( uplo, m, alpha, dA, lda, dX[0], incx, beta, dYcublas, incx, dC_work[0], workspace );
-//                     dC_work, workspace, num_gpus, nb, offset);
-
-        //magmablas_zhemv2( uplo, m, alpha, d_lA[0], lda, dX[0], incx, beta, dYcublas, incx, 
-        //        dC_work[0], workspace);
          
         end = get_current_time();
 
         magma_zgetvector( m, dYcublas, incx, Ycublas, incx );
                 
-       //fillZero(dC_work[0], lda * blocks);
         
         cuda_perf = flops / GetTimerValue(start,end);
         printf(     "%11.2f", cuda_perf );
@@ -329,8 +319,12 @@ int main(int argc, char **argv)
         if(nb == 32)
        { 
 
-//        magmablas_zhemv_mgpu_32_offset( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
-//                     dC_work, workspace, num_gpus, nb, offset, stream);
+        magmablas_zhemv2_mgpu_32_offset( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
+                dC_work, workspace, num_gpus, nb, offset);
+ 
+        }
+        else // nb = 64
+       { 
 
         magmablas_zhemv2_mgpu_offset( uplo, m, alpha, d_lA, lda, dX, incx, beta, dY, incx, 
                 dC_work, workspace, num_gpus, nb, offset);
