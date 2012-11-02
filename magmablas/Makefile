@@ -43,6 +43,8 @@ ZSRC := \
 	zsetmatrix_transpose.cu	\
 	dtrsm.cu		\
 	strsm.cu		\
+	dtrsm_work.cu		\
+	strsm_work.cu		\
 
 # multi-GPU
 ZSRC += \
