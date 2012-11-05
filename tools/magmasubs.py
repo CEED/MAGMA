@@ -332,6 +332,7 @@ subs = {
     ('stranspose',     'dtranspose',     'ctranspose',     'ztranspose'      ),
     ('szero',          'dzero',          'czero',          'zzero'           ),
     ('sy2sb',          'sy2sb',          'he2hb',          'he2hb'           ),
+    ('ssign',          'dsign',          'ssign',          'dsign'           ),
     
     # ----- Constants
     ('CblasTrans',     'CblasTrans',     'CblasConjTrans', 'CblasConjTrans'  ),
@@ -400,6 +401,7 @@ subs = {
     ('slabrd',         'dlabrd',         'clabrd',         'zlabrd'          ),
     ('slacgv',         'dlacgv',         'clacgv',         'zlacgv'          ),
     ('slacpy',         'dlacpy',         'clacpy',         'zlacpy'          ),
+    ('sladiv',         'dladiv',         'cladiv',         'zladiv'          ),
     ('slaed',          'dlaed',          'slaed',          'dlaed'           ),
     ('slaex',          'dlaex',          'slaex',          'dlaex'           ),
     ('slagsy',         'dlagsy',         'clagsy',         'zlagsy'          ),
@@ -408,6 +410,7 @@ subs = {
     ('slamch',         'dlamch',         'slamch',         'dlamch'          ),
     ('slamrg',         'dlamrg',         'slamrg',         'dlamrg'          ),
     ('slange',         'dlange',         'clange',         'zlange'          ),
+    ('slapy3',         'dlapy3',         'slapy3',         'dlapy3'          ),
     ('slanst',         'dlanst',         'clanht',         'zlanht'          ),
     ('slansy',         'dlansy',         'clansy',         'zlansy'          ),
     ('slantr',         'dlantr',         'clantr',         'zlantr'          ),
@@ -418,6 +421,7 @@ subs = {
     ('slarft',         'dlarft',         'clarft',         'zlarft'          ),
     ('slarfx',         'dlarfx',         'clarfx',         'zlarfx'          ),
     ('slarfy',         'dlarfy',         'clarfy',         'zlarfy'          ),
+    ('slarf',          'dlarf',          'clarf',          'zlarf'           ),
     ('slarnv',         'dlarnv',         'clarnv',         'zlarnv'          ),
     ('slarnv',         'dlarnv',         'slarnv',         'dlarnv'          ),
     ('slartg',         'dlartg',         'clartg',         'zlartg'          ),
