@@ -25,6 +25,8 @@ ZSRC := \
 	clag2z.cu		\
 	zlange.cu		\
 	zlanhe.cu		\
+        zlarf.cu                \
+        zlarfg-v2.cu            \
 	zlascl.cu		\
 	zlaswp.cu		\
 	zlat2c.cu		\
@@ -43,6 +45,7 @@ ZSRC := \
 	zsetmatrix_transpose.cu	\
 	dtrsm.cu		\
 	strsm.cu		\
+        dznrm2.cu               \
 	dtrsm_work.cu		\
 	strsm_work.cu		\
 
