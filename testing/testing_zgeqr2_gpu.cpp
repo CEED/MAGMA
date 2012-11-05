@@ -117,7 +117,7 @@ int main( int argc, char** argv)
 
     TESTING_MALLOC( h_work, cuDoubleComplex, lwork );
 
-    printf("  M     N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / ||A||_F\n");
+    printf("  M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)    ||R||_F / ||A||_F\n");
     printf("=======================================================================\n");
     for( i = 0; i < ntest; ++i ) {
         M = msize[i];
@@ -167,7 +167,7 @@ int main( int argc, char** argv)
             error = lapackf77_zlange("f", &M, &N, h_R, &lda, work) / error;
         
             printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e\n",
-                   (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, error );
+                   (int) M, (int) N, cpu_perf, 1000.*cpu_time, gpu_perf, 1000.*gpu_time, error );
         }
         else {
             printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)     ---  \n",
