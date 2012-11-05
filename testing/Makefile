@@ -68,6 +68,7 @@ ZSRC += \
 	\
 	testing_zgelqf_gpu.cpp	\
 	testing_zgeqrf_gpu.cpp	\
+	testing_zgeqr2_gpu.cpp  \
 	testing_zgeqrs3_gpu.cpp	\
 	testing_zgeqrs_gpu.cpp	\
 	testing_zlarfb_gpu.cpp	\
