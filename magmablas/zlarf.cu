@@ -65,10 +65,12 @@ void magma_zlarf_kernel( int m, cuDoubleComplex *v, cuDoubleComplex *tau,
         /*  C := C - v * w  */
         __syncthreads();
         cuDoubleComplex z__1 = - MAGMA_Z_CNJG(*tau) * sum[0];
-        for( int j = i; j < m; j += BLOCK_SIZE ) {
+        //for( int j = i; j < m; j += BLOCK_SIZE ) {
+        for( int j = m-i-1; j>=0 ; j -= BLOCK_SIZE ) {
                 dc[j] += z__1 * v[j];
         }
-        
+        __syncthreads();
+
         if (i==0){
             //v[0] = alpha;
 
