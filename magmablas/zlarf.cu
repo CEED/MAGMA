@@ -46,34 +46,33 @@ void magma_zlarf_kernel( int m, cuDoubleComplex *v, cuDoubleComplex *tau,
 {
     if ( !MAGMA_Z_EQUAL(*tau, MAGMA_Z_ZERO) ) {
         const int i = threadIdx.x;
-        cuDoubleComplex *dc = c + blockIdx.x * ldc;//, alpha;
+        cuDoubleComplex *dc = c + blockIdx.x * ldc;
 
         __shared__ cuDoubleComplex sum[ BLOCK_SIZE ];
 
-        if (i==0){
-            //alpha = v[0];
-            v[0]  = MAGMA_Z_ONE;
-        } 
-        __syncthreads();
-
         /*  w := v' * C  */
         sum[i] = MAGMA_Z_ZERO;
-        for( int j = i; j < m; j += BLOCK_SIZE )
-            sum[i] += MAGMA_Z_MUL( MAGMA_Z_CNJG( v[j] ), dc[j] );
+        for( int j = i; j < m; j += BLOCK_SIZE ){
+            if (j==0)
+               sum[i] += MAGMA_Z_MUL( MAGMA_Z_ONE, dc[j] );
+            else
+               sum[i] += MAGMA_Z_MUL( MAGMA_Z_CNJG( v[j] ), dc[j] );
+        }
         sum_reduce< BLOCK_SIZE >( i, sum );
 
         /*  C := C - v * w  */
         __syncthreads();
         cuDoubleComplex z__1 = - MAGMA_Z_CNJG(*tau) * sum[0];
-        //for( int j = i; j < m; j += BLOCK_SIZE ) {
         for( int j = m-i-1; j>=0 ; j -= BLOCK_SIZE ) {
+             if (j==0)
+                dc[j] += z__1;
+             else
                 dc[j] += z__1 * v[j];
         }
         __syncthreads();
 
+        /* Adjust the rest of the column norms */
         if (i==0){
-            //v[0] = alpha;
-
             double temp = MAGMA_Z_ABS( dc[0] ) / xnorm[blockIdx.x];
             temp = (temp + 1.) * (1. - temp);
             xnorm[blockIdx.x] = xnorm[blockIdx.x] * sqrt(temp); 
