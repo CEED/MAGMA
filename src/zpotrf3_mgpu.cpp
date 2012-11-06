@@ -398,7 +398,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                 trace_gpu_end( d, stream3 );
                 magma_event_record( event[d][3], stream[d][stream3] );
 /* needed on pluto */
-//magma_queue_sync( stream[d][stream3] );
+magma_queue_sync( stream[d][stream3] );
 
                 /* wait for the off-diagonal on cpu */
                 //magma_setdevice(id);
@@ -671,7 +671,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                                       stream[d][stream3] );
               magma_event_record( event[d][3], stream[d][stream3] );
 /* syn on rows on CPU, seem to be needed on Pluto */
-//magma_queue_sync( stream[d][stream3] );
+magma_queue_sync( stream[d][stream3] );
 
               /* broadcast the rows to gpus */
               buf2 = ((j+jb)/nb)%num_gpus;

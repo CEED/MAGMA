@@ -202,8 +202,8 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
               
             if( j > 0 ) {
 /* needed on pluto... */
-//magma_setdevice(id);
-//magma_queue_sync( stream[id][stream0] ); // wait for the column on CPU
+magma_setdevice(id);
+magma_queue_sync( stream[id][stream0] ); // wait for the column on CPU
 
               /* broadcast off-diagonal column to all gpus */
               d = (j/nb+1)%num_gpus;
@@ -459,8 +459,8 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
 
               if( j > 0 ) {
 /* needed on pluto... */
-//magma_setdevice(id);
-//magma_queue_sync( stream[id][stream0] ); // wait for the column on CPU
+magma_setdevice(id);
+magma_queue_sync( stream[id][stream0] ); // wait for the column on CPU
 
                   /* broadcast offdiagonal row to all gpus */
                   d = (j/nb+1)%num_gpus;
