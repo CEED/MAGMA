@@ -129,11 +129,7 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
         }
         magma_queue_create( &stream[d][0] );
         magma_queue_create( &stream[d][1] );
-        if( num_gpus == 1 ) {
-            magma_queue_create( &stream[d][2] );
-        } else {
-            stream[d][2] = NULL;
-        }
+        magma_queue_create( &stream[d][2] );
       }
       magma_setdevice(0);
       h = 1; //num_gpus; //(n+nb-1)/nb;
@@ -159,9 +155,7 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
 
         magma_queue_destroy( stream[d][0] ); 
         magma_queue_destroy( stream[d][1] );
-        if( num_gpus == 1 ) {
-            magma_queue_destroy( stream[d][2] );
-        }
+        magma_queue_destroy( stream[d][2] );
         magma_free( dwork[d] );
       }
       magma_setdevice(0);
