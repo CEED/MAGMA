@@ -52,7 +52,8 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                    cuDoubleComplex **d_lA,  magma_int_t ldda, 
                    cuDoubleComplex **d_lP,  magma_int_t lddp, 
                    cuDoubleComplex *a,      magma_int_t lda,   magma_int_t h,
-                   cudaStream_t stream[][3], magma_int_t *info ) 
+                   cudaStream_t stream[][3], cudaEvent_t event[][5],
+                   magma_int_t *info ) 
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -118,13 +119,13 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
     int upper = lapackf77_lsame(uplo_, "U");
     cuDoubleComplex *dlpanel;
     magma_int_t n_local[MagmaMaxGPUs], ldpanel;
-    cudaEvent_t event0[MagmaMaxGPUs],  /* send row to CPU    */
-                event1[MagmaMaxGPUs],  /* send diag to GPU   */
-                event2[MagmaMaxGPUs],  /* offdiagonal update */
-                event3[MagmaMaxGPUs],  /* send row to GPU    */
-                event4[MagmaMaxGPUs];  /* lookahead          */
+    //cudaEvent_t event0[MagmaMaxGPUs],  /* send row to CPU    */
+    //            event1[MagmaMaxGPUs],  /* send diag to GPU   */
+    //            event2[MagmaMaxGPUs],  /* offdiagonal update */
+    //            event3[MagmaMaxGPUs],  /* send row to GPU    */
+    //            event4[MagmaMaxGPUs];  /* lookahead          */
     const magma_int_t stream1 = 0, stream2 = 1, stream3 = 2;
-    double *d_dinvA[MagmaMaxGPUs][2], *d_x[MagmaMaxGPUs][2]; /* used by ztrsm_work */
+    cuDoubleComplex *d_dinvA[MagmaMaxGPUs][2], *d_x[MagmaMaxGPUs][2]; /* used by ztrsm_work */
 
     *info = 0;
     if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
@@ -157,12 +158,12 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
         else if (d == (m/nb)%num_gpus)
           n_local[d] += m%nb;
       }
-      magma_setdevice(d);
-      magma_event_create( &event0[d] );
-      magma_event_create( &event1[d] );
-      magma_event_create( &event2[d] );
-      magma_event_create( &event3[d] );
-      magma_event_create( &event4[d] );
+      //magma_setdevice(d);
+      //magma_event_create( &event0[d] );
+      //magma_event_create( &event1[d] );
+      //magma_event_create( &event2[d] );
+      //magma_event_create( &event3[d] );
+      //magma_event_create( &event4[d] );
     }
 
     /* == initialize the trace */
@@ -236,7 +237,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                     } else {
                         dlpanel = dlP(d, jb, 0, buf);
                         ldpanel = lddp;
-                        magma_queue_wait_event( stream[d][stream2], event0[d] ); // rows arrived at gpu
+                        magma_queue_wait_event( stream[d][stream2], event[d][0] ); // rows arrived at gpu
                     }
                     trace_gpu_start( d, stream2, "gemm", "gemm" );
                     magma_zgemm(MagmaConjTrans, MagmaNoTrans, 
@@ -245,7 +246,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                                            dlA(d, 0, nb0), ldda,
                                 c_one,     dlA(d, j, nb0), ldda);
                     trace_gpu_end( d, stream2 );
-                    magma_event_record( event2[d], stream[d][stream2] );
+                    magma_event_record( event[d][2], stream[d][stream2] );
                 }
                 d = (d+1)%num_gpus;
             }
@@ -280,7 +281,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                                     dlpanel,  ldpanel, 
                                     stream[d][stream1] );
             trace_gpu_end( d, stream1 );
-            magma_event_record( event1[d], stream[d][stream1] );
+            magma_event_record( event[d][1], stream[d][stream1] );
             d = (d+1)%num_gpus;
           }
         } else {
@@ -315,7 +316,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                 //magma_queue_sync( stream[d][stream2] );
                 if( j+jb < m && d == (j/nb+1)%num_gpus ) { 
                     /* owns the next column, look-ahead next block on stream1 */
-                    magma_queue_wait_event( stream[d][stream1], event2[d] ); // wait for gemm update 
+                    magma_queue_wait_event( stream[d][stream1], event[d][2] ); // wait for gemm update 
                     magmablasSetKernelStream(stream[d][stream1]);
                     trace_gpu_start( d, stream1, "trsm", "trsm" );
 #if (defined(PRECISION_d) || defined(PRECISION_s)) && defined(ZTRSM_WORK)
@@ -330,11 +331,11 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                                  dlpanel,                ldpanel, 
                                  dlA(d, j, nb*j_local2), ldda);
 #endif
-                    magma_event_record( event4[d], stream[d][stream1] );
+                    magma_event_record( event[d][4], stream[d][stream1] );
                     trace_gpu_end( d, stream1 );
                 } else if( nb2 > 0 ) {
                     /* update all the blocks on stream2 */
-                    magma_queue_wait_event( stream[d][stream2], event1[d] ); // wait for cholesky factor 
+                    magma_queue_wait_event( stream[d][stream2], event[d][1] ); // wait for cholesky factor 
                     trace_gpu_start( d, stream2, "trsm", "trsm" );
                     magmablasSetKernelStream(stream[d][stream2]);
 #if (defined(PRECISION_d) || defined(PRECISION_s)) && defined(ZTRSM_WORK)
@@ -375,7 +376,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                         j2 = j - (1+d2)*nb;
                         if( j2 < 0 ) break;
                         id2  = (j2/nb)%num_gpus;
-                        magma_queue_wait_event( stream[d][stream3], event0[id2] );
+                        magma_queue_wait_event( stream[d][stream3], event[id2][0] );
                     }
 
                     /* > diagonal */
@@ -383,11 +384,11 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                         j2 = j - d2*nb;
                         if( j2 < 0 ) break;
                         id2  = (j2/nb)%num_gpus;
-                        magma_queue_wait_event( stream[d][stream3], event1[id2] );
+                        magma_queue_wait_event( stream[d][stream3], event[id2][1] );
                     }
                 }
                 /* lookahead */
-                magma_queue_wait_event( stream[d][stream3], event4[d] );
+                magma_queue_wait_event( stream[d][stream3], event[d][4] );
 
                 trace_gpu_start( d, stream3, "comm", "row to CPU" );
                 magma_zgetmatrix_async( (j+jb), nb0,
@@ -395,7 +396,9 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                                         Aup(0,j+jb),            lda, 
                                         stream[d][stream3] );
                 trace_gpu_end( d, stream3 );
-                magma_event_record( event3[d], stream[d][stream3] );
+                magma_event_record( event[d][3], stream[d][stream3] );
+/* needed on pluto */
+//magma_queue_sync( stream[d][stream3] );
 
                 /* wait for the off-diagonal on cpu */
                 //magma_setdevice(id);
@@ -408,13 +411,13 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                     {
                         magma_setdevice(d2);
                         trace_gpu_start( d2, stream3, "comm", "row to GPUs" );
-                        magma_queue_wait_event( stream[d2][stream3], event3[d] ); // rows arrived at cpu on stream3
+                        magma_queue_wait_event( stream[d2][stream3], event[d][3] ); // rows arrived at cpu on stream3
                         magma_zsetmatrix_async( j+jb, nb0,
                                                 Aup(0,j+jb),        lda,
                                                 dlP(d2,nb0,0,buf2), lddp, 
                                                 stream[d2][stream3] );
                         trace_gpu_end( d2, stream3 );
-                        magma_event_record( event0[d2], stream[d2][stream3] );
+                        magma_event_record( event[d2][0], stream[d2][stream3] );
                     }
                 } 
             }
@@ -442,7 +445,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                 if( nb2 > 0 ) {
                     magma_setdevice(d);
                     magmablasSetKernelStream(stream[d][stream2]);  
-                    magma_queue_wait_event( stream[d][stream2], event1[d] ); // wait for cholesky factor
+                    magma_queue_wait_event( stream[d][stream2], event[d][1] ); // wait for cholesky factor
                     trace_gpu_start( d, stream2, "trsm", "trsm" );
 #if (defined(PRECISION_d) || defined(PRECISION_s)) && defined(ZTRSM_WORK)
                     magmablas_ztrsm_work( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit, 
@@ -525,14 +528,14 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                     } else {
                         dlpanel = dlPT(d,0,jb,buf);
                         ldpanel = nb;
-                        magma_queue_wait_event( stream[d][stream2], event0[d] ); // rows arrived at gpu
+                        magma_queue_wait_event( stream[d][stream2], event[d][0] ); // rows arrived at gpu
                     }
                     magma_zgemm( MagmaNoTrans, MagmaConjTrans,
                                  n_local[d]-nb0, jb, j,
                                  c_neg_one, dlA(d, nb0, 0), ldda,
                                             dlpanel,        ldpanel,
                                  c_one,     dlA(d, nb0, j), ldda);
-                    magma_event_record( event2[d], stream[d][stream2] );
+                    magma_event_record( event[d][2], stream[d][stream2] );
                 }
                 d = (d+1)%num_gpus;
             }
@@ -563,7 +566,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                                     Alo(j,j), lda,
                                     dlpanel,  ldpanel, 
                                     stream[d][stream1] );
-            magma_event_record( event1[d], stream[d][stream1] );
+            magma_event_record( event[d][1], stream[d][stream1] );
             d = (d+1)%num_gpus;
           }
         } else {
@@ -593,7 +596,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
 
             magma_setdevice(d);
             if( j+nb < n && d == (j/nb+1)%num_gpus ) { /* owns next column, look-ahead next block on stream1 */
-              magma_queue_wait_event( stream[d][stream1], event2[d] ); // wait for gemm update 
+              magma_queue_wait_event( stream[d][stream1], event[d][2] ); // wait for gemm update 
               magmablasSetKernelStream(stream[d][stream1]);
 #if (defined(PRECISION_d) || defined(PRECISION_s)) && defined(ZTRSM_WORK)
               magmablas_ztrsm_work( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
@@ -607,10 +610,10 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                            dlpanel,                ldpanel, 
                            dlA(d, nb*j_local2, j), ldda);
 #endif
-              magma_event_record( event4[d], stream[d][stream1] );
+              magma_event_record( event[d][4], stream[d][stream1] );
             } else if( nb2 > 0 ) { /* other gpus updating all the blocks on stream2 */
               /* update the entire column */
-              magma_queue_wait_event( stream[d][stream2], event1[d] ); // wait for the cholesky factor
+              magma_queue_wait_event( stream[d][stream2], event[d][1] ); // wait for the cholesky factor
               magmablasSetKernelStream(stream[d][stream2]);
 #if (defined(PRECISION_d) || defined(PRECISION_s)) && defined(ZTRSM_WORK)
               magmablas_ztrsm_work( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
@@ -648,7 +651,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                       j2 = j - (1+d2)*nb;
                       if( j2 < 0 ) break;
                       id2  = (j2/nb)%num_gpus;
-                      magma_queue_wait_event( stream[d][stream3], event0[id2] );
+                      magma_queue_wait_event( stream[d][stream3], event[id2][0] );
                   }
 
                   /* > diagonal */
@@ -656,17 +659,19 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                       j2 = j - d2*nb;
                       if( j2 < 0 ) break;
                       id2  = (j2/nb)%num_gpus;
-                      magma_queue_wait_event( stream[d][stream3], event1[id2] );
+                      magma_queue_wait_event( stream[d][stream3], event[id2][1] );
                   }
               }
               // lookahead done
-              magma_queue_wait_event( stream[d][stream3], event4[d] );
+              magma_queue_wait_event( stream[d][stream3], event[d][4] );
 
               magma_zgetmatrix_async( nb0, j+jb,
                                       dlA(d, nb*j_local2, 0), ldda,
                                       Alo(j+jb,0),            lda, 
                                       stream[d][stream3] );
-              magma_event_record( event3[d], stream[d][stream3] );
+              magma_event_record( event[d][3], stream[d][stream3] );
+/* syn on rows on CPU, seem to be needed on Pluto */
+//magma_queue_sync( stream[d][stream3] );
 
               /* broadcast the rows to gpus */
               buf2 = ((j+jb)/nb)%num_gpus;
@@ -674,12 +679,12 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                   if( d2 != d ) 
                   {
                       magma_setdevice(d2);
-                      magma_queue_wait_event( stream[d2][stream3], event3[d] ); // getmatrix done
+                      magma_queue_wait_event( stream[d2][stream3], event[d][3] ); // getmatrix done
                       magma_zsetmatrix_async( nb0, j+jb,
                                               Alo(j+jb,0),         lda,
                                               dlPT(d2,0,nb0,buf2), nb, 
                                               stream[d2][stream3] );
-                      magma_event_record( event0[d2], stream[d2][stream3] );
+                      magma_event_record( event[d2][0], stream[d2][stream3] );
                   }
               }
           }
@@ -706,7 +711,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                 magma_setdevice(d);
                 magmablasSetKernelStream(stream[d][stream2]);
                 /* update the remaining blocks in the column */
-                magma_queue_wait_event( stream[d][stream2], event1[d] ); // panel received
+                magma_queue_wait_event( stream[d][stream2], event[d][1] ); // panel received
 #if (defined(PRECISION_d) || defined(PRECISION_s)) && defined(ZTRSM_WORK)
                 magmablas_ztrsm_work( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit, 
                                       nb2, jb, c_one,
@@ -734,11 +739,11 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
       magma_queue_sync( stream[d][2] );
       magmablasSetKernelStream(NULL);
 
-      magma_event_destroy( event0[d] ); 
-      magma_event_destroy( event1[d] );
-      magma_event_destroy( event2[d] );
-      magma_event_destroy( event3[d] );
-      magma_event_destroy( event4[d] );
+      //magma_event_destroy( event0[d] ); 
+      //magma_event_destroy( event1[d] );
+      //magma_event_destroy( event2[d] );
+      //magma_event_destroy( event3[d] );
+      //magma_event_destroy( event4[d] );
 #if (defined(PRECISION_d) || defined(PRECISION_s)) && defined(ZTRSM_WORK)
       for( j=0; j<2; j++ ) {
           magma_free( d_dinvA[d][j] );

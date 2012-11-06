@@ -54,7 +54,8 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                    cuDoubleComplex **d_lA,  magma_int_t ldda,
                    cuDoubleComplex **d_lP,  magma_int_t lddp,
                    cuDoubleComplex *a,      magma_int_t lda,   magma_int_t h,
-                   cudaStream_t stream[][3], magma_int_t *info );
+                   cudaStream_t stream[][3], cudaEvent_t event[][5],
+                   magma_int_t *info );
 
 /* use three streams; seems to be faster on Keeneland, but has problem on Pluto */
 extern "C" magma_int_t
@@ -63,7 +64,8 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                    cuDoubleComplex **d_lA,  magma_int_t ldda,
                    cuDoubleComplex **d_lP,  magma_int_t lddp,
                    cuDoubleComplex *a,      magma_int_t lda,   magma_int_t h,
-                   cudaStream_t stream[][3], magma_int_t *info );
+                   cudaStream_t stream[][3], cudaEvent_t event[][5],
+                   magma_int_t *info );
 #define A(i, j)  (a   +(j)*lda  + (i))
 #define dA(d, i, j) (dwork[(d)]+(j)*lddla + (i))
 #define dT(d, i, j) (dt[(d)]   +(j)*ldda  + (i))
@@ -146,6 +148,7 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
     magma_int_t     ldda, lddla, ldwrk, nb, iinfo, n_local[MagmaMaxGPUs], J2, d, num_gpus;
     magma_int_t     j, jj, jb, jb1, jb2, jb3, J, JB, NB, MB, h;
     cudaStream_t    stream[MagmaMaxGPUs][3];
+    cudaEvent_t     event[MagmaMaxGPUs][5];
 //#define ROW_MAJOR_PROFILE
 #ifdef  ROW_MAJOR_PROFILE
     magma_timestr_t start, end, start0, end0;
@@ -185,7 +188,7 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
     
     MB = n;  /* number of rows in the big panel    */
     NB = (magma_int_t)(num_gpus*((0.8*freeMem-2*nb*ldda)/lddla)); /* number of columns in the big panel */
-    //NB = min(5*nb,n);
+    NB = min(5*nb,n);
 
     if( NB >= n ) {
 #ifdef CHECK_ZPOTRF_OOC
@@ -210,9 +213,9 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
         return *info;
       }
       dwork[d] = &dt[d][max(2,num_gpus)*nb*ldda];
-      magma_queue_create( &stream[d][0] );
-      magma_queue_create( &stream[d][1] );
-      magma_queue_create( &stream[d][2] );
+
+      for( j=0; j<3; j++ ) magma_queue_create( &stream[d][j] );
+      for( j=0; j<5; j++ ) magma_event_create( &event[d][j]  );
     }
 #ifdef  ROW_MAJOR_PROFILE
     start0 = get_current_time();
@@ -349,9 +352,11 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
 
         /* factor the big panel */
         // using two streams
-        magma_zpotrf2_mgpu(num_gpus, uplo, JB, n-J, J, J, nb, dwork, NB, dt, ldda, a, lda, h, stream, &iinfo);
+        //magma_zpotrf2_mgpu(num_gpus, uplo, JB, n-J, J, J, nb, 
+        //                   dwork, NB, dt, ldda, a, lda, h, stream, event, &iinfo);
         // using three streams
-        magma_zpotrf3_mgpu(num_gpus, uplo, JB, n-J, J, J, nb, dwork, NB, dt, ldda, a, lda, h, stream, &iinfo);
+        magma_zpotrf3_mgpu(num_gpus, uplo, JB, n-J, J, J, nb, 
+                           dwork, NB, dt, ldda, a, lda, h, stream, event, &iinfo);
         if( iinfo != 0 ) {
             *info = J+iinfo;
             break;
@@ -480,11 +485,11 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
 
         /* factor the big panel */
         // using two streams
-        magma_zpotrf2_mgpu(num_gpus, uplo, n-J, JB, J, J, nb, 
-                           dwork, lddla, dt, ldda, a, lda, h, stream, &iinfo);
+        //magma_zpotrf2_mgpu(num_gpus, uplo, n-J, JB, J, J, nb, 
+        //                   dwork, lddla, dt, ldda, a, lda, h, stream, event, &iinfo);
         // using three streams
-        //magma_zpotrf3_mgpu(num_gpus, uplo, n-J, JB, J, J, nb, 
-        //                   dwork, lddla, dt, ldda, a, lda, h, stream, &iinfo);
+        magma_zpotrf3_mgpu(num_gpus, uplo, n-J, JB, J, J, nb, 
+                           dwork, lddla, dt, ldda, a, lda, h, stream, event, &iinfo);
         if( iinfo != 0 ) {
             *info = J+iinfo;
             break;
@@ -511,10 +516,14 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
     for (d=0; d<num_gpus; d++ ) {
         magma_setdevice(d);
 
+        for( j=0; j<3; j++ ) {
+            magma_queue_destroy( stream[d][j] );
+        }
         magma_free( dt[d] );
-        magma_queue_destroy( stream[d][0] );
-        magma_queue_destroy( stream[d][1] );
-        magma_queue_destroy( stream[d][2] );
+
+        for( j=0; j<5; j++ ) {
+           magma_event_destroy( event[d][j] );
+        }
     }
     magma_setdevice(0);
     magma_free_pinned( work );

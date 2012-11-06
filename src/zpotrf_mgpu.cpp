@@ -17,7 +17,8 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                    cuDoubleComplex **d_lA, magma_int_t ldda, 
                    cuDoubleComplex **d_lP, magma_int_t lddp,
                    cuDoubleComplex  *a,    magma_int_t lda, magma_int_t h,
-                   cudaStream_t stream[][3], magma_int_t *info );
+                   cudaStream_t stream[][3], cudaEvent_t event[][5],
+                   magma_int_t *info );
 
 /* use three streams; seems to be faster on Keeneland, but has problem on Pluto */
 extern "C" magma_int_t
@@ -26,7 +27,8 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                    cuDoubleComplex **d_lA, magma_int_t ldda, 
                    cuDoubleComplex **d_lP, magma_int_t lddp,
                    cuDoubleComplex  *a,    magma_int_t lda, magma_int_t h,
-                   cudaStream_t stream[][3], magma_int_t *info );
+                   cudaStream_t stream[][3], cudaEvent_t event[][5],
+                   magma_int_t *info );
 
 extern "C" magma_int_t
 magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n, 
@@ -95,6 +97,7 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
     int upper = lapackf77_lsame(uplo_, "U");
     cuDoubleComplex *dwork[MagmaMaxGPUs];
     cudaStream_t    stream[MagmaMaxGPUs][3];
+    cudaEvent_t     event[MagmaMaxGPUs][5];
 
     *info = 0;
     nb = magma_get_zpotrf_nb(n);
@@ -137,9 +140,8 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
           *info = MAGMA_ERR_DEVICE_ALLOC;
           return *info;
         }
-        magma_queue_create( &stream[d][0] );
-        magma_queue_create( &stream[d][1] );
-        magma_queue_create( &stream[d][2] );
+        for( j=0; j<3; j++ ) magma_queue_create( &stream[d][j] );
+        for( j=0; j<5; j++ ) magma_event_create( &event[d][j]  );
       }
       magma_setdevice(0);
       h = 1; //num_gpus; //(n+nb-1)/nb;
@@ -149,31 +151,32 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
       }
       if (upper) {
           /* with two streams */
-          magma_zpotrf2_mgpu(num_gpus, uplo, n, n, 0, 0, nb, d_lA, ldda, dwork, lddp, work, n,  
-                             h, stream, info);
+          //magma_zpotrf2_mgpu(num_gpus, uplo, n, n, 0, 0, nb, d_lA, ldda, dwork, lddp, work, n,  
+          //                   h, stream, event, info);
           /* with three streams */
-          //magma_zpotrf3_mgpu(num_gpus, uplo, n, n, 0, 0, nb, d_lA, ldda, dwork, lddp, work, n,  
-          //                   h, stream, info);
+          magma_zpotrf3_mgpu(num_gpus, uplo, n, n, 0, 0, nb, d_lA, ldda, dwork, lddp, work, n,  
+                             h, stream, event, info);
       } else {
           /* with two streams */
-          magma_zpotrf2_mgpu(num_gpus, uplo, n, n, 0, 0, nb, d_lA, ldda, dwork, lddp, work, nb*h, 
-                             h, stream, info);
-          /* with three streams */
           //magma_zpotrf2_mgpu(num_gpus, uplo, n, n, 0, 0, nb, d_lA, ldda, dwork, lddp, work, nb*h, 
-          //                   h, stream, info);
+          //                   h, stream, event, info);
+          /* with three streams */
+          magma_zpotrf3_mgpu(num_gpus, uplo, n, n, 0, 0, nb, d_lA, ldda, dwork, lddp, work, nb*h, 
+                             h, stream, event, info);
       }
 
       /* clean up */
       for( d=0; d<num_gpus; d++ ) {
         magma_setdevice(d);
-        magma_queue_sync( stream[d][0] );
-        magma_queue_sync( stream[d][1] );
-        magma_queue_sync( stream[d][2] );
+        for( j=0; j<3; j++ ) {
+            magma_queue_sync( stream[d][j] );
+            magma_queue_destroy( stream[d][j] ); 
+        }
         magmablasSetKernelStream(NULL);
 
-        magma_queue_destroy( stream[d][0] ); 
-        magma_queue_destroy( stream[d][1] );
-        magma_queue_destroy( stream[d][2] );
+        for( j=0; j<5; j++ ) 
+            magma_event_destroy( event[d][j] );
+
         magma_free( dwork[d] );
       }
       magma_setdevice(0);
