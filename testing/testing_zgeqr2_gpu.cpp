@@ -139,9 +139,13 @@ int main( int argc, char** argv)
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
+
+        cudaDeviceSynchronize();
+
         gpu_time = magma_wtime();
         // magma_zgeqrf2_gpu( M, N, d_A, ldda, tau, &info);
         magma_zgeqr2_gpu(&M, &N, d_A, &ldda, dtau, dwork, &info);
+        cudaDeviceSynchronize();
         gpu_time = magma_wtime() - gpu_time;
         gpu_perf = gflops / gpu_time;
         if (info != 0)
