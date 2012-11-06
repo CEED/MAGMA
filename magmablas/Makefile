@@ -59,6 +59,8 @@ ZSRC += \
 	zher2k_mgpu.cpp		\
 	zgetmatrix_transpose_mgpu.cu	\
 	zsetmatrix_transpose_mgpu.cu	\
+    zhemv_fermi_mgpu_32.cu  \
+	zhemv_fermi_mgpu.cu
 
 # Card-specific versions that need precisions generated must be above in ZSRC,
 # so they are all put into Makefile.src in the release. The code is #ifdef'd
