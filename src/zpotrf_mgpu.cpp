@@ -10,8 +10,18 @@
 */
 #include "common_magma.h"
 
+/* use two streams; one for comm, and one for comp */
 extern "C" magma_int_t
 magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, 
+                   magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
+                   cuDoubleComplex **d_lA, magma_int_t ldda, 
+                   cuDoubleComplex **d_lP, magma_int_t lddp,
+                   cuDoubleComplex  *a,    magma_int_t lda, magma_int_t h,
+                   cudaStream_t stream[][3], magma_int_t *info );
+
+/* use three streams; seems to be faster on Keeneland, but has problem on Pluto */
+extern "C" magma_int_t
+magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, 
                    magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
                    cuDoubleComplex **d_lA, magma_int_t ldda, 
                    cuDoubleComplex **d_lP, magma_int_t lddp,
@@ -138,11 +148,19 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
         return *info;
       }
       if (upper) {
+          /* with two streams */
           magma_zpotrf2_mgpu(num_gpus, uplo, n, n, 0, 0, nb, d_lA, ldda, dwork, lddp, work, n,  
                              h, stream, info);
+          /* with three streams */
+          //magma_zpotrf3_mgpu(num_gpus, uplo, n, n, 0, 0, nb, d_lA, ldda, dwork, lddp, work, n,  
+          //                   h, stream, info);
       } else {
+          /* with two streams */
           magma_zpotrf2_mgpu(num_gpus, uplo, n, n, 0, 0, nb, d_lA, ldda, dwork, lddp, work, nb*h, 
                              h, stream, info);
+          /* with three streams */
+          //magma_zpotrf2_mgpu(num_gpus, uplo, n, n, 0, 0, nb, d_lA, ldda, dwork, lddp, work, nb*h, 
+          //                   h, stream, info);
       }
 
       /* clean up */

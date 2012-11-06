@@ -37,6 +37,7 @@ ZSRC += \
 	zpotrf.cpp		\
 	zpotrf_m.cpp		\
 	zpotrf2_mgpu.cpp	\
+	zpotrf3_mgpu.cpp	\
 	zpotri.cpp		\
 	zlauum.cpp		\
 	ztrtri.cpp		\

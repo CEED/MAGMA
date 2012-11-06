@@ -47,7 +47,7 @@ void magmablas_ztrsm_work( char side, char uplo, char tran, char diag, magma_int
 
 
 extern "C" magma_int_t
-magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, 
+magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, 
                    magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
                    cuDoubleComplex **d_lA,  magma_int_t ldda, 
                    cuDoubleComplex **d_lP,  magma_int_t lddp, 

@@ -47,8 +47,18 @@ magma_zdtohpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n,
               cuDoubleComplex **work, magma_int_t ldda, 
               cudaStream_t stream[][3], magma_int_t *info);
 
+/* use two streams; one for comm, and one for comp */
 extern "C" magma_int_t
 magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
+                   magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
+                   cuDoubleComplex **d_lA,  magma_int_t ldda,
+                   cuDoubleComplex **d_lP,  magma_int_t lddp,
+                   cuDoubleComplex *a,      magma_int_t lda,   magma_int_t h,
+                   cudaStream_t stream[][3], magma_int_t *info );
+
+/* use three streams; seems to be faster on Keeneland, but has problem on Pluto */
+extern "C" magma_int_t
+magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                    magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
                    cuDoubleComplex **d_lA,  magma_int_t ldda,
                    cuDoubleComplex **d_lP,  magma_int_t lddp,
@@ -338,7 +348,10 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
         } /* end of updates with previous rows */
 
         /* factor the big panel */
+        // using two streams
         magma_zpotrf2_mgpu(num_gpus, uplo, JB, n-J, J, J, nb, dwork, NB, dt, ldda, a, lda, h, stream, &iinfo);
+        // using three streams
+        magma_zpotrf3_mgpu(num_gpus, uplo, JB, n-J, J, J, nb, dwork, NB, dt, ldda, a, lda, h, stream, &iinfo);
         if( iinfo != 0 ) {
             *info = J+iinfo;
             break;
@@ -466,8 +479,12 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
         }
 
         /* factor the big panel */
+        // using two streams
         magma_zpotrf2_mgpu(num_gpus, uplo, n-J, JB, J, J, nb, 
                            dwork, lddla, dt, ldda, a, lda, h, stream, &iinfo);
+        // using three streams
+        //magma_zpotrf3_mgpu(num_gpus, uplo, n-J, JB, J, J, nb, 
+        //                   dwork, lddla, dt, ldda, a, lda, h, stream, &iinfo);
         if( iinfo != 0 ) {
             *info = J+iinfo;
             break;
