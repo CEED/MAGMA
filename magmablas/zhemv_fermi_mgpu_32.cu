@@ -640,7 +640,7 @@ magmablas_zhemv_mgpu_32_offset( char uplo, magma_int_t n,
         }
         if(nb != 32)
         {
-        printf("Error in magmablas_zsymv_200_mgpu: nb != 32, program will exit! please reallocate your matrix among GPUs\n");
+        printf("Error in magmablas_zhemv_200_mgpu: nb != 32, program will exit! please reallocate your matrix among GPUs\n");
         exit(0);
         }
         magma_int_t i = 0;
@@ -678,7 +678,7 @@ magmablas_zhemv_mgpu_32_offset( char uplo, magma_int_t n,
 
 extern "C"
 magma_int_t
-magmablas_zhemv2_200_mgpu_offset_32( char uplo, magma_int_t n,
+magmablas_zhemv2_mgpu_32_offset( char uplo, magma_int_t n,
                       cuDoubleComplex alpha,
                       cuDoubleComplex **A, magma_int_t lda,
                       cuDoubleComplex **X, magma_int_t incx,
@@ -730,7 +730,7 @@ magmablas_zhemv2_200_mgpu_offset_32( char uplo, magma_int_t n,
         }
         if(nb != 32)
         {
-        printf("Error in magmablas_zsymv_200_mgpu: nb != 32, program will exit! please reallocate your matrix among GPUs\n");
+        printf("Error in magmablas_zhemv_200_mgpu: nb != 32, program will exit! please reallocate your matrix among GPUs\n");
         exit(0);
         }
         magma_int_t i = 0;
@@ -819,7 +819,7 @@ magmablas_zhemv2_mgpu_32( char uplo, magma_int_t n,
         }
         if(nb != 32)
         {
-        printf("Error in magmablas_zsymv_200_mgpu: nb != 32, program will exit! please reallocate your matrix among GPUs\n");
+        printf("Error in magmablas_zhemv_200_mgpu: nb != 32, program will exit! please reallocate your matrix among GPUs\n");
         exit(0);
         }
         magma_int_t i = 0;

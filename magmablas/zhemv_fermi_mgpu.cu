@@ -1059,16 +1059,10 @@ magmablas_zhemv_mgpu_offset( char uplo, magma_int_t n,
         }
         if(nb != 64)
         {
-        printf("Error in magmablas_zsymv_200_mgpu_offset: nb != 64, program will exit! please reallocate your matrix among GPUs\n");
+        printf("Error in magmablas_zhemv_200_mgpu_offset: nb != 64, program will exit! please reallocate your matrix among GPUs\n");
         exit(0);
         }
-        /*
-        if(num_gpus == 1)
-        {
-            magmablas_zhemv2(uplo, n-offset, alpha, A[0] + offset + lda * offset, lda, X[0] + offset, incx, beta, Y[0] + offset, incy, work[0], workspace); 
-        }
-        else
-      */
+
         {
         magma_int_t i = 0;
         for(i=0; i<num_gpus; i++)
@@ -1159,16 +1153,16 @@ magmablas_zhemv2_mgpu_offset( char uplo, magma_int_t n,
         }
         if(nb != 64)
         {
-        printf("Error in magmablas_zsymv_200_mgpu_offset: nb != 64, program will exit! please reallocate your matrix among GPUs\n");
+        printf("Error in magmablas_zhemv_200_mgpu_offset: nb != 64, program will exit! please reallocate your matrix among GPUs\n");
         exit(0);
         }
-        /*
+        
         if(num_gpus == 1)
         {
             magmablas_zhemv2(uplo, n-offset, alpha, A[0] + offset + lda * offset, lda, X[0] + offset, incx, beta, Y[0] + offset, incy, work[0], workspace); 
         }
         else
-      */
+      
         {
           
         magma_int_t i = 0; 
@@ -1203,7 +1197,7 @@ magmablas_zhemv2_mgpu_offset( char uplo, magma_int_t n,
 
 extern "C"
 magma_int_t
-magmablas_zhemv2_200_mgpu( char uplo, magma_int_t n,
+magmablas_zhemv2_mgpu( char uplo, magma_int_t n,
                       cuDoubleComplex alpha,
                       cuDoubleComplex **A, magma_int_t lda,
                       cuDoubleComplex **X, magma_int_t incx,
@@ -1259,7 +1253,7 @@ magmablas_zhemv2_200_mgpu( char uplo, magma_int_t n,
         }
         if(nb != 64)
         {
-        printf("Error in magmablas_zsymv_200_mgpu_offset: nb != 64, program will exit! please reallocate your matrix among GPUs\n");
+        printf("Error in magmablas_zhemv_200_mgpu_offset: nb != 64, program will exit! please reallocate your matrix among GPUs\n");
         exit(0);
         }
 
