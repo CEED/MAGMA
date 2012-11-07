@@ -27,10 +27,12 @@
 
 #define PRECISION_z
 
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhetrd
 */
 
+#if (GPUSHMEM >= 200)
 extern "C" magma_int_t
 magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n, 
              cuDoubleComplex *a, magma_int_t lda, 
@@ -38,7 +40,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
              cuDoubleComplex *work, magma_int_t lwork, 
              magma_int_t *info);
 
-
+#endif
 
 
 
@@ -153,11 +155,13 @@ int main( int argc, char** argv)
         if(num_gpus == 1)
               magma_zhetrd(uplo[0], N, h_R, lda, diag, offdiag, 
                      tau, h_work, lwork, &info);
+#if (GPUSHMEM >= 200)
         else
         {     
               magma_zhetrd_mgpu(num_gpus, 1, uplo[0], N, h_R, lda, diag, offdiag, 
                      tau, h_work, lwork, &info);
         }
+#endif
         gpu_time = magma_wtime() - gpu_time;
         if ( info != 0 )
             printf("magma_zhetrd returned error %d\n", (int) info);
@@ -241,4 +245,7 @@ int main( int argc, char** argv)
     /* Shutdown */
     TESTING_CUDA_FINALIZE();
     return EXIT_SUCCESS;
+
 }
+
+
