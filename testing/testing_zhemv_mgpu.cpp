@@ -34,6 +34,9 @@
 #define MultiGPUs
 #define validate
 
+
+#if (GPUSHMEM >= 200)
+
 void fillZero(cuDoubleComplex *A, int size);
 extern "C"
 magma_int_t
@@ -73,7 +76,7 @@ magmablas_zhemv2_mgpu_32_offset( char uplo, magma_int_t n,
 
 
 
-
+#endif
 
 int main(int argc, char **argv)
 {        
@@ -253,13 +256,13 @@ int main(int argc, char **argv)
             "==============================================================\n");
 
 
-    for( offset = 0; offset< N; offset ++ )
+//    for( offset = 0; offset< N; offset ++ )
     
-    //for(int size = istart ; size <= N ; size += 128)
+    for(int size = istart ; size <= N ; size += 128)
     {
-        printf("offset = %d ", offset);
-    //    m = size ;
-        m = N;
+    //    printf("offset = %d ", offset);
+        m = size ;
+    //    m = N;
         // lda = ((m+31)/32)*32;// 
         lda = LDA; 
         flops = FLOPS( (double)m ) / 1e6;
