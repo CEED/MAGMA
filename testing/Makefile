@@ -27,6 +27,7 @@ ZSRC += \
 	testing_zsymmetrize.cpp	\
 	testing_zswap.cpp	\
 	testing_zutil.cpp	\
+	testing_zhemv_mgpu.cpp	\
 
 # ----------
 # Cholesky, GPU interface
