@@ -15,37 +15,37 @@
 #include "trace.h"
 
 extern "C" magma_int_t
-magma_zdtohhe(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
-              cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex **dwork, magma_int_t ldda, cudaStream_t stream[][4],
-              magma_int_t *info);
-
-extern "C" magma_int_t
-magma_zhtodhe(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
+magma_zhtodhe(int num_gpus, char *uplo, magma_int_t n, magma_int_t nb,
               cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex **dwork, magma_int_t ldda, cudaStream_t stream[][10],
               magma_int_t *info);
 
-void
+extern "C" void
 magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
-        cuDoubleComplex alpha, cuDoubleComplex **db, int lddb, 
+        cuDoubleComplex alpha, cuDoubleComplex **db, int lddb, int offset_b,
         double beta,           cuDoubleComplex **dc, int lddc, int offset,
         int num_streams, cudaStream_t stream[][10]);
 
-extern "C" double
-magma_zlatrd_mgpu(int num_gpus, char uplo, magma_int_t n, magma_int_t nb, magma_int_t nb0,
-                  cuDoubleComplex *a,  magma_int_t lda,
-                  double *e, cuDoubleComplex *tau,
-                  cuDoubleComplex *w,       magma_int_t ldw,
-                  cuDoubleComplex **da,     magma_int_t ldda, magma_int_t offset,
-                  cuDoubleComplex **dw,     magma_int_t lddw,
-                  cuDoubleComplex **dwork2, magma_int_t ldwork2,
-                  magma_int_t k, cuDoubleComplex  *dx[MagmaMaxGPUs], cuDoubleComplex *dy[MagmaMaxGPUs], cuDoubleComplex *work,
-                  cudaStream_t stream[][10] );
+extern "C" double     
+magma_zlatrd_mgpu(int num_gpus, char uplo,  
+                  magma_int_t n0, magma_int_t n, magma_int_t nb, magma_int_t nb0,
+                  cuDoubleComplex *a,  magma_int_t lda, 
+                  double *e, cuDoubleComplex *tau, 
+                  cuDoubleComplex *w,   magma_int_t ldw,
+                  cuDoubleComplex **da, magma_int_t ldda, magma_int_t offset,
+                  cuDoubleComplex **dw, magma_int_t lddw,
+                  cuDoubleComplex *dwork[4], magma_int_t ldwork,
+                  magma_int_t k,
+                  cuDoubleComplex  *dx[4], cuDoubleComplex *dy[4],
+                  cuDoubleComplex *work,
+                  cudaStream_t stream[][10],
+                  double *times);
+
 
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 
 #if (defined(PRECISION_s))
-//  #define magma_ssyr2k magmablas_ssyr2k
+//  #define cublasSsyr2k magmablas_ssyr2k
 #endif
 // === End defining what BLAS to use ======================================
 
@@ -70,7 +70,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
     =======   
     ZHETRD reduces a complex Hermitian matrix A to real symmetric   
     tridiagonal form T by an orthogonal similarity transformation:   
-    Q**H * A * Q = T.   
+    Q\*\*H * A * Q = T.   
 
     Arguments   
     =========   
@@ -180,28 +180,26 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
     magma_int_t ln, ldda;
     magma_int_t nb = magma_get_zhetrd_nb(n), ib; 
 
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    double  d_one  = MAGMA_D_ONE;
+    cuDoubleComplex z_neg_one = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex z_one = MAGMA_Z_ONE;
+    double  d_one = MAGMA_D_ONE;
     double mv_time = 0.0;
     double up_time = 0.0;
     
-    magma_int_t kk, nx;
-    magma_int_t i = 0, ii, j, did, i_n;
-    magma_int_t iinfo;
-    magma_int_t ldwork, lddwork, lwkopt, ldwork2;
-    magma_int_t lquery;
-    cudaStream_t stream[MagmaMaxGPUs][10];
-    cuDoubleComplex *dx[MagmaMaxGPUs], *dy[MagmaMaxGPUs], *hwork;
-    cuDoubleComplex *dwork2[MagmaMaxGPUs]; 
+    static magma_int_t kk, nx;
+    static magma_int_t i = 0, ii, iii, j, did, i_n;
+    static magma_int_t iinfo;
+    static magma_int_t ldwork, lddwork, lwkopt, ldwork2;
+    static magma_int_t lquery;
+    cudaStream_t stream[4][10];
+    cuDoubleComplex *dx[4], *dy[4], *hwork;
+    cuDoubleComplex *dwork2[4]; 
 
     *info = 0;
-    int upper = lapackf77_lsame(uplo_, "U");
+    long int upper = lapackf77_lsame(uplo_, "U");
     lquery = lwork == -1;
-    if ( upper ) {
-        printf( " Upper-triangular form not implemented, yet\n" );
-        *info = -1;
-    } else if( ! lapackf77_lsame(uplo_, "L")) {
+    if ( !upper && !lapackf77_lsame(uplo_, "L")) {
+        printf( " uplo = %c\n",uplo );
         *info = -1;
     } else if (n < 0) {
         *info = -2;
@@ -209,6 +207,8 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
         *info = -4;
     } else if (lwork < nb*n && ! lquery) {
         *info = -9;
+    } else if( k > 2 ) {
+    *info = 2;
     }
 
     if (*info == 0) {
@@ -220,51 +220,61 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
-        return *info;
+        return MAGMA_ERR_ILLEGAL_VALUE;
     }
     else if (lquery)
-      return *info;
+      return 0;
 
     /* Quick return if possible */
     if (n == 0) {
-        work[0] = c_one;
-        return *info;
+        work[0] = z_one;
+        return 0;
     }
 
-    cuDoubleComplex *da[MagmaMaxGPUs];
-    cuDoubleComplex *dwork[MagmaMaxGPUs]; 
+    cuDoubleComplex *da[4];
+    cuDoubleComplex *dwork[4]; 
 
+    double times[11];
+    for( did=0; did<11; did++ ) times[did] = 0;
+//#define PROFILE_SY2RK
+#ifdef  PROFILE_SY2RK
+    cudaEvent_t start, stop;
+    float etime;
+    cudaSetDevice(0);
+    cudaEventCreate( &start );
+    cudaEventCreate( &stop  );
+#endif
     /* need to be multiple of 128 and set to be zeros for gemvt? */
     ldda = lda;
     ln = ((nb*(1+n/(nb*num_gpus))+31)/32)*32;
     ldwork2 = (1+ n / nb + (n % nb != 0)) * ldda;
     for( did=0; did<num_gpus; did++ ) {
-      magma_setdevice(did);
-      if (MAGMA_SUCCESS != magma_zmalloc( &da[did], ln*ldda + 3*lddwork*nb ) ||
-           MAGMA_SUCCESS != magma_zmalloc( &dx[did], k*n ) ||
-           MAGMA_SUCCESS != magma_zmalloc( &dy[did], k*n ) ||
-           MAGMA_SUCCESS != magma_zmalloc( &dwork2[did] , ldwork2 )) {
+      cudaSetDevice(did);
+      if ( MAGMA_SUCCESS != cublasAlloc(ln*ldda+3*lddwork*nb, sizeof(cuDoubleComplex), (void**)&da[did]) ||
+           MAGMA_SUCCESS != cublasAlloc(k*n,     sizeof(cuDoubleComplex), (void**)&dx[did]) ||
+           MAGMA_SUCCESS != cublasAlloc(k*n,     sizeof(cuDoubleComplex), (void**)&dy[did]) ||
+           MAGMA_SUCCESS != cublasAlloc(ldwork2, sizeof(cuDoubleComplex), (void**)&dwork2[did] ) ) {
         for( i=0; i<did; i++ ) {
-            magma_setdevice(i);
-            magma_free( da[i] );
-            magma_free( dx[i] );
-            magma_free( dy[i] );
+            cudaSetDevice(i);
+            cublasFree(da[i]);
+            cublasFree(dx[i]);
+            cublasFree(dy[i]);
         }
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
       }
       dwork[did] = da[did] + ln*ldda;
 
-      for( kk=0; kk<k; kk++ ) magma_queue_create( &stream[did][kk] );
+      for( kk=0; kk<k; kk++ ) cudaStreamCreate(&stream[did][kk]);
     }
-    if (MAGMA_SUCCESS != magma_zmalloc_pinned( &hwork, k*num_gpus*n )) {
+    if( MAGMA_SUCCESS != cudaMallocHost( (void**)&hwork, k*num_gpus*n*sizeof(cuDoubleComplex) ) ) {
       for( i=0; i<num_gpus; i++ ) {
-        magma_setdevice(i);
-        magma_free( da[i] );
-        magma_free( dx[i] );
-        magma_free( dy[i] );
+        cudaSetDevice(i);
+        cublasFree(da[i]);
+        cublasFree(dx[i]);
+        cublasFree(dy[i]);
       }
-      *info = MAGMA_ERR_DEVICE_ALLOC;
+      *info = MAGMA_ERR_HOST_ALLOC;
       return *info;
     }
 
@@ -272,73 +282,100 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
       nx = n;
     else
       nx = 512;
-    //nx = 0;
 
     if (upper) {
 
         /* Copy the matrix to the GPU */ 
-        magma_zsetmatrix( n, n, A(0, 0), lda, dA(did, 0, 0), ldda );
+        if (1<=n-nx) {
+          magma_zhtodhe(num_gpus, &uplo, n, nb, a, lda, da, ldda, stream, &iinfo );
+        }
 
         /*  Reduce the upper triangle of A.   
             Columns 1:kk are handled by the unblocked method. */
-        kk = n - (n - nx + nb - 1) / nb * nb;
-
-        for (i = n - nb; i >= kk; i -= nb) 
+        for (i = nb*((n-1)/nb); i >= nx; i -= nb) 
           {
+            ib = min(nb, n-i);
+
+            ii  = nb*(i/(nb*num_gpus));
+            did = (i/nb)%num_gpus;
+
             /* Reduce columns i:i+nb-1 to tridiagonal form and form the   
                matrix W which is needed to update the unreduced part of   
                the matrix */
             
             /*   Get the current panel (no need for the 1st iteration) */
-            if (i!=n-nb)
-              magma_zgetmatrix( i+nb, nb, dA(did, 0, i), ldda, A(0, i), lda );
-            
-            magma_zlatrd_mgpu(num_gpus, uplo, i+nb, nb, nb, A(0, 0), lda, e, tau, 
-                              work, ldwork, da, ldda, i, dwork, lddwork, dwork2, ldwork2, 
-                              k, dx, dy, hwork, stream);
+            if (i!=nb*((n-1)/nb)) {
+              cudaSetDevice(did);
+              cudaMemcpy2DAsync(  A(0, i),       lda *sizeof(cuDoubleComplex),
+                                 dA(did, 0, ii), ldda*sizeof(cuDoubleComplex),
+                                  sizeof(cuDoubleComplex)*(i+ib), ib,
+                                  cudaMemcpyDeviceToHost,stream[did][0]);
+            }
 
-            /* Update the unreduced submatrix A(0:i-2,0:i-2), using an   
-               update of the form:  A := A - V*W' - W*V' */
-            magma_zsetmatrix( i + nb, nb, work, ldwork, dwork[did], lddwork );
+            magma_zlatrd_mgpu(num_gpus, uplo, n, i+ib, ib, nb, 
+                              A(0, 0), lda, e, tau, 
+                              work, ldwork, 
+                              da, ldda, 0, 
+                              dwork, i+ib, 
+                              dwork2, ldwork2, 
+                              1, dx, dy, hwork, 
+                              stream, times);
 
-            magma_zher2k(uplo, MagmaNoTrans, i, nb, c_neg_one, 
-                         dA(did, 0, i), ldda, dwork[did], 
-                         lddwork, d_one, dA(did, 0, 0), ldda);
-            
+            magma_zher2k_mgpu(num_gpus, 'U', 'N', nb, i, ib, 
+                         z_neg_one, dwork, i+ib, 0,
+                         d_one,     da,    ldda, 0, 
+                         k, stream);
+
             /* Copy superdiagonal elements back into A, and diagonal   
                elements into D */
-            for (j = i; j < i+nb; ++j) {
+            for (j = i; j < i+ib; ++j) {
                 if( j > 0 ) { MAGMA_Z_SET2REAL( *A(j-1, j), e[j - 1] ); }
                 d[j] = MAGMA_Z_REAL( *A(j, j) );
             }
+        } /* end of for i=... */
+      
+        if( nx > 0 ) {
+          if (1<=n-nx) { /* else A is already on CPU */
+            did = 0;
+            cudaSetDevice(did);
+            cublasGetMatrix(nx, nx, sizeof(cuDoubleComplex), dA(did, 0, 0), ldda,
+                            A(0, 0), lda);
 
+            int iii = i;
+            for (i=0; i < nx; i += nb) {
+                ib = min(nb, n-i);
+                ii  = nb*(i/(nb*num_gpus));
+                did = (i/nb)%num_gpus;
+
+                cudaSetDevice(did);
+                cudaMemcpy2DAsync( A(0, i),        lda *sizeof(cuDoubleComplex),
+                                   dA(did, 0, ii), ldda*sizeof(cuDoubleComplex),
+                                   sizeof(cuDoubleComplex)*nx, ib,
+                                   cudaMemcpyDeviceToHost,stream[did][0]);
+            }
+            for( did=0; did<num_gpus; did++ ) {
+                cudaSetDevice(did);
+                cudaStreamSynchronize(stream[did][0]);
+            }
           }
-      
-        magma_zgetmatrix( kk, kk, dA(did, 0, 0), ldda, A(0, 0), lda );
-      
-        /*  Use unblocked code to reduce the last or only block */
-        lapackf77_zhetd2(uplo_, &kk, A(0, 0), &lda, d, e, tau, &iinfo);
+
+          for( did=0; did<num_gpus; did++ ) {
+                cudaSetDevice(did);
+                cudaStreamSynchronize(stream[did][0]);
+          }
+          /*  Use unblocked code to reduce the last or only block */
+          lapackf77_zhetd2(uplo_, &nx, A(0, 0), &lda, d, e, tau, &iinfo);
+        }
     } else {
         trace_init( 1, num_gpus, k, (CUstream_st**)stream );
         /* Copy the matrix to the GPU */
         if (1<=n-nx) {
-          //cublasSetMatrix(n, n, sizeof(cuDoubleComplex), A(0,0), lda, dA(did, 0,0), ldda);
-          magma_zhtodhe(num_gpus, &uplo, n, n, 0, 0, nb, a, lda, da, ldda, stream, &iinfo );
+          magma_zhtodhe(num_gpus, &uplo, n, nb, a, lda, da, ldda, stream, &iinfo );
         }
 
-//#define PROFILE_SY2RK
-#ifdef  PROFILE_SY2RK
-        cudaEvent_t start, stop;
-        float etime;
-        magma_setdevice(0);
-        magma_event_create( &start );
-        magma_event_create( &stop  );
-#endif
         /* Reduce the lower triangle of A */
-        for (i = 0; i < n-nx; i += nb) 
-          {
+        for (i = 0; i < n-nx; i += nb) {
             ib = min(nb, n-i);
-            //printf( " === i=%d:%d ==\n",i,ib );
 
             ii  = nb*(i/(nb*num_gpus));
             did = (i/nb)%num_gpus;
@@ -348,75 +385,42 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
 
             /*   Get the current panel (no need for the 1st iteration) */
             if (i!=0) {
-              magma_setdevice(did);
-              //magmablasSetKernelStream(stream[did][0]);
+              cudaSetDevice(did);
               trace_gpu_start( did, 0, "comm", "get" );
-              //cublasGetMatrix(n-i, ib, sizeof(cuDoubleComplex),
-              //                dA(did, i, ii), ldda,
-              //                A(i, i), lda);
-              magma_zgetmatrix_async( (n-i), ib,
-                                      dA(did, i, ii), ldda,
-                                      A(i, i),        lda, stream[did][0] );
+              cudaMemcpy2DAsync(  A(i, i),       lda *sizeof(cuDoubleComplex),
+                                 dA(did, i, ii), ldda*sizeof(cuDoubleComplex),
+                                  sizeof(cuDoubleComplex)*(n-i), ib,
+                                  cudaMemcpyDeviceToHost,stream[did][0]);
               trace_gpu_end( did, 0 );
+              cudaSetDevice(0);
             }
+            
+            
             mv_time += 
-            magma_zlatrd_mgpu(num_gpus, uplo, n-i, ib, nb,
+            magma_zlatrd_mgpu(num_gpus, uplo, n, n-i, ib, nb,
                               A(i, i), lda, &e[i], 
                               &tau[i], work, ldwork, 
                               da, ldda, i, 
                               dwork,  (n-i),
                               dwork2, ldwork2,
                               1, dx, dy, hwork,
-                              stream );
-            //magma_zlatrd(uplo, n-i, nb, A(i, i), lda, &e[i], 
-            //             &tau[i], work, ldwork, 
-            //             dA(0, i, i), ldda,
-            //             dwork[0], lddwork);
-            //cublasSetMatrix(n-i, nb, sizeof(cuDoubleComplex),
-            //                work, ldwork,
-            //                dwork[0], lddwork);
-
-            /*for( did=0; did<num_gpus; did++ )  
-            {
-                  magma_setdevice(did);
-                  //magmablasSetKernelStream(stream[did][0]);
-                  //trace_gpu_start( did, 0, stream[did][0], "comm", "set" );
-                  magma_zsetmatrix( n-i, ib, work, ldwork, dwork[did], n-i );
-                  magma_zsetmatrix( n-i, ib,
-                                    A(i,i),                lda,
-                                    &dwork[did][ib*(n-i)], n-i );
-
-                  // moved inside zlatrd
-                  //cudaMemcpy2DAsync(dwork[did], (n-i)  *sizeof(cuDoubleComplex),
-                  //                  work,       ldwork *sizeof(cuDoubleComplex),
-                  //                  sizeof(cuDoubleComplex)*(n-i), ib,
-                  //                  cudaMemcpyHostToDevice, stream[did][0]);
-                  //cudaMemcpy2DAsync(&dwork[did][ib*(n-i)], (n-i) *sizeof(cuDoubleComplex),
-                  //                  A(i,i),                lda   *sizeof(cuDoubleComplex),
-                  //                  sizeof(cuDoubleComplex)*(n-i), ib,
-                  //                  cudaMemcpyHostToDevice, stream[did][0]);
-                  //trace_gpu_end( did, 0 );
-            }*/
-
+                              stream, times );
+                              
 #ifdef PROFILE_SY2RK
-            magma_setdevice(0);
+            cudaSetDevice(0);
             if( i > 0 ) {
               cudaEventElapsedTime(&etime, start, stop);
               up_time += (etime/1000.0);
             } 
-            magma_event_record(start, 0);
+            cudaEventRecord(start, 0);
 #endif
-            magma_zher2k_mgpu(num_gpus, MagmaLower, MagmaNoTrans, nb, n-i-ib, ib, 
-                         c_neg_one, dwork, n-i, 
-                         d_one,     da, ldda, i+ib, k, stream);
+            magma_zher2k_mgpu(num_gpus, 'L', 'N', nb, n-i-ib, ib, 
+                         z_neg_one, dwork, n-i, ib,
+                         d_one, da, ldda, i+ib, k, stream);
 #ifdef PROFILE_SY2RK
-            magma_setdevice(0);
-            magma_event_record(stop, 0);
+            cudaSetDevice(0);
+            cudaEventRecord(stop, 0);
 #endif
-            /*magma_zher2k(MagmaLower, MagmaNoTrans, n-i-nb, nb, c_neg_one, 
-                         dA(0, i+nb, i), ldda, 
-                         &dwork[0][nb], lddwork, d_one, 
-                         dA(0, i+nb, i+nb), ldda);*/
 
             /* Copy subdiagonal elements back into A, and diagonal   
                elements into D */
@@ -424,16 +428,8 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
                 if( j+1 < n ) { MAGMA_Z_SET2REAL( *A(j+1, j), e[j] ); }
                 d[j] = MAGMA_Z_REAL( *A(j, j) );
             }
-          }
-#ifdef PROFILE_SY2RK
-          magma_setdevice(0);
-          if( n > nx ) {
-            cudaEventElapsedTime(&etime, start, stop);
-            up_time += (etime/1000.0);
-          } 
-          magma_event_destroy( start );
-          magma_event_destroy( stop  );
-#endif
+        } /* for i=... */
+
         /* Use unblocked code to reduce the last or only block */
         if ( i < n ) {
           int iii = i;
@@ -444,160 +440,122 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
                 ii  = nb*(i/(nb*num_gpus));
                 did = (i/nb)%num_gpus;
 
-                magma_setdevice(did);
-                //cublasGetMatrix(i_n, i_n, sizeof(cuDoubleComplex),
-                //                dA(did, i, ii), ldda,
-                //                A(i, i), lda);
-                magma_zgetmatrix_async( i_n, ib,
-                                        dA(did, iii, ii), ldda,
-                                        A(iii, i),        lda, stream[did][0] );
+                cudaSetDevice(did);
+                cudaMemcpy2DAsync( A(iii, i),       lda *sizeof(cuDoubleComplex),
+                                   dA(did, iii, ii), ldda*sizeof(cuDoubleComplex),
+                                    sizeof(cuDoubleComplex)*i_n, ib,
+                                  cudaMemcpyDeviceToHost,stream[did][0]);
             }
             for( did=0; did<num_gpus; did++ ) {
-                magma_setdevice(did);
-                magma_queue_sync( stream[did][0] );
+                cudaSetDevice(did);
+                cudaStreamSynchronize(stream[did][0]);
             }
           }
           lapackf77_zhetrd(uplo_, &i_n, A(iii, iii), &lda, &d[iii], &e[iii],
                            &tau[iii], work, &lwork, &iinfo);
         }
       }
+#ifdef PROFILE_SY2RK
+   cudaSetDevice(0);
+   if( n > nx ) {
+        cudaEventElapsedTime(&etime, start, stop);
+        up_time += (etime/1000.0);
+    } 
+    cudaEventDestroy( start );
+    cudaEventDestroy( stop  );
+#endif
  
     trace_finalize( "zhetrd.svg","trace.css" );
     for( did=0; did<num_gpus; did++ ) {
-      for( kk=0; kk<k; kk++ ) magma_queue_destroy( stream[did][kk] );
-      magma_setdevice(did);
-      magma_free( da[did] );
-      magma_free( dx[did] );
-      magma_free( dy[did] );
-      magma_free( dwork2[did] );
+      cudaSetDevice(did);
+      for( kk=0; kk<k; kk++ ) cudaStreamSynchronize(stream[did][kk]);
+      for( kk=0; kk<k; kk++ ) cudaStreamDestroy(stream[did][kk]);
+      cublasFree(da[did]);
+      cublasFree(dx[did]);
+      cublasFree(dy[did]);
+      cublasFree(dwork2[did]);
     }
-    magma_free_pinned( hwork );
+    cudaSetDevice(0);
+    cudaFreeHost(hwork);
     MAGMA_Z_SET2REAL( work[0], lwkopt );
 
 #ifdef PROFILE_SY2RK
     printf( " n=%d nb=%d\n",n,nb );
+    printf( " Time in ZLARFG: %.2e seconds\n",times[0] );
     printf( " Time in ZHEMV : %.2e seconds\n",mv_time );
     printf( " Time in ZHER2K: %.2e seconds\n",up_time );
 #endif
-    return *info;
+    return MAGMA_SUCCESS;
 } /* magma_zhetrd */
 
 extern "C" magma_int_t
-magma_zhtodhe(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
+magma_zhtodhe(int num_gpus, char *uplo, magma_int_t n, magma_int_t nb,
               cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex **da, magma_int_t ldda, cudaStream_t stream[][10],
               magma_int_t *info) {
 
       magma_int_t k;
-
       if( lapackf77_lsame(uplo, "L") ) {
-
         /* go through each block-column */
         magma_int_t j, jj, jb, mj;
-        for (j=off_j; j<n; j+=nb) {
-          jj =  (j-off_j)/(nb*num_gpus);
-          k  = ((j-off_j)/nb)%num_gpus;
-          magma_setdevice(k);
+        for (j=0; j<n; j+=nb) {
+          jj =  j/(nb*num_gpus);
+          k  = (j/nb)%num_gpus;
+
           jb = min(nb, (n-j));
-          mj = m-(j-off_j);
-          magma_zsetmatrix_async( mj, jb,
-                                  A(off_i+j, j),   lda,
-                                  dA(k, j, jj*nb), ldda, stream[k][0] );
+          mj = n-j;
+
+          cudaSetDevice(k);
+          cudaMemcpy2DAsync( dA(k, j, jj*nb), ldda*sizeof(cuDoubleComplex),
+                             A(j, j),         lda *sizeof(cuDoubleComplex),
+                             sizeof(cuDoubleComplex)*mj, jb,
+                             cudaMemcpyHostToDevice, stream[k][0]);
         }
       } else {
-        magma_int_t i, ii, ib, ni;
-
-        /* go through each row */
-        for(i=off_i; i<m; i+=nb){
-          ii = (i-off_i)/(nb*num_gpus);
-          k  = ((i-off_i)/nb)%num_gpus;
-          magma_setdevice(k);
-
-          ib = min(nb, (m-i));
-          if(i+ib < off_i+n) ni = (i-off_i)+ib;
-          else ni = n;
-
-          magma_zsetmatrix_async( ib, ni,
-                                  A(i, off_j),     lda,
-                                  dA(k, ii*nb, 0), ldda, stream[k][0] );
-        }
-      }
-      for( k=0; k<num_gpus; k++ ) {
-        magma_setdevice(k);
-        magma_queue_sync( stream[k][0] );
-      }
-      magma_setdevice(0);
-
-      return *info;
-}
-
-
-extern "C" magma_int_t
-magma_zdtohhe(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
-              cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex **da, magma_int_t ldda, cudaStream_t stream[][4],
-              magma_int_t *info) {
-
-      magma_int_t k;
-
-      if( lapackf77_lsame(uplo, "L") ) {
+        /* go through each block-column */
         magma_int_t j, jj, jb, mj;
-
-        for (j=off_j; j<n; j+=nb) {
-          jj = (j-off_j)/(nb*num_gpus);
-          k  = ((j-off_j)/nb)%num_gpus;
-          magma_setdevice(k);
+        for (j=0; j<n; j+=nb) {
+          jj =  j/(nb*num_gpus);
+          k  = (j/nb)%num_gpus;
 
           jb = min(nb, (n-j));
-          mj = m-(j-off_i);
-          magma_zgetmatrix_async( mj, jb,
-                                  dA(k, 0, jj*nb), ldda,
-                                  A(off_i, j),     lda, stream[k][0] );
-        }
-      } else {
-        magma_int_t i, ii, ib, ni;
+          //mj = n-j;
+          mj = j+jb;
 
-        /* go through each row */
-        for(i=off_i; i<m; i+=nb){
-          ii = (i-off_i)/(nb*num_gpus);
-          k  = ((i-off_i)/nb)%num_gpus;
-          magma_setdevice(k);
-
-          ib = min(nb, (m-i));
-          if(i+ib < off_i+n) ni = (i-off_i)+ib;
-          else ni = n;
-
-          magma_zgetmatrix_async( ib, ni,
-                                  dA(k, ii*nb, 0), ldda,
-                                  A(i, off_j),     lda, stream[k][2] );
+          cudaSetDevice(k);
+          cudaMemcpy2DAsync( dA(k, 0, jj*nb), ldda*sizeof(cuDoubleComplex),
+                             A(0, j),         lda *sizeof(cuDoubleComplex),
+                             sizeof(cuDoubleComplex)*mj, jb,
+                             cudaMemcpyHostToDevice, stream[k][0]);
         }
       }
       for( k=0; k<num_gpus; k++ ) {
-        magma_setdevice(k);
-        magma_queue_sync( stream[k][0] );
+        cudaSetDevice(k);
+        cudaStreamSynchronize(stream[k][0]);
       }
-      magma_setdevice(0);
+      cudaSetDevice(0);
 
-      return *info;
+      return MAGMA_SUCCESS;
 }
 
-void
+extern "C" void
 magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
-        cuDoubleComplex alpha, cuDoubleComplex **db, int lddb, 
-        double beta,           cuDoubleComplex **dc, int lddc, int offset,
-        int num_streams, cudaStream_t stream[][10]) {
+    cuDoubleComplex alpha, cuDoubleComplex **db, int lddb, int offset_b,
+    double beta,           cuDoubleComplex **dc, int lddc, int offset,
+    int num_streams, cudaStream_t stream[][10]) {
 
-#define dB(id, i, j)  (db[(id)]+(j)*lddb + (i))
-#define dB1(id, i, j) (db[(id)]+(j)*lddb + (i))+k*lddb
+#define dB(id, i, j)  (db[(id)]+(j)*lddb + (i)+offset_b)
+#define dB1(id, i, j) (db[(id)]+(j)*lddb + (i)+offset_b)+k*lddb
 #define dC(id, i, j)  (dc[(id)]+(j)*lddc + (i))
 
-    int i, id, ib, ii, kk;
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    char uplo_[2]  = {uplo, 0};
+    int i, id, ib, ii, kk, n1, m1;
+    cuDoubleComplex z_one = MAGMA_Z_ONE;
 
-    //printf( "\n ==== zher2k ====\n" );
     /* diagonal update */
     for( i=0; i<n; i+=nb ) {
         id = ((i+offset)/nb)%num_gpus;
         kk = (i/(nb*num_gpus))%num_streams;
-        magma_setdevice(id);
+        cudaSetDevice(id);
         magmablasSetKernelStream(stream[id][kk]);
 
         ib = min(nb, n-i);
@@ -605,146 +563,87 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
 
         /* zher2k on diagonal block */
         trace_gpu_start( id, kk, "syr2k", "syr2k" );
-        magma_zher2k(uplo, trans, ib, k, 
-              alpha, dB1(id, i+k,        0 ), lddb, 
-                     dB(id,  i+k,        0 ), lddb,
+        cublasZher2k(uplo, trans, ib, k, 
+              alpha, dB1(id, i,        0 ), lddb, 
+                     dB(id,  i,        0 ), lddb,
               beta,  dC(id,  i+offset,   ii), lddc);
         trace_gpu_end( id, kk );
     }
 
     /* off-diagonal update */
-    int n1, m1, i2, j2, ot = (offset+nb-1)  /nb, 
-                        mt = (offset+n+nb-1)/nb;
-    i2 = n; 
-//#define MERGE_SYR2K
-#ifdef  MERGE_SYR2K
-    for( i=0; i<num_gpus; i++ ) {
-        id = (i+(offset/nb))%num_gpus;
-        /* # of local blocks */
-        i2 = (mt - ot)/num_gpus;
-        if( id < ot%num_gpus ) i2--;
-        if( id < mt%num_gpus ) i2++;
-        if( i2 > 1 ) {
-            /* split into two */
-            //printf( " %d: i2=%d-%d=%d (%d, n=%d)\n",id,mt,ot,i2,nb*((i2-1)*num_gpus+1),n );
-            i2 = i2/2;
-            /* row & column splits */
-            j2 = nb*i2;
-            i2 = nb*(i+(i2-1)*num_gpus+1);
-
-            if( i2 < n ) {
-                kk = 0;
-                magma_setdevice(id);
-                magmablasSetKernelStream(stream[id][kk]);
-                //printf( " 1(%d): zgemm(%d,%d,%d, %dx%dx%d), %d, %d\n",id,i2+k,i*nb+k,i2+offset,n-i2,j2,k,lddb,lddc );
-                magma_zgemm(MagmaNoTrans, MagmaConjTrans, n-i2, j2, k, 
-                            alpha, dB1(id, i2+k,     0 ), lddb,
-                                   dB( id, i*nb+k,        0 ), lddb, 
-                            c_one, dC( id, i2+offset, offset), lddc);
-            }
-        }
-    }
-#endif
-    for( i=0; i<n-nb; i+=nb ) {
+    if( lapackf77_lsame( uplo_, "L" ) ) {
+      for( i=0; i<n-nb; i+=nb ) {
         id = ((i+offset)/nb)%num_gpus;
         kk = (i/(nb*num_gpus))%num_streams;
-        magma_setdevice(id);
+        cudaSetDevice(id);
         magmablasSetKernelStream(stream[id][kk]);
 
         ib = min(nb, n-i);
         ii = nb*((i+offset)/(nb*num_gpus));
-#ifdef  MERGE_SYR2K
-        i2 = (mt - ot)/num_gpus;
-        if( id < ot%num_gpus ) i2--;
-        if( id < mt%num_gpus ) i2++;
-        if( i2 > 1 ) {
-            i2 = i2/2;
-            i2 = nb*(i%num_gpus+(i2-1)*num_gpus+1);
-        } else {
-            i2 = 0;
-        }
-#endif
-        if( i+ib <= i2 ) {
-            n1 = i2-i-ib;
-        } else {
-            n1 = n-i-ib;
-        }
+        n1 = n-i-ib;
+
         // zgemm on off-diagonal blocks 
-        trace_gpu_start( id, kk, "gemm", "gemm" );
-        //printf( " 2(%d): zgemm(%d,%d,%d, %dx%dx%d), %d, %d\n",id,i+k+ib,i+k,i+offset+ib,n1,ib,k,lddb,lddc );
-        magma_zgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k, 
-                    alpha, dB1(id, i+k+ib,      0 ), lddb,
-                           dB(id,  i+k,         0 ), lddb, 
-                    c_one, dC(id,  i+offset+ib, ii), lddc);
+        trace_gpu_start( id, kk, "gemm_up", "gemm_up" );
+        cublasZgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k, 
+                    alpha, dB1(id, i+ib,        0 ), lddb,
+                           dB(id,  i,           0 ), lddb, 
+                    z_one, dC(id,  i+offset+ib, ii), lddc);
         trace_gpu_end( id, kk );
-    }
-
-#ifdef MERGE_SYR2K
-    for( i=0; i<num_gpus; i++ ) {
-        id = (i+(offset/nb))%num_gpus;
-        /* # of local blocks */
-        i2 = (mt - ot)/num_gpus;
-        if( id < ot%num_gpus ) i2--;
-        if( id < mt%num_gpus ) i2++;
-        if( i2 > 1 ) {
-            /* split into two */
-            i2 = i2/2;
-            //printf( " %d: i2=%d-%d=%d (%d, n=%d)\n",id,mt,ot,i2,nb*((i2-1)*num_gpus+1),n );
-            /* row & column splits */
-            j2 = nb*i2;
-            i2 = nb*(i+(i2-1)*num_gpus+1);
-
-            if( i2 < n ) {
-                kk = 0;
-                magma_setdevice(id);
-                magmablasSetKernelStream(stream[id][kk]);
-                //printf( " 3(%d): zgemm(%d,%d,%d, %dx%dx%d), %d, %d\n",id,i2+k,i*nb+k,i2+offset,n-i2,j2,k,lddb,lddc );
-                magma_zgemm(MagmaNoTrans, MagmaConjTrans, n-i2, j2, k, 
-                            alpha, dB( id, i2+k,     0 ), lddb,
-                                   dB1(id, i*nb+k,        0 ), lddb, 
-                            c_one, dC( id, i2+offset, offset), lddc);
-            }
-        }
-    }
-#endif
-    for( i=0; i<n-nb; i+=nb ) {
+      }
+    } else {
+      for( i=nb; i<n; i+=nb ) {
         id = ((i+offset)/nb)%num_gpus;
         kk = (i/(nb*num_gpus))%num_streams;
-        magma_setdevice(id);
+        cudaSetDevice(id);
         magmablasSetKernelStream(stream[id][kk]);
 
         ib = min(nb, n-i);
         ii = nb*((i+offset)/(nb*num_gpus));
-#ifdef  MERGE_SYR2K
-        i2 = (mt - ot)/num_gpus;
-        if( id < ot%num_gpus ) i2--;
-        if( id < mt%num_gpus ) i2++;
-        if( i2 > 1 ) {
-            i2 = i2/2;
-            i2 = nb*(i%num_gpus+(i2-1)*num_gpus+1);
-        } else {
-            i2 = 0;
-        }
-#endif
+        cublasZgemm(MagmaNoTrans, MagmaConjTrans, i, ib, k, 
+                    alpha, dB1(id, 0, 0 ), lddb,
+                           dB(id,  i, 0 ), lddb, 
+                    z_one, dC(id,  0, ii), lddc);
+      }
+    }
 
-        if( i+ib <= i2 ) {
-            n1 = i2-i-ib;
-        } else {
-            n1 = n-i-ib;
-        }
+    if( lapackf77_lsame( uplo_, "L" ) ) {
+      for( i=0; i<n-nb; i+=nb ) {
+        id = ((i+offset)/nb)%num_gpus;
+        kk = (i/(nb*num_gpus))%num_streams;
+        cudaSetDevice(id);
+        magmablasSetKernelStream(stream[id][kk]);
+
+        ib = min(nb, n-i);
+        ii = nb*((i+offset)/(nb*num_gpus));
+        n1 = n-i-ib;
+
         /* zgemm on off-diagonal blocks */
-        trace_gpu_start( id, kk, "gemm", "gemm" );
-        //printf( " 4(%d): zgemm(%d,%d,%d, %dx%dx%d), %d, %d\n",id,i+k+ib,i+k,i+offset+ib,n1,ib,k,lddb,lddc );
-        magma_zgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k, 
-                    alpha, dB(id,  i+k+ib,        0), lddb,
-                           dB1(id, i+k,           0), lddb, 
-                    c_one, dC(id,  i+offset+ib,  ii), lddc);
+        trace_gpu_start( id, kk, "gemm_up", "gemm_up" );
+        cublasZgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k, 
+                    alpha, dB(id,  i+ib,        0 ), lddb,
+                           dB1(id, i,           0 ), lddb, 
+                    z_one, dC(id,  i+offset+ib, ii), lddc);
         trace_gpu_end( id, kk );
+      }
+    } else {
+      for( i=nb; i<n; i+=nb ) {
+        id = ((i+offset)/nb)%num_gpus;
+        kk = (i/(nb*num_gpus))%num_streams;
+        cudaSetDevice(id);
+        magmablasSetKernelStream(stream[id][kk]);
+
+        ib = min(nb, n-i);
+        ii = nb*((i+offset)/(nb*num_gpus));
+        cublasZgemm(MagmaNoTrans, MagmaConjTrans, i, ib, k, 
+                    alpha, dB( id, 0, 0 ), lddb,
+                           dB1(id, i, 0 ), lddb, 
+                    z_one, dC(id,  0, ii), lddc);
+      }
     }
 
     for( id=0; id<num_gpus; id++ ) {
-        magma_setdevice(id);
-        for( kk=0; kk<num_streams; kk++ ) magma_queue_sync( stream[id][kk] );
+        cudaSetDevice(id);
+        for( kk=0; kk<num_streams; kk++ ) cudaStreamSynchronize(stream[id][kk]);
         magmablasSetKernelStream(NULL);
     }
 }
