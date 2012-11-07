@@ -54,7 +54,7 @@ int main( int argc, char** argv)
     cuDoubleComplex *tau;
     double          *diag, *offdiag, *rwork;
     double           result[2] = {0., 0.};
-    int num_gpus = 2;
+    int num_gpus = 1;
 
     /* Matrix size */
     magma_int_t N = 0, n2, lda, lwork;
