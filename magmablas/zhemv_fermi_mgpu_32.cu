@@ -14,9 +14,6 @@
 
 #if (GPUSHMEM >= 200)
 
-#define magmablas_zhemv_200_mgpu_offset magmablas_zhemv_mgpu_32_offset
-#define magmablas_zhemv2_200_mgpu_offset magmablas_zhemv2_mgpu_32_offset
-#define magmablas_zhemv2_200_mgpu   magmablas_zhemv2_mgpu_32
 
 #define zhemv_bs         32
 #define bank_shift       33
@@ -29,7 +26,7 @@
 
 
 __global__ void
-magmablas_zhemv_200_L_special_mgpu_offset( magma_int_t n, cuDoubleComplex alpha,
+magmablas_zhemv_200_L_special_mgpu_offset_32( magma_int_t n, cuDoubleComplex alpha,
                                cuDoubleComplex *A, magma_int_t lda,
                                cuDoubleComplex *x, magma_int_t incx,
                                cuDoubleComplex  beta,
@@ -194,7 +191,7 @@ magmablas_zhemv_200_L_special_mgpu_offset( magma_int_t n, cuDoubleComplex alpha,
  *    Lower case for generic sizes
  */
 __global__ void
-magmablas_zhemv_200_L_generic_mgpu_offset(magma_int_t n, cuDoubleComplex alpha,
+magmablas_zhemv_200_L_generic_mgpu_offset_32(magma_int_t n, cuDoubleComplex alpha,
                               cuDoubleComplex *A, magma_int_t lda,
                               cuDoubleComplex *x, magma_int_t incx,
                               cuDoubleComplex beta,
@@ -404,7 +401,7 @@ magmablas_zhemv_200_L_generic_mgpu_offset(magma_int_t n, cuDoubleComplex alpha,
 
 
 __global__ void
-magmablas_zhemv_200_L_update_mgpu_offset(magma_int_t n, cuDoubleComplex alpha,
+magmablas_zhemv_200_L_update_mgpu_offset_32(magma_int_t n, cuDoubleComplex alpha,
                          cuDoubleComplex* A, magma_int_t lda,
                          cuDoubleComplex *x, magma_int_t incx,
                          cuDoubleComplex beta,
@@ -433,7 +430,7 @@ magmablas_zhemv_200_L_update_mgpu_offset(magma_int_t n, cuDoubleComplex alpha,
 
 
 extern "C"
-void magmablas_zhemv_200_L_mgpu_offset(magma_int_t m, cuDoubleComplex alpha,
+void magmablas_zhemv_200_L_mgpu_offset_32(magma_int_t m, cuDoubleComplex alpha,
                            cuDoubleComplex *A, magma_int_t lda,
                            cuDoubleComplex *X, magma_int_t incx,
                            cuDoubleComplex beta,
@@ -476,7 +473,7 @@ void magmablas_zhemv_200_L_mgpu_offset(magma_int_t m, cuDoubleComplex alpha,
       if(m % zhemv_bs == 0 ) 
       {
 
-        magmablas_zhemv_200_L_special_mgpu_offset <<< grid, threads, 0, magma_stream >>>(
+        magmablas_zhemv_200_L_special_mgpu_offset_32 <<< grid, threads, 0, magma_stream >>>(
             m, alpha, A, lda, X, incx, beta, Y, incy, dC_work, my_gpu_id, num_gpus, nb, kstan);
         }
     else
@@ -485,11 +482,11 @@ void magmablas_zhemv_200_L_mgpu_offset(magma_int_t m, cuDoubleComplex alpha,
 
 
 
-        magmablas_zhemv_200_L_generic_mgpu_offset <<< grid, threads, 0, magma_stream >>> (
+        magmablas_zhemv_200_L_generic_mgpu_offset_32 <<< grid, threads, 0, magma_stream >>> (
             m, alpha, A, lda, X, incx ,beta, Y, incy, dC_work, m_mod_nb, my_gpu_id, num_gpus, nb, kstan);
         }
 
-        magmablas_zhemv_200_L_update_mgpu_offset<<< grid, threads_u, 0, magma_stream >>>(
+        magmablas_zhemv_200_L_update_mgpu_offset_32<<< grid, threads_u, 0, magma_stream >>>(
         m, alpha, A, lda, X, incx, beta, Y, incy, dC_work, my_gpu_id, num_gpus, nb, kstan);
     
 }
@@ -587,7 +584,7 @@ void magmablas_zhemv_200_L_mgpu_offset(magma_int_t m, cuDoubleComplex alpha,
 
 extern "C"
 magma_int_t
-magmablas_zhemv_200_mgpu_offset( char uplo, magma_int_t n,
+magmablas_zhemv_mgpu_32_offset( char uplo, magma_int_t n,
                       cuDoubleComplex alpha,
                       cuDoubleComplex **A, magma_int_t lda,
                       cuDoubleComplex **X, magma_int_t incx,
@@ -603,9 +600,16 @@ magmablas_zhemv_200_mgpu_offset( char uplo, magma_int_t n,
     char uplo_[2] = {uplo, 0};
     int  upper    = lapackf77_lsame(uplo_, "U");
 
+    if ( upper)
+    {
+       printf("Upper case is not implemented on multi GPUs\n");
+       exit(0);
+    }
+
     /*
      * Test the input parameters.
      */
+  
     if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
         return -1;
     } else if ( n < 0 ) {
@@ -617,6 +621,8 @@ magmablas_zhemv_200_mgpu_offset( char uplo, magma_int_t n,
     } else if ( incy == 0 ) {
         return -10;
     }
+
+    
 
     /*
      * Quick return if possible.
@@ -657,7 +663,7 @@ magmablas_zhemv_200_mgpu_offset( char uplo, magma_int_t n,
              
 
 
-           magmablas_zhemv_200_L_mgpu_offset(n, alpha, A[i], lda, X[i], incx, beta, Y[i], incy, work[i], 
+           magmablas_zhemv_200_L_mgpu_offset_32(n, alpha, A[i], lda, X[i], incx, beta, Y[i], incy, work[i], 
                                                         new_gpu_id, num_gpus, nb, offset, num_blocks_skipped);
              
         
@@ -672,7 +678,7 @@ magmablas_zhemv_200_mgpu_offset( char uplo, magma_int_t n,
 
 extern "C"
 magma_int_t
-magmablas_zhemv2_200_mgpu_offset( char uplo, magma_int_t n,
+magmablas_zhemv2_200_mgpu_offset_32( char uplo, magma_int_t n,
                       cuDoubleComplex alpha,
                       cuDoubleComplex **A, magma_int_t lda,
                       cuDoubleComplex **X, magma_int_t incx,
@@ -686,6 +692,12 @@ magmablas_zhemv2_200_mgpu_offset( char uplo, magma_int_t n,
 {
     char uplo_[2] = {uplo, 0};
     int  upper    = lapackf77_lsame(uplo_, "U");
+
+    if ( upper)
+    {
+       printf("Upper case is not implemented on multi GPUs\n");
+       exit(0);
+    }
 
     /*
      * Test the input parameters.
@@ -741,7 +753,7 @@ magmablas_zhemv2_200_mgpu_offset( char uplo, magma_int_t n,
              
 
 
-         magmablas_zhemv_200_L_mgpu_offset(n, alpha, A[i], lda, X[i], incx, beta, Y[i], incy, work[i], 
+         magmablas_zhemv_200_L_mgpu_offset_32(n, alpha, A[i], lda, X[i], incx, beta, Y[i], incy, work[i], 
                                                         new_gpu_id, num_gpus, nb, offset, num_blocks_skipped);
              
         
@@ -756,7 +768,7 @@ magmablas_zhemv2_200_mgpu_offset( char uplo, magma_int_t n,
 
 extern "C"
 magma_int_t
-magmablas_zhemv2_200_mgpu( char uplo, magma_int_t n,
+magmablas_zhemv2_mgpu_32( char uplo, magma_int_t n,
                       cuDoubleComplex alpha,
                       cuDoubleComplex **A, magma_int_t lda,
                       cuDoubleComplex **X, magma_int_t incx,
@@ -769,6 +781,12 @@ magmablas_zhemv2_200_mgpu( char uplo, magma_int_t n,
 {
     char uplo_[2] = {uplo, 0};
     int  upper    = lapackf77_lsame(uplo_, "U");
+
+    if ( upper)
+    {
+       printf("Upper case is not implemented on multi GPUs\n");
+       exit(0);
+    }
 
     /*
      * Test the input parameters.
@@ -810,7 +828,7 @@ magmablas_zhemv2_200_mgpu( char uplo, magma_int_t n,
         {
              magma_setdevice(i);
              
-         magmablas_zhemv_200_L_mgpu_offset(n, alpha, A[i], lda, X[i], incx, beta, Y[i], incy, work[i], 
+         magmablas_zhemv_200_L_mgpu_offset_32(n, alpha, A[i], lda, X[i], incx, beta, Y[i], incy, work[i], 
                                                        i, num_gpus, nb, 0, 0);
              
         

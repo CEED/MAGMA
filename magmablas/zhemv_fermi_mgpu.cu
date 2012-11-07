@@ -14,9 +14,7 @@
 /*The version for tesla can be found in zhemv_tesla.cu */
 #if (GPUSHMEM >= 200)
 
-#define magmablas_zhemv_200_mgpu_offset magmablas_zhemv_mgpu_offset
-#define magmablas_zhemv2_200_mgpu_offset magmablas_zhemv2_mgpu_offset
-#define magmablas_zhemv2_200_mgpu  magmablas_zhemv2_mgpu
+
 
 #define zhemv_bs         64
 #define thread_x         64
@@ -82,19 +80,17 @@ magmablas_zhemv_200_L_special_mgpu_offset( magma_int_t n, cuDoubleComplex alpha,
                 MAGMA_Z_SET2REAL(buff[tx], 0.0);
             }
     } // obtain the vector x store in buff;
-    __syncthreads();
+   // __syncthreads();
 
     tx = tx_ ; ty = ty_ ;
 
     magma_int_t flag = 0;
     
-    A += lda * (blkc/num_gpus) * thread_x; // change
+    
+if ( (blkc % num_gpus) == my_gpu_id)
+{    A += lda * (blkc/num_gpus) * thread_x; // change
    
 
-    if ( (blkc % num_gpus) != my_gpu_id)
-   {   
-        A -= lda * (blkc/num_gpus) * thread_x; // change
-   }
    #pragma unroll
     for(magma_int_t j =0; j<half_thread_x; j +=8)
         la[0][ bank_shift * (ty_+j) + tx_] =  A[ j * lda];
@@ -221,18 +217,12 @@ magmablas_zhemv_200_L_special_mgpu_offset( magma_int_t n, cuDoubleComplex alpha,
 
     flag = 1;
    
-   if ( (blkc % num_gpus) != my_gpu_id)
-   {
-      A -= 0;
-        MAGMA_Z_SET2REAL(res1,0);
-        MAGMA_Z_SET2REAL(res2,0);
-        flag = 0;
-   }
-   else 
-   { 
+
     A -= lda * (blkc/num_gpus) * thread_x; 
    }
-    
+
+
+
     
     tx = threadIdx.x ;
     ty = threadIdx.y ;
@@ -1011,7 +1001,7 @@ magmablas_zhemv2( char uplo, magma_int_t n,
 
 extern "C"
 magma_int_t
-magmablas_zhemv_200_mgpu_offset( char uplo, magma_int_t n,
+magmablas_zhemv_mgpu_offset( char uplo, magma_int_t n,
                       cuDoubleComplex alpha,
                       cuDoubleComplex **A, magma_int_t lda,
                       cuDoubleComplex **X, magma_int_t incx,
@@ -1024,7 +1014,7 @@ magmablas_zhemv_200_mgpu_offset( char uplo, magma_int_t n,
               cudaStream_t stream[][10])
 
 {
-    char uplo_[2] = {uplo, 0};
+    char      uplo_[2] = {uplo, 0};
     int  upper    = lapackf77_lsame(uplo_, "U");
 
 
@@ -1083,7 +1073,7 @@ magmablas_zhemv_200_mgpu_offset( char uplo, magma_int_t n,
         magma_int_t i = 0;
         for(i=0; i<num_gpus; i++)
         {
-             magma_setdevice(i);
+             cudaSetDevice(i);
              magmablasSetKernelStream(stream[i][0]);
 
              
@@ -1112,7 +1102,7 @@ magmablas_zhemv_200_mgpu_offset( char uplo, magma_int_t n,
 
 extern "C"
 magma_int_t
-magmablas_zhemv2_200_mgpu_offset( char uplo, magma_int_t n,
+magmablas_zhemv2_mgpu_offset( char uplo, magma_int_t n,
                       cuDoubleComplex alpha,
                       cuDoubleComplex **A, magma_int_t lda,
                       cuDoubleComplex **X, magma_int_t incx,
@@ -1124,8 +1114,8 @@ magmablas_zhemv2_200_mgpu_offset( char uplo, magma_int_t n,
               magma_int_t offset)
 
 {
-    char uplo_[2] = {uplo, 0};
-    int  upper    = lapackf77_lsame(uplo_, "U");
+    char      uplo_[2] = {uplo, 0};
+    long int  upper    = lapackf77_lsame(uplo_, "U");
 
 
 
@@ -1172,11 +1162,19 @@ magmablas_zhemv2_200_mgpu_offset( char uplo, magma_int_t n,
         printf("Error in magmablas_zsymv_200_mgpu_offset: nb != 64, program will exit! please reallocate your matrix among GPUs\n");
         exit(0);
         }
-
+        /*
+        if(num_gpus == 1)
+        {
+            magmablas_zhemv2(uplo, n-offset, alpha, A[0] + offset + lda * offset, lda, X[0] + offset, incx, beta, Y[0] + offset, incy, work[0], workspace); 
+        }
+        else
+      */
+        {
+          
         magma_int_t i = 0; 
         for(i=0; i<num_gpus; i++)
         {
-             magma_setdevice(i);
+             cudaSetDevice(i);
              
 
              
@@ -1198,11 +1196,10 @@ magmablas_zhemv2_200_mgpu_offset( char uplo, magma_int_t n,
                                          new_gpu_id, num_gpus, nb, offset, num_blocks_skipped);     
 
         }
-     }
-   
+        }
+    }
     return MAGMA_SUCCESS;
 }
-
 
 extern "C"
 magma_int_t
