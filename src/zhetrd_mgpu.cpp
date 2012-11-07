@@ -14,6 +14,8 @@
 #include "common_magma.h"
 #include "trace.h"
 
+#if (GPUSHMEM >= 200)
+
 extern "C" magma_int_t
 magma_zhtodhe(int num_gpus, char *uplo, magma_int_t n, magma_int_t nb,
               cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex **dwork, magma_int_t ldda, cudaStream_t stream[][10],
@@ -647,3 +649,5 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
         magmablasSetKernelStream(NULL);
     }
 }
+
+#endif

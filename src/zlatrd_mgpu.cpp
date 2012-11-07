@@ -18,6 +18,8 @@
 
 #define PRECISION_z
 
+#if (GPUSHMEM >= 200)
+
 #define MAGMABLAS_ZHEMV_MGPU
 #ifdef  MAGMABLAS_ZHEMV_MGPU
 extern "C"
@@ -782,4 +784,7 @@ magmablas_zhemv_synch( magma_int_t num_gpus, magma_int_t k,
 
     return 0;
 }
+
+#endif
+
 
