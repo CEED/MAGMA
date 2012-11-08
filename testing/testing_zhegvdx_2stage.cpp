@@ -338,6 +338,7 @@ int main( int argc, char** argv)
             break;
     }
 
+    cudaSetDevice(0);
     /* Memory clean up */
     TESTING_FREE(       h_A);
     TESTING_FREE(       h_B);
