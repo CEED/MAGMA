@@ -27,6 +27,9 @@
 #if defined(USEMKL)
 #include <mkl_service.h>
 #endif
+#if defined(USEACML)
+#include <omp.h>
+#endif
 
 // Flops formula
 #define PRECISION_z
