@@ -19,10 +19,13 @@
 #if defined(USEMKL)
 #include <mkl_service.h>
 #endif
+#if defined(USEACML)
+#include <omp.h>
+#endif
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-#define magma_zgemm magmablas_zgemm
+//#define magma_zgemm magmablas_zgemm
 #endif
 // === End defining what BLAS to use =======================================
 
