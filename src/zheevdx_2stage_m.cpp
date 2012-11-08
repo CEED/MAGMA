@@ -22,16 +22,7 @@ extern"C" {
     void magma_zmove_eig(char range, magma_int_t n, double *w, magma_int_t *il,
                          magma_int_t *iu, double vl, double vu, magma_int_t *m);
 
-    magma_int_t magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
-                                        cuDoubleComplex *a, magma_int_t lda,
-                                        cuDoubleComplex *tau,
-                                        cuDoubleComplex *work, magma_int_t lwork,
-                                        cuDoubleComplex *dAmgpu[], magma_int_t ldda,
-                                        cuDoubleComplex *dTmgpu[], magma_int_t lddt,
-                                        magma_int_t ngpu, magma_int_t distblk,
-                                        cudaStream_t streams[][20], magma_int_t nstream,
-                                        magma_int_t threads, magma_int_t *info);
-
+                                        
     magma_int_t magma_zstedx_m(magma_int_t nrgpu,
                                char range, magma_int_t n, double vl, double vu,
                                magma_int_t il, magma_int_t iu, double *D, double *E,
@@ -409,13 +400,17 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
     magma_free(dT1);
 #else
-    magma_int_t nstream = 3;
+    magma_int_t nstream = max(3,nrgpu+2);
     cudaStream_t streams[MagmaMaxGPUs][20];
     cuDoubleComplex *da[MagmaMaxGPUs],*dT1[MagmaMaxGPUs];
     magma_int_t ldda = ((n+31)/32)*32;
 
+    magma_int_t ver = 0;
+    magma_int_t distblk = max(256,nb);
+    printf("voici ngpu %d distblk %d NB %d nstream %d version %d \n ",nrgpu,distblk,nb,nstream,ver);
+
     for( magma_int_t dev = 0; dev < nrgpu; ++dev ) {
-        magma_int_t mlocal = ((n / nb) / nrgpu + 1) * nb;
+        magma_int_t mlocal = ((n / distblk) / nrgpu + 1) * distblk;
         magma_setdevice( dev );
         magma_zmalloc(&da[dev], ldda*mlocal );
         magma_zmalloc(&dT1[dev], (n*nb) );
@@ -424,11 +419,16 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
         }
     }
 
-    magmablas_zsetmatrix_1D_bcyclic( n, n, a, lda, da, ldda, nrgpu, nb);
-
+    magmablas_zsetmatrix_1D_bcyclic( n, n, a, lda, da, ldda, nrgpu, distblk);
     magma_setdevice(0);
 
-    magma_zhetrd_he2hb_mgpu(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, da, ldda, dT1, nb, nrgpu, nb, streams, nstream, threads, info);
+    if(ver==30){
+        magma_zhetrd_he2hb_mgpu_spec(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, da, ldda, dT1, nb, nrgpu, distblk, streams, nstream, threads, info);
+    }else{
+        nstream = 3;
+        magma_zhetrd_he2hb_mgpu(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, da, ldda, dT1, nb, nrgpu, distblk, streams, nstream, threads, info);
+    }
+
     for( magma_int_t dev = 0; dev < nrgpu; ++dev ) {
         magma_setdevice( dev );
         magma_free( da[dev] );

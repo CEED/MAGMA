@@ -401,6 +401,6 @@ magma_zhegvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
     /*work[0].r = (doublereal) lopt, work[0].i = 0.;
     rwork[0] = (doublereal) lropt;
     iwork[0] = liopt;*/
-
+    printf("\n\n\n");
     return *info;
 } /* zhegvdx_2stage_m */

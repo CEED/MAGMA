@@ -391,7 +391,7 @@ static void magma_ztile_bulge_applyQ(char side, magma_int_t n_loc, magma_int_t n
      *            that q_i+1 overlap a portion of the E(:, col_i).
      *            IN parallel E is splitten in horizontal block over the threads  */
     
-    printf("  APPLY Q2   N %d  N_loc %d  nbchunk %d  NB %d  Vblksiz %d  SIDE %c \n", n, n_loc, nbchunk, nb, Vblksiz, side);
+    //printf("  APPLY Q2   N %d  N_loc %d  nbchunk %d  NB %d  Vblksiz %d  SIDE %c \n", n, n_loc, nbchunk, nb, Vblksiz, side);
     for (magma_int_t i = 0; i<nbchunk; i++)
     {
         magma_int_t ib_loc = min(nb_loc, (n_loc - i*nb_loc));

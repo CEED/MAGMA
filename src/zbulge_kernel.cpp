@@ -66,10 +66,10 @@ magma_zlarfxsym(magma_int_t N, cuDoubleComplex *A, magma_int_t LDA, cuDoubleComp
   blasf77_zhemv("L",&N, TAU, A, &LDA, V, &IONE, &Z_ZERO, WORK, &IONE);
   /* je calcul dtmp= X'*V */
 #if defined(PRECISION_z) || defined(PRECISION_c)
-   //dtmp = Z_ZERO;
-   //for (j = 0; j < N ; j++)
-   //   dtmp = dtmp + MAGMA_Z_CNJG(WORK[j]) * V[j];
-   cblas_zdotc_sub(N, WORK, IONE, V, IONE, &dtmp);
+   dtmp = Z_ZERO;
+   for (j = 0; j < N ; j++)
+      dtmp = dtmp + MAGMA_Z_CNJG(WORK[j]) * V[j];
+   //cblas_zdotc_sub(N, WORK, IONE, V, IONE, &dtmp);
 #else
   dtmp = cblas_zdotc(N, WORK, IONE, V, IONE);
 #endif

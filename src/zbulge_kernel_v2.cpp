@@ -59,10 +59,14 @@ magma_zlarfxsym_v2(magma_int_t n, cuDoubleComplex *A, magma_int_t lda, cuDoubleC
 
     /* compute dtmp= X'*V */
 #if defined(PRECISION_z) || defined(PRECISION_c)
-    cblas_zdotc_sub(n, work, ione, V, ione, &dtmp);
+   dtmp = c_zero;
+   for (magma_int_t j = 0; j < n ; j++)
+      dtmp = dtmp + MAGMA_Z_CNJG(work[j]) * V[j];
+    //cblas_zdotc_sub(n, work, ione, V, ione, &dtmp);
 #else
     dtmp = cblas_zdotc(n, work, ione, V, ione);
 #endif
+
 
     /* compute 1/2 X'*V*t = 1/2*dtmp*tau  */
     dtmp = -dtmp * c_half * (*TAU);
