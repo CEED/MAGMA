@@ -300,6 +300,7 @@ return;
 
         // put the fstdevcpy stored in gnode in MagmaMaxGPUs+1 to -1;
         // compute the nb of active cmplx
+        magma_int_t firsttime=0;
         magma_int_t nbcmplxactive =0;
         magma_int_t cmplxisactive =0;
         for( magma_int_t cmplxid = 0; cmplxid < nbcmplx; ++cmplxid ) {
@@ -405,12 +406,14 @@ return;
                                 magmablas_zgeadd(m, n, c_one, 
                                                       dwork[fstdevcpy], lddwork, 
                                                       dC[fstdevcpy]   , lddc   );
-                            cudaEventRecord(redevents[fstdevcpy][0], streams[fstdevcpy][0]);
+                            
                         }
                     }
 
                 } // ifmyblk>0
             } // for idev 1:myngpu
+            cudaSetDevice( fstdevcpy );
+            cudaEventRecord(redevents[fstdevcpy][0], streams[fstdevcpy][0]);
             if(nbcmplxactive>1){
                 fstdevcpy = gnode[cmplxid][MagmaMaxGPUs+1];
                 if(fstdevcpy !=-1){
@@ -418,16 +421,18 @@ return;
                     cudaSetDevice( fstdevcpy );
                     cudaStreamWaitEvent(streams[ fstdevcpy ][ 0 ], redevents[fstdevcpy][0], 0);
                     if(CPUREDUCE==1){
-                        if(cmplxid==0)
+                        if(firsttime==0){
+                            firsttime = 1;
                             cudaMemcpy2DAsync(C, ldc*sizeof(cuDoubleComplex),
                                               dC[fstdevcpy], lddc*sizeof(cuDoubleComplex),
                                               m*sizeof(cuDoubleComplex), n,
                                               cudaMemcpyDeviceToHost, streams[ fstdevcpy ][ 0 ]);
-                        else
+                        }else{
                             cudaMemcpy2DAsync(work[fstdevcpy], ldwork*sizeof(cuDoubleComplex),
                                               dC[fstdevcpy], lddc*sizeof(cuDoubleComplex),
                                               m*sizeof(cuDoubleComplex), n,
                                               cudaMemcpyDeviceToHost, streams[ fstdevcpy ][ 0 ]);
+                        }
                     }else{
                         // REDUCTION IS DONE DIRECTLY ON GPU where each complex send its
                         // results to the other complex.                   
@@ -439,19 +444,20 @@ return;
         //*******************************
         //  CPU IS DOING THE REDUCE SUM
         //*******************************
+        firsttime = 0;
         if(CPUREDUCE==1){
             // CPU sync and add, only in case where more than 1 cmplx is active
             if(nbcmplxactive>1){
                 // make the addition of the dC received from each complex.    
-                for( magma_int_t cmplxid = 1; cmplxid < nbcmplx; ++cmplxid ) {
-                    // don't forget we need to sync with cmplxid=0;        
-                    if(cmplxid==1){
-                        fstdevcpy = gnode[0][MagmaMaxGPUs+1];
+                for( magma_int_t cmplxid = 0; cmplxid < nbcmplx; ++cmplxid ) {
+                    fstdevcpy = gnode[cmplxid][MagmaMaxGPUs+1];        
+                    if(fstdevcpy !=-1){
+                        firsttime = firsttime+1;
                         magma_queue_sync( streams[ fstdevcpy ][ 0 ] );
+                        if(firsttime>1){
+                            blasf77_zaxpy( &size, &c_one, work[fstdevcpy], &ione, C, &ione );
+                        }
                     }
-                    fstdevcpy = gnode[cmplxid][MagmaMaxGPUs+1];
-                    magma_queue_sync( streams[ fstdevcpy ][ 0 ] );
-                    blasf77_zaxpy( &size, &c_one, work[fstdevcpy], &ione, C, &ione );
                 }
                 // addition done, broadcast the result to the master of each complex
                 for( magma_int_t cmplxid = 0; cmplxid < nbcmplx; ++cmplxid ) {
@@ -555,7 +561,7 @@ return;
                 cudaSetDevice( dev );
                 // parallel broadcast
                 cudaStreamWaitEvent(streams[ dev ][ 0 ], redevents[dev][0], 0);
-            magma_queue_sync( streams[ dev ][ 0 ] );
+                magma_queue_sync( streams[ dev ][ 0 ] );
                 
                 // sequential broadcast
                 //cudaStreamWaitEvent(streams[ dev ][ 0 ], redevents[fstdevcpy][0], 0);
