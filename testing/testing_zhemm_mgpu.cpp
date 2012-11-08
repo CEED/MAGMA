@@ -55,7 +55,7 @@ int main( int argc, char** argv)
     int nstream = 3;
     int count   = 3;
     int ngpu    = magma_num_gpus();
-    
+    int ver =225;
     magma_int_t ione     = 1;
     magma_int_t iseed[4] = {0,0,0,1};
         
@@ -81,8 +81,12 @@ int main( int argc, char** argv)
             n = atoi( argv[++i] );
             magma_assert( n > 0, "error: -N %s is invalid; must be > 0.\n", argv[i] );
         }
-        else if ( strcmp("-nb", argv[i]) == 0 && i+1 < argc ) {
+        else if ( strcmp("-NB", argv[i]) == 0 && i+1 < argc ) {
             nb = atoi( argv[++i] );
+            magma_assert( nb > 0, "error: -nb %s is invalid; must be > 0.\n", argv[i] );
+        }
+        else if ( strcmp("-v", argv[i]) == 0 && i+1 < argc ) {
+            ver = atoi( argv[++i] );
             magma_assert( nb > 0, "error: -nb %s is invalid; must be > 0.\n", argv[i] );
         }
         else if ( strcmp("-count", argv[i]) == 0 && i+1 < argc ) {
@@ -123,6 +127,15 @@ int main( int argc, char** argv)
     magma_buildconnection_mgpu(gnode, &nbcmplx,  ngpu);
     printf(" Initializin communication pattern.... GPU-ncmplx %d\n\n" , nbcmplx);
 
+    for (int i=0;i<nbcmplx;++i)
+    {
+        int myngpu =gnode[i][MagmaMaxGPUs]; 
+        printf("cmplx %d has %d gpu ",i,myngpu);
+        for(int j=0;j<myngpu;++j)
+            printf("  %d",gnode[i][j]);
+        printf("\n");
+    }
+
     TESTING_MALLOC( hA, cuDoubleComplex, lda*m );
     TESTING_MALLOC( hX, cuDoubleComplex, lda*n );
     TESTING_MALLOC( hB, cuDoubleComplex, lda*n );
@@ -157,7 +170,7 @@ int main( int argc, char** argv)
     TESTING_DEVALLOC( dA2, cuDoubleComplex, ldda*m );
     }
     
-    printf( "nb %d, ngpu %d, nstream %d\n", (int) nb, ngpu, nstream );
+    printf( "nb %d, ngpu %d, nstream %d version %d \n", (int) nb, ngpu, nstream,ver );
     printf("    m     n     nb    offset    CPU GFlop/s (sec)   GPU GFlop/s (sec)   CUBLAS hemm (sec)   ||R|| / ||A||*||X||\n");
     printf("==============================================================================================\n");
 
@@ -167,7 +180,7 @@ int main( int argc, char** argv)
 
     magma_int_t nbtime=0;
     for( int i = 0; i < ntest; ++i ) {
-    for( int offst = 0; offst < m; offst += min(n,nb) ) {
+    for( int offst = 0; offst < 1; offst += min(n,nb) ) {
     for( int j = 0; j < count; ++j ) {
         m = msize[i];
         assert( m > 0 && n > 0 );
@@ -222,23 +235,21 @@ int main( int argc, char** argv)
        */  
         // multi gpu version
        
-       
+        if(ver==21)
         magmablas_zhemm_mgpu(
             MagmaLeft, MagmaLower, msiz, n,
             c_neg_one, dA, ldda, offst,
                        dX, ldda,
             cbeta,     dB, ldda, dwork, ldda, hR, lda, hwork,lda,
             ngpu, nb, streams, nstream, redevents, nbevents );
-        
-
-/*
+        else
         magmablas_zhemm_mgpu_com(
             MagmaLeft, MagmaLower, msiz, n,
             c_neg_one, dA, ldda, offst,
                        dX, ldda,
             cbeta,     dB, ldda, dwork, ldda, hR, lda, hwork,lda,
             ngpu, nb, streams, nstream, redevents, nbevents,gnode,nbcmplx);
-*/
+
 
        
         cudaDeviceSynchronize();
@@ -302,6 +313,8 @@ int main( int argc, char** argv)
             */
             magma_int_t firstprint=0;
             for(magma_int_t dev=0; dev<ngpu; ++dev){
+            
+                magma_setdevice( dev );
                 magma_zgetmatrix( m, n,  dB[dev], ldda, hR, lda );
 
                 // compute relative error ||R||/||A||*||X||, where R := B_magma - B_lapack = R - B

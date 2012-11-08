@@ -368,10 +368,14 @@ return 0;
             memcpy(AINIT, h_A, N*lda*sizeof(cuDoubleComplex));
             /* compute the eigenvalues using lapack routine to be able to compare to it and used as ref */
             start = get_current_time();
-            #if defined(USEMKL)
             i= min(12,THREADS);
+
+#if defined(USEMKL)
             mkl_set_num_threads( i );
-            #endif
+#endif
+#if defined(USEACML)
+            omp_set_num_threads(i);
+#endif
 
 #if defined(PRECISION_z) || defined (PRECISION_c)
             lapackf77_zheev( "N", "L", &N, h_A, &lda, D2, work2, &lwork2, rwork2, &info );
@@ -384,12 +388,9 @@ return 0;
             ////
             end = get_current_time();
             printf("  Finish CHECK - EIGEN   timing= %lf  threads %d \n" ,GetTimerValue(start,end) / 1000., i);
-            #if defined(USEMKL)
-            mkl_set_num_threads( 1 );
-            #endif
 
             /*
-        for(i=0;i<10;i++)
+            for(i=0;i<10;i++)
                 printf(" voici lpk D[%d] %e\n",i,D2[i]);
             */
 
@@ -398,8 +399,8 @@ return 0;
            // dgemm_("N","N",&N,&N,&N,&mydo,h_R,&lda,h_A,&lda,&mydz,Z,&lda);
 
 
-            /* compare result */
-            cmp_vals(N, D2, D, &nrmI, &nrm1, &nrm2);
+           /* compare result */
+           cmp_vals(N, D2, D, &nrmI, &nrm1, &nrm2);
 
 
            cuDoubleComplex *WORKAJETER;
@@ -418,6 +419,12 @@ return 0;
            zcheck_eig_(&JOBZ, &MATYPE, &N, &NB, AINIT, &lda, &NOTHING, &NOTHING, D2 , D, h_R, &lda, WORKAJETER, RWORKAJETER, RESU );
            end = get_current_time();
            printf("  Finish CHECK - results timing= %lf \n" ,GetTimerValue(start,end) / 1000.);
+#if defined(USEMKL)
+           mkl_set_num_threads( 1 );
+#endif
+#if defined(USEACML)
+           omp_set_num_threads(1);
+#endif
 
            printf("\n");
            printf(" ================================================================================================================\n");

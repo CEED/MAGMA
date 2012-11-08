@@ -56,6 +56,17 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                     magma_int_t threads, magma_int_t *info);
 
 extern "C" magma_int_t
+magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
+                    cuDoubleComplex *a, magma_int_t lda, 
+                    cuDoubleComplex *tau,
+                    cuDoubleComplex *work, magma_int_t lwork,
+                    cuDoubleComplex *dAmgpu[], magma_int_t ldda,
+                    cuDoubleComplex *dTmgpu[], magma_int_t lddt,
+                    magma_int_t ngpu, magma_int_t distblk, 
+                    cudaStream_t streams[][20], magma_int_t nstream, 
+                    magma_int_t threads, magma_int_t *info);
+
+extern "C" magma_int_t
 magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int n, int NB, 
                    cuDoubleComplex *A, int LDA, double *D, double *E, cuDoubleComplex *dT1, int ldt1);
 
@@ -94,12 +105,14 @@ int main( int argc, char** argv)
     char *uplo = (char *)MagmaLowerStr;
 
     magma_int_t ngpu    = magma_num_gpus();
-    magma_int_t nstream = 3;
+    magma_int_t nstream = max(3,ngpu+1);
     magma_int_t WANTZ=0;
     magma_int_t THREADS=1;
     magma_int_t NE = 0;
     magma_int_t NB = 0;
     magma_int_t distblk =0;
+    magma_int_t ver =0;
+
     checkres  = 0; //getenv("MAGMA_TESTINGS_CHECK") != NULL;
 
     if (argc != 1){
@@ -125,6 +138,9 @@ int main( int argc, char** argv)
             }
             else if ( strcmp("-c", argv[i]) == 0 ) {
                 checkres = 1;
+            }
+            else if ( strcmp("-v", argv[i]) == 0 && i+1 < argc ) {
+                ver = atoi( argv[++i] );
             }
             else if ( strcmp("-nstream", argv[i]) == 0 && i+1 < argc ) {
                 nstream = atoi( argv[++i] );
@@ -178,11 +194,12 @@ int main( int argc, char** argv)
     TESTING_HOSTALLOC( E,    double, N );
 
 
+    nstream = max(3,ngpu+2);
     cudaStream_t streams[MagmaMaxGPUs][20];    
     cuDoubleComplex *da[MagmaMaxGPUs],*dT1[MagmaMaxGPUs];
     magma_int_t ldda = ((N+31)/32)*32;
     if((distblk==0)||(distblk<NB))distblk = max(64,NB);
-    printf("voici distblk %d NB %d\n ",distblk,NB);
+    printf("voici ngpu %d distblk %d NB %d nstream %d\n ",ngpu,distblk,NB,nstream);
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_int_t mlocal = ((N / distblk) / ngpu + 1) * distblk;
         cudaSetDevice( dev );
@@ -210,6 +227,15 @@ int main( int argc, char** argv)
         for( i = 0; i < N; ++i ) {
             h_A[i + i*lda] = MAGMA_Z_MAKE( MAGMA_Z_REAL( h_A[i+i*lda] ), 0. );
         }
+        // Make the matrix hermitian 
+        {
+            magma_int_t i, j;
+            for(i=0; i<N; i++) {
+                for(j=0; j<i; j++)
+                    h_A[i*lda+j] = cuConj(h_A[j*lda+i]);
+            }
+        }
+
         lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
 
 
@@ -223,17 +249,22 @@ int main( int argc, char** argv)
 //       TESTING_DEVALLOC( dabis,  cuDoubleComplex, ldda*N );
 //       magma_zsetmatrix(N,N,h_R,lda,dabis,ldda);       
        
-for (int count=0; count<1;++count){
+    for (int count=0; count<1;++count){
        cudaSetDevice(0);
-        start = get_current_time();
-//    printf("voici distblk %d NB %d\n ",distblk,NB);
-
-       magma_zhetrd_he2hb_mgpu(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, da, ldda, dT1, NB, ngpu, distblk, streams, nstream, THREADS, &info);
-
+       start = get_current_time();
+       if(ver==30){
+           magma_zhetrd_he2hb_mgpu_spec(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, da, ldda, dT1, NB, ngpu, distblk, streams, nstream, THREADS, &info); 
+       }else{
+           nstream =3;
+           magma_zhetrd_he2hb_mgpu(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, da, ldda, dT1, NB, ngpu, distblk, streams, nstream, THREADS, &info);
+       }
        // magma_zhetrd_he2hb(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, dT1[0], &info);
-        end = get_current_time();
-        printf("  Finish BAND    timing= %lf \n" ,GetTimerValue(start,end) / 1000.);
-}
+       end = get_current_time();
+       printf("  Finish BAND  N %d  NB %d  dist %d  ngpu %d version %d timing= %lf \n" ,N,NB,distblk,ngpu,ver,GetTimerValue(start,end) / 1000.);
+    }
+       cudaSetDevice(0);
+
+// goto fin;
 //return 0;
 
 
@@ -247,6 +278,7 @@ for (int count=0; count<1;++count){
         /* =====================================================================
            Print performance and error.
            =================================================================== */
+
 #if defined(CHECKEIG)
 #if defined(PRECISION_z)  || defined(PRECISION_d)
         if ( checkres ) {
@@ -265,10 +297,14 @@ for (int count=0; count<1;++count){
             memcpy(AINIT, h_A, N*lda*sizeof(cuDoubleComplex));
             /* compute the eigenvalues using lapack routine to be able to compare to it and used as ref */
             start = get_current_time();
-            #if defined(USEMKL)
             i= min(12,THREADS);
+
+#if defined(USEMKL)
             mkl_set_num_threads( i );
-            #endif
+#endif
+#if defined(USEACML)
+            omp_set_num_threads(i);
+#endif
 
 #if defined(PRECISION_z) || defined (PRECISION_c)
             lapackf77_zheev( "N", "L", &N, h_A, &lda, D2, work2, &lwork2, rwork2, &info );
@@ -281,9 +317,6 @@ for (int count=0; count<1;++count){
             ////
             end = get_current_time();
             printf("  Finish CHECK - EIGEN   timing= %lf  threads %d \n" ,GetTimerValue(start,end) / 1000., i);
-            #if defined(USEMKL)
-            mkl_set_num_threads( 1 );
-            #endif
 
             /* compare result */
             cmp_vals(N, D2, D, &nrmI, &nrm1, &nrm2);
@@ -305,6 +338,12 @@ for (int count=0; count<1;++count){
            zcheck_eig_(&JOBZ, &MATYPE, &N, &NB, AINIT, &lda, &NOTHING, &NOTHING, D2 , D, h_R, &lda, WORKAJETER, RWORKAJETER, RESU );
            end = get_current_time();
            printf("  Finish CHECK - results timing= %lf \n" ,GetTimerValue(start,end) / 1000.);
+#if defined(USEMKL)
+           mkl_set_num_threads( 1 );
+#endif
+#if defined(USEACML)
+           omp_set_num_threads(1);
+#endif
 
            printf("\n");
            printf(" ================================================================================================================\n");
@@ -335,13 +374,17 @@ for (int count=0; count<1;++count){
           break;
     }
 
+fin:
+
     /* Memory clean up */
+//    cudaSetDevice( 0 );
     TESTING_FREE( tau ); 
     TESTING_HOSTFREE( h_A );
     TESTING_HOSTFREE( h_R ); 
     TESTING_HOSTFREE( h_work ); 
 
     /* Shutdown */
+    
     TESTING_CUDA_FINALIZE();
     return EXIT_SUCCESS;
 }

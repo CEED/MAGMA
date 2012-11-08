@@ -87,9 +87,9 @@ int main( int argc, char** argv)
             k = atoi( argv[++i] );
             magma_assert( k > 0, "error: -K %s is invalid; must be > 0.\n", argv[i] );
         }
-        else if ( strcmp("-nb", argv[i]) == 0 && i+1 < argc ) {
+        else if ( strcmp("-NB", argv[i]) == 0 && i+1 < argc ) {
             nb = atoi( argv[++i] );
-            magma_assert( nb > 0, "error: -nb %s is invalid; must be > 0.\n", argv[i] );
+            magma_assert( nb > 0, "error: -NB %s is invalid; must be > 0.\n", argv[i] );
         }
         else if ( strcmp("-count", argv[i]) == 0 && i+1 < argc ) {
             count = atoi( argv[++i] );
@@ -132,7 +132,7 @@ int main( int argc, char** argv)
     cudaStream_t streams[MagmaMaxGPUs][20];
     
     for( int d = 0; d < ngpu; ++d ) {
-        magma_int_t nlocal = ((n / k) / ngpu + 1) * k;
+        magma_int_t nlocal = ((n / nb) / ngpu + 1) * nb;
         cudaSetDevice( d );
         TESTING_DEVALLOC( dA[d], cuDoubleComplex, ldda*nlocal );
         TESTING_DEVALLOC( dV[d], cuDoubleComplex, ldda*k*2      );
@@ -175,13 +175,34 @@ int main( int argc, char** argv)
                 
                 cudaDeviceSynchronize();
                 gpu_time = magma_wtime();
-                magmablas_zher2k_mgpu2(
+
+
+ 
+               magmablas_zher2k_mgpu2(
                     MagmaLower, MagmaNoTrans, n-offset, k,
                     c_neg_one, dV, ldda,0,
                                dW, ldda,0,
                     d_one,     dA, ldda, offset,
                     ngpu, nb, streams, nstream );
-                cudaDeviceSynchronize();
+/*
+                magmablas_zher2k_mgpu_spec(
+                    MagmaLower, MagmaNoTrans, n-offset, k,
+                    c_neg_one, dV, ldda,0,
+                               dW, ldda,0,
+                    d_one,     dA, ldda, offset,
+                    ngpu, nb, streams, nstream );
+*/
+
+               /*
+                for( int d = 0; d < ngpu; ++d ) {
+                    cudaSetDevice( d );
+                    cudaDeviceSynchronize();
+                }
+                cudaSetDevice( 0 );
+                */
+
+                    cudaDeviceSynchronize();
+
                 gpu_time = magma_wtime() - gpu_time;
                 gpu_perf = gflops / gpu_time;
                 
