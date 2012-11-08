@@ -55,8 +55,10 @@ ZSRC += \
 	zhemm_1gpu.cpp		\
 	zhemm_1gpu_old.cpp	\
 	zhemm_mgpu.cpp		\
-	zhemm_mgpu225.cpp		\
+	zhemm_mgpu_com.cpp		\
+	zhemm_mgpu_spec.cpp		\
 	zher2k_mgpu.cpp		\
+	zher2k_mgpu_spec.cpp		\
 	zgetmatrix_transpose_mgpu.cu	\
 	zsetmatrix_transpose_mgpu.cu	\
     zhemv_fermi_mgpu_32.cu  \

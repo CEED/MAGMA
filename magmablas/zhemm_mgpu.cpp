@@ -89,8 +89,8 @@ void magmablas_zhemm_mgpu(
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_int_t newstdev      = (newoffset/nb)%ngpu;
         magma_int_t nbblk = remm/nb; // number of block of size nb. if m%nb>0 then a last block exist and is of size ib=m%nb
-        magma_int_t myblk = (nbblk/ngpu) + (nbblk%ngpu > ((dev-newstdev+ngpu)%ngpu) ?  1:0 );
         magma_int_t devperm   = (dev-newstdev+ngpu)%ngpu;
+        magma_int_t myblk = (nbblk/ngpu) + (nbblk%ngpu > devperm ?  1:0 );
         magma_int_t nbblkoffst = newoffset/nb;
         magma_int_t myblkoffst = (nbblkoffst/ngpu)+(nbblkoffst%ngpu > dev?1:0);
         //printf("dev %d  devperm %d   newoffset %d  rowoff %d    coloff %d    myblk %d  \n",dev,devperm,newoffset,newoffset+devperm*nb,myblkoffst*nb,myblk);
