@@ -338,6 +338,9 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
 #if defined(USEMKL)
     mkl_set_num_threads( 1 );
 #endif
+#if defined(USEACML)
+    omp_set_num_threads(1);
+#endif
 
     if (wantz==2 || wantz==3)
         computeQ1 = 1;
@@ -439,6 +442,9 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
 #if defined(USEMKL)
     mkl_set_num_threads(mklth);
 #endif
+#if defined(USEACML)
+    omp_set_num_threads(mklth);
+#endif
 
     timeeigen = magma_wtime();
     if(wantz==0){
@@ -460,7 +466,10 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
         magma_zstedx_withZ(n, ne, D, E, Z, ldz);
 
 #if defined(USEMKL)
-        mkl_set_num_threads(1);
+    mkl_set_num_threads(1);
+#endif
+#if defined(USEACML)
+    omp_set_num_threads(1);
 #endif
 
         timelpk = magma_wtime()-timelpk;
@@ -714,8 +723,12 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
         }
 
 #if defined(USEMKL)
-        mkl_set_num_threads(mklth);
+    mkl_set_num_threads(mklth);
 #endif
+#if defined(USEACML)
+    omp_set_num_threads(mklth);
+#endif
+        
         magma_free_cpu(Z);
         magma_free(dZ);
         magma_free(dQ1);

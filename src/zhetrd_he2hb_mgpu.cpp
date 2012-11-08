@@ -219,15 +219,18 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
         return *info;
     }
 
-#if defined(USEMKL)
     magma_int_t mklth = min(threads,12);
+#if defined(USEMKL)
     mkl_set_num_threads(mklth);
+#endif
+#if defined(USEACML)
+    omp_set_num_threads(mklth);
 #endif
 
     magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2];
     magma_int_t nbcmplx=0;
     magma_buildconnection_mgpu(gnode, &nbcmplx,  ngpu);
-    printf(" Initializin communication pattern.... GPU-ncmplx %d\n\n" , nbcmplx);
+    printf(" Initializing communication pattern.... GPU-ncmplx %d\n\n" , nbcmplx);
 
 
     magma_device_t cdev;
@@ -466,11 +469,12 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
 
              // ===============================================
              //   SYNC TO BE SURE THAT BOTH V AND T WERE 
-             //   RECEIVED AND VT IS COMPUTED
+             //   RECEIVED AND VT IS COMPUTED and SYR2K is done
              // ===============================================
              for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
                  cudaSetDevice( dev );
-                 magma_queue_sync( streams[dev][nstream-1] );
+                 for( magma_int_t s = 0; s < nstream; ++s ) 
+                 magma_queue_sync( streams[dev][s] );
              }
 
 
@@ -480,12 +484,13 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
               // for the GEMMs below otherwise I have to SYNC over the 
               // Broadcasting stream.
               if(ngpu==1){
+                 magmablasSetKernelStream( streams[ 0 ][ 0 ] );
                  magma_zhemm(MagmaLeft, uplo, pm, pk,
                          c_one, dAmgpu[0]+(indi-1)*ldda+(indi-1), ldda,
                          dworktest[0], pm,
                          c_zero, dwtest[0], pm);
               }else{
-                 /*
+                 /*     
                  magmablas_zhemm_mgpu(
                        MagmaLeft, uplo, pm, pk,
                        c_one, dAmgpu, ldda, indi-1,
@@ -500,7 +505,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                        c_zero,     dwtest, pm, dworktestbis, pm, worktest, pm, workngpu, pm,
                        ngpu, distblk, streams, nstream-1, redevents, nbevents, gnode, nbcmplx);
                  
-                 /*
+                 /* 
                  // send X=AVT stored in dW to all GPUs 
                  for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
                      cudaSetDevice( dev );
@@ -644,6 +649,9 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
     MAGMA_Z_SET2REAL( work[0], lwkopt );
 #if defined(USEMKL)
     mkl_set_num_threads(1);
+#endif
+#if defined(USEACML)
+    omp_set_num_threads(1);
 #endif
 
 

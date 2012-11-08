@@ -209,9 +209,12 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
         return *info;
     }
 
-#if defined(USEMKL)
     magma_int_t mklth = min(threads,12);
+#if defined(USEMKL)
     mkl_set_num_threads(mklth);
+#endif
+#if defined(USEACML)
+    omp_set_num_threads(mklth);
 #endif
 
 
@@ -348,7 +351,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
                          c_zero, dwork, pm);
              trace_gpu_end( 0, 2 );
              
-             /* W = X = A*V*T = A dwork */ 
+             /* dW = X = A*V*T. dW = A*dwork */ 
              trace_gpu_start( 0, 2, "hemm", "X = A*work" );
              magma_zhemm(MagmaLeft, uplo, pm, pk,
                          c_one, da_ref(indi, indi), ldda,
@@ -435,10 +438,15 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
     magma_queue_destroy( stream[1] );
     magma_free( da );
     MAGMA_Z_SET2REAL( work[0], lwkopt );
+    magmablasSetKernelStream( 0 );
+    
 #if defined(USEMKL)
     mkl_set_num_threads(1);
 #endif
-    magmablasSetKernelStream( 0 );
+#if defined(USEACML)
+    omp_set_num_threads(1);
+#endif
+    
 
     return *info;
 } /* zhetrd_he2hb_ */

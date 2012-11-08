@@ -163,6 +163,7 @@ ZSRC += \
 	zbulge_kernel_v2.cpp	\
 	zhetrd_he2hb.cpp	\
 	zhetrd_he2hb_mgpu.cpp	\
+	zhetrd_he2hb_mgpu_spec.cpp	\
 	zhetrd_hb2st.cpp	\
 	zbulge_back.cpp		\
 	zhetrd_bhe2trc_v3.cpp	\

@@ -224,6 +224,9 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
 #if defined(USEMKL)
     mkl_set_num_threads( 1 );
 #endif
+#if defined(USEACML)
+    omp_set_num_threads(1);
+#endif
 
     magma_zbulge_data data_bulge(threads, n, nb, nbtiles, INgrsiz, Vblksiz, compT,
                                  A, lda, V, ldv, TAU, T, ldt, prog);
@@ -264,6 +267,9 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
 
 #if defined(USEMKL)
     mkl_set_num_threads( mklth );
+#endif
+#if defined(USEACML)
+    omp_set_num_threads(mklth);
 #endif
     
     /*================================================

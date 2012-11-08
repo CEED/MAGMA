@@ -126,6 +126,9 @@ extern "C" magma_int_t magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t thread
 #if defined(USEMKL)
     mkl_set_num_threads(1);
 #endif
+#if defined(USEACML)
+    omp_set_num_threads(1);
+#endif
 
     double f= 1.;
     magma_int_t n_gpu = ne;
@@ -211,6 +214,9 @@ extern "C" magma_int_t magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t thread
 
 #if defined(USEMKL)
     mkl_set_num_threads(mklth);
+#endif
+#if defined(USEACML)
+    omp_set_num_threads(mklth);
 #endif
 
     return MAGMA_SUCCESS;
