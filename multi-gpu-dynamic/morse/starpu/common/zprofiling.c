@@ -40,7 +40,7 @@ void morse_zdisplay_allprofile()
 
     profiling_display_zpotrf_info();
 
-    profiling_display_zgetrl_info();
+    profiling_display_zgetrf_incpiv_info();
     profiling_display_zgessm_info();
     profiling_display_ztstrf_info();
     profiling_display_zssssm_info();
@@ -85,7 +85,7 @@ void morse_zdisplay_oneprofile( morse_kernel_t kernel )
 
     case MORSE_POTRF: profiling_display_zpotrf_info(); break;
 
-    case MORSE_GETRL: profiling_display_zgetrl_info(); break;
+    case MORSE_GETRF_INCPIV: profiling_display_zgetrf_incpiv_info(); break;
     case MORSE_GESSM: profiling_display_zgessm_info(); break;
     case MORSE_TSTRF: profiling_display_ztstrf_info(); break;
     case MORSE_SSSSM: profiling_display_zssssm_info(); break;

@@ -21,7 +21,7 @@
 CL_CALLBACK(zgemm,  starpu_matrix_get_nx(task->handles[2]),     2. *size*size*size);
 CL_CALLBACK(zgeqrt, starpu_matrix_get_nx(task->handles[0]), (4./3.)*size*size*size);
 CL_CALLBACK(zgessm, starpu_matrix_get_nx(task->handles[2]),     2. *size*size*size);
-CL_CALLBACK(zgetrl, starpu_matrix_get_nx(task->handles[0]), (2./3.)*size*size*size);
+CL_CALLBACK(zgetrf_incpiv, starpu_matrix_get_nx(task->handles[0]), (2./3.)*size*size*size);
 CL_CALLBACK(zherk,  starpu_matrix_get_nx(task->handles[0]), (   1.+size)*size*size);
 CL_CALLBACK(zlacpy, starpu_matrix_get_nx(task->handles[0]),              size*size);
 #if defined(PRECISION_z) || defined(PRECISION_c)

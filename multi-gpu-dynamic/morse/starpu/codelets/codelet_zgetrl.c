@@ -1,6 +1,6 @@
 /**
  *
- *  @file codelet_zgetrl.c
+ *  @file codelet_zgetrf_incpiv.c
  *
  *  MAGMA codelets kernel
  *  MAGMA is a software package provided by Univ. of Tennessee,
@@ -23,7 +23,7 @@
 /*
  * Codelet CPU
  */
-static void cl_zgetrl_cpu_func(void *descr[], void *cl_arg)
+static void cl_zgetrf_incpiv_cpu_func(void *descr[], void *cl_arg)
 {
     int m;
     int n;
@@ -76,7 +76,7 @@ static void cl_zgetrl_cpu_func(void *descr[], void *cl_arg)
  * Codelet Multi-cores
  */
 #ifdef MORSE_USE_MULTICORE
-static void cl_zgetrl_mc_func(void *descr[], void *cl_arg)
+static void cl_zgetrf_incpiv_mc_func(void *descr[], void *cl_arg)
 {
 }
 #endif
@@ -85,7 +85,7 @@ static void cl_zgetrl_mc_func(void *descr[], void *cl_arg)
  * Codelet GPU
  */
 #ifdef MORSE_USE_CUDA
-static void cl_zgetrl_cuda_func(void *descr[], void *cl_arg)
+static void cl_zgetrf_incpiv_cuda_func(void *descr[], void *cl_arg)
 {
     int m;
     int n;
@@ -120,7 +120,7 @@ static void cl_zgetrl_cuda_func(void *descr[], void *cl_arg)
     /* Copy First panel */
     cublasGetMatrix( m, min(ib,m), sizeof(cuDoubleComplex), dA, lda, hA, lda );
 
-    magma_zgetrl_gpu( 'C', m, n, ib,
+    magma_zgetrf_incpiv_gpu( 'C', m, n, ib,
                       hA, lda, dA, lda,
                       hL, ldl, dL, ldl,
                       IPIV, 
@@ -134,32 +134,32 @@ static void cl_zgetrl_cuda_func(void *descr[], void *cl_arg)
 /*
  * Codelet definition
  */
-CODELETS(zgetrl, 2, cl_zgetrl_cpu_func, cl_zgetrl_cuda_func, cl_zgetrl_cpu_func)
+CODELETS(zgetrf_incpiv, 2, cl_zgetrf_incpiv_cpu_func, cl_zgetrf_incpiv_cuda_func, cl_zgetrf_incpiv_cpu_func)
 
 /*
  * Wrapper
  */
-void MORSE_zgetrl( MorseOption_t *options, 
+void MORSE_zgetrf_incpiv( MorseOption_t *options, 
                    int m, int n, int ib,
                    magma_desc_t *A, int Am, int An,
                    magma_desc_t *L, int Lm, int Ln,
                    int *IPIV,
                    PLASMA_bool check, int iinfo)
 {
-    struct starpu_codelet *zgetrl_codelet;
-    void (*callback)(void*) = options->profiling ? cl_zgetrl_callback : NULL;
+    struct starpu_codelet *zgetrf_incpiv_codelet;
+    void (*callback)(void*) = options->profiling ? cl_zgetrf_incpiv_callback : NULL;
     int lda = BLKLDD( A, Am );
     int ldl = BLKLDD( L, Lm );
     morse_starpu_ws_t *h_work = (morse_starpu_ws_t*)(options->ws_host);
     morse_starpu_ws_t *d_work = (morse_starpu_ws_t*)(options->ws_device);
 
 #ifdef MORSE_USE_MULTICORE
-    zgetrl_codelet = options->parallel ? &cl_zgetrl_mc : &cl_zgetrl;
+    zgetrf_incpiv_codelet = options->parallel ? &cl_zgetrf_incpiv_mc : &cl_zgetrf_incpiv;
 #else
-    zgetrl_codelet = &cl_zgetrl;
+    zgetrf_incpiv_codelet = &cl_zgetrf_incpiv;
 #endif
 
-    starpu_insert_task(zgetrl_codelet,
+    starpu_insert_task(zgetrf_incpiv_codelet,
                        STARPU_VALUE,  &m,      sizeof(int),
                        STARPU_VALUE,  &n,      sizeof(int),
                        STARPU_VALUE,  &ib,     sizeof(int),

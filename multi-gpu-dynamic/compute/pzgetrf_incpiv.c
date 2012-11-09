@@ -65,7 +65,7 @@ void magma_pzgetrf_incpiv(magma_desc_t *dA, magma_desc_t *dL, int *IPIV,
     for (k = 0; k < maxk; k++) {
         tempkm = k == dA->mt-1 ? dA->m-k*dA->mb : dA->mb;
         tempkn = k == dA->nt-1 ? dA->n-k*dA->nb : dA->nb;
-        MORSE_zgetrl(
+        MORSE_zgetrf_incpiv(
             &options,
             tempkm, tempkn, ib,
             A(k, k), 

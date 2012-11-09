@@ -22,12 +22,12 @@
 //#define magma_ztrmm magmablas_ztrmm
 
 extern "C" magma_int_t
-magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
-                  cuDoubleComplex *hA, magma_int_t ldha, cuDoubleComplex *dA, magma_int_t ldda,
-                  cuDoubleComplex *hL, magma_int_t ldhl, cuDoubleComplex *dL, magma_int_t lddl,
-                  magma_int_t *ipiv, 
-                  cuDoubleComplex *dwork, magma_int_t lddwork,
-                  magma_int_t *info)
+magma_zgetrf_incpiv_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
+                         cuDoubleComplex *hA, magma_int_t ldha, cuDoubleComplex *dA, magma_int_t ldda,
+                         cuDoubleComplex *hL, magma_int_t ldhl, cuDoubleComplex *dL, magma_int_t lddl,
+                         magma_int_t *ipiv, 
+                         cuDoubleComplex *dwork, magma_int_t lddwork,
+                         magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -38,16 +38,18 @@ magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
     Purpose
     =======
 
-    SGETRF computes an LU factorization of a general M-by-N matrix A
+    ZGETRF_INCPIV computes an LU factorization of a general M-by-N tile A
     using partial pivoting with row interchanges.
-
+  
     The factorization has the form
-       A = P * L * U
+  
+      A = P * L * U
+  
     where P is a permutation matrix, L is lower triangular with unit
     diagonal elements (lower trapezoidal if m > n), and U is upper
     triangular (upper trapezoidal if m < n).
-
-    This is the right-looking Level 3 BLAS version of the algorithm.
+  
+    This is the right-looking Level 2.5 BLAS version of the algorithm.
 
     Arguments
     =========
@@ -58,32 +60,55 @@ magma_zgetrl_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
     N       (input) INTEGER
             The number of columns of the matrix A.  N >= 0.
 
-    A       (input/output) REAL array on the GPU, dimension (LDA,N).
-            On entry, the M-by-N matrix to be factored.
+    IB      (input) INTEGER
+            The inner-blocking size.  IB >= 0.
+
+    hA      (input,output) DOUBLE COMPLEX array, dimension(LDHA, N), on cpu.
+            On entry, only the M-by-IB first panel needs to be identical to dA(1..M, 1..IB).
+            On exit, the content is incomplete. Shouldn't be used.
+ 
+    LDHA    (input) INTEGER
+            The leading dimension of the array hA.  LDHA >= max(1,M).
+ 
+    dA      (input,output) DOUBLE COMPLEX array, dimension(LDDA, N) , on gpu.
+            On entry, the M-by-N tile to be factored.
             On exit, the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
+ 
+    LDDA    (input) INTEGER
+            The leading dimension of the array dA.  LDDA >= max(1,M).
+ 
+    hL      (output) DOUBLE COMPLEX array, dimension(LDHL, min(M,N)), on vpu.
+            On exit, contains in the upper part the IB-by-K lower triangular tile,
+            and in the lower part IB-by-min(M,N) the inverse of the top part.
+ 
+    LDHL    (input) INTEGER
+            The leading dimension of the array hL.  LDHL >= max(1,2*IB).
+ 
+    dL      (output) DOUBLE COMPLEX array, dimension(LDDL, K), on gpu.
+            On exit, contains in the upper part the IB-by-min(M,N) lower triangular tile,
+            and in the lower part IB-by-min(M,N) the inverse of the top part.
+ 
+    LDDL    (input) INTEGER
+            The leading dimension of the array dL.  LDDL >= max(1,2*IB).
+ 
+    IPIV    (output) INTEGER array, dimension min(M,N), on the cpu.
+            The pivot indices array.
+ 
+    dWORK   (output) DOUBLE COMPLEX array, dimension(LDDWORK, 2*IB), on gpu.
+            Workspace.
 
-    LDA     (input) INTEGER
-            The leading dimension of the array A.  LDA >= max(1,M).
-
-    IPIV    (output) INTEGER array, dimension (min(M,N))
-            The pivot indices; for 1 <= i <= min(M,N), row i of the
-            matrix was interchanged with row IPIV(i).
-
-
-    dwork   dimension(LDDWORK, IB) to store a single panel.
-
-    LDDWORK > max(1, ((MB+31)/32)*32)
-
+    LDDWORK (input) INTEGER
+            The leading dimension of the array dWORK.  LDDWORK >= max(NB, 1).
+ 
     INFO    (output) INTEGER
-            = 0:  successful exit
-            < 0:  if INFO = -i, the i-th argument had an illegal value
-                  or another error occured, such as memory allocation failed.
-            > 0:  if INFO = i, U(i,i) is exactly zero. The factorization
-                  has been completed, but the factor U is exactly
-                  singular, and division by zero will occur if it is used
-                  to solve a system of equations.
-
+            - PLASMA_SUCCESS successful exit
+            - < 0 if INFO = -k, the k-th argument had an illegal value
+            - > 0 if INFO = k, U(k,k) is exactly zero. The factorization
+                has been completed, but the factor U is exactly
+                singular, and division by zero will occur if it is used
+                to solve a system of equations.
+           
     =====================================================================    */
 
 #define AT(i,j) (dAT + (i)*ib*ldda + (j)*ib)

@@ -74,7 +74,7 @@ SET(ZSRC
     codelets/codelet_ztrsm.c  
     codelets/codelet_zherk.c
     codelets/codelet_zpotrf.c
-    codelets/codelet_zgetrl.c 
+    codelets/codelet_zgetrf_incpiv.c 
     codelets/codelet_ztstrf.c 
     codelets/codelet_zgessm.c 
     codelets/codelet_zssssm.c

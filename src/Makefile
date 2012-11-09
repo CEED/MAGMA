@@ -67,7 +67,7 @@ ZSRC += \
 
 # LU, auxiliary for multi-gpu-dynamic
 ZSRC += \
-	zgetrl_gpu.cpp		\
+	zgetrf_incpiv_gpu.cpp		\
 	zgessm_gpu.cpp		\
 	zssssm_gpu.cpp		\
 	ztstrf_gpu.cpp		\

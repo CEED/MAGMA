@@ -99,7 +99,7 @@ magmablas_zpermute_long3( cuDoubleComplex *dAT, magma_int_t lda,
 
 // Swap rows of A, stored row-wise.
 // This interface is identical to LAPACK's laswp interface.
-// It is used in zgessm, zgetrl.
+// It is used in zgessm, zgetrf_incpiv.
 extern "C" void
 magmablas_zlaswp( magma_int_t n, cuDoubleComplex *dAT, magma_int_t lda,
                   magma_int_t i1, magma_int_t i2,

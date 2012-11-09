@@ -35,7 +35,7 @@ void MORSE_zgessm( MorseOption_t *options,
                    magma_desc_t *L, int Lm, int Ln,
                    magma_desc_t *D, int Dm, int Dn,
                    magma_desc_t *A, int Am, int An);
-void MORSE_zgetrl( MorseOption_t *options, 
+void MORSE_zgetrf_incpiv( MorseOption_t *options, 
                    int m, int n, int ib,
                    magma_desc_t *A, int Am, int An,
                    magma_desc_t *L, int Lm, int Ln,

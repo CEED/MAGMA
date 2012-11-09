@@ -238,7 +238,7 @@ IF(MAGMA_USE_PLASMA)
     SET(ZSRC ${ZSRC}
              zgessm_gpu.cpp
              zssssm_gpu.cpp
-             zgetrl_gpu.cpp
+             zgetrf_incpiv_gpu.cpp
              ztstrf_gpu.cpp
              )
 ENDIF()

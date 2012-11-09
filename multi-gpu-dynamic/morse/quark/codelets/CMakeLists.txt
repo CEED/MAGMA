@@ -42,7 +42,7 @@ SET(ZSRC codelet_zlacpy.c
          codelet_zplrnt.c codelet_zplghe.c codelet_zplgsy.c codelet_zunmlq.c
          codelet_zgemm.c  codelet_ztrsm.c  codelet_zherk.c  codelet_ztsmlq.c
          codelet_zpotrf.c codelet_zgelqt.c codelet_zlaset.c codelet_ztslqt.c
-         codelet_zgetrl.c codelet_ztstrf.c codelet_zgessm.c codelet_zssssm.c
+         codelet_zgetrf_incpiv.c codelet_ztstrf.c codelet_zgessm.c codelet_zssssm.c
          codelet_zgeqrt.c codelet_ztsqrt.c codelet_zunmqr.c codelet_ztsmqr.c
          codelet_zaxpy.c  codelet_zttqrt.c codelet_zttlqt.c
          codelet_zttmlq.c codelet_zsymm.c codelet_zhemm.c

@@ -37,7 +37,7 @@ typedef enum morse_kernel_e {
 
   MORSE_POTRF,
 
-  MORSE_GETRL,
+  MORSE_GETRF_INCPIV,
   MORSE_GESSM,
   MORSE_TSTRF,
   MORSE_SSSSM,

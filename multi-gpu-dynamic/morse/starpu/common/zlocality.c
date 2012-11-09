@@ -39,7 +39,7 @@ void morse_zlocality_allrestrict( uint32_t where )
 
     cl_zpotrf_restrict_where( where );
 
-    cl_zgetrl_restrict_where( where );
+    cl_zgetrf_incpiv_restrict_where( where );
     cl_zgessm_restrict_where( where );
     cl_ztstrf_restrict_where( where );
     cl_zssssm_restrict_where( where );
@@ -82,7 +82,7 @@ void morse_zlocality_onerestrict( morse_kernel_t kernel, uint32_t where )
 
     case MORSE_POTRF: cl_zpotrf_restrict_where( where ); break;
 
-    case MORSE_GETRL: cl_zgetrl_restrict_where( where ); break;
+    case MORSE_GETRF_INCPIV: cl_zgetrf_incpiv_restrict_where( where ); break;
     case MORSE_GESSM: cl_zgessm_restrict_where( where ); break;
     case MORSE_TSTRF: cl_ztstrf_restrict_where( where ); break;
     case MORSE_SSSSM: cl_zssssm_restrict_where( where ); break;
@@ -127,7 +127,7 @@ void morse_zlocality_allrestore( )
 
     cl_zpotrf_restore_where();
 
-    cl_zgetrl_restore_where();
+    cl_zgetrf_incpiv_restore_where();
     cl_zgessm_restore_where();
     cl_ztstrf_restore_where();
     cl_zssssm_restore_where();
@@ -170,7 +170,7 @@ void morse_zlocality_onerestore( morse_kernel_t kernel )
 
         case MORSE_POTRF: cl_zpotrf_restore_where(); break;
 
-        case MORSE_GETRL: cl_zgetrl_restore_where(); break;
+        case MORSE_GETRF_INCPIV: cl_zgetrf_incpiv_restore_where(); break;
         case MORSE_GESSM: cl_zgessm_restore_where(); break;
         case MORSE_TSTRF: cl_ztstrf_restore_where(); break;
         case MORSE_SSSSM: cl_zssssm_restore_where(); break;

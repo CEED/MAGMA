@@ -1,6 +1,6 @@
 /**
  *
- *  @file codelet_zgetrl.c
+ *  @file codelet_zgetrf_incpiv.c
  *
  *  MAGMA codelets kernel
  *  MAGMA is a software package provided by Univ. of Tennessee,
@@ -19,7 +19,7 @@
 #if (PLASMA_VERSION_MAJOR >= 2) && (PLASMA_VERSION_MINOR >= 4)
 #define CORE_zgetrf CORE_zgetrf_incpiv
 #endif
-static void zgetrl_cpu_func(Quark * quark)
+static void zgetrf_incpiv_cpu_func(Quark * quark)
 {
     int m;
     int n;
@@ -43,7 +43,7 @@ static void zgetrl_cpu_func(Quark * quark)
 /*
  * Wrapper
  */
-void MORSE_zgetrl( MorseOption_t *options, 
+void MORSE_zgetrf_incpiv( MorseOption_t *options, 
                           int m, int n, int ib,
                           magma_desc_t *A, int Am, int An,
                           magma_desc_t *L, int Lm, int Ln,
