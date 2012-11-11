@@ -1,26 +1,24 @@
 ###
 #
-# @file      : installHWLOC.cmake
+#  @file installHWLOC.cmake
 #
-# @description   : Project MORSE (http://hiepacs.bordeaux.inria.fr/eagullo/morse)
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 19-01-2012
-# @last modified : mer. 16 mai 2012 10:17:10 CEST
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
 ###
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 INCLUDE(installExternalPACKAGE)
-INCLUDE(downloadPACKAGE)
-INCLUDE(infoHWLOC)
 
 MACRO(INSTALL_HWLOC _MODE)
-
-    # Get info for this package
-    # -------------------------
-    HWLOC_INFO_INSTALL()
 
     # Define prefix paths
     # -------------------
@@ -30,32 +28,39 @@ MACRO(INSTALL_HWLOC _MODE)
         SET(HWLOC_PATH ${CMAKE_INSTALL_PREFIX})
     ENDIF(MORSE_SEPARATE_PROJECTS)
 
-    # Define steps of installation
-    # ----------------------------
-    SET(HWLOC_CONFIG_CMD ./configure)
-    SET(HWLOC_MAKE_CMD ${CMAKE_MAKE_PROGRAM})
-    SET(HWLOC_MAKEINSTALL_CMD ${CMAKE_MAKE_PROGRAM} install)
-
     # Define options
     # --------------
-    SET(HWLOC_OPTIONS --prefix=${HWLOC_PATH})
+    UNSET(HWLOC_CONFIG_OPTS)
+    LIST(APPEND HWLOC_CONFIG_OPTS --prefix=${HWLOC_PATH})
+    LIST(APPEND HWLOC_CONFIG_OPTS --enable-shared)
+    IF(NOT BUILD_SHARED_LIBS)
+        LIST(APPEND HWLOC_CONFIG_OPTS --enable-static)
+    ENDIF()
+
+    # Define steps of installation
+    # ----------------------------
+    SET(HWLOC_SOURCE_PATH ${CMAKE_BINARY_DIR}/externals/hwloc)
+    SET(HWLOC_BUILD_PATH  ${CMAKE_BINARY_DIR}/externals/hwloc)
+    SET(HWLOC_CONFIG_CMD  ./configure)
+    SET(HWLOC_BUILD_CMD   ${CMAKE_MAKE_PROGRAM})
+    SET(HWLOC_INSTALL_CMD ${CMAKE_MAKE_PROGRAM} install)
 
     # Install the external package
     # ----------------------------
-    DEFINE_DOWNLOAD_PACKAGE("hwloc" "${_MODE}")
-    INSTALL_EXTERNAL_PACKAGE("hwloc" "${HWLOC_BUILD_MODE}")
+    INSTALL_EXTERNAL_PACKAGE("hwloc" "${HWLOC_USED_MODE}")
 
     # Set linker flags
     # ----------------
-    SET(HWLOC_BINARY_PATH ${HWLOC_PATH}/bin)
-    SET(HWLOC_LIBRARY_PATH ${HWLOC_PATH}/lib)
-    SET(HWLOC_INCLUDE_PATH ${HWLOC_PATH}/include)
-    SET(HWLOC_LDFLAGS "-L${HWLOC_LIBRARY_PATH} -lhwloc")
-    SET(HWLOC_LIBRARIES "hwloc")
+    SET(HWLOC_BINARY_PATH  "${HWLOC_BUILD_PATH}/utils/.libs")
+    SET(HWLOC_LIBRARY_PATH "${HWLOC_BUILD_PATH}/src/.libs")
+    SET(HWLOC_INCLUDE_PATH "${HWLOC_BUILD_PATH}/include")
+    SET(HWLOC_LIBRARY      "${HWLOC_LIBRARY_PATH}/libhwloc.${MORSE_LIBRARY_EXTENSION}")
+    SET(HWLOC_LDFLAGS      "-L${HWLOC_LIBRARY_PATH} -lhwloc")
+    SET(HWLOC_LIBRARIES    "hwloc")
 
 ENDMACRO(INSTALL_HWLOC)
 
-###
-### END installHWLOC.cmake
-###
+##
+## @end file installHWLOC.cmake
+##
 

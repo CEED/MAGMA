@@ -132,7 +132,7 @@ ifeq ($(FORT), pgfortran)
 	ZSRCF = testing_zgetrf_gpu_f.cuf
 else
 	FOBJ  = fortran.o
-	ZSRCF = testing_zgetrf_gpu_f.f90	\
+	ZSRCF = testing_zgetrf_gpu_f.F90	\
 		testing_zgetrf_f.f90
 endif
 

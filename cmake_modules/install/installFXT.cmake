@@ -1,26 +1,24 @@
 ###
 #
-# @file      : installFXT.cmake
+#  @file installFXT.cmake
 #
-# @description   : Project MORSE (http://hiepacs.bordeaux.inria.fr/eagullo/morse)
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 19-01-2012
-# @last modified : mer. 16 mai 2012 10:16:27 CEST
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
 ###
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 INCLUDE(installExternalPACKAGE)
-INCLUDE(downloadPACKAGE)
-INCLUDE(infoFXT)
 
 MACRO(INSTALL_FXT _MODE)
-
-    # Get info for this package
-    # -------------------------
-    FXT_INFO_INSTALL()
 
     # Define prefix paths
     # -------------------
@@ -30,32 +28,39 @@ MACRO(INSTALL_FXT _MODE)
         SET(FXT_PATH ${CMAKE_INSTALL_PREFIX})
     ENDIF(MORSE_SEPARATE_PROJECTS)
 
-    # Define steps of installation
-    # ----------------------------
-    SET(FXT_CONFIG_CMD ./configure)
-    SET(FXT_MAKE_CMD ${CMAKE_MAKE_PROGRAM})
-    SET(FXT_MAKEINSTALL_CMD ${CMAKE_MAKE_PROGRAM} install)
-
     # Define options
     # --------------
-    SET(FXT_OPTIONS --prefix=${FXT_PATH})
+    UNSET(FXT_CONFIG_OPTS)
+    LIST(APPEND FXT_CONFIG_OPTS --prefix=${FXT_PATH})
+    LIST(APPEND FXT_CONFIG_OPTS --enable-shared)
+    IF(NOT BUILD_SHARED_LIBS)
+        LIST(APPEND FXT_CONFIG_OPTS --enable-static)
+    ENDIF()
+
+    # Define steps of installation
+    # ----------------------------
+    SET(FXT_SOURCE_PATH ${CMAKE_BINARY_DIR}/externals/fxt)
+    SET(FXT_BUILD_PATH  ${CMAKE_BINARY_DIR}/externals/fxt)
+    SET(FXT_CONFIG_CMD  ./configure)
+    SET(FXT_BUILD_CMD   ${CMAKE_MAKE_PROGRAM})
+    SET(FXT_INSTALL_CMD ${CMAKE_MAKE_PROGRAM} install)
 
     # Install the external package
     # -----------------------------
-    DEFINE_DOWNLOAD_PACKAGE("fxt" "${_MODE}")
-    INSTALL_EXTERNAL_PACKAGE("fxt" "${FXT_BUILD_MODE}")
+    INSTALL_EXTERNAL_PACKAGE("fxt" "${FXT_USED_MODE}")
 
     # Set linker flags
     # ----------------
-    SET(FXT_BINARY_PATH ${FXT_PATH}/bin)
-    SET(FXT_LIBRARY_PATH ${FXT_PATH}/lib)
-    SET(FXT_INCLUDE_PATH ${FXT_PATH}/include/fxt)
-    SET(FXT_LDFLAGS "-L${FXT_LIBRARY_PATH} -lfxt")
-    SET(FXT_LIBRARIES "fxt")
+    SET(FXT_BINARY_PATH  "${FXT_BUILD_PATH}/tools/.libs")
+    SET(FXT_LIBRARY_PATH "${FXT_BUILD_PATH}/tools/.libs")
+    SET(FXT_INCLUDE_PATH "${FXT_BUILD_PATH}/tools")
+    SET(FXT_LIBRARY      "${FXT_LIBRARY_PATH}/libfxt.${MORSE_LIBRARY_EXTENSION}")
+    SET(FXT_LDFLAGS      "-L${FXT_LIBRARY_PATH} -lfxt")
+    SET(FXT_LIBRARIES    "fxt")
 
 ENDMACRO(INSTALL_FXT)
 
-###
-### END installFXT.cmake
-###
+##
+## @end file installFXT.cmake
+##
 

@@ -1,13 +1,17 @@
 ###
 #
-# @file      : FindLAPACKE.cmake
+#  @file FindLAPACKE.cmake
 #
-# @description   : Project MORSE (http://hiepacs.bordeaux.inria.fr/eagullo/morse)
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 19-01-2012
-# @last modified : mer. 04 avril 2012 10:56:12 CEST
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
 ###
 #
@@ -34,6 +38,14 @@
 #
 ###
 
+# Early exit if already searched
+IF(LAPACKE_FOUND)
+    MESSAGE(STATUS "Looking for LAPACKE - already found")
+    RETURN()
+ENDIF(LAPACKE_FOUND)
+
+# Load required modules
+INCLUDE(populatePACKAGE)
 INCLUDE(findPACKAGE)
 INCLUDE(infoLAPACKE)
 
@@ -47,12 +59,17 @@ ELSE(MORSE_SEPARATE_PROJECTS)
     SET(LAPACKE_DIR ${CMAKE_INSTALL_PREFIX})
 ENDIF(MORSE_SEPARATE_PROJECTS)
 
+# Looking for dependencies
+FIND_AND_POPULATE_LIBRARY("LAPACKE")
+IF(HAVE_M)
+    LIST(APPEND LAPACKE_FIND_DEPS "M")
+ENDIF(HAVE_M)
+
 # Define parameters for FIND_MY_PACKAGE
 LAPACKE_INFO_FIND()
 
 # Search for the library
-FIND_MY_PACKAGE("LAPACKE"
-                TRUE FALSE)
+FIND_MY_PACKAGE("LAPACKE")
 
 # Begin section - Looking for LAPACKE
 IF(LAPACKE_FOUND)
@@ -61,6 +78,6 @@ ELSE(LAPACKE_FOUND)
     MESSAGE(STATUS "Looking for LAPACKE - not found")
 ENDIF(LAPACKE_FOUND)
 
-###
-### END FindLAPACKE.cmake
-###
+##
+## @end file FindLAPACKE.cmake
+##

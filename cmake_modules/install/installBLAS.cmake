@@ -1,43 +1,44 @@
 ###
 #
-# @file          : installBLAS.cmake
+#  @file installBLAS.cmake
 #
-# @description   :
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 04-04-2012
-# @last modified : mar. 12 juin 2012 17:13:36 CEST
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
 ###
 
 MACRO(INSTALL_BLAS _MODE)
 
-    # Get the information of BLAS
-    # ---------------------------
+    # Get the implementation of BLAS
+    # ------------------------------
     INCLUDE(infoBLAS)
-    BLAS_INFO_INSTALL()
+    BLAS_DEFINE_DEFAULT()
 
     # Start the installation of BLAS
     # ------------------------------
-    STRING(TOUPPER "${MORSE_USE_BLAS}" VALUE_MORSE_USE_BLAS)
-    IF("${VALUE_MORSE_USE_BLAS}"MATCHES "EIGEN")
+    IF("${MORSE_BLAS_DEFAULT_VALUE} "MATCHES "EIGEN")
         INCLUDE(installEIGEN)
         INSTALL_EIGEN("${_MODE}")
 
-    ELSEIF("${VALUE_MORSE_USE_BLAS}" MATCHES "REFBLAS")
+    ELSEIF("${MORSE_BLAS_DEFAULT_VALUE}" MATCHES "REFBLAS")
         INCLUDE(installREFBLAS)
         INSTALL_REFBLAS("${_MODE}")
 
     ELSE()
-        SET(VALUE_MORSE_USE_BLAS "REFBLAS")
-        INCLUDE(installREFBLAS)
-        INSTALL_REFBLAS("${_MODE}")
+        MESSAGE(FATAL_ERROR "DEV_ERROR - Macro INSTALL_BLAS")
 
     ENDIF()
 
 ENDMACRO(INSTALL_BLAS)
 
-###
-### END installBLAS.cmake
-###
+##
+## @end file installBLAS.cmake
+##

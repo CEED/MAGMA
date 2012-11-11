@@ -1,50 +1,72 @@
 ###
 #
-# @file          : infoOPENMPI.cmake
+#  @file infoOPENMPI.cmake
 #
-# @description   :
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 04-04-2012
-# @last modified : mer. 16 mai 2012 10:18:53 CEST
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
 ###
 
+###
+#   
+#   
+#   
+###     
+MACRO(MPI_INFO_DEPS)
+    # Define the direct dependencies of the library
+    # ---------------------------------------------
+    SET(MPI_DIRECT_DEPS "") 
+
+ENDMACRO(MPI_INFO_DEPS)
+
+###
+#   
+#   
+#   
+###     
 MACRO(MPI_INFO_INSTALL)
     # Define web link of openmpi
     # --------------------------
     IF(NOT DEFINED MPI_URL)
-        SET(MPI_URL     "http://www.open-mpi.org/software/ompi/v1.5/downloads/openmpi-1.5.4.tar.gz")
+        SET(MPI_URL "http://www.open-mpi.org/software/ompi/v1.6/downloads/openmpi-1.6.2.tar.gz")
     ENDIF()
 
     # Define tarball of openmpi
     # -------------------------
     IF(NOT DEFINED MPI_TARBALL)
-        SET(MPI_TARBALL "openmpi-1.5.4.tar.gz"            )
+        SET(MPI_TARBALL "openmpi-1.6.2.tar.gz")
     ENDIF()
 
     # Define md5sum of openmpi
     # ------------------------
     IF(DEFINED MPI_URL OR DEFINED MPI_TARBALL)
-        SET(MPI_MD5SUM  "cb11927986419374c54aa4c878209913")
+        SET(MPI_MD5SUM  "351845a0edd8141feb30d31edd59cdcd")
     ENDIF()
 
     # Define repository of openmpi
     # ----------------------------
-    IF(NOT DEFINED MPI_SVN_REP)
+    IF(NOT DEFINED MPI_REPO_URL)
         SET(MPI_REPO_MODE "SVN"                                   )
-        SET(MPI_SVN_REP   "http://svn.open-mpi.org/svn/ompi/trunk")
-        SET(MPI_SVN_ID    ""                                      )
-        SET(MPI_SVN_PWD   ""                                      )
+        SET(MPI_REPO_URL   "http://svn.open-mpi.org/svn/ompi/trunk")
+        SET(MPI_REPO_ID    ""                                      )
+        SET(MPI_REPO_PWD   ""                                      )
     ENDIF()
-
-   # Define dependencies
-   # -------------------
-   SET(MPI_DEPENDENCIES "")
 
 ENDMACRO(MPI_INFO_INSTALL)
 
+###
+#   
+#   
+#   
+###     
 MACRO(MPI_INFO_FIND)
     # Define parameters for FIND_MY_PACKAGE
     # -------------------------------------
@@ -58,6 +80,6 @@ MACRO(MPI_INFO_FIND)
 
 ENDMACRO(MPI_INFO_FIND)
 
-###
-### END infoOPENMPI.cmake
-###
+##
+## @end file infoOPENMPI.cmake
+##

@@ -1,26 +1,24 @@
 ###
 #
-# @file      : installCBLAS.cmake
+#  @file installCBLAS.cmake
 #
-# @description   :
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 21-01-2012
-# @last modified : mer. 16 mai 2012 10:16:06 CEST
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
 ###
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 INCLUDE(installExternalPACKAGE)
-INCLUDE(downloadPACKAGE)
-INCLUDE(infoCBLAS)
 
 MACRO(INSTALL_CBLAS _MODE)
-
-    # Get info for this package
-    # -------------------------
-    CBLAS_INFO_INSTALL()
 
     # Define prefix paths
     # -------------------
@@ -32,66 +30,83 @@ MACRO(INSTALL_CBLAS _MODE)
 
     # Create make.inc
     # ---------------
-    IF(EXISTS ${CMAKE_SOURCE_DIR}/externals/cblas_make.inc)
-        FILE(REMOVE ${CMAKE_SOURCE_DIR}/externals/cblas_make.inc)
+    IF(EXISTS ${CMAKE_BINARY_DIR}/cblas_make.inc)
+        FILE(REMOVE ${CMAKE_BINARY_DIR}/cblas_make.inc)
     ENDIF()
-    STRING(TOUPPER "${CMAKE_BUILD_TYPE}" TOUPPER_BUILD_TYPE)
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/cblas_make.inc "SHELL  = /bin/sh\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/cblas_make.inc "CC     = ${CMAKE_C_COMPILER}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/cblas_make.inc "FC     = ${CMAKE_Fortran_COMPILER}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/cblas_make.inc "LOADER = ${CMAKE_Fortran_COMPILER} ${CMAKE_EXTRA_LDFLAGS_F}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/cblas_make.inc "CFLAGS = ${CMAKE_C_COMPILER_${TOUPPER_BUILD_TYPE}} ${CMAKE_EXTRA_CFLAGS} ${FORTRAN_MANGLING_DETECTED}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/cblas_make.inc "FFLAGS = ${CMAKE_Fortran_COMPILER_${TOUPPER_BUILD_TYPE}} ${CMAKE_EXTRA_FFLAGS}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/cblas_make.inc "ARCH   = ${CMAKE_AR}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/cblas_make.inc "ARCHFLAGS = cr\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/cblas_make.inc "RANLIB = ${CMAKE_RANLIB}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/cblas_make.inc "BLLIB  = ${BLAS_LDFLAGS}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/cblas_make.inc "CBLIB  = libcblas.a\n")
+    STRING(TOUPPER "${CMAKE_BUILD_TYPE}" TYPE)
+    FILE(APPEND ${CMAKE_BINARY_DIR}/cblas_make.inc
+"
+SHELL      = /bin/sh
+CC         = ${CMAKE_C_COMPILER}
+CFLAGS     = ${CMAKE_C_FLAGS_${TYPE}}
+CFLAGS    += ${CMAKE_C_FLAGS}
+CFLAGS    += ${FORTRAN_MANGLING_DETECTED}
+
+FC         = ${CMAKE_Fortran_COMPILER}
+FFLAGS     = ${CMAKE_Fortran_FLAGS_${TYPE}}
+FFLAGS    += ${CMAKE_Fortran_FLAGS}
+FFLAGS    += ${CMAKE_Fortran_LDFLAGS} 
+
+LOADER     = ${CMAKE_Fortran_COMPILER}
+LOADER    += ${CMAKE_Fortran_LDFLAGS}
+ARCH       = ${CMAKE_AR}
+ARCHFLAGS  = cr
+RANLIB     = ${CMAKE_RANLIB}
+BLLIB      = ${BLAS_LDFLAGS}
+CBLIB      = libcblas.${MORSE_LIBRARY_EXTENSION}
+")
+    IF(BUILD_SHARED_LIBS)
+        FILE(APPEND ${CMAKE_BINARY_DIR}/cblas_make.inc "
+CFLAGS    += -fPIC
+FFLAGS    += -fPIC
+ARCHFLAGS  = rcs
+")
+    ENDIF(BUILD_SHARED_LIBS)
 
     # Define steps of installation
     # ----------------------------
-    SET(CBLAS_CONFIG_CMD ${CMAKE_COMMAND} -E copy
-                        ${CMAKE_SOURCE_DIR}/externals/cblas_make.inc
-                        ${CMAKE_BINARY_DIR}/externals/cblas/Makefile.in)
-    SET(CBLAS_MAKE_CMD ${CMAKE_MAKE_PROGRAM} alllib)
-    SET(CBLAS_MAKEINSTALL_CMD ${CMAKE_COMMAND} -E copy
-                             ${CMAKE_BINARY_DIR}/externals/cblas/src/libcblas.a
-                             ${CBLAS_PATH}/lib/libcblas.a)
+    SET(CBLAS_SOURCE_PATH ${CMAKE_BINARY_DIR}/externals/cblas)
+    SET(CBLAS_BUILD_PATH  ${CMAKE_BINARY_DIR}/externals/cblas)
+    SET(CBLAS_CONFIG_CMD  ${CMAKE_COMMAND} -E copy
+                            ${CMAKE_BINARY_DIR}/cblas_make.inc
+                            ${CBLAS_BUILD_PATH}/Makefile.in)
+    SET(CBLAS_BUILD_CMD   ${CMAKE_MAKE_PROGRAM} alllib)
+    SET(CBLAS_INSTALL_CMD ${CMAKE_COMMAND} -E make_directory ${CBLAS_PATH})
 
-    # Define additional step
-    # ----------------------
-    SET(CBLAS_ADD_STEP cblas_create_prefix_lib cblas_create_prefix_include cblas_copy_include)
-    SET(cblas_create_prefix_lib_CMD ${CMAKE_COMMAND} -E make_directory ${CBLAS_PATH}/lib)
-    SET(cblas_create_prefix_lib_DIR ${CMAKE_INSTALL_PREFIX})
-    SET(cblas_create_prefix_lib_DEP_BEFORE build)
-    SET(cblas_create_prefix_lib_DEP_AFTER install)
-    SET(cblas_create_prefix_include_CMD ${CMAKE_COMMAND} -E make_directory ${CBLAS_PATH}/include)
-    SET(cblas_create_prefix_include_DIR ${CMAKE_INSTALL_PREFIX})
-    SET(cblas_create_prefix_include_DEP_BEFORE build)
-    SET(cblas_create_prefix_include_DEP_AFTER install)
-    SET(cblas_copy_include_CMD ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/externals/cblas/include/cblas.h .)
-    SET(cblas_copy_include_DIR ${CBLAS_PATH}/include)
-    SET(cblas_copy_include_DEP_BEFORE cblas_create_prefix_include)
-    SET(cblas_copy_include_DEP_AFTER install)
-
-    # Define options
-    # --------------
-    SET(CBLAS_OPTIONS "")
+    # Define additional step (warning - the order in very important)
+    # --------------------------------------------------------------
+    UNSET(CBLAS_ADD_INSTALL_STEP)
+    FOREACH(_task lib include)
+        LIST(APPEND CBLAS_ADD_INSTALL_STEP cblas_create_${_task}_path)
+        SET(cblas_create_${_task}_path_CMD ${CMAKE_COMMAND} -E make_directory ${CBLAS_PATH}/${_task})
+        SET(cblas_create_${_task}_path_DIR ${CMAKE_INSTALL_PREFIX})
+    ENDFOREACH()
+    FOREACH(_task libcblas)
+        LIST(APPEND CBLAS_ADD_INSTALL_STEP cblas_copy_${_task})
+        SET(cblas_copy_${_task}_CMD ${CMAKE_COMMAND} -E copy
+                                    ${CBLAS_BUILD_PATH}/src/${_task}.${MORSE_LIBRARY_EXTENSION} .)
+        SET(cblas_copy_${_task}_DIR ${CBLAS_PATH}/lib)
+    ENDFOREACH()
+    FOREACH(_task cblas)
+        LIST(APPEND CBLAS_ADD_INSTALL_STEP cblas_copy_${_task}_h)
+        SET(cblas_copy_${_task}_h_CMD ${CMAKE_COMMAND} -E copy ${CBLAS_BUILD_PATH}/include/${_task}.h .)
+        SET(cblas_copy_${_task}_h_DIR ${CBLAS_PATH}/include)
+    ENDFOREACH()
 
     # Install the external package
     # ----------------------------
-    DEFINE_DOWNLOAD_PACKAGE("cblas" "${_MODE}")
-    INSTALL_EXTERNAL_PACKAGE("cblas" "${CBLAS_BUILD_MODE}")
+    INSTALL_EXTERNAL_PACKAGE("cblas" "${CBLAS_USED_MODE}")
 
     # Set linker flags
     # ----------------
-    SET(CBLAS_LIBRARY_PATH ${CBLAS_PATH}/lib)
-    SET(CBLAS_INCLUDE_PATH ${CBLAS_PATH}/include)
-    SET(CBLAS_LDFLAGS "-L${CBLAS_LIBRARY_PATH} -lcblas")
-    SET(CBLAS_LIBRARIES "cblas")
+    SET(CBLAS_LIBRARY_PATH "${CBLAS_BUILD_PATH}/src")
+    SET(CBLAS_INCLUDE_PATH "${CBLAS_BUILD_PATH}/include")
+    SET(CBLAS_LIBRARY      "${CBLAS_LIBRARY_PATH}/libcblas.${MORSE_LIBRARY_EXTENSION}")
+    SET(CBLAS_LDFLAGS      "-L${CBLAS_LIBRARY_PATH} -lcblas")
+    SET(CBLAS_LIBRARIES    "cblas")
 
 ENDMACRO(INSTALL_CBLAS)
 
-###
-### END installCBLAS.cmake
-###
+##
+## @end file installCBLAS.cmake
+##

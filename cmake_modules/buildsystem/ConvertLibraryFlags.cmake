@@ -1,15 +1,20 @@
 ###
 #
-# @file          : ConvertLibraryFlags.cmake
+#  @file ConvertLibraryFlags.cmake
 #
-# @description   :
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 09-03-2012
-# @last modified : ven. 09 mars 2012 09:52:26 CET
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
 ###
+#
 #- convert from -L and -l flags to full paths of libraries
 #  convert_library_flags(<variable> [flags ...])
 #
@@ -83,6 +88,6 @@ function(convert_library_flags variable)
 
 endfunction(convert_library_flags)
 
-###
-### END ConvertLibraryFlags.cmake
-###
+##
+## @end file ConvertLibraryFlags.cmake
+##

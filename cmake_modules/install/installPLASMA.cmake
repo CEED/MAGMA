@@ -1,33 +1,24 @@
 ###
 #
-# @file      : installPLASMA.cmake
+#  @file installPLASMA.cmake
 #
-# @description   :
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 21-01-2012
-# @last modified : mar. 05 juin 2012 15:37:33 CEST
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
 ###
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-INCLUDE(definePACKAGE)
-INCLUDE(downloadPACKAGE)
 INCLUDE(installExternalPACKAGE)
-INCLUDE(infoPLASMA)
 
 MACRO(INSTALL_PLASMA _MODE)
-
-    # Get info for this package
-    # -------------------------
-    PLASMA_INFO_INSTALL()
-
-    # Search for dependencies
-    # -----------------------
-    DEFINE_PACKAGE("LAPACK" "depends")
-    DEFINE_PACKAGE("CBLAS" "depends")
-    DEFINE_PACKAGE("LAPACKE" "depends")
 
     # Define prefix paths
     # -------------------
@@ -39,52 +30,83 @@ MACRO(INSTALL_PLASMA _MODE)
 
     # Create make.inc
     # ---------------
-    IF(EXISTS ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc)
-        FILE(REMOVE ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc)
+    IF(EXISTS ${CMAKE_BINARY_DIR}/plasma_make.inc)
+        FILE(REMOVE ${CMAKE_BINARY_DIR}/plasma_make.inc)
     ENDIF()
-    STRING(TOUPPER "${CMAKE_BUILD_TYPE}" TOUPPER_BUILD_TYPE)
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc "prefix     = ${PLASMA_PATH}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc "CC         = ${CMAKE_C_COMPILER}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc "FC         = ${CMAKE_Fortran_COMPILER}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc "LOADER     = ${CMAKE_Fortran_COMPILER}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc "ARCH       = ${CMAKE_AR}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc "ARCHFLAGS  = cr\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc "RANLIB     = ${CMAKE_RANLIB}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc "CFLAGS     = ${CMAKE_C_COMPILER_${TOUPPER_BUILD_TYPE}} ${CMAKE_EXTRA_CFLAGS} ${FORTRAN_MANGLING_DETECTED}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc "FFLAGS     = ${CMAKE_Fortran_COMPILER_${TOUPPER_BUILD_TYPE}} ${CMAKE_EXTRA_FFLAGS}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc "LDFLAGS    = ${CMAKE_EXTRA_LDFLAGS_F} ${FORTRAN_MANGLING_DETECTED}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc "LIBBLAS    = ${BLAS_LDFLAGS}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc "LIBCBLAS   = ${CBLAS_LDFLAGS}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc "LIBLAPACK  = ${LAPACK_LDFLAGS}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc "INCCLAPACK = -I${LAPACKE_INCLUDE_PATH}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc "LIBCLAPACK = ${LAPACKE_LDFLAGS}\n")
+    STRING(TOUPPER "${CMAKE_BUILD_TYPE}" TYPE)
+    FILE(APPEND ${CMAKE_BINARY_DIR}/plasma_make.inc
+"
+prefix    ?= ${PLASMA_PATH}
+CC         = ${CMAKE_C_COMPILER}
+FC         = ${CMAKE_Fortran_COMPILER}
+LOADER     = ${CMAKE_Fortran_COMPILER}
+
+ARCH       = ${CMAKE_AR}
+ARCHFLAGS  = cr
+RANLIB     = ${CMAKE_RANLIB}
+
+CFLAGS     = ${CMAKE_C_FLAGS_${TYPE}}
+CFLAGS    += ${CMAKE_C_FLAGS}
+CFLAGS    += ${FORTRAN_MANGLING_DETECTED}
+CFLAGS    += -I${QUARK_INCLUDE_PATH}
+
+FFLAGS     = ${CMAKE_Fortran_FLAGS_${TYPE}}
+FFLAGS    += ${CMAKE_Fortran_FLAGS}
+FFLAGS    += ${CMAKE_Fortran_LDFLAGS} 
+
+LDFLAGS   += ${CMAKE_Fortran_LDFLAGS} 
+LDFLAGS   += ${FORTRAN_MANGLING_DETECTED}
+LDFLAGS   += ${QUARK_LDFLAGS}
+
+LIBBLAS    = ${BLAS_LDFLAGS}
+LIBCBLAS   = ${CBLAS_LDFLAGS}
+LIBLAPACK  = ${LAPACK_LDFLAGS}
+INCCLAPACK = -I${LAPACKE_INCLUDE_PATH}
+LIBCLAPACK = ${LAPACKE_LDFLAGS}
+")
+
+    IF(HAVE_QUARK)
+        FILE(APPEND ${CMAKE_BINARY_DIR}/plasma_make.inc
+"
+QUARKDIR  = ${QUARK_PATH}
+")
+    ENDIF(HAVE_QUARK)
+
+    IF(BUILD_SHARED_LIBS)
+        FILE(APPEND ${CMAKE_BINARY_DIR}/plasma_make.inc "
+CFLAGS    += -fPIC
+FFLAGS    += -fPIC
+ARCHFLAGS  = rcs
+")
+    ENDIF(BUILD_SHARED_LIBS)
 
     # Define steps of installation
     # ----------------------------
-    SET(PLASMA_CONFIG_CMD ${CMAKE_COMMAND} -E copy
-                        ${CMAKE_SOURCE_DIR}/externals/plasma_make.inc
-                        ${CMAKE_BINARY_DIR}/externals/plasma/make.inc)
-    SET(PLASMA_MAKE_CMD ${CMAKE_MAKE_PROGRAM} lib)
-    SET(PLASMA_MAKEINSTALL_CMD ${CMAKE_MAKE_PROGRAM} install)
-
-    # Define options
-    # --------------
-    SET(PLASMA_OPTIONS "") 
+    SET(PLASMA_SOURCE_PATH ${CMAKE_BINARY_DIR}/externals/plasma)
+    SET(PLASMA_BUILD_PATH  ${CMAKE_BINARY_DIR}/externals/plasma)
+    SET(PLASMA_PATCH_CMD   patch -p1 -i ${CMAKE_SOURCE_DIR}/patch/plasma_freebsd.patch)
+    SET(PLASMA_CONFIG_CMD  ${CMAKE_COMMAND} -E copy
+                             ${CMAKE_BINARY_DIR}/plasma_make.inc
+                             ${PLASMA_BUILD_PATH}/make.inc)
+    SET(PLASMA_BUILD_CMD   ${CMAKE_MAKE_PROGRAM} libplasma libcoreblas)
+    SET(PLASMA_INSTALL_CMD ${CMAKE_MAKE_PROGRAM} install)
 
     # Install the external package
     # ----------------------------
-    DEFINE_DOWNLOAD_PACKAGE("plasma" "${_MODE}")
-    INSTALL_EXTERNAL_PACKAGE("plasma" "${PLASMA_BUILD_MODE}")
+    INSTALL_EXTERNAL_PACKAGE("plasma" "${PLASMA_USED_MODE}")
 
     # Set linker flags
     # ----------------
-    SET(PLASMA_LIBRARY_PATH ${PLASMA_PATH}/lib)
-    SET(PLASMA_INCLUDE_PATH ${PLASMA_PATH}/include)
-    SET(PLASMA_LDFLAGS "-L${PLASMA_LIBRARY_PATH} -lplasma -lcoreblas -lquark -l${LAPACKE_LIBRARIES} -l${CBLAS_LIBRARIES} ${LAPACK_LDFLAGS} ${BLAS_LDFLAGS}")
-    SET(PLASMA_LIBRARIES "plasma;coreblas;quark;${LAPACKE_LIBRARIES};${CBLAS_LIBRARIES};${LAPACK_LIBRARIES};${BLAS_LIBRARIES}")
+    SET(PLASMA_LIBRARY_PATH    "${PLASMA_SOURCE_PATH}/lib"    )
+    SET(PLASMA_INCLUDE_PATH    "${PLASMA_SOURCE_PATH}/include")
+    SET(PLASMA_LIBRARY         "${PLASMA_LIBRARY_PATH}/libplasma.${MORSE_LIBRARY_EXTENSION}"  )
+    LIST(APPEND PLASMA_LIBRARY "${PLASMA_LIBRARY_PATH}/libcoreblas.${MORSE_LIBRARY_EXTENSION}")
+    LIST(APPEND PLASMA_LIBRARY "${PLASMA_LIBRARY_PATH}/libplasma.${MORSE_LIBRARY_EXTENSION}"  )
+    SET(PLASMA_LIBRARIES       "plasma;coreblas;plasma")
+    SET(PLASMA_LDFLAGS         "-L${PLASMA_LIBRARY_PATH} -lplasma -lcoreblas -lplasma")
 
 ENDMACRO(INSTALL_PLASMA)
 
-###
-### END installPLASMA.cmake
-###
+##
+## @end file installPLASMA.cmake
+##

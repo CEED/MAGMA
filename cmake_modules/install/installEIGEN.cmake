@@ -1,29 +1,28 @@
 ###
 #
-# @file      : installEIGEN.cmake
+#  @file installEIGEN.cmake
 #
-# @description   :
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 21-01-2012
-# @last modified : mar. 12 juin 2012 16:44:46 CEST
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
 ###
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 INCLUDE(installExternalPACKAGE)
-INCLUDE(downloadPACKAGE)
 
 MACRO(INSTALL_EIGEN _MODE)
 
-    # Define extension of the library
-    # -------------------------------
-    IF(APPLE)
-        SET(EIGEN_EXTENSION dylib)
-    ELSE(APPLE)
-        SET(EIGEN_EXTENSION so)
-    ENDIF(APPLE)
+    # Message about refblas
+    # ---------------------
+    MESSAGE(STATUS "Installing BLAS - eigen version")
 
     # Define prefix paths
     # -------------------
@@ -33,56 +32,102 @@ MACRO(INSTALL_EIGEN _MODE)
         SET(BLAS_PATH ${CMAKE_INSTALL_PREFIX})
     ENDIF(MORSE_SEPARATE_PROJECTS)
 
-    # Define steps of installation
-    # ----------------------------
-    SET(BLAS_CONFIG_CMD cd build && ${CMAKE_COMMAND} ../)
-    SET(BLAS_MAKE_CMD cd build && ${CMAKE_MAKE_PROGRAM} blas lapack)
-    SET(BLAS_MAKEINSTALL_CMD ${CMAKE_COMMAND} -E echo)
-
-    # Define additional step
-    # ----------------------
-    SET(BLAS_ADD_STEP eigen_create_build_out_source eigen_create_prefix eigen_install_blas eigen_install_lapack)
-    SET(eigen_create_build_out_source_CMD ${CMAKE_COMMAND} -E make_directory build)
-    SET(eigen_create_build_out_source_DIR ${CMAKE_BINARY_DIR}/externals/blas)
-    SET(eigen_create_build_out_source_DEP_BEFORE download)
-    SET(eigen_create_build_out_source_DEP_AFTER configure)
-    SET(eigen_create_prefix_CMD ${CMAKE_COMMAND} -E make_directory ${BLAS_PATH}/lib)
-    SET(eigen_create_prefix_DIR ${CMAKE_INSTALL_PREFIX})
-    SET(eigen_create_prefix_DEP_BEFORE build)
-    SET(eigen_create_prefix_DEP_AFTER install)
-    SET(eigen_install_blas_CMD ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/externals/blas/build/blas/libeigen_blas.${EIGEN_EXTENSION} ${BLAS_PATH}/lib/libeigen_blas.${EIGEN_EXTENSION})
-    SET(eigen_install_blas_DIR ${CMAKE_INSTALL_PREFIX})
-    SET(eigen_install_blas_DEP_BEFORE eigen_create_prefix)
-    SET(eigen_install_blas_DEP_AFTER install)
-    SET(eigen_install_lapack_CMD ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/externals/blas/build/lapack/libeigen_lapack.${EIGEN_EXTENSION} ${BLAS_PATH}/lib/libeigen_lapack.${EIGEN_EXTENSION})
-    SET(eigen_install_lapack_DIR ${CMAKE_INSTALL_PREFIX})
-    SET(eigen_install_lapack_DEP_BEFORE eigen_create_prefix)
-    SET(eigen_install_lapack_DEP_AFTER install)
-
     # Define options
     # --------------
-    SET(BLAS_OPTIONS -DCMAKE_INSTALL_PREFIX=${BLAS_PATH})
-    SET(BLAS_OPTIONS ${BLAS_OPTIONS} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
-    SET(BLAS_OPTIONS ${BLAS_OPTIONS} -DEIGEN_BUILD_PKGCONFIG=OFF)
+    UNSET(BLAS_CONFIG_OPTS)
+    LIST(APPEND BLAS_CONFIG_OPTS -DCMAKE_INSTALL_PREFIX=${BLAS_PATH})
+    LIST(APPEND BLAS_CONFIG_OPTS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
+    LIST(APPEND BLAS_CONFIG_OPTS -DEIGEN_BUILD_PKGCONFIG=OFF)
+    IF(NOT BUILD_SHARED_LIBS)
+        LIST(APPEND BLAS_CONFIG_OPTS -DBUILD_SHARED_LIBS=OFF)
+    ENDIF()
     
+    # Define steps of installation
+    # ----------------------------
+    SET(BLAS_SOURCE_PATH ${CMAKE_BINARY_DIR}/externals/blas)
+    SET(BLAS_BUILD_PATH  ${CMAKE_BINARY_DIR}/externals/blas/build)
+    SET(BLAS_CONFIG_CMD  ${CMAKE_COMMAND} ../)
+    SET(BLAS_BUILD_CMD   ${CMAKE_MAKE_PROGRAM} blas lapack)
+    SET(BLAS_INSTALL_CMD ${CMAKE_COMMAND} -E make_directory ${BLAS_PATH})
+
+    # Define what library we will use
+    # -------------------------------
+    IF(BUILD_SHARED_LIBS)
+        SET(eigen_lib_to_install "libeigen_blas;libeigen_lapack")
+    ELSE(BUILD_SHARED_LIBS)
+        SET(eigen_lib_to_install "libeigen_blas_static;libeigen_lapack_static")
+    ENDIF(BUILD_SHARED_LIBS)
+
+    # Define additional step (build)
+    # ------------------------------
+    UNSET(BLAS_ADD_BUILD_STEP)
+    FOREACH(_task build)
+        LIST(APPEND BLAS_ADD_BUILD_STEP blas_create_${_task}_path)
+        SET(blas_create_${_task}_path_CMD ${CMAKE_COMMAND} -E make_directory ${_task})
+        SET(blas_create_${_task}_path_DIR ${CMAKE_BINARY_DIR}/externals/blas)
+        SET(blas_create_${_task}_path_DEP_BEFORE download)
+        SET(blas_create_${_task}_path_DEP_AFTER  configure)
+    ENDFOREACH()
+
+    # Define additional step (install)
+    # --------------------------------
+    UNSET(BLAS_ADD_INSTALL_STEP)
+    FOREACH(_task lib)
+        LIST(APPEND BLAS_ADD_INSTALL_STEP blas_create_${_task}_path)
+        SET(blas_create_${_task}_path_CMD ${CMAKE_COMMAND} -E make_directory ${BLAS_PATH}/${_task})
+        SET(blas_create_${_task}_path_DIR ${CMAKE_INSTALL_PREFIX})
+    ENDFOREACH()
+    FOREACH(_task ${eigen_lib_to_install})
+        STRING(REPLACE "libeigen_" "" _dir "${_task}")
+        STRING(REPLACE "_static" "" _dir "${_dir}")
+        LIST(APPEND BLAS_ADD_INSTALL_STEP blas_copy_${_task})
+        SET(blas_copy_${_task}_CMD ${CMAKE_COMMAND} -E copy
+                                     ${BLAS_BUILD_PATH}/${_dir}/${_task}.${MORSE_LIBRARY_EXTENSION} .)
+        SET(blas_copy_${_task}_DIR ${BLAS_PATH}/lib)
+    ENDFOREACH()
+
     # Install the external package
     # ----------------------------
-    DEFINE_DOWNLOAD_PACKAGE("blas" "${_MODE}")
-    INSTALL_EXTERNAL_PACKAGE("blas" "${BLAS_BUILD_MODE}")
-    MESSAGE(STATUS "Installing BLAS - eigen version")
+    INSTALL_EXTERNAL_PACKAGE("blas" "${BLAS_USED_MODE}")
 
     # Set linker flags
     # ----------------
-    SET(BLAS_LIBRARY_PATH ${BLAS_PATH}/lib)
-    SET(BLAS_LDFLAGS "-L${BLAS_LIBRARY_PATH} -leigen_blas")
-    SET(BLAS_LIBRARIES "eigen_blas")
-    SET(EIGENLAPACK_LIBRARY_PATH ${BLAS_PATH}/lib)
-    SET(EIGENLAPACK_LDFLAGS "-L${BLAS_LIBRARY_PATH} -leigen_lapack")
-    SET(EIGENLAPACK_LIBRARIES "eigen_lapack")
+    SET(BLAS_VENDOR              "eigen"                    )
+    SET(BLAS_LIBRARY_PATH        "${BLAS_BUILD_PATH}/blas"  )
+    SET(EIGENLAPACK_LIBRARY_PATH "${BLAS_BUILD_PATH}/lapack")
 
+    IF(BUILD_SHARED_LIBS)
+        SET(BLAS_LIBRARY      "${BLAS_LIBRARY_PATH}/libeigen_blas.${MORSE_LIBRARY_EXTENSION}")
+        SET(BLAS_LDFLAGS      "-L${BLAS_LIBRARY_PATH} -leigen_blas"                          )
+        SET(BLAS_LIBRARIES    "eigen_blas"                                                   )
+
+        SET(EIGENLAPACK_LIBRARY   "${EIGENLAPACK_LIBRARY_PATH}/libeigen_lapack.${MORSE_LIBRARY_EXTENSION}")
+        SET(EIGENLAPACK_LDFLAGS   "-L${EIGENLAPACK_LIBRARY_PATH} -leigen_lapack"                          )
+        SET(EIGENLAPACK_LIBRARIES "eigen_lapack"                                                          )
+
+    ELSE()
+        SET(BLAS_LIBRARY   "${BLAS_LIBRARY_PATH}/libeigen_blas_static.${MORSE_LIBRARY_EXTENSION}")
+        SET(BLAS_LDFLAGS   "-L${BLAS_LIBRARY_PATH} -leigen_blas_static"                          )
+        SET(BLAS_LIBRARIES "eigen_blas_static"                                                   )
+
+        SET(EIGENLAPACK_LIBRARY   "${EIGENLAPACK_LIBRARY_PATH}/libeigen_lapack_static.${MORSE_LIBRARY_EXTENSION}")
+        SET(EIGENLAPACK_LDFLAGS   "-L${EIGENLAPACK_LIBRARY_PATH} -leigen_lapack_static"                          )
+        SET(EIGENLAPACK_LIBRARIES "eigen_lapack_static"                                                          )
+
+    ENDIF()
+
+    IF(HAVE_STDCPP)
+        SET(BLAS_LDFLAGS           "${BLAS_LDFLAGS} -lstdc++")
+        LIST(APPEND BLAS_LIBRARY   "${STDCPP_LIBRARY}"       )
+        LIST(APPEND BLAS_LIBRARIES "stdc++"                  )
+
+        SET(EIGENLAPACK_LDFLAGS           "${EIGENLAPACK_LDFLAGS} -lstdc++")
+        LIST(APPEND EIGENLAPACK_LIBRARY   "${STDCPP_LIBRARY}"              )
+        LIST(APPEND EIGENLAPACK_LIBRARIES "stdc++"                         )
+     ENDIF(HAVE_STDCPP)
 
 ENDMACRO(INSTALL_EIGEN)
 
-###
-### END installEIGEN.cmake
-###
+##
+## @end file installEIGEN.cmake
+##

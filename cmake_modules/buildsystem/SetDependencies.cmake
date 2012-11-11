@@ -1,13 +1,17 @@
 ###
 #
-# @file          : setPACKAGE.cmake
+#  @file SetDependencies.cmake
 #
-# @description   :
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 09-03-2012
-# @last modified : mar. 12 juin 2012 16:43:45 CEST
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
 ###
 
@@ -33,7 +37,7 @@ MACRO(SET_PACKAGE _NAME)
     # Load infoPACKAGE
     # ----------------
     INCLUDE(infoPACKAGE)
-    INFO_FIND_PACKAGE()
+    INFO_FIND_PACKAGE(${_NAMEVAR})
 
     # Check info<PACKAGE> to know if there is library to link
     # -------------------------------------------------------
@@ -105,10 +109,17 @@ MACRO(SET_PACKAGE _NAME)
     CHECK_PACKAGE(${_NAMEVAR})
     IF(${_NAMEVAR}_ERROR_OCCURRED)
         MESSAGE(FATAL_ERROR "Looking for ${_NAMEVAR} - not working")
+
+    ELSE(${_NAMEVAR}_ERROR_OCCURRED)
+        SET(HAVE_${_NAMEVAR} ON)
+        SET(${_NAMEVAR}_SET  ON)
+        SET(${_NAMEVAR}_USED_MODE "SET")
+        SET(${_NAMEVAR}_VENDOR "user's desire")
+
     ENDIF(${_NAMEVAR}_ERROR_OCCURRED)
 
 ENDMACRO(SET_PACKAGE)
 
-###
-### END setPACKAGE.cmake
-###
+##
+## @end file SetDependencies.cmake
+##

@@ -1,16 +1,19 @@
 ###
 #
-# @file      : FindFXT.cmake
+#  @file FindFXT.cmake
 #
-# @description   : Project MORSE (http://hiepacs.bordeaux.inria.fr/eagullo/morse)
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 19-01-2012
-# @last modified : mer. 04 avril 2012 10:55:29 CEST
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
-###
-#
+####
 # This module finds an installed FXT library.
 # FXT is distributed at : 
 #
@@ -34,6 +37,14 @@
 #
 ###
 
+# Early exit if already searched
+IF(FXT_FOUND)
+    MESSAGE(STATUS "Looking for FXT - already found")
+    RETURN()
+ENDIF(FXT_FOUND)
+
+# Load required modules
+INCLUDE(populatePACKAGE)
 INCLUDE(findPACKAGE)
 INCLUDE(infoFXT)
 
@@ -47,12 +58,14 @@ ELSE(MORSE_SEPARATE_PROJECTS)
     SET(FXT_DIR ${CMAKE_INSTALL_PREFIX})
 ENDIF(MORSE_SEPARATE_PROJECTS)
 
+# Looking for dependencies
+FIND_AND_POPULATE_LIBRARY("FXT")
+
 # Define parameters for FIND_MY_PACKAGE
 FXT_INFO_FIND()
 
 # Search for the library
-FIND_MY_PACKAGE("FXT"
-                TRUE FALSE)
+FIND_MY_PACKAGE("FXT")
 
 # Begin section - Looking for FXT
 IF(FXT_FOUND)
@@ -61,6 +74,6 @@ ELSE(FXT_FOUND)
     MESSAGE(STATUS "Looking for FXT - not found")
 ENDIF(FXT_FOUND)
 
-###
-### END FindFXT.cmake
-###
+##
+## @end file FindFXT.cmake
+##

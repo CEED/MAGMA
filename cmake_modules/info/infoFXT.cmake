@@ -1,49 +1,73 @@
 ###
 #
-# @file          : infoFXT.cmake
+#  @file infoFXT.cmake
 #
-# @description   :
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 04-04-2012
-# @last modified : mer. 16 mai 2012 10:16:32 CEST
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
 ###
 
+###
+#
+#
+#
+###
+MACRO(FXT_INFO_DEPS)
+    # Define the direct dependencies of the library
+    # ---------------------------------------------
+    SET(FXT_DIRECT_DEPS "")
+
+ENDMACRO(FXT_INFO_DEPS)
+
+###
+#
+#
+#
+###
 MACRO(FXT_INFO_INSTALL)
+
     # Define web link of fxt
     # ----------------------
     IF(NOT DEFINED FXT_URL)
-        SET(FXT_URL     "http://download.savannah.gnu.org/releases/fkt/fxt-0.2.5.tar.gz")
+        SET(FXT_URL     "http://download.savannah.gnu.org/releases/fkt/fxt-0.2.10.tar.gz")
     ENDIF()
 
     # Define tarball of fxt
     # ---------------------
     IF(NOT DEFINED FXT_TARBALL)
-        SET(FXT_TARBALL "fxt-0.2.5.tar.gz")
+        SET(FXT_TARBALL "fxt-0.2.10.tar.gz")
     ENDIF()
 
     # Define md5sum of fxt
     # --------------------
     IF(DEFINED FXT_URL OR DEFINED FXT_TARBALL)
-        SET(FXT_MD5SUM  "0ea5a93ff69dbb94bb0b99714df4a004")
+        SET(FXT_MD5SUM  "c23251dc829aa268c0da54a5cf051442")
     ENDIF()
 
     # Define repository of fxt
     # ------------------------
-    IF(NOT DEFINED FXT_SVN_REP)
+    IF(NOT DEFINED FXT_REPO_URL)
         SET(FXT_REPO_MODE "CVS"                                 )
         SET(FXT_CVS_REP   "cvs.savannah.nongnu.org:/sources/fkt")
         SET(FXT_CVS_MOD   "fkt"                                 )
-    ENDIF()
 
-   # Define dependencies
-   # -------------------
-   SET(FXT_DEPENDENCIES "")
+    ENDIF()
 
 ENDMACRO(FXT_INFO_INSTALL)
 
+###
+#
+#
+#
+###
 MACRO(FXT_INFO_FIND)
     # Define parameters for FIND_MY_PACKAGE
     # -------------------------------------
@@ -58,6 +82,6 @@ MACRO(FXT_INFO_FIND)
 
 ENDMACRO(FXT_INFO_FIND)
 
-###
-### END infoFXT.cmake
-###
+##
+## @end file infoFXT.cmake
+##

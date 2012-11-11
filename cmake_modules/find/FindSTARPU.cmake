@@ -1,13 +1,17 @@
 ###
 #
-# @file      : FindSTARPU.cmake
+#  @file FindSTARPU.cmake
 #
-# @description   : Project MORSE (http://hiepacs.bordeaux.inria.fr/eagullo/morse)
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 20-01-2012
-# @last modified : mer. 04 avril 2012 10:56:41 CEST
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
 ###
 #
@@ -36,6 +40,14 @@
 #
 ###
 
+# Early exit if already searched
+IF(STARPU_FOUND)
+    MESSAGE(STATUS "Looking for STARPU - already found")
+    RETURN()
+ENDIF(STARPU_FOUND)
+
+# Load required modules
+INCLUDE(populatePACKAGE)
 INCLUDE(findPACKAGE)
 INCLUDE(infoSTARPU)
 
@@ -49,12 +61,14 @@ ELSE(MORSE_SEPARATE_PROJECTS)
     SET(STARPU_DIR ${CMAKE_INSTALL_PREFIX})
 ENDIF(MORSE_SEPARATE_PROJECTS)
 
+# Looking for dependencies
+FIND_AND_POPULATE_LIBRARY("STARPU")
+
 # Define parameters for FIND_MY_PACKAGE
 STARPU_INFO_FIND()
 
 # Search for the library
-FIND_MY_PACKAGE("STARPU"
-                TRUE FALSE)
+FIND_MY_PACKAGE("STARPU")
 
 # Begin section - Looking for STARPU
 IF(STARPU_FOUND)
@@ -63,13 +77,6 @@ ELSE(STARPU_FOUND)
     MESSAGE(STATUS "Looking for STARPU - not found")
 ENDIF(STARPU_FOUND)
 
-# Define if we have to use deprecated API
-#IF("0.9.9" LESS ${STARPU_VERSION})
-#    SET(STARPU_NEED_DEPRECATED_API ON)
-#ELSE()
-#    SET(STARPU_NEED_DEPRECATED_API OFF)
-#ENDIF()
-
-###
-### END FindSTARPU.cmake
-###
+##
+## @end file FindSTARPU.cmake
+##

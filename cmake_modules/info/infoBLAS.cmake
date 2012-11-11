@@ -1,102 +1,135 @@
 ###
 #
-# @file          : infoBLAS.cmake
+#  @file infoBLAS.cmake
 #
-# @description   :
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 04-04-2012
-# @last modified : mar. 12 juin 2012 16:31:54 CEST
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
 ###
 
+###
+#
+#
+#
+###
+MACRO(BLAS_DEFINE_DEFAULT)
+
+    STRING(TOUPPER "${MORSE_USE_BLAS}" VALUE_MORSE_USE_BLAS)
+    IF("${VALUE_MORSE_USE_BLAS}" MATCHES "EIGEN")
+        SET(MORSE_BLAS_DEFAULT_VALUE "EIGEN")
+
+    ELSEIF("${VALUE_MORSE_USE_BLAS}" MATCHES "REFBLAS")
+        SET(MORSE_BLAS_DEFAULT_VALUE "REFBLAS")
+
+    ELSE()
+        IF(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+            SET(MORSE_BLAS_DEFAULT_VALUE "REFBLAS")
+        ELSE()
+            IF(MAGMA_MORSE)
+                SET(MORSE_BLAS_DEFAULT_VALUE "EIGEN")
+            ELSE(MAGMA_MORSE)
+                SET(MORSE_BLAS_DEFAULT_VALUE "REFBLAS")
+            ENDIF(MAGMA_MORSE)
+        ENDIF()
+
+    ENDIF()
+
+ENDMACRO(BLAS_DEFINE_DEFAULT)
+
+###
+#
+#
+#
+###
+MACRO(BLAS_INFO_DEPS)
+
+    # Get the implementation of BLAS
+    # ------------------------------
+    BLAS_DEFINE_DEFAULT()
+    INFO_DEPS_PACKAGE(${MORSE_BLAS_DEFAULT_VALUE})
+
+    # Define the direct dependencies of the library
+    # ---------------------------------------------
+    SET(BLAS_DIRECT_DEPS "${${MORSE_BLAS_DEFAULT_VALUE}_DIRECT_DEPS}")
+    FOREACH(_dep ${BLAS_DIRECT_DEPS})
+        SET(BLAS_${_dep}_PRIORITY "${${MORSE_BLAS_DEFAULT_VALUE}_${_dep}_PRIORITY}")
+    ENDFOREACH()
+
+ENDMACRO(BLAS_INFO_DEPS)
+
+###
+#
+#
+#
+###
 MACRO(BLAS_INFO_INSTALL)
 
     # Get the implementation of BLAS
     # ------------------------------
-    STRING(TOUPPER "${MORSE_USE_BLAS}" VALUE_MORSE_USE_BLAS)
-    IF("${VALUE_MORSE_USE_BLAS}"MATCHES "EIGEN")
-        INCLUDE(infoEIGEN)
-        EIGEN_INFO_INSTALL()
-
-    ELSEIF("${VALUE_MORSE_USE_BLAS}" MATCHES "REFBLAS")
-        INCLUDE(infoREFBLAS)
-        REFBLAS_INFO_INSTALL()
-
-    ELSE()
-        SET(VALUE_MORSE_USE_BLAS "REFBLAS")
-        INCLUDE(infoREFBLAS)
-        REFBLAS_INFO_INSTALL()
-
-    ENDIF()
-
+    BLAS_DEFINE_DEFAULT()
+    INFO_INSTALL_PACKAGE(${MORSE_BLAS_DEFAULT_VALUE})
 
     # Define web link of blas
     # -----------------------
     IF(NOT DEFINED BLAS_URL)
-        SET(BLAS_URL    ${${VALUE_MORSE_USE_BLAS}_URL})
+        SET(BLAS_URL    ${${MORSE_BLAS_DEFAULT_VALUE}_URL})
     ENDIF()
 
     # Define tarball of blas
     # ----------------------
     IF(NOT DEFINED BLAS_TARBALL)
-        SET(BLAS_TARBALL ${${VALUE_MORSE_USE_BLAS}_TARBALL})
+        SET(BLAS_TARBALL ${${MORSE_BLAS_DEFAULT_VALUE}_TARBALL})
     ENDIF()
 
     # Define md5sum of blas
     # ---------------------
     IF(DEFINED BLAS_URL OR DEFINED BLAS_TARBALL)
-        SET(BLAS_MD5SUM  ${${VALUE_MORSE_USE_BLAS}_MD5SUM})
+        SET(BLAS_MD5SUM  ${${MORSE_BLAS_DEFAULT_VALUE}_MD5SUM})
     ENDIF()
 
     # Define repository of blas
     # -------------------------
-    IF(NOT DEFINED BLAS_SVN_REP)
-        SET(BLAS_REPO_MODE ${${VALUE_MORSE_USE_BLAS}_REPO_MODE})
-        SET(BLAS_SVN_REP   ${${VALUE_MORSE_USE_BLAS}_SVN_REP}  )
-        SET(BLAS_SVN_ID    ${${VALUE_MORSE_USE_BLAS}_SVN_ID}   )
-        SET(BLAS_SVN_PWD   ${${VALUE_MORSE_USE_BLAS}_SVN_PWD}  )
+    IF(NOT DEFINED BLAS_REPO_URL)
+        SET(BLAS_REPO_MODE  ${${MORSE_BLAS_DEFAULT_VALUE}_REPO_MODE})
+        SET(BLAS_REPO_URL   ${${MORSE_BLAS_DEFAULT_VALUE}_REPO_URL} )
+        SET(BLAS_REPO_ID    ${${MORSE_BLAS_DEFAULT_VALUE}_REPO_ID}  )
+        SET(BLAS_REPO_PWD   ${${MORSE_BLAS_DEFAULT_VALUE}_REPO_PWD} )
     ENDIF()
-
-   # Define dependencies
-   # -------------------
-    SET(BLAS_DEPENDENCIES ${${VALUE_MORSE_USE_BLAS}_DEPENDENCIES})
 
 ENDMACRO(BLAS_INFO_INSTALL)
 
+###
+#
+#
+#
+###
 MACRO(BLAS_INFO_FIND)
 
     # Get the implementation of BLAS
     # ------------------------------
-    STRING(TOUPPER "${MORSE_USE_BLAS}" VALUE_MORSE_USE_BLAS)
-    IF("${VALUE_MORSE_USE_BLAS}"MATCHES "EIGEN")
-        INCLUDE(infoEIGEN)
-        EIGEN_INFO_FIND()
-
-    ELSEIF("${VALUE_MORSE_USE_BLAS}" MATCHES "REFBLAS")
-        INCLUDE(infoREFBLAS)
-        REFBLAS_INFO_FIND()
-
-    ELSE()
-        SET(VALUE_MORSE_USE_BLAS "REFBLAS")
-        INCLUDE(infoREFBLAS)
-        REFBLAS_INFO_FIND()
-
-    ENDIF()
+    BLAS_DEFINE_DEFAULT()
+    INFO_FIND_PACKAGE(${MORSE_BLAS_DEFAULT_VALUE})
 
     # Define parameters for FIND_MY_PACKAGE
     # -------------------------------------
-    SET(BLAS_type_library        "${${VALUE_MORSE_USE_BLAS}_type_library}"       )
-    SET(BLAS_name_library        "${${VALUE_MORSE_USE_BLAS}_name_library}"       )
-    SET(BLAS_name_pkgconfig      "${${VALUE_MORSE_USE_BLAS}_name_pkgconfig}"     )
-    SET(BLAS_name_include        "${${VALUE_MORSE_USE_BLAS}_name_include}"       )
-    SET(BLAS_name_include_suffix "${${VALUE_MORSE_USE_BLAS}_name_include_suffix}")
-    SET(BLAS_name_fct_test       "${${VALUE_MORSE_USE_BLAS}_name_fct_test}"      )
-    SET(BLAS_name_binary         "${${VALUE_MORSE_USE_BLAS}_name_binary}"        )
+    SET(BLAS_type_library        "${${MORSE_BLAS_DEFAULT_VALUE}_type_library}"       )
+    SET(BLAS_name_library        "${${MORSE_BLAS_DEFAULT_VALUE}_name_library}"       )
+    SET(BLAS_name_pkgconfig      "${${MORSE_BLAS_DEFAULT_VALUE}_name_pkgconfig}"     )
+    SET(BLAS_name_include        "${${MORSE_BLAS_DEFAULT_VALUE}_name_include}"       )
+    SET(BLAS_name_include_suffix "${${MORSE_BLAS_DEFAULT_VALUE}_name_include_suffix}")
+    SET(BLAS_name_binary         "${${MORSE_BLAS_DEFAULT_VALUE}_name_binary}"        )
+    SET(BLAS_name_fct_test       "${${MORSE_BLAS_DEFAULT_VALUE}_name_fct_test}"      )
 
 ENDMACRO(BLAS_INFO_FIND)
 
-###
-### END infoBLAS.cmake
-###
+##
+## @end file infoBLAS.cmake
+##

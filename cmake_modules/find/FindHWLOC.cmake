@@ -1,13 +1,17 @@
 ###
 #
-# @file      : FindHWLOC.cmake
+#  @file FindHWLOC.cmake
 #
-# @description   : Project MORSE (http://hiepacs.bordeaux.inria.fr/eagullo/morse)
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 20-01-2012
-# @last modified : mer. 04 avril 2012 10:55:51 CEST
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
 ###
 #
@@ -36,6 +40,14 @@
 #
 ###
 
+# Early exit if already searched
+IF(HWLOC_FOUND)
+    MESSAGE(STATUS "Looking for HWLOC - already found")
+    RETURN()
+ENDIF(HWLOC_FOUND)
+
+# Load required modules
+INCLUDE(populatePACKAGE)
 INCLUDE(findPACKAGE)
 INCLUDE(infoHWLOC)
 
@@ -49,12 +61,14 @@ ELSE(MORSE_SEPARATE_PROJECTS)
     SET(HWLOC_DIR ${CMAKE_INSTALL_PREFIX})
 ENDIF(MORSE_SEPARATE_PROJECTS)
 
+# Looking for dependencies
+FIND_AND_POPULATE_LIBRARY("HWLOC")
+
 # Define parameters for FIND_MY_PACKAGE
 HWLOC_INFO_FIND()
 
 # Search for the library
-FIND_MY_PACKAGE("HWLOC"
-                TRUE FALSE)
+FIND_MY_PACKAGE("HWLOC")
 
 # Begin section - Looking for HWLOC
 IF(HWLOC_FOUND)
@@ -63,6 +77,6 @@ ELSE(HWLOC_FOUND)
     MESSAGE(STATUS "Looking for HWLOC - not found")
 ENDIF(HWLOC_FOUND)
 
-###
-### END FindHWLOC.cmake
-###
+##
+## @end file FindHWLOC.cmake
+##

@@ -1,26 +1,24 @@
 ###
 #
-# @file      : installLAPACKE.cmake
+#  @file installLAPACKE.cmake
 #
-# @description   :
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 21-01-2012
-# @last modified : mer. 16 mai 2012 10:18:29 CEST
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
 ###
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 INCLUDE(installExternalPACKAGE)
-INCLUDE(downloadPACKAGE)
-INCLUDE(infoLAPACKE)
 
 MACRO(INSTALL_LAPACKE _MODE)
-
-    # Get info for this package
-    # -------------------------
-    LAPACKE_INFO_INSTALL()
 
     # Define prefix paths
     # -------------------
@@ -32,65 +30,91 @@ MACRO(INSTALL_LAPACKE _MODE)
 
     # Create make.inc
     # ---------------
-    IF(EXISTS ${CMAKE_SOURCE_DIR}/externals/lapacke_make.inc)
-        FILE(REMOVE ${CMAKE_SOURCE_DIR}/externals/lapacke_make.inc)
+    IF(EXISTS ${CMAKE_BINARY_DIR}/lapacke_make.inc)
+        FILE(REMOVE ${CMAKE_BINARY_DIR}/lapacke_make.inc)
     ENDIF()
-    STRING(TOUPPER "${CMAKE_BUILD_TYPE}" TOUPPER_BUILD_TYPE)
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/lapacke_make.inc "SHELL   = /bin/sh\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/lapacke_make.inc "CC      = ${CMAKE_C_COMPILER} ${CMAKE_C_COMPILER_${TOUPPER_BUILD_TYPE}} ${CMAKE_EXTRA_CFLAGS}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/lapacke_make.inc "FORTRAN = ${CMAKE_Fortran_COMPILER} ${CMAKE_Fortran_COMPILER_${TOUPPER_BUILD_TYPE}} ${CMAKE_EXTRA_FFLAGS}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/lapacke_make.inc "LOADER  = ${CMAKE_Fortran_COMPILER} ${CMAKE_EXTRA_LDFLAGS_F}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/lapacke_make.inc "OPTS    = \n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/lapacke_make.inc "NOOPT   = ${CMAKE_EXTRA_NOOPT}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/lapacke_make.inc "ARCH    = ${CMAKE_AR}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/lapacke_make.inc "ARCHFLAGS = cr\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/lapacke_make.inc "RANLIB  = ${CMAKE_RANLIB}\n")
-    FILE(APPEND ${CMAKE_SOURCE_DIR}/externals/lapacke_make.inc "LAPACKE = liblapacke.a\n")
+    STRING(TOUPPER "${CMAKE_BUILD_TYPE}" TYPE)
+    FILE(APPEND ${CMAKE_BINARY_DIR}/lapacke_make.inc "
+SHELL      = /bin/sh
+
+FORTRAN    = ${CMAKE_Fortran_COMPILER}
+OPTS       = ${CMAKE_Fortran_FLAGS_${TYPE}}
+OPTS      += ${CMAKE_Fortran_FLAGS}
+DRVOPTS    = $(OPTS)
+NOOPT      = ${CMAKE_Fortran_FLAGS_${TYPE}}
+NOOPT      = ${CMAKE_Fortran_FLAGS}
+LOADER     = ${CMAKE_Fortran_COMPILER}
+LOADOPTS   = ${CMAKE_Fortran_LDFLAGS}
+
+CC         = ${CMAKE_C_COMPILER} 
+CFLAGS     = ${CMAKE_C_FLAGS_${TYPE}}
+CFLAGS    += ${CMAKE_C_FLAGS}
+
+ARCH       = ${CMAKE_AR}
+ARCHFLAGS  = cr
+RANLIB     = ${CMAKE_RANLIB}
+
+BLASLIB    = ${BLAS_LDFLAGS}
+LAPACKLIB  = ${LAPACK_LDFLAGS}
+TMGLIB     = libtmg.${MORSE_LIBRARY_EXTENSION}
+EIGSRCLIB  = libeigsrc.${MORSE_LIBRARY_EXTENSION}
+LINSRCLIB  = liblinsrc.${MORSE_LIBRARY_EXTENSION}
+LAPACKELIB = liblapacke.${MORSE_LIBRARY_EXTENSION}
+")
+    IF(BUILD_SHARED_LIBS)
+        FILE(APPEND ${CMAKE_BINARY_DIR}/lapacke_make.inc "
+CFLAGS    += -fPIC
+OPTS      += -fPIC
+NOOPT     += -fPIC
+DRVOPTS    = $(OPTS)
+LOADOPTS  += -fPIC
+ARCHFLAGS  = rcs
+")
+    ENDIF(BUILD_SHARED_LIBS)
 
     # Define steps of installation
     # ----------------------------
-    SET(LAPACKE_CONFIG_CMD ${CMAKE_COMMAND} -E copy
-                        ${CMAKE_SOURCE_DIR}/externals/lapacke_make.inc
-                        ${CMAKE_BINARY_DIR}/externals/lapacke/make.inc)
-    SET(LAPACKE_MAKE_CMD ${CMAKE_MAKE_PROGRAM} lapacke)
-    SET(LAPACKE_MAKEINSTALL_CMD ${CMAKE_COMMAND} -E copy
-                             ${CMAKE_BINARY_DIR}/externals/lapacke/liblapacke.a
-                             ${LAPACKE_PATH}/lib/liblapacke.a)
+    SET(LAPACKE_SOURCE_PATH ${CMAKE_BINARY_DIR}/externals/lapacke)
+    SET(LAPACKE_BUILD_PATH  ${CMAKE_BINARY_DIR}/externals/lapacke/lapacke)
+    SET(LAPACKE_CONFIG_CMD  ${CMAKE_COMMAND} -E copy
+                              ${CMAKE_BINARY_DIR}/lapacke_make.inc
+                              ${LAPACKE_SOURCE_PATH}/make.inc)
+    SET(LAPACKE_BUILD_CMD   ${CMAKE_MAKE_PROGRAM} lapacke)
+    SET(LAPACKE_INSTALL_CMD ${CMAKE_COMMAND} -E make_directory ${LAPACKE_PATH})
 
     # Define additional step
     # ----------------------
-    SET(LAPACKE_ADD_STEP lapacke_create_prefix_lib lapacke_create_prefix_include lapacke_copy_include)
-    SET(lapacke_create_prefix_lib_CMD ${CMAKE_COMMAND} -E make_directory ${LAPACKE_PATH}/lib)
-    SET(lapacke_create_prefix_lib_DIR ${CMAKE_INSTALL_PREFIX})
-    SET(lapacke_create_prefix_lib_DEP_BEFORE build)
-    SET(lapacke_create_prefix_lib_DEP_AFTER install)
-    SET(lapacke_create_prefix_include_CMD ${CMAKE_COMMAND} -E make_directory ${LAPACKE_PATH}/include)
-    SET(lapacke_create_prefix_include_DIR ${CMAKE_INSTALL_PREFIX})
-    SET(lapacke_create_prefix_include_DEP_BEFORE build)
-    SET(lapacke_create_prefix_include_DEP_AFTER install)
-    SET(lapacke_copy_include_CMD ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/externals/lapacke/include/lapacke.h .)
-    SET(lapacke_copy_include_DIR ${LAPACKE_PATH}/include)
-    SET(lapacke_copy_include_DEP_BEFORE lapacke_create_prefix_include)
-    SET(lapacke_copy_include_DEP_AFTER install)
-
-    # Define options
-    # --------------
-    SET(LAPACKE_OPTIONS "")
+    UNSET(LAPACKE_ADD_INSTALL_STEP)
+    FOREACH(_task lib include)
+        LIST(APPEND LAPACKE_ADD_INSTALL_STEP lapacke_create_${_task}_path)
+        SET(lapacke_create_${_task}_path_CMD ${CMAKE_COMMAND} -E make_directory ${LAPACKE_PATH}/${_task})
+        SET(lapacke_create_${_task}_path_DIR ${CMAKE_INSTALL_PREFIX})
+    ENDFOREACH()
+    FOREACH(_task liblapacke)
+        LIST(APPEND LAPACKE_ADD_INSTALL_STEP lapacke_copy_${_task})
+        SET(lapacke_copy_${_task}_CMD ${CMAKE_COMMAND} -E copy ${LAPACKE_SOURCE_PATH}/${_task}.${MORSE_LIBRARY_EXTENSION} .)
+        SET(lapacke_copy_${_task}_DIR ${LAPACKE_PATH}/lib)
+    ENDFOREACH()
+    FOREACH(_task lapacke lapacke_config lapacke_utils lapacke_mangling lapacke_mangling_with_flags)
+        LIST(APPEND LAPACKE_ADD_INSTALL_STEP lapacke_copy_${_task}_h)
+        SET(lapacke_copy_${_task}_h_CMD ${CMAKE_COMMAND} -E copy ${LAPACKE_BUILD_PATH}/include/${_task}.h .)
+        SET(lapacke_copy_${_task}_h_DIR ${LAPACKE_PATH}/include)
+    ENDFOREACH()
 
     # Install the external package
     # ----------------------------
-    DEFINE_DOWNLOAD_PACKAGE("lapacke" "${_MODE}")
-    INSTALL_EXTERNAL_PACKAGE("lapacke" "${LAPACKE_BUILD_MODE}")
+    INSTALL_EXTERNAL_PACKAGE("lapacke" "${LAPACKE_USED_MODE}")
 
     # Set linker flags
     # ----------------
-    SET(LAPACKE_LIBRARY_PATH "${LAPACKE_PATH}/lib")
-    SET(LAPACKE_INCLUDE_PATH "${LAPACKE_PATH}/include")
-    SET(LAPACKE_LDFLAGS "-L${LAPACKE_LIBRARY_PATH} -llapacke")
-    SET(LAPACKE_LIBRARIES "lapacke")
+    SET(LAPACKE_LIBRARY_PATH "${LAPACKE_SOURCE_PATH}")
+    SET(LAPACKE_INCLUDE_PATH "${LAPACKE_BUILD_PATH}/include")
+    SET(LAPACKE_LIBRARY      "${LAPACKE_LIBRARY_PATH}/liblapacke.${MORSE_LIBRARY_EXTENSION}")
+    SET(LAPACKE_LDFLAGS      "-L${LAPACKE_LIBRARY_PATH} -llapacke")
+    SET(LAPACKE_LIBRARIES    "lapacke")
 
 ENDMACRO(INSTALL_LAPACKE)
 
-###
-### END installLAPACKE.cmake
-###
+##
+## @end file installLAPACKE.cmake
+##

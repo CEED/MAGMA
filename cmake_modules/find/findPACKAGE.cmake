@@ -1,13 +1,17 @@
 ###
 #
-# @file      : findPACKAGE.cmake
+#  @file findPACKAGE.cmake
 #
-# @description   : Project MORSE (http://hiepacs.bordeaux.inria.fr/eagullo/morse)
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 20-01-2012
-# @last modified : Thu 05 Jul 2012 07:44:32 PM CEST
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
 ###
 #
@@ -35,26 +39,14 @@
 #
 ###
 
+INCLUDE(BuildSystemTools)
 INCLUDE(CheckFunctionExists)
 INCLUDE(CheckFortranFunctionExists)
 INCLUDE(FindPackageHandleStandardArgs)
 
 # Find package
 # ------------
-MACRO(FIND_MY_PACKAGE _NAMEVAR
-                      _check_c _check_fortran)
-
-    # Found env var to check
-    # ----------------------
-    IF(WIN32)
-        SET(_libdir LIB)
-    ELSE(WIN32)
-        IF(APPLE)
-            SET(_libdir DYLD_LIBRARY_PATH)
-        ELSE(APPLE)
-            SET(_libdir LD_LIBRARY_PATH)
-        ENDIF(APPLE)
-    ENDIF(WIN32)
+MACRO(FIND_MY_PACKAGE _NAMEVAR)
 
     # Set ${_NAMEVAR}_FOUND at FALSE by default
     # -----------------------------------------
@@ -65,8 +57,19 @@ MACRO(FIND_MY_PACKAGE _NAMEVAR
     # --------------------------------------------------------------------------------------
     FIND_PACKAGE(PkgConfig QUIET)
     IF(PKG_CONFIG_EXECUTABLE AND ${_NAMEVAR}_name_pkgconfig)
-        pkg_search_module(PC_${_NAMEVAR} QUIET ${${_NAMEVAR}_name_pkgconfig})
-        DEBUG_PKG_CONFIG_OUTPUT(${_NAMEVAR})
+        STRING(REPLACE ":" ";" PATH_PKGCONFIGPATH "$ENV{PKG_CONFIG_PATH}")
+        FIND_FILE(${_NAMEVAR}_PKG_FILE_FOUND
+                  NAME  ${${_NAMEVAR}_name_pkgconfig}.pc
+                  PATHS ${PATH_PKGCONFIGPATH})
+        MARK_AS_ADVANCED(${_NAMEVAR}_PKG_FILE_FOUND)
+        IF(${_NAMEVAR}_PKG_FILE_FOUND)
+            pkg_search_module(PC_${_NAMEVAR} QUIET ${${_NAMEVAR}_name_pkgconfig})
+            DEBUG_PKG_CONFIG_OUTPUT(${_NAMEVAR})
+
+        ELSE(${_NAMEVAR}_PKG_FILE_FOUND)
+            MESSAGE(STATUS "Looking for ${_NAMEVAR} - pkgconfig not used")
+
+        ENDIF(${_NAMEVAR}_PKG_FILE_FOUND)
 
     ELSE(PKG_CONFIG_EXECUTABLE AND ${_NAMEVAR}_name_pkgconfig)
         MESSAGE(STATUS "Looking for ${_NAMEVAR} - pkgconfig not used")
@@ -85,10 +88,41 @@ MACRO(FIND_MY_PACKAGE _NAMEVAR
         SET(${_NAMEVAR}_PATH ${PC_${_NAMEVAR}_PREFIX})
     ENDIF(PC_${_NAMEVAR}_FOUND AND ${_NAMEVAR}_name_pkgconfig)
 
-    # Looking for library
-    # -------------------
-    
+    # Clean old values
+    # ----------------
+    UNSET(${_NAMEVAR}_LIBRARY)
+    UNSET(${_NAMEVAR}_LDFLAGS)
+    UNSET(${_NAMEVAR}_LIBRARIES)
+    UNSET(${_NAMEVAR}_LIBRARY_PATH)
+    UNSET(${_NAMEVAR}_INCLUDE_PATH)
+
+    # Add some path to help
+    # ---------------------
+    UNSET(_lib_env)
+    IF(WIN32)
+        STRING(REPLACE ":" ";" _lib_env "$ENV{LIB}")
+    ELSE(WIN32)
+        IF(APPLE)
+            STRING(REPLACE ":" ";" _lib_env "$ENV{DYLD_LIBRARY_PATH}")
+        ELSE()
+            STRING(REPLACE ":" ";" _lib_env "$ENV{LD_LIBRARY_PATH}")
+        ENDIF()
+        LIST(APPEND _lib_env "/usr/local/lib64")
+        LIST(APPEND _lib_env "/usr/lib64")
+        LIST(APPEND _lib_env "/usr/local/lib")
+        LIST(APPEND _lib_env "/usr/lib")
+    ENDIF()
+
+    # Define path we have to looking for first
+    # ----------------------------------------
+    UNSET(CMAKE_PREFIX_PATH)
+    LIST(APPEND CMAKE_PREFIX_PATH ${PC_${_NAMEVAR}_LIBDIR})
+    LIST(APPEND CMAKE_PREFIX_PATH ${PC_${_NAMEVAR}_LIBRARY_DIRS})
+    LIST(APPEND CMAKE_PREFIX_PATH ${${_NAMEVAR}_DIR})
+    LIST(APPEND CMAKE_PREFIX_PATH ${_lib_env})
+
     # Get and preporcess of collected informations
+    # ---------------------------------------------
     SET(_all_libs "")
     LIST(APPEND _all_libs ${${_NAMEVAR}_name_library})
     LIST(APPEND _all_libs ${PC_${_NAMEVAR}_LIBRARIES})
@@ -104,15 +138,20 @@ MACRO(FIND_MY_PACKAGE _NAMEVAR
         FOREACH(_lib_file ${_all_libs})
             FIND_LIBRARY(${_lib_file}_path
                          NAMES ${_lib_file}
-                         PATHS ${PC_${_NAMEVAR}_LIBDIR} ${PC_${_NAMEVAR}_LIBRARY_DIRS} ${${_NAMEVAR}_DIR} ENV ${_libdir} 
                          PATH_SUFFIXES lib lib64 lib32
                         )
             MARK_AS_ADVANCED(${_lib_file}_path)
             IF(${_lib_file}_path)
-                GET_FILENAME_COMPONENT(${_lib_file}_filename    ${${_lib_file}_path} NAME   )
-                STRING(REGEX REPLACE "(.*)/${${_lib_file}_filename}" "\\1" ${_lib_file}_lib_path "${${_lib_file}_path}")
-                LIST(APPEND ${_NAMEVAR}_LIBRARIES    "${_lib_file}")
-                LIST(APPEND ${_NAMEVAR}_LIBRARY      "${${_lib_file}_path}")
+                GET_FILENAME_COMPONENT(${_lib_file}_filename ${${_lib_file}_path} NAME)
+                GET_FILENAME_COMPONENT(${_lib_file}_lib_path ${${_lib_file}_path} PATH)
+                LIST(FIND ${_NAMEVAR}_LIBRARIES "${_lib_file}" IS_${_lib_file})
+                IF("^${IS_${_lib_file}}$" STREQUAL "^-1$")
+                    LIST(APPEND ${_NAMEVAR}_LIBRARIES    "${_lib_file}")
+                ENDIF()
+                LIST(FIND ${_NAMEVAR}_LIBRARY "${${_lib_file}_path}" IS_${_lib_file}_path)
+                IF("^${IS_${_lib_file}_path}$" STREQUAL "^-1$")
+                    LIST(APPEND ${_NAMEVAR}_LIBRARY      "${${_lib_file}_path}")
+                ENDIF()
                 LIST(APPEND ${_NAMEVAR}_LIBRARY_PATH "${${_lib_file}_lib_path}")
                 LIST(REMOVE_DUPLICATES ${_NAMEVAR}_LIBRARY_PATH)
 
@@ -139,6 +178,31 @@ MACRO(FIND_MY_PACKAGE _NAMEVAR
         ENDIF(${is_extra_flags})
     ENDIF(${_NAMEVAR}_name_library)
 
+    # Add some path to help
+    # ---------------------
+    UNSET(_lib_env)
+    UNSET(_inc_env)
+    IF(WIN32)
+        STRING(REPLACE ":" ";" _lib_env "$ENV{INCLUDE}")
+    ELSE(WIN32)
+        STRING(REPLACE ":" ";" _path_env "$ENV{INCLUDE}")
+        LIST(APPEND _inc_env "${_path_env}")
+        STRING(REPLACE ":" ";" _path_env "$ENV{C_INCLUDE_PATH}")
+        LIST(APPEND _inc_env "${_path_env}")
+        STRING(REPLACE ":" ";" _path_env "$ENV{CPATH}")
+        LIST(APPEND _inc_env "${_path_env}")
+        STRING(REPLACE ":" ";" _path_env "$ENV{INCLUDE_PATH}")
+        LIST(APPEND _inc_env "${_path_env}")
+    ENDIF()
+
+    # Define path we have to looking for first
+    # ----------------------------------------
+    UNSET(CMAKE_PREFIX_PATH)
+    LIST(APPEND CMAKE_PREFIX_PATH ${PC_${_NAMEVAR}_INCLUDEDIR})
+    LIST(APPEND CMAKE_PREFIX_PATH ${PC_${_NAMEVAR}_INCLUDE_DIRS})
+    LIST(APPEND CMAKE_PREFIX_PATH ${${_NAMEVAR}_DIR})
+    LIST(APPEND CMAKE_PREFIX_PATH ${_inc_env})
+
     # Looking for include
     # -------------------
     SET(_all_headers "")
@@ -147,16 +211,12 @@ MACRO(FIND_MY_PACKAGE _NAMEVAR
         FOREACH(_header_file ${_all_headers})
             FIND_PATH(${_header_file}_path
                          NAMES ${_header_file}
-                         PATHS ${PC_${_NAMEVAR}_INCLUDEDIR} ${PC_${_NAMEVAR}_INCLUDE_DIRS} ${${_NAMEVAR}_DIR}
                          PATH_SUFFIXES include ${${_NAMEVAR}_name_include_suffix} include/${${_NAMEVAR}_name_include_suffix}
                         )
             MARK_AS_ADVANCED(${_header_file}_path)
             IF(${_header_file}_path)
-                STRING(REGEX REPLACE "(.*)/${_header_file}" "\\1" ${_header_file}_header_path "${${_header_file}_path}")
-                LIST(APPEND ${_NAMEVAR}_INCLUDE_PATH "${${_header_file}_header_path}")
+                LIST(APPEND ${_NAMEVAR}_INCLUDE_PATH "${${_header_file}_path}")
                 LIST(REMOVE_DUPLICATES ${_NAMEVAR}_INCLUDE_PATH)
-
-            #TODO: rajouter des tests sur les headers : CheckIncludeFile
 
             ELSE(${_header_file}_path)
                 SET(${_NAMEVAR}_ERROR_OCCURED TRUE)
@@ -166,6 +226,10 @@ MACRO(FIND_MY_PACKAGE _NAMEVAR
         ENDFOREACH()
 
     ENDIF(${_NAMEVAR}_name_include)
+
+    # Define path we have to looking for first
+    # ----------------------------------------
+    UNSET(CMAKE_PREFIX_PATH)
 
     # Looking for binary
     # ------------------
@@ -181,8 +245,7 @@ MACRO(FIND_MY_PACKAGE _NAMEVAR
                         )
             MARK_AS_ADVANCED(${_bin_file}_path)
             IF(${_bin_file}_path)
-                STRING(REGEX REPLACE "(.*)/${_bin_file}" "\\1" ${_bin_file}_bin_path "${${_bin_file}_path}")
-                LIST(APPEND ${_NAMEVAR}_BINARY_PATH "${${_bin_file}_bin_path}")
+                LIST(APPEND ${_NAMEVAR}_BINARY_PATH "${${_bin_file}_path}")
                 LIST(REMOVE_DUPLICATES ${_NAMEVAR}_BINARY_PATH)
 
             ELSE(${_bin_file}_path)
@@ -202,38 +265,18 @@ MACRO(FIND_MY_PACKAGE _NAMEVAR
     # --------------------------
     INCLUDE(checkPACKAGE)
     CHECK_PACKAGE(${_NAMEVAR})
+    IF(${_NAMEVAR}_ERROR_OCCURRED)
+        PACKAGE_CLEAN_VALUE(${_NAMEVAR})
+        MESSAGE(STATUS "Looking for ${_NAMEVAR} - not working")
+        SET(${_NAMEVAR}_FOUND FALSE)
 
-    # Warning users on screen
-    # -----------------------
-    PACKAGE_HANDLE(${_NAMEVAR})
+    ELSE(${_NAMEVAR}_ERROR_OCCURRED)
+        SET(${_NAMEVAR}_USED_MODE "FIND")
+        SET(${_NAMEVAR}_FOUND     TRUE  )
+
+    ENDIF(${_NAMEVAR}_ERROR_OCCURRED)
 
 ENDMACRO(FIND_MY_PACKAGE)
-
-###
-#
-#
-#
-###
-MACRO(PACKAGE_HANDLE _NAMEVAR)
-
-    # If one error occurred, we clean all variables
-    # ---------------------------------------------
-    IF(${${_NAMEVAR}_ERROR_OCCURRED})
-        PACKAGE_CLEAN_VALUE(${_NAMEVAR})
-        SET(${_NAMEVAR}_FOUND FALSE)
-        #
-        # TODO: Put test on REQUIRED - need to crash here
-        #
-        #IF()
-        #    MESSAGE(FATAL_ERROR "Looking for ${_NAMEVAR} - not found")
-        #ENDIF()
-
-    ELSE(${${_NAMEVAR}_ERROR_OCCURRED})
-        SET(${_NAMEVAR}_FOUND TRUE)
-
-    ENDIF(${${_NAMEVAR}_ERROR_OCCURRED})
-
-ENDMACRO(PACKAGE_HANDLE _NAMEVAR)
 
 ###
 #
@@ -270,12 +313,14 @@ MACRO(DEBUG_FIND_OUTPUT _NAMEVAR)
 
         # Load infoPACKAGE
         # ----------------
-        INCLUDE(infoPACKAGE)
-        INFO_FIND_PACKAGE()
+        #INCLUDE(infoPACKAGE)
+        #INFO_FIND_PACKAGE(${_NAMEVAR})
 
         # Debug post-treatment
         # --------------------
-        MESSAGE(STATUS "Find${_NAMEVAR}: Value for ${_NAMEVAR}")
+        MESSAGE(STATUS "  * debug:")
+        MESSAGE(STATUS "  * debug: Find${_NAMEVAR} - obtained values")
+        MESSAGE(STATUS "  * debug:")
         MESSAGE(STATUS "  * debug: ${_NAMEVAR}_ERROR_OCCURRED = ${${_NAMEVAR}_ERROR_OCCURRED}")
         MESSAGE(STATUS "  * debug: ${_NAMEVAR}_VERSION        = ${${_NAMEVAR}_VERSION}"       )
         MESSAGE(STATUS "  * debug: ${_NAMEVAR}_PATH           = ${${_NAMEVAR}_PATH}"          )
@@ -291,6 +336,7 @@ MACRO(DEBUG_FIND_OUTPUT _NAMEVAR)
         IF(${_NAMEVAR}_name_binary)
             MESSAGE(STATUS "  * debug: ${_NAMEVAR}_BINARY_PATH    = ${${_NAMEVAR}_BINARY_PATH}" )
         ENDIF(${_NAMEVAR}_name_binary)
+        MESSAGE(STATUS "  * debug:")
 
     ENDIF(MORSE_DEBUG_CMAKE)
 
@@ -307,12 +353,14 @@ MACRO(DEBUG_PKG_CONFIG_OUTPUT _NAMEVAR)
 
         # Load infoPACKAGE
         # ----------------
-        INCLUDE(infoPACKAGE)
-        INFO_FIND_PACKAGE()
+        #INCLUDE(infoPACKAGE)
+        #INFO_FIND_PACKAGE(${_NAMEVAR})
 
         # Debug PKG-CONFIG
         # ----------------
-        MESSAGE(STATUS "Find${_NAMEVAR}: Output form PKG-CONFIG - ${${_NAMEVAR}_name_pkgconfig}")
+        MESSAGE(STATUS "  * debug:")
+        MESSAGE(STATUS "  * debug: Find${_NAMEVAR} - output form pkg-config for ${${_NAMEVAR}_name_pkgconfig}")
+        MESSAGE(STATUS "  * debug:")
         MESSAGE(STATUS "  * debug: PC_${_NAMEVAR}_FOUND        = ${PC_${_NAMEVAR}_FOUND}"       )
         MESSAGE(STATUS "  * debug: PC_${_NAMEVAR}_VERSION      = ${PC_${_NAMEVAR}_VERSION}"     )
         MESSAGE(STATUS "  * debug: PC_${_NAMEVAR}_PREFIX       = ${PC_${_NAMEVAR}_PREFIX}"      )
@@ -324,11 +372,12 @@ MACRO(DEBUG_PKG_CONFIG_OUTPUT _NAMEVAR)
             MESSAGE(STATUS "  * debug: PC_${_NAMEVAR}_INCLUDEDIR   = ${PC_${_NAMEVAR}_INCLUDEDIR}"  )
             MESSAGE(STATUS "  * debug: PC_${_NAMEVAR}_INCLUDE_DIRS = ${PC_${_NAMEVAR}_INCLUDE_DIRS}")
         ENDIF(${_NAMEVAR}_name_include)
+        MESSAGE(STATUS "  * debug:")
 
     ENDIF(MORSE_DEBUG_CMAKE)
 
 ENDMACRO(DEBUG_PKG_CONFIG_OUTPUT)
 
-###
-### END findPACKAGE.cmake
-###
+##
+## @end file findPACKAGE.cmake
+##

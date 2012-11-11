@@ -1,13 +1,17 @@
 ###
 #
-# @file          : FortranMangling.cmake
+#  @file FortranMangling.cmake
 #
-# @description   : Project MORSE (http://hiepacs.bordeaux.inria.fr/eagullo/morse)
+#  @project MORSE
+#  MORSE is a software package provided by:
+#     Inria Bordeaux - Sud-Ouest,
+#     Univ. of Tennessee,
+#     Univ. of California Berkeley,
+#     Univ. of Colorado Denver.
 #
-# @version       :
-# @created by    : Cedric Castagnede
-# @creation date : 21-03-2012
-# @last modified : mer. 21 mars 2012 15:26:07 CET
+#  @version 0.1.0
+#  @author Cedric Castagnede
+#  @date 13-07-2012
 #
 ###
 
@@ -50,7 +54,8 @@ MACRO(FortranMangling)
                    )
     IF(NOT FORTRAN_MANGLING_RESULT)
         ADD_DEFINITIONS(${FORTRAN_MANGLING_DETECTED})
-        MESSAGE(STATUS "Looking Fortran mangling - Done")
+        MESSAGE(STATUS "Looking Fortran mangling - add ${FORTRAN_MANGLING_DETECTED}")
+        MESSAGE(STATUS "Looking Fortran mangling - done")
     ELSE()
         MESSAGE(FATAL_ERROR "Looking Fortran mangling - error")
     ENDIF()
@@ -58,5 +63,5 @@ MACRO(FortranMangling)
 ENDMACRO(FortranMangling)
 
 ###
-### END FortranMangling.cmake
+## @end file FortranMangling.cmake
 ###
