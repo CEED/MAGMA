@@ -42,7 +42,7 @@ else ifeq (${GPU_TARGET}, Fermi)
 	OPTS   += -DGPUSHMEM=200
 	LDOPTS += -DGPUSHMEM=200
 else ifeq (${GPU_TARGET}, Kepler)
-        NVOPTS += -DGPUSHMEM=300 -arch sm_30
+        NVOPTS += -DGPUSHMEM=300 -arch sm_35
 	OPTS   += -DGPUSHMEM=300
         LDOPTS += -DGPUSHMEM=300
 else
