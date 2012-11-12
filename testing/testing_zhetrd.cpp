@@ -71,7 +71,7 @@ int main( int argc, char** argv)
     checkres  = getenv("MAGMA_TESTINGS_CHECK") != NULL;
    
 
-    printf( "\nUsage: %s -N <matrix size> -R <right hand sides> [-L|-U] -c\n", argv[0] );
+    printf( "\nUsage: %s -N <matrix size> [-L|-U] -c -NGPU <number of GPUs>\n", argv[0] );
     printf( "  -N can be repeated up to %d times\n", MAXTESTS );
     printf( "  -c or setting $MAGMA_TESTINGS_CHECK checks result.\n\n" );
     int ntest = 0;
@@ -91,6 +91,9 @@ int main( int argc, char** argv)
         }
         else if ( strcmp("-c", argv[i]) == 0 ) {
             checkres = true;
+        }
+        else if (strcmp("-NGPU",argv[i])==0) {
+            num_gpus = atoi(argv[++i]);
         }
         else {
             printf( "invalid argument: %s\n", argv[i] );
