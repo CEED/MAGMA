@@ -145,6 +145,7 @@ ZSRC += $(ZSRCF)
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 ALLOBJ := $(ALLSRC:.f90=.o)
+ALLOBJ := $(ALLOBJ:.F90=.o)
 ALLOBJ := $(ALLOBJ:.cuf=.o)
 ALLOBJ := $(ALLOBJ:.cpp=.o)
 EXE    := $(ALLOBJ:.o=)
