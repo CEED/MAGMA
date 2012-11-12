@@ -124,6 +124,8 @@ ifeq (${GPU_TARGET}, Tesla)
     ALLSRC += $(TESLASRC)
 else ifeq (${GPU_TARGET}, Fermi)
     ALLSRC += $(FERMISRC)
+else ifeq (${GPU_TARGET}, Kepler)
+    ALLSRC += $(FERMISRC)
 endif
 
 ALLOBJ := $(ALLSRC:.cu=.cu_o) 
