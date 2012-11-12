@@ -141,8 +141,10 @@ ZSRC += \
 	zungtr.cpp		\
 	zunmtr.cpp		\
 
-# symmetric eigenvalues, multi-GPU (not yet released)
-#ZSRC += \
+# symmetric eigenvalues, multi-GPU 
+ZSRC += \
+	zhetrd_mgpu.cpp		\
+	zlatrd_mgpu.cpp		\
 #	zheevd_m.cpp		\
 #	dlaex0_m.cpp		\
 #	dlaex1_m.cpp		\
@@ -150,8 +152,6 @@ ZSRC += \
 #	dstedx_m.cpp		\
 #	zstedx_m.cpp		\
 #	zunmtr_m.cpp		\
-#	zhetrd_mgpu.cpp		\
-#	zlatrd_mgpu.cpp		\
 
 # symmetric eigenvalues 2-stage
 ZSRC += \
