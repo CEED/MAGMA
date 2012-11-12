@@ -36,8 +36,6 @@ my @files2delete = qw(
     src/dstedx_m.cpp
     src/zstedx_m.cpp
     src/zunmtr_m.cpp
-    src/zhetrd_mgpu.cpp
-    src/zlatrd_mgpu.cpp
     
     control/sizeptr
     include/Makefile
