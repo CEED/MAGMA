@@ -37,7 +37,7 @@ int magma_buildconnection_mgpu(  magma_int_t gnode[MagmaMaxGPUs+2][MagmaMaxGPUs+
         // check for unified memory & enable peer memory access between all GPUs.            
         magma_setdevice( d );
         cudaGetDeviceProperties( &prop, d );
-        if ( not prop.unifiedAddressing ) {
+        if ( ! prop.unifiedAddressing ) {
             printf( "device %d doesn't support unified addressing\n", d );
             return -1;
         }
@@ -57,7 +57,7 @@ int magma_buildconnection_mgpu(  magma_int_t gnode[MagmaMaxGPUs+2][MagmaMaxGPUs+
             // check for unified memory & enable peer memory access between all GPUs.            
             magma_setdevice( d2 );
             cudaGetDeviceProperties( &prop, d2 );
-            if ( not prop.unifiedAddressing ) {
+            if ( ! prop.unifiedAddressing ) {
                 printf( "device %d doesn't support unified addressing\n", d2 );
                 return -1;
             }
@@ -72,7 +72,7 @@ int magma_buildconnection_mgpu(  magma_int_t gnode[MagmaMaxGPUs+2][MagmaMaxGPUs+
                 magma_setdevice( d );
                 err   = cudaDeviceEnablePeerAccess( d2, 0 );
                 //printf("enabling devide %d ==> %d  error %d\n",d,d2,err);
-                if ( err != cudaSuccess and err != cudaErrorPeerAccessAlreadyEnabled ) {
+                if ( err != cudaSuccess && err != cudaErrorPeerAccessAlreadyEnabled ) {
                     printf( "device %d cudaDeviceEnablePeerAccess error %d\n", d2, err );
                     return -2;
                 }
