@@ -25,8 +25,8 @@ ZSRC := \
 	clag2z.cu		\
 	zlange.cu		\
 	zlanhe.cu		\
-        zlarf.cu                \
-        zlarfg-v2.cu            \
+	zlarf.cu		\
+	zlarfg-v2.cu		\
 	zlascl.cu		\
 	zlaswp.cu		\
 	zlat2c.cu		\
@@ -45,24 +45,26 @@ ZSRC := \
 	zsetmatrix_transpose.cu	\
 	dtrsm.cu		\
 	strsm.cu		\
-        dznrm2.cu               \
+	dznrm2.cu		\
 	dtrsm_work.cu		\
 	strsm_work.cu		\
 
 # multi-GPU
 ZSRC += \
-	zbcyclic.cu		\
-	zhemm_1gpu.cpp		\
-	zhemm_1gpu_old.cpp	\
-	zhemm_mgpu.cpp		\
-	zhemm_mgpu_com.cpp		\
-	zhemm_mgpu_spec.cpp		\
-	zher2k_mgpu.cpp		\
-	zher2k_mgpu_spec.cpp		\
+	zbcyclic.cu			\
 	zgetmatrix_transpose_mgpu.cu	\
 	zsetmatrix_transpose_mgpu.cu	\
-    zhemv_fermi_mgpu_32.cu  \
-	zhemv_fermi_mgpu.cu
+	zhemv_fermi_mgpu_32.cu		\
+	zhemv_fermi_mgpu.cu		\
+
+# not yet released
+#	zhemm_1gpu.cpp			\
+#	zhemm_1gpu_old.cpp		\
+#	zhemm_mgpu.cpp			\
+#	zhemm_mgpu_com.cpp		\
+#	zhemm_mgpu_spec.cpp		\
+#	zher2k_mgpu.cpp			\
+#	zher2k_mgpu_spec.cpp		\
 
 # Card-specific versions that need precisions generated must be above in ZSRC,
 # so they are all put into Makefile.src in the release. The code is #ifdef'd

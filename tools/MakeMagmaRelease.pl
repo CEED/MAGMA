@@ -36,6 +36,19 @@ my @files2delete = qw(
     src/dstedx_m.cpp
     src/zstedx_m.cpp
     src/zunmtr_m.cpp
+    src/zhetrd_mgpu.cpp
+    src/zlatrd_mgpu.cpp
+    
+    src/zhetrd_he2hb_mgpu.cpp
+    src/zhetrd_he2hb_mgpu_spec.cpp
+    
+    magmablas/zhemm_1gpu.cpp
+    magmablas/zhemm_1gpu_old.cpp
+    magmablas/zhemm_mgpu.cpp
+    magmablas/zhemm_mgpu_com.cpp
+    magmablas/zhemm_mgpu_spec.cpp
+    magmablas/zher2k_mgpu.cpp
+    magmablas/zher2k_mgpu_spec.cpp
     
     control/sizeptr
     include/Makefile

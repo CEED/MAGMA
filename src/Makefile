@@ -162,8 +162,6 @@ ZSRC += \
 	zbulge_kernel.cpp	\
 	zbulge_kernel_v2.cpp	\
 	zhetrd_he2hb.cpp	\
-	zhetrd_he2hb_mgpu.cpp	\
-	zhetrd_he2hb_mgpu_spec.cpp	\
 	zhetrd_hb2st.cpp	\
 	zbulge_back.cpp		\
 	zhetrd_bhe2trc_v3.cpp	\
@@ -172,6 +170,8 @@ ZSRC += \
 	zunmqr_gpu_2stage.cpp	\
 	zheevdx_2stage.cpp	\
 	zhegvdx_2stage.cpp	\
+#	zhetrd_he2hb_mgpu.cpp	\
+#	zhetrd_he2hb_mgpu_spec.cpp	\
 
 # generalized symmetric eigenvalues
 ZSRC += \
