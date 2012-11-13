@@ -144,7 +144,7 @@ ZSRC += \
 # symmetric eigenvalues, multi-GPU 
 #ZSRC += \
 #	zhetrd_mgpu.cpp		\
-	zlatrd_mgpu.cpp		\
+#	zlatrd_mgpu.cpp		\
 #	zheevd_m.cpp		\
 #	dlaex0_m.cpp		\
 #	dlaex1_m.cpp		\
