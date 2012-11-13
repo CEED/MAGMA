@@ -137,6 +137,19 @@ MACRO(POPULATE_COMPILE_SYSTEM _PCS_PACKAGE)
 
     ENDIF()
 
+    # Fill the following variables
+    #   - ${_UPPERPCS_PACKAGE}_LDFLAGS
+    #   - ${_UPPERPCS_PACKAGE}_LIST_LDFLAGS
+    # -------------------------------------
+    #UNSET(${_UPPERPCS_PACKAGE}_LDFLAGS)
+    UNSET(${_UPPERPCS_PACKAGE}_LIST_LDFLAGS)
+    FOREACH(_path ${${_dep}_LIBRARY_PATH})
+        LIST(APPEND ${_UPPERPCS_PACKAGE}_LIST_LDFLAGS "-L${_path}")
+    ENDFOREACH()
+    FOREACH(_lib ${${_dep}_LIBRARIES})
+        LIST(APPEND ${_UPPERPCS_PACKAGE}_LIST_LDFLAGS "-l${_lib}")
+    ENDFOREACH()
+
 ENDMACRO(POPULATE_COMPILE_SYSTEM)
 
 ###
