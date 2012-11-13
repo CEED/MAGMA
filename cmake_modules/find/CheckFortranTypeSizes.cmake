@@ -2,8 +2,8 @@
 #
 #  @file CheckFortranTypeSizes.cmake
 #
-#  @project MORSE
-#  MORSE is a software package provided by:
+#  @project MAGMA
+#  MAGMA is a software package provided by:
 #     Inria Bordeaux - Sud-Ouest,
 #     Univ. of Tennessee,
 #     Univ. of California Berkeley,
@@ -49,15 +49,15 @@ MACRO(_CHECK_FORTRAN_TYPE_SIZE _TYPE_NAME _TEST_SIZES)
 ")
         TRY_COMPILE(SIZEOF_${_TYPE_NAME} ${CMAKE_BINARY_DIR} ${__TEST_FILE})
         IF(SIZEOF_${_TYPE_NAME})
-            IF(MORSE_DEBUG_CMAKE)
+            IF(MAGMA_DEBUG_CMAKE)
                 MESSAGE(STATUS "Testing default ${_TYPE_NAME}*${__TEST_SIZE} - found")
-            ENDIF(MORSE_DEBUG_CMAKE)
+            ENDIF(MAGMA_DEBUG_CMAKE)
             SET(SIZEOF_${_TYPE_NAME} ${__TEST_SIZE} CACHE INTERNAL "Size of the default ${_TYPE_NAME} type" FORCE)
             BREAK()
         ELSE()
-            IF(MORSE_DEBUG_CMAKE)
+            IF(MAGMA_DEBUG_CMAKE)
                 MESSAGE(STATUS "Testing default ${_TYPE_NAME}*${__TEST_SIZE} -")
-            ENDIF(MORSE_DEBUG_CMAKE)
+            ENDIF(MAGMA_DEBUG_CMAKE)
         ENDIF()
     ENDFOREACH()
 

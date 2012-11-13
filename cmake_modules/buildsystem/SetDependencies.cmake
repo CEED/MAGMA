@@ -2,8 +2,8 @@
 #
 #  @file SetDependencies.cmake
 #
-#  @project MORSE
-#  MORSE is a software package provided by:
+#  @project MAGMA
+#  MAGMA is a software package provided by:
 #     Inria Bordeaux - Sud-Ouest,
 #     Univ. of Tennessee,
 #     Univ. of California Berkeley,
@@ -23,10 +23,6 @@ MACRO(SET_PACKAGE _NAME)
     # ---------------------
     STRING(TOUPPER "${_NAME}" _NAMEVAR)
 
-    # Message
-    # -------
-    MESSAGE(STATUS "Looking for ${_NAMEVAR} - manually defined by user")
-
     # Clean internal variables
     # ------------------------
     UNSET(${_NAMEVAR}_LDFLAGS)
@@ -41,76 +37,71 @@ MACRO(SET_PACKAGE _NAME)
 
     # Check info<PACKAGE> to know if there is library to link
     # -------------------------------------------------------
-    IF(${_NAMEVAR}_name_library)
+    # Check if <PACKAGE>_LIB was defined
+    IF(DEFINED ${_NAMEVAR}_LIB)
+        # Get dir and lib
+        STRING(REPLACE " " ";" ${_NAMEVAR}_LIST_LIB "${${_NAMEVAR}_LIB}")
+        FOREACH(_param ${${_NAMEVAR}_LIST_LIB})
 
-        # Check if <PACKAGE>_LIB was defined
-        IF(DEFINED ${_NAMEVAR}_LIB)
-
-            # Get dir and lib
-            STRING(REPLACE " " ";" ${_NAMEVAR}_LIST_LIB "${${_NAMEVAR}_LIB}")
-            FOREACH(_param ${${_NAMEVAR}_LIST_LIB})
-
-                # Library directory processing
-                IF(_param MATCHES "^-L")
-                    STRING(REGEX REPLACE "^-L(.*)$" "\\1" _dir "${_param}")
-                    IF(IS_DIRECTORY ${_dir})
-                        SET(${_NAMEVAR}_LDFLAGS "${${_NAMEVAR}_LDFLAGS} -L${_dir}")
-                        LIST(APPEND ${_NAMEVAR}_LIBRARY_PATH ${_dir})
-                        LINK_DIRECTORIES(${_dir})
-                    ELSE()
-                        MESSAGE(FATAL_ERROR "Looking for ${_NAMEVAR} - ${_dir} is not a directory")
-                    ENDIF()
-
-                # Flag processing
-                ELSEIF(_param MATCHES "^-l")
-                    STRING(REGEX REPLACE "^-l(.*)$" "\\1" _lib "${_param}")
-                    SET(${_NAMEVAR}_LDFLAGS "${${_NAMEVAR}_LDFLAGS} -l${_lib}")
-                    LIST(APPEND ${_NAMEVAR}_LIBRARIES ${_lib})
-
-                # Include directory processing
-                ELSEIF(_param MATCHES "^-I")
-                    STRING(REGEX REPLACE "^-I(.*)$" "\\1" _dir "${_param}")
-                    IF(IS_DIRECTORY ${_dir})
-                        LIST(APPEND ${_NAMEVAR}_INCLUDE_PATH ${_dir})
-                        INCLUDE_DIRECTORIES(${_dir})
-                    ELSE()
-                        MESSAGE(FATAL_ERROR "Looking for ${_NAMEVAR} - ${_dir} is not a directory")
-                    ENDIF()
+            # Library directory processing
+            IF(_param MATCHES "^-L")
+                STRING(REGEX REPLACE "^-L(.*)$" "\\1" _dir "${_param}")
+                IF(IS_DIRECTORY ${_dir})
+                    SET(${_NAMEVAR}_LDFLAGS "${${_NAMEVAR}_LDFLAGS} -L${_dir}")
+                    LIST(APPEND ${_NAMEVAR}_LIBRARY_PATH ${_dir})
+                    LINK_DIRECTORIES(${_dir})
+                ELSE()
+                    MESSAGE(FATAL_ERROR "Setting ${_NAMEVAR} - ${_dir} is not a directory")
                 ENDIF()
-            ENDFOREACH()
+
+            # Flag processing
+            ELSEIF(_param MATCHES "^-l")
+                STRING(REGEX REPLACE "^-l(.*)$" "\\1" _lib "${_param}")
+                SET(${_NAMEVAR}_LDFLAGS "${${_NAMEVAR}_LDFLAGS} -l${_lib}")
+                LIST(APPEND ${_NAMEVAR}_LIBRARIES ${_lib})
+
+            # Include directory processing
+            ELSEIF(_param MATCHES "^-I")
+                STRING(REGEX REPLACE "^-I(.*)$" "\\1" _dir "${_param}")
+                IF(IS_DIRECTORY ${_dir})
+                    LIST(APPEND ${_NAMEVAR}_INCLUDE_PATH ${_dir})
+                    INCLUDE_DIRECTORIES(${_dir})
+                ELSE()
+                    MESSAGE(FATAL_ERROR "Setting ${_NAMEVAR} - ${_dir} is not a directory")
+                ENDIF()
+            ENDIF()
+        ENDFOREACH()
 
         ELSE(DEFINED ${_NAMEVAR}_LIB)
-            MESSAGE(FATAL_ERROR "Looking for ${_NAMEVAR} - ${_NAMEVAR}_LIB was not defined")
+            MESSAGE(FATAL_ERROR "Setting ${_NAMEVAR} - ${_NAMEVAR}_LIB was not defined")
 
-        ENDIF(DEFINED ${_NAMEVAR}_LIB)
-    ENDIF(${_NAMEVAR}_name_library)
+    ENDIF(DEFINED ${_NAMEVAR}_LIB)
 
     # Check info<PACKAGE> to know if there is an include to find
     # ----------------------------------------------------------
-    IF(${_NAMEVAR}_name_include)
-        # Check if <PACKAGE>_INC was defined
-        IF(DEFINED ${_NAMEVAR}_INC)
-            IF(IS_DIRECTORY ${${_NAMEVAR}_INC})
-                LIST(APPEND ${_NAMEVAR}_INCLUDE_PATH ${${_NAMEVAR}_INC})
-                INCLUDE_DIRECTORIES( ${${_NAMEVAR}_INC})
-            ELSE()
-                MESSAGE(FATAL_ERROR "Looking for ${_NAMEVAR} - ${${_NAMEVAR}_INC} is not a directory")
-            ENDIF()
+    # Check if <PACKAGE>_INC was defined
+    IF(DEFINED ${_NAMEVAR}_INC)
+        IF(IS_DIRECTORY ${${_NAMEVAR}_INC})
+            LIST(APPEND ${_NAMEVAR}_INCLUDE_PATH ${${_NAMEVAR}_INC})
+            INCLUDE_DIRECTORIES( ${${_NAMEVAR}_INC})
+        ELSE()
+            MESSAGE(FATAL_ERROR "Setting ${_NAMEVAR} - ${${_NAMEVAR}_INC} is not a directory")
+        ENDIF()
 
-        ELSE(DEFINED ${_NAMEVAR}_INC)
-            MESSAGE(FATAL_ERROR "Looking for ${_NAMEVAR} - ${_NAMEVAR}_INC was not defined")
+    ELSE(DEFINED ${_NAMEVAR}_INC)
+        MESSAGE(FATAL_ERROR "Setting ${_NAMEVAR} - ${_NAMEVAR}_INC was not defined")
 
-        ENDIF(DEFINED ${_NAMEVAR}_INC)
-    ENDIF(${_NAMEVAR}_name_include)
+    ENDIF(DEFINED ${_NAMEVAR}_INC)
 
     # Test library
     # ------------
     INCLUDE(checkPACKAGE)
     CHECK_PACKAGE(${_NAMEVAR})
     IF(${_NAMEVAR}_ERROR_OCCURRED)
-        MESSAGE(FATAL_ERROR "Looking for ${_NAMEVAR} - not working")
+        MESSAGE(FATAL_ERROR "Setting ${_NAMEVAR} - The value that you give is not working")
 
     ELSE(${_NAMEVAR}_ERROR_OCCURRED)
+        MESSAGE(STATUS "Setting ${_NAMEVAR} - worked")
         SET(HAVE_${_NAMEVAR} ON)
         SET(${_NAMEVAR}_SET  ON)
         SET(${_NAMEVAR}_USED_MODE "SET")

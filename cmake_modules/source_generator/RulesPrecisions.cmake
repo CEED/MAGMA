@@ -2,8 +2,8 @@
 #
 #  @file RulesPrecisions.cmake 
 # 
-#  @project MORSE
-#  MORSE is a software package provided by:
+#  @project MAGMA
+#  MAGMA is a software package provided by:
 #     Inria Bordeaux - Sud-Ouest,
 #     Univ. of Tennessee,
 #     Univ. of California Berkeley,

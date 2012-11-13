@@ -2,8 +2,8 @@
 #
 #  @file FindPLASMA.cmake
 #
-#  @project MORSE
-#  MORSE is a software package provided by:
+#  @project MAGMA
+#  MAGMA is a software package provided by:
 #     Inria Bordeaux - Sud-Ouest,
 #     Univ. of Tennessee,
 #     Univ. of California Berkeley,
@@ -52,13 +52,6 @@ INCLUDE(infoPLASMA)
 
 # Begin section - Looking for PLASMA
 MESSAGE(STATUS "Looking for PLASMA")
-
-# Define extra directory to look for
-IF(MORSE_SEPARATE_PROJECTS)
-    SET(PLASMA_DIR ${CMAKE_INSTALL_PREFIX}/plasma)
-ELSE(MORSE_SEPARATE_PROJECTS)
-    SET(PLASMA_DIR ${CMAKE_INSTALL_PREFIX})
-ENDIF(MORSE_SEPARATE_PROJECTS)
 
 # Define parameters for FIND_MY_PACKAGE
 PLASMA_INFO_FIND()
@@ -109,8 +102,8 @@ IF(PLASMA_FOUND)
     FOREACH(_package BLAS CBLAS LAPACK LAPACKE)
         # Message to prevent users
         MESSAGE(STATUS "Looking for PLASMA - FindPLASMA will set ${_package} flags")
-        IF("^${MORSE_USE_${_package}}$" STREQUAL "^ON$" AND NOT "^${MORSE_USE_${_package}}$" STREQUAL "^OFF$" AND NOT"${MORSE_USE_${_package}}" STREQUAL "^$")
-            MESSAGE(STATUS "Looking for PLASMA - MORSE_USE_${_package} was defined as '${MORSE_USE_${_package}}' but not used")
+        IF("^${MAGMA_USE_${_package}}$" STREQUAL "^ON$" AND NOT "^${MAGMA_USE_${_package}}$" STREQUAL "^OFF$" AND NOT"${MAGMA_USE_${_package}}" STREQUAL "^$")
+            MESSAGE(STATUS "Looking for PLASMA - MAGMA_USE_${_package} was defined as '${MAGMA_USE_${_package}}' but not used")
         ENDIF()
 
         # Remove the fact that we have to build ${_package}
@@ -139,8 +132,8 @@ IF(PLASMA_FOUND)
 
     # If PLASMA is found, we have to set QUARK variables correctly
     MESSAGE(STATUS "Looking for PLASMA - FindPLASMA will set QUARK flags")
-    IF("^${MORSE_USE_QUARK}$" STREQUAL "^ON$" AND NOT "^${MORSE_USE_QUARK}$" STREQUAL "^OFF$" AND NOT"${MORSE_USE_${_package}}" STREQUAL "^$")
-        MESSAGE(STATUS "Looking for PLASMA - MORSE_USE_QUARK was defined as '${MORSE_USE_QUARK}' but not used")
+    IF("^${MAGMA_USE_QUARK}$" STREQUAL "^ON$" AND NOT "^${MAGMA_USE_QUARK}$" STREQUAL "^OFF$" AND NOT"${MAGMA_USE_${_package}}" STREQUAL "^$")
+        MESSAGE(STATUS "Looking for PLASMA - MAGMA_USE_QUARK was defined as '${MAGMA_USE_QUARK}' but not used")
     ENDIF()
     SET(QUARK_USED_MODE    "FIND"                           )
     SET(HAVE_QUARK         ON                               )

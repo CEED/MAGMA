@@ -22,12 +22,12 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 #      Force compilation out-of-source      #
 #                                           #
 #############################################
-STRING(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" MORSE_COMPILE_INPLACE)
-IF(MORSE_COMPILE_INPLACE)
-    MESSAGE(FATAL_ERROR "MORSE requires an out of source build.
+STRING(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" MAGMA_COMPILE_INPLACE)
+IF(MAGMA_COMPILE_INPLACE)
+    MESSAGE(FATAL_ERROR "MAGMA requires an out of source build.
   1/ remove CMakeCache.txt and CMakeFiles in ${CMAKE_SOURCE_DIR}
   2/ do mkdir build && cd build and tape cmake ../")
-ENDIF(MORSE_COMPILE_INPLACE)
+ENDIF(MAGMA_COMPILE_INPLACE)
 
 
 #############################################
@@ -35,7 +35,7 @@ ENDIF(MORSE_COMPILE_INPLACE)
 #        Definition of the project          #
 #                                           #
 #############################################
-PROJECT(MORSE Fortran C CXX)
+PROJECT(MAGMA Fortran C CXX)
 
 
 #############################################
@@ -51,9 +51,6 @@ LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules/cmake-2.8-8)
 LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules/buildsystem)
 LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules/find)
 LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules/info)
-LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules/install)
-LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules/options)
-LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules/testing)
 LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules/source_generator)
 
 # Active cmake options
@@ -87,8 +84,8 @@ ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 # Organize output files in a tree
 # -------------------------------
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${MORSE_BINARY_DIR}/lib)
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${MORSE_BINARY_DIR}/lib)
+SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${MAGMA_BINARY_DIR}/lib)
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${MAGMA_BINARY_DIR}/lib)
 
 # Set the build type
 # ------------------
@@ -103,70 +100,52 @@ OPTION(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
 # Set computed precisions
 # -----------------------
-OPTION(BUILD_SINGLE       "Build MORSE Single Precision"         ON)
-OPTION(BUILD_DOUBLE       "Build MORSE Double Precision"         ON)
-OPTION(BUILD_COMPLEX      "Build MORSE Complex Precision"        ON)
-OPTION(BUILD_COMPLEX16    "Build MORSE Double Complex Precision" ON)
-CMAKE_DEPENDENT_OPTION(BUILD_MIXEDREAL    "Build MORSE Mixed Real Precision"    ON
+OPTION(BUILD_SINGLE       "Build MAGMA Single Precision"         ON)
+OPTION(BUILD_DOUBLE       "Build MAGMA Double Precision"         ON)
+OPTION(BUILD_COMPLEX      "Build MAGMA Complex Precision"        ON)
+OPTION(BUILD_COMPLEX16    "Build MAGMA Double Complex Precision" ON)
+CMAKE_DEPENDENT_OPTION(BUILD_MIXEDREAL    "Build MAGMA Mixed Real Precision"    ON
                                           "BUILD_SINGLE;BUILD_DOUBLE"           OFF)
-CMAKE_DEPENDENT_OPTION(BUILD_MIXEDCOMPLEX "Build MORSE Mixed Complex Precision" ON
+CMAKE_DEPENDENT_OPTION(BUILD_MIXEDCOMPLEX "Build MAGMA Mixed Complex Precision" ON
                                           "BUILD_COMPLEX;BUILD_COMPLEX16"       OFF)
 
-# Define precision supported by MORSE
+# Define precision supported by MAGMA
 # -----------------------------------
 IF(BUILD_SINGLE)
-    LIST(APPEND MORSE_PRECISION "s")
+    LIST(APPEND MAGMA_PRECISION "s")
 ENDIF()
 
 IF(BUILD_DOUBLE)
-    LIST(APPEND MORSE_PRECISION "d")
+    LIST(APPEND MAGMA_PRECISION "d")
 ENDIF()
 
 IF(BUILD_MIXEDREAL)
-    LIST(APPEND MORSE_PRECISION "ds")
+    LIST(APPEND MAGMA_PRECISION "ds")
 ENDIF()
 
 IF(BUILD_COMPLEX)
-    LIST(APPEND MORSE_PRECISION "c")
+    LIST(APPEND MAGMA_PRECISION "c")
 ENDIF()
 
 IF(BUILD_COMPLEX16)
-    LIST(APPEND MORSE_PRECISION "z")
+    LIST(APPEND MAGMA_PRECISION "z")
 ENDIF()
 
 IF(BUILD_MIXEDCOMPLEX)
-    LIST(APPEND MORSE_PRECISION "zc")
+    LIST(APPEND MAGMA_PRECISION "zc")
 ENDIF()
 
 
 #############################################
 #                                           #
-#      Definition of the MORSE options      #
+#      Definition of the MAGMA options      #
 #                                           #
 #############################################
 
-# MORSE options
-# -------------
-#OPTION(MORSE_USE_MULTICORE
-#  "Enable/Disable multi-threaded kernels in MORSE" OFF)
-IF(NOT MORSE_SCHED_STARPU AND NOT MORSE_SCHED_QUARK)
-    OPTION(MORSE_SCHED_STARPU
-          "Enable/Disable StarPU scheduler in MORSE" ON)
-ELSE()
-    OPTION(MORSE_SCHED_STARPU
-          "Enable/Disable StarPU scheduler in MORSE" OFF)
-ENDIF()
-OPTION(MORSE_SCHED_QUARK
-      "Enable/Disable Quark scheduler in MORSE" OFF)
-
-OPTION(MORSE_SEPARATE_PROJECTS
-       "Enable/disable the separation of different projects in the installation tree" ON)
-OPTION(MORSE_DEBUG_CMAKE
+OPTION(MAGMA_DEBUG_CMAKE
        "Enable/disable the verbosity of cmake step" OFF)
-OPTION(MORSE_ENABLE_TESTING
-       "Enable/disable all the tests in MORSE" ON)
-OPTION(MORSE_ENABLE_TIMING
-       "Enable/disable all the tests in MORSE" ON)
+OPTION(MAGMA_ENABLE_TESTING
+       "Enable/disable all the tests in MAGMA" ON)
 
 #############################################
 #                                           #
@@ -178,14 +157,14 @@ OPTION(MORSE_ENABLE_TIMING
 # ---------------
 OPTION(MAGMA "Enable/Disable compilation of MAGMA mono-GPU" ON)
 
-# MAGMA_MORSE libraries
-# ---------------------
-OPTION(MAGMA_MORSE "Enable/Disable MORSE version of MAGMA" OFF)
-
 # Define extra options for specific package
 # -----------------------------------------
-INCLUDE(ExtraOptions)
-EXTRA_OPTIONS()
+OPTION(MAGMA_USE_PLASMA 
+       "Enable/Disable kernels using plasma-like kernels in MAGMA" OFF)
+OPTION(MAGMA_USE_FERMI   
+       "Switch between Tesla (OFF) and Fermi (ON) cards" ON)
+#OPTION(MAGMA_MGPUS_STATIC
+#       "Enable/Disable compilation of MAGMA multi-GPUs static" OFF)
 
 
 #############################################
@@ -224,45 +203,20 @@ FIND_PACKAGE(PythonInterp REQUIRED)
 
 #############################################
 #                                           #
-#       Check options compatibility         #
-#                                           #
-#############################################
-
-# Create all options and handle user's desires
-# --------------------------------------------
-INCLUDE(HandleOptions)
-HANDLE_OPTIONS()
-
-# Create distribiuted dependencies graph for MORSE
-# ------------------------------------------------
-INCLUDE(HandleDistrib)
-FOREACH(_library ${MORSE_ALL_LIBRARIES};MORSE)
-    CREATE_GRAPH_DISTRIB("${CMAKE_BINARY_DIR}" "${_library}")
-ENDFOREACH()
-
-# Create requested dependencies graph for MORSE_ALL_LIBRARIES
-# -----------------------------------------------------------
-INCLUDE(HandleDependencies)
-CREATE_GRAPH_DEPENDENCIES("MORSE")
-
-
-#############################################
-#                                           #
 #    Look for the required dependencies     #
 #                                           #
 #############################################
 
 # Looking for dependencies
 # ------------------------
-INCLUDE(FindDependencies)
-FIND_DEPENDENCIES("MORSE")
-
-# Force installation of magma in a particular case
-# ------------------------------------------------
-IF(MAGMA_MORSE AND CUDA_FOUND)
-    MESSAGE(STATUS "Installing MAGMA - installed as an internal project")
-    SET(MAGMA ON CACHE BOOL "Enable/Disable compilation of MAGMA mono-GPU" FORCE)
-ENDIF(MAGMA_MORSE AND CUDA_FOUND)
+INCLUDE(DefineDependencies)
+DEFINE_PACKAGE("CUDA")
+DEFINE_PACKAGE("BLAS")
+DEFINE_PACKAGE("CBLAS")
+DEFINE_PACKAGE("LAPACK")
+IF(MAGMA_ENABLE_TESTING)
+    DEFINE_PACKAGE("BLAS")
+ENDIF(MAGMA_ENABLE_TESTING)
 
 
 #############################################
@@ -288,10 +242,6 @@ IF(MAGMA)
     IF(MAGMA_USE_PLASMA OR HAVE_PLASMA)
         ADD_DEFINITIONS(-DMAGMA_WITH_PLASMA)
     ENDIF(MAGMA_USE_PLASMA OR HAVE_PLASMA)
-
-    # Define precision supported by MAGMA
-    # -----------------------------------
-    SET(MAGMA_PRECISION ${MORSE_PRECISION})
 
     # Define the type of the GPU card
     # -------------------------------
@@ -336,7 +286,7 @@ IF(MAGMA)
     ADD_SUBDIRECTORY(include)
     ADD_SUBDIRECTORY(src)
     ADD_SUBDIRECTORY(magmablas)
-    IF(MORSE_ENABLE_TESTING)
+    IF(MAGMA_ENABLE_TESTING)
         ADD_SUBDIRECTORY(testing)
     ENDIF()
 
@@ -350,15 +300,6 @@ IF(MAGMA)
     INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/include
             DESTINATION ${CMAKE_INSTALL_PREFIX})
 
-ENDIF()
-
-#############################################
-#                                           #
-#     Compilation of the MAGMA_MORSE        #
-#                                           #
-#############################################
-IF(MAGMA_MORSE)
-    ADD_SUBDIRECTORY(multi-gpu-dynamic)
 ENDIF()
 
 #############################################

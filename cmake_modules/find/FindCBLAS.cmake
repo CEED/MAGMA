@@ -2,8 +2,8 @@
 #
 #  @file FindCBLAS.cmake
 #
-#  @project MORSE
-#  MORSE is a software package provided by:
+#  @project MAGMA
+#  MAGMA is a software package provided by:
 #     Inria Bordeaux - Sud-Ouest,
 #     Univ. of Tennessee,
 #     Univ. of California Berkeley,
@@ -52,13 +52,6 @@ INCLUDE(infoCBLAS)
 # Begin section - Looking for CBLAS
 MESSAGE(STATUS "Looking for CBLAS")
 
-# Define extra directory to look for
-IF(MORSE_SEPARATE_PROJECTS)
-    SET(CBLAS_DIR ${CMAKE_INSTALL_PREFIX}/cblas)
-ELSE(MORSE_SEPARATE_PROJECTS)
-    SET(CBLAS_DIR ${CMAKE_INSTALL_PREFIX})
-ENDIF(MORSE_SEPARATE_PROJECTS)
-
 # Define parameters for FIND_MY_PACKAGE
 CBLAS_INFO_FIND()
 SET(BACKUP_CBLAS_name_library "${CBLAS_name_library}")
@@ -75,7 +68,11 @@ IF(CBLAS_FOUND)
 
 ELSE(CBLAS_FOUND)
     # Looking for dependencies
-    FIND_AND_POPULATE_LIBRARY("CBLAS")
+    FIND_PACKAGE(BLAS QUIET)
+    IF(BLAS_FOUND)
+        POPULATE_COMPILE_SYSTEM("BLAS")
+        SET(CBLAS_FIND_DEPS "BLAS")
+    ENDIF(BLAS_FOUND)
 
     # Search for the library
     MESSAGE(STATUS "Looking for CBLAS - check Netlib implementation")

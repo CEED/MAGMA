@@ -2,8 +2,8 @@
 #
 #  @file infoPLASMA.cmake
 #
-#  @project MORSE
-#  MORSE is a software package provided by:
+#  @project MAGMA
+#  MAGMA is a software package provided by:
 #     Inria Bordeaux - Sud-Ouest,
 #     Univ. of Tennessee,
 #     Univ. of California Berkeley,
@@ -15,68 +15,6 @@
 #
 ###
 
-###
-#   
-#   
-#   
-###     
-MACRO(PLASMA_INFO_DEPS)
-    # Define the direct dependencies of the library
-    # ---------------------------------------------
-    SET(PLASMA_DIRECT_DEPS         "LAPACKE")
-    LIST(APPEND PLASMA_DIRECT_DEPS "CBLAS"  )
-    LIST(APPEND PLASMA_DIRECT_DEPS "QUARK"  )
-    LIST(APPEND PLASMA_DIRECT_DEPS "HWLOC"  )
-
-    # Define the priority of dependencies
-    # -----------------------------------
-    SET(PLASMA_LAPACKE_PRIORITY    "depends")
-    SET(PLASMA_CBLAS_PRIORITY      "depends")
-    SET(PLASMA_HWLOC_PRIORITY      "depends")
-    SET(PLASMA_QUARK_PRIORITY      "depends")
-
-ENDMACRO(PLASMA_INFO_DEPS)
-
-###
-#   
-#   
-#   
-###     
-MACRO(PLASMA_INFO_INSTALL)
-    # Define web link of plasma
-    # -------------------------
-    IF(NOT DEFINED PLASMA_URL)
-        SET(PLASMA_URL     "http://icl.cs.utk.edu/projectsfiles/plasma/pubs/plasma_2.4.6.tar.gz")
-    ENDIF()
-
-    # Define tarball of plasma
-    # ------------------------
-    IF(NOT DEFINED PLASMA_TARBALL)
-        SET(PLASMA_TARBALL "plasma_2.4.6.tar.gz")
-    ENDIF()
-
-    # Define md5sum of plasma
-    # -----------------------
-    IF(DEFINED PLASMA_URL OR DEFINED PLASMA_TARBALL)
-        SET(PLASMA_MD5SUM  "95c6e145636bbbdabf6b9c4ecb5ca2a7")
-    ENDIF()
-
-    # Define repository of plasma
-    # ---------------------------
-    IF(NOT DEFINED PLASMA_REPO_URL)
-        SET(PLASMA_REPO_MODE "SVN")
-        SET(PLASMA_REPO_URL   ""  )
-        SET(PLASMA_REPO_ID    ""  )
-        SET(PLASMA_REPO_PWD   ""  )
-    ENDIF()
-
-ENDMACRO(PLASMA_INFO_INSTALL)
-
-###
-#   
-#   
-#   
-###     
 MACRO(PLASMA_INFO_FIND)
     # Define parameters for FIND_MY_PACKAGE
     # -------------------------------------

@@ -2,8 +2,8 @@
 #
 #  @file BuildSystemTools.cmake 
 # 
-#  @project MORSE
-#  MORSE is a software package provided by:
+#  @project MAGMA
+#  MAGMA is a software package provided by:
 #     Inria Bordeaux - Sud-Ouest,
 #     Univ. of Tennessee,
 #     Univ. of California Berkeley,
@@ -74,7 +74,7 @@ MACRO(DEFINE_LIBRARY _NAME)
         SET(${_UPPERNAME}_LIBRARIES    "${_NAME}")
         SET(${_UPPERNAME}_FOUND        TRUE)
         SET(HAVE_${_UPPERNAME}         ON)
-        LIST(APPEND MORSE_EXTRA_LIBS "-l${_NAME}")
+        LIST(APPEND MAGMA_EXTRA_LIBS "-l${_NAME}")
 
     ELSE(${_UPPERNAME}_LIBRARY)
         MESSAGE(STATUS "Looking for lib${_NAME} - not found")
@@ -82,40 +82,6 @@ MACRO(DEFINE_LIBRARY _NAME)
     ENDIF(${_UPPERNAME}_LIBRARY)
 
 ENDMACRO(DEFINE_LIBRARY)
-
-###
-#
-# DEFINE_PRIORITY: Provides a tool to set priority according to MORSE_USE_<PACKAGE>
-#
-###
-MACRO(DEFINE_PRIORITY _PACKAGE _DEPENDENCY _STATUS_ON _STATUS_OFF _STATUS_DEFAULT)
-
-    IF("^${MORSE_USE_${_DEPENDENCY}}$" STREQUAL "^ON$")
-        SET(${_PACKAGE}_${_DEPENDENCY}_PRIORITY "${_STATUS_ON}")
-
-    ELSEIF("^${MORSE_USE_${_DEPENDENCY}}$" STREQUAL "^OFF$")
-        SET(${_PACKAGE}_${_DEPENDENCY}_PRIORITY "${_STATUS_OFF}")
-
-    ELSE()
-        SET(${_PACKAGE}_${_DEPENDENCY}_PRIORITY "${_STATUS_DEFAULT}")
-
-    ENDIF()
-
-ENDMACRO(DEFINE_PRIORITY)
-
-###
-#
-# UPDATE_ENV: Macro to update user's environnement
-#
-###
-MACRO(UPDATE_ENV _VARNAME _ADD)
-
-    STRING(REGEX MATCH "${_ADD}" _STATUS "$ENV{${_VARNAME}}")
-    IF(DEFINED _STATUS)
-        SET(ENV{${_VARNAME}} "${_ADD}:$ENV{${_VARNAME}}")
-    ENDIF()
-
-ENDMACRO(UPDATE_ENV)
 
 ###
 #
@@ -134,25 +100,6 @@ MACRO(GENERATE_PKGCONFIG_FILE _PACKAGE _file)
         IF(HAVE_PLASMA)
             SET(MAGMA_REQUIRED "${MAGMA_REQUIRED} plasma")
         ENDIF()
-
-    ELSEIF(MAGMA_MORSE)
-       IF(HAVE_PLASMA)
-            SET(MORSE_REQUIRED "${MORSE_REQUIRED} plasma")
-        ENDIF()
-        IF(MORSE_SCHED_STARPU)
-            IF(HAVE_MPI)
-                SET(MORSE_REQUIRED "${MORSE_REQUIRED} libstarpumpi")
-            ELSE()
-                SET(MORSE_REQUIRED "${MORSE_REQUIRED} libstarpu")
-            ENDIF()
-        ENDIF()
-        IF(HAVE_HWLOC)
-            SET(MORSE_REQUIRED "${MORSE_REQUIRED} hwloc")
-        ENDIF()
-        IF(HAVE_FXT)
-            SET(MORSE_REQUIRED "${MORSE_REQUIRED} fxt")
-        ENDIF()
-
     ENDIF()
 
     # Create .pc file

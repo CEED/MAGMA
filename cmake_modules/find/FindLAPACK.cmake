@@ -2,8 +2,8 @@
 #
 #  @file FindLAPACK.cmake
 #
-#  @project MORSE
-#  MORSE is a software package provided by:
+#  @project MAGMA
+#  MAGMA is a software package provided by:
 #     Inria Bordeaux - Sud-Ouest,
 #     Univ. of Tennessee,
 #     Univ. of California Berkeley,
@@ -26,7 +26,7 @@
 #
 ###
 #
-# You can choose your prefered LAPACK with this option : -DMORSE_USE_LAPACK="VENDOR"
+# You can choose your prefered LAPACK with this option : -DMAGMA_USE_LAPACK="VENDOR"
 #    NB: "VENDOR" can be in uppercase or lowercase
 #
 # You can defined LAPACK_DIR to help the search of LAPACK
@@ -125,13 +125,13 @@ ENDIF(NOT SIZEOF_INTEGER)
 MACRO(LAPACK_LOCATE_AND_TEST _prefix _lapack_libnames _flags _blas_ldflags)
 
     # Status of internal variables
-    IF(MORSE_DEBUG_CMAKE)
+    IF(MAGMA_DEBUG_CMAKE)
         MESSAGE( STATUS "Looking for LAPACK - try ${_prefix}")
         MESSAGE(STATUS "  * debug:")
         MESSAGE(STATUS "  * debug: Looking for LAPACK - status of ${_prefix}")
         MESSAGE(STATUS "  * debug:   - libraries             : ${_lapack_libnames}")
         MESSAGE(STATUS "  * debug:   - additional flags      : ${_flags}")
-    ENDIF(MORSE_DEBUG_CMAKE)
+    ENDIF(MAGMA_DEBUG_CMAKE)
 
     # Initialize values
     SET(LAPACK_${_prefix}_FOUND        FALSE)
@@ -164,9 +164,9 @@ MACRO(LAPACK_LOCATE_AND_TEST _prefix _lapack_libnames _flags _blas_ldflags)
     IF(NOT "^${LAPACK_EXTRA_PATH}$" STREQUAL "^$")
         LIST(APPEND LAPACK_SEARCH_PATH ${LAPACK_EXTRA_PATH})
     ENDIF()
-    IF(MORSE_DEBUG_CMAKE)
+    IF(MAGMA_DEBUG_CMAKE)
         MESSAGE(STATUS "  * debug:   - searching in this paths : ${LAPACK_SEARCH_PATH}")
-    ENDIF(MORSE_DEBUG_CMAKE)
+    ENDIF(MAGMA_DEBUG_CMAKE)
 
     # Define path we have to looking for first
     SET(CMAKE_PREFIX_PATH ${LAPACK_SEARCH_PATH})
@@ -180,9 +180,9 @@ MACRO(LAPACK_LOCATE_AND_TEST _prefix _lapack_libnames _flags _blas_ldflags)
                     )
         MARK_AS_ADVANCED(LAPACK_${_prefix}_${_library}_LIBRARY)
 
-        IF(MORSE_DEBUG_CMAKE)
+        IF(MAGMA_DEBUG_CMAKE)
             MESSAGE(STATUS "  * debug:   - obtained library path : ${LAPACK_${_prefix}_${_library}_LIBRARY}")
-        ENDIF(MORSE_DEBUG_CMAKE)
+        ENDIF(MAGMA_DEBUG_CMAKE)
 
         IF(LAPACK_${_prefix}_${_library}_LIBRARY)
             LIST(APPEND LAPACK_${_prefix}_LIBRARY   "${LAPACK_${_prefix}_${_library}_LIBRARY}")
@@ -287,12 +287,12 @@ MACRO(LAPACK_LOCATE_AND_TEST _prefix _lapack_libnames _flags _blas_ldflags)
     ENDIF(LAPACK_${_prefix}_WORKS)
 
     # Status of internal variables
-    IF(MORSE_DEBUG_CMAKE)
+    IF(MAGMA_DEBUG_CMAKE)
         MESSAGE(STATUS "  * debug:   - LAPACK_${_prefix}_LIBRARY_PATH : ${LAPACK_${_prefix}_LIBRARY_PATH}")
         MESSAGE(STATUS "  * debug:   - LAPACK_${_prefix}_LDFLAGS      : ${LAPACK_${_prefix}_LDFLAGS}"     )
         MESSAGE(STATUS "  * debug:   - LAPACK_${_prefix}_CHEEV        : ${LAPACK_${_prefix}_WORKS}")
         MESSAGE(STATUS "  * debug:")
-    ENDIF(MORSE_DEBUG_CMAKE)
+    ENDIF(MAGMA_DEBUG_CMAKE)
 
 ENDMACRO(LAPACK_LOCATE_AND_TEST)
 
@@ -312,9 +312,9 @@ ENDIF()
 # Define LAPACK_TESTED_VENDOR
 # -------------------------
 IF(${BLAS_FOUND})
-    IF("^${MORSE_USE_LAPACK}$" STREQUAL "^OFF$" OR "${MORSE_USE_LAPACK}" STREQUAL "^ON$" OR "${MORSE_USE_LAPACK}" STREQUAL  "^$")
+    IF(NOT "${MAGMA_USE_LAPACK}" STREQUAL  "^$")
         MESSAGE(STATUS "Looking for LAPACK - LAPACK tested vendor: ${LAPACK_VENDOR}")
-        STRING(TOUPPER "${MORSE_USE_LAPACK}" LAPACK_TESTED_VENDOR)
+        STRING(TOUPPER "${MAGMA_USE_LAPACK}" LAPACK_TESTED_VENDOR)
 
     ELSE()
         IF("^${BLAS_VENDOR}$" STREQUAL "MKL"        OR
@@ -507,14 +507,14 @@ IF(LAPACK_FOUND)
     SET(LAPACK_LIBRARY_PATH "${LAPACK_${LAPACK_VENDOR}_LIBRARY_PATH}")
 
     # Status of internal variables
-    IF(MORSE_DEBUG_CMAKE)
+    IF(MAGMA_DEBUG_CMAKE)
         MESSAGE(STATUS "  * debug:")
         MESSAGE(STATUS "  * debug: Looking for LAPACK - picked vendor")
         MESSAGE(STATUS "  * debug:   - LAPACK_LIBRARY_PATH     : ${LAPACK_LIBRARY_PATH}")
         MESSAGE(STATUS "  * debug:   - LAPACK_LIBRARIES        : ${LAPACK_LIBRARIES}"   )
         MESSAGE(STATUS "  * debug:   - LAPACK_LDFLAGS          : ${LAPACK_LDFLAGS}"     )
         MESSAGE(STATUS "  * debug:")
-    ENDIF(MORSE_DEBUG_CMAKE)
+    ENDIF(MAGMA_DEBUG_CMAKE)
 ENDIF(LAPACK_FOUND)
 
 ##

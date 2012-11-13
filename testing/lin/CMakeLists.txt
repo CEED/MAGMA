@@ -67,12 +67,6 @@ SET(SRCS
 ADD_LIBRARY(magma_lapacktest ${SRCS})
 SET_PROPERTY(TARGET magma_lapacktest PROPERTY LINKER_LANGUAGE Fortran)
 TARGET_LINK_LIBRARIES(magma_lapacktest ${TMG_LIBRARIES})
-FOREACH(_external_package "blas" "lapack" "tmg")
-    STRING(TOUPPER "${_external_package}" _NAMEVAR)
-    IF(${_NAMEVAR}_EP)
-        ADD_DEPENDENCIES(magma_lapacktest ${_external_package}_build)
-    ENDIF()
-ENDFOREACH()
 
 # Install step of liblapacktest.a
 # -------------------------------
@@ -313,7 +307,7 @@ ENDFOREACH()
 
 LIST(APPEND libs_for_tests ${CMAKE_Fortran_FLAGS})
 LIST(APPEND libs_for_tests ${CMAKE_Fortran_LDFLAGS})
-LIST(APPEND libs_for_tests ${MORSE_EXTRA_LIBS})
+LIST(APPEND libs_for_tests ${MAGMA_EXTRA_LIBS})
 
 # Copy launcher
 # -------------

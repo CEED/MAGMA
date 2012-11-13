@@ -2,8 +2,8 @@
 #
 #  @file FindTMG.cmake
 #
-#  @project MORSE
-#  MORSE is a software package provided by:
+#  @project MAGMA
+#  MAGMA is a software package provided by:
 #     Inria Bordeaux - Sud-Ouest,
 #     Univ. of Tennessee,
 #     Univ. of California Berkeley,
@@ -50,13 +50,6 @@ INCLUDE(infoTMG)
 # Begin section - Looking for TMG
 MESSAGE(STATUS "Looking for TMG")
 
-# Define extra directory to look for
-IF(MORSE_SEPARATE_PROJECTS)
-    SET(TMG_DIR ${CMAKE_INSTALL_PREFIX}/tmg)
-ELSE(MORSE_SEPARATE_PROJECTS)
-    SET(TMG_DIR ${CMAKE_INSTALL_PREFIX})
-ENDIF(MORSE_SEPARATE_PROJECTS)
-
 # Define parameters for FIND_MY_PACKAGE
 TMG_INFO_FIND()
 SET(BACKUP_TMG_name_library "${TMG_name_library}")
@@ -72,8 +65,19 @@ IF(TMG_FOUND)
     SET(TMG_VENDOR "${BLAS_VENDOR}")
 
 ELSE(TMG_FOUND)
-    # Looking for dependencies
-    FIND_AND_POPULATE_LIBRARY("TMG")
+    # Looking for dependencies - LAPACK
+    FIND_PACKAGE(LAPACK QUIET)
+    IF(LAPACK_FOUND)
+        POPULATE_COMPILE_SYSTEM("LAPACK")
+        SET(TMG_FIND_DEPS "LAPACK")
+    ENDIF(LAPACK_FOUND)
+
+    # Looking for dependencies - BLAS
+    FIND_PACKAGE(BLAS QUIET)
+    IF(BLAS_FOUND)
+        POPULATE_COMPILE_SYSTEM("BLAS")
+        SET(TMG_FIND_DEPS "BLAS")
+    ENDIF(BLAS_FOUND)
 
     # Search for the library
     MESSAGE(STATUS "Looking for TMG - check Netlib implementation")

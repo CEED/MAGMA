@@ -203,7 +203,7 @@ FOREACH(_dep DL)
 ENDFOREACH()
 LIST(APPEND libs_for_tests ${CMAKE_Fortran_FLAGS})
 LIST(APPEND libs_for_tests ${CMAKE_Fortran_LDFLAGS})
-LIST(APPEND libs_for_tests ${MORSE_EXTRA_LIBS}) 
+LIST(APPEND libs_for_tests ${MAGMA_EXTRA_LIBS}) 
 
 FOREACH(_test_src ${MAGMA_TEST_GENERATED})
     GET_FILENAME_COMPONENT(_name_exe ${_test_src} NAME_WE)

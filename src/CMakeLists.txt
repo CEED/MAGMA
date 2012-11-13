@@ -275,13 +275,6 @@ ADD_LIBRARY(magma ${MAGMA_SRCS})
 SET_PROPERTY(TARGET magma PROPERTY LINKER_LANGUAGE Fortran)
 SET_PROPERTY(TARGET magma PROPERTY Fortran_MODULE_DIRECTORY "${CMAKE_BINARY_DIR}/include")
 
-FOREACH(_external_package "blas" "lapack")
-    STRING(TOUPPER "${_external_package}" _NAMEVAR)
-    IF(${_NAMEVAR}_EP)
-        ADD_DEPENDENCIES(magma ${_external_package}_build)
-    ENDIF()
-ENDFOREACH()
-
 # Install step
 # ------------
 INSTALL(TARGETS magma

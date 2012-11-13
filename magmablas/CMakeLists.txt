@@ -159,13 +159,6 @@ CUDA_ADD_LIBRARY(magmablas ${MAGMABLAS_SRCS})
 ADD_DEPENDENCIES(magmablas magmablas_sources)
 ADD_DEPENDENCIES(magmablas magma)
 
-FOREACH(_external_package "blas" "lapack" "plasma")
-    STRING(TOUPPER "${_external_package}" _NAMEVAR)
-    IF(${_NAMEVAR}_EP)
-        ADD_DEPENDENCIES(magmablas ${_external_package}_build)
-    ENDIF()
-ENDFOREACH()
-
 # Install step
 # ------------
 INSTALL(TARGETS magmablas

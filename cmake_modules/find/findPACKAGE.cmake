@@ -2,8 +2,8 @@
 #
 #  @file findPACKAGE.cmake
 #
-#  @project MORSE
-#  MORSE is a software package provided by:
+#  @project MAGMA
+#  MAGMA is a software package provided by:
 #     Inria Bordeaux - Sud-Ouest,
 #     Univ. of Tennessee,
 #     Univ. of California Berkeley,
@@ -309,7 +309,7 @@ ENDMACRO(PACKAGE_CLEAN_VALUE)
 ###
 MACRO(DEBUG_FIND_OUTPUT _NAMEVAR)
 
-    IF(MORSE_DEBUG_CMAKE)
+    IF(MAGMA_DEBUG_CMAKE)
 
         # Load infoPACKAGE
         # ----------------
@@ -338,7 +338,7 @@ MACRO(DEBUG_FIND_OUTPUT _NAMEVAR)
         ENDIF(${_NAMEVAR}_name_binary)
         MESSAGE(STATUS "  * debug:")
 
-    ENDIF(MORSE_DEBUG_CMAKE)
+    ENDIF(MAGMA_DEBUG_CMAKE)
 
 ENDMACRO(DEBUG_FIND_OUTPUT)
 
@@ -349,7 +349,7 @@ ENDMACRO(DEBUG_FIND_OUTPUT)
 ###
 MACRO(DEBUG_PKG_CONFIG_OUTPUT _NAMEVAR)
 
-    IF(MORSE_DEBUG_CMAKE)
+    IF(MAGMA_DEBUG_CMAKE)
 
         # Load infoPACKAGE
         # ----------------
@@ -374,7 +374,7 @@ MACRO(DEBUG_PKG_CONFIG_OUTPUT _NAMEVAR)
         ENDIF(${_NAMEVAR}_name_include)
         MESSAGE(STATUS "  * debug:")
 
-    ENDIF(MORSE_DEBUG_CMAKE)
+    ENDIF(MAGMA_DEBUG_CMAKE)
 
 ENDMACRO(DEBUG_PKG_CONFIG_OUTPUT)
 

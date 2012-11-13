@@ -2,8 +2,8 @@
 #
 #  @file checkPACKAGE.cmake
 #
-#  @project MORSE
-#  MORSE is a software package provided by:
+#  @project MAGMA
+#  MAGMA is a software package provided by:
 #     Inria Bordeaux - Sud-Ouest,
 #     Univ. of Tennessee,
 #     Univ. of California Berkeley,
@@ -117,7 +117,7 @@ MACRO(CHECK_PACKAGE _NAME)
                 CHECK_FUNCTION_EXISTS(${_fct} ${hres_prefix}_${_fct}_C_FOUND)
 
                 # Debug message
-                IF(MORSE_DEBUG_CMAKE)
+                IF(MAGMA_DEBUG_CMAKE)
                     MESSAGE(STATUS "  * debug:")
                     MESSAGE(STATUS "  * debug: CHECK ${_PACKAGE}:")
                     MESSAGE(STATUS "  * debug:")
@@ -130,7 +130,7 @@ MACRO(CHECK_PACKAGE _NAME)
                     MESSAGE(STATUS "  * debug: --> return code:")
                     MESSAGE(STATUS "  * debug:     - ${_fct}_C_FOUND        : ${${hres_prefix}_${_fct}_C_FOUND}")
                     MESSAGE(STATUS "  * debug:")
-                ENDIF(MORSE_DEBUG_CMAKE)
+                ENDIF(MAGMA_DEBUG_CMAKE)
 
                 # Handle callback
                 IF(${${hres_prefix}_${_fct}_C_FOUND})
@@ -161,7 +161,7 @@ MACRO(CHECK_PACKAGE _NAME)
                 CHECK_FORTRAN_FUNCTION_EXISTS(${_fct} ${hres_prefix}_${_fct}_F_FOUND)
 
                 # Debug message
-                IF(MORSE_DEBUG_CMAKE)
+                IF(MAGMA_DEBUG_CMAKE)
                     MESSAGE(STATUS "  * debug:")
                     MESSAGE(STATUS "  * debug: CHECK ${_PACKAGE}:")
                     MESSAGE(STATUS "  * debug:")
@@ -172,7 +172,7 @@ MACRO(CHECK_PACKAGE _NAME)
                     MESSAGE(STATUS "  * debug: --> return code:")
                     MESSAGE(STATUS "  * debug:     - ${_fct}_F_FOUND        : ${${hres_prefix}_${_fct}_F_FOUND}")
                     MESSAGE(STATUS "  * debug:")
-                ENDIF(MORSE_DEBUG_CMAKE)
+                ENDIF(MAGMA_DEBUG_CMAKE)
 
                 # Handle callback
                 IF(${${hres_prefix}_${_fct}_F_FOUND})

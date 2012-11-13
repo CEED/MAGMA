@@ -2,8 +2,8 @@
 #
 #  @file FindBLAS.cmake
 #
-#  @project MORSE
-#  MORSE is a software package provided by:
+#  @project MAGMA
+#  MAGMA is a software package provided by:
 #     Inria Bordeaux - Sud-Ouest,
 #     Univ. of Tennessee,
 #     Univ. of California Berkeley,
@@ -26,7 +26,7 @@
 #
 ###
 #
-# You can choose your prefered BLAS with this option : -DMORSE_USE_BLAS="VENDOR"
+# You can choose your prefered BLAS with this option : -DMAGMA_USE_BLAS="VENDOR"
 #    NB: "VENDOR" can be in uppercase or lowercase
 #
 # You can defined BLAS_DIR to help the search of BLAS
@@ -174,13 +174,13 @@ ENDIF(NOT SIZEOF_INTEGER)
 MACRO(BLAS_LOCATE_AND_TEST _prefix _blas_libnames _flags)
 
     # Status of internal variables
-    IF(MORSE_DEBUG_CMAKE)
+    IF(MAGMA_DEBUG_CMAKE)
         MESSAGE( STATUS "Looking for BLAS - try ${_prefix}")
         MESSAGE(STATUS "  * debug:")
         MESSAGE(STATUS "  * debug: Looking for BLAS - status of ${_prefix}")
         MESSAGE(STATUS "  * debug:   - libraries               : ${_blas_libnames}")
         MESSAGE(STATUS "  * debug:   - additional flags        : ${_flags}")
-    ENDIF(MORSE_DEBUG_CMAKE)
+    ENDIF(MAGMA_DEBUG_CMAKE)
 
     # Initialize values
     SET(BLAS_${_prefix}_FOUND        FALSE)
@@ -213,9 +213,9 @@ MACRO(BLAS_LOCATE_AND_TEST _prefix _blas_libnames _flags)
     IF(NOT "^${BLAS_EXTRA_PATH}$" STREQUAL "^$")
         LIST(APPEND BLAS_SEARCH_PATH ${BLAS_EXTRA_PATH})
     ENDIF()
-    IF(MORSE_DEBUG_CMAKE)
+    IF(MAGMA_DEBUG_CMAKE)
         MESSAGE(STATUS "  * debug:   - searching in this paths : ${BLAS_SEARCH_PATH}")
-    ENDIF(MORSE_DEBUG_CMAKE)
+    ENDIF(MAGMA_DEBUG_CMAKE)
 
     # Define path we have to looking for first
     SET(CMAKE_PREFIX_PATH ${BLAS_SEARCH_PATH})
@@ -229,9 +229,9 @@ MACRO(BLAS_LOCATE_AND_TEST _prefix _blas_libnames _flags)
                     )
         MARK_AS_ADVANCED(BLAS_${_prefix}_${_library}_LIBRARY)
 
-        IF(MORSE_DEBUG_CMAKE)
+        IF(MAGMA_DEBUG_CMAKE)
             MESSAGE(STATUS "  * debug:   - obtained library path   : ${BLAS_${_prefix}_${_library}_LIBRARY}")
-        ENDIF(MORSE_DEBUG_CMAKE)
+        ENDIF(MAGMA_DEBUG_CMAKE)
 
         IF(BLAS_${_prefix}_${_library}_LIBRARY)
             LIST(APPEND BLAS_${_prefix}_LIBRARY   "${BLAS_${_prefix}_${_library}_LIBRARY}")
@@ -337,19 +337,19 @@ MACRO(BLAS_LOCATE_AND_TEST _prefix _blas_libnames _flags)
     ENDIF(BLAS_${_prefix}_WORKS)
 
     # Status of internal variables
-    IF(MORSE_DEBUG_CMAKE)
+    IF(MAGMA_DEBUG_CMAKE)
         MESSAGE(STATUS "  * debug:   - BLAS_${_prefix}_LIBRARY_PATH : ${BLAS_${_prefix}_LIBRARY_PATH}")
         MESSAGE(STATUS "  * debug:   - BLAS_${_prefix}_LDFLAGS      : ${BLAS_${_prefix}_LDFLAGS}"     )
         MESSAGE(STATUS "  * debug:   - BLAS_${_prefix}_DGEMM        : ${BLAS_${_prefix}_WORKS}")
         MESSAGE(STATUS "  * debug:")
-    ENDIF(MORSE_DEBUG_CMAKE)
+    ENDIF(MAGMA_DEBUG_CMAKE)
 
 ENDMACRO(BLAS_LOCATE_AND_TEST)
 
 # Define BLAS_TESTED_VENDOR
 # -------------------------
-IF(NOT "^${MORSE_USE_BLAS}$" STREQUAL "^$" AND NOT "^${MORSE_USE_BLAS}$" STREQUAL "^OFF$" AND NOT "^${MORSE_USE_BLAS}$" STREQUAL "^ON$")
-    STRING(TOUPPER "${MORSE_USE_BLAS}" BLAS_TESTED_VENDOR)
+IF(NOT "^${MAGMA_USE_BLAS}$" STREQUAL "^$")
+    STRING(TOUPPER "${MAGMA_USE_BLAS}" BLAS_TESTED_VENDOR)
     MESSAGE(STATUS "Looking for BLAS - BLAS tested vendor: ${BLAS_TESTED_VENDOR}")
 ENDIF()
 
@@ -666,6 +666,10 @@ IF(BLAS_FOUND)
     # Set status of BLAS
     MESSAGE(STATUS "Looking for BLAS - found vendors: ${BLAS_VENDOR_WORKING}")
     MESSAGE(STATUS "Looking for BLAS - picked vendor: ${BLAS_VENDOR}")
+    IF("^${MAGMA_USE_CUDA}$" STREQUAL "^$")
+        SET(MAGMA_USE_CUDA "${BLAS_VENDOR}" CACHE STRING
+            "Enable/Disable CUDA dependency (ON/OFF/<not-defined>)" FORCE)
+     ENDIF()    
     SET(BLAS_USED_MODE "FIND")
     SET(HAVE_BLAS ON         )
 
@@ -676,14 +680,14 @@ IF(BLAS_FOUND)
     SET(BLAS_LIBRARY_PATH "${BLAS_${BLAS_VENDOR}_LIBRARY_PATH}")
 
     # Status of internal variables
-    IF(MORSE_DEBUG_CMAKE)
+    IF(MAGMA_DEBUG_CMAKE)
         MESSAGE(STATUS "  * debug:")
         MESSAGE(STATUS "  * debug: Looking for BLAS - picked vendor"                )
         MESSAGE(STATUS "  * debug:   - BLAS_LIBRARY_PATH     : ${BLAS_LIBRARY_PATH}")
         MESSAGE(STATUS "  * debug:   - BLAS_LIBRARIES        : ${BLAS_LIBRARIES}"   )
         MESSAGE(STATUS "  * debug:   - BLAS_LDFLAGS          : ${BLAS_LDFLAGS}"     )
         MESSAGE(STATUS "  * debug:")
-    ENDIF(MORSE_DEBUG_CMAKE)
+    ENDIF(MAGMA_DEBUG_CMAKE)
 
 ELSE(BLAS_FOUND)
     MESSAGE(STATUS "Looking for BLAS - not found")

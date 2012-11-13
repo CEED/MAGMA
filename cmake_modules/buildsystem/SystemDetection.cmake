@@ -2,8 +2,8 @@
 #
 #  @file CMakeLists.txt
 #
-#  @project MORSE
-#  MORSE is a software package provided by:
+#  @project MAGMA
+#  MAGMA is a software package provided by:
 #     Inria Bordeaux - Sud-Ouest,
 #     Univ. of Tennessee,
 #     Univ. of California Berkeley,
@@ -74,22 +74,22 @@ ENDIF()
 # ---------------------------------------------------
 IF(WIN32)
     IF(BUILD_SHARED_LIBS)
-        SET(MORSE_LIBRARY_EXTENSION "dll")
+        SET(MAGMA_LIBRARY_EXTENSION "dll")
     ELSE()
-        SET(MORSE_LIBRARY_EXTENSION "lib")
+        SET(MAGMA_LIBRARY_EXTENSION "lib")
     ENDIF()
 ENDIF(WIN32)
 IF(APPLE)
     IF(BUILD_SHARED_LIBS)
-        SET(MORSE_LIBRARY_EXTENSION "dylib")
+        SET(MAGMA_LIBRARY_EXTENSION "dylib")
     ELSE()
-        SET(MORSE_LIBRARY_EXTENSION "a")
+        SET(MAGMA_LIBRARY_EXTENSION "a")
     ENDIF()
 ELSE(APPLE)
     IF(BUILD_SHARED_LIBS)
-        SET(MORSE_LIBRARY_EXTENSION "so")
+        SET(MAGMA_LIBRARY_EXTENSION "so")
     ELSE()
-        SET(MORSE_LIBRARY_EXTENSION "a")
+        SET(MAGMA_LIBRARY_EXTENSION "a")
     ENDIF()
 ENDIF(APPLE)
 
@@ -248,7 +248,7 @@ ADD_FLAGS(CMAKE_C_FLAGS_RELWITHDEBINFO "${C_WFLAGS}")
 ########################################
 #                                      #
 #     Looking for others libraries     #
-#      stored in MORSE_EXTRA_LIBS      #
+#      stored in MAGMA_EXTRA_LIBS      #
 #       thanks to DEFINE_LIBRARY       #
 #                                      #
 ########################################
@@ -293,7 +293,7 @@ IF(Threads_FOUND)
     SET(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES};${CMAKE_THREAD_LIBS_INIT}")
     CHECK_FUNCTION_EXISTS(pthread_create HAVE_PTHREAD)
     IF(HAVE_PTHREAD)
-        LIST(APPEND MORSE_EXTRA_LIBS "${CMAKE_THREAD_LIBS_INIT}")
+        LIST(APPEND MAGMA_EXTRA_LIBS "${CMAKE_THREAD_LIBS_INIT}")
     ENDIF(HAVE_PTHREAD)
 ENDIF(Threads_FOUND)
 
@@ -312,7 +312,7 @@ ENDIF(NOT HAVE_TIMESPEC_TV_NSEC)
 
 CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_CLOCK_GETTIME)
 IF(HAVE_CLOCK_GETTIME)
-    LIST(APPEND MORSE_EXTRA_LIBS "rt")
+    LIST(APPEND MAGMA_EXTRA_LIBS "rt")
 ENDIF(HAVE_CLOCK_GETTIME)
 
 ########################################
