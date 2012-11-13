@@ -50,6 +50,10 @@ my @files2delete = qw(
     magmablas/zher2k_mgpu.cpp
     magmablas/zher2k_mgpu_spec.cpp
     
+    testing/testing_zhetrd_he2hb_mgpu.cpp
+    testing/testing_zhemm_mgpu.cpp
+    testing/testing_zher2k_mgpu.cpp
+    
     control/sizeptr
     include/Makefile
     src/zhetrd_bhe2trc.cpp
@@ -63,8 +67,7 @@ my @files2delete = qw(
     testing/testing_zgeqrf-v2.cpp
     testing/testing_zpotrf_mc.cpp
     testing/testing_zgetrf_mc.cpp
-    testing/testing_zswap.cpp
- 
+    
     sparse-iter
 );
 # Using qw() avoids need for "quotes", but comments aren't recognized inside qw()
