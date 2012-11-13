@@ -303,7 +303,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo,
           { 
               int im1_1 = i_1 - 1;
               int im1   = i-1;
-              int im1_n = i_n - 1;
+              int im1_n = i_n + 1;
               int im1w  = i - n + nb;
               /* Update A(1:i,i) */
               #if defined(PRECISION_z) || defined(PRECISION_c)
@@ -311,15 +311,14 @@ magma_zlatrd_mgpu(int num_gpus, char uplo,
               #endif
               blasf77_zgemv("No transpose", &im1_1, &i_n, &c_neg_one, A(0, i+1), &lda,
                             W(im1, iw+1), &ldw, &c_one, A(0, i-1), &ione);
-
               #if defined(PRECISION_z) || defined(PRECISION_c)
-                  lapackf77_zlacgv(&im1_n, W(i, iw+1), &ldw);
-                  lapackf77_zlacgv(&im1_n, A(i, i+1), &ldw);
+                  lapackf77_zlacgv(&im1_n, W(im1, iw+1), &ldw);
+                  lapackf77_zlacgv(&im1_n, A(im1, i +1), &lda);
               #endif
               blasf77_zgemv("No transpose", &im1_1, &i_n, &c_neg_one, W(0, iw+1), &ldw,
                             A(im1, i+1), &lda, &c_one, A(0, i-1), &ione);
               #if defined(PRECISION_z) || defined(PRECISION_c)
-                  lapackf77_zlacgv(&im1_n, A(i, i+1), &ldw);
+                  lapackf77_zlacgv(&im1_n, A(im1, i+1), &lda);
               #endif
           }
 
