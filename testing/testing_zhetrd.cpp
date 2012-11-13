@@ -27,23 +27,9 @@
 
 #define PRECISION_z
 
-
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhetrd
 */
-
-#if (GPUSHMEM >= 200)
-extern "C" magma_int_t
-magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n, 
-             cuDoubleComplex *a, magma_int_t lda, 
-             double *d, double *e, cuDoubleComplex *tau,
-             cuDoubleComplex *work, magma_int_t lwork, 
-             magma_int_t *info);
-
-#endif
-
-
-
 int main( int argc, char** argv)
 {
     TESTING_CUDA_INIT();
@@ -54,7 +40,6 @@ int main( int argc, char** argv)
     cuDoubleComplex *tau;
     double          *diag, *offdiag, *rwork;
     double           result[2] = {0., 0.};
-    int num_gpus = 1;
 
     /* Matrix size */
     magma_int_t N = 0, n2, lda, lwork;
@@ -69,9 +54,8 @@ int main( int argc, char** argv)
     const char *uplo = MagmaLowerStr;
 
     checkres  = getenv("MAGMA_TESTINGS_CHECK") != NULL;
-   
-
-    printf( "\nUsage: %s -N <matrix size> [-L|-U] -c -NGPU <number of GPUs>\n", argv[0] );
+    
+    printf( "\nUsage: %s -N <matrix size> -R <right hand sides> [-L|-U] -c\n", argv[0] );
     printf( "  -N can be repeated up to %d times\n", MAXTESTS );
     printf( "  -c or setting $MAGMA_TESTINGS_CHECK checks result.\n\n" );
     int ntest = 0;
@@ -92,9 +76,6 @@ int main( int argc, char** argv)
         else if ( strcmp("-c", argv[i]) == 0 ) {
             checkres = true;
         }
-        else if (strcmp("-NGPU",argv[i])==0) {
-            num_gpus = atoi(argv[++i]);
-        }
         else {
             printf( "invalid argument: %s\n", argv[i] );
             exit(1);
@@ -109,9 +90,6 @@ int main( int argc, char** argv)
     lda = N;
     n2  = lda * N;
     nb  = magma_get_zhetrd_nb(N);
-   
-
-    printf("nb=%d\n", nb);
     /* We suppose the magma nb is bigger than lapack nb */
     lwork = N*nb; 
 
@@ -155,16 +133,8 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         gpu_time = magma_wtime();
-        if(num_gpus == 1)
-              magma_zhetrd(uplo[0], N, h_R, lda, diag, offdiag, 
+        magma_zhetrd(uplo[0], N, h_R, lda, diag, offdiag, 
                      tau, h_work, lwork, &info);
-#if (GPUSHMEM >= 200)
-        else
-        {     
-              magma_zhetrd_mgpu(num_gpus, 1, uplo[0], N, h_R, lda, diag, offdiag, 
-                     tau, h_work, lwork, &info);
-        }
-#endif
         gpu_time = magma_wtime() - gpu_time;
         if ( info != 0 )
             printf("magma_zhetrd returned error %d\n", (int) info);
@@ -248,7 +218,4 @@ int main( int argc, char** argv)
     /* Shutdown */
     TESTING_CUDA_FINALIZE();
     return EXIT_SUCCESS;
-
 }
-
-
