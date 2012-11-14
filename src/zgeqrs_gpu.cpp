@@ -151,6 +151,10 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     ib   = n-i;
     rows = m-i;
 
+    // TODO: this assumes that, on exit from magma_zunmqr_gpu, hwork contains
+    // the last block of A and B (i.e., C in zunmqr). This should be fixed.
+    // Seems this data should already be on the GPU, so could switch to
+    // magma_ztrsm and drop the zsetmatrix.
     if ( nrhs == 1 ) {
         blasf77_ztrsv( MagmaUpperStr, MagmaNoTransStr, MagmaNonUnitStr, 
                        &ib, hwork,         &rows, 

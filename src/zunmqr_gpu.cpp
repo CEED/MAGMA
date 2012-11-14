@@ -90,7 +90,9 @@ magma_zunmqr_gpu(char side, char trans,
             The leading dimension of the array DC. LDDC >= max(1,M).
 
     HWORK   (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))
-            On exit, if INFO = 0, HWORK(1) returns the optimal LWORK.
+    
+            Currently, zgetrs_gpu assumes that on exit, hwork contains the last
+            block of A and C. This will change and *should not be relied on*!
 
     LWORK   (input) INTEGER
             The dimension of the array HWORK.
@@ -308,6 +310,9 @@ magma_zunmqr_gpu(char side, char trans,
     // TODO sync. For cases Q*C and C*Q^T, last call is magma_zlarfb_gpu,
     // which is async magma_gemm calls, so zunmqr can be unfinished.
 
-    hwork[0] = MAGMA_Z_MAKE( lwkopt, 0 );
+    // TODO: zgeqrs_gpu ASSUMES that hwork contains the last block of A and C.
+    // That needs to be fixed, but until then, don't modify hwork[0] here.
+    // In LAPACK: On exit, if INFO = 0, HWORK(1) returns the optimal LWORK.
+    //hwork[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     return *info;
 }   /* end of magma_zunmqr_gpu */
