@@ -49,7 +49,7 @@ int main( int argc, char** argv )
     magma_int_t iseed[4] = {0,0,0,1};
     
     printf( "Usage: %s -N m,n,k -c\n"
-            "    -N can be repeated %d times. m >= n >= k is required.\n"
+            "    -N can be repeated %d times. m > 0, n > 0, k > 0 is required.\n"
             "    If only m,n is given, then n=k. If only m is given, then m=n=k.\n"
             "    -c or setting $MAGMA_TESTINGS_CHECK runs LAPACK and checks result.\n\n",
             argv[0], MAXTESTS );
@@ -64,12 +64,12 @@ int main( int argc, char** argv )
         if ( strcmp("-N", argv[i]) == 0 && i+1 < argc ) {
             magma_assert( ntest < MAXTESTS, "error: -N repeated more than maximum %d tests\n", MAXTESTS );
             info = sscanf( argv[++i], "%d,%d,%d", &m, &n, &k );
-            if ( info == 3 && m >= n && n >= k && k > 0 ) {
+            if ( info == 3 && m > 0 && n > 0 && k > 0 ) {
                 msize[ ntest ] = m;
                 nsize[ ntest ] = n;
                 ksize[ ntest ] = k;
             }
-            else if ( info == 2 && m >= n && n > 0 ) {
+            else if ( info == 2 && m > 0 && n > 0 ) {
                 msize[ ntest ] = m;
                 nsize[ ntest ] = n;
                 ksize[ ntest ] = n;  // implicitly
@@ -80,7 +80,7 @@ int main( int argc, char** argv )
                 ksize[ ntest ] = m;  // implicitly
             }
             else {
-                printf( "error: -N %s is invalid; ensure m >= n >= k.\n", argv[i] );
+                printf( "error: -N %s is invalid; ensure m > 0, n > 0, k > 0.\n", argv[i] );
                 exit(1);
             }
             mmax = max( mmax, msize[ntest] );
@@ -138,8 +138,9 @@ int main( int argc, char** argv )
     TESTING_MALLOC( W, cuDoubleComplex, lwork_max );
     TESTING_MALLOC( tau, cuDoubleComplex, k   );
     
-    magma_int_t min_mn = min(m,n);
-    magma_int_t dt_size = ( 2*min_mn + ((n + 31)/32)*32 )*nb;
+    // min_pk for geqrf( p, k, ... ) where for left p=m, for right p=n
+    magma_int_t min_pk = min( max(m,n), k );
+    magma_int_t dt_size = ( 2*min_pk + ((k + 31)/32)*32 )*nb;
     cuDoubleComplex *dC, *dA, *dT;
     TESTING_DEVALLOC( dC, cuDoubleComplex, ldc*n );
     TESTING_DEVALLOC( dA, cuDoubleComplex, lda*k );
@@ -158,6 +159,17 @@ int main( int argc, char** argv )
             n = nsize[i];
             k = ksize[i];
             nb  = magma_get_zgeqrf_nb( m );
+
+            if ( *side[iside] == 'L' && m < k ) {
+                printf( "%5d %5d %5d  %-5s  %-9s   skipping because side=left and m < k\n",
+                        (int) m, (int) n, (int) k, side[iside], trans[itran] );
+                continue;
+            }
+            if ( *side[iside] == 'R' && n < k ) {
+                printf( "%5d %5d %5d  %-5s  %-9s   skipping because side=right and n < k\n",
+                        (int) m, (int) n, (int) k, side[iside], trans[itran] );
+                continue;
+            }
             
             gflops = FLOPS_ZUNMQR( m, n, k, *side[iside] ) / 1e9;
             
