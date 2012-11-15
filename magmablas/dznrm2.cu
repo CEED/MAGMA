@@ -11,7 +11,9 @@
 #include "common_magma.h"
 
 // 512 is maximum number of threads for CUDA capability 1.x
-#define BLOCK_SIZE 512
+#define BLOCK_SIZE  512
+#define BLOCK_SIZEx  32
+#define BLOCK_SIZEy  16
 
 #define PRECISION_z
 
@@ -42,6 +44,29 @@ __device__ void sum_reduce( /*int n,*/ int i, double* x )
 // end sum_reduce
 
 
+template< int n >
+__device__ void sum_reduce_2d( /*int n,*/ int i, int c, double x[][BLOCK_SIZEy+1] )
+{
+    __syncthreads();
+    if ( n > 1024 ) { if ( i < 1024 && i + 1024 < n ) { x[i][c] += x[i+1024][c]; }  __syncthreads(); }
+    if ( n >  512 ) { if ( i <  512 && i +  512 < n ) { x[i][c] += x[i+ 512][c]; }  __syncthreads(); }
+    if ( n >  256 ) { if ( i <  256 && i +  256 < n ) { x[i][c] += x[i+ 256][c]; }  __syncthreads(); }
+    if ( n >  128 ) { if ( i <  128 && i +  128 < n ) { x[i][c] += x[i+ 128][c]; }  __syncthreads(); }
+    if ( n >   64 ) { if ( i <   64 && i +   64 < n ) { x[i][c] += x[i+  64][c]; }  __syncthreads(); }
+    if ( n >   32 ) { if ( i <   32 && i +   32 < n ) { x[i][c] += x[i+  32][c]; }  __syncthreads(); }
+    // probably don't need __syncthreads for < 16 threads
+    // because of implicit warp level synchronization.
+    if ( n >   16 ) { if ( i <   16 && i +   16 < n ) { x[i][c] += x[i+  16][c]; }  __syncthreads(); }
+    if ( n >    8 ) { if ( i <    8 && i +    8 < n ) { x[i][c] += x[i+   8][c]; }  __syncthreads(); }
+    if ( n >    4 ) { if ( i <    4 && i +    4 < n ) { x[i][c] += x[i+   4][c]; }  __syncthreads(); }
+    if ( n >    2 ) { if ( i <    2 && i +    2 < n ) { x[i][c] += x[i+   2][c]; }  __syncthreads(); }
+    if ( n >    1 ) { if ( i <    1 && i +    1 < n ) { x[i][c] += x[i+   1][c]; }  __syncthreads(); }
+}
+// end sum_reduce
+
+
+//==============================================================================
+
 __global__ void
 magmablas_dznrm2_kernel( int m, cuDoubleComplex *da, int ldda, double *dxnorm )
 {
@@ -49,31 +74,88 @@ magmablas_dznrm2_kernel( int m, cuDoubleComplex *da, int ldda, double *dxnorm )
     cuDoubleComplex *dx = da + blockIdx.x * ldda;
 
     __shared__ double sum[ BLOCK_SIZE ];
-    double re;
+    double re, lsum;
 
     // get norm of dx
-    sum[i] = 0;
+    lsum = 0;
     for( int j = i; j < m; j += BLOCK_SIZE ) {
 
 #if (defined(PRECISION_s) || defined(PRECISION_d))
         re = dx[j];
-        sum[i] += re*re;
+        lsum += re*re;
 #else
         re = MAGMA_Z_REAL( dx[j] );
         double im = MAGMA_Z_IMAG( dx[j] );
-        sum[i] += re*re + im*im;
+        lsum += re*re + im*im;
 #endif
 
     }
+    sum[i] = lsum;
     sum_reduce< BLOCK_SIZE >( i, sum );
     
     if (i==0)
        dxnorm[blockIdx.x] = sqrt(sum[0]);
 }
 
+//==============================================================================
+
+__global__ void
+magmablas_dznrm2_smkernel( int m, int num, cuDoubleComplex *da, int ldda,
+                           double *dxnorm )
+{
+    const int i = threadIdx.x, c= threadIdx.y;
+    __shared__ double sum[ BLOCK_SIZEx ][ BLOCK_SIZEy + 1];
+    double re, lsum;
+
+    for( int k = c; k < num; k+= BLOCK_SIZEy) 
+    {
+        cuDoubleComplex *dx = da + k * ldda;
+
+        // get norm of dx
+        lsum = 0;
+        for( int j = i; j < m; j += BLOCK_SIZEx ) {
+
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+                re = dx[j];
+                lsum += re*re;
+#else
+                re = MAGMA_Z_REAL( dx[j] );
+                double im = MAGMA_Z_IMAG( dx[j] );
+                lsum += re*re + im*im;
+#endif
+
+        }
+        sum[i][c] = lsum;
+        sum_reduce_2d< BLOCK_SIZEx >( i, c, sum );
+
+        if (i==0)
+                dxnorm[k] = sqrt(sum[0][c]);
+        __syncthreads();
+    }
+}
+
+//==============================================================================
+/*
+   Compute the dznrm2 of da, da+ldda, ..., da +(num-1)*ldda where the vectors are
+   of size m. The resulting norms are written in the dxnorm array.
+   This routine uses only one SM (block).
+*/
+extern "C" void
+magmablas_dznrm2_sm(int m, int num, cuDoubleComplex *da, magma_int_t ldda,
+                    double *dxnorm)
+{
+    dim3  blocks( 1 );
+    dim3 threads( BLOCK_SIZEx, BLOCK_SIZEy );
+
+    magmablas_dznrm2_smkernel<<< blocks, threads >>>( m, num, da, ldda, dxnorm );
+}
+
+//==============================================================================
+
 /*
    Compute the dznrm2 of da, da+ldda, ..., da +(num-1)*ldda where the vectors are
    of size m. The resulting norms are written in the dxnorm array. 
+   The computation can be done using num blocks (default) or on one SM (commented).
 */
 extern "C" void
 magmablas_dznrm2(int m, int num, cuDoubleComplex *da, magma_int_t ldda, 
@@ -83,5 +165,11 @@ magmablas_dznrm2(int m, int num, cuDoubleComplex *da, magma_int_t ldda,
     dim3 threads( BLOCK_SIZE );
     
     magmablas_dznrm2_kernel<<< blocks, threads >>>( m, da, ldda, dxnorm );
+
+    // The following would do the computation on one SM
+    // magmablas_dznrm2_sm(m, num, da, ldda, dxnorm);
 }
+
+//==============================================================================
+
 
