@@ -23,10 +23,11 @@ VERSION 1.3  :  November  2012
   as examples on how to use MAGMA, as well as to benchmark the performance.
  
 * To TUNE MAGMA, you can modify the blocking factors for the algorithms of
-  interest in file 'src/get_nb.cpp'. The default values are tuned for 
-  general Tesla and Fermi GPUs. If you have a Fermi (C2050), you can also 
-  compare your performance to what we get, given in file 
-  'testing/results_fermi.txt', as an easy check for your installation.
+  interest in file 'control/get_nb_{tesla|fermi|kepler}.cpp'. The default 
+  values are tuned for general Tesla, Fermi, and Kepler  GPUs. If you have 
+  a Fermi (C2050), you can also compare your performance to what we get, 
+  given in file 'testing/results_fermi.txt', as an easy check for your 
+  installation.
 
 * To RUN EXPERIMENTAL MAGMA, go to directory 'exp' and type 'make'.  Then 
   type 'export NUM_MKL_THREADS=1'.  Next go to directory 'testing'.  
