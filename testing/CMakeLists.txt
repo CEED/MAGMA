@@ -35,8 +35,8 @@ SET(ZSRC
         testing_zgemv.cpp
         testing_zhemv.cpp
         testing_zsymv.cpp
-        testing_zhemm_mgpu.cpp
-        testing_zher2k_mgpu.cpp
+        #testing_zhemm_mgpu.cpp
+        #testing_zher2k_mgpu.cpp
         testing_auxiliary.cpp
         testing_zblas.cpp
         testing_zgeadd.cpp
@@ -104,7 +104,7 @@ SET(ZSRC
 
 # symmetric eigenvalues, 2-stage
         testing_zhetrd_he2hb.cpp
-        testing_zhetrd_he2hb_mgpu.cpp
+        #testing_zhetrd_he2hb_mgpu.cpp
         testing_zhegvdx_2stage.cpp
 
 # generalized symmetric eigenvalues

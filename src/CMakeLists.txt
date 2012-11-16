@@ -190,7 +190,6 @@ SET(ZSRC
         zunmtr.cpp
 
 ### symmetric eigenvalues, multi-GPU (not yet released)
-###ZSRC +=
 ###        zheevd_m.cpp
 ###        dlaex0_m.cpp
 ###        dlaex1_m.cpp
@@ -209,8 +208,8 @@ SET(ZSRC
         zbulge_kernel.cpp
         zbulge_kernel_v2.cpp
         zhetrd_he2hb.cpp
-        zhetrd_he2hb_mgpu.cpp
-        zhetrd_he2hb_mgpu_spec.cpp
+        #zhetrd_he2hb_mgpu.cpp
+        #zhetrd_he2hb_mgpu_spec.cpp
         zhetrd_hb2st.cpp
         zbulge_back.cpp
         zhetrd_bhe2trc_v3.cpp
