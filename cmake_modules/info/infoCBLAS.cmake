@@ -16,6 +16,10 @@
 ###
 
 MACRO(CBLAS_INFO_FIND)
+    # List of package for the check phase
+    # -----------------------------------
+    SET(CBLAS_CHECK_DEPS "BLAS")
+
     # Define parameters for FIND_MY_PACKAGE
     # -------------------------------------
     UNSET(CBLAS_name_fct_test)

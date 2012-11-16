@@ -26,8 +26,10 @@ MACRO(SET_PACKAGE _NAME)
     # Clean internal variables
     # ------------------------
     UNSET(${_NAMEVAR}_LDFLAGS)
-    UNSET(${_NAMEVAR}_LIBRARY_PATH)
+    UNSET(${_NAMEVAR}_LIBRARY)
     UNSET(${_NAMEVAR}_LIBRARIES)
+    UNSET(${_NAMEVAR}_LIST_LDFLAGS)
+    UNSET(${_NAMEVAR}_LIBRARY_PATH)
     UNSET(${_NAMEVAR}_INCLUDE_PATH)
 
     # Load infoPACKAGE
@@ -37,31 +39,53 @@ MACRO(SET_PACKAGE _NAME)
 
     # Check info<PACKAGE> to know if there is library to link
     # -------------------------------------------------------
-    # Check if <PACKAGE>_LIB was defined
+   # Check if <PACKAGE>_LIB was defined
     IF(DEFINED ${_NAMEVAR}_LIB)
+
         # Get dir and lib
         STRING(REPLACE " " ";" ${_NAMEVAR}_LIST_LIB "${${_NAMEVAR}_LIB}")
-        FOREACH(_param ${${_NAMEVAR}_LIST_LIB})
 
-            # Library directory processing
-            IF(_param MATCHES "^-L")
+        # Library directory processing
+        FOREACH(_param ${${_NAMEVAR}_LIST_LIB})
+            IF("${_param}" MATCHES "-L")
                 STRING(REGEX REPLACE "^-L(.*)$" "\\1" _dir "${_param}")
                 IF(IS_DIRECTORY ${_dir})
                     SET(${_NAMEVAR}_LDFLAGS "${${_NAMEVAR}_LDFLAGS} -L${_dir}")
-                    LIST(APPEND ${_NAMEVAR}_LIBRARY_PATH ${_dir})
+                    LIST(APPEND ${_NAMEVAR}_LIST_LDFLAGS "-L${_dir}")
+                    LIST(APPEND ${_NAMEVAR}_LIBRARY_PATH "${_dir}")
                     LINK_DIRECTORIES(${_dir})
                 ELSE()
                     MESSAGE(FATAL_ERROR "Setting ${_NAMEVAR} - ${_dir} is not a directory")
                 ENDIF()
+            ENDIF()
+        ENDFOREACH()
 
-            # Flag processing
-            ELSEIF(_param MATCHES "^-l")
+        # Flag processing
+        FOREACH(_param ${${_NAMEVAR}_LIST_LIB})
+            IF("${_param}" MATCHES "-l")
+                # Set flags
                 STRING(REGEX REPLACE "^-l(.*)$" "\\1" _lib "${_param}")
                 SET(${_NAMEVAR}_LDFLAGS "${${_NAMEVAR}_LDFLAGS} -l${_lib}")
-                LIST(APPEND ${_NAMEVAR}_LIBRARIES ${_lib})
+                LIST(APPEND ${_NAMEVAR}_LIBRARIES "${_lib}")
+                LIST(APPEND ${_NAMEVAR}_LIST_LDFLAGS "-l${_lib}")
+                # find library
+                UNSET(CMAKE_PREFIX_PATH)
+                LIST(APPEND CMAKE_PREFIX_PATH ${${_NAMEVAR}_LIBRARY_PATH})
+                FIND_LIBRARY(${_NAMEVAR}_${_lib}_lib
+                             NAME ${_lib}
+                             PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES})
+                IF(${_NAMEVAR}_${_lib}_lib)
+                    LIST(APPEND ${_NAMEVAR}_LIBRARY "${${_NAMEVAR}_${_lib}_lib}")
+                ELSE()
+                    MESSAGE(FATAL_ERROR "Setting ${_NAMEVAR} - ${_lib} is not a library")
+                ENDIF()
+                UNSET(CMAKE_PREFIX_PATH)
+            ENDIF()
+        ENDFOREACH()
 
-            # Include directory processing
-            ELSEIF(_param MATCHES "^-I")
+        # Include directory processing
+        FOREACH(_param ${${_NAMEVAR}_LIST_LIB})
+            IF("${_param}" MATCHES "-I")
                 STRING(REGEX REPLACE "^-I(.*)$" "\\1" _dir "${_param}")
                 IF(IS_DIRECTORY ${_dir})
                     LIST(APPEND ${_NAMEVAR}_INCLUDE_PATH ${_dir})
@@ -71,9 +95,6 @@ MACRO(SET_PACKAGE _NAME)
                 ENDIF()
             ENDIF()
         ENDFOREACH()
-
-        ELSE(DEFINED ${_NAMEVAR}_LIB)
-            MESSAGE(FATAL_ERROR "Setting ${_NAMEVAR} - ${_NAMEVAR}_LIB was not defined")
 
     ENDIF(DEFINED ${_NAMEVAR}_LIB)
 
@@ -88,20 +109,18 @@ MACRO(SET_PACKAGE _NAME)
             MESSAGE(FATAL_ERROR "Setting ${_NAMEVAR} - ${${_NAMEVAR}_INC} is not a directory")
         ENDIF()
 
-    ELSE(DEFINED ${_NAMEVAR}_INC)
-        MESSAGE(FATAL_ERROR "Setting ${_NAMEVAR} - ${_NAMEVAR}_INC was not defined")
-
     ENDIF(DEFINED ${_NAMEVAR}_INC)
 
     # Test library
     # ------------
     INCLUDE(checkPACKAGE)
+    SET(${_NAMEVAR}_FIND_DEPS "${${_NAMEVAR}_CHECK_DEPS}")
     CHECK_PACKAGE(${_NAMEVAR})
     IF(${_NAMEVAR}_ERROR_OCCURRED)
-        MESSAGE(FATAL_ERROR "Setting ${_NAMEVAR} - The value that you give is not working")
+        MESSAGE(FATAL_ERROR "Setting ${_NAMEVAR} - check failed")
 
     ELSE(${_NAMEVAR}_ERROR_OCCURRED)
-        MESSAGE(STATUS "Setting ${_NAMEVAR} - worked")
+        MESSAGE(STATUS "Setting ${_NAMEVAR} - check succeed")
         SET(HAVE_${_NAMEVAR} ON)
         SET(${_NAMEVAR}_SET  ON)
         SET(${_NAMEVAR}_USED_MODE "SET")

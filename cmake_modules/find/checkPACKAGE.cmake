@@ -106,7 +106,7 @@ MACRO(CHECK_PACKAGE _NAME)
 
                 # Add library
                 SET(${_NAMEVAR}_TEST_LIBS ${${_NAMEVAR}_LIBRARY})
-                FOREACH(_package ${_EXTRA_DEPENDENCIES};GFORTRAN;IFCORE)
+                FOREACH(_package ${_EXTRA_DEPENDENCIES};GFORTRAN;IFCORE;M)
                     IF(NOT "^${${_package}_LIBRARY}$" STREQUAL "^$")
                         LIST(APPEND ${_NAMEVAR}_TEST_LIBS "${${_package}_LIBRARY}")
                     ENDIF()
@@ -150,7 +150,7 @@ MACRO(CHECK_PACKAGE _NAME)
 
                 # Add library
                 SET(${_NAMEVAR}_TEST_LIBS ${${_NAMEVAR}_LIBRARY})
-                FOREACH(_package ${_EXTRA_DEPENDENCIES};GFORTRAN;IFCORE)
+                FOREACH(_package ${_EXTRA_DEPENDENCIES};GFORTRAN;IFCORE;M)
                     IF(NOT "^${${_package}_LIBRARY}$" STREQUAL "^$")
                         LIST(APPEND ${_NAMEVAR}_TEST_LIBS "${${_package}_LIBRARY}")
                     ENDIF()

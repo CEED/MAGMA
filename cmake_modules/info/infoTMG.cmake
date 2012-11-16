@@ -16,6 +16,10 @@
 ###
 
 MACRO(TMG_INFO_FIND)
+    # List of package for the check phase
+    # -----------------------------------
+    SET(TMG_CHECK_DEPS "LAPACK;BLAS")
+
     # Define parameters for FIND_MY_PACKAGE
     # -------------------------------------
     UNSET(TMG_name_fct_test)

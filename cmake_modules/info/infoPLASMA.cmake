@@ -16,6 +16,10 @@
 ###
 
 MACRO(PLASMA_INFO_FIND)
+    # List of package for the check phase
+    # -----------------------------------
+    SET(PLASMA_CHECK_DEPS "LAPACKE;LAPACK;CBLAS;BLAS;QUARK")
+
     # Define parameters for FIND_MY_PACKAGE
     # -------------------------------------
     SET(PLASMA_type_library        "C;Fortran"                          )

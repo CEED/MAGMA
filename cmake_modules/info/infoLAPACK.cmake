@@ -16,6 +16,10 @@
 ###
 
 MACRO(LAPACK_INFO_FIND)
+    # List of package for the check phase
+    # -----------------------------------
+    SET(LAPCK_CHECK_DEPS "BLAS")
+
     # Define parameters for FIND_MY_PACKAGE
     # -------------------------------------
     SET(LAPACK_type_library        "C;Fortran"                          )

@@ -16,6 +16,9 @@
 ###
 
 MACRO(BLAS_INFO_FIND)
+    # List of package for the check phase
+    # -----------------------------------
+    SET(BLAS_CHECK_DEPS "")
 
     # Define parameters for FIND_MY_PACKAGE
     # -------------------------------------
