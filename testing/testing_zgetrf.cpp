@@ -166,7 +166,7 @@ int main( int argc, char** argv)
 
     magma_int_t i, info, min_mn, nb;
 
-    int lapack   = getenv("MAGMA_RUN_LAPCAK")     != NULL;
+    int lapack   = getenv("MAGMA_RUN_LAPACK")     != NULL;
     int checkres = getenv("MAGMA_TESTINGS_CHECK") != NULL;
     
     // process command line arguments
