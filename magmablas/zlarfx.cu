@@ -51,7 +51,8 @@ void magma_zlarfx_kernel( int m, cuDoubleComplex *v, cuDoubleComplex *tau,
 {
     if ( !MAGMA_Z_EQUAL(*tau, MAGMA_Z_ZERO) ) {
         const int i = threadIdx.x;
-        cuDoubleComplex *dc = c + (blockIdx.x-it-1) * ldc;
+        //cuDoubleComplex *dc = c + (blockIdx.x-it-1) * ldc;
+        cuDoubleComplex *dc = c + (blockIdx.x) * ldc;
 
         __shared__ cuDoubleComplex sum[ BLOCK_SIZE ];
         cuDoubleComplex lsum;
