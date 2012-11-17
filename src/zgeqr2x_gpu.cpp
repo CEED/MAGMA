@@ -134,7 +134,8 @@ magma_zgeqr2x_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
         if (i < *n) {            
             /* Apply H(i)' to A(i:m,i+1:n) from the left */            
             magma_zlarfx_gpu(*m-i, *n-i-1, da_ref(i, i), dtau+i, 
-                             da_ref(i, i+1), *ldda, dwork+i+1,
+                             //da_ref(i, i+1), *ldda, dwork+i+1,
+                             da_ref(i, 0), *ldda, dwork+i+1,
                              dT, i );
         }
     }
