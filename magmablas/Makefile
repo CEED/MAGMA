@@ -26,7 +26,9 @@ ZSRC := \
 	zlange.cu		\
 	zlanhe.cu		\
 	zlarf.cu		\
+	zlarfx.cu               \
 	zlarfg-v2.cu		\
+        zlarfgx-v2.cu           \
 	zlascl.cu		\
 	zlaswp.cu		\
 	zlat2c.cu		\
