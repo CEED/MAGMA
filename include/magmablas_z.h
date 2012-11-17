@@ -256,6 +256,9 @@ void magmablas_zsymmetrize_tiles(
   /*
    * Level 1 BLAS
    */
+void magmablas_dznrm2(int m, int num, 
+    cuDoubleComplex *da, magma_int_t ldda, double *dxnorm);
+
 void magmablas_zswap(
     magma_int_t n,
     cuDoubleComplex *dA, magma_int_t ldda,
