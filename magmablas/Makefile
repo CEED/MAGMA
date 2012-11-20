@@ -21,6 +21,7 @@ ZSRC := \
 	zgeadd.cu		\
 	zhemv_fermi.cu		\
 	zlacpy.cu		\
+	zlacpy_batched.cu	\
 	zlag2c.cu		\
 	clag2z.cu		\
 	zlange.cu		\
