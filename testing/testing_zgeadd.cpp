@@ -6,7 +6,6 @@
  *     November 2011
  *
  * @precisions normal z -> c d s
- *
  * @author Mark Gates
  **/
 // includes, system
@@ -98,6 +97,12 @@ int main( int argc, char** argv)
     TESTING_HOSTALLOC( h_B, cuDoubleComplex, lda *N );
     TESTING_DEVALLOC(  d_A, cuDoubleComplex, ldda*N );
     TESTING_DEVALLOC(  d_B, cuDoubleComplex, ldda*N );
+    
+    /* Check parameters. magma_xerbla calls lapack's xerbla to print out error. */
+    //magmablas_zgeadd( -1,  N, alpha, d_A, ldda, d_B, ldda );
+    //magmablas_zgeadd(  M, -1, alpha, d_A, ldda, d_B, ldda );
+    //magmablas_zgeadd(  M,  N, alpha, d_A, M-1,  d_B, ldda );
+    //magmablas_zgeadd(  M,  N, alpha, d_A, ldda, d_B, N-1  );
 
     printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |Bl-Bm|/|Bl|\n");
     printf("=========================================================================\n");
@@ -118,9 +123,9 @@ int main( int argc, char** argv)
         magma_zsetmatrix( M, N, h_A, lda, d_A, ldda );
         magma_zsetmatrix( M, N, h_B, lda, d_B, ldda );
         
-        gpu_time = magma_wtime();
+        gpu_time = magma_sync_wtime( NULL );
         magmablas_zgeadd( M, N, alpha, d_A, ldda, d_B, ldda );
-        gpu_time = magma_wtime() - gpu_time;
+        gpu_time = magma_sync_wtime( NULL ) - gpu_time;
         gpu_perf = gflops / gpu_time;
 
         /* =====================================================================

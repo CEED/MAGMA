@@ -13,12 +13,13 @@ INC += -I$(MAGMA_DIR)/control
 
 ZHDR  = commonblas_z.h
 
-# mostly alphabetic order
+# alphabetic order by base name (ignoring precision)
 ZSRC := \
 	zauxiliary.cu		\
 	zcaxpycp.cu		\
 	zclaswp.cu		\
 	zgeadd.cu		\
+	zgeadd_batched.cu	\
 	zhemv_fermi.cu		\
 	zlacpy.cu		\
 	zlacpy_batched.cu	\
@@ -27,12 +28,13 @@ ZSRC := \
 	zlange.cu		\
 	zlanhe.cu		\
 	zlarf.cu		\
-	zlarfx.cu               \
+	zlarfx.cu		\
 	zlarfg-v2.cu		\
-        zlarfgx-v2.cu           \
+	zlarfgx-v2.cu		\
 	zlascl.cu		\
 	zlaswp.cu		\
 	zlat2c.cu		\
+	dznrm2.cu		\
 	zswap.cu		\
 	zswapblk.cu		\
 	zswapdblk.cu		\
@@ -48,7 +50,6 @@ ZSRC := \
 	zsetmatrix_transpose.cu	\
 	dtrsm.cu		\
 	strsm.cu		\
-	dznrm2.cu		\
 	dtrsm_work.cu		\
 	strsm_work.cu		\
 

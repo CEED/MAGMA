@@ -20,6 +20,7 @@ ZSRC += \
 	testing_auxiliary.cpp	\
 	testing_zblas.cpp	\
 	testing_zgeadd.cpp	\
+	testing_zgeadd_batched.cpp	\
 	testing_zlacpy.cpp	\
 	testing_zlacpy_batched.cpp	\
 	testing_zsymmetrize.cpp	\

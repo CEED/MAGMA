@@ -26,7 +26,7 @@
 
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing zlacpy
+   -- Testing zgeadd
 */
 #define PRECISION_z
 
@@ -39,18 +39,23 @@ int main( int argc, char** argv)
     
     cuDoubleComplex *hA, *hB, *hR, *dA, *dB;
     cuDoubleComplex **hAarray, **hBarray, **dAarray, **dBarray;
-
+    cuDoubleComplex alpha = MAGMA_Z_MAKE( 3.1415, 2.718 );
+    cuDoubleComplex Rij;
+    
     //magma_int_t ione     = 1;
     //magma_int_t ISEED[4] = {0, 0, 0, 1};
     
     magma_int_t offsets[] = { 64, 256 };
-    magma_int_t size[] = { 0, 1, 32, 63, 64, 65, 255, 256 };
+    magma_int_t size[]    = { 0, 1, 32, 63, 64, 65, 255, 256 };
     int ntest   = sizeof(size)    / sizeof(magma_int_t);
     int noffset = sizeof(offsets) / sizeof(magma_int_t);
     
     magma_int_t count = 3;
     magma_int_t n   = 256*3;  // max offset * count
     magma_int_t lda = n;
+    
+    double tol = 2*lapackf77_slamch( "E" );
+    double diff;
     
     TESTING_MALLOC   ( hA, cuDoubleComplex, lda*n );
     TESTING_MALLOC   ( hB, cuDoubleComplex, lda*n );
@@ -73,12 +78,12 @@ int main( int argc, char** argv)
     }
     
     /* Check parameters. magma_xerbla calls lapack's xerbla to print out error. */
-    //magmablas_zlacpy_batched( 'F', -1,  n, dAarray, lda, dBarray, lda, count );
-    //magmablas_zlacpy_batched( 'F',  n, -1, dAarray, lda, dBarray, lda, count );
-    //magmablas_zlacpy_batched( 'F',  n,  n, dAarray, n-1, dBarray, lda, count );
-    //magmablas_zlacpy_batched( 'F',  n,  n, dAarray, lda, dBarray, n-1, count );
-    //magmablas_zlacpy_batched( 'F',  n,  n, dAarray, lda, dBarray, lda, -1    );
-                                           
+    //magmablas_zgeadd_batched( -1,  n, alpha, dAarray, lda, dBarray, lda, count );
+    //magmablas_zgeadd_batched(  n, -1, alpha, dAarray, lda, dBarray, lda, count );
+    //magmablas_zgeadd_batched(  n,  n, alpha, dAarray, n-1, dBarray, lda, count );
+    //magmablas_zgeadd_batched(  n,  n, alpha, dAarray, lda, dBarray, n-1, count );
+    //magmablas_zgeadd_batched(  n,  n, alpha, dAarray, lda, dBarray, lda, -1    );
+    
     printf( "\nNote: ranges use Python notation, i.e., A[i:j] is A[ i, i+1, ..., j-1 ], excluding A[j].\n\n" );
     for( int ii = 0; ii < ntest; ++ii ) {
     for( int jj = 0; jj < ntest; ++jj ) {
@@ -105,15 +110,16 @@ int main( int argc, char** argv)
         magma_setvector( count, sizeof(cuDoubleComplex*), hAarray, 1, dAarray, 1 );
         magma_setvector( count, sizeof(cuDoubleComplex*), hBarray, 1, dBarray, 1 );
         
-        magmablas_zlacpy_batched( 'F', mb, nb, dAarray, lda, dBarray, lda, count );
+        magmablas_zgeadd_batched( mb, nb, alpha, dAarray, lda, dBarray, lda, count );
         
         /* ====================================================================
            Check result
+           LAPACK doesn't implement zgeadd, sadly.
            =================================================================== */
         int bad_copies = 0;
         int overwrites = 0;
         magma_zgetmatrix( n, n, dB, lda, hR, lda );
-                
+        
         for( int j = 0; j < n; ++j ) {
             for( int i = 0; i < n; ++i ) {
                 if (    (i / offset) < count
@@ -121,12 +127,14 @@ int main( int argc, char** argv)
                      && (i % offset) < mb
                      && (j % offset) < nb )
                 {
-                    // Rij = Aij (copied)
-                    if ( ! MAGMA_Z_EQUAL( hR[i + j*lda], hA[i + j*lda] )) {
+                    // Rij = alpha*Aij + Bij
+                    Rij = MAGMA_Z_ADD( MAGMA_Z_MUL( alpha, hA[i + j*lda] ), hB[i + j*lda] );
+                    diff = MAGMA_Z_ABS( MAGMA_Z_SUB( hR[i + j*lda], Rij ));
+                    if ( diff > tol*MAGMA_Z_ABS( Rij ) ) {
                         bad_copies += 1;
-                        printf( "Copy failed at B[%2d,%2d], expected %9.4f, got %9.4f\n",
-                                i, j, MAGMA_Z_REAL( hA[i + j*lda] ),
-                                      MAGMA_Z_REAL( hR[i + j*lda] ));
+                        printf( "Add failed at B[%2d,%2d], expected %9.4f, got %9.4f, diff %.2e, tol %.2e\n",
+                                i, j, MAGMA_Z_REAL( Rij ),
+                                      MAGMA_Z_REAL( hR[i + j*lda] ), diff, tol*MAGMA_Z_ABS( Rij ) );
                     }
                 }
                 else {
@@ -140,7 +148,7 @@ int main( int argc, char** argv)
                 }
             }
         }
-        printf( "B(i*%-3d:i*%-3d + %3d, i*%-3d:i*%-3d + %3d) = A(...) for i=0,...,%d ",
+        printf( "B(i*%-3d:i*%-3d + %3d, i*%-3d:i*%-3d + %3d) = alpha*A(...) + B(...), for i=0,...,%d ",
                 offset, offset, mb,
                 offset, offset, nb, count-1 );
         if ( bad_copies > 0 || overwrites > 0 ) {

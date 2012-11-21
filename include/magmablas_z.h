@@ -193,11 +193,24 @@ void magmablas_zgeadd(
     const cuDoubleComplex *dA, magma_int_t ldda,
     cuDoubleComplex       *dB, magma_int_t lddb );
 
+void magmablas_zgeadd_batched(
+    magma_int_t m, magma_int_t n,
+    cuDoubleComplex alpha,
+    const cuDoubleComplex * const *dAarray, magma_int_t ldda,
+    cuDoubleComplex              **dBarray, magma_int_t lddb,
+    magma_int_t batchCount );
+
 void magmablas_zlacpy(
     char uplo,
     magma_int_t m, magma_int_t n,
     const cuDoubleComplex *dA, magma_int_t ldda,
     cuDoubleComplex       *dB, magma_int_t lddb );
+
+void magmablas_zlacpy_batched(
+    char uplo, magma_int_t m, magma_int_t n,
+    const cuDoubleComplex * const *dAarray, magma_int_t ldda,
+    cuDoubleComplex              **dBarray, magma_int_t lddb,
+    magma_int_t batchCount );
 
 double magmablas_zlange(
     char norm,

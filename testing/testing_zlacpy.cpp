@@ -6,6 +6,7 @@
        November 2011
 
        @precisions normal z -> c d s
+       @author Mark Gates
 */
 
 // includes, system
@@ -35,20 +36,19 @@ int main( int argc, char** argv)
     cuDoubleComplex c_zero = MAGMA_Z_ZERO;
     cuDoubleComplex c_one  = MAGMA_Z_ONE;
     
-    magma_timestr_t  start, end;
     cuDoubleComplex *hA, *hB, *hR, *dA, *dB;
-    double           gpu_time, gpu_perf;
+    real_Double_t    gpu_time, gpu_perf;
 
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0, 0, 0, 1};
     
-    // groups of tests are:
-    // whole matrix, sub-matrix, around k*64 rows, around k*64 cols,
-    // zero rows, one row, zero cols, one col
-    magma_int_t TESTS_I1[] = {     0,  100,     63,   64,   64,   64,   65,     10,   10,   10,   10,   10,      4,   4,   4,      4,   4,   4,     64,  64,  64,     64,  64,  64 };
-    magma_int_t TESTS_I2[] = {  1000,  500,    511,  511,  512,  513,  513,    900,  900,  900,  900,  900,      4,   4,   4,      5,   5,   5,    127, 128, 129,    255, 256, 257 };
-    magma_int_t TESTS_J1[] = {     0,   50,     10,   10,   10,   10,   10,     63,   64,   64,   64,   65,     64,  64,  64,     64,  64,  64,      4,   4,   4,      4,   4,   4 };
-    magma_int_t TESTS_J2[] = {  1000,  400,    900,  900,  900,  900,  900,    511,  511,  512,  513,  513,    127, 128, 129,    255, 256, 257,      4,   4,   4,      5,   5,   5 };
+    // each test copies A[ i1:i2, j1:j2 ] to B[ i1:i2, j1:j2 ]
+    //                          whole    sub
+    // tests are:              matrix  matrix    <==== around k*64 rows ===>     <==== around k*64 cols ===>     < zero rows >     <= one row =>     < zero cols >     <= one col =>
+    magma_int_t TESTS_I1[] = {     0,    100,     63,   64,   64,   64,   65,     10,   10,   10,   10,   10,      4,   4,   4,      4,   4,   4,     64,  64,  64,     64,  64,  64 };
+    magma_int_t TESTS_I2[] = {  1000,    500,    511,  511,  512,  513,  513,    900,  900,  900,  900,  900,      4,   4,   4,      5,   5,   5,    127, 128, 129,    255, 256, 257 };
+    magma_int_t TESTS_J1[] = {     0,     50,     10,   10,   10,   10,   10,     63,   64,   64,   64,   65,     64,  64,  64,     64,  64,  64,      4,   4,   4,      4,   4,   4 };
+    magma_int_t TESTS_J2[] = {  1000,    400,    900,  900,  900,  900,  900,    511,  511,  512,  513,  513,    127, 128, 129,    255, 256, 257,      4,   4,   4,      5,   5,   5 };
     int ntest = sizeof(TESTS_J2) / sizeof(magma_int_t);
     
     magma_int_t n   = 1000;
@@ -69,8 +69,13 @@ int main( int argc, char** argv)
         }
     }
     
-    printf( "\nNote: ranges use Python notation,\n"
-            "i.e., A[i:j] is A[ i, i+1, ..., j-1 ], excluding A[j].\n\n" );
+    /* Check parameters. magma_xerbla calls lapack's xerbla to print out error. */
+    //magmablas_zlacpy( 'F', -1,  n, dA, lda, dB, lda );
+    //magmablas_zlacpy( 'F',  n, -1, dA, lda, dB, lda );
+    //magmablas_zlacpy( 'F',  n,  n, dA, n-1, dB, lda );
+    //magmablas_zlacpy( 'F',  n,  n, dA, lda, dB, n-1 );
+    
+    printf( "\nNote: ranges use Python notation, i.e., A[i:j] is A[ i, i+1, ..., j-1 ], excluding A[j].\n\n" );
     for( int t = 0; t < ntest; ++t ) {
         magma_zsetmatrix( n, n, hA, lda, dA, lda );
         magma_zsetmatrix( n, n, hB, lda, dB, lda );
@@ -94,7 +99,7 @@ int main( int argc, char** argv)
                 if ( i1 <= i && i < i2 && j1 <= j && j < j2 ) {
                     if ( ! MAGMA_Z_EQUAL( hR[i + j*lda], hA[i + j*lda] )) {
                         bad_copies += 1;
-                        printf( "Copy failed at B[%d,%d], expected %.4f, got %.4f\n",
+                        printf( "Copy failed at B[%d,%d], expected %9.4f, got %9.4f\n",
                                 i, j, MAGMA_Z_REAL( hA[i + j*lda] ),
                                       MAGMA_Z_REAL( hR[i + j*lda] ));
                     }
@@ -102,8 +107,8 @@ int main( int argc, char** argv)
                 else {
                     if ( ! MAGMA_Z_EQUAL( hR[i + j*lda], hB[i + j*lda] )) {
                         overwrites += 1;
-                        printf( "Overwrote at B[%d,%d], expected %.4f, got %.4f\n",
-                                i, j, MAGMA_Z_REAL( hA[i + j*lda] ),
+                        printf( "Overwrote at B[%d,%d], expected %9.4f, got %9.4f\n",
+                                i, j, MAGMA_Z_REAL( hB[i + j*lda] ),
                                       MAGMA_Z_REAL( hR[i + j*lda] ));
                     }
                 }
@@ -152,16 +157,17 @@ int main( int argc, char** argv)
         magma_zsetmatrix( n, n, hA, lda, dA, lda );
         magmablas_zlaset( 'F', n, n, /*c_zero,*/ dB, lda );
         
-        start = get_current_time();
+        gpu_time = magma_sync_wtime( NULL );
         magmablas_zlacpy( 'F', n, n, dA, lda, dB, lda );
-        end = get_current_time();
+        gpu_time = magma_sync_wtime( NULL ) - gpu_time;
+        gpu_perf = n*n*sizeof(cuDoubleComplex) / 1e6 / gpu_time;
         
         // verify copy
         magma_zgetmatrix( n, n, dB, lda, hB, lda );
         for( int j = 0; j < n; ++j ) {
             for( int i = 0; i < n; ++i ) {
                 if ( ! MAGMA_Z_EQUAL( hA[i + j*lda], hB[i + j*lda] )) {
-                    printf( "Copy failed at B[%d,%d], expected %.4f, got %.4f\n",
+                    printf( "Copy failed at B[%d,%d], expected %9.4f, got %9.4f\n",
                             i, j, MAGMA_Z_REAL( hA[i + j*lda] ),
                                   MAGMA_Z_REAL( hB[i + j*lda] ));
                     exit(1);
@@ -169,8 +175,6 @@ int main( int argc, char** argv)
             }
         }
         
-        gpu_time = GetTimerValue( start, end ) * 1e-3;
-        gpu_perf = n*n*sizeof(cuDoubleComplex) / 1024. / 1024. / gpu_time;
         printf( "%5d    %6.2f (%8.6f)\n", (int) n, gpu_perf, gpu_time );
         
         TESTING_FREE   ( hA );
