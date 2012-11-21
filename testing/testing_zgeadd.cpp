@@ -48,7 +48,7 @@ int main( int argc, char** argv)
     magma_int_t ISEED[4] = {0,0,0,1};
 
     // process command line arguments
-    printf( "\nUsage: %s -N <m,n> -c -c2 -l\n"
+    printf( "\nUsage: %s -N <m,n>\n"
             "  -N  can be repeated up to %d times. If only m is given, then m=n.\n\n",
             argv[0], MAXTESTS );
     
