@@ -411,9 +411,11 @@ return;
                     }
 
                 } // ifmyblk>0
-            } // for idev 1:myngpu
-            cudaSetDevice( fstdevcpy );
-            cudaEventRecord(redevents[fstdevcpy][0], streams[fstdevcpy][0]);
+            } // end for idev 1:myngpu
+            if(fstdevcpy !=-1){
+                cudaSetDevice( fstdevcpy );
+                cudaEventRecord(redevents[fstdevcpy][0], streams[fstdevcpy][0]);
+            }
             if(nbcmplxactive>1){
                 fstdevcpy = gnode[cmplxid][MagmaMaxGPUs+1];
                 if(fstdevcpy !=-1){
