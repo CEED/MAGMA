@@ -152,6 +152,55 @@ magmablas_dznrm2_sm(int m, int num, cuDoubleComplex *da, magma_int_t ldda,
 
 //==============================================================================
 
+__device__ void dsum_reduce( int n, int i, double* x )
+{
+    __syncthreads();
+    if ( n > 1024 ) { if ( i < 1024 && i + 1024 < n ) { x[i] += x[i+1024]; }  __syncthreads(); }
+    if ( n >  512 ) { if ( i <  512 && i +  512 < n ) { x[i] += x[i+ 512]; }  __syncthreads(); }
+    if ( n >  256 ) { if ( i <  256 && i +  256 < n ) { x[i] += x[i+ 256]; }  __syncthreads(); }
+    if ( n >  128 ) { if ( i <  128 && i +  128 < n ) { x[i] += x[i+ 128]; }  __syncthreads(); }
+    if ( n >   64 ) { if ( i <   64 && i +   64 < n ) { x[i] += x[i+  64]; }  __syncthreads(); }
+    if ( n >   32 ) { if ( i <   32 && i +   32 < n ) { x[i] += x[i+  32]; }  __syncthreads(); }
+    // probably don't need __syncthreads for < 16 threads
+    // because of implicit warp level synchronization.
+    if ( n >   16 ) { if ( i <   16 && i +   16 < n ) { x[i] += x[i+  16]; }  __syncthreads(); }
+    if ( n >    8 ) { if ( i <    8 && i +    8 < n ) { x[i] += x[i+   8]; }  __syncthreads(); }
+    if ( n >    4 ) { if ( i <    4 && i +    4 < n ) { x[i] += x[i+   4]; }  __syncthreads(); }
+    if ( n >    2 ) { if ( i <    2 && i +    2 < n ) { x[i] += x[i+   2]; }  __syncthreads(); }
+    if ( n >    1 ) { if ( i <    1 && i +    1 < n ) { x[i] += x[i+   1]; }  __syncthreads(); }
+}
+// end sum_reduce
+
+__global__ void
+magma_dznrm2_adjust_kernel(double *xnorm, cuDoubleComplex *c)
+{
+   const int i = threadIdx.x;
+
+   __shared__ double sum[ BLOCK_SIZE ];
+   double temp;
+
+   temp = MAGMA_Z_ABS( c[i] ) / xnorm[0];
+   sum[i] = -temp * temp;
+   dsum_reduce( blockDim.x, i, sum );
+
+   __syncthreads();
+   if (i==0)
+     xnorm[0] = xnorm[0] * sqrt(1+sum[0]);
+}
+
+
+/*
+    Adjust the norm of c to give the norm of c[k+1:], assumin that
+    c was changed with orthogonal transformations.
+*/
+extern "C" void
+magmablas_dznrm2_adjust(int k, double *xnorm, cuDoubleComplex *c)
+{
+   magma_dznrm2_adjust_kernel<<< 1, k >>> (xnorm, c);
+}
+
+//==============================================================================
+
 /*
    Compute the dznrm2 of da, da+ldda, ..., da +(num-1)*ldda where the vectors are
    of size m. The resulting norms are written in the dxnorm array. 
