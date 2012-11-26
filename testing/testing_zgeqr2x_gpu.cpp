@@ -206,9 +206,9 @@ int main( int argc, char** argv)
                     h_R[row + col*M] = h_T[row + col*N];
             }
             
-            error = lapackf77_zlange("f", &M, &N, h_A, &lda, work);
+            error = lapackf77_zlange("M", &M, &N, h_A, &lda, work);
             blasf77_zaxpy(&n2, &c_neg_one, h_A, &ione, h_R, &ione);
-            error = lapackf77_zlange("f", &M, &N, h_R, &lda, work) / error;
+            error = lapackf77_zlange("M", &M, &N, h_R, &lda, work) / error;
 
             // Check if T is the same
             double terr = 0.;
