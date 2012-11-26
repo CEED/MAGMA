@@ -30,6 +30,18 @@ magma_zgeqr2x_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
                   cuDoubleComplex *dT, cuDoubleComplex *ddA,
                   double *dwork, magma_int_t *info);
 
+extern "C" magma_int_t
+magma_zgeqr2x2_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
+                  magma_int_t *ldda, cuDoubleComplex *dtau,
+                  cuDoubleComplex *dT, cuDoubleComplex *ddA,
+                  double *dwork, magma_int_t *info);
+
+extern "C" magma_int_t
+magma_zgeqr2x3_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
+                  magma_int_t *ldda, cuDoubleComplex *dtau,
+                  cuDoubleComplex *dT, cuDoubleComplex *ddA,
+                  double *dwork, magma_int_t *info);
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeqrf
 */
@@ -53,12 +65,12 @@ int main( int argc, char** argv)
     magma_int_t i, info, min_mn;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    magma_int_t checkres;
+    magma_int_t checkres, version = 3;
 
     checkres = getenv("MAGMA_TESTINGS_CHECK") != NULL;
 
     // process command line arguments
-    printf( "\nUsage: %s -N <m,n> -c\n", argv[0] );
+    printf( "\nUsage: %s -N <m,n> -c -v <version 1..3>\n", argv[0] );
     printf( "  -N can be repeated up to %d times. If only m is given, then m=n.\n", MAXTESTS );
     printf( "  -c or setting $MAGMA_TESTINGS_CHECK runs LAPACK and checks result.\n\n" );
     int ntest = 0;
@@ -90,6 +102,9 @@ int main( int argc, char** argv)
         else if ( strcmp("-c", argv[i]) == 0 ) {
             checkres = true;
         }
+        else if ( strcmp("-v", argv[i]) == 0 ) {
+            sscanf( argv[++i], "%d", &version );
+        }
         else {
             printf( "invalid argument: %s\n", argv[i] );
             exit(1);
@@ -116,7 +131,8 @@ int main( int argc, char** argv)
     TESTING_DEVALLOC(  d_T, cuDoubleComplex,    N*N );
     TESTING_DEVALLOC(  ddA, cuDoubleComplex,    N*N );
     TESTING_DEVALLOC( dtau, cuDoubleComplex, min_mn );
-    TESTING_DEVALLOC(dwork, double, min_mn );
+
+    TESTING_DEVALLOC(dwork, double, max(5*min_mn, (32*2+2)*min_mn) );
 
     cudaMemset(ddA, 0, N*N*sizeof(cuDoubleComplex));
     cudaMemset(d_T, 0, N*N*sizeof(cuDoubleComplex));
@@ -144,16 +160,20 @@ int main( int argc, char** argv)
         lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
         magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
 
-        magma_zgeqr2x_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, dwork, &info);
-        magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
-
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
 
         cudaDeviceSynchronize();
         gpu_time = magma_wtime();
-        magma_zgeqr2x_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, dwork, &info);
+
+        if (version == 1)
+            magma_zgeqr2x_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, dwork, &info);
+        else if (version == 2)
+            magma_zgeqr2x2_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, dwork, &info);
+        else 
+            magma_zgeqr2x3_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, dwork, &info);
+
         cudaDeviceSynchronize();
         gpu_time = magma_wtime() - gpu_time;
         gpu_perf = gflops / gpu_time;
@@ -206,7 +226,7 @@ int main( int argc, char** argv)
         }
         else {
             printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)     ---  \n",
-                   (int) M, (int) N, gpu_perf, gpu_time);
+                   (int) M, (int) N, gpu_perf, 1000.*gpu_time);
         }
     }
     
