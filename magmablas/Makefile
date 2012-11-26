@@ -20,6 +20,7 @@ ZSRC := \
 	zclaswp.cu		\
 	zgeadd.cu		\
 	zgeadd_batched.cu	\
+	zgemm_reduce.cu         \
 	zhemv_fermi.cu		\
 	zlacpy.cu		\
 	zlacpy_batched.cu	\
@@ -28,7 +29,8 @@ ZSRC := \
 	zlange.cu		\
 	zlanhe.cu		\
 	zlarf.cu		\
-	zlarfx.cu		\
+	zlarfbx.cu              \
+	zlarfx.cu               \
 	zlarfg-v2.cu		\
 	zlarfgx-v2.cu		\
 	zlascl.cu		\
