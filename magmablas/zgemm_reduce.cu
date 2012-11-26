@@ -12,9 +12,9 @@
 
 // 512 is maximum number of threads for CUDA capability 1.x
 #if (GPUSHMEM < 200)
-   #define BLOCK_SIZE 512
+   #define NUM_THREADS 512
 #else
-   #define BLOCK_SIZE 768
+   #define NUM_THREADS 1024
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -22,7 +22,7 @@
 #define BLK_M 8
 #define BLK_N 8
 
-#define BLK_K (512 / (BLK_M * BLK_N))
+#define BLK_K (NUM_THREADS / (BLK_M * BLK_N))
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -85,7 +85,11 @@ void magmablas_zgemm_reduce_kernel(magma_int_t k, cuDoubleComplex alpha,
         /*  C := C - v * w  */
         __syncthreads();
         if (threadIdx.x == 0)
-           dC[threadIdx.y + threadIdx.z*ldc] = sum[threadIdx.y][threadIdx.z][0];
+           if (MAGMA_Z_EQUAL(beta, MAGMA_Z_ZERO))
+              dC[threadIdx.y + threadIdx.z*ldc] = alpha*sum[threadIdx.y][threadIdx.z][0];
+           else
+              dC[threadIdx.y + threadIdx.z*ldc] = beta* dC[threadIdx.y + threadIdx.z*ldc] + 
+                                                  alpha*sum[threadIdx.y][threadIdx.z][0];
 }
 
 //==============================================================================
