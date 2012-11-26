@@ -11,10 +11,6 @@
 #include "common_magma.h"
 
 extern "C" void
-magmablas_dznrm2(int m, int num, cuDoubleComplex *da, magma_int_t ldda,
-                 double *dxnorm);
-
-extern "C" void
 magma_zlarfg_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
                  cuDoubleComplex *dtau, double *dxnorm);
 
