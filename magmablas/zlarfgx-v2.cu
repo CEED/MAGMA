@@ -11,9 +11,22 @@
 #include "common_magma.h"
 
 // 512 is maximum number of threads for CUDA capability 1.x
-#define BLOCK_SIZE 512
+#if (GPUSHMEM < 200)
+   #define BLOCK_SIZE 512
+#else
+   #define BLOCK_SIZE 768
+#endif
 
 #define PRECISION_z
+
+__global__ void magma_zgemv_kernel3(int m, cuDoubleComplex *V, int ldv, 
+                                    cuDoubleComplex *c, cuDoubleComplex *dwork,
+                                    cuDoubleComplex *tau);
+__global__ void magma_ztrmv_kernel(const cuDoubleComplex *T, int ldt, cuDoubleComplex *v);
+__global__ void magma_ztrmv_kernel2(const cuDoubleComplex *T, int ldt, 
+                                    cuDoubleComplex *v, cuDoubleComplex *y, cuDoubleComplex *tau);
+
+//==============================================================================
 
 __global__
 void magma_zlarfgx_gpu_kernel( int n, cuDoubleComplex* dx0, cuDoubleComplex* dx, 
@@ -84,6 +97,8 @@ void magma_zlarfgx_gpu_kernel( int n, cuDoubleComplex* dx0, cuDoubleComplex* dx,
     } 
 }
 
+//==============================================================================
+
 /*
    Generates Householder elementary reflector H = I - tau v v^T to reduce
      H [ dx0 ] = [ beta ]
@@ -105,4 +120,41 @@ magma_zlarfgx_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
     dim3 threads( BLOCK_SIZE );
  
     magma_zlarfgx_gpu_kernel<<< blocks, threads >>>( n, dx0, dx, dtau, dxnorm, dA, it);
+}
+
+//==============================================================================
+
+/*
+   Generates Householder elementary reflector H = I - tau v v^T to reduce
+     H [ dx0 ] = [ beta ]
+       [ dx  ]   [ 0    ]
+   with beta = ±norm( [dx0, dx] ) = ±dxnorm[0].
+   Stores v over dx; first element of v is 1 and is not stored.
+   Stores beta over dx0.
+   Stores tau.
+
+   The difference with LAPACK's zlarfg is that the norm of dx, and hance beta,
+   are computed outside the routine and passed to it in dxnorm (array on the GPU).
+*/
+extern "C" void
+magma_zlarfgtx_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
+                   cuDoubleComplex *dtau, double *dxnorm,
+                   cuDoubleComplex *dA, int i, 
+                   cuDoubleComplex *V, int ldv, cuDoubleComplex *T, int ldt, 
+                   cuDoubleComplex *work)
+{
+   /*  Generate the elementary reflector H(i)  */
+   magma_zlarfgx_gpu(n, dx0, dx, dtau, dxnorm, dA, i);
+
+   if (i==0){
+      cuDoubleComplex tt = MAGMA_Z_ONE;
+      magmablas_zlacpy(MagmaUpperLower, 1, 1, dtau, 1, T+i+i*ldt, 1);
+      magma_zsetmatrix(1,1, &tt,1, dx0,1);
+   }
+   else
+   {
+      /* Compute the i-th column of T */      
+      magma_zgemv_kernel3<<< i, BLOCK_SIZE >>>(n, V, ldv, dx0, work, dtau);
+      magma_ztrmv_kernel2<<< i, i          >>>( T, ldt, work, T+i*ldt, dtau);
+   }
 }
