@@ -14,6 +14,9 @@
 #include "magma_bulge.h"
 #include <sys/time.h>
 
+#define applyQver 113
+
+
 extern "C" {
 
     magma_int_t magma_bulge_get_nb(magma_int_t n)
@@ -40,25 +43,72 @@ extern "C" {
         *nrm2 = sqrt( sumv );
     }
 
+
+    void magma_bulge_findpos113(magma_int_t n, magma_int_t nb, magma_int_t Vblksiz, magma_int_t sweep, magma_int_t st, magma_int_t *myblkid)
+    {
+        magma_int_t prevGblkid, nbprevGblk, mastersweep;        
+        magma_int_t locblknb   = 0;
+        magma_int_t prevblkcnt = 0;
+        magma_int_t myblknb    = 0;
+        magma_int_t lstGblkid  = magma_ceildiv((n-1),Vblksiz)-1;//nbGblk-1;
+        magma_int_t myGblkid   = sweep/Vblksiz;
+
+        // go forward and for each Gblk(a column of blocks) before my Gblk compute its number of blk.
+        
+        //=================================================== 
+        for (prevGblkid = lstGblkid; prevGblkid > myGblkid; prevGblkid--)
+        {
+            mastersweep  = prevGblkid * Vblksiz;        
+            if(prevGblkid==lstGblkid) 
+                locblknb = magma_ceildiv((n-(mastersweep+1)),nb);
+            else
+                locblknb = magma_ceildiv((n-(mastersweep+2)),nb);
+            prevblkcnt   = prevblkcnt + locblknb;
+        }
+        //=================================================== 
+        /*
+        // for best performance, the if condiiton inside the loop
+        // is only for prevblkid==lastblkid so I can unroll this 
+        // out of the loop and so remove the if condition.
+        //=================================================== 
+        // for prevGblkid==lstGblkid
+        mastersweep  = lstGblkid * Vblksiz;        
+        locblknb     = magma_ceildiv((n-(mastersweep+1)),nb);
+        prevblkcnt   = prevblkcnt + locblknb;
+        // the remaining of the loop
+        for (prevGblkid = lstGblkid-1; prevGblkid > myGblkid; prevGblkid--)
+        {
+            mastersweep  = prevGblkid * Vblksiz;        
+            locblknb     = magma_ceildiv((n-(mastersweep+2)),nb);
+            prevblkcnt   = prevblkcnt + locblknb;
+        }
+        //=================================================== 
+        */
+        myblknb = magma_ceildiv((st-sweep),nb);
+        *myblkid    = prevblkcnt + myblknb -1;
+        //printf("voici sweep %d  lstGblkid %d  myGblkid %d  prevcnt %d  myblknb %d  myblkid %d\n", sweep, lstGblkid,myGblkid,prevblkcnt,myblknb,*myblkid );
+    }
+
+
+
     void magma_bulge_findpos(magma_int_t n, magma_int_t nb, magma_int_t Vblksiz, magma_int_t sweep, magma_int_t st, magma_int_t *myblkid)
     {
-        magma_int_t prevcolblknb, prevblkcnt, prevcolblkid;
-        magma_int_t curcolblknb, nbprevcolblk, mastersweep;
+        magma_int_t locblknb, prevblkcnt, prevGblkid;
+        magma_int_t myblknb, nbprevGblk, mastersweep;
 
-        prevcolblknb = 0;
+        locblknb = 0;
         prevblkcnt   = 0;
-        curcolblknb  = 0;
+        myblknb  = 0;
 
-        nbprevcolblk = sweep/Vblksiz;
-        for (prevcolblkid = 0; prevcolblkid < nbprevcolblk; prevcolblkid++)
+        nbprevGblk = sweep/Vblksiz;
+        for (prevGblkid = 0; prevGblkid < nbprevGblk; prevGblkid++)
         {
-            mastersweep  = prevcolblkid * Vblksiz;
-            prevcolblknb = magma_ceildiv((n-(mastersweep+2)),nb);
-            prevblkcnt   = prevblkcnt + prevcolblknb;
+            mastersweep  = prevGblkid * Vblksiz;
+            locblknb = magma_ceildiv((n-(mastersweep+2)),nb);
+            prevblkcnt   = prevblkcnt + locblknb;
         }
-        curcolblknb = magma_ceildiv((st-sweep),nb);
-        *myblkid    = prevblkcnt + curcolblknb -1;
-
+        myblknb = magma_ceildiv((st-sweep),nb);
+        *myblkid    = prevblkcnt + myblknb -1;
     }
 
     void magma_bulge_findVTAUpos(magma_int_t n, magma_int_t nb, magma_int_t Vblksiz, magma_int_t sweep, magma_int_t st, magma_int_t ldv,
@@ -67,7 +117,10 @@ extern "C" {
         magma_int_t myblkid;
         magma_int_t locj = sweep%Vblksiz;
 
-        magma_bulge_findpos(n, nb, Vblksiz, sweep, st, &myblkid);
+        if(applyQver==113)
+            magma_bulge_findpos113(n, nb, Vblksiz, sweep, st, &myblkid);
+        else
+            magma_bulge_findpos(n, nb, Vblksiz, sweep, st, &myblkid);
 
         *Vpos   = myblkid*Vblksiz*ldv + locj*ldv + locj;
         *TAUpos = myblkid*Vblksiz + locj;
@@ -79,7 +132,11 @@ extern "C" {
         magma_int_t myblkid;
         magma_int_t locj = sweep%Vblksiz;
 
-        magma_bulge_findpos(n, nb, Vblksiz, sweep, st, &myblkid);
+        if(applyQver==113)
+            magma_bulge_findpos113(n, nb, Vblksiz, sweep, st, &myblkid);
+        else
+            magma_bulge_findpos(n, nb, Vblksiz, sweep, st, &myblkid);
+
 
         *Vpos   = myblkid*Vblksiz*ldv + locj*ldv + locj;
         *Tpos   = myblkid*Vblksiz*ldt + locj*ldt + locj;
@@ -91,7 +148,11 @@ extern "C" {
         magma_int_t myblkid;
         magma_int_t locj = sweep%Vblksiz;
 
-        magma_bulge_findpos(n, nb, Vblksiz, sweep, st, &myblkid);
+        if(applyQver==113)
+            magma_bulge_findpos113(n, nb, Vblksiz, sweep, st, &myblkid);
+        else
+            magma_bulge_findpos(n, nb, Vblksiz, sweep, st, &myblkid);
+
 
         *Vpos   = myblkid*Vblksiz*ldv + locj*ldv + locj;
         *TAUpos = myblkid*Vblksiz     + locj;
@@ -102,18 +163,21 @@ extern "C" {
     magma_int_t magma_bulge_get_blkcnt(magma_int_t n, magma_int_t nb, magma_int_t Vblksiz)
     {
         magma_int_t colblk, nbcolblk;
-        magma_int_t curcolblknb, mastersweep;
+        magma_int_t myblknb, mastersweep;
 
         magma_int_t blkcnt = 0;
         nbcolblk = magma_ceildiv((n-1),Vblksiz);
         for (colblk = 0; colblk<nbcolblk; colblk++)
         {
             mastersweep = colblk * Vblksiz;
-            curcolblknb = magma_ceildiv((n-(mastersweep+2)),nb);
-            blkcnt      = blkcnt + curcolblknb;
+            if(colblk == (nbcolblk-1))
+                myblknb = magma_ceildiv((n-(mastersweep+1)),nb);
+            else
+                myblknb = magma_ceildiv((n-(mastersweep+2)),nb);
+            blkcnt      = blkcnt + myblknb;
             //printf("voici  nbcolblk %d    master sweep %d     blkcnt %d \n",nbcolblk, mastersweep,*blkcnt);
         }
-        return blkcnt +1;
+        return blkcnt;
     }
 
     ///////////////////
@@ -127,22 +191,22 @@ extern "C" {
 
     void findVTpos(magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, magma_int_t sweep, magma_int_t st, magma_int_t *Vpos, magma_int_t *TAUpos, magma_int_t *Tpos, magma_int_t *myblkid)
     {
-        magma_int_t prevcolblknb, prevblkcnt, prevcolblkid;
-        magma_int_t curcolblknb, nbprevcolblk, mastersweep;
+        magma_int_t locblknb, prevblkcnt, prevGblkid;
+        magma_int_t myblknb, nbprevGblk, mastersweep;
         magma_int_t blkid, locj, LDV;
-        prevcolblknb = 0;
+        locblknb = 0;
         prevblkcnt   = 0;
-        curcolblknb  = 0;
+        myblknb  = 0;
 
-        nbprevcolblk = sweep/Vblksiz;
-        for (prevcolblkid = 0; prevcolblkid < nbprevcolblk; prevcolblkid++)
+        nbprevGblk = sweep/Vblksiz;
+        for (prevGblkid = 0; prevGblkid < nbprevGblk; prevGblkid++)
         {
-            mastersweep  = prevcolblkid * Vblksiz;
-            prevcolblknb = plasma_ceildiv((N-(mastersweep+2)),NB);
-            prevblkcnt   = prevblkcnt + prevcolblknb;
+            mastersweep  = prevGblkid * Vblksiz;
+            locblknb = plasma_ceildiv((N-(mastersweep+2)),NB);
+            prevblkcnt   = prevblkcnt + locblknb;
         }
-        curcolblknb = plasma_ceildiv((st-sweep),NB);
-        blkid       = prevblkcnt + curcolblknb -1;
+        myblknb = plasma_ceildiv((st-sweep),NB);
+        blkid       = prevblkcnt + myblknb -1;
         locj        = sweep%Vblksiz;
         LDV         = NB + Vblksiz -1;
 
@@ -153,21 +217,26 @@ extern "C" {
         //printf("voici  blkid  %d  locj %d  vpos %d tpos %d \n",blkid,locj,*Vpos,*Tpos);
     }
 
+
+
     void findVTsiz(magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, magma_int_t *blkcnt, magma_int_t *LDV)
     {
         magma_int_t colblk, nbcolblk;
-        magma_int_t curcolblknb, mastersweep;
+        magma_int_t myblknb, mastersweep;
 
         *blkcnt   = 0;
         nbcolblk = plasma_ceildiv((N-1),Vblksiz);
         for (colblk = 0; colblk<nbcolblk; colblk++)
         {
             mastersweep = colblk * Vblksiz;
-            curcolblknb = plasma_ceildiv((N-(mastersweep+2)),NB);
-            *blkcnt      = *blkcnt + curcolblknb;
+            if(colblk == (nbcolblk-1))
+                myblknb = magma_ceildiv((N-(mastersweep+1)),NB);
+            else
+                myblknb = magma_ceildiv((N-(mastersweep+2)),NB);
+
+            *blkcnt      = *blkcnt + myblknb;
             //printf("voici  nbcolblk %d    master sweep %d     blkcnt %d \n",nbcolblk, mastersweep,*blkcnt);
         }
-        *blkcnt = *blkcnt +1;
         *LDV= NB+Vblksiz-1;
     }
 
