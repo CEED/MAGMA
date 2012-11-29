@@ -706,7 +706,7 @@ magmablas_dgemm_fermi( char TRANSA, char TRANSB, magma_int_t m , magma_int_t n ,
                                sizeA * sizeof(A[0]));
         if( errt != cudaSuccess) 
         {
-                printf("can not bind to texture \n");
+                printf("cannot bind to texture\n");
                 return;
         }
 
@@ -714,7 +714,7 @@ magmablas_dgemm_fermi( char TRANSA, char TRANSB, magma_int_t m , magma_int_t n ,
                                sizeB * sizeof(B[0]));
         if( errt != cudaSuccess)
         {
-                printf("can not bind to texture \n");
+                printf("cannot bind to texture\n");
                 return;
         }
 

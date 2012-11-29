@@ -755,11 +755,11 @@ magmablas_sgemm_fermi80(char TRANSA, char TRANSB, magma_int_t m , magma_int_t n 
         cudaError_t errt;
         errt = cudaBindTexture(&offsetA, tex_x_float_A, (int2 *)A, 
                         sizeA * sizeof(A[0]));
-        if( errt != cudaSuccess) printf("can not bind to texture \n");
+        if( errt != cudaSuccess) printf("cannot bind to texture\n");
 
         errt = cudaBindTexture(&offsetB, tex_x_float_B, (int2 *)B, 
                         sizeB * sizeof(B[0]));
-        if( errt != cudaSuccess) printf("can not bind to texture \n");
+        if( errt != cudaSuccess) printf("cannot bind to texture\n");
 
         dim3 threads( 64, 4 );
         dim3 grid(m/(16*bx)+(m%(16*bx)!=0),n/(16*by)+(n%(16*by)!=0));
