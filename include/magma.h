@@ -55,6 +55,9 @@
 
 #define MagmaNoVectors     'N'
 #define MagmaVectors       'V'
+#define MagmaAllVectors    'A'
+#define MagmaSomeVectors   'S'
+#define MagmaOverwriteVectors 'O'
 
 #define MagmaNoTransStr    "NonTrans"
 #define MagmaTransStr      "Trans"
