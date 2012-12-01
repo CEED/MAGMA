@@ -21,6 +21,7 @@
 #include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
+#include "magma_zbulge.h"
 #include "testings.h"
 
 #if defined(USEMKL)
@@ -37,6 +38,20 @@
 #else
 #define FLOPS(n) (      FMULS_HETRD(n) +      FADDS_HETRD(n))
 #endif
+
+
+extern "C"  magma_int_t magma_zheevdx_2stage(char jobz, char range, char uplo, magma_int_t n,
+                                     cuDoubleComplex *a, magma_int_t lda, double vl, double vu, magma_int_t il, magma_int_t iu,
+                                     magma_int_t *m, double *w, cuDoubleComplex *work, magma_int_t lwork,
+                                     double *rwork, magma_int_t lrwork, magma_int_t *iwork, magma_int_t liwork, magma_int_t *info);
+
+extern "C"  magma_int_t magma_zheevdx_2stage_m(int nrgpu, char jobz, char range, char uplo, magma_int_t n,
+                                     cuDoubleComplex *a, magma_int_t lda, double vl, double vu, magma_int_t il, magma_int_t iu,
+                                     magma_int_t *m, double *w, cuDoubleComplex *work, magma_int_t lwork,
+                                     double *rwork, magma_int_t lrwork, magma_int_t *iwork, magma_int_t liwork, magma_int_t *info);
+
+
+
 
 
 extern "C" magma_int_t
@@ -68,16 +83,16 @@ extern "C" void zcheck_eig_(char *JOBZ, int  *MATYPE, int  *N, int  *NB,
 */
 int main( int argc, char** argv)
 {
-    TESTING_CUDA_INIT();
+    TESTING_CUDA_INIT_MGPU();
 
-    magma_timestr_t       start, end;
+    magma_timestr_t       start, end, tband;
     double           eps, flops, gpu_perf, gpu_time;
     cuDoubleComplex *h_A, *h_R, *h_work, *dT1;
     cuDoubleComplex *tau;
     double *D, *E;
 
     /* Matrix size */
-    magma_int_t N = 0, n2, lda, lwork,ldt;
+    magma_int_t N = 0, n2, lda, lwork,ldt,lwork0;
     magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
 
     magma_int_t i, j, k, info, checkres, once = 0;
@@ -89,6 +104,8 @@ int main( int argc, char** argv)
     magma_int_t THREADS=1;
     magma_int_t NE = 0;
     magma_int_t NB = 0;
+    magma_int_t ngpu = 1;
+
     checkres  = 0; //getenv("MAGMA_TESTINGS_CHECK") != NULL;
 
     if (argc != 1){
@@ -102,6 +119,9 @@ int main( int argc, char** argv)
             }
             else if (strcmp("-threads", argv[i])==0) {
                 THREADS = atoi(argv[++i]);
+            }
+            else if (strcmp("-ngpu", argv[i])==0) {
+                ngpu = atoi(argv[++i]);
             }
             else if (strcmp("-wantz", argv[i])==0) {
                 WANTZ = atoi(argv[++i]);
@@ -145,12 +165,12 @@ int main( int argc, char** argv)
         NE  = N; //64; //magma_get_zhetrd_he2hb_nb(N);
 
     /* We suppose the magma NB is bigger than lapack NB */
-    lwork = N*NB; 
+    lwork0 = N*NB; 
 
     /* Allocate host memory for the matrix */
     TESTING_MALLOC(    h_A,    cuDoubleComplex, lda*N );
     TESTING_HOSTALLOC( h_R,    cuDoubleComplex, lda*N );
-    TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork );
+    TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork0 );
     TESTING_MALLOC(    tau,    cuDoubleComplex, N-1   );
     TESTING_HOSTALLOC( D,    double, N );
     TESTING_HOSTALLOC( E,    double, N );
@@ -165,8 +185,9 @@ int main( int argc, char** argv)
         }
         lda  = N;
         n2   = N*lda;
-        flops = FLOPS( (double)N ) / 1e6;
-        if(WANTZ) flops = 2.0*flops;
+        flops = FLOPS_ZHETRD( (double)N ) / 1e6;
+        
+       // if(WANTZ) flops = 2.0*flops;
 
         /* ====================================================================
            Initialize the matrix
@@ -182,127 +203,81 @@ int main( int argc, char** argv)
                     h_A[i*lda+j] = cuConj(h_A[j*lda+i]);
             }
         }
-/*
-            for(i=0; i<N; i++){ 
-                for(j=0; j<N; j++){
-                MAGMA_Z_SET2REAL( h_A[i*lda+j], ( MAGMA_Z_REAL(h_A[i*lda+j]) ) );
-                }
-            }
-*/
-
-/*
-    FILE *trace_file;
-    trace_file = fopen("AJETE/Ainit", "w");
-    for (j = 0; j < N ; j++) 
-          for (i = 0; i < N ; i++) 
-                         fprintf(trace_file,"%10d %10d %25.15e %25.15e\n",i+1,j+1,MAGMA_Z_REAL(h_A[j*lda+i]) ,  MAGMA_Z_IMAG(h_A[j*lda+i])  );
-    fclose(trace_file);
-*/
-
 
 
         lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
-
-/*
-lapackf77_zlarnv( &ione, ISEED, &N, D );
-lapackf77_zlarnv( &ione, ISEED, &N, E );
-i= min(12,THREADS);
-mkl_set_num_threads( i );
-start = get_current_time();
-dstedc_withZ('V', N, D, E, h_R, lda);
-end = get_current_time();
-printf("  Finish EIGEN   timing= %lf  threads %d ---> 0000000 \n" ,GetTimerValue(start,end) / 1000., i);
-mkl_set_num_threads( 1 );
-return 0;
-*/
-/*
-
-    FILE *trace_file;
-    trace_file = fopen("AJETE/Ainit", "w");
-    for (j = 0; j < N ; j++) 
-          for (i = 0; i < N ; i++) 
-                         fprintf(trace_file,"%10d %10d %25.15e %25.15e\n",i+1,j+1,MAGMA_Z_REAL(h_R[j*lda+i]) ,  MAGMA_Z_IMAG(h_R[j*lda+i])  );
-    fclose(trace_file);
-*/
-    /*
-    int pm,pn,indi,indj,n=N;
-    i=1;
-                      indi = i+NB;
-                  indj = i;
-                  pm   = n - i - NB + 1;
-                  pn   = min(i+NB-1, n-NB) -i + 1;
-*/
-                  /*
-                  printf("voici pm pn %d %d \n",pm,pn);
-              lapackf77_zgeqrf(&pm, &pn, &h_R[NB], &lda, 
-                             tau, h_work, &lwork, &info);
-              printf("TOTOTOTO INFO %d\n",info);
-              memset(h_work, 0, lwork*sizeof(cuDoubleComplex));
-            lapackf77_zlarft( "F", "C",
-                              &pm, &pn, &h_R[NB], &lda,
-                              tau, h_work, &pn);
-
-*/
 
 
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
+        char *jobz = (char*)MagmaVectorsStr;
+        char range = 'A';
+        magma_int_t fraction_ev = 100;
+        magma_int_t il,iu,m1,m2;
+        double vl,vu;
+
+        if (fraction_ev == 0){
+            il = N / 10;
+            iu = N / 5+il;
+        }
+        else {
+            il = 1;
+            iu = (int)(fraction_ev*N);
+            if (iu < 1) iu = 1;
+        }
+
+        cuDoubleComplex *hh_work;
+        double *rwork;
+        magma_int_t *iwork;
+       
+
+    
+        magma_device_t cdev;
+        magma_getdevice( &cdev );
+   
+
+
+
         start = get_current_time();
-        //magma_zhetrd_he2hb(uplo[0], N, h_R, lda, tau, h_work, lwork, &info);
-        magma_zhetrd_he2hb(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, dT1, THREADS, &info);
-        end = get_current_time();
-        printf("  Finish BAND    timing= %lf \n" ,GetTimerValue(start,end) / 1000.);
-// return 0;
 /*        
-    int   Vblksiz=-1, blkcnt=-1, LDV=-1, LDT =-1, INgrsiz=1, LDE=-1, BAND=6;
-    Vblksiz = NB; //min(NB,64);
-    LDT     = Vblksiz;
-    findVTsiz(N, NB, Vblksiz, &blkcnt, &LDV);
-    cuDoubleComplex *dVV2, *dTT2, dV3;
-    int dVVs;
-           dVVs = max(N*N,blkcnt*LDV*Vblksiz);
-           printf("dvsize %lf \n",(16.0*(real_Double_t)dVVs)*1e-9);
-           if( CUBLAS_STATUS_SUCCESS != cublasAlloc(dVVs, sizeof(cuDoubleComplex), (void**)&dVV2) ) { 
-               printf ("!!!! -------> cublasAlloc failed for: dVV2\n" );       
-               exit(-1);                                                           
-           }
-    
-           if( CUBLAS_STATUS_SUCCESS != cublasAlloc( dVVs, sizeof(cuDoubleComplex), (void**)&dTT2) ) { 
-              printf ("!!!! ---------> cublasAlloc failed for: dTT2\n" );       
-              exit(-1);                                                           
-           }
-    
-           if( CUBLAS_STATUS_SUCCESS != cublasAlloc( dVVs, sizeof(cuDoubleComplex), (void**)&dV3) ) { 
-              printf ("!!!! ---------> cublasAlloc failed for: dV3\n" );       
-              exit(-1);                                                           
-           }
-
-           printf("done from alloc exit\n");
-           */
-
-            /*        
-    trace_file = fopen("AJETE/Aafter", "w");
-    for (j = 0; j < N ; j++) 
-          for (i = 0; i < N ; i++) 
-                         fprintf(trace_file,"%10d%10d%40.30e\n",i+1,j+1,h_R[j*lda+i]);
-    fclose(trace_file);
-*/
- /*
-        memset(h_work, 0, lwork*sizeof(cuDoubleComplex));
-        magma_zgetmatrix( pn, pn, dT1, ldt, h_work, pn );
-   trace_file = fopen("AJETE/T", "w");
-    for (j = 0; j < pn ; j++) 
-          for (i = 0; i < pn ; i++) 
-                         fprintf(trace_file,"%10d%10d%40.30e\n",i+1,j+1,h_work[j*pn+i]);
-    fclose(trace_file);
-*/        
-        
-        //        dsytrd_bsy2trc(THREADS, uplo[0], N, NB, h_R, lda, D, E);
+        magma_zhetrd_he2hb(uplo[0], N, NB, h_R, lda, tau, h_work, lwork0, dT1, THREADS, &info);
+        tband = get_current_time();
+        printf("  Finish BAND  N %d  NB %d  ngpu %d timing= %lf \n" ,N,NB,ngpu,GetTimerValue(start,tband) / 1000.);
         magma_zhetrd_bhe2trc_v5(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1, ldt);
-        end = get_current_time();
-        if ( info < 0 )
-            printf("Argument %d of magma_zhetrd_he2hb had an illegal value\n", (int) -info);
+*/
+
+/*
+        magma_zhetrd_he2hb(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, dT1, THREADS, &info);
+        tband = get_current_time();
+        printf("  Finish BAND  N %d  NB %d  ngpu %d timing= %lf \n" ,N,NB,ngpu,GetTimerValue(start,tband) / 1000.);
+        magma_zhetrd_bhe2trc(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1, ldt);
+*/
+
+        magma_int_t nb = magma_get_zhetrd_nb(N);
+        magma_int_t lwork = magma_zbulge_get_lq2(N) + 2*N + N*N;
+        magma_int_t lrwork = 1 + 5*N +2*N*N;
+        magma_int_t liwork = 3 + 5*N;
+       
+        TESTING_HOSTALLOC(hh_work, cuDoubleComplex,  lwork);
+        TESTING_HOSTALLOC( rwork,          double, lrwork);
+        TESTING_MALLOC(    iwork,     magma_int_t, liwork);
+
+        if(ngpu==1){
+            printf("calling zheevdx_2stage 1 GPU\n");
+            magma_zheevdx_2stage(jobz[0], range, uplo[0], N, h_R, lda, vl, vu, il, iu, &m1, D, hh_work, lwork, rwork, lrwork, iwork, liwork, &info);
+        }else{
+            printf("calling zheevdx_2stage_m %d GPU\n",ngpu);
+            magma_zheevdx_2stage_m(ngpu,jobz[0], range, uplo[0], N, h_R, lda, vl, vu, il, iu, &m1, D, hh_work, lwork, rwork, lrwork, iwork, liwork, &info);
+        }
+
+
+       cudaSetDevice( cdev );
+        
+       end = get_current_time();
+
+
+
 
         gpu_perf = flops / GetTimerValue(start,end);
         gpu_time = GetTimerValue(start,end) / 1000.;
@@ -451,7 +426,7 @@ return 0;
 #endif         
 #endif  
 
-      printf("  Total N %5d  flops %6.2f        timing %6.2f seconds\n", (int) N, 0.0, gpu_time );
+      printf("  Total N %5d  flops %6.2f        timing %6.2f seconds\n", (int) N, gpu_perf, gpu_time );
       printf("============================================================================\n\n\n");
 
       if ( once )
@@ -465,6 +440,6 @@ return 0;
     TESTING_HOSTFREE( h_work ); 
 
     /* Shutdown */
-    TESTING_CUDA_FINALIZE();
+    TESTING_CUDA_FINALIZE_MGPU();
     return EXIT_SUCCESS;
 }
