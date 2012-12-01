@@ -191,6 +191,15 @@ extern "C" {
 
     void findVTpos(magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, magma_int_t sweep, magma_int_t st, magma_int_t *Vpos, magma_int_t *TAUpos, magma_int_t *Tpos, magma_int_t *myblkid)
     {
+        // to be able to use and compare with the old reduction function.
+        // route the old function to the new ones because the changes are done on the new function.    
+        magma_int_t ldv = NB + Vblksiz -1;
+        magma_int_t ldt = Vblksiz;
+        magma_bulge_findVTAUTpos(N,  NB, Vblksiz,  sweep,  st,  ldv, ldt,
+                               Vpos, TAUpos, Tpos, myblkid);
+        return;
+
+
         magma_int_t locblknb, prevblkcnt, prevGblkid;
         magma_int_t myblknb, nbprevGblk, mastersweep;
         magma_int_t blkid, locj, LDV;
