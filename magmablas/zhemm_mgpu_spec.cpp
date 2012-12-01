@@ -26,7 +26,7 @@ void magmablas_zhemm_mgpu_spec(
                            cuDoubleComplex *work[], magma_int_t ldwork,
                            magma_int_t ngpu, magma_int_t nb, 
                            cudaStream_t streams[][20], magma_int_t nstream, 
-                           cudaEvent_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs],magma_int_t nbevents, 
+                           cudaEvent_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10],magma_int_t nbevents, 
                            magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2], magma_int_t nbcmplx )
 {
     #define dA(dev, i, j) (dA[dev] + (i) + (j)*ldda)
@@ -83,8 +83,6 @@ void magmablas_zhemm_mgpu_spec(
     magma_int_t nbblk       = magma_ceildiv((m+blockoffset),nb);
     magma_int_t maxgsize    = n*nb*magma_ceildiv(nbblk,ngpu);
     magma_int_t remm        = m- fstblksiz;
-    magma_int_t blkid       = (offset / nb) / ngpu;          // local block id
-    magma_int_t dcolind     = blkid*nb;     // local index in parent matrix
     magma_int_t nbblkoffst  = offset/nb;
 
 
