@@ -189,7 +189,7 @@ int main( int argc, char** argv)
     lwork = N*NB; 
 
     /* Allocate host memory for the matrix */
-    TESTING_HOSTALLOC(    h_A,    cuDoubleComplex, lda*N );
+    TESTING_HOSTALLOC( h_A,    cuDoubleComplex, lda*N );
     TESTING_HOSTALLOC( h_R,    cuDoubleComplex, lda*N );
     TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork );
     TESTING_MALLOC(    tau,    cuDoubleComplex, N-1   );
@@ -201,8 +201,9 @@ int main( int argc, char** argv)
     cudaStream_t streams[MagmaMaxGPUs][20];    
     cuDoubleComplex *da[MagmaMaxGPUs],*dT1[MagmaMaxGPUs];
     magma_int_t ldda = ((N+31)/32)*32;
-    if((distblk==0)||(distblk<NB))distblk = max(64,NB);
+    if((distblk==0)||(distblk<NB))distblk = max(256,NB);
     printf("voici ngpu %d distblk %d NB %d nstream %d\n ",ngpu,distblk,NB,nstream);
+       
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_int_t mlocal = ((N / distblk) / ngpu + 1) * distblk;
         cudaSetDevice( dev );
@@ -213,7 +214,6 @@ int main( int argc, char** argv)
         }
     }
     cudaSetDevice( 0 );
-
 
 
     for(i=0; i<10; i++){
@@ -269,9 +269,15 @@ int main( int argc, char** argv)
 
 // goto fin;
 //return 0;
-
+        for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
+            cudaSetDevice(dev);
+            cudaDeviceSynchronize();
+        }
+        cudaSetDevice(0);
+        magmablasSetKernelStream( NULL );
 
         magma_zhetrd_bhe2trc_v5(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1[0], ldt);
+        //  magma_zhetrd_bhe2trc(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1[0], ldt);
         end = get_current_time();
         if ( info < 0 )
             printf("Argument %d of magma_zhetrd_he2hb had an illegal value\n", (int) -info);
@@ -380,7 +386,7 @@ int main( int argc, char** argv)
 fin:
 
     /* Memory clean up */
-//    cudaSetDevice( 0 );
+    cudaSetDevice( 0 );
     TESTING_FREE( tau ); 
     TESTING_HOSTFREE( h_A );
     TESTING_HOSTFREE( h_R ); 
