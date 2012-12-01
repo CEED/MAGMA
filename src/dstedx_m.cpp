@@ -18,7 +18,7 @@ extern "C"{
                                char range, double vl, double vu,
                                magma_int_t il, magma_int_t iu, magma_int_t* info);
 
-    magma_int_t get_dstedx_smlsize()
+    magma_int_t get_dstedx_m_smlsize()
     {
         return 25;
     }
@@ -195,7 +195,7 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
     if (*info == 0) {
         // Compute the workspace requirements
 
-        smlsiz = get_dstedx_smlsize();
+        smlsiz = get_dstedx_m_smlsize();
         if( n <= 1 ){
             lwmin = 1;
             liwmin = 1;
