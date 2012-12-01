@@ -14,6 +14,7 @@
  */
 #include "common_magma.h"
 #include "magma_bulge.h"
+#include "magma_zbulge.h"
 #include <cblas.h>
 
 #if defined(USEMKL)
@@ -274,7 +275,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
 #endif
 
     magma_int_t ldt = Vblksiz;
-    magma_int_t ldv = nb + Vblksiz + 1;
+    magma_int_t ldv = nb + Vblksiz - 1;
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
 
     magma_int_t nbtiles = magma_ceildiv(n, nb);
@@ -441,6 +442,11 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
     magma_int_t ldz=n;
     cuDoubleComplex *dZ;
     magma_int_t info;
+
+    // in case for tridiagonal testing
+    if (wantz < 0){
+        goto fin;    
+    }
 
 #if defined(USEMKL)
     mkl_set_num_threads(mklth);
@@ -639,7 +645,6 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
             /*============================
              *  use GPU+CPU's
              *==========================*/
-
             if(n_gpu < ne)
             {
 
@@ -714,7 +719,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
                 /****************************************************
                  * apply Q1 to (Q2*Z)
                  * **************************************************/
-                printf("calling zunmqr\n");
+                printf("calling zunmqr_gpu_2stages\n");
                 timegemm = magma_wtime();
                 magma_zunmqr_gpu_2stages(MagmaLeft, MagmaNoTrans, n-nb, ne, n-nb, dQ1+nb, lddq1,
                                          dZ+nb, n, dT1, nb, &info);
@@ -722,9 +727,8 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
                 magma_zgetmatrix( n, ne, dZ, n, A, lda );
                 timegemm = magma_wtime()-timegemm;
             }
-            timeeigen = magma_wtime()-timeeigen;
         }
-
+        timeeigen = magma_wtime()-timeeigen;
 #if defined(USEMKL)
     mkl_set_num_threads(mklth);
 #endif
@@ -737,6 +741,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
         magma_free(dQ1);
 
     }
+fin:
 
     magma_free_cpu(A2);
     magma_free_cpu(TAU);
