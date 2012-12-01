@@ -83,29 +83,7 @@ extern "C" void magma_zbulge_applyQ_v2(char side, magma_int_t NE, magma_int_t N,
      * 
     */
 
-
-
-
-
-    // Azzam 21/11/2012
-    // NOTE THAT dwork was of size 2*ldwork*Vblksiz+...
-    // but I modified to ldwork*Vblksiz+...
-    cuDoubleComplex *dwork, *dT0, *dV0, *dT1, *dV1;
-    magma_int_t lddv = ldv; //NB + Vblksiz + 1;
-    magma_int_t lddt = ldt; // Vblksiz;
-
-    magma_int_t ldwork;
-    ldwork  = NE;
-    if(MAGMA_SUCCESS != magma_zmalloc( &dwork, 2*ldwork*Vblksiz +  2*Vchunksiz* (Vblksiz* (lddv+lddt)) )) {
-       printf ("!!!!  magma_zbulge_applyQ magma_alloc failed for: dwork\n" );
-       exit(-1);
-    }
-    dV0 = dwork + 2*ldwork*Vblksiz;
-    dT0 = dV0 + Vchunksiz*Vblksiz*lddv;
-    dV1 = dT0 + Vchunksiz*Vblksiz*lddt;
-    dT1 = dV1 + Vchunksiz*Vblksiz*lddv;
-
-
+    // Initialize streaming and events
     cudaDeviceSynchronize();
     magma_stream_t cstream;
     magmablasGetKernelStream(&cstream);
@@ -117,6 +95,25 @@ extern "C" void magma_zbulge_applyQ_v2(char side, magma_int_t NE, magma_int_t N,
     cudaEvent_t myevent[2];
     cudaEventCreateWithFlags(&myevent[0],cudaEventDisableTiming);
     cudaEventCreateWithFlags(&myevent[1],cudaEventDisableTiming);
+
+
+
+    // Azzam 21/11/2012
+    // NOTE THAT dwork was of size 2*lddwork*Vblksiz+...
+    // but I am thinking why not modifing it to lddwork*Vblksiz+...
+    cuDoubleComplex *dwork, *dT0, *dV0, *dT1, *dV1;
+    magma_int_t lddv = ldv; //NB + Vblksiz + 1;
+    magma_int_t lddt = ldt; // Vblksiz;
+
+    magma_int_t lddwork = NE;
+    if(MAGMA_SUCCESS != magma_zmalloc( &dwork, 2*lddwork*Vblksiz +  2*Vchunksiz* (Vblksiz* (lddv+lddt)) )) {
+       printf ("!!!!  magma_zbulge_applyQ magma_alloc failed for: dwork\n" );
+       exit(-1);
+    }
+    dV0 = dwork + 2*lddwork*Vblksiz;
+    dT0 = dV0 + Vchunksiz*Vblksiz*lddv;
+    dV1 = dT0 + Vchunksiz*Vblksiz*lddt;
+    dT1 = dV1 + Vchunksiz*Vblksiz*lddv;
 
 
     // make overlapped copy
@@ -239,7 +236,7 @@ extern "C" void magma_zbulge_applyQ_v2(char side, magma_int_t NE, magma_int_t N,
                             cudaStreamWaitEvent(stream[0], myevent[1], 0);
                             for(magma_int_t i=0; i<NE; i+= sz_bl){
                                 ib = min(sz_bl, NE-i);
-                                magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV0+lcvpos, lddv, dT0+lctpos, lddt, dE(myrow,i), ldde, dwork, NE);
+                                magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV0+lcvpos, lddv, dT0+lctpos, lddt, dE(myrow,i), ldde, dwork, lddwork);
                             }
                             cudaEventRecord(myevent[0], stream[0]);
                         }else{
@@ -247,7 +244,7 @@ extern "C" void magma_zbulge_applyQ_v2(char side, magma_int_t NE, magma_int_t N,
                             cudaStreamWaitEvent(stream[1], myevent[0], 0);
                             for(magma_int_t i=0; i<NE; i+= sz_bl){
                                 ib = min(sz_bl, NE-i);
-                                magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV1+lcvpos, lddv, dT1+lctpos, lddt, dE(myrow,i), ldde, dwork, NE);
+                                magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV1+lcvpos, lddv, dT1+lctpos, lddt, dE(myrow,i), ldde, dwork, lddwork);
                             }
                             cudaEventRecord(myevent[1], stream[1]);
                         }
