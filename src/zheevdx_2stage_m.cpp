@@ -265,7 +265,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     magma_int_t Vblksiz = magma_zbulge_get_Vblksiz(n, nb);
 
     magma_int_t ldt = Vblksiz;
-    magma_int_t ldv = nb + Vblksiz + 1;
+    magma_int_t ldv = nb + Vblksiz - 1;
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
 
     magma_int_t lq2 = magma_zbulge_get_lq2(n);
@@ -409,6 +409,8 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     magma_int_t distblk = max(256,nb);
     printf("voici ngpu %d distblk %d NB %d nstream %d version %d \n ",nrgpu,distblk,nb,nstream,ver);
 
+    magma_timestr_t tband1, tband2, t1, t2, ta1, ta2;
+    t1 = get_current_time();
     for( magma_int_t dev = 0; dev < nrgpu; ++dev ) {
         magma_int_t mlocal = ((n / distblk) / nrgpu + 1) * distblk;
         magma_setdevice( dev );
@@ -419,15 +421,21 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
         }
     }
 
+    t2 = get_current_time();
     magmablas_zsetmatrix_1D_bcyclic( n, n, a, lda, da, ldda, nrgpu, distblk);
     magma_setdevice(0);
 
+    tband1 = get_current_time();
     if(ver==30){
         magma_zhetrd_he2hb_mgpu_spec(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, da, ldda, dT1, nb, nrgpu, distblk, streams, nstream, threads, info);
     }else{
         nstream = 3;
         magma_zhetrd_he2hb_mgpu(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, da, ldda, dT1, nb, nrgpu, distblk, streams, nstream, threads, info);
     }
+
+    tband2 = get_current_time();
+    printf("  time alloc %7.4f, ditribution %7.4f, zhetrd_he2hb only = %7.4f\n" , GetTimerValue(t1,t2)/1000., GetTimerValue(t2,tband1)/1000., GetTimerValue(tband1,tband2)/1000.);
+
 
     for( magma_int_t dev = 0; dev < nrgpu; ++dev ) {
         magma_setdevice( dev );
@@ -525,7 +533,10 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
         magma_zgetmatrix( n, *m, dZ, lddz, &work[indwrk], n);
 
         magma_free(dZ);
+
 */
+
+        
         magma_zbulge_back_m(nrgpu, threads, uplo, n, nb, *m, Vblksiz, &work[indwrk + n * (il-1)], n,
                             &work[indV2], ldv, &work[indTAU2], &work[indT2], ldt, info);
 
