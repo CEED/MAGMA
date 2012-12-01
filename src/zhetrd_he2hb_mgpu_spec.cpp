@@ -275,7 +275,7 @@ magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
     cuDoubleComplex *dworktest[MagmaMaxGPUs], *dworktestbis[MagmaMaxGPUs];
     cuDoubleComplex *dvtest[MagmaMaxGPUs], *dwtest[MagmaMaxGPUs];
     cuDoubleComplex *workngpu[MagmaMaxGPUs+1];
-    cudaEvent_t     redevents[MagmaMaxGPUs][MagmaMaxGPUs*MagmaMaxGPUs]; 
+    cudaEvent_t     redevents[MagmaMaxGPUs][MagmaMaxGPUs*MagmaMaxGPUs+10]; 
     magma_int_t nbevents = MagmaMaxGPUs*MagmaMaxGPUs;
 
 //    cuDoubleComplex *dttest[MagmaMaxGPUs];
