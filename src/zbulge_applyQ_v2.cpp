@@ -138,7 +138,7 @@ extern "C" void magma_zbulge_applyQ_v2(char side, magma_int_t NE, magma_int_t N,
      *            Also E is splitten by col meaning each apply consist in a block of col (vertical block) */
 
 
-    printf("  APPLY Q_v2 GPU with  N %d, NE %d,  NB %d, Vblksiz %d, versionL %d versionR %d  SIDE %c \n",
+    printf("  APPLY Q_v22 GPU with  N %d, NE %d,  NB %d, Vblksiz %d, versionL %d versionR %d  SIDE %c \n",
            N, NE, NB, Vblksiz, versionL, versionR, side);
 
 
