@@ -387,7 +387,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                       c_neg_one, dvtest, pm_old, flipV*nb*lddv+pn_old,
                                  dwtest, pm_old, pn_old,
                       d_one,     dAmgpu, ldda, indi_old+pn_old-1,
-                      ngpu, distblk, streams, nstream-1 );
+                      ngpu, distblk, streams, 2 );
                  //cudaSetDevice( 0 );
 
                  trace_gpu_end( 0, 2 );
