@@ -29,6 +29,7 @@ void magmablas_zhemm_mgpu(
                            cudaStream_t streams[][20], magma_int_t nstream, 
                            cudaEvent_t redevents[][20],magma_int_t nbevents )
 {
+
     #define dA(dev, i, j) (dA[dev] + (i) + (j)*ldda)
     #define dB(dev, i, j) (dB[dev] + (i) + (j)*lddb)
     #define dC(dev, i, j) (dC[dev] + (i) + (j)*lddc)
@@ -52,7 +53,7 @@ void magmablas_zhemm_mgpu(
     magma_stream_t cstream;
     magmablasGetKernelStream(&cstream);
 
-   
+
 
     magma_int_t stdev      = (offset/nb)%ngpu;  
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
@@ -89,8 +90,8 @@ void magmablas_zhemm_mgpu(
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_int_t newstdev      = (newoffset/nb)%ngpu;
         magma_int_t nbblk = remm/nb; // number of block of size nb. if m%nb>0 then a last block exist and is of size ib=m%nb
+        magma_int_t myblk = (nbblk/ngpu) + (nbblk%ngpu > ((dev-newstdev+ngpu)%ngpu) ?  1:0 );
         magma_int_t devperm   = (dev-newstdev+ngpu)%ngpu;
-        magma_int_t myblk = (nbblk/ngpu) + (nbblk%ngpu > devperm ?  1:0 );
         magma_int_t nbblkoffst = newoffset/nb;
         magma_int_t myblkoffst = (nbblkoffst/ngpu)+(nbblkoffst%ngpu > dev?1:0);
         //printf("dev %d  devperm %d   newoffset %d  rowoff %d    coloff %d    myblk %d  \n",dev,devperm,newoffset,newoffset+devperm*nb,myblkoffst*nb,myblk);
@@ -130,7 +131,6 @@ return;
     // ROW GEMM transpose a row and make a gemm with a block
     // if only 1 GPU used the ROW GEMM is integrated with the 
     // COL GEMM (better accuracy observed) and better perf
-    magma_int_t storingpt = 0;
     if(ngpu>1){
         for( magma_int_t i = fstblksiz; i < m; i += nb ) {
             magma_int_t ib     = min( nb, m-i );      // block size
@@ -140,8 +140,11 @@ return;
             magma_int_t nbblk      = magma_ceildiv(i,nb);
             magma_int_t stdev      = (offset/nb)%ngpu; 
             for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
+
+
                 magma_int_t myblk = (nbblk/ngpu) + (nbblk%ngpu > ((dev-stdev+ngpu)%ngpu) ?  1:0 );
                 magma_int_t myblkoffst = (nbblkoffst/ngpu)+(nbblkoffst%ngpu > dev?1:0);
+
                 magma_int_t myrowsize = myblk * nb;
                 magma_int_t coloffset = myblkoffst*nb;
                 if(dev==stdev) {
@@ -159,33 +162,12 @@ return;
                 }
             }
         }
-        // start async receiving and for all GPU put all their dwork, on work[ngpu] 
-        // note that because each GPU own a myblk so all GPU own nbblk so they could 
-        // fit in work[ngpu] so I store them one after the other. 
-        storingpt = 0;
         for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-            magma_int_t nbblk    = magma_ceildiv((m+blockoffset),nb);
-            magma_int_t nbblkrow = nbblk-1; 
-            magma_int_t stdev    = (offset/nb)%ngpu;
-            magma_int_t devperm  = (dev-stdev+ngpu)%ngpu;
-            magma_int_t myblk = (nbblkrow/ngpu) + (nbblkrow%ngpu > devperm ?  1:0 );
-            magma_int_t myrowsize = myblk * nb;
-             if(dev==stdev) {
-                myrowsize = myrowsize - blockoffset;
-            }
-            //printf("blockoffset %d nbblkrow %d devperm %d  DEV %d RECEIVING myblk %d  myrowsize %d\n",blockoffset,nbblkrow,devperm,dev,myblk,myrowsize);
-            if(myrowsize>0){
-                cudaSetDevice( dev );
-                magmablasSetKernelStream( streams[ dev ][ 1 ] );
-                cudaMemcpy2DAsync(&work[ngpu][storingpt], ldwork*sizeof(cuDoubleComplex),
-                                  dwork[dev], lddwork*sizeof(cuDoubleComplex),
-                                  myrowsize*sizeof(cuDoubleComplex), n,
-                                  cudaMemcpyDeviceToHost, streams[ dev ][ 1 ]);
-                storingpt =  storingpt + myrowsize;
-            }
+            cudaSetDevice( dev );
+            cudaEventRecord(redevents[dev][1], streams[dev][1]);
         }
     }
-
+    
 
     // COL GEMM
     // blockoffset is offset within first block; for subsequent blocks it is 0
@@ -243,15 +225,10 @@ return;
                          c_one, dC(dev,0,0),    lddc );
         }
     }
-    
 
-    // wait and reduce results
-    memset(C,0,ldc*n*sizeof(cuDoubleComplex));
-    //    memset(C,0,n*nb*sizeof(cuDoubleComplex));
-    // receive and put on its placment the row block
+
     
     if(ngpu>1){
-        storingpt = 0;
         for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
             magma_int_t nbblk    = magma_ceildiv((m+blockoffset),nb);
             magma_int_t nbblkrow = nbblk-1; 
@@ -266,9 +243,11 @@ return;
             //printf("blockoffset %d nbblkrow %d devperm %d  DEV %d RECEIVING myblk %d  myrowsize %d\n",blockoffset,nbblkrow,devperm,dev,myblk,myrowsize);
             if(myrowsize>0){
                 cudaSetDevice( dev );
-                magma_queue_sync( streams[ dev ][ 1 ] );
-                // for each dev put the received block each on its placment
-                for(magma_int_t blki = 0; blki < myblk; ++blki){
+                magmablasSetKernelStream( streams[ dev ][ 0 ] );
+                cudaStreamWaitEvent(streams[ dev ][ 0 ], redevents[dev][1], 0);
+                //magma_queue_sync( streams[ dev ][ 1 ] );
+                // for each dev add the computed ROW block each on its placment with dC
+                for( magma_int_t blki = 0; blki < myblk; ++blki){
                     magma_int_t gbblki = (blki*ngpu + devperm)*nb - blockoffset;
                     magma_int_t lcblki = blki*nb;
                     magma_int_t ib     = nb;// min(nb,m-gbblki);
@@ -280,63 +259,65 @@ return;
                             ib     = nb-blockoffset;
                         }
                     }
-                    //printf("blockoffset %d nbblkrow %d devperm %d  DEV %d RECEIVING myblk %d  myrowsize %d copying blki %d of size %d from work[%d] to C[%d]\n",blockoffset,nbblkrow,devperm,dev,myblk,myrowsize,blki,ib,lcblki,gbblki);
-                    //printf("stdev %d  dev %d myblk %d  blki  %d  gbblki %d\n",stdev,dev,myblk,blki,gbblki);
-                    lcblki = lcblki + storingpt;
-                    lapackf77_zlacpy("A", &ib, &n, &work[ngpu][lcblki], &ldwork, &C[gbblki], &ldc);
-         
+                    magmablas_zgeadd(ib, n, c_one, 
+                                    &dwork[dev][lcblki], lddwork, 
+                                    &dC[dev][gbblki]   , lddc   );
                 }
-                storingpt =  storingpt + myrowsize;
+                //cudaEventRecord(redevents[dev][0], streams[dev][0]);                
             }
         }
     }
 
-    
-
-    magma_int_t size   = ldc*n;
-    magma_int_t fstcpy = 1;   
-    magma_int_t nxtdev,nxtdevperm,nxtmyblk;
-    for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-        magma_int_t nbblk   = magma_ceildiv(m+blockoffset,nb);
-        magma_int_t stdev   = (offset/nb)%ngpu;
-        magma_int_t devperm = (dev-stdev+ngpu)%ngpu;
-        magma_int_t myblk   = (nbblk/ngpu) + (nbblk%ngpu > devperm ?  1:0 );
-        //printf("DEV %d COL RECEIVING stdev %d devperm %d myblk %d  m %d   n %d  \n",dev,stdev,devperm,myblk,m,n);
-        if(myblk>0){
-           cudaSetDevice( dev );       
-           magmablasSetKernelStream( streams[ dev ][ 0 ] );
-           magma_queue_sync( streams[ dev ][ 0 ] );
-           if(ngpu==1){
-               magma_zgetmatrix( m, n, dC[dev], lddc, C, ldc );
-           }else{
-               if(fstcpy)magma_zgetmatrix( m, n, dC[dev], lddc, work[dev], ldwork );
-               fstcpy = 0;
-               // preparing next receive from the next available GPU
-               for (nxtdev=dev+1; nxtdev<ngpu; ++nxtdev)
-               {
-                   nxtdevperm = (nxtdev-stdev+ngpu)%ngpu;
-                   nxtmyblk   = (nbblk/ngpu) + (nbblk%ngpu > nxtdevperm ?  1:0 );
-                   if(nxtmyblk>0) {
-                       cudaSetDevice( nxtdev ); 
-                       magma_zgetmatrix_async( m, n, dC[nxtdev], lddc, work[nxtdev], ldwork, streams[ nxtdev ][ 0 ] );
-                       break;
-                   }
+    if(ngpu==1){
+        magma_zgetmatrix( m, n, dC[0], lddc, C, ldwork );
+    }else{
+        // wait and reduce results
+        memset(C,0,ldc*n*sizeof(cuDoubleComplex));
+        magma_int_t size   = ldc*n;
+        magma_int_t blkreceived = 0;  
+        magma_int_t fstdevcpy   = -1;
+        magma_int_t nxtdev,nxtdevperm,nxtmyblk;
+        for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
+            magma_int_t nbblk   = magma_ceildiv(m+blockoffset,nb);
+            magma_int_t stdev   = (offset/nb)%ngpu;
+            magma_int_t devperm = (dev-stdev+ngpu)%ngpu;
+            magma_int_t myblk   = (nbblk/ngpu) + (nbblk%ngpu > devperm ?  1:0 );
+            //printf("DEV %d COL RECEIVING stdev %d devperm %d myblk %d  m %d   n %d  \n",dev,stdev,devperm,myblk,m,n);
+            if(myblk>0){
+               cudaSetDevice( dev );        
+               magmablasSetKernelStream( streams[ dev ][ 0 ] );
+               //cudaStreamWaitEvent(0, redevents[dev][0], 0);
+               //cudaStreamWaitEvent(streams[ dev ][ 0 ], redevents[dev][0], 0);
+               blkreceived = blkreceived +1;
+               if(blkreceived==1){
+                   magma_zgetmatrix_async( m, n, dC[dev], lddc, C, ldc, streams[ dev ][ 0 ] );
+                   fstdevcpy = dev;
                }
-               blasf77_zaxpy( &size, &c_one, work[dev], &ione, C, &ione );
+               if(blkreceived==2){
+                   magma_zgetmatrix_async( m, n, dC[dev], lddc, work[dev], ldwork, streams[ dev ][ 0 ] );
+                   magma_queue_sync( streams[ fstdevcpy ][ 0 ] );
+               }
+
+               // preparing next receive from the next available GPU
+               if(blkreceived>=2){
+                   for (nxtdev=dev+1; nxtdev<ngpu; ++nxtdev)
+                   {
+                       nxtdevperm = (nxtdev-stdev+ngpu)%ngpu;
+                       nxtmyblk   = (nbblk/ngpu) + (nbblk%ngpu > nxtdevperm ?  1:0 );
+                       if(nxtmyblk>0) {
+                           cudaSetDevice( nxtdev ); 
+                           magma_zgetmatrix_async( m, n, dC[nxtdev], lddc, work[nxtdev], ldwork, streams[ nxtdev ][ 0 ] );
+                           break;
+                       }
+                   }
+                   magma_queue_sync( streams[ dev ][ 0 ] );
+                   blasf77_zaxpy( &size, &c_one, work[dev], &ione, C, &ione );
+               }
            }
-        }
-    }
-    
+       }
+   }
  
-/*
-    for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-        cudaSetDevice( dev );
-        magmablasSetKernelStream( streams[ dev ][ 0 ] );
-        for( magma_int_t s = 0; s < nstream; ++s ) {
-            magma_queue_sync( streams[ dev ][ s ] );
-        }
-    }
-*/
+
     // Synchronous send X=AVT from CPU to all active GPUs 
     // because async is the same by cutting the bandwidth
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
@@ -352,7 +333,17 @@ return;
         }
     }
 
-    
+/*
+    // send X=AVT stored in dW to all GPUs 
+    for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
+        cudaSetDevice( dev );
+        magma_zsetmatrix_async( m, n,
+                 work, ldwork,
+                 dC[dev],  lddc, streams[dev][0] );
+
+    }
+*/
+
     cudaSetDevice( cdev );
     magmablasSetKernelStream( cstream );
 
