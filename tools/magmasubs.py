@@ -310,6 +310,7 @@ subs = {
     ('SAUXILIARY',     'DAUXILIARY',     'CAUXILIARY',     'ZAUXILIARY'      ),
     ('sauxiliary',     'dauxiliary',     'cauxiliary',     'zauxiliary'      ),
     ('sbcyclic',       'dbcyclic',       'cbcyclic',       'zbcyclic'        ),
+    ('sb2st',          'sb2st',          'hb2st',          'hb2st'           ),
     ('sbulge',         'dbulge',         'cbulge',         'zbulge'          ),
     ('SCODELETS',      'DCODELETS',      'CCODELETS',      'ZCODELETS'       ),
     ('sgetmatrix',     'dgetmatrix',     'cgetmatrix',     'zgetmatrix'      ),

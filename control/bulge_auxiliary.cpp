@@ -19,10 +19,78 @@
 
 extern "C" {
 
+    /////////////////////////////////////////
+    // Parameters for 2-stage eigensolvers //
+    /////////////////////////////////////////
+
     magma_int_t magma_bulge_get_nb(magma_int_t n)
     {
         return 64;
     }
+
+    /////////////////////////////////////////
+
+    magma_int_t magma_sbulge_get_Vblksiz(magma_int_t n, magma_int_t nb)
+    {
+        return min(nb,64);
+    }
+
+    magma_int_t magma_dbulge_get_Vblksiz(magma_int_t n, magma_int_t nb)
+    {
+        return min(nb,64);
+    }
+
+    magma_int_t magma_cbulge_get_Vblksiz(magma_int_t n, magma_int_t nb)
+    {
+        return min(nb,32);
+    }
+
+    magma_int_t magma_zbulge_get_Vblksiz(magma_int_t n, magma_int_t nb)
+    {
+        return min(nb,32);
+    }
+
+    /////////////////////////////////////////
+
+    magma_int_t magma_sbulge_get_lq2(magma_int_t n)
+    {
+        magma_int_t nb = magma_bulge_get_nb(n);
+        magma_int_t Vblksiz = magma_zbulge_get_Vblksiz(n, nb);
+        magma_int_t ldv = nb + Vblksiz - 1;
+        magma_int_t ldt = Vblksiz;
+        return magma_bulge_get_blkcnt(n, nb, Vblksiz) * Vblksiz * (ldt + ldv + 1);
+    }
+
+    magma_int_t magma_dbulge_get_lq2(magma_int_t n)
+    {
+        magma_int_t nb = magma_bulge_get_nb(n);
+        magma_int_t Vblksiz = magma_dbulge_get_Vblksiz(n, nb);
+        magma_int_t ldv = nb + Vblksiz - 1;
+        magma_int_t ldt = Vblksiz;
+        return magma_bulge_get_blkcnt(n, nb, Vblksiz) * Vblksiz * (ldt + ldv + 1);
+    }
+
+    magma_int_t magma_cbulge_get_lq2(magma_int_t n)
+    {
+        magma_int_t nb = magma_bulge_get_nb(n);
+        magma_int_t Vblksiz = magma_dbulge_get_Vblksiz(n, nb);
+        magma_int_t ldv = nb + Vblksiz - 1;
+        magma_int_t ldt = Vblksiz;
+        return magma_bulge_get_blkcnt(n, nb, Vblksiz) * Vblksiz * (ldt + ldv + 1);
+    }
+
+    magma_int_t magma_zbulge_get_lq2(magma_int_t n)
+    {
+        magma_int_t nb = magma_bulge_get_nb(n);
+        magma_int_t Vblksiz = magma_dbulge_get_Vblksiz(n, nb);
+        magma_int_t ldv = nb + Vblksiz - 1;
+        magma_int_t ldt = Vblksiz;
+        return magma_bulge_get_blkcnt(n, nb, Vblksiz) * Vblksiz * (ldt + ldv + 1);
+    }
+
+    //////////////////////////////////////////////////
+    // Auxiliary functions for 2-stage eigensolvers //
+    //////////////////////////////////////////////////
 
     void cmp_vals(int n, double *wr1, double *wr2, double *nrmI, double *nrm1, double *nrm2)
     {
@@ -43,10 +111,9 @@ extern "C" {
         *nrm2 = sqrt( sumv );
     }
 
-
     void magma_bulge_findpos113(magma_int_t n, magma_int_t nb, magma_int_t Vblksiz, magma_int_t sweep, magma_int_t st, magma_int_t *myblkid)
     {
-        magma_int_t prevGblkid, nbprevGblk, mastersweep;        
+        magma_int_t prevGblkid, nbprevGblk, mastersweep;
         magma_int_t locblknb   = 0;
         magma_int_t prevblkcnt = 0;
         magma_int_t myblknb    = 0;
@@ -54,35 +121,35 @@ extern "C" {
         magma_int_t myGblkid   = sweep/Vblksiz;
 
         // go forward and for each Gblk(a column of blocks) before my Gblk compute its number of blk.
-        
-        //=================================================== 
+
+        //===================================================
         for (prevGblkid = lstGblkid; prevGblkid > myGblkid; prevGblkid--)
         {
-            mastersweep  = prevGblkid * Vblksiz;        
-            if(prevGblkid==lstGblkid) 
+            mastersweep  = prevGblkid * Vblksiz;
+            if(prevGblkid==lstGblkid)
                 locblknb = magma_ceildiv((n-(mastersweep+1)),nb);
             else
                 locblknb = magma_ceildiv((n-(mastersweep+2)),nb);
             prevblkcnt   = prevblkcnt + locblknb;
         }
-        //=================================================== 
+        //===================================================
         /*
         // for best performance, the if condiiton inside the loop
-        // is only for prevblkid==lastblkid so I can unroll this 
+        // is only for prevblkid==lastblkid so I can unroll this
         // out of the loop and so remove the if condition.
-        //=================================================== 
+        //===================================================
         // for prevGblkid==lstGblkid
-        mastersweep  = lstGblkid * Vblksiz;        
+        mastersweep  = lstGblkid * Vblksiz;
         locblknb     = magma_ceildiv((n-(mastersweep+1)),nb);
         prevblkcnt   = prevblkcnt + locblknb;
         // the remaining of the loop
         for (prevGblkid = lstGblkid-1; prevGblkid > myGblkid; prevGblkid--)
         {
-            mastersweep  = prevGblkid * Vblksiz;        
+            mastersweep  = prevGblkid * Vblksiz;
             locblknb     = magma_ceildiv((n-(mastersweep+2)),nb);
             prevblkcnt   = prevblkcnt + locblknb;
         }
-        //=================================================== 
+        //===================================================
         */
         myblknb = magma_ceildiv((st-sweep),nb);
         *myblkid    = prevblkcnt + myblknb -1;
@@ -192,7 +259,7 @@ extern "C" {
     void findVTpos(magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, magma_int_t sweep, magma_int_t st, magma_int_t *Vpos, magma_int_t *TAUpos, magma_int_t *Tpos, magma_int_t *myblkid)
     {
         // to be able to use and compare with the old reduction function.
-        // route the old function to the new ones because the changes are done on the new function.    
+        // route the old function to the new ones because the changes are done on the new function.
         magma_int_t ldv = NB + Vblksiz -1;
         magma_int_t ldt = Vblksiz;
         magma_bulge_findVTAUTpos(N,  NB, Vblksiz,  sweep,  st,  ldv, ldt,
