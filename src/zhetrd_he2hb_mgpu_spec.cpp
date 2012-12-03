@@ -289,6 +289,8 @@ magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
     //magma_int_t mlocal = ((n / distblk) / ngpu + 1) * distblk;
     magma_int_t lddv = n;
     magma_int_t lddw = lddv;
+    magma_int_t dworksiz    = ldda*nb*3; 
+    
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         cudaSetDevice( dev );
         //magma_zmalloc( &datest[dev], mlocal*ldda );
@@ -296,7 +298,7 @@ magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
         magma_zmalloc( &dvtest[dev], 2*nb*lddv );
         magma_zmalloc( &dwtest[dev], nb*lddw );
         magma_zmalloc( &dworktest[dev], nb*ldda );
-        magma_zmalloc( &dworktestbis[dev], 3*nb*ldda );
+        magma_zmalloc( &dworktestbis[dev], dworksiz );
         workngpu[dev] = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
         magmablasSetKernelStream( streams[ dev ][ 0 ] );
        for( magma_int_t i = 0; i < nbevents; ++i ) {
@@ -504,7 +506,7 @@ magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
                        MagmaLeft, uplo, pm, pk,
                        c_one, dAmgpu, ldda, indi-1,
                                    dworktest, pm,
-                       c_zero,     dwtest, pm, dworktestbis, pm, worktest, pm, workngpu, pm,
+                       c_zero,     dwtest, pm, dworktestbis, dworksiz, worktest, pm, workngpu, pm,
                        ngpu, distblk, streams, nstream-1, redevents, nbevents, gnode, nbcmplx);
              }
              trace_gpu_end( 0, 2 );
