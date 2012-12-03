@@ -34,7 +34,7 @@
 // Having n as template parameter allows compiler to evaluate some conditions at compile time.
 
 template< int n >
-__device__ void sum_reduce2( /*int n,*/ int j, int k, int i, cuDoubleComplex x[][ BLK_N ][ BLK_K +1] )
+__device__ void sum_reduce2( /*int n,*/ int j, int k, int i, cuDoubleComplex x[][ BLK_N +1][ BLK_K +1] )
 {
     __syncthreads();
 /*
@@ -60,8 +60,8 @@ __device__ void sum_reduce2( /*int n,*/ int j, int k, int i, cuDoubleComplex x[]
 
 __global__
 void magmablas_zgemm_reduce_kernel(magma_int_t k, cuDoubleComplex alpha, 
-                                   const cuDoubleComplex *d_A, magma_int_t lda,
-                                   const cuDoubleComplex *d_B, magma_int_t ldb,
+                                   const cuDoubleComplex * __restrict__ d_A, magma_int_t lda,
+                                   const cuDoubleComplex * __restrict__ d_B, magma_int_t ldb,
                                    cuDoubleComplex beta,
                                    cuDoubleComplex *d_C, magma_int_t ldc)
 {
@@ -71,7 +71,7 @@ void magmablas_zgemm_reduce_kernel(magma_int_t k, cuDoubleComplex alpha,
         const cuDoubleComplex *dB = d_B + (blockIdx.y*BLK_N + threadIdx.z) * ldb;
         cuDoubleComplex *dC = d_C + blockIdx.x*BLK_M + blockIdx.y*BLK_N * ldc;
 
-        __shared__ cuDoubleComplex sum[BLK_M][BLK_N][ BLK_K +1];
+        __shared__ cuDoubleComplex sum[BLK_M][BLK_N+1][ BLK_K +1];
         cuDoubleComplex lsum;
 
         /*  w := v' * C  */
