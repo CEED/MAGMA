@@ -35,9 +35,11 @@ magma_zheevdx(char jobz, char range, char uplo,
 
     Purpose
     =======
-    ZHEEVD computes all eigenvalues and, optionally, eigenvectors of a
-    complex Hermitian matrix A.  If eigenvectors are desired, it uses a
-    divide and conquer algorithm.
+    ZHEEVDX computes selected eigenvalues and, optionally, eigenvectors
+    of a complex Hermitian matrix A. Eigenvalues and eigenvectors can
+    be selected by specifying either a range of values or a range of
+    indices for the desired eigenvalues.
+    If eigenvectors are desired, it uses a divide and conquer algorithm.
 
     The divide and conquer algorithm makes very mild assumptions about
     floating point arithmetic. It will work on machines with a guard
@@ -102,13 +104,14 @@ magma_zheevdx(char jobz, char range, char uplo,
             If INFO = 0, the required m eigenvalues in ascending order.
 
     WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
+            On exit, if INFO = 0, WORK[0] returns the optimal LWORK.
 
     LWORK   (input) INTEGER
             The length of the array WORK.
             If N <= 1,                LWORK must be at least 1.
-            If JOBZ  = 'N' and N > 1, LWORK must be at least N * (NB + 1).
+            If JOBZ  = 'N' and N > 1, LWORK must be at least N + N*NB.
             If JOBZ  = 'V' and N > 1, LWORK must be at least 2*N + N**2.
+            NB can be obtained through magma_get_zhetrd_nb(N).
 
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal sizes of the WORK, RWORK and
@@ -118,14 +121,13 @@ magma_zheevdx(char jobz, char range, char uplo,
 
     RWORK   (workspace/output) DOUBLE PRECISION array,
                                            dimension (LRWORK)
-            On exit, if INFO = 0, RWORK(1) returns the optimal LRWORK.
+            On exit, if INFO = 0, RWORK[0] returns the optimal LRWORK.
 
     LRWORK  (input) INTEGER
             The dimension of the array RWORK.
             If N <= 1,                LRWORK must be at least 1.
             If JOBZ  = 'N' and N > 1, LRWORK must be at least N.
-            If JOBZ  = 'V' and N > 1, LRWORK must be at least
-                           1 + 5*N + 2*N**2.
+            If JOBZ  = 'V' and N > 1, LRWORK must be at least 1 + 5*N + 2*N**2.
 
             If LRWORK = -1, then a workspace query is assumed; the
             routine only calculates the optimal sizes of the WORK, RWORK
@@ -134,7 +136,7 @@ magma_zheevdx(char jobz, char range, char uplo,
             related to LWORK or LRWORK or LIWORK is issued by XERBLA.
 
     IWORK   (workspace/output) INTEGER array, dimension (MAX(1,LIWORK))
-            On exit, if INFO = 0, IWORK(1) returns the optimal LIWORK.
+            On exit, if INFO = 0, IWORK[0] returns the optimal LIWORK.
 
     LIWORK  (input) INTEGER
             The dimension of the array IWORK.
@@ -171,10 +173,9 @@ magma_zheevdx(char jobz, char range, char uplo,
     char uplo_[2] = {uplo, 0};
     char jobz_[2] = {jobz, 0};
     char range_[2] = {range, 0};
-    magma_int_t c__1 = 1;
-    magma_int_t c_n1 = -1;
-    magma_int_t c__0 = 0;
-    double c_b18 = 1.;
+    magma_int_t ione = 1;
+    magma_int_t izero = 0;
+    double d_one = 1.;
 
     double d__1;
 
@@ -235,20 +236,26 @@ magma_zheevdx(char jobz, char range, char uplo,
         }
     }
 
-    magma_int_t nb = magma_get_zhetrd_nb(n);
-
-    if (wantz) {
-        lwmin = 2 * n + n * n;
-        lrwmin = 1 + 5 * n + 2 * n * n;
-        liwmin = 5 * n + 3;
-    } else {
-        lwmin = n * (nb + 1);
+    magma_int_t nb = magma_get_zhetrd_nb( n );
+    if ( n <= 1 ) {
+        lwmin  = 1;
+        lrwmin = 1;
+        liwmin = 1;
+    }
+    else if ( wantz ) {
+        lwmin  = 2*n + n*n;
+        lrwmin = 1 + 5*n + 2*n*n;
+        liwmin = 3 + 5*n;
+    }
+    else {
+        lwmin  = n + n*nb;
         lrwmin = n;
         liwmin = 1;
     }
-
-    MAGMA_Z_SET2REAL(work[0],(double)lwmin);
-    rwork[0] = lrwmin;
+    // multiply by 1+eps to ensure length gets rounded up,
+    // if it cannot be exactly represented in floating point.
+    work[0]  = MAGMA_Z_MAKE( lwmin * (1. + lapackf77_dlamch("Epsilon")), 0.);
+    rwork[0] = lrwmin * (1. + lapackf77_dlamch("Epsilon"));
     iwork[0] = liwmin;
 
     if ((lwork < lwmin) && !lquery) {
@@ -282,7 +289,7 @@ magma_zheevdx(char jobz, char range, char uplo,
 
     /* Get machine constants. */
     safmin = lapackf77_dlamch("Safe minimum");
-    eps = lapackf77_dlamch("Precision");
+    eps    = lapackf77_dlamch("Precision");
     smlnum = safmin / eps;
     bignum = 1. / smlnum;
     rmin = magma_dsqrt(smlnum);
@@ -299,24 +306,29 @@ magma_zheevdx(char jobz, char range, char uplo,
         sigma = rmax / anrm;
     }
     if (iscale == 1) {
-        lapackf77_zlascl(uplo_, &c__0, &c__0, &c_b18, &sigma, &n, &n, a,
+        lapackf77_zlascl(uplo_, &izero, &izero, &d_one, &sigma, &n, &n, a,
                          &lda, info);
     }
 
     /* Call ZHETRD to reduce Hermitian matrix to tridiagonal form. */
-    inde = 0;
+    // zhetrd rwork: e (n)
+    // zstedx rwork: e (n) + llrwk (1 + 4*N + 2*N**2)  ==>  1 + 5n + 2n^2
+    inde   = 0;
+    indrwk = inde + n;
+    llrwk  = lrwork - indrwk;
+
+    // zhetrd work: tau (n) + llwork (n*nb)  ==>  n + n*nb
+    // zstedx work: tau (n) + z (n^2)
+    // zunmtr work: tau (n) + z (n^2) + llwrk2 (n or n*nb)  ==>  2n + n^2, or n + n*nb + n^2
     indtau = 0;
     indwrk = indtau + n;
-    indrwk = inde + n;
-    indwk2 = indwrk + n * n;
+    indwk2 = indwrk + n*n;
     llwork = lwork - indwrk;
     llwrk2 = lwork - indwk2;
-    llrwk = lrwork - indrwk;
 
 //#define ENABLE_TIMER
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
-
     start = get_current_time();
 #endif
 
@@ -325,7 +337,6 @@ magma_zheevdx(char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-
     printf("time zhetrd = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
@@ -335,6 +346,9 @@ magma_zheevdx(char jobz, char range, char uplo,
      transformations represented as Householder vectors in A. */
     if (! wantz) {
         lapackf77_dsterf(&n, w, &rwork[inde], info);
+
+        magma_zmove_eig(range, n, w, &il, &iu, vl, vu, m);
+
     } else {
 
 #ifdef ENABLE_TIMER
@@ -354,7 +368,6 @@ magma_zheevdx(char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time zstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
 
         start = get_current_time();
@@ -369,7 +382,6 @@ magma_zheevdx(char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time zunmtr + copy = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
@@ -383,11 +395,11 @@ magma_zheevdx(char jobz, char range, char uplo,
             imax = *info - 1;
         }
         d__1 = 1. / sigma;
-        blasf77_dscal(&imax, &d__1, w, &c__1);
+        blasf77_dscal(&imax, &d__1, w, &ione);
     }
 
-    work[0]  = MAGMA_Z_MAKE((double) lwmin, 0.);
-    rwork[0] = (double) lrwmin;
+    work[0]  = MAGMA_Z_MAKE( lwmin * (1. + lapackf77_dlamch("Epsilon")), 0.);  // round up
+    rwork[0] = lrwmin * (1. + lapackf77_dlamch("Epsilon"));
     iwork[0] = liwmin;
 
     return *info;

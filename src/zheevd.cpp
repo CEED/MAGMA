@@ -144,9 +144,9 @@ magma_zheevd(char jobz, char uplo,
     magma_int_t ione = 1;
     magma_int_t izero = 0;
     double d_one = 1.;
-    
+
     double d__1;
-    
+
     double eps;
     magma_int_t inde;
     double anrm;
@@ -166,13 +166,13 @@ magma_zheevd(char jobz, char uplo,
     magma_int_t lrwmin, llwork;
     double smlnum;
     magma_int_t lquery;
-    
+
     double* dwork;
-    
+
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);
     lower = lapackf77_lsame(uplo_, MagmaLowerStr);
     lquery = lwork == -1 || lrwork == -1 || liwork == -1;
-    
+
     *info = 0;
     if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVectorsStr))) {
         *info = -1;
@@ -183,7 +183,7 @@ magma_zheevd(char jobz, char uplo,
     } else if (lda < max(1,n)) {
         *info = -5;
     }
-    
+
     magma_int_t nb = magma_get_zhetrd_nb( n );
     if ( n <= 1 ) {
         lwmin  = 1;
@@ -201,11 +201,11 @@ magma_zheevd(char jobz, char uplo,
         liwmin = 1;
     }
     // multiply by 1+eps to ensure length gets rounded up,
-    // if it cannot be exactly represented in floating point.    
+    // if it cannot be exactly represented in floating point.
     work[0]  = MAGMA_Z_MAKE( lwmin * (1. + lapackf77_dlamch("Epsilon")), 0.);
     rwork[0] = lrwmin * (1. + lapackf77_dlamch("Epsilon"));
     iwork[0] = liwmin;
-    
+
     if ((lwork < lwmin) && !lquery) {
         *info = -8;
     } else if ((lrwork < lrwmin) && ! lquery) {
@@ -213,7 +213,7 @@ magma_zheevd(char jobz, char uplo,
     } else if ((liwork < liwmin) && ! lquery) {
         *info = -12;
     }
-    
+
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
         return *info;
@@ -221,12 +221,12 @@ magma_zheevd(char jobz, char uplo,
     else if (lquery) {
         return *info;
     }
-    
+
     /* Quick return if possible */
     if (n == 0) {
         return *info;
     }
-    
+
     if (n == 1) {
         w[0] = MAGMA_Z_REAL(a[0]);
         if (wantz) {
@@ -234,7 +234,7 @@ magma_zheevd(char jobz, char uplo,
         }
         return *info;
     }
-    
+
     /* Get machine constants. */
     safmin = lapackf77_dlamch("Safe minimum");
     eps    = lapackf77_dlamch("Precision");
@@ -242,7 +242,7 @@ magma_zheevd(char jobz, char uplo,
     bignum = 1. / smlnum;
     rmin = magma_dsqrt(smlnum);
     rmax = magma_dsqrt(bignum);
-    
+
     /* Scale matrix to allowable range, if necessary. */
     anrm = lapackf77_zlanhe("M", uplo_, &n, a, &lda, rwork);
     iscale = 0;
@@ -257,14 +257,14 @@ magma_zheevd(char jobz, char uplo,
         lapackf77_zlascl(uplo_, &izero, &izero, &d_one, &sigma, &n, &n, a,
                          &lda, info);
     }
-    
+
     /* Call ZHETRD to reduce Hermitian matrix to tridiagonal form. */
     // zhetrd rwork: e (n)
     // zstedx rwork: e (n) + llrwk (1 + 4*N + 2*N**2)  ==>  1 + 5n + 2n^2
     inde   = 0;
     indrwk = inde + n;
     llrwk  = lrwork - indrwk;
-    
+
     // zhetrd work: tau (n) + llwork (n*nb)  ==>  n + n*nb
     // zstedx work: tau (n) + z (n^2)
     // zunmtr work: tau (n) + z (n^2) + llwrk2 (n or n*nb)  ==>  2n + n^2, or n + n*nb + n^2
@@ -273,21 +273,21 @@ magma_zheevd(char jobz, char uplo,
     indwk2 = indwrk + n*n;
     llwork = lwork - indwrk;
     llwrk2 = lwork - indwk2;
-    
+
 //#define ENABLE_TIMER
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
     start = get_current_time();
 #endif
-    
+
     magma_zhetrd(uplo_[0], n, a, lda, w, &rwork[inde],
                  &work[indtau], &work[indwrk], llwork, &iinfo);
-    
+
 #ifdef ENABLE_TIMER
     end = get_current_time();
     printf("time zhetrd = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
-    
+
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call
      ZSTEDC to generate the eigenvector matrix, WORK(INDWRK), of the
      tridiagonal matrix, then call ZUNMTR to multiply it to the Householder
@@ -295,40 +295,40 @@ magma_zheevd(char jobz, char uplo,
     if (! wantz) {
         lapackf77_dsterf(&n, w, &rwork[inde], info);
     } else {
-        
+
 #ifdef ENABLE_TIMER
         start = get_current_time();
 #endif
-        
+
         if (MAGMA_SUCCESS != magma_dmalloc( &dwork, 3*n*(n/2 + 1) )) {
             *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;
         }
-        
+
         magma_zstedx('A', n, 0., 0., 0, 0, w, &rwork[inde],
                      &work[indwrk], n, &rwork[indrwk],
                      llrwk, iwork, liwork, dwork, info);
-        
+
         magma_free( dwork );
-        
+
 #ifdef ENABLE_TIMER
         end = get_current_time();
         printf("time zstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
-        
+
         start = get_current_time();
 #endif
-        
+
         magma_zunmtr(MagmaLeft, uplo, MagmaNoTrans, n, n, a, lda, &work[indtau],
                      &work[indwrk], n, &work[indwk2], llwrk2, &iinfo);
-        
+
         lapackf77_zlacpy("A", &n, &n, &work[indwrk], &n, a, &lda);
-        
+
 #ifdef ENABLE_TIMER
         end = get_current_time();
         printf("time zunmtr + copy = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
     }
-    
+
     /* If matrix was scaled, then rescale eigenvalues appropriately. */
     if (iscale == 1) {
         if (*info == 0) {
@@ -339,10 +339,10 @@ magma_zheevd(char jobz, char uplo,
         d__1 = 1. / sigma;
         blasf77_dscal(&imax, &d__1, w, &ione);
     }
-    
+
     work[0]  = MAGMA_Z_MAKE( lwmin * (1. + lapackf77_dlamch("Epsilon")), 0.);  // round up
     rwork[0] = lrwmin * (1. + lapackf77_dlamch("Epsilon"));
     iwork[0] = liwmin;
-    
+
     return *info;
 } /* magma_zheevd */

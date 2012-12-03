@@ -73,9 +73,11 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
 
     Purpose
     =======
-    ZHEEVD computes all eigenvalues and, optionally, eigenvectors of a
-    complex Hermitian matrix A.  If eigenvectors are desired, it uses a
-    divide and conquer algorithm.
+    ZHEEVDX_GPU computes selected eigenvalues and, optionally, eigenvectors
+    of a complex Hermitian matrix A. Eigenvalues and eigenvectors can
+    be selected by specifying either a range of values or a range of
+    indices for the desired eigenvalues.
+    If eigenvectors are desired, it uses a divide and conquer algorithm.
 
     The divide and conquer algorithm makes very mild assumptions about
     floating point arithmetic. It will work on machines with a guard
@@ -103,13 +105,15 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
     N       (input) INTEGER
             The order of the matrix A.  N >= 0.
 
-    DA      (device input/output) COMPLEX_16 array, dimension (LDDA, N)
+    DA      (device input/output) COMPLEX_16 array on the GPU,
+            dimension (LDDA, N).
             On entry, the Hermitian matrix A.  If UPLO = 'U', the
             leading N-by-N upper triangular part of A contains the
             upper triangular part of the matrix A.  If UPLO = 'L',
             the leading N-by-N lower triangular part of A contains
             the lower triangular part of the matrix A.
-            On exit, if JOBZ = 'V', then if INFO = 0, A contains the
+            On exit, if JOBZ = 'V', then if INFO = 0, the first m columns
+            of A contains the required
             orthonormal eigenvectors of the matrix A.
             If JOBZ = 'N', then on exit the lower triangle (if UPLO='L')
             or the upper triangle (if UPLO='U') of A, including the
@@ -136,7 +140,7 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
             If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
 
     W       (output) DOUBLE PRECISION array, dimension (N)
-            If INFO = 0, the eigenvalues in ascending order.
+            If INFO = 0, the required m eigenvalues in ascending order.
 
     WA      (workspace) COMPLEX_16 array, dimension (LDWA, N)
 
@@ -144,13 +148,14 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
             The leading dimension of the array WA.  LDWA >= max(1,N).
 
     WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
+            On exit, if INFO = 0, WORK[0] returns the optimal LWORK.
 
     LWORK   (input) INTEGER
             The length of the array WORK.
             If N <= 1,                LWORK must be at least 1.
-            If JOBZ  = 'N' and N > 1, LWORK must be at least N + 1.
+            If JOBZ  = 'N' and N > 1, LWORK must be at least N + N*NB.
             If JOBZ  = 'V' and N > 1, LWORK must be at least 2*N + N**2.
+            NB can be obtained through magma_get_zhetrd_nb(N).
 
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal sizes of the WORK, RWORK and
@@ -158,16 +163,14 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
             the WORK, RWORK and IWORK arrays, and no error message
             related to LWORK or LRWORK or LIWORK is issued by XERBLA.
 
-    RWORK   (workspace/output) DOUBLE PRECISION array,
-                                           dimension (LRWORK)
-            On exit, if INFO = 0, RWORK(1) returns the optimal LRWORK.
+    RWORK   (workspace/output) DOUBLE PRECISION array, dimension (LRWORK)
+            On exit, if INFO = 0, RWORK[0] returns the optimal LRWORK.
 
     LRWORK  (input) INTEGER
             The dimension of the array RWORK.
             If N <= 1,                LRWORK must be at least 1.
             If JOBZ  = 'N' and N > 1, LRWORK must be at least N.
-            If JOBZ  = 'V' and N > 1, LRWORK must be at least
-                           1 + 5*N + 2*N**2.
+            If JOBZ  = 'V' and N > 1, LRWORK must be at least 1 + 5*N + 2*N**2.
 
             If LRWORK = -1, then a workspace query is assumed; the
             routine only calculates the optimal sizes of the WORK, RWORK
@@ -176,7 +179,7 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
             related to LWORK or LRWORK or LIWORK is issued by XERBLA.
 
     IWORK   (workspace/output) INTEGER array, dimension (MAX(1,LIWORK))
-            On exit, if INFO = 0, IWORK(1) returns the optimal LIWORK.
+            On exit, if INFO = 0, IWORK[0] returns the optimal LIWORK.
 
     LIWORK  (input) INTEGER
             The dimension of the array IWORK.
@@ -213,7 +216,7 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
     char uplo_[2] = {uplo, 0};
     char jobz_[2] = {jobz, 0};
     char range_[2] = {range, 0};
-    magma_int_t c__1 = 1;
+    magma_int_t ione = 1;
 
     double d__1;
 
@@ -237,8 +240,6 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
     double smlnum;
     magma_int_t lquery;
     magma_int_t alleig, valeig, indeig;
-
-    bool dc_freed = false;
 
     double *dwork;
     cuDoubleComplex *dc;
@@ -280,20 +281,26 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
         }
     }
 
-    magma_int_t nb = magma_get_zhetrd_nb(n);
-
-    if (wantz) {
-        lwmin = 2 * n + n * n;
-        lrwmin = 1 + 5 * n + 2 * n * n;
-        liwmin = 5 * n + 3;
-    } else {
-        lwmin = n * (nb + 1);
+    magma_int_t nb = magma_get_zhetrd_nb( n );
+    if ( n <= 1 ) {
+        lwmin  = 1;
+        lrwmin = 1;
+        liwmin = 1;
+    }
+    else if ( wantz ) {
+        lwmin  = 2*n + n*n;
+        lrwmin = 1 + 5*n + 2*n*n;
+        liwmin = 3 + 5*n;
+    }
+    else {
+        lwmin  = n + n*nb;
         lrwmin = n;
         liwmin = 1;
     }
-
-    MAGMA_Z_SET2REAL(work[0],(double)lwmin);
-    rwork[0] = lrwmin;
+    // multiply by 1+eps to ensure length gets rounded up,
+    // if it cannot be exactly represented in floating point.
+    work[0]  = MAGMA_Z_MAKE( lwmin * (1. + lapackf77_dlamch("Epsilon")), 0.);
+    rwork[0] = lrwmin * (1. + lapackf77_dlamch("Epsilon"));
     iwork[0] = liwmin;
 
     if ((lwork < lwmin) && !lquery) {
@@ -307,7 +314,8 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
     if (*info != 0) {
         magma_xerbla( __func__, -(*info));
         return *info;
-    } else if (lquery) {
+    }
+    else if (lquery) {
         return *info;
     }
 
@@ -330,21 +338,25 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
     cudaStream_t stream;
     magma_queue_create( &stream );
 
-    if (MAGMA_SUCCESS != magma_zmalloc( &dc, n*lddc )) {
-        fprintf (stderr, "!!!! device memory allocation error (magma_zheevdx_gpu)\n");
+    // dc and dwork are never used together, so use one buffer for both;
+    // unfortunately they're different types (complex and double).
+    // (this works better in dsyevd_gpu where they're both double).
+    // n*lddc for zhetrd2_gpu, *2 for complex
+    // n for zlanhe
+    magma_int_t ldwork = n*lddc*2;
+    if ( wantz ) {
+        // need 3n^2/2 for zstedx
+        ldwork = max( ldwork, 3*n*(n/2 + 1) );
+    }
+    if (MAGMA_SUCCESS != magma_dmalloc( &dwork, ldwork )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-
-    if (MAGMA_SUCCESS != magma_dmalloc( &dwork, n )) {
-        fprintf (stderr, "!!!! device memory allocation error (magma_zheevdx_gpu)\n");
-        *info = MAGMA_ERR_DEVICE_ALLOC;
-        return *info;
-    }
+    dc = (cuDoubleComplex*) dwork;
 
     /* Get machine constants. */
     safmin = lapackf77_dlamch("Safe minimum");
-    eps = lapackf77_dlamch("Precision");
+    eps    = lapackf77_dlamch("Precision");
     smlnum = safmin / eps;
     bignum = 1. / smlnum;
     rmin = magma_dsqrt(smlnum);
@@ -361,41 +373,43 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
         sigma = rmax / anrm;
     }
     if (iscale == 1) {
-        magmablas_zlascl(uplo, 0, 0, 1., sigma, n, n, da,
-                         ldda, info);
+        magmablas_zlascl(uplo, 0, 0, 1., sigma, n, n, da, ldda, info);
     }
 
-    magma_free( dwork );
-
     /* Call ZHETRD to reduce Hermitian matrix to tridiagonal form. */
-    inde = 0;
+    // zhetrd rwork: e (n)
+    // zstedx rwork: e (n) + llrwk (1 + 4*N + 2*N**2)  ==>  1 + 5n + 2n^2
+    inde   = 0;
+    indrwk = inde + n;
+    llrwk  = lrwork - indrwk;
+
+    // zhetrd work: tau (n) + llwork (n*nb)  ==>  n + n*nb
+    // zstedx work: tau (n) + z (n^2)
+    // zunmtr work: tau (n) + z (n^2) + llwrk2 (n or n*nb)  ==>  2n + n^2, or n + n*nb + n^2
     indtau = 0;
     indwrk = indtau + n;
-    indrwk = inde + n;
-    indwk2 = indwrk + n * n;
+    indwk2 = indwrk + n*n;
     llwork = lwork - indwrk;
     llwrk2 = lwork - indwk2;
-    llrwk = lrwork - indrwk;
 
 //#define ENABLE_TIMER
 #ifdef ENABLE_TIMER
-        magma_timestr_t start, end;
-
-        start = get_current_time();
+    magma_timestr_t start, end;
+    start = get_current_time();
 #endif
 
 #ifdef FAST_HEMV
     magma_zhetrd2_gpu(uplo, n, da, ldda, w, &rwork[inde],
-                      &work[indtau], wa, ldwa, &work[indwrk], llwork, dc, lddc*n, &iinfo);
+                      &work[indtau], wa, ldwa, &work[indwrk], llwork,
+                      dc, n*lddc, &iinfo);
 #else
     magma_zhetrd_gpu (uplo, n, da, ldda, w, &rwork[inde],
                       &work[indtau], wa, ldwa, &work[indwrk], llwork, &iinfo);
 #endif
 
 #ifdef ENABLE_TIMER
-        end = get_current_time();
-
-        printf("time zhetrd_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
+    end = get_current_time();
+    printf("time zhetrd_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call
@@ -414,39 +428,15 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
         start = get_current_time();
 #endif
 
-        if (MAGMA_SUCCESS != magma_dmalloc( &dwork, 3*n*(n/2 + 1) )) {
-            magma_free( dc );  // if not enough memory is available free dc to be able do allocate dwork
-            dc_freed=true;
-#ifdef ENABLE_TIMER
-            printf("dc deallocated\n");
-#endif
-            if (MAGMA_SUCCESS != magma_dmalloc( &dwork, 3*n*(n/2 + 1) )) {
-                fprintf (stderr, "!!!! device memory allocation error (magma_zheevd_gpu)\n");
-                *info = MAGMA_ERR_DEVICE_ALLOC;
-                return *info;
-            }
-        }
-
         magma_zstedx(range, n, vl, vu, il, iu, w, &rwork[inde],
                      &work[indwrk], n, &rwork[indrwk],
                      llrwk, iwork, liwork, dwork, info);
-
-        magma_free( dwork );
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
 
         printf("time zstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
-
-        if(dc_freed){
-            dc_freed = false;
-            if (MAGMA_SUCCESS != magma_zmalloc( &dc, n*lddc )) {
-                fprintf (stderr, "!!!! device memory allocation error (magma_zheevd_gpu)\n");
-                *info = MAGMA_ERR_DEVICE_ALLOC;
-                return *info;
-            }
-        }
 
 #ifdef ENABLE_TIMER
         start = get_current_time();
@@ -459,13 +449,10 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
         magma_zunmtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, *m, da, ldda, &work[indtau],
                          dc, lddc, wa, ldwa, &iinfo);
 
-        magma_zcopymatrix( n, *m,
-                           dc, lddc,
-                           da, ldda );
+        magma_zcopymatrix( n, *m, dc, lddc, da, ldda );
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time zunmtr_gpu + copy = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
     }
@@ -478,16 +465,15 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
             imax = *info - 1;
         }
         d__1 = 1. / sigma;
-        blasf77_dscal(&imax, &d__1, w, &c__1);
+        blasf77_dscal(&imax, &d__1, w, &ione);
     }
 
-    work[0]  = MAGMA_Z_MAKE((double) lwmin, 0.);
-    rwork[0] = (double) lrwmin;
+    work[0]  = MAGMA_Z_MAKE( lwmin * (1. + lapackf77_dlamch("Epsilon")), 0.);  // round up
+    rwork[0] = lrwmin * (1. + lapackf77_dlamch("Epsilon"));
     iwork[0] = liwmin;
 
     magma_queue_destroy( stream );
-    if (!dc_freed)
-        magma_free( dc );
+    magma_free( dwork );
 
     return *info;
 } /* magma_zheevdx_gpu */

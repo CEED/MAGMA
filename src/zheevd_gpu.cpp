@@ -217,7 +217,7 @@ magma_zheevd_gpu(char jobz, char uplo,
         liwmin = 1;
     }
     // multiply by 1+eps to ensure length gets rounded up,
-    // if it cannot be exactly represented in floating point.    
+    // if it cannot be exactly represented in floating point.
     work[0]  = MAGMA_Z_MAKE( lwmin * (1. + lapackf77_dlamch("Epsilon")), 0.);
     rwork[0] = lrwmin * (1. + lapackf77_dlamch("Epsilon"));
     iwork[0] = liwmin;
@@ -301,7 +301,7 @@ magma_zheevd_gpu(char jobz, char uplo,
     inde   = 0;
     indrwk = inde + n;
     llrwk  = lrwork - indrwk;
-    
+
     // zhetrd work: tau (n) + llwork (n*nb)  ==>  n + n*nb
     // zstedx work: tau (n) + z (n^2)
     // zunmtr work: tau (n) + z (n^2) + llwrk2 (n or n*nb)  ==>  2n + n^2, or n + n*nb + n^2
@@ -362,7 +362,7 @@ magma_zheevd_gpu(char jobz, char uplo,
                          dc, lddc, wa, ldwa, &iinfo);
 
         magma_zcopymatrix( n, n, dc, lddc, da, ldda );
-        
+
 #ifdef ENABLE_TIMER
         end = get_current_time();
         printf("time zunmtr_gpu + copy = %6.2f\n", GetTimerValue(start,end)/1000.);
