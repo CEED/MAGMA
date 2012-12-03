@@ -128,7 +128,7 @@ magma_dsyevd(char jobz, char uplo,
     magma_int_t ione = 1;
     magma_int_t izero = 0;
     double d_one = 1.;
-    
+
     double d__1;
 
     double eps;
@@ -252,7 +252,7 @@ magma_dsyevd(char jobz, char uplo,
 
     magma_dsytrd(uplo, n, a, lda, w, &work[inde],
                  &work[indtau], &work[indwrk], llwork, &iinfo);
-    
+
 #ifdef ENABLE_TIMER
     end = get_current_time();
     printf("time dsytrd = %6.2f\n", GetTimerValue(start,end)/1000.);
@@ -269,28 +269,28 @@ magma_dsyevd(char jobz, char uplo,
 #ifdef ENABLE_TIMER
         start = get_current_time();
 #endif
-        
+
         if (MAGMA_SUCCESS != magma_dmalloc( &dwork, 3*n*(n/2 + 1) )) {
             *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;
         }
-        
+
         magma_dstedx('A', n, 0., 0., 0, 0, w, &work[inde],
                      &work[indwrk], n, &work[indwk2],
                      llwrk2, iwork, liwork, dwork, info);
-        
+
         magma_free( dwork );
-        
+
 #ifdef ENABLE_TIMER
         end = get_current_time();
         printf("time dstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
-        
+
         start = get_current_time();
 #endif
 
         magma_dormtr(MagmaLeft, uplo, MagmaNoTrans, n, n, a, lda, &work[indtau],
                      &work[indwrk], n, &work[indwk2], llwrk2, &iinfo);
-        
+
         lapackf77_dlacpy("A", &n, &n, &work[indwrk], &n, a, &lda);
 
 #ifdef ENABLE_TIMER

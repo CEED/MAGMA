@@ -5,7 +5,6 @@
        Univ. of Colorado, Denver
        November 2011
 
-       @author Stan Tomov
        @author Raffaele Solca
 
        @precisions normal d -> s
@@ -14,10 +13,11 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
-             double *a, magma_int_t lda, double *b, magma_int_t ldb,
-             double *w, double *work, magma_int_t lwork,
-             magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
+magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
+              double *a, magma_int_t lda, double *b, magma_int_t ldb,
+              double vl, double vu, magma_int_t il, magma_int_t iu,
+              magma_int_t *m, double *w, double *work, magma_int_t lwork,
+              magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -27,10 +27,12 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
 
     Purpose
     =======
-    DSYGVD computes all the eigenvalues, and optionally, the eigenvectors
+    DSYGVDX computes selected eigenvalues and, optionally, eigenvectors
     of a real generalized symmetric-definite eigenproblem, of the form
     A*x=(lambda)*B*x,  A*Bx=(lambda)*x,  or B*A*x=(lambda)*x.  Here A and
     B are assumed to be symmetric and B is also positive definite.
+    Eigenvalues and eigenvectors can be selected by specifying either a
+    range of values or a range of indices for the desired eigenvalues.
     If eigenvectors are desired, it uses a divide and conquer algorithm.
 
     The divide and conquer algorithm makes very mild assumptions about
@@ -47,6 +49,12 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
             = 1:  A*x = (lambda)*B*x
             = 2:  A*B*x = (lambda)*x
             = 3:  B*A*x = (lambda)*x
+
+    RANGE   (input) CHARACTER*1
+            = 'A': all eigenvalues will be found.
+            = 'V': all eigenvalues in the half-open interval (VL,VU]
+                   will be found.
+            = 'I': the IL-th through IU-th eigenvalues will be found.
 
     JOBZ    (input) CHARACTER*1
             = 'N':  Compute eigenvalues only;
@@ -92,6 +100,22 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     LDB     (input) INTEGER
             The leading dimension of the array B.  LDB >= max(1,N).
 
+    VL      (input) DOUBLE PRECISION
+    VU      (input) DOUBLE PRECISION
+            If RANGE='V', the lower and upper bounds of the interval to
+            be searched for eigenvalues. VL < VU.
+            Not referenced if RANGE = 'A' or 'I'.
+
+    IL      (input) INTEGER
+    IU      (input) INTEGER
+            If RANGE='I', the indices (in ascending order) of the
+            smallest and largest eigenvalues to be returned.
+            1 <= IL <= IU <= N, if N > 0; IL = 1 and IU = 0 if N = 0.
+            Not referenced if RANGE = 'A' or 'V'.
+
+    M       (output) INTEGER
+            The total number of eigenvalues found.  0 <= M <= N.
+            If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
     W       (output) DOUBLE PRECISION array, dimension (N)
             If INFO = 0, the eigenvalues in ascending order.
 
@@ -160,6 +184,7 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
 
     char uplo_[2] = {uplo, 0};
     char jobz_[2] = {jobz, 0};
+    char range_[2] = {range, 0};
 
     double d_one = MAGMA_D_ONE;
 
@@ -171,6 +196,7 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     magma_int_t lower;
     char trans[1];
     magma_int_t wantz, lquery;
+    magma_int_t alleig, valeig, indeig;
 
     magma_int_t lwmin, liwmin;
 
@@ -179,21 +205,38 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
 
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);
     lower = lapackf77_lsame(uplo_, MagmaLowerStr);
+    alleig = lapackf77_lsame(range_, "A");
+    valeig = lapackf77_lsame(range_, "V");
+    indeig = lapackf77_lsame(range_, "I");
     lquery = lwork == -1 || liwork == -1;
 
     *info = 0;
     if (itype < 1 || itype > 3) {
         *info = -1;
-    } else if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVectorsStr))) {
+    } else if (! (alleig || valeig || indeig)) {
         *info = -2;
-    } else if (! (lower || lapackf77_lsame(uplo_, MagmaUpperStr))) {
+    } else if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVectorsStr))) {
         *info = -3;
-    } else if (n < 0) {
+    } else if (! (lower || lapackf77_lsame(uplo_, MagmaUpperStr))) {
         *info = -4;
+    } else if (n < 0) {
+        *info = -5;
     } else if (lda < max(1,n)) {
-        *info = -6;
+        *info = -7;
     } else if (ldb < max(1,n)) {
-        *info = -8;
+        *info = -9;
+    } else {
+        if (valeig) {
+            if (n > 0 && vu <= vl) {
+                *info = -11;
+            }
+        } else if (indeig) {
+            if (il < 1 || il > max(1,n)) {
+                *info = -12;
+            } else if (iu < min(n,il) || iu > n) {
+                *info = -13;
+            }
+        }
     }
 
     magma_int_t nb = magma_get_dsytrd_nb( n );
@@ -215,9 +258,9 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     iwork[0] = liwmin;
 
     if (lwork < lwmin && ! lquery) {
-        *info = -11;
+        *info = -17;
     } else if (liwork < liwmin && ! lquery) {
-         *info = -13;
+         *info = -19;
     }
 
     if (*info != 0) {
@@ -283,12 +326,12 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     start = get_current_time();
 #endif
 
-    magma_dsyevd_gpu(jobz, uplo, n, da, ldda, w, a, lda,
-                     work, lwork, iwork, liwork, info);
+    magma_dsyevdx_gpu(jobz, range, uplo, n, da, ldda, vl, vu, il, iu, m, w, a, lda,
+                      work, lwork, iwork, liwork, info);
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-    printf("time dsyevd_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
+    printf("time dsyevdx_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
     if (wantz && *info == 0)
@@ -310,7 +353,7 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
             }
 
             magma_dtrsm(MagmaLeft, uplo, *trans, MagmaNonUnit,
-                        n, n, d_one, db, lddb, da, ldda);
+                        n, *m, d_one, db, lddb, da, ldda);
 
         }
         else if (itype == 3)
@@ -324,10 +367,10 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
             }
 
             magma_dtrmm(MagmaLeft, uplo, *trans, MagmaNonUnit,
-                        n, n, d_one, db, lddb, da, ldda);
+                        n, *m, d_one, db, lddb, da, ldda);
         }
 
-        magma_dgetmatrix( n, n, da, ldda, a, lda );
+        magma_dgetmatrix( n, *m, da, ldda, a, lda );
 
 #ifdef ENABLE_TIMER
           end = get_current_time();

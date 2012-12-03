@@ -6,26 +6,65 @@
        November 2011
 
        @author Stan Tomov
-       @author Mark Gates
        @author Raffaele Solca
+       @author Mark Gates
 
        @precisions normal d -> s
 
 */
 #include "common_magma.h"
+
 extern"C"
 void magma_dmove_eig(char range, magma_int_t n, double *w, magma_int_t *il,
-                     magma_int_t *iu, double vl, double vu, magma_int_t *m);
+                     magma_int_t *iu, double vl, double vu, magma_int_t *m)
+{
+    char range_[2] = {range, 0};
+
+    magma_int_t valeig, indeig, i;
+
+    valeig = lapackf77_lsame( range_, "V" );
+    indeig = lapackf77_lsame( range_, "I" );
+
+    if (indeig){
+        *m = *iu - *il + 1;
+        if(*il > 1)
+            for (i = 0; i < *m; ++i)
+                w[i] = w[*il - 1 + i];
+    }
+    else if(valeig){
+        *il=1;
+        *iu=n;
+        for (i = 0; i < n; ++i){
+            if (w[i] > vu){
+                *iu = i;
+                break;
+            }
+            else if (w[i] < vl)
+                ++il;
+            else if (*il > 1)
+                w[i-*il+1]=w[i];
+        }
+        *m = *iu - *il + 1;
+    }
+    else{
+        *il = 1;
+        *iu = n;
+        *m = n;
+    }
+
+    return;
+}
 
 extern "C" magma_int_t
-magma_dsyevdx(char jobz, char range, char uplo,
-              magma_int_t n,
-              double *a, magma_int_t lda,
-              double vl, double vu, magma_int_t il, magma_int_t iu,
-              magma_int_t *m, double *w,
-              double *work, magma_int_t lwork,
-              magma_int_t *iwork, magma_int_t liwork,
-              magma_int_t *info)
+magma_dsyevdx_gpu(char jobz, char range, char uplo,
+                  magma_int_t n,
+                  double *da, magma_int_t ldda,
+                  double vl, double vu, magma_int_t il, magma_int_t iu,
+                  magma_int_t *m, double *w,
+                  double *wa,  magma_int_t ldwa,
+                  double *work, magma_int_t lwork,
+                  magma_int_t *iwork, magma_int_t liwork,
+                  magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -67,20 +106,22 @@ magma_dsyevdx(char jobz, char range, char uplo,
     N       (input) INTEGER
             The order of the matrix A.  N >= 0.
 
-    A       (input/output) DOUBLE_PRECISION array, dimension (LDA, N)
+    DA      (device input/output) DOUBLE_PRECISION array on the GPU,
+            dimension (LDDA, N).
             On entry, the symmetric matrix A.  If UPLO = 'U', the
             leading N-by-N upper triangular part of A contains the
             upper triangular part of the matrix A.  If UPLO = 'L',
             the leading N-by-N lower triangular part of A contains
             the lower triangular part of the matrix A.
-            On exit, if JOBZ = 'V', then if INFO = 0, A contains the
+            On exit, if JOBZ = 'V', then if INFO = 0, the first m columns
+            of A contains the required
             orthonormal eigenvectors of the matrix A.
             If JOBZ = 'N', then on exit the lower triangle (if UPLO='L')
             or the upper triangle (if UPLO='U') of A, including the
             diagonal, is destroyed.
 
-    LDA     (input) INTEGER
-            The leading dimension of the array A.  LDA >= max(1,N).
+    LDDA    (input) INTEGER
+            The leading dimension of the array DA.  LDDA >= max(1,N).
 
     VL      (input) DOUBLE PRECISION
     VU      (input) DOUBLE PRECISION
@@ -101,6 +142,11 @@ magma_dsyevdx(char jobz, char range, char uplo,
 
     W       (output) DOUBLE PRECISION array, dimension (N)
             If INFO = 0, the required m eigenvalues in ascending order.
+
+    WA      (workspace) DOUBLE PRECISION array, dimension (LDWA, N)
+
+    LDWA    (input) INTEGER
+            The leading dimension of the array WA.  LDWA >= max(1,N).
 
     WORK    (workspace/output) DOUBLE_PRECISION array, dimension (MAX(1,LWORK))
             On exit, if INFO = 0, WORK[0] returns the optimal LWORK.
@@ -157,8 +203,6 @@ magma_dsyevdx(char jobz, char range, char uplo,
     char jobz_[2] = {jobz, 0};
     char range_[2] = {range, 0};
     magma_int_t ione = 1;
-    magma_int_t izero = 0;
-    double d_one = 1.;
 
     double d__1;
 
@@ -181,7 +225,8 @@ magma_dsyevdx(char jobz, char range, char uplo,
     magma_int_t lquery;
     magma_int_t alleig, valeig, indeig;
 
-    double* dwork;
+    double *dwork;
+    magma_int_t lddc = ldda;
 
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);
     lower = lapackf77_lsame(uplo_, MagmaLowerStr);
@@ -201,8 +246,10 @@ magma_dsyevdx(char jobz, char range, char uplo,
         *info = -3;
     } else if (n < 0) {
         *info = -4;
-    } else if (lda < max(1,n)) {
+    } else if (ldda < max(1,n)) {
         *info = -6;
+    } else if (ldwa < max(1,n)) {
+        *info = -14;
     } else {
         if (valeig) {
             if (n > 0 && vu <= vl) {
@@ -236,9 +283,9 @@ magma_dsyevdx(char jobz, char range, char uplo,
     iwork[0] = liwmin;
 
     if ((lwork < lwmin) && !lquery) {
-        *info = -14;
-    } else if ((liwork < liwmin) && ! lquery) {
         *info = -16;
+    } else if ((liwork < liwmin) && ! lquery) {
+        *info = -18;
     }
 
     if (*info != 0) {
@@ -255,10 +302,28 @@ magma_dsyevdx(char jobz, char range, char uplo,
     }
 
     if (n == 1) {
-        w[0] = a[0];
+        double tmp;
+        magma_dgetvector( 1, da, 1, &tmp, 1 );
+        w[0] = tmp;
         if (wantz) {
-            a[0] = 1.;
+            tmp = 1.;
+            magma_dsetvector( 1, &tmp, 1, da, 1 );
         }
+        return *info;
+    }
+
+    cudaStream_t stream;
+    magma_queue_create( &stream );
+
+    // n*lddc for dsytrd2_gpu
+    // n for dlansy
+    magma_int_t ldwork = n*lddc;
+    if ( wantz ) {
+        // need 3n^2/2 for dstedx
+        ldwork = max( ldwork, 3*n*(n/2 + 1));
+    }
+    if (MAGMA_SUCCESS != magma_dmalloc( &dwork, ldwork )) {
+        *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
 
@@ -271,7 +336,7 @@ magma_dsyevdx(char jobz, char range, char uplo,
     rmax = magma_dsqrt(bignum);
 
     /* Scale matrix to allowable range, if necessary. */
-    anrm = lapackf77_dlansy("M", uplo_, &n, a, &lda, work);
+    anrm = magmablas_dlansy('M', uplo, n, da, ldda, dwork);
     iscale = 0;
     if (anrm > 0. && anrm < rmin) {
         iscale = 1;
@@ -281,8 +346,7 @@ magma_dsyevdx(char jobz, char range, char uplo,
         sigma = rmax / anrm;
     }
     if (iscale == 1) {
-        lapackf77_dlascl(uplo_, &izero, &izero, &d_one, &sigma, &n, &n, a,
-                &lda, info);
+        magmablas_dlascl(uplo, 0, 0, 1., sigma, n, n, da, ldda, info);
     }
 
     /* Call DSYTRD to reduce symmetric matrix to tridiagonal form. */
@@ -301,8 +365,15 @@ magma_dsyevdx(char jobz, char range, char uplo,
     start = get_current_time();
 #endif
 
-    magma_dsytrd(uplo, n, a, lda, w, &work[inde],
-                 &work[indtau], &work[indwrk], llwork, &iinfo);
+#ifdef FAST_SYMV
+    magma_dsytrd2_gpu(uplo, n, da, ldda, w, &work[inde],
+                      &work[indtau], wa, ldwa, &work[indwrk], llwork,
+                      dwork, n*lddc, &iinfo);
+#else
+    magma_dsytrd_gpu(uplo, n, da, ldda, w, &work[inde],
+                     &work[indtau], wa, ldwa, &work[indwrk], llwork,
+                     &iinfo);
+#endif
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
@@ -313,8 +384,9 @@ magma_dsyevdx(char jobz, char range, char uplo,
        DSTEDC to generate the eigenvector matrix, WORK(INDWRK), of the
        tridiagonal matrix, then call DORMTR to multiply it to the Householder
        transformations represented as Householder vectors in A. */
+
     if (! wantz) {
-        lapackf77_dsterf(&n, w, &work[inde], info );
+        lapackf77_dsterf(&n, w, &work[inde], info);
 
         magma_dmove_eig(range, n, w, &il, &iu, vl, vu, m);
 
@@ -324,30 +396,27 @@ magma_dsyevdx(char jobz, char range, char uplo,
         start = get_current_time();
 #endif
 
-        if (MAGMA_SUCCESS != magma_dmalloc( &dwork, 3*n*(n/2 + 1) )) {
-            *info = MAGMA_ERR_DEVICE_ALLOC;
-            return *info;
-        }
-
-        magma_dstedx(range, n, vl, vu, il, iu, &w[1], &work[inde],
+        magma_dstedx(range, n, vl, vu, il, iu, w, &work[inde],
                      &work[indwrk], n, &work[indwk2],
                      llwrk2, iwork, liwork, dwork, info);
-
-        magma_free( dwork );
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
         printf("time dstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
+#endif
 
+#ifdef ENABLE_TIMER
         start = get_current_time();
 #endif
 
         magma_dmove_eig(range, n, w, &il, &iu, vl, vu, m);
 
-        magma_dormtr(MagmaLeft, uplo, MagmaNoTrans, n, *m, a, lda, &work[indtau],
-                     &work[indwrk + n * (il-1) ], n, &work[indwk2], llwrk2, &iinfo);
+        magma_dsetmatrix( n, *m, &work[indwrk + n* (il-1) ], n, dwork, lddc );
 
-        lapackf77_dlacpy("A", &n, m, &work[indwrk + n * (il-1) ], &n, a, &lda);
+        magma_dormtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, *m, da, ldda, &work[indtau],
+                         dwork, lddc, wa, ldwa, &iinfo);
+
+        magma_dcopymatrix( n, *m, dwork, lddc, da, ldda );
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
@@ -364,5 +433,8 @@ magma_dsyevdx(char jobz, char range, char uplo,
     work[0]  = lwmin * (1. + lapackf77_dlamch("Epsilon"));  // round up
     iwork[0] = liwmin;
 
+    magma_queue_destroy( stream );
+    magma_free( dwork );
+
     return *info;
-} /* magma_dsyevd */
+} /* magma_dsyevd_gpu */

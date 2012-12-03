@@ -134,7 +134,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
     char uplo_[2] = {uplo, 0};
     char jobz_[2] = {jobz, 0};
     magma_int_t ione = 1;
-    
+
     double d__1;
 
     double eps;
@@ -257,7 +257,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
     if (iscale == 1) {
         magmablas_dlascl(uplo, 0, 0, 1., sigma, n, n, da, ldda, info);
     }
-    
+
     /* Call DSYTRD to reduce symmetric matrix to tridiagonal form. */
     // dsytrd work: e (n) + tau (n) + llwork (n*nb)  ==>  2n + n*nb
     // dstedx work: e (n) + tau (n) + z (n*n) + llwrk2 (1 + 4*n + n^2)  ==>  1 + 6n + 2n^2
@@ -300,7 +300,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
 #ifdef ENABLE_TIMER
         start = get_current_time();
 #endif
-        
+
         magma_dstedx('A', n, 0., 0., 0, 0, w, &work[inde],
                      &work[indwrk], n, &work[indwk2],
                      llwrk2, iwork, liwork, dwork, info);
@@ -311,14 +311,14 @@ magma_dsyevd_gpu(char jobz, char uplo,
 #endif
 
         magma_dsetmatrix( n, n, &work[indwrk], n, dwork, lddc );
-        
+
 #ifdef ENABLE_TIMER
         start = get_current_time();
 #endif
 
         magma_dormtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, n, da, ldda, &work[indtau],
                          dwork, lddc, wa, ldwa, &iinfo);
-        
+
         magma_dcopymatrix( n, n, dwork, lddc, da, ldda );
 
 #ifdef ENABLE_TIMER
@@ -338,6 +338,6 @@ magma_dsyevd_gpu(char jobz, char uplo,
 
     magma_queue_destroy( stream );
     magma_free( dwork );
-    
+
     return *info;
 } /* magma_dsyevd_gpu */
