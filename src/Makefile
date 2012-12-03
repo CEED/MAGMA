@@ -116,6 +116,7 @@ ZSRC += \
 # symmetric eigenvalues, GPU interface
 ZSRC += \
 	dsyevd_gpu.cpp		\
+	dsyevdx_gpu.cpp		\
 	zheevd_gpu.cpp		\
 	zheevdx_gpu.cpp		\
 	zheevr_gpu.cpp		\
@@ -171,6 +172,8 @@ ZSRC += \
 	zhetrd_bhe2trc_v5.cpp	\
 	zungqr_2stage_gpu.cpp	\
 	zunmqr_gpu_2stage.cpp	\
+	dsyevdx_2stage.cpp	\
+	dsygvdx_2stage.cpp	\
 	zheevdx_2stage.cpp	\
 	zhegvdx_2stage.cpp	\
 #	zhetrd_he2hb_mgpu.cpp	\
@@ -179,6 +182,7 @@ ZSRC += \
 # generalized symmetric eigenvalues
 ZSRC += \
 	dsygvd.cpp		\
+	dsygvdx.cpp		\
 	zhegst.cpp		\
 	zhegvd.cpp		\
 	zhegvdx.cpp		\

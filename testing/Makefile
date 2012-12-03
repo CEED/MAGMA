@@ -107,6 +107,7 @@ ZSRC += \
 # symmetric eigenvalues, 2-stage
 ZSRC += \
 	testing_zhetrd_he2hb.cpp	\
+	testing_dsygvdx_2stage.cpp	\
 	testing_zhegvdx_2stage.cpp	\
 #	testing_zhetrd_he2hb_mgpu.cpp	\
 
