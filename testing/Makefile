@@ -10,7 +10,7 @@ MAGMA_DIR = ..
 include ../Makefile.internal
 
 # ----------
-# BLAS
+# BLAS and auxiliary
 ZSRC += \
 	testing_zgemm.cpp	\
 	testing_zgemv.cpp	\
@@ -18,13 +18,17 @@ ZSRC += \
 	testing_zsymv.cpp	\
 	\
 	testing_auxiliary.cpp	\
+	testing_parse_opts.cpp	\
 	testing_zblas.cpp	\
 	testing_zgeadd.cpp	\
 	testing_zgeadd_batched.cpp	\
 	testing_zlacpy.cpp	\
 	testing_zlacpy_batched.cpp	\
+	testing_dlarfg.cpp	\
+	testing_zprint.cpp	\
 	testing_zsymmetrize.cpp	\
 	testing_zswap.cpp	\
+	testing_ztranspose.cpp	\
 	testing_zutil.cpp	\
 	testing_zhemv_mgpu.cpp	\
 #	\
