@@ -50,11 +50,12 @@ __device__ void zsum_reduce( /*int n,*/ int i, cuDoubleComplex* x )
 //==============================================================================
 
 __global__ void 
-magma_zgemv_kernel1(int m, cuDoubleComplex *V, int ldv, cuDoubleComplex *c, 
+magma_zgemv_kernel1(int m, const cuDoubleComplex * __restrict__ V, int ldv, 
+                    const cuDoubleComplex * __restrict__ c, 
                     cuDoubleComplex *dwork)
 {
         const int i = threadIdx.x;
-        cuDoubleComplex *dV = V + (blockIdx.x) * ldv;
+        const cuDoubleComplex *dV = V + (blockIdx.x) * ldv;
 
         __shared__ cuDoubleComplex sum[ BLOCK_SIZE ];
         cuDoubleComplex lsum;
@@ -75,24 +76,22 @@ magma_zgemv_kernel1(int m, cuDoubleComplex *V, int ldv, cuDoubleComplex *c,
 //==============================================================================
 
 __global__ void
-magma_zgemv_kernel3(int m, cuDoubleComplex *V, int ldv, cuDoubleComplex *c,
+magma_zgemv_kernel3(int m, const cuDoubleComplex * __restrict__ V, int ldv, cuDoubleComplex *c,
                     cuDoubleComplex *dwork, cuDoubleComplex *tau)
 {
         const int i = threadIdx.x;
-        cuDoubleComplex *dV = V + (blockIdx.x) * ldv;
+        const cuDoubleComplex *dV = V + (blockIdx.x) * ldv;
 
         __shared__ cuDoubleComplex sum[ BLOCK_SIZE ];
         cuDoubleComplex lsum;
 
+        if (i==0)
+           c[0] = MAGMA_Z_ONE;           
+
         /*  lsum := v' * C  */
         lsum = MAGMA_Z_ZERO;
         for( int j = i; j < m; j += BLOCK_SIZE )
-           if (j==0){
-              lsum += MAGMA_Z_MUL( MAGMA_Z_CNJG( dV[j] ), MAGMA_Z_ONE );
-              c[j] = MAGMA_Z_ONE;
-           }
-           else
-              lsum += MAGMA_Z_MUL( MAGMA_Z_CNJG( dV[j] ), c[j] );
+           lsum += MAGMA_Z_MUL( MAGMA_Z_CNJG( dV[j] ), c[j] );
 
         sum[i] = lsum;
         zsum_reduce< BLOCK_SIZE >( i, sum );
@@ -105,8 +104,8 @@ magma_zgemv_kernel3(int m, cuDoubleComplex *V, int ldv, cuDoubleComplex *c,
 //==============================================================================
 
 __global__ void
-magma_zgemv_kernel2(int m, int n, cuDoubleComplex *V, int ldv, 
-                    cuDoubleComplex *x, cuDoubleComplex *c)
+magma_zgemv_kernel2(int m, int n, const cuDoubleComplex * __restrict__ V, int ldv, 
+                    const cuDoubleComplex * __restrict__ x, cuDoubleComplex *c)
 {
     const int i = threadIdx.x;
     const int j = i + BLOCK_SIZE * blockIdx.x;
