@@ -268,7 +268,8 @@ int main( int argc, char** argv)
             magma_zheevdx_2stage(jobz[0], range, uplo[0], N, h_R, lda, vl, vu, il, iu, &m1, D, hh_work, lwork, rwork, lrwork, iwork, liwork, &info);
         }else{
             printf("calling zheevdx_2stage_m %d GPU\n",ngpu);
-            magma_zheevdx_2stage_m(ngpu,jobz[0], range, uplo[0], N, h_R, lda, vl, vu, il, iu, &m1, D, hh_work, lwork, rwork, lrwork, iwork, liwork, &info);
+            return;
+            //magma_zheevdx_2stage_m(ngpu,jobz[0], range, uplo[0], N, h_R, lda, vl, vu, il, iu, &m1, D, hh_work, lwork, rwork, lrwork, iwork, liwork, &info);
         }
 
 
