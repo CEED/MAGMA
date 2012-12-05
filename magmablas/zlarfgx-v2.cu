@@ -19,7 +19,7 @@
 
 #define PRECISION_z
 
-__global__ void magma_zgemv_kernel3(int m, cuDoubleComplex *V, int ldv, 
+__global__ void magma_zgemv_kernel3(int m, const cuDoubleComplex * __restrict__ V, int ldv, 
                                     cuDoubleComplex *c, cuDoubleComplex *dwork,
                                     cuDoubleComplex *tau);
 __global__ void magma_ztrmv_kernel(const cuDoubleComplex *T, int ldt, cuDoubleComplex *v);
@@ -158,3 +158,6 @@ magma_zlarfgtx_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
       magma_ztrmv_kernel2<<< i, i          >>>( T, ldt, work, T+i*ldt, dtau);
    }
 }
+
+//==============================================================================
+
