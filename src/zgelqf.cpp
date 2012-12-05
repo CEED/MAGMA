@@ -143,7 +143,7 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
 
             magma_zsetmatrix( m, n, a, lda, dA, ldda );
             dAT = dA;
-            magmablas_zinplace_transpose( dAT, ldda, ldda );
+            magmablas_ztranspose_inplace( ldda, dAT, ldda );
         }
     else
         {
@@ -162,8 +162,8 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
 
     magma_zgeqrf2_gpu(n, m, dAT, ldda, tau, &iinfo);
 
-    if (maxdim*maxdim< 2*maxm*maxn){
-        magmablas_zinplace_transpose( dAT, ldda, ldda );
+    if (maxdim*maxdim < 2*maxm*maxn) {
+        magmablas_ztranspose_inplace( ldda, dAT, ldda );
         magma_zgetmatrix( m, n, dA, ldda, a, lda );
     } else {
         magmablas_ztranspose2( dA, maxm, dAT, ldda, n, m );

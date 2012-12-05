@@ -142,8 +142,8 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
         ldda = maxn;
         work = a;
 
-        if (maxdim*maxdim < 2*maxm*maxn)
-        {
+        if (maxdim*maxdim < 2*maxm*maxn) {
+            // if close to square, allocate square matrix and transpose in-place
             if (MAGMA_SUCCESS != magma_zmalloc( &dA, nb*maxm + maxdim*maxdim )) {
                         /* alloc failed so call non-GPU-resident version */ 
                         magma_int_t rval = magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
@@ -156,10 +156,10 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
             magma_zsetmatrix( m, n, a, lda, da, ldda );
             
             dAT = da;
-            magmablas_zinplace_transpose( dAT, ldda, ldda );
+            magmablas_ztranspose_inplace( ldda, dAT, ldda );
         }
-        else
-        {
+        else {
+            // if very rectangular, allocate dA and dAT and transpose out-of-place
             if (MAGMA_SUCCESS != magma_zmalloc( &dA, (nb + maxn)*maxm )) {
                         /* alloc failed so call non-GPU-resident version */
                         magma_int_t rval = magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
@@ -268,8 +268,8 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
                                 inAT(s, s)+nb0, ldda);
         }
         
-        if (maxdim*maxdim< 2*maxm*maxn){
-            magmablas_zinplace_transpose( dAT, ldda, ldda );
+        if (maxdim*maxdim < 2*maxm*maxn) {
+            magmablas_ztranspose_inplace( ldda, dAT, ldda );
             magma_zgetmatrix( m, n, da, ldda, a, lda );
         } else {
             magmablas_ztranspose2( da, maxm, dAT, ldda, n, m );
