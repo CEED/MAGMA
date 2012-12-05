@@ -44,6 +44,10 @@ void magmablas_zpermute_long3(
   /*
    * Transpose functions
    */
+void magmablas_ztranspose_inplace(
+    magma_int_t n, cuDoubleComplex *dA, magma_int_t ldda );
+
+// old interface
 void magmablas_zinplace_transpose(
     cuDoubleComplex *dA, magma_int_t ldda, magma_int_t n );
 

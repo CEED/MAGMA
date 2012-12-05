@@ -31,6 +31,7 @@ ZSRC := \
 	zlarf.cu		\
 	zlarfbx.cu              \
 	zlarfx.cu               \
+	dlarfg.cu		\
 	zlarfg-v2.cu		\
 	zlarfgx-v2.cu		\
 	zlascl.cu		\
@@ -47,7 +48,7 @@ ZSRC := \
 	ssyr2k.cu		\
 	ztranspose.cu		\
 	ztranspose-v2.cu	\
-	zinplace_transpose.cu	\
+	ztranspose_inplace.cu	\
 	zgetmatrix_transpose.cu	\
 	zsetmatrix_transpose.cu	\
 	dtrsm.cu		\
