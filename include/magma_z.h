@@ -84,8 +84,8 @@ magma_int_t magma_zlaqps( magma_int_t m, magma_int_t n, magma_int_t offset,
 magma_int_t magma_zlarf(  char *side, magma_int_t *m, magma_int_t *n,
                           cuDoubleComplex *v, magma_int_t *incv, cuDoubleComplex *tau,
                           cuDoubleComplex *c__, magma_int_t *ldc, cuDoubleComplex *work);
-magma_int_t magma_zlarfg( magma_int_t *n, cuDoubleComplex *alpha, cuDoubleComplex *x,
-                          magma_int_t *incx, cuDoubleComplex *tau);
+void        magma_zlarfg( magma_int_t n, cuDoubleComplex *alpha, cuDoubleComplex *x,
+                          magma_int_t incx, cuDoubleComplex *tau);
 magma_int_t magma_zlatrd( char uplo, magma_int_t n, magma_int_t nb, cuDoubleComplex *a, 
                           magma_int_t lda, double *e, cuDoubleComplex *tau, 
                           cuDoubleComplex *w, magma_int_t ldw,

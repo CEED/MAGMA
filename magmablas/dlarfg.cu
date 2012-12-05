@@ -107,7 +107,7 @@ void magma_dlarfg_kernel( int n, double* dx0, double* dx, int incx, double* dtau
 // Stores beta over dx0.
 // Stores tau.
 extern "C"
-void magma_dlarfg( int n, double* dx0, double* dx, int incx, double* dtau )
+void magma_dlarfg( magma_int_t n, double* dx0, double* dx, magma_int_t incx, double* dtau )
 {
     dim3 blocks( 1 );
     dim3 threads( BLOCK_SIZE );
