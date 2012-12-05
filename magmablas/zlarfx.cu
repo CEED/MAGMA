@@ -195,19 +195,18 @@ void magma_ztrmv_tkernel(cuDoubleComplex *T, int ldt, cuDoubleComplex *t, cuDoub
 extern "C" void
 magma_zlarfx_gpu(int m, int n, cuDoubleComplex *v, cuDoubleComplex *tau,
                 cuDoubleComplex *c, int ldc, double *xnorm, 
-                cuDoubleComplex *T, int i )
+                cuDoubleComplex *T, int i, cuDoubleComplex *work )
 {
     int N = n + i + 1;
 
-    dim3  blocks( N);
-    dim3 threads( BLOCK_SIZE );
-
-    magma_zlarfx_kernel<<< blocks, threads >>>( m, v, tau, c, ldc, xnorm, T+i*N, i);
+    if (i==0)
+      magma_zlarfx_kernel<<< N, BLOCK_SIZE >>>( m, v, tau, c, ldc, xnorm, T+i*N, i);
+    else
+      magma_zlarfx_kernel<<< N, BLOCK_SIZE >>>( m, v, tau, c, ldc, xnorm, work, i);
 
     if (i > 0){
-       dim3  blocks2( 1 );
-       dim3 threads2( i );
-       magma_ztrmv_kernel<<< blocks2, threads2 >>>( T, N, T+i*N);
+       //magma_ztrmv_kernel<<< 1, i >>>( T, N, T+i*N);
+       magma_ztrmv_kernel2<<< i, i          >>>( T, N, work, T+i*N, tau);
     }
 }
 
