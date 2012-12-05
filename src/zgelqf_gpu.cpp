@@ -131,9 +131,9 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
 
     dAT = dA;
     
-    if ((m == n) && (m % 32 == 0) && (lda%32 == 0)){
+    if ( m == n ) {
         ldat = lda;
-        magmablas_zinplace_transpose( dAT, lda, maxm );
+        magmablas_ztranspose_inplace( m, dAT, lda );
     }
     else {
       if (MAGMA_SUCCESS != magma_zmalloc( &dAT, maxm*maxn ) ){
@@ -146,8 +146,8 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
     
     magma_zgeqrf2_gpu(n, m, dAT, ldat, tau, &iinfo);
 
-    if ((m == n) && (m % 32 == 0) && (lda%32 == 0)){
-      magmablas_zinplace_transpose( dAT, ldat, maxm );
+    if ( m == n ) {
+      magmablas_ztranspose_inplace( m, dAT, ldat );
     }
     else {
       magmablas_ztranspose2( dA, lda, dAT, ldat, n, m );
