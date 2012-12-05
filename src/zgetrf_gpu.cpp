@@ -134,9 +134,9 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
             return *info;
         }
 
-        if ((m == n) && (m % 32 == 0) && (ldda%32 == 0)){
+        if ( m == n ) {
             lddat = ldda;
-            magmablas_zinplace_transpose( dAT, ldda, m);
+            magmablas_ztranspose_inplace( m, dAT, ldda );
         }
         else {
             if (MAGMA_SUCCESS != magma_zmalloc( &dAT, maxm*maxn )) {
@@ -149,7 +149,7 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
 
         if (MAGMA_SUCCESS != magma_zmalloc_pinned( &work, maxm*nb )) {
             magma_free( dAP );
-            if (! ((m == n) && (m % 32 == 0) && (ldda%32 == 0)) )
+            if ( ! (m == n))
                 magma_free( dAT );
             *info = MAGMA_ERR_HOST_ALLOC;
             return *info;
@@ -239,8 +239,8 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
                      c_one, inAT(s,s),     lddat, 
                             inAT(s,s)+nb0, lddat);
 
-        if ((m == n) && (m % 32 == 0) && (ldda%32 == 0)){
-            magmablas_zinplace_transpose( dAT, lddat, m );
+        if ( m == n ) {
+            magmablas_ztranspose_inplace( m, dAT, lddat );
         }
         else {
             magmablas_ztranspose2( dA, ldda, dAT, lddat, n, m );
