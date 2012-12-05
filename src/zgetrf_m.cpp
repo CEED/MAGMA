@@ -10,6 +10,7 @@
 */
 
 #include "common_magma.h"
+#include "../testing/flops.h"
 
 /* === Define what BLAS to use ============================================ */
 #define PRECISION_z
@@ -94,21 +95,11 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleComp
 #define    A(i,j) (a   + (j)*lda + (i))
 #define inAT(d,i,j) (dAT[d] + (i)*nb*ldn_local + (j)*nb)
 #define inPT(d,i,j) (dPT[d] + (i)*nb*nb + (j)*nb*maxm)
-/* Flops formula */
+
 //#define PROFILE
 #ifdef  PROFILE
     double flops, time_rmajor = 0, time_rmajor2 = 0, time_rmajor3 = 0, time_mem = 0;
     magma_timestr_t start, start1, start2, end1, end, start0 = get_current_time();
-#define FMULS_GETRF(__m, __n) ( ((__m) < (__n)) ? (0.5 * (__m) * ((__m) * ((__n) - (1./3.) * (__m) - 1. ) + (__n)) + (2. / 3.) * (__m)) \
-                                :                 (0.5 * (__n) * ((__n) * ((__m) - (1./3.) * (__n) - 1. ) + (__m)) + (2. / 3.) * (__n)) )
-#define FADDS_GETRF(__m, __n) ( ((__m) < (__n)) ? (0.5 * (__m) * ((__m) * ((__n) - (1./3.) * (__m)      ) - (__n)) + (1. / 6.) * (__m)) \
-                                :                 (0.5 * (__n) * ((__n) * ((__m) - (1./3.) * (__n)      ) - (__m)) + (1. / 6.) * (__n)) )
-#define PRECISION_z
-#if defined(PRECISION_z) || defined(PRECISION_c)
-#define FLOPS(m, n) ( 6. * FMULS_GETRF(m, n) + 2. * FADDS_GETRF(m, n) )
-#else
-#define FLOPS(m, n) (      FMULS_GETRF(m, n) +      FADDS_GETRF(m, n) )
-#endif
 #endif
     cuDoubleComplex    *dAT[4], *dA[4], *dPT[4];
     cuDoubleComplex    c_one     = MAGMA_Z_ONE;
@@ -365,7 +356,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleComp
 
 #ifdef PROFILE
     end = get_current_time();
-    flops = FLOPS( (double)m, (double)n ) / 1000000;
+    flops = FLOPS_ZGETRF( m, n ) / 1000000;
     printf(" NB=%d nb=%d\n",NB,nb); 
     printf(" memcopy and transpose %e seconds\n",time_mem );
     printf(" total time %e seconds\n",GetTimerValue(start0,end)/1000.0);

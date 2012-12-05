@@ -9,6 +9,7 @@
 
 */
 #include "common_magma.h"
+#include "../testing/flops.h"
 
 /* === Define what BLAS to use ============================================ */
 #define PRECISION_z
@@ -24,14 +25,6 @@
 #endif
 #endif
 /* === End defining what BLAS to use ====================================== */
-// Flops formula
-#include "../testing/flops.h"
-#define PRECISION_z
-#if defined(PRECISION_z) || defined(PRECISION_c)
-#define FLOPS(n) ( 6. * FMULS_POTRF(n) + 2. * FADDS_POTRF(n) )
-#else
-#define FLOPS(n) (      FMULS_POTRF(n) +      FADDS_POTRF(n) )
-#endif
 
 extern "C" magma_int_t 
 magma_zhtodpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, 
@@ -530,9 +523,12 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
 
 #ifdef  ROW_MAJOR_PROFILE
     printf("\n n=%d NB=%d nb=%d\n",n,NB,nb);
-    printf(" Without memory allocation: %f / %f = %f GFlop/s\n", FLOPS((double)n)/1000000, GetTimerValue(start0, end0), 
-                                                    FLOPS((double)n)/(1000000*GetTimerValue(start0, end0)));
-    printf(" Performance %f / %f = %f GFlop/s\n", FLOPS((double)n)/1000000, chol_time, FLOPS( (double)n ) / (1000000*chol_time));
+    printf(" Without memory allocation: %f / %f = %f GFlop/s\n",
+           FLOPS_ZPOTRF(n)/1000000, GetTimerValue(start0, end0), 
+           FLOPS_ZPOTRF(n)/(1000000*GetTimerValue(start0, end0)));
+    printf(" Performance %f / %f = %f GFlop/s\n",
+           FLOPS_ZPOTRF(n)/1000000, chol_time,
+           FLOPS_ZPOTRF(n)/(1000000*chol_time));
 #endif
     return *info;
 } /* magma_zpotrf_ooc */
