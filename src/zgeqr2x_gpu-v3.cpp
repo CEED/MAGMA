@@ -180,12 +180,13 @@ magma_zgeqr2x3_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
 
     for (int b=0; b < k; b += BLOCK_SIZE) {
         for (i = b; i < min(k, b+BLOCK_SIZE); ++i) {
-            /*   1. Apply H' to A(:,i) from the left    
-                 2. Adjust the dnorm[i] to hold the norm of A(i:m,i) */
+
+            /*   Apply H' to A(:,i) from the left                           */    
             if ( i-b > 0)
                 magma_zlarfbx_gpu(*m-b, i-b, da_ref(b, b), *ldda,
                                   dT+b+b*k, k, da_ref(b, i), work);
 
+            /*   Adjust the dnorm[i] to hold the norm of A(i:m,i)           */ 
             if ( i > 0 )
                 magmablas_dznrm2_adjust(i, dnorm+i, da_ref(0, i));
             
@@ -193,7 +194,7 @@ magma_zgeqr2x3_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
                 1. 1 is not yet put on the diagonal of A
                 2. Elements above the diagonal are copied in ddA and
                    the ones in A are set to zero                                         
-                3. update T                                                  */
+                3. update T                                                 */
             magma_zlarfgtx_gpu(*m-i, da_ref(i, i), da_ref(min(i+1,*m), i), dtau+i, 
                                dnorm+i, ddA + i + i*(*n), i,
                                da_ref(i,0), *ldda,  dT, k, work);
