@@ -18,7 +18,7 @@ magma_zlarfgx_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
 extern "C" void
 magma_zlarfx_gpu(int m, int n, cuDoubleComplex *v, cuDoubleComplex *tau,
                  cuDoubleComplex *c, int ldc, double *xnorm,
-                 cuDoubleComplex *dT, int iter);
+                 cuDoubleComplex *dT, int iter, cuDoubleComplex *work);
 
 extern "C" void
 magma_zlarf_gpu(int m, int n, cuDoubleComplex *v, cuDoubleComplex *tau,
@@ -50,6 +50,8 @@ magma_zgeqr2x_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
     The second holds the diagonal nxn blocks of A, i.e., the diagonal
     submatrices of R. 
 
+    This version implements the right-looking QR.
+ 
     Arguments   
     =========   
     M       (input) INTEGER   
@@ -109,6 +111,9 @@ magma_zgeqr2x_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
     
     static magma_int_t i, k;
 
+    double *dnorm = dwork;
+    cuDoubleComplex *work = (cuDoubleComplex *)(dwork+2*(*n));
+
     *info = 0;
     if (*m < 0) {
         *info = -1;
@@ -124,19 +129,19 @@ magma_zgeqr2x_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
 
     /* Compute the norms of the trailing columns */
     k = min(*m,*n);
-    magmablas_dznrm2(*m, k, da_ref(0,0), *ldda, dwork);
+    magmablas_dznrm2(*m, k, da_ref(0,0), *ldda, dnorm);
 
     for (i = 0; i < k; ++i) {
         /*  Generate elementary reflector H(i) to annihilate A(i+1:m,i) */
-        magma_zlarfgx_gpu(*m-i, da_ref(i, i), da_ref(min(i+1,*m), i), dtau+i, dwork+i,
+        magma_zlarfgx_gpu(*m-i, da_ref(i, i), da_ref(min(i+1,*m), i), dtau+i, dnorm+i,
                           ddA + i + i*(*n), i);
         
         if (i < *n) {            
             /* Apply H(i)' to A(i:m,i+1:n) from the left */            
             magma_zlarfx_gpu(*m-i, *n-i-1, da_ref(i, i), dtau+i, 
-                             //da_ref(i, i+1), *ldda, dwork+i+1,
-                             da_ref(i, 0), *ldda, dwork+i+1,
-                             dT, i );
+                             //da_ref(i, i+1), *ldda, dnorm+i+1,
+                             da_ref(i, 0), *ldda, dnorm+i+1,
+                             dT, i, work );
         }
     }
 
