@@ -35,6 +35,8 @@ int main( int argc, char** argv )
     printf( "uplo     %c\n", opts.uplo   );
     printf( "transA   %c\n", opts.transA );
     printf( "transB   %c\n", opts.transB );
+    printf( "side     %c\n", opts.side   );
+    printf( "diag     %c\n", opts.diag   );
     printf( "jobu     %c\n", opts.jobu   );
     printf( "jobvt    %c\n", opts.jobvt  );
     printf( "jobz     %c\n", opts.jobz   );

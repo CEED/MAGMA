@@ -143,6 +143,8 @@ typedef struct magma_opts
     char uplo;
     char transA;
     char transB;
+    char side;
+    char diag;
     char jobu;    // gesvd:  no left  singular vectors
     char jobvt;   // gesvd:  no right singular vectors
     char jobz;    // heev:   no eigen vectors
