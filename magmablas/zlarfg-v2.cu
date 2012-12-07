@@ -26,6 +26,15 @@ void magma_zlarfg_gpu_kernel( int n, cuDoubleComplex* dx0, cuDoubleComplex* dx,
   
     cuDoubleComplex dxi;
 
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+    if( n <= 1 ) {
+#else
+    if( n <= 0 ) {
+#endif
+        *dtau = MAGMA_Z_ZERO;
+        return;
+    }
+
     if ( j < n-1)
         dxi = dx[j];
   
@@ -91,5 +100,11 @@ magma_zlarfg_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
     dim3 blocks((n+BLOCK_SIZE-1) / BLOCK_SIZE);
     dim3 threads( BLOCK_SIZE );
 
+    /* recomputing the norm */
+    #if defined(PRECISION_d) || defined(PRECISION_z)
+    magmablas_dznrm2(n, 1, dx-1, n, dxnorm);
+    #else
+    magmablas_sznrm2(n, 1, dx-1, n, dxnorm);
+    #endif
     magma_zlarfg_gpu_kernel<<< blocks, threads >>>( n, dx0, dx, dtau, dxnorm );
 }

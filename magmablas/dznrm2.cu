@@ -97,6 +97,50 @@ magmablas_dznrm2_kernel( int m, cuDoubleComplex *da, int ldda, double *dxnorm )
        dxnorm[blockIdx.x] = sqrt(sum[0]);
 }
 
+
+//==============================================================================
+__global__ void
+magmablas_dznrm2_check_kernel( int m, cuDoubleComplex *da, int ldda, double *dxnorm, 
+                               double *lsticc )
+{
+    const int i = threadIdx.x;
+    cuDoubleComplex *dx = da + blockIdx.x * ldda;
+
+    __shared__ double sum[ BLOCK_SIZE ];
+    double re, lsum;
+
+    // get norm of dx only if lsticc[blockIdx+1] != 0
+    if( lsticc[blockIdx.x + 1] == 0 ) return;
+
+    lsum = 0;
+    for( int j = i; j < m; j += BLOCK_SIZE ) {
+
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+        re = dx[j];
+        lsum += re*re;
+#else
+        re = MAGMA_Z_REAL( dx[j] );
+        double im = MAGMA_Z_IMAG( dx[j] );
+        lsum += re*re + im*im;
+#endif
+
+    }
+    sum[i] = lsum;
+    sum_reduce< BLOCK_SIZE >( i, sum );
+    
+    if (i==0)
+       dxnorm[blockIdx.x] = sqrt(sum[0]);
+}
+
+extern "C" void
+magmablas_dznrm2_check(int m, int num, cuDoubleComplex *da, magma_int_t ldda, 
+                       double *dxnorm, double *lsticc) 
+{
+    dim3  blocks( num );
+    dim3 threads( BLOCK_SIZE );
+    
+    magmablas_dznrm2_check_kernel<<< blocks, threads >>>( m, da, ldda, dxnorm, lsticc );
+}
 //==============================================================================
 
 __global__ void
@@ -197,6 +241,72 @@ extern "C" void
 magmablas_dznrm2_adjust(int k, double *xnorm, cuDoubleComplex *c)
 {
    magma_dznrm2_adjust_kernel<<< 1, k >>> (xnorm, c);
+}
+
+//==============================================================================
+
+#define BS 256
+
+__global__ void
+magma_dznrm2_row_adjust_kernel(int n, double *xnorm, cuDoubleComplex *c, int ldc)
+{
+   const int i = threadIdx.x + blockIdx.x*BS;
+
+   if (i<n){
+     double temp = MAGMA_Z_ABS( c[i*ldc] ) / xnorm[i];
+     temp = max( 0.0, ((1.0 + temp) * (1.0 - temp)) );
+     xnorm[i] *= sqrt(temp);
+  }
+}
+
+/*
+    Adjust the norm of c[,1:k] to give the norm of c[k+1:,1:k], assuming that
+    c was changed with orthogonal transformations.
+*/
+extern "C" void
+magmablas_dznrm2_row_adjust(int k, double *xnorm, cuDoubleComplex *c, int ldc)
+{
+   int nblocks = (k+BS-1)/BS;
+   magma_dznrm2_row_adjust_kernel<<< nblocks, BS >>> (k, xnorm, c, ldc);
+}
+
+//-----------------------------------------------------------------------------
+__global__ void
+magma_dznrm2_row_check_adjust_kernel(int n, double tol, double *xnorm, double *xnorm2, 
+                                     cuDoubleComplex *c, int ldc, double *lsticc)
+{
+   const int i = threadIdx.x + blockIdx.x*BS;
+   lsticc[i+1] = 0;
+
+   if (i<n){
+     double temp = MAGMA_Z_ABS( c[i*ldc] ) / xnorm[i];
+     temp = max( 0.0, ((1.0 + temp) * (1.0 - temp)) );
+
+
+     double temp2 = xnorm[i] / xnorm2[i];
+     temp2 = temp * (temp2 * temp2);
+
+     if (temp2 <= tol) {
+         lsticc[i+1] = 1;
+     } else {
+         xnorm[i] *= sqrt(temp);
+     }
+  }
+  if( i==0 ) lsticc[0] = 0;
+  dsum_reduce( blockDim.x, i, lsticc );
+}
+
+/*
+    Adjust the norm of c[,1:k] to give the norm of c[k+1:,1:k], assuming that
+    c was changed with orthogonal transformations.
+    It also do checks for QP3
+*/
+extern "C" void
+magmablas_dznrm2_row_check_adjust(int k, double tol, double *xnorm, double *xnorm2, 
+                                  cuDoubleComplex *c, int ldc, double *lsticc)
+{
+   int nblocks = (k+BS-1)/BS;
+   magma_dznrm2_row_check_adjust_kernel<<< nblocks, BS >>> (k, tol, xnorm, xnorm2, c, ldc, lsticc);
 }
 
 //==============================================================================
