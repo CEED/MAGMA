@@ -54,6 +54,7 @@ void magma_zlarfg_gpu_kernel( int n, cuDoubleComplex* dx0, cuDoubleComplex* dx,
  
             // todo: deal with badly scaled vectors (see lapack's larfg)
             *dtau = (beta - alpha) / beta;
+            if (blockIdx.x == gridDim.x-1)
             *dx0  = beta;
 
             scale = 1. / (alpha - beta);
@@ -67,6 +68,7 @@ void magma_zlarfg_gpu_kernel( int n, cuDoubleComplex* dx0, cuDoubleComplex* dx,
 
             // todo: deal with badly scaled vectors (see lapack's larfg)
             *dtau = MAGMA_Z_MAKE((beta - alphar)/beta, -alphai/beta);
+            if (blockIdx.x == gridDim.x-1)
             *dx0  = MAGMA_Z_MAKE(beta, 0.);
             
             alpha = MAGMA_Z_MAKE( MAGMA_Z_REAL(alpha) - beta, MAGMA_Z_IMAG(alpha));
