@@ -102,9 +102,28 @@ magma_zlarfg_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
 
     /* recomputing the norm */
     #if defined(PRECISION_d) || defined(PRECISION_z)
+    /*double *dn, dns[2];
+    magma_dmalloc( &dn, 1 );
+    if( n > 1 )
+    magmablas_dznrm2(n, 1, dx-1, n, dn);
+    else
+    magmablas_dznrm2(n, 1, dx, n, dn);
+
+    magma_dgetvector( 1, dxnorm, 1, &dns[0], 1 );   
+    magma_dgetvector( 1, dn,     1, &dns[1], 1 );   
+    magma_free( dn );
+    printf( "%.16e %.16e\n",dns[0],dns[1] );*/
+
+    if( n > 1 )
     magmablas_dznrm2(n, 1, dx-1, n, dxnorm);
-    #else
+    else
+    magmablas_dznrm2(n, 1, dx,   n, dxnorm);
+
+    #else /* single precision */
+    if( n > 1 )
     magmablas_sznrm2(n, 1, dx-1, n, dxnorm);
+    else
+    magmablas_sznrm2(n, 1, dx,   n, dxnorm);
     #endif
     magma_zlarfg_gpu_kernel<<< blocks, threads >>>( n, dx0, dx, dtau, dxnorm );
 }

@@ -162,22 +162,6 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
 
             /* F gets swapped so F must be sent at the end to GPU   */
             i__1 = k;
-            //blasf77_zswap( &i__1, F(pvt,0), &ldf, F(k,0), &ldf );
-            magmablas_zswap( i__1, F(pvt,0), ldf, F(k,0), ldf);
-            itemp     = jpvt[pvt];
-            jpvt[pvt] = jpvt[k];
-            jpvt[k]   = itemp;
-            //vn1[pvt] = vn1[k];
-            //vn2[pvt] = vn2[k];
-            #if (defined(PRECISION_d) || defined(PRECISION_z))
-                magma_dswap( 1, &vn1[pvt], 1, &vn1[k], 1 );
-                magma_dswap( 1, &vn2[pvt], 1, &vn2[k], 1 );
-            #else
-                magma_sswap( 1, &vn1[pvt], 1, &vn1[k], 1 );
-                magma_sswap( 1, &vn2[pvt], 1, &vn2[k], 1 );
-            #endif
-
-            magmablas_zswap( m, A(0,pvt), ione, A(0, k), ione );
             /*if (pvt < nb){
                 // no need of transfer if pivot is within the panel 
                 blasf77_zswap( &m, A(0, pvt), &ione, A(0, k), &ione );
@@ -194,6 +178,23 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
                                         A (offset + nb, pvt), lda,
                                         dA(offset + nb, pvt), ldda, stream);
             }*/
+            magmablas_zswap( m, A(0, pvt), ione, A(0, k), ione );
+
+            //blasf77_zswap( &i__1, F(pvt,0), &ldf, F(k,0), &ldf );
+            magmablas_zswap( i__1, F(pvt, 0), ldf, F(k, 0), ldf);
+            itemp     = jpvt[pvt];
+            jpvt[pvt] = jpvt[k];
+            jpvt[k]   = itemp;
+            //vn1[pvt] = vn1[k];
+            //vn2[pvt] = vn2[k];
+            #if (defined(PRECISION_d) || defined(PRECISION_z))
+                magma_dswap( 1, &vn1[pvt], 1, &vn1[k], 1 );
+                magma_dswap( 1, &vn2[pvt], 1, &vn2[k], 1 );
+            #else
+                magma_sswap( 1, &vn1[pvt], 1, &vn1[k], 1 );
+                magma_sswap( 1, &vn2[pvt], 1, &vn2[k], 1 );
+            #endif
+
         }
 
         /* Apply previous Householder reflectors to column K:
@@ -238,10 +239,10 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         if (rk < m-1) {
             i__1 = m - rk;
             //lapackf77_zlarfg( &i__1, A(rk, k), A(rk + 1, k), &ione, &tau[k] );
-            magma_zlarfg_gpu(  i__1, A(rk, k), A(rk + 1, k), &tau[k], &vn1[k]);
+            magma_zlarfg_gpu( i__1, A(rk, k), A(rk + 1, k), &tau[k], &vn1[k]);
         } else {
             //lapackf77_zlarfg( &ione, A(rk, k), A(rk, k), &ione, &tau[k] );
-            magma_zlarfg_gpu( 1, A(rk, k), A(rk, k), &tau[k], &vn1[k]);
+            magma_zlarfg_gpu( 1,    A(rk, k), A(rk, k),     &tau[k], &vn1[k]);
         }
         
         //Akk = *A(rk, k);
@@ -303,7 +304,8 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
            F(1:N,K) := tau(K)*A(RK:M,K+1:N)'*A(RK:M,K) - tau(K)*F(1:N,1:K-1)*A(RK:M,1:K-1)'*A(RK:M,K)
                     := tau(K)(A(RK:M,K+1:N)' - F(1:N,1:K-1)*A(RK:M,1:K-1)') A(RK:M,K)  
            so, F is (updated A)*V */
-        if (k > 0 && k<n-1) {
+        //if (k > 0 && k<n-1) {
+        if (k > 0 ) {
             magma_zgetvector( 1, &tau[k], 1, &tauk, 1 );
             z__1 = MAGMA_Z_NEGATE( tauk );
 #ifdef RIGHT_UPDATE
@@ -377,7 +379,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         }
         
         /* Update partial column norms. */
-        if (k < n-1 ){
+        if (rk < min(m, n+offset)-1 ){
             //magmablas_dznrm2_row_adjust(n-k-1, &vn1[k+1], A(rk,k+1), lda); 
             magmablas_dznrm2_row_check_adjust(n-k-1, tol3z, &vn1[k+1], &vn2[k+1], A(rk,k+1), lda, lsticcs); 
         }
@@ -421,7 +423,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
 
     /* Apply the block reflector to the rest of the matrix:
        A(OFFSET+KB+1:M,KB+1:N) := A(OFFSET+KB+1:M,KB+1:N) - A(OFFSET+KB+1:M,1:KB)*F(KB+1:N,1:KB)'  */
-    if (*kb < min(n, m - offset)) {
+    if (*kb < min(n, m - offset)-1) {
         i__1 = m - rk - 1;
         i__2 = n - *kb;
         
