@@ -163,9 +163,6 @@ LIBSRC  := testing_zutil.o testing_cutil.o testing_dutil.o testing_sutil.o testi
 LIBOBJ  := $(LIBSRC:.cpp=.o)
 LIBEXE  := $(LIBOBJ:.o=)
 
-# depend on header
-$(ALLOBJ): testings.h
-
 # strip out fake exe files generated from LIBSRC
 EXE := $(filter-out $(LIBEXE), $(EXE))
 
@@ -175,6 +172,9 @@ INC += -I../control
 all: $(EXE)
 
 lib: $(LIBMAGMA) $(LIBMAGMABLAS)
+
+# depend on header
+$(ALLOBJ): testings.h
 
 $(LIBTEST): $(LIBOBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $^
