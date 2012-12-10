@@ -27,6 +27,7 @@ ZSRC += \
 	testing_dlarfg.cpp	\
 	testing_zprint.cpp	\
 	testing_zsymmetrize.cpp	\
+	testing_zsymmetrize_tiles.cpp	\
 	testing_zswap.cpp	\
 	testing_ztranspose.cpp	\
 	testing_zutil.cpp	\

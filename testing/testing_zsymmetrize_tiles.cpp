@@ -35,11 +35,12 @@ int main( int argc, char** argv)
     cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex *h_A, *h_R;
     cuDoubleComplex *d_A;
-    magma_int_t N, size, lda, ldda;
+    magma_int_t N, nb, size, lda, ldda, mstride, nstride, ntile;
     magma_int_t ione     = 1;
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
+    nb = (opts.nb == 0 ? 64 : opts.nb);
     
     printf("    N   CPU GByte/s (sec)   GPU GByte/s (sec)   check\n");
     printf("=====================================================\n");
@@ -49,9 +50,7 @@ int main( int argc, char** argv)
             lda    = N;
             ldda   = ((N+31)/32)*32;
             size   = lda*N;
-            // load strictly lower triangle, save strictly upper triangle
-            gbytes = sizeof(cuDoubleComplex) * 1.*N*(N-1) / 1e9;
-    
+            
             TESTING_MALLOC(   h_A, cuDoubleComplex, size   );
             TESTING_MALLOC(   h_R, cuDoubleComplex, size   );
             TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*N );
@@ -68,9 +67,14 @@ int main( int argc, char** argv)
                =================================================================== */
             magma_zsetmatrix( N, N, h_A, lda, d_A, ldda );
             
+            mstride = 2*nb;
+            nstride = 3*nb;
+            ntile = (N < nb ? 0 : (N - nb) / max(mstride, nstride) + 1);
+            // load each tile, save each tile
+            gbytes = sizeof(cuDoubleComplex) * 2.*nb*nb*ntile / 1e9;
+
             gpu_time = magma_sync_wtime( 0 );
-            //magmablas_zsymmetrize( opts.uplo, N-2, d_A+1+ldda, ldda );  // inset by 1 row & col
-            magmablas_zsymmetrize( opts.uplo, N, d_A, ldda );
+            magmablas_zsymmetrize_tiles( opts.uplo, nb, d_A, ldda, ntile, mstride, nstride );
             gpu_time = magma_sync_wtime( 0 ) - gpu_time;
             gpu_perf = gbytes / gpu_time;
             
@@ -79,15 +83,16 @@ int main( int argc, char** argv)
                (LAPACK doesn't implement symmetrize)
                =================================================================== */
             cpu_time = magma_wtime();
-            //for( int j = 1; j < N-1; ++j ) {    // inset by 1 row & col
-            //    for( int i = 1; i < j; ++i ) {
-            for( int j = 0; j < N; ++j ) {
-                for( int i = 0; i < j; ++i ) {
-                    if ( opts.uplo == MagmaLower ) {
-                        h_A[i + j*lda] = h_A[j + i*lda];
-                    }
-                    else {
-                        h_A[j + i*lda] = h_A[i + j*lda];
+            for( int tile = 0; tile < ntile; ++tile ) {
+                int offset = tile*mstride + tile*nstride*lda;
+                for( int j = 0; j < nb; ++j ) {
+                    for( int i = 0; i < j; ++i ) {
+                        if ( opts.uplo == MagmaLower ) {
+                            h_A[offset + i + j*lda] = h_A[offset + j + i*lda];
+                        }
+                        else {
+                            h_A[offset + j + i*lda] = h_A[offset + i + j*lda];
+                        }
                     }
                 }
             }
