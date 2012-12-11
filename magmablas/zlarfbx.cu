@@ -138,15 +138,15 @@ magma_zlarfbx_gpu(int m, int k, cuDoubleComplex *V, int ldv,
                   cuDoubleComplex *dwork)
 {
     /* dwork = V' c                   */
-    magma_zgemv_kernel1<<< k, BLOCK_SIZE >>>(m, V, ldv, c, dwork); 
+    magma_zgemv_kernel1<<< k, BLOCK_SIZE, 0, magma_stream >>>(m, V, ldv, c, dwork); 
 
     /* dwork = T' dwork               */
-    magma_ztrmv_tkernel<<< k, k >>>( T, ldt, dwork, dwork+k);
+    magma_ztrmv_tkernel<<< k, k, 0, magma_stream >>>( T, ldt, dwork, dwork+k);
  
     /* c = c - V dwork                */
     dim3  blocks3( (m + BLOCK_SIZE-1) / BLOCK_SIZE );
     dim3 threads3( BLOCK_SIZE );     
-    magma_zgemv_kernel2<<< blocks3, threads3 >>>( m, k, V, ldv, dwork+k, c);
+    magma_zgemv_kernel2<<< blocks3, threads3, 0, magma_stream >>>( m, k, V, ldv, dwork+k, c);
 }
 
 //==============================================================================

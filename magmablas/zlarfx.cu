@@ -200,13 +200,13 @@ magma_zlarfx_gpu(int m, int n, cuDoubleComplex *v, cuDoubleComplex *tau,
     int N = n + i + 1;
 
     if (i==0)
-      magma_zlarfx_kernel<<< N, BLOCK_SIZE >>>( m, v, tau, c, ldc, xnorm, T+i*N, i);
+      magma_zlarfx_kernel<<< N, BLOCK_SIZE, 0, magma_stream >>>( m, v, tau, c, ldc, xnorm, T+i*N, i);
     else
-      magma_zlarfx_kernel<<< N, BLOCK_SIZE >>>( m, v, tau, c, ldc, xnorm, work, i);
+      magma_zlarfx_kernel<<< N, BLOCK_SIZE, 0, magma_stream >>>( m, v, tau, c, ldc, xnorm, work, i);
 
     if (i > 0){
-       //magma_ztrmv_kernel<<< 1, i >>>( T, N, T+i*N);
-       magma_ztrmv_kernel2<<< i, i          >>>( T, N, work, T+i*N, tau);
+       //magma_ztrmv_kernel<<< 1, i, 0, magma_stream >>>( T, N, T+i*N);
+       magma_ztrmv_kernel2<<< i, i, 0, magma_stream  >>>( T, N, work, T+i*N, tau);
     }
 }
 
