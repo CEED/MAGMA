@@ -23,6 +23,15 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
                  cuDoubleComplex *dF, magma_int_t lddf);
 
 extern "C" magma_int_t
+magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
+                  magma_int_t nb, magma_int_t *kb,
+                  cuDoubleComplex *A,  magma_int_t lda,
+                  magma_int_t *jpvt, cuDoubleComplex *tau,
+                  double *vn1, double *vn2,
+                  cuDoubleComplex *auxv,
+                  cuDoubleComplex *dF, magma_int_t lddf);
+
+extern "C" magma_int_t
 magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
                   cuDoubleComplex *A, magma_int_t lda,
                   magma_int_t *jpvt, cuDoubleComplex *tau,
@@ -252,11 +261,13 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
                                     A (j,j + jb), lda );
                 }*/
 
-                magma_zlaqps_gpu( m, n_j, j, jb, &fjb,
-                                  A (0, j), lda,
-                                  &jpvt[j], &tau[j], &rwork[j], &rwork[n + j],
-                                  work,
-                                  &df[jb],   n_j );
+                //magma_zlaqps_gpu
+                magma_zlaqps2_gpu
+                     ( m, n_j, j, jb, &fjb,
+                       A (0, j), lda,
+                       &jpvt[j], &tau[j], &rwork[j], &rwork[n + j],
+                       work,
+                       &df[jb],   n_j );
                 
                 j += fjb;  /* fjb is actual number of columns factored */
             }
