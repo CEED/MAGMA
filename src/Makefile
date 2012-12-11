@@ -96,6 +96,9 @@ ZSRC += \
 	zunmqr_gpu.cpp		\
 	\
 	zgeqrf_mgpu.cpp		\
+	\
+	zgeqp3_gpu.cpp          \
+	zlaqps_gpu.cpp          \
 
 # QR, CPU interface
 ZSRC += \
