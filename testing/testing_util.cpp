@@ -67,7 +67,7 @@ const char *usage =
 "  --work  [123]    SVD workspace size, from min (1) to max (3), default 1.\n"
 "  --version x      hemm_mgpu version.\n"
 "  --fraction x     fraction of eigenvectors to compute.\n"
-"  -L -U            uplo   = Lower* or Upper.\n"
+"  -L -U -F         uplo   = Lower*, Upper, or Full.\n"
 "  -[NTC][NTC]      transA = NoTrans*, Trans, or ConjTrans (first letter) and\n"
 "                   transB = NoTrans*, Trans, or ConjTrans (second letter).\n"
 "  -S[LR]           side   = Left*, Right.\n"
@@ -269,6 +269,7 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
         // ----- lapack flag arguments
         else if ( strcmp("-L",  argv[i]) == 0 ) { opts->uplo = MagmaLower; }
         else if ( strcmp("-U",  argv[i]) == 0 ) { opts->uplo = MagmaUpper; }
+        else if ( strcmp("-F",  argv[i]) == 0 ) { opts->uplo = MagmaUpperLower; }
         
         else if ( strcmp("-NN", argv[i]) == 0 ) { opts->transA = MagmaNoTrans;   opts->transB = MagmaNoTrans;   }
         else if ( strcmp("-NT", argv[i]) == 0 ) { opts->transA = MagmaNoTrans;   opts->transB = MagmaTrans;     }
