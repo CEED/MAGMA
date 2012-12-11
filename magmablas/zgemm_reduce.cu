@@ -130,7 +130,7 @@ magmablas_zgemm_reduce(magma_int_t m, magma_int_t n, magma_int_t k,
     else {
         dim3  blocks( m/BLK_M, n/BLK_N );
         dim3 threads( BLK_K, BLK_M, BLK_N );
-        magmablas_zgemm_reduce_kernel<<<blocks,threads>>>(k, alpha, d_A, lda,
+        magmablas_zgemm_reduce_kernel<<<blocks,threads, 0, magma_stream >>>(k, alpha, d_A, lda,
                                                           d_B, ldb, beta,
                                                           d_C, ldc );
     }

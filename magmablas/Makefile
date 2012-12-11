@@ -19,11 +19,14 @@ ZSRC := \
 	zcaxpycp.cu		\
 	zclaswp.cu		\
 	zgeadd.cu		\
+	zgeqr2x_gpu-v4.cu       \
 	zgeadd_batched.cu	\
 	zgemm_reduce.cu         \
 	zhemv_fermi.cu		\
 	zlacpy.cu		\
 	zlacpy_batched.cu	\
+	zlaqps2_gpu.cu          \
+	zgemm_reduce.cu         \
 	zlag2c.cu		\
 	clag2z.cu		\
 	zlange.cu		\
