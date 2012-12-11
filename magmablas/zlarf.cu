@@ -176,7 +176,7 @@ magma_zlarf_sm(int m, int n, cuDoubleComplex *v, cuDoubleComplex *tau,
     dim3  blocks( 1 );
     dim3 threads( BLOCK_SIZEx, BLOCK_SIZEy );
 
-    magma_zlarf_smkernel<<< blocks, threads >>>( m, n, v, tau, c, ldc, xnorm);
+    magma_zlarf_smkernel<<< blocks, threads, 0, magma_stream >>>( m, n, v, tau, c, ldc, xnorm);
 }
 
 //==============================================================================
@@ -201,7 +201,7 @@ magma_zlarf_gpu(int m, int n, cuDoubleComplex *v, cuDoubleComplex *tau,
     dim3  blocks( n );
     dim3 threads( BLOCK_SIZE );
 
-    magma_zlarf_kernel<<< blocks, threads >>>( m, v, tau, c, ldc, xnorm);
+    magma_zlarf_kernel<<< blocks, threads, 0, magma_stream >>>( m, v, tau, c, ldc, xnorm);
 
     // The computation can be done on 1 SM with the following routine.
     // magma_zlarf_sm(m, n, v, tau, c, ldc, xnorm);
