@@ -18,6 +18,12 @@ extern "C" void
 magma_zlarfg_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
                  cuDoubleComplex *dtau, double *dxnorm);
 extern "C" void
+magma_zlarfg2_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
+                  cuDoubleComplex *dtau, double *dxnorm, cuDoubleComplex *dAkk);
+extern "C" void
+magma_zlarfg3_gpu(int n, cuDoubleComplex *dx0_in, cuDoubleComplex *dx0_out, 
+                  cuDoubleComplex *dx, cuDoubleComplex *dtau, double *dxnorm);
+extern "C" void
 magmablas_dznrm2_adjust(int k, double *xnorm, cuDoubleComplex *c);
 
 extern "C" void
@@ -127,20 +133,22 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
     cuDoubleComplex z__1;
     
     magma_int_t j, k, rk;
-    cuDoubleComplex Akk, tauk;
+    cuDoubleComplex *Aks, Akk, tauk;
     magma_int_t pvt;
     double temp, temp2, tol3z;
     magma_int_t itemp;
 
     double lsticc, *lsticcs;
     magma_int_t lastrk;
-    magma_dmalloc( &lsticcs, (n+255)/256 );
+    magma_dmalloc( &lsticcs, 1+256*(n+255)/256 );
 
     lastrk = min( m, n + offset );
     tol3z = magma_dsqrt( lapackf77_dlamch("Epsilon"));
 
     lsticc = 0;
     k = 0;
+    magma_zmalloc( &Aks, nb );
+
     while( k < nb && lsticc == 0 ) {
         rk = offset + k;
         
@@ -188,11 +196,13 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
             //vn1[pvt] = vn1[k];
             //vn2[pvt] = vn2[k];
             #if (defined(PRECISION_d) || defined(PRECISION_z))
-                magma_dswap( 1, &vn1[pvt], 1, &vn1[k], 1 );
-                magma_dswap( 1, &vn2[pvt], 1, &vn2[k], 1 );
+                //magma_dswap( 1, &vn1[pvt], 1, &vn1[k], 1 );
+                //magma_dswap( 1, &vn2[pvt], 1, &vn2[k], 1 );
+                magma_dswap( 2, &vn1[pvt], n+offset, &vn1[k], n+offset );
             #else
-                magma_sswap( 1, &vn1[pvt], 1, &vn1[k], 1 );
-                magma_sswap( 1, &vn2[pvt], 1, &vn2[k], 1 );
+                //magma_sswap( 1, &vn1[pvt], 1, &vn1[k], 1 );
+                //magma_sswap( 1, &vn2[pvt], 1, &vn2[k], 1 );
+                magma_sswap(2, &vn1[pvt], n+offset, &vn1[k], n+offset);
             #endif
 
         }
@@ -236,22 +246,27 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         }
         
         /*  Generate elementary reflector H(k). */
-        if (rk < m-1) {
+        /*if (rk < m-1) {
             i__1 = m - rk;
             //lapackf77_zlarfg( &i__1, A(rk, k), A(rk + 1, k), &ione, &tau[k] );
-            magma_zlarfg_gpu( i__1, A(rk, k), A(rk + 1, k), &tau[k], &vn1[k]);
+            magma_zlarfg3_gpu( i__1, A(rk, k), &Aks[k], A(rk + 1, k), &tau[k], &vn1[k]);
         } else {
             //lapackf77_zlarfg( &ione, A(rk, k), A(rk, k), &ione, &tau[k] );
-            magma_zlarfg_gpu( 1,    A(rk, k), A(rk, k),     &tau[k], &vn1[k]);
-        }
-        
+            magma_zlarfg3_gpu( 1,    A(rk, k), &Aks[k], A(rk, k),     &tau[k], &vn1[k]);
+        }*/
+        magma_zlarfg2_gpu(m-rk, A(rk, k), A(rk + 1, k), &tau[k], &vn1[k], &Aks[k]);
+
         //Akk = *A(rk, k);
         //*A(rk, k) = c_one;
-        magma_zgetvector( 1, A(rk, k), 1, &Akk,     1 );
-        magma_zsetvector( 1, &c_one,   1, A(rk, k), 1 );
+        //magma_zgetvector( 1, &Aks[k],  1, &Akk,     1 );
+
+        /* needed to avoid the race condition */
+        if (k == 0) magma_zsetvector(  1,    &c_one,       1, A(rk, k), 1 );
+        else        magma_zcopymatrix( 1, 1, A(offset, 0), 1, A(rk, k), 1 ); 
 
         /* Compute Kth column of F:
            Compute  F(K+1:N,K) := tau(K)*A(RK:M,K+1:N)'*A(RK:M,K) on the GPU */
+        if (k < n-1 || k > 0) magma_zgetvector( 1, &tau[k], 1, &tauk, 1 );
         if (k < n-1) {
             i__1 = m - rk;
             i__2 = n - k - 1;
@@ -264,7 +279,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
             //                 TAU( K ), A( RK,  K+1 ), LDA,
             //                           A( RK,  K   ), 1,
             //                 CZERO,    F( K+1, K   ), 1 )
-            magma_zgetvector( 1, &tau[k], 1, &tauk, 1 );
+            //magma_zgetvector( 1, &tau[k], 1, &tauk, 1 );
             magma_zgemv( MagmaConjTrans, m-rk, n-k-1,
                          tauk,   A( rk,  k+1 ), lda,
                                  A( rk,  k   ), 1,
@@ -305,8 +320,8 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
                     := tau(K)(A(RK:M,K+1:N)' - F(1:N,1:K-1)*A(RK:M,1:K-1)') A(RK:M,K)  
            so, F is (updated A)*V */
         //if (k > 0 && k<n-1) {
-        if (k > 0 ) {
-            magma_zgetvector( 1, &tau[k], 1, &tauk, 1 );
+        if (k > 0) {
+            //magma_zgetvector( 1, &tau[k], 1, &tauk, 1 );
             z__1 = MAGMA_Z_NEGATE( tauk );
 #ifdef RIGHT_UPDATE
             i__1 = m - offset - nb;
@@ -334,7 +349,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
                                      A(rk, k), ione,
                              c_zero, auxv, ione );
             
-            i__1 = k;
+            //i__1 = k;
             //blasf77_zgemv( MagmaNoTransStr, &n, &i__1,
             //               &c_one, F(0,0), &ldf,
             //                       auxv,   &ione,
@@ -344,7 +359,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
                                     auxv,   ione,
                              c_one, F(0,k), ione );*/
             /* I think we only need stricly lower-triangular part :) */
-            magmablas_zgemv( MagmaNoTrans, n-k-1, i__1,
+            magmablas_zgemv( MagmaNoTrans, n-k-1, i__2,
                              c_one, F(k+1,0), ldf,
                                     auxv,     ione,
                              c_one, F(k+1,k), ione );
@@ -382,13 +397,15 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         if (rk < min(m, n+offset)-1 ){
             //magmablas_dznrm2_row_adjust(n-k-1, &vn1[k+1], A(rk,k+1), lda); 
             magmablas_dznrm2_row_check_adjust(n-k-1, tol3z, &vn1[k+1], &vn2[k+1], A(rk,k+1), lda, lsticcs); 
-        }
-        magma_device_sync();
-        #if defined(PRECISION_d) || defined(PRECISION_z)
-        magma_dgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
-        #else
-        magma_sgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
-        #endif
+
+            magma_device_sync();
+            #if defined(PRECISION_d) || defined(PRECISION_z)
+            magma_dgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
+            #else
+            magma_sgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
+            #endif
+        } 
+
 
         /*if (rk < lastrk) {
             for (j = k + 1; j < n; ++j) {
@@ -412,10 +429,13 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         }*/
         
         //*A(rk, k) = Akk;
-        magma_zsetvector( 1, &Akk, 1, A(rk, k), 1 );
+        //magma_zsetvector( 1, &Akk, 1, A(rk, k), 1 );
+        //magma_zswap( 1, &Aks[k], 1, A(rk, k), 1 );
         
         ++k;
     }
+    magma_zcopymatrix( 1, k, Aks, 1, A(offset, 0), lda+1 );
+
     // leave k as the last column done
     --k;
     *kb = k + 1;
@@ -423,7 +443,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
 
     /* Apply the block reflector to the rest of the matrix:
        A(OFFSET+KB+1:M,KB+1:N) := A(OFFSET+KB+1:M,KB+1:N) - A(OFFSET+KB+1:M,1:KB)*F(KB+1:N,1:KB)'  */
-    if (*kb < min(n, m - offset)-1) {
+    if (*kb < min(n, m - offset)) {
         i__1 = m - rk - 1;
         i__2 = n - *kb;
         
@@ -440,10 +460,14 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
     /* Recomputation of difficult columns. */
     if( lsticc > 0 ) {
         printf( " -- recompute dnorms --\n" );
-        magmablas_dznrm2_check(m-rk-1, n-*kb, A(rk+1,rk+1), lda,
-                               &vn1[rk+1], lsticcs);
-        /*
-    while( lsticc > 0 ) {
+        magmablas_dznrm2_check(m-rk-1, n-*kb, A(rk+1,*kb), lda,
+                               &vn1[*kb], lsticcs);
+#if defined(PRECISION_d) || defined(PRECISION_z)
+        magma_dcopymatrix( n-*kb, 1, &vn1[*kb], *kb, &vn2[*kb], *kb);
+#else
+        magma_scopymatrix( n-*kb, 1, &vn1[*kb], *kb, &vn2[*kb], *kb);
+#endif
+    /*while( lsticc > 0 ) {
         itemp = (magma_int_t)(vn2[lsticc] >= 0. ? floor(vn2[lsticc] + .5) : -floor(.5 - vn2[lsticc]));
         i__1 = m - rk - 1;
         if (lsticc <= nb)
@@ -463,6 +487,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         vn2[lsticc] = vn1[lsticc];
         lsticc = itemp;*/
     }
+    magma_free(Aks);
     magma_free(lsticcs);
 
     
