@@ -142,7 +142,7 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
     magma_int_t i__1, i__2;
     
     magma_int_t k, rk;
-    cuDoubleComplex Akk, tauk;
+    cuDoubleComplex tauk;
     magma_int_t pvt, itemp;
     double tol3z;
 
@@ -150,7 +150,7 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
     auxv+=1;
 
     double lsticc, *lsticcs;
-    magma_dmalloc( &lsticcs, (n+255)/256 );
+    magma_dmalloc( &lsticcs, 1+256*(n+255)/256 );
 
     tol3z = magma_dsqrt( lapackf77_dlamch("Epsilon"));
 
@@ -281,7 +281,7 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
     /* Apply the block reflector to the rest of the matrix:
        A(OFFSET+KB+1:M,KB+1:N) := A(OFFSET+KB+1:M,KB+1:N) - 
                                   A(OFFSET+KB+1:M,1:KB)*F(KB+1:N,1:KB)'  */
-    if (*kb < min(n, m - offset)-1) {
+    if (*kb < min(n, m - offset)) {
         i__1 = m - rk - 1;
         i__2 = n - *kb;
         
@@ -294,8 +294,8 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
     /* Recomputation of difficult columns. */
     if( lsticc > 0 ) {
         printf( " -- recompute dnorms --\n" );
-        magmablas_dznrm2_check(m-rk-1, n-*kb, A(rk+1,rk+1), lda,
-                               &vn1[rk+1], lsticcs);
+        magmablas_dznrm2_check(m-rk-1, n-*kb, A(rk+1,*kb), lda,
+                               &vn1[*kb], lsticcs);
     }
     magma_free(lsticcs);
     
