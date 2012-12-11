@@ -119,7 +119,7 @@ magma_zlarfgx_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
     dim3 blocks((n+BLOCK_SIZE-1) / BLOCK_SIZE);
     dim3 threads( BLOCK_SIZE );
  
-    magma_zlarfgx_gpu_kernel<<< blocks, threads >>>( n, dx0, dx, dtau, dxnorm, dA, it);
+    magma_zlarfgx_gpu_kernel<<< blocks, threads, 0, magma_stream >>>( n, dx0, dx, dtau, dxnorm, dA, it);
 }
 
 //==============================================================================
@@ -154,8 +154,8 @@ magma_zlarfgtx_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
    else
    {
       /* Compute the i-th column of T */      
-      magma_zgemv_kernel3<<< i, BLOCK_SIZE >>>(n, V, ldv, dx0, work, dtau);
-      magma_ztrmv_kernel2<<< i, i          >>>( T, ldt, work, T+i*ldt, dtau);
+      magma_zgemv_kernel3<<< i, BLOCK_SIZE, 0, magma_stream >>>(n, V, ldv, dx0, work, dtau);
+      magma_ztrmv_kernel2<<< i, i, 0, magma_stream          >>>( T, ldt, work, T+i*ldt, dtau);
    }
 }
 
