@@ -83,6 +83,78 @@ void magma_zlarfg_gpu_kernel( int n, cuDoubleComplex* dx0, cuDoubleComplex* dx,
         dx[j] = MAGMA_Z_MUL(dxi, scale);
 }
 
+__global__
+void magma_zlarfg2_gpu_kernel( int n, cuDoubleComplex* dx0, cuDoubleComplex* dx,
+                              cuDoubleComplex *dtau, double *dxnorm, cuDoubleComplex* dAkk)
+{
+    const int i = threadIdx.x;
+    const int j = i + BLOCK_SIZE * blockIdx.x;
+    __shared__ cuDoubleComplex scale;
+    __shared__ double xnorm;
+
+    cuDoubleComplex dxi;
+
+/*
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+    if( n <= 1 ) {
+#else
+    if( n <= 0 ) {
+#endif
+        *dtau = MAGMA_Z_ZERO;
+        return;
+    }
+*/
+    if ( j < n-1)
+        dxi = dx[j];
+
+    if ( i == 0 ) {
+        xnorm = *dxnorm;
+        if ( xnorm == 0 ) {
+            *dtau = MAGMA_Z_ZERO;
+        }
+        else {
+
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+            double alpha = *dx0;
+
+            // no need to compute the norm as it is passed as input
+            double beta  = xnorm; // sqrt( alpha*alpha + xnorm*xnorm );
+            beta  = -copysign( beta, alpha );
+
+            // todo: deal with badly scaled vectors (see lapack's larfg)
+            *dtau = (beta - alpha) / beta;
+            if (blockIdx.x == gridDim.x-1)
+            *dx0  = beta;
+            *dAkk  = beta;
+
+            scale = 1. / (alpha - beta);
+#else
+            cuDoubleComplex alpha = *dx0;
+            double alphar =  MAGMA_Z_REAL(alpha), alphai = MAGMA_Z_IMAG(alpha);
+
+            // no need to compute the norm as it is passed as input
+            double beta  = xnorm; // sqrt( alphar*alphar + alphai*alphai + xnorm*xnorm );
+            beta  = -copysign( beta, alphar );
+
+            // todo: deal with badly scaled vectors (see lapack's larfg)
+            *dtau = MAGMA_Z_MAKE((beta - alphar)/beta, -alphai/beta);
+            if (blockIdx.x == gridDim.x-1)
+            *dx0  = MAGMA_Z_MAKE(beta, 0.);
+            *dAkk = MAGMA_Z_MAKE(beta, 0.);
+
+            alpha = MAGMA_Z_MAKE( MAGMA_Z_REAL(alpha) - beta, MAGMA_Z_IMAG(alpha));
+            scale = MAGMA_Z_DIV( MAGMA_Z_ONE, alpha);
+#endif
+        }
+    }
+
+    // scale x
+    __syncthreads();
+    if ( xnorm != 0 && j < n-1)
+        dx[j] = MAGMA_Z_MUL(dxi, scale);
+}
+
+
 /*
    Generates Householder elementary reflector H = I - tau v v^T to reduce
      H [ dx0 ] = [ beta ]
@@ -103,10 +175,22 @@ magma_zlarfg_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
     dim3 threads( BLOCK_SIZE );
 
     /* recomputing the norm */
-    //printf("zlarfg-v2 - recompute norm\n");
-    //magmablas_dznrm2(n, 1, dx-1, n, dxnorm);
-    magmablas_dznrm2(n, 1, dx0, n, dxnorm);
+    //magmablas_dznrm2(n, 1, dx0, n, dxnorm);
 
     magma_zlarfg_gpu_kernel<<< blocks, threads, 
                                0, magma_stream >>>(n, dx0, dx, dtau, dxnorm );
+}
+
+extern "C" void
+magma_zlarfg2_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
+                  cuDoubleComplex *dtau, double *dxnorm, cuDoubleComplex *dAkk)
+{
+    dim3 blocks((n+BLOCK_SIZE-1) / BLOCK_SIZE);
+    dim3 threads( BLOCK_SIZE );
+
+    /* recomputing the norm */
+    magmablas_dznrm2(n, 1, dx0, n, dxnorm);
+
+    magma_zlarfg2_gpu_kernel<<< blocks, threads,
+                               0, magma_stream >>>(n, dx0, dx, dtau, dxnorm, dAkk);
 }
