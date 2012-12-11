@@ -232,14 +232,14 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
                     := tau(K)(A(RK:M,K+1:N)' - F(1:N,1:K-1)*A(RK:M,1:K-1)') A(RK:M,K)  
            so, F is (updated A)*V */
         if (k > 0) {
-            z__1 = MAGMA_Z_NEGATE( tauk );
+            /*z__1 = MAGMA_Z_NEGATE( tauk );
             magmablas_zgemv( MagmaConjTrans, m-rk, k,
                              z__1,   A(rk, 0), lda,
                                      A(rk, k), ione,
-                             c_zero, auxv, ione );
+                             c_zero, auxv, ione );*/
 
-            //magma_zgemv_kernel3<<< k, BLOCK_SIZE, 0, magma_stream >>>(m-rk, A(rk, 0), lda,
-            //                                                          A(rk, k), auxv, tau+k);     
+            magma_zgemv_kernel3<<< k, BLOCK_SIZE, 0, magma_stream >>>(m-rk, A(rk, 0), lda,
+                                                                      A(rk, k), auxv, tau+k);     
             
             /* I think we only need stricly lower-triangular part :) */
             magmablas_zgemv( MagmaNoTrans, n-k-1, k,
