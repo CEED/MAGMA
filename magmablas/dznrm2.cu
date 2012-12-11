@@ -191,7 +191,7 @@ magmablas_dznrm2_sm(int m, int num, cuDoubleComplex *da, magma_int_t ldda,
     dim3  blocks( 1 );
     dim3 threads( BLOCK_SIZEx, BLOCK_SIZEy );
 
-    magmablas_dznrm2_smkernel<<< blocks, threads >>>( m, num, da, ldda, dxnorm );
+    magmablas_dznrm2_smkernel<<< blocks, threads, 0, magma_stream >>>( m, num, da, ldda, dxnorm );
 }
 
 //==============================================================================
@@ -240,7 +240,7 @@ magma_dznrm2_adjust_kernel(double *xnorm, cuDoubleComplex *c)
 extern "C" void
 magmablas_dznrm2_adjust(int k, double *xnorm, cuDoubleComplex *c)
 {
-   magma_dznrm2_adjust_kernel<<< 1, k >>> (xnorm, c);
+   magma_dznrm2_adjust_kernel<<< 1, k, 0, magma_stream >>> (xnorm, c);
 }
 
 //==============================================================================
@@ -323,7 +323,7 @@ magmablas_dznrm2(int m, int num, cuDoubleComplex *da, magma_int_t ldda,
     dim3  blocks( num );
     dim3 threads( BLOCK_SIZE );
     
-    magmablas_dznrm2_kernel<<< blocks, threads >>>( m, da, ldda, dxnorm );
+    magmablas_dznrm2_kernel<<< blocks, threads, 0, magma_stream >>>( m, da, ldda, dxnorm );
 
     // The following would do the computation on one SM
     // magmablas_dznrm2_sm(m, num, da, ldda, dxnorm);
