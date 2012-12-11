@@ -95,6 +95,7 @@ ZSRC += \
 	testing_zunmqr.cpp	\
 	\
 	testing_zgeqp3.cpp	\
+	testing_zgeqp3_gpu.cpp  \
 
 # ----------
 # symmetric eigenvalues, GPU interface
