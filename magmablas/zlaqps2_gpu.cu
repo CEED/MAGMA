@@ -147,7 +147,7 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
     double tol3z;
 
     cuDoubleComplex *dAkk = auxv;
-    auxv+=1;
+    auxv+=nb;
 
     double lsticc, *lsticcs;
     magma_dmalloc( &lsticcs, 1+256*(n+255)/256 );
@@ -205,7 +205,7 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         /*  Generate elementary reflector H(k). */
         //if (rk < m-1)
         //    magma_zlarfg_gpu(m-rk, A(rk, k), A(rk + 1, k), &tau[k], &vn1[k]);
-        magma_zlarfg2_gpu(m-rk, A(rk, k), A(rk + 1, k), &tau[k], &vn1[k], dAkk);
+        magma_zlarfg2_gpu(m-rk, A(rk, k), A(rk + 1, k), &tau[k], &vn1[k], &dAkk[k]);
 
         //else 
         //    magma_zlarfg_gpu( 1, A(rk, k), A(rk, k), &tau[k], &vn1[k]);
@@ -259,20 +259,23 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         if (rk < min(m, n+offset)-1){
            magmablas_dznrm2_row_check_adjust(n-k-1, tol3z, &vn1[k+1], 
                                              &vn2[k+1], A(rk,k+1), lda, lsticcs); 
-        }
 
-        #if defined(PRECISION_d) || defined(PRECISION_z)
-            magma_dgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
-        #else
-            magma_sgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
-        #endif
+           #if defined(PRECISION_d) || defined(PRECISION_z)
+               magma_dgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
+           #else
+               magma_sgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
+           #endif
+        }
 
         //*A(rk, k) = Akk;
         //magma_zsetvector( 1, &Akk, 1, A(rk, k), 1 );
-        magmablas_zlacpy(MagmaUpperLower, 1, 1, dAkk, 1, A(rk, k), 1);
+        //magmablas_zlacpy(MagmaUpperLower, 1, 1, dAkk, 1, A(rk, k), 1);
 
         ++k;
     }
+    // restore the diagonals
+    magma_zcopymatrix( 1, k, dAkk, 1, A(offset, 0), lda+1 );
+
     // leave k as the last column done
     --k;
     *kb = k + 1;
