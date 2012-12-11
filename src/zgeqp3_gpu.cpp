@@ -261,8 +261,8 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
                                     A (j,j + jb), lda );
                 }*/
 
-                //magma_zlaqps_gpu
-                magma_zlaqps2_gpu
+                //magma_zlaqps_gpu    // this is a cpp-file
+                magma_zlaqps2_gpu   // this is a cuda-file
                      ( m, n_j, j, jb, &fjb,
                        A (0, j), lda,
                        &jpvt[j], &tau[j], &rwork[j], &rwork[n + j],
