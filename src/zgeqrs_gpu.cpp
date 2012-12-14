@@ -73,9 +73,9 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
     LWORK   (input) INTEGER
-            The dimension of the array WORK, LWORK >= max(1,NRHS).
-            For optimum performance LWORK >= (M-N+NB)*(NRHS + 2*NB), where 
-            NB is the blocksize given by magma_get_zgeqrf_nb( M ).
+            The dimension of the array WORK,
+            LWORK >= (M - N + NB)*(NRHS + NB) + NRHS*NB,
+            where NB is the blocksize given by magma_get_zgeqrf_nb( M ).
 
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal size of the HWORK array, returns
@@ -97,7 +97,7 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     magma_int_t ione = 1;
 
     magma_int_t nb     = magma_get_zgeqrf_nb(m);
-    magma_int_t lwkopt = (m-n+nb)*(nrhs+2*nb);
+    magma_int_t lwkopt = (m - n + nb)*(nrhs + nb) + nrhs*nb;
     int lquery = (lwork == -1);
 
     hwork[0] = MAGMA_Z_MAKE( (double)lwkopt, 0. );
