@@ -16,6 +16,12 @@ ZSRC += \
 	testing_zgemv.cpp	\
 	testing_zhemv.cpp	\
 	testing_zsymv.cpp	\
+	testing_zherk.cpp	\
+	testing_zher2k.cpp	\
+	testing_ztrmm.cpp	\
+	testing_ztrmv.cpp	\
+	testing_ztrsm.cpp	\
+	testing_ztrsv.cpp	\
 	\
 	testing_auxiliary.cpp	\
 	testing_parse_opts.cpp	\
