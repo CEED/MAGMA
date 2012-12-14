@@ -12,7 +12,7 @@
 #include "common_magma.h"
 #include "trace.h"
 
-void magmaSetDevice( int id ) {
+static void magmaSetDevice( int id ) {
     switch( id ) {
         case 0:
             magma_setdevice( 0 );
