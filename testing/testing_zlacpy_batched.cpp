@@ -7,8 +7,8 @@
 
        @precisions normal z -> c d s
        @author Mark Gates
-*/
 
+*/
 // includes, system
 #include <stdlib.h>
 #include <stdio.h>
@@ -16,153 +16,128 @@
 #include <math.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
-#include <cblas.h>
 
 // includes, project
-#include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
 
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing zlacpy
+   -- Testing zlacpy_batched
+   Code is very similar to testing_zgeadd_batched.cpp
 */
-#define PRECISION_z
-
-int main( int argc, char** argv) 
+int main( int argc, char** argv)
 {
     TESTING_CUDA_INIT();
 
-    //cuDoubleComplex c_zero = MAGMA_Z_ZERO;
-    //cuDoubleComplex c_one  = MAGMA_Z_ONE;
-    
-    cuDoubleComplex *hA, *hB, *hR, *dA, *dB;
+    real_Double_t    gbytes, gpu_perf, gpu_time, cpu_perf, cpu_time;
+    double           error, work[1];
+    cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
+    cuDoubleComplex *h_A, *h_B;
+    cuDoubleComplex *d_A, *d_B;
     cuDoubleComplex **hAarray, **hBarray, **dAarray, **dBarray;
+    magma_int_t M, N, mb, nb, size, lda, ldda, mstride, nstride, mtile, ntile;
+    magma_int_t ione     = 1;
+    magma_int_t ISEED[4] = {0,0,0,1};
+    
+    magma_opts opts;
+    parse_opts( argc, argv, &opts );
+    mb = (opts.nb == 0 ? 32 : opts.nb);
+    nb = (opts.nb == 0 ? 64 : opts.nb);
+    mstride = 2*mb;
+    nstride = 3*nb;
+    
+    printf("mb=%d, nb=%d, mstride=%d, nstride=%d\n", mb, nb, mstride, nstride );
+    printf("    M    N ntile   CPU GFlop/s (sec)   GPU GFlop/s (sec)   check\n");
+    printf("=================================================================\n");
+    for( int i = 0; i < opts.ntest; ++i ) {
+        for( int iter = 0; iter < opts.niter; ++iter ) {
+            M = opts.msize[i];
+            N = opts.nsize[i];
+            lda    = M;
+            ldda   = ((M+31)/32)*32;
+            size   = lda*N;
+            
+            mtile = (M < mb ? 0 : (M - mb)/mstride + 1);
+            ntile = (N < nb ? 0 : (N - nb)/nstride + 1);
+            ntile = min( mtile, ntile );
+            gbytes = 2.*mb*nb*ntile / 1e9;
+            
+            TESTING_MALLOC(   h_A, cuDoubleComplex, lda *N );
+            TESTING_MALLOC(   h_B, cuDoubleComplex, lda *N );
+            TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*N );
+            TESTING_DEVALLOC( d_B, cuDoubleComplex, ldda*N );
+            
+            TESTING_MALLOC(   hAarray, cuDoubleComplex*, ntile );
+            TESTING_MALLOC(   hBarray, cuDoubleComplex*, ntile );
+            TESTING_DEVALLOC( dAarray, cuDoubleComplex*, ntile );
+            TESTING_DEVALLOC( dBarray, cuDoubleComplex*, ntile );
+            
+            lapackf77_zlarnv( &ione, ISEED, &size, h_A );
+            lapackf77_zlarnv( &ione, ISEED, &size, h_B );
 
-    //magma_int_t ione     = 1;
-    //magma_int_t ISEED[4] = {0, 0, 0, 1};
-    
-    magma_int_t offsets[] = { 64, 256 };
-    magma_int_t size[] = { 0, 1, 32, 63, 64, 65, 255, 256 };
-    int ntest   = sizeof(size)    / sizeof(magma_int_t);
-    int noffset = sizeof(offsets) / sizeof(magma_int_t);
-    
-    magma_int_t count = 3;
-    magma_int_t n   = 256*3;  // max offset * count
-    magma_int_t lda = n;
-    
-    TESTING_MALLOC   ( hA, cuDoubleComplex, lda*n );
-    TESTING_MALLOC   ( hB, cuDoubleComplex, lda*n );
-    TESTING_MALLOC   ( hR, cuDoubleComplex, lda*n );
-    TESTING_DEVALLOC ( dA, cuDoubleComplex, lda*n );
-    TESTING_DEVALLOC ( dB, cuDoubleComplex, lda*n );
-    
-    TESTING_MALLOC   ( hAarray, cuDoubleComplex*, count );
-    TESTING_MALLOC   ( hBarray, cuDoubleComplex*, count );
-    TESTING_DEVALLOC ( dAarray, cuDoubleComplex*, count );
-    TESTING_DEVALLOC ( dBarray, cuDoubleComplex*, count );
-    
-    // initialize matrices; entries are (i.j) for A and (800 + i.j) for B.
-    double nf = n;
-    for( int i = 0; i < n; ++i ) {
-        for( int j = 0; j < n; ++j ) {
-            hA[i + j*lda] = MAGMA_Z_MAKE( i + j/nf,       0. );
-            hB[i + j*lda] = MAGMA_Z_MAKE( i + j/nf + 800, 0. );
+            /* ====================================================================
+               Performs operation using MAGMA
+               =================================================================== */
+            magma_zsetmatrix( M, N, h_A, lda, d_A, ldda );
+            magma_zsetmatrix( M, N, h_B, lda, d_B, ldda );
+            
+            // setup pointers
+            for( int tile = 0; tile < ntile; ++tile ) {
+                int offset = tile*mstride + tile*nstride*ldda;
+                hAarray[tile] = &d_A[offset];
+                hBarray[tile] = &d_B[offset];
+            }
+            magma_setvector( ntile, sizeof(cuDoubleComplex*), hAarray, 1, dAarray, 1 );
+            magma_setvector( ntile, sizeof(cuDoubleComplex*), hBarray, 1, dBarray, 1 );
+            
+            gpu_time = magma_sync_wtime( 0 );
+            magmablas_zlacpy_batched( MagmaUpperLower, mb, nb, dAarray, ldda, dBarray, ldda, ntile );
+            gpu_time = magma_sync_wtime( 0 ) - gpu_time;
+            gpu_perf = gbytes / gpu_time;
+            
+            /* =====================================================================
+               Performs operation using LAPACK
+               =================================================================== */
+            cpu_time = magma_wtime();
+            for( int tile = 0; tile < ntile; ++tile ) {
+                int offset = tile*mstride + tile*nstride*lda;
+                lapackf77_zlacpy( MagmaUpperLowerStr, &mb, &nb,
+                                  &h_A[offset], &lda,
+                                  &h_B[offset], &lda );
+            }
+            cpu_time = magma_wtime() - cpu_time;
+            cpu_perf = gbytes / cpu_time;
+            
+            /* =====================================================================
+               Check the result
+               =================================================================== */
+            magma_zgetmatrix( M, N, d_B, ldda, h_A, lda );
+            
+            blasf77_zaxpy(&size, &c_neg_one, h_A, &ione, h_B, &ione);
+            error = lapackf77_zlange("f", &M, &N, h_B, &lda, work);
+
+            printf("%5d %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
+                   (int) M, (int) N, (int) ntile,
+                   cpu_perf, cpu_time, gpu_perf, gpu_time,
+                   (error == 0. ? "okay" : "fail") );
+            
+            TESTING_FREE( h_A );
+            TESTING_FREE( h_B );
+            TESTING_DEVFREE( d_A );
+            TESTING_DEVFREE( d_B );
+            
+            TESTING_FREE( hAarray );
+            TESTING_FREE( hBarray );
+            TESTING_DEVFREE( dAarray );
+            TESTING_DEVFREE( dBarray );
+        }
+        if ( opts.niter > 1 ) {
+            printf( "\n" );
         }
     }
-    
-    /* Check parameters. magma_xerbla calls lapack's xerbla to print out error. */
-    //magmablas_zlacpy_batched( 'F', -1,  n, dAarray, lda, dBarray, lda, count );
-    //magmablas_zlacpy_batched( 'F',  n, -1, dAarray, lda, dBarray, lda, count );
-    //magmablas_zlacpy_batched( 'F',  n,  n, dAarray, n-1, dBarray, lda, count );
-    //magmablas_zlacpy_batched( 'F',  n,  n, dAarray, lda, dBarray, n-1, count );
-    //magmablas_zlacpy_batched( 'F',  n,  n, dAarray, lda, dBarray, lda, -1    );
-                                           
-    printf( "\nNote: ranges use Python notation, i.e., A[i:j] is A[ i, i+1, ..., j-1 ], excluding A[j].\n\n" );
-    for( int ii = 0; ii < ntest; ++ii ) {
-    for( int jj = 0; jj < ntest; ++jj ) {
-    for( int kk = 0; kk < noffset; ++kk ) {
-        int mb = size[ii];
-        int nb = size[jj];
-        int offset = offsets[kk];
-        if ( mb > offset || nb > offset ) {
-            //printf( "skipping mb=%d, nb=%d, offset=%d because mb > offset or nb > offset\n", mb, nb, offset );
-            continue;
-        }
-        
-        /* ====================================================================
-           Performs operation using MAGMA
-           =================================================================== */
-        magma_zsetmatrix( n, n, hA, lda, dA, lda );
-        magma_zsetmatrix( n, n, hB, lda, dB, lda );
-        
-        // setup pointers
-        for( int i = 0; i < count; ++i ) {
-            hAarray[i] = &dA[i*offset + i*offset*lda];
-            hBarray[i] = &dB[i*offset + i*offset*lda];
-        }
-        magma_setvector( count, sizeof(cuDoubleComplex*), hAarray, 1, dAarray, 1 );
-        magma_setvector( count, sizeof(cuDoubleComplex*), hBarray, 1, dBarray, 1 );
-        
-        magmablas_zlacpy_batched( 'F', mb, nb, dAarray, lda, dBarray, lda, count );
-        
-        /* ====================================================================
-           Check result
-           =================================================================== */
-        int bad_copies = 0;
-        int overwrites = 0;
-        magma_zgetmatrix( n, n, dB, lda, hR, lda );
-                
-        for( int j = 0; j < n; ++j ) {
-            for( int i = 0; i < n; ++i ) {
-                if (    (i / offset) < count
-                     && (i / offset) == (j / offset)
-                     && (i % offset) < mb
-                     && (j % offset) < nb )
-                {
-                    // Rij = Aij (copied)
-                    if ( ! MAGMA_Z_EQUAL( hR[i + j*lda], hA[i + j*lda] )) {
-                        bad_copies += 1;
-                        printf( "Copy failed at B[%2d,%2d], expected %9.4f, got %9.4f\n",
-                                i, j, MAGMA_Z_REAL( hA[i + j*lda] ),
-                                      MAGMA_Z_REAL( hR[i + j*lda] ));
-                    }
-                }
-                else {
-                    // Rij = Bij (no change)
-                    if ( ! MAGMA_Z_EQUAL( hR[i + j*lda], hB[i + j*lda] )) {
-                        overwrites += 1;
-                        printf( "Overwrote at B[%2d,%2d], expected %9.4f, got %9.4f\n",
-                                i, j, MAGMA_Z_REAL( hB[i + j*lda] ),
-                                      MAGMA_Z_REAL( hR[i + j*lda] ));
-                    }
-                }
-            }
-        }
-        printf( "B(i*%-3d:i*%-3d + %3d, i*%-3d:i*%-3d + %3d) = A(...) for i=0,...,%d ",
-                offset, offset, mb,
-                offset, offset, nb, count-1 );
-        if ( bad_copies > 0 || overwrites > 0 ) {
-            printf( "failed, %d bad copies, %d overwrites\n", bad_copies, overwrites );
-        }
-        else {
-            printf( "passed\n" );
-        }
-    }}}
-    
-    TESTING_FREE( hA );
-    TESTING_FREE( hB );
-    TESTING_FREE( hR );
-    TESTING_DEVFREE( dA );
-    TESTING_DEVFREE( dB );
-    
-    TESTING_FREE( hAarray );
-    TESTING_FREE( hBarray );
-    TESTING_DEVFREE( dAarray );
-    TESTING_DEVFREE( dBarray );
-    
-    /* Shutdown */
+
     TESTING_CUDA_FINALIZE();
-    return EXIT_SUCCESS;
+    return 0;
 }
