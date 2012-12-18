@@ -86,7 +86,9 @@ void magma_device_sync()
 // In the future, MAGMA queue may be CUBLAS handle.
 // --------------------
 extern "C"
-void magma_queue_create( /*magma_device_t device,*/ magma_queue_t* queuePtr )
+void magma_queue_create_internal(
+    /*magma_device_t device,*/ magma_queue_t* queuePtr,
+    const char* func, const char* file, int line )    
 {
     //cudaStream_t   stream;
     //cublasStatus_t stat;
@@ -95,12 +97,14 @@ void magma_queue_create( /*magma_device_t device,*/ magma_queue_t* queuePtr )
     //stat = cublasCreate( queuePtr );
     err  = cudaStreamCreate( queuePtr );  //&stream );
     //stat = cublasSetStream( *queuePtr, stream );
-    check_error( err );
+    check_xerror( err, func, file, line );
 }
 
 // --------------------
 extern "C"
-void magma_queue_destroy( magma_queue_t queue )
+void magma_queue_destroy_internal(
+    magma_queue_t queue,
+    const char* func, const char* file, int line )
 {
     //cudaStream_t   stream;
     //cublasStatus_t stat;
@@ -108,19 +112,21 @@ void magma_queue_destroy( magma_queue_t queue )
     //stat = cublasGetStream( queue, &stream );
     err  = cudaStreamDestroy( queue );  //stream );
     //stat = cublasDestroy( queue );
-    check_error( err );
+    check_xerror( err, func, file, line );
 }
 
 // --------------------
 extern "C"
-void magma_queue_sync( magma_queue_t queue )
+void magma_queue_sync_internal(
+    magma_queue_t queue,
+    const char* func, const char* file, int line )
 {
     //cudaStream_t   stream;
     //cublasStatus_t stat;
     cudaError_t    err;
     //stat = cublasGetStream( queue, &stream );
     err  = cudaStreamSynchronize( queue );  //stream );
-    check_error( err );
+    check_xerror( err, func, file, line );
 }
 
 

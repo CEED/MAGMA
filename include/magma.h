@@ -255,11 +255,26 @@ void magma_device_sync();
 
 // ========================================
 // queue support
-void magma_queue_create( /*magma_device_t device,*/ magma_queue_t* queuePtr );
+#define magma_queue_create( /*device,*/ queuePtr ) \
+        magma_queue_create_internal( queuePtr, __func__, __FILE__, __LINE__ )
 
-void magma_queue_destroy( magma_queue_t queue );
+#define magma_queue_destroy( queue ) \
+        magma_queue_destroy_internal( queue, __func__, __FILE__, __LINE__ )
 
-void magma_queue_sync( magma_queue_t queue );
+#define magma_queue_sync( queue ) \
+        magma_queue_sync_internal( queue, __func__, __FILE__, __LINE__ )
+
+void magma_queue_create_internal(
+    /*magma_device_t device,*/ magma_queue_t* queuePtr,
+    const char* func, const char* file, int line );
+
+void magma_queue_destroy_internal(
+    magma_queue_t queue,
+    const char* func, const char* file, int line );
+
+void magma_queue_sync_internal(
+    magma_queue_t queue,
+    const char* func, const char* file, int line );
 
 
 // ========================================
@@ -276,40 +291,11 @@ void magma_event_sync( magma_event_t event );
 // blocks queue (but not CPU) until event occurs
 void magma_queue_wait_event( magma_queue_t queue, magma_event_t event );
 
-// magma GPU-complex connection
-int magma_buildconnection_mgpu(  magma_int_t gnode[MagmaMaxGPUs+2][MagmaMaxGPUs+2], magma_int_t *nbcmplx, magma_int_t ngpu);
-
-
-
-// ========================================
-// generic, type-independent routines to copy data.
-// type-safe versions which avoid the user needing sizeof(...) are in [sdcz]set_get.cpp
-void magma_setvector(
-    magma_int_t n, size_t elemSize,
-    void const *hx_src, magma_int_t incx,
-    void       *dy_dst, magma_int_t incy );
-
-void magma_getvector(
-    magma_int_t n, size_t elemSize,
-    void const *dx_src, magma_int_t incx,
-    void       *hy_dst, magma_int_t incy );
-
-void magma_setvector_async(
-    magma_int_t n, size_t elemSize,
-    void const *hx_src, magma_int_t incx,
-    void       *dy_dst, magma_int_t incy,
-    magma_stream_t stream );
-
-void magma_getvector_async(
-    magma_int_t n, size_t elemSize,
-    void const *dx_src, magma_int_t incx,
-    void       *hy_dst, magma_int_t incy,
-    magma_stream_t stream );
-
 
 // ========================================
 // error handler
 void magma_xerbla( const char *name, magma_int_t info );
+
 
 /* ------------------------------------------------------------
  *   -- MAGMA Auxiliary structures and functions
@@ -331,6 +317,9 @@ double magma_sync_wtime( magma_queue_t queue );
 size_t magma_strlcpy(char *dst, const char *src, size_t siz);
 int magma_num_gpus( void );
 int magma_is_devptr( const void* A );
+
+// magma GPU-complex PCIe connection
+int magma_buildconnection_mgpu(  magma_int_t gnode[MagmaMaxGPUs+2][MagmaMaxGPUs+2], magma_int_t *nbcmplx, magma_int_t ngpu);
 
 #ifdef __cplusplus
 }
