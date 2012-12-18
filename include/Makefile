@@ -9,19 +9,20 @@
 MAGMA_DIR = ..
 include ../Makefile.internal
 
-ZHDR =  magma_z.h 	\
-	magma_zc.h 	\
+ZHDR =  magma_z.h	\
+	magma_zc.h	\
 	magmablas_z.h	\
 	magmablas_zc.h	\
-	magma_zlapack.h \
-	magma_zbulge.h  \
-	magma_zbulgeinc.h
+	magma_zlapack.h	\
+	magma_zbulge.h	\
+	magma_zbulgeinc.h	\
+	magma_zgehrd_m.h	\
 
 -include Makefile.local
 -include Makefile.src
 
 ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR) \
-	magma.h 	\
+	magma.h		\
 	magmablas.h	\
 	magma_lapack.h	\
 

@@ -12,6 +12,8 @@
 #define _MAGMA_Z_H_
 #define PRECISION_z
 
+#include "magma_zgehrd_m.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -303,6 +305,62 @@ magma_int_t magma_zlaex3( magma_int_t k, magma_int_t n, magma_int_t n1, double* 
 magma_int_t magma_zhegst( magma_int_t itype, char uplo, magma_int_t n,
                           cuDoubleComplex *a, magma_int_t lda,
                           cuDoubleComplex *b, magma_int_t ldb, magma_int_t *info);
+
+
+/* //////////////////////////////////////////////////////////////////////////// 
+ -- MAGMA function definitions / Data on CPU / Multi-GPU
+*/
+magma_int_t magma_zlahr2_m(
+    magma_int_t n, magma_int_t k, magma_int_t nb,
+    cuDoubleComplex *A, magma_int_t lda,
+    cuDoubleComplex *tau,
+    cuDoubleComplex *T, magma_int_t ldt,
+    cuDoubleComplex *Y, magma_int_t ldy,
+    struct zgehrd_data* data );
+
+magma_int_t magma_zlahru_m(
+    magma_int_t n, magma_int_t ihi, magma_int_t k, magma_int_t nb, 
+    cuDoubleComplex *A, magma_int_t lda,
+    struct zgehrd_data* data );
+
+magma_int_t magma_zgeev_m(
+    char jobvl, char jobvr, magma_int_t n,
+    cuDoubleComplex *A, magma_int_t lda,
+    #if defined(PRECISION_z) || defined(PRECISION_c)
+    cuDoubleComplex *W,
+    #else
+    double *WR, double *WI,
+    #endif
+    cuDoubleComplex *vl, magma_int_t ldvl,
+    cuDoubleComplex *vr, magma_int_t ldvr,
+    cuDoubleComplex *work, magma_int_t lwork,
+    #if defined(PRECISION_z) || defined(PRECISION_c)
+    double *rwork,
+    #endif
+    magma_int_t *info );
+
+magma_int_t magma_zgehrd_m(
+    magma_int_t n, magma_int_t ilo, magma_int_t ihi,
+    cuDoubleComplex *A, magma_int_t lda,
+    cuDoubleComplex *tau,
+    cuDoubleComplex *work, magma_int_t lwork,
+    cuDoubleComplex *T,
+    magma_int_t *info );
+
+magma_int_t magma_zunghr_m(
+    magma_int_t n, magma_int_t ilo, magma_int_t ihi,
+    cuDoubleComplex *A, magma_int_t lda,
+    cuDoubleComplex *tau,
+    cuDoubleComplex *T, magma_int_t nb,
+    magma_int_t *info );
+
+magma_int_t magma_zungqr_m(
+    magma_int_t m, magma_int_t n, magma_int_t k,
+    cuDoubleComplex *A, magma_int_t lda,
+    cuDoubleComplex *tau,
+    cuDoubleComplex *T, magma_int_t nb,
+    magma_int_t *info );
+
 
 /* //////////////////////////////////////////////////////////////////////////// 
  -- MAGMA function definitions / Data on GPU
