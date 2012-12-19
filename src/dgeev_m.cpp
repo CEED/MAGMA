@@ -18,11 +18,13 @@
  * Version1 - LAPACK              (lapack_zgehrd and lapack_zunghr)
  * Version2 - MAGMA without dT    (magma_zgehrd2 and lapack_zunghr)
  * Version3 - MAGMA with dT       (magma_zgehrd  and magma_zunghr)
+ * Version4 - Multi-GPU magma_zgehrd_m with T on CPU, copied to dT, single-GPU magma_zunghr
+ * Version5 - Multi-GPU magma_zgehrd_m with T on CPU, multi-GPU magma_zunghr_m
  */
-#define VERSION3
+#define Version5
 
 extern "C" magma_int_t
-magma_dgeev(
+magma_dgeev_m(
     char jobvl, char jobvr, magma_int_t n,
     double *A, magma_int_t lda,
     double *WR, double *WI,
@@ -121,7 +123,7 @@ magma_dgeev(
                   elements and i+1:N of W contain eigenvalues which have
                   converged.
     =====================================================================    */
-
+    
     #define vl(i,j)  (vl + (i) + (j)*ldvl)
     #define vr(i,j)  (vr + (i) + (j)*ldvr)
     
@@ -135,11 +137,11 @@ magma_dgeev(
     magma_int_t i, k, ilo, ihi;
     magma_int_t ibal, ierr, itau, iwrk, nout, liwrk, i__1, i__2, nb;
     magma_int_t scalea, minwrk, lquery, wantvl, wantvr, select[1];
-
+    
     char side[2]   = {0, 0};
     char jobvl_[2] = {jobvl, 0};
     char jobvr_[2] = {jobvr, 0};
-
+    
     *info = 0;
     lquery = lwork == -1;
     wantvl = lapackf77_lsame( jobvl_, "V" );
@@ -182,10 +184,18 @@ magma_dgeev(
         return *info;
     }
    
-    #if defined(VERSION3)
+    #if defined(Version3) || defined(Version4) || defined(Version5)
     double *dT;
     if (MAGMA_SUCCESS != magma_dmalloc( &dT, nb*n )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
+        return *info;
+    }
+    #endif
+    #if defined(Version4) || defined(Version5)
+    double *T;
+    if (MAGMA_SUCCESS != magma_dmalloc_cpu( &T, nb*n )) {
+        magma_free( dT );
+        *info = MAGMA_ERR_HOST_ALLOC;
         return *info;
     }
     #endif
@@ -223,18 +233,23 @@ magma_dgeev(
     iwrk = itau + n;
     liwrk = lwork - iwrk;
 
-    #if defined(VERSION1)
+    #if defined(Version1)
         // Version 1 - LAPACK
         lapackf77_dgehrd( &n, &ilo, &ihi, A, &lda,
                           &work[itau], &work[iwrk], &liwrk, &ierr );
-    #elif defined(VERSION2)
+    #elif defined(Version2)
         // Version 2 - LAPACK consistent HRD
         magma_dgehrd2( n, ilo, ihi, A, lda,
                        &work[itau], &work[iwrk], &liwrk, &ierr );
-    #elif defined(VERSION3)
+    #elif defined(Version3)
         // Version 3 - LAPACK consistent MAGMA HRD + matrices T stored,
         magma_dgehrd( n, ilo, ihi, A, lda,
                       &work[itau], &work[iwrk], liwrk, dT, &ierr );
+    #elif defined(Version4) || defined(Version5)
+        // Version 4 - Multi-GPU, T on host
+        magma_dgehrd_m( n, ilo, ihi, A, lda,
+                        &work[itau], &work[iwrk], liwrk, T, &ierr );
+        magma_dsetmatrix( nb, n, T, nb, dT, nb );
     #endif
 
     if (wantvl) {
@@ -246,13 +261,16 @@ magma_dgeev(
 
         /* Generate orthogonal matrix in VL
          * (Workspace: need 3*N-1, prefer 2*N + (N-1)*NB) */
-        #if defined(VERSION1) || defined(VERSION2)
+        #if defined(Version1) || defined(Version2)
             // Version 1 & 2 - LAPACK
             lapackf77_dorghr( &n, &ilo, &ihi, vl, &ldvl, &work[itau],
                               &work[iwrk], &liwrk, &ierr );
-        #elif defined(VERSION3)
+        #elif defined(Version3) || defined(Version4)
             // Version 3 - LAPACK consistent MAGMA HRD + matrices T stored
             magma_dorghr( n, ilo, ihi, vl, ldvl, &work[itau], dT, nb, &ierr );
+        #elif defined(Version5)
+            // Version 5 - Multi-GPU, T on host
+            magma_dorghr_m( n, ilo, ihi, vl, ldvl, &work[itau], T, nb, &ierr );
         #endif
 
         /* Perform QR iteration, accumulating Schur vectors in VL
@@ -277,13 +295,16 @@ magma_dgeev(
 
         /* Generate orthogonal matrix in VR
          * (Workspace: need 3*N-1, prefer 2*N + (N-1)*NB) */
-        #if defined(VERSION1) || defined(VERSION2)
+        #if defined(Version1) || defined(Version2)
             // Version 1 & 2 - LAPACK
             lapackf77_dorghr( &n, &ilo, &ihi, vr, &ldvr, &work[itau],
                               &work[iwrk], &liwrk, &ierr );
-        #elif defined(VERSION3)
+        #elif defined(Version3) || defined(Version4)
             // Version 3 - LAPACK consistent MAGMA HRD + matrices T stored
             magma_dorghr( n, ilo, ihi, vr, ldvr, &work[itau], dT, nb, &ierr );
+        #elif defined(Version5)
+            // Version 5 - Multi-GPU, T on host
+            magma_dorghr_m( n, ilo, ihi, vr, ldvr, &work[itau], T, nb, &ierr );
         #endif
 
         /* Perform QR iteration, accumulating Schur vectors in VR
@@ -396,8 +417,11 @@ CLEANUP:
         }
     }
 
-    #if defined(VERSION3)
+    #if defined(Version3) || defined(Version4) || defined(Version5)
     magma_free( dT );
+    #endif
+    #if defined(Version4) || defined(Version5)
+    magma_free_cpu( T );
     #endif
     
     return *info;

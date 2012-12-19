@@ -114,6 +114,8 @@ ZSRC += \
 	\
 	zgeqp3.cpp		\
 	zlaqps.cpp		\
+	\
+	zungqr_m.cpp		\
 
 # ----------
 # symmetric eigenvalues, GPU interface
@@ -207,6 +209,15 @@ ZSRC += \
 	zlahr2.cpp		\
 	zlahru.cpp		\
 	zunghr.cpp		\
+
+# non-symmetric eigenvalues, multi-GPU
+ZSRC += \
+	dgeev_m.cpp		\
+	zgeev_m.cpp		\
+	zgehrd_m.cpp		\
+	zlahr2_m.cpp		\
+	zlahru_m.cpp		\
+	zunghr_m.cpp		\
 
 # ----------
 # SVD

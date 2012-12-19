@@ -259,3 +259,60 @@ int sp_cat(char *lp, char *rpp[], magma_int_t *rnp, magma_int_t*np, magma_int_t 
 
   return 0;
 }
+
+
+// --------------------
+// Convert global indices [j0, j1) to local indices [dj0, dj1) on GPU dev,
+// according to 1D block cyclic distribution.
+// Note j0 and dj0 are inclusive, while j1 and dj1 are exclusive.
+// This is consistent with the C++ container notion of first and last.
+//
+// Example with n = 75, nb = 10, ngpu = 3
+// local dj:                0- 9, 10-19, 20-29
+// -------------------------------------------
+// gpu 0: 2  blocks, cols:  0- 9, 30-39, 60-69
+// gpu 1: 1+ blocks, cols: 10-19, 40-49, 70-74 (partial)
+// gpu 2: 1  block , cols: 20-29, 50-59
+//
+// j0 = 15, j0dev = 1
+// j1 = 70, j1dev = 0
+// gpu 0: dj0 = 10, dj1 = 30
+// gpu 1: dj0 =  5, dj1 = 20
+// gpu 2: dj0 =  0, dj1 = 20
+//
+// @author Mark Gates
+
+extern "C"
+void magma_indices_1D_bcyclic( magma_int_t nb, magma_int_t ngpu, magma_int_t dev,
+                               magma_int_t j0, magma_int_t j1,
+                               magma_int_t* dj0, magma_int_t* dj1 )
+{
+    // on GPU jdev, which contains j0, dj0 maps to j0.
+    // on other GPUs, dj0 is start of the block on that GPU after j0's block.
+    magma_int_t jblock = (j0 / nb) / ngpu;
+    magma_int_t jdev   = (j0 / nb) % ngpu;
+    if ( dev < jdev ) {
+        jblock += 1;
+    }
+    *dj0 = jblock*nb;
+    if ( dev == jdev ) {
+        *dj0 += (j0 % nb);
+    }
+    
+    // on GPU jdev, which contains j1-1, dj1 maps to j1.
+    // on other GPUs, dj1 is end of the block on that GPU before j1's block.
+    // j1 points to element after end (e.g., n), so subtract 1 to get last
+    // element, compute index, then add 1 to get just after that index again.
+    j1 -= 1;
+    jblock = (j1 / nb) / ngpu;
+    jdev   = (j1 / nb) % ngpu;
+    if ( dev > jdev ) {
+        jblock -= 1;
+    }
+    if ( dev == jdev ) {
+        *dj1 = jblock*nb + (j1 % nb) + 1;
+    }
+    else {
+        *dj1 = jblock*nb + nb;
+    }
+}

@@ -24,6 +24,8 @@ Included are routines for the following algorithms:
       gemm, gemv, symv, and trsm.
 
  1.3.1
+    * Add multi-GPU Hessenberg and non-symmetric eigenvalue routines:
+      geev_m, gehrd_m, unghr_m, ungqr_m.
     * Fix required workspace size in gels_gpu, gels3_gpu, geqrs_gpu, geqrs3_gpu.
 
  1.3.0 - November 12, 2012
