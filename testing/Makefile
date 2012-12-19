@@ -82,8 +82,8 @@ ZSRC += \
 	\
 	testing_zgelqf_gpu.cpp	\
 	testing_zgeqrf_gpu.cpp	\
-	testing_zgeqr2_gpu.cpp  \
-	testing_zgeqr2x_gpu.cpp \
+	testing_zgeqr2_gpu.cpp	\
+	testing_zgeqr2x_gpu.cpp	\
 	testing_zgeqrs3_gpu.cpp	\
 	testing_zgeqrs_gpu.cpp	\
 	testing_zlarfb_gpu.cpp	\
@@ -100,8 +100,10 @@ ZSRC += \
 	testing_zungqr.cpp	\
 	testing_zunmqr.cpp	\
 	\
+	testing_zungqr_m.cpp	\
+	\
 	testing_zgeqp3.cpp	\
-	testing_zgeqp3_gpu.cpp  \
+	testing_zgeqp3_gpu.cpp	\
 
 # ----------
 # symmetric eigenvalues, GPU interface
@@ -135,6 +137,9 @@ ZSRC += \
 	testing_dgeev.cpp	\
 	testing_zgeev.cpp	\
 	testing_zgehrd.cpp	\
+	testing_dgeev_m.cpp	\
+	testing_zgeev_m.cpp	\
+	testing_zgehrd_m.cpp	\
 
 # ----------
 # SVD
