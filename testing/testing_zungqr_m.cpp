@@ -37,7 +37,7 @@ int main( int argc, char** argv )
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double           error, work[1];
     cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *hA, *hR, *tau, *h_work;
+    cuDoubleComplex *hA, *hR, *hT, *tau, *h_work;
     cuDoubleComplex *dA, *dT;
     magma_int_t m, n, k;
     magma_int_t n2, lda, ldda, lwork, min_mn, nb, info;
@@ -70,6 +70,7 @@ int main( int argc, char** argv )
             TESTING_HOSTALLOC( hA,     cuDoubleComplex, lda*n  );
             TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork  );
             TESTING_MALLOC(    hR,     cuDoubleComplex, lda*n  );
+            TESTING_MALLOC(    hT,     cuDoubleComplex, min_mn*nb );
             TESTING_MALLOC(    tau,    cuDoubleComplex, min_mn );
             TESTING_DEVALLOC(  dA,     cuDoubleComplex, ldda*n );
             TESTING_DEVALLOC(  dT,     cuDoubleComplex, ( 2*min_mn + ((n + 31)/32)*32 )*nb );
@@ -86,9 +87,10 @@ int main( int argc, char** argv )
             if ( info != 0 )
                 printf("magma_zgeqrf_gpu returned error %d\n", info);
             magma_zgetmatrix( m, n, dA, ldda, hR, lda );
+            magma_zgetmatrix( nb, min_mn, dT, nb, hT, nb );
             
             gpu_time = magma_wtime();
-            magma_zungqr( m, n, k, hR, lda, tau, dT, nb, &info );
+            magma_zungqr_m( m, n, k, hR, lda, tau, hT, nb, &info );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if ( info != 0 )
@@ -126,6 +128,7 @@ int main( int argc, char** argv )
             TESTING_HOSTFREE( hA     );
             TESTING_HOSTFREE( h_work );
             TESTING_FREE(     hR     );
+            TESTING_FREE(     hT     );
             TESTING_FREE(     tau    );
             TESTING_DEVFREE(  dA     );
             TESTING_DEVFREE(  dT     );

@@ -27,9 +27,6 @@
 #define PRECISION_d
 #define REAL
 
-
-// DLAPY2 returns sqrt(x**2+y**2), taking care not to cause unnecessary overflow.
-// TODO: put into auxiliary file. It's useful elsewhere.
 extern "C"
 double magma_dlapy2(double x, double y)
 {
@@ -99,10 +96,10 @@ int main( int argc, char** argv)
                Performs operation using MAGMA
                =================================================================== */
             gpu_time = magma_wtime();
-            magma_dgeev( opts.jobvl, opts.jobvr,
-                         N, h_R, lda, w1, w1i,
-                         VL, lda, VR, lda,
-                         h_work, lwork, &info );
+            magma_dgeev_m( opts.jobvl, opts.jobvr,
+                           N, h_R, lda, w1, w1i,
+                           VL, lda, VR, lda,
+                           h_work, lwork, &info );
             gpu_time = magma_wtime() - gpu_time;
             if (info < 0)
                 printf("Argument %d of magma_dgeev had an illegal value.\n", (int) -info);
@@ -179,10 +176,10 @@ int main( int argc, char** argv)
                 
                 // ----------
                 // Compute eigenvalues, left and right eigenvectors, and test them
-                magma_dgeev( MagmaVectors, MagmaVectors,
-                             N, h_R, lda, w1, w1i,
-                             VL, lda, VR, lda,
-                             h_work, lwork, &info );
+                magma_dgeev_m( MagmaVectors, MagmaVectors,
+                               N, h_R, lda, w1, w1i,
+                               VL, lda, VR, lda,
+                               h_work, lwork, &info );
                 
                 // Do test 1
                 lapackf77_dget22( MagmaNoTransStr, MagmaNoTransStr, MagmaNoTransStr,
@@ -261,10 +258,10 @@ int main( int argc, char** argv)
                 // ----------
                 // Compute eigenvalues only, and test them
                 lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
-                magma_dgeev( MagmaNoVectors, MagmaNoVectors,
-                             N, h_R, lda, w2, w2i,
-                             &DUM, 1, &DUM, 1,
-                             h_work, lwork, &info );
+                magma_dgeev_m( MagmaNoVectors, MagmaNoVectors,
+                               N, h_R, lda, w2, w2i,
+                               &DUM, 1, &DUM, 1,
+                               h_work, lwork, &info );
                 
                 if (info != 0) {
                     result[0] = ulpinv;
@@ -282,10 +279,10 @@ int main( int argc, char** argv)
                 // ----------
                 // Compute eigenvalues and right eigenvectors, and test them
                 lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
-                magma_dgeev( MagmaNoVectors, MagmaVectors,
-                             N, h_R, lda, w2, w2i,
-                             &DUM, 1, LRE, lda,
-                             h_work, lwork, &info );
+                magma_dgeev_m( MagmaNoVectors, MagmaVectors,
+                               N, h_R, lda, w2, w2i,
+                               &DUM, 1, LRE, lda,
+                               h_work, lwork, &info );
                 
                 if (info != 0) {
                     result[0] = ulpinv;
@@ -310,10 +307,10 @@ int main( int argc, char** argv)
                 // ----------
                 // Compute eigenvalues and left eigenvectors, and test them
                 lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
-                magma_dgeev( MagmaVectors, MagmaNoVectors,
-                             N, h_R, lda, w2, w2i,
-                             LRE, lda, &DUM, 1,
-                             h_work, lwork, &info );
+                magma_dgeev_m( MagmaVectors, MagmaNoVectors,
+                               N, h_R, lda, w2, w2i,
+                               LRE, lda, &DUM, 1,
+                               h_work, lwork, &info );
                 
                 if (info != 0) {
                     result[0] = ulpinv;

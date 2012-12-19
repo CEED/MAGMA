@@ -26,14 +26,15 @@
 #define PRECISION_z
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing zgehrd2
+   -- Testing zgehrd
 */
 int main( int argc, char** argv)
 {
     TESTING_CUDA_INIT();
-
+    cudaSetDevice( 0 );  // without this, T -> dT copy fails
+    
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
-    cuDoubleComplex *h_A, *h_R, *h_Q, *h_work, *tau, *twork, *dT;
+    cuDoubleComplex *h_A, *h_R, *h_Q, *h_work, *tau, *twork, *T, *dT;
     #if defined(PRECISION_z) || defined(PRECISION_c)
     double      *rwork;
     #endif
@@ -55,12 +56,13 @@ int main( int argc, char** argv)
             lda    = N;
             n2     = lda*N;
             nb     = magma_get_zgehrd_nb(N);
-            /* We suppose the magma nb is bigger than lapack nb */
-            lwork  = N*nb;
+            // magma needs larger workspace than lapack, esp. multi-gpu verison
+            lwork  = N*(nb + nb*MagmaMaxGPUs);
             gflops = FLOPS_ZGEHRD( N ) / 1e9;
             
             TESTING_MALLOC   ( h_A,    cuDoubleComplex, n2    );
             TESTING_MALLOC   ( tau,    cuDoubleComplex, N     );
+            TESTING_MALLOC   ( T,      cuDoubleComplex, nb*N  );
             TESTING_HOSTALLOC( h_R,    cuDoubleComplex, n2    );
             TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork );
             TESTING_DEVALLOC ( dT,     cuDoubleComplex, nb*N  );
@@ -73,7 +75,7 @@ int main( int argc, char** argv)
                Performs operation using MAGMA
                =================================================================== */
             gpu_time = magma_wtime();
-            magma_zgehrd( N, ione, N, h_R, lda, tau, h_work, lwork, dT, &info);
+            magma_zgehrd_m( N, ione, N, h_R, lda, tau, h_work, lwork, T, &info);
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if ( info < 0 )
@@ -94,6 +96,8 @@ int main( int argc, char** argv)
                 for( int j = 0; j < N-1; ++j )
                     for( int i = j+2; i < N; ++i )
                         h_R[i+j*lda] = MAGMA_Z_ZERO;
+                
+                magma_zsetmatrix( nb, N, T, nb, dT, nb );
                 
                 magma_zunghr(N, ione, N, h_Q, lda, tau, dT, nb, &info);
                 if ( info != 0 ) {
@@ -150,6 +154,7 @@ int main( int argc, char** argv)
             
             TESTING_FREE    ( h_A  );
             TESTING_FREE    ( tau  );
+            TESTING_FREE    ( T    );
             TESTING_HOSTFREE( h_work);
             TESTING_HOSTFREE( h_R  );
             TESTING_DEVFREE ( dT   );
