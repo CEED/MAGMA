@@ -38,7 +38,7 @@ int main( int argc, char** argv)
     cuDoubleComplex *d_A, *d_B;
     cuDoubleComplex **hAarray, **hBarray, **dAarray, **dBarray;
     cuDoubleComplex alpha = MAGMA_Z_MAKE( 3.1415, 2.718 );
-    magma_int_t M, N, mb, nb, size, lda, ldda, mstride, nstride, mtile, ntile;
+    magma_int_t M, N, mb, nb, size, lda, ldda, mstride, nstride, ntile;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     
@@ -60,9 +60,12 @@ int main( int argc, char** argv)
             ldda   = ((M+31)/32)*32;
             size   = lda*N;
             
-            mtile = (M < mb ? 0 : (M - mb)/mstride + 1);
-            ntile = (N < nb ? 0 : (N - nb)/nstride + 1);
-            ntile = min( mtile, ntile );
+            if ( N < nb || M < nb ) {
+                ntile = 0;
+            } else {
+                ntile = min( (M - nb)/mstride + 1,
+                             (N - nb)/nstride + 1 );
+            }
             gflops = 2.*mb*nb*ntile / 1e9;
             
             TESTING_MALLOC(   h_A, cuDoubleComplex, lda *N );

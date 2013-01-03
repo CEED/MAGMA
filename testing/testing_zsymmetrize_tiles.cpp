@@ -41,15 +41,27 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     nb = (opts.nb == 0 ? 64 : opts.nb);
+    mstride = 2*nb;
+    nstride = 3*nb;
     
-    printf("    N   CPU GByte/s (sec)   GPU GByte/s (sec)   check\n");
-    printf("=====================================================\n");
+    printf("nb=%d, mstride=%d, nstride=%d\n", nb, mstride, nstride );
+    printf("    N ntile   CPU GByte/s (sec)   GPU GByte/s (sec)   check\n");
+    printf("===========================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[i];
             lda    = N;
             ldda   = ((N+31)/32)*32;
             size   = lda*N;
+            
+            if ( N < nb ) {
+                ntile = 0;
+            } else {
+                ntile = min( (N - nb)/mstride + 1,
+                             (N - nb)/nstride + 1 );
+            }
+            // load each tile, save each tile
+            gbytes = sizeof(cuDoubleComplex) * 2.*nb*nb*ntile / 1e9;
             
             TESTING_MALLOC(   h_A, cuDoubleComplex, size   );
             TESTING_MALLOC(   h_R, cuDoubleComplex, size   );
@@ -61,18 +73,12 @@ int main( int argc, char** argv)
                     h_A[i + j*lda] = MAGMA_Z_MAKE( i + j/10000., j );
                 }
             }
-            
+
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
             magma_zsetmatrix( N, N, h_A, lda, d_A, ldda );
             
-            mstride = 2*nb;
-            nstride = 3*nb;
-            ntile = (N < nb ? 0 : (N - nb) / max(mstride, nstride) + 1);
-            // load each tile, save each tile
-            gbytes = sizeof(cuDoubleComplex) * 2.*nb*nb*ntile / 1e9;
-
             gpu_time = magma_sync_wtime( 0 );
             magmablas_zsymmetrize_tiles( opts.uplo, nb, d_A, ldda, ntile, mstride, nstride );
             gpu_time = magma_sync_wtime( 0 ) - gpu_time;
@@ -88,10 +94,10 @@ int main( int argc, char** argv)
                 for( int j = 0; j < nb; ++j ) {
                     for( int i = 0; i < j; ++i ) {
                         if ( opts.uplo == MagmaLower ) {
-                            h_A[offset + i + j*lda] = h_A[offset + j + i*lda];
+                            h_A[offset + i + j*lda] = MAGMA_Z_CNJG( h_A[offset + j + i*lda] );
                         }
                         else {
-                            h_A[offset + j + i*lda] = h_A[offset + i + j*lda];
+                            h_A[offset + j + i*lda] = MAGMA_Z_CNJG( h_A[offset + i + j*lda] );
                         }
                     }
                 }
@@ -107,8 +113,9 @@ int main( int argc, char** argv)
             blasf77_zaxpy(&size, &c_neg_one, h_A, &ione, h_R, &ione);
             error = lapackf77_zlange("f", &N, &N, h_R, &lda, work);
 
-            printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
-                   (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time,
+            printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
+                   (int) N, (int) ntile,
+                   cpu_perf, cpu_time, gpu_perf, gpu_time,
                    (error == 0. ? "okay" : "fail") );
             
             TESTING_FREE( h_A );

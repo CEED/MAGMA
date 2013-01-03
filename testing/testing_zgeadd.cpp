@@ -17,7 +17,6 @@
 #include <cublas.h>
 
 // includes, project
-#include "flops.h"
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
@@ -31,13 +30,12 @@ int main( int argc, char** argv)
     TESTING_CUDA_INIT();
 
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
-    double          error;
+    double          error, work[1];
     cuDoubleComplex *h_A, *h_B, *d_A, *d_B;
     cuDoubleComplex alpha = MAGMA_Z_MAKE( 3.1415, 2.718 );
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    double work[1];
     
-    magma_int_t M, N, size, lda, ldda, info;
+    magma_int_t M, N, size, lda, ldda;
     magma_int_t ione = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
 
@@ -62,10 +60,10 @@ int main( int argc, char** argv)
             size   = lda*N;
             gflops = 2.*M*N / 1e9;
             
-            TESTING_HOSTALLOC( h_A, cuDoubleComplex, lda *N );
-            TESTING_HOSTALLOC( h_B, cuDoubleComplex, lda *N );
-            TESTING_DEVALLOC(  d_A, cuDoubleComplex, ldda*N );
-            TESTING_DEVALLOC(  d_B, cuDoubleComplex, ldda*N );
+            TESTING_MALLOC(   h_A, cuDoubleComplex, lda *N );
+            TESTING_MALLOC(   h_B, cuDoubleComplex, lda *N );
+            TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*N );
+            TESTING_DEVALLOC( d_B, cuDoubleComplex, ldda*N );
             
             lapackf77_zlarnv( &ione, ISEED, &size, h_A );
             lapackf77_zlarnv( &ione, ISEED, &size, h_B );
@@ -102,10 +100,14 @@ int main( int argc, char** argv)
             
             printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e\n",
                    (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, error );
-            TESTING_HOSTFREE( h_A );
-            TESTING_HOSTFREE( h_B );
+            
+            TESTING_FREE( h_A );
+            TESTING_FREE( h_B );
             TESTING_DEVFREE(  d_A );
             TESTING_DEVFREE(  d_B );
+        }
+        if ( opts.niter > 1 ) {
+            printf( "\n" );
         }
     }
 

@@ -6,6 +6,7 @@
        November 2011
 
        @precisions normal z -> s d c
+       @author Mark Gates
 
 */
 

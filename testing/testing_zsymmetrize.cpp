@@ -6,6 +6,7 @@
        November 2011
 
        @precisions normal z -> s d c
+       @author Mark Gates
 
 */
 
@@ -84,10 +85,10 @@ int main( int argc, char** argv)
             for( int j = 0; j < N; ++j ) {
                 for( int i = 0; i < j; ++i ) {
                     if ( opts.uplo == MagmaLower ) {
-                        h_A[i + j*lda] = h_A[j + i*lda];
+                        h_A[i + j*lda] = MAGMA_Z_CNJG( h_A[j + i*lda] );
                     }
                     else {
-                        h_A[j + i*lda] = h_A[i + j*lda];
+                        h_A[j + i*lda] = MAGMA_Z_CNJG( h_A[i + j*lda] );
                     }
                 }
             }

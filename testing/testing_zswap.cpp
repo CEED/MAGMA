@@ -413,7 +413,9 @@ int main( int argc, char** argv)
             TESTING_HOSTFREE( h_R2 );
             TESTING_DEVFREE(  d_A1 );
             TESTING_DEVFREE(  d_A2 );
-            TESTING_FREE( ipiv );
+            TESTING_FREE( ipiv  );
+            TESTING_FREE( ipiv2 );
+            TESTING_DEVFREE( d_ipiv );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );
