@@ -84,6 +84,8 @@ int main( int argc, char** argv)
                           h_work, lwork,
                           iwork, liwork,
                           &info );
+            if (info != 0)
+                printf("magma_dsyevd returned error %d.\n", (int) info);
             
             lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
             
@@ -97,6 +99,8 @@ int main( int argc, char** argv)
                           iwork, liwork,
                           &info );
             gpu_time = magma_wtime() - gpu_time;
+            if (info != 0)
+                printf("magma_dsyevd returned error %d.\n", (int) info);
             
             if ( opts.check ) {
                 /* =====================================================================
@@ -122,6 +126,8 @@ int main( int argc, char** argv)
                               h_work, lwork,
                               iwork, liwork,
                               &info );
+                if (info != 0)
+                    printf("magma_dsyevd returned error %d.\n", (int) info);
                 
                 temp1 = temp2 = 0;
                 for(int j=0; j<N; j++){
@@ -142,8 +148,8 @@ int main( int argc, char** argv)
                               iwork, &liwork,
                               &info );
             cpu_time = magma_wtime() - cpu_time;
-            if (info < 0)
-                printf("Argument %d of dsyevd had an illegal value.\n", (int) -info);
+            if (info != 0)
+                printf("lapackf77_dsyevd returned error %d.\n", (int) info);
             
             /* =====================================================================
                Print execution time

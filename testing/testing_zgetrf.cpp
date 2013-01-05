@@ -68,8 +68,8 @@ double get_residual(
     
     // solve Ax = b
     lapackf77_zgetrs( "Notrans", &n, &ione, A, &lda, ipiv, x, &n, &info );
-    if ( info != 0 )
-        printf( "lapackf77_zgetrs returned error %d\n", info );
+    if (info != 0)
+        printf("lapackf77_zgetrs returned error %d.\n", (int) info);
     
     // reset to original A
     init_matrix( m, n, A, lda );

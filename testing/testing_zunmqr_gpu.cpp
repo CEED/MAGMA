@@ -108,8 +108,8 @@ int main( int argc, char** argv )
             magma_zsetmatrix( lda, k, A,  lda, dA, lda );
             magma_zgeqrf_gpu( lda, k, dA, lda, tau, dT, &info );
             magma_zgetmatrix( lda, k, dA, lda, A,  lda );
-            if ( info != 0 )
-                printf("magma_zgeqrf_gpu returned error %d\n", info);
+            if (info != 0)
+                printf("magma_zgeqrf_gpu returned error %d.\n", (int) info);
             
             /* =====================================================================
                Performs operation using LAPACK
@@ -132,7 +132,7 @@ int main( int argc, char** argv )
                               m, n, k,
                               dA, lda, tau, dC, ldc, W, lwork, dT, nb, &info );
             if (info != 0)
-                printf("magma_zunmqr_gpu returned error %d (lwork query).\n", (int) info);
+                printf("magma_zunmqr_gpu (lwork query) returned error %d.\n", (int) info);
             lwork = (magma_int_t) MAGMA_Z_REAL( W[0] );
             if ( lwork < 0 || lwork > lwork_max )
                 printf("invalid lwork %d, lwork_max %d\n", lwork, lwork_max );

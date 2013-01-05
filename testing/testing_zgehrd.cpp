@@ -76,8 +76,8 @@ int main( int argc, char** argv)
             magma_zgehrd( N, ione, N, h_R, lda, tau, h_work, lwork, dT, &info);
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
-            if ( info < 0 )
-                printf("Argument %d of magma_zgehrd had an illegal value\n", (int) -info);
+            if (info != 0)
+                printf("magma_zgehrd returned error %d.\n", (int) info);
             
             /* =====================================================================
                Check the factorization
@@ -96,8 +96,8 @@ int main( int argc, char** argv)
                         h_R[i+j*lda] = MAGMA_Z_ZERO;
                 
                 magma_zunghr(N, ione, N, h_Q, lda, tau, dT, nb, &info);
-                if ( info != 0 ) {
-                    printf("magma_zunghr failed with error %d\n", info);
+                if (info != 0) {
+                    printf("magma_zunghr returned error %d.\n", (int) info);
                     exit(1);
                 }
                 #if defined(PRECISION_z) || defined(PRECISION_c)
@@ -125,8 +125,8 @@ int main( int argc, char** argv)
                 lapackf77_zgehrd(&N, &ione, &N, h_R, &lda, tau, h_work, &lwork, &info);
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                if (info < 0)
-                    printf("Argument %d of lapack_zgehrd had an illegal value.\n", (int) -info);
+                if (info != 0)
+                    printf("lapack_zgehrd returned error %d.\n", (int) info);
             }
             
             /* =====================================================================

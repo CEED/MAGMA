@@ -83,16 +83,16 @@ int main( int argc, char** argv )
             // first, get QR factors
             magma_zsetmatrix( m, n, hA, lda, dA, ldda );
             magma_zgeqrf_gpu( m, n, dA, ldda, tau, dT, &info );
-            if ( info != 0 )
-                printf("magma_zgeqrf_gpu returned error %d\n", info);
+            if (info != 0)
+                printf("magma_zgeqrf_gpu returned error %d.\n", (int) info);
             magma_zgetmatrix( m, n, dA, ldda, hR, lda );
             
             gpu_time = magma_wtime();
             magma_zungqr( m, n, k, hR, lda, tau, dT, nb, &info );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
-            if ( info != 0 )
-                printf("magma_zungqr_gpu returned error %d\n", info);
+            if (info != 0)
+                printf("magma_zungqr_gpu returned error %d.\n", (int) info);
             
             /* =====================================================================
                Performs operation using LAPACK
@@ -101,15 +101,15 @@ int main( int argc, char** argv )
                 error = lapackf77_zlange("f", &m, &n, hA, &lda, work );
                 
                 lapackf77_zgeqrf( &m, &n, hA, &lda, tau, h_work, &lwork, &info );
-                if ( info != 0 )
-                    printf("lapackf77_zgeqrf returned error %d\n", info);
+                if (info != 0)
+                    printf("lapackf77_zgeqrf returned error %d.\n", (int) info);
                 
                 cpu_time = magma_wtime();
                 lapackf77_zungqr( &m, &n, &k, hA, &lda, tau, h_work, &lwork, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
-                if ( info != 0 )
-                    printf("lapackf77_zungqr returned error %d\n", info);
+                if (info != 0)
+                    printf("lapackf77_zungqr returned error %d.\n", (int) info);
                 
                 // compute relative error |R|/|A| := |Q_magma - Q_lapack|/|A|
                 blasf77_zaxpy( &n2, &c_neg_one, hA, &ione, hR, &ione );

@@ -161,8 +161,8 @@ int main( int argc, char** argv)
                              iwork, &liwork,
                              &info);
             cpu_time = magma_wtime() - cpu_time;
-            if (info < 0)
-                printf("Argument %d of zheevd had an illegal value.\n", (int) -info);
+            if (info != 0)
+                printf("lapackf77_zheevd returned error %d.\n", (int) info);
     
             
             /* =====================================================================

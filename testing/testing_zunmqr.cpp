@@ -93,8 +93,8 @@ int main( int argc, char** argv )
             
             // compute QR factorization to get Householder vectors in A, tau
             magma_zgeqrf( lda, k, A, lda, tau, W, lwork_max, &info );
-            if ( info != 0 )
-                printf("magma_zgeqrf returned error %d\n", info);
+            if (info != 0)
+                printf("magma_zgeqrf returned error %d.\n", (int) info);
             
             /* =====================================================================
                Performs operation using LAPACK
@@ -117,7 +117,7 @@ int main( int argc, char** argv )
                           m, n, k,
                           A, lda, tau, R, ldc, W, lwork, &info );
             if (info != 0)
-                printf("magma_zunmqr returned error %d (lwork query).\n", (int) info);
+                printf("magma_zunmqr (lwork query) returned error %d.\n", (int) info);
             lwork = (magma_int_t) MAGMA_Z_REAL( W[0] );
             if ( lwork < 0 || lwork > lwork_max )
                 printf("invalid lwork %d, lwork_max %d\n", lwork, lwork_max );

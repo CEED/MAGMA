@@ -78,8 +78,8 @@ int main( int argc, char** argv)
             magma_zgeqlf( M, N, h_R, lda, tau, h_work, lwork, &info);
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
-            if (info < 0)
-                printf("Argument %d of magma_zgeqlf had an illegal value.\n", (int) -info);
+            if (info != 0)
+                printf("magma_zgeqlf returned error %d.\n", (int) info);
             
             /* =====================================================================
                Performs operation using LAPACK
@@ -88,8 +88,8 @@ int main( int argc, char** argv)
             lapackf77_zgeqlf(&M, &N, h_A, &lda, tau, h_work, &lwork, &info);
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gflops / cpu_time;
-            if (info < 0)
-                printf("Argument %d of lapack_zgeqlf had an illegal value.\n", (int) -info);
+            if (info != 0)
+                printf("lapack_zgeqlf returned error %d.\n", (int) info);
             
             /* =====================================================================
                Check the result compared to LAPACK

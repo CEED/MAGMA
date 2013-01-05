@@ -104,8 +104,8 @@ int main( int argc, char** argv)
                          VL, lda, VR, lda,
                          h_work, lwork, &info );
             gpu_time = magma_wtime() - gpu_time;
-            if (info < 0)
-                printf("Argument %d of magma_dgeev had an illegal value.\n", (int) -info);
+            if (info != 0)
+                printf("magma_dgeev returned error %d.\n", (int) info);
             
             /* =====================================================================
                Performs operation using LAPACK
@@ -116,8 +116,8 @@ int main( int argc, char** argv)
                              VL, &lda, VR, &lda,
                              h_work, &lwork, &info );
             cpu_time = magma_wtime() - cpu_time;
-            if (info < 0)
-                printf("Argument %d of dgeev had an illegal value.\n", (int) -info);
+            if (info != 0)
+                printf("lapackf77_dgeev returned error %d.\n", (int) info);
             
             /* =====================================================================
                Check the result compared to LAPACK
@@ -268,8 +268,7 @@ int main( int argc, char** argv)
                 
                 if (info != 0) {
                     result[0] = ulpinv;
-                    info = abs(info);
-                    printf("Info = %d fo case N, N\n", (int) info);
+                    printf("magma_dgeev (case N, N) returned error %d.\n", (int) info);
                 }
                 
                 // Do test 5
@@ -289,8 +288,7 @@ int main( int argc, char** argv)
                 
                 if (info != 0) {
                     result[0] = ulpinv;
-                    info = abs(info);
-                    printf("Info = %d fo case N, V\n", (int) info);
+                    printf("magma_dgeev (case N, V) returned error %d.\n", (int) info);
                 }
                 
                 // Do test 5 again
@@ -317,8 +315,7 @@ int main( int argc, char** argv)
                 
                 if (info != 0) {
                     result[0] = ulpinv;
-                    info = abs(info);
-                    printf("Info = %d fo case V, N\n", (int) info);
+                    printf("magma_dgeev (case V, N) returned error %d.\n", (int) info);
                 }
                 
                 // Do test 5 again
