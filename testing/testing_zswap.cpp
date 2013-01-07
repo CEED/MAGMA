@@ -68,6 +68,7 @@ int main( int argc, char** argv)
     real_Double_t row_perf5, col_perf5;
     real_Double_t row_perf6, col_perf6;
     real_Double_t row_perf7;
+    real_Double_t cpu_perf;
 
     real_Double_t time, gbytes;
 
@@ -81,11 +82,13 @@ int main( int argc, char** argv)
     
     magma_queue_t queue = 0;
     
-    printf("            cublasZswap       zswap             zswapblk          zlaswp   zpermute zlaswp2  zlaswpx           zcopymatrix             \n");
-    printf("    N   nb  row-maj/col-maj   row-maj/col-maj   row-maj/col-maj   row-maj  row-maj  row-maj  row-maj/col-maj   row-blk/col-blk  GByte/s\n");
-    printf("=======================================================================================================================================\n");
+    printf("            cublasZswap       zswap             zswapblk          zlaswp   zpermute zlaswp2  zlaswpx           zcopymatrix      CPU      (all in )\n");
+    printf("    N   nb  row-maj/col-maj   row-maj/col-maj   row-maj/col-maj   row-maj  row-maj  row-maj  row-maj/col-maj   row-blk/col-blk  zlaswp   (GByte/s)\n");
+    printf("==================================================================================================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
+            // each test is assigned one bit in the check bitmask, bit=1 is failure.
+            // shift keeps track of which bit is for current test
             int shift = 1;
             int check = 0;
             N = opts.nsize[i];
@@ -369,7 +372,10 @@ int main( int argc, char** argv)
             time = magma_sync_wtime( queue ) - time;
             col_perf5 = gbytes / time;
             
+            time = magma_wtime();
             lapackf77_zlaswp( &N, h_A1, &lda, &ione, &nb, ipiv, &ione);
+            time = magma_wtime() - time;
+            cpu_perf = gbytes / time;
             magma_zgetmatrix( N, N, d_A1, ldda, h_R1, lda );
             check += diff_matrix( N, N, h_A1, lda, h_R1, lda )*shift;
             shift *= 2;
@@ -390,7 +396,7 @@ int main( int argc, char** argv)
             // copy reads 1 matrix and writes 1 matrix, so has half gbytes of swap
             row_perf6 = 0.5 * gbytes / time;
             
-            printf("%5d  %3d  %6.2f%c/ %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f%c  %6.2f%c  %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f / %6.2f   (%s: check=0x%04x)\n",
+            printf("%5d  %3d  %6.2f%c/ %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f%c  %6.2f%c  %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f / %6.2f  %6.2f  %10s\n",
                    N, nb,
                    row_perf0, ((check & 0x001) != 0 ? '*' : ' '),
                    col_perf0, ((check & 0x002) != 0 ? '*' : ' '),
@@ -405,7 +411,8 @@ int main( int argc, char** argv)
                    col_perf5, ((check & 0x400) != 0 ? '*' : ' '),
                    row_perf6,
                    col_perf6,
-                   (check == 0 ? "all succeeded" : "* failures"), check );
+                   cpu_perf,
+                   (check == 0 ? "okay" : "* failures") );
             
             TESTING_HOSTFREE( h_A1 );
             TESTING_HOSTFREE( h_A2 );
