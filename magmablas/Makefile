@@ -26,6 +26,7 @@ ZSRC := \
 	zlacpy.cu		\
 	zlacpy_batched.cu	\
 	zlaqps2_gpu.cu          \
+        zlaqps3_gpu.cu          \
 	zlag2c.cu		\
 	clag2z.cu		\
 	zlange.cu		\
