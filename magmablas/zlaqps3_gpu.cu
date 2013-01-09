@@ -533,8 +533,9 @@ magma_zlaqps3_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
                            (n-k-1, k+1, A(rk, 0  ), lda, F(k+1,0  ), ldf, A(rk, k+1),
                            &vn1[k+1], &vn2[k+1], dAkk, dlsticc, dlsticcs);
             magma_getmatrix(1,1, sizeof(int), dlsticc, 1, &lsticc, 1); 
-
+ 
             // TTT: force not to recompute; has to be finally commented 
+            if ( nb<3 )
             lsticc = 0; 
 
             // printf("k=%d n-k = %d\n", k, n-k);
@@ -592,8 +593,6 @@ magma_zlaqps3_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         // There is a bug when we get to recompute  
         magmablas_dznrm2_check_kernel<<< n-*kb, BLOCK_SIZE >>>
                      ( m-rk-1, A(rk+1,rk+1), lda, &vn1[rk+1], &vn2[rk+1], dlsticc, dlsticcs);
-        
-        lsticc = 0;
     }
     magma_free(dlsticcs);
     
