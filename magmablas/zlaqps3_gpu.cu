@@ -237,6 +237,11 @@ magma_zgemv_kernel1(int m, cuDoubleComplex *tau, const cuDoubleComplex * __restr
 
 
 #define BLOCK_SIZE2 192
+#if (defined(PRECISION_z) || defined(PRECISION_d))
+  #define TOL 1.e-8
+#else
+  #define TOL 1.e-4
+#endif
 
 __global__ void
 magma_zgemv_kernel_adjust(int n, int k, cuDoubleComplex * A, int lda, 
@@ -267,7 +272,7 @@ magma_zgemv_kernel_adjust(int n, int k, cuDoubleComplex * A, int lda,
       // Below 'j' was 'i'; was that a bug?
       double temp2 = xnorm[j] / xnorm2[j];
       temp2 = temp*(temp2 * temp2);
-      if (temp2 <= 1e-8){
+      if (temp2 <= TOL){
          *lsticc = 1;
          lsticcs[j] = 1;
       }
