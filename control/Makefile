@@ -29,7 +29,6 @@ endif
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
 	auxiliary.cpp	\
-	xerbla.cpp 	\
 	get_nb_tesla.cpp	\
 	get_nb_fermi.cpp	\
 	get_nb_kepler.cpp       \

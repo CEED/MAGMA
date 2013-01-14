@@ -213,13 +213,13 @@ endif
 
 testing_%_f : testing_%_f.o $(FOBJ)
 	$(FORT) $(LDOPTS) $< $(FOBJ) -o $@ \
-	$(LIBTEST) $(LIBLAPACKTEST) -L../lib -lmagma -lmagmablas -lmagma \
+	$(LIBTEST) $(LIBLAPACKTEST) -L../lib -lmagma -lmagmablas \
 	$(LIBDIR) \
 	$(LIB) 
 
 testing_% : testing_%.o
 	$(CC) $(LDOPTS) $(NOMAIN) $< $(OBJ) -o $@ \
-	$(LIBTEST) $(LIBLAPACKTEST) -L../lib -lmagma -lmagmablas -lmagma \
+	$(LIBTEST) $(LIBLAPACKTEST) -L../lib -lmagma -lmagmablas \
 	$(LIBDIR) \
 	$(LIB) 
 

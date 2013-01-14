@@ -18,15 +18,16 @@ ZSRC  = blas_z.cpp	\
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
 	alloc.cpp	\
 	error.cpp	\
-	set_get.cpp	\
 	interface.cpp	\
+	set_get.cpp	\
+	xerbla.cpp	\
 
 ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f=.o)
 
-all: $(LIBMAGMA)
+all: $(LIBMAGMABLAS)
 
-$(LIBMAGMA): $(ALLOBJ)
+$(LIBMAGMABLAS): $(ALLOBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
 
