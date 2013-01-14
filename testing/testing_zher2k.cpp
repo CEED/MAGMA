@@ -56,7 +56,7 @@ int main( int argc, char** argv)
     printf("==================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
-            N = opts.nsize[i];
+            N = opts.msize[i];
             K = opts.ksize[i];
             gflops = FLOPS_ZHER2K(K, N) / 1e9;
 
