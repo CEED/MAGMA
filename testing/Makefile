@@ -179,9 +179,6 @@ LIBEXE  := $(LIBOBJ:.o=)
 # strip out fake exe files generated from LIBSRC
 EXE := $(filter-out $(LIBEXE), $(EXE))
 
-# only testing_auxiliary needs control
-INC += -I../control
-
 all: $(EXE)
 
 lib: $(LIBMAGMA) $(LIBMAGMABLAS)

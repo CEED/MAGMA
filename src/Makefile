@@ -9,8 +9,6 @@
 MAGMA_DIR = ..
 include ../Makefile.internal
 
-INC += -I$(MAGMA_DIR)/control
-
 # ------------------------------------------------------------
 # Loosely, the order is alphabetic in each section, but mixed precision,
 # driver, and multi-GPU routines are separated where it made sense.

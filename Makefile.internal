@@ -49,7 +49,7 @@ else
 $(error GPU_TARGET, currently ${GPU_TARGET}, must be one of Tesla, Fermi, or Kepler. Please edit your make.inc file)
 endif
 
-INC += -I$(MAGMA_DIR)/include
+INC += -I$(MAGMA_DIR)/include -I$(MAGMA_DIR)/control
 
 LIBEXT = $(LIBDIR) $(LIB)
 

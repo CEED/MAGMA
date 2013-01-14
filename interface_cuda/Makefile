@@ -9,8 +9,6 @@
 MAGMA_DIR = ..
 include ../Makefile.internal
 
-INC += -I$(MAGMA_DIR)/control
-
 ZSRC  = blas_z.cpp	\
 	zset_get.cpp	\
 

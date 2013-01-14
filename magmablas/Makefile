@@ -9,8 +9,6 @@
 MAGMA_DIR = ..
 include ../Makefile.internal
 
-INC += -I$(MAGMA_DIR)/control
-
 ZHDR  = commonblas_z.h
 
 # alphabetic order by base name (ignoring precision)
