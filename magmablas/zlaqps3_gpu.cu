@@ -23,12 +23,6 @@
 #endif
 
 
-extern "C"
-void magma_getmatrix(
-    magma_int_t m, magma_int_t n, size_t elemSize,
-    void const* dA_src, magma_int_t lda,
-    void*       hB_dst, magma_int_t ldb );
-
 __global__ void magma_zgemv_kernel3(int m, const cuDoubleComplex * __restrict__ V, int ldv,
                                     cuDoubleComplex *c, cuDoubleComplex *dwork,
                                     cuDoubleComplex *tau);
