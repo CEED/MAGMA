@@ -84,9 +84,9 @@ magma_zlatrd_mgpu(int num_gpus, char uplo,
                   cuDoubleComplex *w,   magma_int_t ldw,
                   cuDoubleComplex **da, magma_int_t ldda, magma_int_t offset,
                   cuDoubleComplex **dw, magma_int_t lddw, 
-                  cuDoubleComplex *dwork[4], magma_int_t ldwork,
+                  cuDoubleComplex *dwork[MagmaMaxGPUs], magma_int_t ldwork,
                   magma_int_t k, 
-                  cuDoubleComplex  *dx[4], cuDoubleComplex *dy[4], 
+                  cuDoubleComplex  *dx[MagmaMaxGPUs], cuDoubleComplex *dy[MagmaMaxGPUs], 
                   cuDoubleComplex *work,
                   cudaStream_t stream[][10],
           double *times)
@@ -235,7 +235,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo,
   
     cuDoubleComplex alpha;
 
-    cuDoubleComplex *dx2[4];
+    cuDoubleComplex *dx2[MagmaMaxGPUs];
     cuDoubleComplex *f = (cuDoubleComplex *)malloc(n*sizeof(cuDoubleComplex ));
 
     if (n <= 0) {

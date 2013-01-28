@@ -36,9 +36,9 @@ magma_zlatrd_mgpu(int num_gpus, char uplo,
                   cuDoubleComplex *w,   magma_int_t ldw,
                   cuDoubleComplex **da, magma_int_t ldda, magma_int_t offset,
                   cuDoubleComplex **dw, magma_int_t lddw,
-                  cuDoubleComplex *dwork[4], magma_int_t ldwork,
+                  cuDoubleComplex *dwork[MagmaMaxGPUs], magma_int_t ldwork,
                   magma_int_t k,
-                  cuDoubleComplex  *dx[4], cuDoubleComplex *dy[4],
+                  cuDoubleComplex  *dx[MagmaMaxGPUs], cuDoubleComplex *dy[MagmaMaxGPUs],
                   cuDoubleComplex *work,
                   cudaStream_t stream[][10],
                   double *times);
@@ -194,9 +194,9 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
     magma_int_t iinfo;
     magma_int_t ldwork, lddwork, lwkopt, ldwork2;
     magma_int_t lquery;
-    cudaStream_t stream[4][10];
-    cuDoubleComplex *dx[4], *dy[4], *hwork;
-    cuDoubleComplex *dwork2[4]; 
+    cudaStream_t stream[MagmaMaxGPUs][10];
+    cuDoubleComplex *dx[MagmaMaxGPUs], *dy[MagmaMaxGPUs], *hwork;
+    cuDoubleComplex *dwork2[MagmaMaxGPUs]; 
 
     *info = 0;
     long int upper = lapackf77_lsame(uplo_, "U");
@@ -234,8 +234,8 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
         return 0;
     }
 
-    cuDoubleComplex *da[4];
-    cuDoubleComplex *dwork[4]; 
+    cuDoubleComplex *da[MagmaMaxGPUs];
+    cuDoubleComplex *dwork[MagmaMaxGPUs]; 
 
     double times[11];
     for( did=0; did<11; did++ ) times[did] = 0;
