@@ -23,14 +23,15 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
                cuDoubleComplex *b, magma_int_t ldb, magma_int_t *info);
 
 extern "C" magma_int_t
-magma_zheevd_m(magma_int_t nrgpu, char jobz, char uplo,
-               magma_int_t n,
-               cuDoubleComplex *a, magma_int_t lda,
-               double *w,
-               cuDoubleComplex *work, magma_int_t lwork,
-               double *rwork, magma_int_t lrwork,
-               magma_int_t *iwork, magma_int_t liwork,
-               magma_int_t *info);
+magma_zheevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
+                magma_int_t n,
+                cuDoubleComplex *a, magma_int_t lda,
+                double vl, double vu, magma_int_t il, magma_int_t iu,
+                magma_int_t *m, double *w,
+                cuDoubleComplex *work, magma_int_t lwork,
+                double *rwork, magma_int_t lrwork,
+                magma_int_t *iwork, magma_int_t liwork,
+                magma_int_t *info);
 
 extern "C" magma_int_t
 magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
@@ -38,11 +39,12 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                magma_int_t lda, cuDoubleComplex *b, magma_int_t ldb);
 
 extern "C" magma_int_t
-magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma_int_t n,
-               cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *b, magma_int_t ldb,
-               double *w, cuDoubleComplex *work, magma_int_t lwork,
-               double *rwork, magma_int_t lrwork,
-               magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
+magma_zhegvdx_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
+                cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *b, magma_int_t ldb,
+                double vl, double vu, magma_int_t il, magma_int_t iu,
+                magma_int_t *m, double *w, cuDoubleComplex *work, magma_int_t lwork,
+                double *rwork, magma_int_t lrwork,
+                magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -72,6 +74,12 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
             = 1:  A*x = (lambda)*B*x
             = 2:  A*B*x = (lambda)*x
             = 3:  B*A*x = (lambda)*x
+
+    RANGE   (input) CHARACTER*1
+            = 'A': all eigenvalues will be found.
+            = 'V': all eigenvalues in the half-open interval (VL,VU]
+                   will be found.
+            = 'I': the IL-th through IU-th eigenvalues will be found.
 
     JOBZ    (input) CHARACTER*1
             = 'N':  Compute eigenvalues only;
@@ -116,6 +124,23 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
 
     LDB     (input) INTEGER
             The leading dimension of the array B.  LDB >= max(1,N).
+
+    VL      (input) DOUBLE PRECISION
+    VU      (input) DOUBLE PRECISION
+            If RANGE='V', the lower and upper bounds of the interval to
+            be searched for eigenvalues. VL < VU.
+            Not referenced if RANGE = 'A' or 'I'.
+
+    IL      (input) INTEGER
+    IU      (input) INTEGER
+            If RANGE='I', the indices (in ascending order) of the
+            smallest and largest eigenvalues to be returned.
+            1 <= IL <= IU <= N, if N > 0; IL = 1 and IU = 0 if N = 0.
+            Not referenced if RANGE = 'A' or 'V'.
+
+    M       (output) INTEGER
+            The total number of eigenvalues found.  0 <= M <= N.
+            If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
 
     W       (output) DOUBLE PRECISION array, dimension (N)
             If INFO = 0, the eigenvalues in ascending order.
@@ -196,40 +221,56 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
 
     char uplo_[2] = {uplo, 0};
     char jobz_[2] = {jobz, 0};
-
+    char range_[2] = {range, 0};
+    
     cuDoubleComplex c_one = MAGMA_Z_ONE;
-
+    
     magma_int_t lower;
     char trans[1];
     magma_int_t wantz;
     magma_int_t lquery;
-
+    magma_int_t alleig, valeig, indeig;
+    
     magma_int_t lwmin;
     magma_int_t liwmin;
     magma_int_t lrwmin;
-
-    cudaStream_t stream;
-    magma_queue_create( &stream );
-
+    
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);
     lower = lapackf77_lsame(uplo_, MagmaLowerStr);
+    alleig = lapackf77_lsame(range_, "A");
+    valeig = lapackf77_lsame(range_, "V");
+    indeig = lapackf77_lsame(range_, "I");
     lquery = lwork == -1 || lrwork == -1 || liwork == -1;
-
+    
     *info = 0;
     if (itype < 1 || itype > 3) {
         *info = -1;
-    } else if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVectorsStr))) {
+    } else if (! (alleig || valeig || indeig)) {
         *info = -2;
-    } else if (! (lower || lapackf77_lsame(uplo_, MagmaUpperStr))) {
+    } else if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVectorsStr))) {
         *info = -3;
-    } else if (n < 0) {
+    } else if (! (lower || lapackf77_lsame(uplo_, MagmaUpperStr))) {
         *info = -4;
+    } else if (n < 0) {
+        *info = -5;
     } else if (lda < max(1,n)) {
-        *info = -6;
+        *info = -7;
     } else if (ldb < max(1,n)) {
-        *info = -8;
+        *info = -9;
+    } else {
+        if (valeig) {
+            if (n > 0 && vu <= vl) {
+                *info = -11;
+            }
+        } else if (indeig) {
+            if (il < 1 || il > max(1,n)) {
+                *info = -12;
+            } else if (iu < min(n,il) || iu > n) {
+                *info = -13;
+            }
+        }
     }
-
+    
     magma_int_t nb = magma_get_zhetrd_nb( n );
     if ( n <= 1 ) {
         lwmin  = 1;
@@ -246,28 +287,28 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
         lrwmin = n;
         liwmin = 1;
     }
-
+    
     work[0]  = MAGMA_Z_MAKE( lwmin * (1. + lapackf77_dlamch("Epsilon")), 0.);  // round up
     rwork[0] = lrwmin * (1. + lapackf77_dlamch("Epsilon"));
     iwork[0] = liwmin;
-
+    
     if (lwork < lwmin && ! lquery) {
-        *info = -11;
+        *info = -17;
     } else if (lrwork < lrwmin && ! lquery) {
-        *info = -13;
+        *info = -19;
     } else if (liwork < liwmin && ! lquery) {
-        *info = -15;
+        *info = -21;
     }
-
+    
     if (*info != 0) {
-        magma_xerbla( __func__, -(*info) );
+        magma_xerbla( __func__, -(*info));
         return *info;
     }
     else if (lquery) {
         return *info;
     }
-
-    /*     Quick return if possible */
+    
+    /*  Quick return if possible */
     if (n == 0) {
         return *info;
     }
@@ -304,7 +345,7 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
         start = get_current_time();
 #endif
 
-    magma_zheevd_m(nrgpu, jobz_[0], uplo_[0], n, a, lda, w, work, lwork, rwork, lrwork, iwork, liwork, info);
+    magma_zheevdx_m(nrgpu, jobz, range, uplo, n, a, lda, vl, vu, il, iu, m, w, work, lwork, rwork, lrwork, iwork, liwork, info);
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
@@ -331,7 +372,7 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
             }
 
             magma_ztrsm_m(nrgpu, MagmaLeft, uplo_[0], *trans, MagmaNonUnit,
-                          n, n, c_one, b, ldb, a, lda);
+                          n, *m, c_one, b, ldb, a, lda);
 
         }
         else if (itype == 3)
@@ -358,6 +399,7 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
     work[0]  = MAGMA_Z_MAKE( lwmin * (1. + lapackf77_dlamch("Epsilon")), 0.);  // round up
     rwork[0] = lrwmin * (1. + lapackf77_dlamch("Epsilon"));
     iwork[0] = liwmin;
+
 
     return *info;
 } /* magma_zhegvd_m */

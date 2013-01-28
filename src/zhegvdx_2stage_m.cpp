@@ -235,9 +235,6 @@ magma_zhegvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
 //    magma_int_t lropt;
     magma_int_t lrwmin;
 
-    cudaStream_t stream;
-    magma_queue_create( &stream );
-
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);
     lower = lapackf77_lsame(uplo_, MagmaLowerStr);
     alleig = lapackf77_lsame(range_, "A");
@@ -287,8 +284,8 @@ magma_zhegvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
         liwmin = 1;
     }
 
-    MAGMA_Z_SET2REAL(work[0],(double)lwmin);
-    rwork[0] = lrwmin;
+    work[0]  = MAGMA_Z_MAKE( lwmin * (1. + lapackf77_dlamch("Epsilon")), 0.);  // round up
+    rwork[0] = lrwmin * (1. + lapackf77_dlamch("Epsilon"));
     iwork[0] = liwmin;
 
     if (lwork < lwmin && ! lquery) {
@@ -398,9 +395,9 @@ magma_zhegvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
 
     }
 
-    /*work[0].r = (doublereal) lopt, work[0].i = 0.;
-    rwork[0] = (doublereal) lropt;
-    iwork[0] = liopt;*/
-    printf("\n\n\n");
+    work[0]  = MAGMA_Z_MAKE( lwmin * (1. + lapackf77_dlamch("Epsilon")), 0.);  // round up
+    rwork[0] = lrwmin * (1. + lapackf77_dlamch("Epsilon"));
+    iwork[0] = liwmin;
+
     return *info;
 } /* zhegvdx_2stage_m */
