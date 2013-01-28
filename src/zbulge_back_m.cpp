@@ -7,6 +7,7 @@
 
  @author Azzam Haidar
  @author Stan Tomov
+ @author Raffaele Solca
 
  @precisions normal z -> s d c
 
@@ -15,18 +16,18 @@
 #include "magma_bulge.h"
 #include <cblas.h>
 
+#ifdef SETAFFINITY
+#include "affinity.h"
+#endif
 #if defined(USEMKL)
 #include <mkl_service.h>
 #endif
 #if defined(USEACML)
 #include <omp.h>
 #endif
-// === Define what BLAS to use ============================================
+
 #define PRECISION_z
-#if (defined(PRECISION_s) || defined(PRECISION_d))
-#define magma_zgemm magmablas_zgemm
-#endif
-// === End defining what BLAS to use =======================================
+
 extern "C" {
     magma_int_t magma_zbulge_applyQ_v2_m(magma_int_t nrgpu, char side, magma_int_t NE, magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, cuDoubleComplex *E,
                                          magma_int_t lde, cuDoubleComplex *V, magma_int_t ldv, cuDoubleComplex *T, magma_int_t ldt, magma_int_t *info);
@@ -137,16 +138,15 @@ extern "C" magma_int_t magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t thread
     magma_int_t n_gpu = ne;
 
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-    double gpu_cpu_perf = 0;  // to be defined //gpu over cpu performance
+    double gpu_cpu_perf = 20; //gpu over cpu performance
 #else
-//    double gpu_cpu_perf = 27.5;  // gpu over cpu performance  //100% ev
-    double gpu_cpu_perf = 17.5;  // gpu over cpu performance   //10% ev
+    double gpu_cpu_perf = 22;  // gpu over cpu performance
 #endif
 
     double perf_temp= .85;
     double perf_temp2= perf_temp;
     for (magma_int_t itmp=1; itmp<nrgpu; ++itmp)
-        perf_temp2*=perf_temp; 
+        perf_temp2*=perf_temp;
 
     if(threads>1){
         f = 1. / (1. + (double)(threads-1)/ (gpu_cpu_perf*(1.-perf_temp2)/(1.-perf_temp)));
@@ -254,11 +254,37 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
 
     magma_int_t n_cpu = ne - n_gpu;
 
-#if defined(SETAFFINITY)
-    cpu_set_t set;
-    CPU_ZERO( &set );
-    CPU_SET( my_core_id, &set );
-    sched_setaffinity( 0, sizeof(set), &set) ;
+#if defined(USEMKL)
+    mkl_set_num_threads(1);
+#endif
+#if defined(USEACML)
+    omp_set_num_threads(1);
+#endif
+
+#ifdef SETAFFINITY
+    //#define PRINTAFFINITY
+#ifdef PRINTAFFINITY
+    affinity_set print_set;
+    print_set.print_affinity(my_core_id, "starting affinity");
+#endif
+    affinity_set original_set;
+    affinity_set new_set(my_core_id);
+    int check  = 0;
+    int check2 = 0;
+    // bind threads
+    check = original_set.get_affinity();
+    if (check == 0) {
+        check2 = new_set.set_affinity();
+        if (check2 != 0)
+            printf("Error in sched_setaffinity (single cpu)\n");
+    }
+    else
+    {
+        printf("Error in sched_getaffinity\n");
+    }
+#ifdef PRINTAFFINITY
+    print_set.print_affinity(my_core_id, "set affinity");
+#endif
 #endif
 
     if(my_core_id==0)
@@ -296,15 +322,16 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
 
     } // END if my_core_id
 
-
-#if defined(SETAFFINITY)
+#ifdef SETAFFINITY
     // unbind threads
-    magma_int_t sys_corenbr = 1;
-    sys_corenbr = sysconf(_SC_NPROCESSORS_ONLN);
-    CPU_ZERO( &set );
-    for(magma_int_t i=0; i<sys_corenbr; i++)
-        CPU_SET( i, &set );
-    sched_setaffinity( 0, sizeof(set), &set) ;
+    if (check == 0){
+        check2 = original_set.set_affinity();
+        if (check2 != 0)
+            printf("Error in sched_setaffinity (restore cpu list)\n");
+    }
+#ifdef PRINTAFFINITY
+    print_set.print_affinity(my_core_id, "restored_affinity");
+#endif
 #endif
 
     return 0;

@@ -7,6 +7,7 @@
 
  @author Azzam Haidar
  @author Stan Tomov
+ @author Raffaele Solca
 
  @precisions normal z -> s d c
 
@@ -15,10 +16,14 @@
 #include "magma_bulge.h"
 #include <cblas.h>
 
-#if defined(USEMKL)
+#ifdef SETAFFINITY
+#include "affinity.h"
+#endif
+
+#ifdef USEMKL
 #include <mkl_service.h>
 #endif
-#if defined(USEACML)
+#ifdef USEACML
 #include <omp.h>
 #endif
 // === Define what BLAS to use ============================================
@@ -28,14 +33,14 @@
 #endif
 // === End defining what BLAS to use =======================================
 extern "C" {
-    
+
     void magma_ztrdtype1cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, cuDoubleComplex *A, magma_int_t lda, cuDoubleComplex *V, magma_int_t ldv, cuDoubleComplex *TAU,
                                          magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, cuDoubleComplex *work);
     void magma_ztrdtype2cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, cuDoubleComplex *A, magma_int_t lda, cuDoubleComplex *V, magma_int_t ldv, cuDoubleComplex *TAU,
                                          magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, cuDoubleComplex *work);
     void magma_ztrdtype3cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, cuDoubleComplex *A, magma_int_t LDA, cuDoubleComplex *V, magma_int_t ldv, cuDoubleComplex *TAU,
                                          magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, cuDoubleComplex *work);
-        
+
 }
 
 static void *magma_zhetrd_hb2st_parallel_section(void *arg);
@@ -106,20 +111,20 @@ private:
 };
 
 class magma_zbulge_id_data {
-    
+
 public:
-    
+
     magma_zbulge_id_data()
     : id(-1), data(NULL)
     {}
-    
+
     magma_zbulge_id_data(magma_int_t id_, magma_zbulge_data* data_)
     : id(id_), data(data_)
     {}
-    
+
     magma_int_t id;
     magma_zbulge_data* data;
-    
+
 };
 
 
@@ -151,10 +156,10 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
 
     N       (input) INTEGER
             The order of the matrix A.  N >= 0.
-     
+
     NB      (input) INTEGER
             The order of the band matrix A.  N >= NB >= 0.
-     
+
     VBLKSIZ (input) INTEGER
             The size of the block of householder vectors applied at once.
 
@@ -164,12 +169,12 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
     LDA     (input) INTEGER
             The leading dimension of the array A.  LDA >= 2*NB.
 
-    D       (output) DOUBLE array, dimension (N)   
-            The diagonal elements of the tridiagonal matrix T:   
-            D(i) = A(i,i).   
+    D       (output) DOUBLE array, dimension (N)
+            The diagonal elements of the tridiagonal matrix T:
+            D(i) = A(i,i).
 
-    E       (output) DOUBLE array, dimension (N-1)   
-            The off-diagonal elements of the tridiagonal matrix T:   
+    E       (output) DOUBLE array, dimension (N-1)
+            The off-diagonal elements of the tridiagonal matrix T:
             E(i) = A(i,i+1) if UPLO = 'U', E(i) = A(i+1,i) if UPLO = 'L'.
 
     V       (output) COMPLEX*16 array, dimension (BLKCNT, LDV, VBLKSIZ)
@@ -182,7 +187,7 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
 
     TAU     (output) COMPLEX*16 dimension(BLKCNT, VBLKSIZ)
             ???
-     
+
     COMPT   (input) INTEGER
             if COMPT = 0 T is not computed
             if COMPT = 1 T is computed
@@ -190,17 +195,17 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
     T       (output) COMPLEX*16 dimension(LDT *)
             if COMPT = 1 on exit contains the matrices T needed for Q2
             if COMPT = 0 T is not referenced
-     
+
     LDT     (input) INTEGER
             The leading dimension of T.
             LDT > Vblksiz
-     
+
     INFO    (output) INTEGER ????????????????????????????????????????????????????????????????????????????????????
             = 0:  successful exit
-            
+
 
     =====================================================================  */
-    
+
     char uplo_[2] = {uplo, 0};
     double timeblg=0.0;
 
@@ -211,19 +216,19 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
 
     magma_int_t nbtiles = magma_ceildiv(n, nb);
-    
+
     memset(T,   0, blkcnt*ldt*Vblksiz*sizeof(cuDoubleComplex));
     memset(TAU, 0, blkcnt*Vblksiz*sizeof(cuDoubleComplex));
     memset(V,   0, blkcnt*ldv*Vblksiz*sizeof(cuDoubleComplex));
-    
+
     magma_int_t* prog = new magma_int_t[2*nbtiles+threads+10];
     memset(prog, 0, (2*nbtiles+threads+10)*sizeof(magma_int_t));
-    
+
     magma_zbulge_id_data* arg = new magma_zbulge_id_data[threads];
     pthread_t* thread_id = new pthread_t[threads];
 
     pthread_attr_t thread_attr;
-    
+
 #if defined(USEMKL)
     mkl_set_num_threads( 1 );
 #endif
@@ -257,15 +262,15 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
         void *exitcodep;
         pthread_join(thread_id[thread], &exitcodep);
     }
-    
+
     // timing
     timeblg = magma_wtime()-timeblg;
 
-    
+
     delete[] thread_id;
     delete[] arg;
     delete[] prog;
-    
+
     printf("time BULGE+T = %lf \n" ,timeblg);
 
 #if defined(USEMKL)
@@ -274,7 +279,7 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
 #if defined(USEACML)
     omp_set_num_threads(mklth);
 #endif
-    
+
     /*================================================
      *  store resulting diag and lower diag D and E
      *  note that D and E are always real
@@ -325,7 +330,7 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
     }
 #endif
     return MAGMA_SUCCESS;
-    
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -357,13 +362,37 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 
     double timeB=0.0, timeT=0.0;
 
-#if defined(SETAFFINITY)
+#if defined(USEMKL)
+    mkl_set_num_threads( 1 );
+#endif
+#if defined(USEACML)
+    omp_set_num_threads(1);
+#endif
+
+#ifdef SETAFFINITY
+//#define PRINTAFFINITY
+#ifdef PRINTAFFINITY
+    affinity_set print_set;
+    print_set.print_affinity(my_core_id, "starting affinity");
+#endif
+    affinity_set original_set;
+    affinity_set new_set(my_core_id);
+    int check  = 0;
+    int check2 = 0;
     // bind threads
-    cpu_set_t set;
-    // bind threads
-    CPU_ZERO( &set );
-    CPU_SET( my_core_id, &set );
-    sched_setaffinity( 0, sizeof(set), &set) ;
+    check = original_set.get_affinity();
+    if (check == 0) {
+        check2 = new_set.set_affinity();
+        if (check2 != 0)
+            printf("Error in sched_setaffinity (single cpu)\n");
+    }
+    else
+    {
+        printf("Error in sched_getaffinity\n");
+    }
+#ifdef PRINTAFFINITY
+    print_set.print_affinity(my_core_id, "set affinity");
+#endif
 #endif
 
     if(compT==1)
@@ -438,24 +467,27 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
         //=========================
         if(my_core_id == 0)
             timeB = magma_wtime();
-        
+
         magma_ztile_bulge_parallel(my_core_id, allcores_num, A, lda, V, ldv, TAU, n, nb, nbtiles, grsiz, Vblksiz, prog);
 
         pthread_barrier_wait(barrier);
-        
+
         if(my_core_id == 0){
             timeB = magma_wtime()-timeB;
             printf("  Finish BULGE   timing= %lf \n" ,timeB);
         }
     } // WANTZ > 0
 
-#if defined(SETAFFINITY)
+#ifdef SETAFFINITY
     // unbind threads
-    sys_corenbr = sysconf(_SC_NPROCESSORS_ONLN);
-    CPU_ZERO( &set );
-    for(magma_int_t i=0; i<sys_corenbr; i++)
-        CPU_SET( i, &set );
-    sched_setaffinity( 0, sizeof(set), &set) ;
+    if (check == 0){
+        check2 = original_set.set_affinity();
+        if (check2 != 0)
+            printf("Error in sched_setaffinity (restore cpu list)\n");
+    }
+#ifdef PRINTAFFINITY
+    print_set.print_affinity(my_core_id, "restored_affinity");
+#endif
 #endif
 
     return 0;
@@ -476,7 +508,7 @@ static void magma_ztile_bulge_parallel(magma_int_t my_core_id, magma_int_t cores
     magma_int_t colblktile,maxrequiredcores,colpercore,mycoresnb;
     magma_int_t fin;
     cuDoubleComplex *work;
-    
+
     if(n<=0)
         return ;
 
@@ -493,7 +525,7 @@ static void magma_ztile_bulge_parallel(magma_int_t my_core_id, magma_int_t cores
      * */
 
     magma_zmalloc_cpu(&work, n);
-    
+
     mycoresnb = cores_num;
 
     shift   = 5;
@@ -513,13 +545,13 @@ static void magma_ztile_bulge_parallel(magma_int_t my_core_id, magma_int_t cores
         mycoresnb = maxrequiredcores;
     }
     thgrsiz = n;
-    
+
     if(my_core_id==0) printf("  Static bulgechasing version v9_9col threads  %4d      N %5d      NB %5d    grs %4d thgrsiz %4d \n",cores_num, n, nb, grsiz,thgrsiz);
 
     stepercol = magma_ceildiv(shift, grsiz);
 
     thgrnb  = magma_ceildiv(n-1, thgrsiz);
-    
+
     for (thgrid = 1; thgrid<=thgrnb; thgrid++){
         stt  = (thgrid-1)*thgrsiz+1;
         thed = min( (stt + thgrsiz -1), (n-1));
@@ -567,7 +599,7 @@ static void magma_ztile_bulge_parallel(magma_int_t my_core_id, magma_int_t cores
                                 {
                                     if( (prog[myid+shift-1]== (sweepid-1)) )
                                     {
-                                        magma_ztrdtype1cbHLsym_withQ_v2(n, nb, A, lda, V, ldv, TAU, stind, edind, sweepid, Vblksiz, work);                                        
+                                        magma_ztrdtype1cbHLsym_withQ_v2(n, nb, A, lda, V, ldv, TAU, stind, edind, sweepid, Vblksiz, work);
 
                                         fin=1;
                                         prog[myid]= sweepid;
@@ -584,7 +616,7 @@ static void magma_ztile_bulge_parallel(magma_int_t my_core_id, magma_int_t cores
                                         if(myid%2 == 0)
                                             magma_ztrdtype2cbHLsym_withQ_v2(n, nb, A, lda, V, ldv, TAU, stind, edind, sweepid, Vblksiz, work);
                                         else
-                                            magma_ztrdtype3cbHLsym_withQ_v2(n, nb, A, lda, V, ldv, TAU, stind, edind, sweepid, Vblksiz, work);                                      
+                                            magma_ztrdtype3cbHLsym_withQ_v2(n, nb, A, lda, V, ldv, TAU, stind, edind, sweepid, Vblksiz, work);
 
                                         fin=1;
                                         prog[myid]= sweepid;
@@ -609,7 +641,7 @@ static void magma_ztile_bulge_parallel(magma_int_t my_core_id, magma_int_t cores
             } // END for m=1:stepercol
         } // END for i=1:n-1
     } // END for thgrid=1:thgrnb
-    
+
     magma_free_cpu(work);
 
 } // END FUNCTION
@@ -629,23 +661,23 @@ static void magma_ztile_bulge_computeT_parallel(magma_int_t my_core_id, magma_in
     magma_int_t st,ed,fst,vlen,vnb,colj;
     magma_int_t blkid,vpos,taupos,tpos;
     magma_int_t blkpercore, myid;
-    
+
     if(n<=0)
         return ;
-    
+
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
-    
+
     blkpercore = blkcnt/cores_num;
-    
+
     magma_int_t nbGblk  = magma_ceildiv(n-1, Vblksiz);
-    
+
     if(my_core_id==0) printf("  COMPUTE T parallel threads %d with  N %d   NB %d   Vblksiz %d \n",cores_num,n,nb,Vblksiz);
-    
+
     for (magma_int_t bg = nbGblk; bg>0; bg--)
     {
         firstcolj = (bg-1)*Vblksiz + 1;
         rownbm    = magma_ceildiv(n-(firstcolj+1), nb);
-        if(bg==nbGblk) 
+        if(bg==nbGblk)
             rownbm    = magma_ceildiv(n-firstcolj ,nb);  // last blk has size=1 used for complex to handle A(N,N-1)
 
         for (magma_int_t m = rownbm; m>0; m--)
@@ -663,10 +695,10 @@ static void magma_ztile_bulge_computeT_parallel(magma_int_t my_core_id, magma_in
                     break;
                 if((st==ed)&&(colj!=n-2))
                     break;
-                
+
                 vlen=ed-fst+1;
                 vnb=k+1;
-            }        
+            }
             colj     = (bg-1)*Vblksiz;
             magma_bulge_findVTAUTpos(n, nb, Vblksiz, colj, fst, ldv, ldt, &vpos, &taupos, &tpos, &blkid);
             myid = blkid/blkpercore;
