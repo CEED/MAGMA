@@ -36,6 +36,7 @@ ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
 	trace.cpp	\
 	strlcpy.cpp	\
 	bulge_auxiliary.cpp \
+	affinity.cpp \
 	connection_mgpu.cpp
 
 ALLOBJ := $(ALLSRC:.cpp=.o)
