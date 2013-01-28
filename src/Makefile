@@ -149,10 +149,13 @@ ZSRC += \
 	zunmtr.cpp		\
 
 # symmetric eigenvalues, multi-GPU 
-#ZSRC += \
+ZSRC += \
 #	zhetrd_mgpu.cpp		\
 #	zlatrd_mgpu.cpp		\
+#	dsyevd_m.cpp		\
 #	zheevd_m.cpp		\
+#	dsyevdx_m.cpp		\
+#	zheevdx_m.cpp		\
 #	dlaex0_m.cpp		\
 #	dlaex1_m.cpp		\
 #	dlaex3_m.cpp		\
@@ -179,6 +182,12 @@ ZSRC += \
 	dsygvdx_2stage.cpp	\
 	zheevdx_2stage.cpp	\
 	zhegvdx_2stage.cpp	\
+#	zbulge_back_m.cpp	\
+#	zbulge_applyQ_v2_m.cpp	\
+#	dsyevdx_2stage_m.cpp	\
+#	dsygvdx_2stage_m.cpp	\
+#	zheevdx_2stage_m.cpp	\
+#	zhegvdx_2stage_m.cpp	\
 #	zhetrd_he2hb_mgpu.cpp	\
 #	zhetrd_he2hb_mgpu_spec.cpp	\
 
@@ -193,9 +202,12 @@ ZSRC += \
 	zhegvx.cpp		\
 	zhegst_gpu.cpp		\
 	\
-	zhegst_m.cpp		\
-	zhegvd_m.cpp		\
-	ztrsm_m.cpp		\
+#	zhegst_m.cpp		\
+#	dsygvd_m.cpp		\
+#	zhegvd_m.cpp		\
+#	dsygvdx_m.cpp		\
+#	zhegvdx_m.cpp		\
+#	ztrsm_m.cpp		\
 
 # ----------
 # non-symmetric eigenvalues
