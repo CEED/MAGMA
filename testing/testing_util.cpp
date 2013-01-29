@@ -98,6 +98,7 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     opts->itype    = 1;
     opts->svd_work = 1;
     opts->version  = 0;  // auto
+    opts->fraction  = 1.;
     
     opts->check     = (getenv("MAGMA_TESTINGS_CHECK") != NULL);
     opts->lapack    = (getenv("MAGMA_RUN_LAPACK")     != NULL);
