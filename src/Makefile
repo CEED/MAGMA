@@ -9,6 +9,8 @@
 MAGMA_DIR = ..
 include ../Makefile.internal
 
+INC += -I$(MAGMA_DIR)/control
+
 # ------------------------------------------------------------
 # Loosely, the order is alphabetic in each section, but mixed precision,
 # driver, and multi-GPU routines are separated where it made sense.
@@ -94,9 +96,6 @@ ZSRC += \
 	zunmqr_gpu.cpp		\
 	\
 	zgeqrf_mgpu.cpp		\
-	\
-	zgeqp3_gpu.cpp          \
-	zlaqps_gpu.cpp          \
 
 # QR, CPU interface
 ZSRC += \
@@ -112,8 +111,6 @@ ZSRC += \
 	\
 	zgeqp3.cpp		\
 	zlaqps.cpp		\
-	\
-	zungqr_m.cpp		\
 
 # ----------
 # symmetric eigenvalues, GPU interface
@@ -150,30 +147,29 @@ ZSRC += \
 
 # symmetric eigenvalues, multi-GPU 
 ZSRC += \
-#	zhetrd_mgpu.cpp		\
-#	zlatrd_mgpu.cpp		\
-#	dsyevd_m.cpp		\
-#	zheevd_m.cpp		\
-#	dsyevdx_m.cpp		\
-#	zheevdx_m.cpp		\
-#	dlaex0_m.cpp		\
-#	dlaex1_m.cpp		\
-#	dlaex3_m.cpp		\
-#	dstedx_m.cpp		\
-#	zstedx_m.cpp		\
-#	zunmtr_m.cpp		\
+	zhetrd_mgpu.cpp		\
+	zlatrd_mgpu.cpp		\
+	zheevd_m.cpp		\
+	dlaex0_m.cpp		\
+	dlaex1_m.cpp		\
+	dlaex3_m.cpp		\
+	dstedx_m.cpp		\
+	zstedx_m.cpp		\
+	zunmtr_m.cpp		\
 
 # symmetric eigenvalues 2-stage
 ZSRC += \
 	dbulge_aux.cpp		\
 	zbulge_applyQ.cpp	\
 	zbulge_applyQ_v2.cpp	\
+	zbulge_applyQ_v2_m.cpp	\
 	zbulge_aux.cpp		\
 	zbulge_kernel.cpp	\
 	zbulge_kernel_v2.cpp	\
 	zhetrd_he2hb.cpp	\
 	zhetrd_hb2st.cpp	\
 	zbulge_back.cpp		\
+	zbulge_back_m.cpp		\
 	zhetrd_bhe2trc_v3.cpp	\
 	zhetrd_bhe2trc_v5.cpp	\
 	zungqr_2stage_gpu.cpp	\
@@ -182,14 +178,10 @@ ZSRC += \
 	dsygvdx_2stage.cpp	\
 	zheevdx_2stage.cpp	\
 	zhegvdx_2stage.cpp	\
-#	zbulge_back_m.cpp	\
-#	zbulge_applyQ_v2_m.cpp	\
-#	dsyevdx_2stage_m.cpp	\
-#	dsygvdx_2stage_m.cpp	\
-#	zheevdx_2stage_m.cpp	\
-#	zhegvdx_2stage_m.cpp	\
-#	zhetrd_he2hb_mgpu.cpp	\
-#	zhetrd_he2hb_mgpu_spec.cpp	\
+	zheevdx_2stage_m.cpp	\
+	zhegvdx_2stage_m.cpp	\
+	zhetrd_he2hb_mgpu.cpp	\
+	zhetrd_he2hb_mgpu_spec.cpp	\
 
 # generalized symmetric eigenvalues
 ZSRC += \
@@ -202,12 +194,9 @@ ZSRC += \
 	zhegvx.cpp		\
 	zhegst_gpu.cpp		\
 	\
-#	zhegst_m.cpp		\
-#	dsygvd_m.cpp		\
-#	zhegvd_m.cpp		\
-#	dsygvdx_m.cpp		\
-#	zhegvdx_m.cpp		\
-#	ztrsm_m.cpp		\
+	zhegst_m.cpp		\
+	zhegvd_m.cpp		\
+	ztrsm_m.cpp		\
 
 # ----------
 # non-symmetric eigenvalues
@@ -219,15 +208,6 @@ ZSRC += \
 	zlahr2.cpp		\
 	zlahru.cpp		\
 	zunghr.cpp		\
-
-# non-symmetric eigenvalues, multi-GPU
-ZSRC += \
-	dgeev_m.cpp		\
-	zgeev_m.cpp		\
-	zgehrd_m.cpp		\
-	zlahr2_m.cpp		\
-	zlahru_m.cpp		\
-	zunghr_m.cpp		\
 
 # ----------
 # SVD
