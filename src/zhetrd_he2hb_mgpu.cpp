@@ -12,6 +12,7 @@
 
 */
 #include "common_magma.h"
+#include "magma_bulge.h"
 #include "trace.h"
 #include <assert.h>
 #if defined(USEMKL)
@@ -189,6 +190,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
     int lquery;
 
     assert (nstream>=3);
+    assert (nstream>=(ngpu+1));
 
 
     *info = 0;
@@ -236,6 +238,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
     printf(" Initializing communication pattern.... GPU-ncmplx %d\n\n" , nbcmplx);
 
 
+
     magma_device_t cdev;
     magma_getdevice( &cdev );
 
@@ -275,8 +278,8 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
     cuDoubleComplex *dworktest[MagmaMaxGPUs], *dworktestbis[MagmaMaxGPUs];
     cuDoubleComplex *dvtest[MagmaMaxGPUs], *dwtest[MagmaMaxGPUs];
     cuDoubleComplex *workngpu[MagmaMaxGPUs+1];
-    cudaEvent_t     redevents[MagmaMaxGPUs][20]; 
-    magma_int_t nbevents =2;
+    cudaEvent_t     redevents[MagmaMaxGPUs][MagmaMaxGPUs*MagmaMaxGPUs+10]; 
+    magma_int_t nbevents = MagmaMaxGPUs*MagmaMaxGPUs;
 
 //    cuDoubleComplex *dttest[MagmaMaxGPUs];
 //    cuDoubleComplex *Atest = (cuDoubleComplex *) malloc(n*lda*sizeof(cuDoubleComplex));
@@ -287,8 +290,12 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
 
 
     //magma_int_t mlocal = ((n / distblk) / ngpu + 1) * distblk;
-    magma_int_t lddv = n;
+    magma_int_t nGblk = magma_ceildiv( (magma_ceildiv(n,nb)),ngpu);   
+    magma_int_t lddv = ldda;
     magma_int_t lddw = lddv;
+    magma_int_t dworksiz    = ldda*nb*(ngpu+1);  
+    magma_int_t worksiz     = n*nb;  
+
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         cudaSetDevice( dev );
         //magma_zmalloc( &datest[dev], mlocal*ldda );
@@ -296,16 +303,16 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
         magma_zmalloc( &dvtest[dev], 2*nb*lddv );
         magma_zmalloc( &dwtest[dev], nb*lddw );
         magma_zmalloc( &dworktest[dev], nb*ldda );
-        magma_zmalloc( &dworktestbis[dev], 3*nb*ldda );
-        workngpu[dev] = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
+        magma_zmalloc( &dworktestbis[dev], dworksiz );
+        //workngpu[dev] = (cuDoubleComplex *) malloc(worksiz*sizeof(cuDoubleComplex));
+        magma_zmalloc_pinned ( &workngpu[dev], worksiz);
         magmablasSetKernelStream( streams[ dev ][ 0 ] );
        for( magma_int_t i = 0; i < nbevents; ++i ) {
             cudaEventCreateWithFlags(&redevents[dev][i],cudaEventDisableTiming);
        }
-
     }
-    workngpu[ngpu] = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));    
-    //cudaSetDevice(0  );
+    magma_zmalloc_pinned ( &workngpu[ngpu], worksiz);
+    //workngpu[ngpu] = (cuDoubleComplex *) malloc(worksiz*sizeof(cuDoubleComplex));    
     // ======================
 
     #ifdef TRACING
@@ -505,7 +512,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                        MagmaLeft, uplo, pm, pk,
                        c_one, dAmgpu, ldda, indi-1,
                                    dworktest, pm,
-                       c_zero,     dwtest, pm, dworktestbis, pm, worktest, pm, workngpu, pm,
+                       c_zero,     dwtest, pm, dworktestbis, dworksiz, worktest, pm, workngpu, worksiz,
                        ngpu, distblk, streams, nstream-1, redevents, nbevents, gnode, nbcmplx);
                  
                  /* 
@@ -637,10 +644,12 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
         magma_free( dwtest[dev] );
         magma_free( dworktest[dev]);
         magma_free( dworktestbis[dev]);
+        magma_free_pinned(workngpu[dev]);
         for( magma_int_t e = 0; e < nbevents; ++e ) {
              cudaEventDestroy(redevents[dev][e]);
         }
     }
+    magma_free_pinned(workngpu[ngpu]);
     magma_setdevice( cdev );
 
 
