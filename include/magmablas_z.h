@@ -153,7 +153,7 @@ void magmablas_zhemm_mgpu_com(
                            cuDoubleComplex *work[], magma_int_t ldwork,
                            magma_int_t ngpu, magma_int_t nb, 
                            cudaStream_t streams[][20], magma_int_t nstream, 
-                           cudaEvent_t redevents[][20],magma_int_t nbevents, 
+                           cudaEvent_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10],magma_int_t nbevents, 
                            magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2], magma_int_t nbcmplx );
 
 void magmablas_zhemm_mgpu_spec(
@@ -169,6 +169,19 @@ void magmablas_zhemm_mgpu_spec(
                            cudaEvent_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10],magma_int_t nbevents, 
                            magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2], magma_int_t nbcmplx );
 
+void magmablas_zhemm_mgpu_spec33(
+    char side, char uplo, magma_int_t m, magma_int_t n,
+    cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
+                           cuDoubleComplex *dB[], magma_int_t lddb,
+    cuDoubleComplex beta,  cuDoubleComplex *dC[], magma_int_t lddc,
+                           cuDoubleComplex *dVIN[], magma_int_t lddv, magma_int_t voffst,
+                           cuDoubleComplex *dwork[],    magma_int_t lddwork,
+                           cuDoubleComplex *C,    magma_int_t ldc,
+                           cuDoubleComplex *work[], magma_int_t ldwork,
+                           magma_int_t ngpu, magma_int_t nb, 
+                           cudaStream_t streams[][20], magma_int_t nstream, 
+                           cudaEvent_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10],magma_int_t nbevents, 
+                           magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2], magma_int_t nbcmplx );
 
 
 void magmablas_zher2k_mgpu2(
@@ -187,6 +200,27 @@ void magmablas_zher2k_mgpu_spec(
                            cuDoubleComplex *dB[], magma_int_t ldb, magma_int_t boff,
     double beta,           cuDoubleComplex *dC[], magma_int_t ldc,  magma_int_t offset,
     magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][20], magma_int_t nstream );
+
+void magmablas_zher2k_mgpu_spec324(
+    char uplo, char trans, magma_int_t m, magma_int_t n,
+    cuDoubleComplex alpha, cuDoubleComplex *dVIN[], magma_int_t lddv, magma_int_t voff,
+                           cuDoubleComplex *dWIN[], magma_int_t lddw, magma_int_t woff,
+    double beta,           cuDoubleComplex *dC[], magma_int_t lddc,  magma_int_t offset,
+                           cuDoubleComplex *dwork[], magma_int_t lndwork,
+                           magma_int_t ngpu, magma_int_t nb, 
+                           cudaStream_t streams[][20], magma_int_t nstream, 
+                           cudaEvent_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10],magma_int_t nbevents);
+
+void magmablas_zher2k_mgpu_spec325(
+    char uplo, char trans, magma_int_t m, magma_int_t n,
+    cuDoubleComplex alpha, cuDoubleComplex *dVIN[], magma_int_t lddv, magma_int_t voff,
+                           cuDoubleComplex *dWIN[], magma_int_t lddw, magma_int_t woff,
+    double beta,           cuDoubleComplex *dC[], magma_int_t lddc,  magma_int_t offset,
+                           cuDoubleComplex *dwork[], magma_int_t lndwork,
+                           magma_int_t ngpu, magma_int_t nb,
+                           cuDoubleComplex **harray[], cuDoubleComplex **darray[],
+                           cudaStream_t streams[][20], magma_int_t nstream, 
+                           cudaEvent_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10],magma_int_t nbevents);
 
   /*
    * LAPACK auxiliary functions
