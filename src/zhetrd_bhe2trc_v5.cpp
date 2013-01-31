@@ -728,19 +728,19 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
                 timegemm = magma_wtime()-timegemm;
             }
         }
-        timeeigen = magma_wtime()-timeeigen;
 #if defined(USEMKL)
     mkl_set_num_threads(mklth);
 #endif
 #if defined(USEACML)
     omp_set_num_threads(mklth);
 #endif
-        
         magma_free_cpu(Z);
         magma_free(dZ);
         magma_free(dQ1);
-
     }
+    timeeigen = magma_wtime()-timeeigen;
+
+
 fin:
 
     magma_free_cpu(A2);
