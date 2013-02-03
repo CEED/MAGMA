@@ -125,16 +125,18 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
     char side_[2] = {side, 0};
     char trans_[2] = {trans, 0};
 
+    magma_int_t nb = 128;
+    cuDoubleComplex *t ;
+    magma_zmalloc_pinned (&t, nb*nb);
+    printf("calling zunmqr_m with nb=%d\n",nb);
+
     cuDoubleComplex* dw[MagmaMaxGPUs];
     magma_stream_t stream [MagmaMaxGPUs][2];
     magma_event_t  event [MagmaMaxGPUs][2];
 
     magma_int_t ind_c;
 
-    cuDoubleComplex t[4160];
-
     magma_int_t igpu = 0;
-
     int gpu_b;
     magma_getdevice(&gpu_b);
 
@@ -154,7 +156,6 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
         nw = m;
     }
 
-    magma_int_t nb = 64;
 
     if (! left && ! lapackf77_lsame(side_, "R")) {
         *info = -1;
