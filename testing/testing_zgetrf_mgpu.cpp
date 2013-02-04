@@ -260,6 +260,7 @@ int main( int argc, char** argv)
     TESTING_FREE( h_A );
     TESTING_HOSTFREE( h_R );
     for(i=0; i<num_gpus0; i++){
+      cudaSetDevice(i);
                 TESTING_DEVFREE( d_lA[i] );
         }
 
