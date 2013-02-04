@@ -69,6 +69,7 @@ extern "C" {
 #define lapackf77_zheev    FORTRAN_NAME( zheev,  ZHEEV  )
 #define lapackf77_zheevd   FORTRAN_NAME( zheevd, ZHEEVD )
 #define lapackf77_zhegs2   FORTRAN_NAME( zhegs2, ZHEGS2 )
+#define lapackf77_zhegst   FORTRAN_NAME( zhegst, ZHEGST )
 #define lapackf77_zhegvd   FORTRAN_NAME( zhegvd, ZHEGVD )
 #define lapackf77_zhetd2   FORTRAN_NAME( zhetd2, ZHETD2 )
 #define lapackf77_zhetrd   FORTRAN_NAME( zhetrd, ZHETRD )
@@ -440,6 +441,12 @@ void   lapackf77_zheevd( const char *jobz, const char *uplo,
                          magma_int_t *info );
 
 void   lapackf77_zhegs2( const magma_int_t *itype, const char *uplo,
+                         const magma_int_t *n,
+                         cuDoubleComplex *A, const magma_int_t *lda,
+                         cuDoubleComplex *B, const magma_int_t *ldb,
+                         magma_int_t *info );
+
+void   lapackf77_zhegst( const magma_int_t *itype, const char *uplo,
                          const magma_int_t *n,
                          cuDoubleComplex *A, const magma_int_t *lda,
                          cuDoubleComplex *B, const magma_int_t *ldb,
