@@ -23,7 +23,6 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zherk
 */
@@ -92,7 +91,7 @@ int main( int argc, char** argv)
                =================================================================== */
             magma_zsetmatrix( An, Ak, h_A, lda, d_A, ldda );
             magma_zsetmatrix( N, N, h_C, ldc, d_C, lddc );
-            
+
             cublas_time = magma_sync_wtime( NULL );
             cublasZherk( opts.uplo, opts.transA, N, K,
                          alpha, d_A, ldda,
@@ -120,10 +119,10 @@ int main( int argc, char** argv)
             if ( opts.lapack ) {
                 // compute relative error for both magma & cublas, relative to lapack,
                 // |C_magma - C_lapack| / |C_lapack|
-                Cnorm = lapackf77_zlange( "M", &N, &N, h_C, &ldc, work );
-                
+                Cnorm = lapackf77_zlanhe("fro", &opts.uplo, &N, h_C, &ldc, work);
+
                 blasf77_zaxpy( &sizeC, &c_neg_one, h_C, &ione, h_Ccublas, &ione );
-                cublas_error = lapackf77_zlange( "M", &N, &N, h_Ccublas, &ldc, work ) / Cnorm;
+                cublas_error = lapackf77_zlanhe( "fro", &opts.uplo, &N, h_Ccublas, &ldc, work ) / Cnorm;
                 
                 printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e\n",
                        (int) N, (int) K,
