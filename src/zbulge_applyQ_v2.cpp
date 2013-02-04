@@ -102,7 +102,7 @@ extern "C" void magma_zbulge_applyQ_v2(char side, magma_int_t NE, magma_int_t N,
     // NOTE THAT dwork was of size 2*lddwork*Vblksiz+...
     // but I am thinking why not modifing it to lddwork*Vblksiz+...
     cuDoubleComplex *dwork, *dT0, *dV0, *dT1, *dV1, *dwvt;
-    magma_int_t lddv = ldv; //NB + Vblksiz + 1;
+    magma_int_t lddv = ldv; //NB + Vblksiz - 1;
     magma_int_t lddt = ldt; // Vblksiz;
     magma_int_t lddwvt = ldv; 
 

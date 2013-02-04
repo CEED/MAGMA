@@ -144,7 +144,7 @@ extern "C" magma_int_t magma_zbulge_back(magma_int_t threads, char uplo, magma_i
     double gpu_cpu_perf = 0;  // to be defined //gpu over cpu performance
 #else
 //    double gpu_cpu_perf = 27.5;  // gpu over cpu performance  //100% ev // Westmere - Fermi (M2090)
-    double gpu_cpu_perf = 21;  // gpu over cpu performance  //100% ev // SandyB. - Kepler (K20c)
+    double gpu_cpu_perf = 32;  // gpu over cpu performance  //100% ev // SandyB. - Kepler (K20c)
 //    double gpu_cpu_perf = 130;  // gpu over cpu performance  //100% ev // Bulldozer - Kepler (K20X)
 #endif
 

@@ -224,7 +224,7 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
     magma_int_t Vblksiz = magma_dbulge_get_Vblksiz(n, nb);
 
     magma_int_t ldt = Vblksiz;
-    magma_int_t ldv = nb + Vblksiz - 1;
+    magma_int_t ldv = nb + Vblksiz;
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
 
     magma_int_t lq2 = blkcnt * Vblksiz * (ldt + ldv + 1);
