@@ -259,11 +259,11 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
         }
     }
 
-    magma_int_t nb = magma_bulge_get_nb(n);
+    magma_int_t nb =  magma_bulge_get_nb(n);
     magma_int_t Vblksiz = magma_zbulge_get_Vblksiz(n, nb);
 
     magma_int_t ldt = Vblksiz;
-    magma_int_t ldv = nb + Vblksiz - 1;
+    magma_int_t ldv = nb + Vblksiz;
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
 
     magma_int_t lq2 = blkcnt * Vblksiz * (ldt + ldv + 1);
@@ -392,9 +392,10 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-
+    tband1 = get_current_time();
     magma_zhetrd_he2hb(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, dT1, threads, info);
-
+    tband2 = get_current_time();
+    printf("  1 GPU seq code time zhetrd_he2hb only = %7.4f\n" , GetTimerValue(tband1,tband2)/1000.);
     magma_free(dT1);
 #else
     magma_int_t nstream = max(3,nrgpu+2);
@@ -403,7 +404,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     magma_int_t ldda = ((n+31)/32)*32;
 
     magma_int_t ver = 0;
-    magma_int_t distblk = max(256,nb);
+    magma_int_t distblk = 4*nb; // max(256,nb);
     printf("voici ngpu %d distblk %d NB %d nstream %d version %d \n ",nrgpu,distblk,nb,nstream,ver);
 
     magma_timestr_t tband1, tband2, t1, t2, ta1, ta2;

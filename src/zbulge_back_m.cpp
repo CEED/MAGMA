@@ -138,9 +138,9 @@ extern "C" magma_int_t magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t thread
     magma_int_t n_gpu = ne;
 
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-    double gpu_cpu_perf = 20; //gpu over cpu performance
+    double gpu_cpu_perf = 24; //gpu over cpu performance
 #else
-    double gpu_cpu_perf = 22;  // gpu over cpu performance
+    double gpu_cpu_perf = 38;  // gpu over cpu performance
 #endif
 
     double perf_temp= .85;
@@ -162,7 +162,7 @@ extern "C" magma_int_t magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t thread
     /*============================
      *  use GPU+CPU's
      *==========================*/
-
+//n_gpu = ne;
     if(n_gpu < ne)
     {
 

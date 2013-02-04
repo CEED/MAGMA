@@ -241,7 +241,8 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
 
     magma_device_t cdev;
     magma_getdevice( &cdev );
-
+    magma_stream_t cstream;
+    magmablasGetKernelStream(&cstream);
 /*
     cuDoubleComplex *dworkmgpu[MagmaMaxGPUs], *dWmgpu[MagmaMaxGPUs];
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
@@ -650,7 +651,10 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
         }
     }
     magma_free_pinned(workngpu[ngpu]);
+
+
     magma_setdevice( cdev );
+    magmablasSetKernelStream( cstream );
 
 
 
