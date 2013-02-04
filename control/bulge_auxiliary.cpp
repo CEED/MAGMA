@@ -42,7 +42,7 @@ extern "C" {
 
     magma_int_t magma_cbulge_get_Vblksiz(magma_int_t n, magma_int_t nb)
     {
-        return min(nb,32);
+        return min(nb,48);
     }
 
     magma_int_t magma_zbulge_get_Vblksiz(magma_int_t n, magma_int_t nb)
@@ -56,7 +56,7 @@ extern "C" {
     {
         magma_int_t nb = magma_bulge_get_nb(n);
         magma_int_t Vblksiz = magma_zbulge_get_Vblksiz(n, nb);
-        magma_int_t ldv = nb + Vblksiz - 1;
+        magma_int_t ldv = nb + Vblksiz;
         magma_int_t ldt = Vblksiz;
         return magma_bulge_get_blkcnt(n, nb, Vblksiz) * Vblksiz * (ldt + ldv + 1);
     }
@@ -65,7 +65,7 @@ extern "C" {
     {
         magma_int_t nb = magma_bulge_get_nb(n);
         magma_int_t Vblksiz = magma_dbulge_get_Vblksiz(n, nb);
-        magma_int_t ldv = nb + Vblksiz - 1;
+        magma_int_t ldv = nb + Vblksiz;
         magma_int_t ldt = Vblksiz;
         return magma_bulge_get_blkcnt(n, nb, Vblksiz) * Vblksiz * (ldt + ldv + 1);
     }
@@ -74,7 +74,7 @@ extern "C" {
     {
         magma_int_t nb = magma_bulge_get_nb(n);
         magma_int_t Vblksiz = magma_dbulge_get_Vblksiz(n, nb);
-        magma_int_t ldv = nb + Vblksiz - 1;
+        magma_int_t ldv = nb + Vblksiz;
         magma_int_t ldt = Vblksiz;
         return magma_bulge_get_blkcnt(n, nb, Vblksiz) * Vblksiz * (ldt + ldv + 1);
     }
@@ -83,7 +83,7 @@ extern "C" {
     {
         magma_int_t nb = magma_bulge_get_nb(n);
         magma_int_t Vblksiz = magma_dbulge_get_Vblksiz(n, nb);
-        magma_int_t ldv = nb + Vblksiz - 1;
+        magma_int_t ldv = nb + Vblksiz;
         magma_int_t ldt = Vblksiz;
         return magma_bulge_get_blkcnt(n, nb, Vblksiz) * Vblksiz * (ldt + ldv + 1);
     }
@@ -260,7 +260,7 @@ extern "C" {
     {
         // to be able to use and compare with the old reduction function.
         // route the old function to the new ones because the changes are done on the new function.
-        magma_int_t ldv = NB + Vblksiz -1;
+        magma_int_t ldv = NB + Vblksiz;
         magma_int_t ldt = Vblksiz;
         magma_bulge_findVTAUTpos(N,  NB, Vblksiz,  sweep,  st,  ldv, ldt,
                                Vpos, TAUpos, Tpos, myblkid);
@@ -284,7 +284,7 @@ extern "C" {
         myblknb = plasma_ceildiv((st-sweep),NB);
         blkid       = prevblkcnt + myblknb -1;
         locj        = sweep%Vblksiz;
-        LDV         = NB + Vblksiz -1;
+        LDV         = NB + Vblksiz;
 
         *myblkid= blkid;
         *Vpos   = blkid*Vblksiz*LDV  + locj*LDV + locj;
@@ -313,7 +313,7 @@ extern "C" {
             *blkcnt      = *blkcnt + myblknb;
             //printf("voici  nbcolblk %d    master sweep %d     blkcnt %d \n",nbcolblk, mastersweep,*blkcnt);
         }
-        *LDV= NB+Vblksiz-1;
+        *LDV= NB+Vblksiz;
     }
 
 
