@@ -397,8 +397,7 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     if(ver==30){
         magma_dsytrd_sy2sb_mgpu_spec(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, da, ldda, dT1, nb, nrgpu, distblk, streams, nstream, threads, info);
     }else{
-        magma_int_t nstream_ = 3;
-        magma_dsytrd_sy2sb_mgpu(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, da, ldda, dT1, nb, nrgpu, distblk, streams, nstream_, threads, info);
+        magma_dsytrd_sy2sb_mgpu(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, da, ldda, dT1, nb, nrgpu, distblk, streams, nstream, threads, info);
     }
 
     tband2 = get_current_time();
