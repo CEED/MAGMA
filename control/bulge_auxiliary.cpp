@@ -25,7 +25,7 @@ extern "C" {
 
     magma_int_t magma_bulge_get_nb(magma_int_t n)
     {
-        return 64;
+        return 96;
     }
 
     /////////////////////////////////////////
@@ -37,7 +37,7 @@ extern "C" {
 
     magma_int_t magma_dbulge_get_Vblksiz(magma_int_t n, magma_int_t nb)
     {
-        return min(nb,64);
+        return 64; //min(nb,32);
     }
 
     magma_int_t magma_cbulge_get_Vblksiz(magma_int_t n, magma_int_t nb)
@@ -47,7 +47,7 @@ extern "C" {
 
     magma_int_t magma_zbulge_get_Vblksiz(magma_int_t n, magma_int_t nb)
     {
-        return min(nb,32);
+        return min(nb,48);
     }
 
     /////////////////////////////////////////
