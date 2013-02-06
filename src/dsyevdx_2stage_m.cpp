@@ -374,7 +374,7 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     magma_int_t ldda = ((n+31)/32)*32;
 
     magma_int_t ver = 0;
-    magma_int_t distblk = max(256,nb);
+    magma_int_t distblk = 4*nb; //max(256,nb);
     printf("voici ngpu %d distblk %d NB %d nstream %d version %d \n ",nrgpu,distblk,nb,nstream,ver);
 
     magma_timestr_t tband1, tband2, t1, t2, ta1, ta2;
