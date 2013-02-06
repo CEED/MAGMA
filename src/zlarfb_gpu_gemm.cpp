@@ -205,7 +205,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
             magma_zgemm( notransV, MagmaConjTrans,
                          m, n, k,
                          c_neg_one, dV,  ldv,
-                                    dwork,    ldwork,
+                                    dworkvt,    ldworkvt,
                          c_one,     dC,       ldc);
         }
     }
