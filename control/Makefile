@@ -12,6 +12,7 @@ include ../Makefile.internal
 ZSRC := \
 	zpanel_to_q.cpp	\
 	zprint.cpp	\
+	pthread_barrier.cpp	\
 
 ifeq ($(PGIFORTRAN), 0)
 ZSRC := $(ZSRC) 		\

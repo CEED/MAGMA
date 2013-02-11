@@ -50,6 +50,10 @@
 
 #endif
 
+#if defined(__APPLE__)
+    #include "pthread_barrier.h"
+#endif
+
 #include "magma.h"
 #include "magma_lapack.h"
 #include "operators.h"
