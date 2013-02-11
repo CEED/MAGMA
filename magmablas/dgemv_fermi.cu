@@ -12,9 +12,8 @@
 
 #define magmablas_dgemv_fermi magmablas_dgemv
 
-#define num_threads 64
 #define dgemv_bs 64
-#define threadSize 128
+#define threadSize 256
 
 
 
@@ -22,10 +21,10 @@ __global__ void
 dgemvn_kernel_fermi(
     magma_int_t n, magma_int_t m, magma_int_t n1, double alpha,
     const double *A, magma_int_t lda,
-    const double *x,
+    const double *x, double beta, 
     double *y)
 {
-  magma_int_t ind = blockIdx.x*num_threads + threadIdx.x;
+  magma_int_t ind = blockIdx.x*dgemv_bs + threadIdx.x;
 
   A += ind;
   x += threadIdx.x;
@@ -58,7 +57,7 @@ dgemvn_kernel_fermi(
   }
 
   if (ind<n)
-     y[ind] = alpha * res;
+     y[ind] = alpha * res + beta * y[ind];
 }
 
 
@@ -66,7 +65,7 @@ extern "C" void
 magmablas_dgemvn_fermi(
     magma_int_t n, magma_int_t m, double alpha,
     const double *A, magma_int_t lda,
-    const double *x,
+    const double *x, double beta, 
     double *y)
 {
 /*  -- MAGMA (version 1.1) --
@@ -99,16 +98,16 @@ magmablas_dgemvn_fermi(
     ===================================================================== */
 
     magma_int_t blocks;
-    if (n % num_threads==0)
-        blocks = n/num_threads;
+    if (n % dgemv_bs==0)
+        blocks = n/dgemv_bs;
     else
-        blocks = n/num_threads + 1;
+        blocks = n/dgemv_bs + 1;
 
     dim3 grid(blocks, 1, 1);
-    dim3 threads(num_threads, 1, 1);
+    dim3 threads(dgemv_bs, 1, 1);
  
     dgemvn_kernel_fermi<<< grid, threads, 0, magma_stream >>>(n, m, (m / dgemv_bs)*dgemv_bs, 
-                                    alpha, A, lda, x, y);
+                                    alpha, A, lda, x, beta, y);
 }
 
 
@@ -116,7 +115,7 @@ __global__ void
 dgemvt_kernel_fermi(
     magma_int_t m, magma_int_t n, double alpha, magma_int_t n1,
     const double *A, magma_int_t lda,
-    const double *x,
+    const double *x, double beta, 
     double *y)
 {
         magma_int_t tx = threadIdx.x;
@@ -171,11 +170,10 @@ dgemvt_kernel_fermi(
 
         if( tx == 0 )
         {
-                y[blockIdx.y] = sdata[0];
                 
                 if (blockIdx.y < n)
                 {
-                        y[blockIdx.y] = y[blockIdx.y] * alpha;
+                        y[blockIdx.y] = sdata[0] * alpha + beta * y[blockIdx.y];
                 }
         }
 }
@@ -187,7 +185,7 @@ extern "C" void
 magmablas_dgemvt_fermi(
     magma_int_t m, magma_int_t n, double alpha,
     const double *A, magma_int_t lda,
-    const double *x,
+    const double *x, double beta,
     double *y)
 {
 /*  -- MAGMA (version 1.1) --
@@ -223,7 +221,7 @@ magmablas_dgemvt_fermi(
         dim3 threads ( threadSize,   1,  1);
 
         dgemvt_kernel_fermi<<< grid, threads, 0, magma_stream >>>( m, n, alpha, ( m / threadSize) * threadSize,
-                                                                       A, lda, x, y);
+                                                                       A, lda, x, beta,  y);
 }
 
 
@@ -296,16 +294,17 @@ void magmablas_dgemv_fermi(char trans,
             INCZ must not be zero. Unchanged on exit.
     ===================================================================== */
 
-    if (incx == 1 && incz == 1 && beta == 0.) {
+    if (incx == 1 && incz == 1) 
+    {
        if (trans == 'n' || trans == 'N')
            {
                if ( m >= 7000 && m <= 8000 )
                 cublasDgemv(trans, m, n, alpha, A, lda, x, incx, beta, z, incz);
                    else 
-                                magmablas_dgemvn_fermi(m,  n, alpha, A, lda, x, z);
+                                magmablas_dgemvn_fermi(m,  n, alpha, A, lda, x, beta,  z);
            }
        else if (trans == 't' || trans == 'T')
-          magmablas_dgemvt_fermi(m,  n, alpha, A, lda, x, z);
+          magmablas_dgemvt_fermi(m,  n, alpha, A, lda, x, beta, z);
        else
           printf("trans = %c in sgemv_fermi is not available\n", trans);               
     }
@@ -313,6 +312,5 @@ void magmablas_dgemv_fermi(char trans,
        cublasDgemv(trans, m, n, alpha, A, lda, x, incx, beta, z, incz);
 }
 
-#undef num_threads
 #undef dgemv_bs
 #undef threadSize
