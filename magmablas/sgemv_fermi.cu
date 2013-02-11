@@ -21,7 +21,7 @@ __global__ void
 sgemvn_kernel1_fermi(
     magma_int_t n, magma_int_t m, magma_int_t n1, float alpha,
     const float* A, magma_int_t lda,
-    const float *x,
+    const float *x, float beta, 
     float *y)
 {
   magma_int_t ind = blockIdx.x*num_threads + threadIdx.x;
@@ -49,7 +49,7 @@ sgemvn_kernel1_fermi(
   }
 
   if (ind<n)
-     y[ind] = alpha * res;
+     y[ind] = alpha * res + beta * y[ind];
 
 }
 
@@ -57,7 +57,7 @@ __global__ void
 sgemvn_kernel2_fermi(
     magma_int_t n, magma_int_t m, magma_int_t n1, float alpha,
     const float* A, magma_int_t lda,
-    const float *x,
+    const float *x, float beta, 
     float *y)
 {
   magma_int_t ind = blockIdx.x*num_threads + threadIdx.x;
@@ -92,14 +92,14 @@ sgemvn_kernel2_fermi(
   }
 
   if (ind<n)
-     y[ind] = alpha * res;
+     y[ind] = alpha * res + beta * y[ind];
 }
 
 extern "C" void
 magmablas_sgemvn_fermi(
     magma_int_t n, magma_int_t m, float alpha,
     const float *A, magma_int_t lda,
-    const float *x,
+    const float *x, float beta,
     float *y)
 {
 /*  -- MAGMA (version 1.1) --
@@ -141,10 +141,10 @@ magmablas_sgemvn_fermi(
     dim3 threads(num_threads, 1, 1);
     if(n<=8500) 
                 sgemvn_kernel1_fermi<<< grid, threads, 0, magma_stream >>>(n, m, (m / sgemv_bs)*sgemv_bs, 
-                                                   alpha, A, lda, x, y);
+                                                   alpha, A, lda, x, beta,  y);
     else
                 sgemvn_kernel2_fermi<<< grid, threads, 0, magma_stream >>>(n, m, (m / num_threads)*num_threads, 
-                                                   alpha, A, lda, x, y);
+                                                   alpha, A, lda, x, beta, y);
 }
 
 
@@ -153,7 +153,7 @@ __global__ void
 sgemvt_kernel1_fermi(
     magma_int_t m, magma_int_t n, float alpha, magma_int_t n1,
     const float* A, magma_int_t lda,
-    const float *x,
+    const float *x, float beta,
     float *y)
 {
         magma_int_t tx = threadIdx.x;
@@ -209,11 +209,10 @@ sgemvt_kernel1_fermi(
 
     if( tx == 0 ) 
         {
-                y[blockIdx.y] = sdata[0];                 
 
                 if (blockIdx.y < n)
                 {
-                        y[blockIdx.y] = y[blockIdx.y] * alpha;
+                        y[blockIdx.y] = sdata[0] * alpha + beta * y[blockIdx.y];
                 }
         }
 }
@@ -223,7 +222,7 @@ __global__ void
 sgemvt_kernel2_fermi(
     magma_int_t m, magma_int_t n, float alpha, magma_int_t n1,
     const float* A, magma_int_t lda,
-    const float *x,
+    const float *x, float beta, 
     float *y)
 {
   const magma_int_t inx = threadIdx.x;
@@ -324,7 +323,7 @@ sgemvt_kernel2_fermi(
   __syncthreads();
   if (ind<n && iny==0){
      res = la[inx][0] + la[inx][1] + la[inx][2] + la[inx][3];
-     y[ind] = alpha*res;
+     y[ind] = alpha*res + beta * y[ind];
   }
 }
 
@@ -332,7 +331,7 @@ extern "C" void
 magmablas_sgemvt1_fermi(
     magma_int_t m, magma_int_t n, float alpha,
     const float *A, magma_int_t lda,
-    const float *x,
+    const float *x, float beta,
     float *y)
 {
 
@@ -341,7 +340,7 @@ magmablas_sgemvt1_fermi(
     dim3 threads ( threadSize,   1,  1);
 
     sgemvt_kernel1_fermi<<< grid, threads, 0, magma_stream >>>( m, n, alpha, ( m / threadSize) * threadSize,
-                                       A, lda, x, y);
+                                       A, lda, x, beta, y);
 
                                                                           
 }
@@ -350,7 +349,7 @@ extern "C" void
 magmablas_sgemvt2_fermi(
     magma_int_t m, magma_int_t n, float alpha,
     const float *A, magma_int_t lda,
-    const float *x,
+    const float *x, float beta,
     float *y)
 {
 
@@ -365,14 +364,14 @@ magmablas_sgemvt2_fermi(
     dim3 threads(16, 4, 1);
 
     sgemvt_kernel2_fermi<<< grid, threads, 0, magma_stream >>>(m, n, alpha, (m / 32)*32,
-                                      A, lda, x, y);
+                                      A, lda, x, beta, y);
 }
 
 extern "C" void
 magmablas_sgemvt_fermi(
     magma_int_t m, magma_int_t n, float alpha,
     const float *A, magma_int_t lda, 
-    const float *x,
+    const float *x, float beta,
     float *y)
 {
 /*  -- MAGMA (version 1.1) --
@@ -404,7 +403,7 @@ magmablas_sgemvt_fermi(
 
     ===================================================================== */
 
-      magmablas_sgemvt1_fermi(m, n, alpha, A, lda, x, y);
+      magmablas_sgemvt1_fermi(m, n, alpha, A, lda, x, beta, y);
     
 
 }
@@ -478,11 +477,11 @@ magmablas_sgemv_fermi(char trans,
             INCZ must not be zero. Unchanged on exit.
     ===================================================================== */
 
-    if (incx == 1 && incz == 1 && beta == 0.) {
+    if (incx == 1 && incz == 1 ) {
        if (trans == 'n' || trans == 'N')
-           magmablas_sgemvn_fermi(m,  n, alpha, A, lda, x, z);
+           magmablas_sgemvn_fermi(m,  n, alpha, A, lda, x, beta, z);
        else if (trans == 't' || trans == 'T')
-          magmablas_sgemvt_fermi(m,  n, alpha, A, lda, x, z);
+          magmablas_sgemvt_fermi(m,  n, alpha, A, lda, x, beta, z);
        else
           printf("trans = %c in sgemv_fermi is not available\n", trans);               
     }

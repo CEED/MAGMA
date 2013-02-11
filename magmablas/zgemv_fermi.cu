@@ -20,7 +20,7 @@ __global__ void
 zgemvn_kernel1_fermi(
     int n, int m, int n1, cuDoubleComplex alpha,
     const cuDoubleComplex *A, int lda,
-    const cuDoubleComplex *x,
+    const cuDoubleComplex *x, cuDoubleComplex beta, 
     cuDoubleComplex *y)
 {
   int ind = blockIdx.x*num_threads + threadIdx.x;
@@ -49,7 +49,7 @@ zgemvn_kernel1_fermi(
   }
 
   if (ind<n)
-     y[ind] = alpha * res;
+     y[ind] = alpha * res + beta * y[ind];
 
 }
 
@@ -57,7 +57,7 @@ __global__ void
 zgemvn_kernel2_fermi(
     int n, int m, int n1, cuDoubleComplex alpha,
     const cuDoubleComplex *A, int lda,
-    const cuDoubleComplex *x,
+    const cuDoubleComplex *x, cuDoubleComplex beta,
     cuDoubleComplex *y)
 {
   int ind = blockIdx.x*num_threads + threadIdx.x;
@@ -93,14 +93,14 @@ zgemvn_kernel2_fermi(
   }
 
   if (ind<n)
-     y[ind] = alpha * res;
+     y[ind] = alpha * res + y[ind] * beta;
 }
 
 extern "C" void
 magmablas_zgemvn_fermi(
     int n, int m, cuDoubleComplex alpha,
     const cuDoubleComplex *A, int lda,
-    const cuDoubleComplex *x,
+    const cuDoubleComplex *x, cuDoubleComplex beta, 
     cuDoubleComplex *y)
 {
 /*  -- MAGMA (version 1.1) --
@@ -145,7 +145,7 @@ magmablas_zgemvn_fermi(
                                                    alpha, A, lda, x, y);
     else */
                 zgemvn_kernel2_fermi<<< grid, threads, 0, magma_stream >>>(n, m, (m / num_threads)*num_threads, 
-                                                   alpha, A, lda, x, y);
+                                                   alpha, A, lda, x, beta, y);
 }
 
 
@@ -154,7 +154,7 @@ __global__ void
 zgemvt_kernel_fermi(
     int m, int n, cuDoubleComplex alpha, int n1,
     const cuDoubleComplex *A, int lda,
-    const cuDoubleComplex *x,
+    const cuDoubleComplex *x, cuDoubleComplex beta,
     cuDoubleComplex *y)
 {
         unsigned int tx = threadIdx.x;
@@ -214,11 +214,10 @@ zgemvt_kernel_fermi(
 
     if( tx == 0 ) 
         {
-                y[blockIdx.y] = sdata[0];                 
 
                 if (blockIdx.y < n)
                 {
-                        y[blockIdx.y] = y[blockIdx.y] * alpha;
+                        y[blockIdx.y] = sdata[0] * alpha + beta * y[blockIdx.y];
                 }
         }
 }
@@ -230,7 +229,7 @@ extern "C" void
 magmablas_zgemvt_fermi(
     int m, int n, cuDoubleComplex alpha,
     const cuDoubleComplex *A, int lda, 
-    const cuDoubleComplex *x,
+    const cuDoubleComplex *x, cuDoubleComplex beta,
     cuDoubleComplex *y)
 {
 /*  -- MAGMA (version 1.1) --
@@ -267,7 +266,7 @@ magmablas_zgemvt_fermi(
     dim3 threads ( threadSize,   1,  1);
 
     zgemvt_kernel_fermi<<< grid, threads, 0, magma_stream >>>( m, n, alpha, ( m / threadSize) * threadSize,
-                                       A, lda, x, y);
+                                       A, lda, x, beta, y);
 
 }
 
@@ -277,7 +276,7 @@ __global__ void
 zgemvc_kernel_fermi(
     int m, int n, cuDoubleComplex alpha, int n1,
     const cuDoubleComplex *A, int lda,
-    const cuDoubleComplex *x,
+    const cuDoubleComplex *x, cuDoubleComplex beta,
     cuDoubleComplex *y)
 {
         unsigned int tx = threadIdx.x;
@@ -340,11 +339,10 @@ zgemvc_kernel_fermi(
 
     if( tx == 0 ) 
         {
-                y[blockIdx.y] = sdata[0];                 
 
                 if (blockIdx.y < n)
                 {
-                        y[blockIdx.y] = y[blockIdx.y] * alpha;
+                        y[blockIdx.y] = sdata[0] * alpha + beta * y[blockIdx.y];
                 }
         }
 }
@@ -357,6 +355,7 @@ magmablas_zgemvc_fermi(
     int m, int n, cuDoubleComplex alpha,
     const cuDoubleComplex *A, int lda, 
     const cuDoubleComplex *x,
+    cuDoubleComplex beta,
     cuDoubleComplex *y)
 {
 /*  -- MAGMA (version 1.1) --
@@ -393,7 +392,7 @@ magmablas_zgemvc_fermi(
     dim3 threads ( threadSize,   1,  1);
 
     zgemvc_kernel_fermi<<< grid, threads, 0, magma_stream >>>( m, n, alpha, ( m / threadSize) * threadSize,
-                                       A, lda, x, y);
+                                       A, lda, x, beta, y);
 
 }
 
@@ -410,7 +409,7 @@ magmablas_zgemv_fermi(
     cuDoubleComplex *y, magma_int_t incy) 
 {
 
-    if(beta.x==0.0 && beta.y==0.0 && incx ==1 && incy==1)
+    if(incx ==1 && incy==1)
         {
                 if (flag == 'N' || flag == 'n')
                 {
@@ -420,16 +419,16 @@ magmablas_zgemv_fermi(
                         }
                         else
                         {
-                                magmablas_zgemvn_fermi(m,  n, alpha, A, lda, x, y);
+                                magmablas_zgemvn_fermi(m,  n, alpha, A, lda, x, beta, y);
                         }
                 }
                 else if(flag == 'T' || flag == 't')
                 {
-                        magmablas_zgemvt_fermi(m,  n, alpha, A, lda, x, y);
+                        magmablas_zgemvt_fermi(m,  n, alpha, A, lda, x, beta, y);
                 }
                 else if(flag == 'C' || flag == 'c') 
                 {
-                        magmablas_zgemvc_fermi(m,  n, alpha, A, lda, x, y);
+                        magmablas_zgemvc_fermi(m,  n, alpha, A, lda, x, beta, y);
                 }
                 else 
                 {
