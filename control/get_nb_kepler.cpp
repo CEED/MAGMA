@@ -43,12 +43,18 @@ int magma_get_zpotrf_nb(int n) {
 */
 extern "C"
 int magma_get_sgeqp3_nb(int m) {
+  if (m < 9000)
     return 32;
+  else
+    return 64;
 }
 
 extern "C"
 int magma_get_dgeqp3_nb(int m) {
+  if (m < 9000)
     return 32;
+  else
+    return 64;
 }
 
 extern "C"
@@ -76,8 +82,10 @@ extern "C"
 int magma_get_dgeqrf_nb(int m) {
     if (m <= 2048)
         return 64;
-    else 
+    else if (m<10000)
         return 128;
+    else
+      return 256;
 }
 
 extern "C"
@@ -169,19 +177,27 @@ int magma_get_zgelqf_nb(int m) {
 extern "C"
 int magma_get_sgetrf_nb(int m) {
     if (m <= 3200)
-        return 64;
-    else
-        return 192;
+        return 128;
+    else if (m<= 5200)
+      return 192;
+    else if (m<=10200)
+      return 256;
+    else if (m<=15200)
+      return 512;
+    else if (m<=16100)
+      return 768;
+    else 
+      return 1024;
 }
 
 extern "C"
 int magma_get_dgetrf_nb(int m) {
-    if (m <= 2048)
-        return 64;
-    else if (m < 7200)
+    if (m <= 3100)
         return 128;
-    else
+    else if (m < 10200)
         return 256;
+    else
+      return 512;
 }
 
 extern "C"
