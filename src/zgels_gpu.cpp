@@ -46,7 +46,7 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
     NRHS    (input) INTEGER
             The number of columns of the matrix C. NRHS >= 0.
 
-    A       (input/output) COMPLEX_16 array, dimension (LDA,N)
+    DA       (input/output) COMPLEX_16 array on the GPU, dimension (LDA,N)
             On entry, the M-by-N matrix A.
             On exit, A is overwritten by details of its QR
             factorization as returned by ZGEQRF.
