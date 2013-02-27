@@ -104,7 +104,7 @@ int main( int argc, char** argv)
             
             /* Initialize the matrices */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, LU );
-            err = magma_malloc_cpu( (void**) &piv, N*sizeof(magma_int_t) );  assert( err == 0 );
+            err = magma_malloc_cpu( (void**) &piv, Ak*sizeof(magma_int_t) );  assert( err == 0 );
             lapackf77_zgetrf( &Ak, &Ak, LU, &lda, piv, &info );
         
             int i, j;
