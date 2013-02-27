@@ -66,7 +66,7 @@ magma_zgetri_gpu( magma_int_t n, cuDoubleComplex *dA, magma_int_t lda,
                 The pivot indices from ZGETRF; for 1<=i<=N, row i of the
                 matrix was interchanged with row IPIV(i).
 
-        DWORK    (workspace/output) COMPLEX*16 array on the GPU, dimension (MAX(1,LWORK))
+        DWORK   (workspace/output) COMPLEX_16 array on the GPU, dimension (MAX(1,LWORK))
       
         LWORK   (input) INTEGER
                 The dimension of the array DWORK.  LWORK >= N*NB, where NB is
