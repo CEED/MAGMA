@@ -121,7 +121,7 @@ magma_zunmqr(const char side, const char trans,
 
     magma_int_t nq_i, lddwork;
     magma_int_t i;
-    cuDoubleComplex T[ 2*nb*nb ];
+    cuDoubleComplex *T;
     magma_int_t i1, i2, step, ib, ic, jc, mi, ni, nq, nw;
     int left, notran, lquery;
     magma_int_t iinfo, lwkopt;
@@ -179,6 +179,21 @@ magma_zunmqr(const char side, const char trans,
     cuDoubleComplex *dwork, *dC;
     magma_zmalloc( &dC, lddc*n );
     magma_zmalloc( &dwork, (m + n + nb)*nb );
+    if ( dC == NULL || dwork == NULL ) {
+        magma_free( dC );
+        magma_free( dwork );
+        *info = MAGMA_ERR_DEVICE_ALLOC;
+        return *info;
+    }
+    
+    /* work space on CPU */
+    T = (cuDoubleComplex*) malloc( 2*nb*nb * sizeof(cuDoubleComplex) );
+    if ( T == NULL ) {
+        magma_free( dC );
+        magma_free( dwork );
+        *info = MAGMA_ERR_HOST_ALLOC;
+        return *info;
+    }
     
     /* Copy matrix C from the CPU to the GPU */
     magma_zsetmatrix( m, n, C, ldc, dC, lddc );
@@ -254,6 +269,7 @@ magma_zunmqr(const char side, const char trans,
 
     magma_free( dC );
     magma_free( dwork );
+    free( T );
 
     return *info;
 } /* magma_zunmqr */
