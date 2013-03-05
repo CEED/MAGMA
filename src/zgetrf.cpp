@@ -130,7 +130,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
         magma_int_t num_gpus = magma_num_gpus();
         if ( num_gpus > 1 ) {
           /* call multi-GPU non-GPU-resident interface  */
-          magma_int_t rval = magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
+          magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
           if( *info >= 0 ) magma_zgetrf_piv(num_gpus, m, n, a, lda, ipiv, info);
           return *info;
         }
@@ -146,7 +146,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
             // if close to square, allocate square matrix and transpose in-place
             if (MAGMA_SUCCESS != magma_zmalloc( &dA, nb*maxm + maxdim*maxdim )) {
                         /* alloc failed so call non-GPU-resident version */ 
-                        magma_int_t rval = magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
+                        magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
                         if( *info >= 0 ) magma_zgetrf_piv(num_gpus, m, n, a, lda, ipiv, info);
                         return *info;
             }
@@ -162,7 +162,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
             // if very rectangular, allocate dA and dAT and transpose out-of-place
             if (MAGMA_SUCCESS != magma_zmalloc( &dA, (nb + maxn)*maxm )) {
                         /* alloc failed so call non-GPU-resident version */
-                        magma_int_t rval = magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
+                        magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
                         if( *info >= 0 ) magma_zgetrf_piv(num_gpus, m, n, a, lda, ipiv, info);
                         return *info;
             }
@@ -173,7 +173,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
             if (MAGMA_SUCCESS != magma_zmalloc( &dAT, maxm*maxn )) {
                         /* alloc failed so call non-GPU-resident version */
                         magma_free( dA );
-                        magma_int_t rval = magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
+                        magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
                         if( *info >= 0 ) magma_zgetrf_piv(num_gpus, m, n, a, lda, ipiv, info);
                         return *info;
             }
