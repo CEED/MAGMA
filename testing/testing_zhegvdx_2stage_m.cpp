@@ -56,7 +56,7 @@ int main( int argc, char** argv)
     TESTING_CUDA_INIT_MGPU();
 
     real_Double_t   mgpu_time;
-    cuDoubleComplex *h_A, *h_R, *h_B, *h_S, *h_work;
+    cuDoubleComplex *h_A, *h_Ainit, *h_B, *h_Binit, *h_work;
 
 #if defined(PRECISION_z) || defined(PRECISION_c)
     double *rwork;
@@ -95,7 +95,7 @@ int main( int argc, char** argv)
     }
 
     printf("using: nrgpu = %d, itype = %d, jobz = %c,range = %c, uplo = %c, checkres = %d, fraction = %6.4f\n", opts.ngpu, itype, jobz, range, uplo, checkres, f);
-
+    
     printf("  N     M   nr GPU     MGPU Time(s) \n");
     printf("====================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
@@ -110,13 +110,15 @@ int main( int argc, char** argv)
 #endif
             liwork = 3 + 5*N;
 
+
+            magma_int_t NB = 96;//magma_bulge_get_nb(N);
+            magma_int_t sizvblg = magma_zbulge_get_lq2(N);        
+            magma_int_t siz = max(sizvblg,n2)+2*(N*NB+N)+24*N; 
             /* Allocate host memory for the matrix */
-            TESTING_MALLOC(   h_A, cuDoubleComplex, n2);
-            TESTING_MALLOC(   h_B, cuDoubleComplex, n2);
+            TESTING_HOSTALLOC(   h_A, cuDoubleComplex, siz);
+            TESTING_HOSTALLOC(   h_B, cuDoubleComplex, siz);
             TESTING_MALLOC(    w1, double         ,  N);
-            TESTING_HOSTALLOC(h_R, cuDoubleComplex, n2);
-            TESTING_HOSTALLOC(h_S, cuDoubleComplex, n2);
-            TESTING_HOSTALLOC(h_work, cuDoubleComplex,  lwork);
+            TESTING_HOSTALLOC(h_work, cuDoubleComplex,  128);
 #if defined(PRECISION_z) || defined(PRECISION_c)
             TESTING_HOSTALLOC( rwork,          double, lrwork);
 #endif
@@ -133,6 +135,15 @@ int main( int argc, char** argv)
                 }
             }
 
+            if((opts.warmup)||( checkres )){
+                TESTING_HOSTALLOC(h_Ainit, cuDoubleComplex, n2);
+                TESTING_HOSTALLOC(h_Binit, cuDoubleComplex, n2);
+                lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_Ainit, &N );
+                lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_Binit, &N );
+            }
+
+
+
             magma_int_t m1 = 0;
             double vl = 0;
             double vu = 0;
@@ -147,32 +158,27 @@ int main( int argc, char** argv)
             if(opts.warmup){
 
                 // ==================================================================
-                // Warmup using MAGMA
+                // Warmup using MAGMA. I prefer to use smalltest to warmup A-
                 // ==================================================================
-
-                lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
-                lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
-
                 magma_zhegvdx_2stage_m(opts.ngpu, itype, jobz, range, uplo,
-                                       N, h_R, N, h_S, N, vl, vu, il, iu, &m1, w1,
+                                       N, h_A, N, h_B, N, vl, vu, il, iu, &m1, w1,
                                        h_work, lwork,
 #if defined(PRECISION_z) || defined(PRECISION_c)
                                        rwork, lrwork,
 #endif
                                        iwork, liwork,
                                        &info);
+                lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_Ainit, &N, h_A, &N );
+                lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_Binit, &N, h_B, &N );
             }
 
             // ===================================================================
             // Performs operation using MAGMA
             // ===================================================================
 
-            lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
-            lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
-
             start = get_current_time();
             magma_zhegvdx_2stage_m(opts.ngpu, itype, jobz, range, uplo,
-                                   N, h_R, N, h_S, N, vl, vu, il, iu, &m1, w1,
+                                   N, h_A, N, h_B, N, vl, vu, il, iu, &m1, w1,
                                    h_work, lwork,
 #if defined(PRECISION_z) || defined(PRECISION_c)
                                    rwork, lrwork,
@@ -196,29 +202,29 @@ int main( int argc, char** argv)
                 double *rwork = h_work;
 #endif
                 result = 1.;
-                result /= lapackf77_zlanhe("1",&uplo, &N, h_A, &N, rwork);
-                result /= lapackf77_zlange("1",&N , &m1, h_R, &N, rwork);
+                result /= lapackf77_zlanhe("1",&uplo, &N, h_Ainit, &N, rwork);
+                result /= lapackf77_zlange("1",&N , &m1, h_A, &N, rwork);
 
                 if (itype == 1){
-                    blasf77_zhemm("L", &uplo, &N, &m1, &c_one, h_A, &N, h_R, &N, &c_zero, h_work, &N);
+                    blasf77_zhemm("L", &uplo, &N, &m1, &c_one, h_Ainit, &N, h_A, &N, &c_zero, h_work, &N);
                     for(int i=0; i<m1; ++i)
-                        blasf77_zdscal(&N, &w1[i], &h_R[i*N], &ione);
-                    blasf77_zhemm("L", &uplo, &N, &m1, &c_neg_one, h_B, &N, h_R, &N, &c_one, h_work, &N);
+                        blasf77_zdscal(&N, &w1[i], &h_A[i*N], &ione);
+                    blasf77_zhemm("L", &uplo, &N, &m1, &c_neg_one, h_Binit, &N, h_A, &N, &c_one, h_work, &N);
                     result *= lapackf77_zlange("1", &N, &m1, h_work, &N, rwork)/N;
                 }
                 else if (itype == 2){
-                    blasf77_zhemm("L", &uplo, &N, &m1, &c_one, h_B, &N, h_R, &N, &c_zero, h_work, &N);
+                    blasf77_zhemm("L", &uplo, &N, &m1, &c_one, h_Binit, &N, h_A, &N, &c_zero, h_work, &N);
                     for(int i=0; i<m1; ++i)
-                        blasf77_zdscal(&N, &w1[i], &h_R[i*N], &ione);
-                    blasf77_zhemm("L", &uplo, &N, &m1, &c_one, h_A, &N, h_work, &N, &c_neg_one, h_R, &N);
-                    result *= lapackf77_zlange("1", &N, &m1, h_R, &N, rwork)/N;
+                        blasf77_zdscal(&N, &w1[i], &h_A[i*N], &ione);
+                    blasf77_zhemm("L", &uplo, &N, &m1, &c_one, h_Ainit, &N, h_work, &N, &c_neg_one, h_A, &N);
+                    result *= lapackf77_zlange("1", &N, &m1, h_A, &N, rwork)/N;
                 }
                 else if (itype == 3){
-                    blasf77_zhemm("L", &uplo, &N, &m1, &c_one, h_A, &N, h_R, &N, &c_zero, h_work, &N);
+                    blasf77_zhemm("L", &uplo, &N, &m1, &c_one, h_Ainit, &N, h_A, &N, &c_zero, h_work, &N);
                     for(int i=0; i<m1; ++i)
-                        blasf77_zdscal(&N, &w1[i], &h_R[i*N], &ione);
-                    blasf77_zhemm("L", &uplo, &N, &m1, &c_one, h_B, &N, h_work, &N, &c_neg_one, h_R, &N);
-                    result *= lapackf77_zlange("1", &N, &m1, h_R, &N, rwork)/N;
+                        blasf77_zdscal(&N, &w1[i], &h_A[i*N], &ione);
+                    blasf77_zhemm("L", &uplo, &N, &m1, &c_one, h_Binit, &N, h_work, &N, &c_neg_one, h_A, &N);
+                    result *= lapackf77_zlange("1", &N, &m1, h_A, &N, rwork)/N;
                 }
             }
 
@@ -237,16 +243,18 @@ int main( int argc, char** argv)
                     printf("(1)    | B A Z - Z D | / (|A| |Z| N) = %e\n", result);
             }
 
-            TESTING_FREE(       h_A);
-            TESTING_FREE(       h_B);
+            TESTING_HOSTFREE(       h_A);
+            TESTING_HOSTFREE(       h_B);
             TESTING_FREE(        w1);
 #if defined(PRECISION_z) || defined(PRECISION_c)
             TESTING_HOSTFREE( rwork);
 #endif
             TESTING_FREE(     iwork);
             TESTING_HOSTFREE(h_work);
-            TESTING_HOSTFREE(   h_R);
-            TESTING_HOSTFREE(   h_S);
+            if((opts.warmup)||( checkres )){
+                TESTING_HOSTFREE(   h_Ainit);
+                TESTING_HOSTFREE(   h_Binit);
+            }
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );
