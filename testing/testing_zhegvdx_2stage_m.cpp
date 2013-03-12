@@ -111,14 +111,14 @@ int main( int argc, char** argv)
             liwork = 3 + 5*N;
 
 
-            magma_int_t NB = 96;//magma_bulge_get_nb(N);
-            magma_int_t sizvblg = magma_zbulge_get_lq2(N);        
-            magma_int_t siz = max(sizvblg,n2)+2*(N*NB+N)+24*N; 
+            //magma_int_t NB = 96;//magma_bulge_get_nb(N);
+            //magma_int_t sizvblg = magma_zbulge_get_lq2(N);        
+            //magma_int_t siz = max(sizvblg,n2)+2*(N*NB+N)+24*N; 
             /* Allocate host memory for the matrix */
-            TESTING_HOSTALLOC(   h_A, cuDoubleComplex, siz);
-            TESTING_HOSTALLOC(   h_B, cuDoubleComplex, siz);
+            TESTING_HOSTALLOC(   h_A, cuDoubleComplex, n2);
+            TESTING_HOSTALLOC(   h_B, cuDoubleComplex, n2);
             TESTING_MALLOC(    w1, double         ,  N);
-            TESTING_HOSTALLOC(h_work, cuDoubleComplex,  128);
+            TESTING_HOSTALLOC(h_work, cuDoubleComplex,  lwork);
 #if defined(PRECISION_z) || defined(PRECISION_c)
             TESTING_HOSTALLOC( rwork,          double, lrwork);
 #endif
@@ -136,8 +136,8 @@ int main( int argc, char** argv)
             }
 
             if((opts.warmup)||( checkres )){
-                TESTING_HOSTALLOC(h_Ainit, cuDoubleComplex, n2);
-                TESTING_HOSTALLOC(h_Binit, cuDoubleComplex, n2);
+                TESTING_MALLOC(h_Ainit, cuDoubleComplex, n2);
+                TESTING_MALLOC(h_Binit, cuDoubleComplex, n2);
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_Ainit, &N );
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_Binit, &N );
             }
@@ -252,8 +252,8 @@ int main( int argc, char** argv)
             TESTING_FREE(     iwork);
             TESTING_HOSTFREE(h_work);
             if((opts.warmup)||( checkres )){
-                TESTING_HOSTFREE(   h_Ainit);
-                TESTING_HOSTFREE(   h_Binit);
+                TESTING_FREE(   h_Ainit);
+                TESTING_FREE(   h_Binit);
             }
         }
         if ( opts.niter > 1 ) {
