@@ -8,8 +8,6 @@
 
 include $(MAGMA_DIR)/make.inc
 
-OPTS += -DHAVE_CUBLAS
-
 #
 # Set default values if they are not set in make.inc
 #
@@ -35,15 +33,15 @@ ifeq (${GPU_TARGET}, Tesla)
 	NVOPTS += -DGPUSHMEM=130 -arch sm_13 \
 	          -gencode arch=compute_13,code=compute_13 \
 	          -gencode arch=compute_10,code=compute_10
-	OPTS   += -DGPUSHMEM=130
+	OPTS   += -DGPUSHMEM=130 -DHAVE_CUBLAS
 	LDOPTS += -DGPUSHMEM=130
 else ifeq (${GPU_TARGET}, Fermi)
 	NVOPTS += -DGPUSHMEM=200 -arch sm_20
-	OPTS   += -DGPUSHMEM=200
+	OPTS   += -DGPUSHMEM=200 -DHAVE_CUBLAS
 	LDOPTS += -DGPUSHMEM=200
 else ifeq (${GPU_TARGET}, Kepler)
         NVOPTS += -DGPUSHMEM=300 -arch sm_35
-	OPTS   += -DGPUSHMEM=300
+	OPTS   += -DGPUSHMEM=300 -DHAVE_CUBLAS
         LDOPTS += -DGPUSHMEM=300
 else
 $(error GPU_TARGET, currently ${GPU_TARGET}, must be one of Tesla, Fermi, or Kepler. Please edit your make.inc file)
@@ -68,11 +66,16 @@ PTREXEC = $(MAGMA_DIR)/control/sizeptr
 PTRSIZE = $(shell $(PTREXEC))
 PTROPT  = -Dmagma_devptr_t="integer(kind=$(PTRSIZE))"
 
+$(PTREXEC): $(PTRFILE)
+	$(CC) $(OPTS) -o $@ $<
+
 FOPTS += $(PTROPT)
 
 #
 # Rules to compile object files
 #
+.SUFFIXES:
+
 %.o: %.cpp
 	$(CC) $(OPTS) $(INC) -c $< -o $@
 

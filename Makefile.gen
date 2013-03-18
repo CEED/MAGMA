@@ -18,14 +18,21 @@ cleanmkgen:
 	find . -name  Makefile.src -delete
 
 generation:
+	@echo ======================================== include
 	(cd $(MAGMA_DIR)/include        && $(MAKE) generate )
+	@echo ======================================== control
 	(cd $(MAGMA_DIR)/control        && $(MAKE) generate )
+	@echo ======================================== src
 	(cd $(MAGMA_DIR)/src            && $(MAKE) generate )
+	@echo ======================================== interface
 	(cd $(MAGMA_DIR)/interface_cuda && $(MAKE) generate )
+	@echo ======================================== magmablas
 	(cd $(MAGMA_DIR)/magmablas      && $(MAKE) generate )
+	@echo ======================================== testing
 	(cd $(MAGMA_DIR)/testing        && $(MAKE) generate )
 
 headers:
+	@echo ======================================== include
 	( cd include && $(MAKE) )
 
 libmagma:     headers
@@ -42,6 +49,7 @@ libmagma_interface: headers
 
 # first line creates file, rest append to file
 Makefile.src: $(CODEGEN) Makefile
+	@echo "--- Generate ${PWD}/Makefile"
 	echo "CHDR = \\"                               >  $@
 	$(PYTHON) $(CODEGEN) -o -p "c"    -f "$(ZHDR)" >> $@
 	echo                                           >> $@

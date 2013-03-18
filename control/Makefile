@@ -15,13 +15,13 @@ ZSRC := \
 	pthread_barrier.cpp	\
 
 ifeq ($(PGIFORTRAN), 0)
-ZSRC := $(ZSRC) 		\
+ZSRC += \
 	magma_zf77.cpp		\
 	magma_param.f90		\
 	magma_zfortran.F90	\
 	magma.f90
 else
-ZSRC := $(ZSRC) 		\
+ZSRC += \
 	magma_zf77pgi.cpp
 endif
 
@@ -33,29 +33,26 @@ ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
 	get_nb_tesla.cpp	\
 	get_nb_fermi.cpp	\
 	get_nb_kepler.cpp       \
-	timer.cpp	\
-	trace.cpp	\
-	strlcpy.cpp	\
-	bulge_auxiliary.cpp \
-	affinity.cpp \
-	connection_mgpu.cpp
+	timer.cpp		\
+	trace.cpp		\
+	strlcpy.cpp		\
+	bulge_auxiliary.cpp	\
+	affinity.cpp		\
+	connection_mgpu.cpp	\
 
 ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f90=.o)
 ALLOBJ := $(ALLOBJ:.F90=.o)
 
-all: $(LIBMAGMA) $(PTREXEC)
+all: $(LIBMAGMA)
 
 $(LIBMAGMA): $(ALLOBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
 	cp *.mod ../include
 
-$(PTREXEC): $(PTRFILE)
-	$(CC) $(OPTS) -o $@ $<
-
 clean:
-	rm -f *.cu_o *.o *~ *.linkinfo *.mod include/*.mod sizeptr
+	rm -f *.cu_o *.o *~ *.linkinfo *.mod ../include/*.mod sizeptr
 
 cleanall: clean
 	rm -f *.a

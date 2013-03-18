@@ -8,33 +8,39 @@
 
 MAGMA_DIR = .
 include ./Makefile.internal
+-include Makefile.local
+
+.PHONY: lib
 
 all: lib test
 
 lib: libmagma libmagmablas
 
-# add dependencies so src, control, and interface_cuda directories
-# don't all update libmagma.a at the same time
-libmagma: libmagma_control libmagma_interface
+# libmagmablas is not a true dependency, but adding it forces parallel make
+# to do one directory at a time, making output less confusing.
+libmagma: libmagmablas
+	@echo ======================================== src
 	( cd src            && $(MAKE) )
-
-libmagma_control:
+	@echo ======================================== control
 	( cd control        && $(MAKE) )
-
-libmagma_interface: libmagma_control
+	@echo ======================================== interface
 	( cd interface_cuda && $(MAKE) )
 
 libmagmablas:
+	@echo ======================================== magmablas
 	( cd magmablas      && $(MAKE) )
 
 libquark:
+	@echo ======================================== quark
 	( cd quark          && $(MAKE) )
 
 lapacktest:
+	@echo ======================================== lapacktest
 	( cd testing/matgen && $(MAKE) )
 	( cd testing/lin    && $(MAKE) )
 
 test: lib
+	@echo ======================================== test
 	( cd testing        && $(MAKE) )
 
 clean:
