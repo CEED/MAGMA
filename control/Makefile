@@ -29,10 +29,8 @@ endif
 -include Makefile.src
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
-	auxiliary.cpp	\
-	get_nb_tesla.cpp	\
-	get_nb_fermi.cpp	\
-	get_nb_kepler.cpp       \
+	auxiliary.cpp		\
+	get_nb.cpp		\
 	timer.cpp		\
 	trace.cpp		\
 	strlcpy.cpp		\
