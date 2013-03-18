@@ -21,18 +21,18 @@ extern "C" {
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA Auxiliary functions to get the NB used
 */
-int magma_get_zpotrf_nb(int m);
-int magma_get_zgetrf_nb(int m);
-int magma_get_zgetri_nb(int m);
-int magma_get_zgeqp3_nb(int m);
-int magma_get_zgeqrf_nb(int m);
-int magma_get_zgeqlf_nb(int m);
-int magma_get_zgehrd_nb(int m);
-int magma_get_zhetrd_nb(int m);
-int magma_get_zgelqf_nb(int m);
-int magma_get_zgebrd_nb(int m);
-int magma_get_zhegst_nb(int m);
-int magma_get_zgesvd_nb(int m);
+magma_int_t magma_get_zpotrf_nb( magma_int_t m );
+magma_int_t magma_get_zgetrf_nb( magma_int_t m );
+magma_int_t magma_get_zgetri_nb( magma_int_t m );
+magma_int_t magma_get_zgeqp3_nb( magma_int_t m );
+magma_int_t magma_get_zgeqrf_nb( magma_int_t m );
+magma_int_t magma_get_zgeqlf_nb( magma_int_t m );
+magma_int_t magma_get_zgehrd_nb( magma_int_t m );
+magma_int_t magma_get_zhetrd_nb( magma_int_t m );
+magma_int_t magma_get_zgelqf_nb( magma_int_t m );
+magma_int_t magma_get_zgebrd_nb( magma_int_t m );
+magma_int_t magma_get_zhegst_nb( magma_int_t m );
+magma_int_t magma_get_zgesvd_nb( magma_int_t m );
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA function definitions / Data on CPU
