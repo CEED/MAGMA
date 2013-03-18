@@ -24,12 +24,9 @@
 #endif
 // === End defining what BLAS to use ======================================
 
-#define A(i, j)  (a   +(j)*lda  + (i))
-#define dA(i, j) (work+(j)*ldda + (i))
-
 extern "C" magma_int_t
 magma_ztrtri(char uplo, char diag, magma_int_t n,
-              cuDoubleComplex *a, magma_int_t lda, magma_int_t *info)
+              cuDoubleComplex *A, magma_int_t lda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -83,6 +80,9 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 
     ===================================================================== */
 
+    #define  A(i, j) ( A + (i) + (j)*lda )
+    #define dA(i, j) (dA + (i) + (j)*ldda)
+
     /* Local variables */
     char uplo_[2] = {uplo, 0};
     char diag_[2] = {diag, 0};
@@ -90,7 +90,7 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
     cuDoubleComplex c_zero     = MAGMA_Z_ZERO;
     cuDoubleComplex c_one      = MAGMA_Z_ONE;
     cuDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *work;
+    cuDoubleComplex *dA;
 
     int upper  = lapackf77_lsame(uplo_, "U");
     int nounit = lapackf77_lsame(diag_, "N");
@@ -129,7 +129,7 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
     nb = magma_get_zpotrf_nb(n);
 
     ldda = ((n+31)/32)*32;
-    if (MAGMA_SUCCESS != magma_zmalloc( &work, (n)*ldda )) {
+    if (MAGMA_SUCCESS != magma_zmalloc( &dA, (n)*ldda )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
@@ -139,7 +139,7 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
     magma_queue_create( &stream[1] );
 
     if (nb <= 1 || nb >= n)
-        lapackf77_ztrtri(uplo_, diag_, &n, a, &lda, info);
+        lapackf77_ztrtri(uplo_, diag_, &n, A, &lda, info);
     else {
         if (upper) {
             /* Compute inverse of upper triangular matrix */
@@ -225,7 +225,7 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 
     magma_queue_destroy( stream[0] );
     magma_queue_destroy( stream[1] );
-    magma_free( work );
+    magma_free( dA );
 
     return *info;
 }
