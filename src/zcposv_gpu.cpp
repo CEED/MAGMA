@@ -80,7 +80,7 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    A       (input or input/output) COMPLEX_16 array, dimension (LDA,N)
+    dA      (input or input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N)
             On entry, the symmetric matrix A.  If UPLO = 'U', the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
@@ -92,28 +92,28 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
             (INFO.EQ.0 and ITER.GE.0, see description below), then A is
             unchanged, if double factorization has been used
             (INFO.EQ.0 and ITER.LT.0, see description below), then the
-            array A contains the factor U or L from the Cholesky
+            array dA contains the factor U or L from the Cholesky
             factorization A = U**T*U or A = L*L**T.
 
-    LDA     (input) INTEGER
-            The leading dimension of the array A.  LDA >= max(1,N).
+    LDDA    (input) INTEGER
+            The leading dimension of the array dA.  LDDA >= max(1,N).
 
-    B       (input) COMPLEX_16 array, dimension (LDB,NRHS)
+    dB      (input) COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
             The N-by-NRHS right hand side matrix B.
 
-    LDB     (input) INTEGER
-            The leading dimension of the array B.  LDB >= max(1,N).
+    LDDB    (input) INTEGER
+            The leading dimension of the array dB.  LDDB >= max(1,N).
 
-    X       (output) COMPLEX_16 array, dimension (LDX,NRHS)
+    dX      (output) COMPLEX_16 array on the GPU, dimension (LDDX,NRHS)
             If INFO = 0, the N-by-NRHS solution matrix X.
 
-    LDX     (input) INTEGER
-            The leading dimension of the array X.  LDX >= max(1,N).
+    LDDX    (input) INTEGER
+            The leading dimension of the array dX.  LDDX >= max(1,N).
 
-    dworkd  (workspace) COMPLEX_16 array, dimension (N*NRHS)
+    dworkd  (workspace) COMPLEX_16 array on the GPU, dimension (N*NRHS)
             This array is used to hold the residual vectors.
 
-    dworks  (workspace) COMPLEX array, dimension (N*(N+NRHS))
+    dworks  (workspace) COMPLEX array on the GPU, dimension (N*(N+NRHS))
             This array is used to use the complex single precision matrix 
             and the right-hand sides or solutions in single precision.
 
@@ -125,8 +125,7 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
                  -2 : narrowing the precision induced an overflow,
                       the routine fell back to full precision
                  -3 : failure of SPOTRF
-                 -31: stop the iterative refinement after the 30th
-                      iterations
+                 -31: stop the iterative refinement after the 30th iteration
             > 0: iterative refinement has been successfully used.
                  Returns the number of iterations
 

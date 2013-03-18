@@ -75,17 +75,17 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    dA      (input or input/output) COMPLEX_16 array, dimension (ldda,N)
+    dA      (input or input/output) COMPLEX_16 array on the GPU, dimension (ldda,N)
             On entry, the N-by-N coefficient matrix A.
             On exit, if iterative refinement has been successfully used
             (info.EQ.0 and ITER.GE.0, see description below), A is
             unchanged. If double precision factorization has been used
             (info.EQ.0 and ITER.LT.0, see description below), then the
-            array A contains the factors L and U from the factorization
+            array dA contains the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
 
     ldda    (input) INTEGER
-            The leading dimension of the array A.  ldda >= max(1,N).
+            The leading dimension of the array dA.  ldda >= max(1,N).
 
     IPIV    (output) INTEGER array, dimension (N)
             The pivot indices that define the permutation matrix P;
@@ -98,22 +98,22 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
             The pivot indices; for 1 <= i <= min(M,N), row i of the
             matrix was moved to row IPIV(i).
 
-    dB      (input) COMPLEX_16 array, dimension (lddb,NRHS)
+    dB      (input) COMPLEX_16 array on the GPU, dimension (lddb,NRHS)
             The N-by-NRHS right hand side matrix B.
 
     lddb    (input) INTEGER
-            The leading dimension of the array B.  lddb >= max(1,N).
+            The leading dimension of the array dB.  lddb >= max(1,N).
 
-    dX      (output) COMPLEX_16 array, dimension (lddx,NRHS)
+    dX      (output) COMPLEX_16 array on the GPU, dimension (lddx,NRHS)
             If info = 0, the N-by-NRHS solution matrix X.
 
     lddx    (input) INTEGER
-            The leading dimension of the array X.  lddx >= max(1,N).
+            The leading dimension of the array dX.  lddx >= max(1,N).
 
-    dworkd  (workspace) COMPLEX_16 array, dimension (N*NRHS)
+    dworkd  (workspace) COMPLEX_16 array on the GPU, dimension (N*NRHS)
             This array is used to hold the residual vectors.
 
-    dworks  (workspace) COMPLEX array, dimension (N*(N+NRHS))
+    dworks  (workspace) COMPLEX array on the GPU, dimension (N*(N+NRHS))
             This array is used to store the single precision matrix and the
             right-hand sides or solutions in single precision.
 
@@ -125,8 +125,7 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
                  -2 : narrowing the precision induced an overflow,
                       the routine fell back to full precision
                  -3 : failure of SGETRF
-                 -31: stop the iterative refinement after the 30th
-                      iterations
+                 -31: stop the iterative refinement after the 30th iteration
             > 0: iterative refinement has been successfully used.
                  Returns the number of iterations
  

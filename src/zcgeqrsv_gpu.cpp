@@ -71,34 +71,34 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    A       (input or input/output) DOUBLE PRECISION array, dimension (ldda,N)
+    dA      (input or input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N)
             On entry, the M-by-N coefficient matrix A.
             On exit, if iterative refinement has been successfully used
             (info.EQ.0 and ITER.GE.0, see description below), A is
             unchanged. If double precision factorization has been used
             (info.EQ.0 and ITER.LT.0, see description below), then the
-            array A contains the QR factorization of A as returned by
+            array dA contains the QR factorization of A as returned by
             function DGEQRF_GPU.
 
-    ldda     (input) INTEGER
-            The leading dimension of the array A.  ldda >= max(1,M).
+    LDDA    (input) INTEGER
+            The leading dimension of the array dA.  LDDA >= max(1,M).
 
-    B       (input) DOUBLE PRECISION array, dimension (LDB,NRHS)
+    dB      (input) COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
             The M-by-NRHS right hand side matrix B.
 
-    LDB     (input) INTEGER
-            The leading dimension of the array B.  LDB >= max(1,M).
+    LDDB    (input) INTEGER
+            The leading dimension of the array dB.  LDDB >= max(1,M).
 
-    X       (output) DOUBLE PRECISION array, dimension (LDX,NRHS)
+    dX      (output) COMPLEX_16 array on the GPU, dimension (LDDX,NRHS)
             If info = 0, the N-by-NRHS solution matrix X.
 
-    LDX     (input) INTEGER
-            The leading dimension of the array X.  LDX >= max(1,N).
+    LDDX    (input) INTEGER
+            The leading dimension of the array dX.  LDDX >= max(1,N).
 
-    WORK    (workspace) DOUBLE PRECISION array, dimension (N*NRHS)
+    WORK    (workspace) COMPLEX_16 array, dimension (N*NRHS)
             This array is used to hold the residual vectors.
 
-    SWORK   (workspace) REAL array, dimension (M*(N+NRHS))
+    SWORK   (workspace) COMPLEX array, dimension (M*(N+NRHS))
             This array is used to store the single precision matrix and the
             right-hand sides or solutions in single precision.
 
@@ -110,55 +110,13 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
                  -2 : narrowing the precision induced an overflow,
                       the routine fell back to full precision
                  -3 : failure of SGETRF
-                 -31: stop the iterative refinement after the 30th
-                      iterations
+                 -31: stop the iterative refinement after the 30th iteration
             > 0: iterative refinement has been successfully used.
                  Returns the number of iterations
  
-    info    (output) INTEGER
+    INFO    (output) INTEGER
             = 0:  successful exit
             < 0:  if info = -i, the i-th argument had an illegal value
-
-    TAU     (output) REAL array, dimension (N)
-            On exit, TAU(i) contains the scalar factor of the elementary
-            reflector H(i), as returned by magma_cgeqrf_gpu.
-
-    LWORK   (input) INTEGER   
-            The dimension of the array H_WORK.  LWORK >= (M+N+NB)*NB,   
-            where NB can be obtained through magma_get_sgeqrf_nb(M).
-
-    H_WORK  (workspace/output) REAL array, dimension (MAX(1,LWORK))   
-            Higher performance is achieved if H_WORK is in pinned memory, e.g.
-            allocated using magma_malloc_pinned.
-
-    D_WORK  (workspace/output)  REAL array on the GPU, dimension 2*N*NB,
-            where NB can be obtained through magma_get_sgeqrf_nb(M).
-            It starts with NB*NB blocks that store the triangular T 
-            matrices, followed by the NB*NB blocks of the diagonal 
-            inverses for the R matrix.
-
-    TAU_D   (output) DOUBLE REAL array, dimension (N)
-            On exit, if the matrix had to be factored in double precision,
-            TAU(i) contains the scalar factor of the elementary
-            reflector H(i), as returned by magma_zgeqrf_gpu.
-
-    LWORK_D (input) INTEGER   
-            The dimension of the array H_WORK_D. LWORK_D >= (M+N+NB)*NB,   
-            where NB can be obtained through magma_get_dgeqrf_nb(M).
-
-    H_WORK_D (workspace/output) DOUBLE REAL array, dimension (MAX(1,LWORK_D))
-            This memory is unattached if the iterative refinement worked, 
-            otherwise it is used as workspace to factor the matrix in
-            double precision. Higher performance is achieved if H_WORK_D is 
-            in pinned memory, e.g. allocated using magma_malloc_pinned. 
-
-    D_WORK_D (workspace/output) DOUBLE REAL array on the GPU, dimension 2*N*NB,
-            where NB can be obtained through magma_get_dgeqrf_nb(M).
-            This memory is unattached if the iterative refinement worked, 
-            otherwise it is used as workspace to factor the matrix in
-            double precision. It starts with NB*NB blocks that store the 
-            triangular T matrices, followed by the NB*NB blocks of the 
-            diagonal inverses for the R matrix.
 
     =====================================================================    */
 

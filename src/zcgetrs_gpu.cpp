@@ -37,7 +37,7 @@ magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
     ZCGETRS solves a system of linear equations   
        A * X = B  or  A' * X = B   
     with a general N-by-N matrix A using the LU factorization computed   
-    by MAGMA_CGETRF_GPU. B and X are in COMPLEX_16, and A in in COMPLEX. 
+    by MAGMA_CGETRF_GPU. B and X are in COMPLEX_16, and A is in COMPLEX. 
     This routine is used in the mixed precision iterative solver 
     magma_zcgesv.
 
