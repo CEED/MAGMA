@@ -32,13 +32,14 @@ EXTS = ['.c', '.cpp', '.h', '.hpp', '.f', '.jdf', '.f90', '.F90', '.f77', '.F77'
 
 def check_gen(file, work, rex):
     """Reads the file and determines if the file needs generation."""
-    fd = open(path.realpath(file), 'r')
+    fd = open( file, 'r')
     lines = fd.readlines()
     fd.close()
     for line in lines:
         m = rex.match(line)
-        if m is None: continue
-        work.append((file, m.groups(), ''.join(lines)))
+        if m:
+            work.append((file, m.groups(), ''.join(lines)))
+            break
 
 
 def grep(string, list):
@@ -58,12 +59,6 @@ def valid_extension(file):
         if file.endswith(ext):
             return True
     return False
-
-
-def relpath(p):
-    """Get the relative path of a file."""
-    p = path.realpath(p)
-    return p.replace(path.realpath('.')+'/', '')
 
 
 class Conversion:
@@ -102,7 +97,7 @@ class Conversion:
         if file is None: return
         self.content = content
         #file = path.realpath(file)
-        rel = relpath(file)
+        rel = path.relpath(file)
         self.file = list(path.split(file))
         self.date = path.getmtime(file)
         if sys.platform!="win32" and path.samefile( path.join( self.file[0], self.file[1] ), sys.argv[0]):
@@ -138,7 +133,7 @@ class Conversion:
         self.copy = []
         self.converted = []
         load = False
-        if self.debug: print '|'.join(self.types), self.precision, relpath(path.join(self.file[0], self.file[1]))
+        if self.debug: print '|'.join(self.types), self.precision, path.relpath(path.join(self.file[0], self.file[1]))
         for precision in self.precisions:
             # For each destination precision, make the appropriate changes to the file name/data.
             new_file = self.convert(self.file[1], precision)
@@ -157,16 +152,16 @@ class Conversion:
                         copy = True
                 # Where the destination file will reside.
                 conversion = path.join(prefix, new_file)
-                file_out = relpath(conversion)
+                file_out = path.relpath(conversion)
                 if self.make:
                     # If in GNU Make mode, write the rule to create the file.
-                    file_in = relpath(path.join(self.file[0], self.file[1]))
+                    file_in = path.relpath(path.join(self.file[0], self.file[1]))
                     print file_out+':', file_in
-                    print "\t$(PYTHON)", path.realpath(sys.argv[0]), makeprefix, '-p', precision, "--file", file_in
+                    print "\t$(PYTHON)", sys.argv[0], makeprefix, '-p', precision, "--file", file_in
                 self.names.append(new_file)
                 self.files_out.append(file_out)
                 self.dependencies.append( (path.join(self.file[0], self.file[1]), precision, file_out) )
-                if self.debug: print relpath(conversion), ':',
+                if self.debug: print path.relpath(conversion), ':',
                 try:
                     # Try to emulate Make like time based dependencies.
                     date = path.getmtime(conversion)
