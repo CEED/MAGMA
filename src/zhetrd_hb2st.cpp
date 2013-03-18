@@ -163,7 +163,7 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
     VBLKSIZ (input) INTEGER
             The size of the block of householder vectors applied at once.
 
-    A       (input/workspace) COMPLEX*16 array, dimension (LDA, N)
+    A       (input/workspace) COMPLEX_16 array, dimension (LDA, N)
             On entry the band matrix stored in the following way:
 
     LDA     (input) INTEGER
@@ -177,7 +177,7 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
             The off-diagonal elements of the tridiagonal matrix T:
             E(i) = A(i,i+1) if UPLO = 'U', E(i) = A(i+1,i) if UPLO = 'L'.
 
-    V       (output) COMPLEX*16 array, dimension (BLKCNT, LDV, VBLKSIZ)
+    V       (output) COMPLEX_16 array, dimension (BLKCNT, LDV, VBLKSIZ)
             On exit it contains the blocks of householder reflectors
             BLKCNT is the number of block and it is returned by the funtion MAGMA_BULGE_GET_BLKCNT.
 
@@ -185,14 +185,14 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
             The leading dimension of V.
             LDV > NB + VBLKSIZ + 1
 
-    TAU     (output) COMPLEX*16 dimension(BLKCNT, VBLKSIZ)
+    TAU     (output) COMPLEX_16 dimension(BLKCNT, VBLKSIZ)
             ???
 
     COMPT   (input) INTEGER
             if COMPT = 0 T is not computed
             if COMPT = 1 T is computed
 
-    T       (output) COMPLEX*16 dimension(LDT *)
+    T       (output) COMPLEX_16 dimension(LDT *)
             if COMPT = 1 on exit contains the matrices T needed for Q2
             if COMPT = 0 T is not referenced
 

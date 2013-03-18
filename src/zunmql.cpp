@@ -65,7 +65,7 @@ magma_zunmql(const char side, const char trans,
             If SIDE = 'L', M >= K >= 0;   
             if SIDE = 'R', N >= K >= 0.   
 
-    A       (input) COMPLEX*16 array, dimension (LDA,K)   
+    A       (input) COMPLEX_16 array, dimension (LDA,K)   
             The i-th column must contain the vector which defines the   
             elementary reflector H(i), for i = 1,2,...,k, as returned by   
             ZGEQLF in the last k columns of its array argument A.   
@@ -76,18 +76,18 @@ magma_zunmql(const char side, const char trans,
             If SIDE = 'L', LDA >= max(1,M);   
             if SIDE = 'R', LDA >= max(1,N).   
 
-    TAU     (input) COMPLEX*16 array, dimension (K)   
+    TAU     (input) COMPLEX_16 array, dimension (K)   
             TAU(i) must contain the scalar factor of the elementary   
             reflector H(i), as returned by ZGEQLF.   
 
-    C       (input/output) COMPLEX*16 array, dimension (LDC,N)   
+    C       (input/output) COMPLEX_16 array, dimension (LDC,N)   
             On entry, the M-by-N matrix C.   
             On exit, C is overwritten by Q*C or Q**H*C or C*Q**H or C*Q.   
 
     LDC     (input) INTEGER   
             The leading dimension of the array C. LDC >= max(1,M).   
 
-    WORK    (workspace/output) COMPLEX*16 array, dimension (MAX(1,LWORK))   
+    WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   

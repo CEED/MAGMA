@@ -96,7 +96,7 @@ magma_zhegvr(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
     N       (input) INTEGER   
             The order of the matrices A and B.  N >= 0.   
 
-    A       (input/output) COMPLEX*16 array, dimension (LDA, N)   
+    A       (input/output) COMPLEX_16 array, dimension (LDA, N)   
             On entry, the Hermitian matrix A.  If UPLO = 'U', the   
             leading N-by-N upper triangular part of A contains the   
             upper triangular part of the matrix A.  If UPLO = 'L',   
@@ -115,7 +115,7 @@ magma_zhegvr(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
     LDA     (input) INTEGER   
             The leading dimension of the array A.  LDA >= max(1,N).   
 
-    B       (input/output) COMPLEX*16 array, dimension (LDB, N)   
+    B       (input/output) COMPLEX_16 array, dimension (LDB, N)   
             On entry, the Hermitian matrix B.  If UPLO = 'U', the   
             leading N-by-N upper triangular part of B contains the   
             upper triangular part of the matrix B.  If UPLO = 'L',   
@@ -177,7 +177,7 @@ magma_zhegvr(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
     W       (output) DOUBLE PRECISION array, dimension (N)   
             If INFO = 0, the eigenvalues in ascending order.
  
-    Z       (output) COMPLEX*16 array, dimension (LDZ, max(1,M))   
+    Z       (output) COMPLEX_16 array, dimension (LDZ, max(1,M))   
             If JOBZ = 'V', then if INFO = 0, the first M columns of Z   
             contain the orthonormal eigenvectors of the matrix A   
             corresponding to the selected eigenvalues, with the i-th   
@@ -198,7 +198,7 @@ magma_zhegvr(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
             ISUPPZ( 2*i ).   
    ********* Implemented only for RANGE = 'A' or 'I' and IU - IL = N - 1 
 
-    WORK    (workspace/output) COMPLEX*16 array, dimension (LWORK)   
+    WORK    (workspace/output) COMPLEX_16 array, dimension (LWORK)   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   

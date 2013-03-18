@@ -61,55 +61,55 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
     NB      (input) INTEGER
             The blocking size.  NB >= 0.
 
-    hU      (input,output) DOUBLE COMPLEX array, dimension(LDHU, N), on cpu. 
+    hU      (input,output) COMPLEX_16 array, dimension(LDHU, N), on cpu. 
             On entry, the NB-by-N upper triangular tile hU.
             On exit, the content is incomplete. Shouldn't be used.
  
     LDHU    (input) INTEGER
             The leading dimension of the array hU.  LDHU >= max(1,NB).
  
-    dU      (input,output) DOUBLE COMPLEX array, dimension(LDDU, N), on gpu. 
+    dU      (input,output) COMPLEX_16 array, dimension(LDDU, N), on gpu. 
             On entry, the NB-by-N upper triangular tile dU identical to hU.
             On exit, the new factor U from the factorization.
  
     LDDU    (input) INTEGER
             The leading dimension of the array dU.  LDDU >= max(1,NB).
  
-    hA      (input,output) DOUBLE COMPLEX array, dimension(LDHA, N), on cpu.
+    hA      (input,output) COMPLEX_16 array, dimension(LDHA, N), on cpu.
             On entry, only the M-by-IB first panel needs to be identical to dA(1..M, 1..IB).
             On exit, the content is incomplete. Shouldn't be used.
  
     LDHA    (input) INTEGER
             The leading dimension of the array hA.  LDHA >= max(1,M).
  
-    dA      (input,output) DOUBLE COMPLEX array, dimension(LDDA, N) , on gpu.
+    dA      (input,output) COMPLEX_16 array, dimension(LDDA, N) , on gpu.
             On entry, the M-by-N tile to be factored.
             On exit, the factor L from the factorization
  
     LDDA    (input) INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,M).
  
-    hL      (output) DOUBLE COMPLEX array, dimension(LDHL, K), on vpu.
+    hL      (output) COMPLEX_16 array, dimension(LDHL, K), on vpu.
             On exit, contains in the upper part the IB-by-K lower triangular tile,
             and in the lower part IB-by-K the inverse of the top part.
  
     LDHL    (input) INTEGER
             The leading dimension of the array hL.  LDHL >= max(1,2*IB).
  
-    dL      (output) DOUBLE COMPLEX array, dimension(LDDL, K), on gpu.
+    dL      (output) COMPLEX_16 array, dimension(LDDL, K), on gpu.
             On exit, contains in the upper part the IB-by-K lower triangular tile,
             and in the lower part IB-by-K the inverse of the top part.
  
     LDDL    (input) INTEGER
             The leading dimension of the array dL.  LDDL >= max(1,2*IB).
  
-    hWORK   (output) DOUBLE COMPLEX array, dimension(LDHWORK, 2*IB), on cpu.
+    hWORK   (output) COMPLEX_16 array, dimension(LDHWORK, 2*IB), on cpu.
             Workspace.
 
     LDHWORK (input) INTEGER
             The leading dimension of the array hWORK.  LDHWORK >= max(NB, 1).
  
-    dWORK   (output) DOUBLE COMPLEX array, dimension(LDDWORK, 2*IB), on gpu.
+    dWORK   (output) COMPLEX_16 array, dimension(LDDWORK, 2*IB), on gpu.
             Workspace.
 
     LDDWORK (input) INTEGER

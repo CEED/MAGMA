@@ -62,7 +62,7 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
     KB      (output) INTEGER
             The number of columns actually factorized.
 
-    A       (input/output) COMPLEX*16 array, dimension (LDA,N)
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N)
             On entry, the M-by-N matrix A.
             On exit, block A(OFFSET+1:M,1:KB) is the triangular
             factor obtained and block A(1:OFFSET,1:N) has been
@@ -77,7 +77,7 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
             JPVT(I) = K <==> Column K of the full matrix A has been
             permuted into position I in AP.
 
-    TAU     (output) COMPLEX*16 array, dimension (KB)
+    TAU     (output) COMPLEX_16 array, dimension (KB)
             The scalar factors of the elementary reflectors.
 
     VN1     (input/output) DOUBLE PRECISION array, dimension (N)
@@ -86,10 +86,10 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
     VN2     (input/output) DOUBLE PRECISION array, dimension (N)
             The vector with the exact column norms.
 
-    AUXV    (input/output) COMPLEX*16 array, dimension (NB)
+    AUXV    (input/output) COMPLEX_16 array, dimension (NB)
             Auxiliar vector.
 
-    F       (input/output) COMPLEX*16 array, dimension (LDF,NB)
+    F       (input/output) COMPLEX_16 array, dimension (LDF,NB)
             Matrix F' = L*Y'*A.
 
     LDF     (input) INTEGER

@@ -92,7 +92,7 @@ magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
     N       (input) INTEGER   
             The order of the matrix A.  N >= 0.   
 
-    DA      (input/output) COMPLEX*16 array, dimension (LDDA, N)   
+    DA      (input/output) COMPLEX_16 array, dimension (LDDA, N)   
             On entry, the Hermitian matrix A.  If UPLO = 'U', the   
             leading N-by-N upper triangular part of A contains the   
             upper triangular part of the matrix A.  If UPLO = 'L',   
@@ -152,7 +152,7 @@ magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
             The first M elements contain the selected eigenvalues in   
             ascending order.   
 
-    DZ      (output) COMPLEX*16 array, dimension (LDDZ, max(1,M))   
+    DZ      (output) COMPLEX_16 array, dimension (LDDZ, max(1,M))   
             If JOBZ = 'V', then if INFO = 0, the first M columns of Z   
             contain the orthonormal eigenvectors of the matrix A   
             corresponding to the selected eigenvalues, with the i-th   
@@ -185,7 +185,7 @@ magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
             The leading dimension of the array DZ.  LDWZ >= 1, and if   
             JOBZ = 'V', LDWZ >= max(1,N). 
    
-    WORK    (workspace/output) COMPLEX*16 array, dimension (LWORK)   
+    WORK    (workspace/output) COMPLEX_16 array, dimension (LWORK)   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   

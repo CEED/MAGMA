@@ -58,7 +58,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
    N       (input) INTEGER
            The order of the matrices A and B.  N >= 0.
    
-   DA      (device input/output) COMPLEX*16 array, dimension (LDA,N)
+   DA      (device input/output) COMPLEX_16 array, dimension (LDA,N)
            On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
            N-by-N upper triangular part of A contains the upper
            triangular part of the matrix A, and the strictly lower
@@ -73,7 +73,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
    LDDA    (input) INTEGER
            The leading dimension of the array A.  LDA >= max(1,N).
    
-   DB      (device input) COMPLEX*16 array, dimension (LDB,N)
+   DB      (device input) COMPLEX_16 array, dimension (LDB,N)
            The triangular factor from the Cholesky factorization of B,
            as returned by ZPOTRF.
    

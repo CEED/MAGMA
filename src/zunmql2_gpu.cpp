@@ -69,7 +69,7 @@ magma_zunmql2_gpu(const char side, const char trans,
             If SIDE = 'L', M >= K >= 0;   
             if SIDE = 'R', N >= K >= 0.   
 
-    DA      (input) COMPLEX*16 array, dimension (LDA,K)   
+    DA      (input) COMPLEX_16 array, dimension (LDA,K)   
             The i-th column must contain the vector which defines the   
             elementary reflector H(i), for i = 1,2,...,k, as returned by   
             ZGEQLF in the last k columns of its array argument A.   
@@ -81,7 +81,7 @@ magma_zunmql2_gpu(const char side, const char trans,
             The leading dimension of the array DA.   
             LDDA >= max(1,M) if SIDE = 'L'; LDDA >= max(1,N) if SIDE = 'R'.  
 
-    TAU     (input) COMPLEX*16 array, dimension (K)   
+    TAU     (input) COMPLEX_16 array, dimension (K)   
             TAU(i) must contain the scalar factor of the elementary   
             reflector H(i), as returned by ZGEQLF.   
 

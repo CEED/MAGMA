@@ -65,17 +65,17 @@ magma_zgeev(
     N       (input) INTEGER
             The order of the matrix A. N >= 0.
 
-    A       (input/output) COMPLEX*16 array, dimension (LDA,N)
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N)
             On entry, the N-by-N matrix A.
             On exit, A has been overwritten.
 
     LDA     (input) INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
 
-    W       (output) COMPLEX*16 array, dimension (N)
+    W       (output) COMPLEX_16 array, dimension (N)
             W contains the computed eigenvalues.
 
-    VL      (output) COMPLEX*16 array, dimension (LDVL,N)
+    VL      (output) COMPLEX_16 array, dimension (LDVL,N)
             If JOBVL = 'V', the left eigenvectors u(j) are stored one
             after another in the columns of VL, in the same order
             as their eigenvalues.
@@ -86,7 +86,7 @@ magma_zgeev(
             The leading dimension of the array VL.  LDVL >= 1; if
             JOBVL = 'V', LDVL >= N.
 
-    VR      (output) COMPLEX*16 array, dimension (LDVR,N)
+    VR      (output) COMPLEX_16 array, dimension (LDVR,N)
             If JOBVR = 'V', the right eigenvectors v(j) are stored one
             after another in the columns of VR, in the same order
             as their eigenvalues.
@@ -97,7 +97,7 @@ magma_zgeev(
             The leading dimension of the array VR.  LDVR >= 1; if
             JOBVR = 'V', LDVR >= N.
 
-    WORK    (workspace/output) COMPLEX*16 array, dimension (MAX(1,LWORK))
+    WORK    (workspace/output) COMPLEX_16 array, dimension (MAX(1,LWORK))
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
     LWORK   (input) INTEGER

@@ -54,7 +54,7 @@ magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
     N       (input) INTEGER   
             The number of columns of the matrix A.  N >= 0.   
 
-    A       (input/output) COMPLEX*16 array, dimension (LDA,N)   
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N)   
             On entry, the M-by-N matrix to be factored.   
             On exit, the factors L and U from the factorization   
             A = P*L*U; the unit diagonal elements of L are not stored.   

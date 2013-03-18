@@ -63,28 +63,28 @@ magma_zssssm_gpu(char storev, magma_int_t m1, magma_int_t n1,
     IB      (input) INTEGER
             The inner-blocking size.  IB >= 0.
 
-    dA1     (input,output) DOUBLE COMPLEX array, dimension(LDDA1, N), on gpu. 
+    dA1     (input,output) COMPLEX_16 array, dimension(LDDA1, N), on gpu. 
             On entry, the M1-by-N1 tile dA1.
             On exit, dA1 is updated by the application of dL (dL1 dL2).
  
     LDDA1   (input) INTEGER
             The leading dimension of the array dA1.  LDDA1 >= max(1,M1).
  
-    dA2     (input,output) DOUBLE COMPLEX array, dimension(LDDA2, N) , on gpu.
+    dA2     (input,output) COMPLEX_16 array, dimension(LDDA2, N) , on gpu.
             On entry, the M2-by-N2 tile dA2.
             On exit, dA2 is updated by the application of dL (dL1 dL2).
  
     LDDA2   (input) INTEGER
             The leading dimension of the array dA2.  LDDA2 >= max(1,M2).
  
-    dL1     (input) DOUBLE COMPLEX array, dimension(LDDL1, K), on gpu.
+    dL1     (input) COMPLEX_16 array, dimension(LDDL1, K), on gpu.
             The inverse of the IB-by-K lower triangular tile as returned by
             ZTSTRF.
  
     LDDL1   (input) INTEGER
             The leading dimension of the array L1.  LDDL1 >= max(1,2*IB).
  
-    dL2     (input) DOUBLE COMPLEX array, dimension(LDDL2, K) 
+    dL2     (input) COMPLEX_16 array, dimension(LDDL2, K) 
             The M2-by-K tile as returned by ZTSTRF.
  
     LDDL2   (input) INTEGER

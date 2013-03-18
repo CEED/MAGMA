@@ -44,7 +44,7 @@ magma_zungtr(char uplo, magma_int_t n, cuDoubleComplex *a,
     N       (input) INTEGER   
             The order of the matrix Q. N >= 0.   
 
-    A       (input/output) COMPLEX*16 array, dimension (LDA,N)   
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N)   
             On entry, the vectors which define the elementary reflectors,   
             as returned by ZHETRD.   
             On exit, the N-by-N unitary matrix Q.   
@@ -52,11 +52,11 @@ magma_zungtr(char uplo, magma_int_t n, cuDoubleComplex *a,
     LDA     (input) INTEGER   
             The leading dimension of the array A. LDA >= N.   
 
-    TAU     (input) COMPLEX*16 array, dimension (N-1)   
+    TAU     (input) COMPLEX_16 array, dimension (N-1)   
             TAU(i) must contain the scalar factor of the elementary   
             reflector H(i), as returned by ZHETRD.   
 
-    WORK    (workspace/output) COMPLEX*16 array, dimension (LWORK)   
+    WORK    (workspace/output) COMPLEX_16 array, dimension (LWORK)   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   

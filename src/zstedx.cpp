@@ -34,17 +34,6 @@ magma_zstedx(char range, magma_int_t n, double vl, double vu,
     Univ. of Colorado, Denver
     November 2011
 
-       .. Scalar Arguments ..
-      CHARACTER          RANGE
-      INTEGER            IL, IU, INFO, LDZ, LIWORK, LRWORK, N
-      DOUBLE PRECISION   VL, VU
-       ..
-       .. Array Arguments ..
-      INTEGER            IWORK( * )
-      DOUBLE PRECISION   D( * ), E( * ), RWORK( * ), DWORK ( * )
-      COMPLEX*16         Z( LDZ, * )
-       ..
-
     Purpose
     =======
 
@@ -91,7 +80,7 @@ magma_zstedx(char range, magma_int_t n, double vl, double vu,
             On entry, the subdiagonal elements of the tridiagonal matrix.
             On exit, E has been destroyed.
 
-    Z       (output) COMPLEX*16 array, dimension (LDZ,N)
+    Z       (output) COMPLEX_16 array, dimension (LDZ,N)
             On exit, if INFO = 0, Z contains the orthonormal eigenvectors
             of the symmetric tridiagonal matrix.
 
