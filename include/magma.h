@@ -240,7 +240,9 @@ static inline magma_err_t magma_zmalloc_pinned( cuDoubleComplex **ptrPtr, size_t
 
 
 // ========================================
-// device & queue support
+// device support
+magma_int_t magma_getdevice_arch();
+
 void magma_getdevices(
     magma_device_t* devices,
     magma_int_t     size,

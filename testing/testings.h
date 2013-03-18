@@ -17,6 +17,7 @@
 
 
 #define TESTING_CUDA_INIT()                                                \
+    magma_init();                                                          \
     if( CUBLAS_STATUS_SUCCESS != cublasInit() ) {                          \
         fprintf(stderr, "ERROR: cublasInit failed\n");                     \
         exit(-1);                                                          \
@@ -25,6 +26,7 @@
 
 
 #define TESTING_CUDA_FINALIZE()                                            \
+    magma_finalize();                                                      \
     cublasShutdown();
 
 
@@ -107,7 +109,7 @@ void magma_shpd( magma_int_t N, float*           A, magma_int_t lda );
 
 void magma_assert( bool condition, const char* msg, ... );
 
-#define MAX_NTEST 50
+#define MAX_NTEST 1000
 
 typedef struct magma_opts
 {

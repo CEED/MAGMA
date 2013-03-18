@@ -16,23 +16,72 @@
 
 #ifdef HAVE_CUBLAS
 
+// --------------------
+// subset of the CUDA device properties, set by magma_init()
+struct magma_device
+{
+    size_t memory;
+    magma_int_t cuda_arch;
+};
+
+int g_magma_devices_cnt = 0;
+struct magma_device* g_magma_devices = NULL;
+
+
 // ========================================
 // initialization
 // --------------------
+// Caches information about available CUDA devices.
+// When renumbering devices after calling magma_init,
+// call magma_finalize, then cudaSetValidDevices, then magma_init again.
+// Ideally magma_init is paired with magma_finalize, but this implementation
+// ensures there isn't a memory leak if magma_init is called multiple times
+// without calling magma_finalize.
 extern "C"
 void magma_init()
 {
+    if ( g_magma_devices != NULL ) {
+        free( g_magma_devices );
+    }
+    cudaGetDeviceCount( &g_magma_devices_cnt );
+    g_magma_devices = (struct magma_device*) malloc( g_magma_devices_cnt * sizeof(struct magma_device) );
+    for( int i = 0; i < g_magma_devices_cnt; ++i ) {
+        cudaDeviceProp prop;
+        cudaGetDeviceProperties( &prop, i );
+        g_magma_devices[i].memory = prop.totalGlobalMem;
+        g_magma_devices[i].cuda_arch  = prop.major*100 + prop.minor*10;
+    }
 }
 
 // --------------------
+// Frees information about CUDA devices.
 extern "C"
 void magma_finalize()
 {
+    free( g_magma_devices );
 }
 
 
 // ========================================
 // device support
+// ---------------------------------------------
+// Returns CUDA architecture capability for the current device.
+// This requires magma_init to be called first (to cache the information).
+// Version is integer xyz, where x is major, y is minor, and z is micro,
+// the same as __CUDA_ARCH__. For instance, for architecture 1.3, returns 130.
+extern "C"
+magma_int_t magma_getdevice_arch()
+{
+    int dev;
+    cudaGetDevice( &dev );
+    if ( g_magma_devices == NULL || dev < 0 || dev >= g_magma_devices_cnt ) {
+        fprintf( stderr, "Error in %s: MAGMA not initialized or bad device\n", __func__ );
+        return 0;
+    }
+    return g_magma_devices[dev].cuda_arch;
+}
+
+
 // --------------------
 extern "C"
 void magma_getdevices(
