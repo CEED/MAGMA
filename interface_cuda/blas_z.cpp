@@ -29,6 +29,27 @@
 
 // --------------------
 extern "C"
+void magma_zaxpy(
+    magma_int_t n,
+    cuDoubleComplex alpha,
+    cuDoubleComplex *dx, magma_int_t incx,
+    cuDoubleComplex *dy, magma_int_t incy )
+{
+    cublasZaxpy( n, alpha, dx, incx, dy, incy );
+}
+
+// --------------------
+extern "C"
+void magma_zcopy(
+    magma_int_t n,
+    cuDoubleComplex *dx, magma_int_t incx,
+    cuDoubleComplex *dy, magma_int_t incy )
+{
+    cublasZcopy( n, dx, incx, dy, incy );
+}
+
+// --------------------
+extern "C"
 void magma_zswap(
     magma_int_t n,
     cuDoubleComplex *dx, magma_int_t incx,

@@ -574,6 +574,17 @@ void magma_zcopymatrix_async_internal(
 // ========================================
 // Level 1 BLAS
 
+void magma_zaxpy(
+    magma_int_t n,
+    cuDoubleComplex alpha,
+    cuDoubleComplex *dx, magma_int_t incx,
+    cuDoubleComplex *dy, magma_int_t incy );
+
+void magma_zcopy(
+    magma_int_t n,
+    cuDoubleComplex *dx, magma_int_t incx,
+    cuDoubleComplex *dy, magma_int_t incy );
+
 void magma_zswap(
     magma_int_t n,
     cuDoubleComplex *dx, magma_int_t incx,
