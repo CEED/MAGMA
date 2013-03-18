@@ -122,17 +122,17 @@ extern "C" {
 #define lapackf77_zunmqr   FORTRAN_NAME( zunmqr, ZUNMQR )
 #define lapackf77_zunmtr   FORTRAN_NAME( zunmtr, ZUNMTR )
 
-/* testing functions */
+/* testing functions (alphabetical order) */
 #define lapackf77_zbdt01   FORTRAN_NAME( zbdt01, ZBDT01 )
 #define lapackf77_zget22   FORTRAN_NAME( zget22, ZGET22 )
-#define lapackf77_zqpt01   FORTRAN_NAME( zqpt01, ZQPT01 )
 #define lapackf77_zhet21   FORTRAN_NAME( zhet21, ZHET21 )
 #define lapackf77_zhst01   FORTRAN_NAME( zhst01, ZHST01 )
-#define lapackf77_zqrt02   FORTRAN_NAME( zqrt02, ZQRT02 )
-#define lapackf77_zunt01   FORTRAN_NAME( zunt01, ZUNT01 )
-#define lapackf77_zlarfy   FORTRAN_NAME( zlarfy, ZLARFY )
 #define lapackf77_zlarfx   FORTRAN_NAME( zlarfx, ZLARFX )
+#define lapackf77_zlarfy   FORTRAN_NAME( zlarfy, ZLARFY )
+#define lapackf77_zqpt01   FORTRAN_NAME( zqpt01, ZQPT01 )
+#define lapackf77_zqrt02   FORTRAN_NAME( zqrt02, ZQRT02 )
 #define lapackf77_zstt21   FORTRAN_NAME( zstt21, ZSTT21 )
+#define lapackf77_zunt01   FORTRAN_NAME( zunt01, ZUNT01 )
 
 // macros to handle differences in arguments between complex and real versions of routines.
 #if defined(PRECISION_z) || defined(PRECISION_c)
