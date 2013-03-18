@@ -24,9 +24,12 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
 
     Purpose
     =======
-
     ZGEQRF computes a QR factorization of a complex M-by-N matrix A:
     A = Q * R.
+    
+    This version has LAPACK-complaint arguments.
+    Other versions (magma_zgeqrf_gpu and magma_zgeqrf3_gpu) store the
+    intermediate T matrices.
 
     Arguments
     =========
@@ -37,7 +40,7 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
             The number of columns of the matrix A.  N >= 0.
 
     dA      (input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N)
-            On entry, the M-by-N matrix dA.
+            On entry, the M-by-N matrix A.
             On exit, the elements on and above the diagonal of the array
             contain the min(M,N)-by-N upper trapezoidal matrix R (R is
             upper triangular if m >= n); the elements below the diagonal,
@@ -61,7 +64,6 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
 
     Further Details
     ===============
-
     The matrix Q is represented as a product of elementary reflectors
 
        Q = H(1) H(2) . . . H(k), where k = min(m,n).

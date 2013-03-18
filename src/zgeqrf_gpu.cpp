@@ -14,10 +14,11 @@
    -- Auxiliary function: 'a' is pointer to the current panel holding the 
       Householder vectors for the QR factorization of the panel. This routine
       puts ones on the diagonal and zeros in the upper triangular part of 'a'.
-      The upper triangular values are stored in work. Than the inverse is 
-      calculated in place in work, so as final result work holds the inverse
-      of the upper triangular diagonal block.
- */
+      The upper triangular values are stored in work.
+      
+      Then, the inverse is calculated in place in work, so as a final result,
+      work holds the inverse of the upper triangular diagonal block.
+*/
 void zsplit_diag_block(magma_int_t ib, cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *work)
 {
     magma_int_t i, j, info;
@@ -52,12 +53,16 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
 
     Purpose
     =======
-    ZGEQRF computes a QR factorization of a COMPLEX_16 M-by-N matrix A:
-    A = Q * R. This version stores the triangular matrices used in
-    the factorization so that they can be applied directly (i.e.,
+    ZGEQRF computes a QR factorization of a complex M-by-N matrix A:
+    A = Q * R.
+    
+    This version stores the triangular dT matrices used in
+    the block QR factorization so that they can be applied directly (i.e.,
     without being recomputed) later. As a result, the application
-    of Q is much faster.
-
+    of Q is much faster. Also, the upper triangular matrices for V have 0s
+    in them. The corresponding parts of the upper triangular R are inverted
+    and stored separately in dT.
+    
     Arguments
     =========
     M       (input) INTEGER
@@ -66,7 +71,7 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
     N       (input) INTEGER
             The number of columns of the matrix A.  N >= 0.
 
-    A       (input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N)
+    dA      (input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N)
             On entry, the M-by-N matrix A.
             On exit, the elements on and above the diagonal of the array
             contain the min(M,N)-by-N upper trapezoidal matrix R (R is
@@ -76,7 +81,7 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
             Details).
 
     LDDA     (input) INTEGER
-            The leading dimension of the array A.  LDDA >= max(1,M).
+            The leading dimension of the array dA.  LDDA >= max(1,M).
             To benefit from coalescent memory accesses LDDA must be
             dividable by 16.
 
@@ -193,7 +198,7 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
                               work_ref(i), &ldwork, tau+i, hwork, &ib);
 
             /* Put 0s in the upper triangular part of a panel (and 1s on the
-               diagonal); copy the upper triangular in ut and invert it     */
+               diagonal); copy the upper triangular in ut and invert it. */
             magma_queue_sync( stream[0] );
             zsplit_diag_block(ib, work_ref(i), ldwork, ut);
             magma_zsetmatrix( rows, ib, work_ref(i), ldwork, a_ref(i,i), ldda );
