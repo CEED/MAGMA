@@ -71,7 +71,7 @@ magma_zunmtr_gpu(char side, char uplo, char trans,
                                  (LDDA,N) if SIDE = 'R'   
             The vectors which define the elementary reflectors, as   
             returned by ZHETRD_GPU. On output the diagonal, the subdiagonal and the
-            upper part(UPLO='L') or lower part(UPLO='U') are destroyed.
+            upper part (UPLO='L') or lower part (UPLO='U') are destroyed.
 
     LDDA    (input) INTEGER   
             The leading dimension of the array DA.   
@@ -85,7 +85,7 @@ magma_zunmtr_gpu(char side, char uplo, char trans,
 
     DC      (device input/output) COMPLEX_16 array, dimension (LDDC,N)   
             On entry, the M-by-N matrix C.   
-            On exit, C is overwritten by Q*C or Q**H * C or C * Q**H or C*Q.   
+            On exit, C is overwritten by (Q*C) or (Q**H * C) or (C * Q**H) or (C*Q).   
 
     LDDC    (input) INTEGER   
             The leading dimension of the array C. LDDC >= max(1,M).
@@ -126,7 +126,6 @@ magma_zunmtr_gpu(char side, char uplo, char trans,
     char side_[2]  = {side, 0};
     char uplo_[2]  = {uplo, 0};
     char trans_[2] = {trans, 0};
-    magma_int_t  i__2;
     magma_int_t i1, i2, mi, ni, nq, nw;
     int left, upper;
     magma_int_t iinfo;
@@ -180,14 +179,11 @@ magma_zunmtr_gpu(char side, char uplo, char trans,
         ni = n - 1;
     }
 
-    if (upper) 
-      {
-        i__2 = nq - 1;
-        magma_zunmql2_gpu(side, trans, mi, ni, i__2, &da[ldda], ldda, tau,
+    if (upper) {
+        magma_zunmql2_gpu(side, trans, mi, ni, nq-1, &da[ldda], ldda, tau,
                           dc, lddc, &wa[ldwa], ldwa, &iinfo);
-      }
-    else 
-      {
+    }
+    else {
         /* Q was determined by a call to SSYTRD with UPLO = 'L' */
         if (left) {
             i1 = 1;
@@ -196,11 +192,9 @@ magma_zunmtr_gpu(char side, char uplo, char trans,
             i1 = 0;
             i2 = 1;
         }
-        i__2 = nq - 1;
-        magma_zunmqr2_gpu(side, trans, mi, ni, i__2, &da[1], ldda, tau,
-                          &dc[i1 + i2 * lddc], lddc, &wa[1], ldwa, &iinfo);
-      }
+        magma_zunmqr2_gpu(side, trans, mi, ni, nq-1, &da[1], ldda, tau,
+                          &dc[i1 + i2*lddc], lddc, &wa[1], ldwa, &iinfo);
+    }
 
     return *info;
 } /* zunmtr */
-
