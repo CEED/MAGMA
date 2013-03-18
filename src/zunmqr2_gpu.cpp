@@ -87,7 +87,7 @@ magma_zunmqr2_gpu(const char side, const char trans,
 
     DC      (device input/output) COMPLEX_16 array, dimension (LDDC,N)   
             On entry, the M-by-N matrix C.   
-            On exit, C is overwritten by Q*C or Q**H * C or C * Q**H or C*Q.   
+            On exit, C is overwritten by (Q*C) or (Q**H * C) or (C * Q**H) or (C*Q).   
 
     LDDC    (input) INTEGER   
             The leading dimension of the array C. LDDC >= max(1,M). 
@@ -109,16 +109,16 @@ magma_zunmqr2_gpu(const char side, const char trans,
     
     cuDoubleComplex c_one = MAGMA_Z_ONE;
 
-    char side_[2] = {side, 0};
+    char side_[2]  = {side,  0};
     char trans_[2] = {trans, 0};
 
     /* Allocate work space on the GPU */
     cuDoubleComplex *dwork;
 
     magma_int_t wa_offset, dc_offset, i__4, lddwork;
-    magma_int_t i__;
+    magma_int_t i;
     cuDoubleComplex t[2*4160]        /* was [65][64] */;
-    magma_int_t i1, i2, i3, ib, ic, jc, nb, mi, ni, nq, nw;
+    magma_int_t i1, i2, step, ib, ic, jc, nb, mi, ni, nq, nw;
     int left, notran;
 
     wa_offset = 1 + ldwa;
@@ -128,7 +128,7 @@ magma_zunmqr2_gpu(const char side, const char trans,
     dc -= dc_offset;
 
     *info = 0;
-    left = lapackf77_lsame(side_, "L");
+    left   = lapackf77_lsame(side_,  "L");
     notran = lapackf77_lsame(trans_, "N");
 
     /* NQ is the order of Q and NW is the minimum dimension of WORK */
@@ -172,65 +172,62 @@ magma_zunmqr2_gpu(const char side, const char trans,
         return *info;
     }
         
-        /* Use hybrid CPU-GPU code */
-  
-        if ( ( left && (! notran) ) ||  ( (! left) && notran ) ) {
-            i1 = 1;
-            i2 = k;
-            i3 = nb;
-        } else {
-            i1 = (k - 1) / nb * nb + 1;
-            i2 = 1;
-            i3 = -nb;
-        }
+    /* Use hybrid CPU-GPU code */
+    if ( ( left && (! notran) ) ||  ( (! left) && notran ) ) {
+        i1 = 1;
+        i2 = k;
+        step = nb;
+    } else {
+        i1 = ((k - 1)/nb)*nb + 1;
+        i2 = 1;
+        step = -nb;
+    }
 
-        if (left) {
-            ni = n;
-            jc = 1;
-        } else {
-            mi = m;
-            ic = 1;
-        }
-  
-        magmablas_zsetdiag1subdiag0('L', k, nb, da, ldda);
+    if (left) {
+        ni = n;
+        jc = 1;
+    } else {
+        mi = m;
+        ic = 1;
+    }
+
+    magmablas_zsetdiag1subdiag0('L', k, nb, da, ldda);
+    
+    // for i=i1 to i2 by step
+    for (i = i1; (step < 0 ? i >= i2 : i <= i2); i += step) {
+        ib = min(nb, k - i + 1);
+
+        /* Form the triangular factor of the block reflector   
+           H = H(i) H(i+1) . . . H(i+ib-1) */
+        i__4 = nq - i + 1;
+        lapackf77_zlarft("F", "C", &i__4, &ib, &wa[i + i*ldwa], &ldwa, 
+                         &tau[i], t, &ib);
+
         
-        for (i__ = i1; i3 < 0 ? i__ >= i2 : i__ <= i2; i__ += i3) 
-          {
-            ib = min(nb, k - i__ + 1);
+        if (left) {
+            /* H or H' is applied to C(i:m,1:n) */
+            mi = m - i + 1;
+            ic = i;
+        } 
+        else {
+            /* H or H' is applied to C(1:m,i:n) */
+            ni = n - i + 1;
+            jc = i;
+        }
 
-            /* Form the triangular factor of the block reflector   
-               H = H(i) H(i+1) . . . H(i+ib-1) */
-            i__4 = nq - i__ + 1;
-            lapackf77_zlarft("F", "C", &i__4, &ib, &wa[i__ + i__ * ldwa], &ldwa, 
-                             &tau[i__], t, &ib);
-
-            
-            if (left) 
-              {
-                /* H or H' is applied to C(i:m,1:n) */
-                mi = m - i__ + 1;
-                ic = i__;
-              } 
-            else 
-              {
-                /* H or H' is applied to C(1:m,i:n) */
-                ni = n - i__ + 1;
-                jc = i__;
-              }
-
-            if (left)
-                lddwork = ni;
-            else
-                lddwork = mi;
-            
-            /* Apply H or H'; First copy T to the GPU */
-            magma_zsetmatrix( ib, ib, t, ib, dwork, ib );
-            magma_zlarfb_gpu( side, trans, MagmaForward, MagmaColumnwise,
-                              mi, ni, ib,
-                              da + (i__ - 1) + (i__ - 1) * ldda , ldda, dwork, ib,
-                              &dc[ic + jc * lddc], lddc, 
-                              dwork + ib*ib, lddwork);
-          }
+        if (left)
+            lddwork = ni;
+        else
+            lddwork = mi;
+        
+        /* Apply H or H'; First copy T to the GPU */
+        magma_zsetmatrix( ib, ib, t, ib, dwork, ib );
+        magma_zlarfb_gpu( side, trans, MagmaForward, MagmaColumnwise,
+                          mi, ni, ib,
+                          da + (i - 1) + (i - 1)*ldda , ldda, dwork, ib,
+                          &dc[ic + jc*lddc], lddc, 
+                          dwork + ib*ib, lddwork);
+    }
 
     magma_free( dwork );
 
