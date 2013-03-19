@@ -65,7 +65,7 @@ const char *usage =
 "  --nthread x      Number of CPU threads, default 1.\n"
 "  --itype [123]    Generalized Hermitian-definite eigenproblem type, default 1.\n"
 "  --work  [123]    SVD workspace size, from min (1) to max (3), default 1.\n"
-"  --version x      hemm_mgpu version.\n"
+"  --version x      version (e.g., during development of hemm_mgpu, trevc).\n"
 "  --fraction x     fraction of eigenvectors to compute.\n"
 "  -L -U -F         uplo   = Lower*, Upper, or Full.\n"
 "  -[NTC][NTC]      transA = NoTrans*, Trans, or ConjTrans (first letter) and\n"
@@ -98,7 +98,7 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     opts->itype    = 1;
     opts->svd_work = 1;
     opts->version  = 0;  // auto
-    opts->fraction  = 1.;
+    opts->fraction = 1.;
     
     opts->check     = (getenv("MAGMA_TESTINGS_CHECK") != NULL);
     opts->lapack    = (getenv("MAGMA_RUN_LAPACK")     != NULL);
@@ -160,8 +160,8 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
             i++;
             int start, stop, step;
             info = sscanf( argv[i], "%d:%d:%d", &start, &stop, &step );
-            if ( info == 3 && start >= 0 && stop >= start && step > 0 ) {
-                for( int n = start; n <= stop; n += step ) {
+            if ( info == 3 && start >= 0 && stop >= 0 && step != 0 ) {
+                for( int n = start; (step > 0 ? n <= stop : n >= stop); n += step ) {
                     if ( ntest >= MAX_NTEST ) {
                         printf( "warning: --range %s, max number of tests reached, ntest=%d.\n",
                                 argv[i], ntest );
@@ -243,8 +243,8 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
         }
         else if ( strcmp("--version", argv[i]) == 0 && i+1 < argc ) {
             opts->version = atoi( argv[++i] );
-            magma_assert( opts->version > 0,
-                          "error: --version %s is invalid; ensure version > 0.\n", argv[i] );
+            magma_assert( opts->version >= 0,
+                          "error: --version %s is invalid; ensure version >= 0.\n", argv[i] );
         }
         else if ( strcmp("--fraction", argv[i]) == 0 && i+1 < argc ) {
             opts->fraction = atof( argv[++i] );
