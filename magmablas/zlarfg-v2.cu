@@ -164,7 +164,7 @@ void magma_zlarfg2_gpu_kernel( int n, cuDoubleComplex* dx0, cuDoubleComplex* dx,
    Stores beta over dx0.
    Stores tau.  
 
-   The difference with LAPACK's zlarfg is that the norm of dx, and hance beta,
+   The difference with LAPACK's zlarfg is that the norm of dx, and hence beta,
    are computed outside the routine and passed to it in dxnorm (array on the GPU).
 */
 extern "C" void
