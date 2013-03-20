@@ -14,7 +14,6 @@
 #define PRECISION_z
 #if (defined(PRECISION_s) || defined(PRECISION_d))
         #define magma_zgemm magmablas_zgemm
-        #define magma_ztrsm magmablas_ztrsm
 #endif
 
 #if (GPUSHMEM >= 200)
