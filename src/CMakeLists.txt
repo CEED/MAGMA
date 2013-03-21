@@ -52,9 +52,7 @@ SET(MAGMA_CTRL
     ${MAGMA_CTRL_GENERATED}
     ../control/auxiliary.cpp
     ../control/bulge_auxiliary.cpp
-    ../control/get_nb_fermi.cpp
-    ../control/get_nb_kepler.cpp
-    ../control/get_nb_tesla.cpp
+    ../control/get_nb.cpp
     ../control/strlcpy.cpp
     ../control/timer.cpp
     ../control/trace.cpp

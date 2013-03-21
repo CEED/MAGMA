@@ -23,8 +23,8 @@ VERSION 1.3  :  November  2012
   as examples on how to use MAGMA, as well as to benchmark the performance.
  
 * To TUNE MAGMA, you can modify the blocking factors for the algorithms of
-  interest in file 'control/get_nb_{tesla|fermi|kepler}.cpp'. The default 
-  values are tuned for general Tesla, Fermi, and Kepler  GPUs. If you have 
+  interest in file 'control/get_nb.cpp'. The default values are tuned for
+  general 1.x, Fermi (2.x), and Kepler (3.x) GPUs. If you have 
   a Fermi (C2050), you can also compare your performance to what we get, 
   given in file 'testing/results_fermi.txt', as an easy check for your 
   installation.
