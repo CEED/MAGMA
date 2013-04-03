@@ -204,14 +204,14 @@ int main( int argc, char** argv)
             /* =====================================================================
                Performs operation using LAPACK
                =================================================================== */
-            gpu_time = magma_wtime();
+            cpu_time = magma_wtime();
             lapackf77_zhegvd( &opts.itype, &opts.jobz, &opts.uplo,
                               &N, h_A, &N, h_B, &N, w2,
                               h_work, &lwork,
                               rwork, &lrwork,
                               iwork, &liwork,
                               &info );
-            gpu_time = magma_wtime() - gpu_time;
+            cpu_time = magma_wtime() - cpu_time;
             if (info != 0)
                 printf("lapackf77_zhegvd returned error %d.\n", (int) info);
             
