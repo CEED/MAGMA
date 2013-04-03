@@ -253,6 +253,84 @@ module magma_zfortran
        integer       :: info
      end subroutine magmaf_zheevd
 
+     subroutine magmaf_zheevdx( jobz, range, uplo, n, a, lda, vl, vu, &
+                                il, iu, m, w, work, lwork, rwork, lrwork, & 
+                                iwork, liwork, info)
+       character     :: jobz
+       character     :: range
+       character     :: uplo
+       integer       :: n
+       complex*16    :: a(*)
+       integer       :: lda
+       double precision:: vl
+       double precision:: vu
+       integer       :: il
+       integer       :: iu
+       integer       :: m
+       double precision:: w(*)
+       complex*16    :: work(*)
+       integer       :: lwork
+       double precision:: rwork(*)
+       integer       :: lrwork
+       integer       :: iwork(*)
+       integer       :: liwork
+       integer       :: info
+     end subroutine magmaf_zheevdx
+
+     subroutine magmaf_zheevx( jobz, range, uplo, n, a, lda, vl, vu, &
+                               il, iu, abstol, m, w, z, ldz, &
+                               work, lwork, rwork, iwork, ifail, info)
+       character     :: jobz
+       character     :: range
+       character     :: uplo
+       integer       :: n
+       complex*16    :: a(*)
+       integer       :: lda
+       double precision:: vl
+       double precision:: vu
+       integer       :: il
+       integer       :: iu
+       double precision:: abstol
+       integer       :: m
+       complex*16    :: z(*)
+       integer       :: ldz
+       double precision:: w(*)
+       complex*16    :: work(*)
+       integer       :: lwork
+       double precision:: rwork(*)
+       integer       :: iwork(*)
+       integer       :: ifail(*)
+       integer       :: info
+     end subroutine magmaf_zheevx
+
+     subroutine magmaf_zheevr( jobz, range, uplo, n, a, lda, vl, vu, &
+                               il, iu, abstol, m, w, z, ldz, isuppz,&
+                               work, lwork, rwork, lrwork, iwork, liwork, info)
+       character     :: jobz
+       character     :: range
+       character     :: uplo
+       integer       :: n
+       complex*16    :: a(*)
+       integer       :: lda
+       double precision:: vl
+       double precision:: vu
+       integer       :: il
+       integer       :: iu
+       double precision:: abstol
+       integer       :: m
+       complex*16    :: z(*)       
+       integer       :: ldz
+       integer       :: isuppz(*)
+       double precision:: w(*)
+       complex*16    :: work(*)
+       integer       :: lwork
+       double precision:: rwork(*)
+       integer       :: lrwork
+       integer       :: iwork(*)
+       integer       :: liwork
+       integer       :: info
+     end subroutine magmaf_zheevr
+
      subroutine magmaf_zhegvd( itype, jobz, uplo, n, a, lda, b, ldb, w, work, lwork, rwork, lrwork, iwork, liwork, info)
        integer       :: itype
        character     :: jobz
@@ -271,6 +349,94 @@ module magma_zfortran
        integer       :: liwork
        integer       :: info
      end subroutine magmaf_zhegvd
+
+     subroutine magmaf_zhegvdx( itype, jobz, range, uplo, n, a, lda, b, ldb, vl, vu, &
+                                il, iu, m, w, work, lwork, rwork, lrwork, & 
+                                iwork, liwork, info)
+       integer       :: itype
+       character     :: jobz
+       character     :: range
+       character     :: uplo
+       integer       :: n
+       complex*16    :: a(*)
+       integer       :: lda
+       complex*16    :: b(*)
+       integer       :: ldb
+       double precision:: vl
+       double precision:: vu
+       integer       :: il
+       integer       :: iu
+       integer       :: m
+       double precision:: w(*)
+       complex*16    :: work(*)
+       integer       :: lwork
+       double precision:: rwork(*)
+       integer       :: lrwork
+       integer       :: iwork(*)
+       integer       :: liwork
+       integer       :: info
+     end subroutine magmaf_zhegvdx
+
+     subroutine magmaf_zhegvx( itype, jobz, range, uplo, n, a, lda, b, ldb, vl, vu, &
+                               il, iu, abstol, m, w, z, ldz, &
+                               work, lwork, rwork, iwork, ifail, info)
+       integer       :: itype
+       character     :: jobz
+       character     :: range
+       character     :: uplo
+       integer       :: n
+       complex*16    :: a(*)
+       integer       :: lda
+       complex*16    :: b(*)
+       integer       :: ldb
+       double precision:: vl
+       double precision:: vu
+       integer       :: il
+       integer       :: iu
+       double precision:: abstol
+       integer       :: m
+       complex*16    :: z(*)
+       integer       :: ldz
+       double precision:: w(*)
+       complex*16    :: work(*)
+       integer       :: lwork
+       double precision:: rwork(*)
+       integer       :: iwork(*)
+       integer       :: ifail(*)
+       integer       :: info
+     end subroutine magmaf_zhegvx
+
+     subroutine magmaf_zhegvr( itype, jobz, range, uplo, n, a, lda, b, ldb, vl, vu, &
+                               il, iu, abstol, m, w, z, ldz, isuppz,&
+                               work, lwork, rwork, lrwork, iwork, liwork, info)
+       integer       :: itype
+       character     :: jobz
+       character     :: range
+       character     :: uplo
+       integer       :: n
+       complex*16    :: a(*)
+       integer       :: lda
+       complex*16    :: b(*)
+       integer       :: ldb
+       double precision:: vl
+       double precision:: vu
+       integer       :: il
+       integer       :: iu
+       double precision:: abstol
+       integer       :: m
+       complex*16    :: z(*)       
+       integer       :: ldz
+       integer       :: isuppz(*)
+       double precision:: w(*)
+       complex*16    :: work(*)
+       integer       :: lwork
+       double precision:: rwork(*)
+       integer       :: lrwork
+       integer       :: iwork(*)
+       integer       :: liwork
+       integer       :: info
+     end subroutine magmaf_zhegvr
+
 
 #else
      subroutine magmaf_zgeev( jobvl, jobvr, n, a, lda, wr, wi, vl, ldvl, vr, ldvr, work, lwork, info)
@@ -321,6 +487,28 @@ module magma_zfortran
        integer       :: info
      end subroutine magmaf_zheevd
 
+     subroutine magmaf_zheevdx( jobz, range, uplo, n, a, lda, vl, vu, &
+                                il, iu, m, w, work, lwork, & 
+                                iwork, liwork, info)
+       character     :: jobz
+       character     :: range
+       character     :: uplo
+       integer       :: n
+       complex*16    :: a(*)
+       integer       :: lda
+       double precision:: vl
+       double precision:: vu
+       integer       :: il
+       integer       :: iu
+       integer       :: m
+       double precision:: w(*)
+       complex*16    :: work(*)
+       integer       :: lwork
+       integer       :: iwork(*)
+       integer       :: liwork
+       integer       :: info
+     end subroutine magmaf_zheevdx
+
      subroutine magmaf_zhegvd( itype, jobz, uplo, n, a, lda, b, ldb, w, work, lwork, iwork, liwork, info)
        integer       :: itype
        character     :: jobz
@@ -337,6 +525,31 @@ module magma_zfortran
        integer       :: liwork
        integer       :: info
      end subroutine magmaf_zhegvd
+
+     subroutine magmaf_zhegvdx( itype, jobz, range, uplo, n, a, lda, b, ldb, vl, vu, &
+                                il, iu, m, w, work, lwork, & 
+                                iwork, liwork, info)
+       integer       :: itype
+       character     :: jobz
+       character     :: range
+       character     :: uplo
+       integer       :: n
+       complex*16    :: a(*)
+       integer       :: lda
+       complex*16    :: b(*)
+       integer       :: ldb
+       double precision:: vl
+       double precision:: vu
+       integer       :: il
+       integer       :: iu
+       integer       :: m
+       double precision:: w(*)
+       complex*16    :: work(*)
+       integer       :: lwork
+       integer       :: iwork(*)
+       integer       :: liwork
+       integer       :: info
+     end subroutine magmaf_zhegvdx
 #endif
 
      subroutine magmaf_zgels_gpu(  trans, m, n, nrhs, dA, ldda, dB, lddb, hwork, lwork, info)

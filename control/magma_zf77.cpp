@@ -71,7 +71,13 @@ typedef size_t devptr_t;
 #define MAGMAF_ZGEEV   MAGMA_FORTRAN_NAME(zgeev,   ZGEEV  )
 #define MAGMAF_ZGESVD  MAGMA_FORTRAN_NAME(zgesvd,  ZGESVD )
 #define MAGMAF_ZHEEVD  MAGMA_FORTRAN_NAME(zheevd,  ZHEEVD )
+#define MAGMAF_ZHEEVDX MAGMA_FORTRAN_NAME(zheevdx, ZHEEVDX)
+#define MAGMAF_ZHEEVX  MAGMA_FORTRAN_NAME(zheevx,  ZHEEVX )
+#define MAGMAF_ZHEEVR  MAGMA_FORTRAN_NAME(zheevr,  ZHEEVR )
 #define MAGMAF_ZHEGVD  MAGMA_FORTRAN_NAME(zhegvd,  ZHEGVD )
+#define MAGMAF_ZHEGVDX MAGMA_FORTRAN_NAME(zhegvdx, ZHEGVDX)
+#define MAGMAF_ZHEGVX  MAGMA_FORTRAN_NAME(zhegvx,  ZHEGVX )
+#define MAGMAF_ZHEGVR  MAGMA_FORTRAN_NAME(zhegvr,  ZHEGVR )
 
 /* //////////////////////////////////////////////////////////////////////////// 
  -- MAGMA function definitions / Data on GPU
@@ -358,6 +364,49 @@ void MAGMAF_ZHEEVD( char *jobz, char *uplo, magma_int_t *n,
                   iwork, *liwork, info);
 }
 
+void MAGMAF_ZHEEVDX(char *jobz, char *range, char *uplo, magma_int_t *n,
+                   cuDoubleComplex *a, magma_int_t *lda,
+                   double *vl, double *vu, magma_int_t *il, magma_int_t *iu, magma_int_t *m,
+                   double *w, cuDoubleComplex *work, magma_int_t *lwork,
+                   double *rwork, magma_int_t *lrwork,
+                   magma_int_t *iwork, magma_int_t *liwork, magma_int_t *info)
+{
+  magma_zheevdx( jobz[0], range[0], uplo[0], *n,
+                 a, *lda,
+                 *vl, *vu, *il, *iu, m,
+                 w, work, *lwork,
+                 rwork, *lrwork,
+                 iwork, *liwork, info);
+}
+
+void MAGMAF_ZHEEVX(char *jobz, char *range, char *uplo, magma_int_t *n,
+                   cuDoubleComplex *a, magma_int_t *lda,
+                   double *vl, double *vu, magma_int_t *il, magma_int_t *iu, double *abstol, magma_int_t *m,
+                   double *w, cuDoubleComplex *z, magma_int_t *ldz,
+                   cuDoubleComplex *work, magma_int_t *lwork,
+                   double *rwork, magma_int_t *iwork, magma_int_t *ifail, magma_int_t *info)
+{
+  magma_zheevx( jobz[0], range[0], uplo[0], *n,
+                a, *lda, *vl, *vu, *il, *iu, *abstol, m,
+                w, z, *ldz, work, *lwork,
+                rwork, iwork, ifail, info);
+}
+
+void MAGMAF_ZHEEVR(char *jobz, char *range, char *uplo, magma_int_t *n,
+                   cuDoubleComplex *a, magma_int_t *lda,
+                   double *vl, double *vu, magma_int_t *il, magma_int_t *iu, double *abstol, magma_int_t *m,
+                   double *w, cuDoubleComplex *z, magma_int_t *ldz, magma_int_t *isuppz, 
+                   cuDoubleComplex *work, magma_int_t *lwork,
+                   double *rwork, magma_int_t *lrwork,
+                   magma_int_t *iwork, magma_int_t *liwork, magma_int_t *info)
+{
+  magma_zheevr( jobz[0], range[0], uplo[0], *n,
+                a, *lda, *vl, *vu, *il, *iu, *abstol, m,
+                w, z, *ldz, isuppz, work, *lwork,
+                rwork, *lrwork,
+                iwork, *liwork, info);
+}
+
 void MAGMAF_ZHEGVD(magma_int_t *itype, char *jobz, char *uplo, magma_int_t *n,
                    cuDoubleComplex *a, magma_int_t *lda, 
                    cuDoubleComplex *b, magma_int_t *ldb,
@@ -371,7 +420,54 @@ void MAGMAF_ZHEGVD(magma_int_t *itype, char *jobz, char *uplo, magma_int_t *n,
                 rwork, *lrwork,
                 iwork, *liwork, info);
 }
-    
+
+void MAGMAF_ZHEGVDX(magma_int_t *itype, char *jobz, char *range, char *uplo, magma_int_t *n,
+                    cuDoubleComplex *a, magma_int_t *lda,
+                    cuDoubleComplex *b, magma_int_t *ldb,
+                    double *vl, double *vu, magma_int_t *il, magma_int_t *iu, magma_int_t *m,
+                    double *w, cuDoubleComplex *work, magma_int_t *lwork,
+                    double *rwork, magma_int_t *lrwork,
+                    magma_int_t *iwork, magma_int_t *liwork, magma_int_t *info)
+{
+  magma_zhegvdx( *itype, jobz[0], range[0], uplo[0], *n,
+                 a, *lda, b, *ldb,
+                 *vl, *vu, *il, *iu, m,
+                 w, work, *lwork,
+                 rwork, *lrwork,
+                 iwork, *liwork, info);
+}
+
+void MAGMAF_ZHEGVX(magma_int_t *itype, char *jobz, char *range, char *uplo, magma_int_t *n,
+                   cuDoubleComplex *a, magma_int_t *lda,
+                   cuDoubleComplex *b, magma_int_t *ldb,
+                   double *vl, double *vu, magma_int_t *il, magma_int_t *iu, double *abstol, magma_int_t *m,
+                   double *w, cuDoubleComplex *z, magma_int_t *ldz,
+                   cuDoubleComplex *work, magma_int_t *lwork,
+                   double *rwork, magma_int_t *iwork, magma_int_t *ifail, magma_int_t *info)
+{
+  magma_zhegvx( *itype, jobz[0], range[0], uplo[0], *n,
+                a, *lda, b, *ldb, *vl, *vu, *il, *iu, *abstol, m,
+                w, z, *ldz, work, *lwork,
+                rwork, iwork, ifail, info);
+}
+
+void MAGMAF_ZHEGVR(magma_int_t *itype, char *jobz, char *range, char *uplo, magma_int_t *n,
+                   cuDoubleComplex *a, magma_int_t *lda,
+                   cuDoubleComplex *b, magma_int_t *ldb,
+                   double *vl, double *vu, magma_int_t *il, magma_int_t *iu, double *abstol, magma_int_t *m,
+                   double *w, cuDoubleComplex *z, magma_int_t *ldz, magma_int_t *isuppz, 
+                   cuDoubleComplex *work, magma_int_t *lwork,
+                   double *rwork, magma_int_t *lrwork,
+                   magma_int_t *iwork, magma_int_t *liwork, magma_int_t *info)
+{
+  magma_zhegvr( *itype, jobz[0], range[0], uplo[0], *n,
+                a, *lda, b, *ldb, *vl, *vu, *il, *iu, *abstol, m,
+                w, z, *ldz, isuppz, work, *lwork,
+                rwork, *lrwork,
+                iwork, *liwork, info);
+}
+
+
 #else
 void MAGMAF_ZGEEV( char *jobvl, char *jobvr, magma_int_t *n,
                    cuDoubleComplex *a,    magma_int_t *lda,
@@ -415,6 +511,19 @@ void MAGMAF_ZHEEVD( char *jobz, char *uplo, magma_int_t *n,
                   work, *lwork,
                   iwork, *liwork, info);
 }
+    
+void MAGMAF_ZHEEVDX(char *jobz, char *range, char *uplo, magma_int_t *n,
+                   cuDoubleComplex *a, magma_int_t *lda,
+                   double *vl, double *vu, magma_int_t *il, magma_int_t *iu, magma_int_t *m,
+                   double *w, cuDoubleComplex *work, magma_int_t *lwork,
+                   magma_int_t *iwork, magma_int_t *liwork, magma_int_t *info)
+{
+  magma_zheevdx( jobz[0], range[0], uplo[0], *n,
+                 a, *lda,
+                 *vl, *vu, *il, *iu, m,
+                 w, work, *lwork,
+                 iwork, *liwork, info);
+}
 
 void MAGMAF_ZHEGVD(magma_int_t *itype, char *jobz, char *uplo, magma_int_t *n,
                    cuDoubleComplex *a, magma_int_t *lda,
@@ -426,6 +535,20 @@ void MAGMAF_ZHEGVD(magma_int_t *itype, char *jobz, char *uplo, magma_int_t *n,
                 a, *lda, b, *ldb,
                 w, work, *lwork,
                 iwork, *liwork, info);
+}
+
+void MAGMAF_ZHEGVDX(magma_int_t *itype, char *jobz, char *range, char *uplo, magma_int_t *n,
+                   cuDoubleComplex *a, magma_int_t *lda,
+                   cuDoubleComplex *b, magma_int_t *ldb,
+                   double *vl, double *vu, magma_int_t *il, magma_int_t *iu, magma_int_t *m,
+                   double *w, cuDoubleComplex *work, magma_int_t *lwork,
+                   magma_int_t *iwork, magma_int_t *liwork, magma_int_t *info)
+{
+  magma_zhegvdx( *itype, jobz[0], range[0], uplo[0], *n,
+                 a, *lda, b, *ldb,
+                 *vl, *vu, *il, *iu, m,
+                 w, work, *lwork,
+                 iwork, *liwork, info);
 }
 
 

@@ -149,17 +149,6 @@ magma_int_t magma_zunghr( magma_int_t n, magma_int_t ilo, magma_int_t ihi,
                           cuDoubleComplex *tau,
                           cuDoubleComplex *dT, magma_int_t nb,
                           magma_int_t *info);
-magma_int_t magma_zheev( char jobz, char uplo, magma_int_t n,
-                         cuDoubleComplex *a, magma_int_t lda, double *w,
-                         cuDoubleComplex *work, magma_int_t lwork,
-                         double *rwork, magma_int_t *info);
-magma_int_t magma_zheevx(char jobz, char range, char uplo, magma_int_t n,
-                         cuDoubleComplex *a, magma_int_t lda, double vl, double vu,
-                         magma_int_t il, magma_int_t iu, double abstol, magma_int_t *m,
-                         double *w, cuDoubleComplex *z, magma_int_t ldz,
-                         cuDoubleComplex *work, magma_int_t lwork,
-                         double *rwork, magma_int_t *iwork,
-                         magma_int_t *ifail, magma_int_t *info);
 
 #if defined(PRECISION_z) || defined(PRECISION_c)
 
@@ -192,6 +181,13 @@ magma_int_t magma_zheevdx(char jobz, char range, char uplo, magma_int_t n,
                           magma_int_t *m, double *w, cuDoubleComplex *work,
                           magma_int_t lwork, double *rwork, magma_int_t lrwork,
                           magma_int_t *iwork, magma_int_t liwork, magma_int_t *info);
+magma_int_t magma_zheevx( char jobz, char range, char uplo, magma_int_t n,
+                          cuDoubleComplex *a, magma_int_t lda, double vl, double vu,
+                          magma_int_t il, magma_int_t iu, double abstol, magma_int_t *m,
+                          double *w, cuDoubleComplex *z, magma_int_t ldz,
+                          cuDoubleComplex *work, magma_int_t lwork,
+                          double *rwork, magma_int_t *iwork,
+                          magma_int_t *ifail, magma_int_t *info);
 magma_int_t magma_zheevr( char jobz, char range, char uplo, magma_int_t n,
                           cuDoubleComplex *a, magma_int_t lda, double vl, double vu,
                           magma_int_t il, magma_int_t iu, double abstol, magma_int_t *m,
@@ -569,6 +565,16 @@ magma_int_t magma_zheevdx_gpu(char jobz, char range, char uplo,
                               double *rwork, magma_int_t lrwork,
                               magma_int_t *iwork, magma_int_t liwork,
                               magma_int_t *info);
+magma_int_t magma_zheevx_gpu( char jobz, char range, char uplo, magma_int_t n,
+                              cuDoubleComplex *da, magma_int_t ldda, double vl,
+                              double vu, magma_int_t il, magma_int_t iu,
+                              double abstol, magma_int_t *m,
+                              double *w, cuDoubleComplex *dz, magma_int_t lddz,
+                              cuDoubleComplex *wa, magma_int_t ldwa,
+                              cuDoubleComplex *wz, magma_int_t ldwz,
+                              cuDoubleComplex *work, magma_int_t lwork,
+                              double *rwork, magma_int_t *iwork,
+                              magma_int_t *ifail, magma_int_t *info);
 magma_int_t magma_zheevr_gpu( char jobz, char range, char uplo, magma_int_t n,
                               cuDoubleComplex *da, magma_int_t ldda, double vl, double vu,
                               magma_int_t il, magma_int_t iu, double abstol, magma_int_t *m,
@@ -599,16 +605,6 @@ magma_int_t magma_zheevdx_gpu(char jobz, char range, char uplo,
                               magma_int_t *info);
 #endif
 
-magma_int_t magma_zheevx_gpu( char jobz, char range, char uplo, magma_int_t n,
-                              cuDoubleComplex *da, magma_int_t ldda, double vl,
-                              double vu, magma_int_t il, magma_int_t iu,
-                              double abstol, magma_int_t *m,
-                              double *w, cuDoubleComplex *dz, magma_int_t lddz,
-                              cuDoubleComplex *wa, magma_int_t ldwa,
-                              cuDoubleComplex *wz, magma_int_t ldwz,
-                              cuDoubleComplex *work, magma_int_t lwork,
-                              double *rwork, magma_int_t *iwork,
-                              magma_int_t *ifail, magma_int_t *info);
 magma_int_t magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                              cuDoubleComplex *da, magma_int_t ldda,
                              cuDoubleComplex *db, magma_int_t lddb, magma_int_t *info);
