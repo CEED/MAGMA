@@ -32,12 +32,13 @@
 
 #define TESTING_CUDA_INIT_MGPU()                                           \
 {                                                                          \
+    magma_init();                                                          \
     int ndevices;                                                          \
     cudaGetDeviceCount( &ndevices );                                       \
     for( int idevice = 0; idevice < ndevices; ++idevice ) {                \
         cudaSetDevice(idevice);                                            \
         if( CUBLAS_STATUS_SUCCESS != cublasInit() ) {                      \
-            fprintf(stderr, "ERROR: cublasInit failed\n");                 \
+            fprintf(stderr, "ERROR: gpu %d: cublasInit failed\n", idevice);\
             exit(-1);                                                      \
         }                                                                  \
     }                                                                      \
@@ -48,6 +49,7 @@
 
 #define TESTING_CUDA_FINALIZE_MGPU()                                       \
 {                                                                          \
+    magma_finalize();                                                      \
     int ndevices;                                                          \
     cudaGetDeviceCount( &ndevices );                                       \
     for( int idevice = 0; idevice < ndevices; ++idevice ) {                \

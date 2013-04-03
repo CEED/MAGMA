@@ -151,7 +151,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
           
           /* Update the upper triangle of A(k:n,k:n) */
           
-          lapackf77_zhegs2( &itype, uplo_, &kb, A(k,k), &lda, B(k,k), &ldb, info);
+          lapackf77_zhegst( &itype, uplo_, &kb, A(k,k), &lda, B(k,k), &ldb, info);
           
           magma_zsetmatrix_async( kb, kb,
                                   A(k, k),  lda,
@@ -211,7 +211,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
           
           /* Update the lower triangle of A(k:n,k:n) */
           
-          lapackf77_zhegs2( &itype, uplo_, &kb, A(k,k), &lda, B(k,k), &ldb, info);
+          lapackf77_zhegst( &itype, uplo_, &kb, A(k,k), &lda, B(k,k), &ldb, info);
           
           magma_zsetmatrix_async( kb, kb,
                                   A(k, k),  lda,
@@ -312,7 +312,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
           
           magma_queue_sync( stream[0] );
           
-          lapackf77_zhegs2( &itype, uplo_, &kb, A(k, k), &lda, B(k, k), &ldb, info);
+          lapackf77_zhegst( &itype, uplo_, &kb, A(k, k), &lda, B(k, k), &ldb, info);
           
           magma_zsetmatrix_async( kb, kb,
                                   A(k, k),  lda,
@@ -369,7 +369,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
           
           magma_queue_sync( stream[0] );
           
-          lapackf77_zhegs2( &itype, uplo_, &kb, A(k,k), &lda, B(k,k), &ldb, info);
+          lapackf77_zhegst( &itype, uplo_, &kb, A(k,k), &lda, B(k,k), &ldb, info);
           
           magma_zsetmatrix_async( kb, kb,
                                   A(k, k),  lda,

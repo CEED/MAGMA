@@ -159,7 +159,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
             magma_queue_sync( stream[2] );
             magma_queue_sync( stream[1] );
             
-            lapackf77_zhegs2( &itype, uplo_, &kb, A(0,0), &lda, B(0,0), &ldb, info);
+            lapackf77_zhegst( &itype, uplo_, &kb, A(0,0), &lda, B(0,0), &ldb, info);
             
             magma_zsetmatrix_async( kb, kb,
                                     A(0, 0),  lda,
@@ -234,7 +234,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
           magma_queue_sync( stream[2] );
           magma_queue_sync( stream[1] );
           
-          lapackf77_zhegs2( &itype, uplo_, &kb, A(0, 0), &lda, B(0, 0), &ldb, info);
+          lapackf77_zhegst( &itype, uplo_, &kb, A(0, 0), &lda, B(0, 0), &ldb, info);
           
           magma_zsetmatrix_async( kb, kb,
                                   A(0, 0),  lda,
@@ -347,7 +347,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
           magma_queue_sync( stream[2] );
           magma_queue_sync( stream[0] );
           
-          lapackf77_zhegs2( &itype, uplo_, &kb, A(0, 0), &lda, B(0, 0), &ldb, info);
+          lapackf77_zhegst( &itype, uplo_, &kb, A(0, 0), &lda, B(0, 0), &ldb, info);
           
           magma_zsetmatrix_async( kb, kb,
                                   A(0, 0),  lda,
@@ -413,7 +413,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
           magma_queue_sync( stream[2] );
           magma_queue_sync( stream[0] );
           
-          lapackf77_zhegs2( &itype, uplo_, &kb, A(0, 0), &lda, B(0, 0), &ldb, info);
+          lapackf77_zhegst( &itype, uplo_, &kb, A(0, 0), &lda, B(0, 0), &ldb, info);
           
           magma_zsetmatrix_async( kb, kb,
                                   A(0, 0),  lda,
