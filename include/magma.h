@@ -321,7 +321,7 @@ int magma_num_gpus( void );
 int magma_is_devptr( const void* A );
 
 // magma GPU-complex PCIe connection
-int magma_buildconnection_mgpu(  magma_int_t gnode[MagmaMaxGPUs+2][MagmaMaxGPUs+2], magma_int_t *nbcmplx, magma_int_t ngpu);
+magma_int_t magma_buildconnection_mgpu(  magma_int_t gnode[MagmaMaxGPUs+2][MagmaMaxGPUs+2], magma_int_t *nbcmplx, magma_int_t ngpu);
 
 void magma_indices_1D_bcyclic( magma_int_t nb, magma_int_t ngpu, magma_int_t dev,
                                magma_int_t j0, magma_int_t j1,
