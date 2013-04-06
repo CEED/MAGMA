@@ -435,10 +435,10 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
         D[n-1] = A2[(n-1)*lda2+nb];
     }
 #endif
-
+/*
     if (wantz != 4)
         magma_free( dT1 );  //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
+*/
     magma_int_t ldz=n;
     cuDoubleComplex *dZ;
     magma_int_t info;
