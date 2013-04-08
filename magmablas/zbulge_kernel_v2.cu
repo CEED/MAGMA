@@ -101,7 +101,7 @@ __device__ void zlarfxsym_v2(magma_int_t n,
     for(j = 0; j< i; j++)
          dtmp += *dAC(i, j) * dV[j];
     for(j = i; j< n; j++)
-         dtmp += *dAC(j, i) * dV[j];
+         dtmp += MAGMA_Z_CNJG(*dAC(j, i)) * dV[j];
 
     dwork[i] = dTAU[0] * dtmp;
 
@@ -122,25 +122,94 @@ __device__ void zlarfxsym_v2(magma_int_t n,
        performs the symmetric rank 2 operation A := alpha*x*y' + alpha*y*x' + A 
        blasf77_zher2("L", &n, &c_neg_one, work, &ione, V, &ione, A, &lda);
     */
-   // __syncthreads();
-
+    __syncthreads();
     for(j=0; j<=i; j++)
        *dAC(i, j) -= dwork[i]*MAGMA_Z_CNJG( dV[j] ) + dV[i]*MAGMA_Z_CNJG( dwork[j] ); 
+
+    *dAC(i, i) = MAGMA_Z_MAKE( MAGMA_Z_REAL(*dAC(i, i)), 0.);
+    // synch the routine
+    __syncthreads();
+
 }
 
 ///////////////////////////////////////////////////////////
 //                  TYPE 1-BAND Householder
 ///////////////////////////////////////////////////////////
 __device__ void zlarfg(int n, cuDoubleComplex *dA, cuDoubleComplex *dx,
-                       cuDoubleComplex *dtau, double beta)
+                       cuDoubleComplex *dtau)
 {
     const int i = threadIdx.x;
     __shared__ cuDoubleComplex scale;
+    __shared__ double sum[ BLOCK_SIZE ], beta;
+    cuDoubleComplex alpha;
 
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-    if( n <= 1 || beta == 0) {
 #else
-    if( n <= 0 || beta == 0) {
+    double alphar;
+    __shared__ double alphai;
+#endif
+
+
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+    if( n <= 1 ) {
+#else
+    if( n <= 0 ) {
+#endif
+        *dtau = MAGMA_Z_ZERO;
+        return;
+    }
+
+/*
+    sum[i] = MAGMA_D_ZERO
+*/    
+/*
+#if (defined(PRECISION_c) || defined(PRECISION_z))
+    if (( n == 1 ) &&( i==0 ) ){
+       sum[0] = MAGMA_D_ZERO
+    }
+#endif
+*/
+
+    /* Compute the norm of dx
+      XNORM = DZNRM2( N-1, X, INCX )
+    */
+    if (i<n-1){
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+         {
+         double re = dx[i];
+         sum[i] = re*re;
+         }
+#else
+         {
+         double re = MAGMA_Z_REAL(dx[i]), im = MAGMA_Z_IMAG(dx[i]);
+         sum[i] = re*re + im*im;
+         }
+#endif
+        sum_reduce( n-1, i, sum );
+    }
+
+
+    if ( i == 0 ) {
+    alpha = *dA;
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+    beta = sqrt(sum[0]);
+#else
+    alphar = MAGMA_Z_REAL(alpha);
+    alphai = MAGMA_Z_IMAG(alpha);
+    if ( n == 1 )
+        beta = MAGMA_D_ZERO;
+    else
+        beta = sqrt(sum[0]);
+#endif 
+    }
+    __syncthreads();
+
+
+
+#if (defined(PRECISION_s) || defined(PRECISION_d))
+    if( beta == 0) {
+#else
+    if( beta == 0 && alphai == 0) {
 #endif
         *dtau = MAGMA_Z_ZERO;
         return;
@@ -148,7 +217,6 @@ __device__ void zlarfg(int n, cuDoubleComplex *dA, cuDoubleComplex *dx,
 
     if ( i == 0 ) {
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-            double alpha = *dA;
             beta  = beta*beta + alpha*alpha;
             beta  = sqrt(beta);
             beta  = -copysign( beta, alpha );
@@ -159,8 +227,8 @@ __device__ void zlarfg(int n, cuDoubleComplex *dA, cuDoubleComplex *dx,
 
             scale = 1. / (alpha - beta);
 #else
-            cuDoubleComplex alpha = *dA;
-            double alphar =  MAGMA_Z_REAL(alpha), alphai = MAGMA_Z_IMAG(alpha);
+            beta  = beta*beta + alphar*alphar + alphai*alphai;
+            beta  = sqrt(beta);
             beta  = -copysign( beta, alphar );
 
             // todo: deal with badly scaled vectors (see lapack's larfg)
@@ -177,6 +245,12 @@ __device__ void zlarfg(int n, cuDoubleComplex *dA, cuDoubleComplex *dx,
     __syncthreads();
     if ( i < n-1)
         dx[i] = MAGMA_Z_MUL(dx[i], scale);
+
+
+
+    // synch the routine
+    __syncthreads();
+    
 }
 
 
@@ -188,49 +262,24 @@ void magma_ztrdtype1cbHLsym_withQ_v2_gpu_kernel(cuDoubleComplex *dA, int ldda,
        const int i = threadIdx.x;
 
        if (i < len) {
-          /* beta = norm of dA(st+1:st+len,st-1) of length len-1
-          thats is used for the check and then inside dlarfg it should compute the norm of length len */
-          __shared__ double sum[ BLOCK_SIZE ], beta;
-
-          #if (defined(PRECISION_s) || defined(PRECISION_d))
-               {
-               double re = *dA(st+i,st-1);
-               sum[i] = re*re;
-               }
-          #else
-               {
-               double re = MAGMA_Z_REAL(*dA(st+i,st-1)), im = MAGMA_Z_IMAG(*dA(st+i,st-1));
-               sum[i] = re*re + im*im;
-               }
-          #endif
-          sum[0] =0;
-          sum_reduce( len, i, sum );
-
           /*
              V(0)  = c_one;
              cblas_zcopy(len-1, A(st+1, st-1), ione, V(1), ione);
              memset(A(st+1, st-1), 0, (len-1)*sizeof(cuDoubleComplex));
           */
-          
           if (i==0){
-             beta = sqrt(sum[0]);
              dV[0] = MAGMA_Z_ONE;
           } else {
              dV[i] = *dA(st+i, st-1);
              *dA(st+i, st-1) = MAGMA_Z_ZERO;
           }
        
-          __syncthreads();
           /*
              Eliminate the col  at st-1
              lapackf77_zlarfg( &len, A(st, st-1), V(1), &ione, TAU );
           */
-          //if(i==0)printf("HELLO HERE IS BETA %12.8e\n",beta);
-          double alpha1 = MAGMA_Z_REAL(*dA(st,st-1));
-
-          zlarfg(len, dA(st,st-1), dV(1), dTAU, beta);
-
-          //if(i==0)printf("HELLO HERE IS ALPHA %15.8e  BETA %15.8e V(2) %12.8e\n",alpha1, *dA(st,st-1), dV[1]);
+          __syncthreads();
+          zlarfg(len, dA(st,st-1), dV(1), dTAU);
 
           /*
              apply left and right on A(st:ed,st:ed)
