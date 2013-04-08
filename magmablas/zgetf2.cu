@@ -9,24 +9,15 @@
     @precisions normal z -> s d c
 */
 
-#include "stdio.h"
+#include <stdio.h>
 #include "common_magma.h"
-
-#define CUBLAS_V2 
-
-#ifdef CUBLAS_V2
-   #include "cublas_v2.h"
-#else
-   #include "cublas.h"
-#endif
-
-
+#include "magmablas.h"
     
 #define A(i, j)  (A +(i) + (j)*lda)   // A(i, j) means at i row, j column 
 
-void  magma_swap(int n, cuDoubleComplex *x, int i, int j, int lda);
+void  magma_zswap(int n, cuDoubleComplex *x, int i, int j, int lda);
 
-void magma_scal_ger(int, int, cuDoubleComplex *, int);
+void magma_zscal_zgeru(int, int, cuDoubleComplex *, int);
 
 
 int magma_zgetf2(int m, int n, cuDoubleComplex *A, int lda, int *ipiv, int* info)
@@ -91,15 +82,6 @@ int magma_zgetf2(int m, int n, cuDoubleComplex *A, int lda, int *ipiv, int* info
 
 //     Compute machine safe minimum 
 
-#ifdef CUBLAS_V2
-    cublasHandle_t handle;
-
-    cublasCreate(&handle);
-
-#else
-    cublasInit();
-
-#endif
 
     int i__1 = min(m, n);
 
@@ -114,11 +96,7 @@ int magma_zgetf2(int m, int n, cuDoubleComplex *A, int lda, int *ipiv, int* info
 
         cudaDeviceSetCacheConfig(cudaFuncCachePreferShared);    
     
-#ifdef CUBLAS_V2
-        cublasIzamax(handle,  m-j, (const cuDoubleComplex*)A(j,j), 1, &jp); 
-#else
         jp = cublasIzamax(m-j, (const cuDoubleComplex*)A(j,j), 1); 
-#endif
 
         jp = jp -1 + j;
     
@@ -133,7 +111,7 @@ int magma_zgetf2(int m, int n, cuDoubleComplex *A, int lda, int *ipiv, int* info
 
          if (jp != j) 
              {
-                magma_swap(n, A, j, jp, lda);
+                magma_zswap(n, A, j, jp, lda);
            
           }   
 
@@ -142,7 +120,7 @@ int magma_zgetf2(int m, int n, cuDoubleComplex *A, int lda, int *ipiv, int* info
           if (j < m) 
           {        
 
-              magma_scal_ger(m-j, n-j, A(j, j), lda);
+              magma_zscal_zgeru(m-j, n-j, A(j, j), lda);
 
           }
  
@@ -153,26 +131,19 @@ int magma_zgetf2(int m, int n, cuDoubleComplex *A, int lda, int *ipiv, int* info
 
    }
 
-#ifdef CUBLAS_V2
-    cublasDestroy(handle);
-
-#else
-    cublasShutdown();
-
-#endif
 
     return 0;
 
 } 
 
 
-#define swap_bs 64
-#define ger_bs 1024
+#define zswap_bs 64
+#define zgeru_bs 1024
 
 
-__global__ void kernel_swap(int n, cuDoubleComplex *x, int i, int j, int lda)
+__global__ void kernel_zswap(int n, cuDoubleComplex *x, int i, int j, int lda)
 {
-    int id = blockIdx.x * swap_bs + threadIdx.x;
+    int id = blockIdx.x * zswap_bs + threadIdx.x;
 
     if(id < n)
     {    
@@ -187,16 +158,21 @@ __global__ void kernel_swap(int n, cuDoubleComplex *x, int i, int j, int lda)
 }
 
 
-void  magma_swap(int n, cuDoubleComplex *x, int i, int j, int lda)
+void  magma_zswap(int n, cuDoubleComplex *x, int i, int j, int lda)
 {
+/*
 
-    dim3 threads(swap_bs, 1, 1);
+   zswap two row vectors: ith and jth  
+   
+*/
+
+    dim3 threads(zswap_bs, 1, 1);
     
-    int num_blocks = (n - 1)/swap_bs + 1;
+    int num_blocks = (n - 1)/zswap_bs + 1;
 
     dim3 grid(num_blocks,1);
 
-    kernel_swap<<< grid, threads, 0, magma_stream >>>(n, x, i, j, lda);
+    kernel_zswap<<< grid, threads, 0, magma_stream >>>(n, x, i, j, lda);
 
 }
 
@@ -204,12 +180,12 @@ void  magma_swap(int n, cuDoubleComplex *x, int i, int j, int lda)
 extern __shared__  cuDoubleComplex shared_data[];
 
 __global__ void
-kernel_scal_ger(int m, int n, cuDoubleComplex *A, int lda)
+kernel_zscal_zgeru(int m, int n, cuDoubleComplex *A, int lda)
 {
 
     cuDoubleComplex *shared_y = (cuDoubleComplex *)shared_data;
 
-    int tid = blockIdx.x * ger_bs + threadIdx.x;
+    int tid = blockIdx.x * zgeru_bs + threadIdx.x;
         
     cuDoubleComplex reg = MAGMA_Z_ZERO;
         
@@ -239,19 +215,25 @@ kernel_scal_ger(int m, int n, cuDoubleComplex *A, int lda)
 } 
 
 
-void  magma_scal_ger(int m, int n, cuDoubleComplex *A, int lda)
+void  magma_zscal_zgeru(int m, int n, cuDoubleComplex *A, int lda)
 {
+/*
 
+   Specialized kernel which merged zscal and zgeru the two kernels  
+   1) zscale a column vector  
+   2) Performe a zgeru Operation A := alpha*x*y**T + A,
 
-    dim3 threads(ger_bs, 1, 1);
+*/
+
+    dim3 threads(zgeru_bs, 1, 1);
     
-    int num_blocks = (m - 1)/ger_bs + 1;
+    int num_blocks = (m - 1)/zgeru_bs + 1;
 
     dim3 grid(num_blocks,1);
     
     size_t shared_size = sizeof(cuDoubleComplex)*(n);
 
-    kernel_scal_ger<<< grid, threads, shared_size, magma_stream>>>(m, n, A, lda);
+    kernel_zscal_zgeru<<< grid, threads, shared_size, magma_stream>>>(m, n, A, lda);
 
 
 }
