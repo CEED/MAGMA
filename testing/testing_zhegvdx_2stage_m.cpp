@@ -199,7 +199,7 @@ int main( int argc, char** argv)
                 // | B A Z - Z D | / ( |A||Z| N )  (itype = 3)
                 // ===================================================================
 #if defined(PRECISION_d) || defined(PRECISION_s)
-                double *rwork = h_work;
+                double *rwork = h_work + N*N;
 #endif
                 result = 1.;
                 result /= lapackf77_zlanhe("1",&uplo, &N, h_Ainit, &N, rwork);

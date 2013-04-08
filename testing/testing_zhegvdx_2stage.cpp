@@ -194,7 +194,7 @@ int main( int argc, char** argv)
                  (2)    | S(with V) - S(w/o V) | / | S |
                  =================================================================== */
 #if defined(PRECISION_d) || defined(PRECISION_s)
-                double *rwork = h_work;
+                double *rwork = h_work + N*N;
 #endif
                 double temp1, temp2;
 
