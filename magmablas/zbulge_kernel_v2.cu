@@ -19,18 +19,15 @@
 // === Define what BLAS to use ============================================
 #define PRECISION_z
 
+// nb is assumed to be < BLOCK_SIZE; if not, increase BLOCK_SIZE
+#define BLOCK_SIZEx  32
+#define BLOCK_SIZEy   4
+
+#define BLOCK_SIZE 128
+
 // === End defining what BLAS to use ======================================
 
 extern "C" {
-
-    void magma_ztrdtype1cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, cuDoubleComplex *A, magma_int_t lda, cuDoubleComplex *V, magma_int_t ldv, cuDoubleComplex *TAU,
-                                         magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, cuDoubleComplex *work);
-
-    void magma_ztrdtype2cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, cuDoubleComplex *A, magma_int_t lda, cuDoubleComplex *V, magma_int_t ldv, cuDoubleComplex *TAU,
-                                         magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, cuDoubleComplex *work);
-
-    void magma_ztrdtype3cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, cuDoubleComplex *A, magma_int_t lda, cuDoubleComplex *V, magma_int_t ldv, cuDoubleComplex *TAU,
-                                         magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, cuDoubleComplex *work);
 
     void magma_zlarfxsym_v2(magma_int_t n, cuDoubleComplex *A, magma_int_t lda, cuDoubleComplex *V, cuDoubleComplex *TAU, cuDoubleComplex *work);
 
@@ -67,6 +64,24 @@ __device__ void zsum_reduce( int n, int i, cuDoubleComplex* x )
     if ( n >    1 ) { if ( i <    1 && i +    1 < n ) { x[i] += x[i+   1]; }  __syncthreads(); }
 }
 
+template< int n >
+__device__ void sum_reduce_2d( /*int n,*/ int i, int c, cuDoubleComplex x[][BLOCK_SIZEy+1] )
+{
+    __syncthreads();
+    if ( n > 1024 ) { if ( i < 1024 && i + 1024 < n ) { x[i][c] += x[i+1024][c]; }  __syncthreads(); }
+    if ( n >  512 ) { if ( i <  512 && i +  512 < n ) { x[i][c] += x[i+ 512][c]; }  __syncthreads(); }
+    if ( n >  256 ) { if ( i <  256 && i +  256 < n ) { x[i][c] += x[i+ 256][c]; }  __syncthreads(); }
+    if ( n >  128 ) { if ( i <  128 && i +  128 < n ) { x[i][c] += x[i+ 128][c]; }  __syncthreads(); }
+    if ( n >   64 ) { if ( i <   64 && i +   64 < n ) { x[i][c] += x[i+  64][c]; }  __syncthreads(); }
+    if ( n >   32 ) { if ( i <   32 && i +   32 < n ) { x[i][c] += x[i+  32][c]; }  __syncthreads(); }
+    // probably don't need __syncthreads for < 16 threads
+    // because of implicit warp level synchronization.
+    if ( n >   16 ) { if ( i <   16 && i +   16 < n ) { x[i][c] += x[i+  16][c]; }  __syncthreads(); }
+    if ( n >    8 ) { if ( i <    8 && i +    8 < n ) { x[i][c] += x[i+   8][c]; }  __syncthreads(); }
+    if ( n >    4 ) { if ( i <    4 && i +    4 < n ) { x[i][c] += x[i+   4][c]; }  __syncthreads(); }
+    if ( n >    2 ) { if ( i <    2 && i +    2 < n ) { x[i][c] += x[i+   2][c]; }  __syncthreads(); }
+    if ( n >    1 ) { if ( i <    1 && i +    1 < n ) { x[i][c] += x[i+   1][c]; }  __syncthreads(); }
+}
 
 ///////////////////////////////////////////////////////////
 //// add -1 because of C
@@ -75,9 +90,6 @@ __device__ void zsum_reduce( int n, int i, cuDoubleComplex* x )
 
 #define dV(i)     &(dV[(i)])
 #define dTAU(i)   &(dTAU[(i)])
-
-// nb is assumed to be < BLOCK_SIZE; if not, increase BLOCK_SIZE
-#define BLOCK_SIZE 128
 
 __device__ void zlarfxsym_v2(magma_int_t n, 
                              cuDoubleComplex *dA, magma_int_t ldda, 
@@ -326,6 +338,7 @@ magma_ztrdtype1cbHLsym_withQ_v2_gpu(magma_int_t n, magma_int_t nb,
                                                                   st, len, dwork);
 }
 #undef dA
+#undef dAC
 #undef dV
 #undef dTAU
 
@@ -333,55 +346,195 @@ magma_ztrdtype1cbHLsym_withQ_v2_gpu(magma_int_t n, magma_int_t nb,
 //                  TYPE 1-LPK Householder
 ///////////////////////////////////////////////////////////
 //// add -1 because of C
-#define A(i,j)   &(A[((i)-(j)) + lda*((j)-1)])
-#define V(i)     &(V[(i)])
-#define TAU(i)   &(TAU[(i)])
+#define dA(i,j)    &(dA[((i)-(j)) + ldda*((j)-1)])
+#define dAC(i,j)   &(dA[((i)-(j)) + ldda*((j)  )])
+
+#define   dV(i)     &(dV[(i)])
+#define dTAU(i)   &(dTAU[(i)])
+
+
+/* Applies a complex elementary reflector H to a complex m by n
+   matrix C, from the right. H is represented in the form
+
+        H = I - tau * v * v'
+
+   where tau is a complex scalar and v is a complex vector.
+   If tau = 0, then H is taken to be the unit matrix              */
+
+__device__ void zlarfr(int m, int n, cuDoubleComplex *v, cuDoubleComplex dtau, 
+                       cuDoubleComplex *c, int ldc)
+{
+   if ( !MAGMA_Z_EQUAL(dtau, MAGMA_Z_ZERO) ) {
+        const int i = threadIdx.x;
+        cuDoubleComplex *dc = c + i;
+
+        if (i<m) {
+           cuDoubleComplex lsum;
+
+           /*  w := C  * v  */
+           lsum = MAGMA_Z_ZERO;
+           for( int j = 0; j < n; j ++ )
+              lsum += MAGMA_Z_MUL( dc[j*ldc], v[j] );
+
+
+           /*  C := C - tau * w * v'  */
+           __syncthreads();
+           cuDoubleComplex z__1 = - dtau * lsum;
+           for( int j = 0; j<n ; j ++ ) 
+               dc[j*ldc] += z__1 * MAGMA_Z_CNJG( v[j] );
+        }
+  }
+}
+
+/* Applies a complex elementary reflector H to a complex m by n
+   matrix C, from the left. H is represented in the form
+
+        H = I - tau * v * v'
+
+   where tau is a complex scalar and v is a complex vector.
+   If tau = 0, then H is taken to be the unit matrix              */
+
+__device__ void zlarfl(int m, int n, cuDoubleComplex *v, cuDoubleComplex dtau,
+                       cuDoubleComplex *c, int ldc)
+{
+   if ( !MAGMA_Z_EQUAL(dtau, MAGMA_Z_ZERO) ) {
+        const int i = threadIdx.x % BLOCK_SIZEx, col= threadIdx.x / BLOCK_SIZEx;
+        
+        for( int k = col; k < n; k+= BLOCK_SIZEy)
+        {
+           cuDoubleComplex *dc = c + k * ldc;
+
+           __shared__ cuDoubleComplex sum[ BLOCK_SIZEx ][ BLOCK_SIZEy + 1];
+           cuDoubleComplex lsum;
+
+           /*  w := v' * C  */
+           lsum = MAGMA_Z_ZERO;
+           for( int j = i; j < m; j += BLOCK_SIZEx )
+               lsum += MAGMA_Z_MUL( MAGMA_Z_CNJG( v[j] ), dc[j] );
+       
+           sum[i][col] = lsum;
+           sum_reduce_2d< BLOCK_SIZEx >( i, col, sum );
+
+           /*  C := C - v * w  */
+           __syncthreads();
+           cuDoubleComplex z__1 = - MAGMA_Z_CNJG(dtau) * sum[0][col];
+           for( int j = m-i-1; j>=0 ; j -= BLOCK_SIZEx )
+               dc[j] += z__1 * v[j];
+
+        }
+   }
+}
+
+__global__ void
+magma_zlarfr_gpu_kernel(int lem, int len, cuDoubleComplex *dV, cuDoubleComplex *dTAU,
+                        cuDoubleComplex *dA, int ldda)
+{
+    zlarfr(lem, len, dV, dTAU[0], dA, ldda);
+}
+
+__global__ void
+magma_ztrdtype2cbHLsym_withQ_v2_gpu_kernel(int lem, int len,
+                                           cuDoubleComplex *dA, int ldda,
+                                           cuDoubleComplex *dV, cuDoubleComplex *dTAU,
+                                           int st, int ed)
+{
+     const int i = threadIdx.x;
+
+     if (i < lem) {
+        /* === Compute the following using one multiprocessor with BLOCK_SIZE threads ===
+
+             // remove the first column of the created bulge
+             *V(vpos)  = c_one;
+             cblas_zcopy(lem-1, A(ed+2, st), ione, V(1), ione);
+             memset(A(ed+2, st),0,(lem-1)*sizeof(cuDoubleComplex));
+        */
+
+        if (i==0){
+             dV[0] = MAGMA_Z_ONE;
+        } else {
+             dV[i] = *dA(ed+1+i, st);
+             *dA(ed+1+i, st) = MAGMA_Z_ZERO;
+        }
+
+        /* === Compute the following using one multiprocessor with BLOCK_SIZE threads ===
+
+             // Eliminate the col at st
+             lapackf77_zlarfg( &lem, A(ed+1, st), V(1), &ione, TAU );
+
+        */
+   
+        zlarfg(lem, dA(ed+1, st), dV(1), dTAU);
+     }
+        /* === Compute the following using one multiprocessor with BLOCK_SIZE threads ===
+
+             // apply left on A(J1:J2,st+1:ed)
+             len = len-1; // because we start at col st+1 instead of st. col st is the col that has been removed
+             conjtmp = MAGMA_Z_CNJG(*TAU(taupos));
+             lapackf77_zlarfx("L", &lem, &len, V(vpos),  &conjtmp, A(ed+1, st+1), &ldx, work);
+        */
+       
+        zlarfl(lem, len, dV, MAGMA_Z_CNJG( dTAU[0] ), dA(ed+1, st+1), ldda);
+}
+
 extern "C" void
-magma_ztrdtype2cbHLsym_withQ_v2_fake(magma_int_t n, magma_int_t nb, cuDoubleComplex *A, magma_int_t lda, cuDoubleComplex *V, magma_int_t ldv, cuDoubleComplex *TAU,
-                                magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, cuDoubleComplex *work) {
-
-    /*
-     WORK (workspace) double complex array, dimension NB
-    */
-
-    magma_int_t ione = 1;
+magma_ztrdtype2cbHLsym_withQ_v2_gpu(magma_int_t n, magma_int_t nb, 
+                                    cuDoubleComplex *dA, magma_int_t ldda, 
+                                    cuDoubleComplex *dV, magma_int_t lddv, 
+                                    cuDoubleComplex *dTAU,
+                                    magma_int_t st, magma_int_t ed, magma_int_t sweep, 
+                                    magma_int_t Vblksiz) 
+{
     magma_int_t vpos, taupos;
 
-    cuDoubleComplex conjtmp;
-
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
-
-    magma_int_t ldx = lda-1;
+    magma_int_t lddx = ldda-1;
     magma_int_t len = ed - st + 1;
     magma_int_t lem = min(ed+nb, n) - ed;
 
+    if (nb > BLOCK_SIZE)
+       printf("magma_ztrdtype2cbHLsym_withQ_v2_gpu: BLOCK_SIZE should be > %d\n", nb);
+
     if(lem>0){
-        magma_bulge_findVTAUpos(n, nb, Vblksiz, sweep-1, st-1, ldv, &vpos, &taupos);
-        /* apply remaining right coming from the top block */
-        lapackf77_zlarfx("R", &lem, &len, V(vpos), TAU(taupos), A(ed+1, st), &ldx, work);
+        magma_bulge_findVTAUpos(n, nb, Vblksiz, sweep-1, st-1, lddv, &vpos, &taupos);
+
+        /* 
+           Apply remaining right coming from the top block using multiprocessor 
+           with BLOCK_SIZE threads
+
+           lapackf77_zlarfx("R", &lem, &len, V(vpos), TAU(taupos), A(ed+1, st), &ldx, work);
+        */
+        magma_zlarfr_gpu_kernel<<< 1, BLOCK_SIZE >>>(lem, len, dV+vpos, dTAU+taupos, 
+                                                     dA(ed+1, st), lddx);
     }
     if(lem>1){
-        magma_bulge_findVTAUpos(n, nb, Vblksiz, sweep-1, ed, ldv, &vpos, &taupos);
+        magma_bulge_findVTAUpos(n, nb, Vblksiz, sweep-1, ed, lddv, &vpos, &taupos);
 
-        /* remove the first column of the created bulge */
-        *V(vpos)  = c_one;
-        //memcpy(V(vpos+1), A(ed+2, st), (lem-1)*sizeof(cuDoubleComplex));
-        cblas_zcopy(lem-1, A(ed+2, st), ione, V(vpos+1), ione);
-        memset(A(ed+2, st),0,(lem-1)*sizeof(cuDoubleComplex));
+        /* === Compute the following using one multiprocessor with BLOCK_SIZE threads ===
 
-        /* Eliminate the col at st */
-        lapackf77_zlarfg( &lem, A(ed+1, st), V(vpos+1), &ione, TAU(taupos) );
+           // remove the first column of the created bulge 
+           *V(vpos)  = c_one;
+           cblas_zcopy(lem-1, A(ed+2, st), ione, V(vpos+1), ione);
+           memset(A(ed+2, st),0,(lem-1)*sizeof(cuDoubleComplex));
 
-        /* apply left on A(J1:J2,st+1:ed) */
-        len = len-1; /* because we start at col st+1 instead of st. col st is the col that has been removed;*/
-        conjtmp = MAGMA_Z_CNJG(*TAU(taupos));
-        lapackf77_zlarfx("L", &lem, &len, V(vpos),  &conjtmp, A(ed+1, st+1), &ldx, work);
+           // Eliminate the col at st 
+           lapackf77_zlarfg( &lem, A(ed+1, st), V(vpos+1), &ione, TAU(taupos) );
+
+           // apply left on A(J1:J2,st+1:ed) 
+           len = len-1; // because we start at col st+1 instead of st. col st is the col that has been removed
+           conjtmp = MAGMA_Z_CNJG(*TAU(taupos));
+           lapackf77_zlarfx("L", &lem, &len, V(vpos),  &conjtmp, A(ed+1, st+1), &ldx, work);
+        */
+        magma_ztrdtype2cbHLsym_withQ_v2_gpu_kernel<<<1, BLOCK_SIZE>>>(lem, len,
+                                                                      dA, lddx,
+                                                                      dV + vpos, dTAU + taupos,
+                                                                      st, ed);
     }
 
 }
-#undef A
-#undef V
-#undef TAU
+#undef dA
+#undef dAC
+
+#undef dV
+#undef dTAU
 
 ///////////////////////////////////////////////////////////
 //                  TYPE 1-LPK Householder
