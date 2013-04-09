@@ -86,7 +86,7 @@ __device__ void sum_reduce_2d( /*int n,*/ int i, int c, cuDoubleComplex x[][BLOC
 ///////////////////////////////////////////////////////////
 //// add -1 because of C
 #define dA(i,j)   &(dA[((i)-(j)) + ldda*((j)-1)])
-#define dAC(i,j)   &(dA[((i)-(j)) + ldda*((j))])
+#define dAC(i,j)   &(dA[(i) + ldda*(j)])
 
 #define dV(i)     &(dV[(i)])
 #define dTAU(i)   &(dTAU[(i)])
@@ -297,7 +297,7 @@ void magma_ztrdtype1cbHLsym_withQ_v2_gpu_kernel(cuDoubleComplex *dA, int ldda,
              apply left and right on A(st:ed,st:ed)
              magma_zlarfxsym_v2(len, A(st,st), lda-1, V, TAU, work);
           */
-          zlarfxsym_v2(len, dA(st,st), ldda, dV, dTAU, dwork);
+          zlarfxsym_v2(len, dA(st,st), ldda-1, dV, dTAU, dwork);
        }
 }
 
@@ -313,6 +313,7 @@ magma_ztrdtype1cbHLsym_withQ_v2_gpu(magma_int_t n, magma_int_t nb,
     WORK (workspace) double complex array, dimension N
 */
     magma_int_t vpos, taupos, len;
+    magma_int_t lddx = ldda-1;
 
     if (nb > BLOCK_SIZE)
        printf("magma_ztrdtype1cbHLsym_withQ_v2_gpu: BLOCK_SIZE should be > %d\n", nb);
@@ -347,7 +348,7 @@ magma_ztrdtype1cbHLsym_withQ_v2_gpu(magma_int_t n, magma_int_t nb,
 ///////////////////////////////////////////////////////////
 //// add -1 because of C
 #define dA(i,j)    &(dA[((i)-(j)) + ldda*((j)-1)])
-#define dAC(i,j)   &(dA[((i)-(j)) + ldda*((j)  )])
+#define dAC(i,j)   &(dA[(i) + ldda*(j)])
 
 #define   dV(i)     &(dV[(i)])
 #define dTAU(i)   &(dTAU[(i)])
@@ -378,13 +379,51 @@ __device__ void zlarfr(int m, int n, cuDoubleComplex *v, cuDoubleComplex dtau,
 
 
            /*  C := C - tau * w * v'  */
-           __syncthreads();
-           cuDoubleComplex z__1 = - dtau * lsum;
+           //__syncthreads();
+           lsum = - dtau * lsum;
            for( int j = 0; j<n ; j ++ ) 
-               dc[j*ldc] += z__1 * MAGMA_Z_CNJG( v[j] );
+               dc[j*ldc] += lsum * MAGMA_Z_CNJG( v[j] );
         }
+        // synch the routine
+        __syncthreads();
   }
 }
+
+
+
+
+
+
+__device__ void zlarfl2(int m, int n, cuDoubleComplex *v, cuDoubleComplex dtau, 
+                       cuDoubleComplex *c, int ldc)
+{
+   if ( !MAGMA_Z_EQUAL(dtau, MAGMA_Z_ZERO) ) {
+        const int i = threadIdx.x;
+        cuDoubleComplex *dc = c + i*ldc;
+
+        if (i<n) {
+           cuDoubleComplex lsum;
+
+           /*  w := v'  * C  */
+           lsum = MAGMA_Z_ZERO;
+           for( int j = 0; j < m; j ++ )
+              lsum += MAGMA_Z_MUL( dc[j],  MAGMA_Z_CNJG(v[j]) );
+
+
+           /*  C := C - tau * v * w */
+           //__syncthreads();
+           lsum = - dtau * lsum;
+           for( int j = 0; j<m ; j ++ ) 
+               dc[j] += lsum *  v[j];
+        }
+        // synch the routine
+        __syncthreads();
+  }
+}
+
+
+
+
 
 /* Applies a complex elementary reflector H to a complex m by n
    matrix C, from the left. H is represented in the form
@@ -393,22 +432,27 @@ __device__ void zlarfr(int m, int n, cuDoubleComplex *v, cuDoubleComplex dtau,
 
    where tau is a complex scalar and v is a complex vector.
    If tau = 0, then H is taken to be the unit matrix              */
-
+ 
 __device__ void zlarfl(int m, int n, cuDoubleComplex *v, cuDoubleComplex dtau,
                        cuDoubleComplex *c, int ldc)
 {
    if ( !MAGMA_Z_EQUAL(dtau, MAGMA_Z_ZERO) ) {
         const int i = threadIdx.x % BLOCK_SIZEx, col= threadIdx.x / BLOCK_SIZEx;
-        
+
+        __shared__ cuDoubleComplex sum[ BLOCK_SIZEx ][ BLOCK_SIZEy + 1];
+        sum[i][col] = MAGMA_Z_ZERO;
+
         for( int k = col; k < n; k+= BLOCK_SIZEy)
         {
            cuDoubleComplex *dc = c + k * ldc;
+           //__shared__ cuDoubleComplex sum[ BLOCK_SIZEx ][ BLOCK_SIZEy + 1];
 
-           __shared__ cuDoubleComplex sum[ BLOCK_SIZEx ][ BLOCK_SIZEy + 1];
-           cuDoubleComplex lsum;
+           
+           // sum[i][col] = MAGMA_Z_ZERO;
+           cuDoubleComplex lsum = MAGMA_Z_ZERO;
 
            /*  w := v' * C  */
-           lsum = MAGMA_Z_ZERO;
+           //lsum = MAGMA_Z_ZERO;
            for( int j = i; j < m; j += BLOCK_SIZEx )
                lsum += MAGMA_Z_MUL( MAGMA_Z_CNJG( v[j] ), dc[j] );
        
@@ -418,10 +462,16 @@ __device__ void zlarfl(int m, int n, cuDoubleComplex *v, cuDoubleComplex dtau,
            /*  C := C - v * w  */
            __syncthreads();
            cuDoubleComplex z__1 = - MAGMA_Z_CNJG(dtau) * sum[0][col];
+           for( int j = i; j < m; j += BLOCK_SIZEx )
+               dc[j] += z__1 * v[j]; 
+
+/*
            for( int j = m-i-1; j>=0 ; j -= BLOCK_SIZEx )
-               dc[j] += z__1 * v[j];
+               dc[j] += z__1 * v[j];*/
 
         }
+        // synch the routine
+        __syncthreads();
    }
 }
 
@@ -472,8 +522,10 @@ magma_ztrdtype2cbHLsym_withQ_v2_gpu_kernel(int lem, int len,
              conjtmp = MAGMA_Z_CNJG(*TAU(taupos));
              lapackf77_zlarfx("L", &lem, &len, V(vpos),  &conjtmp, A(ed+1, st+1), &ldx, work);
         */
-       
-        zlarfl(lem, len, dV, MAGMA_Z_CNJG( dTAU[0] ), dA(ed+1, st+1), ldda);
+
+       // note that all htreads need to call this function
+        __syncthreads();
+        zlarfl(lem, len-1, dV, MAGMA_Z_CNJG( dTAU[0] ), dA(ed+1, st+1), ldda-1);
 }
 
 extern "C" void
@@ -524,7 +576,7 @@ magma_ztrdtype2cbHLsym_withQ_v2_gpu(magma_int_t n, magma_int_t nb,
            lapackf77_zlarfx("L", &lem, &len, V(vpos),  &conjtmp, A(ed+1, st+1), &ldx, work);
         */
         magma_ztrdtype2cbHLsym_withQ_v2_gpu_kernel<<<1, BLOCK_SIZE>>>(lem, len,
-                                                                      dA, lddx,
+                                                                      dA, ldda,
                                                                       dV + vpos, dTAU + taupos,
                                                                       st, ed);
     }
