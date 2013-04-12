@@ -69,7 +69,6 @@ ZSRC += \
 	testing_zgetri_gpu.cpp	\
 	\
 	testing_zgetrf_mgpu.cpp	\
-	testing_zgetf2.cpp	\
 
 # LU, CPU interface
 ZSRC += \
