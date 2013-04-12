@@ -40,7 +40,7 @@ void magma_xerror( magma_err_t err, const char* func, const char* file, int line
 {
     if ( err != MAGMA_SUCCESS ) {
         fprintf( stderr, "MAGMA error: %s (%d) in %s at %s:%d\n",
-                 magmaGetErrorString( err ), err, func, file, line );
+                 magma_geterrorstring( err ), err, func, file, line );
     }
 }
 
@@ -221,14 +221,55 @@ const char* cublasGetErrorString( cublasStatus_t error )
 
 
 // ----------------------------------------
-const char* magmaGetErrorString( magma_err_t error )
+const char* magma_geterrorstring( magma_err_t error )
 {
+    // LAPACK-compliant errors
+    if ( error > 0 ) {
+        return "see function documentation";
+    }
+    else if ( error < 0 && error > MAGMA_ERR ) {
+        return "bad argument value";
+    }
+    // MAGMA-specific errors
     switch( error ) {
         case MAGMA_SUCCESS:
             return "success";
         
+        case MAGMA_ERR:
+            return "unknown error";
+        
+        case MAGMA_ERR_NOT_INITIALIZED:
+            return "not initialized";
+        
+        case MAGMA_ERR_REINITIALIZED:
+            return "reinitialized";
+        
+        case MAGMA_ERR_NOT_SUPPORTED:
+            return "not supported";
+        
         case MAGMA_ERR_ILLEGAL_VALUE:
             return "illegal value";
+        
+        case MAGMA_ERR_NOT_FOUND:
+            return "not found";
+        
+        case MAGMA_ERR_ALLOCATION:
+            return "allocation";
+        
+        case MAGMA_ERR_INTERNAL_LIMIT:
+            return "internal limit";
+        
+        case MAGMA_ERR_UNALLOCATED:
+            return "unallocated";
+        
+        case MAGMA_ERR_FILESYSTEM:
+            return "filesystem";
+        
+        case MAGMA_ERR_UNEXPECTED:
+            return "unexpected";
+        
+        case MAGMA_ERR_SEQUENCE_FLUSHED:
+            return "sequence flushed";
         
         case MAGMA_ERR_HOST_ALLOC:
             return "host malloc";

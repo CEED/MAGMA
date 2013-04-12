@@ -308,6 +308,7 @@ void magma_queue_wait_event( magma_queue_t queue, magma_event_t event );
 // ========================================
 // error handler
 void magma_xerbla( const char *name, magma_int_t info );
+const char* magma_geterrorstring( magma_err_t error );
 
 
 /* ------------------------------------------------------------
