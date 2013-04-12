@@ -67,7 +67,7 @@ int main( int argc, char** argv)
             sizeB = ldb*opts.nrhs;
             lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );
             lapackf77_zlarnv( &ione, ISEED, &sizeB, h_B );
-            magma_zhpd( N, h_A, lda );
+            magma_zmake_hpd( N, h_A, lda );
             
             magma_zsetmatrix( N, N,         h_A, N, d_A, ldda );
             magma_zsetmatrix( N, opts.nrhs, h_B, N, d_B, lddb );

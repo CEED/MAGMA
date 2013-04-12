@@ -99,15 +99,15 @@
 extern "C" {
 #endif
 
-void magma_zhermitian( magma_int_t N, cuDoubleComplex* A, magma_int_t lda );
-void magma_chermitian( magma_int_t N, cuFloatComplex*  A, magma_int_t lda );
-void magma_dhermitian( magma_int_t N, double*          A, magma_int_t lda );
-void magma_shermitian( magma_int_t N, float*           A, magma_int_t lda );
+void magma_zmake_hermitian( magma_int_t N, cuDoubleComplex* A, magma_int_t lda );
+void magma_cmake_hermitian( magma_int_t N, cuFloatComplex*  A, magma_int_t lda );
+void magma_dmake_symmetric( magma_int_t N, double*          A, magma_int_t lda );
+void magma_smake_symmetric( magma_int_t N, float*           A, magma_int_t lda );
 
-void magma_zhpd( magma_int_t N, cuDoubleComplex* A, magma_int_t lda );
-void magma_chpd( magma_int_t N, cuFloatComplex*  A, magma_int_t lda );
-void magma_dhpd( magma_int_t N, double*          A, magma_int_t lda );
-void magma_shpd( magma_int_t N, float*           A, magma_int_t lda );
+void magma_zmake_hpd( magma_int_t N, cuDoubleComplex* A, magma_int_t lda );
+void magma_cmake_hpd( magma_int_t N, cuFloatComplex*  A, magma_int_t lda );
+void magma_dmake_hpd( magma_int_t N, double*          A, magma_int_t lda );
+void magma_smake_hpd( magma_int_t N, float*           A, magma_int_t lda );
 
 void magma_assert( bool condition, const char* msg, ... );
 

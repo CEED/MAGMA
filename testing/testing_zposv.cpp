@@ -62,7 +62,7 @@ int main( int argc, char** argv)
             sizeB = ldb*opts.nrhs;
             lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );
             lapackf77_zlarnv( &ione, ISEED, &sizeB, h_B );
-            magma_zhpd( N, h_A, lda );
+            magma_zmake_hpd( N, h_A, lda );
             
             // copy A to R and B to X; save A and B for residual
             lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N,         h_A, &lda, h_R, &lda );

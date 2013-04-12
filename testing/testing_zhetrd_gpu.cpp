@@ -99,7 +99,7 @@ int main( int argc, char** argv)
                Initialize the matrix
                =================================================================== */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-            magma_zhermitian( N, h_A, lda );
+            magma_zmake_hermitian( N, h_A, lda );
             magma_zsetmatrix( N, N, h_A, lda, d_R, lda );
             
             /* ====================================================================

@@ -248,7 +248,7 @@ int main(int argc, char **argv)
     fp = fopen ("results_zhemv_mgpu.csv", "w") ;
     if( fp == NULL ){ printf("Couldn't open output file\n"); exit(1);}
 
-    printf("HEMV cuDoubleComplex Precision\n\n");
+    printf("ZHEMV cuDoubleComplex precision\n\n");
 
     printf( "   n   CUBLAS,Gflop/s   MAGMABLAS,Gflop/s      \"error\"\n" 
             "==============================================================\n");

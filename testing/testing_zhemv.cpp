@@ -82,7 +82,7 @@ int main(int argc, char **argv)
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, A );
-            magma_zhermitian( N, A, lda );
+            magma_zmake_hermitian( N, A, lda );
             lapackf77_zlarnv( &ione, ISEED, &sizeX, X );
             lapackf77_zlarnv( &ione, ISEED, &sizeY, Y );
             

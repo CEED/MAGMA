@@ -81,7 +81,7 @@ int main( int argc, char** argv)
             /* Initialize the matrix */
             lapackf77_dlarnv( &ione, ISEED, &n2, h_A );
             lapackf77_dlarnv( &ione, ISEED, &n2, h_B );
-            magma_dhpd( N, h_B, N );
+            magma_dmake_hpd( N, h_B, N );
             lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
             lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
             
@@ -145,21 +145,21 @@ int main( int argc, char** argv)
                 if ( opts.itype == 1 ) {
                     blasf77_dsymm("L", &opts.uplo, &N, &N, &c_one, h_A, &N, h_R, &N, &d_zero, h_work, &N);
                     for(int i=0; i<N; ++i)
-                        blasf77_ddscal(&N, &w1[i], &h_R[i*N], &ione);
+                        blasf77_dscal(&N, &w1[i], &h_R[i*N], &ione);
                     blasf77_dsymm("L", &opts.uplo, &N, &N, &c_neg_one, h_B, &N, h_R, &N, &c_one, h_work, &N);
                     result[0] *= lapackf77_dlange("1", &N, &N, h_work, &N, &temp1)/N;
                 }
                 else if ( opts.itype == 2 ) {
                     blasf77_dsymm("L", &opts.uplo, &N, &N, &c_one, h_B, &N, h_R, &N, &d_zero, h_work, &N);
                     for(int i=0; i<N; ++i)
-                        blasf77_ddscal(&N, &w1[i], &h_R[i*N], &ione);
+                        blasf77_dscal(&N, &w1[i], &h_R[i*N], &ione);
                     blasf77_dsymm("L", &opts.uplo, &N, &N, &c_one, h_A, &N, h_work, &N, &c_neg_one, h_R, &N);
                     result[0] *= lapackf77_dlange("1", &N, &N, h_R, &N, &temp1)/N;
                 }
                 else if ( opts.itype == 3 ) {
                     blasf77_dsymm("L", &opts.uplo, &N, &N, &c_one, h_A, &N, h_R, &N, &d_zero, h_work, &N);
                     for(int i=0; i<N; ++i)
-                        blasf77_ddscal(&N, &w1[i], &h_R[i*N], &ione);
+                        blasf77_dscal(&N, &w1[i], &h_R[i*N], &ione);
                     blasf77_dsymm("L", &opts.uplo, &N, &N, &c_one, h_B, &N, h_work, &N, &c_neg_one, h_R, &N);
                     result[0] *= lapackf77_dlange("1", &N, &N, h_R, &N, &temp1)/N;
                 }
