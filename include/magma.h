@@ -94,7 +94,6 @@
 #define MAGMA_ERR_NOT_SUPPORTED    -103
 #define MAGMA_ERR_ILLEGAL_VALUE    -104
 #define MAGMA_ERR_NOT_FOUND        -105
-#define MAGMA_ERR_OUT_OF_RESOURCES -106
 #define MAGMA_ERR_ALLOCATION       -106
 #define MAGMA_ERR_INTERNAL_LIMIT   -107
 #define MAGMA_ERR_UNALLOCATED      -108
@@ -213,13 +212,25 @@ void magma_version( int* major, int* minor, int* micro );
 // ========================================
 // memory allocation
 magma_err_t magma_malloc( magma_devptr *ptrPtr, size_t bytes );
-magma_err_t magma_free  ( magma_devptr ptr );
-
 magma_err_t magma_malloc_cpu( void **ptrPtr, size_t bytes );
-magma_err_t magma_free_cpu  ( void *ptr );
-
 magma_err_t magma_malloc_pinned( void **ptrPtr, size_t bytes );
-magma_err_t magma_free_pinned  ( void *ptr );
+
+magma_err_t magma_free_cpu( magma_devptr ptr );
+
+#define magma_free( ptr ) \
+        magma_free_internal( ptr, __func__, __FILE__, __LINE__ )
+
+#define magma_free_pinned( ptr ) \
+        magma_free_pinned_internal( ptr, __func__, __FILE__, __LINE__ )
+
+magma_err_t magma_free_internal(
+    magma_devptr ptr,
+    const char* func, const char* file, int line );
+
+magma_err_t magma_free_pinned_internal(
+    magma_devptr ptr,
+    const char* func, const char* file, int line );
+
 
 // type-safe convenience functions to avoid using (void**) cast and sizeof(...)
 // here n is the number of elements (floats, doubles, etc.) not the number of bytes.
