@@ -19,6 +19,9 @@ typedef int64_t magma_int_t;
 typedef int magma_int_t;
 #endif
 
+typedef cuDoubleComplex magmaDoubleComplex;
+typedef cuFloatComplex  magmaFloatComplex;
+
 typedef int   magma_err_t;
 typedef void* magma_devptr;
 
@@ -45,7 +48,7 @@ typedef int          magma_device_t;
 #include "magmablas_zc.h"
 #include "magmablas_ds.h"
 
-#if (GPUSHMEM < 200)  
+#if (GPUSHMEM < 200)
 #define magmablas_zgemm cublasZgemm
 #endif
 #define magmablas_cgemm cublasCgemm
@@ -117,19 +120,19 @@ void magma_getvector_async_internal(
 
 #define magma_setmatrix(           m, n, elemSize, hA_src, lda, dB_dst, lddb ) \
         magma_setmatrix_internal(  m, n, elemSize, hA_src, lda, dB_dst, lddb, __func__, __FILE__, __LINE__ )
-                                         
+
 #define magma_getmatrix(           m, n, elemSize, dA_src, ldda, hB_dst, ldb ) \
         magma_getmatrix_internal(  m, n, elemSize, dA_src, ldda, hB_dst, ldb, __func__, __FILE__, __LINE__ )
-                                         
+
 #define magma_copymatrix(          m, n, elemSize, dA_src, ldda, dB_dst, lddb ) \
         magma_copymatrix_internal( m, n, elemSize, dA_src, ldda, dB_dst, lddb, __func__, __FILE__, __LINE__ )
 
 #define magma_setmatrix_async(           m, n, elemSize, hA_src, lda, dB_dst, lddb, stream ) \
         magma_setmatrix_async_internal(  m, n, elemSize, hA_src, lda, dB_dst, lddb, stream, __func__, __FILE__, __LINE__ )
-                                               
+
 #define magma_getmatrix_async(           m, n, elemSize, dA_src, ldda, hB_dst, ldb, stream ) \
         magma_getmatrix_async_internal(  m, n, elemSize, dA_src, ldda, hB_dst, ldb, stream, __func__, __FILE__, __LINE__ )
-                                               
+
 #define magma_copymatrix_async(          m, n, elemSize, dA_src, ldda, dB_dst, lddb, stream ) \
         magma_copymatrix_async_internal( m, n, elemSize, dA_src, ldda, dB_dst, lddb, stream, __func__, __FILE__, __LINE__ )
 

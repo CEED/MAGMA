@@ -234,20 +234,20 @@ magma_err_t magma_free_pinned_internal(
 
 // type-safe convenience functions to avoid using (void**) cast and sizeof(...)
 // here n is the number of elements (floats, doubles, etc.) not the number of bytes.
-static inline magma_err_t magma_smalloc( float           **ptrPtr, size_t n ) { return magma_malloc( (void**) ptrPtr, n*sizeof(float)           ); }
-static inline magma_err_t magma_dmalloc( double          **ptrPtr, size_t n ) { return magma_malloc( (void**) ptrPtr, n*sizeof(double)          ); }
-static inline magma_err_t magma_cmalloc( cuFloatComplex  **ptrPtr, size_t n ) { return magma_malloc( (void**) ptrPtr, n*sizeof(cuFloatComplex)  ); }
-static inline magma_err_t magma_zmalloc( cuDoubleComplex **ptrPtr, size_t n ) { return magma_malloc( (void**) ptrPtr, n*sizeof(cuDoubleComplex) ); }
+static inline magma_err_t magma_smalloc( float              **ptrPtr, size_t n ) { return magma_malloc( (void**) ptrPtr, n*sizeof(float)              ); }
+static inline magma_err_t magma_dmalloc( double             **ptrPtr, size_t n ) { return magma_malloc( (void**) ptrPtr, n*sizeof(double)             ); }
+static inline magma_err_t magma_cmalloc( magmaFloatComplex  **ptrPtr, size_t n ) { return magma_malloc( (void**) ptrPtr, n*sizeof(magmaFloatComplex)  ); }
+static inline magma_err_t magma_zmalloc( magmaDoubleComplex **ptrPtr, size_t n ) { return magma_malloc( (void**) ptrPtr, n*sizeof(magmaDoubleComplex) ); }
 
-static inline magma_err_t magma_smalloc_cpu( float           **ptrPtr, size_t n ) { return magma_malloc_cpu( (void**) ptrPtr, n*sizeof(float)           ); }
-static inline magma_err_t magma_dmalloc_cpu( double          **ptrPtr, size_t n ) { return magma_malloc_cpu( (void**) ptrPtr, n*sizeof(double)          ); }
-static inline magma_err_t magma_cmalloc_cpu( cuFloatComplex  **ptrPtr, size_t n ) { return magma_malloc_cpu( (void**) ptrPtr, n*sizeof(cuFloatComplex)  ); }
-static inline magma_err_t magma_zmalloc_cpu( cuDoubleComplex **ptrPtr, size_t n ) { return magma_malloc_cpu( (void**) ptrPtr, n*sizeof(cuDoubleComplex) ); }
+static inline magma_err_t magma_smalloc_cpu( float              **ptrPtr, size_t n ) { return magma_malloc_cpu( (void**) ptrPtr, n*sizeof(float)              ); }
+static inline magma_err_t magma_dmalloc_cpu( double             **ptrPtr, size_t n ) { return magma_malloc_cpu( (void**) ptrPtr, n*sizeof(double)             ); }
+static inline magma_err_t magma_cmalloc_cpu( magmaFloatComplex  **ptrPtr, size_t n ) { return magma_malloc_cpu( (void**) ptrPtr, n*sizeof(magmaFloatComplex)  ); }
+static inline magma_err_t magma_zmalloc_cpu( magmaDoubleComplex **ptrPtr, size_t n ) { return magma_malloc_cpu( (void**) ptrPtr, n*sizeof(magmaDoubleComplex) ); }
 
-static inline magma_err_t magma_smalloc_pinned( float           **ptrPtr, size_t n ) { return magma_malloc_pinned( (void**) ptrPtr, n*sizeof(float)           ); }
-static inline magma_err_t magma_dmalloc_pinned( double          **ptrPtr, size_t n ) { return magma_malloc_pinned( (void**) ptrPtr, n*sizeof(double)          ); }
-static inline magma_err_t magma_cmalloc_pinned( cuFloatComplex  **ptrPtr, size_t n ) { return magma_malloc_pinned( (void**) ptrPtr, n*sizeof(cuFloatComplex)  ); }
-static inline magma_err_t magma_zmalloc_pinned( cuDoubleComplex **ptrPtr, size_t n ) { return magma_malloc_pinned( (void**) ptrPtr, n*sizeof(cuDoubleComplex) ); }
+static inline magma_err_t magma_smalloc_pinned( float              **ptrPtr, size_t n ) { return magma_malloc_pinned( (void**) ptrPtr, n*sizeof(float)              ); }
+static inline magma_err_t magma_dmalloc_pinned( double             **ptrPtr, size_t n ) { return magma_malloc_pinned( (void**) ptrPtr, n*sizeof(double)             ); }
+static inline magma_err_t magma_cmalloc_pinned( magmaFloatComplex  **ptrPtr, size_t n ) { return magma_malloc_pinned( (void**) ptrPtr, n*sizeof(magmaFloatComplex)  ); }
+static inline magma_err_t magma_zmalloc_pinned( magmaDoubleComplex **ptrPtr, size_t n ) { return magma_malloc_pinned( (void**) ptrPtr, n*sizeof(magmaDoubleComplex) ); }
 
 
 // ========================================

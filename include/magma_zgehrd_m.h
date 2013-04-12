@@ -26,12 +26,12 @@ struct zgehrd_data
     magma_int_t ldv;
     magma_int_t ldvd;
     
-    cuDoubleComplex *A    [ MagmaMaxGPUs ];  // ldda*nlocal
-    cuDoubleComplex *V    [ MagmaMaxGPUs ];  // ldv *nb, whole panel
-    cuDoubleComplex *Vd   [ MagmaMaxGPUs ];  // ldvd*nb, block-cyclic
-    cuDoubleComplex *Y    [ MagmaMaxGPUs ];  // ldda*nb
-    cuDoubleComplex *W    [ MagmaMaxGPUs ];  // ldda*nb
-    cuDoubleComplex *Ti   [ MagmaMaxGPUs ];  // nb*nb
+    magmaDoubleComplex *A    [ MagmaMaxGPUs ];  // ldda*nlocal
+    magmaDoubleComplex *V    [ MagmaMaxGPUs ];  // ldv *nb, whole panel
+    magmaDoubleComplex *Vd   [ MagmaMaxGPUs ];  // ldvd*nb, block-cyclic
+    magmaDoubleComplex *Y    [ MagmaMaxGPUs ];  // ldda*nb
+    magmaDoubleComplex *W    [ MagmaMaxGPUs ];  // ldda*nb
+    magmaDoubleComplex *Ti   [ MagmaMaxGPUs ];  // nb*nb
     
     magma_stream_t streams[ MagmaMaxGPUs ];
 };
