@@ -26,10 +26,10 @@ extern"C" {
 extern "C" magma_int_t
 magma_zheevdx_2stage(char jobz, char range, char uplo,
                      magma_int_t n,
-                     cuDoubleComplex *a, magma_int_t lda,
+                     magmaDoubleComplex *a, magma_int_t lda,
                      double vl, double vu, magma_int_t il, magma_int_t iu,
                      magma_int_t *m, double *w,
-                     cuDoubleComplex *work, magma_int_t lwork,
+                     magmaDoubleComplex *work, magma_int_t lwork,
                      double *rwork, magma_int_t lrwork,
                      magma_int_t *iwork, magma_int_t liwork,
                      magma_int_t *info)
@@ -181,7 +181,7 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
     char uplo_[2] = {uplo, 0};
     char jobz_[2] = {jobz, 0};
     char range_[2] = {range, 0};
-    cuDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
     magma_int_t ione = 1;
     magma_int_t izero = 0;
     double d_one = 1.;
@@ -366,7 +366,7 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
     start = get_current_time();
 #endif
 
-    cuDoubleComplex *dT1;
+    magmaDoubleComplex *dT1;
 
     if (MAGMA_SUCCESS != magma_zmalloc( &dT1, n*nb)) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
@@ -388,20 +388,20 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
     }
 
     /* copy the input matrix into WORK(INDWRK) with band storage */
-    cuDoubleComplex* A2 = &work[indwrk];
+    magmaDoubleComplex* A2 = &work[indwrk];
 
-    memset(A2 , 0, n*lda2*sizeof(cuDoubleComplex));
+    memset(A2 , 0, n*lda2*sizeof(magmaDoubleComplex));
 
     for (magma_int_t j = 0; j < n-nb; j++)
     {
         cblas_zcopy(nb+1, &a[j*(lda+1)], 1, &A2[j*lda2], 1);
-        memset(&a[j*(lda+1)], 0, (nb+1)*sizeof(cuDoubleComplex));
+        memset(&a[j*(lda+1)], 0, (nb+1)*sizeof(magmaDoubleComplex));
         a[nb + j*(lda+1)] = c_one;
     }
     for (magma_int_t j = 0; j < nb; j++)
     {
         cblas_zcopy(nb-j, &a[(j+n-nb)*(lda+1)], 1, &A2[(j+n-nb)*lda2], 1);
-        memset(&a[(j+n-nb)*(lda+1)], 0, (nb-j)*sizeof(cuDoubleComplex));
+        memset(&a[(j+n-nb)*(lda+1)], 0, (nb-j)*sizeof(magmaDoubleComplex));
     }
 
 #ifdef ENABLE_TIMER
@@ -451,10 +451,10 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
 
         start = get_current_time();
 #endif
-        cuDoubleComplex *dZ;
+        magmaDoubleComplex *dZ;
         magma_int_t lddz = n;
 
-        cuDoubleComplex *da;
+        magmaDoubleComplex *da;
         magma_int_t ldda = n;
 
         magma_zmove_eig(range, n, w, &il, &iu, vl, vu, m);

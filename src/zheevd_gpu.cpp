@@ -23,10 +23,10 @@
 extern "C" magma_int_t
 magma_zheevd_gpu(char jobz, char uplo,
                  magma_int_t n,
-                 cuDoubleComplex *da, magma_int_t ldda,
+                 magmaDoubleComplex *da, magma_int_t ldda,
                  double *w,
-                 cuDoubleComplex *wa,  magma_int_t ldwa,
-                 cuDoubleComplex *work, magma_int_t lwork,
+                 magmaDoubleComplex *wa,  magma_int_t ldwa,
+                 magmaDoubleComplex *work, magma_int_t lwork,
                  double *rwork, magma_int_t lrwork,
                  magma_int_t *iwork, magma_int_t liwork,
                  magma_int_t *info)
@@ -180,7 +180,7 @@ magma_zheevd_gpu(char jobz, char uplo,
     magma_int_t lquery;
 
     double *dwork;
-    cuDoubleComplex *dc;
+    magmaDoubleComplex *dc;
     magma_int_t lddc = ldda;
 
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);
@@ -244,7 +244,7 @@ magma_zheevd_gpu(char jobz, char uplo,
     }
 
     if (n == 1) {
-        cuDoubleComplex tmp;
+        magmaDoubleComplex tmp;
         magma_zgetvector( 1, da, 1, &tmp, 1 );
         w[0] = MAGMA_Z_REAL(tmp);
         if (wantz) {
@@ -254,7 +254,7 @@ magma_zheevd_gpu(char jobz, char uplo,
         return *info;
     }
 
-    cudaStream_t stream;
+    magma_queue_t stream;
     magma_queue_create( &stream );
 
     // dc and dwork are never used together, so use one buffer for both;
@@ -271,7 +271,7 @@ magma_zheevd_gpu(char jobz, char uplo,
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-    dc = (cuDoubleComplex*) dwork;
+    dc = (magmaDoubleComplex*) dwork;
 
     /* Get machine constants. */
     safmin = lapackf77_dlamch("Safe minimum");

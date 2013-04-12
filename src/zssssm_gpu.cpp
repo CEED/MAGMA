@@ -20,10 +20,10 @@
 extern "C" magma_int_t
 magma_zssssm_gpu(char storev, magma_int_t m1, magma_int_t n1, 
                  magma_int_t m2, magma_int_t n2, magma_int_t k, magma_int_t ib, 
-                 cuDoubleComplex *dA1, magma_int_t ldda1, 
-                 cuDoubleComplex *dA2, magma_int_t ldda2, 
-                 cuDoubleComplex *dL1, magma_int_t lddl1, 
-                 cuDoubleComplex *dL2, magma_int_t lddl2,
+                 magmaDoubleComplex *dA1, magma_int_t ldda1, 
+                 magmaDoubleComplex *dA2, magma_int_t ldda2, 
+                 magmaDoubleComplex *dL1, magma_int_t lddl1, 
+                 magmaDoubleComplex *dL2, magma_int_t lddl2,
                  magma_int_t *IPIV, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -100,11 +100,11 @@ magma_zssssm_gpu(char storev, magma_int_t m1, magma_int_t n1,
 #define L1(i)    (dL1  + (i)*lddl1      )
 #define L2(i,j)  (dL2  + (i)*lddl2i + (j)*lddl2j)
 
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     int ip, ii, sb;
-    cuDoubleComplex *dA1T, *dA2T;
+    magmaDoubleComplex *dA1T, *dA2T;
     char transL;
     int lddl2i, lddl2j;
 

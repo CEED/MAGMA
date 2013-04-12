@@ -19,12 +19,12 @@
 // === End defining what BLAS to use =======================================
 
 extern "C" magma_int_t
-magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
+magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *a,
                    magma_int_t *lda, magma_int_t *info);
 
 extern "C" magma_int_t
 magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n, 
-                       cuDoubleComplex *dA, magma_int_t ldda,
+                       magmaDoubleComplex *dA, magma_int_t ldda,
                        magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -74,13 +74,13 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
 
 #define inA(i,j) (dA + (i)*nb + (j)*nb*ldda)
 
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     magma_int_t iinfo, nb;
     magma_int_t maxm, maxn, mindim;
     magma_int_t i, rows, cols, s, lddwork;
-    cuDoubleComplex *work;
+    magmaDoubleComplex *work;
 
     /* Check arguments */
     *info = 0;

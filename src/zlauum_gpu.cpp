@@ -28,7 +28,7 @@
 
 extern "C" magma_int_t
 magma_zlauum_gpu(char uplo, magma_int_t n,
-             cuDoubleComplex  *dA, magma_int_t ldda, magma_int_t *info)
+             magmaDoubleComplex  *dA, magma_int_t ldda, magma_int_t *info)
 {
 
 
@@ -85,8 +85,8 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
         char uplo_[2] = {uplo, 0};
         magma_int_t         nb, i, ib;
         double              d_one = MAGMA_D_ONE;
-        cuDoubleComplex     c_one = MAGMA_Z_ONE;
-        cuDoubleComplex     *work;
+        magmaDoubleComplex     c_one = MAGMA_Z_ONE;
+        magmaDoubleComplex     *work;
 
         int upper  = lapackf77_lsame(uplo_, "U");
 
@@ -111,7 +111,7 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
                 return *info;
         }
         
-        cudaStream_t stream[2];
+        magma_queue_t stream[2];
         magma_queue_create( &stream[0] );
         magma_queue_create( &stream[1] );
 

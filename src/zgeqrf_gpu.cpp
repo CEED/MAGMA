@@ -19,12 +19,12 @@
       Then, the inverse is calculated in place in work, so as a final result,
       work holds the inverse of the upper triangular diagonal block.
 */
-void zsplit_diag_block(magma_int_t ib, cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *work)
+void zsplit_diag_block(magma_int_t ib, magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *work)
 {
     magma_int_t i, j, info;
-    cuDoubleComplex *cola, *colw;
-    cuDoubleComplex c_zero = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex *cola, *colw;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
 
     for(i=0; i<ib; i++){
         cola = a    + i*lda;
@@ -41,8 +41,8 @@ void zsplit_diag_block(magma_int_t ib, cuDoubleComplex *a, magma_int_t lda, cuDo
 
 extern "C" magma_int_t
 magma_zgeqrf_gpu( magma_int_t m, magma_int_t n, 
-                  cuDoubleComplex *dA,   magma_int_t ldda,
-                  cuDoubleComplex *tau, cuDoubleComplex *dT, 
+                  magmaDoubleComplex *dA,   magma_int_t ldda,
+                  magmaDoubleComplex *tau, magmaDoubleComplex *dT, 
                   magma_int_t *info )
 {
 /*  -- MAGMA (version 1.1) --
@@ -126,7 +126,7 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
     magma_int_t i, k, minmn, old_i, old_ib, rows, cols;
     magma_int_t ib, nb;
     magma_int_t ldwork, lddwork, lwork, lhwork;
-    cuDoubleComplex *work, *ut;
+    magmaDoubleComplex *work, *ut;
 
     /* check arguments */
     *info = 0;
@@ -157,9 +157,9 @@ magma_zgeqrf_gpu( magma_int_t m, magma_int_t n,
     }
     
     ut = hwork+nb*(n);
-    memset( ut, 0, nb*nb*sizeof(cuDoubleComplex));
+    memset( ut, 0, nb*nb*sizeof(magmaDoubleComplex));
 
-    cudaStream_t stream[2];
+    magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 

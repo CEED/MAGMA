@@ -14,9 +14,9 @@
 
 extern "C" magma_int_t
 magma_zgesv(     magma_int_t n, magma_int_t nrhs, 
-                 cuDoubleComplex *A, magma_int_t lda,
+                 magmaDoubleComplex *A, magma_int_t lda,
                  magma_int_t *ipiv, 
-                 cuDoubleComplex *B, magma_int_t ldb, 
+                 magmaDoubleComplex *B, magma_int_t ldb, 
                  magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -96,7 +96,7 @@ magma_zgesv(     magma_int_t n, magma_int_t nrhs,
     
     /* If single-GPU and allocation suceeds, use GPU interface. */
     num_gpus = magma_num_gpus();
-    cuDoubleComplex *dA, *dB;
+    magmaDoubleComplex *dA, *dB;
     if ( num_gpus > 1 ) {
         goto CPU_INTERFACE;
     }

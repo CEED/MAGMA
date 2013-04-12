@@ -210,7 +210,7 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
     magma_int_t lwmin;
     magma_int_t liwmin;
 
-    cudaStream_t stream;
+    magma_queue_t stream;
     magma_queue_create( &stream );
 
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);

@@ -31,7 +31,7 @@
 #define V(m)     &(V[(m)])
 #define TAU(m)   &(TAU[(m)])
 #define T(m)     &(T[(m)])
-extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE, magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, cuDoubleComplex *E, magma_int_t LDE, cuDoubleComplex *V, cuDoubleComplex *TAU, cuDoubleComplex *T, magma_int_t *INFO, cuDoubleComplex *dV, cuDoubleComplex *dT, cuDoubleComplex *dE, magma_int_t copytype )
+extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE, magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, magmaDoubleComplex *E, magma_int_t LDE, magmaDoubleComplex *V, magmaDoubleComplex *TAU, magmaDoubleComplex *T, magma_int_t *INFO, magmaDoubleComplex *dV, magmaDoubleComplex *dT, magmaDoubleComplex *dE, magma_int_t copytype )
 {
 
     //%===========================
@@ -41,7 +41,7 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
     magma_int_t bg, nbGblk,rownbm, k, m, n;
     magma_int_t st,ed,fst,vlen,vnb,colj,len;
     magma_int_t blkid, vpos,taupos,tpos;
-    cuDoubleComplex *WORK;
+    magmaDoubleComplex *WORK;
     magma_int_t LWORK;
     magma_int_t  cur_blksiz,avai_blksiz, ncolinvolvd;
     magma_int_t  nbgr, colst, coled, versionL,versionR;
@@ -54,7 +54,7 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
     LDV      = NB+Vblksiz-1;
     blklen   = LDV*Vblksiz;
     nbGblk   = plasma_ceildiv((N-1),Vblksiz);
-    //WORK    = (cuDoubleComplex *) malloc (LWORK*sizeof(cuDoubleComplex));
+    //WORK    = (magmaDoubleComplex *) malloc (LWORK*sizeof(magmaDoubleComplex));
 
     /* find the size of the matrix T V*/
     findVTsiz(N, NB, Vblksiz, &blkcnt, &LDV);
@@ -67,7 +67,7 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
     if(copytype>0) magma_zsetmatrix( LDV, blkcnt*Vblksiz, V, LDV, dV, LDV );
     if(copytype>1) magma_zsetmatrix( LDT, blkcnt*Vblksiz, T, LDT, dT, LDT );
     if(copytype>2) magma_zsetmatrix( N, NE, E, N, dE, N );
-    cuDoubleComplex *dwork;
+    magmaDoubleComplex *dwork;
     magma_int_t ldwork;
     ldwork  = NE;
     LWORK   = 2*N*max(Vblksiz,64);
@@ -105,7 +105,7 @@ extern "C" void magma_zbulge_applyQ(magma_int_t WANTZ, char SIDE, magma_int_t NE
     magma_int_t N1=N-N2;   
 #if defined(USESTREAM)
     printf("using stream\n");
-    cudaStream_t stream[2];
+    magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 #endif

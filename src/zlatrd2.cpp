@@ -27,21 +27,21 @@
 extern "C"
 magma_int_t
 magmablas_zhemv2( char uplo, magma_int_t n,
-                      cuDoubleComplex alpha,
-                      cuDoubleComplex *A, magma_int_t lda,
-                      cuDoubleComplex *X, magma_int_t incx,
-                      cuDoubleComplex beta,
-                      cuDoubleComplex *Y, magma_int_t incy,
-                      cuDoubleComplex *work, magma_int_t lwork);
+                      magmaDoubleComplex alpha,
+                      magmaDoubleComplex *A, magma_int_t lda,
+                      magmaDoubleComplex *X, magma_int_t incx,
+                      magmaDoubleComplex beta,
+                      magmaDoubleComplex *Y, magma_int_t incy,
+                      magmaDoubleComplex *work, magma_int_t lwork);
 
 extern "C" magma_int_t 
 magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb, 
-              cuDoubleComplex *a,  magma_int_t lda, 
-              double *e, cuDoubleComplex *tau, 
-              cuDoubleComplex *w,  magma_int_t ldw,
-              cuDoubleComplex *da, magma_int_t ldda, 
-              cuDoubleComplex *dw, magma_int_t lddw,
-              cuDoubleComplex *dwork, magma_int_t ldwork)
+              magmaDoubleComplex *a,  magma_int_t lda, 
+              double *e, magmaDoubleComplex *tau, 
+              magmaDoubleComplex *w,  magma_int_t ldw,
+              magmaDoubleComplex *da, magma_int_t ldda, 
+              magmaDoubleComplex *dw, magma_int_t lddw,
+              magmaDoubleComplex *dwork, magma_int_t ldwork)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -173,24 +173,24 @@ magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
 
     magma_int_t i;
   
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
 
-    cuDoubleComplex value = MAGMA_Z_ZERO;
+    magmaDoubleComplex value = MAGMA_Z_ZERO;
     
     magma_int_t ione = 1;
 
     magma_int_t i_n, i_1, iw;
   
-    cuDoubleComplex alpha;
-    cuDoubleComplex *f;
+    magmaDoubleComplex alpha;
+    magmaDoubleComplex *f;
 
     if (n <= 0) {
       return 0;
     }
 
-    cudaStream_t stream;
+    magma_queue_t stream;
     magma_queue_create( &stream );
     magma_zmalloc_cpu( &f, n );
     assert( f != NULL );  // TODO return error, or allocate outside zlatrd

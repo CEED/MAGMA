@@ -13,7 +13,7 @@
 #define PRECISION_z
 
 extern "C" magma_int_t
-magma_zgetf2_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a, 
+magma_zgetf2_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *a, 
                    magma_int_t *lda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -60,11 +60,11 @@ magma_zgetf2_nopiv(magma_int_t *m, magma_int_t *n, cuDoubleComplex *a,
                  to solve a system of equations.   
     =====================================================================   */
     
-  cuDoubleComplex c_one = MAGMA_Z_ONE, c_zero = MAGMA_Z_ZERO;
+  magmaDoubleComplex c_one = MAGMA_Z_ONE, c_zero = MAGMA_Z_ZERO;
     magma_int_t c__1 = 1;
     
     magma_int_t a_dim1, a_offset, i__1, i__2, i__3;
-    cuDoubleComplex z__1;
+    magmaDoubleComplex z__1;
     magma_int_t i__, j;
     double sfmin;
 

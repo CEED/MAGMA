@@ -78,23 +78,23 @@ typedef struct context
 extern "C" magma_int_t
 magma_zgetrf_mc(magma_context *cntxt,
                 int *m, int *n,
-                cuDoubleComplex *a, int *lda,
+                magmaDoubleComplex *a, int *lda,
                 int *ipiv, int *info);
 /* ==================================================================== */
 
 extern "C" magma_int_t
 magma_zgetrf2_mgpu(magma_context *cntxt, magma_int_t num_gpus, 
                    magma_int_t m, magma_int_t n, magma_int_t nb, magma_int_t offset,
-                   cuDoubleComplex **d_lAT, magma_int_t lddat, magma_int_t *ipiv,
-                   cuDoubleComplex *d_lAP[4], cuDoubleComplex *a, magma_int_t lda,
-                   cudaStream_t stream[][2], magma_int_t *info)
+                   magmaDoubleComplex **d_lAT, magma_int_t lddat, magma_int_t *ipiv,
+                   magmaDoubleComplex *d_lAP[4], magmaDoubleComplex *a, magma_int_t lda,
+                   magma_queue_t stream[][2], magma_int_t *info)
 #else
 extern "C" magma_int_t
 magma_zgetrf2_mgpu(magma_int_t num_gpus, 
          magma_int_t m, magma_int_t n, magma_int_t nb, magma_int_t offset,
-         cuDoubleComplex **d_lAT, magma_int_t lddat, magma_int_t *ipiv,
-         cuDoubleComplex **d_lAP, cuDoubleComplex *w, magma_int_t ldw,
-         cudaStream_t streaml[][2], magma_int_t *info)
+         magmaDoubleComplex **d_lAT, magma_int_t lddat, magma_int_t *ipiv,
+         magmaDoubleComplex **d_lAP, magmaDoubleComplex *w, magma_int_t ldw,
+         magma_queue_t streaml[][2], magma_int_t *info)
 #endif
 {
 /*  -- MAGMA (version 1.0) --
@@ -156,16 +156,16 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
 #define inAT(id,i,j)  (d_lAT[(id)] + ((offset)+(i)*nb)*lddat + (j)*nb)
 #define W(j) (w+((j)%num_gpus)*nb*ldw)
 
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     magma_int_t block_size = 32;
     magma_int_t iinfo, n_local[4]; 
     magma_int_t maxm, mindim;
     magma_int_t i, ii, d, dd, rows, cols, s, ldpan[4];
     magma_int_t id, i_local, i_local2, nb0, nb1;
-    cuDoubleComplex *d_panel[4], *panel_local[4];
-    //cudaStream_t streaml[4][2];
+    magmaDoubleComplex *d_panel[4], *panel_local[4];
+    //magma_queue_t streaml[4][2];
 
     /* Check arguments */
     *info = 0;

@@ -12,10 +12,10 @@
 
 extern "C" magma_int_t
 magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
-                 cuDoubleComplex *dA,    magma_int_t ldda, 
-                 cuDoubleComplex *tau,   cuDoubleComplex *dT, 
-                 cuDoubleComplex *dB,    magma_int_t lddb, 
-                 cuDoubleComplex *hwork, magma_int_t lwork, 
+                 magmaDoubleComplex *dA,    magma_int_t ldda, 
+                 magmaDoubleComplex *tau,   magmaDoubleComplex *dT, 
+                 magmaDoubleComplex *dB,    magma_int_t lddb, 
+                 magmaDoubleComplex *hwork, magma_int_t lwork, 
                  magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -89,10 +89,10 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
    #define a_ref(a_1,a_2) (dA+(a_2)*(ldda) + (a_1))
    #define d_ref(a_1)     (dT+(lddwork+(a_1))*nb)
 
-    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *dwork;
+    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *dwork;
     magma_int_t i, k, lddwork, rows, ib;
     magma_int_t ione = 1;
 

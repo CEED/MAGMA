@@ -17,12 +17,12 @@
 extern "C" magma_int_t
 magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
              magma_int_t nb, magma_int_t *kb,
-             cuDoubleComplex *A,  magma_int_t lda,
-             cuDoubleComplex *dA, magma_int_t ldda,
-             magma_int_t *jpvt, cuDoubleComplex *tau, double *vn1, double *vn2,
-             cuDoubleComplex *auxv,
-             cuDoubleComplex *F,  magma_int_t ldf,
-             cuDoubleComplex *dF, magma_int_t lddf)
+             magmaDoubleComplex *A,  magma_int_t lda,
+             magmaDoubleComplex *dA, magma_int_t ldda,
+             magma_int_t *jpvt, magmaDoubleComplex *tau, double *vn1, double *vn2,
+             magmaDoubleComplex *auxv,
+             magmaDoubleComplex *F,  magma_int_t ldf,
+             magmaDoubleComplex *dF, magma_int_t lddf)
 {
 /*
     -- MAGMA (version 1.1) --
@@ -102,17 +102,17 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
 #define  F(i, j) (F  + (i) + (j)*(ldf ))
 #define dF(i, j) (dF + (i) + (j)*(lddf))
 
-    cuDoubleComplex c_zero    = MAGMA_Z_MAKE( 0.,0.);
-    cuDoubleComplex c_one     = MAGMA_Z_MAKE( 1.,0.);
-    cuDoubleComplex c_neg_one = MAGMA_Z_MAKE(-1.,0.);
+    magmaDoubleComplex c_zero    = MAGMA_Z_MAKE( 0.,0.);
+    magmaDoubleComplex c_one     = MAGMA_Z_MAKE( 1.,0.);
+    magmaDoubleComplex c_neg_one = MAGMA_Z_MAKE(-1.,0.);
     magma_int_t ione = 1;
     
     magma_int_t i__1, i__2;
     double d__1;
-    cuDoubleComplex z__1;
+    magmaDoubleComplex z__1;
     
     magma_int_t j, k, rk;
-    cuDoubleComplex Akk;
+    magmaDoubleComplex Akk;
     magma_int_t pvt;
     double temp, temp2, tol3z;
     magma_int_t itemp;
@@ -123,7 +123,7 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
     lastrk = min( m, n + offset );
     tol3z = magma_dsqrt( lapackf77_dlamch("Epsilon"));
 
-    cudaStream_t stream;
+    magma_queue_t stream;
     magma_queue_create( &stream );
 
     lsticc = 0;

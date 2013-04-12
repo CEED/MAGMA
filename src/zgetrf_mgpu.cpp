@@ -14,9 +14,9 @@
 extern "C" magma_int_t
 magma_zgetrf2_mgpu(magma_int_t num_gpus, 
          magma_int_t m, magma_int_t n, magma_int_t nb, magma_int_t offset,
-         cuDoubleComplex **d_lAT, magma_int_t lddat, magma_int_t *ipiv,
-         cuDoubleComplex **d_lAP, cuDoubleComplex *a, magma_int_t lda,
-         cudaStream_t streaml[][2], magma_int_t *info);
+         magmaDoubleComplex **d_lAT, magma_int_t lddat, magma_int_t *ipiv,
+         magmaDoubleComplex **d_lAP, magmaDoubleComplex *a, magma_int_t lda,
+         magma_queue_t streaml[][2], magma_int_t *info);
 
 
 // === Define what BLAS to use ============================================
@@ -31,7 +31,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
 extern "C" magma_int_t
 magma_zgetrf_mgpu(magma_int_t num_gpus, 
                  magma_int_t m, magma_int_t n, 
-                 cuDoubleComplex **d_lA, magma_int_t ldda,
+                 magmaDoubleComplex **d_lA, magma_int_t ldda,
                  magma_int_t *ipiv, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -91,16 +91,16 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
 
 #define inAT(id,i,j) (d_lAT[(id)] + (i)*nb*lddat + (j)*nb)
 
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     magma_int_t iinfo, nb, n_local[MagmaMaxGPUs];
     magma_int_t maxm, mindim;
     magma_int_t i, j, d, rows, cols, s, lddat, lddwork;
     magma_int_t id, i_local, i_local2, nb0, nb1;
-    cuDoubleComplex *d_lAT[MagmaMaxGPUs];
-    cuDoubleComplex *d_panel[MagmaMaxGPUs], *work;
-    cudaStream_t streaml[4][2];
+    magmaDoubleComplex *d_lAT[MagmaMaxGPUs];
+    magmaDoubleComplex *d_panel[MagmaMaxGPUs], *work;
+    magma_queue_t streaml[4][2];
 
     /* Check arguments */
     *info = 0;
@@ -216,7 +216,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
 
           /* calling multi-gpu interface with allocated workspaces and streams */
           //magma_zgetrf1_mgpu( num_gpus, m, n, nb, 0, d_lAT, lddat, ipiv, d_panel, work, maxm,
-          //                   (cudaStream_t **)streaml, info );
+          //                   (magma_queue_t **)streaml, info );
           magma_zgetrf2_mgpu(num_gpus, m, n, nb, 0, d_lAT, lddat, ipiv, d_panel, work, maxm,
                              streaml, info);
 

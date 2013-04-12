@@ -29,7 +29,7 @@
 // definition of a non-GPU-resident interface to multiple GPUs
 extern "C" magma_int_t
 magma_zpotrf_m(magma_int_t num_gpus, char uplo, magma_int_t n,
-               cuDoubleComplex *a, magma_int_t lda, magma_int_t *info);
+               magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info);
 // ========================================================================
 
 #define A(i, j)  (a   +(j)*lda  + (i))
@@ -37,7 +37,7 @@ magma_zpotrf_m(magma_int_t num_gpus, char uplo, magma_int_t n,
 
 extern "C" magma_int_t 
 magma_zpotrf(char uplo, magma_int_t n, 
-             cuDoubleComplex *a, magma_int_t lda, magma_int_t *info)
+             magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -103,9 +103,9 @@ magma_zpotrf(char uplo, magma_int_t n,
     char uplo_[2] = {uplo, 0};
     magma_int_t        ldda, nb;
     magma_int_t j, jb;
-    cuDoubleComplex    c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex    c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex   *work;
+    magmaDoubleComplex    c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex    c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex   *work;
     double             d_one     =  1.0;
     double             d_neg_one = -1.0;
     int upper = lapackf77_lsame(uplo_, "U");
@@ -140,7 +140,7 @@ magma_zpotrf(char uplo, magma_int_t n,
         return magma_zpotrf_m(num_gpus, uplo, n, a, lda, info);
     }
 
-    cudaStream_t stream[2];
+    magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 

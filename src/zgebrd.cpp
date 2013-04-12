@@ -22,9 +22,9 @@
 
 extern "C" magma_int_t
 magma_zgebrd(magma_int_t m, magma_int_t n,
-             cuDoubleComplex *a, magma_int_t lda, double *d, double *e,
-             cuDoubleComplex *tauq, cuDoubleComplex *taup, 
-             cuDoubleComplex *work, magma_int_t lwork, 
+             magmaDoubleComplex *a, magma_int_t lda, double *d, double *e,
+             magmaDoubleComplex *tauq, magmaDoubleComplex *taup, 
+             magmaDoubleComplex *work, magma_int_t lwork, 
              magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -142,9 +142,9 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
     the vector defining G(i).
     =====================================================================    */
 
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex *da, *dwork;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex *da, *dwork;
 
     magma_int_t ncol, nrow, jmax, nb, ldda;
 

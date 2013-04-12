@@ -26,12 +26,12 @@
 extern "C" magma_int_t
 magma_zgetrf2_mgpu(magma_int_t num_gpus, 
                    magma_int_t m, magma_int_t n, magma_int_t nb, magma_int_t offset,
-                   cuDoubleComplex **d_lAT, magma_int_t lddat, magma_int_t *ipiv,
-                   cuDoubleComplex **d_lAP, cuDoubleComplex *a, magma_int_t lda,
-                   cudaStream_t streaml[][2], magma_int_t *info);
+                   magmaDoubleComplex **d_lAT, magma_int_t lddat, magma_int_t *ipiv,
+                   magmaDoubleComplex **d_lAP, magmaDoubleComplex *a, magma_int_t lda,
+                   magma_queue_t streaml[][2], magma_int_t *info);
 
 extern "C" magma_int_t
-magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
+magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda, 
                magma_int_t *ipiv, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.0) --
@@ -101,15 +101,15 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleComp
     double flops, time_rmajor = 0, time_rmajor2 = 0, time_rmajor3 = 0, time_mem = 0;
     magma_timestr_t start, start1, start2, end1, end, start0 = get_current_time();
 #endif
-    cuDoubleComplex    *dAT[4], *dA[4], *dPT[4];
-    cuDoubleComplex    c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex    c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex    *dAT[4], *dA[4], *dPT[4];
+    magmaDoubleComplex    c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex    c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t        iinfo = 0, nb, nbi, maxm, n_local[4], ldn_local;
     magma_int_t        N, M, NB, NBk, I, d, num_gpus;
     magma_int_t        i, ii, jj, h = 3, offset, ib, rows, s;
         
-    cudaStream_t stream[4][2];
-    cudaEvent_t  event[4][2];
+    magma_queue_t stream[4][2];
+    magma_event_t  event[4][2];
 
     *info = 0;
 
@@ -136,7 +136,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleComp
     /* figure out NB */
     size_t freeMem, totalMem;
     cudaMemGetInfo( &freeMem, &totalMem );
-    freeMem /= sizeof(cuDoubleComplex);
+    freeMem /= sizeof(magmaDoubleComplex);
     
     /* number of columns in the big panel */
     NB = (magma_int_t)(0.8*freeMem/maxm-h*nb); 
@@ -320,7 +320,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleComp
           /* calling magma-gpu interface to panel-factorize the big panel */
           if( M > I ) {
             //magma_zgetrf1_mgpu(num_gpus, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, &a[I*lda], lda,
-            //                   (cudaStream_t **)stream, &iinfo);
+            //                   (magma_queue_t **)stream, &iinfo);
             magma_zgetrf2_mgpu(num_gpus, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, &a[I*lda], lda,
                                stream, &iinfo);
             if( iinfo < 0 ) {
@@ -385,7 +385,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleComp
 
 
 extern "C" magma_int_t
-magma_zgetrf_piv(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
+magma_zgetrf_piv(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda, 
                  magma_int_t *ipiv, magma_int_t *info)
 {
     magma_int_t nb, h = 2, num_gpus;
@@ -414,7 +414,7 @@ magma_zgetrf_piv(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleCo
     /* figure out NB */
     size_t freeMem, totalMem;
     cudaMemGetInfo( &freeMem, &totalMem );
-    freeMem /= sizeof(cuDoubleComplex);
+    freeMem /= sizeof(magmaDoubleComplex);
 
     /* number of columns in the big panel */
     NB = (magma_int_t)(0.8*freeMem/maxm-h*nb); 
@@ -455,7 +455,7 @@ magma_zgetrf_piv(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleCo
 
 extern "C" magma_int_t
 magma_zgetrf2_piv(magma_int_t m, magma_int_t n, magma_int_t start, magma_int_t end,
-                  cuDoubleComplex *a, magma_int_t lda, magma_int_t *ipiv, magma_int_t *info)
+                  magmaDoubleComplex *a, magma_int_t lda, magma_int_t *ipiv, magma_int_t *info)
 {
     magma_int_t I, k1, k2, nb, incx, minmn;
 

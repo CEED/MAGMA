@@ -20,8 +20,8 @@
 
 extern "C" magma_int_t
 magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
-             cuDoubleComplex *a, magma_int_t lda,
-             cuDoubleComplex *b, magma_int_t ldb, magma_int_t *info)
+             magmaDoubleComplex *a, magma_int_t lda,
+             magmaDoubleComplex *b, magma_int_t ldb, magma_int_t *info)
 {
 /*
   -- MAGMA (version 1.1) --
@@ -92,11 +92,11 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
   char uplo_[2] = {uplo, 0};
   magma_int_t        nb;
   magma_int_t        k, kb, kb2;
-  cuDoubleComplex    c_one      = MAGMA_Z_ONE;
-  cuDoubleComplex    c_neg_one  = MAGMA_Z_NEG_ONE;
-  cuDoubleComplex    c_half     = MAGMA_Z_HALF;
-  cuDoubleComplex    c_neg_half = MAGMA_Z_NEG_HALF;
-  cuDoubleComplex   *dw;
+  magmaDoubleComplex    c_one      = MAGMA_Z_ONE;
+  magmaDoubleComplex    c_neg_one  = MAGMA_Z_NEG_ONE;
+  magmaDoubleComplex    c_half     = MAGMA_Z_HALF;
+  magmaDoubleComplex    c_neg_half = MAGMA_Z_NEG_HALF;
+  magmaDoubleComplex   *dw;
   magma_int_t        ldda = n;
   magma_int_t        lddb = n;
   double             d_one = 1.0;
@@ -131,7 +131,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
   
   nb = magma_get_zhegst_nb(n);
   
-  cudaStream_t stream[2];
+  magma_queue_t stream[2];
   magma_queue_create( &stream[0] );
   magma_queue_create( &stream[1] );
 

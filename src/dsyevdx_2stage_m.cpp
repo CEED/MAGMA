@@ -369,7 +369,7 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     magma_free(dT1);
 #else
     magma_int_t nstream = max(3,nrgpu+2);
-    cudaStream_t streams[MagmaMaxGPUs][20];
+    magma_queue_t streams[MagmaMaxGPUs][20];
     double *da[MagmaMaxGPUs],*dT1[MagmaMaxGPUs];
     magma_int_t ldda = ((n+31)/32)*32;
 

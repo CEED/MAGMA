@@ -20,9 +20,9 @@
 extern "C" magma_int_t
 magma_zgessm_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t k, magma_int_t ib, 
                   magma_int_t *ipiv, 
-                  cuDoubleComplex *dL1, magma_int_t lddl1, 
-                  cuDoubleComplex *dL,  magma_int_t lddl, 
-                  cuDoubleComplex *dA,  magma_int_t ldda, 
+                  magmaDoubleComplex *dL1, magma_int_t lddl1, 
+                  magmaDoubleComplex *dL,  magma_int_t lddl, 
+                  magmaDoubleComplex *dA,  magma_int_t ldda, 
                   magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -78,11 +78,11 @@ magma_zgessm_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t k, magm
 #define L(i,j)  (dL  + (i)      + (j)*lddl )
 #define dL1(j)  (dL1            + (j)*lddl1)
 
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     int i, s, sb;
-    cuDoubleComplex *dAT;
+    magmaDoubleComplex *dAT;
 
     /* Check arguments */
     *info = 0;

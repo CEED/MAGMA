@@ -30,7 +30,7 @@
  
 extern "C" magma_int_t
 magma_zlauum(char uplo, magma_int_t n,
-             cuDoubleComplex *a, magma_int_t lda, magma_int_t *info)
+             magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -84,9 +84,9 @@ magma_zlauum(char uplo, magma_int_t n,
         char uplo_[2] = {uplo, 0};
         magma_int_t     ldda, nb;
         magma_int_t i, ib;
-        cuDoubleComplex    c_one = MAGMA_Z_ONE;
+        magmaDoubleComplex    c_one = MAGMA_Z_ONE;
         double             d_one = MAGMA_D_ONE;
-        cuDoubleComplex    *work;
+        magmaDoubleComplex    *work;
         int upper = lapackf77_lsame(uplo_, "U");
 
         *info = 0;
@@ -113,7 +113,7 @@ magma_zlauum(char uplo, magma_int_t n,
                 return *info;
         }
 
-        cudaStream_t stream[2];
+        magma_queue_t stream[2];
         magma_queue_create( &stream[0] );
         magma_queue_create( &stream[1] );
 
@@ -130,7 +130,7 @@ magma_zlauum(char uplo, magma_int_t n,
                         {
                                 ib=min(nb,n-i);
 
-                                //cublasSetMatrix(ib, (n-i), sizeof(cuDoubleComplex), A(i, i), lda, dA(i, i), ldda);
+                                //cublasSetMatrix(ib, (n-i), sizeof(magmaDoubleComplex), A(i, i), lda, dA(i, i), ldda);
                                 
                                 magma_zsetmatrix_async( ib, ib,
                                                         A(i,i),   lda,
@@ -178,7 +178,7 @@ magma_zlauum(char uplo, magma_int_t n,
                         for(i=0; i<n; i=i+nb)
                         {
                                 ib=min(nb,n-i);
-                                //cublasSetMatrix((n-i), ib, sizeof(cuDoubleComplex),
+                                //cublasSetMatrix((n-i), ib, sizeof(magmaDoubleComplex),
                                 //                A(i, i), lda, dA(i, i), ldda);
 
                                 magma_zsetmatrix_async( ib, ib,
@@ -199,7 +199,7 @@ magma_zlauum(char uplo, magma_int_t n,
 
                                 lapackf77_zlauum(MagmaLowerStr, &ib, A(i,i), &lda, info);
 
-                                //cublasSetMatrix(ib, ib, sizeof(cuDoubleComplex),
+                                //cublasSetMatrix(ib, ib, sizeof(magmaDoubleComplex),
                                 //                A(i, i), lda, dA(i, i), ldda);
 
                                 magma_zsetmatrix_async( ib, ib,

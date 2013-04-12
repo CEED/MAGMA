@@ -21,7 +21,7 @@ extern "C" {
                                double* q, magma_int_t ldq, double rho,
                                double* dlamda, double* q2, magma_int_t* indx,
                                magma_int_t* ctot, double* w, double* s, magma_int_t* indxq,
-                               double** dwork, cudaStream_t stream[MagmaMaxGPUs][2],
+                               double** dwork, magma_queue_t stream[MagmaMaxGPUs][2],
                                char range, double vl, double vu, magma_int_t il, magma_int_t iu,
                                magma_int_t* info );
 
@@ -39,7 +39,7 @@ extern "C" magma_int_t
 magma_dlaex1_m(magma_int_t nrgpu, magma_int_t n, double* d, double* q, magma_int_t ldq,
                magma_int_t* indxq, double rho, magma_int_t cutpnt,
                double* work, magma_int_t* iwork, double** dwork,
-               cudaStream_t stream[MagmaMaxGPUs][2],
+               magma_queue_t stream[MagmaMaxGPUs][2],
                char range, double vl, double vu,
                magma_int_t il, magma_int_t iu, magma_int_t* info)
 {
@@ -134,7 +134,7 @@ magma_dlaex1_m(magma_int_t nrgpu, magma_int_t n, double* d, double* q, magma_int
             ceil((N-N1) * (N-N1) / floor(nrgpu/2)) +
             NB * ((N-N1) + (N-N1) / floor(nrgpu/2))
 
-    STREAM  (device stream) cudaStream_t array,
+    STREAM  (device stream) magma_queue_t array,
             dimension (MagmaMaxGPUs,2)
 
     RANGE   (input) CHARACTER*1

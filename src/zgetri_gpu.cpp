@@ -13,8 +13,8 @@
 #define PRECISION_z
 
 extern "C" magma_int_t
-magma_zgetri_gpu( magma_int_t n, cuDoubleComplex *dA, magma_int_t ldda,
-                  magma_int_t *ipiv, cuDoubleComplex *dwork, magma_int_t lwork,
+magma_zgetri_gpu( magma_int_t n, magmaDoubleComplex *dA, magma_int_t ldda,
+                  magma_int_t *ipiv, magmaDoubleComplex *dwork, magma_int_t lwork,
                   magma_int_t *info )
 {
 /*  -- MAGMA (version 1.1) --
@@ -74,9 +74,9 @@ magma_zgetri_gpu( magma_int_t n, cuDoubleComplex *dA, magma_int_t ldda,
     #define dL(i, j)  (dL + (i) + (j)*lddl)
     
     /* Local variables */
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *dL = dwork;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *dL = dwork;
     magma_int_t lddl = n;
     magma_int_t nb   = magma_get_zgetri_nb(n);
     magma_int_t j, jmax, jb, jp;

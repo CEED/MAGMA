@@ -12,9 +12,9 @@
 
 extern "C" magma_int_t
 magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
-                 cuDoubleComplex *dA,    magma_int_t ldda, 
-                 cuDoubleComplex *dB,    magma_int_t lddb, 
-                 cuDoubleComplex *hwork, magma_int_t lwork, 
+                 magmaDoubleComplex *dA,    magma_int_t ldda, 
+                 magmaDoubleComplex *dB,    magma_int_t lddb, 
+                 magmaDoubleComplex *hwork, magma_int_t lwork, 
                  magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -78,7 +78,7 @@ magma_zgels_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================    */
 
-    cuDoubleComplex *dT, *tau;
+    magmaDoubleComplex *dT, *tau;
     magma_int_t k;
 
     magma_int_t nb     = magma_get_zgeqrf_nb(m);

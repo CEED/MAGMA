@@ -221,7 +221,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
         return *info;
     }
 
-    cudaStream_t stream;
+    magma_queue_t stream;
     magma_queue_create( &stream );
 
     // n*lddc for dsytrd2_gpu

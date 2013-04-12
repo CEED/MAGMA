@@ -15,9 +15,9 @@
 
 extern "C" magma_int_t
 magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS, 
-                   cuDoubleComplex *dA,  magma_int_t ldda, 
-                   cuDoubleComplex *dB,  magma_int_t lddb, 
-                   cuDoubleComplex *dX,  magma_int_t lddx, 
+                   magmaDoubleComplex *dA,  magma_int_t ldda, 
+                   magmaDoubleComplex *dB,  magma_int_t lddb, 
+                   magmaDoubleComplex *dX,  magma_int_t lddx, 
                    magma_int_t *iter, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -120,14 +120,14 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
 
     =====================================================================    */
 
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magma_int_t     ione  = 1;
-    cuDoubleComplex *dworkd, *hworkd;
-    cuFloatComplex  *dworks, *hworks;
-    cuDoubleComplex *dR, *tau, *dT;
-    cuFloatComplex  *dSA, *dSX, *dST, *stau;
-    cuDoubleComplex Xnrmv, Rnrmv; 
+    magmaDoubleComplex *dworkd, *hworkd;
+    magmaFloatComplex  *dworks, *hworks;
+    magmaDoubleComplex *dR, *tau, *dT;
+    magmaFloatComplex  *dSA, *dSX, *dST, *stau;
+    magmaDoubleComplex Xnrmv, Rnrmv; 
     double          Anrm, Xnrm, Rnrm, cte, eps; 
     magma_int_t     i, j, iiter, nb, lhwork, minmn, size;
     
@@ -348,7 +348,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     /* hworks(stau + workspace for cgeqrs) = min(M,N) + lhworks */
     /* re-use hworks memory for hworkd if possible, else re-allocate. */
     if ( (2*lhwork) <= (minmn+lhwork) ) {
-        hworkd = (cuDoubleComplex*) hworks;
+        hworkd = (magmaDoubleComplex*) hworks;
     }
     else {
         magma_free_cpu( hworks );

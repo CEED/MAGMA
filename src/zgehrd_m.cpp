@@ -15,10 +15,10 @@
 extern "C" magma_int_t
 magma_zgehrd_m(
     magma_int_t n, magma_int_t ilo, magma_int_t ihi,
-    cuDoubleComplex *A, magma_int_t lda,
-    cuDoubleComplex *tau,
-    cuDoubleComplex *work, magma_int_t lwork,
-    cuDoubleComplex *T,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *tau,
+    magmaDoubleComplex *work, magma_int_t lwork,
+    magmaDoubleComplex *T,
     magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -131,8 +131,8 @@ magma_zgehrd_m(
     #define  A( i, j )    (A + (i) + (j)*lda)
     #define dA( d, i, j ) (data.A[d] + (i) + (j)*ldda)
 
-    cuDoubleComplex c_one  = MAGMA_Z_ONE;
-    cuDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
 
     magma_int_t nb = magma_get_zgehrd_nb(n);
 

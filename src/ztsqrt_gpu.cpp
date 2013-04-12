@@ -12,9 +12,9 @@
 
 extern "C" int 
 magma_ztsqrt_gpu(int *m, int *n, 
-                 cuDoubleComplex *a1, cuDoubleComplex *a2, int  *lda,
-                 cuDoubleComplex  *tau, cuDoubleComplex *work, 
-                 int *lwork, cuDoubleComplex *dwork, int *info )
+                 magmaDoubleComplex *a1, magmaDoubleComplex *a2, int  *lda,
+                 magmaDoubleComplex  *tau, magmaDoubleComplex *work, 
+                 int *lwork, magmaDoubleComplex *dwork, int *info )
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -111,7 +111,7 @@ magma_ztsqrt_gpu(int *m, int *n,
    int nb = magma_get_zgeqrf_nb(*m);
 
    int lwkopt = (*n+*m) * nb;
-   work[0] = (cuDoubleComplex) lwkopt;
+   work[0] = (magmaDoubleComplex) lwkopt;
    int lquery = *lwork == -1;
    if (*m < 0) {
      *info = -1;
@@ -137,7 +137,7 @@ magma_ztsqrt_gpu(int *m, int *n,
 
    int lhwork = *lwork - (*m)*nb;
 
-   cudaStream_t stream[2];
+   magma_queue_t stream[2];
    magma_queue_create( &stream[0] );
    magma_queue_create( &stream[1] );
 
@@ -157,7 +157,7 @@ magma_ztsqrt_gpu(int *m, int *n,
                              a2_ref(0,i), (*lda),
                              work_a2,     ldwork, stream[1] );
 
-                         // a1_ref(i,i), (*lda)*sizeof(cuDoubleComplex),
+                         // a1_ref(i,i), (*lda)*sizeof(magmaDoubleComplex),
                          // the diagonal of a1 is in d_ref generated and
                          // passed from magma_zgeqrf_gpu
      magma_zgetmatrix_async( ib, ib,

@@ -26,11 +26,11 @@
 extern "C" magma_int_t
 magma_zgeev_m(
     char jobvl, char jobvr, magma_int_t n,
-    cuDoubleComplex *A, magma_int_t lda,
-    cuDoubleComplex *W,
-    cuDoubleComplex *vl, magma_int_t ldvl,
-    cuDoubleComplex *vr, magma_int_t ldvr,
-    cuDoubleComplex *work, magma_int_t lwork,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *W,
+    magmaDoubleComplex *vl, magma_int_t ldvl,
+    magmaDoubleComplex *vr, magma_int_t ldvr,
+    magmaDoubleComplex *work, magma_int_t lwork,
     double *rwork, magma_int_t *info )
 {
 /*  -- MAGMA (version 1.1) --
@@ -128,8 +128,8 @@ magma_zgeev_m(
     magma_int_t c_zero = 0;
     
     double d__1, d__2;
-    cuDoubleComplex z__1, z__2;
-    cuDoubleComplex tmp;
+    magmaDoubleComplex z__1, z__2;
+    magmaDoubleComplex tmp;
     double scl;
     double dum[1], eps;
     double anrm, cscale, bignum, smlnum;
@@ -184,14 +184,14 @@ magma_zgeev_m(
     }
    
     #if defined(Version3) || defined(Version4) || defined(Version5)
-    cuDoubleComplex *dT;
+    magmaDoubleComplex *dT;
     if (MAGMA_SUCCESS != magma_zmalloc( &dT, nb*n )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
     #endif
     #if defined(Version4) || defined(Version5)
-    cuDoubleComplex *T;
+    magmaDoubleComplex *T;
     if (MAGMA_SUCCESS != magma_zmalloc_cpu( &T, nb*n )) {
         magma_free( dT );
         *info = MAGMA_ERR_HOST_ALLOC;

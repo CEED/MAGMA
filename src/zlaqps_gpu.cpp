@@ -15,37 +15,37 @@
 #define PRECISION_z
 /* --------------------------------------------------------------------------- */
 extern "C" void
-magma_zlarfg_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
-                 cuDoubleComplex *dtau, double *dxnorm);
+magma_zlarfg_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
+                 magmaDoubleComplex *dtau, double *dxnorm);
 extern "C" void
-magma_zlarfg2_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
-                  cuDoubleComplex *dtau, double *dxnorm, cuDoubleComplex *dAkk);
+magma_zlarfg2_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
+                  magmaDoubleComplex *dtau, double *dxnorm, magmaDoubleComplex *dAkk);
 extern "C" void
-magma_zlarfg3_gpu(int n, cuDoubleComplex *dx0_in, cuDoubleComplex *dx0_out, 
-                  cuDoubleComplex *dx, cuDoubleComplex *dtau, double *dxnorm);
+magma_zlarfg3_gpu(int n, magmaDoubleComplex *dx0_in, magmaDoubleComplex *dx0_out, 
+                  magmaDoubleComplex *dx, magmaDoubleComplex *dtau, double *dxnorm);
 extern "C" void
-magmablas_dznrm2_adjust(int k, double *xnorm, cuDoubleComplex *c);
+magmablas_dznrm2_adjust(int k, double *xnorm, magmaDoubleComplex *c);
 
 extern "C" void
-magmablas_dznrm2_row_adjust(int k, double *xnorm, cuDoubleComplex *c, int inc);
+magmablas_dznrm2_row_adjust(int k, double *xnorm, magmaDoubleComplex *c, int inc);
 
 extern "C" void
 magmablas_dznrm2_row_check_adjust(int k, double tol, double *xnorm, double *xnorm2, 
-                                  cuDoubleComplex *c, int ldc, double *lsticc);
+                                  magmaDoubleComplex *c, int ldc, double *lsticc);
 
 extern "C" void
-magmablas_dznrm2_check(int m, int num, cuDoubleComplex *da, magma_int_t ldda,
+magmablas_dznrm2_check(int m, int num, magmaDoubleComplex *da, magma_int_t ldda,
                                double *dxnorm, double *lsticc);
 /* --------------------------------------------------------------------------- */
 
 extern "C" magma_int_t
 magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
              magma_int_t nb, magma_int_t *kb,
-             cuDoubleComplex *A,  magma_int_t lda,
-             magma_int_t *jpvt, cuDoubleComplex *tau, 
+             magmaDoubleComplex *A,  magma_int_t lda,
+             magma_int_t *jpvt, magmaDoubleComplex *tau, 
              double *vn1, double *vn2,
-             cuDoubleComplex *auxv,
-             cuDoubleComplex *F,  magma_int_t ldf)
+             magmaDoubleComplex *auxv,
+             magmaDoubleComplex *F,  magma_int_t ldf)
 {
 /*
     -- MAGMA (version 1.1) --
@@ -123,17 +123,17 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
 #define  A(i, j) (A  + (i) + (j)*(lda ))
 #define  F(i, j) (F  + (i) + (j)*(ldf ))
 
-    cuDoubleComplex c_zero    = MAGMA_Z_MAKE( 0.,0.);
-    cuDoubleComplex c_one     = MAGMA_Z_MAKE( 1.,0.);
-    cuDoubleComplex c_neg_one = MAGMA_Z_MAKE(-1.,0.);
+    magmaDoubleComplex c_zero    = MAGMA_Z_MAKE( 0.,0.);
+    magmaDoubleComplex c_one     = MAGMA_Z_MAKE( 1.,0.);
+    magmaDoubleComplex c_neg_one = MAGMA_Z_MAKE(-1.,0.);
     magma_int_t ione = 1;
     
     magma_int_t i__1, i__2;
     double d__1;
-    cuDoubleComplex z__1;
+    magmaDoubleComplex z__1;
     
     magma_int_t j, k, rk;
-    cuDoubleComplex *Aks, Akk, tauk;
+    magmaDoubleComplex *Aks, Akk, tauk;
     magma_int_t pvt;
     double temp, temp2, tol3z;
     magma_int_t itemp;

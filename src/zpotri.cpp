@@ -14,7 +14,7 @@
 
 extern "C" magma_int_t
 magma_zpotri(char uplo, magma_int_t n,
-              cuDoubleComplex *A, magma_int_t lda, magma_int_t *info)
+              magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville

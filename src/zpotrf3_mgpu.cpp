@@ -19,9 +19,9 @@
   #define ZTRSM_WORK
 extern "C"
 void magmablas_ztrsm_work( char side, char uplo, char tran, char diag, magma_int_t M, magma_int_t N,
-                           cuDoubleComplex alpha, const cuDoubleComplex* A, magma_int_t lda, 
-                           cuDoubleComplex* b, magma_int_t ldb,
-                           cuDoubleComplex *d_dinvA, cuDoubleComplex *d_x );
+                           magmaDoubleComplex alpha, const magmaDoubleComplex* A, magma_int_t lda, 
+                           magmaDoubleComplex* b, magma_int_t ldb,
+                           magmaDoubleComplex *d_dinvA, magmaDoubleComplex *d_x );
 #endif
 
 #if (defined(PRECISION_s))
@@ -33,9 +33,9 @@ void magmablas_ztrsm_work( char side, char uplo, char tran, char diag, magma_int
   //#define ZTRSM_WORK
 extern "C"
 void magmablas_ztrsm_work( char side, char uplo, char tran, char diag, magma_int_t M, magma_int_t N,
-                           cuDoubleComplex alpha, const cuDoubleComplex* A, magma_int_t lda, 
-                           cuDoubleComplex* b, magma_int_t ldb,
-                           cuDoubleComplex *d_dinvA, cuDoubleComplex *d_x );
+                           magmaDoubleComplex alpha, const magmaDoubleComplex* A, magma_int_t lda, 
+                           magmaDoubleComplex* b, magma_int_t ldb,
+                           magmaDoubleComplex *d_dinvA, magmaDoubleComplex *d_x );
 #endif
 /* === End defining what BLAS to use ======================================= */
 #define Alo(i, j)  (a   +            ((j)+off_j)*lda  + (nb*(((i)/nb)%h)+off_i))
@@ -49,10 +49,10 @@ void magmablas_ztrsm_work( char side, char uplo, char tran, char diag, magma_int
 extern "C" magma_int_t
 magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, 
                    magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
-                   cuDoubleComplex **d_lA,  magma_int_t ldda, 
-                   cuDoubleComplex **d_lP,  magma_int_t lddp, 
-                   cuDoubleComplex *a,      magma_int_t lda,   magma_int_t h,
-                   cudaStream_t stream[][3], cudaEvent_t event[][5],
+                   magmaDoubleComplex **d_lA,  magma_int_t ldda, 
+                   magmaDoubleComplex **d_lP,  magma_int_t lddp, 
+                   magmaDoubleComplex *a,      magma_int_t lda,   magma_int_t h,
+                   magma_queue_t stream[][3], magma_event_t event[][5],
                    magma_int_t *info ) 
 {
 /*  -- MAGMA (version 1.1) --
@@ -112,20 +112,20 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
 
     magma_int_t     j, jb, nb0, nb2, d, dd, id, j_local, j_local2, buf;
     char            uplo_[2] = {uplo, 0};
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     double          d_one     =  1.0;
     double          d_neg_one = -1.0;
     int upper = lapackf77_lsame(uplo_, "U");
-    cuDoubleComplex *dlpanel;
+    magmaDoubleComplex *dlpanel;
     magma_int_t n_local[MagmaMaxGPUs], ldpanel;
-    //cudaEvent_t event0[MagmaMaxGPUs],  /* send row to CPU    */
+    //magma_event_t event0[MagmaMaxGPUs],  /* send row to CPU    */
     //            event1[MagmaMaxGPUs],  /* send diag to GPU   */
     //            event2[MagmaMaxGPUs],  /* offdiagonal update */
     //            event3[MagmaMaxGPUs],  /* send row to GPU    */
     //            event4[MagmaMaxGPUs];  /* lookahead          */
     const magma_int_t stream1 = 0, stream2 = 1, stream3 = 2;
-    cuDoubleComplex *d_dinvA[MagmaMaxGPUs][2], *d_x[MagmaMaxGPUs][2]; /* used by ztrsm_work */
+    magmaDoubleComplex *d_dinvA[MagmaMaxGPUs][2], *d_x[MagmaMaxGPUs][2]; /* used by ztrsm_work */
 
     *info = 0;
     if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
@@ -182,10 +182,10 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
       for( d=0; d<num_gpus; d++ ) {
           magma_setdevice(d);
           for( j=0; j<2; j++ ) {
-              cudaMalloc((void**)&d_dinvA[d][j], nb*nb*sizeof(cuDoubleComplex));
-              cudaMalloc((void**)&d_x[d][j],      n*nb*sizeof(cuDoubleComplex));
-              cudaMemset(d_dinvA[d][j], 0, nb*nb*sizeof(cuDoubleComplex));
-              cudaMemset(d_x[d][j],     0,  n*nb*sizeof(cuDoubleComplex));
+              cudaMalloc((void**)&d_dinvA[d][j], nb*nb*sizeof(magmaDoubleComplex));
+              cudaMalloc((void**)&d_x[d][j],      n*nb*sizeof(magmaDoubleComplex));
+              cudaMemset(d_dinvA[d][j], 0, nb*nb*sizeof(magmaDoubleComplex));
+              cudaMemset(d_x[d][j],     0,  n*nb*sizeof(magmaDoubleComplex));
           }
       }
       magma_setdevice(0);
@@ -477,10 +477,10 @@ magma_queue_sync( stream[d][stream3] );
       for( d=0; d<num_gpus; d++ ) {
          magma_setdevice(d);
          for( j=0; j<2; j++ ) {
-             cudaMalloc((void**)&d_dinvA[d][j], nb*nb*sizeof(cuDoubleComplex));
-             cudaMalloc((void**)&d_x[d][j],     nb*m *sizeof(cuDoubleComplex));
-             cudaMemset(d_dinvA[d][j], 0, nb*nb*sizeof(cuDoubleComplex));
-             cudaMemset(d_x[d][j],     0, nb* m*sizeof(cuDoubleComplex));
+             cudaMalloc((void**)&d_dinvA[d][j], nb*nb*sizeof(magmaDoubleComplex));
+             cudaMalloc((void**)&d_x[d][j],     nb*m *sizeof(magmaDoubleComplex));
+             cudaMemset(d_dinvA[d][j], 0, nb*nb*sizeof(magmaDoubleComplex));
+             cudaMemset(d_x[d][j],     0, nb* m*sizeof(magmaDoubleComplex));
          }
       }
       magma_setdevice(0);
@@ -764,9 +764,9 @@ magma_queue_sync( stream[d][stream3] );
 extern "C" magma_int_t
 magma_zhtodpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, 
               magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
-              cuDoubleComplex *a,      magma_int_t lda, 
-              cuDoubleComplex **dwork, magma_int_t ldda, 
-              cudaStream_t stream[][3], magma_int_t *info) {
+              magmaDoubleComplex *a,      magma_int_t lda, 
+              magmaDoubleComplex **dwork, magma_int_t ldda, 
+              magma_queue_t stream[][3], magma_int_t *info) {
 
       magma_int_t k;
 
@@ -818,9 +818,9 @@ magma_zhtodpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n,
 extern "C" magma_int_t
 magma_zdtohpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n, 
               magma_int_t off_i, magma_int_t off_j, magma_int_t nb, magma_int_t NB,
-              cuDoubleComplex *a,      magma_int_t lda, 
-              cuDoubleComplex **dwork, magma_int_t ldda, 
-              cudaStream_t stream[][3], magma_int_t *info) {
+              magmaDoubleComplex *a,      magma_int_t lda, 
+              magmaDoubleComplex **dwork, magma_int_t ldda, 
+              magma_queue_t stream[][3], magma_int_t *info) {
 
       magma_int_t k, stream_id = 1;
       if( lapackf77_lsame(uplo, "U") ) {

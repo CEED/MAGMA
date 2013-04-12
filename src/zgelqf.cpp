@@ -12,8 +12,8 @@
 
 extern "C" magma_int_t
 magma_zgelqf( magma_int_t m, magma_int_t n, 
-              cuDoubleComplex *a,    magma_int_t lda,   cuDoubleComplex *tau, 
-              cuDoubleComplex *work, magma_int_t lwork, magma_int_t *info)
+              magmaDoubleComplex *a,    magma_int_t lda,   magmaDoubleComplex *tau, 
+              magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -93,8 +93,8 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
 
     #define  a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
 
-    cuDoubleComplex *dA, *dAT;
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex *dA, *dAT;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magma_int_t maxm, maxn, maxdim, nb;
     magma_int_t iinfo, ldda;
     int lquery;

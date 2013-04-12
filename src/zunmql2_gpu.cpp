@@ -13,16 +13,16 @@
 #include "common_magma.h"
 
 extern"C"{
-  void magmablas_zsetdiag1subdiag0(char uplo, int k, int nb, cuDoubleComplex *A, int lda);
+  void magmablas_zsetdiag1subdiag0(char uplo, int k, int nb, magmaDoubleComplex *A, int lda);
 }
 
 extern "C" magma_int_t
 magma_zunmql2_gpu(const char side, const char trans, 
                   magma_int_t m, magma_int_t n, magma_int_t k, 
-                  cuDoubleComplex *da, magma_int_t ldda, 
-                  cuDoubleComplex *tau, 
-                  cuDoubleComplex *dc, magma_int_t lddc,
-                  cuDoubleComplex *wa, magma_int_t ldwa,
+                  magmaDoubleComplex *da, magma_int_t ldda, 
+                  magmaDoubleComplex *tau, 
+                  magmaDoubleComplex *dc, magma_int_t lddc,
+                  magmaDoubleComplex *wa, magma_int_t ldwa,
                   magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -111,13 +111,13 @@ magma_zunmql2_gpu(const char side, const char trans,
     char trans_[2] = {trans, 0};
 
     /* Allocate work space on the GPU */
-    cuDoubleComplex *dwork;
+    magmaDoubleComplex *dwork;
     magma_zmalloc( &dwork, 2*(m + 64)*64 );
 
     magma_int_t wa_offset, dc_offset, i__4;
     
     magma_int_t i__;
-    cuDoubleComplex t[2*4160]        /* was [65][64] */;
+    magmaDoubleComplex t[2*4160]        /* was [65][64] */;
     magma_int_t i1, i2, i3, ib, nb, mi, ni, nq, nw;
     magma_int_t ldwork;
     int left, notran;

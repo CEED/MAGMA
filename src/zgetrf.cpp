@@ -23,18 +23,18 @@
 // definitions of non-GPU-resident multi-GPU subroutines
 /* non-gpu-resident interface to multiple GPUs */
 extern "C" magma_int_t
-magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
+magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
                magma_int_t *ipiv, magma_int_t *info);
 
 /* to apply pivoting from the previous big panel on CPU */
 extern "C" magma_int_t
-magma_zgetrf_piv(magma_int_t num_gpus, magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
+magma_zgetrf_piv(magma_int_t num_gpus, magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
                  magma_int_t *ipiv, magma_int_t *info);
 // =========================================================================
 
 
 extern "C" magma_int_t
-magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda, 
+magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda, 
              magma_int_t *ipiv, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -94,9 +94,9 @@ magma_zgetrf(magma_int_t m, magma_int_t n, cuDoubleComplex *a, magma_int_t lda,
 
 #define inAT(i,j) (dAT + (i)*nb*ldda + (j)*nb)
 
-    cuDoubleComplex *dAT, *dA, *da, *work;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *dAT, *dA, *da, *work;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t     iinfo, nb;
 
     *info = 0;

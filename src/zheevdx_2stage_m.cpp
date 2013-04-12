@@ -26,31 +26,31 @@ extern"C" {
     magma_int_t magma_zstedx_m(magma_int_t nrgpu,
                                char range, magma_int_t n, double vl, double vu,
                                magma_int_t il, magma_int_t iu, double *D, double *E,
-                               cuDoubleComplex *Z, magma_int_t ldz,
+                               magmaDoubleComplex *Z, magma_int_t ldz,
                                double *rwork, magma_int_t ldrwork, magma_int_t *iwork,
                                magma_int_t liwork, magma_int_t *info);
 
     magma_int_t magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t threads, char uplo, magma_int_t n, magma_int_t nb, magma_int_t ne, magma_int_t Vblksiz,
-                                    cuDoubleComplex *Z, magma_int_t ldz,
-                                    cuDoubleComplex *V, magma_int_t ldv, cuDoubleComplex *TAU, cuDoubleComplex *T, magma_int_t ldt, magma_int_t* info);
+                                    magmaDoubleComplex *Z, magma_int_t ldz,
+                                    magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU, magmaDoubleComplex *T, magma_int_t ldt, magma_int_t* info);
 }
 
 extern "C" magma_int_t
 magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
                magma_int_t m, magma_int_t n, magma_int_t k,
-               cuDoubleComplex *a,    magma_int_t lda,
-               cuDoubleComplex *tau,
-               cuDoubleComplex *c,    magma_int_t ldc,
-               cuDoubleComplex *work, magma_int_t lwork,
+               magmaDoubleComplex *a,    magma_int_t lda,
+               magmaDoubleComplex *tau,
+               magmaDoubleComplex *c,    magma_int_t ldc,
+               magmaDoubleComplex *work, magma_int_t lwork,
                magma_int_t *info);
 
 extern "C" magma_int_t
 magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
                        magma_int_t n,
-                       cuDoubleComplex *a, magma_int_t lda,
+                       magmaDoubleComplex *a, magma_int_t lda,
                        double vl, double vu, magma_int_t il, magma_int_t iu,
                        magma_int_t *m, double *w,
-                       cuDoubleComplex *work, magma_int_t lwork,
+                       magmaDoubleComplex *work, magma_int_t lwork,
                        double *rwork, magma_int_t lrwork,
                        magma_int_t *iwork, magma_int_t liwork,
                        magma_int_t *info)
@@ -202,7 +202,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     char uplo_[2] = {uplo, 0};
     char jobz_[2] = {jobz, 0};
     char range_[2] = {range, 0};
-    cuDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
     magma_int_t ione = 1;
     magma_int_t izero = 0;
     double d_one = 1.;
@@ -386,7 +386,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 #endif
 
 #ifdef HE2HB_SINGLEGPU
-    cuDoubleComplex *dT1;
+    magmaDoubleComplex *dT1;
 
     if (MAGMA_SUCCESS != magma_zmalloc( &dT1, n*nb)) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
@@ -399,8 +399,8 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     magma_free(dT1);
 #else
     magma_int_t nstream = max(3,nrgpu+2);
-    cudaStream_t streams[MagmaMaxGPUs][20];
-    cuDoubleComplex *da[MagmaMaxGPUs],*dT1[MagmaMaxGPUs];
+    magma_queue_t streams[MagmaMaxGPUs][20];
+    magmaDoubleComplex *da[MagmaMaxGPUs],*dT1[MagmaMaxGPUs];
     magma_int_t ldda = ((n+31)/32)*32;
 
     magma_int_t ver = 0;
@@ -457,20 +457,20 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     }
 
     /* copy the input matrix into WORK(INDWRK) with band storage */
-    cuDoubleComplex* A2 = &work[indwrk];
+    magmaDoubleComplex* A2 = &work[indwrk];
 
-    memset(A2 , 0, n*lda2*sizeof(cuDoubleComplex));
+    memset(A2 , 0, n*lda2*sizeof(magmaDoubleComplex));
 
     for (magma_int_t j = 0; j < n-nb; j++)
     {
         cblas_zcopy(nb+1, &a[j*(lda+1)], 1, &A2[j*lda2], 1);
-        memset(&a[j*(lda+1)], 0, (nb+1)*sizeof(cuDoubleComplex));
+        memset(&a[j*(lda+1)], 0, (nb+1)*sizeof(magmaDoubleComplex));
         a[nb + j*(lda+1)] = c_one;
     }
     for (magma_int_t j = 0; j < nb; j++)
     {
         cblas_zcopy(nb-j, &a[(j+n-nb)*(lda+1)], 1, &A2[(j+n-nb)*lda2], 1);
-        memset(&a[(j+n-nb)*(lda+1)], 0, (nb-j)*sizeof(cuDoubleComplex));
+        memset(&a[(j+n-nb)*(lda+1)], 0, (nb-j)*sizeof(magmaDoubleComplex));
     }
 
 #ifdef ENABLE_TIMER
@@ -516,7 +516,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
         magma_zmove_eig(range, n, w, &il, &iu, vl, vu, m);
 /*
-        cuDoubleComplex *dZ;
+        magmaDoubleComplex *dZ;
         magma_int_t lddz = n;
 
         if (MAGMA_SUCCESS != magma_zmalloc( &dZ, *m*lddz)) {

@@ -11,17 +11,17 @@
 #include "common_magma.h"
 
 extern "C" void
-magma_zlarfg_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
-                 cuDoubleComplex *dtau, double *dxnorm);
+magma_zlarfg_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
+                 magmaDoubleComplex *dtau, double *dxnorm);
 
 extern "C" void
-magma_zlarf_gpu(int m, int n, cuDoubleComplex *v, cuDoubleComplex *tau,
-                cuDoubleComplex *c, int ldc, double *xnorm);
+magma_zlarf_gpu(int m, int n, magmaDoubleComplex *v, magmaDoubleComplex *tau,
+                magmaDoubleComplex *c, int ldc, double *xnorm);
 
 
 extern "C" magma_int_t
-magma_zgeqr2_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA, 
-                 magma_int_t *ldda, cuDoubleComplex *dtau, double *dwork, 
+magma_zgeqr2_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA, 
+                 magma_int_t *ldda, magmaDoubleComplex *dtau, double *dwork, 
                  magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --

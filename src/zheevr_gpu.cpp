@@ -14,12 +14,12 @@
 
 extern "C" magma_int_t 
 magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n, 
-                 cuDoubleComplex *da, magma_int_t ldda, double vl, double vu, 
+                 magmaDoubleComplex *da, magma_int_t ldda, double vl, double vu, 
                  magma_int_t il, magma_int_t iu, double abstol, magma_int_t *m, 
-                 double *w, cuDoubleComplex *dz, magma_int_t lddz, magma_int_t *isuppz,
-                 cuDoubleComplex *wa, magma_int_t ldwa,
-                 cuDoubleComplex *wz, magma_int_t ldwz,
-                 cuDoubleComplex *work, magma_int_t lwork,
+                 double *w, magmaDoubleComplex *dz, magma_int_t lddz, magma_int_t *isuppz,
+                 magmaDoubleComplex *wa, magma_int_t ldwa,
+                 magmaDoubleComplex *wz, magma_int_t ldwz,
+                 magmaDoubleComplex *work, magma_int_t lwork,
                  double *rwork, magma_int_t lrwork, magma_int_t *iwork, 
                  magma_int_t liwork, magma_int_t *info)
 {
@@ -336,7 +336,7 @@ magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
   }
   
   if (n == 1) {
-    cuDoubleComplex tmp;
+    magmaDoubleComplex tmp;
     magma_zgetvector( 1, da, 1, &tmp, 1 );
     w[0] = MAGMA_Z_REAL(tmp);
     if (alleig || indeig) {

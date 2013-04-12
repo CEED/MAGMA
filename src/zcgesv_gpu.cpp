@@ -15,11 +15,11 @@
 
 extern "C" magma_int_t
 magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS, 
-                 cuDoubleComplex *dA, magma_int_t ldda, 
+                 magmaDoubleComplex *dA, magma_int_t ldda, 
                  magma_int_t *IPIV,  magma_int_t *dIPIV,
-                 cuDoubleComplex *dB, magma_int_t lddb, 
-                 cuDoubleComplex *dX, magma_int_t lddx, 
-                 cuDoubleComplex *dworkd, cuFloatComplex *dworks,
+                 magmaDoubleComplex *dB, magma_int_t lddb, 
+                 magmaDoubleComplex *dX, magma_int_t lddx, 
+                 magmaDoubleComplex *dworkd, magmaFloatComplex *dworks,
                  magma_int_t *iter, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -138,12 +138,12 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
                   could not be computed.
     =====================================================================    */
 
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magma_int_t     ione  = 1;
     double          cte, eps;
-    cuDoubleComplex Xnrmv, Rnrmv;
-    cuFloatComplex  *dSA, *dSX;
+    magmaDoubleComplex Xnrmv, Rnrmv;
+    magmaFloatComplex  *dSA, *dSX;
     double          Anrm, Xnrm, Rnrm;
     magma_int_t     i, j, iiter;
     
@@ -240,7 +240,7 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
     {
         *info = 0 ;
         /*
-          Convert R (in dworkd) from cuDoubleComplex precision to single precision
+          Convert R (in dworkd) from magmaDoubleComplex precision to single precision
           and store the result in SX.
           Solve the system SA * X = dworkd and store the result in dworkd.
           -- These two Tasks are merged here. 
@@ -295,14 +295,14 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
       If we are at this place of the code, this is because we have
       performed ITER=ITERMAX iterations and never satisified the
       stopping criterion, set up the ITER flag accordingly and follow up
-      on cuDoubleComplex precision routine.
+      on magmaDoubleComplex precision routine.
     */
     *iter = -ITERMAX - 1 ;
     
   L40:
     /*
       Single-precision iterative refinement failed to converge to a
-      satisfactory solution, so we resort to cuDoubleComplex precision.  
+      satisfactory solution, so we resort to magmaDoubleComplex precision.  
     */
     if( *info != 0 ){
         return *info;

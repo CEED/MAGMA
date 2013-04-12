@@ -20,7 +20,7 @@
 
 extern "C" magma_int_t
 magma_ztrtri(char uplo, char diag, magma_int_t n,
-              cuDoubleComplex *A, magma_int_t lda, magma_int_t *info)
+              magmaDoubleComplex *A, magma_int_t lda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -81,10 +81,10 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
     char uplo_[2] = {uplo, 0};
     char diag_[2] = {diag, 0};
     magma_int_t     ldda, nb, nn, j, jb;
-    cuDoubleComplex c_zero     = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one      = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *dA;
+    magmaDoubleComplex c_zero     = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one      = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *dA;
 
     int upper  = lapackf77_lsame(uplo_, "U");
     int nounit = lapackf77_lsame(diag_, "N");
@@ -128,7 +128,7 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
         return *info;
     }
 
-    cudaStream_t stream[2];
+    magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 
@@ -152,7 +152,7 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
                              MagmaNoTrans, MagmaNonUnit, j, jb,
                              c_neg_one, dA(j,j), ldda, dA(0, j),ldda);
 
-                //cublasGetMatrix(j ,jb, sizeof( cuDoubleComplex),
+                //cublasGetMatrix(j ,jb, sizeof( magmaDoubleComplex),
                 //dA(0, j), ldda, A(0, j), lda);
 
                 magma_zgetmatrix_async( jb, jb,
@@ -194,7 +194,7 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
                                  MagmaNoTrans, MagmaNonUnit, (n-j-jb), jb,
                                  c_neg_one, dA(j,j), ldda, dA(j+jb, j), ldda );
 
-                    //cublasGetMatrix((n-j), jb, sizeof( cuDoubleComplex),dA(j, j), ldda, A(j, j), lda);
+                    //cublasGetMatrix((n-j), jb, sizeof( magmaDoubleComplex),dA(j, j), ldda, A(j, j), lda);
 
                     magma_zgetmatrix_async( n-j-jb, jb,
                                             dA(j+jb, j), ldda,

@@ -20,10 +20,10 @@
 extern "C" magma_int_t
 magma_zlarfb_gpu( char side, char trans, char direct, char storev,
                   magma_int_t m, magma_int_t n, magma_int_t k,
-                  const cuDoubleComplex *dV,    magma_int_t ldv,
-                  const cuDoubleComplex *dT,    magma_int_t ldt,
-                  cuDoubleComplex *dC,          magma_int_t ldc,
-                  cuDoubleComplex *dwork,       magma_int_t ldwork )
+                  const magmaDoubleComplex *dV,    magma_int_t ldv,
+                  const magmaDoubleComplex *dT,    magma_int_t ldt,
+                  magmaDoubleComplex *dC,          magma_int_t ldc,
+                  magmaDoubleComplex *dwork,       magma_int_t ldwork )
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Univ. of California Berkeley
@@ -125,9 +125,9 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
 
     ===================================================================      */
 
-    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     /* Check input arguments */
     magma_int_t info = 0;

@@ -45,7 +45,7 @@
      *     consist in a block of col (vertical block)
      */
 /***************************************************************************/
-extern "C" void magma_zbulge_applyQ_v2(char side, magma_int_t NE, magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, cuDoubleComplex *dE, magma_int_t ldde, cuDoubleComplex *V, magma_int_t ldv, cuDoubleComplex *T, magma_int_t ldt, magma_int_t *info)
+extern "C" void magma_zbulge_applyQ_v2(char side, magma_int_t NE, magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, magmaDoubleComplex *dE, magma_int_t ldde, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *T, magma_int_t ldt, magma_int_t *info)
 {
     //%===========================
     //%   local variables
@@ -88,11 +88,11 @@ extern "C" void magma_zbulge_applyQ_v2(char side, magma_int_t NE, magma_int_t N,
     magma_stream_t cstream;
     magmablasGetKernelStream(&cstream);
 
-    cudaStream_t stream[2];
+    magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 
-    cudaEvent_t myevent[2];
+    magma_event_t myevent[2];
     cudaEventCreateWithFlags(&myevent[0],cudaEventDisableTiming);
     cudaEventCreateWithFlags(&myevent[1],cudaEventDisableTiming);
 
@@ -101,7 +101,7 @@ extern "C" void magma_zbulge_applyQ_v2(char side, magma_int_t NE, magma_int_t N,
     // Azzam 21/11/2012
     // NOTE THAT dwork was of size 2*lddwork*Vblksiz+...
     // but I am thinking why not modifing it to lddwork*Vblksiz+...
-    cuDoubleComplex *dwork, *dT0, *dV0, *dT1, *dV1, *dwvt;
+    magmaDoubleComplex *dwork, *dT0, *dV0, *dT1, *dV1, *dwvt;
     magma_int_t lddv = ldv; //NB + Vblksiz - 1;
     magma_int_t lddt = ldt; // Vblksiz;
     magma_int_t lddwvt = ldv; 

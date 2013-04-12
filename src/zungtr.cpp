@@ -11,10 +11,10 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zungtr(char uplo, magma_int_t n, cuDoubleComplex *a, 
-             magma_int_t lda, cuDoubleComplex *tau, 
-             cuDoubleComplex *work, magma_int_t lwork,
-             cuDoubleComplex *dT, magma_int_t nb, 
+magma_zungtr(char uplo, magma_int_t n, magmaDoubleComplex *a, 
+             magma_int_t lda, magmaDoubleComplex *tau, 
+             magmaDoubleComplex *work, magma_int_t lwork,
+             magmaDoubleComplex *dT, magma_int_t nb, 
              magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --

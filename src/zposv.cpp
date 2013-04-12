@@ -14,8 +14,8 @@
 
 extern "C" magma_int_t
 magma_zposv    ( char uplo, magma_int_t n, magma_int_t nrhs, 
-                 cuDoubleComplex *A, magma_int_t lda, 
-                 cuDoubleComplex *B, magma_int_t ldb, magma_int_t *info )
+                 magmaDoubleComplex *A, magma_int_t lda, 
+                 magmaDoubleComplex *B, magma_int_t ldb, magma_int_t *info )
 {
 /*  -- MAGMA (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -103,7 +103,7 @@ magma_zposv    ( char uplo, magma_int_t n, magma_int_t nrhs,
 
     /* If single-GPU and allocation suceeds, use GPU interface. */
     num_gpus = magma_num_gpus();
-    cuDoubleComplex *dA, *dB;
+    magmaDoubleComplex *dA, *dB;
     if ( num_gpus > 1 ) {
         goto CPU_INTERFACE;
     }

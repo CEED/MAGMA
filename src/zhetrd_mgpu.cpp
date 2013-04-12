@@ -18,29 +18,29 @@
 
 extern "C" magma_int_t
 magma_zhtodhe(int num_gpus, char *uplo, magma_int_t n, magma_int_t nb,
-              cuDoubleComplex *a, magma_int_t lda, 
-              cuDoubleComplex **dwork, magma_int_t ldda, 
-              cudaStream_t stream[][10], magma_int_t *info);
+              magmaDoubleComplex *a, magma_int_t lda, 
+              magmaDoubleComplex **dwork, magma_int_t ldda, 
+              magma_queue_t stream[][10], magma_int_t *info);
 
 extern "C" void
 magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
-        cuDoubleComplex alpha, cuDoubleComplex **db, int lddb, int offset_b,
-        double beta,           cuDoubleComplex **dc, int lddc, int offset,
-        int num_streams, cudaStream_t stream[][10]);
+        magmaDoubleComplex alpha, magmaDoubleComplex **db, int lddb, int offset_b,
+        double beta,           magmaDoubleComplex **dc, int lddc, int offset,
+        int num_streams, magma_queue_t stream[][10]);
 
 extern "C" double     
 magma_zlatrd_mgpu(int num_gpus, char uplo,  
                   magma_int_t n0, magma_int_t n, magma_int_t nb, magma_int_t nb0,
-                  cuDoubleComplex *a,  magma_int_t lda, 
-                  double *e, cuDoubleComplex *tau, 
-                  cuDoubleComplex *w,   magma_int_t ldw,
-                  cuDoubleComplex **da, magma_int_t ldda, magma_int_t offset,
-                  cuDoubleComplex **dw, magma_int_t lddw,
-                  cuDoubleComplex *dwork[MagmaMaxGPUs], magma_int_t ldwork,
+                  magmaDoubleComplex *a,  magma_int_t lda, 
+                  double *e, magmaDoubleComplex *tau, 
+                  magmaDoubleComplex *w,   magma_int_t ldw,
+                  magmaDoubleComplex **da, magma_int_t ldda, magma_int_t offset,
+                  magmaDoubleComplex **dw, magma_int_t lddw,
+                  magmaDoubleComplex *dwork[MagmaMaxGPUs], magma_int_t ldwork,
                   magma_int_t k,
-                  cuDoubleComplex  *dx[MagmaMaxGPUs], cuDoubleComplex *dy[MagmaMaxGPUs],
-                  cuDoubleComplex *work,
-                  cudaStream_t stream[][10],
+                  magmaDoubleComplex  *dx[MagmaMaxGPUs], magmaDoubleComplex *dy[MagmaMaxGPUs],
+                  magmaDoubleComplex *work,
+                  magma_queue_t stream[][10],
                   double *times);
 
 
@@ -58,9 +58,9 @@ magma_zlatrd_mgpu(int num_gpus, char uplo,
 
 extern "C" magma_int_t
 magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n, 
-             cuDoubleComplex *a, magma_int_t lda, 
-             double *d, double *e, cuDoubleComplex *tau,
-             cuDoubleComplex *work, magma_int_t lwork, 
+             magmaDoubleComplex *a, magma_int_t lda, 
+             double *d, double *e, magmaDoubleComplex *tau,
+             magmaDoubleComplex *work, magma_int_t lwork, 
              magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -183,8 +183,8 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
     magma_int_t ln, ldda;
     magma_int_t nb = magma_get_zhetrd_nb(n), ib; 
 
-    cuDoubleComplex z_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex z_one = MAGMA_Z_ONE;
+    magmaDoubleComplex z_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex z_one = MAGMA_Z_ONE;
     double  d_one = MAGMA_D_ONE;
     double mv_time = 0.0;
     double up_time = 0.0;
@@ -194,9 +194,9 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
     magma_int_t iinfo;
     magma_int_t ldwork, lddwork, lwkopt, ldwork2;
     magma_int_t lquery;
-    cudaStream_t stream[MagmaMaxGPUs][10];
-    cuDoubleComplex *dx[MagmaMaxGPUs], *dy[MagmaMaxGPUs], *hwork;
-    cuDoubleComplex *dwork2[MagmaMaxGPUs]; 
+    magma_queue_t stream[MagmaMaxGPUs][10];
+    magmaDoubleComplex *dx[MagmaMaxGPUs], *dy[MagmaMaxGPUs], *hwork;
+    magmaDoubleComplex *dwork2[MagmaMaxGPUs]; 
 
     *info = 0;
     long int upper = lapackf77_lsame(uplo_, "U");
@@ -234,14 +234,14 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
         return 0;
     }
 
-    cuDoubleComplex *da[MagmaMaxGPUs];
-    cuDoubleComplex *dwork[MagmaMaxGPUs]; 
+    magmaDoubleComplex *da[MagmaMaxGPUs];
+    magmaDoubleComplex *dwork[MagmaMaxGPUs]; 
 
     double times[11];
     for( did=0; did<11; did++ ) times[did] = 0;
 //#define PROFILE_SY2RK
 #ifdef  PROFILE_SY2RK
-    cudaEvent_t start, stop;
+    magma_event_t start, stop;
     float etime;
     magma_setdevice(0);
     magma_event_create( &start );
@@ -493,9 +493,9 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
 
 extern "C" magma_int_t
 magma_zhtodhe(int num_gpus, char *uplo, magma_int_t n, magma_int_t nb,
-              cuDoubleComplex *a, magma_int_t lda, 
-              cuDoubleComplex **da, magma_int_t ldda, 
-              cudaStream_t stream[][10], magma_int_t *info) {
+              magmaDoubleComplex *a, magma_int_t lda, 
+              magmaDoubleComplex **da, magma_int_t ldda, 
+              magma_queue_t stream[][10], magma_int_t *info) {
 
       magma_int_t k;
       if( lapackf77_lsame(uplo, "L") ) {
@@ -542,9 +542,9 @@ magma_zhtodhe(int num_gpus, char *uplo, magma_int_t n, magma_int_t nb,
 
 extern "C" void
 magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
-    cuDoubleComplex alpha, cuDoubleComplex **db, int lddb, int offset_b,
-    double beta,           cuDoubleComplex **dc, int lddc, int offset,
-    int num_streams, cudaStream_t stream[][10]) {
+    magmaDoubleComplex alpha, magmaDoubleComplex **db, int lddb, int offset_b,
+    double beta,           magmaDoubleComplex **dc, int lddc, int offset,
+    int num_streams, magma_queue_t stream[][10]) {
 
 #define dB(id, i, j)  (db[(id)]+(j)*lddb + (i)+offset_b)
 #define dB1(id, i, j) (db[(id)]+(j)*lddb + (i)+offset_b)+k*lddb
@@ -552,7 +552,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
 
     char uplo_[2]  = {uplo, 0};
     int i, id, ib, ii, kk, n1, m1;
-    cuDoubleComplex z_one = MAGMA_Z_ONE;
+    magmaDoubleComplex z_one = MAGMA_Z_ONE;
 
     /* diagonal update */
     for( i=0; i<n; i+=nb ) {

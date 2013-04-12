@@ -15,10 +15,10 @@
 
 extern "C" magma_int_t
 magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
-             cuDoubleComplex *A, magma_int_t lda,
-             cuDoubleComplex *tau,
-             cuDoubleComplex *work, magma_int_t lwork,
-             cuDoubleComplex *dT,
+             magmaDoubleComplex *A, magma_int_t lda,
+             magmaDoubleComplex *tau,
+             magmaDoubleComplex *work, magma_int_t lwork,
+             magmaDoubleComplex *dT,
              magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -131,8 +131,8 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     #define  A( i, j ) ( A + (i) + (j)*lda)
     #define dA( i, j ) (dA + (i) + (j-ilo)*ldda)
 
-    cuDoubleComplex c_one  = MAGMA_Z_ONE;
-    cuDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
 
     magma_int_t nb = magma_get_zgehrd_nb(n);
     magma_int_t ldda = n;  // assumed in zlahru
@@ -179,18 +179,18 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     //   nb*ldda for dwork for zlahru
     //   nb*ldda for dV
     //   n*ldda  for dA
-    cuDoubleComplex *dwork;
+    magmaDoubleComplex *dwork;
     if (MAGMA_SUCCESS != magma_zmalloc( &dwork, 2*nb*ldda + n*ldda )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-    cuDoubleComplex *dV = dwork + nb*ldda;
-    cuDoubleComplex *dA = dwork + nb*ldda*2;
+    magmaDoubleComplex *dV = dwork + nb*ldda;
+    magmaDoubleComplex *dA = dwork + nb*ldda*2;
     ldwork = n;
 
     magma_int_t i;
 
-    cuDoubleComplex *T, *dTi;
+    magmaDoubleComplex *T, *dTi;
     magma_zmalloc_cpu( &T, nb*nb );
     if ( T == NULL ) {
         magma_free( dwork );

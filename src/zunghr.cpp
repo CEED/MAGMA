@@ -12,9 +12,9 @@
 
 extern "C" magma_int_t
 magma_zunghr(magma_int_t n, magma_int_t ilo, magma_int_t ihi, 
-             cuDoubleComplex *a, magma_int_t lda, 
-             cuDoubleComplex *tau,
-             cuDoubleComplex *dT, magma_int_t nb,
+             magmaDoubleComplex *a, magma_int_t lda, 
+             magmaDoubleComplex *tau,
+             magmaDoubleComplex *dT, magma_int_t nb,
              magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --

@@ -15,8 +15,8 @@
 
 extern "C" magma_int_t
 magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
-             cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *b, magma_int_t ldb,
-             double *w, cuDoubleComplex *work, magma_int_t lwork,
+             magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
+             double *w, magmaDoubleComplex *work, magma_int_t lwork,
              double *rwork, magma_int_t lrwork,
              magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
 {
@@ -174,10 +174,10 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     char uplo_[2] = {uplo, 0};
     char jobz_[2] = {jobz, 0};
 
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
-    cuDoubleComplex *da;
-    cuDoubleComplex *db;
+    magmaDoubleComplex *da;
+    magmaDoubleComplex *db;
     magma_int_t ldda = n;
     magma_int_t lddb = n;
 
@@ -190,7 +190,7 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     magma_int_t liwmin;
     magma_int_t lrwmin;
 
-    cudaStream_t stream;
+    magma_queue_t stream;
     magma_queue_create( &stream );
 
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);

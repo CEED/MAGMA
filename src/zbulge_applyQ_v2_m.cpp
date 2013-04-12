@@ -45,7 +45,7 @@
      *     consist in a block of col (vertical block)
      */
 /***************************************************************************/
-extern "C" magma_int_t magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side, magma_int_t NE, magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, cuDoubleComplex *E, magma_int_t lde, cuDoubleComplex *V, magma_int_t ldv, cuDoubleComplex *T, magma_int_t ldt, magma_int_t *info)
+extern "C" magma_int_t magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side, magma_int_t NE, magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, magmaDoubleComplex *E, magma_int_t lde, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *T, magma_int_t ldt, magma_int_t *info)
 {
     //%===========================
     //%   local variables
@@ -91,8 +91,8 @@ extern "C" magma_int_t magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side, mag
     magmablasGetKernelStream(&cstream);
 
     magma_int_t  nbevents =2, nstream=2;
-    cudaStream_t streams[MagmaMaxGPUs][20];    
-    cudaEvent_t  myevent[MagmaMaxGPUs][20]; 
+    magma_queue_t streams[MagmaMaxGPUs][20];    
+    magma_event_t  myevent[MagmaMaxGPUs][20]; 
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         cudaSetDevice( dev );
         for( magma_int_t i = 0; i < nstream; ++i ) {
@@ -106,8 +106,8 @@ extern "C" magma_int_t magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side, mag
     // Azzam 21/11/2012
     // NOTE THAT dwork was of size 2*lddwork*Vblksiz+...
     // but I am thinking why not modifing it to lddwork*Vblksiz+...
-    cuDoubleComplex *dE[MagmaMaxGPUs], *dwork[MagmaMaxGPUs], *dwvt[MagmaMaxGPUs];
-    cuDoubleComplex *dT0[MagmaMaxGPUs], *dV0[MagmaMaxGPUs], *dT1[MagmaMaxGPUs], *dV1[MagmaMaxGPUs];
+    magmaDoubleComplex *dE[MagmaMaxGPUs], *dwork[MagmaMaxGPUs], *dwvt[MagmaMaxGPUs];
+    magmaDoubleComplex *dT0[MagmaMaxGPUs], *dV0[MagmaMaxGPUs], *dT1[MagmaMaxGPUs], *dV1[MagmaMaxGPUs];
     magma_int_t dev;
     magma_int_t ldde = N;
     magma_int_t lddv = ldv;

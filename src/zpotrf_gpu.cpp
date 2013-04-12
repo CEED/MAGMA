@@ -29,7 +29,7 @@
 
 extern "C" magma_int_t
 magma_zpotrf_gpu(char uplo, magma_int_t n, 
-                 cuDoubleComplex *dA, magma_int_t ldda, magma_int_t *info)
+                 magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -86,9 +86,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
 
     magma_int_t     j, jb, nb;
     char            uplo_[2] = {uplo, 0};
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *work;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *work;
     double          d_one     =  1.0;
     double          d_neg_one = -1.0;
     int upper = lapackf77_lsame(uplo_, "U");
@@ -113,7 +113,7 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
         return *info;
     }
 
-    cudaStream_t stream[2];
+    magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 

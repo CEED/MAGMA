@@ -16,10 +16,10 @@
 extern "C" magma_int_t
 magma_zlahru(
     magma_int_t n, magma_int_t ihi, magma_int_t k, magma_int_t nb, 
-    cuDoubleComplex *A, magma_int_t lda,
-    cuDoubleComplex *dA, cuDoubleComplex *dY,
-    cuDoubleComplex *dV, cuDoubleComplex *dT, 
-    cuDoubleComplex *dwork )
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *dA, magmaDoubleComplex *dY,
+    magmaDoubleComplex *dV, magmaDoubleComplex *dT, 
+    magmaDoubleComplex *dwork )
 {
 /*  -- MAGMA auxiliary routine (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -101,12 +101,12 @@ magma_zlahru(
 
     #define dA( i, j ) (dA + (i) + (j)*ldda)
     
-    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     magma_int_t ldda = lda;
-    cuDoubleComplex *dYm = dV + ihi - k;
+    magmaDoubleComplex *dYm = dV + ihi - k;
 
     magma_int_t info = 0;
     if (n < 0) {

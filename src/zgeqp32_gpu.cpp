@@ -16,35 +16,35 @@
 extern "C" magma_int_t
 magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
                  magma_int_t nb, magma_int_t *kb,
-                 cuDoubleComplex *A,  magma_int_t lda,
-                 magma_int_t *jpvt, cuDoubleComplex *tau,
+                 magmaDoubleComplex *A,  magma_int_t lda,
+                 magma_int_t *jpvt, magmaDoubleComplex *tau,
                  double *vn1, double *vn2,
-                 cuDoubleComplex *auxv,
-                 cuDoubleComplex *dF, magma_int_t lddf);
+                 magmaDoubleComplex *auxv,
+                 magmaDoubleComplex *dF, magma_int_t lddf);
 
 extern "C" magma_int_t
 magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
                   magma_int_t nb, magma_int_t *kb,
-                  cuDoubleComplex *A,  magma_int_t lda,
-                  magma_int_t *jpvt, cuDoubleComplex *tau,
+                  magmaDoubleComplex *A,  magma_int_t lda,
+                  magma_int_t *jpvt, magmaDoubleComplex *tau,
                   double *vn1, double *vn2,
-                  cuDoubleComplex *auxv,
-                  cuDoubleComplex *dF, magma_int_t lddf);
+                  magmaDoubleComplex *auxv,
+                  magmaDoubleComplex *dF, magma_int_t lddf);
 
 extern "C" magma_int_t
 magma_zlaqps3_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
                   magma_int_t nb, magma_int_t *kb,
-                  cuDoubleComplex *A,  magma_int_t lda,
-                  magma_int_t *jpvt, cuDoubleComplex *tau,
+                  magmaDoubleComplex *A,  magma_int_t lda,
+                  magma_int_t *jpvt, magmaDoubleComplex *tau,
                   double *vn1, double *vn2,
-                  cuDoubleComplex *auxv,
-                  cuDoubleComplex *dF, magma_int_t lddf);
+                  magmaDoubleComplex *auxv,
+                  magmaDoubleComplex *dF, magma_int_t lddf);
 
 extern "C" magma_int_t
 magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
-                  cuDoubleComplex *A, magma_int_t lda,
-                  magma_int_t *jpvt, cuDoubleComplex *tau,
-                  cuDoubleComplex *work, magma_int_t lwork,
+                  magmaDoubleComplex *A, magma_int_t lda,
+                  magma_int_t *jpvt, magmaDoubleComplex *tau,
+                  magmaDoubleComplex *work, magma_int_t lwork,
 #if defined(PRECISION_z) || defined(PRECISION_c)
                   double *rwork,
 #endif
@@ -175,12 +175,12 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
 #if defined(PRECISION_d) || defined(PRECISION_s)
     double *rwork = work + (n + 1)*nb;
 #endif
-    cuDoubleComplex   *df;
+    magmaDoubleComplex   *df;
     if (MAGMA_SUCCESS != magma_zmalloc( &df, (n+1)*(nb+32) )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-    cudaMemset( df, 0, (n+1)*(nb+32)*sizeof(cuDoubleComplex) );
+    cudaMemset( df, 0, (n+1)*(nb+32)*sizeof(magmaDoubleComplex) );
 
     nfxd = 0;
     /* Move initial columns up front.

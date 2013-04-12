@@ -30,9 +30,9 @@
 
 extern "C" magma_int_t
 magma_zhetrd(char uplo, magma_int_t n, 
-             cuDoubleComplex *a, magma_int_t lda, 
-             double *d, double *e, cuDoubleComplex *tau,
-             cuDoubleComplex *work, magma_int_t lwork, 
+             magmaDoubleComplex *a, magma_int_t lda, 
+             double *d, double *e, magmaDoubleComplex *tau,
+             magmaDoubleComplex *work, magma_int_t lwork, 
              magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -154,8 +154,8 @@ magma_zhetrd(char uplo, magma_int_t n,
     magma_int_t ldda = lda;
     magma_int_t nb = magma_get_zhetrd_nb(n); 
 
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     double          d_one     = MAGMA_D_ONE;
     
     magma_int_t kk, nx;
@@ -197,13 +197,13 @@ magma_zhetrd(char uplo, magma_int_t n,
         return *info;
     }
 
-    cuDoubleComplex *da;
+    magmaDoubleComplex *da;
     if (MAGMA_SUCCESS != magma_zmalloc( &da, n*ldda + 2*n*nb )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
 
-    cuDoubleComplex *dwork = da + (n)*ldda;
+    magmaDoubleComplex *dwork = da + (n)*ldda;
 
     if (n < 2048)
         nx = n;
@@ -258,7 +258,7 @@ magma_zhetrd(char uplo, magma_int_t n,
 
         #ifdef FAST_HEMV
         // TODO this leaks memory from da, above
-        cuDoubleComplex *dwork2;
+        magmaDoubleComplex *dwork2;
         if (MAGMA_SUCCESS != magma_zmalloc( &dwork2, n*n )) {
             *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;

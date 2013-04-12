@@ -15,10 +15,10 @@
 extern "C" magma_int_t
 magma_zunmql(const char side, const char trans, 
              magma_int_t m, magma_int_t n, magma_int_t k, 
-             cuDoubleComplex *a, magma_int_t lda, 
-             cuDoubleComplex *tau, 
-             cuDoubleComplex *c, magma_int_t ldc, 
-             cuDoubleComplex *work, magma_int_t lwork,
+             magmaDoubleComplex *a, magma_int_t lda, 
+             magmaDoubleComplex *tau, 
+             magmaDoubleComplex *c, magma_int_t ldc, 
+             magmaDoubleComplex *work, magma_int_t lwork,
              magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -112,7 +112,7 @@ magma_zunmql(const char side, const char trans,
     char trans_[2] = {trans, 0};
 
     /* Allocate work space on the GPU */
-    cuDoubleComplex *dwork, *dc;
+    magmaDoubleComplex *dwork, *dc;
     magma_zmalloc( &dc, (m)*(n) );
     magma_zmalloc( &dwork, 2*(m + 64)*64 );
 
@@ -123,7 +123,7 @@ magma_zunmql(const char side, const char trans,
     magma_int_t a_offset, c_dim1, c_offset, i__4;
     
     magma_int_t i__;
-    cuDoubleComplex t[2*4160]        /* was [65][64] */;
+    magmaDoubleComplex t[2*4160]        /* was [65][64] */;
     magma_int_t i1, i2, i3, ib, nb, mi, ni, nq, nw;
     magma_int_t iinfo, ldwork, lwkopt;
     int lquery, left, notran;

@@ -12,8 +12,8 @@
 
 extern "C" magma_int_t
 magma_zgeqrf_ooc(magma_int_t m, magma_int_t n, 
-                 cuDoubleComplex *a,    magma_int_t lda, cuDoubleComplex *tau, 
-                 cuDoubleComplex *work, magma_int_t lwork,
+                 magmaDoubleComplex *a,    magma_int_t lda, magmaDoubleComplex *tau, 
+                 magmaDoubleComplex *work, magma_int_t lwork,
                  magma_int_t *info )
 {
 /*  -- MAGMA (version 1.1) --
@@ -96,8 +96,8 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
     #define  a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
     #define da_ref(a_1,a_2) (da+(a_2)*ldda  + (a_1))
 
-    cuDoubleComplex *da, *dwork;
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex *da, *dwork;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
     int  k, lddwork, ldda;
 
@@ -126,7 +126,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
     /* Check how much memory do we have */
     size_t freeMem, totalMem;
     cudaMemGetInfo( &freeMem, &totalMem );
-    freeMem /= sizeof(cuDoubleComplex);
+    freeMem /= sizeof(magmaDoubleComplex);
     
     magma_int_t IB, NB = (magma_int_t)(0.8*freeMem/m);
     NB = (NB / nb) * nb;
@@ -148,13 +148,13 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
         return *info;
     }
 
-    cudaStream_t stream[2];
+    magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 
     //   magmablasSetKernelStream(stream[1]);
 
-    cuDoubleComplex *ptr = da + ldda * NB;
+    magmaDoubleComplex *ptr = da + ldda * NB;
     dwork = da + ldda*(NB + nb);
 
     /* start the main loop over the blocks that fit in the GPU memory */

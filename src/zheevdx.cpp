@@ -19,10 +19,10 @@ void magma_zmove_eig(char range, magma_int_t n, double *w, magma_int_t *il,
 extern "C" magma_int_t
 magma_zheevdx(char jobz, char range, char uplo,
               magma_int_t n,
-              cuDoubleComplex *a, magma_int_t lda,
+              magmaDoubleComplex *a, magma_int_t lda,
               double vl, double vu, magma_int_t il, magma_int_t iu,
               magma_int_t *m, double *w,
-              cuDoubleComplex *work, magma_int_t lwork,
+              magmaDoubleComplex *work, magma_int_t lwork,
               double *rwork, magma_int_t lrwork,
               magma_int_t *iwork, magma_int_t liwork,
               magma_int_t *info)

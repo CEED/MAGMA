@@ -33,13 +33,13 @@
 
 extern "C" magma_int_t
 magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
-                    cuDoubleComplex *a, magma_int_t lda, 
-                    cuDoubleComplex *tau,
-                    cuDoubleComplex *work, magma_int_t lwork,
-                    cuDoubleComplex *dAmgpu[], magma_int_t ldda,
-                    cuDoubleComplex *dTmgpu[], magma_int_t lddt,
+                    magmaDoubleComplex *a, magma_int_t lda, 
+                    magmaDoubleComplex *tau,
+                    magmaDoubleComplex *work, magma_int_t lwork,
+                    magmaDoubleComplex *dAmgpu[], magma_int_t ldda,
+                    magmaDoubleComplex *dTmgpu[], magma_int_t lddt,
                     magma_int_t ngpu, magma_int_t distblk, 
-                    cudaStream_t streams[][20], magma_int_t nstream, 
+                    magma_queue_t streams[][20], magma_int_t nstream, 
                     magma_int_t threads, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -176,10 +176,10 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
 
 
    
-    cuDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex c_neg_half = MAGMA_Z_NEG_HALF;
-    cuDoubleComplex c_one  = MAGMA_Z_ONE ;
-    cuDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_neg_half = MAGMA_Z_NEG_HALF;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE ;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     double  d_one = MAGMA_D_ONE;
 
     magma_int_t pm, pn, indi, indj, pk;
@@ -244,7 +244,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
     magma_stream_t cstream;
     magmablasGetKernelStream(&cstream);
 /*
-    cuDoubleComplex *dworkmgpu[MagmaMaxGPUs], *dWmgpu[MagmaMaxGPUs];
+    magmaDoubleComplex *dworkmgpu[MagmaMaxGPUs], *dWmgpu[MagmaMaxGPUs];
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         cudaSetDevice( dev );
         if (MAGMA_SUCCESS != magma_zmalloc( &dworkmgpu[dev], nb*ldda )) {
@@ -259,14 +259,14 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
         cudaSetDevice( 0 );
 
     // Use the first panel of da as work space 
-    cuDoubleComplex *dwork = dworkmgpu[0];
-    cuDoubleComplex *dW    = dWmgpu[0];
-    //cuDoubleComplex *da    = damgpu[0];
-    //cuDoubleComplex *dT    = dTmgpu[0];
+    magmaDoubleComplex *dwork = dworkmgpu[0];
+    magmaDoubleComplex *dW    = dWmgpu[0];
+    //magmaDoubleComplex *da    = damgpu[0];
+    //magmaDoubleComplex *dT    = dTmgpu[0];
 
    
- //   cuDoubleComplex *dwork, *dW;
-    cuDoubleComplex *da;
+ //   magmaDoubleComplex *dwork, *dW;
+    magmaDoubleComplex *da;
     if (MAGMA_SUCCESS != magma_zmalloc( &da, n*ldda )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
@@ -275,18 +275,18 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
   */   
 // ======================
 
-//    cuDoubleComplex *datest[MagmaMaxGPUs];
-    cuDoubleComplex *dworktest[MagmaMaxGPUs], *dworktestbis[MagmaMaxGPUs];
-    cuDoubleComplex *dvtest[MagmaMaxGPUs], *dwtest[MagmaMaxGPUs];
-    cuDoubleComplex *workngpu[MagmaMaxGPUs+1];
-    cudaEvent_t     redevents[MagmaMaxGPUs][MagmaMaxGPUs*MagmaMaxGPUs+10]; 
+//    magmaDoubleComplex *datest[MagmaMaxGPUs];
+    magmaDoubleComplex *dworktest[MagmaMaxGPUs], *dworktestbis[MagmaMaxGPUs];
+    magmaDoubleComplex *dvtest[MagmaMaxGPUs], *dwtest[MagmaMaxGPUs];
+    magmaDoubleComplex *workngpu[MagmaMaxGPUs+1];
+    magma_event_t     redevents[MagmaMaxGPUs][MagmaMaxGPUs*MagmaMaxGPUs+10]; 
     magma_int_t nbevents = MagmaMaxGPUs*MagmaMaxGPUs;
 
-//    cuDoubleComplex *dttest[MagmaMaxGPUs];
-//    cuDoubleComplex *Atest = (cuDoubleComplex *) malloc(n*lda*sizeof(cuDoubleComplex));
-//    cuDoubleComplex *Vtest = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
-//    cuDoubleComplex *Wtest = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
-    cuDoubleComplex *worktest = (cuDoubleComplex *) malloc(n*nb*sizeof(cuDoubleComplex));
+//    magmaDoubleComplex *dttest[MagmaMaxGPUs];
+//    magmaDoubleComplex *Atest = (magmaDoubleComplex *) malloc(n*lda*sizeof(magmaDoubleComplex));
+//    magmaDoubleComplex *Vtest = (magmaDoubleComplex *) malloc(n*nb*sizeof(magmaDoubleComplex));
+//    magmaDoubleComplex *Wtest = (magmaDoubleComplex *) malloc(n*nb*sizeof(magmaDoubleComplex));
+    magmaDoubleComplex *worktest = (magmaDoubleComplex *) malloc(n*nb*sizeof(magmaDoubleComplex));
 
 
 
@@ -305,7 +305,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
         magma_zmalloc( &dwtest[dev], nb*lddw );
         magma_zmalloc( &dworktest[dev], nb*ldda );
         magma_zmalloc( &dworktestbis[dev], dworksiz );
-        //workngpu[dev] = (cuDoubleComplex *) malloc(worksiz*sizeof(cuDoubleComplex));
+        //workngpu[dev] = (magmaDoubleComplex *) malloc(worksiz*sizeof(magmaDoubleComplex));
         magma_zmalloc_pinned ( &workngpu[dev], worksiz);
         magmablasSetKernelStream( streams[ dev ][ 0 ] );
        for( magma_int_t i = 0; i < nbevents; ++i ) {
@@ -313,7 +313,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
        }
     }
     magma_zmalloc_pinned ( &workngpu[ngpu], worksiz);
-    //workngpu[ngpu] = (cuDoubleComplex *) malloc(worksiz*sizeof(cuDoubleComplex));    
+    //workngpu[ngpu] = (magmaDoubleComplex *) malloc(worksiz*sizeof(magmaDoubleComplex));    
     // ======================
 
     #ifdef TRACING
@@ -321,12 +321,12 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
     #endif
 
 
-    trace_init( 1, ngpu, nstream, (cudaStream_t*) streams );
+    trace_init( 1, ngpu, nstream, (magma_queue_t*) streams );
     
 
-    cuDoubleComplex *hT = work + lwork - nb*nb;
+    magmaDoubleComplex *hT = work + lwork - nb*nb;
     lwork -= nb*nb;
-    memset( hT, 0, nb*nb*sizeof(cuDoubleComplex));
+    memset( hT, 0, nb*nb*sizeof(magmaDoubleComplex));
 
     if (upper) {
 
@@ -378,9 +378,9 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                  
                  /*
                  magma_device_sync();
-                 cudaMemcpy2DAsync(a_ref(i,i), lda*sizeof(cuDoubleComplex),
-                                  datest(idev,i,di+1), ldda*sizeof(cuDoubleComplex),
-                                  (pm+pn)*sizeof(cuDoubleComplex), pn,
+                 cudaMemcpy2DAsync(a_ref(i,i), lda*sizeof(magmaDoubleComplex),
+                                  datest(idev,i,di+1), ldda*sizeof(magmaDoubleComplex),
+                                  (pm+pn)*sizeof(magmaDoubleComplex), pn,
                                   cudaMemcpyDeviceToHost, streams[ idev ][ nstream-1 ]);
 
                  */

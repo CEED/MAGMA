@@ -17,9 +17,9 @@
 extern "C" magma_int_t
 magma_zungqr_m(
     magma_int_t m, magma_int_t n, magma_int_t k,
-    cuDoubleComplex *A, magma_int_t lda,
-    cuDoubleComplex *tau,
-    cuDoubleComplex *T, magma_int_t nb,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *tau,
+    magmaDoubleComplex *T, magma_int_t nb,
     magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -83,13 +83,13 @@ magma_zungqr_m(
 #define dA(d,i,j) (dA[d] + (i) + (j)*ldda)
 #define dT(d,i,j) (dT[d] + (i) + (j)*nb)
 
-    cuDoubleComplex c_zero = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
 
     magma_int_t m_kk, n_kk, k_kk, mi;
     magma_int_t lwork, ldwork;
     magma_int_t i, ib, ki, kk, iinfo;
-    cuDoubleComplex *work;
+    magmaDoubleComplex *work;
 
     *info = 0;
     if (m < 0) {
@@ -124,11 +124,11 @@ magma_zungqr_m(
     magma_int_t last_dev    = (n / nb) % ngpu;  // device with last block
     
     magma_int_t  nlocal[ MagmaMaxGPUs ] = { 0 };
-    cuDoubleComplex *dA[ MagmaMaxGPUs ] = { NULL };
-    cuDoubleComplex *dT[ MagmaMaxGPUs ] = { NULL };
-    cuDoubleComplex *dV[ MagmaMaxGPUs ] = { NULL };
-    cuDoubleComplex *dW[ MagmaMaxGPUs ] = { NULL };
-    cudaStream_t stream[ MagmaMaxGPUs ] = { NULL };
+    magmaDoubleComplex *dA[ MagmaMaxGPUs ] = { NULL };
+    magmaDoubleComplex *dT[ MagmaMaxGPUs ] = { NULL };
+    magmaDoubleComplex *dV[ MagmaMaxGPUs ] = { NULL };
+    magmaDoubleComplex *dW[ MagmaMaxGPUs ] = { NULL };
+    magma_queue_t stream[ MagmaMaxGPUs ] = { NULL };
     
     for( int d = 0; d < ngpu; ++d ) {
         // example with n = 75, nb = 10, ngpu = 3

@@ -22,7 +22,7 @@ extern "C"{
 extern "C" magma_int_t
 magma_zstedx(char range, magma_int_t n, double vl, double vu,
              magma_int_t il, magma_int_t iu, double* d, double* e,
-             cuDoubleComplex* z, magma_int_t ldz,
+             magmaDoubleComplex* z, magma_int_t ldz,
              double* rwork, magma_int_t lrwork,
              magma_int_t* iwork, magma_int_t liwork,
              double* dwork, magma_int_t* info)

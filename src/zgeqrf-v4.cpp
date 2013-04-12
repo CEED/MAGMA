@@ -12,8 +12,8 @@
 
 extern "C" magma_int_t
 magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n, 
-              cuDoubleComplex *a,    magma_int_t lda, cuDoubleComplex *tau, 
-              cuDoubleComplex *work, magma_int_t lwork,
+              magmaDoubleComplex *a,    magma_int_t lda, magmaDoubleComplex *tau, 
+              magmaDoubleComplex *work, magma_int_t lwork,
               magma_int_t *info )
 {
 /*  -- MAGMA (version 1.1) --
@@ -94,8 +94,8 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
     and tau in TAU(i).
     =====================================================================    */
 
-    cuDoubleComplex *da[MagmaMaxGPUs];
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex *da[MagmaMaxGPUs];
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
     int i, k, ldda;
 

@@ -20,7 +20,7 @@
 
 extern "C" magma_int_t
 magma_zgetrf_gpu(magma_int_t m, magma_int_t n, 
-                 cuDoubleComplex *dA, magma_int_t ldda,
+                 magmaDoubleComplex *dA, magma_int_t ldda,
                  magma_int_t *ipiv, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -76,13 +76,13 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
 
     #define dAT(i,j) (dAT + (i)*nb*lddat + (j)*nb)
 
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     magma_int_t iinfo, nb;
     magma_int_t maxm, maxn, mindim;
     magma_int_t i, rows, cols, s, lddat, lddwork;
-    cuDoubleComplex *dAT, *dAP, *work;
+    magmaDoubleComplex *dAT, *dAP, *work;
 
     /* Check arguments */
     *info = 0;

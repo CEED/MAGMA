@@ -23,10 +23,10 @@
 
 extern "C" magma_int_t
 magma_zgetrf_incpiv_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib,
-                         cuDoubleComplex *hA, magma_int_t ldha, cuDoubleComplex *dA, magma_int_t ldda,
-                         cuDoubleComplex *hL, magma_int_t ldhl, cuDoubleComplex *dL, magma_int_t lddl,
+                         magmaDoubleComplex *hA, magma_int_t ldha, magmaDoubleComplex *dA, magma_int_t ldda,
+                         magmaDoubleComplex *hL, magma_int_t ldhl, magmaDoubleComplex *dL, magma_int_t lddl,
                          magma_int_t *ipiv, 
-                         cuDoubleComplex *dwork, magma_int_t lddwork,
+                         magmaDoubleComplex *dwork, magma_int_t lddwork,
                          magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -118,16 +118,16 @@ magma_zgetrf_incpiv_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t 
 #define dL(j)   (dL  + (j)*ib*lddl         )
 #define dL2(j)  (dL2 + (j)*ib*lddl         )
 
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     magma_int_t iinfo;
     magma_int_t maxm, mindim;
     magma_int_t i, rows, cols, s, ii, sb;
-    cuDoubleComplex *dAT;
+    magmaDoubleComplex *dAT;
 #ifndef WITHOUTTRTRI
-    cuDoubleComplex *dL2 = dL + ib;
-    cuDoubleComplex *hL2 = hL + ib;
+    magmaDoubleComplex *dL2 = dL + ib;
+    magmaDoubleComplex *hL2 = hL + ib;
 #endif
 
     /* Check arguments */

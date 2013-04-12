@@ -21,10 +21,10 @@
 
 extern "C" magma_int_t 
 magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
-                  cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *da, magma_int_t ldda,
-                  double *d, double *e, cuDoubleComplex *tauq, cuDoubleComplex *taup,
-                  cuDoubleComplex *x, magma_int_t ldx, cuDoubleComplex *dx, magma_int_t lddx,
-                  cuDoubleComplex *y, magma_int_t ldy, cuDoubleComplex *dy, magma_int_t lddy)
+                  magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *da, magma_int_t ldda,
+                  double *d, double *e, magmaDoubleComplex *tauq, magmaDoubleComplex *taup,
+                  magmaDoubleComplex *x, magma_int_t ldx, magmaDoubleComplex *dx, magma_int_t lddx,
+                  magmaDoubleComplex *y, magma_int_t ldy, magmaDoubleComplex *dy, magma_int_t lddy)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -153,16 +153,16 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 
 
     /* Table of constant values */
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
-    cuDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     magma_int_t c__1 = 1;
     
     /* System generated locals */
     magma_int_t a_dim1, a_offset, x_dim1, x_offset, y_dim1, y_offset, i__2, i__3;
     /* Local variables */
     magma_int_t i__;
-    cuDoubleComplex alpha;
+    magmaDoubleComplex alpha;
 
     a_dim1 = lda;
     a_offset = 1 + a_dim1;
@@ -187,8 +187,8 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
         return 0;
     }
 
-    cuDoubleComplex *f;
-    cudaStream_t stream;
+    magmaDoubleComplex *f;
+    magma_queue_t stream;
     magma_queue_create( &stream );
     magma_zmalloc_cpu( &f, max(n,m) );
     assert( f != NULL );  // TODO return error, or allocate outside zlatrd

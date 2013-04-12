@@ -11,24 +11,24 @@
 #include "common_magma.h"
 
 extern "C" void
-magma_zlarfbx_gpu(int m, int k, cuDoubleComplex *V, int ldv,
-                  cuDoubleComplex *dT, int ldt, cuDoubleComplex *c,
-                  cuDoubleComplex *dwork);
+magma_zlarfbx_gpu(int m, int k, magmaDoubleComplex *V, int ldv,
+                  magmaDoubleComplex *dT, int ldt, magmaDoubleComplex *c,
+                  magmaDoubleComplex *dwork);
 
 extern "C" void
-magma_zlarfgtx_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
-                   cuDoubleComplex *dtau, double *dxnorm,
-                   cuDoubleComplex *dA, int it,
-                   cuDoubleComplex *V, int ldv, cuDoubleComplex *T, int ldt,
-                   cuDoubleComplex *dwork);
+magma_zlarfgtx_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
+                   magmaDoubleComplex *dtau, double *dxnorm,
+                   magmaDoubleComplex *dA, int it,
+                   magmaDoubleComplex *V, int ldv, magmaDoubleComplex *T, int ldt,
+                   magmaDoubleComplex *dwork);
 
 extern "C" void
-magmablas_dznrm2_adjust(int k, double *xnorm, cuDoubleComplex *c);
+magmablas_dznrm2_adjust(int k, double *xnorm, magmaDoubleComplex *c);
     
 extern "C" magma_int_t
-magma_zgeqr2x2_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA, 
-                  magma_int_t *ldda, cuDoubleComplex *dtau,
-                  cuDoubleComplex *dT, cuDoubleComplex *ddA,
+magma_zgeqr2x2_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA, 
+                  magma_int_t *ldda, magmaDoubleComplex *dtau,
+                  magmaDoubleComplex *dT, magmaDoubleComplex *ddA,
                   double *dwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -110,7 +110,7 @@ magma_zgeqr2x2_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
     
     static magma_int_t i, k;
    
-    cuDoubleComplex *work = (cuDoubleComplex *)dwork;
+    magmaDoubleComplex *work = (magmaDoubleComplex *)dwork;
     double *dnorm = dwork + 4*(*n);
 
 

@@ -19,10 +19,10 @@
 
 extern "C" magma_int_t
 magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs, 
-                 cuDoubleComplex *dA, magma_int_t ldda, 
-                 cuDoubleComplex *dB, magma_int_t lddb, 
-                 cuDoubleComplex *dX, magma_int_t lddx, 
-                 cuDoubleComplex *dworkd, cuFloatComplex *dworks,
+                 magmaDoubleComplex *dA, magma_int_t ldda, 
+                 magmaDoubleComplex *dB, magma_int_t lddb, 
+                 magmaDoubleComplex *dX, magma_int_t lddx, 
+                 magmaDoubleComplex *dworkd, magmaFloatComplex *dworks,
                  magma_int_t *iter, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -140,11 +140,11 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
     =====================================================================    */
 
 
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magma_int_t     ione  = 1;
-    cuFloatComplex *dSA, *dSX;
-    cuDoubleComplex Xnrmv, Rnrmv; 
+    magmaFloatComplex *dSA, *dSX;
+    magmaDoubleComplex Xnrmv, Rnrmv; 
     double          Xnrm, Rnrm, Anrm, cte, eps;
     magma_int_t     i, j, iiter;
 

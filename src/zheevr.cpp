@@ -14,10 +14,10 @@
 
 extern "C" magma_int_t 
 magma_zheevr(char jobz, char range, char uplo, magma_int_t n, 
-             cuDoubleComplex *a, magma_int_t lda, double vl, double vu, 
+             magmaDoubleComplex *a, magma_int_t lda, double vl, double vu, 
              magma_int_t il, magma_int_t iu, double abstol, magma_int_t *m, 
-             double *w, cuDoubleComplex *z, magma_int_t ldz, magma_int_t *isuppz, 
-             cuDoubleComplex *work, magma_int_t lwork,
+             double *w, magmaDoubleComplex *z, magma_int_t ldz, magma_int_t *isuppz, 
+             magmaDoubleComplex *work, magma_int_t lwork,
              double *rwork, magma_int_t lrwork, magma_int_t *iwork, 
              magma_int_t liwork, magma_int_t *info)
 {

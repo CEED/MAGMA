@@ -12,8 +12,8 @@
 
 extern "C" magma_int_t
 magma_zgelqf_gpu( magma_int_t m, magma_int_t n, 
-                  cuDoubleComplex *dA,    magma_int_t lda,   cuDoubleComplex *tau, 
-                  cuDoubleComplex *work, magma_int_t lwork, magma_int_t *info)
+                  magmaDoubleComplex *dA,    magma_int_t lda,   magmaDoubleComplex *tau, 
+                  magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -89,8 +89,8 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
 
     #define  a_ref(a_1,a_2) ( dA+(a_2)*(lda) + (a_1))
 
-    cuDoubleComplex *dAT;
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex *dAT;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magma_int_t maxm, maxn, maxdim, nb;
     magma_int_t iinfo;
     int lquery;

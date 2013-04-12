@@ -16,9 +16,9 @@
 
 extern "C" magma_int_t
 magma_zgeqp3( magma_int_t m, magma_int_t n,
-              cuDoubleComplex *A, magma_int_t lda,
-              magma_int_t *jpvt, cuDoubleComplex *tau,
-              cuDoubleComplex *work, magma_int_t lwork,
+              magmaDoubleComplex *A, magma_int_t lda,
+              magma_int_t *jpvt, magmaDoubleComplex *tau,
+              magmaDoubleComplex *work, magma_int_t lwork,
 #if defined(PRECISION_z) || defined(PRECISION_c)
               double *rwork,
 #endif
@@ -103,7 +103,7 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
 #define  A(i, j) (A     + (i) + (j)*(lda ))
 #define dA(i, j) (dwork + (i) + (j)*(ldda))
 
-    cuDoubleComplex   *dwork, *df;
+    magmaDoubleComplex   *dwork, *df;
 
     magma_int_t ione = 1;
 
@@ -162,7 +162,7 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
     df = dwork + n*ldda;
     // dwork used for dA
 
-    cudaStream_t stream;
+    magma_queue_t stream;
     magma_queue_create( &stream );
 
     /* Move initial columns up front.

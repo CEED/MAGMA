@@ -12,8 +12,8 @@
 
 extern "C" magma_int_t
 magma_zgeqlf(magma_int_t m, magma_int_t n, 
-             cuDoubleComplex *a,    magma_int_t lda, cuDoubleComplex *tau, 
-             cuDoubleComplex *work, magma_int_t lwork, magma_int_t *info)
+             magmaDoubleComplex *a,    magma_int_t lda, magmaDoubleComplex *tau, 
+             magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -96,8 +96,8 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
     #define  a_ref(a_1,a_2) ( a+(a_2)*(lda) + (a_1))
     #define da_ref(a_1,a_2) (da+(a_2)*ldda   + (a_1))
 
-    cuDoubleComplex *da, *dwork;
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex *da, *dwork;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magma_int_t i, k, lddwork, old_i, old_ib, nb;
     magma_int_t rows, cols;
     magma_int_t ib, ki, kk, mu, nu, iinfo, ldda;
@@ -147,7 +147,7 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
     }
     dwork = da + ldda*(n);
 
-    cudaStream_t stream[2];
+    magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 

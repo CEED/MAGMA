@@ -15,10 +15,10 @@
 extern "C" magma_int_t
 magma_zunmqr(const char side, const char trans, 
              magma_int_t m, magma_int_t n, magma_int_t k, 
-             cuDoubleComplex *A,    magma_int_t lda, 
-             cuDoubleComplex *tau, 
-             cuDoubleComplex *C,    magma_int_t ldc,
-             cuDoubleComplex *work, magma_int_t lwork, 
+             magmaDoubleComplex *A,    magma_int_t lda, 
+             magmaDoubleComplex *tau, 
+             magmaDoubleComplex *C,    magma_int_t ldc,
+             magmaDoubleComplex *work, magma_int_t lwork, 
              magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -114,14 +114,14 @@ magma_zunmqr(const char side, const char trans,
     
     magma_int_t nb = magma_get_zgeqrf_nb( min( m, n ));
     
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
     char side_[2]  = {side,  0};
     char trans_[2] = {trans, 0};
 
     magma_int_t nq_i, lddwork;
     magma_int_t i;
-    cuDoubleComplex *T;
+    magmaDoubleComplex *T;
     magma_int_t i1, i2, step, ib, ic, jc, mi, ni, nq, nw;
     int left, notran, lquery;
     magma_int_t iinfo, lwkopt;
@@ -176,7 +176,7 @@ magma_zunmqr(const char side, const char trans,
 
     /* Allocate work space on the GPU */
     magma_int_t lddc = m;
-    cuDoubleComplex *dwork, *dC;
+    magmaDoubleComplex *dwork, *dC;
     magma_zmalloc( &dC, lddc*n );
     magma_zmalloc( &dwork, (m + n + nb)*nb );
     if ( dC == NULL || dwork == NULL ) {
@@ -187,7 +187,7 @@ magma_zunmqr(const char side, const char trans,
     }
     
     /* work space on CPU */
-    T = (cuDoubleComplex*) malloc( 2*nb*nb * sizeof(cuDoubleComplex) );
+    T = (magmaDoubleComplex*) malloc( 2*nb*nb * sizeof(magmaDoubleComplex) );
     if ( T == NULL ) {
         magma_free( dC );
         magma_free( dwork );

@@ -23,16 +23,16 @@ magma_int_t magma_get_zhegst_m_nb() { return 256;}
 #define dB_r(gpui, i, j) (dw[gpui] + dima*ldda + (i)*nb + (j)*nb*lddbr)
 #define dwork(gpui, i, j) (dw[gpui] + dima*ldda + lddbc*lddbr + (j)*nb*nb + (i)*nb)
 
-static void magma_zhegst_m_1_L_col_update(magma_int_t nk, magma_int_t nb, cuDoubleComplex* dA_col, magma_int_t ldda,
-                                          cuDoubleComplex* dC1, magma_int_t lddc1, cuDoubleComplex* dC2, magma_int_t lddc2);
+static void magma_zhegst_m_1_L_col_update(magma_int_t nk, magma_int_t nb, magmaDoubleComplex* dA_col, magma_int_t ldda,
+                                          magmaDoubleComplex* dC1, magma_int_t lddc1, magmaDoubleComplex* dC2, magma_int_t lddc2);
 
-static void magma_zhegst_m_1_U_row_update(magma_int_t nk, magma_int_t nb, cuDoubleComplex* dA_row, magma_int_t ldda,
-                                          cuDoubleComplex* dC1, magma_int_t lddc1, cuDoubleComplex* dC2, magma_int_t lddc2);
+static void magma_zhegst_m_1_U_row_update(magma_int_t nk, magma_int_t nb, magmaDoubleComplex* dA_row, magma_int_t ldda,
+                                          magmaDoubleComplex* dC1, magma_int_t lddc1, magmaDoubleComplex* dC2, magma_int_t lddc2);
 
 extern "C" magma_int_t
 magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
-               cuDoubleComplex *a, magma_int_t lda,
-               cuDoubleComplex *b, magma_int_t ldb, magma_int_t *info)
+               magmaDoubleComplex *a, magma_int_t lda,
+               magmaDoubleComplex *b, magma_int_t ldb, magma_int_t *info)
 {
 /*
   -- MAGMA (version 1.1) --
@@ -106,11 +106,11 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
     char uplo_[2] = {uplo, 0};
 
     double             d_one      = 1.0;
-    cuDoubleComplex    c_one      = MAGMA_Z_ONE;
-    cuDoubleComplex    c_neg_one  = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex    c_half     = MAGMA_Z_HALF;
-    cuDoubleComplex    c_neg_half = MAGMA_Z_NEG_HALF;
-    cuDoubleComplex* dw[MagmaMaxGPUs];
+    magmaDoubleComplex    c_one      = MAGMA_Z_ONE;
+    magmaDoubleComplex    c_neg_one  = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex    c_half     = MAGMA_Z_HALF;
+    magmaDoubleComplex    c_neg_half = MAGMA_Z_NEG_HALF;
+    magmaDoubleComplex* dw[MagmaMaxGPUs];
 
     magma_stream_t stream [MagmaMaxGPUs][3];
     magma_event_t  event  [MagmaMaxGPUs][2];
@@ -910,13 +910,13 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
     return *info;
 } /* magma_zhegst_gpu */
 
-inline static void magma_zhegst_m_1_U_row_update(magma_int_t nk, magma_int_t nb, cuDoubleComplex* dA_row, magma_int_t ldda,
-                                                 cuDoubleComplex* dC1, magma_int_t lddc1, cuDoubleComplex* dC2, magma_int_t lddc2){
+inline static void magma_zhegst_m_1_U_row_update(magma_int_t nk, magma_int_t nb, magmaDoubleComplex* dA_row, magma_int_t ldda,
+                                                 magmaDoubleComplex* dC1, magma_int_t lddc1, magmaDoubleComplex* dC2, magma_int_t lddc2){
     //update 1 rowblock (rowwise zher2k) for itype=1 Upper case
 
     double             d_one      = 1.0;
-    cuDoubleComplex    c_one      = MAGMA_Z_ONE;
-    cuDoubleComplex    c_neg_one  = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex    c_one      = MAGMA_Z_ONE;
+    magmaDoubleComplex    c_neg_one  = MAGMA_Z_NEG_ONE;
 
     magma_int_t kb = min(nk, nb);
 
@@ -932,13 +932,13 @@ inline static void magma_zhegst_m_1_U_row_update(magma_int_t nk, magma_int_t nb,
     return;
 }
 
-inline static void magma_zhegst_m_1_L_col_update(magma_int_t nk, magma_int_t nb, cuDoubleComplex* dA_col, magma_int_t ldda,
-                                                 cuDoubleComplex* dC1, magma_int_t lddc1, cuDoubleComplex* dC2, magma_int_t lddc2){
+inline static void magma_zhegst_m_1_L_col_update(magma_int_t nk, magma_int_t nb, magmaDoubleComplex* dA_col, magma_int_t ldda,
+                                                 magmaDoubleComplex* dC1, magma_int_t lddc1, magmaDoubleComplex* dC2, magma_int_t lddc2){
     //update 1 columnblock (columnwise zher2k) for itype=1 Lower case
 
     double             d_one      = 1.0;
-    cuDoubleComplex    c_one      = MAGMA_Z_ONE;
-    cuDoubleComplex    c_neg_one  = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex    c_one      = MAGMA_Z_ONE;
+    magmaDoubleComplex    c_neg_one  = MAGMA_Z_NEG_ONE;
 
     magma_int_t kb = min(nk, nb);
 

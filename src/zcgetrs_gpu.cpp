@@ -19,11 +19,11 @@
 
 extern "C" magma_int_t 
 magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs, 
-                  cuFloatComplex  *dA, magma_int_t ldda, 
+                  magmaFloatComplex  *dA, magma_int_t ldda, 
                   magma_int_t     *ipiv, 
-                  cuDoubleComplex *dB, magma_int_t lddb, 
-                  cuDoubleComplex  *dX, magma_int_t lddx,
-                  cuFloatComplex  *dSX,
+                  magmaDoubleComplex *dB, magma_int_t lddb, 
+                  magmaDoubleComplex  *dX, magma_int_t lddx,
+                  magmaFloatComplex  *dSX,
                   magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -87,7 +87,7 @@ magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
             < 0:  if INFO = -i, the i-th argument had an illegal value   
     =====================================================================    */
 
-    cuFloatComplex cone = MAGMA_C_ONE;
+    magmaFloatComplex cone = MAGMA_C_ONE;
     char            trans_[2] = {trans, 0};
     int notran = lapackf77_lsame(trans_, "N");
     magma_int_t inc;

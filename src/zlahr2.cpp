@@ -16,11 +16,11 @@
 extern "C" magma_int_t
 magma_zlahr2(
     magma_int_t n, magma_int_t k, magma_int_t nb,
-    cuDoubleComplex *dA, cuDoubleComplex *dV,
-    cuDoubleComplex *A, magma_int_t lda,
-    cuDoubleComplex *tau,
-    cuDoubleComplex *T, magma_int_t ldt,
-    cuDoubleComplex *Y, magma_int_t ldy )
+    magmaDoubleComplex *dA, magmaDoubleComplex *dV,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *tau,
+    magmaDoubleComplex *T, magma_int_t ldt,
+    magmaDoubleComplex *Y, magma_int_t ldy )
 {
 /*  -- MAGMA auxiliary routine (version 1.0) --
        Univ. of Tennessee, Knoxville
@@ -138,18 +138,18 @@ magma_zlahr2(
     #define dA( i, j ) (dA + (i) + (j)*ldda)
     #define dV( i, j ) (dV + (i) + (j)*ldda)
     
-    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     magma_int_t ldda = lda;
     magma_int_t ione = 1;
     
     magma_int_t n_k_i_1, n_k;
-    cuDoubleComplex scale;
+    magmaDoubleComplex scale;
 
     magma_int_t i;
-    cuDoubleComplex ei;
+    magmaDoubleComplex ei;
 
     // adjust from 1-based indexing
     k -= 1;

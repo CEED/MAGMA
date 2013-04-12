@@ -27,11 +27,11 @@
 
 extern "C" magma_int_t
 magma_zhetrd2_gpu(char uplo, magma_int_t n,               
-                  cuDoubleComplex *da, magma_int_t ldda, 
-                  double *d, double *e, cuDoubleComplex *tau,
-                  cuDoubleComplex *wa,  magma_int_t ldwa,
-                  cuDoubleComplex *work, magma_int_t lwork, 
-                  cuDoubleComplex *dwork, magma_int_t ldwork,
+                  magmaDoubleComplex *da, magma_int_t ldda, 
+                  double *d, double *e, magmaDoubleComplex *tau,
+                  magmaDoubleComplex *wa,  magma_int_t ldwa,
+                  magmaDoubleComplex *work, magma_int_t lwork, 
+                  magmaDoubleComplex *dwork, magma_int_t ldwork,
                   magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -168,8 +168,8 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
 
     magma_int_t nb = magma_get_zhetrd_nb(n); 
 
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     double          d_one     = MAGMA_D_ONE;
     
     magma_int_t kk, nx;

@@ -14,25 +14,25 @@
 extern "C" magma_int_t
 magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, 
                    magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
-                   cuDoubleComplex **d_lA, magma_int_t ldda, 
-                   cuDoubleComplex **d_lP, magma_int_t lddp,
-                   cuDoubleComplex  *a,    magma_int_t lda, magma_int_t h,
-                   cudaStream_t stream[][3], cudaEvent_t event[][5],
+                   magmaDoubleComplex **d_lA, magma_int_t ldda, 
+                   magmaDoubleComplex **d_lP, magma_int_t lddp,
+                   magmaDoubleComplex  *a,    magma_int_t lda, magma_int_t h,
+                   magma_queue_t stream[][3], magma_event_t event[][5],
                    magma_int_t *info );
 
 /* use three streams; seems to be faster on Keeneland, but has problem on Pluto */
 extern "C" magma_int_t
 magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n, 
                    magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
-                   cuDoubleComplex **d_lA, magma_int_t ldda, 
-                   cuDoubleComplex **d_lP, magma_int_t lddp,
-                   cuDoubleComplex  *a,    magma_int_t lda, magma_int_t h,
-                   cudaStream_t stream[][3], cudaEvent_t event[][5],
+                   magmaDoubleComplex **d_lA, magma_int_t ldda, 
+                   magmaDoubleComplex **d_lP, magma_int_t lddp,
+                   magmaDoubleComplex  *a,    magma_int_t lda, magma_int_t h,
+                   magma_queue_t stream[][3], magma_event_t event[][5],
                    magma_int_t *info );
 
 extern "C" magma_int_t
 magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n, 
-                  cuDoubleComplex **d_lA, magma_int_t ldda, magma_int_t *info)
+                  magmaDoubleComplex **d_lA, magma_int_t ldda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -89,15 +89,15 @@ magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
 
     magma_int_t     j, jb, nb, nb0, nb2, d, id, j_local, j_local2, lddp, h;
     char            uplo_[2] = {uplo, 0};
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *work;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *work;
     double          d_one     =  1.0;
     double          d_neg_one = -1.0;
     int upper = lapackf77_lsame(uplo_, "U");
-    cuDoubleComplex *dwork[MagmaMaxGPUs];
-    cudaStream_t    stream[MagmaMaxGPUs][3];
-    cudaEvent_t     event[MagmaMaxGPUs][5];
+    magmaDoubleComplex *dwork[MagmaMaxGPUs];
+    magma_queue_t    stream[MagmaMaxGPUs][3];
+    magma_event_t     event[MagmaMaxGPUs][5];
 
     *info = 0;
     nb = magma_get_zpotrf_nb(n);

@@ -205,7 +205,7 @@ magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
     magma_int_t lwmin;
     magma_int_t liwmin;
 
-    cudaStream_t stream;
+    magma_queue_t stream;
     magma_queue_create( &stream );
 
     wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);

@@ -15,34 +15,34 @@
 
 extern "C" magma_int_t
 magma_zpotrf_m(magma_int_t num_gpus, char uplo, magma_int_t n,
-                  cuDoubleComplex *a, magma_int_t lda, magma_int_t *info);
+                  magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info);
 
 extern "C" magma_int_t
 magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
-               cuDoubleComplex *a, magma_int_t lda,
-               cuDoubleComplex *b, magma_int_t ldb, magma_int_t *info);
+               magmaDoubleComplex *a, magma_int_t lda,
+               magmaDoubleComplex *b, magma_int_t ldb, magma_int_t *info);
 
 extern "C" magma_int_t
 magma_zheevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
                 magma_int_t n,
-                cuDoubleComplex *a, magma_int_t lda,
+                magmaDoubleComplex *a, magma_int_t lda,
                 double vl, double vu, magma_int_t il, magma_int_t iu,
                 magma_int_t *m, double *w,
-                cuDoubleComplex *work, magma_int_t lwork,
+                magmaDoubleComplex *work, magma_int_t lwork,
                 double *rwork, magma_int_t lrwork,
                 magma_int_t *iwork, magma_int_t liwork,
                 magma_int_t *info);
 
 extern "C" magma_int_t
 magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
-               magma_int_t m, magma_int_t n, cuDoubleComplex alpha, cuDoubleComplex *a,
-               magma_int_t lda, cuDoubleComplex *b, magma_int_t ldb);
+               magma_int_t m, magma_int_t n, magmaDoubleComplex alpha, magmaDoubleComplex *a,
+               magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb);
 
 extern "C" magma_int_t
 magma_zhegvdx_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
-                cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *b, magma_int_t ldb,
+                magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
                 double vl, double vu, magma_int_t il, magma_int_t iu,
-                magma_int_t *m, double *w, cuDoubleComplex *work, magma_int_t lwork,
+                magma_int_t *m, double *w, magmaDoubleComplex *work, magma_int_t lwork,
                 double *rwork, magma_int_t lrwork,
                 magma_int_t *iwork, magma_int_t liwork, magma_int_t *info)
 {
@@ -223,7 +223,7 @@ magma_zhegvdx_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char range, cha
     char jobz_[2] = {jobz, 0};
     char range_[2] = {range, 0};
     
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
     
     magma_int_t lower;
     char trans[1];

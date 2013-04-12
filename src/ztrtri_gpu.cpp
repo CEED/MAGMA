@@ -22,7 +22,7 @@
 
 extern "C" magma_int_t
 magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
-             cuDoubleComplex *dA, magma_int_t ldda, magma_int_t *info)
+             magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -81,10 +81,10 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
     char uplo_[2] = {uplo, 0};
     char diag_[2] = {diag, 0};
     magma_int_t     nb, nn, j, jb;
-    cuDoubleComplex c_zero     = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one      = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *work;
+    magmaDoubleComplex c_zero     = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one      = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *work;
 
     int upper  = lapackf77_lsame(uplo_, "U");
     int nounit = lapackf77_lsame(diag_, "N");
@@ -126,7 +126,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
         return *info;
     }
     
-    cudaStream_t stream[2];
+    magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 
@@ -151,7 +151,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
                              c_neg_one, dA(j,j), ldda, dA(0, j),ldda);
 
         
-                //cublasGetMatrix(jb ,jb, sizeof(cuDoubleComplex),
+                //cublasGetMatrix(jb ,jb, sizeof(magmaDoubleComplex),
                 //                dA(j, j), ldda, work, jb);
 
                 magma_zgetmatrix_async( jb, jb,
@@ -163,7 +163,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
                 /* Compute inverse of current diagonal block */
                 lapackf77_ztrtri(MagmaUpperStr, diag_, &jb, work, &jb, info);
 
-                //cublasSetMatrix(jb, jb, sizeof(cuDoubleComplex),
+                //cublasSetMatrix(jb, jb, sizeof(magmaDoubleComplex),
                 //                work, jb, dA(j, j), ldda);
 
                 magma_zsetmatrix_async( jb, jb,
@@ -189,7 +189,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
                                  c_neg_one, dA(j,j), ldda, dA(j+jb, j), ldda);
                 }
 
-                //cublasGetMatrix(jb, jb, sizeof(cuDoubleComplex),
+                //cublasGetMatrix(jb, jb, sizeof(magmaDoubleComplex),
                 //               dA(j, j), ldda, work, jb);
                 
                 magma_zgetmatrix_async( jb, jb,
@@ -201,7 +201,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
                 /* Compute inverse of current diagonal block */
                 lapackf77_ztrtri(MagmaLowerStr, diag_, &jb, work, &jb, info);
         
-                //cublasSetMatrix(jb, jb, sizeof(cuDoubleComplex),
+                //cublasSetMatrix(jb, jb, sizeof(magmaDoubleComplex),
                 //                work, jb, dA(j, j), ldda);
 
                 magma_zsetmatrix_async( jb, jb,

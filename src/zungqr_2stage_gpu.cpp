@@ -12,8 +12,8 @@
 
 extern "C" magma_int_t
 magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
-                 cuDoubleComplex *da, magma_int_t ldda,
-                 cuDoubleComplex *tau, cuDoubleComplex *dT,
+                 magmaDoubleComplex *da, magma_int_t ldda,
+                 magmaDoubleComplex *tau, magmaDoubleComplex *dT,
                  magma_int_t nb, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -82,9 +82,9 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     magma_int_t lwork;
     magma_int_t i, ib, ki, kk, iinfo;
     magma_int_t lddwork = min(m, n);
-    cuDoubleComplex *work, *panel;
-    cuDoubleComplex *dwork;
-    //cudaStream_t stream[2];
+    magmaDoubleComplex *work, *panel;
+    magmaDoubleComplex *dwork;
+    //magma_queue_t stream[2];
     magma_int_t ldt=nb; // need to be an input parameter
 
 
@@ -149,12 +149,12 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
         i__1 = m - kk;
         i__2 = n - kk;
         i__3 = k - kk;
-        //cublasGetMatrix(i__1, i__2, sizeof(cuDoubleComplex),
+        //cublasGetMatrix(i__1, i__2, sizeof(magmaDoubleComplex),
         //                da_ref(kk, kk), ldda, panel, i__1);
         //lapackf77_zungqr(&i__1, &i__2, &i__3, panel, &i__1, &tau[kk], 
         //                 work, &lwork, &iinfo);
         //
-        //cublasSetMatrix(i__1, i__2, sizeof(cuDoubleComplex),
+        //cublasSetMatrix(i__1, i__2, sizeof(magmaDoubleComplex),
         //              panel, i__1, da_ref(kk, kk), ldda);
 
         
@@ -175,9 +175,9 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
             ib = min(nb, k - i);
             /* Send current panel to the CPU for update */
             i__2 = m - i;
-            //cudaMemcpy2DAsync(panel,       i__2 * sizeof(cuDoubleComplex),
-            //                  da_ref(i,i), ldda * sizeof(cuDoubleComplex),
-            //                  sizeof(cuDoubleComplex)*i__2, ib,
+            //cudaMemcpy2DAsync(panel,       i__2 * sizeof(magmaDoubleComplex),
+            //                  da_ref(i,i), ldda * sizeof(magmaDoubleComplex),
+            //                  sizeof(magmaDoubleComplex)*i__2, ib,
             //                  cudaMemcpyDeviceToHost,stream[0]);
             if (i + ib < n)
               {
@@ -198,9 +198,9 @@ magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
             //magma_queue_sync( stream[0] );
             //lapackf77_zungqr(&i__2, &ib, &ib, panel, &i__2, &tau[i], 
             //                 work, &lwork, &iinfo);
-            //cudaMemcpy2DAsync(da_ref(i,i), ldda * sizeof(cuDoubleComplex),
-            //                  panel,       i__2 * sizeof(cuDoubleComplex),
-            //                  sizeof(cuDoubleComplex)*i__2, ib,
+            //cudaMemcpy2DAsync(da_ref(i,i), ldda * sizeof(magmaDoubleComplex),
+            //                  panel,       i__2 * sizeof(magmaDoubleComplex),
+            //                  sizeof(magmaDoubleComplex)*i__2, ib,
             //                  cudaMemcpyHostToDevice,stream[1]);
 
             /* Set rows 1:i-1 of current block to zero */

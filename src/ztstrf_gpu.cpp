@@ -23,11 +23,11 @@
 
 extern "C" magma_int_t
 magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, magma_int_t nb,
-                  cuDoubleComplex *hU, magma_int_t ldhu, cuDoubleComplex *dU, magma_int_t lddu, 
-                  cuDoubleComplex *hA, magma_int_t ldha, cuDoubleComplex *dA, magma_int_t ldda, 
-                  cuDoubleComplex *hL, magma_int_t ldhl, cuDoubleComplex *dL, magma_int_t lddl,
+                  magmaDoubleComplex *hU, magma_int_t ldhu, magmaDoubleComplex *dU, magma_int_t lddu, 
+                  magmaDoubleComplex *hA, magma_int_t ldha, magmaDoubleComplex *dA, magma_int_t ldda, 
+                  magmaDoubleComplex *hL, magma_int_t ldhl, magmaDoubleComplex *dL, magma_int_t lddl,
                   magma_int_t *ipiv, 
-                  cuDoubleComplex *hwork, magma_int_t ldhwork, cuDoubleComplex *dwork, magma_int_t lddwork,
+                  magmaDoubleComplex *hwork, magma_int_t ldhwork, magmaDoubleComplex *dwork, magma_int_t lddwork,
                   magma_int_t *info) 
 {
 /*  -- MAGMA (version 1.1) --
@@ -137,17 +137,17 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
 #define hL(i)   (hL  + (i)*ib*ldhl          )
 #define hL2(i)  (hL2 + (i)*ib*ldhl          )
 
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     int iinfo = 0;
     int maxm, mindim;
     int i, j, im, s, ip, ii, sb, p = 1;
-    cuDoubleComplex *dAT, *dUT;
-    cuDoubleComplex *dAp, *dUp;
+    magmaDoubleComplex *dAT, *dUT;
+    magmaDoubleComplex *dAp, *dUp;
 #ifndef WITHOUTTRTRI
-    cuDoubleComplex *dL2 = dL + ib;
-    cuDoubleComplex *hL2 = hL + ib;
+    magmaDoubleComplex *dL2 = dL + ib;
+    magmaDoubleComplex *hL2 = hL + ib;
     p = 2;
 #endif
 

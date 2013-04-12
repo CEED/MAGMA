@@ -16,11 +16,11 @@
       puts ones on the diagonal and zeros in the upper triangular part of 'a'.
       The upper triangular values are stored in work. 
  */
-void zsplit_diag_block3(int ib, cuDoubleComplex *a, int lda, cuDoubleComplex *work){
+void zsplit_diag_block3(int ib, magmaDoubleComplex *a, int lda, magmaDoubleComplex *work){
     int i, j;
-    cuDoubleComplex *cola, *colw;
-    cuDoubleComplex c_zero = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex *cola, *colw;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
 
     for(i=0; i<ib; i++){
         cola = a    + i*lda;
@@ -36,8 +36,8 @@ void zsplit_diag_block3(int ib, cuDoubleComplex *a, int lda, cuDoubleComplex *wo
 
 extern "C" magma_int_t
 magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n, 
-                  cuDoubleComplex *dA,   magma_int_t ldda,
-                  cuDoubleComplex *tau, cuDoubleComplex *dT, 
+                  magmaDoubleComplex *dA,   magma_int_t ldda,
+                  magmaDoubleComplex *tau, magmaDoubleComplex *dT, 
                   magma_int_t *info )
 {
 /*  -- MAGMA (version 1.1) --
@@ -121,7 +121,7 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
     magma_int_t i, k, minmn, old_i, old_ib, rows, cols;
     magma_int_t ib, nb;
     magma_int_t ldwork, lddwork, lwork, lhwork;
-    cuDoubleComplex *work, *ut;
+    magmaDoubleComplex *work, *ut;
 
     /* check arguments */
     *info = 0;
@@ -152,9 +152,9 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
     }
     
     ut = hwork+nb*(n);
-    memset( ut, 0, nb*nb*sizeof(cuDoubleComplex));
+    memset( ut, 0, nb*nb*sizeof(magmaDoubleComplex));
 
-    cudaStream_t stream[2];
+    magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 

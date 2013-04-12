@@ -16,11 +16,11 @@
 extern "C" magma_int_t
 magma_zunmqr_gpu(char side, char trans,
                  magma_int_t m, magma_int_t n, magma_int_t k,
-                 cuDoubleComplex *dA,    magma_int_t ldda,
-                 cuDoubleComplex *tau,
-                 cuDoubleComplex *dC,    magma_int_t lddc,
-                 cuDoubleComplex *hwork, magma_int_t lwork,
-                 cuDoubleComplex *dT,    magma_int_t nb,
+                 magmaDoubleComplex *dA,    magma_int_t ldda,
+                 magmaDoubleComplex *tau,
+                 magmaDoubleComplex *dC,    magma_int_t lddc,
+                 magmaDoubleComplex *hwork, magma_int_t lwork,
+                 magmaDoubleComplex *dT,    magma_int_t nb,
                  magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -121,12 +121,12 @@ magma_zunmqr_gpu(char side, char trans,
     #define dC(a_1,a_2) (dC + (a_1) + (a_2)*lddc)
     #define dT(a_1)     (dT + (a_1)*nb)
 
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
     char side_[2]  = {side,  0};
     char trans_[2] = {trans, 0};
 
-    cuDoubleComplex *dwork;
+    magmaDoubleComplex *dwork;
     magma_int_t i, lddwork;
     magma_int_t i1, i2, step, ib, ic, jc, ma, mi, ni, nq, nw;
     int left, notran, lquery;
@@ -230,9 +230,9 @@ magma_zunmqr_gpu(char side, char trans,
             jc = i;
         }
         
-        cuDoubleComplex* hA = hwork;
-        cuDoubleComplex* hC = hwork + ma*ib;
-        cuDoubleComplex* hW = hwork + ma*ib + mi*ni;
+        magmaDoubleComplex* hA = hwork;
+        magmaDoubleComplex* hC = hwork + ma*ib;
+        magmaDoubleComplex* hW = hwork + ma*ib + mi*ni;
         magma_int_t lhwork = lwork - (ma*ib + mi*ni);
         
         magma_zgetmatrix( ma, ib, dA(i,  i ), ldda, hA, ma );
@@ -289,9 +289,9 @@ magma_zunmqr_gpu(char side, char trans,
             jc = i;
         }
         
-        cuDoubleComplex* hA = hwork;
-        cuDoubleComplex* hC = hwork + ma*ib;
-        cuDoubleComplex* hW = hwork + ma*ib + mi*ni;
+        magmaDoubleComplex* hA = hwork;
+        magmaDoubleComplex* hC = hwork + ma*ib;
+        magmaDoubleComplex* hW = hwork + ma*ib + mi*ni;
         magma_int_t lhwork = lwork - (ma*ib + mi*ni);
         
         magma_zgetmatrix( ma, ib, dA(i,  i ), ldda, hA, ma );

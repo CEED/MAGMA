@@ -31,10 +31,10 @@
 
 extern "C" magma_int_t
 magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
-                    cuDoubleComplex *a, magma_int_t lda, 
-                    cuDoubleComplex *tau,
-                    cuDoubleComplex *work, magma_int_t lwork,
-                    cuDoubleComplex *dT,
+                    magmaDoubleComplex *a, magma_int_t lda, 
+                    magmaDoubleComplex *tau,
+                    magmaDoubleComplex *work, magma_int_t lwork,
+                    magmaDoubleComplex *dT,
                     magma_int_t threads, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -163,10 +163,10 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
     int ldda = ((n+31)/32)*32;
     int lddt = nb;
    
-    cuDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex c_neg_half = MAGMA_Z_NEG_HALF;
-    cuDoubleComplex c_one  = MAGMA_Z_ONE ;
-    cuDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_neg_half = MAGMA_Z_NEG_HALF;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE ;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     double  d_one = MAGMA_D_ONE;
 
     magma_int_t pm, pn, indi, indj, pk;
@@ -206,7 +206,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
         return *info;
     }
 
-    cuDoubleComplex *da;
+    magmaDoubleComplex *da;
     if (MAGMA_SUCCESS != magma_zmalloc( &da, (n + 2*nb)*ldda )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
@@ -222,25 +222,25 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
 
 
     /* Use the first panel of da as work space */
-    cuDoubleComplex *dwork = da+n*ldda;
-    cuDoubleComplex *dW    = dwork + nb*ldda;
+    magmaDoubleComplex *dwork = da+n*ldda;
+    magmaDoubleComplex *dW    = dwork + nb*ldda;
 
     #ifdef TRACING
     char buf[80];
     #endif
-    cudaStream_t stream[3];
+    magma_queue_t stream[3];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
     stream[2] = 0;  // default stream
     
     trace_init( 1, 1, 3, stream );
 
-    cuDoubleComplex *hT = work + lwork - nb*nb;
+    magmaDoubleComplex *hT = work + lwork - nb*nb;
     lwork -= nb*nb;
-    memset( hT, 0, nb*nb*sizeof(cuDoubleComplex));
+    memset( hT, 0, nb*nb*sizeof(magmaDoubleComplex));
 
     magmablasSetKernelStream( stream[0] );
-    cudaEvent_t Pupdate_event;
+    magma_event_t Pupdate_event;
     cudaEventCreateWithFlags(&Pupdate_event,cudaEventDisableTiming);
     //cudaEventCreate(&Pupdate_event);
 

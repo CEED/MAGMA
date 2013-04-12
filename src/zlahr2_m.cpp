@@ -15,10 +15,10 @@
 extern "C" magma_int_t
 magma_zlahr2_m(
     magma_int_t n, magma_int_t k, magma_int_t nb,
-    cuDoubleComplex *A, magma_int_t lda,
-    cuDoubleComplex *tau,
-    cuDoubleComplex *T, magma_int_t ldt,
-    cuDoubleComplex *Y, magma_int_t ldy,
+    magmaDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *tau,
+    magmaDoubleComplex *T, magma_int_t ldt,
+    magmaDoubleComplex *Y, magma_int_t ldy,
     struct zgehrd_data* data )
 {
 /*  -- MAGMA auxiliary routine (version 1.0) --
@@ -140,10 +140,10 @@ magma_zlahr2_m(
     #define dVd( d, i, j ) (data->Vd[d] + (i) + (j)*ldvd)
     #define dY(  d, i, j ) (data->Y [d] + (i) + (j)*ldda)
 
-    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex tmp;
+    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex tmp;
 
     magma_int_t ngpu = data->ngpu;
     magma_int_t ldda = data->ldda;
@@ -154,10 +154,10 @@ magma_zlahr2_m(
     
     magma_int_t d, dki1, dn, nblocks, gblock, lblock, lgid;
     magma_int_t n_k_i_1, n_k;
-    cuDoubleComplex scale;
+    magmaDoubleComplex scale;
 
     magma_int_t i;
-    cuDoubleComplex ei;
+    magmaDoubleComplex ei;
 
     magma_int_t info_data = 0;
     magma_int_t *info = &info_data;

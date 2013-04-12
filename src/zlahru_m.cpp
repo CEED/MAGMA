@@ -15,7 +15,7 @@
 extern "C" magma_int_t
 magma_zlahru_m(
     magma_int_t n, magma_int_t ihi, magma_int_t k, magma_int_t nb, 
-    cuDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *A, magma_int_t lda,
     struct zgehrd_data* data )
 {
 /*  -- MAGMA auxiliary routine (version 1.0) --
@@ -103,9 +103,9 @@ magma_zlahru_m(
     #define dW(  d, i, j ) (data->W [d] + (i) + (j)*ldda)
     #define dY(  d, i, j ) (data->Y [d] + (i) + (j)*ldda)
     
-    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     magma_int_t ngpu = data->ngpu;
     magma_int_t ldda = data->ldda;

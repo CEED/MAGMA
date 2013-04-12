@@ -16,9 +16,9 @@
 extern "C" magma_int_t
 magma_zunmqr_gpu_2stages(const char side, const char trans,
                          magma_int_t m, magma_int_t n, magma_int_t k,
-                         cuDoubleComplex *da,   magma_int_t ldda,
-                         cuDoubleComplex *dc,    magma_int_t lddc,
-                         cuDoubleComplex *dT,    magma_int_t nb,
+                         magmaDoubleComplex *da,   magma_int_t ldda,
+                         magmaDoubleComplex *dc,    magma_int_t lddc,
+                         magmaDoubleComplex *dT,    magma_int_t nb,
                          magma_int_t *info)
 {
     /*  -- MAGMA (version 1.1) --
@@ -95,12 +95,12 @@ magma_zunmqr_gpu_2stages(const char side, const char trans,
      < 0:  if INFO = -i, the i-th argument had an illegal value
      =====================================================================   */
 
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
     char side_[2] = {side, 0};
     char trans_[2] = {trans, 0};
 
-    cuDoubleComplex *dwork;
+    magmaDoubleComplex *dwork;
 
     magma_int_t i1, i2, i3, ib, ic, jc, mi, ni, nq, nw, ret;
     int left, notran;

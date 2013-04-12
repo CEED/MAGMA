@@ -23,16 +23,16 @@
 #define dwork(gpui, ind) (dw[gpui] + maxnlocal*lddc + 2*lddac*lddar + 2*((nb+1)*nb) + (ind)*(lddwork*nb))
 
 extern"C"{
-    void magmablas_zsetdiag1subdiag0_stream(char uplo, int k, int nb, cuDoubleComplex *A, int lda, cudaStream_t stream);
+    void magmablas_zsetdiag1subdiag0_stream(char uplo, int k, int nb, magmaDoubleComplex *A, int lda, magma_queue_t stream);
 }
 
 extern "C" magma_int_t
 magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
                magma_int_t m, magma_int_t n, magma_int_t k,
-               cuDoubleComplex *a,    magma_int_t lda,
-               cuDoubleComplex *tau,
-               cuDoubleComplex *c,    magma_int_t ldc,
-               cuDoubleComplex *work, magma_int_t lwork,
+               magmaDoubleComplex *a,    magma_int_t lda,
+               magmaDoubleComplex *tau,
+               magmaDoubleComplex *c,    magma_int_t ldc,
+               magmaDoubleComplex *work, magma_int_t lwork,
                magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -120,17 +120,17 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
             = 0:  successful exit
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================   */
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
     char side_[2] = {side, 0};
     char trans_[2] = {trans, 0};
 
     magma_int_t nb = 128;
-    cuDoubleComplex *t ;
+    magmaDoubleComplex *t ;
     magma_zmalloc_pinned (&t, nb*nb);
     printf("calling zunmqr_m with nb=%d\n",nb);
 
-    cuDoubleComplex* dw[MagmaMaxGPUs];
+    magmaDoubleComplex* dw[MagmaMaxGPUs];
     magma_stream_t stream [MagmaMaxGPUs][2];
     magma_event_t  event [MagmaMaxGPUs][2];
 

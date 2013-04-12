@@ -12,8 +12,8 @@
 
 extern "C" magma_int_t
 magma_zgeqrf(magma_int_t m, magma_int_t n, 
-             cuDoubleComplex *A,    magma_int_t lda, cuDoubleComplex *tau, 
-             cuDoubleComplex *work, magma_int_t lwork,
+             magmaDoubleComplex *A,    magma_int_t lda, magmaDoubleComplex *tau, 
+             magmaDoubleComplex *work, magma_int_t lwork,
              magma_int_t *info )
 {
 /*  -- MAGMA (version 1.1) --
@@ -93,8 +93,8 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
     #define  A(i,j) ( A + (i) + (j)*lda )
     #define dA(i,j) (dA + (i) + (j)*ldda)
 
-    cuDoubleComplex *dA, *dwork, *dT;
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex *dA, *dwork, *dT;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
     magma_int_t i, k, lddwork, old_i, old_ib;
     magma_int_t ib, ldda;
@@ -145,7 +145,7 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
         return magma_zgeqrf_ooc(m, n, A, lda, tau, work, lwork, info);
     }
 
-    cudaStream_t stream[2];
+    magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 

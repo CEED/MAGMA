@@ -23,8 +23,8 @@ magma_int_t magma_get_ztrsm_m_nb() { return 128;}
 
 extern "C" magma_int_t
 magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
-         magma_int_t m, magma_int_t n, cuDoubleComplex alpha, cuDoubleComplex *a,
-         magma_int_t lda, cuDoubleComplex *b, magma_int_t ldb)
+         magma_int_t m, magma_int_t n, magmaDoubleComplex alpha, magmaDoubleComplex *a,
+         magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb)
 {
 
 /*  Purpose
@@ -122,11 +122,11 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
     char uplo_[2] = {uplo, 0};
     char transa_[2] = {transa, 0};
     char diag_[2] = {diag, 0};
-    cuDoubleComplex  c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex  alpha_;
-    cuDoubleComplex* dw[MagmaMaxGPUs];
-    cudaStream_t stream [MagmaMaxGPUs][3];
+    magmaDoubleComplex  c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex  alpha_;
+    magmaDoubleComplex* dw[MagmaMaxGPUs];
+    magma_queue_t stream [MagmaMaxGPUs][3];
     magma_int_t lside;
     magma_int_t upper;
     magma_int_t notransp;

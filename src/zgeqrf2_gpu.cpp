@@ -12,8 +12,8 @@
 
 extern "C" magma_int_t
 magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
-                   cuDoubleComplex *dA, magma_int_t ldda,
-                   cuDoubleComplex *tau, 
+                   magmaDoubleComplex *dA, magma_int_t ldda,
+                   magmaDoubleComplex *tau, 
                    magma_int_t *info )
 {
 /*  -- MAGMA (version 1.1) --
@@ -81,8 +81,8 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
     #define work_ref(a_1)  ( work + (a_1))
     #define hwork          ( work + (nb)*(m))
 
-    cuDoubleComplex *dwork;
-    cuDoubleComplex *work;
+    magmaDoubleComplex *dwork;
+    magmaDoubleComplex *work;
     magma_int_t i, k, ldwork, lddwork, old_i, old_ib, rows;
     magma_int_t nbmin, nx, ib, nb;
     magma_int_t lhwork, lwork;
@@ -121,7 +121,7 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
         return *info;
     }
 
-    cudaStream_t stream[2];
+    magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 

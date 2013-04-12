@@ -16,10 +16,10 @@
 extern "C" magma_int_t
 magma_zunmtr_gpu(char side, char uplo, char trans,
                  magma_int_t m, magma_int_t n, 
-                 cuDoubleComplex *da,    magma_int_t ldda, 
-                 cuDoubleComplex *tau, 
-                 cuDoubleComplex *dc,    magma_int_t lddc,
-                 cuDoubleComplex *wa,    magma_int_t ldwa,
+                 magmaDoubleComplex *da,    magma_int_t ldda, 
+                 magmaDoubleComplex *tau, 
+                 magmaDoubleComplex *dc,    magma_int_t lddc,
+                 magmaDoubleComplex *wa,    magma_int_t ldwa,
                  magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -121,7 +121,7 @@ magma_zunmtr_gpu(char side, char uplo, char trans,
             < 0:  if INFO = -i, the i-th argument had an illegal value   
     =====================================================================    */
    
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
     char side_[2]  = {side, 0};
     char uplo_[2]  = {uplo, 0};

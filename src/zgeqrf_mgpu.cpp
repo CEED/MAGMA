@@ -14,8 +14,8 @@
 
 extern "C" magma_int_t
 magma_zgeqrf2_mgpu( magma_int_t num_gpus, magma_int_t m, magma_int_t n,
-                    cuDoubleComplex **dlA, magma_int_t ldda,
-                    cuDoubleComplex *tau, 
+                    magmaDoubleComplex **dlA, magma_int_t ldda,
+                    magmaDoubleComplex *tau, 
                     magma_int_t *info )
 {
 /*  -- MAGMA (version 1.1) --
@@ -83,7 +83,7 @@ magma_zgeqrf2_mgpu( magma_int_t num_gpus, magma_int_t m, magma_int_t n,
     #define hwrk_ref(a_1)    ( local_work + (a_1))
     #define lhwrk            ( local_work + (nb)*(m))
 
-    cuDoubleComplex *dwork[4], *panel[4], *local_work;
+    magmaDoubleComplex *dwork[4], *panel[4], *local_work;
 
     magma_int_t i, j, k, ldwork, lddwork, old_i, old_ib, rows;
     magma_int_t nbmin, nx, ib, nb;
@@ -149,7 +149,7 @@ magma_zgeqrf2_mgpu( magma_int_t num_gpus, magma_int_t m, magma_int_t n,
       return *info;
     }
 
-    cudaStream_t streaml[4][2];
+    magma_queue_t streaml[4][2];
     for(i=0; i<num_gpus; i++){
       #ifdef  MultiGPUs
          magma_setdevice(i);
