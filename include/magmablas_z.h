@@ -11,7 +11,7 @@
 #ifndef MAGMABLAS_Z_H
 #define MAGMABLAS_Z_H
 
-#define PRECISION_z
+#define COMPLEX
 
 #ifdef __cplusplus
 extern "C" {
@@ -138,13 +138,13 @@ void magmablas_zhemm_1gpu(
 void magmablas_zhemm_mgpu(
     char side, char uplo, magma_int_t m, magma_int_t n,
     magmaDoubleComplex alpha,
-    magmaDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
-    magmaDoubleComplex *dB[], magma_int_t lddb,
+    magmaDoubleComplex *dA[],    magma_int_t ldda,  magma_int_t offset,
+    magmaDoubleComplex *dB[],    magma_int_t lddb,
     magmaDoubleComplex beta,
-    magmaDoubleComplex *dC[], magma_int_t lddc,
-    magmaDoubleComplex *dwork[],    magma_int_t lddwork,
-    magmaDoubleComplex *C,    magma_int_t ldc,
-    magmaDoubleComplex *work[], magma_int_t ldwork,
+    magmaDoubleComplex *dC[],    magma_int_t lddc,
+    magmaDoubleComplex *dwork[], magma_int_t lddwork,
+    magmaDoubleComplex *C,       magma_int_t ldc,
+    magmaDoubleComplex *work[],  magma_int_t ldwork,
     magma_int_t ngpu, magma_int_t nb,
     cudaStream_t streams[][20], magma_int_t nstream,
     cudaEvent_t redevents[][20],magma_int_t nbevents );
@@ -152,13 +152,13 @@ void magmablas_zhemm_mgpu(
 void magmablas_zhemm_mgpu_com(
     char side, char uplo, magma_int_t m, magma_int_t n,
     magmaDoubleComplex alpha,
-    magmaDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
-    magmaDoubleComplex *dB[], magma_int_t lddb,
+    magmaDoubleComplex *dA[],    magma_int_t ldda,  magma_int_t offset,
+    magmaDoubleComplex *dB[],    magma_int_t lddb,
     magmaDoubleComplex beta,
-    magmaDoubleComplex *dC[], magma_int_t lddc,
-    magmaDoubleComplex *dwork[],    magma_int_t lddwork,
-    magmaDoubleComplex *C,    magma_int_t ldc,
-    magmaDoubleComplex *work[], magma_int_t ldwork,
+    magmaDoubleComplex *dC[],    magma_int_t lddc,
+    magmaDoubleComplex *dwork[], magma_int_t lddwork,
+    magmaDoubleComplex *C,       magma_int_t ldc,
+    magmaDoubleComplex *work[],  magma_int_t ldwork,
     magma_int_t ngpu, magma_int_t nb,
     cudaStream_t streams[][20], magma_int_t nstream,
     cudaEvent_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10],magma_int_t nbevents,
@@ -167,13 +167,13 @@ void magmablas_zhemm_mgpu_com(
 void magmablas_zhemm_mgpu_spec(
     char side, char uplo, magma_int_t m, magma_int_t n,
     magmaDoubleComplex alpha,
-    magmaDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
-    magmaDoubleComplex *dB[], magma_int_t lddb,
+    magmaDoubleComplex *dA[],    magma_int_t ldda,  magma_int_t offset,
+    magmaDoubleComplex *dB[],    magma_int_t lddb,
     magmaDoubleComplex beta,
-    magmaDoubleComplex *dC[], magma_int_t lddc,
-    magmaDoubleComplex *dwork[],    magma_int_t lddwork,
-    magmaDoubleComplex *C,    magma_int_t ldc,
-    magmaDoubleComplex *work[], magma_int_t ldwork,
+    magmaDoubleComplex *dC[],    magma_int_t lddc,
+    magmaDoubleComplex *dwork[], magma_int_t lddwork,
+    magmaDoubleComplex *C,       magma_int_t ldc,
+    magmaDoubleComplex *work[],  magma_int_t ldwork,
     magma_int_t ngpu, magma_int_t nb,
     cudaStream_t streams[][20], magma_int_t nstream,
     cudaEvent_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10],magma_int_t nbevents,
@@ -361,7 +361,7 @@ void magmablas_zgemv(
     magmaDoubleComplex beta,
     magmaDoubleComplex       *dy, magma_int_t incy );
 
-#if defined(PRECISION_z ) || defined(PRECISION_c )
+#ifdef COMPLEX
 magma_int_t magmablas_zhemv(
     char u, magma_int_t n,
     magmaDoubleComplex alpha,
@@ -595,25 +595,92 @@ void magma_zcopymatrix_async_internal(
 // ========================================
 // Level 1 BLAS
 
+// in cublas_v2, result returned through output argument
+magma_int_t magma_izamax(
+    magma_int_t n,
+    const magmaDoubleComplex *dx, magma_int_t incx );
+
+// in cublas_v2, result returned through output argument
+magma_int_t magma_izamin(
+    magma_int_t n,
+    const magmaDoubleComplex *dx, magma_int_t incx );
+
+// in cublas_v2, result returned through output argument
+double magma_dzasum(
+    magma_int_t n,
+    const magmaDoubleComplex *dx, magma_int_t incx );
+
 void magma_zaxpy(
     magma_int_t n,
     magmaDoubleComplex alpha,
-    magmaDoubleComplex *dx, magma_int_t incx,
-    magmaDoubleComplex *dy, magma_int_t incy );
+    const magmaDoubleComplex *dx, magma_int_t incx,
+    magmaDoubleComplex       *dy, magma_int_t incy );
 
 void magma_zcopy(
     magma_int_t n,
+    const magmaDoubleComplex *dx, magma_int_t incx,
+    magmaDoubleComplex       *dy, magma_int_t incy );
+
+// in cublas_v2, result returned through output argument
+magmaDoubleComplex magma_zdotc(
+    magma_int_t n,
+    const magmaDoubleComplex *dx, magma_int_t incx,
+    const magmaDoubleComplex *dy, magma_int_t incy );
+
+// in cublas_v2, result returned through output argument
+#ifdef COMPLEX
+magmaDoubleComplex magma_zdotu(
+    magma_int_t n,
+    const magmaDoubleComplex *dx, magma_int_t incx,
+    const magmaDoubleComplex *dy, magma_int_t incy );
+#endif
+
+// in cublas_v2, result returned through output argument
+double magma_dznrm2(
+    magma_int_t n,
+    const magmaDoubleComplex *dx, magma_int_t incx );
+
+void magma_zrot(
+    magma_int_t n,
     magmaDoubleComplex *dx, magma_int_t incx,
-    magmaDoubleComplex *dy, magma_int_t incy );
+    magmaDoubleComplex *dy, magma_int_t incy,
+    double dc, magmaDoubleComplex ds );
+
+#ifdef COMPLEX
+void magma_zdrot(
+    magma_int_t n,
+    magmaDoubleComplex *dx, magma_int_t incx,
+    magmaDoubleComplex *dy, magma_int_t incy,
+    double dc, double ds );
+#endif
+
+#ifdef REAL
+void magma_zrotm(
+    magma_int_t n,
+    double *dx, magma_int_t incx,
+    double *dy, magma_int_t incy,
+    const double *param );
+
+void magma_zrotmg(
+    double *d1, double       *d2,
+    double *x1, const double *y1,
+    double *param );
+#endif
+
+void magma_zscal(
+    magma_int_t n,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex *dx, magma_int_t incx );
+
+void magma_zdscal(
+    magma_int_t n,
+    double alpha,
+    magmaDoubleComplex *dx, magma_int_t incx );
 
 void magma_zswap(
     magma_int_t n,
     magmaDoubleComplex *dx, magma_int_t incx,
     magmaDoubleComplex *dy, magma_int_t incy );
-
-magma_int_t magma_izamax(
-    magma_int_t n,
-    magmaDoubleComplex *dx, magma_int_t incx );
 
 // ========================================
 // Level 2 BLAS
@@ -627,6 +694,22 @@ void magma_zgemv(
     magmaDoubleComplex beta,
     magmaDoubleComplex       *dy, magma_int_t incy );
 
+void magma_zgerc(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex alpha,
+    const magmaDoubleComplex *dx, magma_int_t incx,
+    const magmaDoubleComplex *dy, magma_int_t incy,
+    magmaDoubleComplex       *dA, magma_int_t ldda );
+
+#ifdef COMPLEX
+void magma_zgeru(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex alpha,
+    const magmaDoubleComplex *dx, magma_int_t incx,
+    const magmaDoubleComplex *dy, magma_int_t incy,
+    magmaDoubleComplex       *dA, magma_int_t ldda );
+#endif
+
 void magma_zhemv(
     magma_uplo_t uplo,
     magma_int_t n,
@@ -635,6 +718,27 @@ void magma_zhemv(
     const magmaDoubleComplex *dx, magma_int_t incx,
     magmaDoubleComplex beta,
     magmaDoubleComplex       *dy, magma_int_t incy );
+
+void magma_zher(
+    magma_uplo_t uplo,
+    magma_int_t n,
+    double alpha,
+    const magmaDoubleComplex *dx, magma_int_t incx,
+    magmaDoubleComplex       *dA, magma_int_t ldda );
+
+void magma_zher2(
+    magma_uplo_t uplo,
+    magma_int_t n,
+    magmaDoubleComplex alpha,
+    const magmaDoubleComplex *dx, magma_int_t incx,
+    const magmaDoubleComplex *dy, magma_int_t incy,
+    magmaDoubleComplex       *dA, magma_int_t ldda );
+
+void magma_ztrmv(
+    magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
+    magma_int_t n,
+    const magmaDoubleComplex *dA, magma_int_t ldda,
+    magmaDoubleComplex       *dx, magma_int_t incx );
 
 void magma_ztrsv(
     magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
@@ -654,6 +758,33 @@ void magma_zgemm(
     magmaDoubleComplex beta,
     magmaDoubleComplex       *dC, magma_int_t lddc );
 
+void magma_zsymm(
+    magma_side_t side, magma_uplo_t uplo,
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex alpha,
+    const magmaDoubleComplex *dA, magma_int_t ldda,
+    const magmaDoubleComplex *dB, magma_int_t lddb,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex       *dC, magma_int_t lddc );
+
+void magma_zsyrk(
+    magma_uplo_t uplo, magma_trans_t trans,
+    magma_int_t n, magma_int_t k,
+    magmaDoubleComplex alpha,
+    const magmaDoubleComplex *dA, magma_int_t ldda,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex       *dC, magma_int_t lddc );
+
+void magma_zsyr2k(
+    magma_uplo_t uplo, magma_trans_t trans,
+    magma_int_t n, magma_int_t k,
+    magmaDoubleComplex alpha,
+    const magmaDoubleComplex *dA, magma_int_t ldda,
+    const magmaDoubleComplex *dB, magma_int_t lddb,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex       *dC, magma_int_t lddc );
+
+#ifdef COMPLEX
 void magma_zhemm(
     magma_side_t side, magma_uplo_t uplo,
     magma_int_t m, magma_int_t n,
@@ -679,6 +810,7 @@ void magma_zher2k(
     const magmaDoubleComplex *dB, magma_int_t lddb,
     double beta,
     magmaDoubleComplex       *dC, magma_int_t lddc );
+#endif
 
 void magma_ztrmm(
     magma_side_t side, magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
@@ -698,6 +830,6 @@ void magma_ztrsm(
 }
 #endif
 
-#undef PRECISION_z
+#undef COMPLEX
 
 #endif  // MAGMABLAS_Z_H
