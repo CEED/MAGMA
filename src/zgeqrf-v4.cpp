@@ -94,7 +94,7 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
     and tau in TAU(i).
     =====================================================================    */
 
-    cuDoubleComplex *da[4];
+    cuDoubleComplex *da[MagmaMaxGPUs];
     cuDoubleComplex c_one = MAGMA_Z_ONE;
 
     int i, k, ldda;
@@ -131,7 +131,7 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
 
     ldda    = ((m+31)/32)*32;
 
-    magma_int_t  n_local[4];
+    magma_int_t  n_local[MagmaMaxGPUs];
     for(i=0; i<num_gpus; i++){
         n_local[i] = ((n/nb)/num_gpus)*nb;
         if (i < (n/nb)%num_gpus)
