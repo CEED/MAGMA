@@ -183,8 +183,8 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
     magma_int_t ln, ldda;
     magma_int_t nb = magma_get_zhetrd_nb(n), ib; 
 
-    magmaDoubleComplex z_neg_one = MAGMA_Z_NEG_ONE;
-    magmaDoubleComplex z_one = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
     double  d_one = MAGMA_D_ONE;
     double mv_time = 0.0;
     double up_time = 0.0;
@@ -230,7 +230,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
 
     /* Quick return if possible */
     if (n == 0) {
-        work[0] = z_one;
+        work[0] = c_one;
         return 0;
     }
 
@@ -318,7 +318,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
                               stream, times);
 
             magma_zher2k_mgpu(num_gpus, 'U', 'N', nb, i, ib, 
-                         z_neg_one, dwork, i+ib, 0,
+                         c_neg_one, dwork, i+ib, 0,
                          d_one,     da,    ldda, 0, 
                          k, stream);
 
@@ -418,7 +418,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
             magma_event_record(start, 0);
 #endif
             magma_zher2k_mgpu(num_gpus, 'L', 'N', nb, n-i-ib, ib, 
-                         z_neg_one, dwork, n-i, ib,
+                         c_neg_one, dwork, n-i, ib,
                          d_one, da, ldda, i+ib, k, stream);
 #ifdef PROFILE_SY2RK
             magma_setdevice(0);
@@ -552,7 +552,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
 
     char uplo_[2]  = {uplo, 0};
     int i, id, ib, ii, kk, n1, m1;
-    magmaDoubleComplex z_one = MAGMA_Z_ONE;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
     /* diagonal update */
     for( i=0; i<n; i+=nb ) {
@@ -586,7 +586,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
         magma_zgemm(MagmaNoTrans, MagmaConjTrans, i, ib, k, 
                     alpha, dB1(id, 0, 0 ), lddb,
                            dB(id,  i, 0 ), lddb, 
-                    z_one, dC(id,  0, ii), lddc);
+                    c_one, dC(id,  0, ii), lddc);
       }
     } else {
       for( i=0; i<n-nb; i+=nb ) {
@@ -604,7 +604,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
         magma_zgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k, 
                     alpha, dB1(id, i+ib,        0 ), lddb,
                            dB(id,  i,           0 ), lddb, 
-                    z_one, dC(id,  i+offset+ib, ii), lddc);
+                    c_one, dC(id,  i+offset+ib, ii), lddc);
         trace_gpu_end( id, kk );
       }
     }
@@ -621,7 +621,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
         magma_zgemm(MagmaNoTrans, MagmaConjTrans, i, ib, k, 
                     alpha, dB( id, 0, 0 ), lddb,
                            dB1(id, i, 0 ), lddb, 
-                    z_one, dC(id,  0, ii), lddc);
+                    c_one, dC(id,  0, ii), lddc);
       }
     } else {
       for( i=0; i<n-nb; i+=nb ) {
@@ -639,7 +639,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
         magma_zgemm(MagmaNoTrans, MagmaConjTrans, n1, ib, k, 
                     alpha, dB(id,  i+ib,        0 ), lddb,
                            dB1(id, i,           0 ), lddb, 
-                    z_one, dC(id,  i+offset+ib, ii), lddc);
+                    c_one, dC(id,  i+offset+ib, ii), lddc);
         trace_gpu_end( id, kk );
       }
     }

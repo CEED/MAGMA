@@ -66,9 +66,9 @@ magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *a,
     =====================================================================   */
    
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     
     magma_int_t a_dim1, a_offset, min_mn, i__3, i__4;
-    magmaDoubleComplex z__1;
     magma_int_t j, jb, nb, iinfo;
 
     a_dim1 = *lda;
@@ -137,9 +137,8 @@ magma_zgetrf_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *a,
                     /* Update trailing submatrix. */
                     i__3 = *m - j - jb + 1;
                     i__4 = *n - j - jb + 1;
-                    z__1 = MAGMA_Z_NEG_ONE;
                     blasf77_zgemm("No transpose", "No transpose", &i__3, &i__4, &jb, 
-                           &z__1, &a[j + jb + j * a_dim1], lda, 
+                           &c_neg_one, &a[j + jb + j * a_dim1], lda, 
                            &a[j + (j + jb) * a_dim1], lda, &c_one, 
                            &a[j + jb + (j + jb) * a_dim1], lda);
                   }

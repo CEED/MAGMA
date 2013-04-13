@@ -87,7 +87,7 @@ magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
             < 0:  if INFO = -i, the i-th argument had an illegal value   
     =====================================================================    */
 
-    magmaFloatComplex cone = MAGMA_C_ONE;
+    magmaFloatComplex c_one = MAGMA_C_ONE;
     char            trans_[2] = {trans, 0};
     int notran = lapackf77_lsame(trans_, "N");
     magma_int_t inc;
@@ -132,11 +132,11 @@ magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
 
       /* Solve L*X = B, overwriting B with SX. */
       magma_ctrsm( MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit, 
-                   n, nrhs, cone, dA, ldda, dSX, n);
+                   n, nrhs, c_one, dA, ldda, dSX, n);
     
       /* Solve U*X = B, overwriting B with X. */
       magma_ctrsm( MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit, 
-                   n, nrhs, cone, dA, ldda, dSX, n);
+                   n, nrhs, c_one, dA, ldda, dSX, n);
 
       magmablas_clag2z(n, nrhs, dSX, n, dX, lddx, info );
     } else {
@@ -147,9 +147,9 @@ magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
 
       /* Solve A' * X = B. */
       magma_ctrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
-                  n, nrhs, cone, dA, ldda, dSX, n);
+                  n, nrhs, c_one, dA, ldda, dSX, n);
       magma_ctrsm(MagmaLeft, MagmaLower, MagmaConjTrans, MagmaUnit,
-                  n, nrhs, cone, dA, ldda, dSX, n);
+                  n, nrhs, c_one, dA, ldda, dSX, n);
       
       magmablas_zclaswp(nrhs, dX, lddx, dSX, n, ipiv, inc);
     }

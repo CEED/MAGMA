@@ -60,8 +60,10 @@ magma_zgetf2_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *a,
                  to solve a system of equations.   
     =====================================================================   */
     
-  magmaDoubleComplex c_one = MAGMA_Z_ONE, c_zero = MAGMA_Z_ZERO;
-    magma_int_t c__1 = 1;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magma_int_t ione = 1;
     
     magma_int_t a_dim1, a_offset, i__1, i__2, i__3;
     magmaDoubleComplex z__1;
@@ -106,7 +108,7 @@ magma_zgetf2_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *a,
               {
                 i__2 = *m - j;
                 z__1 = MAGMA_Z_DIV(c_one, a[j + j * a_dim1]);
-                blasf77_zscal(&i__2, &z__1, &a[j + 1 + j * a_dim1], &c__1);
+                blasf77_zscal(&i__2, &z__1, &a[j + 1 + j * a_dim1], &ione);
               } 
             else 
               {
@@ -125,9 +127,8 @@ magma_zgetf2_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *a,
           /* Update trailing submatrix. */
           i__2 = *m - j;
           i__3 = *n - j;
-          z__1 = MAGMA_Z_NEG_ONE; 
-          blasf77_zgeru( &i__2, &i__3, &z__1,
-                         &a[j + 1 + j * a_dim1], &c__1,
+          blasf77_zgeru( &i__2, &i__3, &c_neg_one,
+                         &a[j + 1 + j * a_dim1], &ione,
                          &a[j + (j+1) * a_dim1], lda,
                          &a[j + 1 + (j+1) * a_dim1], lda);
         }
