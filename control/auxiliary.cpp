@@ -222,45 +222,6 @@ void swp2pswp(char trans, magma_int_t n, magma_int_t *ipiv, magma_int_t *newipiv
   }
 }
 
-/* ////////////////////////////////////////////////////////////////////////////
-   -- Auxiliary function: used for debugging. Given a pointer to floating
-      point number on the GPU memory, the function returns the value
-      at that location.
-*/
-extern "C"
-float getv(float *da){
-  float res[1];
-  cublasGetVector(1, sizeof(float), da, 1, res, 1);
-  return res[0];
-}
-
-/* ////////////////////////////////////////////////////////////////////////////
-   -- Auxiliary function sp_cat
-*/
-extern "C"
-int sp_cat(char *lp, char *rpp[], magma_int_t *rnp, magma_int_t*np, magma_int_t ll)
-{
-  magma_int_t i, n, nc;
-  char *f__rp;
-
-  n = (int)*np;
-  for(i = 0 ; i < n ; ++i)
-    {
-      nc = ll;
-      if(rnp[i] < nc)
-        nc = rnp[i];
-      ll -= nc;
-      f__rp = rpp[i];
-      while(--nc >= 0)
-        *lp++ = *f__rp++;
-    }
-  while(--ll >= 0)
-    *lp++ = ' ';
-
-  return 0;
-}
-
-
 // --------------------
 // Convert global indices [j0, j1) to local indices [dj0, dj1) on GPU dev,
 // according to 1D block cyclic distribution.

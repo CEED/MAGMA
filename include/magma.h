@@ -324,7 +324,6 @@ magma_timestr_t get_current_time(void);
 double GetTimerValue(magma_timestr_t time_1, magma_timestr_t time_2);
 void printout_devices();
 void swp2pswp(char trans, magma_int_t n, magma_int_t *ipiv, magma_int_t *newipiv);
-float getv(float *da);
 
 double magma_wtime( void );
 double magma_sync_wtime( magma_queue_t queue );
