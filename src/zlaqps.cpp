@@ -341,9 +341,9 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
             double r1, r2;
             
             r1 = cblas_dznrm2(nb-k, A(rk + 1, lsticc), ione);
-            r2 = cublasDznrm2(m-offset-nb, dA(offset + nb + 1, lsticc), ione);
+            r2 = magma_dznrm2(m-offset-nb, dA(offset + nb + 1, lsticc), ione);
             
-            //vn1[lsticc] = cublasDznrm2(i__1, dA(rk + 1, lsticc), ione);
+            //vn1[lsticc] = magma_dznrm2(i__1, dA(rk + 1, lsticc), ione);
             vn1[lsticc] = magma_dsqrt(r1*r1+r2*r2);
         }
         

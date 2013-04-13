@@ -566,7 +566,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
     }
     //magma_setdevice(0);
     //magmablasSetKernelStream(stream[0][0]);
-    //cublasZhemv('L', n, alpha, &da[0][offset+offset*ldda], ldda, &dx[0][offset], incx, beta, &dy[0][offset], incy );
+    //magma_zhemv('L', n, alpha, &da[0][offset+offset*ldda], ldda, &dx[0][offset], incx, beta, &dy[0][offset], incy );
     //magmablasSetKernelStream(NULL);
 
     /* send to CPU */
@@ -584,7 +584,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
         magmablasSetKernelStream(NULL);
     }
 #else
-    //cublasZhemv(uplo, n, alpha, da, ldda, dx, incx, beta, dy, incy );
+    //magma_zhemv(uplo, n, alpha, da, ldda, dx, incx, beta, dy, incy );
     
     idw = (offset/nb)%num_gpus;
 

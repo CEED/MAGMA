@@ -284,7 +284,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
                          tauk,   A( rk,  k+1 ), lda,
                                  A( rk,  k   ), 1,
                          c_zero, F( k+1, k   ), 1 );
-            //cublasZscal( m-rk, tau[k], F( k+1, k), 1 ); 
+            //magma_zscal( m-rk, tau[k], F( k+1, k), 1 ); 
             //magma_int_t i__3 = nb-k-1;
             //magma_int_t i__4 = i__2 - i__3;
             //magma_int_t i__5 = nb-k;
@@ -477,7 +477,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
             double r1, r2;
             
             r1 = cblas_dznrm2(nb-k, A(rk + 1, lsticc), ione);
-            r2 = cublasDznrm2(m-offset-nb, dA(offset + nb + 1, lsticc), ione);
+            r2 = magma_dznrm2(m-offset-nb, dA(offset + nb + 1, lsticc), ione);
             
             vn1[lsticc] = magma_dsqrt(r1*r1+r2*r2);
         }

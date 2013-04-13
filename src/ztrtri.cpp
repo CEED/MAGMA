@@ -152,9 +152,6 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
                              MagmaNoTrans, MagmaNonUnit, j, jb,
                              c_neg_one, dA(j,j), ldda, dA(0, j),ldda);
 
-                //cublasGetMatrix(j ,jb, sizeof( magmaDoubleComplex),
-                //dA(0, j), ldda, A(0, j), lda);
-
                 magma_zgetmatrix_async( jb, jb,
                                         dA(j, j), ldda,
                                         A(j, j),  lda, stream[1] );
@@ -193,8 +190,6 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
                     magma_ztrsm( MagmaRight, MagmaLower,
                                  MagmaNoTrans, MagmaNonUnit, (n-j-jb), jb,
                                  c_neg_one, dA(j,j), ldda, dA(j+jb, j), ldda );
-
-                    //cublasGetMatrix((n-j), jb, sizeof( magmaDoubleComplex),dA(j, j), ldda, A(j, j), lda);
 
                     magma_zgetmatrix_async( n-j-jb, jb,
                                             dA(j+jb, j), ldda,

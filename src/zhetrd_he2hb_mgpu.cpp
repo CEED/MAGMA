@@ -246,7 +246,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
 /*
     magmaDoubleComplex *dworkmgpu[MagmaMaxGPUs], *dWmgpu[MagmaMaxGPUs];
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-        cudaSetDevice( dev );
+        magma_setdevice( dev );
         if (MAGMA_SUCCESS != magma_zmalloc( &dworkmgpu[dev], nb*ldda )) {
             *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;
@@ -256,7 +256,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
             return *info;
         }
     }
-        cudaSetDevice( 0 );
+        magma_setdevice( 0 );
 
     // Use the first panel of da as work space 
     magmaDoubleComplex *dwork = dworkmgpu[0];
@@ -298,7 +298,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
     magma_int_t worksiz     = n*nb;  
 
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-        cudaSetDevice( dev );
+        magma_setdevice( dev );
         //magma_zmalloc( &datest[dev], mlocal*ldda );
         //magma_zmalloc( &dttest[dev], mlocal*ldda );
         magma_zmalloc( &dvtest[dev], 2*nb*lddv );
@@ -363,7 +363,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                  //printf("Receiving panel ofsize %d %d from idev %d A(%d,%d) \n",(pm+pn), pn,idev,i-1,di); 
 
                  trace_gpu_start( idev, 1, "get", "get panel" );
-                 cudaSetDevice( idev );
+                 magma_setdevice( idev );
 
                  /*
                  magma_zgetmatrix( (pm+pn), pn,
@@ -386,7 +386,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                  */
                  trace_gpu_end( idev, 1 );
 
-                 //cudaSetDevice( 0 );
+                 //magma_setdevice( 0 );
                  trace_gpu_start( 0, 2, "her2k", "her2k" );
                  //printf("updating zher2k on A(%d,%d) of size %d %d \n",indi_old+pn_old-1,indi_old+pn_old-1,pm_old-pn_old,pn_old); 
                 // compute ZHER2K_MGPU
@@ -396,13 +396,13 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                                  dwtest, pm_old, pn_old,
                       d_one,     dAmgpu, ldda, indi_old+pn_old-1,
                       ngpu, distblk, streams, 2 );
-                 //cudaSetDevice( 0 );
+                 //magma_setdevice( 0 );
 
                  trace_gpu_end( 0, 2 );
                  trace_cpu_start( 0, "sync", "sync on 1" );
-                 cudaSetDevice( idev );
+                 magma_setdevice( idev );
                  magma_queue_sync( streams[idev][ nstream-1 ] );
-                 //cudaSetDevice( 0 );
+                 //magma_setdevice( 0 );
                  trace_cpu_end( 0 );
                  zq_to_panel(MagmaUpper, pn-1, a_ref(i, i+1), lda, work);
              }
@@ -440,7 +440,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
              // vector of Vs. if step%2=0 use V[0] else use V[nb*n]
              flipV = ((i-1)/nb)%2;
              for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-                 cudaSetDevice( dev );
+                 magma_setdevice( dev );
                  trace_gpu_start( dev, 0, "set", "set V and T" );
                 // send V
                  magma_zsetmatrix_async( pm, pk,
@@ -462,7 +462,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
              for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
                  // dwork = V T 
                  trace_cpu_start( 0, "sync", "sync on 0" );
-                 cudaSetDevice( dev );
+                 magma_setdevice( dev );
                  magmablasSetKernelStream( streams[ dev ][ nstream-1 ] );
                  magma_queue_sync( streams[dev][nstream-1] );
                  trace_cpu_end( 0 );
@@ -483,7 +483,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
              //   RECEIVED AND VT IS COMPUTED and SYR2K is done
              // ===============================================
              for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-                 cudaSetDevice( dev );
+                 magma_setdevice( dev );
                  for( magma_int_t s = 0; s < nstream; ++s ) 
                  magma_queue_sync( streams[dev][s] );
              }
@@ -519,7 +519,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                  /* 
                  // send X=AVT stored in dW to all GPUs 
                  for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-                     cudaSetDevice( dev );
+                     magma_setdevice( dev );
                      magma_zsetmatrix_async( pm, pk,
                               worktest, pm,
                               dwtest[dev],  pm, streams[dev][0] );
@@ -537,7 +537,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                  // Here we have to wait until the broadcast of ZHEMM has been done.
                  // Note that the broadcast should be done on stream[0] so in a way 
                  // we can continue here on the same stream and avoid a sync    
-                 cudaSetDevice( dev );
+                 magma_setdevice( dev );
                  magmablasSetKernelStream( streams[ dev ][ 0 ] );
                  // magma_queue_sync( streams[dev][0] );
                  trace_gpu_start( dev, 2, "gemm", "work = T'*V'*X" );
@@ -568,7 +568,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
              // computed and also used for the same reason in
              // the panel update below and also for the last HER2K
              for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-                 cudaSetDevice( dev );
+                 magma_setdevice( dev );
                  magma_queue_sync( streams[dev][0] );
              }
 
@@ -583,7 +583,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                  iblock = ((indi-1) / distblk) / ngpu;          // local block id
                  di     = iblock*distblk + (indi-1)%distblk;     // local index in parent matrix
                  idev   = ((indi-1) / distblk) % ngpu;          // device with this block
-                 cudaSetDevice( idev );
+                 magma_setdevice( idev );
                  magmablasSetKernelStream( streams[ idev ][ nstream-1 ] );
                  //magma_queue_sync( streams[idev][0] ); removed because the sync has been done in the loop above
 
@@ -608,7 +608,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                  iblock = ((indi-1) / distblk) / ngpu;          // local block id
                  di     = iblock*distblk + (indi-1)%distblk;     // local index in parent matrix
                  idev   = ((indi-1) / distblk) % ngpu;          // device with this block
-                 cudaSetDevice( idev );
+                 magma_setdevice( idev );
                  magmablasSetKernelStream( streams[ idev ][ 0 ] );
                  //printf("LAST ZHER2K idev %d on A(%d,%d) of size %d \n",idev, indi-1,di,pk); 
 
@@ -637,10 +637,10 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
         }  // end loop for(i)
 
     }// end of LOWER
-    //cudaSetDevice( 0 );
+    //magma_setdevice( 0 );
 
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-        cudaSetDevice( dev );
+        magma_setdevice( dev );
         magma_free( dvtest[dev]);
         magma_free( dwtest[dev] );
         magma_free( dworktest[dev]);

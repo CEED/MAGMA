@@ -94,7 +94,7 @@ extern "C" magma_int_t magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side, mag
     magma_queue_t streams[MagmaMaxGPUs][20];    
     magma_event_t  myevent[MagmaMaxGPUs][20]; 
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-        cudaSetDevice( dev );
+        magma_setdevice( dev );
         for( magma_int_t i = 0; i < nstream; ++i ) {
             cudaStreamCreate( &streams[dev][i] );
         }
@@ -123,7 +123,7 @@ extern "C" magma_int_t magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side, mag
 
     // copy dE to GPUs 
     for (dev=0; dev < ngpu; ++dev){
-        cudaSetDevice( dev );
+        magma_setdevice( dev );
         lddwork = ne_loc;
         if(MAGMA_SUCCESS != magma_zmalloc( &dE[dev], ldde * ne_loc)) {
             printf ("!!!!  magma_zbulge_applyQ magma_alloc failed for: dE\n" );
@@ -213,7 +213,7 @@ extern "C" magma_int_t magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side, mag
                             vld  = mysiz * ldv;
                             tld  = mysiz * ldt;
                             for( dev = 0; dev < ngpu; ++dev ) {
-                                cudaSetDevice( dev );
+                                magma_setdevice( dev );
                                 magmablasSetKernelStream( streams[ dev ][ 1 ] );
                                 magma_zsetmatrix_async(vld, Vblksiz, V(vpos), vld, dV1[dev], vld, streams[dev][1]);
                                 magma_zsetmatrix_async(tld, Vblksiz, T(tpos), tld, dT1[dev], tld, streams[dev][1]);
@@ -237,7 +237,7 @@ extern "C" magma_int_t magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side, mag
                             if(flip==0){ // now I am working on dV0 so copy the next and put it on dV1
                                 //printf("doing overlapping copy of mysiz %2d copyst %2d copyed %2d vpos %8d tpos %8d into dV1 dT1\n",mysiz,copyst,copyed,vpos,tpos);  
                                 for( dev = 0; dev < ngpu; ++dev ) {
-                                    cudaSetDevice( dev );
+                                    magma_setdevice( dev );
                                     magmablasSetKernelStream( streams[ dev ][ 1 ] );
                                     magma_zsetmatrix_async(vld, Vblksiz, V(vpos), vld, dV1[dev], vld, streams[dev][1]);
                                     magma_zsetmatrix_async(tld, Vblksiz, T(tpos), tld, dT1[dev], tld, streams[dev][1]);
@@ -245,7 +245,7 @@ extern "C" magma_int_t magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side, mag
                             }else{ // now I am working on dV1 so copy the next and put it on dV0
                                 //printf("doing overlapping copy of mysiz %2d copyst %2d copyed %2d vpos %8d tpos %8d into dV0 dT0\n",mysiz,copyst,copyed,vpos,tpos);   
                                 for( dev = 0; dev < ngpu; ++dev ) {
-                                    cudaSetDevice( dev );
+                                    magma_setdevice( dev );
                                     magmablasSetKernelStream( streams[ dev ][ 0 ] );
                                     magma_zsetmatrix_async(vld, Vblksiz, V(vpos), vld, dV0[dev], vld, streams[dev][0]);
                                     magma_zsetmatrix_async(tld, Vblksiz, T(tpos), tld, dT0[dev], tld, streams[dev][0]);
@@ -265,7 +265,7 @@ extern "C" magma_int_t magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side, mag
                                 magma_int_t nr_bl = magma_ceildiv(ie_loc,10000);       //nr of blocks
                                 magma_int_t sz_bl = magma_ceildiv(ie_loc,nr_bl*64)*64; //maximum size of blocks (to have blocks of around the same size and multiple of 64)
                                 magma_int_t ib;                                        //size of current block
-                                cudaSetDevice( dev );
+                                magma_setdevice( dev );
                                 magmablasSetKernelStream(streams[dev][0]);
                                 cudaStreamWaitEvent(streams[dev][0], myevent[dev][1], 0);
                                 for(magma_int_t i=0; i<ie_loc; i+= sz_bl){
@@ -281,7 +281,7 @@ extern "C" magma_int_t magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side, mag
                                 magma_int_t nr_bl = magma_ceildiv(ie_loc,10000);       //nr of blocks
                                 magma_int_t sz_bl = magma_ceildiv(ie_loc,nr_bl*64)*64; //maximum size of blocks (to have blocks of around the same size and multiple of 64)
                                 magma_int_t ib;                                        //size of current block
-                                cudaSetDevice( dev );
+                                magma_setdevice( dev );
                                 magmablasSetKernelStream(streams[dev][1]);
                                 cudaStreamWaitEvent(streams[dev][1], myevent[dev][0], 0);
                                 for(magma_int_t i=0; i<ie_loc; i+= sz_bl){
@@ -433,7 +433,7 @@ extern "C" magma_int_t magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side, mag
 
     // copy back the dE form each GPU 
     for( dev = 0; dev < ngpu; ++dev ) {
-        cudaSetDevice( dev );
+        magma_setdevice( dev );
         magmablasSetKernelStream(streams[dev][0]);
         cudaStreamWaitEvent(streams[dev][0], myevent[dev][1], 0);
         cudaStreamWaitEvent(streams[dev][0], myevent[dev][0], 0);
@@ -444,7 +444,7 @@ extern "C" magma_int_t magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side, mag
 
 
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-        cudaSetDevice( dev );
+        magma_setdevice( dev );
         magmablasSetKernelStream(streams[dev][0]);
         cudaStreamWaitEvent(streams[dev][0], myevent[dev][0], 0);
         cudaDeviceSynchronize(); // no need for synchronize
@@ -458,7 +458,7 @@ extern "C" magma_int_t magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side, mag
         }
     }
 
-    cudaSetDevice( cdev );
+    magma_setdevice( cdev );
     magmablasSetKernelStream( cstream );
     return MAGMA_SUCCESS;
 

@@ -181,8 +181,8 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
           for( d=0; d<num_gpus; d++ ) {
               magma_setdevice(d);
               for( j=0; j<2; j++ ) {
-                  cudaMalloc((void**)&d_dinvA[d][j], nb*nb*sizeof(magmaDoubleComplex));
-                  cudaMalloc((void**)&d_x[d][j],      n*nb*sizeof(magmaDoubleComplex));
+                  magma_zmalloc( &d_dinvA[d][j], nb*nb );
+                  magma_zmalloc( &d_x[d][j],      n*nb );
                   cudaMemset(d_dinvA[d][j], 0, nb*nb*sizeof(magmaDoubleComplex));
                   cudaMemset(d_x[d][j],     0,  n*nb*sizeof(magmaDoubleComplex));
               }
@@ -438,8 +438,8 @@ magma_queue_sync( stream[id][stream0] ); // wait for the column on CPU
             for( d=0; d<num_gpus; d++ ) {
                 magma_setdevice(d);
                 for( j=0; j<2; j++ ) {
-                    cudaMalloc((void**)&d_dinvA[d][j], nb*nb*sizeof(magmaDoubleComplex));
-                    cudaMalloc((void**)&d_x[d][j],     nb*m *sizeof(magmaDoubleComplex));
+                    magma_zmalloc( &d_dinvA[d][j], nb*nb );
+                    magma_zmalloc( &d_x[d][j],     nb*m  );
                     cudaMemset(d_dinvA[d][j], 0, nb*nb*sizeof(magmaDoubleComplex));
                     cudaMemset(d_x[d][j],     0, nb* m*sizeof(magmaDoubleComplex));
                 }
