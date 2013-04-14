@@ -22,9 +22,9 @@
 // nb is assumed to be < BLOCK_SIZE; if not, increase BLOCK_SIZE
 // NOTE THAT BLOCK_SIZE should be equal BLOCK_SIZEx*BLOCK_SIZEy
 // and BLOCK_SIZEy <= BLOCK_SIZEx
-#define BLOCK_SIZE  128
+#define BLOCK_SIZE  256
 #define BLOCK_SIZEx  32
-#define BLOCK_SIZEy   4
+#define BLOCK_SIZEy   8
 
 
 
@@ -108,12 +108,10 @@ __device__ void zlarfxsym_v2(magma_int_t n,
     const int myrow = threadIdx.x % BLOCK_SIZEx, mycol= threadIdx.x / BLOCK_SIZEx,  thid = threadIdx.x;
 
     __shared__ cuDoubleComplex loctau;
-    __shared__ cuDoubleComplex locw[ BLOCK_SIZE ];
+   // __shared__ cuDoubleComplex locw[ BLOCK_SIZE ];
     __shared__ cuDoubleComplex locv[ BLOCK_SIZE ];
     __shared__ cuDoubleComplex loca[ BLOCK_SIZEx ][ BLOCK_SIZEx+1 ];
     __shared__ cuDoubleComplex sum[ BLOCK_SIZE ][ BLOCK_SIZEy+1];
-    __shared__ cuDoubleComplex test[ BLOCK_SIZE ];
-    test[thid] =MAGMA_Z_ZERO;
 
     __syncthreads();
     locv[thid] = thid < n ? dV[thid] : MAGMA_Z_ZERO;
@@ -130,6 +128,7 @@ __device__ void zlarfxsym_v2(magma_int_t n,
     for( j = 0; j < BLOCK_SIZEy; j++){
          sum[thid][j] = MAGMA_Z_ZERO;
     }  
+    //if(thid==0)printf("hello"); return;
     __syncthreads();
 
 
@@ -168,14 +167,6 @@ __device__ void zlarfxsym_v2(magma_int_t n,
                 sum[gbcol+myrow][mycol] += MAGMA_Z_CNJG(loca[j][myrow]) * locv[blkjcol+j];
             }
             __syncthreads();
-/*
-            if(thid<32){
-            printf("%d ===============> MAIN LOOP  offDIAG BLOCK myrow %d gbrow %d   gbcol %d   blkjcol %d\n", thid, myrow, gbrow, gbcol,blkjcol); __syncthreads();                    
-            for( j = 0; j < BLOCK_SIZEx; j++)
-                sum[gbcol+myrow][0] += MAGMA_Z_CNJG(loca[j][myrow]) * locv[blkjcol+j];
-            }
-            __syncthreads();
-            */
         }
         // the diagonal block
         gbcol = blkjcol;
@@ -244,7 +235,10 @@ __device__ void zlarfxsym_v2(magma_int_t n,
     for( j = 1; j < BLOCK_SIZEy; j++){
         sum[thid][0] += sum[thid][j];
     }
-    locw[thid] = loctau * sum[thid][0];
+    sum[thid][1] = loctau * sum[thid][0];
+
+
+
 
 /*
     if(thid<n){
@@ -266,7 +260,7 @@ __device__ void zlarfxsym_v2(magma_int_t n,
     sum[thid][0]  = MAGMA_Z_ZERO;    
     if(thid<n){
         /* compute dtmp= X'*V */
-        sum[thid][0] = MAGMA_Z_CNJG( locw[thid]) * locv[thid];
+        sum[thid][0] = MAGMA_Z_CNJG( sum[thid][1] ) * locv[thid];
     }
     sum_reduce_2d(n, thid, 0, sum);
 
@@ -278,7 +272,7 @@ __device__ void zlarfxsym_v2(magma_int_t n,
        compute W=X-1/2VX'Vt = X - dtmp*V 
        blasf77_zaxpy(&n, &dtmp, V, &ione, work, &ione); 
     */
-    locw[thid] -= dtmp * locv[thid]; 
+    sum[thid][1] -= dtmp * locv[thid]; 
     }
     /* 
        performs the symmetric rank 2 operation A := alpha*x*y' + alpha*y*x' + A 
@@ -287,9 +281,15 @@ __device__ void zlarfxsym_v2(magma_int_t n,
     __syncthreads();
 
     if(thid<n){
-        for(j=0; j<=thid; j++)
-           *dAC(thid, j) -= locw[thid]*MAGMA_Z_CNJG( locv[j] ) + locv[thid]*MAGMA_Z_CNJG( locw[j] ); 
-        //*dAC(thid, thid) = MAGMA_Z_MAKE( MAGMA_Z_REAL(*dAC(thid, thid)), 0.);
+        if( n <= BLOCK_SIZEx){ // meaningthat the matrix is fully loaded into shared so use it
+            for(j=0; j<=thid; j++)
+               *dAC(thid, j) = loca[thid][j] - sum[thid][1]*MAGMA_Z_CNJG( locv[j] ) - locv[thid]*MAGMA_Z_CNJG( sum[j][1] ); 
+            // *dAC(thid, thid) = MAGMA_Z_MAKE( MAGMA_Z_REAL(*dAC(thid, thid)), 0.);
+        }else{        
+            for(j=0; j<=thid; j++)
+               *dAC(thid, j) -= sum[thid][1]*MAGMA_Z_CNJG( locv[j] ) + locv[thid]*MAGMA_Z_CNJG( sum[j][1] ); 
+            // *dAC(thid, thid) = MAGMA_Z_MAKE( MAGMA_Z_REAL(*dAC(thid, thid)), 0.);
+        }
 
     }
 
@@ -471,7 +471,7 @@ magma_ztrdtype1cbHLsym_withQ_v2_gpu(magma_int_t n, magma_int_t nb,
     WORK (workspace) double complex array, dimension N
 */
     magma_int_t vpos, taupos, len;
-    magma_int_t lddx = ldda-1;
+    //magma_int_t lddx = ldda-1;
 
     if (nb > BLOCK_SIZE)
        printf("magma_ztrdtype1cbHLsym_withQ_v2_gpu: BLOCK_SIZE should be > %d\n", nb);
