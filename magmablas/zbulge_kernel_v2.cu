@@ -20,10 +20,13 @@
 #define PRECISION_z
 
 // nb is assumed to be < BLOCK_SIZE; if not, increase BLOCK_SIZE
+// NOTE THAT BLOCK_SIZE should be equal BLOCK_SIZEx*BLOCK_SIZEy
+// and BLOCK_SIZEy <= BLOCK_SIZEx
+#define BLOCK_SIZE  128
 #define BLOCK_SIZEx  32
 #define BLOCK_SIZEy   4
 
-#define BLOCK_SIZE 128
+
 
 // === End defining what BLAS to use ======================================
 
@@ -64,8 +67,7 @@ __device__ void zsum_reduce( int n, int i, cuDoubleComplex* x )
     if ( n >    1 ) { if ( i <    1 && i +    1 < n ) { x[i] += x[i+   1]; }  __syncthreads(); }
 }
 
-template< int n >
-__device__ void sum_reduce_2d( /*int n,*/ int i, int c, cuDoubleComplex x[][BLOCK_SIZEy+1] )
+__device__ void sum_reduce_2d( int n, int i, int c, cuDoubleComplex x[][BLOCK_SIZEy+1] )
 {
     __syncthreads();
     if ( n > 1024 ) { if ( i < 1024 && i + 1024 < n ) { x[i][c] += x[i+1024][c]; }  __syncthreads(); }
@@ -100,45 +102,199 @@ __device__ void zlarfxsym_v2(magma_int_t n,
     WORK (workspace) double complex array, dimension N
 */
 
-    magma_int_t j, i = threadIdx.x;
+    magma_int_t j,nint,gbrow,gbcol,blkjcol;
     cuDoubleComplex dtmp     = MAGMA_Z_ZERO;
     cuDoubleComplex c_half   =  MAGMA_Z_HALF;
+    const int myrow = threadIdx.x % BLOCK_SIZEx, mycol= threadIdx.x / BLOCK_SIZEx,  thid = threadIdx.x;
 
-    __shared__ cuDoubleComplex sum[ BLOCK_SIZE ];
+    __shared__ cuDoubleComplex loctau;
+    __shared__ cuDoubleComplex locw[ BLOCK_SIZE ];
+    __shared__ cuDoubleComplex locv[ BLOCK_SIZE ];
+    __shared__ cuDoubleComplex loca[ BLOCK_SIZEx ][ BLOCK_SIZEx+1 ];
+    __shared__ cuDoubleComplex sum[ BLOCK_SIZE ][ BLOCK_SIZEy+1];
+    __shared__ cuDoubleComplex test[ BLOCK_SIZE ];
+    test[thid] =MAGMA_Z_ZERO;
+
+    __syncthreads();
+    locv[thid] = thid < n ? dV[thid] : MAGMA_Z_ZERO;
+    if(thid==0) loctau     = dTAU[0];
+    __syncthreads();
+   
+    // initialize all the column of sum (BLOCK_SIZEy col) to zero
+    /* 
+    for( j = myrow; j < BLOCK_SIZE; j+= BLOCK_SIZEx)
+    {
+        sum[j][mycol] = MAGMA_Z_ZERO;
+    }
+    */
+    for( j = 0; j < BLOCK_SIZEy; j++){
+         sum[thid][j] = MAGMA_Z_ZERO;
+    }  
+    __syncthreads();
+
+
 
     /* 
         X = tau A V 
         blasf77_zhemv("L", &n, TAU, A, &lda, V, &ione, &c_zero, work, &ione);
     */
-    for(j = 0; j< i; j++)
-         dtmp += *dAC(i, j) * dV[j];
-    for(j = i; j< n; j++)
-         dtmp += MAGMA_Z_CNJG(*dAC(j, i)) * dV[j];
 
-    dwork[i] = dTAU[0] * dtmp;
+    j = n%BLOCK_SIZEx;
+    nint = j == 0 ? n : n - j; 
+    //printf("me %d nint %d\n",thid,myrow, nint);
+    
+    // go over the blocki (vertical down) excluding the last block in case of padding required
+    for(gbrow = myrow; gbrow<nint; gbrow+=BLOCK_SIZEx){
+        //if(thid==0)printf("%d  ===============  HELLO FROM THE MAIN LOOP  ================= \n", thid); __syncthreads();
 
-    /* compute dtmp= X'*V */
-    sum[i] = MAGMA_Z_CNJG( dwork[i]) * dV[i];
-    zsum_reduce(n, i, sum);
+        // go over the blockj (horizontal left to right)
+        // excluding diagonal block which is treated after it
+        blkjcol = (gbrow/BLOCK_SIZEx)*BLOCK_SIZEx;
+        for( gbcol = 0; gbcol<blkjcol; gbcol+=BLOCK_SIZEx){
+            //if(thid==0)printf("%d ===============> MAIN LOOP  offDIAG BLOCK gbrow %d   gbcol %d \n", thid, gbrow, gbcol); __syncthreads();
 
+            // for non diag block, copy the matrix to shared,
+            // and directly do the first GEMV (threads horizontal reading)  
+            // then another loop will do the second GEMV 
+            // with the transpose (vertical reading)  
+            for( j = mycol; j < BLOCK_SIZEx; j+= BLOCK_SIZEy)
+            {
+                loca[myrow][j] = *(dAC(gbrow, (gbcol+j))) ;  
+                sum[gbrow][mycol] += loca[myrow][j] * locv[gbcol+j];
+            }
+            __syncthreads();
+            for( j = mycol; j < BLOCK_SIZEx; j+= BLOCK_SIZEy)
+            {
+                sum[gbcol+myrow][mycol] += MAGMA_Z_CNJG(loca[j][myrow]) * locv[blkjcol+j];
+            }
+            __syncthreads();
+/*
+            if(thid<32){
+            printf("%d ===============> MAIN LOOP  offDIAG BLOCK myrow %d gbrow %d   gbcol %d   blkjcol %d\n", thid, myrow, gbrow, gbcol,blkjcol); __syncthreads();                    
+            for( j = 0; j < BLOCK_SIZEx; j++)
+                sum[gbcol+myrow][0] += MAGMA_Z_CNJG(loca[j][myrow]) * locv[blkjcol+j];
+            }
+            __syncthreads();
+            */
+        }
+        // the diagonal block
+        gbcol = blkjcol;
+        //if(thid==0)printf("%d  ===============>  DIAG BLOCK  myrow %d mycol %d gbrow %d   gbcol %d \n", thid,myrow, mycol, gbrow, gbcol); __syncthreads();
+        for( j = mycol; j <= myrow; j+= BLOCK_SIZEy)
+        {
+            loca[myrow][j] = *(dAC(gbrow, (gbcol+j))) ; 
+            loca[j][myrow] =  MAGMA_Z_CNJG( loca[myrow][j] );
+        }
+        __syncthreads();
+
+        for( j = mycol; j < BLOCK_SIZEx; j+= BLOCK_SIZEy)
+        {
+            sum[gbrow][mycol] += loca[myrow][j] * locv[gbcol+j];
+        }
+        __syncthreads();
+    }
+    // In case where a padding should exist and is not, so let do the last block in case of its size < BLOCK_SIZEx independently
+
+
+    if(nint<n){
+
+        gbrow = nint+myrow;
+        blkjcol = (gbrow/BLOCK_SIZEx)*BLOCK_SIZEx;    
+        for( gbcol = 0; gbcol<blkjcol; gbcol+=BLOCK_SIZEx){
+            //printf("%d  LAST LOOP  gbrow %d   gbcol %d \n", thid, gbrow, gbcol);
+            if(gbrow<n){
+                for( j = mycol; j < BLOCK_SIZEx; j+= BLOCK_SIZEy)
+                {
+                    loca[myrow][j] = *(dAC(gbrow, (gbcol+j))) ;  
+                    sum[gbrow][mycol] += loca[myrow][j] * locv[gbcol+j];
+                }
+            }
+            __syncthreads();
+
+            for( j = mycol; j < n-nint; j+= BLOCK_SIZEy)
+            {
+                sum[gbcol+myrow][mycol] += MAGMA_Z_CNJG(loca[j][myrow]) * locv[blkjcol+j];
+            }
+            __syncthreads();
+        }
+        // the diagonal block
+        gbcol = blkjcol;
+        //printf("%d  LAST DIAG BLOCK  gbrow %d   gbcol %d \n", thid, gbrow, gbcol);
+        if(gbrow<n){
+            for( j = mycol; j <= myrow; j+= BLOCK_SIZEy)
+            {
+                loca[myrow][j] = *(dAC(gbrow, (gbcol+j))) ; 
+                loca[j][myrow] =  MAGMA_Z_CNJG( loca[myrow][j] );
+            }
+        }
+        __syncthreads();
+        if(gbrow<n){
+            for( j = mycol; j <  n-nint; j+= BLOCK_SIZEy)
+            {
+                sum[gbrow][mycol] += loca[myrow][j] * locv[gbcol+j];
+            }
+        }
+        __syncthreads();
+
+    }
+    
+    // The result of the GEMV is now in sum[1:n][BLOCK_SIZEy]
+    // and need to be summed over the BLOCK_SIZEy.
+    // each thread go over the BLOCK_SIZEy and summ it to its sum[thid][0]
+    for( j = 1; j < BLOCK_SIZEy; j++){
+        sum[thid][0] += sum[thid][j];
+    }
+    locw[thid] = loctau * sum[thid][0];
+
+/*
+    if(thid<n){
+        dtmp = MAGMA_Z_ZERO;
+        for(j = 0; j< n; j++){
+             test[thid] = j<thid ? *dAC(thid, j) : MAGMA_Z_CNJG(*dAC(j, thid));
+             dtmp += test[thid] * locv[j];
+        }
+        test[thid] = loctau * dtmp;
+    }
+    __syncthreads();
+    printf("coucou voici locw[%d], test[%d] %10.5e   %10.5e\n",thid,thid,locw[thid],test[thid]);
+    __syncthreads();
+    return;
+
+*/
+
+
+    sum[thid][0]  = MAGMA_Z_ZERO;    
+    if(thid<n){
+        /* compute dtmp= X'*V */
+        sum[thid][0] = MAGMA_Z_CNJG( locw[thid]) * locv[thid];
+    }
+    sum_reduce_2d(n, thid, 0, sum);
+
+    if(thid<n){
     /* compute 1/2 X'*V*t = 1/2*dtmp*tau  */
-    dtmp = sum[0] * c_half * dTAU[0];
+    dtmp = sum[0][0] * c_half * loctau;
 
     /*
        compute W=X-1/2VX'Vt = X - dtmp*V 
        blasf77_zaxpy(&n, &dtmp, V, &ione, work, &ione); 
     */
-    dwork[i] -= dtmp * dV[i]; 
-
+    locw[thid] -= dtmp * locv[thid]; 
+    }
     /* 
        performs the symmetric rank 2 operation A := alpha*x*y' + alpha*y*x' + A 
        blasf77_zher2("L", &n, &c_neg_one, work, &ione, V, &ione, A, &lda);
     */
     __syncthreads();
-    for(j=0; j<=i; j++)
-       *dAC(i, j) -= dwork[i]*MAGMA_Z_CNJG( dV[j] ) + dV[i]*MAGMA_Z_CNJG( dwork[j] ); 
 
-    *dAC(i, i) = MAGMA_Z_MAKE( MAGMA_Z_REAL(*dAC(i, i)), 0.);
+    if(thid<n){
+        for(j=0; j<=thid; j++)
+           *dAC(thid, j) -= locw[thid]*MAGMA_Z_CNJG( locv[j] ) + locv[thid]*MAGMA_Z_CNJG( locw[j] ); 
+        //*dAC(thid, thid) = MAGMA_Z_MAKE( MAGMA_Z_REAL(*dAC(thid, thid)), 0.);
+
+    }
+
+
+
     // synch the routine
     __syncthreads();
 
@@ -171,9 +327,9 @@ __device__ void zlarfg(int n, cuDoubleComplex *dA, cuDoubleComplex *dx,
         return;
     }
 
-/*
-    sum[i] = MAGMA_D_ZERO
-*/    
+    //sum[i] = MAGMA_D_ZERO
+
+   
 /*
 #if (defined(PRECISION_c) || defined(PRECISION_z))
     if (( n == 1 ) &&( i==0 ) ){
@@ -197,8 +353,12 @@ __device__ void zlarfg(int n, cuDoubleComplex *dA, cuDoubleComplex *dx,
          sum[i] = re*re + im*im;
          }
 #endif
-        sum_reduce( n-1, i, sum );
+    }else{
+        sum[i] = MAGMA_D_ZERO;
     }
+    // we need a sync here but because sum_reduce has a sync implicitly at the top so we comment it
+    //__syncthreads();
+    sum_reduce( n-1, i, sum );
 
 
     if ( i == 0 ) {
@@ -273,7 +433,6 @@ void magma_ztrdtype1cbHLsym_withQ_v2_gpu_kernel(cuDoubleComplex *dA, int ldda,
 {
        const int i = threadIdx.x;
 
-       if (i < len) {
           /*
              V(0)  = c_one;
              cblas_zcopy(len-1, A(st+1, st-1), ione, V(1), ione);
@@ -281,7 +440,7 @@ void magma_ztrdtype1cbHLsym_withQ_v2_gpu_kernel(cuDoubleComplex *dA, int ldda,
           */
           if (i==0){
              dV[0] = MAGMA_Z_ONE;
-          } else {
+          } else if(i < len){
              dV[i] = *dA(st+i, st-1);
              *dA(st+i, st-1) = MAGMA_Z_ZERO;
           }
@@ -298,7 +457,6 @@ void magma_ztrdtype1cbHLsym_withQ_v2_gpu_kernel(cuDoubleComplex *dA, int ldda,
              magma_zlarfxsym_v2(len, A(st,st), lda-1, V, TAU, work);
           */
           zlarfxsym_v2(len, dA(st,st), ldda-1, dV, dTAU, dwork);
-       }
 }
 
 extern "C" void
@@ -457,7 +615,7 @@ __device__ void zlarfl(int m, int n, cuDoubleComplex *v, cuDoubleComplex dtau,
                lsum += MAGMA_Z_MUL( MAGMA_Z_CNJG( v[j] ), dc[j] );
        
            sum[i][col] = lsum;
-           sum_reduce_2d< BLOCK_SIZEx >( i, col, sum );
+           //sum_reduce_2d< BLOCK_SIZEx >( i, col, sum );
 
            /*  C := C - v * w  */
            __syncthreads();
@@ -525,7 +683,7 @@ magma_ztrdtype2cbHLsym_withQ_v2_gpu_kernel(int lem, int len,
 
        // note that all htreads need to call this function
         __syncthreads();
-        zlarfl(lem, len-1, dV, MAGMA_Z_CNJG( dTAU[0] ), dA(ed+1, st+1), ldda-1);
+        zlarfl2(lem, len-1, dV, MAGMA_Z_CNJG( dTAU[0] ), dA(ed+1, st+1), ldda-1);
 }
 
 extern "C" void
