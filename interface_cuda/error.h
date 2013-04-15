@@ -13,11 +13,19 @@ void magma_xerror( CUresult       err, const char* func, const char* file, int l
 void magma_xerror( cublasStatus_t err, const char* func, const char* file, int line );
 void magma_xerror( magma_err_t    err, const char* func, const char* file, int line );
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // cuda provides cudaGetErrorString,
 // but not cuGetErrorString or cublasGetErrorString, so provide our own.
 // In magma.h, we also provide magma_geterrorstring.
 const char* cuGetErrorString( CUresult error );
 const char* cublasGetErrorString( cublasStatus_t error );
+
+#ifdef __cplusplus
+}
+#endif
 
 #ifdef NDEBUG
 #define check_error( err )                     ((void)0)

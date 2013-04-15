@@ -47,6 +47,7 @@ void magma_xerror( magma_err_t err, const char* func, const char* file, int line
 
 // ----------------------------------------
 // cuda provides cudaGetErrorString, but not cuGetErrorString.
+extern "C"
 const char* cuGetErrorString( CUresult error )
 {
     switch( error ) {
@@ -187,6 +188,7 @@ const char* cuGetErrorString( CUresult error )
 
 // ----------------------------------------
 // cuda provides cudaGetErrorString, but not cublasGetErrorString.
+extern "C"
 const char* cublasGetErrorString( cublasStatus_t error )
 {
     switch( error ) {
@@ -221,6 +223,7 @@ const char* cublasGetErrorString( cublasStatus_t error )
 
 
 // ----------------------------------------
+extern "C"
 const char* magma_geterrorstring( magma_err_t error )
 {
     // LAPACK-compliant errors
