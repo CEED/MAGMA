@@ -66,7 +66,7 @@ cleanall:
 #	( cd quark          && $(MAKE) cleanall )
 	$(MAKE) cleanall2
 
-# cleanall2 is a dummy rule to run cleangen at the *end* of make cleanall, so
+# cleanall2 is a dummy rule to run cleanmkgen at the *end* of make cleanall, so
 # .Makefile.gen files aren't deleted and immediately re-created. see Makefile.gen
 cleanall2:
 	@echo
