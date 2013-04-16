@@ -30,9 +30,12 @@ FOPTS     = -O3 -DADD_ -fdefault-integer-8 -x f95-cpp-input
 NVOPTS    = -O3 -DADD_ --compiler-options -fno-strict-aliasing -DUNIX
 LDOPTS    = -fPIC -Xlinker -zmuldefs
 
+# IMPORTANT: this link line is for 64-bit int !!!!
+# For regular 64-bit builds using 64-bit pointers and 32-bit int,
+# use the lp64 library, not the ilp64 library. See make.inc.mkl-gcc or make.inc.mkl-icc.
 # see MKL Link Advisor at http://software.intel.com/sites/products/mkl/
 # gcc with MKL 10.3, GNU threads, 64-bit int
-# note -DUSE_INT64 in OPTS above
+# note -DUSE_INT64 and -fdefault-integer-8 in OPTS above
 LIB       = -lmkl_gf_ilp64 -lmkl_gnu_thread -lmkl_core -lpthread -lcublas -lm -fopenmp
 
 # define these in your environment
