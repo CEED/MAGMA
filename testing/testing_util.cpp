@@ -65,8 +65,8 @@ const char *usage =
 "  --nthread x      Number of CPU threads, default 1.\n"
 "  --itype [123]    Generalized Hermitian-definite eigenproblem type, default 1.\n"
 "  --work  [123]    SVD workspace size, from min (1) to max (3), default 1.\n"
-"  --version x      version (e.g., during development of hemm_mgpu, trevc).\n"
-"  --fraction x     fraction of eigenvectors to compute.\n"
+"  --version x      version of routine, e.g., during development, default 1.\n"
+"  --fraction x     fraction of eigenvectors to compute, default 1.\n"
 "  -L -U -F         uplo   = Lower*, Upper, or Full.\n"
 "  -[NTC][NTC]      transA = NoTrans*, Trans, or ConjTrans (first letter) and\n"
 "                   transB = NoTrans*, Trans, or ConjTrans (second letter).\n"
@@ -91,13 +91,13 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     opts->device   = 0;
     opts->nb       = 0;  // auto
     opts->nrhs     = 1;
-    opts->nstream  = 0;  // auto
+    opts->nstream  = 1;
     opts->ngpu     = magma_num_gpus();
     opts->niter    = 1;
     opts->nthread  = 1;
     opts->itype    = 1;
     opts->svd_work = 1;
-    opts->version  = 0;  // auto
+    opts->version  = 1;
     opts->fraction = 1.;
     
     opts->check     = (getenv("MAGMA_TESTINGS_CHECK") != NULL);
@@ -243,8 +243,8 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
         }
         else if ( strcmp("--version", argv[i]) == 0 && i+1 < argc ) {
             opts->version = atoi( argv[++i] );
-            magma_assert( opts->version >= 0,
-                          "error: --version %s is invalid; ensure version >= 0.\n", argv[i] );
+            magma_assert( opts->version >= 1,
+                          "error: --version %s is invalid; ensure version > 0.\n", argv[i] );
         }
         else if ( strcmp("--fraction", argv[i]) == 0 && i+1 < argc ) {
             opts->fraction = atof( argv[++i] );
