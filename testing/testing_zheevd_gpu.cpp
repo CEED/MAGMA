@@ -38,7 +38,7 @@ int main( int argc, char** argv)
     cuDoubleComplex *h_A, *h_R, *d_R, *h_work, aux_work[1];
     double *rwork, *w1, *w2, result[3], eps, aux_rwork[1];
     magma_int_t *iwork, aux_iwork[1];
-    magma_int_t N, n2, info, lwork, lrwork, liwork, ldda;
+    magma_int_t N, n2, info, lwork, lrwork, liwork, lda, ldda;
     magma_int_t izero    = 0;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
@@ -51,19 +51,20 @@ int main( int argc, char** argv)
         fprintf( stderr, "checking results requires vectors; setting jobz=V (option -JV)\n" );
         opts.jobz = MagmaVectors;
     }
-
+    
     printf("    N   CPU Time (sec)   GPU Time (sec)\n");
     printf("=======================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[i];
-            n2 = N*N;
+            n2   = N*N;
+            lda  = N;
             ldda = ((N + 31)/32)*32;
             
             /* Query for workspace sizes */
             magma_zheevd_gpu( opts.jobz, opts.uplo,
-                              N, d_R, N, w1,
-                              h_R, N,
+                              N, d_R, ldda, w1,
+                              h_R, lda,
                               aux_work,  -1,
                               aux_rwork, -1,
                               aux_iwork, -1,
@@ -73,10 +74,10 @@ int main( int argc, char** argv)
             liwork = aux_iwork[0];
             
             /* Allocate host memory for the matrix */
-            TESTING_MALLOC(    h_A, cuDoubleComplex, N*N );
-            TESTING_MALLOC(    w1,  double,          N   );
-            TESTING_MALLOC(    w2,  double,          N   );
-            TESTING_HOSTALLOC( h_R, cuDoubleComplex, N*N );
+            TESTING_MALLOC(    h_A, cuDoubleComplex, N*lda  );
+            TESTING_MALLOC(    w1,  double,          N      );
+            TESTING_MALLOC(    w2,  double,          N      );
+            TESTING_HOSTALLOC( h_R, cuDoubleComplex, N*lda  );
             TESTING_DEVALLOC(  d_R, cuDoubleComplex, N*ldda );
             TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork  );
             TESTING_MALLOC(    rwork,  double,          lrwork );
@@ -87,18 +88,21 @@ int main( int argc, char** argv)
             for( int j=0; j < N; j++ ) {
                 h_A[j*N+j] = MAGMA_Z_MAKE( MAGMA_Z_REAL(h_A[j*N+j]), 0. );
             }
-            magma_zsetmatrix( N, N, h_A, N, d_R, ldda );
+            magma_zsetmatrix( N, N, h_A, lda, d_R, ldda );
             
             /* warm up run */
-            magma_zheevd_gpu( opts.jobz, opts.uplo,
-                              N, d_R, ldda, w1,
-                              h_R, N,
-                              h_work, lwork,
-                              rwork, lrwork,
-                              iwork, liwork,
-                              &info );
-            
-            magma_zsetmatrix( N, N, h_A, N, d_R, ldda );
+            if ( opts.warmup ) {
+                magma_zheevd_gpu( opts.jobz, opts.uplo,
+                                  N, d_R, ldda, w1,
+                                  h_R, lda,
+                                  h_work, lwork,
+                                  rwork, lrwork,
+                                  iwork, liwork,
+                                  &info );
+                if (info != 0)
+                    printf("magma_zheevd_gpu returned error %d.\n", (int) info);
+                magma_zsetmatrix( N, N, h_A, lda, d_R, ldda );
+            }
             
             /* ====================================================================
                Performs operation using MAGMA
@@ -106,12 +110,14 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime();
             magma_zheevd_gpu( opts.jobz, opts.uplo,
                               N, d_R, ldda, w1,
-                              h_R, N,
+                              h_R, lda,
                               h_work, lwork,
                               rwork, lrwork,
                               iwork, liwork,
                               &info );
             gpu_time = magma_wtime() - gpu_time;
+            if (info != 0)
+                printf("magma_zheevd_gpu returned error %d.\n", (int) info);
             
             if ( opts.check ) {
                 /* =====================================================================
@@ -124,25 +130,27 @@ int main( int argc, char** argv)
                 double temp1, temp2;
                 
                 // tau=NULL is unused since itype=1
-                magma_zgetmatrix( N, N, d_R, ldda, h_R, N );
+                magma_zgetmatrix( N, N, d_R, ldda, h_R, lda );
                 lapackf77_zhet21( &ione, &opts.uplo, &N, &izero,
-                                  h_A, &N,
+                                  h_A, &lda,
                                   w1, w1,
-                                  h_R, &N,
-                                  h_R, &N,
+                                  h_R, &lda,
+                                  h_R, &lda,
                                   NULL, h_work, rwork, &result[0]);
                 
-                magma_zsetmatrix( N, N, h_A, N, d_R, ldda );
+                magma_zsetmatrix( N, N, h_A, lda, d_R, ldda );
                 magma_zheevd_gpu( MagmaNoVectors, opts.uplo,
                                   N, d_R, ldda, w2,
-                                  h_R, N,
+                                  h_R, lda,
                                   h_work, lwork,
                                   rwork, lrwork,
                                   iwork, liwork,
                                   &info);
+                if (info != 0)
+                    printf("magma_zheevd_gpu returned error %d.\n", (int) info);
                 
                 temp1 = temp2 = 0;
-                for(int j=0; j<N; j++){
+                for( int j=0; j<N; j++ ) {
                     temp1 = max(temp1, absv(w1[j]));
                     temp1 = max(temp1, absv(w2[j]));
                     temp2 = max(temp2, absv(w1[j]-w2[j]));
@@ -153,28 +161,34 @@ int main( int argc, char** argv)
             /* =====================================================================
                Performs operation using LAPACK
                =================================================================== */
-            cpu_time = magma_wtime();
-            lapackf77_zheevd(&opts.jobz, &opts.uplo,
-                             &N, h_A, &N, w2,
-                             h_work, &lwork,
-                             rwork, &lrwork,
-                             iwork, &liwork,
-                             &info);
-            cpu_time = magma_wtime() - cpu_time;
-            if (info != 0)
-                printf("lapackf77_zheevd returned error %d.\n", (int) info);
-    
+            if ( opts.lapack ) {
+                cpu_time = magma_wtime();
+                lapackf77_zheevd(&opts.jobz, &opts.uplo,
+                                 &N, h_A, &lda, w2,
+                                 h_work, &lwork,
+                                 rwork, &lrwork,
+                                 iwork, &liwork,
+                                 &info);
+                cpu_time = magma_wtime() - cpu_time;
+                if (info != 0)
+                    printf("lapackf77_zheevd returned error %d.\n", (int) info);
+                
+                printf("%5d     %7.2f         %7.2f\n",
+                       (int) N, cpu_time, gpu_time);
+            }
+            else {
+                printf("%5d       ---           %7.2f\n",
+                       (int) N, gpu_time);
+            }
             
             /* =====================================================================
                Print execution time
                =================================================================== */
-            printf("%5d     %7.2f         %7.2f\n",
-                   (int) N, cpu_time, gpu_time);
-            if ( opts.check ){
+            if ( opts.check ) {
                 printf("Testing the factorization A = U S U' for correctness:\n");
-                printf("(1)    | A - U S U' | / (|A| N) = %e\n", result[0]*eps);
-                printf("(2)    | I -   U'U  | /  N      = %e\n", result[1]*eps);
-                printf("(3)    | S(w/ U)-S(w/o U)|/ |S| = %e\n\n", result[2]);
+                printf("(1)    | A - U S U' | / (|A| N)     = %8.2e\n",   result[0]*eps );
+                printf("(2)    | I -   U'U  | /  N          = %8.2e\n",   result[1]*eps );
+                printf("(3)    | S(w/ U) - S(w/o U) | / |S| = %8.2e\n\n", result[2]     );
             }
 
             TESTING_FREE(     h_A    );
