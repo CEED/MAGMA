@@ -65,8 +65,8 @@ int main( int argc, char** argv)
     printf("If running lapack (option --lapack), MAGMA and CUBLAS error are both computed\n"
            "relative to CPU BLAS result. Else, MAGMA error is computed relative to CUBLAS result.\n\n"
            "side = %c, uplo = %c, transA = %c, diag = %c \n", opts.side, opts.uplo, opts.transA, opts.diag );
-    printf("    M     N   MAGMA Gflop/s (ms)    CUBLAS Gflop/s (ms)   CPU Gflop/s (ms)  MAGMA error  CUBLAS error\n");
-    printf("=====================================================================================================\n");
+    printf("    M     N  MAGMA Gflop/s (ms)  CUBLAS Gflop/s (ms)   CPU Gflop/s (ms)  MAGMA error  CUBLAS error\n");
+    printf("==================================================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[i];
@@ -201,12 +201,21 @@ int main( int argc, char** argv)
             
             cublas_error = norm1/(normx*normA);
             
-            printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)        %7.2f (%7.2f)    %8.2e    %8.2e\n",
-                    (int) M, (int) N,
-                    magma_perf, 1000.*magma_time,
-                    cublas_perf, 1000.*cublas_time,
-                    cpu_perf,    1000.*cpu_time,
-                    magma_error, cublas_error );
+            if ( opts.lapack ) {
+                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e     %8.2e\n",
+                        (int) M, (int) N,
+                        magma_perf,  1000.*magma_time,
+                        cublas_perf, 1000.*cublas_time,
+                        cpu_perf,    1000.*cpu_time,
+                        magma_error, cublas_error );
+            }
+            else {
+                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)     ---   (  ---  )   %8.2e     %8.2e\n",
+                        (int) M, (int) N,
+                        magma_perf,  1000.*magma_time,
+                        cublas_perf, 1000.*cublas_time,
+                        magma_error, cublas_error );
+            }
             
             TESTING_FREE( h_A  );
             TESTING_FREE( LU  );
