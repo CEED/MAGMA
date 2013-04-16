@@ -58,6 +58,10 @@ ZSRC := \
 	dtrsm_work.cu		\
 	strsm_work.cu		\
 
+# not yet released
+#   zpotf2.cu \
+#	zgetf2.cu \
+
 # multi-GPU
 ZSRC += \
 	zbcyclic.cu			\
