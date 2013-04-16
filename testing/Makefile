@@ -218,7 +218,7 @@ testing_%_f : testing_%_f.o $(FOBJ)
 	$(LIB) 
 
 testing_% : testing_%.o
-	$(CC) $(LDOPTS) $(NOMAIN) $< $(OBJ) -o $@ \
+	$(CC) $(LDOPTS) $(NOMAIN) $< -o $@ \
 	$(LIBTEST) $(LIBLAPACKTEST) -L../lib -lmagma -lmagmablas \
 	$(LIBDIR) \
 	$(LIB) 
