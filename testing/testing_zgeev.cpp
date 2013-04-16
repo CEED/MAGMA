@@ -86,17 +86,26 @@ int main( int argc, char** argv)
             /* =====================================================================
                Performs operation using LAPACK
                =================================================================== */
-            cpu_time = magma_wtime();
-            lapackf77_zgeev( &opts.jobvl, &opts.jobvr,
-                             &N, h_A, &lda, w2,
-                             VL, &lda, VR, &lda,
-                             h_work, &lwork, rwork, &info );
-            cpu_time = magma_wtime() - cpu_time;
-            if (info != 0)
-                printf("lapackf77_zgeev returned error %d.\n", (int) info);
+            if ( opts.lapack ) {
+                cpu_time = magma_wtime();
+                lapackf77_zgeev( &opts.jobvl, &opts.jobvr,
+                                 &N, h_A, &lda, w2,
+                                 VL, &lda, VR, &lda,
+                                 h_work, &lwork, rwork, &info );
+                cpu_time = magma_wtime() - cpu_time;
+                if (info != 0)
+                    printf("lapackf77_zgeev returned error %d.\n", (int) info);
+                
+                printf("%5d   %7.2f          %7.2f\n",
+                       (int) N, cpu_time, gpu_time);
+            }
+            else {
+                printf("%5d     ---            %7.2f\n",
+                       (int) N, gpu_time);
+            }
             
             /* =====================================================================
-               Check the result compared to LAPACK
+               Check the result
                =================================================================== */
             if ( opts.check ) {
                 /* ===================================================================
@@ -292,28 +301,15 @@ int main( int argc, char** argv)
                         if ( ! MAGMA_Z_EQUAL( VL[j+jj*lda], LRE[j+jj*lda] ))
                             result[6] = 0;
                 
-                printf("Test 1: | A * VR - VR * W | / ( n |A| ) = %e\n", result[0]);
-                printf("Test 2: | A'* VL - VL * W'| / ( n |A| ) = %e\n", result[1]);
-                printf("Test 3: |  |VR(i)| - 1    |             = %e\n", result[2]);
-                printf("Test 4: |  |VL(i)| - 1    |             = %e\n", result[3]);
-                printf("Test 5:   W (full)  ==  W (partial)     = %f\n", result[4]);
-                printf("Test 6:  VR (full)  == VR (partial)     = %f\n", result[5]);
-                printf("Test 7:  VL (full)  == VL (partial)     = %f\n", result[6]);
-                
-                //====================================================================
-                
-                matnorm = lapackf77_zlange("f", &N, &ione, w1, &N, work);
-                blasf77_zaxpy(&N, &c_neg_one, w1, &ione, w2, &ione);
-                result[7] = lapackf77_zlange("f", &N, &ione, w2, &N, work) / matnorm;
-                
-                printf("%5d   %7.2f   %7.2f   %8.2e\n",
-                       (int) N, cpu_time, gpu_time, result[7]);
+                printf("Test 1: | A * VR - VR * W | / ( n |A| ) = %8.2e\n", result[0]);
+                printf("Test 2: | A'* VL - VL * W'| / ( n |A| ) = %8.2e\n", result[1]);
+                printf("Test 3: |  |VR(i)| - 1    |             = %8.2e\n", result[2]);
+                printf("Test 4: |  |VL(i)| - 1    |             = %8.2e\n", result[3]);
+                printf("Test 5:   W (full)  ==  W (partial)     = %s\n",   (result[4] == 1. ? "okay" : "fail"));
+                printf("Test 6:  VR (full)  == VR (partial)     = %s\n",   (result[5] == 1. ? "okay" : "fail"));
+                printf("Test 7:  VL (full)  == VL (partial)     = %s\n\n", (result[6] == 1. ? "okay" : "fail"));
                 
                 TESTING_HOSTFREE( LRE );
-            }
-            else {
-                printf("%5d   %7.2f   %7.2f\n",
-                       (int) N, cpu_time, gpu_time);
             }
             
             TESTING_FREE( w1 );
