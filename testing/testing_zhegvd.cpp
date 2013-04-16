@@ -232,7 +232,7 @@ int main( int argc, char** argv)
                     printf("(2)    | I -   Z Z' B | /  N         = %8.2e\n", result[1]);
                 else
                     printf("(2)    | B -  Z Z' | / (|B| N)       = %8.2e\n", result[1]);
-                printf("(3)    | D(w/ Z)-D(w/o Z)|/ |D|      = %8.2e\n\n", result[2]);
+                printf(    "(3)    | D(w/ Z) - D(w/o Z) | / |D|  = %8.2e\n\n", result[2]);
             }
             
             TESTING_FREE( h_A );
