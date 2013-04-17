@@ -231,7 +231,7 @@ magma_zgeev(
     #elif defined(VERSION2)
         // Version 2 - LAPACK consistent HRD
         magma_zgehrd2( n, ilo, ihi, A, lda,
-                       &work[itau], &work[iwrk], &liwrk, &ierr );
+                       &work[itau], &work[iwrk], liwrk, &ierr );
     #elif defined(VERSION3)
         // Version 3 - LAPACK consistent MAGMA HRD + matrices T stored,
         magma_zgehrd( n, ilo, ihi, A, lda,

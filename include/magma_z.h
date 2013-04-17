@@ -43,7 +43,7 @@ magma_int_t magma_zgebrd( magma_int_t m, magma_int_t n, magmaDoubleComplex *A,
                           magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info);
 magma_int_t magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
                           magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *tau,
-                          magmaDoubleComplex *work, magma_int_t *lwork, magma_int_t *info);
+                          magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info);
 magma_int_t magma_zgehrd( magma_int_t n, magma_int_t ilo, magma_int_t ihi,
                           magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *tau,
                           magmaDoubleComplex *work, magma_int_t lwork,

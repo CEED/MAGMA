@@ -14,7 +14,7 @@ extern "C" magma_int_t
 magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi, 
               magmaDoubleComplex *a, magma_int_t lda,
               magmaDoubleComplex *tau, magmaDoubleComplex *work, 
-              magma_int_t *lwork, magma_int_t *info)
+              magma_int_t lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -131,7 +131,7 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     *info = 0;
     MAGMA_Z_SET2REAL( work[0], (double) n * nb );
 
-    lquery = *lwork == -1;
+    lquery = lwork == -1;
     if (n < 0) {
         *info = -1;
     } else if (ilo < 1 || ilo > max(1,n)) {
@@ -140,7 +140,7 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
         *info = -3;
     } else if (lda < max(1,n)) {
         *info = -5;
-    } else if (*lwork < max(1,n) && ! lquery) {
+    } else if (lwork < max(1,n) && ! lquery) {
         *info = -8;
     }
     if (*info != 0) {
@@ -199,14 +199,14 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 
         /* Determine if workspace is large enough for blocked code      */
         iws = n * nb;
-        if (*lwork < iws) {
+        if (lwork < iws) {
 
           /*    Not enough workspace to use optimal NB:  determine the   
                 minimum value of NB, and reduce NB or force use of   
                 unblocked code                                          */
           nbmin = nb;
-          if (*lwork >= n * nbmin)
-            nb = *lwork / n;
+          if (lwork >= n * nbmin)
+            nb = lwork / n;
           else 
             nb = 1;
         }
