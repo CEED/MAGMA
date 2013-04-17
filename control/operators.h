@@ -247,14 +247,14 @@ operator == (const magmaDoubleComplex a, const magmaDoubleComplex b)
              imag(a) == imag(b) );
 }
 
-__host__ __device__ static inline magmaDoubleComplex
+__host__ __device__ static inline bool
 operator == (const magmaDoubleComplex a, const double s)
 {
     return ( real(a) == s &&
              imag(a) == 0. );
 }
 
-__host__ __device__ static inline magmaDoubleComplex
+__host__ __device__ static inline bool
 operator == (const double s, const magmaDoubleComplex a)
 {
     return ( real(a) == s &&
@@ -269,13 +269,13 @@ operator != (const magmaDoubleComplex a, const magmaDoubleComplex b)
     return ! (a == b);
 }
 
-__host__ __device__ static inline magmaDoubleComplex
+__host__ __device__ static inline bool
 operator != (const magmaDoubleComplex a, const double s)
 {
     return ! (a == s);
 }
 
-__host__ __device__ static inline magmaDoubleComplex
+__host__ __device__ static inline bool
 operator != (const double s, const magmaDoubleComplex a)
 {
     return ! (a == s);
@@ -495,14 +495,14 @@ operator == (const magmaFloatComplex a, const magmaFloatComplex b)
              imag(a) == imag(b) );
 }
 
-__host__ __device__ static inline magmaFloatComplex
+__host__ __device__ static inline bool
 operator == (const magmaFloatComplex a, const float s)
 {
     return ( real(a) == s &&
              imag(a) == 0. );
 }
 
-__host__ __device__ static inline magmaFloatComplex
+__host__ __device__ static inline bool
 operator == (const float s, const magmaFloatComplex a)
 {
     return ( real(a) == s &&
@@ -517,13 +517,13 @@ operator != (const magmaFloatComplex a, const magmaFloatComplex b)
     return ! (a == b);
 }
 
-__host__ __device__ static inline magmaFloatComplex
+__host__ __device__ static inline bool
 operator != (const magmaFloatComplex a, const float s)
 {
     return ! (a == s);
 }
 
-__host__ __device__ static inline magmaFloatComplex
+__host__ __device__ static inline bool
 operator != (const float s, const magmaFloatComplex a)
 {
     return ! (a == s);
