@@ -63,7 +63,7 @@
   if ( ( (m) == (n) ) && ( (m)%32 == 0) && ( (ldda)%32 == 0) ){ \
     magmablas_cinplace_transpose( dAT, ldda, ldda );            \
   } else {                                                      \
-    cublasStatus_t status = cublasAlloc( (m)*(n), sizeof(cuFloatComplex), (void**)&dAT); \
+    cublasStatus_t status = cublasAlloc( (m)*(n), sizeof(magmaFloatComplex), (void**)&dAT); \
     if (status != CUBLAS_STATUS_SUCCESS)                                \
       return -7;                                                        \
     magmablas_ctranspose2( dAT, ldda, dA, ldda, m, n );                 \
@@ -82,7 +82,7 @@
   if ( ( (m) == (n) ) && ( (m)%32 == 0) && ( (ldda)%32 == 0) ){ \
     magmablas_zinplace_transpose( dAT, ldda, ldda );            \
   } else {                                                      \
-    cublasStatus_t status = cublasAlloc( (m)*(n), sizeof(cuDoubleComplex), (void**)&dAT); \
+    cublasStatus_t status = cublasAlloc( (m)*(n), sizeof(magmaDoubleComplex), (void**)&dAT); \
     if (status != CUBLAS_STATUS_SUCCESS)                                \
       return -7;                                                        \
     magmablas_ztranspose2( dAT, ldda, dA, ldda, m, n );                 \
