@@ -331,7 +331,7 @@ magma_zlahr2_m(
             // This updates one more row than LAPACK does (row k),
             // making block above panel an even multiple of nb.
             // Use last column of T as workspace, w.
-            int i1 = i+1;
+            magma_int_t i1 = i+1;
             
             // If complex, conjugate row of V, and undo afterwards
             #if defined(PRECISION_z) || defined(PRECISION_c)

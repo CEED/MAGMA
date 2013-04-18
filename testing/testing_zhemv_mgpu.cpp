@@ -108,7 +108,8 @@ int main(int argc, char **argv)
     cuDoubleComplex *C_work;
     cuDoubleComplex *dC_work[4];
 
-    magma_int_t num_gpus = 1, max_num_gpus, nb;
+    int max_num_gpus;
+    magma_int_t num_gpus = 1, nb;
     magma_int_t blocks, workspace;
     magma_int_t offset;
     
@@ -405,7 +406,7 @@ int main(int argc, char **argv)
            Computing the Difference Cublas VS Magma
            =================================================================== */
        
-        int nw = m - offset ;
+        magma_int_t nw = m - offset ;
         blasf77_zaxpy( &nw, &c_neg_one, Y[0] + offset, &incx, Ycublas + offset, &incx);
         error = lapackf77_zlange( "M", &nw, &ione, Ycublas + offset, &nw, work );
             

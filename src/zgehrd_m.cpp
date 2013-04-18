@@ -167,7 +167,7 @@ magma_zgehrd_m(
     else if (lquery)
         return *info;
     
-    magma_int_t cdevice;
+    magma_device_t cdevice;
     magma_getdevice( &cdevice );
 
     // Adjust from 1-based indexing
