@@ -69,12 +69,13 @@ endif
 
 # Define the pointer size for fortran compilation
 PTRFILE = $(MAGMA_DIR)/control/sizeptr.c
+PTROBJ  = $(MAGMA_DIR)/control/sizeptr.o
 PTREXEC = $(MAGMA_DIR)/control/sizeptr
 PTRSIZE = $(shell $(PTREXEC))
 PTROPT  = -Dmagma_devptr_t="integer(kind=$(PTRSIZE))"
 
-$(PTREXEC): $(PTRFILE)
-	$(CC) $(OPTS) -o $@ $<
+$(PTREXEC): $(PTROBJ)
+	$(CC) $(LDOPTS) -o $@ $<
 
 FOPTS += $(PTROPT)
 
