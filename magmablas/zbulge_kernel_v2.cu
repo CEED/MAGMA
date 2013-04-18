@@ -350,17 +350,12 @@ __device__ void zlarfxsym_v2(magma_int_t n,
     }
     __syncthreads();    
 
-//=======================================================================
-//=======================================================================
-//=======================================================================
-    // still need to be optimized using all thread 2D writing back data same as i read it.
-//=======================================================================
-//=======================================================================
-//=======================================================================
     /* 
        performs the symmetric rank 2 operation A := alpha*x*y' + alpha*y*x' + A 
        blasf77_zher2("L", &n, &c_neg_one, work, &ione, V, &ione, A, &lda);
     */
+    // old way of updating A. bad perf
+    /*
     if(thid<n){
         if( n <= BLOCK_SIZEx){ // meaning that the matrix is fully loaded into shared so use it
             for(j=0; j<=thid; j++)
@@ -371,7 +366,37 @@ __device__ void zlarfxsym_v2(magma_int_t n,
         }
     }
     
+   */
 
+    if( n <= BLOCK_SIZEx){ // meaning that the matrix is fully loaded into shared so use it
+         if(myrow<n){
+            for( j = mycol; j <= myrow; j+= BLOCK_SIZEy)
+                *(dAC(myrow, j)) = loca[myrow][j] - sum[myrow][1]*MAGMA_Z_CNJG( locv[j] ) - locv[myrow]*MAGMA_Z_CNJG( sum[j][1] ); 
+        }
+    }else{
+        nint = ((n+BLOCK_SIZEx-1)/BLOCK_SIZEx)*BLOCK_SIZEx;    
+        // go over the blocki (vertical down) excluding the last block in case of padding required
+        for(gbrow = myrow; gbrow<nint; gbrow+=BLOCK_SIZEx){
+            // go over the blockj (horizontal left to right)
+            // excluding diagonal block which is treated after it
+            blkjcol = (gbrow/BLOCK_SIZEx)*BLOCK_SIZEx;
+            for( gbcol = 0; gbcol<blkjcol; gbcol+=BLOCK_SIZEx){
+                // for non diag block, update and then copy the whole matrix from shared.
+                if(gbrow<n){
+                    for( j = mycol; j < BLOCK_SIZEx; j+= BLOCK_SIZEy)
+                        *(dAC(gbrow, (gbcol+j))) -= sum[gbrow][1]*MAGMA_Z_CNJG( locv[gbcol+j] ) + locv[gbrow]*MAGMA_Z_CNJG( sum[gbcol+j][1] ); 
+                }
+                __syncthreads();
+            }
+            // the diagonal block
+            gbcol = blkjcol;
+             if(gbrow<n){
+                for( j = mycol; j <= myrow; j+= BLOCK_SIZEy)
+                    *(dAC(gbrow, (gbcol+j))) -= sum[gbrow][1]*MAGMA_Z_CNJG( locv[gbcol+j] ) + locv[gbrow]*MAGMA_Z_CNJG( sum[gbcol+j][1] ); 
+            }
+            __syncthreads();
+        }
+    }
 
 
     // synch the routine
