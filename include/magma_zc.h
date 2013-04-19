@@ -1,15 +1,15 @@
 /*
- *   -- MAGMA (version 1.1) --
- *      Univ. of Tennessee, Knoxville
- *      Univ. of California, Berkeley
- *      Univ. of Colorado, Denver
- *      November 2011
- *
- * @precisions mixed zc -> ds
- */
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
 
-#ifndef _MAGMA_ZC_H_
-#define _MAGMA_ZC_H_
+       @precisions mixed zc -> ds
+*/
+
+#ifndef MAGMA_ZC_H
+#define MAGMA_ZC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,4 +49,4 @@ magma_int_t magma_zcgeqrsv_gpu( magma_int_t M, magma_int_t N, magma_int_t NRHS,
 }
 #endif
 
-#endif /* _MAGMA_Z_H_ */
+#endif /* MAGMA_ZC_H */

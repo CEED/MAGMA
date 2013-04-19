@@ -1,15 +1,15 @@
 /*
- *   -- MAGMA (version 1.1) --
- *      Univ. of Tennessee, Knoxville
- *      Univ. of California, Berkeley
- *      Univ. of Colorado, Denver
- *      November 2011
- *
- * @precisions normal z -> s d c
- */
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
 
-#ifndef MAGMA_ZBULGEINC_H
-#define MAGMA_ZBULGEINC_H
+       @precisions normal z -> s d c
+*/
+
+#ifndef MAGMA_ZBULGE_H
+#define MAGMA_ZBULGE_H
 
 #define PRECISION_z
 
@@ -56,4 +56,4 @@ magma_int_t magma_zbulge_get_Vblksiz(magma_int_t n, magma_int_t nb);
 }
 #endif
 
-#endif
+#endif /* MAGMA_ZBULGE_H */

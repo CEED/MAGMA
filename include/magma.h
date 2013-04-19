@@ -8,8 +8,8 @@
 
 /*#include <quark.h>*/
 
-#ifndef _MAGMA_
-#define _MAGMA_
+#ifndef MAGMA_H
+#define MAGMA_H
 
 /* ------------------------------------------------------------
  * MAGMA Blas Functions
@@ -342,4 +342,4 @@ void magma_indices_1D_bcyclic( magma_int_t nb, magma_int_t ngpu, magma_int_t dev
 }
 #endif
 
-#endif
+#endif /* MAGMA_H */

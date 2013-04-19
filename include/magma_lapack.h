@@ -1,3 +1,13 @@
+/*
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+ 
+       @precisions normal z -> s d c
+*/
+
 #ifndef MAGMA_LAPACK_H
 #define MAGMA_LAPACK_H
 
@@ -110,4 +120,4 @@ float  lapackf77_slapy2( const float  *x, const float  *y );
 }
 #endif
 
-#endif /* MAGMA LAPACK */
+#endif /* MAGMA_LAPACK_H */

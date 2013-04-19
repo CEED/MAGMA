@@ -172,12 +172,12 @@ undef $/;  # slurp whole file
 $_ = <>;
 
 # strip out lines we don't want to copy
-s/#ifndef _MAGMA_Z_H_\n//;
-s/#define _MAGMA_Z_H_\n//;
+s/#ifndef MAGMA_Z_H\n//;
+s/#define MAGMA_Z_H\n//;
+s/#endif \/\* MAGMA_Z_H \*\/\n//;
 s/#include .*\n//;
 s/void zpanel_to_q.*\n//;
 s/void zq_to_panel.*\n//;
-s/#endif \/\* _MAGMA_Z_H_ \*\/\n//;
 s/#ifdef __cplusplus\nextern "C" {\n#endif\n//;
 s/#ifdef __cplusplus\n}\n#endif\n//;
 s/#define PRECISION_z\n//;

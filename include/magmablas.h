@@ -6,8 +6,8 @@
        November 2011
 */
 
-#ifndef _MAGMABLAS_
-#define _MAGMABLAS_
+#ifndef MAGMABLAS_H
+#define MAGMABLAS_H
 
 #include <cublas.h>
 #include <stdint.h>
@@ -179,4 +179,4 @@ void magma_copymatrix_async_internal(
 }
 #endif
 
-#endif
+#endif /* MAGMABLAS_H */
