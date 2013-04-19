@@ -1,15 +1,15 @@
 /*
- -- MAGMA (version 1.1) --
- Univ. of Tennessee, Knoxville
- Univ. of California, Berkeley
- Univ. of Colorado, Denver
- November 2011
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
 
- @author Azzam Haidar
- @author Stan Tomov
- @author Raffaele Solca
+       @author Azzam Haidar
+       @author Stan Tomov
+       @author Raffaele Solca
 
- @precisions normal z -> s d c
+       @precisions normal z -> s d c
 
  */
 #include "common_magma.h"
@@ -445,7 +445,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
 
     // in case for tridiagonal testing
     if (wantz < 0){
-        goto fin;    
+        goto fin;
     }
 
 #if defined(USEMKL)

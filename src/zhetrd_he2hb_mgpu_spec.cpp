@@ -205,16 +205,16 @@ magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
     }
 
     if (*info == 0) {
-      /* Determine the block size. */
-      lwkopt = n * nb;
-      MAGMA_Z_SET2REAL( work[0], lwkopt );
+        /* Determine the block size. */
+        lwkopt = n * nb;
+        MAGMA_Z_SET2REAL( work[0], lwkopt );
     }
 
 
     if (*info != 0)
-      return *info;
+        return *info;
     else if (lquery)
-      return *info;
+        return *info;
 
     /* Quick return if possible */
     if (n == 0) {
@@ -301,10 +301,9 @@ magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
         magma_zmalloc( &dworktestbis[dev], dworksiz );
         workngpu[dev] = (magmaDoubleComplex *) malloc(n*nb*sizeof(magmaDoubleComplex));
         magmablasSetKernelStream( streams[ dev ][ 0 ] );
-       for( magma_int_t i = 0; i < nbevents; ++i ) {
+        for( magma_int_t i = 0; i < nbevents; ++i ) {
             cudaEventCreateWithFlags(&redevents[dev][i],cudaEventDisableTiming);
-       }
-
+        }
     }
     workngpu[ngpu] = (magmaDoubleComplex *) malloc(n*nb*sizeof(magmaDoubleComplex));    
     //magma_setdevice(0  );
@@ -324,8 +323,8 @@ magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
 
     if (upper) {
 
-      printf("ZHETRD_HE2HB is not yet implemented for upper matrix storage. Exit.\n");
-      exit(1);
+        printf("ZHETRD_HE2HB is not yet implemented for upper matrix storage. Exit.\n");
+        exit(1);
 
     }else {
             /* Reduce the lower triangle of A */
@@ -632,7 +631,7 @@ magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
         magma_free( dworktest[dev]);
         magma_free( dworktestbis[dev]);
         for( magma_int_t e = 0; e < nbevents; ++e ) {
-             cudaEventDestroy(redevents[dev][e]);
+            cudaEventDestroy(redevents[dev][e]);
         }
     }
     magma_setdevice( cdev );

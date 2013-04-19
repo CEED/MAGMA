@@ -93,7 +93,6 @@ extern "C" void  magma_zstedx_withZ(magma_int_t N, magma_int_t NE, double *D, do
 #define ENABLE_TIMER 
 #ifdef ENABLE_TIMER 
     magma_timestr_t start, end;
-    
     start = get_current_time();
 #endif
 
@@ -113,7 +112,6 @@ extern "C" void  magma_zstedx_withZ(magma_int_t N, magma_int_t NE, double *D, do
 
 #ifdef ENABLE_TIMER    
     end = get_current_time();
-    
     printf("time zstevx = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
