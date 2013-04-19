@@ -181,7 +181,7 @@ magma_dgeev(
     if (n == 0) {
         return *info;
     }
-   
+    
     #if defined(VERSION3)
     double *dT;
     if (MAGMA_SUCCESS != magma_dmalloc( &dT, nb*n )) {

@@ -352,7 +352,6 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
     magma_timestr_t start, st1, st2, end;
-
     start = get_current_time();
 #endif
 
@@ -453,7 +452,6 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-
     printf("  time dsytrd_sy2st = %6.2f\n" , GetTimerValue(st2,end)/1000.);
     printf("time dsytrd = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
@@ -478,9 +476,7 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time dstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
-
         start = get_current_time();
 #endif
 
@@ -501,7 +497,6 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("  time dormqr + copy = %6.2f\n", GetTimerValue(st1,end)/1000.);
 
         printf("time eigenvectors backtransf. = %6.2f\n" , GetTimerValue(start,end)/1000.);

@@ -182,7 +182,6 @@ magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
 
     Further Details
     ===============
-
     Based on contributions by
        Mark Fahey, Department of Mathematics, Univ. of Kentucky, USA
 
@@ -266,7 +265,6 @@ magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
 //#define ENABLE_TIMER
 #ifdef ENABLE_TIMER
         magma_timestr_t start, end;
-
         start = get_current_time();
 #endif
 
@@ -278,9 +276,7 @@ magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time dpotrf = %6.2f\n", GetTimerValue(start,end)/1000.);
-
         start = get_current_time();
 #endif
 
@@ -289,9 +285,7 @@ magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time dsygst = %6.2f\n", GetTimerValue(start,end)/1000.);
-
         start = get_current_time();
 #endif
 
@@ -299,7 +293,6 @@ magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time dsyevd = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
@@ -311,10 +304,9 @@ magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
 #endif
 
         /* Backtransform eigenvectors to the original problem. */
-        if (itype == 1 || itype == 2)
-        {
+        if (itype == 1 || itype == 2) {
             /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;
-             backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
+               backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
             if (lower) {
                 *(unsigned char *)trans = MagmaTrans;
             } else {
@@ -323,12 +315,10 @@ magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
 
             magma_dtrsm_m(nrgpu, MagmaLeft, uplo, *trans, MagmaNonUnit,
                           n, n, d_one, b, ldb, a, lda);
-
         }
-        else if (itype == 3)
-        {
-            /*  For B*A*x=(lambda)*x;
-             backtransform eigenvectors: x = L*y or U'*y */
+        else if (itype == 3) {
+            /* For B*A*x=(lambda)*x;
+               backtransform eigenvectors: x = L*y or U'*y */
             if (lower) {
                 *(unsigned char *)trans = MagmaNoTrans;
             } else {
@@ -341,7 +331,6 @@ magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time setmatrices trsm/mm + getmatrices = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
     }

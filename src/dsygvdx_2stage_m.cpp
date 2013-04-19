@@ -191,7 +191,6 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
 
     Further Details
     ===============
-
     Based on contributions by
        Mark Fahey, Department of Mathematics, Univ. of Kentucky, USA
 
@@ -239,17 +238,17 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
     } else if (ldb < max(1,n)) {
         *info = -9;
     } else {
-      if (valeig) {
-        if (n > 0 && vu <= vl) {
-          *info = -11;
+        if (valeig) {
+            if (n > 0 && vu <= vl) {
+                *info = -11;
+            }
+        } else if (indeig) {
+            if (il < 1 || il > max(1,n)) {
+                *info = -12;
+            } else if (iu < min(n,il) || iu > n) {
+                *info = -13;
+            }
         }
-      } else if (indeig) {
-        if (il < 1 || il > max(1,n)) {
-          *info = -12;
-        } else if (iu < min(n,il) || iu > n) {
-          *info = -13;
-        }
-      }
     }
 
     magma_int_t nb = magma_bulge_get_nb(n);
@@ -289,7 +288,6 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
 #define ENABLE_TIMER
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
-
     start = get_current_time();
 #endif
 
@@ -301,7 +299,6 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-
     printf("time dpotrf_m = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
@@ -314,9 +311,7 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-
     printf("time dsygst_m = %6.2f\n", GetTimerValue(start,end)/1000.);
-
     start = get_current_time();
 #endif
 
@@ -324,7 +319,6 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-
     printf("time dsyevdx_2stage_m = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
@@ -365,7 +359,6 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time dtrsm/mm + getmatrix = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
     }

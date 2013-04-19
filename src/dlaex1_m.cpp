@@ -1,12 +1,13 @@
-/*  -- MAGMA (version 1.1) --
-    Univ. of Tennessee, Knoxville
-    Univ. of California, Berkeley
-    Univ. of Colorado, Denver
-    November 2011
-
-    @author Raffaele Solca
-
-    @precisions normal d -> s
+/*
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+       
+       @author Raffaele Solca
+       
+       @precisions normal d -> s
 */
 #include "common_magma.h"
 
@@ -43,12 +44,11 @@ magma_dlaex1_m(magma_int_t nrgpu, magma_int_t n, double* d, double* q, magma_int
                char range, double vl, double vu,
                magma_int_t il, magma_int_t iu, magma_int_t* info)
 {
-/*
-    -- MAGMA (version 1.1) --
-    Univ. of Tennessee, Knoxville
-    Univ. of California, Berkeley
-    Univ. of Colorado, Denver
-    November 2011
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
 
        .. Scalar Arguments ..
       CHARACTER          RANGE
@@ -62,71 +62,69 @@ magma_dlaex1_m(magma_int_t nrgpu, magma_int_t n, double* d, double* q, magma_int
 
     Purpose
     =======
-
     DLAEX1 computes the updated eigensystem of a diagonal
     matrix after modification by a rank-one symmetric matrix.
 
-      T = Q(in) ( D(in) + RHO * Z*Z' ) Q'(in) = Q(out) * D(out) * Q'(out)
+        T = Q(in) ( D(in) + RHO * Z*Z' ) Q'(in) = Q(out) * D(out) * Q'(out)
 
-       where Z = Q'u, u is a vector of length N with ones in the
-       CUTPNT and CUTPNT + 1 th elements and zeros elsewhere.
+    where Z = Q'u, u is a vector of length N with ones in the
+    CUTPNT and CUTPNT + 1 th elements and zeros elsewhere.
 
-       The eigenvectors of the original matrix are stored in Q, and the
-       eigenvalues are in D.  The algorithm consists of three stages:
+    The eigenvectors of the original matrix are stored in Q, and the
+    eigenvalues are in D.  The algorithm consists of three stages:
 
-          The first stage consists of deflating the size of the problem
-          when there are multiple eigenvalues or if there is a zero in
-          the Z vector.  For each such occurence the dimension of the
-          secular equation problem is reduced by one.  This stage is
-          performed by the routine DLAED2.
-
-          The second stage consists of calculating the updated
-          eigenvalues. This is done by finding the roots of the secular
-          equation via the routine DLAED4 (as called by DLAED3).
-          This routine also calculates the eigenvectors of the current
-          problem.
-
-          The final stage consists of computing the updated eigenvectors
-          directly using the updated eigenvalues.  The eigenvectors for
-          the current problem are multiplied with the eigenvectors from
-          the overall problem.
+    The first stage consists of deflating the size of the problem
+    when there are multiple eigenvalues or if there is a zero in
+    the Z vector.  For each such occurence the dimension of the
+    secular equation problem is reduced by one.  This stage is
+    performed by the routine DLAED2.
+    
+    The second stage consists of calculating the updated
+    eigenvalues. This is done by finding the roots of the secular
+    equation via the routine DLAED4 (as called by DLAED3).
+    This routine also calculates the eigenvectors of the current
+    problem.
+    
+    The final stage consists of computing the updated eigenvectors
+    directly using the updated eigenvalues.  The eigenvectors for
+    the current problem are multiplied with the eigenvectors from
+    the overall problem.
 
     Arguments
     =========
-
-    N      (input) INTEGER
-           The dimension of the symmetric tridiagonal matrix.  N >= 0.
-
-    D      (input/output) DOUBLE PRECISION array, dimension (N)
-           On entry, the eigenvalues of the rank-1-perturbed matrix.
-           On exit, the eigenvalues of the repaired matrix.
-
-    Q      (input/output) DOUBLE PRECISION array, dimension (LDQ,N)
-           On entry, the eigenvectors of the rank-1-perturbed matrix.
-           On exit, the eigenvectors of the repaired tridiagonal matrix.
-
-    LDQ    (input) INTEGER
-           The leading dimension of the array Q.  LDQ >= max(1,N).
-
-    INDXQ  (input/output) INTEGER array, dimension (N)
-           On entry, the permutation which separately sorts the two
-           subproblems in D into ascending order.
-           On exit, the permutation which will reintegrate the
-           subproblems back into sorted order,
-           i.e. D( INDXQ( I = 1, N ) ) will be in ascending order.
-
-    RHO    (input) DOUBLE PRECISION
-           The subdiagonal entry used to create the rank-1 modification.
-
-    CUTPNT (input) INTEGER
-           The location of the last eigenvalue in the leading sub-matrix.
-           min(1,N) <= CUTPNT <= N/2.
-
-    WORK   (workspace) DOUBLE PRECISION array, dimension (4*N + N**2)
-
-    IWORK  (workspace) INTEGER array, dimension (4*N)
-
-    DWORK  (devices workspaces) DOUBLE PRECISION array of arrays,
+    N       (input) INTEGER
+            The dimension of the symmetric tridiagonal matrix.  N >= 0.
+            
+    D       (input/output) DOUBLE PRECISION array, dimension (N)
+            On entry, the eigenvalues of the rank-1-perturbed matrix.
+            On exit, the eigenvalues of the repaired matrix.
+            
+    Q       (input/output) DOUBLE PRECISION array, dimension (LDQ,N)
+            On entry, the eigenvectors of the rank-1-perturbed matrix.
+            On exit, the eigenvectors of the repaired tridiagonal matrix.
+            
+    LDQ     (input) INTEGER
+            The leading dimension of the array Q.  LDQ >= max(1,N).
+            
+    INDXQ   (input/output) INTEGER array, dimension (N)
+            On entry, the permutation which separately sorts the two
+            subproblems in D into ascending order.
+            On exit, the permutation which will reintegrate the
+            subproblems back into sorted order,
+            i.e. D( INDXQ( I = 1, N ) ) will be in ascending order.
+            
+    RHO     (input) DOUBLE PRECISION
+            The subdiagonal entry used to create the rank-1 modification.
+            
+    CUTPNT  (input) INTEGER
+            The location of the last eigenvalue in the leading sub-matrix.
+            min(1,N) <= CUTPNT <= N/2.
+            
+    WORK    (workspace) DOUBLE PRECISION array, dimension (4*N + N**2)
+            
+    IWORK   (workspace) INTEGER array, dimension (4*N)
+            
+    DWORK   (devices workspaces) DOUBLE PRECISION array of arrays,
             dimension NRGPU.
             if NRGPU = 1 the dimension of the first workspace
             should be (3*N*N/2+3*N)
@@ -156,14 +154,13 @@ magma_dlaex1_m(magma_int_t nrgpu, magma_int_t n, double* d, double* q, magma_int
             1 <= IL <= IU <= N, if N > 0; IL = 1 and IU = 0 if N = 0.
             Not referenced if RANGE = 'A' or 'V'.
 
-    INFO   (output) INTEGER
+    INFO    (output) INTEGER
             = 0:  successful exit.
             < 0:  if INFO = -i, the i-th argument had an illegal value.
             > 0:  if INFO = 1, an eigenvalue did not converge
 
     Further Details
     ===============
-
     Based on contributions by
        Jeff Rutter, Computer Science Division, University of California
        at Berkeley, USA

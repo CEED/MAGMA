@@ -148,7 +148,6 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
 
     Further Details
     ===============
-
     Based on contributions by
        Mark Fahey, Department of Mathematics, Univ. of Kentucky, USA
 
@@ -217,7 +216,7 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     if (lwork < lwmin && ! lquery) {
         *info = -11;
     } else if (liwork < liwmin && ! lquery) {
-         *info = -13;
+        *info = -13;
     }
 
     if (*info != 0) {
@@ -235,8 +234,8 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
 
     if (MAGMA_SUCCESS != magma_dmalloc( &da, n*ldda ) ||
         MAGMA_SUCCESS != magma_dmalloc( &db, n*lddb )) {
-      *info = -17;
-      return MAGMA_ERR_DEVICE_ALLOC;
+        *info = MAGMA_ERR_DEVICE_ALLOC;
+        return *info;
     }
 
     /* Form a Cholesky factorization of B. */
@@ -279,7 +278,6 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
 #ifdef ENABLE_TIMER
     end = get_current_time();
     printf("time dsygst_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
-
     start = get_current_time();
 #endif
 
@@ -291,16 +289,14 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     printf("time dsyevd_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
-    if (wantz && *info == 0)
-      {
+    if (wantz && *info == 0) {
 
 #ifdef ENABLE_TIMER
-          start = get_current_time();
+        start = get_current_time();
 #endif
 
         /* Backtransform eigenvectors to the original problem. */
-        if (itype == 1 || itype == 2)
-          {
+        if (itype == 1 || itype == 2) {
             /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;
                backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
             if (lower) {
@@ -311,10 +307,8 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
 
             magma_dtrsm(MagmaLeft, uplo, *trans, MagmaNonUnit,
                         n, n, d_one, db, lddb, da, ldda);
-
         }
-        else if (itype == 3)
-        {
+        else if (itype == 3) {
             /*  For B*A*x=(lambda)*x;
                 backtransform eigenvectors: x = L*y or U'*y */
             if (lower) {
@@ -330,10 +324,9 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
         magma_dgetmatrix( n, n, da, ldda, a, lda );
 
 #ifdef ENABLE_TIMER
-          end = get_current_time();
-          printf("time dtrsm/mm + getmatrix = %6.2f\n", GetTimerValue(start,end)/1000.);
+        end = get_current_time();
+        printf("time dtrsm/mm + getmatrix = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
-
     }
 
     magma_queue_sync( stream );

@@ -332,7 +332,6 @@ magma_dsyevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 //#define ENABLE_TIMER
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
-
     start = get_current_time();
 #endif
 
@@ -341,7 +340,6 @@ magma_dsyevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-
     printf("time dsytrd = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
@@ -357,15 +355,13 @@ magma_dsyevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
         start = get_current_time();
 #endif
 
-       magma_dstedx_m(nrgpu, range, n, vl, vu, il, iu, w, &work[inde],
-                      &work[indwrk], n, &work[indwk2],
-                      llwrk2, iwork, liwork, info);
+        magma_dstedx_m(nrgpu, range, n, vl, vu, il, iu, w, &work[inde],
+                       &work[indwrk], n, &work[indwk2],
+                       llwrk2, iwork, liwork, info);
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time dstedc = %6.2f\n", GetTimerValue(start,end)/1000.);
-
         start = get_current_time();
 #endif
 
@@ -378,7 +374,6 @@ magma_dsyevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time dormtr + copy = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 

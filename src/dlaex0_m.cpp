@@ -1,12 +1,13 @@
-/*  -- MAGMA (version 1.1) --
-    Univ. of Tennessee, Knoxville
-    Univ. of California, Berkeley
-    Univ. of Colorado, Denver
-    November 2011
-
-    @author Raffaele Solca
-
-    @precisions normal d -> s
+/*
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+       
+       @author Raffaele Solca
+       
+       @precisions normal d -> s
 */
 #include "common_magma.h"
 
@@ -31,12 +32,11 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
                char range, double vl, double vu,
                magma_int_t il, magma_int_t iu, magma_int_t* info)
 {
-/*
-    -- MAGMA (version 1.1) --
-    Univ. of Tennessee, Knoxville
-    Univ. of California, Berkeley
-    Univ. of Colorado, Denver
-    November 2011
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
 
        .. Scalar Arguments ..
       CHARACTER          RANGE
@@ -51,59 +51,57 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
 
     Purpose
     =======
-
     DLAEX0 computes all eigenvalues and the choosen eigenvectors of a
     symmetric tridiagonal matrix using the divide and conquer method.
 
     Arguments
     =========
-
-    N      (input) INTEGER
-           The dimension of the symmetric tridiagonal matrix.  N >= 0.
-
-    D      (input/output) DOUBLE PRECISION array, dimension (N)
-           On entry, the main diagonal of the tridiagonal matrix.
-           On exit, its eigenvalues.
-
-    E      (input) DOUBLE PRECISION array, dimension (N-1)
-           The off-diagonal elements of the tridiagonal matrix.
-           On exit, E has been destroyed.
-
-    Q      (input/output) DOUBLE PRECISION array, dimension (LDQ, N)
-           On entry, Q will be the identity matrix.
-           On exit, Q contains the eigenvectors of the
-           tridiagonal matrix.
-
-    LDQ    (input) INTEGER
-           The leading dimension of the array Q.  If eigenvectors are
-           desired, then  LDQ >= max(1,N).  In any case,  LDQ >= 1.
-
-    WORK   (workspace) DOUBLE PRECISION array,
-           the dimension of WORK must be at least 4*N + N**2.
-
-    IWORK  (workspace) INTEGER array,
-           the dimension of IWORK must be at least 3 + 5*N.
-
+    N       (input) INTEGER
+            The dimension of the symmetric tridiagonal matrix.  N >= 0.
+            
+    D       (input/output) DOUBLE PRECISION array, dimension (N)
+            On entry, the main diagonal of the tridiagonal matrix.
+            On exit, its eigenvalues.
+            
+    E       (input) DOUBLE PRECISION array, dimension (N-1)
+            The off-diagonal elements of the tridiagonal matrix.
+            On exit, E has been destroyed.
+            
+    Q       (input/output) DOUBLE PRECISION array, dimension (LDQ, N)
+            On entry, Q will be the identity matrix.
+            On exit, Q contains the eigenvectors of the
+            tridiagonal matrix.
+            
+    LDQ     (input) INTEGER
+            The leading dimension of the array Q.  If eigenvectors are
+            desired, then  LDQ >= max(1,N).  In any case,  LDQ >= 1.
+            
+    WORK    (workspace) DOUBLE PRECISION array,
+            the dimension of WORK must be at least 4*N + N**2.
+            
+    IWORK   (workspace) INTEGER array,
+            the dimension of IWORK must be at least 3 + 5*N.
+            
     RANGE   (input) CHARACTER*1
             = 'A': all eigenvalues will be found.
             = 'V': all eigenvalues in the half-open interval (VL,VU]
                    will be found.
             = 'I': the IL-th through IU-th eigenvalues will be found.
-
+            
     VL      (input) DOUBLE PRECISION
     VU      (input) DOUBLE PRECISION
             If RANGE='V', the lower and upper bounds of the interval to
             be searched for eigenvalues. VL < VU.
             Not referenced if RANGE = 'A' or 'I'.
-
+            
     IL      (input) INTEGER
     IU      (input) INTEGER
             If RANGE='I', the indices (in ascending order) of the
             smallest and largest eigenvalues to be returned.
             1 <= IL <= IU <= N, if N > 0; IL = 1 and IU = 0 if N = 0.
             Not referenced if RANGE = 'A' or 'V'.
-
-    INFO   (output) INTEGER
+            
+    INFO    (output) INTEGER
             = 0:  successful exit.
             < 0:  if INFO = -i, the i-th argument had an illegal value.
             > 0:  The algorithm failed to compute an eigenvalue while
@@ -112,7 +110,6 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
 
     Further Details
     ===============
-
     Based on contributions by
        Jeff Rutter, Computer Science Division, University of California
        at Berkeley, USA
@@ -209,7 +206,6 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
 //#define ENABLE_TIMER
 #ifdef ENABLE_TIMER
         magma_timestr_t start, end;
-
         start = get_current_time();
 #endif
 
@@ -238,7 +234,6 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-
     printf("for: dsteqr = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
     // Successively merge eigensystems of adjacent submatrices
@@ -248,7 +243,6 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
     while (subpbs > 1){
 #ifdef ENABLE_TIMER
         magma_timestr_t start, end;
-
         start = get_current_time();
 #endif
         for (i=0; i<subpbs-1; i+=2){
@@ -288,7 +282,6 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
         ++curlvl;
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("%d: time: %6.2f\n", curlvl, GetTimerValue(start,end)/1000.);
 #endif
 

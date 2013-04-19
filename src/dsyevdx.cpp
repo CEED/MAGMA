@@ -338,7 +338,6 @@ magma_dsyevdx(char jobz, char range, char uplo,
 #ifdef ENABLE_TIMER
         end = get_current_time();
         printf("time dstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
-
         start = get_current_time();
 #endif
 

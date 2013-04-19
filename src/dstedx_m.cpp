@@ -1,12 +1,13 @@
-/*  -- MAGMA (version 1.1) --
-    Univ. of Tennessee, Knoxville
-    Univ. of California, Berkeley
-    Univ. of Colorado, Denver
-    November 2011
-
-    @author Raffaele Solca
-
-    @precisions normal d -> s
+/*
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+       
+       @author Raffaele Solca
+       
+       @precisions normal d -> s
 */
 #include "common_magma.h"
 
@@ -30,12 +31,11 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
                double* work, magma_int_t lwork, magma_int_t* iwork, magma_int_t liwork,
                magma_int_t* info)
 {
-/*
-    -- MAGMA (version 1.1) --
-    Univ. of Tennessee, Knoxville
-    Univ. of California, Berkeley
-    Univ. of Colorado, Denver
-    November 2011
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
 
        .. Scalar Arguments ..
       CHARACTER          RANGE
@@ -50,7 +50,6 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
 
     Purpose
     =======
-
     DSTEDX computes some eigenvalues and, optionally, eigenvectors of a
     symmetric tridiagonal matrix using the divide and conquer method.
 
@@ -63,7 +62,6 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
 
     Arguments
     =========
-
     RANGE   (input) CHARACTER*1
             = 'A': all eigenvalues will be found.
             = 'V': all eigenvalues in the half-open interval (VL,VU]
@@ -141,7 +139,6 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
 
     Further Details
     ===============
-
     Based on contributions by
        Jeff Rutter, Computer Science Division, University of California
        at Berkeley, USA

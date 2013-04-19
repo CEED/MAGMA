@@ -180,7 +180,6 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
 
     Further Details
     ===============
-
     Based on contributions by
        Mark Fahey, Department of Mathematics, Univ. of Kentucky, USA
 
@@ -236,17 +235,17 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
     } else if (ldb < max(1,n)) {
         *info = -9;
     } else {
-      if (valeig) {
-        if (n > 0 && vu <= vl) {
-          *info = -11;
+        if (valeig) {
+            if (n > 0 && vu <= vl) {
+                *info = -11;
+            }
+        } else if (indeig) {
+            if (il < 1 || il > max(1,n)) {
+                *info = -12;
+            } else if (iu < min(n,il) || iu > n) {
+                *info = -13;
+            }
         }
-      } else if (indeig) {
-        if (il < 1 || il > max(1,n)) {
-          *info = -12;
-        } else if (iu < min(n,il) || iu > n) {
-          *info = -13;
-        }
-      }
     }
 
     magma_int_t nb = magma_bulge_get_nb(n);
@@ -294,7 +293,6 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
 //#define ENABLE_TIMER
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
-
     start = get_current_time();
 #endif
 
@@ -306,7 +304,6 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-
     printf("time dpotrf_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
     magma_dgetmatrix_async( n, n,
@@ -331,9 +328,7 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-
     printf("time dsygst_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
-
     start = get_current_time();
 #endif
 
@@ -341,7 +336,6 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-
     printf("time dsyevdx_2stage = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
@@ -360,13 +354,10 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
         magma_dsetmatrix( n, *m, a, lda, da, ldda );
         magma_dsetmatrix( n,  n, b, ldb, db, lddb );
 
-        /*        Backtransform eigenvectors to the original problem. */
-
+        /* Backtransform eigenvectors to the original problem. */
         if (itype == 1 || itype == 2) {
-
-            /*           For A*x=(lambda)*B*x and A*B*x=(lambda)*x;
-             backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
-
+            /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;
+               backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
             if (lower) {
                 *(unsigned char *)trans = MagmaConjTrans;
             } else {
@@ -374,11 +365,10 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
             }
 
             magma_dtrsm(MagmaLeft, uplo, *trans, MagmaNonUnit, n, *m, d_one, db, lddb, da, ldda);
-
-        } else if (itype == 3) {
-
-            /*           For B*A*x=(lambda)*x;
-                         backtransform eigenvectors: x = L*y or U'*y */
+        }
+        else if (itype == 3) {
+            /* For B*A*x=(lambda)*x;
+               backtransform eigenvectors: x = L*y or U'*y */
             if (lower) {
                 *(unsigned char *)trans = MagmaNoTrans;
             } else {
@@ -386,20 +376,17 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
             }
 
             magma_dtrmm(MagmaLeft, uplo, *trans, MagmaNonUnit, n, *m, d_one, db, lddb, da, ldda);
-
         }
 
         magma_dgetmatrix( n, *m, da, ldda, a, lda );
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time dtrsm/mm + getmatrix = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
         magma_free( da );
         magma_free( db );
-
     }
 
     magma_queue_destroy( stream );
