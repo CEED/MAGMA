@@ -14,11 +14,11 @@
 #define ITERMAX 30
 
 extern "C" magma_int_t
-magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS, 
-                 magmaDoubleComplex *dA, magma_int_t ldda, 
+magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
+                 magmaDoubleComplex *dA, magma_int_t ldda,
                  magma_int_t *IPIV,  magma_int_t *dIPIV,
-                 magmaDoubleComplex *dB, magma_int_t lddb, 
-                 magmaDoubleComplex *dX, magma_int_t lddx, 
+                 magmaDoubleComplex *dB, magma_int_t lddb,
+                 magmaDoubleComplex *dX, magma_int_t lddx,
                  magmaDoubleComplex *dworkd, magmaFloatComplex *dworks,
                  magma_int_t *iter, magma_int_t *info)
 {
@@ -147,20 +147,18 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
     double          Anrm, Xnrm, Rnrm;
     magma_int_t     i, j, iiter;
     
-    /*
-      Check The Parameters. 
-    */
+    /* Check arguments */
     *info = *iter = 0 ;
     if ( N <0)
         *info = -1;
     else if(NRHS<0)
-        *info =-2;
+        *info = -2;
     else if(ldda < max(1,N))
-        *info =-4;
+        *info = -4;
     else if( lddb < max(1,N))
-        *info =-8;
+        *info = -8;
     else if( lddx < max(1,N))
-        *info =-10;
+        *info = -10;
     
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
@@ -210,8 +208,8 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
     magma_zcgetrs_gpu(trans, N, NRHS, dSA, N, dIPIV, dB, lddb, dX, lddx, dSX, info);
     
     magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dworkd, N);
-     /* TODO: update optimisation from gemv_MLU into classic gemv */
-    if ( NRHS == 1 ) 
+    /* TODO: update optimisation from gemv_MLU into classic gemv */
+    if ( NRHS == 1 )
         magma_zgemv( trans, N, N, c_neg_one, dA, ldda, dX, 1, c_one, dworkd, 1);
     else
         magma_zgemm( trans, MagmaNoTrans, N, NRHS, N, c_neg_one, dA, ldda, dX, lddx, c_one, dworkd, N);
@@ -233,9 +231,8 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
     
     *iter = 0;
     return *info;
+
   L10:
-    ;
-    
     for(iiter=1;iiter<ITERMAX;)
     {
         *info = 0 ;
@@ -243,7 +240,7 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
           Convert R (in dworkd) from magmaDoubleComplex precision to single precision
           and store the result in SX.
           Solve the system SA * X = dworkd and store the result in dworkd.
-          -- These two Tasks are merged here. 
+          -- These two Tasks are merged here.
         */
         magma_zcgetrs_gpu(trans, N, NRHS, dSA, N, dIPIV, dworkd, lddb, dworkd, N, dSX, info);
         if(info[0] != 0){
@@ -302,7 +299,7 @@ magma_zcgesv_gpu(char trans, magma_int_t N, magma_int_t NRHS,
   L40:
     /*
       Single-precision iterative refinement failed to converge to a
-      satisfactory solution, so we resort to magmaDoubleComplex precision.  
+      satisfactory solution, so we resort to magmaDoubleComplex precision.
     */
     if( *info != 0 ){
         return *info;

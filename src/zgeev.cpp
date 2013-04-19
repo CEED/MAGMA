@@ -180,7 +180,7 @@ magma_zgeev(
     if (n == 0) {
         return *info;
     }
-   
+    
     #if defined(VERSION3)
     magmaDoubleComplex *dT;
     if (MAGMA_SUCCESS != magma_zmalloc( &dT, nb*n )) {

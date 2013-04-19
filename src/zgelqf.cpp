@@ -11,8 +11,8 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zgelqf( magma_int_t m, magma_int_t n, 
-              magmaDoubleComplex *a,    magma_int_t lda,   magmaDoubleComplex *tau, 
+magma_zgelqf( magma_int_t m, magma_int_t n,
+              magmaDoubleComplex *a,    magma_int_t lda,   magmaDoubleComplex *tau,
               magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -23,13 +23,11 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
 
     Purpose
     =======
-
     ZGELQF computes an LQ factorization of a COMPLEX_16 M-by-N matrix A:
     A = L * Q.
 
     Arguments
     =========
-
     M       (input) INTEGER
             The number of rows of the matrix A.  M >= 0.
 
@@ -77,7 +75,6 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
 
     Further Details
     ===============
-
     The matrix Q is represented as a product of elementary reflectors
 
        Q = H(k) . . . H(2) H(1), where k = min(m,n).

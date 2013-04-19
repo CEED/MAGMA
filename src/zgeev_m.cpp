@@ -182,7 +182,7 @@ magma_zgeev_m(
     if (n == 0) {
         return *info;
     }
-   
+    
     #if defined(Version3) || defined(Version4) || defined(Version5)
     magmaDoubleComplex *dT;
     if (MAGMA_SUCCESS != magma_zmalloc( &dT, nb*n )) {

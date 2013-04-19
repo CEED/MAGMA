@@ -12,9 +12,9 @@
 
 extern "C" magma_int_t
 magma_zgels3_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
-                  magmaDoubleComplex *dA,    magma_int_t ldda, 
-                  magmaDoubleComplex *dB,    magma_int_t lddb, 
-                  magmaDoubleComplex *hwork, magma_int_t lwork, 
+                  magmaDoubleComplex *dA,    magma_int_t ldda,
+                  magmaDoubleComplex *dB,    magma_int_t lddb,
+                  magmaDoubleComplex *hwork, magma_int_t lwork,
                   magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -140,7 +140,7 @@ magma_zgels3_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
     magma_zgeqrf3_gpu( m, n, dA, ldda, tau, dT, info );
     if ( *info == 0 ) {
         magma_zgeqrs3_gpu( m, n, nrhs,
-                           dA, ldda, tau, dT, 
+                           dA, ldda, tau, dT,
                            dB, lddb, hwork, lwork, info );
     }
 

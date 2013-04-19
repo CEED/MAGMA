@@ -11,8 +11,8 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zgelqf_gpu( magma_int_t m, magma_int_t n, 
-                  magmaDoubleComplex *dA,    magma_int_t lda,   magmaDoubleComplex *tau, 
+magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
+                  magmaDoubleComplex *dA,    magma_int_t lda,   magmaDoubleComplex *tau,
                   magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -23,7 +23,6 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
 
     Purpose
     =======
-
     ZGELQF computes an LQ factorization of a COMPLEX_16 M-by-N matrix dA:
     dA = L * Q.
 
@@ -73,7 +72,6 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
 
     Further Details
     ===============
-
     The matrix Q is represented as a product of elementary reflectors
 
        Q = H(k) . . . H(2) H(1), where k = min(m,n).
@@ -136,22 +134,22 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
         magmablas_ztranspose_inplace( m, dAT, lda );
     }
     else {
-      if (MAGMA_SUCCESS != magma_zmalloc( &dAT, maxm*maxn ) ){
-        *info = MAGMA_ERR_DEVICE_ALLOC;
-        return *info;
-      }
-      
-      magmablas_ztranspose2( dAT, ldat, dA, lda, m, n );
+        if (MAGMA_SUCCESS != magma_zmalloc( &dAT, maxm*maxn ) ){
+            *info = MAGMA_ERR_DEVICE_ALLOC;
+            return *info;
+        }
+        
+        magmablas_ztranspose2( dAT, ldat, dA, lda, m, n );
     }
     
     magma_zgeqrf2_gpu(n, m, dAT, ldat, tau, &iinfo);
 
     if ( m == n ) {
-      magmablas_ztranspose_inplace( m, dAT, ldat );
+        magmablas_ztranspose_inplace( m, dAT, ldat );
     }
     else {
-      magmablas_ztranspose2( dA, lda, dAT, ldat, n, m );
-      magma_free( dAT );
+        magmablas_ztranspose2( dA, lda, dAT, ldat, n, m );
+        magma_free( dAT );
     }
 
     return *info;

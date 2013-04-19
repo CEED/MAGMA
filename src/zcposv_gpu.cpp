@@ -18,10 +18,10 @@
 // === End defining what BLAS to use ======================================
 
 extern "C" magma_int_t
-magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs, 
-                 magmaDoubleComplex *dA, magma_int_t ldda, 
-                 magmaDoubleComplex *dB, magma_int_t lddb, 
-                 magmaDoubleComplex *dX, magma_int_t lddx, 
+magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
+                 magmaDoubleComplex *dA, magma_int_t ldda,
+                 magmaDoubleComplex *dB, magma_int_t lddb,
+                 magmaDoubleComplex *dX, magma_int_t lddx,
                  magmaDoubleComplex *dworkd, magmaFloatComplex *dworks,
                  magma_int_t *iter, magma_int_t *info)
 {
@@ -33,7 +33,6 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
 
     Purpose
     =======
-
     ZCPOSV computes the solution to a complex system of linear equations
        A * X = B,
     where A is an N-by-N symmetric positive definite matrix and X and B
@@ -67,7 +66,6 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
 
     Arguments
     =========
-
     UPLO    (input) CHARACTER
             = 'U':  Upper triangle of A is stored;
             = 'L':  Lower triangle of A is stored.
@@ -114,7 +112,7 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
             This array is used to hold the residual vectors.
 
     dworks  (workspace) COMPLEX array on the GPU, dimension (N*(N+NRHS))
-            This array is used to use the complex single precision matrix 
+            This array is used to use the complex single precision matrix
             and the right-hand sides or solutions in single precision.
 
     ITER    (output) INTEGER
@@ -144,52 +142,52 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magma_int_t     ione  = 1;
     magmaFloatComplex *dSA, *dSX;
-    magmaDoubleComplex Xnrmv, Rnrmv; 
+    magmaDoubleComplex Xnrmv, Rnrmv;
     double          Xnrm, Rnrm, Anrm, cte, eps;
     magma_int_t     i, j, iiter;
 
     *iter = 0 ;
-    *info = 0 ; 
+    *info = 0 ;
 
     if ( n <0)
         *info = -1;
     else if( nrhs<0 )
-        *info =-2;
+        *info = -2;
     else if( ldda < max(1,n) )
-        *info =-4;
+        *info = -4;
     else if( lddb < max(1,n) )
-        *info =-7;
+        *info = -7;
     else if( lddx < max(1,n) )
-        *info =-9;
-   
+        *info = -9;
+
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
         return *info;
     }
 
-    if( n == 0 || nrhs == 0 ) 
+    if( n == 0 || nrhs == 0 )
         return *info;
 
     eps = lapackf77_dlamch("Epsilon");
 
     //ANRM = magmablas_zlanhe(  'I',  uplo , N ,A, LDA, (double*)dworkd);
-    //cte  = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;  
+    //cte  = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;
 
     dSX = dworks;
     dSA = dworks + n*nrhs;
- 
+
     magmablas_zlag2c(n, nrhs, dB, lddb, dSX, n, info );
     if( *info !=0 ){
         *iter = -2;
         goto L40;
-    } 
-  
-    magmablas_zlat2c(uplo, n, dA, ldda, dSA, n, info ); 
+    }
+
+    magmablas_zlat2c(uplo, n, dA, ldda, dSA, n, info );
     if( *info !=0 ){
         *iter = -2 ;
         goto L40;
     }
- 
+
     Anrm = magmablas_clanhe( 'I', uplo, n, dSA, n, (float *)dworkd);
     cte  = Anrm * eps * pow((double)n,0.5) * BWDMAX ;
 
@@ -200,72 +198,70 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
     }
     magma_cpotrs_gpu(uplo, n, nrhs, dSA, ldda, dSX, lddb, info);
     magmablas_clag2z(n, nrhs, dSX, n, dX, lddx, info);
-  
+
     magmablas_zlacpy( MagmaUpperLower, n, nrhs, dB, lddb, dworkd, n);
-    
+
     if( nrhs == 1 )
         magma_zhemv(uplo, n, c_neg_one, dA, ldda, dX, 1, c_one, dworkd, 1);
     else
         magma_zhemm(MagmaLeft, uplo, n, nrhs, c_neg_one, dA, ldda, dX, lddx, c_one, dworkd, n);
-  
+
     for(i=0; i<nrhs; i++){
         j = magma_izamax( n, dX+i*n, 1) ;
         magma_zgetmatrix( 1, 1, dX+i*n+j-1, 1, &Xnrmv, 1 );
         Xnrm = lapackf77_zlange( "F", &ione, &ione, &Xnrmv, &ione, NULL );
-      
+
         j = magma_izamax ( n, dworkd+i*n, 1 );
         magma_zgetmatrix( 1, 1, dworkd+i*n+j-1, 1, &Rnrmv, 1 );
         Rnrm = lapackf77_zlange( "F", &ione, &ione, &Rnrmv, &ione, NULL );
-      
+
         if( Rnrm >  Xnrm *cte ){
             goto L10;
         }
     }
-    *iter =0; 
+    *iter = 0;
     return *info;
-  
-  L10:
-    ;
 
-    for(iiter=1;iiter<ITERMAX;){
-        *info = 0 ; 
+  L10:
+    for( iiter=1; iiter < ITERMAX; ) {
+        *info = 0 ;
         magmablas_zlag2c(n, nrhs, dworkd, n, dSX, n, info );
         if(*info !=0){
             *iter = -2 ;
             goto L40;
-        } 
+        }
         magma_cpotrs_gpu(uplo, n, nrhs, dSA, ldda, dSX, lddb, info);
-      
-        for(i=0;i<nrhs;i++){
+
+        for(i=0; i<nrhs; i++){
             magmablas_zcaxpycp(dworks+i*n, dX+i*n, n, dB+i*n,dworkd+i*n) ;
         }
-      
+
         if( nrhs == 1 )
             magma_zhemv(uplo, n, c_neg_one, dA, ldda, dX, 1, c_one, dworkd, 1);
-        else 
+        else
             magma_zhemm(MagmaLeft, uplo, n, nrhs, c_neg_one, dA, ldda, dX, lddx, c_one, dworkd, n);
-      
+
         for(i=0; i<nrhs; i++){
             j = magma_izamax( n, dX+i*n, 1) ;
             magma_zgetmatrix( 1, 1, dX+i*n+j-1, 1, &Xnrmv, 1 );
             Xnrm = lapackf77_zlange( "F", &ione, &ione, &Xnrmv, &ione, NULL );
-          
+
             j = magma_izamax ( n, dworkd+i*n, 1 );
             magma_zgetmatrix( 1, 1, dworkd+i*n+j-1, 1, &Rnrmv, 1 );
             Rnrm = lapackf77_zlange( "F", &ione, &ione, &Rnrmv, &ione, NULL );
-          
+
             if( Rnrm >  Xnrm *cte ){
                 goto L20;
             }
-        }  
+        }
 
         *iter = iiter;
         return *info;
       L20:
         iiter++ ;
     }
-    *iter = -ITERMAX - 1; 
-  
+    *iter = -ITERMAX - 1;
+
   L40:
     magma_zpotrf_gpu( uplo, n, dA, ldda, info );
     if( *info == 0 ){

@@ -14,10 +14,10 @@
 #define ITERMAX 30
 
 extern "C" magma_int_t
-magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS, 
-                   magmaDoubleComplex *dA,  magma_int_t ldda, 
-                   magmaDoubleComplex *dB,  magma_int_t lddb, 
-                   magmaDoubleComplex *dX,  magma_int_t lddx, 
+magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
+                   magmaDoubleComplex *dA,  magma_int_t ldda,
+                   magmaDoubleComplex *dB,  magma_int_t lddb,
+                   magmaDoubleComplex *dX,  magma_int_t lddx,
                    magma_int_t *iter, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -28,8 +28,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
 
     Purpose
     =======
-
-    ZCGEQRSV solves the least squares problem 
+    ZCGEQRSV solves the least squares problem
        min || A*X - B ||,
     where A is an M-by-N matrix and X and B are M-by-NRHS matrices.
 
@@ -60,8 +59,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
 
     Arguments
     =========
-
-    M       (input) INTEGER   
+    M       (input) INTEGER
             The number of rows of the matrix A. M >= 0.
 
     N       (input) INTEGER
@@ -113,7 +111,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
                  -31: stop the iterative refinement after the 30th iteration
             > 0: iterative refinement has been successfully used.
                  Returns the number of iterations
- 
+
     INFO    (output) INTEGER
             = 0:  successful exit
             < 0:  if info = -i, the i-th argument had an illegal value
@@ -127,13 +125,11 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     magmaFloatComplex  *dworks, *hworks;
     magmaDoubleComplex *dR, *tau, *dT;
     magmaFloatComplex  *dSA, *dSX, *dST, *stau;
-    magmaDoubleComplex Xnrmv, Rnrmv; 
-    double          Anrm, Xnrm, Rnrm, cte, eps; 
+    magmaDoubleComplex Xnrmv, Rnrmv;
+    double          Anrm, Xnrm, Rnrm, cte, eps;
     magma_int_t     i, j, iiter, nb, lhwork, minmn, size;
-    
-    /*
-      Check The Parameters. 
-    */
+
+    /* Check arguments */
     *iter = 0 ;
     *info = 0 ;
     if ( N < 0 )
@@ -171,7 +167,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     dSA = dworks;
     dSX = dSA + ldda*N;
     dST = dSX + N*NRHS;
-    
+
     /* dworkd(dR) = N*NRHS */
     size = N*NRHS;
     if (MAGMA_SUCCESS != magma_zmalloc( &dworkd, size )) {
@@ -229,25 +225,25 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
 
     // dR = dB - dA * dX
     if( NRHS == 1 )
-        magma_zgemv( MagmaNoTrans, N, N, 
-                     c_neg_one, dA, ldda, 
-                                dX, 1, 
+        magma_zgemv( MagmaNoTrans, N, N,
+                     c_neg_one, dA, ldda,
+                                dX, 1,
                      c_one,     dR, 1);
     else
-        magma_zgemm( MagmaNoTrans, MagmaNoTrans, N, NRHS, N, 
-                     c_neg_one, dA, ldda, 
-                                dX, lddx, 
+        magma_zgemm( MagmaNoTrans, MagmaNoTrans, N, NRHS, N,
+                     c_neg_one, dA, ldda,
+                                dX, lddx,
                      c_one,     dR, N );
 
     for(i=0; i<NRHS; i++){
         j = magma_izamax( N, dX+i*N, 1);
         magma_zgetmatrix( 1, 1, dX+i*N+j-1, 1, &Xnrmv, 1 );
         Xnrm = lapackf77_zlange( "F", &ione, &ione, &Xnrmv, &ione, NULL );
-      
+
         j = magma_izamax ( N, dR+i*N, 1 );
         magma_zgetmatrix( 1, 1, dR+i*N+j-1, 1, &Rnrmv, 1 );
         Rnrm = lapackf77_zlange( "F", &ione, &ione, &Rnrmv, &ione, NULL );
-      
+
         if( Rnrm >  Xnrm *cte ) goto L10;
     }
 
@@ -266,7 +262,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
             and store the result in SX.
             Solve the system SA*SX = SR.
             -- These two Tasks are merged here. */
-        // make SWORK = WORK ... residuals... 
+        // make SWORK = WORK ... residuals...
         magmablas_zlag2c( N, NRHS, dR, N, dSX, N, info );
         magma_cgeqrs_gpu( M, N, NRHS, dSA, ldda, stau, dST, dSX, N, hworks, lhwork, info);
 
@@ -281,12 +277,12 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
         /* unnecessary may be */
         magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dR, N);
         if( NRHS == 1 )
-            magma_zgemv( MagmaNoTrans, N, N, 
+            magma_zgemv( MagmaNoTrans, N, N,
                          c_neg_one, dA, ldda,
                                     dX, 1,
                          c_one,     dR, 1);
         else
-            magma_zgemm( MagmaNoTrans, MagmaNoTrans, N, NRHS, N, 
+            magma_zgemm( MagmaNoTrans, MagmaNoTrans, N, NRHS, N,
                          c_neg_one, dA, ldda,
                                     dX, lddx,
                          c_one,     dR, N);
@@ -298,11 +294,11 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
             j = magma_izamax( N, dX+i*N, 1);
             magma_zgetmatrix( 1, 1, dX+i*N+j-1, 1, &Xnrmv, 1 );
             Xnrm = lapackf77_zlange( "F", &ione, &ione, &Xnrmv, &ione, NULL );
-            
+
             j = magma_izamax ( N, dR+i*N, 1 );
             magma_zgetmatrix( 1, 1, dR+i*N+j-1, 1, &Rnrmv, 1 );
             Rnrm = lapackf77_zlange( "F", &ione, &ione, &Rnrmv, &ione, NULL );
-            
+
             if( Rnrm >  Xnrm *cte ) goto L20;
         }
 
@@ -368,7 +364,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
         magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dX, lddx);
         magma_zgeqrs_gpu(M, N, NRHS, dA, ldda, tau, dT, dX, lddx, hworkd, lhwork, info);
     }
-    
+
     magma_free( dworkd );
     magma_free_cpu( hworkd );
     return *info;
