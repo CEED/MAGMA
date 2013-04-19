@@ -196,6 +196,7 @@ magmablas_dznrm2_sm(int m, int num, cuDoubleComplex *da, magma_int_t ldda,
 
 //==============================================================================
 
+static
 __device__ void dsum_reduce( int n, int i, double* x )
 {
     __syncthreads();

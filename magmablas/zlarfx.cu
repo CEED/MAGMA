@@ -46,6 +46,7 @@ __device__ void sum_reduce( /*int n,*/ int i, cuDoubleComplex* x )
 }
 // end sum_reduce
 
+static
 __device__ void zsum_reduce( int n, int i, cuDoubleComplex* x )
 {
     __syncthreads();

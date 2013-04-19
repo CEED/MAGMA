@@ -57,6 +57,7 @@ extern "C" {
 
 }
 
+static
 __device__ void zsum_reduce( int n, int i, cuDoubleComplex* x )
 {
     __syncthreads();
@@ -73,7 +74,8 @@ __device__ void zsum_reduce( int n, int i, cuDoubleComplex* x )
 }
 
 
- __device__ void sum_reduce(int n, int i, double* x )
+static
+__device__ void sum_reduce(int n, int i, double* x )
 {
     __syncthreads();
     if ( n >  128 ) { if ( i <  128 && i +  128 < n ) { x[i] += x[i+ 128]; }  __syncthreads(); }
