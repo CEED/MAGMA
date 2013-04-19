@@ -12,32 +12,30 @@
 
 // === Define what BLAS to use ============================================
 #define PRECISION_z
-#if (defined(PRECISION_s) || defined(PRECISION_d)) 
+#if (defined(PRECISION_s) || defined(PRECISION_d))
   #define magma_ztrsm magmablas_ztrsm
 #endif
 // === End defining what BLAS to use =======================================
 
 extern "C" magma_int_t
-magma_zpotrs_gpu(char uplo, magma_int_t n, magma_int_t nrhs, 
-                 magmaDoubleComplex *dA, magma_int_t ldda, 
+magma_zpotrs_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
+                 magmaDoubleComplex *dA, magma_int_t ldda,
                  magmaDoubleComplex *dB, magma_int_t lddb, magma_int_t *info)
 {
-/*  -- MAGMA (version 1.0) --
+/*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2011
- 
+
     Purpose
     =======
-
     ZPOTRS solves a system of linear equations A*X = B with a Hermitian
     positive definite matrix A using the Cholesky factorization
     A = U**H*U or A = L*L**H computed by ZPOTRF.
 
     Arguments
     =========
- 
     UPLO    (input) CHARACTER*1
             = 'U':  Upper triangle of A is stored;
             = 'L':  Lower triangle of A is stored.
@@ -69,16 +67,16 @@ magma_zpotrs_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
     =====================================================================   */
 
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
-    
-    *info = 0 ; 
+
+    *info = 0 ;
     if( (uplo != 'U') && (uplo != 'u') && (uplo != 'L') && (uplo != 'l') )
-        *info = -1; 
+        *info = -1;
     if( n < 0 )
-        *info = -2; 
-    if( nrhs < 0) 
-        *info = -3; 
+        *info = -2;
+    if( nrhs < 0)
+        *info = -3;
     if ( ldda < max(1, n) )
-        *info = -5; 
+        *info = -5;
     if ( lddb < max(1, n) )
         *info = -7;
     if (*info != 0) {

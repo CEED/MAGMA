@@ -24,14 +24,12 @@ magma_zpotri(char uplo, magma_int_t n,
 
     Purpose
     =======
-
     ZPOTRI computes the inverse of a real symmetric positive definite
     matrix A using the Cholesky factorization A = U**T*U or A = L*L**T
     computed by ZPOTRF.
 
     Arguments
     =========
-
     UPLO    (input) CHARACTER*1
             = 'U':  Upper triangle of A is stored;
             = 'L':  Lower triangle of A is stored.

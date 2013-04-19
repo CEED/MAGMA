@@ -13,19 +13,18 @@
 #include <assert.h>
 
 extern "C" magma_int_t
-magma_zposv    ( char uplo, magma_int_t n, magma_int_t nrhs, 
-                 magmaDoubleComplex *A, magma_int_t lda, 
+magma_zposv    ( char uplo, magma_int_t n, magma_int_t nrhs,
+                 magmaDoubleComplex *A, magma_int_t lda,
                  magmaDoubleComplex *B, magma_int_t ldb, magma_int_t *info )
 {
-/*  -- MAGMA (version 1.0) --
+/*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2011
- 
+
     Purpose
     =======
-
     ZPOSV computes the solution to a complex system of linear equations
        A * X = B,
     where A is an N-by-N Hermitian positive definite matrix and X and B
@@ -39,7 +38,6 @@ magma_zposv    ( char uplo, magma_int_t n, magma_int_t nrhs,
 
     Arguments
     =========
- 
     UPLO    (input) CHARACTER*1
             = 'U':  Upper triangle of A is stored;
             = 'L':  Lower triangle of A is stored.
@@ -51,17 +49,17 @@ magma_zposv    ( char uplo, magma_int_t n, magma_int_t nrhs,
             The number of right hand sides, i.e., the number of columns
             of the matrix B.  NRHS >= 0.
 
-    A       (input/output) COMPLEX_16 array, dimension (LDA,N)   
-            On entry, the Hermitian matrix A.  If UPLO = 'U', the leading   
-            N-by-N upper triangular part of A contains the upper   
-            triangular part of the matrix A, and the strictly lower   
-            triangular part of A is not referenced.  If UPLO = 'L', the   
-            leading N-by-N lower triangular part of A contains the lower   
-            triangular part of the matrix A, and the strictly upper   
-            triangular part of A is not referenced.   
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N)
+            On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
+            N-by-N upper triangular part of A contains the upper
+            triangular part of the matrix A, and the strictly lower
+            triangular part of A is not referenced.  If UPLO = 'L', the
+            leading N-by-N lower triangular part of A contains the lower
+            triangular part of the matrix A, and the strictly upper
+            triangular part of A is not referenced.
 
-            On exit, if INFO = 0, the factor U or L from the Cholesky   
-            factorization A = U**H*U or A = L*L**H.   
+            On exit, if INFO = 0, the factor U or L from the Cholesky
+            factorization A = U**H*U or A = L*L**H.
 
     LDA     (input) INTEGER
             The leading dimension of the array A.  LDA >= max(1,N).
@@ -79,16 +77,16 @@ magma_zposv    ( char uplo, magma_int_t n, magma_int_t nrhs,
     =====================================================================   */
 
     magma_int_t num_gpus, ldda, lddb;
-    
-    *info = 0 ; 
+
+    *info = 0 ;
     if( (uplo != 'U') && (uplo != 'u') && (uplo != 'L') && (uplo != 'l') )
-        *info = -1; 
+        *info = -1;
     if( n < 0 )
-        *info = -2; 
-    if( nrhs < 0) 
-        *info = -3; 
+        *info = -2;
+    if( nrhs < 0)
+        *info = -3;
     if ( lda < max(1, n) )
-        *info = -5; 
+        *info = -5;
     if ( ldb < max(1, n) )
         *info = -7;
     if (*info != 0) {
@@ -137,6 +135,6 @@ CPU_INTERFACE:
     if ( *info == 0 ) {
         lapackf77_zpotrs( &uplo, &n, &nrhs, A, &lda, B, &ldb, info );
     }
-    
+
     return *info;
 }

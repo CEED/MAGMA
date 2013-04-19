@@ -1,14 +1,14 @@
 /*
-   -- MAGMA (version 1.1) --
-      Univ. of Tennessee, Knoxville
-      Univ. of California, Berkeley
-      Univ. of Colorado, Denver
-      November 2011
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+    
+       @author Raffaele Solca
+    
+       @precisions normal z -> c
 
-      @author Raffaele Solca
- 
-      @precisions normal z -> c
-       
 */
 #include "common_magma.h"
 
@@ -27,16 +27,14 @@ magma_zstedx(char range, magma_int_t n, double vl, double vu,
              magma_int_t* iwork, magma_int_t liwork,
              double* dwork, magma_int_t* info)
 {
-/*
-    -- MAGMA (version 1.1) --
-    Univ. of Tennessee, Knoxville
-    Univ. of California, Berkeley
-    Univ. of Colorado, Denver
-    November 2011
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
 
     Purpose
     =======
-
     ZSTEDX computes some eigenvalues and eigenvectors of a
     symmetric tridiagonal matrix using the divide and conquer method.
 
@@ -49,7 +47,6 @@ magma_zstedx(char range, magma_int_t n, double vl, double vu,
 
     Arguments
     =========
-
     RANGE   (input) CHARACTER*1
             = 'A': all eigenvalues will be found.
             = 'V': all eigenvalues in the half-open interval (VL,VU]
@@ -130,7 +127,6 @@ magma_zstedx(char range, magma_int_t n, double vl, double vu,
 
     Further Details
     ===============
-
     Based on contributions by
        Jeff Rutter, Computer Science Division, University of California
        at Berkeley, USA

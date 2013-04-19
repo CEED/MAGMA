@@ -23,12 +23,12 @@
 
 extern "C" magma_int_t
 magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, magma_int_t nb,
-                  magmaDoubleComplex *hU, magma_int_t ldhu, magmaDoubleComplex *dU, magma_int_t lddu, 
-                  magmaDoubleComplex *hA, magma_int_t ldha, magmaDoubleComplex *dA, magma_int_t ldda, 
+                  magmaDoubleComplex *hU, magma_int_t ldhu, magmaDoubleComplex *dU, magma_int_t lddu,
+                  magmaDoubleComplex *hA, magma_int_t ldha, magmaDoubleComplex *dA, magma_int_t ldda,
                   magmaDoubleComplex *hL, magma_int_t ldhl, magmaDoubleComplex *dL, magma_int_t lddl,
-                  magma_int_t *ipiv, 
+                  magma_int_t *ipiv,
                   magmaDoubleComplex *hwork, magma_int_t ldhwork, magmaDoubleComplex *dwork, magma_int_t lddwork,
-                  magma_int_t *info) 
+                  magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -38,17 +38,15 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
 
     Purpose
     =======
-
     ZSSSSM applies the LU factorization update from a complex
     matrix formed by a lower triangular IB-by-K tile L1 on top of a
     M2-by-K tile L2 to a second complex matrix formed by a M1-by-N1
     tile A1 on top of a M2-by-N2 tile A2 (N1 == N2).
-  
+
     This is the right-looking Level 2.5 BLAS version of the algorithm.
-  
+
     Arguments
     =========
-
     M       (input) INTEGER
             The number of rows of the matrix A.  M >= 0.
 
@@ -61,63 +59,63 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
     NB      (input) INTEGER
             The blocking size.  NB >= 0.
 
-    hU      (input,output) COMPLEX_16 array, dimension(LDHU, N), on cpu. 
+    hU      (input,output) COMPLEX_16 array, dimension(LDHU, N), on cpu.
             On entry, the NB-by-N upper triangular tile hU.
             On exit, the content is incomplete. Shouldn't be used.
- 
+
     LDHU    (input) INTEGER
             The leading dimension of the array hU.  LDHU >= max(1,NB).
- 
-    dU      (input,output) COMPLEX_16 array, dimension(LDDU, N), on gpu. 
+
+    dU      (input,output) COMPLEX_16 array, dimension(LDDU, N), on gpu.
             On entry, the NB-by-N upper triangular tile dU identical to hU.
             On exit, the new factor U from the factorization.
- 
+
     LDDU    (input) INTEGER
             The leading dimension of the array dU.  LDDU >= max(1,NB).
- 
+
     hA      (input,output) COMPLEX_16 array, dimension(LDHA, N), on cpu.
             On entry, only the M-by-IB first panel needs to be identical to dA(1..M, 1..IB).
             On exit, the content is incomplete. Shouldn't be used.
- 
+
     LDHA    (input) INTEGER
             The leading dimension of the array hA.  LDHA >= max(1,M).
- 
+
     dA      (input,output) COMPLEX_16 array, dimension(LDDA, N) , on gpu.
             On entry, the M-by-N tile to be factored.
             On exit, the factor L from the factorization
- 
+
     LDDA    (input) INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,M).
- 
+
     hL      (output) COMPLEX_16 array, dimension(LDHL, K), on vpu.
             On exit, contains in the upper part the IB-by-K lower triangular tile,
             and in the lower part IB-by-K the inverse of the top part.
- 
+
     LDHL    (input) INTEGER
             The leading dimension of the array hL.  LDHL >= max(1,2*IB).
- 
+
     dL      (output) COMPLEX_16 array, dimension(LDDL, K), on gpu.
             On exit, contains in the upper part the IB-by-K lower triangular tile,
             and in the lower part IB-by-K the inverse of the top part.
- 
+
     LDDL    (input) INTEGER
             The leading dimension of the array dL.  LDDL >= max(1,2*IB).
- 
+
     hWORK   (output) COMPLEX_16 array, dimension(LDHWORK, 2*IB), on cpu.
             Workspace.
 
     LDHWORK (input) INTEGER
             The leading dimension of the array hWORK.  LDHWORK >= max(NB, 1).
- 
+
     dWORK   (output) COMPLEX_16 array, dimension(LDDWORK, 2*IB), on gpu.
             Workspace.
 
     LDDWORK (input) INTEGER
             The leading dimension of the array dWORK.  LDDWORK >= max(NB, 1).
- 
+
     IPIV    (output) INTEGER array on the cpu.
             The pivot indices array of size K as returned by ZTSTRF
- 
+
     INFO    (output) INTEGER
             - PLASMA_SUCCESS successful exit
             - < 0 if INFO = -k, the k-th argument had an illegal value
@@ -125,7 +123,7 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
                 has been completed, but the factor U is exactly
                 singular, and division by zero will occur if it is used
                 to solve a system of equations.
-           
+
     =====================================================================    */
 
 #define UT(i,j) (dUT + (i)*ib*lddu + (j)*ib )
@@ -198,14 +196,14 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
                     info);
 
 #ifndef WITHOUTTRTRI
-        CORE_zlacpy( PlasmaUpperLower, mindim, mindim, 
-                     (PLASMA_Complex64_t*)hL, ldhl, 
+        CORE_zlacpy( PlasmaUpperLower, mindim, mindim,
+                     (PLASMA_Complex64_t*)hL, ldhl,
                      (PLASMA_Complex64_t*)hL2, ldhl );
-        CORE_ztrtri( PlasmaLower, PlasmaUnit, mindim, 
+        CORE_ztrtri( PlasmaLower, PlasmaUnit, mindim,
                      (PLASMA_Complex64_t*)hL2, ldhl, info );
         if (*info != 0 ) {
-          fprintf(stderr, "ERROR, trtri returned with info = %d\n", *info);
-        }          
+            fprintf(stderr, "ERROR, trtri returned with info = %d\n", *info);
+        }
 #endif
 
         if ( (storev == 'R') || (storev == 'r') ) {
@@ -252,30 +250,30 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
                 //magma_device_sync();
                 
 #ifndef WITHOUTTRTRI
-                magma_ztrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
-                             n-(ii+sb), ib, 
+                magma_ztrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit,
+                             n-(ii+sb), ib,
                              c_one, L2(i-1),      lddl,
                                     UT(i-1, i+1), lddu);
 #else
-                magma_ztrsm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
-                             n-(ii+sb), ib, 
+                magma_ztrsm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit,
+                             n-(ii+sb), ib,
                              c_one, L(i-1),       lddl,
                                     UT(i-1, i+1), lddu);
 #endif
-                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans,
                              n-(ii+sb), m, ib,
-                             c_neg_one, UT(i-1, i+1), lddu, 
+                             c_neg_one, UT(i-1, i+1), lddu,
                                         AT(0,   i-1), ldda,
                              c_one,     AT(0,   i+1), ldda );
             }
 
             // do the cpu part
             CORE_ztstrf(m, sb, ib, nb,
-                        (PLASMA_Complex64_t*)hU(i, i), ldhu, 
+                        (PLASMA_Complex64_t*)hU(i, i), ldhu,
                         (PLASMA_Complex64_t*)hA(0, i), ldha,
-                        (PLASMA_Complex64_t*)hL(i),    ldhl, 
-                        ipiv+ii, 
-                        (PLASMA_Complex64_t*)hwork, ldhwork, 
+                        (PLASMA_Complex64_t*)hL(i),    ldhl,
+                        ipiv+ii,
+                        (PLASMA_Complex64_t*)hwork, ldhwork,
                         info);
 
             if ( (*info == 0) && (iinfo > 0) )
@@ -310,14 +308,14 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
 #endif
 
 #ifndef WITHOUTTRTRI
-            CORE_zlacpy( PlasmaUpperLower, sb, sb, 
-                         (PLASMA_Complex64_t*)hL(i), ldhl, 
+            CORE_zlacpy( PlasmaUpperLower, sb, sb,
+                         (PLASMA_Complex64_t*)hL(i), ldhl,
                          (PLASMA_Complex64_t*)hL2(i), ldhl );
-            CORE_ztrtri( PlasmaLower, PlasmaUnit, sb, 
+            CORE_ztrtri( PlasmaLower, PlasmaUnit, sb,
                          (PLASMA_Complex64_t*)hL2(i), ldhl, info );
             if (*info != 0 ) {
-              fprintf(stderr, "ERROR, trtri returned with info = %d\n", *info);
-            }   
+                fprintf(stderr, "ERROR, trtri returned with info = %d\n", *info);
+            }
 #endif
             // upload i-th panel
             magma_zsetmatrix( sb, sb, hU(i, i), ldhu, dUp, lddu );
@@ -332,37 +330,37 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
             // do the small non-parallel computations
             if ( s > (i+1) ) {
 #ifndef WITHOUTTRTRI
-                 magma_ztrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
-                              sb, sb, 
-                              c_one, L2(i),      lddl,
-                                     UT(i, i+1), lddu);
+                magma_ztrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit,
+                             sb, sb,
+                             c_one, L2(i),      lddl,
+                                    UT(i, i+1), lddu);
 #else
-                 magma_ztrsm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
-                              sb, sb, 
-                              c_one, L(i),      lddl,
-                                     UT(i, i+1), lddu);
+                magma_ztrsm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit,
+                             sb, sb,
+                             c_one, L(i),      lddl,
+                                    UT(i, i+1), lddu);
 #endif
-                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans,
                              sb, m, sb,
-                             c_neg_one, UT(i, i+1), lddu, 
+                             c_neg_one, UT(i, i+1), lddu,
                                         AT(0, i  ), ldda,
                              c_one,     AT(0, i+1), ldda );
             }
             else {
 #ifndef WITHOUTTRTRI
-                magma_ztrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
-                             n-mindim, sb, 
+                magma_ztrmm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit,
+                             n-mindim, sb,
                              c_one, L2(i),      lddl,
                                     UT(i, i+1), lddu);
 #else
-                magma_ztrsm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit, 
-                             n-mindim, sb, 
+                magma_ztrsm( MagmaRight, MagmaLower, MagmaTrans, MagmaUnit,
+                             n-mindim, sb,
                              c_one, L(i),      lddl,
                                     UT(i, i+1), lddu);
 #endif
-                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans,
                              n-mindim, m, sb,
-                             c_neg_one, UT(i, i+1), lddu, 
+                             c_neg_one, UT(i, i+1), lddu,
                                         AT(0, i  ), ldda,
                              c_one,     AT(0, i+1), ldda );
             }
@@ -376,4 +374,4 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
     return *info;
 }
 
-#endif
+#endif /* MAGMA_WITH_PLASMA */

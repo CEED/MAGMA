@@ -32,7 +32,6 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
 
     Purpose
     =======
-
     ZTRTRI computes the inverse of a real upper or lower triangular
     matrix dA.
 
@@ -40,7 +39,6 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
 
     Arguments
     =========
-
     UPLO    (input) CHARACTER*1
             = 'U':  A is upper triangular;
             = 'L':  A is lower triangular.
@@ -138,7 +136,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
     else {
         if (upper) {
             /* Compute inverse of upper triangular matrix */
-            for (j=0; j<n; j =j+ nb) {
+            for (j=0; j < n; j += nb) {
                 jb = min(nb, (n-j));
 
                 /* Compute rows 1:j-1 of current block column */

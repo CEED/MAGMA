@@ -30,7 +30,6 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 
     Purpose
     =======
-
     ZTRTRI computes the inverse of a real upper or lower triangular
     matrix A.
 
@@ -38,7 +37,6 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 
     Arguments
     =========
-
     UPLO    (input) CHARACTER*1
             = 'U':  A is upper triangular;
             = 'L':  A is lower triangular.
