@@ -93,3 +93,31 @@ install: lib dir
 	    sed -e s:\__PREFIX:"$(prefix)":     | \
 	    sed -e s:\__LIBEXT:"$(LIBEXT)":       \
 	    > $(prefix)/lib/pkgconfig/magma.pc
+
+# ========================================
+# This is a crude manner of creating shared libraries.
+# First create objects (with -fPIC) and static .a libraries,
+# then assume all objects in these directories go into the shared libraries.
+# Better solution would be to use non-recursive make, so make knows all the
+# objects in each subdirectory, or use libtool, or put rules for, e.g., the
+# control directory in src/Makefile (as done in src/CMakeLists.txt)
+LIBMAGMA_SO     = $(LIBMAGMA:.a=.so)
+LIBMAGMABLAS_SO = $(LIBMAGMABLAS:.a=.so)
+
+shared: lib
+	$(MAKE) $(LIBMAGMA_SO) $(LIBMAGMABLAS_SO)
+
+$(LIBMAGMABLAS_SO): interface_cuda/*.o magmablas/*.cu_o
+	@echo ======================================== libmagmablas.so
+	$(CC) $(LDOPTS) -shared -o $(LIBMAGMABLAS_SO) \
+	interface_cuda/*.o magmablas/*.cu_o \
+	$(LIBDIR) \
+	$(LIB)
+
+$(LIBMAGMA_SO): src/*.o control/*.o $(LIBMAGMABLAS_SO)
+	@echo ======================================== libmagma.so
+	$(CC) $(LDOPTS) -shared -o $(LIBMAGMA_SO) \
+	src/*.o control/*.o \
+	-L lib -lmagmablas \
+	$(LIBDIR) \
+	$(LIB)
