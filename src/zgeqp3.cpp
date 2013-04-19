@@ -1,11 +1,11 @@
 /*
-  -- MAGMA (version 1.1) --
-     Univ. of Tennessee, Knoxville
-     Univ. of California, Berkeley
-     Univ. of Colorado, Denver
-     November 2011
-
-     @precisions normal z -> c d s
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+  
+       @precisions normal z -> c d s
 
 */
 
@@ -114,11 +114,11 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
     *info = 0;
     lquery = (lwork == -1);
     if (m < 0) {
-       *info = -1;
+        *info = -1;
     } else if (n < 0) {
-       *info = -2;
+        *info = -2;
     } else if (lda < max(1,m)) {
-       *info = -4;
+        *info = -4;
     }
     
     if (*info == 0) {
@@ -170,15 +170,15 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
     nfxd = 0;
     for (j = 0; j < n; ++j) {
         if (jpvt[j] != 0) {
-           if (j != nfxd) {
-               blasf77_zswap(&m, A(0, j), &ione, A(0, nfxd), &ione);
-               jpvt[j]    = jpvt[nfxd];
-               jpvt[nfxd] = j + 1;
-           }
-           else {
-               jpvt[j] = j + 1;
-           }
-           ++nfxd;
+            if (j != nfxd) {
+                blasf77_zswap(&m, A(0, j), &ione, A(0, nfxd), &ione);
+                jpvt[j]    = jpvt[nfxd];
+                jpvt[nfxd] = j + 1;
+            }
+            else {
+                jpvt[j] = j + 1;
+            }
+            ++nfxd;
         }
         else {
             jpvt[j] = j + 1;
@@ -207,12 +207,12 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
         sminmn = minmn - nfxd;
         
         if (nb < sminmn) {
-          j = nfxd;
-
-          // Set the original matrix to the GPU
-          magma_zsetmatrix_async( m, sn,
-                                  A (0,j), lda,
-                                  dA(0,j), ldda, stream );
+            j = nfxd;
+            
+            // Set the original matrix to the GPU
+            magma_zsetmatrix_async( m, sn,
+                                    A (0,j), lda,
+                                    dA(0,j), ldda, stream );
         }
 
         /* Initialize partial column norms. */
@@ -235,15 +235,15 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
                 n_j = n - j;
                 
                 if (j>nfxd) {
-                  // Get panel to the CPU
-                  magma_zgetmatrix( m-j, jb,
-                                    dA(j,j), ldda,
-                                    A (j,j), lda );
-                
-                  // Get the rows
-                  magma_zgetmatrix( jb, n_j - jb,
-                                    dA(j,j + jb), ldda,
-                                    A (j,j + jb), lda );
+                    // Get panel to the CPU
+                    magma_zgetmatrix( m-j, jb,
+                                      dA(j,j), ldda,
+                                      A (j,j), lda );
+                    
+                    // Get the rows
+                    magma_zgetmatrix( jb, n_j - jb,
+                                      dA(j,j + jb), ldda,
+                                      A (j,j + jb), lda );
                 }
 
                 magma_zlaqps( m, n_j, j, jb, &fjb,

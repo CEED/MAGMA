@@ -11,8 +11,8 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zgeqrf_ooc(magma_int_t m, magma_int_t n, 
-                 magmaDoubleComplex *a,    magma_int_t lda, magmaDoubleComplex *tau, 
+magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
+                 magmaDoubleComplex *a,    magma_int_t lda, magmaDoubleComplex *tau,
                  magmaDoubleComplex *work, magma_int_t lwork,
                  magma_int_t *info )
 {
@@ -132,7 +132,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
     NB = (NB / nb) * nb;
 
     if (NB >= n)
-      return magma_zgeqrf(m, n, a, lda, tau, work, lwork, info);
+        return magma_zgeqrf(m, n, a, lda, tau, work, lwork, info);
 
     k = min(m,n);
     if (k == 0) {
@@ -158,8 +158,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
     dwork = da + ldda*(NB + nb);
 
     /* start the main loop over the blocks that fit in the GPU memory */
-    for(int i=0; i<n; i+=NB)
-      { 
+    for(int i=0; i<n; i+=NB) {
         IB = min(n-i, NB);
         //printf("Processing %5d columns -- %5d to %5d ... \n", IB, i, i+IB);
 
@@ -170,8 +169,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
         magma_queue_sync( stream[0] );
 
         /* 2. Update it with the previous transformations */
-        for(int j=0; j<min(i,k); j+=nb)
-          {
+        for(int j=0; j<min(i,k); j+=nb) {
             magma_int_t ib = min(k-j, nb);
 
             /* Get a panel in ptr.                                           */
@@ -200,17 +198,17 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
                               da_ref(j, 0), ldda, dwork+ib, lddwork);
 
             zq_to_panel(MagmaUpper, ib, a_ref(j,j), lda, work+ib*ib);
-          }
+        }
 
         /* 3. Do a QR on the current part */
         if (i<k)
-          magma_zgeqrf2_gpu(m-i, IB, da_ref(i,0), ldda, tau+i, info);
+            magma_zgeqrf2_gpu(m-i, IB, da_ref(i,0), ldda, tau+i, info);
 
         /* 4. Copy the current part back to the CPU */
         magma_zgetmatrix_async( (m), IB,
                                 da_ref(0,0), ldda,
                                 a_ref(0,i),  lda, stream[0] );
-      }
+    }
 
     magma_queue_sync( stream[0] );
 

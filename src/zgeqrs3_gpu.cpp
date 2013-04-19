@@ -12,10 +12,10 @@
 
 extern "C" magma_int_t
 magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
-                  magmaDoubleComplex *dA,    magma_int_t ldda, 
-                  magmaDoubleComplex *tau,   magmaDoubleComplex *dT, 
-                  magmaDoubleComplex *dB,    magma_int_t lddb, 
-                  magmaDoubleComplex *hwork, magma_int_t lwork, 
+                  magmaDoubleComplex *dA,    magma_int_t ldda,
+                  magmaDoubleComplex *tau,   magmaDoubleComplex *dT,
+                  magmaDoubleComplex *dB,    magma_int_t lddb,
+                  magmaDoubleComplex *hwork, magma_int_t lwork,
                   magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -59,11 +59,11 @@ magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
 
     DT      (input) COMPLEX_16 array that is the output (the 6th argument)
             of magma_zgeqrf_gpu of size
-            2*MIN(M, N)*NB + ((N+31)/32*32 )* MAX(NB, NRHS). 
-            The array starts with a block of size MIN(M,N)*NB that stores 
-            the triangular T matrices used in the QR factorization, 
-            followed by MIN(M,N)*NB block storing the diagonal block 
-            matrices for the R matrix, followed by work space of size 
+            2*MIN(M, N)*NB + ((N+31)/32*32 )* MAX(NB, NRHS).
+            The array starts with a block of size MIN(M,N)*NB that stores
+            the triangular T matrices used in the QR factorization,
+            followed by MIN(M,N)*NB block storing the diagonal block
+            matrices for the R matrix, followed by work space of size
             ((N+31)/32*32 )* MAX(NB, NRHS).
 
     LDDB    (input) INTEGER
@@ -86,8 +86,8 @@ magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================    */
 
-   #define a_ref(a_1,a_2) (dA+(a_2)*(ldda) + (a_1))
-   #define d_ref(a_1)     (dT+(lddwork+(a_1))*nb)
+    #define a_ref(a_1,a_2) (dA+(a_2)*(ldda) + (a_1))
+    #define d_ref(a_1)     (dT+(lddwork+(a_1))*nb)
 
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magma_int_t k, lddwork;
@@ -127,18 +127,18 @@ magma_zgeqrs3_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     lddwork= k;
 
     /* B := Q' * B */
-    magma_zunmqr_gpu( MagmaLeft, MagmaConjTrans, 
+    magma_zunmqr_gpu( MagmaLeft, MagmaConjTrans,
                       m, nrhs, n,
-                      a_ref(0,0), ldda, tau, 
+                      a_ref(0,0), ldda, tau,
                       dB, lddb, hwork, lwork, dT, nb, info );
     if ( *info != 0 ) {
         return *info;
     }
 
-    /* Solve R*X = B(1:n,:) 
+    /* Solve R*X = B(1:n,:)
        1. Move the block diagonal submatrices from d_ref to R
-       2. Solve 
-       3. Restore the data format moving data from R back to d_ref 
+       2. Solve
+       3. Restore the data format moving data from R back to d_ref
     */
     magmablas_zswapdblk(k, nb, a_ref(0,0), ldda, 1, d_ref(0), nb, 0);
     if ( nrhs == 1 ) {

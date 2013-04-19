@@ -1,11 +1,11 @@
 /*
-  -- MAGMA (version 1.1) --
-     Univ. of Tennessee, Knoxville
-     Univ. of California, Berkeley
-     Univ. of Colorado, Denver
-     November 2011
-
-     @precisions normal z -> c d s
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+  
+       @precisions normal z -> c d s
 
 */
 
@@ -128,11 +128,11 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
     *info = 0;
     lquery = (lwork == -1);
     if (m < 0) {
-       *info = -1;
+        *info = -1;
     } else if (n < 0) {
-       *info = -2;
+        *info = -2;
     } else if (lda < max(1,m)) {
-       *info = -4;
+        *info = -4;
     }
     
     if (*info == 0) {
@@ -178,15 +178,15 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
      * Note jpvt uses 1-based indices for historical compatibility. */
     for (j = 0; j < n; ++j) {
         if (jpvt[j] != 0) {
-           if (j != nfxd) {
-               blasf77_zswap(&m, A(0, j), &ione, A(0, nfxd), &ione);
-               jpvt[j]    = jpvt[nfxd];
-               jpvt[nfxd] = j + 1;
-           }
-           else {
-               jpvt[j] = j + 1;
-           }
-           ++nfxd;
+            if (j != nfxd) {
+                blasf77_zswap(&m, A(0, j), &ione, A(0, nfxd), &ione);
+                jpvt[j]    = jpvt[nfxd];
+                jpvt[nfxd] = j + 1;
+            }
+            else {
+                jpvt[j] = j + 1;
+            }
+            ++nfxd;
         }
         else {
             jpvt[j] = j + 1;
@@ -196,7 +196,7 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
     /*     Factorize fixed columns
            =======================
            Compute the QR factorization of fixed columns and update
-           remaining columns. 
+           remaining columns.
     if (nfxd > 0) {
         na = min(m,nfxd);
         lapackf77_zgeqrf(&m, &na, A, &lda, tau, work, &lwork, info);
@@ -215,12 +215,12 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
         sminmn = minmn - nfxd;
         
         /*if (nb < sminmn) {
-          j = nfxd;
-
-          // Set the original matrix to the GPU
-          magma_zsetmatrix_async( m, sn,
-                                  A (0,j), lda,
-                                  dA(0,j), ldda, stream[0] );
+            j = nfxd;
+            
+            // Set the original matrix to the GPU
+            magma_zsetmatrix_async( m, sn,
+                                    A (0,j), lda,
+                                    dA(0,j), ldda, stream[0] );
         }*/
 
         /* Initialize partial column norms. */
@@ -236,7 +236,7 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
         }*/
         
         j = nfxd;
-        //if (nb < sminmn) 
+        //if (nb < sminmn)
         {
             /* Use blocked code initially. */
             //magma_queue_sync( stream[0] );
@@ -250,15 +250,15 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
                 n_j = n - j;
                 
                 /*if (j>nfxd) {
-                  // Get panel to the CPU
-                  magma_zgetmatrix( m-j, jb,
-                                    dA(j,j), ldda,
-                                    A (j,j), lda );
-                
-                  // Get the rows
-                  magma_zgetmatrix( jb, n_j - jb,
-                                    dA(j,j + jb), ldda,
-                                    A (j,j + jb), lda );
+                    // Get panel to the CPU
+                    magma_zgetmatrix( m-j, jb,
+                                      dA(j,j), ldda,
+                                      A (j,j), lda );
+                    
+                    // Get the rows
+                    magma_zgetmatrix( jb, n_j - jb,
+                                      dA(j,j + jb), ldda,
+                                      A (j,j + jb), lda );
                 }*/
 
                 //magma_zlaqps_gpu    // this is a cpp-file
@@ -273,7 +273,7 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
             }
         }
         
-        /* Use unblocked code to factor the last or only block. 
+        /* Use unblocked code to factor the last or only block.
         if (j < minmn) {
             n_j = n - j;
             if (j > nfxd) {

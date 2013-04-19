@@ -11,8 +11,8 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n, 
-              magmaDoubleComplex *a,    magma_int_t lda, magmaDoubleComplex *tau, 
+magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
+              magmaDoubleComplex *a,    magma_int_t lda, magmaDoubleComplex *tau,
               magmaDoubleComplex *work, magma_int_t lwork,
               magma_int_t *info )
 {
@@ -30,10 +30,10 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
 
     Arguments
     =========
-    NUM_GPUS 
+    NUM_GPUS
             (input) INTEGER
             The number of GPUs to be used for the factorization.
- 
+
     M       (input) INTEGER
             The number of rows of the matrix A.  M >= 0.
 
@@ -158,11 +158,9 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
 
         /* Copy the matrix back from the GPUs to the CPU */
         magmablas_zgetmatrix_1D_bcyclic(m, n, da, ldda, a, lda, num_gpus, nb);
-
-    } else {
-
-      lapackf77_zgeqrf(&m, &n, a, &lda, tau, work, &lwork, info);
-
+    }
+    else {
+        lapackf77_zgeqrf(&m, &n, a, &lda, tau, work, &lwork, info);
     }
 
 

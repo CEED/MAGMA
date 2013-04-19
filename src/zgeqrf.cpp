@@ -11,8 +11,8 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zgeqrf(magma_int_t m, magma_int_t n, 
-             magmaDoubleComplex *A,    magma_int_t lda, magmaDoubleComplex *tau, 
+magma_zgeqrf(magma_int_t m, magma_int_t n,
+             magmaDoubleComplex *A,    magma_int_t lda, magmaDoubleComplex *tau,
              magmaDoubleComplex *work, magma_int_t lwork,
              magma_int_t *info )
 {
@@ -174,7 +174,7 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
                 /* Apply H' to A(i:m,i+2*ib:n) from the left */
                 //printf( "m %4d, n %4d, nb %4d, i %4d, larfb m %4d, n %4d, k %4d\n",
                 //        m, n, nb, i, m-old_i, n-old_i-2*old_ib, old_ib );
-                magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
+                magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                                   m-old_i, n-old_i-2*old_ib, old_ib,
                                   dA(old_i, old_i),          ldda, dT,    nb,
                                   dA(old_i, old_i+2*old_ib), ldda, dwork, lddwork);
@@ -185,7 +185,7 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
             lapackf77_zgeqrf(&rows, &ib, A(i,i), &lda, tau+i, work, &lwork, info);
             /* Form the triangular factor of the block reflector
                H = H(i) H(i+1) . . . H(i+ib-1) */
-            lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr, 
+            lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr,
                               &rows, &ib, A(i,i), &lda, tau+i, work, &ib);
             zpanel_to_q(MagmaUpper, ib, A(i,i), lda, work+ib*ib);
             magma_zsetmatrix( rows, ib, A(i,i), lda, dA(i,i), ldda );
@@ -198,9 +198,9 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
                     /* Apply H' to A(i:m,i+ib:i+2*ib) from the left (look-ahead) */
                     //printf( "m %4d, n %4d, nb %4d, i %4d, larfb m %4d, n %4d, k %4d, lddwork %4d (lookahead 1)\n",
                     //        m, n, nb, i, rows, ib, ib, lddwork );
-                    magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
-                                      rows, ib, ib, 
-                                      dA(i, i   ), ldda, dT,    nb, 
+                    magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
+                                      rows, ib, ib,
+                                      dA(i, i   ), ldda, dT,    nb,
                                       dA(i, i+ib), ldda, dwork, lddwork);
                 }
                 else {
@@ -208,9 +208,9 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
                     /* Apply H' to A(i:m,i+ib:n) from the left */
                     //printf( "m %4d, n %4d, nb %4d, i %4d, larfb m %4d, n %4d, k %4d, lddwork %4d (last)\n",
                     //        m, n, nb, i, rows, n-i-ib, ib, lddwork );
-                    magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise, 
-                                      rows, n-i-ib, ib, 
-                                      dA(i, i   ), ldda, dT,    nb, 
+                    magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
+                                      rows, n-i-ib, ib,
+                                      dA(i, i   ), ldda, dT,    nb,
                                       dA(i, i+ib), ldda, dwork, lddwork);
                 }
 

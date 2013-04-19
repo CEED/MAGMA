@@ -11,10 +11,10 @@
 #include "common_magma.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Auxiliary function: 'a' is pointer to the current panel holding the 
+   -- Auxiliary function: 'a' is pointer to the current panel holding the
       Householder vectors for the QR factorization of the panel. This routine
       puts ones on the diagonal and zeros in the upper triangular part of 'a'.
-      The upper triangular values are stored in work. 
+      The upper triangular values are stored in work.
  */
 void zsplit_diag_block3(int ib, magmaDoubleComplex *a, int lda, magmaDoubleComplex *work){
     int i, j;
@@ -35,9 +35,9 @@ void zsplit_diag_block3(int ib, magmaDoubleComplex *a, int lda, magmaDoubleCompl
 }
 
 extern "C" magma_int_t
-magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n, 
+magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
                   magmaDoubleComplex *dA,   magma_int_t ldda,
-                  magmaDoubleComplex *tau, magmaDoubleComplex *dT, 
+                  magmaDoubleComplex *tau, magmaDoubleComplex *dT,
                   magma_int_t *info )
 {
 /*  -- MAGMA (version 1.1) --
@@ -84,7 +84,7 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
             The scalar factors of the elementary reflectors (see Further
             Details).
 
-    dT      (workspace/output)  COMPLEX_16 array on the GPU, 
+    dT      (workspace/output)  COMPLEX_16 array on the GPU,
             dimension (2*MIN(M, N) + (N+31)/32*32 )*NB,
             where NB can be obtained through magma_get_zgeqrf_nb(M).
             It starts with MIN(M,N)*NB block that store the triangular T
@@ -188,8 +188,8 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
             lapackf77_zgeqrf(&rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &lhwork, info);
             /* Form the triangular factor of the block reflector
                H = H(i) H(i+1) . . . H(i+ib-1) */
-            lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr, 
-                              &rows, &ib, 
+            lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr,
+                              &rows, &ib,
                               work_ref(i), &ldwork, tau+i, hwork, &ib);
 
             /* Put 0s in the upper triangular part of a panel (and 1s on the
@@ -205,15 +205,15 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
                 if (i+nb < k-nb){
                     /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-                                      rows, ib, ib, 
-                                      a_ref(i, i   ), ldda, t_ref(i),  nb, 
+                                      rows, ib, ib,
+                                      a_ref(i, i   ), ldda, t_ref(i),  nb,
                                       a_ref(i, i+ib), ldda, dd_ref(0), lddwork);
                 }
                 else {
                     cols = n-i-ib;
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-                                      rows, cols, ib, 
-                                      a_ref(i, i   ), ldda, t_ref(i),  nb, 
+                                      rows, cols, ib,
+                                      a_ref(i, i   ), ldda, t_ref(i),  nb,
                                       a_ref(i, i+ib), ldda, dd_ref(0), lddwork);
                     /* Fix the diagonal block */
                     magma_zsetmatrix( ib, ib, ut, ib, d_ref(i), ib );

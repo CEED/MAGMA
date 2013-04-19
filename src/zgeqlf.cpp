@@ -11,8 +11,8 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zgeqlf(magma_int_t m, magma_int_t n, 
-             magmaDoubleComplex *a,    magma_int_t lda, magmaDoubleComplex *tau, 
+magma_zgeqlf(magma_int_t m, magma_int_t n,
+             magmaDoubleComplex *a,    magma_int_t lda, magmaDoubleComplex *tau,
              magmaDoubleComplex *work, magma_int_t lwork, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -23,13 +23,11 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
 
     Purpose
     =======
-
     SGEQLF computes a QL factorization of a COMPLEX_16 M-by-N matrix A:
     A = Q * L.
 
     Arguments
     =========
-
     M       (input) INTEGER
             The number of rows of the matrix A.  M >= 0.
 
@@ -79,7 +77,6 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
 
     Further Details
     ===============
-
     The matrix Q is represented as a product of elementary reflectors
 
        Q = H(k) . . . H(2) H(1), where k = min(m,n).
@@ -198,8 +195,8 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
             if (cols > 0) {
                 /* Form the triangular factor of the block reflector
                    H = H(i+ib-1) . . . H(i+1) H(i) */
-                lapackf77_zlarft( MagmaBackwardStr, MagmaColumnwiseStr, 
-                                  &rows, &ib, 
+                lapackf77_zlarft( MagmaBackwardStr, MagmaColumnwiseStr,
+                                  &rows, &ib,
                                   a_ref(0, cols), &lda, tau + i, work, &ib);
 
                 zpanel_to_q( MagmaLower, ib, a_ref(rows-ib,cols), lda, work+ib*ib);
@@ -241,7 +238,7 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
 
     /* Use unblocked code to factor the last or only block */
     if (mu > 0 && nu > 0)
-      lapackf77_zgeqlf(&mu, &nu, a_ref(0,0), &lda, tau, work, &lwork, &iinfo);
+        lapackf77_zgeqlf(&mu, &nu, a_ref(0,0), &lda, tau, work, &lwork, &iinfo);
 
     magma_queue_destroy( stream[0] );
     magma_queue_destroy( stream[1] );

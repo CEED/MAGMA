@@ -13,7 +13,7 @@
 extern "C" magma_int_t
 magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
                    magmaDoubleComplex *dA, magma_int_t ldda,
-                   magmaDoubleComplex *tau, 
+                   magmaDoubleComplex *tau,
                    magma_int_t *info )
 {
 /*  -- MAGMA (version 1.1) --
@@ -155,8 +155,8 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
             lapackf77_zgeqrf(&rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &lhwork, info);
             /* Form the triangular factor of the block reflector
                H = H(i) H(i+1) . . . H(i+ib-1) */
-            lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr, 
-                              &rows, &ib, 
+            lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr,
+                              &rows, &ib,
                               work_ref(i), &ldwork, tau+i, hwork, &ib);
 
             zpanel_to_q( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
@@ -166,16 +166,17 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
             if (i + ib < n) {
                 magma_zsetmatrix( ib, ib, hwork, ib, dwork, lddwork );
 
-                if (i+nb < k-nx)
+                if (i+nb < k-nx) {
                     /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-                                      rows, ib, ib, 
-                                      dA(i, i   ), ldda, dwork,    lddwork, 
+                                      rows, ib, ib,
+                                      dA(i, i   ), ldda, dwork,    lddwork,
                                       dA(i, i+ib), ldda, dwork+ib, lddwork);
+                }
                 else {
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
-                                      rows, n-i-ib, ib, 
-                                      dA(i, i   ), ldda, dwork,    lddwork, 
+                                      rows, n-i-ib, ib,
+                                      dA(i, i   ), ldda, dwork,    lddwork,
                                       dA(i, i+ib), ldda, dwork+ib, lddwork);
                     magma_zsetmatrix( ib, ib,
                                       work_ref(i), ldwork,
