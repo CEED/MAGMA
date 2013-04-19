@@ -34,7 +34,7 @@ magma_zgetrf_piv(magma_int_t num_gpus, magma_int_t m, magma_int_t n, magmaDouble
 
 
 extern "C" magma_int_t
-magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda, 
+magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
              magma_int_t *ipiv, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -129,10 +129,10 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
         
         magma_int_t num_gpus = magma_num_gpus();
         if ( num_gpus > 1 ) {
-          /* call multi-GPU non-GPU-resident interface  */
-          magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
-          if( *info >= 0 ) magma_zgetrf_piv(num_gpus, m, n, a, lda, ipiv, info);
-          return *info;
+            /* call multi-GPU non-GPU-resident interface  */
+            magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
+            if( *info >= 0 ) magma_zgetrf_piv(num_gpus, m, n, a, lda, ipiv, info);
+            return *info;
         }
 
         maxm = ((m + 31)/32)*32;
@@ -145,7 +145,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
         if (maxdim*maxdim < 2*maxm*maxn) {
             // if close to square, allocate square matrix and transpose in-place
             if (MAGMA_SUCCESS != magma_zmalloc( &dA, nb*maxm + maxdim*maxdim )) {
-                        /* alloc failed so call non-GPU-resident version */ 
+                        /* alloc failed so call non-GPU-resident version */
                         magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
                         if( *info >= 0 ) magma_zgetrf_piv(num_gpus, m, n, a, lda, ipiv, info);
                         return *info;
@@ -195,14 +195,14 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
                 // make sure that gpu queue is empty
                 magma_device_sync();
                 
-                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
-                             n - (i+1)*nb, nb, 
-                             c_one, inAT(i-1,i-1), ldda, 
+                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
+                             n - (i+1)*nb, nb,
+                             c_one, inAT(i-1,i-1), ldda,
                                     inAT(i-1,i+1), ldda );
-                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
-                             n-(i+1)*nb, m-i*nb, nb, 
-                             c_neg_one, inAT(i-1,i+1), ldda, 
-                                        inAT(i,  i-1), ldda, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans,
+                             n-(i+1)*nb, m-i*nb, nb,
+                             c_neg_one, inAT(i-1,i+1), ldda,
+                                        inAT(i,  i-1), ldda,
                              c_one,     inAT(i,  i+1), ldda );
 
                 // do the cpu part
@@ -219,25 +219,25 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
 
             // do the small non-parallel computations
             if (s > (i+1)){
-                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
-                             nb, nb, 
+                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
+                             nb, nb,
                              c_one, inAT(i, i  ), ldda,
                                     inAT(i, i+1), ldda);
-                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
-                             nb, m-(i+1)*nb, nb, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans,
+                             nb, m-(i+1)*nb, nb,
                              c_neg_one, inAT(i,   i+1), ldda,
-                                        inAT(i+1, i  ), ldda, 
+                                        inAT(i+1, i  ), ldda,
                              c_one,     inAT(i+1, i+1), ldda );
             }
             else{
-                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
                              n-s*nb, nb,
                              c_one, inAT(i, i  ), ldda,
                                     inAT(i, i+1), ldda);
-                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans,
                              n-(i+1)*nb, m-(i+1)*nb, nb,
                              c_neg_one, inAT(i,   i+1), ldda,
-                                        inAT(i+1, i  ), ldda, 
+                                        inAT(i+1, i  ), ldda,
                              c_one,     inAT(i+1, i+1), ldda );
             }
         }
@@ -262,9 +262,9 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
             magma_zsetmatrix( rows, nb0, work, lda, dA, cols );
             magmablas_ztranspose2( inAT(s,s), ldda, dA, cols, rows, nb0);
     
-            magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+            magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
                          n-s*nb-nb0, nb0,
-                         c_one, inAT(s, s),     ldda, 
+                         c_one, inAT(s, s),     ldda,
                                 inAT(s, s)+nb0, ldda);
         }
         

@@ -11,10 +11,10 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs, 
+magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs,
                  magmaDoubleComplex *dA, magma_int_t ldda,
-                 magma_int_t *ipiv, 
-                 magmaDoubleComplex *dB, magma_int_t lddb, 
+                 magma_int_t *ipiv,
+                 magmaDoubleComplex *dB, magma_int_t lddb,
                  magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -25,7 +25,6 @@ magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs,
 
     Purpose
     =======
-
     Solves a system of linear equations
        A * X = B
     where A is a general N-by-N matrix and X and B are N-by-NRHS matrices.
@@ -38,7 +37,6 @@ magma_zgesv_gpu( magma_int_t n, magma_int_t nrhs,
 
     Arguments
     =========
-
     N       (input) INTEGER
             The order of the matrix A.  N >= 0.
 

@@ -11,10 +11,10 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs, 
+magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
                  magmaDoubleComplex *dA, magma_int_t ldda,
-                 magma_int_t *ipiv, 
-                 magmaDoubleComplex *dB, magma_int_t lddb, 
+                 magma_int_t *ipiv,
+                 magmaDoubleComplex *dB, magma_int_t lddb,
                  magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -25,14 +25,12 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
 
     Purpose
     =======
-
     Solves a system of linear equations
       A * X = B  or  A' * X = B
     with a general N-by-N matrix A using the LU factorization computed by ZGETRF_GPU.
 
     Arguments
     =========
-
     TRANS   (input) CHARACTER*1
             Specifies the form of the system of equations:
             = 'N':  A * X = B  (No transpose)
@@ -79,8 +77,8 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
     magma_int_t i1, i2, inc;
 
     *info = 0;
-    if ( (! notran) && 
-         (! lapackf77_lsame(trans_, "T")) && 
+    if ( (! notran) &&
+         (! lapackf77_lsame(trans_, "T")) &&
          (! lapackf77_lsame(trans_, "C")) ) {
         *info = -1;
     } else if (n < 0) {

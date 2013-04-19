@@ -19,7 +19,7 @@
 // === End defining what BLAS to use =======================================
 
 extern "C" magma_int_t
-magma_zgetrf_gpu(magma_int_t m, magma_int_t n, 
+magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
                  magmaDoubleComplex *dA, magma_int_t ldda,
                  magma_int_t *ipiv, magma_int_t *info)
 {
@@ -31,7 +31,6 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
 
     Purpose
     =======
-
     ZGETRF computes an LU factorization of a general M-by-N matrix A
     using partial pivoting with row interchanges.
 
@@ -45,7 +44,6 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
 
     Arguments
     =========
-
     M       (input) INTEGER
             The number of rows of the matrix A.  M >= 0.
 
@@ -165,14 +163,14 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
             magma_device_sync();
 
             if ( i>0 ) {
-                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
-                             n - (i+1)*nb, nb, 
-                             c_one, dAT(i-1,i-1), lddat, 
+                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
+                             n - (i+1)*nb, nb,
+                             c_one, dAT(i-1,i-1), lddat,
                                     dAT(i-1,i+1), lddat );
-                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
-                             n-(i+1)*nb, m-i*nb, nb, 
-                             c_neg_one, dAT(i-1,i+1), lddat, 
-                                        dAT(i,  i-1), lddat, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans,
+                             n-(i+1)*nb, m-i*nb, nb,
+                             c_neg_one, dAT(i-1,i+1), lddat,
+                                        dAT(i,  i-1), lddat,
                              c_one,     dAT(i,  i+1), lddat );
             }
 
@@ -190,25 +188,25 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
 
             // do the small non-parallel computations
             if ( s > (i+1) ) {
-                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
-                             nb, nb, 
+                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
+                             nb, nb,
                              c_one, dAT(i, i  ), lddat,
                                     dAT(i, i+1), lddat);
-                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
-                             nb, m-(i+1)*nb, nb, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans,
+                             nb, m-(i+1)*nb, nb,
                              c_neg_one, dAT(i,   i+1), lddat,
-                                        dAT(i+1, i  ), lddat, 
+                                        dAT(i+1, i  ), lddat,
                              c_one,     dAT(i+1, i+1), lddat );
             }
             else {
-                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
-                             n-s*nb, nb, 
+                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
+                             n-s*nb, nb,
                              c_one, dAT(i, i  ), lddat,
                                     dAT(i, i+1), lddat);
-                magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans,
                              n-(i+1)*nb, m-(i+1)*nb, nb,
                              c_neg_one, dAT(i,   i+1), lddat,
-                                        dAT(i+1, i  ), lddat, 
+                                        dAT(i+1, i  ), lddat,
                              c_one,     dAT(i+1, i+1), lddat );
             }
         }
@@ -233,9 +231,9 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
         magma_zsetmatrix( rows, nb0, work, lddwork, dAP, maxm );
         magmablas_ztranspose2( dAT(s,s), lddat, dAP, maxm, rows, nb0);
 
-        magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+        magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
                      n-s*nb-nb0, nb0,
-                     c_one, dAT(s,s),     lddat, 
+                     c_one, dAT(s,s),     lddat,
                             dAT(s,s)+nb0, lddat);
 
         if ( m == n ) {
