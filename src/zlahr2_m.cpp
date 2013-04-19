@@ -21,7 +21,7 @@ magma_zlahr2_m(
     magmaDoubleComplex *Y, magma_int_t ldy,
     struct zgehrd_data* data )
 {
-/*  -- MAGMA auxiliary routine (version 1.0) --
+/*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
@@ -29,7 +29,6 @@ magma_zlahr2_m(
 
     Purpose
     =======
-
     ZLAHR2 reduces the first NB columns of a complex general n-BY-(n-k+1)
     matrix A so that elements below the k-th subdiagonal are zero. The
     reduction is performed by an orthogonal similarity transformation
@@ -41,7 +40,6 @@ magma_zlahr2_m(
 
     Arguments
     =========
-
     N       (input) INTEGER
             The order of the matrix A.
 

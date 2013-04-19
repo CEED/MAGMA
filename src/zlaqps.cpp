@@ -1,11 +1,11 @@
 /*
-   -- MAGMA (version 1.1) --
-   Univ. of Tennessee, Knoxville
-   Univ. of California, Berkeley
-   Univ. of Colorado, Denver
-   November 2011
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
 
-   @precisions normal z -> s d c
+       @precisions normal z -> s d c
 
 */
 
@@ -24,12 +24,11 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
              magmaDoubleComplex *F,  magma_int_t ldf,
              magmaDoubleComplex *dF, magma_int_t lddf)
 {
-/*
-    -- MAGMA (version 1.1) --
-    Univ. of Tennessee, Knoxville
-    Univ. of California, Berkeley
-    Univ. of Colorado, Denver
-    November 2011
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
 
     Purpose
     =======
@@ -156,7 +155,7 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
             vn2[pvt] = vn2[k];
 
             if (pvt < nb){
-                /* no need of transfer if pivot is within the panel */ 
+                /* no need of transfer if pivot is within the panel */
                 blasf77_zswap( &m, A(0, pvt), &ione, A(0, k), &ione );
             }
             else {

@@ -101,7 +101,6 @@ magma_zlarfb_gpu( char side, char trans, char direct, char storev,
 
     Further Details
     ===============
-
     The shape of the matrix V and the storage of the vectors which define
     the H(i) is best illustrated by the following example with n = 5 and
     k = 3.

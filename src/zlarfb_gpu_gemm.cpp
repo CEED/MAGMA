@@ -106,12 +106,11 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
     WORKVT  (workspace) COMPLEX_16 array, dimension (LDWORKT,K)
 
     LDWORKVT(input) INTEGER
-            The leading dimension of the array WORKVT. 
+            The leading dimension of the array WORKVT.
             LDWORKVT >= max(1,min(M,N));
 
     Further Details
     ===============
-
     The shape of the matrix V and the storage of the vectors which define
     the H(i) is best illustrated by the following example with n = 5 and
     k = 3.
@@ -171,7 +170,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
 
     if ( side  == 'l' || side  == 'L' ) {
         // Form H C or H' C
-        // Comments assume H C. 
+        // Comments assume H C.
         // When forming H' C, T gets transposed via transt for m>=n or by trans for m<n.
         
         // W = C' V
@@ -182,13 +181,13 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                      c_zero, dwork, ldwork);
 
         if(m<n){
-            // W2 = V T 
+            // W2 = V T
             magma_zgemm( notransV, trans,
                          m, k, k,
                          c_one,  dV, ldv,
                                  dT, ldt,
                          c_zero, dworkvt, ldworkvt);
-            // C = C - W2 W' = C - V T V' C = (I - V T V') C = H C 
+            // C = C - W2 W' = C - V T V' C = (I - V T V') C = H C
             magma_zgemm( MagmaNoTrans, MagmaConjTrans,
                          m, n, k,
                          c_neg_one, dworkvt,  ldworkvt,
@@ -201,7 +200,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                          c_one,  dwork, ldwork,
                                  dT, ldt,
                          c_zero, dworkvt, ldworkvt);
-            // C = C - V W2' = C - V T V' C = (I - V T V') C = H C 
+            // C = C - V W2' = C - V T V' C = (I - V T V') C = H C
             magma_zgemm( notransV, MagmaConjTrans,
                          m, n, k,
                          c_neg_one, dV,  ldv,
@@ -211,7 +210,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
     }
     else {
         // Form C H or C H'
-        // Comments assume C H. 
+        // Comments assume C H.
         // When forming C H', T gets transposed via trans.
         
         // W = C V
@@ -234,7 +233,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                                     dV,    ldv,
                          c_one,     dC,    ldc);
         }else{
-            // W2 = T V' 
+            // W2 = T V'
             magma_zgemm( trans, transV,
                          k, n, k,
                          c_one,  dT, ldt,

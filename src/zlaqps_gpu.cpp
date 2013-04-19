@@ -1,11 +1,11 @@
 /*
-   -- MAGMA (version 1.1) --
-   Univ. of Tennessee, Knoxville
-   Univ. of California, Berkeley
-   Univ. of Colorado, Denver
-   November 2011
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
 
-   @precisions normal z -> s d c
+       @precisions normal z -> s d c
 
 */
 
@@ -21,7 +21,7 @@ extern "C" void
 magma_zlarfg2_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
                   magmaDoubleComplex *dtau, double *dxnorm, magmaDoubleComplex *dAkk);
 extern "C" void
-magma_zlarfg3_gpu(int n, magmaDoubleComplex *dx0_in, magmaDoubleComplex *dx0_out, 
+magma_zlarfg3_gpu(int n, magmaDoubleComplex *dx0_in, magmaDoubleComplex *dx0_out,
                   magmaDoubleComplex *dx, magmaDoubleComplex *dtau, double *dxnorm);
 extern "C" void
 magmablas_dznrm2_adjust(int k, double *xnorm, magmaDoubleComplex *c);
@@ -30,7 +30,7 @@ extern "C" void
 magmablas_dznrm2_row_adjust(int k, double *xnorm, magmaDoubleComplex *c, int inc);
 
 extern "C" void
-magmablas_dznrm2_row_check_adjust(int k, double tol, double *xnorm, double *xnorm2, 
+magmablas_dznrm2_row_check_adjust(int k, double tol, double *xnorm, double *xnorm2,
                                   magmaDoubleComplex *c, int ldc, double *lsticc);
 
 extern "C" void
@@ -42,17 +42,16 @@ extern "C" magma_int_t
 magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
              magma_int_t nb, magma_int_t *kb,
              magmaDoubleComplex *A,  magma_int_t lda,
-             magma_int_t *jpvt, magmaDoubleComplex *tau, 
+             magma_int_t *jpvt, magmaDoubleComplex *tau,
              double *vn1, double *vn2,
              magmaDoubleComplex *auxv,
              magmaDoubleComplex *F,  magma_int_t ldf)
 {
-/*
-    -- MAGMA (version 1.1) --
-    Univ. of Tennessee, Knoxville
-    Univ. of California, Berkeley
-    Univ. of Colorado, Denver
-    November 2011
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
 
     Purpose
     =======
@@ -162,7 +161,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         if (pvt != k) {
 
             /*if (pvt >= nb) {
-                // 1. Start copy from GPU 
+                // 1. Start copy from GPU
                 magma_zgetmatrix_async( m - offset - nb, 1,
                                         dA(offset + nb, pvt), ldda,
                                         A (offset + nb, pvt), lda, stream );
@@ -171,17 +170,17 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
             /* F gets swapped so F must be sent at the end to GPU   */
             i__1 = k;
             /*if (pvt < nb){
-                // no need of transfer if pivot is within the panel 
+                // no need of transfer if pivot is within the panel
                 blasf77_zswap( &m, A(0, pvt), &ione, A(0, k), &ione );
             }
             else {
-                // 1. Finish copy from GPU                         
+                // 1. Finish copy from GPU
                 magma_queue_sync( stream );
 
-                // 2. Swap as usual on CPU                        
+                // 2. Swap as usual on CPU
                 blasf77_zswap(&m, A(0, pvt), &ione, A(0, k), &ione);
 
-                // 3. Restore the GPU                            
+                // 3. Restore the GPU
                 magma_zsetmatrix_async( m - offset - nb, 1,
                                         A (offset + nb, pvt), lda,
                                         dA(offset + nb, pvt), ldda, stream);
@@ -218,7 +217,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
             #endif*/
 
 //#define RIGHT_UPDATE
-#ifdef  RIGHT_UPDATE
+#ifdef RIGHT_UPDATE
             i__1 = m - offset - nb;
             i__2 = k;
             magmablas_zgemv( MagmaNoTrans, i__1, i__2,
@@ -262,7 +261,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
 
         /* needed to avoid the race condition */
         if (k == 0) magma_zsetvector(  1,    &c_one,       1, A(rk, k), 1 );
-        else        magma_zcopymatrix( 1, 1, A(offset, 0), 1, A(rk, k), 1 ); 
+        else        magma_zcopymatrix( 1, 1, A(offset, 0), 1, A(rk, k), 1 );
 
         /* Compute Kth column of F:
            Compute  F(K+1:N,K) := tau(K)*A(RK:M,K+1:N)'*A(RK:M,K) on the GPU */
@@ -270,10 +269,10 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         if (k < n-1) {
             i__1 = m - rk;
             i__2 = n - k - 1;
-        
+
             /* Send the vector to the GPU */
             //magma_zsetmatrix( i__1, 1, A(rk, k), lda, dA(rk,k), ldda );
-        
+
             /* Multiply on GPU */
             // was CALL ZGEMV( 'Conjugate transpose', M-RK+1, N-K,
             //                 TAU( K ), A( RK,  K+1 ), LDA,
@@ -284,7 +283,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
                          tauk,   A( rk,  k+1 ), lda,
                                  A( rk,  k   ), 1,
                          c_zero, F( k+1, k   ), 1 );
-            //magma_zscal( m-rk, tau[k], F( k+1, k), 1 ); 
+            //magma_zscal( m-rk, tau[k], F( k+1, k), 1 );
             //magma_int_t i__3 = nb-k-1;
             //magma_int_t i__4 = i__2 - i__3;
             //magma_int_t i__5 = nb-k;
@@ -309,15 +308,15 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
             //               &c_one,  F(k+1+i__3, k ), &ione );
         }
         
-        /* Padding F(1:K,K) with zeros. 
+        /* Padding F(1:K,K) with zeros.
         for (j = 0; j <= k; ++j) {
             magma_zsetvector( 1, &c_zero, 1, F(j, k), 1 );
         }*/
         
         /* Incremental updating of F:
-           F(1:N,K) := F(1:N,K)                        - tau(K)*F(1:N,1:K-1)*A(RK:M,1:K-1)'*A(RK:M,K). 
+           F(1:N,K) := F(1:N,K)                        - tau(K)*F(1:N,1:K-1)*A(RK:M,1:K-1)'*A(RK:M,K).
            F(1:N,K) := tau(K)*A(RK:M,K+1:N)'*A(RK:M,K) - tau(K)*F(1:N,1:K-1)*A(RK:M,1:K-1)'*A(RK:M,K)
-                    := tau(K)(A(RK:M,K+1:N)' - F(1:N,1:K-1)*A(RK:M,1:K-1)') A(RK:M,K)  
+                    := tau(K)(A(RK:M,K+1:N)' - F(1:N,1:K-1)*A(RK:M,1:K-1)') A(RK:M,K)
            so, F is (updated A)*V */
         //if (k > 0 && k<n-1) {
         if (k > 0) {
@@ -389,14 +388,14 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
             magmablas_zgemm( MagmaNoTrans, MagmaConjTrans, ione, i__1, i__2,
                              c_neg_one, A(rk, 0  ), lda,
                                         F(k+1,0  ), ldf,
-                             c_one,     A(rk, k+1), lda ); 
+                             c_one,     A(rk, k+1), lda );
 #endif
         }
         
         /* Update partial column norms. */
         if (rk < min(m, n+offset)-1 ){
-            //magmablas_dznrm2_row_adjust(n-k-1, &vn1[k+1], A(rk,k+1), lda); 
-            magmablas_dznrm2_row_check_adjust(n-k-1, tol3z, &vn1[k+1], &vn2[k+1], A(rk,k+1), lda, lsticcs); 
+            //magmablas_dznrm2_row_adjust(n-k-1, &vn1[k+1], A(rk,k+1), lda);
+            magmablas_dznrm2_row_check_adjust(n-k-1, tol3z, &vn1[k+1], &vn2[k+1], A(rk,k+1), lda, lsticcs);
 
             magma_device_sync();
             #if defined(PRECISION_d) || defined(PRECISION_z)
@@ -404,20 +403,20 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
             #else
             magma_sgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
             #endif
-        } 
+        }
 
 
         /*if (rk < lastrk) {
             for (j = k + 1; j < n; ++j) {
                 if (vn1[j] != 0.) {
                     // NOTE: The following 4 lines follow from the analysis in
-                    //   Lapack Working Note 176. 
+                    //   Lapack Working Note 176.
                     temp = MAGMA_Z_ABS( *A(rk,j) ) / vn1[j];
                     temp = max( 0., ((1. + temp) * (1. - temp)) );
-        
+
                     d__1 = vn1[j] / vn2[j];
                     temp2 = temp * (d__1 * d__1);
-        
+
                     if (temp2 <= tol3z) {
                         vn2[j] = (double) lsticc;
                         lsticc = j;
@@ -447,7 +446,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         i__1 = m - rk - 1;
         i__2 = n - *kb;
         
-        /* Send F to the GPU 
+        /* Send F to the GPU
         magma_zsetmatrix( i__2, *kb,
                           F (*kb, 0), ldf,
                           dF(*kb, 0), i__2 );*/
@@ -473,7 +472,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         if (lsticc <= nb)
             vn1[lsticc] = cblas_dznrm2(i__1, A(rk + 1, lsticc), ione);
         else {
-            // Where is the data, CPU or GPU ? 
+            // Where is the data, CPU or GPU ?
             double r1, r2;
             
             r1 = cblas_dznrm2(nb-k, A(rk + 1, lsticc), ione);
@@ -483,13 +482,12 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         }
         
         // NOTE: The computation of VN1( LSTICC ) relies on the fact that
-        //   SNRM2 does not fail on vectors with norm below the value of SQRT(DLAMCH('S')) 
+        //   SNRM2 does not fail on vectors with norm below the value of SQRT(DLAMCH('S'))
         vn2[lsticc] = vn1[lsticc];
         lsticc = itemp;*/
     }
     magma_free(Aks);
     magma_free(lsticcs);
 
-    
     return MAGMA_SUCCESS;
 } /* magma_zlaqps */

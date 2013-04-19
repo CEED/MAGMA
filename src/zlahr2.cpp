@@ -22,39 +22,37 @@ magma_zlahr2(
     magmaDoubleComplex *T, magma_int_t ldt,
     magmaDoubleComplex *Y, magma_int_t ldy )
 {
-/*  -- MAGMA auxiliary routine (version 1.0) --
+/*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2011
 
-    Purpose   
-    =======   
-
-    ZLAHR2 reduces the first NB columns of a complex general n-BY-(n-k+1)   
-    matrix A so that elements below the k-th subdiagonal are zero. The   
-    reduction is performed by an orthogonal similarity transformation   
-    Q' * A * Q. The routine returns the matrices V and T which determine   
-    Q as a block reflector I - V*T*V', and also the matrix Y = A * V.   
+    Purpose
+    =======
+    ZLAHR2 reduces the first NB columns of a complex general n-BY-(n-k+1)
+    matrix A so that elements below the k-th subdiagonal are zero. The
+    reduction is performed by an orthogonal similarity transformation
+    Q' * A * Q. The routine returns the matrices V and T which determine
+    Q as a block reflector I - V*T*V', and also the matrix Y = A * V.
     (Note this is different than LAPACK, which computes Y = A * V * T.)
 
-    This is an auxiliary routine called by ZGEHRD.   
+    This is an auxiliary routine called by ZGEHRD.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
+    N       (input) INTEGER
+            The order of the matrix A.
 
-    N       (input) INTEGER   
-            The order of the matrix A.   
+    K       (input) INTEGER
+            The offset for the reduction. Elements below the k-th
+            subdiagonal in the first NB columns are reduced to zero.
+            K < N.
 
-    K       (input) INTEGER   
-            The offset for the reduction. Elements below the k-th   
-            subdiagonal in the first NB columns are reduced to zero.   
-            K < N.   
-
-    NB      (input) INTEGER   
+    NB      (input) INTEGER
             The number of columns to be reduced.
 
-    dA      (input/output) COMPLEX_16 array on the GPU, dimension (LDA,N-K+1)   
+    dA      (input/output) COMPLEX_16 array on the GPU, dimension (LDA,N-K+1)
             On entry, the n-by-(n-k+1) general matrix A.
             On exit, the elements in rows K:N of the first NB columns are
             overwritten with the matrix Y.
@@ -62,66 +60,66 @@ magma_zlahr2(
     DV      (output) COMPLEX_16 array on the GPU, dimension (N, NB)
             On exit this contains the Householder vectors of the transformation.
 
-    A       (input/output) COMPLEX_16 array, dimension (LDA,N-K+1)   
-            On entry, the n-by-(n-k+1) general matrix A.   
-            On exit, the elements on and above the k-th subdiagonal in   
-            the first NB columns are overwritten with the corresponding   
-            elements of the reduced matrix; the elements below the k-th   
-            subdiagonal, with the array TAU, represent the matrix Q as a   
-            product of elementary reflectors. The other columns of A are   
-            unchanged. See Further Details.   
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N-K+1)
+            On entry, the n-by-(n-k+1) general matrix A.
+            On exit, the elements on and above the k-th subdiagonal in
+            the first NB columns are overwritten with the corresponding
+            elements of the reduced matrix; the elements below the k-th
+            subdiagonal, with the array TAU, represent the matrix Q as a
+            product of elementary reflectors. The other columns of A are
+            unchanged. See Further Details.
 
-    LDA     (input) INTEGER   
-            The leading dimension of the array A.  LDA >= max(1,N).   
+    LDA     (input) INTEGER
+            The leading dimension of the array A.  LDA >= max(1,N).
 
-    TAU     (output) COMPLEX_16 array, dimension (NB)   
-            The scalar factors of the elementary reflectors. See Further   
-            Details.   
+    TAU     (output) COMPLEX_16 array, dimension (NB)
+            The scalar factors of the elementary reflectors. See Further
+            Details.
 
-    T       (output) COMPLEX_16 array, dimension (LDT,NB)   
-            The upper triangular matrix T.   
+    T       (output) COMPLEX_16 array, dimension (LDT,NB)
+            The upper triangular matrix T.
 
-    LDT     (input) INTEGER   
-            The leading dimension of the array T.  LDT >= NB.   
+    LDT     (input) INTEGER
+            The leading dimension of the array T.  LDT >= NB.
 
-    Y       (output) COMPLEX_16 array, dimension (LDY,NB)   
-            The n-by-nb matrix Y.   
+    Y       (output) COMPLEX_16 array, dimension (LDY,NB)
+            The n-by-nb matrix Y.
 
-    LDY     (input) INTEGER   
-            The leading dimension of the array Y. LDY >= N.   
+    LDY     (input) INTEGER
+            The leading dimension of the array Y. LDY >= N.
 
-    Further Details   
-    ===============   
-    The matrix Q is represented as a product of nb elementary reflectors   
+    Further Details
+    ===============
+    The matrix Q is represented as a product of nb elementary reflectors
 
-       Q = H(1) H(2) . . . H(nb).   
+       Q = H(1) H(2) . . . H(nb).
 
-    Each H(i) has the form   
+    Each H(i) has the form
 
-       H(i) = I - tau * v * v'   
+       H(i) = I - tau * v * v'
 
-    where tau is a complex scalar, and v is a complex vector with   
-    v(1:i+k-1) = 0, v(i+k) = 1; v(i+k+1:n) is stored on exit in   
-    A(i+k+1:n,i), and tau in TAU(i).   
+    where tau is a complex scalar, and v is a complex vector with
+    v(1:i+k-1) = 0, v(i+k) = 1; v(i+k+1:n) is stored on exit in
+    A(i+k+1:n,i), and tau in TAU(i).
 
-    The elements of the vectors v together form the (n-k+1)-by-nb matrix   
-    V which is needed, with T and Y, to apply the transformation to the   
-    unreduced part of the matrix, using an update of the form:   
-    A := (I - V*T*V') * (A - Y*T*V').   
+    The elements of the vectors v together form the (n-k+1)-by-nb matrix
+    V which is needed, with T and Y, to apply the transformation to the
+    unreduced part of the matrix, using an update of the form:
+    A := (I - V*T*V') * (A - Y*T*V').
 
-    The contents of A on exit are illustrated by the following example   
-    with n = 7, k = 3 and nb = 2:   
+    The contents of A on exit are illustrated by the following example
+    with n = 7, k = 3 and nb = 2:
 
-       ( a   a   a   a   a )   
-       ( a   a   a   a   a )   
-       ( a   a   a   a   a )   
-       ( h   h   a   a   a )   
-       ( v1  h   a   a   a )   
-       ( v1  v2  a   a   a )   
-       ( v1  v2  a   a   a )   
+       ( a   a   a   a   a )
+       ( a   a   a   a   a )
+       ( a   a   a   a   a )
+       ( h   h   a   a   a )
+       ( v1  h   a   a   a )
+       ( v1  v2  a   a   a )
+       ( v1  v2  a   a   a )
 
     where "a" denotes an element of the original matrix A, h denotes a
-    modified element of the upper Hessenberg matrix H, and vi denotes an   
+    modified element of the upper Hessenberg matrix H, and vi denotes an
     element of the vector defining H(i).
 
     This implementation follows the hybrid algorithm and notations described in

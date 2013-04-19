@@ -15,13 +15,13 @@
 
 extern "C" magma_int_t
 magma_zlahru(
-    magma_int_t n, magma_int_t ihi, magma_int_t k, magma_int_t nb, 
+    magma_int_t n, magma_int_t ihi, magma_int_t k, magma_int_t nb,
     magmaDoubleComplex *A, magma_int_t lda,
     magmaDoubleComplex *dA, magmaDoubleComplex *dY,
-    magmaDoubleComplex *dV, magmaDoubleComplex *dT, 
+    magmaDoubleComplex *dV, magmaDoubleComplex *dT,
     magmaDoubleComplex *dwork )
 {
-/*  -- MAGMA auxiliary routine (version 1.0) --
+/*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
