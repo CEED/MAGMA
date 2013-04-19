@@ -341,7 +341,6 @@ magma_zheevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 //#define ENABLE_TIMER
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
-
     start = get_current_time();
 #endif
 
@@ -350,7 +349,6 @@ magma_zheevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-
     printf("time zhetrd = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
@@ -366,15 +364,13 @@ magma_zheevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
         start = get_current_time();
 #endif
 
-       magma_zstedx_m(nrgpu, range, n, vl, vu, il, iu, w, &rwork[inde],
-                      &work[indwrk], n, &rwork[indrwk],
-                      llrwk, iwork, liwork, info);
+        magma_zstedx_m(nrgpu, range, n, vl, vu, il, iu, w, &rwork[inde],
+                       &work[indwrk], n, &rwork[indrwk],
+                       llrwk, iwork, liwork, info);
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time zstedc = %6.2f\n", GetTimerValue(start,end)/1000.);
-
         start = get_current_time();
 #endif
 
@@ -384,10 +380,9 @@ magma_zheevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
                        &work[indwrk + n * (il-1)], n, &work[indwk2], llwrk2, &iinfo);
 
         lapackf77_zlacpy("A", &n, m, &work[indwrk + n * (il-1)] , &n, a, &lda);
-
+        
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time zunmtr + copy = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 

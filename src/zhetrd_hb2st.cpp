@@ -1,17 +1,17 @@
 /*
- -- MAGMA (version 1.1) --
- Univ. of Tennessee, Knoxville
- Univ. of California, Berkeley
- Univ. of Colorado, Denver
- November 2011
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+       
+       @author Azzam Haidar
+       @author Stan Tomov
+       @author Raffaele Solca
 
- @author Azzam Haidar
- @author Stan Tomov
- @author Raffaele Solca
+       @precisions normal z -> s d c
 
- @precisions normal z -> s d c
-
- */
+*/
 #include "common_magma.h"
 #include "magma_bulge.h"
 #include <cblas.h>
@@ -134,7 +134,7 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
                                           magmaDoubleComplex *A, magma_int_t lda, double *D, double *E,
                                           magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU, magma_int_t compT, magmaDoubleComplex *T, magma_int_t ldt)
 {
-    /*  -- MAGMA (version 1.1) --
+/*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver

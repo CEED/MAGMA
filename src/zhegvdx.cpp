@@ -185,7 +185,6 @@ magma_zhegvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
 
     Further Details
     ===============
-
     Based on contributions by
        Mark Fahey, Department of Mathematics, Univ. of Kentucky, USA
 
@@ -343,7 +342,6 @@ magma_zhegvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
 #ifdef ENABLE_TIMER
     end = get_current_time();
     printf("time zhegst_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
-
     start = get_current_time();
 #endif
 

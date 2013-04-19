@@ -209,7 +209,6 @@ magma_zhegvdx_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char range, cha
 
     Further Details
     ===============
-
     Based on contributions by
        Mark Fahey, Department of Mathematics, Univ. of Kentucky, USA
 
@@ -316,7 +315,6 @@ magma_zhegvdx_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char range, cha
 //#define ENABLE_TIMER
 #ifdef ENABLE_TIMER
         magma_timestr_t start, end;
-
         start = get_current_time();
 #endif
 
@@ -328,9 +326,7 @@ magma_zhegvdx_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char range, cha
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time zpotrf = %6.2f\n", GetTimerValue(start,end)/1000.);
-
         start = get_current_time();
 #endif
 
@@ -339,9 +335,7 @@ magma_zhegvdx_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char range, cha
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time zhegst = %6.2f\n", GetTimerValue(start,end)/1000.);
-
         start = get_current_time();
 #endif
 
@@ -349,7 +343,6 @@ magma_zhegvdx_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char range, cha
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time zheevd = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
@@ -391,7 +384,6 @@ magma_zhegvdx_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char range, cha
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time setmatrices trsm/mm + getmatrices = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
     }

@@ -1,13 +1,13 @@
 /*
-   -- MAGMA (version 1.1) --
-      Univ. of Tennessee, Knoxville
-      Univ. of California, Berkeley
-      Univ. of Colorado, Denver
-      November 2011
-
-      @author Raffaele Solca
-
-      @precisions normal z -> c
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+    
+       @author Raffaele Solca
+    
+       @precisions normal z -> c
 
 */
 #include "common_magma.h"
@@ -24,11 +24,11 @@ void magma_zmove_eig(char range, magma_int_t n, double *w, magma_int_t *il,
     indeig = lapackf77_lsame( range_, "I" );
 
     if (indeig){
-      *m = *iu - *il + 1;
-      if(*il > 1)
-        for (i = 0; i < *m; ++i)
-          w[i] = w[*il - 1 + i];
-    }
+        *m = *iu - *il + 1;
+        if(*il > 1)
+            for (i = 0; i < *m; ++i)
+                w[i] = w[*il - 1 + i];
+    }     
     else if(valeig){
         *il=1;
         *iu=n;
@@ -434,7 +434,6 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-
         printf("time zstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 

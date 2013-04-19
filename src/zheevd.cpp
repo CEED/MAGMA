@@ -314,7 +314,6 @@ magma_zheevd(char jobz, char uplo,
 #ifdef ENABLE_TIMER
         end = get_current_time();
         printf("time zstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
-
         start = get_current_time();
 #endif
 
