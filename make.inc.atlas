@@ -6,10 +6,10 @@
 #      November 2011
 #//////////////////////////////////////////////////////////////////////////////
 
-#
 # GPU_TARGET specifies for which GPU you want to compile MAGMA:
-#     "Tesla" (NVIDIA compute capability 1.x cards)
-#     "Fermi" (NVIDIA compute capability 2.x cards)
+#     "Tesla"  (NVIDIA compute capability 1.x cards)
+#     "Fermi"  (NVIDIA compute capability 2.x cards)
+#     "Kepler" (NVIDIA compute capability 3.x cards)
 # See http://developer.nvidia.com/cuda-gpus
 
 GPU_TARGET = Fermi
@@ -22,18 +22,24 @@ ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
 
-OPTS      = -O3 -DADD_
+# CUDA 5 needs -DCUBLAS_GFORTRAN or appropriate setting to compile cuda/src/fortran.c bindings
+OPTS      = -O3 -DADD_ -DCUBLAS_GFORTRAN
 F77OPTS   = -O3 -DADD_
 FOPTS     = -O3 -DADD_ -x f95-cpp-input
-NVOPTS    = -O3 -DADD_ --compiler-options -fno-strict-aliasing -DUNIX
-LDOPTS    = -fPIC -Xlinker -zmuldefs
+NVOPTS    = -O3 -DADD_ -Xcompiler -fno-strict-aliasing
+LDOPTS    = 
 
-LIB       = /home/tomov/LIB/lapack-lite-3.1.1/lapack_LINUX64.a \
-            -lf77blas -latlas -lcblas -lf2c -lcublas -lm
+# Depending on how ATLAS and LAPACK were compiled, you may need one or more of:
+# -lifcore -ldl -lf2c -lgfortran
+LIB       = -llapack -lf77blas -latlas -lcblas -lcublas -lm -lgfortran -lifcore
 
-CUDADIR   = /usr/local/cuda-3.0
+# define library directories here or in your environment
+#LAPACKDIR = $HOME/src/lapack-3.4.2
+#ATLASDIR  = /mnt/scratch/sw/atlas-gcc
+#CUDADIR   = /usr/local/cuda
 
-LIBDIR    = -L/home/tomov/LIB/ATLAS/lib/Linux_UNKNOWNSSE2 \
-            -L/home/tomov/LIB/CLAPACK-3.1.1/F2CLIBS/ \
+LIBDIR    = -L$(LAPACKDIR) \
+            -L$(ATLASDIR)/lib \
             -L$(CUDADIR)/lib64
+
 INC       = -I$(CUDADIR)/include

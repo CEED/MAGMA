@@ -8,10 +8,10 @@
 #      Contributed by: Massimiliano Fatica (NVIDIA)
 #//////////////////////////////////////////////////////////////////////////////
 
-#
 # GPU_TARGET specifies for which GPU you want to compile MAGMA:
-#     "Tesla" (NVIDIA compute capability 1.x cards)
-#     "Fermi" (NVIDIA compute capability 2.x cards)
+#     "Tesla"  (NVIDIA compute capability 1.x cards)
+#     "Fermi"  (NVIDIA compute capability 2.x cards)
+#     "Kepler" (NVIDIA compute capability 3.x cards)
 # See http://developer.nvidia.com/cuda-gpus
 
 GPU_TARGET = Tesla
@@ -26,17 +26,20 @@ RANLIB    = ranlib
 
 # use -m32 to compile with 32-bit long & pointers.
 # use -m64 to compile with 64-bit long & pointers (lp64). int is still 32-bit.
+# currently, there are RUNTIME ERRORS with 64-bit on MacOS!
 # add -DNDEBUG to disable asserts and certain error checks.
 # CUDA 5 needs -DCUBLAS_GFORTRAN or appropriate setting to compile cuda/src/fortran.c bindings
 OPTS      = -Wall -m32 -O3 -DADD_ -DCUBLAS_GFORTRAN
 F77OPTS   = -Wall -m32 -O3 -DADD_
 FOPTS     = -Wall -m32 -O3 -DADD_ -x f95-cpp-input
-NVOPTS    =       -m32 -O3 -DADD_ --compiler-options -fno-strict-aliasing -DUNIX
-LDOPTS    = -Wall -m32 -fPIC
+NVOPTS    =       -m32 -O3 -DADD_ -Xcompiler -fno-strict-aliasing
+LDOPTS    = -Wall -m32
 
-LIB       = -framework Accelerate -lcublas -lcudart -lm -lstdc++.6
+LIB       = -framework Accelerate -lcublas -lcudart -lm
 
-CUDADIR   = /usr/local/cuda
+# define library directories here or in your environment
+#CUDADIR   = /usr/local/cuda
 
-LIBDIR    = -L$(CUDADIR)/lib 
+LIBDIR    = -L$(CUDADIR)/lib
+
 INC       = -I$(CUDADIR)/include

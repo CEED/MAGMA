@@ -7,8 +7,9 @@
 #//////////////////////////////////////////////////////////////////////////////
 
 # GPU_TARGET specifies for which GPU you want to compile MAGMA:
-#     "Tesla" (NVIDIA compute capability 1.x cards)
-#     "Fermi" (NVIDIA compute capability 2.x cards)
+#     "Tesla"  (NVIDIA compute capability 1.x cards)
+#     "Fermi"  (NVIDIA compute capability 2.x cards)
+#     "Kepler" (NVIDIA compute capability 3.x cards)
 # See http://developer.nvidia.com/cuda-gpus
 
 GPU_TARGET = Fermi
@@ -25,8 +26,8 @@ RANLIB    = ranlib
 OPTS      = -O3 -DADD_ -DCUBLAS_GFORTRAN
 F77OPTS   = -O3 -DADD_
 FOPTS     = -O3 -DADD_
-NVOPTS    = -O3 -DADD_ --compiler-options -fno-strict-aliasing -DUNIX
-LDOPTS    = -fPIC -Xlinker -zmuldefs
+NVOPTS    = -O3 -DADD_ -Xcompiler -fno-strict-aliasing
+LDOPTS    = 
 
 # old MKL
 #LIB       = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_lapack -lmkl_core -lguide -lpthread -lcublas -lcudart -lm
@@ -35,11 +36,12 @@ LDOPTS    = -fPIC -Xlinker -zmuldefs
 # icc with MKL 10.3
 LIB       = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lcublas -lcudart -lm -openmp
 
-# define these in your environment
+# define library directories here or in your environment
 # for MKL run, e.g.: /opt/sw/intel/2011.2.137/mkl/bin/mklvars.sh intel64
 #MKLROOT   = /opt/intel/2011.2.137/composerxe-2011.2.137/mkl
 #CUDADIR   = /usr/local/cuda
 
 LIBDIR    = -L$(MKLROOT)/lib/intel64 \
             -L$(CUDADIR)/lib64
+
 INC       = -I$(CUDADIR)/include

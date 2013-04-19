@@ -5,34 +5,39 @@
 #      Univ. of Colorado, Denver
 #      November 2011
 #//////////////////////////////////////////////////////////////////////////////
-#
-# GPU_TARGET specifies for which GPU you want to compile MAGMA
-#      0: Tesla family
-#      1: Fermi Family
-#
+
+# GPU_TARGET specifies for which GPU you want to compile MAGMA:
+#     "Tesla"  (NVIDIA compute capability 1.x cards)
+#     "Fermi"  (NVIDIA compute capability 2.x cards)
+#     "Kepler" (NVIDIA compute capability 3.x cards)
+# See http://developer.nvidia.com/cuda-gpus
+
 GPU_TARGET = Fermi
 
-CC        = gcc -shared
+CC        = gcc
 NVCC      = nvcc
 FORT      = gfortran
 
-ARCH      = gcc
-ARCHFLAGS = -shared -o
-RANLIB    = strip
+ARCH      = ar
+ARCHFLAGS = cr
+RANLIB    = ranlib
 
-OPTS      = -DADD_ -O3 -fPIC
-F77OPTS   = -DADD_ -O3 -fPIC
-FOPTS     = -DADD_ -O3 -fPIC -x f95-cpp-input
-NVOPTS    = -DADD_ -O3 -fPIC --shared --compiler-options  -DUNIX
-LDOPTS    = -Xlinker -zmuldefs
+# CUDA 5 needs -DCUBLAS_GFORTRAN or appropriate setting to compile cuda/src/fortran.c bindings
+OPTS      = -fPIC -DADD_ -O3 -DCUBLAS_GFORTRAN
+F77OPTS   = -fPIC -DADD_ -O3
+FOPTS     = -fPIC -DADD_ -O3 -x f95-cpp-input
+NVOPTS    =       -DADD_ -O3 -Xcompiler "-fno-strict-aliasing -fPIC"
+LDOPTS    = -fPIC
 
-LIB       = -lmkl_em64t -lguide -lpthread -lcublas -lm 
+# gcc with MKL 10.3, Intel threads
+LIB       = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lcublas -lcudart -lm -fopenmp -liomp5
 
-CUDADIR   = /usr/local/cuda
+# define library directories here or in your environment
+# for MKL run, e.g.: /opt/sw/intel/2011.2.137/mkl/bin/mklvars.sh intel64
+#MKLROOT   = /opt/intel/2011.2.137/composerxe-2011.2.137/mkl
+#CUDADIR   = /usr/local/cuda
 
-LIBDIR    = -L/home/tomov/intel/mkl/10.0.1.014/lib/em64t \
+LIBDIR    = -L$(MKLROOT)/lib/intel64 \
             -L$(CUDADIR)/lib64
-INC       = -I$(CUDADIR)/include
 
-LIBMAGMA     = $(MAGMA_DIR)/lib/libmagma.so
-LIBMAGMABLAS = $(MAGMA_DIR)/lib/libmagmablas.so
+INC       = -I$(CUDADIR)/include

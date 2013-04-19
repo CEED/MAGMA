@@ -6,32 +6,38 @@
 #      November 2011
 #//////////////////////////////////////////////////////////////////////////////
 
-#
 # GPU_TARGET specifies for which GPU you want to compile MAGMA:
-#     "Tesla" (NVIDIA compute capability 1.x cards)
-#     "Fermi" (NVIDIA compute capability 2.x cards)
+#     "Tesla"  (NVIDIA compute capability 1.x cards)
+#     "Fermi"  (NVIDIA compute capability 2.x cards)
+#     "Kepler" (NVIDIA compute capability 3.x cards)
 # See http://developer.nvidia.com/cuda-gpus
 
 GPU_TARGET = Fermi
 
 CC        = gcc
 NVCC      = nvcc
-FORT      = ifort
+FORT      = gfortran
 
 ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
 
-OPTS      = -O3 -DADD_ -fPIC
+# CUDA 5 needs -DCUBLAS_GFORTRAN or appropriate setting to compile cuda/src/fortran.c bindings
+OPTS      = -O3 -DADD_ -DCUBLAS_GFORTRAN
 F77OPTS   = -O3 -DADD_
-FOPTS     = -O3 -DADD_
-NVOPTS    = -O3 -DADD_ --compiler-options -fno-strict-aliasing -DUNIX
-LDOPTS    = -fPIC -Xlinker -zmuldefs
+FOPTS     = -O3 -DADD_ -x f95-cpp-input
+NVOPTS    = -O3 -DADD_ -Xcompiler -fno-strict-aliasing
+LDOPTS    = 
 
-LIB       = -lacml -lpthread -lcublas -lm 
+LIB       = -lacml_mp -lacml_mv -lcblas -lcublas -lm
 
-CUDADIR   = /sw/analysis-x64/cuda/2.3/sl5.0_binary/
+# define library directories here or in your environment
+#ACMLDIR   = /mnt/scratch/sw/acml-4.4.0/gfortran_mp
+#CBLASDIR  = $(HOME)/src/cblas
+#CUDADIR   = /usr/local/cuda
 
-LIBDIR    = -L/sw/analysis-x64/acml/4.1.0/sl5_binary/pgi64/lib \
-            -L$(CUDADIR)/lib64 
+LIBDIR    = -L$(ACMLDIR)/lib \
+            -L$(CBLASDIR)/lib \
+            -L$(CUDADIR)/lib64
+
 INC       = -I$(CUDADIR)/include
