@@ -1,11 +1,11 @@
 /*
-  -- MAGMA (version 1.1) --
-  Univ. of Tennessee, Knoxville
-  Univ. of California, Berkeley
-  Univ. of Colorado, Denver
-  November 2011
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
 
-  @precisions mixed zc -> ds
+       @precisions mixed zc -> ds
 
 */
 #include "common_magma.h"

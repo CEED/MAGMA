@@ -1,11 +1,11 @@
 /*
-   -- MAGMA (version 1.1) --
-   Univ. of Tennessee, Knoxville
-   Univ. of California, Berkeley
-   Univ. of Colorado, Denver
-   November 2011
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
 
-   @precisions normal z -> s d c
+       @precisions normal z -> s d c
 
 */
 
@@ -60,10 +60,10 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
 {
 /*
     -- MAGMA (version 1.1) --
-    Univ. of Tennessee, Knoxville
-    Univ. of California, Berkeley
-    Univ. of Colorado, Denver
-    November 2011
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
 
     Purpose
     =======

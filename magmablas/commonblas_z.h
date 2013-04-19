@@ -1,15 +1,15 @@
 /*
- *   -- MAGMA (version 1.1) --
- *      Univ. of Tennessee, Knoxville
- *      Univ. of California, Berkeley
- *      Univ. of Colorado, Denver
- *      November 2011
- *
- * @precisions normal z -> s d c
- */
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
 
-#ifndef _COMMONBLAS_Z_H_
-#define _COMMONBLAS_Z_H_
+       @precisions normal z -> s d c
+*/
+
+#ifndef COMMONBLAS_Z_H
+#define COMMONBLAS_Z_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,4 +41,4 @@ void magmablas_zgemm_fermi64(char tA, char tB, magma_int_t m, magma_int_t n, mag
 }
 #endif
 
-#endif /* _COMMONBLAS_Z_H_ */
+#endif /* COMMONBLAS_Z_H */
