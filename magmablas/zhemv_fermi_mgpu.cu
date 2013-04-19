@@ -1276,6 +1276,7 @@ magmablas_zhemv2_mgpu( char uplo, magma_int_t n,
 
 
 
+/*
 __global__ void 
 kernel_fillZero(cuDoubleComplex *A, magma_int_t size)
 {
@@ -1298,6 +1299,7 @@ void fillZero(cuDoubleComplex *A, magma_int_t size)
     kernel_fillZero<<<grid, threads>>>(A, size);
 
 }
+*/
 
 
 #endif /* (GPUSHMEM >= 200) */
