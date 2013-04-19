@@ -290,8 +290,6 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
                 magma_zsetmatrix_async(kb, kb,
                                        t,               kb,
                                        dt(igpu, ind_c), kb, stream[igpu][0] );
-
-
             }
 
             for (igpu = 0; igpu < nrgpu; ++igpu){

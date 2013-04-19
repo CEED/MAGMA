@@ -6,7 +6,7 @@
        November 2011
 
        @precisions normal z -> s d c
-       
+
        @author Stan Tomov
        @author Mark Gates
 */
