@@ -1,13 +1,13 @@
 /*
- *  -- MAGMA (version 1.1) --
- *     Univ. of Tennessee, Knoxville
- *     Univ. of California, Berkeley
- *     Univ. of Colorado, Denver
- *     November 2011
- *
- * @precisions normal z -> c d s
- *
- **/
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+  
+       @precisions normal z -> c d s
+       @author Mark Gates
+*/
 // includes, system
 #include <stdlib.h>
 #include <stdio.h>
