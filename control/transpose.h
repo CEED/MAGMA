@@ -1,24 +1,18 @@
-/**
- *
- * @file transpose.h
- *
- *  MAGMA (version 1.1) --
- *  Univ. of Tennessee, Knoxville
- *  Univ. of California, Berkeley
- *  Univ. of Colorado, Denver
- *  November 2011
- *
- * @version 1.0.0
- * @author Mathieu Faverge
- * @date 2010-11
- *
- * Macro to transpose matrices before and after computation
- * in LU kernels
- *
- **/
+/*
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+ 
+       @author Mathieu Faverge
+ 
+       Macro to transpose matrices before and after computation
+       in LU kernels
+*/
 
-#ifndef _MAGMA_TRANSPOSE_H_
-#define _MAGMA_TRANSPOSE_H_
+#ifndef MAGMA_TRANSPOSE_H
+#define MAGMA_TRANSPOSE_H
 
 #define magmablas_sgetmo_in( dA, dAT, ldda, m, n )              \
   dAT = dA;                                                     \
@@ -96,4 +90,4 @@
     cublasFree(dAT);                                            \
   }
 
-#endif /* _MAGMA_TRANSPOSE_H_ */
+#endif /* MAGMA_TRANSPOSE_H */

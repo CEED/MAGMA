@@ -1,26 +1,20 @@
-/**
- *
- * @file common_magma.h
- *
- *  MAGMA (version 1.1) --
- *  Univ. of Tennessee, Knoxville
- *  Univ. of California, Berkeley
- *  Univ. of Colorado, Denver
- *  November 2011
- *
- * @version 1.0.0
- * @author Mathieu Faverge
- * @date 2010-11
- *
- * Based on PLASMA common.h
- *
- **/
+/*
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+ 
+       @author Mathieu Faverge
+ 
+       Based on PLASMA common.h
+*/
 
 /***************************************************************************//**
  *  MAGMA facilities of interest to both src and magmablas directories
  **/
-#ifndef _MAGMA_COMMON_H_
-#define _MAGMA_COMMON_H_
+#ifndef MAGMA_COMMON_H
+#define MAGMA_COMMON_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -103,4 +97,4 @@
 #define magma_dsqrt sqrt
 #define magma_ssqrt sqrtf
 
-#endif /* _MAGMA_COMMON_H_ */
+#endif /* MAGMA_COMMON_H */

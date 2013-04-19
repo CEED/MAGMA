@@ -47,14 +47,14 @@ extern "C" {
 #endif
 
 /*
- *   -- MAGMA (version 1.1) --
- *      Univ. of Tennessee, Knoxville
- *      Univ. of California, Berkeley
- *      Univ. of Colorado, Denver
- *      November 2011
- *
- * @precisions normal z -> s d c
- */
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+       @precisions normal z -> s d c
+*/
 
 
 

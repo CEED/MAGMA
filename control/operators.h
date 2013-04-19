@@ -1,16 +1,14 @@
-/**
- *
- *  @file operators.h
- *
- *  MAGMA (version 1.1) --
- *  Univ. of Tennessee, Knoxville
- *  Univ. of California, Berkeley
- *  Univ. of Colorado, Denver
- *  November 2011
- *
- * @author Mathieu Faverge
- * @author Mark Gates
- **/
+/*
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+ 
+       @author Mathieu Faverge
+       @author Mark Gates
+*/
+
 #ifndef MAGMA_OPERATORS_H
 #define MAGMA_OPERATORS_H
 
