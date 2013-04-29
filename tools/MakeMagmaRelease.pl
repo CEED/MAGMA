@@ -193,15 +193,16 @@ sub MakeRelease
 
 sub Usage
 {
-    print "MakeRelease.pl [-h] [-u username] [-r revision] Major Minor Micro\n";
-    print "   -h   Print this help\n";
-    print "   -r   Choose svn release number\n";
-    print "   -s   Choose magma directory for export\n";
-    print "   -u   username\n";
+    print "MakeRelease.pl [options] Major Minor Micro\n";
+    print "   -h            Print this help\n";
+    print "   -c candidate  Release candidate number\n";
+    print "   -r revision   Choose svn revision number\n";
+    print "   -s url        Choose svn repository for export (default: $svn)\n";
+    print "   -u username   SVN username\n";
 }
 
 my %opts;
-getopts("hd:u:r:s:c:",\%opts);
+getopts("hu:r:s:c:",\%opts);
 
 if ( defined $opts{h}  ) {
     Usage();
@@ -219,7 +220,7 @@ if ( defined $opts{s} ) {
 if ( defined $opts{c} ) {
     $rc = $opts{c};
 }
-if ( ($#ARGV + 1) < 3 ) {
+if ( ($#ARGV + 1) != 3 ) {
     Usage();
     exit;
 }
