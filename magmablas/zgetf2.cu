@@ -19,7 +19,7 @@ void  magma_zswap(int n, cuDoubleComplex *x, int i, int j, int lda);
 void magma_zscal_zgeru(int, int, cuDoubleComplex *, int);
 
 
-int magma_zgetf2(int m, int n, cuDoubleComplex *A, int lda, int *ipiv, int* info)
+int magma_zgetf2_gpu(int m, int n, cuDoubleComplex *A, int lda, int *ipiv, int* info)
 {
    
 /*  ZGETF2 computes an LU factorization of a general m-by-n matrix A */

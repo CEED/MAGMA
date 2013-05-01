@@ -26,7 +26,7 @@ void zpotf2_zdotc(int n, cuDoubleComplex *x, int incx);
 void  zlacgv(int n, cuDoubleComplex *x, int incx);
 #endif
 
-int magma_zpotf2(char uplo, int n, cuDoubleComplex *A, int lda, int *info)
+int magma_zpotf2_gpu(char uplo, int n, cuDoubleComplex *A, int lda, int *info)
 {
    
 /*  Purpose */
