@@ -58,10 +58,6 @@ ZSRC := \
 	dtrsm_work.cu		\
 	strsm_work.cu		\
 
-# not yet released
-#   zpotf2.cu \
-#	zgetf2.cu \
-
 # multi-GPU
 ZSRC += \
 	zbcyclic.cu			\
@@ -69,6 +65,11 @@ ZSRC += \
 	zsetmatrix_transpose_mgpu.cu	\
 	zhemv_fermi_mgpu_32.cu		\
 	zhemv_fermi_mgpu.cu		\
+
+# panels for one-sided factorizations in CUDA
+ZSRC += \
+	zgetf2.cu                       \
+	zpotf2.cu                       \
 
 # not yet released
 #	zhemm_1gpu.cpp			\
