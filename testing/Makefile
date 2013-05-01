@@ -49,6 +49,7 @@ ZSRC += \
 	\
 	testing_zposv_gpu.cpp	\
 	testing_zpotrf_gpu.cpp	\
+	testing_zpotf2_gpu.cpp  \
 	testing_zpotri_gpu.cpp	\
 	\
 	testing_zpotrf_mgpu.cpp	\
@@ -66,6 +67,7 @@ ZSRC += \
 	\
 	testing_zgesv_gpu.cpp	\
 	testing_zgetrf_gpu.cpp	\
+	testing_zgetf2_gpu.cpp  \
 	testing_zgetri_gpu.cpp	\
 	\
 	testing_zgetrf_mgpu.cpp	\
