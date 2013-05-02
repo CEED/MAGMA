@@ -331,11 +331,15 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
     memset(TAU, 0, blkcnt*Vblksiz*sizeof(magmaDoubleComplex));
     memset(V,   0, blkcnt*ldv*Vblksiz*sizeof(magmaDoubleComplex));
 
-    magma_int_t* prog = new magma_int_t[2*nbtiles+threads+10];
+    magma_int_t* prog;
+    magma_malloc_cpu((void**) &prog, (2*nbtiles+threads+10)*sizeof(magma_int_t));
     memset(prog, 0, (2*nbtiles+threads+10)*sizeof(magma_int_t));
 
-    bulge_id_data* arg = new bulge_id_data[threads];
-    pthread_t* thread_id = new pthread_t[threads];
+    bulge_id_data* arg;
+    magma_malloc_cpu((void**) &arg, threads*sizeof(bulge_id_data));
+
+    pthread_t* thread_id;
+    magma_malloc_cpu((void**) &thread_id, threads*sizeof(pthread_t));
 
     pthread_attr_t thread_attr;
 
@@ -380,9 +384,9 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
     timeblg = magma_wtime()-timeblg;
 
 
-    delete[] thread_id;
-    delete[] arg;
-    delete[] prog;
+    magma_free_cpu(thread_id);
+    magma_free_cpu(arg);
+    magma_free_cpu(prog);
 
     printf("  Finish BULGE+T timing= %lf \n" ,timeblg);
 
@@ -531,8 +535,11 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
 
                 applyQ_data data_applyQ(threads, n, ne, n_gpu, nb, Vblksiz, wantz, A, lda, V, ldv, TAU, T, ldt, da, lda);
 
-                applyQ_id_data* arg = new applyQ_id_data[threads];
-                pthread_t* thread_id = new pthread_t[threads];
+                applyQ_id_data* arg;
+                magma_malloc_cpu((void**) &arg, threads*sizeof(applyQ_id_data));
+
+                pthread_t* thread_id;
+                magma_malloc_cpu((void**) &thread_id, threads*sizeof(pthread_t));
 
                 //pthread_attr_t thread_attr;
 
@@ -560,8 +567,8 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
                     pthread_join(thread_id[thread], &exitcodep);
                 }
 
-                delete[] thread_id;
-                delete[] arg;
+                magma_free_cpu(thread_id);
+                magma_free_cpu(arg);
 
                 magma_zsetmatrix( n-n_gpu, n, &A[n_gpu], lda, &da[n_gpu], lda);
 
@@ -655,8 +662,11 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
 
                 applyQ_data data_applyQ(threads, n, ne, n_gpu, nb, Vblksiz, wantz, Z, ldz, V, ldv, TAU, T, ldt, dZ, n);
 
-                applyQ_id_data* arg = new applyQ_id_data[threads];
-                pthread_t* thread_id = new pthread_t[threads];
+                applyQ_id_data* arg;
+                magma_malloc_cpu((void**) &arg, threads*sizeof(applyQ_id_data));
+
+                pthread_t* thread_id;
+                magma_malloc_cpu((void**) &thread_id, threads*sizeof(pthread_t));
 
                 pthread_attr_t thread_attr;
 
@@ -684,8 +694,8 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
                     pthread_join(thread_id[thread], &exitcodep);
                 }
 
-                delete[] thread_id;
-                delete[] arg;
+                magma_free_cpu(thread_id);
+                magma_free_cpu(arg);
 
                 magma_zsetmatrix(n, ne-n_gpu, Z + n_gpu*ldz, ldz, dZ + n_gpu*ldz, n);
 

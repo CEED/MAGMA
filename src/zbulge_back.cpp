@@ -173,8 +173,11 @@ extern "C" magma_int_t magma_zbulge_back(magma_int_t threads, char uplo, magma_i
 
         magma_zapplyQ_data data_applyQ(threads, n, ne, n_gpu, nb, Vblksiz, Z, ldz, V, ldv, TAU, T, ldt, dZ, lddz);
 
-        magma_zapplyQ_id_data* arg = new magma_zapplyQ_id_data[threads];
-        pthread_t* thread_id = new pthread_t[threads];
+        magma_zapplyQ_id_data* arg;
+        magma_malloc_cpu((void**) &arg, threads*sizeof(magma_zapplyQ_id_data));
+
+        pthread_t* thread_id;
+        magma_malloc_cpu((void**) &thread_id, threads*sizeof(pthread_t));
 
         pthread_attr_t thread_attr;
 
@@ -202,8 +205,8 @@ extern "C" magma_int_t magma_zbulge_back(magma_int_t threads, char uplo, magma_i
             pthread_join(thread_id[thread], &exitcodep);
         }
 
-        delete[] thread_id;
-        delete[] arg;
+        magma_free_cpu(thread_id);
+        magma_free_cpu(arg);
 
         magma_zsetmatrix(n, ne-n_gpu, Z + n_gpu*ldz, ldz, dZ + n_gpu*ldz, lddz);
 

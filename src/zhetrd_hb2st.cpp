@@ -221,11 +221,15 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
     memset(TAU, 0, blkcnt*Vblksiz*sizeof(magmaDoubleComplex));
     memset(V,   0, blkcnt*ldv*Vblksiz*sizeof(magmaDoubleComplex));
 
-    magma_int_t* prog = new magma_int_t[2*nbtiles+threads+10];
+    magma_int_t* prog;
+    magma_malloc_cpu((void**) &prog, (2*nbtiles+threads+10)*sizeof(magma_int_t));
     memset(prog, 0, (2*nbtiles+threads+10)*sizeof(magma_int_t));
 
-    magma_zbulge_id_data* arg = new magma_zbulge_id_data[threads];
-    pthread_t* thread_id = new pthread_t[threads];
+    magma_zbulge_id_data* arg;
+    magma_malloc_cpu((void**) &arg, threads*sizeof(magma_zbulge_id_data));
+
+    pthread_t* thread_id;
+    magma_malloc_cpu((void**) &thread_id, threads*sizeof(pthread_t));
 
     pthread_attr_t thread_attr;
 
@@ -266,10 +270,9 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
     // timing
     timeblg = magma_wtime()-timeblg;
 
-
-    delete[] thread_id;
-    delete[] arg;
-    delete[] prog;
+    magma_free_cpu(thread_id);
+    magma_free_cpu(arg);
+    magma_free_cpu(prog);
 
     printf("time BULGE+T = %lf \n" ,timeblg);
 
