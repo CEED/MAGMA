@@ -43,6 +43,7 @@ extern "C" {
 #define blasf77_ztrsm      FORTRAN_NAME( ztrsm,  ZTRSM  )
 #define blasf77_ztrsv      FORTRAN_NAME( ztrsv,  ZTRSV  )
 
+#define lapackf77_dlaed2   FORTRAN_NAME( dlaed2, DLAED2 )
 #define lapackf77_dlaed4   FORTRAN_NAME( dlaed4, DLAED4 )
 #define lapackf77_dlamc3   FORTRAN_NAME( dlamc3, DLAMC3 )
 #define lapackf77_dlamrg   FORTRAN_NAME( dlamrg, DLAMRG )
@@ -813,6 +814,13 @@ void   lapackf77_dlamrg( magma_int_t* n1, magma_int_t* n2,
                          magma_int_t* dtrd1, magma_int_t* dtrd2, magma_int_t* index );
 
 double lapackf77_dlapy3( double *x, double *y, double *z );
+
+void   lapackf77_dlaed2( magma_int_t* k, magma_int_t* n, magma_int_t* cutpnt,
+                         double* d, double* q, magma_int_t* ldq, magma_int_t* indxq,
+                         double* rho, double* z,
+                         double*  dlmda, double* w, double* q2,
+                         magma_int_t* indx, magma_int_t* indxc, magma_int_t* indxp,
+                         magma_int_t* coltyp, magma_int_t* info);
 
 void   lapackf77_dlaed4( magma_int_t* n, magma_int_t* i,
                          double* d,

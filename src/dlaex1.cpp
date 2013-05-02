@@ -13,17 +13,6 @@
 
 #define Q(ix, iy) (q + (ix) + ldq * (iy))
 
-#define magma_dlaed2 FORTRAN_NAME( magma_dlaed2, MAGMA_DLAED2 )
-
-extern "C" {
-    void magma_dlaed2( magma_int_t* k, magma_int_t* n, magma_int_t* cutpnt,
-                       double* d, double* q, magma_int_t* ldq, magma_int_t* indxq,
-                       double* rho, double* z,
-                       double*  dlmda, double* w, double* q2,
-                       magma_int_t* indx, magma_int_t* indxc, magma_int_t* indxp,
-                       magma_int_t* coltyp, magma_int_t* info);
-}
-
 extern "C" magma_int_t
 magma_dlaex1(magma_int_t n, double* d, double* q, magma_int_t ldq,
              magma_int_t* indxq, double rho, magma_int_t cutpnt,
@@ -193,10 +182,10 @@ magma_dlaex1(magma_int_t n, double* d, double* q, magma_int_t ldq,
 
     //  Deflate eigenvalues.
 
-    magma_dlaed2(&k, &n, &cutpnt, d, q, &ldq, indxq, &rho, &work[iz],
-                 &work[idlmda], &work[iw], &work[iq2],
-                 &iwork[indx], &iwork[indxc], &iwork[indxp],
-                 &iwork[coltyp], info);
+    lapackf77_dlaed2(&k, &n, &cutpnt, d, q, &ldq, indxq, &rho, &work[iz],
+                     &work[idlmda], &work[iw], &work[iq2],
+                     &iwork[indx], &iwork[indxc], &iwork[indxp],
+                     &iwork[coltyp], info);
 
     if( *info != 0 )
         return MAGMA_SUCCESS;
