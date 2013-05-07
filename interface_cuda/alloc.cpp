@@ -20,7 +20,7 @@
 // memory allocation
 // Allocate size bytes on GPU, returning pointer in ptrPtr.
 extern "C"
-magma_err_t magma_malloc( magma_devptr* ptrPtr, size_t size )
+magma_err_t magma_malloc( magma_ptr* ptrPtr, size_t size )
 {
     if ( cudaSuccess != cudaMalloc( ptrPtr, size )) {
         return MAGMA_ERR_DEVICE_ALLOC;
@@ -31,7 +31,7 @@ magma_err_t magma_malloc( magma_devptr* ptrPtr, size_t size )
 // --------------------
 // Free GPU memory allocated by magma_malloc.
 extern "C"
-magma_err_t magma_free_internal( magma_devptr ptr,
+magma_err_t magma_free_internal( magma_ptr ptr,
     const char* func, const char* file, int line )
 {
     cudaError_t err = cudaFree( ptr );
