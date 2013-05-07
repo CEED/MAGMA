@@ -11,6 +11,8 @@
 #ifndef MAGMABLAS_Z_H
 #define MAGMABLAS_Z_H
 
+#include "magma_types.h"
+
 #define COMPLEX
 
 #ifdef __cplusplus

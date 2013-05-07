@@ -9,38 +9,6 @@
 #ifndef MAGMABLAS_H
 #define MAGMABLAS_H
 
-#include <cublas.h>
-#include <stdint.h>
-
-/* To use int64_t, link with mkl_intel_ilp64 or similar (instead of mkl_intel_lp64). */
-#ifdef USE_INT64
-typedef int64_t magma_int_t;
-#else
-typedef int magma_int_t;
-#endif
-
-typedef cuDoubleComplex magmaDoubleComplex;
-typedef cuFloatComplex  magmaFloatComplex;
-
-typedef int   magma_err_t;
-typedef void* magma_devptr;
-
-// For now, make these compatible with old cublas v1 prototypes.
-// In the future, we will redefine these data types and
-// add queues (opencl queues, cublas handles).
-typedef char magma_trans_t;
-typedef char magma_side_t ;
-typedef char magma_uplo_t ;
-typedef char magma_diag_t ;
-
-typedef cudaStream_t magma_stream_t;
-typedef cudaStream_t magma_queue_t;
-typedef cudaEvent_t  magma_event_t;
-typedef int          magma_device_t;
-
-// needed by magmablas*.h, but should eventually go in magma_types.h (see clMAGMA)
-#define MagmaMaxGPUs       8
-
 #include "magmablas_z.h"
 #include "magmablas_c.h"
 #include "magmablas_d.h"

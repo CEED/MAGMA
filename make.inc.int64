@@ -22,7 +22,7 @@ ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
 
-# Defining USE_INT64 changes magma_int_t to int64_t in include/magmablas.h
+# Defining USE_INT64 changes magma_int_t to int64_t in include/magma_types.h
 # CUDA 5 needs -DCUBLAS_GFORTRAN or appropriate setting to compile cuda/src/fortran.c bindings
 OPTS      = -O3 -DADD_ -DCUBLAS_GFORTRAN -DUSE_INT64 -DMKL_ILP64
 F77OPTS   = -O3 -DADD_ -fdefault-integer-8

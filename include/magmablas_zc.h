@@ -11,6 +11,8 @@
 #ifndef MAGMABLAS_ZC_H
 #define MAGMABLAS_ZC_H
 
+#include "magma_types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
