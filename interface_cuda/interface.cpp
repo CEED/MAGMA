@@ -38,7 +38,7 @@ struct magma_device* g_magma_devices = NULL;
 // ensures there isn't a memory leak if magma_init is called multiple times
 // without calling magma_finalize.
 extern "C"
-void magma_init()
+magma_err_t magma_init()
 {
     if ( g_magma_devices != NULL ) {
         free( g_magma_devices );
@@ -51,14 +51,16 @@ void magma_init()
         g_magma_devices[i].memory = prop.totalGlobalMem;
         g_magma_devices[i].cuda_arch  = prop.major*100 + prop.minor*10;
     }
+    return MAGMA_SUCCESS;
 }
 
 // --------------------
 // Frees information about CUDA devices.
 extern "C"
-void magma_finalize()
+magma_err_t magma_finalize()
 {
     free( g_magma_devices );
+    return MAGMA_SUCCESS;
 }
 
 
