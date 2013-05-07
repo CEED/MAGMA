@@ -51,7 +51,7 @@ __global__ void zlaswp_kernel( zlaswp_params_t params )
 
 
 // Launch zlaswp kernel with ceil( n / NTHREADS ) blocks of NTHREADS threads each.
-extern "C" void zlaswp( zlaswp_params_t &params )
+extern "C" void zlaswp_launch( zlaswp_params_t &params )
 {
     int blocks = (params.n + NTHREADS - 1) / NTHREADS;
     zlaswp_kernel<<< blocks, NTHREADS, 0, magma_stream >>>( params );
@@ -73,7 +73,7 @@ magmablas_zpermute_long2( magma_int_t n, cuDoubleComplex *dAT, magma_int_t lda,
             params.ipiv[j] = ipiv[ind + k + j] - k - 1;
             ipiv[ind + k + j] += ind;
         }
-        zlaswp( params );
+        zlaswp_launch( params );
     }
 }
 
@@ -92,7 +92,7 @@ magmablas_zpermute_long3( cuDoubleComplex *dAT, magma_int_t lda,
         for( int j = 0; j < MAX_PIVOTS; ++j ) {
             params.ipiv[j] = ipiv[ind + k + j] - k - 1 - ind;
         }
-        zlaswp( params );
+        zlaswp_launch( params );
     }
 }
 
@@ -112,7 +112,7 @@ magmablas_zlaswp( magma_int_t n, cuDoubleComplex *dAT, magma_int_t lda,
         for( int j = 0; j < npivots; ++j ) {
             params.ipiv[j] = ipiv[(k+j)*inci] - k - 1;
         }
-        zlaswp( params );
+        zlaswp_launch( params );
     }
 }
 
