@@ -91,7 +91,7 @@ magma_zstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
 
     LRWORK  (input) INTEGER
             The dimension of the array RWORK.
-            LRWORK must be at least 1 + 4*N + 2*N**2 .
+            LRWORK >= 1 + 4*N + 2*N**2 .
             Note that if N is less than or
             equal to the minimum divide size, usually 25, then LRWORK
             need only be max(1,2*(N-1)).
@@ -107,7 +107,7 @@ magma_zstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
 
     LIWORK  (input) INTEGER
             The dimension of the array IWORK.
-            LIWORK must be at least 3 + 5*N .
+            LIWORK >= 3 + 5*N .
             Note that if N is less than or
             equal to the minimum divide size, usually 25, then LIWORK
             need only be 1.

@@ -132,10 +132,9 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
 
     LRWORK  (input) INTEGER
             The dimension of the array RWORK.
-            If N <= 1,                LRWORK must be at least 1.
-            If JOBZ  = 'N' and N > 1, LRWORK must be at least N.
-            If JOBZ  = 'V' and N > 1, LRWORK must be at least
-                           1 + 5*N + 2*N**2.
+            If N <= 1,                LRWORK >= 1.
+            If JOBZ  = 'N' and N > 1, LRWORK >= N.
+            If JOBZ  = 'V' and N > 1, LRWORK >= 1 + 5*N + 2*N**2.
 
             If LRWORK = -1, then a workspace query is assumed; the
             routine only calculates the optimal sizes of the WORK, RWORK
@@ -148,9 +147,9 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
 
     LIWORK  (input) INTEGER
             The dimension of the array IWORK.
-            If N <= 1,                LIWORK must be at least 1.
-            If JOBZ  = 'N' and N > 1, LIWORK must be at least 1.
-            If JOBZ  = 'V' and N > 1, LIWORK must be at least 3 + 5*N.
+            If N <= 1,                LIWORK >= 1.
+            If JOBZ  = 'N' and N > 1, LIWORK >= 1.
+            If JOBZ  = 'V' and N > 1, LIWORK >= 3 + 5*N.
 
             If LIWORK = -1, then a workspace query is assumed; the
             routine only calculates the optimal sizes of the WORK, RWORK

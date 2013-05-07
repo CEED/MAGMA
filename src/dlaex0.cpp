@@ -71,10 +71,10 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
             desired, then  LDQ >= max(1,N).  In any case,  LDQ >= 1.
             
     WORK    (workspace) DOUBLE PRECISION array,
-            the dimension of WORK must be at least 4*N + N**2.
+            the dimension of WORK >= 4*N + N**2.
             
     IWORK   (workspace) INTEGER array,
-            the dimension of IWORK must be at least 3 + 5*N.
+            the dimension of IWORK >= 3 + 5*N.
             
     DWORK   (device workspace) DOUBLE PRECISION array, dimension (3*N*N/2+3*N)
             

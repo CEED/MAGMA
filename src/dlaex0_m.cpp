@@ -77,10 +77,10 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
             desired, then  LDQ >= max(1,N).  In any case,  LDQ >= 1.
             
     WORK    (workspace) DOUBLE PRECISION array,
-            the dimension of WORK must be at least 4*N + N**2.
+            the dimension of WORK >= 4*N + N**2.
             
     IWORK   (workspace) INTEGER array,
-            the dimension of IWORK must be at least 3 + 5*N.
+            the dimension of IWORK >= 3 + 5*N.
             
     RANGE   (input) CHARACTER*1
             = 'A': all eigenvalues will be found.

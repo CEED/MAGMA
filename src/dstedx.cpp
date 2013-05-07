@@ -100,7 +100,7 @@ magma_dstedx(char range, magma_int_t n, double vl, double vu,
 
     LWORK   (input) INTEGER
             The dimension of the array WORK.
-            If N > 1 then LWORK must be at least ( 1 + 4*N + N**2 ).
+            If N > 1 then LWORK >= ( 1 + 4*N + N**2 ).
             Note that  if N is less than or
             equal to the minimum divide size, usually 25, then LWORK need
             only be max(1,2*(N-1)).
@@ -115,7 +115,7 @@ magma_dstedx(char range, magma_int_t n, double vl, double vu,
 
     LIWORK  (input) INTEGER
             The dimension of the array IWORK.
-            LIWORK must be at least ( 3 + 5*N ).
+            LIWORK >= ( 3 + 5*N ).
             Note that if N is less than or
             equal to the minimum divide size, usually 25, then LIWORK
             need only be 1.

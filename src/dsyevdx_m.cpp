@@ -127,9 +127,9 @@ magma_dsyevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
     LWORK   (input) INTEGER
             The length of the array WORK.
-            If N <= 1,                LWORK must be at least 1.
-            If JOBZ  = 'N' and N > 1, LWORK must be at least N * (NB + 1).
-            If JOBZ  = 'V' and N > 1, LWORK must be at least 2*N + N**2.
+            If N <= 1,                LWORK >= 1.
+            If JOBZ  = 'N' and N > 1, LWORK >= N * (NB + 1).
+            If JOBZ  = 'V' and N > 1, LWORK >= 2*N + N**2.
 
             If LWORK = -1, then a workspace query is assumed; the routine
             only calculates the optimal sizes of the WORK, RWORK and
@@ -143,9 +143,9 @@ magma_dsyevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
     LRWORK  (input) INTEGER
             The dimension of the array RWORK.
-            If N <= 1,                LRWORK must be at least 1.
-            If JOBZ  = 'N' and N > 1, LRWORK must be at least N.
-            If JOBZ  = 'V' and N > 1, LRWORK must be at least
+            If N <= 1,                LRWORK >= 1.
+            If JOBZ  = 'N' and N > 1, LRWORK >= N.
+            If JOBZ  = 'V' and N > 1, LRWORK >=
                            1 + 5*N + 2*N**2.
 
             If LRWORK = -1, then a workspace query is assumed; the
@@ -159,9 +159,9 @@ magma_dsyevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
     LIWORK  (input) INTEGER
             The dimension of the array IWORK.
-            If N <= 1,                LIWORK must be at least 1.
-            If JOBZ  = 'N' and N > 1, LIWORK must be at least 1.
-            If JOBZ  = 'V' and N > 1, LIWORK must be at least 3 + 5*N.
+            If N <= 1,                LIWORK >= 1.
+            If JOBZ  = 'N' and N > 1, LIWORK >= 1.
+            If JOBZ  = 'V' and N > 1, LIWORK >= 3 + 5*N.
 
             If LIWORK = -1, then a workspace query is assumed; the
             routine only calculates the optimal sizes of the WORK, RWORK

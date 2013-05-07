@@ -107,9 +107,9 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
 
     LDA     INTEGER.
             On entry, LDA specifies the first dimension of A as declared
-            in the calling (sub) program.  When  SIDE = 'L' or 'l'  then
-            LDA  must be at least  max( 1, m ),  when  SIDE = 'R' or 'r'
-            then LDA must be at least max( 1, n ).
+            in the calling (sub) program. 
+            When  SIDE = 'L' or 'l' then LDA >= max( 1, m ),
+            when  SIDE = 'R' or 'r' then LDA >= max( 1, n ).
             Unchanged on exit.
 
     B       COMPLEX_16       array of DIMENSION ( LDB, n ).
