@@ -243,11 +243,8 @@ ZSRC += \
 -include Makefile.local
 -include Makefile.src
 
-ALLSRC_F = dlaed2.f \
-           slaed2.f
-
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
-ALLOBJ := $(ALLSRC:.cpp=.o) $(ALLSRC_F:.f=.o)
+ALLOBJ := $(ALLSRC:.cpp=.o)
 
 all: $(LIBMAGMA)
 
