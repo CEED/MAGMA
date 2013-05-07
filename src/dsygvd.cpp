@@ -105,7 +105,7 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
             The length of the array WORK.
             If N <= 1,                LWORK must be at least 1.
             If JOBZ  = 'N' and N > 1, LWORK must be at least 2*N + N*NB.
-            If JOBZ  = 'V' and N > 1, LWORK must be at least 1 + 6*N + 2*N**2.
+            If JOBZ  = 'V' and N > 1, LWORK must be at least max( 2*N + N*NB, 1 + 6*N + 2*N**2 ).
             NB can be obtained through magma_get_dsytrd_nb(N).
 
             If LWORK = -1, then a workspace query is assumed; the routine
@@ -201,7 +201,7 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
         liwmin = 1;
     }
     else if ( wantz ) {
-        lwmin  = 1 + 6*n + 2*n*n;
+        lwmin  = max( 2*n + n*nb, 1 + 6*n + 2*n*n );
         liwmin = 3 + 5*n;
     }
     else {

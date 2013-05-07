@@ -154,7 +154,7 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
             The length of the array WORK.
             If N <= 1,                LWORK must be at least 1.
             If JOBZ  = 'N' and N > 1, LWORK must be at least N + N*NB.
-            If JOBZ  = 'V' and N > 1, LWORK must be at least 2*N + N**2.
+            If JOBZ  = 'V' and N > 1, LWORK must be at least max( N + N*NB, 2*N + N**2 ).
             NB can be obtained through magma_get_zhetrd_nb(N).
 
             If LWORK = -1, then a workspace query is assumed; the routine
@@ -288,7 +288,7 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
         liwmin = 1;
     }
     else if ( wantz ) {
-        lwmin  = 2*n + n*n;
+        lwmin  = max( n + n*nb, 2*n + n*n );
         lrwmin = 1 + 5*n + 2*n*n;
         liwmin = 3 + 5*n;
     }
