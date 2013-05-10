@@ -107,33 +107,6 @@ int magma_num_gpus( void )
 
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Print the available GPU devices
-   @author Mark Gates
-*/
-extern "C"
-void printout_devices( )
-{
-    int major, minor, micro;
-    magma_version( &major, &minor, &micro );
-    printf( "MAGMA %d.%d.%d\n", major, minor, micro );
-    
-    int ndevices;
-    cudaGetDeviceCount( &ndevices );
-    for( int idevice = 0; idevice < ndevices; idevice++ ) {
-        cudaDeviceProp prop;
-        cudaGetDeviceProperties( &prop, idevice );
-        printf( "device %d: %s, %.1f MHz clock, %.1f MB memory, capability %d.%d\n",
-                idevice,
-                prop.name,
-                prop.clockRate / 1000.,
-                prop.totalGlobalMem / (1024.*1024.),
-                prop.major,
-                prop.minor );
-    }
-}
-
-
-/* ////////////////////////////////////////////////////////////////////////////
    -- Auxiliary function: ipiv(i) indicates that row i has been swapped with 
       ipiv(i) from top to bottom. This function rearranges ipiv into newipiv
       where row i has to be moved to newipiv(i). The new pivoting allows for

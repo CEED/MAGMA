@@ -63,6 +63,30 @@ magma_err_t magma_finalize()
     return MAGMA_SUCCESS;
 }
 
+// --------------------
+// Print the available GPU devices. Used in testing.
+extern "C"
+void magma_print_devices()
+{
+    int major, minor, micro;
+    magma_version( &major, &minor, &micro );
+    printf( "MAGMA %d.%d.%d\n", major, minor, micro );
+    
+    int ndevices;
+    cudaGetDeviceCount( &ndevices );
+    for( int idevice = 0; idevice < ndevices; idevice++ ) {
+        cudaDeviceProp prop;
+        cudaGetDeviceProperties( &prop, idevice );
+        printf( "device %d: %s, %.1f MHz clock, %.1f MB memory, capability %d.%d\n",
+                idevice,
+                prop.name,
+                prop.clockRate / 1000.,
+                prop.totalGlobalMem / (1024.*1024.),
+                prop.major,
+                prop.minor );
+    }
+}
+
 
 // ========================================
 // device support
