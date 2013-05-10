@@ -241,7 +241,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
 
     magma_device_t cdev;
     magma_getdevice( &cdev );
-    magma_stream_t cstream;
+    magma_queue_t cstream;
     magmablasGetKernelStream(&cstream);
 /*
     magmaDoubleComplex *dworkmgpu[MagmaMaxGPUs], *dWmgpu[MagmaMaxGPUs];

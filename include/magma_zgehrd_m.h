@@ -33,7 +33,7 @@ struct zgehrd_data
     magmaDoubleComplex *W    [ MagmaMaxGPUs ];  // ldda*nb
     magmaDoubleComplex *Ti   [ MagmaMaxGPUs ];  // nb*nb
     
-    magma_stream_t streams[ MagmaMaxGPUs ];
+    magma_queue_t streams[ MagmaMaxGPUs ];
 };
 
 #ifdef __cplusplus

@@ -68,7 +68,7 @@ void magmablas_zhemm_mgpu_com(
         
     magma_device_t cdev;
     magma_getdevice( &cdev );
-    magma_stream_t cstream;
+    magma_queue_t cstream;
     magmablasGetKernelStream(&cstream);
 
 

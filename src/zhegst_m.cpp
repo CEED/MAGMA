@@ -108,7 +108,7 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
     magmaDoubleComplex    c_neg_half = MAGMA_Z_NEG_HALF;
     magmaDoubleComplex* dw[MagmaMaxGPUs];
 
-    magma_stream_t stream [MagmaMaxGPUs][3];
+    magma_queue_t stream [MagmaMaxGPUs][3];
     magma_event_t  event  [MagmaMaxGPUs][2];
 
     int gpu_b;

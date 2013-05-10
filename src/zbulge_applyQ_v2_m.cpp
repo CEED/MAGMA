@@ -87,7 +87,7 @@ extern "C" magma_int_t magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side, mag
     cudaDeviceSynchronize();
     magma_device_t cdev;
     magma_getdevice( &cdev );
-    magma_stream_t cstream;
+    magma_queue_t cstream;
     magmablasGetKernelStream(&cstream);
 
     magma_int_t  nbevents =2, nstream=2;

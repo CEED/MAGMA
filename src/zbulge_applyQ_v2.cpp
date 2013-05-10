@@ -85,7 +85,7 @@ extern "C" void magma_zbulge_applyQ_v2(char side, magma_int_t NE, magma_int_t N,
 
     // Initialize streaming and events
     cudaDeviceSynchronize();
-    magma_stream_t cstream;
+    magma_queue_t cstream;
     magmablasGetKernelStream(&cstream);
 
     magma_queue_t stream[2];

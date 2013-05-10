@@ -131,7 +131,7 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
     printf("calling zunmqr_m with nb=%d\n",nb);
 
     magmaDoubleComplex* dw[MagmaMaxGPUs];
-    magma_stream_t stream [MagmaMaxGPUs][2];
+    magma_queue_t stream [MagmaMaxGPUs][2];
     magma_event_t  event [MagmaMaxGPUs][2];
 
     magma_int_t ind_c;

@@ -517,14 +517,14 @@ void magma_zsetvector_async_internal(
     magma_int_t n,
     const magmaDoubleComplex *hx_src, magma_int_t incx,
     magmaDoubleComplex       *dy_dst, magma_int_t incy,
-    magma_stream_t stream,
+    magma_queue_t stream,
     const char* func, const char* file, int line );
 
 void magma_zgetvector_async_internal(
     magma_int_t n,
     const magmaDoubleComplex *dx_src, magma_int_t incx,
     magmaDoubleComplex       *hy_dst, magma_int_t incy,
-    magma_stream_t stream,
+    magma_queue_t stream,
     const char* func, const char* file, int line );
 
 
@@ -576,21 +576,21 @@ void magma_zsetmatrix_async_internal(
     magma_int_t m, magma_int_t n,
     const magmaDoubleComplex *hA_src, magma_int_t lda,
     magmaDoubleComplex       *dB_dst, magma_int_t lddb,
-    magma_stream_t stream,
+    magma_queue_t stream,
     const char* func, const char* file, int line );
 
 void magma_zgetmatrix_async_internal(
     magma_int_t m, magma_int_t n,
     const magmaDoubleComplex *dA_src, magma_int_t ldda,
     magmaDoubleComplex       *hB_dst, magma_int_t ldb,
-    magma_stream_t stream,
+    magma_queue_t stream,
     const char* func, const char* file, int line );
 
 void magma_zcopymatrix_async_internal(
     magma_int_t m, magma_int_t n,
     const magmaDoubleComplex *dA_src, magma_int_t ldda,
     magmaDoubleComplex       *dB_dst, magma_int_t lddb,
-    magma_stream_t stream,
+    magma_queue_t stream,
     const char* func, const char* file, int line );
 
 

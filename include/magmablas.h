@@ -67,14 +67,14 @@ void magma_setvector_async_internal(
     magma_int_t n, size_t elemSize,
     const void *hx_src, magma_int_t incx,
     void       *dy_dst, magma_int_t incy,
-    magma_stream_t stream,
+    magma_queue_t stream,
     const char* func, const char* file, int line );
 
 void magma_getvector_async_internal(
     magma_int_t n, size_t elemSize,
     const void *dx_src, magma_int_t incx,
     void       *hy_dst, magma_int_t incy,
-    magma_stream_t stream,
+    magma_queue_t stream,
     const char* func, const char* file, int line );
 
 
@@ -126,21 +126,21 @@ void magma_setmatrix_async_internal(
     magma_int_t m, magma_int_t n, size_t elemSize,
     const void *hA_src, magma_int_t lda,
     void       *dB_dst, magma_int_t lddb,
-    magma_stream_t stream,
+    magma_queue_t stream,
     const char* func, const char* file, int line );
 
 void magma_getmatrix_async_internal(
     magma_int_t m, magma_int_t n, size_t elemSize,
     const void *dA_src, magma_int_t ldda,
     void       *hB_dst, magma_int_t ldb,
-    magma_stream_t stream,
+    magma_queue_t stream,
     const char* func, const char* file, int line );
 
 void magma_copymatrix_async_internal(
     magma_int_t m, magma_int_t n, size_t elemSize,
     const void *dA_src, magma_int_t ldda,
     void       *dB_dst, magma_int_t lddb,
-    magma_stream_t stream,
+    magma_queue_t stream,
     const char* func, const char* file, int line );
 
 #ifdef __cplusplus

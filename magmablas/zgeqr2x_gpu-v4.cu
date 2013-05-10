@@ -197,7 +197,7 @@ magma_zgeqr2x4_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
     double *dnorm = (double *)dwork;
     cuDoubleComplex *work = (cuDoubleComplex *)(dwork+2*(*n));
 
-    magma_stream_t cstream;
+    magma_queue_t cstream;
     magmablasGetKernelStream(&cstream);
     magmablasSetKernelStream(stream);
 
