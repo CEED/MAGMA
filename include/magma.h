@@ -23,6 +23,7 @@
 #include "magma_s.h"
 #include "magma_zc.h"
 #include "magma_ds.h"
+#include "auxiliary.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -151,34 +152,6 @@ void magma_queue_wait_event( magma_queue_t queue, magma_event_t event );
 void magma_xerbla( const char *name, magma_int_t info );
 
 const char* magma_strerror( magma_err_t error );
-
-
-/* ------------------------------------------------------------
- *   -- MAGMA Auxiliary structures and functions
- * --------------------------------------------------------- */
-typedef struct magma_timestr_s
-{
-  unsigned int sec;
-  unsigned int usec;
-} magma_timestr_t;
-
-magma_timestr_t get_current_time(void);
-double GetTimerValue(magma_timestr_t time_1, magma_timestr_t time_2);
-void printout_devices();
-void swp2pswp(char trans, magma_int_t n, magma_int_t *ipiv, magma_int_t *newipiv);
-
-double magma_wtime( void );
-double magma_sync_wtime( magma_queue_t queue );
-size_t magma_strlcpy(char *dst, const char *src, size_t siz);
-int magma_num_gpus( void );
-int magma_is_devptr( const void* A );
-
-// magma GPU-complex PCIe connection
-magma_int_t magma_buildconnection_mgpu(  magma_int_t gnode[MagmaMaxGPUs+2][MagmaMaxGPUs+2], magma_int_t *nbcmplx, magma_int_t ngpu);
-
-void magma_indices_1D_bcyclic( magma_int_t nb, magma_int_t ngpu, magma_int_t dev,
-                               magma_int_t j0, magma_int_t j1,
-                               magma_int_t* dj0, magma_int_t* dj1 );
 
 #ifdef __cplusplus
 }
