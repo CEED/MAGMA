@@ -12,7 +12,6 @@ include ../Makefile.internal
 ZSRC := \
 	zpanel_to_q.cpp	\
 	zprint.cpp	\
-	pthread_barrier.cpp	\
 
 ifeq ($(PGIFORTRAN), 0)
 ZSRC += \
@@ -37,6 +36,8 @@ ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
 	bulge_auxiliary.cpp	\
 	affinity.cpp		\
 	connection_mgpu.cpp	\
+	pthread_barrier.cpp	\
+	xerbla.cpp		\
 
 ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f90=.o)

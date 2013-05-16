@@ -20,7 +20,6 @@ ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
 	error.cpp	\
 	interface.cpp	\
 	set_get.cpp	\
-	xerbla.cpp	\
 
 ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f=.o)
