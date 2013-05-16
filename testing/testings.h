@@ -22,7 +22,7 @@
         fprintf(stderr, "ERROR: cublasInit failed\n");                     \
         exit(-1);                                                          \
     }                                                                      \
-    printout_devices();
+    magma_print_devices();
 
 
 #define TESTING_CUDA_FINALIZE()                                            \
@@ -43,7 +43,7 @@
         }                                                                  \
     }                                                                      \
     cudaSetDevice(0);                                                      \
-    printout_devices();                                                    \
+    magma_print_devices();                                                 \
 }
 
 
