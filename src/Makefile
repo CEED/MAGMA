@@ -256,5 +256,4 @@ clean:
 	rm -f *.o *~ *.linkinfo
 
 cleanall: clean
-	rm -f *.a
 	rm -f $(LIBMAGMA)

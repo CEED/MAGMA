@@ -53,7 +53,6 @@ clean:
 	rm -f *.cu_o *.o *~ *.linkinfo *.mod ../include/*.mod sizeptr
 
 cleanall: clean
-	rm -f *.a
 	rm -f $(LIBMAGMA)
 
 # Extra dependencies for .mod files

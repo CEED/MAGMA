@@ -183,7 +183,7 @@ EXE := $(filter-out $(LIBEXE), $(EXE))
 
 all: $(EXE)
 
-lib: $(LIBMAGMA) $(LIBMAGMABLAS)
+lib: $(LIBMAGMA)
 
 # depend on header
 $(ALLOBJ): testings.h
@@ -197,7 +197,7 @@ LIBLAPACKTEST = lin/liblapacktest.a
 $(LIBLAPACKTEST):
 	cd lin && make liblapacktest.a
 
-$(EXE): $(LIBMAGMA) $(LIBMAGMABLAS) $(LIBLAPACKTEST) $(LIBTEST)
+$(EXE): $(LIBMAGMA) $(LIBLAPACKTEST) $(LIBTEST)
 
 clean:
 	rm -f *.o *~ $(LIBTEST)
@@ -215,13 +215,13 @@ endif
 
 testing_%_f : testing_%_f.o $(FOBJ)
 	$(FORT) $(LDOPTS) $< $(FOBJ) -o $@ \
-	$(LIBTEST) $(LIBLAPACKTEST) -L../lib -lmagma -lmagmablas \
+	$(LIBTEST) $(LIBLAPACKTEST) -L../lib -lmagma \
 	$(LIBDIR) \
 	$(LIB) 
 
 testing_% : testing_%.o
 	$(CC) $(LDOPTS) $(NOMAIN) $< -o $@ \
-	$(LIBTEST) $(LIBLAPACKTEST) -L../lib -lmagma -lmagmablas \
+	$(LIBTEST) $(LIBLAPACKTEST) -L../lib -lmagma \
 	$(LIBDIR) \
 	$(LIB) 
 

@@ -25,9 +25,9 @@ ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
 ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f=.o)
 
-all: $(LIBMAGMABLAS)
+all: $(LIBMAGMA)
 
-$(LIBMAGMABLAS): $(ALLOBJ)
+$(LIBMAGMA): $(ALLOBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
 
@@ -35,5 +35,4 @@ clean:
 	rm -f *.o *~ *.linkinfo
 
 cleanall: clean
-	rm -f *.a
 	rm -f $(LIBMAGMA)

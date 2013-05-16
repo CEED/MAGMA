@@ -52,7 +52,7 @@ clean:
 	( cd testing/lin    && $(MAKE) clean )
 	( cd magmablas      && $(MAKE) clean ) 
 #	( cd quark          && $(MAKE) clean )
-	-rm -f $(LIBMAGMA) $(LIBMAGMABLAS)
+	-rm -f $(LIBMAGMA)
 
 cleanall:
 	( cd include        && $(MAKE) cleanall )
@@ -81,7 +81,6 @@ install: lib dir
 #       MAGMA
 	cp $(MAGMA_DIR)/include/*.h  $(prefix)/include
 	cp $(LIBMAGMA)               $(prefix)/lib
-	cp $(LIBMAGMABLAS)           $(prefix)/lib
 #       QUARK
 #	cp $(QUARKDIR)/include/quark.h             $(prefix)/include
 #	cp $(QUARKDIR)/include/quark_unpack_args.h $(prefix)/include
@@ -102,22 +101,14 @@ install: lib dir
 # objects in each subdirectory, or use libtool, or put rules for, e.g., the
 # control directory in src/Makefile (as done in src/CMakeLists.txt)
 LIBMAGMA_SO     = $(LIBMAGMA:.a=.so)
-LIBMAGMABLAS_SO = $(LIBMAGMABLAS:.a=.so)
 
 shared: lib
-	$(MAKE) $(LIBMAGMA_SO) $(LIBMAGMABLAS_SO)
+	$(MAKE) $(LIBMAGMA_SO)
 
-$(LIBMAGMABLAS_SO): interface_cuda/*.o magmablas/*.cu_o
-	@echo ======================================== libmagmablas.so
-	$(CC) $(LDOPTS) -shared -o $(LIBMAGMABLAS_SO) \
-	interface_cuda/*.o magmablas/*.cu_o \
-	$(LIBDIR) \
-	$(LIB)
-
-$(LIBMAGMA_SO): src/*.o control/*.o $(LIBMAGMABLAS_SO)
+$(LIBMAGMA_SO): src/*.o control/*.o interface_cuda/*.o magmablas/*.cu_o
 	@echo ======================================== libmagma.so
 	$(CC) $(LDOPTS) -shared -o $(LIBMAGMA_SO) \
 	src/*.o control/*.o \
-	-L lib -lmagmablas \
+	interface_cuda/*.o magmablas/*.cu_o \
 	$(LIBDIR) \
 	$(LIB)

@@ -14,7 +14,6 @@ include $(MAGMA_DIR)/make.inc
 PGIFORTRAN   ?= 0
 GPU_TARGET   ?= Fermi
 LIBMAGMA     ?= $(MAGMA_DIR)/lib/libmagma.a
-LIBMAGMABLAS ?= $(MAGMA_DIR)/lib/libmagmablas.a
 
 prefix ?= ./install
 #prefix :=`($(prefix) && pwd)`

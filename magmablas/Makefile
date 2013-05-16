@@ -147,9 +147,9 @@ endif
 ALLOBJ := $(ALLSRC:.cu=.cu_o) 
 ALLOBJ := $(ALLOBJ:.cpp=.o)
 
-all: $(LIBMAGMABLAS) 
+all: $(LIBMAGMA) 
 
-$(LIBMAGMABLAS): $(ALLHDR) $(ALLOBJ)
+$(LIBMAGMA): $(ALLHDR) $(ALLOBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
 
@@ -157,5 +157,4 @@ clean:
 	rm -f *.cu_o *.o *~ *.linkinfo
 
 cleanall: clean
-	rm -f *.a
-	rm -f $(LIBMAGMABLAS)
+	rm -f $(LIBMAGMA)
