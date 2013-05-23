@@ -215,7 +215,7 @@ void blasf77_zher2(  const char *uplo,
                      const magmaDoubleComplex *y, const magma_int_t *incy,
                            magmaDoubleComplex *A, const magma_int_t *lda );
 
-void blasf77_zher2k(  const char *uplo, const char *trans,
+void blasf77_zher2k( const char *uplo, const char *trans,
                      const magma_int_t *n, const magma_int_t *k,
                      const magmaDoubleComplex *alpha,
                      const magmaDoubleComplex *A, const magma_int_t *lda,
@@ -244,6 +244,8 @@ void blasf77_zswap(  const magma_int_t *n,
                      magmaDoubleComplex *x, const magma_int_t *incx,
                      magmaDoubleComplex *y, const magma_int_t *incy );
 
+#if defined(PRECISION_z) || defined(PRECISION_c)
+/* complex-symmetric (non-Hermitian) routines */
 void blasf77_zsymm(  const char *side, const char *uplo,
                      const magma_int_t *m, const magma_int_t *n,
                      const magmaDoubleComplex *alpha,
@@ -266,6 +268,7 @@ void blasf77_zsyrk(  const char *uplo, const char *trans,
                      const magmaDoubleComplex *A, const magma_int_t *lda,
                      const magmaDoubleComplex *beta,
                            magmaDoubleComplex *C, const magma_int_t *ldc );
+#endif
 
 void blasf77_ztrmm(  const char *side, const char *uplo, const char *transa, const char *diag,
                      const magma_int_t *m, const magma_int_t *n,
