@@ -26,7 +26,7 @@
 
 extern "C" magma_int_t
 magma_zgeqr2x_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
-                  magma_int_t *ldda, cuDoubleComplex *dtau, 
+                  magma_int_t *ldda, cuDoubleComplex *dtau,
                   cuDoubleComplex *dT, cuDoubleComplex *ddA,
                   double *dwork, magma_int_t *info);
 
@@ -171,7 +171,7 @@ int main( int argc, char** argv)
             magma_zgeqr2x_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, dwork, &info);
         else if (version == 2)
             magma_zgeqr2x2_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, dwork, &info);
-        else 
+        else
             magma_zgeqr2x3_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, dwork, &info);
 
         cudaDeviceSynchronize();
@@ -193,14 +193,14 @@ int main( int argc, char** argv)
             cpu_perf = gflops / cpu_time;
             if (info != 0)
                 printf("lapackf77_zgeqrf returned error %d.\n", (int) info);
-    
+            
             /* =====================================================================
                Check the result compared to LAPACK
                =================================================================== */
             magma_zgetmatrix( M, N, d_A, ldda, h_R, M );
             magma_zgetmatrix( N, N, ddA, N,    h_T, N );
 
-            // Restore the upper triangular part of A before the check 
+            // Restore the upper triangular part of A before the check
             for(int col=0; col<N; col++){
                 for(int row=0; row<=col; row++)
                     h_R[row + col*M] = h_T[row + col*N];
@@ -221,7 +221,7 @@ int main( int argc, char** argv)
             terr = magma_dsqrt(terr);
 
             printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)     %8.2e     %8.2e\n",
-                   (int) M, (int) N, cpu_perf, 1000.*cpu_time, gpu_perf, 1000.*gpu_time, 
+                   (int) M, (int) N, cpu_perf, 1000.*cpu_time, gpu_perf, 1000.*gpu_time,
                    error, terr);
         }
         else {
@@ -240,6 +240,7 @@ int main( int argc, char** argv)
     TESTING_DEVFREE( d_T  );
     TESTING_DEVFREE( ddA  );
     TESTING_DEVFREE( dtau );
+    TESTING_DEVFREE( dwork );
 
     TESTING_FINALIZE();
     return 0;
