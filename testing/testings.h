@@ -16,21 +16,22 @@
 #endif
 
 
-#define TESTING_INIT()                                                \
+#define TESTING_INIT()                                                     \
     magma_init();                                                          \
     if( CUBLAS_STATUS_SUCCESS != cublasInit() ) {                          \
         fprintf(stderr, "ERROR: cublasInit failed\n");                     \
+        magma_finalize();                                                  \
         exit(-1);                                                          \
     }                                                                      \
     magma_print_devices();
 
 
-#define TESTING_FINALIZE()                                            \
+#define TESTING_FINALIZE()                                                 \
     magma_finalize();                                                      \
     cublasShutdown();
 
 
-#define TESTING_INIT_MGPU()                                           \
+#define TESTING_INIT_MGPU()                                                \
 {                                                                          \
     magma_init();                                                          \
     int ndevices;                                                          \
@@ -39,6 +40,7 @@
         cudaSetDevice(idevice);                                            \
         if( CUBLAS_STATUS_SUCCESS != cublasInit() ) {                      \
             fprintf(stderr, "ERROR: gpu %d: cublasInit failed\n", idevice);\
+            magma_finalize();                                              \
             exit(-1);                                                      \
         }                                                                  \
     }                                                                      \
@@ -47,7 +49,7 @@
 }
 
 
-#define TESTING_FINALIZE_MGPU()                                       \
+#define TESTING_FINALIZE_MGPU()                                            \
 {                                                                          \
     magma_finalize();                                                      \
     int ndevices;                                                          \
@@ -63,51 +65,54 @@
     if ( MAGMA_SUCCESS !=                                                  \
             magma_malloc_cpu( (void**) &ptr, (size)*sizeof(type) )) {      \
         fprintf( stderr, "!!!! malloc failed for: %s\n", #ptr );           \
+        magma_finalize();                                                  \
         exit(-1);                                                          \
     }
 
 
-#define TESTING_HOSTALLOC( ptr, type, size )                                  \
+#define TESTING_HOSTALLOC( ptr, type, size )                              \
     if ( MAGMA_SUCCESS !=                                                     \
             magma_malloc_pinned( (void**) &ptr, (size)*sizeof(type) )) {      \
         fprintf( stderr, "!!!! magma_malloc_pinned failed for: %s\n", #ptr ); \
+        magma_finalize();                                                     \
         exit(-1);                                                             \
     }
 
 
-#define TESTING_DEVALLOC( ptr, type, size )                                \
+#define TESTING_DEVALLOC( ptr, type, size )                              \
     if ( MAGMA_SUCCESS !=                                                  \
             magma_malloc( (void**) &ptr, (size)*sizeof(type) )) {          \
         fprintf( stderr, "!!!! magma_malloc failed for: %s\n", #ptr );     \
+        magma_finalize();                                                  \
         exit(-1);                                                          \
     }
 
 
 #define TESTING_FREE( ptr )                                                \
-    magma_free_cpu( ptr );
+    magma_free_cpu( ptr )
 
 
-#define TESTING_HOSTFREE( ptr )                                            \
-    magma_free_pinned( ptr );
+#define TESTING_HOSTFREE( ptr )                                         \
+    magma_free_pinned( ptr )
 
 
-#define TESTING_DEVFREE( ptr )                                             \
-    magma_free( ptr );
+#define TESTING_DEVFREE( ptr )                                            \
+    magma_free( ptr )
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void magma_zmake_hermitian( magma_int_t N, cuDoubleComplex* A, magma_int_t lda );
-void magma_cmake_hermitian( magma_int_t N, cuFloatComplex*  A, magma_int_t lda );
-void magma_dmake_symmetric( magma_int_t N, double*          A, magma_int_t lda );
-void magma_smake_symmetric( magma_int_t N, float*           A, magma_int_t lda );
+void magma_zmake_hermitian( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda );
+void magma_cmake_hermitian( magma_int_t N, magmaFloatComplex*  A, magma_int_t lda );
+void magma_dmake_symmetric( magma_int_t N, double*             A, magma_int_t lda );
+void magma_smake_symmetric( magma_int_t N, float*              A, magma_int_t lda );
 
-void magma_zmake_hpd( magma_int_t N, cuDoubleComplex* A, magma_int_t lda );
-void magma_cmake_hpd( magma_int_t N, cuFloatComplex*  A, magma_int_t lda );
-void magma_dmake_hpd( magma_int_t N, double*          A, magma_int_t lda );
-void magma_smake_hpd( magma_int_t N, float*           A, magma_int_t lda );
+void magma_zmake_hpd( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda );
+void magma_cmake_hpd( magma_int_t N, magmaFloatComplex*  A, magma_int_t lda );
+void magma_dmake_hpd( magma_int_t N, double*             A, magma_int_t lda );
+void magma_smake_hpd( magma_int_t N, float*              A, magma_int_t lda );
 
 void magma_assert( bool condition, const char* msg, ... );
 
@@ -144,16 +149,16 @@ typedef struct magma_opts
     int all;
     
     // lapack flags
-    char uplo;
-    char transA;
-    char transB;
-    char side;
-    char diag;
-    char jobu;    // gesvd:  no left  singular vectors
-    char jobvt;   // gesvd:  no right singular vectors
-    char jobz;    // heev:   no eigen vectors
-    char jobvr;   // geev:   no right eigen vectors
-    char jobvl;   // geev:   no left  eigen vectors
+    magma_uplo_t    uplo;
+    magma_trans_t   transA;
+    magma_trans_t   transB;
+    magma_side_t    side;
+    magma_diag_t    diag;
+    magma_vec_t     jobu;    // gesvd:  no left  singular vectors
+    magma_vec_t     jobvt;   // gesvd:  no right singular vectors
+    magma_vec_t     jobz;    // heev:   no eigen vectors
+    magma_vec_t     jobvr;   // geev:   no right eigen vectors
+    magma_vec_t     jobvl;   // geev:   no left  eigen vectors
 } magma_opts;
 
 void parse_opts( int argc, char** argv, magma_opts *opts );
