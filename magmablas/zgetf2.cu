@@ -11,193 +11,172 @@
 #include <stdio.h>
 #include "common_magma.h"
 #include "magmablas.h"
-    
-#define A(i, j)  (A +(i) + (j)*lda)   // A(i, j) means at i row, j column 
 
-void  magma_zswap(int n, cuDoubleComplex *x, int i, int j, int lda);
+#define PRECISION_z
 
-void magma_zscal_zgeru(int, int, cuDoubleComplex *, int);
+#define A(i, j)  (A + (i) + (j)*lda)   // A(i, j) means at i row, j column
+
+void magma_zswap(
+    magma_int_t n, cuDoubleComplex *x, magma_int_t i, magma_int_t j, magma_int_t incx);
+
+void magma_zscal_zgeru(
+    magma_int_t m, magma_int_t n, cuDoubleComplex *A, magma_int_t lda);
 
 
-int magma_zgetf2_gpu(int m, int n, cuDoubleComplex *A, int lda, int *ipiv, int* info)
+extern "C" magma_int_t
+magma_zgetf2_gpu(
+    magma_int_t m, magma_int_t n,
+    cuDoubleComplex *A, magma_int_t lda,
+    magma_int_t *ipiv,
+    magma_int_t* info )
 {
-   
-/*  ZGETF2 computes an LU factorization of a general m-by-n matrix A */
-/*  using partial pivoting with row interchanges. */
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
 
-/*  The factorization has the form */
-/*     A = P * L * U */
-/*  where P is a permutation matrix, L is lower triangular with unit */
-/*  diagonal elements (lower trapezoidal if m > n), and U is upper */
-/*  triangular (upper trapezoidal if m < n). */
+    ZGETF2 computes an LU factorization of a general m-by-n matrix A
+    using partial pivoting with row interchanges.
 
-/*  This is the right-looking Level 2 BLAS version of the algorithm. */
+    The factorization has the form
+        A = P * L * U
+    where P is a permutation matrix, L is lower triangular with unit
+    diagonal elements (lower trapezoidal if m > n), and U is upper
+    triangular (upper trapezoidal if m < n).
 
-/*  Arguments */
-/*  ========= */
+    This is the right-looking Level 2 BLAS version of the algorithm.
 
-/*  M       (input) INTEGER */
-/*          The number of rows of the matrix A.  M >= 0. */
+    Arguments
+    =========
 
-/*  N       (input) INTEGER */
-/*          The number of columns of the matrix A.  N >= 0. */
+    M       (input) INTEGER
+            The number of rows of the matrix A.  M >= 0.
 
-/*  A       (input/output) cuDoubleComplex PRECISION array, dimension (LDA,N) */
-/*          On entry, the m by n matrix to be factored. */
-/*          On exit, the factors L and U from the factorization */
-/*          A = P*L*U; the unit diagonal elements of L are not stored. */
+    N       (input) INTEGER
+            The number of columns of the matrix A.  N >= 0 and N <= 1024.
 
-/*  LDA     (input) INTEGER */
-/*          The leading dimension of the array A.  LDA >= max(1,M). */
+    A       (input/output) COMPLEX_16 array, dimension (LDA,N)
+            On entry, the m by n matrix to be factored.
+            On exit, the factors L and U from the factorization
+            A = P*L*U; the unit diagonal elements of L are not stored.
 
-/*  IPIV    (output) INTEGER array, dimension (min(M,N)) */
-/*          The pivot indices; for 1 <= i <= min(M,N), row i of the */
-/*          matrix was interchanged with row IPIV(i). */
+    LDA     (input) INTEGER
+            The leading dimension of the array A.  LDA >= max(1,M).
 
-/*  INFO    (output) INTEGER */
-/*          = 0: successful exit */
-/*          < 0: if INFO = -k, the k-th argument had an illegal value */
-/*          > 0: if INFO = k, U(k,k) is exactly zero. The factorization */
-/*               has been completed, but the factor U is exactly */
-/*               singular, and division by zero will occur if it is used */
-/*               to solve a system of equations. */
+    IPIV    (output) INTEGER array, dimension (min(M,N))
+            The pivot indices; for 1 <= i <= min(M,N), row i of the
+            matrix was interchanged with row IPIV(i).
 
-/*  ===================================================================== */
+    INFO    (output) INTEGER
+            = 0: successful exit
+            < 0: if INFO = -k, the k-th argument had an illegal value
+            > 0: if INFO = k, U(k,k) is exactly zero. The factorization
+                 has been completed, but the factor U is exactly
+                 singular, and division by zero will occur if it is used
+                 to solve a system of equations.
 
+    ===================================================================== */
 
+    *info = 0;
+    if (m < 0) {
+        *info = -1;
+    } else if (n < 0 || n > 1024) {
+        *info = -2;
+    } else if (lda < max(1,m)) {
+        *info = -4;
+    }
 
+    if (*info != 0) {
+        magma_xerbla( __func__, -(*info) );
+        return *info;
+    }
 
-//    Quick return if possible 
-
+    // Quick return if possible
     if (m == 0 || n == 0) {
-    return 0;
+        return *info;
     }
 
-    if(n>1024)
-    {
-       printf("N = %d > 1024 is not supported. This routine targets on slim matrix\n", n);
-       return 1;
-    }
+    magma_int_t minmn = min(m, n);
+    magma_int_t j;
 
-//     Compute machine safe minimum 
+    for (j = 0; j < minmn; j++) {
+        cudaDeviceSetCacheConfig( cudaFuncCachePreferShared );
 
-
-    int i__1 = min(m, n);
-
-    
-    for (int j = 0; j < i__1; j++) {
-
-//        Find pivot and test for singularity. 
-
-        //int i__2 = m - j;
-
-        int jp; 
-
-        cudaDeviceSetCacheConfig(cudaFuncCachePreferShared);    
-    
-        jp = cublasIzamax(m-j, (const cuDoubleComplex*)A(j,j), 1); 
-
-        jp = jp -1 + j;
-    
-
+        // Find pivot and test for singularity.
+        int jp;
+        jp = cublasIzamax(m-j, A(j,j), 1);
+        jp = jp - 1 + j;
         ipiv[j] = jp + 1;
-    
-    //if ( A(jp, j) != 0.0)
-//    {
-//           Apply the interchange to columns 1:N. 
-
-         cudaDeviceSetCacheConfig(cudaFuncCachePreferL1);
-
-         if (jp != j) 
-             {
+        // Can't check value of A since it is on GPU
+        //if ( A(jp, j) != 0.0) {
+            cudaDeviceSetCacheConfig( cudaFuncCachePreferL1 );
+            
+            // Apply the interchange to columns 1:N.
+            if (jp != j){
                 magma_zswap(n, A, j, jp, lda);
-           
-          }   
+            }
+            
+            // Compute elements J+1:M of J-th column.
+            if (j < m) {
+                magma_zscal_zgeru(m-j, n-j, A(j, j), lda);
+            }
+        //}
+        //else if (*info == 0) {
+        //    *info = j;
+        //}
+    }
 
-//           Compute elements J+1:M of J-th column.  
-           
-          if (j < m) 
-          {        
-
-              magma_zscal_zgeru(m-j, n-j, A(j, j), lda);
-
-          }
- 
-          else if (*info == 0) 
-          {
-              *info = j;
-          }
-
-   }
-
-
-    return 0;
-
-} 
+    return *info;
+}
 
 
 #define zswap_bs 64
 #define zgeru_bs 1024
 
 
-__global__ void kernel_zswap(int n, cuDoubleComplex *x, int i, int j, int lda)
+__global__ void kernel_zswap(int n, cuDoubleComplex *x, int i, int j, int incx)
 {
     int id = blockIdx.x * zswap_bs + threadIdx.x;
 
-    if(id < n)
-    {    
-        cuDoubleComplex res = x[i + lda * id]; 
-
-        x[i + lda * id] = x[j + lda*id];
-
-        x[j + lda*id] = res;
-
+    if (id < n) {
+        cuDoubleComplex res = x[i + incx*id];
+        x[i + incx*id] = x[j + incx*id];
+        x[j + incx*id] = res;
     }
-
 }
 
 
-void  magma_zswap(int n, cuDoubleComplex *x, int i, int j, int lda)
+void magma_zswap(int n, cuDoubleComplex *x, int i, int j, int incx)
 {
 /*
-
-   zswap two row vectors: ith and jth  
-   
+    zswap two row vectors: ith and jth
 */
-
     dim3 threads(zswap_bs, 1, 1);
-    
     int num_blocks = (n - 1)/zswap_bs + 1;
-
     dim3 grid(num_blocks,1);
-
-    kernel_zswap<<< grid, threads, 0, magma_stream >>>(n, x, i, j, lda);
-
+    kernel_zswap<<< grid, threads, 0, magma_stream >>>(n, x, i, j, incx);
 }
 
 
-extern __shared__  cuDoubleComplex shared_data[];
+extern __shared__ cuDoubleComplex shared_data[];
 
 __global__ void
 kernel_zscal_zgeru(int m, int n, cuDoubleComplex *A, int lda)
 {
-
     cuDoubleComplex *shared_y = (cuDoubleComplex *)shared_data;
 
     int tid = blockIdx.x * zgeru_bs + threadIdx.x;
-        
+
     cuDoubleComplex reg = MAGMA_Z_ZERO;
-        
-    
-    if(threadIdx.x < n)
-    {    
-        shared_y[threadIdx.x] = A[lda * threadIdx.x];    
+
+    if (threadIdx.x < n) {
+        shared_y[threadIdx.x] = A[lda * threadIdx.x];
     }
-    
+
     __syncthreads();
 
-    if(tid<m && tid>0)
-    {
+    if (tid < m && tid > 0) {
         reg = A[tid];
 
         reg *= MAGMA_Z_DIV(MAGMA_Z_ONE, shared_y[0]);
@@ -205,37 +184,25 @@ kernel_zscal_zgeru(int m, int n, cuDoubleComplex *A, int lda)
         A[tid] = reg;
 
         #pragma unroll
-        for(int i=1; i<n; i++)
-        {
+        for(int i=1; i < n; i++) {
             A[tid + i*lda] += (MAGMA_Z_NEG_ONE) * shared_y[i] * reg;
         }
-
     }
-} 
-
-
-void  magma_zscal_zgeru(int m, int n, cuDoubleComplex *A, int lda)
-{
-/*
-
-   Specialized kernel which merged zscal and zgeru the two kernels  
-   1) zscale a column vector  
-   2) Performe a zgeru Operation A := alpha*x*y**T + A,
-
-*/
-
-    dim3 threads(zgeru_bs, 1, 1);
-    
-    int num_blocks = (m - 1)/zgeru_bs + 1;
-
-    dim3 grid(num_blocks,1);
-    
-    size_t shared_size = sizeof(cuDoubleComplex)*(n);
-
-    kernel_zscal_zgeru<<< grid, threads, shared_size, magma_stream>>>(m, n, A, lda);
-
-
 }
 
 
+void magma_zscal_zgeru(int m, int n, cuDoubleComplex *A, int lda)
+{
+/*
 
+    Specialized kernel which merged zscal and zgeru the two kernels
+    1) zscale a column vector
+    2) Performe a zgeru Operation A := alpha*x*y**T + A,
+
+*/
+    dim3 threads(zgeru_bs, 1, 1);
+    int num_blocks = (m - 1)/zgeru_bs + 1;
+    dim3 grid(num_blocks,1);
+    size_t shared_size = sizeof(cuDoubleComplex)*(n);
+    kernel_zscal_zgeru<<< grid, threads, shared_size, magma_stream>>>(m, n, A, lda);
+}
