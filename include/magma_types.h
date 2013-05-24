@@ -10,6 +10,7 @@
 #define MAGMA_TYPES_H
 
 #include <stdint.h>
+#include <assert.h>
 
 
 // ========================================
@@ -42,26 +43,28 @@ typedef double real_Double_t;
     #define MAGMA_Z_MAKE(r,i)     make_cuDoubleComplex(r, i)
     #define MAGMA_Z_REAL(a)       (a).x
     #define MAGMA_Z_IMAG(a)       (a).y
-    #define MAGMA_Z_SET2REAL(a,r) { (a).x = (r);   (a).y =  0.0; }
+    #define MAGMA_Z_SET2REAL(a,r) { (a).x = (r);   (a).y = 0.0; }
     #define MAGMA_Z_ADD(a, b)     cuCadd(a, b)
     #define MAGMA_Z_SUB(a, b)     cuCsub(a, b)
     #define MAGMA_Z_MUL(a, b)     cuCmul(a, b)
     #define MAGMA_Z_DIV(a, b)     cuCdiv(a, b)
     #define MAGMA_Z_ABS(a)        cuCabs(a)
     #define MAGMA_Z_CNJG(a)       cuConj(a)
+    #define MAGMA_Z_DSCALE(v,t,s) {(v).x = (t).x/(s); (v).y = (t).y/(s);}
     
     #define MAGMA_C_MAKE(r,i)     make_cuFloatComplex(r, i)
     #define MAGMA_C_REAL(a)       (a).x
     #define MAGMA_C_IMAG(a)       (a).y
-    #define MAGMA_C_SET2REAL(a,r) { (a).x = (r);   (a).y =  0.0; }
+    #define MAGMA_C_SET2REAL(a,r) { (a).x = (r);   (a).y = 0.0; }
     #define MAGMA_C_ADD(a, b)     cuCaddf(a, b)
     #define MAGMA_C_SUB(a, b)     cuCsubf(a, b)
     #define MAGMA_C_MUL(a, b)     cuCmulf(a, b)
     #define MAGMA_C_DIV(a, b)     cuCdivf(a, b)
     #define MAGMA_C_ABS(a)        cuCabsf(a)
     #define MAGMA_C_CNJG(a)       cuConjf(a)
+    #define MAGMA_C_SSCALE(v,t,s) {(v).x = (t).x/(s); (v).y = (t).y/(s);}
     
-#elif HAVE_AMDBLAS
+#elif HAVE_clAmdBlas
     #if defined(__APPLE__) || defined(__MACOSX)
     #include "my_amdblas.h"
     #else
@@ -78,18 +81,22 @@ typedef double real_Double_t;
     #define MAGMA_Z_MAKE(r,i)     doubleComplex(r,i)
     #define MAGMA_Z_REAL(a)       (a).x
     #define MAGMA_Z_IMAG(a)       (a).y
-    #define MAGMA_Z_SET2REAL(a,r) { (a).x = (r);   (a).y =  0.0; }
+    #define MAGMA_Z_SET2REAL(a,r) { (a).x = (r);   (a).y = 0.0; }
     #define MAGMA_Z_ADD(a, b)     MAGMA_Z_MAKE((a).x+(b).x, (a).y+(b).y)
     #define MAGMA_Z_SUB(a, b)     MAGMA_Z_MAKE((a).x-(b).x, (a).y-(b).y)
+    #define MAGMA_Z_ABS(a)        magma_cabs(a)
     #define MAGMA_Z_CNJG(a)       MAGMA_Z_MAKE((a).x, -(a).y)
+    #define MAGMA_Z_DSCALE(v,t,s) {(v).x = (t).x/(s); (v).y = (t).y/(s);}
     
     #define MAGMA_C_MAKE(r,i)     floatComplex(r,i)
     #define MAGMA_C_REAL(a)       (a).x
     #define MAGMA_C_IMAG(a)       (a).y
-    #define MAGMA_C_SET2REAL(a,r) { (a).x = (r);   (a).y =  0.0; }
+    #define MAGMA_C_SET2REAL(a,r) { (a).x = (r);   (a).y = 0.0; }
     #define MAGMA_C_ADD(a, b)     MAGMA_C_MAKE((a).x+(b).x, (a).y+(b).y)
     #define MAGMA_C_SUB(a, b)     MAGMA_C_MAKE((a).x-(b).x, (a).y-(b).y)
+    #define MAGMA_C_ABS(a)        magma_cabsf(a)
     #define MAGMA_C_CNJG(a)       MAGMA_C_MAKE((a).x, -(a).y)
+    #define MAGMA_C_SSCALE(v,t,s) {(v).x = (t).x/(s); (v).y = (t).y/(s);}
 
 #elif HAVE_MIC
     #include <stdio.h>
@@ -115,33 +122,33 @@ typedef double real_Double_t;
     #define MAGMA_Z_MAKE(r, i)    std::complex<double>(r,i)
     #define MAGMA_Z_REAL(x)       (x).real()
     #define MAGMA_Z_IMAG(x)       (x).imag()
-    #define MAGMA_Z_SET2REAL(a,r) { (a).real() = (r);   (a).imag() =  0.0; }
+    #define MAGMA_Z_SET2REAL(a,r) { (a).real() = (r);   (a).imag() = 0.0; }
     #define MAGMA_Z_ADD(a, b)     ((a)+(b))
     #define MAGMA_Z_SUB(a, b)     ((a)-(b))
     #define MAGMA_Z_MUL(a, b)     ((a)*(b))
     #define MAGMA_Z_DIV(a, b)     ((a)/(b))
     #define MAGMA_Z_CNJG(a)       conj(a)
+    #define MAGMA_Z_DSCALE(v,t,s) ((v) = (t)/(s))
 
     #define MAGMA_C_MAKE(r, i)    std::complex<float> (r,i)
     #define MAGMA_C_REAL(x)       (x).real()
     #define MAGMA_C_IMAG(x)       (x).imag()
-    #define MAGMA_C_SET2REAL(a,r) { (a).real() = (r);   (a).imag() =  0.0; }
+    #define MAGMA_C_SET2REAL(a,r) { (a).real() = (r);   (a).imag() = 0.0; }
     #define MAGMA_C_ADD(a, b)     ((a)+(b))
     #define MAGMA_C_SUB(a, b)     ((a)-(b))
     #define MAGMA_C_MUL(a, b)     ((a)*(b))
     #define MAGMA_C_DIV(a, b)     ((a)/(b))
     #define MAGMA_C_CNJG(a)       conj(a)
+    #define MAGMA_C_SSCALE(v,t,s) ((v) = (t)/(s))
 #else
-    #error "One of HAVE_CUBLAS, HAVE_AMDBLAS, or HAVE_MIC must be defined. This typically happens in Makefile.internal."
+    #error "One of HAVE_CUBLAS, HAVE_clAmdBlas, or HAVE_MIC must be defined. This typically happens in Makefile.internal."
 #endif
 
-#define MAGMA_Z_EQUAL(a,b)    (MAGMA_Z_REAL(a)==MAGMA_Z_REAL(b) && MAGMA_Z_IMAG(a)==MAGMA_Z_IMAG(b))
-#define MAGMA_Z_NEGATE(a)     MAGMA_Z_MAKE( -MAGMA_Z_REAL(a), -MAGMA_Z_IMAG(a))
-#define MAGMA_Z_DSCALE(v, t, s)   {(v).x = (t).x/(s); (v).y = (t).y/(s);}
+#define MAGMA_Z_EQUAL(a,b)        (MAGMA_Z_REAL(a)==MAGMA_Z_REAL(b) && MAGMA_Z_IMAG(a)==MAGMA_Z_IMAG(b))
+#define MAGMA_Z_NEGATE(a)         MAGMA_Z_MAKE( -MAGMA_Z_REAL(a), -MAGMA_Z_IMAG(a))
 
-#define MAGMA_C_EQUAL(a,b)    (MAGMA_C_REAL(a)==MAGMA_C_REAL(b) && MAGMA_C_IMAG(a)==MAGMA_C_IMAG(b))
-#define MAGMA_C_NEGATE(a)     MAGMA_C_MAKE( -MAGMA_C_REAL(a), -MAGMA_C_IMAG(a))
-#define MAGMA_C_SSCALE(v, t, s)   {(v).x = (t).x/(s); (v).y = (t).y/(s);}
+#define MAGMA_C_EQUAL(a,b)        (MAGMA_C_REAL(a)==MAGMA_C_REAL(b) && MAGMA_C_IMAG(a)==MAGMA_C_IMAG(b))
+#define MAGMA_C_NEGATE(a)         MAGMA_C_MAKE( -MAGMA_C_REAL(a), -MAGMA_C_IMAG(a))
 
 #define MAGMA_D_MAKE(r,i)         (r)
 #define MAGMA_D_REAL(x)           (x)
@@ -149,8 +156,8 @@ typedef double real_Double_t;
 #define MAGMA_D_SET2REAL(a,r)     (a) = (r)
 #define MAGMA_D_ADD(a, b)         ((a) + (b))
 #define MAGMA_D_SUB(a, b)         ((a) - (b))
-#define MAGMA_D_MUL(a, b)         ( (a) * (b) )
-#define MAGMA_D_DIV(a, b)         ( (a) / (b) )
+#define MAGMA_D_MUL(a, b)         ((a) * (b))
+#define MAGMA_D_DIV(a, b)         ((a) / (b))
 #define MAGMA_D_ABS(a)            ((a)>0?(a):-(a))
 #define MAGMA_D_CNJG(a)           (a)
 #define MAGMA_D_EQUAL(a,b)        ((a) == (b))
@@ -163,8 +170,8 @@ typedef double real_Double_t;
 #define MAGMA_S_SET2REAL(a,r)     (a) = (r)
 #define MAGMA_S_ADD(a, b)         ((a) + (b))
 #define MAGMA_S_SUB(a, b)         ((a) - (b))
-#define MAGMA_S_MUL(a, b)         ( (a) * (b) )
-#define MAGMA_S_DIV(a, b)         ( (a) / (b) )
+#define MAGMA_S_MUL(a, b)         ((a) * (b))
+#define MAGMA_S_DIV(a, b)         ((a) / (b))
 #define MAGMA_S_ABS(a)            ((a)>0?(a):-(a))
 #define MAGMA_S_CNJG(a)           (a)
 #define MAGMA_S_EQUAL(a,b)        ((a) == (b))
@@ -199,7 +206,7 @@ typedef double real_Double_t;
 #define CBLAS_SADDR(a)  &(a)
 #endif
 
-#if HAVE_AMDBLAS
+#if HAVE_clAmdBlas
     // OpenCL uses opaque memory references on GPU
     typedef cl_mem magma_ptr;
     typedef cl_mem magmaInt_ptr;
@@ -264,6 +271,7 @@ typedef double real_Double_t;
 #define MAGMA_ERR_DEVICE_ALLOC     -113
 #define MAGMA_ERR_CUDASTREAM       -114
 #define MAGMA_ERR_INVALID_PTR      -115
+#define MAGMA_ERR_UNKNOWN          -116
 
 
 // ----------------------------------------
@@ -290,14 +298,22 @@ typedef double real_Double_t;
 #define MagmaRight         'R'  /* 142 */
 
 #define MagmaOneNorm       '1'  /* 171 */
+#define MagmaRealOneNorm   172
 #define MagmaTwoNorm       '2'  /* 173 */
 #define MagmaFrobeniusNorm 'F'  /* 174 */
 #define MagmaInfNorm       'I'  /* 175 */
+#define MagmaRealInfNorm   176
 #define MagmaMaxNorm       'M'  /* 177 */
+#define MagmaRealMaxNorm   178
 
 #define MagmaDistUniform   201
 #define MagmaDistSymmetric 202
 #define MagmaDistNormal    203
+
+#define MagmaHermGeev      241
+#define MagmaHermPoev      242
+#define MagmaNonsymPosv    243
+#define MagmaSymPosv       244
 
 #define MagmaNoPacking     291
 #define MagmaPackSubdiag   292
@@ -308,12 +324,12 @@ typedef double real_Double_t;
 #define MagmaPackUpeprBand 297
 #define MagmaPackAll       298
 
-#define MagmaNoVectors         'N'  /* 301 */  /* geev, syev, gesvd */
-#define MagmaVectors           'V'  /* 302 */  /* geev, syev */
-#define MagmaIVectors          'I'  /* 303 */  /* stedc */
-#define MagmaAllVectors        'A'  /* 304 */  /* gesvd */
-#define MagmaSomeVectors       'S'  /* 305 */  /* gesvd */
-#define MagmaOverwriteVectors  'O'  /* 306 */  /* gesvd */
+#define MagmaNoVec         'N'  /* 301 */  /* geev, syev, gesvd */
+#define MagmaVec           'V'  /* 302 */  /* geev, syev */
+#define MagmaIvec          'I'  /* 303 */  /* stedc */
+#define MagmaAllVec        'A'  /* 304 */  /* gesvd */
+#define MagmaSomeVec       'S'  /* 305 */  /* gesvd */
+#define MagmaOverwriteVec  'O'  /* 306 */  /* gesvd */
 
 #define MagmaForward       'F'  /* 391 */  /* larfb */
 #define MagmaBackward      'B'  /* 392 */  /* larfb */
@@ -325,12 +341,28 @@ typedef double real_Double_t;
 #define MagmaMinConst      101
 #define MagmaMaxConst      402
 
+// these could be enums, but that isn't portable in C++,
+// e.g., if -fshort-enums is used
+typedef char magma_trans_t;
+typedef char magma_uplo_t;
+typedef char magma_diag_t;
+typedef char magma_side_t;
+typedef char magma_norm_t;
+typedef char magma_dist_t;
+typedef char magma_pack_t;
+typedef char magma_vec_t;
+typedef char magma_direct_t;
+typedef char magma_storev_t;
+
 // ----------------------------------------
 // string constants for calling Fortran BLAS and LAPACK
 // todo: use translators instead? lapack_trans_const( MagmaUpper )
-#define MagmaNoTransStr    "NonTrans"
+#define MagmaRowMajorStr   "Row"
+#define MagmaColMajorStr   "Col"
+
+#define MagmaNoTransStr    "NoTrans"
 #define MagmaTransStr      "Trans"
-#define MagmaConjTransStr  "Conj"
+#define MagmaConjTransStr  "ConjTrans"
 
 #define MagmaUpperStr      "Upper"
 #define MagmaLowerStr      "Lower"
@@ -349,24 +381,71 @@ typedef double real_Double_t;
 #define MagmaColumnwiseStr "Columnwise"
 #define MagmaRowwiseStr    "Rowwise"
 
-#define MagmaNoVectorsStr        "NoVectors"
-#define MagmaVectorsStr          "Vectors"
-#define MagmaIVectorsStr         "IVectors"
-#define MagmaAllVectorsStr       "All"
-#define MagmaSomeVectorsStr      "Some"
-#define MagmaOverwriteVectorsStr "Overwrite"
+#define MagmaNoVecStr        "NoVec"
+#define MagmaVecStr          "Vec"
+#define MagmaIVecStr         "IVec"
+#define MagmaAllVecStr       "All"
+#define MagmaSomeVecStr      "Some"
+#define MagmaOverwriteVecStr "Overwrite"
 
-// these could be enums, but that isn't portable in C++,
-// e.g., if -fshort-enums is used
-typedef char magma_trans_t;
-typedef char magma_uplo_t;
-typedef char magma_diag_t;
-typedef char magma_side_t;
-typedef char magma_norm_t;
-typedef char magma_dist_t;
-typedef char magma_pack_t;
-typedef char magma_vectors_t;
-typedef char magma_direction_t;
-typedef char magma_storev_t;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// --------------------
+// translators
+magma_trans_t  magma_trans_const ( char lapack_char );
+magma_uplo_t   magma_uplo_const  ( char lapack_char );
+magma_diag_t   magma_diag_const  ( char lapack_char );
+magma_side_t   magma_side_const  ( char lapack_char );
+magma_norm_t   magma_norm_const  ( char lapack_char );
+magma_dist_t   magma_dist_const  ( char lapack_char );
+magma_pack_t   magma_pack_const  ( char lapack_char );
+magma_vec_t    magma_vec_const   ( char lapack_char );
+magma_direct_t magma_direct_const( char lapack_char );
+magma_storev_t magma_storev_const( char lapack_char );
+
+char        lapacke_const( int magma_const );
+const char* lapack_const ( int magma_const );
+
+#ifdef HAVE_clAmdBlas
+int                  amdblas_const      ( int           magma_const );
+clAmdBlasOrder       amdblas_order_const( magma_order_t magma_const );
+clAmdBlasTranspose   amdblas_trans_const( magma_trans_t magma_const );
+clAmdBlasSide        amdblas_side_const ( magma_side_t  magma_const );
+clAmdBlasDiag        amdblas_diag_const ( magma_diag_t  magma_const );
+clAmdBlasUplo        amdblas_uplo_const ( magma_uplo_t  magma_const );
+#endif
+
+#ifdef CUBLAS_V2_H_
+int                  cublas_const       ( int           magma_const );
+cublasOperation_t    cublas_trans_const ( magma_trans_t magma_const );
+cublasSideMode_t     cublas_side_const  ( magma_side_t  magma_const );
+cublasDiagType_t     cublas_diag_const  ( magma_diag_t  magma_const );
+cublasFillMode_t     cublas_uplo_const  ( magma_uplo_t  magma_const );
+#endif
+
+#ifdef HAVE_CBLAS
+#include "cblas.h"
+enum CBLAS_ORDER     cblas_order_const  ( magma_order_t magma_const );
+enum CBLAS_TRANSPOSE cblas_trans_const  ( magma_trans_t magma_const );
+enum CBLAS_SIDE      cblas_side_const   ( magma_side_t  magma_const );
+enum CBLAS_DIAG      cblas_diag_const   ( magma_diag_t  magma_const );
+enum CBLAS_UPLO      cblas_uplo_const   ( magma_uplo_t  magma_const );
+#endif
+
+// todo: above functions should all be inlined or macros for
+// efficiency. Here's an example.
+// In C99, static inline potentially wastes some space by
+// emitting multiple definitions, but is portable.
+static inline int cblas_const( int magma_const ) {
+    assert( magma_const >= MagmaMinConst );
+    assert( magma_const <= MagmaMaxConst );
+    return magma_const;
+}
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif        //  #ifndef MAGMA_TYPES_H
