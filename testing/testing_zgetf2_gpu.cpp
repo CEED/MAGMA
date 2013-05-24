@@ -21,8 +21,6 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-int magma_zgetf2_gpu(int m, int n, cuDoubleComplex *A, int lda, int *ipiv, int* info);
-
 double get_LU_error(magma_int_t M, magma_int_t N,
                     cuDoubleComplex *A,  magma_int_t lda,
                     cuDoubleComplex *LU, magma_int_t *IPIV)

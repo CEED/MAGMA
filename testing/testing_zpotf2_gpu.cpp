@@ -25,8 +25,6 @@
    -- Testing zpotf2_gpu
 */
 
-int magma_zpotf2_gpu(char uplo, int n, cuDoubleComplex *A, int lda, int *info);
-
 int main( int argc, char** argv)
 {
     TESTING_INIT();
