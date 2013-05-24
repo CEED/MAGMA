@@ -240,8 +240,8 @@ int main( int argc, char** argv)
                                  iwork, &liwork,
                                  &info);
                 end = get_current_time();
-                if (info < 0)
-                    printf("Argument %d of zhegvd had an illegal value.\n", -info);
+                if (info != 0)
+                    printf("lapackf77_zhegvd returned error %d.\n", (int) info);
 
                 cpu_time = GetTimerValue(start,end)/1000.;
 

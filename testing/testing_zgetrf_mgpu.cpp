@@ -177,15 +177,10 @@ int main( int argc, char** argv)
         start = get_current_time();
         lapackf77_zgetrf(&M, &N, h_A, &lda, ipiv, &info);
         end = get_current_time();
-        if (info < 0) {
-                        printf("Argument %d of zgetrf had an illegal value.\n", (int) -info);
-                        break;
-                } else if (info != 0 ) {
-                        printf("zgetrf returned info=%d.\n", (int) info);
-                        break;
-                }
+        if (info != 0)
+            printf("lapackf77_zgetrf returned error %d.\n", (int) info);
         cpu_perf = flops / GetTimerValue(start, end);
-                lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_R, &lda, h_A, &lda );
+        lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_R, &lda, h_A, &lda );
 
         /* ====================================================================
            Performs operation using MAGMA
@@ -222,16 +217,11 @@ int main( int argc, char** argv)
         magma_zgetrf_mgpu( num_gpus, M, N, d_lA, ldda, ipiv, &info);
         end = get_current_time();
         gpu_perf = flops / GetTimerValue(start, end);
-        if (info < 0) {
-            printf("Argument %d of magma_zgetrf_mgpu had an illegal value.\n", (int) -info);
-                        break;
-                } else if (info != 0 ) {
-            printf("magma_zgetrf_mgpu returned info=%d.\n", (int) info);
-                        break;
-                }
-                /* == download the matrix from GPUs == */
-                //cudaSetDevice(0);
-                //cublasGetMatrix( M, N, sizeof(cuDoubleComplex), d_lA[0], ldda, h_R, M);
+        if (info != 0)
+            printf("magma_zgetrf_mgpu returned error %d.\n", (int) info);
+        /* == download the matrix from GPUs == */
+        //cudaSetDevice(0);
+        //cublasGetMatrix( M, N, sizeof(cuDoubleComplex), d_lA[0], ldda, h_R, M);
         for(int j=0; j<N; j+=nb){
                   k = (j/nb)%num_gpus;
                   cudaSetDevice(k);
