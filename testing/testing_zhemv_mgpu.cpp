@@ -450,7 +450,7 @@ int main(int argc, char **argv)
         TESTING_FREE( Y[i] );
         cudaSetDevice(i);
 
-        TESTING_DEVFREE( d_lA[i] )
+        TESTING_DEVFREE( d_lA[i] );
         TESTING_DEVFREE( dX[i] );
         TESTING_DEVFREE( dY[i] );
 
