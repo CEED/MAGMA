@@ -10,9 +10,11 @@
 
 #ifndef MAGMA_Z_H
 #define MAGMA_Z_H
-#define PRECISION_z
 
+#include "magma_types.h"
 #include "magma_zgehrd_m.h"
+
+#define PRECISION_z
 
 #ifdef __cplusplus
 extern "C" {
@@ -617,8 +619,8 @@ magma_int_t magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
 void magma_zprint    ( magma_int_t m, magma_int_t n, const magmaDoubleComplex  *A, magma_int_t lda  );
 void magma_zprint_gpu( magma_int_t m, magma_int_t n, const magmaDoubleComplex *dA, magma_int_t ldda );
 
-void zpanel_to_q( char uplo, magma_int_t ib, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *work );
-void zq_to_panel( char uplo, magma_int_t ib, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *work );
+void zpanel_to_q( magma_uplo_t uplo, magma_int_t ib, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *work );
+void zq_to_panel( magma_uplo_t uplo, magma_int_t ib, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *work );
 
 #ifdef __cplusplus
 }
