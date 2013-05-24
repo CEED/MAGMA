@@ -46,7 +46,7 @@ extern"C" {
 int main( int argc, char** argv)
 {
 
-    TESTING_CUDA_INIT();
+    TESTING_INIT();
 
     real_Double_t gpu_time;
 
@@ -282,7 +282,7 @@ int main( int argc, char** argv)
     }
 
     /* Shutdown */
-    TESTING_CUDA_FINALIZE();
+    TESTING_FINALIZE();
 
     return 0;
 }

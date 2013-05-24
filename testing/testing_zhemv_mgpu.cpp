@@ -80,7 +80,7 @@ magmablas_zhemv2_mgpu_32_offset( char uplo, magma_int_t n,
 int main(int argc, char **argv)
 {        
 #if (GPUSHMEM >= 200)
-    TESTING_CUDA_INIT();
+    TESTING_INIT();
     cudaSetDevice(0);
 
     magma_timestr_t  start, end;
@@ -464,7 +464,7 @@ int main(int argc, char **argv)
       
 
     /* Free device */
-    TESTING_CUDA_FINALIZE();
+    TESTING_FINALIZE();
 #endif
     return 0;
 }        

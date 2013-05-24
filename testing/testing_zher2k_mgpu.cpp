@@ -43,7 +43,7 @@ magma_zher2k_mgpu(
 */
 int main( int argc, char** argv)
 {
-    TESTING_CUDA_INIT();
+    TESTING_INIT();
 
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex alpha = MAGMA_Z_MAKE( 1.2345, 4.321 );
@@ -207,6 +207,6 @@ int main( int argc, char** argv)
         printf( "\n" );
     }
     
-    TESTING_CUDA_FINALIZE();
+    TESTING_FINALIZE();
     return 0;
 }

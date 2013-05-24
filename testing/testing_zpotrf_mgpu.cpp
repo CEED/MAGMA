@@ -44,7 +44,7 @@ magma_zpotrf1_mgpu(int num_gpus, char uplo, magma_int_t n,
 */
 int main( int argc, char** argv) 
 {
-    TESTING_CUDA_INIT();
+    TESTING_INIT();
     magma_setdevice(0);
 
     magma_timestr_t  start, end;
@@ -251,5 +251,5 @@ int main( int argc, char** argv)
     }
 
     /* Shutdown */
-    TESTING_CUDA_FINALIZE();
+    TESTING_FINALIZE();
 }

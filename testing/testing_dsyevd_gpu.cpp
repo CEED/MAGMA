@@ -29,7 +29,7 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_CUDA_INIT();
+    TESTING_INIT();
 
     real_Double_t   gpu_time, cpu_time;
     double *h_A, *h_R, *d_R, *h_work;
@@ -192,6 +192,6 @@ int main( int argc, char** argv)
         }
     }
     
-    TESTING_CUDA_FINALIZE();
+    TESTING_FINALIZE();
     return 0;
 }

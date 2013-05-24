@@ -86,7 +86,7 @@ double get_LU_error(magma_int_t M, magma_int_t N,
 */
 int main( int argc, char** argv)
 {
-    TESTING_CUDA_INIT();
+    TESTING_INIT();
 
     magma_timestr_t  start, end;
     double           flops, gpu_perf, cpu_perf, error;
@@ -264,5 +264,5 @@ int main( int argc, char** argv)
         }
 
     /* Shutdown */
-    TESTING_CUDA_FINALIZE();
+    TESTING_FINALIZE();
 }

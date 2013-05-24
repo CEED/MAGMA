@@ -55,7 +55,7 @@ double magma_dlapy2(double x, double y)
 */
 int main( int argc, char** argv)
 {
-    TESTING_CUDA_INIT();
+    TESTING_INIT();
 
     real_Double_t   gpu_time, cpu_time;
     double *h_A, *h_R, *VL, *VR, *h_work, *w1, *w2;
@@ -367,6 +367,6 @@ int main( int argc, char** argv)
         }
     }
 
-    TESTING_CUDA_FINALIZE();
+    TESTING_FINALIZE();
     return 0;
 }

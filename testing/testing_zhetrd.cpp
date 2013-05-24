@@ -32,7 +32,7 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_CUDA_INIT();
+    TESTING_INIT();
 
     real_Double_t    gflops, gpu_perf, cpu_perf, gpu_time, cpu_time;
     double           eps;
@@ -175,6 +175,6 @@ int main( int argc, char** argv)
         }
     }
 
-    TESTING_CUDA_FINALIZE();
+    TESTING_FINALIZE();
     return 0;
 }

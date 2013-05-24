@@ -31,7 +31,7 @@
 
 int main( int argc, char** argv )
 {
-    TESTING_CUDA_INIT();
+    TESTING_INIT();
     
     real_Double_t   gflops, t1, t2;
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -408,6 +408,6 @@ int main( int argc, char** argv )
         printf( "all tests passed\n" );
     }
     
-    TESTING_CUDA_FINALIZE();
+    TESTING_FINALIZE();
     return 0;
 }

@@ -39,7 +39,7 @@
 
 int main( int argc, char** argv)
 {
-    TESTING_CUDA_INIT();
+    TESTING_INIT();
     cudaSetDevice(0);
 
     magma_timestr_t       start, end;
@@ -200,6 +200,6 @@ int main( int argc, char** argv)
     }
 
     /* Shutdown */
-    TESTING_CUDA_FINALIZE();
+    TESTING_FINALIZE();
     return EXIT_SUCCESS;
 }

@@ -83,7 +83,7 @@ extern "C" void zcheck_eig_(char *JOBZ, int  *MATYPE, int  *N, int  *NB,
 */
 int main( int argc, char** argv)
 {
-    TESTING_CUDA_INIT_MGPU();
+    TESTING_INIT_MGPU();
 
     magma_timestr_t       start, end, tband;
     double           eps, flops, gpu_perf, gpu_time;
@@ -441,6 +441,6 @@ int main( int argc, char** argv)
     TESTING_HOSTFREE( h_work ); 
 
     /* Shutdown */
-    TESTING_CUDA_FINALIZE_MGPU();
+    TESTING_FINALIZE_MGPU();
     return EXIT_SUCCESS;
 }

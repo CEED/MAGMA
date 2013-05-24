@@ -27,7 +27,7 @@
 */
 int main(int argc , char **argv)
 {
-    TESTING_CUDA_INIT();
+    TESTING_INIT();
 
     real_Double_t   gflops, gpu_perf, gpu_time;
     double          Rnorm, Anorm, Xnorm, *work;
@@ -116,6 +116,6 @@ int main(int argc , char **argv)
         }
     }
 
-    TESTING_CUDA_FINALIZE();
+    TESTING_FINALIZE();
     return 0;
 }

@@ -53,7 +53,7 @@ static void init_matrix( magma_int_t m, magma_int_t n, cuDoubleComplex *A, magma
 */
 int main( int argc, char** argv)
 {
-    TESTING_CUDA_INIT();
+    TESTING_INIT();
 
     cuDoubleComplex *h_A1, *h_A2;
     cuDoubleComplex *d_A1, *d_A2;
@@ -429,6 +429,6 @@ int main( int argc, char** argv)
         }
     }
     
-    TESTING_CUDA_FINALIZE();
+    TESTING_FINALIZE();
     return 0;
 }

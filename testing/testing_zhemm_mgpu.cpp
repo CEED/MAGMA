@@ -32,7 +32,7 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_CUDA_INIT();
+    TESTING_INIT();
 
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
@@ -352,6 +352,6 @@ int main( int argc, char** argv)
     TESTING_HOSTFREE( hR );
     
     /* Shutdown */
-    TESTING_CUDA_FINALIZE();
+    TESTING_FINALIZE();
     return 0;
 }

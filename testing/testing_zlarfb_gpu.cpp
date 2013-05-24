@@ -29,7 +29,7 @@
 */
 int main( int argc, char** argv )
 {
-    TESTING_CUDA_INIT();
+    TESTING_INIT();
     
     cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
     cuDoubleComplex c_one     = MAGMA_Z_ONE;
@@ -167,6 +167,6 @@ int main( int argc, char** argv )
         printf( "\n" );
     }
     
-    TESTING_CUDA_FINALIZE();
+    TESTING_FINALIZE();
     return 0;
 }

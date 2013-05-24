@@ -53,7 +53,7 @@ extern"C" {
 int main( int argc, char** argv)
 {
 
-    TESTING_CUDA_INIT_MGPU();
+    TESTING_INIT_MGPU();
 
     real_Double_t   mgpu_time;
     cuDoubleComplex *h_A, *h_Ainit, *h_B, *h_Binit, *h_work;
@@ -262,7 +262,7 @@ int main( int argc, char** argv)
     }
 
     /* Shutdown */
-    TESTING_CUDA_FINALIZE_MGPU();
+    TESTING_FINALIZE_MGPU();
 
     return 0;
 }

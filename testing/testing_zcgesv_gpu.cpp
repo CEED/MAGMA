@@ -32,7 +32,7 @@
 
 int main(int argc , char **argv)
 {
-    TESTING_CUDA_INIT();
+    TESTING_INIT();
 
     magma_timestr_t  start, end;
     double      flopsF, flopsS, gpu_perf;
@@ -233,5 +233,5 @@ int main(int argc , char **argv)
     TESTING_DEVFREE( d_WORKD );
 
     /* Shutdown */
-    TESTING_CUDA_FINALIZE();
+    TESTING_FINALIZE();
 }

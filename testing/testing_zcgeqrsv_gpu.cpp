@@ -44,7 +44,7 @@ int main( int argc, char** argv)
     return EXIT_SUCCESS;
 #else
   */
-    TESTING_CUDA_INIT();
+    TESTING_INIT();
 
     magma_timestr_t  start, end;
     double      flops, gpu_perf, cpu_perf;
@@ -231,7 +231,7 @@ int main( int argc, char** argv)
     TESTING_DEVFREE( d_T );
 
     /* Shutdown */
-    TESTING_CUDA_FINALIZE();
+    TESTING_FINALIZE();
 
     //#endif /*defined(PRECISION_z) && (GPUSHMEM < 200)*/
 }

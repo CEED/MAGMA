@@ -16,7 +16,7 @@
 #endif
 
 
-#define TESTING_CUDA_INIT()                                                \
+#define TESTING_INIT()                                                \
     magma_init();                                                          \
     if( CUBLAS_STATUS_SUCCESS != cublasInit() ) {                          \
         fprintf(stderr, "ERROR: cublasInit failed\n");                     \
@@ -25,12 +25,12 @@
     magma_print_devices();
 
 
-#define TESTING_CUDA_FINALIZE()                                            \
+#define TESTING_FINALIZE()                                            \
     magma_finalize();                                                      \
     cublasShutdown();
 
 
-#define TESTING_CUDA_INIT_MGPU()                                           \
+#define TESTING_INIT_MGPU()                                           \
 {                                                                          \
     magma_init();                                                          \
     int ndevices;                                                          \
@@ -47,7 +47,7 @@
 }
 
 
-#define TESTING_CUDA_FINALIZE_MGPU()                                       \
+#define TESTING_FINALIZE_MGPU()                                       \
 {                                                                          \
     magma_finalize();                                                      \
     int ndevices;                                                          \

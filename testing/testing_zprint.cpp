@@ -28,7 +28,7 @@
 */
 int main( int argc, char** argv)
 {
-    TESTING_CUDA_INIT();
+    TESTING_INIT();
     cudaSetDevice( 0 );
 
     cuDoubleComplex *hA, *dA;
@@ -72,5 +72,5 @@ int main( int argc, char** argv)
     TESTING_DEVFREE( dA );
 
     /* Shutdown */
-    TESTING_CUDA_FINALIZE();
+    TESTING_FINALIZE();
 }
