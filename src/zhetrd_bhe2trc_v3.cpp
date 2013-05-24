@@ -507,7 +507,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( magma_int_t THREADS, magma_int_t WA
         mkl_set_num_threads(mklth);
 #endif
         // call eigensolver for our resulting tridiag [D E] and form E=Q*Z
-        magma_zstedc_withZ(MagmaNoVectors, N, D2, E2, Z, LDZ);
+        magma_zstedc_withZ(MagmaNoVec, N, D2, E2, Z, LDZ);
 #if defined(USEMKL)
         mkl_set_num_threads( 1 );
 #endif
@@ -919,7 +919,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( magma_int_t THREADS, magma_int_t WA
                mkl_set_num_threads(mklth);
                #endif
                // call eigensolver for our resulting tridiag [D E] and form E=Q*Z
-               magma_zstedc_withZ(MagmaVectors, N, D2, E2, A1, LDA1);
+               magma_zstedc_withZ(MagmaVec, N, D2, E2, A1, LDA1);
                #if defined(USEMKL)
                mkl_set_num_threads( 1 );
                #endif
@@ -1025,7 +1025,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( magma_int_t THREADS, magma_int_t WA
        if(WANTZ!=1) JOBZ='N';
        if(WANTZ==1) JOBZ='V';
        magma_zstedc_withZ(JOBZ, N, D2, E2, Q2, LDQ2);            
-       //magma_zstedc_withZ(MagmaNoVectors, N, D2, E2, Q1, LDQ1);            
+       //magma_zstedc_withZ(MagmaNoVec, N, D2, E2, Q1, LDQ1);            
     }
     
 

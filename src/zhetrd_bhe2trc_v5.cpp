@@ -463,8 +463,8 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t 
     if(wantz==0){
         timelpk = magma_wtime();
 
-        magma_zstedc_withZ(MagmaNoVectors, n, D, E, NULL, 1);
-        //magma_zstedc_withZ(MagmaNoVectors, n, D, E, Z, ldz);
+        magma_zstedc_withZ(MagmaNoVec, n, D, E, NULL, 1);
+        //magma_zstedc_withZ(MagmaNoVec, n, D, E, Z, ldz);
 
         timelpk = magma_wtime()-timelpk;
         printf("  Finish WANTZ %d  eigensolver 'N'    timing= %lf  threads %d \n" ,wantz, timelpk, mklth);

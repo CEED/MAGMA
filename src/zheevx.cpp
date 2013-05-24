@@ -186,14 +186,14 @@ magma_zheevx(char jobz, char range, char uplo, magma_int_t n,
     
     /* Function Body */
     lower = lapackf77_lsame(uplo_, MagmaLowerStr);
-    wantz = lapackf77_lsame(jobz_, MagmaVectorsStr);
+    wantz = lapackf77_lsame(jobz_, MagmaVecStr);
     alleig = lapackf77_lsame(range_, "A");
     valeig = lapackf77_lsame(range_, "V");
     indeig = lapackf77_lsame(range_, "I");
     lquery = lwork == -1;
     
     *info = 0;
-    if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVectorsStr))) {
+    if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVecStr))) {
         *info = -1;
     } else if (! (alleig || valeig || indeig)) {
         *info = -2;
