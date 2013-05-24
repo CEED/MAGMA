@@ -4,8 +4,6 @@
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
        November 2011
-
-       @precisions normal z -> s d c
 */
 
 #ifndef MAGMA_AUXILIARY_H
