@@ -76,9 +76,9 @@ int main( int argc, char** argv)
     char uplo = opts.uplo;
     magma_int_t itype = opts.itype;
 
-    if ( checkres && jobz == MagmaNoVectors ) {
+    if ( checkres && jobz == MagmaNoVec ) {
         fprintf( stderr, "checking results requires vectors; setting jobz=V (option -JV)\n" );
-        jobz = MagmaVectors;
+        jobz = MagmaVec;
     }
 
     printf("using: nrgpu = %d, itype = %d, jobz = %c, uplo = %c, checkres = %d\n", opts.ngpu, itype, jobz, uplo, checkres);

@@ -47,9 +47,9 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
-    if ( opts.check && opts.jobz == MagmaNoVectors ) {
+    if ( opts.check && opts.jobz == MagmaNoVec ) {
         fprintf( stderr, "checking results requires vectors; setting jobz=V (option -JV)\n" );
-        opts.jobz = MagmaVectors;
+        opts.jobz = MagmaVec;
     }
     
     printf("    N   CPU Time (sec)   GPU Time (sec)\n");
@@ -139,7 +139,7 @@ int main( int argc, char** argv)
                                   NULL, h_work, rwork, &result[0]);
                 
                 magma_zsetmatrix( N, N, h_A, lda, d_R, ldda );
-                magma_zheevd_gpu( MagmaNoVectors, opts.uplo,
+                magma_zheevd_gpu( MagmaNoVec, opts.uplo,
                                   N, d_R, ldda, w2,
                                   h_R, lda,
                                   h_work, lwork,

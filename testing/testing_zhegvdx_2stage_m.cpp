@@ -89,9 +89,9 @@ int main( int argc, char** argv)
     if (f != 1)
         range='I';
 
-    if ( checkres && jobz == MagmaNoVectors ) {
+    if ( checkres && jobz == MagmaNoVec ) {
         fprintf( stderr, "checking results requires vectors; setting jobz=V (option -JV)\n" );
-        jobz = MagmaVectors;
+        jobz = MagmaVec;
     }
 
     printf("using: nrgpu = %d, itype = %d, jobz = %c,range = %c, uplo = %c, checkres = %d, fraction = %6.4f\n", opts.ngpu, itype, jobz, range, uplo, checkres, f);

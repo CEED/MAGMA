@@ -211,7 +211,7 @@ int main( int argc, char** argv)
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-        char *jobz = (char*)MagmaVectorsStr;
+        char *jobz = (char*)MagmaVecStr;
         char range = 'A';
         magma_int_t fraction_ev = 100;
         magma_int_t il,iu,m1,m2;

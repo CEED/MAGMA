@@ -110,11 +110,11 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     opts->transB    = MagmaNoTrans;    // gemm
     opts->side      = MagmaLeft;       // trsm, etc.
     opts->diag      = MagmaNonUnit;    // trsm, etc.
-    opts->jobu      = MagmaNoVectors;  // gesvd: no left  singular vectors
-    opts->jobvt     = MagmaNoVectors;  // gesvd: no right singular vectors
-    opts->jobz      = MagmaNoVectors;  // heev:  no eigen vectors
-    opts->jobvr     = MagmaNoVectors;  // geev:  no right eigen vectors
-    opts->jobvl     = MagmaNoVectors;  // geev:  no left  eigen vectors
+    opts->jobu      = MagmaNoVec;  // gesvd: no left  singular vectors
+    opts->jobvt     = MagmaNoVec;  // gesvd: no right singular vectors
+    opts->jobz      = MagmaNoVec;  // heev:  no eigen vectors
+    opts->jobvr     = MagmaNoVec;  // geev:  no right eigen vectors
+    opts->jobvl     = MagmaNoVec;  // geev:  no left  eigen vectors
     
     printf( usage_short, argv[0] );
     
@@ -288,24 +288,24 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
         else if ( strcmp("-DN", argv[i]) == 0 ) { opts->diag  = MagmaNonUnit; }
         else if ( strcmp("-DU", argv[i]) == 0 ) { opts->diag  = MagmaUnit;    }
         
-        else if ( strcmp("-UA", argv[i]) == 0 ) { opts->jobu  = MagmaAllVectors;       }
-        else if ( strcmp("-US", argv[i]) == 0 ) { opts->jobu  = MagmaSomeVectors;      }
-        else if ( strcmp("-UO", argv[i]) == 0 ) { opts->jobu  = MagmaOverwriteVectors; }
-        else if ( strcmp("-UN", argv[i]) == 0 ) { opts->jobu  = MagmaNoVectors;        }
+        else if ( strcmp("-UA", argv[i]) == 0 ) { opts->jobu  = MagmaAllVec;       }
+        else if ( strcmp("-US", argv[i]) == 0 ) { opts->jobu  = MagmaSomeVec;      }
+        else if ( strcmp("-UO", argv[i]) == 0 ) { opts->jobu  = MagmaOverwriteVec; }
+        else if ( strcmp("-UN", argv[i]) == 0 ) { opts->jobu  = MagmaNoVec;        }
         
-        else if ( strcmp("-VA", argv[i]) == 0 ) { opts->jobvt = MagmaAllVectors;       }
-        else if ( strcmp("-VS", argv[i]) == 0 ) { opts->jobvt = MagmaSomeVectors;      }
-        else if ( strcmp("-VO", argv[i]) == 0 ) { opts->jobvt = MagmaOverwriteVectors; }
-        else if ( strcmp("-VN", argv[i]) == 0 ) { opts->jobvt = MagmaNoVectors;        }
+        else if ( strcmp("-VA", argv[i]) == 0 ) { opts->jobvt = MagmaAllVec;       }
+        else if ( strcmp("-VS", argv[i]) == 0 ) { opts->jobvt = MagmaSomeVec;      }
+        else if ( strcmp("-VO", argv[i]) == 0 ) { opts->jobvt = MagmaOverwriteVec; }
+        else if ( strcmp("-VN", argv[i]) == 0 ) { opts->jobvt = MagmaNoVec;        }
         
-        else if ( strcmp("-JN", argv[i]) == 0 ) { opts->jobz  = MagmaNoVectors; }
-        else if ( strcmp("-JV", argv[i]) == 0 ) { opts->jobz  = MagmaVectors;   }
+        else if ( strcmp("-JN", argv[i]) == 0 ) { opts->jobz  = MagmaNoVec; }
+        else if ( strcmp("-JV", argv[i]) == 0 ) { opts->jobz  = MagmaVec;   }
         
-        else if ( strcmp("-LN", argv[i]) == 0 ) { opts->jobvl = MagmaNoVectors; }
-        else if ( strcmp("-LV", argv[i]) == 0 ) { opts->jobvl = MagmaVectors;   }
+        else if ( strcmp("-LN", argv[i]) == 0 ) { opts->jobvl = MagmaNoVec; }
+        else if ( strcmp("-LV", argv[i]) == 0 ) { opts->jobvl = MagmaVec;   }
         
-        else if ( strcmp("-RN", argv[i]) == 0 ) { opts->jobvr = MagmaNoVectors; }
-        else if ( strcmp("-RV", argv[i]) == 0 ) { opts->jobvr = MagmaVectors;   }
+        else if ( strcmp("-RN", argv[i]) == 0 ) { opts->jobvr = MagmaNoVec; }
+        else if ( strcmp("-RV", argv[i]) == 0 ) { opts->jobvr = MagmaVec;   }
         
         // ----- usage
         else if ( strcmp("-h",     argv[i]) == 0 ||

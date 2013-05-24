@@ -51,9 +51,9 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
-    if ( opts.check && opts.jobz == MagmaNoVectors ) {
+    if ( opts.check && opts.jobz == MagmaNoVec ) {
         fprintf( stderr, "checking results requires vectors; setting jobz=V (option -JV)\n" );
-        opts.jobz = MagmaVectors;
+        opts.jobz = MagmaVec;
     }
     
     printf("    N   CPU Time (sec)   GPU Time(sec)\n");
@@ -183,7 +183,7 @@ int main( int argc, char** argv)
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &lda, h_S, &lda );
                 
-                magma_zhegvd( opts.itype, MagmaNoVectors, opts.uplo,
+                magma_zhegvd( opts.itype, MagmaNoVec, opts.uplo,
                               N, h_R, lda, h_S, lda, w2,
                               h_work, lwork,
                               rwork, lrwork,

@@ -164,7 +164,7 @@ int main( int argc, char** argv)
                 
                 // ----------
                 // Compute eigenvalues, left and right eigenvectors, and test them
-                magma_zgeev( MagmaVectors, MagmaVectors,
+                magma_zgeev( MagmaVec, MagmaVec,
                              N, h_R, lda, w1,
                              VL, lda, VR, lda,
                              h_work, lwork, rwork, &info );
@@ -230,7 +230,7 @@ int main( int argc, char** argv)
                 // ----------
                 // Compute eigenvalues only, and test them
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
-                magma_zgeev( MagmaNoVectors, MagmaNoVectors,
+                magma_zgeev( MagmaNoVec, MagmaNoVec,
                              N, h_R, lda, w2,
                              &DUM, 1, &DUM, 1,
                              h_work, lwork, rwork, &info );
@@ -250,7 +250,7 @@ int main( int argc, char** argv)
                 // ----------
                 // Compute eigenvalues and right eigenvectors, and test them
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
-                magma_zgeev( MagmaNoVectors, MagmaVectors,
+                magma_zgeev( MagmaNoVec, MagmaVec,
                              N, h_R, lda, w2,
                              &DUM, 1, LRE, lda,
                              h_work, lwork, rwork, &info );
@@ -277,7 +277,7 @@ int main( int argc, char** argv)
                 // ----------
                 // Compute eigenvalues and left eigenvectors, and test them
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
-                magma_zgeev( MagmaVectors, MagmaNoVectors,
+                magma_zgeev( MagmaVec, MagmaNoVec,
                              N, h_R, lda, w2,
                              LRE, lda, &DUM, 1,
                              h_work, lwork, rwork, &info );

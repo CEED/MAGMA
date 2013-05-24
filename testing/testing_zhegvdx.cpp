@@ -49,9 +49,9 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
-    if ( opts.check && opts.jobz == MagmaNoVectors ) {
+    if ( opts.check && opts.jobz == MagmaNoVec ) {
         fprintf( stderr, "checking results requires vectors; setting jobz=V (option -JV)\n" );
-        opts.jobz = MagmaVectors;
+        opts.jobz = MagmaVec;
     }
     
     printf("    N     M   GPU Time (sec)\n");
