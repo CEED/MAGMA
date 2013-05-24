@@ -21,10 +21,7 @@ ZHDR =  magma_z.h	\
 -include Makefile.local
 -include Makefile.src
 
-ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR) \
-	magma.h		\
-	magmablas.h	\
-	magma_lapack.h	\
+ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR)
 
 all: $(ALLHDR)
 
