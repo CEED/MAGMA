@@ -1,14 +1,13 @@
 /*
- *  -- MAGMA (version 1.1) --
- *     Univ. of Tennessee, Knoxville
- *     Univ. of California, Berkeley
- *     Univ. of Colorado, Denver
- *     November 2011
- *
- * @precisions normal z -> c d s
- * @author Chongxiao Cao
- *
- **/
+    -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+       @precisions normal z -> c d s
+       @author Chongxiao Cao
+*/
 
 // make sure that asserts are enabled
 #ifdef NDEBUG
@@ -30,6 +29,8 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
+#define h_A(i,j) (h_A + (i) + (j)*lda)
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing ztrsm
 */
@@ -38,84 +39,65 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t   gflops, cublas_perf, cublas_time, cpu_perf, cpu_time;
-    double          cublas_error, Cnorm, work[1];
+    double          cublas_error, normA, normx, normr, work[1];
     magma_int_t N, info;
-    magma_int_t Ak;
     magma_int_t sizeA;
     magma_int_t lda, ldda;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-   
-    magma_int_t *piv;
-    magma_err_t err;
+    magma_int_t *ipiv;
 
-    cuDoubleComplex *h_A, *h_x, *h_b1, *h_xcublas, *h_x1, *LU, *LUT;
+    cuDoubleComplex *h_A, *h_b, *h_x, *h_xcublas;
     cuDoubleComplex *d_A, *d_x;
     cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
-    printf("If running lapack (option --lapack), MAGMA and CUBLAS error are both computed\n"
-           "relative to CPU BLAS result. Else, MAGMA error is computed relative to CUBLAS result.\n\n"
-           "uplo = %c, transA = %c, diag = %c \n", opts.uplo, opts.transA, opts.diag );
-    printf("    N   CUBLAS Gflop/s (ms)   CPU Gflop/s (ms)  CUBLAS error\n");
-    printf("=================================================================\n");
+    printf("uplo = %c, transA = %c, diag = %c\n", opts.uplo, opts.transA, opts.diag );
+    printf("    N  CUBLAS Gflop/s (ms)   CPU Gflop/s (ms)   CUBLAS error\n");
+    printf("============================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[i];
             gflops = FLOPS_ZTRSM(opts.side, N, 1) / 1e9;
-
-            lda = N;
-            Ak = N;
+            lda    = N;
+            ldda   = ((lda+31)/32)*32;
+            sizeA  = lda*N;
             
-            ldda = ((lda+31)/32)*32;
-            
-            sizeA = lda*Ak;
-            
-            TESTING_MALLOC( h_A,  cuDoubleComplex, lda*Ak );
-            TESTING_MALLOC( LU,      cuDoubleComplex, lda*Ak );
-            TESTING_MALLOC( LUT,  cuDoubleComplex, lda*Ak );
-            TESTING_MALLOC( h_x,  cuDoubleComplex, N  );
-            TESTING_MALLOC( h_x1,  cuDoubleComplex, N );
-            TESTING_MALLOC( h_b1,  cuDoubleComplex, N );
+            TESTING_MALLOC( ipiv, magma_int_t, N );
+            TESTING_MALLOC( h_A,  cuDoubleComplex, lda*N );
+            TESTING_MALLOC( h_b,  cuDoubleComplex, N );
+            TESTING_MALLOC( h_x,  cuDoubleComplex, N );
             TESTING_MALLOC( h_xcublas, cuDoubleComplex, N  );
             
-            TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*Ak );
+            TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*N );
             TESTING_DEVALLOC( d_x, cuDoubleComplex, N  );
             
             /* Initialize the matrices */
-            lapackf77_zlarnv( &ione, ISEED, &sizeA, LU );
-            err = magma_malloc_cpu( (void**) &piv, N*sizeof(magma_int_t) );  assert( err == 0 );
-            lapackf77_zgetrf( &Ak, &Ak, LU, &lda, piv, &info );
-            
-            int i, j;
-            for(i=0;i<Ak;i++){
-                for(j=0;j<Ak;j++){
-                    LUT[j+i*lda] = LU[i+j*lda];
+            /* Factor A into LU to get well-conditioned triangular matrix.
+             * Copy L to U, since L seems okay when used with non-unit diagonal
+             * (i.e., from U), while U fails when used with unit diagonal. */
+            lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );
+            lapackf77_zgetrf( &N, &N, h_A, &lda, ipiv, &info );
+            for( int j = 0; j < N; ++j ) {
+                for( int i = 0; i < j; ++i ) {
+                    *h_A(i,j) = *h_A(j,i);
                 }
             }
-
-            lapackf77_zlacpy(MagmaUpperStr, &Ak, &Ak, LUT, &lda, LU, &lda);
             
-            if(opts.uplo == MagmaLower){
-                lapackf77_zlacpy(MagmaLowerStr, &Ak, &Ak, LU, &lda, h_A, &lda);
-            }else{
-                lapackf77_zlacpy(MagmaUpperStr, &Ak, &Ak, LU, &lda, h_A, &lda);
-            }
+            lapackf77_zlarnv( &ione, ISEED, &N, h_b );
+            blasf77_zcopy( &N, h_b, &ione, h_x, &ione );
             
-            lapackf77_zlarnv( &ione, ISEED, &N, h_x );
-            memcpy(h_b1, h_x, N*sizeof(cuDoubleComplex));
             /* =====================================================================
                Performs operation using CUDA-BLAS
                =================================================================== */
-            magma_zsetmatrix( Ak, Ak, h_A, lda, d_A, ldda );
+            magma_zsetmatrix( N, N, h_A, lda, d_A, ldda );
             magma_zsetvector( N, h_x, 1, d_x, 1 );
             
             cublas_time = magma_sync_wtime( NULL );
             cublasZtrsv( opts.uplo, opts.transA, opts.diag,
-                         N, 
+                         N,
                          d_A, ldda,
                          d_x, 1 );
             cublas_time = magma_sync_wtime( NULL ) - cublas_time;
@@ -128,7 +110,7 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                blasf77_ztrsv( &opts.uplo, &opts.transA, &opts.diag, 
+                blasf77_ztrsv( &opts.uplo, &opts.transA, &opts.diag,
                                &N,
                                h_A, &lda,
                                h_x, &ione );
@@ -140,32 +122,35 @@ int main( int argc, char** argv)
                Check the result
                =================================================================== */
             // ||b - Ax|| / (||A||*||x||)
-            memcpy(h_x1, h_xcublas, N*sizeof(cuDoubleComplex));
-            blasf77_ztrmv( &opts.uplo, &opts.transA, &opts.diag, 
-                            &N,
-                            h_A, &lda,
-                            h_xcublas, &ione );
-
-            blasf77_zaxpy( &N, &c_neg_one, h_b1, &ione, h_xcublas, &ione );
-            double norm1 =  lapackf77_zlange( "M", &N, &ione, h_xcublas, &N, work );
-            double normx =  lapackf77_zlange( "M", &N, &ione, h_x1, &ione, work );
-            double normA =  lapackf77_zlange( "M", &Ak, &Ak, h_A, &lda, work );
-
-
-            cublas_error = norm1/(normx*normA);
-
-            printf("%5d   %7.2f (%7.2f)    %7.2f (%7.2f) %8.2e\n",
-                    (int) N,
-                    cublas_perf, 1000.*cublas_time,
-                    cpu_perf,    1000.*cpu_time,
-                    cublas_error );
+            // error for CUBLAS
+            normA = lapackf77_zlange( "F", &N, &N, h_A, &lda, work );
             
-            TESTING_FREE( h_A  );
-            TESTING_FREE( LU  );
-            TESTING_FREE( LUT );
-            TESTING_FREE( h_x  );
+            normx = lapackf77_zlange( "F", &N, &ione, h_xcublas, &ione, work );
+            blasf77_ztrmv( &opts.uplo, &opts.transA, &opts.diag,
+                           &N,
+                           h_A, &lda,
+                           h_xcublas, &ione );
+            blasf77_zaxpy( &N, &c_neg_one, h_b, &ione, h_xcublas, &ione );
+            normr = lapackf77_zlange( "F", &N, &ione, h_xcublas, &N, work );
+            cublas_error = normr / (normA*normx);
+
+            if ( opts.lapack ) {
+                printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e\n",
+                        (int) N,
+                        cublas_perf, 1000.*cublas_time,
+                        cpu_perf,    1000.*cpu_time,
+                        cublas_error );
+            }
+            else {
+                printf("%5d   %7.2f (%7.2f)     ---  (  ---  )   %8.2e\n",
+                        (int) N,
+                        cublas_perf, 1000.*cublas_time,
+                        cublas_error );
+            }
+            
+            TESTING_FREE( h_A );
+            TESTING_FREE( h_x );
             TESTING_FREE( h_xcublas );
-            TESTING_FREE( h_x1 );
             
             TESTING_DEVFREE( d_A );
             TESTING_DEVFREE( d_x );
