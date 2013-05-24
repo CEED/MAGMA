@@ -41,6 +41,10 @@ subs = {
     ('float',                     'float2'                  ),
     ('double',                    'cuDoubleComplex'         ),
     ('float',                     'cuFloatComplex'          ),
+    ('magmaFloat_const_ptr',      'magmaFloatComplex_const_ptr' ),  # before magmaDoubleComplex
+    ('magmaDouble_const_ptr',     'magmaDoubleComplex_const_ptr'),
+    ('magmaFloat_ptr',            'magmaFloatComplex_ptr'   ),
+    ('magmaDouble_ptr',           'magmaDoubleComplex_ptr'  ),
     ('double',                    'magmaDoubleComplex'      ),
     ('float',                     'magmaFloatComplex'       ),
     ('DOUBLE PRECISION',          'COMPLEX_16'              ),
@@ -182,9 +186,12 @@ subs = {
     ('real',                'double precision',    'real',                'double precision'    ),  # before double
     ('float',               'double',              'float _Complex',      'double _Complex'     ),
     ('float',               'double',              'cuFloatComplex',      'cuDoubleComplex'     ),
+    ('magmaFloat_const_ptr', 'magmaDouble_const_ptr', 'magmaFloatComplex_const_ptr', 'magmaDoubleComplex_const_ptr'),  # before magmaDoubleComplex
+    ('magmaFloat_const_ptr', 'magmaDouble_const_ptr', 'magmaFloat_const_ptr',        'magmaDouble_const_ptr'       ),  # before magmaDoubleComplex
+    ('magmaFloat_ptr',       'magmaDouble_ptr',       'magmaFloatComplex_ptr',       'magmaDoubleComplex_ptr'      ),  # before magmaDoubleComplex
+    ('magmaFloat_ptr',       'magmaDouble_ptr',       'magmaFloat_ptr',              'magmaDouble_ptr'             ),  # before magmaDoubleComplex
     ('float',               'double',              'magmaFloatComplex',   'magmaDoubleComplex'  ),
     ('float',               'double',              'PLASMA_Complex32_t',  'PLASMA_Complex64_t'  ),
-    ('float',               'double',              'PLASMA_voidComplex32_t', 'PLASMA_voidComplex64_t'),
     ('PlasmaRealFloat',     'PlasmaRealDouble',    'PlasmaComplexFloat',  'PlasmaComplexDouble' ),
     ('real',                'double precision',    'complex',             'complex\*16'         ),
     ('REAL',                'DOUBLE_PRECISION',    'COMPLEX',             'COMPLEX_16'          ),
