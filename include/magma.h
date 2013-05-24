@@ -52,7 +52,7 @@ magma_err_t
 magma_malloc_pinned( void **ptrPtr, size_t bytes );
 
 magma_err_t
-magma_free_cpu( magma_ptr ptr );
+magma_free_cpu( void *ptr );
 
 #define magma_free( ptr ) \
         magma_free_internal( ptr, __func__, __FILE__, __LINE__ )
@@ -67,17 +67,17 @@ magma_free_internal(
 
 magma_err_t
 magma_free_pinned_internal(
-    magma_ptr ptr,
+    void *ptr,
     const char* func, const char* file, int line );
 
 
 // type-safe convenience functions to avoid using (void**) cast and sizeof(...)
 // here n is the number of elements (floats, doubles, etc.) not the number of bytes.
-static inline magma_err_t magma_imalloc( magma_int_t        **ptrPtr, size_t n ) { return magma_malloc( (void**) ptrPtr, n*sizeof(magma_int_t)        ); }
-static inline magma_err_t magma_smalloc( float              **ptrPtr, size_t n ) { return magma_malloc( (void**) ptrPtr, n*sizeof(float)              ); }
-static inline magma_err_t magma_dmalloc( double             **ptrPtr, size_t n ) { return magma_malloc( (void**) ptrPtr, n*sizeof(double)             ); }
-static inline magma_err_t magma_cmalloc( magmaFloatComplex  **ptrPtr, size_t n ) { return magma_malloc( (void**) ptrPtr, n*sizeof(magmaFloatComplex)  ); }
-static inline magma_err_t magma_zmalloc( magmaDoubleComplex **ptrPtr, size_t n ) { return magma_malloc( (void**) ptrPtr, n*sizeof(magmaDoubleComplex) ); }
+static inline magma_err_t magma_imalloc( magmaInt_ptr           *ptrPtr, size_t n ) { return magma_malloc( (magma_ptr*) ptrPtr, n*sizeof(magma_int_t)        ); }
+static inline magma_err_t magma_smalloc( magmaFloat_ptr         *ptrPtr, size_t n ) { return magma_malloc( (magma_ptr*) ptrPtr, n*sizeof(float)              ); }
+static inline magma_err_t magma_dmalloc( magmaDouble_ptr        *ptrPtr, size_t n ) { return magma_malloc( (magma_ptr*) ptrPtr, n*sizeof(double)             ); }
+static inline magma_err_t magma_cmalloc( magmaFloatComplex_ptr  *ptrPtr, size_t n ) { return magma_malloc( (magma_ptr*) ptrPtr, n*sizeof(magmaFloatComplex)  ); }
+static inline magma_err_t magma_zmalloc( magmaDoubleComplex_ptr *ptrPtr, size_t n ) { return magma_malloc( (magma_ptr*) ptrPtr, n*sizeof(magmaDoubleComplex) ); }
 
 static inline magma_err_t magma_imalloc_cpu( magma_int_t        **ptrPtr, size_t n ) { return magma_malloc_cpu( (void**) ptrPtr, n*sizeof(magma_int_t)        ); }
 static inline magma_err_t magma_smalloc_cpu( float              **ptrPtr, size_t n ) { return magma_malloc_cpu( (void**) ptrPtr, n*sizeof(float)              ); }
@@ -139,6 +139,8 @@ void magma_event_create( magma_event_t* eventPtr );
 void magma_event_destroy( magma_event_t event );
 
 void magma_event_record( magma_event_t event, magma_queue_t queue );
+
+void magma_event_query( magma_event_t event );
 
 // blocks CPU until event occurs
 void magma_event_sync( magma_event_t event );
