@@ -107,17 +107,17 @@ int magma_num_gpus( void )
 
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Auxiliary function: ipiv(i) indicates that row i has been swapped with 
+   -- Auxiliary function: ipiv(i) indicates that row i has been swapped with
       ipiv(i) from top to bottom. This function rearranges ipiv into newipiv
       where row i has to be moved to newipiv(i). The new pivoting allows for
       parallel processing vs the original one assumes a specific ordering and
       has to be done sequentially.
 */
 extern "C"
-void swp2pswp(char trans, magma_int_t n, magma_int_t *ipiv, magma_int_t *newipiv){
-  int i, newind, ind;
-  char            trans_[2] = {trans, 0};
-  int    notran = lapackf77_lsame(trans_, "N");
+void swp2pswp( magma_trans_t trans, magma_int_t n, magma_int_t *ipiv, magma_int_t *newipiv)
+{
+  magma_int_t i, newind, ind;
+  magma_int_t    notran = (trans == 'N' || trans == 'n');
 
   for(i=0; i<n; i++)
     newipiv[i] = -1;
