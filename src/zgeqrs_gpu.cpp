@@ -112,9 +112,9 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
     else if (ldda < max(1,m))
         *info = -5;
     else if (lddb < max(1,m))
-        *info = -8;
+        *info = -9;
     else if (lwork < lwkopt && ! lquery)
-        *info = -10;
+        *info = -11;
 
     if (*info != 0) {
         magma_xerbla( __func__, -(*info) );
