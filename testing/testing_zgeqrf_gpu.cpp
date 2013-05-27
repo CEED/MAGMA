@@ -35,7 +35,7 @@ int main( int argc, char** argv)
     cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex *h_A, *h_R, *tau, *h_work, tmp[1];
     cuDoubleComplex *d_A;
-    magma_int_t M, N, n2, lda, ldda, lwork, info, min_mn;
+    magma_int_t M, N, n2, lda, ldda, lwork, info, min_mn, nb, size;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     
@@ -73,7 +73,25 @@ int main( int argc, char** argv)
                Performs operation using MAGMA
                =================================================================== */
             gpu_time = magma_wtime();
-            magma_zgeqrf2_gpu( M, N, d_A, ldda, tau, &info);
+            if ( opts.version == 2 ) {
+                magma_zgeqrf2_gpu( M, N, d_A, ldda, tau, &info);
+            }
+            else {
+                printf( "NOTE: residual checks for this version will be wrong!\n"
+                        "Because tester ignores the special structure of MAGMA zgeqrf resuls.\n"
+                        "Use --version 2 to see correct residuals.\n" );
+                cuDoubleComplex *dT;
+                nb = magma_get_zgeqrf_nb( M );
+                size = (2*min(M, N) + (N+31)/32*32 )*nb;
+                magma_zmalloc( &dT, size );
+                if ( opts.version == 3 ) {
+                    magma_zgeqrf3_gpu( M, N, d_A, ldda, tau, dT, &info);
+                }
+                else {
+                    magma_zgeqrf_gpu( M, N, d_A, ldda, tau, dT, &info);
+                }
+                magma_free( dT );
+            }
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
