@@ -262,7 +262,7 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
 
         ind_c = 0;
 
-        for (magma_int_t i = i1; i3 < 0 ? i >= i2 : i < i2; i += i3)
+        for (magma_int_t i = i1; (i3 < 0 ? i >= i2 : i < i2); i += i3)
         {
             // start the copy of A panel
             magma_int_t kb = min(nb, k - i);
@@ -344,7 +344,7 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
          mi = m;
          ic = 0;
 
-         for (i = i1; i3 < 0 ? i >= i2 : i < i2; i += i3)
+         for (i = i1; (i3 < 0 ? i >= i2 : i < i2); i += i3)
          {
          ib = min(nb, k - i);
 

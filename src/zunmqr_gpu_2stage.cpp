@@ -167,7 +167,7 @@ magma_zunmqr_gpu_2stages(const char side, const char trans,
         ic = 0;
     }
 
-    for (magma_int_t i=i1; i3<0 ? i>=i2 : i<i2; i+=i3)
+    for (magma_int_t i=i1; (i3<0 ? i>=i2 : i<i2); i+=i3)
     {
         ib = min(nb, k - i);
         if (left){
