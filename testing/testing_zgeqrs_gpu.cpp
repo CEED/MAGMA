@@ -33,13 +33,13 @@ int main( int argc, char** argv )
     TESTING_INIT();
     
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
-    double           gpu_error, cpu_error, matnorm, work[1];
+    double           gpu_error, cpu_error, Anorm, work[1];
     cuDoubleComplex  c_one     = MAGMA_Z_ONE;
     cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     cuDoubleComplex *h_A, *h_A2, *h_B, *h_X, *h_R, *tau, *h_work, tmp[1];
     cuDoubleComplex *d_A, *d_B;
-    magma_int_t M, N, n2, nrhs, lda, ldb, ldda, lddb, min_mn, max_mn, nb, info;
-    magma_int_t lworkgpu, lhwork, lhwork2;
+    magma_int_t M, N, size, nrhs, lda, ldb, ldda, lddb, min_mn, max_mn, nb, info;
+    magma_int_t lworkgpu, lhwork;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
 
@@ -49,7 +49,7 @@ int main( int argc, char** argv )
     nrhs = opts.nrhs;
     
     printf("                                                            ||b-Ax|| / (N||A||)\n");
-    printf("    M     N  nrhs   CPU GFlop/s (sec)   GPU GFlop/s (sec)   CPU        GPU     \n");
+    printf("    M     N  NRHS   CPU GFlop/s (sec)   GPU GFlop/s (sec)   CPU        GPU     \n");
     printf("===============================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -63,7 +63,6 @@ int main( int argc, char** argv )
             max_mn = max(M, N);
             lda    = M;
             ldb    = max_mn;
-            n2     = lda*N;
             ldda   = ((M+31)/32)*32;
             lddb   = ((max_mn+31)/32)*32;
             nb     = magma_get_zgeqrf_nb(M);
@@ -73,15 +72,10 @@ int main( int argc, char** argv )
             lworkgpu = (M - N + nb)*(nrhs + nb) + nrhs*nb;
             
             lhwork = -1;
-            lapackf77_zgeqrf(&M, &N, h_A, &M, tau, tmp, &lhwork, &info);
-            lhwork2 = (magma_int_t) MAGMA_Z_REAL( tmp[0] );
-            
-            lhwork = -1;
-            lapackf77_zunmqr( MagmaLeftStr, MagmaConjTransStr,
-                              &M, &nrhs, &min_mn, h_A, &lda, tau,
-                              h_X, &ldb, tmp, &lhwork, &info );
+            lapackf77_zgels( MagmaNoTransStr, &M, &N, &nrhs,
+                             h_A, &lda, h_X, &ldb, tmp, &lhwork, &info );
             lhwork = (magma_int_t) MAGMA_Z_REAL( tmp[0] );
-            lhwork = max( max( lhwork, lhwork2 ), lworkgpu );
+            lhwork = max( lhwork, lworkgpu );
             
             TESTING_MALLOC(   tau,    cuDoubleComplex, min_mn    );
             TESTING_MALLOC(   h_A,    cuDoubleComplex, lda*N     );
@@ -95,17 +89,18 @@ int main( int argc, char** argv )
             TESTING_DEVALLOC( d_B,    cuDoubleComplex, lddb*nrhs );
             
             /* Initialize the matrices */
-            lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
+            size = lda*N;
+            lapackf77_zlarnv( &ione, ISEED, &size, h_A );
             lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_A2, &lda );
             
             // make random RHS
-            n2 = M*nrhs;
-            lapackf77_zlarnv( &ione, ISEED, &n2, h_B );
+            size = ldb*nrhs;
+            lapackf77_zlarnv( &ione, ISEED, &size, h_B );
             lapackf77_zlacpy( MagmaUpperLowerStr, &M, &nrhs, h_B, &ldb, h_R, &ldb );
             
             // make consistent RHS
-            //n2 = N*nrhs;
-            //lapackf77_zlarnv( &ione, ISEED, &n2, h_X );
+            //size = N*nrhs;
+            //lapackf77_zlarnv( &ione, ISEED, &size, h_X );
             //blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &M, &nrhs, &N,
             //               &c_one,  h_A, &lda,
             //                        h_X, &ldb,
@@ -126,15 +121,13 @@ int main( int argc, char** argv )
             if (info != 0)
                 printf("magma_zgels returned error %d.\n", (int) info);
             
-            // Get the solution in h_X
-            magma_zgetmatrix( N, nrhs, d_B, lddb, h_X, ldb );
-            
             // compute the residual
+            magma_zgetmatrix( N, nrhs, d_B, lddb, h_X, ldb );
             blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &M, &nrhs, &N,
                            &c_neg_one, h_A, &lda,
                                        h_X, &ldb,
                            &c_one,     h_R, &ldb );
-            matnorm = lapackf77_zlange("f", &M, &N, h_A, &lda, work);
+            Anorm = lapackf77_zlange("f", &M, &N, h_A, &lda, work);
             
             /* =====================================================================
                Performs operation using LAPACK
@@ -154,8 +147,8 @@ int main( int argc, char** argv )
                                        h_X,  &ldb,
                            &c_one,     h_B,  &ldb );
             
-            cpu_error = lapackf77_zlange("f", &M, &nrhs, h_B, &ldb, work) / (min_mn*matnorm);
-            gpu_error = lapackf77_zlange("f", &M, &nrhs, h_R, &ldb, work) / (min_mn*matnorm);
+            cpu_error = lapackf77_zlange("f", &M, &nrhs, h_B, &ldb, work) / (min_mn*Anorm);
+            gpu_error = lapackf77_zlange("f", &M, &nrhs, h_R, &ldb, work) / (min_mn*Anorm);
             
             printf("%5d %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e\n",
                    (int) M, (int) N, (int) nrhs,
