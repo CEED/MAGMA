@@ -14,7 +14,7 @@
 #define ITERMAX 30
 
 extern "C" magma_int_t
-magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
+magma_zcgeqrsv_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
                    magmaDoubleComplex *dA,  magma_int_t ldda,
                    magmaDoubleComplex *dB,  magma_int_t lddb,
                    magmaDoubleComplex *dX,  magma_int_t lddx,
@@ -81,8 +81,9 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     LDDA    (input) INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,M).
 
-    dB      (input) COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
+    dB      (input or input/output) COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
             The M-by-NRHS right hand side matrix B.
+            May be overwritten (e.g., if refinement fails).
 
     LDDB    (input) INTEGER
             The leading dimension of the array dB.  LDDB >= max(1,M).
@@ -93,13 +94,6 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     LDDX    (input) INTEGER
             The leading dimension of the array dX.  LDDX >= max(1,N).
 
-    WORK    (workspace) COMPLEX_16 array, dimension (N*NRHS)
-            This array is used to hold the residual vectors.
-
-    SWORK   (workspace) COMPLEX array, dimension (M*(N+NRHS))
-            This array is used to store the single precision matrix and the
-            right-hand sides or solutions in single precision.
-
     ITER    (output) INTEGER
             < 0: iterative refinement has failed, double precision
                  factorization has been performed
@@ -107,7 +101,7 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
                       implementation- or machine-specific reasons
                  -2 : narrowing the precision induced an overflow,
                       the routine fell back to full precision
-                 -3 : failure of SGETRF
+                 -3 : failure of SGEQRF
                  -31: stop the iterative refinement after the 30th iteration
             > 0: iterative refinement has been successfully used.
                  Returns the number of iterations
@@ -127,20 +121,22 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     magmaFloatComplex  *dSA, *dSX, *dST, *stau;
     magmaDoubleComplex Xnrmv, Rnrmv;
     double          Anrm, Xnrm, Rnrm, cte, eps;
-    magma_int_t     i, j, iiter, nb, lhwork, minmn, size;
+    magma_int_t     i, j, iiter, nb, lhwork, minmn, size, lddsx, ldworkd;
 
     /* Check arguments */
-    *iter = 0 ;
-    *info = 0 ;
-    if ( N < 0 )
+    *iter = 0;
+    *info = 0;
+    if ( m < 0 )
         *info = -1;
-    else if(NRHS<0)
+    else if ( n < 0 || n > m )
+        *info = -2;
+    else if ( nrhs < 0 )
         *info = -3;
-    else if( ldda < max(1,N))
+    else if ( ldda < max(1,m))
         *info = -5;
-    else if( lddb < max(1,N))
+    else if ( lddb < max(1,m))
         *info = -7;
-    else if( lddx < max(1,N))
+    else if ( lddx < max(1,n))
         *info = -9;
 
     if (*info != 0) {
@@ -148,29 +144,31 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
         return *info;
     }
 
-    if( N == 0 || NRHS == 0 )
+    if ( m == 0 || n == 0 || nrhs == 0 )
         return *info;
 
-    nb   = magma_get_cgeqrf_nb(M);
-    minmn= min(M, N);
-
+    nb   = magma_get_cgeqrf_nb(m);
+    minmn= min(m, n);
+    
     /*
      * Allocate temporary buffers
      */
     /* dworks(dSA + dSX + dST) */
-    size = ldda*N + N*NRHS + ( 2*minmn + ((N+31)/32)*32 )*nb;
+    /* dSX contains both B and X, so must be max(m,n). */
+    lddsx = max(m,n);
+    size = ldda*n + lddsx*nrhs + ( 2*minmn + ((n+31)/32)*32 )*nb;
     if (MAGMA_SUCCESS != magma_cmalloc( &dworks, size )) {
         fprintf(stderr, "Allocation of dworks failed (%d)\n", (int) size);
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
     dSA = dworks;
-    dSX = dSA + ldda*N;
-    dST = dSX + N*NRHS;
+    dSX = dSA + ldda*n;
+    dST = dSX + lddsx*nrhs;
 
-    /* dworkd(dR) = N*NRHS */
-    size = N*NRHS;
-    if (MAGMA_SUCCESS != magma_zmalloc( &dworkd, size )) {
+    /* dworkd(dR) = n*nrhs */
+    ldworkd = lddb*nrhs;
+    if (MAGMA_SUCCESS != magma_zmalloc( &dworkd, ldworkd )) {
         magma_free( dworks );
         fprintf(stderr, "Allocation of dworkd failed\n");
         *info = MAGMA_ERR_DEVICE_ALLOC;
@@ -178,10 +176,9 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     }
     dR = dworkd;
 
-    /* hworks(stau + workspace for cgeqrs) = min(M,N) + lhworks */
-    lhwork = nb*max((M-N+nb+2*(NRHS)), 1);
-    lhwork = max(lhwork, N*nb); /* We hope that magma nb is bigger than lapack nb to have enough memory in workspace */
-    size = minmn + lhwork;
+    /* hworks(workspace for cgeqrs + stau) = min(m,n) + lhworks */
+    lhwork = (m - n + nb)*(nrhs + nb) + nrhs*nb;
+    size = lhwork + minmn;
     magma_cmalloc_cpu( &hworks, size );
     if ( hworks == NULL ) {
         magma_free( dworks );
@@ -193,58 +190,65 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     stau = hworks + lhwork;
 
     eps  = lapackf77_dlamch("Epsilon");
-    Anrm = magmablas_zlange('I', M, N, dA, ldda, (double*)dworkd );
-    cte  = Anrm * eps *  pow((double)N, 0.5) * BWDMAX ;
+    Anrm = magmablas_zlange('I', m, n, dA, ldda, (double*)dworkd );
+    cte  = Anrm * eps *  pow((double)n, 0.5) * BWDMAX;
 
     /*
      * Convert to single precision
      */
-    magmablas_zlag2c(N, NRHS, dB, lddb, dSX, N, info );
-    if( *info != 0 ) {
-        *iter = -2; goto L40;
+    magmablas_zlag2c( m, nrhs, dB, lddb, dSX, lddsx, info );
+    if ( *info != 0 ) {
+        *iter = -2; goto FALLBACK;
     }
 
-    magmablas_zlag2c(N, N, dA, ldda, dSA, ldda, info );
-    if(*info !=0){
-        *iter = -2; goto L40;
+    magmablas_zlag2c( m, n, dA, ldda, dSA, ldda, info );
+    if ( *info != 0 ) {
+        *iter = -2; goto FALLBACK;
     }
 
-    // In an ideal version these variables should come from user.
-    magma_cgeqrf_gpu(M, N, dSA, ldda, stau, dST, info);
-    if( *info != 0 ) {
-        *iter = -3; goto L40;
+    // factor and solve dSA*dSX = dB in single precision
+    magma_cgeqrf_gpu( m, n, dSA, ldda, stau, dST, info );
+    if ( *info != 0 ) {
+        *iter = -3; goto FALLBACK;
     }
 
-    magma_cgeqrs_gpu(M, N, NRHS, dSA, ldda, stau, dST, dSX, N, hworks, lhwork, info);
+    magma_cgeqrs_gpu( m, n, nrhs, dSA, ldda, stau, dST, dSX, lddsx, hworks, lhwork, info );
+    if ( *info != 0 ) {
+        *iter = -3; goto FALLBACK;
+    }
 
     // dX = dSX
-    magmablas_clag2z(N, NRHS, dSX, N, dX, lddx, info);
-
+    // note single -> double precision can't fail
+    magmablas_clag2z( n, nrhs, dSX, lddsx, dX, lddx, info );
+    
     // dR = dB
-    magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dR, N);
+    magmablas_zlacpy( MagmaUpperLower, m, nrhs, dB, lddb, dR, lddb );
 
-    // dR = dB - dA * dX
-    if( NRHS == 1 )
-        magma_zgemv( MagmaNoTrans, N, N,
+    // dR = dB - dA*dX in double precision
+    if ( nrhs == 1 ) {
+        magma_zgemv( MagmaNoTrans, m, n,
                      c_neg_one, dA, ldda,
                                 dX, 1,
                      c_one,     dR, 1);
-    else
-        magma_zgemm( MagmaNoTrans, MagmaNoTrans, N, NRHS, N,
+    }
+    else {
+        magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, nrhs, n,
                      c_neg_one, dA, ldda,
                                 dX, lddx,
-                     c_one,     dR, N );
+                     c_one,     dR, lddb );
+    }
 
-    for(i=0; i<NRHS; i++){
-        j = magma_izamax( N, dX+i*N, 1);
-        magma_zgetmatrix( 1, 1, dX+i*N+j-1, 1, &Xnrmv, 1 );
+    // TODO: use MAGMA_Z_ABS( dX(i,j) ) instead of zlange?
+    for(j=0; j < nrhs; j++) {
+        i = magma_izamax( n, &dX[j*lddx], 1) - 1;
+        magma_zgetmatrix( 1, 1, &dX[i + j*lddx], 1, &Xnrmv, 1 );
         Xnrm = lapackf77_zlange( "F", &ione, &ione, &Xnrmv, &ione, NULL );
 
-        j = magma_izamax ( N, dR+i*N, 1 );
-        magma_zgetmatrix( 1, 1, dR+i*N+j-1, 1, &Rnrmv, 1 );
+        i = magma_izamax ( m, &dR[j*lddb], 1 ) - 1;
+        magma_zgetmatrix( 1, 1, &dR[i + j*lddb], 1, &Rnrmv, 1 );
         Rnrm = lapackf77_zlange( "F", &ione, &ione, &Rnrmv, &ione, NULL );
 
-        if( Rnrm >  Xnrm *cte ) goto L10;
+        if ( Rnrm >  Xnrm *cte ) goto REFINEMENT;
     }
 
     *iter = 0;
@@ -255,56 +259,65 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     magma_free_cpu( hworks );
     return *info;
 
-  L10:
-    for(iiter=1; iiter<ITERMAX; ) {
-        *info = 0 ;
-        /*  Convert R from double precision to single precision
-            and store the result in SX.
-            Solve the system SA*SX = SR.
-            -- These two Tasks are merged here. */
-        // make SWORK = WORK ... residuals...
-        magmablas_zlag2c( N, NRHS, dR, N, dSX, N, info );
-        magma_cgeqrs_gpu( M, N, NRHS, dSA, ldda, stau, dST, dSX, N, hworks, lhwork, info);
-
-        if( *info != 0 ){
-            *iter = -3; goto L40;
+REFINEMENT:
+    /* TODO: this iterative refinement algorithm works only for compatibile
+     * systems (B in colspan of A).
+     * See Matrix Computations (3rd ed) p. 267 for correct algorithm. */
+    for(iiter=1; iiter < ITERMAX; ) {
+        *info = 0;
+        // convert residual dR to single precision
+        magmablas_zlag2c( m, nrhs, dR, lddb, dSX, lddsx, info );
+        if ( *info != 0 ) {
+            *iter = -2; goto FALLBACK;
+        }
+        
+        // solve dSA*dSX = dSR in single precision
+        magma_cgeqrs_gpu( m, n, nrhs, dSA, ldda, stau, dST, dSX, lddsx, hworks, lhwork, info);
+        if ( *info != 0 ) {
+            *iter = -3; goto FALLBACK;
         }
 
-        for(i=0; i<NRHS; i++) {
-            magmablas_zcaxpycp( dSX+i*N, dX+i*lddx, N, dB+i*lddb, dR+i*N );
+        // dX += dSX [including single to double conversion]
+        // --and--
+        // dR[1:n] = dB[1:n]   (only n rows, not whole m rows!)
+        for(j=0; j < nrhs; j++) {
+            magmablas_zcaxpycp( &dSX[j*lddsx], &dX[j*lddx], n, &dB[j*lddb], &dR[j*lddb] );
         }
 
-        /* unnecessary may be */
-        magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dR, N);
-        if( NRHS == 1 )
-            magma_zgemv( MagmaNoTrans, N, N,
+        // dR = dB  (whole m rows)
+        magmablas_zlacpy( MagmaUpperLower, m, nrhs, dB, lddb, dR, lddb );
+        
+        // dR = dB - dA*dX in double precision
+        if ( nrhs == 1 ) {
+            magma_zgemv( MagmaNoTrans, m, n,
                          c_neg_one, dA, ldda,
                                     dX, 1,
                          c_one,     dR, 1);
-        else
-            magma_zgemm( MagmaNoTrans, MagmaNoTrans, N, NRHS, N,
+        }
+        else {
+            magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, nrhs, n,
                          c_neg_one, dA, ldda,
                                     dX, lddx,
-                         c_one,     dR, N);
-
-        /*  Check whether the NRHS normwise backward errors satisfy the
-            stopping criterion. If yes, set ITER=IITER>0 and return.     */
-        for(i=0;i<NRHS;i++)
-        {
-            j = magma_izamax( N, dX+i*N, 1);
-            magma_zgetmatrix( 1, 1, dX+i*N+j-1, 1, &Xnrmv, 1 );
-            Xnrm = lapackf77_zlange( "F", &ione, &ione, &Xnrmv, &ione, NULL );
-
-            j = magma_izamax ( N, dR+i*N, 1 );
-            magma_zgetmatrix( 1, 1, dR+i*N+j-1, 1, &Rnrmv, 1 );
-            Rnrm = lapackf77_zlange( "F", &ione, &ione, &Rnrmv, &ione, NULL );
-
-            if( Rnrm >  Xnrm *cte ) goto L20;
+                         c_one,     dR, lddb);
         }
 
-        /*  If we are here, the NRHS normwise backward errors satisfy
-            the stopping criterion, we are good to exit.                    */
-        *iter = iiter ;
+        /*  Check whether the nrhs normwise backward errors satisfy the
+         *  stopping criterion. If yes, set ITER=IITER>0 and return.     */
+        for(j=0; j < nrhs; j++) {
+            i = magma_izamax( n, &dX[j*lddx], 1) - 1;
+            magma_zgetmatrix( 1, 1, &dX[i + j*lddx], 1, &Xnrmv, 1 );
+            Xnrm = lapackf77_zlange( "F", &ione, &ione, &Xnrmv, &ione, NULL );
+
+            i = magma_izamax ( m, &dR[j*lddb], 1 ) - 1;
+            magma_zgetmatrix( 1, 1, &dR[i + j*lddb], 1, &Rnrmv, 1 );
+            Rnrm = lapackf77_zlange( "F", &ione, &ione, &Rnrmv, &ione, NULL );
+
+            if ( Rnrm >  Xnrm *cte ) goto L20;
+        }
+
+        /*  If we are here, the nrhs normwise backward errors satisfy
+         *  the stopping criterion, we are good to exit.                    */
+        *iter = iiter;
 
         /* Free workspaces */
         magma_free( dworks );
@@ -316,21 +329,23 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
     }
 
     /* If we are at this place of the code, this is because we have
-       performed ITER=ITERMAX iterations and never satisified the
-       stopping criterion, set up the ITER flag accordingly and follow
-       up on double precision routine.                                    */
-    *iter = -ITERMAX - 1 ;
-
-  L40:
+     * performed ITER=ITERMAX iterations and never satisified the
+     * stopping criterion, set up the ITER flag accordingly and follow
+     * up on double precision routine.                                    */
+    *iter = -ITERMAX - 1;
+    
+FALLBACK:
+    /* Something failed: fall back to double precision. */
     magma_free( dworks );
+    magma_free_cpu( hworks );
 
     /*
      * Allocate temporary buffers
      */
-    /* dworkd(dT + tau) = min_mn + min_mn*nb*3 */
-    nb   = magma_get_zgeqrf_nb(M);
-    size = minmn * (3 * nb + 1);
-    if ( size > (N*NRHS) ) {
+    /* dworkd = dT for zgeqrf */
+    nb   = magma_get_zgeqrf_nb( m );
+    size = (2*min(m, n) + (n+31)/32*32 )*nb;
+    if ( size > ldworkd ) {
         magma_free( dworkd );
         if (MAGMA_SUCCESS != magma_zmalloc( &dworkd, size )) {
             fprintf(stderr, "Allocation of dworkd2 failed\n");
@@ -338,35 +353,28 @@ magma_zcgeqrsv_gpu(magma_int_t M, magma_int_t N, magma_int_t NRHS,
             return *info;
         }
     }
-    tau = dworkd;
-    dT  = tau + minmn;
+    dT = dworkd;
 
-    /* hworks(stau + workspace for cgeqrs) = min(M,N) + lhworks */
-    /* re-use hworks memory for hworkd if possible, else re-allocate. */
-    if ( (2*lhwork) <= (minmn+lhwork) ) {
-        hworkd = (magmaDoubleComplex*) hworks;
+    /* hworkd(dtau + workspace for zgeqrs) = min(m,n) + lhwork */
+    size = lhwork + minmn;
+    magma_zmalloc_cpu( &hworkd, size );
+    if ( hworkd == NULL ) {
+        magma_free( dworkd );
+        fprintf(stderr, "Allocation of hworkd2 failed\n");
+        *info = MAGMA_ERR_HOST_ALLOC;
+        return *info;
     }
-    else {
-        magma_free_cpu( hworks );
-        magma_zmalloc_cpu( &hworkd, lhwork );
-        if ( hworkd == NULL ) {
-            magma_free( dworkd );
-            fprintf(stderr, "Allocation of hworkd2 failed\n");
-            *info = MAGMA_ERR_HOST_ALLOC;
-            return *info;
-        }
-    }
+    tau = hworkd + lhwork;
 
     /* Single-precision iterative refinement failed to converge to a
-       satisfactory solution, so we resort to double precision.           */
-    magma_zgeqrf_gpu(M, N, dA, ldda, tau, dT, info);
+     * satisfactory solution, so we resort to double precision.           */
+    magma_zgeqrf_gpu( m, n, dA, ldda, tau, dT, info );
     if ( *info == 0 ) {
-        magmablas_zlacpy(MagmaUpperLower, N, NRHS, dB, lddb, dX, lddx);
-        magma_zgeqrs_gpu(M, N, NRHS, dA, ldda, tau, dT, dX, lddx, hworkd, lhwork, info);
+        magma_zgeqrs_gpu( m, n, nrhs, dA, ldda, tau, dT, dB, lddb, hworkd, lhwork, info );
+        magmablas_zlacpy( MagmaUpperLower, n, nrhs, dB, lddb, dX, lddx );
     }
 
     magma_free( dworkd );
     magma_free_cpu( hworkd );
     return *info;
 }
-
