@@ -191,7 +191,7 @@ magma_zunmql2_gpu(const char side, const char trans,
     
     magmablas_zsetdiag1subdiag0('U', k, nb, da, ldda);
     
-    for (i__ = i1; i3 < 0 ? i__ >= i2 : i__ <= i2; i__ += i3) {
+    for (i__ = i1; (i3 < 0 ? i__ >= i2 : i__ <= i2); i__ += i3) {
         ib = min(nb, k - i__ + 1);
         
         /* Form the triangular factor of the block reflector
