@@ -36,17 +36,17 @@ int main(int argc , char **argv)
     cuDoubleComplex *h_A, *h_B, *h_X;
     cuDoubleComplex *d_A, *d_B;
     magma_int_t *ipiv;
-    magma_int_t N, NRHS, lda, ldb, ldda, lddb, info, sizeA, sizeB;
+    magma_int_t N, nrhs, lda, ldb, ldda, lddb, info, sizeA, sizeB;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
-    NRHS = opts.nrhs;
+    nrhs = opts.nrhs;
     
-    printf("    N   NRHS   GPU GFlop/s (sec)   ||B - AX|| / ||A||*||X||\n");
-    printf("===========================================================\n");
+    printf("    N  NRHS   GPU GFlop/s (sec)   ||B - AX|| / ||A||*||X||\n");
+    printf("==========================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[i];
@@ -54,31 +54,31 @@ int main(int argc , char **argv)
             ldb    = lda;
             ldda   = ((N+31)/32)*32;
             lddb   = ldda;
-            gflops = ( FLOPS_ZGETRF( N, N ) + FLOPS_ZGETRS( N, NRHS ) ) / 1e9;
+            gflops = ( FLOPS_ZGETRF( N, N ) + FLOPS_ZGETRS( N, nrhs ) ) / 1e9;
             
             TESTING_MALLOC( h_A, cuDoubleComplex, lda*N    );
-            TESTING_MALLOC( h_B, cuDoubleComplex, ldb*NRHS );
-            TESTING_MALLOC( h_X, cuDoubleComplex, ldb*NRHS );
+            TESTING_MALLOC( h_B, cuDoubleComplex, ldb*nrhs );
+            TESTING_MALLOC( h_X, cuDoubleComplex, ldb*nrhs );
             TESTING_MALLOC( work, double,         N        );
             TESTING_MALLOC( ipiv, magma_int_t,    N        );
             
             TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*N    );
-            TESTING_DEVALLOC( d_B, cuDoubleComplex, lddb*NRHS );
+            TESTING_DEVALLOC( d_B, cuDoubleComplex, lddb*nrhs );
             
             /* Initialize the matrices */
             sizeA = lda*N;
-            sizeB = ldb*NRHS;
+            sizeB = ldb*nrhs;
             lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );
             lapackf77_zlarnv( &ione, ISEED, &sizeB, h_B );
             
             magma_zsetmatrix( N, N,    h_A, lda, d_A, ldda );
-            magma_zsetmatrix( N, NRHS, h_B, ldb, d_B, lddb );
+            magma_zsetmatrix( N, nrhs, h_B, ldb, d_B, lddb );
             
             //=====================================================================
             // Solve Ax = b through an LU factorization, using MAGMA
             //=====================================================================
             gpu_time = magma_wtime();
-            magma_zgesv_gpu( N, NRHS, d_A, ldda, ipiv, d_B, lddb, &info );
+            magma_zgesv_gpu( N, nrhs, d_A, ldda, ipiv, d_B, lddb, &info );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
@@ -87,20 +87,20 @@ int main(int argc , char **argv)
             //=====================================================================
             // Residual
             //=====================================================================
-            magma_zgetmatrix( N, NRHS, d_B, lddb, h_X, ldb );
+            magma_zgetmatrix( N, nrhs, d_B, lddb, h_X, ldb );
             
             Anorm = lapackf77_zlange("I", &N, &N,    h_A, &lda, work);
-            Xnorm = lapackf77_zlange("I", &N, &NRHS, h_X, &ldb, work);
+            Xnorm = lapackf77_zlange("I", &N, &nrhs, h_X, &ldb, work);
             
-            blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &N, &NRHS, &N,
+            blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &N, &nrhs, &N,
                            &c_one,     h_A, &lda,
                                        h_X, &ldb,
                            &c_neg_one, h_B, &ldb);
             
-            Rnorm = lapackf77_zlange("I", &N, &NRHS, h_B, &ldb, work);
+            Rnorm = lapackf77_zlange("I", &N, &nrhs, h_B, &ldb, work);
             
-            printf( "%5d  %5d   %7.2f (%7.2f)   %8.2e\n",
-                    (int) N, (int) NRHS, gpu_perf, gpu_time, Rnorm/(Anorm*Xnorm) );
+            printf( "%5d %5d   %7.2f (%7.2f)   %8.2e\n",
+                    (int) N, (int) nrhs, gpu_perf, gpu_time, Rnorm/(Anorm*Xnorm) );
             
             TESTING_FREE( h_A );
             TESTING_FREE( h_B );

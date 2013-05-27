@@ -161,7 +161,7 @@ int main( int argc, char** argv)
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gflops / cpu_time;
             if (info != 0)
-                printf("lapack_zgeqp3 returned error %d.\n", info);
+                printf("lapack_zgeqp3 returned error %d.\n", (int) info);
         }
         
         /* ====================================================================
@@ -204,7 +204,7 @@ int main( int argc, char** argv)
 
         gpu_perf = gflops / gpu_time;
         if (info != 0)
-            printf("magma_zgeqp3 returned error %d.\n", info);
+            printf("magma_zgeqp3 returned error %d.\n", (int) info);
 
         /* =====================================================================
            Check the result 

@@ -41,8 +41,8 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
-    printf("    N   NRHS   GPU GFlop/s (sec)   ||B - AX|| / ||A||*||X||\n");
-    printf("===========================================================\n");
+    printf("    N  NRHS   GPU GFlop/s (sec)   ||B - AX|| / ||A||*||X||\n");
+    printf("==========================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N   = opts.nsize[i];
@@ -96,7 +96,7 @@ int main( int argc, char** argv)
             
             Rnorm = lapackf77_zlange("I", &N, &opts.nrhs, h_B, &ldb, work);
             
-            printf( "%5d  %5d   %7.2f (%7.2f)   %8.2e\n",
+            printf( "%5d %5d   %7.2f (%7.2f)   %8.2e\n",
                     (int) N, (int) opts.nrhs, gpu_perf, gpu_time, Rnorm/(Anorm*Xnorm) );
             
             TESTING_FREE(    h_A  );

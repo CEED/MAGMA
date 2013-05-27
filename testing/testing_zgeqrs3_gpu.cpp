@@ -49,7 +49,7 @@ int main( int argc, char** argv)
     nrhs = opts.nrhs;
     
     printf("                                                            ||b-Ax|| / (N||A||)\n");
-    printf("    M     N  nrhs   CPU GFlop/s (sec)   GPU GFlop/s (sec)   CPU        GPU     \n");
+    printf("    M     N  NRHS   CPU GFlop/s (sec)   GPU GFlop/s (sec)   CPU        GPU     \n");
     printf("===============================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {

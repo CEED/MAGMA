@@ -101,7 +101,7 @@ int main( int argc, char** argv)
                 
                 magma_zunghr(N, ione, N, h_Q, lda, tau, dT, nb, &info);
                 if ( info != 0 ) {
-                    printf("magma_zunghr failed with error %d\n", info);
+                    printf("magma_zunghr failed with error %d\n", (int) info);
                     exit(1);
                 }
                 #if defined(PRECISION_z) || defined(PRECISION_c)

@@ -44,33 +44,33 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t NB,
                     cuDoubleComplex *a, magma_int_t lda,
                     cuDoubleComplex *tau,
                     cuDoubleComplex *work, magma_int_t lwork,
-                    cuDoubleComplex *dT,  
+                    cuDoubleComplex *dT,
                     magma_int_t *info);
 
 extern "C" magma_int_t
 magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
-                    cuDoubleComplex *a, magma_int_t lda, 
+                    cuDoubleComplex *a, magma_int_t lda,
                     cuDoubleComplex *tau,
                     cuDoubleComplex *work, magma_int_t lwork,
                     cuDoubleComplex *dAmgpu[], magma_int_t ldda,
                     cuDoubleComplex *dTmgpu[], magma_int_t lddt,
-                    magma_int_t ngpu, magma_int_t distblk, 
-                    cudaStream_t streams[][20], magma_int_t nstream, 
+                    magma_int_t ngpu, magma_int_t distblk,
+                    cudaStream_t streams[][20], magma_int_t nstream,
                     magma_int_t threads, magma_int_t *info);
 
 extern "C" magma_int_t
 magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
-                    cuDoubleComplex *a, magma_int_t lda, 
+                    cuDoubleComplex *a, magma_int_t lda,
                     cuDoubleComplex *tau,
                     cuDoubleComplex *work, magma_int_t lwork,
                     cuDoubleComplex *dAmgpu[], magma_int_t ldda,
                     cuDoubleComplex *dTmgpu[], magma_int_t lddt,
-                    magma_int_t ngpu, magma_int_t distblk, 
-                    cudaStream_t streams[][20], magma_int_t nstream, 
+                    magma_int_t ngpu, magma_int_t distblk,
+                    cudaStream_t streams[][20], magma_int_t nstream,
                     magma_int_t threads, magma_int_t *info);
 
 extern "C" magma_int_t
-magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int n, int NB, 
+magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int n, int NB,
                    cuDoubleComplex *A, int LDA, double *D, double *E, cuDoubleComplex *dT1, int ldt1);
 
 extern "C" magma_int_t
@@ -174,11 +174,11 @@ int main( int argc, char** argv)
         N = size[9];
     }
         
- 
+    
     eps = lapackf77_dlamch( "E" );
     lda = N;
     ldt = N;
-    n2  = lda * N; 
+    n2  = lda * N;
     if(NB<1)
         NB  = 64; //64; //magma_get_zhetrd_he2hb_nb(N);
 
@@ -186,7 +186,7 @@ int main( int argc, char** argv)
         NE  = N; //64; //magma_get_zhetrd_he2hb_nb(N);
 
     /* We suppose the magma NB is bigger than lapack NB */
-    lwork = N*NB; 
+    lwork = N*NB;
 
     /* Allocate host memory for the matrix */
     TESTING_HOSTALLOC( h_A,    cuDoubleComplex, lda*N );
@@ -198,12 +198,12 @@ int main( int argc, char** argv)
 
 
     nstream = max(3,ngpu+2);
-    cudaStream_t streams[MagmaMaxGPUs][20];    
+    cudaStream_t streams[MagmaMaxGPUs][20];
     cuDoubleComplex *da[MagmaMaxGPUs],*dT1[MagmaMaxGPUs];
     magma_int_t ldda = ((N+31)/32)*32;
     if((distblk==0)||(distblk<NB))distblk = max(256,NB);
     printf("voici ngpu %d distblk %d NB %d nstream %d\n ",ngpu,distblk,NB,nstream);
-       
+    
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_int_t mlocal = ((N / distblk) / ngpu + 1) * distblk;
         cudaSetDevice( dev );
@@ -230,7 +230,7 @@ int main( int argc, char** argv)
         for( i = 0; i < N; ++i ) {
             h_A[i + i*lda] = MAGMA_Z_MAKE( MAGMA_Z_REAL( h_A[i+i*lda] ), 0. );
         }
-        // Make the matrix hermitian 
+        // Make the matrix hermitian
         {
             magma_int_t i, j;
             for(i=0; i<N; i++) {
@@ -250,13 +250,13 @@ int main( int argc, char** argv)
         magmablas_zsetmatrix_1D_bcyclic( N, N, h_R, lda, da, ldda, ngpu, distblk);
 //cuDoubleComplex *dabis;
 //       TESTING_DEVALLOC( dabis,  cuDoubleComplex, ldda*N );
-//       magma_zsetmatrix(N,N,h_R,lda,dabis,ldda);       
-       
+//       magma_zsetmatrix(N,N,h_R,lda,dabis,ldda);
+    
     for (int count=0; count<1;++count){
        cudaSetDevice(0);
        start = get_current_time();
        if(ver==30){
-           magma_zhetrd_he2hb_mgpu_spec(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, da, ldda, dT1, NB, ngpu, distblk, streams, nstream, THREADS, &info); 
+           magma_zhetrd_he2hb_mgpu_spec(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, da, ldda, dT1, NB, ngpu, distblk, streams, nstream, THREADS, &info);
        }else{
            nstream =3;
            magma_zhetrd_he2hb_mgpu(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, da, ldda, dT1, NB, ngpu, distblk, streams, nstream, THREADS, &info);
@@ -279,8 +279,8 @@ int main( int argc, char** argv)
         magma_zhetrd_bhe2trc_v5(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1[0], ldt);
         //  magma_zhetrd_bhe2trc(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1[0], ldt);
         end = get_current_time();
-        if ( info < 0 )
-            printf("Argument %d of magma_zhetrd_he2hb had an illegal value\n", (int) -info);
+        if (info != 0)
+            printf("magma_zhetrd_he2hb returned error %d.\n", (int) info);
 
         gpu_perf = flops / GetTimerValue(start,end);
         gpu_time = GetTimerValue(start,end) / 1000.;
@@ -293,7 +293,7 @@ int main( int argc, char** argv)
         if ( checkres ) {
             printf("  Total N %5d  flops %6.2f  timing %6.2f seconds\n", (int) N, gpu_perf, gpu_time );
             char JOBZ;
-            if(WANTZ==0) 
+            if(WANTZ==0)
                     JOBZ='N';
             else
                     JOBZ = 'V';
@@ -322,7 +322,7 @@ int main( int argc, char** argv)
 #endif
             ///* call eigensolver for our resulting tridiag [D E] and for Q */
             //dstedc_withZ('V', N, D, E, h_R, lda);
-            ////dsterf_( &N, D, E, &info); 
+            ////dsterf_( &N, D, E, &info);
             ////
             end = get_current_time();
             printf("  Finish CHECK - EIGEN   timing= %lf  threads %d \n" ,GetTimerValue(start,end) / 1000., i);
@@ -339,7 +339,7 @@ int main( int argc, char** argv)
            int MATYPE;
            memset(RESU,0,10*sizeof(double));
 
- 
+           
            MATYPE=3;
            double NOTHING=0.0;
            start = get_current_time();
@@ -361,20 +361,20 @@ int main( int argc, char** argv)
            printf("            DSBTRD                : %15s \n", "STATblgv9withQ    ");
            printf(" ================================================================================================================\n");
            if(WANTZ>0)
-              printf(" | A - U S U' | / ( |A| n ulp )   : %15.3E   \n",RESU[0]); 
+              printf(" | A - U S U' | / ( |A| n ulp )   : %15.3E   \n",RESU[0]);
            if(WANTZ>0)
               printf(" | I - U U' | / ( n ulp )         : %15.3E   \n", RESU[1]);
            printf(" | D1 - EVEIGS | / (|D| ulp)      : %15.3E   \n",  RESU[2]);
            printf(" max | D1 - EVEIGS |              : %15.3E   \n",  RESU[6]);
            printf(" ================================================================================================================\n\n\n");
-       
+           
            printf(" ****************************************************************************************************************\n");
            printf(" * Hello here are the norm  Infinite (max)=%e  norm one (sum)=%e   norm2(sqrt)=%e *\n",nrmI, nrm1, nrm2);
            printf(" ****************************************************************************************************************\n\n");
 
-        } 
-#endif         
-#endif  
+        }
+#endif
+#endif
 
       printf("  Total N %5d  flops %6.2f        timing %6.2f seconds\n", (int) N, 0.0, gpu_time );
       printf("============================================================================\n\n\n");
@@ -387,10 +387,10 @@ fin:
 
     /* Memory clean up */
     cudaSetDevice( 0 );
-    TESTING_FREE( tau ); 
+    TESTING_FREE( tau );
     TESTING_HOSTFREE( h_A );
-    TESTING_HOSTFREE( h_R ); 
-    TESTING_HOSTFREE( h_work ); 
+    TESTING_HOSTFREE( h_R );
+    TESTING_HOSTFREE( h_work );
 
     /* Shutdown */
     
