@@ -25,7 +25,7 @@
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgesv_gpu
 */
-int main(int argc , char **argv)
+int main(int argc, char **argv)
 {
     TESTING_INIT();
 

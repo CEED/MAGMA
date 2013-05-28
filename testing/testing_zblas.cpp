@@ -72,9 +72,9 @@ int main( int argc, char** argv )
         ld = maxn;
         size = maxn*maxn;
         err = magma_malloc_cpu( (void**) &piv, maxn*sizeof(magma_int_t) );  assert( err == 0 );
-        err = magma_zmalloc_pinned( &A , size );  assert( err == 0 );
-        err = magma_zmalloc_pinned( &B , size );  assert( err == 0 );
-        err = magma_zmalloc_pinned( &C , size );  assert( err == 0 );
+        err = magma_zmalloc_pinned( &A,  size );  assert( err == 0 );
+        err = magma_zmalloc_pinned( &B,  size );  assert( err == 0 );
+        err = magma_zmalloc_pinned( &C,  size );  assert( err == 0 );
         err = magma_zmalloc_pinned( &C2, size );  assert( err == 0 );
         err = magma_zmalloc_pinned( &LU, size );  assert( err == 0 );
         err = magma_zmalloc( &dA,  size );        assert( err == 0 );
