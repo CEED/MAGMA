@@ -84,7 +84,8 @@ int main( int argc, char** argv )
             magma_zsetmatrix( m, n, hA, lda, dA, ldda );
             magma_zgeqrf_gpu( m, n, dA, ldda, tau, dT, &info );
             if (info != 0)
-                printf("magma_zgeqrf_gpu returned error %d.\n", (int) info);
+                printf("magma_zgeqrf_gpu returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             magma_zgetmatrix( m, n, dA, ldda, hR, lda );
             
             gpu_time = magma_wtime();
@@ -92,7 +93,8 @@ int main( int argc, char** argv )
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
-                printf("magma_zungqr_gpu returned error %d.\n", (int) info);
+                printf("magma_zungqr_gpu returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             
             /* =====================================================================
                Performs operation using LAPACK
@@ -102,14 +104,16 @@ int main( int argc, char** argv )
                 
                 lapackf77_zgeqrf( &m, &n, hA, &lda, tau, h_work, &lwork, &info );
                 if (info != 0)
-                    printf("lapackf77_zgeqrf returned error %d.\n", (int) info);
+                    printf("lapackf77_zgeqrf returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
                 
                 cpu_time = magma_wtime();
                 lapackf77_zungqr( &m, &n, &k, hA, &lda, tau, h_work, &lwork, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0)
-                    printf("lapackf77_zungqr returned error %d.\n", (int) info);
+                    printf("lapackf77_zungqr returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
                 
                 // compute relative error |R|/|A| := |Q_magma - Q_lapack|/|A|
                 blasf77_zaxpy( &n2, &c_neg_one, hA, &ione, hR, &ione );

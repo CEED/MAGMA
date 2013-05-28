@@ -151,8 +151,9 @@ int main( int argc, char** argv)
         start = get_current_time();
         lapackf77_zgeqrf(&M, &N, h_A, &M, tau, h_work, &lhwork, &info);
         end = get_current_time();
-        if (info < 0)
-            printf("Argument %d of lapack_zgeqrf had an illegal value.\n", (int) -info);
+        if (info != 0)
+            printf("lapackf77_zgeqrf returned error %d: %s.\n",
+                   (int) info, magma_strerror( info ));
 
         cpu_perf = flops / GetTimerValue(start, end);
 
@@ -165,8 +166,9 @@ int main( int argc, char** argv)
         magma_zgeqrf2_mgpu( num_gpus, M, N, d_lA, ldda, tau, &info);
         end = get_current_time();
 
-        if (info < 0)
-          printf("Argument %d of magma_zgeqrf2 had an illegal value.\n", (int) -info);
+        if (info != 0)
+            printf("magma_zgeqrf2_mgpu returned error %d: %s.\n",
+                   (int) info, magma_strerror( info ));
         
         gpu_perf = flops / GetTimerValue(start, end);
         

@@ -100,7 +100,8 @@ int main( int argc, char** argv)
                                   iwork, liwork,
                                   &info );
                 if (info != 0)
-                    printf("magma_zheevd_gpu returned error %d.\n", (int) info);
+                    printf("magma_zheevd_gpu returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
                 magma_zsetmatrix( N, N, h_A, lda, d_R, ldda );
             }
             
@@ -117,7 +118,8 @@ int main( int argc, char** argv)
                               &info );
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0)
-                printf("magma_zheevd_gpu returned error %d.\n", (int) info);
+                printf("magma_zheevd_gpu returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             
             if ( opts.check ) {
                 /* =====================================================================
@@ -147,7 +149,8 @@ int main( int argc, char** argv)
                                   iwork, liwork,
                                   &info);
                 if (info != 0)
-                    printf("magma_zheevd_gpu returned error %d.\n", (int) info);
+                    printf("magma_zheevd_gpu returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
                 
                 temp1 = temp2 = 0;
                 for( int j=0; j<N; j++ ) {
@@ -171,7 +174,8 @@ int main( int argc, char** argv)
                                  &info);
                 cpu_time = magma_wtime() - cpu_time;
                 if (info != 0)
-                    printf("lapackf77_zheevd returned error %d.\n", (int) info);
+                    printf("lapackf77_zheevd returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
                 
                 printf("%5d     %7.2f         %7.2f\n",
                        (int) N, cpu_time, gpu_time);

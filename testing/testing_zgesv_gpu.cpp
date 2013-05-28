@@ -82,7 +82,8 @@ int main(int argc , char **argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
-                printf("magma_zgesv_gpu returned error %d.\n", (int) info);
+                printf("magma_zgesv_gpu returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             
             //=====================================================================
             // Residual

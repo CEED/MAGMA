@@ -84,7 +84,8 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
-                printf("magma_zgebrd returned error %d.\n", (int) info);
+                printf("magma_zgebrd returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             
             /* =====================================================================
                Check the factorization
@@ -104,10 +105,12 @@ int main( int argc, char** argv)
                 // generate Q & P'
                 lapackf77_zungbr("Q", &M, &minmn, &N, h_Q,  &lda, tauq, chkwork, &lchkwork, &info);
                 if (info != 0)
-                    printf("lapackf77_zungbr returned error %d.\n", (int) info);
+                    printf("lapackf77_zungbr returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
                 lapackf77_zungbr("P", &minmn, &N, &M, h_PT, &lda, taup, chkwork, &lchkwork, &info);
                 if (info != 0)
-                    printf("lapackf77_zungbr (2) returned error %d.\n", (int) info);
+                    printf("lapackf77_zungbr (2) returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
                 
                 // Test 1:  Check the decomposition A := Q * B * PT
                 //      2:  Check the orthogonality of Q
@@ -146,7 +149,8 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0)
-                    printf("lapackf77_zgebrd returned error %d.\n", (int) info);
+                    printf("lapackf77_zgebrd returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
             }
             
             /* =====================================================================

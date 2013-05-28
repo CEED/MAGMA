@@ -128,8 +128,9 @@ int main(int argc , char **argv)
                           d_B, lddb, d_X, lddx, 
                           d_WORKD, d_WORKS, &iter, &info);
         end = get_current_time();
-        if (info < 0)
-            printf("Argument %d of magma_zcgesv had an illegal value.\n", (int) -info);
+        if (info != 0)
+            printf("magma_zcgesv_gpu returned error %d: %s.\n",
+                   (int) info, magma_strerror( info ));
         gpu_perf = flopsS / GetTimerValue(start, end);
 
         //=====================================================================
@@ -153,8 +154,9 @@ int main(int argc , char **argv)
         start = get_current_time();
         magma_zgetrf_gpu(N, N, d_A, ldda, h_ipiv, &info);
         end = get_current_time();
-        if (info < 0)
-            printf("Argument %d of magma_zgetrf had an illegal value.\n", (int) -info);
+        if (info != 0)
+            printf("magma_zgetrf_gpu returned error %d: %s.\n",
+                   (int) info, magma_strerror( info ));
         gpu_perfdf = flopsF / GetTimerValue(start, end);
 
         printf("%6.2f    ", gpu_perfdf); fflush(stdout);
@@ -169,8 +171,9 @@ int main(int argc , char **argv)
         magma_zgetrf_gpu(N, N, d_A, ldda, h_ipiv, &info);
         magma_zgetrs_gpu( trans, N, NRHS, d_A, ldda, h_ipiv, d_B, lddb, &info );
         end = get_current_time();
-        if (info < 0)
-            printf("Argument %d of magma_zgetrs had an illegal value.\n", (int) -info);
+        if (info != 0)
+            printf("magma_zgetrs_gpu returned error %d: %s.\n",
+                   (int) info, magma_strerror( info ));
 
         gpu_perfds = flopsS / GetTimerValue(start, end);
 
@@ -189,8 +192,9 @@ int main(int argc , char **argv)
         start = get_current_time();
         magma_cgetrf_gpu(N, N, d_As, ldda, h_ipiv, &info);
         end = get_current_time();
-        if (info < 0)
-            printf("Argument %d of magma_cgetrf had an illegal value.\n", (int) -info);
+        if (info != 0)
+            printf("magma_cgetrf_gpu returned error %d: %s.\n",
+                   (int) info, magma_strerror( info ));
         
         gpu_perfsf = flopsF / GetTimerValue(start, end);
         printf("%6.2f     ", gpu_perfsf); fflush(stdout);
@@ -206,8 +210,9 @@ int main(int argc , char **argv)
         magma_cgetrs_gpu( trans, N, NRHS, d_As, ldda, h_ipiv, 
                           d_Bs, lddb, &info);
         end = get_current_time();
-        if (info < 0)
-            printf("Argument %d of magma_cgetrs had an illegal value.\n", (int) -info);
+        if (info != 0)
+            printf("magma_cgetrs_gpu returned error %d: %s.\n",
+                   (int) info, magma_strerror( info ));
 
         gpu_perfss = flopsS / GetTimerValue(start, end);
         printf("%6.2f     ", gpu_perfss); fflush(stdout);

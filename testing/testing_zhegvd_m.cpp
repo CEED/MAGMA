@@ -161,7 +161,8 @@ int main( int argc, char** argv)
             end = get_current_time();
 
             if(info != 0)
-                printf("MGPU error code: %d\n",info);
+                printf("magma_zhegvd_m returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
 
             mgpu_time = GetTimerValue(start,end)/1000.;
 
@@ -223,7 +224,8 @@ int main( int argc, char** argv)
                 end = get_current_time();
 
                 if(info != 0)
-                    printf("GPU error code: %d\n",info);
+                    printf("magma_zhegvd returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
 
                 gpu_time = GetTimerValue(start,end)/1000.;
 
@@ -241,7 +243,8 @@ int main( int argc, char** argv)
                                  &info);
                 end = get_current_time();
                 if (info != 0)
-                    printf("lapackf77_zhegvd returned error %d.\n", (int) info);
+                    printf("lapackf77_zhegvd returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
 
                 cpu_time = GetTimerValue(start,end)/1000.;
 

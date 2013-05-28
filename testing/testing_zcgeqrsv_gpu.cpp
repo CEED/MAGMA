@@ -125,7 +125,8 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
-                printf("magma_zcgeqrsv returned error %d.\n", (int) info);
+                printf("magma_zcgeqrsv returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             
             // compute the residual
             magma_zgetmatrix( N, nrhs, d_X, lddx, h_X, ldb );
@@ -179,7 +180,8 @@ int main( int argc, char** argv)
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gflops / cpu_time;
             if (info != 0)
-                printf("lapackf77_zgels returned error %d.\n", (int) info);
+                printf("lapackf77_zgels returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             
             blasf77_zgemm( MagmaNoTransStr, MagmaNoTransStr, &M, &nrhs, &N,
                            &c_neg_one, h_A2, &lda,

@@ -87,7 +87,8 @@ int main( int argc, char** argv)
                               iwork, liwork,
                               &info );
                 if (info != 0)
-                    printf("magma_dsyevd returned error %d.\n", (int) info);
+                    printf("magma_dsyevd returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
                 lapackf77_dlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
             }
             
@@ -102,7 +103,8 @@ int main( int argc, char** argv)
                           &info );
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0)
-                printf("magma_dsyevd returned error %d.\n", (int) info);
+                printf("magma_dsyevd returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             
             if ( opts.check ) {
                 /* =====================================================================
@@ -129,7 +131,8 @@ int main( int argc, char** argv)
                               iwork, liwork,
                               &info );
                 if (info != 0)
-                    printf("magma_dsyevd returned error %d.\n", (int) info);
+                    printf("magma_dsyevd returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
                 
                 temp1 = temp2 = 0;
                 for( int j=0; j<N; j++ ) {
@@ -152,7 +155,8 @@ int main( int argc, char** argv)
                                   &info );
                 cpu_time = magma_wtime() - cpu_time;
                 if (info != 0)
-                    printf("lapackf77_dsyevd returned error %d.\n", (int) info);
+                    printf("lapackf77_dsyevd returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
                 
                 printf("%5d   %7.2f          %7.2f\n",
                        (int) N, cpu_time, gpu_time);

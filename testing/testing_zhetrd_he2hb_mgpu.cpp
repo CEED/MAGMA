@@ -280,7 +280,8 @@ int main( int argc, char** argv)
         //  magma_zhetrd_bhe2trc(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1[0], ldt);
         end = get_current_time();
         if (info != 0)
-            printf("magma_zhetrd_he2hb returned error %d.\n", (int) info);
+            printf("magma_zhetrd_he2hb returned error %d: %s.\n",
+                   (int) info, magma_strerror( info ));
 
         gpu_perf = flops / GetTimerValue(start,end);
         gpu_time = GetTimerValue(start,end) / 1000.;

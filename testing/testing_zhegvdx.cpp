@@ -105,7 +105,8 @@ int main( int argc, char** argv)
                            iwork, liwork,
                            &info );
             if (info != 0)
-                printf("magma_zhegvdx returned error %d.\n", (int) info);
+                printf("magma_zhegvdx returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             
             lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
             lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
@@ -122,7 +123,8 @@ int main( int argc, char** argv)
                            &info );
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0)
-                printf("magma_zhegvdx returned error %d.\n", (int) info);
+                printf("magma_zhegvdx returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             
             if ( opts.check ) {
                 /* =====================================================================
@@ -172,7 +174,8 @@ int main( int argc, char** argv)
                                iwork, liwork,
                                &info );
                 if (info != 0)
-                    printf("magma_zhegvdx returned error %d.\n", (int) info);
+                    printf("magma_zhegvdx returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
                 
                 temp1 = temp2 = 0;
                 for(int j=0; j < m2; j++) {

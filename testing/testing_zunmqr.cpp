@@ -92,7 +92,8 @@ int main( int argc, char** argv )
             // compute QR factorization to get Householder vectors in A, tau
             magma_zgeqrf( lda, k, A, lda, tau, W, lwork_max, &info );
             if (info != 0)
-                printf("magma_zgeqrf returned error %d.\n", (int) info);
+                printf("magma_zgeqrf returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             
             /* =====================================================================
                Performs operation using LAPACK
@@ -104,7 +105,8 @@ int main( int argc, char** argv )
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gflops / cpu_time;
             if (info != 0)
-                printf("lapackf77_zunmqr returned error %d.\n", (int) info);
+                printf("lapackf77_zunmqr returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             
             /* ====================================================================
                Performs operation using MAGMA
@@ -115,7 +117,8 @@ int main( int argc, char** argv )
                           m, n, k,
                           A, lda, tau, R, ldc, W, lwork, &info );
             if (info != 0)
-                printf("magma_zunmqr (lwork query) returned error %d.\n", (int) info);
+                printf("magma_zunmqr (lwork query) returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             lwork = (magma_int_t) MAGMA_Z_REAL( W[0] );
             if ( lwork < 0 || lwork > lwork_max )
                 printf("invalid lwork %d, lwork_max %d\n", lwork, lwork_max );
@@ -127,7 +130,8 @@ int main( int argc, char** argv )
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
-                printf("magma_zunmqr returned error %d.\n", (int) info);
+                printf("magma_zunmqr returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             
             //magma_zgetmatrix( m, n, dC, ldc, R, ldc );
             

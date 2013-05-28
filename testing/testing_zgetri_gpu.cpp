@@ -58,7 +58,8 @@ int main( int argc, char** argv )
             lwork = -1;
             lapackf77_zgetri( &N, h_A, &lda, ipiv, &tmp, &lwork, &info );
             if (info != 0)
-                printf("lapackf77_zgetri returned error %d.\n", (int) info);
+                printf("lapackf77_zgetri returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             lwork = int( MAGMA_Z_REAL( tmp ));
             
             TESTING_MALLOC(    ipiv,  magma_int_t,     N      );
@@ -89,7 +90,8 @@ int main( int argc, char** argv )
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
-                printf("magma_zgetri_gpu returned error %d.\n", (int) info);
+                printf("magma_zgetri_gpu returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             
             magma_zgetmatrix( N, N, d_A, ldda, h_R, lda );
             
@@ -102,7 +104,8 @@ int main( int argc, char** argv )
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0)
-                    printf("lapackf77_zgetri returned error %d.\n", (int) info);
+                    printf("lapackf77_zgetri returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
                 
                 /* =====================================================================
                    Check the result compared to LAPACK

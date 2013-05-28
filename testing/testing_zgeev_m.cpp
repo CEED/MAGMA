@@ -81,7 +81,8 @@ int main( int argc, char** argv)
                            h_work, lwork, rwork, &info );
             gpu_time = magma_wtime() - gpu_time;
             if (info != 0)
-                printf("magma_zgeev returned error %d.\n", (int) info);
+                printf("magma_zgeev returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             
             /* =====================================================================
                Performs operation using LAPACK
@@ -94,7 +95,8 @@ int main( int argc, char** argv)
                                  h_work, &lwork, rwork, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 if (info != 0)
-                    printf("lapackf77_zgeev returned error %d.\n", (int) info);
+                    printf("lapackf77_zgeev returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
                 
                 printf("%5d   %7.2f          %7.2f\n",
                        (int) N, cpu_time, gpu_time);
@@ -237,7 +239,8 @@ int main( int argc, char** argv)
                 
                 if (info != 0) {
                     result[0] = ulpinv;
-                    printf("magma_zgeev (case N, N) returned error %d.\n", (int) info);
+                    printf("magma_zgeev (case N, N) returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
                 }
                 
                 // Do test 5
@@ -257,7 +260,8 @@ int main( int argc, char** argv)
                 
                 if (info != 0) {
                     result[0] = ulpinv;
-                    printf("magma_zgeev (case N, V) returned error %d.\n", (int) info);
+                    printf("magma_zgeev (case N, V) returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
                 }
                 
                 // Do test 5 again
@@ -284,7 +288,8 @@ int main( int argc, char** argv)
                 
                 if (info != 0) {
                     result[0] = ulpinv;
-                    printf("magma_zgeev (case V, N) returned error %d.\n", (int) info);
+                    printf("magma_zgeev (case V, N) returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
                 }
                 
                 // Do test 5 again

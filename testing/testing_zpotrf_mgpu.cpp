@@ -184,11 +184,9 @@ int main( int argc, char** argv)
         start = get_current_time();
         magma_zpotrf_mgpu(num_gpus, uplo[0], N, d_lA, ldda, &info);
         end = get_current_time();
-        if (info < 0) {
-            printf("Argument %d of magma_zpotrf_mgpu had an illegal value.\n", (int) -info);
-            break;
-        } else if (info != 0) {
-            printf("magma_zpotrf_mgpu returned info=%d\n", (int) info );
+        if (info != 0) {
+            printf("magma_zpotrf_mgpu returned error %d: %s.\n",
+                   (int) info, magma_strerror( info ));
             break;
         }
         gpu_perf = flops / GetTimerValue(start, end);
@@ -221,12 +219,10 @@ int main( int argc, char** argv)
         start = get_current_time();
         lapackf77_zpotrf(uplo, &N, h_A, &lda, &info);
         end = get_current_time();
-        if (info < 0) {
-              printf("Argument %d of zpotrf had an illegal value.\n", (int) -info);
-              break;
-        } else if (info != 0) {
-              printf("lapackf77_zpotrf returned info=%d\n", (int) info );
-              break;
+        if (info != 0) {
+            printf("lapackf77_zpotrf returned error %d: %s.\n",
+                   (int) info, magma_strerror( info ));
+            break;
         }
         cpu_perf = flops / GetTimerValue(start, end);
       

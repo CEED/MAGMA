@@ -77,7 +77,8 @@ int main( int argc, char** argv)
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
-                printf("magma_zgehrd returned error %d.\n", (int) info);
+                printf("magma_zgehrd returned error %d: %s.\n",
+                       (int) info, magma_strerror( info ));
             
             /* =====================================================================
                Check the factorization
@@ -97,7 +98,8 @@ int main( int argc, char** argv)
                 
                 magma_zunghr(N, ione, N, h_Q, lda, tau, dT, nb, &info);
                 if (info != 0) {
-                    printf("magma_zunghr returned error %d.\n", (int) info);
+                    printf("magma_zunghr returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
                     exit(1);
                 }
                 #if defined(PRECISION_z) || defined(PRECISION_c)
@@ -126,7 +128,8 @@ int main( int argc, char** argv)
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0)
-                    printf("lapack_zgehrd returned error %d.\n", (int) info);
+                    printf("lapack_zgehrd returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
             }
             
             /* =====================================================================

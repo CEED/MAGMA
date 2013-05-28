@@ -178,7 +178,8 @@ int main( int argc, char** argv)
         lapackf77_zgetrf(&M, &N, h_A, &lda, ipiv, &info);
         end = get_current_time();
         if (info != 0)
-            printf("lapackf77_zgetrf returned error %d.\n", (int) info);
+            printf("lapackf77_zgetrf returned error %d: %s.\n",
+                   (int) info, magma_strerror( info ));
         cpu_perf = flops / GetTimerValue(start, end);
         lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_R, &lda, h_A, &lda );
 
@@ -218,7 +219,8 @@ int main( int argc, char** argv)
         end = get_current_time();
         gpu_perf = flops / GetTimerValue(start, end);
         if (info != 0)
-            printf("magma_zgetrf_mgpu returned error %d.\n", (int) info);
+            printf("magma_zgetrf_mgpu returned error %d: %s.\n",
+                   (int) info, magma_strerror( info ));
         /* == download the matrix from GPUs == */
         //cudaSetDevice(0);
         //cublasGetMatrix( M, N, sizeof(cuDoubleComplex), d_lA[0], ldda, h_R, M);
