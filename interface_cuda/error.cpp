@@ -228,10 +228,10 @@ const char* magma_strerror( magma_err_t error )
 {
     // LAPACK-compliant errors
     if ( error > 0 ) {
-        return "see function documentation";
+        return "function-specific error, see documentation";
     }
     else if ( error < 0 && error > MAGMA_ERR ) {
-        return "bad argument value";
+        return "invalid argument";
     }
     // MAGMA-specific errors
     switch( error ) {
@@ -263,25 +263,25 @@ const char* magma_strerror( magma_err_t error )
             return "internal limit";
         
         case MAGMA_ERR_UNALLOCATED:
-            return "unallocated";
+            return "unallocated error";
         
         case MAGMA_ERR_FILESYSTEM:
-            return "filesystem";
+            return "filesystem error";
         
         case MAGMA_ERR_UNEXPECTED:
-            return "unexpected";
+            return "unexpected error";
         
         case MAGMA_ERR_SEQUENCE_FLUSHED:
             return "sequence flushed";
         
         case MAGMA_ERR_HOST_ALLOC:
-            return "host malloc";
+            return "cannot allocate memory on CPU host";
         
         case MAGMA_ERR_DEVICE_ALLOC:
-            return "device malloc";
+            return "cannot allocate memory on GPU device";
         
         case MAGMA_ERR_CUDASTREAM:
-            return "CUDA stream";
+            return "CUDA stream error";
         
         case MAGMA_ERR_INVALID_PTR:
             return "invalid pointer";
