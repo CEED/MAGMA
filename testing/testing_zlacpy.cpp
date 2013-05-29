@@ -32,9 +32,9 @@ int main( int argc, char** argv)
 
     real_Double_t    gbytes, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double           error, work[1];
-    cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *h_A, *h_B, *h_R;
-    cuDoubleComplex *d_A, *d_B;
+    magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *h_A, *h_B, *h_R;
+    magmaDoubleComplex *d_A, *d_B;
     magma_int_t M, N, size, lda, ldb, ldda, lddb;
     magma_int_t ione     = 1;
     
@@ -55,18 +55,18 @@ int main( int argc, char** argv)
             // uplo not yet implemented
             //if ( opts.uplo == MagmaLower || opts.uplo == MagmaUpper ) {
             //    // load and save triangle (with diagonal)
-            //    gbytes = sizeof(cuDoubleComplex) * 1.*N*(N+1) / 1e9;
+            //    gbytes = sizeof(magmaDoubleComplex) * 1.*N*(N+1) / 1e9;
             //}
             //else {
                 // load entire matrix, save entire matrix
-                gbytes = sizeof(cuDoubleComplex) * 2.*M*N / 1e9;
+                gbytes = sizeof(magmaDoubleComplex) * 2.*M*N / 1e9;
             //}
     
-            TESTING_MALLOC(   h_A, cuDoubleComplex, size   );
-            TESTING_MALLOC(   h_B, cuDoubleComplex, size   );
-            TESTING_MALLOC(   h_R, cuDoubleComplex, size   );
-            TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*N );
-            TESTING_DEVALLOC( d_B, cuDoubleComplex, ldda*N );
+            TESTING_MALLOC(   h_A, magmaDoubleComplex, size   );
+            TESTING_MALLOC(   h_B, magmaDoubleComplex, size   );
+            TESTING_MALLOC(   h_R, magmaDoubleComplex, size   );
+            TESTING_DEVALLOC( d_A, magmaDoubleComplex, ldda*N );
+            TESTING_DEVALLOC( d_B, magmaDoubleComplex, ldda*N );
             
             /* Initialize the matrix */
             for( int j = 0; j < N; ++j ) {

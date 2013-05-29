@@ -36,8 +36,8 @@ int main( int argc, char** argv)
 
     real_Double_t    gflops, gpu_perf, cpu_perf, gpu_time, cpu_time;
     double           eps;
-    cuDoubleComplex *h_A, *h_R, *h_Q, *h_work, *work;
-    cuDoubleComplex *tau;
+    magmaDoubleComplex *h_A, *h_R, *h_Q, *h_work, *work;
+    magmaDoubleComplex *tau;
     double          *diag, *offdiag;
     double           result[2] = {0., 0.};
     magma_int_t N, n2, lda, lwork, info, nb;
@@ -66,16 +66,16 @@ int main( int argc, char** argv)
             lwork  = N*nb; /* We suppose the magma nb is bigger than lapack nb */
             gflops = FLOPS_ZHETRD( N ) / 1e9;
             
-            TESTING_MALLOC(    h_A,     cuDoubleComplex, lda*N );
-            TESTING_HOSTALLOC( h_R,     cuDoubleComplex, lda*N );
-            TESTING_HOSTALLOC( h_work,  cuDoubleComplex, lwork );
-            TESTING_MALLOC(    tau,     cuDoubleComplex, N     );
+            TESTING_MALLOC(    h_A,     magmaDoubleComplex, lda*N );
+            TESTING_HOSTALLOC( h_R,     magmaDoubleComplex, lda*N );
+            TESTING_HOSTALLOC( h_work,  magmaDoubleComplex, lwork );
+            TESTING_MALLOC(    tau,     magmaDoubleComplex, N     );
             TESTING_MALLOC(    diag,    double, N   );
             TESTING_MALLOC(    offdiag, double, N-1 );
             
             if ( opts.check ) {
-                TESTING_MALLOC( h_Q,  cuDoubleComplex, lda*N );
-                TESTING_MALLOC( work, cuDoubleComplex, 2*N*N );
+                TESTING_MALLOC( h_Q,  magmaDoubleComplex, lda*N );
+                TESTING_MALLOC( work, magmaDoubleComplex, 2*N*N );
                 #if defined(PRECISION_z) || defined(PRECISION_c)
                 TESTING_MALLOC( rwork, double, N );
                 #endif

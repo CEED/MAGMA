@@ -47,9 +47,9 @@ int main( int argc, char** argv)
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t *ipiv;
 
-    cuDoubleComplex *h_A, *h_b, *h_x, *h_xcublas;
-    cuDoubleComplex *d_A, *d_x;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *h_A, *h_b, *h_x, *h_xcublas;
+    magmaDoubleComplex *d_A, *d_x;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
@@ -66,13 +66,13 @@ int main( int argc, char** argv)
             sizeA  = lda*N;
             
             TESTING_MALLOC( ipiv, magma_int_t, N );
-            TESTING_MALLOC( h_A,  cuDoubleComplex, lda*N );
-            TESTING_MALLOC( h_b,  cuDoubleComplex, N );
-            TESTING_MALLOC( h_x,  cuDoubleComplex, N );
-            TESTING_MALLOC( h_xcublas, cuDoubleComplex, N  );
+            TESTING_MALLOC( h_A,  magmaDoubleComplex, lda*N );
+            TESTING_MALLOC( h_b,  magmaDoubleComplex, N );
+            TESTING_MALLOC( h_x,  magmaDoubleComplex, N );
+            TESTING_MALLOC( h_xcublas, magmaDoubleComplex, N  );
             
-            TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*N );
-            TESTING_DEVALLOC( d_x, cuDoubleComplex, N  );
+            TESTING_DEVALLOC( d_A, magmaDoubleComplex, ldda*N );
+            TESTING_DEVALLOC( d_x, magmaDoubleComplex, N  );
             
             /* Initialize the matrices */
             /* Factor A into LU to get well-conditioned triangular matrix.

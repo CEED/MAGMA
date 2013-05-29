@@ -34,13 +34,13 @@ int main( int argc, char** argv)
 
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time, gpu_perfd, gpu_perfs;
     double           gpu_error, cpu_error, Anorm, work[1];
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *h_A, *h_A2, *h_B, *h_X, *h_R;
-    cuDoubleComplex *d_A, *d_B, *d_X, *d_T;
-    cuFloatComplex  *d_SA, *d_SB, *d_ST;
-    cuDoubleComplex *h_workd, *tau, tmp[1];
-    cuFloatComplex  *h_works, *tau_s;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *h_A, *h_A2, *h_B, *h_X, *h_R;
+    magmaDoubleComplex *d_A, *d_B, *d_X, *d_T;
+    magmaFloatComplex  *d_SA, *d_SB, *d_ST;
+    magmaDoubleComplex *h_workd, *tau, tmp[1];
+    magmaFloatComplex  *h_works, *tau_s;
     magma_int_t lda,  ldb, lhwork, lworkgpu;
     magma_int_t ldda, lddb, lddx;
     magma_int_t M, N, nrhs, qrsv_iters, info, size, min_mn, max_mn, nb;
@@ -86,21 +86,21 @@ int main( int argc, char** argv)
             lhwork = (magma_int_t) MAGMA_Z_REAL( tmp[0] );
             lhwork = max( lhwork, lworkgpu );
             
-            TESTING_MALLOC( tau,     cuDoubleComplex, min_mn   );
-            TESTING_MALLOC( h_A,     cuDoubleComplex, lda*N    );
-            TESTING_MALLOC( h_A2,    cuDoubleComplex, lda*N    );
-            TESTING_MALLOC( h_B,     cuDoubleComplex, ldb*nrhs );
-            TESTING_MALLOC( h_X,     cuDoubleComplex, ldb*nrhs );
-            TESTING_MALLOC( h_R,     cuDoubleComplex, ldb*nrhs );
-            TESTING_MALLOC( h_workd, cuDoubleComplex, lhwork   );
-            tau_s   = (cuFloatComplex*)tau;
-            h_works = (cuFloatComplex*)h_workd;
+            TESTING_MALLOC( tau,     magmaDoubleComplex, min_mn   );
+            TESTING_MALLOC( h_A,     magmaDoubleComplex, lda*N    );
+            TESTING_MALLOC( h_A2,    magmaDoubleComplex, lda*N    );
+            TESTING_MALLOC( h_B,     magmaDoubleComplex, ldb*nrhs );
+            TESTING_MALLOC( h_X,     magmaDoubleComplex, ldb*nrhs );
+            TESTING_MALLOC( h_R,     magmaDoubleComplex, ldb*nrhs );
+            TESTING_MALLOC( h_workd, magmaDoubleComplex, lhwork   );
+            tau_s   = (magmaFloatComplex*)tau;
+            h_works = (magmaFloatComplex*)h_workd;
             
-            TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*N      );
-            TESTING_DEVALLOC( d_B, cuDoubleComplex, lddb*nrhs   );
-            TESTING_DEVALLOC( d_X, cuDoubleComplex, lddx*nrhs   );
-            TESTING_DEVALLOC( d_T, cuDoubleComplex, ( 2*min_mn + (N+31)/32*32 )*nb );
-            d_ST = (cuFloatComplex*)d_T;
+            TESTING_DEVALLOC( d_A, magmaDoubleComplex, ldda*N      );
+            TESTING_DEVALLOC( d_B, magmaDoubleComplex, lddb*nrhs   );
+            TESTING_DEVALLOC( d_X, magmaDoubleComplex, lddx*nrhs   );
+            TESTING_DEVALLOC( d_T, magmaDoubleComplex, ( 2*min_mn + (N+31)/32*32 )*nb );
+            d_ST = (magmaFloatComplex*)d_T;
             
             /* Initialize the matrices */
             size = lda*N;
@@ -156,8 +156,8 @@ int main( int argc, char** argv)
             
             /* The allocation of d_SA and d_SB is done here to avoid
              * to double the memory used on GPU with zcgeqrsv */
-            TESTING_DEVALLOC( d_SA, cuFloatComplex, ldda*N    );
-            TESTING_DEVALLOC( d_SB, cuFloatComplex, lddb*nrhs );
+            TESTING_DEVALLOC( d_SA, magmaFloatComplex, ldda*N    );
+            TESTING_DEVALLOC( d_SB, magmaFloatComplex, lddb*nrhs );
             magmablas_zlag2c( M, N,    d_A, ldda, d_SA, ldda, &info );
             magmablas_zlag2c( N, nrhs, d_B, lddb, d_SB, lddb, &info );
             

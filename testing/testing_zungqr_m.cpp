@@ -36,9 +36,9 @@ int main( int argc, char** argv )
 
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double           error, work[1];
-    cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *hA, *hR, *hT, *tau, *h_work;
-    cuDoubleComplex *dA, *dT;
+    magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *hA, *hR, *hT, *tau, *h_work;
+    magmaDoubleComplex *dA, *dT;
     magma_int_t m, n, k;
     magma_int_t n2, lda, ldda, lwork, min_mn, nb, info;
     magma_int_t ione     = 1;
@@ -67,13 +67,13 @@ int main( int argc, char** argv )
             lwork  = (m + 2*n+nb)*nb;
             gflops = FLOPS_ZUNGQR( m, n, k ) / 1e9;
             
-            TESTING_HOSTALLOC( hA,     cuDoubleComplex, lda*n  );
-            TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork  );
-            TESTING_MALLOC(    hR,     cuDoubleComplex, lda*n  );
-            TESTING_MALLOC(    hT,     cuDoubleComplex, min_mn*nb );
-            TESTING_MALLOC(    tau,    cuDoubleComplex, min_mn );
-            TESTING_DEVALLOC(  dA,     cuDoubleComplex, ldda*n );
-            TESTING_DEVALLOC(  dT,     cuDoubleComplex, ( 2*min_mn + ((n + 31)/32)*32 )*nb );
+            TESTING_HOSTALLOC( hA,     magmaDoubleComplex, lda*n  );
+            TESTING_HOSTALLOC( h_work, magmaDoubleComplex, lwork  );
+            TESTING_MALLOC(    hR,     magmaDoubleComplex, lda*n  );
+            TESTING_MALLOC(    hT,     magmaDoubleComplex, min_mn*nb );
+            TESTING_MALLOC(    tau,    magmaDoubleComplex, min_mn );
+            TESTING_DEVALLOC(  dA,     magmaDoubleComplex, ldda*n );
+            TESTING_DEVALLOC(  dT,     magmaDoubleComplex, ( 2*min_mn + ((n + 31)/32)*32 )*nb );
             
             lapackf77_zlarnv( &ione, ISEED, &n2, hA );
             lapackf77_zlacpy( MagmaUpperLowerStr, &m, &n, hA, &lda, hR, &lda );

@@ -41,48 +41,48 @@
 
 extern "C" magma_int_t
 magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t NB,
-                    cuDoubleComplex *a, magma_int_t lda,
-                    cuDoubleComplex *tau,
-                    cuDoubleComplex *work, magma_int_t lwork,
-                    cuDoubleComplex *dT,
+                    magmaDoubleComplex *a, magma_int_t lda,
+                    magmaDoubleComplex *tau,
+                    magmaDoubleComplex *work, magma_int_t lwork,
+                    magmaDoubleComplex *dT,
                     magma_int_t *info);
 
 extern "C" magma_int_t
 magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
-                    cuDoubleComplex *a, magma_int_t lda,
-                    cuDoubleComplex *tau,
-                    cuDoubleComplex *work, magma_int_t lwork,
-                    cuDoubleComplex *dAmgpu[], magma_int_t ldda,
-                    cuDoubleComplex *dTmgpu[], magma_int_t lddt,
+                    magmaDoubleComplex *a, magma_int_t lda,
+                    magmaDoubleComplex *tau,
+                    magmaDoubleComplex *work, magma_int_t lwork,
+                    magmaDoubleComplex *dAmgpu[], magma_int_t ldda,
+                    magmaDoubleComplex *dTmgpu[], magma_int_t lddt,
                     magma_int_t ngpu, magma_int_t distblk,
-                    cudaStream_t streams[][20], magma_int_t nstream,
+                    magma_queue_t streams[][20], magma_int_t nstream,
                     magma_int_t threads, magma_int_t *info);
 
 extern "C" magma_int_t
 magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
-                    cuDoubleComplex *a, magma_int_t lda,
-                    cuDoubleComplex *tau,
-                    cuDoubleComplex *work, magma_int_t lwork,
-                    cuDoubleComplex *dAmgpu[], magma_int_t ldda,
-                    cuDoubleComplex *dTmgpu[], magma_int_t lddt,
+                    magmaDoubleComplex *a, magma_int_t lda,
+                    magmaDoubleComplex *tau,
+                    magmaDoubleComplex *work, magma_int_t lwork,
+                    magmaDoubleComplex *dAmgpu[], magma_int_t ldda,
+                    magmaDoubleComplex *dTmgpu[], magma_int_t lddt,
                     magma_int_t ngpu, magma_int_t distblk,
-                    cudaStream_t streams[][20], magma_int_t nstream,
+                    magma_queue_t streams[][20], magma_int_t nstream,
                     magma_int_t threads, magma_int_t *info);
 
 extern "C" magma_int_t
 magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int n, int NB,
-                   cuDoubleComplex *A, int LDA, double *D, double *E, cuDoubleComplex *dT1, int ldt1);
+                   magmaDoubleComplex *A, int LDA, double *D, double *E, magmaDoubleComplex *dT1, int ldt1);
 
 extern "C" magma_int_t
 magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t wantz, char uplo, magma_int_t ne, magma_int_t n, magma_int_t nb,
-                        cuDoubleComplex *A, magma_int_t lda, double *D, double *E,
-                        cuDoubleComplex *dT1, magma_int_t ldt1);
+                        magmaDoubleComplex *A, magma_int_t lda, double *D, double *E,
+                        magmaDoubleComplex *dT1, magma_int_t ldt1);
 
 #if defined(PRECISION_z) || defined(PRECISION_d)
 extern "C" void cmp_vals(int n, double *wr1, double *wr2, double *nrmI, double *nrm1, double *nrm2);
 extern "C" void zcheck_eig_(char *JOBZ, int  *MATYPE, int  *N, int  *NB,
-                       cuDoubleComplex* A, int  *LDA, double *AD, double *AE, double *D1, double *EIG,
-                    cuDoubleComplex *Z, int  *LDZ, cuDoubleComplex *WORK, double *RWORK, double *RESU);
+                       magmaDoubleComplex* A, int  *LDA, double *AD, double *AE, double *D1, double *EIG,
+                    magmaDoubleComplex *Z, int  *LDZ, magmaDoubleComplex *WORK, double *RWORK, double *RESU);
 #endif
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -94,8 +94,8 @@ int main( int argc, char** argv)
 
     magma_timestr_t       start, end;
     double           eps, flops, gpu_perf, gpu_time;
-    cuDoubleComplex *h_A, *h_R, *h_work;
-    cuDoubleComplex *tau;
+    magmaDoubleComplex *h_A, *h_R, *h_work;
+    magmaDoubleComplex *tau;
     double *D, *E;
 
     /* Matrix size */
@@ -189,31 +189,31 @@ int main( int argc, char** argv)
     lwork = N*NB;
 
     /* Allocate host memory for the matrix */
-    TESTING_HOSTALLOC( h_A,    cuDoubleComplex, lda*N );
-    TESTING_HOSTALLOC( h_R,    cuDoubleComplex, lda*N );
-    TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork );
-    TESTING_MALLOC(    tau,    cuDoubleComplex, N-1   );
+    TESTING_HOSTALLOC( h_A,    magmaDoubleComplex, lda*N );
+    TESTING_HOSTALLOC( h_R,    magmaDoubleComplex, lda*N );
+    TESTING_HOSTALLOC( h_work, magmaDoubleComplex, lwork );
+    TESTING_MALLOC(    tau,    magmaDoubleComplex, N-1   );
     TESTING_HOSTALLOC( D,    double, N );
     TESTING_HOSTALLOC( E,    double, N );
 
 
     nstream = max(3,ngpu+2);
-    cudaStream_t streams[MagmaMaxGPUs][20];
-    cuDoubleComplex *da[MagmaMaxGPUs],*dT1[MagmaMaxGPUs];
+    magma_queue_t streams[MagmaMaxGPUs][20];
+    magmaDoubleComplex *da[MagmaMaxGPUs],*dT1[MagmaMaxGPUs];
     magma_int_t ldda = ((N+31)/32)*32;
     if((distblk==0)||(distblk<NB))distblk = max(256,NB);
     printf("voici ngpu %d distblk %d NB %d nstream %d\n ",ngpu,distblk,NB,nstream);
     
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_int_t mlocal = ((N / distblk) / ngpu + 1) * distblk;
-        cudaSetDevice( dev );
-        TESTING_DEVALLOC( da[dev],  cuDoubleComplex, ldda*mlocal );
-        TESTING_DEVALLOC( dT1[dev], cuDoubleComplex, (N*NB) );
+        magma_setdevice( dev );
+        TESTING_DEVALLOC( da[dev],  magmaDoubleComplex, ldda*mlocal );
+        TESTING_DEVALLOC( dT1[dev], magmaDoubleComplex, (N*NB) );
         for( int i = 0; i < nstream; ++i ) {
-            cudaStreamCreate( &streams[dev][i] );
+            magma_queue_create( &streams[dev][i] );
         }
     }
-    cudaSetDevice( 0 );
+    magma_setdevice( 0 );
 
 
     for(i=0; i<10; i++){
@@ -248,12 +248,12 @@ int main( int argc, char** argv)
            =================================================================== */
         /* Copy the matrix to the GPU */
         magmablas_zsetmatrix_1D_bcyclic( N, N, h_R, lda, da, ldda, ngpu, distblk);
-//cuDoubleComplex *dabis;
-//       TESTING_DEVALLOC( dabis,  cuDoubleComplex, ldda*N );
+//magmaDoubleComplex *dabis;
+//       TESTING_DEVALLOC( dabis,  magmaDoubleComplex, ldda*N );
 //       magma_zsetmatrix(N,N,h_R,lda,dabis,ldda);
     
     for (int count=0; count<1;++count){
-       cudaSetDevice(0);
+       magma_setdevice(0);
        start = get_current_time();
        if(ver==30){
            magma_zhetrd_he2hb_mgpu_spec(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, da, ldda, dT1, NB, ngpu, distblk, streams, nstream, THREADS, &info);
@@ -265,15 +265,15 @@ int main( int argc, char** argv)
        end = get_current_time();
        printf("  Finish BAND  N %d  NB %d  dist %d  ngpu %d version %d timing= %lf \n" ,N,NB,distblk,ngpu,ver,GetTimerValue(start,end) / 1000.);
     }
-       cudaSetDevice(0);
+       magma_setdevice(0);
 
 // goto fin;
 //return 0;
         for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-            cudaSetDevice(dev);
+            magma_setdevice(dev);
             cudaDeviceSynchronize();
         }
-        cudaSetDevice(0);
+        magma_setdevice(0);
         magmablasSetKernelStream( NULL );
 
         magma_zhetrd_bhe2trc_v5(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1[0], ldt);
@@ -300,11 +300,11 @@ int main( int argc, char** argv)
                     JOBZ = 'V';
             double nrmI=0.0, nrm1=0.0, nrm2=0.0;
             int    lwork2 = 256*N;
-            cuDoubleComplex *work2     = (cuDoubleComplex *) malloc (lwork2*sizeof(cuDoubleComplex));
+            magmaDoubleComplex *work2     = (magmaDoubleComplex *) malloc (lwork2*sizeof(magmaDoubleComplex));
             double *rwork2     = (double *) malloc (N*sizeof(double));
             double *D2          = (double *) malloc (N*sizeof(double));
-            cuDoubleComplex *AINIT    = (cuDoubleComplex *) malloc (N*lda*sizeof(cuDoubleComplex));
-            memcpy(AINIT, h_A, N*lda*sizeof(cuDoubleComplex));
+            magmaDoubleComplex *AINIT    = (magmaDoubleComplex *) malloc (N*lda*sizeof(magmaDoubleComplex));
+            memcpy(AINIT, h_A, N*lda*sizeof(magmaDoubleComplex));
             /* compute the eigenvalues using lapack routine to be able to compare to it and used as ref */
             start = get_current_time();
             i= min(12,THREADS);
@@ -332,9 +332,9 @@ int main( int argc, char** argv)
             cmp_vals(N, D2, D, &nrmI, &nrm1, &nrm2);
 
 
-           cuDoubleComplex *WORKAJETER;
+           magmaDoubleComplex *WORKAJETER;
            double *RWORKAJETER, *RESU;
-           WORKAJETER  = (cuDoubleComplex *) malloc( (2* N * N + N) * sizeof(cuDoubleComplex) );
+           WORKAJETER  = (magmaDoubleComplex *) malloc( (2* N * N + N) * sizeof(magmaDoubleComplex) );
            RWORKAJETER = (double *) malloc( N * sizeof(double) );
            RESU        = (double *) malloc(10*sizeof(double));
            int MATYPE;
@@ -387,7 +387,7 @@ int main( int argc, char** argv)
 fin:
 
     /* Memory clean up */
-    cudaSetDevice( 0 );
+    magma_setdevice( 0 );
     TESTING_FREE( tau );
     TESTING_HOSTFREE( h_A );
     TESTING_HOSTFREE( h_R );

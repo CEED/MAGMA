@@ -33,8 +33,8 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
-    cuDoubleComplex *h_A, *h_Q, *h_PT, *h_work, *chkwork;
-    cuDoubleComplex *taup, *tauq;
+    magmaDoubleComplex *h_A, *h_Q, *h_PT, *h_work, *chkwork;
+    magmaDoubleComplex *taup, *tauq;
     #if defined(PRECISION_z) || defined(PRECISION_c)
     double      *rwork;
     #endif
@@ -62,13 +62,13 @@ int main( int argc, char** argv)
             lhwork = (M + N)*nb;
             gflops = FLOPS_ZGEBRD( M, N ) / 1e9;
 
-            TESTING_MALLOC( h_A,     cuDoubleComplex, lda*N );
-            TESTING_MALLOC( tauq,    cuDoubleComplex, minmn  );
-            TESTING_MALLOC( taup,    cuDoubleComplex, minmn  );
+            TESTING_MALLOC( h_A,     magmaDoubleComplex, lda*N );
+            TESTING_MALLOC( tauq,    magmaDoubleComplex, minmn  );
+            TESTING_MALLOC( taup,    magmaDoubleComplex, minmn  );
             TESTING_MALLOC( diag,    double, minmn   );
             TESTING_MALLOC( offdiag, double, (minmn-1) );
-            TESTING_HOSTALLOC( h_Q, cuDoubleComplex, lda*N );
-            TESTING_HOSTALLOC( h_work, cuDoubleComplex, lhwork );
+            TESTING_HOSTALLOC( h_Q, magmaDoubleComplex, lda*N );
+            TESTING_HOSTALLOC( h_work, magmaDoubleComplex, lhwork );
             
             /* Initialize the matrices */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -94,8 +94,8 @@ int main( int argc, char** argv)
                 lchkwork = max( minmn * nb, M+N );
                 /* For optimal performance in zunt01 */
                 lchkwork = max( lchkwork, minmn*minmn );
-                TESTING_MALLOC( h_PT,    cuDoubleComplex, lda*N   );
-                TESTING_MALLOC( chkwork, cuDoubleComplex, lchkwork );
+                TESTING_MALLOC( h_PT,    magmaDoubleComplex, lda*N   );
+                TESTING_MALLOC( chkwork, magmaDoubleComplex, lchkwork );
                 #if defined(PRECISION_z) || defined(PRECISION_c)
                 TESTING_MALLOC( rwork, double, 5*minmn );
                 #endif

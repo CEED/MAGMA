@@ -31,9 +31,9 @@ int main( int argc, char** argv )
 {
     TESTING_INIT();
     
-    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t M, N, K, size, ldc, ldv, ldt, ldw, nv;
     magma_int_t ione =  1;
     magma_int_t ISEED[4] = {0,0,0,1};
@@ -71,18 +71,18 @@ int main( int argc, char** argv )
             nv  = K;
             
             // Allocate memory for matrices
-            cuDoubleComplex *C, *R, *V, *T, *W;
-            TESTING_MALLOC( C, cuDoubleComplex, ldc*N );
-            TESTING_MALLOC( R, cuDoubleComplex, ldc*N );
-            TESTING_MALLOC( V, cuDoubleComplex, ldv*K );
-            TESTING_MALLOC( T, cuDoubleComplex, ldt*K );
-            TESTING_MALLOC( W, cuDoubleComplex, ldw*K );
+            magmaDoubleComplex *C, *R, *V, *T, *W;
+            TESTING_MALLOC( C, magmaDoubleComplex, ldc*N );
+            TESTING_MALLOC( R, magmaDoubleComplex, ldc*N );
+            TESTING_MALLOC( V, magmaDoubleComplex, ldv*K );
+            TESTING_MALLOC( T, magmaDoubleComplex, ldt*K );
+            TESTING_MALLOC( W, magmaDoubleComplex, ldw*K );
             
-            cuDoubleComplex *dC, *dV, *dT, *dW;
-            TESTING_DEVALLOC( dC, cuDoubleComplex, ldc*N );
-            TESTING_DEVALLOC( dV, cuDoubleComplex, ldv*K );
-            TESTING_DEVALLOC( dT, cuDoubleComplex, ldt*K );
-            TESTING_DEVALLOC( dW, cuDoubleComplex, ldw*K );
+            magmaDoubleComplex *dC, *dV, *dT, *dW;
+            TESTING_DEVALLOC( dC, magmaDoubleComplex, ldc*N );
+            TESTING_DEVALLOC( dV, magmaDoubleComplex, ldv*K );
+            TESTING_DEVALLOC( dT, magmaDoubleComplex, ldt*K );
+            TESTING_DEVALLOC( dW, magmaDoubleComplex, ldw*K );
             
             // C is M x N.
             size = ldc*N;

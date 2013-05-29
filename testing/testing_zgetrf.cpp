@@ -26,7 +26,7 @@
 // Initialize matrix to random.
 // Having this in separate function ensures the same ISEED is always used,
 // so we can re-generate the identical matrix.
-void init_matrix( int m, int n, cuDoubleComplex *h_A, magma_int_t lda )
+void init_matrix( int m, int n, magmaDoubleComplex *h_A, magma_int_t lda )
 {
     magma_int_t ione = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
@@ -42,7 +42,7 @@ void init_matrix( int m, int n, cuDoubleComplex *h_A, magma_int_t lda )
 // Returns residual, |Ax - b| / (n |A| |x|).
 double get_residual(
     magma_int_t m, magma_int_t n,
-    cuDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *A, magma_int_t lda,
     magma_int_t *ipiv )
 {
     if ( m != n ) {
@@ -50,19 +50,19 @@ double get_residual(
         return -1;
     }
     
-    const cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    const cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    const magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    const magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     const magma_int_t ione = 1;
     
     // this seed should be DIFFERENT than used in init_matrix
     // (else x is column of A, so residual can be exactly zero)
     magma_int_t ISEED[4] = {0,0,0,2};
     magma_int_t info = 0;
-    cuDoubleComplex *x, *b;
+    magmaDoubleComplex *x, *b;
     
     // initialize RHS
-    TESTING_MALLOC( x, cuDoubleComplex, n );
-    TESTING_MALLOC( b, cuDoubleComplex, n );
+    TESTING_MALLOC( x, magmaDoubleComplex, n );
+    TESTING_MALLOC( b, magmaDoubleComplex, n );
     lapackf77_zlarnv( &ione, ISEED, &n, b );
     blasf77_zcopy( &n, b, &ione, x, &ione );
     
@@ -100,22 +100,22 @@ double get_residual(
 // Returns error in factorization, |PA - LU| / (n |A|)
 // This allocates 3 more matrices to store A, L, and U.
 double get_LU_error(magma_int_t M, magma_int_t N,
-                    cuDoubleComplex *LU, magma_int_t lda,
+                    magmaDoubleComplex *LU, magma_int_t lda,
                     magma_int_t *ipiv)
 {
     magma_int_t min_mn = min(M,N);
     magma_int_t ione   = 1;
     magma_int_t i, j;
-    cuDoubleComplex alpha = MAGMA_Z_ONE;
-    cuDoubleComplex beta  = MAGMA_Z_ZERO;
-    cuDoubleComplex *A, *L, *U;
+    magmaDoubleComplex alpha = MAGMA_Z_ONE;
+    magmaDoubleComplex beta  = MAGMA_Z_ZERO;
+    magmaDoubleComplex *A, *L, *U;
     double work[1], matnorm, residual;
     
-    TESTING_MALLOC( A, cuDoubleComplex, lda*N    );
-    TESTING_MALLOC( L, cuDoubleComplex, M*min_mn );
-    TESTING_MALLOC( U, cuDoubleComplex, min_mn*N );
-    memset( L, 0, M*min_mn*sizeof(cuDoubleComplex) );
-    memset( U, 0, min_mn*N*sizeof(cuDoubleComplex) );
+    TESTING_MALLOC( A, magmaDoubleComplex, lda*N    );
+    TESTING_MALLOC( L, magmaDoubleComplex, M*min_mn );
+    TESTING_MALLOC( U, magmaDoubleComplex, min_mn*N );
+    memset( L, 0, M*min_mn*sizeof(magmaDoubleComplex) );
+    memset( U, 0, min_mn*N*sizeof(magmaDoubleComplex) );
 
     // set to original A
     init_matrix( M, N, A, lda );
@@ -156,7 +156,7 @@ int main( int argc, char** argv)
 
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double          error;
-    cuDoubleComplex *h_A;
+    magmaDoubleComplex *h_A;
     magma_int_t     *ipiv;
     magma_int_t     M, N, n2, lda, ldda, info, min_mn;
     
@@ -181,7 +181,7 @@ int main( int argc, char** argv)
             gflops = FLOPS_ZGETRF( M, N ) / 1e9;
             
             TESTING_MALLOC( ipiv, magma_int_t, min_mn );
-            TESTING_HOSTALLOC( h_A,  cuDoubleComplex, n2 );
+            TESTING_HOSTALLOC( h_A,  magmaDoubleComplex, n2 );
             
             /* =====================================================================
                Performs operation using LAPACK

@@ -34,10 +34,10 @@ int main( int argc, char** argv )
     
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double           gpu_error, cpu_error, Anorm, work[1];
-    cuDoubleComplex  c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *h_A, *h_A2, *h_B, *h_X, *h_R, *tau, *h_work, tmp[1];
-    cuDoubleComplex *d_A, *d_B;
+    magmaDoubleComplex  c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *h_A, *h_A2, *h_B, *h_X, *h_R, *tau, *h_work, tmp[1];
+    magmaDoubleComplex *d_A, *d_B;
     magma_int_t M, N, size, nrhs, lda, ldb, ldda, lddb, min_mn, max_mn, nb, info;
     magma_int_t lworkgpu, lhwork;
     magma_int_t ione     = 1;
@@ -77,16 +77,16 @@ int main( int argc, char** argv )
             lhwork = (magma_int_t) MAGMA_Z_REAL( tmp[0] );
             lhwork = max( lhwork, lworkgpu );
             
-            TESTING_MALLOC(   tau,    cuDoubleComplex, min_mn    );
-            TESTING_MALLOC(   h_A,    cuDoubleComplex, lda*N     );
-            TESTING_MALLOC(   h_A2,   cuDoubleComplex, lda*N     );
-            TESTING_MALLOC(   h_B,    cuDoubleComplex, ldb*nrhs  );
-            TESTING_MALLOC(   h_X,    cuDoubleComplex, ldb*nrhs  );
-            TESTING_MALLOC(   h_R,    cuDoubleComplex, ldb*nrhs  );
-            TESTING_MALLOC(   h_work, cuDoubleComplex, lhwork    );
+            TESTING_MALLOC(   tau,    magmaDoubleComplex, min_mn    );
+            TESTING_MALLOC(   h_A,    magmaDoubleComplex, lda*N     );
+            TESTING_MALLOC(   h_A2,   magmaDoubleComplex, lda*N     );
+            TESTING_MALLOC(   h_B,    magmaDoubleComplex, ldb*nrhs  );
+            TESTING_MALLOC(   h_X,    magmaDoubleComplex, ldb*nrhs  );
+            TESTING_MALLOC(   h_R,    magmaDoubleComplex, ldb*nrhs  );
+            TESTING_MALLOC(   h_work, magmaDoubleComplex, lhwork    );
             
-            TESTING_DEVALLOC( d_A,    cuDoubleComplex, ldda*N    );
-            TESTING_DEVALLOC( d_B,    cuDoubleComplex, lddb*nrhs );
+            TESTING_DEVALLOC( d_A,    magmaDoubleComplex, ldda*N    );
+            TESTING_DEVALLOC( d_B,    magmaDoubleComplex, lddb*nrhs );
             
             /* Initialize the matrices */
             size = lda*N;

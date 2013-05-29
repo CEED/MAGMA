@@ -30,10 +30,10 @@ int main( int argc, char** argv)
 
     real_Double_t   gflops, gpu_perf, gpu_time;
     double          Rnorm, Anorm, Xnorm, *work;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *h_A, *h_B, *h_X;
-    cuDoubleComplex *d_A, *d_B;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *h_A, *h_B, *h_X;
+    magmaDoubleComplex *d_A, *d_B;
     magma_int_t N, lda, ldb, ldda, lddb, info, sizeA, sizeB;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
@@ -51,13 +51,13 @@ int main( int argc, char** argv)
             lddb = ldda;
             gflops = ( FLOPS_ZPOTRF( N ) + FLOPS_ZPOTRS( N, opts.nrhs ) ) / 1e9;
             
-            TESTING_MALLOC( h_A, cuDoubleComplex, lda*N         );
-            TESTING_MALLOC( h_B, cuDoubleComplex, ldb*opts.nrhs );
-            TESTING_MALLOC( h_X, cuDoubleComplex, ldb*opts.nrhs );
+            TESTING_MALLOC( h_A, magmaDoubleComplex, lda*N         );
+            TESTING_MALLOC( h_B, magmaDoubleComplex, ldb*opts.nrhs );
+            TESTING_MALLOC( h_X, magmaDoubleComplex, ldb*opts.nrhs );
             TESTING_MALLOC( work, double,         N             );
             
-            TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*N         );
-            TESTING_DEVALLOC( d_B, cuDoubleComplex, lddb*opts.nrhs );
+            TESTING_DEVALLOC( d_A, magmaDoubleComplex, ldda*N         );
+            TESTING_DEVALLOC( d_B, magmaDoubleComplex, lddb*opts.nrhs );
             
             /* ====================================================================
                Initialize the matrix

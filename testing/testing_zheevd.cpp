@@ -34,7 +34,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t   gpu_time, cpu_time;
-    cuDoubleComplex *h_A, *h_R, *h_work, aux_work[1];
+    magmaDoubleComplex *h_A, *h_R, *h_work, aux_work[1];
     double *rwork, *w1, *w2, result[3], eps, aux_rwork[1];
     magma_int_t *iwork, aux_iwork[1];
     magma_int_t N, n2, info, lwork, lrwork, liwork, lda;
@@ -71,11 +71,11 @@ int main( int argc, char** argv)
             liwork = aux_iwork[0];
             
             /* Allocate host memory for the matrix */
-            TESTING_MALLOC(    h_A, cuDoubleComplex, N*lda  );
+            TESTING_MALLOC(    h_A, magmaDoubleComplex, N*lda  );
             TESTING_MALLOC(    w1,  double,          N      );
             TESTING_MALLOC(    w2,  double,          N      );
-            TESTING_HOSTALLOC( h_R, cuDoubleComplex, N*lda  );
-            TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork  );
+            TESTING_HOSTALLOC( h_R, magmaDoubleComplex, N*lda  );
+            TESTING_HOSTALLOC( h_work, magmaDoubleComplex, lwork  );
             TESTING_MALLOC(    rwork,  double,          lrwork );
             TESTING_MALLOC(    iwork,  magma_int_t,     liwork );
             

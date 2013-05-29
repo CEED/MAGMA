@@ -39,9 +39,9 @@ int main( int argc, char** argv)
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     
-    cuDoubleComplex *h_A, *h_x, *h_xcublas;
-    cuDoubleComplex *d_A, *d_x;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *h_A, *h_x, *h_xcublas;
+    magmaDoubleComplex *d_A, *d_x;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
@@ -63,12 +63,12 @@ int main( int argc, char** argv)
             
             sizeA = lda*Ak;
             
-            TESTING_MALLOC( h_A,  cuDoubleComplex, lda*Ak );
-            TESTING_MALLOC( h_x,  cuDoubleComplex, N  );
-            TESTING_MALLOC( h_xcublas, cuDoubleComplex, N  );
+            TESTING_MALLOC( h_A,  magmaDoubleComplex, lda*Ak );
+            TESTING_MALLOC( h_x,  magmaDoubleComplex, N  );
+            TESTING_MALLOC( h_xcublas, magmaDoubleComplex, N  );
             
-            TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*Ak );
-            TESTING_DEVALLOC( d_x, cuDoubleComplex, N  );
+            TESTING_DEVALLOC( d_A, magmaDoubleComplex, ldda*Ak );
+            TESTING_DEVALLOC( d_x, magmaDoubleComplex, N  );
             
             /* Initialize the matrices */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );

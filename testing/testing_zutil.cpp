@@ -21,7 +21,7 @@
 // Makes diagonal real.
 // Sets Aji = conj( Aij ) for j < i, that is, copy lower triangle to upper triangle.
 extern "C"
-void magma_zmake_hermitian( magma_int_t N, cuDoubleComplex* A, magma_int_t lda )
+void magma_zmake_hermitian( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda )
 {
     magma_int_t i, j;
     for( i=0; i<N; ++i ) {
@@ -38,7 +38,7 @@ void magma_zmake_hermitian( magma_int_t N, cuDoubleComplex* A, magma_int_t lda )
 // Increases diagonal by N, and makes it real.
 // Sets Aji = conj( Aij ) for j < i, that is, copy lower triangle to upper triangle.
 extern "C"
-void magma_zmake_hpd( magma_int_t N, cuDoubleComplex* A, magma_int_t lda )
+void magma_zmake_hpd( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda )
 {
     magma_int_t i, j;
     for( i=0; i<N; ++i ) {

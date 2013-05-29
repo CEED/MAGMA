@@ -31,10 +31,10 @@
 int main( int argc, char** argv)
 {
     TESTING_INIT();
-    cudaSetDevice( 0 );  // without this, T -> dT copy fails
+    magma_setdevice( 0 );  // without this, T -> dT copy fails
     
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
-    cuDoubleComplex *h_A, *h_R, *h_Q, *h_work, *tau, *twork, *T, *dT;
+    magmaDoubleComplex *h_A, *h_R, *h_Q, *h_work, *tau, *twork, *T, *dT;
     #if defined(PRECISION_z) || defined(PRECISION_c)
     double      *rwork;
     #endif
@@ -60,12 +60,12 @@ int main( int argc, char** argv)
             lwork  = N*(nb + nb*MagmaMaxGPUs);
             gflops = FLOPS_ZGEHRD( N ) / 1e9;
             
-            TESTING_MALLOC   ( h_A,    cuDoubleComplex, n2    );
-            TESTING_MALLOC   ( tau,    cuDoubleComplex, N     );
-            TESTING_MALLOC   ( T,      cuDoubleComplex, nb*N  );
-            TESTING_HOSTALLOC( h_R,    cuDoubleComplex, n2    );
-            TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork );
-            TESTING_DEVALLOC ( dT,     cuDoubleComplex, nb*N  );
+            TESTING_MALLOC   ( h_A,    magmaDoubleComplex, n2    );
+            TESTING_MALLOC   ( tau,    magmaDoubleComplex, N     );
+            TESTING_MALLOC   ( T,      magmaDoubleComplex, nb*N  );
+            TESTING_HOSTALLOC( h_R,    magmaDoubleComplex, n2    );
+            TESTING_HOSTALLOC( h_work, magmaDoubleComplex, lwork );
+            TESTING_DEVALLOC ( dT,     magmaDoubleComplex, nb*N  );
             
             /* Initialize the matrices */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -87,8 +87,8 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.check ) {
                 ltwork = 2*(N*N);
-                TESTING_HOSTALLOC( h_Q,   cuDoubleComplex, lda*N  );
-                TESTING_MALLOC(    twork, cuDoubleComplex, ltwork );
+                TESTING_HOSTALLOC( h_Q,   magmaDoubleComplex, lda*N  );
+                TESTING_MALLOC(    twork, magmaDoubleComplex, ltwork );
                 #if defined(PRECISION_z) || defined(PRECISION_c)
                 TESTING_MALLOC(    rwork, double,          N      );
                 #endif

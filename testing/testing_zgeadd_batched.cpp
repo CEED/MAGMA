@@ -33,11 +33,11 @@ int main( int argc, char** argv)
 
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double           error, work[1];
-    cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *h_A, *h_B;
-    cuDoubleComplex *d_A, *d_B;
-    cuDoubleComplex **hAarray, **hBarray, **dAarray, **dBarray;
-    cuDoubleComplex alpha = MAGMA_Z_MAKE( 3.1415, 2.718 );
+    magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *h_A, *h_B;
+    magmaDoubleComplex *d_A, *d_B;
+    magmaDoubleComplex **hAarray, **hBarray, **dAarray, **dBarray;
+    magmaDoubleComplex alpha = MAGMA_Z_MAKE( 3.1415, 2.718 );
     magma_int_t M, N, mb, nb, size, lda, ldda, mstride, nstride, ntile;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
@@ -68,15 +68,15 @@ int main( int argc, char** argv)
             }
             gflops = 2.*mb*nb*ntile / 1e9;
             
-            TESTING_MALLOC(   h_A, cuDoubleComplex, lda *N );
-            TESTING_MALLOC(   h_B, cuDoubleComplex, lda *N );
-            TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*N );
-            TESTING_DEVALLOC( d_B, cuDoubleComplex, ldda*N );
+            TESTING_MALLOC(   h_A, magmaDoubleComplex, lda *N );
+            TESTING_MALLOC(   h_B, magmaDoubleComplex, lda *N );
+            TESTING_DEVALLOC( d_A, magmaDoubleComplex, ldda*N );
+            TESTING_DEVALLOC( d_B, magmaDoubleComplex, ldda*N );
             
-            TESTING_MALLOC(   hAarray, cuDoubleComplex*, ntile );
-            TESTING_MALLOC(   hBarray, cuDoubleComplex*, ntile );
-            TESTING_DEVALLOC( dAarray, cuDoubleComplex*, ntile );
-            TESTING_DEVALLOC( dBarray, cuDoubleComplex*, ntile );
+            TESTING_MALLOC(   hAarray, magmaDoubleComplex*, ntile );
+            TESTING_MALLOC(   hBarray, magmaDoubleComplex*, ntile );
+            TESTING_DEVALLOC( dAarray, magmaDoubleComplex*, ntile );
+            TESTING_DEVALLOC( dBarray, magmaDoubleComplex*, ntile );
             
             lapackf77_zlarnv( &ione, ISEED, &size, h_A );
             lapackf77_zlarnv( &ione, ISEED, &size, h_B );
@@ -93,8 +93,8 @@ int main( int argc, char** argv)
                 hAarray[tile] = &d_A[offset];
                 hBarray[tile] = &d_B[offset];
             }
-            magma_setvector( ntile, sizeof(cuDoubleComplex*), hAarray, 1, dAarray, 1 );
-            magma_setvector( ntile, sizeof(cuDoubleComplex*), hBarray, 1, dBarray, 1 );
+            magma_setvector( ntile, sizeof(magmaDoubleComplex*), hAarray, 1, dAarray, 1 );
+            magma_setvector( ntile, sizeof(magmaDoubleComplex*), hBarray, 1, dBarray, 1 );
             
             gpu_time = magma_sync_wtime( 0 );
             magmablas_zgeadd_batched( mb, nb, alpha, dAarray, ldda, dBarray, ldda, ntile );

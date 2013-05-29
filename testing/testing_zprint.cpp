@@ -29,9 +29,9 @@
 int main( int argc, char** argv)
 {
     TESTING_INIT();
-    cudaSetDevice( 0 );
+    magma_setdevice( 0 );
 
-    cuDoubleComplex *hA, *dA;
+    magmaDoubleComplex *hA, *dA;
 
     /* Matrix size */
     magma_int_t m = 5;
@@ -45,8 +45,8 @@ int main( int argc, char** argv)
     ldda   = ((m + 31)/32)*32;
 
     /* Allocate host memory for the matrix */
-    TESTING_MALLOC(   hA, cuDoubleComplex, lda *n );
-    TESTING_DEVALLOC( dA, cuDoubleComplex, ldda*n );
+    TESTING_MALLOC(   hA, magmaDoubleComplex, lda *n );
+    TESTING_DEVALLOC( dA, magmaDoubleComplex, ldda*n );
 
     //size = lda*n;
     //lapackf77_zlarnv( &ione, ISEED, &size, hA );

@@ -361,6 +361,6 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     }
     
     // set device
-    cudaSetDevice( opts->device );
+    magma_setdevice( opts->device );
 }
 // end parse_opts

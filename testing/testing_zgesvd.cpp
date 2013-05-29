@@ -32,7 +32,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t   gpu_time, cpu_time;
-    cuDoubleComplex *h_A, *h_R, *U, *VT, *h_work;
+    magmaDoubleComplex *h_A, *h_R, *U, *VT, *h_work;
     double *S1, *S2;
 #if defined(PRECISION_z) || defined(PRECISION_c)
     double *rwork;
@@ -87,16 +87,16 @@ int main( int argc, char** argv)
                 #endif
             }
             
-            TESTING_MALLOC( h_A, cuDoubleComplex,  n2 );
-            TESTING_MALLOC(  VT, cuDoubleComplex, N*N );
-            TESTING_MALLOC(   U, cuDoubleComplex, M*M );
+            TESTING_MALLOC( h_A, magmaDoubleComplex,  n2 );
+            TESTING_MALLOC(  VT, magmaDoubleComplex, N*N );
+            TESTING_MALLOC(   U, magmaDoubleComplex, M*M );
             TESTING_MALLOC(  S1, double,       min_mn );
             TESTING_MALLOC(  S2, double,       min_mn );
             #if defined(PRECISION_z) || defined(PRECISION_c)
             TESTING_MALLOC( rwork, double,   5*min_mn );
             #endif
-            TESTING_HOSTALLOC( h_R,    cuDoubleComplex, n2    );
-            TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork );
+            TESTING_HOSTALLOC( h_R,    magmaDoubleComplex, n2    );
+            TESTING_HOSTALLOC( h_work, magmaDoubleComplex, lwork );
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -134,9 +134,9 @@ int main( int argc, char** argv)
                    =================================================================== */
                 magma_int_t izero = 0;
                 double *E;
-                cuDoubleComplex *h_work_err;
+                magmaDoubleComplex *h_work_err;
                 magma_int_t lwork_err = max(5*min_mn, (3*min_mn + max(M,N)))*128;
-                TESTING_MALLOC(h_work_err, cuDoubleComplex, lwork_err);
+                TESTING_MALLOC(h_work_err, magmaDoubleComplex, lwork_err);
                 
                 // get size and location of U and V^T depending on jobu and jobvt
                 // U2=NULL and VT2=NULL if they were not computed (e.g., jobu=N)
@@ -144,8 +144,8 @@ int main( int argc, char** argv)
                 magma_int_t N2  = (jobvt == 'A' ? N : min_mn);
                 magma_int_t ldu = M;
                 magma_int_t ldv = (jobvt == 'O' ? M : N);
-                cuDoubleComplex *U2  = NULL;
-                cuDoubleComplex *VT2 = NULL;
+                magmaDoubleComplex *U2  = NULL;
+                magmaDoubleComplex *VT2 = NULL;
                 if ( jobu == 'S' || jobu == 'A' ) {
                     U2 = U;
                 } else if ( jobu == 'O' ) {

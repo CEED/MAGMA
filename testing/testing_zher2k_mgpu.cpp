@@ -32,9 +32,9 @@
 extern "C" void
 magma_zher2k_mgpu(
     int num_gpus, char uplo, char trans, int nb, int n, int k,
-    cuDoubleComplex alpha, cuDoubleComplex **db, int lddb,
-    double beta,           cuDoubleComplex **dc, int lddc, int offset,
-    int num_streams, cudaStream_t streams[][10]);
+    magmaDoubleComplex alpha, magmaDoubleComplex **db, int lddb,
+    double beta,           magmaDoubleComplex **dc, int lddc, int offset,
+    int num_streams, magma_queue_t streams[][10]);
 #endif
 
 
@@ -45,19 +45,19 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex alpha = MAGMA_Z_MAKE( 1.2345, 4.321 );
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex alpha = MAGMA_Z_MAKE( 1.2345, 4.321 );
     double beta = 3.14159;
     
     real_Double_t    gflops, gpu_perf, cpu_perf, gpu_time, cpu_time;
     double           error, work[1];
-    cuDoubleComplex *hA, *hR, *hR2, *hV, *hW;
-    cuDoubleComplex *dV[MagmaMaxGPUs], *dW[MagmaMaxGPUs], *dA[MagmaMaxGPUs];
+    magmaDoubleComplex *hA, *hR, *hR2, *hV, *hW;
+    magmaDoubleComplex *dV[MagmaMaxGPUs], *dW[MagmaMaxGPUs], *dA[MagmaMaxGPUs];
     magma_int_t n, k, size, lda, ldda, nb, ngpu, nstream;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
 
-    cudaStream_t streams[MagmaMaxGPUs][20];
+    magma_queue_t streams[MagmaMaxGPUs][20];
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
@@ -86,19 +86,19 @@ int main( int argc, char** argv)
                 ldda   = ((n + 31)/32)*32;
                 gflops = FLOPS_ZHER2K( k, n-offset ) / 1e9;
                 
-                TESTING_MALLOC( hA,  cuDoubleComplex, lda*n );
-                TESTING_MALLOC( hR,  cuDoubleComplex, lda*n );
-                TESTING_MALLOC( hR2, cuDoubleComplex, lda*n );
-                TESTING_MALLOC( hV,  cuDoubleComplex, lda*k*2 );
-                //TESTING_MALLOC( hW,  cuDoubleComplex, lda*k );
+                TESTING_MALLOC( hA,  magmaDoubleComplex, lda*n );
+                TESTING_MALLOC( hR,  magmaDoubleComplex, lda*n );
+                TESTING_MALLOC( hR2, magmaDoubleComplex, lda*n );
+                TESTING_MALLOC( hV,  magmaDoubleComplex, lda*k*2 );
+                //TESTING_MALLOC( hW,  magmaDoubleComplex, lda*k );
                 for( int d = 0; d < ngpu; ++d ) {
                     magma_int_t nlocal = ((n / nb) / ngpu + 1) * nb;
-                    cudaSetDevice( d );
-                    TESTING_DEVALLOC( dA[d], cuDoubleComplex, ldda*nlocal );
-                    TESTING_DEVALLOC( dV[d], cuDoubleComplex, ldda*k*2      );
-                    //TESTING_DEVALLOC( dW[d], cuDoubleComplex, ldda*k      );
+                    magma_setdevice( d );
+                    TESTING_DEVALLOC( dA[d], magmaDoubleComplex, ldda*nlocal );
+                    TESTING_DEVALLOC( dV[d], magmaDoubleComplex, ldda*k*2      );
+                    //TESTING_DEVALLOC( dW[d], magmaDoubleComplex, ldda*k      );
                     for( int i = 0; i < nstream; ++i ) {
-                        cudaStreamCreate( &streams[d][i] );
+                        magma_queue_create( &streams[d][i] );
                     }
                 }
                 
@@ -114,7 +114,7 @@ int main( int argc, char** argv)
                    =================================================================== */
                 magmablas_zsetmatrix_1D_bcyclic( n, n, hA, lda, dA, ldda, ngpu, nb );
                 for( int d = 0; d < ngpu; ++d ) {
-                    cudaSetDevice( d );
+                    magma_setdevice( d );
                     dW[d] = dV[d] + ldda*k;
                     magma_zsetmatrix( n, k, hV, lda, dV[d], ldda );
                     magma_zsetmatrix( n, k, hW, lda, dW[d], ldda );
@@ -197,7 +197,7 @@ int main( int argc, char** argv)
                 TESTING_FREE( hV );
                 //TESTING_FREE( hW );
                 for( int d = 0; d < ngpu; ++d ) {
-                    cudaSetDevice( d );
+                    magma_setdevice( d );
                     TESTING_DEVFREE( dA[d] );
                     TESTING_DEVFREE( dV[d] );
                     //TESTING_DEVFREE( dW[d] );

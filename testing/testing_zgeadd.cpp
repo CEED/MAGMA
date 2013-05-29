@@ -31,9 +31,9 @@ int main( int argc, char** argv)
 
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double          error, work[1];
-    cuDoubleComplex *h_A, *h_B, *d_A, *d_B;
-    cuDoubleComplex alpha = MAGMA_Z_MAKE( 3.1415, 2.718 );
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *h_A, *h_B, *d_A, *d_B;
+    magmaDoubleComplex alpha = MAGMA_Z_MAKE( 3.1415, 2.718 );
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     
     magma_int_t M, N, size, lda, ldda;
     magma_int_t ione = 1;
@@ -60,10 +60,10 @@ int main( int argc, char** argv)
             size   = lda*N;
             gflops = 2.*M*N / 1e9;
             
-            TESTING_MALLOC(   h_A, cuDoubleComplex, lda *N );
-            TESTING_MALLOC(   h_B, cuDoubleComplex, lda *N );
-            TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*N );
-            TESTING_DEVALLOC( d_B, cuDoubleComplex, ldda*N );
+            TESTING_MALLOC(   h_A, magmaDoubleComplex, lda *N );
+            TESTING_MALLOC(   h_B, magmaDoubleComplex, lda *N );
+            TESTING_DEVALLOC( d_A, magmaDoubleComplex, ldda*N );
+            TESTING_DEVALLOC( d_B, magmaDoubleComplex, ldda*N );
             
             lapackf77_zlarnv( &ione, ISEED, &size, h_A );
             lapackf77_zlarnv( &ione, ISEED, &size, h_B );

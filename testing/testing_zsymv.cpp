@@ -32,11 +32,11 @@ int main(int argc, char **argv)
     magma_int_t N, lda, sizeA, sizeX, sizeY;
     magma_int_t incx = 1;
     magma_int_t incy = 1;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex alpha = MAGMA_Z_MAKE(  1.5, -2.3 );
-    cuDoubleComplex beta  = MAGMA_Z_MAKE( -0.6,  0.8 );
-    cuDoubleComplex *A, *X, *Y, *Ymagma;
-    cuDoubleComplex *dA, *dX, *dY;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex alpha = MAGMA_Z_MAKE(  1.5, -2.3 );
+    magmaDoubleComplex beta  = MAGMA_Z_MAKE( -0.6,  0.8 );
+    magmaDoubleComplex *A, *X, *Y, *Ymagma;
+    magmaDoubleComplex *dA, *dX, *dY;
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
@@ -52,14 +52,14 @@ int main(int argc, char **argv)
             sizeY  = N*incy;
             gflops = FLOPS_ZSYMV( N ) / 1e9;
             
-            TESTING_MALLOC( A,       cuDoubleComplex, sizeA );
-            TESTING_MALLOC( X,       cuDoubleComplex, sizeX );
-            TESTING_MALLOC( Y,       cuDoubleComplex, sizeY );
-            TESTING_MALLOC( Ymagma,  cuDoubleComplex, sizeY );
+            TESTING_MALLOC( A,       magmaDoubleComplex, sizeA );
+            TESTING_MALLOC( X,       magmaDoubleComplex, sizeX );
+            TESTING_MALLOC( Y,       magmaDoubleComplex, sizeY );
+            TESTING_MALLOC( Ymagma,  magmaDoubleComplex, sizeY );
             
-            TESTING_DEVALLOC( dA, cuDoubleComplex, sizeA );
-            TESTING_DEVALLOC( dX, cuDoubleComplex, sizeX );
-            TESTING_DEVALLOC( dY, cuDoubleComplex, sizeY );
+            TESTING_DEVALLOC( dA, magmaDoubleComplex, sizeA );
+            TESTING_DEVALLOC( dX, magmaDoubleComplex, sizeX );
+            TESTING_DEVALLOC( dY, magmaDoubleComplex, sizeY );
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, A );

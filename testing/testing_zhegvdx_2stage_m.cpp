@@ -28,18 +28,18 @@
 
 extern"C" {
     magma_int_t magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
-                                     cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *b, magma_int_t ldb,
+                                     magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
                                      double vl, double vu, magma_int_t il, magma_int_t iu,
-                                     magma_int_t *m, double *w, cuDoubleComplex *work, magma_int_t lwork,
+                                     magma_int_t *m, double *w, magmaDoubleComplex *work, magma_int_t lwork,
 #if defined(PRECISION_z) || defined(PRECISION_c)
                                      double *rwork, magma_int_t lrwork,
 #endif
                                      magma_int_t *iwork, magma_int_t liwork, magma_int_t *info);
 
     magma_int_t magma_zhegvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
-                                       cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *b, magma_int_t ldb,
+                                       magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
                                        double vl, double vu, magma_int_t il, magma_int_t iu,
-                                       magma_int_t *m, double *w, cuDoubleComplex *work, magma_int_t lwork,
+                                       magma_int_t *m, double *w, magmaDoubleComplex *work, magma_int_t lwork,
 #if defined(PRECISION_z) || defined(PRECISION_c)
                                        double *rwork, magma_int_t lrwork,
 #endif
@@ -56,7 +56,7 @@ int main( int argc, char** argv)
     TESTING_INIT_MGPU();
 
     real_Double_t   mgpu_time;
-    cuDoubleComplex *h_A, *h_Ainit, *h_B, *h_Binit, *h_work;
+    magmaDoubleComplex *h_A, *h_Ainit, *h_B, *h_Binit, *h_work;
 
 #if defined(PRECISION_z) || defined(PRECISION_c)
     double *rwork;
@@ -66,9 +66,9 @@ int main( int argc, char** argv)
     double *w1, result;
     magma_int_t *iwork;
     magma_int_t N, n2, info, lwork, liwork;
-    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
 
@@ -115,10 +115,10 @@ int main( int argc, char** argv)
             //magma_int_t sizvblg = magma_zbulge_get_lq2(N);        
             //magma_int_t siz = max(sizvblg,n2)+2*(N*NB+N)+24*N; 
             /* Allocate host memory for the matrix */
-            TESTING_HOSTALLOC(   h_A, cuDoubleComplex, n2);
-            TESTING_HOSTALLOC(   h_B, cuDoubleComplex, n2);
+            TESTING_HOSTALLOC(   h_A, magmaDoubleComplex, n2);
+            TESTING_HOSTALLOC(   h_B, magmaDoubleComplex, n2);
             TESTING_MALLOC(    w1, double         ,  N);
-            TESTING_HOSTALLOC(h_work, cuDoubleComplex,  lwork);
+            TESTING_HOSTALLOC(h_work, magmaDoubleComplex,  lwork);
 #if defined(PRECISION_z) || defined(PRECISION_c)
             TESTING_HOSTALLOC( rwork,          double, lrwork);
 #endif
@@ -136,8 +136,8 @@ int main( int argc, char** argv)
             }
 
             if((opts.warmup)||( checkres )){
-                TESTING_MALLOC(h_Ainit, cuDoubleComplex, n2);
-                TESTING_MALLOC(h_Binit, cuDoubleComplex, n2);
+                TESTING_MALLOC(h_Ainit, magmaDoubleComplex, n2);
+                TESTING_MALLOC(h_Binit, magmaDoubleComplex, n2);
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_Ainit, &N );
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_Binit, &N );
             }

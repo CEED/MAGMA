@@ -23,21 +23,21 @@
 
 
 double get_LU_error(magma_int_t M, magma_int_t N,
-                    cuDoubleComplex *A,  magma_int_t lda,
-                    cuDoubleComplex *LU, magma_int_t *IPIV)
+                    magmaDoubleComplex *A,  magma_int_t lda,
+                    magmaDoubleComplex *LU, magma_int_t *IPIV)
 {
     magma_int_t min_mn = min(M,N);
     magma_int_t ione   = 1;
     magma_int_t i, j;
-    cuDoubleComplex alpha = MAGMA_Z_ONE;
-    cuDoubleComplex beta  = MAGMA_Z_ZERO;
-    cuDoubleComplex *L, *U;
+    magmaDoubleComplex alpha = MAGMA_Z_ONE;
+    magmaDoubleComplex beta  = MAGMA_Z_ZERO;
+    magmaDoubleComplex *L, *U;
     double work[1], matnorm, residual;
     
-    TESTING_MALLOC( L, cuDoubleComplex, M*min_mn);
-    TESTING_MALLOC( U, cuDoubleComplex, min_mn*N);
-    memset( L, 0, M*min_mn*sizeof(cuDoubleComplex) );
-    memset( U, 0, min_mn*N*sizeof(cuDoubleComplex) );
+    TESTING_MALLOC( L, magmaDoubleComplex, M*min_mn);
+    TESTING_MALLOC( U, magmaDoubleComplex, min_mn*N);
+    memset( L, 0, M*min_mn*sizeof(magmaDoubleComplex) );
+    memset( U, 0, min_mn*N*sizeof(magmaDoubleComplex) );
 
     lapackf77_zlaswp( &N, A, &lda, &ione, &min_mn, IPIV, &ione);
     lapackf77_zlacpy( MagmaLowerStr, &M, &min_mn, LU, &lda, L, &M      );
@@ -73,8 +73,8 @@ int main( int argc, char** argv)
 
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double          error;
-    cuDoubleComplex *h_A, *h_R;
-    cuDoubleComplex *d_A;
+    magmaDoubleComplex *h_A, *h_R;
+    magmaDoubleComplex *d_A;
     magma_int_t     *ipiv;
     magma_int_t M, N, n2, lda, ldda, info, min_mn;
     magma_int_t ione     = 1;
@@ -96,9 +96,9 @@ int main( int argc, char** argv)
             gflops = FLOPS_ZGETRF( M, N ) / 1e9;
             
             TESTING_MALLOC(    ipiv, magma_int_t,     min_mn );
-            TESTING_MALLOC(    h_A,  cuDoubleComplex, n2     );
-            TESTING_HOSTALLOC( h_R,  cuDoubleComplex, n2     );
-            TESTING_DEVALLOC(  d_A,  cuDoubleComplex, ldda*N );
+            TESTING_MALLOC(    h_A,  magmaDoubleComplex, n2     );
+            TESTING_HOSTALLOC( h_R,  magmaDoubleComplex, n2     );
+            TESTING_DEVALLOC(  d_A,  magmaDoubleComplex, ldda*N );
             
             /* Initialize the matrix */
             if ( opts.check ) {

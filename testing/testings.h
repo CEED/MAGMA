@@ -37,14 +37,14 @@
     int ndevices;                                                          \
     cudaGetDeviceCount( &ndevices );                                       \
     for( int idevice = 0; idevice < ndevices; ++idevice ) {                \
-        cudaSetDevice(idevice);                                            \
+        magma_setdevice( idevice );                                        \
         if( CUBLAS_STATUS_SUCCESS != cublasInit() ) {                      \
             fprintf(stderr, "ERROR: gpu %d: cublasInit failed\n", idevice);\
             magma_finalize();                                              \
             exit(-1);                                                      \
         }                                                                  \
     }                                                                      \
-    cudaSetDevice(0);                                                      \
+    magma_setdevice(0);                                                    \
     magma_print_devices();                                                 \
 }
 
@@ -55,7 +55,7 @@
     int ndevices;                                                          \
     cudaGetDeviceCount( &ndevices );                                       \
     for( int idevice = 0; idevice < ndevices; ++idevice ) {                \
-        cudaSetDevice(idevice);                                            \
+        magma_setdevice(idevice);                                          \
         cublasShutdown();                                                  \
     }                                                                      \
 }

@@ -27,8 +27,8 @@
 
 extern "C" magma_int_t
 magma_zhegvd_m(int nrgpu, magma_int_t itype, char jobz, char uplo, magma_int_t n,
-               cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *b, magma_int_t ldb,
-               double *w, cuDoubleComplex *work, magma_int_t lwork,
+               magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
+               double *w, magmaDoubleComplex *work, magma_int_t lwork,
 #if defined(PRECISION_z) || defined(PRECISION_c)
                double *rwork, magma_int_t lrwork,
 #endif
@@ -45,7 +45,7 @@ int main( int argc, char** argv)
 {
     TESTING_INIT_MGPU();
 
-    cuDoubleComplex *h_A, *h_Ainit, *h_B, *h_Binit, *h_work;
+    magmaDoubleComplex *h_A, *h_Ainit, *h_B, *h_Binit, *h_work;
 #if defined(PRECISION_z) || defined(PRECISION_c)
     double *rwork;
 #endif
@@ -59,9 +59,9 @@ int main( int argc, char** argv)
     magma_int_t info;
     magma_int_t ione = 1;
 
-    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     magma_int_t ISEED[4] = {0,0,0,1};
 
@@ -97,11 +97,11 @@ int main( int argc, char** argv)
 #endif
             magma_int_t liwork = 3 + 5*N;
 
-            TESTING_HOSTALLOC(h_A, cuDoubleComplex, n2);
-            TESTING_HOSTALLOC(h_B, cuDoubleComplex, n2);
+            TESTING_HOSTALLOC(h_A, magmaDoubleComplex, n2);
+            TESTING_HOSTALLOC(h_B, magmaDoubleComplex, n2);
             TESTING_MALLOC(   w1,  double         ,  N);
             TESTING_MALLOC(   w2,  double         ,  N);
-            TESTING_HOSTALLOC(h_work, cuDoubleComplex,  lwork);
+            TESTING_HOSTALLOC(h_work, magmaDoubleComplex,  lwork);
 #if defined(PRECISION_z) || defined(PRECISION_c)
             TESTING_HOSTALLOC( rwork,          double, lrwork);
 #endif
@@ -122,8 +122,8 @@ int main( int argc, char** argv)
             }
 
             if((opts.warmup)||( checkres )){
-                TESTING_MALLOC(h_Ainit, cuDoubleComplex, n2);
-                TESTING_MALLOC(h_Binit, cuDoubleComplex, n2);
+                TESTING_MALLOC(h_Ainit, magmaDoubleComplex, n2);
+                TESTING_MALLOC(h_Binit, magmaDoubleComplex, n2);
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_Ainit, &N );
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_Binit, &N );
             }

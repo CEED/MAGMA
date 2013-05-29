@@ -32,13 +32,13 @@ int main( int argc, char** argv )
     
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double error, work[1];
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t ione = 1;
     magma_int_t m, n, k, size, info;
     magma_int_t ISEED[4] = {0,0,0,1};
     magma_int_t nb, ldc, lda, lwork, lwork_max, dt_size;
-    cuDoubleComplex *C, *R, *A, *W, *tau;
-    cuDoubleComplex *dC, *dA, *dT;
+    magmaDoubleComplex *C, *R, *A, *W, *tau;
+    magmaDoubleComplex *dC, *dA, *dT;
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
@@ -82,15 +82,15 @@ int main( int argc, char** argv )
                 dt_size = ( 2*min(n,k) + ((k + 31)/32)*32 )*nb;
             }
             
-            TESTING_MALLOC( C, cuDoubleComplex, ldc*n );
-            TESTING_MALLOC( R, cuDoubleComplex, ldc*n );
-            TESTING_MALLOC( A, cuDoubleComplex, lda*k );
-            TESTING_MALLOC( W, cuDoubleComplex, lwork_max );
-            TESTING_MALLOC( tau, cuDoubleComplex, k   );
+            TESTING_MALLOC( C, magmaDoubleComplex, ldc*n );
+            TESTING_MALLOC( R, magmaDoubleComplex, ldc*n );
+            TESTING_MALLOC( A, magmaDoubleComplex, lda*k );
+            TESTING_MALLOC( W, magmaDoubleComplex, lwork_max );
+            TESTING_MALLOC( tau, magmaDoubleComplex, k   );
             
-            TESTING_DEVALLOC( dC, cuDoubleComplex, ldc*n );
-            TESTING_DEVALLOC( dA, cuDoubleComplex, lda*k );
-            TESTING_DEVALLOC( dT, cuDoubleComplex, dt_size );
+            TESTING_DEVALLOC( dC, magmaDoubleComplex, ldc*n );
+            TESTING_DEVALLOC( dA, magmaDoubleComplex, lda*k );
+            TESTING_DEVALLOC( dT, magmaDoubleComplex, dt_size );
             
             // C is full, m x n
             size = ldc*n;

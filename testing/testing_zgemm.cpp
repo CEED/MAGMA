@@ -39,11 +39,11 @@ int main( int argc, char** argv)
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     
-    cuDoubleComplex *h_A, *h_B, *h_C, *h_Cmagma, *h_Ccublas;
-    cuDoubleComplex *d_A, *d_B, *d_C;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex alpha = MAGMA_Z_MAKE(  0.29, -0.86 );
-    cuDoubleComplex beta  = MAGMA_Z_MAKE( -0.48,  0.38 );
+    magmaDoubleComplex *h_A, *h_B, *h_C, *h_Cmagma, *h_Ccublas;
+    magmaDoubleComplex *d_A, *d_B, *d_C;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex alpha = MAGMA_Z_MAKE(  0.29, -0.86 );
+    magmaDoubleComplex beta  = MAGMA_Z_MAKE( -0.48,  0.38 );
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
@@ -85,15 +85,15 @@ int main( int argc, char** argv)
             sizeB = ldb*Bn;
             sizeC = ldc*N;
             
-            TESTING_MALLOC( h_A,  cuDoubleComplex, lda*An );
-            TESTING_MALLOC( h_B,  cuDoubleComplex, ldb*Bn );
-            TESTING_MALLOC( h_C,  cuDoubleComplex, ldc*N  );
-            TESTING_MALLOC( h_Cmagma,  cuDoubleComplex, ldc*N  );
-            TESTING_MALLOC( h_Ccublas, cuDoubleComplex, ldc*N  );
+            TESTING_MALLOC( h_A,  magmaDoubleComplex, lda*An );
+            TESTING_MALLOC( h_B,  magmaDoubleComplex, ldb*Bn );
+            TESTING_MALLOC( h_C,  magmaDoubleComplex, ldc*N  );
+            TESTING_MALLOC( h_Cmagma,  magmaDoubleComplex, ldc*N  );
+            TESTING_MALLOC( h_Ccublas, magmaDoubleComplex, ldc*N  );
             
-            TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*An );
-            TESTING_DEVALLOC( d_B, cuDoubleComplex, lddb*Bn );
-            TESTING_DEVALLOC( d_C, cuDoubleComplex, lddc*N  );
+            TESTING_DEVALLOC( d_A, magmaDoubleComplex, ldda*An );
+            TESTING_DEVALLOC( d_B, magmaDoubleComplex, lddb*Bn );
+            TESTING_DEVALLOC( d_C, magmaDoubleComplex, lddc*N  );
             
             /* Initialize the matrices */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, h_A );

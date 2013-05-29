@@ -25,21 +25,21 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zgeqr2x_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
-                  magma_int_t *ldda, cuDoubleComplex *dtau,
-                  cuDoubleComplex *dT, cuDoubleComplex *ddA,
+magma_zgeqr2x_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
+                  magma_int_t *ldda, magmaDoubleComplex *dtau,
+                  magmaDoubleComplex *dT, magmaDoubleComplex *ddA,
                   double *dwork, magma_int_t *info);
 
 extern "C" magma_int_t
-magma_zgeqr2x2_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
-                  magma_int_t *ldda, cuDoubleComplex *dtau,
-                  cuDoubleComplex *dT, cuDoubleComplex *ddA,
+magma_zgeqr2x2_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
+                  magma_int_t *ldda, magmaDoubleComplex *dtau,
+                  magmaDoubleComplex *dT, magmaDoubleComplex *ddA,
                   double *dwork, magma_int_t *info);
 
 extern "C" magma_int_t
-magma_zgeqr2x3_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
-                  magma_int_t *ldda, cuDoubleComplex *dtau,
-                  cuDoubleComplex *dT, cuDoubleComplex *ddA,
+magma_zgeqr2x3_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
+                  magma_int_t *ldda, magmaDoubleComplex *dtau,
+                  magmaDoubleComplex *dT, magmaDoubleComplex *ddA,
                   double *dwork, magma_int_t *info);
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -51,9 +51,9 @@ int main( int argc, char** argv)
 
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double           error, work[1];
-    cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *h_A, *h_T, *h_R, *tau, *dtau, *h_work, tmp[1];
-    cuDoubleComplex *d_A, *d_T, *ddA;
+    magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *h_A, *h_T, *h_R, *tau, *dtau, *h_work, tmp[1];
+    magmaDoubleComplex *d_A, *d_T, *ddA;
     double *dwork;
 
     /* Matrix size */
@@ -121,28 +121,28 @@ int main( int argc, char** argv)
     min_mn = min(M, N);
 
     /* Allocate memory for the matrix */
-    TESTING_MALLOC(    tau, cuDoubleComplex, min_mn );
-    TESTING_MALLOC(    h_A, cuDoubleComplex, n2     );
-    TESTING_MALLOC(    h_T, cuDoubleComplex,    N*N );
+    TESTING_MALLOC(    tau, magmaDoubleComplex, min_mn );
+    TESTING_MALLOC(    h_A, magmaDoubleComplex, n2     );
+    TESTING_MALLOC(    h_T, magmaDoubleComplex,    N*N );
 
-    TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2     );
+    TESTING_HOSTALLOC( h_R, magmaDoubleComplex, n2     );
 
-    TESTING_DEVALLOC(  d_A, cuDoubleComplex, ldda*N );
-    TESTING_DEVALLOC(  d_T, cuDoubleComplex,    N*N );
-    TESTING_DEVALLOC(  ddA, cuDoubleComplex,    N*N );
-    TESTING_DEVALLOC( dtau, cuDoubleComplex, min_mn );
+    TESTING_DEVALLOC(  d_A, magmaDoubleComplex, ldda*N );
+    TESTING_DEVALLOC(  d_T, magmaDoubleComplex,    N*N );
+    TESTING_DEVALLOC(  ddA, magmaDoubleComplex,    N*N );
+    TESTING_DEVALLOC( dtau, magmaDoubleComplex, min_mn );
 
     TESTING_DEVALLOC(dwork, double, max(5*min_mn, (32*2+2)*min_mn) );
 
-    cudaMemset(ddA, 0, N*N*sizeof(cuDoubleComplex));
-    cudaMemset(d_T, 0, N*N*sizeof(cuDoubleComplex));
+    cudaMemset(ddA, 0, N*N*sizeof(magmaDoubleComplex));
+    cudaMemset(d_T, 0, N*N*sizeof(magmaDoubleComplex));
 
     lwork = -1;
     lapackf77_zgeqrf(&M, &N, h_A, &M, tau, tmp, &lwork, &info);
     lwork = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
     lwork = max(lwork, N*N);
 
-    TESTING_MALLOC( h_work, cuDoubleComplex, lwork );
+    TESTING_MALLOC( h_work, magmaDoubleComplex, lwork );
 
     printf("  M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)   ||R||_F/||A||_F  ||R_T||\n");
     printf("=============================================================================\n");

@@ -35,8 +35,8 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t   gpu_time, cpu_time;
-    cuDoubleComplex *h_A, *h_R, *VL, *VR, *h_work, *w1, *w2;
-    cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *h_A, *h_R, *VL, *VR, *h_work, *w1, *w2;
+    magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     double *rwork, work[1];
     double matnorm, tnrm, result[8];
     magma_int_t N, n2, lda, nb, lwork, info;
@@ -58,14 +58,14 @@ int main( int argc, char** argv)
             // generous workspace - required by zget22
             lwork = max( lwork, N*(5 + 2*N) );
             
-            TESTING_MALLOC( w1,  cuDoubleComplex, N );
-            TESTING_MALLOC( w2,  cuDoubleComplex, N );
+            TESTING_MALLOC( w1,  magmaDoubleComplex, N );
+            TESTING_MALLOC( w2,  magmaDoubleComplex, N );
             TESTING_MALLOC( rwork, double, 2*N );
-            TESTING_MALLOC( h_A, cuDoubleComplex, n2 );
-            TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2 );
-            TESTING_HOSTALLOC( VL,  cuDoubleComplex, n2 );
-            TESTING_HOSTALLOC( VR,  cuDoubleComplex, n2 );
-            TESTING_HOSTALLOC( h_work, cuDoubleComplex, lwork );
+            TESTING_MALLOC( h_A, magmaDoubleComplex, n2 );
+            TESTING_HOSTALLOC( h_R, magmaDoubleComplex, n2 );
+            TESTING_HOSTALLOC( VL,  magmaDoubleComplex, n2 );
+            TESTING_HOSTALLOC( VR,  magmaDoubleComplex, n2 );
+            TESTING_HOSTALLOC( h_work, magmaDoubleComplex, lwork );
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -151,8 +151,8 @@ int main( int argc, char** argv)
                  *       when only VL is computed.
                  ================================================================= */
                 double ulp, ulpinv, vmx, vrmx, vtst;
-                cuDoubleComplex *LRE, DUM;
-                TESTING_HOSTALLOC( LRE, cuDoubleComplex, n2 );
+                magmaDoubleComplex *LRE, DUM;
+                TESTING_HOSTALLOC( LRE, magmaDoubleComplex, n2 );
                 
                 ulp = lapackf77_dlamch( "P" );
                 ulpinv = 1./ulp;

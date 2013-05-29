@@ -34,17 +34,17 @@ int main( int argc, char** argv )
     TESTING_INIT();
     
     real_Double_t   gflops, t1, t2;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t ione = 1;
     const char trans[] = { 'N', 'C', 'T' };
     const char uplo[]  = { 'L', 'U' };
     const char diag[]  = { 'U', 'N' };
     const char side[]  = { 'L', 'R' };
     
-    cuDoubleComplex  *A,  *B,  *C,   *C2, *LU;
-    cuDoubleComplex *dA, *dB, *dC1, *dC2;
-    cuDoubleComplex alpha = MAGMA_Z_MAKE( 0.5, 0.1 );
-    cuDoubleComplex beta  = MAGMA_Z_MAKE( 0.7, 0.2 );
+    magmaDoubleComplex  *A,  *B,  *C,   *C2, *LU;
+    magmaDoubleComplex *dA, *dB, *dC1, *dC2;
+    magmaDoubleComplex alpha = MAGMA_Z_MAKE( 0.5, 0.1 );
+    magmaDoubleComplex beta  = MAGMA_Z_MAKE( 0.7, 0.2 );
     double dalpha = 0.6;
     double dbeta  = 0.8;
     double work[1], error, total_error;

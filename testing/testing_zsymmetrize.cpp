@@ -33,9 +33,9 @@ int main( int argc, char** argv)
 
     real_Double_t    gbytes, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double           error, work[1];
-    cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *h_A, *h_R;
-    cuDoubleComplex *d_A;
+    magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *h_A, *h_R;
+    magmaDoubleComplex *d_A;
     magma_int_t N, size, lda, ldda;
     magma_int_t ione     = 1;
     
@@ -51,11 +51,11 @@ int main( int argc, char** argv)
             ldda   = ((N+31)/32)*32;
             size   = lda*N;
             // load strictly lower triangle, save strictly upper triangle
-            gbytes = sizeof(cuDoubleComplex) * 1.*N*(N-1) / 1e9;
+            gbytes = sizeof(magmaDoubleComplex) * 1.*N*(N-1) / 1e9;
     
-            TESTING_MALLOC(   h_A, cuDoubleComplex, size   );
-            TESTING_MALLOC(   h_R, cuDoubleComplex, size   );
-            TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*N );
+            TESTING_MALLOC(   h_A, magmaDoubleComplex, size   );
+            TESTING_MALLOC(   h_R, magmaDoubleComplex, size   );
+            TESTING_DEVALLOC( d_A, magmaDoubleComplex, ldda*N );
             
             /* Initialize the matrix */
             for( int j = 0; j < N; ++j ) {

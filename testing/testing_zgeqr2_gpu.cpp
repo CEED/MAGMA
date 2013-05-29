@@ -25,8 +25,8 @@
 #include "testings.h"
 
 extern "C" magma_int_t
-magma_zgeqr2_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
-                 magma_int_t *ldda, cuDoubleComplex *dtau, double *dwork,
+magma_zgeqr2_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
+                 magma_int_t *ldda, magmaDoubleComplex *dtau, double *dwork,
                  magma_int_t *info);
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -38,9 +38,9 @@ int main( int argc, char** argv)
 
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double           error, work[1];
-    cuDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *h_A, *h_R, *tau, *dtau, *h_work, tmp[1];
-    cuDoubleComplex *d_A;
+    magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *h_A, *h_R, *tau, *dtau, *h_work, tmp[1];
+    magmaDoubleComplex *d_A;
     double *dwork;
     magma_int_t M, N, n2, lda, ldda, lwork, info, min_mn;
     magma_int_t ione     = 1;
@@ -65,13 +65,13 @@ int main( int argc, char** argv)
             lapackf77_zgeqrf(&M, &N, h_A, &M, tau, tmp, &lwork, &info);
             lwork = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
             
-            TESTING_MALLOC(    tau, cuDoubleComplex, min_mn );
-            TESTING_MALLOC(    h_A, cuDoubleComplex, n2     );
-            TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2     );
-            TESTING_DEVALLOC(  d_A, cuDoubleComplex, ldda*N );
-            TESTING_DEVALLOC( dtau, cuDoubleComplex, min_mn );
+            TESTING_MALLOC(    tau, magmaDoubleComplex, min_mn );
+            TESTING_MALLOC(    h_A, magmaDoubleComplex, n2     );
+            TESTING_HOSTALLOC( h_R, magmaDoubleComplex, n2     );
+            TESTING_DEVALLOC(  d_A, magmaDoubleComplex, ldda*N );
+            TESTING_DEVALLOC( dtau, magmaDoubleComplex, min_mn );
             TESTING_DEVALLOC(dwork, double, min_mn );
-            TESTING_MALLOC( h_work, cuDoubleComplex, lwork );
+            TESTING_MALLOC( h_work, magmaDoubleComplex, lwork );
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );

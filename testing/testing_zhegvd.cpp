@@ -34,13 +34,13 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t   gpu_time, cpu_time;
-    cuDoubleComplex *h_A, *h_R, *h_B, *h_S, *h_work;
+    magmaDoubleComplex *h_A, *h_R, *h_B, *h_S, *h_work;
     double *rwork, *w1, *w2, result[4];
     magma_int_t *iwork;
     magma_int_t N, n2, info, nb, lwork, liwork, lda, lrwork;
-    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     double d_one         =  1.;
     double d_neg_one     = -1.;
     //double d_ten         = 10.;
@@ -68,13 +68,13 @@ int main( int argc, char** argv)
             lrwork = 1 + 5*N +2*N*N;
             liwork = 3 + 5*N;
 
-            TESTING_MALLOC(    h_A,    cuDoubleComplex,  n2 );
-            TESTING_MALLOC(    h_B,    cuDoubleComplex,  n2 );
+            TESTING_MALLOC(    h_A,    magmaDoubleComplex,  n2 );
+            TESTING_MALLOC(    h_B,    magmaDoubleComplex,  n2 );
             TESTING_MALLOC(    w1,     double,           N  );
             TESTING_MALLOC(    w2,     double,           N  );
-            TESTING_HOSTALLOC( h_R,    cuDoubleComplex,  n2 );
-            TESTING_HOSTALLOC( h_S,    cuDoubleComplex,  n2 );
-            TESTING_HOSTALLOC( h_work, cuDoubleComplex,  lwork  );
+            TESTING_HOSTALLOC( h_R,    magmaDoubleComplex,  n2 );
+            TESTING_HOSTALLOC( h_S,    magmaDoubleComplex,  n2 );
+            TESTING_HOSTALLOC( h_work, magmaDoubleComplex,  lwork  );
             TESTING_MALLOC(    rwork,  double,           lrwork );
             TESTING_MALLOC(    iwork,  magma_int_t,      liwork );
             
@@ -132,7 +132,7 @@ int main( int argc, char** argv)
                    (3)    | S(with V) - S(w/o V) | / | S |
                    =================================================================== */
                 double temp1, temp2;
-                //cuDoubleComplex *tau;
+                //magmaDoubleComplex *tau;
                 
                 if ( opts.itype == 1 || opts.itype == 2 ) {
                     lapackf77_zlaset( "A", &N, &N, &c_zero, &c_one, h_S, &lda);

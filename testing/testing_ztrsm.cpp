@@ -51,11 +51,11 @@ int main( int argc, char** argv)
     magma_int_t *piv;
     magma_err_t err;
 
-    cuDoubleComplex *h_A, *h_B, *h_Bcublas, *h_Bmagma, *h_B1, *h_X1, *h_X2, *LU, *LUT;
-    cuDoubleComplex *d_A, *d_B;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex c_one = MAGMA_Z_ONE;
-    cuDoubleComplex alpha = MAGMA_Z_MAKE(  0.29, -0.86 );
+    magmaDoubleComplex *h_A, *h_B, *h_Bcublas, *h_Bmagma, *h_B1, *h_X1, *h_X2, *LU, *LUT;
+    magmaDoubleComplex *d_A, *d_B;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex alpha = MAGMA_Z_MAKE(  0.29, -0.86 );
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
@@ -87,18 +87,18 @@ int main( int argc, char** argv)
             sizeA = lda*Ak;
             sizeB = ldb*N;
             
-            TESTING_MALLOC( h_A,  cuDoubleComplex, lda*Ak );
-            TESTING_MALLOC( LU,      cuDoubleComplex, lda*Ak );
-            TESTING_MALLOC( LUT,  cuDoubleComplex, lda*Ak );
-            TESTING_MALLOC( h_B,  cuDoubleComplex, ldb*N  );
-            TESTING_MALLOC( h_B1,  cuDoubleComplex, ldb*N );
-            TESTING_MALLOC( h_X1,  cuDoubleComplex, ldb*N );
-            TESTING_MALLOC( h_X2,  cuDoubleComplex, ldb*N );
-            TESTING_MALLOC( h_Bcublas, cuDoubleComplex, ldb*N  );
-            TESTING_MALLOC( h_Bmagma, cuDoubleComplex, ldb*N  );
+            TESTING_MALLOC( h_A,  magmaDoubleComplex, lda*Ak );
+            TESTING_MALLOC( LU,      magmaDoubleComplex, lda*Ak );
+            TESTING_MALLOC( LUT,  magmaDoubleComplex, lda*Ak );
+            TESTING_MALLOC( h_B,  magmaDoubleComplex, ldb*N  );
+            TESTING_MALLOC( h_B1,  magmaDoubleComplex, ldb*N );
+            TESTING_MALLOC( h_X1,  magmaDoubleComplex, ldb*N );
+            TESTING_MALLOC( h_X2,  magmaDoubleComplex, ldb*N );
+            TESTING_MALLOC( h_Bcublas, magmaDoubleComplex, ldb*N  );
+            TESTING_MALLOC( h_Bmagma, magmaDoubleComplex, ldb*N  );
             
-            TESTING_DEVALLOC( d_A, cuDoubleComplex, ldda*Ak );
-            TESTING_DEVALLOC( d_B, cuDoubleComplex, lddb*N  );
+            TESTING_DEVALLOC( d_A, magmaDoubleComplex, ldda*Ak );
+            TESTING_DEVALLOC( d_B, magmaDoubleComplex, lddb*N  );
             
             /* Initialize the matrices */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, LU );
@@ -121,7 +121,7 @@ int main( int argc, char** argv)
             }
             
             lapackf77_zlarnv( &ione, ISEED, &sizeB, h_B );
-            memcpy(h_B1, h_B, sizeB*sizeof(cuDoubleComplex));
+            memcpy(h_B1, h_B, sizeB*sizeof(magmaDoubleComplex));
             /* =====================================================================
                Performs operation using MAGMA-BLAS
                =================================================================== */
@@ -170,9 +170,9 @@ int main( int argc, char** argv)
                Check the result
                =================================================================== */
             // ||b - Ax|| / (||A||*||x||)
-            memcpy(h_X1, h_Bmagma, sizeB*sizeof(cuDoubleComplex));
+            memcpy(h_X1, h_Bmagma, sizeB*sizeof(magmaDoubleComplex));
             
-            cuDoubleComplex alpha2 = MAGMA_Z_DIV(  c_one, alpha );
+            magmaDoubleComplex alpha2 = MAGMA_Z_DIV(  c_one, alpha );
             blasf77_ztrmm( &opts.side, &opts.uplo, &opts.transA, &opts.diag, 
                             &M, &N,
                             &alpha2, h_A, &lda,
@@ -186,7 +186,7 @@ int main( int argc, char** argv)
 
             magma_error = norm1/(normx*normA);
 
-            memcpy(h_X2, h_Bcublas, sizeB*sizeof(cuDoubleComplex));
+            memcpy(h_X2, h_Bcublas, sizeB*sizeof(magmaDoubleComplex));
             blasf77_ztrmm( &opts.side, &opts.uplo, &opts.transA, &opts.diag, 
                             &M, &N,
                             &alpha2, h_A, &lda,

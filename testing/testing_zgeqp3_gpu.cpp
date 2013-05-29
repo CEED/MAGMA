@@ -26,18 +26,18 @@
 #define PRECISION_z
 extern "C" magma_int_t
 magma_zgeqp3_v0( magma_int_t m, magma_int_t n,
-                 cuDoubleComplex *A, magma_int_t lda,
-                 magma_int_t *jpvt, cuDoubleComplex *tau,
-                 cuDoubleComplex *work, magma_int_t lwork,
+                 magmaDoubleComplex *A, magma_int_t lda,
+                 magma_int_t *jpvt, magmaDoubleComplex *tau,
+                 magmaDoubleComplex *work, magma_int_t lwork,
 #if defined(PRECISION_z) || defined(PRECISION_c)
                  double *rwork,
 #endif
                  magma_int_t *info );
 extern "C" magma_int_t
 magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
-                  cuDoubleComplex *A, magma_int_t lda,
-                  magma_int_t *jpvt, cuDoubleComplex *tau,
-                  cuDoubleComplex *work, magma_int_t lwork,
+                  magmaDoubleComplex *A, magma_int_t lda,
+                  magma_int_t *jpvt, magmaDoubleComplex *tau,
+                  magmaDoubleComplex *work, magma_int_t lwork,
 #if defined(PRECISION_z) || defined(PRECISION_c)
                   double *rwork,
 #endif
@@ -52,7 +52,7 @@ int main( int argc, char** argv)
 
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     magma_int_t      checkres;
-    cuDoubleComplex *h_A, *h_R, *tau, *h_work;
+    magmaDoubleComplex *h_A, *h_R, *tau, *h_work;
     magma_int_t *jpvt;
 
     /* Matrix size */
@@ -119,9 +119,9 @@ int main( int argc, char** argv)
     TESTING_MALLOC(   rwork, double, 2*N );
 #endif
     TESTING_MALLOC(    jpvt, magma_int_t,     N );
-    TESTING_MALLOC(    tau,  cuDoubleComplex, min_mn);
-    TESTING_MALLOC(    h_A,  cuDoubleComplex, n2 );
-    TESTING_HOSTALLOC( h_R,  cuDoubleComplex, n2 );
+    TESTING_MALLOC(    tau,  magmaDoubleComplex, min_mn);
+    TESTING_MALLOC(    h_A,  magmaDoubleComplex, n2 );
+    TESTING_HOSTALLOC( h_R,  magmaDoubleComplex, n2 );
 
     lwork = ( N+1 )*nb;
 #if defined(PRECISION_d) || defined(PRECISION_s)
@@ -129,7 +129,7 @@ int main( int argc, char** argv)
 #endif
     if ( checkres )
         lwork = max(lwork, M * N + N);
-    TESTING_HOSTALLOC(h_work, cuDoubleComplex, lwork ); 
+    TESTING_HOSTALLOC(h_work, magmaDoubleComplex, lwork ); 
 
     printf("  M     N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||A*P - Q*R||_F\n");
     printf("=====================================================================\n");
@@ -173,12 +173,12 @@ int main( int argc, char** argv)
             jpvt[j] = 0 ;
 
         {
-            cuDoubleComplex *d_R, *dtau, *d_work;
+            magmaDoubleComplex *d_R, *dtau, *d_work;
 
             /* allocate gpu workspaces */
-            TESTING_DEVALLOC( d_R,    cuDoubleComplex, lda*N );
-            TESTING_DEVALLOC( dtau,   cuDoubleComplex, min_mn);
-            TESTING_DEVALLOC( d_work, cuDoubleComplex, lwork );
+            TESTING_DEVALLOC( d_R,    magmaDoubleComplex, lda*N );
+            TESTING_DEVALLOC( dtau,   magmaDoubleComplex, min_mn);
+            TESTING_DEVALLOC( d_work, magmaDoubleComplex, lwork );
 
             /* copy A to gpu */
             magma_zsetmatrix( M, N, h_R, lda, d_R, lda );

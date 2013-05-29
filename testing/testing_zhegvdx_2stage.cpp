@@ -30,9 +30,9 @@
 
 extern"C" {
     magma_int_t magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
-                                     cuDoubleComplex *a, magma_int_t lda, cuDoubleComplex *b, magma_int_t ldb,
+                                     magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
                                      double vl, double vu, magma_int_t il, magma_int_t iu,
-                                     magma_int_t *m, double *w, cuDoubleComplex *work, magma_int_t lwork,
+                                     magma_int_t *m, double *w, magmaDoubleComplex *work, magma_int_t lwork,
 #if defined(PRECISION_z) || defined(PRECISION_c)
                                      double *rwork, magma_int_t lrwork,
 #endif
@@ -50,7 +50,7 @@ int main( int argc, char** argv)
 
     real_Double_t gpu_time;
 
-    cuDoubleComplex *h_A, *h_R, *h_B, *h_S, *h_work;
+    magmaDoubleComplex *h_A, *h_R, *h_B, *h_S, *h_work;
 
 #if defined(PRECISION_z) || defined(PRECISION_c)
     double *rwork;
@@ -61,9 +61,9 @@ int main( int argc, char** argv)
     double *w1, *w2, result[2];
     magma_int_t *iwork;
     magma_int_t N, n2, info, lwork, liwork;
-    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};;
 
@@ -106,13 +106,13 @@ int main( int argc, char** argv)
             liwork = 3 + 5*N;
 
             /* Allocate host memory for the matrix */
-            TESTING_MALLOC(   h_A, cuDoubleComplex, n2);
-            TESTING_MALLOC(   h_B, cuDoubleComplex, n2);
+            TESTING_MALLOC(   h_A, magmaDoubleComplex, n2);
+            TESTING_MALLOC(   h_B, magmaDoubleComplex, n2);
             TESTING_MALLOC(    w1, double         ,  N);
             TESTING_MALLOC(    w2, double         ,  N);
-            TESTING_HOSTALLOC(h_R, cuDoubleComplex, n2);
-            TESTING_HOSTALLOC(h_S, cuDoubleComplex, n2);
-            TESTING_HOSTALLOC(h_work, cuDoubleComplex,  lwork);
+            TESTING_HOSTALLOC(h_R, magmaDoubleComplex, n2);
+            TESTING_HOSTALLOC(h_S, magmaDoubleComplex, n2);
+            TESTING_HOSTALLOC(h_work, magmaDoubleComplex,  lwork);
 #if defined(PRECISION_z) || defined(PRECISION_c)
             TESTING_HOSTALLOC( rwork,          double, lrwork);
 #endif

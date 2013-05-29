@@ -31,9 +31,9 @@ int main(int argc, char **argv)
 
     real_Double_t   gflops, gpu_perf, gpu_time;
     double          Rnorm, Anorm, Xnorm, *work;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *h_A, *h_LU, *h_B, *h_X;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *h_A, *h_LU, *h_B, *h_X;
     magma_int_t *ipiv;
     magma_int_t N, nrhs, lda, ldb, info, sizeA, sizeB;
     magma_int_t ione     = 1;
@@ -53,10 +53,10 @@ int main(int argc, char **argv)
             ldb    = lda;
             gflops = ( FLOPS_ZGETRF( N, N ) + FLOPS_ZGETRS( N, nrhs ) ) / 1e9;
             
-            TESTING_MALLOC( h_A,  cuDoubleComplex, lda*N    );
-            TESTING_MALLOC( h_LU, cuDoubleComplex, lda*N    );
-            TESTING_MALLOC( h_B,  cuDoubleComplex, ldb*nrhs );
-            TESTING_MALLOC( h_X,  cuDoubleComplex, ldb*nrhs );
+            TESTING_MALLOC( h_A,  magmaDoubleComplex, lda*N    );
+            TESTING_MALLOC( h_LU, magmaDoubleComplex, lda*N    );
+            TESTING_MALLOC( h_B,  magmaDoubleComplex, ldb*nrhs );
+            TESTING_MALLOC( h_X,  magmaDoubleComplex, ldb*nrhs );
             TESTING_MALLOC( work, double,          N        );
             TESTING_MALLOC( ipiv, magma_int_t,     N        );
             

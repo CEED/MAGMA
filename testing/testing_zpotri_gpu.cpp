@@ -29,9 +29,9 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
-    cuDoubleComplex *h_A, *h_R;
-    cuDoubleComplex *d_A;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *h_A, *h_R;
+    magmaDoubleComplex *d_A;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t N, n2, lda, ldda, info;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
@@ -50,9 +50,9 @@ int main( int argc, char** argv)
             ldda   = ((N+31)/32)*32;
             gflops = FLOPS_ZPOTRI( N ) / 1e9;
             
-            TESTING_MALLOC(    h_A, cuDoubleComplex, n2 );
-            TESTING_HOSTALLOC( h_R, cuDoubleComplex, n2 );
-            TESTING_DEVALLOC(  d_A, cuDoubleComplex, ldda*N );
+            TESTING_MALLOC(    h_A, magmaDoubleComplex, n2 );
+            TESTING_HOSTALLOC( h_R, magmaDoubleComplex, n2 );
+            TESTING_DEVALLOC(  d_A, magmaDoubleComplex, ldda*N );
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );

@@ -25,7 +25,7 @@
 #define PRECISION_z
 
 // if ( A==B ) return 0, else return 1
-static int diff_matrix( magma_int_t m, magma_int_t n, cuDoubleComplex *A, magma_int_t lda, cuDoubleComplex *B, magma_int_t ldb )
+static int diff_matrix( magma_int_t m, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *B, magma_int_t ldb )
 {
     for( magma_int_t j = 0; j < n; j++ ) {
         for( magma_int_t i = 0; i < m; i++ ) {
@@ -38,7 +38,7 @@ static int diff_matrix( magma_int_t m, magma_int_t n, cuDoubleComplex *A, magma_
 
 // fill matrix with entries Aij = offset + (i+1) + (j+1)/10000,
 // which makes it easy to identify which rows & cols have been swapped.
-static void init_matrix( magma_int_t m, magma_int_t n, cuDoubleComplex *A, magma_int_t lda, magma_int_t offset )
+static void init_matrix( magma_int_t m, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda, magma_int_t offset )
 {
     assert( lda >= m );
     for( magma_int_t j = 0; j < n; ++j ) {
@@ -55,9 +55,9 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    cuDoubleComplex *h_A1, *h_A2;
-    cuDoubleComplex *d_A1, *d_A2;
-    cuDoubleComplex *h_R1, *h_R2;
+    magmaDoubleComplex *h_A1, *h_A2;
+    magmaDoubleComplex *d_A1, *d_A2;
+    magmaDoubleComplex *h_R1, *h_R2;
     
     // row-major and column-major performance
     real_Double_t row_perf0, col_perf0;
@@ -96,18 +96,18 @@ int main( int argc, char** argv)
             ldda   = ((N+31)/32)*32;
             nb     = (opts.nb > 0 ? opts.nb : magma_get_zgetrf_nb( N ));
             // for each swap, does 2N loads and 2N stores
-            gbytes = sizeof(cuDoubleComplex) * 4.*N*nb / 1e9;
+            gbytes = sizeof(magmaDoubleComplex) * 4.*N*nb / 1e9;
             
-            TESTING_HOSTALLOC( h_A1, cuDoubleComplex, lda*N );
-            TESTING_HOSTALLOC( h_A2, cuDoubleComplex, lda*N );
-            TESTING_HOSTALLOC( h_R1, cuDoubleComplex, lda*N );
-            TESTING_HOSTALLOC( h_R2, cuDoubleComplex, lda*N );
+            TESTING_HOSTALLOC( h_A1, magmaDoubleComplex, lda*N );
+            TESTING_HOSTALLOC( h_A2, magmaDoubleComplex, lda*N );
+            TESTING_HOSTALLOC( h_R1, magmaDoubleComplex, lda*N );
+            TESTING_HOSTALLOC( h_R2, magmaDoubleComplex, lda*N );
             
             TESTING_MALLOC( ipiv,  magma_int_t, nb );
             TESTING_MALLOC( ipiv2, magma_int_t, nb );
             TESTING_DEVALLOC( d_ipiv, magma_int_t, nb );
-            TESTING_DEVALLOC( d_A1, cuDoubleComplex, ldda*N );
-            TESTING_DEVALLOC( d_A2, cuDoubleComplex, ldda*N );
+            TESTING_DEVALLOC( d_A1, magmaDoubleComplex, ldda*N );
+            TESTING_DEVALLOC( d_A2, magmaDoubleComplex, ldda*N );
             
             for( j=0; j < nb; j++ ) {
                 ipiv[j] = (magma_int_t) ((rand()*1.*N) / (RAND_MAX * 1.)) + 1;
