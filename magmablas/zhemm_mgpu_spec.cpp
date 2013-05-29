@@ -25,8 +25,8 @@ void magmablas_zhemm_mgpu_spec(
                            magmaDoubleComplex *C,    magma_int_t ldc,
                            magmaDoubleComplex *work[], magma_int_t ldwork,
                            magma_int_t ngpu, magma_int_t nb, 
-                           cudaStream_t streams[][20], magma_int_t nstream, 
-                           cudaEvent_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10],magma_int_t nbevents, 
+                           magma_queue_t streams[][20], magma_int_t nstream, 
+                           magma_event_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10],magma_int_t nbevents, 
                            magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2], magma_int_t nbcmplx )
 {
     #define dA(dev, i, j) (dA[dev] + (i) + (j)*ldda)
@@ -138,7 +138,7 @@ void magmablas_zhemm_mgpu_spec(
                              alpha, dA(dev,offset,myblkoffst), ldda,
                                     dB(dev,0,0),    lddb,
                              beta,  &dwork[dev][maxgsize*dev], mycolsize );
-                cudaEventRecord(redevents[dev][dev*ngpu+dev], streams[dev][dev]);
+                magma_event_record(redevents[dev][dev*ngpu+dev], streams[dev][dev]);
             }
             if(dev == masterdev){
                 nbcmplxactive = nbcmplxactive +1;
@@ -192,12 +192,12 @@ void magmablas_zhemm_mgpu_spec(
                         gmaster = gnode[k][MagmaMaxGPUs+1];
                         if(gmaster!=-1){ //complex is active
                             //printf     ("                    device %d from cmplx %d is sending to master %d on cmplx %d block of size %d event %d\n",dev,cmplxid,gmaster,k,mycolsize,redevents[dev][gmaster*ngpu+dev]);
-                            cudaStreamWaitEvent(streams[ dev ][ gmaster ], redevents[dev][dev*ngpu+dev], 0);
+                            magma_queue_wait_event(streams[ dev ][ gmaster ], redevents[dev][dev*ngpu+dev], 0);
                             cudaMemcpy2DAsync(&dwork[gmaster][maxgsize*dev], mycolsize*sizeof(magmaDoubleComplex),
                                          &dwork[dev][maxgsize*dev], mycolsize*sizeof(magmaDoubleComplex),
                                          mycolsize*sizeof(magmaDoubleComplex), n,
                                          cudaMemcpyDeviceToDevice, streams[dev][gmaster]);
-                            cudaEventRecord(redevents[dev][gmaster*ngpu+dev], streams[dev][gmaster]);
+                            magma_event_record(redevents[dev][gmaster*ngpu+dev], streams[dev][gmaster]);
                         }
                     }
                 }
@@ -212,12 +212,12 @@ void magmablas_zhemm_mgpu_spec(
                     lccolsize     = gpuisactive[lcdev];
                     if((lcdev!=dev)&&(lccolsize>0)){
                         //printf     ("                    device %d from cmplx %d is sending internal to dev %d block of size %d event %d\n",dev,cmplxid,lcdev,mycolsize,redevents[dev][lcdev*ngpu+dev]);
-                        cudaStreamWaitEvent(streams[ dev ][ lcdev ], redevents[dev][dev*ngpu+dev], 0);
+                        magma_queue_wait_event(streams[ dev ][ lcdev ], redevents[dev][dev*ngpu+dev], 0);
                         cudaMemcpy2DAsync(&dwork[lcdev][maxgsize*dev], mycolsize*sizeof(magmaDoubleComplex),
                                          &dwork[dev][maxgsize*dev], mycolsize*sizeof(magmaDoubleComplex),
                                          mycolsize*sizeof(magmaDoubleComplex), n,
                                          cudaMemcpyDeviceToDevice, streams[dev][lcdev]);
-                        cudaEventRecord(redevents[dev][lcdev*ngpu+dev], streams[dev][lcdev]);
+                        magma_event_record(redevents[dev][lcdev*ngpu+dev], streams[dev][lcdev]);
                     }
                 }
                 //==============================================
@@ -250,7 +250,7 @@ void magmablas_zhemm_mgpu_spec(
                         // check if I received from this GPU,
                         // if yes send it to my group
                         if(gcolsize>0){
-                           cudaStreamWaitEvent(streams[ masterdev ][ gdev ], redevents[gdev][masterdev*ngpu+gdev], 0);
+                           magma_queue_wait_event(streams[ masterdev ][ gdev ], redevents[gdev][masterdev*ngpu+gdev], 0);
                            for( magma_int_t l = 0; l < myngpu; ++l ) {
                                 lcdev         = gnode[cmplxid][l];
                                 lccolsize     = gpuisactive[lcdev];
@@ -260,7 +260,7 @@ void magmablas_zhemm_mgpu_spec(
                                                     &dwork[masterdev][maxgsize*gdev], gcolsize*sizeof(magmaDoubleComplex),
                                                     gcolsize*sizeof(magmaDoubleComplex), n,
                                                     cudaMemcpyDeviceToDevice, streams[masterdev][gdev]);
-                                    cudaEventRecord(redevents[masterdev][lcdev*ngpu+gdev], streams[masterdev][gdev]);
+                                    magma_event_record(redevents[masterdev][lcdev*ngpu+gdev], streams[masterdev][gdev]);
                                 }
                             }
                         }
@@ -308,7 +308,7 @@ void magmablas_zhemm_mgpu_spec(
                     devperm     = (gdev-stdev+ngpu)%ngpu;
                     gblk        = (nbblk/ngpu) + (nbblk%ngpu > devperm ?  1:0 );
                     magmablasSetKernelStream( streams[ dev ][ gdev ] );
-                    cudaStreamWaitEvent(streams[ dev ][ gdev ], redevents[gdev][dev*ngpu+gdev], 0);
+                    magma_queue_wait_event(streams[ dev ][ gdev ], redevents[gdev][dev*ngpu+gdev], 0);
                     //printf     ("              GPU %d stream %d doing zlacpy\n",dev,streams[ dev ][ gdev ]);
                     for( magma_int_t blki = 0; blki < gblk; ++blki){
                         gbblki = (blki*ngpu + devperm)*nb - blockoffset;
@@ -346,7 +346,7 @@ void magmablas_zhemm_mgpu_spec(
                                 if(k==cmplxid){
                                     //we are on the same group so wait on event issued by gdev for me citing his id
                                     if(gdev!=dev){
-                                        cudaStreamWaitEvent(streams[ dev ][ gdev ], redevents[gdev][dev*ngpu+gdev], 0);
+                                        magma_queue_wait_event(streams[ dev ][ gdev ], redevents[gdev][dev*ngpu+gdev], 0);
                                         //printf     ("              GPU %d stream %d waiting on event %d to collecte from %d the size of gcolsize %d\n",dev,streams[ dev ][ gdev ],redevents[gdev][dev*ngpu+gdev],gdev,gcolsize);
                                     }
                                 }else{
@@ -355,9 +355,9 @@ void magmablas_zhemm_mgpu_spec(
                                     //else  wait event issued by my master for me on the behalf of gdev
                                     //printf     ("              GPU %d stream %d waiting on event %d to collecte from %d the size of gcolsize %d\n",dev,streams[ dev ][ gdev ],redevents[masterdev][dev*ngpu+gdev],gdev,gcolsize);
                                     if(dev==masterdev)
-                                        cudaStreamWaitEvent(streams[ dev ][ gdev ], redevents[gdev][dev*ngpu+gdev], 0);
+                                        magma_queue_wait_event(streams[ dev ][ gdev ], redevents[gdev][dev*ngpu+gdev], 0);
                                     else
-                                        cudaStreamWaitEvent(streams[ dev ][ gdev ], redevents[masterdev][dev*ngpu+gdev], 0);
+                                        magma_queue_wait_event(streams[ dev ][ gdev ], redevents[masterdev][dev*ngpu+gdev], 0);
                                 }
                                 //printf     ("              GPU %d stream %d doing zlacpy\n",dev,streams[ dev ][ gdev ]);
                                 for( magma_int_t blki = 0; blki < gblk; ++blki){

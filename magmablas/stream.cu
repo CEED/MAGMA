@@ -8,9 +8,9 @@
 
 #include "common_magma.h"
 
-cudaStream_t magma_stream = 0;
+magma_queue_t magma_stream = 0;
 
-cublasStatus_t magmablasSetKernelStream( cudaStream_t stream )
+cublasStatus_t magmablasSetKernelStream( magma_queue_t stream )
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -25,7 +25,7 @@ cublasStatus_t magmablasSetKernelStream( cudaStream_t stream )
 
     Arguments
     =========
-    stream  (input) cudaStream_t
+    stream  (input) magma_queue_t
             The CUDA stream.
 
     =====================================================================   */
@@ -34,7 +34,7 @@ cublasStatus_t magmablasSetKernelStream( cudaStream_t stream )
 }
 
 
-cublasStatus_t magmablasGetKernelStream( cudaStream_t *stream )
+cublasStatus_t magmablasGetKernelStream( magma_queue_t *stream )
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -49,7 +49,7 @@ cublasStatus_t magmablasGetKernelStream( cudaStream_t *stream )
 
     Arguments
     =========
-    stream  (output) cudaStream_t
+    stream  (output) magma_queue_t
             The CUDA stream.
 
     =====================================================================   */

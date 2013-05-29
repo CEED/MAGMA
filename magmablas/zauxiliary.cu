@@ -273,7 +273,7 @@ __global__ void zsetdiag1subdiag0_U(int k, magmaDoubleComplex *A, int lda)
  */
 extern "C" void
 magmablas_zsetdiag1subdiag0_stream(char uplo, magma_int_t k, magma_int_t nb,
-                 magmaDoubleComplex *A, magma_int_t lda, cudaStream_t stream)
+                 magmaDoubleComplex *A, magma_int_t lda, magma_queue_t stream)
 {
   dim3 threads(nb, 1, 1);
   dim3 grid((k-1)/nb+1);

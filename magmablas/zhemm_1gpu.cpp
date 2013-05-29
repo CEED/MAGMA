@@ -21,7 +21,7 @@ void magmablas_zhemm_1gpu(
                            magmaDoubleComplex *dB[], magma_int_t lddb,
     magmaDoubleComplex beta,  magmaDoubleComplex *dC[], magma_int_t lddc,
                            magmaDoubleComplex *C,    magma_int_t ldc,
-    magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][20], magma_int_t nstream )
+    magma_int_t ngpu, magma_int_t nb, magma_queue_t streams[][20], magma_int_t nstream )
 {
     #define dA(dev, i, j) (dA[dev] + (i) + (j)*ldda)
     #define dB(dev, i, j) (dB[dev] + (i) + (j)*lddb)
@@ -40,7 +40,7 @@ void magmablas_zhemm_1gpu(
     
     // put init/finalize into testing_zhemm_mgpu,
     // so Gflop/s doesn't include writing file.
-    //trace_init( 1, ngpu, nstream, (cudaStream_t*) streams );
+    //trace_init( 1, ngpu, nstream, (magma_queue_t*) streams );
         
     magma_device_t cdev;
     magma_getdevice( &cdev );

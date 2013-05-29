@@ -109,7 +109,7 @@ extern "C" magma_int_t
 magma_zgeqr2x4_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA, 
                    magma_int_t *ldda, magmaDoubleComplex *dtau,
                    magmaDoubleComplex *dT, magmaDoubleComplex *ddA,
-                   double *dwork, magma_int_t *info, cudaStream_t stream)
+                   double *dwork, magma_int_t *info, magma_queue_t stream)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville

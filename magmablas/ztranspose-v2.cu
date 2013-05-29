@@ -194,7 +194,7 @@ magmablas_ztranspose2(magmaDoubleComplex       *odata, magma_int_t ldo,
 extern "C" void
 magmablas_ztranspose2s(magmaDoubleComplex       *odata, magma_int_t ldo,
                        const magmaDoubleComplex *idata, magma_int_t ldi,
-                       magma_int_t m, magma_int_t n, cudaStream_t *stream )
+                       magma_int_t m, magma_int_t n, magma_queue_t *stream )
 {
     /* Quick return */
     if ( (m == 0) || (n == 0) )

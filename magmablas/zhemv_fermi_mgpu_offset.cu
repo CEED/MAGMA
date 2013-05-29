@@ -1020,7 +1020,7 @@ magmablas_zhemv_200_mgpu_offset( char uplo, magma_int_t n,
               magma_int_t num_gpus, 
               magma_int_t nb,
               magma_int_t offset,
-              cudaStream_t stream[][10])
+              magma_queue_t stream[][10])
 
 {
     char uplo_[2] = {uplo, 0};

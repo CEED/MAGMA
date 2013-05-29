@@ -38,7 +38,7 @@ magmablas_zsetmatrix_transpose( magma_int_t m, magma_int_t n,
         return;
     }
 
-    cudaStream_t stream[2];
+    magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
    
@@ -84,7 +84,7 @@ magmablas_zsetmatrix_transpose2( magma_int_t m, magma_int_t n,
                                  const magmaDoubleComplex  *ha,  magma_int_t  lda, 
                                  magmaDoubleComplex       **dat, magma_int_t *ldda,
                                  magmaDoubleComplex       **dB,  magma_int_t  lddb, magma_int_t nb,
-                                 magma_int_t num_gpus, cudaStream_t stream[][2] )
+                                 magma_int_t num_gpus, magma_queue_t stream[][2] )
 {
     magma_int_t i = 0, j[4] = {0, 0, 0, 0}, ib, k = 0;
 

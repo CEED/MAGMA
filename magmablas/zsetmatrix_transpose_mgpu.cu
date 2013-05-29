@@ -22,7 +22,7 @@
 //
 extern "C" void 
 magmablas_zsetmatrix_transpose_mgpu(
-                  magma_int_t ngpus, cudaStream_t stream[][2],
+                  magma_int_t ngpus, magma_queue_t stream[][2],
                   const magmaDoubleComplex  *ha,  magma_int_t lda, 
                   magmaDoubleComplex       **dat, magma_int_t ldda, 
                   magmaDoubleComplex       **db,  magma_int_t lddb,

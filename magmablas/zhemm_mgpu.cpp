@@ -26,8 +26,8 @@ void magmablas_zhemm_mgpu_com(
                            magmaDoubleComplex *C,    magma_int_t ldc,
                            magmaDoubleComplex *work[], magma_int_t worksiz,
                            magma_int_t ngpu, magma_int_t nb, 
-                           cudaStream_t streams[][20], magma_int_t nstream, 
-                           cudaEvent_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10],magma_int_t nbevents, 
+                           magma_queue_t streams[][20], magma_int_t nstream, 
+                           magma_event_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10],magma_int_t nbevents, 
                            magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2], magma_int_t nbcmplx )
 {
     #define dA(dev, i, j) (dA[dev] + (i) + (j)*ldda)
@@ -202,7 +202,7 @@ return;
         }
         for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
             magma_setdevice( dev );
-            cudaEventRecord(redevents[dev][1], streams[dev][1]);
+            magma_event_record(redevents[dev][1], streams[dev][1]);
         }
     }
     
@@ -247,7 +247,7 @@ return;
                                dB(dev,i,0),        lddb,
                         c_one, dC(dev,i,0),     lddc );
         }
-        cudaEventRecord(redevents[dev][0], streams[dev][0]);
+        magma_event_record(redevents[dev][0], streams[dev][0]);
         // if only 1 GPU is used, do the ROW GEMM
         if(ngpu==1){
             // NOTE THAT because the COL gemm write dC below the diagonal (i) 
@@ -281,7 +281,7 @@ return;
             if(myrowsize>0){
                 magma_setdevice( dev );
                 magmablasSetKernelStream( streams[ dev ][ 0 ] );
-                cudaStreamWaitEvent(streams[ dev ][ 0 ], redevents[dev][1], 0);
+                magma_queue_wait_event(streams[ dev ][ 0 ], redevents[dev][1], 0);
                 //magma_queue_sync( streams[ dev ][ 1 ] );
                 // for each dev add the computed ROW block each on its placment with dC
                 for( magma_int_t blki = 0; blki < myblk; ++blki){
@@ -300,7 +300,7 @@ return;
                                     &dwork[dev][lcblki], lddwork, 
                                     &dC[dev][gbblki]   , lddc   );
                 }
-                cudaEventRecord(redevents[dev][0], streams[dev][0]);                
+                magma_event_record(redevents[dev][0], streams[dev][0]);                
             }
         }
     }
@@ -378,13 +378,13 @@ return;
                         magma_setdevice( dev );        
                         //printf("             GPU %d sending to my master %d\n",dev,masterdev);
                         // wait the geadd of my ROW and COL GEMM is done
-                        cudaStreamWaitEvent(streams[ dev ][ 0 ], redevents[dev][0], 0);
+                        magma_queue_wait_event(streams[ dev ][ 0 ], redevents[dev][0], 0);
                         // sending to the master of my complex
                         cudaMemcpy2DAsync(&dwork2[masterdev][maxgsize*dev], m*sizeof(magmaDoubleComplex),
                                           &dC[dev][0], lddc*sizeof(magmaDoubleComplex),
                                           m*sizeof(magmaDoubleComplex), n,
                                           cudaMemcpyDeviceToDevice, streams[dev][0]);
-                        cudaEventRecord(redevents[dev][masterdev], streams[dev][0]);
+                        magma_event_record(redevents[dev][masterdev], streams[dev][0]);
                     } // end I am not the masterdev
                 }// end if mycolsize>0
             }// for idev
@@ -409,7 +409,7 @@ return;
             // addition is done on stream 0 sequentially
             magmablasSetKernelStream( streams[ masterdev ][ 0 ] );
             // wait the geadd of my ROW and COL GEMM is done
-            cudaStreamWaitEvent(streams[ masterdev ][ 0 ], redevents[dev][0], 0);
+            magma_queue_wait_event(streams[ masterdev ][ 0 ], redevents[dev][0], 0);
             // ========================================
             //     local addition
             // ========================================
@@ -420,7 +420,7 @@ return;
                     //printf("             master %d receiving from %d and adding \n",masterdev,lcdev);
                     // this is an active GPU of my complex. 
                     // wait I received what he send it to me and then do addition.
-                    cudaStreamWaitEvent(streams[ masterdev ][ 0 ], redevents[lcdev][masterdev], 0);
+                    magma_queue_wait_event(streams[ masterdev ][ 0 ], redevents[lcdev][masterdev], 0);
                     magmablas_zgeadd(m, n, c_one, 
                                     &dwork2[masterdev][maxgsize*lcdev], m, 
                                     &dC[masterdev][0]   , lddc   );
@@ -428,7 +428,7 @@ return;
             }// for l=1:myngpu
             // because addition is done sequentially on stream 0, 
             // I have to record this to be able to synch using it 
-            cudaEventRecord(redevents[masterdev][masterdev], streams[masterdev][0]);
+            magma_event_record(redevents[masterdev][masterdev], streams[masterdev][0]);
             // ========================================
             //
             // ========================================
@@ -442,13 +442,13 @@ return;
                          //use stream 0 to make it sequential or stream gmaster to make it parallel.
                          //Now both re the same.
                         //printf("             master %d from cmplx %d sending to other master %d on cmplx %d \n",masterdev,cmplxid,gmaster,k);
-                        cudaStreamWaitEvent(streams[ masterdev ][ gmaster ], redevents[masterdev][masterdev], 0);
+                        magma_queue_wait_event(streams[ masterdev ][ gmaster ], redevents[masterdev][masterdev], 0);
                         cudaMemcpy2DAsync(&dwork2[gmaster][maxgsize*masterdev], m*sizeof(magmaDoubleComplex),
                                           &dC[masterdev][0], lddc*sizeof(magmaDoubleComplex),
                                           m*sizeof(magmaDoubleComplex), n,
                                           cudaMemcpyDeviceToDevice, streams[masterdev][gmaster]);
-                        cudaEventRecord(redevents[masterdev][gmaster], streams[masterdev][gmaster]);
-                        cudaEventRecord(redevents[masterdev][masterdev], streams[masterdev][gmaster]);
+                        magma_event_record(redevents[masterdev][gmaster], streams[masterdev][gmaster]);
+                        magma_event_record(redevents[masterdev][masterdev], streams[masterdev][gmaster]);
                       } // end of gmaster!=-1
                 } // end of k!=cmplxid
             }// for k = 0: nbcmplx
@@ -473,7 +473,7 @@ return;
             // addition is done on stream 0 sequentially
             magmablasSetKernelStream( streams[ masterdev ][ 0 ] );
             // master has to wait until finishing all the send to other masters.
-            cudaStreamWaitEvent(streams[ masterdev ][ 0 ], redevents[masterdev][masterdev], 0);
+            magma_queue_wait_event(streams[ masterdev ][ 0 ], redevents[masterdev][masterdev], 0);
             // ========================================
             //  addition of results from other masters
             // ========================================
@@ -483,7 +483,7 @@ return;
                     if(gmaster!=-1){ //complex is active
                         //Master has to  wait until receiving from gmaster, then do addition using stream 0
                         //printf("             master %d from cmplx %d receiving from other master %d on cmplx %d and adding \n",masterdev,cmplxid,gmaster,k);
-                        cudaStreamWaitEvent(streams[ masterdev ][ 0 ], redevents[gmaster][masterdev], 0);
+                        magma_queue_wait_event(streams[ masterdev ][ 0 ], redevents[gmaster][masterdev], 0);
                         magmablas_zgeadd(m, n, c_one, 
                                         &dwork2[masterdev][maxgsize*gmaster], m, 
                                         &dC[masterdev][0]   , lddc   );
@@ -492,7 +492,7 @@ return;
             }// for k = 0: nbcmplx
             // because addition is done sequentially on stream 0, 
             // I have to record this to be able to synch using it 
-            cudaEventRecord(redevents[masterdev][masterdev], streams[masterdev][0]);
+            magma_event_record(redevents[masterdev][masterdev], streams[masterdev][0]);
             // ========================================
             // ========================================
             //     local broadcast of final results
@@ -505,12 +505,12 @@ return;
                     // wait the previous addition is done maening stream 0 is finished and broadcast sequentially for now.
                     // to make it parallel put stream lcdev instead of stream 0
                     //printf("             master %d broadcasting local to %d  \n",masterdev,lcdev);
-                    cudaStreamWaitEvent(streams[ masterdev ][ 0 ], redevents[masterdev][masterdev], 0);
+                    magma_queue_wait_event(streams[ masterdev ][ 0 ], redevents[masterdev][masterdev], 0);
                     cudaMemcpy2DAsync(&dC[lcdev][0], lddc*sizeof(magmaDoubleComplex),
                                       &dC[masterdev][0], lddc*sizeof(magmaDoubleComplex),
                                       m*sizeof(magmaDoubleComplex), n,
                                       cudaMemcpyDeviceToDevice, streams[masterdev][0]);
-                    cudaEventRecord(redevents[masterdev][lcdev], streams[masterdev][0]);
+                    magma_event_record(redevents[masterdev][lcdev], streams[masterdev][0]);
                 }
             }// for l=1:myngpu
             // ========================================
@@ -534,8 +534,8 @@ return;
                 lccolsize     = gpuisactive[lcdev];
                 if(lccolsize>0){
                     magma_setdevice( lcdev );
-                    cudaStreamWaitEvent(streams[ lcdev ][ 0 ], redevents[lcdev][0], 0);
-                    cudaStreamWaitEvent(streams[ lcdev ][ 0 ], redevents[masterdev][lcdev], 0);
+                    magma_queue_wait_event(streams[ lcdev ][ 0 ], redevents[lcdev][0], 0);
+                    magma_queue_wait_event(streams[ lcdev ][ 0 ], redevents[masterdev][lcdev], 0);
                 }
             }// for l=1:myngpu
         }// end of if masterdev!=-1 maening complex is active

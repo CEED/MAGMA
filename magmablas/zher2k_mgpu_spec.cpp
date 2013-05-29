@@ -162,7 +162,7 @@ void magmablas_zher2k_mgpu_spec(
     magmaDoubleComplex alpha, magmaDoubleComplex *dA[], magma_int_t lda, magma_int_t aoffset,
                            magmaDoubleComplex *dB[], magma_int_t ldb, magma_int_t boffset,
     double beta,           magmaDoubleComplex *dC[], magma_int_t ldc, magma_int_t coffset,
-    magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][20], magma_int_t nstream )
+    magma_int_t ngpu, magma_int_t nb, magma_queue_t streams[][20], magma_int_t nstream )
 {
     #define dA(dev, i, j) (dA[dev] + (i) + (j)*lda + (aoffset) )
     #define dB(dev, i, j) (dB[dev] + (i) + (j)*ldb + (boffset) )
