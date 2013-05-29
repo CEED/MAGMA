@@ -486,7 +486,7 @@ magma_int_t magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
                               magmaDoubleComplex *dAmgpu[], magma_int_t ldda,
                               magmaDoubleComplex *dTmgpu[], magma_int_t lddt,
                               magma_int_t ngpu, magma_int_t distblk,
-                              magma_stream_t streams[][20], magma_int_t nstream,
+                              magma_queue_t streams[][20], magma_int_t nstream,
                               magma_int_t threads, magma_int_t *info);
 magma_int_t magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
                               magmaDoubleComplex *a, magma_int_t lda,
@@ -495,7 +495,7 @@ magma_int_t magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t 
                               magmaDoubleComplex *dAmgpu[], magma_int_t ldda,
                               magmaDoubleComplex *dTmgpu[], magma_int_t lddt,
                               magma_int_t ngpu, magma_int_t distblk,
-                              magma_stream_t streams[][20], magma_int_t nstream,
+                              magma_queue_t streams[][20], magma_int_t nstream,
                               magma_int_t threads, magma_int_t *info);
 magma_int_t magma_zpotrs_gpu( char uplo,  magma_int_t n, magma_int_t nrhs,
                               magmaDoubleComplex *dA, magma_int_t ldda,
