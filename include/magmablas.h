@@ -27,10 +27,10 @@ extern "C" {
 
 // ========================================
 // Define magma streams
-extern cudaStream_t magma_stream;
+extern magma_queue_t magma_stream;
 
-cublasStatus_t magmablasSetKernelStream( cudaStream_t stream );
-cublasStatus_t magmablasGetKernelStream( cudaStream_t *stream );
+cublasStatus_t magmablasSetKernelStream( magma_queue_t stream );
+cublasStatus_t magmablasGetKernelStream( magma_queue_t *stream );
 
 
 // ========================================
