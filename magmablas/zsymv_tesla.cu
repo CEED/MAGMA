@@ -23,13 +23,13 @@
 #define threadSize 128  // used in zsymv_130_kernel2
 
 __global__ void 
-magmablas_zsymv_130_kernel1( magma_int_t m, cuDoubleComplex alpha,
-                             const cuDoubleComplex *A, magma_int_t lda,
-                             const cuDoubleComplex *x, magma_int_t incx,
-                             cuDoubleComplex beta,
-                             cuDoubleComplex *y, magma_int_t incy )
+magmablas_zsymv_130_kernel1( magma_int_t m, magmaDoubleComplex alpha,
+                             const magmaDoubleComplex *A, magma_int_t lda,
+                             const magmaDoubleComplex *x, magma_int_t incx,
+                             magmaDoubleComplex beta,
+                             magmaDoubleComplex *y, magma_int_t incy )
 {
-    cuDoubleComplex res = MAGMA_Z_ZERO;
+    magmaDoubleComplex res = MAGMA_Z_ZERO;
     magma_int_t tid = blockIdx.x * thread_seg  + threadIdx.x;
     magma_int_t i;
 
@@ -45,18 +45,18 @@ magmablas_zsymv_130_kernel1( magma_int_t m, cuDoubleComplex alpha,
 }        
 
 __global__ void 
-magmablas_zsymv_130_kernel2( magma_int_t m, cuDoubleComplex alpha,
-                             const cuDoubleComplex *A, magma_int_t lda,
-                             const cuDoubleComplex *x, magma_int_t incx,
-                             cuDoubleComplex beta,
-                             cuDoubleComplex *y, magma_int_t incy )
+magmablas_zsymv_130_kernel2( magma_int_t m, magmaDoubleComplex alpha,
+                             const magmaDoubleComplex *A, magma_int_t lda,
+                             const magmaDoubleComplex *x, magma_int_t incx,
+                             magmaDoubleComplex beta,
+                             magmaDoubleComplex *y, magma_int_t incy )
 {
-    __shared__ cuDoubleComplex sdata[threadSize];
+    __shared__ magmaDoubleComplex sdata[threadSize];
     magma_int_t tx = threadIdx.x;
     magma_int_t i;
     
-    cuDoubleComplex c_zero = MAGMA_Z_ZERO;
-    cuDoubleComplex res    = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex res    = MAGMA_Z_ZERO;
 
     magma_int_t m1 = ((m - blockIdx.y)/threadSize) * threadSize;
 
@@ -194,11 +194,11 @@ magmablas_zsymv_130_kernel2( magma_int_t m, cuDoubleComplex alpha,
 extern "C"
 magma_int_t
 magmablas_zsymv_130( char uplo, magma_int_t n,
-                     cuDoubleComplex alpha, 
-                     const cuDoubleComplex *A, magma_int_t lda,
-                     const cuDoubleComplex *X, magma_int_t incx,
-                     cuDoubleComplex beta,  
-                     cuDoubleComplex *Y, magma_int_t incy)
+                     magmaDoubleComplex alpha, 
+                     const magmaDoubleComplex *A, magma_int_t lda,
+                     const magmaDoubleComplex *X, magma_int_t incx,
+                     magmaDoubleComplex beta,  
+                     magmaDoubleComplex *Y, magma_int_t incy)
 {
     char uplo_[2] = {uplo, 0};
     int  upper    = lapackf77_lsame(uplo_, "U");

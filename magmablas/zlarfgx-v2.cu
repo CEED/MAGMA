@@ -19,26 +19,26 @@
 
 #define PRECISION_z
 
-__global__ void magma_zgemv_kernel3(int m, const cuDoubleComplex * __restrict__ V, int ldv, 
-                                    cuDoubleComplex *c, cuDoubleComplex *dwork,
-                                    cuDoubleComplex *tau);
-__global__ void magma_ztrmv_kernel(const cuDoubleComplex *T, int ldt, cuDoubleComplex *v);
-__global__ void magma_ztrmv_kernel2(const cuDoubleComplex *T, int ldt, 
-                                    cuDoubleComplex *v, cuDoubleComplex *y, cuDoubleComplex *tau);
+__global__ void magma_zgemv_kernel3(int m, const magmaDoubleComplex * __restrict__ V, int ldv, 
+                                    magmaDoubleComplex *c, magmaDoubleComplex *dwork,
+                                    magmaDoubleComplex *tau);
+__global__ void magma_ztrmv_kernel(const magmaDoubleComplex *T, int ldt, magmaDoubleComplex *v);
+__global__ void magma_ztrmv_kernel2(const magmaDoubleComplex *T, int ldt, 
+                                    magmaDoubleComplex *v, magmaDoubleComplex *y, magmaDoubleComplex *tau);
 
 //==============================================================================
 
 __global__
-void magma_zlarfgx_gpu_kernel( int n, cuDoubleComplex* dx0, cuDoubleComplex* dx, 
-                               cuDoubleComplex *dtau, double *dxnorm,
-                               cuDoubleComplex *dA, int it)
+void magma_zlarfgx_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComplex* dx, 
+                               magmaDoubleComplex *dtau, double *dxnorm,
+                               magmaDoubleComplex *dA, int it)
 {
     const int i = threadIdx.x;
     const int j = i + BLOCK_SIZE * blockIdx.x;
-    __shared__ cuDoubleComplex scale;
+    __shared__ magmaDoubleComplex scale;
     __shared__ double xnorm;    
   
-    cuDoubleComplex dxi;
+    magmaDoubleComplex dxi;
 
     if ( j < n-1)
         dxi = dx[j];
@@ -66,7 +66,7 @@ void magma_zlarfgx_gpu_kernel( int n, cuDoubleComplex* dx0, cuDoubleComplex* dx,
 
             scale = 1. / (alpha - beta);
 #else
-            cuDoubleComplex alpha = *dx0;
+            magmaDoubleComplex alpha = *dx0;
             double alphar =  MAGMA_Z_REAL(alpha), alphai = MAGMA_Z_IMAG(alpha);
 
             // no need to compute the norm as it is passed as input
@@ -112,9 +112,9 @@ void magma_zlarfgx_gpu_kernel( int n, cuDoubleComplex* dx0, cuDoubleComplex* dx,
    are computed outside the routine and passed to it in dxnorm (array on the GPU).
 */
 extern "C" void
-magma_zlarfgx_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx, 
-                  cuDoubleComplex *dtau, double *dxnorm, 
-                  cuDoubleComplex *dA, int it)
+magma_zlarfgx_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx, 
+                  magmaDoubleComplex *dtau, double *dxnorm, 
+                  magmaDoubleComplex *dA, int it)
 {
     dim3 blocks((n+BLOCK_SIZE-1) / BLOCK_SIZE);
     dim3 threads( BLOCK_SIZE );
@@ -137,17 +137,17 @@ magma_zlarfgx_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
    are computed outside the routine and passed to it in dxnorm (array on the GPU).
 */
 extern "C" void
-magma_zlarfgtx_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
-                   cuDoubleComplex *dtau, double *dxnorm,
-                   cuDoubleComplex *dA, int i, 
-                   cuDoubleComplex *V, int ldv, cuDoubleComplex *T, int ldt, 
-                   cuDoubleComplex *work)
+magma_zlarfgtx_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
+                   magmaDoubleComplex *dtau, double *dxnorm,
+                   magmaDoubleComplex *dA, int i, 
+                   magmaDoubleComplex *V, int ldv, magmaDoubleComplex *T, int ldt, 
+                   magmaDoubleComplex *work)
 {
    /*  Generate the elementary reflector H(i)  */
    magma_zlarfgx_gpu(n, dx0, dx, dtau, dxnorm, dA, i);
 
    if (i==0){
-      cuDoubleComplex tt = MAGMA_Z_ONE;
+      magmaDoubleComplex tt = MAGMA_Z_ONE;
       magmablas_zlacpy(MagmaUpperLower, 1, 1, dtau, 1, T+i+i*ldt, 1);
       magma_zsetmatrix(1,1, &tt,1, dx0,1);
    }

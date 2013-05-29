@@ -17,10 +17,10 @@
 extern "C"
 void magmablas_zhemm_1gpu(
     char side, char uplo, magma_int_t m, magma_int_t n,
-    cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
-                           cuDoubleComplex *dB[], magma_int_t lddb,
-    cuDoubleComplex beta,  cuDoubleComplex *dC[], magma_int_t lddc,
-                           cuDoubleComplex *C,    magma_int_t ldc,
+    magmaDoubleComplex alpha, magmaDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
+                           magmaDoubleComplex *dB[], magma_int_t lddb,
+    magmaDoubleComplex beta,  magmaDoubleComplex *dC[], magma_int_t lddc,
+                           magmaDoubleComplex *C,    magma_int_t ldc,
     magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][20], magma_int_t nstream )
 {
     #define dA(dev, i, j) (dA[dev] + (i) + (j)*ldda)
@@ -34,8 +34,8 @@ void magmablas_zhemm_1gpu(
     assert( lddb >= m );
     assert( lddc >= m );
     
-    cuDoubleComplex c_one  = MAGMA_Z_ONE;
-    cuDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     magma_int_t ione = 1;
     
     // put init/finalize into testing_zhemm_mgpu,
@@ -61,7 +61,7 @@ void magmablas_zhemm_1gpu(
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
         //magmablas_zlaset( MagmaUpperLower, m, n, dC(dev,0,0), lddc );
-        cudaMemset(dC(dev,0,0), 0, (lddc)*(n)*sizeof(cuDoubleComplex) );
+        cudaMemset(dC(dev,0,0), 0, (lddc)*(n)*sizeof(magmaDoubleComplex) );
     }
     // 1. symmetrize
     magma_int_t dev=0;    
@@ -128,7 +128,7 @@ void magmablas_zhemm_1gpu(
     
     // wait and reduce results
     magma_int_t size = ldc*n;
-    cuDoubleComplex *Ctmp = C(0,n);
+    magmaDoubleComplex *Ctmp = C(0,n);
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
         trace_gpu_start( dev, 0, "get", "get C_dev" );

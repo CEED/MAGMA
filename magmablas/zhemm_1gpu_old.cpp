@@ -15,15 +15,15 @@
 #include <assert.h>
 
 extern "C" void
-magmablas_zsymmetrize( char uplo, magma_int_t m, cuDoubleComplex *dA, magma_int_t ldda );
+magmablas_zsymmetrize( char uplo, magma_int_t m, magmaDoubleComplex *dA, magma_int_t ldda );
 
 extern "C"
 void magmablas_zhemm_1gpu_old(
     char side, char uplo, magma_int_t m, magma_int_t n,
-    cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
-                           cuDoubleComplex *dB[], magma_int_t lddb,
-    cuDoubleComplex beta,  cuDoubleComplex *dC[], magma_int_t lddc,
-                           cuDoubleComplex *C,    magma_int_t ldc,
+    magmaDoubleComplex alpha, magmaDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
+                           magmaDoubleComplex *dB[], magma_int_t lddb,
+    magmaDoubleComplex beta,  magmaDoubleComplex *dC[], magma_int_t lddc,
+                           magmaDoubleComplex *C,    magma_int_t ldc,
     magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][20], magma_int_t nstream )
 {
     #define dA(dev, i, j) (dA[dev] + (i) + (j)*ldda)
@@ -35,8 +35,8 @@ void magmablas_zhemm_1gpu_old(
     assert( lddb >= m );
     assert( lddc >= m );
     
-    cuDoubleComplex c_one  = MAGMA_Z_ONE;
-    cuDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     magma_int_t ione = 1;
     
     // put init/finalize into testing_zhemm_mgpu,
@@ -157,7 +157,7 @@ void magmablas_zhemm_1gpu_old(
     
     // wait and reduce results
     magma_int_t size = ldc*n;
-    cuDoubleComplex *Ctmp = C(0,n);
+    magmaDoubleComplex *Ctmp = C(0,n);
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
         trace_gpu_start( dev, 0, "get", "get C_dev" );

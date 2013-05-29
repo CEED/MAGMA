@@ -27,7 +27,7 @@
 // Assumes number of threads <= 1024 (which is max number of threads up to CUDA capability 3.0)
 // Having n as template parameter allows compiler to evaluate some conditions at compile time.
 template< int n >
-__device__ void sum_reduce( /*int n,*/ int i, cuDoubleComplex* x )
+__device__ void sum_reduce( /*int n,*/ int i, magmaDoubleComplex* x )
 {
     __syncthreads();
     if ( n > 1024 ) { if ( i < 1024 && i + 1024 < n ) { x[i] += x[i+1024]; }  __syncthreads(); }
@@ -47,7 +47,7 @@ __device__ void sum_reduce( /*int n,*/ int i, cuDoubleComplex* x )
 // end sum_reduce
 
 static
-__device__ void zsum_reduce( int n, int i, cuDoubleComplex* x )
+__device__ void zsum_reduce( int n, int i, magmaDoubleComplex* x )
 {
     __syncthreads();
     if ( n >  128 ) { if ( i <  128 && i +  128 < n ) { x[i] += x[i+ 128]; }  __syncthreads(); }
@@ -66,17 +66,17 @@ __device__ void zsum_reduce( int n, int i, cuDoubleComplex* x )
 //==============================================================================
 
 __global__
-void magma_zlarfx_kernel( int m, cuDoubleComplex *v, cuDoubleComplex *tau,
-                         cuDoubleComplex *c, int ldc, double *xnorm,
-                         cuDoubleComplex *T, int it )
+void magma_zlarfx_kernel( int m, magmaDoubleComplex *v, magmaDoubleComplex *tau,
+                         magmaDoubleComplex *c, int ldc, double *xnorm,
+                         magmaDoubleComplex *T, int it )
 {
     if ( !MAGMA_Z_EQUAL(*tau, MAGMA_Z_ZERO) ) {
         const int i = threadIdx.x;
-        //cuDoubleComplex *dc = c + (blockIdx.x-it-1) * ldc;
-        cuDoubleComplex *dc = c + (blockIdx.x) * ldc;
+        //magmaDoubleComplex *dc = c + (blockIdx.x-it-1) * ldc;
+        magmaDoubleComplex *dc = c + (blockIdx.x) * ldc;
 
-        __shared__ cuDoubleComplex sum[ BLOCK_SIZE ];
-        cuDoubleComplex lsum;
+        __shared__ magmaDoubleComplex sum[ BLOCK_SIZE ];
+        magmaDoubleComplex lsum;
 
         /*  w := v' * C  */
         lsum = MAGMA_Z_ZERO;
@@ -93,7 +93,7 @@ void magma_zlarfx_kernel( int m, cuDoubleComplex *v, cuDoubleComplex *tau,
 
         /*  C := C - v * w  */
         __syncthreads();
-        cuDoubleComplex z__1 = - MAGMA_Z_CNJG(*tau) * sum[0];
+        magmaDoubleComplex z__1 = - MAGMA_Z_CNJG(*tau) * sum[0];
         if (blockIdx.x>it){
            for( int j = m-i-1; j>=0 ; j -= BLOCK_SIZE )
                  dc[j] += z__1 * v[j];
@@ -119,13 +119,13 @@ void magma_zlarfx_kernel( int m, cuDoubleComplex *v, cuDoubleComplex *tau,
 //==============================================================================
 
 __global__
-void magma_ztrmv_kernel(const cuDoubleComplex *T, int ldt, cuDoubleComplex *t)
+void magma_ztrmv_kernel(const magmaDoubleComplex *T, int ldt, magmaDoubleComplex *t)
 {
    const int i = threadIdx.x;
    T += i;
 
-   __shared__ cuDoubleComplex tlocal[ BLOCK_SIZE ];
-   cuDoubleComplex res = MAGMA_Z_MAKE(0., 0.);
+   __shared__ magmaDoubleComplex tlocal[ BLOCK_SIZE ];
+   magmaDoubleComplex res = MAGMA_Z_MAKE(0., 0.);
 
    tlocal[i] = t[i];
    __syncthreads();
@@ -138,13 +138,13 @@ void magma_ztrmv_kernel(const cuDoubleComplex *T, int ldt, cuDoubleComplex *t)
 }
 
 __global__
-void magma_ztrmv_kernel2(const cuDoubleComplex *T, int ldt, cuDoubleComplex *t, 
-                         cuDoubleComplex *y, cuDoubleComplex *tau)
+void magma_ztrmv_kernel2(const magmaDoubleComplex *T, int ldt, magmaDoubleComplex *t, 
+                         magmaDoubleComplex *y, magmaDoubleComplex *tau)
 {
    const int i = threadIdx.x;
    T += blockIdx.x;
 
-   __shared__ cuDoubleComplex sum[ 128 ];
+   __shared__ magmaDoubleComplex sum[ 128 ];
 
    sum[i] = T[i*ldt]*t[i];
    zsum_reduce(blockDim.x, i, sum);
@@ -161,12 +161,12 @@ void magma_ztrmv_kernel2(const cuDoubleComplex *T, int ldt, cuDoubleComplex *t,
 //==============================================================================
 
 __global__
-void magma_ztrmv_tkernel(cuDoubleComplex *T, int ldt, cuDoubleComplex *t, cuDoubleComplex *y)
+void magma_ztrmv_tkernel(magmaDoubleComplex *T, int ldt, magmaDoubleComplex *t, magmaDoubleComplex *y)
 {
    const int i = threadIdx.x;
    T += blockIdx.x*ldt;
 
-   __shared__ cuDoubleComplex sum[ 128 ];
+   __shared__ magmaDoubleComplex sum[ 128 ];
 
    sum[i] = MAGMA_Z_CNJG(T[i])*t[i];
    zsum_reduce(blockDim.x, i, sum);
@@ -194,9 +194,9 @@ void magma_ztrmv_tkernel(cuDoubleComplex *T, int ldt, cuDoubleComplex *t, cuDoub
     LAPACK's zlarf routine. 
  */
 extern "C" void
-magma_zlarfx_gpu(int m, int n, cuDoubleComplex *v, cuDoubleComplex *tau,
-                cuDoubleComplex *c, int ldc, double *xnorm, 
-                cuDoubleComplex *T, int i, cuDoubleComplex *work )
+magma_zlarfx_gpu(int m, int n, magmaDoubleComplex *v, magmaDoubleComplex *tau,
+                magmaDoubleComplex *c, int ldc, double *xnorm, 
+                magmaDoubleComplex *T, int i, magmaDoubleComplex *work )
 {
     int N = n + i + 1;
 

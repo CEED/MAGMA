@@ -16,15 +16,15 @@
 #define PRECISION_z
 
 __global__
-void magma_zlarfg_gpu_kernel( int n, cuDoubleComplex* dx0, cuDoubleComplex* dx, 
-                              cuDoubleComplex *dtau, double *dxnorm )
+void magma_zlarfg_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComplex* dx, 
+                              magmaDoubleComplex *dtau, double *dxnorm )
 {
     const int i = threadIdx.x;
     const int j = i + BLOCK_SIZE * blockIdx.x;
-    __shared__ cuDoubleComplex scale;
+    __shared__ magmaDoubleComplex scale;
     __shared__ double xnorm;    
   
-    cuDoubleComplex dxi;
+    magmaDoubleComplex dxi;
 
 #if (defined(PRECISION_s) || defined(PRECISION_d))
     if( n <= 1 ) {
@@ -59,7 +59,7 @@ void magma_zlarfg_gpu_kernel( int n, cuDoubleComplex* dx0, cuDoubleComplex* dx,
 
             scale = 1. / (alpha - beta);
 #else
-            cuDoubleComplex alpha = *dx0;
+            magmaDoubleComplex alpha = *dx0;
             double alphar =  MAGMA_Z_REAL(alpha), alphai = MAGMA_Z_IMAG(alpha);
 
             // no need to compute the norm as it is passed as input
@@ -84,15 +84,15 @@ void magma_zlarfg_gpu_kernel( int n, cuDoubleComplex* dx0, cuDoubleComplex* dx,
 }
 
 __global__
-void magma_zlarfg2_gpu_kernel( int n, cuDoubleComplex* dx0, cuDoubleComplex* dx,
-                              cuDoubleComplex *dtau, double *dxnorm, cuDoubleComplex* dAkk)
+void magma_zlarfg2_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComplex* dx,
+                              magmaDoubleComplex *dtau, double *dxnorm, magmaDoubleComplex* dAkk)
 {
     const int i = threadIdx.x;
     const int j = i + BLOCK_SIZE * blockIdx.x;
-    __shared__ cuDoubleComplex scale;
+    __shared__ magmaDoubleComplex scale;
     __shared__ double xnorm;
 
-    cuDoubleComplex dxi;
+    magmaDoubleComplex dxi;
 
 /*
 #if (defined(PRECISION_s) || defined(PRECISION_d))
@@ -129,7 +129,7 @@ void magma_zlarfg2_gpu_kernel( int n, cuDoubleComplex* dx0, cuDoubleComplex* dx,
 
             scale = 1. / (alpha - beta);
 #else
-            cuDoubleComplex alpha = *dx0;
+            magmaDoubleComplex alpha = *dx0;
             double alphar =  MAGMA_Z_REAL(alpha), alphai = MAGMA_Z_IMAG(alpha);
 
             // no need to compute the norm as it is passed as input
@@ -168,8 +168,8 @@ void magma_zlarfg2_gpu_kernel( int n, cuDoubleComplex* dx0, cuDoubleComplex* dx,
    are computed outside the routine and passed to it in dxnorm (array on the GPU).
 */
 extern "C" void
-magma_zlarfg_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx, 
-                 cuDoubleComplex *dtau, double *dxnorm)
+magma_zlarfg_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx, 
+                 magmaDoubleComplex *dtau, double *dxnorm)
 {
     dim3 blocks((n+BLOCK_SIZE-1) / BLOCK_SIZE);
     dim3 threads( BLOCK_SIZE );
@@ -182,8 +182,8 @@ magma_zlarfg_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
 }
 
 extern "C" void
-magma_zlarfg2_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
-                  cuDoubleComplex *dtau, double *dxnorm, cuDoubleComplex *dAkk)
+magma_zlarfg2_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
+                  magmaDoubleComplex *dtau, double *dxnorm, magmaDoubleComplex *dAkk)
 {
     dim3 blocks((n+BLOCK_SIZE-1) / BLOCK_SIZE);
     dim3 threads( BLOCK_SIZE );

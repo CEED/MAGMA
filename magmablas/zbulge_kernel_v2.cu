@@ -53,12 +53,12 @@
 
 extern "C" {
 
-    void magma_zlarfxsym_v2(magma_int_t n, cuDoubleComplex *A, magma_int_t lda, cuDoubleComplex *V, cuDoubleComplex *TAU, cuDoubleComplex *work);
+    void magma_zlarfxsym_v2(magma_int_t n, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *V, magmaDoubleComplex *TAU, magmaDoubleComplex *work);
 
 }
 
 static
-__device__ void zsum_reduce( int n, int i, cuDoubleComplex* x )
+__device__ void zsum_reduce( int n, int i, magmaDoubleComplex* x )
 {
     __syncthreads();
     if ( n >  128 ) { if ( i <  128 && i +  128 < n ) { x[i] += x[i+ 128]; }  __syncthreads(); }
@@ -90,7 +90,7 @@ __device__ void sum_reduce(int n, int i, double* x )
     if ( n >    1 ) { if ( i <    1 && i +    1 < n ) { x[i] += x[i+   1]; }  __syncthreads(); }
 }
 
-__device__ void sum_rowreduce_1d( int n, int thxid, int thyid, cuDoubleComplex x[][BLOCK_SIZEy+1] )// +1 is bad here but this function is used to reduce only 1 column so its OK
+__device__ void sum_rowreduce_1d( int n, int thxid, int thyid, magmaDoubleComplex x[][BLOCK_SIZEy+1] )// +1 is bad here but this function is used to reduce only 1 column so its OK
 {
     __syncthreads();
     if ( n > 1024 ) { if ( thxid < 1024 && thxid + 1024 < n ) { x[thxid][thyid] += x[thxid+1024][thyid]; }  __syncthreads(); }
@@ -107,7 +107,7 @@ __device__ void sum_rowreduce_1d( int n, int thxid, int thyid, cuDoubleComplex x
     if ( n >    2 ) { if ( thxid <    2 && thxid +    2 < n ) { x[thxid][thyid] += x[thxid+   2][thyid]; }  __syncthreads(); }
     if ( n >    1 ) { if ( thxid <    1 && thxid +    1 < n ) { x[thxid][thyid] += x[thxid+   1][thyid]; }  __syncthreads(); }
 }
-__device__ void sum_colreduce_2d(int ncol, int thxid, int thyid, cuDoubleComplex x[BLOCK_SIZEx][BLOCK_SIZEy+1] )
+__device__ void sum_colreduce_2d(int ncol, int thxid, int thyid, magmaDoubleComplex x[BLOCK_SIZEx][BLOCK_SIZEy+1] )
 {
     __syncthreads();
     if ( ncol > 1024 ) { if ( thyid < 1024 && thyid + 1024 < ncol ) { x[thxid][thyid] += x[thxid][thyid+1024]; }  __syncthreads(); }
@@ -124,7 +124,7 @@ __device__ void sum_colreduce_2d(int ncol, int thxid, int thyid, cuDoubleComplex
     if ( ncol >    2 ) { if ( thyid <    2 && thyid +    2 < ncol ) { x[thxid][thyid] += x[thxid][thyid+   2]; }  __syncthreads(); }
     if ( ncol >    1 ) { if ( thyid <    1 && thyid +    1 < ncol ) { x[thxid][thyid] += x[thxid][thyid+   1]; }  __syncthreads(); }
 }
-__device__ void sum_colreduce_2de(int mrow, int ncol, int thxid, int thyid, int blkx, cuDoubleComplex x[][BLOCK_SIZEy+1] )
+__device__ void sum_colreduce_2de(int mrow, int ncol, int thxid, int thyid, int blkx, magmaDoubleComplex x[][BLOCK_SIZEy+1] )
 {
     __syncthreads();
     for(int k=0; k<mrow; k+=blkx){
@@ -146,7 +146,7 @@ __device__ void sum_colreduce_2de(int mrow, int ncol, int thxid, int thyid, int 
 
 
 
-__device__ void sum_rowreduce_2dn( int nrow, int thxid, int thyid, cuDoubleComplex x[BLKD2_SIZE][BLKD1_SIZE] )
+__device__ void sum_rowreduce_2dn( int nrow, int thxid, int thyid, magmaDoubleComplex x[BLKD2_SIZE][BLKD1_SIZE] )
 {
     __syncthreads();
     if ( nrow > 1024 ) { if ( thxid < 1024 && thxid + 1024 < nrow ) { x[thxid][thyid] += x[thxid+1024][thyid]; }  __syncthreads(); }
@@ -164,7 +164,7 @@ __device__ void sum_rowreduce_2dn( int nrow, int thxid, int thyid, cuDoubleCompl
     if ( nrow >    1 ) { if ( thxid <    1 && thxid +    1 < nrow ) { x[thxid][thyid] += x[thxid+   1][thyid]; }  __syncthreads(); }
 }
 
-__device__ void sum_colreduce_2dn(int ncol, int thxid, int thyid, cuDoubleComplex x[BLKD1_SIZE][BLKD2_SIZE+1] )
+__device__ void sum_colreduce_2dn(int ncol, int thxid, int thyid, magmaDoubleComplex x[BLKD1_SIZE][BLKD2_SIZE+1] )
 {
     __syncthreads();
     if ( ncol > 1024 ) { if ( thyid < 1024 && thyid + 1024 < ncol ) { x[thxid][thyid] += x[thxid][thyid+1024]; }  __syncthreads(); }
@@ -192,22 +192,22 @@ __device__ void sum_colreduce_2dn(int ncol, int thxid, int thyid, cuDoubleComple
 #define dTAU(i)   &(dTAU[(i)])
 
 __device__ void zlarfxsym_v2(magma_int_t n, 
-                             cuDoubleComplex *dA, magma_int_t ldda, 
-                             cuDoubleComplex *dV, cuDoubleComplex *dTAU) 
+                             magmaDoubleComplex *dA, magma_int_t ldda, 
+                             magmaDoubleComplex *dV, magmaDoubleComplex *dTAU) 
 {
 /*
     WORK (workspace) double complex array, dimension N
 */
 
     magma_int_t j,nint,gbrow,gbcol,blkjcol;
-    cuDoubleComplex dtmp     = MAGMA_Z_ZERO;
-    cuDoubleComplex c_half   =  MAGMA_Z_HALF;
+    magmaDoubleComplex dtmp     = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_half   =  MAGMA_Z_HALF;
     const int myrow = threadIdx.x % BLOCK_SIZEx, mycol= threadIdx.x / BLOCK_SIZEx,  thid = threadIdx.x;
 
-    __shared__ cuDoubleComplex loctau;
-    __shared__ cuDoubleComplex locv[ MAX_NB ];
-    __shared__ cuDoubleComplex loca[ BLOCK_SIZEx ][ BLOCK_SIZEx+1 ];
-    __shared__ cuDoubleComplex sum[ MAX_NB ][ BLOCK_SIZEy+1];
+    __shared__ magmaDoubleComplex loctau;
+    __shared__ magmaDoubleComplex locv[ MAX_NB ];
+    __shared__ magmaDoubleComplex loca[ BLOCK_SIZEx ][ BLOCK_SIZEx+1 ];
+    __shared__ magmaDoubleComplex sum[ MAX_NB ][ BLOCK_SIZEy+1];
 
     __syncthreads();
     if(thid<n)
@@ -409,13 +409,13 @@ __device__ void zlarfxsym_v2(magma_int_t n,
 ///////////////////////////////////////////////////////////
 //                  TYPE 1-BAND Householder
 ///////////////////////////////////////////////////////////
-__device__ void zlarfg(int n, cuDoubleComplex *dA, cuDoubleComplex *dx,
-                       cuDoubleComplex *dtau)
+__device__ void zlarfg(int n, magmaDoubleComplex *dA, magmaDoubleComplex *dx,
+                       magmaDoubleComplex *dtau)
 {
     const int i = threadIdx.x;
-    __shared__ cuDoubleComplex scale;
+    __shared__ magmaDoubleComplex scale;
     __shared__ double dsum[ MAX_NB ], beta;
-    cuDoubleComplex alpha;
+    magmaDoubleComplex alpha;
 
 #if (defined(PRECISION_s) || defined(PRECISION_d))
 #else
@@ -528,8 +528,8 @@ __device__ void zlarfg(int n, cuDoubleComplex *dA, cuDoubleComplex *dx,
 
 
 __global__
-void magma_ztrdtype1cbHLsym_withQ_v2_gpu_kernel(cuDoubleComplex *dA, int ldda,
-                                                cuDoubleComplex *dV, cuDoubleComplex *dTAU,
+void magma_ztrdtype1cbHLsym_withQ_v2_gpu_kernel(magmaDoubleComplex *dA, int ldda,
+                                                magmaDoubleComplex *dV, magmaDoubleComplex *dTAU,
                                                 int st, int len)
 {
        const int thid = threadIdx.x;
@@ -537,7 +537,7 @@ void magma_ztrdtype1cbHLsym_withQ_v2_gpu_kernel(cuDoubleComplex *dA, int ldda,
           /*
              V(0)  = c_one;
              cblas_zcopy(len-1, A(st+1, st-1), ione, V(1), ione);
-             memset(A(st+1, st-1), 0, (len-1)*sizeof(cuDoubleComplex));
+             memset(A(st+1, st-1), 0, (len-1)*sizeof(magmaDoubleComplex));
           */
           if (thid==0){
              dV[0] = MAGMA_Z_ONE;
@@ -561,11 +561,11 @@ void magma_ztrdtype1cbHLsym_withQ_v2_gpu_kernel(cuDoubleComplex *dA, int ldda,
 
 extern "C" void
 magma_ztrdtype1cbHLsym_withQ_v2_gpu(magma_int_t n, magma_int_t nb, 
-                                    cuDoubleComplex *dA, magma_int_t ldda, 
-                                    cuDoubleComplex *dV, magma_int_t lddv, 
-                                    cuDoubleComplex *dTAU,
+                                    magmaDoubleComplex *dA, magma_int_t ldda, 
+                                    magmaDoubleComplex *dV, magma_int_t lddv, 
+                                    magmaDoubleComplex *dTAU,
                                     magma_int_t st, magma_int_t ed, magma_int_t sweep, 
-                                    magma_int_t Vblksiz, cuDoubleComplex *dwork) 
+                                    magma_int_t Vblksiz, magmaDoubleComplex *dwork) 
 {
 /*
     WORK (workspace) double complex array, dimension N
@@ -584,7 +584,7 @@ magma_ztrdtype1cbHLsym_withQ_v2_gpu(magma_int_t n, magma_int_t nb,
     /* === Compute the following using one multiprocessor with BLOCK_SIZE threads ===
        *V(vpos)  = c_one;
        cblas_zcopy(len-1, A(st+1, st-1), ione, V(vpos+1), ione);
-       memset(A(st+1, st-1), 0, (len-1)*sizeof(cuDoubleComplex));
+       memset(A(st+1, st-1), 0, (len-1)*sizeof(magmaDoubleComplex));
 
        // Eliminate the col  at st-1 
        lapackf77_zlarfg( &len, A(st, st-1), V(vpos+1), &ione, TAU(taupos) );
@@ -645,13 +645,13 @@ magma_ztrdtype1cbHLsym_withQ_v2_gpu(magma_int_t n, magma_int_t nb,
 //====================================================================================================
 //    RIGHT + ZLARFG + LEFT 2D BLOCKED when matrix fir into shared
 //====================================================================================================
-__device__ void zlarfrgl(int m, int n, cuDoubleComplex *vr, cuDoubleComplex dtaur, 
-                       cuDoubleComplex *vl, cuDoubleComplex *dtaul,
-                       cuDoubleComplex *c, int ldc)
+__device__ void zlarfrgl(int m, int n, magmaDoubleComplex *vr, magmaDoubleComplex dtaur, 
+                       magmaDoubleComplex *vl, magmaDoubleComplex *dtaul,
+                       magmaDoubleComplex *c, int ldc)
 {
 
    const int thid = threadIdx.x;
-   __shared__ cuDoubleComplex loctau;
+   __shared__ magmaDoubleComplex loctau;
    __syncthreads();
 
    if(thid==0) loctau     = dtaur;
@@ -660,16 +660,16 @@ __device__ void zlarfrgl(int m, int n, cuDoubleComplex *vr, cuDoubleComplex dtau
 
    if ( !MAGMA_Z_EQUAL(loctau, MAGMA_Z_ZERO) ) {
 
-       cuDoubleComplex dalpha = MAGMA_Z_ZERO;
-       cuDoubleComplex lsum = MAGMA_Z_ZERO;
+       magmaDoubleComplex dalpha = MAGMA_Z_ZERO;
+       magmaDoubleComplex lsum = MAGMA_Z_ZERO;
        magma_int_t j;
        const int myrow = threadIdx.x % BLOCK_SIZEx, mycol= threadIdx.x / BLOCK_SIZEx;
-       __shared__ cuDoubleComplex locv[ BLOCK_SIZEx ];
-       __shared__ cuDoubleComplex loca[ BLOCK_SIZEx ][ BLOCK_SIZEx+1 ];
-       __shared__ cuDoubleComplex sum[ BLOCK_SIZEx ][ BLOCK_SIZEy+1];
+       __shared__ magmaDoubleComplex locv[ BLOCK_SIZEx ];
+       __shared__ magmaDoubleComplex loca[ BLOCK_SIZEx ][ BLOCK_SIZEx+1 ];
+       __shared__ magmaDoubleComplex sum[ BLOCK_SIZEx ][ BLOCK_SIZEy+1];
 
        
-       //__shared__ cuDoubleComplex sumrow[ BLOCK_SIZEy ][ BLOCK_SIZEx];
+       //__shared__ magmaDoubleComplex sumrow[ BLOCK_SIZEy ][ BLOCK_SIZEx];
 
  
        if(thid<n)
@@ -800,12 +800,12 @@ __device__ void zlarfrgl(int m, int n, cuDoubleComplex *vr, cuDoubleComplex dtau
 //====================================================================================================
 //    RIGHT UPDATE 2D BLOCKED
 //====================================================================================================
-__device__ void zlarfr(int m, int n, cuDoubleComplex *v, cuDoubleComplex dtau, 
-                       cuDoubleComplex *c, int ldc)
+__device__ void zlarfr(int m, int n, magmaDoubleComplex *v, magmaDoubleComplex dtau, 
+                       magmaDoubleComplex *c, int ldc)
 {
 
    const int thid = threadIdx.x;
-   __shared__ cuDoubleComplex loctau;
+   __shared__ magmaDoubleComplex loctau;
    __syncthreads();
 
 
@@ -813,12 +813,12 @@ __device__ void zlarfr(int m, int n, cuDoubleComplex *v, cuDoubleComplex dtau,
    __syncthreads();
 
    if ( !MAGMA_Z_EQUAL(loctau, MAGMA_Z_ZERO) ) {
-      cuDoubleComplex lsum = MAGMA_Z_ZERO;
+      magmaDoubleComplex lsum = MAGMA_Z_ZERO;
       magma_int_t j, gbrow, mpad;
       const int myrow = threadIdx.x % BLKD1_SIZE, mycol= threadIdx.x / BLKD1_SIZE;
-      __shared__ cuDoubleComplex locv[ MAX_NB ];
-      __shared__ cuDoubleComplex loca[ BLKD1_SIZE ][ MAX_NB+1 ];
-      __shared__ cuDoubleComplex sum[ BLKD1_SIZE ][ BLKD2_SIZE+1];
+      __shared__ magmaDoubleComplex locv[ MAX_NB ];
+      __shared__ magmaDoubleComplex loca[ BLKD1_SIZE ][ MAX_NB+1 ];
+      __shared__ magmaDoubleComplex sum[ BLKD1_SIZE ][ BLKD2_SIZE+1];
 
       if(thid<n)
           locv[thid] = v[thid];
@@ -871,12 +871,12 @@ __device__ void zlarfr(int m, int n, cuDoubleComplex *v, cuDoubleComplex dtau,
 //====================================================================================================
 //    LEFT UPDATE 2D BLOCKED
 //====================================================================================================
-__device__ void zlarfl(int m, int n, cuDoubleComplex *v, cuDoubleComplex dtau, 
-                       cuDoubleComplex *c, int ldc)
+__device__ void zlarfl(int m, int n, magmaDoubleComplex *v, magmaDoubleComplex dtau, 
+                       magmaDoubleComplex *c, int ldc)
 {
 
    const int thid = threadIdx.x;
-   __shared__ cuDoubleComplex loctau;
+   __shared__ magmaDoubleComplex loctau;
    __syncthreads();
 
 
@@ -884,14 +884,14 @@ __device__ void zlarfl(int m, int n, cuDoubleComplex *v, cuDoubleComplex dtau,
    __syncthreads();
 
    if ( !MAGMA_Z_EQUAL(loctau, MAGMA_Z_ZERO) ) {
-      cuDoubleComplex lsum = MAGMA_Z_ZERO;
+      magmaDoubleComplex lsum = MAGMA_Z_ZERO;
       magma_int_t j, gbcol, npad;
       magma_int_t idlastblk,blkid,blknbcol,gbrow,blkjcol;
       //magma_int_t irow,icol,blksize;
       const int mycol = threadIdx.x % BLKD1_SIZE, myrow= threadIdx.x / BLKD1_SIZE;
-      __shared__ cuDoubleComplex locv[ MAX_NB ];
-      __shared__ cuDoubleComplex loca[ MAX_NB ] [ BLKD1_SIZE +1];
-      __shared__ cuDoubleComplex sum[ BLKD2_SIZE] [ BLKD1_SIZE ];
+      __shared__ magmaDoubleComplex locv[ MAX_NB ];
+      __shared__ magmaDoubleComplex loca[ MAX_NB ] [ BLKD1_SIZE +1];
+      __shared__ magmaDoubleComplex sum[ BLKD2_SIZE] [ BLKD1_SIZE ];
 
       if(thid<m)
           locv[thid] = v[thid];
@@ -972,24 +972,24 @@ __device__ void zlarfl(int m, int n, cuDoubleComplex *v, cuDoubleComplex dtau,
 }
 //====================================================================================================
 __global__ void
-magma_zlarfrgl_gpu_kernel(int lem, int len, cuDoubleComplex *dVR, cuDoubleComplex *dTAUR,
-                        cuDoubleComplex *dVL, cuDoubleComplex *dTAUL,
-                        cuDoubleComplex *dA, int ldda)
+magma_zlarfrgl_gpu_kernel(int lem, int len, magmaDoubleComplex *dVR, magmaDoubleComplex *dTAUR,
+                        magmaDoubleComplex *dVL, magmaDoubleComplex *dTAUL,
+                        magmaDoubleComplex *dA, int ldda)
 {
      zlarfrgl(lem, len, dVR, dTAUR[0], dVL, dTAUL, dA, ldda);
 }
 //====================================================================================================
 __global__ void
-magma_zlarfr_gpu_kernel(int lem, int len, cuDoubleComplex *dV, cuDoubleComplex *dTAU,
-                        cuDoubleComplex *dA, int ldda)
+magma_zlarfr_gpu_kernel(int lem, int len, magmaDoubleComplex *dV, magmaDoubleComplex *dTAU,
+                        magmaDoubleComplex *dA, int ldda)
 {
     zlarfr(lem, len, dV, dTAU[0], dA, ldda);
 }
 //====================================================================================================
 __global__ void
 magma_ztrdtype2cbHLsym_withQ_v2_gpu_kernel(int lem, int len,
-                                           cuDoubleComplex *dA, int ldda,
-                                           cuDoubleComplex *dV, cuDoubleComplex *dTAU,
+                                           magmaDoubleComplex *dA, int ldda,
+                                           magmaDoubleComplex *dV, magmaDoubleComplex *dTAU,
                                            int st, int ed)
 {
      const int thid = threadIdx.x;
@@ -1011,9 +1011,9 @@ magma_ztrdtype2cbHLsym_withQ_v2_gpu_kernel(int lem, int len,
 
 extern "C" void
 magma_ztrdtype2cbHLsym_withQ_v2_gpu(magma_int_t n, magma_int_t nb, 
-                                    cuDoubleComplex *dA, magma_int_t ldda, 
-                                    cuDoubleComplex *dV, magma_int_t lddv, 
-                                    cuDoubleComplex *dTAU,
+                                    magmaDoubleComplex *dA, magma_int_t ldda, 
+                                    magmaDoubleComplex *dV, magma_int_t lddv, 
+                                    magmaDoubleComplex *dTAU,
                                     magma_int_t st, magma_int_t ed, magma_int_t sweep, 
                                     magma_int_t Vblksiz) 
 {
@@ -1066,8 +1066,8 @@ magma_ztrdtype2cbHLsym_withQ_v2_gpu(magma_int_t n, magma_int_t nb,
 #define dTAU(i)   &(dTAU[(i)])
 
 __global__
-void magma_ztrdtype3cbHLsym_withQ_v2_gpu_kernel(cuDoubleComplex *dA, int ldda,
-                                                cuDoubleComplex *dV, cuDoubleComplex *dTAU,
+void magma_ztrdtype3cbHLsym_withQ_v2_gpu_kernel(magmaDoubleComplex *dA, int ldda,
+                                                magmaDoubleComplex *dV, magmaDoubleComplex *dTAU,
                                                 int st, int len)
 {
           /*
@@ -1079,9 +1079,9 @@ void magma_ztrdtype3cbHLsym_withQ_v2_gpu_kernel(cuDoubleComplex *dA, int ldda,
 
 extern "C" void
 magma_ztrdtype3cbHLsym_withQ_v2_gpu(magma_int_t n, magma_int_t nb, 
-                                    cuDoubleComplex *dA, magma_int_t ldda, 
-                                    cuDoubleComplex *dV, magma_int_t lddv, 
-                                    cuDoubleComplex *dTAU,
+                                    magmaDoubleComplex *dA, magma_int_t ldda, 
+                                    magmaDoubleComplex *dV, magma_int_t lddv, 
+                                    magmaDoubleComplex *dTAU,
                                     magma_int_t st, magma_int_t ed, magma_int_t sweep, 
                                     magma_int_t Vblksiz) 
 {

@@ -17,16 +17,16 @@
 #define A(i, j)  (A + (i) + (j)*lda)   // A(i, j) means at i row, j column
 
 void magma_zswap(
-    magma_int_t n, cuDoubleComplex *x, magma_int_t i, magma_int_t j, magma_int_t incx);
+    magma_int_t n, magmaDoubleComplex *x, magma_int_t i, magma_int_t j, magma_int_t incx);
 
 void magma_zscal_zgeru(
-    magma_int_t m, magma_int_t n, cuDoubleComplex *A, magma_int_t lda);
+    magma_int_t m, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda);
 
 
 extern "C" magma_int_t
 magma_zgetf2_gpu(
     magma_int_t m, magma_int_t n,
-    cuDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *A, magma_int_t lda,
     magma_int_t *ipiv,
     magma_int_t* info )
 {
@@ -135,19 +135,19 @@ magma_zgetf2_gpu(
 #define zgeru_bs 1024
 
 
-__global__ void kernel_zswap(int n, cuDoubleComplex *x, int i, int j, int incx)
+__global__ void kernel_zswap(int n, magmaDoubleComplex *x, int i, int j, int incx)
 {
     int id = blockIdx.x * zswap_bs + threadIdx.x;
 
     if (id < n) {
-        cuDoubleComplex res = x[i + incx*id];
+        magmaDoubleComplex res = x[i + incx*id];
         x[i + incx*id] = x[j + incx*id];
         x[j + incx*id] = res;
     }
 }
 
 
-void magma_zswap(int n, cuDoubleComplex *x, int i, int j, int incx)
+void magma_zswap(int n, magmaDoubleComplex *x, int i, int j, int incx)
 {
 /*
     zswap two row vectors: ith and jth
@@ -159,16 +159,16 @@ void magma_zswap(int n, cuDoubleComplex *x, int i, int j, int incx)
 }
 
 
-extern __shared__ cuDoubleComplex shared_data[];
+extern __shared__ magmaDoubleComplex shared_data[];
 
 __global__ void
-kernel_zscal_zgeru(int m, int n, cuDoubleComplex *A, int lda)
+kernel_zscal_zgeru(int m, int n, magmaDoubleComplex *A, int lda)
 {
-    cuDoubleComplex *shared_y = (cuDoubleComplex *)shared_data;
+    magmaDoubleComplex *shared_y = (magmaDoubleComplex *)shared_data;
 
     int tid = blockIdx.x * zgeru_bs + threadIdx.x;
 
-    cuDoubleComplex reg = MAGMA_Z_ZERO;
+    magmaDoubleComplex reg = MAGMA_Z_ZERO;
 
     if (threadIdx.x < n) {
         shared_y[threadIdx.x] = A[lda * threadIdx.x];
@@ -191,7 +191,7 @@ kernel_zscal_zgeru(int m, int n, cuDoubleComplex *A, int lda)
 }
 
 
-void magma_zscal_zgeru(int m, int n, cuDoubleComplex *A, int lda)
+void magma_zscal_zgeru(int m, int n, magmaDoubleComplex *A, int lda)
 {
 /*
 
@@ -203,6 +203,6 @@ void magma_zscal_zgeru(int m, int n, cuDoubleComplex *A, int lda)
     dim3 threads(zgeru_bs, 1, 1);
     int num_blocks = (m - 1)/zgeru_bs + 1;
     dim3 grid(num_blocks,1);
-    size_t shared_size = sizeof(cuDoubleComplex)*(n);
+    size_t shared_size = sizeof(magmaDoubleComplex)*(n);
     kernel_zscal_zgeru<<< grid, threads, shared_size, magma_stream>>>(m, n, A, lda);
 }

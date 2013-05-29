@@ -18,8 +18,8 @@
 //===========================================================================
 extern "C" void
 magmablas_zsetmatrix_1D_bcyclic( magma_int_t m, magma_int_t n,
-                                 const cuDoubleComplex *hA,   magma_int_t lda,
-                                 cuDoubleComplex       *dA[], magma_int_t ldda,
+                                 const magmaDoubleComplex *hA,   magma_int_t lda,
+                                 magmaDoubleComplex       *dA[], magma_int_t ldda,
                                  magma_int_t num_gpus, magma_int_t nb )
 {
     magma_int_t i, d, nk;
@@ -46,8 +46,8 @@ magmablas_zsetmatrix_1D_bcyclic( magma_int_t m, magma_int_t n,
 //===========================================================================
 extern "C" void
 magmablas_zgetmatrix_1D_bcyclic( magma_int_t m, magma_int_t n,
-                                 cuDoubleComplex  *dA[], magma_int_t ldda,
-                                 cuDoubleComplex  *hA,   magma_int_t lda,
+                                 magmaDoubleComplex  *dA[], magma_int_t ldda,
+                                 magmaDoubleComplex  *hA,   magma_int_t lda,
                                  magma_int_t num_gpus, magma_int_t nb )
 {
     magma_int_t i, d, nk;

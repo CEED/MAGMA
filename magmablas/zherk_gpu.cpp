@@ -14,15 +14,15 @@
 extern "C"
 void magmablas_zherk_gpu(
     char uplo, char trans, magma_int_t n, magma_int_t k, magma_int_t nb,
-    double alpha, cuDoubleComplex *dA, magma_int_t lda, magma_int_t aoff,
-    double beta,           cuDoubleComplex *dC, magma_int_t ldc,  magma_int_t offset)
+    double alpha, magmaDoubleComplex *dA, magma_int_t lda, magma_int_t aoff,
+    double beta,           magmaDoubleComplex *dC, magma_int_t ldc,  magma_int_t offset)
 {
     #define dA(i, j) (dA + (i) + (j)*lda + (aoff) )
     #define dC(i, j) (dC + (i) + (j)*ldc)
     char transA;
     char transB;  
-    cuDoubleComplex cbeta  = MAGMA_Z_MAKE( beta, 0. );
-    cuDoubleComplex calpha = MAGMA_Z_MAKE( alpha, 0. );
+    magmaDoubleComplex cbeta  = MAGMA_Z_MAKE( beta, 0. );
+    magmaDoubleComplex calpha = MAGMA_Z_MAKE( alpha, 0. );
     
     if(trans==MagmaNoTrans){
         transA = MagmaNoTrans;

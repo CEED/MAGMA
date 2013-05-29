@@ -34,7 +34,7 @@
 // Having n as template parameter allows compiler to evaluate some conditions at compile time.
 
 template< int n >
-__device__ void sum_reduce2( /*int n,*/ int j, int k, int i, cuDoubleComplex x[][ BLK_N +1][ BLK_K +1] )
+__device__ void sum_reduce2( /*int n,*/ int j, int k, int i, magmaDoubleComplex x[][ BLK_N +1][ BLK_K +1] )
 {
     __syncthreads();
 /*
@@ -59,20 +59,20 @@ __device__ void sum_reduce2( /*int n,*/ int j, int k, int i, cuDoubleComplex x[]
 //==============================================================================
 
 __global__
-void magmablas_zgemm_reduce_kernel(magma_int_t k, cuDoubleComplex alpha, 
-                                   const cuDoubleComplex * __restrict__ d_A, magma_int_t lda,
-                                   const cuDoubleComplex * __restrict__ d_B, magma_int_t ldb,
-                                   cuDoubleComplex beta,
-                                   cuDoubleComplex *d_C, magma_int_t ldc)
+void magmablas_zgemm_reduce_kernel(magma_int_t k, magmaDoubleComplex alpha, 
+                                   const magmaDoubleComplex * __restrict__ d_A, magma_int_t lda,
+                                   const magmaDoubleComplex * __restrict__ d_B, magma_int_t ldb,
+                                   magmaDoubleComplex beta,
+                                   magmaDoubleComplex *d_C, magma_int_t ldc)
 {
         const int i = threadIdx.x;
 
-        const cuDoubleComplex *dA = d_A + (blockIdx.x*BLK_M + threadIdx.y) * lda;
-        const cuDoubleComplex *dB = d_B + (blockIdx.y*BLK_N + threadIdx.z) * ldb;
-        cuDoubleComplex *dC = d_C + blockIdx.x*BLK_M + blockIdx.y*BLK_N * ldc;
+        const magmaDoubleComplex *dA = d_A + (blockIdx.x*BLK_M + threadIdx.y) * lda;
+        const magmaDoubleComplex *dB = d_B + (blockIdx.y*BLK_N + threadIdx.z) * ldb;
+        magmaDoubleComplex *dC = d_C + blockIdx.x*BLK_M + blockIdx.y*BLK_N * ldc;
 
-        __shared__ cuDoubleComplex sum[BLK_M][BLK_N+1][ BLK_K +1];
-        cuDoubleComplex lsum;
+        __shared__ magmaDoubleComplex sum[BLK_M][BLK_N+1][ BLK_K +1];
+        magmaDoubleComplex lsum;
 
         /*  w := v' * C  */
         lsum = MAGMA_Z_ZERO;
@@ -96,9 +96,9 @@ void magmablas_zgemm_reduce_kernel(magma_int_t k, cuDoubleComplex alpha,
 
 extern "C" void
 magmablas_zgemm_reduce(magma_int_t m, magma_int_t n, magma_int_t k,
-                       cuDoubleComplex alpha, const cuDoubleComplex *d_A, magma_int_t lda,
-                       const cuDoubleComplex *d_B, magma_int_t ldb,
-                       cuDoubleComplex beta,        cuDoubleComplex *d_C, magma_int_t ldc )
+                       magmaDoubleComplex alpha, const magmaDoubleComplex *d_A, magma_int_t lda,
+                       const magmaDoubleComplex *d_B, magma_int_t ldb,
+                       magmaDoubleComplex beta,        magmaDoubleComplex *d_C, magma_int_t ldc )
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville

@@ -29,27 +29,27 @@
  */
 
 __global__ void
-magmablas_zsymv_200_L_special( magma_int_t n, cuDoubleComplex alpha,
-                               const cuDoubleComplex *A, magma_int_t lda,
-                               const cuDoubleComplex *x, magma_int_t incx,
-                               cuDoubleComplex  beta,
-                               cuDoubleComplex *y, magma_int_t incy,
-                               cuDoubleComplex *WC)
+magmablas_zsymv_200_L_special( magma_int_t n, magmaDoubleComplex alpha,
+                               const magmaDoubleComplex *A, magma_int_t lda,
+                               const magmaDoubleComplex *x, magma_int_t incx,
+                               magmaDoubleComplex  beta,
+                               magmaDoubleComplex *y, magma_int_t incy,
+                               magmaDoubleComplex *WC)
 {
     magma_int_t tx   = threadIdx.x ;
     magma_int_t ty   = threadIdx.y ;
     magma_int_t blkc = blockIdx.x ;
 
-    cuDoubleComplex res  = MAGMA_Z_ZERO;
-    cuDoubleComplex res_ = MAGMA_Z_ZERO;
-    cuDoubleComplex res1 = MAGMA_Z_ZERO;
+    magmaDoubleComplex res  = MAGMA_Z_ZERO;
+    magmaDoubleComplex res_ = MAGMA_Z_ZERO;
+    magmaDoubleComplex res1 = MAGMA_Z_ZERO;
 
-    __shared__ cuDoubleComplex la   [quarter_thread_x][thread_x+2];
-    __shared__ cuDoubleComplex buff [thread_x];
-    __shared__ cuDoubleComplex buff2 [thread_x];
+    __shared__ magmaDoubleComplex la   [quarter_thread_x][thread_x+2];
+    __shared__ magmaDoubleComplex buff [thread_x];
+    __shared__ magmaDoubleComplex buff2 [thread_x];
 
-    cuDoubleComplex tr[4];
-    cuDoubleComplex b[4];
+    magmaDoubleComplex tr[4];
+    magmaDoubleComplex b[4];
 
     magma_int_t break_d   =  thread_x * blkc;
     const magma_int_t td  = (thread_x * ty ) + tx;
@@ -127,7 +127,7 @@ magmablas_zsymv_200_L_special( magma_int_t n, cuDoubleComplex alpha,
     la[0][bank_shift*tx_+ty_]= res ;
     __syncthreads();
 
-    cuDoubleComplex res2;
+    magmaDoubleComplex res2;
     MAGMA_Z_SET2REAL(res2,0);
     if( ty_== 1 )
         res2 = la[0][tx_*bank_shift+0]+la[0][tx_*bank_shift+1]
@@ -363,28 +363,28 @@ magmablas_zsymv_200_L_special( magma_int_t n, cuDoubleComplex alpha,
  *    Lower case for generic sizes
  */
 __global__ void
-magmablas_zsymv_200_L_generic(magma_int_t n, cuDoubleComplex alpha,
-                              const cuDoubleComplex *A, magma_int_t lda,
-                              const cuDoubleComplex *x, magma_int_t incx,
-                              cuDoubleComplex beta,
-                              cuDoubleComplex *y, magma_int_t incy,
-                              cuDoubleComplex *WC,
+magmablas_zsymv_200_L_generic(magma_int_t n, magmaDoubleComplex alpha,
+                              const magmaDoubleComplex *A, magma_int_t lda,
+                              const magmaDoubleComplex *x, magma_int_t incx,
+                              magmaDoubleComplex beta,
+                              magmaDoubleComplex *y, magma_int_t incy,
+                              magmaDoubleComplex *WC,
                               magma_int_t m_mod_thread_x)
 {
     magma_int_t tx   = threadIdx.x ;
     magma_int_t ty   = threadIdx.y ;
     magma_int_t blkc = blockIdx.x ;
 
-    cuDoubleComplex res  = MAGMA_Z_ZERO;
-    cuDoubleComplex res_ = MAGMA_Z_ZERO;
-    cuDoubleComplex res1 = MAGMA_Z_ZERO;
+    magmaDoubleComplex res  = MAGMA_Z_ZERO;
+    magmaDoubleComplex res_ = MAGMA_Z_ZERO;
+    magmaDoubleComplex res1 = MAGMA_Z_ZERO;
 
-    __shared__ cuDoubleComplex la   [quarter_thread_x][thread_x+2];
-    __shared__ cuDoubleComplex buff [thread_x];
-    __shared__ cuDoubleComplex buff2[thread_x];
+    __shared__ magmaDoubleComplex la   [quarter_thread_x][thread_x+2];
+    __shared__ magmaDoubleComplex buff [thread_x];
+    __shared__ magmaDoubleComplex buff2[thread_x];
 
-    cuDoubleComplex tr[4];
-    cuDoubleComplex b[8];
+    magmaDoubleComplex tr[4];
+    magmaDoubleComplex b[8];
 
     magma_int_t break_d   =  thread_x * blkc;
     const magma_int_t td  = (thread_x * ty ) + tx;
@@ -527,7 +527,7 @@ magmablas_zsymv_200_L_generic(magma_int_t n, cuDoubleComplex alpha,
     la[0][bank_shift*tx_+ty_]= res ;
     __syncthreads();
 
-    cuDoubleComplex res2;
+    magmaDoubleComplex res2;
     MAGMA_Z_SET2REAL(res2,0);
     if( ty_== 1 )
         res2 = la[0][tx_*bank_shift+0]
@@ -788,17 +788,17 @@ magmablas_zsymv_200_L_generic(magma_int_t n, cuDoubleComplex alpha,
 }
 
 __global__ void
-magmablas_zsymv_200_L_update(magma_int_t n, cuDoubleComplex alpha,
-                         const cuDoubleComplex* A, magma_int_t lda,
-                         const cuDoubleComplex *x, magma_int_t incx,
-                         cuDoubleComplex beta,
-                         cuDoubleComplex *y, magma_int_t incy,
-                         cuDoubleComplex *WC )
+magmablas_zsymv_200_L_update(magma_int_t n, magmaDoubleComplex alpha,
+                         const magmaDoubleComplex* A, magma_int_t lda,
+                         const magmaDoubleComplex *x, magma_int_t incx,
+                         magmaDoubleComplex beta,
+                         magmaDoubleComplex *y, magma_int_t incy,
+                         magmaDoubleComplex *WC )
 {
     magma_int_t i;
     magma_int_t tx  = threadIdx.x ;
     magma_int_t ind = blockIdx.x * thread_x + tx ;
-    cuDoubleComplex Ca;
+    magmaDoubleComplex Ca;
 
     MAGMA_Z_SET2REAL(Ca, 0) ;
     WC+= ind + lda * blockIdx.x;
@@ -813,12 +813,12 @@ magmablas_zsymv_200_L_update(magma_int_t n, cuDoubleComplex alpha,
 
 
 extern "C"
-void magmablas_zsymv_200_L(magma_int_t m, cuDoubleComplex alpha,
-                           const cuDoubleComplex *A, magma_int_t lda,
-                           const cuDoubleComplex *X, magma_int_t incx,
-                           cuDoubleComplex beta,
-                           cuDoubleComplex *Y, magma_int_t incy,
-                           cuDoubleComplex *dC_work)
+void magmablas_zsymv_200_L(magma_int_t m, magmaDoubleComplex alpha,
+                           const magmaDoubleComplex *A, magma_int_t lda,
+                           const magmaDoubleComplex *X, magma_int_t incx,
+                           magmaDoubleComplex beta,
+                           magmaDoubleComplex *Y, magma_int_t incy,
+                           magmaDoubleComplex *dC_work)
 {
     magma_int_t blocks;
 
@@ -940,11 +940,11 @@ void magmablas_zsymv_200_L(magma_int_t m, cuDoubleComplex alpha,
 extern "C"
 magma_int_t
 magmablas_zsymv_200( char uplo, magma_int_t n,
-                     cuDoubleComplex alpha, 
-                     const cuDoubleComplex *A, magma_int_t lda,
-                     const cuDoubleComplex *X, magma_int_t incx,
-                     cuDoubleComplex beta,  
-                     cuDoubleComplex *Y, magma_int_t incy)
+                     magmaDoubleComplex alpha, 
+                     const magmaDoubleComplex *A, magma_int_t lda,
+                     const magmaDoubleComplex *X, magma_int_t incx,
+                     magmaDoubleComplex beta,  
+                     magmaDoubleComplex *Y, magma_int_t incy)
 {
     char      uplo_[2] = {uplo, 0};
     int  upper    = lapackf77_lsame(uplo_, "U");
@@ -980,12 +980,12 @@ magmablas_zsymv_200( char uplo, magma_int_t n,
     }
     else
     {
-        cuDoubleComplex *dC_work;
+        magmaDoubleComplex *dC_work;
         magma_int_t blocks    = n / thread_x + (n % thread_x != 0);
         magma_int_t workspace = lda * (blocks + 1);
 
         /* TODO: need to add a MAGMA context to handle workspaces */
-        cublasAlloc( workspace, sizeof(cuDoubleComplex), (void**)&dC_work ) ;
+        cublasAlloc( workspace, sizeof(magmaDoubleComplex), (void**)&dC_work ) ;
         cublasGetError( ) ;
 
         magmablas_zsymv_200_L(n, alpha, A, lda, X, incx, beta, Y, incy, dC_work);
@@ -1036,12 +1036,12 @@ magmablas_zsymv_200( char uplo, magma_int_t n,
 extern "C"
 magma_int_t
 magmablas_zsymv2_200( char uplo, magma_int_t n,
-                      cuDoubleComplex alpha, 
-                      const cuDoubleComplex *A, magma_int_t lda,
-                      const cuDoubleComplex *X, magma_int_t incx,
-                      cuDoubleComplex beta,  
-                      cuDoubleComplex *Y, magma_int_t incy,
-                      cuDoubleComplex *dC_work,
+                      magmaDoubleComplex alpha, 
+                      const magmaDoubleComplex *A, magma_int_t lda,
+                      const magmaDoubleComplex *X, magma_int_t incx,
+                      magmaDoubleComplex beta,  
+                      magmaDoubleComplex *Y, magma_int_t incy,
+                      magmaDoubleComplex *dC_work,
                       magma_int_t lwork)
 {
     char uplo_[2] = {uplo, 0};

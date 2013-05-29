@@ -19,8 +19,8 @@
 
 __global__ void 
 magmagpu_zswapdblk(magma_int_t nb,
-                   cuDoubleComplex *dA1, magma_int_t ldda1, magma_int_t inca1,
-                   cuDoubleComplex *dA2, magma_int_t ldda2, magma_int_t inca2 )
+                   magmaDoubleComplex *dA1, magma_int_t ldda1, magma_int_t inca1,
+                   magmaDoubleComplex *dA2, magma_int_t ldda2, magma_int_t inca2 )
 {
     const magma_int_t tx = threadIdx.x;
     const magma_int_t bx = blockIdx.x;
@@ -28,7 +28,7 @@ magmagpu_zswapdblk(magma_int_t nb,
     dA1 += tx + bx * nb * (ldda1 + inca1);
     dA2 += tx + bx * nb * (ldda2 + inca2);
 
-    cuDoubleComplex tmp;
+    magmaDoubleComplex tmp;
 
     #pragma unroll
     for( magma_int_t i = 0; i < nb; i++ ){
@@ -41,8 +41,8 @@ magmagpu_zswapdblk(magma_int_t nb,
 
 extern "C" void 
 magmablas_zswapdblk(magma_int_t n, magma_int_t nb,
-                    cuDoubleComplex *dA1, magma_int_t ldda1, magma_int_t inca1,
-                    cuDoubleComplex *dA2, magma_int_t ldda2, magma_int_t inca2 )
+                    magmaDoubleComplex *dA1, magma_int_t ldda1, magma_int_t inca1,
+                    magmaDoubleComplex *dA2, magma_int_t ldda2, magma_int_t inca2 )
 {
 /* -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville

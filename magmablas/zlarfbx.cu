@@ -18,8 +18,8 @@
 #endif
 
 
-__global__ void magma_ztrmv_tkernel(cuDoubleComplex *T, int ldt, cuDoubleComplex *v, 
-                                    cuDoubleComplex *y);
+__global__ void magma_ztrmv_tkernel(magmaDoubleComplex *T, int ldt, magmaDoubleComplex *v, 
+                                    magmaDoubleComplex *y);
 
 // ----------------------------------------
 // Does sum reduction of array x, leaving total in x[0].
@@ -28,7 +28,7 @@ __global__ void magma_ztrmv_tkernel(cuDoubleComplex *T, int ldt, cuDoubleComplex
 // Assumes number of threads <= 1024 (which is max number of threads up to CUDA capability 3.0)
 // Having n as template parameter allows compiler to evaluate some conditions at compile time.
 template< int n >
-__device__ void zsum_reduce( /*int n,*/ int i, cuDoubleComplex* x )
+__device__ void zsum_reduce( /*int n,*/ int i, magmaDoubleComplex* x )
 {
     __syncthreads();
     if ( n > 1024 ) { if ( i < 1024 && i + 1024 < n ) { x[i] += x[i+1024]; }  __syncthreads(); }
@@ -50,15 +50,15 @@ __device__ void zsum_reduce( /*int n,*/ int i, cuDoubleComplex* x )
 //==============================================================================
 
 __global__ void 
-magma_zgemv_kernel1(int m, const cuDoubleComplex * __restrict__ V, int ldv, 
-                    const cuDoubleComplex * __restrict__ c, 
-                    cuDoubleComplex *dwork)
+magma_zgemv_kernel1(int m, const magmaDoubleComplex * __restrict__ V, int ldv, 
+                    const magmaDoubleComplex * __restrict__ c, 
+                    magmaDoubleComplex *dwork)
 {
         const int i = threadIdx.x;
-        const cuDoubleComplex *dV = V + (blockIdx.x) * ldv;
+        const magmaDoubleComplex *dV = V + (blockIdx.x) * ldv;
 
-        __shared__ cuDoubleComplex sum[ BLOCK_SIZE ];
-        cuDoubleComplex lsum;
+        __shared__ magmaDoubleComplex sum[ BLOCK_SIZE ];
+        magmaDoubleComplex lsum;
 
         /*  lsum := v' * C  */
         lsum = MAGMA_Z_ZERO;
@@ -76,14 +76,14 @@ magma_zgemv_kernel1(int m, const cuDoubleComplex * __restrict__ V, int ldv,
 //==============================================================================
 
 __global__ void
-magma_zgemv_kernel3(int m, const cuDoubleComplex * __restrict__ V, int ldv, cuDoubleComplex *c,
-                    cuDoubleComplex *dwork, cuDoubleComplex *tau)
+magma_zgemv_kernel3(int m, const magmaDoubleComplex * __restrict__ V, int ldv, magmaDoubleComplex *c,
+                    magmaDoubleComplex *dwork, magmaDoubleComplex *tau)
 {
         const int i = threadIdx.x;
-        const cuDoubleComplex *dV = V + (blockIdx.x) * ldv;
+        const magmaDoubleComplex *dV = V + (blockIdx.x) * ldv;
 
-        __shared__ cuDoubleComplex sum[ BLOCK_SIZE ];
-        cuDoubleComplex lsum;
+        __shared__ magmaDoubleComplex sum[ BLOCK_SIZE ];
+        magmaDoubleComplex lsum;
 
         if (i==0)
            c[0] = MAGMA_Z_ONE;           
@@ -104,12 +104,12 @@ magma_zgemv_kernel3(int m, const cuDoubleComplex * __restrict__ V, int ldv, cuDo
 //==============================================================================
 
 __global__ void
-magma_zgemv_kernel2(int m, int n, const cuDoubleComplex * __restrict__ V, int ldv, 
-                    const cuDoubleComplex * __restrict__ x, cuDoubleComplex *c)
+magma_zgemv_kernel2(int m, int n, const magmaDoubleComplex * __restrict__ V, int ldv, 
+                    const magmaDoubleComplex * __restrict__ x, magmaDoubleComplex *c)
 {
     const int i = threadIdx.x;
     const int j = i + BLOCK_SIZE * blockIdx.x;
-    cuDoubleComplex lsum;
+    magmaDoubleComplex lsum;
 
     V += j;
 
@@ -133,9 +133,9 @@ magma_zgemv_kernel2(int m, int n, const cuDoubleComplex * __restrict__ V, int ld
     k elementary reflectors. 
 */
 extern "C" void
-magma_zlarfbx_gpu(int m, int k, cuDoubleComplex *V, int ldv,
-                  cuDoubleComplex *T, int ldt, cuDoubleComplex *c,
-                  cuDoubleComplex *dwork)
+magma_zlarfbx_gpu(int m, int k, magmaDoubleComplex *V, int ldv,
+                  magmaDoubleComplex *T, int ldt, magmaDoubleComplex *c,
+                  magmaDoubleComplex *dwork)
 {
     /* dwork = V' c                   */
     magma_zgemv_kernel1<<< k, BLOCK_SIZE, 0, magma_stream >>>(m, V, ldv, c, dwork); 

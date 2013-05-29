@@ -28,27 +28,27 @@
  */
 
 __global__ void
-magmablas_chemv_130_L_special( magma_int_t n, cuFloatComplex alpha,
-                               const cuFloatComplex *A, magma_int_t lda,
-                               const cuFloatComplex *x, magma_int_t incx,
-                               cuFloatComplex  beta,
-                               cuFloatComplex *y, magma_int_t incy,
-                               cuFloatComplex *WC)
+magmablas_chemv_130_L_special( magma_int_t n, magmaFloatComplex alpha,
+                               const magmaFloatComplex *A, magma_int_t lda,
+                               const magmaFloatComplex *x, magma_int_t incx,
+                               magmaFloatComplex  beta,
+                               magmaFloatComplex *y, magma_int_t incy,
+                               magmaFloatComplex *WC)
 {
     magma_int_t tx   = threadIdx.x ;
     magma_int_t ty   = threadIdx.y ;
     magma_int_t blkc = blockIdx.x ;
 
-    cuFloatComplex res  = MAGMA_C_ZERO;
-    cuFloatComplex res_ = MAGMA_C_ZERO;
-    cuFloatComplex res1 = MAGMA_C_ZERO;
+    magmaFloatComplex res  = MAGMA_C_ZERO;
+    magmaFloatComplex res_ = MAGMA_C_ZERO;
+    magmaFloatComplex res1 = MAGMA_C_ZERO;
 
-    __shared__ cuFloatComplex la   [quarter_thread_x][thread_x+3]; /* Why +3? */ 
-    __shared__ cuFloatComplex buff [thread_x];
-    __shared__ cuFloatComplex buff2[thread_x];
+    __shared__ magmaFloatComplex la   [quarter_thread_x][thread_x+3]; /* Why +3? */ 
+    __shared__ magmaFloatComplex buff [thread_x];
+    __shared__ magmaFloatComplex buff2[thread_x];
 
-    cuFloatComplex tr[4];
-    cuFloatComplex b[4];
+    magmaFloatComplex tr[4];
+    magmaFloatComplex b[4];
 
     magma_int_t break_d   =  thread_x * blkc;
     const magma_int_t td  = (thread_x * ty ) + tx;
@@ -127,7 +127,7 @@ magmablas_chemv_130_L_special( magma_int_t n, cuFloatComplex alpha,
     la[0][bank_shift*tx_+ty_]= res ;
     __syncthreads();
 
-    cuFloatComplex res2;
+    magmaFloatComplex res2;
     MAGMA_C_SET2REAL(res2,0);
     if( ty_== 1 )
         res2 = la[0][tx_*bank_shift+0]+la[0][tx_*bank_shift+1]
@@ -357,28 +357,28 @@ magmablas_chemv_130_L_special( magma_int_t n, cuFloatComplex alpha,
  *    Lower case for generic sizes
  */
 __global__ void
-magmablas_chemv_130_L_generic(magma_int_t n, cuFloatComplex alpha,
-                              const cuFloatComplex *A, magma_int_t lda,
-                              const cuFloatComplex *x, magma_int_t incx,
-                              cuFloatComplex beta,
-                              cuFloatComplex *y, magma_int_t incy,
-                              cuFloatComplex *WC,
+magmablas_chemv_130_L_generic(magma_int_t n, magmaFloatComplex alpha,
+                              const magmaFloatComplex *A, magma_int_t lda,
+                              const magmaFloatComplex *x, magma_int_t incx,
+                              magmaFloatComplex beta,
+                              magmaFloatComplex *y, magma_int_t incy,
+                              magmaFloatComplex *WC,
                               magma_int_t m_mod_thread_x)
 {
     magma_int_t tx   = threadIdx.x ;
     magma_int_t ty   = threadIdx.y ;
     magma_int_t blkc = blockIdx.x ;
 
-    cuFloatComplex res  = MAGMA_C_ZERO;
-    cuFloatComplex res_ = MAGMA_C_ZERO;
-    cuFloatComplex res1 = MAGMA_C_ZERO;
+    magmaFloatComplex res  = MAGMA_C_ZERO;
+    magmaFloatComplex res_ = MAGMA_C_ZERO;
+    magmaFloatComplex res1 = MAGMA_C_ZERO;
 
-    __shared__ cuFloatComplex la   [quarter_thread_x][thread_x+3];
-    __shared__ cuFloatComplex buff [thread_x];
-    __shared__ cuFloatComplex buff2[thread_x];
+    __shared__ magmaFloatComplex la   [quarter_thread_x][thread_x+3];
+    __shared__ magmaFloatComplex buff [thread_x];
+    __shared__ magmaFloatComplex buff2[thread_x];
 
-    cuFloatComplex tr[4];
-    cuFloatComplex b[8];
+    magmaFloatComplex tr[4];
+    magmaFloatComplex b[8];
 
     magma_int_t break_d   =  thread_x * blkc;
     const magma_int_t td  = (thread_x * ty ) + tx;
@@ -522,7 +522,7 @@ magmablas_chemv_130_L_generic(magma_int_t n, cuFloatComplex alpha,
     la[0][bank_shift*tx_+ty_]= res ;
     __syncthreads();
 
-    cuFloatComplex res2;
+    magmaFloatComplex res2;
     MAGMA_C_SET2REAL(res2,0);
     if( ty_== 1 )
         res2 = la[0][tx_*bank_shift+0]
@@ -783,17 +783,17 @@ magmablas_chemv_130_L_generic(magma_int_t n, cuFloatComplex alpha,
 }
 
 __global__ void
-magmablas_chemv_130_L_update(magma_int_t n, cuFloatComplex alpha,
-                         const cuFloatComplex *A, magma_int_t lda,
-                         const cuFloatComplex *x, magma_int_t incx,
-                         cuFloatComplex beta,
-                         cuFloatComplex *y, magma_int_t incy,
-                         cuFloatComplex *WC )
+magmablas_chemv_130_L_update(magma_int_t n, magmaFloatComplex alpha,
+                         const magmaFloatComplex *A, magma_int_t lda,
+                         const magmaFloatComplex *x, magma_int_t incx,
+                         magmaFloatComplex beta,
+                         magmaFloatComplex *y, magma_int_t incy,
+                         magmaFloatComplex *WC )
 {
     magma_int_t i;
     magma_int_t tx  = threadIdx.x ;
     magma_int_t ind = blockIdx.x * thread_x + tx ;
-    cuFloatComplex Ca;
+    magmaFloatComplex Ca;
 
     MAGMA_C_SET2REAL(Ca, 0) ;
     WC+= ind + lda * blockIdx.x;
@@ -808,12 +808,12 @@ magmablas_chemv_130_L_update(magma_int_t n, cuFloatComplex alpha,
 
 
 extern "C"
-void magmablas_chemv_130_L(magma_int_t m, cuFloatComplex alpha,
-                           const cuFloatComplex *A, magma_int_t lda,
-                           const cuFloatComplex *X, magma_int_t incx,
-                           cuFloatComplex beta,
-                           cuFloatComplex *Y, magma_int_t incy,
-                           cuFloatComplex *dC_work)
+void magmablas_chemv_130_L(magma_int_t m, magmaFloatComplex alpha,
+                           const magmaFloatComplex *A, magma_int_t lda,
+                           const magmaFloatComplex *X, magma_int_t incx,
+                           magmaFloatComplex beta,
+                           magmaFloatComplex *Y, magma_int_t incy,
+                           magmaFloatComplex *dC_work)
 {
     magma_int_t blocks;
 
@@ -935,11 +935,11 @@ void magmablas_chemv_130_L(magma_int_t m, cuFloatComplex alpha,
 extern "C"
 magma_int_t
 magmablas_chemv_130( char uplo, magma_int_t n,
-                     cuFloatComplex alpha, 
-                     const cuFloatComplex *A, magma_int_t lda,
-                     const cuFloatComplex *X, magma_int_t incx,
-                     cuFloatComplex beta,  
-                     cuFloatComplex *Y, magma_int_t incy)
+                     magmaFloatComplex alpha, 
+                     const magmaFloatComplex *A, magma_int_t lda,
+                     const magmaFloatComplex *X, magma_int_t incx,
+                     magmaFloatComplex beta,  
+                     magmaFloatComplex *Y, magma_int_t incy)
 {
     char uplo_[2] = {uplo, 0};
     int  upper    = lapackf77_lsame(uplo_, "U");
@@ -970,12 +970,12 @@ magmablas_chemv_130( char uplo, magma_int_t n,
         cublasChemv(uplo, n, alpha, A, lda, X, incx, beta, Y, incy);
     else
     {
-        cuFloatComplex *dC_work;
+        magmaFloatComplex *dC_work;
         magma_int_t blocks    = n / thread_x + (n % thread_x != 0);
         magma_int_t workspace = lda * (blocks + 1);
 
         /* TODO: need to add a MAGMA context to handle workspaces */
-        cublasAlloc( workspace, sizeof(cuFloatComplex), (void**)&dC_work ) ;
+        cublasAlloc( workspace, sizeof(magmaFloatComplex), (void**)&dC_work ) ;
         cublasGetError( ) ;
 
         magmablas_chemv_130_L(n, alpha, A, lda, X, incx, beta, Y, incy, dC_work);

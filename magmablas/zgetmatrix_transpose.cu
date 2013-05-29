@@ -23,9 +23,9 @@
 //
 extern "C" void 
 magmablas_zgetmatrix_transpose( magma_int_t m, magma_int_t n,
-                                const cuDoubleComplex *dat, magma_int_t ldda,
-                                cuDoubleComplex       *ha,  magma_int_t lda,
-                                cuDoubleComplex       *dB,  magma_int_t lddb, magma_int_t nb )
+                                const magmaDoubleComplex *dat, magma_int_t ldda,
+                                magmaDoubleComplex       *ha,  magma_int_t lda,
+                                magmaDoubleComplex       *dB,  magma_int_t lddb, magma_int_t nb )
 {
     magma_int_t i = 0, j = 0, ib;
 
@@ -67,9 +67,9 @@ magmablas_zgetmatrix_transpose( magma_int_t m, magma_int_t n,
 //===========================================================================
 extern "C" void
 magmablas_zgetmatrix_transpose2( magma_int_t m, magma_int_t n,
-                                 const cuDoubleComplex **dat, magma_int_t *ldda,
-                                 cuDoubleComplex         *ha, magma_int_t  lda,
-                                 cuDoubleComplex        **dB, magma_int_t  lddb, magma_int_t nb,
+                                 const magmaDoubleComplex **dat, magma_int_t *ldda,
+                                 magmaDoubleComplex         *ha, magma_int_t  lda,
+                                 magmaDoubleComplex        **dB, magma_int_t  lddb, magma_int_t nb,
                                  magma_int_t num_gpus, cudaStream_t stream[][2] )
 {
     magma_int_t i = 0, j[4] = {0, 0, 0, 0}, ib, k;

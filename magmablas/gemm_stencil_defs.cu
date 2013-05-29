@@ -9,9 +9,9 @@
 
 #ifdef COMPLEX
   #ifdef DOUBLE
-    typedef cuDoubleComplex FloatingPoint_t;
+    typedef magmaDoubleComplex FloatingPoint_t;
   #else
-    typedef cuFloatComplex FloatingPoint_t;
+    typedef magmaFloatComplex FloatingPoint_t;
   #endif
 #else
   #ifdef DOUBLE
@@ -31,7 +31,7 @@
         FloatingPoint_t tex_fetch(texture<int4> tex_ref, int coord)
         {
             int4 v = tex1Dfetch(tex_ref, coord);
-            return make_cuDoubleComplex(__hiloint2double(v.y, v.x), __hiloint2double(v.w, v.z));
+            return make_magmaDoubleComplex(__hiloint2double(v.y, v.x), __hiloint2double(v.w, v.z));
         }
       #else
         static __device__
@@ -72,13 +72,13 @@
     #define add(A, B)        cuCadd(A, B)
     #define mul(A, B)        cuCmul(A, B)
     #define fma(A, B, C) C = cuCfma(A, B, C)
-    #define make_FloatingPoint(x, y) make_cuDoubleComplex(x, y);
+    #define make_FloatingPoint(x, y) make_magmaDoubleComplex(x, y);
   #else
     #define conj(A)          cuConjf(A)
     #define add(A, B)        cuCaddf(A, B)
     #define mul(A, B)        cuCmulf(A, B)
     #define fma(A, B, C) C = cuCfmaf(A, B, C)
-    #define make_FloatingPoint(x, y) make_cuFloatComplex(x, y);
+    #define make_FloatingPoint(x, y) make_magmaFloatComplex(x, y);
   #endif
 #else
     #define conj(A)           (A)

@@ -23,15 +23,15 @@
 __global__ void
 zlacpy_kernel(
     int m, int n,
-    const cuDoubleComplex *dA, int ldda,
-    cuDoubleComplex       *dB, int lddb )
+    const magmaDoubleComplex *dA, int ldda,
+    magmaDoubleComplex       *dB, int lddb )
 {
     // dA and dB iterate across row i
     int i = blockIdx.x*blockDim.x + threadIdx.x;
     if ( i < m ) {
         dA += i;
         dB += i;
-        const cuDoubleComplex *dAend = dA + n*ldda;
+        const magmaDoubleComplex *dAend = dA + n*ldda;
         while( dA < dAend ) {
             *dB = *dA;
             dA += ldda;
@@ -45,8 +45,8 @@ zlacpy_kernel(
 extern "C" void
 magmablas_zlacpy(
     char uplo, magma_int_t m, magma_int_t n,
-    const cuDoubleComplex *dA, magma_int_t ldda,
-    cuDoubleComplex       *dB, magma_int_t lddb )
+    const magmaDoubleComplex *dA, magma_int_t ldda,
+    magmaDoubleComplex       *dB, magma_int_t lddb )
 {
 /*
       Note

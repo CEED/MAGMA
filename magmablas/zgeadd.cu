@@ -26,16 +26,16 @@
 __global__ void
 zgeadd_kernel(
     int m, int n,
-    cuDoubleComplex alpha,
-    const cuDoubleComplex *dA, int ldda,
-    cuDoubleComplex       *dB, int lddb )
+    magmaDoubleComplex alpha,
+    const magmaDoubleComplex *dA, int ldda,
+    magmaDoubleComplex       *dB, int lddb )
 {
     // dA and dB iterate across row i
     int i = blockIdx.x*blockDim.x + threadIdx.x;
     if ( i < m ) {
         dA += i;
         dB += i;
-        const cuDoubleComplex *dAend = dA + n*ldda;
+        const magmaDoubleComplex *dAend = dA + n*ldda;
         while( dA < dAend ) {
             *dB = alpha*(*dA) + (*dB);
             dA += ldda;
@@ -49,9 +49,9 @@ zgeadd_kernel(
 extern "C" void
 magmablas_zgeadd(
     magma_int_t m, magma_int_t n,
-    cuDoubleComplex alpha,
-    const cuDoubleComplex *dA, magma_int_t ldda,
-    cuDoubleComplex       *dB, magma_int_t lddb )
+    magmaDoubleComplex alpha,
+    const magmaDoubleComplex *dA, magma_int_t ldda,
+    magmaDoubleComplex       *dB, magma_int_t lddb )
 {
 /*
     Purpose

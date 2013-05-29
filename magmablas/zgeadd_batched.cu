@@ -29,18 +29,18 @@
 __global__ void
 zgeadd_batched_kernel(
     int m, int n,
-    cuDoubleComplex alpha,
-    const cuDoubleComplex * const *dAarray, int ldda,
-    cuDoubleComplex              **dBarray, int lddb )
+    magmaDoubleComplex alpha,
+    const magmaDoubleComplex * const *dAarray, int ldda,
+    magmaDoubleComplex              **dBarray, int lddb )
 {
     // dA and dB iterate across row i
-    const cuDoubleComplex *dA = dAarray[ blockIdx.y ];
-    cuDoubleComplex       *dB = dBarray[ blockIdx.y ];
+    const magmaDoubleComplex *dA = dAarray[ blockIdx.y ];
+    magmaDoubleComplex       *dB = dBarray[ blockIdx.y ];
     int i = blockIdx.x*blockDim.x + threadIdx.x;
     if ( i < m ) {
         dA += i;
         dB += i;
-        const cuDoubleComplex *dAend = dA + n*ldda;
+        const magmaDoubleComplex *dAend = dA + n*ldda;
         while( dA < dAend ) {
             *dB = alpha*(*dA) + (*dB);
             dA += ldda;
@@ -54,9 +54,9 @@ zgeadd_batched_kernel(
 extern "C" void
 magmablas_zgeadd_batched(
     magma_int_t m, magma_int_t n,
-    cuDoubleComplex alpha,
-    const cuDoubleComplex * const *dAarray, magma_int_t ldda,
-    cuDoubleComplex              **dBarray, magma_int_t lddb,
+    magmaDoubleComplex alpha,
+    const magmaDoubleComplex * const *dAarray, magma_int_t ldda,
+    magmaDoubleComplex              **dBarray, magma_int_t lddb,
     magma_int_t batchCount )
 {
 /*

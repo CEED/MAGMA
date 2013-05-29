@@ -18,12 +18,12 @@ __device__ int flag = 0;
 
 __global__ void 
 magmaint_zlag2c( magma_int_t M, magma_int_t N, 
-                  const cuDoubleComplex *A, int lda, 
-                  cuFloatComplex *SA,       int ldsa, 
+                  const magmaDoubleComplex *A, int lda, 
+                  magmaFloatComplex *SA,       int ldsa, 
                   double RMAX ) 
 {
-    const cuDoubleComplex *Aend = A + lda*N;
-    cuDoubleComplex tmp;
+    const magmaDoubleComplex *Aend = A + lda*N;
+    magmaDoubleComplex tmp;
     double mRMAX = - RMAX;
     int    mym   = blockIdx.x * blksize + threadIdx.x;
 
@@ -53,8 +53,8 @@ magmaint_zlag2c( magma_int_t M, magma_int_t N,
 
 extern "C" void 
 magmablas_zlag2c( magma_int_t M, magma_int_t N , 
-                  const cuDoubleComplex *A, magma_int_t lda, 
-                  cuFloatComplex *SA,       magma_int_t ldsa, 
+                  const magmaDoubleComplex *A, magma_int_t lda, 
+                  magmaFloatComplex *SA,       magma_int_t ldsa, 
                   magma_int_t *info ) 
 {    
 /*

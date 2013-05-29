@@ -23,31 +23,31 @@
 #endif
 
 
-__global__ void magma_zgemv_kernel3(int m, const cuDoubleComplex * __restrict__ V, int ldv,
-                                    cuDoubleComplex *c, cuDoubleComplex *dwork,
-                                    cuDoubleComplex *tau);
+__global__ void magma_zgemv_kernel3(int m, const magmaDoubleComplex * __restrict__ V, int ldv,
+                                    magmaDoubleComplex *c, magmaDoubleComplex *dwork,
+                                    magmaDoubleComplex *tau);
 
 /* --------------------------------------------------------------------------- */
 extern "C" void
-magma_zlarfg_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
-                 cuDoubleComplex *dtau, double *dxnorm);
+magma_zlarfg_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
+                 magmaDoubleComplex *dtau, double *dxnorm);
 
 extern "C" void
-magma_zlarfg2_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
-                 cuDoubleComplex *dtau, double *dxnorm, cuDoubleComplex *dAkk);
+magma_zlarfg2_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
+                 magmaDoubleComplex *dtau, double *dxnorm, magmaDoubleComplex *dAkk);
 
 extern "C" void
-magmablas_dznrm2_adjust(int k, double *xnorm, cuDoubleComplex *c);
+magmablas_dznrm2_adjust(int k, double *xnorm, magmaDoubleComplex *c);
 
 extern "C" void
-magmablas_dznrm2_row_adjust(int k, double *xnorm, cuDoubleComplex *c, int inc);
+magmablas_dznrm2_row_adjust(int k, double *xnorm, magmaDoubleComplex *c, int inc);
 
 extern "C" void
 magmablas_dznrm2_row_check_adjust(int k, double tol, double *xnorm, double *xnorm2, 
-                                  cuDoubleComplex *c, int ldc, double *lsticc);
+                                  magmaDoubleComplex *c, int ldc, double *lsticc);
 
 extern "C" void
-magmablas_dznrm2_check(int m, int num, cuDoubleComplex *da, magma_int_t ldda,
+magmablas_dznrm2_check(int m, int num, magmaDoubleComplex *da, magma_int_t ldda,
                                double *dxnorm, double *lsticc);
 
 
@@ -76,12 +76,12 @@ __device__ void sum_reduce( /*int n,*/ int i, double* x )
 #define BLOCK_SIZE1 192
 
 __global__ void
-magma_zswap_gemv_kernel(int m, int rk, int n, const cuDoubleComplex * __restrict__ V, int ldv,
-                     const cuDoubleComplex * __restrict__ x, int ldx, cuDoubleComplex *c, cuDoubleComplex *b)
+magma_zswap_gemv_kernel(int m, int rk, int n, const magmaDoubleComplex * __restrict__ V, int ldv,
+                     const magmaDoubleComplex * __restrict__ x, int ldx, magmaDoubleComplex *c, magmaDoubleComplex *b)
 {
     const int i = threadIdx.x;
     const int j = i + BLOCK_SIZE1 * blockIdx.x;
-    cuDoubleComplex lsum, tmp;
+    magmaDoubleComplex lsum, tmp;
 
     V += j;
 
@@ -98,12 +98,12 @@ magma_zswap_gemv_kernel(int m, int rk, int n, const cuDoubleComplex * __restrict
 }
 
 __global__ void
-magma_zgemv_kernel(int m, int n, const cuDoubleComplex * __restrict__ V, int ldv,
-                     const cuDoubleComplex * __restrict__ x, cuDoubleComplex *b, cuDoubleComplex *c)
+magma_zgemv_kernel(int m, int n, const magmaDoubleComplex * __restrict__ V, int ldv,
+                     const magmaDoubleComplex * __restrict__ x, magmaDoubleComplex *b, magmaDoubleComplex *c)
 {
     const int i = threadIdx.x;
     const int j = i + BLOCK_SIZE1 * blockIdx.x;
-    cuDoubleComplex lsum, tmp;
+    magmaDoubleComplex lsum, tmp;
 
     V += j;
 
@@ -118,15 +118,15 @@ magma_zgemv_kernel(int m, int n, const cuDoubleComplex * __restrict__ V, int ldv
 
 
 __global__
-void magma_zscale_kernel(int n, cuDoubleComplex* dx0,
-                         cuDoubleComplex *dtau, double *dxnorm, cuDoubleComplex* dAkk)
+void magma_zscale_kernel(int n, magmaDoubleComplex* dx0,
+                         magmaDoubleComplex *dtau, double *dxnorm, magmaDoubleComplex* dAkk)
 {
    const int i = threadIdx.x;
-   cuDoubleComplex tmp;
-   __shared__ cuDoubleComplex scale;
+   magmaDoubleComplex tmp;
+   __shared__ magmaDoubleComplex scale;
 
    /* === Compute the norm of dx0 === */
-   cuDoubleComplex *dx = dx0;
+   magmaDoubleComplex *dx = dx0;
    __shared__ double sum[ BLOCK_SIZE ];
    double re, lsum;
 
@@ -188,7 +188,7 @@ void magma_zscale_kernel(int n, cuDoubleComplex* dx0,
 
 
 template< int n >
-__device__ void zsum_reduce( /*int n,*/ int i, cuDoubleComplex* x )
+__device__ void zsum_reduce( /*int n,*/ int i, magmaDoubleComplex* x )
 {
     __syncthreads();
     if ( n >  512 ) { if ( i <  512 && i +  512 < n ) { x[i] += x[i+ 512]; }  __syncthreads(); }
@@ -206,15 +206,15 @@ __device__ void zsum_reduce( /*int n,*/ int i, cuDoubleComplex* x )
 }
 
 __global__ void
-magma_zgemv_kernel1(int m, cuDoubleComplex *tau, const cuDoubleComplex * __restrict__ V, int ldv,
-                    const cuDoubleComplex * __restrict__ c,
-                    cuDoubleComplex *dwork)
+magma_zgemv_kernel1(int m, magmaDoubleComplex *tau, const magmaDoubleComplex * __restrict__ V, int ldv,
+                    const magmaDoubleComplex * __restrict__ c,
+                    magmaDoubleComplex *dwork)
 {
         const int i = threadIdx.x;
-        const cuDoubleComplex *dV = V + (blockIdx.x) * ldv;
+        const magmaDoubleComplex *dV = V + (blockIdx.x) * ldv;
 
-        __shared__ cuDoubleComplex sum[ BLOCK_SIZE ];
-        cuDoubleComplex lsum;
+        __shared__ magmaDoubleComplex sum[ BLOCK_SIZE ];
+        magmaDoubleComplex lsum;
 
         /*  lsum := v' * C  */
         lsum = MAGMA_Z_ZERO;
@@ -238,13 +238,13 @@ magma_zgemv_kernel1(int m, cuDoubleComplex *tau, const cuDoubleComplex * __restr
 #endif
 
 __global__ void
-magma_zgemv_kernel_adjust(int n, int k, cuDoubleComplex * A, int lda, 
-                          cuDoubleComplex *B, int ldb, cuDoubleComplex *C,
-                          double *xnorm, double *xnorm2, cuDoubleComplex *Akk, int *lsticc, int *lsticcs)
+magma_zgemv_kernel_adjust(int n, int k, magmaDoubleComplex * A, int lda, 
+                          magmaDoubleComplex *B, int ldb, magmaDoubleComplex *C,
+                          double *xnorm, double *xnorm2, magmaDoubleComplex *Akk, int *lsticc, int *lsticcs)
 {
     const int i = threadIdx.x;
     const int j = i + BLOCK_SIZE2 * blockIdx.x;
-    cuDoubleComplex sum;
+    magmaDoubleComplex sum;
     double temp, oldnorm;
 
     if (j<n) {
@@ -281,7 +281,7 @@ magma_zgemv_kernel_adjust(int n, int k, cuDoubleComplex * A, int lda,
     if (blockIdx.x==0) {
        //if (2.*temp < oldnorm) {
            //printf("recompute norm\n");
-           cuDoubleComplex *dx = C+blockIdx.x*lda+1;
+           magmaDoubleComplex *dx = C+blockIdx.x*lda+1;
            __shared__ double sum[ BLOCK_SIZE2 ];
            double re, lsum;
  
@@ -311,12 +311,12 @@ magma_zgemv_kernel_adjust(int n, int k, cuDoubleComplex * A, int lda,
 }
 
 __global__ void
-magmablas_dznrm2_check_kernel(int m, cuDoubleComplex *da, int ldda, 
+magmablas_dznrm2_check_kernel(int m, magmaDoubleComplex *da, int ldda, 
                               double *dxnorm, double *dxnorm2, 
                               int *dlsticc, int *dlsticcs)
 {
     const int i = threadIdx.x;
-    cuDoubleComplex *dx = da + blockIdx.x * ldda;
+    magmaDoubleComplex *dx = da + blockIdx.x * ldda;
 
     __shared__ double sum[ BLOCK_SIZE ];
     double re, lsum;
@@ -360,11 +360,11 @@ magmablas_dznrm2_check_kernel(int m, cuDoubleComplex *da, int ldda,
 extern "C" magma_int_t
 magma_zlaqps3_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
              magma_int_t nb, magma_int_t *kb,
-             cuDoubleComplex *A,  magma_int_t lda,
-             magma_int_t *jpvt, cuDoubleComplex *tau, 
+             magmaDoubleComplex *A,  magma_int_t lda,
+             magma_int_t *jpvt, magmaDoubleComplex *tau, 
              double *vn1, double *vn2,
-             cuDoubleComplex *auxv,
-             cuDoubleComplex *F,  magma_int_t ldf)
+             magmaDoubleComplex *auxv,
+             magmaDoubleComplex *F,  magma_int_t ldf)
 {
 /*
     -- MAGMA (version 1.1) --
@@ -442,19 +442,19 @@ magma_zlaqps3_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
 #define  A(i, j) (A  + (i) + (j)*(lda ))
 #define  F(i, j) (F  + (i) + (j)*(ldf ))
 
-    cuDoubleComplex c_zero    = MAGMA_Z_MAKE( 0.,0.);
-    cuDoubleComplex c_one     = MAGMA_Z_MAKE( 1.,0.);
-    cuDoubleComplex c_neg_one = MAGMA_Z_MAKE(-1.,0.);
+    magmaDoubleComplex c_zero    = MAGMA_Z_MAKE( 0.,0.);
+    magmaDoubleComplex c_one     = MAGMA_Z_MAKE( 1.,0.);
+    magmaDoubleComplex c_neg_one = MAGMA_Z_MAKE(-1.,0.);
     magma_int_t ione = 1;
     
     magma_int_t i__1, i__2;
     
     magma_int_t k, rk;
-    cuDoubleComplex Akk, tauk;
+    magmaDoubleComplex Akk, tauk;
     magma_int_t pvt, itemp;
     double tol3z;
 
-    cuDoubleComplex *dAkk = auxv;
+    magmaDoubleComplex *dAkk = auxv;
     auxv+=1;
 
     int lsticc, *dlsticc, *dlsticcs;

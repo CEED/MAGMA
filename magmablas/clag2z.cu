@@ -12,8 +12,8 @@
 
 __global__ void 
 clag2z_generic(int M, int N, 
-               const cuFloatComplex *SA, int LDSA, 
-               cuDoubleComplex       *A, int LDA ) 
+               const magmaFloatComplex *SA, int LDSA, 
+               magmaDoubleComplex       *A, int LDA ) 
 { 
     int ibx = blockIdx.x * 64;
 
@@ -29,8 +29,8 @@ clag2z_generic(int M, int N,
         SA += ibx+idt;
         A  += ibx+idt;
     }
-    const cuFloatComplex * SAend = SA+LDSA*N;
-    cuDoubleComplex Ap[1]={ cuComplexFloatToDouble(SA[0]) };
+    const magmaFloatComplex * SAend = SA+LDSA*N;
+    magmaDoubleComplex Ap[1]={ cuComplexFloatToDouble(SA[0]) };
     do {
         SA  += LDSA;
         A[0] = Ap[0];
@@ -44,8 +44,8 @@ clag2z_generic(int M, int N,
 
 __global__ void 
 clag2z_special(int M, int N, 
-               const cuFloatComplex *SA, int LDSA, 
-               cuDoubleComplex       *A, int LDA ) 
+               const magmaFloatComplex *SA, int LDSA, 
+               magmaDoubleComplex       *A, int LDA ) 
 { 
     int ibx = blockIdx.x * 64;
 
@@ -61,14 +61,14 @@ clag2z_special(int M, int N,
         SA += ibx+idt;
         A  += ibx+idt;
     }
-    cuDoubleComplex Ap[1] = { cuComplexFloatToDouble(SA[0]) };
+    magmaDoubleComplex Ap[1] = { cuComplexFloatToDouble(SA[0]) };
     A[0] = Ap[0];
 }
 
 void 
 magmablas_clag2z_64_64_16_4_v2( int M, int N, 
-                                const cuFloatComplex *SA, int LDSA, 
-                                cuDoubleComplex       *A, int LDA )
+                                const magmaFloatComplex *SA, int LDSA, 
+                                magmaDoubleComplex       *A, int LDA )
 {
     if( M == 0 || N==0 ) {
         printf("One of the dimension is ZERO\n");
@@ -87,8 +87,8 @@ magmablas_clag2z_64_64_16_4_v2( int M, int N,
 extern "C" void 
 magmablas_clag2z(
     magma_int_t m, magma_int_t n,
-    const cuFloatComplex *SA, magma_int_t ldsa,
-    cuDoubleComplex       *A, magma_int_t lda,
+    const magmaFloatComplex *SA, magma_int_t ldsa,
+    magmaDoubleComplex       *A, magma_int_t lda,
     magma_int_t *info)
 {
 /*

@@ -23,9 +23,9 @@
 extern "C" void 
 magmablas_zgetmatrix_transpose_mgpu(
                   magma_int_t ngpus, cudaStream_t stream[][2],
-                  cuDoubleComplex **dat, magma_int_t ldda,
-                  cuDoubleComplex   *ha, magma_int_t lda,
-                  cuDoubleComplex  **db, magma_int_t lddb,
+                  magmaDoubleComplex **dat, magma_int_t ldda,
+                  magmaDoubleComplex   *ha, magma_int_t lda,
+                  magmaDoubleComplex  **db, magma_int_t lddb,
                   magma_int_t m, magma_int_t n, magma_int_t nb)
 {
 #define   A(j)     (ha  + (j)*lda)

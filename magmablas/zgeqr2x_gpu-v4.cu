@@ -17,46 +17,46 @@
 #endif
 
 extern "C" void
-magma_zlarfbx_gpu(int m, int k, cuDoubleComplex *V, int ldv,
-                  cuDoubleComplex *dT, int ldt, cuDoubleComplex *c,
-                  cuDoubleComplex *dwork);
+magma_zlarfbx_gpu(int m, int k, magmaDoubleComplex *V, int ldv,
+                  magmaDoubleComplex *dT, int ldt, magmaDoubleComplex *c,
+                  magmaDoubleComplex *dwork);
 
 extern "C" void
-magma_zlarfgtx_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
-                   cuDoubleComplex *dtau, double *dxnorm,
-                   cuDoubleComplex *dA, int it,
-                   cuDoubleComplex *V, int ldv, cuDoubleComplex *T, int ldt,
-                   cuDoubleComplex *dwork);
+magma_zlarfgtx_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
+                   magmaDoubleComplex *dtau, double *dxnorm,
+                   magmaDoubleComplex *dA, int it,
+                   magmaDoubleComplex *V, int ldv, magmaDoubleComplex *T, int ldt,
+                   magmaDoubleComplex *dwork);
 
 extern "C" void
-magmablas_dznrm2_adjust(int k, double *xnorm, cuDoubleComplex *c);
+magmablas_dznrm2_adjust(int k, double *xnorm, magmaDoubleComplex *c);
     
 extern "C" void
 magmablas_zgemm_reduce(magma_int_t m, magma_int_t n, magma_int_t k,
-                       cuDoubleComplex alpha, const cuDoubleComplex *d_A, magma_int_t lda,
-                       const cuDoubleComplex *d_B, magma_int_t ldb,
-                       cuDoubleComplex beta,        cuDoubleComplex *d_C, magma_int_t ldc );
+                       magmaDoubleComplex alpha, const magmaDoubleComplex *d_A, magma_int_t lda,
+                       const magmaDoubleComplex *d_B, magma_int_t ldb,
+                       magmaDoubleComplex beta,        magmaDoubleComplex *d_C, magma_int_t ldc );
 
 __global__ void 
-magma_ztrmv_kernel2(const cuDoubleComplex *T, int ldt,
-                    cuDoubleComplex *v, cuDoubleComplex *y, cuDoubleComplex *tau);
+magma_ztrmv_kernel2(const magmaDoubleComplex *T, int ldt,
+                    magmaDoubleComplex *v, magmaDoubleComplex *y, magmaDoubleComplex *tau);
 
 __global__ void 
-magma_zgemv_kernel3(int m, const cuDoubleComplex * __restrict__ V, int ldv,
-                    cuDoubleComplex *c, cuDoubleComplex *dwork,
-                    cuDoubleComplex *tau);
+magma_zgemv_kernel3(int m, const magmaDoubleComplex * __restrict__ V, int ldv,
+                    magmaDoubleComplex *c, magmaDoubleComplex *dwork,
+                    magmaDoubleComplex *tau);
 
 
 extern "C" magma_int_t
 magma_zlarfb2_gpu( magma_int_t m, magma_int_t n, magma_int_t k,
-                   const cuDoubleComplex *dV,    magma_int_t ldv,
-                   const cuDoubleComplex *dT,    magma_int_t ldt,
-                   cuDoubleComplex *dC,          magma_int_t ldc,
-                   cuDoubleComplex *dwork,       magma_int_t ldwork )
+                   const magmaDoubleComplex *dV,    magma_int_t ldv,
+                   const magmaDoubleComplex *dT,    magma_int_t ldt,
+                   magmaDoubleComplex *dC,          magma_int_t ldc,
+                   magmaDoubleComplex *dwork,       magma_int_t ldwork )
 {
-    cuDoubleComplex c_zero    = MAGMA_Z_ZERO;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
     if (m <= 0 || n <= 0)
         return MAGMA_SUCCESS;
@@ -88,27 +88,27 @@ magma_zlarfb2_gpu( magma_int_t m, magma_int_t n, magma_int_t k,
 //////////////////////////////////////////////////////////////////////////////
 
 __global__ void
-magma_zgemv_kernel1(int m, const cuDoubleComplex * __restrict__ V, int ldv,
-                    const cuDoubleComplex * __restrict__ c,
-                    cuDoubleComplex *dwork);
+magma_zgemv_kernel1(int m, const magmaDoubleComplex * __restrict__ V, int ldv,
+                    const magmaDoubleComplex * __restrict__ c,
+                    magmaDoubleComplex *dwork);
 __global__ void
-magma_zgemv_kernel2(int m, int n, const cuDoubleComplex * __restrict__ V, int ldv,
-                    const cuDoubleComplex * __restrict__ x, cuDoubleComplex *c);
+magma_zgemv_kernel2(int m, int n, const magmaDoubleComplex * __restrict__ V, int ldv,
+                    const magmaDoubleComplex * __restrict__ x, magmaDoubleComplex *c);
 __global__ void 
-magma_ztrmv_tkernel(cuDoubleComplex *T, int ldt, cuDoubleComplex *v,
-                                    cuDoubleComplex *y);
+magma_ztrmv_tkernel(magmaDoubleComplex *T, int ldt, magmaDoubleComplex *v,
+                                    magmaDoubleComplex *y);
 __global__ void
-magma_dznrm2_adjust_kernel(double *xnorm, cuDoubleComplex *c);
+magma_dznrm2_adjust_kernel(double *xnorm, magmaDoubleComplex *c);
 
 extern "C" void
-magma_zlarfgx_gpu(int n, cuDoubleComplex *dx0, cuDoubleComplex *dx,
-                  cuDoubleComplex *dtau, double *dxnorm,
-                  cuDoubleComplex *dA, int it);
+magma_zlarfgx_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
+                  magmaDoubleComplex *dtau, double *dxnorm,
+                  magmaDoubleComplex *dA, int it);
 
 extern "C" magma_int_t
-magma_zgeqr2x4_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA, 
-                   magma_int_t *ldda, cuDoubleComplex *dtau,
-                   cuDoubleComplex *dT, cuDoubleComplex *ddA,
+magma_zgeqr2x4_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA, 
+                   magma_int_t *ldda, magmaDoubleComplex *dtau,
+                   magmaDoubleComplex *dT, magmaDoubleComplex *ddA,
                    double *dwork, magma_int_t *info, cudaStream_t stream)
 {
 /*  -- MAGMA (version 1.1) --
@@ -195,7 +195,7 @@ magma_zgeqr2x4_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
     static magma_int_t i, k;
 
     double *dnorm = (double *)dwork;
-    cuDoubleComplex *work = (cuDoubleComplex *)(dwork+2*(*n));
+    magmaDoubleComplex *work = (magmaDoubleComplex *)(dwork+2*(*n));
 
     magma_queue_t cstream;
     magmablasGetKernelStream(&cstream);
@@ -255,7 +255,7 @@ magma_zgeqr2x4_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
                               dnorm+i, ddA + i + i*(*n), i);
 
             if (i==0){
-              cuDoubleComplex tt = MAGMA_Z_ONE;
+              magmaDoubleComplex tt = MAGMA_Z_ONE;
               magmablas_zlacpy(MagmaUpperLower, 1, 1, dtau, 1, dt_ref(0,0), 1);
               magma_zsetmatrix(1,1, &tt,1, da_ref(i, i),1);
             }

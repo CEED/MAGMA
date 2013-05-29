@@ -14,9 +14,9 @@
 
 extern "C" void
 magmablas_zgemv_tesla(char trans, magma_int_t m, magma_int_t n, 
-                      cuDoubleComplex alpha, const cuDoubleComplex *A, magma_int_t lda, 
-                                             const cuDoubleComplex *x, magma_int_t incx, 
-                      cuDoubleComplex beta,  cuDoubleComplex       *y, magma_int_t incy) 
+                      magmaDoubleComplex alpha, const magmaDoubleComplex *A, magma_int_t lda, 
+                                             const magmaDoubleComplex *x, magma_int_t incx, 
+                      magmaDoubleComplex beta,  magmaDoubleComplex       *y, magma_int_t incy) 
 {
     cublasZgemv(trans, m, n, alpha, A, lda, x, incx, beta, y, incy);
 }

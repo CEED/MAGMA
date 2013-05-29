@@ -16,17 +16,17 @@
 
 #define A(i, j)  (A + (i) + (j)*lda)   // A(i, j) means at i row, j column
 
-void zpotf2_zdscal(magma_int_t n, cuDoubleComplex *x, magma_int_t incx);
-void zpotf2_zdotc(magma_int_t n, cuDoubleComplex *x, magma_int_t incx);
+void zpotf2_zdscal(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx);
+void zpotf2_zdotc(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx);
 
 #if defined(PRECISION_z) || defined(PRECISION_c)
-void zlacgv(magma_int_t n, cuDoubleComplex *x, magma_int_t incx);
+void zlacgv(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx);
 #endif
 
 extern "C" magma_int_t
 magma_zpotf2_gpu(
     magma_uplo_t uplo, magma_int_t n,
-    cuDoubleComplex *A, magma_int_t lda,
+    magmaDoubleComplex *A, magma_int_t lda,
     magma_int_t *info )
 {
 /*  -- MAGMA (version 1.1) --
@@ -105,8 +105,8 @@ magma_zpotf2_gpu(
         return *info;
     }
 
-    cuDoubleComplex alpha = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex beta  = MAGMA_Z_ONE;
+    magmaDoubleComplex alpha = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex beta  = MAGMA_Z_ONE;
 
     if (uplo == 'U' || uplo == 'u') {
         for(j = 0; j < n; j++) {
@@ -156,13 +156,13 @@ magma_zpotf2_gpu(
 
 extern __shared__ double shared_data[];
 
-__global__ void kernel_zdotc(int n, cuDoubleComplex *x, int incx, int threadSize)
+__global__ void kernel_zdotc(int n, magmaDoubleComplex *x, int incx, int threadSize)
 {
     int tx = threadIdx.x;
 
     double *sdata = (double*)shared_data;
 
-    cuDoubleComplex res= MAGMA_Z_ZERO;
+    magmaDoubleComplex res= MAGMA_Z_ZERO;
 
     if (tx < n) {
        res = x[tx*incx];
@@ -195,7 +195,7 @@ __global__ void kernel_zdotc(int n, cuDoubleComplex *x, int incx, int threadSize
     }
 }
 
-void zpotf2_zdotc(magma_int_t n, cuDoubleComplex *x, magma_int_t incx)
+void zpotf2_zdotc(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx)
 {
 /*
        Specialized Zdotc
@@ -228,11 +228,11 @@ void zpotf2_zdotc(magma_int_t n, cuDoubleComplex *x, magma_int_t incx)
     kernel_zdotc<<< 1, threadSize, threadSize * sizeof(double), magma_stream>>> (n, x, incx, threadSize);
 }
 
-__global__ void kernel_zdscal(int n, cuDoubleComplex *x, int incx)
+__global__ void kernel_zdscal(int n, magmaDoubleComplex *x, int incx)
 {
     int id = blockIdx.x * zdscal_bs + threadIdx.x;
 
-    __shared__ cuDoubleComplex factor;
+    __shared__ magmaDoubleComplex factor;
 
     if (threadIdx.x ==0) {
         factor = MAGMA_Z_MAKE(1.0/MAGMA_Z_REAL(x[0]), 0.0);
@@ -244,7 +244,7 @@ __global__ void kernel_zdscal(int n, cuDoubleComplex *x, int incx)
 }
 
 
-void zpotf2_zdscal(magma_int_t n, cuDoubleComplex *x, magma_int_t incx)
+void zpotf2_zdscal(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx)
 {
 /*
     Specialized Zdscal perform x[1:n-1]/x[0]
@@ -259,7 +259,7 @@ void zpotf2_zdscal(magma_int_t n, cuDoubleComplex *x, magma_int_t incx)
 
 #if defined(PRECISION_z) || defined(PRECISION_c)
 
-__global__ void kernel_zlacgv(int n, cuDoubleComplex *x, int incx)
+__global__ void kernel_zlacgv(int n, magmaDoubleComplex *x, int incx)
 {
     int id = blockIdx.x * zlacgv_bs + threadIdx.x;
 
@@ -269,7 +269,7 @@ __global__ void kernel_zlacgv(int n, cuDoubleComplex *x, int incx)
 }
 
 
-void zlacgv(magma_int_t n, cuDoubleComplex *x, magma_int_t incx)
+void zlacgv(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx)
 {
 /*
     Purpose

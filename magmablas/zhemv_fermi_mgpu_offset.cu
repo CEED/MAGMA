@@ -29,12 +29,12 @@
  */
 
 __global__ void
-magmablas_zhemv_200_L_special_mgpu_offset( magma_int_t n, cuDoubleComplex alpha,
-                               cuDoubleComplex *A, magma_int_t lda,
-                               cuDoubleComplex *x, magma_int_t incx,
-                               cuDoubleComplex  beta,
-                               cuDoubleComplex *y, magma_int_t incy,
-                               cuDoubleComplex *WC, 
+magmablas_zhemv_200_L_special_mgpu_offset( magma_int_t n, magmaDoubleComplex alpha,
+                               magmaDoubleComplex *A, magma_int_t lda,
+                               magmaDoubleComplex *x, magma_int_t incx,
+                               magmaDoubleComplex  beta,
+                               magmaDoubleComplex *y, magma_int_t incy,
+                               magmaDoubleComplex *WC, 
                          magma_int_t my_gpu_id,
                          magma_int_t num_gpus, 
                          magma_int_t nb,
@@ -51,17 +51,17 @@ magmablas_zhemv_200_L_special_mgpu_offset( magma_int_t n, cuDoubleComplex alpha,
     return;
     }
 
-    cuDoubleComplex res  = MAGMA_Z_ZERO;
-    cuDoubleComplex res_ = MAGMA_Z_ZERO;
-    cuDoubleComplex res1 = MAGMA_Z_ZERO;
-    cuDoubleComplex res2 = MAGMA_Z_ZERO;
+    magmaDoubleComplex res  = MAGMA_Z_ZERO;
+    magmaDoubleComplex res_ = MAGMA_Z_ZERO;
+    magmaDoubleComplex res1 = MAGMA_Z_ZERO;
+    magmaDoubleComplex res2 = MAGMA_Z_ZERO;
 
-    __shared__ cuDoubleComplex la   [quarter_thread_x][thread_x+2];
-    __shared__ cuDoubleComplex buff [thread_x];
-    __shared__ cuDoubleComplex buff2 [thread_x];
+    __shared__ magmaDoubleComplex la   [quarter_thread_x][thread_x+2];
+    __shared__ magmaDoubleComplex buff [thread_x];
+    __shared__ magmaDoubleComplex buff2 [thread_x];
 
-    cuDoubleComplex tr[4];
-    cuDoubleComplex b[4];
+    magmaDoubleComplex tr[4];
+    magmaDoubleComplex b[4];
 
     magma_int_t break_d   =  thread_x * blkc;
     const magma_int_t td  = (thread_x * ty ) + tx;
@@ -372,12 +372,12 @@ magmablas_zhemv_200_L_special_mgpu_offset( magma_int_t n, cuDoubleComplex alpha,
  *    Lower case for generic sizes
  */
 __global__ void
-magmablas_zhemv_200_L_generic_mgpu_offset(magma_int_t n, cuDoubleComplex alpha,
-                              cuDoubleComplex *A, magma_int_t lda,
-                              cuDoubleComplex *x, magma_int_t incx,
-                              cuDoubleComplex beta,
-                              cuDoubleComplex *y, magma_int_t incy,
-                              cuDoubleComplex *WC,
+magmablas_zhemv_200_L_generic_mgpu_offset(magma_int_t n, magmaDoubleComplex alpha,
+                              magmaDoubleComplex *A, magma_int_t lda,
+                              magmaDoubleComplex *x, magma_int_t incx,
+                              magmaDoubleComplex beta,
+                              magmaDoubleComplex *y, magma_int_t incy,
+                              magmaDoubleComplex *WC,
                               magma_int_t m_mod_thread_x,
                          magma_int_t my_gpu_id,
                          magma_int_t num_gpus, 
@@ -395,18 +395,18 @@ magmablas_zhemv_200_L_generic_mgpu_offset(magma_int_t n, cuDoubleComplex alpha,
     return;
     }
 
-    cuDoubleComplex res  = MAGMA_Z_ZERO;
-    cuDoubleComplex res_ = MAGMA_Z_ZERO;
-    cuDoubleComplex res1 = MAGMA_Z_ZERO;
-    cuDoubleComplex res2 = MAGMA_Z_ZERO;
+    magmaDoubleComplex res  = MAGMA_Z_ZERO;
+    magmaDoubleComplex res_ = MAGMA_Z_ZERO;
+    magmaDoubleComplex res1 = MAGMA_Z_ZERO;
+    magmaDoubleComplex res2 = MAGMA_Z_ZERO;
 
-    __shared__ cuDoubleComplex la   [quarter_thread_x][thread_x+2];
-    __shared__ cuDoubleComplex buff [thread_x];
-    __shared__ cuDoubleComplex buff2 [thread_x];
+    __shared__ magmaDoubleComplex la   [quarter_thread_x][thread_x+2];
+    __shared__ magmaDoubleComplex buff [thread_x];
+    __shared__ magmaDoubleComplex buff2 [thread_x];
 
 
-    cuDoubleComplex tr[4];
-    cuDoubleComplex b[4];
+    magmaDoubleComplex tr[4];
+    magmaDoubleComplex b[4];
 
     magma_int_t break_d   =  thread_x * blkc;
     const magma_int_t td  = (thread_x * ty ) + tx;
@@ -795,12 +795,12 @@ magmablas_zhemv_200_L_generic_mgpu_offset(magma_int_t n, cuDoubleComplex alpha,
 }
 
 __global__ void
-magmablas_zhemv_200_L_update_mgpu_offset(magma_int_t n, cuDoubleComplex alpha,
-                         cuDoubleComplex* A, magma_int_t lda,
-                         cuDoubleComplex *x, magma_int_t incx,
-                         cuDoubleComplex beta,
-                         cuDoubleComplex *y, magma_int_t incy,
-                         cuDoubleComplex *WC,
+magmablas_zhemv_200_L_update_mgpu_offset(magma_int_t n, magmaDoubleComplex alpha,
+                         magmaDoubleComplex* A, magma_int_t lda,
+                         magmaDoubleComplex *x, magma_int_t incx,
+                         magmaDoubleComplex beta,
+                         magmaDoubleComplex *y, magma_int_t incy,
+                         magmaDoubleComplex *WC,
                          magma_int_t my_gpu_id,
                          magma_int_t num_gpus, 
                          magma_int_t nb,
@@ -817,7 +817,7 @@ magmablas_zhemv_200_L_update_mgpu_offset(magma_int_t n, cuDoubleComplex alpha,
     magma_int_t i;
     magma_int_t tx  = threadIdx.x ;
     magma_int_t ind = blockIdx.x * thread_x + tx ;
-    cuDoubleComplex Ca;
+    magmaDoubleComplex Ca;
     
 
     MAGMA_Z_SET2REAL(Ca, 0) ;
@@ -835,12 +835,12 @@ magmablas_zhemv_200_L_update_mgpu_offset(magma_int_t n, cuDoubleComplex alpha,
 
 
 extern "C"
-void magmablas_zhemv_200_L_mgpu_offset(magma_int_t m, cuDoubleComplex alpha,
-                           cuDoubleComplex *A, magma_int_t lda,
-                           cuDoubleComplex *X, magma_int_t incx,
-                           cuDoubleComplex beta,
-                           cuDoubleComplex *Y, magma_int_t incy,
-                           cuDoubleComplex *dC_work,
+void magmablas_zhemv_200_L_mgpu_offset(magma_int_t m, magmaDoubleComplex alpha,
+                           magmaDoubleComplex *A, magma_int_t lda,
+                           magmaDoubleComplex *X, magma_int_t incx,
+                           magmaDoubleComplex beta,
+                           magmaDoubleComplex *Y, magma_int_t incy,
+                           magmaDoubleComplex *dC_work,
                          magma_int_t my_gpu_id,
                          magma_int_t num_gpus,
                          magma_int_t nb,
@@ -911,12 +911,12 @@ void magmablas_zhemv_200_L_mgpu_offset(magma_int_t m, cuDoubleComplex alpha,
 extern "C"
 magma_int_t
 magmablas_zhemv2( char uplo, magma_int_t n,
-                      cuDoubleComplex alpha,
-                      cuDoubleComplex *A, magma_int_t lda,
-                      cuDoubleComplex *X, magma_int_t incx,
-                      cuDoubleComplex beta,
-                      cuDoubleComplex *Y, magma_int_t incy,
-                      cuDoubleComplex *work, magma_int_t lwork);
+                      magmaDoubleComplex alpha,
+                      magmaDoubleComplex *A, magma_int_t lda,
+                      magmaDoubleComplex *X, magma_int_t incx,
+                      magmaDoubleComplex beta,
+                      magmaDoubleComplex *Y, magma_int_t incy,
+                      magmaDoubleComplex *work, magma_int_t lwork);
 
 
 /*************************************************************************
@@ -1011,12 +1011,12 @@ magmablas_zhemv2( char uplo, magma_int_t n,
 extern "C"
 magma_int_t
 magmablas_zhemv_200_mgpu_offset( char uplo, magma_int_t n,
-                      cuDoubleComplex alpha,
-                      cuDoubleComplex **A, magma_int_t lda,
-                      cuDoubleComplex **X, magma_int_t incx,
-                      cuDoubleComplex beta,
-                      cuDoubleComplex **Y, magma_int_t incy,
-                      cuDoubleComplex **work, magma_int_t lwork,
+                      magmaDoubleComplex alpha,
+                      magmaDoubleComplex **A, magma_int_t lda,
+                      magmaDoubleComplex **X, magma_int_t incx,
+                      magmaDoubleComplex beta,
+                      magmaDoubleComplex **Y, magma_int_t incy,
+                      magmaDoubleComplex **work, magma_int_t lwork,
               magma_int_t num_gpus, 
               magma_int_t nb,
               magma_int_t offset,
@@ -1112,12 +1112,12 @@ magmablas_zhemv_200_mgpu_offset( char uplo, magma_int_t n,
 extern "C"
 magma_int_t
 magmablas_zhemv2_200_mgpu_offset( char uplo, magma_int_t n,
-                      cuDoubleComplex alpha,
-                      cuDoubleComplex **A, magma_int_t lda,
-                      cuDoubleComplex **X, magma_int_t incx,
-                      cuDoubleComplex beta,
-                      cuDoubleComplex **Y, magma_int_t incy,
-                      cuDoubleComplex **work, magma_int_t lwork,
+                      magmaDoubleComplex alpha,
+                      magmaDoubleComplex **A, magma_int_t lda,
+                      magmaDoubleComplex **X, magma_int_t incx,
+                      magmaDoubleComplex beta,
+                      magmaDoubleComplex **Y, magma_int_t incy,
+                      magmaDoubleComplex **work, magma_int_t lwork,
               magma_int_t num_gpus, 
               magma_int_t nb,
               magma_int_t offset)
@@ -1213,7 +1213,7 @@ magmablas_zhemv2_200_mgpu_offset( char uplo, magma_int_t n,
 
 /*
 __global__ void 
-kernel_fillZero(cuDoubleComplex *A, magma_int_t size)
+kernel_fillZero(magmaDoubleComplex *A, magma_int_t size)
 {
     magma_int_t id = blockIdx.x * blockDim.x + threadIdx.x;
     if(id < size)
@@ -1223,7 +1223,7 @@ kernel_fillZero(cuDoubleComplex *A, magma_int_t size)
 }
 
 
-void fillZero(cuDoubleComplex *A, magma_int_t size)
+void fillZero(magmaDoubleComplex *A, magma_int_t size)
 {
 
     magma_int_t blocks = (size-1)/512 + 1;

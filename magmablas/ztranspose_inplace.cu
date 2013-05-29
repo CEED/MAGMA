@@ -29,10 +29,10 @@
 //
 // See ztranspose_inplace_even for description of threads.
 
-__global__ void ztranspose_inplace_odd( int n, cuDoubleComplex *matrix, int lda )
+__global__ void ztranspose_inplace_odd( int n, magmaDoubleComplex *matrix, int lda )
 {
-    __shared__ cuDoubleComplex sA[ NB ][ NB ];
-    __shared__ cuDoubleComplex sB[ NB ][ NB ];
+    __shared__ magmaDoubleComplex sA[ NB ][ NB ];
+    __shared__ magmaDoubleComplex sB[ NB ][ NB ];
 
     int i = threadIdx.x;
     int j = threadIdx.y;
@@ -44,7 +44,7 @@ __global__ void ztranspose_inplace_odd( int n, cuDoubleComplex *matrix, int lda 
     ii *= NB;
     jj *= NB;
 
-    cuDoubleComplex *A = matrix + ii+i + (jj+j)*lda;
+    magmaDoubleComplex *A = matrix + ii+i + (jj+j)*lda;
     if( ii == jj ) {
         if ( ii+i < n && jj+j < n ) {
             sA[j][i] = *A;
@@ -55,7 +55,7 @@ __global__ void ztranspose_inplace_odd( int n, cuDoubleComplex *matrix, int lda 
         }
     }
     else {
-        cuDoubleComplex *B = matrix + jj+i + (ii+j)*lda;
+        magmaDoubleComplex *B = matrix + jj+i + (ii+j)*lda;
         if ( ii+i < n && jj+j < n ) {
             sA[j][i] = *A;
         }
@@ -91,10 +91,10 @@ __global__ void ztranspose_inplace_odd( int n, cuDoubleComplex *matrix, int lda 
 // syncs, then saves sA(i,j) to B(i,j) and sB(i,j) to A(i,j).
 // Threads outside the matrix do not touch memory.
 
-__global__ void ztranspose_inplace_even( int n, cuDoubleComplex *matrix, int lda )
+__global__ void ztranspose_inplace_even( int n, magmaDoubleComplex *matrix, int lda )
 {
-    __shared__ cuDoubleComplex sA[ NB ][ NB ];
-    __shared__ cuDoubleComplex sB[ NB ][ NB ];
+    __shared__ magmaDoubleComplex sA[ NB ][ NB ];
+    __shared__ magmaDoubleComplex sB[ NB ][ NB ];
 
     int i = threadIdx.x;
     int j = threadIdx.y;
@@ -106,7 +106,7 @@ __global__ void ztranspose_inplace_even( int n, cuDoubleComplex *matrix, int lda
     ii *= NB;
     jj *= NB;
 
-    cuDoubleComplex *A = matrix + ii+i + (jj+j)*lda;
+    magmaDoubleComplex *A = matrix + ii+i + (jj+j)*lda;
     if( ii == jj ) {
         if ( ii+i < n && jj+j < n ) {
             sA[j][i] = *A;
@@ -117,7 +117,7 @@ __global__ void ztranspose_inplace_even( int n, cuDoubleComplex *matrix, int lda
         }
     }
     else {
-        cuDoubleComplex *B = matrix + jj+i + (ii+j)*lda;
+        magmaDoubleComplex *B = matrix + jj+i + (ii+j)*lda;
         if ( ii+i < n && jj+j < n ) {
             sA[j][i] = *A;
         }
@@ -137,7 +137,7 @@ __global__ void ztranspose_inplace_even( int n, cuDoubleComplex *matrix, int lda
 
 ////////////////////////////////////////////////////////////////////////////////
 extern "C" void
-magmablas_ztranspose_inplace( magma_int_t n, cuDoubleComplex *A, magma_int_t lda )
+magmablas_ztranspose_inplace( magma_int_t n, magmaDoubleComplex *A, magma_int_t lda )
 {
     dim3 threads( NB, NB );
     int nblock = (n + NB - 1)/NB;
@@ -158,7 +158,7 @@ magmablas_ztranspose_inplace( magma_int_t n, cuDoubleComplex *A, magma_int_t lda
 ////////////////////////////////////////////////////////////////////////////////
 // old interface, for backwards compatiiility
 extern "C" void
-magmablas_zinplace_transpose( cuDoubleComplex *A, magma_int_t lda, magma_int_t n )
+magmablas_zinplace_transpose( magmaDoubleComplex *A, magma_int_t lda, magma_int_t n )
 {
     magmablas_ztranspose_inplace( n, A, lda );
 }

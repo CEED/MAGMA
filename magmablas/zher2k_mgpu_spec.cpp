@@ -159,9 +159,9 @@
 extern "C"
 void magmablas_zher2k_mgpu_spec(
     char uplo, char trans, magma_int_t n, magma_int_t k,
-    cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t lda, magma_int_t aoffset,
-                           cuDoubleComplex *dB[], magma_int_t ldb, magma_int_t boffset,
-    double beta,           cuDoubleComplex *dC[], magma_int_t ldc, magma_int_t coffset,
+    magmaDoubleComplex alpha, magmaDoubleComplex *dA[], magma_int_t lda, magma_int_t aoffset,
+                           magmaDoubleComplex *dB[], magma_int_t ldb, magma_int_t boffset,
+    double beta,           magmaDoubleComplex *dC[], magma_int_t ldc, magma_int_t coffset,
     magma_int_t ngpu, magma_int_t nb, cudaStream_t streams[][20], magma_int_t nstream )
 {
     #define dA(dev, i, j) (dA[dev] + (i) + (j)*lda + (aoffset) )
@@ -204,8 +204,8 @@ void magmablas_zher2k_mgpu_spec(
         return;
     }
     
-    const cuDoubleComplex c_one = MAGMA_Z_ONE;
-    cuDoubleComplex cbeta = MAGMA_Z_MAKE( beta, 0. );
+    const magmaDoubleComplex c_one = MAGMA_Z_ONE;
+    magmaDoubleComplex cbeta = MAGMA_Z_MAKE( beta, 0. );
     
     magma_int_t ib, ioff, iblock, idev, di, s;
     

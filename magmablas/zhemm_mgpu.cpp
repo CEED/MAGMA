@@ -19,12 +19,12 @@
 extern "C"
 void magmablas_zhemm_mgpu_com(
     char side, char uplo, magma_int_t m, magma_int_t n,
-    cuDoubleComplex alpha, cuDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
-                           cuDoubleComplex *dB[], magma_int_t lddb,
-    cuDoubleComplex beta,  cuDoubleComplex *dC[], magma_int_t lddc,
-                           cuDoubleComplex *dwork[],    magma_int_t dworksiz,
-                           cuDoubleComplex *C,    magma_int_t ldc,
-                           cuDoubleComplex *work[], magma_int_t worksiz,
+    magmaDoubleComplex alpha, magmaDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
+                           magmaDoubleComplex *dB[], magma_int_t lddb,
+    magmaDoubleComplex beta,  magmaDoubleComplex *dC[], magma_int_t lddc,
+                           magmaDoubleComplex *dwork[],    magma_int_t dworksiz,
+                           magmaDoubleComplex *C,    magma_int_t ldc,
+                           magmaDoubleComplex *work[], magma_int_t worksiz,
                            magma_int_t ngpu, magma_int_t nb, 
                            cudaStream_t streams[][20], magma_int_t nstream, 
                            cudaEvent_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10],magma_int_t nbevents, 
@@ -46,13 +46,13 @@ void magmablas_zhemm_mgpu_com(
     assert( nbevents >= ngpu*ngpu );
    
     
-    cuDoubleComplex c_one  = MAGMA_Z_ONE;
-    cuDoubleComplex c_zero = MAGMA_Z_ZERO;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     magma_int_t ione = 1;
     
 
-    cuDoubleComplex *dwork1[MagmaMaxGPUs];
-    cuDoubleComplex *dwork2[MagmaMaxGPUs];
+    magmaDoubleComplex *dwork1[MagmaMaxGPUs];
+    magmaDoubleComplex *dwork2[MagmaMaxGPUs];
 
 
     magma_int_t maxgsize    = n*m;
@@ -104,13 +104,13 @@ void magmablas_zhemm_mgpu_com(
 
 
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-        cudaSetDevice( dev );
+        magma_setdevice( dev );
         magmablasSetKernelStream( streams[ dev ][ 0 ] );
-        cudaMemset(dwork(dev,0,0), 0, (lddwork)*(n)*sizeof(cuDoubleComplex) );
+        cudaMemset(dwork(dev,0,0), 0, (lddwork)*(n)*sizeof(magmaDoubleComplex) );
         // put all dC on all dev to 0 except the one which
         // hold i==0 because this one has to multiply by beta.
         if(dev!=stdev){
-           cudaMemset(dC(dev,0,0), 0, (lddc)*(n)*sizeof(cuDoubleComplex) );
+           cudaMemset(dC(dev,0,0), 0, (lddc)*(n)*sizeof(magmaDoubleComplex) );
         }
     }
 
@@ -121,7 +121,7 @@ void magmablas_zhemm_mgpu_com(
         newoffset  = offset+fstblksiz; // newoffset is adjusted over nb
         magma_int_t myblkoffst = (nbblkoffst/ngpu)+(nbblkoffst%ngpu > stdev?1:0);
         //printf("STDEV %d  voici offset %d remm %d   myblockoffset %d    siz %d \n",stdev,offset,remm,myblkoffst, fstblksiz);
-        cudaSetDevice( stdev );
+        magma_setdevice( stdev );
         magmablasSetKernelStream( streams[ stdev ][ 0 ] );
         magmablas_zsymmetrize_tiles(  MagmaLower,  fstblksiz,  dA(stdev, offset, myblkoffst*nb+blockoffset),  ldda,  1,  ngpu*nb,  nb  );         
     }
@@ -134,7 +134,7 @@ void magmablas_zhemm_mgpu_com(
         magma_int_t nbblkoffst = newoffset/nb;
         magma_int_t myblkoffst = (nbblkoffst/ngpu)+(nbblkoffst%ngpu > dev?1:0);
         //printf("dev %d  devperm %d   newoffset %d  rowoff %d    coloff %d    myblk %d  \n",dev,devperm,newoffset,newoffset+devperm*nb,myblkoffst*nb,myblk);
-        cudaSetDevice( dev );
+        magma_setdevice( dev );
         magmablasSetKernelStream( streams[ dev ][ 0 ] );
         magmablas_zsymmetrize_tiles(  MagmaLower,  nb,  dA(dev, newoffset+devperm*nb, myblkoffst*nb),  ldda,  myblk,  ngpu*nb,  nb  );
         if(remm%nb>0){
@@ -151,10 +151,10 @@ void magmablas_zhemm_mgpu_com(
 
 /*
     magma_int_t siz = m+offset;
-    cuDoubleComplex *R=(cuDoubleComplex *) malloc(siz*siz*sizeof(cuDoubleComplex));
+    magmaDoubleComplex *R=(magmaDoubleComplex *) malloc(siz*siz*sizeof(magmaDoubleComplex));
     // collecte back A
     magmablas_zgetmatrix_1D_bcyclic( siz, siz, dA, ldda, R, siz, ngpu, nb );
-    cudaSetDevice( 0 );
+    magma_setdevice( 0 );
     magmablasSetKernelStream( streams[ dev ][ 0 ] );
     //magma_zgetmatrix( siz, siz, dA[0], ldda, R, siz );
     FILE *trace_file;
@@ -191,7 +191,7 @@ return;
                 }
                 //printf("ROW GEMM: voici i %d   ib %d    ioff %d   nbblkoffst %d stdev %d  dev %d myblk %d  myblkoffset %d  coloffset %d  rowsize %d\n",i,ib,ioff,nbblkoffst,stdev,dev,myblk,myblkoffst,coloffset,myrowsize);
                 if(myrowsize>0){
-                    cudaSetDevice( dev );
+                    magma_setdevice( dev );
                     magmablasSetKernelStream( streams[ dev ][ 1 ] );    
                     magma_zgemm( MagmaConjTrans, MagmaNoTrans, myrowsize, n, ib,
                                  alpha, dA(dev,ioff,coloffset), ldda,
@@ -201,7 +201,7 @@ return;
             }
         }
         for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-            cudaSetDevice( dev );
+            magma_setdevice( dev );
             cudaEventRecord(redevents[dev][1], streams[dev][1]);
         }
     }
@@ -213,7 +213,7 @@ return;
         magma_int_t ib     = min( nb-blockoffset, m );  // block size
         magma_int_t iblock = (offset / nb) / ngpu;          // local block id
         magma_int_t di     = iblock*nb+blockoffset;       // local index in parent matrix
-        cudaSetDevice( stdev );
+        magma_setdevice( stdev );
         magmablasSetKernelStream( streams[ stdev ][ 0 ] );        
         //printf("DEV %d COL GEMM first   ioff %d  di %d   m %d   n %d   ib %d \n",stdev,offset,di,m,n,ib);
         magma_zgemm( MagmaNoTrans, MagmaNoTrans, m, n, ib,
@@ -234,7 +234,7 @@ return;
         
         //printf("DEV %d COL GEMM i %d      ioff %d  di %d m-i %d    n %d   ib %d \n",dev,i,ioff,di,m-i,n,ib);
         
-        cudaSetDevice( dev );
+        magma_setdevice( dev );
         magmablasSetKernelStream( streams[ dev ][ 0 ] );
         if(i==0){
            magma_zgemm( MagmaNoTrans, MagmaNoTrans, m-i, n, ib,
@@ -279,7 +279,7 @@ return;
       
             //printf("blockoffset %d nbblkrow %d devperm %d  DEV %d RECEIVING myblk %d  myrowsize %d\n",blockoffset,nbblkrow,devperm,dev,myblk,myrowsize);
             if(myrowsize>0){
-                cudaSetDevice( dev );
+                magma_setdevice( dev );
                 magmablasSetKernelStream( streams[ dev ][ 0 ] );
                 cudaStreamWaitEvent(streams[ dev ][ 0 ], redevents[dev][1], 0);
                 //magma_queue_sync( streams[ dev ][ 1 ] );
@@ -346,7 +346,7 @@ return;
     }
 /*
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-        cudaSetDevice( dev );
+        magma_setdevice( dev );
         cudaDeviceSynchronize();
     }
 */
@@ -375,14 +375,14 @@ return;
                     // I am an active GPU. if I am not the master, then send my result to my master.
                     // store result on dwork[masterdev][dev*maxgsize]
                     if(dev!=masterdev){
-                        cudaSetDevice( dev );        
+                        magma_setdevice( dev );        
                         //printf("             GPU %d sending to my master %d\n",dev,masterdev);
                         // wait the geadd of my ROW and COL GEMM is done
                         cudaStreamWaitEvent(streams[ dev ][ 0 ], redevents[dev][0], 0);
                         // sending to the master of my complex
-                        cudaMemcpy2DAsync(&dwork2[masterdev][maxgsize*dev], m*sizeof(cuDoubleComplex),
-                                          &dC[dev][0], lddc*sizeof(cuDoubleComplex),
-                                          m*sizeof(cuDoubleComplex), n,
+                        cudaMemcpy2DAsync(&dwork2[masterdev][maxgsize*dev], m*sizeof(magmaDoubleComplex),
+                                          &dC[dev][0], lddc*sizeof(magmaDoubleComplex),
+                                          m*sizeof(magmaDoubleComplex), n,
                                           cudaMemcpyDeviceToDevice, streams[dev][0]);
                         cudaEventRecord(redevents[dev][masterdev], streams[dev][0]);
                     } // end I am not the masterdev
@@ -392,7 +392,7 @@ return;
     }// for cmplxid
 /*
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-        cudaSetDevice( dev );
+        magma_setdevice( dev );
         cudaDeviceSynchronize();
     }
 */
@@ -405,7 +405,7 @@ return;
         masterdev = gnode[cmplxid][MagmaMaxGPUs+1];
         //check if complex is active
         if(masterdev!=-1){ 
-            cudaSetDevice( masterdev ); 
+            magma_setdevice( masterdev ); 
             // addition is done on stream 0 sequentially
             magmablasSetKernelStream( streams[ masterdev ][ 0 ] );
             // wait the geadd of my ROW and COL GEMM is done
@@ -443,9 +443,9 @@ return;
                          //Now both re the same.
                         //printf("             master %d from cmplx %d sending to other master %d on cmplx %d \n",masterdev,cmplxid,gmaster,k);
                         cudaStreamWaitEvent(streams[ masterdev ][ gmaster ], redevents[masterdev][masterdev], 0);
-                        cudaMemcpy2DAsync(&dwork2[gmaster][maxgsize*masterdev], m*sizeof(cuDoubleComplex),
-                                          &dC[masterdev][0], lddc*sizeof(cuDoubleComplex),
-                                          m*sizeof(cuDoubleComplex), n,
+                        cudaMemcpy2DAsync(&dwork2[gmaster][maxgsize*masterdev], m*sizeof(magmaDoubleComplex),
+                                          &dC[masterdev][0], lddc*sizeof(magmaDoubleComplex),
+                                          m*sizeof(magmaDoubleComplex), n,
                                           cudaMemcpyDeviceToDevice, streams[masterdev][gmaster]);
                         cudaEventRecord(redevents[masterdev][gmaster], streams[masterdev][gmaster]);
                         cudaEventRecord(redevents[masterdev][masterdev], streams[masterdev][gmaster]);
@@ -457,7 +457,7 @@ return;
     }// for cmplxid
 /*
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-        cudaSetDevice( dev );
+        magma_setdevice( dev );
         cudaDeviceSynchronize();
     }
 */
@@ -469,7 +469,7 @@ return;
         masterdev = gnode[cmplxid][MagmaMaxGPUs+1];
         //check if complex is active
         if(masterdev!=-1){ 
-            cudaSetDevice( masterdev ); 
+            magma_setdevice( masterdev ); 
             // addition is done on stream 0 sequentially
             magmablasSetKernelStream( streams[ masterdev ][ 0 ] );
             // master has to wait until finishing all the send to other masters.
@@ -506,9 +506,9 @@ return;
                     // to make it parallel put stream lcdev instead of stream 0
                     //printf("             master %d broadcasting local to %d  \n",masterdev,lcdev);
                     cudaStreamWaitEvent(streams[ masterdev ][ 0 ], redevents[masterdev][masterdev], 0);
-                    cudaMemcpy2DAsync(&dC[lcdev][0], lddc*sizeof(cuDoubleComplex),
-                                      &dC[masterdev][0], lddc*sizeof(cuDoubleComplex),
-                                      m*sizeof(cuDoubleComplex), n,
+                    cudaMemcpy2DAsync(&dC[lcdev][0], lddc*sizeof(magmaDoubleComplex),
+                                      &dC[masterdev][0], lddc*sizeof(magmaDoubleComplex),
+                                      m*sizeof(magmaDoubleComplex), n,
                                       cudaMemcpyDeviceToDevice, streams[masterdev][0]);
                     cudaEventRecord(redevents[masterdev][lcdev], streams[masterdev][0]);
                 }
@@ -518,7 +518,7 @@ return;
     }// for cmplxid
 /*
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-        cudaSetDevice( dev );
+        magma_setdevice( dev );
         cudaDeviceSynchronize();
     }
 */
@@ -533,7 +533,7 @@ return;
                 lcdev         = gnode[cmplxid][l];
                 lccolsize     = gpuisactive[lcdev];
                 if(lccolsize>0){
-                    cudaSetDevice( lcdev );
+                    magma_setdevice( lcdev );
                     cudaStreamWaitEvent(streams[ lcdev ][ 0 ], redevents[lcdev][0], 0);
                     cudaStreamWaitEvent(streams[ lcdev ][ 0 ], redevents[masterdev][lcdev], 0);
                 }
@@ -547,7 +547,7 @@ return;
    //printf("                      finish zhemm                   \n");
    //printf("****************************************************\n");
 
-    cudaSetDevice( cdev );
+    magma_setdevice( cdev );
     magmablasSetKernelStream( cstream );
 
 }

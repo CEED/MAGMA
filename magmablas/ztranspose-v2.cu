@@ -12,11 +12,11 @@
 #define PRECISION_z
 #include "commonblas.h"
 
-__global__ void ztranspose3_32( cuDoubleComplex       *B, int ldb, 
-                                const cuDoubleComplex *A, int lda,
+__global__ void ztranspose3_32( magmaDoubleComplex       *B, int ldb, 
+                                const magmaDoubleComplex *A, int lda,
                                 int m, int m32, int n, int n32)
 {
-         __shared__ cuDoubleComplex a[32][ZSIZE_1SHARED+1];
+         __shared__ magmaDoubleComplex a[32][ZSIZE_1SHARED+1];
 
         int inx = threadIdx.x;
         int iny = threadIdx.y;
@@ -109,11 +109,11 @@ __global__ void ztranspose3_32( cuDoubleComplex       *B, int ldb,
 
 
 
-__global__ void ztranspose2_32( cuDoubleComplex       *B, int ldb, 
-                                const cuDoubleComplex *A, int lda, 
+__global__ void ztranspose2_32( magmaDoubleComplex       *B, int ldb, 
+                                const magmaDoubleComplex *A, int lda, 
                                 int m, int m32, int n, int n32)
 {        
-        __shared__ cuDoubleComplex a[32][ZSIZE_1SHARED+1];
+        __shared__ magmaDoubleComplex a[32][ZSIZE_1SHARED+1];
         
         int inx = threadIdx.x;
         int iny = threadIdx.y;
@@ -176,8 +176,8 @@ __global__ void ztranspose2_32( cuDoubleComplex       *B, int ldb,
 //             Note that ldi >= m and ldo >= n.
 //
 extern "C" void 
-magmablas_ztranspose2(cuDoubleComplex       *odata, magma_int_t ldo, 
-                      const cuDoubleComplex *idata, magma_int_t ldi, 
+magmablas_ztranspose2(magmaDoubleComplex       *odata, magma_int_t ldo, 
+                      const magmaDoubleComplex *idata, magma_int_t ldi, 
                       magma_int_t m, magma_int_t n )
 {
     /* Quick return */
@@ -192,8 +192,8 @@ magmablas_ztranspose2(cuDoubleComplex       *odata, magma_int_t ldo,
 }
 
 extern "C" void
-magmablas_ztranspose2s(cuDoubleComplex       *odata, magma_int_t ldo,
-                       const cuDoubleComplex *idata, magma_int_t ldi,
+magmablas_ztranspose2s(magmaDoubleComplex       *odata, magma_int_t ldo,
+                       const magmaDoubleComplex *idata, magma_int_t ldi,
                        magma_int_t m, magma_int_t n, cudaStream_t *stream )
 {
     /* Quick return */
