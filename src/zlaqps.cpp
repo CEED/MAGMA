@@ -176,7 +176,7 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
            A(RK:M,K) := A(RK:M,K) - A(RK:M,1:K-1)*F(K,1:K-1)'.
            Optimization: multiply with beta=0; wait for vector and subtract */
         if (k > 0) {
-            #if (defined(PRECISION_c) || defined(PRECISION_z))
+            #if defined(PRECISION_c) || defined(PRECISION_z)
             for (j = 0; j < k; ++j){
                 *F(k,j) = MAGMA_Z_CNJG( *F(k,j) );
             }
@@ -189,7 +189,7 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
                                        F(k,  0), &ldf,
                            &c_one,     A(rk, k), &ione );
 
-            #if (defined(PRECISION_c) || defined(PRECISION_z))
+            #if defined(PRECISION_c) || defined(PRECISION_z)
             for (j = 0; j < k; ++j) {
                 *F(k,j) = MAGMA_Z_CNJG( *F(k,j) );
             }

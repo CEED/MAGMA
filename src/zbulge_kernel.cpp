@@ -14,13 +14,7 @@
 #include "common_magma.h"
 #include <cblas.h>
 
-//#include "magma_zbulgeinc.h"
-// === Define what BLAS to use ============================================
 #define PRECISION_z
-
-// === End defining what BLAS to use ======================================
- 
-
  
 #ifdef __cplusplus
 extern "C" {

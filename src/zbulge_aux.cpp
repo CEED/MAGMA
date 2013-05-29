@@ -12,10 +12,6 @@
  */
 
 #include "common_magma.h"
-//#include "magma_zbulgeinc.h"
-// === Define what BLAS to use ============================================
-
-// === End defining what BLAS to use ======================================
  
 
 //////////////////////////////////////////////////////////////

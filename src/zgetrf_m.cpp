@@ -12,16 +12,6 @@
 #include "common_magma.h"
 #include "../testing/flops.h"
 
-/* === Define what BLAS to use ============================================ */
-#define PRECISION_z
-#if (defined(PRECISION_s) || defined(PRECISION_d))
-  #define magma_zgemm magmablas_zgemm
-  #define magma_ztrsm magmablas_ztrsm
-#endif
-#if (defined(PRECISION_z))
-  //#define magma_zgemm magmablas_zgemm
-#endif
-/* === End defining what BLAS to use ======================================= */
 
 extern "C" magma_int_t
 magma_zgetrf2_mgpu(magma_int_t num_gpus,

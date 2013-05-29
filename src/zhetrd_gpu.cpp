@@ -13,13 +13,6 @@
 */
 #include "common_magma.h"
 
-// === Define what BLAS to use ============================================
-#define PRECISION_z
-
-#if (defined(PRECISION_s))
-     #define magma_ssyr2k magmablas_ssyr2k
-#endif
-// === End defining what BLAS to use ======================================
 
 #define  A(i, j) (wa+(j)*ldwa + (i))
 #define dA(i, j) (da+(j)*ldda + (i))

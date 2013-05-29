@@ -10,13 +10,6 @@
 */
 #include "common_magma.h"
 
-// === Define what BLAS to use ============================================
-#define PRECISION_z
-#if (defined(PRECISION_s) || defined(PRECISION_d))
-//  #define magma_zgemm magmablas_zgemm
-#endif
-// === End defining what BLAS to use =======================================
-
 extern "C" magma_int_t
 magma_zlarfb_gpu( char side, char trans, char direct, char storev,
                   magma_int_t m, magma_int_t n, magma_int_t k,

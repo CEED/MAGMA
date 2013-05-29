@@ -16,10 +16,7 @@
 #include "magma_bulge.h"
 #include "magma_zbulgeinc.h"
 #include <cblas.h>
-// === Define what BLAS to use ============================================
-#define PRECISION_z
 
-// === End defining what BLAS to use ======================================
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

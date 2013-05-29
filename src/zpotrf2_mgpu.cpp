@@ -13,23 +13,17 @@
 
 /* === Define what BLAS to use ============================================ */
 #define PRECISION_z
-#if (defined(PRECISION_s) || defined(PRECISION_d))
-  #define magma_zgemm magmablas_zgemm
-  #define magma_ztrsm magmablas_ztrsm
-  //#define ZTRSM_WORK
-extern "C"
-void magmablas_dtrsm_work( char side, char uplo, char tran, char diag, magma_int_t M, magma_int_t N,
-                           double alpha, const double* A, magma_int_t lda, double* b, magma_int_t ldb,
-                           double *d_dinvA, double *d_x );
-#endif
 
-#if (GPUSHMEM >= 200)
-  #if (defined(PRECISION_s))
-     #undef  magma_sgemm
-     #define magma_sgemm magmablas_sgemm_fermi80
-  #endif
+#if defined(PRECISION_s) || defined(PRECISION_d)
+//#define ZTRSM_WORK
+extern "C"
+void magmablas_ztrsm_work( char side, char uplo, char tran, char diag, magma_int_t M, magma_int_t N,
+                           magmaDoubleComplex alpha, const magmaDoubleComplex* A, magma_int_t lda,
+                           magmaDoubleComplex* b, magma_int_t ldb,
+                           magmaDoubleComplex *d_dinvA, magmaDoubleComplex *d_x );
 #endif
 /* === End defining what BLAS to use ======================================= */
+
 
 //#define dlA(id, i, j)  (d_lA[id] + (j)*ldda + (i))
 //#define dlAT(id, i, j)  (d_lA[id] + (j)*lddat + (i))
@@ -115,14 +109,16 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
     double          d_neg_one = -1.0;
     int upper = lapackf77_lsame(uplo_, "U");
     magmaDoubleComplex *dlpanel;
-    magmaDoubleComplex *d_dinvA[MagmaMaxGPUs][2], *d_x[MagmaMaxGPUs][2]; /* used by ztrsm_work */
     //magma_event_t event0[MagmaMaxGPUs], // syrk
     //            event1[MagmaMaxGPUs], // send off-diagonal
     //            event2[MagmaMaxGPUs], // send diagonal
     //            event3[MagmaMaxGPUs]; // trsm
     magma_int_t n_local[MagmaMaxGPUs], ldpanel;
     int stream0 = 0, stream1 = 1;
-
+    #ifdef ZTRSM_WORK
+    magmaDoubleComplex *d_dinvA[MagmaMaxGPUs][2], *d_x[MagmaMaxGPUs][2]; /* used by ztrsm_work */
+    #endif
+    
     *info = 0;
     if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
         *info = -1;

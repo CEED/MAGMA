@@ -26,12 +26,9 @@
 #ifdef USEACML
 #include <omp.h>
 #endif
-// === Define what BLAS to use ============================================
+
 #define PRECISION_z
-#if (defined(PRECISION_s) || defined(PRECISION_d))
-//#define magma_zgemm magmablas_zgemm
-#endif
-// === End defining what BLAS to use =======================================
+
 extern "C" {
 
     void magma_ztrdtype1cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU,

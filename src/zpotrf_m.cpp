@@ -11,21 +11,6 @@
 #include "common_magma.h"
 #include "../testing/flops.h"
 
-/* === Define what BLAS to use ============================================ */
-#define PRECISION_z
-#if (defined(PRECISION_s) || defined(PRECISION_d))
-    //#define magma_dgemm magmablas_dgemm
-    //#define magma_dtrsm magmablas_dtrsm
-#endif
-
-#if (GPUSHMEM >= 200)
-#if (defined(PRECISION_s))
-     #undef  magma_sgemm
-     #define magma_sgemm magmablas_sgemm_fermi80
-#endif
-#endif
-/* === End defining what BLAS to use ====================================== */
-
 extern "C" magma_int_t
 magma_zhtodpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n,
               magma_int_t off_i, magma_int_t off_j, magma_int_t nb,

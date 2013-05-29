@@ -44,14 +44,6 @@ magma_zlatrd_mgpu(int num_gpus, char uplo,
                   double *times);
 
 
-// === Define what BLAS to use ============================================
-#define PRECISION_z
-
-#if (defined(PRECISION_s))
-//  #define cublasSsyr2k magmablas_ssyr2k
-#endif
-// === End defining what BLAS to use ======================================
-
 #define  A(i, j) ( a+(j)*lda  + (i))
 #define dA(id, i, j) (da[(id)]+(j)*ldda + (i))
 #define dW(id, i, j) (dwork[(id)]+(j)*ldda + (i))

@@ -10,14 +10,6 @@
 */
 #include "common_magma.h"
 
-// === Define what BLAS to use ============================================
-#define PRECISION_z
-#if (GPUSHMEM <= 200) && (defined(PRECISION_s) || defined(PRECISION_d))
-  #define magma_zgemm magmablas_zgemm
-  #define magma_ztrsm magmablas_ztrsm
-#endif
-// === End defining what BLAS to use =======================================
-
 
 // =========================================================================
 // definitions of non-GPU-resident multi-GPU subroutines

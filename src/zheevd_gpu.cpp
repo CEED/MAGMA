@@ -15,9 +15,7 @@
 #include "common_magma.h"
 
 // === Define what BLAS to use ============================================
-
 //#define FAST_HEMV
-
 // === End defining what BLAS to use ======================================
 
 extern "C" magma_int_t

@@ -13,10 +13,6 @@
 #define ITERMAX 30
 #define BWDMAX 1.0
 
-// === Define what BLAS to use ============================================
-#define magma_zhemv magmablas_zhemv
-// === End defining what BLAS to use ======================================
-
 extern "C" magma_int_t
 magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
                  magmaDoubleComplex *dA, magma_int_t ldda,

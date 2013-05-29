@@ -21,14 +21,6 @@
 #include <omp.h>
 #endif
 
-// === Define what BLAS to use ============================================
-#define PRECISION_z
-
-#if (defined(PRECISION_s))
-     #define magma_ssyr2k magmablas_ssyr2k
-#endif
-// === End defining what BLAS to use ======================================
-
 
 extern "C" magma_int_t
 magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,

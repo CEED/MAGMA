@@ -13,24 +13,9 @@
 
 /* === Define what BLAS to use ============================================ */
 #define PRECISION_z
-#if defined(PRECISION_d)
-  #define magma_zgemm magmablas_zgemm
-  #define magma_ztrsm magmablas_ztrsm
-  #define ZTRSM_WORK
-extern "C"
-void magmablas_ztrsm_work( char side, char uplo, char tran, char diag, magma_int_t M, magma_int_t N,
-                           magmaDoubleComplex alpha, const magmaDoubleComplex* A, magma_int_t lda,
-                           magmaDoubleComplex* b, magma_int_t ldb,
-                           magmaDoubleComplex *d_dinvA, magmaDoubleComplex *d_x );
-#endif
 
-#if (defined(PRECISION_s))
-  #if (GPUSHMEM >= 200)
-     #undef  magma_sgemm
-     #define magma_sgemm magmablas_sgemm_fermi80
-  #endif
-  //#define magma_ztrsm magmablas_ztrsm /* caused sync error for upper-triangular on pluto */
-  //#define ZTRSM_WORK
+#if defined(PRECISION_s) || defined(PRECISION_d)
+//#define ZTRSM_WORK
 extern "C"
 void magmablas_ztrsm_work( char side, char uplo, char tran, char diag, magma_int_t M, magma_int_t N,
                            magmaDoubleComplex alpha, const magmaDoubleComplex* A, magma_int_t lda,
@@ -38,6 +23,8 @@ void magmablas_ztrsm_work( char side, char uplo, char tran, char diag, magma_int
                            magmaDoubleComplex *d_dinvA, magmaDoubleComplex *d_x );
 #endif
 /* === End defining what BLAS to use ======================================= */
+
+
 #define Alo(i, j)  (a   +            ((j)+off_j)*lda  + (nb*(((i)/nb)%h)+off_i))
 #define Aup(i, j)  (a   +(nb*(((j)/nb)%h)+off_j)*lda  +               (i+off_i))
 
@@ -125,8 +112,10 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
     //            event3[MagmaMaxGPUs],  /* send row to GPU    */
     //            event4[MagmaMaxGPUs];  /* lookahead          */
     const magma_int_t stream1 = 0, stream2 = 1, stream3 = 2;
+    #ifdef ZTRSM_WORK
     magmaDoubleComplex *d_dinvA[MagmaMaxGPUs][2], *d_x[MagmaMaxGPUs][2]; /* used by ztrsm_work */
-
+    #endif
+    
     *info = 0;
     if ( (! upper) && (! lapackf77_lsame(uplo_, "L")) ) {
         *info = -1;

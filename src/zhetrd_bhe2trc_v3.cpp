@@ -16,15 +16,8 @@
 #if defined(USEMKL)
 #include <mkl_service.h>
 #endif
-// === Define what BLAS to use ============================================
+
 #define PRECISION_z
-#if (defined(PRECISION_s) || defined(PRECISION_d))
-  #define magma_zgemm magmablas_zgemm
-#endif
-// === End defining what BLAS to use =======================================
-
-
-
 
 #define CHECK 0
 #define LOGQ 0
@@ -67,7 +60,6 @@ extern "C" void TRD_type3cHLsym_withQ(int N, int NB, magmaDoubleComplex *A, int 
 #define magma_ztrdtype3cbHLsym_withQ                magma_dtrdtype3cbHLsym_withQ
 #define magma_zbulge_applyQ                           magma_dbulge_applyQ
 #define magma_zstedc_withZ                        magma_dstedc_withZ
-#define magma_zgemm                                 magmablas_dgemm
 */
 
 extern "C" void magma_ztrdtype1cbHLsym_withQ(magma_int_t N, magma_int_t NB, magmaDoubleComplex *A, magma_int_t LDA, magmaDoubleComplex *V, magmaDoubleComplex *TAU, magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz);

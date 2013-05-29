@@ -13,10 +13,6 @@
 */
 #include "common_magma.h"
 
-#define magma_zgemm magmablas_zgemm
-//#define magma_ztrsm magmablas_ztrsm
-//#define magma_ztrmm magmablas_ztrmm
-
 extern "C" magma_int_t
 magma_zgessm_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t k, magma_int_t ib,
                   magma_int_t *ipiv,

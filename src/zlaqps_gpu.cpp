@@ -194,7 +194,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
             jpvt[k]   = itemp;
             //vn1[pvt] = vn1[k];
             //vn2[pvt] = vn2[k];
-            #if (defined(PRECISION_d) || defined(PRECISION_z))
+            #if defined(PRECISION_d) || defined(PRECISION_z)
                 //magma_dswap( 1, &vn1[pvt], 1, &vn1[k], 1 );
                 //magma_dswap( 1, &vn2[pvt], 1, &vn2[k], 1 );
                 magma_dswap( 2, &vn1[pvt], n+offset, &vn1[k], n+offset );
@@ -220,10 +220,10 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
 #ifdef RIGHT_UPDATE
             i__1 = m - offset - nb;
             i__2 = k;
-            magmablas_zgemv( MagmaNoTrans, i__1, i__2,
-                             c_neg_one, A(offset+nb, 0), lda,
-                                        F(k,         0), ldf,
-                             c_one,     A(offset+nb, k), ione );
+            magma_zgemv( MagmaNoTrans, i__1, i__2,
+                         c_neg_one, A(offset+nb, 0), lda,
+                                    F(k,         0), ldf,
+                         c_one,     A(offset+nb, k), ione );
 #else
             i__1 = m - rk;
             i__2 = k;
@@ -231,10 +231,10 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
                            &c_neg_one, A(rk, 0), &lda,
                                        F(k,  0), &ldf,
                            &c_one,     A(rk, k), &ione );*/
-            magmablas_zgemv( MagmaNoTrans, i__1, i__2,
-                             c_neg_one, A(rk, 0), lda,
-                                        F(k,  0), ldf,
-                             c_one,     A(rk, k), ione );
+            magma_zgemv( MagmaNoTrans, i__1, i__2,
+                         c_neg_one, A(rk, 0), lda,
+                                    F(k,  0), ldf,
+                         c_one,     A(rk, k), ione );
 #endif
 
             /*#if (defined(PRECISION_c) || defined(PRECISION_z))
@@ -325,16 +325,16 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
 #ifdef RIGHT_UPDATE
             i__1 = m - offset - nb;
             i__2 = k;
-            magmablas_zgemv( MagmaConjTrans, i__1, i__2,
-                             z__1,   A(offset+nb, 0), lda,
-                                     A(offset+nb, k), ione,
-                             c_zero, auxv, ione );
+            magma_zgemv( MagmaConjTrans, i__1, i__2,
+                         z__1,   A(offset+nb, 0), lda,
+                                 A(offset+nb, k), ione,
+                         c_zero, auxv, ione );
             
             i__1 = k;
-            magmablas_zgemv( MagmaNoTrans, n-k-1, i__1,
-                             c_one, F(k+1,0), ldf,
-                                    auxv,     ione,
-                             c_one, F(k+1,k), ione );
+            magma_zgemv( MagmaNoTrans, n-k-1, i__1,
+                         c_one, F(k+1,0), ldf,
+                                auxv,     ione,
+                         c_one, F(k+1,k), ione );
 #else
             i__1 = m - rk;
             i__2 = k;
@@ -343,25 +343,25 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
             //                        A(rk, k), &ione,
             //               &c_zero, auxv, &ione );
 
-            magmablas_zgemv( MagmaConjTrans, i__1, i__2,
-                             z__1,   A(rk, 0), lda,
-                                     A(rk, k), ione,
-                             c_zero, auxv, ione );
+            magma_zgemv( MagmaConjTrans, i__1, i__2,
+                         z__1,   A(rk, 0), lda,
+                                 A(rk, k), ione,
+                         c_zero, auxv, ione );
             
             //i__1 = k;
             //blasf77_zgemv( MagmaNoTransStr, &n, &i__1,
             //               &c_one, F(0,0), &ldf,
             //                       auxv,   &ione,
             //               &c_one, F(0,k), &ione );
-            /*magmablas_zgemv( MagmaNoTrans, n, i__1,
-                             c_one, F(0,0), ldf,
-                                    auxv,   ione,
-                             c_one, F(0,k), ione );*/
+            /*magma_zgemv( MagmaNoTrans, n, i__1,
+                           c_one, F(0,0), ldf,
+                                  auxv,   ione,
+                           c_one, F(0,k), ione );*/
             /* I think we only need stricly lower-triangular part :) */
-            magmablas_zgemv( MagmaNoTrans, n-k-1, i__2,
-                             c_one, F(k+1,0), ldf,
-                                    auxv,     ione,
-                             c_one, F(k+1,k), ione );
+            magma_zgemv( MagmaNoTrans, n-k-1, i__2,
+                         c_one, F(k+1,0), ldf,
+                                auxv,     ione,
+                         c_one, F(k+1,k), ione );
 #endif
         }
         
@@ -378,17 +378,17 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
             //               &c_one,     A(rk, k+1), &lda );
 #ifdef RIGHT_UPDATE
             /* right-looking update of rows,                     */
-            magmablas_zgemm( MagmaNoTrans, MagmaConjTrans, nb-k, i__1, ione,
-                             c_neg_one, A(rk,  k  ), lda,
-                                        F(k+1, k  ), ldf,
-                             c_one,     A(rk,  k+1), lda );
+            magma_zgemm( MagmaNoTrans, MagmaConjTrans, nb-k, i__1, ione,
+                         c_neg_one, A(rk,  k  ), lda,
+                                    F(k+1, k  ), ldf,
+                         c_one,     A(rk,  k+1), lda );
 #else
             /* left-looking update of rows,                     *
              * since F=A'v with original A, so no right-looking */
-            magmablas_zgemm( MagmaNoTrans, MagmaConjTrans, ione, i__1, i__2,
-                             c_neg_one, A(rk, 0  ), lda,
-                                        F(k+1,0  ), ldf,
-                             c_one,     A(rk, k+1), lda );
+            magma_zgemm( MagmaNoTrans, MagmaConjTrans, ione, i__1, i__2,
+                         c_neg_one, A(rk, 0  ), lda,
+                                    F(k+1,0  ), ldf,
+                         c_one,     A(rk, k+1), lda );
 #endif
         }
         

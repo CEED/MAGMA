@@ -10,13 +10,6 @@
 */
 #include "common_magma.h"
 
-// === Define what BLAS to use ============================================
-#define PRECISION_z
-#if (defined(PRECISION_s) || defined(PRECISION_d))
-  #define magma_ctrsm magmablas_ctrsm
-#endif
-// === End defining what BLAS to use ======================================
-
 extern "C" magma_int_t
 magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
                   magmaFloatComplex  *dA, magma_int_t ldda,

@@ -12,16 +12,8 @@
 
 // === Define what BLAS to use ============================================
 #define PRECISION_z
-#if (GPUSHMEM <= 200) && (defined(PRECISION_s) || defined(PRECISION_d))
-  #define magma_zgemm magmablas_zgemm
+#if defined(PRECISION_s) || defined(PRECISION_d)
   #define magma_ztrsm magmablas_ztrsm
-#endif
-
-#if (GPUSHMEM == 200)
-#if (defined(PRECISION_s))
-     #undef  magma_sgemm
-     #define magma_sgemm magmablas_sgemm_fermi80
-  #endif
 #endif
 // === End defining what BLAS to use ======================================
 

@@ -12,41 +12,6 @@
 #include "common_magma.h"
 #include "trace.h"
 
-static void magmaSetDevice( int id ) {
-    switch( id ) {
-        case 0:
-            magma_setdevice( 0 );
-            break;
-        case 1:
-            magma_setdevice( 1 );
-            break;
-        case 2:
-            magma_setdevice( 2 );
-            break;
-        case 3:
-            magma_setdevice( 3 );
-            break;
-        default:
-            magma_setdevice( id );
-            break;
-    }
-}
-
-
-// === Define what BLAS to use ============================================
-#define PRECISION_z
-#if (defined(PRECISION_s) || defined(PRECISION_d))
-  //#define magma_zgemm magmablas_zgemm
-  //#define cublasZgemm magmablas_zgemm
-  /* =========================== A BUG TO BE FIXED ====================== */
-  /* note: magma_blas_dtrsm seems to have a bug with not-multiple-of-32 N *
-   * and rhs > N on Fermi (Pluto)?                                        */
-  //#define cublasZtrsm magmablas_ztrsm
-#else
-  //#define magmablas_ztrsm magma_ztrsm
-#endif
-// === End defining what BLAS to use =======================================
-
 
 //#define PANEL_FACT_MC
 #ifdef PANEL_FACT_MC
@@ -198,7 +163,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
 
     /* some initializations */
     for(i=0; i<num_gpus; i++){
-        magmaSetDevice(i);
+        magma_setdevice(i);
         
         n_local[i] = ((n/nb)/num_gpus)*nb;
         if (i < (n/nb)%num_gpus)
@@ -217,7 +182,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
 
     /* start sending the panel to cpu */
     nb0 = min(mindim, nb);
-    magmaSetDevice(0);
+    magma_setdevice(0);
     magmablasSetKernelStream(streaml[0][1]);
     trace_gpu_start( 0, 1, "comm", "get" );
     if( nb0 == nb )
@@ -238,7 +203,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
     for( i=0; i<s; i++ ) {
         /* Set the GPU number that holds the current panel */
         id = i%num_gpus;
-        magmaSetDevice(id);
+        magma_setdevice(id);
         
         /* Set the local index where the current panel is */
         i_local = i/num_gpus;
@@ -265,7 +230,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
         /* start sending the panel to all the gpus */
         d = (i+1)%num_gpus;
         for( dd=0; dd<num_gpus; dd++ ) {
-            magmaSetDevice(d);
+            magma_setdevice(d);
             trace_gpu_start( 0, 1, "comm", "set" );
             magma_zsetmatrix_async( rows, nb,
                                     W(i),     ldw,
@@ -277,7 +242,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
         /* apply the pivoting */
         d = (i+1)%num_gpus;
         for( dd=0; dd<num_gpus; dd++ ) {
-            magmaSetDevice(d);
+            magma_setdevice(d);
             magmablasSetKernelStream(streaml[d][0]);
             
             trace_gpu_start( d, 1, "pivot", "pivot" );
@@ -293,7 +258,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
         /* update the trailing-matrix/look-ahead */
         d = (i+1)%num_gpus;
         for( dd=0; dd<num_gpus; dd++ ) {
-            magmaSetDevice(d);
+            magma_setdevice(d);
             
             /* storage for panel */
             if( d == id ) {
@@ -385,7 +350,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
             int rows  = m - (i+1)*nb;
             
             d = (i+1)%num_gpus;
-            magmaSetDevice(d);
+            magma_setdevice(d);
             magmablasSetKernelStream(streaml[d][0]);
             trace_gpu_start( d, 0, "gemm", "gemm" );
             magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
@@ -414,7 +379,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
     cols = maxm - s*nb;
     
     if( nb0 > 0 ) {
-        magmaSetDevice(id);
+        magma_setdevice(id);
         
         /* wait for the last panel on cpu */
         magma_queue_sync( streaml[id][1] );
@@ -426,7 +391,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
         
         /* send the factor to gpus */
         for( d=0; d<num_gpus; d++ ) {
-            magmaSetDevice(d);
+            magma_setdevice(d);
             i_local2 = i_local;
             if( d < id ) i_local2 ++;
             
@@ -438,7 +403,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
         }
         
         for( d=0; d<num_gpus; d++ ) {
-            magmaSetDevice(d);
+            magma_setdevice(d);
             magmablasSetKernelStream(streaml[d][0]);
             if( d == 0 )
                 magmablas_zpermute_long2( lddat, inAT(d,0,0), lddat, ipiv, nb0, s*nb );
@@ -447,7 +412,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
         }
         
         for( d=0; d<num_gpus; d++ ) {
-            magmaSetDevice(d);
+            magma_setdevice(d);
             magmablasSetKernelStream(streaml[d][1]);
             
             /* wait for the pivoting to be done */
@@ -490,14 +455,14 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
     /* clean up */
     trace_finalize( "zgetrf_mgpu.svg","trace.css" );
     for( d=0; d<num_gpus; d++ ) {
-        magmaSetDevice(d);
+        magma_setdevice(d);
         magma_queue_sync( streaml[d][0] );
         magma_queue_sync( streaml[d][1] );
         //magma_queue_destroy(streaml[d][0]);
         //magma_queue_destroy(streaml[d][1]);
         magmablasSetKernelStream(NULL);
     }
-    magmaSetDevice(0);
+    magma_setdevice(0);
 #ifdef PROFILE
     end_timer = get_current_time();
     printf("\n Performance %f GFlop/s\n", (2./3.*n*n*n /1000000.) / GetTimerValue(start_timer, end_timer));

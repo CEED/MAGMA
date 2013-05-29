@@ -16,15 +16,8 @@
 #if defined(USEMKL)
 #include <mkl_service.h>
 #endif
-// === Define what BLAS to use ============================================
+
 #define PRECISION_z
-#if (defined(PRECISION_s) || defined(PRECISION_d))
-  #define magma_zgemm magmablas_zgemm
-#endif
-// === End defining what BLAS to use =======================================
-
-
-
 
 #define CHECK 0
 #define LOGQ 0
@@ -62,7 +55,6 @@ extern "C" void TRD_type3cHLsym_withQ(int N, int NB, magmaDoubleComplex *A, int 
 #define magma_ztrdtype3cbHLsym_withQ                magma_dtrdtype3cbHLsym_withQ
 #define magma_zbulge_applyQ                           magma_dbulge_applyQ
 #define magma_zstedc_withZ                        magma_dstedc_withZ
-#define magma_zgemm                                 magmablas_dgemm
 */
 
 extern "C" void magma_ztrdtype1cbHLsym_withQ(int N, int NB, magmaDoubleComplex *A, int LDA, magmaDoubleComplex *V, magmaDoubleComplex *TAU, int st, int ed, int sweep, int Vblksiz);
@@ -357,7 +349,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
     /* In complex case, the off diagonal element are
      * not necessary real. we have to make off-diagonal
      * elements real and copy them to E.
-     * When using HouseHolder elimination,
+     * When using Householder elimination,
      * the ZLARFG give us a real as output so, all the
      * diagonal/off-diagonal element except the last one are already
      * real and thus we need only to take the abs of the last
@@ -382,16 +374,16 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
 #if defined(PRECISION_z) || defined(PRECISION_c)  
     if(uplo==MagmaLower){
-       for (i=0; i < N-1 ; i++)
-       {
-          D2[i] = MAGMA_Z_REAL( A2[i*LDA2]);               
-          E2[i] = MAGMA_Z_REAL(A2[i*LDA2+1]);
-       }
-       D2[N-1] = MAGMA_Z_REAL(A2[(N-1)*LDA2]);
+        for (i=0; i < N-1 ; i++)
+        {
+            D2[i] = MAGMA_Z_REAL( A2[i*LDA2]);               
+            E2[i] = MAGMA_Z_REAL(A2[i*LDA2+1]);
+        }
+        D2[N-1] = MAGMA_Z_REAL(A2[(N-1)*LDA2]);
     } else { /* MagmaUpper not tested yet */
         for (i=0; i<N-1; i++)
         {
-            D2[i]  =  MAGMA_Z_REAL(A2[i*LDA2+NB]);               
+            D2[i] = MAGMA_Z_REAL(A2[i*LDA2+NB]);               
             E2[i] = MAGMA_Z_REAL(A2[i*LDA2+NB-1]);
         }
         D2[N-1] = MAGMA_Z_REAL(A2[(N-1)*LDA2+NB]);
