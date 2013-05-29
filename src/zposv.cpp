@@ -10,8 +10,6 @@
 */
 #include "common_magma.h"
 
-#include <assert.h>
-
 extern "C" magma_int_t
 magma_zposv    ( char uplo, magma_int_t n, magma_int_t nrhs,
                  magmaDoubleComplex *A, magma_int_t lda,
@@ -112,12 +110,15 @@ magma_zposv    ( char uplo, magma_int_t n, magma_int_t nrhs,
     }
     if ( MAGMA_SUCCESS != magma_zmalloc( &dB, lddb*nrhs )) {
         magma_free( dA );
-        dA = NULL;
         goto CPU_INTERFACE;
     }
-    assert( num_gpus == 1 && dA != NULL && dB != NULL );
     magma_zsetmatrix( n, n, A, lda, dA, ldda );
     magma_zpotrf_gpu( uplo, n, dA, ldda, info );
+    if ( *info == MAGMA_ERR_DEVICE_ALLOC ) {
+        magma_free( dA );
+        magma_free( dB );
+        goto CPU_INTERFACE;
+    }
     magma_zgetmatrix( n, n, dA, ldda, A, lda );
     if ( *info == 0 ) {
         magma_zsetmatrix( n, nrhs, B, ldb, dB, lddb );
