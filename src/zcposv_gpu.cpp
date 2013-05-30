@@ -10,8 +10,8 @@
 */
 #include "common_magma.h"
 
-#define ITERMAX 30
 #define BWDMAX 1.0
+#define ITERMAX 30
 
 extern "C" magma_int_t
 magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
@@ -31,7 +31,7 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
     =======
     ZCPOSV computes the solution to a complex system of linear equations
        A * X = B,
-    where A is an N-by-N symmetric positive definite matrix and X and B
+    where A is an N-by-N Hermitian positive definite matrix and X and B
     are N-by-NRHS matrices.
 
     ZCPOSV first attempts to factorize the matrix in complex SINGLE PRECISION
@@ -41,7 +41,7 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
     complex DOUBLE PRECISION factorization and solve.
 
     The iterative refinement is not going to be a winning strategy if
-    the ratio complex SINGLE PRECISION performance over DOUBLE PRECISION
+    the ratio complex SINGLE PRECISION performance over complex DOUBLE PRECISION
     performance is too small. A reasonable strategy should take the
     number of right-hand sides and the size of the matrix into account.
     This might be done with a call to ILAENV in the future. Up to now, we
@@ -75,7 +75,7 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
             of the matrix B.  NRHS >= 0.
 
     dA      (input or input/output) COMPLEX_16 array on the GPU, dimension (LDDA,N)
-            On entry, the symmetric matrix A.  If UPLO = 'U', the leading
+            On entry, the Hermitian matrix A.  If UPLO = 'U', the leading
             N-by-N upper triangular part of A contains the upper
             triangular part of the matrix A, and the strictly lower
             triangular part of A is not referenced.  If UPLO = 'L', the
@@ -108,7 +108,7 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
             This array is used to hold the residual vectors.
 
     dworks  (workspace) COMPLEX array on the GPU, dimension (N*(N+NRHS))
-            This array is used to use the complex single precision matrix
+            This array is used to store the complex single precision matrix
             and the right-hand sides or solutions in single precision.
 
     ITER    (output) INTEGER
@@ -133,27 +133,32 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
 
     =====================================================================    */
 
+    #define dB(i,j)     (dB + (i) + (j)*lddb)
+    #define dX(i,j)     (dX + (i) + (j)*lddx)
+    #define dR(i,j)     (dR + (i) + (j)*lddr)
+    #define dSX(i,j)    (dSX + (i) + (j)*lddsx)
 
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magma_int_t     ione  = 1;
-    magmaFloatComplex *dSA, *dSX;
+    magmaDoubleComplex *dR;
+    magmaFloatComplex  *dSA, *dSX;
     magmaDoubleComplex Xnrmv, Rnrmv;
-    double          Xnrm, Rnrm, Anrm, cte, eps;
-    magma_int_t     i, j, iiter;
+    double          Anrm, Xnrm, Rnrm, cte, eps;
+    magma_int_t     i, j, iiter, lddsa, lddsx, lddr;
 
-    *iter = 0 ;
-    *info = 0 ;
-
-    if ( n <0)
+    /* Check arguments */
+    *iter = 0;
+    *info = 0;
+    if ( n < 0 )
         *info = -1;
-    else if( nrhs<0 )
+    else if ( nrhs < 0 )
         *info = -2;
-    else if( ldda < max(1,n) )
+    else if ( ldda < max(1,n))
         *info = -4;
-    else if( lddb < max(1,n) )
+    else if ( lddb < max(1,n))
         *info = -7;
-    else if( lddx < max(1,n) )
+    else if ( lddx < max(1,n))
         *info = -9;
 
     if (*info != 0) {
@@ -161,108 +166,152 @@ magma_zcposv_gpu(char uplo, magma_int_t n, magma_int_t nrhs,
         return *info;
     }
 
-    if( n == 0 || nrhs == 0 )
+    if ( n == 0 || nrhs == 0 )
         return *info;
 
-    eps = lapackf77_dlamch("Epsilon");
+    lddsa = n;
+    lddsx = n;
+    lddr  = n;
+    
+    dSA = dworks;
+    dSX = dSA + lddsa*n;
+    dR  = dworkd;
 
-    //ANRM = magmablas_zlanhe(  'I',  uplo , N ,A, LDA, (double*)dworkd);
-    //cte  = ANRM * EPS *  pow((double)N,0.5) * BWDMAX ;
+    eps  = lapackf77_dlamch("Epsilon");
+    Anrm = magmablas_zlanhe('I', uplo, n, dA, ldda, (double*)dworkd );
+    cte  = Anrm * eps * pow((double)n, 0.5) * BWDMAX;
 
-    dSX = dworks;
-    dSA = dworks + n*nrhs;
-
-    magmablas_zlag2c(n, nrhs, dB, lddb, dSX, n, info );
-    if( *info !=0 ){
+    /*
+     * Convert to single precision
+     */
+    magmablas_zlag2c( n, nrhs, dB, lddb, dSX, lddsx, info );
+    if (*info != 0) {
         *iter = -2;
-        goto L40;
+        goto FALLBACK;
     }
 
-    magmablas_zlat2c(uplo, n, dA, ldda, dSA, n, info );
-    if( *info !=0 ){
-        *iter = -2 ;
-        goto L40;
+    magmablas_zlat2c( uplo, n, dA, ldda, dSA, lddsa, info );
+    if (*info != 0) {
+        *iter = -2;
+        goto FALLBACK;
+    }
+    
+    // factor dSA in single precision
+    magma_cpotrf_gpu( uplo, n, dSA, lddsa, info );
+    if (*info != 0) {
+        *iter = -3;
+        goto FALLBACK;
+    }
+    
+    // solve dSA*dSX = dB in single precision
+    magma_cpotrs_gpu( uplo, n, nrhs, dSA, lddsa, dSX, lddsx, info );
+
+    // residual dR = dB - dA*dX in double precision
+    magmablas_clag2z( n, nrhs, dSX, lddsx, dX, lddx, info );
+    magmablas_zlacpy( MagmaUpperLower, n, nrhs, dB, lddb, dR, lddr );
+    if ( nrhs == 1 ) {
+        magma_zhemv( uplo, n,
+                     c_neg_one, dA, ldda,
+                                dX, 1,
+                     c_one,     dR, 1 );
+    }
+    else {
+        magma_zhemm( MagmaLeft, uplo, n, nrhs,
+                     c_neg_one, dA, ldda,
+                                dX, lddx,
+                     c_one,     dR, lddr );
     }
 
-    Anrm = magmablas_clanhe( 'I', uplo, n, dSA, n, (float *)dworkd);
-    cte  = Anrm * eps * pow((double)n,0.5) * BWDMAX ;
-
-    magma_cpotrf_gpu(uplo, n, dSA, ldda, info);
-    if( *info !=0 ){
-        *iter = -3 ;
-        goto L40;
-    }
-    magma_cpotrs_gpu(uplo, n, nrhs, dSA, ldda, dSX, lddb, info);
-    magmablas_clag2z(n, nrhs, dSX, n, dX, lddx, info);
-
-    magmablas_zlacpy( MagmaUpperLower, n, nrhs, dB, lddb, dworkd, n);
-
-    if( nrhs == 1 )
-        magma_zhemv(uplo, n, c_neg_one, dA, ldda, dX, 1, c_one, dworkd, 1);
-    else
-        magma_zhemm(MagmaLeft, uplo, n, nrhs, c_neg_one, dA, ldda, dX, lddx, c_one, dworkd, n);
-
-    for(i=0; i<nrhs; i++){
-        j = magma_izamax( n, dX+i*n, 1) ;
-        magma_zgetmatrix( 1, 1, dX+i*n+j-1, 1, &Xnrmv, 1 );
+    // TODO: use MAGMA_Z_ABS( dX(i,j) ) instead of zlange?
+    for( j=0; j < nrhs; j++ ) {
+        i = magma_izamax( n, dX(0,j), 1) - 1;
+        magma_zgetmatrix( 1, 1, dX(i,j), 1, &Xnrmv, 1 );
         Xnrm = lapackf77_zlange( "F", &ione, &ione, &Xnrmv, &ione, NULL );
 
-        j = magma_izamax ( n, dworkd+i*n, 1 );
-        magma_zgetmatrix( 1, 1, dworkd+i*n+j-1, 1, &Rnrmv, 1 );
+        i = magma_izamax ( n, dR(0,j), 1 ) - 1;
+        magma_zgetmatrix( 1, 1, dR(i,j), 1, &Rnrmv, 1 );
         Rnrm = lapackf77_zlange( "F", &ione, &ione, &Rnrmv, &ione, NULL );
 
-        if( Rnrm >  Xnrm *cte ){
-            goto L10;
+        if ( Rnrm >  Xnrm*cte ) {
+            goto REFINEMENT;
         }
     }
+    
     *iter = 0;
     return *info;
 
-  L10:
+REFINEMENT:
     for( iiter=1; iiter < ITERMAX; ) {
-        *info = 0 ;
-        magmablas_zlag2c(n, nrhs, dworkd, n, dSX, n, info );
-        if(*info !=0){
-            *iter = -2 ;
-            goto L40;
+        *info = 0;
+        // convert residual dR to single precision dSX
+        magmablas_zlag2c( n, nrhs, dR, lddr, dSX, lddsx, info );
+        if (*info != 0) {
+            *iter = -2;
+            goto FALLBACK;
         }
-        magma_cpotrs_gpu(uplo, n, nrhs, dSA, ldda, dSX, lddb, info);
+        // solve dSA*dSX = R in single precision
+        magma_cpotrs_gpu( uplo, n, nrhs, dSA, lddsa, dSX, lddsx, info );
 
-        for(i=0; i<nrhs; i++){
-            magmablas_zcaxpycp(dworks+i*n, dX+i*n, n, dB+i*n,dworkd+i*n) ;
+        // Add correction and setup residual
+        // dX += dSX [including conversion]  --and--
+        // dR = dB
+        for( j=0; j < nrhs; j++ ) {
+            magmablas_zcaxpycp( n, dSX(0,j), dX(0,j), dB(0,j), dR(0,j) );
         }
 
-        if( nrhs == 1 )
-            magma_zhemv(uplo, n, c_neg_one, dA, ldda, dX, 1, c_one, dworkd, 1);
-        else
-            magma_zhemm(MagmaLeft, uplo, n, nrhs, c_neg_one, dA, ldda, dX, lddx, c_one, dworkd, n);
+        // residual dR = dB - dA*dX in double precision
+        if ( nrhs == 1 ) {
+            magma_zhemv( uplo, n,
+                         c_neg_one, dA, ldda,
+                                    dX, 1,
+                         c_one,     dR, 1 );
+        }
+        else {
+            magma_zhemm( MagmaLeft, uplo, n, nrhs,
+                         c_neg_one, dA, ldda,
+                                    dX, lddx,
+                         c_one,     dR, lddr );
+        }
 
-        for(i=0; i<nrhs; i++){
-            j = magma_izamax( n, dX+i*n, 1) ;
-            magma_zgetmatrix( 1, 1, dX+i*n+j-1, 1, &Xnrmv, 1 );
+        /*  Check whether the nrhs normwise backward errors satisfy the
+         *  stopping criterion. If yes, set ITER=IITER>0 and return. */
+        for( j=0; j < nrhs; j++ ) {
+            i = magma_izamax( n, dX(0,j), 1) - 1;
+            magma_zgetmatrix( 1, 1, dX(i,j), 1, &Xnrmv, 1 );
             Xnrm = lapackf77_zlange( "F", &ione, &ione, &Xnrmv, &ione, NULL );
 
-            j = magma_izamax ( n, dworkd+i*n, 1 );
-            magma_zgetmatrix( 1, 1, dworkd+i*n+j-1, 1, &Rnrmv, 1 );
+            i = magma_izamax ( n, dR(0,j), 1 ) - 1;
+            magma_zgetmatrix( 1, 1, dR(i,j), 1, &Rnrmv, 1 );
             Rnrm = lapackf77_zlange( "F", &ione, &ione, &Rnrmv, &ione, NULL );
 
-            if( Rnrm >  Xnrm *cte ){
+            if ( Rnrm >  Xnrm*cte ) {
                 goto L20;
             }
         }
 
+        /*  If we are here, the nrhs normwise backward errors satisfy
+         *  the stopping criterion, we are good to exit. */
         *iter = iiter;
         return *info;
+        
       L20:
-        iiter++ ;
+        iiter++;
     }
+    
+    /* If we are at this place of the code, this is because we have
+     * performed ITER=ITERMAX iterations and never satisified the
+     * stopping criterion. Set up the ITER flag accordingly and follow
+     * up on double precision routine. */
     *iter = -ITERMAX - 1;
 
-  L40:
+FALLBACK:
+    /* Single-precision iterative refinement failed to converge to a
+     * satisfactory solution, so we resort to double precision. */
     magma_zpotrf_gpu( uplo, n, dA, ldda, info );
-    if( *info == 0 ){
+    if (*info == 0) {
         magmablas_zlacpy( MagmaUpperLower, n, nrhs, dB, lddb, dX, lddx );
         magma_zpotrs_gpu( uplo, n, nrhs, dA, ldda, dX, lddx, info );
     }
+    
     return *info;
 }

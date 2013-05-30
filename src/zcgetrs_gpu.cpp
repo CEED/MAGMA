@@ -13,9 +13,9 @@
 extern "C" magma_int_t
 magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
                   magmaFloatComplex  *dA, magma_int_t ldda,
-                  magma_int_t     *ipiv,
+                  magma_int_t        *ipiv,
                   magmaDoubleComplex *dB, magma_int_t lddb,
-                  magmaDoubleComplex  *dX, magma_int_t lddx,
+                  magmaDoubleComplex *dX, magma_int_t lddx,
                   magmaFloatComplex  *dSX,
                   magma_int_t *info)
 {
@@ -131,20 +131,21 @@ magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
         magma_ctrsm( MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
                      n, nrhs, c_one, dA, ldda, dSX, n);
         
-        magmablas_clag2z(n, nrhs, dSX, n, dX, lddx, info );
-    } else {
+        magmablas_clag2z( n, nrhs, dSX, n, dX, lddx, info );
+    }
+    else {
         inc = -1;
         
         /* Cast the COMPLEX_16 RHS to COMPLEX */
-        magmablas_zlag2c(n, nrhs, dB, lddb, dSX, n, info );
+        magmablas_zlag2c( n, nrhs, dB, lddb, dSX, n, info );
         
         /* Solve A' * X = B. */
-        magma_ctrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
-                    n, nrhs, c_one, dA, ldda, dSX, n);
-        magma_ctrsm(MagmaLeft, MagmaLower, MagmaConjTrans, MagmaUnit,
-                    n, nrhs, c_one, dA, ldda, dSX, n);
+        magma_ctrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
+                     n, nrhs, c_one, dA, ldda, dSX, n );
+        magma_ctrsm( MagmaLeft, MagmaLower, MagmaConjTrans, MagmaUnit,
+                     n, nrhs, c_one, dA, ldda, dSX, n );
         
-        magmablas_zclaswp(nrhs, dX, lddx, dSX, n, ipiv, inc);
+        magmablas_zclaswp( nrhs, dX, lddx, dSX, n, ipiv, inc );
     }
 
     return *info;
