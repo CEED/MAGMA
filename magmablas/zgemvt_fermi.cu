@@ -28,7 +28,7 @@ zgemvtn_kernel2_fermi(int n, int m, int n1, magmaDoubleComplex alpha,  magmaDoub
   for(int i=0; i<n1; i += num_threads ){
     __syncthreads();
     //buff[threadIdx.x]  = x[i];
-    buff[threadIdx.x]  = make_magmaDoubleComplex (cuCreal(x[i*incx]), -cuCimag(x[i*incx]));
+    buff[threadIdx.x]  = MAGMA_Z_MAKE(cuCreal(x[i*incx]), -cuCimag(x[i*incx]));
 
     __syncthreads();
     #pragma unroll
@@ -41,7 +41,7 @@ zgemvtn_kernel2_fermi(int n, int m, int n1, magmaDoubleComplex alpha,  magmaDoub
 
   if (m>n1){
      //buff[threadIdx.x]  = x[n1];
-     buff[threadIdx.x]  = make_magmaDoubleComplex (cuCreal(x[n1*incx]), -cuCimag(x[n1*incx]));
+     buff[threadIdx.x]  = MAGMA_Z_MAKE(cuCreal(x[n1*incx]), -cuCimag(x[n1*incx]));
 
      __syncthreads();
      for(int j=0; j<(m-n1); j++){
