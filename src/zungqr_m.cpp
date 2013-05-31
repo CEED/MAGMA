@@ -259,7 +259,7 @@ magma_zungqr_m(
     
     // copy result back to CPU
     trace_cpu_start( 0, "get", "get A" );
-    magmablas_zgetmatrix_1D_bcyclic( m, n, dA, ldda, A, lda, ngpu, nb );
+    magma_zgetmatrix_1D_col_bcyclic( m, n, dA, ldda, A, lda, ngpu, nb );
     trace_cpu_end( 0 );
     
     #ifdef TRACING

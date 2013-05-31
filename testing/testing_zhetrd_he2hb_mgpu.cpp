@@ -247,7 +247,7 @@ int main( int argc, char** argv)
            Performs operation using MAGMA
            =================================================================== */
         /* Copy the matrix to the GPU */
-        magmablas_zsetmatrix_1D_bcyclic( N, N, h_R, lda, da, ldda, ngpu, distblk);
+        magma_zsetmatrix_1D_col_bcyclic( N, N, h_R, lda, da, ldda, ngpu, distblk);
 //magmaDoubleComplex *dabis;
 //       TESTING_DEVALLOC( dabis,  magmaDoubleComplex, ldda*N );
 //       magma_zsetmatrix(N,N,h_R,lda,dabis,ldda);

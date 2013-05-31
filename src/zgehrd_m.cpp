@@ -249,7 +249,7 @@ magma_zgehrd_m(
         }
         
         // Copy the matrix to GPUs
-        magmablas_zsetmatrix_1D_bcyclic( n, n, A, lda, data.A, ldda, ngpu, nb );
+        magma_zsetmatrix_1D_col_bcyclic( n, n, A, lda, data.A, ldda, ngpu, nb );
         
         // round ilo down to block boundary
         ilo = (ilo/nb)*nb;

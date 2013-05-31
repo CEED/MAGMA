@@ -278,7 +278,7 @@ int main(int argc, char **argv)
            Performs operation using CUDA-BLAS
            =================================================================== */
         magma_setdevice(0);
-        magmablas_zsetmatrix_1D_bcyclic(m, m, A, LDA, d_lA, lda, num_gpus, nb); 
+        magma_zsetmatrix_1D_col_bcyclic(m, m, A, LDA, d_lA, lda, num_gpus, nb); 
         magma_setdevice(0);
 
     

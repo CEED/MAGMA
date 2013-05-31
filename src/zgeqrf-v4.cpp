@@ -151,13 +151,13 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
     if (m > nb && n > nb) {
 
         /* Copy the matrix to the GPUs in 1D block cyclic distribution */
-        magmablas_zsetmatrix_1D_bcyclic(m, n, a, lda, da, ldda, num_gpus, nb);
+        magma_zsetmatrix_1D_col_bcyclic(m, n, a, lda, da, ldda, num_gpus, nb);
 
         /* Factor using the GPU interface */
         magma_zgeqrf2_mgpu( num_gpus, m, n, da, ldda, tau, info);
 
         /* Copy the matrix back from the GPUs to the CPU */
-        magmablas_zgetmatrix_1D_bcyclic(m, n, da, ldda, a, lda, num_gpus, nb);
+        magma_zgetmatrix_1D_col_bcyclic(m, n, da, ldda, a, lda, num_gpus, nb);
     }
     else {
         lapackf77_zgeqrf(&m, &n, a, &lda, tau, work, &lwork, info);

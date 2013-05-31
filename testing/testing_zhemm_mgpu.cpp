@@ -204,7 +204,7 @@ int main( int argc, char** argv)
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-        magmablas_zsetmatrix_1D_bcyclic( m, m, hA, lda, dA, ldda, ngpu, nb );
+        magma_zsetmatrix_1D_col_bcyclic( m, m, hA, lda, dA, ldda, ngpu, nb );
         for( int d = 0; d < ngpu; ++d ) {
             cudaSetDevice( d );
             //magmablasSetKernelStream( streams[ d ][  0 ] );

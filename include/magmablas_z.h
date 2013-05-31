@@ -104,13 +104,25 @@ void magmablas_zsetmatrix_transpose_mgpu(
     magmaDoubleComplex_ptr    dB[],  magma_int_t lddb,
     magma_int_t m, magma_int_t n, magma_int_t nb );
 
-void magmablas_zgetmatrix_1D_bcyclic(
+void magma_zgetmatrix_1D_col_bcyclic(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex_ptr dA[], magma_int_t ldda,
     magmaDoubleComplex    *hA,   magma_int_t lda,
     magma_int_t ngpu, magma_int_t nb );
 
-void magmablas_zsetmatrix_1D_bcyclic(
+void magma_zsetmatrix_1D_col_bcyclic(
+    magma_int_t m, magma_int_t n,
+    const magmaDoubleComplex *hA,   magma_int_t lda,
+    magmaDoubleComplex_ptr    dA[], magma_int_t ldda,
+    magma_int_t ngpu, magma_int_t nb );
+
+void magma_zgetmatrix_1D_row_bcyclic(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex_ptr dA[], magma_int_t ldda,
+    magmaDoubleComplex    *hA,   magma_int_t lda,
+    magma_int_t ngpu, magma_int_t nb );
+
+void magma_zsetmatrix_1D_row_bcyclic(
     magma_int_t m, magma_int_t n,
     const magmaDoubleComplex *hA,   magma_int_t lda,
     magmaDoubleComplex_ptr    dA[], magma_int_t ldda,
