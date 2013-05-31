@@ -14,7 +14,6 @@ ZHDR  = commonblas_z.h
 # alphabetic order by base name (ignoring precision)
 ZSRC := \
 	zauxiliary.cu		\
-	zbulge_kernel_v2.cu     \
 	zcaxpycp.cu		\
 	zclaswp.cu		\
 	zgeadd.cu		\
