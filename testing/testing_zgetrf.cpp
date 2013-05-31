@@ -163,6 +163,7 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
+    printf("ngpu %d\n", opts.ngpu );
     if ( opts.check == 2 ) {
         printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |Ax-b|/(N*|A|*|x|)\n");
     }
