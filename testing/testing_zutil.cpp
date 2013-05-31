@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        November 2011
 
-       @precisions normal z -> c s d
+       @precisions normal z -> c d s
 
        @author Mark Gates
 

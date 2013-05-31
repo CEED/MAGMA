@@ -5,10 +5,8 @@
        Univ. of Colorado, Denver
        November 2011
 
-       @precisions normal z -> s d c
-
+       @precisions normal z -> c d s
 */
-
 // includes, system
 #include <stdlib.h>
 #include <stdio.h>
@@ -41,6 +39,7 @@ int main( int argc, char** argv)
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
+    opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     
     printf("  M     N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / ||A||_F\n");
     printf("=======================================================================\n");
@@ -98,7 +97,7 @@ int main( int argc, char** argv)
                 printf("magma_zgeqrf returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
             
-            if ( opts.check ) {
+            if ( opts.lapack ) {
                 /* =====================================================================
                    Performs operation using LAPACK
                    =================================================================== */

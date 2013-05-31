@@ -42,6 +42,7 @@ int main( int argc, char** argv )
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
+    opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     
     printf("    N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / ||A||_F\n");
     printf("=================================================================\n");
@@ -98,7 +99,7 @@ int main( int argc, char** argv )
             /* =====================================================================
                Performs operation using LAPACK
                =================================================================== */
-            if ( opts.check ) {
+            if ( opts.lapack ) {
                 cpu_time = magma_wtime();
                 lapackf77_zgetri( &N,     h_A, &lda, ipiv, work, &lwork, &info );
                 cpu_time = magma_wtime() - cpu_time;

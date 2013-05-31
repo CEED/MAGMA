@@ -101,18 +101,14 @@ int main( int argc, char** argv)
             TESTING_DEVALLOC(  d_A,  magmaDoubleComplex, ldda*N );
             
             /* Initialize the matrix */
-            if ( opts.check ) {
-                lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-                lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
-            }
-            else
-                lapackf77_zlarnv( &ione, ISEED, &n2, h_R );
+            lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
+            lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
             magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
             
             /* =====================================================================
                Performs operation using LAPACK
                =================================================================== */
-            if ( opts.check ) {
+            if ( opts.lapack ) {
                 cpu_time = magma_wtime();
                 lapackf77_zgetrf(&M, &N, h_A, &lda, ipiv, &info);
                 cpu_time = magma_wtime() - cpu_time;
@@ -136,16 +132,21 @@ int main( int argc, char** argv)
             /* =====================================================================
                Check the factorization
                =================================================================== */
-            if ( opts.check ) {
-                magma_zgetmatrix( M, N, d_A, ldda, h_A, lda );
-                error = get_LU_error(M, N, h_R, lda, h_A, ipiv);
-                
-                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e\n",
-                       (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, error);
+            if ( opts.lapack ) {
+                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)",
+                       (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
             }
             else {
-                printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)     ---  \n",
-                       (int) M, (int) N, gpu_perf, gpu_time);
+                printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)",
+                       (int) M, (int) N, gpu_perf, gpu_time );
+            }
+            if ( opts.check ) {
+                magma_zgetmatrix( M, N, d_A, ldda, h_A, lda );
+                error = get_LU_error( M, N, h_R, lda, h_A, ipiv );
+                printf("   %8.2e\n", error );
+            }
+            else {
+                printf("     ---  \n");
             }
             
             TESTING_FREE( ipiv );

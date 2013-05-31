@@ -24,7 +24,6 @@
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zpotf2_gpu
 */
-
 int main( int argc, char** argv)
 {
     TESTING_INIT();
@@ -40,6 +39,7 @@ int main( int argc, char** argv)
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
+    opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     
     printf("  N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
     printf("========================================================\n");
@@ -72,7 +72,7 @@ int main( int argc, char** argv)
                 printf("magma_zpotf2_gpu returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
             
-            if ( opts.check ) {
+            if ( opts.lapack ) {
                 /* =====================================================================
                    Performs operation using LAPACK
                    =================================================================== */
