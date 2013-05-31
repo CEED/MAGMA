@@ -91,7 +91,7 @@ magma_zsetmatrix_1D_row_bcyclic(
     for( i = 0; i < m; i += nb ) {
         dev = (i/nb) % num_gpus;
         magma_setdevice( dev );
-        jb = min(nb, n-i);
+        jb = min(nb, m-i);
         magma_zsetmatrix_async( jb, n,
                                 hA + i, lda,
                                 dA[dev] + i/(nb*num_gpus)*nb, ldda, NULL );
@@ -120,8 +120,8 @@ magma_zgetmatrix_1D_row_bcyclic(
     for( i = 0; i < m; i += nb ) {
         dev = (i/nb) % num_gpus;
         magma_setdevice( dev );
-        jb = min(nb, n-i);
-        magma_zgetmatrix_async( jb, m,
+        jb = min(nb, m-i);
+        magma_zgetmatrix_async( jb, n,
                                 dA[dev] + i/(nb*num_gpus)*nb, ldda,
                                 hA + i, lda, NULL );
     }
