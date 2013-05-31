@@ -389,7 +389,7 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     }
 
     t2 = get_current_time();
-    magmablas_dsetmatrix_1D_bcyclic( n, n, a, lda, da, ldda, nrgpu, distblk);
+    magma_dsetmatrix_1D_col_bcyclic( n, n, a, lda, da, ldda, nrgpu, distblk );
     magma_setdevice(0);
 
     tband1 = get_current_time();
