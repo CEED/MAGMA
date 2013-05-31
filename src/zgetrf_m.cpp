@@ -91,15 +91,15 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
     double flops, time_rmajor = 0, time_rmajor2 = 0, time_rmajor3 = 0, time_mem = 0;
     magma_timestr_t start, start1, start2, end1, end, start0 = get_current_time();
 #endif
-    magmaDoubleComplex    *dAT[4], *dA[4], *dPT[4];
+    magmaDoubleComplex    *dAT[MagmaMaxGPUs], *dA[MagmaMaxGPUs], *dPT[MagmaMaxGPUs];
     magmaDoubleComplex    c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex    c_neg_one = MAGMA_Z_NEG_ONE;
-    magma_int_t        iinfo = 0, nb, nbi, maxm, n_local[4], ldn_local;
+    magma_int_t        iinfo = 0, nb, nbi, maxm, n_local[MagmaMaxGPUs], ldn_local;
     magma_int_t        N, M, NB, NBk, I, d, num_gpus;
-    magma_int_t        i, ii, jj, h = 3, offset, ib, rows, s;
+    magma_int_t        i, ii, jj, h, offset, ib, rows, s;
     
-    magma_queue_t stream[4][2];
-    magma_event_t  event[4][2];
+    magma_queue_t stream[MagmaMaxGPUs][2];
+    magma_event_t  event[MagmaMaxGPUs][2];
 
     *info = 0;
 
@@ -151,6 +151,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
         NB = num_gpus*NB;
         NB = max(nb,(NB / nb) * nb); /* making sure it's devisable by nb (x64) */
     }
+    h = 1+(2+num_gpus);
 
     #ifdef CHECK_ZGETRF_OOC
     if( NB != n ) printf( "      * running in out-core mode (n=%d, NB=%d, nb=%d).\n",n,NB,nb );
@@ -408,8 +409,6 @@ magma_zgetrf_piv(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubl
 
     /* number of columns in the big panel */
     NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
-    //NB = (magma_int_t)min(n,num_gpus*(0.8*freeMem/maxm-h*nb));
-    //NB = (magma_int_t)min(n,(num_gpus*0.8*freeMem/(maxm))-2*nb);
     char * ngr_nb_char = getenv("MAGMA_NGR_NB");
     if( ngr_nb_char != NULL ) NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
     //NB = 5*max(nb,32);
