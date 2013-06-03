@@ -117,14 +117,15 @@ int main( int argc, char** argv )
                        (int) info, magma_strerror( info ));
             
             magma_zgetmatrix_1D_col_bcyclic( M, N, d_lA, ldda, h_R, lda, ngpu, nb );
+            magma_queue_sync( NULL );
             
             /* =====================================================================
                Check the result compared to LAPACK
                =================================================================== */
             if ( opts.lapack ) {
-                error = lapackf77_zlange("f", &M, &N, h_A, &M, work );  // TODO take before lapack zgeqrf?
+                error = lapackf77_zlange("f", &M, &N, h_A, &lda, work );
                 blasf77_zaxpy( &n2, &c_neg_one, h_A, &ione, h_R, &ione );
-                error = lapackf77_zlange("f", &M, &N, h_R, &M, work ) / error;
+                error = lapackf77_zlange("f", &M, &N, h_R, &lda, work ) / error;
                 
                 printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e\n",
                        (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, error );
