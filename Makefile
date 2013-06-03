@@ -10,7 +10,7 @@ MAGMA_DIR = .
 include ./Makefile.internal
 -include Makefile.local
 
-.PHONY: lib
+.PHONY: all lib libmagma libmagmablas test clean cleanall install shared
 
 all: lib test
 
