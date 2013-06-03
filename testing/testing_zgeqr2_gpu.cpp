@@ -24,11 +24,6 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-extern "C" magma_int_t
-magma_zgeqr2_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
-                 magma_int_t *ldda, magmaDoubleComplex *dtau, double *dwork,
-                 magma_int_t *info);
-
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeqrf
 */
@@ -80,15 +75,14 @@ int main( int argc, char** argv)
             magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
             
             // warmup
-            magma_zgeqr2_gpu(&M, &N, d_A, &ldda, dtau, dwork, &info);
+            magma_zgeqr2_gpu( M, N, d_A, ldda, dtau, dwork, &info );
             magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
             
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
             gpu_time = magma_sync_wtime( 0 );
-            // magma_zgeqrf2_gpu( M, N, d_A, ldda, tau, &info);
-            magma_zgeqr2_gpu(&M, &N, d_A, &ldda, dtau, dwork, &info);
+            magma_zgeqr2_gpu( M, N, d_A, ldda, dtau, dwork, &info );
             gpu_time = magma_sync_wtime( 0 ) - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
