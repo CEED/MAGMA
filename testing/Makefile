@@ -181,9 +181,12 @@ LIBEXE  := $(LIBOBJ:.o=)
 # strip out fake exe files generated from LIBSRC
 EXE := $(filter-out $(LIBEXE), $(EXE))
 
+.PHONY: all lib clean cleanall
+
 all: $(EXE)
 
 lib: $(LIBMAGMA)
+	cd .. && make lib
 
 # depend on header
 $(ALLOBJ): testings.h

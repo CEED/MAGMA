@@ -246,6 +246,8 @@ ZSRC += \
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 ALLOBJ := $(ALLSRC:.cpp=.o)
 
+.PHONY: all clean cleanall
+
 all: $(LIBMAGMA)
 
 $(LIBMAGMA): $(ALLOBJ)

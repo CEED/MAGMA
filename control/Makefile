@@ -43,6 +43,8 @@ ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f90=.o)
 ALLOBJ := $(ALLOBJ:.F90=.o)
 
+.PHONY: all clean cleanall
+
 all: $(LIBMAGMA)
 
 $(LIBMAGMA): $(ALLOBJ)

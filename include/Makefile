@@ -23,6 +23,8 @@ ZHDR =  magma_z.h	\
 
 ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR)
 
+.PHONY: all clean cleanall
+
 all: $(ALLHDR)
 
 clean:

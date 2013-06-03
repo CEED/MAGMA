@@ -146,6 +146,8 @@ endif
 ALLOBJ := $(ALLSRC:.cu=.cu_o) 
 ALLOBJ := $(ALLOBJ:.cpp=.o)
 
+.PHONY: all clean cleanall
+
 all: $(LIBMAGMA) 
 
 $(LIBMAGMA): $(ALLHDR) $(ALLOBJ)
