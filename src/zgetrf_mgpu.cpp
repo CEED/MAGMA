@@ -89,7 +89,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
     magma_int_t id, i_local, i_local2, nb0, nb1;
     magmaDoubleComplex *d_lAT[MagmaMaxGPUs];
     magmaDoubleComplex *d_panel[MagmaMaxGPUs], *work;
-    magma_queue_t streaml[4][2];
+    magma_queue_t streaml[MagmaMaxGPUs][2];
 
     /* Check arguments */
     *info = 0;
