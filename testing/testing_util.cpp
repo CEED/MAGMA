@@ -211,6 +211,8 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
         }
         else if ( strcmp("--ngpu",    argv[i]) == 0 && i+1 < argc ) {
             opts->ngpu = atoi( argv[++i] );
+            magma_assert( opts->ngpu <= MagmaMaxGPUs,
+                          "error: --ngpu %s exceeds MagmaMaxGPUs, %d.\n", argv[i], MagmaMaxGPUs );
             magma_assert( opts->ngpu <= ndevices,
                           "error: --ngpu %s exceeds number of CUDA devices, %d.\n", argv[i], ndevices );
             magma_assert( opts->ngpu > 0,
