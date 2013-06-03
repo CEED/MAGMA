@@ -16,6 +16,14 @@
 
 #define A(i, j)  (A + (i) + (j)*lda)   // A(i, j) means at i row, j column
 
+#define zswap_bs 64
+
+#if (GPUSHMEM < 200)
+#define zgeru_bs 512  // 512 is max threads for 1.x cards
+#else
+#define zgeru_bs 1024
+#endif
+
 void magma_zswap(
     magma_int_t n, magmaDoubleComplex *x, magma_int_t i, magma_int_t j, magma_int_t incx);
 
@@ -55,6 +63,7 @@ magma_zgetf2_gpu(
 
     N       (input) INTEGER
             The number of columns of the matrix A.  N >= 0 and N <= 1024.
+            On CUDA architecture 1.x cards, N <= 512.
 
     A       (input/output) COMPLEX_16 array, dimension (LDA,N)
             On entry, the m by n matrix to be factored.
@@ -81,7 +90,7 @@ magma_zgetf2_gpu(
     *info = 0;
     if (m < 0) {
         *info = -1;
-    } else if (n < 0 || n > 1024) {
+    } else if (n < 0 || n > zgeru_bs) {
         *info = -2;
     } else if (lda < max(1,m)) {
         *info = -4;
@@ -97,24 +106,26 @@ magma_zgetf2_gpu(
         return *info;
     }
 
-    magma_int_t minmn = min(m, n);
-    magma_int_t j;
-
-    for (j = 0; j < minmn; j++) {
+    magma_int_t min_mn = min(m, n);
+    magma_int_t j, jp;
+    
+    for( j=0; j < min_mn; j++ ) {
         cudaDeviceSetCacheConfig( cudaFuncCachePreferShared );
 
         // Find pivot and test for singularity.
-        int jp;
-        jp = cublasIzamax(m-j, A(j,j), 1);
-        jp = jp - 1 + j;
-        ipiv[j] = jp + 1;
+        jp = j - 1 + cublasIzamax(m-j, A(j,j), 1);
+        ipiv[j] = jp + 1;  // ipiv uses Fortran one-based index
         // Can't check value of A since it is on GPU
         //if ( A(jp, j) != 0.0) {
             cudaDeviceSetCacheConfig( cudaFuncCachePreferL1 );
             
             // Apply the interchange to columns 1:N.
-            if (jp != j){
+            // TODO: replace with pre-existing BLAS-standard zswap routine,
+            // e.g., magmablas_zswap or cublasZswap
+            if (jp != j) {
                 magma_zswap(n, A, j, jp, lda);
+                //magmablas_zswap( n, A(j,0), lda, A(jp,0), lda );
+                //cublasZswap( n, A(j,0), lda, A(jp,0), lda );
             }
             
             // Compute elements J+1:M of J-th column.
@@ -131,23 +142,20 @@ magma_zgetf2_gpu(
 }
 
 
-#define zswap_bs 64
-#define zgeru_bs 1024
-
-
-__global__ void kernel_zswap(int n, magmaDoubleComplex *x, int i, int j, int incx)
+__global__
+void kernel_zswap(int n, magmaDoubleComplex *x, int i, int j, int incx)
 {
     int id = blockIdx.x * zswap_bs + threadIdx.x;
 
     if (id < n) {
-        magmaDoubleComplex res = x[i + incx*id];
+        magmaDoubleComplex tmp = x[i + incx*id];
         x[i + incx*id] = x[j + incx*id];
-        x[j + incx*id] = res;
+        x[j + incx*id] = tmp;
     }
 }
 
 
-void magma_zswap(int n, magmaDoubleComplex *x, int i, int j, int incx)
+void magma_zswap(magma_int_t n, magmaDoubleComplex *x, magma_int_t i, magma_int_t j, magma_int_t incx)
 {
 /*
     zswap two row vectors: ith and jth
@@ -159,12 +167,14 @@ void magma_zswap(int n, magmaDoubleComplex *x, int i, int j, int incx)
 }
 
 
+// dynamically allocated shared memory, set to size n when the kernel is launched.
+// See CUDA Guide B.2.3
 extern __shared__ magmaDoubleComplex shared_data[];
 
-__global__ void
-kernel_zscal_zgeru(int m, int n, magmaDoubleComplex *A, int lda)
+__global__
+void kernel_zscal_zgeru(int m, int n, magmaDoubleComplex *A, int lda)
 {
-    magmaDoubleComplex *shared_y = (magmaDoubleComplex *)shared_data;
+    magmaDoubleComplex *shared_y = shared_data;
 
     int tid = blockIdx.x * zgeru_bs + threadIdx.x;
 
@@ -191,7 +201,7 @@ kernel_zscal_zgeru(int m, int n, magmaDoubleComplex *A, int lda)
 }
 
 
-void magma_zscal_zgeru(int m, int n, magmaDoubleComplex *A, int lda)
+void magma_zscal_zgeru(magma_int_t m, magma_int_t n, magmaDoubleComplex *A, magma_int_t lda)
 {
 /*
 

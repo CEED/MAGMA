@@ -14,6 +14,12 @@
 
 #define PRECISION_z
 
+#if (GPUSHMEM < 200)
+#define zdotc_max_bs 512  // 512 is max threads for 1.x cards
+#else
+#define zdotc_max_bs 1024
+#endif
+
 #define A(i, j)  (A + (i) + (j)*lda)   // A(i, j) means at i row, j column
 
 void zpotf2_zdscal(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx);
@@ -59,6 +65,7 @@ magma_zpotf2_gpu(
 
     N       (input) INTEGER
             The order of the matrix A.  N >= 0 and N <= 1024.
+            On CUDA architecture 1.x cards, N <= 512.
 
     A       (input/output) COMPLEX_16 array, dimension (LDA,N)
             On entry, the symmetric matrix A.  If UPLO = 'U', the leading
@@ -89,7 +96,7 @@ magma_zpotf2_gpu(
     *info = 0;
     if ( uplo != 'U' && uplo != 'u' && uplo != 'L' && uplo != 'l') {
         *info = -1;
-    } else if (n < 0 || n > 1024) {
+    } else if (n < 0 || n > zdotc_max_bs) {
         *info = -2;
     } else if (lda < max(1,n)) {
         *info = -4;
@@ -154,21 +161,23 @@ magma_zpotf2_gpu(
 #define zdotc_bs  512
 #define zlacgv_bs 512
 
+// dynamically allocated shared memory, set to size number of threads when the kernel is launched.
+// See CUDA Guide B.2.3
 extern __shared__ double shared_data[];
 
 __global__ void kernel_zdotc(int n, magmaDoubleComplex *x, int incx, int threadSize)
 {
     int tx = threadIdx.x;
 
-    double *sdata = (double*)shared_data;
+    double *sdata = shared_data;
 
-    magmaDoubleComplex res= MAGMA_Z_ZERO;
+    magmaDoubleComplex res = MAGMA_Z_ZERO;
 
     if (tx < n) {
        res = x[tx*incx];
     }
 
-    sdata[tx] = MAGMA_Z_REAL(res * cuConj(res));
+    sdata[tx] = MAGMA_Z_REAL(res * MAGMA_Z_CNJG(res));
 
     __syncthreads();
 
@@ -198,13 +207,13 @@ __global__ void kernel_zdotc(int n, magmaDoubleComplex *x, int incx, int threadS
 void zpotf2_zdotc(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx)
 {
 /*
-       Specialized Zdotc
-       1)performs zdotc sum = x[0:n-1]*cuConj(x[0:n-1])
-       2)updates x[n] = sqrt(x[n]-sum);
+    Specialized Zdotc
+    1) performs zdotc sum = x[0:n-1]*conj(x[0:n-1])
+    2) updates x[n] = sqrt(x[n]-sum);
 
 */
-    if (n > 1024) {
-        printf("n = %d > 1024 is not supported in zpotf2_zdotc\n", n);
+    if (n > zdotc_max_bs) {
+        printf("n = %d > %d is not supported in zpotf2_zdotc\n", n, zdotc_max_bs);
         exit(1);
     }
     int threadSize;
@@ -234,7 +243,7 @@ __global__ void kernel_zdscal(int n, magmaDoubleComplex *x, int incx)
 
     __shared__ magmaDoubleComplex factor;
 
-    if (threadIdx.x ==0) {
+    if (threadIdx.x == 0) {
         factor = MAGMA_Z_MAKE(1.0/MAGMA_Z_REAL(x[0]), 0.0);
     }
 
@@ -264,7 +273,7 @@ __global__ void kernel_zlacgv(int n, magmaDoubleComplex *x, int incx)
     int id = blockIdx.x * zlacgv_bs + threadIdx.x;
 
     if ( id < n ) {
-        x[id*incx] = cuConj(x[id*incx]);
+        x[id*incx] = MAGMA_Z_CNJG(x[id*incx]);
     }
 }
 
