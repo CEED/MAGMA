@@ -343,20 +343,6 @@ void magmablas_zsymmetrize_tiles(
     magma_int_t ntile, magma_int_t mstride, magma_int_t nstride );
 
   /*
-   * Panels on GPU
-   */
-magma_int_t magma_zpotf2_gpu(
-    magma_uplo_t uplo, magma_int_t n,
-    cuDoubleComplex *A, magma_int_t lda,
-    magma_int_t *info );
-
-magma_int_t magma_zgetf2_gpu(
-    magma_int_t m, magma_int_t n,
-    cuDoubleComplex *A, magma_int_t lda,
-    magma_int_t *ipiv,
-    magma_int_t* info );
-
-  /*
    * Level 1 BLAS
    */
 void magmablas_dznrm2(int m, int num,
