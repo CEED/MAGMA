@@ -83,7 +83,7 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
-    printf("  M     N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||PA-LU||/(||A||*N)\n");
+    printf("  M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)    ||PA-LU||/(||A||*N)\n");
     printf("=========================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -134,11 +134,11 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)",
-                       (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
+                       (int) M, (int) N, cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000. );
             }
             else {
                 printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)",
-                       (int) M, (int) N, gpu_perf, gpu_time );
+                       (int) M, (int) N, gpu_perf, gpu_time*1000. );
             }
             if ( opts.check ) {
                 magma_zgetmatrix( M, N, d_A, ldda, h_A, lda );

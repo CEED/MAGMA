@@ -41,7 +41,7 @@ int main( int argc, char** argv)
     parse_opts( argc, argv, &opts );
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     
-    printf("  N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
+    printf("    N   CPU GFlop/s (ms)    GPU GFlop/s (ms)    ||R_magma - R_lapack||_F / ||R_lapack||_F\n");
     printf("========================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -93,11 +93,11 @@ int main( int argc, char** argv)
                 error = lapackf77_zlange("f", &N, &N, h_R, &lda, work) / error;
                 
                 printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e\n",
-                       (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, error );
+                       (int) N, cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000., error );
             }
             else {
                 printf("%5d     ---   (  ---  )   %7.2f (%7.2f)     ---  \n",
-                       (int) N, gpu_perf, gpu_time );
+                       (int) N, gpu_perf, gpu_time*1000. );
             }
             TESTING_FREE(     h_A );
             TESTING_HOSTFREE( h_R );
