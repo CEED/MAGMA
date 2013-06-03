@@ -192,7 +192,7 @@ magma_zgeqr2x4_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
     #define dt_ref(a_1,a_2) ( dT+(a_2)*(k) + (a_1))
     #define BS 32
 
-    static magma_int_t i, k;
+    magma_int_t i, k;
 
     double *dnorm = (double *)dwork;
     magmaDoubleComplex *work = (magmaDoubleComplex *)(dwork+2*(*n));
