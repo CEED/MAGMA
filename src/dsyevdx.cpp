@@ -329,7 +329,7 @@ magma_dsyevdx(char jobz, char range, char uplo,
             return *info;
         }
 
-        magma_dstedx(range, n, vl, vu, il, iu, &w[1], &work[inde],
+        magma_dstedx(range, n, vl, vu, il, iu, w, &work[inde],
                      &work[indwrk], n, &work[indwk2],
                      llwrk2, iwork, liwork, dwork, info);
 
