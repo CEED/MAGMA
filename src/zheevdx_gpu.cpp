@@ -38,7 +38,7 @@ void magma_zmove_eig(char range, magma_int_t n, double *w, magma_int_t *il,
                 break;
             }
             else if (w[i] < vl)
-                ++il;
+                ++*il;
             else if (*il > 1)
                 w[i-*il+1]=w[i];
         }

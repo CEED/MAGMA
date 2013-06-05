@@ -34,7 +34,7 @@ extern "C"{
                 break;
             }
             else if (d[i] < vl)
-                ++il;
+                ++*il;
         }
         return;
     }
