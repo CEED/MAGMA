@@ -42,6 +42,12 @@ magma_zgeqr2x3_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
                   magmaDoubleComplex *dT, magmaDoubleComplex *ddA,
                   double *dwork, magma_int_t *info);
 
+extern "C" magma_int_t
+magma_zgeqr2x4_gpu(magma_int_t *m, magma_int_t *n, cuDoubleComplex *dA,
+                   magma_int_t *ldda, cuDoubleComplex *dtau,
+                   cuDoubleComplex *dT, cuDoubleComplex *ddA,
+                   double *dwork, magma_int_t *info, cudaStream_t stream);
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeqrf
 */
@@ -51,10 +57,12 @@ int main( int argc, char** argv)
 
     real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
     double           error, work[1];
+
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
-    magmaDoubleComplex *h_A, *h_T, *h_R, *tau, *dtau, *h_work, tmp[1];
-    magmaDoubleComplex *d_A, *d_T, *ddA;
-    double *dwork;
+    magmaDoubleComplex *h_A, *h_T, *h_R, *tau, *h_work, tmp[1];
+    magmaDoubleComplex *d_A,  *d_T, *ddA, *dtau;
+    magmaDoubleComplex *d_A2, *d_T2, *ddA2, *dtau2;
+    double *dwork, *dwork2;
 
     /* Matrix size */
     magma_int_t M = 0, N = 0, n2, lda, ldda, lwork;
@@ -70,7 +78,7 @@ int main( int argc, char** argv)
     checkres = getenv("MAGMA_TESTINGS_CHECK") != NULL;
 
     // process command line arguments
-    printf( "\nUsage: %s -N <m,n> -c -v <version 1..3>\n", argv[0] );
+    printf( "\nUsage: %s -N <m,n> -c -v <version 1..4>\n", argv[0] );
     printf( "  -N can be repeated up to %d times. If only m is given, then m=n.\n", MAXTESTS );
     printf( "  -c or setting $MAGMA_TESTINGS_CHECK runs LAPACK and checks result.\n\n" );
     int ntest = 0;
@@ -132,10 +140,20 @@ int main( int argc, char** argv)
     TESTING_DEVALLOC(  ddA, magmaDoubleComplex,    N*N );
     TESTING_DEVALLOC( dtau, magmaDoubleComplex, min_mn );
 
-    TESTING_DEVALLOC(dwork, double, max(5*min_mn, (32*2+2)*min_mn) );
+    TESTING_DEVALLOC( d_A2, magmaDoubleComplex, ldda*N );
+    TESTING_DEVALLOC( d_T2, magmaDoubleComplex,    N*N );
+    TESTING_DEVALLOC( ddA2, magmaDoubleComplex,    N*N );
+    TESTING_DEVALLOC(dtau2, magmaDoubleComplex, min_mn );
+
+#define BLOCK_SIZE 64
+    TESTING_DEVALLOC( dwork, double, max(5*min_mn, (BLOCK_SIZE*2+2)*min_mn) );
+    TESTING_DEVALLOC(dwork2, double, max(5*min_mn, (BLOCK_SIZE*2+2)*min_mn) );
 
     cudaMemset(ddA, 0, N*N*sizeof(magmaDoubleComplex));
     cudaMemset(d_T, 0, N*N*sizeof(magmaDoubleComplex));
+
+    cudaMemset(ddA2, 0, N*N*sizeof(magmaDoubleComplex));
+    cudaMemset(d_T2, 0, N*N*sizeof(magmaDoubleComplex));
 
     lwork = -1;
     lapackf77_zgeqrf(&M, &N, h_A, &M, tau, tmp, &lwork, &info);
@@ -143,6 +161,11 @@ int main( int argc, char** argv)
     lwork = max(lwork, N*N);
 
     TESTING_MALLOC( h_work, magmaDoubleComplex, lwork );
+
+    cudaStream_t stream[2];
+    magma_queue_create( &stream[0] );
+    magma_queue_create( &stream[1] );
+
 
     printf("  M     N     CPU GFlop/s (ms)    GPU GFlop/s (ms)   ||R||_F/||A||_F  ||R_T||\n");
     printf("=============================================================================\n");
@@ -158,7 +181,8 @@ int main( int argc, char** argv)
         /* Initialize the matrix */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
         lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
-        magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
+        magma_zsetmatrix( M, N, h_R, lda,  d_A, ldda );
+        magma_zsetmatrix( M, N, h_R, lda, d_A2, ldda );
 
         /* ====================================================================
            Performs operation using MAGMA
@@ -171,8 +195,21 @@ int main( int argc, char** argv)
             magma_zgeqr2x_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, dwork, &info);
         else if (version == 2)
             magma_zgeqr2x2_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, dwork, &info);
-        else
+        else if (version == 3)
             magma_zgeqr2x3_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, dwork, &info);
+        else {
+          /*
+            Going through NULL stream is faster
+            Going through any stream is slower
+            Doing two streams in parallel is slower than doing them sequentially
+            Queuing happens on the NULL stream - user defined buffers are smaller?
+          */
+          //magma_zgeqr2x4_gpu(&M, &N,  d_A, &ldda, dtau, d_T, ddA, dwork, &info, NULL);
+          magma_zgeqr2x4_gpu(&M, &N,  d_A, &ldda, dtau, d_T, ddA, dwork, &info, stream[1]);
+          magma_zgeqr2x4_gpu(&M, &N, d_A2, &ldda,dtau2,d_T2,ddA2,dwork2, &info, stream[0]);
+          //magma_zgeqr2x4_gpu(&M, &N, d_A2, &ldda,dtau2,d_T2,ddA2,dwork2, &info, NULL);
+          //gflops *= 2;
+        }
 
         cudaDeviceSynchronize();
         gpu_time = magma_wtime() - gpu_time;
@@ -182,6 +219,19 @@ int main( int argc, char** argv)
                    (int) info, magma_strerror( info ));
         
         if ( checkres ) {
+          /*
+            int tm=1000,tn=1000,tsiz=tm*tn;
+            magmaDoubleComplex *myA, *mytau, *mywork;
+
+            TESTING_MALLOC(    myA, magmaDoubleComplex, tsiz     );
+            TESTING_MALLOC(    mywork, magmaDoubleComplex, tsiz     );
+            TESTING_MALLOC(    mytau, magmaDoubleComplex, tn     );
+            lapackf77_zlarnv( &ione, ISEED, &tsiz, myA );
+            lapackf77_zgeqrf(&tm, &tn, myA, &tm, mytau, mywork, &tsiz, &info);
+            lapackf77_zlarft( MagmaForwardStr, MagmaColumnwiseStr,
+                              &tm, &tn, myA, &tm, mytau, mywork, &tn);
+          */
+
             /* =====================================================================
                Performs operation using LAPACK
                =================================================================== */
@@ -232,18 +282,29 @@ int main( int argc, char** argv)
         }
     }
     
+    magma_queue_destroy( stream[0] );
+    magma_queue_destroy( stream[1] );
+
     /* Memory clean up */
     TESTING_FREE( tau );
     TESTING_FREE( h_A );
     TESTING_FREE( h_T );
     TESTING_FREE( h_work );
     TESTING_HOSTFREE( h_R );
+
     TESTING_DEVFREE( d_A  );
     TESTING_DEVFREE( d_T  );
     TESTING_DEVFREE( ddA  );
     TESTING_DEVFREE( dtau );
     TESTING_DEVFREE( dwork );
 
+    TESTING_DEVFREE( d_A2 );
+    TESTING_DEVFREE( d_T2 );
+    TESTING_DEVFREE( ddA2 );
+    TESTING_DEVFREE( dtau2);
+    TESTING_DEVFREE(dwork2);
+
     TESTING_FINALIZE();
+
     return 0;
 }
