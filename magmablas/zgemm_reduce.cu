@@ -19,8 +19,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // size of work for a thread block
-#define BLK_M 8
-#define BLK_N 8
+#define BLK_M 16
+#define BLK_N 16
 
 #define BLK_K (NUM_THREADS / (BLK_M * BLK_N))
 
@@ -59,13 +59,16 @@ __device__ void sum_reduce2( /*int n,*/ int j, int k, int i, magmaDoubleComplex 
 //==============================================================================
 
 __global__
-void magmablas_zgemm_reduce_kernel(magma_int_t k, magmaDoubleComplex alpha, 
+void magmablas_zgemm_reduce_kernel(magma_int_t m, magma_int_t n, magma_int_t k, 
+                                   magmaDoubleComplex alpha, 
                                    const magmaDoubleComplex * __restrict__ d_A, magma_int_t lda,
                                    const magmaDoubleComplex * __restrict__ d_B, magma_int_t ldb,
                                    magmaDoubleComplex beta,
                                    magmaDoubleComplex *d_C, magma_int_t ldc)
 {
         const int i = threadIdx.x;
+
+        if (blockIdx.x*BLK_M + threadIdx.y < m && blockIdx.y*BLK_N + threadIdx.z < n){
 
         const magmaDoubleComplex *dA = d_A + (blockIdx.x*BLK_M + threadIdx.y) * lda;
         const magmaDoubleComplex *dB = d_B + (blockIdx.y*BLK_N + threadIdx.z) * ldb;
@@ -90,6 +93,7 @@ void magmablas_zgemm_reduce_kernel(magma_int_t k, magmaDoubleComplex alpha,
            else
               dC[threadIdx.y + threadIdx.z*ldc] = beta* dC[threadIdx.y + threadIdx.z*ldc] + 
                                                   alpha*sum[threadIdx.y][threadIdx.z][0];
+        }
 }
 
 //==============================================================================
@@ -119,21 +123,12 @@ magmablas_zgemm_reduce(magma_int_t m, magma_int_t n, magma_int_t k,
    less than 128. 
    =====================================================================    */
 
-    if (m%BLK_M!=0 || n%BLK_N!=0) {
-        printf("zgemm_reduce works only for m and n divisible by \n");
-        printf("correspondingly %d and %d. Calling magma_zgemm ...\n.", 
-               BLK_M, BLK_N);
-        magma_zgemm( MagmaConjTrans, MagmaNoTrans,
-                     m, n, k, 
-                     alpha, d_A, lda, d_B, ldb, beta, d_C, ldc );
-    }   
-    else {
-        dim3  blocks( m/BLK_M, n/BLK_N );
-        dim3 threads( BLK_K, BLK_M, BLK_N );
-        magmablas_zgemm_reduce_kernel<<<blocks,threads, 0, magma_stream >>>(k, alpha, d_A, lda,
+   dim3  blocks( (m+BLK_M-1)/BLK_M, (n+BLK_N-1)/BLK_N );
+   dim3 threads( BLK_K, BLK_M, BLK_N );
+   magmablas_zgemm_reduce_kernel<<<blocks,threads, 0, magma_stream >>>(m, n, k, 
+                                                          alpha, d_A, lda,
                                                           d_B, ldb, beta,
                                                           d_C, ldc );
-    }
 }
 
 //==============================================================================
