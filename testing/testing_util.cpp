@@ -363,6 +363,12 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
         opts->nmax = max( opts->nmax, opts->nsize[i] );
         opts->kmax = max( opts->kmax, opts->ksize[i] );
     }
+
+    // jobu=O, job
+    if ( opts->jobu == MagmaOverwriteVec && opts->jobvt == MagmaOverwriteVec ) {
+        printf( "jobu and jobvt cannot both be Overwrite.\n" );
+        exit(1);
+    }
     
     // set device
     magma_setdevice( opts->device );

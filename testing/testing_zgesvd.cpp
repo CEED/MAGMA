@@ -50,6 +50,10 @@ int main( int argc, char** argv)
 
     const char jobs[] = { 'N', 'S', 'O', 'A' };
     
+    if ( opts.check && (jobu == 'N' || jobvt == 'N')) {
+        printf( "NOTE: some checks require that singularvectors are computed;\n"
+                "      set both jobu (%c) and jobvt (%c) to be S, O, or A.\n", jobu, jobvt );
+    }
     printf("jobu jobv     M     N  CPU time (sec)  GPU time (sec)  |S1-S2|/.  |A-USV'|/. |I-UU'|/M  |I-VV'|/N  S sorted\n");
     printf("===========================================================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
