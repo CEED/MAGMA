@@ -206,8 +206,9 @@ void magma_zscal_zgeru(magma_int_t m, magma_int_t n, magmaDoubleComplex *A, magm
 /*
 
     Specialized kernel which merged zscal and zgeru the two kernels
-    1) zscale a column vector
-    2) Performe a zgeru Operation A := alpha*x*y**T + A,
+    1) zscale the first column vector A(1:M-1,0) with 1/A(0,0);
+    2) Performe a zgeru Operation for trailing matrix of A(1:M-1,1:N-1) += alpha*x*y**T, where 
+       alpha := -1.0; x := A(1:M-1,0) and y:= A(0,1:N-1);
 
 */
     dim3 threads(zgeru_bs, 1, 1);
