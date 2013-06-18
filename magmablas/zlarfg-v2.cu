@@ -40,13 +40,12 @@ void magma_zlarfg_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComplex
   
     if ( i == 0 ) {
         xnorm = *dxnorm;
-        if ( xnorm == 0 ) {
-            *dtau = MAGMA_Z_ZERO;
-        }
-        else {
+        magmaDoubleComplex alpha = *dx0;
 
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-            double alpha = *dx0;
+       if ( xnorm == 0 )
+            *dtau = MAGMA_Z_ZERO;
+       else {
 
             // no need to compute the norm as it is passed as input
             double beta  = xnorm; // sqrt( alpha*alpha + xnorm*xnorm );
@@ -58,10 +57,12 @@ void magma_zlarfg_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComplex
             *dx0  = beta;
 
             scale = 1. / (alpha - beta);
+       }
 #else
-            magmaDoubleComplex alpha = *dx0;
-            double alphar =  MAGMA_Z_REAL(alpha), alphai = MAGMA_Z_IMAG(alpha);
-
+       double alphar =  MAGMA_Z_REAL(alpha), alphai = MAGMA_Z_IMAG(alpha);
+       if ( xnorm == 0 && alphai == 0)
+            *dtau = MAGMA_Z_ZERO;
+       else {
             // no need to compute the norm as it is passed as input
             double beta  = xnorm; // sqrt( alphar*alphar + alphai*alphai + xnorm*xnorm );
             beta  = -copysign( beta, alphar );
@@ -73,8 +74,8 @@ void magma_zlarfg_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComplex
             
             alpha = MAGMA_Z_MAKE( MAGMA_Z_REAL(alpha) - beta, MAGMA_Z_IMAG(alpha));
             scale = MAGMA_Z_DIV( MAGMA_Z_ONE, alpha);
+       }
 #endif
-        }
     }
 
     // scale x
@@ -90,11 +91,10 @@ void magma_zlarfg2_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComple
     const int i = threadIdx.x;
     const int j = i + BLOCK_SIZE * blockIdx.x;
     __shared__ magmaDoubleComplex scale;
-    __shared__ double xnorm;
+    double xnorm;
 
     magmaDoubleComplex dxi;
 
-/*
 #if (defined(PRECISION_s) || defined(PRECISION_d))
     if( n <= 1 ) {
 #else
@@ -103,55 +103,48 @@ void magma_zlarfg2_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComple
         *dtau = MAGMA_Z_ZERO;
         return;
     }
-*/
+
     if ( j < n-1)
         dxi = dx[j];
 
-    if ( i == 0 ) {
-        xnorm = *dxnorm;
-        if ( xnorm == 0 ) {
-            *dtau = MAGMA_Z_ZERO;
-        }
-        else {
+    xnorm = *dxnorm;
+    magmaDoubleComplex alpha = *dx0;
 
 #if (defined(PRECISION_s) || defined(PRECISION_d))
-            double alpha = *dx0;
-
-            // no need to compute the norm as it is passed as input
-            double beta  = xnorm; // sqrt( alpha*alpha + xnorm*xnorm );
+    if ( xnorm != 0 ) {
+       if (i == 0) {  
+            double beta  = sqrt( alpha*alpha + xnorm*xnorm );
             beta  = -copysign( beta, alpha );
 
             // todo: deal with badly scaled vectors (see lapack's larfg)
             *dtau = (beta - alpha) / beta;
-            //if (blockIdx.x == gridDim.x-1)
-            //*dx0  = beta;
             *dAkk  = beta;
 
             scale = 1. / (alpha - beta);
+       }
 #else
-            magmaDoubleComplex alpha = *dx0;
-            double alphar =  MAGMA_Z_REAL(alpha), alphai = MAGMA_Z_IMAG(alpha);
-
-            // no need to compute the norm as it is passed as input
-            double beta  = xnorm; // sqrt( alphar*alphar + alphai*alphai + xnorm*xnorm );
+    double alphar =  MAGMA_Z_REAL(alpha), alphai = MAGMA_Z_IMAG(alpha);
+    if ( xnorm != 0 || alphai != 0) {
+       if (i == 0) {
+            double beta  = sqrt( alphar*alphar + alphai*alphai + xnorm*xnorm );
             beta  = -copysign( beta, alphar );
 
             // todo: deal with badly scaled vectors (see lapack's larfg)
             *dtau = MAGMA_Z_MAKE((beta - alphar)/beta, -alphai/beta);
-            //if (blockIdx.x == gridDim.x-1)
-            //*dx0  = MAGMA_Z_MAKE(beta, 0.);
             *dAkk = MAGMA_Z_MAKE(beta, 0.);
 
             alpha = MAGMA_Z_MAKE( MAGMA_Z_REAL(alpha) - beta, MAGMA_Z_IMAG(alpha));
             scale = MAGMA_Z_DIV( MAGMA_Z_ONE, alpha);
+      }
 #endif
-        }
-    }
 
-    // scale x
-    __syncthreads();
-    if ( xnorm != 0 && j < n-1)
-        dx[j] = MAGMA_Z_MUL(dxi, scale);
+      // scale x
+      __syncthreads();
+      if ( xnorm != 0 && j < n-1)
+          dx[j] = MAGMA_Z_MUL(dxi, scale);
+
+    } else
+        *dtau = MAGMA_Z_ZERO;
 }
 
 
@@ -181,7 +174,7 @@ magma_zlarfg_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
                                0, magma_stream >>>(n, dx0, dx, dtau, dxnorm );
 }
 
-extern "C" void
+extern "C" magma_int_t
 magma_zlarfg2_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
                   magmaDoubleComplex *dtau, double *dxnorm, magmaDoubleComplex *dAkk)
 {
@@ -189,8 +182,12 @@ magma_zlarfg2_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
     dim3 threads( BLOCK_SIZE );
 
     /* recomputing the norm */
-    magmablas_dznrm2(n, 1, dx0, n, dxnorm);
+    //magmablas_dznrm2(n, 1, dx0, n, dxnorm);
+    magmablas_dznrm2(n-1, 1, dx0+1, n, dxnorm);
 
     magma_zlarfg2_gpu_kernel<<< blocks, threads,
                                0, magma_stream >>>(n, dx0, dx, dtau, dxnorm, dAkk);
+
+    return MAGMA_SUCCESS;
 }
+
