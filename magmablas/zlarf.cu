@@ -194,7 +194,8 @@ magma_zlarf_sm(int m, int n, magmaDoubleComplex *v, magmaDoubleComplex *tau,
     are adjusted to hold the norms of v(2:m,2:n). This is a difference with the 
     LAPACK's zlarf routine. 
  */
-extern "C" void
+
+extern "C" magma_int_t
 magma_zlarf_gpu(int m, int n, magmaDoubleComplex *v, magmaDoubleComplex *tau,
                 magmaDoubleComplex *c, int ldc, double *xnorm)
 {
@@ -205,6 +206,8 @@ magma_zlarf_gpu(int m, int n, magmaDoubleComplex *v, magmaDoubleComplex *tau,
 
     // The computation can be done on 1 SM with the following routine.
     // magma_zlarf_sm(m, n, v, tau, c, ldc, xnorm);
+
+    return MAGMA_SUCCESS;
 }
 
 //==============================================================================
