@@ -20,10 +20,6 @@ magma_zlarfx_gpu(int m, int n, magmaDoubleComplex *v, magmaDoubleComplex *tau,
                  magmaDoubleComplex *c, int ldc, double *xnorm,
                  magmaDoubleComplex *dT, int iter, magmaDoubleComplex *work);
 
-extern "C" void
-magma_zlarf_gpu(int m, int n, magmaDoubleComplex *v, magmaDoubleComplex *tau,
-                 magmaDoubleComplex *c, int ldc, double *xnorm);
-
 extern "C" magma_int_t
 magma_zgeqr2x_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
                   magma_int_t *ldda, magmaDoubleComplex *dtau,

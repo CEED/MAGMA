@@ -14,13 +14,9 @@ extern "C" void
 magma_zlarfg_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
                  magmaDoubleComplex *dtau, double *dxnorm);
 
-extern "C" void
-magma_zlarf_gpu(int m, int n, magmaDoubleComplex *v, magmaDoubleComplex *tau,
-                magmaDoubleComplex *c, int ldc, double *xnorm);
-
 
 extern "C" magma_int_t
-magma_zgeqr2_gpu(
+magma_zgeqr2_gpu2(
     magma_int_t m, magma_int_t n,
     magmaDoubleComplex *dA, magma_int_t ldda,
     magmaDoubleComplex *dtau, double *dwork,
@@ -108,11 +104,11 @@ magma_zgeqr2_gpu(
         /*  Generate elementary reflector H(i) to annihilate A(i+1:m,i) */
         magma_zlarfg_gpu(m-i, da_ref(i, i), da_ref(min(i+1,m), i), dtau+i, dwork+i);
 
-        if (i <= n) {
-            /* Apply H(i)' to A(i:m,i+1:n) from the left */
-            magma_zlarf_gpu(m-i, n-i-1, da_ref(i, i), dtau+i, da_ref(i, i+1), ldda,
-                            dwork+i+1);
-        }
+        if (n-i-1>0)
+           /* Apply H(i)' to A(i:m,i+1:n) from the left */
+           magma_zlarf_gpu(m-i, n-i-1, da_ref(i, i), dtau+i, da_ref(i, i+1), ldda,
+                           dwork+i+1);
+        
     }
 
     return *info;
