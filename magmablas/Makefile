@@ -69,6 +69,7 @@ ZSRC += \
 ZSRC += \
 	zgetf2.cu                       \
 	zpotf2.cu                       \
+	zgeqr2.cu                       \
 
 # not yet released
 #	zhemm_1gpu.cpp			\
