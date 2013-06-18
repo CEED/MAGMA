@@ -249,30 +249,6 @@ magmablas_dznrm2_adjust(int k, double *xnorm, magmaDoubleComplex *c)
 #define BS 256
 
 __global__ void
-magma_dznrm2_row_adjust_kernel(int n, double *xnorm, magmaDoubleComplex *c, int ldc)
-{
-   const int i = threadIdx.x + blockIdx.x*BS;
-
-   if (i<n){
-     double temp = MAGMA_Z_ABS( c[i*ldc] ) / xnorm[i];
-     temp = max( 0.0, ((1.0 + temp) * (1.0 - temp)) );
-     xnorm[i] *= sqrt(temp);
-  }
-}
-
-/*
-    Adjust the norm of c[,1:k] to give the norm of c[k+1:,1:k], assuming that
-    c was changed with orthogonal transformations.
-*/
-extern "C" void
-magmablas_dznrm2_row_adjust(int k, double *xnorm, magmaDoubleComplex *c, int ldc)
-{
-   int nblocks = (k+BS-1)/BS;
-   magma_dznrm2_row_adjust_kernel<<< nblocks, BS >>> (k, xnorm, c, ldc);
-}
-
-//-----------------------------------------------------------------------------
-__global__ void
 magma_dznrm2_row_check_adjust_kernel(int n, double tol, double *xnorm, double *xnorm2, 
                                      magmaDoubleComplex *c, int ldc, double *lsticc)
 {

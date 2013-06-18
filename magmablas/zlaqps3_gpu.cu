@@ -33,14 +33,7 @@ magma_zlarfg_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
                  magmaDoubleComplex *dtau, double *dxnorm);
 
 extern "C" void
-magma_zlarfg2_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
-                 magmaDoubleComplex *dtau, double *dxnorm, magmaDoubleComplex *dAkk);
-
-extern "C" void
 magmablas_dznrm2_adjust(int k, double *xnorm, magmaDoubleComplex *c);
-
-extern "C" void
-magmablas_dznrm2_row_adjust(int k, double *xnorm, magmaDoubleComplex *c, int inc);
 
 extern "C" void
 magmablas_dznrm2_row_check_adjust(int k, double tol, double *xnorm, double *xnorm2, 
@@ -103,7 +96,7 @@ magma_zgemv_kernel(int m, int n, const magmaDoubleComplex * __restrict__ V, int 
 {
     const int i = threadIdx.x;
     const int j = i + BLOCK_SIZE1 * blockIdx.x;
-    magmaDoubleComplex lsum, tmp;
+    magmaDoubleComplex lsum;
 
     V += j;
 
@@ -450,9 +443,8 @@ magma_zlaqps3_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
     magma_int_t i__1, i__2;
     
     magma_int_t k, rk;
-    magmaDoubleComplex Akk, tauk;
+    magmaDoubleComplex tauk;
     magma_int_t pvt, itemp;
-    double tol3z;
 
     magmaDoubleComplex *dAkk = auxv;
     auxv+=1;
@@ -462,7 +454,7 @@ magma_zlaqps3_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
     cudaMemset( dlsticcs, 0, (n+1)*sizeof(int) );
     dlsticc = dlsticcs + n;
  
-    tol3z = magma_dsqrt( lapackf77_dlamch("Epsilon"));
+    // double tol3z = magma_dsqrt( lapackf77_dlamch("Epsilon"));
 
     lsticc = 0;
     k = 0;
@@ -556,10 +548,9 @@ magma_zlaqps3_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
             magma_sgetvector( 1, &lsticcs[0], 1, &lsticc, 1 );
         #endif
 */
-        //*A(rk, k) = Akk;
-        //magma_zsetvector( 1, &Akk, 1, A(rk, k), 1 );
+
         if (k>=n-1)
-        magmablas_zlacpy(MagmaUpperLower, 1, 1, dAkk, 1, A(rk, k), 1);
+           magmablas_zlacpy(MagmaUpperLower, 1, 1, dAkk, 1, A(rk, k), 1);
 
         ++k;
     }
@@ -568,7 +559,7 @@ magma_zlaqps3_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
     *kb = k + 1;
     rk = offset + *kb - 1;
 
-//printf("actually factored = %d",*kb);
+    //printf("actually factored = %d",*kb);
 
     /* Apply the block reflector to the rest of the matrix:
        A(OFFSET+KB+1:M,KB+1:N) := A(OFFSET+KB+1:M,KB+1:N) - 

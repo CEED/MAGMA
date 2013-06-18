@@ -31,14 +31,7 @@ magma_zlarfg_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
                  magmaDoubleComplex *dtau, double *dxnorm);
 
 extern "C" void
-magma_zlarfg2_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
-                 magmaDoubleComplex *dtau, double *dxnorm, magmaDoubleComplex *dAkk);
-
-extern "C" void
 magmablas_dznrm2_adjust(int k, double *xnorm, magmaDoubleComplex *c);
-
-extern "C" void
-magmablas_dznrm2_row_adjust(int k, double *xnorm, magmaDoubleComplex *c, int inc);
 
 extern "C" void
 magmablas_dznrm2_row_check_adjust(int k, double tol, double *xnorm, double *xnorm2, 
@@ -142,7 +135,7 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
     magma_int_t i__1, i__2;
     
     magma_int_t k, rk;
-    magmaDoubleComplex tauk, z__1;
+    magmaDoubleComplex tauk;
     magma_int_t pvt, itemp;
     double tol3z;
 
@@ -203,12 +196,7 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         }
         
         /*  Generate elementary reflector H(k). */
-        //if (rk < m-1)
-        //    magma_zlarfg_gpu(m-rk, A(rk, k), A(rk + 1, k), &tau[k], &vn1[k]);
         magma_zlarfg2_gpu(m-rk, A(rk, k), A(rk + 1, k), &tau[k], &vn1[k], &dAkk[k]);
-
-        //else 
-        //    magma_zlarfg_gpu( 1, A(rk, k), A(rk, k), &tau[k], &vn1[k]);
                 
         //Akk = *A(rk, k);
         //*A(rk, k) = c_one;
@@ -239,9 +227,9 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
                              c_zero, auxv, ione );*/
 
             magma_zgemv_kernel3<<< k, BLOCK_SIZE, 0, magma_stream >>>(m-rk, A(rk, 0), lda,
-                                                                      A(rk, k), auxv, tau+k);     
-            
-            /* I think we only need stricly lower-triangular part :) */
+                                                                      A(rk, k), auxv, tau+k);
+
+            /* I think we only need stricly lower-triangular part */
             magmablas_zgemv( MagmaNoTrans, n-k-1, k,
                              c_one, F(k+1,0), ldf,
                                     auxv,     ione,
