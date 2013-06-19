@@ -17,21 +17,20 @@ ZSRC := \
 	zcaxpycp.cu		\
 	zclaswp.cu		\
 	zgeadd.cu		\
-	zgeqr2x_gpu-v4.cu       \
 	zgeadd_batched.cu	\
-	zgemm_reduce.cu         \
+	zgemm_reduce.cu		\
 	zhemv_fermi.cu		\
 	zlacpy.cu		\
 	zlacpy_batched.cu	\
-	zlaqps2_gpu.cu          \
-        zlaqps3_gpu.cu          \
+	zlaqps2_gpu.cu		\
+	zlaqps3_gpu.cu		\
 	zlag2c.cu		\
 	clag2z.cu		\
 	zlange.cu		\
 	zlanhe.cu		\
 	zlarf.cu		\
-	zlarfbx.cu              \
-	zlarfx.cu               \
+	zlarfbx.cu		\
+	zlarfx.cu		\
 	dlarfg.cu		\
 	zlarfg-v2.cu		\
 	zlarfgx-v2.cu		\
@@ -64,21 +63,17 @@ ZSRC += \
 	zsetmatrix_transpose_mgpu.cu	\
 	zhemv_fermi_mgpu_32.cu		\
 	zhemv_fermi_mgpu.cu		\
+	zhemm_mgpu.cpp			\
+	zhemm_mgpu_spec.cpp		\
+	zher2k_mgpu.cpp			\
+	zher2k_mgpu_spec.cpp		\
 
 # panels for one-sided factorizations in CUDA
 ZSRC += \
-	zgetf2.cu                       \
-	zpotf2.cu                       \
-	zgeqr2.cu                       \
-
-# not yet released
-#	zhemm_1gpu.cpp			\
-#	zhemm_1gpu_old.cpp		\
-#	zhemm_mgpu.cpp			\
-#	zhemm_mgpu_com.cpp		\
-#	zhemm_mgpu_spec.cpp		\
-#	zher2k_mgpu.cpp			\
-#	zher2k_mgpu_spec.cpp		\
+	zgetf2.cu		\
+	zpotf2.cu		\
+	zgeqr2.cu		\
+	zgeqr2x_gpu-v4.cu	\
 
 # Card-specific versions that need precisions generated must be above in ZSRC,
 # so they are all put into Makefile.src in the release. The code is #ifdef'd
