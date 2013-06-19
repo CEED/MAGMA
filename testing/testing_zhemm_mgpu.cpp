@@ -129,10 +129,10 @@ int main( int argc, char** argv)
 
     for (int i=0;i<nbcmplx;++i)
     {
-        int myngpu =gnode[i][MagmaMaxGPUs]; 
-        printf("cmplx %d has %d gpu ",i,myngpu);
+        int myngpu =gnode[i][MagmaMaxGPUs];
+        printf("cmplx %d has %d gpu ", i, myngpu);
         for(int j=0;j<myngpu;++j)
-            printf("  %d",gnode[i][j]);
+            printf("  %d", gnode[i][j]);
         printf("\n");
     }
 
@@ -142,8 +142,9 @@ int main( int argc, char** argv)
     TESTING_HOSTALLOC( hR, cuDoubleComplex, lda*n );
 
     magma_int_t  nbevents =2;
-    cudaStream_t streams[MagmaMaxGPUs][20];    
-    cudaEvent_t  redevents[MagmaMaxGPUs][20]; 
+    cudaStream_t streams[MagmaMaxGPUs][20];
+    cudaEvent_t  redevents[MagmaMaxGPUs][20];
+    cudaEvent_t  redevents2[MagmaMaxGPUs][MagmaMaxGPUs*MagmaMaxGPUs+10];
     for( int d = 0; d < ngpu; ++d ) {
         magma_int_t mlocal = ((m / nb) / ngpu + 1) * nb;
         cudaSetDevice( d );
@@ -156,10 +157,9 @@ int main( int argc, char** argv)
             cudaStreamCreate( &streams[d][i] );
         }
         for( magma_int_t i = 0; i < nbevents; ++i ) {
-            cudaEventCreateWithFlags(&redevents[d][i],cudaEventDisableTiming);
+            cudaEventCreateWithFlags(&redevents[d][i], cudaEventDisableTiming);
+            cudaEventCreateWithFlags(&redevents2[d][i], cudaEventDisableTiming);
         }
-
-
     }
     TESTING_HOSTALLOC( hwork[ngpu], cuDoubleComplex, lda*n );
 
@@ -170,9 +170,9 @@ int main( int argc, char** argv)
     TESTING_DEVALLOC( dA2, cuDoubleComplex, ldda*m );
     }
     
-    printf( "nb %d, ngpu %d, nstream %d version %d \n", (int) nb, ngpu, nstream,ver );
-    printf("    m     n     nb    offset    CPU GFlop/s (sec)   GPU GFlop/s (sec)   CUBLAS hemm (sec)   ||R|| / ||A||*||X||\n");
-    printf("==============================================================================================\n");
+    printf( "nb %d, ngpu %d, nstream %d version %d \n", (int) nb, ngpu, nstream, ver );
+    printf("    m     n    nb offset  CPU GFlop/s (sec)   GPU GFlop/s (sec)   CUBLAS hemm (sec)   ||R|| / ||A||*||X||\n");
+    printf("=========================================================================================================\n");
 
 //    for( int nb = 64; nb < 256; nb+=64 ) {
 //            if(nb==192) nb=256;
@@ -216,7 +216,7 @@ int main( int argc, char** argv)
 
 
 
-//        memset(hR,0,lda*n*sizeof(cuDoubleComplex));
+        //memset(hR, 0, lda*n*sizeof(cuDoubleComplex));
 
         //trace_init( 1, ngpu, nstream, (cudaStream_t*) streams );
 
@@ -232,25 +232,26 @@ int main( int argc, char** argv)
                        dX, ldda,
             cbeta,     dB, ldda, hR, lda,
             ngpu, nb, streams, nstream );
-       */  
+        */
         // multi gpu version
-       
-        if(ver==21)
-        magmablas_zhemm_mgpu(
-            MagmaLeft, MagmaLower, msiz, n,
-            c_neg_one, dA, ldda, offst,
-                       dX, ldda,
-            cbeta,     dB, ldda, dwork, ldda, hR, lda, hwork,lda,
-            ngpu, nb, streams, nstream, redevents, nbevents );
-        else
-        magmablas_zhemm_mgpu_com(
-            MagmaLeft, MagmaLower, msiz, n,
-            c_neg_one, dA, ldda, offst,
-                       dX, ldda,
-            cbeta,     dB, ldda, dwork, ldda, hR, lda, hwork,lda,
-            ngpu, nb, streams, nstream, redevents, nbevents,gnode,nbcmplx);
-
-
+        
+        if (ver==21) {
+            // TODO: not available?
+            //magmablas_zhemm_mgpu(
+            //    MagmaLeft, MagmaLower, msiz, n,
+            //    c_neg_one, dA, ldda, offst,
+            //               dX, ldda,
+            //    cbeta,     dB, ldda, dwork, ldda, hR, lda, hwork, lda,
+            //    ngpu, nb, streams, nstream, redevents, nbevents );
+        }
+        else {
+            magmablas_zhemm_mgpu_com(
+                MagmaLeft, MagmaLower, msiz, n,
+                c_neg_one, dA, ldda, offst,
+                           dX, ldda,
+                cbeta,     dB, ldda, dwork, ldda, hR, lda, hwork, lda,
+                ngpu, nb, streams, nstream, redevents2, nbevents, gnode, nbcmplx);
+        }
        
         cudaDeviceSynchronize();
         gpu_time = magma_wtime() - gpu_time;
@@ -265,7 +266,7 @@ int main( int argc, char** argv)
            Performs operation using CUBLAS
            =================================================================== */
         if (( checkres )&&(nbtime==0)) {
-            nbtime =1;        
+            nbtime =1;
             magma_setdevice( 0 );
             magmablasSetKernelStream(  0  );
             magma_zsetmatrix( m, m, hA, lda, dA2, ldda );
@@ -306,9 +307,9 @@ int main( int argc, char** argv)
             cpu_perf = gflops / cpu_time;
             /*
               trace_file = fopen("AJETE/C", "w");
-              for (int j = 0; j < n ; j++) 
-                    for (int i = 0; i < siz ; i++) 
-                                   fprintf(trace_file,"%10d%10d%40.30e\n",i+1,j+1,hB[j*lda+i]);
+              for (int j = 0; j < n ; j++)
+                    for (int i = 0; i < siz ; i++)
+                                   fprintf(trace_file, "%10d%10d%40.30e\n", i+1, j+1, hB[j*lda+i]);
               fclose(trace_file);
             */
             magma_int_t firstprint=0;
@@ -324,15 +325,21 @@ int main( int argc, char** argv)
                 
                 //printf( "R ="  ); magma_zprint( m, n, hR, lda );
                 if(firstprint==0)
-                   printf( "%5d %5d  %5d %10d  %7.1f (%7.4f)   %7.1f (%7.4f)   %7.1f (%7.4f)   %8.2e\n",
-                        (int) m, (int) n,(int) nb,(int) offst, cpu_perf, cpu_time, gpu_perf, gpu_time, gpu_perf2, gpu_time2, error );
+                   printf( "%5d %5d %5d %5d   %7.1f (%7.4f)   %7.1f (%7.4f)   %7.1f (%7.4f)   %8.2e\n",
+                        (int) m, (int) n, (int) nb, (int) offst,
+                        cpu_perf, cpu_time,
+                        gpu_perf, gpu_time,
+                        gpu_perf2, gpu_time2, error );
                 else
-                   printf( "%89s  %8.2e\n"," ", error );
+                   printf( "%89s  %8.2e\n", " ", error );
                 firstprint =1;
              }
-        }else {
-            printf( "%5d %5d %5d    ---   (  ---  )   %7.1f (%7.4f)     ---   (  ---  )   ---\n",
-                    (int) m, (int) n,(int) nb,(int) offst, /*cpu_perf, cpu_time,*/ gpu_perf, gpu_time /*, gpu_perf2, gpu_time2, error*/ );
+        } else {
+            printf( "%5d %5d %5d %5d     ---   (  ---  )   %7.1f (%7.4f)     ---   (  ---  )   ---\n",
+                    (int) m, (int) n, (int) nb, (int) offst,
+                    /*cpu_perf, cpu_time,*/
+                    gpu_perf, gpu_time
+                    /*, gpu_perf2, gpu_time2, error*/ );
         }
 
     }}}//}
