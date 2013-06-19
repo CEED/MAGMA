@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 {
     TESTING_INIT();
 
-    real_Double_t   gflops, gpu_perf, gpu_time;
+    real_Double_t   gflops, cpu_perf, cpu_time, gpu_perf, gpu_time;
     double          Rnorm, Anorm, Xnorm, *work;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
@@ -45,8 +45,8 @@ int main(int argc, char **argv)
     
     nrhs = opts.nrhs;
     
-    printf("    N  NRHS   GPU GFlop/s (sec)   ||B - AX|| / ||A||*||X||\n");
-    printf("==========================================================\n");
+    printf("    N  NRHS   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / ||A||*||X||\n");
+    printf("==============================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[i];
@@ -74,9 +74,9 @@ int main(int argc, char **argv)
             magma_zsetmatrix( N, N,    h_A, lda, d_A, ldda );
             magma_zsetmatrix( N, nrhs, h_B, ldb, d_B, lddb );
             
-            //=====================================================================
-            // Solve Ax = b through an LU factorization, using MAGMA
-            //=====================================================================
+            /* ====================================================================
+               Performs operation using MAGMA
+               =================================================================== */
             gpu_time = magma_wtime();
             magma_zgesv_gpu( N, nrhs, d_A, ldda, ipiv, d_B, lddb, &info );
             gpu_time = magma_wtime() - gpu_time;
@@ -100,8 +100,26 @@ int main(int argc, char **argv)
             
             Rnorm = lapackf77_zlange("I", &N, &nrhs, h_B, &ldb, work);
             
-            printf( "%5d %5d   %7.2f (%7.2f)   %8.2e\n",
-                    (int) N, (int) nrhs, gpu_perf, gpu_time, Rnorm/(Anorm*Xnorm) );
+            
+            /* ====================================================================
+               Performs operation using LAPACK
+               =================================================================== */
+            if ( opts.lapack ) {
+                cpu_time = magma_wtime();
+                lapackf77_zgesv( &N, &nrhs, h_A, &lda, ipiv, h_B, &ldb, &info );
+                cpu_time = magma_wtime() - cpu_time;
+                cpu_perf = gflops / cpu_time;
+                if (info != 0)
+                    printf("lapackf77_zgesv returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
+                
+                printf( "%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e\n",
+                        (int) N, (int) nrhs, cpu_perf, cpu_time, gpu_perf, gpu_time, Rnorm/(Anorm*Xnorm) );
+            }
+            else {
+                printf( "%5d %5d     ---   (  ---  )   %7.2f (%7.2f)   %8.2e\n",
+                        (int) N, (int) nrhs, gpu_perf, gpu_time, Rnorm/(Anorm*Xnorm) );
+            }
             
             TESTING_FREE( h_A );
             TESTING_FREE( h_B );
