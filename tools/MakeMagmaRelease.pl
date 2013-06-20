@@ -15,6 +15,7 @@ my $svn      = "https://icl.cs.utk.edu/svn/magma/trunk";
 my $user     = "";
 my $revision = "";
 my $rc       = 0;  # release candidate
+my $beta     = 0;
 
 my @files2delete = qw(
     Makefile.gen
@@ -95,6 +96,9 @@ sub MakeRelease
 
     if ( $rc > 0 ) {
         $numversion .= "-rc$rc";
+    }
+    if ( $beta > 0 ) {
+        $numversion .= "-beta$beta";
     }
 
     my $RELEASE_PATH = $ENV{PWD}."/magma-$numversion";
@@ -195,6 +199,7 @@ sub Usage
 {
     print "MakeRelease.pl [options] Major Minor Micro\n";
     print "   -h            Print this help\n";
+    print "   -b beta       Beta version\n";
     print "   -c candidate  Release candidate number\n";
     print "   -r revision   Choose svn revision number\n";
     print "   -s url        Choose svn repository for export (default: $svn)\n";
@@ -202,7 +207,7 @@ sub Usage
 }
 
 my %opts;
-getopts("hu:r:s:c:",\%opts);
+getopts("hu:b:r:s:c:",\%opts);
 
 if ( defined $opts{h}  ) {
     Usage();
@@ -219,6 +224,9 @@ if ( defined $opts{s} ) {
 }
 if ( defined $opts{c} ) {
     $rc = $opts{c};
+}
+if ( defined $opts{b} ) {
+    $beta = $opts{b};
 }
 if ( ($#ARGV + 1) != 3 ) {
     Usage();
