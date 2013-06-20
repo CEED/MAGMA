@@ -59,11 +59,11 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t NB,
                     magmaDoubleComplex *a, magma_int_t lda,
                     magmaDoubleComplex *tau,
                     magmaDoubleComplex *work, magma_int_t lwork,
-                    magmaDoubleComplex *dT, magma_int_t threads,  
+                    magmaDoubleComplex *dT, magma_int_t threads,
                     magma_int_t *info);
 
 extern "C" magma_int_t
-magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int n, int NB, 
+magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int n, int NB,
                    magmaDoubleComplex *A, int LDA, double *D, double *E, magmaDoubleComplex *dT1, int ldt1);
 
 extern "C" magma_int_t
@@ -92,8 +92,8 @@ int main( int argc, char** argv)
     double *D, *E;
 
     /* Matrix size */
-    magma_int_t N = 0, n2, lda, lwork,ldt,lwork0;
-    magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
+    magma_int_t N = 0, n2, lda, lwork, ldt, lwork0;
+    magma_int_t size[10] = {1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 10112};
 
     magma_int_t i, j, k, info, checkres, once = 0;
     magma_int_t ione     = 1;
@@ -152,12 +152,12 @@ int main( int argc, char** argv)
         N = size[9];
     }
         
- printf ("HELLOOOOOOOO\n");
+    printf ("HELLOOOOOOOO\n");
 
     eps = lapackf77_dlamch( "E" );
     lda = N;
     ldt = N;
-    n2  = lda * N; 
+    n2  = lda * N;
     if(NB<1)
         NB  = 64; //64; //magma_get_zhetrd_he2hb_nb(N);
 
@@ -165,7 +165,7 @@ int main( int argc, char** argv)
         NE  = N; //64; //magma_get_zhetrd_he2hb_nb(N);
 
     /* We suppose the magma NB is bigger than lapack NB */
-    lwork0 = N*NB; 
+    lwork0 = N*NB;
 
     /* Allocate host memory for the matrix */
     TESTING_MALLOC(    h_A,    magmaDoubleComplex, lda*N );
@@ -187,14 +187,14 @@ int main( int argc, char** argv)
         n2   = N*lda;
         flops = FLOPS_ZHETRD( (double)N ) / 1e6;
         
-       // if(WANTZ) flops = 2.0*flops;
+        // if(WANTZ) flops = 2.0*flops;
 
         /* ====================================================================
            Initialize the matrix
            =================================================================== */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
 
-        // Make the matrix hermitian 
+        // Make the matrix hermitian
         {
             magma_int_t i, j;
             for(i=0; i<N; i++) {
@@ -214,8 +214,8 @@ int main( int argc, char** argv)
         char *jobz = (char*)MagmaVecStr;
         char range = 'A';
         magma_int_t fraction_ev = 100;
-        magma_int_t il,iu,m1,m2;
-        double vl,vu;
+        magma_int_t il, iu, m1, m2;
+        double vl, vu;
 
         if (fraction_ev == 0){
             il = N / 10;
@@ -240,17 +240,17 @@ int main( int argc, char** argv)
 
 
         start = get_current_time();
-/*        
+/*
         magma_zhetrd_he2hb(uplo[0], N, NB, h_R, lda, tau, h_work, lwork0, dT1, THREADS, &info);
         tband = get_current_time();
-        printf("  Finish BAND  N %d  NB %d  ngpu %d timing= %lf \n" ,N,NB,ngpu,GetTimerValue(start,tband) / 1000.);
+        printf("  Finish BAND  N %d  NB %d  ngpu %d timing= %lf \n", N, NB, ngpu, GetTimerValue(start, tband) / 1000.);
         magma_zhetrd_bhe2trc_v5(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1, ldt);
 */
 
 /*
         magma_zhetrd_he2hb(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, dT1, THREADS, &info);
         tband = get_current_time();
-        printf("  Finish BAND  N %d  NB %d  ngpu %d timing= %lf \n" ,N,NB,ngpu,GetTimerValue(start,tband) / 1000.);
+        printf("  Finish BAND  N %d  NB %d  ngpu %d timing= %lf \n", N, NB, ngpu, GetTimerValue(start, tband) / 1000.);
         magma_zhetrd_bhe2trc(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1, ldt);
 */
 
@@ -267,21 +267,21 @@ int main( int argc, char** argv)
             printf("calling zheevdx_2stage 1 GPU\n");
             magma_zheevdx_2stage(jobz[0], range, uplo[0], N, h_R, lda, vl, vu, il, iu, &m1, D, hh_work, lwork, rwork, lrwork, iwork, liwork, &info);
         }else{
-            printf("calling zheevdx_2stage_m %d GPU\n",ngpu);
+            printf("calling zheevdx_2stage_m %d GPU\n", ngpu);
             return 0;
-            //magma_zheevdx_2stage_m(ngpu,jobz[0], range, uplo[0], N, h_R, lda, vl, vu, il, iu, &m1, D, hh_work, lwork, rwork, lrwork, iwork, liwork, &info);
+            //magma_zheevdx_2stage_m(ngpu, jobz[0], range, uplo[0], N, h_R, lda, vl, vu, il, iu, &m1, D, hh_work, lwork, rwork, lrwork, iwork, liwork, &info);
         }
 
 
-       magma_setdevice( cdev );
+        magma_setdevice( cdev );
         
-       end = get_current_time();
+        end = get_current_time();
 
 
 
 
-        gpu_perf = flops / GetTimerValue(start,end);
-        gpu_time = GetTimerValue(start,end) / 1000.;
+        gpu_perf = flops / GetTimerValue(start, end);
+        gpu_time = GetTimerValue(start, end) / 1000.;
 
         /* =====================================================================
            Check the factorization
@@ -294,35 +294,35 @@ int main( int argc, char** argv)
             fp = fopen ("matlab_i_mat.txt", "w") ;
             if( fp == NULL ){ printf("Couldn't open output file\n"); exit(1);}
 
-            for(j=0; j<N; j++)
-                for(k=0; k<N; k++)
-                    {
-                        #if defined(PRECISION_z) || defined(PRECISION_c)
-                        fprintf(fp, "%5d %5d %11.8f %11.8f\n", k+1, j+1, 
-                                h_A[k+j*lda].x, h_A[k+j*lda].y);
-                        #else
-                        fprintf(fp, "%5d %5d %11.8f\n", k+1, j+1, h_A[k+j*lda]);
-                        #endif
-                    }
+            for(j=0; j<N; j++) {
+                for(k=0; k<N; k++) {
+                    #if defined(PRECISION_z) || defined(PRECISION_c)
+                    fprintf(fp, "%5d %5d %11.8f %11.8f\n", k+1, j+1,
+                            h_A[k+j*lda].x, h_A[k+j*lda].y);
+                    #else
+                    fprintf(fp, "%5d %5d %11.8f\n", k+1, j+1, h_A[k+j*lda]);
+                    #endif
+                }
+            }
             fclose( fp ) ;
 
-          printf("Writing output matrix in matlab_o_mat.txt ...\n");
-          fp = fopen ("matlab_o_mat.txt", "w") ;
-          if( fp == NULL ){ printf("Couldn't open output file\n"); exit(1);}
+            printf("Writing output matrix in matlab_o_mat.txt ...\n");
+            fp = fopen ("matlab_o_mat.txt", "w") ;
+            if( fp == NULL ){ printf("Couldn't open output file\n"); exit(1);}
 
-          for(j=0; j<N; j++)
-            for(k=0; k<N; k++)
-              {
-                #if defined(PRECISION_z) || defined(PRECISION_c)
-                fprintf(fp, "%5d %5d %11.8f %11.8f\n", k+1, j+1,
-                        h_R[k+j*lda].x, h_R[k+j*lda].y);
-                #else
-                fprintf(fp, "%5d %5d %11.8f\n", k+1, j+1, h_R[k+j*lda]);
-                #endif
-              } 
-          fclose( fp ) ;
-
-        }*/
+            for(j=0; j<N; j++) {
+                for(k=0; k<N; k++) {
+                    #if defined(PRECISION_z) || defined(PRECISION_c)
+                    fprintf(fp, "%5d %5d %11.8f %11.8f\n", k+1, j+1,
+                            h_R[k+j*lda].x, h_R[k+j*lda].y);
+                    #else
+                    fprintf(fp, "%5d %5d %11.8f\n", k+1, j+1, h_R[k+j*lda]);
+                    #endif
+                }
+            }
+            fclose( fp ) ;
+        }
+        */
 
 
 
@@ -334,7 +334,7 @@ int main( int argc, char** argv)
         if ( checkres ) {
             printf("  Total N %5d  flops %6.2f  timing %6.2f seconds\n", (int) N, gpu_perf, gpu_time );
             char JOBZ;
-            if(WANTZ==0) 
+            if(WANTZ==0)
                     JOBZ='N';
             else
                     JOBZ = 'V';
@@ -347,98 +347,97 @@ int main( int argc, char** argv)
             memcpy(AINIT, h_A, N*lda*sizeof(magmaDoubleComplex));
             /* compute the eigenvalues using lapack routine to be able to compare to it and used as ref */
             start = get_current_time();
-            i= min(12,THREADS);
+            i= min(12, THREADS);
 
-#if defined(USEMKL)
+            #if defined(USEMKL)
             mkl_set_num_threads( i );
-#endif
-#if defined(USEACML)
+            #endif
+            #if defined(USEACML)
             omp_set_num_threads(i);
-#endif
+            #endif
 
-#if defined(PRECISION_z) || defined (PRECISION_c)
+            #if defined(PRECISION_z) || defined (PRECISION_c)
             lapackf77_zheev( "N", "L", &N, h_A, &lda, D2, work2, &lwork2, rwork2, &info );
-#else
+            #else
             lapackf77_dsyev( "N", "L", &N, h_A, &lda, D2, work2, &lwork2, &info );
-#endif
+            #endif
             ///* call eigensolver for our resulting tridiag [D E] and for Q */
             //dstedc_withZ('V', N, D, E, h_R, lda);
-            ////dsterf_( &N, D, E, &info); 
+            ////dsterf_( &N, D, E, &info);
             ////
             end = get_current_time();
-            printf("  Finish CHECK - EIGEN   timing= %lf  threads %d \n" ,GetTimerValue(start,end) / 1000., i);
+            printf("  Finish CHECK - EIGEN   timing= %lf  threads %d \n", GetTimerValue(start, end) / 1000., i);
 
             /*
             for(i=0;i<10;i++)
-                printf(" voici lpk D[%d] %e\n",i,D2[i]);
+                printf(" voici lpk D[%d] %e\n", i, D2[i]);
             */
 
-            //magmaDoubleComplex mydz=0.0,mydo=1.0;
+            //magmaDoubleComplex mydz=0.0, mydo=1.0;
             //magmaDoubleComplex *Z = (magmaDoubleComplex *) malloc(N*lda*sizeof(magmaDoubleComplex));
-           // dgemm_("N","N",&N,&N,&N,&mydo,h_R,&lda,h_A,&lda,&mydz,Z,&lda);
+            // dgemm_("N", "N", &N, &N, &N, &mydo, h_R, &lda, h_A, &lda, &mydz, Z, &lda);
 
 
-           /* compare result */
-           cmp_vals(N, D2, D, &nrmI, &nrm1, &nrm2);
+            /* compare result */
+            cmp_vals(N, D2, D, &nrmI, &nrm1, &nrm2);
 
 
-           magmaDoubleComplex *WORKAJETER;
-           double *RWORKAJETER, *RESU;
-           WORKAJETER  = (magmaDoubleComplex *) malloc( (2* N * N + N) * sizeof(magmaDoubleComplex) );
-           RWORKAJETER = (double *) malloc( N * sizeof(double) );
-           RESU        = (double *) malloc(10*sizeof(double));
-           int MATYPE;
-           memset(RESU,0,10*sizeof(double));
+            magmaDoubleComplex *WORKAJETER;
+            double *RWORKAJETER, *RESU;
+            WORKAJETER  = (magmaDoubleComplex *) malloc( (2* N * N + N) * sizeof(magmaDoubleComplex) );
+            RWORKAJETER = (double *) malloc( N * sizeof(double) );
+            RESU        = (double *) malloc(10*sizeof(double));
+            int MATYPE;
+            memset(RESU, 0, 10*sizeof(double));
 
  
-           MATYPE=3;
-           double NOTHING=0.0;
-           start = get_current_time();
-           // check results
-           zcheck_eig_(&JOBZ, &MATYPE, &N, &NB, AINIT, &lda, &NOTHING, &NOTHING, D2 , D, h_R, &lda, WORKAJETER, RWORKAJETER, RESU );
-           end = get_current_time();
-           printf("  Finish CHECK - results timing= %lf \n" ,GetTimerValue(start,end) / 1000.);
-#if defined(USEMKL)
-           mkl_set_num_threads( 1 );
+            MATYPE=3;
+            double NOTHING=0.0;
+            start = get_current_time();
+            // check results
+            zcheck_eig_(&JOBZ, &MATYPE, &N, &NB, AINIT, &lda, &NOTHING, &NOTHING, D2, D, h_R, &lda, WORKAJETER, RWORKAJETER, RESU );
+            end = get_current_time();
+            printf("  Finish CHECK - results timing= %lf \n", GetTimerValue(start, end) / 1000.);
+            #if defined(USEMKL)
+            mkl_set_num_threads( 1 );
+            #endif
+            #if defined(USEACML)
+            omp_set_num_threads(1);
+            #endif
+
+            printf("\n");
+            printf(" ================================================================================================================\n");
+            printf("   ==> INFO voici  threads=%d    N=%d    NB=%d   WANTZ=%d\n", (int) THREADS, (int) N, (int) NB, (int) WANTZ);
+            printf(" ================================================================================================================\n");
+            printf("            DSBTRD                : %15s \n", "STATblgv9withQ    ");
+            printf(" ================================================================================================================\n");
+            if(WANTZ>0)
+                printf(" | A - U S U' | / ( |A| n ulp )   : %15.3E   \n", RESU[0]);
+            if(WANTZ>0)
+                printf(" | I - U U' | / ( n ulp )         : %15.3E   \n", RESU[1]);
+            printf(" | D1 - EVEIGS | / (|D| ulp)      : %15.3E   \n",  RESU[2]);
+            printf(" max | D1 - EVEIGS |              : %15.3E   \n",  RESU[6]);
+            printf(" ================================================================================================================\n\n\n");
+            
+            printf(" ****************************************************************************************************************\n");
+            printf(" * Hello here are the norm  Infinite (max)=%e  norm one (sum)=%e   norm2(sqrt)=%e *\n", nrmI, nrm1, nrm2);
+            printf(" ****************************************************************************************************************\n\n");
+        }
 #endif
-#if defined(USEACML)
-           omp_set_num_threads(1);
 #endif
 
-           printf("\n");
-           printf(" ================================================================================================================\n");
-           printf("   ==> INFO voici  threads=%d    N=%d    NB=%d   WANTZ=%d\n", (int) THREADS, (int) N, (int) NB, (int) WANTZ);
-           printf(" ================================================================================================================\n");
-           printf("            DSBTRD                : %15s \n", "STATblgv9withQ    ");
-           printf(" ================================================================================================================\n");
-           if(WANTZ>0)
-              printf(" | A - U S U' | / ( |A| n ulp )   : %15.3E   \n",RESU[0]); 
-           if(WANTZ>0)
-              printf(" | I - U U' | / ( n ulp )         : %15.3E   \n", RESU[1]);
-           printf(" | D1 - EVEIGS | / (|D| ulp)      : %15.3E   \n",  RESU[2]);
-           printf(" max | D1 - EVEIGS |              : %15.3E   \n",  RESU[6]);
-           printf(" ================================================================================================================\n\n\n");
-       
-           printf(" ****************************************************************************************************************\n");
-           printf(" * Hello here are the norm  Infinite (max)=%e  norm one (sum)=%e   norm2(sqrt)=%e *\n",nrmI, nrm1, nrm2);
-           printf(" ****************************************************************************************************************\n\n");
+        printf("  Total N %5d  flops %6.2f        timing %6.2f seconds\n", (int) N, gpu_perf, gpu_time );
+        printf("============================================================================\n\n\n");
 
-        } 
-#endif         
-#endif  
-
-      printf("  Total N %5d  flops %6.2f        timing %6.2f seconds\n", (int) N, gpu_perf, gpu_time );
-      printf("============================================================================\n\n\n");
-
-      if ( once )
-          break;
+        if ( once )
+            break;
     }
 
     /* Memory clean up */
     TESTING_FREE( h_A );
-    TESTING_FREE( tau ); 
-    TESTING_HOSTFREE( h_R ); 
-    TESTING_HOSTFREE( h_work ); 
+    TESTING_FREE( tau );
+    TESTING_HOSTFREE( h_R );
+    TESTING_HOSTFREE( h_work );
 
     /* Shutdown */
     TESTING_FINALIZE_MGPU();
