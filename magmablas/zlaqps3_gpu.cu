@@ -29,10 +29,6 @@ __global__ void magma_zgemv_kernel3(int m, const magmaDoubleComplex * __restrict
 
 /* --------------------------------------------------------------------------- */
 extern "C" void
-magma_zlarfg_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
-                 magmaDoubleComplex *dtau, double *dxnorm);
-
-extern "C" void
 magmablas_dznrm2_adjust(int k, double *xnorm, magmaDoubleComplex *c);
 
 extern "C" void
