@@ -185,8 +185,8 @@ EXE := $(filter-out $(LIBEXE), $(EXE))
 
 all: $(EXE)
 
-lib: $(LIBMAGMA)
-	cd .. && make lib
+lib:
+	cd .. && $(MAKE) lib
 
 # depend on header
 $(ALLOBJ): testings.h
@@ -198,11 +198,13 @@ $(LIBTEST): $(LIBOBJ)
 LIBLAPACKTEST = lin/liblapacktest.a
 
 $(LIBLAPACKTEST):
-	cd lin && make liblapacktest.a
+	cd lin && $(MAKE) liblapacktest.a
 
 $(EXE): $(LIBMAGMA) $(LIBLAPACKTEST) $(LIBTEST)
 
 clean:
+	cd lin    && $(MAKE) clean
+	cd matgen && $(MAKE) clean
 	rm -f *.o *~ $(LIBTEST)
 
 cleanall: clean
