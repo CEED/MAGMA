@@ -15,19 +15,7 @@
 #define PRECISION_z
 /* --------------------------------------------------------------------------- */
 extern "C" void
-magma_zlarfg_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
-                 magmaDoubleComplex *dtau, double *dxnorm);
-extern "C" void
-magma_zlarfg2_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
-                  magmaDoubleComplex *dtau, double *dxnorm, magmaDoubleComplex *dAkk);
-extern "C" void
-magma_zlarfg3_gpu(int n, magmaDoubleComplex *dx0_in, magmaDoubleComplex *dx0_out,
-                  magmaDoubleComplex *dx, magmaDoubleComplex *dtau, double *dxnorm);
-extern "C" void
 magmablas_dznrm2_adjust(int k, double *xnorm, magmaDoubleComplex *c);
-
-extern "C" void
-magmablas_dznrm2_row_adjust(int k, double *xnorm, magmaDoubleComplex *c, int inc);
 
 extern "C" void
 magmablas_dznrm2_row_check_adjust(int k, double tol, double *xnorm, double *xnorm2,
@@ -245,15 +233,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         }
         
         /*  Generate elementary reflector H(k). */
-        /*if (rk < m-1) {
-            i__1 = m - rk;
-            //lapackf77_zlarfg( &i__1, A(rk, k), A(rk + 1, k), &ione, &tau[k] );
-            magma_zlarfg3_gpu( i__1, A(rk, k), &Aks[k], A(rk + 1, k), &tau[k], &vn1[k]);
-        } else {
-            //lapackf77_zlarfg( &ione, A(rk, k), A(rk, k), &ione, &tau[k] );
-            magma_zlarfg3_gpu( 1,    A(rk, k), &Aks[k], A(rk, k),     &tau[k], &vn1[k]);
-        }*/
-        magma_zlarfg2_gpu(m-rk, A(rk, k), A(rk + 1, k), &tau[k], &vn1[k], &Aks[k]);
+        magma_zlarfg_gpu(m-rk, A(rk, k), A(rk + 1, k), &tau[k], &vn1[k], &Aks[k]);
 
         //Akk = *A(rk, k);
         //*A(rk, k) = c_one;
@@ -394,7 +374,6 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         
         /* Update partial column norms. */
         if (rk < min(m, n+offset)-1 ){
-            //magmablas_dznrm2_row_adjust(n-k-1, &vn1[k+1], A(rk,k+1), lda);
             magmablas_dznrm2_row_check_adjust(n-k-1, tol3z, &vn1[k+1], &vn2[k+1], A(rk,k+1), lda, lsticcs);
 
             magma_device_sync();
