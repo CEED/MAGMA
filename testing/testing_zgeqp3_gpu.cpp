@@ -24,24 +24,6 @@
 #include "testings.h"
 
 #define PRECISION_z
-extern "C" magma_int_t
-magma_zgeqp3_v0( magma_int_t m, magma_int_t n,
-                 magmaDoubleComplex *A, magma_int_t lda,
-                 magma_int_t *jpvt, magmaDoubleComplex *tau,
-                 magmaDoubleComplex *work, magma_int_t lwork,
-#if defined(PRECISION_z) || defined(PRECISION_c)
-                 double *rwork,
-#endif
-                 magma_int_t *info );
-extern "C" magma_int_t
-magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
-                  magmaDoubleComplex *A, magma_int_t lda,
-                  magma_int_t *jpvt, magmaDoubleComplex *tau,
-                  magmaDoubleComplex *work, magma_int_t lwork,
-#if defined(PRECISION_z) || defined(PRECISION_c)
-                  double *rwork,
-#endif
-                  magma_int_t *info );
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeqp3
@@ -115,8 +97,9 @@ int main( int argc, char** argv)
     nb = magma_get_zgeqp3_nb(min_mn);
 
 #if defined(PRECISION_z) || defined(PRECISION_c)
-    double *rwork;
-    TESTING_MALLOC(   rwork, double, 2*N );
+    double *drwork, *rwork;
+    TESTING_DEVALLOC(   drwork, double, 2*N        +( N+1 )*nb);
+    TESTING_MALLOC( rwork, double, 2*N );
 #endif
     TESTING_MALLOC(    jpvt, magma_int_t,     N );
     TESTING_MALLOC(    tau,  magmaDoubleComplex, min_mn);
@@ -186,7 +169,7 @@ int main( int argc, char** argv)
             /* call gpu-interface */
             gpu_time = magma_wtime();
             #if defined(PRECISION_z) || defined(PRECISION_c)
-            magma_zgeqp3_gpu(M, N, d_R, lda, jpvt, dtau, d_work, lwork, rwork, &info);
+            magma_zgeqp3_gpu(M, N, d_R, lda, jpvt, dtau, d_work, lwork, drwork, &info);
             #else
             magma_zgeqp3_gpu(M, N, d_R, lda, jpvt, dtau, d_work, lwork, &info);
             #endif
@@ -234,6 +217,7 @@ int main( int argc, char** argv)
     /* Memory clean up */
 #if defined(PRECISION_z) || defined(PRECISION_c)
     TESTING_FREE( rwork );
+    TESTING_DEVFREE( drwork );
 #endif
     TESTING_FREE( jpvt );
     TESTING_FREE( tau );

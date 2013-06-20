@@ -564,6 +564,11 @@ magma_int_t magma_zunmtr_gpu( char side, char uplo, char trans,
                               magma_int_t *info);
 
 #if defined(PRECISION_z) || defined(PRECISION_c)
+magma_int_t magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
+                              magmaDoubleComplex *A, magma_int_t lda,
+                              magma_int_t *jpvt, magmaDoubleComplex *tau,
+                              magmaDoubleComplex *work, magma_int_t lwork,
+                              double *rwork, magma_int_t *info );
 magma_int_t magma_zheevd_gpu( char jobz, char uplo,
                               magma_int_t n,
                               magmaDoubleComplex *da, magma_int_t ldda,
@@ -604,6 +609,11 @@ magma_int_t magma_zheevr_gpu( char jobz, char range, char uplo, magma_int_t n,
                               double *rwork, magma_int_t lrwork, magma_int_t *iwork,
                               magma_int_t liwork, magma_int_t *info);
 #else
+magma_int_t magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
+                              magmaDoubleComplex *A, magma_int_t lda,
+                              magma_int_t *jpvt, magmaDoubleComplex *tau,
+                              magmaDoubleComplex *work, magma_int_t lwork,
+                              magma_int_t *info );
 magma_int_t magma_zheevd_gpu( char jobz, char uplo,
                               magma_int_t n,
                               magmaDoubleComplex *da, magma_int_t ldda,
