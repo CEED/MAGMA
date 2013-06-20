@@ -75,7 +75,6 @@ int main( int argc, char** argv)
             magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
             
             // warmup
-            // magma_zgeqr2_gpu2( M, N, d_A, ldda, dtau, dwork, &info );
             magma_zgeqr2_gpu( M, N, d_A, ldda, dtau, dwork, &info );
 
             magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
@@ -85,7 +84,6 @@ int main( int argc, char** argv)
                =================================================================== */
             gpu_time = magma_sync_wtime( 0 );
 
-            // magma_zgeqr2_gpu2( M, N, d_A, ldda, dtau, dwork, &info );
             magma_zgeqr2_gpu( M, N, d_A, ldda, dtau, dwork, &info );
 
             gpu_time = magma_sync_wtime( 0 ) - gpu_time;
