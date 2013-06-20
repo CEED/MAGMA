@@ -301,10 +301,10 @@ magma_zlatrd_mgpu(int num_gpus, char uplo,
                 /* overlap update */
                 if( i < n-1 && i-1 >= n - nb )
                 {
-                    int im1_1 = i_1 - 1;
-                    int im1   = i-1;
-                    int im1_n = i_n + 1;
-                    int im1w  = i - n + nb;
+                    magma_int_t im1_1 = i_1 - 1;
+                    magma_int_t im1   = i-1;
+                    magma_int_t im1_n = i_n + 1;
+                    magma_int_t im1w  = i - n + nb;
                     /* Update A(1:i,i) */
                     #if defined(PRECISION_z) || defined(PRECISION_c)
                         lapackf77_zlacgv(&im1_n, W(im1, iw+1), &ldw);
@@ -439,7 +439,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo,
                 /* overlap update */
                 if( i > 0 && i+1 < n )
                 {
-                    int ip1 = i+1;
+                    magma_int_t ip1 = i+1;
                     trace_cpu_start( 0, "gemv", "gemv" );
                     #if defined(PRECISION_z) || defined(PRECISION_c)
                         lapackf77_zlacgv(&i, W(ip1, 0), &ldw);

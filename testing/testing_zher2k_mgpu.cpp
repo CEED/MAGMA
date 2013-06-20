@@ -162,7 +162,7 @@ int main( int argc, char** argv)
                    =================================================================== */
                 if ( opts.lapack || opts.check ) {
                     // store ||V||*||W|| + ||A||
-                    int n_offset = n - offset;
+                    magma_int_t n_offset = n - offset;
                     error  = lapackf77_zlange("f", &n_offset, &k, hV, &lda, work );
                     error *= lapackf77_zlange("f", &n_offset, &k, hW, &lda, work );
                     error += lapackf77_zlange("f", &n_offset, &n_offset, &hA[offset + offset*lda], &lda, work );

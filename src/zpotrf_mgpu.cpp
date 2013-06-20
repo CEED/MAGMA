@@ -31,7 +31,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
                    magma_int_t *info );
 
 extern "C" magma_int_t
-magma_zpotrf_mgpu(int num_gpus, char uplo, magma_int_t n,
+magma_zpotrf_mgpu(magma_int_t num_gpus, char uplo, magma_int_t n,
                   magmaDoubleComplex **d_lA, magma_int_t ldda, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
