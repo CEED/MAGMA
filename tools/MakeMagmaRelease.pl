@@ -30,30 +30,8 @@ my @files2delete = qw(
     Release-ToDo-1.1.txt
     BugsToFix.txt
     
-    src/zheevd_m.cpp
-    src/dlaex0_m.cpp
-    src/dlaex1_m.cpp
-    src/dlaex3_m.cpp
-    src/dstedx_m.cpp
-    src/zstedx_m.cpp
-    src/zunmtr_m.cpp
-    src/zhetrd_mgpu.cpp
-    src/zlatrd_mgpu.cpp
-    
-    src/zhetrd_he2hb_mgpu.cpp
-    src/zhetrd_he2hb_mgpu_spec.cpp
-    
     magmablas/zhemm_1gpu.cpp
     magmablas/zhemm_1gpu_old.cpp
-    magmablas/zhemm_mgpu.cpp
-    magmablas/zhemm_mgpu_com.cpp
-    magmablas/zhemm_mgpu_spec.cpp
-    magmablas/zher2k_mgpu.cpp
-    magmablas/zher2k_mgpu_spec.cpp
-    
-    testing/testing_zhetrd_he2hb_mgpu.cpp
-    testing/testing_zhemm_mgpu.cpp
-    testing/testing_zher2k_mgpu.cpp
     
     control/sizeptr
     include/Makefile
