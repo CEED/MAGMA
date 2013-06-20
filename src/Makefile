@@ -81,7 +81,6 @@ ZSRC += \
 	zgeqrf2_gpu.cpp		\
 	zgeqrf3_gpu.cpp		\
 	zgeqrf_gpu.cpp		\
-	zgeqr2_gpu.cpp          \
 	zgeqr2x_gpu.cpp         \
 	zgeqr2x_gpu-v2.cpp      \
 	zgeqr2x_gpu-v3.cpp      \
