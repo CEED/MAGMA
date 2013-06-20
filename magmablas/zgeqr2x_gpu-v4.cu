@@ -52,38 +52,7 @@ magma_zlarfb2_gpu( magma_int_t m, magma_int_t n, magma_int_t k,
                    const magmaDoubleComplex *dV,    magma_int_t ldv,
                    const magmaDoubleComplex *dT,    magma_int_t ldt,
                    magmaDoubleComplex *dC,          magma_int_t ldc,
-                   magmaDoubleComplex *dwork,       magma_int_t ldwork )
-{
-    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
-    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
-    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-
-    if (m <= 0 || n <= 0)
-        return MAGMA_SUCCESS;
-
-    // W = C^H V
-    // magma_zgemm( MagmaConjTrans, MagmaNoTrans,
-    magmablas_zgemm_reduce(
-                           n, k, m,
-                           c_one,  dC,    ldc,
-                           dV,    ldv,
-                           c_zero, dwork, ldwork);
-
-    // W = W T^H = C^H V T^H
-    magma_ztrmm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
-                 n, k,
-                 c_one, dT,    ldt,
-                 dwork, ldwork);
-
-    // C = C - V W^H = C - V T V^H C = (I - V T V^H) C = H C
-    magma_zgemm( MagmaNoTrans, MagmaConjTrans,
-                 m, n, k,
-                 c_neg_one, dV,    ldv,
-                 dwork, ldwork,
-                 c_one,     dC,    ldc);
-
-    return MAGMA_SUCCESS;
-}
+                   magmaDoubleComplex *dwork,       magma_int_t ldwork );
 
 //////////////////////////////////////////////////////////////////////////////
 
