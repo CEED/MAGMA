@@ -93,7 +93,7 @@ void magma_zlarfg_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComplex
    are computed outside the routine and passed to it in dxnorm (array on the GPU).
 */
 extern "C" magma_int_t
-magma_zlarfg_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
+magma_zlarfg_gpu( magma_int_t n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
                   magmaDoubleComplex *dtau, double *dxnorm, magmaDoubleComplex *dAkk)
 {
     dim3 blocks((n+BLOCK_SIZE-1) / BLOCK_SIZE);
