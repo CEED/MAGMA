@@ -99,7 +99,7 @@ magma_zgeqr2_gpu(
     for (i = 0; i < k; ++i) {
 
         /*  Generate elementary reflector H(i) to annihilate A(i+1:m,i) */
-        magma_zlarfg2_gpu(m-i, da_ref(i, i), da_ref(min(i+1,m), i), dtau+i, dwork, &Aks[i]);
+        magma_zlarfg_gpu(m-i, da_ref(i, i), da_ref(min(i+1,m), i), dtau+i, dwork, &Aks[i]);
 
         if (n-i-1>0)
            /* Apply H(i)' to A(i:m,i+1:n) from the left */

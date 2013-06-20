@@ -196,12 +196,12 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         }
         
         /*  Generate elementary reflector H(k). */
-        magma_zlarfg2_gpu(m-rk, A(rk, k), A(rk + 1, k), &tau[k], &vn1[k], &dAkk[k]);
+        magma_zlarfg_gpu(m-rk, A(rk, k), A(rk + 1, k), &tau[k], &vn1[k], &dAkk[k]);
                 
         //Akk = *A(rk, k);
         //*A(rk, k) = c_one;
         //magma_zgetvector( 1, A(rk, k), 1, &Akk,     1 );
-        // this needs to be done outside zlarfg2 to avoid the race condition.
+        // this needs to be done outside zlarfg to avoid the race condition.
         magma_zsetvector( 1, &c_one,   1, A(rk, k), 1 );
 
         /* Compute Kth column of F:

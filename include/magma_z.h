@@ -464,7 +464,7 @@ magma_int_t magma_zlarfb_gpu_gemm( char side, char trans, char direct, char stor
                               magmaDoubleComplex *dc,       magma_int_t ldc,
                               magmaDoubleComplex *dwork,    magma_int_t ldwork,
                               magmaDoubleComplex *dworkvt,  magma_int_t ldworkvt);
-magma_int_t magma_zlarfg2_gpu(magma_int_t n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
+magma_int_t magma_zlarfg_gpu( magma_int_t n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
                               magmaDoubleComplex *dtau, double *dxnorm, magmaDoubleComplex *dAkk);
 magma_int_t magma_zposv_gpu(  char uplo, magma_int_t n, magma_int_t nrhs,
                               magmaDoubleComplex *dA, magma_int_t ldda,
