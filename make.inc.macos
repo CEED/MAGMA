@@ -16,7 +16,7 @@
 
 GPU_TARGET = Tesla
 
-CC        = gcc
+CC        = g++
 NVCC      = nvcc
 FORT      = gfortran
 

@@ -102,3 +102,6 @@ FOPTS += $(PTROPT)
 	$(FORT) $(F77OPTS) $(INC) -c $< -o $@
 
 -include $(MAGMA_DIR)/Makefile.gen
+
+# reset default goal
+.DEFAULT_GOAL :=

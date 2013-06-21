@@ -37,8 +37,6 @@ headers:
 
 libmagma:     headers
 libmagmablas: headers
-libmagma_control: headers
-libmagma_interface: headers
 
 # if an error occurs in creating .Makefile.gen or Makefile.src (or any other file)
 # have make delete them -- else they are corrupted and cause confusion.
@@ -68,6 +66,4 @@ Makefile.src: $(CODEGEN) Makefile
 	echo "SSRC = \\"                               >> $@
 	$(PYTHON) $(CODEGEN) -o -p "s"    -f "$(ZSRC)" >> $@
 
-.DEFAULT_GOAL :=
 -include .Makefile.gen
-.DEFAULT_GOAL :=
