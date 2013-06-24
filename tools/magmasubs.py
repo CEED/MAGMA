@@ -633,6 +633,11 @@ subs = {
     ('STSTRF',         'DTSTRF',         'CTSTRF',         'ZTSTRF'          ),
     ('SUNGESV',        'SUNGESV',        'CUNGESV',        'CUNGESV'         ),
     ('SSTEGR',         'DSTEGR',         'CSTEGR',         'ZSTEGR'          ),
+
+    # ----- SPARSE BLAS
+
+    # ----- SPARSE Iterative Solvers
+    ('scg',            'dcg',            'ccg',            'zcg'             ),
     
     # ----- Prefixes
     # Most routines have already been renamed by above BLAS/LAPACK rules.
