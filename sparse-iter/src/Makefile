@@ -19,34 +19,27 @@ INC += -I$(MAGMA_DIR)/control
 
 # Krylov space linear solvers
 ZSRC += \
-	zbicg.cpp               \  #BiCG - preconditioned in other files?
-        zcg.cpp                 \  # CG - preconditioned in other file?
-	zgmres.cpp		\  # GMRES
+	zcg.cpp			\
+	zgmres.cpp		\
+	#zbicg.cpp		\
 
 # Krylov space eign-solvers
 ZSRC += \
-        zcgeig.cpp              \  # CG based eigensolver for part of the spectrum
-                                   # There are variations for middle of spectrum - like
-                                   # folded spectrum, etc., where to put those
-        zlobpcg.cpp             \  # LOBPCG - similar to CG
-        zlancsoz.cpp            \
+	#zcgeig.cpp		\
+	#zlobpcg.cpp		\
+	#zlancsoz.cpp		\
 
 # Mixed-precision example solvers
 ZSRC += \
-	zcfgmres.cpp		\  # Flexible GMRES example of inner - outer loop
-                                   # The "preconditioner" is some iterative process in
-                                   # in single; there could be variations of this
+	#zcfgmres.cpp		\
 
 # QR and least squares, GPU interface
 ZSRC += \
-        zungqr_lapack.cpp       \  # From a set of vectors to get orthogonal vectors; 
-                                   # could be LAPACK QR + zungqr
-	zungqr_cgs.cpp		\  # or clasical Gram-Schmidt
-	zungqr_mgs.cpp          \  # modified
-	zungqr_chol.cpp         \  # Cholesky based
-	zungqr_iter.cpp         \  # Iterative for cases where Cholesky fails
-                                   # What else can we put?
-        \
+	#zungqr_lapack.cpp	\
+	#zungqr_cgs.cpp		\
+	#zungqr_mgs.cpp		\
+	#zungqr_chol.cpp		\
+	#zungqr_iter.cpp		\
 
 # ------------------------------------------------------------
 -include Makefile.local
@@ -57,9 +50,11 @@ ALLSRC_F = \
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 ALLOBJ := $(ALLSRC:.cpp=.o) $(ALLSRC_F:.f=.o)
 
-all: $(LIBItMAGMA)
+LIBMAGMA_SPARSE = $(MAGMA_DIR)/lib/libmagma_sparse.a
 
-$(LIBItMAGMA): $(ALLOBJ)
+all: $(LIBMAGMA_SPARSE)
+
+$(LIBMAGMA_SPARSE): $(ALLOBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
 
@@ -68,4 +63,4 @@ clean:
 
 cleanall: clean
 	rm -f *.a
-	rm -f $(LIBItMAGMA)
+	rm -f $(LIBMAGMA_SPARSE)
