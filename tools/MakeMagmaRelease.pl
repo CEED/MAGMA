@@ -22,6 +22,7 @@ my @files2delete = qw(
     tools
     quark
     docs
+    make.inc.bulge
     make.inc.cumin
     make.inc.disco
     make.inc.ig
@@ -47,6 +48,18 @@ my @files2delete = qw(
     testing/testing_zpotrf_mc.cpp
     testing/testing_zgetrf_mc.cpp
     
+    multi-gpu-dynamic-deprecated
+    CPackConfig_MAGMA.cmake
+    CPackConfig_MAGMA_full.cmake
+    CPackConfig_MORSE_full.cmake
+    CPackConfig_MORSE_light.cmake
+    CMakeLists.txt
+    include/CMakeLists.txt
+    magmablas/CMakeLists.txt
+    src/CMakeLists.txt
+    testing/lin/CMakeLists.txt
+    testing/matgen/CMakeLists.txt
+
     sparse-iter
 );
 # Using qw() avoids need for "quotes", but comments aren't recognized inside qw()
