@@ -20,10 +20,10 @@ INC += -I$(MAGMA_DIR)/control
 # Krylov space linear solvers
 ZSRC += \
 	zcg.cpp			\
-	zgmres.cpp		\
+	#zgmres.cpp		\
 	#zbicg.cpp		\
 
-# Krylov space eign-solvers
+# Krylov space eigen-solvers
 ZSRC += \
 	#zcgeig.cpp		\
 	#zlobpcg.cpp		\
@@ -49,8 +49,6 @@ ALLSRC_F = \
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 ALLOBJ := $(ALLSRC:.cpp=.o) $(ALLSRC_F:.f=.o)
-
-LIBMAGMA_SPARSE = $(MAGMA_DIR)/lib/libmagma_sparse.a
 
 all: $(LIBMAGMA_SPARSE)
 
