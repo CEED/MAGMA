@@ -7,8 +7,6 @@
 
        @precisions normal z -> s d c
        @author Azzam Haidar
-       
-       This still has poor performance. Work in progress.
 */
 #include "common_magma.h"
 #include "magma_bulge.h"
@@ -21,7 +19,7 @@ void magmablas_zhemm_mgpu_spec(
     magmaDoubleComplex alpha, magmaDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
                            magmaDoubleComplex *dB[], magma_int_t lddb,
     magmaDoubleComplex beta,  magmaDoubleComplex *dC[], magma_int_t lddc,
-                           magmaDoubleComplex *dwork[],    magma_int_t lddwork,
+                           magmaDoubleComplex *dwork[],    magma_int_t dworksiz,
                            magmaDoubleComplex *C,    magma_int_t ldc,
                            magmaDoubleComplex *work[], magma_int_t ldwork,
                            magma_int_t ngpu, magma_int_t nb, 
@@ -38,7 +36,6 @@ void magmablas_zhemm_mgpu_spec(
     assert( ldda >= m );
     assert( lddb >= m );
     assert( lddc >= m );
-    assert( lddwork >= m );
     assert( nstream >= ngpu );
     assert( nbevents >= ngpu*ngpu );
     
@@ -49,15 +46,14 @@ void magmablas_zhemm_mgpu_spec(
 
     magmaDoubleComplex *dwork1[MagmaMaxGPUs];
     magmaDoubleComplex *dwork2[MagmaMaxGPUs];
-    magmaDoubleComplex *dwork3[MagmaMaxGPUs];
 
 
-
+    magma_int_t lddwork = lddc;
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         dwork1[dev] = dwork[dev];
         dwork2[dev] = dwork[dev]+n*lddwork;
-        dwork3[dev] = dwork[dev]+2*n*lddwork;
     }
+    assert( dworksiz >= (2*n*lddwork) );
 
 
 
@@ -106,7 +102,22 @@ void magmablas_zhemm_mgpu_spec(
     //  transpose of its blocks to compute
     //  a final portion of X=A*VT
     //*******************************
-
+    /* dB = V*T already ==> dB' = T'*V'
+     * compute T'*V'*X is equal to compute locally (VT)'_i*X_i 
+     * then  each GPU broadcast its X_i to assemble the full X which is used
+     * to compute W  =  X  - 0.5 * V * T'*V'*X  = X - 0.5 * V *dwork3
+     */
+    if(ngpu ==1){
+        magma_setdevice( 0 );
+        magmablasSetKernelStream( streams[ 0 ][ 0 ] );
+        // compute X[me] = A*VT = A[me]^tr *VT;
+        magma_zgemm( MagmaConjTrans, MagmaNoTrans, m, n, m,
+                     alpha, dA(0,offset,offset), ldda,
+                            dB[0],         lddb,
+                     beta,  dC[0], lddc );
+        return;
+    }
+    //ngpu>1
     for( magma_int_t cmplxid = 0; cmplxid < nbcmplx; ++cmplxid ) {
         masterdev     = -1;
         gnode[cmplxid][MagmaMaxGPUs+1] = -1;
@@ -298,10 +309,16 @@ void magmablas_zhemm_mgpu_spec(
             dev         = gnode[cmplxid][idev];
             mycolsize   = gpuisactive[dev];
             if(mycolsize>0){ // I am an active GPU
-                //printf     ("\n\n==============GPU %d collecting\n",dev);
+                //printf("\n\n==============GPU %d collecting\n",dev);
                 magma_setdevice( dev );        
-                // collect my results ifrst as no need to wait toreceive just wait that 
-                // the gemm are done
+                // collect my results first as tyhere is no need to wait to   
+                // receive nothing, just wait that my gemm are done.
+                // in theory this should be inside the loop but cuda was not 
+                // able to run it first for all gpu and on gpu>0 it was waiting
+                // however it was on different stream so it should run. but maybe
+                // this is because there are too many function call and this make 
+                // cuda not handleit so nice. anyway it coul dbe removed when cuda
+                // is able to lunch it first without wait.
                 gdev = dev;
                 gcolsize     = gpuisactive[gdev];
                 if(gcolsize>0){
@@ -345,10 +362,8 @@ void magmablas_zhemm_mgpu_spec(
                                 magmablasSetKernelStream( streams[ dev ][ gdev ] );
                                 if(k==cmplxid){
                                     //we are on the same group so wait on event issued by gdev for me citing his id
-                                    if(gdev!=dev){
-                                        magma_queue_wait_event(streams[ dev ][ gdev ], redevents[gdev][dev*ngpu+gdev]);
-                                        //printf     ("              GPU %d stream %d waiting on event %d to collecte from %d the size of gcolsize %d\n",dev,streams[ dev ][ gdev ],redevents[gdev][dev*ngpu+gdev],gdev,gcolsize);
-                                    }
+                                    magma_queue_wait_event(streams[ dev ][ gdev ], redevents[gdev][dev*ngpu+gdev]);
+                                    //printf     ("              GPU %d stream %d waiting on event %d to collecte from %d the size of gcolsize %d\n",dev,streams[ dev ][ gdev ],redevents[gdev][dev*ngpu+gdev],gdev,gcolsize);
                                 }else{
                                     //we are on different group so:
                                     //if I am the master wait on the event issued by gdev for me citing his id
@@ -395,35 +410,7 @@ void magmablas_zhemm_mgpu_spec(
         cudaDeviceSynchronize();
     }
 
-
-
-
-
-
-/*
-
-    int pt=0;
-    for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
-        magma_setdevice( dev );                        
-        magmablasSetKernelStream( streams[ dev ][ 0 ] );    
-        pt=0;
-        for( magma_int_t gdev = 0; gdev < ngpu; ++gdev ) {  
-            gcolsize     = gpuisactive[gdev]; 
-            //printf("GPU %d collecting from %d the size of gcolsize %d\n",dev,gdev,gcolsize);
-           // magmablas_zlacpy( 'A', gcolsize, n, &dwork[dev][maxgsize*gdev], gcolsize, &dC[dev][pt], lddc);
-                                    
-            
-
-                                   // cudaMemcpy2DAsync(&dC[dev][pt], lddc*sizeof(magmaDoubleComplex),
-                                   //      &dwork[dev][maxgsize*gdev], gcolsize*sizeof(magmaDoubleComplex),
-                                   //      gcolsize*sizeof(magmaDoubleComplex), n,
-                                   //      cudaMemcpyDeviceToDevice, streams[dev][0]);
-            magma_queue_sync( streams[ dev ][ 0 ] );
-            pt=pt+gcolsize;
-        }
-    }
-*/
-
+    // put back the input gpu and its input stream 
     magma_setdevice( cdev );
     magmablasSetKernelStream( cstream );
 
