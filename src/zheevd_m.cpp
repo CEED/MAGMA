@@ -7,34 +7,12 @@
 
        @author Raffaele Solca
        @author Stan Tomov
+       @author Azzam Haidar
 
        @precisions normal z -> c
 
 */
 #include "common_magma.h"
-
-extern "C" {
-    magma_int_t magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
-                                  magmaDoubleComplex *a, magma_int_t lda,
-                                  double *d, double *e, magmaDoubleComplex *tau,
-                                  magmaDoubleComplex *work, magma_int_t lwork,
-                                  magma_int_t *info);
-
-    magma_int_t magma_zstedx_m(magma_int_t nrgpu,
-                               char range, magma_int_t n, double vl, double vu,
-                               magma_int_t il, magma_int_t iu, double *D, double *E,
-                               magmaDoubleComplex *Z, magma_int_t ldz,
-                               double *rwork, magma_int_t ldrwork, magma_int_t *iwork,
-                               magma_int_t liwork, magma_int_t *info);
-
-    magma_int_t magma_zunmtr_m(magma_int_t nrgpu, char side, char uplo, char trans,
-                               magma_int_t m, magma_int_t n,
-                               magmaDoubleComplex *a,    magma_int_t lda,
-                               magmaDoubleComplex *tau,
-                               magmaDoubleComplex *c,    magma_int_t ldc,
-                               magmaDoubleComplex *work, magma_int_t lwork,
-                               magma_int_t *info);
-}
 
 extern "C" magma_int_t
 magma_zheevd_m(magma_int_t nrgpu, char jobz, char uplo,

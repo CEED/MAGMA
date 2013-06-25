@@ -282,6 +282,7 @@ magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
     magma_int_t lddv = n;
     magma_int_t lddw = lddv;
     magma_int_t dworksiz    = ldda*nb*3; 
+    magma_int_t worksiz     = n*nb;  
     
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_setdevice( dev );
@@ -291,13 +292,13 @@ magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
         magma_zmalloc( &dwtest[dev], nb*lddw );
         magma_zmalloc( &dworktest[dev], nb*ldda );
         magma_zmalloc( &dworktestbis[dev], dworksiz );
-        workngpu[dev] = (magmaDoubleComplex *) malloc(n*nb*sizeof(magmaDoubleComplex));
+        magma_zmalloc_pinned ( &workngpu[dev], worksiz);
         magmablasSetKernelStream( streams[ dev ][ 0 ] );
         for( magma_int_t i = 0; i < nbevents; ++i ) {
             cudaEventCreateWithFlags(&redevents[dev][i],cudaEventDisableTiming);
         }
     }
-    workngpu[ngpu] = (magmaDoubleComplex *) malloc(n*nb*sizeof(magmaDoubleComplex));    
+    magma_zmalloc_pinned ( &workngpu[ngpu], worksiz);    
     //magma_setdevice(0  );
     // ======================
 

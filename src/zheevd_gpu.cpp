@@ -8,6 +8,7 @@
        @author Raffaele Solca
        @author Stan Tomov
        @author Mark Gates
+       @author Azzam Haidar
 
        @precisions normal z -> c
 

@@ -14,6 +14,7 @@
 */
 #include "common_magma.h"
 #include "magma_bulge.h"
+#include "magma_zbulge.h"
 #include <cblas.h>
 
 #ifdef SETAFFINITY
@@ -29,19 +30,7 @@
 
 #define PRECISION_z
 
-extern "C" {
-
-    void magma_ztrdtype1cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU,
-                                         magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, magmaDoubleComplex *work);
-    void magma_ztrdtype2cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU,
-                                         magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, magmaDoubleComplex *work);
-    void magma_ztrdtype3cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, magmaDoubleComplex *A, magma_int_t LDA, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU,
-                                         magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, magmaDoubleComplex *work);
-
-}
-
 static void *magma_zhetrd_hb2st_parallel_section(void *arg);
-
 static void magma_ztile_bulge_parallel(magma_int_t my_core_id, magma_int_t cores_num, magmaDoubleComplex *A, magma_int_t lda,
                                        magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU, magma_int_t n, magma_int_t nb, magma_int_t nbtiles,
                                        magma_int_t grsiz, magma_int_t Vblksiz, volatile magma_int_t *prog);

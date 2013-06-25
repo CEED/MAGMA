@@ -7,6 +7,7 @@
 
        @author Stan Tomov
        @author Raffaele Solca
+       @author Azzam Haidar
 
        @precisions normal z -> c
 
@@ -17,32 +18,6 @@
 #include <cblas.h>
 
 #define PRECISION_z
-
-extern"C" {
-    void magma_zmove_eig(char range, magma_int_t n, double *w, magma_int_t *il,
-                         magma_int_t *iu, double vl, double vu, magma_int_t *m);
-
-
-    magma_int_t magma_zstedx_m(magma_int_t nrgpu,
-                               char range, magma_int_t n, double vl, double vu,
-                               magma_int_t il, magma_int_t iu, double *D, double *E,
-                               magmaDoubleComplex *Z, magma_int_t ldz,
-                               double *rwork, magma_int_t ldrwork, magma_int_t *iwork,
-                               magma_int_t liwork, magma_int_t *info);
-
-    magma_int_t magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t threads, char uplo, magma_int_t n, magma_int_t nb, magma_int_t ne, magma_int_t Vblksiz,
-                                    magmaDoubleComplex *Z, magma_int_t ldz,
-                                    magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU, magmaDoubleComplex *T, magma_int_t ldt, magma_int_t* info);
-}
-
-extern "C" magma_int_t
-magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
-               magma_int_t m, magma_int_t n, magma_int_t k,
-               magmaDoubleComplex *a,    magma_int_t lda,
-               magmaDoubleComplex *tau,
-               magmaDoubleComplex *c,    magma_int_t ldc,
-               magmaDoubleComplex *work, magma_int_t lwork,
-               magma_int_t *info);
 
 extern "C" magma_int_t
 magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
@@ -490,7 +465,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     if (! wantz) {
         lapackf77_dsterf(&n, w, &rwork[inde], info);
 
-        magma_zmove_eig(range, n, w, &il, &iu, vl, vu, m);
+        magma_dmove_eig(range, n, w, &il, &iu, vl, vu, m);
     } else {
 
 #ifdef ENABLE_TIMER
@@ -507,7 +482,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
         start = get_current_time();
 #endif
 
-        magma_zmove_eig(range, n, w, &il, &iu, vl, vu, m);
+        magma_dmove_eig(range, n, w, &il, &iu, vl, vu, m);
 /*
         magmaDoubleComplex *dZ;
         magma_int_t lddz = n;

@@ -27,27 +27,8 @@
 #define PRECISION_z
 
 extern "C" {
-
-    void magma_ztrdtype1cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU,
-                                         magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, magmaDoubleComplex *work);
-    void magma_ztrdtype2cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU,
-                                         magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, magmaDoubleComplex *work);
-    void magma_ztrdtype3cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, magmaDoubleComplex *A, magma_int_t LDA, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU,
-                                         magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, magmaDoubleComplex *work);
-
-
-    void magma_zbulge_applyQ_v2(char side, magma_int_t NE, magma_int_t N, magma_int_t NB, magma_int_t Vblksiz,
-                                magmaDoubleComplex *dE, magma_int_t ldde, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *T, magma_int_t ldt, magma_int_t *info);
-
     void magma_zstedc_withZ(char JOBZ, magma_int_t n, double *D, double * E, magmaDoubleComplex *Z, magma_int_t LDZ);
     void magma_zstedx_withZ(magma_int_t n, magma_int_t ne, double *D, double * E, magmaDoubleComplex *Z, magma_int_t LDZ);
-
-    magma_int_t magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k, magmaDoubleComplex *da, magma_int_t ldda,
-                                        magmaDoubleComplex *tau, magmaDoubleComplex *dT, magma_int_t nb, magma_int_t *info);
-
-    magma_int_t magma_zunmqr_gpu_2stages(char side, char trans, magma_int_t m, magma_int_t n, magma_int_t k, magmaDoubleComplex *dA, magma_int_t ldda,
-                                         magmaDoubleComplex *dC, magma_int_t lddc, magmaDoubleComplex *dT, magma_int_t nb, magma_int_t *info);
-
 }
 
 static void* parallel_section(void *arg);
@@ -236,10 +217,12 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-extern "C" magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t wantz, char uplo, magma_int_t ne, magma_int_t n, magma_int_t nb,
-                                               magmaDoubleComplex *A, magma_int_t lda, double *D, double *E,
-                                               /*magmaDoubleComplex* dQ1, magma_int_t lddq1,*/ magmaDoubleComplex *dT1, magma_int_t ldt1)
+extern "C" 
+magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t wantz, char uplo, 
+                                    magma_int_t ne, magma_int_t n, magma_int_t nb,
+                                    magmaDoubleComplex *A, magma_int_t lda, 
+                                    double *D, double *E,
+                                    magmaDoubleComplex *dT1, magma_int_t ldt1)
 {
     ////////////////////////////////////////////////////////////////
     magmaDoubleComplex *da, *Z;

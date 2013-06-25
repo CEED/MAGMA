@@ -6,18 +6,15 @@
        November 2011
 
        @author Raffaele Solca
+       @author Azzam Haidar
 
        @precisions normal z -> s d c
 */
 #include "common_magma.h"
 #include <cblas.h>
 
-extern "C"
-magma_int_t magma_get_zhegst_m_nb() { return 256;}
-
 #define A(i, j) (a+(j)*nb*lda + (i)*nb)
 #define B(i, j) (b+(j)*nb*ldb + (i)*nb)
-
 #define dA(gpui, i, j) (dw[gpui] + (j)*nb*ldda + (i)*nb)
 #define dB_c(gpui, i, j) (dw[gpui] + dima*ldda + (i)*nb + (j)*nb*lddbc)
 #define dB_r(gpui, i, j) (dw[gpui] + dima*ldda + (i)*nb + (j)*nb*lddbr)
@@ -116,7 +113,7 @@ magma_zhegst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
 
     int upper = lapackf77_lsame(uplo_, "U");
 
-    magma_int_t nb = magma_get_zhegst_m_nb();
+    magma_int_t nb = magma_get_zhegst_nb_m(n);
 
     /* Test the input parameters. */
     *info = 0;

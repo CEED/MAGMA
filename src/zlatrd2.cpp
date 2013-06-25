@@ -24,16 +24,7 @@
 #define dA(i, j) (da+(j)*ldda + (i))
 #define dW(i, j) (dw+(j)*lddw + (i))
 
-extern "C"
-magma_int_t
-magmablas_zhemv2( char uplo, magma_int_t n,
-                      magmaDoubleComplex alpha,
-                      magmaDoubleComplex *A, magma_int_t lda,
-                      magmaDoubleComplex *X, magma_int_t incx,
-                      magmaDoubleComplex beta,
-                      magmaDoubleComplex *Y, magma_int_t incy,
-                      magmaDoubleComplex *work, magma_int_t lwork);
-
+                      
 extern "C" magma_int_t
 magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
               magmaDoubleComplex *a,  magma_int_t lda,

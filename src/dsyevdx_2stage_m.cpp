@@ -7,6 +7,7 @@
 
        @author Stan Tomov
        @author Raffaele Solca
+       @author Azzam Haidar
 
        @precisions normal d -> s
 
@@ -17,32 +18,6 @@
 #include <cblas.h>
 
 #define PRECISION_z
-
-extern"C" {
-    void magma_dmove_eig(char range, magma_int_t n, double *w, magma_int_t *il,
-                         magma_int_t *iu, double vl, double vu, magma_int_t *m);
-
-
-    magma_int_t magma_dstedx_m(magma_int_t nrgpu,
-                               char range, magma_int_t n, double vl, double vu,
-                               magma_int_t il, magma_int_t iu, double *D, double *E,
-                               double *Z, magma_int_t ldz,
-                               double *rwork, magma_int_t ldrwork, magma_int_t *iwork,
-                               magma_int_t liwork, magma_int_t *info);
-
-    magma_int_t magma_dbulge_back_m(magma_int_t nrgpu, magma_int_t threads, char uplo, magma_int_t n, magma_int_t nb, magma_int_t ne, magma_int_t Vblksiz,
-                                    double *Z, magma_int_t ldz,
-                                    double *V, magma_int_t ldv, double *TAU, double *T, magma_int_t ldt, magma_int_t* info);
-}
-
-extern "C" magma_int_t
-magma_dormqr_m(magma_int_t nrgpu, char side, char trans,
-               magma_int_t m, magma_int_t n, magma_int_t k,
-               double *a,    magma_int_t lda,
-               double *tau,
-               double *c,    magma_int_t ldc,
-               double *work, magma_int_t lwork,
-               magma_int_t *info);
 
 extern "C" magma_int_t
 magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,

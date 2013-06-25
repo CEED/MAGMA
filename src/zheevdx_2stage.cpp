@@ -7,6 +7,7 @@
 
        @author Stan Tomov
        @author Raffaele Solca
+       @author Azzam Haidar
 
        @precisions normal z -> c
 
@@ -17,11 +18,6 @@
 #include <cblas.h>
 
 #define PRECISION_z
-
-extern"C" {
-    void magma_zmove_eig(char range, magma_int_t n, double *w, magma_int_t *il,
-                         magma_int_t *iu, double vl, double vu, magma_int_t *m);
-}
 
 extern "C" magma_int_t
 magma_zheevdx_2stage(char jobz, char range, char uplo,
@@ -421,7 +417,7 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
     if (! wantz) {
         lapackf77_dsterf(&n, w, &rwork[inde], info);
 
-        magma_zmove_eig(range, n, w, &il, &iu, vl, vu, m);
+        magma_dmove_eig(range, n, w, &il, &iu, vl, vu, m);
     } else {
 
 #ifdef ENABLE_TIMER
@@ -450,7 +446,7 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
         magmaDoubleComplex *da;
         magma_int_t ldda = n;
 
-        magma_zmove_eig(range, n, w, &il, &iu, vl, vu, m);
+        magma_dmove_eig(range, n, w, &il, &iu, vl, vu, m);
 
         if (MAGMA_SUCCESS != magma_zmalloc( &dZ, *m*lddz)) {
             *info = MAGMA_ERR_DEVICE_ALLOC;

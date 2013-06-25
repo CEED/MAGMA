@@ -7,14 +7,12 @@
 
        @author Stan Tomov
        @author Raffaele Solca
+       @author Azzam Haidar
 
        @precisions normal z -> c
 
 */
 #include "common_magma.h"
-extern"C"
-void magma_zmove_eig(char range, magma_int_t n, double *w, magma_int_t *il,
-                   magma_int_t *iu, double vl, double vu, magma_int_t *m);
 
 extern "C" magma_int_t
 magma_zheevdx(char jobz, char range, char uplo,
@@ -347,7 +345,7 @@ magma_zheevdx(char jobz, char range, char uplo,
     if (! wantz) {
         lapackf77_dsterf(&n, w, &rwork[inde], info);
 
-        magma_zmove_eig(range, n, w, &il, &iu, vl, vu, m);
+        magma_dmove_eig(range, n, w, &il, &iu, vl, vu, m);
 
     } else {
 
@@ -372,7 +370,7 @@ magma_zheevdx(char jobz, char range, char uplo,
         start = get_current_time();
 #endif
 
-        magma_zmove_eig(range, n, w, &il, &iu, vl, vu, m);
+        magma_dmove_eig(range, n, w, &il, &iu, vl, vu, m);
 
         magma_zunmtr(MagmaLeft, uplo, MagmaNoTrans, n, *m, a, lda, &work[indtau],
                      &work[indwrk + n * (il-1) ], n, &work[indwk2], llwrk2, &iinfo);

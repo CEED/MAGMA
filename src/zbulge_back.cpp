@@ -14,6 +14,7 @@
  */
 #include "common_magma.h"
 #include "magma_bulge.h"
+#include "magma_zbulge.h"
 #include <cblas.h>
 
 #ifdef SETAFFINITY
@@ -28,11 +29,7 @@
 
 #define PRECISION_z
 
-extern "C" {
-    void magma_zbulge_applyQ_v2(char side, magma_int_t NE, magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, magmaDoubleComplex *dE,
-                                magma_int_t ldde, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *T, magma_int_t ldt, magma_int_t *info);
 
-}
 
 static void *magma_zapplyQ_parallel_section(void *arg);
 
@@ -122,9 +119,16 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-extern "C" magma_int_t magma_zbulge_back(magma_int_t threads, char uplo, magma_int_t n, magma_int_t nb, magma_int_t ne, magma_int_t Vblksiz,
-                                         magmaDoubleComplex *Z, magma_int_t ldz, magmaDoubleComplex *dZ, magma_int_t lddz,
-                                         magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU, magmaDoubleComplex *T, magma_int_t ldt, magma_int_t* info)
+extern "C" magma_int_t 
+magma_zbulge_back(magma_int_t threads, char uplo, 
+                magma_int_t n, magma_int_t nb, 
+                magma_int_t ne, magma_int_t Vblksiz,
+                magmaDoubleComplex *Z, magma_int_t ldz, 
+                magmaDoubleComplex *dZ, magma_int_t lddz,
+                magmaDoubleComplex *V, magma_int_t ldv, 
+                magmaDoubleComplex *TAU, 
+                magmaDoubleComplex *T, magma_int_t ldt, 
+                magma_int_t* info)
 {
     magma_int_t mklth = threads;
 

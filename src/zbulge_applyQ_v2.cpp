@@ -42,7 +42,14 @@
      *     consist in a block of col (vertical block)
      */
 /***************************************************************************/
-extern "C" void magma_zbulge_applyQ_v2(char side, magma_int_t NE, magma_int_t N, magma_int_t NB, magma_int_t Vblksiz, magmaDoubleComplex *dE, magma_int_t ldde, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *T, magma_int_t ldt, magma_int_t *info)
+extern "C" magma_int_t 
+magma_zbulge_applyQ_v2(char side, 
+                        magma_int_t NE, magma_int_t N, 
+                        magma_int_t NB, magma_int_t Vblksiz, 
+                        magmaDoubleComplex *dE, magma_int_t ldde, 
+                        magmaDoubleComplex *V, magma_int_t ldv, 
+                        magmaDoubleComplex *T, magma_int_t ldt, 
+                        magma_int_t *info)
 {
     //%===========================
     //%   local variables
@@ -58,13 +65,13 @@ extern "C" void magma_zbulge_applyQ_v2(char side, magma_int_t NE, magma_int_t N,
 
     /* Quick return */
     if ( NE == 0 ) {
-        return;
+        return MAGMA_SUCCESS;
     }
     if ( N == 0 ) {
-        return;
+        return MAGMA_SUCCESS;
     }
     if ( NB == 0 ) {
-        return;
+        return MAGMA_SUCCESS;
     }
     /* ==========================================
      * some infos for developer 
@@ -388,7 +395,7 @@ extern "C" void magma_zbulge_applyQ_v2(char side, magma_int_t NE, magma_int_t N,
     magma_queue_destroy( stream[1] );
 
 
-
+    return MAGMA_SUCCESS;
 }
 #undef V
 #undef T

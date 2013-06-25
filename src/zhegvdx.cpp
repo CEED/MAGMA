@@ -6,6 +6,7 @@
        November 2011
 
        @author Raffaele Solca
+       @author Azzam Haidar
 
        @precisions normal z -> c
 

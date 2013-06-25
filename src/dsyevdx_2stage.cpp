@@ -7,6 +7,7 @@
 
        @author Stan Tomov
        @author Raffaele Solca
+       @author Azzam Haidar
 
        @precisions normal d -> s
 
@@ -17,11 +18,6 @@
 #include <cblas.h>
 
 #define PRECISION_z
-
-extern"C" {
-    void magma_dmove_eig(char range, magma_int_t n, double *w, magma_int_t *il,
-                         magma_int_t *iu, double vl, double vu, magma_int_t *m);
-}
 
 extern "C" magma_int_t
 magma_dsyevdx_2stage(char jobz, char range, char uplo,

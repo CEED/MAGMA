@@ -7,34 +7,12 @@
 
        @author Raffaele Solca
        @author Stan Tomov
+       @author Azzam Haidar
 
        @precisions normal d -> s
 
 */
 #include "common_magma.h"
-
-extern "C" {
-    magma_int_t magma_dsytrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
-                                  double *a, magma_int_t lda,
-                                  double *d, double *e, double *tau,
-                                  double *work, magma_int_t lwork,
-                                  magma_int_t *info);
-
-    magma_int_t magma_dstedx_m(magma_int_t nrgpu,
-                               char range, magma_int_t n, double vl, double vu,
-                               magma_int_t il, magma_int_t iu, double *D, double *E,
-                               double *Z, magma_int_t ldz,
-                               double *work, magma_int_t ldwork, magma_int_t *iwork,
-                               magma_int_t liwork, magma_int_t *info);
-
-    magma_int_t magma_dormtr_m(magma_int_t nrgpu, char side, char uplo, char trans,
-                               magma_int_t m, magma_int_t n,
-                               double *a,    magma_int_t lda,
-                               double *tau,
-                               double *c,    magma_int_t ldc,
-                               double *work, magma_int_t lwork,
-                               magma_int_t *info);
-}
 
 extern "C" magma_int_t
 magma_dsyevd_m(magma_int_t nrgpu, char jobz, char uplo,

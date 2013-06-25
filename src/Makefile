@@ -147,6 +147,7 @@ ZSRC += \
 	zstedx.cpp		\
 	zungtr.cpp		\
 	zunmtr.cpp		\
+	dmove_eig.cpp		\
 
 # symmetric eigenvalues, multi-GPU 
 ZSRC += \

@@ -6,6 +6,7 @@
        November 2011
 
        @author Raffaele Solca
+       @author Azzam Haidar
 
        @precisions normal d -> s
 
@@ -13,13 +14,6 @@
 #include "common_magma.h"
 #include "magma_bulge.h"
 #include "magma_dbulge.h"
-
-extern "C" {
-    magma_int_t magma_dsyevdx_2stage(char jobz, char range, char uplo, magma_int_t n,
-                                     double *a, magma_int_t lda, double vl, double vu, magma_int_t il, magma_int_t iu,
-                                     magma_int_t *m, double *w, double *work, magma_int_t lwork,
-                                     magma_int_t *iwork, magma_int_t liwork, magma_int_t *info);
-}
 
 extern "C" magma_int_t
 magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,

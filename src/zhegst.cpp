@@ -6,6 +6,7 @@
        November 2011
 
        @author Raffaele Solca
+       @author Azzam Haidar
 
        @precisions normal z -> s d c
 */
@@ -369,3 +370,8 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
     
     return *info;
 } /* magma_zhegst_gpu */
+#undef A
+#undef B
+#undef dA
+#undef dB
+

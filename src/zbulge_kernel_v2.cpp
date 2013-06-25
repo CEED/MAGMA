@@ -17,28 +17,19 @@
 
 #define PRECISION_z
 
-extern "C" {
-
-    void magma_ztrdtype1cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU,
-                                         magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, magmaDoubleComplex *work);
-
-    void magma_ztrdtype2cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU,
-                                         magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, magmaDoubleComplex *work);
-
-    void magma_ztrdtype3cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU,
-                                         magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, magmaDoubleComplex *work);
-
-    void magma_zlarfxsym_v2(magma_int_t n, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *V, magmaDoubleComplex *TAU, magmaDoubleComplex *work);
-
-}
-
-
-
+inline static void
+magma_zlarfxsym_v2(magma_int_t n, 
+                magmaDoubleComplex *A, magma_int_t lda, 
+                magmaDoubleComplex *V, magmaDoubleComplex *TAU, 
+                magmaDoubleComplex *work);
 ///////////////////////////////////////////////////////////
 
-extern "C" void
-magma_zlarfxsym_v2(magma_int_t n, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *V, magmaDoubleComplex *TAU, magmaDoubleComplex *work) {
-
+inline static void
+magma_zlarfxsym_v2(magma_int_t n, 
+                magmaDoubleComplex *A, magma_int_t lda, 
+                magmaDoubleComplex *V, magmaDoubleComplex *TAU, 
+                magmaDoubleComplex *work) 
+{
 /*
     WORK (workspace) double complex array, dimension N
 */
@@ -83,8 +74,14 @@ magma_zlarfxsym_v2(magma_int_t n, magmaDoubleComplex *A, magma_int_t lda, magmaD
 #define V(i)     &(V[(i)])
 #define TAU(i)   &(TAU[(i)])
 extern "C" void
-magma_ztrdtype1cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU,
-                                magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, magmaDoubleComplex *work) {
+magma_ztrdtype1cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, 
+                                magmaDoubleComplex *A, magma_int_t lda, 
+                                magmaDoubleComplex *V, magma_int_t ldv, 
+                                magmaDoubleComplex *TAU,
+                                magma_int_t st, magma_int_t ed, 
+                                magma_int_t sweep, magma_int_t Vblksiz, 
+                                magmaDoubleComplex *work) 
+{
 
 /*
     WORK (workspace) double complex array, dimension N
@@ -124,8 +121,14 @@ magma_ztrdtype1cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, magmaDoubleComple
 #define V(i)     &(V[(i)])
 #define TAU(i)   &(TAU[(i)])
 extern "C" void
-magma_ztrdtype2cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU,
-                                magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, magmaDoubleComplex *work) {
+magma_ztrdtype2cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, 
+                                magmaDoubleComplex *A, magma_int_t lda, 
+                                magmaDoubleComplex *V, magma_int_t ldv, 
+                                magmaDoubleComplex *TAU,
+                                magma_int_t st, magma_int_t ed, 
+                                magma_int_t sweep, magma_int_t Vblksiz, 
+                                magmaDoubleComplex *work) 
+{
 
     /*
      WORK (workspace) double complex array, dimension NB
@@ -178,8 +181,14 @@ magma_ztrdtype2cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, magmaDoubleComple
 #define V(i)     &(V[(i)])
 #define TAU(i)   &(TAU[(i)])
 extern "C" void
-magma_ztrdtype3cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, magmaDoubleComplex *A, magma_int_t lda, magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *TAU,
-                                magma_int_t st, magma_int_t ed, magma_int_t sweep, magma_int_t Vblksiz, magmaDoubleComplex *work) {
+magma_ztrdtype3cbHLsym_withQ_v2(magma_int_t n, magma_int_t nb, 
+                                magmaDoubleComplex *A, magma_int_t lda, 
+                                magmaDoubleComplex *V, magma_int_t ldv, 
+                                magmaDoubleComplex *TAU,
+                                magma_int_t st, magma_int_t ed, 
+                                magma_int_t sweep, magma_int_t Vblksiz, 
+                                magmaDoubleComplex *work) 
+{
 
     /*
      WORK (workspace) double complex array, dimension N
