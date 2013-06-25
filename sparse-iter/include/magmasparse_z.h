@@ -8,10 +8,11 @@
        @precisions normal z -> s d c
 */
 
-#ifndef MAGMA_Z_H
-#define MAGMA_Z_H
+#ifndef MAGMASPARSE_Z_H
+#define MAGMASPARSE_Z_H
 
 #include "magma_types.h"
+#include "magmasparse_types.h"
 
 #define PRECISION_z
 
@@ -51,4 +52,4 @@ magma_int_t magma_zcg( magma_int_t dofs, magma_int_t & num_of_iter,
 #endif
 
 #undef PRECISION_z
-#endif /* MAGMA_Z_H */
+#endif /* MAGMASPARSE_Z_H */
