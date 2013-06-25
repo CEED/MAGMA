@@ -5,6 +5,8 @@
        Univ. of Colorado, Denver
        November 2010
 
+       @author Azzam Haidar
+
        @precisions normal z -> s d c
 
 */
@@ -39,37 +41,6 @@
 #define FLOPS(n) (      FMULS_HETRD(n) +      FADDS_HETRD(n))
 #endif
 
-
-extern "C"  magma_int_t magma_zheevdx_2stage(char jobz, char range, char uplo, magma_int_t n,
-                                     magmaDoubleComplex *a, magma_int_t lda, double vl, double vu, magma_int_t il, magma_int_t iu,
-                                     magma_int_t *m, double *w, magmaDoubleComplex *work, magma_int_t lwork,
-                                     double *rwork, magma_int_t lrwork, magma_int_t *iwork, magma_int_t liwork, magma_int_t *info);
-
-extern "C"  magma_int_t magma_zheevdx_2stage_m(int nrgpu, char jobz, char range, char uplo, magma_int_t n,
-                                     magmaDoubleComplex *a, magma_int_t lda, double vl, double vu, magma_int_t il, magma_int_t iu,
-                                     magma_int_t *m, double *w, magmaDoubleComplex *work, magma_int_t lwork,
-                                     double *rwork, magma_int_t lrwork, magma_int_t *iwork, magma_int_t liwork, magma_int_t *info);
-
-
-
-
-
-extern "C" magma_int_t
-magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t NB,
-                    magmaDoubleComplex *a, magma_int_t lda,
-                    magmaDoubleComplex *tau,
-                    magmaDoubleComplex *work, magma_int_t lwork,
-                    magmaDoubleComplex *dT, magma_int_t threads,
-                    magma_int_t *info);
-
-extern "C" magma_int_t
-magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int n, int NB,
-                   magmaDoubleComplex *A, int LDA, double *D, double *E, magmaDoubleComplex *dT1, int ldt1);
-
-extern "C" magma_int_t
-magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t wantz, char uplo, magma_int_t ne, magma_int_t n, magma_int_t nb,
-                        magmaDoubleComplex *A, magma_int_t lda, double *D, double *E,
-                        magmaDoubleComplex *dT1, magma_int_t ldt1);
 
 #if defined(PRECISION_z) || defined(PRECISION_d)
 extern "C" void cmp_vals(int n, double *wr1, double *wr2, double *nrmI, double *nrm1, double *nrm2);
@@ -203,41 +174,14 @@ int main( int argc, char** argv)
                     h_A[i*lda+j] = cuConj(h_A[j*lda+i]);
             }
         }
-
-
         lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
 
 
         /* ====================================================================
            Performs operation using MAGMA
            =================================================================== */
-        char *jobz = (char*)MagmaVecStr;
-        char range = 'A';
-        magma_int_t fraction_ev = 100;
-        magma_int_t il, iu, m1, m2;
-        double vl, vu;
-
-        if (fraction_ev == 0){
-            il = N / 10;
-            iu = N / 5+il;
-        }
-        else {
-            il = 1;
-            iu = (int)(fraction_ev*N);
-            if (iu < 1) iu = 1;
-        }
-
-        magmaDoubleComplex *hh_work;
-        double *rwork;
-        magma_int_t *iwork;
-       
-
-    
         magma_device_t cdev;
         magma_getdevice( &cdev );
-   
-
-
 
         start = get_current_time();
 /*
@@ -254,30 +198,68 @@ int main( int argc, char** argv)
         magma_zhetrd_bhe2trc(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1, ldt);
 */
 
-        magma_int_t nb = magma_get_zhetrd_nb(N);
-        magma_int_t lwork = magma_zbulge_get_lq2(N) + 2*N + N*N;
-        magma_int_t lrwork = 1 + 5*N +2*N*N;
-        magma_int_t liwork = 3 + 5*N;
-       
-        TESTING_HOSTALLOC(hh_work, magmaDoubleComplex,  lwork);
+        char *jobz = (char*)MagmaVecStr;
+        char range = 'A';
+        magma_int_t fraction_ev = 100;
+        magma_int_t il, iu, m1, m2;
+        double vl, vu;
+
+        if (fraction_ev == 0){
+            il = N / 10;
+            iu = N / 5+il;
+        }
+        else {
+            il = 1;
+            iu = (int)(fraction_ev*N);
+            if (iu < 1) iu = 1;
+        }
+        magmaDoubleComplex *hh_work;
+        magma_int_t *iwork;
+        magma_int_t nb,lwork,liwork;
+#if defined(PRECISION_z) || defined(PRECISION_c)
+        double *rwork;
+        magma_int_t lrwork;
+        lwork  = magma_zbulge_get_lq2(N) + 2*N + N*N;
+        lrwork = 1 + 5*N +2*N*N;
         TESTING_HOSTALLOC( rwork,          double, lrwork);
+#else
+        lwork  = magma_zbulge_get_lq2(N) + 1 + 6*N + 2*N*N;
+#endif
+        liwork = 3 + 5*N;
+        nb = magma_get_zhetrd_nb(N);
+        TESTING_HOSTALLOC(hh_work, magmaDoubleComplex,  lwork);
         TESTING_MALLOC(    iwork,     magma_int_t, liwork);
 
         if(ngpu==1){
             printf("calling zheevdx_2stage 1 GPU\n");
-            magma_zheevdx_2stage(jobz[0], range, uplo[0], N, h_R, lda, vl, vu, il, iu, &m1, D, hh_work, lwork, rwork, lrwork, iwork, liwork, &info);
+            magma_zheevdx_2stage(jobz[0], range, uplo[0], N, 
+                            h_R, lda, 
+                            vl, vu, il, iu, 
+                            &m1, D, 
+                            hh_work, lwork, 
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                            rwork, lrwork, 
+#endif
+                            iwork, liwork, 
+                            &info);
+
         }else{
             printf("calling zheevdx_2stage_m %d GPU\n", ngpu);
-            return 0;
-            //magma_zheevdx_2stage_m(ngpu, jobz[0], range, uplo[0], N, h_R, lda, vl, vu, il, iu, &m1, D, hh_work, lwork, rwork, lrwork, iwork, liwork, &info);
+            magma_zheevdx_2stage_m(ngpu, jobz[0], range, uplo[0], N, 
+                            h_R, lda, 
+                            vl, vu, il, iu, 
+                            &m1, D, 
+                            hh_work, lwork, 
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                            rwork, lrwork, 
+#endif
+                            iwork, liwork, 
+                            &info);
         }
 
 
-        magma_setdevice( cdev );
-        
+        magma_setdevice( cdev );        
         end = get_current_time();
-
-
 
 
         gpu_perf = flops / GetTimerValue(start, end);

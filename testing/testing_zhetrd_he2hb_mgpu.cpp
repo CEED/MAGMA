@@ -39,44 +39,6 @@
 #define FLOPS(n) (      FMULS_HETRD(n) +      FADDS_HETRD(n))
 #endif
 
-extern "C" magma_int_t
-magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t NB,
-                    magmaDoubleComplex *a, magma_int_t lda,
-                    magmaDoubleComplex *tau,
-                    magmaDoubleComplex *work, magma_int_t lwork,
-                    magmaDoubleComplex *dT,
-                    magma_int_t *info);
-
-extern "C" magma_int_t
-magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
-                    magmaDoubleComplex *a, magma_int_t lda,
-                    magmaDoubleComplex *tau,
-                    magmaDoubleComplex *work, magma_int_t lwork,
-                    magmaDoubleComplex *dAmgpu[], magma_int_t ldda,
-                    magmaDoubleComplex *dTmgpu[], magma_int_t lddt,
-                    magma_int_t ngpu, magma_int_t distblk,
-                    magma_queue_t streams[][20], magma_int_t nstream,
-                    magma_int_t threads, magma_int_t *info);
-
-extern "C" magma_int_t
-magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
-                    magmaDoubleComplex *a, magma_int_t lda,
-                    magmaDoubleComplex *tau,
-                    magmaDoubleComplex *work, magma_int_t lwork,
-                    magmaDoubleComplex *dAmgpu[], magma_int_t ldda,
-                    magmaDoubleComplex *dTmgpu[], magma_int_t lddt,
-                    magma_int_t ngpu, magma_int_t distblk,
-                    magma_queue_t streams[][20], magma_int_t nstream,
-                    magma_int_t threads, magma_int_t *info);
-
-extern "C" magma_int_t
-magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, int NE, int n, int NB,
-                   magmaDoubleComplex *A, int LDA, double *D, double *E, magmaDoubleComplex *dT1, int ldt1);
-
-extern "C" magma_int_t
-magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t wantz, char uplo, magma_int_t ne, magma_int_t n, magma_int_t nb,
-                        magmaDoubleComplex *A, magma_int_t lda, double *D, double *E,
-                        magmaDoubleComplex *dT1, magma_int_t ldt1);
 
 #if defined(PRECISION_z) || defined(PRECISION_d)
 extern "C" void cmp_vals(int n, double *wr1, double *wr2, double *nrmI, double *nrm1, double *nrm2);

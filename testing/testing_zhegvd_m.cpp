@@ -6,6 +6,7 @@
        November 2011
 
     @author Raffaele Solca
+    @author Azzam Haidar
 
     @precisions normal z -> c d s
 
@@ -25,14 +26,6 @@
 
 #define PRECISION_z
 
-extern "C" magma_int_t
-magma_zhegvd_m(int nrgpu, magma_int_t itype, char jobz, char uplo, magma_int_t n,
-               magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
-               double *w, magmaDoubleComplex *work, magma_int_t lwork,
-#if defined(PRECISION_z) || defined(PRECISION_c)
-               double *rwork, magma_int_t lrwork,
-#endif
-               magma_int_t *iwork, magma_int_t liwork, magma_int_t *info);
 
 #include "testings.h"
 

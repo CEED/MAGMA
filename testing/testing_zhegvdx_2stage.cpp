@@ -6,6 +6,7 @@
        November 2010
 
     @author Raffaele Solca
+    @author Azzam Haidar
 
     @precisions normal z -> c d s
 
@@ -23,23 +24,12 @@
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
+#include "magma_zbulge.h"
 
 #define PRECISION_z
 
 #define absv(v1) ((v1)>0? (v1): -(v1))
 
-extern"C" {
-    magma_int_t magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
-                                     magmaDoubleComplex *a, magma_int_t lda, magmaDoubleComplex *b, magma_int_t ldb,
-                                     double vl, double vu, magma_int_t il, magma_int_t iu,
-                                     magma_int_t *m, double *w, magmaDoubleComplex *work, magma_int_t lwork,
-#if defined(PRECISION_z) || defined(PRECISION_c)
-                                     double *rwork, magma_int_t lrwork,
-#endif
-                                     magma_int_t *iwork, magma_int_t liwork, magma_int_t *info);
-
-    magma_int_t magma_zbulge_get_lq2(magma_int_t n);
-}
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhegvdx
 */

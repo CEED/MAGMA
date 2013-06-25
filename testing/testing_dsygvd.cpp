@@ -7,6 +7,7 @@
 
     @author Stan Tomov
     @author Raffaele Solca
+    @author Azzam Haidar
 
     @precisions normal d -> s
 
