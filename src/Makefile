@@ -202,12 +202,12 @@ ZSRC += \
 	zhegvx.cpp		\
 	zhegst_gpu.cpp		\
 	\
-#	zhegst_m.cpp		\
-#	dsygvd_m.cpp		\
-#	zhegvd_m.cpp		\
-#	dsygvdx_m.cpp		\
-#	zhegvdx_m.cpp		\
-#	ztrsm_m.cpp		\
+	zhegst_m.cpp		\
+	dsygvd_m.cpp		\
+	zhegvd_m.cpp		\
+	dsygvdx_m.cpp		\
+	zhegvdx_m.cpp		\
+	ztrsm_m.cpp		\
 
 # ----------
 # non-symmetric eigenvalues
