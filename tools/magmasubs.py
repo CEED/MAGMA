@@ -681,6 +681,7 @@ subs = {
     ('MAGMA_S',        'MAGMA_D',        'MAGMA_C',        'MAGMA_Z'         ),
     ('MAGMA_s',        'MAGMA_d',        'MAGMA_c',        'MAGMA_z'         ),
     ('magma_s',        'magma_d',        'magma_c',        'magma_z'         ),
+    ('magmasparse_s',  'magmasparse_d',  'magmasparse_c',  'magmasparse_z'   ),
     ('morse_ps',       'morse_pd',       'morse_pc',       'morse_pz'        ),
     ('MORSE_S',        'MORSE_D',        'MORSE_C',        'MORSE_Z'         ),
     ('morse_s',        'morse_d',        'morse_c',        'morse_z'         ),
