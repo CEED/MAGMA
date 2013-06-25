@@ -6,7 +6,7 @@
        June 2013
 
        @precisions normal z -> s d c
-
+       @author Hartwig Anzt
 */
 
 
@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include "../include/magmasparse_z.h"
+#include "../../include/magma.h"
 //extern "C"{
 #include "../include/mmio.h"
 //}

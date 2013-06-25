@@ -11,6 +11,7 @@ include ../../Makefile.internal
 
 ZSRC := \
         matrix_zio.cpp \
+				matrix_z_converter.cpp \
 
 -include Makefile.local
 -include Makefile.src
@@ -29,7 +30,6 @@ all: $(LIBMAGMA_SPARSE)
 $(LIBMAGMA_SPARSE): $(ALLOBJ)
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
-	cp *.mod ../include
 
 clean:
 	rm -f *.cu_o *.o *~ *.linkinfo *.mod ../include/*.mod sizeptr
