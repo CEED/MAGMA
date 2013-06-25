@@ -307,7 +307,7 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
                 *info = J+iinfo;
                 break;
             }
-#ifdef   R  OW_MAJOR_PROFILE
+#ifdef ROW_MAJOR_PROFILE
             end = get_current_time();
             chol_time += GetTimerValue(start, end);
 #endif      
