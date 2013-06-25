@@ -635,6 +635,7 @@ subs = {
     ('SSTEGR',         'DSTEGR',         'CSTEGR',         'ZSTEGR'          ),
 
     # ----- SPARSE BLAS
+    ('sgecsrmv',       'dgecsrmv',       'cgecsrmv',       'zgecsrmv'        ),
 
     # ----- SPARSE Iterative Solvers
     ('scg',            'dcg',            'ccg',            'zcg'             ),
