@@ -59,6 +59,8 @@ my @files2delete = qw(
     src/CMakeLists.txt
     testing/lin/CMakeLists.txt
     testing/matgen/CMakeLists.txt
+    cmake_modules
+    contrib
 
     sparse-iter
 );
