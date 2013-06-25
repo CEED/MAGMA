@@ -497,7 +497,7 @@ void magmablas_zher2k(
     double  beta,
     magmaDoubleComplex_ptr       dC, magma_int_t lddc );
 
-#ifdef COMPLEX
+#ifndef COMPLEX
 void magmablas_ztrsm(
     magma_side_t side, magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
     magma_int_t m, magma_int_t n,
