@@ -608,6 +608,85 @@ magma_int_t magma_get_zgesvd_nb( magma_int_t m )
 }
 
 
+
+
+
+
+
+
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for sygst based on m
+*/
+magma_int_t magma_get_ssygst_nb_m( magma_int_t m )
+{
+    return 256; //to be updated
+
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler
+        if      (m <  4096) return 768;
+        else                return 1536;
+    }
+    else if ( arch >= 200 ) {  // 2.x Fermi
+        if      (m <  2048) return 512;
+        else                return 1024;
+    }
+    else {                     // 1.x
+        return 64;
+    }
+}
+
+magma_int_t magma_get_dsygst_nb_m( magma_int_t m )
+{
+    return 256; //to be updated
+
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler
+        if      (m <  2048) return 384;
+        else                return 768;
+    }
+    else if ( arch >= 200 ) {  // 2.x Fermi
+        return 512;
+    }
+    else {                     // 1.x
+        return 64;
+    }
+}
+
+magma_int_t magma_get_chegst_nb_m( magma_int_t m )
+{
+    return 256; //to be updated
+
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler
+        if      (m <  2048) return 384;
+        else                return 768;
+    }
+    else if ( arch >= 200 ) {  // 2.x Fermi
+        return 512;
+    }
+    else {                     // 1.x
+        return 64;
+    }
+}
+
+magma_int_t magma_get_zhegst_nb_m( magma_int_t m )
+{
+    return 256; //to be updated
+
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler
+        return 384;
+    }
+    else if ( arch >= 200 ) {  // 2.x Fermi
+        return 256;
+    }
+    else {                     // 1.x
+        return 64;
+    }
+}
+
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
