@@ -14,15 +14,6 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
-               magma_int_t m, magma_int_t n, magma_int_t k,
-               magmaDoubleComplex *a,    magma_int_t lda,
-               magmaDoubleComplex *tau,
-               magmaDoubleComplex *c,    magma_int_t ldc,
-               magmaDoubleComplex *work, magma_int_t lwork,
-               magma_int_t *info);
-
-extern "C" magma_int_t
 magma_zunmtr_m(magma_int_t nrgpu, char side, char uplo, char trans,
                magma_int_t m, magma_int_t n,
                magmaDoubleComplex *a,    magma_int_t lda,

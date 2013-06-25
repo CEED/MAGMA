@@ -210,6 +210,15 @@ void magmablas_zhemm_mgpu_spec33(
     magma_event_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10], magma_int_t nbevents,
     magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2], magma_int_t nbcmplx );
 
+// Ichi's version, in src/zhetrd_mgpu.cpp
+void magma_zher2k_mgpu(
+    int num_gpus, char uplo, char trans, int nb, int n, int k,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex **db, int lddb,
+    double beta,
+    magmaDoubleComplex **dc, int lddc, int offset,
+    int num_streams, magma_queue_t streams[][10]);
+
 void magmablas_zher2k_mgpu2(
     magma_uplo_t uplo, magma_trans_t trans, magma_int_t n, magma_int_t k,
     magmaDoubleComplex alpha,
@@ -389,6 +398,15 @@ magma_int_t magmablas_zhemv(
     magmaDoubleComplex_ptr       dy, magma_int_t incy );
 #endif
 
+magma_int_t magmablas_zhemv2(
+    magma_uplo_t uplo, magma_int_t n,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_const_ptr dX, magma_int_t incx,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex_ptr       dY, magma_int_t incy,
+    magmaDoubleComplex_ptr       dwork, magma_int_t lwork);
+
 magma_int_t magmablas_zsymv(
     magma_uplo_t uplo, magma_int_t n,
     magmaDoubleComplex alpha,
@@ -479,13 +497,7 @@ void magmablas_zher2k(
     double  beta,
     magmaDoubleComplex_ptr       dC, magma_int_t lddc );
 
-void magmablas_ztrmm(
-    magma_side_t side, magma_uplo_t uplo, magma_trans_t trans,  magma_diag_t diag,
-    magma_int_t m, magma_int_t n,
-    magmaDoubleComplex alpha,
-    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
-    magmaDoubleComplex_ptr       dB, magma_int_t lddb );
-
+#ifdef COMPLEX
 void magmablas_ztrsm(
     magma_side_t side, magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
     magma_int_t m, magma_int_t n,
@@ -493,6 +505,15 @@ void magmablas_ztrsm(
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_ptr       dB, magma_int_t lddb );
 
+void magmablas_ztrsm_work(
+    magma_side_t side, magma_uplo_t uplo, magma_trans_t trans, magma_diag_t diag,
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
+    magmaDoubleComplex_ptr       db, magma_int_t lddb,
+    magmaDoubleComplex_ptr d_dinvA,
+    magmaDoubleComplex_ptr d_x );
+#endif
 
   /*
    * Wrappers for platform independence.

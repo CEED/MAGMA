@@ -16,11 +16,6 @@
 
 #if defined(PRECISION_s) || defined(PRECISION_d)
 //#define ZTRSM_WORK
-extern "C"
-void magmablas_ztrsm_work( char side, char uplo, char tran, char diag, magma_int_t M, magma_int_t N,
-                           magmaDoubleComplex alpha, const magmaDoubleComplex* A, magma_int_t lda,
-                           magmaDoubleComplex* b, magma_int_t ldb,
-                           magmaDoubleComplex *d_dinvA, magmaDoubleComplex *d_x );
 #endif
 /* === End defining what BLAS to use ======================================= */
 

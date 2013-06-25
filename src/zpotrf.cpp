@@ -17,12 +17,6 @@
 #endif
 // === End defining what BLAS to use ======================================
 
-// ========================================================================
-// definition of a non-GPU-resident interface to multiple GPUs
-extern "C" magma_int_t
-magma_zpotrf_m(magma_int_t num_gpus, char uplo, magma_int_t n,
-               magmaDoubleComplex *a, magma_int_t lda, magma_int_t *info);
-// ========================================================================
 
 #define A(i, j)  (a   +(j)*lda  + (i))
 #define dA(i, j) (work+(j)*ldda + (i))

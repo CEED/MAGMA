@@ -14,29 +14,6 @@
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_dpotrf_m(magma_int_t num_gpus, char uplo, magma_int_t n,
-                  double *a, magma_int_t lda, magma_int_t *info);
-
-extern "C" magma_int_t
-magma_dsygst_m(magma_int_t nrgpu, magma_int_t itype, char uplo, magma_int_t n,
-               double *a, magma_int_t lda,
-               double *b, magma_int_t ldb, magma_int_t *info);
-
-extern "C" magma_int_t
-magma_dsyevd_m(magma_int_t nrgpu, char jobz, char uplo,
-               magma_int_t n,
-               double *a, magma_int_t lda,
-               double *w,
-               double *work, magma_int_t lwork,
-               magma_int_t *iwork, magma_int_t liwork,
-               magma_int_t *info);
-
-extern "C" magma_int_t
-magma_dtrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
-               magma_int_t m, magma_int_t n, double alpha, double *a,
-               magma_int_t lda, double *b, magma_int_t ldb);
-
-extern "C" magma_int_t
 magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma_int_t n,
                double *a, magma_int_t lda, double *b, magma_int_t ldb,
                double *w, double *work, magma_int_t lwork,

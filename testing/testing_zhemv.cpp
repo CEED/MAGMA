@@ -21,18 +21,6 @@
 
 #define PRECISION_z
 
-#if (GPUSHMEM >= 200)
-// todo: put prototypes in include header file
-extern "C" magma_int_t
-magmablas_zhemv2( char uplo, magma_int_t n,
-                      magmaDoubleComplex alpha,
-                      magmaDoubleComplex *A, magma_int_t lda,
-                      magmaDoubleComplex *X, magma_int_t incx,
-                      magmaDoubleComplex beta,
-                      magmaDoubleComplex *Y, magma_int_t incy,
-                      magmaDoubleComplex *work, magma_int_t lwork);
-#endif
-
 int main(int argc, char **argv)
 {
     TESTING_INIT();

@@ -25,17 +25,8 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
+// define ICHI to test with Ichi's version, too
 #undef ICHI
-#ifdef ICHI
-// version from zhetrd_mgpu.cpp (i.e., Ichi's code)
-// FIX DIMENSION of streams there before changing this -- otherwise it will segfault.
-extern "C" void
-magma_zher2k_mgpu(
-    int num_gpus, char uplo, char trans, int nb, int n, int k,
-    magmaDoubleComplex alpha, magmaDoubleComplex **db, int lddb,
-    double beta,           magmaDoubleComplex **dc, int lddc, int offset,
-    int num_streams, magma_queue_t streams[][10]);
-#endif
 
 
 /* ////////////////////////////////////////////////////////////////////////////
