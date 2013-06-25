@@ -434,6 +434,11 @@ magma_int_t magma_zgetrf_gpu( magma_int_t m, magma_int_t n,
 magma_int_t magma_zgetrf_mgpu(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
                               magmaDoubleComplex **d_lA, magma_int_t ldda,
                               magma_int_t *ipiv, magma_int_t *info);
+magma_int_t magma_zgetrf2_mgpu(magma_int_t num_gpus,
+                               magma_int_t m, magma_int_t n, magma_int_t nb, magma_int_t offset,
+                               magmaDoubleComplex **d_lAT, magma_int_t lddat, magma_int_t *ipiv,
+                               magmaDoubleComplex **d_lAP, magmaDoubleComplex *a, magma_int_t lda,
+                               magma_queue_t streaml[][2], magma_int_t *info);
 magma_int_t
       magma_zgetrf_nopiv_gpu( magma_int_t m, magma_int_t n,
                               magmaDoubleComplex *dA, magma_int_t ldda,
@@ -476,6 +481,23 @@ magma_int_t magma_zpotrf_gpu( char uplo,  magma_int_t n,
                               magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info);
 magma_int_t magma_zpotrf_mgpu(magma_int_t ngpu, char uplo, magma_int_t n,
                               magmaDoubleComplex **d_lA, magma_int_t ldda, magma_int_t *info);
+magma_int_t magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
+                               magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
+                               magmaDoubleComplex **d_lA,  magma_int_t ldda,
+                               magmaDoubleComplex **d_lP,  magma_int_t lddp,
+                               magmaDoubleComplex *a,      magma_int_t lda,   magma_int_t h,
+                               magma_queue_t stream[][3], magma_event_t event[][5],
+                               magma_int_t *info );
+magma_int_t magma_zhtodpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n,
+                          magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
+                          magmaDoubleComplex  *h_A,  magma_int_t lda,
+                          magmaDoubleComplex **d_lA, magma_int_t ldda,
+                          magma_queue_t stream[][3], magma_int_t *info);
+magma_int_t magma_zdtohpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n,
+                          magma_int_t off_i, magma_int_t off_j, magma_int_t nb, magma_int_t NB,
+                          magmaDoubleComplex  *a,    magma_int_t lda,
+                          magmaDoubleComplex **work, magma_int_t ldda,
+                          magma_queue_t stream[][3], magma_int_t *info);
 magma_int_t magma_zpotri_gpu( char uplo,  magma_int_t n,
                               magmaDoubleComplex *dA, magma_int_t ldda, magma_int_t *info);
 magma_int_t magma_zlauum_gpu( char uplo,  magma_int_t n,

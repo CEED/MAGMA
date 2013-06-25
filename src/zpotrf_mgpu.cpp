@@ -10,25 +10,6 @@
 */
 #include "common_magma.h"
 
-/* use two streams; one for comm, and one for comp */
-extern "C" magma_int_t
-magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
-                   magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
-                   magmaDoubleComplex **d_lA, magma_int_t ldda,
-                   magmaDoubleComplex **d_lP, magma_int_t lddp,
-                   magmaDoubleComplex  *a,    magma_int_t lda, magma_int_t h,
-                   magma_queue_t stream[][3], magma_event_t event[][5],
-                   magma_int_t *info );
-
-/* use three streams; seems to be faster on Keeneland, but has problem on Pluto */
-extern "C" magma_int_t
-magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
-                   magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
-                   magmaDoubleComplex **d_lA, magma_int_t ldda,
-                   magmaDoubleComplex **d_lP, magma_int_t lddp,
-                   magmaDoubleComplex  *a,    magma_int_t lda, magma_int_t h,
-                   magma_queue_t stream[][3], magma_event_t event[][5],
-                   magma_int_t *info );
 
 extern "C" magma_int_t
 magma_zpotrf_mgpu(magma_int_t num_gpus, char uplo, magma_int_t n,

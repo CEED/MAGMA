@@ -14,13 +14,6 @@
 
 
 extern "C" magma_int_t
-magma_zgetrf2_mgpu(magma_int_t num_gpus,
-                   magma_int_t m, magma_int_t n, magma_int_t nb, magma_int_t offset,
-                   magmaDoubleComplex **d_lAT, magma_int_t lddat, magma_int_t *ipiv,
-                   magmaDoubleComplex **d_lAP, magmaDoubleComplex *a, magma_int_t lda,
-                   magma_queue_t streaml[][2], magma_int_t *info);
-
-extern "C" magma_int_t
 magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
                magma_int_t *ipiv, magma_int_t *info)
 {
