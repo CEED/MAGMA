@@ -1758,7 +1758,7 @@ magmablas_zhemv2_200( char uplo, magma_int_t n,
                       const magmaDoubleComplex *X, magma_int_t incx,
                       magmaDoubleComplex beta,
                       magmaDoubleComplex *Y, magma_int_t incy,
-                      magmaDoubleComplex *work, int lwork)
+                      magmaDoubleComplex *work, magma_int_t lwork)
 {
     char uplo_[2] = {uplo, 0};
     int  upper    = lapackf77_lsame(uplo_, "U");

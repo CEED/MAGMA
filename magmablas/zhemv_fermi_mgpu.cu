@@ -899,16 +899,6 @@ void magmablas_zhemv_200_L_mgpu_offset(magma_int_t m, magmaDoubleComplex alpha,
               the_chosen_block_id, the_chosen_gpu_id, kstan);
 }
 
-extern "C"
-magma_int_t
-magmablas_zhemv2( char uplo, magma_int_t n,
-                      magmaDoubleComplex alpha,
-                      magmaDoubleComplex *A, magma_int_t lda,
-                      magmaDoubleComplex *X, magma_int_t incx,
-                      magmaDoubleComplex beta,
-                      magmaDoubleComplex *Y, magma_int_t incy,
-                      magmaDoubleComplex *work, magma_int_t lwork);
-
 
 /*************************************************************************
 
