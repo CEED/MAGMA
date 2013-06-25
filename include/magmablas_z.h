@@ -214,7 +214,7 @@ void magmablas_zhemm_mgpu_spec33(
 void magma_zher2k_mgpu(
     int num_gpus, char uplo, char trans, int nb, int n, int k,
     magmaDoubleComplex alpha,
-    magmaDoubleComplex **db, int lddb,
+    magmaDoubleComplex **db, int lddb, int boffset,
     double beta,
     magmaDoubleComplex **dc, int lddc, int offset,
     int num_streams, magma_queue_t streams[][10]);
