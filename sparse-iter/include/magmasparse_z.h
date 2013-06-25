@@ -16,6 +16,7 @@
 
 #define PRECISION_z
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -23,6 +24,24 @@ extern "C" {
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE Auxiliary functions
 */
+magma_int_t read_z_csr_from_binary( magma_int_t* n_row, magma_int_t* n_col, 
+                                    magma_int_t* nnz, magmaDoubleComplex **val, 
+                                    magma_int_t **col, magma_int_t **row, 
+                                    const char * filename);
+
+magma_int_t read_z_csr_from_mtx( magma_int_t* n_row, magma_int_t* n_col, 
+                                 magma_int_t* nnz, magmaDoubleComplex **val, 
+                                 magma_int_t **col, magma_int_t **row, 
+                                 const char *filename);
+
+magma_int_t write_z_csr_mtx(magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, 
+                            magmaDoubleComplex **val, magma_int_t **col, 
+                            magma_int_t **row, const char *filename);
+
+magma_int_t cout_z_csr_mtx(magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, 
+                           magmaDoubleComplex **val, magma_int_t **col, 
+                           magma_int_t **row);
+
 
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -41,7 +60,7 @@ magma_int_t magma_zcg( magma_int_t dofs, magma_int_t & num_of_iter,
                        magmaDoubleComplex *x, magmaDoubleComplex *b,
                        magmaDoubleComplex *d_A, magma_int_t *d_I, magma_int_t *d_J,
                        magmaDoubleComplex *dwork,
-                       double rtol = RTOLERANCE );
+                       double rtol );
 
 /* ////////////////////////////////////////////////////////////////////////////
  -- MAGMA_SPARSE utility function definitions

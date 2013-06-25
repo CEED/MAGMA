@@ -10,11 +10,13 @@ MAGMA_DIR = ../..
 include ../../Makefile.internal
 
 ZSRC := \
+        matrix_zio.cpp \
 
 -include Makefile.local
 -include Makefile.src
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
+					mmio.cpp
 
 ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f90=.o)
