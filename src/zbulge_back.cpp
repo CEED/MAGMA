@@ -131,7 +131,7 @@ magma_zbulge_back(magma_int_t threads, char uplo,
     magma_int_t n_gpu = ne;
 
 #if defined(PRECISION_s) || defined(PRECISION_d)
-    double gpu_cpu_perf = 0;  // to be defined //gpu over cpu performance
+    double gpu_cpu_perf = 32;  // gpu over cpu performance  //100% ev // SandyB. - Kepler (K20c)
 #else
 //    double gpu_cpu_perf = 27.5;  // gpu over cpu performance  //100% ev // Westmere - Fermi (M2090)
     double gpu_cpu_perf = 32;  // gpu over cpu performance  //100% ev // SandyB. - Kepler (K20c)

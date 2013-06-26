@@ -128,9 +128,9 @@ magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t threads, char uplo,
     magma_int_t n_gpu = ne;
 
 #if defined(PRECISION_s) || defined(PRECISION_d)
-    double gpu_cpu_perf = 24; //gpu over cpu performance
+    double gpu_cpu_perf = 32; //gpu over cpu performance
 #else
-    double gpu_cpu_perf = 38;  // gpu over cpu performance
+    double gpu_cpu_perf = 32;  // gpu over cpu performance
 #endif
 
     double perf_temp= .85;
