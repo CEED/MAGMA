@@ -101,7 +101,7 @@ magma_int_t magma_getdevice_arch()
     int dev;
     cudaGetDevice( &dev );
     if ( g_magma_devices == NULL || dev < 0 || dev >= g_magma_devices_cnt ) {
-        fprintf( stderr, "Error in %s: MAGMA not initialized or bad device\n", __func__ );
+        fprintf( stderr, "Error in %s: MAGMA not initialized (call magma_init() first) or bad device\n", __func__ );
         return 0;
     }
     return g_magma_devices[dev].cuda_arch;
