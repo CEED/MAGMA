@@ -23,15 +23,15 @@
 #define threadSize 128  // used in zsymv_130_kernel2
 
 __global__ void 
-magmablas_zsymv_130_kernel1( magma_int_t m, magmaDoubleComplex alpha,
-                             const magmaDoubleComplex *A, magma_int_t lda,
-                             const magmaDoubleComplex *x, magma_int_t incx,
+magmablas_zsymv_130_kernel1( int m, magmaDoubleComplex alpha,
+                             const magmaDoubleComplex *A, int lda,
+                             const magmaDoubleComplex *x, int incx,
                              magmaDoubleComplex beta,
-                             magmaDoubleComplex *y, magma_int_t incy )
+                             magmaDoubleComplex *y, int incy )
 {
     magmaDoubleComplex res = MAGMA_Z_ZERO;
-    magma_int_t tid = blockIdx.x * thread_seg  + threadIdx.x;
-    magma_int_t i;
+    int tid = blockIdx.x * thread_seg  + threadIdx.x;
+    int i;
 
     if(tid < m)
     {
@@ -45,20 +45,20 @@ magmablas_zsymv_130_kernel1( magma_int_t m, magmaDoubleComplex alpha,
 }        
 
 __global__ void 
-magmablas_zsymv_130_kernel2( magma_int_t m, magmaDoubleComplex alpha,
-                             const magmaDoubleComplex *A, magma_int_t lda,
-                             const magmaDoubleComplex *x, magma_int_t incx,
+magmablas_zsymv_130_kernel2( int m, magmaDoubleComplex alpha,
+                             const magmaDoubleComplex *A, int lda,
+                             const magmaDoubleComplex *x, int incx,
                              magmaDoubleComplex beta,
-                             magmaDoubleComplex *y, magma_int_t incy )
+                             magmaDoubleComplex *y, int incy )
 {
     __shared__ magmaDoubleComplex sdata[threadSize];
-    magma_int_t tx = threadIdx.x;
-    magma_int_t i;
+    int tx = threadIdx.x;
+    int i;
     
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     magmaDoubleComplex res    = MAGMA_Z_ZERO;
 
-    magma_int_t m1 = ((m - blockIdx.y)/threadSize) * threadSize;
+    int m1 = ((m - blockIdx.y)/threadSize) * threadSize;
 
     for(i=blockIdx.y; i<(m1 + blockIdx.y); i+= threadSize)
     {

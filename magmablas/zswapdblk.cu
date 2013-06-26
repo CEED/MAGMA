@@ -18,12 +18,12 @@
  */
 
 __global__ void 
-magmagpu_zswapdblk(magma_int_t nb,
-                   magmaDoubleComplex *dA1, magma_int_t ldda1, magma_int_t inca1,
-                   magmaDoubleComplex *dA2, magma_int_t ldda2, magma_int_t inca2 )
+magmagpu_zswapdblk(int nb,
+                   magmaDoubleComplex *dA1, int ldda1, int inca1,
+                   magmaDoubleComplex *dA2, int ldda2, int inca2 )
 {
-    const magma_int_t tx = threadIdx.x;
-    const magma_int_t bx = blockIdx.x;
+    const int tx = threadIdx.x;
+    const int bx = blockIdx.x;
 
     dA1 += tx + bx * nb * (ldda1 + inca1);
     dA2 += tx + bx * nb * (ldda2 + inca2);
@@ -31,7 +31,7 @@ magmagpu_zswapdblk(magma_int_t nb,
     magmaDoubleComplex tmp;
 
     #pragma unroll
-    for( magma_int_t i = 0; i < nb; i++ ){
+    for( int i = 0; i < nb; i++ ){
         tmp = dA1[i*ldda1];
         dA1[i*ldda1] = dA2[i*ldda2];
         dA2[i*ldda2] = tmp;

@@ -12,9 +12,9 @@
 
 // 512 is maximum number of threads for CUDA capability 1.x
 #if (GPUSHMEM < 200)
-   #define NUM_THREADS 512
+    #define NUM_THREADS 512
 #else
-   #define NUM_THREADS 1024
+    #define NUM_THREADS 1024
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -59,24 +59,24 @@ __device__ void sum_reduce2( /*int n,*/ int j, int k, int i, magmaDoubleComplex 
 //==============================================================================
 
 __global__
-void magmablas_zgemm_reduce_kernel(magma_int_t m, magma_int_t n, magma_int_t k, 
+void magmablas_zgemm_reduce_kernel(int m, int n, int k, 
                                    magmaDoubleComplex alpha, 
-                                   const magmaDoubleComplex * __restrict__ d_A, magma_int_t lda,
-                                   const magmaDoubleComplex * __restrict__ d_B, magma_int_t ldb,
+                                   const magmaDoubleComplex * __restrict__ d_A, int lda,
+                                   const magmaDoubleComplex * __restrict__ d_B, int ldb,
                                    magmaDoubleComplex beta,
-                                   magmaDoubleComplex *d_C, magma_int_t ldc)
+                                   magmaDoubleComplex *d_C, int ldc)
 {
-        const int i = threadIdx.x;
-
-        if (blockIdx.x*BLK_M + threadIdx.y < m && blockIdx.y*BLK_N + threadIdx.z < n){
-
+    const int i = threadIdx.x;
+    
+    if (blockIdx.x*BLK_M + threadIdx.y < m && blockIdx.y*BLK_N + threadIdx.z < n){
+    
         const magmaDoubleComplex *dA = d_A + (blockIdx.x*BLK_M + threadIdx.y) * lda;
         const magmaDoubleComplex *dB = d_B + (blockIdx.y*BLK_N + threadIdx.z) * ldb;
         magmaDoubleComplex *dC = d_C + blockIdx.x*BLK_M + blockIdx.y*BLK_N * ldc;
-
+        
         __shared__ magmaDoubleComplex sum[BLK_M][BLK_N+1][ BLK_K +1];
         magmaDoubleComplex lsum;
-
+        
         /*  w := v' * C  */
         lsum = MAGMA_Z_ZERO;
         for( int j = i; j < k; j += BLK_K )
@@ -84,25 +84,28 @@ void magmablas_zgemm_reduce_kernel(magma_int_t m, magma_int_t n, magma_int_t k,
         
         sum[threadIdx.y][threadIdx.z][i] = lsum;
         sum_reduce2< BLK_K >( threadIdx.y, threadIdx.z, i, sum );
-
+        
         /*  C := C - v * w  */
         __syncthreads();
-        if (threadIdx.x == 0)
-           if (MAGMA_Z_EQUAL(beta, MAGMA_Z_ZERO))
-              dC[threadIdx.y + threadIdx.z*ldc] = alpha*sum[threadIdx.y][threadIdx.z][0];
-           else
-              dC[threadIdx.y + threadIdx.z*ldc] = beta* dC[threadIdx.y + threadIdx.z*ldc] + 
-                                                  alpha*sum[threadIdx.y][threadIdx.z][0];
+        if (threadIdx.x == 0) {
+            if (MAGMA_Z_EQUAL(beta, MAGMA_Z_ZERO))
+                dC[threadIdx.y + threadIdx.z*ldc] = alpha*sum[threadIdx.y][threadIdx.z][0];
+            else
+                dC[threadIdx.y + threadIdx.z*ldc] = beta* dC[threadIdx.y + threadIdx.z*ldc] + 
+                                                    alpha*sum[threadIdx.y][threadIdx.z][0];
         }
+    }
 }
 
 //==============================================================================
 
 extern "C" void
 magmablas_zgemm_reduce(magma_int_t m, magma_int_t n, magma_int_t k,
-                       magmaDoubleComplex alpha, const magmaDoubleComplex *d_A, magma_int_t lda,
+                       magmaDoubleComplex alpha,
+                       const magmaDoubleComplex *d_A, magma_int_t lda,
                        const magmaDoubleComplex *d_B, magma_int_t ldb,
-                       magmaDoubleComplex beta,        magmaDoubleComplex *d_C, magma_int_t ldc )
+                       magmaDoubleComplex beta,
+                       magmaDoubleComplex *d_C, magma_int_t ldc )
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -110,25 +113,23 @@ magmablas_zgemm_reduce(magma_int_t m, magma_int_t n, magma_int_t k,
        Univ. of Colorado, Denver
        November 2011
 
-   Purpose
-   =======
-   ZGEMM_REDUCE  performs one of the matrix-matrix operations
+    Purpose
+    =======
+    ZGEMM_REDUCE  performs one of the matrix-matrix operations
+    
+       C := alpha* A' B  + beta*C,
+    
+    where alpha and beta are scalars, and A, B and C are matrices, with A
+    a k-by-m matrix, B a k-by-n matrix, and C an m-by-n matrix. 
+    
+    This routine is tuned for m, n << k. Typically, m and n are expected
+    to be less than 128. 
+    =====================================================================    */
 
-      C := alpha* A' B  + beta*C,
-
-   where alpha and beta are scalars, and A, B and C are matrices, with A
-   an k-by-m matrix, B a k-by-n matrix, and C an m-by-n matrix. 
-
-   This routine is tuned for m, n << k. Typically, m and n are expected
-   less than 128. 
-   =====================================================================    */
-
-   dim3  blocks( (m+BLK_M-1)/BLK_M, (n+BLK_N-1)/BLK_N );
-   dim3 threads( BLK_K, BLK_M, BLK_N );
-   magmablas_zgemm_reduce_kernel<<<blocks,threads, 0, magma_stream >>>(m, n, k, 
-                                                          alpha, d_A, lda,
-                                                          d_B, ldb, beta,
-                                                          d_C, ldc );
+    dim3  blocks( (m+BLK_M-1)/BLK_M, (n+BLK_N-1)/BLK_N );
+    dim3 threads( BLK_K, BLK_M, BLK_N );
+    magmablas_zgemm_reduce_kernel<<<blocks,threads, 0, magma_stream >>>(
+        m, n, k, alpha, d_A, lda,  d_B, ldb, beta, d_C, ldc );
 }
 
 //==============================================================================

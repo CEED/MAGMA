@@ -17,7 +17,7 @@
 __device__ int flag = 0; 
 
 __global__ void 
-magmaint_zlag2c( magma_int_t M, magma_int_t N, 
+magmaint_zlag2c(  int M, int N, 
                   const magmaDoubleComplex *A, int lda, 
                   magmaFloatComplex *SA,       int ldsa, 
                   double RMAX ) 

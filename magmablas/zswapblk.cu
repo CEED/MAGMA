@@ -14,7 +14,7 @@
 
 /*********************************************************/
 /*
-*  Blocked version: swap several pair of line
+ *  Blocked version: swap several pairs of lines
  */
 typedef struct {
     magmaDoubleComplex *A1;
@@ -75,9 +75,9 @@ magmablas_zswapblk( char storev, magma_int_t n,
                     magma_int_t i1, magma_int_t i2,
                     const magma_int_t *ipiv, magma_int_t inci, magma_int_t offset )
 {
-    int  blocksize = 64;
+    magma_int_t  blocksize = 64;
     dim3 blocks( (n+blocksize-1) / blocksize, 1, 1);
-    int  k, im;
+    magma_int_t  k, im;
     
     /* Quick return */
     if ( n == 0 )
@@ -86,9 +86,9 @@ magmablas_zswapblk( char storev, magma_int_t n,
     if ( (storev == 'C') || (storev == 'c') ) {
         for( k=(i1-1); k<i2; k+=BLOCK_SIZE )
         {
-            int sb = min(BLOCK_SIZE, i2-k);
+            magma_int_t sb = min(BLOCK_SIZE, i2-k);
             magmagpu_zswapblk_params_t params = { dA1T+k, dA2T, n, lda1, lda2, sb };
-            for( int j = 0; j < sb; j++ )
+            for( magma_int_t j = 0; j < sb; j++ )
             {
                 im = ipiv[(k+j)*inci] - 1;
                 if ( (k+j) == im)
@@ -98,12 +98,13 @@ magmablas_zswapblk( char storev, magma_int_t n,
             }
             magmagpu_zswapblkcm<<< blocks, blocksize, 0, magma_stream >>>( params );
         }
-    }else {
+    }
+    else {
         for( k=(i1-1); k<i2; k+=BLOCK_SIZE )
         {
-            int sb = min(BLOCK_SIZE, i2-k);
+            magma_int_t sb = min(BLOCK_SIZE, i2-k);
             magmagpu_zswapblk_params_t params = { dA1T+k*lda1, dA2T, n, lda1, lda2, sb };
-            for( int j = 0; j < sb; j++ )
+            for( magma_int_t j = 0; j < sb; j++ )
             {
                 im = ipiv[(k+j)*inci] - 1;
                 if ( (k+j) == im)

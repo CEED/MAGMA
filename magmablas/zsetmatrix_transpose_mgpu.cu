@@ -31,7 +31,7 @@ magmablas_zsetmatrix_transpose_mgpu(
 #define   A(j)    (ha       + (j)*lda)
 #define  dB(d, j) (db[(d)]  + (j)*nb*lddb)
 #define dAT(d, j) (dat[(d)] + (j)*nb)
-    int nstreams = 2, d, j, j_local, id, ib;
+    magma_int_t nstreams = 2, d, j, j_local, id, ib;
 
     /* Quick return */
     if ( (m == 0) || (n == 0) )

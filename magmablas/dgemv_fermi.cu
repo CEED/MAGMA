@@ -19,12 +19,12 @@
 
 __global__ void 
 dgemvn_kernel_fermi(
-    magma_int_t m, magma_int_t n, magma_int_t n1, double alpha,
-    const double *A, magma_int_t lda,
-    const double *x, magma_int_t incx, double beta, 
-    double *y, magma_int_t incy)
+    int m, int n, int n1, double alpha,
+    const double *A, int lda,
+    const double *x, int incx, double beta, 
+    double *y, int incy)
 {
-  magma_int_t ind = blockIdx.x*dgemv_bs + threadIdx.x;
+  int ind = blockIdx.x*dgemv_bs + threadIdx.x;
 
 
   if(ind < m)
@@ -36,13 +36,13 @@ dgemvn_kernel_fermi(
 
   __shared__ double buff[dgemv_bs];
 
-  for(magma_int_t i=0; i<n1; i += dgemv_bs ){
+  for(int i=0; i<n1; i += dgemv_bs ){
     __syncthreads();
     buff[threadIdx.x]  = x[(threadIdx.x + i) * incx];
 
     __syncthreads();
     #pragma unroll
-    for(magma_int_t j=0; j < dgemv_bs ; j++){
+    for(int j=0; j < dgemv_bs ; j++){
        res+=A[0]*buff[j];
        A+=lda;
     }
@@ -53,7 +53,7 @@ dgemvn_kernel_fermi(
   {
    if (n>n1)
    {
-      for(magma_int_t j=0; j<(n-n1); j++){
+      for(int j=0; j<(n-n1); j++){
             res += A[0] * x[(n1+j) * incx];
             A+=lda;
       }
@@ -117,12 +117,12 @@ magmablas_dgemvn_fermi(
 
 __global__ void
 dgemvt_kernel_fermi(
-    magma_int_t m, magma_int_t n, double alpha, magma_int_t n1,
-    const double *A, magma_int_t lda,
-    const double *x, magma_int_t incx, double beta, 
-    double *y, magma_int_t incy)
+    int m, int n, double alpha, int n1,
+    const double *A, int lda,
+    const double *x, int incx, double beta, 
+    double *y, int incy)
 {
-        magma_int_t tx = threadIdx.x;
+        int tx = threadIdx.x;
 
         __shared__ double sdata[threadSize];
 
@@ -130,7 +130,7 @@ dgemvt_kernel_fermi(
         double res;
         res = 0.0;
 
-        for(magma_int_t i=0; i<n1; i+= threadSize)
+        for(int i=0; i<n1; i+= threadSize)
         {
                 res += A[tx + i + lda * blockIdx.y] * x[(tx + i)*incx];
         }
