@@ -47,7 +47,7 @@ magmablas_zgetmatrix_transpose( magma_int_t m, magma_int_t n,
        ib   = min(n-i, nb);
 
        //magmablas_ztranspose2 ( dB + (j%2)*nb*lddb, lddb, dat+i, ldda, ib, m);
-       magmablas_ztranspose2s( dB + (j%2)*nb*lddb, lddb, dat+i, ldda, ib, m, &stream[j%2]);
+       magmablas_ztranspose2s( dB + (j%2)*nb*lddb, lddb, dat+i, ldda, ib, m, stream[j%2]);
        magma_zgetmatrix_async( m, ib,
                                dB + (j%2) * nb * lddb, lddb,
                                ha+i*lda,               lda, stream[j%2] );
@@ -94,7 +94,7 @@ magmablas_zgetmatrix_transpose2( magma_int_t m, magma_int_t n,
        //                       dat[k]+i/(nb*num_gpus)*nb, ldda[k], ib, m);
        magmablas_ztranspose2s(dB[k] + (j[k]%2)*nb*lddb, lddb,
                               dat[k]+i/(nb*num_gpus)*nb, ldda[k], 
-                              ib, m, &stream[k][j[k]%2]);
+                              ib, m, stream[k][j[k]%2]);
        magma_zgetmatrix_async( m, ib,
                                dB[k] + (j[k]%2) * nb * lddb, lddb,
                                ha+i*lda,                     lda, stream[k][j[k]%2] );

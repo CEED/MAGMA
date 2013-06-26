@@ -153,12 +153,3 @@ magmablas_ztranspose_inplace( magma_int_t n, magmaDoubleComplex *A, magma_int_t 
         ztranspose_inplace_even<<< grid, threads, 0, magma_stream >>>( n, A, lda );
     }
 }
-
-
-////////////////////////////////////////////////////////////////////////////////
-// old interface, for backwards compatiiility
-extern "C" void
-magmablas_zinplace_transpose( magmaDoubleComplex *A, magma_int_t lda, magma_int_t n )
-{
-    magmablas_ztranspose_inplace( n, A, lda );
-}

@@ -55,10 +55,6 @@ void magmablas_ztranspose_inplace(
     magma_int_t n,
     magmaDoubleComplex_ptr dA, magma_int_t ldda );
 
-// old interface
-void magmablas_zinplace_transpose(
-    magmaDoubleComplex_ptr dA, magma_int_t ldda, magma_int_t n );
-
 void magmablas_ztranspose(
     magmaDoubleComplex_ptr       odata, magma_int_t ldo,
     magmaDoubleComplex_const_ptr idata, magma_int_t ldi,
@@ -73,7 +69,7 @@ void magmablas_ztranspose2s(
     magmaDoubleComplex_ptr       odata, magma_int_t ldo,
     magmaDoubleComplex_const_ptr idata, magma_int_t ldi,
     magma_int_t m, magma_int_t n,
-    magma_queue_t *stream );
+    magma_queue_t stream );
 
 void magmablas_zgetmatrix_transpose(
     magma_int_t m, magma_int_t n,

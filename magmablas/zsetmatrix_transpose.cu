@@ -60,13 +60,13 @@ magmablas_zsetmatrix_transpose( magma_int_t m, magma_int_t n,
        /* Note that the previous panel (i.e., j%2) comes through the stream
           for the kernel so there is no need to synchronize.             */
        // magmablas_ztranspose2( dat+i-nb, ldda, dB + (j%2)*nb*lddb, lddb, m, nb);
-       magmablas_ztranspose2s( dat+i-nb, ldda, dB + (j%2)*nb*lddb, lddb, m, nb, &stream[j%2]);
+       magmablas_ztranspose2s( dat+i-nb, ldda, dB + (j%2)*nb*lddb, lddb, m, nb, stream[j%2]);
     }
 
     /* Transpose the last part of the matrix.                            */
     j++;
     // magmablas_ztranspose2( dat+i-nb, ldda, dB + (j%2)*nb*lddb, lddb, m, ib);
-    magmablas_ztranspose2s( dat+i-nb, ldda, dB + (j%2)*nb*lddb, lddb, m, ib, &stream[j%2]);
+    magmablas_ztranspose2s( dat+i-nb, ldda, dB + (j%2)*nb*lddb, lddb, m, ib, stream[j%2]);
 
     magma_queue_destroy( stream[0] );
     magma_queue_destroy( stream[1] );

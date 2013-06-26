@@ -17,7 +17,7 @@
 #define magmablas_sgetmo_in( dA, dAT, ldda, m, n )              \
   dAT = dA;                                                     \
   if ( ( (m) == (n) ) && ( (m)%32 == 0) && ( (ldda)%32 == 0) ){ \
-    magmablas_sinplace_transpose( dAT, ldda, ldda );            \
+    magmablas_stranspose_inplace( ldda, dAT, ldda );            \
   } else {                                                      \
     cublasStatus_t status = cublasAlloc( (m)*(n), sizeof(float), (void**)&dAT); \
     if (status != CUBLAS_STATUS_SUCCESS)                                \
@@ -27,7 +27,7 @@
 
 #define magmablas_sgetmo_out( dA, dAT, ldda, m, n )             \
   if ( ( (m) == (n) ) && ( (m)%32 == 0) && ( (ldda)%32 == 0) ){ \
-    magmablas_sinplace_transpose( dAT, ldda, ldda );            \
+    magmablas_stranspose_inplace( ldda, dAT, ldda );            \
   } else {                                                      \
     magmablas_stranspose2( dA, ldda, dAT, ldda, n, m );         \
     cublasFree(dAT);                                            \
@@ -36,7 +36,7 @@
 #define magmablas_dgetmo_in( dA, dAT, ldda, m, n )              \
   dAT = dA;                                                     \
   if ( ( (m) == (n) ) && ( (m)%32 == 0) && ( (ldda)%32 == 0) ){ \
-    magmablas_dinplace_transpose( dAT, ldda, ldda );            \
+    magmablas_dtranspose_inplace( ldda, dAT, ldda );            \
   } else {                                                      \
     cublasStatus_t status = cublasAlloc( (m)*(n), sizeof(double), (void**)&dAT); \
     if (status != CUBLAS_STATUS_SUCCESS)                                \
@@ -46,7 +46,7 @@
 
 #define magmablas_dgetmo_out( dA, dAT, ldda, m, n )             \
   if ( ( (m) == (n) ) && ( (m)%32 == 0) && ( (ldda)%32 == 0) ){ \
-    magmablas_dinplace_transpose( dAT, ldda, ldda );            \
+    magmablas_dtranspose_inplace( ldda, dAT, ldda );            \
   } else {                                                      \
     magmablas_dtranspose2( dA, ldda, dAT, ldda, n, m );         \
     cublasFree(dAT);                                            \
@@ -55,7 +55,7 @@
 #define magmablas_cgetmo_in( dA, dAT, ldda, m, n )              \
   dAT = dA;                                                     \
   if ( ( (m) == (n) ) && ( (m)%32 == 0) && ( (ldda)%32 == 0) ){ \
-    magmablas_cinplace_transpose( dAT, ldda, ldda );            \
+    magmablas_ctranspose_inplace( ldda, dAT, ldda );            \
   } else {                                                      \
     cublasStatus_t status = cublasAlloc( (m)*(n), sizeof(magmaFloatComplex), (void**)&dAT); \
     if (status != CUBLAS_STATUS_SUCCESS)                                \
@@ -65,7 +65,7 @@
 
 #define magmablas_cgetmo_out( dA, dAT, ldda, m, n )             \
   if ( ( (m) == (n) ) && ( (m)%32 == 0) && ( (ldda)%32 == 0) ){ \
-    magmablas_cinplace_transpose( dAT, ldda, ldda );            \
+    magmablas_ctranspose_inplace( ldda, dAT, ldda );            \
   } else {                                                      \
     magmablas_ctranspose2( dA, ldda, dAT, ldda, n, m );         \
     cublasFree(dAT);                                            \
@@ -74,7 +74,7 @@
 #define magmablas_zgetmo_in( dA, dAT, ldda, m, n )              \
   dAT = dA;                                                     \
   if ( ( (m) == (n) ) && ( (m)%32 == 0) && ( (ldda)%32 == 0) ){ \
-    magmablas_zinplace_transpose( dAT, ldda, ldda );            \
+    magmablas_ztranspose_inplace( ldda, dAT, ldda );            \
   } else {                                                      \
     cublasStatus_t status = cublasAlloc( (m)*(n), sizeof(magmaDoubleComplex), (void**)&dAT); \
     if (status != CUBLAS_STATUS_SUCCESS)                                \
@@ -84,7 +84,7 @@
 
 #define magmablas_zgetmo_out( dA, dAT, ldda, m, n )             \
   if ( ( (m) == (n) ) && ( (m)%32 == 0) && ( (ldda)%32 == 0) ){ \
-    magmablas_zinplace_transpose( dAT, ldda, ldda );            \
+    magmablas_ztranspose_inplace( ldda, dAT, ldda );            \
   } else {                                                      \
     magmablas_ztranspose2( dA, ldda, dAT, ldda, n, m );         \
     cublasFree(dAT);                                            \
