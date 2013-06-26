@@ -112,9 +112,9 @@ void magma_zlarfgx_gpu_kernel( int n, magmaDoubleComplex* dx0, magmaDoubleComple
    are computed outside the routine and passed to it in dxnorm (array on the GPU).
 */
 extern "C" void
-magma_zlarfgx_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx, 
+magma_zlarfgx_gpu(magma_int_t n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx, 
                   magmaDoubleComplex *dtau, double *dxnorm, 
-                  magmaDoubleComplex *dA, int it)
+                  magmaDoubleComplex *dA, magma_int_t it)
 {
     dim3 blocks((n+BLOCK_SIZE-1) / BLOCK_SIZE);
     dim3 threads( BLOCK_SIZE );
@@ -137,10 +137,10 @@ magma_zlarfgx_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
    are computed outside the routine and passed to it in dxnorm (array on the GPU).
 */
 extern "C" void
-magma_zlarfgtx_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
+magma_zlarfgtx_gpu(magma_int_t n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
                    magmaDoubleComplex *dtau, double *dxnorm,
-                   magmaDoubleComplex *dA, int i, 
-                   magmaDoubleComplex *V, int ldv, magmaDoubleComplex *T, int ldt, 
+                   magmaDoubleComplex *dA, magma_int_t i, 
+                   magmaDoubleComplex *V, magma_int_t ldv, magmaDoubleComplex *T, magma_int_t ldt, 
                    magmaDoubleComplex *work)
 {
    /*  Generate the elementary reflector H(i)  */

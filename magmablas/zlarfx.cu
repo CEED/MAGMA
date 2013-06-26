@@ -194,20 +194,20 @@ void magma_ztrmv_tkernel(magmaDoubleComplex *T, int ldt, magmaDoubleComplex *t, 
     LAPACK's zlarf routine. 
  */
 extern "C" void
-magma_zlarfx_gpu(int m, int n, magmaDoubleComplex *v, magmaDoubleComplex *tau,
-                magmaDoubleComplex *c, int ldc, double *xnorm, 
-                magmaDoubleComplex *T, int i, magmaDoubleComplex *work )
+magma_zlarfx_gpu(magma_int_t m, magma_int_t n, magmaDoubleComplex *v, magmaDoubleComplex *tau,
+                magmaDoubleComplex *c, magma_int_t ldc, double *xnorm, 
+                magmaDoubleComplex *T, magma_int_t i, magmaDoubleComplex *work )
 {
-    int N = n + i + 1;
+    magma_int_t N = n + i + 1;
 
     if (i==0)
-      magma_zlarfx_kernel<<< N, BLOCK_SIZE, 0, magma_stream >>>( m, v, tau, c, ldc, xnorm, T+i*N, i);
+        magma_zlarfx_kernel<<< N, BLOCK_SIZE, 0, magma_stream >>>( m, v, tau, c, ldc, xnorm, T+i*N, i);
     else
-      magma_zlarfx_kernel<<< N, BLOCK_SIZE, 0, magma_stream >>>( m, v, tau, c, ldc, xnorm, work, i);
+        magma_zlarfx_kernel<<< N, BLOCK_SIZE, 0, magma_stream >>>( m, v, tau, c, ldc, xnorm, work, i);
 
     if (i > 0){
-       //magma_ztrmv_kernel<<< 1, i, 0, magma_stream >>>( T, N, T+i*N);
-       magma_ztrmv_kernel2<<< i, i, 0, magma_stream  >>>( T, N, work, T+i*N, tau);
+        //magma_ztrmv_kernel<<< 1, i, 0, magma_stream >>>( T, N, T+i*N);
+        magma_ztrmv_kernel2<<< i, i, 0, magma_stream  >>>( T, N, work, T+i*N, tau);
     }
 }
 

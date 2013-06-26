@@ -133,8 +133,8 @@ magma_zgemv_kernel2(int m, int n, const magmaDoubleComplex * __restrict__ V, int
     k elementary reflectors. 
 */
 extern "C" void
-magma_zlarfbx_gpu(int m, int k, magmaDoubleComplex *V, int ldv,
-                  magmaDoubleComplex *T, int ldt, magmaDoubleComplex *c,
+magma_zlarfbx_gpu(magma_int_t m, magma_int_t k, magmaDoubleComplex *V, magma_int_t ldv,
+                  magmaDoubleComplex *T, magma_int_t ldt, magmaDoubleComplex *c,
                   magmaDoubleComplex *dwork)
 {
     /* dwork = V' c                   */

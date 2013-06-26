@@ -29,7 +29,7 @@
 
 
 extern "C" magma_int_t
-magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
+magma_zpotrf3_mgpu(magma_int_t num_gpus, char uplo, magma_int_t m, magma_int_t n,
                    magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
                    magmaDoubleComplex **d_lA,  magma_int_t ldda,
                    magmaDoubleComplex **d_lP,  magma_int_t lddp,
@@ -744,7 +744,7 @@ magma_zpotrf3_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
 #define dA(d, i, j) (dwork[(d)]+(j)*ldda + (i))
 
 extern "C" magma_int_t
-magma_zhtodpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n,
+magma_zhtodpo(magma_int_t num_gpus, char *uplo, magma_int_t m, magma_int_t n,
               magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
               magmaDoubleComplex *a,      magma_int_t lda,
               magmaDoubleComplex **dwork, magma_int_t ldda,
@@ -804,7 +804,7 @@ magma_zhtodpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n,
 
 
 extern "C" magma_int_t
-magma_zdtohpo(int num_gpus, char *uplo, magma_int_t m, magma_int_t n,
+magma_zdtohpo(magma_int_t num_gpus, char *uplo, magma_int_t m, magma_int_t n,
               magma_int_t off_i, magma_int_t off_j, magma_int_t nb, magma_int_t NB,
               magmaDoubleComplex *a,      magma_int_t lda,
               magmaDoubleComplex **dwork, magma_int_t ldda,

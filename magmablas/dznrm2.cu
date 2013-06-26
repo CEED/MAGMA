@@ -133,8 +133,9 @@ magmablas_dznrm2_check_kernel( int m, magmaDoubleComplex *da, int ldda, double *
 }
 
 extern "C" void
-magmablas_dznrm2_check(int m, int n, magmaDoubleComplex *da, magma_int_t ldda, 
-                       double *dxnorm, double *lsticc) 
+magmablas_dznrm2_check(
+    magma_int_t m, magma_int_t n, magmaDoubleComplex *da, magma_int_t ldda, 
+    double *dxnorm, double *lsticc) 
 {
     dim3  blocks( n );
     dim3 threads( BLOCK_SIZE );
@@ -187,8 +188,9 @@ magmablas_dznrm2_smkernel( int m, int n, magmaDoubleComplex *da, int ldda,
     This routine uses only one SM (block).
 */
 extern "C" void
-magmablas_dznrm2_sm(int m, int n, magmaDoubleComplex *da, magma_int_t ldda,
-                    double *dxnorm)
+magmablas_dznrm2_sm(
+    magma_int_t m, magma_int_t n, magmaDoubleComplex *da, magma_int_t ldda,
+    double *dxnorm)
 {
     dim3  blocks( 1 );
     dim3 threads( BLOCK_SIZEx, BLOCK_SIZEy );
@@ -241,7 +243,7 @@ magma_dznrm2_adjust_kernel(double *xnorm, magmaDoubleComplex *c)
     c was changed with orthogonal transformations.
 */
 extern "C" void
-magmablas_dznrm2_adjust(int k, double *xnorm, magmaDoubleComplex *c)
+magmablas_dznrm2_adjust(magma_int_t k, double *xnorm, magmaDoubleComplex *c)
 {
     magma_dznrm2_adjust_kernel<<< 1, k, 0, magma_stream >>> (xnorm, c);
 }
@@ -281,8 +283,9 @@ magma_dznrm2_row_check_adjust_kernel(int n, double tol, double *xnorm, double *x
     It also do checks for QP3
 */
 extern "C" void
-magmablas_dznrm2_row_check_adjust(int k, double tol, double *xnorm, double *xnorm2, 
-                                  magmaDoubleComplex *c, int ldc, double *lsticc)
+magmablas_dznrm2_row_check_adjust(
+    magma_int_t k, double tol, double *xnorm, double *xnorm2, 
+    magmaDoubleComplex *c, magma_int_t ldc, double *lsticc)
 {
     int nblocks = (k+BS-1)/BS;
     magma_dznrm2_row_check_adjust_kernel<<< nblocks, BS >>> (k, tol, xnorm, xnorm2, c, ldc, lsticc);
