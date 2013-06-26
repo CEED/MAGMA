@@ -21,13 +21,6 @@
 #include "affinity.h"
 #endif
 
-#ifdef USEMKL
-#include <mkl_service.h>
-#endif
-#ifdef USEACML
-#include <omp.h>
-#endif
-
 #define PRECISION_z
 
 static void *magma_zhetrd_hb2st_parallel_section(void *arg);
@@ -219,13 +212,7 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
 
     pthread_attr_t thread_attr;
 
-#if defined(USEMKL)
-    mkl_set_num_threads( 1 );
-#endif
-#if defined(USEACML)
-    omp_set_num_threads(1);
-#endif
-
+    magma_setlapack_numthreads(1);
     magma_zbulge_data data_bulge(threads, n, nb, nbtiles, INgrsiz, Vblksiz, compT,
                                  A, lda, V, ldv, TAU, T, ldt, prog);
 
@@ -262,13 +249,7 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
 
     printf("time BULGE+T = %lf \n" ,timeblg);
 
-#if defined(USEMKL)
-    mkl_set_num_threads( mklth );
-#endif
-#if defined(USEACML)
-    omp_set_num_threads(mklth);
-#endif
-
+    magma_setlapack_numthreads(mklth);
     /*================================================
      *  store resulting diag and lower diag D and E
      *  note that D and E are always real
@@ -351,13 +332,7 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 
     double timeB=0.0, timeT=0.0;
 
-#if defined(USEMKL)
-    mkl_set_num_threads( 1 );
-#endif
-#if defined(USEACML)
-    omp_set_num_threads(1);
-#endif
-
+    magma_setlapack_numthreads(1);
 #ifdef SETAFFINITY
 //#define PRINTAFFINITY
 #ifdef PRINTAFFINITY

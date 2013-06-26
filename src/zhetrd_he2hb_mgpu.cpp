@@ -15,13 +15,6 @@
 #include "magma_bulge.h"
 #include "trace.h"
 #include <assert.h>
-#if defined(USEMKL)
-#include <mkl_service.h>
-#endif
-#if defined(USEACML)
-#include <omp.h>
-#endif
-
 
 extern "C" magma_int_t
 magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
@@ -216,13 +209,8 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
         return *info;
     }
 
-    magma_int_t mklth = min(threads,12);
-#if defined(USEMKL)
-    mkl_set_num_threads(mklth);
-#endif
-#if defined(USEACML)
-    omp_set_num_threads(mklth);
-#endif
+    magma_int_t mklth = min(threads,16);
+    magma_setlapack_numthreads(mklth);
 
     magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2];
     magma_int_t nbcmplx=0;
@@ -655,13 +643,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
     trace_finalize( "zhetrd_he2hb.svg", "trace.css" );
     
     MAGMA_Z_SET2REAL( work[0], lwkopt );
-#if defined(USEMKL)
-    mkl_set_num_threads(1);
-#endif
-#if defined(USEACML)
-    omp_set_num_threads(1);
-#endif
 
-
+    magma_setlapack_numthreads(1);
     return *info;
 } /* zhetrd_he2hb_ */

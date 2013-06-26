@@ -17,12 +17,6 @@
 #include "magma_zbulge.h"
 #include <cblas.h>
 
-#if defined(USEMKL)
-#include <mkl_service.h>
-#endif
-#if defined(USEACML)
-#include <omp.h>
-#endif
 
 #define PRECISION_z
 
@@ -322,12 +316,7 @@ magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t wantz, char
 
     pthread_attr_t thread_attr;
 
-#if defined(USEMKL)
-    mkl_set_num_threads( 1 );
-#endif
-#if defined(USEACML)
-    omp_set_num_threads(1);
-#endif
+    magma_setlapack_numthreads(1);
 
     if (wantz==2 || wantz==3)
         computeQ1 = 1;
@@ -431,12 +420,7 @@ magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t wantz, char
         goto fin;
     }
 
-#if defined(USEMKL)
-    mkl_set_num_threads(mklth);
-#endif
-#if defined(USEACML)
-    omp_set_num_threads(mklth);
-#endif
+    magma_setlapack_numthreads(mklth);
 
     timeeigen = magma_wtime();
     if(wantz==0){
@@ -457,12 +441,7 @@ magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t wantz, char
 
         magma_zstedx_withZ(n, ne, D, E, Z, ldz);
 
-#if defined(USEMKL)
-    mkl_set_num_threads(1);
-#endif
-#if defined(USEACML)
-    omp_set_num_threads(1);
-#endif
+        magma_setlapack_numthreads(1);
 
         timelpk = magma_wtime()-timelpk;
 
@@ -717,12 +696,8 @@ magma_int_t magma_zhetrd_bhe2trc_v5(magma_int_t threads, magma_int_t wantz, char
                 timegemm = magma_wtime()-timegemm;
             }
         }
-#if defined(USEMKL)
-    mkl_set_num_threads(mklth);
-#endif
-#if defined(USEACML)
-    omp_set_num_threads(mklth);
-#endif
+        magma_setlapack_numthreads(mklth);
+
         magma_free_cpu(Z);
         magma_free(dZ);
         magma_free(dQ1);

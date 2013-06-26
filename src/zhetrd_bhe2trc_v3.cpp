@@ -13,9 +13,6 @@
 */
 #include "common_magma.h"
 #include "magma_zbulgeinc.h"
-#if defined(USEMKL)
-#include <mkl_service.h>
-#endif
 
 #define PRECISION_z
 
@@ -300,9 +297,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( magma_int_t THREADS, magma_int_t WA
 
     //goto ed;
     
-#if defined(USEMKL)
-    mkl_set_num_threads( 1 );
-#endif
+    magma_setlapack_numthreads(1);
     core_in_all.cores_num = THREADS;
     core_in_all.dQ1       = da;
     core_in_all.dT1       = dT1;
@@ -494,15 +489,11 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( magma_int_t THREADS, magma_int_t WA
     if(WANTZ==0){
         timelpk = magma_wtime();
         // compute the eigenvalues using lapack routine to be able to compare to it and used as ref 
-#if defined(USEMKL)
-        mklth=THREADS; //;
-        mkl_set_num_threads(mklth);
-#endif
+        magma_setlapack_numthreads(THREADS);
+
         // call eigensolver for our resulting tridiag [D E] and form E=Q*Z
         magma_zstedc_withZ(MagmaNoVec, N, D2, E2, Z, LDZ);
-#if defined(USEMKL)
-        mkl_set_num_threads( 1 );
-#endif
+        magma_setlapack_numthreads(1);
         timelpk = magma_wtime()-timelpk;
         printf("  Finish WANTZ %d  eigensolver 'N'    timing= %lf  threads %d \n", (int) WANTZ, timelpk, (int) i);
         /*
@@ -554,16 +545,11 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( magma_int_t THREADS, magma_int_t WA
         if((WANTZ==1)||(WANTZ==2)||(WANTZ==3)||(WANTZ==4)){
             timelpk = magma_wtime();
             // compute the eigenvalues using lapack routine to be able to compare to it and used as ref 
-#if defined(USEMKL)
-            mklth=THREADS; //;
-            mkl_set_num_threads(mklth);
-#endif
+            magma_setlapack_numthreads(THREADS);
             // call eigensolver for our resulting tridiag [D E] and form E=Q*Z
             //magma_zstedc_withZ('I', N, D2, E2, Z, LDZ);
             magma_zstedx_withZ(N, NE, D2, E2, Z, LDZ);
-#if defined(USEMKL)
-            mkl_set_num_threads( 1 );
-#endif
+            magma_setlapack_numthreads(1);
             timelpk = magma_wtime()-timelpk;
         }
 
@@ -906,15 +892,10 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( magma_int_t THREADS, magma_int_t WA
                timeaplQ2 = magma_wtime()-timeaplQ2;
                timelpk = magma_wtime();
                // compute the eigenvalues using lapack routine to be able to compare to it and used as ref 
-               #if defined(USEMKL)
-               mklth=THREADS; //;
-               mkl_set_num_threads(mklth);
-               #endif
+               magma_setlapack_numthreads(THREADS);
                // call eigensolver for our resulting tridiag [D E] and form E=Q*Z
                magma_zstedc_withZ(MagmaVec, N, D2, E2, A1, LDA1);
-               #if defined(USEMKL)
-               mkl_set_num_threads( 1 );
-               #endif
+               magma_setlapack_numthreads(1);
                timelpk = magma_wtime()-timelpk;
            }
 

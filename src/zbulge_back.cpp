@@ -20,16 +20,9 @@
 #ifdef SETAFFINITY
 #include "affinity.h"
 #endif
-#if defined(USEMKL)
-#include <mkl_service.h>
-#endif
-#if defined(USEACML)
-#include <omp.h>
-#endif
+
 
 #define PRECISION_z
-
-
 
 static void *magma_zapplyQ_parallel_section(void *arg);
 
@@ -131,16 +124,9 @@ magma_zbulge_back(magma_int_t threads, char uplo,
                 magma_int_t* info)
 {
     magma_int_t mklth = threads;
+    magma_setlapack_numthreads(1);
 
     double timeaplQ2=0.0;
-
-#if defined(USEMKL)
-    mkl_set_num_threads(1);
-#endif
-#if defined(USEACML)
-    omp_set_num_threads(1);
-#endif
-
     double f= 1.;
     magma_int_t n_gpu = ne;
 
@@ -225,13 +211,7 @@ magma_zbulge_back(magma_int_t threads, char uplo,
 
     timeaplQ2 = magma_wtime()-timeaplQ2;
 
-#if defined(USEMKL)
-    mkl_set_num_threads(mklth);
-#endif
-#if defined(USEACML)
-    omp_set_num_threads(mklth);
-#endif
-
+    magma_setlapack_numthreads(mklth);
     return MAGMA_SUCCESS;
 }
 
@@ -265,13 +245,7 @@ static void *magma_zapplyQ_parallel_section(void *arg)
 
     magma_int_t n_cpu = ne - n_gpu;
 
-#if defined(USEMKL)
-    mkl_set_num_threads(1);
-#endif
-#if defined(USEACML)
-    omp_set_num_threads(1);
-#endif
-
+    magma_setlapack_numthreads(1);
 #ifdef SETAFFINITY
     //#define PRINTAFFINITY
 #ifdef PRINTAFFINITY

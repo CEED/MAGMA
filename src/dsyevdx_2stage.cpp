@@ -269,7 +269,7 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
     /* determine the number of threads */
 
     // First check MKL_NUM_THREADS if MKL is used
-#ifdef USEMKL
+#ifdef MAGMA_WITH_MKL
     env = getenv("MKL_NUM_THREADS");
     if (env != NULL)
         threads = atoi(env);
