@@ -7,7 +7,7 @@
 
        @author Azzam Haidar
 */
-#include "common.h"
+#include "common_magma.h"
 /***************************************************************************//**
  * switch lapack thread_num initialization
  **/
