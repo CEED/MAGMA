@@ -47,6 +47,7 @@ extern "C" {
 #define lapackf77_dlaed4   FORTRAN_NAME( dlaed4, DLAED4 )
 #define lapackf77_dlamc3   FORTRAN_NAME( dlamc3, DLAMC3 )
 #define lapackf77_dlamrg   FORTRAN_NAME( dlamrg, DLAMRG )
+#define lapackf77_dlasrt   FORTRAN_NAME( dlasrt, DLASRT )
 #define lapackf77_dstebz   FORTRAN_NAME( dstebz, DSTEBZ )
 
 #define lapackf77_zbdsqr   FORTRAN_NAME( zbdsqr, ZBDSQR )
@@ -132,6 +133,7 @@ extern "C" {
 #define lapackf77_zhst01   FORTRAN_NAME( zhst01, ZHST01 )
 #define lapackf77_zlarfx   FORTRAN_NAME( zlarfx, ZLARFX )
 #define lapackf77_zlarfy   FORTRAN_NAME( zlarfy, ZLARFY )
+#define lapackf77_zlatms   FORTRAN_NAME( zlatms, ZLATMS )
 #define lapackf77_zqpt01   FORTRAN_NAME( zqpt01, ZQPT01 )
 #define lapackf77_zqrt02   FORTRAN_NAME( zqrt02, ZQRT02 )
 #define lapackf77_zstt21   FORTRAN_NAME( zstt21, ZSTT21 )
@@ -846,6 +848,8 @@ void   lapackf77_dlaed4( magma_int_t* n, magma_int_t* i,
                          double* rho,
                          double* dlam, magma_int_t* info );
 
+void lapackf77_dlasrt(const char *id, const magma_int_t *n, double *d, magma_int_t *info);
+
 /*
  * Testing functions
  */
@@ -976,6 +980,12 @@ void   lapackf77_zqrt02( const magma_int_t *m, const magma_int_t *n, const magma
                          magmaDoubleComplex *work, const magma_int_t *lwork,
                          double *rwork,
                          double *result );
+
+void lapackf77_zlatms( magma_int_t *m, magma_int_t *n,
+                           const char *dist, magma_int_t *iseed, const char *sym, double *d,
+                           magma_int_t *mode, const double *cond, const double *dmax,
+                           magma_int_t *kl, magma_int_t *ku, const char *pack,
+                           magmaDoubleComplex *a, magma_int_t *lda, magmaDoubleComplex *work, magma_int_t *info );
 
 #ifdef __cplusplus
 }

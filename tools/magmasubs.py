@@ -348,6 +348,8 @@ subs = {
     ('ssytd2',         'dsytd2',         'chetd2',         'zhetd2'          ),
     ('ssytrd',         'dsytrd',         'chetrd',         'zhetrd'          ),
     ('ssytrf',         'dsytrf',         'chetrf',         'zhetrf'          ),
+    ('slasrt',         'dlasrt',         'slasrt',         'dlasrt'          ),
+    ('slatms',         'dlatms',         'clatms',         'zlatms'          ),
     
     # LAPACK, UPPERCASE, real != complex name
     ('SLAG2D',         'DLAG2S',         'CLAG2Z',         'ZLAG2C'          ),
@@ -616,6 +618,8 @@ subs = {
     ('SSHIFT',         'DSHIFT',         'CSHIFT',         'ZSHIFT'          ),
     ('SSSSSM',         'DSSSSM',         'CSSSSM',         'ZSSSSM'          ),
     ('SSTEBZ',         'DSTEBZ',         'SSTEBZ',         'DSTEBZ'          ),
+    ('SLATMS',         'DLATMS',         'CLATMS',         'ZLATMS'          ),
+    ('SLASRT',         'DLASRT',         'SLASRT',         'DLASRT'          ),
     ('SSTEDC',         'DSTEDC',         'CSTEDC',         'ZSTEDC'          ),
     ('SSTEDX',         'DSTEDX',         'CSTEDX',         'ZSTEDX'          ),
     ('SSTEDX',         'DSTEDX',         'SSTEDX',         'DSTEDX'          ),
