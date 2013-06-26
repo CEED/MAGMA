@@ -98,8 +98,8 @@ cgemvn_kernel2_fermi(
 
 extern "C" void
 magmablas_cgemvn_fermi(
-    int n, int m, magmaFloatComplex alpha,
-    const magmaFloatComplex *A, int lda,
+    magma_int_t n, magma_int_t m, magmaFloatComplex alpha,
+    const magmaFloatComplex *A, magma_int_t lda,
     const magmaFloatComplex *x, magmaFloatComplex beta,
     magmaFloatComplex *y)
 {
@@ -229,8 +229,8 @@ cgemvt_kernel_fermi(
 
 extern "C" void
 magmablas_cgemvt_fermi(
-    int m, int n, magmaFloatComplex alpha,
-    const magmaFloatComplex *A, int lda, 
+    magma_int_t m, magma_int_t n, magmaFloatComplex alpha,
+    const magmaFloatComplex *A, magma_int_t lda, 
     const magmaFloatComplex *x, magmaFloatComplex beta,
     magmaFloatComplex *y)
 {

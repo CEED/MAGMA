@@ -65,10 +65,10 @@ clag2z_special(int M, int N,
     A[0] = Ap[0];
 }
 
-void 
-magmablas_clag2z_64_64_16_4_v2( int M, int N, 
-                                const magmaFloatComplex *SA, int LDSA, 
-                                magmaDoubleComplex       *A, int LDA )
+extern "C" void 
+magmablas_clag2z_64_64_16_4_v2( magma_int_t M, magma_int_t N, 
+                                const magmaFloatComplex *SA, magma_int_t LDSA, 
+                                magmaDoubleComplex       *A, magma_int_t LDA )
 {
     if( M == 0 || N==0 ) {
         printf("One of the dimension is ZERO\n");
