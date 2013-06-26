@@ -16,40 +16,12 @@
 
 #if (GPUSHMEM >= 200)
 
-extern "C" magma_int_t
-magma_zhtodhe(int num_gpus, char *uplo, magma_int_t n, magma_int_t nb,
-              magmaDoubleComplex *a, magma_int_t lda,
-              magmaDoubleComplex **dwork, magma_int_t ldda,
-              magma_queue_t stream[][10], magma_int_t *info);
-
-extern "C" void
-magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
-        magmaDoubleComplex alpha, magmaDoubleComplex **db, int lddb, int offset_b,
-        double beta,           magmaDoubleComplex **dc, int lddc, int offset,
-        int num_streams, magma_queue_t stream[][10]);
-
-extern "C" double
-magma_zlatrd_mgpu(int num_gpus, char uplo,
-                  magma_int_t n0, magma_int_t n, magma_int_t nb, magma_int_t nb0,
-                  magmaDoubleComplex *a,  magma_int_t lda,
-                  double *e, magmaDoubleComplex *tau,
-                  magmaDoubleComplex *w,   magma_int_t ldw,
-                  magmaDoubleComplex **da, magma_int_t ldda, magma_int_t offset,
-                  magmaDoubleComplex **dw, magma_int_t lddw,
-                  magmaDoubleComplex *dwork[MagmaMaxGPUs], magma_int_t ldwork,
-                  magma_int_t k,
-                  magmaDoubleComplex  *dx[MagmaMaxGPUs], magmaDoubleComplex *dy[MagmaMaxGPUs],
-                  magmaDoubleComplex *work,
-                  magma_queue_t stream[][10],
-                  double *times);
-
-
 #define  A(i, j) ( a+(j)*lda  + (i))
 #define dA(id, i, j) (da[(id)]+(j)*ldda + (i))
 #define dW(id, i, j) (dwork[(id)]+(j)*ldda + (i))
 
 extern "C" magma_int_t
-magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
+magma_zhetrd_mgpu(magma_int_t num_gpus, magma_int_t k, char uplo, magma_int_t n,
              magmaDoubleComplex *a, magma_int_t lda,
              double *d, double *e, magmaDoubleComplex *tau,
              magmaDoubleComplex *work, magma_int_t lwork,
@@ -191,7 +163,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
     magmaDoubleComplex *dwork2[MagmaMaxGPUs];
 
     *info = 0;
-    long int upper = lapackf77_lsame(uplo_, "U");
+    int upper = lapackf77_lsame(uplo_, "U");
     lquery = lwork == -1;
     if ( !upper && !lapackf77_lsame(uplo_, "L")) {
         printf( " uplo = %c\n",uplo );
@@ -340,7 +312,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
       
         if( nx > 0 ) {
             if (1<=n-nx) { /* else A is already on CPU */
-                int iii = i;
+                magma_int_t iii = i;
                 for (i=0; i < nx; i += nb) {
                     ib = min(nb, n-i);
                     ii  = nb*(i/(nb*num_gpus));
@@ -429,7 +401,7 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
 
         /* Use unblocked code to reduce the last or only block */
         if ( i < n ) {
-            int iii = i;
+            magma_int_t iii = i;
             i_n = n-i;
             if( i > 0 ) {
                 for (; i < n; i += nb) {
@@ -487,8 +459,9 @@ magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
     return MAGMA_SUCCESS;
 } /* magma_zhetrd */
 
+
 extern "C" magma_int_t
-magma_zhtodhe(int num_gpus, char *uplo, magma_int_t n, magma_int_t nb,
+magma_zhtodhe(magma_int_t num_gpus, char *uplo, magma_int_t n, magma_int_t nb,
               magmaDoubleComplex *a, magma_int_t lda,
               magmaDoubleComplex **da, magma_int_t ldda,
               magma_queue_t stream[][10], magma_int_t *info)
@@ -538,10 +511,10 @@ magma_zhtodhe(int num_gpus, char *uplo, magma_int_t n, magma_int_t nb,
 }
 
 extern "C" void
-magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
-    magmaDoubleComplex alpha, magmaDoubleComplex **db, int lddb, int offset_b,
-    double beta,           magmaDoubleComplex **dc, int lddc, int offset,
-    int num_streams, magma_queue_t stream[][10])
+magma_zher2k_mgpu(magma_int_t num_gpus, char uplo, char trans, magma_int_t nb, magma_int_t n, magma_int_t k,
+    magmaDoubleComplex alpha, magmaDoubleComplex **db, magma_int_t lddb, magma_int_t offset_b,
+    double beta,           magmaDoubleComplex **dc, magma_int_t lddc, magma_int_t offset,
+    magma_int_t num_streams, magma_queue_t stream[][10])
 {
 
 #define dB(id, i, j)  (db[(id)]+(j)*lddb + (i)+offset_b)
@@ -549,7 +522,7 @@ magma_zher2k_mgpu(int num_gpus, char uplo, char trans, int nb, int n, int k,
 #define dC(id, i, j)  (dc[(id)]+(j)*lddc + (i))
 
     char uplo_[2]  = {uplo, 0};
-    int i, id, ib, ii, kk, n1, m1;
+    magma_int_t i, id, ib, ii, kk, n1, m1;
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
     /* diagonal update */

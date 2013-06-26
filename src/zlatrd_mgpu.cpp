@@ -21,53 +21,6 @@
 #if (GPUSHMEM >= 200)
 
 #define MAGMABLAS_ZHEMV_MGPU
-#ifdef  MAGMABLAS_ZHEMV_MGPU
-extern "C"
-magma_int_t
-magmablas_zhemv_mgpu_offset( char uplo, magma_int_t n,
-                             magmaDoubleComplex alpha,
-                             magmaDoubleComplex **A, magma_int_t lda,
-                             magmaDoubleComplex **X, magma_int_t incx,
-                             magmaDoubleComplex beta,
-                             magmaDoubleComplex **Y, magma_int_t incy,
-                             magmaDoubleComplex **work, magma_int_t lwork,
-                             magma_int_t num_gpus,
-                             magma_int_t nb,
-                             magma_int_t offset,
-                             magma_queue_t stream[][10]);
-
-extern "C"
-magma_int_t
-magmablas_zhemv_mgpu_32_offset( char uplo, magma_int_t n,
-                                magmaDoubleComplex alpha,
-                                magmaDoubleComplex **A, magma_int_t lda,
-                                magmaDoubleComplex **X, magma_int_t incx,
-                                magmaDoubleComplex beta,
-                                magmaDoubleComplex **Y, magma_int_t incy,
-                                magmaDoubleComplex **work, magma_int_t lwork,
-                                magma_int_t num_gpus,
-                                magma_int_t nb,
-                                magma_int_t offset,
-                                magma_queue_t stream[][10]);
-#endif
-extern "C"
-magma_int_t
-magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
-                      magma_int_t n, magma_int_t nb,
-                      magmaDoubleComplex alpha,
-                      magmaDoubleComplex **da, magma_int_t ldda, magma_int_t offset,
-                      magmaDoubleComplex **dx, magma_int_t incx,
-                      magmaDoubleComplex beta,
-                      magmaDoubleComplex **dy, magma_int_t incy,
-                      magmaDoubleComplex **dwork, magma_int_t ldwork,
-                      magmaDoubleComplex *work, magmaDoubleComplex *w,
-                      magma_queue_t stream[][10]);
-
-extern "C"
-magma_int_t
-magmablas_zhemv_synch( magma_int_t num_gpus, magma_int_t k,
-                      magma_int_t n, magmaDoubleComplex *work, magmaDoubleComplex *w,
-                      magma_queue_t stream[][10]);
 
 #define A(i, j) (a+(j)*lda + (i))
 #define W(i, j) (w+(j)*ldw + (i))
@@ -77,7 +30,7 @@ magmablas_zhemv_synch( magma_int_t num_gpus, magma_int_t k,
 #define dW1(id, i, j) (dw[(id)]+ ((j)+nb) *lddw + (i))
 
 extern "C" double
-magma_zlatrd_mgpu(int num_gpus, char uplo,
+magma_zlatrd_mgpu(magma_int_t num_gpus, char uplo,
                   magma_int_t n0, magma_int_t n, magma_int_t nb, magma_int_t nb0,
                   magmaDoubleComplex *a,  magma_int_t lda,
                   double *e, magmaDoubleComplex *tau,
@@ -323,7 +276,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo,
                 }
 
                 // 3. Here is where we need it // TODO find the right place
-                magmablas_zhemv_synch(num_gpus, k, i, work, W(0, iw), stream );
+                magmablas_zhemv_sync(num_gpus, k, i, work, W(0, iw), stream );
 
                 if (i < n-1) {
                     blasf77_zgemv("No transpose", &i, &i_n, &c_neg_one, A(0, i+1), &lda,
@@ -459,7 +412,7 @@ magma_zlatrd_mgpu(int num_gpus, char uplo,
                 }
 
                 /* synchronize */
-                magmablas_zhemv_synch(num_gpus, k, i_n, work, W(i+1,i), stream );
+                magmablas_zhemv_sync(num_gpus, k, i_n, work, W(i+1,i), stream );
 #ifdef PROFILE_SYMV
                 cudaEventElapsedTime(&etime, start, stop);
                 mv_time += (etime/1000.0);
@@ -717,7 +670,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
 
 extern "C"
 magma_int_t
-magmablas_zhemv_synch( magma_int_t num_gpus, magma_int_t k,
+magmablas_zhemv_sync( magma_int_t num_gpus, magma_int_t k,
                       magma_int_t n, magmaDoubleComplex *work, magmaDoubleComplex *w,
                       magma_queue_t stream[][10] )
 {
