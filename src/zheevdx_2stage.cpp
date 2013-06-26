@@ -407,7 +407,7 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
 #ifdef ENABLE_TIMER
     end = get_current_time();
     printf("  time zhetrd_hb2st = %6.2f\n" , GetTimerValue(st2,end)/1000.);
-    printf("time zhetrd = %6.2f\n", GetTimerValue(start,end)/1000.);
+    printf("  time zhetrd = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call
@@ -437,7 +437,7 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-        printf("time zstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
+        printf("  time zstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
         start = get_current_time();
 #endif
         magmaDoubleComplex *dZ;
@@ -478,7 +478,7 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
 #ifdef ENABLE_TIMER
         end = get_current_time();
         printf("  time zunmqr + copy = %6.2f\n", GetTimerValue(st1,end)/1000.);
-        printf("time eigenvectors backtransf. = %6.2f\n" , GetTimerValue(start,end)/1000.);
+        printf("  time eigenvectors backtransf. = %6.2f\n" , GetTimerValue(start,end)/1000.);
 #endif
 
     }

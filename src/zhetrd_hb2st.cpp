@@ -245,7 +245,7 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
     // timing
     #ifdef ENABLE_TIMER
     timeblg = magma_wtime()-timeblg;
-    printf("time BULGE+T = %lf \n" ,timeblg);
+    printf("  time BULGE+T = %lf \n" ,timeblg);
     #endif
 
     magma_free_cpu(thread_id);
@@ -499,6 +499,8 @@ static void magma_ztile_bulge_parallel(magma_int_t my_core_id, magma_int_t cores
 
     if(n<=0)
         return ;
+    if(grsiz<=0)
+        return ;
 
     //printf("=================> my core id %d of %d \n",my_core_id, cores_num);
 
@@ -513,7 +515,6 @@ static void magma_ztile_bulge_parallel(magma_int_t my_core_id, magma_int_t cores
      * */
 
     magma_zmalloc_cpu(&work, n);
-
     mycoresnb = cores_num;
 
     shift   = 5;
@@ -533,9 +534,11 @@ static void magma_ztile_bulge_parallel(magma_int_t my_core_id, magma_int_t cores
 
     #ifdef ENABLE_DEBUG
     if(my_core_id==0){
-        printf("==================================================================================\n");
-        printf("  WARNING only %3d threads are required to run this test optimizing cache reuse\n",maxrequiredcores);
-        printf("==================================================================================\n");
+        if(cores_num > maxrequiredcores)    {
+           printf("==================================================================================\n");
+           printf("  WARNING only %3d threads are required to run this test optimizing cache reuse\n",maxrequiredcores);
+           printf("==================================================================================\n");
+        }
         printf("  Static bulgechasing version v9_9col threads  %4d      N %5d      NB %5d    grs %4d thgrsiz %4d \n",cores_num, n, nb, grsiz,thgrsiz);
     }
     #endif

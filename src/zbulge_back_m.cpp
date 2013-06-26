@@ -26,7 +26,7 @@
 
 static void *magma_zapplyQ_m_parallel_section(void *arg);
 
-static void magma_ztile_bulge_applyQ(char side, magma_int_t n_loc, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
+static void magma_ztile_bulge_applyQ(magma_int_t core_id, char side, magma_int_t n_loc, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
                                      magmaDoubleComplex *E, magma_int_t lde, magmaDoubleComplex *V, magma_int_t ldv,
                                      magmaDoubleComplex *TAU, magmaDoubleComplex *T, magma_int_t ldt);
 
@@ -299,7 +299,7 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
         magmaDoubleComplex* E_loc = E + (n_gpu+ n_loc * (my_core_id-1))*lde;
         n_loc = min(n_loc,n_cpu - n_loc * (my_core_id-1));
 
-        magma_ztile_bulge_applyQ('L', n_loc, n, nb, Vblksiz, E_loc, lde, V, ldv, TAU, T, ldt);
+        magma_ztile_bulge_applyQ(my_core_id, 'L', n_loc, n, nb, Vblksiz, E_loc, lde, V, ldv, TAU, T, ldt);
         pthread_barrier_wait(barrier);
 
         #ifdef ENABLE_TIMER
@@ -332,7 +332,7 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
 #define V(m)     &(V[(m)])
 #define TAU(m)   &(TAU[(m)])
 #define T(m)     &(T[(m)])
-static void magma_ztile_bulge_applyQ(char side, magma_int_t n_loc, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
+static void magma_ztile_bulge_applyQ(magma_int_t core_id, char side, magma_int_t n_loc, magma_int_t n, magma_int_t nb, magma_int_t Vblksiz,
                                      magmaDoubleComplex *E, magma_int_t lde, magmaDoubleComplex *V, magma_int_t ldv,
                                      magmaDoubleComplex *TAU, magmaDoubleComplex *T, magma_int_t ldt)//, magma_int_t* info)
 {
@@ -387,9 +387,10 @@ static void magma_ztile_bulge_applyQ(char side, magma_int_t n_loc, magma_int_t n
      *            that q_i+1 overlap a portion of the E(:, col_i).
      *            IN parallel E is splitten in horizontal block over the threads  */
     #ifdef ENABLE_DEBUG
-    printf("  APPLY Q2_cpu zbulge_back_m   N %d  N_loc %d  nbchunk %d  NB %d  Vblksiz %d  SIDE %c \n", n, n_loc, nbchunk, nb, Vblksiz, side);
+    if((core_id==0)||(core_id==1))
+        printf("  APPLY Q2_cpu zbulge_back_m   N %d  N_loc %d  nbchunk %d  NB %d  Vblksiz %d  SIDE %c \n", n, n_loc, nbchunk, nb, Vblksiz, side);
     #endif
-    
+   
     for (magma_int_t i = 0; i<nbchunk; i++)
     {
         magma_int_t ib_loc = min(nb_loc, (n_loc - i*nb_loc));

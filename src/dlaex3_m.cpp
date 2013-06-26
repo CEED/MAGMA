@@ -407,7 +407,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-    printf("eigenvalues/vector D+zzT = %6.2f\n", GetTimerValue(start,end)/1000.);
+    //printf("eigenvalues/vector D+zzT = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
 #else
@@ -494,7 +494,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-    printf("eigenvalues/vector D+zzT = %6.2f\n", GetTimerValue(start,end)/1000.);
+    //printf("eigenvalues/vector D+zzT = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
 #endif //_OPENMP
@@ -648,7 +648,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
     }
 #ifdef ENABLE_TIMER
     end = get_current_time();
-    printf("gemms = %6.2f\n", GetTimerValue(start,end)/1000.);
+    //printf("gemms = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
     return MAGMA_SUCCESS;

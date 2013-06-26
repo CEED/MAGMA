@@ -234,7 +234,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-    printf("for: dsteqr = %6.2f\n", GetTimerValue(start,end)/1000.);
+    printf("  for: dsteqr = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
     // Successively merge eigensystems of adjacent submatrices
     // into eigensystem for the corresponding larger matrix.
@@ -282,7 +282,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
         ++curlvl;
 #ifdef ENABLE_TIMER
         end = get_current_time();
-        printf("%d: time: %6.2f\n", curlvl, GetTimerValue(start,end)/1000.);
+        //printf("%d: time: %6.2f\n", curlvl, GetTimerValue(start,end)/1000.);
 #endif
 
     }

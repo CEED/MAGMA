@@ -381,7 +381,7 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
 #ifdef ENABLE_TIMER
     end = get_current_time();
     printf("  time dsytrd_sy2st = %6.2f\n" , GetTimerValue(st2,end)/1000.);
-    printf("time dsytrd = %6.2f\n", GetTimerValue(start,end)/1000.);
+    printf("  time dsytrd = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call
@@ -411,7 +411,7 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-        printf("time dstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
+        printf("  time dstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
         start = get_current_time();
 #endif
         double *dZ;
@@ -454,7 +454,7 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
         end = get_current_time();
         printf("  time dormqr + copy = %6.2f\n", GetTimerValue(st1,end)/1000.);
 
-        printf("time eigenvectors backtransf. = %6.2f\n" , GetTimerValue(start,end)/1000.);
+        printf("  time eigenvectors backtransf. = %6.2f\n" , GetTimerValue(start,end)/1000.);
 #endif
 
     }
