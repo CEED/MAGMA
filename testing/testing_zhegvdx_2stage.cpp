@@ -131,11 +131,9 @@ int main( int argc, char** argv)
             }
 
             if(opts.warmup){
-
                 // ==================================================================
                 // Warmup using MAGMA
                 // ==================================================================
-
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
 
@@ -148,14 +146,9 @@ int main( int argc, char** argv)
                                      iwork, liwork,
                                      &info);
             }
-
-            lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
-            lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
-
             // ===================================================================
             // Performs operation using MAGMA
             // ===================================================================
-
             lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
             lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
 
@@ -169,7 +162,6 @@ int main( int argc, char** argv)
                                  iwork, liwork,
                                  &info);
             end = get_current_time();
-
             gpu_time = GetTimerValue(start,end)/1000.;
 
 
@@ -218,7 +210,6 @@ int main( int argc, char** argv)
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
 
                 magma_int_t m2 = 0;
-
                 magma_zhegvdx(itype, 'N', range, uplo,
                               N, h_R, N, h_S, N, vl, vu, il, iu, &m2, w2,
                               h_work, lwork,

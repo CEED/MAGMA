@@ -124,6 +124,7 @@ ZSRC += \
 ZSRC += \
 	testing_zhetrd_he2hb.cpp	\
 	testing_zhegvdx_2stage.cpp	\
+	testing_zheevdx_2stage.cpp	\
 #	testing_zhegvdx_2stage_m.cpp	\
 #	testing_zhetrd_he2hb_mgpu.cpp	\
 
