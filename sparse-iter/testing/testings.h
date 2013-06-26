@@ -6,6 +6,7 @@
 #include <stdarg.h>
 
 #include "magma.h"
+#include "../include/magmasparse.h"
 
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))

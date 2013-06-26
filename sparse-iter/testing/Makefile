@@ -13,6 +13,8 @@ include ../../Makefile.internal
 # Krylov space linear solvers
 ZSRC += \
 	testing_zcg.cpp	        \
+  testing_z_matrix_io.cpp \
+
 
 # ----------
 # Krylov space eigen-solvers 
