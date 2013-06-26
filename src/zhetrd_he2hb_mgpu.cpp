@@ -215,8 +215,9 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
     magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2];
     magma_int_t nbcmplx=0;
     magma_buildconnection_mgpu(gnode, &nbcmplx,  ngpu);
+    #ifdef ENABLE_DEBUG
     printf(" Initializing communication pattern.... GPU-ncmplx %d\n\n" , nbcmplx);
-
+    #endif
 
 
     magma_device_t cdev;

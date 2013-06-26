@@ -144,10 +144,10 @@ magma_zbulge_applyQ_v2(char side,
     /* SIDE RIGHT meaning apply E = E*Q = E * (q_1*q_2*.....*q_n) ==> so tarverse Vs in normal  order (forward) from q_1 to q_n
      *            Also E is splitten by col meaning each apply consist in a block of col (vertical block) */
 
-
+    #ifdef ENABLE_DEBUG
     printf("  APPLY Q_v22 GPU with  N %d, NE %d,  NB %d, Vblksiz %d, versionL %d versionR %d  SIDE %c \n",
            N, NE, NB, Vblksiz, versionL, versionR, side);
-
+    #endif
 
     /*
      * MagmamaLeft

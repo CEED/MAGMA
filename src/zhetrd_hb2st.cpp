@@ -222,7 +222,9 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
     pthread_setconcurrency(threads);
 
     //timing
+    #ifdef ENABLE_TIMER
     timeblg = magma_wtime();
+    #endif
 
     // Launch threads
     for (magma_int_t thread = 1; thread < threads; thread++)
@@ -241,13 +243,14 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
     }
 
     // timing
+    #ifdef ENABLE_TIMER
     timeblg = magma_wtime()-timeblg;
+    printf("time BULGE+T = %lf \n" ,timeblg);
+    #endif
 
     magma_free_cpu(thread_id);
     magma_free_cpu(arg);
     magma_free_cpu(prog);
-
-    printf("time BULGE+T = %lf \n" ,timeblg);
 
     magma_setlapack_numthreads(mklth);
     /*================================================
@@ -373,22 +376,29 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
             //=========================
             //    bulge chasing
             //=========================
+            #ifdef ENABLE_TIMER
             timeB = magma_wtime();
-
+            #endif
+            
             magma_ztile_bulge_parallel(0, 1, A, lda, V, ldv, TAU, n, nb, nbtiles, grsiz, Vblksiz, prog);
 
+            #ifdef ENABLE_TIMER
             timeB = magma_wtime()-timeB;
             printf("  Finish BULGE   timing= %lf \n" ,timeB);
-
-
+            #endif
             //=========================
             // compute the T's to be used when applying Q2
             //=========================
+            #ifdef ENABLE_TIMER
             timeT = magma_wtime();
+            #endif
+
             magma_ztile_bulge_computeT_parallel(0, 1, V, ldv, TAU, T, ldt, n, nb, Vblksiz);
 
+            #ifdef ENABLE_TIMER
             timeT = magma_wtime()-timeT;
             printf("  Finish T's     timing= %lf \n" ,timeT);
+            #endif
 
         }else{ // allcore_num > 1
 
@@ -399,28 +409,38 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
                 //=========================
                 //    bulge chasing
                 //=========================
-                if(id == 0)timeB = magma_wtime();
+                #ifdef ENABLE_TIMER
+                if(id == 0)
+                    timeB = magma_wtime();
+                #endif
 
                 magma_ztile_bulge_parallel(id, tot, A, lda, V, ldv, TAU, n, nb, nbtiles, grsiz, Vblksiz, prog);
                 pthread_barrier_wait(barrier);
 
+                #ifdef ENABLE_TIMER
                 if(id == 0){
                     timeB = magma_wtime()-timeB;
                     printf("  Finish BULGE   timing= %lf \n" ,timeB);
                 }
+                #endif
 
                 //=========================
                 // compute the T's to be used when applying Q2
                 //=========================
-                if(id == 0)timeT = magma_wtime();
+                #ifdef ENABLE_TIMER
+                if(id == 0)
+                    timeT = magma_wtime();
+                #endif
 
                 magma_ztile_bulge_computeT_parallel(id, tot, V, ldv, TAU, T, ldt, n, nb, Vblksiz);
                 pthread_barrier_wait(barrier);
 
+                #ifdef ENABLE_TIMER
                 if (id == 0){
                     timeT = magma_wtime()-timeT;
                     printf("  Finish T's     timing= %lf \n" ,timeT);
                 }
+                #endif
 
         } // allcore == 1
 
@@ -429,17 +449,21 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
         //=========================
         //    bulge chasing
         //=========================
+        #ifdef ENABLE_TIMER
         if(my_core_id == 0)
             timeB = magma_wtime();
+        #endif
 
         magma_ztile_bulge_parallel(my_core_id, allcores_num, A, lda, V, ldv, TAU, n, nb, nbtiles, grsiz, Vblksiz, prog);
-
         pthread_barrier_wait(barrier);
 
+        #ifdef ENABLE_TIMER
         if(my_core_id == 0){
             timeB = magma_wtime()-timeB;
             printf("  Finish BULGE   timing= %lf \n" ,timeB);
         }
+        #endif
+
     } // WANTZ > 0
 
 #ifdef SETAFFINITY
@@ -502,19 +526,19 @@ static void magma_ztile_bulge_parallel(magma_int_t my_core_id, magma_int_t cores
     if(maxrequiredcores<1)maxrequiredcores=1;
     colpercore  = colblktile*nb;
     if(mycoresnb > maxrequiredcores)
-    {
-        if(my_core_id==0)printf("==================================================================================\n");
-        if(my_core_id==0)printf("  WARNING only %3d threads are required to run this test optimizing cache reuse\n",maxrequiredcores);
-        if(my_core_id==0)printf("==================================================================================\n");
         mycoresnb = maxrequiredcores;
-    }
     thgrsiz = n;
-
-    if(my_core_id==0) printf("  Static bulgechasing version v9_9col threads  %4d      N %5d      NB %5d    grs %4d thgrsiz %4d \n",cores_num, n, nb, grsiz,thgrsiz);
-
     stepercol = magma_ceildiv(shift, grsiz);
-
     thgrnb  = magma_ceildiv(n-1, thgrsiz);
+
+    #ifdef ENABLE_DEBUG
+    if(my_core_id==0){
+        printf("==================================================================================\n");
+        printf("  WARNING only %3d threads are required to run this test optimizing cache reuse\n",maxrequiredcores);
+        printf("==================================================================================\n");
+        printf("  Static bulgechasing version v9_9col threads  %4d      N %5d      NB %5d    grs %4d thgrsiz %4d \n",cores_num, n, nb, grsiz,thgrsiz);
+    }
+    #endif
 
     for (thgrid = 1; thgrid<=thgrnb; thgrid++){
         stt  = (thgrid-1)*thgrsiz+1;
@@ -555,7 +579,6 @@ static void magma_ztile_bulge_parallel(magma_int_t my_core_id, magma_int_t cores
 
                         if(my_core_id==coreid)
                         {
-
                             fin=0;
                             while(fin==0)
                             {
@@ -630,12 +653,13 @@ static void magma_ztile_bulge_computeT_parallel(magma_int_t my_core_id, magma_in
         return ;
 
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
-
     blkpercore = blkcnt/cores_num;
-
     magma_int_t nbGblk  = magma_ceildiv(n-1, Vblksiz);
 
-    if(my_core_id==0) printf("  COMPUTE T parallel threads %d with  N %d   NB %d   Vblksiz %d \n",cores_num,n,nb,Vblksiz);
+    #ifdef ENABLE_DEBUG
+    if(my_core_id==0) 
+        printf("  COMPUTE T parallel threads %d with  N %d   NB %d   Vblksiz %d \n",cores_num,n,nb,Vblksiz);
+    #endif
 
     for (magma_int_t bg = nbGblk; bg>0; bg--)
     {

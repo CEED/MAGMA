@@ -158,9 +158,9 @@ magma_zbulge_back(magma_int_t threads, char uplo,
 
         // define the size of Q to be done on CPU's and the size on GPU's
         // note that GPU use Q(1:N_GPU) and CPU use Q(N_GPU+1:N)
-
+        #ifdef ENABLE_DEBUG
         printf("---> calling GPU + CPU(if N_CPU>0) to apply V2 to Z with NE %d     N_GPU %d   N_CPU %d\n",ne, n_gpu, ne-n_gpu);
-
+        #endif
         magma_zapplyQ_data data_applyQ(threads, n, ne, n_gpu, nb, Vblksiz, Z, ldz, V, ldv, TAU, T, ldt, dZ, lddz);
 
         magma_zapplyQ_id_data* arg;
@@ -278,22 +278,27 @@ static void *magma_zapplyQ_parallel_section(void *arg)
         //   on GPU on thread 0:
         //    - apply V2*Z(:,1:N_GPU)
         //=============================================
+        #ifdef ENABLE_TIMER
         timeQgpu = magma_wtime();
+        #endif
 
         magma_zsetmatrix(n, n_gpu, E, lde, dE, ldde);
         magma_zbulge_applyQ_v2('L', n_gpu, n, nb, Vblksiz, dE, ldde, V, ldv, T, ldt, &info);
-
         magma_device_sync();
+
+        #ifdef ENABLE_TIMER
         timeQgpu = magma_wtime()-timeQgpu;
         printf("  Finish Q2_GPU GGG timing= %lf \n" ,timeQgpu);
-
+        #endif
     }else{
         //=============================================
         //   on CPU on threads 1:allcores_num-1:
         //    - apply V2*Z(:,N_GPU+1:NE)
         //=============================================
+        #ifdef ENABLE_TIMER
         if(my_core_id == 1)
             timeQcpu = magma_wtime();
+        #endif
 
         magma_int_t n_loc = magma_ceildiv(n_cpu, allcores_num-1);
         magmaDoubleComplex* E_loc = E + (n_gpu+ n_loc * (my_core_id-1))*lde;
@@ -301,10 +306,13 @@ static void *magma_zapplyQ_parallel_section(void *arg)
 
         magma_ztile_bulge_applyQ('L', n_loc, n, nb, Vblksiz, E_loc, lde, V, ldv, TAU, T, ldt);
         pthread_barrier_wait(barrier);
+
+        #ifdef ENABLE_TIMER
         if(my_core_id == 1){
             timeQcpu = magma_wtime()-timeQcpu;
             printf("  Finish Q2_CPU CCC timing= %lf \n" ,timeQcpu);
         }
+        #endif
 
     } // END if my_core_id
 
@@ -383,8 +391,9 @@ static void magma_ztile_bulge_applyQ(char side, magma_int_t n_loc, magma_int_t n
      *            each q_i consist of applying V to a block of col E(:, col_i,:) and the applies are overlapped meaning
      *            that q_i+1 overlap a portion of the E(:, col_i).
      *            IN parallel E is splitten in horizontal block over the threads  */
-
-    //printf("  APPLY Q2   N %d  N_loc %d  nbchunk %d  NB %d  Vblksiz %d  SIDE %c \n", n, n_loc, nbchunk, nb, Vblksiz, side);
+    #ifdef ENABLE_DEBUG
+    printf("  APPLY Q2_cpu zbulge_back   N %d  N_loc %d  nbchunk %d  NB %d  Vblksiz %d  SIDE %c \n", n, n_loc, nbchunk, nb, Vblksiz, side);
+    #endif
     for (magma_int_t i = 0; i<nbchunk; i++)
     {
         magma_int_t ib_loc = min(nb_loc, (n_loc - i*nb_loc));
