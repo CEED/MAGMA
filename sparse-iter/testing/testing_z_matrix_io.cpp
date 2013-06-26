@@ -3,11 +3,12 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2013
+       November 2011
 
-       @precisions normal z -> c d s
+       @precisions normal z -> s d c
        @author Hartwig Anzt
 */
+
 // includes, system
 #include <stdlib.h>
 #include <stdio.h>
@@ -42,7 +43,10 @@ int main( int argc, char** argv)
     const char *filename[] =
     {
      "test_matrices/Trefethen_20.mtx",
-     "test_matrices/Trefethen_2000.mtx"
+     "test_matrices/Trefethen_2000.mtx",
+     "test_matrices/Trefethen_20_new.mtx",
+     "test_matrices/Trefethen_20_new2.mtx",
+     "test_matrices/Trefethen_20_new3.mtx"
     };
     magma_int_t n, nnz, n_col;
   
@@ -51,9 +55,11 @@ int main( int argc, char** argv)
     magma_int_t *row_h;
     magma_int_t *col_h;
     //read matrix from file
-    read_z_csr_from_mtx( &n,&n_col,&nnz, &val_h, &col_h, &row_h, filename[0] );
+    read_z_csr_from_mtx( &n,&n_col,&nnz, &val_h, &row_h, &col_h, filename[0] );
 
-    cout_z_csr_mtx( n, n, nnz, &val_h, &col_h, &row_h );
+    print_z_csr_mtx( n, n, nnz, &val_h, &row_h, &col_h, 0 );
+    write_z_csr_mtx( n, n, nnz, &val_h, &row_h, &col_h, 0, filename[2] );
+    write_z_csr_mtx( n, n, nnz, &val_h, &row_h, &col_h, 1, filename[3] );
 
 
     TESTING_FINALIZE();

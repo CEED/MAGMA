@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2013
+       November 2011
 
        @precisions normal z -> s d c
        @author Hartwig Anzt

@@ -12,6 +12,7 @@ include ../../Makefile.internal
 ZSRC := \
         matrix_zio.cpp \
 				matrix_z_converter.cpp \
+				z_transpose_csr.cpp \
 
 -include Makefile.local
 -include Makefile.src

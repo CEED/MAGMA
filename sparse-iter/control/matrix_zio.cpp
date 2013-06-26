@@ -3,7 +3,7 @@
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
        Univ. of Colorado, Denver
-       June 2013
+       November 2011
 
        @precisions normal z -> s d c
        @author Hartwig Anzt
@@ -20,16 +20,39 @@
 #include <stdio.h>
 #include "../include/magmasparse_z.h"
 #include "../../include/magma.h"
-//extern "C"{
 #include "../include/mmio.h"
-//}
 
 
 using namespace std;
 
 
-magma_int_t read_z_csr_from_binary(magma_int_t* n_row, magma_int_t* n_col, magma_int_t* nnz, magmaDoubleComplex **val, magma_int_t **col, magma_int_t **row, const char * filename){
+magma_int_t read_z_csr_from_binary( magma_int_t* n_row, magma_int_t* n_col, magma_int_t* nnz, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col, const char * filename ){
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
 
+    Purpose
+    =======
+
+    Reads in a matrix stored in coo format from a binary and converts it
+    into CSR format. It duplicates the off-diagonal entries in the 
+    symmetric case.
+
+
+    Arguments
+    =========
+
+    magma_int_t* n_row                   number of rows in matrix
+    magma_int_t* n_col                   number of columns in matrix
+    magma_int_t* nnz                     number of nonzeros 
+    magmaDoubleComplex **val             value array of CSR output 
+    magma_int_t **row                    row pointer of CSR output
+    magma_int_t **col                    column indices of CSR output
+    const char * filename                filname of the binary matrix
+
+    =====================================================================  */
 
   std::fstream binary_test(filename);
 
@@ -85,8 +108,35 @@ magma_int_t read_z_csr_from_binary(magma_int_t* n_row, magma_int_t* n_col, magma
   fflush(stdout);
 }
 
-magma_int_t read_z_csr_from_mtx(magma_int_t* n_row, magma_int_t* n_col, magma_int_t* nnz, magmaDoubleComplex **val, magma_int_t **col, magma_int_t **row, const char *filename){
+
+magma_int_t read_z_csr_from_mtx( magma_int_t* n_row, magma_int_t* n_col, magma_int_t* nnz, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col, const char *filename ){
   
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+    Purpose
+    =======
+
+    Reads in a matrix stored in coo format from a Matrix Market (.mtx)
+    file and converts it into CSR format. It duplicates the off-diagonal
+    entries in the symmetric case.
+
+    Arguments
+    =========
+
+    magma_int_t* n_row                   number of rows in matrix
+    magma_int_t* n_col                   number of columns in matrix
+    magma_int_t* nnz                     number of nonzeros 
+    magmaDoubleComplex **val             value array of CSR output 
+    magma_int_t **row                    row pointer of CSR output
+    magma_int_t **col                    column indices of CSR output
+    const char * filename                filname of the mtx matrix
+
+    =====================================================================  */
+
   FILE *fid;
   MM_typecode matcode;
     
@@ -135,7 +185,7 @@ magma_int_t read_z_csr_from_mtx(magma_int_t* n_row, magma_int_t* n_col, magma_in
   assert( coo_val != NULL);
 
 
-  printf("#Reading sparse matrix from file (%s):",filename);
+  printf("Reading sparse matrix from file (%s):",filename);
   fflush(stdout);
 
 
@@ -161,7 +211,7 @@ magma_int_t read_z_csr_from_mtx(magma_int_t* n_row, magma_int_t* n_col, magma_in
   
 
   if(mm_is_symmetric(matcode)) { //duplicate off diagonal entries
-  printf("#symmetric!!!");
+  printf("detected symmetric case\n");
     magma_int_t off_diagonals = 0;
     for(magma_int_t i = 0; i < *nnz; ++i){
       if(coo_row[i] != coo_col[i])
@@ -171,7 +221,7 @@ magma_int_t read_z_csr_from_mtx(magma_int_t* n_row, magma_int_t* n_col, magma_in
     magma_int_t true_nonzeros = 2*off_diagonals + (*nnz - off_diagonals);
     
     
-    cout<<"#nnz="<<*nnz<<endl;
+    printf("total number of nonzeros: %d\n",*nnz);
 
     
     
@@ -335,30 +385,116 @@ magma_int_t read_z_csr_from_mtx(magma_int_t* n_row, magma_int_t* n_col, magma_in
 
 
 
-magma_int_t write_z_csr_mtx(magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, magmaDoubleComplex **val, magma_int_t **col, magma_int_t **row, const char *filename)
-{
-   std::ofstream file(filename);
-   file << "%%MatrixMarket matrix coordinate real general" << std::endl;
-   file << n_row <<" "<< n_col <<" "<< nnz << std::endl;
-   
-  magma_int_t i=0,j=0;
+magma_int_t write_z_csr_mtx( magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col, magma_int_t MajorType, const char *filename ){
 
-  for(i=0; i<n_col; i++)
-  {
-    magma_int_t rowtemp1=(*row)[i];
-    magma_int_t rowtemp2=(*row)[i+1];
-    for(j=0; j<rowtemp2-rowtemp1; j++)  
-      {
-  //b[i*n+col[rowtemp1+j]]=val[rowtemp1+j];
-  file << (rowtemp1+1) <<" "<< ((*col)[rowtemp1+j]+1) <<" "<< MAGMA_Z_REAL((*val)[rowtemp1+j]) << std::endl;
-      }
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+    Purpose
+    =======
+
+    Writes a CSR matrix to a file using Matrix Market format.
+
+    Arguments
+    =========
+
+    magma_int_t* n_row                   number of rows in matrix
+    magma_int_t* n_col                   number of columns in matrix
+    magma_int_t* nnz                     number of nonzeros 
+    magmaDoubleComplex **val             value array of CSR  
+    magma_int_t **row                    row pointer of CSR 
+    magma_int_t **col                    column indices of CSR 
+    magma_int_t MajorType                Row or Column sort
+                                         default: 0 = RowMajor, 1 = ColMajor
+    const char * filename                output filename for the matrix
+
+    =====================================================================  */
+
+  if( MajorType == 1){
+    //to obtain ColMajr output we transpose the matrix 
+    //and flip in the output the row and col pointer
+    magmaDoubleComplex *new_val;
+    magma_int_t *new_row;                    
+    magma_int_t *new_col;
+    magma_int_t new_n_row;
+    magma_int_t new_n_col;
+    magma_int_t new_nnz;
+
+    z_transpose_csr( n_row, n_col, nnz, *val, *row, *col, &new_n_row, &new_n_col, &new_nnz, &new_val, &new_row, &new_col);
+    printf("Writing sparse matrix to file (%s):",filename);
+    fflush(stdout);
+
+    std::ofstream file(filename);
+    file << "%%MatrixMarket matrix coordinate real general" << std::endl;
+    file << new_n_row <<" "<< new_n_col <<" "<< new_nnz << std::endl;
+   
+    magma_int_t i=0, j=0, rowindex=1;
+
+    for(i=0; i<n_col; i++)
+    {    
+      magma_int_t rowtemp1=(new_row)[i];
+      magma_int_t rowtemp2=(new_row)[i+1];
+      for(j=0; j<rowtemp2-rowtemp1; j++)  
+        file << ((new_col)[rowtemp1+j]+1) <<" "<< rowindex <<" "<< MAGMA_Z_REAL((new_val)[rowtemp1+j]) << std::endl;
+      rowindex++;
+    }
+    printf(" done\n");
+
+  }
+  else{
+    printf("Writing sparse matrix to file (%s):",filename);
+    fflush(stdout);
+
+    std::ofstream file(filename);
+    file << "%%MatrixMarket matrix coordinate real general" << std::endl;
+    file << n_row <<" "<< n_col <<" "<< nnz << std::endl;
+   
+    magma_int_t i=0, j=0, rowindex=1;
+
+    for(i=0; i<n_col; i++)
+    {
+      magma_int_t rowtemp1=(*row)[i];
+      magma_int_t rowtemp2=(*row)[i+1];
+      for(j=0; j<rowtemp2-rowtemp1; j++)  
+        file << rowindex <<" "<< ((*col)[rowtemp1+j]+1) <<" "<< MAGMA_Z_REAL((*val)[rowtemp1+j]) << std::endl;
+      rowindex++;
+    }
+    printf(" done\n");
   }
 }
 
-magma_int_t cout_z_csr_mtx(magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, magmaDoubleComplex **val, magma_int_t **col, magma_int_t **row)
-{
-   cout << "%%MatrixMarket matrix coordinate real general" << endl;
-   cout << n_row <<" "<< n_col <<" "<< nnz <<endl;
+
+
+magma_int_t print_z_csr( magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col ){
+
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+    Purpose
+    =======
+
+    Prints a CSR matrix in CSR format.
+
+    Arguments
+    =========
+
+    magma_int_t* n_row                   number of rows in matrix
+    magma_int_t* n_col                   number of columns in matrix
+    magma_int_t* nnz                     number of nonzeros 
+    magmaDoubleComplex **val             value array of CSR  
+    magma_int_t **row                    row pointer of CSR 
+    magma_int_t **col                    column indices of CSR 
+
+    =====================================================================  */
+
+  cout << "Matrix in CSR format (row col val)" << endl;
+  cout << n_row <<" "<< n_col <<" "<< nnz <<endl;
    
   magma_int_t i=0,j=0;
 
@@ -367,9 +503,51 @@ magma_int_t cout_z_csr_mtx(magma_int_t n_row, magma_int_t n_col, magma_int_t nnz
     magma_int_t rowtemp1=(*row)[i];
     magma_int_t rowtemp2=(*row)[i+1];
     for(j=0; j<rowtemp2-rowtemp1; j++)  
-      {
-  //b[i*n+col[rowtemp1+j]]=val[rowtemp1+j];
-  cout<< rowtemp1+1 <<" "<< (*col)[rowtemp1+j]+1 <<" "<< MAGMA_Z_REAL((*val)[rowtemp1+j]) <<endl;
-      }
+      cout<< (rowtemp1+1) <<" "<< (*col)[rowtemp1+j]+1 <<" "<< MAGMA_Z_REAL((*val)[rowtemp1+j]) <<endl;
+  }
+
+}
+
+
+
+magma_int_t print_z_csr_mtx( magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col, magma_int_t MajorType ){
+
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+    Purpose
+    =======
+
+    Prints a CSR matrix in Matrix Market format.
+
+    Arguments
+    =========
+
+    magma_int_t* n_row                   number of rows in matrix
+    magma_int_t* n_col                   number of columns in matrix
+    magma_int_t* nnz                     number of nonzeros 
+    magmaDoubleComplex **val             value array of CSR  
+    magma_int_t **row                    row pointer of CSR 
+    magma_int_t **col                    column indices of CSR
+    magma_int_t MajorType                Row or Column sort
+                                         default: 0 = RowMajor, 1 = ColMajor
+
+    =====================================================================  */
+
+  cout << "%%MatrixMarket matrix coordinate real general" << endl;
+  cout << n_row <<" "<< n_col <<" "<< nnz <<endl;
+   
+  magma_int_t i=0, j=0, rowindex=1;
+
+  for(i=0; i<n_col; i++)
+  {
+    magma_int_t rowtemp1 = (*row)[i];
+    magma_int_t rowtemp2 = (*row)[i+1];
+    for(j=0; j<rowtemp2-rowtemp1; j++)
+      cout<< rowindex <<" "<< (*col)[rowtemp1+j]+1 <<" "<< MAGMA_Z_REAL((*val)[rowtemp1+j]) <<endl;
+    rowindex++;
   }
 }
