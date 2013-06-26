@@ -7,8 +7,8 @@
 
        @precisions normal z -> z
 
-       WARNING: this version has really poor performance 
-       and cublas is prefered to this implementation. 
+       WARNING: this version has really poor performance
+       and cublas is prefered to this implementation.
 
 */
 #include "common_magma.h"
@@ -19,10 +19,10 @@
 
 #define magmablas_zhemv_130 magmablas_zhemv
 
-#define thread_seg 128  // used in zhemv_130_kernel1 
+#define thread_seg 128  // used in zhemv_130_kernel1
 #define threadSize 128  // used in zhemv_130_kernel2
 
-__global__ void 
+__global__ void
 magmablas_zhemv_130_kernel1( magma_int_t m, magmaDoubleComplex alpha,
                                const magmaDoubleComplex *A, magma_int_t lda,
                                const magmaDoubleComplex *x, magma_int_t incx,
@@ -36,15 +36,15 @@ magmablas_zhemv_130_kernel1( magma_int_t m, magmaDoubleComplex alpha,
     if(tid < m)
     {
 #pragma unroll
-        for (i=0; i<tid; i++)
+        for (i=0; i < tid; i++)
         {
             res +=  A[tid + i*lda] * x[i];
         }
         y[tid] = beta * y[tid] + alpha * res;
     }
-}        
+}
 
-__global__ void 
+__global__ void
 magmablas_zhemv_130_kernel2( magma_int_t m, magmaDoubleComplex alpha,
                                const magmaDoubleComplex *A, magma_int_t lda,
                                const magmaDoubleComplex *x, magma_int_t incx,
@@ -60,7 +60,7 @@ magmablas_zhemv_130_kernel2( magma_int_t m, magmaDoubleComplex alpha,
 
     magma_int_t m1 = ((m - blockIdx.y)/threadSize) * threadSize;
 
-    for(i=blockIdx.y; i<(m1 + blockIdx.y); i+= threadSize)
+    for(i=blockIdx.y; i < (m1 + blockIdx.y); i += threadSize)
     {
         res += cuConj(A[tx+i + lda*blockIdx.y]) * x[tx+i];
     }
@@ -69,25 +69,25 @@ magmablas_zhemv_130_kernel2( magma_int_t m, magmaDoubleComplex alpha,
     {
         if( (tx + m1 + blockIdx.y) <  m )
         {
-            res += cuConj(A[tx+m1+blockIdx.y + lda*blockIdx.y]) 
+            res += cuConj(A[tx+m1+blockIdx.y + lda*blockIdx.y])
                 *  x[tx+m1+blockIdx.y];
         }
-        else 
+        else
         {
             res += c_zero;
         }
-    }        
+    }
 
     sdata[tx] = res;
     __syncthreads();
     
-    if(tx < 64) 
+    if(tx < 64)
     {
         sdata[tx] += sdata[tx + 64];
     }
     __syncthreads();
-        
-    if(tx < 32) 
+    
+    if(tx < 32)
     {
         sdata[tx] += sdata[tx + 32];
         sdata[tx] += sdata[tx + 16];
@@ -96,7 +96,7 @@ magmablas_zhemv_130_kernel2( magma_int_t m, magmaDoubleComplex alpha,
         sdata[tx] += sdata[tx +  2];
         sdata[tx] += sdata[tx +  1];
     }
-    if( tx == 0 ) 
+    if( tx == 0 )
     {
         y[blockIdx.y] = alpha * sdata[0] + y[blockIdx.y];
     }
@@ -193,12 +193,13 @@ magmablas_zhemv_130_kernel2( magma_int_t m, magmaDoubleComplex alpha,
 
 extern "C"
 magma_int_t
-magmablas_zhemv_130( char uplo, magma_int_t n,
-                       magmaDoubleComplex alpha, 
-                       const magmaDoubleComplex *A, magma_int_t lda,
-                       const magmaDoubleComplex *X, magma_int_t incx,
-                       magmaDoubleComplex beta,  
-                       magmaDoubleComplex *Y, magma_int_t incy)
+magmablas_zhemv_130(
+    char uplo, magma_int_t n,
+    magmaDoubleComplex alpha,
+    const magmaDoubleComplex *A, magma_int_t lda,
+    const magmaDoubleComplex *X, magma_int_t incx,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex *Y, magma_int_t incy)
 {
     char uplo_[2] = {uplo, 0};
     int  upper    = lapackf77_lsame(uplo_, "U");
@@ -230,20 +231,20 @@ magmablas_zhemv_130( char uplo, magma_int_t n,
     dim3 threads1(thread_seg, 1, 1);
     dim3 grid2( 1, n, 1);
     dim3 threads2(threadSize, 1, 1);
-        
+    
     /* TODO: Upper case is not implemented in MAGMA */
     if ( upper )
         cublasZhemv(uplo, n, alpha, A, lda, X, incx, beta, Y, incy);
     else
     {
-        magmablas_zhemv_130_kernel1 <<< grid1, threads1, 0, magma_stream >>> 
+        magmablas_zhemv_130_kernel1 <<< grid1, threads1, 0, magma_stream >>>
             (n, alpha, A, lda, X, incx, beta, Y, incy);
 
-        magmablas_zhemv_130_kernel2 <<< grid2, threads2, 0, magma_stream >>> 
+        magmablas_zhemv_130_kernel2 <<< grid2, threads2, 0, magma_stream >>>
             (n, alpha, A, lda, X, incx, beta, Y, incy);
     }
 
-    return MAGMA_SUCCESS;    
+    return MAGMA_SUCCESS;
 }
 
 #endif /* defined(PRECISION_z) && (GPUSHMEM < 200)*/
