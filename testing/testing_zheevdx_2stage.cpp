@@ -51,7 +51,7 @@ magma_int_t main( magma_int_t argc, char** argv)
 #endif
 
     /* Matrix size */
-    double *w0, *w1, *w2, result[2];
+    double *w1, *w2, result[2];
     magma_int_t *iwork;
     magma_int_t N, n2, info, lwork, liwork;
     magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
@@ -103,8 +103,8 @@ magma_int_t main( magma_int_t argc, char** argv)
 
             /* Allocate host memory for the matrix */
             TESTING_MALLOC(   h_A, magmaDoubleComplex, n2);
-            TESTING_MALLOC(    w0, double         ,  N);
             TESTING_MALLOC(    w1, double         ,  N);
+            TESTING_MALLOC(    w2, double         ,  N);
             TESTING_HOSTALLOC(h_R, magmaDoubleComplex, n2);
             TESTING_HOSTALLOC(h_work, magmaDoubleComplex,  lwork);
 #if defined(PRECISION_z) || defined(PRECISION_c)
@@ -113,24 +113,15 @@ magma_int_t main( magma_int_t argc, char** argv)
             TESTING_MALLOC(    iwork,     magma_int_t, liwork);
 
 
-            /*----------------------------------------------------------
-            *  TESTING ZHEEVD
-            */
-            /* Initialize A1 */
-            magma_int_t   mode  = 4;
-            double eps   = lapackf77_dlamch("E");
-            double dmax  = 1.0;
-            double rcond = 1.0e6;
-            lapackf77_zlatms( &N, &N, "S", ISEED, "H",
-                              w0, &mode, &rcond,
-                              &dmax, &N, &N,
-                              "N", h_A, &N, h_work, &info );
-            /*
-             * Sort the eigenvalue because when computing the tridiag
-             * and then the eigenvalue of the DSTQR are sorted.
-             * So to avoid testing fail when having good results W1 should be sorted
-            */
-            lapackf77_dlasrt( "I", &N, w0,&info );
+            /* Initialize the matrix */
+            lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
+            /* Make diagonal real */
+            {
+                for(int i=0; i<N; i++) {
+                    MAGMA_Z_SET2REAL( h_A[i*N+i], MAGMA_Z_REAL(h_A[i*N+i]) );
+                }
+            }
+
 
             magma_int_t m1 = 0;
             double vl = 0;
@@ -211,6 +202,7 @@ magma_int_t main( magma_int_t argc, char** argv)
             gpu_time = GetTimerValue(start,end)/1000.;
 
             if ( checkres ) {
+                double eps   = lapackf77_dlamch("E");
                 printf("\n");
                 printf("------ TESTS FOR MAGMA ZHEEVD ROUTINE -------  \n");
                 printf("        Size of the Matrix %d by %d\n", N, N);
@@ -225,7 +217,16 @@ magma_int_t main( magma_int_t argc, char** argv)
                     info_ortho = check_orthogonality(N, N, h_R, N, eps);
                     info_reduction = check_reduction(uplo, N, 1, h_A, w1, N, h_R, eps);
                 }
-                info_solution = check_solution(N, w0, w1, eps);
+                printf("------ CALLING LAPACK ZHEEVD TO COMPUTE only eigenvalue and verify elementswise -------  \n");
+                lapackf77_zheevd("N", "L", &N, 
+                                h_A, &N, w2, 
+                                h_work, &lwork, 
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                                rwork, &lrwork, 
+#endif     
+                                iwork, &liwork, 
+                                &info);
+                info_solution = check_solution(N, w2, w1, eps);
               
                 if ( (info_solution == 0) & (info_ortho == 0) & (info_reduction == 0) ) {
                     printf("***************************************************\n");
@@ -247,15 +248,14 @@ magma_int_t main( magma_int_t argc, char** argv)
                    (magma_int_t) N, (magma_int_t) m1, gpu_time);
 
             TESTING_FREE(       h_A);
-            TESTING_FREE(       h_B);
             TESTING_FREE(        w1);
+            TESTING_FREE(        w2);
 #if defined(PRECISION_z) || defined(PRECISION_c)
             TESTING_HOSTFREE( rwork);
 #endif
             TESTING_FREE(     iwork);
             TESTING_HOSTFREE(h_work);
             TESTING_HOSTFREE(   h_R);
-            TESTING_HOSTFREE(   h_S);
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );
