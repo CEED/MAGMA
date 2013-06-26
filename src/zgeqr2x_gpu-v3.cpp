@@ -10,28 +10,6 @@
 */
 #include "common_magma.h"
 
-extern "C" void
-magma_zlarfbx_gpu(int m, int k, magmaDoubleComplex *V, int ldv,
-                  magmaDoubleComplex *dT, int ldt, magmaDoubleComplex *c,
-                  magmaDoubleComplex *dwork);
-
-extern "C" void
-magma_zlarfgtx_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
-                   magmaDoubleComplex *dtau, double *dxnorm,
-                   magmaDoubleComplex *dA, int it,
-                   magmaDoubleComplex *V, int ldv, magmaDoubleComplex *T, int ldt,
-                   magmaDoubleComplex *dwork);
-
-extern "C" void
-magmablas_dznrm2_adjust(int k, double *xnorm, magmaDoubleComplex *c);
-    
-extern "C" void
-magmablas_zgemm_reduce(magma_int_t m, magma_int_t n, magma_int_t k,
-                       magmaDoubleComplex alpha, const magmaDoubleComplex *d_A, magma_int_t lda,
-                       const magmaDoubleComplex *d_B, magma_int_t ldb,
-                       magmaDoubleComplex beta,        magmaDoubleComplex *d_C, magma_int_t ldc );
-
-
 extern "C" magma_int_t
 magma_zlarfb2_gpu( magma_int_t m, magma_int_t n, magma_int_t k,
                    const magmaDoubleComplex *dV,    magma_int_t ldv,
@@ -176,7 +154,7 @@ magma_zgeqr2x3_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
 
     /* Compute the norms of the trailing columns */
     k = min(*m,*n);
-    magmablas_dznrm2(*m, k, da_ref(0,0), *ldda, dnorm);
+    magmablas_dznrm2_cols(*m, k, da_ref(0,0), *ldda, dnorm);
 
     for (int b=0; b < k; b += BLOCK_SIZE) {
         for (i = b; i < min(k, b+BLOCK_SIZE); ++i) {

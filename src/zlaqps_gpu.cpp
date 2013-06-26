@@ -8,23 +8,10 @@
        @precisions normal z -> s d c
 
 */
-
 #include "common_magma.h"
 #include <cblas.h>
 
 #define PRECISION_z
-/* --------------------------------------------------------------------------- */
-extern "C" void
-magmablas_dznrm2_adjust(int k, double *xnorm, magmaDoubleComplex *c);
-
-extern "C" void
-magmablas_dznrm2_row_check_adjust(int k, double tol, double *xnorm, double *xnorm2,
-                                  magmaDoubleComplex *c, int ldc, double *lsticc);
-
-extern "C" void
-magmablas_dznrm2_check(int m, int num, magmaDoubleComplex *da, magma_int_t ldda,
-                               double *dxnorm, double *lsticc);
-/* --------------------------------------------------------------------------- */
 
 extern "C" magma_int_t
 magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
@@ -142,8 +129,6 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         /* Determine ith pivot column and swap if necessary */
         // Fortran: pvt, k, idamax are all 1-based; subtract 1 from k.
         // C:       pvt, k, idamax are all 0-based; don't subtract 1.
-        //pvt = k - 1 + idamax_( n-k+1, &vn1[k], &ione);
-        //pvt = k + cblas_idamax( n-k, &vn1[k], ione );
         pvt = k - 1 + magma_idamax( n-k, &vn1[k], ione );
         
         if (pvt != k) {

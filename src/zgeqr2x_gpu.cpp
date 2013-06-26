@@ -10,16 +10,6 @@
 */
 #include "common_magma.h"
 
-extern "C" void
-magma_zlarfgx_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
-                  magmaDoubleComplex *dtau, double *dxnorm,
-                  magmaDoubleComplex *ddx0, int iter);
-
-extern "C" void
-magma_zlarfx_gpu(int m, int n, magmaDoubleComplex *v, magmaDoubleComplex *tau,
-                 magmaDoubleComplex *c, int ldc, double *xnorm,
-                 magmaDoubleComplex *dT, int iter, magmaDoubleComplex *work);
-
 extern "C" magma_int_t
 magma_zgeqr2x_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
                   magma_int_t *ldda, magmaDoubleComplex *dtau,
@@ -125,7 +115,7 @@ magma_zgeqr2x_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
 
     /* Compute the norms of the trailing columns */
     k = min(*m,*n);
-    magmablas_dznrm2(*m, k, da_ref(0,0), *ldda, dnorm);
+    magmablas_dznrm2_cols(*m, k, da_ref(0,0), *ldda, dnorm);
 
     for (i = 0; i < k; ++i) {
         /*  Generate elementary reflector H(i) to annihilate A(i+1:m,i) */

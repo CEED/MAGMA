@@ -16,27 +16,6 @@
    #define BLOCK_SIZE 768
 #endif
 
-extern "C" void
-magma_zlarfbx_gpu(int m, int k, magmaDoubleComplex *V, int ldv,
-                  magmaDoubleComplex *dT, int ldt, magmaDoubleComplex *c,
-                  magmaDoubleComplex *dwork);
-
-extern "C" void
-magma_zlarfgtx_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
-                   magmaDoubleComplex *dtau, double *dxnorm,
-                   magmaDoubleComplex *dA, int it,
-                   magmaDoubleComplex *V, int ldv, magmaDoubleComplex *T, int ldt,
-                   magmaDoubleComplex *dwork);
-
-extern "C" void
-magmablas_dznrm2_adjust(int k, double *xnorm, magmaDoubleComplex *c);
-    
-extern "C" void
-magmablas_zgemm_reduce(magma_int_t m, magma_int_t n, magma_int_t k,
-                       magmaDoubleComplex alpha, const magmaDoubleComplex *d_A, magma_int_t lda,
-                       const magmaDoubleComplex *d_B, magma_int_t ldb,
-                       magmaDoubleComplex beta,        magmaDoubleComplex *d_C, magma_int_t ldc );
-
 __global__ void 
 magma_ztrmv_kernel2(const magmaDoubleComplex *T, int ldt,
                     magmaDoubleComplex *v, magmaDoubleComplex *y, magmaDoubleComplex *tau);
@@ -46,13 +25,6 @@ magma_zgemv_kernel3(int m, const magmaDoubleComplex * __restrict__ V, int ldv,
                     magmaDoubleComplex *c, magmaDoubleComplex *dwork,
                     magmaDoubleComplex *tau);
 
-
-extern "C" magma_int_t
-magma_zlarfb2_gpu( magma_int_t m, magma_int_t n, magma_int_t k,
-                   const magmaDoubleComplex *dV,    magma_int_t ldv,
-                   const magmaDoubleComplex *dT,    magma_int_t ldt,
-                   magmaDoubleComplex *dC,          magma_int_t ldc,
-                   magmaDoubleComplex *dwork,       magma_int_t ldwork );
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -68,11 +40,6 @@ magma_ztrmv_tkernel(magmaDoubleComplex *T, int ldt, magmaDoubleComplex *v,
                                     magmaDoubleComplex *y);
 __global__ void
 magma_dznrm2_adjust_kernel(double *xnorm, magmaDoubleComplex *c);
-
-extern "C" void
-magma_zlarfgx_gpu(int n, magmaDoubleComplex *dx0, magmaDoubleComplex *dx,
-                  magmaDoubleComplex *dtau, double *dxnorm,
-                  magmaDoubleComplex *dA, int it);
 
 extern "C" magma_int_t
 magma_zgeqr2x4_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA, 
@@ -185,9 +152,9 @@ magma_zgeqr2x4_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
 
     /* Compute the norms of the trailing columns */
     k = min(*m,*n);
-    magmablas_dznrm2(*m, k, da_ref(0,0), *ldda, dnorm);
+    magmablas_dznrm2_cols(*m, k, da_ref(0,0), *ldda, dnorm);
 
-    for (int b=0; b < k; b += BS) {
+    for (magma_int_t b=0; b < k; b += BS) {
         for (i = b; i < min(k, b+BS); ++i) {
 
             /*   Apply H' to A(:,i) from the left                           */    

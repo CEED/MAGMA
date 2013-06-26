@@ -94,7 +94,7 @@ magmablas_dznrm2_kernel( int m, magmaDoubleComplex *da, int ldda, double *dxnorm
     sum_reduce< BLOCK_SIZE >( i, sum );
     
     if (i==0)
-       dxnorm[blockIdx.x] = sqrt(sum[0]);
+        dxnorm[blockIdx.x] = sqrt(sum[0]);
 }
 
 
@@ -129,29 +129,30 @@ magmablas_dznrm2_check_kernel( int m, magmaDoubleComplex *da, int ldda, double *
     sum_reduce< BLOCK_SIZE >( i, sum );
     
     if (i==0)
-       dxnorm[blockIdx.x] = sqrt(sum[0]);
+        dxnorm[blockIdx.x] = sqrt(sum[0]);
 }
 
 extern "C" void
-magmablas_dznrm2_check(int m, int num, magmaDoubleComplex *da, magma_int_t ldda, 
+magmablas_dznrm2_check(int m, int n, magmaDoubleComplex *da, magma_int_t ldda, 
                        double *dxnorm, double *lsticc) 
 {
-    dim3  blocks( num );
+    dim3  blocks( n );
     dim3 threads( BLOCK_SIZE );
     
     magmablas_dznrm2_check_kernel<<< blocks, threads >>>( m, da, ldda, dxnorm, lsticc );
 }
-//==============================================================================
 
+
+//==============================================================================
 __global__ void
-magmablas_dznrm2_smkernel( int m, int num, magmaDoubleComplex *da, int ldda,
+magmablas_dznrm2_smkernel( int m, int n, magmaDoubleComplex *da, int ldda,
                            double *dxnorm )
 {
     const int i = threadIdx.x, c= threadIdx.y;
     __shared__ double sum[ BLOCK_SIZEx ][ BLOCK_SIZEy + 1];
     double re, lsum;
 
-    for( int k = c; k < num; k+= BLOCK_SIZEy) 
+    for( int k = c; k < n; k+= BLOCK_SIZEy) 
     {
         magmaDoubleComplex *dx = da + k * ldda;
 
@@ -178,20 +179,21 @@ magmablas_dznrm2_smkernel( int m, int num, magmaDoubleComplex *da, int ldda,
     }
 }
 
+
 //==============================================================================
 /*
-   Compute the dznrm2 of da, da+ldda, ..., da +(num-1)*ldda where the vectors are
-   of size m. The resulting norms are written in the dxnorm array.
-   This routine uses only one SM (block).
+    Compute the dznrm2 of each column of m-by-n matrix dA.
+    The resulting norms are written in the dxnorm array.
+    This routine uses only one SM (block).
 */
 extern "C" void
-magmablas_dznrm2_sm(int m, int num, magmaDoubleComplex *da, magma_int_t ldda,
+magmablas_dznrm2_sm(int m, int n, magmaDoubleComplex *da, magma_int_t ldda,
                     double *dxnorm)
 {
     dim3  blocks( 1 );
     dim3 threads( BLOCK_SIZEx, BLOCK_SIZEy );
 
-    magmablas_dznrm2_smkernel<<< blocks, threads, 0, magma_stream >>>( m, num, da, ldda, dxnorm );
+    magmablas_dznrm2_smkernel<<< blocks, threads, 0, magma_stream >>>( m, n, da, ldda, dxnorm );
 }
 
 //==============================================================================
@@ -219,18 +221,18 @@ __device__ void dsum_reduce( int n, int i, double* x )
 __global__ void
 magma_dznrm2_adjust_kernel(double *xnorm, magmaDoubleComplex *c)
 {
-   const int i = threadIdx.x;
+    const int i = threadIdx.x;
 
-   __shared__ double sum[ BLOCK_SIZE ];
-   double temp;
+    __shared__ double sum[ BLOCK_SIZE ];
+    double temp;
 
-   temp = MAGMA_Z_ABS( c[i] ) / xnorm[0];
-   sum[i] = -temp * temp;
-   dsum_reduce( blockDim.x, i, sum );
+    temp = MAGMA_Z_ABS( c[i] ) / xnorm[0];
+    sum[i] = -temp * temp;
+    dsum_reduce( blockDim.x, i, sum );
 
-   __syncthreads();
-   if (i==0)
-     xnorm[0] = xnorm[0] * sqrt(1+sum[0]);
+    __syncthreads();
+    if (i==0)
+        xnorm[0] = xnorm[0] * sqrt(1+sum[0]);
 }
 
 
@@ -241,7 +243,7 @@ magma_dznrm2_adjust_kernel(double *xnorm, magmaDoubleComplex *c)
 extern "C" void
 magmablas_dznrm2_adjust(int k, double *xnorm, magmaDoubleComplex *c)
 {
-   magma_dznrm2_adjust_kernel<<< 1, k, 0, magma_stream >>> (xnorm, c);
+    magma_dznrm2_adjust_kernel<<< 1, k, 0, magma_stream >>> (xnorm, c);
 }
 
 //==============================================================================
@@ -252,25 +254,25 @@ __global__ void
 magma_dznrm2_row_check_adjust_kernel(int n, double tol, double *xnorm, double *xnorm2, 
                                      magmaDoubleComplex *c, int ldc, double *lsticc)
 {
-   const int i = threadIdx.x + blockIdx.x*BS;
-   lsticc[i+1] = 0;
+    const int i = threadIdx.x + blockIdx.x*BS;
+    lsticc[i+1] = 0;
 
-   if (i<n){
-     double temp = MAGMA_Z_ABS( c[i*ldc] ) / xnorm[i];
-     temp = max( 0.0, ((1.0 + temp) * (1.0 - temp)) );
-
-
-     double temp2 = xnorm[i] / xnorm2[i];
-     temp2 = temp * (temp2 * temp2);
-
-     if (temp2 <= tol) {
-         lsticc[i+1] = 1;
-     } else {
-         xnorm[i] *= sqrt(temp);
-     }
-  }
-  if( i==0 ) lsticc[0] = 0;
-  dsum_reduce( blockDim.x, i, lsticc );
+    if (i<n){
+        double temp = MAGMA_Z_ABS( c[i*ldc] ) / xnorm[i];
+        temp = max( 0.0, ((1.0 + temp) * (1.0 - temp)) );
+        
+        
+        double temp2 = xnorm[i] / xnorm2[i];
+        temp2 = temp * (temp2 * temp2);
+        
+        if (temp2 <= tol) {
+            lsticc[i+1] = 1;
+        } else {
+            xnorm[i] *= sqrt(temp);
+        }
+    }
+    if( i==0 ) lsticc[0] = 0;
+    dsum_reduce( blockDim.x, i, lsticc );
 }
 
 /*
@@ -282,30 +284,30 @@ extern "C" void
 magmablas_dznrm2_row_check_adjust(int k, double tol, double *xnorm, double *xnorm2, 
                                   magmaDoubleComplex *c, int ldc, double *lsticc)
 {
-   int nblocks = (k+BS-1)/BS;
-   magma_dznrm2_row_check_adjust_kernel<<< nblocks, BS >>> (k, tol, xnorm, xnorm2, c, ldc, lsticc);
+    int nblocks = (k+BS-1)/BS;
+    magma_dznrm2_row_check_adjust_kernel<<< nblocks, BS >>> (k, tol, xnorm, xnorm2, c, ldc, lsticc);
 }
 
 //==============================================================================
 
 /*
-   Compute the dznrm2 of da, da+ldda, ..., da +(num-1)*ldda where the vectors are
-   of size m. The resulting norms are written in the dxnorm array. 
-   The computation can be done using num blocks (default) or on one SM (commented).
+    Compute the dznrm2 of each column of m-by-n matrix dA.
+    The resulting norms are written in the dxnorm array. 
+    The computation can be done using n blocks (default) or on one SM (commented).
 */
 extern "C" void
-magmablas_dznrm2(int m, int num, magmaDoubleComplex *da, magma_int_t ldda, 
-                 double *dxnorm) 
+magmablas_dznrm2_cols(
+    magma_int_t m, magma_int_t n,
+    magmaDoubleComplex *da, magma_int_t ldda, 
+    double *dxnorm) 
 {
-    dim3  blocks( num );
+    dim3  blocks( n );
     dim3 threads( BLOCK_SIZE );
     
     magmablas_dznrm2_kernel<<< blocks, threads, 0, magma_stream >>>( m, da, ldda, dxnorm );
 
     // The following would do the computation on one SM
-    // magmablas_dznrm2_sm(m, num, da, ldda, dxnorm);
+    // magmablas_dznrm2_sm(m, n, da, ldda, dxnorm);
 }
 
 //==============================================================================
-
-

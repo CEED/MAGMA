@@ -8,37 +8,10 @@
        @precisions normal z -> c d s
 
 */
-
 #include "common_magma.h"
 #include <cblas.h>
 
 #define PRECISION_z
-extern "C" magma_int_t
-magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
-                 magma_int_t nb, magma_int_t *kb,
-                 magmaDoubleComplex *A,  magma_int_t lda,
-                 magma_int_t *jpvt, magmaDoubleComplex *tau,
-                 double *vn1, double *vn2,
-                 magmaDoubleComplex *auxv,
-                 magmaDoubleComplex *dF, magma_int_t lddf);
-
-extern "C" magma_int_t
-magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
-                  magma_int_t nb, magma_int_t *kb,
-                  magmaDoubleComplex *A,  magma_int_t lda,
-                  magma_int_t *jpvt, magmaDoubleComplex *tau,
-                  double *vn1, double *vn2,
-                  magmaDoubleComplex *auxv,
-                  magmaDoubleComplex *dF, magma_int_t lddf);
-
-extern "C" magma_int_t
-magma_zlaqps3_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
-                  magma_int_t nb, magma_int_t *kb,
-                  magmaDoubleComplex *A,  magma_int_t lda,
-                  magma_int_t *jpvt, magmaDoubleComplex *tau,
-                  double *vn1, double *vn2,
-                  magmaDoubleComplex *auxv,
-                  magmaDoubleComplex *dF, magma_int_t lddf);
 
 extern "C" magma_int_t
 magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
@@ -233,7 +206,7 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
         }*/
 
         /* Initialize partial column norms. */
-        magmablas_dznrm2(sm, sn, A(nfxd,nfxd), lda, &rwork[nfxd]);
+        magmablas_dznrm2_cols(sm, sn, A(nfxd,nfxd), lda, &rwork[nfxd]);
 #if defined(PRECISION_d) || defined(PRECISION_z)
         magma_dcopymatrix( sn, 1, &rwork[nfxd], sn, &rwork[n+nfxd], sn);
 #else
@@ -274,8 +247,8 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
                 //magma_zlaqps_gpu
                 //magma_zlaqps2_gpu
                 //    if (j!=nfxd)
-                // magmablas_dznrm2(sm-j, jb, A(nfxd+j,nfxd+j), lda, &rwork[nfxd+j]);
-                //magmablas_dznrm2(sm-j, sn-j, A(nfxd+j,nfxd+j), lda, &rwork[nfxd+j]);
+                //magmablas_dznrm2_cols(sm-j, jb, A(nfxd+j,nfxd+j), lda, &rwork[nfxd+j]);
+                //magmablas_dznrm2_cols(sm-j, sn-j, A(nfxd+j,nfxd+j), lda, &rwork[nfxd+j]);
 
                 magma_zlaqps3_gpu( m, n_j, j, jb, &fjb,
                     A (0, j), lda,

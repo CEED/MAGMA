@@ -28,17 +28,6 @@ __global__ void magma_zgemv_kernel3(int m, const magmaDoubleComplex * __restrict
                                     magmaDoubleComplex *tau);
 
 /* --------------------------------------------------------------------------- */
-extern "C" void
-magmablas_dznrm2_adjust(int k, double *xnorm, magmaDoubleComplex *c);
-
-extern "C" void
-magmablas_dznrm2_row_check_adjust(int k, double tol, double *xnorm, double *xnorm2, 
-                                  magmaDoubleComplex *c, int ldc, double *lsticc);
-
-extern "C" void
-magmablas_dznrm2_check(int m, int num, magmaDoubleComplex *da, magma_int_t ldda,
-                               double *dxnorm, double *lsticc);
-
 
 template< int n >
 __device__ void sum_reduce( /*int n,*/ int i, double* x )

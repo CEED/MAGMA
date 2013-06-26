@@ -133,7 +133,6 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
         /* Determine ith pivot column and swap if necessary */
         // Fortran: pvt, k, idamax are all 1-based; subtract 1 from k.
         // C:       pvt, k, idamax are all 0-based; don't subtract 1.
-        //pvt = k - 1 + idamax_( n-k+1, &vn1[k], &ione);
         pvt = k + cblas_idamax( n-k, &vn1[k], ione );
         
         if (pvt != k) {
