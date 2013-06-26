@@ -52,6 +52,7 @@
 #include "magma_lapack.h"
 #include "operators.h"
 #include "transpose.h"
+#include "magma_threadsetting.h"
 
 /** ****************************************************************************
  * C99 standard defines __func__. Some older compilers use __FUNCTION__.

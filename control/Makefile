@@ -38,6 +38,7 @@ ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
 	connection_mgpu.cpp	\
 	pthread_barrier.cpp	\
 	xerbla.cpp		\
+	magma_threadsetting.cpp \
 
 ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f90=.o)
