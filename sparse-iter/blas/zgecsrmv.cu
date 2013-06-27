@@ -41,7 +41,17 @@ zgecsrmv_kernel( int m,
 }
 
 
-
+extern "C" magma_int_t
+magma_zgecsrmv(char transA,
+               magma_int_t m, magma_int_t n,
+               magmaDoubleComplex alpha,
+               magmaDoubleComplex *d_val,
+               magma_int_t *d_rowptr,
+               magma_int_t *d_colind,
+               magmaDoubleComplex *d_x,
+               magmaDoubleComplex beta,
+               magmaDoubleComplex *d_y)
+{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -67,18 +77,6 @@ zgecsrmv_kernel( int m,
     magmaDoubleComplex *d_y         input/output vector y
 
     =====================================================================    */
-
-extern "C" magma_int_t
-magma_zgecsrmv(char transA, 
-               magma_int_t m, magma_int_t n, 
-               magmaDoubleComplex alpha, 
-               magmaDoubleComplex *d_val, 
-               magma_int_t *d_rowptr, 
-               magma_int_t *d_colind,
-               magmaDoubleComplex *d_x,
-               magmaDoubleComplex beta, 
-               magmaDoubleComplex *d_y){
-
 
    dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
 
