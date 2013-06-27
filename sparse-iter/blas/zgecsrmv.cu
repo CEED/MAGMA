@@ -30,10 +30,9 @@ zgecsrmv_kernel( int m,
 {
   int index = blockIdx.x*blockDim.x+threadIdx.x;
   int j;
-  magmaDoubleComplex tmp;
 
   if(index<m){
-    tmp = 0;
+    magmaDoubleComplex tmp = MAGMA_Z_ZERO;
     for( j=d_rowptr[index]; j<d_rowptr[index+1]; j++ ){
       tmp += d_val[j] * d_x[d_colind[j]];
     }
@@ -81,11 +80,11 @@ magma_zgecsrmv(char transA,
                magmaDoubleComplex *d_y){
 
 
-   dim3 grid(N/num_threads, 1, 1);
-   dim3 threads(num_threads, 1, 1);
+   dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
 
-   zgecsrmv_kernel<<< grid, threads, 0, magma_stream >>>(d_A, d_I, d_J, N, d_X, d_Y);
-
+   zgecsrmv_kernel<<< grid, BLOCK_SIZE, 0, magma_stream >>>(m, alpha,
+                                                            d_val, d_rowptr, d_colind,
+                                                            d_x, beta, d_y);
 
    return MAGMA_SUCCESS;
 }
