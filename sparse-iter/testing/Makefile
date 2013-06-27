@@ -13,7 +13,7 @@ include ../../Makefile.internal
 # Krylov space linear solvers
 ZSRC += \
 	testing_zcg.cpp	        \
-  testing_z_matrix_io.cpp \
+	testing_z_matrix_io.cpp \
 
 
 # ----------
@@ -56,7 +56,7 @@ lib:
 $(ALLOBJ): testings.h
 
 
-$(EXE): $(LIBMAGMA) $(LIBMAGMA_SPARSE) testing_util.o
+$(EXE): ../$(LIBMAGMA) $(LIBMAGMA_SPARSE) testing_util.o
 
 clean:
 	rm -f *.o *~ 
