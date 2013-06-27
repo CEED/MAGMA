@@ -36,7 +36,7 @@ static magma_int_t check_solution(magma_int_t, double*, double*, double);
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhegvdx
 */
-magma_int_t main( magma_int_t argc, char** argv)
+int main( int argc, char** argv)
 {
 
     TESTING_INIT();
