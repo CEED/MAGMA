@@ -232,6 +232,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
         // need 3n^2/2 for dstedx
         ldwork = max( ldwork, 3*n*(n/2 + 1));
     }
+
     if (MAGMA_SUCCESS != magma_dmalloc( &dwork, ldwork )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
@@ -287,7 +288,11 @@ magma_dsyevd_gpu(char jobz, char uplo,
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
+    #ifdef FAST_SYMV
+    printf("time dsytrd2 = %6.2f\n", GetTimerValue(start,end)/1000.);
+    #else
     printf("time dsytrd = %6.2f\n", GetTimerValue(start,end)/1000.);
+    #endif
 #endif
 
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call

@@ -280,7 +280,6 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
     magma_setlapack_numthreads(threads);
 
 
-
     if (MAGMA_SUCCESS != magma_dmalloc( &da, n*ldda ) ||
         MAGMA_SUCCESS != magma_dmalloc( &db, n*lddb )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;

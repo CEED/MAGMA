@@ -315,20 +315,17 @@ magma_zhegvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
     magma_timestr_t start, end;
     start = get_current_time();
 #endif
-
     magma_zpotrf_gpu(uplo, n, db, lddb, info);
     if (*info != 0) {
         *info = n + *info;
         return *info;
     }
-
 #ifdef ENABLE_TIMER
     end = get_current_time();
     printf("time zpotrf_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
     magma_queue_sync( stream );
-
     magma_zgetmatrix_async( n, n,
                            db, lddb,
                            b,  ldb, stream );
@@ -336,19 +333,25 @@ magma_zhegvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
 #ifdef ENABLE_TIMER
     start = get_current_time();
 #endif
-
 /*  Transform problem to standard eigenvalue problem and solve. */
     magma_zhegst_gpu(itype, uplo, n, da, ldda, db, lddb, info);
-
 #ifdef ENABLE_TIMER
     end = get_current_time();
     printf("time zhegst_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
-    start = get_current_time();
 #endif
 
+    /* simple fix to be able to run bigger size.
+     * need to have a dwork here that will be used 
+     * a db and then passed to  dsyevd.
+     * */
+    magma_queue_sync( stream );
+    magma_free( db );
+
+#ifdef ENABLE_TIMER
+    start = get_current_time();
+#endif
     magma_zheevdx_gpu(jobz, range, uplo, n, da, ldda, vl, vu, il, iu, m, w, a, lda,
                       work, lwork, rwork, lrwork, iwork, liwork, info);
-
 #ifdef ENABLE_TIMER
     end = get_current_time();
     printf("time zheevdx_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
@@ -356,10 +359,15 @@ magma_zhegvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
 
     if (wantz && *info == 0)
     {
-
 #ifdef ENABLE_TIMER
         start = get_current_time();
 #endif
+        /* allocate and copy db back */ 
+        if (MAGMA_SUCCESS != magma_zmalloc( &db, n*lddb ) ){
+            *info = MAGMA_ERR_DEVICE_ALLOC;
+            return *info;
+        }
+        magma_zsetmatrix( n, n, b, ldb, db, lddb );
 
 /*      Backtransform eigenvectors to the original problem. */
         if (itype == 1 || itype == 2)
@@ -374,7 +382,6 @@ magma_zhegvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
 
             magma_ztrsm(MagmaLeft, uplo, *trans, MagmaNonUnit,
                         n, *m, c_one, db, lddb, da, ldda);
-
         }
         else if (itype == 3)
         {
@@ -391,12 +398,10 @@ magma_zhegvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
         }
 
         magma_zgetmatrix( n, *m, da, ldda, a, lda );
-
 #ifdef ENABLE_TIMER
         end = get_current_time();
         printf("time ztrsm/mm + getmatrix = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
-
     }
 
     magma_queue_sync( stream );

@@ -8,7 +8,7 @@
     @author Raffaele Solca
     @author Azzam Haidar
 
-    @precisions normal z -> c
+    @precisions normal z -> c d s
 
 */
 
@@ -27,6 +27,8 @@
 
 #define absv(v1) ((v1)>0? (v1): -(v1))
 
+#define PRECISION_z
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhegvdx
 */
@@ -36,12 +38,16 @@ int main( int argc, char** argv)
 
     real_Double_t   gpu_time /*cpu_time*/;
     magmaDoubleComplex *h_A, *h_R, *h_B, *h_S, *h_work;
-    double *rwork, *w1, *w2, vl, vu, result[2];
+    double *w1, *w2, vl, vu, result[2];
     magma_int_t *iwork;
-    magma_int_t N, n2, info, il, iu, m1, m2, nb, lwork, lrwork, liwork;
+    magma_int_t N, n2, info, il, iu, m1, m2, nb, lwork, liwork;
     magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+#if defined(PRECISION_z) || defined(PRECISION_c)
+    double *rwork;
+    magma_int_t lrwork;
+#endif
     //double d_one         =  1.;
     //double d_ten         = 10.;
     magma_int_t ione     = 1;
@@ -62,10 +68,14 @@ int main( int argc, char** argv)
             N = opts.nsize[i];
             n2     = N*N;
             nb     = magma_get_zhetrd_nb(N);
+#if defined(PRECISION_z) || defined(PRECISION_c)
             lwork  = 2*N*nb + N*N;
-            lrwork = 1 + 5*N + 2*N*N;
+            lrwork = 1 + 5*N +2*N*N;
+#else
+            lwork  = 1 + 6*N*nb + 2* N*N;
+#endif
             liwork = 3 + 5*N;
-            
+
             if ( opts.fraction == 0 ) {
                 il = N / 10;
                 iu = N / 5+il;
@@ -80,46 +90,56 @@ int main( int argc, char** argv)
             TESTING_MALLOC(    h_B,    magmaDoubleComplex, n2     );
             TESTING_MALLOC(    w1,     double,          N      );
             TESTING_MALLOC(    w2,     double,          N      );
-            TESTING_MALLOC(    rwork,  double,          lrwork );
             TESTING_MALLOC(    iwork,  magma_int_t,     liwork );
             TESTING_HOSTALLOC( h_R,    magmaDoubleComplex, n2     );
             TESTING_HOSTALLOC( h_S,    magmaDoubleComplex, n2     );
             TESTING_HOSTALLOC( h_work, magmaDoubleComplex, lwork  );
+#if defined(PRECISION_z) || defined(PRECISION_c)
+            TESTING_HOSTALLOC( rwork,          double, lrwork);
+#endif
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-            //lapackf77_zlatms( &N, &N, "U", ISEED, "P", w1, &five, &d_ten,
-            //                 &d_one, &N, &N, &opts.uplo, h_B, &N, h_work, &info);
-            //lapackf77_zlaset( "A", &N, &N, &c_zero, &c_one, h_B, &N);
             lapackf77_zlarnv( &ione, ISEED, &n2, h_B );
             /* increase the diagonal */
-            for( int i=0; i < N; i++ ) {
-                h_B[i*N+i] = MAGMA_Z_MAKE( MAGMA_Z_REAL(h_B[i*N+i]) + N, 0. );
+            for(int i=0; i<N; i++) {
+                MAGMA_Z_SET2REAL( h_B[i*N+i], ( MAGMA_Z_REAL(h_B[i*N+i]) + 1.*N ) );
+                MAGMA_Z_SET2REAL( h_A[i*N+i], MAGMA_Z_REAL(h_A[i*N+i]) );
             }
-            lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
-            lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
-            
-            magma_zhegvdx( opts.itype, opts.jobz, 'I', opts.uplo,
-                           N, h_R, N, h_S, N, vl, vu, il, iu, &m1, w1,
-                           h_work, lwork,
-                           rwork, lrwork,
-                           iwork, liwork,
-                           &info );
-            if (info != 0)
-                printf("magma_zhegvdx returned error %d: %s.\n",
-                       (int) info, magma_strerror( info ));
-            
-            lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
-            lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
-            
+
+
+            // ==================================================================
+            // Warmup using MAGMA
+            // ==================================================================
+            if(opts.warmup){
+                lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
+                lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
+                
+                magma_zhegvdx( opts.itype, opts.jobz, 'I', opts.uplo,
+                               N, h_R, N, h_S, N, vl, vu, il, iu, &m1, w1,
+                               h_work, lwork,
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                               rwork, lrwork,
+#endif      
+                               iwork, liwork,
+                               &info );
+                if (info != 0)
+                    printf("magma_zhegvdx returned error %d: %s.\n",
+                           (int) info, magma_strerror( info ));
+            }
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
+            lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
+            lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
+
             gpu_time = magma_wtime();
             magma_zhegvdx( opts.itype, opts.jobz, 'I', opts.uplo,
                            N, h_R, N, h_S, N, vl, vu, il, iu, &m1, w1,
                            h_work, lwork,
+#if defined(PRECISION_z) || defined(PRECISION_c)
                            rwork, lrwork,
+#endif
                            iwork, liwork,
                            &info );
             gpu_time = magma_wtime() - gpu_time;
@@ -171,7 +191,9 @@ int main( int argc, char** argv)
                 magma_zhegvdx( opts.itype, 'N', 'I', opts.uplo,
                                N, h_R, N, h_S, N, vl, vu, il, iu, &m2, w2,
                                h_work, lwork,
+#if defined(PRECISION_z) || defined(PRECISION_c)
                                rwork, lrwork,
+#endif
                                iwork, liwork,
                                &info );
                 if (info != 0)
@@ -207,7 +229,9 @@ int main( int argc, char** argv)
             TESTING_FREE( h_B   );
             TESTING_FREE( w1    );
             TESTING_FREE( w2    );
-            TESTING_FREE( rwork );
+#if defined(PRECISION_z) || defined(PRECISION_c)
+            TESTING_HOSTFREE( rwork);
+#endif
             TESTING_FREE( iwork );
             TESTING_HOSTFREE( h_work );
             TESTING_HOSTFREE( h_R    );

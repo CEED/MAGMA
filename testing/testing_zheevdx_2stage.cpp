@@ -116,10 +116,8 @@ int main( int argc, char** argv)
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
             /* Make diagonal real */
-            {
-                for(int i=0; i<N; i++) {
-                    MAGMA_Z_SET2REAL( h_A[i*N+i], MAGMA_Z_REAL(h_A[i*N+i]) );
-                }
+            for(int i=0; i<N; i++) {
+                MAGMA_Z_SET2REAL( h_A[i*N+i], MAGMA_Z_REAL(h_A[i*N+i]) );
             }
 
 

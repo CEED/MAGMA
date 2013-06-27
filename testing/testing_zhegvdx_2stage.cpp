@@ -112,11 +112,9 @@ int main( int argc, char** argv)
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
             lapackf77_zlarnv( &ione, ISEED, &n2, h_B );
             /* increase the diagonal */
-            {
-                for(int i=0; i<N; i++) {
-                    MAGMA_Z_SET2REAL( h_B[i*N+i], ( MAGMA_Z_REAL(h_B[i*N+i]) + 1.*N ) );
-                    MAGMA_Z_SET2REAL( h_A[i*N+i], MAGMA_Z_REAL(h_A[i*N+i]) );
-                }
+            for(int i=0; i<N; i++) {
+                MAGMA_Z_SET2REAL( h_B[i*N+i], ( MAGMA_Z_REAL(h_B[i*N+i]) + 1.*N ) );
+                MAGMA_Z_SET2REAL( h_A[i*N+i], MAGMA_Z_REAL(h_A[i*N+i]) );
             }
 
             magma_int_t m1 = 0;
@@ -130,10 +128,10 @@ int main( int argc, char** argv)
                 iu = f*N;
             }
 
+            // ==================================================================
+            // Warmup using MAGMA
+            // ==================================================================
             if(opts.warmup){
-                // ==================================================================
-                // Warmup using MAGMA
-                // ==================================================================
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
 
@@ -249,6 +247,7 @@ int main( int argc, char** argv)
             TESTING_FREE(       h_A);
             TESTING_FREE(       h_B);
             TESTING_FREE(        w1);
+            TESTING_FREE(        w2);
 #if defined(PRECISION_z) || defined(PRECISION_c)
             TESTING_HOSTFREE( rwork);
 #endif
