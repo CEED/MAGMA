@@ -8,6 +8,7 @@
        @author Azzam Haidar
 */
 #include "common_magma.h"
+
 /***************************************************************************//**
  * switch lapack thread_num initialization
  **/
@@ -15,13 +16,17 @@
 #include <mkl_service.h>
 #include <omp.h>
 #endif
+
 #if defined(MAGMA_WITH_ACML)
 #include <omp.h>
 #endif
+
 #if defined(_OPENMP) 
 #include <omp.h>
 #endif
+
 /////////////////////////////////////////////////////////////
+extern "C"
 void magma_setlapack_numthreads(magma_int_t num_threads)
 {
 #if defined(MAGMA_WITH_MKL)
@@ -38,6 +43,7 @@ void magma_setlapack_numthreads(magma_int_t num_threads)
 
 
 /////////////////////////////////////////////////////////////
+extern "C"
 magma_int_t magma_get_numthreads()
 {
     /* determine the number of threads */
@@ -65,13 +71,3 @@ magma_int_t magma_get_numthreads()
     return threads;
 }
 /////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
