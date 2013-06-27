@@ -143,8 +143,23 @@ magma_int_t magma_zcg( magma_int_t dofs, magma_int_t & num_of_iter,
                        double rtol );
 
 /* ////////////////////////////////////////////////////////////////////////////
- -- MAGMA_SPARSE utility function definitions
+   -- MAGMA_SPARSE utility function definitions
 */
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- MAGMA_SPARSE BLAS function definitions
+*/
+magma_int_t 
+magma_zgecsrmv(        char transA,
+                       magma_int_t m, magma_int_t n,
+                       magmaDoubleComplex alpha,
+                       magmaDoubleComplex *d_val,
+                       magma_int_t *d_rowptr,
+                       magma_int_t *d_colind,
+                       magmaDoubleComplex *d_x,
+                       magmaDoubleComplex beta,
+                       magmaDoubleComplex *d_y);
+
 
 #ifdef __cplusplus
 }
