@@ -34,14 +34,14 @@ using namespace std;
     Purpose
     =======
 
-    Copies a matrix from memory location src to memory location des.
+    Copies a matrix from memory location src to memory location dst.
 
 
     Arguments
     =========
 
     magma_z_sparse_matrix A              sparse matrix A    
-    magma_z_sparse_matrix B              copy of A      
+    magma_z_sparse_matrix *B             copy of A      
     magma_location_t src                 original location A
     magma_location_t dst                 location of the copy of A
    
@@ -230,3 +230,111 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
 
     return MAGMA_SUCCESS;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+    Purpose
+    =======
+
+    Copies a vector from memory location src to memory location dst.
+
+
+    Arguments
+    =========
+
+    magma_z_vector A              vector x    
+    magma_z_vector *B             copy of x      
+    magma_location_t src          original location x
+    magma_location_t dst          location of the copy of x
+   
+
+    =====================================================================  */
+
+magma_int_t 
+magma_z_vtransfer( magma_z_vector x, 
+                   magma_z_vector *y, 
+                   magma_location_t src, 
+                   magma_location_t dst){
+
+    cublasStatus stat;
+
+    // first case: copy matrix from host to device
+    if( src == Magma_CPU && dst == Magma_DEV ){
+        // fill in information for B
+        y->memory_location = Magma_DEV;
+        y->num_rows = x.num_rows;
+        y->nnz = x.nnz;
+        // memory allocation
+        stat = cublasAlloc( x.num_rows, sizeof( magmaDoubleComplex ), ( void** )&y->val );
+        if( ( int )stat != 0 ) {printf("Memory Allocation Error transferring vector\n"); exit(0); }
+        // data transfer
+        cublasSetVector( x.num_rows , sizeof( magmaDoubleComplex ), x.val, 1, y->val, 1 );
+    }
+    // second case: copy matrix from host to host
+    if( src == Magma_CPU && dst == Magma_CPU ){
+        // fill in information for B
+        y->memory_location = Magma_DEV;
+        y->num_rows = x.num_rows;
+        y->nnz = x.nnz;
+        // memory allocation
+        y->val = new magmaDoubleComplex[x.num_rows]; 
+        // data transfer
+        for( magma_int_t i=0; i<x.num_rows; i++ )
+            y->val[i] = x.val[i];
+    }
+    // third case: copy matrix from device to host
+    if( src == Magma_DEV && dst == Magma_CPU ){
+        // fill in information for B
+        y->memory_location = Magma_DEV;
+        y->num_rows = x.num_rows;
+        y->nnz = x.nnz;
+        // memory allocation
+        y->val = new magmaDoubleComplex[x.num_rows]; 
+        // data transfer
+        cublasGetVector( x.num_rows, sizeof( magmaDoubleComplex ), x.val, 1, y->val, 1 );
+    }
+    // fourth case: copy matrix from device to device
+    if( src == Magma_DEV && dst == Magma_DEV ){
+        // fill in information for B
+        y->memory_location = Magma_DEV;
+        y->num_rows = x.num_rows;
+        y->nnz = x.nnz;
+        // memory allocation
+        stat = cublasAlloc( x.num_rows, sizeof( magmaDoubleComplex ), ( void** )&y->val );
+        if( ( int )stat != 0 ) {printf("Memory Allocation Error transferring vector\n"); exit(0); }
+        // data transfer
+        cudaMemcpy( y->val, x.val, x.num_rows*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
+    }
+
+    return MAGMA_SUCCESS;
+}
+
+

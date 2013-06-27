@@ -81,6 +81,44 @@ struct magma_s_sparse_matrix{
 
 
 
+struct magma_z_vector{
+
+    magma_location_t   memory_location;
+    magma_int_t        num_rows;
+    magma_int_t        nnz; 
+    magmaDoubleComplex *val;
+
+};
+
+struct magma_c_vector{
+
+    magma_location_t   memory_location;
+    magma_int_t        num_rows;
+    magma_int_t        nnz; 
+    magmaFloatComplex  *val;
+
+};
+
+
+struct magma_d_vector{
+
+    magma_location_t   memory_location;
+    magma_int_t        num_rows;
+    magma_int_t        nnz; 
+    double             *val;
+
+};
+
+
+struct magma_s_vector{
+
+    magma_location_t   memory_location;
+    magma_int_t        num_rows;
+    magma_int_t        nnz; 
+    float              *val;
+
+};
+
 #ifdef __cplusplus
 }
 #endif
