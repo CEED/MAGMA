@@ -20,6 +20,7 @@ extern "C" {
 void magma_setlapack_multithreads(int numthreads);
 void magma_setlapack_sequential();
 void magma_setlapack_numthreads(int numthreads);
+magma_int_t magma_get_numthreads();
 /***************************************************************************/
 #ifdef __cplusplus
 }

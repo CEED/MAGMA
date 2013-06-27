@@ -302,17 +302,20 @@ magma_int_t magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char 
         return *info;
     }
 
+
+    /* determine the number of threads */
+    magma_int_t threads = magma_get_numthreads();
+    magma_setlapack_numthreads(threads);
+
+
     if (MAGMA_SUCCESS != magma_zmalloc( &da, n*ldda ) ||
         MAGMA_SUCCESS != magma_zmalloc( &db, n*lddb )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-
     /*     Form a Cholesky factorization of B. */
-
     magma_zsetmatrix( n, n, b, ldb, db, lddb );
 
-//#define ENABLE_TIMER
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
     start = get_current_time();

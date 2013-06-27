@@ -266,9 +266,13 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
         return *info;
     }
 
-    /*     Form a Cholesky factorization of B. */
 
-#define ENABLE_TIMER
+    /* determine the number of threads */
+    magma_int_t threads = magma_get_numthreads();
+    magma_setlapack_numthreads(threads);
+
+
+    /*     Form a Cholesky factorization of B. */
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
     start = get_current_time();

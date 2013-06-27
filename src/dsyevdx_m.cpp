@@ -304,7 +304,7 @@ magma_dsyevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     llwork = lwork - indwrk;
     llwrk2 = lwork - indwk2;
 
-//#define ENABLE_TIMER
+//
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
     start = get_current_time();

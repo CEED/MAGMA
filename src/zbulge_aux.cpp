@@ -86,7 +86,6 @@ extern "C" void  magma_zstedx_withZ(magma_int_t N, magma_int_t NE, double *D, do
   }
   printf("using magma_zstedx\n");
 
-#define ENABLE_TIMER 
 #ifdef ENABLE_TIMER 
     magma_timestr_t start, end;
     start = get_current_time();

@@ -263,32 +263,11 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
         return *info;
     }
 
-    magma_int_t threads = 0;
-    char *env;
-
     /* determine the number of threads */
-
-    // First check MKL_NUM_THREADS if MKL is used
-#ifdef MAGMA_WITH_MKL
-    env = getenv("MKL_NUM_THREADS");
-    if (env != NULL)
-        threads = atoi(env);
-#endif
-    // Second check OMP_NUM_THREADS
-    if (threads < 1){
-        env = getenv("OMP_NUM_THREADS");
-        if (env != NULL)
-            threads = atoi(env);
-    }
-    // Third use the number of CPUs
-    if (threads < 1)
-        threads = sysconf(_SC_NPROCESSORS_ONLN);
-    // Fourth use one thread
-    if (threads < 1)
-        threads = 1;
+    magma_int_t threads = magma_get_numthreads();
+    magma_setlapack_numthreads(threads);
 
 
-//#define ENABLE_TIMER
 #ifdef ENABLE_TIMER
     printf("using %d threads\n", threads);
 #endif

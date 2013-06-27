@@ -274,6 +274,13 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
         return *info;
     }
 
+
+    /* determine the number of threads */
+    magma_int_t threads = magma_get_numthreads();
+    magma_setlapack_numthreads(threads);
+
+
+
     if (MAGMA_SUCCESS != magma_dmalloc( &da, n*ldda ) ||
         MAGMA_SUCCESS != magma_dmalloc( &db, n*lddb )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
@@ -284,7 +291,7 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
 
     magma_dsetmatrix( n, n, b, ldb, db, lddb );
 
-//#define ENABLE_TIMER
+
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
     start = get_current_time();

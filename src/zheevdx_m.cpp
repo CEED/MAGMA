@@ -313,7 +313,7 @@ magma_zheevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     llwrk2 = lwork - indwk2;
     llrwk = lrwork - indrwk;
 
-//#define ENABLE_TIMER
+//
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
     start = get_current_time();

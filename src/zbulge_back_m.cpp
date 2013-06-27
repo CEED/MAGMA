@@ -119,7 +119,6 @@ magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t threads, char uplo,
                         magmaDoubleComplex *T, magma_int_t ldt, 
                         magma_int_t* info)
 {
-    magma_int_t mklth = threads;
     magma_setlapack_numthreads(1);
 
     double timeaplQ2=0.0;
@@ -208,7 +207,7 @@ magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t threads, char uplo,
 
     timeaplQ2 = magma_wtime()-timeaplQ2;
 
-    magma_setlapack_numthreads(mklth);
+    magma_setlapack_numthreads(threads);
     return MAGMA_SUCCESS;
 }
 
@@ -241,7 +240,6 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
 
     magma_int_t n_cpu = ne - n_gpu;
 
-    magma_setlapack_numthreads(1);
 #ifdef SETAFFINITY
     //#define PRINTAFFINITY
 #ifdef PRINTAFFINITY

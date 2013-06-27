@@ -280,7 +280,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
         }
     }
 
-    //#define ENABLE_TIMER
+    //
 
 #ifdef _OPENMP
     /////////////////////////////////////////////////////////////////////////////////

@@ -187,13 +187,9 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
 
     char uplo_[2] = {uplo, 0};
     double timeblg=0.0;
-
     magma_int_t mklth = threads;
-
     magma_int_t INgrsiz=1;
-
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
-
     magma_int_t nbtiles = magma_ceildiv(n, nb);
 
     memset(T,   0, blkcnt*ldt*Vblksiz*sizeof(magmaDoubleComplex));
@@ -209,7 +205,6 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
 
     pthread_t* thread_id;
     magma_malloc_cpu((void**) &thread_id, threads*sizeof(pthread_t));
-
     pthread_attr_t thread_attr;
 
     magma_setlapack_numthreads(1);
@@ -335,7 +330,6 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 
     double timeB=0.0, timeT=0.0;
 
-    magma_setlapack_numthreads(1);
 #ifdef SETAFFINITY
 //#define PRINTAFFINITY
 #ifdef PRINTAFFINITY

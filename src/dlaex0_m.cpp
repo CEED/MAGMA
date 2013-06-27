@@ -203,7 +203,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
     // conquer tree.
 
     char char_I[] = {'I', 0};
-//#define ENABLE_TIMER
+//
 #ifdef ENABLE_TIMER
         magma_timestr_t start, end;
         start = get_current_time();

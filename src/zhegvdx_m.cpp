@@ -288,7 +288,7 @@ magma_zhegvdx_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char range, cha
         return *info;
     }
 
-//#define ENABLE_TIMER
+//
 #ifdef ENABLE_TIMER
         magma_timestr_t start, end;
         start = get_current_time();
