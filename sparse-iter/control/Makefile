@@ -9,6 +9,8 @@
 MAGMA_DIR = ../..
 include ../../Makefile.internal
 
+INC += -I../include
+
 ZSRC := \
         matrix_zio.cpp \
 				matrix_z_converter.cpp \

@@ -17,6 +17,11 @@
 
 #define PRECISION_z
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE Matrix Descriptors
 */
@@ -74,7 +79,7 @@ read_z_csr_from_mtx(    magma_int_t* n_row, magma_int_t* n_col,
 magma_int_t 
 write_z_csr_mtx(        magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, 
                         magmaDoubleComplex **val, magma_int_t **row, 
-                        magma_int_t **col, magma_int_t MajorType,
+                        magma_int_t **col, magma_major_t MajorType,
                         const char *filename );
 
 magma_int_t 
@@ -85,7 +90,12 @@ print_z_csr(            magma_int_t n_row, magma_int_t n_col, magma_int_t nnz,
 magma_int_t 
 print_z_csr_mtx(        magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, 
                         magmaDoubleComplex **val, magma_int_t **row, 
-                        magma_int_t **col, magma_int_t MajorType );
+                        magma_int_t **col, magma_major_t MajorType );
+
+magma_int_t 
+print_z_csr_matrix(    magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, 
+                       magmaDoubleComplex **val, magma_int_t **row, 
+                       magma_int_t **col );
 
 magma_int_t 
 z_array2csr(            magma_int_t *m, magma_int_t *n, magma_int_t *nnz,

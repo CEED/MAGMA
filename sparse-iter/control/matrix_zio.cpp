@@ -18,14 +18,15 @@
 #include <ostream>
 #include <assert.h>
 #include <stdio.h>
-#include "../include/magmasparse_z.h"
-#include "../../include/magma.h"
-#include "../include/mmio.h"
+
+#include "magmasparse_z.h"
+#include "magma.h"
+#include "mmio.h"
 
 
 using namespace std;
 
-
+extern "C"
 magma_int_t read_z_csr_from_binary( magma_int_t* n_row, magma_int_t* n_col, magma_int_t* nnz, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col, const char * filename ){
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -110,7 +111,7 @@ magma_int_t read_z_csr_from_binary( magma_int_t* n_row, magma_int_t* n_col, magm
   return MAGMA_SUCCESS;
 }
 
-
+extern "C"
 magma_int_t read_z_csr_from_mtx( magma_int_t* n_row, magma_int_t* n_col, magma_int_t* nnz, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col, const char *filename ){
   
 /*  -- MAGMA (version 1.1) --
@@ -386,7 +387,7 @@ magma_int_t read_z_csr_from_mtx( magma_int_t* n_row, magma_int_t* n_col, magma_i
 }
 
 
-
+extern "C"
 magma_int_t write_z_csr_mtx( magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col, magma_major_t MajorType, const char *filename ){
 
 /*  -- MAGMA (version 1.1) --
@@ -470,7 +471,7 @@ magma_int_t write_z_csr_mtx( magma_int_t n_row, magma_int_t n_col, magma_int_t n
 }
 
 
-
+extern "C"
 magma_int_t print_z_csr_mtx( magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col, magma_major_t MajorType ){
 
 /*  -- MAGMA (version 1.1) --
@@ -542,6 +543,7 @@ magma_int_t print_z_csr_mtx( magma_int_t n_row, magma_int_t n_col, magma_int_t n
   return MAGMA_SUCCESS;
 }
 
+extern "C"
 magma_int_t print_z_csr( magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col ){
 
 /*  -- MAGMA (version 1.1) --
@@ -582,7 +584,7 @@ magma_int_t print_z_csr( magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, 
   return MAGMA_SUCCESS;
 }
 
-
+extern "C"
 magma_int_t print_z_csr_matrix( magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col )
 {
 

@@ -324,6 +324,8 @@ typedef double real_Double_t;
 #define MagmaPackUpeprBand 297
 #define MagmaPackAll       298
 
+
+
 #define MagmaNoVec         'N'  /* 301 */  /* geev, syev, gesvd */
 #define MagmaVec           'V'  /* 302 */  /* geev, syev */
 #define MagmaIvec          'I'  /* 303 */  /* stedc */
@@ -337,9 +339,15 @@ typedef double real_Double_t;
 #define MagmaColumnwise    'C'  /* 401 */  /* larfb */
 #define MagmaRowwise       'R'  /* 402 */  /* larfb */
 
+#define Magma_CSR          411
+#define Magma_ELLPACK      412  
+
+#define Magma_CPU          421
+#define Magma_DEV          422
+
 // remember to update min/max when adding constants!
 #define MagmaMinConst      101
-#define MagmaMaxConst      402
+#define MagmaMaxConst      422
 
 // these could be enums, but that isn't portable in C++,
 // e.g., if -fshort-enums is used
@@ -354,6 +362,11 @@ typedef char magma_pack_t;
 typedef char magma_vec_t;
 typedef char magma_direct_t;
 typedef char magma_storev_t;
+
+// for sparse linear algebra
+// properties of the magma_sparse_matrix
+typedef int magma_storage_t;
+typedef int magma_location_t;
 
 // ----------------------------------------
 // string constants for calling Fortran BLAS and LAPACK
