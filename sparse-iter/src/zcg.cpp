@@ -118,6 +118,8 @@ magma_zcg( magma_int_t dofs, magma_int_t & num_of_iter,
         
         printf( "      || r_N ||   = %f\n", den);
     }
+
+    return MAGMA_SUCCESS;
 }
 
 
