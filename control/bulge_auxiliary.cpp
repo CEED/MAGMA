@@ -48,7 +48,7 @@ extern "C" {
 
     magma_int_t magma_sbulge_get_lq2(magma_int_t n)
     {
-        magma_int_t nb = magma_bulge_get_nb(n);
+        magma_int_t nb = magma_get_sbulge_nb(n);
         magma_int_t Vblksiz = magma_zbulge_get_Vblksiz(n, nb);
         magma_int_t ldv = nb + Vblksiz;
         magma_int_t ldt = Vblksiz;
@@ -57,7 +57,7 @@ extern "C" {
 
     magma_int_t magma_dbulge_get_lq2(magma_int_t n)
     {
-        magma_int_t nb = magma_bulge_get_nb(n);
+        magma_int_t nb = magma_get_dbulge_nb(n);
         magma_int_t Vblksiz = magma_dbulge_get_Vblksiz(n, nb);
         magma_int_t ldv = nb + Vblksiz;
         magma_int_t ldt = Vblksiz;
@@ -66,7 +66,7 @@ extern "C" {
 
     magma_int_t magma_cbulge_get_lq2(magma_int_t n)
     {
-        magma_int_t nb = magma_bulge_get_nb(n);
+        magma_int_t nb = magma_get_cbulge_nb(n);
         magma_int_t Vblksiz = magma_dbulge_get_Vblksiz(n, nb);
         magma_int_t ldv = nb + Vblksiz;
         magma_int_t ldt = Vblksiz;
@@ -75,7 +75,7 @@ extern "C" {
 
     magma_int_t magma_zbulge_get_lq2(magma_int_t n)
     {
-        magma_int_t nb = magma_bulge_get_nb(n);
+        magma_int_t nb = magma_get_zbulge_nb(n);
         magma_int_t Vblksiz = magma_dbulge_get_Vblksiz(n, nb);
         magma_int_t ldv = nb + Vblksiz;
         magma_int_t ldt = Vblksiz;
