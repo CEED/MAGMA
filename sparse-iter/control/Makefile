@@ -15,6 +15,8 @@ ZSRC := \
         matrix_zio.cpp \
 				matrix_z_converter.cpp \
 				z_transpose_csr.cpp \
+				magma_z_transfer.cpp \
+ 
 
 -include Makefile.local
 -include Makefile.src
