@@ -18,15 +18,10 @@
 #define PRECISION_z
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE Matrix Descriptors
 */
 /* CSR Matrix descriptor */
-/*
 typedef struct {
     int type;
 
@@ -41,7 +36,7 @@ typedef struct {
 } magma_zmatrix_t;
 
 
-/* BCSR Matrix descriptor *
+/* BCSR Matrix descriptor */
 typedef struct {
     int type;
 
