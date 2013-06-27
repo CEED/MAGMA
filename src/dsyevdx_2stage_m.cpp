@@ -214,7 +214,7 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
         }
     }
 
-    magma_int_t nb = magma_bulge_get_nb(n);
+    magma_int_t nb = magma_dbulge_get_nb_mgpu(n);
     magma_int_t Vblksiz = magma_dbulge_get_Vblksiz(n, nb);
 
     magma_int_t ldt = Vblksiz;

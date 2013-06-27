@@ -242,7 +242,7 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
         }
     }
 
-    magma_int_t nb = magma_bulge_get_nb(n);
+    magma_int_t nb = magma_dbulge_get_nb(n);
     magma_int_t lq2 = magma_dbulge_get_lq2(n);
 
     if (wantz) {

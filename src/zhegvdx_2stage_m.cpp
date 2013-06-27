@@ -259,7 +259,7 @@ magma_int_t magma_zhegvdx_2stage_m(magma_int_t nrgpu,
         }
     }
 
-    magma_int_t nb = magma_bulge_get_nb(n);
+    magma_int_t nb = magma_zbulge_get_nb_mgpu(n);
     magma_int_t lq2 = magma_zbulge_get_lq2(n);
 
     if (wantz) {
