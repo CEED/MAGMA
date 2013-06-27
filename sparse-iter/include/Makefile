@@ -9,7 +9,8 @@
 MAGMA_DIR = ../..
 include ../../Makefile.internal
 
-ZHDR =  magmasparse_z.h	\
+ZHDR =  magmasparse_z.h	       \
+        magmasparse_types.h	 \
 
 -include Makefile.local
 -include Makefile.src

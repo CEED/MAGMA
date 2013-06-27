@@ -26,6 +26,12 @@
 /* ------------------------------------------------------------
  * MAGMASPARSE types
  * --------------------------------------------------------- */
-#include "magmasparse_types.h"
+/*
+#include "magmasparse_types_z.h"
+#include "magmasparse_types_c.h"
+#include "magmasparse_types_d.h"
+#include "magmasparse_types_s.h"
 
+*/
+#include "magmasparse_types.h"
 #endif /* MAGMASPARSE_H */

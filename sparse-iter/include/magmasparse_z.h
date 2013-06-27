@@ -26,6 +26,7 @@ extern "C" {
    -- MAGMA_SPARSE Matrix Descriptors
 */
 /* CSR Matrix descriptor */
+/*
 typedef struct {
     int type;
 
@@ -71,10 +72,14 @@ read_z_csr_from_binary( magma_int_t* n_row, magma_int_t* n_col,
                         const char * filename);
 
 magma_int_t 
-read_z_csr_from_mtx(    magma_int_t* n_row, magma_int_t* n_col, 
+read_z_csr_from_mtx(    magma_storage_t *type, magma_storage_t *location,
+                        magma_int_t* n_row, magma_int_t* n_col, 
                         magma_int_t* nnz, magmaDoubleComplex **val, 
                         magma_int_t **row, magma_int_t **col, 
                         const char *filename);
+
+magma_int_t 
+magma_z_csr_mtx(        magma_z_sparse_matrix *A, const char *filename );
 
 magma_int_t 
 write_z_csr_mtx(        magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, 
@@ -115,7 +120,9 @@ z_transpose_csr(        magma_int_t n_rows, magma_int_t n_cols,
                         magma_int_t *new_nnz, magmaDoubleComplex **new_val, 
                         magma_int_t **new_row, magma_int_t **new_col );
 
-
+magma_int_t 
+magma_z_mtransfer(      magma_z_sparse_matrix A, magma_z_sparse_matrix *B, 
+                        magma_location_t src, magma_location_t dst);
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE function definitions / Data on CPU

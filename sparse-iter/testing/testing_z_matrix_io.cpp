@@ -48,6 +48,9 @@ int main( int argc, char** argv)
      "test_matrices/Trefethen_20_new2.mtx",
      "test_matrices/Trefethen_20_new3.mtx"
     };
+
+    magma_z_sparse_matrix A, B, C, D;
+
     magma_int_t n, nnz, n_col;
   
     //create vectors for sparse matrix
@@ -55,12 +58,19 @@ int main( int argc, char** argv)
     magma_int_t *row_h;
     magma_int_t *col_h;
     //read matrix from file
-    read_z_csr_from_mtx( &n,&n_col,&nnz, &val_h, &row_h, &col_h, filename[0] );
+    //read_z_csr_from_mtx( &A.storage_type, &A.memory_location, &A.num_rows, &A.num_cols, &A.nnz, &A.val, &A.row, &A.col, filename[0] );
+    magma_z_csr_mtx( &A, filename[0] );
 
-    print_z_csr_mtx( n, n, nnz, &val_h, &row_h, &col_h, MagmaRowMajor );
-    print_z_csr_matrix( n, n, nnz, &val_h, &row_h, &col_h );
-    write_z_csr_mtx( n, n, nnz, &val_h, &row_h, &col_h, MagmaRowMajor, filename[2] );
-    write_z_csr_mtx( n, n, nnz, &val_h, &row_h, &col_h, MagmaColMajor, filename[3] );
+    magma_z_mtransfer( A, &B, Magma_CPU, Magma_DEV);
+    magma_z_mtransfer( B, &C, Magma_DEV, Magma_DEV);
+    magma_z_mtransfer( C, &D, Magma_DEV, Magma_CPU);
+
+
+    print_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor );
+    print_z_csr_matrix( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col );
+    print_z_csr_matrix( D.num_rows, D.num_cols, D.nnz, &D.val, &D.row, &D.col );
+    write_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor, filename[2] );
+    write_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor, filename[3] );
 
 
     TESTING_FINALIZE();
