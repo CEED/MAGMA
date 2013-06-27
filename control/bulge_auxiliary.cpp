@@ -22,12 +22,6 @@ extern "C" {
     /////////////////////////////////////////
     // Parameters for 2-stage eigensolvers //
     /////////////////////////////////////////
-
-    magma_int_t magma_bulge_get_nb(magma_int_t n)
-    {
-        return 96;
-    }
-
     /////////////////////////////////////////
 
     magma_int_t magma_sbulge_get_Vblksiz(magma_int_t n, magma_int_t nb)
@@ -37,7 +31,7 @@ extern "C" {
 
     magma_int_t magma_dbulge_get_Vblksiz(magma_int_t n, magma_int_t nb)
     {
-        return 64; //min(nb,32);
+        return min(nb,64);
     }
 
     magma_int_t magma_cbulge_get_Vblksiz(magma_int_t n, magma_int_t nb)

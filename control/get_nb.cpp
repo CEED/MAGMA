@@ -687,6 +687,137 @@ magma_int_t magma_get_zhegst_nb_m( magma_int_t m )
 }
 
 
+
+
+
+
+
+
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for  2 stage TRD
+*/
+magma_int_t magma_get_sbulge_nb( magma_int_t m )
+{
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler + SB
+        return 128;
+    }
+    else if ( arch >= 200 ) {  // 2.x Fermi
+        return 64;
+    }
+    else {                     // 1.x
+        return 64;
+    }
+}
+//////////////////////////////////////////////////
+magma_int_t magma_get_dbulge_nb( magma_int_t m )
+{
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler + SB
+        return 128;
+    }
+    else if ( arch >= 200 ) {  // 2.x Fermi
+        return 64;
+    }
+    else {                     // 1.x
+        return 64;
+    }
+}
+//////////////////////////////////////////////////
+magma_int_t magma_get_cbulge_nb( magma_int_t m )
+{
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler + SB
+        return 96;
+    }
+    else if ( arch >= 200 ) {  // 2.x Fermi
+        return 64;
+    }
+    else {                     // 1.x
+        return 64;
+    }
+}
+//////////////////////////////////////////////////
+magma_int_t magma_get_zbulge_nb( magma_int_t m )
+{
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler + SB
+        return 96;
+    }
+    else if ( arch >= 200 ) {  // 2.x Fermi
+        return 64;
+    }
+    else {                     // 1.x
+        return 64;
+    }
+}
+//////////////////////////////////////////////////
+
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return nb for  2 stage TRD
+*/
+magma_int_t magma_get_sbulge_nb_mgpu( magma_int_t m )
+{
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler + SB
+        return 128;
+    }
+    else if ( arch >= 200 ) {  // 2.x Fermi
+        return 64;
+    }
+    else {                     // 1.x
+        return 64;
+    }
+}
+//////////////////////////////////////////////////
+magma_int_t magma_get_dbulge_nb_mgpu( magma_int_t m )
+{
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler + SB
+        return 128;
+    }
+    else if ( arch >= 200 ) {  // 2.x Fermi
+        return 64;
+    }
+    else {                     // 1.x
+        return 64;
+    }
+}
+//////////////////////////////////////////////////
+magma_int_t magma_get_cbulge_nb_mgpu( magma_int_t m )
+{
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler + SB
+        return 96;
+    }
+    else if ( arch >= 200 ) {  // 2.x Fermi
+        return 64;
+    }
+    else {                     // 1.x
+        return 64;
+    }
+}
+//////////////////////////////////////////////////
+magma_int_t magma_get_zbulge_nb_mgpu( magma_int_t m )
+{
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler + SB
+        return 96;
+    }
+    else if ( arch >= 200 ) {  // 2.x Fermi
+        return 64;
+    }
+    else {                     // 1.x
+        return 64;
+    }
+}
+//////////////////////////////////////////////////
+
+
+
+
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
