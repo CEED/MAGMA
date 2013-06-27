@@ -718,7 +718,7 @@ magma_int_t magma_get_dbulge_nb( magma_int_t m )
         return 128;
     }
     else if ( arch >= 200 ) {  // 2.x Fermi
-        return 64;
+        return 128;
     }
     else {                     // 1.x
         return 64;
