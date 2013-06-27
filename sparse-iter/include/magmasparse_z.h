@@ -105,6 +105,8 @@ z_transpose_csr(        magma_int_t n_rows, magma_int_t n_cols,
                         magma_int_t *new_nnz, magmaDoubleComplex **new_val, 
                         magma_int_t **new_row, magma_int_t **new_col );
 
+
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE function definitions / Data on CPU
 */

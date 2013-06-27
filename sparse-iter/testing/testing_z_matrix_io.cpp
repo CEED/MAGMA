@@ -57,9 +57,10 @@ int main( int argc, char** argv)
     //read matrix from file
     read_z_csr_from_mtx( &n,&n_col,&nnz, &val_h, &row_h, &col_h, filename[0] );
 
-    print_z_csr_mtx( n, n, nnz, &val_h, &row_h, &col_h, 0 );
-    write_z_csr_mtx( n, n, nnz, &val_h, &row_h, &col_h, 0, filename[2] );
-    write_z_csr_mtx( n, n, nnz, &val_h, &row_h, &col_h, 1, filename[3] );
+    print_z_csr_mtx( n, n, nnz, &val_h, &row_h, &col_h, MagmaRowMajor );
+    print_z_csr_matrix( n, n, nnz, &val_h, &row_h, &col_h );
+    write_z_csr_mtx( n, n, nnz, &val_h, &row_h, &col_h, MagmaRowMajor, filename[2] );
+    write_z_csr_mtx( n, n, nnz, &val_h, &row_h, &col_h, MagmaColMajor, filename[3] );
 
 
     TESTING_FINALIZE();

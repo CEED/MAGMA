@@ -43,9 +43,9 @@ magma_int_t z_transpose_csr( magma_int_t n_rows, magma_int_t n_cols, magma_int_t
     Arguments
     =========
 
-    magma_int_t *n_rows                  number of rows in input matrix
-    magma_int_t *n_cols                  number of columns in input matrix
-    magma_int_t *nnz                     number of nonzeros in input matrix
+    magma_int_t n_rows                  number of rows in input matrix
+    magma_int_t n_cols                  number of columns in input matrix
+    magma_int_t nnz                     number of nonzeros in input matrix
     magmaDoubleComplex *val              value array of input matrix 
     magma_int_t *row                     row pointer of input matrix
     magma_int_t *col                     column indices of input matrix 
@@ -107,6 +107,8 @@ magma_int_t z_transpose_csr( magma_int_t n_rows, magma_int_t n_cols, magma_int_t
     }
     (*new_row)[j+1]=nnztmp;
   }
+//usually the temporary memory should be freed afterwards
+//however, it does not work
 /*
   for( magma_int_t j=0; j<n_rows; j++ ){
     free(valtemp[j]);

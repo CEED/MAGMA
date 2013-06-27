@@ -343,6 +343,7 @@ typedef double real_Double_t;
 
 // these could be enums, but that isn't portable in C++,
 // e.g., if -fshort-enums is used
+typedef char magma_major_t;
 typedef char magma_trans_t;
 typedef char magma_uplo_t;
 typedef char magma_diag_t;

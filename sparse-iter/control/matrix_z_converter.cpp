@@ -70,11 +70,11 @@ magma_int_t z_array2csr( magma_int_t *m, magma_int_t *n, magma_int_t *nnz, magma
 
   }
   (*row)[*n]=*nnz;
+  return MAGMA_SUCCESS;
 }
 
-
-magma_int_t z_csr2array( magma_int_t *m, magma_int_t *n, magma_int_t *nnz, magmaDoubleComplex *val, magma_int_t *row, magma_int_t *col, magmaDoubleComplex*b )
-{
+extern "C"
+magma_int_t z_csr2array( magma_int_t *m, magma_int_t *n, magma_int_t *nnz, magmaDoubleComplex *val, magma_int_t *row, magma_int_t *col, magmaDoubleComplex*b ){
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -111,5 +111,6 @@ magma_int_t z_csr2array( magma_int_t *m, magma_int_t *n, magma_int_t *nnz, magma
     magma_int_t rowtemp2 = row[i+1];
     for( j=0; j<rowtemp2-rowtemp1; j++ )  
       (b)[i*(*n)+col[rowtemp1+j]] = val[rowtemp1+j];
-  }
+  }  
+  return MAGMA_SUCCESS;
 }

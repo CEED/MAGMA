@@ -637,12 +637,26 @@ subs = {
     ('SUNGESV',        'SUNGESV',        'CUNGESV',        'CUNGESV'         ),
     ('SSTEGR',         'DSTEGR',         'CSTEGR',         'ZSTEGR'          ),
 
+
+
     # ----- SPARSE BLAS
     ('sgecsrmv',       'dgecsrmv',       'cgecsrmv',       'zgecsrmv'        ),
 
     # ----- SPARSE Iterative Solvers
     ('scg',            'dcg',            'ccg',            'zcg'             ),
-    
+    # ----- SPARSE auxiliary tools
+    ('matrix_s',       'matrix_d',       'matrix_c',       'matrix_z'        ), 
+    ('s_csr2array',    'd_csr2array',    'c_csr2array',    'z_csr2array'     ),
+    ('s_array2csr',    'd_array2csr',    'c_array2csr',    'z_array2csr'     ),
+    ('read_s_csr',     'read_d_csr',     'read_c_csr',     'read_z_csr'      ),
+    ('print_s_csr',    'print_d_csr',    'print_c_csr',    'print_z_csr'     ),
+    ('write_s_csr',    'write_d_csr',    'write_c_csr',    'write_z_csr'     ),
+    ('s_transpose',    'd_transpose',    'c_transpose',    'z_transpose'     ),
+    ('SPARSE_S_H',     'SPARSE_D_H',     'SPARSE_C_H',     'SPARSE_Z_H'      ),
+
+
+
+
     # ----- Prefixes
     # Most routines have already been renamed by above BLAS/LAPACK rules.
     # cublas[SDCZ] functions where real==complex name are handled here;
