@@ -29,7 +29,7 @@ NVOPTS    =       -O3 -DADD_ -Xcompiler "-fno-strict-aliasing -fPIC"
 LDOPTS    = -fPIC -fopenmp
 
 # gcc with MKL 10.3, Intel threads
-LIB       = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lcublas -lcudart -lm -liomp5
+LIB       = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lcublas -lcudart -lstdc++ -lm -liomp5
 
 # define library directories here or in your environment
 # for MKL run, e.g.: source /opt/intel/composerxe/mkl/bin/mklvars.sh intel64

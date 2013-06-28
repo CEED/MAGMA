@@ -16,7 +16,7 @@
 
 GPU_TARGET = Tesla
 
-CC        = g++
+CC        = gcc
 NVCC      = nvcc
 FORT      = gfortran
 
@@ -35,7 +35,7 @@ FOPTS     = -Wall -m32 -O3 -DADD_ -x f95-cpp-input
 NVOPTS    =       -m32 -O3 -DADD_ -Xcompiler -fno-strict-aliasing
 LDOPTS    = -Wall -m32
 
-LIB       = -framework Accelerate -lcublas -lcudart -lm
+LIB       = -framework Accelerate -lcublas -lcudart -lstdc++ -lm
 
 # define library directories here or in your environment
 #CUDADIR   = /usr/local/cuda
