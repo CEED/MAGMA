@@ -25,10 +25,9 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
-#define absv(v1) ((v1)>0? (v1): -(v1))
-
 #define PRECISION_z
 
+#define absv(v1) ((v1)>0? (v1): -(v1))
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhegvdx
 */
@@ -157,6 +156,9 @@ int main( int argc, char** argv)
                           | B A Z - Z D | / ( |A||Z| N )  (itype = 3)
                    (2)    | S(with V) - S(w/o V) | / | S |
                    =================================================================== */
+#if defined(PRECISION_d) || defined(PRECISION_s)
+                double *rwork = h_work + N*N;
+#endif
                 double temp1, temp2;
                 
                 result[0] = 1.;
