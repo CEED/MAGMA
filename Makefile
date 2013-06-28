@@ -109,6 +109,6 @@ $(LIBMAGMA_SO): src/*.o control/*.o interface_cuda/*.o magmablas/*.cu_o
 	@echo ======================================== libmagma.so
 	$(CC) $(LDOPTS) -shared -o $(LIBMAGMA_SO) \
 	src/*.o control/*.o \
-	interface_cuda/*.o magmablas/*.cu_o \
+	interface_cuda/*.o magmablas/*.cu_o magmablas/*.o \
 	$(LIBDIR) \
 	$(LIB)
