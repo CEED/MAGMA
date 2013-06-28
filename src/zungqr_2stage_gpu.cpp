@@ -134,7 +134,7 @@ magma_int_t magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     //    *info = MAGMA_ERR_HOST_ALLOC;
     //    return *info;
     //}
-    panel = work + n * nb;
+    //panel = work + n * nb;
 
     //magma_queue_create( &stream[0] );
     //magma_queue_create( &stream[1] );
