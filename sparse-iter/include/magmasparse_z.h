@@ -123,6 +123,11 @@ magma_int_t
 magma_z_vtransfer(      magma_z_vector x, magma_z_vector *y, 
                         magma_location_t src, magma_location_t dst );
 
+magma_int_t 
+magma_z_mconvert(       magma_z_sparse_matrix A, magma_z_sparse_matrix *B, 
+                        magma_storage_t old_format, magma_storage_t new_format,
+                        magma_mmajor_t old_major, magma_mmajor_t new_major );
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE function definitions / Data on CPU
 */

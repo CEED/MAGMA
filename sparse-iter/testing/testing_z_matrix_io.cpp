@@ -49,7 +49,7 @@ int main( int argc, char** argv)
      "test_matrices/Trefethen_20_new3.mtx"
     };
 
-    magma_z_sparse_matrix A, B, C, D;
+    magma_z_sparse_matrix A, B, C, D, E, F, Z;
 
     magma_int_t n, nnz, n_col;
   
@@ -64,11 +64,23 @@ int main( int argc, char** argv)
     magma_z_mtransfer( A, &B, Magma_CPU, Magma_DEV);
     magma_z_mtransfer( B, &C, Magma_DEV, Magma_DEV);
     magma_z_mtransfer( C, &D, Magma_DEV, Magma_CPU);
+    magma_z_mconvert( D, &E, Magma_CSR, Magma_ELLPACK, Magma_RowMajor, Magma_RowMajor);
+    magma_z_mconvert( E, &Z, Magma_ELLPACK, Magma_CSR, Magma_RowMajor, Magma_RowMajor);
+/*
+    printf("\n now to ELLPACK \n");
+    for(magma_int_t i=0; i<E.num_rows*E.max_nnz_row; i++)
+      printf(" %f, %d \n", E.val[i],E.col[i]);
+    printf("\n now back CSR \n");
+    for(magma_int_t i=0; i<Z.num_rows; i++)
+      printf(" %f, %d, %d \n", Z.val[i],Z.col[i],Z.row[i]);
+
+*/
+
 
 
     print_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor );
     print_z_csr_matrix( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col );
-    print_z_csr_matrix( D.num_rows, D.num_cols, D.nnz, &D.val, &D.row, &D.col );
+    print_z_csr_matrix( Z.num_rows, Z.num_cols, Z.nnz, &Z.val, &Z.row, &Z.col );
     write_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor, filename[2] );
     write_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor, filename[3] );
 

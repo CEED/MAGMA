@@ -16,6 +16,7 @@ ZSRC := \
 				matrix_z_converter.cpp \
 				z_transpose_csr.cpp \
 				magma_z_transfer.cpp \
+        magma_z_mconverter.cpp \
  
 
 -include Makefile.local

@@ -62,6 +62,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;
+            B->major_type = A.major_type;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
@@ -83,6 +84,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;
+            B->major_type = A.major_type;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
@@ -105,6 +107,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
+            B->major_type = A.major_type;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
@@ -127,6 +130,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
+            B->major_type = A.major_type;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
@@ -149,6 +153,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
+            B->major_type = A.major_type;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
@@ -167,6 +172,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_CPU;
+            B->major_type = A.major_type;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
@@ -189,6 +195,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;
+            B->major_type = A.major_type;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
@@ -202,7 +209,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             if( ( int )stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
             // data transfer
             cudaMemcpy( B->val, A.val, A.nnz*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
-            cudaMemcpy( B->row, A.row, A.num_rows*sizeof( magma_int_t ), cudaMemcpyDeviceToDevice );
+            cudaMemcpy( B->row, A.row, (A.num_rows+1)*sizeof( magma_int_t ), cudaMemcpyDeviceToDevice );
             cudaMemcpy( B->col, A.col, A.nnz*sizeof( magma_int_t ), cudaMemcpyDeviceToDevice );
         } 
         //ELLPACK-type
@@ -210,6 +217,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             // fill in information for B
             B->storage_type = A.storage_type;
             B->memory_location = Magma_DEV;
+            B->major_type = A.major_type;
             B->num_rows = A.num_rows;
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;

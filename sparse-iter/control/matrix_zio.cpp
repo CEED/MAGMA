@@ -751,14 +751,8 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
       if(coo_row[i] != coo_col[i])
         ++off_diagonals;
     }
-    
-    magma_int_t true_nonzeros = 2*off_diagonals + (A->nnz - off_diagonals);
-    
-    
-    printf("total number of nonzeros: %d\n",A->nnz);
-
-    
-    
+    magma_int_t true_nonzeros = 2 * off_diagonals + (A->nnz - off_diagonals);
+      
     magma_int_t* new_row = (magma_int_t *) malloc(true_nonzeros*sizeof(magma_int_t)) ; 
     magma_int_t* new_col = (magma_int_t *) malloc(true_nonzeros*sizeof(magma_int_t)) ; 
     magmaDoubleComplex* new_val = (magmaDoubleComplex *) malloc(true_nonzeros*sizeof(magmaDoubleComplex)) ; 
@@ -789,10 +783,9 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
 
     coo_row = new_row;  
     coo_col = new_col; 
-    coo_val = new_val;   
-    
+    coo_val = new_val;     
     A->nnz = true_nonzeros;
-    
+    printf("total number of nonzeros: %d\n",A->nnz);    
 
   } //end symmetric case
   
