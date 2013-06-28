@@ -44,6 +44,8 @@ magma_zlarfb2_gpu( magma_int_t m, magma_int_t n, magma_int_t k,
                  c_neg_one, dV,    ldv,
                  dwork, ldwork,
                  c_one,     dC,    ldc);
+    
+    return MAGMA_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////////
