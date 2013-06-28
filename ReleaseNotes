@@ -24,7 +24,7 @@ single (s), double (d), single-complex (c), double-complex (z).
     * Use magma_init() and magma_finalize() to initialize and cleanup MAGMA.
     * Merge libmagmablas into libmagma to eliminate circular dependencies.
       Link with just -lmagma now.
-    * Can compile as shared library; see make.inc.shared and 'make shared'.
+    * Can compile as shared library; see make.inc.mkl-shared and 'make shared'.
     * Fix required workspace size in gels_gpu, gels3_gpu, geqrs_gpu, geqrs3_gpu.
     * Fix required workspace size in [zcsd]geqrf.
     * Fix required workspace size in [he|sy]evd*, [he|sy]gvd*.
@@ -32,7 +32,7 @@ single (s), double (d), single-complex (c), double-complex (z).
     * Fix gesv and posv in some situations when GPU memory is close to full.
     * Fix synchronization in multi-GPU getrf_m and getrf2_mgpu.
     * Fix multi-GPU geqrf_mgpu for M < N.
-    * Add macro USE_INT64 to compile with int being 64-bit. See make.inc.int64.
+    * Add MAGMA_ILP64 to compile with int being 64-bit. See make.inc.mkl-ilp64.
     * Add panel factorizations for LU, QR, and Cholesky entirely on the GPU,
       correspondingly in [zcsd]getf2_gpu, [zcsd]geqr2_gpu, and [zcsd]potf2_gpu.
     * Add QR with pivoting in GPU interface (functions [zcsd]geqp3_gpu);
