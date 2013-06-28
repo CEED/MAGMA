@@ -267,7 +267,6 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
     magma_int_t threads = magma_get_numthreads();
     magma_setlapack_numthreads(threads);
 
-
 #ifdef ENABLE_TIMER
     printf("using %d threads\n", threads);
 #endif
@@ -323,7 +322,7 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
 #ifdef ENABLE_TIMER
     st1 = get_current_time();
 
-    printf("  time dsytrd_sy2sb = %6.2f\n" , GetTimerValue(start,st1)/1000.);
+    printf("    time dsytrd_sy2sb = %6.2f\n" , GetTimerValue(start,st1)/1000.);
 #endif
 
     magma_int_t lda2 = nb+1+(nb-1);
@@ -352,14 +351,14 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
 #ifdef ENABLE_TIMER
     st2 = get_current_time();
 
-    printf("  time dsytrd_convert = %6.2f\n" , GetTimerValue(st1,st2)/1000.);
+    printf("    time dsytrd_convert = %6.2f\n" , GetTimerValue(st1,st2)/1000.);
 #endif
 
     magma_dsytrd_sb2st(threads, uplo, n, nb, Vblksiz, A2, lda2, w, &work[inde], &work[indV2], ldv, &work[indTAU2], wantz, &work[indT2], ldt);
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-    printf("  time dsytrd_sy2st = %6.2f\n" , GetTimerValue(st2,end)/1000.);
+    printf("    time dsytrd_sy2st = %6.2f\n" , GetTimerValue(st2,end)/1000.);
     printf("  time dsytrd = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
@@ -416,7 +415,7 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
 #ifdef ENABLE_TIMER
         st1 = get_current_time();
 
-        printf("  time dbulge_back = %6.2f\n" , GetTimerValue(start,st1)/1000.);
+        printf("    time dbulge_back = %6.2f\n" , GetTimerValue(start,st1)/1000.);
 #endif
 
         magma_dsetmatrix( n, n, a, lda, da, ldda );
@@ -431,7 +430,7 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-        printf("  time dormqr + copy = %6.2f\n", GetTimerValue(st1,end)/1000.);
+        printf("    time dormqr + copy = %6.2f\n", GetTimerValue(st1,end)/1000.);
 
         printf("  time eigenvectors backtransf. = %6.2f\n" , GetTimerValue(start,end)/1000.);
 #endif

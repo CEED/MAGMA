@@ -354,7 +354,7 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     }
 
     tband2 = get_current_time();
-    printf("  time alloc %7.4f, ditribution %7.4f, dsytrd_he2hb only = %7.4f\n" , GetTimerValue(t1,t2)/1000., GetTimerValue(t2,tband1)/1000., GetTimerValue(tband1,tband2)/1000.);
+    printf("    time alloc %7.4f, ditribution %7.4f, dsytrd_he2hb only = %7.4f\n" , GetTimerValue(t1,t2)/1000., GetTimerValue(t2,tband1)/1000., GetTimerValue(tband1,tband2)/1000.);
 
 
     for( magma_int_t dev = 0; dev < nrgpu; ++dev ) {
@@ -370,7 +370,7 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 #ifdef ENABLE_TIMER
     st1 = get_current_time();
 
-    printf("  time dsytrd_sy2sb = %6.2f\n" , GetTimerValue(start,st1)/1000.);
+    printf("    time dsytrd_sy2sb_mgpu = %6.2f\n" , GetTimerValue(start,st1)/1000.);
 #endif
 
     magma_int_t lda2 = nb+1+(nb-1);
@@ -399,14 +399,14 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 #ifdef ENABLE_TIMER
     st2 = get_current_time();
 
-    printf("  time dsytrd_convert = %6.2f\n" , GetTimerValue(st1,st2)/1000.);
+    printf("    time dsytrd_convert = %6.2f\n" , GetTimerValue(st1,st2)/1000.);
 #endif
 
     magma_dsytrd_sb2st(threads, uplo, n, nb, Vblksiz, A2, lda2, w, &work[inde], &work[indV2], ldv, &work[indTAU2], wantz, &work[indT2], ldt);
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-    printf("  time dsytrd_sy2st = %6.2f\n" , GetTimerValue(st2,end)/1000.);
+    printf("    time dsytrd_sy2st = %6.2f\n" , GetTimerValue(st2,end)/1000.);
     printf("  time dsytrd = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
@@ -430,7 +430,7 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-        printf("  time dstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
+        printf("  time dstedx_m = %6.2f\n", GetTimerValue(start,end)/1000.);
         start = get_current_time();
 #endif
 
@@ -442,7 +442,7 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 #ifdef ENABLE_TIMER
         st1 = get_current_time();
 
-        printf("  time dbulge_back = %6.2f\n" , GetTimerValue(start,st1)/1000.);
+        printf("    time dbulge_back_m = %6.2f\n" , GetTimerValue(start,st1)/1000.);
 #endif
         magma_dormqr_m(nrgpu, MagmaLeft, MagmaNoTrans, n-nb, *m, n-nb, a+nb, lda, &work[indtau1],
                        &work[indwrk + n * (il-1) + nb], n, &work[indwk2], llwrk2, info);
@@ -451,7 +451,7 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-        printf("  time dormqr + copy = %6.2f\n", GetTimerValue(st1,end)/1000.);
+        printf("    time dormqr_m + copy = %6.2f\n", GetTimerValue(st1,end)/1000.);
 
         printf("  time eigenvectors backtransf. = %6.2f\n" , GetTimerValue(start,end)/1000.);
 #endif

@@ -289,7 +289,6 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     magma_int_t threads = magma_get_numthreads();
     magma_setlapack_numthreads(threads);
 
-
 #ifdef ENABLE_DEBUG
     printf("using %d threads\n", threads);
 #endif
@@ -350,7 +349,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     magma_zhetrd_he2hb(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, dT1, threads, info);
     #ifdef ENABLE_TIMER
     tband2 = get_current_time();
-    printf("  1 GPU seq code time zhetrd_he2hb only = %7.4f\n" , GetTimerValue(tband1,tband2)/1000.);
+    printf("    1 GPU seq code time zhetrd_he2hb only = %7.4f\n" , GetTimerValue(tband1,tband2)/1000.);
     #endif
     magma_free(dT1);
 #else
@@ -396,7 +395,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
     #ifdef ENABLE_TIMER
     tband2 = get_current_time();
-    printf("  time alloc %7.4f, ditribution %7.4f, zhetrd_he2hb only = %7.4f\n" , GetTimerValue(t1,t2)/1000., GetTimerValue(t2,tband1)/1000., GetTimerValue(tband1,tband2)/1000.);
+    printf("    time alloc %7.4f, ditribution %7.4f, zhetrd_he2hb only = %7.4f\n" , GetTimerValue(t1,t2)/1000., GetTimerValue(t2,tband1)/1000., GetTimerValue(tband1,tband2)/1000.);
     #endif
 
     for( magma_int_t dev = 0; dev < nrgpu; ++dev ) {
@@ -411,7 +410,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
     st1 = get_current_time();
-    printf("  time zhetrd_he2hb = %6.2f\n" , GetTimerValue(start,st1)/1000.);
+    printf("    time zhetrd_he2hb_mgpu = %6.2f\n" , GetTimerValue(start,st1)/1000.);
 #endif
 
     magma_int_t lda2 = nb+1+(nb-1);
@@ -439,14 +438,14 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
     st2 = get_current_time();
-    printf("  time zhetrd_convert = %6.2f\n" , GetTimerValue(st1,st2)/1000.);
+    printf("    time zhetrd_convert = %6.2f\n" , GetTimerValue(st1,st2)/1000.);
 #endif
 
     magma_zhetrd_hb2st(threads, uplo, n, nb, Vblksiz, A2, lda2, w, &rwork[inde], &work[indV2], ldv, &work[indTAU2], wantz, &work[indT2], ldt);
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
-    printf("  time zhetrd_hb2st = %6.2f\n" , GetTimerValue(st2,end)/1000.);
+    printf("    time zhetrd_hb2st = %6.2f\n" , GetTimerValue(st2,end)/1000.);
     printf("  time zhetrd = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
@@ -499,7 +498,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
         st1 = get_current_time();
-        printf("  time zbulge_back = %6.2f\n" , GetTimerValue(start,st1)/1000.);
+        printf("    time zbulge_back_m = %6.2f\n" , GetTimerValue(start,st1)/1000.);
 #endif
 
         magma_zunmqr_m(nrgpu, MagmaLeft, MagmaNoTrans, n-nb, *m, n-nb, a+nb, lda, &work[indtau1],
@@ -509,7 +508,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
         end = get_current_time();
-        printf("  time zunmqr + copy = %6.2f\n", GetTimerValue(st1,end)/1000.);
+        printf("    time zunmqr_m + copy = %6.2f\n", GetTimerValue(st1,end)/1000.);
         printf("  time eigenvectors backtransf. = %6.2f\n" , GetTimerValue(start,end)/1000.);
 #endif
 

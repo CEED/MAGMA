@@ -15,8 +15,8 @@
 #include "magma_bulge.h"
 #include "magma_zbulge.h"
 
-extern "C" 
-magma_int_t magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
+extern "C" magma_int_t
+magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
                      magmaDoubleComplex *a, magma_int_t lda, 
                      magmaDoubleComplex *b, magma_int_t ldb,
                      double vl, double vu, magma_int_t il, magma_int_t iu,

@@ -290,7 +290,6 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
 
     magma_dsetmatrix( n, n, b, ldb, db, lddb );
 
-
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
     start = get_current_time();
