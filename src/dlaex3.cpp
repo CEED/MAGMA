@@ -254,13 +254,11 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
 
     magma_dsetvector_async( lq2, q2, 1, dq2, 1, NULL );
 
-//
-
 #ifdef _OPENMP
     /////////////////////////////////////////////////////////////////////////////////
     //openmp implementation
     /////////////////////////////////////////////////////////////////////////////////
-#ifdef ENABLE_TIMER
+#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
     magma_timestr_t start, end;
     start = get_current_time();
 #endif
@@ -379,16 +377,16 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
     if (*info != 0)
         return MAGMA_SUCCESS; //??????
 
-#ifdef ENABLE_TIMER
+#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
     end = get_current_time();
-    //printf("eigenvalues/vector D+zzT = %6.2f\n", GetTimerValue(start,end)/1000.);
+    printf("eigenvalues/vector D+zzT = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
 #else
     /////////////////////////////////////////////////////////////////////////////////
     // Non openmp implementation
     /////////////////////////////////////////////////////////////////////////////////
-#ifdef ENABLE_TIMER
+#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
     magma_timestr_t start, end;
     start = get_current_time();
 #endif
@@ -466,15 +464,15 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
         }
     }
 
-#ifdef ENABLE_TIMER
+#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
     end = get_current_time();
-    //printf("eigenvalues/vector D+zzT = %6.2f\n", GetTimerValue(start,end)/1000.);
+    printf("eigenvalues/vector D+zzT = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
 #endif //_OPENMP
     // Compute the updated eigenvectors.
 
-#ifdef ENABLE_TIMER
+#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
     start = get_current_time();
 #endif
     magma_queue_sync( NULL );
@@ -506,9 +504,9 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
         } else
             lapackf77_dlaset("A", &n1, &rk, &d_zero, &d_zero, Q(0,iil-1), &ldq);
     }
-#ifdef ENABLE_TIMER
+#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
     end = get_current_time();
-    //printf("gemms = %6.2f\n", GetTimerValue(start,end)/1000.);
+    printf("gemms = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
 
     return MAGMA_SUCCESS;

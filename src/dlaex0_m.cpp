@@ -203,8 +203,8 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
     // conquer tree.
 
     char char_I[] = {'I', 0};
-//
-#ifdef ENABLE_TIMER
+
+#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
         magma_timestr_t start, end;
         start = get_current_time();
 #endif
@@ -232,7 +232,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
         }
     }
 
-#ifdef ENABLE_TIMER
+#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
     end = get_current_time();
     printf("  for: dsteqr = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
@@ -241,7 +241,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
 
     curlvl = 1;
     while (subpbs > 1){
-#ifdef ENABLE_TIMER
+#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
         magma_timestr_t start, end;
         start = get_current_time();
 #endif
@@ -280,7 +280,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
         }
         subpbs /= 2;
         ++curlvl;
-#ifdef ENABLE_TIMER
+#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
         end = get_current_time();
         //printf("%d: time: %6.2f\n", curlvl, GetTimerValue(start,end)/1000.);
 #endif
