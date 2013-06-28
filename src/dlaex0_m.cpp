@@ -303,7 +303,6 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
         magma_setdevice(igpu);
         magma_queue_destroy( stream[igpu][0] );
         magma_queue_destroy( stream[igpu][1] );
-/*if(nrgpu==1)*/
         magma_free( dw[igpu] );
     }
 
