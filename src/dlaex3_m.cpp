@@ -10,7 +10,7 @@
 */
 
 #ifdef _OPENMP
-#include<omp.h>
+#include <omp.h>
 #endif
 
 #include "common_magma.h"
