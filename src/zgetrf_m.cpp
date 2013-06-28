@@ -122,6 +122,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
     freeMem /= sizeof(magmaDoubleComplex);
     
     /* number of columns in the big panel */
+    h = 1+(2+num_gpus);
     NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
     char * ngr_nb_char = getenv("MAGMA_NGR_NB");
     if( ngr_nb_char != NULL ) NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
@@ -144,7 +145,6 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
         NB = num_gpus*NB;
         NB = max(nb,(NB / nb) * nb); /* making sure it's devisable by nb (x64) */
     }
-    h = 1+(2+num_gpus);
 
     #ifdef CHECK_ZGETRF_OOC
     if( NB != n ) printf( "      * running in out-core mode (n=%d, NB=%d, nb=%d).\n",n,NB,nb );
