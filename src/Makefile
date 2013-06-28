@@ -175,8 +175,6 @@ ZSRC += \
 	zhetrd_he2hb.cpp	\
 	zhetrd_hb2st.cpp	\
 	zbulge_back.cpp		\
-	zhetrd_bhe2trc_v3.cpp	\
-	zhetrd_bhe2trc_v5.cpp	\
 	zungqr_2stage_gpu.cpp	\
 	zunmqr_gpu_2stage.cpp	\
 	dsyevdx_2stage.cpp	\
