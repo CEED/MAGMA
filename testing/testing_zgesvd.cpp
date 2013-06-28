@@ -137,7 +137,6 @@ int main( int argc, char** argv)
                           (Return 0 if true, 1/ULP if false.)
                    =================================================================== */
                 magma_int_t izero = 0;
-                double *E;
                 magmaDoubleComplex *h_work_err;
                 magma_int_t lwork_err = max(5*min_mn, (3*min_mn + max(M,N)))*128;
                 TESTING_MALLOC(h_work_err, magmaDoubleComplex, lwork_err);
@@ -161,10 +160,12 @@ int main( int argc, char** argv)
                     VT2 = h_R;
                 }
                 
+                // since KD=0 (3rd arg), E is not referenced so pass NULL (9th arg)
                 #if defined(PRECISION_z) || defined(PRECISION_c)
                 if ( U2 != NULL && VT2 != NULL ) {
                     lapackf77_zbdt01(&M, &N, &izero, h_A, &M,
-                                     U2, &ldu, S1, E, VT2, &ldv, h_work_err, rwork, &result[0]);
+                                     U2, &ldu, S1, NULL, VT2, &ldv,
+                                     h_work_err, rwork, &result[0]);
                 }
                 if ( U2 != NULL ) {
                     lapackf77_zunt01("Columns", &M, &M2, U2,  &ldu, h_work_err, &lwork_err, rwork, &result[1]);
@@ -175,7 +176,8 @@ int main( int argc, char** argv)
                 #else
                 if ( U2 != NULL && VT2 != NULL ) {
                     lapackf77_zbdt01(&M, &N, &izero, h_A, &M,
-                                     U2, &ldu, S1, E, VT2, &ldv, h_work_err, &result[0]);
+                                      U2, &ldu, S1, NULL, VT2, &ldv,
+                                      h_work_err, &result[0]);
                 }
                 if ( U2 != NULL ) {
                     lapackf77_zunt01("Columns", &M, &M2, U2,  &ldu, h_work_err, &lwork_err, &result[1]);
