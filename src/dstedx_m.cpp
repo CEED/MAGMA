@@ -227,6 +227,14 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
         return MAGMA_SUCCESS;
     }
 
+    /* determine the number of threads */
+    magma_int_t threads = magma_get_numthreads();
+    magma_setlapack_numthreads(threads);
+
+#ifdef ENABLE_DEBUG
+    printf("D&C is using %d threads\n", threads);
+#endif
+
     // If N is smaller than the minimum divide size (SMLSIZ+1), then
     // solve the problem with another solver.
 

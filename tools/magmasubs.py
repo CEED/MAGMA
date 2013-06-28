@@ -683,7 +683,7 @@ subs = {
     ('cublasS',        'cublasD',        'cublasC',        'cublasZ'         ),
     ('cublasIs',       'cublasId',       'cublasIs',       'cublasId'        ),
     ('cublasIs',       'cublasId',       'cublasIc',       'cublasIz'        ),
-    ('smove',           'dmove',          'smove',          'dmove'           ),
+    ('smove',          'dmove',          'smove',          'dmove'           ),
     ('example_s',      'example_d',      'example_c',      'example_z'       ),
     ('ipt_s',          'ipt_d',          'ipt_c',          'ipt_z'           ),
     ('LAPACKE_s',      'LAPACKE_d',      'LAPACKE_c',      'LAPACKE_z'       ),
