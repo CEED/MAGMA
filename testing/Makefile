@@ -233,7 +233,9 @@ testing_% : testing_%.o
 
 #
 # These two files are provided by cuda
+# CUDA 5 needs -DCUBLAS_GFORTRAN or appropriate setting to compile cuda/src/fortran.c bindings
 #
+fortran.o : OPTS += -DCUBLAS_GFORTRAN
 fortran.o : $(CUDADIR)/src/fortran.c
 	$(CC) $(OPTS) $(INC) -c $< -o $@
 

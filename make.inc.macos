@@ -29,7 +29,7 @@ RANLIB    = ranlib
 # currently, there are RUNTIME ERRORS with 64-bit on MacOS!
 # add -DNDEBUG to disable asserts and certain error checks.
 # CUDA 5 needs -DCUBLAS_GFORTRAN or appropriate setting to compile cuda/src/fortran.c bindings
-OPTS      = -Wall -m32 -O3 -DADD_ -DCUBLAS_GFORTRAN
+OPTS      = -Wall -m32 -O3 -DADD_
 F77OPTS   = -Wall -m32 -O3 -DADD_
 FOPTS     = -Wall -m32 -O3 -DADD_ -x f95-cpp-input
 NVOPTS    =       -m32 -O3 -DADD_ -Xcompiler -fno-strict-aliasing
@@ -39,6 +39,15 @@ LIB       = -framework Accelerate -lcublas -lcudart -lm
 
 # define library directories here or in your environment
 #CUDADIR   = /usr/local/cuda
+
+# check for directories and give user hint how to set them
+ifeq ($(CUDADIR),)
+    cuda := $(shell which nvcc | perl -pe 's|/bin/nvcc||')
+    ifeq ($(cuda),)
+        cuda := /usr/local/cuda
+    endif
+$(error Define $$CUDADIR, preferably in your environment, e.g., run "export CUDADIR=$(cuda)" in ~/.bashrc, or "setenv CUDADIR $(cuda)" in ~/.cshrc)
+endif
 
 LIBDIR    = -L$(CUDADIR)/lib
 
