@@ -14,7 +14,7 @@
 #     "Kepler" (NVIDIA compute capability 3.x cards)
 # See http://developer.nvidia.com/cuda-gpus
 
-GPU_TARGET = Tesla
+GPU_TARGET ?= Tesla
 
 CC        = gcc
 NVCC      = nvcc

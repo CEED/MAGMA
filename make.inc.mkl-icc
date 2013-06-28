@@ -12,7 +12,7 @@
 #     "Kepler" (NVIDIA compute capability 3.x cards)
 # See http://developer.nvidia.com/cuda-gpus
 
-GPU_TARGET = Fermi
+GPU_TARGET ?= Fermi
 
 CC        = icc
 NVCC      = nvcc
