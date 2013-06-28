@@ -8,42 +8,33 @@
        @author Azzam Haidar
 */
 #include "common_magma.h"
-
 /***************************************************************************//**
  * switch lapack thread_num initialization
  **/
-#if defined(MAGMA_WITH_MKL)
-#include <mkl_service.h>
-#include <omp.h>
-#endif
-
-#if defined(MAGMA_WITH_ACML)
-#include <omp.h>
-#endif
-
 #if defined(_OPENMP) 
 #include <omp.h>
+    #if defined(MAGMA_WITH_MKL)
+    #include <mkl_service.h>
+    #endif
 #endif
-
 /////////////////////////////////////////////////////////////
-extern "C"
 void magma_setlapack_numthreads(magma_int_t num_threads)
 {
-#if defined(MAGMA_WITH_MKL)
-    mkl_set_num_threads( num_threads );
-#endif
-#if defined(MAGMA_WITH_ACML)
+#if defined(_OPENMP)
     omp_set_num_threads( num_threads );
-#endif
-#if defined(_OPENMP) || defined(MAGMA_WITH_MKL)
-    omp_set_num_threads( num_threads );
+    #if defined(MAGMA_WITH_MKL)
+        mkl_set_num_threads( num_threads );
+    #endif
+#else
+   printf("==========================================================================================\n");
+   printf("  WARNING you are calling a parallel section without linking with a multithread library   \n");
+   printf("==========================================================================================\n");
 #endif
 }
 /////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////
-extern "C"
 magma_int_t magma_get_numthreads()
 {
     /* determine the number of threads */
@@ -71,3 +62,13 @@ magma_int_t magma_get_numthreads()
     return threads;
 }
 /////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
