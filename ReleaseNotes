@@ -19,7 +19,8 @@ Included are routines for the following algorithms:
 Most routines have all four precisions:
 single (s), double (d), single-complex (c), double-complex (z).
 
- 1.4.0 - beta 2: June 25, 2013
+ 1.4.0 -
+       - beta 2: June 28, 2013
        - beta 1: June 19, 2013
     * Use magma_init() and magma_finalize() to initialize and cleanup MAGMA.
     * Merge libmagmablas into libmagma to eliminate circular dependencies.
