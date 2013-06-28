@@ -323,8 +323,10 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
      * need to have a dwork here that will be used 
      * a db and then passed to  dsyevd.
      * */
-    magma_queue_sync( stream );
-    magma_free( db );
+    if(n>5000){
+        magma_queue_sync( stream );
+        magma_free( db );
+    }
 
 #ifdef ENABLE_TIMER
     start = get_current_time();
@@ -340,13 +342,14 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
 #ifdef ENABLE_TIMER
         start = get_current_time();
 #endif
-        /* allocate and copy db back */ 
-        if (MAGMA_SUCCESS != magma_dmalloc( &db, n*lddb ) ){
-            *info = MAGMA_ERR_DEVICE_ALLOC;
-            return *info;
+        /* allocate and copy db back */
+        if(n>5000){
+            if (MAGMA_SUCCESS != magma_dmalloc( &db, n*lddb ) ){
+                *info = MAGMA_ERR_DEVICE_ALLOC;
+                return *info;
+            }
+            magma_dsetmatrix( n, n, b, ldb, db, lddb );
         }
-        magma_dsetmatrix( n, n, b, ldb, db, lddb );
-
         /* Backtransform eigenvectors to the original problem. */
         if (itype == 1 || itype == 2) {
             /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;
@@ -376,6 +379,10 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
         end = get_current_time();
         printf("time dtrsm/mm + getmatrix = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
+        /* free db */
+        if(n>5000){        
+            magma_free( db );
+        }        
     }
 
     magma_queue_sync( stream );
@@ -385,7 +392,6 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
     iwork[0] = liwmin;
 
     magma_free( da );
-    magma_free( db );
 
     return MAGMA_SUCCESS;
 } /* magma_dsygvd */
