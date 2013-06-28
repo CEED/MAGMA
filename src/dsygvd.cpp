@@ -245,7 +245,6 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
                             a,  lda,
                             da, ldda, stream );
 
-//
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
     start = get_current_time();
@@ -279,7 +278,7 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
      * need to have a dwork here that will be used 
      * a db and then passed to  dsyevd.
      * */
-    if(n<=5000){
+    if(n > 5000){
         magma_queue_sync( stream );
         magma_free( db );
     }
@@ -299,7 +298,7 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
         start = get_current_time();
 #endif
         /* allocate and copy db back */
-        if(n<=5000){
+        if(n > 5000){
             if (MAGMA_SUCCESS != magma_dmalloc( &db, n*lddb ) ){
                 *info = MAGMA_ERR_DEVICE_ALLOC;
                 return *info;
@@ -336,7 +335,7 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
         printf("time dtrsm/mm + getmatrix = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
         /* free db */
-        if(n<=5000){        
+        if(n > 5000){        
             magma_free( db );
         }
     }
@@ -348,6 +347,9 @@ magma_dsygvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     iwork[0] = liwmin;
 
     magma_free( da );
+    if(n <= 5000){
+        magma_free( db );
+    }
 
     return MAGMA_SUCCESS;
 } /* magma_dsygvd */
