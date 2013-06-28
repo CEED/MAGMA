@@ -28,7 +28,7 @@ FOPTS     = -O3 -DADD_ -x f95-cpp-input
 NVOPTS    = -O3 -DADD_ -Xcompiler -fno-strict-aliasing
 LDOPTS    = -fopenmp
 
-LIB       = -lacml_mp -lacml_mv -lcblas -lcublas -lm
+LIB       = -lacml_mp -lacml_mv -lcblas -lcublas -lcudart -lm
 
 # define library directories here or in your environment
 #ACMLDIR   = /opt/acml/gfortran_mp
