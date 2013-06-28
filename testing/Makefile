@@ -124,15 +124,16 @@ ZSRC += \
 ZSRC += \
 	testing_zhetrd_he2hb.cpp	\
 	testing_zheevdx_2stage.cpp	\
-#	testing_zhegvdx_2stage_m.cpp	\
 #	testing_zhetrd_he2hb_mgpu.cpp	\
 
 # generalized symmetric eigenvalues
 ZSRC += \
 	testing_dsygvd.cpp	\
 	testing_zhegvd.cpp	\
+	testing_zhegvd_m.cpp	\
 	testing_zhegvdx.cpp	\
 	testing_zhegvdx_2stage.cpp	\
+	testing_zhegvdx_2stage_m.cpp	\
 # ----------
 # non-symmetric eigenvalues
 ZSRC += \
