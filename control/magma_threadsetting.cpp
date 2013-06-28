@@ -13,10 +13,12 @@
  **/
 #if defined(_OPENMP) 
 #include <omp.h>
-    #if defined(MAGMA_WITH_MKL)
-    #include <mkl_service.h>
-    #endif
 #endif
+
+#if defined(MAGMA_WITH_MKL)
+#include <mkl_service.h>
+#endif
+
 /////////////////////////////////////////////////////////////
 void magma_setlapack_numthreads(magma_int_t num_threads)
 {
@@ -25,6 +27,8 @@ void magma_setlapack_numthreads(magma_int_t num_threads)
     #if defined(MAGMA_WITH_MKL)
         mkl_set_num_threads( num_threads );
     #endif
+#elif defined(MAGMA_WITH_MKL)
+        mkl_set_num_threads( num_threads );
 #else
    printf("==========================================================================================\n");
    printf("  WARNING you are calling a parallel section without linking with a multithread library   \n");
