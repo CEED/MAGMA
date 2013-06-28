@@ -17,7 +17,7 @@ extern "C" {
 
 
 
-struct magma_z_sparse_matrix{
+typedef struct magma_z_sparse_matrix{
 
     magma_storage_t    storage_type;
     magma_location_t   memory_location;
@@ -29,10 +29,9 @@ struct magma_z_sparse_matrix{
     magma_int_t        *row; 
     magma_int_t        *col;
 
+}magma_z_sparse_matrix;
 
-};
-
-struct magma_c_sparse_matrix{
+typedef struct magma_c_sparse_matrix{
 
     magma_storage_t    storage_type;
     magma_location_t   memory_location;
@@ -44,11 +43,10 @@ struct magma_c_sparse_matrix{
     magma_int_t        *row; 
     magma_int_t        *col;
 
+}magma_c_sparse_matrix;
 
-};
 
-
-struct magma_d_sparse_matrix{
+typedef struct magma_d_sparse_matrix{
 
     magma_storage_t    storage_type;
     magma_location_t   memory_location;
@@ -60,11 +58,10 @@ struct magma_d_sparse_matrix{
     magma_int_t        *row; 
     magma_int_t        *col;
 
+}magma_d_sparse_matrix;
 
-};
 
-
-struct magma_s_sparse_matrix{
+typedef struct magma_s_sparse_matrix{
 
     magma_storage_t    storage_type;
     magma_location_t   memory_location;
@@ -76,48 +73,47 @@ struct magma_s_sparse_matrix{
     magma_int_t        *row; 
     magma_int_t        *col;
 
-
-};
-
+}magma_s_sparse_matrix;
 
 
-struct magma_z_vector{
+
+typedef struct magma_z_vector{
 
     magma_location_t   memory_location;
     magma_int_t        num_rows;
     magma_int_t        nnz; 
     magmaDoubleComplex *val;
 
-};
+}magma_z_vector;
 
-struct magma_c_vector{
+typedef struct magma_c_vector{
 
     magma_location_t   memory_location;
     magma_int_t        num_rows;
     magma_int_t        nnz; 
     magmaFloatComplex  *val;
 
-};
+}magma_c_vector;
 
 
-struct magma_d_vector{
+typedef struct magma_d_vector{
 
     magma_location_t   memory_location;
     magma_int_t        num_rows;
     magma_int_t        nnz; 
     double             *val;
 
-};
+}magma_d_vector;
 
 
-struct magma_s_vector{
+typedef struct magma_s_vector{
 
     magma_location_t   memory_location;
     magma_int_t        num_rows;
     magma_int_t        nnz; 
     float              *val;
 
-};
+}magma_s_vector;
 
 #ifdef __cplusplus
 }

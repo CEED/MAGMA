@@ -56,7 +56,7 @@ lib:
 $(ALLOBJ): testings.h
 
 
-$(EXE): ../$(LIBMAGMA) $(LIBMAGMA_SPARSE) testing_util.o
+$(EXE): $(LIBMAGMA) $(LIBMAGMA_SPARSE) testing_util.o
 
 clean:
 	rm -f *.o *~ 
