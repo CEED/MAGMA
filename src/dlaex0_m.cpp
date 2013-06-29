@@ -119,7 +119,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
 
     magma_int_t ione = 1;
     char range_;
-    magma_int_t curlvl, curprb, i, indxq;
+    magma_int_t curlvl, i, indxq;
     magma_int_t igpu, j, k, matsiz, msd2, smlsiz;
     magma_int_t submat, subpbs, tlvls;
     double* dw[MagmaMaxGPUs];

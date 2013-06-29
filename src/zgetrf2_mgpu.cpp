@@ -127,7 +127,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
     magma_int_t block_size = 32;
     magma_int_t iinfo, n_local[MagmaMaxGPUs];
     magma_int_t maxm, mindim;
-    magma_int_t i, ii, d, dd, rows, cols, s, ldpan[MagmaMaxGPUs];
+    magma_int_t i, d, dd, rows, cols, s, ldpan[MagmaMaxGPUs];
     magma_int_t id, i_local, i_local2, nb0, nb1;
     magmaDoubleComplex *d_panel[MagmaMaxGPUs], *panel_local[MagmaMaxGPUs];
     //magma_queue_t streaml[MagmaMaxGPUs][2];

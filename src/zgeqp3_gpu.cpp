@@ -103,8 +103,9 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
 
     magma_int_t ione = 1;
 
+    //magma_int_t na;
     magma_int_t n_j;
-    magma_int_t j, jb, na, nb, sm, sn, fjb, nfxd, minmn;
+    magma_int_t j, jb, nb, sm, sn, fjb, nfxd, minmn;
     magma_int_t topbmn, sminmn, lwkopt, lquery;
     
     *info = 0;

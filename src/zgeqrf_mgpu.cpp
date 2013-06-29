@@ -181,7 +181,7 @@ magma_zgeqrf2_mgpu( magma_int_t num_gpus, magma_int_t m, magma_int_t n,
             lapackf77_zgeqrf( &rows, &ib, hpanel(i), &ldhpanel, tau+i,
                               hwork, &lhwork, info );
             if ( *info != 0 ) {
-                fprintf( stderr, "error %d\n", *info );
+                fprintf( stderr, "error %d\n", (int) *info );
             }
 
             // Form the triangular factor of the block reflector
@@ -292,7 +292,7 @@ magma_zgeqrf2_mgpu( magma_int_t num_gpus, magma_int_t m, magma_int_t n,
         lhwork = lwork - ib*rows;
         lapackf77_zgeqrf( &rows, &ib, hwork, &rows, tau+i, hwork + ib*rows, &lhwork, info );
         if ( *info != 0 ) {
-            fprintf( stderr, "error %d\n", *info );
+            fprintf( stderr, "error %d\n", (int) *info );
         }
         
         for( j=i; j < n; j += nb ) {

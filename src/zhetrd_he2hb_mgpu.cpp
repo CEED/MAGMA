@@ -169,7 +169,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
 
     magma_int_t pm, pn, indi, indj, pk;
     magma_int_t pm_old=0, pn_old=0, indi_old=0, indj_old=0, flipV=-1;
-    magma_int_t iblock, idev, di, indi_next;
+    magma_int_t iblock, idev, di;
     int i;
     int lwkopt;
     int lquery;
@@ -272,7 +272,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
 
 
     //magma_int_t mlocal = ((n / distblk) / ngpu + 1) * distblk;
-    magma_int_t nGblk = magma_ceildiv( (magma_ceildiv(n,nb)),ngpu);   
+    //magma_int_t nGblk = magma_ceildiv( (magma_ceildiv(n,nb)),ngpu);   
     magma_int_t lddv = ldda;
     magma_int_t lddw = lddv;
     magma_int_t dworksiz    = ldda*nb*(ngpu+1);  

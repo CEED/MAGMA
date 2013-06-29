@@ -140,7 +140,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
     magma_int_t nb = magma_get_ztrsm_m_nb();
     magma_int_t igpu = 0;
     magma_int_t info;
-    magma_int_t k,j,jj,kb,jb,jjb;
+    magma_int_t k, j, kb, jb;
     magma_int_t ldda, dima, lddb, dimb;
     int gpu_b;
     magma_getdevice(&gpu_b);

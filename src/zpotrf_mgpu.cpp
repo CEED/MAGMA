@@ -68,13 +68,11 @@ magma_zpotrf_mgpu(magma_int_t num_gpus, char uplo, magma_int_t n,
     =====================================================================   */
 
 
-    magma_int_t     j, jb, nb, nb0, nb2, d, id, j_local, j_local2, lddp, h;
+    magma_int_t     j, nb, d, lddp, h;
     char            uplo_[2] = {uplo, 0};
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *work;
-    double          d_one     =  1.0;
-    double          d_neg_one = -1.0;
     int upper = lapackf77_lsame(uplo_, "U");
     magmaDoubleComplex *dwork[MagmaMaxGPUs];
     magma_queue_t    stream[MagmaMaxGPUs][3];

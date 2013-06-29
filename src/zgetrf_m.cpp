@@ -89,7 +89,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
     magmaDoubleComplex    c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t        iinfo = 0, nb, nbi, maxm, n_local[MagmaMaxGPUs], ldn_local;
     magma_int_t        N, M, NB, NBk, I, d, num_gpus;
-    magma_int_t        i, ii, jj, h, offset, ib, rows, s;
+    magma_int_t        ii, jj, h, offset, ib, rows, s;
     
     magma_queue_t stream[MagmaMaxGPUs][2];
     magma_event_t  event[MagmaMaxGPUs][2];

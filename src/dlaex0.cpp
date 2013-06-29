@@ -114,7 +114,7 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
 
     magma_int_t ione = 1;
     char range_;
-    magma_int_t curlvl, curprb, i, indxq;
+    magma_int_t curlvl, i, indxq;
     magma_int_t j, k, matsiz, msd2, smlsiz;
     magma_int_t submat, subpbs, tlvls;
 

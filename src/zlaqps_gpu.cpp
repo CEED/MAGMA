@@ -103,13 +103,17 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
     magma_int_t ione = 1;
     
     magma_int_t i__1, i__2;
-    double d__1;
+    //double d__1;
     magmaDoubleComplex z__1;
     
-    magma_int_t j, k, rk;
-    magmaDoubleComplex *Aks, Akk, tauk;
+    //magma_int_t j;
+    magma_int_t k, rk;
+    //magmaDoubleComplex Akk;
+    magmaDoubleComplex *Aks;
+    magmaDoubleComplex tauk;
     magma_int_t pvt;
-    double temp, temp2, tol3z;
+    //double temp, temp2;
+    double tol3z;
     magma_int_t itemp;
 
     double lsticc, *lsticcs;
