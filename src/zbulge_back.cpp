@@ -17,7 +17,7 @@
 #include "magma_zbulge.h"
 #include <cblas.h>
 
-#ifdef SETAFFINITY
+#ifdef MAGMA_SETAFFINITY
 #include "affinity.h"
 #endif
 
@@ -146,9 +146,15 @@ magma_zbulge_back(magma_int_t threads, char uplo,
     /****************************************************
      *  apply V2 from left to the eigenvectors Z. dZ = (I-V2*T2*V2')*Z
      * **************************************************/
-
+//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+n_gpu=ne;
+//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     timeaplQ2 = magma_wtime();
-
     /*============================
      *  use GPU+CPU's
      *==========================*/
@@ -245,7 +251,7 @@ static void *magma_zapplyQ_parallel_section(void *arg)
 
     magma_int_t n_cpu = ne - n_gpu;
 
-#ifdef SETAFFINITY
+#ifdef MAGMA_SETAFFINITY
     //#define PRINTAFFINITY
 #ifdef PRINTAFFINITY
     affinity_set print_set;
@@ -315,7 +321,7 @@ static void *magma_zapplyQ_parallel_section(void *arg)
 
     } // END if my_core_id
 
-#ifdef SETAFFINITY
+#ifdef MAGMA_SETAFFINITY
     // unbind threads
     if (check == 0){
         check2 = original_set.set_affinity();

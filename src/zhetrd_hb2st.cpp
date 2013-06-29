@@ -17,7 +17,7 @@
 #include "magma_zbulge.h"
 #include <cblas.h>
 
-#ifdef SETAFFINITY
+#ifdef MAGMA_SETAFFINITY
 #include "affinity.h"
 #endif
 
@@ -330,7 +330,7 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 
     double timeB=0.0, timeT=0.0;
 
-#ifdef SETAFFINITY
+#ifdef MAGMA_SETAFFINITY
 //#define PRINTAFFINITY
 #ifdef PRINTAFFINITY
     affinity_set print_set;
@@ -460,7 +460,7 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 
     } // WANTZ > 0
 
-#ifdef SETAFFINITY
+#ifdef MAGMA_SETAFFINITY
     // unbind threads
     if (check == 0){
         check2 = original_set.set_affinity();

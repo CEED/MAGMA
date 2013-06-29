@@ -17,7 +17,7 @@
 #include "magma_zbulge.h"
 #include <cblas.h>
 
-#ifdef SETAFFINITY
+#ifdef MAGMA_SETAFFINITY
 #include "affinity.h"
 #endif
 
@@ -240,7 +240,7 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
 
     magma_int_t n_cpu = ne - n_gpu;
 
-#ifdef SETAFFINITY
+#ifdef MAGMA_SETAFFINITY
     //#define PRINTAFFINITY
 #ifdef PRINTAFFINITY
     affinity_set print_set;
@@ -309,7 +309,7 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
 
     } // END if my_core_id
 
-#ifdef SETAFFINITY
+#ifdef MAGMA_SETAFFINITY
     // unbind threads
     if (check == 0){
         check2 = original_set.set_affinity();

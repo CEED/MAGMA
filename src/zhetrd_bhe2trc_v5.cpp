@@ -764,7 +764,7 @@ static void *parallel_section(void *arg)
 
     double timeB=0.0, timeT=0.0, timeaplQ1=0.0;
 
-#if defined(SETAFFINITY)
+#if defined(MAGMA_SETAFFINITY)
     // bind threads
     cpu_set_t set;
     // bind threads
@@ -893,7 +893,7 @@ static void *parallel_section(void *arg)
         }
     } // WANTZ > 0
 
-#if defined(SETAFFINITY)
+#if defined(MAGMA_SETAFFINITY)
     // unbind threads
     sys_corenbr = sysconf(_SC_NPROCESSORS_ONLN);
     CPU_ZERO( &set );
@@ -1166,7 +1166,7 @@ static void *applyQ_parallel_section(void *arg)
     if(wantz<=0)
         return 0;
 
-#if defined(SETAFFINITY)
+#if defined(MAGMA_SETAFFINITY)
     cpu_set_t set;
     CPU_ZERO( &set );
     CPU_SET( my_core_id, &set );
@@ -1257,7 +1257,7 @@ static void *applyQ_parallel_section(void *arg)
 
     }// END of WANTZ==3 / 4
 
-#if defined(SETAFFINITY)
+#if defined(MAGMA_SETAFFINITY)
     // unbind threads
     magma_int_t sys_corenbr = 1;
     sys_corenbr = sysconf(_SC_NPROCESSORS_ONLN);
