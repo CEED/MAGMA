@@ -12,10 +12,7 @@
 
 #include "affinity.h"
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-#include <sched.h>
+#include <stdio.h>
 
 affinity_set::affinity_set()
 {
@@ -54,6 +51,8 @@ void affinity_set::print_affinity(int id, const char* s)
 
 void affinity_set::print_set(int id, const char* s)
 {
+// CPU_COUNT() first appeared in glibc 2.6.
+#if __GLIBC_PREREQ(2,6)
     char cpustring[1024];
 
     int cpu_count=CPU_COUNT(&set);
@@ -72,7 +71,7 @@ void affinity_set::print_set(int id, const char* s)
     charcnt += sprintf(&(cpustring[charcnt-1]),"\n") - 1; // -1 is used to remove "," after last cpu.
     printf("%s: %s", s, cpustring);
     fflush(stdout);
+#endif
 }
 
-#endif
-
+#endif  // MAGMA_SETAFFINITY
