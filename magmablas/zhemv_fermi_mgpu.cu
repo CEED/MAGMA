@@ -1012,7 +1012,7 @@ magmablas_zhemv_mgpu_offset(
 
         if (lwork < workspace) {
             printf("Not enough work space in magmablas_zhemv: passed %d, required %d\n",
-                   lwork, workspace);
+                   (int) lwork, (int) workspace);
             exit(1);
         }
         if(nb != 64)
@@ -1099,7 +1099,7 @@ magmablas_zhemv2_mgpu_offset(
 
         if (lwork < workspace) {
             printf("Not enough work space in magmablas_zhemv: passed %d, required %d\n",
-                   lwork, workspace);
+                   (int) lwork, (int) workspace);
             exit(1);
         }
         if(nb != 64)
@@ -1190,7 +1190,7 @@ magmablas_zhemv2_mgpu(
 
         if (lwork < workspace) {
             printf("Not enough work space in magmablas_zhemv: passed %d, required %d\n",
-                   lwork, workspace);
+                   (int) lwork, (int) workspace);
             exit(1);
         }
         if(nb != 64)

@@ -39,7 +39,7 @@ magmablas_zgetmatrix_transpose_mgpu(
 
     if (lda < m || ngpus*ldda < n || lddb < m){
         printf( "Wrong arguments in magmablas_zgetmatrix_transpose_mgpu (%d<%d), (%d*%d<%d), or (%d<%d).\n",
-                lda, m, ngpus, ldda, n, lddb, m );
+                (int) lda, (int) m, (int) ngpus, (int) ldda, (int) n, (int) lddb, (int) m );
         return;
     }
     

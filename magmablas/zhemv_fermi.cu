@@ -1738,7 +1738,7 @@ magmablas_zhemv2_200(
 
         if (lwork < workspace) {
             printf("Not enough work space in magmablas_zhemv: passed %d, required %d\n",
-                   lwork, workspace);
+                   (int) lwork, (int) workspace);
             exit(1);
         }
         //printf("You are using zhemv_bs=%d\n", zhemv_bs);

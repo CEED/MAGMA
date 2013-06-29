@@ -213,7 +213,7 @@ void zpotf2_zdotc(magma_int_t n, magmaDoubleComplex *x, magma_int_t incx)
 
 */
     if (n > zdotc_max_bs) {
-        printf("n = %d > %d is not supported in zpotf2_zdotc\n", n, zdotc_max_bs);
+        printf("n = %d > %d is not supported in zpotf2_zdotc\n", (int) n, (int) zdotc_max_bs);
         exit(1);
     }
     int threadSize;

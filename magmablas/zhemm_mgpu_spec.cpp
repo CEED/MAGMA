@@ -16,16 +16,18 @@
 extern "C"
 void magmablas_zhemm_mgpu_spec(
     char side, char uplo, magma_int_t m, magma_int_t n,
-    magmaDoubleComplex alpha, magmaDoubleComplex *dA[], magma_int_t ldda,  magma_int_t offset,
-                           magmaDoubleComplex *dB[], magma_int_t lddb,
-    magmaDoubleComplex beta,  magmaDoubleComplex *dC[], magma_int_t lddc,
-                           magmaDoubleComplex *dwork[],    magma_int_t dworksiz,
-                           magmaDoubleComplex *C,    magma_int_t ldc,
-                           magmaDoubleComplex *work[], magma_int_t ldwork,
-                           magma_int_t ngpu, magma_int_t nb, 
-                           magma_queue_t streams[][20], magma_int_t nstream, 
-                           magma_event_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10],magma_int_t nbevents, 
-                           magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2], magma_int_t nbcmplx )
+    magmaDoubleComplex alpha,
+    magmaDoubleComplex *dA[],    magma_int_t ldda,  magma_int_t offset,
+    magmaDoubleComplex *dB[],    magma_int_t lddb,
+    magmaDoubleComplex beta,
+    magmaDoubleComplex *dC[],    magma_int_t lddc,
+    magmaDoubleComplex *dwork[], magma_int_t dworksiz,
+    magmaDoubleComplex *C,       magma_int_t ldc,
+    magmaDoubleComplex *work[],  magma_int_t ldwork,
+    magma_int_t ngpu, magma_int_t nb, 
+    magma_queue_t streams[][20], magma_int_t nstream, 
+    magma_event_t redevents[][MagmaMaxGPUs*MagmaMaxGPUs+10],magma_int_t nbevents, 
+    magma_int_t gnode[MagmaMaxGPUs][MagmaMaxGPUs+2], magma_int_t nbcmplx )
 {
     #define dA(dev, i, j) (dA[dev] + (i) + (j)*ldda)
     #define dB(dev, i, j) (dB[dev] + (i) + (j)*lddb)
@@ -39,11 +41,6 @@ void magmablas_zhemm_mgpu_spec(
     assert( nstream >= ngpu );
     assert( nbevents >= ngpu*ngpu );
     
-    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
-    magma_int_t ione = 1;
-    
-
     magmaDoubleComplex *dwork1[MagmaMaxGPUs];
     magmaDoubleComplex *dwork2[MagmaMaxGPUs];
 
