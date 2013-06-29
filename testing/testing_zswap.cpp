@@ -397,7 +397,7 @@ int main( int argc, char** argv)
             row_perf6 = 0.5 * gbytes / time;
             
             printf("%5d  %3d  %6.2f%c/ %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f%c  %6.2f%c  %6.2f%c  %6.2f%c/ %6.2f%c  %6.2f / %6.2f  %6.2f  %10s\n",
-                   N, nb,
+                   (int) N, (int) nb,
                    row_perf0, ((check & 0x001) != 0 ? '*' : ' '),
                    col_perf0, ((check & 0x002) != 0 ? '*' : ' '),
                    row_perf1, ((check & 0x004) != 0 ? '*' : ' '),

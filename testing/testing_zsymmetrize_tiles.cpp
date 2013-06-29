@@ -44,7 +44,7 @@ int main( int argc, char** argv)
     mstride = 2*nb;
     nstride = 3*nb;
     
-    printf("nb=%d, mstride=%d, nstride=%d\n", nb, mstride, nstride );
+    printf("nb=%d, mstride=%d, nstride=%d\n", (int) nb, (int) mstride, (int) nstride );
     printf("    N ntile   CPU GByte/s (sec)   GPU GByte/s (sec)   check\n");
     printf("===========================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {

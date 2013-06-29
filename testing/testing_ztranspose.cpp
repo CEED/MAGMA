@@ -34,7 +34,7 @@ int main( int argc, char** argv)
     real_Double_t    gbytes, gpu_perf, gpu_time, gpu_perf2, gpu_time2, cpu_perf, cpu_time;
     double           error, error2, work[1];
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
-    magmaDoubleComplex *h_A, *h_B, *h_R, tmp;
+    magmaDoubleComplex *h_A, *h_B, *h_R;
     magmaDoubleComplex *d_A, *d_B;
     magma_int_t M, N, size, lda, ldda, ldb, lddb;
     magma_int_t ione     = 1;

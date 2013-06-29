@@ -42,7 +42,7 @@ int main( int argc, char** argv)
     parse_opts( argc, argv, &opts );
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     
-    printf("ngpu %d\n", opts.ngpu );
+    printf("ngpu %d\n", (int) opts.ngpu );
     printf("  M     N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / ||A||_F\n");
     printf("=======================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {

@@ -64,7 +64,7 @@ int main( int argc, char** argv)
             M = opts.msize[i];
             N = opts.nsize[i];
             if ( M < N ) {
-                printf( "skipping M=%d, N=%d because M < N is not yet supported.\n", M, N );
+                printf( "skipping M=%d, N=%d because M < N is not yet supported.\n", (int) M, (int) N );
                 continue;
             }
             min_mn = min(M, N);

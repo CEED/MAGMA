@@ -49,7 +49,7 @@ int main( int argc, char** argv)
     mstride = 2*mb;
     nstride = 3*nb;
     
-    printf("mb=%d, nb=%d, mstride=%d, nstride=%d\n", mb, nb, mstride, nstride );
+    printf("mb=%d, nb=%d, mstride=%d, nstride=%d\n", (int) mb, (int) nb, (int) mstride, (int) nstride );
     printf("    M     N ntile   CPU GFlop/s (sec)   GPU GFlop/s (sec)   error   \n");
     printf("====================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {

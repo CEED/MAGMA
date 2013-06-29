@@ -55,7 +55,7 @@ int main( int argc, char** argv )
         N = opts.nsize[i];
         K = opts.ksize[i];
         if ( M < K || N < K || K <= 0 ) {
-            printf( "skipping M %d, N %d, K %d; requires M >= K, N >= K, K >= 0.\n", M, N, K );
+            printf( "skipping M %d, N %d, K %d; requires M >= K, N >= K, K >= 0.\n", (int) M, (int) N, (int) K );
             continue;
         }
         for( int istor = 0; istor < 2; ++istor ) {

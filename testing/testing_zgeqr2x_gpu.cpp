@@ -87,7 +87,7 @@ int main( int argc, char** argv)
             checkres = true;
         }
         else if ( strcmp("-v", argv[i]) == 0 ) {
-            sscanf( argv[++i], "%d", &version );
+            version = atoi( argv[++i] );
         }
         else {
             printf( "invalid argument: %s\n", argv[i] );

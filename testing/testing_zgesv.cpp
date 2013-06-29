@@ -44,7 +44,7 @@ int main(int argc, char **argv)
     
     nrhs = opts.nrhs;
     
-    printf("ngpu %d\n", opts.ngpu );
+    printf("ngpu %d\n", (int) opts.ngpu );
     printf("    N  NRHS   CPU Gflop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / ||A||*||X||\n");
     printf("==============================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {

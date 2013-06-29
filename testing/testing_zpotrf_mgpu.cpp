@@ -35,7 +35,7 @@ int main( int argc, char** argv )
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *h_A, *h_R;
     magmaDoubleComplex *d_lA[ MagmaMaxGPUs ];
-    magma_int_t M, N, n2, lda, ldda, max_size, ngpu;
+    magma_int_t N, n2, lda, ldda, max_size, ngpu;
     magma_int_t info, nb;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
@@ -44,7 +44,7 @@ int main( int argc, char** argv )
     parse_opts( argc, argv, &opts );
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     
-    printf("ngpu %d, uplo %c\n", opts.ngpu, opts.uplo );
+    printf("ngpu %d, uplo %c\n", (int) opts.ngpu, opts.uplo );
     printf("    N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / ||A||_F\n");
     printf("=================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {

@@ -125,7 +125,7 @@ int main(int argc, char **argv)
             N = M;
         }
         if (M>0 && N>0)
-        {    printf("  testing_zhemv_mgpu -M %d -N %d -NGPU %d\n\n", M, N, num_gpus);
+        {    printf("  testing_zhemv_mgpu -M %d -N %d -NGPU %d\n\n", (int) M, (int) N, (int) num_gpus);
             printf("  in %c side \n", uplo);
         }
         else
@@ -147,7 +147,7 @@ int main(int argc, char **argv)
         num_gpus = 2;
         offset = 0;
         printf("\nUsage: \n");
-        printf("  testing_zhemv_mgpu -M %d -N %d -NGPU %d\n\n", M, N, num_gpus);
+        printf("  testing_zhemv_mgpu -M %d -N %d -NGPU %d\n\n", (int) M, (int) N, (int) num_gpus);
     }
          
 
@@ -157,7 +157,7 @@ int main(int argc, char **argv)
       printf("More GPUs requested than available. Have to change it.\n");
       num_gpus = max_num_gpus;
     }
-    printf("Number of GPUs to be used = %d\n", num_gpus);
+    printf("Number of GPUs to be used = %d\n", (int) num_gpus);
     for(int i=0; i< num_gpus; i++)
     {
         magma_queue_create(&stream[i][0]);
@@ -170,7 +170,7 @@ int main(int argc, char **argv)
     nb = 32;
     //nb = 64;
 
-    printf("block size = %d\n", nb);
+    printf("block size = %d\n", (int) nb);
    
     TESTING_MALLOC( A, magmaDoubleComplex, matsize );
     TESTING_MALLOC( X, magmaDoubleComplex, vecsize );
@@ -199,7 +199,7 @@ int main(int argc, char **argv)
       TESTING_DEVALLOC( dX[i], magmaDoubleComplex, vecsize );
       TESTING_DEVALLOC( dY[i], magmaDoubleComplex, vecsize );
       
-      printf("device %2d n_local = %4d\n", i, n_local[i]); 
+      printf("device %2d n_local = %4d\n", (int) i, (int) n_local[i]); 
 
     }
     magma_setdevice(0);
@@ -257,8 +257,8 @@ int main(int argc, char **argv)
         lda = LDA; 
         flops = FLOPS( (double)m ) / 1e6;
 
-        printf(      "N %5d ", m );
-        fprintf( fp, "%5d, ", m );
+        printf(      "N %5d ", (int) m );
+        fprintf( fp, "%5d, ", (int) m );
 
         vecsize = m * incx;
         lapackf77_zlarnv( &ione, ISEED, &vecsize, X );

@@ -78,7 +78,8 @@ int main( int argc, char** argv)
         jobz = MagmaVec;
     }
 
-    printf("using: itype = %d, jobz = %c,range = %c, uplo = %c, checkres = %d, fraction = %6.4f\n", itype, jobz, range, uplo, checkres, f);
+    printf("using: itype = %d, jobz = %c, range = %c, uplo = %c, checkres = %d, fraction = %6.4f\n",
+           (int) itype, jobz, range, uplo, (int) checkres, f);
 
     printf("  N     M     GPU Time(s) \n");
     printf("==========================\n");

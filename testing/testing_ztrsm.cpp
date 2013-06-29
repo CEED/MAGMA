@@ -40,7 +40,7 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t   gflops, magma_perf, magma_time, cublas_perf, cublas_time, cpu_perf, cpu_time;
-    double          magma_error, cublas_error, Cnorm, work[1];
+    double          magma_error, cublas_error, work[1];
     magma_int_t M, N, info;
     magma_int_t Ak;
     magma_int_t sizeA, sizeB;

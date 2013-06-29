@@ -56,7 +56,7 @@ int main( int argc, char** argv)
 {
     TESTING_INIT_MGPU();
 
-    magma_timestr_t       start, end, tband;
+    magma_timestr_t       start, end;  //, tband;
     double           eps, flops, gpu_perf, gpu_time;
     magmaDoubleComplex *h_A, *h_R, *h_work, *dT1;
     magmaDoubleComplex *tau;
@@ -66,7 +66,8 @@ int main( int argc, char** argv)
     magma_int_t N = 0, n2, lda, lwork, ldt, lwork0;
     magma_int_t size[10] = {1024, 2048, 3072, 4032, 5184, 6016, 7040, 8064, 9088, 10112};
 
-    magma_int_t i, j, k, info, checkres, once = 0;
+    //magma_int_t j, k;
+    magma_int_t i, info, checkres, once = 0;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     const char *uplo = MagmaLowerStr;
@@ -109,7 +110,8 @@ int main( int argc, char** argv)
                 uplo = MagmaLowerStr;
         }
         if ( N > 0 )
-            printf("  testing_zhetrd_he2hb -L|U -N %d -NB %d   -wantz %d   -threads %d    check %d \n\n", N, NB, WANTZ, THREADS, checkres);
+            printf("  testing_zhetrd_he2hb -L|U -N %d -NB %d   -wantz %d   -threads %d    check %d \n\n",
+                   (int) N, (int) NB, (int) WANTZ, (int) THREADS, (int) checkres);
         else
         {
             printf("\nUsage: \n");
@@ -122,9 +124,7 @@ int main( int argc, char** argv)
         printf("  testing_zhetrd_he2hb -L|U -N %d\n\n", 1024);
         N = size[9];
     }
-        
-    printf ("HELLOOOOOOOO\n");
-
+    
     eps = lapackf77_dlamch( "E" );
     lda = N;
     ldt = N;
@@ -201,7 +201,7 @@ int main( int argc, char** argv)
         char *jobz = (char*)MagmaVecStr;
         char range = 'A';
         magma_int_t fraction_ev = 100;
-        magma_int_t il, iu, m1, m2;
+        magma_int_t il, iu, m1;
         double vl, vu;
 
         if (fraction_ev == 0){
@@ -215,7 +215,7 @@ int main( int argc, char** argv)
         }
         magmaDoubleComplex *hh_work;
         magma_int_t *iwork;
-        magma_int_t nb,lwork,liwork;
+        magma_int_t nb, /*lwork,*/ liwork;
 #if defined(PRECISION_z) || defined(PRECISION_c)
         double *rwork;
         magma_int_t lrwork;
@@ -244,7 +244,7 @@ int main( int argc, char** argv)
                             &info);
 
         }else{
-            printf("calling zheevdx_2stage_m %d GPU\n", ngpu);
+            printf("calling zheevdx_2stage_m %d GPU\n", (int) ngpu);
             magma_zheevdx_2stage_m(ngpu, jobz[0], range, uplo[0], N, 
                             h_R, lda, 
                             vl, vu, il, iu, 

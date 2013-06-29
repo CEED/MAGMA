@@ -33,6 +33,7 @@
 static magma_int_t check_orthogonality(magma_int_t, magma_int_t, magmaDoubleComplex*, magma_int_t, double);
 static magma_int_t check_reduction(magma_int_t, magma_int_t, magma_int_t, magmaDoubleComplex*, double*, magma_int_t, magmaDoubleComplex*, double);
 static magma_int_t check_solution(magma_int_t, double*, double*, double);
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhegvdx
 */
@@ -43,7 +44,7 @@ int main( int argc, char** argv)
 
     real_Double_t gpu_time;
 
-    magmaDoubleComplex *h_A, *h_R, *h_B, *h_S, *h_work;
+    magmaDoubleComplex *h_A, *h_R, *h_work;
 
 #if defined(PRECISION_z) || defined(PRECISION_c)
     double *rwork;
@@ -51,12 +52,9 @@ int main( int argc, char** argv)
 #endif
 
     /* Matrix size */
-    double *w1, *w2, result[2];
+    double *w1, *w2;
     magma_int_t *iwork;
     magma_int_t N, n2, info, lwork, liwork;
-    magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
-    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
-    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};;
     magma_int_t info_ortho     = 0;
@@ -85,7 +83,8 @@ int main( int argc, char** argv)
         jobz = MagmaVec;
     }
 
-    printf("using: itype = %d, jobz = %c,range = %c, uplo = %c, checkres = %d, fraction = %6.4f\n", itype, jobz, range, uplo, checkres, f);
+    printf("using: itype = %d, jobz = %c, range = %c, uplo = %c, checkres = %d, fraction = %6.4f\n",
+           (int) itype, jobz, range, uplo, (int) checkres, f);
 
     printf("  N     M     GPU Time(s) \n");
     printf("==========================\n");
@@ -150,7 +149,7 @@ int main( int argc, char** argv)
                                     &info);
                
                 }else{
-                    printf("calling zheevdx_2stage_m %d GPU\n", ngpu);
+                    printf("calling zheevdx_2stage_m %d GPU\n", (int) ngpu);
                     magma_zheevdx_2stage_m(ngpu, jobz, range, uplo, N, 
                                     h_R, N, 
                                     vl, vu, il, iu, 
@@ -184,7 +183,7 @@ int main( int argc, char** argv)
                                 &info);
            
             }else{
-                printf("calling zheevdx_2stage_m %d GPU\n", ngpu);
+                printf("calling zheevdx_2stage_m %d GPU\n", (int) ngpu);
                 magma_zheevdx_2stage_m(ngpu, jobz, range, uplo, N, 
                                 h_R, N, 
                                 vl, vu, il, iu, 
@@ -203,7 +202,7 @@ int main( int argc, char** argv)
                 double eps   = lapackf77_dlamch("E");
                 printf("\n");
                 printf("------ TESTS FOR MAGMA ZHEEVD ROUTINE -------  \n");
-                printf("        Size of the Matrix %d by %d\n", N, N);
+                printf("        Size of the Matrix %d by %d\n", (int) N, (int) N);
                 printf("\n");
                 printf(" The matrix A is randomly generated for each test.\n");
                 printf("============\n");
@@ -243,7 +242,7 @@ int main( int argc, char** argv)
              Print execution time
              =================================================================== */
             printf("%5d %5d     %6.2f\n",
-                   (magma_int_t) N, (magma_int_t) m1, gpu_time);
+                   (int) N, (int) m1, gpu_time);
 
             TESTING_FREE(       h_A);
             TESTING_FREE(        w1);

@@ -74,7 +74,8 @@ int main( int argc, char** argv)
         jobz = MagmaVec;
     }
 
-    printf("using: nrgpu = %d, itype = %d, jobz = %c, uplo = %c, checkres = %d\n", opts.ngpu, itype, jobz, uplo, checkres);
+    printf("using: nrgpu = %d, itype = %d, jobz = %c, uplo = %c, checkres = %d\n",
+           (int) opts.ngpu, (int) itype, jobz, uplo, (int) checkres);
 
     printf("  N     M   nr GPU     MGPU Time(s) \n");
     printf("====================================\n");
@@ -254,7 +255,7 @@ int main( int argc, char** argv)
                  Print execution time
                  =================================================================== */
                 printf("%5d     %6.2f         %6.2f         %6.2f\n",
-                       N, cpu_time, gpu_time, mgpu_time);
+                       (int) N, cpu_time, gpu_time, mgpu_time);
                 printf("Testing the eigenvalues and eigenvectors for correctness:\n");
                 if(itype==1)
                     printf("(1)    | A Z - B Z D | / (|A| |Z| N) = %e\n", result);
@@ -267,7 +268,7 @@ int main( int argc, char** argv)
             }
             else {
                 printf("%5d     ------         ------         %6.2f\n",
-                       N, mgpu_time);
+                       (int) N, mgpu_time);
             }
 
             /* Memory clean up */

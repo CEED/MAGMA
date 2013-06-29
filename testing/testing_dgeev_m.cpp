@@ -59,9 +59,8 @@ int main( int argc, char** argv)
 
     real_Double_t   gpu_time, cpu_time;
     double *h_A, *h_R, *VL, *VR, *h_work, *w1, *w2;
-    double c_neg_one = MAGMA_D_NEG_ONE;
-    double *w1i, *w2i, work[1];
-    double matnorm, tnrm, result[8];
+    double *w1i, *w2i;
+    double tnrm, result[8];
     magma_int_t N, n2, lda, nb, lwork, info;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};

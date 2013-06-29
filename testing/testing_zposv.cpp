@@ -40,7 +40,7 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
-    printf("ngpu %d, uplo %c\n", opts.ngpu, opts.uplo );
+    printf("ngpu %d, uplo %c\n", (int) opts.ngpu, opts.uplo );
     printf("    N  NRHS   CPU Gflop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / ||A||*||X||\n");
     printf("==============================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
