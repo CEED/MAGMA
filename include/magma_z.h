@@ -37,6 +37,7 @@ magma_int_t magma_get_zgesvd_nb( magma_int_t m );
 magma_int_t magma_get_zhegst_nb_m( magma_int_t m );
 magma_int_t magma_get_zbulge_nb( magma_int_t m );
 magma_int_t magma_get_zbulge_nb_mgpu( magma_int_t m );
+magma_int_t magma_zbulge_get_Vblksiz( magma_int_t m, magma_int_t nb );
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA function definitions / Data on CPU

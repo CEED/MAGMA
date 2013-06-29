@@ -10,6 +10,7 @@
 */
 
 #include "magma.h"
+#include "common_magma.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -693,6 +694,11 @@ magma_int_t magma_get_zhegst_nb_m( magma_int_t m )
 
 
 
+    /////////////////////////////////////////
+    /////////////////////////////////////////
+    // Parameters for 2-stage eigensolvers //
+    /////////////////////////////////////////
+    /////////////////////////////////////////
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Return nb for  2 stage TRD
@@ -753,9 +759,58 @@ magma_int_t magma_get_zbulge_nb( magma_int_t m )
     }
 }
 //////////////////////////////////////////////////
+/* ////////////////////////////////////////////////////////////////////////////
+   -- Return Vblksiz for  2 stage TRD
+*/
+magma_int_t magma_sbulge_get_Vblksiz( magma_int_t m, magma_int_t nb )
+{
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler + SB
+        return min(nb,128);
+    }
+    else {                     // 2.x Fermi or 1.x
+        return min(nb,64);
+    }
+}
+//////////////////////////////////////////////////
+magma_int_t magma_dbulge_get_Vblksiz( magma_int_t m, magma_int_t nb )
+{
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler + SB
+        return min(nb,128);
+    }
+    else {                     // 2.x Fermi or 1.x
+        return min(nb,64);
+    }
+}
+//////////////////////////////////////////////////
+magma_int_t magma_cbulge_get_Vblksiz( magma_int_t m, magma_int_t nb )
+{
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler + SB
+        return min(nb,64);
+    }
+    else {                     // 2.x Fermi or 1.x
+        return min(nb,48);
+    }
+}
+//////////////////////////////////////////////////
+magma_int_t magma_zbulge_get_Vblksiz( magma_int_t m, magma_int_t nb )
+{
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler + SB
+        return min(nb,64);
+    }
+    else {                     // 2.x Fermi or 1.x
+        return min(nb,48);
+    }
+}
+//////////////////////////////////////////////////
+
+
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Return nb for  2 stage TRD
+   -- Return nb for  2 stage TRD_MGPU
 */
 magma_int_t magma_get_sbulge_nb_mgpu( magma_int_t m )
 {

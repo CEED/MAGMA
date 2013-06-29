@@ -95,7 +95,6 @@ magma_int_t magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 
 
 magma_int_t magma_zbulge_get_lq2(magma_int_t n);
-magma_int_t magma_zbulge_get_Vblksiz(magma_int_t n, magma_int_t nb);
 
 #ifdef __cplusplus
 }
