@@ -8,8 +8,8 @@
        @author Azzam Haidar
 */
 
-#ifndef _MAGMA_THREADSETTING_H_
-#define _MAGMA_THREADSETTING_H_
+#ifndef MAGMA_THREADSETTING_H
+#define MAGMA_THREADSETTING_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,4 +26,4 @@ magma_int_t magma_get_numthreads();
 }
 #endif
 
-#endif
+#endif  // MAGMA_THREADSETTING_H

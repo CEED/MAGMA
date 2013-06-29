@@ -111,9 +111,9 @@ if ( $do_wrapper ) {  #################### header for magma_zf77.cpp wrappers
 typedef size_t devptr_t;
 
 #ifdef PGI_FORTRAN
-#define DEVPTR(__ptr) ((magmaDoubleComplex*)(__ptr))
+#define DEVPTR(ptr_) ((magmaDoubleComplex*)(ptr_))
 #else
-#define DEVPTR(__ptr) ((magmaDoubleComplex*)(uintptr_t)(*(__ptr)))
+#define DEVPTR(ptr_) ((magmaDoubleComplex*)(uintptr_t)(*(ptr_)))
 #endif
 
 #ifndef MAGMA_FORTRAN_NAME

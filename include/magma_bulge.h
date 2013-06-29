@@ -6,8 +6,8 @@
        November 2011
 */
 
-#ifndef _MAGMA_BULGE_H_
-#define _MAGMA_BULGE_H_
+#ifndef MAGMA_BULGE_H
+#define MAGMA_BULGE_H
 
 #ifdef __cplusplus
 extern "C"{
@@ -40,4 +40,4 @@ extern "C"{
 }
 #endif
 
-#endif
+#endif  // MAGMA_BULGE_H
