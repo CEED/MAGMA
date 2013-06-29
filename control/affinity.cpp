@@ -8,7 +8,7 @@
        @author Raffaele Solca
 
 */
-#ifdef SETAFFINITY
+#ifdef MAGMA_SETAFFINITY
 
 #include "affinity.h"
 

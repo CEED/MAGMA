@@ -13,7 +13,7 @@
 #ifndef _MAGMA_AFFINITY
 #define _MAGMA_AFFINITY
 
-#ifdef SETAFFINITY
+#ifdef MAGMA_SETAFFINITY
 
 class affinity_set
 {
