@@ -107,7 +107,7 @@ extern "C" {
 
     void magma_bulge_findpos113(magma_int_t n, magma_int_t nb, magma_int_t Vblksiz, magma_int_t sweep, magma_int_t st, magma_int_t *myblkid)
     {
-        magma_int_t prevGblkid, nbprevGblk, mastersweep;
+        magma_int_t prevGblkid, mastersweep;
         magma_int_t locblknb   = 0;
         magma_int_t prevblkcnt = 0;
         magma_int_t myblknb    = 0;

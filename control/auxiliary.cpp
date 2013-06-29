@@ -83,7 +83,7 @@ extern "C"
 magma_int_t magma_num_gpus( void )
 {
     const char *ngpu_str = getenv("MAGMA_NUM_GPUS");
-    magma_int_t ngpu = 1;
+    int ngpu = 1;
     if ( ngpu_str != NULL ) {
         char* endptr;
         ngpu = strtol( ngpu_str, &endptr, 10 );
