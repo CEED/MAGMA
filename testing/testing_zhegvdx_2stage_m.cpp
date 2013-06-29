@@ -134,7 +134,7 @@ int main( int argc, char** argv)
 
             if (range == 'I'){
                 il = 1;
-                iu = f*N;
+                iu = (int) f*N;
             }
 
             if(opts.warmup){
