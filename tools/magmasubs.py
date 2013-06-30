@@ -641,6 +641,7 @@ subs = {
 
     # ----- SPARSE BLAS
     ('sgecsrmv',       'dgecsrmv',       'cgecsrmv',       'zgecsrmv'        ),
+    ('sgeellmv',       'dgeellmv',       'cgeellmv',       'zgeellmv'        ),
 
     # ----- SPARSE Iterative Solvers
     ('scg',            'dcg',            'ccg',            'zcg'             ),
