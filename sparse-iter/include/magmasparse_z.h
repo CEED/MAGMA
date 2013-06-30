@@ -162,7 +162,18 @@ magma_zgecsrmv(        char transA,
                        magma_int_t *d_colind,
                        magmaDoubleComplex *d_x,
                        magmaDoubleComplex beta,
-                       magmaDoubleComplex *d_y);
+                       magmaDoubleComplex *d_y );
+
+magma_int_t 
+magma_zgeellmv(        char transA,
+                       magma_int_t m, magma_int_t n,
+                       magma_int_t nnz_per_row,
+                       magmaDoubleComplex alpha,
+                       magmaDoubleComplex *d_val,
+                       magma_int_t *d_colind,
+                       magmaDoubleComplex *d_x,
+                       magmaDoubleComplex beta,
+                       magmaDoubleComplex *d_y );
 
 
 #ifdef __cplusplus

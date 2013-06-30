@@ -14,6 +14,7 @@ ZHDR  =
 # alphabetic order by base name (ignoring precision)
 ZSRC := \
 	zgecsrmv.cu		\
+	zgeellmv.cu		\
 
 # multi-GPU
 ZSRC += \
