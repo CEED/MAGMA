@@ -278,8 +278,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
     Arguments
     =========
 
-    magma_z_vector A              vector x    
-    magma_z_vector *B             copy of x      
+    magma_z_vector x              vector x    
+    magma_z_vector *y             copy of x      
     magma_location_t src          original location x
     magma_location_t dst          location of the copy of x
    

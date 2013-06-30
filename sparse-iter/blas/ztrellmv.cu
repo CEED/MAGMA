@@ -20,7 +20,7 @@
 
 //Michael Garland
 __global__ void 
-zgeellmv_kernel( int num_rows, 
+ztrellmv_kernel( int num_rows, 
                  int num_cols,
                  int num_cols_per_row,
                  magmaDoubleComplex alpha, 
@@ -35,7 +35,7 @@ int row = blockDim.x * blockIdx.x + threadIdx.x ;
         magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
         for ( int n = 0; n < num_cols_per_row ; n ++){
             int col = d_colind [ num_rows * n + row ];
-            magmaDoubleComplex val = d_val [ num_rows * row + n ];
+            magmaDoubleComplex val = d_val [ num_rows * n + row ];
             if( val != 0)
                 dot += val * d_x[col ];
         }
@@ -74,7 +74,7 @@ int row = blockDim.x * blockIdx.x + threadIdx.x ;
     =====================================================================    */
 
 extern "C" magma_int_t
-magma_zgeellmv(const char *transA,
+magma_ztrellmv(const char *transA,
                magma_int_t m, magma_int_t n,
                magma_int_t nnz_per_row,
                magmaDoubleComplex alpha,
@@ -88,7 +88,7 @@ magma_zgeellmv(const char *transA,
 
    dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
 
-   zgeellmv_kernel<<< grid, BLOCK_SIZE, 0 >>>
+   ztrellmv_kernel<<< grid, BLOCK_SIZE, 0 >>>
                   ( m, n, nnz_per_row, alpha, d_val, d_colind, d_x, beta, d_y );
 
 

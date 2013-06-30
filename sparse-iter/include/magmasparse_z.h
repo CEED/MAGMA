@@ -160,6 +160,10 @@ magma_int_t magma_zcg( magma_int_t dofs, magma_int_t & num_of_iter,
    -- MAGMA_SPARSE utility function definitions
 */
 
+magma_int_t
+magma_z_SpMV(     magmaDoubleComplex alpha, magma_z_sparse_matrix A, 
+                  magma_z_vector x, magmaDoubleComplex beta, magma_z_vector y );
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE BLAS function definitions
 */
@@ -176,6 +180,18 @@ magma_zgecsrmv(        const char *transA,
 
 magma_int_t 
 magma_zgeellmv(        const char *transA,
+                       magma_int_t m, magma_int_t n,
+                       magma_int_t nnz_per_row,
+                       magmaDoubleComplex alpha,
+                       magmaDoubleComplex *d_val,
+                       magma_int_t *d_colind,
+                       magmaDoubleComplex *d_x,
+                       magmaDoubleComplex beta,
+                       magmaDoubleComplex *d_y );
+
+
+magma_int_t 
+magma_ztrellmv(        const char *transA,
                        magma_int_t m, magma_int_t n,
                        magma_int_t nnz_per_row,
                        magmaDoubleComplex alpha,
