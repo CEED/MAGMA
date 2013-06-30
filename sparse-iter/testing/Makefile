@@ -14,6 +14,7 @@ include ../../Makefile.internal
 ZSRC += \
 	testing_zcg.cpp	        \
 	testing_z_matrix_io.cpp \
+  testing_z_mv.cpp \
 
 
 # ----------

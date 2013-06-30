@@ -33,7 +33,9 @@ zgecsrmv_kernel( int m,
 
   if(index<m){
     magmaDoubleComplex tmp = MAGMA_Z_ZERO;
-    for( j=d_rowptr[index]; j<d_rowptr[index+1]; j++ ){
+    int start = d_rowptr[index];
+    int end = d_rowptr[index+1];
+    for( j=start; j<end; j++){
       tmp += d_val[j] * d_x[d_colind[j]];
     }
     d_y[index] = alpha * tmp + beta * d_y[index];
@@ -41,8 +43,11 @@ zgecsrmv_kernel( int m,
 }
 
 
+
+
+
 extern "C" magma_int_t
-magma_zgecsrmv(char transA,
+magma_zgecsrmv(const char *transA,
                magma_int_t m, magma_int_t n,
                magmaDoubleComplex alpha,
                magmaDoubleComplex *d_val,
@@ -80,7 +85,7 @@ magma_zgecsrmv(char transA,
 
    dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
 
-   zgecsrmv_kernel<<< grid, BLOCK_SIZE, 0, magma_stream >>>(m, alpha,
+   zgecsrmv_kernel<<< grid, BLOCK_SIZE, 0 >>>(m, alpha,
                                                             d_val, d_rowptr, d_colind,
                                                             d_x, beta, d_y);
 

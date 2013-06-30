@@ -128,6 +128,16 @@ magma_z_mconvert(       magma_z_sparse_matrix A, magma_z_sparse_matrix *B,
                         magma_storage_t old_format, magma_storage_t new_format,
                         magma_mmajor_t old_major, magma_mmajor_t new_major );
 
+magma_int_t
+magma_z_vinit(          magma_z_vector *x, 
+                        magma_int_t num_rows, 
+                        magmaDoubleComplex values );
+
+magma_int_t
+magma_z_vvisu(          magma_z_vector x, 
+                        magma_int_t offset, 
+                        magma_int_t displaylength );
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE function definitions / Data on CPU
 */
@@ -154,7 +164,7 @@ magma_int_t magma_zcg( magma_int_t dofs, magma_int_t & num_of_iter,
    -- MAGMA_SPARSE BLAS function definitions
 */
 magma_int_t 
-magma_zgecsrmv(        char transA,
+magma_zgecsrmv(        const char *transA,
                        magma_int_t m, magma_int_t n,
                        magmaDoubleComplex alpha,
                        magmaDoubleComplex *d_val,
@@ -165,7 +175,7 @@ magma_zgecsrmv(        char transA,
                        magmaDoubleComplex *d_y );
 
 magma_int_t 
-magma_zgeellmv(        char transA,
+magma_zgeellmv(        const char *transA,
                        magma_int_t m, magma_int_t n,
                        magma_int_t nnz_per_row,
                        magmaDoubleComplex alpha,

@@ -909,3 +909,52 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
 
   return MAGMA_SUCCESS;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+extern "C"
+magma_int_t
+magma_z_vvisu(      magma_z_vector x, 
+                    magma_int_t offset, 
+                    magma_int_t displaylength ){
+
+    printf("visualize entries %d - %d of vector ", offset, offset+displaylength, x);
+    fflush(stdout);  
+    if( x.memory_location == Magma_CPU ){
+        printf("located on CPU:\n");
+        for( magma_int_t i=offset; i<offset+displaylength; i++ )
+            printf("%f\n", MAGMA_Z_REAL(x.val[i]));
+    return MAGMA_SUCCESS;
+    }
+
+    if( x.memory_location == Magma_DEV ){
+        printf("located on DEV:\n");
+        magma_z_vector y;
+        magma_z_vtransfer( x, &y, Magma_DEV, Magma_CPU);
+        for( magma_int_t i=offset; i<offset+displaylength; i++ )
+            printf("%f\n", MAGMA_Z_REAL(y.val[i]));
+    free(y.val);
+    return MAGMA_SUCCESS;
+    }
+
+}   

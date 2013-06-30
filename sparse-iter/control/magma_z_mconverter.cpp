@@ -268,7 +268,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             // conversion
             magma_int_t *row_tmp;
             magmaDoubleComplex *val_tmp;
-            row_tmp=(magma_int_t*)malloc((A.num_rows+1)*sizeof(magma_int_t));
+            row_tmp = (magma_int_t*)malloc((A.num_rows+1)*sizeof(magma_int_t));
             //fill the row-pointer
             for( magma_int_t i=0; i<A.num_rows+1; i++ )
                 row_tmp[i] = i*A.max_nnz_row;
