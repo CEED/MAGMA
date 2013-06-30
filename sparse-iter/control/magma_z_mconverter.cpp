@@ -235,7 +235,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_int_t *col_tmp;
             magmaDoubleComplex *val_tmp;
             col_tmp=(magma_int_t*)malloc((A.num_rows*A.max_nnz_row)*sizeof(magma_int_t));
-            val_tmp=(magmaDoubleComplex*)malloc((A.num_rows*A.max_nnz_row)*sizeof(float));
+            val_tmp=(magmaDoubleComplex*)malloc((A.num_rows*A.max_nnz_row)*sizeof(magmaDoubleComplex));
             row_tmp=(magma_int_t*)malloc((A.num_rows+1)*sizeof(magma_int_t));
             //fill the row-pointer
             for( magma_int_t i=0; i<A.num_rows+1; i++ )
@@ -245,13 +245,11 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                 for( magma_int_t i=0;i<A.num_rows;i++ ){
                     col_tmp[i*A.max_nnz_row+j] = A.col[j*A.num_rows+i];
                     val_tmp[i*A.max_nnz_row+j] = A.val[j*A.num_rows+i];
-        //            printf(" inserted %f at %d\n",A.val[j*A.num_rows+i], A.col[j*A.num_rows+i]);
-          //          printf(" inserted %f at %d\n",val_tmp[i*A.max_nnz_row+j], col_tmp[i*A.max_nnz_row+j]);
                 }
             }    
             //now use AA_ELL, IA_ELL, row_tmp as CSR with some zeros. 
             //The CSR compressor removes these
-            csr_compressor(&val_tmp, &row_tmp, &col_tmp, &B->val, &B->row, &B->col, &B->num_rows);  
+            csr_compressor(&val_tmp, &row_tmp, &col_tmp, &B->val, &B->row, &B->col, &B->num_rows); 
         }  
 
 
