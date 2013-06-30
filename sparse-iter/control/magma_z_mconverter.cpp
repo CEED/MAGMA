@@ -245,6 +245,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                 for( magma_int_t i=0;i<A.num_rows;i++ ){
                     col_tmp[i*A.max_nnz_row+j] = A.col[j*A.num_rows+i];
                     val_tmp[i*A.max_nnz_row+j] = A.val[j*A.num_rows+i];
+        //            printf(" inserted %f at %d\n",A.val[j*A.num_rows+i], A.col[j*A.num_rows+i]);
+          //          printf(" inserted %f at %d\n",val_tmp[i*A.max_nnz_row+j], col_tmp[i*A.max_nnz_row+j]);
                 }
             }    
             //now use AA_ELL, IA_ELL, row_tmp as CSR with some zeros. 
