@@ -627,4 +627,17 @@ magma_zher2k_mgpu(
     }
 }
 
+#else /* GPUSHMEM >= 200 */
+
+extern "C" magma_int_t
+magma_zhetrd_mgpu(magma_int_t num_gpus, magma_int_t k, char uplo, magma_int_t n,
+                  magmaDoubleComplex *a, magma_int_t lda,
+                  double *d, double *e, magmaDoubleComplex *tau,
+                  magmaDoubleComplex *work, magma_int_t lwork,
+                  magma_int_t *info)
+{
+    printf("magma_zhetrd_mgpu is not supported on this GPU. Exit.\n");
+    exit(1);
+}
+
 #endif /* GPUSHMEM >= 200 */
