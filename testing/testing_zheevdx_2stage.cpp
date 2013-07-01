@@ -127,7 +127,7 @@ int main( int argc, char** argv)
             magma_int_t iu = 0;
             if (range == 'I'){
                 il = 1;
-                iu = (int) f*N;
+                iu = (int) (f*N);
             }
 
             if(opts.warmup){
