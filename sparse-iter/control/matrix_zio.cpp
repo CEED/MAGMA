@@ -586,9 +586,6 @@ magma_int_t print_z_csr( magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, 
   return MAGMA_SUCCESS;
 }
 
-extern "C"
-magma_int_t print_z_csr_matrix( magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col )
-{
 
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -599,31 +596,32 @@ magma_int_t print_z_csr_matrix( magma_int_t n_row, magma_int_t n_col, magma_int_
     Purpose
     =======
 
-    Prints a CSR matrix in CSR format.
+    Prints a sparse matrix in CSR format.
 
     Arguments
     =========
 
-    magma_int_t* n_row                   number of rows in matrix
-    magma_int_t* n_col                   number of columns in matrix
-    magma_int_t* nnz                     number of nonzeros 
-    magmaDoubleComplex **val             value array of CSR  
-    magma_int_t **row                    row pointer of CSR 
-    magma_int_t **col                    column indices of CSR 
+    magma_z_sparse_matrix A              sparse matrix in Magma_CSR format
 
     =====================================================================  */
+
+extern "C"
+magma_int_t magma_z_mvisu( magma_z_sparse_matrix A )
+{
+
+
    
-  magmaDoubleComplex *A;
-  A=(magmaDoubleComplex*)malloc((n_row)*(n_row)*sizeof(magmaDoubleComplex));
-  z_csr2array( &n_row, &n_col, &nnz, *val, *row, *col, A );
+  magma_z_sparse_matrix B;
+  magma_z_mconvert( A, &B, Magma_CSR, Magma_DENSE);
   
    
-  for( magma_int_t i=0; i<(n_row); i++ )
+  for( magma_int_t i=0; i<(B.num_rows); i++ )
   {
-    for( magma_int_t j=0; j<n_col; j++ )
-      cout << MAGMA_Z_REAL( A[i*(n_col)+j] ) << " " ;
+    for( magma_int_t j=0; j<B.num_cols; j++ )
+      cout << MAGMA_Z_REAL( B.val[i*(B.num_cols)+j] ) << " " ;
     cout << endl;
   }
+  free(B.val);
   return MAGMA_SUCCESS;
 }
 

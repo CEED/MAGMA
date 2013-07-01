@@ -13,7 +13,6 @@ INC += -I../include
 
 ZSRC := \
         matrix_zio.cpp \
-				matrix_z_converter.cpp \
 				z_transpose_csr.cpp \
 				magma_z_transfer.cpp \
         magma_z_mconverter.cpp \

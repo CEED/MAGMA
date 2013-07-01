@@ -61,6 +61,7 @@ int main( int argc, char** argv)
     //read_z_csr_from_mtx( &A.storage_type, &A.memory_location, &A.num_rows, &A.num_cols, &A.nnz, &A.val, &A.row, &A.col, filename[0] );
     magma_z_csr_mtx( &A, filename[0] );
 
+    magma_z_mvisu( A );
 
     magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);
     magma_z_mconvert( B, &C, Magma_ELLPACK, Magma_CSR);
@@ -74,10 +75,9 @@ int main( int argc, char** argv)
 
 
 
-    //print_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor );
-    print_z_csr_matrix( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col );
+
     printf("\n now back CSR \n");
-    print_z_csr_matrix( Z.num_rows, Z.num_cols, Z.nnz, &Z.val, &Z.row, &Z.col );
+    magma_z_mvisu( Z );
     //write_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor, filename[2] );
     //write_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor, filename[3] );
 
