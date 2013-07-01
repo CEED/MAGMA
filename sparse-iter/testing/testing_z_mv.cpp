@@ -76,7 +76,7 @@ int main( int argc, char** argv)
     magma_z_mconvert( E, &Z, Magma_ELLPACK, Magma_CSR, Magma_RowMajor, Magma_RowMajor);
 
 
-    magma_zgecsrmv( N, B.num_rows, B.num_cols, one, A.val, A.row, A.col, y.val, one, z.val);
+    magma_zgecsrmv( N, B.num_rows, B.num_cols, one, B.val, B.row, B.col, y.val, one, z.val);
 
     magma_z_vvisu( z, 0,10);
 
