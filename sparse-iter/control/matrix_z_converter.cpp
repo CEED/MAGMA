@@ -14,6 +14,7 @@
 #include <sys/time.h>
 #include <math.h>
 #include "../include/magmasparse_z.h"
+#include "common_magma.h"
 
 magma_int_t z_array2csr( magma_int_t *m, magma_int_t *n, magma_int_t *nnz, magmaDoubleComplex*a, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col )
 {
@@ -74,7 +75,10 @@ magma_int_t z_array2csr( magma_int_t *m, magma_int_t *n, magma_int_t *nnz, magma
 }
 
 extern "C"
-magma_int_t z_csr2array( magma_int_t *m, magma_int_t *n, magma_int_t *nnz, magmaDoubleComplex *val, magma_int_t *row, magma_int_t *col, magmaDoubleComplex*b ){
+magma_int_t z_csr2array( magma_int_t *m, magma_int_t *n, magma_int_t *nnz, 
+                         magmaDoubleComplex *val, magma_int_t *row, magma_int_t *col, 
+                         magmaDoubleComplex *b )
+{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -98,19 +102,14 @@ magma_int_t z_csr2array( magma_int_t *m, magma_int_t *n, magma_int_t *nnz, magma
     magmaDoubleComplex*b                 output matrix in array format
 
     =====================================================================  */
-  magma_int_t i=0,j=0;
-  magma_int_t nn = (*n)*(*m);
 
-  for( i=0; i<nn; i++ )
-    (b)[i] = MAGMA_Z_MAKE( 0.0, 0.0 );
+    memset(b, 0, (*m)*(*n)*sizeof(magmaDoubleComplex));  
 
+    for(int i=0; i<*m; i++ )
+        {
+            for(int j=row[i]; j<row[i+1]; j++ )
+                b[i * (*m) + col[j] ] = val[ j ];
+        }
 
-  for( i=0; i<*n; i++ )
-  {
-    magma_int_t rowtemp1 = row[i];
-    magma_int_t rowtemp2 = row[i+1];
-    for( j=0; j<rowtemp2-rowtemp1; j++ )  
-      (b)[i*(*n)+col[rowtemp1+j]] = val[rowtemp1+j];
-  }  
-  return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }
