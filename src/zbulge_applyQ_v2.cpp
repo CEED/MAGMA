@@ -103,24 +103,29 @@ magma_zbulge_applyQ_v2(char side,
 
 
     // Azzam 21/11/2012
-    // NOTE THAT dwork was of size 2*lddwork*Vblksiz+...
-    // but I am thinking why not modifing it to lddwork*Vblksiz+...
-    magmaDoubleComplex *dwork, *dT0, *dV0, *dT1, *dV1, *dwvt;
-    magma_int_t lddv = ldv; //NB + Vblksiz - 1;
-    magma_int_t lddt = ldt; // Vblksiz;
-    magma_int_t lddwvt = ldv; 
+    // NOTE THAT dwork was of size 2*NE*Vblksiz+...
+    // but I am thinking why not modifing it to NE*Vblksiz+...
+    // BUT NO because the 2* is used because of making 2 streams working and so 
+    // they might be using dwork in parallel
+    magmaDoubleComplex *dwork, *dwork0, *dwork1, *dwvt0, *dwvt1;
+    magmaDoubleComplex *dT0, *dV0, *dT1, *dV1;
+    magma_int_t lddv = ldv;
+    magma_int_t lddt = ldt; 
+    magma_int_t dwVTsiz  = ldv*Vblksiz; // lddv*ldv + lddv*NE;// ldv*Vblksiz;
+    magma_int_t dworksiz = NE*Vblksiz;  // lddv*Vblksiz;     // NE*Vblksiz;
 
-
-    magma_int_t lddwork = NE;
-    if(MAGMA_SUCCESS != magma_zmalloc( &dwork, 2*lddwork*Vblksiz +  2*Vchunksiz* (Vblksiz* (lddv+lddt)) + lddwvt*Vblksiz )) {
+    if(MAGMA_SUCCESS != magma_zmalloc( &dwork, 2*dworksiz + 2*dwVTsiz +  2*Vchunksiz* (Vblksiz* (lddv+lddt)) )) {
        printf ("!!!!  magma_zbulge_applyQ magma_alloc failed for: dwork\n" );
        exit(-1);
     }
-    dV0 = dwork + 2*lddwork*Vblksiz;
-    dT0 = dV0 + Vchunksiz*Vblksiz*lddv;
-    dV1 = dT0 + Vchunksiz*Vblksiz*lddt;
-    dT1 = dV1 + Vchunksiz*Vblksiz*lddv;
-    dwvt= dT1 + Vchunksiz*Vblksiz*lddt;
+    dwork0 = dwork;               // size = dworksiz;
+    dwork1 = dwork0 + dworksiz;   // size = dworksiz;
+    dwvt0  = dwork + 2*dworksiz;  // size = dwVTsiz;
+    dwvt1  = dwvt0 + dwVTsiz;     // size = dwVTsiz;
+    dV0    = dwork + 2*dworksiz + 2*dwVTsiz;
+    dT0    = dV0 + Vchunksiz*Vblksiz*lddv;
+    dV1    = dT0 + Vchunksiz*Vblksiz*lddt;
+    dT1    = dV1 + Vchunksiz*Vblksiz*lddv;
 
 
     // make overlapped copy
@@ -243,8 +248,8 @@ magma_zbulge_applyQ_v2(char side,
                             cudaStreamWaitEvent(stream[0], myevent[1], 0);
                             for(magma_int_t i=0; i<NE; i+= sz_bl){
                                 ib = min(sz_bl, NE-i);
-                                //magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV0+lcvpos, lddv, dT0+lctpos, lddt, dE(myrow,i), ldde, dwork, ib);
-                                magma_zlarfb_gpu_gemm( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV0+lcvpos, lddv, dT0+lctpos, lddt, dE(myrow,i), ldde, dwork, ib, dwvt, Vm);
+                                //magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV0+lcvpos, lddv, dT0+lctpos, lddt, dE(myrow,i), ldde, dwork0, ib);
+                                magma_zlarfb_gpu_gemm( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV0+lcvpos, lddv, dT0+lctpos, lddt, dE(myrow,i), ldde, dwork0, ib, dwvt0, Vm);
                             }
                             cudaEventRecord(myevent[0], stream[0]);
                         }else{
@@ -252,8 +257,8 @@ magma_zbulge_applyQ_v2(char side,
                             cudaStreamWaitEvent(stream[1], myevent[0], 0);
                             for(magma_int_t i=0; i<NE; i+= sz_bl){
                                 ib = min(sz_bl, NE-i);
-                                //magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV1+lcvpos, lddv, dT1+lctpos, lddt, dE(myrow,i), ldde, dwork, ib);
-                                magma_zlarfb_gpu_gemm( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV1+lcvpos, lddv, dT1+lctpos, lddt, dE(myrow,i), ldde, dwork, ib, dwvt, Vm);
+                                //magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV1+lcvpos, lddv, dT1+lctpos, lddt, dE(myrow,i), ldde, dwork1, ib);
+                                magma_zlarfb_gpu_gemm( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV1+lcvpos, lddv, dT1+lctpos, lddt, dE(myrow,i), ldde, dwork1, ib, dwvt1, Vm);
                             }
                             cudaEventRecord(myevent[1], stream[1]);
                         }
