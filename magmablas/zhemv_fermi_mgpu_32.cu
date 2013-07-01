@@ -11,7 +11,6 @@
 #include "common_magma.h"
 #define PRECISION_z
 
-#if (GPUSHMEM >= 200)
 
 #define zhemv_bs         32
 #define bank_shift       33
@@ -1283,4 +1282,3 @@ magmablas_zhemv2_mgpu_32(
     return MAGMA_SUCCESS;
 }
 
-#endif /* (GPUSHMEM >= 200) */

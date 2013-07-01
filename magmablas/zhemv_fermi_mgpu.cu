@@ -11,8 +11,6 @@
 #include "common_magma.h"
 #define PRECISION_z
 
-/*The version for tesla can be found in zhemv_tesla.cu */
-#if (GPUSHMEM >= 200)
 
 #define zhemv_bs         64
 #define thread_x         64
@@ -1212,4 +1210,3 @@ magmablas_zhemv2_mgpu(
     return MAGMA_SUCCESS;
 }
 
-#endif /* (GPUSHMEM >= 200) */
