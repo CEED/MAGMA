@@ -10,6 +10,7 @@
 
 */
 #include "common_magma.h"
+#include "../../include/magmablas.h"
 #include "../include/magmasparse_types.h"
 #include "../include/magmasparse.h"
 
@@ -44,25 +45,47 @@ magma_z_SpMV(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
                 magma_z_vector x, magmaDoubleComplex beta, magma_z_vector y ){
 
     if( A.memory_location != x.memory_location || x.memory_location != y.memory_location ){
-        printf(" error: linear algebra objects are not located in same memory!\n");
+        printf("error: linear algebra objects are not located in same memory!\n");
         // return some MAGMA_ERROR
     }
 
     // DEV case
-    if( A.memory_location == x.memory_location == y.memory_location == Magma_DEV){
-         if( A.storage_type == Magma_CSR )
+    if( A.memory_location == Magma_DEV ){
+         if( A.storage_type == Magma_CSR ){
+             printf("using CSR kernel for SpMV: ");
              magma_zgecsrmv( MagmaNoTransStr, A.num_rows, A.num_cols, alpha, A.val, A.row, A.col, x.val, beta, y.val );
-         if( A.storage_type == Magma_ELLPACK )
+             printf("done.\n");
+             return MAGMA_SUCCESS;
+         }
+         if( A.storage_type == Magma_ELLPACK ){
+             printf("using ELLPACK kernel for SpMV: ");
              magma_zgeellmv( MagmaNoTransStr, A.num_rows, A.num_cols, A.max_nnz_row, alpha, A.val, A.col, x.val, beta, y.val );
-         if( A.storage_type == Magma_ELLPACKT )
+             printf("done.\n");
+             return MAGMA_SUCCESS;
+         }
+         if( A.storage_type == Magma_ELLPACKT ){
+             printf("using ELLPACK kernel for SpMV: ");
              magma_zgeelltmv( MagmaNoTransStr, A.num_rows, A.num_cols, A.max_nnz_row, alpha, A.val, A.col, x.val, beta, y.val );
+             printf("done.\n");
+             return MAGMA_SUCCESS;
+         }
+         if( A.storage_type == Magma_DENSE ){
+             printf("using ELLPACK kernel for SpMV: ");
+             //magmablas_zgemv_fermi( MagmaNoTransStr, A.num_rows, A.num_cols, alpha, A.val, A.num_rows, x.val, 0, beta,  y.val, 0 );
+             printf("done.\n");
+             return MAGMA_SUCCESS;
+         }
+         else
+             printf("error: format not supported.\n");
 
     }
-    // CPU case missing!
-     
- 
+    // CPU case missing!     
+    else{
+             printf("error: CPU not yet supported.\n");
+
+    }
 
 
 
-    return MAGMA_SUCCESS;
+
 }

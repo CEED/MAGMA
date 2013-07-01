@@ -57,7 +57,7 @@ int row = blockDim.x * blockIdx.x + threadIdx.x ;
     =======
     
     This routine computes y = alpha *  A^t *  x + beta * y on the GPU.
-    Input format is RowMajor ELLPACK.
+    Input format is ELLPACK.
     
     Arguments
     =========

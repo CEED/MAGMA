@@ -65,17 +65,19 @@ int main( int argc, char** argv)
     magma_z_vtransfer( x, &y, Magma_CPU, Magma_DEV);
     magma_z_vtransfer( x, &z, Magma_CPU, Magma_DEV);
     magma_z_vvisu( y, 0,10);
-    magma_z_vvisu( y, 0,10);
 
 
     magma_z_mtransfer( A, &B, Magma_CPU, Magma_DEV);
-    magma_z_mtransfer( B, &C, Magma_DEV, Magma_DEV);
-    magma_z_mtransfer( B, &D, Magma_DEV, Magma_CPU);
 
-    magma_z_mconvert( D, &E, Magma_CSR, Magma_ELLPACK);
-    magma_z_mconvert( E, &Z, Magma_ELLPACK, Magma_CSR);
+    magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACKT);
+    magma_z_mtransfer( C, &D, Magma_CPU, Magma_DEV);
 
-    magma_zgecsrmv( N, B.num_rows, B.num_cols, one, B.val, B.row, B.col, y.val, one, z.val);
+
+
+
+   //magma_zgecsrmv( N, B.num_rows, B.num_cols, one, B.val, B.row, B.col, y.val, one, z.val);
+    magma_z_SpMV( one, D, y, one, z);
+    printf("B.memory_location: %d\n", D.memory_location);
 
     magma_z_vvisu( z, 0,10);
 
