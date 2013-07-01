@@ -138,6 +138,11 @@ magma_z_vvisu(          magma_z_vector x,
                         magma_int_t offset, 
                         magma_int_t displaylength );
 
+magma_int_t
+magma_z_vread(         magma_z_vector *x, 
+                       magma_int_t length,
+                       char * filename );
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE function definitions / Data on CPU
 */

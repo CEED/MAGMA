@@ -646,8 +646,8 @@ magma_int_t print_z_csr_matrix( magma_int_t n_row, magma_int_t n_col, magma_int_
 
 
 
-extern "C"
-magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
+
+
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -668,6 +668,10 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
     const char * filename                filname of the mtx matrix
 
     =====================================================================  */
+
+extern "C"
+magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
+
 
   FILE *fid;
   MM_typecode matcode;
@@ -913,48 +917,3 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-extern "C"
-magma_int_t
-magma_z_vvisu(      magma_z_vector x, 
-                    magma_int_t offset, 
-                    magma_int_t displaylength ){
-
-    printf("visualize entries %d - %d of vector ", offset, offset+displaylength, x);
-    fflush(stdout);  
-    if( x.memory_location == Magma_CPU ){
-        printf("located on CPU:\n");
-        for( magma_int_t i=offset; i<offset+displaylength; i++ )
-            printf("%f\n", MAGMA_Z_REAL(x.val[i]));
-    return MAGMA_SUCCESS;
-    }
-
-    if( x.memory_location == Magma_DEV ){
-        printf("located on DEV:\n");
-        magma_z_vector y;
-        magma_z_vtransfer( x, &y, Magma_DEV, Magma_CPU);
-        for( magma_int_t i=offset; i<offset+displaylength; i++ )
-            printf("%f\n", MAGMA_Z_REAL(y.val[i]));
-    free(y.val);
-    return MAGMA_SUCCESS;
-    }
-
-}   
