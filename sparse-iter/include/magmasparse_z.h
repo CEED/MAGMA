@@ -125,8 +125,7 @@ magma_z_vtransfer(      magma_z_vector x, magma_z_vector *y,
 
 magma_int_t 
 magma_z_mconvert(       magma_z_sparse_matrix A, magma_z_sparse_matrix *B, 
-                        magma_storage_t old_format, magma_storage_t new_format,
-                        magma_mmajor_t old_major, magma_mmajor_t new_major );
+                        magma_storage_t old_format, magma_storage_t new_format );
 
 magma_int_t
 magma_z_vinit(          magma_z_vector *x, 
@@ -196,7 +195,7 @@ magma_zgeellmv(        const char *transA,
 
 
 magma_int_t 
-magma_ztrellmv(        const char *transA,
+magma_zgeelltmv(       const char *transA,
                        magma_int_t m, magma_int_t n,
                        magma_int_t nnz_per_row,
                        magmaDoubleComplex alpha,

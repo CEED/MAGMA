@@ -52,10 +52,10 @@ magma_z_SpMV(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
     if( A.memory_location == x.memory_location == y.memory_location == Magma_DEV){
          if( A.storage_type == Magma_CSR )
              magma_zgecsrmv( MagmaNoTransStr, A.num_rows, A.num_cols, alpha, A.val, A.row, A.col, x.val, beta, y.val );
-         if( A.storage_type == Magma_ELLPACK && A.major_type == Magma_RowMajor )
-             magma_ztrellmv( MagmaNoTransStr, A.num_rows, A.num_cols, A.max_nnz_row, alpha, A.val, A.col, x.val, beta, y.val );
-         if( A.storage_type == Magma_ELLPACK && A.major_type == Magma_ColMajor )
+         if( A.storage_type == Magma_ELLPACK )
              magma_zgeellmv( MagmaNoTransStr, A.num_rows, A.num_cols, A.max_nnz_row, alpha, A.val, A.col, x.val, beta, y.val );
+         if( A.storage_type == Magma_ELLPACKT )
+             magma_zgeelltmv( MagmaNoTransStr, A.num_rows, A.num_cols, A.max_nnz_row, alpha, A.val, A.col, x.val, beta, y.val );
 
     }
     // CPU case missing!

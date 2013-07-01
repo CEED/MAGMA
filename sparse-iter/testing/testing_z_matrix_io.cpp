@@ -61,38 +61,25 @@ int main( int argc, char** argv)
     //read_z_csr_from_mtx( &A.storage_type, &A.memory_location, &A.num_rows, &A.num_cols, &A.nnz, &A.val, &A.row, &A.col, filename[0] );
     magma_z_csr_mtx( &A, filename[0] );
 
-    magma_z_mtransfer( A, &B, Magma_CPU, Magma_DEV);
-    magma_z_mtransfer( B, &C, Magma_DEV, Magma_DEV);
-    magma_z_mtransfer( C, &D, Magma_DEV, Magma_CPU);
-    magma_z_mconvert( D, &E, Magma_CSR, Magma_ELLPACK, Magma_RowMajor, Magma_RowMajor);
-    magma_z_mconvert( E, &Z, Magma_ELLPACK, Magma_CSR, Magma_RowMajor, Magma_RowMajor);
-/*
-    printf("\n now to ELLPACK \n");
-    for(magma_int_t i=0; i<E.num_rows*E.max_nnz_row; i++)
-      printf(" %f, %d \n", E.val[i],E.col[i]);
 
-    printf("E    num_rows:%d, nnz:%d\n", E.num_rows, E.nnz);
-    printf("\n now back CSR \n");
-    printf("Z    num_rows:%d, nnz:%d\n", Z.num_rows, Z.nnz);
+    magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);
+    magma_z_mconvert( B, &C, Magma_ELLPACK, Magma_CSR);
+    magma_z_mconvert( C, &D, Magma_CSR, Magma_ELLPACKT);
+    magma_z_mconvert( D, &E, Magma_ELLPACKT, Magma_CSR);
+    magma_z_mconvert( E, &F, Magma_CSR, Magma_DENSE);
+    magma_z_mconvert( F, &Z, Magma_DENSE, Magma_CSR);
 
 
-    for(magma_int_t i=0; i<Z.num_rows; i++)
-      printf(" %f, %d, %d \n", Z.val[i],Z.col[i],Z.row[i]);
-    printf("\n now back CSR \n");
-    printf("Z    num_rows:%d, nnz:%d\n", Z.num_rows, Z.nnz);
-    for(magma_int_t i=0; i<Z.nnz; i++)
-      printf(" %f, %d \n", Z.val[i],Z.col[i]);
-*/
 
 
 
 
     //print_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor );
     print_z_csr_matrix( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col );
- printf("\n now back CSR \n");
+    printf("\n now back CSR \n");
     print_z_csr_matrix( Z.num_rows, Z.num_cols, Z.nnz, &Z.val, &Z.row, &Z.col );
-    write_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor, filename[2] );
-    write_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor, filename[3] );
+    //write_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor, filename[2] );
+    //write_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor, filename[3] );
 
 
     TESTING_FINALIZE();

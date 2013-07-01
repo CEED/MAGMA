@@ -72,9 +72,8 @@ int main( int argc, char** argv)
     magma_z_mtransfer( B, &C, Magma_DEV, Magma_DEV);
     magma_z_mtransfer( B, &D, Magma_DEV, Magma_CPU);
 
-    magma_z_mconvert( D, &E, Magma_CSR, Magma_ELLPACK, Magma_RowMajor, Magma_RowMajor);
-    magma_z_mconvert( E, &Z, Magma_ELLPACK, Magma_CSR, Magma_RowMajor, Magma_RowMajor);
-
+    magma_z_mconvert( D, &E, Magma_CSR, Magma_ELLPACK);
+    magma_z_mconvert( E, &Z, Magma_ELLPACK, Magma_CSR);
 
     magma_zgecsrmv( N, B.num_rows, B.num_cols, one, B.val, B.row, B.col, y.val, one, z.val);
 

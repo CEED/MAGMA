@@ -16,7 +16,7 @@ ZSRC := \
   magma_z_blaswrapper.cpp  \
 	zgecsrmv.cu		\
 	zgeellmv.cu		\
-  ztrellmv.cu		\
+  zgeelltmv.cu		\
 
 # multi-GPU
 ZSRC += \
