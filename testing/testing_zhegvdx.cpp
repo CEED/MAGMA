@@ -81,7 +81,7 @@ int main( int argc, char** argv)
             }
             else {
                 il = 1;
-                iu = (int) opts.fraction*N;
+                iu = (int) (opts.fraction*N);
                 if (iu < 1) iu = 1;
             }
 
