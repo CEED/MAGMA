@@ -61,7 +61,7 @@ int main( int argc, char** argv)
     //print_z_csr_matrix( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col );
 
 
-    magma_z_vinit( &x, 10, one );
+    magma_z_vinit( &x, A.num_cols, one );
     magma_z_vtransfer( x, &y, Magma_CPU, Magma_DEV);
     magma_z_vtransfer( x, &z, Magma_CPU, Magma_DEV);
     magma_z_vvisu( y, 0,10);
