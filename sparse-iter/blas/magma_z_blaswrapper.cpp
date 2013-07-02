@@ -42,50 +42,54 @@
 
 magma_int_t
 magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A, 
-                magma_z_vector x, magmaDoubleComplex beta, magma_z_vector y ){
-
+                magma_z_vector x, magmaDoubleComplex beta, magma_z_vector y )
+{
     if( A.memory_location != x.memory_location || x.memory_location != y.memory_location ){
         printf("error: linear algebra objects are not located in same memory!\n");
-        // return some MAGMA_ERROR
+        return MAGMA_ERR_INVALID_PTR;
     }
 
     // DEV case
     if( A.memory_location == Magma_DEV ){
          if( A.storage_type == Magma_CSR ){
              printf("using CSR kernel for SpMV: ");
-             magma_zgecsrmv( MagmaNoTransStr, A.num_rows, A.num_cols, alpha, A.val, A.row, A.col, x.val, beta, y.val );
+             magma_zgecsrmv( MagmaNoTransStr, A.num_rows, A.num_cols, alpha, 
+                             A.val, A.row, A.col, x.val, beta, y.val );
              printf("done.\n");
              return MAGMA_SUCCESS;
          }
          if( A.storage_type == Magma_ELLPACK ){
              printf("using ELLPACK kernel for SpMV: ");
-             magma_zgeellmv( MagmaNoTransStr, A.num_rows, A.num_cols, A.max_nnz_row, alpha, A.val, A.col, x.val, beta, y.val );
+             magma_zgeellmv( MagmaNoTransStr, A.num_rows, A.num_cols, A.max_nnz_row, alpha, 
+                             A.val, A.col, x.val, beta, y.val );
              printf("done.\n");
              return MAGMA_SUCCESS;
          }
          if( A.storage_type == Magma_ELLPACKT ){
              printf("using ELLPACK kernel for SpMV: ");
-             magma_zgeelltmv( MagmaNoTransStr, A.num_rows, A.num_cols, A.max_nnz_row, alpha, A.val, A.col, x.val, beta, y.val );
+             magma_zgeelltmv( MagmaNoTransStr, A.num_rows, A.num_cols, A.max_nnz_row, alpha, 
+                              A.val, A.col, x.val, beta, y.val );
              printf("done.\n");
              return MAGMA_SUCCESS;
          }
          if( A.storage_type == Magma_DENSE ){
              printf("using ELLPACK kernel for SpMV: ");
-             //magmablas_zgemv_fermi( MagmaNoTransStr, A.num_rows, A.num_cols, alpha, A.val, A.num_rows, x.val, 0, beta,  y.val, 0 );
+             magmablas_zgemv( MagmaNoTrans, A.num_rows, A.num_cols, alpha, 
+                              A.val, A.num_rows, x.val, 1, beta,  y.val, 1 );
              printf("done.\n");
              return MAGMA_SUCCESS;
          }
-         else
+         else {
              printf("error: format not supported.\n");
-
+             return MAGMA_ERR_NOT_SUPPORTED;
+         }
+         
+         
     }
     // CPU case missing!     
     else{
-             printf("error: CPU not yet supported.\n");
-
+        printf("error: CPU not yet supported.\n");
+        return MAGMA_ERR_NOT_SUPPORTED;
     }
-
-
-
 
 }
