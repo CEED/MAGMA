@@ -159,7 +159,7 @@ magma_int_t magma_zcg( magma_int_t dofs, magma_int_t & num_of_iter,
 */
 
 magma_int_t
-magma_z_SpMV(     magmaDoubleComplex alpha, magma_z_sparse_matrix A, 
+magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A, 
                   magma_z_vector x, magmaDoubleComplex beta, magma_z_vector y );
 
 /* ////////////////////////////////////////////////////////////////////////////

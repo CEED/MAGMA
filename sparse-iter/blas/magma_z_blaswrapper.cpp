@@ -41,7 +41,7 @@
     =====================================================================  */
 
 magma_int_t
-magma_z_SpMV(     magmaDoubleComplex alpha, magma_z_sparse_matrix A, 
+magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A, 
                 magma_z_vector x, magmaDoubleComplex beta, magma_z_vector y ){
 
     if( A.memory_location != x.memory_location || x.memory_location != y.memory_location ){

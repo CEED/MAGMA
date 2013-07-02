@@ -76,7 +76,7 @@ int main( int argc, char** argv)
 
 
    //magma_zgecsrmv( N, B.num_rows, B.num_cols, one, B.val, B.row, B.col, y.val, one, z.val);
-    magma_z_SpMV( one, D, y, one, z);
+    magma_z_spmv( one, D, y, one, z);
 
     magma_z_vvisu( z, 0,10);
 
