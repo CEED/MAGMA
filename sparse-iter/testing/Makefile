@@ -57,7 +57,7 @@ lib:
 $(ALLOBJ): testings.h
 
 
-$(EXE): $(LIBMAGMA) $(LIBMAGMA_SPARSE) testing_util.o
+$(EXE): $(LIBMAGMA_SPARSE) testing_util.o
 
 clean:
 	rm -f *.o *~ 
@@ -67,7 +67,7 @@ cleanall: clean
 
 testing_% : testing_%.o
 	$(CC) $(LDOPTS) $(NOMAIN) $< -o $@ \
-	testing_util.o -L$(MAGMA_DIR)/lib -lmagma -lmagma_sparse \
+	testing_util.o -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
 	$(LIBDIR) \
 	$(LIB) 
 
