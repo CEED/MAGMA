@@ -11,6 +11,7 @@
 #include "common_magma.h"
 #define PRECISION_z
 
+#if (GPUSHMEM >= 200) || defined(PRECISION_s) || defined(PRECISION_d) || defined(PRECISION_c)
 
 #define zhemv_bs         64
 #define thread_x         64
@@ -1210,3 +1211,4 @@ magmablas_zhemv2_mgpu(
     return MAGMA_SUCCESS;
 }
 
+#endif
