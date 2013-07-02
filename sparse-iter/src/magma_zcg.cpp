@@ -58,16 +58,16 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     double nom, nom0, r0, betanom, den;
     magma_int_t i;
 
-    cublasZscal(dofs, c_zero, x->val, 1);     // x = 0
-    cublasZcopy(dofs, b.val, 1, r.val, 1);       // r = b
-    cublasZcopy(dofs, b.val, 1, d.val, 1);       // d = b
-    nom = cublasDznrm2(dofs, r.val, 1);      // nom = || r ||
+    magma_zscal(dofs, c_zero, x->val, 1);     // x = 0
+    magma_zcopy(dofs, b.val, 1, r.val, 1);       // r = b
+    magma_zcopy(dofs, b.val, 1, d.val, 1);       // d = b
+    nom = magma_dznrm2(dofs, r.val, 1);      // nom = || r ||
     nom = nom * nom;
 
     nom0 = nom;                          // nom = r dot r
     
     magma_z_spmv( c_one, A, r, c_zero, z ); // z = A r
-    den = MAGMA_Z_REAL(cublasZdotc(dofs, z.val, 1, r.val, 1));  // den = z dot r
+    den = MAGMA_Z_REAL(magma_zdotc(dofs, z.val, 1, r.val, 1));  // den = z dot r
     
     if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE) r0 = ATOLERANCE;
     if (nom < r0)
@@ -84,9 +84,9 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     for( i= 1; i<solver_par->maxiter; i++ ) {
         alpha = MAGMA_Z_MAKE(nom/den, 0.);
         
-        cublasZaxpy(dofs,  alpha, d.val, 1, x->val, 1);         // x = x + alpha d
-        cublasZaxpy(dofs, -alpha, z.val, 1, r.val, 1);         // r = r - alpha z
-        betanom = cublasDznrm2(dofs, r.val, 1);             // betanom = || r ||
+        magma_zaxpy(dofs,  alpha, d.val, 1, x->val, 1);         // x = x + alpha d
+        magma_zaxpy(dofs, -alpha, z.val, 1, r.val, 1);         // r = r - alpha z
+        betanom = magma_dznrm2(dofs, r.val, 1);             // betanom = || r ||
         betanom = betanom * betanom;                   // betanom = r dot r
         
         printf("Iteration : %4d  Norm: %f\n", i, betanom);
@@ -98,11 +98,11 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
         beta = MAGMA_Z_MAKE(betanom/nom, 0.);         // beta = betanom/nom
         
-        cublasZscal(dofs, beta, d.val, 1);                // d = beta*d
-        cublasZaxpy(dofs, c_one, r.val, 1, d.val, 1);             // d = d + r 
+        magma_zscal(dofs, beta, d.val, 1);                // d = beta*d
+        magma_zaxpy(dofs, c_one, r.val, 1, d.val, 1);             // d = d + r 
         
         magma_z_spmv( c_one, A, d, c_zero, z );      // z = A d
-        den = MAGMA_Z_REAL(cublasZdotc(dofs, d.val, 1, z.val, 1));// den = d dot z
+        den = MAGMA_Z_REAL(magma_zdotc(dofs, d.val, 1, z.val, 1));// den = d dot z
         nom = betanom;
     } 
     
@@ -114,8 +114,8 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
         magma_z_spmv( c_one, A, *x, c_zero, r );      // z = A d
         
-        cublasZaxpy(dofs,  c_mone, b.val, 1, r.val, 1);         // r = r - b
-        den = cublasDznrm2(dofs, r.val, 1);                // den = || r ||
+        magma_zaxpy(dofs,  c_mone, b.val, 1, r.val, 1);         // r = r - b
+        den = magma_dznrm2(dofs, r.val, 1);                // den = || r ||
         
         printf( "      || r_N ||   = %f\n", den);
         solver_par->residual = (double)(den);
