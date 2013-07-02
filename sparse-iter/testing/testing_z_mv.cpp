@@ -24,7 +24,7 @@
 #include "testings.h"
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing matrix IO
+   -- Testing matrix vector product
 */
 int main( int argc, char** argv)
 {

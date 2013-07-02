@@ -6,8 +6,9 @@
        November 2011
 
        @precisions normal z -> c d s
-       @author Mark Gates
+       @author Hartwig Anzt
 */
+
 // includes, system
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,7 +25,7 @@
 
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing zgemm
+   -- Testing magma_zcg
 */
 int main( int argc, char** argv)
 {
@@ -33,20 +34,55 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
-    printf("If running lapack (option --lapack), MAGMA and CUBLAS error are both computed\n"
-           "relative to CPU BLAS result. Else, MAGMA error is computed relative to CUBLAS result.\n\n"
-           "transA = %c, transB = %c\n", opts.transA, opts.transB );
-    printf("    M     N     K   MAGMA Gflop/s (ms)  CUBLAS Gflop/s (ms)   CPU Gflop/s (ms)  MAGMA error  CUBLAS error\n");
-    printf("=========================================================================================================\n");
-    for( int i = 0; i < opts.ntest; ++i ) {
-        for( int iter = 0; iter < opts.niter; ++iter ) {
+    const char *filename[] =
+    {
+     "test_matrices/Trefethen_20.mtx",
+     "test_matrices/Trefethen_2000.mtx",
+     "test_matrices/Trefethen_20_new.mtx",
+     "test_matrices/Trefethen_20_new2.mtx",
+     "test_matrices/Trefethen_20_new3.mtx"
+    };
+
+    magma_z_sparse_matrix A, B, C, D;
+    magma_z_vector x, b;
+
+    magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
+    magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
+    const char *N="N";
+
+  
+    magma_z_csr_mtx( &A, filename[1] );
+    //print_z_csr_matrix( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col );
 
 
-        }
-        if ( opts.niter > 1 ) {
-            printf( "\n" );
-        }
-    }
+    magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
+    magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
+
+    magma_z_vvisu( x, 0,10);
+
+
+
+
+    magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);
+    magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACKT);
+    magma_z_mtransfer( C, &D, Magma_CPU, Magma_DEV);
+
+
+    magma_solver_parameters solver_par;
+
+    solver_par.epsilon = 10e-8;
+    solver_par.maxiter = 1000;
+
+    magma_zcg( D, b, &x, &solver_par );
+
+    magma_z_vvisu( x, 0,10);
+
+
+
+
+
+
+
 
     TESTING_FINALIZE();
     return 0;

@@ -122,7 +122,8 @@ typedef struct magma_solver_parameters{
     double             epsilon;  
     magma_int_t        maxiter;
     magma_int_t        restart_par; 
-    double             resiudal;
+    magma_int_t        numiter;
+    double             residual;
 
 }magma_solver_parameters;
 
