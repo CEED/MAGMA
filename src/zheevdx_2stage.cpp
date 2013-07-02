@@ -316,6 +316,22 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
         lapackf77_zlascl(uplo_, &izero, &izero, &d_one, &sigma, &n, &n, a,
                          &lda, info);
     }
+    /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
+    magma_int_t lda2 = nb+1+(nb-1);
+    if(lda2>n){
+        printf("--------------------------------------------------------------\n");
+        printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n",n,nb);
+        printf("--------------------------------------------------------------\n");
+        lapackf77_zheevd(&jobz, &uplo, &n, 
+                        a, &lda, w, 
+                        work, &lwork, 
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                        rwork, &lrwork, 
+#endif  
+                        iwork, &liwork, 
+                        info);
+        return *info;
+    }
 
     magma_int_t indT2   = 0;
     magma_int_t indTAU2 = indT2  + blkcnt*ldt*Vblksiz;
@@ -323,13 +339,10 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
     magma_int_t indtau1 = indV2  + blkcnt*ldv*Vblksiz;
     magma_int_t indwrk  = indtau1+ n;
     magma_int_t indwk2  = indwrk + n * n;
-
     magma_int_t llwork = lwork - indwrk;
     magma_int_t llwrk2 = lwork - indwk2;
-
     magma_int_t inde = 0;
     magma_int_t indrwk = inde + n;
-
     magma_int_t llrwk = lrwork - indrwk;
 
 #ifdef ENABLE_TIMER
@@ -338,12 +351,10 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
 #endif
 
     magmaDoubleComplex *dT1;
-
     if (MAGMA_SUCCESS != magma_zmalloc( &dT1, n*nb)) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-
     magma_zhetrd_he2hb(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, dT1, threads, info);
 
 #ifdef ENABLE_TIMER
@@ -351,15 +362,8 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
     printf("    time zhetrd_he2hb = %6.2f\n" , GetTimerValue(start,st1)/1000.);
 #endif
 
-    magma_int_t lda2 = nb+1+(nb-1);
-    if(lda2>n){
-        printf("error matrix too small N=%d NB=%d\n",n,nb);
-        return -14;
-    }
-
     /* copy the input matrix into WORK(INDWRK) with band storage */
     magmaDoubleComplex* A2 = &work[indwrk];
-
     memset(A2 , 0, n*lda2*sizeof(magmaDoubleComplex));
 
     for (magma_int_t j = 0; j < n-nb; j++)
