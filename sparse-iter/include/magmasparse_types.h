@@ -115,6 +115,19 @@ typedef struct magma_s_vector{
 
 }magma_s_vector;
 
+
+
+typedef struct magma_solver_parameters{
+
+    double             epsilon;  
+    magma_int_t        maxiter;
+    magma_int_t        restart_par; 
+    double             resiudal;
+
+}magma_solver_parameters;
+
+
+
 #ifdef __cplusplus
 }
 #endif

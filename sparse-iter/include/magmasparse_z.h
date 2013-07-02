@@ -120,6 +120,7 @@ magma_z_mconvert(       magma_z_sparse_matrix A, magma_z_sparse_matrix *B,
 
 magma_int_t
 magma_z_vinit(          magma_z_vector *x, 
+                        magma_location_t memory_location,
                         magma_int_t num_rows, 
                         magmaDoubleComplex values );
 
@@ -129,9 +130,9 @@ magma_z_vvisu(          magma_z_vector x,
                         magma_int_t displaylength );
 
 magma_int_t
-magma_z_vread(         magma_z_vector *x, 
-                       magma_int_t length,
-                       char * filename );
+magma_z_vread(          magma_z_vector *x, 
+                        magma_int_t length,
+                        char * filename );
 
 magma_int_t
 magma_z_mvisu(          magma_z_sparse_matrix );
@@ -148,11 +149,13 @@ magma_z_mvisu(          magma_z_sparse_matrix );
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE function definitions / Data on GPU
 */
-magma_int_t magma_zcg( magma_int_t dofs, magma_int_t & num_of_iter,
+/*magma_int_t magma_zcg( magma_int_t dofs, magma_int_t & num_of_iter,
                        magmaDoubleComplex *x, magmaDoubleComplex *b,
                        magmaDoubleComplex *d_A, magma_int_t *d_I, magma_int_t *d_J,
                        magmaDoubleComplex *dwork,
-                       double rtol );
+                       double rtol );*/
+magma_int_t magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+                       magma_solver_parameters solver_par )
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE utility function definitions
