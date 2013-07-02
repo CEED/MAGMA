@@ -34,8 +34,8 @@ int row = blockDim.x * blockIdx.x + threadIdx.x ;
     if(row < num_rows ){
         magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
         for ( int n = 0; n < num_cols_per_row ; n ++){
-            int col = d_colind [ num_rows * n + row ];
-            magmaDoubleComplex val = d_val [ num_rows * row + n ];
+            magma_int_t col = d_colind [ num_cols_per_row * row + n ];
+            magmaDoubleComplex val = d_val [ num_cols_per_row * row + n ];
             if( val != 0)
                 dot += val * d_x[col ];
         }
