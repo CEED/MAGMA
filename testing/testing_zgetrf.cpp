@@ -159,10 +159,13 @@ int main( int argc, char** argv)
     magmaDoubleComplex *h_A;
     magma_int_t     *ipiv;
     magma_int_t     M, N, n2, lda, ldda, info, min_mn;
+    magma_int_t     status = 0;
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
+    double tol = opts.tolerance * lapackf77_dlamch("E");
+
     printf("ngpu %d\n", (int) opts.ngpu );
     if ( opts.check == 2 ) {
         printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |Ax-b|/(N*|A|*|x|)\n");
@@ -225,11 +228,13 @@ int main( int argc, char** argv)
             }
             if ( opts.check == 2 ) {
                 error = get_residual( M, N, h_A, lda, ipiv );
-                printf("   %8.2e\n", error );
+                printf("   %8.2e%s\n", error, (error > tol ? " fail" : ""));
+                status |= (error > tol);
             }
             else if ( opts.check ) {
                 error = get_LU_error( M, N, h_A, lda, ipiv );
-                printf("   %8.2e\n", error );
+                printf("   %8.2e%s\n", error, (error > tol ? " fail" : ""));
+                status |= (error > tol);
             }
             else {
                 printf("     ---   \n");
@@ -244,5 +249,5 @@ int main( int argc, char** argv)
     }
 
     TESTING_FINALIZE();
-    return 0;
+    return status;
 }

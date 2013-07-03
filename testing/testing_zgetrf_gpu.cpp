@@ -79,9 +79,12 @@ int main( int argc, char** argv)
     magma_int_t M, N, n2, lda, ldda, info, min_mn;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
+    magma_int_t status   = 0;
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
+
+    double tol = opts.tolerance * lapackf77_dlamch("E");
     
     printf("  M     N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||PA-LU||/(||A||*N)\n");
     printf("=========================================================================\n");
@@ -143,7 +146,8 @@ int main( int argc, char** argv)
             if ( opts.check ) {
                 magma_zgetmatrix( M, N, d_A, ldda, h_A, lda );
                 error = get_LU_error( M, N, h_R, lda, h_A, ipiv );
-                printf("   %8.2e\n", error );
+                printf("   %8.2e%s\n", error, (error > tol ? " fail" : ""));
+                status |= (error > tol);
             }
             else {
                 printf("     ---  \n");
@@ -160,5 +164,5 @@ int main( int argc, char** argv)
     }
 
     TESTING_FINALIZE();
-    return 0;
+    return status;
 }
