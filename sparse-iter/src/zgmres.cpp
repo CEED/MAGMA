@@ -6,23 +6,18 @@
        November 2011
 
        @precisions normal z -> s d c
+       @author Hartwig Anzt
 
 */
 #include "common_magma.h"
+#include "../include/magmasparse.h"
 
 #include <assert.h>
 
 #define RTOLERANCE     10e-10
 #define ATOLERANCE     10e-10
 
-// This is the restart value
-#define Kmax 30
 
-magma_int_t
-magma_gmres(magma_int_t n, magma_int_t &nit, cuDoubleComplex *x, cuDoubleComplex *b,
-            cuDoubleComplex *d_A, magma_int_t *d_I, magma_int_t *d_J, 
-            cuDoubleComplex *dwork)
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -40,53 +35,67 @@ magma_gmres(magma_int_t n, magma_int_t &nit, cuDoubleComplex *x, cuDoubleComplex
     Arguments
     =========
 
-    ??? What should be the argument; order; what matrix format, etc ....
+    magma_z_sparse_matrix A                   input matrix A
+    magma_z_vector b                          RHS b
+    magma_z_vector *x                         solution approximation
+    magma_solver_parameters *solver_par       solver parameters
 
     =====================================================================  */
 
-    magma_int_t i, j, k, m;  
-    cuDoubleComplex H[Kmax+2][Kmax+1], HH[Kmax+1][Kmax+1], v; 
-    cuDoubleComplex *r = dwork;
-    magma_int_t iter;
-    
-    doubele rNorm, RNorm, r0 = 0.;
-    cuDoubleComplex y[Kmax+1], h1[Kmax+1];
-    
-    // if (Kmax > n) Kmax=n; 
-    cuDoubleComplex *q[Kmax+1];
-    for (i=1; i<=Kmax; i++) 
-        q[i] = dwork + i*n; 
-    
-    cublasZscal(n, 0.f, x, 1);              //  x = 0
-    cublasZcopy(n, b, 1, r, 1);             //  r = b
+magma_int_t
+magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+           magma_solver_parameters *solver_par ){
 
-    H[1][0] = r0 =cublasZnrm2(n, r, 1);     //  r0= || r||
+    // some useful variables
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = MAGMA_Z_NEG_ONE;
+    magma_int_t dofs = A.num_rows;
+    magma_int_t i, j, k, m, iter;
+    double rNorm, RNorm, r0 = 0.;
 
-    if ((r0 *= RTOLERANCE) < ATOLERANCE) r0 = ATOLERANCE;
+    // workspace
+    magma_z_vector r;
+    magma_z_vinit( &r, Magma_DEV, dofs, c_zero );
+    cuDoubleComplex H[(solver_par->restart)+2][(solver_par->restart)+1], HH[(solver_par->restart)+1][(solver_par->restart)+1], v; 
+    cuDoubleComplex y[(solver_par->restart)+1], h1[(solver_par->restart)+1];
+    
+
+    magma_z_vector q, q_t;
+    magma_z_vinit( &q, Magma_DEV, dofs*((solver_par->restart)+1), c_zero );
+    magma_z_vinit( &q_t, Magma_DEV, dofs, c_zero );
+
+    
+    magma_zscal( dofs, c_zero, x->val, 1 );              //  x = 0
+    magma_zcopy( dofs, b.val, 1, r.val, 1 );             //  r = b
+
+    r0 = magma_dznrm2( dofs, r.val, 1 );                 //  r0= || r||
+    H[1][0] = MAGMA_Z_MAKE( r0, 0. ); 
+
+    if ((r0 *= solver_par->epsilon) < ATOLERANCE) r0 = ATOLERANCE;
     
     printf("Iteration %4d done!\n", 0);
     printf("The current residual RNorm = %f\n", H[1][0]);
 
-    for (iter = 0; iter<nit; iter++) {
-        
-        for(k=1; k<=Kmax; k++) {
+    for (iter = 0; iter<solver_par->maxiter; iter++) {
+        for(k=1; k<=(solver_par->restart); k++) {
             v =1./H[k][k-1];
             
-            cublasZcopy(n, r, 1, q[k], 1);       //  q[k]    = 1.0/H[k][k-1] r
-            cublasZscal(n, v, q[k], 1);          //  (to be fused)
-            
-            ssmv_gpu(d_A, d_I, d_J, n, q[k], r); //  r       = A q[k] 
+            magma_zcopy(dofs, r.val, 1, q.val+k*dofs, 1);       //  q[k]    = 1.0/H[k][k-1] r
+            magma_zscal(dofs, v, q.val+k*dofs, 1);          //  (to be fused)
+
+            q_t.val = q.val+k*dofs;
+            magma_z_spmv( c_one, A, q_t, c_zero, r ); //  r       = A q[k] 
+
             for (i=1; i<=k; i++) {
-                H[i][k]=cublasZdot(n,q[i],1,r,1);  //  H[i][k] = q[i] . r
+                H[i][k]=magma_zdotc(dofs,q.val+i*dofs,1,r.val,1);  //  H[i][k] = q[i] . r
                 
-                cublasZaxpy(n,-H[i][k],q[i],1,r,1);//  r       = r - H[i][k] q[i]
+                magma_zaxpy(dofs,-H[i][k],q.val+i*dofs,1,r.val,1);//  r       = r - H[i][k] q[i]
             }
             
-            H[k+1][k]=cublasZnrm2(n, r, 1);       //  H[k+1][k] = sqrt(r . r) 
-            
+            H[k+1][k]= MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. );       //  H[k+1][k] = sqrt(r . r) 
+
             //   Minimization of  || b-Ax ||  in K_k 
             for (i=1; i<=k; i++) {
-                HH[k][i] = 0.0;
+                HH[k][i] = MAGMA_Z_MAKE( 0.0, 0. );
                 for (j=1; j<=i+1; j++)
                     HH[k][i] +=  H[j][k] * H[j][i];
             } 
@@ -110,28 +119,30 @@ magma_gmres(magma_int_t n, magma_int_t &nit, cuDoubleComplex *x, cuDoubleComplex
             
             m = k;
             
-            rNorm = fabs(H[k+1][k]);
+            rNorm = fabs(MAGMA_Z_REAL(H[k+1][k]));
             //if (rNorm < r0) break;
         }
         
         //   Minimization Done      
         for (i=1; i<=m; i++)
-            cublasZaxpy(n, y[i], q[i], 1, x, 1);  //  xNew += y[i]*q[i]
+            magma_zaxpy(dofs, y[i], q.val+i*dofs, 1, x->val, 1);  //  xNew += y[i]*q[i]
         
-        ssmv_gpu(d_A, d_I, d_J, n, x, r);       //  r = Ax
-        
-        cublasZaxpy(n, -1.f, b, 1, r, 1);       //  r = r - b
-        cublasZscal(n, -1.f, r, 1);             //  r = -r (to be fused)
-        RNorm = H[1][0] = cublasZnrm2(n, r, 1); //  RNorm = H[1][0] = || r ||
-        
+
+        magma_z_spmv( c_one, A, *x, c_zero, r );             //  r = A * x
+        magma_zaxpy(dofs, c_mone, b.val, 1, r.val, 1);       //  r = r - b
+        magma_zscal(dofs, c_mone, r.val, 1);             //  r = -r (to be fused)
+        H[1][0] = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. ); //  RNorm = H[1][0] = || r ||
+        RNorm = MAGMA_Z_REAL( H[1][0] );
+    
         printf("Iteration %4d done!\n", iter);
         printf("The current residual RNorm = %f\n", RNorm);
         
-        if (fabs(H[1][0]) < r0) break;    
+        if (fabs(MAGMA_Z_REAL(H[1][0])) < r0) break;    
         //if (rNorm < r0) break;
     }
     
-    nit = iter;
+    solver_par->numiter = iter;
     printf("\nThe final residual is %f\n\n", RNorm);
+
 }
 

@@ -75,9 +75,9 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_spmv( c_one, A, r, c_zero, z );                           // z = A r
     den = MAGMA_Z_REAL( magma_zdotc(dofs, z.val, 1, r.val, 1) );      // den = z dot r
     
-    if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE) 
+    if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE ) 
         r0 = ATOLERANCE;
-    if (nom < r0)
+    if ( nom < r0 )
         return MAGMA_SUCCESS;
     
     if (den <= 0.0) {

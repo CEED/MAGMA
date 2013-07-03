@@ -12,9 +12,10 @@ include ../../Makefile.internal
 # ----------
 # Krylov space linear solvers
 ZSRC += \
-	testing_zcg.cpp	        \
-	testing_z_matrix_io.cpp \
-  testing_z_mv.cpp \
+	testing_z_matrix_io.cpp     \
+    testing_z_mv.cpp            \
+	testing_zcg.cpp	            \
+	testing_zgmres.cpp	        \
 
 
 # ----------
