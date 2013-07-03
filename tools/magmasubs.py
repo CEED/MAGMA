@@ -647,6 +647,7 @@ subs = {
     # ----- SPARSE Iterative Solvers
     ('scg',            'dcg',            'ccg',            'zcg'             ),
     ('sgmres',         'dgmres',         'cgmres',         'zgmres'          ),
+    ('sbicgstab',      'dbicgstab',      'cbicgstab',      'zbicgstab',      ),
 
     # ----- SPARSE auxiliary tools
     ('matrix_s',       'matrix_d',       'matrix_c',       'matrix_z'        ), 
