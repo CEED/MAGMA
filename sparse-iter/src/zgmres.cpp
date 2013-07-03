@@ -50,7 +50,7 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = MAGMA_Z_NEG_ONE;
     magma_int_t dofs = A.num_rows;
     magma_int_t i, j, k, m, iter;
-    double rNorm, RNorm, r0 = 0.;
+    double rNorm, RNorm, den, nom0, r0 = 0.;
 
     // workspace
     magma_z_vector r;
@@ -68,12 +68,12 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_zcopy( dofs, b.val, 1, r.val, 1 );             //  r = b
 
     r0 = magma_dznrm2( dofs, r.val, 1 );                 //  r0= || r||
+    nom0 = r0*r0;
     H[1][0] = MAGMA_Z_MAKE( r0, 0. ); 
 
     if ((r0 *= solver_par->epsilon) < ATOLERANCE) r0 = ATOLERANCE;
     
-    printf("Iteration %4d done!\n", 0);
-    printf("The current residual RNorm = %f\n", H[1][0]);
+    printf("Iteration : %4d  Norm: %f\n", 0, H[1][0]*H[1][0]);
 
     for (iter = 0; iter<solver_par->maxiter; iter++) {
         for(k=1; k<=(solver_par->restart); k++) {
@@ -134,15 +134,25 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         H[1][0] = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. ); //  RNorm = H[1][0] = || r ||
         RNorm = MAGMA_Z_REAL( H[1][0] );
     
-        printf("Iteration %4d done!\n", iter);
-        printf("The current residual RNorm = %f\n", RNorm);
+        printf("Iteration : %4d  Norm: %f\n", iter, RNorm*RNorm);
         
-        if (fabs(MAGMA_Z_REAL(H[1][0])) < r0) break;    
+        if (fabs(RNorm*RNorm) < r0) break;    
         //if (rNorm < r0) break;
     }
     
+
+    printf( "      (r_0, r_0) = %e\n", nom0 );
+    printf( "      (r_N, r_N) = %e\n", RNorm*RNorm);
+    printf( "      Number of GMRES restarts: %d\n", iter);
+    
+    if (solver_par->epsilon == RTOLERANCE) {
+        magma_z_spmv( c_one, A, *x, c_zero, r );                       // q_t = A x
+        magma_zaxpy(dofs,  c_mone, b.val, 1, r.val, 1);                // r = r - b
+        den = magma_dznrm2(dofs, r.val, 1);                            // den = || r ||
+        printf( "      || r_N ||   = %f\n", den);
+        solver_par->residual = (double)(den);
+    }
     solver_par->numiter = iter;
-    printf("\nThe final residual is %f\n\n", RNorm);
 
 }
 

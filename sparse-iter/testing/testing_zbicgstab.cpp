@@ -70,11 +70,10 @@ int main( int argc, char** argv)
 
     magma_solver_parameters solver_par;
 
-    solver_par.epsilon = 10e-6;
+    solver_par.epsilon = 10e-9;
     solver_par.maxiter = 1000;
-    solver_par.restart = 30;
 
-    magma_zgmres( D, b, &x, &solver_par );
+    magma_zbicgstab( D, b, &x, &solver_par );
 
     magma_z_vvisu( x, 0,10);
 

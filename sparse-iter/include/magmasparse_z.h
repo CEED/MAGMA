@@ -154,11 +154,16 @@ magma_z_mvisu(          magma_z_sparse_matrix );
                        magmaDoubleComplex *d_A, magma_int_t *d_I, magma_int_t *d_J,
                        magmaDoubleComplex *dwork,
                        double rtol );*/
-magma_int_t magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+magma_int_t 
+magma_zcg(             magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
                        magma_solver_parameters *solver_par );
 
-magma_int_t magma_zgmres(
-                       magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+magma_int_t 
+magma_zgmres(          magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+                       magma_solver_parameters *solver_par );
+
+magma_int_t
+magma_zbicgstab(       magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
                        magma_solver_parameters *solver_par );
 
 /* ////////////////////////////////////////////////////////////////////////////

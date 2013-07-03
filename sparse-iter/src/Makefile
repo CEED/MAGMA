@@ -21,6 +21,7 @@ INC += -I$(MAGMA_DIR)/control
 ZSRC += \
 	zcg.cpp			\
 	zgmres.cpp		\
+	zbicgstab.cpp	\
 	#zbicg.cpp		\
 
 # Krylov space eigen-solvers

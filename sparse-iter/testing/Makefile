@@ -16,6 +16,7 @@ ZSRC += \
     testing_z_mv.cpp            \
 	testing_zcg.cpp	            \
 	testing_zgmres.cpp	        \
+	testing_zbicgstab.cpp       \
 
 
 # ----------

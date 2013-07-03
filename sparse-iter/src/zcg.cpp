@@ -112,7 +112,7 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     printf( "      Number of CG iterations: %d\n", i);
     
     if (solver_par->epsilon == RTOLERANCE) {
-        magma_z_spmv( c_one, A, *x, c_zero, r );                       // z = A d
+        magma_z_spmv( c_one, A, *x, c_zero, r );                       // r = A x
         magma_zaxpy(dofs,  c_mone, b.val, 1, r.val, 1);                // r = r - b
         den = magma_dznrm2(dofs, r.val, 1);                            // den = || r ||
         printf( "      || r_N ||   = %f\n", den);
