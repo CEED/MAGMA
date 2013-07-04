@@ -221,7 +221,7 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
     }
 
     magma_int_t nb = magma_get_dbulge_nb(n, threads);
-    magma_int_t Vblksiz = magma_dbulge_get_Vblksiz(n, nb);
+    magma_int_t Vblksiz = magma_dbulge_get_Vblksiz(n, nb, threads);
 
     magma_int_t ldt = Vblksiz;
     magma_int_t ldv = nb + Vblksiz;
