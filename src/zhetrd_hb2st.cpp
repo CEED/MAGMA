@@ -640,9 +640,8 @@ static void magma_ztile_bulge_computeT_parallel(magma_int_t my_core_id, magma_in
     //%===========================
     //%   local variables
     //%===========================
-    magma_int_t firstcolj;
-    magma_int_t rownbm;
-    magma_int_t st,ed,fst,vlen,vnb,colj;
+    magma_int_t Vm, Vn, mt, nt;
+    magma_int_t myrow, mycol, blkj, blki, firstrow;
     magma_int_t blkid,vpos,taupos,tpos;
     magma_int_t blkpercore, myid;
 
@@ -651,6 +650,7 @@ static void magma_ztile_bulge_computeT_parallel(magma_int_t my_core_id, magma_in
 
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
     blkpercore = blkcnt/cores_num;
+    blkpercore = blkpercore==0 ? 1:blkpercore;
     magma_int_t nbGblk  = magma_ceildiv(n-1, Vblksiz);
 
     #ifdef ENABLE_DEBUG
@@ -658,38 +658,47 @@ static void magma_ztile_bulge_computeT_parallel(magma_int_t my_core_id, magma_in
         printf("  COMPUTE T parallel threads %d with  N %d   NB %d   Vblksiz %d \n",cores_num,n,nb,Vblksiz);
     #endif
 
-    for (magma_int_t bg = nbGblk; bg>0; bg--)
-    {
-        firstcolj = (bg-1)*Vblksiz + 1;
-        rownbm    = magma_ceildiv(n-(firstcolj+1), nb);
-        if(bg==nbGblk)
-            rownbm    = magma_ceildiv(n-firstcolj ,nb);  // last blk has size=1 used for complex to handle A(N,N-1)
 
-        for (magma_int_t m = rownbm; m>0; m--)
-        {
-            vlen = 0;
-            vnb  = 0;
-            colj      = (bg-1)*Vblksiz; // for k=0;I compute the fst and then can remove it from the loop
-            fst       = (rownbm -m)*nb+colj +1;
-            for (magma_int_t k=0; k<Vblksiz; k++)
-            {
-                colj     = (bg-1)*Vblksiz + k;
-                st       = (rownbm -m)*nb+colj +1;
-                ed       = min(st+nb-1,n-1);
-                if(st>ed)
-                    break;
-                if((st==ed)&&(colj!=n-2))
-                    break;
 
-                vlen=ed-fst+1;
-                vnb=k+1;
+    /*========================================
+     * compute the T's in parallel.
+     * The Ts are independent so each core pick
+     * a T and compute it. The loop is based on 
+     * the version 113 of the applyQ
+     * which go over the losange block_column 
+     * by block column. but it is not important 
+     * here the order because Ts are independent.
+     * ========================================
+    */ 
+    nt  = magma_ceildiv((n-1),Vblksiz);
+    for (blkj=nt-1; blkj>=0; blkj--) {
+        /* the index of the first row on the top of block (blkj) */ 
+        firstrow = blkj * Vblksiz + 1;
+        /*find the number of tile for this block */
+        if( blkj == nt-1 )
+            mt = magma_ceildiv( n -  firstrow,    nb);
+        else
+            mt = magma_ceildiv( n - (firstrow+1), nb);
+        /*loop over the tiles find the size of the Vs and apply it */
+        for (blki=mt; blki>0; blki--) {
+            /*calculate the size of each losange of Vs= (Vm,Vn)*/
+            myrow     = firstrow + (mt-blki)*nb;
+            mycol     = blkj*Vblksiz;
+            Vm = min( nb+Vblksiz-1, n-myrow);
+            if( ( blkj == nt-1 ) && ( blki == mt ) ){
+                Vn = min (Vblksiz, Vm);
+            } else {
+                Vn = min (Vblksiz, Vm-1);
             }
-            colj     = (bg-1)*Vblksiz;
-            magma_bulge_findVTAUTpos(n, nb, Vblksiz, colj, fst, ldv, ldt, &vpos, &taupos, &tpos, &blkid);
+            /*calculate the pointer to the Vs and the Ts.
+             * Note that Vs and Ts have special storage done
+             * by the bulgechasing function*/
+            magma_bulge_findVTAUTpos(n, nb, Vblksiz, mycol, myrow, ldv, ldt, &vpos, &taupos, &tpos, &blkid);
             myid = blkid/blkpercore;
-            if(my_core_id==(myid%cores_num)){
-                if((vlen>0)&&(vnb>0))
-                    lapackf77_zlarft( "F", "C", &vlen, &vnb, V(vpos), &ldv, TAU(taupos), T(tpos), &ldt);
+            if( my_core_id==(myid%cores_num) ){
+                if( ( Vm > 0 ) && ( Vn > 0 ) ){
+                    lapackf77_zlarft( "F", "C", &Vm, &Vn, V(vpos), &ldv, TAU(taupos), T(tpos), &ldt);
+                }
             }
         }
     }
