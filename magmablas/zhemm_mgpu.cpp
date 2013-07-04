@@ -95,10 +95,10 @@ void magmablas_zhemm_mgpu_com(
     }
 
     magma_int_t nbcmplxactive =  0;
-    magma_int_t cmplxisactive[nbcmplx];
-    magma_int_t gpuisactive[ngpu];
-    memset(gpuisactive, 0, ngpu*sizeof(magma_int_t));
-    memset(cmplxisactive, 0, nbcmplx*sizeof(magma_int_t));
+    magma_int_t cmplxisactive[MagmaMaxGPUs];
+    magma_int_t gpuisactive[MagmaMaxGPUs];
+    memset(gpuisactive, 0, MagmaMaxGPUs*sizeof(magma_int_t));
+    memset(cmplxisactive, 0, MagmaMaxGPUs*sizeof(magma_int_t));
 
 
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
