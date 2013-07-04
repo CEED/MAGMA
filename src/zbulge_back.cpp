@@ -134,7 +134,7 @@ magma_zbulge_back(magma_int_t threads, char uplo,
     //double gpu_cpu_perf = 16;  // gpu over cpu performance  //100% ev // SandyB. - Fermi (M2090)
 #else
 //    double gpu_cpu_perf = 27.5;  // gpu over cpu performance  //100% ev // Westmere - Fermi (M2090)
-    double gpu_cpu_perf = 32;  // gpu over cpu performance  //100% ev // SandyB. - Kepler (K20c)
+    double gpu_cpu_perf = 50;  // gpu over cpu performance  //100% ev // SandyB. - Kepler (K20c)
 //    double gpu_cpu_perf = 130;  // gpu over cpu performance  //100% ev // Bulldozer - Kepler (K20X)
 #endif
 

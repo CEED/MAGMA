@@ -111,7 +111,9 @@ magma_zbulge_applyQ_v2(char side,
     magmaDoubleComplex *dT0, *dV0, *dT1, *dV1;
     magma_int_t lddv = ldv;
     magma_int_t lddt = ldt; 
-    magma_int_t dwVTsiz  = ldv*Vblksiz; // lddv*ldv + lddv*NE;// ldv*Vblksiz;
+    magma_int_t lddw = 0;
+    magma_int_t lddwork  = ((NE+31)/32)*32;
+    magma_int_t dwVTsiz  = lddv*lddwork; // lddv*lddv + lddv*lddwork;// lddv*lddwork;
     magma_int_t dworksiz = NE*Vblksiz;  // lddv*Vblksiz;     // NE*Vblksiz;
 
     if(MAGMA_SUCCESS != magma_zmalloc( &dwork, 2*dworksiz + 2*dwVTsiz +  2*Vchunksiz* (Vblksiz* (lddv+lddt)) )) {
@@ -133,8 +135,6 @@ magma_zbulge_applyQ_v2(char side,
     magma_int_t copyed=0, copyst=0;
     magma_int_t blkcnt,nothing, mysiz, flip, vld,tld, locpos;
     findVTsiz(N, NB, Vblksiz, &blkcnt, &nothing);
-
-
 
 
     // performance loss if the reflector are applied to a big number of eigenvectors (~10000)
@@ -248,8 +248,9 @@ magma_zbulge_applyQ_v2(char side,
                             cudaStreamWaitEvent(stream[0], myevent[1], 0);
                             for(magma_int_t i=0; i<NE; i+= sz_bl){
                                 ib = min(sz_bl, NE-i);
-                                //magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV0+lcvpos, lddv, dT0+lctpos, lddt, dE(myrow,i), ldde, dwork0, ib);
-                                magma_zlarfb_gpu_gemm( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV0+lcvpos, lddv, dT0+lctpos, lddt, dE(myrow,i), ldde, dwork0, ib, dwvt0, Vm);
+                                lddw = min(lddwork,sz_bl);
+                                //magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV0+lcvpos, lddv, dT0+lctpos, lddt, dE(myrow,i), ldde, dwork0, lddw);
+                                magma_zlarfb_gpu_gemm( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV0+lcvpos, lddv, dT0+lctpos, lddt, dE(myrow,i), ldde, dwork0, lddw, dwvt0, lddv);
                             }
                             cudaEventRecord(myevent[0], stream[0]);
                         }else{
@@ -257,8 +258,9 @@ magma_zbulge_applyQ_v2(char side,
                             cudaStreamWaitEvent(stream[1], myevent[0], 0);
                             for(magma_int_t i=0; i<NE; i+= sz_bl){
                                 ib = min(sz_bl, NE-i);
-                                //magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV1+lcvpos, lddv, dT1+lctpos, lddt, dE(myrow,i), ldde, dwork1, ib);
-                                magma_zlarfb_gpu_gemm( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV1+lcvpos, lddv, dT1+lctpos, lddt, dE(myrow,i), ldde, dwork1, ib, dwvt1, Vm);
+                                lddw = min(lddwork,sz_bl);
+                                //magma_zlarfb_gpu( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV1+lcvpos, lddv, dT1+lctpos, lddt, dE(myrow,i), ldde, dwork1, lddw);
+                                magma_zlarfb_gpu_gemm( MagmaLeft, MagmaNoTrans, MagmaForward, MagmaColumnwise, Vm, ib, Vn, dV1+lcvpos, lddv, dT1+lctpos, lddt, dE(myrow,i), ldde, dwork1, lddw, dwvt1, lddv);
                             }
                             cudaEventRecord(myevent[1], stream[1]);
                         }

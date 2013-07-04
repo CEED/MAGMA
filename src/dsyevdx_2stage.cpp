@@ -182,6 +182,10 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
 
     double* dwork;
 
+    /* determine the number of threads */
+    magma_int_t threads = magma_get_numthreads();
+    magma_setlapack_numthreads(threads);
+
     wantz = lapackf77_lsame(jobz_, MagmaVecStr);
     lower = lapackf77_lsame(uplo_, MagmaLowerStr);
 
@@ -216,7 +220,7 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
         }
     }
 
-    magma_int_t nb = magma_get_dbulge_nb(n);
+    magma_int_t nb = magma_get_dbulge_nb(n, threads);
     magma_int_t Vblksiz = magma_dbulge_get_Vblksiz(n, nb);
 
     magma_int_t ldt = Vblksiz;
@@ -263,9 +267,6 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
         return *info;
     }
 
-    /* determine the number of threads */
-    magma_int_t threads = magma_get_numthreads();
-    magma_setlapack_numthreads(threads);
 
 #ifdef ENABLE_TIMER
     printf("using %d threads\n", threads);

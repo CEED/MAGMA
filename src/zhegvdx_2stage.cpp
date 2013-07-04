@@ -229,6 +229,10 @@ magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
     magma_queue_t stream;
     magma_queue_create( &stream );
 
+    /* determine the number of threads */
+    magma_int_t threads = magma_get_numthreads();
+    magma_setlapack_numthreads(threads);
+
     wantz = lapackf77_lsame(jobz_, MagmaVecStr);
     lower = lapackf77_lsame(uplo_, MagmaLowerStr);
     alleig = lapackf77_lsame(range_, "A");
@@ -265,7 +269,7 @@ magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
         }
     }
 
-    magma_int_t nb = magma_get_zbulge_nb(n);
+    magma_int_t nb = magma_get_zbulge_nb(n, threads);
     magma_int_t lq2 = magma_zbulge_get_lq2(n);
 
     if (wantz) {
@@ -301,11 +305,6 @@ magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
     if (n == 0) {
         return *info;
     }
-
-
-    /* determine the number of threads */
-    magma_int_t threads = magma_get_numthreads();
-    magma_setlapack_numthreads(threads);
 
 
     if (MAGMA_SUCCESS != magma_zmalloc( &da, n*ldda ) ||
