@@ -24,6 +24,7 @@ ZSRC += \
 	zbicgstab.cpp	\
                     \
 	zpcg.cpp		\
+	zpbicgstab.cpp	\
 
 # Krylov space eigen-solvers
 ZSRC += \

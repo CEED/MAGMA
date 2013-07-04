@@ -70,7 +70,7 @@ magma_zpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_zscal( dofs, c_zero, x->val, 1) ;                           // x = 0
     magma_zcopy( dofs, b.val, 1, r.val, 1 );                           // r = b
     //magma_zcopy( dofs, r.val, 1, z.val, 1 );
-    magma_z_precond( A, r, &z, *precond_par );                      // precond: A * z = r
+    magma_z_precond( A, r, &z, *precond_par );                      // precond: M * z = r
     magma_zcopy( dofs, z.val, 1, p.val, 1 );                           // d = b
     nom = MAGMA_Z_REAL( magma_zdotc( dofs, r.val, 1, z.val, 1 ) );     // nom = r * z
     nom0 = nom;                                                        
@@ -95,7 +95,7 @@ magma_zpcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_zaxpy(dofs,  alpha, p.val, 1, x->val, 1);                    // x = x + alpha d
         magma_zaxpy(dofs, -alpha, q.val, 1, r.val, 1);                     // r = r - alpha z
         //magma_zcopy( dofs, r.val, 1, z.val, 1 );
-        magma_z_precond( A, r, &z, *precond_par );                         // precond: A * z = r
+        magma_z_precond( A, r, &z, *precond_par );                         // precond: M * z = r
         betanom = MAGMA_Z_REAL( magma_zdotc( dofs, r.val, 1, z.val, 1 ) ); // betanom = r * z
         printf("Iteration : %4d  Norm: %f\n", i, betanom);
         if ( betanom < r0 ) {

@@ -648,7 +648,9 @@ subs = {
     ('scg',            'dcg',            'ccg',            'zcg'             ),
     ('sgmres',         'dgmres',         'cgmres',         'zgmres'          ),
     ('sbicgstab',      'dbicgstab',      'cbicgstab',      'zbicgstab',      ),
+
     ('spcg',           'dpcg',           'cpcg',           'zpcg',           ),
+    ('spbicgstab',     'dpbicgstab',     'cpbicgstab',     'zpbicgstab',     ),
 
     # ----- SPARSE auxiliary tools
     ('matrix_s',       'matrix_d',       'matrix_c',       'matrix_z'        ), 
