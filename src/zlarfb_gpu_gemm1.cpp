@@ -166,12 +166,12 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
         // Comments assume H C.
         // When forming H' C, T gets transposed via transt for m>=n or by trans for m<n.
         
-        // W = V' C
+        // W = C' V
         magma_zgemm( MagmaConjTrans, notransV,
-                     k, n, m,
-                     c_one,  dV,    ldv,
-                             dC,    ldc,
-                     c_zero, dwork, k);
+                     n, k, m,
+                     c_one,  dC,    ldc,
+                             dV,    ldv,
+                     c_zero, dwork, ldwork);
 
         if(m<n){
             // W2 = V T
@@ -180,21 +180,21 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                          c_one,  dV, ldv,
                                  dT, ldt,
                          c_zero, dworkvt, ldworkvt);
-            // C = C - W2 W = C - V T V' C = (I - V T V') C = H C
-            magma_zgemm( MagmaNoTrans, MagmaNoTrans,
+            // C = C - W2 W' = C - V T V' C = (I - V T V') C = H C
+            magma_zgemm( MagmaNoTrans, MagmaConjTrans,
                          m, n, k,
                          c_neg_one, dworkvt,  ldworkvt,
-                                    dwork,    k,
+                                    dwork,    ldwork,
                          c_one,     dC,       ldc);
         }else{
-            // W2 = T W  = T  V' C
+            // W2 = W T' = C' V T'
             magma_zgemm( MagmaNoTrans, transt,
-                         k, n, k,
-                         c_one,  dT, ldt,
-                                 dwork, ldwork,
+                         n, k, k,
+                         c_one,  dwork, ldwork,
+                                 dT, ldt,
                          c_zero, dworkvt, ldworkvt);
-            // C = C - V W2 = C - V T V' C = (I - V T V') C = H C
-            magma_zgemm( notransV, MagmaNoTrans,
+            // C = C - V W2' = C - V T V' C = (I - V T V') C = H C
+            magma_zgemm( notransV, MagmaConjTrans,
                          m, n, k,
                          c_neg_one, dV,  ldv,
                                     dworkvt,    ldworkvt,

@@ -131,6 +131,11 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
 
+    magmaDoubleComplex *dwVT = dwork;           // size = m*k
+    magmaDoubleComplex *dwQ  = dworkvt;         // size = m*m
+    magmaDoubleComplex *dwC  = dwQ + m*m;       // size = m*n
+
+
     /* Function Body */
     if (m <= 0 || n <= 0) {
         return MAGMA_SUCCESS;
@@ -166,80 +171,33 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
         // Comments assume H C.
         // When forming H' C, T gets transposed via transt for m>=n or by trans for m<n.
         
-        // W = V' C
-        magma_zgemm( MagmaConjTrans, notransV,
-                     k, n, m,
-                     c_one,  dV,    ldv,
-                             dC,    ldc,
-                     c_zero, dwork, k);
+        // dwVT = V T
+        magma_zgemm( notransV, trans,
+                     m, k, k,
+                     c_one,  dV, ldv,
+                             dT, ldt,
+                     c_zero, dwVT, m);
+        // dwQ = dwVT * V' = V T V'
+        magma_zgemm( MagmaNoTrans, transV,
+                     m, m, k,
+                     c_one,  dwVT,   m,
+                             dV,    ldv,
+                     c_zero, dwQ,   m);
+        // copy C to Wc then do a gemm C = (I-VTV')*C = C - dwQ * dwC
+         magma_zcopymatrix( m, n, dC, ldc, dwC, m );
 
-        if(m<n){
-            // W2 = V T
-            magma_zgemm( notransV, trans,
-                         m, k, k,
-                         c_one,  dV, ldv,
-                                 dT, ldt,
-                         c_zero, dworkvt, ldworkvt);
-            // C = C - W2 W = C - V T V' C = (I - V T V') C = H C
-            magma_zgemm( MagmaNoTrans, MagmaNoTrans,
-                         m, n, k,
-                         c_neg_one, dworkvt,  ldworkvt,
-                                    dwork,    k,
-                         c_one,     dC,       ldc);
-        }else{
-            // W2 = T W  = T  V' C
-            magma_zgemm( MagmaNoTrans, transt,
-                         k, n, k,
-                         c_one,  dT, ldt,
-                                 dwork, ldwork,
-                         c_zero, dworkvt, ldworkvt);
-            // C = C - V W2 = C - V T V' C = (I - V T V') C = H C
-            magma_zgemm( notransV, MagmaNoTrans,
-                         m, n, k,
-                         c_neg_one, dV,  ldv,
-                                    dworkvt,    ldworkvt,
-                         c_one,     dC,       ldc);
-        }
+        // Wq = Wvt * V' = V T V'
+        magma_zgemm( MagmaNoTrans, MagmaNoTrans,
+                     m, n, m,
+                     c_neg_one, dwQ,   m,
+                                dwC,   m,
+                     c_one,     dC, ldc);
     }
     else {
         // Form C H or C H'
         // Comments assume C H.
         // When forming C H', T gets transposed via trans.
-        
-        // W = C V
-        magma_zgemm( MagmaNoTrans, notransV,
-                     m, k, n,
-                     c_one,  dC,    ldc,
-                             dV,    ldv,
-                     c_zero, dwork, ldwork);
-        if(m<=n){
-            // W2 = W T = C V T
-            magma_zgemm( MagmaNoTrans, trans,
-                         m, k, k,
-                         c_one,  dwork, ldwork,
-                                 dT, ldt,
-                         c_zero, dworkvt, ldworkvt);
-            // C = C - W2 V' = C - C V T V' = C (I - V T V') = C H
-            magma_zgemm( MagmaNoTrans, transV,
-                         m, n, k,
-                         c_neg_one, dwork, ldwork,
-                                    dV,    ldv,
-                         c_one,     dC,    ldc);
-        }else{
-            // W2 = T V'
-            magma_zgemm( trans, transV,
-                         k, n, k,
-                         c_one,  dT, ldt,
-                                 dV, ldv,
-                         c_zero, dworkvt, ldworkvt);
-            // C = C - W W2 = C - C V T V' = C (I - V T V') = C H
-            magma_zgemm( MagmaNoTrans, MagmaNoTrans,
-                         m, n, k,
-                         c_neg_one, dwork,   ldwork,
-                                    dworkvt, ldworkvt,
-                         c_one,     dC,      ldc);
-
-        }
+        printf("not implemented\n");
     }
 
     return MAGMA_SUCCESS;
