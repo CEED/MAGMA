@@ -347,11 +347,23 @@ typedef double real_Double_t;
 #define Magma_CPU          421
 #define Magma_DEV          422
 
+#define Magma_CG           431
+#define Magma_GMRES        432
+#define Magma_BICGSTAB     433
+#define Magma_JACOBI       434
+#define Magma_GS           435
+
+#define Magma_DCOMPLEX     451
+#define Magma_FCOMPLEX     452
+#define Magma_DOUBLE       453
+#define Magma_FLOAT        454
 
 
 // remember to update min/max when adding constants!
 #define MagmaMinConst      101
-#define MagmaMaxConst      422
+#define MagmaMaxConst      435
+
+
 
 // these could be enums, but that isn't portable in C++,
 // e.g., if -fshort-enums is used
@@ -371,7 +383,9 @@ typedef char magma_storev_t;
 // properties of the magma_sparse_matrix
 typedef int magma_storage_t;
 typedef int magma_location_t;
-
+// properties of the magma_precond_parameters
+typedef int magma_precond_type;
+typedef int magma_precision;
 
 // ----------------------------------------
 // string constants for calling Fortran BLAS and LAPACK

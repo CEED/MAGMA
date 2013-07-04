@@ -166,6 +166,13 @@ magma_int_t
 magma_zbicgstab(       magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
                        magma_solver_parameters *solver_par );
 
+
+
+magma_int_t
+magma_zpcg(            magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+                       magma_solver_parameters *solver_par, 
+                       magma_precond_parameters *precond_par );
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE utility function definitions
 */
@@ -173,6 +180,10 @@ magma_zbicgstab(       magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector
 magma_int_t
 magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A, 
                   magma_z_vector x, magmaDoubleComplex beta, magma_z_vector y );
+
+magma_int_t
+magma_z_precond( magma_z_sparse_matrix A, magma_z_vector b, 
+                 magma_z_vector *x, magma_precond_parameters precond );
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE BLAS function definitions

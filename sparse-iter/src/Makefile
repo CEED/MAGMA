@@ -22,7 +22,8 @@ ZSRC += \
 	zcg.cpp			\
 	zgmres.cpp		\
 	zbicgstab.cpp	\
-	#zbicg.cpp		\
+                    \
+	zpcg.cpp		\
 
 # Krylov space eigen-solvers
 ZSRC += \
@@ -41,6 +42,13 @@ ZSRC += \
 	#zungqr_mgs.cpp		\
 	#zungqr_chol.cpp		\
 	#zungqr_iter.cpp		\
+
+
+
+# Wrappers, tools etc
+ZSRC += \
+	magma_z_precond_wrapper.cpp \
+
 
 # ------------------------------------------------------------
 -include Makefile.local

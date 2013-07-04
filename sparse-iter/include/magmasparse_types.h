@@ -128,6 +128,19 @@ typedef struct magma_solver_parameters{
 }magma_solver_parameters;
 
 
+typedef struct magma_precond_parameters{
+
+    magma_precond_type precond;
+    magma_precision    format;
+    double             epsilon;  
+    magma_int_t        maxiter;
+    magma_int_t        restart; 
+    magma_int_t        numiter;
+    double             residual;
+
+}magma_precond_parameters;
+
+
 
 #ifdef __cplusplus
 }
