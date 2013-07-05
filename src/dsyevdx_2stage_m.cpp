@@ -265,11 +265,25 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
         return *info;
     }
 
-
 #ifdef ENABLE_TIMER
     printf("using %d threads\n", threads);
 #endif
 
+    /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
+    magma_int_t lda2 = nb+1+(nb-1);
+    if(lda2>n){
+        printf("--------------------------------------------------------------\n");
+        printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n",n,nb);
+        printf("--------------------------------------------------------------\n");
+        lapackf77_dsyevd(&jobz, &uplo, &n, 
+                        a, &lda, w, 
+                        work, &lwork, 
+                        iwork, &liwork, 
+                        info);
+        *m = n; 
+        return *info;
+    }
+    
     /* Get machine constants. */
     safmin = lapackf77_dlamch("Safe minimum");
     eps = lapackf77_dlamch("Precision");
@@ -291,19 +305,6 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     if (iscale == 1) {
         lapackf77_dlascl(uplo_, &izero, &izero, &d_one, &sigma, &n, &n, a,
                          &lda, info);
-    }
-    /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
-    magma_int_t lda2 = nb+1+(nb-1);
-    if(lda2>n){
-        printf("--------------------------------------------------------------\n");
-        printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n",n,nb);
-        printf("--------------------------------------------------------------\n");
-        lapackf77_dsyevd(&jobz, &uplo, &n, 
-                        a, &lda, w, 
-                        work, &lwork, 
-                        iwork, &liwork, 
-                        info);
-        return *info;
     }
 
     magma_int_t inde    = 0;
