@@ -238,8 +238,8 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
         }
     }
 
-    magma_int_t nb = magma_get_dbulge_nb_mgpu(n);
-    magma_int_t lq2 = magma_dbulge_get_lq2(n);
+    magma_int_t nb = magma_get_dbulge_nb(n, threads);
+    magma_int_t lq2 = magma_dbulge_get_lq2(n, threads);
 
     if (wantz) {
         lwmin = lq2 + 1 + 6*n + 2*n*n;
