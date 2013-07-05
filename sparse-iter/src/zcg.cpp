@@ -5,10 +5,12 @@
        Univ. of Colorado, Denver
        November 2011
 
-       @precisions normal z -> s d c
-       @author Hartwig Anzt
+       @author Stan Tomov
+       @author Hartwig Anzt 
 
+       @precisions normal z -> s d c
 */
+
 #include "common_magma.h"
 #include "../include/magmasparse.h"
 
@@ -18,6 +20,10 @@
 #define ATOLERANCE     10e-16
 
 
+magma_int_t
+magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+           magma_solver_parameters *solver_par )
+{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -42,19 +48,13 @@
 
     =====================================================================  */
 
-
-magma_int_t
-magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-           magma_solver_parameters *solver_par )
-{
-
-    // some useful variables
+    // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = MAGMA_Z_NEG_ONE;
     
     magma_int_t dofs = A.num_rows;
 
-    // workspace
-    magma_z_vector r,p,q;
+    // GPU workspace
+    magma_z_vector r, p, q;
     magma_z_vinit( &r, Magma_DEV, dofs, c_zero );
     magma_z_vinit( &p, Magma_DEV, dofs, c_zero );
     magma_z_vinit( &q, Magma_DEV, dofs, c_zero );
@@ -64,14 +64,13 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     double nom, nom0, r0, betanom, den;
     magma_int_t i;
 
-
     // solver setup
-    //magma_zscal( dofs, c_zero, x->val, 1) ;                           // x = 0
-    magma_zcopy( dofs, b.val, 1, r.val, 1 );                           // r = b
-    magma_zcopy( dofs, b.val, 1, p.val, 1 );                           // p = b
-    nom = magma_dznrm2( dofs, r.val, 1 );                              // nom = || r ||
+    //magma_zscal( dofs, c_zero, x->val, 1) ;                         // x = 0
+    magma_zcopy( dofs, b.val, 1, r.val, 1 );                          // r = b
+    magma_zcopy( dofs, b.val, 1, p.val, 1 );                          // p = b
+    nom = magma_dznrm2( dofs, r.val, 1 );                             // nom = || r ||
     nom = nom * nom;
-    nom0 = nom;                                                        // nom = r dot r
+    nom0 = nom;                                                       // nom = r dot r
     magma_z_spmv( c_one, A, p, c_zero, q );                           // q = A p
     den = MAGMA_Z_REAL( magma_zdotc(dofs, p.val, 1, q.val, 1) );      // den = p dot q
     
@@ -120,6 +119,6 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     }
     
     return MAGMA_SUCCESS;
-}
+}   /* magma_zcg */
 
 
