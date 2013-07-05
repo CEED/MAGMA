@@ -216,14 +216,15 @@ int main( int argc, char** argv)
         magmaDoubleComplex *hh_work;
         magma_int_t *iwork;
         magma_int_t nb, /*lwork,*/ liwork;
+        magma_int_t threads = magma_get_numthreads();
 #if defined(PRECISION_z) || defined(PRECISION_c)
         double *rwork;
         magma_int_t lrwork;
-        lwork  = magma_zbulge_get_lq2(N) + 2*N + N*N;
+        lwork  = magma_zbulge_get_lq2(N, threads) + 2*N + N*N;
         lrwork = 1 + 5*N +2*N*N;
         TESTING_HOSTALLOC( rwork,          double, lrwork);
 #else
-        lwork  = magma_zbulge_get_lq2(N) + 1 + 6*N + 2*N*N;
+        lwork  = magma_zbulge_get_lq2(N, threads) + 1 + 6*N + 2*N*N;
 #endif
         liwork = 3 + 5*N;
         nb = magma_get_zhetrd_nb(N);
