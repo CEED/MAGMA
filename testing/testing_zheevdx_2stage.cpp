@@ -25,6 +25,7 @@
 #include "magma_lapack.h"
 #include "testings.h"
 #include "magma_zbulge.h"
+#include "magma_threadsetting.h"
 
 #define PRECISION_z
 #define absv(v1) ((v1)>0? (v1): -(v1))

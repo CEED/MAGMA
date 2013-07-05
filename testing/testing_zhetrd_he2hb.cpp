@@ -25,6 +25,7 @@
 #include "magma_lapack.h"
 #include "magma_zbulge.h"
 #include "testings.h"
+#include "magma_threadsetting.h"
 
 #if defined(USEMKL)
 #include <mkl_service.h>

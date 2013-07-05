@@ -25,6 +25,7 @@
 #include "magma_lapack.h"
 #include "testings.h"
 #include "magma_zbulge.h"
+#include "magma_threadsetting.h"
 
 #define PRECISION_z
 
