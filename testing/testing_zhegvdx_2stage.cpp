@@ -209,14 +209,14 @@ int main( int argc, char** argv)
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
 
-                magma_int_t m2 = 0;
-                magma_zhegvdx(itype, 'N', range, uplo,
-                              N, h_R, N, h_S, N, vl, vu, il, iu, &m2, w2,
-                              h_work, lwork,
+                magma_int_t m2 = m1;
+                lapackf77_zhegvd(&itype, "N", &uplo, &N,
+                              h_R, &N, h_S, &N, w2,
+                              h_work, &lwork,
 #if defined(PRECISION_z) || defined(PRECISION_c)
-                              rwork, lrwork,
+                              rwork, &lrwork,
 #endif
-                              iwork, liwork,
+                              iwork, &liwork,
                               &info);
 
                 temp1 = temp2 = 0;
