@@ -226,8 +226,7 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
     magma_int_t ldt = Vblksiz;
     magma_int_t ldv = nb + Vblksiz;
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
-
-    magma_int_t lq2 = blkcnt * Vblksiz * (ldt + ldv + 1);
+    magma_int_t lq2 = magma_dbulge_get_lq2(n, threads);
 
     if (wantz) {
         lwmin = lq2 + 1 + 6 * n + 2 * n * n;
@@ -253,7 +252,6 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
     else if (lquery) {
         return *info;
     }
-
     /* Quick return if possible */
     if (n == 0) {
         return *info;
