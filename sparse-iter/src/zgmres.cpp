@@ -71,10 +71,9 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_vinit( &q  , Magma_DEV, dofs*ldh, c_zero );
     magma_z_vinit( &q_t, Magma_DEV, dofs,     c_zero );
 
-    magma_z_vector q, q_t;
-    magma_z_vinit( &q, Magma_DEV, dofs*((solver_par->restart)+2), c_zero );
-    magma_z_vinit( &q_t, Magma_DEV, dofs, c_zero );
-
+    magmaDoubleComplex *dy;
+    if (MAGMA_SUCCESS != magma_zmalloc( &dy, ldh )) 
+        return MAGMA_ERR_DEVICE_ALLOC;
     
     magma_zscal( dofs, c_zero, x->val, 1 );              //  x = 0
     magma_zcopy( dofs, b.val, 1, r.val, 1 );             //  r = b
@@ -83,17 +82,18 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     nom0 = r0*r0;
     H(1,0) = MAGMA_Z_MAKE( r0, 0. ); 
 
-
-    if ((r0 *= solver_par->epsilon) < ATOLERANCE) r0 = ATOLERANCE;
+    if ((r0 *= solver_par->epsilon) < ATOLERANCE) 
+        r0 = ATOLERANCE;
     
     printf("Iteration : %4d  Norm: %f\n", 0, H(1,0)*H(1,0));
 
-    for (iter = 0; iter<solver_par->maxiter; iter++) {
-        for(k=1; k<=(solver_par->restart); k++) {
+    for (iter = 0; iter<solver_par->maxiter; iter++) 
+        {
+            for(k=1; k<=(solver_par->restart); k++) 
+                {
+                    magma_zcopy(dofs, r.val, 1, q(k), 1);                        //  q[k]    = 1.0/H[k][k-1] r
+                    magma_zscal(dofs, 1./H(k,k-1), q(k), 1);                     //  (to be fused)
 
-            v =1./H[k][k-1];
-            magma_zcopy(dofs, r.val, 1, q.val+(k)*dofs, 1);       //  q[k]    = 1.0/H[k][k-1] r
-            magma_zscal(dofs, v, q.val+(k)*dofs, 1);          //  (to be fused)
                     q_t.val = q(k);
                     magma_z_spmv( c_one, A, q_t, c_zero, r );                    //  r       = A q[k] 
                     
@@ -142,16 +142,10 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
             magma_zsetmatrix(m, 1, y+1, m, dy, m);
             magma_zgemv(MagmaNoTrans, dofs, m, c_one, q(1), dofs, dy, 1, c_one, x->val, 1); 
 
-          //  v =1./H[k+1][k];
-          //  magma_zcopy(dofs, r.val, 1, q.val+(k+1)*dofs, 1);       //  q[k]    = 1.0/H[k][k-1] r
-          //  magma_zscal(dofs, v, q.val+(k+1)*dofs, 1);          //  (to be fused)
-
-            //   Minimization of  || b-Ax ||  in K_k 
-            for (i=1; i<=k; i++) {
-                HH[k][i] = MAGMA_Z_MAKE( 0.0, 0. );
-                for (j=1; j<=i+1; j++)
-                    HH[k][i] +=  H[j][k] * H[j][i];
-            } 
+            magma_z_spmv( c_mone, A, *x, c_zero, r );                  //  r = - A * x
+            magma_zaxpy(dofs, c_one, b.val, 1, r.val, 1);              //  r = r + b
+            H(1,0) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. ); //  RNorm = H[1][0] = || r ||
+            RNorm = MAGMA_Z_REAL( H(1,0) );
             
             printf("Iteration : %4d  Norm: %f\n", iter, RNorm*RNorm);
             
