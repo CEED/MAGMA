@@ -203,7 +203,7 @@ int main( int argc, char** argv)
         char range = 'A';
         magma_int_t fraction_ev = 100;
         magma_int_t il, iu, m1;
-        double vl, vu;
+        double vl=0., vu=0.;
 
         if (fraction_ev == 0){
             il = N / 10;
