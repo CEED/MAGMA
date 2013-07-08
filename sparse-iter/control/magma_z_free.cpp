@@ -55,7 +55,7 @@ magma_int_t
 magma_z_vfree( magma_z_vector *x ){
 
     if( x->memory_location == Magma_CPU ){
-        free( x->val );
+        magma_free_cpu( x->val );
         x->num_rows = 0;
         x->nnz = 0;
         return MAGMA_SUCCESS;     
