@@ -78,12 +78,12 @@ int main( int argc, char** argv)
 
     magma_z_vvisu( x, 0,10);
 
-
-
-
-
-
-
+    magma_z_vfree(&x);
+    magma_z_vfree(&b);
+    magma_z_mfree(&A);
+    magma_z_mfree(&B);
+    magma_z_mfree(&C);
+    magma_z_mfree(&D);
 
     TESTING_FINALIZE();
     return 0;

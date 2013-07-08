@@ -47,7 +47,8 @@ using namespace std;
     Arguments
     =========
 
-    magma_z_vector x                     vector to initialize    
+    magma_z_vector x                     vector to initialize   
+    magma_location_t memory_location     memory for vector 
     magma_int_t num_rows                 desired length of vector      
     magmaDoubleComplex values            entries in vector
 
@@ -81,7 +82,11 @@ magma_z_vinit(    magma_z_vector *x,
         for( magma_int_t i=0; i<num_rows; i++)
              tmp[i] = values; 
         stat = cublasAlloc( x->num_rows, sizeof( magmaDoubleComplex ), ( void** )&x->val );
-        if( ( int )stat != 0 ) {printf("Memory Allocation Error.\n"); exit(0); }
+        if( ( int )stat != 0 ) {
+            printf("Memory Allocation Error.\n"); 
+            return MAGMA_ERR_DEVICE_ALLOC;
+            exit(0); 
+        }
         // data transfer
         cublasSetVector( x->num_rows , sizeof( magmaDoubleComplex ), tmp, 1, x->val, 1 );
         free(tmp);

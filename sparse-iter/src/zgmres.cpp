@@ -167,7 +167,11 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     }
     solver_par->numiter = iter;
 
-    magma_free(dy);
+    magma_free(dy); 
+
+    magma_z_vfree(&r);
+    magma_z_vfree(&q);
+    magma_z_vfree(&q_t);
 
     return MAGMA_SUCCESS;
 }   /* magma_zgmres */

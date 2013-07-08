@@ -18,6 +18,7 @@ ZSRC := \
         magma_z_mconverter.cpp \
         magma_z_init.cpp \
         magma_z_vio.cpp \
+        magma_z_free.cpp \
  
 
 -include Makefile.local

@@ -133,9 +133,14 @@ magma_int_t
 magma_z_vread(          magma_z_vector *x, 
                         magma_int_t length,
                         char * filename );
+magma_int_t
+magma_z_mvisu(          magma_z_sparse_matrix A );
 
 magma_int_t
-magma_z_mvisu(          magma_z_sparse_matrix );
+magma_z_mfree(          magma_z_sparse_matrix *A );
+
+magma_int_t
+magma_z_vfree(          magma_z_vector *x );
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE function definitions / Data on CPU
