@@ -343,6 +343,7 @@ typedef double real_Double_t;
 #define Magma_ELLPACK      412
 #define Magma_ELLPACKT     413
 #define Magma_DENSE        414  
+#define Magma_BCSR         415
 
 #define Magma_CPU          421
 #define Magma_DEV          422
