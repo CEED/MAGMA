@@ -122,7 +122,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
     freeMem /= sizeof(magmaDoubleComplex);
     
     /* number of columns in the big panel */
-    h = 1+(2+num_gpus);
+    h = 1+(2+num_gpus0);
     NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
     char * ngr_nb_char = getenv("MAGMA_NGR_NB");
     if( ngr_nb_char != NULL ) NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
@@ -130,6 +130,8 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
 
     if( num_gpus0 > ceil((double)NB/nb) ) {
         num_gpus = (int)ceil((double)NB/nb);
+        h = 1+(2+num_gpus);
+        NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
     } else {
         num_gpus = num_gpus0;
     }
@@ -372,7 +374,7 @@ extern "C" magma_int_t
 magma_zgetrf_piv(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
                  magma_int_t *ipiv, magma_int_t *info)
 {
-    magma_int_t nb, h = 2, num_gpus;
+    magma_int_t nb, h, num_gpus;
     magma_int_t NB, I, k1, k2, incx, minmn, maxm;
 
     *info = 0;
@@ -401,6 +403,7 @@ magma_zgetrf_piv(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubl
     freeMem /= sizeof(magmaDoubleComplex);
 
     /* number of columns in the big panel */
+    h = 1+(2+num_gpus0);
     NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
     char * ngr_nb_char = getenv("MAGMA_NGR_NB");
     if( ngr_nb_char != NULL ) NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
@@ -408,6 +411,8 @@ magma_zgetrf_piv(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubl
 
     if( num_gpus0 > ceil((double)NB/nb) ) {
         num_gpus = (int)ceil((double)NB/nb);
+        h = 1+(2+num_gpus);
+        NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
     } else {
         num_gpus = num_gpus0;
     }
