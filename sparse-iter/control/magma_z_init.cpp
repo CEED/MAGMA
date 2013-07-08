@@ -66,7 +66,10 @@ magma_z_vinit(    magma_z_vector *x,
     if( memory_location == Magma_CPU ){
         x->memory_location = Magma_CPU;
 
-        x->val = (magmaDoubleComplex*)malloc((num_rows)*sizeof(magmaDoubleComplex));
+        magma_zmalloc_cpu( &x->val, num_rows );
+        if ( x->val == NULL )
+            return MAGMA_ERR_HOST_ALLOC;
+
         #pragma unroll
         for( magma_int_t i=0; i<num_rows; i++)
              x->val[i] = values; 
@@ -75,21 +78,24 @@ magma_z_vinit(    magma_z_vector *x,
     if( memory_location == Magma_DEV ){
         x->memory_location = Magma_DEV;
 
-        cublasStatus stat;
         magmaDoubleComplex *tmp;
-        tmp = (magmaDoubleComplex*)malloc((num_rows)*sizeof(magmaDoubleComplex));
+
+        magma_zmalloc_cpu( &tmp, num_rows );
+        if ( tmp == NULL )
+            return MAGMA_ERR_HOST_ALLOC;
+
         #pragma unroll
         for( magma_int_t i=0; i<num_rows; i++)
              tmp[i] = values; 
-        stat = cublasAlloc( x->num_rows, sizeof( magmaDoubleComplex ), ( void** )&x->val );
-        if( ( int )stat != 0 ) {
-            printf("Memory Allocation Error.\n"); 
+
+        if (MAGMA_SUCCESS != magma_zmalloc( &x->val, x->num_rows)) 
             return MAGMA_ERR_DEVICE_ALLOC;
-            exit(0); 
-        }
+
         // data transfer
-        cublasSetVector( x->num_rows , sizeof( magmaDoubleComplex ), tmp, 1, x->val, 1 );
-        free(tmp);
+        magma_zsetvector(x->num_rows, tmp, 1, x->val, 1 );
+ 
+        magma_free_cpu(tmp);
+
         return MAGMA_SUCCESS; 
     }
 }
