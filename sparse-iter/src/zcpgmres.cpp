@@ -5,10 +5,9 @@
        Univ. of Colorado, Denver
        November 2011
 
-       @author Stan Tomov
        @author Hartwig Anzt
 
-       @precisions normal z -> s d c
+       @precisions mixed z -> s d c
 */
 
 #include "common_magma.h"
@@ -49,7 +48,7 @@
     =====================================================================  */
 
 magma_int_t
-magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+magma_zcpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
               magma_solver_parameters *solver_par,  magma_precond_parameters *precond_par) 
 {
 
@@ -76,6 +75,11 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_vinit( &q_t, Magma_DEV, dofs,     c_zero );
     magma_z_vinit( &z  , Magma_DEV, dofs*ldh, c_zero );
     magma_z_vinit( &z_t, Magma_DEV, dofs,     c_zero );
+    // for mixed precision on GPU
+    magma_c_vector qs_t, zs_t;
+    magma_c_sparse_matrix AS;
+    magma_sparse_matrix_zlag2c( A, &AS );
+
 
     magmaDoubleComplex *dy;
     if (MAGMA_SUCCESS != magma_zmalloc( &dy, ldh )) 
@@ -101,7 +105,18 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                     magma_zscal(dofs, 1./H(k,k-1), q(k), 1);                     //  (to be fused)
 
                     q_t.val = q(k);
-                    magma_z_precond( A, q_t, &z_t, *precond_par );  // preconditioner A * z =  q[k]
+                    /*
+                     * Convert to single precision
+                     */
+                    magma_vector_zlag2c(q_t, &qs_t);
+
+                    magma_c_precond( AS, qs_t, &zs_t, *precond_par );  // preconditioner AS * zs =  qs[k]
+
+                    /*
+                     * Convert to double precision
+                     */
+                    magma_vector_clag2z(zs_t, &z_t);
+
                     z_t.val = z(k);
                     magma_z_spmv( c_one, A, z_t, c_zero, r );                    //  r       = A q[k] 
                     

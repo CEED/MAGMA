@@ -33,9 +33,9 @@ ZSRC += \
 	#zlobpcg.cpp		\
 	#zlancsoz.cpp		\
 
-# Mixed-precision example solvers
+# Mixed-precision solvers
 ZSRC += \
-	#zcfgmres.cpp		\
+	zcpgmres.cpp		\
 
 # QR and least squares, GPU interface
 ZSRC += \
