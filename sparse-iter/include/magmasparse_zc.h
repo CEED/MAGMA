@@ -83,5 +83,5 @@ magma_zcpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 }
 #endif
 
-#undef PRECISION_Z
+#undef PRECISION_z
 #endif /* MAGMASPARSE_ZC_H */
