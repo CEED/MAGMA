@@ -170,7 +170,24 @@ subs = {
     ('magma_s',                   'magma_c'                 ),
     ('magma_get_d',               'magma_get_z'             ),
     ('magma_get_s',               'magma_get_c'             ),
-],
+
+
+
+
+    #------ Sparse Stuff
+    ('magma_dlag2s',               'magma_zlag2c'               ),
+    ('magmasparse_ds',             'magmasparse_zc'             ),
+    ('magma_vector_dlag2s',        'magma_vector_zlag2c'        ),
+    ('magma_vector_slag2d',        'magma_vector_clag2z'        ), 
+    ('magma_sparse_matrix_dlag2s', 'magma_sparse_matrix_zlag2c' ), 
+    ('magma_sparse_matrix_slag2d', 'magma_sparse_matrix_clag2z' ), 
+
+    ('dspgmres',                   'zcpgmres'                   ),
+    ('dspbicgstab',                'zcpbicgstab'                ),
+
+    ('testing_dspgmres',           'testing_zcpgmres'           ),
+    ('testing_dspbicgstab',        'testing_zcpbicgstab'        ),
+], 
   
   # ------------------------------------------------------------
   # replacements applied to most files.

@@ -136,6 +136,13 @@ magma_zbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         printf( "      || r_N ||   = %f\n", den);
         solver_par->residual = (double)(den);
     }
+
+    magma_z_vfree(&r);
+    magma_z_vfree(&rr);
+    magma_z_vfree(&p);
+    magma_z_vfree(&v);
+    magma_z_vfree(&s);
+    magma_z_vfree(&t);
     
     return MAGMA_SUCCESS;
 }

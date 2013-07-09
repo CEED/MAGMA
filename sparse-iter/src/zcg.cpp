@@ -117,7 +117,11 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         printf( "      || r_N ||   = %f\n", den);
         solver_par->residual = (double)(den);
     }
-    
+
+    magma_z_vfree(&r);
+    magma_z_vfree(&p);
+    magma_z_vfree(&q);
+
     return MAGMA_SUCCESS;
 }   /* magma_zcg */
 

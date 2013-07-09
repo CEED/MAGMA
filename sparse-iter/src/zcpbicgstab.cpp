@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        November 2011
 
-       @precisions normal z -> s d c
+       @precisions mixed z -> s d c
        @author Hartwig Anzt
 
 */
@@ -46,7 +46,7 @@
 
 
 magma_int_t
-magma_zpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+magma_zcpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
            magma_solver_parameters *solver_par, magma_precond_parameters *precond_par )
 {
 
@@ -55,7 +55,7 @@ magma_zpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     
     magma_int_t dofs = A.num_rows;
 
-    // workspace
+    // workspace on GPU
     magma_z_vector r,rr,p,v,s,t,y,z;
     magma_z_vinit( &r, Magma_DEV, dofs, c_zero );
     magma_z_vinit( &rr, Magma_DEV, dofs, c_zero );
@@ -65,6 +65,11 @@ magma_zpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_vinit( &t, Magma_DEV, dofs, c_zero );
     magma_z_vinit( &y, Magma_DEV, dofs, c_zero );
     magma_z_vinit( &z, Magma_DEV, dofs, c_zero );
+
+    // for mixed precision on GPU
+    magma_c_vector ps, ys, ss, zs;
+    magma_c_sparse_matrix AS;
+    magma_sparse_matrix_zlag2c( A, &AS );
 
     
     // solver variables
@@ -105,14 +110,18 @@ magma_zpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_zscal( dofs, beta, p.val, 1 );                                    // p = beta*p
         magma_zaxpy( dofs, c_mone * omega * beta, v.val, 1 , p.val, 1 );        // p = p-omega*beta*v
         magma_zaxpy( dofs, c_one, r.val, 1, p.val, 1 );                         // p = p+r
-        magma_z_precond( A, p, &y, *precond_par );                              // precond: M * y = p
+        magma_vector_zlag2c(p, &ps);                                            // conversion to single precision
+        magma_c_precond( AS, ps, &ys, *precond_par );                           // precond: MS * ys = ps
+        magma_vector_clag2z(ys, &y);                                            // conversion to double precision
         magma_z_spmv( c_one, A, p, c_zero, v );                                 // v = Ay
         alpha = rho_new / magma_zdotc( dofs, rr.val, 1, v.val, 1 );
 
         magma_zcopy( dofs, r.val, 1 , s.val, 1 );
         magma_zaxpy( dofs, c_mone * alpha, v.val, 1 , s.val, 1 );
-        magma_z_precond( A, s, &z, *precond_par );                         // precond: M * z = s
-        magma_z_spmv( c_one, A, z, c_zero, t );                                  //t=Az
+        magma_vector_zlag2c(s, &ss);                                            // conversion to single precision
+        magma_c_precond( AS, ss, &zs, *precond_par );                           // precond: MS * zs = ss
+        magma_vector_clag2z(zs, &z);                                            // conversion to double precision
+        magma_z_spmv( c_one, A, z, c_zero, t );                                 //t=Az
         omega = magma_zdotc( dofs, t.val, 1, s.val, 1 ) 
                    / magma_zdotc( dofs, t.val, 1, t.val, 1 );
 
@@ -151,6 +160,12 @@ magma_zpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_vfree(&t);
     magma_z_vfree(&y);
     magma_z_vfree(&z);
+    magma_c_vfree(&ps);
+    magma_c_vfree(&ys);
+    magma_c_vfree(&ss);
+    magma_c_vfree(&zs);
+
+    magma_c_mfree(&AS);
     
     return MAGMA_SUCCESS;
 }
