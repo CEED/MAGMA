@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        November 2011
 
-       @precisions mixed z -> s d c
+       @precisions mixed zc -> ds
        @author Hartwig Anzt
 
 */
