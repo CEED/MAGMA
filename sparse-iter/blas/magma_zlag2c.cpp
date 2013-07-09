@@ -18,23 +18,10 @@
 #include <assert.h>
 #include <stdio.h>
 #include "../include/magmasparse_z.h"
+#include "../include/magmasparse_zc.h"
 #include "../../include/magma.h"
 #include "../include/mmio.h"
 #include "common_magma.h"
-
-
-
-using namespace std;
-
-
-
-
-
-
-
-
-
-
 
 
 /*  -- MAGMA (version 1.1) --

@@ -13,12 +13,12 @@ ZHDR  =
 
 # alphabetic order by base name (ignoring precision)
 ZSRC := \
-  magma_z_blaswrapper.cpp  \
+	magma_z_blaswrapper.cpp \
 	zgecsrmv.cu		\
 	zgeellmv.cu		\
-  zgeelltmv.cu		\
-	magma_zlag2c.cpp    \
-	magma_clag2z.cpp    \
+	zgeelltmv.cu            \
+	magma_zlag2c.cpp        \
+	magma_clag2z.cpp        \
 
 # multi-GPU
 ZSRC += \
