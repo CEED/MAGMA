@@ -28,6 +28,7 @@ subs = {
     
     # ----- Mixed precisions
     ('DS',                        'ZC'                      ),
+    ('dcopy',                     'zcopy'                   ),
     ('ds',                        'zc'                      ),
     
     # ----- Preprocessor
@@ -175,12 +176,7 @@ subs = {
 
 
     #------ Sparse Stuff
-    ('magma_dlag2s',               'magma_zlag2c'               ),
     ('magmasparse_ds',             'magmasparse_zc'             ),
-    ('magma_vector_dlag2s',        'magma_vector_zlag2c'        ),
-    ('magma_vector_slag2d',        'magma_vector_clag2z'        ), 
-    ('magma_sparse_matrix_dlag2s', 'magma_sparse_matrix_zlag2c' ), 
-    ('magma_sparse_matrix_slag2d', 'magma_sparse_matrix_clag2z' ), 
 
     ('dspgmres',                   'zcpgmres'                   ),
     ('dspbicgstab',                'zcpbicgstab'                ),
