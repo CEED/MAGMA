@@ -29,9 +29,6 @@
 
 #define PRECISION_z
 
-// ZHETRD2 uses much faster ZHEMV (from MAGMA BLAS) but requires extra space
-#define USE_ZHETRD2
-
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhetrd_gpu
 */
