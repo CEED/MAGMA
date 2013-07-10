@@ -25,7 +25,7 @@
 
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing magma_zpgmres
+   -- Testing magma_zcpgmres
 */
 int main( int argc, char** argv)
 {

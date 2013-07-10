@@ -7,7 +7,7 @@
 
        @author Hartwig Anzt
 
-       @precisions mixed z -> s d c
+       @precisions mixed zc -> ds
 */
 
 #include "common_magma.h"
@@ -195,5 +195,5 @@ magma_zcpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_c_mfree(&AS);
 
     return MAGMA_SUCCESS;
-}   /* magma_zgmres */
+}   /* magma_zcpgmres */
 
