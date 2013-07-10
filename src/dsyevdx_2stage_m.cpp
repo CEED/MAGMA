@@ -271,9 +271,11 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
     magma_int_t lda2 = nb+1+(nb-1);
     if(lda2>n){
+        #ifndef NO_WARNING	    
         printf("--------------------------------------------------------------\n");
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n",n,nb);
         printf("--------------------------------------------------------------\n");
+        #endif
         lapackf77_dsyevd(&jobz, &uplo, &n, 
                         a, &lda, w, 
                         work, &lwork, 
@@ -316,10 +318,10 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     magma_int_t llwork = lwork - indwrk;
     magma_int_t llwrk2 = lwork - indwk2;
 
-#ifdef ENABLE_TIMER
+    #ifdef ENABLE_TIMER
     magma_timestr_t start, st1, st2, end;
     start = get_current_time();
-#endif
+    #endif
 
 #ifdef HE2HB_SINGLEGPU
     double *dT1;
@@ -336,11 +338,16 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     magma_int_t ldda = ((n+31)/32)*32;
 
     magma_int_t ver = 0;
-    magma_int_t distblk = 4*nb; //max(256,nb);
-    printf("voici ngpu %d distblk %d NB %d nstream %d version %d \n ",nrgpu,distblk,nb,nstream,ver);
+    magma_int_t distblk = max(256, 4*nb);
 
+    #ifdef ENABLE_DEBUG
+    printf("voici ngpu %d distblk %d NB %d nstream %d version %d \n ",nrgpu,distblk,nb,nstream,ver);
+    #endif
+
+    #ifdef ENABLE_TIMER
     magma_timestr_t tband1, tband2, t1, t2, ta1, ta2;
     t1 = get_current_time();
+    #endif
     for( magma_int_t dev = 0; dev < nrgpu; ++dev ) {
         magma_int_t mlocal = ((n / distblk) / nrgpu + 1) * distblk;
         magma_setdevice( dev );
@@ -351,20 +358,25 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
         }
     }
 
+    #ifdef ENABLE_TIMER
     t2 = get_current_time();
+    #endif
     magma_dsetmatrix_1D_col_bcyclic( n, n, a, lda, da, ldda, nrgpu, distblk );
     magma_setdevice(0);
 
+    #ifdef ENABLE_TIMER
     tband1 = get_current_time();
+    #endif
     if(ver==30){
         magma_dsytrd_sy2sb_mgpu_spec(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, da, ldda, dT1, nb, nrgpu, distblk, streams, nstream, threads, info);
     }else{
         magma_dsytrd_sy2sb_mgpu(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, da, ldda, dT1, nb, nrgpu, distblk, streams, nstream, threads, info);
     }
 
+    #ifdef ENABLE_TIMER
     tband2 = get_current_time();
     printf("  time alloc %7.4f, ditribution %7.4f, dsytrd_he2hb only = %7.4f\n" , GetTimerValue(t1,t2)/1000., GetTimerValue(t2,tband1)/1000., GetTimerValue(tband1,tband2)/1000.);
-
+    #endif
 
     for( magma_int_t dev = 0; dev < nrgpu; ++dev ) {
         magma_setdevice( dev );
@@ -376,11 +388,10 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     }
 #endif
 
-#ifdef ENABLE_TIMER
+    #ifdef ENABLE_TIMER
     st1 = get_current_time();
-
     printf("  time dsytrd_sy2sb_mgpu = %6.2f\n" , GetTimerValue(start,st1)/1000.);
-#endif
+    #endif
 
     /* copy the input matrix into WORK(INDWRK) with band storage */
     double* A2 = &work[indwrk];
@@ -401,7 +412,6 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
     st2 = get_current_time();
-
     printf("  time dsytrd_convert = %6.2f\n" , GetTimerValue(st1,st2)/1000.);
 #endif
 

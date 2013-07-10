@@ -295,9 +295,11 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
     magma_int_t lda2 = nb+1+(nb-1);
     if(lda2>n){
+        #ifndef NO_WARNING	    
         printf("--------------------------------------------------------------\n");
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n",n,nb);
         printf("--------------------------------------------------------------\n");
+        #endif
         lapackf77_zheevd(&jobz, &uplo, &n, 
                         a, &lda, w, 
                         work, &lwork, 
@@ -373,13 +375,14 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     magma_int_t ldda = ((n+31)/32)*32;
 
     magma_int_t ver = 0;
-    magma_int_t distblk = 4*nb; // max(256,nb);
+    magma_int_t distblk = max(256, 4*nb);
+
     #ifdef ENABLE_DEBUG
     printf("voici ngpu %d distblk %d NB %d nstream %d version %d \n ",nrgpu,distblk,nb,nstream,ver);
     #endif
 
-    magma_timestr_t tband1, tband2, t1, t2, ta1, ta2;
     #ifdef ENABLE_TIMER
+    magma_timestr_t tband1, tband2, t1, t2, ta1, ta2;
     t1 = get_current_time();
     #endif
     for( magma_int_t dev = 0; dev < nrgpu; ++dev ) {

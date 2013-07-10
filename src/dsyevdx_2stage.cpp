@@ -271,9 +271,11 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
     magma_int_t lda2 = nb+1+(nb-1);
     if(lda2>n){
+        #ifndef NO_WARNING	    	    
         printf("--------------------------------------------------------------\n");
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n",n,nb);
         printf("--------------------------------------------------------------\n");
+        #endif
         lapackf77_dsyevd(&jobz, &uplo, &n, 
                         a, &lda, w, 
                         work, &lwork, 
@@ -333,13 +335,11 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
     st1 = get_current_time();
-
     printf("  time dsytrd_sy2sb = %6.2f\n" , GetTimerValue(start,st1)/1000.);
 #endif
 
     /* copy the input matrix into WORK(INDWRK) with band storage */
     double* A2 = &work[indwrk];
-
     memset(A2 , 0, n*lda2*sizeof(double));
 
     for (magma_int_t j = 0; j < n-nb; j++)
@@ -356,7 +356,6 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
 
 #ifdef ENABLE_TIMER
     st2 = get_current_time();
-
     printf("  time dsytrd_convert = %6.2f\n" , GetTimerValue(st1,st2)/1000.);
 #endif
 
