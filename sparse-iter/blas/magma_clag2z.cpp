@@ -60,13 +60,13 @@ using namespace std;
 magma_int_t
 magma_vector_clag2z( magma_c_vector x, magma_z_vector *y )
 {
-    magma_int_t *info,*iter;
+    magma_int_t info,*iter;
     if( x.memory_location == Magma_DEV){
         y->memory_location = x.memory_location;
         y->num_rows = x.num_rows;
         y->nnz = x.nnz;
         magma_zmalloc( &y->val, x.num_rows );
-        magmablas_clag2z( x.num_rows, 1, x.val, 1, y->val, 1, info );
+        magmablas_clag2z( x.num_rows, 1, x.val, x.num_rows, y->val, x.num_rows, &info );
         return MAGMA_SUCCESS;
     }
     else
@@ -97,7 +97,7 @@ magma_vector_clag2z( magma_c_vector x, magma_z_vector *y )
 magma_int_t
 magma_sparse_matrix_clag2z( magma_c_sparse_matrix A, magma_z_sparse_matrix *B )
 {
-    magma_int_t *info, *iter;
+    magma_int_t info, *iter;
     if( A.memory_location == Magma_DEV){
         B->storage_type = A.storage_type;
         B->memory_location = A.memory_location;
@@ -107,26 +107,26 @@ magma_sparse_matrix_clag2z( magma_c_sparse_matrix A, magma_z_sparse_matrix *B )
         B->max_nnz_row = A.max_nnz_row;
         if( A.storage_type == Magma_CSR ){
             magma_zmalloc( &B->val, A.nnz );
-            magmablas_clag2z( A.nnz, 1, A.val, 1, B->val, 1, info );
+            magmablas_clag2z( A.nnz, 1, A.val, A.nnz, B->val, A.nnz, &info );
             B->row = A.row;
             B->col = A.col;
             return MAGMA_SUCCESS;
         }
         if( A.storage_type == Magma_ELLPACK ){
             magma_zmalloc( &B->val, A.num_rows*A.max_nnz_row );
-            magmablas_clag2z( A.num_rows*A.max_nnz_row, 1, A.val, 1, B->val, 1, info );
+            magmablas_clag2z( A.num_rows*A.max_nnz_row, 1, A.val, 1, B->val, 1, &info );
             B->col = A.col;
             return MAGMA_SUCCESS;
         }
         if( A.storage_type == Magma_ELLPACKT ){
             magma_zmalloc( &B->val, A.num_rows*A.max_nnz_row );
-            magmablas_clag2z( A.num_rows*A.max_nnz_row, 1, A.val, 1, B->val, 1, info );
+            magmablas_clag2z( A.num_rows*A.max_nnz_row, 1, A.val, 1, B->val, 1, &info );
             B->col = A.col;
             return MAGMA_SUCCESS;
         }
         if( A.storage_type == Magma_DENSE ){
             magma_zmalloc( &B->val, A.num_rows*A.num_cols );
-            magmablas_clag2z( A.num_rows, A.num_cols, A.val, A.num_rows, B->val, A.num_rows, info );
+            magmablas_clag2z( A.num_rows, A.num_cols, A.val, A.num_rows, B->val, A.num_rows, &info );
             return MAGMA_SUCCESS;
         }
         else
