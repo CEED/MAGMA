@@ -29,6 +29,9 @@ subs = {
     # ----- Mixed precisions
     ('DS',                        'ZC'                      ),
     ('dcopy',                     'zcopy'                   ),
+    ('magma_dnrm2',               'magma_dznrm2'            ),
+    ('magma_ddot',                'magma_zdotc'             ),
+    ('cblas_ddot',                'cblas_zdotc'             ),
     ('ds',                        'zc'                      ),
     
     # ----- Preprocessor
