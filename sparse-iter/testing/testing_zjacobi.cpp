@@ -5,7 +5,7 @@
        Univ. of Colorado, Denver
        November 2011
 
-       @precisions mixed zc -> ds
+       @precisions normal z -> c d s
        @author Hartwig Anzt
 */
 
@@ -25,7 +25,7 @@
 
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing magma_zcpgmres
+   -- Testing magma_zjacobi
 */
 int main( int argc, char** argv)
 {
@@ -62,36 +62,18 @@ int main( int argc, char** argv)
 
 
 
-
     magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);
     magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACKT);
     magma_z_mtransfer( C, &D, Magma_CPU, Magma_DEV);
 
-
     magma_solver_parameters solver_par;
+
     solver_par.epsilon = 10e-8;
-    solver_par.maxiter = 1000;
-    solver_par.restart = 30;
+    solver_par.maxiter = 2000;
 
-    magma_precond_parameters precond_par;
-    precond_par.precond = Magma_BICGSTAB;
-    precond_par.epsilon = 10e-3;
-    precond_par.maxiter = 5;
-    precond_par.restart = 30;
-
-
-
-
-    magma_zcpgmres( D, b, &x, &solver_par, &precond_par );
+    magma_zjacobi( D, b, &x, &solver_par );
 
     magma_z_vvisu( x, 0,10);
-
-
-
-
-
-
-
 
     TESTING_FINALIZE();
     return 0;
