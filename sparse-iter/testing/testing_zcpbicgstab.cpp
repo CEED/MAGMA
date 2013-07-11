@@ -73,8 +73,8 @@ int main( int argc, char** argv)
     solver_par.maxiter = 1000;
 
     magma_precond_parameters precond_par;
-    precond_par.precond = Magma_GMRES;
-    precond_par.epsilon = 10e-5;
+    precond_par.precond = Magma_BICGSTAB;
+    precond_par.epsilon = 10e-4;
     precond_par.maxiter = 1000;
 
 

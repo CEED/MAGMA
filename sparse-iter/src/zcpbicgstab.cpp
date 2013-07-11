@@ -71,6 +71,8 @@ magma_zcpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_c_sparse_matrix AS;
     magma_sparse_matrix_zlag2c( A, &AS );
 
+    magma_c_vinit( &ys, Magma_DEV, dofs, MAGMA_C_ZERO );
+    magma_c_vinit( &zs, Magma_DEV, dofs, MAGMA_C_ZERO );
     
     // solver variables
     magmaDoubleComplex alpha, beta, omega, rho_old, rho_new;
@@ -110,17 +112,21 @@ magma_zcpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_zscal( dofs, beta, p.val, 1 );                                    // p = beta*p
         magma_zaxpy( dofs, c_mone * omega * beta, v.val, 1 , p.val, 1 );        // p = p-omega*beta*v
         magma_zaxpy( dofs, c_one, r.val, 1, p.val, 1 );                         // p = p+r
+
         magma_vector_zlag2c(p, &ps);                                            // conversion to single precision
         magma_c_precond( AS, ps, &ys, *precond_par );                           // precond: MS * ys = ps
         magma_vector_clag2z(ys, &y);                                            // conversion to double precision
-        magma_z_spmv( c_one, A, p, c_zero, v );                                 // v = Ay
+
+        magma_z_spmv( c_one, A, y, c_zero, v );                                 // v = Ay
         alpha = rho_new / magma_zdotc( dofs, rr.val, 1, v.val, 1 );
 
         magma_zcopy( dofs, r.val, 1 , s.val, 1 );
         magma_zaxpy( dofs, c_mone * alpha, v.val, 1 , s.val, 1 );
+
         magma_vector_zlag2c(s, &ss);                                            // conversion to single precision
         magma_c_precond( AS, ss, &zs, *precond_par );                           // precond: MS * zs = ss
         magma_vector_clag2z(zs, &z);                                            // conversion to double precision
+
         magma_z_spmv( c_one, A, z, c_zero, t );                                 //t=Az
         omega = magma_zdotc( dofs, t.val, 1, s.val, 1 ) 
                    / magma_zdotc( dofs, t.val, 1, t.val, 1 );
@@ -151,7 +157,7 @@ magma_zcpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         printf( "      || r_N ||   = %f\n", den);
         solver_par->residual = (double)(den);
     }
-
+/*
     magma_z_vfree(&r);
     magma_z_vfree(&rr);
     magma_z_vfree(&p);
@@ -166,7 +172,7 @@ magma_zcpbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_c_vfree(&zs);
 
     magma_c_mfree(&AS);
-    
+  */  
     return MAGMA_SUCCESS;
 }
 
