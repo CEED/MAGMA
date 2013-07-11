@@ -60,7 +60,7 @@ using namespace std;
 magma_int_t
 magma_vector_clag2z( magma_c_vector x, magma_z_vector *y )
 {
-    magma_int_t info,*iter;
+    magma_int_t info;
     if( x.memory_location == Magma_DEV){
         y->memory_location = x.memory_location;
         y->num_rows = x.num_rows;
@@ -97,7 +97,7 @@ magma_vector_clag2z( magma_c_vector x, magma_z_vector *y )
 magma_int_t
 magma_sparse_matrix_clag2z( magma_c_sparse_matrix A, magma_z_sparse_matrix *B )
 {
-    magma_int_t info, *iter;
+    magma_int_t info;
     if( A.memory_location == Magma_DEV){
         B->storage_type = A.storage_type;
         B->memory_location = A.memory_location;
@@ -114,13 +114,15 @@ magma_sparse_matrix_clag2z( magma_c_sparse_matrix A, magma_z_sparse_matrix *B )
         }
         if( A.storage_type == Magma_ELLPACK ){
             magma_zmalloc( &B->val, A.num_rows*A.max_nnz_row );
-            magmablas_clag2z( A.num_rows*A.max_nnz_row, 1, A.val, 1, B->val, 1, &info );
+            magmablas_clag2z( A.num_rows*A.max_nnz_row, 1, A.val, A.num_rows*A.max_nnz_row,
+                              B->val, A.num_rows*A.max_nnz_row, &info );
             B->col = A.col;
             return MAGMA_SUCCESS;
         }
         if( A.storage_type == Magma_ELLPACKT ){
             magma_zmalloc( &B->val, A.num_rows*A.max_nnz_row );
-            magmablas_clag2z( A.num_rows*A.max_nnz_row, 1, A.val, 1, B->val, 1, &info );
+            magmablas_clag2z( A.num_rows*A.max_nnz_row, 1, A.val, A.num_rows*A.max_nnz_row,
+                              B->val, A.num_rows*A.max_nnz_row, &info );
             B->col = A.col;
             return MAGMA_SUCCESS;
         }

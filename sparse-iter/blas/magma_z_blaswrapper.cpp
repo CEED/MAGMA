@@ -66,14 +66,14 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
              return MAGMA_SUCCESS;
          }
          if( A.storage_type == Magma_ELLPACKT ){
-             printf("using ELLPACK kernel for SpMV: ");
+             printf("using ELLPACKT kernel for SpMV: ");
              magma_zgeelltmv( MagmaNoTransStr, A.num_rows, A.num_cols, A.max_nnz_row, alpha, 
                               A.val, A.col, x.val, beta, y.val );
              printf("done.\n");
              return MAGMA_SUCCESS;
          }
          if( A.storage_type == Magma_DENSE ){
-             printf("using ELLPACK kernel for SpMV: ");
+             printf("using DENSE kernel for SpMV: ");
              magmablas_zgemv( MagmaNoTrans, A.num_rows, A.num_cols, alpha, 
                               A.val, A.num_rows, x.val, 1, beta,  y.val, 1 );
              printf("done.\n");
