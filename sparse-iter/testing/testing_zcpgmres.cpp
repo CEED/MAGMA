@@ -71,12 +71,12 @@ int main( int argc, char** argv)
     magma_solver_parameters solver_par;
     solver_par.epsilon = 10e-8;
     solver_par.maxiter = 1000;
-    solver_par.restart = 1;
+    solver_par.restart = 30;
 
     magma_precond_parameters precond_par;
     precond_par.precond = Magma_GMRES;
     precond_par.epsilon = 10e-1;
-    precond_par.maxiter = 1000;
+    precond_par.maxiter = 5;
     precond_par.restart = 30;
 
 

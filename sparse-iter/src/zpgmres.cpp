@@ -102,7 +102,7 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
                     q_t.val = q(k);
                     magma_z_precond( A, q_t, &z_t, *precond_par );  // preconditioner A * z =  q[k]
-                    z_t.val = z(k);
+                    magma_zcopy( dofs, z_t.val, 1, z(k), 1 );             // z(k) = z_t
                     magma_z_spmv( c_one, A, z_t, c_zero, r );                    //  r       = A q[k] 
                     
                     for (i=1; i<=k; i++) {

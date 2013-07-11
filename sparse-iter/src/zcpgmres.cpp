@@ -79,7 +79,7 @@ magma_zcpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_c_vector qs_t, zs_t;
     magma_c_sparse_matrix AS;
     magma_sparse_matrix_zlag2c( A, &AS );
-
+    magma_c_vinit( &zs_t, Magma_DEV, dofs, MAGMA_C_ZERO );
 
     magmaDoubleComplex *dy;
     if (MAGMA_SUCCESS != magma_zmalloc( &dy, ldh )) 
@@ -105,11 +105,10 @@ magma_zcpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                     magma_zscal(dofs, 1./H(k,k-1), q(k), 1);                     //  (to be fused)
 
                     q_t.val = q(k);
-                    magma_vector_zlag2c(q_t, &qs_t);                    // conversion to single precision
+                    magma_vector_zlag2c(q_t, &qs_t);                    // conversion to single precision            
                     magma_c_precond( AS, qs_t, &zs_t, *precond_par );   // preconditioner AS * zs =  qs[k]
                     magma_vector_clag2z(zs_t, &z_t);                    // conversion to double precision
-
-                    z_t.val = z(k);
+                    magma_zcopy( dofs, z_t.val, 1, z(k), 1 );             // z(k) = z_t
                     magma_z_spmv( c_one, A, z_t, c_zero, r );                    //  r       = A q[k] 
                     
                     for (i=1; i<=k; i++) {
@@ -183,7 +182,7 @@ magma_zcpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     solver_par->numiter = iter;
 
     magma_free(dy); 
-
+/*
     magma_z_vfree(&r);
     magma_z_vfree(&q);
     magma_z_vfree(&q_t);
@@ -193,7 +192,7 @@ magma_zcpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_c_vfree(&zs_t);
 
     magma_c_mfree(&AS);
-
+*/
     return MAGMA_SUCCESS;
 }   /* magma_zcpgmres */
 
