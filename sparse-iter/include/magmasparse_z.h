@@ -60,6 +60,8 @@ extern "C" {
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE Auxiliary functions
 */
+
+
 magma_int_t 
 read_z_csr_from_binary( magma_int_t* n_row, magma_int_t* n_col, 
                         magma_int_t* nnz, magmaDoubleComplex **val, 
@@ -75,6 +77,12 @@ read_z_csr_from_mtx(    magma_storage_t *type, magma_storage_t *location,
 
 magma_int_t 
 magma_z_csr_mtx(        magma_z_sparse_matrix *A, const char *filename );
+
+magma_int_t 
+magma_z_csr_compressor( magmaDoubleComplex ** val, magma_int_t ** row, 
+                        magma_int_t ** col, magmaDoubleComplex ** valn, 
+                        magma_int_t ** rown, magma_int_t ** coln, magma_int_t *n);
+
 
 magma_int_t 
 write_z_csr_mtx(        magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, 
@@ -142,6 +150,14 @@ magma_z_mfree(          magma_z_sparse_matrix *A );
 magma_int_t
 magma_z_vfree(          magma_z_vector *x );
 
+magma_int_t
+magma_zjacobisetup(     magma_z_sparse_matrix A, magma_z_vector b, 
+                        magma_z_sparse_matrix *M, magma_z_vector *c );
+
+magma_int_t
+magma_zjacobiiter(      magma_z_sparse_matrix M, magma_z_vector c, magma_z_vector *x,  
+                        magma_solver_parameters *solver_par );
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE function definitions / Data on CPU
 */
@@ -187,6 +203,10 @@ magma_int_t
 magma_zpgmres(         magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
                        magma_solver_parameters *solver_par, 
                        magma_precond_parameters *precond_par );
+magma_int_t
+magma_zjacobi(         magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+                       magma_solver_parameters *solver_par );
+
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE utility function definitions

@@ -19,6 +19,7 @@ INC += -I$(MAGMA_DIR)/control
 
 # Krylov space linear solvers
 ZSRC += \
+    zjacobi.cpp     \
 	zcg.cpp			\
 	zgmres.cpp		\
 	zbicgstab.cpp		\
