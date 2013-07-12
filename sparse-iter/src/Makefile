@@ -39,6 +39,7 @@ ZSRC += \
 	zcpbicgstab.cpp		\
 	zcpgmres.cpp		\
 	zcir.cpp    		\
+	zcpir.cpp    		\
 
 # QR and least squares, GPU interface
 ZSRC += \

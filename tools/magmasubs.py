@@ -184,10 +184,12 @@ subs = {
     ('dspgmres',                   'zcpgmres'                   ),
     ('dspbicgstab',                'zcpbicgstab'                ),
     ('dsir',                       'zcir'                       ),
+    ('dspir',                      'zcpir'                      ),
 
     ('testing_dspgmres',           'testing_zcpgmres'           ),
     ('testing_dspbicgstab',        'testing_zcpbicgstab'        ),
     ('testing_dsir',               'testing_zcir'               ),
+    ('testing_dspir',              'testing_zcpir'              ),
 ], 
   
   # ------------------------------------------------------------
