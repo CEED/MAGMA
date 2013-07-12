@@ -65,7 +65,7 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_int_t i;
 
     // solver setup
-    //magma_zscal( dofs, c_zero, x->val, 1) ;                         // x = 0
+    magma_zscal( dofs, c_zero, x->val, 1) ;                         // x = 0
     magma_zcopy( dofs, b.val, 1, r.val, 1 );                          // r = b
     magma_zcopy( dofs, b.val, 1, p.val, 1 );                          // p = b
     nom = magma_dznrm2( dofs, r.val, 1 );                             // nom = || r ||
@@ -84,7 +84,7 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         return -100;
     }
     
-    printf("Iteration : %4d  Norm: %f\n", 0, nom);
+  //  printf("Iteration : %4d  Norm: %f\n", 0, nom);
     
     // start iteration
     for( i= 1; i<solver_par->maxiter; i++ ) {
@@ -93,7 +93,7 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_zaxpy(dofs, -alpha, q.val, 1, r.val, 1);                // r = r - alpha q
         betanom = magma_dznrm2(dofs, r.val, 1);                       // betanom = || r ||
         betanom = betanom * betanom;                                  // betanom = r dot r
-        printf("Iteration : %4d  Norm: %f\n", i, betanom);
+     //   printf("Iteration : %4d  Norm: %f\n", i, betanom);
         if ( betanom < r0 ) {
             solver_par->numiter = i;
             break;
@@ -110,13 +110,13 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     printf( "      (r_N, r_N) = %e\n", betanom);
     printf( "      Number of CG iterations: %d\n", i);
     
-    if (solver_par->epsilon == RTOLERANCE) {
+//    if (solver_par->epsilon == RTOLERANCE) {
         magma_z_spmv( c_one, A, *x, c_zero, r );                       // r = A x
         magma_zaxpy(dofs,  c_mone, b.val, 1, r.val, 1);                // r = r - b
         den = magma_dznrm2(dofs, r.val, 1);                            // den = || r ||
         printf( "      || r_N ||   = %f\n", den);
         solver_par->residual = (double)(den);
-    }
+//    }
 
     magma_z_vfree(&r);
     magma_z_vfree(&p);

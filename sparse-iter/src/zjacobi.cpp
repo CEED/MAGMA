@@ -31,7 +31,7 @@
     Solves a system of linear equations
        A * X = B
     where A is a complex Hermitian N-by-N positive definite matrix A.
-    This is a GPU implementation of the Conjugate Gradient method.
+    This is a GPU implementation of the Jacobi method.
 
     Arguments
     =========

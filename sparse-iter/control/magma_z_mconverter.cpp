@@ -57,7 +57,7 @@ using namespace std;
     =====================================================================  */
 
 
-magma_int_t csr_compressor(magmaDoubleComplex ** val, magma_int_t ** row, magma_int_t ** col, magmaDoubleComplex ** valn, magma_int_t ** rown, magma_int_t ** coln, magma_int_t *n)
+magma_int_t magma_z_csr_compressor(magmaDoubleComplex ** val, magma_int_t ** row, magma_int_t ** col, magmaDoubleComplex ** valn, magma_int_t ** rown, magma_int_t ** coln, magma_int_t *n)
 {
     magma_int_t nnz_new=0; 
     for( magma_int_t i=0; i<(*row)[*n]; i++ )
@@ -192,7 +192,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                 row_tmp[i] = i*A.max_nnz_row;
             //now use AA_ELL, IA_ELL, row_tmp as CSR with some zeros. 
             //The CSR compressor removes these
-            csr_compressor(&A.val, &row_tmp, &A.col, &B->val, &B->row, &B->col, &B->num_rows);  
+            magma_z_csr_compressor(&A.val, &row_tmp, &A.col, 
+                                   &B->val, &B->row, &B->col, &B->num_rows);  
 
             printf( "done\n" );      
             return MAGMA_SUCCESS; 
@@ -271,7 +272,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             }    
             //now use AA_ELL, IA_ELL, row_tmp as CSR with some zeros. 
             //The CSR compressor removes these
-            csr_compressor(&val_tmp, &row_tmp, &col_tmp, &B->val, &B->row, &B->col, &B->num_rows); 
+            magma_z_csr_compressor(&val_tmp, &row_tmp, &col_tmp, 
+                                   &B->val, &B->row, &B->col, &B->num_rows); 
 
             printf( "done\n" );      
             return MAGMA_SUCCESS; 
@@ -351,10 +353,83 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             printf( "done\n" );      
             return MAGMA_SUCCESS; 
         }
+/*        // CSR to BCSR
+        if( old_format == Magma_CSR && new_format == Magma_BCSR ){
+            printf( "Conversion to BCSR: " );
+            // fill in information for B
+            B->storage_type = Magma_BCSR;
+            B->memory_location = A.memory_location;
+            B->num_rows = A.num_rows;
+            B->num_cols = A.num_cols;
+            B->nnz = A.nnz;
+            B->max_nnz_row = A.max_nnz_row;
+
+            // conversion
+            magma_int_t size_b=3;
+            magma_int_t c_blocks = ceil( (float)A.num_cols / (float)size_b );     // max number of blocks per row
+            magma_int_t r_blocks = ceil( (float)A.num_rows / (float)size_b );     // max number of blocks per column
+            printf("c_blocks: %d  r_blocks: %d\n", c_blocks, r_blocks);
+
+            B->row = ( magma_int_t* )malloc((r_blocks+1)*sizeof( magma_int_t ));                     // B->row has r_blocks+1 elements
+            B->row[0] = 0;
+            magma_int_t* tmp;
+            tmp = ( magma_int_t* )malloc((c_blocks)*sizeof( magma_int_t )); 
+            
+            magma_int_t nzb=0, i, j, k = 0, l=0;
+            k=0, l=0;
+            while( k<A.num_rows ){
+                for( j=0; j<c_blocks; j++ ){
+                    tmp[j] = 0;         // set to zero
+                }
+                for( j=k; j<k+size_b; j++){       // go over size_b rows
+                    for( i=A.row[j]; i<A.row[j+1]; j++){        // go over all entries
+                         magma_int_t tmpindex = floor((float)A.col[i]/(float)size_b);
+                         printf("k:%d j:%d i:%d tmpindex:%d\n",k,j, i, tmpindex);
+                         tmp[ tmpindex ] = 1;           // 1 means block active
+                    }
+                }
+                for( j=0; j<c_blocks; j++ ){
+                    printf("%d  ", tmp[j]);
+                    if( tmp[j]!=0 ){
+                        nzb++;               // increase number of non-zero-blocks by one
+                        tmp[j] = 0;         // set to zero again
+                    }
+                }
+                printf(" nzb : %d\n", nzb);
+                B->row[l+1] = nzb;
+                l++;
+                k+=size_b;
+            }
+
+            B->val = ( magmaDoubleComplex* )malloc((size_b * size_b * nzb)*sizeof( magmaDoubleComplex ));   // B->val has size_b * size_b * nzb elements
+            B->col = ( magma_int_t* )malloc((nzb)*sizeof( magma_int_t ));                            // B->col has nzb elements
+
+            // fill in new pointers
+
+            k=0;
+            while( k<=A.num_rows){
+                for( j=0; j<c_blocks; j++ ){
+                    tmp[j] = 0;         // set to zero
+                }
+                for( j=0; j<c_blocks; j++ ){
+                    if( tmp[j]!=0 ){
+                        B->col[l] = j*size_b;
+                        l++;
+                    }
+                }
+                k+=c_blocks;
+            }
+
+            printf( "done\n" );      
+            return MAGMA_SUCCESS; 
+        }
+
+*/
+
 
         else{
 
-            printf("error: formet not supported.\n");
+            printf("error: format not supported.\n");
             // return some MAGMA Error
 
         }

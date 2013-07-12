@@ -20,6 +20,7 @@ INC += -I$(MAGMA_DIR)/control
 # Krylov space linear solvers
 ZSRC += \
     zjacobi.cpp     \
+    zir.cpp         \
 	zcg.cpp			\
 	zgmres.cpp		\
 	zbicgstab.cpp		\
@@ -37,6 +38,7 @@ ZSRC += \
 ZSRC += \
 	zcpbicgstab.cpp		\
 	zcpgmres.cpp		\
+	zcir.cpp    		\
 
 # QR and least squares, GPU interface
 ZSRC += \

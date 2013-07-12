@@ -183,9 +183,11 @@ subs = {
 
     ('dspgmres',                   'zcpgmres'                   ),
     ('dspbicgstab',                'zcpbicgstab'                ),
+    ('dsir',                       'zcir'                       ),
 
     ('testing_dspgmres',           'testing_zcpgmres'           ),
     ('testing_dspbicgstab',        'testing_zcpbicgstab'        ),
+    ('testing_dsir',               'testing_zcir'               ),
 ], 
   
   # ------------------------------------------------------------
@@ -668,6 +670,8 @@ subs = {
     ('spcg',           'dpcg',           'cpcg',           'zpcg',           ),
     ('spbicgstab',     'dpbicgstab',     'cpbicgstab',     'zpbicgstab',     ),
     ('spgmres',        'dpgmres',        'cpgmres',        'zpgmres'         ),
+    ('sjacobi',        'djacobi',        'cjacobi',        'zjacobi'         ),
+    ('sir',            'dir',            'cir',            'zir'             ),
 
 
     # ----- SPARSE auxiliary tools
