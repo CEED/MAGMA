@@ -20,6 +20,7 @@ ZSRC += \
 	testing_zbicgstab.cpp       \
   	testing_zir.cpp              \
   	testing_zcir.cpp              \
+  	testing_zcpir.cpp              \
                                 \
   	testing_zpcg.cpp            \
   	testing_zpbicgstab.cpp      \

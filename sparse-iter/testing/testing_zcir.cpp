@@ -40,7 +40,13 @@ int main( int argc, char** argv)
      "test_matrices/Trefethen_2000.mtx",
      "test_matrices/Trefethen_20_new.mtx",
      "test_matrices/Trefethen_20_new2.mtx",
-     "test_matrices/Trefethen_20_new3.mtx"
+     "test_matrices/Trefethen_20_new3.mtx",
+     "test_matrices/audikw_1.mtx",
+     "test_matrices/circuit5M.mtx",
+     "test_matrices/europe_osm.mtx",
+     "test_matrices/parabolic_fem.mtx",
+     "test_matrices/road_usa.mtx",
+     "test_matrices/road_central.mtx"
     };
 
     magma_z_sparse_matrix A, B, C, D;
@@ -51,7 +57,7 @@ int main( int argc, char** argv)
     const char *N="N";
 
   
-    magma_z_csr_mtx( &A, filename[1] );
+    magma_z_csr_mtx( &A, filename[8] );
     //print_z_csr_matrix( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col );
 
 
