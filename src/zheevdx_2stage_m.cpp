@@ -469,7 +469,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
         start = get_current_time();
 #endif
 
-        lapackf77_dsterf(&n, w, &work[inde], info);
+        lapackf77_dsterf(&n, w, &rwork[inde], info);
         magma_dmove_eig(range, n, w, &il, &iu, vl, vu, m);
 
 #ifdef ENABLE_TIMER
