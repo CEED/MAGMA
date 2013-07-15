@@ -86,12 +86,15 @@ sub MakeRelease
 {
     my $numversion = "$major.$minor.$micro";
     my $cmd;
+    my $stage = "";
 
     if ( $rc > 0 ) {
         $numversion .= "-rc$rc";
+        $stage = "rc$rc";
     }
     if ( $beta > 0 ) {
         $numversion .= "-beta$beta";
+        $stage = "beta$beta";
     }
 
     my $RELEASE_PATH = $ENV{PWD}."/magma-$numversion";
@@ -109,6 +112,7 @@ sub MakeRelease
     myCmd("perl -pi -e 's/VERSION_MAJOR +[0-9]+/VERSION_MAJOR $major/' include/magma_types.h");
     myCmd("perl -pi -e 's/VERSION_MINOR +[0-9]+/VERSION_MINOR $minor/' include/magma_types.h");
     myCmd("perl -pi -e 's/VERSION_MICRO +[0-9]+/VERSION_MICRO $micro/' include/magma_types.h");
+    myCmd("perl -pi -e 's/VERSION_STAGE +.+/VERSION_STAGE \"$stage\"/' include/magma_types.h");
 
     # Change the version and date in comments
     # TODO make a generic date tag to search for, instead of November 2011.

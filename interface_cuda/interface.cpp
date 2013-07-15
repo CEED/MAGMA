@@ -70,7 +70,7 @@ void magma_print_devices()
 {
     int major, minor, micro;
     magma_version( &major, &minor, &micro );
-    printf( "MAGMA %d.%d.%d\n", major, minor, micro );
+    printf( "MAGMA %d.%d.%d %s\n", major, minor, micro, MAGMA_VERSION_STAGE );
     
     int ndevices;
     cudaGetDeviceCount( &ndevices );
