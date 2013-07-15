@@ -232,7 +232,7 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
     magma_setlapack_numthreads(threads);
 
 #ifdef ENABLE_DEBUG
-    printf("D&C is using %d threads\n", threads);
+    printf("  D&C_m is using %d threads\n", threads);
 #endif
 
     // If N is smaller than the minimum divide size (SMLSIZ+1), then

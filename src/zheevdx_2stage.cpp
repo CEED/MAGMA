@@ -297,7 +297,7 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
     magma_int_t lda2 = nb+1+(nb-1);
     if(lda2>n){
-        #ifndef NO_WARNING	    
+        #ifndef NO_WARNING
         printf("--------------------------------------------------------------\n");
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n",n,nb);
         printf("--------------------------------------------------------------\n");
@@ -400,9 +400,18 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
      tridiagonal matrix, then call ZUNMTR to multiply it to the Householder
      transformations represented as Householder vectors in A. */
     if (! wantz) {
-        lapackf77_dsterf(&n, w, &rwork[inde], info);
+#ifdef ENABLE_TIMER
+        start = get_current_time();
+#endif
 
+        lapackf77_dsterf(&n, w, &rwork[inde], info);
         magma_dmove_eig(range, n, w, &il, &iu, vl, vu, m);
+
+#ifdef ENABLE_TIMER
+        end = get_current_time();
+        printf("  time dstedc = %6.2f\n", GetTimerValue(start,end)/1000.);
+#endif
+
     } else {
 
 #ifdef ENABLE_TIMER
