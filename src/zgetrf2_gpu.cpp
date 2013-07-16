@@ -7,13 +7,14 @@
 
        @author Stan Tomov
        @precisions normal z -> s d c
+
 */
 #include "common_magma.h"
 
 extern "C" magma_int_t
-magma_zgetrf_gpu(magma_int_t m, magma_int_t n, 
-                 magmaDoubleComplex *dA, magma_int_t ldda,
-                 magma_int_t *ipiv, magma_int_t *info)
+magma_zgetrf2_gpu(magma_int_t m, magma_int_t n,
+                  magmaDoubleComplex *dA, magma_int_t ldda,
+                  magma_int_t *ipiv, magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -33,8 +34,8 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
     triangular (upper trapezoidal if m < n).
 
     This is the right-looking Level 3 BLAS version of the algorithm.
-    If the current stream is NULL, this version replaces it with user defined
-    stream to overlap computation with communication. 
+    This version assumes the computation runs through the NULL stream 
+    and therefore is not overlapping computation with communication.
 
     Arguments
     =========
@@ -147,82 +148,63 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
             return *info;
         }
 
-        /* Define user stream if current stream is NULL */ 
-        cudaStream_t stream[2], current_stream;
-        magmablasGetKernelStream(&current_stream);
+        for( i=0; i<s; i++ ) {
+            // download i-th panel
+            cols = maxm - i*nb;
+            magmablas_ztranspose( dAP, cols, dAT(i,i), lddat, nb, cols );
+            magma_zgetmatrix( m-i*nb, nb, dAP, cols, work, lddwork );
 
-        magma_queue_create( &stream[0] );
-        if (current_stream == NULL) {
-           magma_queue_create( &stream[1] );
-           magmablasSetKernelStream(stream[1]);
-        }
-        else
-           stream[1] = current_stream;
-  
-        for( i=0; i<s; i++ )
-            {
-                // download i-th panel
-                cols = maxm - i*nb;
-                magmablas_ztranspose( dAP, cols, dAT(i,i), lddat, nb, cols );
+            // make sure that gpu queue is empty
+            magma_device_sync();
 
-                // make sure that gpu queue is empty
-                magma_device_sync();
-
-                magma_zgetmatrix_async( m-i*nb, nb, dAP, cols, work, lddwork,
-                                        stream[0]);
-
-                if ( i>0 ){
-                    magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
-                                 n - (i+1)*nb, nb, 
-                                 c_one, dAT(i-1,i-1), lddat, 
-                                        dAT(i-1,i+1), lddat );
-                    magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
-                                 n-(i+1)*nb, m-i*nb, nb, 
-                                 c_neg_one, dAT(i-1,i+1), lddat, 
-                                            dAT(i,  i-1), lddat, 
-                                 c_one,     dAT(i,  i+1), lddat );
-                }
-
-                // do the cpu part
-                rows = m - i*nb;
-                magma_queue_sync( stream[0] );
-                lapackf77_zgetrf( &rows, &nb, work, &lddwork, ipiv+i*nb, &iinfo);
-                if ( (*info == 0) && (iinfo > 0) )
-                    *info = iinfo + i*nb;
-
-                // upload i-th panel
-                magma_zsetmatrix_async( m-i*nb, nb, work, lddwork, dAP, maxm,
-                                        stream[0]);
-
-                magmablas_zpermute_long2( n, dAT, lddat, ipiv, nb, i*nb );
-
-                magma_queue_sync( stream[0] );
-                magmablas_ztranspose(dAT(i,i), lddat, dAP, maxm, cols, nb);
-
-                // do the small non-parallel computations (next panel update)
-                if ( s > (i+1) ) {
-                    magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
-                                 nb, nb, 
-                                 c_one, dAT(i, i  ), lddat,
-                                        dAT(i, i+1), lddat);
-                    magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
-                                 nb, m-(i+1)*nb, nb, 
-                                 c_neg_one, dAT(i,   i+1), lddat,
-                                            dAT(i+1, i  ), lddat, 
-                                 c_one,     dAT(i+1, i+1), lddat );
-                }
-                else {
-                    magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
-                                 n-s*nb, nb, 
-                                 c_one, dAT(i, i  ), lddat,
-                                        dAT(i, i+1), lddat);
-                    magma_zgemm( MagmaNoTrans, MagmaNoTrans, 
-                                 n-(i+1)*nb, m-(i+1)*nb, nb,
-                                 c_neg_one, dAT(i,   i+1), lddat,
-                                            dAT(i+1, i  ), lddat, 
-                                 c_one,     dAT(i+1, i+1), lddat );
-                }
+            if ( i>0 ) {
+                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
+                             n - (i+1)*nb, nb,
+                             c_one, dAT(i-1,i-1), lddat,
+                                    dAT(i-1,i+1), lddat );
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans,
+                             n-(i+1)*nb, m-i*nb, nb,
+                             c_neg_one, dAT(i-1,i+1), lddat,
+                                        dAT(i,  i-1), lddat,
+                             c_one,     dAT(i,  i+1), lddat );
             }
+
+            // do the cpu part
+            rows = m - i*nb;
+            lapackf77_zgetrf( &rows, &nb, work, &lddwork, ipiv+i*nb, &iinfo);
+            if ( (*info == 0) && (iinfo > 0) )
+                *info = iinfo + i*nb;
+
+            magmablas_zpermute_long2( n, dAT, lddat, ipiv, nb, i*nb );
+
+            // upload i-th panel
+            magma_zsetmatrix( m-i*nb, nb, work, lddwork, dAP, maxm );
+            magmablas_ztranspose(dAT(i,i), lddat, dAP, maxm, cols, nb);
+
+            // do the small non-parallel computations (next panel update)
+            if ( s > (i+1) ) {
+                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
+                             nb, nb,
+                             c_one, dAT(i, i  ), lddat,
+                                    dAT(i, i+1), lddat);
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans,
+                             nb, m-(i+1)*nb, nb,
+                             c_neg_one, dAT(i,   i+1), lddat,
+                                        dAT(i+1, i  ), lddat,
+                             c_one,     dAT(i+1, i+1), lddat );
+            }
+            else {
+                magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
+                             n-s*nb, nb,
+                             c_one, dAT(i, i  ), lddat,
+                                    dAT(i, i+1), lddat);
+                magma_zgemm( MagmaNoTrans, MagmaNoTrans,
+                             n-(i+1)*nb, m-(i+1)*nb, nb,
+                             c_neg_one, dAT(i,   i+1), lddat,
+                                        dAT(i+1, i  ), lddat,
+                             c_one,     dAT(i+1, i+1), lddat );
+            }
+        }
 
         magma_int_t nb0 = min(m - s*nb, n - s*nb);
         rows = m - s*nb;
@@ -244,9 +226,9 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
         magma_zsetmatrix( rows, nb0, work, lddwork, dAP, maxm );
         magmablas_ztranspose2( dAT(s,s), lddat, dAP, maxm, rows, nb0);
 
-        magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit, 
+        magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
                      n-s*nb-nb0, nb0,
-                     c_one, dAT(s,s),     lddat, 
+                     c_one, dAT(s,s),     lddat,
                             dAT(s,s)+nb0, lddat);
 
         if ( m == n ) {
@@ -259,12 +241,6 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
 
         magma_free( dAP );
         magma_free_pinned( work );
-    
-        magma_queue_destroy( stream[0] );
-        if (current_stream == NULL) {
-            magma_queue_destroy( stream[1] );
-            magmablasSetKernelStream(NULL);
-        }
     }
     return *info;
 }   /* End of MAGMA_ZGETRF_GPU */
