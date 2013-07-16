@@ -119,6 +119,11 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
         magma_int_t maxm, maxn, ldda, maxdim;
         magma_int_t i, rows, cols, s = min(m, n)/nb;
         
+        maxm = ((m + 31)/32)*32;
+        maxn = ((n + 31)/32)*32;
+        maxdim = max(maxm, maxn);
+
+        /* set number of GPUs */
         magma_int_t num_gpus = magma_num_gpus();
         if ( num_gpus > 1 ) {
             /* call multi-GPU non-GPU-resident interface  */
@@ -127,13 +132,30 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
             return *info;
         }
 
-        maxm = ((m + 31)/32)*32;
-        maxn = ((n + 31)/32)*32;
-        maxdim = max(maxm, maxn);
+        /* explicitly checking the memory requirement */
+        size_t freeMem, totalMem;
+        cudaMemGetInfo( &freeMem, &totalMem );
+        freeMem /= sizeof(magmaDoubleComplex);
+
+        int h = 1+(2+num_gpus), num_gpus2 = num_gpus;
+        int NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
+        char * ngr_nb_char = getenv("MAGMA_NGR_NB");
+        if( ngr_nb_char != NULL ) NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
+
+        if( num_gpus > ceil((double)NB/nb) ) {
+            num_gpus2 = (int)ceil((double)NB/nb);
+            h = 1+(2+num_gpus2);
+            NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
+        } 
+        if( num_gpus2*NB < n ) {
+            /* call non-GPU-resident interface if too much memory is required */
+            magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
+            if( *info >= 0 ) magma_zgetrf_piv(num_gpus, m, n, a, lda, ipiv, info);
+            return *info;
+        }
 
         ldda = maxn;
         work = a;
-
         if (maxdim*maxdim < 2*maxm*maxn) {
             // if close to square, allocate square matrix and transpose in-place
             if (MAGMA_SUCCESS != magma_zmalloc( &dA, nb*maxm + maxdim*maxdim )) {
