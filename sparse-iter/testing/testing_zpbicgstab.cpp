@@ -86,7 +86,7 @@ int main( int argc, char** argv)
 
 
 
-
+    //magma_z_mfree( &D );  
 
 
 

@@ -60,7 +60,7 @@ magma_z_vfree( magma_z_vector *x ){
         x->nnz = 0;
         return MAGMA_SUCCESS;     
     }
-    if( x->memory_location == Magma_DEV ){
+    else if( x->memory_location == Magma_DEV ){
         magma_free( x->val );
         
         x->num_rows = 0;

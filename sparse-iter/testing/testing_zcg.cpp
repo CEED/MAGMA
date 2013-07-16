@@ -36,14 +36,22 @@ int main( int argc, char** argv)
     
     const char *filename[] =
     {
-     "test_matrices/Trefethen_20.mtx",
      "test_matrices/Trefethen_2000.mtx",
-     "test_matrices/Trefethen_20_new.mtx",
-     "test_matrices/Trefethen_20_new2.mtx",
-     "test_matrices/Trefethen_20_new3.mtx"
+     "test_matrices/ecology2.mtx",
+     "test_matrices/apache2.mtx",
+     "test_matrices/audikw_1.mtx",
+     "test_matrices/boneS10.mtx",
+     "test_matrices/inline_1.mtx",
+     "test_matrices/ldoor.mtx"
+     "test_matrices/bmwcra_1.mtx",
+     "test_matrices/F1.mtx",
+     "test_matrices/circuit5M.mtx",
+     "test_matrices/parabolic_fem.mtx",
+     "test_matrices/crankseg_2.mtx",
     };
+for(magma_int_t matrix=1; matrix<2; matrix++){
 
-    magma_z_sparse_matrix A, B, C, D;
+    magma_z_sparse_matrix A, C, D;
     magma_z_vector x, b;
 
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
@@ -51,7 +59,7 @@ int main( int argc, char** argv)
     const char *N="N";
 
   
-    magma_z_csr_mtx( &A, filename[1] );
+    magma_z_csr_mtx( &A, filename[matrix] );
     //print_z_csr_matrix( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col );
 
 
@@ -63,7 +71,6 @@ int main( int argc, char** argv)
 
 
 
-    magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);
     magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACKT);
     magma_z_mtransfer( C, &D, Magma_CPU, Magma_DEV);
 
@@ -71,14 +78,20 @@ int main( int argc, char** argv)
     magma_solver_parameters solver_par;
 
     solver_par.epsilon = 10e-8;
-    solver_par.maxiter = 1000;
+    solver_par.maxiter = 10000;
 
     magma_zcg( D, b, &x, &solver_par );
 
     magma_z_vvisu( x, 0,10);
 
+    magma_z_vfree(&b);
+    magma_z_vfree(&x);
+    magma_z_mfree(&A);
+    magma_z_mfree(&C);
+    magma_z_mfree(&D);
 
 
+}
 
 
 

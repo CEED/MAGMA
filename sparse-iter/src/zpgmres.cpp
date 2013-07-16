@@ -179,9 +179,7 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
     magma_z_vfree(&r);
     magma_z_vfree(&q);
-    magma_z_vfree(&q_t);
     magma_z_vfree(&z);
-    magma_z_vfree(&z_t);
 
     return MAGMA_SUCCESS;
 }   /* magma_zgmres */

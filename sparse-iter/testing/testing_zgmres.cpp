@@ -61,9 +61,9 @@ int main( int argc, char** argv)
 
 
 
-    magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);
-    magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACKT);
-    magma_z_mtransfer( C, &D, Magma_CPU, Magma_DEV);
+    //magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);
+    //magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACKT);
+    magma_z_mtransfer( A, &D, Magma_CPU, Magma_DEV);
 
 
     magma_solver_parameters solver_par;
@@ -79,8 +79,8 @@ int main( int argc, char** argv)
     magma_z_vfree(&x);
     magma_z_vfree(&b);
     magma_z_mfree(&A);
-    magma_z_mfree(&B);
-    magma_z_mfree(&C);
+   // magma_z_mfree(&B);
+   // magma_z_mfree(&C);
     magma_z_mfree(&D);
 
     TESTING_FINALIZE();

@@ -93,7 +93,7 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_zaxpy(dofs, -alpha, q.val, 1, r.val, 1);                // r = r - alpha q
         betanom = magma_dznrm2(dofs, r.val, 1);                       // betanom = || r ||
         betanom = betanom * betanom;                                  // betanom = r dot r
-     //   printf("Iteration : %4d  Norm: %f\n", i, betanom);
+        printf("Iteration : %4d  Norm: %f\n", i, betanom);
         if ( betanom < r0 ) {
             solver_par->numiter = i;
             break;

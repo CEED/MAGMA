@@ -43,7 +43,7 @@ int main( int argc, char** argv)
      "test_matrices/Trefethen_20_new3.mtx"
     };
 
-    magma_z_sparse_matrix A, B, C, D;
+    magma_z_sparse_matrix A, C, D;
     magma_z_vector x, b;
 
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
@@ -63,7 +63,6 @@ int main( int argc, char** argv)
 
 
 
-    magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);
     magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACKT);
     magma_z_mtransfer( C, &D, Magma_CPU, Magma_DEV);
 
@@ -75,7 +74,7 @@ int main( int argc, char** argv)
     magma_precond_parameters precond_par;
     precond_par.precond = Magma_CG;
     precond_par.epsilon = 10e-3;
-    precond_par.maxiter = 10;
+    precond_par.maxiter = 100;
 
 
 
@@ -84,9 +83,11 @@ int main( int argc, char** argv)
     magma_z_vvisu( x, 0,10);
 
 
-
-
-
+    magma_z_vfree(&b);
+    magma_z_vfree(&x);
+    magma_z_mfree(&A);
+    magma_z_mfree(&C);
+    magma_z_mfree(&D);
 
 
 

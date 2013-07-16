@@ -124,7 +124,10 @@ magma_zcir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         solver_par->residual = (double)(den);
     }
     
-    return MAGMA_SUCCESS;
+    magma_z_vfree(&r);
+    magma_z_vfree(&z);
+    magma_c_vfree(&rs);
+    magma_c_vfree(&zs);
 
     return MAGMA_SUCCESS;
 }   /* magma_zcir */

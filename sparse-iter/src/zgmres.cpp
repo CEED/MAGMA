@@ -62,8 +62,11 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     double rNorm, RNorm, den, nom0, r0 = 0.;
 
     // CPU workspace
-    magmaDoubleComplex H[(ldh+1)*ldh], HH[ldh*ldh]; 
-    magmaDoubleComplex  y[ldh], h1[ldh];
+    magmaDoubleComplex *H, *HH, *y, *h1;
+    magma_zmalloc_cpu( &H, (ldh+1)*ldh );
+    magma_zmalloc_cpu( &HH, ldh*ldh );
+    magma_zmalloc_cpu( &y, ldh );
+    magma_zmalloc_cpu( &h1, ldh );
     
     // GPU workspace
     magma_z_vector r, q, q_t;
@@ -166,13 +169,13 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         solver_par->residual = (double)(den);
     }
     solver_par->numiter = iter;
-/*
+
     magma_free(dy); 
 
     magma_z_vfree(&r);
     magma_z_vfree(&q);
-    magma_z_vfree(&q_t);
-*/
+
+
     return MAGMA_SUCCESS;
 }   /* magma_zgmres */
 

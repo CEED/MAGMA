@@ -76,8 +76,10 @@ magma_zcpir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
     // Jacobi setup
     magma_z_sparse_matrix M;
-    magma_z_vector c;
+    magma_z_vector c,d;
     magma_solver_parameters jacobiiter_par;
+    // Jacobi setup
+    magma_zjacobisetup_matrix( A, r, &M, &d );
  
 
 
@@ -104,9 +106,9 @@ magma_zcpir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_vector_zlag2c(r, &rs);                              // conversion to single precision
         magma_c_precond( AS, rs, &zs, *precond_par );             // inner solver: AS * zs = rs
         magma_vector_clag2z(zs, &z);                              // conversion to double precision
-
+        magma_z_precond( A, r, &z, *precond_par );             // inner solver: AS * zs = rs
         // Jacobi setup
-        magma_zjacobisetup( A, r, &M, &c );
+        magma_zjacobisetup_vector(r, d, &c );
         jacobiiter_par.maxiter = 1;
         // Jacobi iterator
         magma_zjacobiiter( M, c, &z, &jacobiiter_par );
@@ -139,7 +141,14 @@ magma_zcpir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         solver_par->residual = (double)(den);
     }
     
-    return MAGMA_SUCCESS;
+    magma_z_mfree(&M);
+    magma_z_vfree(&r);
+    magma_z_vfree(&z);
+    magma_c_vfree(&rs);
+    magma_c_vfree(&zs);
+    magma_z_vfree(&c);
+    magma_z_vfree(&d);
+
 
     return MAGMA_SUCCESS;
 }   /* magma_zcpir */

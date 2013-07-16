@@ -101,6 +101,141 @@ magma_zjacobi( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     Purpose
     =======
 
+    Prepares the Matrix M for the Jacobi Iteration according to
+       x^(k+1) = D^(-1) * b - D^(-1) * (L+U) * x^k
+       x^(k+1) =      c     -       M        * x^k.
+
+    It returns the preconditioner Matrix M and a vector d
+    containing the diagonal elements. 
+
+    Arguments
+    =========
+
+    magma_z_sparse_matrix A                   input matrix A
+    magma_z_vector b                          RHS b
+    magma_z_sparse_matrix *M                  M = D^(-1) * (L+U)
+    magma_z_vector *d                         vector with diagonal elements
+
+    =====================================================================  */
+
+magma_int_t
+magma_zjacobisetup_matrix( magma_z_sparse_matrix A, magma_z_vector b, 
+                    magma_z_sparse_matrix *M, magma_z_vector *d ){
+    magma_int_t i;
+
+    
+
+    magma_z_sparse_matrix A_h1, A_h2, B, C;
+    magma_z_vector diag, b_h;
+    magma_z_vinit( &diag, Magma_CPU, A.num_rows, MAGMA_Z_ZERO );
+    magma_z_mtransfer( A, &A_h1, A.memory_location, Magma_CPU);
+    magma_z_vtransfer( b, &b_h, A.memory_location, Magma_CPU);
+    if( A_h1.storage_type != Magma_CSR){
+        magma_z_mtransfer( A, &A_h1, A.memory_location, Magma_CPU);
+        magma_z_mconvert( A_h1, &B, A_h1.storage_type, Magma_CSR);
+    }
+    else{
+        magma_z_mtransfer( A, &B, A.memory_location, Magma_CPU);
+    }
+printf("2\n");
+    for( magma_int_t rowindex=0; rowindex<B.num_rows; rowindex++ ){
+        magma_int_t start = (B.row[rowindex]);
+        magma_int_t end = (B.row[rowindex+1]);
+        for( i=start; i<end; i++ ){
+            if( B.col[i]==rowindex ){
+                diag.val[rowindex] = B.val[i];
+                if( MAGMA_Z_REAL( diag.val[rowindex]) == 0 )
+                    printf(" error: zero diagonal element in row %d!\n", rowindex);
+            }
+        }
+        for( i=start; i<end; i++ ){
+            B.val[i] = B.val[i] / diag.val[rowindex];
+            if( B.col[i]==rowindex ){
+                B.val[i] = MAGMA_Z_MAKE( 0., 0. );
+            }
+        }
+    }
+printf("3\n");
+    magma_z_csr_compressor(&B.val, &B.row, &B.col, 
+                           &C.val, &C.row, &C.col, &B.num_rows);  
+    C.num_rows = B.num_rows;
+    C.num_cols = B.num_cols;
+    C.memory_location = B.memory_location;
+    C.nnz = C.row[B.num_rows];
+    C.storage_type = B.storage_type;
+    C.memory_location = B.memory_location;
+    magma_z_mconvert( C, &A_h2, Magma_CSR, A_h1.storage_type);
+    magma_z_mtransfer( A_h2, M, Magma_CPU, A.memory_location);    
+    magma_z_vtransfer( diag, d, Magma_CPU, A.memory_location);
+    //magma_z_mfree( &H1 );
+    //magma_z_mfree( &H2 );   
+    //magma_z_mfree( &B );
+    //magma_z_mfree( &C );  
+    return MAGMA_SUCCESS;
+
+
+}
+
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+    Purpose
+    =======
+
+    Prepares the Jacobi Iteration according to
+       x^(k+1) = D^(-1) * b - D^(-1) * (L+U) * x^k
+       x^(k+1) =      c     -       M        * x^k.
+
+    Returns the vector c
+
+    Arguments
+    =========
+
+    magma_z_vector b                          RHS b
+    magma_z_vector d                          vector with diagonal entries
+    magma_z_vector *c                         c = D^(-1) * b
+
+    =====================================================================  */
+
+magma_int_t
+magma_zjacobisetup_vector( magma_z_vector b, magma_z_vector d, 
+                           magma_z_vector *c ){
+    magma_int_t i;
+
+    
+    //if( b.memory_location == Magma_CPU ){
+        magma_z_vector diag, c_t, b_h;
+        magma_z_vinit( &c_t, Magma_CPU, b.num_rows, MAGMA_Z_ZERO );
+
+        magma_z_vtransfer( b, &b_h, b.memory_location, Magma_CPU);
+        magma_z_vtransfer( d, &diag, b.memory_location, Magma_CPU);
+
+        for( magma_int_t rowindex=0; rowindex<b.num_rows; rowindex++ ){   
+            c_t.val[rowindex] = b_h.val[rowindex] / diag.val[rowindex];
+
+        }  
+        magma_z_vtransfer( c_t, c, Magma_CPU, b.memory_location); 
+        return MAGMA_SUCCESS;
+    //}
+
+
+}
+
+
+
+
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+    Purpose
+    =======
+
     Prepares the Jacobi Iteration according to
        x^(k+1) = D^(-1) * b - D^(-1) * (L+U) * x^k
        x^(k+1) =      c     -       M        * x^k.

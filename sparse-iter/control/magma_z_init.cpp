@@ -92,7 +92,7 @@ magma_z_vinit(    magma_z_vector *x,
             return MAGMA_ERR_DEVICE_ALLOC;
 
         // data transfer
-        magma_zsetvector(x->num_rows, tmp, 1, x->val, 1 );
+        magma_zsetvector( x->num_rows, tmp, 1, x->val, 1 );
  
         magma_free_cpu(tmp);
 

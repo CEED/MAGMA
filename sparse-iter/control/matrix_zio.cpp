@@ -755,10 +755,13 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
     }
     magma_int_t true_nonzeros = 2 * off_diagonals + (A->nnz - off_diagonals);
       
-    magma_int_t* new_row = (magma_int_t *) malloc(true_nonzeros*sizeof(magma_int_t)) ; 
-    magma_int_t* new_col = (magma_int_t *) malloc(true_nonzeros*sizeof(magma_int_t)) ; 
-    magmaDoubleComplex* new_val = (magmaDoubleComplex *) malloc(true_nonzeros*sizeof(magmaDoubleComplex)) ; 
-    
+    magmaDoubleComplex *new_val;
+    magma_int_t* new_row;
+    magma_int_t* new_col;
+    magma_zmalloc_cpu( &new_val, true_nonzeros );
+    magma_imalloc_cpu( &new_row, true_nonzeros );
+    magma_imalloc_cpu( &new_col, true_nonzeros );
+
     magma_int_t ptr = 0;
     for(magma_int_t i = 0; i < A->nnz; ++i) {
         if(coo_row[i] != coo_col[i]) {
@@ -842,13 +845,13 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   */
   
   
-  (A->val) = (magmaDoubleComplex *) malloc(A->nnz*sizeof(magmaDoubleComplex)) ;
+  magma_zmalloc_cpu( &A->val, A->nnz );
   assert((A->val) != NULL);
   
-  (A->col) = (magma_int_t *) malloc(A->nnz*sizeof(magma_int_t));
+  magma_imalloc_cpu( &A->col, A->nnz );
   assert((A->col) != NULL);
   
-  (A->row) = (magma_int_t *) malloc((A->num_rows+1)*sizeof(magma_int_t)) ;
+  magma_imalloc_cpu( &A->row, A->num_rows+1 );
   assert((A->row) != NULL);
   
 

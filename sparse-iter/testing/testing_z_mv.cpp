@@ -42,12 +42,21 @@ int main( int argc, char** argv)
 
     const char *filename[] =
     {
-     "test_matrices/Trefethen_20.mtx",
      "test_matrices/Trefethen_2000.mtx",
-     "test_matrices/Trefethen_20_new.mtx",
-     "test_matrices/Trefethen_20_new2.mtx",
-     "test_matrices/Trefethen_20_new3.mtx"
+     "test_matrices/ecology2.mtx",
+     "test_matrices/apache2.mtx",
+     "test_matrices/crankseg_2.mtx",
+     "test_matrices/bmwcra_1.mtx",
+     "test_matrices/F1.mtx",
+     "test_matrices/audikw_1.mtx",
+     "test_matrices/circuit5M.mtx",
+     "test_matrices/boneS10.mtx",
+     "test_matrices/parabolic_fem.mtx",
+     "test_matrices/inline_1.mtx",
+     "test_matrices/ldoor.mtx"
     };
+for(magma_int_t matrix=6; matrix<12; matrix++){
+
 
     magma_z_sparse_matrix A, B, C, D, E, Z;
     magma_z_vector x, y, z;
@@ -57,30 +66,31 @@ int main( int argc, char** argv)
     const char *N="N";
 
   
-    magma_z_csr_mtx( &A, filename[1] );
+    magma_z_csr_mtx( &A, filename[matrix] );
     //print_z_csr_matrix( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col );
 
 
     magma_z_vinit( &x, Magma_CPU, A.num_cols, one );
     magma_z_vinit( &y, Magma_DEV, A.num_cols, one );
+    magma_z_vinit( &z, Magma_DEV, A.num_cols, zero );
     magma_z_vtransfer( x, &z, Magma_CPU, Magma_DEV);
     magma_z_vvisu( y, 0,10);
 
 
     magma_z_mtransfer( A, &B, Magma_CPU, Magma_DEV);
 
-    magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACK);
-    magma_z_mtransfer( C, &D, Magma_CPU, Magma_DEV);
+   // magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACK);
+   // magma_z_mtransfer( C, &D, Magma_CPU, Magma_DEV);
 
 
 
 
    //magma_zgecsrmv( N, B.num_rows, B.num_cols, one, B.val, B.row, B.col, y.val, one, z.val);
-    magma_z_spmv( one, D, y, one, z);
+    magma_z_spmv( one, B, y, zero, z);
 
     magma_z_vvisu( z, 0,10);
 
-
+}
 
 
 

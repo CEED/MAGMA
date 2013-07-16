@@ -50,6 +50,7 @@ int main( int argc, char** argv)
     };
 
     magma_z_sparse_matrix A, B, C, D, E, F, G, Z;
+    magma_z_sparse_matrix A_D, B_D, C_D, D_D, E_D, F_D, G_D, Z_D;
 
     magma_int_t n, nnz, n_col;
   
@@ -58,17 +59,63 @@ int main( int argc, char** argv)
     magma_int_t *row_h;
     magma_int_t *col_h;
     //read matrix from file
-    //read_z_csr_from_mtx( &A.storage_type, &A.memory_location, &A.num_rows, &A.num_cols, &A.nnz, &A.val, &A.row, &A.col, filename[0] );
     magma_z_csr_mtx( &A, filename[0] );
-
+    magma_z_mvisu( A );
+    write_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor, filename[2] );
+    magma_z_mfree( &A );
+    magma_z_csr_mtx( &A, filename[2] );
     magma_z_mvisu( A );
 
     magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);
     magma_z_mconvert( B, &C, Magma_ELLPACK, Magma_CSR);
     magma_z_mconvert( C, &D, Magma_CSR, Magma_ELLPACKT);
     magma_z_mconvert( D, &E, Magma_ELLPACKT, Magma_CSR);
-    magma_z_mconvert( E, &F, Magma_CSR, Magma_DENSE);
+    magma_z_mconvert( A, &F, Magma_CSR, Magma_DENSE);
     magma_z_mconvert( F, &G, Magma_DENSE, Magma_CSR);
+
+    magma_z_mvisu( G );
+   
+    magma_z_mtransfer( A, &A_D, Magma_CPU, Magma_DEV);
+    magma_z_mtransfer( B, &B_D, Magma_CPU, Magma_DEV);
+    magma_z_mtransfer( C, &C_D, Magma_CPU, Magma_DEV);
+    magma_z_mtransfer( D, &D_D, Magma_CPU, Magma_DEV);
+    magma_z_mtransfer( E, &E_D, Magma_CPU, Magma_DEV);
+    magma_z_mtransfer( F, &F_D, Magma_CPU, Magma_DEV);
+
+
+
+
+
+printf("A:\n");
+    magma_z_mfree(&A);
+printf("B:\n");
+    magma_z_mfree(&B);
+printf("C:\n");
+    magma_z_mfree(&C);
+printf("D:\n");
+    magma_z_mfree(&D);
+printf("E:\n");
+    magma_z_mfree(&E);
+printf("F:\n");
+    magma_z_mfree(&F);
+printf("G:\n");
+    magma_z_mfree(&G);
+
+printf("A_D:\n");
+    magma_z_mfree(&A_D);
+printf("B_D:\n");
+    magma_z_mfree(&B_D);
+printf("C_D:\n");
+    magma_z_mfree(&C_D);
+printf("D_D:\n");
+    magma_z_mfree(&D_D);
+printf("E_D:\n");
+    magma_z_mfree(&E_D);
+printf("F_D:\n");
+    magma_z_mfree(&F_D);
+
+
+
    // magma_z_mconvert( G, &Z, Magma_CSR, Magma_BCSR);
 
 /*
@@ -80,11 +127,23 @@ int main( int argc, char** argv)
     } 
     printf("\n");
 */
-    printf("\n now back CSR \n");
-    magma_z_mvisu( G );
-    //write_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor, filename[2] );
+
+
     //write_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor, filename[3] );
 
+    magma_z_vector x, y, z;
+
+    magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
+    magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
+
+    magma_z_vinit( &x, Magma_CPU, A.num_cols, one );
+    magma_z_vinit( &y, Magma_DEV, A.num_cols, one );
+    magma_z_vinit( &z, Magma_DEV, A.num_cols, zero );
+
+    magma_z_vvisu( z, 0,10);
+    magma_z_vfree(&z);
+    magma_z_vfree(&x);
+    magma_z_vfree(&y);
 
     TESTING_FINALIZE();
     return 0;

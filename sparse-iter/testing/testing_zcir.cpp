@@ -14,6 +14,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <sys/time.h>
+#include <time.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
 
@@ -33,21 +35,28 @@ int main( int argc, char** argv)
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
+
+    //Chronometry
+    struct timeval inicio, fim;
+    double tempo1, tempo2;
     
     const char *filename[] =
     {
-     "test_matrices/Trefethen_20.mtx",
      "test_matrices/Trefethen_2000.mtx",
-     "test_matrices/Trefethen_20_new.mtx",
-     "test_matrices/Trefethen_20_new2.mtx",
-     "test_matrices/Trefethen_20_new3.mtx",
+     "test_matrices/nasa1824.mtx",
+     "test_matrices/ecology2.mtx",
+     "test_matrices/apache2.mtx",
+     "test_matrices/crankseg_2.mtx",
+     "test_matrices/bmwcra_1.mtx",
+     "test_matrices/F1.mtx",
      "test_matrices/audikw_1.mtx",
      "test_matrices/circuit5M.mtx",
-     "test_matrices/europe_osm.mtx",
+     "test_matrices/boneS10.mtx",
      "test_matrices/parabolic_fem.mtx",
-     "test_matrices/road_usa.mtx",
-     "test_matrices/road_central.mtx"
+     "test_matrices/inline_1.mtx",
+     "test_matrices/ldoor.mtx"
     };
+for(magma_int_t matrix=1; matrix<2; matrix++){
 
     magma_z_sparse_matrix A, B, C, D;
     magma_z_vector x, b;
@@ -57,7 +66,7 @@ int main( int argc, char** argv)
     const char *N="N";
 
   
-    magma_z_csr_mtx( &A, filename[8] );
+    magma_z_csr_mtx( &A, filename[matrix] );
     //print_z_csr_matrix( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col );
 
 
@@ -69,9 +78,9 @@ int main( int argc, char** argv)
 
 
 
-    magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);
-    magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACKT);
-    magma_z_mtransfer( C, &D, Magma_CPU, Magma_DEV);
+    //magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);
+    //magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACKT);
+    magma_z_mtransfer( A, &D, Magma_CPU, Magma_DEV);
 
 
     magma_solver_parameters solver_par;
@@ -86,13 +95,25 @@ int main( int argc, char** argv)
     precond_par.restart = 30;
 
 
-
+    //Chronometry 
+    gettimeofday(&inicio, NULL);
+    tempo1=inicio.tv_sec+(inicio.tv_usec/1000000.0);
 
     magma_zcir( D, b, &x, &solver_par, &precond_par );
 
-    magma_z_vvisu( x, 0,10);
+    //Chronometry  
+    gettimeofday(&fim, NULL);
+    tempo2=fim.tv_sec+(fim.tv_usec/1000000.0);
+    printf("runtime: %f\n", tempo2-tempo1);
 
+    magma_z_vfree(&b);
+    magma_z_vfree(&x);
+    magma_z_mfree(&A);
+    magma_z_mfree(&D);
 
+    //magma_z_vvisu( x, 0,10);
+
+}
 
 
     TESTING_FINALIZE();

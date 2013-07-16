@@ -75,7 +75,7 @@ int main( int argc, char** argv)
 
     magma_precond_parameters precond_par;
     precond_par.precond = Magma_GMRES;
-    precond_par.epsilon = 10e-1;
+    precond_par.epsilon = 10e-3;
     precond_par.maxiter = 1000;
     precond_par.restart = 30;
 

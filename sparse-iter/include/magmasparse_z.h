@@ -153,6 +153,12 @@ magma_z_vfree(          magma_z_vector *x );
 magma_int_t
 magma_zjacobisetup(     magma_z_sparse_matrix A, magma_z_vector b, 
                         magma_z_sparse_matrix *M, magma_z_vector *c );
+magma_int_t
+magma_zjacobisetup_matrix( magma_z_sparse_matrix A, magma_z_vector b, 
+                        magma_z_sparse_matrix *M, magma_z_vector *d );
+magma_int_t
+magma_zjacobisetup_vector( magma_z_vector b,  magma_z_vector d, 
+                           magma_z_vector *c );
 
 magma_int_t
 magma_zjacobiiter(      magma_z_sparse_matrix M, magma_z_vector c, magma_z_vector *x,  
