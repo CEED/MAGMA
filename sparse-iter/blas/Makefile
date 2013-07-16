@@ -17,8 +17,11 @@ ZSRC := \
 	zgecsrmv.cu		\
 	zgeellmv.cu		\
 	zgeelltmv.cu            \
+    zlag2c_sparse.cu        \
+    clag2z_sparse.cu        \
 	magma_zlag2c.cpp        \
 	magma_clag2z.cpp        \
+
 
 # multi-GPU
 ZSRC += \

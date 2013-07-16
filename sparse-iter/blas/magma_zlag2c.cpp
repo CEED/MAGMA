@@ -52,7 +52,7 @@ magma_vector_zlag2c( magma_z_vector x, magma_c_vector *y )
         y->num_rows = x.num_rows;
         y->nnz = x.nnz;
         magma_cmalloc( &y->val, x.num_rows );
-        magmablas_zlag2c( x.num_rows, 1, x.val, x.num_rows, y->val, x.num_rows, &info );
+        magmablas_zlag2c_sparse( x.num_rows, 1, x.val, x.num_rows, y->val, x.num_rows, &info );
         return MAGMA_SUCCESS;
     }
     else
@@ -93,36 +93,39 @@ magma_sparse_matrix_zlag2c( magma_z_sparse_matrix A, magma_c_sparse_matrix *B )
         B->max_nnz_row = A.max_nnz_row;
         if( A.storage_type == Magma_CSR ){
             magma_cmalloc( &B->val, A.nnz );
-            magmablas_zlag2c( A.nnz, 1, A.val, A.nnz, B->val, A.nnz, &info );
+            magmablas_zlag2c_sparse( A.nnz, 1, A.val, A.nnz, B->val, A.nnz, &info );
             B->row = A.row;
             B->col = A.col;
             return MAGMA_SUCCESS;
         }
         if( A.storage_type == Magma_ELLPACK ){
             magma_cmalloc( &B->val, A.num_rows*A.max_nnz_row );
-            magmablas_zlag2c( A.num_rows*A.max_nnz_row, 1, A.val, A.num_rows*A.max_nnz_row, 
+            magmablas_zlag2c_sparse( A.num_rows*A.max_nnz_row, 1, A.val, A.num_rows*A.max_nnz_row, 
                               B->val, A.num_rows*A.max_nnz_row, &info );
             B->col = A.col;
             return MAGMA_SUCCESS;
         }
         if( A.storage_type == Magma_ELLPACKT ){
             magma_cmalloc( &B->val, A.num_rows*A.max_nnz_row );
-            magmablas_zlag2c( A.num_rows*A.max_nnz_row, 1, A.val, A.num_rows*A.max_nnz_row, 
+            magmablas_zlag2c_sparse(  A.num_rows*A.max_nnz_row, 1, A.val, A.num_rows*A.max_nnz_row, 
                               B->val, A.num_rows*A.max_nnz_row, &info );
             B->col = A.col;
             return MAGMA_SUCCESS;
         }
         if( A.storage_type == Magma_DENSE ){
             magma_cmalloc( &B->val, A.num_rows*A.num_cols );
-            magmablas_zlag2c( A.num_rows, A.num_cols, A.val, A.num_rows, B->val, A.num_rows, &info );
+            magmablas_zlag2c_sparse(  A.num_rows, A.num_cols, A.val, A.num_rows, B->val, A.num_rows, &info );
             return MAGMA_SUCCESS;
         }
-        else
+        else{
             return MAGMA_ERR_NOT_SUPPORTED;
+            printf("error:format not supported\n");
+        }
     }
-    else
+    else{
         return MAGMA_ERR_NOT_SUPPORTED;
-
+        printf("error:matrix not on GPU\n");
+        }
 }
 
 

@@ -47,6 +47,17 @@ int main( int argc, char** argv)
      "test_matrices/Trefethen_20_new.mtx",
      "test_matrices/Trefethen_20_new2.mtx",
      "test_matrices/Trefethen_20_new3.mtx"
+     "test_matrices/ecology2.mtx",
+     "test_matrices/apache2.mtx",
+     "test_matrices/audikw_1.mtx",
+     "test_matrices/boneS10.mtx",
+     "test_matrices/inline_1.mtx",
+     "test_matrices/ldoor.mtx"
+     "test_matrices/bmwcra_1.mtx",
+     "test_matrices/F1.mtx",
+     "test_matrices/circuit5M.mtx",
+     "test_matrices/parabolic_fem.mtx",
+     "test_matrices/crankseg_2.mtx",
     };
 
     magma_z_sparse_matrix A, B, C, D, E, F, G, Z;
@@ -54,12 +65,11 @@ int main( int argc, char** argv)
 
     magma_int_t n, nnz, n_col;
   
-    //create vectors for sparse matrix
-    magmaDoubleComplex *val_h;
-    magma_int_t *row_h;
-    magma_int_t *col_h;
+
     //read matrix from file
     magma_z_csr_mtx( &A, filename[0] );
+
+
     magma_z_mvisu( A );
     write_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor, filename[2] );
     magma_z_mfree( &A );
