@@ -7,7 +7,6 @@
 
        @author Stan Tomov
        @precisions normal z -> s d c
-
 */
 #include "common_magma.h"
 
@@ -28,9 +27,9 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
     ZGEQRF computes a QR factorization of a complex M-by-N matrix A:
     A = Q * R.
     
-    This version has LAPACK-complaint arguments. 
-    If the current stream is NULL, this version replaces it with user defined
-    stream to overlap computation with communication.    
+    This version has LAPACK-complaint arguments.
+    This version assumes the computation runs through the NULL stream
+    and therefore is not overlapping some computation with communication.
 
     Other versions (magma_zgeqrf_gpu and magma_zgeqrf3_gpu) store the
     intermediate T matrices.
@@ -125,17 +124,9 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
         return *info;
     }
 
-    /* Define user stream if current stream is NULL */
-    magma_queue_t stream[2], current_stream;
-    magmablasGetKernelStream(&current_stream);
-
+    magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
-    if (current_stream == NULL) {
-        magma_queue_create( &stream[1] );
-        magmablasSetKernelStream(stream[1]);
-    }
-    else
-        stream[1] = current_stream;
+    magma_queue_create( &stream[1] );
 
     nbmin = 2;
     nx    = nb;
@@ -148,25 +139,22 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
         for (i = 0; i < k-nx; i += nb) {
             ib = min(k-i, nb);
             rows = m -i;
-
-            /* download i-th panel */
-            magma_queue_sync( stream[1] );
             magma_zgetmatrix_async( rows, ib,
-                                    dA(i,i),       ldda,
-                                    work_ref(i), ldwork, stream[0] );
+                                    dA(i,i),     ldda,
+                                    work_ref(i), ldwork, stream[1] );
             if (i>0){
                 /* Apply H' to A(i:m,i+2*ib:n) from the left */
                 magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                                   m-old_i, n-old_i-2*old_ib, old_ib,
                                   dA(old_i, old_i         ), ldda, dwork,        lddwork,
                                   dA(old_i, old_i+2*old_ib), ldda, dwork+old_ib, lddwork);
-
+                
                 magma_zsetmatrix_async( old_ib, old_ib,
                                         work_ref(old_i),  ldwork,
-                                        dA(old_i, old_i), ldda, stream[1] );
+                                        dA(old_i, old_i), ldda, stream[0] );
             }
 
-            magma_queue_sync( stream[0] );
+            magma_queue_sync( stream[1] );
             lapackf77_zgeqrf(&rows, &ib, work_ref(i), &ldwork, tau+i, hwork, &lhwork, info);
             /* Form the triangular factor of the block reflector
                H = H(i) H(i+1) . . . H(i+ib-1) */
@@ -175,15 +163,11 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
                               work_ref(i), &ldwork, tau+i, hwork, &ib);
 
             zpanel_to_q( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
-
-            /* download the i-th V matrix */
-            magma_zsetmatrix_async( rows, ib, work_ref(i), ldwork, dA(i,i), ldda, stream[0] );
-
-            /* download the T matrix */
-            magma_zsetmatrix_async( ib, ib, hwork, ib, dwork, lddwork, stream[0] );
-            magma_queue_sync( stream[0] );
+            magma_zsetmatrix( rows, ib, work_ref(i), ldwork, dA(i,i), ldda );
+            zq_to_panel( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
 
             if (i + ib < n) {
+                magma_zsetmatrix( ib, ib, hwork, ib, dwork, lddwork );
 
                 if (i+nb < k-nx) {
                     /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
@@ -191,17 +175,15 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
                                       rows, ib, ib,
                                       dA(i, i   ), ldda, dwork,    lddwork,
                                       dA(i, i+ib), ldda, dwork+ib, lddwork);
-                    zq_to_panel( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
                 }
                 else {
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                                       rows, n-i-ib, ib,
                                       dA(i, i   ), ldda, dwork,    lddwork,
                                       dA(i, i+ib), ldda, dwork+ib, lddwork);
-                    zq_to_panel( MagmaUpper, ib, work_ref(i), ldwork, hwork+ib*ib );
-                    magma_zsetmatrix_async( ib, ib,
-                                            work_ref(i), ldwork,
-                                            dA(i,i),     ldda, stream[1] );
+                    magma_zsetmatrix( ib, ib,
+                                      work_ref(i), ldwork,
+                                      dA(i,i),     ldda );
                 }
                 old_i  = i;
                 old_ib = ib;
@@ -210,27 +192,22 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
     } else {
         i = 0;
     }
+
     magma_free( dwork );
 
     /* Use unblocked code to factor the last or only block. */
     if (i < k) {
         ib   = n-i;
         rows = m-i;
-        magma_zgetmatrix_async( rows, ib, dA(i, i), ldda, work, rows, stream[1] );
-        magma_queue_sync( stream[1] );
+        magma_zgetmatrix( rows, ib, dA(i, i), ldda, work, rows );
         lhwork = lwork - rows*ib;
         lapackf77_zgeqrf(&rows, &ib, work, &rows, tau+i, work+ib*rows, &lhwork, info);
         
-        magma_zsetmatrix_async( rows, ib, work, rows, dA(i, i), ldda, stream[1] );
+        magma_zsetmatrix( rows, ib, work, rows, dA(i, i), ldda );
     }
 
     magma_free_pinned( work );
-
     magma_queue_destroy( stream[0] );
-    if (current_stream == NULL) {
-      magma_queue_destroy( stream[1] );
-      magmablasSetKernelStream(NULL);
-    }
-
+    magma_queue_destroy( stream[1] );
     return *info;
-}   /* magma_zgeqrf2_gpu */
+} /* magma_zgeqrf2_gpu */
