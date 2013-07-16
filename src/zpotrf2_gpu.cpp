@@ -41,8 +41,8 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
     where U is an upper triangular matrix and L is lower triangular.
 
     This is the block version of the algorithm, calling Level 3 BLAS.
-    If the current stream is NULL, this version replaces it with user defined
-    stream to overlap computation with communication.
+    This version assumes the computation runs through the NULL stream
+    and therefore is not overlapping some computation with communication.
 
     Arguments
     =========
@@ -108,24 +108,15 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
         return *info;
     }
 
-    /* Define user stream if current stream is NULL */
-    cudaStream_t stream[2], current_stream;
-    magmablasGetKernelStream(&current_stream);
-
+    magma_queue_t stream[2];
     magma_queue_create( &stream[0] );
-    if (current_stream == NULL) {
-      magma_queue_create( &stream[1] );
-      magmablasSetKernelStream(stream[1]);
-    }
-    else
-      stream[1] = current_stream;
+    magma_queue_create( &stream[1] );
 
     if ((nb <= 1) || (nb >= n)) {
         /*  Use unblocked code. */
-        magma_zgetmatrix_async( n, n, dA, ldda, work, n, stream[1] );
-        magma_queue_sync( stream[1] );
+        magma_zgetmatrix( n, n, dA, ldda, work, n );
         lapackf77_zpotrf(uplo_, &n, work, &n, info);
-        magma_zsetmatrix_async( n, n, work, n, dA, ldda, stream[1] );
+        magma_zsetmatrix( n, n, work, n, dA, ldda );
     }
     else {
 
@@ -143,10 +134,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                             d_neg_one, dA(0, j), ldda,
                             d_one,     dA(j, j), ldda);
 
-                magma_queue_sync( stream[1] );
                 magma_zgetmatrix_async( jb, jb,
                                         dA(j, j), ldda,
-                                        work,     jb, stream[0] );
+                                        work,     jb, stream[1] );
                 
                 if ( (j+jb) < n) {
                     /* Compute the current block row. */
@@ -157,11 +147,12 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                                 c_one,     dA(j, j+jb), ldda);
                 }
                 
-                magma_queue_sync( stream[0] );
+                magma_queue_sync( stream[1] );
+
                 lapackf77_zpotrf(MagmaUpperStr, &jb, work, &jb, info);
                 magma_zsetmatrix_async( jb, jb,
                                         work,     jb,
-                                        dA(j, j), ldda, stream[1] );
+                                        dA(j, j), ldda, stream[0] );
                 if (*info != 0) {
                     *info = *info + j;
                     break;
@@ -188,10 +179,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                             d_neg_one, dA(j, 0), ldda,
                             d_one,     dA(j, j), ldda);
                 
-                magma_queue_sync( stream[1] );
                 magma_zgetmatrix_async( jb, jb,
                                         dA(j, j), ldda,
-                                        work,     jb, stream[0] );
+                                        work,     jb, stream[1] );
                 
                 if ( (j+jb) < n) {
                     magma_zgemm( MagmaNoTrans, MagmaConjTrans,
@@ -201,11 +191,11 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
                                  c_one,     dA(j+jb, j), ldda);
                 }
 
-                magma_queue_sync( stream[0] );
+                magma_queue_sync( stream[1] );
                 lapackf77_zpotrf(MagmaLowerStr, &jb, work, &jb, info);
                 magma_zsetmatrix_async( jb, jb,
                                         work,     jb,
-                                        dA(j, j), ldda, stream[1] );
+                                        dA(j, j), ldda, stream[0] );
                 if (*info != 0) {
                     *info = *info + j;
                     break;
@@ -221,13 +211,9 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
         }
     }
 
-    magma_free_pinned( work );
-
     magma_queue_destroy( stream[0] );
-    if (current_stream == NULL) {
-      magma_queue_destroy( stream[1] );
-      magmablasSetKernelStream(NULL);
-    }
+    magma_queue_destroy( stream[1] );
+    magma_free_pinned( work );
 
     return *info;
 } /* magma_zpotrf_gpu */
