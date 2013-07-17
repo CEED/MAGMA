@@ -93,7 +93,7 @@ magma_zir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_zaxpy(dofs,  c_one, b.val, 1, r.val, 1);                // r = r + b
         nom = magma_dznrm2(dofs, r.val, 1);                            // nom = || r ||
 
-        printf("Iteration : %4d  Norm: %f\n", i, nom);
+        printf("Iteration : %4d  Norm: %e\n", i, nom);
         if ( nom < r0 ) {
             solver_par->numiter = i;
             break;
@@ -110,11 +110,13 @@ magma_zir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_z_spmv( c_one, A, *x, c_zero, r );                       // r = A x
         magma_zaxpy(dofs,  c_mone, b.val, 1, r.val, 1);                // r = r - b
         den = magma_dznrm2(dofs, r.val, 1);                            // den = || r ||
-        printf( "      || r_N ||   = %f\n", den);
+        printf( "      || r_N ||   = %e\n", den);
         solver_par->residual = (double)(den);
     }
     
-    return MAGMA_SUCCESS;
+    magma_z_vfree(&r);
+    magma_z_vfree(&z);
+
 
     return MAGMA_SUCCESS;
 }   /* magma_zir */

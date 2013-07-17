@@ -39,17 +39,17 @@ int main( int argc, char** argv)
      "test_matrices/Trefethen_2000.mtx",
      "test_matrices/ecology2.mtx",
      "test_matrices/apache2.mtx",
-     "test_matrices/audikw_1.mtx",
-     "test_matrices/boneS10.mtx",
-     "test_matrices/inline_1.mtx",
-     "test_matrices/ldoor.mtx"
+     "test_matrices/crankseg_2.mtx",
      "test_matrices/bmwcra_1.mtx",
      "test_matrices/F1.mtx",
-     "test_matrices/circuit5M.mtx",
+     "test_matrices/boneS10.mtx",
      "test_matrices/parabolic_fem.mtx",
-     "test_matrices/crankseg_2.mtx",
+     "test_matrices/inline_1.mtx",
+     "test_matrices/ldoor.mtx",
+     "test_matrices/audikw_1.mtx",
+     "test_matrices/circuit5M.mtx"
     };
-for(magma_int_t matrix=1; matrix<2; matrix++){
+for(magma_int_t matrix=6; matrix<12; matrix++){
 
     magma_z_sparse_matrix A, C, D;
     magma_z_vector x, b;
@@ -66,28 +66,28 @@ for(magma_int_t matrix=1; matrix<2; matrix++){
     magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
     magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
 
-    magma_z_vvisu( x, 0,10);
+    //magma_z_vvisu( x, 0,10);
 
 
 
 
-    magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACKT);
-    magma_z_mtransfer( C, &D, Magma_CPU, Magma_DEV);
+    //magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACKT);
+    magma_z_mtransfer( A, &D, Magma_CPU, Magma_DEV);
 
 
     magma_solver_parameters solver_par;
 
-    solver_par.epsilon = 10e-8;
-    solver_par.maxiter = 10000;
+    solver_par.epsilon = 10e-3;
+    solver_par.maxiter = 1000;
 
     magma_zcg( D, b, &x, &solver_par );
 
-    magma_z_vvisu( x, 0,10);
+    //magma_z_vvisu( x, 0,10);
 
     magma_z_vfree(&b);
     magma_z_vfree(&x);
     magma_z_mfree(&A);
-    magma_z_mfree(&C);
+    //magma_z_mfree(&C);
     magma_z_mfree(&D);
 
 

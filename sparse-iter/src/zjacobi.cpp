@@ -137,7 +137,6 @@ magma_zjacobisetup_matrix( magma_z_sparse_matrix A, magma_z_vector b,
     else{
         magma_z_mtransfer( A, &B, A.memory_location, Magma_CPU);
     }
-printf("2\n");
     for( magma_int_t rowindex=0; rowindex<B.num_rows; rowindex++ ){
         magma_int_t start = (B.row[rowindex]);
         magma_int_t end = (B.row[rowindex+1]);
@@ -155,7 +154,6 @@ printf("2\n");
             }
         }
     }
-printf("3\n");
     magma_z_csr_compressor(&B.val, &B.row, &B.col, 
                            &C.val, &C.row, &C.col, &B.num_rows);  
     C.num_rows = B.num_rows;
@@ -164,13 +162,18 @@ printf("3\n");
     C.nnz = C.row[B.num_rows];
     C.storage_type = B.storage_type;
     C.memory_location = B.memory_location;
-    magma_z_mconvert( C, &A_h2, Magma_CSR, A_h1.storage_type);
-    magma_z_mtransfer( A_h2, M, Magma_CPU, A.memory_location);    
+    if( A_h1.storage_type != Magma_CSR){
+        magma_z_mconvert( C, &A_h2, Magma_CSR, A_h1.storage_type);
+        magma_z_mtransfer( A_h2, M, Magma_CPU, A.memory_location);
+    }
+    else{
+        magma_z_mtransfer( C, M, Magma_CPU, A.memory_location);
+    }    
     magma_z_vtransfer( diag, d, Magma_CPU, A.memory_location);
-    //magma_z_mfree( &H1 );
-    //magma_z_mfree( &H2 );   
-    //magma_z_mfree( &B );
-    //magma_z_mfree( &C );  
+    magma_z_mfree( &A_h1 );
+    magma_z_mfree( &A_h2 );   
+    magma_z_mfree( &B );
+    magma_z_mfree( &C );  
     return MAGMA_SUCCESS;
 
 

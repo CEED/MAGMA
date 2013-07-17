@@ -49,14 +49,14 @@ int main( int argc, char** argv)
      "test_matrices/crankseg_2.mtx",
      "test_matrices/bmwcra_1.mtx",
      "test_matrices/F1.mtx",
-     "test_matrices/audikw_1.mtx",
-     "test_matrices/circuit5M.mtx",
      "test_matrices/boneS10.mtx",
      "test_matrices/parabolic_fem.mtx",
      "test_matrices/inline_1.mtx",
-     "test_matrices/ldoor.mtx"
+     "test_matrices/ldoor.mtx",
+     "test_matrices/audikw_1.mtx",
+     "test_matrices/circuit5M.mtx"
     };
-for(magma_int_t matrix=1; matrix<2; matrix++){
+for(magma_int_t matrix=0; matrix<13; matrix++){
 
     magma_z_sparse_matrix A, B, C, D;
     magma_z_vector x, b;
@@ -73,7 +73,7 @@ for(magma_int_t matrix=1; matrix<2; matrix++){
     magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
     magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
 
-    magma_z_vvisu( x, 0,10);
+    //magma_z_vvisu( x, 0,10);
 
 
 
@@ -91,7 +91,7 @@ for(magma_int_t matrix=1; matrix<2; matrix++){
     magma_precond_parameters precond_par;
     precond_par.precond = Magma_CG;
     precond_par.epsilon = 1e-6;
-    precond_par.maxiter = 1000;
+    precond_par.maxiter = 10000;
     precond_par.restart = 30;
 
 
