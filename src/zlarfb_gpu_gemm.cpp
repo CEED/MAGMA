@@ -171,9 +171,9 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                      k, n, m,
                      c_one,  dV,    ldv,
                              dC,    ldc,
-                     c_zero, dwork, k);
+                     c_zero, dwork, ldwork);
 
-        if(m<n){
+        if(m<=n){
             // W2 = V T
             magma_zgemm( notransV, trans,
                          m, k, k,
@@ -184,11 +184,11 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
             magma_zgemm( MagmaNoTrans, MagmaNoTrans,
                          m, n, k,
                          c_neg_one, dworkvt,  ldworkvt,
-                                    dwork,    k,
+                                    dwork,    ldwork,
                          c_one,     dC,       ldc);
         }else{
             // W2 = T W  = T  V' C
-            magma_zgemm( MagmaNoTrans, transt,
+            magma_zgemm( trans, MagmaNoTrans,
                          k, n, k,
                          c_one,  dT, ldt,
                                  dwork, ldwork,
@@ -222,7 +222,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
             // C = C - W2 V' = C - C V T V' = C (I - V T V') = C H
             magma_zgemm( MagmaNoTrans, transV,
                          m, n, k,
-                         c_neg_one, dwork, ldwork,
+                         c_neg_one, dworkvt, ldworkvt,
                                     dV,    ldv,
                          c_one,     dC,    ldc);
         }else{

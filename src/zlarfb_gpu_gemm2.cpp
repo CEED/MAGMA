@@ -165,6 +165,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
         notransV = MagmaConjTrans;
         transV   = MagmaNoTrans;
     }
+        printf("check that workspace dworkvt is of good size \n");
 
     if ( side  == 'l' || side  == 'L' ) {
         // Form H C or H' C
@@ -186,7 +187,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
         // copy C to Wc then do a gemm C = (I-VTV')*C = C - dwQ * dwC
          magma_zcopymatrix( m, n, dC, ldc, dwC, m );
 
-        // Wq = Wvt * V' = V T V'
+        // C = C - dwQ*dwC = C - V T V'C
         magma_zgemm( MagmaNoTrans, MagmaNoTrans,
                      m, n, m,
                      c_neg_one, dwQ,   m,
