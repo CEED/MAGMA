@@ -7,6 +7,7 @@
        
        @author Stan Tomov
        @author Mark Gates
+       @author Azzam Haidar
 */
 
 #include "magma.h"
@@ -856,7 +857,7 @@ magma_int_t magma_get_cbulge_nb_mgpu( magma_int_t m )
 {
     magma_int_t arch = magma_getdevice_arch();
     if ( arch >= 300 ) {       // 3.x Kepler + SB
-        return 96;
+        return 64;
     }
     else if ( arch >= 200 ) {  // 2.x Fermi
         return 64;
@@ -870,7 +871,7 @@ magma_int_t magma_get_zbulge_nb_mgpu( magma_int_t m )
 {
     magma_int_t arch = magma_getdevice_arch();
     if ( arch >= 300 ) {       // 3.x Kepler + SB
-        return 96;
+        return 64;
     }
     else if ( arch >= 200 ) {  // 2.x Fermi
         return 64;
