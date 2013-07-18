@@ -269,7 +269,7 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
     printf("using %d threads\n", threads);
 #endif
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
-    magma_int_t lda2 = nb+1+(nb-1);
+    magma_int_t lda2 = 2*nb; //nb+1+(nb-1);
     if(lda2>n){
         #ifndef NO_WARNING    
         printf("--------------------------------------------------------------\n");

@@ -113,8 +113,8 @@ magma_zbulge_applyQ_v2(char side,
     magma_int_t lddt = ldt; 
     magma_int_t lddw = 0;
     magma_int_t lddwork  = ((NE+31)/32)*32;
-    magma_int_t dwVTsiz  = lddv*lddwork; // lddv*lddv + lddv*lddwork;// lddv*lddwork;
-    magma_int_t dworksiz = NE*Vblksiz;  // lddv*Vblksiz;     // NE*Vblksiz;
+    magma_int_t dwVTsiz  = lddv*Vblksiz; // lddv*lddv + lddv*lddwork;(v2) // lddv*Vblksiz; (v1,v3)
+    magma_int_t dworksiz = lddwork*Vblksiz;  // lddv*Vblksiz; (v2)   // NE*Vblksiz=lddwork*Vblksiz; (v1,v3)
 
     if(MAGMA_SUCCESS != magma_zmalloc( &dwork, 2*dworksiz + 2*dwVTsiz +  2*Vchunksiz* (Vblksiz* (lddv+lddt)) )) {
        printf ("!!!!  magma_zbulge_applyQ magma_alloc failed for: dwork\n" );

@@ -173,7 +173,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                              dV,    ldv,
                      c_zero, dwork, ldwork);
 
-        if(m<n){
+        if(m<=n){
             // W2 = V T
             magma_zgemm( notransV, trans,
                          m, k, k,
