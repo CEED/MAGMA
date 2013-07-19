@@ -135,6 +135,8 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
     if (m <= 0 || n <= 0) {
         return MAGMA_SUCCESS;
     }
+    //internal variable
+    magma_int_t ldwvt = m > n ?  k : m;
 
     // opposite of trans
     char transt;
@@ -179,11 +181,11 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                          m, k, k,
                          c_one,  dV, ldv,
                                  dT, ldt,
-                         c_zero, dworkvt, ldworkvt);
+                         c_zero, dworkvt, ldwvt);
             // C = C - W2 W = C - V T V' C = (I - V T V') C = H C
             magma_zgemm( MagmaNoTrans, MagmaNoTrans,
                          m, n, k,
-                         c_neg_one, dworkvt,  ldworkvt,
+                         c_neg_one, dworkvt,  ldwvt,
                                     dwork,    ldwork,
                          c_one,     dC,       ldc);
         }else{
@@ -192,12 +194,12 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                          k, n, k,
                          c_one,  dT, ldt,
                                  dwork, ldwork,
-                         c_zero, dworkvt, ldworkvt);
+                         c_zero, dworkvt, ldwvt);
             // C = C - V W2 = C - V T V' C = (I - V T V') C = H C
             magma_zgemm( notransV, MagmaNoTrans,
                          m, n, k,
                          c_neg_one, dV,  ldv,
-                                    dworkvt,    ldworkvt,
+                                    dworkvt,  ldwvt,
                          c_one,     dC,       ldc);
         }
     }
@@ -218,11 +220,11 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                          m, k, k,
                          c_one,  dwork, ldwork,
                                  dT, ldt,
-                         c_zero, dworkvt, ldworkvt);
+                         c_zero, dworkvt, ldwvt);
             // C = C - W2 V' = C - C V T V' = C (I - V T V') = C H
             magma_zgemm( MagmaNoTrans, transV,
                          m, n, k,
-                         c_neg_one, dworkvt, ldworkvt,
+                         c_neg_one, dworkvt, ldwvt,
                                     dV,    ldv,
                          c_one,     dC,    ldc);
         }else{
@@ -231,12 +233,12 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                          k, n, k,
                          c_one,  dT, ldt,
                                  dV, ldv,
-                         c_zero, dworkvt, ldworkvt);
+                         c_zero, dworkvt, ldwvt);
             // C = C - W W2 = C - C V T V' = C (I - V T V') = C H
             magma_zgemm( MagmaNoTrans, MagmaNoTrans,
                          m, n, k,
                          c_neg_one, dwork,   ldwork,
-                                    dworkvt, ldworkvt,
+                                    dworkvt, ldwvt,
                          c_one,     dC,      ldc);
 
         }
