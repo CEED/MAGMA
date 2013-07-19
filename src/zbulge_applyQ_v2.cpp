@@ -400,6 +400,7 @@ magma_zbulge_applyQ_v2(char side,
     cudaEventDestroy(myevent[1]);
     magma_queue_destroy( stream[0] );
     magma_queue_destroy( stream[1] );
+    magma_free(dwork);
 
 
     return MAGMA_SUCCESS;
