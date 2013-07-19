@@ -48,8 +48,8 @@ int main(int argc, char **argv)
     
     nrhs = opts.nrhs;
     
-    printf("    N  NRHS   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / ||A||*||X||\n");
-    printf("==============================================================================\n");
+    printf("    N  NRHS   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||B - AX|| / N*||A||*||X||\n");
+    printf("================================================================================\n");
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             N = opts.nsize[i];
@@ -102,7 +102,7 @@ int main(int argc, char **argv)
                            &c_neg_one, h_B, &ldb);
             
             Rnorm = lapackf77_zlange("I", &N, &nrhs, h_B, &ldb, work);
-            error = Rnorm/(Anorm*Xnorm);
+            error = Rnorm/(N*Anorm*Xnorm);
             status |= (error > tol);
             
             /* ====================================================================
