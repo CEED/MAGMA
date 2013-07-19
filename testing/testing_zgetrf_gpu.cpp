@@ -146,7 +146,7 @@ int main( int argc, char** argv)
             if ( opts.check ) {
                 magma_zgetmatrix( M, N, d_A, ldda, h_A, lda );
                 error = get_LU_error( M, N, h_R, lda, h_A, ipiv );
-                printf("   %8.2e%s\n", error, (error > tol ? " fail" : ""));
+                printf("   %8.2e%s\n", error, (error > tol ? "  fail" : ""));
                 status |= (error > tol);
             }
             else {
