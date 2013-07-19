@@ -62,6 +62,7 @@ int main( int argc, char** argv)
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
+    double tol = opts.tolerance * lapackf77_dlamch("E");
 
     char jobz = opts.jobz;
     int checkres = opts.check;
@@ -258,13 +259,13 @@ int main( int argc, char** argv)
                        (int) N, cpu_time, gpu_time, mgpu_time);
                 printf("Testing the eigenvalues and eigenvectors for correctness:\n");
                 if(itype==1)
-                    printf("(1)    | A Z - B Z D | / (|A| |Z| N) = %e\n", result);
+                    printf("(1)    | A Z - B Z D | / (|A| |Z| N) = %e %s\n", result, (result > tol ? "  failed" : "  passed") );
                 else if(itype==2)
-                    printf("(1)    | A B Z - Z D | / (|A| |Z| N) = %e\n", result);
+                    printf("(1)    | A B Z - Z D | / (|A| |Z| N) = %e %s \n", result, (result > tol ? "  failed" : "  passed") );
                 else if(itype==3)
-                    printf("(1)    | B A Z - Z D | / (|A| |Z| N) = %e\n", result);
+                    printf("(1)    | B A Z - Z D | / (|A| |Z| N) = %e %s\n", result, (result > tol ? "  failed" : "  passed") );
 
-                printf("(3)    | D(MGPU)-D(LAPACK) |/ |D| = %e\n\n", result2);
+                printf("(3)    | D(MGPU)-D(LAPACK) |/ |D| = %e %s \n\n", result2, (result2 > tol ? "  failed" : "  passed") );
             }
             else {
                 printf("%5d     ------         ------         %6.2f\n",

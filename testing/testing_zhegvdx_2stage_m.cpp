@@ -58,6 +58,7 @@ int main( int argc, char** argv)
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
+    double tol = opts.tolerance * lapackf77_dlamch("E");
 
     char jobz = opts.jobz;
     int checkres = opts.check;
@@ -220,11 +221,11 @@ int main( int argc, char** argv)
             if ( checkres ){
                 printf("Testing the eigenvalues and eigenvectors for correctness:\n");
                 if(itype==1)
-                    printf("(1)    | A Z - B Z D | / (|A| |Z| N) = %e\n", result);
+                    printf("(1)    | A Z - B Z D | / (|A| |Z| N) = %e%s\n", result, (result > tol ? "  failed" : "  passed") );
                 else if(itype==2)
-                    printf("(1)    | A B Z - Z D | / (|A| |Z| N) = %e\n", result);
+                    printf("(1)    | A B Z - Z D | / (|A| |Z| N) = %e%s\n", result, (result > tol ? "  failed" : "  passed") );
                 else if(itype==3)
-                    printf("(1)    | B A Z - Z D | / (|A| |Z| N) = %e\n", result);
+                    printf("(1)    | B A Z - Z D | / (|A| |Z| N) = %e%s\n", result, (result > tol ? "  failed" : "  passed") );
             }
 
             TESTING_HOSTFREE(       h_A);

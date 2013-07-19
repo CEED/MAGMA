@@ -12,6 +12,7 @@ include ../Makefile.internal
 # ----------
 # BLAS and auxiliary
 ZSRC += \
+	testing_zgemm_multistream.cpp	\
 	testing_zgemm.cpp	\
 	testing_zgemv.cpp	\
 	testing_zhemv.cpp	\
@@ -93,6 +94,7 @@ ZSRC += \
 	testing_zunmqr_gpu.cpp	\
 	\
 	testing_zgeqrf_mgpu.cpp	\
+
 
 # QR, CPU interface
 ZSRC += \

@@ -48,6 +48,7 @@ int main( int argc, char** argv)
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
+    double tol = opts.tolerance * lapackf77_dlamch("E");
     
     printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   |A-QBP'|/N|A|  |I-QQ'|/N  |I-PP'|/N\n");
     printf("=========================================================================================\n");
@@ -165,10 +166,10 @@ int main( int argc, char** argv)
                        (int) M, (int) N, gpu_perf, gpu_time );
             }
             if ( opts.check ) {
-                printf("   %8.2e       %8.2e   %8.2e\n",
-                       result[0]*eps, result[1]*eps, result[2]*eps );
+                printf("   %8.2e       %8.2e   %8.2e %s \n",
+                       result[0]*eps, result[1]*eps, result[2]*eps,  ( ( (result[0]*eps>tol) || (result[1]*eps>tol) ) ? "  failed" : "  passed")   );
             } else {
-                printf("     ---            ---      ---\n");
+                printf("     ---            --- \n");
             }
             
             TESTING_FREE( h_A );
