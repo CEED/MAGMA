@@ -12,7 +12,6 @@ include ../Makefile.internal
 # ----------
 # BLAS and auxiliary
 ZSRC += \
-	testing_zgemm_multistream.cpp	\
 	testing_zgemm.cpp	\
 	testing_zgemv.cpp	\
 	testing_zhemv.cpp	\
