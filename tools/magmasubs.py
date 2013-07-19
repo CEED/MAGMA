@@ -678,6 +678,7 @@ subs = {
 
     # ----- SPARSE auxiliary tools
     ('matrix_s',       'matrix_d',       'matrix_c',       'matrix_z'        ), 
+    ('svjacobi',       'dvjacobi',       'cvjacobi',       'zvjacobi'        ),
     ('s_csr2array',    'd_csr2array',    'c_csr2array',    'z_csr2array'     ),
     ('s_array2csr',    'd_array2csr',    'c_array2csr',    'z_array2csr'     ),
     ('read_s_csr',     'read_d_csr',     'read_c_csr',     'read_z_csr'      ),

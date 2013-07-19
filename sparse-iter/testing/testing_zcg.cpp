@@ -14,6 +14,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <sys/time.h>
+#include <time.h>
 #include <cuda_runtime_api.h>
 #include <cublas.h>
 
@@ -33,24 +35,35 @@ int main( int argc, char** argv)
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
+
+    //Chronometry
+    struct timeval inicio, fim;
+    double tempo1, tempo2;
     
-    const char *filename[] =
+  const char *filename[] =
     {
+     "test_matrices/fv1.mtx",
      "test_matrices/Trefethen_2000.mtx",
+     "test_matrices/parabolic_fem.mtx",
+     "test_matrices/shallow_water1.mtx",
+     "test_matrices/G3_circuit.mtx",
+     "test_matrices/thermal1.mtx",
+     "test_matrices/nasa1824.mtx",
+     "test_matrices/m_t1.mtx",
+     "test_matrices/bloweybq.mtx",
      "test_matrices/ecology2.mtx",
      "test_matrices/apache2.mtx",
      "test_matrices/crankseg_2.mtx",
      "test_matrices/bmwcra_1.mtx",
      "test_matrices/F1.mtx",
      "test_matrices/boneS10.mtx",
-     "test_matrices/parabolic_fem.mtx",
      "test_matrices/inline_1.mtx",
      "test_matrices/ldoor.mtx",
      "test_matrices/audikw_1.mtx",
      "test_matrices/circuit5M.mtx"
     };
-for(magma_int_t matrix=6; matrix<12; matrix++){
-
+for(magma_int_t matrix=4; matrix<5; matrix++){
+for(magma_int_t iters=1000; iters<20000; iters+=1000){
     magma_z_sparse_matrix A, C, D;
     magma_z_vector x, b;
 
@@ -77,10 +90,19 @@ for(magma_int_t matrix=6; matrix<12; matrix++){
 
     magma_solver_parameters solver_par;
 
-    solver_par.epsilon = 10e-3;
-    solver_par.maxiter = 1000;
+    solver_par.epsilon = 10e-20;
+    solver_par.maxiter = iters;
+
+    //Chronometry 
+    gettimeofday(&inicio, NULL);
+    tempo1=inicio.tv_sec+(inicio.tv_usec/1000000.0);
 
     magma_zcg( D, b, &x, &solver_par );
+
+    //Chronometry  
+    gettimeofday(&fim, NULL);
+    tempo2=fim.tv_sec+(fim.tv_usec/1000000.0);
+    printf("runtime: %f\n", tempo2-tempo1);
 
     //magma_z_vvisu( x, 0,10);
 
@@ -90,7 +112,7 @@ for(magma_int_t matrix=6; matrix<12; matrix++){
     //magma_z_mfree(&C);
     magma_z_mfree(&D);
 
-
+}
 }
 
 

@@ -34,14 +34,30 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
-    const char *filename[] =
+  const char *filename[] =
     {
-     "test_matrices/Trefethen_20.mtx",
+     "test_matrices/fv1.mtx",
      "test_matrices/Trefethen_2000.mtx",
-     "test_matrices/Trefethen_20_new.mtx",
-     "test_matrices/Trefethen_20_new2.mtx",
-     "test_matrices/Trefethen_20_new3.mtx"
+     "test_matrices/parabolic_fem.mtx",
+     "test_matrices/shallow_water1.mtx",
+     "test_matrices/G3_circuit.mtx",
+     "test_matrices/thermal1.mtx",
+     "test_matrices/nasa1824.mtx",
+     "test_matrices/m_t1.mtx",
+     "test_matrices/bloweybq.mtx",
+     "test_matrices/ecology2.mtx",
+     "test_matrices/apache2.mtx",
+     "test_matrices/crankseg_2.mtx",
+     "test_matrices/bmwcra_1.mtx",
+     "test_matrices/F1.mtx",
+     "test_matrices/boneS10.mtx",
+     "test_matrices/inline_1.mtx",
+     "test_matrices/ldoor.mtx",
+     "test_matrices/audikw_1.mtx",
+     "test_matrices/circuit5M.mtx"
     };
+for(magma_int_t matrix=0; matrix<5; matrix++){
+
 
     magma_z_sparse_matrix A, B, C, D;
     magma_z_vector x, b;
@@ -51,7 +67,7 @@ int main( int argc, char** argv)
     const char *N="N";
 
   
-    magma_z_csr_mtx( &A, filename[1] );
+    magma_z_csr_mtx( &A, filename[matrix] );
     //print_z_csr_matrix( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col );
 
 
@@ -62,18 +78,25 @@ int main( int argc, char** argv)
 
 
 
-    magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);
-    magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACKT);
-    magma_z_mtransfer( C, &D, Magma_CPU, Magma_DEV);
+  //  magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);
+  //  magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACKT);
+    magma_z_mtransfer( A, &D, Magma_CPU, Magma_DEV);
 
     magma_solver_parameters solver_par;
 
-    solver_par.epsilon = 10e-8;
-    solver_par.maxiter = 2000;
+    solver_par.epsilon = 10e-10;
+    solver_par.maxiter = 500000;
 
     magma_zjacobi( D, b, &x, &solver_par );
 
     magma_z_vvisu( x, 0,10);
+
+    magma_z_mfree( &A );
+    magma_z_mfree( &D );
+    magma_z_vfree( &x );
+    magma_z_vfree( &b );
+
+}
 
     TESTING_FINALIZE();
     return 0;

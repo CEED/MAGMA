@@ -51,24 +51,24 @@ magma_z_precond( magma_z_sparse_matrix A, magma_z_vector b,
     psolver_par.restart = precond.restart;
    
     if( precond.precond == Magma_CG ){
-        printf( "start CG preconditioner with epsilon: %f and maxiter: %d: ", 
-                                    psolver_par.epsilon, psolver_par.maxiter );
+        // printf( "start CG preconditioner with epsilon: %f and maxiter: %d: ", 
+        //                            psolver_par.epsilon, psolver_par.maxiter );
         magma_zcg( A, b, x, &psolver_par );
-        printf( "done.\n" );
+        // printf( "done.\n" );
         return MAGMA_SUCCESS;
     }
     if( precond.precond == Magma_GMRES ){
-        printf( "start GMRES preconditioner with epsilon: %f and maxiter: %d: ", 
-                                       psolver_par.epsilon, psolver_par.maxiter );
+        // printf( "start GMRES preconditioner with epsilon: %f and maxiter: %d: ", 
+        //                               psolver_par.epsilon, psolver_par.maxiter );
         magma_zgmres( A, b, x, &psolver_par );
-        printf( "done.\n" );
+        // printf( "done.\n" );
         return MAGMA_SUCCESS;
     }
     if( precond.precond == Magma_BICGSTAB ){
-        printf( "start BICGSTAB preconditioner with epsilon: %f and maxiter: %d: ", 
-                                          psolver_par.epsilon, psolver_par.maxiter );
+        // printf( "start BICGSTAB preconditioner with epsilon: %f and maxiter: %d: ", 
+        //                                  psolver_par.epsilon, psolver_par.maxiter );
         magma_zbicgstab( A, b, x, &psolver_par );
-        printf( "done.\n");
+        // printf( "done.\n");
         return MAGMA_SUCCESS;
     }
 

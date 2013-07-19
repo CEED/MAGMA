@@ -9,6 +9,8 @@
 
        @precisions mixed zc -> ds
 */
+#include <sys/time.h>
+#include <time.h>
 
 #include "common_magma.h"
 #include "../include/magmasparse.h"
@@ -51,6 +53,9 @@ magma_int_t
 magma_zcpir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
            magma_solver_parameters *solver_par, magma_precond_parameters *precond_par )
 {
+    //Chronometry
+    struct timeval inicio, fim;
+    double tempo1, tempo2;
 
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = MAGMA_Z_NEG_ONE;
@@ -80,6 +85,7 @@ magma_zcpir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_solver_parameters jacobiiter_par;
     // Jacobi setup
     magma_zjacobisetup_matrix( A, r, &M, &d );
+    magma_z_vinit( &c, Magma_DEV, b.num_rows, MAGMA_Z_ZERO );
  
 
 
@@ -96,7 +102,11 @@ magma_zcpir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         return MAGMA_SUCCESS;
 
     
-    printf("Iteration : %4d  Norm: %e\n", 0, nom);
+    //Chronometry 
+    gettimeofday(&inicio, NULL);
+    tempo1=inicio.tv_sec+(inicio.tv_usec/1000000.0);
+
+    printf("Iteration: %4d  Norm: %e  Time: %e\n", 0, nom/nom0, 0.0);
     
 
     // start iteration
@@ -106,14 +116,13 @@ magma_zcpir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_vector_zlag2c(r, &rs);                              // conversion to single precision
         magma_c_precond( AS, rs, &zs, *precond_par );             // inner solver: AS * zs = rs
         magma_vector_clag2z(zs, &z);                              // conversion to double precision
-        magma_z_precond( A, r, &z, *precond_par );             // inner solver: AS * zs = rs
         // Jacobi setup
         magma_zjacobisetup_vector(r, d, &c );
-        jacobiiter_par.maxiter = 1;
+        jacobiiter_par.maxiter = 3;
         // Jacobi iterator
-        printf("Jacobi iterator: ");
+        //printf("Jacobi iterator: ");
         magma_zjacobiiter( M, c, &z, &jacobiiter_par );
-        printf("done.\n");
+        //printf("done.\n");
 
         magma_zscal( dofs, MAGMA_Z_MAKE(nom, 0.), z.val, 1) ;     // scale it
         magma_zaxpy(dofs,  c_one, z.val, 1, x->val, 1);                    // x = x + z
@@ -121,7 +130,11 @@ magma_zcpir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_zaxpy(dofs,  c_one, b.val, 1, r.val, 1);                // r = r + b
         nom = magma_dznrm2(dofs, r.val, 1);                            // nom = || r ||
 
-        printf("Iteration : %4d  Norm: %e\n", i, nom);
+        //Chronometry  
+        gettimeofday(&fim, NULL);
+        tempo2=fim.tv_sec+(fim.tv_usec/1000000.0);
+
+        printf("Iteration: %4d  Norm: %e  Time: %e\n", i, nom/nom0, tempo2-tempo1);
         if ( nom < r0 ) {
             solver_par->numiter = i;
             break;

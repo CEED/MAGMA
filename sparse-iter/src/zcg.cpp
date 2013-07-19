@@ -106,18 +106,18 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         nom = betanom;
     } 
     
-    printf( "      (r_0, r_0) = %e\n", nom0);
-    printf( "      (r_N, r_N) = %e\n", betanom);
-    printf( "      Number of CG iterations: %d\n", i);
-    
-//    if (solver_par->epsilon == RTOLERANCE) {
+   // printf( "      (r_0, r_0) = %e\n", nom0);
+   // printf( "      (r_N, r_N) = %e\n", betanom);
+   // printf( "      Number of CG iterations: %d\n", i);
+/*    
+    if (solver_par->epsilon == RTOLERANCE) {
         magma_z_spmv( c_one, A, *x, c_zero, r );                       // r = A x
         magma_zaxpy(dofs,  c_mone, b.val, 1, r.val, 1);                // r = r - b
         den = magma_dznrm2(dofs, r.val, 1);                            // den = || r ||
         printf( "      || r_N ||   = %e\n", den);
         solver_par->residual = (double)(den);
-//    }
-
+    }
+*/
     magma_z_vfree(&r);
     magma_z_vfree(&p);
     magma_z_vfree(&q);

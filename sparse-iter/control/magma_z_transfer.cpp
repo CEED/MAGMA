@@ -128,9 +128,9 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
             // memory allocation
-            B->val = new magmaDoubleComplex[A.nnz];
-            B->row = new magma_int_t[A.num_rows+1];
-            B->col = new magma_int_t[A.nnz];
+            magma_zmalloc_cpu( &B->val, A.nnz );
+            magma_imalloc_cpu( &B->row, A.num_rows+1 );
+            magma_imalloc_cpu( &B->col, A.nnz );
             // data transfer
             for( magma_int_t i=0; i<A.nnz; i++ ){
                 B->val[i] = A.val[i];
@@ -150,8 +150,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
             // memory allocation
-            B->val = new magmaDoubleComplex[A.num_rows*A.max_nnz_row];
-            B->col = new magma_int_t[A.num_rows*A.max_nnz_row];
+            magma_zmalloc_cpu( &B->val, A.num_rows*A.max_nnz_row );
+            magma_imalloc_cpu( &B->col, A.num_rows*A.max_nnz_row );
             // data transfer
             for( magma_int_t i=0; i<A.num_rows*A.max_nnz_row; i++ ){
                 B->val[i] = A.val[i];
@@ -168,8 +168,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
             // memory allocation
-            B->val = new magmaDoubleComplex[A.num_rows*A.max_nnz_row];
-            B->col = new magma_int_t[A.num_rows*A.max_nnz_row];
+            magma_zmalloc_cpu( &B->val, A.num_rows*A.max_nnz_row );
+            magma_imalloc_cpu( &B->col, A.num_rows*A.max_nnz_row );
             // data transfer
             for( magma_int_t i=0; i<A.num_rows*A.max_nnz_row; i++ ){
                 B->val[i] = A.val[i];
@@ -190,9 +190,9 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
             // memory allocation
-            B->val = new magmaDoubleComplex[A.nnz];
-            B->row = new magma_int_t[A.num_rows+1];
-            B->col = new magma_int_t[A.nnz];
+            magma_zmalloc_cpu( &B->val, A.nnz );
+            magma_imalloc_cpu( &B->row, A.num_rows+1 );
+            magma_imalloc_cpu( &B->col, A.nnz );
             // data transfer
             cublasGetVector( A.nnz, sizeof( magmaDoubleComplex ), A.val, 1, B->val, 1 );
             cublasGetVector( A.num_rows+1, sizeof( magma_int_t ), A.row, 1, B->row, 1 );            
@@ -208,8 +208,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
             // memory allocation
-            B->val = new magmaDoubleComplex[A.num_rows*A.max_nnz_row];
-            B->col = new magma_int_t[A.num_rows*A.max_nnz_row];
+            magma_zmalloc_cpu( &B->val, A.num_rows*A.max_nnz_row );
+            magma_imalloc_cpu( &B->col, A.num_rows*A.max_nnz_row );
             // data transfer
             cublasGetVector( A.num_rows*A.max_nnz_row, sizeof( magmaDoubleComplex ), A.val, 1, B->val, 1 );
             cublasGetVector( A.num_rows*A.max_nnz_row, sizeof( magma_int_t ), A.col, 1, B->col, 1 );
@@ -224,8 +224,8 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
             // memory allocation
-            B->val = new magmaDoubleComplex[A.num_rows*A.max_nnz_row];
-            B->col = new magma_int_t[A.num_rows*A.max_nnz_row];
+            magma_zmalloc_cpu( &B->val, A.num_rows*A.max_nnz_row );
+            magma_imalloc_cpu( &B->col, A.num_rows*A.max_nnz_row );
             // data transfer
             cublasGetVector( A.num_rows*A.max_nnz_row, sizeof( magmaDoubleComplex ), A.val, 1, B->val, 1 );
             cublasGetVector( A.num_rows*A.max_nnz_row, sizeof( magma_int_t ), A.col, 1, B->col, 1 );
@@ -375,7 +375,7 @@ magma_z_vtransfer( magma_z_vector x,
         y->num_rows = x.num_rows;
         y->nnz = x.nnz;
         // memory allocation
-        y->val = new magmaDoubleComplex[x.num_rows]; 
+        magma_zmalloc_cpu( &y->val, x.num_rows );
         // data transfer
         for( magma_int_t i=0; i<x.num_rows; i++ )
             y->val[i] = x.val[i];
@@ -387,7 +387,7 @@ magma_z_vtransfer( magma_z_vector x,
         y->num_rows = x.num_rows;
         y->nnz = x.nnz;
         // memory allocation
-        y->val = new magmaDoubleComplex[x.num_rows]; 
+        magma_zmalloc_cpu( &y->val, x.num_rows );
         // data transfer
         cublasGetVector( x.num_rows, sizeof( magmaDoubleComplex ), x.val, 1, y->val, 1 );
     }

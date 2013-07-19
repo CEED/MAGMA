@@ -42,20 +42,30 @@ int main( int argc, char** argv)
     
     const char *filename[] =
     {
+    // "test_matrices/offshore.mtx",
+     "test_matrices/af_shell3.mtx",
+     "test_matrices/tmt_sym.mtx",
+     "test_matrices/fv1.mtx",
      "test_matrices/Trefethen_2000.mtx",
+     "test_matrices/parabolic_fem.mtx",
+     "test_matrices/shallow_water1.mtx",
+     "test_matrices/G3_circuit.mtx",
+     "test_matrices/thermal1.mtx",
+     "test_matrices/nasa1824.mtx",
+     "test_matrices/m_t1.mtx",
+     "test_matrices/bloweybq.mtx",
      "test_matrices/ecology2.mtx",
      "test_matrices/apache2.mtx",
      "test_matrices/crankseg_2.mtx",
      "test_matrices/bmwcra_1.mtx",
      "test_matrices/F1.mtx",
      "test_matrices/boneS10.mtx",
-     "test_matrices/parabolic_fem.mtx",
      "test_matrices/inline_1.mtx",
      "test_matrices/ldoor.mtx",
      "test_matrices/audikw_1.mtx",
      "test_matrices/circuit5M.mtx"
     };
-for(magma_int_t matrix=0; matrix<12; matrix++){
+for(magma_int_t matrix=0; matrix<7; matrix++){
 
     magma_z_sparse_matrix A, B, C, D;
     magma_z_vector x, b;
@@ -83,14 +93,14 @@ for(magma_int_t matrix=0; matrix<12; matrix++){
 
 
     magma_solver_parameters solver_par;
-    solver_par.epsilon = 1e-8;
+    solver_par.epsilon = 1e-16;
     solver_par.maxiter = 10;
     solver_par.restart = 1;
 
     magma_precond_parameters precond_par;
     precond_par.precond = Magma_CG;
     precond_par.epsilon = 1e-5;
-    precond_par.maxiter = 10000;
+    precond_par.maxiter = 100000;
     precond_par.restart = 30;
 
 

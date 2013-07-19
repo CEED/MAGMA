@@ -219,6 +219,7 @@ magma_zir(             magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector
                        magma_precond_parameters *precond_par );
 
 
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE utility function definitions
 */
@@ -230,6 +231,8 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
 magma_int_t
 magma_z_precond( magma_z_sparse_matrix A, magma_z_vector b, 
                  magma_z_vector *x, magma_precond_parameters precond );
+
+
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE BLAS function definitions
@@ -267,6 +270,9 @@ magma_zgeelltmv(       const char *transA,
                        magmaDoubleComplex *d_x,
                        magmaDoubleComplex beta,
                        magmaDoubleComplex *d_y );
+
+magma_int_t
+magma_zjacobisetup_vector_gpu(int num_rows, magmaDoubleComplex *b, magmaDoubleComplex *d, magmaDoubleComplex *c);
 
 
 #ifdef __cplusplus

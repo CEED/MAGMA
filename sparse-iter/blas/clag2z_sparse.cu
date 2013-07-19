@@ -30,7 +30,7 @@ magmaint_clag2z_sparse(  int M, int N,
                   double RMAX ) 
 {
     int inner_bsize = blockDim.x;
-    int outer_bsize = inner_bsize * 128;
+    int outer_bsize = inner_bsize * 512;
     int thread_id = blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
     
 
