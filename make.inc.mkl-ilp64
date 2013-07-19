@@ -67,4 +67,4 @@ endif
 LIBDIR    = -L$(MKLROOT)/lib/intel64 \
             -L$(CUDADIR)/lib64
 
-INC       = -I$(CUDADIR)/include
+INC       = -I$(CUDADIR)/include -I$(MKLROOT)/include
