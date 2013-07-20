@@ -77,6 +77,9 @@ int main( int argc, char** argv)
     magma_z_mvisu( A );
 
     magma_z_mconvert( A, &B, Magma_CSR, Magma_BCSR);
+    magma_z_mconvert( B, &C, Magma_BCSR, Magma_CSR);
+
+    magma_z_mvisu( C );
     /*
 
     magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);

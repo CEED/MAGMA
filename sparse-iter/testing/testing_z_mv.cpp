@@ -55,7 +55,7 @@ int main( int argc, char** argv)
      "test_matrices/inline_1.mtx",
      "test_matrices/ldoor.mtx"
     };
-for(magma_int_t matrix=6; matrix<12; matrix++){
+for(magma_int_t matrix=0; matrix<1; matrix++){
 
 
     magma_z_sparse_matrix A, B, C, D, E, Z;
@@ -79,14 +79,19 @@ for(magma_int_t matrix=6; matrix<12; matrix++){
 
     magma_z_mtransfer( A, &B, Magma_CPU, Magma_DEV);
 
-   // magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACK);
-   // magma_z_mtransfer( C, &D, Magma_CPU, Magma_DEV);
+    magma_z_mconvert( A, &C, Magma_CSR, Magma_BCSR);
+    magma_z_mconvert( C, &D, Magma_BCSR, Magma_CSR);
+    magma_z_mtransfer( D, &E, Magma_CPU, Magma_DEV);
 
 
 
 
    //magma_zgecsrmv( N, B.num_rows, B.num_cols, one, B.val, B.row, B.col, y.val, one, z.val);
     magma_z_spmv( one, B, y, zero, z);
+
+    magma_z_vvisu( z, 0,10);
+
+    magma_z_spmv( one, E, y, zero, z);
 
     magma_z_vvisu( z, 0,10);
 

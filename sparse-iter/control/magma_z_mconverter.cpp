@@ -366,7 +366,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_int_t i, j, k, l, numblocks;
 
             // conversion
-            magma_int_t size_b = 3;
+            magma_int_t size_b = 7;
             magma_int_t c_blocks = ceil( (float)A.num_cols / (float)size_b );     // max number of blocks per row
             magma_int_t r_blocks = ceil( (float)A.num_rows / (float)size_b );     // max number of blocks per column
             printf("c_blocks: %d  r_blocks: %d\n", c_blocks, r_blocks);
@@ -422,7 +422,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                     B->val[ (blockinfo(k,l)-1) * size_b * size_b + i%size_b * size_b + A.col[j]%size_b ] = A.val[j];
                 }
             } 
-/*
+            /*
             printf("blockinfo for blocksize %d:\n", size_b);
             for( i=0; i<c_blocks; i++ ){
                 for( j=0; j<c_blocks; j++ ){
@@ -430,29 +430,110 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                 }
                 printf("\n");
             }
-
             printf("numblocks: %d\n", numblocks);
             printf("row:\n");
             for( i=0; i<r_blocks+1; i++ ){
                 printf("%d  ", B->row[i]);
             }
             printf("\n");
-
             printf("col:\n");
             for( i=0; i<numblocks; i++ ){
                 printf("%d  ", B->col[i]);
             }
             printf("\n");
-
             printf("val:\n");
             for( i=0; i<numblocks*size_b*size_b; i++ ){
                 printf("%f\n", B->val[i]);
             }
             printf("\n");
-*/
+            */
+            //magma_free( blockinfo );
+
+            printf( "done\n" );      
+            return MAGMA_SUCCESS; 
 
         }
+        // BCSR to CSR
+        if( old_format == Magma_BCSR && new_format == Magma_CSR ){
+            printf( "Conversion to CSR: " );
+            // fill in information for B
+            B->storage_type = Magma_CSR;
+            B->memory_location = A.memory_location;
+            B->num_rows = A.num_rows;
+            B->num_cols = A.num_cols;
+            B->nnz = A.nnz;
+            B->max_nnz_row = A.max_nnz_row;
 
+            magma_int_t i, j, k, l, numblocks, index;
+
+            // conversion
+            magma_int_t size_b = 7;
+            magma_int_t c_blocks = ceil( (float)A.num_cols / (float)size_b );     // max number of blocks per row
+            magma_int_t r_blocks = ceil( (float)A.num_rows / (float)size_b );     // max number of blocks per column
+            printf("c_blocks: %d  r_blocks: %d\n", c_blocks, r_blocks);
+
+            magmaDoubleComplex *val_tmp;      
+            magma_zmalloc_cpu( &val_tmp, A.row[ r_blocks ] * size_b * size_b );
+            magma_int_t *row_tmp;            
+            magma_imalloc_cpu( &row_tmp, r_blocks*size_b+1 );   // larger than the final size due to overhead blocks
+            magma_int_t *col_tmp;            
+            magma_imalloc_cpu( &col_tmp, A.row[ r_blocks ] * size_b * size_b );
+            
+            // fill row_tmp
+            index = A.row[0];
+            for( i = 0; i<r_blocks+1; i++ ){
+                for( j=0; j<size_b; j++ ){            
+                    row_tmp[ j + i * size_b] =  index;
+                    index = index +  size_b * (A.row[i+1]-A.row[i]);
+                }
+            }
+
+            // fill col and val
+            index = 0;
+            for( j=0; j<r_blocks; j++ ){
+                for( i=A.row[j]; i<A.row[j+1]; i++){ // submatrix blocks
+                    for( k =0; k<size_b; k++){ // row in submatrix
+                        for( l =0; l<size_b; l++){ // col in submatrix
+                            // offset due to col in submatrix: l
+                            // offset due to submatrix block (in row): (i-A.row[j])*size_b
+                            // offset due to submatrix row: size_b*k*(A.row[j+1]-A.row[j])
+                            // offset due to submatrix block row: size_b*size_b*(A.row[j])
+                            col_tmp[ l + (i-A.row[j])*size_b + size_b*k*(A.row[j+1]-A.row[j]) + size_b*size_b*(A.row[j]) ] 
+                                   = A.col[i] * size_b + l;
+                            val_tmp[ l + (i-A.row[j])*size_b + size_b*k*(A.row[j+1]-A.row[j]) + size_b*size_b*(A.row[j]) ] 
+                                   = A.val[index];
+                            index++;
+                        }  
+                    }
+                }
+            }
+            /*
+            printf("col_tmp:\n");
+            for( i=0; i<A.row[ r_blocks ] * size_b * size_b; i++ )
+                printf("%d  ", col_tmp[i]);
+            printf("\n");
+            printf("row_tmp:\n");
+            for( i=0; i<r_blocks*size_b+1; i++ )
+                printf("%d  ", row_tmp[i]);
+            printf("\n");
+            printf("val_tmp:\n");
+            for( i=0; i<A.row[ r_blocks ] * size_b * size_b; i++ )
+                printf("%2.0f  ", val_tmp[i]);
+            printf("\n");
+            */
+        
+            magma_z_csr_compressor(&val_tmp, &row_tmp, &col_tmp, 
+                                   &B->val, &B->row, &B->col, &B->num_rows); 
+
+            B->nnz = B->row[B->num_rows];
+
+            magma_free_cpu( val_tmp );
+            magma_free_cpu( row_tmp );
+            magma_free_cpu( col_tmp );
+        
+            printf( "done\n" );      
+            return MAGMA_SUCCESS; 
+        }
 
         else{
 
