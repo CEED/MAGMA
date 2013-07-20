@@ -118,7 +118,7 @@ magma_zcpir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_vector_clag2z(zs, &z);                              // conversion to double precision
         // Jacobi setup
         magma_zjacobisetup_vector(r, d, &c );
-        jacobiiter_par.maxiter = 3;
+        jacobiiter_par.maxiter = 2;
         // Jacobi iterator
         //printf("Jacobi iterator: ");
         magma_zjacobiiter( M, c, &z, &jacobiiter_par );

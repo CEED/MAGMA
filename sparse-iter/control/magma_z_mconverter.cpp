@@ -352,7 +352,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             printf( "done\n" );      
             return MAGMA_SUCCESS; 
         }
-/*        // CSR to BCSR
+        // CSR to BCSR
         if( old_format == Magma_CSR && new_format == Magma_BCSR ){
             printf( "Conversion to BCSR: " );
             // fill in information for B
@@ -363,67 +363,95 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
 
+            magma_int_t i, j, k, l, numblocks;
+
             // conversion
-            magma_int_t size_b=3;
+            magma_int_t size_b = 3;
             magma_int_t c_blocks = ceil( (float)A.num_cols / (float)size_b );     // max number of blocks per row
             magma_int_t r_blocks = ceil( (float)A.num_rows / (float)size_b );     // max number of blocks per column
             printf("c_blocks: %d  r_blocks: %d\n", c_blocks, r_blocks);
-
-            B->row = ( magma_int_t* )malloc((r_blocks+1)*sizeof( magma_int_t ));                     // B->row has r_blocks+1 elements
-            B->row[0] = 0;
-            magma_int_t* tmp;
-            tmp = ( magma_int_t* )malloc((c_blocks)*sizeof( magma_int_t )); 
+            magma_int_t *blockinfo;            
+            magma_imalloc_cpu( &blockinfo, c_blocks * r_blocks );
+            for( i=0; i<c_blocks * r_blocks; i++ )
+                blockinfo[i] = 0;
+            #define  blockinfo(i,j)  blockinfo[(i)*c_blocks   + (j)]
             
-            magma_int_t nzb=0, i, j, k = 0, l=0;
-            k=0, l=0;
-            while( k<A.num_rows ){
-                for( j=0; j<c_blocks; j++ ){
-                    tmp[j] = 0;         // set to zero
+            // fill in "1" in blockinfo if block is occupied
+            for( i=0; i<A.num_rows; i++ ){
+                for( j=A.row[i]; j<A.row[i+1]; j++ ){
+                    k = floor(i / size_b);
+                    l = floor(A.col[j] / size_b);
+                    blockinfo(k,l) = 1;
                 }
-                for( j=k; j<k+size_b; j++){       // go over size_b rows
-                    for( i=A.row[j]; i<A.row[j+1]; j++){        // go over all entries
-                         magma_int_t tmpindex = floor((float)A.col[i]/(float)size_b);
-                         printf("k:%d j:%d i:%d tmpindex:%d\n",k,j, i, tmpindex);
-                         tmp[ tmpindex ] = 1;           // 1 means block active
-                    }
+            } 
+
+            // count blocks and fill rowpointer
+            magma_imalloc_cpu( &B->row, r_blocks+1 );
+            numblocks = 0;
+            for( i=0; i<c_blocks * r_blocks; i++ ){
+                if( i%c_blocks == 0)
+                    B->row[i/c_blocks] = numblocks;
+                if( blockinfo[i] != 0 ){
+                    numblocks++;
+                    blockinfo[i] = numblocks;
                 }
-                for( j=0; j<c_blocks; j++ ){
-                    printf("%d  ", tmp[j]);
-                    if( tmp[j]!=0 ){
-                        nzb++;               // increase number of non-zero-blocks by one
-                        tmp[j] = 0;         // set to zero again
-                    }
+            }
+            B->row[r_blocks] = numblocks;
+
+
+            magma_zmalloc_cpu( &B->val, numblocks * size_b * size_b );
+            magma_imalloc_cpu( &B->col, numblocks  );
+            for( i=0; i<numblocks * size_b * size_b; i++)
+                B->val[i] = MAGMA_Z_MAKE(0.0, 0.0);
+
+            // fill in col
+            k = 0;
+            for( i=0; i<c_blocks * r_blocks; i++ ){
+                if( blockinfo[i] != 0 ){
+                    B->col[k] = i%c_blocks;
+                    k++;
                 }
-                printf(" nzb : %d\n", nzb);
-                B->row[l+1] = nzb;
-                l++;
-                k+=size_b;
             }
 
-            B->val = ( magmaDoubleComplex* )malloc((size_b * size_b * nzb)*sizeof( magmaDoubleComplex ));   // B->val has size_b * size_b * nzb elements
-            B->col = ( magma_int_t* )malloc((nzb)*sizeof( magma_int_t ));                            // B->col has nzb elements
-
-            // fill in new pointers
-
-            k=0;
-            while( k<=A.num_rows){
-                for( j=0; j<c_blocks; j++ ){
-                    tmp[j] = 0;         // set to zero
+            // fill in val
+            for( i=0; i<A.num_rows; i++ ){
+                for( j=A.row[i]; j<A.row[i+1]; j++ ){
+                    k = floor(i / size_b);
+                    l = floor(A.col[j] / size_b);
+                    //      find correct block + take row into account + correct column
+                    B->val[ (blockinfo(k,l)-1) * size_b * size_b + i%size_b * size_b + A.col[j]%size_b ] = A.val[j];
                 }
+            } 
+/*
+            printf("blockinfo for blocksize %d:\n", size_b);
+            for( i=0; i<c_blocks; i++ ){
                 for( j=0; j<c_blocks; j++ ){
-                    if( tmp[j]!=0 ){
-                        B->col[l] = j*size_b;
-                        l++;
-                    }
+                    printf("%d  ", blockinfo(i,j));
                 }
-                k+=c_blocks;
+                printf("\n");
             }
 
-            printf( "done\n" );      
-            return MAGMA_SUCCESS; 
-        }
+            printf("numblocks: %d\n", numblocks);
+            printf("row:\n");
+            for( i=0; i<r_blocks+1; i++ ){
+                printf("%d  ", B->row[i]);
+            }
+            printf("\n");
 
+            printf("col:\n");
+            for( i=0; i<numblocks; i++ ){
+                printf("%d  ", B->col[i]);
+            }
+            printf("\n");
+
+            printf("val:\n");
+            for( i=0; i<numblocks*size_b*size_b; i++ ){
+                printf("%f\n", B->val[i]);
+            }
+            printf("\n");
 */
+
+        }
 
 
         else{

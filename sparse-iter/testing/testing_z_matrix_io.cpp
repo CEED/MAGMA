@@ -76,6 +76,9 @@ int main( int argc, char** argv)
     magma_z_csr_mtx( &A, filename[2] );
     magma_z_mvisu( A );
 
+    magma_z_mconvert( A, &B, Magma_CSR, Magma_BCSR);
+    /*
+
     magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);
     magma_z_mconvert( B, &C, Magma_ELLPACK, Magma_CSR);
     magma_z_mconvert( C, &D, Magma_CSR, Magma_ELLPACKT);
@@ -140,7 +143,7 @@ printf("F_D:\n");
 
 
     //write_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor, filename[3] );
-
+/*
     magma_z_vector x, y, z;
 
     magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
@@ -154,7 +157,7 @@ printf("F_D:\n");
     magma_z_vfree(&z);
     magma_z_vfree(&x);
     magma_z_vfree(&y);
-
+*/
     TESTING_FINALIZE();
     return 0;
 }
