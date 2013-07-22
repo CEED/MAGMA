@@ -165,9 +165,8 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
                 cols = maxm - i*nb;
                 magmablas_ztranspose( dAP, cols, dAT(i,i), lddat, nb, cols );
 
-                // make sure that gpu queue is empty
-                magma_device_sync();
-
+                // make sure that that the transpose has completed
+                magma_queue_sync( stream[1] );
                 magma_zgetmatrix_async( m-i*nb, nb, dAP, cols, work, lddwork,
                                         stream[0]);
 
@@ -230,9 +229,6 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
 
         magmablas_ztranspose2( dAP, maxm, dAT(s,s), lddat, nb0, rows);
         magma_zgetmatrix( rows, nb0, dAP, maxm, work, lddwork );
-
-        // make sure that gpu queue is empty
-        magma_device_sync();
 
         // do the cpu part
         lapackf77_zgetrf( &rows, &nb0, work, &lddwork, ipiv+s*nb, &iinfo);
