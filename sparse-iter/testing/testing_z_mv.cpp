@@ -43,6 +43,8 @@ int main( int argc, char** argv)
     const char *filename[] =
     {
      "test_matrices/Trefethen_2000.mtx",
+     "test_matrices/Pres_Poisson.mtx",
+     "test_matrices/bloweybq.mtx",
      "test_matrices/ecology2.mtx",
      "test_matrices/apache2.mtx",
      "test_matrices/crankseg_2.mtx",
@@ -55,7 +57,7 @@ int main( int argc, char** argv)
      "test_matrices/inline_1.mtx",
      "test_matrices/ldoor.mtx"
     };
-for(magma_int_t matrix=0; matrix<1; matrix++){
+for(magma_int_t matrix=0; matrix<10; matrix++){
 
 
     magma_z_sparse_matrix A, B, C, D, E, Z;
@@ -86,7 +88,7 @@ for(magma_int_t matrix=0; matrix<1; matrix++){
 
 
 
-   //magma_zgecsrmv( N, B.num_rows, B.num_cols, one, B.val, B.row, B.col, y.val, one, z.val);
+    magma_zgecsrmv( N, B.num_rows, B.num_cols, one, B.val, B.row, B.col, y.val, one, z.val);
     magma_z_spmv( one, B, y, zero, z);
 
     magma_z_vvisu( z, 0,10);

@@ -67,6 +67,13 @@ magma_int_t magma_z_csr_compressor(magmaDoubleComplex ** val, magma_int_t ** row
     magma_zmalloc_cpu( valn, nnz_new );
     magma_imalloc_cpu( coln, nnz_new );
     magma_imalloc_cpu( rown, *n+1 );
+    if( valn == NULL || coln == NULL || rown == NULL ){
+        magma_free( valn );
+        magma_free( coln );
+        magma_free( rown );
+        printf("error: memory allocation.\n");
+        return MAGMA_ERR_HOST_ALLOC;
+    }
       
   
     magma_int_t nzcount=-1, nz_row=0;
@@ -366,12 +373,17 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_int_t i, j, k, l, numblocks;
 
             // conversion
-            magma_int_t size_b = 7;
+            magma_int_t size_b = 100;
             magma_int_t c_blocks = ceil( (float)A.num_cols / (float)size_b );     // max number of blocks per row
             magma_int_t r_blocks = ceil( (float)A.num_rows / (float)size_b );     // max number of blocks per column
-            printf("c_blocks: %d  r_blocks: %d\n", c_blocks, r_blocks);
+            printf("c_blocks: %d  r_blocks: %d  ", c_blocks, r_blocks);
             magma_int_t *blockinfo;            
             magma_imalloc_cpu( &blockinfo, c_blocks * r_blocks );
+            if( blockinfo == NULL ){
+                magma_free( blockinfo );
+                printf("error: memory allocation.\n");
+                return MAGMA_ERR_HOST_ALLOC;
+            }
             for( i=0; i<c_blocks * r_blocks; i++ )
                 blockinfo[i] = 0;
             #define  blockinfo(i,j)  blockinfo[(i)*c_blocks   + (j)]
@@ -397,10 +409,17 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                 }
             }
             B->row[r_blocks] = numblocks;
-
+            printf("number of blocks: %d  ", numblocks);
 
             magma_zmalloc_cpu( &B->val, numblocks * size_b * size_b );
             magma_imalloc_cpu( &B->col, numblocks  );
+            if( B->val == NULL || B->col == NULL ){
+                magma_free( B->val );
+                magma_free( B->col );
+                printf("error: memory allocation.\n");
+                return MAGMA_ERR_HOST_ALLOC;
+            }
+
             for( i=0; i<numblocks * size_b * size_b; i++)
                 B->val[i] = MAGMA_Z_MAKE(0.0, 0.0);
 
@@ -467,10 +486,10 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_int_t i, j, k, l, numblocks, index;
 
             // conversion
-            magma_int_t size_b = 7;
+            magma_int_t size_b = 100;
             magma_int_t c_blocks = ceil( (float)A.num_cols / (float)size_b );     // max number of blocks per row
             magma_int_t r_blocks = ceil( (float)A.num_rows / (float)size_b );     // max number of blocks per column
-            printf("c_blocks: %d  r_blocks: %d\n", c_blocks, r_blocks);
+            printf("c_blocks: %d  r_blocks: %d  ", c_blocks, r_blocks);
 
             magmaDoubleComplex *val_tmp;      
             magma_zmalloc_cpu( &val_tmp, A.row[ r_blocks ] * size_b * size_b );
@@ -478,14 +497,24 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_imalloc_cpu( &row_tmp, r_blocks*size_b+1 );   // larger than the final size due to overhead blocks
             magma_int_t *col_tmp;            
             magma_imalloc_cpu( &col_tmp, A.row[ r_blocks ] * size_b * size_b );
+            if( col_tmp == NULL || val_tmp == NULL || row_tmp == NULL ){
+                magma_free( B->val );
+                magma_free( B->col );
+                printf("error: memory allocation.\n");
+                return MAGMA_ERR_HOST_ALLOC;
+            }
             
             // fill row_tmp
             index = A.row[0];
-            for( i = 0; i<r_blocks+1; i++ ){
+            for( i = 0; i<r_blocks; i++ ){
                 for( j=0; j<size_b; j++ ){            
                     row_tmp[ j + i * size_b] =  index;
                     index = index +  size_b * (A.row[i+1]-A.row[i]);
                 }
+            }
+            if( r_blocks * size_b == A.num_rows ){
+                // in this case the last entry of the row-pointer has to be filled manually
+                row_tmp[r_blocks*size_b] = A.row[r_blocks] * size_b * size_b;
             }
 
             // fill col and val
@@ -521,9 +550,9 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                 printf("%2.0f  ", val_tmp[i]);
             printf("\n");
             */
-        
+            
             magma_z_csr_compressor(&val_tmp, &row_tmp, &col_tmp, 
-                                   &B->val, &B->row, &B->col, &B->num_rows); 
+                                 &B->val, &B->row, &B->col, &B->num_rows); 
 
             B->nnz = B->row[B->num_rows];
 
@@ -531,14 +560,14 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_free_cpu( row_tmp );
             magma_free_cpu( col_tmp );
         
-            printf( "done\n" );      
+            printf( "done.\n" );      
             return MAGMA_SUCCESS; 
         }
 
         else{
 
             printf("error: format not supported.\n");
-            // return some MAGMA Error
+            return MAGMA_ERR_NOT_SUPPORTED;
 
         }
      
@@ -548,7 +577,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
     else{
 
         printf("error: matrix not on CPU.\n");
-        // return some MAGMA Error
+        return MAGMA_ERR_ALLOCATION;
 
     }
      
