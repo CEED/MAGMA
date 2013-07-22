@@ -45,7 +45,10 @@ int main( int argc, char** argv)
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
-    
+ 
+    magma_int_t status = 0;
+    double tol = opts.tolerance * lapackf77_dlamch("E");
+
     nrhs = opts.nrhs;
     
     printf("                                                            ||b-Ax|| / (N||A||)\n");
@@ -159,9 +162,11 @@ int main( int argc, char** argv)
             cpu_error = lapackf77_zlange("f", &M, &nrhs, h_B, &ldb, work) / (min_mn*matnorm);
             gpu_error = lapackf77_zlange("f", &M, &nrhs, h_R, &ldb, work) / (min_mn*matnorm);
             
-            printf("%5d %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e\n",
+            printf("%5d %5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e   %8.2e",
                    (int) M, (int) N, (int) nrhs,
                    cpu_perf, cpu_time, gpu_perf, gpu_time, cpu_error, gpu_error );
+            printf("%s\n", (gpu_error > tol ? "  fail" : ""));
+            status |= (gpu_error > tol);
             
             TESTING_FREE( tau  );
             TESTING_FREE( h_A  );
@@ -179,5 +184,5 @@ int main( int argc, char** argv)
     }
 
     TESTING_FINALIZE();
-    return 0;
+    return status;
 }

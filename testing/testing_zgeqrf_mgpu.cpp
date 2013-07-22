@@ -43,7 +43,10 @@ int main( int argc, char** argv )
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
-    
+ 
+    magma_int_t status = 0;
+    double tol = opts.tolerance * lapackf77_dlamch("E");
+
     printf("ngpu %d\n", (int) opts.ngpu );
     printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / ||A||_F\n");
     printf("=======================================================================\n");
@@ -127,8 +130,10 @@ int main( int argc, char** argv )
                 blasf77_zaxpy( &n2, &c_neg_one, h_A, &ione, h_R, &ione );
                 error = lapackf77_zlange("f", &M, &N, h_R, &lda, work ) / error;
                 
-                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e\n",
+                printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e",
                        (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, error );
+                printf("%s\n", (error > tol ? "  fail" : ""));
+                status |= (error > tol);
             }
             else {
                 printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)     ---\n",
@@ -150,5 +155,5 @@ int main( int argc, char** argv )
     }
     
     TESTING_FINALIZE();
-    return 0;
+    return status;
 }
