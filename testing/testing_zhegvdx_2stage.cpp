@@ -226,7 +226,7 @@ int main( int argc, char** argv)
                     temp1 = max(temp1, absv(w2[j]));
                     temp2 = max(temp2, absv(w1[j]-w2[j]));
                 }
-                result[1] = temp2 / temp1;
+                result[1] = temp2 / (((double)m2)*temp1);
             }
 
 
