@@ -132,7 +132,7 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
     
     MB = n;  /* number of rows in the big panel    */
     NB = (magma_int_t)(num_gpus*((0.8*freeMem-2*nb*ldda)/lddla)); /* number of columns in the big panel */
-    NB = min(5*nb,n);
+    //NB = min(5*nb,n);
 
     if( NB >= n ) {
         #ifdef CHECK_ZPOTRF_OOC

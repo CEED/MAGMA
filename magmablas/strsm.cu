@@ -1737,13 +1737,14 @@ b_copy_kernel (int M, int N, float *b, int ldb, float *d_x, int ldx)
 
 
 extern "C"
-void diag_strtri (magma_int_t M, char uplo, char diag, const float *A, float *d_dinvA, magma_int_t lda)
+void diag_strtri (magma_int_t M, char uplo, char diag, const float *A, int flag, float *d_dinvA, magma_int_t lda)
 {
         int nblocks = M/BLOCK_SIZE+(M%BLOCK_SIZE!=0);
 
         if (uplo == 'l' || uplo == 'L')
         {
                 // solve the diagonal blocks
+                if (flag == 1)
                 diag_strtri_kernel_lower<<< nblocks, BLOCK_SIZE, 0, magma_stream >>>(diag, A, d_dinvA, lda);
 
                 // update the inverse up to the size of BLOCK_SIZE
@@ -1778,6 +1779,7 @@ void diag_strtri (magma_int_t M, char uplo, char diag, const float *A, float *d_
         }
         else
         {
+                if (flag == 1)
                 diag_strtri_kernel_upper<<< nblocks, BLOCK_SIZE, 0, magma_stream >>>(diag, A, d_dinvA, lda);
 
                 // update the inverse up to the size of BLOCK_SIZE
@@ -1958,7 +1960,7 @@ void magmablas_strsm( char side, char uplo, char tran, char diag, magma_int_t M,
                 magma_smalloc( &d_x,     N*M );
                 cudaMemset(d_x,     0, N*M*sizeof(float));
                 cudaMemset(d_dinvA, 0, NB*((M/NB)+(M%NB!=0))*NB*sizeof(float));
-                diag_strtri (M, uplo, diag, A, d_dinvA, lda);
+                diag_strtri (M, uplo, diag, A, 1, d_dinvA, lda);
 
                 if (tran == 'N' || tran == 'n')
                 /* the non-transpose case */
@@ -2101,7 +2103,7 @@ void magmablas_strsm( char side, char uplo, char tran, char diag, magma_int_t M,
                 magma_smalloc( &d_x,     N*M );
                 cudaMemset(d_x,     0, N*M*sizeof(float));
                 cudaMemset(d_dinvA, 0, NB*((N/NB)+(N%NB!=0))*NB*sizeof(float));
-                diag_strtri (N, uplo, diag, A, d_dinvA, lda);
+                diag_strtri (N, uplo, diag, A, 1, d_dinvA, lda);
 
                 if (tran == 'N' || tran == 'n')
                 /* the non-transpose case */

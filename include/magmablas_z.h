@@ -615,8 +615,7 @@ void magmablas_ztrsm_work(
     magmaDoubleComplex alpha,
     magmaDoubleComplex_const_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_ptr       db, magma_int_t lddb,
-    magmaDoubleComplex_ptr d_dinvA,
-    magmaDoubleComplex_ptr dx );
+    int flag, magmaDoubleComplex_ptr d_dinvA, magmaDoubleComplex_ptr dx );
 #endif
 
   /*

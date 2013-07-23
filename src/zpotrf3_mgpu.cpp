@@ -15,7 +15,8 @@
 #define PRECISION_z
 
 #if defined(PRECISION_s) || defined(PRECISION_d)
-//#define ZTRSM_WORK
+#define ZTRSM_WORK
+//#define magma_ztrsm magmablas_ztrsm
 #endif
 /* === End defining what BLAS to use ======================================= */
 
@@ -308,7 +309,7 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, char uplo, magma_int_t m, magma_int_t n
                                               jb, nb0, c_one,
                                               dlpanel,                ldpanel,
                                               dlA(d, j, nb*j_local2), ldda,
-                                              d_dinvA[d][0], d_x[d][0] );
+                                              1, d_dinvA[d][0], d_x[d][0] );
 #else
                         magma_ztrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
                                      jb, nb0, c_one,
@@ -327,7 +328,7 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, char uplo, magma_int_t m, magma_int_t n
                                               jb, nb2, c_one,
                                               dlpanel,                ldpanel,
                                               dlA(d, j, nb*j_local2), ldda,
-                                              d_dinvA[d][1], d_x[d][1] );
+                                              1, d_dinvA[d][1], d_x[d][1] );
 #else
                         magma_ztrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
                                      jb, nb2, c_one,
@@ -381,7 +382,7 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, char uplo, magma_int_t m, magma_int_t n
                     trace_gpu_end( d, stream3 );
                     magma_event_record( event[d][3], stream[d][stream3] );
                     /* needed on pluto */
-                    magma_queue_sync( stream[d][stream3] );
+                    //magma_queue_sync( stream[d][stream3] );
                 
                     /* wait for the off-diagonal on cpu */
                     //magma_setdevice(id);
@@ -428,14 +429,15 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, char uplo, magma_int_t m, magma_int_t n
                     if( nb2 > 0 ) {
                         magma_setdevice(d);
                         magmablasSetKernelStream(stream[d][stream2]);
-                        magma_queue_wait_event( stream[d][stream2], event[d][1] ); // wait for cholesky factor
+                        //magma_queue_wait_event( stream[d][stream2], event[d][1] ); // wait for cholesky factor
+                        magma_queue_wait_event( stream[d][stream2], event[d][4] ); // lookahead -> diagonal inversion
                         trace_gpu_start( d, stream2, "trsm", "trsm" );
 #if (defined(PRECISION_d) || defined(PRECISION_s)) && defined(ZTRSM_WORK)
                         magmablas_ztrsm_work( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
                                               jb, nb2, c_one,
                                               dlpanel,                    ldpanel,
                                               dlA(d, j, nb*j_local2+nb0), ldda,
-                                              d_dinvA[d][1], d_x[d][1] );
+                                              0, d_dinvA[d][0], d_x[d][1] );
 #else
                         magma_ztrsm( MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
                                      jb, nb2, c_one,
@@ -586,7 +588,7 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, char uplo, magma_int_t m, magma_int_t n
                                               nb0, jb, c_one,
                                               dlpanel,                ldpanel,
                                               dlA(d, nb*j_local2, j), ldda,
-                                              d_dinvA[d][0], d_x[d][0] );
+                                              1, d_dinvA[d][0], d_x[d][0] );
 #else
                         magma_ztrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit,
                                      nb0, jb, c_one,
@@ -603,7 +605,7 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, char uplo, magma_int_t m, magma_int_t n
                                               nb2, jb, c_one,
                                               dlpanel,                ldpanel,
                                               dlA(d, nb*j_local2, j), ldda,
-                                              d_dinvA[d][1], d_x[d][1] );
+                                              1, d_dinvA[d][1], d_x[d][1] );
 #else
                         magma_ztrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit,
                                      nb2, jb, c_one,
@@ -653,7 +655,7 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, char uplo, magma_int_t m, magma_int_t n
                                             stream[d][stream3] );
                     magma_event_record( event[d][3], stream[d][stream3] );
                     /* syn on rows on CPU, seem to be needed on Pluto */
-                    magma_queue_sync( stream[d][stream3] );
+                    //magma_queue_sync( stream[d][stream3] );
                 
                     /* broadcast the rows to gpus */
                     buf2 = ((j+jb)/nb)%num_gpus;
@@ -693,13 +695,14 @@ magma_zpotrf3_mgpu(magma_int_t num_gpus, char uplo, magma_int_t m, magma_int_t n
                         magma_setdevice(d);
                         magmablasSetKernelStream(stream[d][stream2]);
                         /* update the remaining blocks in the column */
-                        magma_queue_wait_event( stream[d][stream2], event[d][1] ); // panel received
+                        //magma_queue_wait_event( stream[d][stream2], event[d][1] ); // panel received
+                        magma_queue_wait_event( stream[d][stream2], event[d][4] ); // lookahead -> diagonal inversion
 #if (defined(PRECISION_d) || defined(PRECISION_s)) && defined(ZTRSM_WORK)
                         magmablas_ztrsm_work( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit,
                                               nb2, jb, c_one,
                                               dlpanel,                    ldpanel,
                                               dlA(d, nb*j_local2+nb0, j), ldda,
-                                              d_dinvA[d][1], d_x[d][1] );
+                                              0, d_dinvA[d][0], d_x[d][1] );
 #else
                         magma_ztrsm( MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit,
                                      nb2, jb, c_one,

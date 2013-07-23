@@ -15,7 +15,7 @@
 //#define cublasSgemm magmablas_sgemm_fermi64
 
 extern "C"
-void diag_strtri (magma_int_t M, char uplo, char diag, const float *A, float *d_dinvA, magma_int_t lda);
+void diag_strtri (magma_int_t M, char uplo, char diag, const float *A, int flag, float *d_dinvA, magma_int_t lda);
 
 __global__ void
 b_copy_kernel (int M, int N, float *b, int ldb, float *d_x, int ldx);
@@ -36,7 +36,7 @@ b_copy_kernel (int M, int N, float *b, int ldb, float *d_x, int ldx);
 extern "C"
 void magmablas_strsm_work( char side, char uplo, char tran, char diag, magma_int_t M, magma_int_t N, 
                            float alpha, const float* A, magma_int_t lda, float* b, magma_int_t ldb,
-                           float *d_dinvA, float *d_x)
+                           int flag, float *d_dinvA, float *d_x)
 {
         /*  -- MAGMA (version 1.1) --
                 Univ. of Tennessee, Knoxville
@@ -171,7 +171,6 @@ void magmablas_strsm_work( char side, char uplo, char tran, char diag, magma_int
         /* quick return on wrong size */
         if (M<=0 || N<=0)
                 return;
-
         if (side == 'l' || side == 'L')
         {
                 /* invert the diagonals
@@ -179,7 +178,7 @@ void magmablas_strsm_work( char side, char uplo, char tran, char diag, magma_int
                  */
                 //cudaMemset(d_x,     0, N*M*sizeof(float));
                 //cudaMemset(d_dinvA, 0, NB*((M/NB)+(M%NB!=0))*NB*sizeof(float));
-                diag_strtri (M, uplo, diag, A, d_dinvA, lda);
+                diag_strtri (M, uplo, diag, A, flag, d_dinvA, lda);
 
                 if (tran == 'N' || tran == 'n')
                 /* the non-transpose case */
@@ -312,7 +311,7 @@ void magmablas_strsm_work( char side, char uplo, char tran, char diag, magma_int
                  */
                 //cudaMemset(d_x,     0, N*M*sizeof(float));
                 //cudaMemset(d_dinvA, 0, NB*((N/NB)+(N%NB!=0))*NB*sizeof(float));
-                diag_strtri (N, uplo, diag, A, d_dinvA, lda);
+                diag_strtri (N, uplo, diag, A, flag, d_dinvA, lda);
 
                 if (tran == 'N' || tran == 'n')
                 /* the non-transpose case */
