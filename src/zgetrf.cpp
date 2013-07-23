@@ -11,19 +11,6 @@
 #include "common_magma.h"
 
 
-// =========================================================================
-// definitions of non-GPU-resident multi-GPU subroutines
-/* non-gpu-resident interface to multiple GPUs */
-extern "C" magma_int_t
-magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
-               magma_int_t *ipiv, magma_int_t *info);
-
-/* to apply pivoting from the previous big panel on CPU */
-extern "C" magma_int_t
-magma_zgetrf_piv(magma_int_t num_gpus, magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
-                 magma_int_t *ipiv, magma_int_t *info);
-// =========================================================================
-
 
 extern "C" magma_int_t
 magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t lda,
@@ -130,7 +117,6 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
         if ( num_gpus > 1 ) {
             /* call multi-GPU non-GPU-resident interface  */
             magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
-            if( *info >= 0 ) magma_zgetrf_piv(num_gpus, m, n, a, lda, ipiv, info);
             return *info;
         }
 
@@ -150,9 +136,8 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
             NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
         } 
         if( num_gpus2*NB < n ) {
-            /* call non-GPU-resident interface if too much memory is required */
+            /* require too much memory, so call non-GPU-resident version */
             magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
-            if( *info >= 0 ) magma_zgetrf_piv(num_gpus, m, n, a, lda, ipiv, info);
             return *info;
         }
 
@@ -161,10 +146,9 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
         if (maxdim*maxdim < 2*maxm*maxn) {
             // if close to square, allocate square matrix and transpose in-place
             if (MAGMA_SUCCESS != magma_zmalloc( &dA, nb*maxm + maxdim*maxdim )) {
-                        /* alloc failed so call non-GPU-resident version */
-                        magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
-                        if( *info >= 0 ) magma_zgetrf_piv(num_gpus, m, n, a, lda, ipiv, info);
-                        return *info;
+                /* alloc failed so call non-GPU-resident version */
+                magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
+                return *info;
             }
             da = dA + nb*maxm;
             
@@ -177,21 +161,19 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
         else {
             // if very rectangular, allocate dA and dAT and transpose out-of-place
             if (MAGMA_SUCCESS != magma_zmalloc( &dA, (nb + maxn)*maxm )) {
-                        /* alloc failed so call non-GPU-resident version */
-                        magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
-                        if( *info >= 0 ) magma_zgetrf_piv(num_gpus, m, n, a, lda, ipiv, info);
-                        return *info;
+                /* alloc failed so call non-GPU-resident version */
+                magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
+                return *info;
             }
             da = dA + nb*maxm;
             
             magma_zsetmatrix( m, n, a, lda, da, maxm );
             
             if (MAGMA_SUCCESS != magma_zmalloc( &dAT, maxm*maxn )) {
-                        /* alloc failed so call non-GPU-resident version */
-                        magma_free( dA );
-                        magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
-                        if( *info >= 0 ) magma_zgetrf_piv(num_gpus, m, n, a, lda, ipiv, info);
-                        return *info;
+                /* alloc failed so call non-GPU-resident version */
+                magma_free( dA );
+                magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
+                return *info;
             }
 
             magmablas_ztranspose2( dAT, ldda, da, maxm, m, n );
