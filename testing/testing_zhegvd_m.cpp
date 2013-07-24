@@ -250,7 +250,7 @@ int main( int argc, char** argv)
                     temp1 = max(temp1, absv(w2[j]));
                     temp2 = max(temp2, absv(w1[j]-w2[j]));
                 }
-                double result2 = temp2 / (((double)N*)temp1);
+                double result2 = temp2 / (((double)N)*temp1);
 
                 /* =====================================================================
                  Print execution time
