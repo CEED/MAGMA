@@ -765,6 +765,7 @@ magma_int_t magma_zhetrd2_gpu(char uplo, magma_int_t n,
                               double *d, double *e, magmaDoubleComplex *tau,
                               magmaDoubleComplex *wa,  magma_int_t ldwa,
                               magmaDoubleComplex *work, magma_int_t lwork,
+                              magmaDoubleComplex *dwork, magma_int_t ldwork,
                               magma_int_t *info);
 
 double magma_zlatrd_mgpu(

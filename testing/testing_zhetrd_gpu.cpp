@@ -38,11 +38,11 @@ int main( int argc, char** argv)
 
     real_Double_t    gflops, gpu_perf, cpu_perf, gpu_time, cpu_time;
     double           eps;
-    magmaDoubleComplex *h_A, *h_R, *d_R, *h_Q, *h_work, *work;
+    magmaDoubleComplex *h_A, *h_R, *d_R, *h_Q, *h_work, *work, *dwork;
     magmaDoubleComplex *tau;
     double          *diag, *offdiag;
     double           result[2] = {0., 0.};
-    magma_int_t N, n2, lda, lwork, info, nb;
+    magma_int_t N, n2, lda, lwork, info, nb, ldwork;
     magma_int_t ione     = 1;
     magma_int_t itwo     = 2;
     magma_int_t ithree   = 3;
@@ -72,9 +72,11 @@ int main( int argc, char** argv)
             nb     = magma_get_zhetrd_nb(N);
             lwork  = N*nb;  /* We suppose the magma nb is bigger than lapack nb */
             gflops = FLOPS_ZHETRD( N ) / 1e9;
+            ldwork = (N*N+64-1)/64 + 2*N*nb;
             
             TESTING_MALLOC(    h_A,     magmaDoubleComplex, lda*N );
             TESTING_DEVALLOC(  d_R,     magmaDoubleComplex, lda*N );
+            TESTING_DEVALLOC(dwork,     magmaDoubleComplex, ldwork);
             TESTING_HOSTALLOC( h_R,     magmaDoubleComplex, lda*N );
             TESTING_HOSTALLOC( h_work,  magmaDoubleComplex, lwork );
             TESTING_MALLOC(    tau,     magmaDoubleComplex, N     );
@@ -105,7 +107,7 @@ int main( int argc, char** argv)
                                   tau, h_R, lda, h_work, lwork, &info );
             else
                 magma_zhetrd2_gpu( opts.uplo, N, d_R, lda, diag, offdiag,
-                                   tau, h_R, lda, h_work, lwork, &info );
+                                   tau, h_R, lda, h_work, lwork, dwork, ldwork, &info );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
@@ -180,6 +182,7 @@ int main( int argc, char** argv)
             TESTING_HOSTFREE( h_R );
             TESTING_HOSTFREE( h_work );
             TESTING_DEVFREE ( d_R );
+            TESTING_DEVFREE ( dwork );
             
             if ( opts.check ) {
                 TESTING_FREE( h_Q );

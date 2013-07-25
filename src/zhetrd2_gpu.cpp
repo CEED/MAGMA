@@ -24,6 +24,7 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
                   double *d, double *e, magmaDoubleComplex *tau,
                   magmaDoubleComplex *wa,  magma_int_t ldwa,
                   magmaDoubleComplex *work, magma_int_t lwork,
+                  magmaDoubleComplex *dwork, magma_int_t ldwork,
                   magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -102,6 +103,12 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
             only calculates the optimal size of the WORK array, returns
             this value as the first entry of the WORK array, and no error
             message related to LWORK is issued by XERBLA.
+
+    DWORK   (workspace/output) COMPLEX_16 array on the GPU, dim (MAX(1,LDWORK))
+
+    LDWORK  (input) INTEGER
+            The dimension of the array DWORK.  
+            LDWORK >= (n*n+64-1)/64 + 2*n*nb, where nb = magma_get_zhetrd_nb(n)
 
     INFO    (output) INTEGER
             = 0:  successful exit
@@ -204,12 +211,10 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
     else
         nx = 300;
 
-    magma_int_t ldwork = (ldw*n+64-1)/64 + 2*ldw*nb;
-    magmaDoubleComplex *dwork;
-    if (MAGMA_SUCCESS != magma_zmalloc( &dwork, ldwork )) {
+    if (ldwork<(ldw*n+64-1)/64 + 2*ldw*nb) {
       *info = MAGMA_ERR_DEVICE_ALLOC;
       return *info;
-    }
+    } 
 
     if (upper) {
         /*  Reduce the upper triangle of A.
@@ -297,7 +302,6 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
     }
     
     MAGMA_Z_SET2REAL( work[0], lwkopt );
-    magma_free(dwork);
 
     return *info;
 } /* zhetrd2_gpu */

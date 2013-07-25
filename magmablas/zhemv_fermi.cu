@@ -1734,7 +1734,7 @@ magmablas_zhemv2_200(
     else
     {
         magma_int_t blocks    = n / zhemv_bs + (n % zhemv_bs != 0);
-        magma_int_t workspace = lda * (blocks + 1);
+        magma_int_t workspace = n * (blocks );
 
         if (lwork < workspace) {
             printf("Not enough work space in magmablas_zhemv: passed %d, required %d\n",

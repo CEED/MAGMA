@@ -1392,6 +1392,7 @@ void magmaf_zhetrd2_gpu(
     magmaDoubleComplex *tau,
     magmaDoubleComplex *wa, magma_int_t *ldwa,
     magmaDoubleComplex *work, magma_int_t *lwork,
+    magmaDoubleComplex *dwork, magma_int_t *ldwork,
     magma_int_t *info )
 {
     magma_zhetrd2_gpu(
@@ -1402,6 +1403,7 @@ void magmaf_zhetrd2_gpu(
         tau,
         wa, *ldwa,
         work, *lwork,
+        dwork, *ldwork,
         info );
 }
 
