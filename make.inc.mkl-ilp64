@@ -47,8 +47,8 @@ LIB       = -lmkl_gf_ilp64 -lmkl_gnu_thread -lmkl_core -lpthread -lcublas -lcuda
 
 # check for directories and give user hint how to set them
 ifeq ($(MKLROOT),)
-    vars_sh  := $(shell which icc 2>/dev/null | perl -pe 's|/bin/\w+/icc|/mkl/bin/mklvars.sh|')
-    vars_csh := $(shell which icc 2>/dev/null | perl -pe 's|/bin/\w+/icc|/mkl/bin/mklvars.csh|')
+    vars_sh  := $(shell which icc 2>/dev/null | perl -pe 's|/bin.*/icc|/mkl/bin/mklvars.sh|')
+    vars_csh := $(shell which icc 2>/dev/null | perl -pe 's|/bin.*/icc|/mkl/bin/mklvars.csh|')
     ifeq ($(vars_sh),)
         vars_sh  := /opt/intel/composerxe/mkl/bin/mklvars.sh
         vars_csh := /opt/intel/composerxe/mkl/bin/mklvars.csh
