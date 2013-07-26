@@ -6,9 +6,7 @@
        November 2011
 
        @precisions normal z -> s d c
-
 */
-
 // includes, system
 #include <stdlib.h>
 #include <stdio.h>
@@ -95,6 +93,8 @@ int main( int argc, char** argv)
                 /* =====================================================================
                    Performs operation using LAPACK
                    =================================================================== */
+                magmaDoubleComplex *tau;
+                TESTING_MALLOC( tau, magmaDoubleComplex, min_mn );
                 cpu_time = magma_wtime();
                 lapackf77_zgeqrf(&M, &N, h_A, &lda, tau, h_work, &lwork, &info);
                 cpu_time = magma_wtime() - cpu_time;
@@ -102,6 +102,7 @@ int main( int argc, char** argv)
                 if (info != 0)
                     printf("lapackf77_zgeqrf returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                TESTING_FREE( tau );
             }
 
             if ( opts.check == 1 ) {
