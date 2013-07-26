@@ -185,15 +185,16 @@ int main( int argc, char** argv)
                 } else if(M >= N) {
                     magma_int_t lwork;
                     magmaDoubleComplex *x, *b, *d_B, *hwork;
+                    const magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;
                     const magmaDoubleComplex c_one     = MAGMA_Z_ONE;
                     const magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
                     const magma_int_t ione = 1;
 
-                    // initialize RHS
-                    TESTING_MALLOC( x, magmaDoubleComplex, M );
+                    // initialize RHS, b = A*random
+                    TESTING_MALLOC( x, magmaDoubleComplex, N );
                     TESTING_MALLOC( b, magmaDoubleComplex, M );
-                    lapackf77_zlarnv( &ione, ISEED, &M, b );
-                    blasf77_zcopy( &M, b, &ione, x, &ione );
+                    lapackf77_zlarnv( &ione, ISEED, &N, x );
+                    blasf77_zgemv( "Notrans", &M, &N, &c_one, h_A, &lda, x, &ione, &c_zero, b, &ione );
                     // copy to GPU
                     TESTING_DEVALLOC( d_B, magmaDoubleComplex, M );
                     magma_zsetvector( M, b, 1, d_B, 1 );
