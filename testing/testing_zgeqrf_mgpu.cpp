@@ -38,18 +38,26 @@ int main( int argc, char** argv )
     magma_int_t M, N, n2, lda, ldda, n_local, ngpu;
     magma_int_t info, min_mn, nb, lhwork;
     magma_int_t ione     = 1;
-    magma_int_t ISEED[4] = {0,0,0,1};
+    magma_int_t ISEED[4] = {0,0,0,1}, ISEED2[4];
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
-    opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
+    opts.lapack |= (opts.check == 2);  // check (-c2) implies lapack (-l)
  
     magma_int_t status = 0;
-    double tol = opts.tolerance * lapackf77_dlamch("E");
+    double tol;
 
     printf("ngpu %d\n", (int) opts.ngpu );
-    printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / ||A||_F\n");
-    printf("=======================================================================\n");
+    if ( opts.check == 1 ) {
+        printf("  M     N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R-Q'A||_1 / (M*||A||_1*eps) ||I-Q'Q||_1 / (M*eps)\n");
+        printf("=========================================================================================================\n");
+        tol = 1.0;
+
+    } else {
+        printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / ||A||_F\n");
+        printf("=======================================================================\n");
+        tol = opts.tolerance * lapackf77_dlamch("E");
+    }
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             M = opts.msize[i];
@@ -90,6 +98,7 @@ int main( int argc, char** argv )
             }
             
             /* Initialize the matrix */
+            for ( int j=0; j<4; j++ ) ISEED2[j] = ISEED[j]; // saving seeds
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
             lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
             
@@ -97,6 +106,8 @@ int main( int argc, char** argv )
                Performs operation using LAPACK
                =================================================================== */
             if ( opts.lapack ) {
+                magmaDoubleComplex *tau;
+                TESTING_MALLOC( tau, magmaDoubleComplex, min_mn );
                 cpu_time = magma_wtime();
                 lapackf77_zgeqrf( &M, &N, h_A, &M, tau, h_work, &lhwork, &info );
                 cpu_time = magma_wtime() - cpu_time;
@@ -104,6 +115,7 @@ int main( int argc, char** argv )
                 if (info != 0)
                     printf("lapack_zgeqrf returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
+                TESTING_FREE( tau );
             }
             
             /* ====================================================================
@@ -122,10 +134,41 @@ int main( int argc, char** argv )
             magma_zgetmatrix_1D_col_bcyclic( M, N, d_lA, ldda, h_R, lda, ngpu, nb );
             magma_queue_sync( NULL );
             
-            /* =====================================================================
-               Check the result compared to LAPACK
-               =================================================================== */
-            if ( opts.lapack ) {
+            if ( opts.check == 1 ) {
+                /* =====================================================================
+                   Check the result 
+                   =================================================================== */
+                magma_int_t i, lwork = n2+N;
+                magmaDoubleComplex *h_W1, *h_W2, *h_W3;
+                double *h_RW, results[2];
+    
+                TESTING_MALLOC( h_W1, magmaDoubleComplex, n2 ); // Q
+                TESTING_MALLOC( h_W2, magmaDoubleComplex, n2 ); // R
+                TESTING_MALLOC( h_W3, magmaDoubleComplex, lwork ); // WORK
+                TESTING_MALLOC( h_RW, double, M );  // RWORK
+                lapackf77_zlarnv( &ione, ISEED2, &n2, h_A );
+                lapackf77_zqrt02( &M, &N, &min_mn, h_A, h_R, h_W1, h_W2, &lda, tau, h_W3, &lwork,
+                                  h_RW, results );
+
+                if ( opts.lapack ) {
+                    printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e                      %8.2e",
+                           (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, results[0],results[1] );
+                    printf("%s\n", (results[0] > tol ? "  fail" : ""));
+                } else {
+                    printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)    %8.2e                      %8.2e",
+                           (int) M, (int) N, gpu_perf, gpu_time, results[0],results[1] );
+                    printf("%s\n", (results[0] > tol ? "  fail" : ""));
+                }
+                status |= (error > tol);
+
+                TESTING_FREE( h_W1 );
+                TESTING_FREE( h_W2 );
+                TESTING_FREE( h_W3 );
+                TESTING_FREE( h_RW );
+            } else if ( opts.check == 2 ) {
+                /* =====================================================================
+                   Check the result compared to LAPACK
+                   =================================================================== */
                 error = lapackf77_zlange("f", &M, &N, h_A, &lda, work );
                 blasf77_zaxpy( &n2, &c_neg_one, h_A, &ione, h_R, &ione );
                 error = lapackf77_zlange("f", &M, &N, h_R, &lda, work ) / error;
@@ -136,8 +179,14 @@ int main( int argc, char** argv )
                 status |= (error > tol);
             }
             else {
-                printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)     ---\n",
-                       (int) M, (int) N, gpu_perf, gpu_time );
+                if ( opts.lapack ) {
+                    printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   ---\n",
+                           (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time );
+                } else {
+                    printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)     ---  \n",
+                           (int) M, (int) N, gpu_perf, gpu_time);
+                }
+
             }
             
             TESTING_FREE( tau );
