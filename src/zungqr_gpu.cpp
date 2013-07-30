@@ -150,7 +150,7 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
         m_kk = m - kk;
         n_kk = n - kk;
         k_kk = k - kk;
-        magma_zgetmatrix( m_kk, n_kk,
+        magma_zgetmatrix( m_kk, k_kk,
                           dA(kk, kk), ldda, panel, m_kk );
         
         lapackf77_zungqr( &m_kk, &n_kk, &k_kk,
