@@ -129,6 +129,9 @@ magma_int_t magma_zungqr( magma_int_t m, magma_int_t n, magma_int_t k,
                           magmaDoubleComplex *a, magma_int_t lda,
                           magmaDoubleComplex *tau, magmaDoubleComplex *dT,
                           magma_int_t nb, magma_int_t *info );
+magma_int_t magma_zungqr2(magma_int_t m, magma_int_t n, magma_int_t k,
+                          magmaDoubleComplex *a, magma_int_t lda,
+                          magmaDoubleComplex *tau, magma_int_t *info );
 magma_int_t magma_zunmql( char side, char trans,
                           magma_int_t m, magma_int_t n, magma_int_t k,
                           magmaDoubleComplex *a, magma_int_t lda,
