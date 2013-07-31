@@ -5,6 +5,7 @@
        Univ. of Colorado, Denver
        November 2011
 
+       @author Stan Tomov
        @precisions normal z -> c
 
 */
@@ -370,7 +371,10 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                     // (CWorkspace: need N*N + 2*N, prefer N*N + N + N*NB)
                     // (RWorkspace: 0)
                     i__2 = lwork - iwork + 1;
-                    lapackf77_zungqr(&m, &n, &n, A, &lda, &work[itau], &work[iwork], &i__2, &ierr);
+
+                    // lapackf77_zungqr(&m, &n, &n, A, &lda, &work[itau], &work[iwork], &i__2, &ierr);
+                    magma_zungqr2(m, n, n, A, lda, &work[itau], &ierr);
+
                     ie = 1;
                     itauq = itau;
                     itaup = itauq + n;
@@ -491,7 +495,10 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                     // (CWorkspace: need N*N + 2*N, prefer N*N + N + N*NB)
                     // (RWorkspace: 0)
                     i__3 = lwork - iwork + 1;
-                    lapackf77_zungqr(&m, &n, &n, A, &lda, &work[itau], &work[iwork], &i__3, &ierr);
+
+                    // lapackf77_zungqr(&m, &n, &n, A, &lda, &work[itau], &work[iwork], &i__3, &ierr);
+                    magma_zungqr2(m, n, n, A, lda, &work[itau], &ierr);
+
                     ie = 1;
                     itauq = itau;
                     itaup = itauq + n;
@@ -563,7 +570,10 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                     // (CWorkspace: need 2*N, prefer N + N*NB)
                     // (RWorkspace: 0)
                     i__2 = lwork - iwork + 1;
-                    lapackf77_zungqr(&m, &n, &n, A, &lda, &work[itau], &work[iwork], &i__2, &ierr);
+
+                    // lapackf77_zungqr(&m, &n, &n, A, &lda, &work[itau], &work[iwork], &i__2, &ierr);
+                    magma_zungqr2(m, n, n, A, lda, &work[itau], &ierr);
+
                     ie = 1;
                     itauq = itau;
                     itaup = itauq + n;
@@ -633,7 +643,10 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                         // (CWorkspace: need N*N + 2*N, prefer N*N + N + N*NB)
                         // (RWorkspace: 0)
                         i__2 = lwork - iwork + 1;
-                        lapackf77_zungqr(&m, &n, &n, A, &lda, &work[itau], &work[iwork], &i__2, &ierr);
+
+                        // lapackf77_zungqr(&m, &n, &n, A, &lda, &work[itau], &work[iwork], &i__2, &ierr);
+                        magma_zungqr2(m, n, n, A, lda, &work[itau], &ierr);
+
                         ie = 1;
                         itauq = itau;
                         itaup = itauq + n;
@@ -681,7 +694,10 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                         // (CWorkspace: need 2*N, prefer N + N*NB)
                         // (RWorkspace: 0)
                         i__2 = lwork - iwork + 1;
-                        lapackf77_zungqr(&m, &n, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
+
+                        // lapackf77_zungqr(&m, &n, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
+                        magma_zungqr2(m, n, n, U, ldu, &work[itau], &ierr);
+
                         ie = 1;
                         itauq = itau;
                         itaup = itauq + n;
@@ -758,7 +774,10 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                         // (CWorkspace: need 2*N*N + 2*N, prefer 2*N*N + N + N*NB)
                         // (RWorkspace: 0)
                         i__2 = lwork - iwork + 1;
-                        lapackf77_zungqr(&m, &n, &n, A, &lda, &work[itau], &work[iwork], &i__2, &ierr);
+
+                        // lapackf77_zungqr(&m, &n, &n, A, &lda, &work[itau], &work[iwork], &i__2, &ierr);
+                        magma_zungqr2(m, n, n, A, lda, &work[itau], &ierr);
+
                         ie = 1;
                         itauq = itau;
                         itaup = itauq + n;
@@ -822,7 +841,10 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                         // (CWorkspace: need 2*N, prefer N + N*NB)
                         // (RWorkspace: 0)
                         i__2 = lwork - iwork + 1;
-                        lapackf77_zungqr(&m, &n, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
+
+                        // lapackf77_zungqr(&m, &n, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
+                        magma_zungqr2(m, n, n, U, ldu, &work[itau], &ierr);
+
                         ie = 1;
                         itauq = itau;
                         itaup = itauq + n;
@@ -896,7 +918,10 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                         // (CWorkspace: need N*N + 2*N, prefer N*N + N + N*NB)
                         // (RWorkspace: 0)
                         i__2 = lwork - iwork + 1;
-                        lapackf77_zungqr(&m, &n, &n, A, &lda, &work[itau], &work[iwork], &i__2, &ierr);
+
+                        // lapackf77_zungqr(&m, &n, &n, A, &lda, &work[itau], &work[iwork], &i__2, &ierr);
+                        magma_zungqr2(m, n, n, A, lda, &work[itau], &ierr);
+
                         ie = 1;
                         itauq = itau;
                         itaup = itauq + n;
@@ -953,8 +978,10 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                         // (CWorkspace: need 2*N, prefer N + N*NB)
                         // (RWorkspace: 0)
                         i__2 = lwork - iwork + 1;
-                        lapackf77_zungqr(&m, &n, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
-                        
+
+                        // lapackf77_zungqr(&m, &n, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
+                        magma_zungqr2(m, n, n, U, ldu, &work[itau], &ierr);
+           
                         // Copy R to VT, zeroing out below it
                         lapackf77_zlacpy("U", &n, &n, A, &lda, VT, &ldvt);
                         if (n > 1) {
@@ -1033,7 +1060,10 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                         // (CWorkspace: need N*N + N + M, prefer N*N + N + M*NB)
                         // (RWorkspace: 0)
                         i__2 = lwork - iwork + 1;
-                        lapackf77_zungqr(&m, &m, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
+
+                        // lapackf77_zungqr(&m, &m, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
+                        magma_zungqr2(m, m, n, U, ldu, &work[itau], &ierr);
+
                         ie = 1;
                         itauq = itau;
                         itaup = itauq + n;
@@ -1084,7 +1114,10 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                         // (CWorkspace: need N + M, prefer N + M*NB)
                         // (RWorkspace: 0)
                         i__2 = lwork - iwork + 1;
-                        lapackf77_zungqr(&m, &m, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
+                        
+                        // lapackf77_zungqr(&m, &m, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
+                        magma_zungqr2(m, m, n, U, ldu, &work[itau], &ierr);
+
                         ie = 1;
                         itauq = itau;
                         itaup = itauq + n;
@@ -1156,8 +1189,10 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                         // (CWorkspace: need 2*N*N + N + M, prefer 2*N*N + N + M*NB)
                         // (RWorkspace: 0)
                         i__2 = lwork - iwork + 1;
-                        lapackf77_zungqr(&m, &m, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
-                        
+ 
+                        // lapackf77_zungqr(&m, &m, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
+                        magma_zungqr2(m, m, n, U, ldu, &work[itau], &ierr);
+
                         // Copy R to WORK(IU), zeroing out below it
                         lapackf77_zlacpy("U", &n, &n, A, &lda, &work[iu], &ldwrku);
                         i__2 = n - 1;
@@ -1226,7 +1261,10 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                         // (CWorkspace: need N + M, prefer N + M*NB)
                         // (RWorkspace: 0)
                         i__2 = lwork - iwork + 1;
-                        lapackf77_zungqr(&m, &m, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
+                        
+                        // lapackf77_zungqr(&m, &m, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
+                        magma_zungqr2(m, m, n, U, ldu, &work[itau], &ierr);
+
                         ie = 1;
                         itauq = itau;
                         itaup = itauq + n;
@@ -1295,7 +1333,8 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                         // (CWorkspace: need N*N + N + M, prefer N*N + N + M*NB)
                         // (RWorkspace: 0)
                         i__2 = lwork - iwork + 1;
-                        //lapackf77_zungqr(&m, &m, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
+
+                        // lapackf77_zungqr(&m, &m, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
                         magma_zungqr2(m, m, n, U, ldu, &work[itau], &ierr);
                         
                         // Copy R to WORK(IU), zeroing out below it
@@ -1363,7 +1402,8 @@ magma_zgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                         // (CWorkspace: need N + M, prefer N + M*NB)
                         // (RWorkspace: 0)
                         i__2 = lwork - iwork + 1;
-                        //lapackf77_zungqr(&m, &m, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
+
+                        // lapackf77_zungqr(&m, &m, &n, U, &ldu, &work[itau], &work[iwork], &i__2, &ierr);
                         magma_zungqr2(m, m, n, U, ldu, &work[itau], &ierr);
                         
                         // Copy R from A to VT, zeroing out below it
