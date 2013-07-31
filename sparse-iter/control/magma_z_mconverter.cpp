@@ -147,7 +147,6 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_int_t i, j, *length, maxrowlength=0;
             magma_imalloc_cpu( &length, A.num_rows);
 
-            #pragma omp parallel for
             for( i=0; i<A.num_rows; i++ ){
                 length[i] = A.row[i+1]-A.row[i];
                 if(length[i] > maxrowlength)
@@ -165,7 +164,6 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             //memset(B->val, 0, (maxrowlength*A.num_rows)*sizeof(magmaDoubleComplex));  
             //memset(B->col, 0, (maxrowlength*A.num_rows)*sizeof(magma_int_t));  
    
-            #pragma omp parallel for
             for( i=0; i<A.num_rows; i++ ){
                  magma_int_t offset = 0;
                  for( j=A.row[i]; j<A.row[i+1]; j++ ){
@@ -220,14 +218,13 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_int_t i, j, *length, maxrowlength=0;
             magma_imalloc_cpu( &length, A.num_rows);
 
-            #pragma omp parallel for
             for( i=0; i<A.num_rows; i++ ){
                 length[i] = A.row[i+1]-A.row[i];
                 if(length[i] > maxrowlength)
                      maxrowlength = length[i];
             }
             printf( "Conversion to ELLPACKT with %d elements per row: ", maxrowlength );
-
+            fflush(stdout);
             magma_zmalloc_cpu( &B->val, maxrowlength*A.num_rows );
             magma_imalloc_cpu( &B->col, maxrowlength*A.num_rows );
             for( magma_int_t i=0; i<(maxrowlength*A.num_rows); i++){
@@ -235,7 +232,6 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                  B->col[i] =  0;
             }
 
-            #pragma omp parallel for
             for( i=0; i<A.num_rows; i++ ){
                 magma_int_t offset = 0;
                 for( j=A.row[i]; j<A.row[i+1]; j++ ){
@@ -252,6 +248,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
         // ELLPACKT to CSR
         if( old_format == Magma_ELLPACKT && new_format == Magma_CSR ){
             printf( "Conversion to CSR: " ); 
+            fflush(stdout);
             // fill in information for B
             B->storage_type = Magma_CSR;
             B->memory_location = A.memory_location;
@@ -373,19 +370,20 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_int_t i, j, k, l, numblocks;
 
             // conversion
-            magma_int_t size_b = 100;
+            magma_int_t size_b = 4;
+            B->blocksize = size_b;
             magma_int_t c_blocks = ceil( (float)A.num_cols / (float)size_b );     // max number of blocks per row
             magma_int_t r_blocks = ceil( (float)A.num_rows / (float)size_b );     // max number of blocks per column
             printf("c_blocks: %d  r_blocks: %d  ", c_blocks, r_blocks);
-            magma_int_t *blockinfo;            
-            magma_imalloc_cpu( &blockinfo, c_blocks * r_blocks );
-            if( blockinfo == NULL ){
-                magma_free( blockinfo );
+         
+            magma_imalloc_cpu( &B->blockinfo, c_blocks * r_blocks );
+            if( B->blockinfo == NULL ){
+                magma_free( B->blockinfo );
                 printf("error: memory allocation.\n");
                 return MAGMA_ERR_HOST_ALLOC;
             }
             for( i=0; i<c_blocks * r_blocks; i++ )
-                blockinfo[i] = 0;
+                B->blockinfo[i] = 0;
             #define  blockinfo(i,j)  blockinfo[(i)*c_blocks   + (j)]
             
             // fill in "1" in blockinfo if block is occupied
@@ -393,7 +391,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                 for( j=A.row[i]; j<A.row[i+1]; j++ ){
                     k = floor(i / size_b);
                     l = floor(A.col[j] / size_b);
-                    blockinfo(k,l) = 1;
+                    B->blockinfo(k,l) = 1;
                 }
             } 
 
@@ -403,13 +401,14 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             for( i=0; i<c_blocks * r_blocks; i++ ){
                 if( i%c_blocks == 0)
                     B->row[i/c_blocks] = numblocks;
-                if( blockinfo[i] != 0 ){
+                if( B->blockinfo[i] != 0 ){
                     numblocks++;
-                    blockinfo[i] = numblocks;
+                    B->blockinfo[i] = numblocks;
                 }
             }
             B->row[r_blocks] = numblocks;
             printf("number of blocks: %d  ", numblocks);
+            B->numblocks = numblocks;
 
             magma_zmalloc_cpu( &B->val, numblocks * size_b * size_b );
             magma_imalloc_cpu( &B->col, numblocks  );
@@ -426,7 +425,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             // fill in col
             k = 0;
             for( i=0; i<c_blocks * r_blocks; i++ ){
-                if( blockinfo[i] != 0 ){
+                if( B->blockinfo[i] != 0 ){
                     B->col[k] = i%c_blocks;
                     k++;
                 }
@@ -438,14 +437,14 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                     k = floor(i / size_b);
                     l = floor(A.col[j] / size_b);
                     //      find correct block + take row into account + correct column
-                    B->val[ (blockinfo(k,l)-1) * size_b * size_b + i%size_b * size_b + A.col[j]%size_b ] = A.val[j];
+                    B->val[ (B->blockinfo(k,l)-1) * size_b * size_b + i%size_b * size_b + A.col[j]%size_b ] = A.val[j];
                 }
             } 
             /*
             printf("blockinfo for blocksize %d:\n", size_b);
             for( i=0; i<c_blocks; i++ ){
                 for( j=0; j<c_blocks; j++ ){
-                    printf("%d  ", blockinfo(i,j));
+                    printf("%d  ", B->blockinfo(i,j));
                 }
                 printf("\n");
             }
@@ -466,7 +465,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             }
             printf("\n");
             */
-            //magma_free( blockinfo );
+
 
             printf( "done\n" );      
             return MAGMA_SUCCESS; 
@@ -486,7 +485,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_int_t i, j, k, l, numblocks, index;
 
             // conversion
-            magma_int_t size_b = 100;
+            magma_int_t size_b = 4;
             magma_int_t c_blocks = ceil( (float)A.num_cols / (float)size_b );     // max number of blocks per row
             magma_int_t r_blocks = ceil( (float)A.num_rows / (float)size_b );     // max number of blocks per column
             printf("c_blocks: %d  r_blocks: %d  ", c_blocks, r_blocks);

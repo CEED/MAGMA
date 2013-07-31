@@ -105,6 +105,17 @@ magma_z_mfree( magma_z_sparse_matrix *A ){
             A->nnz = 0;        
             return MAGMA_SUCCESS;                 
         } 
+        if( A->storage_type = Magma_BCSR ){
+            free( A->val );
+            free( A->col );
+            free( A->row );
+            free( A->blockinfo );
+            A->num_rows = 0;
+            A->num_cols = 0;
+            A->nnz = 0; 
+            A->blockinfo = 0;        
+            return MAGMA_SUCCESS;                 
+        } 
         if( A->storage_type = Magma_DENSE ){
             free( A->val );
             A->num_rows = 0;
