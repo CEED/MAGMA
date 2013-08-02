@@ -139,6 +139,7 @@ magma_zgeev(
     char jobvl_[2] = {jobvl, 0};
     char jobvr_[2] = {jobvr, 0};
 
+    irwork = 0;
     *info = 0;
     lquery = lwork == -1;
     wantvl = lapackf77_lsame( jobvl_, "V" );
@@ -158,8 +159,8 @@ magma_zgeev(
     }
 
     /* Compute workspace */
+    nb = magma_get_zgehrd_nb( n );
     if (*info == 0) {
-        nb = magma_get_zgehrd_nb( n );
         minwrk = (1+nb)*n;
         work[0] = MAGMA_Z_MAKE( (double) minwrk, 0. );
 
