@@ -71,7 +71,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
     char uplo_[2] = {uplo, 0};
     char diag_[2] = {diag, 0};
     magma_int_t     nb, nn, j, jb;
-    magmaDoubleComplex c_zero     = MAGMA_Z_ZERO;
+    //magmaDoubleComplex c_zero     = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one      = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *work;

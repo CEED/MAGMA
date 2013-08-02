@@ -73,9 +73,6 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
 
 #define inAT(id,i,j) (d_lAT[(id)] + (i)*nb*lddat + (j)*nb)
 
-    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
-    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-
     magma_int_t nb, n_local[MagmaMaxGPUs];
     magma_int_t maxm, mindim;
     magma_int_t i, j, d, lddat, lddwork;

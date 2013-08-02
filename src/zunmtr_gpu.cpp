@@ -121,8 +121,6 @@ magma_zunmtr_gpu(char side, char uplo, char trans,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================    */
 
-    magmaDoubleComplex c_one = MAGMA_Z_ONE;
-
     char side_[2]  = {side, 0};
     char uplo_[2]  = {uplo, 0};
     char trans_[2] = {trans, 0};

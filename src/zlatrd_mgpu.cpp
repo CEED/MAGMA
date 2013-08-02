@@ -478,7 +478,6 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
 #define dX(id, i)    (dx[(id)]+incx*(i))
 #define dY(id, i, j) (dy[(id)]+incy*(i)+n*(j))
 
-    magmaDoubleComplex c_one = MAGMA_Z_ONE;
     magma_int_t id;
 
 #ifdef MAGMABLAS_ZHEMV_MGPU
@@ -533,6 +532,7 @@ magmablas_zhemv_mgpu( magma_int_t num_gpus, magma_int_t k, char uplo,
         magmablasSetKernelStream(NULL);
     }
 #else
+    magmaDoubleComplex c_one = MAGMA_Z_ONE;
     char uplo_[2]  = {uplo, 0};
     magma_int_t i, ii, j, kk, ib, ib0, i_1, i_local, idw;
     magma_int_t i_0=n;
