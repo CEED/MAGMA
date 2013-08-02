@@ -135,7 +135,7 @@ int main( int argc, char** argv)
                 /* =====================================================================
                    Check the result 
                    =================================================================== */
-                magma_int_t i, lwork = n2+N;
+                magma_int_t lwork = n2+N;
                 magmaDoubleComplex *h_W1, *h_W2, *h_W3;
                 double *h_RW, results[2];
                 magma_zgetmatrix( M, N, d_A, ldda, h_R, M );
