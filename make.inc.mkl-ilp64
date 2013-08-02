@@ -25,8 +25,8 @@ RANLIB    = ranlib
 # Defining MAGMA_ILP64 changes magma_int_t to int64_t in include/magma_types.h
 # Compiling with -std=c++98 -pedantic finds non-standard things like variable length arrays
 OPTS      = -O3 -DADD_ -fopenmp -DMAGMA_WITH_MKL -DMAGMA_SETAFFINITY -DMAGMA_ILP64 -DMKL_ILP64
-OPTS     += -std=c++98 -pedantic -Wno-long-long
-#OPTS    += -Werror
+OPTS     += -std=c++98 -pedantic -Wno-long-long -Wall
+#OPTS     += -fno-strict-aliasing -Werror  # uncomment to ensure all warnings are dealt with
 F77OPTS   = -O3 -DADD_ -fdefault-integer-8
 FOPTS     = -O3 -DADD_ -fdefault-integer-8 -x f95-cpp-input
 NVOPTS    = -O3 -DADD_ -Xcompiler -fno-strict-aliasing -DMAGMA_ILP64 -DMKL_ILP64
@@ -38,7 +38,7 @@ LDOPTS    = -fopenmp
 # see MKL Link Advisor at http://software.intel.com/sites/products/mkl/
 # gcc with MKL 10.3, GNU threads, 64-bit int
 # note -DMAGMA_ILP64 -DMKL_ILP64 and -fdefault-integer-8 in OPTS above
-LIB       = -lmkl_gf_ilp64 -lmkl_gnu_thread -lmkl_core -lpthread -lcublas -lcudart -lstdc++ -lm
+LIB       = -lmkl_gf_ilp64 -lmkl_gnu_thread -lmkl_core -lpthread -lcublas -lcudart -lstdc++ -lm -lgfortran
 
 # define library directories here or in your environment
 # for MKL run, e.g.: source /opt/intel/composerxe/mkl/bin/mklvars.sh intel64
