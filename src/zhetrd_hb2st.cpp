@@ -185,8 +185,11 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
 
     =====================================================================  */
 
-    char uplo_[2] = {uplo, 0};
+    #ifdef ENABLE_TIMER
     double timeblg=0.0;
+    #endif
+
+    //char uplo_[2] = {uplo, 0};
     magma_int_t mklth = threads;
     magma_int_t INgrsiz=1;
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
@@ -326,9 +329,11 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 
     pthread_barrier_t* barrier = &(data -> barrier);
 
-    magma_int_t sys_corenbr    = 1;
+    //magma_int_t sys_corenbr    = 1;
 
+    #ifdef ENABLE_TIMER
     double timeB=0.0, timeT=0.0;
+    #endif
 
     // with MKL and when using omp_set_num_threads instead of mkl_set_num_threads
     // it need that all threads setting it to 1.
@@ -559,7 +564,7 @@ static void magma_ztile_bulge_parallel(magma_int_t my_core_id, magma_int_t cores
                             edind      = min(colpt,n);
                             blklastind = colpt;
                             if(stind>=edind){
-                                printf("ERROR---------> st>=ed  %d  %d \n\n",stind, edind);
+                                printf("ERROR---------> st>=ed  %d  %d \n\n", (int) stind, (int) edind);
                                 exit(-10);
                             }
                         }else{
@@ -571,7 +576,7 @@ static void magma_ztile_bulge_parallel(magma_int_t my_core_id, magma_int_t cores
                             else
                                 blklastind=0;
                             if(stind>edind){
-                                printf("ERROR---------> st>=ed  %d  %d \n\n",stind, edind);
+                                printf("ERROR---------> st>=ed  %d  %d \n\n", (int) stind, (int) edind);
                                 exit(-10);
                             }
                         }
@@ -655,7 +660,7 @@ static void magma_ztile_bulge_computeT_parallel(magma_int_t my_core_id, magma_in
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
     blkpercore = blkcnt/cores_num;
     blkpercore = blkpercore==0 ? 1:blkpercore;
-    magma_int_t nbGblk  = magma_ceildiv(n-1, Vblksiz);
+    //magma_int_t nbGblk  = magma_ceildiv(n-1, Vblksiz);
 
     #ifdef ENABLE_DEBUG
     if(my_core_id==0) 

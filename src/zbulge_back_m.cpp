@@ -236,7 +236,9 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
 
     magma_int_t info;
 
+    #ifdef ENABLE_TIMER
     real_Double_t timeQcpu=0.0, timeQgpu=0.0;
+    #endif
 
     magma_int_t n_cpu = ne - n_gpu;
 
@@ -428,7 +430,7 @@ static void magma_ztile_bulge_applyQ(magma_int_t core_id, char side, magma_int_t
                         lapackf77_zlarfb( "L", "N", "F", "C", &vlen, &ib_loc, &vnb, V(vpos), &ldv, T(tpos), &ldt, E(fst,i*nb_loc), &lde, work, &ib_loc);
                     }
                     if(INFO!=0)
-                        printf("ERROR ZUNMQR INFO %d \n",INFO);
+                        printf("ERROR ZUNMQR INFO %d \n", (int) INFO);
                 }
             }
         }else if (side=='R'){
