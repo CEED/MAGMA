@@ -54,8 +54,8 @@ int main( int argc, char** argv )
         tol = 1.0;
 
     } else {
-        printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F / ||A||_F\n");
-        printf("=======================================================================\n");
+        printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F /(M*||A||_F)\n");
+        printf("==========================================================================\n");
         tol = opts.tolerance * lapackf77_dlamch("E");
     }
     for( int i = 0; i < opts.ntest; ++i ) {
@@ -171,7 +171,7 @@ int main( int argc, char** argv )
                    =================================================================== */
                 error = lapackf77_zlange("f", &M, &N, h_A, &lda, work );
                 blasf77_zaxpy( &n2, &c_neg_one, h_A, &ione, h_R, &ione );
-                error = lapackf77_zlange("f", &M, &N, h_R, &lda, work ) / error;
+                error = lapackf77_zlange("f", &M, &N, h_R, &lda, work ) / (min_mn*error);
                 
                 printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e",
                        (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, error );
