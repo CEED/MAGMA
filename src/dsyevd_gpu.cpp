@@ -249,6 +249,7 @@ magma_dsyevd_gpu(char jobz, char uplo,
     /* Scale matrix to allowable range, if necessary. */
     anrm = magmablas_dlansy('M', uplo, n, da, ldda, dwork);
     iscale = 0;
+    sigma  = 1;
     if (anrm > 0. && anrm < rmin) {
         iscale = 1;
         sigma = rmin / anrm;
