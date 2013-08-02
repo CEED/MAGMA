@@ -155,7 +155,7 @@ magma_zlahr2_m(
     magmaDoubleComplex scale;
 
     magma_int_t i;
-    magmaDoubleComplex ei;
+    magmaDoubleComplex ei = MAGMA_Z_ZERO;
 
     magma_int_t info_data = 0;
     magma_int_t *info = &info_data;

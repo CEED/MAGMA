@@ -178,6 +178,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
     minmn = min(m,n);
     mnthr = (magma_int_t)( minmn * 1.6 );
     bdspac = 5*n;
+    ie = 0;
     
     want_ua  = lapackf77_lsame(jobu_, "A");
     want_us  = lapackf77_lsame(jobu_, "S");

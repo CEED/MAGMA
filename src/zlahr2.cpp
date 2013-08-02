@@ -147,7 +147,7 @@ magma_zlahr2(
     magmaDoubleComplex scale;
 
     magma_int_t i;
-    magmaDoubleComplex ei;
+    magmaDoubleComplex ei = MAGMA_Z_ZERO;
 
     // adjust from 1-based indexing
     k -= 1;
