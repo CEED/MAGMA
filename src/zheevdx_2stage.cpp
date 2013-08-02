@@ -187,7 +187,7 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
     magma_int_t imax;
     double rmin, rmax;
     double sigma;
-    magma_int_t iinfo;
+    //magma_int_t iinfo;
     magma_int_t lwmin, lrwmin, liwmin;
     magma_int_t lower;
     magma_int_t wantz;
@@ -299,7 +299,7 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
     if(lda2>n){
         #ifndef NO_WARNING
         printf("--------------------------------------------------------------\n");
-        printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n",n,nb);
+        printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
         printf("--------------------------------------------------------------\n");
         #endif
         lapackf77_zheevd(&jobz, &uplo, &n, 
@@ -342,9 +342,9 @@ magma_zheevdx_2stage(char jobz, char range, char uplo,
     magma_int_t indV2   = indTAU2+ blkcnt*Vblksiz;
     magma_int_t indtau1 = indV2  + blkcnt*ldv*Vblksiz;
     magma_int_t indwrk  = indtau1+ n;
-    magma_int_t indwk2  = indwrk + n * n;
+    //magma_int_t indwk2  = indwrk + n * n;
     magma_int_t llwork = lwork - indwrk;
-    magma_int_t llwrk2 = lwork - indwk2;
+    //magma_int_t llwrk2 = lwork - indwk2;
     magma_int_t inde = 0;
     magma_int_t indrwk = inde + n;
     magma_int_t llrwk = lrwork - indrwk;

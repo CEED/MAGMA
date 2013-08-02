@@ -136,10 +136,11 @@ magma_zbulge_applyQ_v2(char side,
     magma_int_t blkcnt,nothing, mysiz, flip, vld,tld, locpos;
     findVTsiz(N, NB, Vblksiz, &blkcnt, &nothing);
 
+    flip = 0;
 
     // performance loss if the reflector are applied to a big number of eigenvectors (~10000)
     // => apply the reflectors to blocks of eigenvectors.
-    magma_int_t nr_bl = magma_ceildiv(NE,10000);        //nr of blocks
+    //magma_int_t nr_bl = magma_ceildiv(NE,10000);        //nr of blocks
     magma_int_t sz_bl = NE; //magma_ceildiv(NE,nr_bl*64)*64; //maximum size of blocks (to have blocks of around the same size and multiple of 64)
     magma_int_t ib;                                      //size of current block
 

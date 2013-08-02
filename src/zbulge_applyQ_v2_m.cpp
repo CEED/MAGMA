@@ -116,7 +116,8 @@ magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side,
     // they might be using dwork in parallel
     magmaDoubleComplex *dE[MagmaMaxGPUs];
     magmaDoubleComplex *dwork[MagmaMaxGPUs], *dwork0[MagmaMaxGPUs], *dwork1[MagmaMaxGPUs];
-    magmaDoubleComplex *dwvt[MagmaMaxGPUs], *dwvt0[MagmaMaxGPUs], *dwvt1[MagmaMaxGPUs];
+    //magmaDoubleComplex *dwvt[MagmaMaxGPUs];
+    magmaDoubleComplex *dwvt0[MagmaMaxGPUs], *dwvt1[MagmaMaxGPUs];
     magmaDoubleComplex *dT0[MagmaMaxGPUs], *dV0[MagmaMaxGPUs], *dT1[MagmaMaxGPUs], *dV1[MagmaMaxGPUs];
     magma_int_t dev;
     magma_int_t ldde = N;
@@ -160,6 +161,8 @@ magma_zbulge_applyQ_v2_m(magma_int_t ngpu, char side,
     magma_int_t copyed=0, copyst=0;
     magma_int_t blkcnt,nothing, mysiz, flip, vld,tld, locpos;
     findVTsiz(N, NB, Vblksiz, &blkcnt, &nothing);
+    
+    flip = 0;
 
 
     /* SIDE LEFT  meaning apply E = Q*E = (q_1*q_2*.....*q_n) * E ==> so traverse Vs in reverse order (forward) from q_n to q_1
