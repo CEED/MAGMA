@@ -240,6 +240,10 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
 
     magma_int_t n_cpu = ne - n_gpu;
 
+    // with MKL and when using omp_set_num_threads instead of mkl_set_num_threads
+    // it need that all threads setting it to 1.
+    magma_setlapack_numthreads(1);
+
 #ifdef MAGMA_SETAFFINITY
     //#define PRINTAFFINITY
 #ifdef PRINTAFFINITY

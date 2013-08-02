@@ -764,6 +764,10 @@ static void *parallel_section(void *arg)
 
     double timeB=0.0, timeT=0.0, timeaplQ1=0.0;
 
+    // with MKL and when using omp_set_num_threads instead of mkl_set_num_threads
+    // it need that all threads setting it to 1.
+    magma_setlapack_numthreads(1);
+
 #if defined(MAGMA_SETAFFINITY)
     // bind threads
     cpu_set_t set;
@@ -1082,7 +1086,6 @@ static void tile_bulge_computeT_parallel(magma_int_t my_core_id, magma_int_t cor
 
     if(n<=0)
         return ;
-
     magma_int_t blkcnt = magma_bulge_get_blkcnt(n, nb, Vblksiz);
 
     blkpercore = blkcnt/cores_num;
@@ -1165,6 +1168,9 @@ static void *applyQ_parallel_section(void *arg)
 
     if(wantz<=0)
         return 0;
+    // with MKL and when using omp_set_num_threads instead of mkl_set_num_threads
+    // it need that all threads setting it to 1.
+    magma_setlapack_numthreads(1);
 
 #if defined(MAGMA_SETAFFINITY)
     cpu_set_t set;

@@ -330,6 +330,10 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
 
     double timeB=0.0, timeT=0.0;
 
+    // with MKL and when using omp_set_num_threads instead of mkl_set_num_threads
+    // it need that all threads setting it to 1.
+    magma_setlapack_numthreads(1);
+
 #ifdef MAGMA_SETAFFINITY
 //#define PRINTAFFINITY
 #ifdef PRINTAFFINITY
