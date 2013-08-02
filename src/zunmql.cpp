@@ -125,7 +125,7 @@ magma_zunmql(const char side, const char trans,
     magma_int_t i__;
     magmaDoubleComplex t[2*4160]        /* was [65][64] */;
     magma_int_t i1, i2, i3, ib, nb, mi, ni, nq, nw;
-    magma_int_t iinfo, ldwork, lwkopt;
+    magma_int_t iinfo, ldwork, lwkopt=0;
     int lquery, left, notran;
 
     a_offset = 1 + lda;
@@ -212,6 +212,10 @@ magma_zunmql(const char side, const char trans,
             i3 = -nb;
         }
 
+        // silence "uninitialized" warnings
+        mi = 0;
+        ni = 0;
+        
         if (left) {
             ni = n;
         } else {

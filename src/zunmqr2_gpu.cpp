@@ -107,8 +107,6 @@ magma_zunmqr2_gpu(const char side, const char trans,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================   */
 
-    magmaDoubleComplex c_one = MAGMA_Z_ONE;
-
     char side_[2]  = {side,  0};
     char trans_[2] = {trans, 0};
 
@@ -183,6 +181,10 @@ magma_zunmqr2_gpu(const char side, const char trans,
         step = -nb;
     }
 
+    // silence "uninitialized" warnings
+    mi = 0;
+    ni = 0;
+    
     if (left) {
         ni = n;
         jc = 1;

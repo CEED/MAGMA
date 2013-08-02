@@ -215,6 +215,10 @@ magma_zunmqr(const char side, const char trans,
             step = -nb;
         }
 
+        // silence "uninitialized" warnings
+        mi = 0;
+        ni = 0;
+        
         if (left) {
             ni = n;
             jc = 0;

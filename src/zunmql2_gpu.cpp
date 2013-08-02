@@ -183,6 +183,10 @@ magma_zunmql2_gpu(const char side, const char trans,
         i3 = -nb;
     }
     
+    // silence "uninitialized" warnings
+    mi = 0;
+    ni = 0;
+    
     if (left) {
         ni = n;
     } else {
