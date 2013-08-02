@@ -153,10 +153,9 @@ magma_zunmtr(char side, char uplo, char trans,
         *info = -12;
     }
 
-    if (*info == 0)
-    {
-        nb = 32;
-        lwkopt = max(1,nw) * nb;
+    nb = 32;
+    lwkopt = max(1,nw) * nb;
+    if (*info == 0) {
         MAGMA_Z_SET2REAL( work[0], lwkopt );
     }
 

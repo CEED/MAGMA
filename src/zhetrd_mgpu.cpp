@@ -180,10 +180,10 @@ magma_zhetrd_mgpu(magma_int_t num_gpus, magma_int_t k, char uplo, magma_int_t n,
         *info = 2;
     }
 
+    /* Determine the block size. */
+    ldwork = lddwork = n;
+    lwkopt = n * nb;
     if (*info == 0) {
-        /* Determine the block size. */
-        ldwork = lddwork = n;
-        lwkopt = n * nb;
         MAGMA_Z_SET2REAL( work[0], lwkopt );
     }
 

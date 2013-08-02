@@ -165,10 +165,10 @@ magma_zhetrd(char uplo, magma_int_t n,
         *info = -9;
     }
 
+    /* Determine the block size. */
+    ldwork = lddwork = n;
+    lwkopt = n * nb;
     if (*info == 0) {
-        /* Determine the block size. */
-        ldwork = lddwork = n;
-        lwkopt = n * nb;
         MAGMA_Z_SET2REAL( work[0], lwkopt );
     }
 

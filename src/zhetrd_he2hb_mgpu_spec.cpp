@@ -191,9 +191,9 @@ magma_zhetrd_he2hb_mgpu_spec( char uplo, magma_int_t n, magma_int_t nb,
         *info = -9;
     }
 
+    /* Determine the block size. */
+    lwkopt = n * nb;
     if (*info == 0) {
-        /* Determine the block size. */
-        lwkopt = n * nb;
         MAGMA_Z_SET2REAL( work[0], lwkopt );
     }
 

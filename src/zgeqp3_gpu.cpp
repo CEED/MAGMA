@@ -118,12 +118,12 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
         *info = -4;
     }
     
+    nb = magma_get_zgeqp3_nb(min(m, n));
     if (*info == 0) {
         minmn = min(m,n);
         if (minmn == 0) {
             lwkopt = 1;
         } else {
-            nb = magma_get_zgeqp3_nb(min(m, n));
             lwkopt = (n + 1)*nb;
 #if defined(PRECISION_d) || defined(PRECISION_s)
             lwkopt += 2*n;

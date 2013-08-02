@@ -161,8 +161,8 @@ magma_dgeev_m(
     }
 
     /* Compute workspace */
+    nb = magma_get_dgehrd_nb( n );
     if (*info == 0) {
-        nb = magma_get_dgehrd_nb( n );
         minwrk = (2+nb)*n;
         work[0] = MAGMA_D_MAKE( (double) minwrk, 0. );
         
