@@ -183,7 +183,7 @@ LIBEXE  := $(LIBOBJ:.o=)
 # strip out fake exe files generated from LIBSRC
 EXE := $(filter-out $(LIBEXE), $(EXE))
 
-.PHONY: all lib clean cleanall
+.PHONY: all lib clean cleanall cleanexe
 
 all: $(EXE)
 
@@ -209,8 +209,10 @@ clean:
 	cd matgen && $(MAKE) clean
 	rm -f *.o *~ $(LIBTEST)
 
-cleanall: clean
+cleanexe:
 	rm -f $(EXE)
+
+cleanall: clean cleanexe
 
 ifeq ($(FORT), pgfortran)
 testing_%.o : testing_%.cuf
