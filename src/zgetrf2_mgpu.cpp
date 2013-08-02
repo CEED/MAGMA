@@ -135,10 +135,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
     magma_setdevice(0);
     magmablasSetKernelStream(streaml[0][1]);
     trace_gpu_start( 0, 1, "comm", "get" );
-    if( nb0 == nb )
-        magmablas_ztranspose(  d_lAP[0], maxm, inAT(0,0,0), lddat, nb0, maxm );
-    else
-        magmablas_ztranspose2( d_lAP[0], maxm, inAT(0,0,0), lddat, nb0, maxm );
+    magmablas_ztranspose2( d_lAP[0], maxm, inAT(0,0,0), lddat, nb0, m );
     magma_zgetmatrix_async( m, nb0,
                             d_lAP[0], maxm,
                             W(0),     ldw, streaml[0][1] );
@@ -236,7 +233,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
                 magma_queue_sync(streaml[d][0]);
                 trace_gpu_start( d, 1, "gemm", "gemm" );
                 /* transpose panel on GPU */
-                magmablas_ztranspose(panel_local[d], ldpan[d], &d_lAP[d][(i%h)*nb*maxm], cols, cols, nb);
+                magmablas_ztranspose2(panel_local[d], ldpan[d], &d_lAP[d][(i%h)*nb*maxm], cols, rows, nb);
                 /* synch for remaining update */
                 magma_queue_sync(streaml[d][1]);
             } else {
@@ -248,7 +245,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
                 magma_queue_sync(streaml[d][1]);
                 trace_gpu_start( d, 0, "gemm", "gemm" );
                 /* transpose panel on GPU */
-                magmablas_ztranspose(panel_local[d], ldpan[d], &d_lAP[d][(i%h)*nb*maxm], cols, cols, nb);
+                magmablas_ztranspose2(panel_local[d], ldpan[d], &d_lAP[d][(i%h)*nb*maxm], cols, rows, nb);
             }
             
             /* gpu updating the trailing matrix */
@@ -275,10 +272,7 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
                 if( nb0 > 0 ) {
                     /* transpose the panel for sending it to cpu */
                     trace_gpu_start( d, 1, "comm", "get" );
-                    if( i+1 < s )
-                        magmablas_ztranspose(  &d_lAP[d][((i+1)%h)*nb*maxm], ldda, inAT(d,loff,i_local), lddat, nb0, ldda );
-                    else
-                        magmablas_ztranspose2( &d_lAP[d][((i+1)%h)*nb*maxm], ldda, inAT(d,loff,i_local), lddat, nb0, ldda );
+                    magmablas_ztranspose2( &d_lAP[d][((i+1)%h)*nb*maxm], ldda, inAT(d,loff,i_local), lddat, nb0, m-(i+1)*nb );
              
                     /* send the panel to cpu */
                     magma_zgetmatrix_async( cols, nb0,
