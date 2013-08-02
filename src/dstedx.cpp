@@ -16,7 +16,7 @@
 extern "C"{
     magma_int_t get_dstedx_smlsize()
     {
-        return 25;
+        return 128;
     }
 }
 

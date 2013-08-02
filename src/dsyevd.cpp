@@ -156,6 +156,17 @@ magma_dsyevd(char jobz, char uplo,
     lquery = lwork == -1 || liwork == -1;
 
     *info = 0;
+    
+    if (n <= 128){
+        char jobzs[2] = {jobz, '\n'}, uplos[2] = {uplo, '\n'};
+        
+        lapackf77_dsyevd(jobzs, uplos,
+                         &n, a, &lda,
+                         w, work, &lwork,
+                         iwork, &liwork, info);
+        return *info;
+    }
+
     if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVecStr))) {
         *info = -1;
     } else if (! (lower || lapackf77_lsame(uplo_, MagmaUpperStr))) {
@@ -275,6 +286,7 @@ magma_dsyevd(char jobz, char uplo,
             return *info;
         }
 
+        // TTT Possible bug for n < 128
         magma_dstedx('A', n, 0., 0., 0, 0, w, &work[inde],
                      &work[indwrk], n, &work[indwk2],
                      llwrk2, iwork, liwork, dwork, info);

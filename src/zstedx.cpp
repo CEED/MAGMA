@@ -15,7 +15,7 @@
 extern "C"{
     magma_int_t get_zstedx_smlsize()
     {
-        return 25;
+        return 128;
     }
 }
 

@@ -175,6 +175,17 @@ magma_zheevd(char jobz, char uplo,
     lquery = lwork == -1 || lrwork == -1 || liwork == -1;
 
     *info = 0;
+    if (n <= 128){
+        char jobzs[2] = {jobz, '\n'}, uplos[2] = {uplo, '\n'};
+
+        lapackf77_zheevd(jobzs, uplos,
+                         &n, a, &lda,
+                         w, work, &lwork,
+                         rwork, &lrwork,
+                         iwork, &liwork, info);
+        return *info;
+    }
+
     if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVecStr))) {
         *info = -1;
     } else if (! (lower || lapackf77_lsame(uplo_, MagmaUpperStr))) {
