@@ -142,7 +142,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
                n_local[i] += n%nb;
             
             /* workspaces */
-            if (MAGMA_SUCCESS != magma_zmalloc( &d_panel[i], 3*nb*maxm )) {
+            if (MAGMA_SUCCESS != magma_zmalloc( &d_panel[i], (3+num_gpus)*nb*maxm )) {
                 for( j=0; j<=i; j++ ) {
                     magma_setdevice(j);
                 }
