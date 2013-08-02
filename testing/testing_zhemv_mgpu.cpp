@@ -100,10 +100,10 @@ int main(int argc, char **argv)
     int max_num_gpus;
     magma_int_t num_gpus = 1, nb;
     magma_int_t blocks, workspace;
-    magma_int_t offset;
-    
-//    offset = 257;
+    magma_int_t offset = 0;
 
+    M = 0;
+    N = 0;
     if (argc != 1){
         for(i = 1; i<argc; i++){
             if (strcmp("-N", argv[i])==0)
@@ -139,10 +139,8 @@ int main(int argc, char **argv)
     else {
 #if defined(PRECISION_z)
         M = N = 8000;
-      
 #else
         M = N = 12480;
-
 #endif 
         num_gpus = 2;
         offset = 0;
