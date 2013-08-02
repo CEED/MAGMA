@@ -85,7 +85,7 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
 
     magma_int_t  m_kk, n_kk, k_kk, mi;
     magma_int_t lwork, ldda;
-    magma_int_t i, ib, ki, kk, iinfo;
+    magma_int_t i, ib, ki, kk;  //, iinfo;
     magma_int_t lddwork;
     magmaDoubleComplex *dA, *dV, *dW;
     magmaDoubleComplex *work;
@@ -110,10 +110,12 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
     }
 
     // first kk columns are handled by blocked method.
+    // ki is start of 2nd-to-last block
     if ((nb > 1) && (nb < k)) {
         ki = (k - nb - 1) / nb * nb;
         kk = min(k, ki + nb);
     } else {
+        ki = 0;
         kk = 0;
     }
 

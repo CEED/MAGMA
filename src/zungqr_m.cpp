@@ -164,10 +164,12 @@ magma_zungqr_m(
     trace_init( 1, ngpu, 1, stream );
     
     // first kk columns are handled by blocked method.
+    // ki is start of 2nd-to-last block
     if ((nb > 1) && (nb < k)) {
         ki = (k - nb - 1) / nb * nb;
         kk = min(k, ki + nb);
     } else {
+        ki = 0;
         kk = 0;
     }
 

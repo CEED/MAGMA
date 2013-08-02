@@ -110,10 +110,12 @@ magma_zungqr_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     }
 
     // first kk columns are handled by blocked method.
+    // ki is start of 2nd-to-last block
     if ((nb > 1) && (nb < k)) {
         ki = (k - nb - 1) / nb * nb;
         kk = min( k, ki+nb );
     } else {
+        ki = 0;
         kk = 0;
     }
 
