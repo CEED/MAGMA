@@ -151,7 +151,8 @@ magma_zgetrf2_gpu(magma_int_t m, magma_int_t n,
         for( i=0; i<s; i++ ) {
             // download i-th panel
             cols = maxm - i*nb;
-            magmablas_ztranspose( dAP, cols, dAT(i,i), lddat, nb, cols );
+            //magmablas_ztranspose( dAP, cols, dAT(i,i), lddat, nb, cols );
+            magmablas_ztranspose2( dAP, cols, dAT(i,i), lddat, nb, m-i*nb );
             magma_zgetmatrix( m-i*nb, nb, dAP, cols, work, lddwork );
 
             // make sure that gpu queue is empty
@@ -179,7 +180,8 @@ magma_zgetrf2_gpu(magma_int_t m, magma_int_t n,
 
             // upload i-th panel
             magma_zsetmatrix( m-i*nb, nb, work, lddwork, dAP, maxm );
-            magmablas_ztranspose(dAT(i,i), lddat, dAP, maxm, cols, nb);
+            //magmablas_ztranspose(dAT(i,i), lddat, dAP, maxm, cols, nb);
+            magmablas_ztranspose2(dAT(i,i), lddat, dAP, maxm, m-i*nb, nb);
 
             // do the small non-parallel computations (next panel update)
             if ( s > (i+1) ) {
