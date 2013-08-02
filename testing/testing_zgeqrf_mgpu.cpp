@@ -45,18 +45,17 @@ int main( int argc, char** argv )
     opts.lapack |= (opts.check == 2);  // check (-c2) implies lapack (-l)
  
     magma_int_t status = 0;
-    double tol;
+    double tol, eps = lapackf77_dlamch("E");
+    tol = opts.tolerance * eps;
 
     printf("ngpu %d\n", (int) opts.ngpu );
     if ( opts.check == 1 ) {
-        printf("  M     N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R-Q'A||_1 / (M*||A||_1*eps) ||I-Q'Q||_1 / (M*eps)\n");
-        printf("=========================================================================================================\n");
-        tol = 1.0;
+        printf("  M     N     CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R-Q'A||_1 / (M*||A||_1) ||I-Q'Q||_1 / M\n");
+        printf("================================================================================================\n");
 
     } else {
         printf("    M     N   CPU GFlop/s (sec)   GPU GFlop/s (sec)   ||R||_F /(M*||A||_F)\n");
         printf("==========================================================================\n");
-        tol = opts.tolerance * lapackf77_dlamch("E");
     }
     for( int i = 0; i < opts.ntest; ++i ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
@@ -149,13 +148,15 @@ int main( int argc, char** argv )
                 lapackf77_zlarnv( &ione, ISEED2, &n2, h_A );
                 lapackf77_zqrt02( &M, &N, &min_mn, h_A, h_R, h_W1, h_W2, &lda, tau, h_W3, &lwork,
                                   h_RW, results );
+                results[0] *= eps;
+                results[1] *= eps;
 
                 if ( opts.lapack ) {
-                    printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e                      %8.2e",
+                    printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e                 %8.2e",
                            (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, results[0],results[1] );
                     printf("%s\n", (results[0] > tol ? "  fail" : ""));
                 } else {
-                    printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)    %8.2e                      %8.2e",
+                    printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)    %8.2e                 %8.2e",
                            (int) M, (int) N, gpu_perf, gpu_time, results[0],results[1] );
                     printf("%s\n", (results[0] > tol ? "  fail" : ""));
                 }
