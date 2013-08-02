@@ -10,6 +10,8 @@
 
        @precisions normal z -> s d c
 */
+#include <sys/time.h>
+#include <time.h>
 
 #include "common_magma.h"
 #include "../include/magmasparse.h"
@@ -21,11 +23,6 @@
 #define RTOLERANCE     10e-10
 #define ATOLERANCE     10e-10
 
-
-magma_int_t
-magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-              magma_solver_parameters *solver_par ) 
-{
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -51,9 +48,17 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
     =====================================================================  */
 
+magma_int_t
+magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+              magma_solver_parameters *solver_par ){
+
 #define  q(i)     (q.val + (i)*dofs)
 #define  H(i,j)  H[(i)   + (j)*ldh]
 #define HH(i,j) HH[(i)   + (j)*ldh]
+
+    //Chronometry
+    struct timeval inicio, fim;
+    double tempo1, tempo2;
 
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = MAGMA_Z_NEG_ONE;
@@ -88,26 +93,35 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     if ((r0 *= solver_par->epsilon) < ATOLERANCE) 
         r0 = ATOLERANCE;
     
-    printf("Iteration : %4d  Norm: %f\n", 0, H(1,0)*H(1,0));
+    //Chronometry 
+    gettimeofday(&inicio, NULL);
+    tempo1=inicio.tv_sec+(inicio.tv_usec/1000000.0);
+
+    printf("Iteration: %4d  Norm: %e  Time: %e\n", 0, H(1,0)*H(1,0), 0.0);
 
     for (iter = 0; iter<solver_par->maxiter; iter++) 
         {
             for(k=1; k<=(solver_par->restart); k++) 
                 {
-                    magma_zcopy(dofs, r.val, 1, q(k), 1);                        //  q[k]    = 1.0/H[k][k-1] r
-                    magma_zscal(dofs, 1./H(k,k-1), q(k), 1);                     //  (to be fused)
+                    magma_zcopy(dofs, r.val, 1, q(k-1), 1);                        //  q[k]    = 1.0/H[k][k-1] r
+                    magma_zscal(dofs, 1./H(k,k-1), q(k-1), 1);                     //  (to be fused)
 
-                    q_t.val = q(k);
+                    q_t.val = q(k-1);
                     magma_z_spmv( c_one, A, q_t, c_zero, r );                    //  r       = A q[k] 
                     
                     for (i=1; i<=k; i++) {
-                        H(i,k) =magma_zdotc(dofs, q(i), 1, r.val, 1);            //  H[i][k] = q[i] . r
-                        magma_zaxpy(dofs,-H(i,k), q(i), 1, r.val, 1);            //  r       = r - H[i][k] q[i]
+                        H(i,k) =magma_zdotc(dofs, q(i-1), 1, r.val, 1);            //  H[i][k] = q[i] . r
+                        magma_zaxpy(dofs,-H(i,k), q(i-1), 1, r.val, 1);            //  r       = r - H[i][k] q[i]
                     }
                     
                     H(k+1,k) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. ); //  H[k+1][k] = sqrt(r . r) 
-                    
-                    /*     Minimization of  || b-Ax ||  in K_k       */ 
+                      
+
+}
+
+            for(k=1; k<=(solver_par->restart); k++) 
+                {
+                    /*     Minimization of  || b-Ax ||  in H_k       */ 
                     for (i=1; i<=k; i++) {
                         #if defined(PRECISION_z) || defined(PRECISION_c)
                         cblas_zdotc_sub( i+1, &H(1,k), 1, &H(1,i), 1, &HH(k,i) );
@@ -127,6 +141,7 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                             HH(k,i) = HH(k,i)/HH(i,i);
                             h1[k] -= h1[i] * HH(k,i);   
                         }    
+
                     y[k] = h1[k]/HH(k,k); 
                     if (k != 1)  
                         for (i=k-1; i>=1; i--) {
@@ -143,14 +158,18 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
             
             /*   Update the current approximation: x += Q y  */
             magma_zsetmatrix(m, 1, y+1, m, dy, m);
-            magma_zgemv(MagmaNoTrans, dofs, m, c_one, q(1), dofs, dy, 1, c_one, x->val, 1); 
+            magma_zgemv(MagmaNoTrans, dofs, m, c_one, q(0), dofs, dy, 1, c_one, x->val, 1); 
 
             magma_z_spmv( c_mone, A, *x, c_zero, r );                  //  r = - A * x
             magma_zaxpy(dofs, c_one, b.val, 1, r.val, 1);              //  r = r + b
             H(1,0) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. ); //  RNorm = H[1][0] = || r ||
             RNorm = MAGMA_Z_REAL( H(1,0) );
             
-            printf("Iteration : %4d  Norm: %f\n", iter, RNorm*RNorm);
+            //Chronometry  
+            gettimeofday(&fim, NULL);
+            tempo2=fim.tv_sec+(fim.tv_usec/1000000.0);
+
+            printf("Iteration: %4d  Norm: %e  Time: %e\n", iter+1, RNorm*RNorm, tempo2-tempo1);
             
             if (fabs(RNorm*RNorm) < r0) break;    
             //if (rNorm < r0) break;

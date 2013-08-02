@@ -42,6 +42,7 @@ int main( int argc, char** argv)
 
     const char *filename[] =
     {
+     "test_matrices/LF10.mtx",
      "test_matrices/Trefethen_20.mtx",
      "test_matrices/Trefethen_2000.mtx",
      "test_matrices/Trefethen_20_new.mtx",

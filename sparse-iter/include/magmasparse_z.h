@@ -100,10 +100,6 @@ print_z_csr_mtx(        magma_int_t n_row, magma_int_t n_col, magma_int_t nnz,
                         magmaDoubleComplex **val, magma_int_t **row, 
                         magma_int_t **col, magma_major_t MajorType );
 
-magma_int_t 
-print_z_csr_matrix(    magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, 
-                       magmaDoubleComplex **val, magma_int_t **row, 
-                       magma_int_t **col );
 
 
 magma_int_t 
@@ -168,6 +164,9 @@ magma_zjacobiiter(      magma_z_sparse_matrix M, magma_z_vector c, magma_z_vecto
    -- MAGMA_SPARSE function definitions / Data on CPU
 */
 
+magma_int_t
+magma_zilusetup( magma_z_sparse_matrix A, magma_z_sparse_matrix *M );
+
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE function definitions / Data on CPU / Multi-GPU
@@ -218,7 +217,9 @@ magma_zir(             magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector
                        magma_solver_parameters *solver_par, 
                        magma_precond_parameters *precond_par );
 
-
+magma_int_t
+magma_zp1gmres(        magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+                       magma_solver_parameters *solver_par );
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE utility function definitions
@@ -270,6 +271,21 @@ magma_zgeelltmv(       const char *transA,
                        magmaDoubleComplex *d_x,
                        magmaDoubleComplex beta,
                        magmaDoubleComplex *d_y );
+
+magma_int_t 
+magma_zp1gmres_mgs(    magma_int_t  n, 
+                       magma_int_t  k, 
+                       magmaDoubleComplex *skp, 
+                       magmaDoubleComplex *v, 
+                       magmaDoubleComplex *z );
+
+
+magma_int_t
+magma_zblockdot(       magma_int_t n, 
+                       magma_int_t k, 
+                       magmaDoubleComplex *v, 
+                       magmaDoubleComplex *r,
+                       magmaDoubleComplex *skp );
 
 magma_int_t
 magma_zjacobisetup_vector_gpu(int num_rows, magmaDoubleComplex *b, magmaDoubleComplex *d, magmaDoubleComplex *c);
