@@ -32,7 +32,7 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
+    real_Double_t    gflops, gpu_perf, gpu_time, cpu_perf=0, cpu_time=0;
     magma_int_t      checkres;
     magmaDoubleComplex *h_A, *h_R, *tau, *h_work;
     magma_int_t *jpvt;

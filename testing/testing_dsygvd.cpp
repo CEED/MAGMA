@@ -40,7 +40,7 @@ int main( int argc, char** argv)
     double *w1, *w2;
     magma_int_t *iwork;
     magma_int_t N, n2, info, nb, lwork, liwork, lda;
-    double result[4];
+    double result[4] = {0};
 
     double c_one     = MAGMA_D_ONE;
     double c_neg_one = MAGMA_D_NEG_ONE;

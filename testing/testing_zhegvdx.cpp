@@ -37,7 +37,8 @@ int main( int argc, char** argv)
 
     real_Double_t   gpu_time /*cpu_time*/;
     magmaDoubleComplex *h_A, *h_R, *h_B, *h_S, *h_work;
-    double *w1, *w2, vl, vu, result[2];
+    double *w1, *w2, vl=0, vu=0;
+    double result[2] = {0};
     magma_int_t *iwork;
     magma_int_t N, n2, info, il, iu, m1, m2, nb, lwork, liwork;
     magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;

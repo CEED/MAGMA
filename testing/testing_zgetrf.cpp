@@ -154,7 +154,7 @@ int main( int argc, char** argv)
 {
     TESTING_INIT();
 
-    real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf, cpu_time;
+    real_Double_t   gflops, gpu_perf, gpu_time, cpu_perf=0, cpu_time=0;
     double          error;
     magmaDoubleComplex *h_A;
     magma_int_t     *ipiv;
