@@ -149,7 +149,7 @@ magma_zungqr(magma_int_t m, magma_int_t n, magma_int_t k,
         n_kk = n - kk;
         k_kk = k - kk;
         /*
-            // Replacing this with the following 4 routines works but is slow for
+            // Replacing this with the following 4 routines works but zungqr is slow for
             // k smaller than the zungqr's blocking size (new version can be up to 60x faster) 
             lapackf77_zungqr( &m_kk, &n_kk, &k_kk,
                               A(kk, kk), &lda,
