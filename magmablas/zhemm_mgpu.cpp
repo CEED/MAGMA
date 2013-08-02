@@ -406,7 +406,7 @@ return;
             // addition is done on stream 0 sequentially
             magmablasSetKernelStream( streams[ masterdev ][ 0 ] );
             // wait the geadd of my ROW and COL GEMM is done
-            magma_queue_wait_event(streams[ masterdev ][ 0 ], redevents[dev][0]);
+            magma_queue_wait_event(streams[ masterdev ][ 0 ], redevents[masterdev][0]);
             // ========================================
             //     local addition
             // ========================================
