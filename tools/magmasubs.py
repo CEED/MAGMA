@@ -663,6 +663,7 @@ subs = {
     ('sgecsrmv',       'dgecsrmv',       'cgecsrmv',       'zgecsrmv'        ),
     ('sgeellmv',       'dgeellmv',       'cgeellmv',       'zgeellmv'        ),
     ('sgeelltmv',      'dgeelltmv',      'cgeelltmv',      'zgeelltmv'       ),
+    ('sp1',            'dp1',            'cp1',            'zp1'             ),
 
     # ----- SPARSE Iterative Solvers
     ('scg',            'dcg',            'ccg',            'zcg'             ),
@@ -672,8 +673,10 @@ subs = {
     ('spcg',           'dpcg',           'cpcg',           'zpcg',           ),
     ('spbicgstab',     'dpbicgstab',     'cpbicgstab',     'zpbicgstab',     ),
     ('spgmres',        'dpgmres',        'cpgmres',        'zpgmres'         ),
+    ('sp1gmres',       'dp1gmres',       'cp1gmres',       'zp1gmres'        ),
     ('sjacobi',        'djacobi',        'cjacobi',        'zjacobi'         ),
     ('sir',            'dir',            'cir',            'zir'             ),
+    ('silu',           'dilu',           'cilu',           'zilu'            ),
 
 
     # ----- SPARSE auxiliary tools
