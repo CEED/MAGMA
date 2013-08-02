@@ -746,8 +746,8 @@ magma_int_t magma_zpotrf_mgpu(magma_int_t ngpu, char uplo, magma_int_t n,
                               magmaDoubleComplex **d_lA, magma_int_t ldda, magma_int_t *info);
 magma_int_t magma_zpotrf3_mgpu(magma_int_t num_gpus, char uplo, magma_int_t m, magma_int_t n,
                                magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
-                               magmaDoubleComplex **d_lA,  magma_int_t ldda,
-                               magmaDoubleComplex **d_lP,  magma_int_t lddp,
+                               magmaDoubleComplex *d_lA[],  magma_int_t ldda,
+                               magmaDoubleComplex *d_lP[],  magma_int_t lddp,
                                magmaDoubleComplex *a,      magma_int_t lda,   magma_int_t h,
                                magma_queue_t stream[][3], magma_event_t event[][5],
                                magma_int_t *info );

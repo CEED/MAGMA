@@ -15,7 +15,7 @@
 //#define cublasSgemm magmablas_sgemm_fermi64
 
 extern "C"
-void diag_strtri (magma_int_t M, char uplo, char diag, const float *A, int flag, float *d_dinvA, magma_int_t lda);
+void diag_strtri (magma_int_t M, char uplo, char diag, const float *A, float *d_dinvA, magma_int_t lda);
 
 __global__ void
 b_copy_kernel (int M, int N, float *b, int ldb, float *d_x, int ldx);
@@ -176,9 +176,9 @@ void magmablas_strsm_work( char side, char uplo, char tran, char diag, magma_int
                 /* invert the diagonals
                  * Allocate device memory for the inverted diagonal blocks, size=m*NB
                  */
-                //cudaMemset(d_x,     0, N*M*sizeof(float));
-                //cudaMemset(d_dinvA, 0, NB*((M/NB)+(M%NB!=0))*NB*sizeof(float));
-                diag_strtri (M, uplo, diag, A, flag, d_dinvA, lda);
+                if (flag == 1) {
+                    diag_strtri (M, uplo, diag, A, d_dinvA, lda);
+                }
 
                 if (tran == 'N' || tran == 'n')
                 /* the non-transpose case */
@@ -309,9 +309,9 @@ void magmablas_strsm_work( char side, char uplo, char tran, char diag, magma_int
                 /* invert the diagonals
                  * Allocate device memory for the inverted diagonal blocks, size=N*BLOCK_SIZE 
                  */
-                //cudaMemset(d_x,     0, N*M*sizeof(float));
-                //cudaMemset(d_dinvA, 0, NB*((N/NB)+(N%NB!=0))*NB*sizeof(float));
-                diag_strtri (N, uplo, diag, A, flag, d_dinvA, lda);
+                if (flag == 1) {
+                    diag_strtri (N, uplo, diag, A, d_dinvA, lda);
+                }
 
                 if (tran == 'N' || tran == 'n')
                 /* the non-transpose case */

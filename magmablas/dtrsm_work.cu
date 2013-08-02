@@ -18,7 +18,7 @@ __global__ void
 b_copy_kernel (int M, int N, double *b, int ldb, double *d_x, int ldx);
 
 extern "C"
-void diag_dtrtri (magma_int_t M, char uplo, char diag, const double *A, int flag, double *d_dinvA, magma_int_t lda);
+void diag_dtrtri (magma_int_t M, char uplo, char diag, const double *A, double *d_dinvA, magma_int_t lda);
 
 #define b_copy();        dim3 dimBlock((M>=MAX_THREAD_PER_BLOCK)?MAX_THREAD_PER_BLOCK:(WARP_SIZE*((M/WARP_SIZE)+(M%WARP_SIZE!=0))), 1);\
                                         dim3 dimGrid(M/dimBlock.x+(M%dimBlock.x!=0), N);\
@@ -176,9 +176,9 @@ void magmablas_dtrsm_work( char side, char uplo, char tran, char diag, magma_int
         if (side == 'l' || side == 'L')
         {
                 /* invert the diagonals */
-                //cudaMemset(d_x,     0, N*M*sizeof(double));
-                //cudaMemset(d_dinvA, 0, NB*((M/NB)+(M%NB!=0))*NB*sizeof(double));
-                diag_dtrtri (M, uplo, diag, A, flag, d_dinvA, lda);
+                if (flag == 1) {
+                    diag_dtrtri (M, uplo, diag, A, d_dinvA, lda);
+                }
 
                 if (tran == 'N' || tran == 'n')
                 /* the non-transpose case */
@@ -305,9 +305,9 @@ void magmablas_dtrsm_work( char side, char uplo, char tran, char diag, magma_int
         {        // side=R
 
                 /* invert the diagonals */
-                //cudaMemset(d_x, 0, N*M*sizeof(double));
-                //cudaMemset (d_dinvA, 0, NB*((N/NB)+(N%NB!=0))*NB*sizeof(double));
-                diag_dtrtri (N, uplo, diag, A, flag, d_dinvA, lda);
+                if (flag == 1) {
+                    diag_dtrtri (N, uplo, diag, A, d_dinvA, lda);
+                }
 
                 if (tran == 'N' || tran == 'n')
                 /* the non-transpose case */
@@ -315,6 +315,7 @@ void magmablas_dtrsm_work( char side, char uplo, char tran, char diag, magma_int
                         if (uplo == 'L' || uplo == 'l')
                         {
                         /* the lower case */
+
                                 /* handle the first block seperately with alpha */
                                 int NN = (N%NB==0)?NB:(N%NB);
                                 i=N-NN;
@@ -374,10 +375,10 @@ void magmablas_dtrsm_work( char side, char uplo, char tran, char diag, magma_int
                         if (uplo == 'L' || uplo == 'l')
                         {
                         /* the lower case */
+
                                 /* handle the first block seperately with alpha */
                                 int NN = min(NB, N); 
                                 cublasDgemm ('N', 'T', M, NN, NN, alpha, b, ldb, d_dinvA, NB, 0, d_x, M);  
-
                                 if (NB>=N)
                                 {
                                         b_copy();

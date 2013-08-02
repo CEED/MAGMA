@@ -135,16 +135,16 @@ magma_int_t magma_zhtodhe(
 magma_int_t magma_zhtodpo(
     magma_int_t num_gpus, char *uplo, magma_int_t m, magma_int_t n,
     magma_int_t off_i, magma_int_t off_j, magma_int_t nb,
-    magmaDoubleComplex  *h_A,  magma_int_t lda,
-    magmaDoubleComplex **d_lA, magma_int_t ldda,
+    magmaDoubleComplex  *h_A,   magma_int_t lda,
+    magmaDoubleComplex *d_lA[], magma_int_t ldda,
     magma_queue_t stream[][3], magma_int_t *info );
 
 // in src/zpotrf3_mgpu.cpp
 magma_int_t magma_zdtohpo(
     magma_int_t num_gpus, char *uplo, magma_int_t m, magma_int_t n,
     magma_int_t off_i, magma_int_t off_j, magma_int_t nb, magma_int_t NB,
-    magmaDoubleComplex  *a,    magma_int_t lda,
-    magmaDoubleComplex **work, magma_int_t ldda,
+    magmaDoubleComplex  *a,     magma_int_t lda,
+    magmaDoubleComplex *work[], magma_int_t ldda,
     magma_queue_t stream[][3], magma_int_t *info );
 
 magma_int_t magmablas_zhemv_mgpu_offset(
