@@ -50,7 +50,7 @@ int main( int argc, char** argv )
     opts.lapack |= opts.check;  // check (-c) implies lapack (-l)
     
     printf("Running version %d; available are (specified through --version num):\n",
-           opts.version);
+           (int) opts.version);
     printf("1 - uses precomputed zlarft matrices (default)\n");
     printf("2 - recomputes the zlarft matrices on the fly\n\n");
 
