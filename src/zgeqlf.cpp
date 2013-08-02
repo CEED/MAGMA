@@ -104,6 +104,10 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
     *info = 0;
     lquery = (lwork == -1);
 
+    // silence "uninitialized" warnings
+    old_ib = nb;
+    old_i  = 0;
+    
     if (m < 0) {
         *info = -1;
     } else if (n < 0) {
@@ -161,7 +165,7 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
         for (i = k - kk + ki; i >= k -kk; i -= nb) {
             ib = min(k-i,nb);
 
-            if (i< k - kk + ki){
+            if (i < k - kk + ki) {
                 /* 1. Copy asynchronously the current panel to the CPU.
                    2. Copy asynchronously the submatrix below the panel
                    to the CPU)                                        */
