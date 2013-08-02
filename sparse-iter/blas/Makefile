@@ -22,7 +22,8 @@ ZSRC := \
     zjacobisetup.cu         \
 	magma_zlag2c.cpp        \
 	magma_clag2z.cpp        \
-
+	zp1.cu                  \
+	zp1_b.cu                  \
 
 
 # multi-GPU

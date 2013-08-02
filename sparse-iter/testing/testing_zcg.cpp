@@ -40,8 +40,16 @@ int main( int argc, char** argv)
     struct timeval inicio, fim;
     double tempo1, tempo2;
     
-  const char *filename[] =
+    const char *filename[] =
     {
+    // "test_matrices/offshore.mtx",
+     "test_matrices/af_shell3.mtx",
+     "test_matrices/tmt_sym.mtx",
+     "test_matrices/fv1.mtx",
+     "test_matrices/Trefethen_2000.mtx",
+     "test_matrices/parabolic_fem.mtx",
+     "test_matrices/shallow_water1.mtx",
+     "test_matrices/G3_circuit.mtx",
      "test_matrices/fv1.mtx",
      "test_matrices/Trefethen_2000.mtx",
      "test_matrices/parabolic_fem.mtx",
@@ -62,7 +70,7 @@ int main( int argc, char** argv)
      "test_matrices/audikw_1.mtx",
      "test_matrices/circuit5M.mtx"
     };
-for(magma_int_t matrix=4; matrix<5; matrix++){
+for(magma_int_t matrix=0; matrix<7; matrix++){
 for(magma_int_t iters=1000; iters<20000; iters+=1000){
     magma_z_sparse_matrix A, C, D;
     magma_z_vector x, b;

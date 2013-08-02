@@ -63,7 +63,7 @@ int main( int argc, char** argv)
     const char *N="N";
 
   
-    magma_z_csr_mtx( &A, filename[9] );
+    magma_z_csr_mtx( &A, filename[13] );
     //print_z_csr_matrix( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col );
 
 

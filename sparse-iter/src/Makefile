@@ -27,6 +27,7 @@ ZSRC += \
 	zpcg.cpp		\
 	zpbicgstab.cpp		\
 	zpgmres.cpp  		\
+	zp1gmres.cpp  		\
 
 # Krylov space eigen-solvers
 ZSRC += \
@@ -49,6 +50,9 @@ ZSRC += \
 	#zungqr_chol.cpp		\
 	#zungqr_iter.cpp		\
 
+# ILU and sparse direct
+ZSRC += \
+	zilu.cpp      		\
 
 
 # Wrappers, tools etc

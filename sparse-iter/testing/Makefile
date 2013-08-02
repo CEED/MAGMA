@@ -17,16 +17,13 @@ ZSRC += \
   	testing_zjacobi.cpp         \
 	testing_zcg.cpp	            \
 	testing_zgmres.cpp	        \
+	testing_zp1gmres.cpp	        \
 	testing_zbicgstab.cpp       \
   	testing_zir.cpp              \
   	testing_zcir.cpp              \
   	testing_zcpir.cpp              \
                                 \
-  	testing_zpcg.cpp            \
-  	testing_zpbicgstab.cpp      \
-  	testing_zcpbicgstab.cpp      \
-  	testing_zpgmres.cpp         \
-  	testing_zcpgmres.cpp         \
+
 
 
 # ----------
@@ -36,7 +33,15 @@ ZSRC += \
 # ----------
 # Mixed-precision solvers
 ZSRC += \
+  	testing_zpcg.cpp            \
+  	testing_zpbicgstab.cpp      \
+  	testing_zcpbicgstab.cpp      \
+  	testing_zpgmres.cpp         \
+  	testing_zcpgmres.cpp         \
 
+# debugging
+ZSRC += \
+  	testing_zdebug.cpp              \
 # ------------------------------------------------------------
 -include Makefile.local
 -include Makefile.src
