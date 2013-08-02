@@ -163,7 +163,8 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
             {
                 // download i-th panel
                 cols = maxm - i*nb;
-                magmablas_ztranspose( dAP, cols, dAT(i,i), lddat, nb, cols );
+                //magmablas_ztranspose( dAP, cols, dAT(i,i), lddat, nb, cols   );
+                magmablas_ztranspose2( dAP, cols, dAT(i,i), lddat, nb, m-i*nb );
 
                 // make sure that that the transpose has completed
                 magma_queue_sync( stream[1] );
@@ -196,7 +197,8 @@ magma_zgetrf_gpu(magma_int_t m, magma_int_t n,
                 magmablas_zpermute_long2( n, dAT, lddat, ipiv, nb, i*nb );
 
                 magma_queue_sync( stream[0] );
-                magmablas_ztranspose(dAT(i,i), lddat, dAP, maxm, cols, nb);
+                //magmablas_ztranspose(dAT(i,i), lddat, dAP, maxm, cols, nb);
+                magmablas_ztranspose2(dAT(i,i), lddat, dAP, maxm, m-i*nb, nb);
 
                 // do the small non-parallel computations (next panel update)
                 if ( s > (i+1) ) {
