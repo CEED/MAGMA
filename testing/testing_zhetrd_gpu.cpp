@@ -47,6 +47,7 @@ int main( int argc, char** argv)
     magma_int_t itwo     = 2;
     magma_int_t ithree   = 3;
     magma_int_t ISEED[4] = {0,0,0,1};
+    magma_int_t status = 0;
     
     #if defined(PRECISION_z) || defined(PRECISION_c)
     double *rwork;
@@ -56,6 +57,8 @@ int main( int argc, char** argv)
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
+
+    double tol = opts.tolerance * lapackf77_dlamch("E");
     
     printf("Running version %d; available are (specified through --version num):\n", 
            opts.version);
@@ -170,7 +173,10 @@ int main( int argc, char** argv)
                        (int) N, gpu_perf, gpu_time );
             }
             if ( opts.check ) {
-                printf("   %8.2e        %8.2e\n", result[0]*eps, result[1]*eps );
+                printf("   %8.2e        %8.2e %s", result[0]*eps, result[1]*eps,
+                        ( ( (result[0]*eps > tol) || (result[1]*eps > tol) ) ? "  failed" : "  passed")  );
+                status |= (result[0]*eps > tol);
+                status |= (result[1]*eps > tol);
             } else {
                 printf("     ---             ---\n" );
             }
@@ -195,5 +201,5 @@ int main( int argc, char** argv)
     }
 
     TESTING_FINALIZE();
-    return 0;
+    return status;
 }
