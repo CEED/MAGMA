@@ -7,6 +7,7 @@
 
        @precisions normal z -> s d c
 
+       @author Stan Tomov
        @author Mark Gates
 */
 #include "common_magma.h"
@@ -31,8 +32,8 @@
 
 __global__ void ztranspose_inplace_odd( int n, magmaDoubleComplex *matrix, int lda )
 {
-    __shared__ magmaDoubleComplex sA[ NB ][ NB ];
-    __shared__ magmaDoubleComplex sB[ NB ][ NB ];
+    __shared__ magmaDoubleComplex sA[ NB ][ NB+1 ];
+    __shared__ magmaDoubleComplex sB[ NB ][ NB+1 ];
 
     int i = threadIdx.x;
     int j = threadIdx.y;
@@ -93,8 +94,8 @@ __global__ void ztranspose_inplace_odd( int n, magmaDoubleComplex *matrix, int l
 
 __global__ void ztranspose_inplace_even( int n, magmaDoubleComplex *matrix, int lda )
 {
-    __shared__ magmaDoubleComplex sA[ NB ][ NB ];
-    __shared__ magmaDoubleComplex sB[ NB ][ NB ];
+    __shared__ magmaDoubleComplex sA[ NB ][ NB+1 ];
+    __shared__ magmaDoubleComplex sB[ NB ][ NB+1 ];
 
     int i = threadIdx.x;
     int j = threadIdx.y;

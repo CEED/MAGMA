@@ -7,6 +7,7 @@
 
        @precisions normal z -> s d c
        
+       @author Stan Tomov
        @author Mathieu Faverge
        @author Ichitaro Yamazaki
        @author Mark Gates
@@ -15,6 +16,9 @@
 
 // MAX_PIVOTS is maximum number of pivots to apply in each kernel launch
 // NTHREADS is number of threads in a block
+// 64 and 256 are better on Kepler; 
+//#define MAX_PIVOTS 64
+//#define NTHREADS   256
 #define MAX_PIVOTS 32
 #define NTHREADS   64
 

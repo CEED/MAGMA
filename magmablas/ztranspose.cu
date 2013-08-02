@@ -7,6 +7,7 @@
 
        @precisions normal z -> s d c
 
+       @author Stan Tomov
 */
 #include "common_magma.h"
 #define PRECISION_z
