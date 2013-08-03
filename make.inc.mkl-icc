@@ -22,9 +22,9 @@ ARCH      = ar
 ARCHFLAGS = cr
 RANLIB    = ranlib
 
-OPTS      = -O3 -DADD_ -openmp -DMAGMA_WITH_MKL -DMAGMA_SETAFFINITY
-F77OPTS   = -O3 -DADD_
-FOPTS     = -O3 -DADD_
+OPTS      = -O3 -DADD_ -Wall -openmp -DMAGMA_WITH_MKL -DMAGMA_SETAFFINITY
+F77OPTS   = -O3 -DADD_ -warn all
+FOPTS     = -O3 -DADD_ -warn all
 NVOPTS    = -O3 -DADD_ -Xcompiler -fno-strict-aliasing
 LDOPTS    = -openmp
 

@@ -24,11 +24,11 @@ RANLIB    = ranlib
 
 # Defining MAGMA_ILP64 changes magma_int_t to int64_t in include/magma_types.h
 # Compiling with -std=c++98 -pedantic finds non-standard things like variable length arrays
-OPTS      = -O3 -DADD_ -fopenmp -DMAGMA_WITH_MKL -DMAGMA_SETAFFINITY -DMAGMA_ILP64 -DMKL_ILP64
-OPTS     += -std=c++98 -pedantic -Wno-long-long -Wall
-#OPTS     += -fno-strict-aliasing -Werror  # uncomment to ensure all warnings are dealt with
-F77OPTS   = -O3 -DADD_ -fdefault-integer-8
-FOPTS     = -O3 -DADD_ -fdefault-integer-8 -x f95-cpp-input
+OPTS      = -O3 -DADD_ -Wall -fno-strict-aliasing -fopenmp -DMAGMA_WITH_MKL -DMAGMA_SETAFFINITY -DMAGMA_ILP64 -DMKL_ILP64
+OPTS     += -std=c++98 -pedantic -Wno-long-long
+#OPTS     += -Werror  # uncomment to ensure all warnings are dealt with
+F77OPTS   = -O3 -DADD_ -Wall -fdefault-integer-8
+FOPTS     = -O3 -DADD_ -Wall -fdefault-integer-8 -x f95-cpp-input
 NVOPTS    = -O3 -DADD_ -Xcompiler -fno-strict-aliasing -DMAGMA_ILP64 -DMKL_ILP64
 LDOPTS    = -fopenmp
 
