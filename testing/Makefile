@@ -216,10 +216,10 @@ cleanall: clean cleanexe
 
 ifeq ($(FORT), pgfortran)
 testing_%.o : testing_%.cuf
-	$(FORT) $(FOPTS) $(INC) -c $< -o $@ 
+	$(FORT) $(FOPTS) $(INC_MAGMA) -c $< -o $@ 
 else
 testing_%.o : testing_%.f90
-	$(FORT) $(FOPTS) $(INC) -c $< -o $@ 
+	$(FORT) $(FOPTS) $(INC_MAGMA) -c $< -o $@ 
 endif
 
 testing_%_f : testing_%_f.o $(FOBJ)
@@ -240,10 +240,10 @@ testing_% : testing_%.o
 #
 fortran.o : OPTS += -DCUBLAS_GFORTRAN
 fortran.o : $(CUDADIR)/src/fortran.c
-	$(CC) $(OPTS) $(INC) -c $< -o $@
+	$(CC) $(OPTS) $(INC_MAGMA) -c $< -o $@
 
 fortran_thunking.o : $(CUDADIR)/src/fortran_thunking.c
-	$(CC) $(OPTS) $(INC) -c $< -o $@
+	$(CC) $(OPTS) $(INC_MAGMA) -c $< -o $@
 
 # keep intermediate object files, to speed up re-compiling when library changes
 .SECONDARY: $(ALLOBJ)
