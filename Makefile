@@ -81,6 +81,7 @@ install: lib dir
 #       MAGMA
 	cp $(MAGMA_DIR)/include/*.h  $(prefix)/include
 	cp $(LIBMAGMA)               $(prefix)/lib
+	-cp $(LIBMAGMA_SO)           $(prefix)/lib
 #       QUARK
 #	cp $(QUARKDIR)/include/quark.h             $(prefix)/include
 #	cp $(QUARKDIR)/include/quark_unpack_args.h $(prefix)/include
@@ -88,9 +89,11 @@ install: lib dir
 #	cp $(QUARKDIR)/include/icl_list.h          $(prefix)/include
 #	cp $(QUARKDIR)/lib/libquark.a              $(prefix)/lib
 #       pkgconfig
-	cat $(MAGMA_DIR)/lib/pkgconfig/magma.pc | \
-	    sed -e s:\__PREFIX:"$(prefix)":     | \
-	    sed -e s:\__LIBEXT:"$(LIBEXT)":       \
+	cat $(MAGMA_DIR)/lib/pkgconfig/magma.pc.in | \
+	    sed -e s:@INSTALL_PREFIX@:"$(prefix)": | \
+	    sed -e s:@INCLUDES@:"$(INC)":     | \
+	    sed -e s:@LIBEXT@:"$(LIBEXT)":               | \
+	    sed -e s:@MAGMA_REQUIRED@::              \
 	    > $(prefix)/lib/pkgconfig/magma.pc
 
 # ========================================

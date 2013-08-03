@@ -130,7 +130,7 @@ sub MakeRelease
     
     # Change version in pkgconfig
     $script = "s/Version: [0-9.]+/Version: $numversion/;";
-    myCmd("perl -pi -e '$script' lib/pkgconfig/magma.pc");
+    myCmd("perl -pi -e '$script' lib/pkgconfig/magma.pc.in");
     
     # Precision Generation
     print "Generate the different precisions\n";
