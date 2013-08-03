@@ -107,7 +107,7 @@ magma_zpotrf_mgpu(magma_int_t num_gpus, char uplo, magma_int_t n,
         magma_free_pinned( work );
     }
     else {
-        lddp = 32*((n+31)/32);
+        lddp = nb*((n+nb-1)/nb);
         for( d=0; d<num_gpus; d++ ) {
             magma_setdevice(d);
             if (MAGMA_SUCCESS != magma_zmalloc( &dwork[d], num_gpus*nb*lddp )) {
