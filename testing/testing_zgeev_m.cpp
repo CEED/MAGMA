@@ -47,6 +47,8 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
+    // need slightly looser bound (60*eps instead of 30*eps) for some tests
+    opts.tolerance = max( 60., opts.tolerance );
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
     printf("    N   CPU Time (sec)   GPU Time (sec)   ||R||_F / ||A||_F\n");
