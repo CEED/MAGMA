@@ -354,7 +354,7 @@ int main( int argc, char** argv)
 
             /*
             for(i=0;i<10;i++)
-                printf(" voici lpk D[%d] %e\n", i, D2[i]);
+                printf(" voici lpk D[%d] %8.2e\n", i, D2[i]);
             */
 
             //magmaDoubleComplex mydz=0.0, mydo=1.0;
@@ -404,7 +404,7 @@ int main( int argc, char** argv)
             printf(" ================================================================================================================\n\n\n");
             
             printf(" ****************************************************************************************************************\n");
-            printf(" * Hello here are the norm  Infinite (max)=%e  norm one (sum)=%e   norm2(sqrt)=%e *\n", nrmI, nrm1, nrm2);
+            printf(" * Hello here are the norm  Infinite (max)=%8.2e  norm one (sum)=%8.2e   norm2(sqrt)=%8.2e *\n", nrmI, nrm1, nrm2);
             printf(" ****************************************************************************************************************\n\n");
         }
 #endif

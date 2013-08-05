@@ -259,13 +259,13 @@ int main( int argc, char** argv)
                        (int) N, cpu_time, gpu_time, mgpu_time);
                 printf("Testing the eigenvalues and eigenvectors for correctness:\n");
                 if(itype==1)
-                    printf("(1)    | A Z - B Z D | / (|A| |Z| N) = %e %s\n", result, (result > tol ? "  failed" : "  passed") );
+                    printf("(1)    | A Z - B Z D | / (|A| |Z| N) = %8.2e %s\n", result, (result > tol ? "  failed" : "  passed") );
                 else if(itype==2)
-                    printf("(1)    | A B Z - Z D | / (|A| |Z| N) = %e %s \n", result, (result > tol ? "  failed" : "  passed") );
+                    printf("(1)    | A B Z - Z D | / (|A| |Z| N) = %8.2e %s\n", result, (result > tol ? "  failed" : "  passed") );
                 else if(itype==3)
-                    printf("(1)    | B A Z - Z D | / (|A| |Z| N) = %e %s\n", result, (result > tol ? "  failed" : "  passed") );
+                    printf("(1)    | B A Z - Z D | / (|A| |Z| N) = %8.2e %s\n", result, (result > tol ? "  failed" : "  passed") );
 
-                printf("(3)    | D(MGPU)-D(LAPACK) |/ |D| = %e %s \n\n", result2, (result2 > tol ? "  failed" : "  passed") );
+                printf(    "(3)    | D(MGPU)-D(LAPACK) |/ |D|    = %8.2e %s\n\n", result2, (result2 > tol ? "  failed" : "  passed") );
             }
             else {
                 printf("%5d     ------         ------         %6.2f\n",

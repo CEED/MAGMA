@@ -221,11 +221,11 @@ int main( int argc, char** argv)
             if ( checkres ){
                 printf("Testing the eigenvalues and eigenvectors for correctness:\n");
                 if(itype==1)
-                    printf("(1)    | A Z - B Z D | / (|A| |Z| N) = %e%s\n", result, (result > tol ? "  failed" : "  passed") );
+                    printf("(1)    | A Z - B Z D | / (|A| |Z| N) = %8.2e%s\n", result, (result > tol ? "  failed" : "  passed") );
                 else if(itype==2)
-                    printf("(1)    | A B Z - Z D | / (|A| |Z| N) = %e%s\n", result, (result > tol ? "  failed" : "  passed") );
+                    printf("(1)    | A B Z - Z D | / (|A| |Z| N) = %8.2e%s\n", result, (result > tol ? "  failed" : "  passed") );
                 else if(itype==3)
-                    printf("(1)    | B A Z - Z D | / (|A| |Z| N) = %e%s\n", result, (result > tol ? "  failed" : "  passed") );
+                    printf("(1)    | B A Z - Z D | / (|A| |Z| N) = %8.2e%s\n", result, (result > tol ? "  failed" : "  passed") );
             }
 
             TESTING_HOSTFREE(       h_A);

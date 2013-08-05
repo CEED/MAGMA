@@ -208,7 +208,7 @@ int main( int argc, char** argv)
                 printf("\n");
                 printf(" The matrix A is randomly generated for each test.\n");
                 printf("============\n");
-                printf(" The relative machine precision (eps) is to be %e \n",eps);
+                printf(" The relative machine precision (eps) is %8.2e\n",eps);
                 printf(" Computational tests pass if scaled residuals are less than 60.\n");
               
                 /* Check the orthogonality, reduction and the eigen solutions */
