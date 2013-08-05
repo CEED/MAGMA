@@ -25,7 +25,7 @@
       integer,    allocatable       :: ipiv(:)
 
       complex*16                    :: zone, mzone
-      integer                       :: i, n, info, stat, lda
+      integer                       :: i, n, info, stat, lda, ldda
       integer                       :: size_of_elt, nrhs
       real(kind=8)                  :: flops, t, tstart, tend
 
