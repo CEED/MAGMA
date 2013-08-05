@@ -87,6 +87,12 @@ int main( int argc, char** argv)
 #if defined(PRECISION_z) || defined(PRECISION_c)
             magma_int_t lwork = 2*N + N*N;
             magma_int_t lrwork = 1 + 5*N +2*N*N;
+            // MKL's zhegvd has a bug for small N - it looks like what is returned by a 
+            // query (consistent with LAPACK's number above) is different from a the memory
+            // requirement ckeck (that returns info -11). The lwork increase below is needed
+            // to pass this check.  
+            if (N<32)
+                lwork = 34*32;
 #else
             magma_int_t lwork  = 1 + 6*N + 2*N*N;
 #endif
