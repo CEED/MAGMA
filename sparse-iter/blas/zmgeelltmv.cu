@@ -19,10 +19,10 @@
 
 
 
-//Michael Garland
 __global__ void 
-zgeellmv_kernel( int num_rows, 
+zmgeelltmv_kernel( int num_rows, 
                  int num_cols,
+                 int num_vecs,
                  int num_cols_per_row,
                  magmaDoubleComplex alpha, 
                  magmaDoubleComplex *d_val, 
@@ -31,16 +31,21 @@ zgeellmv_kernel( int num_rows,
                  magmaDoubleComplex beta, 
                  magmaDoubleComplex *d_y)
 {
-int row = blockDim.x * blockIdx.x + threadIdx.x ;
+    extern __shared__ magmaDoubleComplex dot[];
+    int row = blockDim.x * blockIdx.x + threadIdx.x ;
     if(row < num_rows ){
-        magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
+        for( magma_int_t i=0; i<num_vecs; i++ )
+                dot[ threadIdx.x+ i*blockDim.x ] = MAGMA_Z_MAKE(0.0, 0.0);
         for ( int n = 0; n < num_cols_per_row ; n ++){
-            magma_int_t col = d_colind [ num_cols_per_row * row + n ];
-            magmaDoubleComplex val = d_val [ num_cols_per_row * row + n ];
-            if( val != 0)
-                dot += val * d_x[col ];
+            magma_int_t col = d_colind [ num_rows * n + row ];
+            magmaDoubleComplex val = d_val [ num_rows * n + row ];
+            if( val != 0){
+                for( magma_int_t i=0; i<num_vecs; i++ )
+                    dot[ threadIdx.x + i*blockDim.x ] += val * d_x[col + i * num_cols ];
+            }
         }
-        d_y[ row ] = dot * alpha + beta * d_y [ row ];
+        for( magma_int_t i=0; i<num_vecs; i++ )
+                d_y[ row + i*num_cols ] = dot[ threadIdx.x + i*blockDim.x ] * alpha + beta * d_y [ row + i*num_cols ];
     }
 }
 
@@ -57,14 +62,15 @@ int row = blockDim.x * blockIdx.x + threadIdx.x ;
     Purpose
     =======
     
-    This routine computes y = alpha *  A *  x + beta * y on the GPU.
-    Input format is ELLPACK.
+    This routine computes Y = alpha *  A *  X + beta * Y for X and Y sets of 
+    num_vec vectors on the GPU. Input format is ELLPACKT. 
     
     Arguments
     =========
 
     magma_int_t m                   number of rows in A
     magma_int_t n                   number of columns in A 
+    mama_int_t num_vecs             number of vectors
     magmaDoubleComplex alpha        scalar multiplier
     magmaDoubleComplex *d_val       array containing values of A in ELLPACK
     magma_int_t *d_colind           columnindices of A in ELLPACK
@@ -75,8 +81,9 @@ int row = blockDim.x * blockIdx.x + threadIdx.x ;
     =====================================================================    */
 
 extern "C" magma_int_t
-magma_zgeellmv(const char *transA,
+magma_zmgeelltmv(const char *transA,
                magma_int_t m, magma_int_t n,
+               magma_int_t num_vecs,
                magma_int_t nnz_per_row,
                magmaDoubleComplex alpha,
                magmaDoubleComplex *d_val,
@@ -87,13 +94,13 @@ magma_zgeellmv(const char *transA,
 
 
 
-   dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
+    dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
+    unsigned int MEM_SIZE =  num_vecs* BLOCK_SIZE * sizeof( magmaDoubleComplex ); // num_vecs vectors 
+    zmgeelltmv_kernel<<< grid, BLOCK_SIZE, MEM_SIZE >>>
+                  ( m, n, num_vecs, nnz_per_row, alpha, d_val, d_colind, d_x, beta, d_y );
 
-   zgeellmv_kernel<<< grid, BLOCK_SIZE, 0 >>>
-                  ( m, n, nnz_per_row, alpha, d_val, d_colind, d_x, beta, d_y );
 
-
-   return MAGMA_SUCCESS;
+    return MAGMA_SUCCESS;
 }
 
 

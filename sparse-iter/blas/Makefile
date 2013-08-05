@@ -15,8 +15,11 @@ ZHDR  =
 ZSRC := \
 	magma_z_blaswrapper.cpp \
 	zgecsrmv.cu		\
+	zmgecsrmv.cu		\
 	zgeellmv.cu		\
+	zmgeellmv.cu		\
 	zgeelltmv.cu            \
+	zmgeelltmv.cu            \
     zlag2c_sparse.cu        \
     clag2z_sparse.cu        \
     zjacobisetup.cu         \

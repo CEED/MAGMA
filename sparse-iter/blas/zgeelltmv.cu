@@ -31,7 +31,7 @@ zgeelltmv_kernel( int num_rows,
                  magmaDoubleComplex beta, 
                  magmaDoubleComplex *d_y)
 {
-int row = blockDim.x * blockIdx.x + threadIdx.x ;
+    int row = blockDim.x * blockIdx.x + threadIdx.x ;
     if(row < num_rows ){
         magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
         for ( int n = 0; n < num_cols_per_row ; n ++){

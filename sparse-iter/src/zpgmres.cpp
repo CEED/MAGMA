@@ -35,7 +35,7 @@
        A * X = B
     where A is a complex sparse matrix stored in the GPU memory.
     X and B are complex vectors stored on the GPU memory. 
-    This is a GPU implementation of the GMRES method.
+    This is a GPU implementation of the preconditioned GMRES method.
 
     Arguments
     =========
@@ -101,9 +101,9 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                     magma_zscal(dofs, 1./H(k,k-1), q(k), 1);                     //  (to be fused)
 
                     q_t.val = q(k);
-                    magma_z_precond( A, q_t, &z_t, *precond_par );  // preconditioner A * z =  q[k]
-                    magma_zcopy( dofs, z_t.val, 1, z(k), 1 );             // z(k) = z_t
-                    magma_z_spmv( c_one, A, z_t, c_zero, r );                    //  r       = A q[k] 
+                    magma_z_precond( A, q_t, &z_t, *precond_par );               // preconditioner A * z =  q[k]
+                    magma_zcopy( dofs, z_t.val, 1, z(k), 1 );                    // z(k) = z_t
+                    magma_z_spmv( c_one, A, z_t, c_zero, r );                    //  r       = A z(k) 
                     
                     for (i=1; i<=k; i++) {
                         H(i,k) =magma_zdotc(dofs, q(i), 1, r.val, 1);            //  H[i][k] = q[i] . r
@@ -182,5 +182,5 @@ magma_zpgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_vfree(&z);
 
     return MAGMA_SUCCESS;
-}   /* magma_zgmres */
+}   /* magma_zpgmres */
 

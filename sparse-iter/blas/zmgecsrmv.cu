@@ -19,27 +19,36 @@
 
 
 __global__ void 
-zgecsrmv_kernel( int num_rows, int num_cols, 
-                 magmaDoubleComplex alpha, 
-                 magmaDoubleComplex *d_val, 
-                 int *d_rowptr, 
-                 int *d_colind,
-                 magmaDoubleComplex *d_x,
-                 magmaDoubleComplex beta, 
-                 magmaDoubleComplex *d_y){
+zmgecsrmv_kernel( int num_rows, int num_cols, 
+                  int num_vecs,
+                  magmaDoubleComplex alpha, 
+                  magmaDoubleComplex *d_val, 
+                  int *d_rowptr, 
+                  int *d_colind,
+                  magmaDoubleComplex *d_x,
+                  magmaDoubleComplex beta, 
+                  magmaDoubleComplex *d_y){
 
     int row = blockIdx.x*blockDim.x+threadIdx.x;
     int j;
+    extern __shared__ magmaDoubleComplex dot[];
 
-    if(row<num_rows){
-        magmaDoubleComplex dot = MAGMA_Z_ZERO;
-        int start = d_rowptr[ row ];
+    if( row<num_rows ){
+        for( magma_int_t i=0; i<num_vecs; i++ )
+                dot[ threadIdx.x+ i*blockDim.x ] = MAGMA_Z_MAKE(0.0, 0.0);
+        int start = d_rowptr[ row ] ;
         int end = d_rowptr[ row+1 ];
-        for( j=start; j<end; j++)
-            dot += d_val[ j ] * d_x[ d_colind[j] ];
-        d_y[ row ] = alpha * dot + beta * d_y[ row ];
+        for( j=start; j<end; j++ ){
+            int col = d_colind [ j ];
+            magmaDoubleComplex val = d_val[ j ];
+            for( magma_int_t i=0; i<num_vecs; i++ )
+                dot[ threadIdx.x + i*blockDim.x ] += val * d_x[ col + i*num_cols ];
+        }
+        for( magma_int_t i=0; i<num_vecs; i++ )
+            d_y[ row +i*num_cols ] = alpha * dot[ threadIdx.x + i*blockDim.x ] + beta * d_y[ row + i*num_cols ];
     }
 }
+
 
 
 /*  -- MAGMA (version 1.1) --
@@ -51,13 +60,15 @@ zgecsrmv_kernel( int num_rows, int num_cols,
     Purpose
     =======
     
-    This routine computes y = alpha *  A^t *  x + beta * y on the GPU.
+    This routine computes Y = alpha *  A *  X + beta * Y for X and Y sets of 
+    num_vec vectors on the GPU. Input format is CSR. 
     
     Arguments
     =========
 
     magma_int_t m                   number of rows in A
     magma_int_t n                   number of columns in A 
+    mama_int_t num_vecs             number of vectors
     magmaDoubleComplex alpha        scalar multiplier
     magmaDoubleComplex *d_val       array containing values of A in CSR
     magma_int_t *d_rowptr           rowpointer of A in CSR
@@ -69,8 +80,9 @@ zgecsrmv_kernel( int num_rows, int num_cols,
     =====================================================================    */
 
 extern "C" magma_int_t
-magma_zgecsrmv(     const char *transA,
+magma_zmgecsrmv(    const char *transA,
                     magma_int_t m, magma_int_t n,
+                    magma_int_t num_vecs, 
                     magmaDoubleComplex alpha,
                     magmaDoubleComplex *d_val,
                     magma_int_t *d_rowptr,
@@ -80,12 +92,12 @@ magma_zgecsrmv(     const char *transA,
                     magmaDoubleComplex *d_y ){
 
     dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
-
-    zgecsrmv_kernel<<< grid, BLOCK_SIZE, 0 >>>(m, n, alpha,
+    unsigned int MEM_SIZE =  num_vecs* BLOCK_SIZE * sizeof( magmaDoubleComplex ); // num_vecs vectors 
+    zmgecsrmv_kernel<<< grid, BLOCK_SIZE, MEM_SIZE >>>(m, n, num_vecs, alpha,
                                                             d_val, d_rowptr, d_colind,
                                                             d_x, beta, d_y);
 
-    return MAGMA_SUCCESS;
+   return MAGMA_SUCCESS;
 }
 
 

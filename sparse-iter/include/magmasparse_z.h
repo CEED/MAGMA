@@ -250,6 +250,19 @@ magma_zgecsrmv(        const char *transA,
                        magmaDoubleComplex *d_y );
 
 magma_int_t 
+magma_zmgecsrmv(        const char *transA,
+                       magma_int_t m, magma_int_t n,
+                       magma_int_t num_vecs,
+                       magmaDoubleComplex alpha,
+                       magmaDoubleComplex *d_val,
+                       magma_int_t *d_rowptr,
+                       magma_int_t *d_colind,
+                       magmaDoubleComplex *d_x,
+                       magmaDoubleComplex beta,
+                       magmaDoubleComplex *d_y );
+
+
+magma_int_t 
 magma_zgeellmv(        const char *transA,
                        magma_int_t m, magma_int_t n,
                        magma_int_t nnz_per_row,
@@ -262,8 +275,33 @@ magma_zgeellmv(        const char *transA,
 
 
 magma_int_t 
+magma_zmgeellmv(       const char *transA,
+                       magma_int_t m, magma_int_t n,
+                       magma_int_t num_vecs,
+                       magma_int_t nnz_per_row,
+                       magmaDoubleComplex alpha,
+                       magmaDoubleComplex *d_val,
+                       magma_int_t *d_colind,
+                       magmaDoubleComplex *d_x,
+                       magmaDoubleComplex beta,
+                       magmaDoubleComplex *d_y );
+
+
+magma_int_t 
 magma_zgeelltmv(       const char *transA,
                        magma_int_t m, magma_int_t n,
+                       magma_int_t nnz_per_row,
+                       magmaDoubleComplex alpha,
+                       magmaDoubleComplex *d_val,
+                       magma_int_t *d_colind,
+                       magmaDoubleComplex *d_x,
+                       magmaDoubleComplex beta,
+                       magmaDoubleComplex *d_y );
+
+magma_int_t 
+magma_zmgeelltmv(      const char *transA,
+                       magma_int_t m, magma_int_t n,
+                       magma_int_t num_vecs,
                        magma_int_t nnz_per_row,
                        magmaDoubleComplex alpha,
                        magmaDoubleComplex *d_val,
