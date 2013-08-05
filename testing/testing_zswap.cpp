@@ -412,7 +412,7 @@ int main( int argc, char** argv)
                    row_perf6,
                    col_perf6,
                    cpu_perf,
-                   (check == 0 ? "okay" : "* failures") );
+                   (check == 0 ? "ok" : "* failures") );
             
             TESTING_HOSTFREE( h_A1 );
             TESTING_HOSTFREE( h_A2 );

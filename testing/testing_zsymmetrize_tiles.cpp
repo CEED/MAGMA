@@ -116,7 +116,7 @@ int main( int argc, char** argv)
             printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %s\n",
                    (int) N, (int) ntile,
                    cpu_perf, cpu_time, gpu_perf, gpu_time,
-                   (error == 0. ? "okay" : "fail") );
+                   (error == 0. ? "ok" : "failed") );
             
             TESTING_FREE( h_A );
             TESTING_FREE( h_R );

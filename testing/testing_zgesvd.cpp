@@ -245,7 +245,7 @@ int main( int argc, char** argv)
                 if ( result[0] < 0. ) { printf("     ---   "); } else { printf("  %#9.3g", result[0] ); }
                 if ( result[1] < 0. ) { printf("     ---   "); } else { printf("  %#9.3g", result[1] ); }
                 if ( result[2] < 0. ) { printf("     ---   "); } else { printf("  %#9.3g", result[2] ); }
-                printf("   %s\n", (result[3] == 0. ? "passed" : "fail"));
+                printf("   %s\n", (result[3] == 0. ? "ok" : "failed"));
             }
             else {
                 printf("\n");

@@ -98,7 +98,7 @@ int main(int argc, char **argv)
             
             Rnorm = lapackf77_zlange("I", &N, &nrhs, h_B, &ldb, work);
             error = Rnorm/(N*Anorm*Xnorm);
-            status |= (error > tol);
+            status |= ! (error < tol);
             
             /* ====================================================================
                Performs operation using LAPACK
@@ -114,12 +114,12 @@ int main(int argc, char **argv)
                 
                 printf( "%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e%s\n",
                         (int) N, (int) nrhs, cpu_perf, cpu_time, gpu_perf, gpu_time,
-                        error, (error > tol ? "  fail" : ""));
+                        error, (error < tol ? "" : "  failed"));
             }
             else {
                 printf( "%5d %5d     ---   (  ---  )   %7.2f (%7.2f)   %8.2e%s\n",
                         (int) N, (int) nrhs, gpu_perf, gpu_time,
-                        error, (error > tol ? "  fail" : ""));
+                        error, (error < tol ? "" : "  failed"));
             }
             
             TESTING_FREE( h_A  );

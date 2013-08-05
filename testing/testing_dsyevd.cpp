@@ -172,9 +172,9 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.check ) {
                 printf("Testing the factorization A = U S U' for correctness:\n");
-                printf("(1)    | A - U S U' | / (|A| N)     = %8.2e %s\n",   result[0]*eps, (result[0]*eps > tol ? "  failed" : "  passed") );
-                printf("(2)    | I -   U'U  | /  N          = %8.2e %s\n",   result[1]*eps, (result[1]*eps > tol ? "  failed" : "  passed") );
-                printf("(3)    | S(w/ U) - S(w/o U) | / |S| = %8.2e %s\n\n", result[2]    , (result[2] > tol ? "  failed" : "  passed") );
+                printf("(1)    | A - U S U' | / (|A| N)     = %8.2e%s\n",   result[0]*eps, (result[0]*eps < tol ? "" : "  failed") );
+                printf("(2)    | I -   U'U  | /  N          = %8.2e%s\n",   result[1]*eps, (result[1]*eps < tol ? "" : "  failed") );
+                printf("(3)    | S(w/ U) - S(w/o U) | / |S| = %8.2e%s\n\n", result[2]    , (result[2]     < tol ? "" : "  failed") );
             }
             
 

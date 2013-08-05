@@ -133,14 +133,14 @@ int main( int argc, char** argv)
     
                 printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)  %4s    %7.2f (%7.2f)  %4s\n",
                        (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time,
-                       (error  == 0. ? "okay" : "fail"),
+                       (error  == 0. ? "ok" : "failed"),
                        gpu_perf2, gpu_time2,
-                       (error2 == 0. ? "okay" : "fail") );
+                       (error2 == 0. ? "ok" : "failed") );
             }
             else {
                 printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)  %4s      ---   (  ---  )\n",
                        (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time,
-                       (error  == 0. ? "okay" : "fail") );
+                       (error  == 0. ? "ok" : "failed") );
             }
             
             TESTING_FREE( h_A );

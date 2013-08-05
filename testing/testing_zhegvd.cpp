@@ -237,16 +237,16 @@ int main( int argc, char** argv)
             if ( opts.check ) {
                 printf("Testing the eigenvalues and eigenvectors for correctness:\n");
                 if ( opts.itype==1 )
-                    printf("(1)    | A Z - B Z D | / (|A| |Z| N) = %8.2e %s\n", result[0], (result[0] > tol ? "  failed" : "  passed") );
+                    printf("(1)    | A Z - B Z D | / (|A| |Z| N) = %8.2e%s\n", result[0], (result[0] < tol ? "" : "  failed") );
                 else if ( opts.itype==2 )
-                    printf("(1)    | A B Z - Z D | / (|A| |Z| N) = %8.2e %s\n", result[0], (result[0] > tol ? "  failed" : "  passed") );
+                    printf("(1)    | A B Z - Z D | / (|A| |Z| N) = %8.2e%s\n", result[0], (result[0] < tol ? "" : "  failed") );
                 else if ( opts.itype==3 )
-                    printf("(1)    | B A Z - Z D | / (|A| |Z| N) = %8.2e %s\n", result[0], (result[0] > tol ? "  failed" : "  passed") );
+                    printf("(1)    | B A Z - Z D | / (|A| |Z| N) = %8.2e%s\n", result[0], (result[0] < tol ? "" : "  failed") );
                 if ( opts.itype==1 || opts.itype==2 )
-                    printf("(2)    | I -   Z Z' B | /  N         = %8.2e %s\n", result[1], (result[1] > tol ? "  failed" : "  passed") );
+                    printf("(2)    | I -   Z Z' B | /  N         = %8.2e%s\n", result[1], (result[1] < tol ? "" : "  failed") );
                 else
-                    printf("(2)    | B -  Z Z' | / (|B| N)       = %8.2e %s\n", result[1], (result[1] > tol ? "  failed" : "  passed") );
-                printf(    "(3)    | D(w/ Z) - D(w/o Z) | / |D|  = %8.2e %s\n\n", result[2], (result[2] > tol ? "  failed" : "  passed") );
+                    printf("(2)    | B -  Z Z' | / (|B| N)       = %8.2e%s\n", result[1], (result[1] < tol ? "" : "  failed") );
+                printf(    "(3)    | D(w/ Z) - D(w/o Z) | / |D|  = %8.2e%s\n\n", result[2], (result[2] < tol ? "" : "  failed") );
             }
             
             TESTING_FREE( h_A );

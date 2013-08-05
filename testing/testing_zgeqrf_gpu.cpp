@@ -155,8 +155,8 @@ int main( int argc, char** argv)
                     printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)    %8.2e                      %8.2e",
                            (int) M, (int) N, gpu_perf, gpu_time, results[0],results[1] );
                 } 
-                printf("%s\n", (results[0] > tol ? "  fail" : ""));
-                status |= (results[0] > tol);
+                printf("%s\n", (results[0] < tol ? "" : "  failed"));
+                status |= ! (results[0] < tol);
             
                 TESTING_FREE( h_W1 );
                 TESTING_FREE( h_W2 );
@@ -180,8 +180,8 @@ int main( int argc, char** argv)
                         printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)   %8.2e",
                                (int) M, (int) N, gpu_perf, gpu_time, error );
                     }
-                    printf("%s\n", (error > tol ? "  fail" : ""));
-                    status |= (error > tol);
+                    printf("%s\n", (error < tol ? "" : "  failed"));
+                    status |= ! (error < tol);
                 } else if(M >= N) {
                     magma_int_t lwork;
                     magmaDoubleComplex *x, *b, *d_B, *hwork;
@@ -256,8 +256,8 @@ int main( int argc, char** argv)
                         printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)   %8.2e",
                                (int) M, (int) N, gpu_perf, gpu_time, error );
                     }
-                    printf("%s\n", (error > tol ? "  fail" : ""));
-                    status |= (error > tol);
+                    printf("%s\n", (error < tol ? "" : "  failed"));
+                    status |= ! (error < tol);
                 } else {
                     if ( opts.lapack ) {
                         printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   --- ",

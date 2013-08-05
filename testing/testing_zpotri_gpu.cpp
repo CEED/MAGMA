@@ -106,8 +106,8 @@ int main( int argc, char** argv)
                 error = lapackf77_zlange("f", &N, &N, h_R, &lda, work) / error;
                 printf("%5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e%s\n",
                        (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time,
-                       error, (error > tol ? "  fail" : "") );
-                status |= (error > tol);
+                       error, (error < tol ? "" : "  failed") );
+                status |= ! (error < tol);
             }
             else {
                 printf("%5d     ---   (  ---  )   %7.2f (%7.2f)     ---\n",

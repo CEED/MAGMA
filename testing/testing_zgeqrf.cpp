@@ -126,13 +126,13 @@ int main( int argc, char** argv)
                 if ( opts.lapack ) {
                     printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e                  %8.2e",
                            (int) M, (int) N, cpu_perf, cpu_time, gpu_perf, gpu_time, results[0],results[1] );
-                    printf("%s\n", (results[0] > tol ? "  fail" : ""));
+                    printf("%s\n", (results[0] < tol ? "" : "  failed"));
                 } else {
                     printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)    %8.2e                  %8.2e",
                            (int) M, (int) N, gpu_perf, gpu_time, results[0],results[1] );
-                    printf("%s\n", (results[0] > tol ? "  fail" : ""));
+                    printf("%s\n", (results[0] < tol ? "" : "  failed"));
                 }
-                status |= (results[0] > tol);
+                status |= ! (results[0] < tol);
 
                 TESTING_FREE( h_W1 );
                 TESTING_FREE( h_W2 );
@@ -153,8 +153,8 @@ int main( int argc, char** argv)
                     printf("%5d %5d     ---   (  ---  )   %7.2f (%7.2f)    %8.2e",
                            (int) M, (int) N, gpu_perf, gpu_time, error );
                 }
-                printf("%s\n", (error > tol ? "  fail" : ""));
-                status |= (error > tol);
+                printf("%s\n", (error < tol ? "" : "  failed"));
+                status |= ! (error < tol);
             }
             else {
                 if ( opts.lapack ) {
