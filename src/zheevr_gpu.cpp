@@ -283,11 +283,11 @@ magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
         *info = -4;
     } else if (ldda < max(1,n)) {
         *info = -6;
-    } else if (lddz < 1 || wantz && lddz < n) {
+    } else if (lddz < 1 || (wantz && lddz < n)) {
         *info = -15;
     } else if (ldwa < max(1,n)) {
         *info = -18;
-    } else if (ldwz < 1 || wantz && ldwz < n) {
+    } else if (ldwz < 1 || (wantz && ldwz < n)) {
         *info = -20;
     } else {
         if (valeig) {
@@ -434,7 +434,7 @@ magma_zheevr_gpu(char jobz, char range, char uplo, magma_int_t n,
     if (! wantz) {
         blasf77_dcopy(&n, &rwork[indrd], &ione, &w[1], &ione);
         i__1 = n - 1;
-        if ((alleig || indeig && il == 1 && iu == n)){
+        if (alleig || (indeig && il == 1 && iu == n)) {
             lapackf77_dsterf(&n, &w[1], &rwork[indre], info);
             *m = n;
         } else {

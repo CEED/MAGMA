@@ -236,7 +236,7 @@ magma_zhegvx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
         *info = -7;
     } else if (ldb < max(1,n)) {
         *info = -9;
-    } else if (ldz < 1 || wantz && ldz < n) {
+    } else if (ldz < 1 || (wantz && ldz < n)) {
         *info = -18;
     } else {
         if (valeig) {

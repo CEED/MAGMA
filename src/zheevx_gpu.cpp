@@ -218,11 +218,11 @@ magma_zheevx_gpu(char jobz, char range, char uplo, magma_int_t n,
         *info = -4;
     } else if (ldda < max(1,n)) {
         *info = -6;
-    } else if (lddz < 1 || wantz && lddz < n) {
+    } else if (lddz < 1 || (wantz && lddz < n)) {
         *info = -15;
     } else if (ldwa < max(1,n)) {
         *info = -17;
-    } else if (ldwz < 1 || wantz && ldwz < n) {
+    } else if (ldwz < 1 || (wantz && ldwz < n)) {
         *info = -19;
     } else {
         if (valeig) {
@@ -345,7 +345,7 @@ magma_zheevx_gpu(char jobz, char range, char uplo, magma_int_t n,
     /* If all eigenvalues are desired and ABSTOL is less than or equal to
        zero, then call DSTERF or ZUNGTR and ZSTEQR.  If this fails for
        some eigenvalue, then try DSTEBZ. */
-    if ((alleig || indeig && il == 1 && iu == n) && abstol <= 0.) {
+    if ((alleig || (indeig && il == 1 && iu == n)) && abstol <= 0.) {
         blasf77_dcopy(&n, &rwork[indd], &ione, &w[1], &ione);
         indee = indrwk + 2*n;
         if (! wantz) {

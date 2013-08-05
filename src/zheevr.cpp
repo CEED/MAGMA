@@ -272,7 +272,7 @@ magma_zheevr(char jobz, char range, char uplo, magma_int_t n,
         *info = -4;
     } else if (lda < max(1,n)) {
         *info = -6;
-    } else if (ldz < 1 || wantz && ldz < n) {
+    } else if (ldz < 1 || (wantz && ldz < n)) {
         *info = -15;
     } else {
         if (valeig) {
@@ -403,7 +403,7 @@ magma_zheevr(char jobz, char range, char uplo, magma_int_t n,
     if (! wantz) {
         blasf77_dcopy(&n, &rwork[indrd], &ione, &w[1], &ione);
         i__1 = n - 1;
-        if ((alleig || indeig && il == 1 && iu == n)){
+        if (alleig || (indeig && il == 1 && iu == n)) {
             lapackf77_dsterf(&n, &w[1], &rwork[indre], info);
             *m = n;
         } else {

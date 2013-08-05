@@ -202,7 +202,7 @@ magma_zunmql(const char side, const char trans,
     }
     else {
         /* Use hybrid CPU-GPU code */
-        if (left && notran || ! left && ! notran) {
+        if ((left && notran) || (! left && ! notran)) {
             i1 = 1;
             i2 = k;
             i3 = nb;

@@ -204,7 +204,7 @@ magma_zheevx(char jobz, char range, char uplo, magma_int_t n,
         *info = -4;
     } else if (lda < max(1,n)) {
         *info = -6;
-    } else if (ldz < 1 || wantz && ldz < n) {
+    } else if (ldz < 1 || (wantz && ldz < n)) {
         *info = -15;
     } else {
         if (valeig) {
@@ -311,7 +311,7 @@ magma_zheevx(char jobz, char range, char uplo, magma_int_t n,
     /* If all eigenvalues are desired and ABSTOL is less than or equal to
        zero, then call DSTERF or ZUNGTR and ZSTEQR.  If this fails for
        some eigenvalue, then try DSTEBZ. */
-    if ((alleig || indeig && il == 1 && iu == n) && abstol <= 0.) {
+    if ((alleig || (indeig && il == 1 && iu == n)) && abstol <= 0.) {
         blasf77_dcopy(&n, &rwork[indd], &ione, &w[1], &ione);
         indee = indrwk + 2*n;
         if (! wantz) {
