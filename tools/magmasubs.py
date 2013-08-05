@@ -661,8 +661,11 @@ subs = {
 
     # ----- SPARSE BLAS
     ('sgecsrmv',       'dgecsrmv',       'cgecsrmv',       'zgecsrmv'        ),
+    ('smgecsrmv',      'dmgecsrmv',      'cmgecsrmv',      'zmgecsrmv'       ),
     ('sgeellmv',       'dgeellmv',       'cgeellmv',       'zgeellmv'        ),
+    ('smgeellmv',      'dmgeellmv',      'cmgeellmv',      'zmgeellmv'       ),
     ('sgeelltmv',      'dgeelltmv',      'cgeelltmv',      'zgeelltmv'       ),
+    ('smgeelltmv',     'dmgeelltmv',     'cmgeelltmv',     'zmgeelltmv'      ),
     ('sp1',            'dp1',            'cp1',            'zp1'             ),
 
     # ----- SPARSE Iterative Solvers
