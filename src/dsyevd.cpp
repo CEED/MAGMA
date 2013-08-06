@@ -156,16 +156,6 @@ magma_dsyevd(char jobz, char uplo,
     lquery = lwork == -1 || liwork == -1;
 
     *info = 0;
-    
-    if (n <= 128){
-        char jobzs[2] = {jobz, '\n'}, uplos[2] = {uplo, '\n'};
-        
-        lapackf77_dsyevd(jobzs, uplos,
-                         &n, a, &lda,
-                         w, work, &lwork,
-                         iwork, &liwork, info);
-        return *info;
-    }
 
     if (! (wantz || lapackf77_lsame(jobz_, MagmaNoVecStr))) {
         *info = -1;
@@ -219,6 +209,24 @@ magma_dsyevd(char jobz, char uplo,
         if (wantz) {
             a[0] = 1.;
         }
+        return *info;
+    }
+    
+    /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
+    if (n <= 128){
+        #ifdef ENABLE_DEBUG
+        printf("--------------------------------------------------------------\n");
+        printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
+        printf("--------------------------------------------------------------\n");
+        #endif
+        char jobzs[2] = {jobz, '\n'}, uplos[2] = {uplo, '\n'};
+        lapackf77_zheevd(jobzs, uplos,
+                         &n, a, &lda,
+                         w, work, &lwork,
+#if defined(PRECISION_z) || defined(PRECISION_c)
+                         rwork, &lrwork, 
+#endif  
+                         iwork, &liwork, info);
         return *info;
     }
 
