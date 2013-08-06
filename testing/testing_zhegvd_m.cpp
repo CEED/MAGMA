@@ -62,7 +62,9 @@ int main( int argc, char** argv)
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
-    double tol = opts.tolerance * lapackf77_dlamch("E");
+    
+    double tol    = opts.tolerance * lapackf77_dlamch("E");
+    double tolulp = opts.tolerance * lapackf77_dlamch("P");
 
     char jobz = opts.jobz;
     int checkres = opts.check;
@@ -271,7 +273,7 @@ int main( int argc, char** argv)
                 else if(itype==3)
                     printf("(1)    | B A Z - Z D | / (|A| |Z| N) = %8.2e%s\n", result, (result < tol ? "" : "  failed") );
 
-                printf(    "(3)    | D(MGPU)-D(LAPACK) |/ |D|    = %8.2e%s\n\n", result2, (result2 < tol ? "" : "  failed") );
+                printf(    "(3)    | D(MGPU)-D(LAPACK) |/ |D|    = %8.2e%s\n\n", result2, (result2 < tolulp ? "" : "  failed") );
             }
             else {
                 printf("%5d     ------         ------         %6.2f\n",

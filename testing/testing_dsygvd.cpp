@@ -54,7 +54,9 @@ int main( int argc, char** argv)
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
-    double tol = opts.tolerance * lapackf77_dlamch("E");
+    
+    double tol    = opts.tolerance * lapackf77_dlamch("E");
+    double tolulp = opts.tolerance * lapackf77_dlamch("P");
     
     if ( opts.check && opts.jobz == MagmaNoVec ) {
         fprintf( stderr, "checking results requires vectors; setting jobz=V (option -JV)\n" );
@@ -239,7 +241,7 @@ int main( int argc, char** argv)
                     printf("(2)    | I -   Z Z' B | /  N         = %8.2e%s\n", result[1], (result[1] < tol ? "" : "  failed") );
                 else
                     printf("(2)    | B -  Z Z' | / (|B| N)       = %8.2e%s\n", result[1], (result[1] < tol ? "" : "  failed") );
-                printf(    "(3)    | D(w/ Z) - D(w/o Z) | / |D|  = %8.2e%s\n\n", result[2], (result[2] < tol ? "" : "  failed") );
+                printf(    "(3)    | D(w/ Z) - D(w/o Z) | / |D|  = %8.2e%s\n\n", result[2], (result[2] < tolulp ? "" : "  failed") );
             }
             
             TESTING_FREE( h_A );
