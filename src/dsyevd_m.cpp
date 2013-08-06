@@ -233,12 +233,9 @@ magma_dsyevd_m(magma_int_t nrgpu, char jobz, char uplo,
         printf("--------------------------------------------------------------\n");
         #endif
         char jobzs[2] = {jobz, '\n'}, uplos[2] = {uplo, '\n'};
-        lapackf77_zheevd(jobzs, uplos,
+        lapackf77_dsyevd(jobzs, uplos,
                          &n, a, &lda,
                          w, work, &lwork,
-#if defined(PRECISION_z) || defined(PRECISION_c)
-                         rwork, &lrwork, 
-#endif  
                          iwork, &liwork, info);
         return *info;
     }

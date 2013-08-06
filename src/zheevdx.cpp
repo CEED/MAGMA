@@ -13,6 +13,7 @@
 
 */
 #include "common_magma.h"
+#define PRECISION_z
 
 extern "C" magma_int_t
 magma_zheevdx(char jobz, char range, char uplo,
