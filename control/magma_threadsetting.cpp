@@ -33,7 +33,8 @@ void magma_setlapack_numthreads(magma_int_t num_threads)
         printf("==========================================================================================\n");
         printf("  WARNING a parallel section (D&C) that use OPENMP could not perform in parallel because  \n");
         printf("  it need to be compiled with multi thread library and add -fopenmp(gcc)/-openmp(icc)     \n");
-        printf("  to both compilation and linkage flags                                                   \n");
+        printf("  to both compilation and linkage flags.                                                  \n");
+        printf("  If you wish to remove the printout of this WARNING, please compile with -DNO_WARNING    \n");
         printf("==========================================================================================\n");
         #endif
 #else
@@ -41,7 +42,8 @@ void magma_setlapack_numthreads(magma_int_t num_threads)
    printf("==========================================================================================\n");
    printf("  WARNING you are calling a parallel section without linking with a multithread library   \n");
    printf("  please compile with multi thread library and add -fopenmp(gcc)/-openmp(icc) to both     \n");
-   printf("  compilation and linkage flags                                                           \n");
+   printf("  compilation and linkage flags.                                                          \n");
+   printf("  If you wish to remove the printout of this WARNING, please compile with -DNO_WARNING    \n");
    printf("==========================================================================================\n");
    #endif
 #endif
