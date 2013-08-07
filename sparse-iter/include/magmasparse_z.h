@@ -230,6 +230,11 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
                   magma_z_vector x, magmaDoubleComplex beta, magma_z_vector y );
 
 magma_int_t
+magma_z_mpk(      magmaDoubleComplex alpha, magma_z_sparse_matrix A, 
+                  magma_z_vector x, magmaDoubleComplex beta, magma_z_vector y, 
+                  magma_int_t k );
+
+magma_int_t
 magma_z_precond( magma_z_sparse_matrix A, magma_z_vector b, 
                  magma_z_vector *x, magma_precond_parameters precond );
 
@@ -300,6 +305,18 @@ magma_zgeelltmv(       const char *transA,
 
 magma_int_t 
 magma_zmgeelltmv(      const char *transA,
+                       magma_int_t m, magma_int_t n,
+                       magma_int_t num_vecs,
+                       magma_int_t nnz_per_row,
+                       magmaDoubleComplex alpha,
+                       magmaDoubleComplex *d_val,
+                       magma_int_t *d_colind,
+                       magmaDoubleComplex *d_x,
+                       magmaDoubleComplex beta,
+                       magmaDoubleComplex *d_y );
+
+magma_int_t 
+magma_zmpkgeelltmv(    const char *transA,
                        magma_int_t m, magma_int_t n,
                        magma_int_t num_vecs,
                        magma_int_t nnz_per_row,

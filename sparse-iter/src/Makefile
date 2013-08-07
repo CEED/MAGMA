@@ -52,7 +52,7 @@ ZSRC += \
 
 # ILU and sparse direct
 ZSRC += \
-	zilu.cpp      		\
+#	zilu.cpp      		\
 
 
 # Wrappers, tools etc
