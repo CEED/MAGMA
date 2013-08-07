@@ -285,9 +285,11 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
         return *info;
     }
 
-    /*     Form a Cholesky factorization of B. */
-
+    /* Form a Cholesky factorization of B. */
     magma_dsetmatrix( n, n, b, ldb, db, lddb );
+    magma_dsetmatrix_async( n, n,
+                            a,  lda,
+                            da, ldda, stream );
 
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
@@ -304,29 +306,30 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
     end = get_current_time();
     printf("time dpotrf_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
-    magma_dgetmatrix_async( n, n,
-                           db, lddb,
-                           b,  ldb, stream );
 
-    magma_dsetmatrix( n, n, a, lda, da, ldda );
+    magma_queue_sync( stream );
+    magma_dgetmatrix_async( n, n,
+                            db, lddb,
+                            b,  ldb, stream );
 
 #ifdef ENABLE_TIMER
     start = get_current_time();
 #endif
 
-    /*     Transform problem to standard eigenvalue problem and solve. */
+    /* Transform problem to standard eigenvalue problem and solve. */
     magma_dsygst_gpu(itype, uplo, n, da, ldda, db, lddb, info);
-
-    magma_dgetmatrix( n, n, da, ldda, a, lda );
-
-    magma_queue_sync( stream );
-
-    magma_free( da );
-    magma_free( db );
 
 #ifdef ENABLE_TIMER
     end = get_current_time();
     printf("time dsygst_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
+#endif
+
+    magma_dgetmatrix( n, n, da, ldda, a, lda );
+    magma_queue_sync( stream );
+    magma_free( da );
+    magma_free( db );
+
+#ifdef ENABLE_TIMER
     start = get_current_time();
 #endif
 

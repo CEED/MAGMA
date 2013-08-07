@@ -284,7 +284,6 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
 
     /* Form a Cholesky factorization of B. */
     magma_dsetmatrix( n, n, b, ldb, db, lddb );
-
     magma_dsetmatrix_async( n, n,
                             a,  lda,
                             da, ldda, stream );
@@ -293,11 +292,13 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
     magma_timestr_t start, end;
     start = get_current_time();
 #endif
+
     magma_dpotrf_gpu(uplo, n, db, lddb, info);
     if (*info != 0) {
         *info = n + *info;
-        return 0;
+        return *info;
     }
+
 #ifdef ENABLE_TIMER
     end = get_current_time();
     printf("time dpotrf_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
@@ -311,8 +312,10 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
 #ifdef ENABLE_TIMER
     start = get_current_time();
 #endif
+
     /*  Transform problem to standard eigenvalue problem and solve. */
     magma_dsygst_gpu(itype, uplo, n, da, ldda, db, lddb, info);
+
 #ifdef ENABLE_TIMER
     end = get_current_time();
     printf("time dsygst_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);

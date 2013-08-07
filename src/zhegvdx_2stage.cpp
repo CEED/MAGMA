@@ -315,6 +315,10 @@ magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
     /*     Form a Cholesky factorization of B. */
     magma_zsetmatrix( n, n, b, ldb, db, lddb );
 
+    magma_zsetmatrix_async( n, n,
+                           a,  lda,
+                           da, ldda, stream );
+
 #ifdef ENABLE_TIMER
     magma_timestr_t start, end;
     start = get_current_time();
@@ -330,11 +334,11 @@ magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
     end = get_current_time();
     printf("time zpotrf_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
 #endif
+
+    magma_queue_sync( stream );
     magma_zgetmatrix_async( n, n,
                            db, lddb,
                            b,  ldb, stream );
-
-    magma_zsetmatrix( n, n, a, lda, da, ldda );
 
 #ifdef ENABLE_TIMER
     start = get_current_time();
@@ -342,17 +346,17 @@ magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
 
     /*     Transform problem to standard eigenvalue problem and solve. */
     magma_zhegst_gpu(itype, uplo, n, da, ldda, db, lddb, info);
+#ifdef ENABLE_TIMER
+    end = get_current_time();
+    printf("time zhegst_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
+#endif
 
     magma_zgetmatrix( n, n, da, ldda, a, lda );
-
     magma_queue_sync( stream );
-
     magma_free( da );
     magma_free( db );
 
 #ifdef ENABLE_TIMER
-    end = get_current_time();
-    printf("time zhegst_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
     start = get_current_time();
 #endif
 
