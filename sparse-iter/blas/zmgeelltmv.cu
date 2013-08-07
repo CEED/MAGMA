@@ -34,17 +34,17 @@ zmgeelltmv_kernel( int num_rows,
     extern __shared__ magmaDoubleComplex dot[];
     int row = blockDim.x * blockIdx.x + threadIdx.x ;
     if(row < num_rows ){
-        for( magma_int_t i=0; i<num_vecs; i++ )
+        for( int i=0; i<num_vecs; i++ )
                 dot[ threadIdx.x+ i*blockDim.x ] = MAGMA_Z_MAKE(0.0, 0.0);
         for ( int n = 0; n < num_cols_per_row ; n ++){
-            magma_int_t col = d_colind [ num_rows * n + row ];
+            int col = d_colind [ num_rows * n + row ];
             magmaDoubleComplex val = d_val [ num_rows * n + row ];
             if( val != 0){
-                for( magma_int_t i=0; i<num_vecs; i++ )
+                for( int i=0; i<num_vecs; i++ )
                     dot[ threadIdx.x + i*blockDim.x ] += val * d_x[col + i * num_cols ];
             }
         }
-        for( magma_int_t i=0; i<num_vecs; i++ )
+        for( int i=0; i<num_vecs; i++ )
                 d_y[ row + i*num_cols ] = dot[ threadIdx.x + i*blockDim.x ] * alpha + beta * d_y [ row + i*num_cols ];
     }
 }

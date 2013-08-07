@@ -34,17 +34,17 @@ zmgecsrmv_kernel( int num_rows, int num_cols,
     extern __shared__ magmaDoubleComplex dot[];
 
     if( row<num_rows ){
-        for( magma_int_t i=0; i<num_vecs; i++ )
+        for( int i=0; i<num_vecs; i++ )
                 dot[ threadIdx.x+ i*blockDim.x ] = MAGMA_Z_MAKE(0.0, 0.0);
         int start = d_rowptr[ row ] ;
         int end = d_rowptr[ row+1 ];
         for( j=start; j<end; j++ ){
             int col = d_colind [ j ];
             magmaDoubleComplex val = d_val[ j ];
-            for( magma_int_t i=0; i<num_vecs; i++ )
+            for( int i=0; i<num_vecs; i++ )
                 dot[ threadIdx.x + i*blockDim.x ] += val * d_x[ col + i*num_cols ];
         }
-        for( magma_int_t i=0; i<num_vecs; i++ )
+        for( int i=0; i<num_vecs; i++ )
             d_y[ row +i*num_cols ] = alpha * dot[ threadIdx.x + i*blockDim.x ] + beta * d_y[ row + i*num_cols ];
     }
 }

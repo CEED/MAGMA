@@ -32,11 +32,11 @@
     Arguments
     =========
 
+    magmaDoubleComplex alpha      scalar alpha
     magma_z_sparse_matrix A       sparse matrix A    
     magma_z_vector x              input vector x  
-    magma_z_vector y              input vector y      
-    magmaDoubleComplex alpha      scalar alpha
     magmaDoublComplex beta        scalar beta
+    magma_z_vector y              input vector y      
 
     =====================================================================  */
 
@@ -51,7 +51,6 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
 
     // DEV case
     if( A.memory_location == Magma_DEV ){
-        printf("A.num_cols: %d  x.num_rows: %d\n", A.num_cols, x.num_rows);
         if( A.num_cols == x.num_rows ){
              if( A.storage_type == Magma_CSR ){
                  //printf("using CSR kernel for SpMV: ");

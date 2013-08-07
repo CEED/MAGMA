@@ -35,7 +35,7 @@ zgeelltmv_kernel( int num_rows,
     if(row < num_rows ){
         magmaDoubleComplex dot = MAGMA_Z_MAKE(0.0, 0.0);
         for ( int n = 0; n < num_cols_per_row ; n ++){
-            magma_int_t col = d_colind [ num_rows * n + row ];
+            int col = d_colind [ num_rows * n + row ];
             magmaDoubleComplex val = d_val [ num_rows * n + row ];
             if( val != 0)
                 dot += val * d_x[col ];
