@@ -84,7 +84,14 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magmaDoubleComplex *dy;
     if (MAGMA_SUCCESS != magma_zmalloc( &dy, ldh )) 
         return MAGMA_ERR_DEVICE_ALLOC;
-    
+//#define GMRES_CGS
+#ifdef  GMRES_CGS
+#define  dH(i,j)  (dH+ (i) + (j)*ldh)
+    magmaDoubleComplex *dH;
+    if (MAGMA_SUCCESS != magma_zmalloc( &dH, (ldh+1)*ldh )) 
+        return MAGMA_ERR_DEVICE_ALLOC;
+#endif
+
     magma_zscal( dofs, c_zero, x->val, 1 );              //  x = 0
     magma_zcopy( dofs, b.val, 1, r.val, 1 );             //  r = b
 
@@ -122,10 +129,16 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                     magma_device_sync();
                     gettimeofday(&inicio, NULL);
                     t_orth1=inicio.tv_sec+(inicio.tv_usec/1000000.0);
+#ifdef  GMRES_CGS
+                    magma_zgemv(MagmaTrans,   dofs, k, c_one,  q(0), dofs, r.val,   1, c_zero, dH(1,k), 1);
+                    magma_zgemv(MagmaNoTrans, dofs, k, c_mone, q(0), dofs, dH(1,k), 1, c_one,  r.val,   1);
+                    magma_zgetvector(k, dH(1,k), 1, &H(1,k), 1);
+#else
                     for (i=1; i<=k; i++) {
                         H(i,k) =magma_zdotc(dofs, q(i-1), 1, r.val, 1);            //  H[i][k] = q[i] . r
                         magma_zaxpy(dofs,-H(i,k), q(i-1), 1, r.val, 1);            //  r       = r - H[i][k] q[i]
                     }
+#endif
                     H(k+1,k) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. ); //  H[k+1][k] = sqrt(r . r) 
                     magma_device_sync();
                     gettimeofday(&inicio, NULL);
@@ -214,7 +227,9 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     solver_par->numiter = iter;
 
     magma_free(dy); 
-
+#ifdef  GMRES_CGS
+    magma_free(dH); 
+#endif
     magma_z_vfree(&r);
     magma_z_vfree(&q);
 
