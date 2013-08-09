@@ -13,12 +13,6 @@
 
 #define Z(ix, iy) (z + (ix) + ldz * (iy))
 
-extern "C"{
-    magma_int_t get_dstedx_smlsize()
-    {
-        return 128;
-    }
-}
 
 extern "C" magma_int_t
 magma_dstedx(char range, magma_int_t n, double vl, double vu,
@@ -189,7 +183,7 @@ magma_dstedx(char range, magma_int_t n, double vl, double vu,
     if (*info == 0) {
         // Compute the workspace requirements
 
-        smlsiz = get_dstedx_smlsize();
+        smlsiz = magma_get_divideconquer_smlsize();
         if( n <= 1 ){
             lwmin = 1;
             liwmin = 1;
