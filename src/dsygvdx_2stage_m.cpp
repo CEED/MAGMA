@@ -278,7 +278,7 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
         printf("--------------------------------------------------------------\n");
         #endif
         lapackf77_dsygvd(&itype, jobz_, uplo_,
-                         &n, a, &lda,
+                         &n, a, &lda, b, &ldb,
                          w, work, &lwork,
                          iwork, &liwork, info);
         *m = n;

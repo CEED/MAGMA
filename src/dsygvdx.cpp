@@ -283,7 +283,7 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
         printf("--------------------------------------------------------------\n");
         #endif
         lapackf77_dsygvd(&itype, jobz_, uplo_,
-                         &n, a, &lda,
+                         &n, a, &lda, b, &ldb,
                          w, work, &lwork,
                          iwork, &liwork, info);
         *m = n;

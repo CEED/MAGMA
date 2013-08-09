@@ -247,11 +247,12 @@ magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
         printf("--------------------------------------------------------------\n");
         #endif
         lapackf77_dsygvd(&itype, jobz_, uplo_,
-                         &n, a, &lda,
+                         &n, a, &lda, b, &ldb,
                          w, work, &lwork,
                          iwork, &liwork, info);
         return *info;
     }
+
 
 //
 #ifdef ENABLE_TIMER
