@@ -300,7 +300,7 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
         printf("--------------------------------------------------------------\n");
         #endif
-        lapackf77_zheevd(&jobz, &uplo, &n, 
+        lapackf77_zheevd(jobz_, uplo_, &n, 
                         a, &lda, w, 
                         work, &lwork, 
 #if defined(PRECISION_z) || defined(PRECISION_c)

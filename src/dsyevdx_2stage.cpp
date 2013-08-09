@@ -276,7 +276,7 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int ) nb);
         printf("--------------------------------------------------------------\n");
         #endif
-        lapackf77_dsyevd(&jobz, &uplo, &n, 
+        lapackf77_dsyevd(jobz_, uplo_, &n, 
                         a, &lda, w, 
                         work, &lwork, 
                         iwork, &liwork, 
