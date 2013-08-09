@@ -702,6 +702,67 @@ magma_int_t magma_get_zhegst_nb_m( magma_int_t m )
     /////////////////////////////////////////
 
 /* ////////////////////////////////////////////////////////////////////////////
+   -- Return gpu_cpu_perf for  2 stage TRD
+*/
+magma_int_t magma_get_sbulge_gcperf( )
+{
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler + SB
+        return 37;
+    }
+    else if ( arch >= 200 ) {  // 2.x Fermi
+        return 15000;
+    }
+    else {                     // 1.x
+        return 10000;
+    }
+}
+//////////////////////////////////////////////////
+magma_int_t magma_get_dbulge_gcperf( )
+{
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler + SB
+        return 37;
+    }
+    else if ( arch >= 200 ) {  // 2.x Fermi
+        return 15000;
+    }
+    else {                     // 1.x
+        return 10000;
+    }
+}
+//////////////////////////////////////////////////
+magma_int_t magma_get_cbulge_gcperf( )
+{
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler + SB
+            return 50;
+    }
+    else if ( arch >= 200 ) {  // 2.x Fermi
+        return 30;
+    }
+    else {                     // 1.x
+        return 10000;
+    }
+}
+//////////////////////////////////////////////////
+magma_int_t magma_get_zbulge_gcperf( )
+{
+    magma_int_t arch = magma_getdevice_arch();
+    if ( arch >= 300 ) {       // 3.x Kepler + SB
+            return 50;
+    }
+    else if ( arch >= 200 ) {  // 2.x Fermi
+        return 15000;
+    }
+    else {                     // 1.x
+        return 10000;
+    }
+}
+//////////////////////////////////////////////////
+
+
+/* ////////////////////////////////////////////////////////////////////////////
    -- Return nb for  2 stage TRD
 */
 magma_int_t magma_get_sbulge_nb( magma_int_t m, magma_int_t nbthreads  )
@@ -766,6 +827,7 @@ magma_int_t magma_get_zbulge_nb( magma_int_t m, magma_int_t nbthreads )
     }
 }
 //////////////////////////////////////////////////
+//
 /* ////////////////////////////////////////////////////////////////////////////
    -- Return Vblksiz for  2 stage TRD
 */
