@@ -11,11 +11,6 @@
 */
 #include "common_magma.h"
 
-extern "C"{
-
-    magma_int_t get_zstedx_smlsize();  // defined in zstedx.cpp
-}
-
 extern "C" magma_int_t
 magma_zstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double vu,
                magma_int_t il, magma_int_t iu, double* d, double* e,
@@ -165,7 +160,7 @@ magma_zstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
     if (*info == 0) {
         // Compute the workspace requirements
 
-        smlsiz = get_zstedx_smlsize();
+        smlsiz = magma_get_divideconquer_smlsize();
         if( n <= 1 ){
             lrwmin = 1;
             liwmin = 1;
