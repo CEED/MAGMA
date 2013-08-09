@@ -295,6 +295,8 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
                          iwork, &liwork, info);
         magma_zsetmatrix( n, n, a, n, da, ldda);
         free(a);
+        *m=n;
+        return *info;
     }
 
     magma_queue_t stream;
