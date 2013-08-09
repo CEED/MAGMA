@@ -186,7 +186,7 @@ extern "C" magma_int_t magma_zhetrd_hb2st(magma_int_t threads, char uplo, magma_
     =====================================================================  */
 
     #ifdef ENABLE_TIMER
-    double timeblg=0.0;
+    real_Double_t timeblg=0.0;
     #endif
 
     //char uplo_[2] = {uplo, 0};
@@ -332,7 +332,7 @@ static void *magma_zhetrd_hb2st_parallel_section(void *arg)
     //magma_int_t sys_corenbr    = 1;
 
     #ifdef ENABLE_TIMER
-    double timeB=0.0, timeT=0.0;
+    real_Double_t timeB=0.0, timeT=0.0;
     #endif
 
     // with MKL and when using omp_set_num_threads instead of mkl_set_num_threads

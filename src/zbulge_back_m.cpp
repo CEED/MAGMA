@@ -126,21 +126,26 @@ magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t threads, char uplo,
     double f= 1.;
     magma_int_t n_gpu = ne;
 
-#if defined(PRECISION_s) || defined(PRECISION_d)
-    double gpu_cpu_perf = 32; //gpu over cpu performance
-#else
-    double gpu_cpu_perf = 32;  // gpu over cpu performance
-#endif
+//#if defined(PRECISION_s) || defined(PRECISION_d)
+//    double gpu_cpu_perf = 32; //gpu over cpu performance
+//#else
+//    double gpu_cpu_perf = 32;  // gpu over cpu performance
+//#endif
 
     double perf_temp= .85;
     double perf_temp2= perf_temp;
     for (magma_int_t itmp=1; itmp<nrgpu; ++itmp)
         perf_temp2*=perf_temp;
-
+    magma_int_t gpu_cpu_perf = magma_get_zbulge_gcperf();
     if(threads>1){
-        f = 1. / (1. + (double)(threads-1)/ (gpu_cpu_perf*(1.-perf_temp2)/(1.-perf_temp)));
+        f = 1. / (1. + (double)(threads-1)/ ((double)gpu_cpu_perf*(1.-perf_temp2)/(1.-perf_temp)));
         n_gpu = (magma_int_t)(f*ne);
     }
+
+
+
+
+
 
     /****************************************************
      *  apply V2 from left to the eigenvectors Z. dZ = (I-V2*T2*V2')*Z
