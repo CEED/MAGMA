@@ -72,6 +72,7 @@ extern "C" {
 #define lapackf77_zheev    FORTRAN_NAME( zheev,  ZHEEV  )
 #define lapackf77_zheevd   FORTRAN_NAME( zheevd, ZHEEVD )
 #define lapackf77_zheevr   FORTRAN_NAME( zheevr, ZHEEVR )
+#define lapackf77_zheevx   FORTRAN_NAME( zheevx, ZHEEVX )
 #define lapackf77_zhegs2   FORTRAN_NAME( zhegs2, ZHEGS2 )
 #define lapackf77_zhegst   FORTRAN_NAME( zhegst, ZHEGST )
 #define lapackf77_zhegvd   FORTRAN_NAME( zhegvd, ZHEGVD )
