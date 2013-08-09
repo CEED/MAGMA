@@ -237,24 +237,18 @@ magma_zheevx(char jobz, char range, char uplo, magma_int_t n,
         return *info;
     }
     
-    /* Quick return if possible */
     *m = 0;
-    if (n == 0) {
-        return *info;
-    }
-    
-    if (n == 1) {
-        w[0] = MAGMA_Z_REAL(a[0]);
-        if (alleig || indeig) {
-            *m = 1;
-        } else if (valeig) {
-            if (vl < w[0] && vu >= w[0]) {
-                *m = 1;
-            }
-        }
-        if (wantz) {
-            z[0]=MAGMA_Z_ONE;
-        }
+    /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
+    if (n <= 128) {
+        #ifdef ENABLE_DEBUG
+        printf("--------------------------------------------------------------\n");
+        printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
+        printf("--------------------------------------------------------------\n");
+        #endif
+        lapackf77_zheevx(jobz_, range_, uplo_,
+                         &n, a, &lda, &vl, &vu, &il, &iu, &abstol, m,
+                         w, z, &ldz, work, &lwork,
+                         rwork, iwork, ifail, info);
         return *info;
     }
     
