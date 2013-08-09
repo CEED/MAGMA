@@ -14,9 +14,10 @@
 #include "common_magma.h"
 #include "magma_bulge.h"
 #include "magma_zbulge.h"
+#define PRECISION_z
 
-extern "C" 
-magma_int_t magma_zhegvdx_2stage_m(magma_int_t nrgpu, 
+extern "C" magma_int_t 
+magma_zhegvdx_2stage_m(magma_int_t nrgpu, 
                              magma_int_t itype, char jobz, char range, char uplo, 
                              magma_int_t n,
                              magmaDoubleComplex *a, magma_int_t lda, 

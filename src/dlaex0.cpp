@@ -129,7 +129,7 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
     if(n == 0)
         return MAGMA_SUCCESS;
 
-    smlsiz = magma_get_divideconquer_smlsize();
+    smlsiz = magma_get_smlsize_divideconquer();
 
     // Determine the size and placement of the submatrices, and save in
     // the leading elements of IWORK.

@@ -168,7 +168,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
         magma_queue_create( &stream[igpu][1] );
     }
 
-    smlsiz = get_dlaex0_smlsize();
+    smlsiz = magma_get_smlsize_divideconquer();
 
     // Determine the size and placement of the submatrices, and save in
     // the leading elements of IWORK.
