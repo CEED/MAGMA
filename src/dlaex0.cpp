@@ -13,13 +13,6 @@
 
 #define Q(ix, iy) (q + (ix) + ldq * (iy))
 
-extern "C" {
-    magma_int_t get_dlaex0_smlsize()
-    {
-        return 25;
-    }
-}
-
 extern "C" magma_int_t
 magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
              double* work, magma_int_t* iwork, double* dwork,
@@ -136,7 +129,7 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
     if(n == 0)
         return MAGMA_SUCCESS;
 
-    smlsiz = get_dlaex0_smlsize();
+    smlsiz = magma_get_divideconquer_smlsize();
 
     // Determine the size and placement of the submatrices, and save in
     // the leading elements of IWORK.

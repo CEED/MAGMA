@@ -23,8 +23,8 @@
 #define dQ(id, ii) (dwork[id] + n2*n2_loc + 2  * (n2*nb) +(ii)* (n2_loc*nb))
 
 extern "C"{
-    int magma_get_dlaex3_m_k()  { return  512; }
-    int magma_get_dlaex3_m_nb() { return 1024; }
+    magna_int_t magma_get_dlaex3_m_k()  { return  512; }
+    magma_int_t magma_get_dlaex3_m_nb() { return 1024; }
     
     // defined in dlaex3.cpp
     void magma_dvrange(magma_int_t k, double *d, magma_int_t *il, magma_int_t *iu, double vl, double vu);
