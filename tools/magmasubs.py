@@ -297,6 +297,7 @@ subs = {
     ('sger',           'dger',           'cgerc',          'zgerc'           ),
     ('sger',           'dger',           'cgeru',          'zgeru'           ),
     ('snrm2',          'dnrm2',          'scnrm2',         'dznrm2'          ),
+    ('scnrm2',         'dznrm2',         'scnrm2',         'dznrm2'          ),
     ('srot',           'drot',           'csrot',          'zdrot'           ),
     ('ssymm',          'dsymm',          'chemm',          'zhemm'           ),
     ('ssymv',          'dsymv',          'chemv',          'zhemv'           ),
