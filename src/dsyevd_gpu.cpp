@@ -225,17 +225,6 @@ magma_dsyevd_gpu(char jobz, char uplo,
         return *info;
     }
 
-    if (n == 1) {
-        double tmp;
-        magma_dgetvector( 1, da, 1, &tmp, 1 );
-        w[0] = tmp;
-        if (wantz) {
-            tmp = 1.;
-            magma_dsetvector( 1, &tmp, 1, da, 1 );
-        }
-        return *info;
-    }
-
     magma_queue_t stream;
     magma_queue_create( &stream );
 
