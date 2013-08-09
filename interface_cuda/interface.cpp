@@ -70,8 +70,8 @@ void magma_print_devices()
 {
     int major, minor, micro;
     magma_version( &major, &minor, &micro );
-    printf( "MAGMA %d.%d.%d %s, capability %d\n",
-            major, minor, micro, MAGMA_VERSION_STAGE, GPUSHMEM );
+    printf( "MAGMA %d.%d.%d %s, capability %.1f\n",
+            major, minor, micro, MAGMA_VERSION_STAGE, GPUSHMEM/100. );
     
     int ndevices;
     cudaGetDeviceCount( &ndevices );
@@ -85,6 +85,9 @@ void magma_print_devices()
                 prop.totalGlobalMem / (1024.*1024.),
                 prop.major,
                 prop.minor );
+        if ( prop.major*100 + prop.minor*10 < GPUSHMEM ) {
+            printf( "Warning: MAGMA compiled for higher capability; some routines will not run correctly!\n" );
+        }
     }
 }
 
