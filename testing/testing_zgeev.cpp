@@ -85,8 +85,8 @@ int main( int argc, char** argv)
             // generous workspace - required by zget22
             lwork = max( lwork, N*(5 + 2*N) );
             
+            TESTING_MALLOC( w1copy, magmaDoubleComplex, N );
             TESTING_MALLOC( w1,  magmaDoubleComplex, N );
-            TESTING_MALLOC( w1copy,  magmaDoubleComplex, N );
             TESTING_MALLOC( w2,  magmaDoubleComplex, N );
             TESTING_MALLOC( rwork, double, 2*N );
             TESTING_MALLOC( h_A, magmaDoubleComplex, n2 );
@@ -322,7 +322,7 @@ int main( int argc, char** argv)
             
             /* =====================================================================
                Performs operation using LAPACK
-               Do this after checks, because it overwriten VL and VR.
+               Do this after checks, because it overwrites VL and VR.
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
@@ -395,6 +395,7 @@ int main( int argc, char** argv)
                 if ( result[8] != -1 ) { status |=   (result[8] != 1.); }
             }
             
+            TESTING_FREE( w1copy );
             TESTING_FREE( w1 );
             TESTING_FREE( w2 );
             TESTING_FREE( rwork );
