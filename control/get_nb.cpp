@@ -763,6 +763,16 @@ magma_int_t magma_get_zbulge_gcperf( )
 
 
 /* ////////////////////////////////////////////////////////////////////////////
+   -- Return smlsiz for the divide and conquewr routine dlaex0 dstedx zstedx
+*/
+magma_int_t magma_get_divideconquer_smlsize()
+    {
+        return 128;
+    }
+
+
+
+/* ////////////////////////////////////////////////////////////////////////////
    -- Return nb for  2 stage TRD
 */
 magma_int_t magma_get_sbulge_nb( magma_int_t m, magma_int_t nbthreads  )
