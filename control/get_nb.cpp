@@ -739,7 +739,7 @@ magma_int_t magma_get_cbulge_gcperf( )
             return 50;
     }
     else if ( arch >= 200 ) {  // 2.x Fermi
-        return 30;
+        return 15000;
     }
     else {                     // 1.x
         return 10000;
