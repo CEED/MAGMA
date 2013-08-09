@@ -18,7 +18,7 @@
 #if (!defined(PRECISION_z)) || (GPUSHMEM >= 200)
 
 /*------------------------------------------ UPLO = 'L' ----------------------------------*/
-__device__ int flag = 0; 
+static __device__ int flag = 0; 
 
 __global__ void
 l_zlat2c_special(

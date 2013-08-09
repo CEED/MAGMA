@@ -14,7 +14,7 @@
 #define blksize 64
 
 // TODO get rid of global variable!
-__device__ int flag = 0; 
+static __device__ int flag = 0; 
 
 __global__ void 
 magmaint_zlag2c(  int M, int N, 
