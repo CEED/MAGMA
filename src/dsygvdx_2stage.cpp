@@ -278,6 +278,20 @@ magma_dsygvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
         return *info;
     }
 
+    /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
+    if (n <= 128){
+        #ifdef ENABLE_DEBUG
+        printf("--------------------------------------------------------------\n");
+        printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
+        printf("--------------------------------------------------------------\n");
+        #endif
+        lapackf77_dsygvd(&itype, jobz_, uplo_,
+                         &n, a, &lda,
+                         w, work, &lwork,
+                         iwork, &liwork, info);
+        *m = n;
+        return *info;
+    }
 
     if (MAGMA_SUCCESS != magma_dmalloc( &da, n*ldda ) ||
         MAGMA_SUCCESS != magma_dmalloc( &db, n*lddb )) {

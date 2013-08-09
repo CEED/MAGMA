@@ -269,8 +269,8 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 #endif
 
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
-    magma_int_t lda2 = nb+1+(nb-1);
-    if((lda2>n)||(n<=128)){
+    magma_int_t ntiles = n/nb;
+    if( ( ntiles < 2 ) || ( n <= 128 ) ){
         #ifdef ENABLE_DEBUG
         printf("--------------------------------------------------------------\n");
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
@@ -394,8 +394,9 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     #endif
 
     /* copy the input matrix into WORK(INDWRK) with band storage */
+    /* PAY ATTENTION THAT work[indwrk] should be able to be of size lda2*n which it should be checked in any future modification of lwork.*/
+    magma_int_t lda2 = 2*nb; //nb+1+(nb-1);
     double* A2 = &work[indwrk];
-
     memset(A2 , 0, n*lda2*sizeof(double));
 
     for (magma_int_t j = 0; j < n-nb; j++)
