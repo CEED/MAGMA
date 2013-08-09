@@ -765,7 +765,7 @@ magma_int_t magma_get_zbulge_gcperf( )
 /* ////////////////////////////////////////////////////////////////////////////
    -- Return smlsiz for the divide and conquewr routine dlaex0 dstedx zstedx
 */
-magma_int_t magma_get_divideconquer_smlsize()
+magma_int_t magma_get_smlsize_divideconquer()
     {
         return 128;
     }
