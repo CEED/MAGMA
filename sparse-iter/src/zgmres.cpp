@@ -55,12 +55,10 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 #define  q(i)     (q.val + (i)*dofs)
 #define  H(i,j)  H[(i)   + (j)*ldh]
 #define HH(i,j) HH[(i)   + (j)*ldh]
+#define dH(i,j)  (dH+ (i) + (j)*ldh)
 
     //Chronometry
-    struct timeval inicio, fim;
     double tempo1, tempo2;
-    double t_spmv1, t_spmv2, t_spmv = 0.0;
-    double t_orth1, t_orth2, t_orth = 0.0;
 
     // local variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = MAGMA_Z_NEG_ONE;
@@ -81,16 +79,13 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_z_vinit( &q  , Magma_DEV, dofs*ldh, c_zero );
     magma_z_vinit( &q_t, Magma_DEV, dofs,     c_zero );
 
-    magmaDoubleComplex *dy;
+    magmaDoubleComplex *dy, *dH = NULL;
     if (MAGMA_SUCCESS != magma_zmalloc( &dy, ldh )) 
         return MAGMA_ERR_DEVICE_ALLOC;
-//#define GMRES_CGS
-#ifdef  GMRES_CGS
-#define  dH(i,j)  (dH+ (i) + (j)*ldh)
-    magmaDoubleComplex *dH;
-    if (MAGMA_SUCCESS != magma_zmalloc( &dH, (ldh+1)*ldh )) 
-        return MAGMA_ERR_DEVICE_ALLOC;
-#endif
+    if (solver_par->ortho != MAGMA_MGS ) {
+        if (MAGMA_SUCCESS != magma_zmalloc( &dH, (ldh+1)*ldh )) 
+            return MAGMA_ERR_DEVICE_ALLOC;
+    }
 
     magma_zscal( dofs, c_zero, x->val, 1 );              //  x = 0
     magma_zcopy( dofs, b.val, 1, r.val, 1 );             //  r = b
@@ -103,11 +98,13 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         r0 = ATOLERANCE;
     
     //Chronometry 
-    magma_device_sync();
-    gettimeofday(&inicio, NULL);
-    tempo1=inicio.tv_sec+(inicio.tv_usec/1000000.0);
-
-    printf("Iteration: %4d  Norm: %e  Time: %e\n", 0, H(1,0)*H(1,0), 0.0);
+    magma_device_sync(); tempo1=magma_wtime();
+    //#define ENABLE_TIMER
+    #ifdef ENABLE_TIMER
+    printf("Iteration: %4d  Norm: %e  Time: %e\n", 0, MAGMA_Z_REAL(H(1,0)*H(1,0)), 0.0);
+    double t_spmv1, t_spmv2, t_spmv = 0.0;
+    double t_orth1, t_orth2, t_orth = 0.0;
+    #endif
 
     for (iter = 0; iter<solver_par->maxiter; iter++) 
         {
@@ -116,36 +113,46 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                     magma_zcopy(dofs, r.val, 1, q(k-1), 1);                        //  q[k]    = 1.0/H[k][k-1] r
                     magma_zscal(dofs, 1./H(k,k-1), q(k-1), 1);                     //  (to be fused)
 
+                    #ifdef ENABLE_TIMER
+                    magma_device_sync(); t_spmv1=magma_wtime();
+                    #endif
                     q_t.val = q(k-1);
-                    magma_device_sync();
-                    gettimeofday(&inicio, NULL);
-                    t_spmv1=inicio.tv_sec+(inicio.tv_usec/1000000.0);
                     magma_z_spmv( c_one, A, q_t, c_zero, r );                      //  r       = A q[k] 
-                    magma_device_sync();
-                    gettimeofday(&inicio, NULL);
-                    t_spmv2=inicio.tv_sec+(inicio.tv_usec/1000000.0);
+                    #ifdef ENABLE_TIMER
+                    magma_device_sync(); t_spmv2=magma_wtime();
                     t_spmv += t_spmv2-t_spmv1;
+                    #endif
                     
-                    magma_device_sync();
-                    gettimeofday(&inicio, NULL);
-                    t_orth1=inicio.tv_sec+(inicio.tv_usec/1000000.0);
-#ifdef  GMRES_CGS
-                    magma_zgemv(MagmaTrans,   dofs, k, c_one,  q(0), dofs, r.val,   1, c_zero, dH(1,k), 1);
-                    magma_zgemv(MagmaNoTrans, dofs, k, c_mone, q(0), dofs, dH(1,k), 1, c_one,  r.val,   1);
-                    magma_zgetvector(k, dH(1,k), 1, &H(1,k), 1);
-#else
-                    for (i=1; i<=k; i++) {
-                        H(i,k) =magma_zdotc(dofs, q(i-1), 1, r.val, 1);            //  H[i][k] = q[i] . r
-                        magma_zaxpy(dofs,-H(i,k), q(i-1), 1, r.val, 1);            //  r       = r - H[i][k] q[i]
+                    #ifdef ENABLE_TIMER
+                    magma_device_sync(); t_orth1=magma_wtime();
+                    #endif
+                    if (solver_par->ortho == MAGMA_MGS ) {
+                        // modified Gram-Schmidt
+                        for (i=1; i<=k; i++) {
+                            H(i,k) =magma_zdotc(dofs, q(i-1), 1, r.val, 1);            //  H[i][k] = q[i] . r
+                            magma_zaxpy(dofs,-H(i,k), q(i-1), 1, r.val, 1);            //  r       = r - H[i][k] q[i]
+                        }
+                        H(k+1,k) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. );   //  H[k+1][k] = sqrt(r . r) 
+                    } else if (solver_par->ortho == MAGMA_FUSED_CGS ) {
+                        // fusing zgemv with dznrm2 in classical Gram-Schmidt
+                        magma_zcopy(dofs, r.val, 1, q(k), 1);  
+                        magma_zgemv(MagmaTrans,   dofs, k+1, c_one,  q(0), dofs, r.val,   1, c_zero, dH(1,k), 1);
+                        magma_zgemv(MagmaNoTrans, dofs, k, c_mone, q(0), dofs, dH(1,k), 1, c_one,  r.val,   1);
+                        magma_zgetvector(k+1, dH(1,k), 1, &H(1,k), 1);
+                        for (i=1; i<=k; i++) H(k+1,k) -= H(i,k)*H(i,k);
+                        H(k+1,k) = MAGMA_Z_MAKE( sqrt( MAGMA_Z_REAL(H(k+1,k))), 0 );
+                    } else {
+                        // classical Gram-Schmidt (default)
+                        magma_zgemv(MagmaTrans,   dofs, k, c_one,  q(0), dofs, r.val,   1, c_zero, dH(1,k), 1);
+                        magma_zgemv(MagmaNoTrans, dofs, k, c_mone, q(0), dofs, dH(1,k), 1, c_one,  r.val,   1);
+                        magma_zgetvector(k, dH(1,k), 1, &H(1,k), 1);
+                        H(k+1,k) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. );   //  H[k+1][k] = sqrt(r . r) 
                     }
-#endif
-                    H(k+1,k) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. ); //  H[k+1][k] = sqrt(r . r) 
-                    magma_device_sync();
-                    gettimeofday(&inicio, NULL);
-                    t_orth2=inicio.tv_sec+(inicio.tv_usec/1000000.0);
+                    #ifdef ENABLE_TIMER
+                    magma_device_sync(); t_orth2=magma_wtime();
                     t_orth += t_orth2-t_orth1;
+                    #endif
                 }
-
             for(k=1; k<=(solver_par->restart); k++) 
                 {
                     /*     Minimization of  || b-Ax ||  in H_k       */ 
@@ -163,7 +170,7 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                         for (i=1; i<k; i++) {
                             for (m=i+1; m<k; m++)
                                 HH(k,m) -= HH(k,i) * HH(m,i);
-                           
+
                             HH(k,k) -= HH(k,i) * HH(k,i) / HH(i,i);
                             HH(k,i) = HH(k,i)/HH(i,i);
                             h1[k] -= h1[i] * HH(k,i);   
@@ -187,36 +194,39 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
             magma_zsetmatrix(m, 1, y+1, m, dy, m);
             magma_zgemv(MagmaNoTrans, dofs, m, c_one, q(0), dofs, dy, 1, c_one, x->val, 1); 
 
-            magma_device_sync();
-            gettimeofday(&inicio, NULL);
-            t_spmv1=inicio.tv_sec+(inicio.tv_usec/1000000.0);
+            #ifdef ENABLE_TIMER
+            magma_device_sync(); t_spmv1=magma_wtime();
+            #endif
             magma_z_spmv( c_mone, A, *x, c_zero, r );                  //  r = - A * x
-            magma_device_sync();
-            gettimeofday(&inicio, NULL);
-            t_spmv2=inicio.tv_sec+(inicio.tv_usec/1000000.0);
+            #ifdef ENABLE_TIMER
+            magma_device_sync(); t_spmv2=magma_wtime();
             t_spmv += t_spmv2 - t_spmv1;
+            #endif
 
             magma_zaxpy(dofs, c_one, b.val, 1, r.val, 1);              //  r = r + b
             H(1,0) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. ); //  RNorm = H[1][0] = || r ||
             RNorm = MAGMA_Z_REAL( H(1,0) );
             
+            #ifdef ENABLE_TIMER
             //Chronometry  
-            magma_device_sync();
-            gettimeofday(&fim, NULL);
-            tempo2=fim.tv_sec+(fim.tv_usec/1000000.0);
-
-            printf("Iteration: %4d  Norm: %e  Time: %.2lf, Orth: %.2lf (%.2lf\%) SpMV: %.2lf (%.2lf\%)\n", iter+1, RNorm*RNorm, tempo2-tempo1, 
+            magma_device_sync(); tempo2=magma_wtime();
+            printf("Iteration: %4d  Norm: %e  Time: %.2lf, Orth: %.2lf (%.2lf%%) SpMV: %.2lf (%.2lf%%)\n", iter+1, RNorm*RNorm, tempo2-tempo1, 
                    t_orth, t_orth/(tempo2-tempo1), t_spmv,t_spmv/(tempo2-tempo1));
+            #endif
             
             if (fabs(RNorm*RNorm) < r0) break;    
             //if (rNorm < r0) break;
         }
     
-    
+  
+    printf( "\n" );
     printf( "      (r_0, r_0) = %e\n", nom0 );
     printf( "      (r_N, r_N) = %e\n", RNorm*RNorm);
     printf( "      Number of GMRES restarts: %d\n", iter);
-    
+    #ifndef ENABLE_TIMER
+    magma_device_sync(); tempo2=magma_wtime();
+    printf( "      Time: %.2lf\n",tempo2-tempo1 );
+    #endif
     if (solver_par->epsilon == RTOLERANCE) {
         magma_z_spmv( c_one, A, *x, c_zero, r );                       // q_t = A x
         magma_zaxpy(dofs,  c_mone, b.val, 1, r.val, 1);                // r = r - b
@@ -224,12 +234,11 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         printf( "      || r_N ||   = %f\n", den);
         solver_par->residual = (double)(den);
     }
+    printf( "\n" );
     solver_par->numiter = iter;
 
     magma_free(dy); 
-#ifdef  GMRES_CGS
-    magma_free(dH); 
-#endif
+    if (dH != NULL ) magma_free(dH); 
     magma_z_vfree(&r);
     magma_z_vfree(&q);
 
