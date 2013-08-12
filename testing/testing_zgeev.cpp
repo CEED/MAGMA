@@ -26,6 +26,10 @@
 #include "magma_lapack.h"
 #include "testings.h"
 
+#define PRECISION_z
+#define COMPLEX
+
+
 // comparison operator for sorting
 bool compare( magmaDoubleComplex a, magmaDoubleComplex b )
 {
@@ -33,9 +37,33 @@ bool compare( magmaDoubleComplex a, magmaDoubleComplex b )
         (MAGMA_Z_REAL(a) == MAGMA_Z_REAL(b) && MAGMA_Z_IMAG(a) < MAGMA_Z_IMAG(b));
 }
 
+// DLAPY2 returns sqrt(x**2+y**2), taking care not to cause unnecessary overflow.
+// TODO: put into auxiliary file. It's useful elsewhere.
+extern "C"
+double magma_dlapy2(double x, double y)
+{
+    double ret_val, d;
+    double w, z, xabs, yabs;
+    
+    xabs = MAGMA_D_ABS(x);
+    yabs = MAGMA_D_ABS(y);
+    w    = max(xabs, yabs);
+    z    = min(xabs, yabs);
+    if (z == 0.) {
+        ret_val = w;
+    } else {
+        d = z / w;
+        ret_val = w * sqrt(d * d + 1.);
+    }
+    return ret_val;
+}
 
-#define PRECISION_z
-#define COMPLEX
+extern "C"
+double magma_dzlapy2(magmaDoubleComplex x)
+{
+    return magma_dlapy2( MAGMA_Z_REAL(x), MAGMA_Z_IMAG(x) );
+}
+
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zgeev
@@ -45,7 +73,8 @@ int main( int argc, char** argv)
     TESTING_INIT();
 
     real_Double_t   gpu_time, cpu_time;
-    magmaDoubleComplex *h_A, *h_R, *VL, *VR, *h_work, *w1, *w1copy, *w2;
+    magmaDoubleComplex *h_A, *h_R, *VL, *VR, *h_work, *w1, *w2;
+    magmaDoubleComplex *w1copy, *w2copy;
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     double *rwork;
     double tnrm, result[9];
@@ -63,7 +92,8 @@ int main( int argc, char** argv)
     
     // need slightly looser bound (60*eps instead of 30*eps) for some tests
     opts.tolerance = max( 60., opts.tolerance );
-    double tol = opts.tolerance * lapackf77_dlamch("E");
+    double tol    = opts.tolerance * lapackf77_dlamch("E");
+    double tolulp = opts.tolerance * lapackf77_dlamch("P");
     
     // enable at least some minimal checks, if requested
     if ( opts.check && !opts.lapack && opts.jobvl == MagmaNoVec && opts.jobvr == MagmaNoVec ) {
@@ -86,6 +116,7 @@ int main( int argc, char** argv)
             lwork = max( lwork, N*(5 + 2*N) );
             
             TESTING_MALLOC( w1copy, magmaDoubleComplex, N );
+            TESTING_MALLOC( w2copy, magmaDoubleComplex, N );
             TESTING_MALLOC( w1,  magmaDoubleComplex, N );
             TESTING_MALLOC( w2,  magmaDoubleComplex, N );
             TESTING_MALLOC( rwork, double, 2*N );
@@ -184,7 +215,7 @@ int main( int argc, char** argv)
                         
                         vmx = vrmx = 0.;
                         for( int jj = 0; jj <N; ++jj ) {
-                            vtst = cuCabs(VR[jj + j*lda]);
+                            vtst = magma_dzlapy2(VR[jj + j*lda]);
                             if (vtst > vmx)
                                 vmx = vtst;
                             
@@ -216,7 +247,7 @@ int main( int argc, char** argv)
                         
                         vmx = vrmx = 0.;
                         for( int jj = 0; jj < N; ++jj ) {
-                            vtst = cuCabs(VL[jj + j*lda]);
+                            vtst = magma_dzlapy2(VL[jj + j*lda]);
                             if (vtst > vmx)
                                 vmx = vtst;
                             
@@ -338,34 +369,33 @@ int main( int argc, char** argv)
                 // check | W_magma - W_lapack | / | W |
                 // need to sort eigenvalues first
                 blasf77_zcopy( &N, w1, &ione, w1copy, &ione );
+                blasf77_zcopy( &N, w2, &ione, w2copy, &ione );
                 std::sort( w1copy, &w1copy[N], compare );
-                std::sort( w2,     &w2[N],     compare );
+                std::sort( w2copy, &w2copy[N], compare );
                 
                 // adjust sorting to deal with numerical inaccuracy
                 // search down w2 for eigenvalue that matches w1's eigenvalue
-                // in both real and imag, swapping if needed.
                 for( int j=0; j < N; ++j ) {
                     for( int j2=j; j2 < N; ++j2 ) {
-                        if ( fabs( MAGMA_Z_REAL( w1copy[j] ) - MAGMA_Z_REAL( w2[j2] ) ) > 100*tol ) {
-                            break;
-                        }
-                        if ( fabs( MAGMA_Z_IMAG( w1copy[j] ) - MAGMA_Z_IMAG( w2[j2] ) ) < 100*tol ) {
+                        magmaDoubleComplex diff = MAGMA_Z_SUB( w1copy[j], w2copy[j2] );
+                        double diff2 = magma_dzlapy2( diff ) / max( magma_dzlapy2( w1copy[j] ), tol );
+                        if ( diff2 < 100*tol ) {
                             if ( j != j2 ) {
-                                std::swap( w2[j], w2[j2] );
+                                std::swap( w2copy[j], w2copy[j2] );
                             }
                             break;
                         }
                     }
                 }
                 
-                blasf77_zaxpy( &N, &c_neg_one, w2, &ione, w1copy, &ione );
-                error = cblas_dznrm2( N, w1copy, 1 );
-                error /= cblas_dznrm2( N, w2, 1 );
+                blasf77_zaxpy( &N, &c_neg_one, w2copy, &ione, w1copy, &ione );
+                error  = cblas_dznrm2( N, w1copy, 1 );
+                error /= cblas_dznrm2( N, w2copy, 1 );
                 
                 printf("%5d   %7.2f          %7.2f          %.2e %s\n",
                        (int) N, cpu_time, gpu_time,
-                       error, (error < tol ? "  ok" : "  failed"));
-                status |= ! (error < tol);
+                       error, (error < tolulp ? "  ok" : "  failed"));
+                status |= ! (error < tolulp);
             }
             else {
                 printf("%5d     ---            %7.2f\n",
@@ -382,20 +412,24 @@ int main( int argc, char** argv)
                 if ( result[6] != -1 ) { printf("        W  (full) == W  (partial, W and VL)        %s\n", (result[6] == 1. ? "  ok" : "  failed"));         }
                 if ( result[7] != -1 ) { printf("        VR (full) == VR (partial, W and VR)        %s\n", (result[7] == 1. ? "  ok" : "  failed"));         }
                 if ( result[8] != -1 ) { printf("        VL (full) == VL (partial, W and VL)        %s\n", (result[8] == 1. ? "  ok" : "  failed"));         }
-                printf( "\n" );
                 
-                if ( result[0] != -1 ) { status |= ! (result[0] < tol); }
-                if ( result[1] != -1 ) { status |= ! (result[1] < tol); }
-                if ( result[2] != -1 ) { status |= ! (result[2] < tol); }
-                if ( result[3] != -1 ) { status |= ! (result[3] < tol); }
-                if ( result[4] != -1 ) { status |=   (result[4] != 1.); }
-                if ( result[5] != -1 ) { status |=   (result[5] != 1.); }
-                if ( result[6] != -1 ) { status |=   (result[6] != 1.); }
-                if ( result[7] != -1 ) { status |=   (result[7] != 1.); }
-                if ( result[8] != -1 ) { status |=   (result[8] != 1.); }
+                int newline = 0;
+                if ( result[0] != -1 ) { status |= ! (result[0] < tol);  newline = 1; }
+                if ( result[1] != -1 ) { status |= ! (result[1] < tol);  newline = 1; }
+                if ( result[2] != -1 ) { status |= ! (result[2] < tol);  newline = 1; }
+                if ( result[3] != -1 ) { status |= ! (result[3] < tol);  newline = 1; }
+                if ( result[4] != -1 ) { status |=   (result[4] != 1.);  newline = 1; }
+                if ( result[5] != -1 ) { status |=   (result[5] != 1.);  newline = 1; }
+                if ( result[6] != -1 ) { status |=   (result[6] != 1.);  newline = 1; }
+                if ( result[7] != -1 ) { status |=   (result[7] != 1.);  newline = 1; }
+                if ( result[8] != -1 ) { status |=   (result[8] != 1.);  newline = 1; }
+                if ( newline ) {
+                    printf( "\n" );
+                }
             }
             
             TESTING_FREE( w1copy );
+            TESTING_FREE( w2copy );
             TESTING_FREE( w1 );
             TESTING_FREE( w2 );
             TESTING_FREE( rwork );
