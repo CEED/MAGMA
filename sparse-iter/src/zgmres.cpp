@@ -55,7 +55,8 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 #define  q(i)     (q.val + (i)*dofs)
 #define  H(i,j)  H[(i)   + (j)*ldh]
 #define HH(i,j) HH[(i)   + (j)*ldh]
-#define dH(i,j)  (dH+ (i) + (j)*ldh)
+//#define dH(i,j)  (dH+ (i) + (j)*ldh)
+#define dH(i,j)  dH[(i)   + (j)*ldh]
 
     //Chronometry
     double tempo1, tempo2;
@@ -76,7 +77,7 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     // GPU workspace
     magma_z_vector r, q, q_t;
     magma_z_vinit( &r  , Magma_DEV, dofs,     c_zero );
-    magma_z_vinit( &q  , Magma_DEV, dofs*ldh, c_zero );
+    magma_z_vinit( &q  , Magma_DEV, dofs*(ldh+1), c_zero );
     magma_z_vinit( &q_t, Magma_DEV, dofs,     c_zero );
 
     magmaDoubleComplex *dy, *dH = NULL;
@@ -96,6 +97,9 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     nom0 = r0*r0;
     H(1,0) = MAGMA_Z_MAKE( r0, 0. ); 
 
+
+    magma_zsetvector(1, &H(1,0), 1, &dH(1,0), 1);
+
     if ((r0 *= solver_par->epsilon) < ATOLERANCE) 
         r0 = ATOLERANCE;
     
@@ -108,10 +112,11 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 
     for (iter = 0; iter<solver_par->maxiter; iter++) 
         {
+            magma_zcopy(dofs, r.val, 1, q(0), 1);                        //  q[0]    = 1.0/||r||
+            magma_zscal(dofs, 1./H(1,0), q(0), 1);                     //  (to be fused)
+
             for(k=1; k<=(solver_par->restart); k++) 
                 {
-                    magma_zcopy(dofs, r.val, 1, q(k-1), 1);                        //  q[k]    = 1.0/H[k][k-1] r
-                    magma_zscal(dofs, 1./H(k,k-1), q(k-1), 1);                     //  (to be fused)
 
                     #ifdef ENABLE_TIMER
                     magma_device_sync(); t_spmv1=magma_wtime();
@@ -132,33 +137,41 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                             magma_zaxpy(dofs,-H(i,k), q(i-1), 1, r.val, 1);            //  r       = r - H[i][k] q[i]
                         }
                         H(k+1,k) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. );   //  H[k+1][k] = sqrt(r . r) 
+                        if( k<solver_par->restart ){
+                                magma_zcopy(dofs, r.val, 1, q(k), 1);                        //  q[k]    = 1.0/H[k][k-1] r
+                                magma_zscal(dofs, 1./H(k+1,k), q(k), 1);                     //  (to be fused)   
+                         }
                     } else if (solver_par->ortho == MAGMA_FUSED_CGS ) {
                         // fusing zgemv with dznrm2 in classical Gram-Schmidt
                         magma_zcopy(dofs, r.val, 1, q(k), 1);  
                         #ifdef ENABLE_TIMER
                         magma_device_sync(); t_orth2=magma_wtime();
                         #endif
-                        magmablas_zgemv(MagmaTrans,   dofs, k+1, c_one,  q(0), dofs, r.val,   1, c_zero, dH(1,k), 1);
+                        magmablas_zgemv(MagmaTrans,   dofs, k+1, c_one,  q(0), dofs, r.val,   1, c_zero, &dH(1,k), 1);
                         #ifdef ENABLE_TIMER
                         magma_device_sync(); t_gemv_reduce += magma_wtime()-t_orth2;
                         #endif
-                        magma_zgemv(MagmaNoTrans, dofs, k, c_mone, q(0), dofs, dH(1,k), 1, c_one,  r.val,   1);
-                        magma_zgetvector(k+1, dH(1,k), 1, &H(1,k), 1);
-                        for (i=1; i<=k; i++) H(k+1,k) -= H(i,k)*H(i,k);
-                        H(k+1,k) = MAGMA_Z_MAKE( sqrt( MAGMA_Z_REAL(H(k+1,k))), 0 );
+                        magma_zgemv(MagmaNoTrans, dofs, k, c_mone, q(0), dofs, &dH(1,k), 1, c_one,  r.val,   1);
+
+                        magma_zcopyscale(  dofs, k, r.val, q(k), &dH(1,k) );        // H[k+1][k], scaling, copy on GPU 
+                        magma_zgetvector(k+2, &dH(1,k), 1, &H(1,k), 1);
                     } else {
                         // classical Gram-Schmidt (default)
                         #ifdef ENABLE_TIMER
                         magma_device_sync(); t_orth2=magma_wtime();
                         #endif
                         // > explicitly calling magmabls
-                        magmablas_zgemv(MagmaTrans,   dofs, k, c_one,  q(0), dofs, r.val,   1, c_zero, dH(1,k), 1);
+                        magmablas_zgemv(MagmaTrans,   dofs, k, c_one,  q(0), dofs, r.val,   1, c_zero, &dH(1,k), 1);
                         #ifdef ENABLE_TIMER
                         magma_device_sync(); t_gemv_reduce += magma_wtime()-t_orth2;
                         #endif
-                        magma_zgemv(MagmaNoTrans, dofs, k, c_mone, q(0), dofs, dH(1,k), 1, c_one,  r.val,   1);
-                        magma_zgetvector(k, dH(1,k), 1, &H(1,k), 1);
+                        magma_zgemv(MagmaNoTrans, dofs, k, c_mone, q(0), dofs, &dH(1,k), 1, c_one,  r.val,   1);
+                        magma_zgetvector(k, &dH(1,k), 1, &H(1,k), 1);
                         H(k+1,k) = MAGMA_Z_MAKE( magma_dznrm2(dofs, r.val, 1), 0. );   //  H[k+1][k] = sqrt(r . r) 
+                        if( k<solver_par->restart ){
+                                magma_zcopy(dofs, r.val, 1, q(k), 1);                        //  q[k]    = 1.0/H[k][k-1] r
+                                magma_zscal(dofs, 1./H(k+1,k), q(k), 1);                     //  (to be fused)   
+                         }
                     }
                     #ifdef ENABLE_TIMER
                     magma_device_sync(); t_orth += magma_wtime()-t_orth1;

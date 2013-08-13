@@ -343,6 +343,21 @@ magma_zblockdot(       magma_int_t n,
                        magmaDoubleComplex *skp );
 
 magma_int_t
+magma_zmergedgs(    magma_int_t n, 
+                    magma_int_t ldh,
+                    magma_int_t k, 
+                    magmaDoubleComplex *v, 
+                    magmaDoubleComplex *r,
+                    magmaDoubleComplex *skp );
+
+magma_int_t
+magma_zcopyscale(   int n, 
+                    int k,
+                    magmaDoubleComplex *r, 
+                    magmaDoubleComplex *v,
+                    magmaDoubleComplex *skp );
+
+magma_int_t
 magma_zjacobisetup_vector_gpu(int num_rows, magmaDoubleComplex *b, magmaDoubleComplex *d, magmaDoubleComplex *c);
 
 

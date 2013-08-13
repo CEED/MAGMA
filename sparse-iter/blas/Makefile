@@ -28,6 +28,8 @@ ZSRC := \
 	magma_zlag2c.cpp        \
 	magma_clag2z.cpp        \
 	zp1.cu                  \
+    zpipelinedgs.cu          \
+    zpipelinedgmrescopyscale.cu     \
 	#zp1_b.cu                  \
 
 
