@@ -667,7 +667,9 @@ subs = {
     ('smgeellmv',      'dmgeellmv',      'cmgeellmv',      'zmgeellmv'       ),
     ('sgeelltmv',      'dgeelltmv',      'cgeelltmv',      'zgeelltmv'       ),
     ('smgeelltmv',     'dmgeelltmv',     'cmgeelltmv',     'zmgeelltmv'      ),
+    ('smpkgeelltmv',   'dmpkgeelltmv',   'cmpkgeelltmv',   'zmpkgeelltmv'    ),
     ('sp1',            'dp1',            'cp1',            'zp1'             ),
+    ('spipelined',     'dpipelined',     'cpipelined',     'zpipelined'      ),
 
     # ----- SPARSE Iterative Solvers
     ('scg',            'dcg',            'ccg',            'zcg'             ),
