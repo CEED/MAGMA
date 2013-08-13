@@ -31,7 +31,9 @@ typedef double real_Double_t;
 // define types specific to implementation (CUDA, OpenCL, MIC)
 // define macros to deal with complex numbers
 #if HAVE_CUBLAS
+    #ifndef CUBLAS_V2_H_
     #include <cublas.h>
+    #endif
     
     typedef cudaStream_t   magma_queue_t;
     typedef cudaEvent_t    magma_event_t;

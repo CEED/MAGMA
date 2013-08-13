@@ -12,6 +12,7 @@ include ../Makefile.internal
 # ----------
 # BLAS and auxiliary
 ZSRC += \
+	testing_z_cublas_v2.cpp	\
 	testing_zgemm.cpp	\
 	testing_zgemv.cpp	\
 	testing_zhemv.cpp	\
