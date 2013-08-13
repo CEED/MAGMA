@@ -20,7 +20,9 @@
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
-
+magma_int_t
+magma_zgmres0( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
+               magma_solver_parameters *solver_par );
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing magma_zgmres
@@ -44,13 +46,18 @@ int main( int argc, char** argv)
                 case 1: solver_par.ortho = MAGMA_CGS; break;
                 case 2: solver_par.ortho = MAGMA_FUSED_CGS; break;
             }
+        } else if ( strcmp("--restart", argv[i]) == 0 ) {
+            solver_par.restart = atoi( argv[++i] );
+        } else if ( strcmp("--maxiter", argv[i]) == 0 ) {
+            solver_par.maxiter = atoi( argv[++i] );
         }
     }
-    printf( "\n    Usage: ./testing_zgmres --ortho %d (0=MGS, 1=CGS, 2=FUSED_CGS)\n\n",ortho_int );
+    printf( "\n    Usage: ./testing_zgmres --restart %d --maxiter %d --ortho %d (0=MGS, 1=CGS, 2=FUSED_CGS)\n\n",
+            solver_par.restart, solver_par.maxiter, ortho_int );
 
     const char *filename[] =
     {
-     "test_matrices/LF10.mtx",
+     "test_matrices/G3_circuit.mtx",
      "test_matrices/Trefethen_20.mtx",
      "test_matrices/test.mtx",
      "test_matrices/bcsstk01.mtx",
@@ -78,10 +85,14 @@ int main( int argc, char** argv)
     magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
 
  
+    //magma_z_csr_mtx( &A, filename[0] ); // G3_circuit
     magma_z_csr_mtx( &A, filename[5] ); // Trefethen_2000
+    //magma_z_csr_mtx( &A, filename[8] ); // ecology_2
+    //magma_z_csr_mtx( &A, filename[11] ); // bmwcra_1.mtx
+    //magma_z_csr_mtx( &A, filename[13] ); // audidx_1.mtx
     //magma_z_csr_mtx( &A, filename[9] );
     //print_z_csr_matrix( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col );
-
+    printf( "\nmatrix read: %d-by-%d with %d nonzeros\n\n",A.num_rows,A.num_cols,A.nnz );
 
     magma_z_vinit( &b, Magma_DEV, A.num_cols, one );
     magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
@@ -94,6 +105,7 @@ int main( int argc, char** argv)
     magma_z_mtransfer( C, &D, Magma_CPU, Magma_DEV);
 
 
+    //magma_zgmres0( D, b, &x, &solver_par );
     magma_zgmres( D, b, &x, &solver_par );
 
     //magma_z_vvisu( x, 0,10);
