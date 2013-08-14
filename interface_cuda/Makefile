@@ -28,12 +28,16 @@ ALLOBJ := $(ALLOBJ:.f=.o)
 
 all: $(LIBMAGMA)
 
-$(LIBMAGMA): $(ALLOBJ)
+$(LIBMAGMA): $(ALLOBJ) stamp
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
 
+# this forces LIBMAGMA to be archived
+stamp: $(ALLHDR) $(ALLOBJ)
+	touch $@
+
 clean:
-	rm -f *.o *~ *.linkinfo
+	rm -f *.o *~ *.linkinfo stamp
 
 cleanall: clean
 	rm -f $(LIBMAGMA)
