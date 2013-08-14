@@ -52,7 +52,7 @@ clean:
 	( cd testing/lin    && $(MAKE) clean )
 	( cd magmablas      && $(MAKE) clean ) 
 #	( cd quark          && $(MAKE) clean )
-	-rm -f $(LIBMAGMA)
+	-rm -f $(LIBMAGMA) $(LIBMAGMA_SO)
 
 cleanall:
 	( cd include        && $(MAKE) cleanall )
