@@ -140,6 +140,12 @@ magma_z_vread(          magma_z_vector *x,
 magma_int_t
 magma_z_mvisu(          magma_z_sparse_matrix A );
 
+magma_int_t 
+magma_zdiameter( magma_z_sparse_matrix *A );
+
+magma_int_t 
+magma_zrowentries( magma_z_sparse_matrix *A );
+
 magma_int_t
 magma_z_mfree(          magma_z_sparse_matrix *A );
 
@@ -220,6 +226,10 @@ magma_zir(             magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector
 magma_int_t
 magma_zp1gmres(        magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
                        magma_solver_parameters *solver_par );
+
+magma_int_t
+magma_zgmres_pipe( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+                   magma_solver_parameters *solver_par );
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE utility function definitions
@@ -326,6 +336,18 @@ magma_zmpkgeelltmv(    const char *transA,
                        magmaDoubleComplex *d_x,
                        magmaDoubleComplex beta,
                        magmaDoubleComplex *d_y );
+
+magma_int_t
+magma_zmpkgeelltmv_2( const char *transA,
+                    magma_int_t m, magma_int_t n,
+                    magma_int_t num_vecs,
+                    magma_int_t nnz_per_row,
+                    magmaDoubleComplex alpha,
+                    magmaDoubleComplex *d_val,
+                    magma_int_t *d_colind,
+                    magmaDoubleComplex *d_x,
+                    magmaDoubleComplex beta,
+                    magmaDoubleComplex *d_y );
 
 magma_int_t 
 magma_zp1gmres_mgs(    magma_int_t  n, 

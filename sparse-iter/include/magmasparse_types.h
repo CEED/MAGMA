@@ -25,6 +25,7 @@ typedef struct magma_z_sparse_matrix{
     magma_int_t        num_cols; 
     magma_int_t        nnz; 
     magma_int_t        max_nnz_row;
+    magma_int_t        diameter;
     magmaDoubleComplex *val;
     magma_int_t        *row; 
     magma_int_t        *col;
@@ -42,6 +43,7 @@ typedef struct magma_c_sparse_matrix{
     magma_int_t        num_cols; 
     magma_int_t        nnz; 
     magma_int_t        max_nnz_row;
+    magma_int_t        diameter;
     magmaFloatComplex  *val;
     magma_int_t        *row; 
     magma_int_t        *col;
@@ -60,6 +62,7 @@ typedef struct magma_d_sparse_matrix{
     magma_int_t        num_cols; 
     magma_int_t        nnz; 
     magma_int_t        max_nnz_row;
+    magma_int_t        diameter;
     double             *val;
     magma_int_t        *row; 
     magma_int_t        *col;
@@ -78,6 +81,7 @@ typedef struct magma_s_sparse_matrix{
     magma_int_t        num_cols; 
     magma_int_t        nnz; 
     magma_int_t        max_nnz_row;
+    magma_int_t        diameter;
     float              *val;
     magma_int_t        *row; 
     magma_int_t        *col;

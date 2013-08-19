@@ -142,6 +142,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
 
             // conversion
             magma_int_t i, j, *length, maxrowlength=0;
@@ -187,6 +188,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
 
             // conversion
             magma_int_t *row_tmp;
@@ -213,6 +215,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
 
             // conversion
             magma_int_t i, j, *length, maxrowlength=0;
@@ -256,6 +259,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
 
             // conversion
             magma_int_t *row_tmp;
@@ -293,6 +297,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
 
             // conversion
             magma_zmalloc_cpu( &B->val, A.num_rows*A.num_cols );
@@ -320,6 +325,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
 
             // conversion
 
@@ -366,6 +372,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
 
             magma_int_t i, j, k, l, numblocks;
 
@@ -481,6 +488,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
 
             magma_int_t i, j, k, l, numblocks, index;
 
