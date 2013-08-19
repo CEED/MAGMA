@@ -226,6 +226,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                 if(length[i] > maxrowlength)
                      maxrowlength = length[i];
             }
+            magma_free_cpu( length );
             printf( "Conversion to ELLPACKT with %d elements per row: ", maxrowlength );
             fflush(stdout);
             magma_zmalloc_cpu( &B->val, maxrowlength*A.num_rows );

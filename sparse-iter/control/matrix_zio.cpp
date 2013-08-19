@@ -886,6 +886,9 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
     
     (A->row)[row_]++;
   }
+  free (coo_row);
+  free (coo_col);
+  free (coo_val);
   
   for(int i = 0, last = 0; i <= num_rows; i++){
     int temp = (A->row)[i];
