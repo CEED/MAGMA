@@ -22,7 +22,7 @@
 #include "../include/mmio.h"
 
 
-#define THRESHOLD 10e-16
+#define THRESHOLD 10e-99
 
 using namespace std;
 
@@ -124,9 +124,11 @@ magma_zdiameter( magma_z_sparse_matrix *A ){
             for( i=0; i<A->num_rows; i++ ){
                 dim[i] = 0;
                 for( j=A->row[i]; j<A->row[i+1]; j++ ){
-                    tmp = abs( i - A->col[j] );
-                    if( tmp > dim[i] )
-                        dim[i] = tmp;
+                   // if( MAGMA_Z_REAL(A->val[j]) > THRESHOLD ){
+                        tmp = abs( i - A->col[j] );
+                        if( tmp > dim[i] )
+                            dim[i] = tmp;
+                   // }
                 }
                 if( dim[i] > maxdim )
                      maxdim = dim[i];

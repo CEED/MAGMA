@@ -66,6 +66,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             // memory allocation
             stat = cublasAlloc( A.nnz, sizeof( magmaDoubleComplex ), ( void** )&B->val );
             if( ( int )stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
@@ -87,6 +88,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             // memory allocation
             stat = cublasAlloc( A.num_rows * A.max_nnz_row, sizeof( magmaDoubleComplex ), ( void** )&B->val );
             if( ( int )stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
@@ -105,6 +107,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             // memory allocation
             stat = cublasAlloc( A.num_rows * A.max_nnz_row, sizeof( magmaDoubleComplex ), ( void** )&B->val );
             if( ( int )stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
@@ -123,6 +126,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             B->blocksize = A.blocksize;
             B->numblocks = A.numblocks;
             magma_int_t size_b = A.blocksize;
@@ -153,6 +157,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             // memory allocation
             stat = cublasAlloc( A.num_rows*A.num_cols, sizeof( magmaDoubleComplex ), ( void** )&B->val );
             if( ( int )stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
@@ -172,6 +177,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             // memory allocation
             magma_zmalloc_cpu( &B->val, A.nnz );
             magma_imalloc_cpu( &B->row, A.num_rows+1 );
@@ -194,6 +200,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             // memory allocation
             magma_zmalloc_cpu( &B->val, A.num_rows*A.max_nnz_row );
             magma_imalloc_cpu( &B->col, A.num_rows*A.max_nnz_row );
@@ -212,6 +219,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             // memory allocation
             magma_zmalloc_cpu( &B->val, A.num_rows*A.max_nnz_row );
             magma_imalloc_cpu( &B->col, A.num_rows*A.max_nnz_row );
@@ -230,6 +238,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             // memory allocation
             magma_zmalloc_cpu( &B->val, A.num_rows*A.num_cols );
             // data transfer
@@ -250,6 +259,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             // memory allocation
             magma_zmalloc_cpu( &B->val, A.nnz );
             magma_imalloc_cpu( &B->row, A.num_rows+1 );
@@ -268,6 +278,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             // memory allocation
             magma_zmalloc_cpu( &B->val, A.num_rows*A.max_nnz_row );
             magma_imalloc_cpu( &B->col, A.num_rows*A.max_nnz_row );
@@ -284,6 +295,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             // memory allocation
             magma_zmalloc_cpu( &B->val, A.num_rows*A.max_nnz_row );
             magma_imalloc_cpu( &B->col, A.num_rows*A.max_nnz_row );
@@ -300,6 +312,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             B->blocksize = A.blocksize;
             B->numblocks = A.numblocks;
             magma_int_t size_b = A.blocksize;
@@ -327,6 +340,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             // memory allocation
             magma_zmalloc_cpu( &B->val, A.num_rows*A.num_cols );
             // data transfer
@@ -345,6 +359,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             // memory allocation
             stat = cublasAlloc( A.nnz, sizeof( magmaDoubleComplex ), ( void** )&B->val );
             if( ( int )stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
@@ -366,6 +381,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             // memory allocation
             stat = cublasAlloc( A.num_rows * A.max_nnz_row, sizeof( magmaDoubleComplex ), ( void** )&B->val );
             if( ( int )stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
@@ -384,6 +400,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             // memory allocation
             stat = cublasAlloc( A.num_rows * A.max_nnz_row, sizeof( magmaDoubleComplex ), ( void** )&B->val );
             if( ( int )stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); }
@@ -402,6 +419,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             B->blocksize = A.blocksize;
             B->numblocks = A.numblocks;
             magma_int_t size_b = A.blocksize;
@@ -432,6 +450,7 @@ magma_z_mtransfer( magma_z_sparse_matrix A,
             B->num_cols = A.num_cols;
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
             // memory allocation
             stat = cublasAlloc( A.num_rows*A.num_cols, sizeof( magmaDoubleComplex ), ( void** )&B->val );
             if( ( int )stat != 0 ) {printf("Memory Allocation Error transferring matrix\n"); exit(0); }

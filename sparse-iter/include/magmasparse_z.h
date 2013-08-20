@@ -340,6 +340,19 @@ magma_zmpkgeelltmv(    const char *transA,
 magma_int_t
 magma_zmpkgeelltmv_2( const char *transA,
                     magma_int_t m, magma_int_t n,
+                    magma_int_t diameter,
+                    magma_int_t num_vecs,
+                    magma_int_t nnz_per_row,
+                    magmaDoubleComplex alpha,
+                    magmaDoubleComplex *d_val,
+                    magma_int_t *d_colind,
+                    magmaDoubleComplex *d_x,
+                    magmaDoubleComplex beta,
+                    magmaDoubleComplex *d_y );
+
+magma_int_t
+magma_zmpkgeelltmv_3( const char *transA,
+                    magma_int_t m, magma_int_t n,
                     magma_int_t num_vecs,
                     magma_int_t nnz_per_row,
                     magmaDoubleComplex alpha,
