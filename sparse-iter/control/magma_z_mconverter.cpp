@@ -365,7 +365,6 @@ magma_z_mconvert( magma_z_sparse_matrix A,
         }
         // CSR to BCSR
         if( old_format == Magma_CSR && new_format == Magma_BCSR ){
-            printf( "Conversion to BCSR: " );
             // fill in information for B
             B->storage_type = Magma_BCSR;
             B->memory_location = A.memory_location;
@@ -374,20 +373,20 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
+            printf( "Conversion to BCSR(blocksize=%d): ",B->blocksize );
 
             magma_int_t i, j, k, l, numblocks;
 
             // conversion
-            magma_int_t size_b = 4;
-            B->blocksize = size_b;
+            magma_int_t size_b = B->blocksize;
             magma_int_t c_blocks = ceil( (float)A.num_cols / (float)size_b );     // max number of blocks per row
             magma_int_t r_blocks = ceil( (float)A.num_rows / (float)size_b );     // max number of blocks per column
             printf("c_blocks: %d  r_blocks: %d  ", c_blocks, r_blocks);
          
             magma_imalloc_cpu( &B->blockinfo, c_blocks * r_blocks );
             if( B->blockinfo == NULL ){
+                printf("error: memory allocation (B->blockinfo).\n");
                 magma_free( B->blockinfo );
-                printf("error: memory allocation.\n");
                 return MAGMA_ERR_HOST_ALLOC;
             }
             for( i=0; i<c_blocks * r_blocks; i++ )
@@ -421,9 +420,10 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_zmalloc_cpu( &B->val, numblocks * size_b * size_b );
             magma_imalloc_cpu( &B->col, numblocks  );
             if( B->val == NULL || B->col == NULL ){
-                magma_free( B->val );
-                magma_free( B->col );
-                printf("error: memory allocation.\n");
+                printf("error: memory allocation (B->val or B->col).\n");
+                magma_free( B->blockinfo );
+                if( B->val != NULL ) magma_free( B->val );
+                if( B->col != NULL ) magma_free( B->col );
                 return MAGMA_ERR_HOST_ALLOC;
             }
 
