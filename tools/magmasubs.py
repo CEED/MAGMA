@@ -661,6 +661,7 @@ subs = {
 
 
     # ----- SPARSE BLAS
+    ('cusparseS',      'cusparseD',      'cusparseC',      'cusparseZ'       ),
     ('sgecsrmv',       'dgecsrmv',       'cgecsrmv',       'zgecsrmv'        ),
     ('smgecsrmv',      'dmgecsrmv',      'cmgecsrmv',      'zmgecsrmv'       ),
     ('sgeellmv',       'dgeellmv',       'cgeellmv',       'zgeellmv'        ),
