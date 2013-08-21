@@ -610,18 +610,23 @@ magma_int_t magma_z_mvisu( magma_z_sparse_matrix A )
 {
 
 
-   
-  magma_z_sparse_matrix B;
-  magma_z_mconvert( A, &B, Magma_CSR, Magma_DENSE);
-  
-   
-  for( magma_int_t i=0; i<(B.num_rows); i++ )
-  {
-    for( magma_int_t j=0; j<B.num_cols; j++ )
-      cout << MAGMA_Z_REAL( B.val[i*(B.num_cols)+j] ) << " " ;
-    cout << endl;
-  }
-  free(B.val);
+    if( A.storage_type != Magma_DENSE ){
+        magma_z_sparse_matrix B;
+        magma_z_mconvert( A, &B, A.storage_type, Magma_DENSE);
+        for( magma_int_t i=0; i<(B.num_rows); i++ ){
+          for( magma_int_t j=0; j<B.num_cols; j++ )
+            cout << MAGMA_Z_REAL( B.val[i*(B.num_cols)+j] ) << " " ;
+          cout << endl;
+        }
+        free(B.val);
+    }
+    else{
+        for( magma_int_t i=0; i<(A.num_rows); i++ ){
+          for( magma_int_t j=0; j<A.num_cols; j++ )
+            cout << MAGMA_Z_REAL( A.val[i*(A.num_cols)+j] ) << " " ;
+          cout << endl;
+        }
+    }
   return MAGMA_SUCCESS;
 }
 
@@ -670,6 +675,7 @@ magma_int_t magma_z_mvisu( magma_z_sparse_matrix A )
 extern "C"
 magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
 
+  int csr_compressor = 0;       // checks for zeros in original file
 
   FILE *fid;
   MM_typecode matcode;
@@ -731,7 +737,8 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
       double VAL;  // always read in a double and convert later if necessary
       
       fscanf(fid, " %d %d %lf \n", &ROW, &COL, &VAL);   
-      
+      if( VAL == 0 ) 
+        csr_compressor=1;
       coo_row[i] = (magma_int_t) ROW - 1; 
       coo_col[i] = (magma_int_t) COL - 1;
       coo_val[i] = MAGMA_Z_MAKE( VAL, 0.);
@@ -914,7 +921,21 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
         (A->val)[j+1] = tv;
 
       }
-
+  if( csr_compressor > 0){ // run the CSR compressor to remove zeros
+      printf("removing zeros: ");
+      magma_z_sparse_matrix B;
+      magma_z_mtransfer( *A, &B, Magma_CPU, Magma_CPU ); 
+      magma_z_csr_compressor(&(A->val), 
+                        &(A->row),
+                         &(A->col), 
+                       &B.val, &B.row, &B.col, &B.num_rows);  
+      magma_free_cpu( A->val ); 
+      magma_free_cpu( A->row ); 
+      magma_free_cpu( A->col ); 
+      magma_z_mtransfer( B, A, Magma_CPU, Magma_CPU ); 
+      magma_z_mfree( &B ); 
+      printf("done.\n");
+  }
   return MAGMA_SUCCESS;
 }
 
