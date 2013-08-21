@@ -928,7 +928,9 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
       magma_z_csr_compressor(&(A->val), 
                         &(A->row),
                          &(A->col), 
-                       &B.val, &B.row, &B.col, &B.num_rows);  
+                       &B.val, &B.row, &B.col, &B.num_rows); 
+      B.nnz = B.row[num_rows];
+      printf(" remaining nonzeros:%d ", B.nnz); 
       magma_free_cpu( A->val ); 
       magma_free_cpu( A->row ); 
       magma_free_cpu( A->col ); 
