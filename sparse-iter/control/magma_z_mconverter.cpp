@@ -742,6 +742,69 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
             return MAGMA_SUCCESS; 
         }
+        // CSR to CSC   
+        if( old_format == Magma_CSR && new_format == Magma_CSC ){
+            // fill in information for B
+            B->storage_type = Magma_CSC;
+            B->memory_location = A.memory_location;
+            B->num_rows = A.num_rows;
+            B->num_cols = A.num_cols;
+            B->nnz = A.nnz;
+            B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
+
+            /* CUSPARSE context */
+            cusparseHandle_t cusparseHandle = 0;
+            cusparseStatus_t cusparseStatus;
+            cusparseStatus = cusparseCreate(&cusparseHandle);
+            cusparseMatDescr_t descr = 0;
+            cusparseStatus = cusparseCreateMatDescr(&descr);
+            /* end CUSPARSE context */
+
+            magma_zmalloc( &B->val, B->nnz );
+            magma_imalloc( &B->row, B->nnz );
+            magma_imalloc( &B->col, B->num_cols+1 );
+            // conversion
+            cusparseZcsr2csc(cusparseHandle, A.num_rows, A.num_cols, A.nnz,
+                             A.val, A.row, A.col, 
+                             B->val, B->row, B->col, 
+                             CUSPARSE_ACTION_NUMERIC, 
+                             CUSPARSE_INDEX_BASE_ZERO);
+
+            return MAGMA_SUCCESS; 
+        }
+        // CSC to CSR   
+        if( old_format == Magma_CSC && new_format == Magma_CSR ){
+            // fill in information for B
+            B->storage_type = Magma_CSR;
+            B->memory_location = A.memory_location;
+            B->num_rows = A.num_rows;
+            B->num_cols = A.num_cols;
+            B->nnz = A.nnz;
+            B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
+
+            /* CUSPARSE context */
+            cusparseHandle_t cusparseHandle = 0;
+            cusparseStatus_t cusparseStatus;
+            cusparseStatus = cusparseCreate(&cusparseHandle);
+            cusparseMatDescr_t descr = 0;
+            cusparseStatus = cusparseCreateMatDescr(&descr);
+            /* end CUSPARSE context */
+
+            magma_zmalloc( &B->val, B->nnz );
+            magma_imalloc( &B->row, B->num_rows+1 );
+            magma_imalloc( &B->col, B->nnz );
+
+            // conversion
+            cusparseZcsr2csc(cusparseHandle, A.num_rows, A.num_cols, A.nnz,
+                             A.val, A.col, A.row, 
+                             B->val, B->col, B->row, 
+                             CUSPARSE_ACTION_NUMERIC, 
+                             CUSPARSE_INDEX_BASE_ZERO);
+
+            return MAGMA_SUCCESS; 
+        }
 
         else{
             printf("error: format not supported.\n");
