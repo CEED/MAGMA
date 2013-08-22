@@ -24,6 +24,16 @@
 #include "testings.h"
 #include "mkl_spblas.h"
 
+#define PRECISION_z
+#if defined(PRECISION_z)
+#define MKL_ADDR(a) (MKL_Complex16*)(a)
+#elif defined(PRECISION_c)
+#define MKL_ADDR(a) (MKL_Complex8*)(a)
+#else
+#define MKL_ADDR(a) (a)
+#endif
+
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing matrix vector product
 */
@@ -65,7 +75,7 @@ int main( int argc, char** argv)
         magma_z_sparse_matrix hA, hB, hC, dA, dB;
         magma_z_vector hx, hy, dx, dy;
 
-        magmaDoubleComplex one = MAGMA_Z_MAKE(1.0, 0.0);
+        magmaDoubleComplex one  = MAGMA_Z_MAKE(1.0, 0.0);
         magmaDoubleComplex zero = MAGMA_Z_MAKE(0.0, 0.0);
   
         // init matrix on CPU
@@ -91,7 +101,10 @@ int main( int argc, char** argv)
         for (i=0; i<hA.num_rows; i++ ) pntre[i] = hA.row[i+1];
         start = magma_wtime(); 
         for (i=0; i<10; i++ )
-        mkl_zcsrmv( "N", &hA.num_rows, &hA.num_cols, &one, "GFNC", hA.val, hA.col, hA.row, pntre, hx.val, &zero, hy.val );
+        mkl_zcsrmv( "N", &hA.num_rows, &hA.num_cols, 
+                    MKL_ADDR(&one), "GFNC", MKL_ADDR(hA.val), hA.col, hA.row, pntre, 
+                                            MKL_ADDR(hx.val), 
+                    MKL_ADDR(&zero),        MKL_ADDR(hy.val) );
         end = magma_wtime();
         printf( "\n > MKL  : %.2e seconds (CSR).\n",(end-start)/10 );
         free(pntre);
@@ -106,7 +119,10 @@ int main( int argc, char** argv)
             for (i=0; i<num_rblocks; i++ ) pntre[i] = hC.row[i+1];
             start = magma_wtime(); 
             for (i=0; i<10; i++ )
-            mkl_zbsrmv( "N", &num_rblocks, &num_cblocks, &hC.blocksize, &one, "GFNC", hC.val, hC.col, hC.row, pntre, hx.val, &zero, hy.val );
+            mkl_zbsrmv( "N", &num_rblocks, &num_cblocks, &hC.blocksize, 
+                        MKL_ADDR(&one), "GFNC", MKL_ADDR(hC.val), hC.col, hC.row, pntre, 
+                                                MKL_ADDR(hx.val), 
+                        MKL_ADDR(&zero),        MKL_ADDR(hy.val) );
             end = magma_wtime();
             printf( " > MKL  : %.2e seconds (BSR, %dx%d,%d).\n",(end-start)/10,num_rblocks,num_cblocks,hC.blocksize );
             free(pntre);
