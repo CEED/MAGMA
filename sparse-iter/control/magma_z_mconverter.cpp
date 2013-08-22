@@ -605,7 +605,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
             magma_zmalloc( &B->val, A.num_rows*A.num_cols );
 
-            // conversion
+            // conversion using CUSPARSE
             cusparseZcsr2dense( cusparseHandle, A.num_rows, A.num_cols,
                                 descr, A.val, A.row, A.col,
                                 B->val, A.num_rows );
@@ -643,7 +643,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_imalloc( &B->row, B->num_rows+1 );
             magma_imalloc( &B->col, B->nnz );
 
-            // conversion
+            // conversion using CUSPARSE
             cusparseZdense2csr( cusparseHandle, A.num_rows, A.num_cols,
                                 descr,
                                 A.val, A.num_rows, nnz_per_row,
@@ -696,6 +696,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_zmalloc( &B->val, nnzb*size_b*size_b );
             magma_imalloc( &B->col, nnzb );
 
+            // conversion using CUSPARSE
             cusparseZcsr2bsr( cusparseHandle, CUSPARSE_DIRECTION_COLUMN,
                               A.num_rows, A.num_cols, descr,
                               A.val, A.row, A.col,
@@ -733,7 +734,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_imalloc( &B->row, B->num_rows+1 );
             magma_imalloc( &B->col, B->nnz );
 
-            // conversion
+            // conversion using CUSPARSE
             cusparseZbsr2csr( cusparseHandle, CUSPARSE_DIRECTION_COLUMN,
                               mb, nb, descr, A.val, A.row, A.col, 
                               size_b, descr,
@@ -764,7 +765,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_zmalloc( &B->val, B->nnz );
             magma_imalloc( &B->row, B->nnz );
             magma_imalloc( &B->col, B->num_cols+1 );
-            // conversion
+
+            // conversion using CUSPARSE
             cusparseZcsr2csc(cusparseHandle, A.num_rows, A.num_cols, A.nnz,
                              A.val, A.row, A.col, 
                              B->val, B->row, B->col, 
@@ -796,7 +798,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_imalloc( &B->row, B->num_rows+1 );
             magma_imalloc( &B->col, B->nnz );
 
-            // conversion
+            // conversion using CUSPARSE
             cusparseZcsr2csc(cusparseHandle, A.num_rows, A.num_cols, A.nnz,
                              A.val, A.col, A.row, 
                              B->val, B->col, B->row, 
@@ -805,6 +807,74 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
             return MAGMA_SUCCESS; 
         }
+        // CSR to COO
+        if( old_format == Magma_CSR && new_format == Magma_COO ){
+            // fill in information for B
+            B->storage_type = Magma_COO;
+            B->memory_location = A.memory_location;
+            B->num_rows = A.num_rows;
+            B->num_cols = A.num_cols;
+            B->nnz = A.nnz;
+            B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
+
+            /* CUSPARSE context */
+            cusparseHandle_t cusparseHandle = 0;
+            cusparseStatus_t cusparseStatus;
+            cusparseStatus = cusparseCreate(&cusparseHandle);
+            cusparseMatDescr_t descr = 0;
+            cusparseStatus = cusparseCreateMatDescr(&descr);
+            /* end CUSPARSE context */
+
+            magma_zmalloc( &B->val, B->nnz );
+            magma_imalloc( &B->row, B->nnz );
+            magma_imalloc( &B->col, B->nnz );
+
+            cudaMemcpy( B->val, A.val, A.nnz*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
+            cudaMemcpy( B->col, A.col, A.nnz*sizeof( magma_int_t ), cudaMemcpyDeviceToDevice );
+
+            // conversion using CUSPARSE
+            cusparseXcsr2coo( cusparseHandle, A.row,
+                              A.nnz, A.num_rows, B->row, 
+                              CUSPARSE_INDEX_BASE_ZERO );
+
+            return MAGMA_SUCCESS; 
+        }
+        // COO to CSR
+        if( old_format == Magma_COO && new_format == Magma_CSR ){
+            // fill in information for B
+            B->storage_type = Magma_CSR;
+            B->memory_location = A.memory_location;
+            B->num_rows = A.num_rows;
+            B->num_cols = A.num_cols;
+            B->nnz = A.nnz;
+            B->max_nnz_row = A.max_nnz_row;
+            B->diameter = A.diameter;
+
+            /* CUSPARSE context */
+            cusparseHandle_t cusparseHandle = 0;
+            cusparseStatus_t cusparseStatus;
+            cusparseStatus = cusparseCreate(&cusparseHandle);
+            cusparseMatDescr_t descr = 0;
+            cusparseStatus = cusparseCreateMatDescr(&descr);
+            /* end CUSPARSE context */
+
+            magma_zmalloc( &B->val, B->nnz );
+            magma_imalloc( &B->row, B->nnz );
+            magma_imalloc( &B->col, B->nnz );
+
+            cudaMemcpy( B->val, A.val, A.nnz*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
+            cudaMemcpy( B->col, A.col, A.nnz*sizeof( magma_int_t ), cudaMemcpyDeviceToDevice );
+
+            // conversion using CUSPARSE
+            cusparseXcoo2csr( cusparseHandle, A.row,
+                              A.nnz, A.num_rows, B->row, 
+                              CUSPARSE_INDEX_BASE_ZERO );            
+
+            return MAGMA_SUCCESS; 
+        }
+
+
 
         else{
             printf("error: format not supported.\n");
