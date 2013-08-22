@@ -697,7 +697,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_imalloc( &B->col, nnzb );
 
             // conversion using CUSPARSE
-            cusparseZcsr2bsr( cusparseHandle, CUSPARSE_DIRECTION_COLUMN,
+            cusparseZcsr2bsr( cusparseHandle, CUSPARSE_DIRECTION_ROW,
                               A.num_rows, A.num_cols, descr,
                               A.val, A.row, A.col,
                               size_b, descr,
@@ -735,7 +735,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_imalloc( &B->col, B->nnz );
 
             // conversion using CUSPARSE
-            cusparseZbsr2csr( cusparseHandle, CUSPARSE_DIRECTION_COLUMN,
+            cusparseZbsr2csr( cusparseHandle, CUSPARSE_DIRECTION_ROW,
                               mb, nb, descr, A.val, A.row, A.col, 
                               size_b, descr,
                               B->val, B->row, B->col );
@@ -877,8 +877,8 @@ magma_z_mconvert( magma_z_sparse_matrix A,
 
 
         else{
-            printf("error: format not supported.\n");
-            return MAGMA_ERR_ALLOCATION;
+             printf("error: format not supported.\n");
+             return MAGMA_ERR_NOT_SUPPORTED;
         }
     }
      

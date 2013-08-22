@@ -9,6 +9,9 @@
        @author Hartwig Anzt
 
 */
+
+#include <cusparse_v2.h>
+
 #include "common_magma.h"
 #include "../../include/magmablas.h"
 #include "../include/magmasparse_types.h"
@@ -59,24 +62,42 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
                  //printf("done.\n");
                  return MAGMA_SUCCESS;
              }
-             if( A.storage_type == Magma_ELLPACK ){
+             else if( A.storage_type == Magma_ELLPACK ){
                  //printf("using ELLPACK kernel for SpMV: ");
                  magma_zgeellmv( MagmaNoTransStr, A.num_rows, A.num_cols, A.max_nnz_row, alpha, 
                                  A.val, A.col, x.val, beta, y.val );
                  //printf("done.\n");
                  return MAGMA_SUCCESS;
              }
-             if( A.storage_type == Magma_ELLPACKT ){
+             else if( A.storage_type == Magma_ELLPACKT ){
                  //printf("using ELLPACKT kernel for SpMV: ");
                  magma_zgeelltmv( MagmaNoTransStr, A.num_rows, A.num_cols, A.max_nnz_row, alpha, 
                                   A.val, A.col, x.val, beta, y.val );
                  //printf("done.\n");
                  return MAGMA_SUCCESS;
              }
-             if( A.storage_type == Magma_DENSE ){
+             else if( A.storage_type == Magma_DENSE ){
                  //printf("using DENSE kernel for SpMV: ");
                  magmablas_zgemv( MagmaNoTrans, A.num_rows, A.num_cols, alpha, 
                                   A.val, A.num_rows, x.val, 1, beta,  y.val, 1 );
+                 //printf("done.\n");
+                 return MAGMA_SUCCESS;
+             }
+             else if( A.storage_type == Magma_BCSR ){
+                 //printf("using CUSPARSE BCSR kernel for SpMV: ");
+                /* CUSPARSE context */
+                cusparseHandle_t cusparseHandle = 0;
+                cusparseStatus_t cusparseStatus;
+                cusparseStatus = cusparseCreate(&cusparseHandle);
+                cusparseMatDescr_t descr = 0;
+                cusparseStatus = cusparseCreateMatDescr(&descr);
+                /* end CUSPARSE context */
+                cusparseDirection_t dirA = CUSPARSE_DIRECTION_ROW;
+                int mb = (A.num_rows + A.blocksize-1)/A.blocksize;
+                int nb = (A.num_cols + A.blocksize-1)/A.blocksize;
+                cusparseZbsrmv( cusparseHandle, dirA, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                mb, nb, A.numblocks, &alpha, descr,
+                                A.val, A.row, A.col, A.blocksize, x.val, &beta, y.val );
                  //printf("done.\n");
                  return MAGMA_SUCCESS;
              }
@@ -94,14 +115,14 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
                  //printf("done.\n");
                  return MAGMA_SUCCESS;
              }
-             if( A.storage_type == Magma_ELLPACK ){
+             else if( A.storage_type == Magma_ELLPACK ){
                  //printf("using ELLPACK kernel for SpMV: ");
                  magma_zmgeellmv( MagmaNoTransStr, A.num_rows, A.num_cols, num_vecs, A.max_nnz_row, alpha, 
                                  A.val, A.col, x.val, beta, y.val );
                  //printf("done.\n");
                  return MAGMA_SUCCESS;
              }
-             if( A.storage_type == Magma_ELLPACKT ){
+             else if( A.storage_type == Magma_ELLPACKT ){
                  //printf("using ELLPACKT kernel for SpMV: ");
                  magma_zmgeelltmv( MagmaNoTransStr, A.num_rows, A.num_cols, num_vecs, A.max_nnz_row, alpha, 
                                   A.val, A.col, x.val, beta, y.val );
