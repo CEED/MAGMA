@@ -142,7 +142,7 @@ typedef struct magma_opts
     magma_int_t version;   // hemm_mgpu, hetrd
     double      fraction;  // hegvdx
     double      tolerance;
-    
+    magma_int_t panel_nthread; //first dimension for a 2D big panel
     // boolean arguments
     int check;
     int lapack;

@@ -68,6 +68,7 @@ const char *usage =
 "  --version x      version of routine, e.g., during development, default 1.\n"
 "  --fraction x     fraction of eigenvectors to compute, default 1.\n"
 "  --tolerance x    accuracy tolerance, multiplied by machine epsilon, default 30.\n"
+"  --panel_nthread xNumber of threads in the first dimension if the panel is decomposed into a 2D layout, default 1.\n"
 "  -L -U -F         uplo   = Lower*, Upper, or Full.\n"
 "  -[NTC][NTC]      transA = NoTrans*, Trans, or ConjTrans (first letter) and\n"
 "                   transB = NoTrans*, Trans, or ConjTrans (second letter).\n"
@@ -101,7 +102,8 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     opts->version  = 1;
     opts->fraction = 1.;
     opts->tolerance = 30.;
-    
+    opts->panel_nthread = 1;
+
     opts->check     = (getenv("MAGMA_TESTINGS_CHECK") != NULL);
     opts->lapack    = (getenv("MAGMA_RUN_LAPACK")     != NULL);
     opts->warmup    = (getenv("MAGMA_WARMUP")         != NULL);
@@ -261,6 +263,11 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
             opts->tolerance = atof( argv[++i] );
             magma_assert( opts->tolerance >= 0 && opts->tolerance <= 1000,
                           "error: --tolerance %s is invalid; ensure tolerance in [0,1000].\n", argv[i] );
+        }
+        else if ( strcmp("--panel_nthread", argv[i]) == 0 && i+1 < argc ) {
+            opts->panel_nthread = atoi( argv[++i] );
+            magma_assert( opts->panel_nthread > 0,
+                          "error: --panel_nthread %s is invalid; ensure panel_nthread > 0.\n", argv[i] );
         }
         
         // ----- boolean arguments
