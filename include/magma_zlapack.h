@@ -68,6 +68,7 @@ extern "C" {
 #define lapackf77_zgetrf   FORTRAN_NAME( zgetrf, ZGETRF )
 #define lapackf77_zgetri   FORTRAN_NAME( zgetri, ZGETRI )
 #define lapackf77_zgetrs   FORTRAN_NAME( zgetrs, ZGETRS )
+#define lapackf77_zhetrs   FORTRAN_NAME( zhetrs, ZHETRS )
 #define lapackf77_zhbtrd   FORTRAN_NAME( zhbtrd, ZHBTRD )
 #define lapackf77_zheev    FORTRAN_NAME( zheev,  ZHEEV  )
 #define lapackf77_zheevd   FORTRAN_NAME( zheevd, ZHEEVD )
@@ -425,6 +426,13 @@ void   lapackf77_zgetri( const magma_int_t *n,
                          magma_int_t *info );
 
 void   lapackf77_zgetrs( const char* trans,
+                         const magma_int_t *n, const magma_int_t *nrhs,
+                         const magmaDoubleComplex *A, const magma_int_t *lda,
+                         const magma_int_t *ipiv,
+                         magmaDoubleComplex *B, const magma_int_t *ldb,
+                         magma_int_t *info );
+
+void   lapackf77_zhetrs( const char* uplo,
                          const magma_int_t *n, const magma_int_t *nrhs,
                          const magmaDoubleComplex *A, const magma_int_t *lda,
                          const magma_int_t *ipiv,
