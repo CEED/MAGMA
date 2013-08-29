@@ -114,6 +114,26 @@ magmablas_dgemvn_fermi(
                                     alpha, A, lda, x, incx, beta, y, incy);
 }
 
+/*
+static
+__device__ void dsum_reduce( int n, int i, double* x )
+{
+    __syncthreads();
+    if ( n > 1024 ) { if ( i < 1024 && i + 1024 < n ) { x[i] += x[i+1024]; }  __syncthreads(); }
+    if ( n >  512 ) { if ( i <  512 && i +  512 < n ) { x[i] += x[i+ 512]; }  __syncthreads(); }
+    if ( n >  256 ) { if ( i <  256 && i +  256 < n ) { x[i] += x[i+ 256]; }  __syncthreads(); }
+    if ( n >  128 ) { if ( i <  128 && i +  128 < n ) { x[i] += x[i+ 128]; }  __syncthreads(); }
+    if ( n >   64 ) { if ( i <   64 && i +   64 < n ) { x[i] += x[i+  64]; }  __syncthreads(); }
+    if ( n >   32 ) { if ( i <   32 && i +   32 < n ) { x[i] += x[i+  32]; }  __syncthreads(); }
+    // probably don't need __syncthreads for < 16 threads
+    // because of implicit warp level synchronization.
+    if ( n >   16 ) { if ( i <   16 && i +   16 < n ) { x[i] += x[i+  16]; }  __syncthreads(); }
+    if ( n >    8 ) { if ( i <    8 && i +    8 < n ) { x[i] += x[i+   8]; }  __syncthreads(); }
+    if ( n >    4 ) { if ( i <    4 && i +    4 < n ) { x[i] += x[i+   4]; }  __syncthreads(); }
+    if ( n >    2 ) { if ( i <    2 && i +    2 < n ) { x[i] += x[i+   2]; }  __syncthreads(); }
+    if ( n >    1 ) { if ( i <    1 && i +    1 < n ) { x[i] += x[i+   1]; }  __syncthreads(); }
+}
+*/
 
 __global__ void
 dgemvt_kernel_fermi(
@@ -148,6 +168,8 @@ dgemvt_kernel_fermi(
     }
 
         sdata[tx] = res;
+        //dsum_reduce(threadSize, tx, sdata);
+
          __syncthreads();
 
         for(int s=blockDim.x/2; s>32;s>>=1)
@@ -174,11 +196,7 @@ dgemvt_kernel_fermi(
 
         if( tx == 0 )
         {
-                
-                if (blockIdx.y < n)
-                {
-                        y[blockIdx.y*incy] = sdata[0] * alpha + beta * y[blockIdx.y*incy];
-                }
+                y[blockIdx.y*incy] = sdata[0] * alpha + beta * y[blockIdx.y*incy];
         }
 }
 
@@ -297,6 +315,9 @@ void magmablas_dgemv_fermi(char trans,
     INCZ  - (input) Specifies the increment for the elements of Z.
             INCZ must not be zero. Unchanged on exit.
     ===================================================================== */
+
+    if (m==0 || n==0)
+       return;
 
     //if (incx == 1 && incz == 1) 
     {
