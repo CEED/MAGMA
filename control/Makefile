@@ -15,6 +15,7 @@ ZSRC := \
 
 ifeq ($(PGIFORTRAN), 0)
 ZSRC += \
+	magma_f77.cpp		\
 	magma_zf77.cpp		\
 	magma_param.f90		\
 	magma_zfortran.F90	\
