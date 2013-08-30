@@ -64,6 +64,10 @@ clean:
 cleanall: clean
 	rm -f $(LIBMAGMA)
 
+wrappers:
+	../tools/fortran_wrappers.pl --wrappers  ../include/magma_z.h -o magma_zf77.cpp
+	../tools/fortran_wrappers.pl --interface ../include/magma_z.h -o magma_zfortran.F90
+
 # Extra dependencies for .mod files
 magma.o: magma_zfortran.o magma_cfortran.o magma_dfortran.o magma_sfortran.o 
 magma_zfortran.o: magma_param.o

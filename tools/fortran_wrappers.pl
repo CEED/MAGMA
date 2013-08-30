@@ -45,8 +45,8 @@ my @ignore = qw(
 my $ignore = join( "|", @ignore );
 
 
-print STDOUT "*********************************************\n";
-print STDOUT "$ignore\n";
+print STDERR "*********************************************\n";
+print STDERR "$ignore\n";
 
 
 # map C base types to Fortran types
@@ -60,6 +60,18 @@ my %types = (
 	'cuDoubleComplex'    => 'complex*16      ',
 	'magmaFloatComplex'  => 'complex         ',
 	'magmaDoubleComplex' => 'complex*16      ',
+	'magma_queue_t'      => 'integer         ',  # not sure what type to use for streams -- they are pointers, right?
+	'magma_uplo_t'       => 'integer         ',
+);
+
+my %devptrs = (
+	'magma_int_t'        => 'magma_idevptr',
+	'float'              => 'magma_sdevptr',
+	'double'             => 'magma_ddevptr',
+	'cuFloatComplex'     => 'magma_cdevptr',
+	'cuDoubleComplex'    => 'magma_zdevptr',
+	'magmaFloatComplex'  => 'magma_cdevptr',
+	'magmaDoubleComplex' => 'magma_zdevptr',
 );
 
 # Fortran 90 has 132 line length limit, so wrap text
@@ -111,9 +123,29 @@ if ( $do_wrapper ) {  #################### header for magma_zf77.cpp wrappers
 typedef size_t devptr_t;
 
 #ifdef PGI_FORTRAN
-#define DEVPTR(ptr_) ((magmaDoubleComplex*)(ptr_))
+    #define magma_idevptr(ptr_) ((int*)               (ptr_))
+    #define magma_zdevptr(ptr_) ((magmaDoubleComplex*)(ptr_))
+    #ifndef magma_cdevptr
+    #define magma_cdevptr(ptr_) ((magmaFloatComplex*) (ptr_))
+    #endif
+    #ifndef magma_ddevptr
+    #define magma_ddevptr(ptr_) ((double*)            (ptr_))
+    #endif
+    #ifndef magma_sdevptr
+    #define magma_sdevptr(ptr_) ((float*)             (ptr_))
+    #endif
 #else
-#define DEVPTR(ptr_) ((magmaDoubleComplex*)(uintptr_t)(*(ptr_)))
+    #define magma_idevptr(ptr_) ((int*)               (uintptr_t)(*(ptr_)))
+    #define magma_zdevptr(ptr_) ((magmaDoubleComplex*)(uintptr_t)(*(ptr_)))
+    #ifndef magma_cdevptr
+    #define magma_cdevptr(ptr_) ((magmaFloatComplex*) (uintptr_t)(*(ptr_)))
+    #endif
+    #ifndef magma_ddevptr
+    #define magma_ddevptr(ptr_) ((double*)            (uintptr_t)(*(ptr_)))
+    #endif
+    #ifndef magma_sdevptr
+    #define magma_sdevptr(ptr_) ((float*)             (uintptr_t)(*(ptr_)))
+    #endif
 #endif
 
 #ifndef MAGMA_FORTRAN_NAME
@@ -175,7 +207,7 @@ $_ = <>;
 s/#ifndef MAGMA_Z_H\n//;
 s/#define MAGMA_Z_H\n//;
 s/#endif \/\* MAGMA_Z_H \*\/\n//;
-s/#include .*\n//;
+s/#include .*\n//g;
 s/void zpanel_to_q.*\n//;
 s/void zq_to_panel.*\n//;
 s/#ifdef __cplusplus\nextern "C" {\n#endif\n//;
@@ -208,6 +240,7 @@ while( $_ ) {
 		$args =~ s/\n/ /g;
 		$args =~ s/^\( *//;
 		$args =~ s/ *\)$//;
+		@args = split( /, */, $args );
 		
 		$funcf = "magmaf_$func$is_gpu";
 		$FUNCF = $funcf;  #uc($funcf);
@@ -221,15 +254,15 @@ while( $_ ) {
 		}
 		
 		my $match = $func =~ m/^($ignore)$/;
-		print STDOUT "FUNC $func $match\n";
+		print STDERR "FUNC $func $match\n";
 		if ( $func =~ m/^($ignore)$/ or $func =~ m/_mgpu/ ) {
 			# ignore auxiliary functions and multi-GPU functions, since
 			# we haven't dealt with passing arrays of pointers in Fortran yet
 			$wrapper   = "";
 			$interface = "";
 		}
-		elsif ( $func =~ m/get_\w+_nb/ ) {
-			# special case for get_nb functions
+		elsif ( $func =~ m/get_\w+_nb/ and $#args == 0 ) {  # i.e., len(@args) is 1
+			# special case for get_nb functions, to return a value
 			# is returning an int safe? otherwise, we could make these take an output argument.
 			$wrapper  .= "magma_int_t ${FUNCF}( magma_int_t *m )\n{\n    return magma_$func( *m );\n}\n\n";
 			$interface = "integer function $funcf( m )\n    integer :: m\nend function $funcf\n\n";
@@ -244,7 +277,6 @@ while( $_ ) {
 			$vars      = "";
 			
 			$first_arg = 1;
-			@args = split( /, */, $args );
 			foreach $arg ( @args ) {
 				($type, $var) = $arg =~ m/^((?:const +)?\w+(?: *\*+)?) *(\w+[\[\]0-9]*)$/;
 				if ( not $type ) {
@@ -255,6 +287,7 @@ while( $_ ) {
 				$base_type =~ s/const +//;
 				$base_type =~ s/^ +//;
 				$base_type =~ s/ +$//;
+				print STDERR "base_type $base_type\n";
 				
 				$is_ptr = ($type =~ m/\*/);
 				if ( $is_ptr ) {
@@ -267,7 +300,7 @@ while( $_ ) {
 						# for _gpu interfaces assume ptrs that start with "d" are device pointers
 						# Also CPU interface for geqrf, etc., passes dT as device pointer (weirdly)
 						$wrapper .= "devptr_t *$var";
-						$call    .= "DEVPTR($var)";
+						$call    .= "$devptrs{$base_type}($var)";
 						$vars    .= "    magma_devptr_t   :: $var\n";
 					}
 					else {
@@ -307,7 +340,7 @@ while( $_ ) {
 		}
 		
 		if ( $pre ) {
-			print STDOUT "WARNING: ignoring unrecognized text before function: <<<\n$pre>>>\n";
+			print STDERR "WARNING: ignoring unrecognized text before function: <<<\n$pre>>>\n";
 		}
 		
 		if ( $do_wrapper ) {
@@ -321,7 +354,7 @@ while( $_ ) {
 		s/^ *;//;
 	}
 	else {
-		print STDOUT "WARNING: ignoring unrecognized text at end of file: <<<\n$_>>>\n";
+		print STDERR "WARNING: ignoring unrecognized text at end of file: <<<\n$_>>>\n";
 		last;
 	}
 	s/^\n+//;
