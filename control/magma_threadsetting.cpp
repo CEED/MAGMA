@@ -6,6 +6,7 @@
        November 2011
 
        @author Azzam Haidar
+       @author Simplice Donfack
 */
 #include "common_magma.h"
 /***************************************************************************//**
@@ -29,7 +30,7 @@ void magma_setlapack_numthreads(magma_int_t num_threads)
     #endif
 #elif defined(MAGMA_WITH_MKL)
         mkl_set_num_threads( num_threads );
-        #ifndef NO_WARNING	    	
+        #ifndef NO_WARNING            
         printf("==========================================================================================\n");
         printf("  WARNING a parallel section (D&C) that use OPENMP could not perform in parallel because  \n");
         printf("  it need to be compiled with multi thread library and add -fopenmp(gcc)/-openmp(icc)     \n");
@@ -38,7 +39,7 @@ void magma_setlapack_numthreads(magma_int_t num_threads)
         printf("==========================================================================================\n");
         #endif
 #else
-   #ifndef NO_WARNING	
+   #ifndef NO_WARNING    
    printf("==========================================================================================\n");
    printf("  WARNING you are calling a parallel section without linking with a multithread library   \n");
    printf("  please compile with multi thread library and add -fopenmp(gcc)/-openmp(icc) to both     \n");
@@ -50,7 +51,37 @@ void magma_setlapack_numthreads(magma_int_t num_threads)
 }
 /////////////////////////////////////////////////////////////
 
-
+magma_int_t magma_getlapack_numthreads()
+{
+    magma_int_t num_threads = -1;
+#if defined(_OPENMP)
+    num_threads = omp_get_num_threads();
+    #if defined(MAGMA_WITH_MKL)
+    num_threads = mkl_get_max_threads();
+    #endif
+#elif defined(MAGMA_WITH_MKL)
+        num_threads = mkl_get_max_threads();
+        #ifndef NO_WARNING            
+        printf("==========================================================================================\n");
+        printf("  WARNING a parallel section (D&C) that use OPENMP could not perform in parallel because  \n");
+        printf("  it need to be compiled with multi thread library and add -fopenmp(gcc)/-openmp(icc)     \n");
+        printf("  to both compilation and linkage flags.                                                  \n");
+        printf("  If you wish to remove the printout of this WARNING, please compile with -DNO_WARNING    \n");
+        printf("==========================================================================================\n");
+        #endif
+#else
+   #ifndef NO_WARNING    
+   printf("==========================================================================================\n");
+   printf("  WARNING you are calling a parallel section without linking with a multithread library   \n");
+   printf("  please compile with multi thread library and add -fopenmp(gcc)/-openmp(icc) to both     \n");
+   printf("  compilation and linkage flags.                                                          \n");
+   printf("  If you wish to remove the printout of this WARNING, please compile with -DNO_WARNING    \n");
+   printf("==========================================================================================\n");
+   #endif
+#endif
+    if(num_threads==-1) num_threads = magma_get_numthreads();
+    return num_threads;
+}
 /////////////////////////////////////////////////////////////
 magma_int_t magma_get_numthreads()
 {
