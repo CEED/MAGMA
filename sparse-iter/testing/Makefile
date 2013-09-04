@@ -37,11 +37,13 @@ ZSRC += \
   	testing_zpbicgstab.cpp      \
   	testing_zcpbicgstab.cpp      \
   	testing_zpgmres.cpp         \
+  	testing_zgmres_pipe.cpp         \
   	testing_zcpgmres.cpp         \
 
 # debugging
 ZSRC += \
   	testing_zdebug.cpp              \
+  	testing_zdot.cpp              \
 # ------------------------------------------------------------
 -include Makefile.local
 -include Makefile.src

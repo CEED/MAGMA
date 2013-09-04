@@ -94,7 +94,7 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
     magma_event_create( &event[0] );
-    trace_init( 1, 1, 2, (CUstream_st**)stream );
+    //trace_init( 1, 1, 2, (CUstream_st**)stream );
 
     //Chronometry 
     magma_device_sync(); tempo1=magma_wtime();
@@ -132,9 +132,9 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                     #endif
                     q_t.val = q(k-1);
                     magmablasSetKernelStream(stream[0]);
-                    trace_gpu_start( 0, 0, "spmv", "spmv" );
+                    //trace_gpu_start( 0, 0, "spmv", "spmv" );
                     magma_z_spmv( c_one, A, q_t, c_zero, r );                      //  r       = A q[k] 
-                    trace_gpu_end( 0, 0 );
+                    //trace_gpu_end( 0, 0 );
                     #ifdef ENABLE_TIMER
                     magma_device_sync(); t_spmv += magma_wtime()-t_spmv1;
                     #endif
@@ -159,9 +159,9 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                         magmablasSetKernelStream(stream[0]);
                         trace_gpu_start( 0, 0, "copy", "copy" );              // q[k] = r
                         magma_zcopy(dofs, r.val, 1, q(k), 1);  
-                        trace_gpu_end( 0, 0 );
+                        //trace_gpu_end( 0, 0 );
 
-                        trace_gpu_start( 0, 0, "gemv", "gemv" );
+                        //trace_gpu_start( 0, 0, "gemv", "gemv" );
                         #ifdef ENABLE_TIMER
                         magma_device_sync(); t_orth2=magma_wtime();
                         #endif
@@ -172,18 +172,18 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                         #endif
                                                                               // r = r - q[0:k-1] dH(1:k,k)
                         magmablas_zgemv(MagmaNoTrans, dofs, k, c_mone, q(0), dofs, &dH(1,k), 1, c_one, r.val, 1);
-                        trace_gpu_end( 0, 0 );
+                        //trace_gpu_end( 0, 0 );
 
-                        trace_gpu_start( 0, 0, "scal", "scal" );
+                        //trace_gpu_start( 0, 0, "scal", "scal" );
                                                                               // 1) dH(k+1,k) = sqrt( dH(k+1,k) - dH(1:k,k) )
                         magma_zcopyscale(  dofs, k, r.val, q(k), &dH(1,k) );  // 2) q[k] = q[k] / dH(k+1,k) 
-                        trace_gpu_end( 0, 0 );
+                        //trace_gpu_end( 0, 0 );
                         magma_event_record( event[0], stream[0] );
 
                         magma_queue_wait_event( stream[1], event[0] );
-                        trace_gpu_start( 0, 1, "get", "get" );
+                        //trace_gpu_start( 0, 1, "get", "get" );
                         magma_zgetvector_async(k+1, &dH(1,k), 1, &H(1,k), 1, stream[1]); // asynch copy dH(1:(k+1),k) to H(1:(k+1),k)
-                        trace_gpu_end( 0, 1 );
+                        //trace_gpu_end( 0, 1 );
                     } else {
                         // classical Gram-Schmidt (default)
                         #ifdef ENABLE_TIMER
@@ -227,7 +227,7 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                     #endif
                 }
             magma_queue_sync( stream[1] );
-            trace_cpu_start( 0, "dot", "restart" );
+            //trace_cpu_start( 0, "dot", "restart" );
             for(k=1; k<=restart; k++) 
                 {
                     /*     Minimization of  || b-Ax ||  in H_k       */ 
@@ -263,23 +263,23 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
                     
                     rNorm = fabs(MAGMA_Z_REAL(H(k+1,k)));
                 }
-            trace_cpu_end( 0 );
+            //trace_cpu_end( 0 );
             
             /*   Update the current approximation: x += Q y  */
-            trace_gpu_start( 0, 0, "set", "set" );
+            //trace_gpu_start( 0, 0, "set", "set" );
             magma_zsetmatrix_async(m, 1, y+1, m, dy, m, stream[0]);
-            trace_gpu_end( 0, 0 );
+            //trace_gpu_end( 0, 0 );
             magmablasSetKernelStream(stream[0]);
-            trace_gpu_start( 0, 0, "gemv", "gemv" );
+            //trace_gpu_start( 0, 0, "gemv", "gemv" );
             magma_zgemv(MagmaNoTrans, dofs, m, c_one, q(0), dofs, dy, 1, c_one, x->val, 1); 
-            trace_gpu_end( 0, 0 );
+            //trace_gpu_end( 0, 0 );
 
             #ifdef ENABLE_TIMER
             magma_device_sync(); t_spmv1=magma_wtime();
             #endif
-            trace_gpu_start( 0, 0, "spmv", "spmv" );
+            //trace_gpu_start( 0, 0, "spmv", "spmv" );
             magma_z_spmv( c_mone, A, *x, c_zero, r );                  //  r = - A * x
-            trace_gpu_end( 0, 0 );
+            //trace_gpu_end( 0, 0 );
             #ifdef ENABLE_TIMER
             magma_device_sync(); t_spmv += magma_wtime() - t_spmv1;
             #endif
@@ -319,7 +319,7 @@ magma_zgmres( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     }
     printf( "\n" );
     solver_par->numiter = iter;
-    trace_finalize( "zgmres.svg","trace.css" );
+    //trace_finalize( "zgmres.svg","trace.css" );
 
     // free GPU streams and events
     magma_queue_destroy( stream[0] );

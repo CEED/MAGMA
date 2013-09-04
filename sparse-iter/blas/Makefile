@@ -21,15 +21,19 @@ ZSRC := \
 	zmgeellmv.cu		\
 	zgeelltmv.cu            \
 	zmgeelltmv.cu            \
-	zmpkgeelltmv.cu            \
+	#zmpkgeelltmv.cu            \
+	#zmpkgeelltmv_2.cu            \
+	#zmpkgeelltmv_3.cu            \
     zlag2c_sparse.cu        \
     clag2z_sparse.cu        \
     zjacobisetup.cu         \
 	magma_zlag2c.cpp        \
 	magma_clag2z.cpp        \
-	zp1.cu                  \
-    zpipelinedgs.cu          \
-    zpipelinedgmrescopyscale.cu     \
+	#zp1.cu                  \
+    #zpipelinedgs.cu          \
+    zmergebicgstab.cu          \
+    #zpipelinedgmrescopyscale.cu     \
+    zmdot.cu                    \
 	#zp1_b.cu                  \
 
 

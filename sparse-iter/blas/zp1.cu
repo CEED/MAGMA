@@ -21,16 +21,19 @@
 
 
 __global__ void 
-zp1gmres_mgs(          magma_int_t  n, 
-                       magma_int_t  k, 
+zp1gmres_mgs(          int  n, 
+                       int  k, 
                        magmaDoubleComplex *skp, 
                        magmaDoubleComplex *v, 
                        magmaDoubleComplex *z){
     int row = blockDim.x * blockIdx.x + threadIdx.x ;
     if(row < n ){
-        for(int i=0; i<k; i++){
-            z[row] = z[row] - skp[i] * v[row+i*n];
+        magmaDoubleComplex z_local;
+        z_local = z[ row ] - skp[ 0 ] * v[ row ];
+        for(int i=1; i<k-1; i++){
+            z_local = z_local - skp[i] * v[row+i*n];
         }
+        z[row] = z_local - skp[k-1] * v[ row+(k-1)*n ];
     }
 }
 

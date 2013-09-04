@@ -41,13 +41,55 @@ int main( int argc, char** argv)
 
 
     const char *filename[] =
-    {
+    {//"test_matrices/FullChip.mtx",-
+     //"test_matrices/kkt_power.mtx",
+     //"test_matrices/pre2.mtx",
+     //"test_matrices/kron_g500-logn21.mtx",-
+     "test_matrices/para-10.mtx",
+     "test_matrices/Fault_639.mtx",
+     "test_matrices/thermomech_dK.mtx",
+     "test_matrices/thermal2.mtx",
+     "test_matrices/apache2.mtx",
+     "test_matrices/audikw_1.mtx",
+     "test_matrices/boneS10.mtx",
+     "test_matrices/inline_1.mtx",
+     "test_matrices/thermal2.mtx",
+     "test_matrices/G3_circuit.mtx",
+     "test_matrices/tmt_sym.mtx",
+     "test_matrices/offshore.mtx",
+     "test_matrices/bmw3_2.mtx",
+     "test_matrices/airfoil_2d.mtx",
+     "test_matrices/cyl6.mtx",
+     "test_matrices/poisson3Da.mtx",
+     "test_matrices/stokes64.mtx",
+     "test_matrices/circuit_3.mtx",
+     "test_matrices/cage10.mtx",
+     "test_matrices/parabolic_fem.mtx",
+     "test_matrices/circuit5M.mtx",
+     "test_matrices/parabolic_fem.mtx",
+     "test_matrices/crankseg_2.mtx",
      "test_matrices/LF10.mtx",
      "test_matrices/Trefethen_20.mtx",
      "test_matrices/Trefethen_2000.mtx",
      "test_matrices/Trefethen_20_new.mtx",
      "test_matrices/Trefethen_20_new2.mtx",
      "test_matrices/Trefethen_20_new3.mtx"
+     "test_matrices/ecology2.mtx",
+     "test_matrices/apache2.mtx",
+     "test_matrices/audikw_1.mtx",
+     "test_matrices/boneS10.mtx",
+     "test_matrices/inline_1.mtx",
+     "test_matrices/bmwcra_1.mtx",
+     "test_matrices/F1.mtx",
+     "test_matrices/circuit5M.mtx",
+     "test_matrices/parabolic_fem.mtx",
+     "test_matrices/crankseg_2.mtx",
+     "test_matrices/LF10.mtx",
+     "test_matrices/Trefethen_20.mtx",
+     "test_matrices/Trefethen_2000.mtx",
+     "test_matrices/Trefethen_20_new.mtx",
+     "test_matrices/Trefethen_20_new2.mtx",
+     "test_matrices/Trefethen_20_new3.mtx",
      "test_matrices/ecology2.mtx",
      "test_matrices/apache2.mtx",
      "test_matrices/audikw_1.mtx",
@@ -60,6 +102,7 @@ int main( int argc, char** argv)
      "test_matrices/parabolic_fem.mtx",
      "test_matrices/crankseg_2.mtx",
     };
+for(magma_int_t matrix=0; matrix<8; matrix++){
 
     magma_z_sparse_matrix A, B, C, D, E, F, G, Z;
     magma_z_sparse_matrix A_D, B_D, C_D, D_D, E_D, F_D, G_D, Z_D;
@@ -68,19 +111,20 @@ int main( int argc, char** argv)
   
 
     //read matrix from file
-    magma_z_csr_mtx( &A, filename[0] );
+    magma_z_csr_mtx( &A, filename[matrix] );
 
+    magma_z_mfree(&A);
 
-    magma_z_mvisu( A );
-    write_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor, filename[2] );
-    magma_z_mfree( &A );
-    magma_z_csr_mtx( &A, filename[2] );
-    magma_z_mvisu( A );
+    //magma_z_mvisu( A );
+    //write_z_csr_mtx( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col, MagmaRowMajor, filename[2] );
+    //magma_z_mfree( &A );
+    //magma_z_csr_mtx( &A, filename[2] );
+    //magma_z_mvisu( A );
 
-    magma_z_mconvert( A, &B, Magma_CSR, Magma_BCSR);
-    magma_z_mconvert( B, &C, Magma_BCSR, Magma_CSR);
+    //magma_z_mconvert( A, &B, Magma_CSR, Magma_BCSR);
+    //magma_z_mconvert( B, &C, Magma_BCSR, Magma_CSR);
 
-    magma_z_mvisu( C );
+    //magma_z_mvisu( C );
     /*
 
     magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);
@@ -162,6 +206,8 @@ printf("F_D:\n");
     magma_z_vfree(&x);
     magma_z_vfree(&y);
 */
+
+}
     TESTING_FINALIZE();
     return 0;
 }

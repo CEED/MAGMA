@@ -34,7 +34,7 @@ int main( int argc, char** argv)
     magma_solver_parameters solver_par;
     solver_par.epsilon = 10e-8;
     solver_par.maxiter = 1000;
-    solver_par.restart = 30;
+    solver_par.restart = 10;
     solver_par.gmres_ortho = MAGMA_CGS;
 
     int i, id = -1, ortho_int = 1;
@@ -78,6 +78,7 @@ int main( int argc, char** argv)
      "test_matrices/boneS10.mtx",            // 14
      "test_matrices/parabolic_fem.mtx",      // 15
     };
+for(magma_int_t matrix=0; matrix<1; matrix++){
 
     magma_z_sparse_matrix A, C, D;
     magma_z_vector x, b;
@@ -107,6 +108,8 @@ int main( int argc, char** argv)
 
         if (id > -1) break;
     }
+
+}
 
     TESTING_FINALIZE();
     return 0;

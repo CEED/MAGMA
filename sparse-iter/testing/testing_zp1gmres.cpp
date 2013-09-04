@@ -32,28 +32,40 @@ int main( int argc, char** argv)
     magma_opts opts;
     parse_opts( argc, argv, &opts );
 
-    const char *filename[] =
-    {
-     "test_matrices/LF10.mtx",
-     "test_matrices/Trefethen_20.mtx",
+   const char *filename[] =
+    {"test_matrices/Trefethen_2000.mtx",
      "test_matrices/test.mtx",
-     "test_matrices/bcsstk01.mtx",
-     "test_matrices/Trefethen_200.mtx",
-     "test_matrices/Trefethen_2000.mtx",
-     "test_matrices/Pres_Poisson.mtx",
+     "test_matrices/kkt_power.mtx",
+     "test_matrices/Fault_639.mtx",
+     "test_matrices/thermomech_dK.mtx",
+     "test_matrices/thermal2.mtx",
+     "test_matrices/G3_circuit.mtx",
+     "test_matrices/tmt_sym.mtx",
+     "test_matrices/offshore.mtx",
+     "test_matrices/bmw3_2.mtx",
+     "test_matrices/airfoil_2d.mtx",
+     "test_matrices/cyl6.mtx",
+     "test_matrices/poisson3Da.mtx",
+     "test_matrices/stokes64.mtx",
+     "test_matrices/circuit_3.mtx",
+     "test_matrices/cage10.mtx",
      "test_matrices/bloweybq.mtx",
      "test_matrices/ecology2.mtx",
      "test_matrices/apache2.mtx",
      "test_matrices/crankseg_2.mtx",
      "test_matrices/bmwcra_1.mtx",
      "test_matrices/F1.mtx",
-     "test_matrices/audikw_1.mtx",
-     "test_matrices/circuit5M.mtx",
      "test_matrices/boneS10.mtx",
      "test_matrices/parabolic_fem.mtx",
-     "test_matrices/inline_1.mtx",
-     "test_matrices/ldoor.mtx"
+//     "test_matrices/inline_1.mtx",
+     "test_matrices/ldoor.mtx",
+     "test_matrices/audikw_1.mtx",
+     "test_matrices/circuit5M.mtx"
+     "test_matrices/Pres_Poisson.mtx",
     };
+for(magma_int_t matrix=0; matrix<1; matrix++){
+
+    cudaSetDevice(0); 
 
     magma_z_sparse_matrix A, B, C, D;
     magma_z_vector x, b;
@@ -63,7 +75,7 @@ int main( int argc, char** argv)
     const char *N="N";
 
   
-    magma_z_csr_mtx( &A, filename[13] );
+    magma_z_csr_mtx( &A, filename[6] );
     //print_z_csr_matrix( A.num_rows, A.num_cols, A.nnz, &A.val, &A.row, &A.col );
 
 
@@ -75,7 +87,6 @@ int main( int argc, char** argv)
 
 
 
-    //magma_z_mconvert( A, &B, Magma_CSR, Magma_ELLPACK);
     magma_z_mconvert( A, &C, Magma_CSR, Magma_ELLPACKT);
     magma_z_mtransfer( C, &D, Magma_CPU, Magma_DEV);
 
@@ -83,19 +94,20 @@ int main( int argc, char** argv)
     magma_solver_parameters solver_par;
 
     solver_par.epsilon = 10e-8;
-    solver_par.maxiter = 1000;
-    solver_par.restart = 30;
+    solver_par.maxiter = 1;
+    solver_par.restart = 5;
 
-    magma_zgmres( D, b, &x, &solver_par );
+    magma_zp1gmres( D, b, &x, &solver_par );
 
     magma_z_vvisu( x, 0,10);
 
     magma_z_vfree(&x);
     magma_z_vfree(&b);
     magma_z_mfree(&A);
-   // magma_z_mfree(&B);
     magma_z_mfree(&C);
     magma_z_mfree(&D);
+
+}
 
     TESTING_FINALIZE();
     return 0;

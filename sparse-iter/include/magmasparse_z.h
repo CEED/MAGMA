@@ -198,7 +198,9 @@ magma_int_t
 magma_zbicgstab(       magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
                        magma_solver_parameters *solver_par );
 
-
+magma_int_t
+magma_zbicgstab_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+                       magma_solver_parameters *solver_par );
 
 magma_int_t
 magma_zpcg(            magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
@@ -238,12 +240,12 @@ magma_zgmres_pipe( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 magma_int_t
 magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A, 
                   magma_z_vector x, magmaDoubleComplex beta, magma_z_vector y );
-
+/*
 magma_int_t
 magma_z_mpk(      magmaDoubleComplex alpha, magma_z_sparse_matrix A, 
                   magma_z_vector x, magmaDoubleComplex beta, magma_z_vector y, 
                   magma_int_t k );
-
+*/
 magma_int_t
 magma_z_precond( magma_z_sparse_matrix A, magma_z_vector b, 
                  magma_z_vector *x, magma_precond_parameters precond );
@@ -324,7 +326,7 @@ magma_zmgeelltmv(      const char *transA,
                        magmaDoubleComplex *d_x,
                        magmaDoubleComplex beta,
                        magmaDoubleComplex *d_y );
-
+/*
 magma_int_t 
 magma_zmpkgeelltmv(    const char *transA,
                        magma_int_t m, magma_int_t n,
@@ -392,9 +394,55 @@ magma_zcopyscale(   int n,
                     magmaDoubleComplex *v,
                     magmaDoubleComplex *skp );
 
+*/
+
 magma_int_t
 magma_zjacobisetup_vector_gpu(int num_rows, magmaDoubleComplex *b, magmaDoubleComplex *d, magmaDoubleComplex *c);
 
+magma_int_t
+magma_zbicgmerge1(  int n, 
+                    magmaDoubleComplex *skp,
+                    magmaDoubleComplex *v, 
+                    magmaDoubleComplex *r, 
+                    magmaDoubleComplex *p );
+
+
+magma_int_t
+magma_zbicgmerge2(  int n, 
+                    magmaDoubleComplex *skp, 
+                    magmaDoubleComplex *r,
+                    magmaDoubleComplex *v, 
+                    magmaDoubleComplex *s );
+
+magma_int_t
+magma_zbicgmerge3(  int n, 
+                    magmaDoubleComplex *skp, 
+                    magmaDoubleComplex *p,
+                    magmaDoubleComplex *s,
+                    magmaDoubleComplex *t,
+                    magmaDoubleComplex *x, 
+                    magmaDoubleComplex *r );
+magma_int_t
+magma_zbicgmerge4(  int type, 
+                    magmaDoubleComplex *skp );
+
+magma_int_t
+magma_zmdotc(       magma_int_t n, 
+                    magma_int_t k, 
+                    magmaDoubleComplex *v, 
+                    magmaDoubleComplex *r,
+                    magmaDoubleComplex *d1,
+                    magmaDoubleComplex *d2,
+                    magmaDoubleComplex *skp );
+
+magma_int_t
+magma_zgemvmdot(    int n, 
+                    int k, 
+                    magmaDoubleComplex *v, 
+                    magmaDoubleComplex *r,
+                    magmaDoubleComplex *d1,
+                    magmaDoubleComplex *d2,
+                    magmaDoubleComplex *skp );
 
 #ifdef __cplusplus
 }
