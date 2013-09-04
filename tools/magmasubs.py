@@ -672,9 +672,12 @@ subs = {
     ('smgeelltmv',     'dmgeelltmv',     'cmgeelltmv',     'zmgeelltmv'      ),
     ('smpkgeelltmv',   'dmpkgeelltmv',   'cmpkgeelltmv',   'zmpkgeelltmv'    ),
     ('sp1',            'dp1',            'cp1',            'zp1'             ),
+    ('smdot',          'dmdot',          'cmdot',          'zmdot'           ),
     ('spipelined',     'dpipelined',     'cpipelined',     'zpipelined'      ),
     ('mkl_scsrmv',     'mkl_dcsrmv',     'mkl_ccsrmv',     'mkl_zcsrmv'      ),
     ('mkl_sbsrmv',     'mkl_dbsrmv',     'mkl_cbsrmv',     'mkl_zbsrmv'      ),
+    ('smerge',         'dmerge',         'cmerge',         'zmerge'          ),
+
 
     # ----- SPARSE Iterative Solvers
     ('scg',            'dcg',            'ccg',            'zcg'             ),
