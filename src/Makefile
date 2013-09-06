@@ -78,6 +78,7 @@ ZSRC += \
 	zgelqf_gpu.cpp		\
 	zgels3_gpu.cpp		\
 	zgels_gpu.cpp		\
+	zgegqr_gpu.cpp          \
 	zgeqrf2_gpu.cpp		\
 	zgeqrf3_gpu.cpp		\
 	zgeqrf_gpu.cpp		\
