@@ -94,6 +94,7 @@ ZSRC += \
 	testing_zunmqr_gpu.cpp	\
 	\
 	testing_zgeqrf_mgpu.cpp	\
+	testing_zgegqr_gpu.cpp  \
 
 
 # QR, CPU interface
