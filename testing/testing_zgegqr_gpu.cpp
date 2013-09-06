@@ -121,12 +121,12 @@ int main( int argc, char** argv)
 
                 magmaDoubleComplex one = MAGMA_Z_ONE, zero = MAGMA_Z_ZERO;
                 blasf77_zgemm("t", "n", &N, &N, &M, &one, h_R, &M, h_R, &M, &zero, h_work, &N);
-                for(int ii=0; ii<N*N; ii+=(N+1)) h_work[ii] -= one;
+                for(int ii=0; ii<N*N; ii+=(N+1)) h_work[ii] = MAGMA_Z_SUB(h_work[ii], one);
 
                 e1    = lapackf77_zlange("f", &N, &N, h_work, &N, work);
 
                 blasf77_zgemm("t", "n", &N, &N, &M, &one, h_A, &M, h_A, &M, &zero, h_work, &N);
-                for(int ii=0; ii<N*N; ii+=(N+1)) h_work[ii] -= one;
+                for(int ii=0; ii<N*N; ii+=(N+1)) h_work[ii] = MAGMA_Z_SUB(h_work[ii], one);
                 e2    = lapackf77_zlange("f", &N, &N, h_work, &N, work);
                 
                 printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e  %8.2e\n",
