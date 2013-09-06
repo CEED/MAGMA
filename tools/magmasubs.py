@@ -467,6 +467,7 @@ subs = {
     ('sgebd2',         'dgebd2',         'cgebd2',         'zgebd2'          ),
     ('sgebrd',         'dgebrd',         'cgebrd',         'zgebrd'          ),
     ('sgeev',          'dgeev',          'cgeev',          'zgeev'           ),
+    ('sgegqr',         'dgegqr',         'cgegqr',         'zgegqr'          ),
     ('sgehd2',         'dgehd2',         'cgehd2',         'zgehd2'          ),
     ('sgehrd',         'dgehrd',         'cgehrd',         'zgehrd'          ),
     ('sgelq2',         'dgelq2',         'cgelq2',         'zgelq2'          ),
