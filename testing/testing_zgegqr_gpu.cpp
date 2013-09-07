@@ -68,7 +68,7 @@ int main( int argc, char** argv)
             lwork = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
             lwork = max(lwork, 3*N*N);
             
-            TESTING_MALLOC(    tau, magmaDoubleComplex, min_mn );
+            TESTING_HOSTALLOC( tau, magmaDoubleComplex, min_mn );
             TESTING_MALLOC(    h_A, magmaDoubleComplex, n2     );
             TESTING_MALLOC(    h_R, magmaDoubleComplex, n2     );
             TESTING_DEVALLOC(  d_A, magmaDoubleComplex, ldda*N );
@@ -76,6 +76,13 @@ int main( int argc, char** argv)
             TESTING_DEVALLOC(dwork, magmaDoubleComplex,    N*N );
             TESTING_HOSTALLOC( h_work, magmaDoubleComplex,  lwork );
             
+
+            magmaDoubleComplex *ddA, *d_T;
+            TESTING_DEVALLOC(  ddA, magmaDoubleComplex,    N*N );
+            TESTING_DEVALLOC(  d_T, magmaDoubleComplex,    N*N );
+            cudaMemset(ddA, 0, N*N*sizeof(magmaDoubleComplex));
+            cudaMemset(d_T, 0, N*N*sizeof(magmaDoubleComplex));
+
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
             lapackf77_zlacpy( MagmaUpperLowerStr, &M, &N, h_A, &lda, h_R, &lda );
@@ -83,14 +90,24 @@ int main( int argc, char** argv)
             
             // warmup
             magma_zgegqr_gpu( M, N, d_A, ldda, dwork, h_work, &info );
-
             magma_zsetmatrix( M, N, h_R, lda, d_A, ldda );
             
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
             gpu_time = magma_sync_wtime( 0 );
-            magma_zgegqr_gpu( M, N, d_A, ldda, dwork, h_work, &info );
+            if (opts.version == 2) {
+                int min_mn = min(M, N);
+                int     nb = N;
+
+                cuDoubleComplex *dtau = dwork;
+                
+                magma_zgeqr2x3_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, dwork+min_mn, &info);
+                magma_zgetmatrix( min_mn, 1, dtau, min_mn, tau, min_mn);  
+                magma_zungqr_gpu( M, N, N, d_A, ldda, tau, d_T, nb, &info );
+            }
+            else
+               magma_zgegqr_gpu( M, N, d_A, ldda, dwork, h_work, &info );
             gpu_time = magma_sync_wtime( 0 ) - gpu_time;
 
             gpu_perf = gflops / gpu_time;
@@ -137,13 +154,16 @@ int main( int argc, char** argv)
                        (int) M, (int) N, gpu_perf, 1000.*gpu_time );
             }
             
-            TESTING_FREE(      tau );
+            TESTING_HOSTFREE(  tau );
             TESTING_FREE(      h_A );
             TESTING_HOSTFREE(h_work);
             TESTING_FREE(    h_R );
             TESTING_DEVFREE( d_A  );
             TESTING_DEVFREE( dtau );
             TESTING_DEVFREE( dwork );
+
+            TESTING_DEVFREE( ddA );
+            TESTING_DEVFREE( d_T );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );
