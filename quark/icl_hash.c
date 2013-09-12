@@ -1,12 +1,14 @@
 /**
- * @file
+ * @file icl_hash.c
  *
  * Dependency free hash table implementation.
  *
  * This simple hash table implementation should be easy to drop into
  * any other peice of code, it does not depend on anything else :-)
+ * 
+ * @author Keith Seymour
+ * @author Asim YarKhan
  */
-/* $Id: icl_hash.c 1746 2010-11-07 18:43:24Z kurzak $ */
 /* $UTK_Copyright: $ */
 
 #include <stdlib.h>
@@ -31,7 +33,7 @@
  * to a datum to be hashed and returns an unsigned integer.
  * From: Keith Seymour's proxy library code
  *
- * @param datum -- the string to be hashed
+ * @param[in] key -- the string to be hashed
  *
  * @returns the hash index
  */
@@ -60,8 +62,9 @@ static int string_compare(void* a, void* b)
 /**
  * Create a new hash table.
  *
- * @param nbuckets -- number of buckets to create
- * @param hash_function -- pointer to the hashing function to be used
+ * @param[in] nbuckets -- number of buckets to create
+ * @param[in] hash_function -- pointer to the hashing function to be used
+ * @param[in] hash_key_compare -- pointer to the hash key comparison function to be used
  *
  * @returns pointer to new hash table.
  */
@@ -131,14 +134,14 @@ icl_hash_find(icl_hash_t *ht, void* key)
 icl_entry_t *
 icl_hash_insert(icl_hash_t *ht, void* key, void *data)
 {
-    icl_entry_t *curr, *prev;
+    icl_entry_t *curr;
     unsigned int hash_val;
 
     if(!ht || !key) return NULL;
 
     hash_val = (* ht->hash_function)(key) % ht->nbuckets;
 
-    for (prev=NULL,curr=ht->buckets[hash_val]; curr != NULL; prev=curr, curr=curr->next)
+    for (curr=ht->buckets[hash_val]; curr != NULL; curr=curr->next)
         if ( ht->hash_key_compare(curr->key, key))
             return(NULL); /* key already exists */
 

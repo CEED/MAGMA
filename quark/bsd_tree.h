@@ -606,7 +606,7 @@ name##_RB_INSERT(struct name *head, struct type *elm)                   \
 /* ICL                  tmp = RB_RIGHT(tmp, field);     */              \
 /* ICL          else                                            */      \
 /* ICL                 return (tmp);  */                                \
-                if (comp <= 0)                                          \
+                if (comp < 0)                                          \
                         tmp = RB_LEFT(tmp, field);                      \
                 else                                                    \
                         tmp = RB_RIGHT(tmp, field);                     \
@@ -614,7 +614,7 @@ name##_RB_INSERT(struct name *head, struct type *elm)                   \
         RB_SET(elm, parent, field);                                     \
         if (parent != NULL) {                                           \
 /* ICL            if (comp < 0)       */                               \
-                if (comp <= 0)                                           \
+                if (comp < 0)                                           \
                         RB_LEFT(parent, field) = elm;                   \
                 else                                                    \
                         RB_RIGHT(parent, field) = elm;                  \

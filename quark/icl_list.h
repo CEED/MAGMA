@@ -3,8 +3,9 @@
  *
  * Header file for the icl_list routines.
  *
+ * @author Keith Seymour
+ * @author Asim YarKhan
  */
-/* $Id: icl_list.h 1532 2010-09-07 15:38:18Z yarkhan $ */
 /* $UTK_Copyright: $ */
 
 #ifndef ICL_LIST_H

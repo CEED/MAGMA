@@ -7,7 +7,7 @@
  * PLASMA is a software package provided by Univ. of Tennessee,
  * Univ. of California Berkeley and Univ. of Colorado Denver
  *
- * @version 2.3.1
+ * @version 2.5.0
  * @author Asim YarKhan
  * @date 2010-11-15
  *
@@ -23,7 +23,7 @@
     arg1) \
 { \
   void *lastarg = NULL; \
-  void *args_list = (void *)QUARK_Args_List( quark );        \
+  void *args_list = (void *)QUARK_Args_List( quark );	\
   void *arg = QUARK_Args_Pop(args_list, &lastarg); \
   memcpy(&arg1, arg, sizeof(arg1)); \
 }
@@ -677,6 +677,114 @@
   memcpy(&arg20, arg, sizeof(arg20)); arg = QUARK_Args_Pop(args_list, &lastarg); \
   memcpy(&arg21, arg, sizeof(arg21)); arg = QUARK_Args_Pop(args_list, &lastarg); \
   memcpy(&arg22, arg, sizeof(arg22)); \
+}
+
+#define quark_unpack_args_23(quark, \
+    arg1, \
+    arg2, \
+    arg3, \
+    arg4, \
+    arg5, \
+    arg6, \
+    arg7, \
+    arg8, \
+    arg9, \
+    arg10, \
+    arg11, \
+    arg12, \
+    arg13, \
+    arg14, \
+    arg15, \
+    arg16, \
+    arg17, \
+    arg18, \
+    arg19, \
+    arg20, \
+    arg21, \
+    arg22, \
+    arg23) \
+{ \
+  void *lastarg = NULL; \
+  void *args_list = QUARK_Args_List( quark ); \
+  void *arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg1, arg, sizeof(arg1)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg2, arg, sizeof(arg2)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg3, arg, sizeof(arg3)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg4, arg, sizeof(arg4)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg5, arg, sizeof(arg5)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg6, arg, sizeof(arg6)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg7, arg, sizeof(arg7)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg8, arg, sizeof(arg8)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg9, arg, sizeof(arg9)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg10, arg, sizeof(arg10)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg11, arg, sizeof(arg11)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg12, arg, sizeof(arg12)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg13, arg, sizeof(arg13)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg14, arg, sizeof(arg14)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg15, arg, sizeof(arg15)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg16, arg, sizeof(arg16)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg17, arg, sizeof(arg17)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg18, arg, sizeof(arg18)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg19, arg, sizeof(arg19)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg20, arg, sizeof(arg20)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg21, arg, sizeof(arg21)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg22, arg, sizeof(arg22)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg23, arg, sizeof(arg23)); \
+}
+
+#define quark_unpack_args_24(quark, \
+    arg1, \
+    arg2, \
+    arg3, \
+    arg4, \
+    arg5, \
+    arg6, \
+    arg7, \
+    arg8, \
+    arg9, \
+    arg10, \
+    arg11, \
+    arg12, \
+    arg13, \
+    arg14, \
+    arg15, \
+    arg16, \
+    arg17, \
+    arg18, \
+    arg19, \
+    arg20, \
+    arg21, \
+    arg22, \
+    arg23, \
+    arg24) \
+{ \
+  void *lastarg = NULL; \
+  void *args_list = QUARK_Args_List( quark ); \
+  void *arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg1, arg, sizeof(arg1)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg2, arg, sizeof(arg2)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg3, arg, sizeof(arg3)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg4, arg, sizeof(arg4)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg5, arg, sizeof(arg5)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg6, arg, sizeof(arg6)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg7, arg, sizeof(arg7)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg8, arg, sizeof(arg8)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg9, arg, sizeof(arg9)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg10, arg, sizeof(arg10)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg11, arg, sizeof(arg11)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg12, arg, sizeof(arg12)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg13, arg, sizeof(arg13)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg14, arg, sizeof(arg14)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg15, arg, sizeof(arg15)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg16, arg, sizeof(arg16)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg17, arg, sizeof(arg17)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg18, arg, sizeof(arg18)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg19, arg, sizeof(arg19)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg20, arg, sizeof(arg20)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg21, arg, sizeof(arg21)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg22, arg, sizeof(arg22)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg23, arg, sizeof(arg23)); arg = QUARK_Args_Pop(args_list, &lastarg); \
+  memcpy(&arg24, arg, sizeof(arg24)); \
 }
 
 #endif

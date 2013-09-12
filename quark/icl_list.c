@@ -3,8 +3,9 @@
  *
  * Dependency free doubly linked list implementation.
  *
+ * @author Keith Seymour 
+ * @author Asim YarKhan
  */
-/* $Id: icl_list.c 1693 2010-10-26 18:29:56Z yarkhan $ */
 /* $UTK_Copyright: $ */
 
 #include <stdio.h>

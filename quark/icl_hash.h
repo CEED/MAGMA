@@ -3,8 +3,9 @@
  *
  * Header file for icl_hash routines.
  *
+ * @author Keith Seymour
+ * @author Asim YarKhan
  */
-/* $Id: icl_hash.h 1532 2010-09-07 15:38:18Z yarkhan $ */
 /* $UTK_Copyright: $ */
 
 #ifndef icl_hash_h

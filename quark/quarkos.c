@@ -6,7 +6,7 @@
  *  QUARK is a software package provided by Univ. of Tennessee,
  *  Univ. of California Berkeley and Univ. of Colorado Denver
  *
- * @version 2.3.1
+ * @version 2.5.0
  * @author Piotr Luszczek
  * @author Mathieu Faverge
  * @date 2010-11-15
@@ -19,6 +19,13 @@
 #define QUARK_OS_LINUX 1
 #define _GNU_SOURCE
 #include <unistd.h>
+#include <sched.h>
+#elif defined(__FreeBSD__)
+#define QUARK_OS_FREEBSD 1
+#include <unistd.h>
+#include <inttypes.h>
+#include <sys/param.h>
+#include <sys/cpuset.h>
 #include <sched.h>
 #elif defined( _WIN32 ) || defined( _WIN64 )
 #define QUARK_OS_WINDOWS 1
@@ -78,7 +85,7 @@ static volatile int topo_initialized = 0;
 void quark_topology_init(){
     pthread_mutex_lock(&mutextopo);
     if ( !topo_initialized ) {
-#if (defined QUARK_OS_LINUX) || (defined QUARK_OS_AIX)
+#if (defined QUARK_OS_LINUX) || (defined QUARK_OS_FREEBSD) || (defined QUARK_OS_AIX)
 
         sys_corenbr = sysconf(_SC_NPROCESSORS_ONLN);
 
@@ -87,7 +94,7 @@ void quark_topology_init(){
         int mib[4];
         int cpu;
         size_t len = sizeof(cpu);
-
+        
         /* set the mib for hw.ncpu */
         mib[0] = CTL_HW;
         mib[1] = HW_AVAILCPU;
@@ -111,7 +118,10 @@ void quark_topology_init(){
     pthread_mutex_unlock(&mutextopo);
 }
 
-void quark_topology_finalize(){}
+void quark_topology_finalize()
+{
+    quark_unsetaffinity();
+}
 
 /**
  This routine will set affinity for the calling thread that has rank 'rank'.
@@ -123,17 +133,27 @@ void quark_topology_finalize(){}
  Also, affinity is not resotred when QUARK_Finalize() is called.
  */
 int quark_setaffinity(int rank) {
-#ifndef QUARK_AFFINITY_DISABLE
-#if (defined QUARK_OS_LINUX)
+#ifdef QUARK_AFFINITY_DISABLE
+    return QUARK_SUCCESS;
+#else  /* QUARK_AFFINITY_DISABLE not defined */
+#if defined(QUARK_OS_LINUX) || defined(QUARK_OS_FREEBSD)
     {
+#if (defined QUARK_OS_LINUX)
         cpu_set_t set;
+#elif (defined QUARK_OS_FREEBSD)
+        cpuset_t set;
+#endif
         CPU_ZERO( &set );
         CPU_SET( rank, &set );
-
+        
 #if (defined HAVE_OLD_SCHED_SETAFFINITY)
         if( sched_setaffinity( 0, &set ) < 0 )
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
+#if (defined QUARK_OS_LINUX)
         if( sched_setaffinity( 0, sizeof(set), &set) < 0 )
+#elif (defined QUARK_OS_FREEBSD)
+        if( cpuset_setaffinity(CPU_LEVEL_WHICH, CPU_WHICH_PID, 0, sizeof(set), &set) < 0 )
+#endif
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
             {
                 return QUARK_ERR_UNEXPECTED;
@@ -145,7 +165,7 @@ int quark_setaffinity(int rank) {
     {
         thread_affinity_policy_data_t ap;
         int                           ret;
-
+        
         ap.affinity_tag = 1; /* non-null affinity tag */
         ret = thread_policy_set( mach_thread_self(),
                                  THREAD_AFFINITY_POLICY,
@@ -176,8 +196,96 @@ int quark_setaffinity(int rank) {
     return QUARK_ERR_NOT_SUPPORTED;
 #endif
 #endif /* QUARK_AFFINITY_DISABLE */
-    return QUARK_ERR_NOT_SUPPORTED;
 }
+
+/**
+ This routine will set affinity for the calling thread that has rank 'rank'.
+ Ranks start with 0.
+
+ If there are multiple instances of QUARK then affinity will be wrong: all ranks 0
+ will be pinned to core 0.
+
+ Also, affinity is not resotred when QUARK_Finalize() is called.
+ */
+int quark_unsetaffinity() {
+#ifdef QUARK_AFFINITY_DISABLE
+    return QUARK_SUCCESS;
+#else  /* QUARK_AFFINITY_DISABLE not defined */
+#if defined(QUARK_OS_LINUX) || defined(QUARK_OS_FREEBSD)
+    {
+        int i;
+#if (defined QUARK_OS_LINUX)
+        cpu_set_t set;
+#elif (defined QUARK_OS_FREEBSD)
+        cpuset_t set;
+#endif
+        CPU_ZERO( &set );
+
+        for(i=0; i<sys_corenbr; i++)
+            CPU_SET( i, &set );
+
+#if (defined HAVE_OLD_SCHED_SETAFFINITY)
+        if( sched_setaffinity( 0, &set ) < 0 )
+#else /* HAVE_OLD_SCHED_SETAFFINITY */
+#if (defined QUARK_OS_LINUX)
+        if( sched_setaffinity( 0, sizeof(set), &set) < 0 )
+#elif (defined QUARK_OS_FREEBSD)
+        if( cpuset_setaffinity(CPU_LEVEL_WHICH, CPU_WHICH_PID, 0, sizeof(set), &set) < 0 )
+#endif
+#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+            {
+                quark_warning("quark_unsetaffinity", "Could not unbind thread");
+                return QUARK_ERR_UNEXPECTED;
+            }
+
+        return QUARK_SUCCESS;
+    }
+#elif (defined QUARK_OS_MACOS)
+    {
+        /* TODO: check how to unbind the main thread if necessary for OpenMP */
+        /* thread_affinity_policy_data_t ap; */
+        /* int                           ret; */
+        
+        /* ap.affinity_tag = 1; /\* non-null affinity tag *\/ */
+        /* ret = thread_policy_set( mach_thread_self(), */
+        /*                          THREAD_AFFINITY_POLICY, */
+        /*                          (integer_t*) &ap, */
+        /*                          THREAD_AFFINITY_POLICY_COUNT */
+        /*     ); */
+        /* if(ret != 0) { */
+        /*     quark_warning("quark_unsetaffinity", "Could not unbind thread"); */
+        /*     return QUARK_ERR_UNEXPECTED; */
+        /* } */
+
+        return QUARK_SUCCESS;
+    }
+#elif (defined QUARK_OS_WINDOWS)
+    {
+        int i;
+        DWORD mask = 0;
+
+        for(i=0; i<sys_corenbr; i++)
+            mask |= 1 << i;
+
+        if( SetThreadAffinityMask(GetCurrentThread(), mask) == 0) {
+            quark_warning("quark_unsetaffinity", "Could not unbind thread");
+            return QUARK_ERR_UNEXPECTED;
+        }
+        return QUARK_SUCCESS;
+    }
+#elif (defined QUARK_OS_AIX)
+    {
+        /* TODO: check how to unbind the main thread if necessary for OpenMP */
+        /* tid_t self_ktid = thread_self (); */
+        /* bindprocessor(BINDTHREAD, self_ktid, rank); */
+        return QUARK_SUCCESS;
+    }
+#else
+    return QUARK_ERR_NOT_SUPPORTED;
+#endif
+#endif /* QUARK_AFFINITY_DISABLE */
+}
+
 #endif /* QUARK_HWLOC */
 
 /** ****************************************************************************
@@ -185,7 +293,7 @@ int quark_setaffinity(int rank) {
    another thread of less priority running for example for I/O.
  */
 int quark_yield() {
-#if (defined QUARK_OS_LINUX) || (defined QUARK_OS_MACOS) || (defined QUARK_OS_AIX)
+#if (defined QUARK_OS_LINUX) || (defined QUARK_OS_FREEBSD) || (defined QUARK_OS_MACOS) || (defined QUARK_OS_AIX)
     return sched_yield();
 #elif QUARK_OS_WINDOWS
     return SleepEx(0,0);
@@ -245,7 +353,7 @@ int quark_get_numthreads()
 int *quark_get_affthreads(/* int *coresbind */) {
     char *envstr = NULL;
     int i;
-    
+
     int *coresbind = (int *)malloc(CONTEXT_THREADS_MAX*sizeof(int));
     /* Env variable does not exist, we search the system number of core */
     QUARK_GETENV("QUARK_AFF_THREADS", envstr);
