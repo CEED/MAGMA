@@ -102,7 +102,8 @@ int main( int argc, char** argv)
 
                 cuDoubleComplex *dtau = dwork;
                 
-                magma_zgeqr2x3_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, dwork+min_mn, &info);
+                magma_zgeqr2x3_gpu(&M, &N, d_A, &ldda, dtau, d_T, ddA, 
+                                   (double *)(dwork+min_mn), &info);
                 magma_zgetmatrix( min_mn, 1, dtau, min_mn, tau, min_mn);  
                 magma_zungqr_gpu( M, N, N, d_A, ldda, tau, d_T, nb, &info );
             }
