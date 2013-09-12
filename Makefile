@@ -10,25 +10,21 @@ MAGMA_DIR = .
 include ./Makefile.internal
 -include Makefile.local
 
-.PHONY: all lib libmagma libmagmablas test clean cleanall install shared
+.PHONY: all lib libmagma test clean cleanall install shared
 
 all: lib test
 
-lib: libmagma libmagmablas
+lib: libmagma
 
-# libmagmablas is not a true dependency, but adding it forces parallel make
-# to do one directory at a time, making output less confusing.
-libmagma: libmagmablas
+libmagma:
+	@echo ======================================== magmablas
+	( cd magmablas      && $(MAKE) )
 	@echo ======================================== src
 	( cd src            && $(MAKE) )
 	@echo ======================================== control
 	( cd control        && $(MAKE) )
 	@echo ======================================== interface
 	( cd interface_cuda && $(MAKE) )
-
-libmagmablas:
-	@echo ======================================== magmablas
-	( cd magmablas      && $(MAKE) )
 
 libquark:
 	@echo ======================================== quark
