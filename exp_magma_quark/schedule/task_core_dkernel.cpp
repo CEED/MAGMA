@@ -12,17 +12,13 @@
 #include "ca_dbg_tools.h"
 #endif
 
-#ifndef USE_CUDBG
-//#include <mkl.h>
-#define dgetrf dgetrf_
-#define dtrsm dtrsm_
-#define dlaswp dlaswp_
-#define dgemm dgemm_
-#endif
+
 
 #include "common_magma.h"
 
 #include "schedule.h"
+
+#include "core_dkernel.h"
 
 #include "task_core_dkernel.h"
 

@@ -23,7 +23,4 @@ void task_core_dlaswp(Schedule* sched_obj);
 void task_core_dtrsm(Schedule* sched_obj);
 void task_core_dgemm(Schedule* sched_obj);
 
-int CORE_zgetrf_reclap(int M, int N,
-                       double *A, int LDA,
-                       int *IPIV, int *info); //core_zgetrf_reclap.cpp
 #endif

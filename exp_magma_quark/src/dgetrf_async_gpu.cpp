@@ -17,7 +17,9 @@
 #include "magma_async.h"
 
 #include "schedule.h" 
- 
+
+#include "core_dkernel.h"
+
 // === Define what BLAS to use ============================================ 
 /* 
 #define PRECISION_d 
@@ -53,7 +55,8 @@
 #define ipiv(I) (ipiv+(I)*nb) 
  
 
-extern "C" void CORE_zgetrf_reclap_init(void);
+//extern "C" 
+//void CORE_zgetrf_reclap_init();
 
 /*
 *

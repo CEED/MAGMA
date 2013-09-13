@@ -17,7 +17,7 @@ ALLOBJ := $(ALLSRC:.cpp=.o)
 
 .PHONY: all clean cleanall
 
-all: libquark libexp $(LIBMAGMA) testing
+all: libquark libexp testing
 
 libexp: 
 	@echo ======================================== control
@@ -30,15 +30,10 @@ libexp:
 	( cd schedule && $(MAKE) )
 	@echo ======================================== src
 	( cd src      && $(MAKE) )
-
+	
 libquark:
 	@echo ======================================== quark
 	( cd $(QUARKDIR)          && $(MAKE) CC=gcc)
-	
-	
-$(LIBMAGMA): $(ALLOBJ)
-	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
-	$(RANLIB) $@
 
 testing:	
 	@echo ======================================== test
@@ -50,6 +45,7 @@ clean:
 	( cd core     && $(MAKE) clean )
 	( cd schedule && $(MAKE) clean )
 	( cd src      && $(MAKE) clean )
+	( cd test     && $(MAKE) clean )
 	rm -f *.o *~ *.linkinfo
 
 cleanall: clean

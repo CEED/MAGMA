@@ -21,7 +21,7 @@ QUARKDIR ?= $(MAGMA_DIR)/quark
 INC += -I$(QUARKDIR)
 LIB += -L$(QUARKDIR) -lquark
 
-INC += -I../include -I../schedule -I../control -I../debug -I../schedule
+INC += -I../include -I../schedule -I../control -I../core -I../debug -I../schedule
 
 LIBMAGMA_QUARK = $(MAGMA_DIR)/exp_magma_quark/libmagma_quark.a
 
@@ -29,3 +29,4 @@ LIBMAGMA_QUARK = $(MAGMA_DIR)/exp_magma_quark/libmagma_quark.a
 # 
 #
 INC += -I../../testing
+LIB += -L../../testing -ltest

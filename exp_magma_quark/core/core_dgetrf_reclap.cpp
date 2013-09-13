@@ -46,7 +46,7 @@ double LAPACKE_dlamch_work( char cmach )
  }
 #endif
 
-//void CORE_zgetrf_reclap_init(void);
+//void CORE_zgetrf_reclap_init();
 
 static inline void
 CORE_zgetrf_reclap_update(int M, int column, int n1, int n2,
@@ -193,8 +193,7 @@ int CORE_zgetrf_reclap(int M, int N,
 static volatile double CORE_zamax1buf[AMAX1BUF_SIZE];
 static double sfmin;
 
-void
-CORE_zgetrf_reclap_init(void) {
+void CORE_zgetrf_reclap_init() {
     int i;
 
     for (i = 0; i < AMAX1BUF_SIZE; ++i) CORE_zamax1buf[i] = -1.0;
