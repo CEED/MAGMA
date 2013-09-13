@@ -207,7 +207,7 @@ int main( int argc, char** argv)
             magma_dsetmatrix( M, N, h_R, lda, d_A, ldda );
             magma_async_init(P, d_cpu, Pr, nb);
             gpu_time2 = magma_wtime();
-            magma_async_dgetrf_rec_gpu( M, N, d_A, ldda, ipiv, &info);
+            magma_dgetrf_async_gpu( M, N, d_A, ldda, ipiv, &info);
             gpu_time2 = magma_wtime() - gpu_time2;
             gpu_perf2 = gflops / gpu_time2;
             magma_async_finalize();
@@ -244,7 +244,7 @@ int main( int argc, char** argv)
             magma_async_init(P, d_cpu, Pr, nb);
 
             gpu_time3 = magma_wtime();
-            magma_async_dgetrf_rec_work_gpu(M, N, d_A, ldda, ipiv, &info, WORK, WORK_LD, WORK_n);
+            magma_dgetrf_async_work_gpu(M, N, d_A, ldda, ipiv, &info, WORK, WORK_LD, WORK_n);
             gpu_time3 = magma_wtime() - gpu_time3;
             gpu_perf3 = gflops / gpu_time3;
             magma_async_finalize();

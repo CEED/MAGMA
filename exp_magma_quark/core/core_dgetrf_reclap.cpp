@@ -20,25 +20,20 @@
 #if (dbglevel >=1)
 #include "ca_dbg_tools.h"
 #endif
-#ifdef USE_CUDBG
-#include "cudbg.h"    /*cuda debug mode*/
-#include "cudbg_magma_wrap.h" 
-#include "dbg_complex_to_double.h"
-#else
+
+#ifndef USE_CUDBG
 #include <cblas.h>
 //#include <mkl.h>
 #endif
 
 #include "common_magma.h"
 
-#include "dbg_complex_to_double.h"
-
-/*
-#include <lapacke.h>
-#include "common.h"
-*/
-#include "plasma_wrap.h"
-
+/*Some CBLAS function that need a translation*/
+#define cblas_izamax(a,b,c) cblas_idamax((a),(b),(c))
+#define cblas_ztrsm  cblas_dtrsm
+#define cblas_zgemm  cblas_dgemm
+#define cblas_zscal  cblas_dscal
+#define cabs(a) ((a)>=0?(a):-(a))
 
 #ifndef LAPACKE_dlamch_work
 double LAPACKE_dlamch_work( char cmach )
