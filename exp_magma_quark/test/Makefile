@@ -28,7 +28,7 @@ EXE    := $(ALLOBJ:.o=)
 all: $(EXE)
 
 clean:
-	rm -f *.cu_o *.o *~ *.linkinfo stamp
+	rm -f *.cu_o *.o *~ *.linkinfo stamp $(EXE)
 
 cleanall: clean
 	rm -f $(LIBMAGMA)
