@@ -238,10 +238,6 @@ ZSRC += \
 	zgebrd.cpp		\
 	zlabrd_gpu.cpp		\
 
-# ----------
-# NEW QUARK DEV
-ZSRC += \
-	zpotrf_gpu_quark_v1.cpp		\
 
 # ------------------------------------------------------------
 -include Makefile.local
