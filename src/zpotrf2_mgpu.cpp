@@ -153,7 +153,7 @@ magma_zpotrf2_mgpu(int num_gpus, char uplo, magma_int_t m, magma_int_t n,
     magma_setdevice(0);
 
     /* == initialize the trace */
-    trace_init( 1, num_gpus, 3, stream );
+    trace_init( 1, num_gpus, 3, (magma_queue_t*)stream );
 
     /* Use blocked code. */
     if (upper) {
