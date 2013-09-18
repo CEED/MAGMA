@@ -20,6 +20,8 @@ ZSRC := \
         magma_z_vio.cpp \
         magma_z_free.cpp \
         magma_z_matrixchar.cpp \
+        magma_z_lra.cpp \
+        magma_z_mpksetup.cpp \
  
 
 -include Makefile.local

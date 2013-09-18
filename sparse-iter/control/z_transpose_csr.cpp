@@ -75,7 +75,7 @@ magma_int_t z_transpose_csr( magma_int_t n_rows, magma_int_t n_cols, magma_int_t
   for( magma_int_t i=0; i<nnz; i++ )
     nnztemp[col[i]]++;    
 
-  for( magma_int_t i=0; i<n_rows+1; i++ ){
+  for( magma_int_t i=0; i<n_rows; i++ ){
     valtemp[i] = (magmaDoubleComplex*)malloc((nnztemp[i])*sizeof(magmaDoubleComplex));
     coltemp[i] = (magma_int_t*)malloc(nnztemp[i]*sizeof(magma_int_t));
   }
@@ -119,3 +119,33 @@ magma_int_t z_transpose_csr( magma_int_t n_rows, magma_int_t n_cols, magma_int_t
     fflush(stdout);
 */
 }
+
+magma_int_t 
+magma_z_mtranspose( magma_z_sparse_matrix A, magma_z_sparse_matrix *B ){
+
+    if( A.memory_location == Magma_CPU ){
+        if( A.storage_type == Magma_CSR ){
+            z_transpose_csr( A.num_rows, A.num_cols, A.nnz, A.val, A.row, A.col, &(B->num_rows), &(B->num_cols), &(B->nnz), &(B->val), &(B->row), &(B->col) );
+            B->memory_location = Magma_CPU;
+            B->storage_type = Magma_CSR;
+        }
+        else{
+            magma_z_sparse_matrix C, D;
+            magma_z_mconvert( A, &C, A.storage_type, Magma_CSR);
+            magma_z_mtranspose( C, &D );
+            magma_z_mconvert( D, B, Magma_CSR, A.storage_type );
+            magma_z_mfree(&C);
+            magma_z_mfree(&D);
+        }
+    }
+    else{
+        magma_z_sparse_matrix C, D;
+        magma_z_mtransfer( A, &C, A.memory_location, Magma_CPU);
+        magma_z_mtranspose( C, &D );
+        magma_z_mtransfer( D, B, Magma_CPU, A.memory_location );
+        magma_z_mfree(&C);
+        magma_z_mfree(&D);
+    }
+
+}
+
