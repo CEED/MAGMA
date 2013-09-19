@@ -35,7 +35,26 @@ int main( int argc, char** argv)
     parse_opts( argc, argv, &opts );
     
     const char *filename[] =
-    {
+    {    
+
+     "test_matrices/airfoil_2d.mtx",
+     "test_matrices/apache2.mtx",
+     "test_matrices/audikw_1.mtx",
+     "test_matrices/bloweybq.mtx",
+     "test_matrices/bmw3_2.mtx",
+     "test_matrices/cage10.mtx",
+     "test_matrices/ecology2.mtx",
+     "test_matrices/F1.mtx",
+     "test_matrices/fv1.mtx",
+     "test_matrices/G3_circuit.mtx",
+     "test_matrices/poisson3Da.mtx",
+     "test_matrices/Pres_Poisson.mtx",
+     "test_matrices/Trefethen_2000.mtx",
+     "test_matrices/Trefethen_20000.mtx",
+
+     "test_matrices/fv1.mtx",
+     "test_matrices/parabolic_fem.mtx",
+    "test_matrices/Trefethen_20000.mtx",
     "test_matrices/Trefethen_2000.mtx",
      "test_matrices/Pres_Poisson.mtx",
      "test_matrices/bloweybq.mtx",
@@ -56,14 +75,40 @@ int main( int argc, char** argv)
      "test_matrices/airfoil_2d.mtx",
      "test_matrices/cyl6.mtx",
      "test_matrices/poisson3Da.mtx",
-     "test_matrices/stokes64.mtx",
      "test_matrices/circuit_3.mtx",
      "test_matrices/cage10.mtx",
      "test_matrices/boneS10.mtx",
      "test_matrices/parabolic_fem.mtx",
-     "test_matrices/circuit5M.mtx"
+
+/*
+    "test_matrices/Trefethen_2000.mtx",
+     "test_matrices/Pres_Poisson.mtx",
+     "test_matrices/bloweybq.mtx",
+     "test_matrices/ecology2.mtx",
+     "test_matrices/apache2.mtx",
+     //"test_matrices/crankseg_2.mtx",
+     //"test_matrices/bmwcra_1.mtx",
+     //"test_matrices/F1.mtx",
+
+     "test_matrices/audikw_1.mtx",
+     //"test_matrices/inline_1.mtx",
+     //"test_matrices/ldoor.mtx",
+     "test_matrices/thermal2.mtx",
+     "test_matrices/G3_circuit.mtx",
+     "test_matrices/tmt_sym.mtx",
+     "test_matrices/offshore.mtx",
+     //"test_matrices/bmw3_2.mtx",
+     //"test_matrices/airfoil_2d.mtx",
+     //"test_matrices/cyl6.mtx",
+     //"test_matrices/poisson3Da.mtx",
+     //"test_matrices/stokes64.mtx",
+     //"test_matrices/circuit_3.mtx",
+     "test_matrices/cage10.mtx",
+     //"test_matrices/boneS10.mtx",
+     //"test_matrices/parabolic_fem.mtx",
+     //"test_matrices/circuit5M.mtx"*/
     };
-for(magma_int_t matrix=0; matrix<30; matrix++){
+for(magma_int_t matrix=0; matrix<14; matrix++){
 
     magma_z_sparse_matrix A, B, C, D;
     magma_z_vector x, b;
@@ -94,6 +139,9 @@ for(magma_int_t matrix=0; matrix<30; matrix++){
     solver_par.maxiter = 1000;
 
     magma_zbicgstab( D, b, &x, &solver_par );
+    magma_z_vfree(&x);
+    magma_z_vinit( &x, Magma_DEV, A.num_cols, zero );
+    magma_zbicgstab_merge2( D, b, &x, &solver_par );
 
    // magma_z_vvisu( x, 0,10);
 

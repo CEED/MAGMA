@@ -44,6 +44,10 @@ ZSRC += \
 ZSRC += \
   	testing_zdebug.cpp              \
   	testing_zdot.cpp              \
+  	testing_zkernel.cpp              \
+  	testing_z_csrmv.cpp              \
+  	testing_z_mpk.cpp              \
+
 # ------------------------------------------------------------
 -include Makefile.local
 -include Makefile.src

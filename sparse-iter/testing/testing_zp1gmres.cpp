@@ -97,7 +97,7 @@ for(magma_int_t matrix=0; matrix<1; matrix++){
     solver_par.maxiter = 1;
     solver_par.restart = 5;
 
-    magma_zp1gmres( D, b, &x, &solver_par );
+    //magma_zp1gmres( D, b, &x, &solver_par );
 
     magma_z_vvisu( x, 0,10);
 

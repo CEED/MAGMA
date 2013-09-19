@@ -70,7 +70,7 @@ int main( int argc, char** argv)
     }
     if (id > -1) printf( "\n    Usage: ./testing_z_mv --id %d\n\n",id );
 
-    for(matrix=0; matrix<16; matrix++)
+    for(matrix=0; matrix<13; matrix++)
     {
         magma_z_sparse_matrix hA, hB, hC, dA, dB;
         magma_z_vector hx, hy, dx, dy;
@@ -142,11 +142,10 @@ int main( int argc, char** argv)
         // SpMV on GPU (CSR)
         magma_device_sync(); start = magma_wtime(); 
         for (i=0; i<10; i++)
-        magma_z_spmv( one, dA, dx, zero, dy);
+            magma_z_spmv( one, dA, dx, zero, dy);
         magma_device_sync(); end = magma_wtime(); 
         printf( " > MAGMA: %.2e seconds (CSR).\n",(end-start)/10 );
         //magma_z_vvisu( dy, 0,10);
-
         // SpMV on GPU (ELLPACKT)
         magma_device_sync(); start = magma_wtime(); 
         for (i=0; i<10; i++)
