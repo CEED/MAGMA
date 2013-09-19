@@ -609,24 +609,36 @@ extern "C"
 magma_int_t magma_z_mvisu( magma_z_sparse_matrix A )
 {
 
-
-    if( A.storage_type != Magma_DENSE ){
-        magma_z_sparse_matrix B;
-        magma_z_mconvert( A, &B, A.storage_type, Magma_DENSE);
-        for( magma_int_t i=0; i<(B.num_rows); i++ ){
-          for( magma_int_t j=0; j<B.num_cols; j++ )
-            cout << MAGMA_Z_REAL( B.val[i*(B.num_cols)+j] ) << " " ;
-          cout << endl;
+    if( A.memory_location == Magma_CPU ){
+        if( A.storage_type == Magma_DENSE ){
+            for( magma_int_t i=0; i<(A.num_rows); i++ ){
+              for( magma_int_t j=0; j<A.num_cols; j++ )
+                cout << MAGMA_Z_REAL( A.val[i*(A.num_cols)+j] ) << " " ;
+              cout << endl;
+            }
         }
-        free(B.val);
+        else if( A.storage_type == Magma_CSR ){
+            magma_z_sparse_matrix C;
+            magma_z_mconvert( A, &C, A.storage_type, Magma_DENSE );
+            magma_z_mvisu(  C );
+            magma_z_mfree(&C);
+        }
+        else{
+            magma_z_sparse_matrix C, D;
+            magma_z_mconvert( A, &C, A.storage_type, Magma_CSR );
+            magma_z_mconvert( C, &D, Magma_CSR, Magma_DENSE );
+            magma_z_mvisu(  D );
+            magma_z_mfree(&C);
+            magma_z_mfree(&D);
+        }
     }
     else{
-        for( magma_int_t i=0; i<(A.num_rows); i++ ){
-          for( magma_int_t j=0; j<A.num_cols; j++ )
-            cout << MAGMA_Z_REAL( A.val[i*(A.num_cols)+j] ) << " " ;
-          cout << endl;
-        }
+        magma_z_sparse_matrix C;
+        magma_z_mtransfer( A, &C, A.memory_location, Magma_CPU );
+        magma_z_mvisu(  C );
+        magma_z_mfree(&C);
     }
+
   return MAGMA_SUCCESS;
 }
 
@@ -727,8 +739,8 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   assert( coo_val != NULL);
 
 
-  printf("Reading sparse matrix from file (%s):",filename);
-  fflush(stdout);
+  //printf("Reading sparse matrix from file (%s):",filename);
+  //fflush(stdout);
 
 
   if (mm_is_real(matcode) || mm_is_integer(matcode)){
@@ -749,12 +761,12 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   }
   
   fclose(fid);
-  printf(" done\n");
+  //printf(" done\n");
   
   
 
   if(mm_is_symmetric(matcode)) { //duplicate off diagonal entries
-  printf("detected symmetric case\n");
+  //printf("detected symmetric case\n");
     magma_int_t off_diagonals = 0;
     for(magma_int_t i = 0; i < A->nnz; ++i){
       if(coo_row[i] != coo_col[i])
@@ -797,7 +809,7 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
     coo_col = new_col; 
     coo_val = new_val;     
     A->nnz = true_nonzeros;
-    printf("total number of nonzeros: %d\n",A->nnz);    
+    //printf("total number of nonzeros: %d\n",A->nnz);    
 
   } //end symmetric case
   
@@ -922,7 +934,7 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
 
       }
   if( csr_compressor > 0){ // run the CSR compressor to remove zeros
-      printf("removing zeros: ");
+      //printf("removing zeros: ");
       magma_z_sparse_matrix B;
       magma_z_mtransfer( *A, &B, Magma_CPU, Magma_CPU ); 
       magma_z_csr_compressor(&(A->val), 
@@ -930,13 +942,13 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
                          &(A->col), 
                        &B.val, &B.row, &B.col, &B.num_rows); 
       B.nnz = B.row[num_rows];
-      printf(" remaining nonzeros:%d ", B.nnz); 
+     // printf(" remaining nonzeros:%d ", B.nnz); 
       magma_free_cpu( A->val ); 
       magma_free_cpu( A->row ); 
       magma_free_cpu( A->col ); 
       magma_z_mtransfer( B, A, Magma_CPU, Magma_CPU ); 
       magma_z_mfree( &B ); 
-      printf("done.\n");
+     // printf("done.\n");
   }
   return MAGMA_SUCCESS;
 }

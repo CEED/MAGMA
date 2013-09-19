@@ -59,14 +59,36 @@ using namespace std;
 
 magma_int_t magma_z_csr_compressor(magmaDoubleComplex ** val, magma_int_t ** row, magma_int_t ** col, magmaDoubleComplex ** valn, magma_int_t ** rown, magma_int_t ** coln, magma_int_t *n)
 {
-    magma_int_t nnz_new=0; 
-    for( magma_int_t i=0; i<(*row)[*n]; i++ )
-        if( MAGMA_Z_REAL((*val)[i]) != 0 )
-            nnz_new++;
+    magma_int_t i,j, nnz_new=0, (*row_nnz), nnz_this_row; 
+    magma_imalloc_cpu( &(row_nnz), (*n) );
+    magma_imalloc_cpu( rown, *n+1 );
+    for( i=0; i<*n; i++ ){
+        (*rown)[i] = nnz_new;
+        nnz_this_row = 0;
+        for( j=(*row)[i]; j<(*row)[i+1]; j++ ){
+            if( MAGMA_Z_REAL((*val)[j]) != 0 ){
+                nnz_new++;
+                nnz_this_row++;
+            }
+        }
+        row_nnz[i] = nnz_this_row;
+    }
+    (*rown)[*n] = nnz_new;
 
     magma_zmalloc_cpu( valn, nnz_new );
     magma_imalloc_cpu( coln, nnz_new );
-    magma_imalloc_cpu( rown, *n+1 );
+
+    nnz_new = 0;
+    for( i=0; i<*n; i++ ){
+        for( j=(*row)[i]; j<(*row)[i+1]; j++ ){
+            if( MAGMA_Z_REAL((*val)[j]) != 0 ){
+                (*valn)[nnz_new]= (*val)[j];
+                (*coln)[nnz_new]= (*col)[j];
+                nnz_new++;
+            }
+        }
+    }
+
     if( valn == NULL || coln == NULL || rown == NULL ){
         magma_free( valn );
         magma_free( coln );
@@ -74,27 +96,6 @@ magma_int_t magma_z_csr_compressor(magmaDoubleComplex ** val, magma_int_t ** row
         printf("error: memory allocation.\n");
         return MAGMA_ERR_HOST_ALLOC;
     }
-      
-  
-    magma_int_t nzcount=-1, nz_row=0;
-    for(magma_int_t i=0; i<*n; i++)
-    {
-        nz_row=-1;
-        for(magma_int_t nzj=(*row)[i]; nzj<(*row)[i+1]; nzj++)
-        {
-            if( MAGMA_Z_REAL((*val)[nzj]) != 0.0 )
-            {
-                  nzcount++;
-                  nz_row++;
-                  if(nz_row==0)
-                      (*rown)[i]= nzcount;
-          
-            (*valn)[nzcount]= (*val)[nzj];
-            (*coln)[nzcount]= (*col)[nzj];
-            }
-        }   
-    }
-    (*rown)[*n]=nnz_new;
     return MAGMA_SUCCESS;
 }
 
@@ -201,7 +202,6 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             //The CSR compressor removes these
             magma_z_csr_compressor(&A.val, &row_tmp, &A.col, 
                                    &B->val, &B->row, &B->col, &B->num_rows);  
-
             printf( "done\n" );      
             return MAGMA_SUCCESS; 
         }        
