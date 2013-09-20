@@ -98,12 +98,19 @@ magma_z_mpkinfo(        magma_z_sparse_matrix A,
 
 
 magma_int_t 
-magma_z_mpksetup(       magma_z_sparse_matrix A, 
+magma_z_mpksetup_one(   magma_z_sparse_matrix A, 
                         magma_z_sparse_matrix *B, 
                         magma_int_t offset, 
                         magma_int_t chunksize, 
                         magma_int_t s );
 
+magma_int_t 
+magma_z_mpksetup(  magma_z_sparse_matrix A, 
+                   magma_z_sparse_matrix B[MagmaMaxGPUs], 
+                   magma_int_t num_procs,
+                   magma_int_t *offset, 
+                   magma_int_t *chunksize, 
+                   magma_int_t s );
 
 magma_int_t 
 write_z_csr_mtx(        magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, 
