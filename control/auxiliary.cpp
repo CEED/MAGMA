@@ -14,18 +14,20 @@
 
 // -------------------------
 // Return log base 2 of x, per C99 standard. Not provided by Microsoft.
+extern "C"
 double log2( double x )
 {
     const double log_2 = 0.6931471805599453;
     return log( x ) / log_2;
 }
 
-#endif
+#endif  // _WIN32 || _WIN64
 
 
 // -------------------------
 // Returns version of MAGMA, as defined by
 // MAGMA_VERSION_MAJOR, MAGMA_VERSION_MINOR, MAGMA_VERSION_MICRO constants.
+extern "C"
 void magma_version( int* major, int* minor, int* micro )
 {
     if ( major != NULL && minor != NULL && micro != NULL ) {
@@ -44,6 +46,7 @@ void magma_version( int* major, int* minor, int* micro )
 // On 2.0 cards with unified addressing, CUDA can tell if this is a device pointer.
 // For malloc'd host pointers, cudaPointerGetAttributes returns error.
 // @author Mark Gates
+extern "C"
 magma_int_t magma_is_devptr( const void* A )
 {
     cudaError_t err;
