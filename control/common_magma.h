@@ -33,8 +33,11 @@
     #include <io.h>
 
     // functions where Microsoft fails to provide C99 standard
+    // (only with Microsoft, not with e.g. nvcc on Windows)
+    #ifdef _MSC_VER
     #define copysign(x,y) _copysign(x,y)
     double log2( double x );  // defined in auxiliary.cpp
+    #endif
 
 #else
 
@@ -44,9 +47,8 @@
 
 #endif
 
-#if defined(__APPLE__)
-    #include "pthread_barrier.h"
-#endif
+// provide our own support for pthread_barrier on MacOS and Windows
+#include "pthread_barrier.h"
 
 #include "magma.h"
 #include "magma_lapack.h"

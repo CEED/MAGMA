@@ -9,6 +9,7 @@
        @author Simplice Donfack
 */
 #include "common_magma.h"
+
 /***************************************************************************//**
  * switch lapack thread_num initialization
  **/
@@ -49,8 +50,9 @@ void magma_setlapack_numthreads(magma_int_t num_threads)
    #endif
 #endif
 }
-/////////////////////////////////////////////////////////////
 
+
+/////////////////////////////////////////////////////////////
 magma_int_t magma_getlapack_numthreads()
 {
     magma_int_t num_threads = -1;
@@ -82,6 +84,8 @@ magma_int_t magma_getlapack_numthreads()
     if(num_threads==-1) num_threads = magma_get_numthreads();
     return num_threads;
 }
+
+
 /////////////////////////////////////////////////////////////
 magma_int_t magma_get_numthreads()
 {
@@ -101,8 +105,15 @@ magma_int_t magma_get_numthreads()
             threads = atoi(env);
     }
     // Third use the number of CPUs
-    if (threads < 1)
+    if (threads < 1) {
+        #ifdef _MSC_VER  // Windows
+        SYSTEM_INFO sysinfo;
+        GetSystemInfo( &sysinfo );
+        threads = sysinfo.dwNumberOfProcessors;
+        #else
         threads = sysconf(_SC_NPROCESSORS_ONLN);
+        #endif
+    }
     // Fourth use one thread
     if (threads < 1)
         threads = 1;
@@ -110,13 +121,3 @@ magma_int_t magma_get_numthreads()
     return threads;
 }
 /////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
