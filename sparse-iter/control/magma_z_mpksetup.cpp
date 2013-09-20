@@ -35,8 +35,8 @@ using namespace std;
     Purpose
     =======
 
-    Provides for a matrix A, a number of processors num_procs, 
-    the processor id proc_id, and a number of matrix powers s, the 
+    Provides for a matrix A, a chunksize, an offset, 
+    and a number of matrix powers s, the 
     local matrix B to needed by this processor for the matrix power kernel.
 
     Arguments
@@ -53,11 +53,11 @@ using namespace std;
 
 
 magma_int_t 
-magma_z_mpksetup(  magma_z_sparse_matrix A, 
-                   magma_z_sparse_matrix *B, 
-                   magma_int_t offset, 
-                   magma_int_t chunksize, 
-                   magma_int_t s ){
+magma_z_mpksetup_one(  magma_z_sparse_matrix A, 
+                       magma_z_sparse_matrix *B, 
+                       magma_int_t offset, 
+                       magma_int_t chunksize, 
+                       magma_int_t s ){
 
     if( A.memory_location == Magma_CPU ){
         if( A.storage_type == Magma_CSR ){
@@ -69,31 +69,36 @@ magma_z_mpksetup(  magma_z_sparse_matrix A,
                 
             magma_int_t start = offset;
             magma_int_t end = offset + chunksize;
-            printf("local block size: %d offset: %d\n", chunksize, offset);
+            //printf("local block size: %d offset: %d\n", chunksize, offset);
 
-            magma_int_t *z, i, j, count, num_new_nnz;
-            magma_imalloc_cpu( &z, A.num_rows );
-
+            magma_int_t *z1, *z2, i, j, count, num_new_nnz;
+            magma_imalloc_cpu( &z1, A.num_rows );
+            magma_imalloc_cpu( &z2, A.num_rows );
             for( i=0; i<A.num_rows; i++ )
-                    z[i] = 0;
+                    z1[i] = 0;
+            for( i=0; i<A.num_rows; i++ )
+                    z2[i] = 0;
             for( i=start; i<end; i++ )
-                    z[i] = 1;
+                    z1[i] = 1;
 
             // determine the rows of A needed in local matrix B 
-            for( count=0; count<s; count++ ){
+            for( count=0; count<s-1; count++ ){
                 for( j=0; j<A.num_rows; j++ ){
-                    if ( z[j] == 1 ){
+                    if ( z1[j] == 1 ){
                         for( i=A.row[j]; i<A.row[j+1]; i++ )
-                            z[A.col[i]] = 1;
+                            z2[A.col[i]] = 1;
                     }
                 }
-            }
-            
+                for( i=0; i<A.num_rows; i++){
+                    if( z1[i] == 1 || z2[i] ==1 )
+                        z1[i] = 1; 
+                }  
+            }   
             // fill row pointer of B
             num_new_nnz = 0;
             for( i=0; i<A.num_rows; i++){
                 B->row[i] = num_new_nnz;
-                if( z[i] != 0 ){
+                if( z1[i] != 0 ){
                     num_new_nnz += A.row[i+1]-A.row[i];
                 }            
             }
@@ -101,11 +106,10 @@ magma_z_mpksetup(  magma_z_sparse_matrix A,
             B->nnz = num_new_nnz;
             magma_zmalloc_cpu( &B->val, num_new_nnz );
             magma_imalloc_cpu( &B->col, num_new_nnz );
-
             // fill val and col pointer of B
             num_new_nnz = 0;
             for( j=0; j<A.num_rows; j++){
-                if( z[j] != 0 ){
+                if( z1[j] != 0 ){
                     for( i=A.row[j]; i<A.row[j+1]; i++ ){
                         B->col[num_new_nnz] = A.col[i];
                         B->val[num_new_nnz] = A.val[i];
@@ -113,11 +117,13 @@ magma_z_mpksetup(  magma_z_sparse_matrix A,
                     }
                 }
             }
+            magma_free_cpu(z1);
+            magma_free_cpu(z2);
         }
         else{
             magma_z_sparse_matrix C, D;
             magma_z_mconvert( A, &C, A.storage_type, Magma_CSR );
-            magma_z_mpksetup(  C, &D, offset, chunksize, s );
+            magma_z_mpksetup_one(  C, &D, offset, chunksize, s );
             magma_z_mconvert( D, B, Magma_CSR, A.storage_type );
             magma_z_mfree(&C);
             magma_z_mfree(&D);
@@ -126,12 +132,54 @@ magma_z_mpksetup(  magma_z_sparse_matrix A,
     else{
         magma_z_sparse_matrix C, D;
         magma_z_mtransfer( A, &C, A.memory_location, Magma_CPU );
-        magma_z_mpksetup(  C, &D, offset, chunksize, s );
+        magma_z_mpksetup_one(  C, &D, offset, chunksize, s );
         magma_z_mtransfer( D, B, Magma_CPU, A.memory_location );
         magma_z_mfree(&C);
         magma_z_mfree(&D);
     }
      
+
+    return MAGMA_SUCCESS; 
+}
+
+
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+    Purpose
+    =======
+
+    Provides for a matrix A, a number of processors num_procs, 
+    and a distribution *offset, *chunksize a set of matrices B
+    each containing the matrix rows to compute the matrix power kernel.
+
+    Arguments
+    =========
+
+    magma_sparse_matrix A                input matrix A
+    magma_sparse_matrix B[MagmaMaxGPUs]  set of output matrices B
+    magma_int_t *offset                  array containing the offsets
+    magma_int_t *chunksize               array containing the chunk sizes
+    magma_int_t s                        matrix powers
+
+    =====================================================================  */
+
+
+
+magma_int_t 
+magma_z_mpksetup(  magma_z_sparse_matrix A, 
+                   magma_z_sparse_matrix B[MagmaMaxGPUs], 
+                   magma_int_t num_procs,
+                   magma_int_t *offset, 
+                   magma_int_t *chunksize, 
+                   magma_int_t s ){
+
+    for(int procs=0; procs<num_procs; procs++){
+            magma_z_mpksetup_one( A, &B[procs], offset[procs], chunksize[procs], s );        
+    }
 
     return MAGMA_SUCCESS; 
 }
@@ -148,9 +196,9 @@ magma_z_mpksetup(  magma_z_sparse_matrix A,
     Purpose
     =======
 
-    Determines for a matrix A, a number of processors num_procs, 
-    the processor id proc_id, and a number of matrix powers s, the number 
-    of additional rows are needed by this processor for the matrix power kernel.
+    Provides for a matrix A, a chunksize, an offset, 
+    and a number of matrix powers s, the number of additional rows 
+    that are needed by this processor for the matrix power kernel.
 
     Arguments
     =========
@@ -176,34 +224,45 @@ magma_z_mpkinfo(   magma_z_sparse_matrix A,
             magma_int_t end = offset + chunksize;
             printf("local block size: %d\n", chunksize);
 
-            magma_int_t *z, i, j, count;
-            magma_imalloc_cpu( &z, A.num_rows );
+            magma_int_t *z1, *z2, i, j, count;
+            magma_imalloc_cpu( &z1, A.num_rows );
+            magma_imalloc_cpu( &z2, A.num_rows );
             for( i=0; i<A.num_rows; i++ )
-                    z[i] = 0;
+                    z1[i] = 0;
+            for( i=0; i<A.num_rows; i++ )
+                    z2[i] = 0;
             for( i=start; i<end; i++ )
-                    z[i] = 1;
+                    z1[i] = 1;
 
             // determine the rows of A needed in local matrix B 
-            for( count=0; count<s; count++ ){
+            for( count=0; count<s-1; count++ ){
                 for( j=0; j<A.num_rows; j++ ){
-                    if ( z[j] == 1 ){
+                    if ( z1[j] == 1 ){
                         for( i=A.row[j]; i<A.row[j+1]; i++ )
-                            z[A.col[i]] = 1;
+                            z2[A.col[i]] = 1;
                     }
                 }
-            }
+
+                for( i=0; i<A.num_rows; i++){
+                    if( z1[i] == 1 || z2[i] ==1 )
+                        z1[i] = 1; 
+                }  
+            }   
+
 
             (*num_add_rows) = 0;
             for( i=0; i<start; i++){
-                if( z[i] != 0 )
+                if( z1[i] != 0 )
                     (*num_add_rows)++;
             }
             for( i=end; i<A.num_rows; i++){
-                if( z[i] != 0 )
+                if( z1[i] != 0 )
                     (*num_add_rows)++;
             }
             printf("additional rows: %d\n", (*num_add_rows));
-        
+
+            magma_free_cpu(z1);
+            magma_free_cpu(z2);
 
         /*
             // this part would allow to determine the additional rows needed
