@@ -89,12 +89,20 @@ magma_zlra(             magma_z_sparse_matrix A,
                         int icompression );
 
 magma_int_t 
-magma_z_mpksetup(       magma_z_sparse_matrix A, 
-                        magma_int_t num_procs, 
-                        magma_int_t procs_id, 
+magma_z_mpkinfo(        magma_z_sparse_matrix A, 
+                        magma_int_t offset, 
+                        magma_int_t chunksize, 
                         magma_int_t s,    
                         magma_int_t *num_add_rows,
                         magma_int_t *add_rows );
+
+
+magma_int_t 
+magma_z_mpksetup(       magma_z_sparse_matrix A, 
+                        magma_z_sparse_matrix *B, 
+                        magma_int_t offset, 
+                        magma_int_t chunksize, 
+                        magma_int_t s );
 
 
 magma_int_t 
