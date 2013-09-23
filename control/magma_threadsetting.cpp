@@ -94,23 +94,31 @@ magma_int_t magma_get_numthreads()
 {
     /* determine the number of threads */
     magma_int_t threads = 0;
-    char *env;
-    // First check OMP_NUM_THREADS if MKL is used
+    char *myenv;
+
+    // First check OMP_NUM_THREADS then MKL then the system CPUs
 #if defined(_OPENMP)
     #pragma omp parallel
     {
-        threads = omp_get_num_threads;
+        threads = omp_get_num_threads();
     }
 #elif defined(MAGMA_WITH_MKL)
-    threads = mkl_get_num_threads;
+    threads = mkl_get_num_threads();
 #else
-    #ifdef _MSC_VER  // Windows
-    SYSTEM_INFO sysinfo;
-    GetSystemInfo( &sysinfo );
-    threads = sysinfo.dwNumberOfProcessors;
-    #else
-    threads = sysconf(_SC_NPROCESSORS_ONLN);
-    #endif
+    myenv = getenv("MAGMA_NUM_THREADS");
+    if (myenv != NULL)
+    {
+        threads = atoi(myenv);
+    }
+    else{
+        #ifdef _MSC_VER  // Windows
+        SYSTEM_INFO sysinfo;
+        GetSystemInfo( &sysinfo );
+        threads = sysinfo.dwNumberOfProcessors;
+        #else
+        threads = sysconf(_SC_NPROCESSORS_ONLN);
+        #endif
+    }
 #endif
 
     // Fourth use one thread
