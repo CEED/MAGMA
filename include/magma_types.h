@@ -15,7 +15,7 @@
 
 // ========================================
 // To use int64_t, link with mkl_intel_ilp64 or similar (instead of mkl_intel_lp64).
-#ifdef MAGMA_ILP64
+#if defined(MAGMA_ILP64) || defined(MKL_ILP64)
 typedef int64_t magma_int_t;
 typedef int64_t magma_err_t;
 #else
@@ -23,7 +23,7 @@ typedef int magma_int_t;
 typedef int magma_err_t;
 #endif
 
-// Define new type that will not be changed by the generator (matches PLASMA)
+// Define new type that the precision generator will not change (matches PLASMA)
 typedef double real_Double_t;
 
 
