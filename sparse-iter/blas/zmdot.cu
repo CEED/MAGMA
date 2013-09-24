@@ -32,7 +32,6 @@ magma_zgpumemzero(  magmaDoubleComplex *d, int n, int k ){
 __global__ void 
 magma_zdot_kernel( int Gs,
                         int n, 
-                        int k,
                         magmaDoubleComplex *v,
                         magmaDoubleComplex *r,
                         magmaDoubleComplex *vtmp){
@@ -266,7 +265,6 @@ magma_zblockreduce_kernel( int Gs,
 __global__ void 
 magma_zreduce_kernel_fast( int Gs,
                            int n, 
-                           int k,
                            magmaDoubleComplex *vtmp,
                            magmaDoubleComplex *vtmp2 ){
 
@@ -454,7 +452,7 @@ magma_zmdotc(       int n,
         magma_zblockdot_kernel<<<Gs, Bs, Ms>>>( Gs.x, n, k, v, r, d1 );
     }
     else{
-        magma_zdot_kernel<<<Gs, Bs, Ms>>>( Gs.x, n, k, v, r, d1 );
+        magma_zdot_kernel<<<Gs, Bs, Ms>>>( Gs.x, n, v, r, d1 );
     }
 /*
     magma_zgpumemzero<<<Gs, Bs, 0>>>( d1, n*k,1 );
@@ -490,7 +488,7 @@ magma_zmdotc(       int n,
         while( Gs.x > 1 ){
             Gs_next.x = ( Gs.x+Bs.x-1 )/ Bs.x ;
             if( Gs_next.x == 1 ) Gs_next.x = 2;
-            magma_zreduce_kernel_fast<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> ( Gs.x, n, k, aux1, aux2 );
+            magma_zreduce_kernel_fast<<< Gs_next.x/2, Bs.x/2, Ms/2 >>> ( Gs.x, n, aux1, aux2 );
             Gs_next.x = Gs_next.x /2;
             Gs.x = Gs_next.x;
             b = 1 - b;
