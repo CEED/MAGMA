@@ -283,6 +283,10 @@ magma_zgmres_pipe( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
 magma_int_t
 magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A, 
                   magma_z_vector x, magmaDoubleComplex beta, magma_z_vector y );
+
+magma_int_t
+magma_z_spmv_shift(     magmaDoubleComplex alpha, magma_z_sparse_matrix A, magmaDoubleComplex lambda,
+                        magma_z_vector x, magmaDoubleComplex beta, magma_z_vector y );
 /*
 magma_int_t
 magma_z_mpk(      magmaDoubleComplex alpha, magma_z_sparse_matrix A, 
@@ -310,6 +314,18 @@ magma_zgecsrmv(        const char *transA,
                        magmaDoubleComplex *d_y );
 
 magma_int_t 
+magma_zgecsrmv_shift(  const char *transA,
+                       magma_int_t m, magma_int_t n,
+                       magmaDoubleComplex alpha,
+                       magmaDoubleComplex lambda,
+                       magmaDoubleComplex *d_val,
+                       magma_int_t *d_rowptr,
+                       magma_int_t *d_colind,
+                       magmaDoubleComplex *d_x,
+                       magmaDoubleComplex beta,
+                       magmaDoubleComplex *d_y );
+
+magma_int_t 
 magma_zmgecsrmv(        const char *transA,
                        magma_int_t m, magma_int_t n,
                        magma_int_t num_vecs,
@@ -321,12 +337,23 @@ magma_zmgecsrmv(        const char *transA,
                        magmaDoubleComplex beta,
                        magmaDoubleComplex *d_y );
 
-
 magma_int_t 
 magma_zgeellmv(        const char *transA,
                        magma_int_t m, magma_int_t n,
                        magma_int_t nnz_per_row,
                        magmaDoubleComplex alpha,
+                       magmaDoubleComplex *d_val,
+                       magma_int_t *d_colind,
+                       magmaDoubleComplex *d_x,
+                       magmaDoubleComplex beta,
+                       magmaDoubleComplex *d_y );
+
+magma_int_t 
+magma_zgeellmv_shift(  const char *transA,
+                       magma_int_t m, magma_int_t n,
+                       magma_int_t nnz_per_row,
+                       magmaDoubleComplex alpha,
+                       magmaDoubleComplex lambda,
                        magmaDoubleComplex *d_val,
                        magma_int_t *d_colind,
                        magmaDoubleComplex *d_x,
@@ -352,6 +379,18 @@ magma_zgeelltmv(       const char *transA,
                        magma_int_t m, magma_int_t n,
                        magma_int_t nnz_per_row,
                        magmaDoubleComplex alpha,
+                       magmaDoubleComplex *d_val,
+                       magma_int_t *d_colind,
+                       magmaDoubleComplex *d_x,
+                       magmaDoubleComplex beta,
+                       magmaDoubleComplex *d_y );
+
+magma_int_t 
+magma_zgeelltmv_shift( const char *transA,
+                       magma_int_t m, magma_int_t n,
+                       magma_int_t nnz_per_row,
+                       magmaDoubleComplex alpha,
+                       magmaDoubleComplex lambda,
                        magmaDoubleComplex *d_val,
                        magma_int_t *d_colind,
                        magmaDoubleComplex *d_x,
