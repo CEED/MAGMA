@@ -63,6 +63,34 @@ int main( int argc, char** argv)
      "test_matrices/parabolic_fem.mtx",      // 15
      "test_matrices/fv1.mtx",                // 16
      "test_matrices/lap_25.mtx",             // 17
+
+     "test_matrices/Trefethen_2000.mtx",
+     "test_matrices/bcsstk01.mtx",
+     "test_matrices/Pres_Poisson.mtx",
+     "test_matrices/bloweybq.mtx",
+     "test_matrices/ecology2.mtx",
+     "test_matrices/apache2.mtx",
+     "test_matrices/crankseg_2.mtx",
+     "test_matrices/bmwcra_1.mtx",
+     "test_matrices/F1.mtx",
+     "test_matrices/audikw_1.mtx",
+     "test_matrices/ldoor.mtx",
+     "test_matrices/G3_circuit.mtx",
+     "test_matrices/tmt_sym.mtx",
+     "test_matrices/offshore.mtx",
+     "test_matrices/bmw3_2.mtx",
+     "test_matrices/cyl6.mtx",
+     "test_matrices/poisson3Da.mtx",
+     "test_matrices/stokes64.mtx",
+     "test_matrices/circuit_3.mtx",
+     "test_matrices/cage10.mtx",
+     "test_matrices/boneS01.mtx",
+     "test_matrices/boneS10.mtx",
+     "test_matrices/bone010.mtx",
+     "test_matrices/gr_30_30.mtx",
+     "test_matrices/ML_Laplace.mtx",
+     "test_matrices/parabolic_fem.mtx",
+     "test_matrices/circuit5M.mtx"
     };
 
     int id = -1, matrix = 0, i, ione = 1, *pntre, num_rblocks, num_cblocks;
@@ -74,7 +102,7 @@ int main( int argc, char** argv)
     }
     if (id > -1) printf( "\n    Usage: ./testing_z_mv --id %d\n\n",id );
 
-    for(matrix=0; matrix<1; matrix++)
+    for(matrix=40; matrix<50; matrix++)
     {
         magma_z_sparse_matrix hA, hB1, hB2, hB3, dA, hC;
         magma_int_t num_add_rows, *add_rows;
@@ -91,7 +119,12 @@ int main( int argc, char** argv)
 
         // set the total number of matrix powers - in CA-GMRES this
         // corresponds to the restart parameter
-        magma_int_t power_count = 3;
+        magma_int_t power_count = 30;
+        // array containing the shift for higher numerical stability
+        magmaDoubleComplex lambda[power_count];
+        for( i=0; i<power_count; i++)
+            lambda[ i ] = zero;
+
 
         #define ENABLE_TIMER
         #ifdef ENABLE_TIMER
@@ -187,7 +220,7 @@ int main( int argc, char** argv)
                         for (int gpu=0; gpu<num_gpus; gpu++) {
                             magma_setdevice(gpu);
                             magmablasSetKernelStream(stream[gpu]);
-                            magma_z_spmv( one, dB[gpu], a[gpu][i*sk+j], zero, a[gpu][i*sk+j+1] );
+                            magma_z_spmv_shift( one, dB[gpu], lambda[i*sk+j], a[gpu][i*sk+j], zero, a[gpu][i*sk+j+1] );
                         }
                     }
                 }
@@ -197,7 +230,7 @@ int main( int argc, char** argv)
                         for (int gpu=0; gpu<num_gpus; gpu++) {
                             magma_setdevice(gpu);
                             magmablasSetKernelStream(stream[gpu]);
-                            magma_z_spmv( one, dB[gpu], a[gpu][i*sk+j], zero, a[gpu][i*sk+j+1] );
+                            magma_z_spmv_shift( one, dB[gpu], lambda[i*sk+j], a[gpu][i*sk+j], zero, a[gpu][i*sk+j+1] );
                         }
                     }
                 }
