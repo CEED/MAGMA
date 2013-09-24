@@ -153,7 +153,7 @@ magma_z_mpksetup_one(  magma_z_sparse_matrix A,
     =======
 
     Provides for a matrix A, a number of processors num_procs, 
-    and a distribution *offset, *chunksize a set of matrices B
+    and a distribution *offset, *chunksize and s a set of matrices B
     each containing the matrix rows to compute the matrix power kernel.
 
     Arguments
@@ -161,6 +161,7 @@ magma_z_mpksetup_one(  magma_z_sparse_matrix A,
 
     magma_sparse_matrix A                input matrix A
     magma_sparse_matrix B[MagmaMaxGPUs]  set of output matrices B
+    magma_int_t num_procs                number of processors
     magma_int_t *offset                  array containing the offsets
     magma_int_t *chunksize               array containing the chunk sizes
     magma_int_t s                        matrix powers
@@ -212,17 +213,16 @@ magma_z_mpksetup(  magma_z_sparse_matrix A,
     =====================================================================  */
 
 magma_int_t 
-magma_z_mpkinfo(   magma_z_sparse_matrix A, 
-                   magma_int_t offset, 
-                   magma_int_t chunksize, 
-                   magma_int_t s,    
-                   magma_int_t *num_add_rows ){
+magma_z_mpkinfo_one( magma_z_sparse_matrix A, 
+                     magma_int_t offset, 
+                     magma_int_t chunksize, 
+                     magma_int_t s,    
+                     magma_int_t *num_add_rows ){
 
     if( A.memory_location == Magma_CPU ){
         if( A.storage_type == Magma_CSR ){
             magma_int_t start = offset;
             magma_int_t end = offset + chunksize;
-            printf("local block size: %d\n", chunksize);
 
             magma_int_t *z1, *z2, i, j, count;
             magma_imalloc_cpu( &z1, A.num_rows );
@@ -259,7 +259,6 @@ magma_z_mpkinfo(   magma_z_sparse_matrix A,
                 if( z1[i] != 0 )
                     (*num_add_rows)++;
             }
-            printf("additional rows: %d\n", (*num_add_rows));
 
             magma_free_cpu(z1);
             magma_free_cpu(z2);
@@ -293,16 +292,60 @@ magma_z_mpkinfo(   magma_z_sparse_matrix A,
         else{
             magma_z_sparse_matrix C;
             magma_z_mconvert( A, &C, A.storage_type, Magma_CSR );
-            magma_z_mpkinfo(  C, offset, chunksize, s, num_add_rows );
+            magma_z_mpkinfo_one(  C, offset, chunksize, s, num_add_rows );
             magma_z_mfree(&C);
         }
     }
     else{
         magma_z_sparse_matrix C;
         magma_z_mtransfer( A, &C, A.memory_location, Magma_CPU );
-        magma_z_mpkinfo(  C, offset, chunksize, s, num_add_rows );
+        magma_z_mpkinfo_one(  C, offset, chunksize, s, num_add_rows );
         magma_z_mfree(&C);
     }
 
    return MAGMA_SUCCESS; 
+}
+
+
+
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+    Purpose
+    =======
+
+    Provides for a matrix A, a number of processors num_procs, 
+    and a distribution *offset, *chunksize and s the number of 
+    rows added to the different matrices.
+
+    Arguments
+    =========
+
+    magma_sparse_matrix A                input matrix A
+    magma_int_t num_procs                number of processors
+    magma_int_t *offset                  array containing the offsets
+    magma_int_t *chunksize               array containing the chunk sizes
+    magma_int_t s                        matrix powers
+    magma_int_t *num_add_rows            output array: number of additional rows
+
+    =====================================================================  */
+
+
+
+magma_int_t 
+magma_z_mpkinfo(   magma_z_sparse_matrix A, 
+                   magma_int_t num_procs,
+                   magma_int_t *offset, 
+                   magma_int_t *chunksize, 
+                   magma_int_t s,
+                   magma_int_t *num_add_rows ){
+
+    for(int procs=0; procs<num_procs; procs++){
+        magma_z_mpkinfo_one( A, offset[procs], chunksize[procs], s, &num_add_rows[procs] ); 
+    }
+
+    return MAGMA_SUCCESS; 
 }

@@ -739,8 +739,8 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   assert( coo_val != NULL);
 
 
-  //printf("Reading sparse matrix from file (%s):",filename);
-  //fflush(stdout);
+  printf("Reading sparse matrix from file (%s):",filename);
+  fflush(stdout);
 
 
   if (mm_is_real(matcode) || mm_is_integer(matcode)){
@@ -761,7 +761,7 @@ magma_int_t magma_z_csr_mtx( magma_z_sparse_matrix *A, const char *filename ){
   }
   
   fclose(fid);
-  //printf(" done\n");
+  printf(" done\n");
   
   
 
