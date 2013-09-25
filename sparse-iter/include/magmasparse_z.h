@@ -94,7 +94,10 @@ magma_z_mpkinfo_one(    magma_z_sparse_matrix A,
                         magma_int_t offset, 
                         magma_int_t chunksize, 
                         magma_int_t s,    
-                        magma_int_t *num_add_rows );
+                        magma_int_t *num_add_rows,
+                        magma_int_t **add_rows,
+                        magma_int_t *num_add_vecs,
+                        magma_int_t **add_vecs );
 
 magma_int_t 
 magma_z_mpkinfo(        magma_z_sparse_matrix A, 
@@ -102,7 +105,10 @@ magma_z_mpkinfo(        magma_z_sparse_matrix A,
                         magma_int_t *offset, 
                         magma_int_t *chunksize, 
                         magma_int_t s,
-                        magma_int_t *num_add_rows );
+                        magma_int_t *num_add_rows,
+                        magma_int_t **add_rows,
+                        magma_int_t *num_add_vecs,
+                        magma_int_t **add_vecs );
 
 magma_int_t 
 magma_z_mpksetup_one(   magma_z_sparse_matrix A, 
@@ -118,6 +124,18 @@ magma_z_mpksetup(       magma_z_sparse_matrix A,
                         magma_int_t *offset, 
                         magma_int_t *chunksize, 
                         magma_int_t s );
+
+magma_int_t 
+magma_z_mpk_compress(   magma_int_t num_add_rows,
+                        magma_int_t *add_rows,
+                        magmaDoubleComplex *x,
+                        magmaDoubleComplex *y );
+
+magma_int_t 
+magma_z_mpk_uncompress( magma_int_t num_add_rows,
+                        magma_int_t *add_rows,
+                        magmaDoubleComplex *x,
+                        magmaDoubleComplex *y );
 
 magma_int_t 
 write_z_csr_mtx(        magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, 
@@ -275,6 +293,7 @@ magma_zp1gmres(        magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector
 magma_int_t
 magma_zgmres_pipe( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
                    magma_solver_parameters *solver_par );
+
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE utility function definitions
