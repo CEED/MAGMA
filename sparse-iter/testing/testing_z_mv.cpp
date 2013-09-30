@@ -59,6 +59,19 @@ int main( int argc, char** argv)
      "test_matrices/audikw_1.mtx",           // 13
      "test_matrices/boneS10.mtx",            // 14
      "test_matrices/parabolic_fem.mtx",      // 15
+
+     "test_matrices/jj_StocF-1465.mtx",      // 16
+     "test_matrices/jj_Geo_1438.mtx",
+     "test_matrices/jj_Emilia_923.mtx",
+     "test_matrices/jj_ML_Geer.mtx",
+     "test_matrices/jj_Flan_1565.mtx",
+     "test_matrices/jj_Hook_1498.mtx",
+     "test_matrices/jj_Long_Coup_dt0.mtx",
+     "test_matrices/jj_Long_Coup_dt6.mtx",
+     "test_matrices/jj_Cube_Coup_dt6.mtx",
+     "test_matrices/jj_Cube_Coup_dt0.mtx",
+     "test_matrices/jj_CoupCons3D.mtx",
+     "test_matrices/jj_ML_Laplace.mtx",      // 27
     };
 
     int id = -1, matrix = 0, i, ione = 1, *pntre, num_rblocks, num_cblocks;
@@ -70,7 +83,7 @@ int main( int argc, char** argv)
     }
     if (id > -1) printf( "\n    Usage: ./testing_z_mv --id %d\n\n",id );
 
-    for(matrix=0; matrix<13; matrix++)
+    for(matrix=16; matrix<27; matrix++)
     {
         magma_z_sparse_matrix hA, hB, hC, dA, dB;
         magma_z_vector hx, hy, dx, dy;

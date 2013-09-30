@@ -44,7 +44,6 @@ int main( int argc, char** argv)
      "test_matrices/bmw3_2.mtx",
      "test_matrices/cage10.mtx",
      "test_matrices/ecology2.mtx",
-     "test_matrices/F1.mtx",
      "test_matrices/fv1.mtx",
      "test_matrices/G3_circuit.mtx",
      "test_matrices/poisson3Da.mtx",
@@ -108,7 +107,7 @@ int main( int argc, char** argv)
      //"test_matrices/parabolic_fem.mtx",
      //"test_matrices/circuit5M.mtx"*/
     };
-for(magma_int_t matrix=0; matrix<14; matrix++){
+for(magma_int_t matrix=2; matrix<13; matrix++){
 
     magma_z_sparse_matrix A, B, C, D;
     magma_z_vector x, b;

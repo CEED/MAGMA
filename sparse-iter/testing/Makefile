@@ -47,6 +47,7 @@ ZSRC += \
   	testing_zkernel.cpp              \
   	testing_z_csrmv.cpp              \
   	testing_z_mpk.cpp              \
+  	testing_z_mpk_2.cpp              \
 
 # ------------------------------------------------------------
 -include Makefile.local
