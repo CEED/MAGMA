@@ -210,6 +210,8 @@ magma_z_mpksetup(  magma_z_sparse_matrix A,
     magma_int_t s                        matrix powers
     magma_int_t *num_add_rows            number of additional rows
     magma_int_t *add_rows                array for additional rows
+    magma_int_t *num_add_vecs            number of additional vector entries
+    magma_int_t *add_vecs                array for additional vector entries
 
     =====================================================================  */
 
@@ -360,6 +362,8 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
     magma_int_t *chunksize               array containing the chunk sizes
     magma_int_t s                        matrix powers
     magma_int_t *num_add_rows            output array: number of additional rows
+    magma_int_t *num_add_vecs            number of additional vector entries
+    magma_int_t *add_vecs                array for additional vector entries
 
     =====================================================================  */
 
@@ -394,7 +398,7 @@ magma_z_mpkinfo(   magma_z_sparse_matrix A,
     =======
 
     Packs for a given vector x and a key add_rows a compressed version
-    where the num_add_rows are in consecutive order.
+    where the add_rows are in consecutive order.
 
     Arguments
     =========
@@ -420,5 +424,162 @@ magma_z_mpk_compress(    magma_int_t num_add_rows,
 
     return MAGMA_SUCCESS; 
 }
+
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+    Purpose
+    =======
+
+    Unpacks for a given vector x and a key add_rows the compressed version.
+
+    Arguments
+    =========
+
+    magma_int_t num_add_rows             number of elements to pack
+    magma_int_t *add_rows                indices of elements to pack
+    magmaDoubleComplex *x                compressed input vector
+    magmaDoubleComplex *y                uncompressed output vector
+
+    =====================================================================  */
+
+
+
+magma_int_t 
+magma_z_mpk_uncompress(  magma_int_t num_add_rows,
+                         magma_int_t *add_rows,
+                         magmaDoubleComplex *x,
+                         magmaDoubleComplex *y ){
+    #pragma unroll
+    for(magma_int_t i=0; i<num_add_rows; i++){
+        y[add_rows[i]] = x[ i ];
+    }
+
+    return MAGMA_SUCCESS; 
+}
+
+
+
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+    Purpose
+    =======
+
+    Unpacks for a given vector x and a key add_rows the compressed version.
+    The selective version uncompresses only vectors within the area
+    [ offset , offset+blocksize ]
+
+    Arguments
+    =========
+
+    magma_int_t num_add_rows             number of elements to pack
+    magma_int_t *add_rows                indices of elements to pack
+    magma_int_t offset                   lower bound of vector chunk
+    magma_int_t blocksize                number of locally computed elements
+    magmaDoubleComplex *x                compressed input vector
+    magmaDoubleComplex *y                uncompressed output vector
+
+    =====================================================================  */
+
+
+
+magma_int_t 
+magma_z_mpk_uncompress_sel(    magma_int_t num_add_rows,
+                         magma_int_t *add_rows,
+                         magma_int_t offset,
+                         magma_int_t blocksize,
+                         magmaDoubleComplex *x,
+                         magmaDoubleComplex *y ){
+    #pragma unroll
+    for(magma_int_t i=0; i<num_add_rows; i++){
+ //       if( offset <= add_rows[i] )//&& add_rows[i] < offset+blocksize)
+            y[add_rows[i]] = x[ i ];
+    }
+
+    return MAGMA_SUCCESS; 
+}
+
+
+
+/*  -- MAGMA (version 1.1) --
+       Univ. of Tennessee, Knoxville
+       Univ. of California, Berkeley
+       Univ. of Colorado, Denver
+       November 2011
+
+    Purpose
+    =======
+
+    Packs the local matrix for higher SpMV performance.
+
+    Arguments
+    =========
+
+    magma_int_t num_add_rows             number of elements to pack
+    magma_int_t *add_rows                indices of elements to pack
+    magmaDoubleComplex *x                uncompressed input vector
+    magmaDoubleComplex *y                compressed output vector
+
+    =====================================================================  */
+
+
+magma_int_t
+magma_z_mpk_mcompresso(      magma_z_sparse_matrix A,
+                             magma_z_sparse_matrix *B,
+                             magma_int_t offset,
+                             magma_int_t blocksize,
+                             magma_int_t num_add_rows,
+                             magma_int_t *add_rows ){
+    if( A.storage_type==Magma_CSR && A.memory_location==Magma_CPU ){
+            int i=0,j,n=0,nnz=0;
+            B->storage_type = Magma_CSR;
+            B->memory_location = A.memory_location;
+            B->num_rows = blocksize + num_add_rows;
+            B->num_cols = A.num_cols;
+            magma_imalloc_cpu( &B->row, B->num_rows+1 );
+            for( j=0; j<blocksize+1; j++ ){
+                (B->row)[n] = A.row[j+offset] - A.row[offset];
+                i = (B->row)[j];
+                n++;
+            }
+            for( j=0; j<num_add_rows; j++ ){
+                i += A.row[add_rows[j]+1] - A.row[add_rows[j]];
+                (B->row)[n] = i;
+                n++;
+            }
+            B->nnz = i;
+            magma_imalloc_cpu( &B->col, B->nnz );
+            magma_zmalloc_cpu( &B->val, B->nnz );
+
+            for( j=A.row[offset]; j<A.row[offset+blocksize]; j++ ){
+                B->col[nnz] = A.col[j];
+                B->val[nnz] = A.val[j];
+                nnz++;
+            }
+
+            for( j=0; j<num_add_rows; j++ ){
+                for( i=A.row[add_rows[j]]; i<A.row[add_rows[j]+1]; i++){
+                    B->col[nnz] = A.col[i];
+                    B->val[nnz] = A.val[i];
+                    nnz++;
+                }
+            }
+            //printf("\n");magma_z_mvisu(*B);printf("\n");
+    }
+    else{
+        printf("not supported!\n");
+    }
+
+    return MAGMA_SUCCESS; 
+}
+
+
 
 
