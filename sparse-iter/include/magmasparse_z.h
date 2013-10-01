@@ -83,11 +83,12 @@ magma_z_csr_compressor( magmaDoubleComplex ** val, magma_int_t ** row,
                         magma_int_t ** col, magmaDoubleComplex ** valn, 
                         magma_int_t ** rown, magma_int_t ** coln, magma_int_t *n);
 
+/*
 magma_int_t 
 magma_zlra(             magma_z_sparse_matrix A, 
                         magma_z_sparse_matrix *B, 
                         int icompression );
-
+*/
 
 magma_int_t 
 magma_z_mpkinfo_one(    magma_z_sparse_matrix A, 
@@ -136,6 +137,42 @@ magma_z_mpk_uncompress( magma_int_t num_add_rows,
                         magma_int_t *add_rows,
                         magmaDoubleComplex *x,
                         magmaDoubleComplex *y );
+
+magma_int_t 
+magma_z_mpk_uncompress_sel( magma_int_t num_add_rows,
+                        magma_int_t *add_rows,
+                        magma_int_t offset,
+                        magma_int_t blocksize,
+                        magmaDoubleComplex *x,
+                        magmaDoubleComplex *y );
+
+magma_int_t 
+magma_z_mpk_compress_gpu( magma_int_t num_add_rows,
+                        magma_int_t *add_rows,
+                        magmaDoubleComplex *x,
+                        magmaDoubleComplex *y );
+
+magma_int_t 
+magma_z_mpk_uncompress_gpu( magma_int_t num_add_rows,
+                        magma_int_t *add_rows,
+                        magmaDoubleComplex *x,
+                        magmaDoubleComplex *y );
+
+magma_int_t 
+magma_z_mpk_uncompspmv(  magma_int_t offset,
+                         magma_int_t blocksize,
+                         magma_int_t num_add_rows,
+                         magma_int_t *add_rows,
+                         magmaDoubleComplex *x,
+                         magmaDoubleComplex *y );
+
+magma_int_t
+magma_z_mpk_mcompresso(  magma_z_sparse_matrix A,
+                         magma_z_sparse_matrix *B,
+                         magma_int_t offset,
+                         magma_int_t blocksize,
+                         magma_int_t num_add_rows,
+                         magma_int_t *add_rows );
 
 magma_int_t 
 write_z_csr_mtx(        magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, 
