@@ -103,7 +103,7 @@ magma_int_t magma_get_numthreads()
         threads = omp_get_num_threads();
     }
 #elif defined(MAGMA_WITH_MKL)
-    threads = mkl_get_num_threads();
+    threads = mkl_get_max_threads();
 #else
     myenv = getenv("MAGMA_NUM_THREADS");
     if (myenv != NULL)
