@@ -147,8 +147,8 @@ int main( int argc, char** argv)
     }
     if (id > -1) printf( "\n    Usage: ./testing_z_mv --id %d\n\n",id );
 
-   // for(matrix=4; matrix<5; matrix++)
-    for(matrix=31; matrix<38; matrix++)
+    for(matrix=3; matrix<4; matrix++)
+   // for(matrix=31; matrix<38; matrix++)
     {
         magma_z_sparse_matrix hA;
 
@@ -166,7 +166,7 @@ int main( int argc, char** argv)
 
         // set the total number of matrix powers - in CA-GMRES this
         // corresponds to the restart parameter
-        magma_int_t power_count = 30;
+        magma_int_t power_count = 20;
         // array containing the shift for higher numerical stability
         magmaDoubleComplex lambda[power_count];
         for( i=0; i<power_count; i++)
@@ -289,8 +289,6 @@ for( int noise=0; noise<1; noise++){
                     magma_z_mpk_compress( num_add_vecs[gpu], add_vecs[gpu], ha.val, compressed[gpu] );
                     magma_zsetvector_async( num_add_vecs[gpu], compressed[gpu], 1, compressed_gpu[gpu], 1, stream[gpu] );
                     magma_z_mpk_uncompress_gpu( num_add_vecs[gpu], add_vecs_gpu[gpu], compressed_gpu[gpu], (a[gpu][i*sk]).val );
-
-
                 }
 
                 if( i<restarts-1 ){
@@ -340,7 +338,9 @@ for( int noise=0; noise<1; noise++){
             //printf("sk: %d  runtime: %.2lf  GFLOPS: %.2lf\n", sk, t_spmv, (double) computations/(t_spmv*(1.e+09)) );
             printf("|   %.2lf  %.2lf\n", t_spmv/100, (double) computations*100/(t_spmv*(1.e+09)) );
             #endif
-            // check the results
+
+
+// check the results
             //for( int gpu=0; gpu<num_gpus; gpu++ )
               //  magma_zgetvector_async( blocksize[gpu], (a[gpu][power_count-1]).val+offset[gpu], 1, ha.val+offset[gpu], 1, stream[gpu] );
 
@@ -359,10 +359,12 @@ for( int noise=0; noise<1; noise++){
                 cudaMemcpy( du.val, dv.val, dA.num_rows*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
             }
             
-
+            //magma_z_vvisu(du, 0, 7);
             cublasSetVector(hA.num_rows, sizeof(magmaDoubleComplex), ha.val, 1, dv.val, 1);
+            //magma_z_vvisu(dv, 0, 7);
             magma_zaxpy(hA.num_rows, mone, dv.val, 1, du.val, 1);   
             cublasGetVector(hA.num_rows, sizeof(magmaDoubleComplex), du.val, 1, hw.val, 1);
+
 
 
 
