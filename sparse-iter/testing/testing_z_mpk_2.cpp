@@ -109,7 +109,20 @@ int main( int argc, char** argv)
      "test_matrices/A252.rsa",
      "test_matrices/A318.rsa",           //57
 
-     "test_matrices/Trefethen_2000.mtx",     // 58
+     "test_matrices/cant.mtx",           //58
+     "test_matrices/pwtk.mtx",
+     "test_matrices/cfd2.mtx",
+     "test_matrices/xenon2.mtx",
+     "test_matrices/shipsec1.mtx",           //62
+
+     "test_matrices/kkt_power.mtx",           //63
+     "test_matrices/G3_circuit.mtx",
+     "test_matrices/Hook_1498.mtx",
+     "test_matrices/StocF-1465.mtx",
+     "test_matrices/dielFilterV2real.mtx",           //67
+
+
+     "test_matrices/Trefethen_2000.mtx",     // 68
      "test_matrices/bcsstk01.mtx",
      "test_matrices/Pres_Poisson.mtx",
      "test_matrices/bloweybq.mtx",
@@ -147,7 +160,7 @@ int main( int argc, char** argv)
     }
     if (id > -1) printf( "\n    Usage: ./testing_z_mv --id %d\n\n",id );
 
-    for(matrix=4; matrix<5; matrix++)
+    for(matrix=58; matrix<63; matrix++)
     // for(matrix=31; matrix<38; matrix++)
     {
         magma_z_sparse_matrix hA;
@@ -162,13 +175,14 @@ int main( int argc, char** argv)
         if (id > -1) matrix = id;
         magma_z_csr_mtx( &hA, filename[matrix] );
         printf( "\nmatrix read: %d-by-%d with %d nonzeros\n\n",hA.num_rows,hA.num_cols,hA.nnz );
-        magma_z_mvisu(hA );
+        //magma_z_mvisu(hA );
 
         // set the total number of matrix powers - in CA-GMRES this
         // corresponds to the restart parameter
-        magma_int_t power_count = 20;
+        magma_int_t power_count = 30;
         // array containing the shift for higher numerical stability
         magmaDoubleComplex lambda[power_count];
+
         for( i=0; i<power_count; i++)
             lambda[ i ] = zero;
 
@@ -241,7 +255,7 @@ int main( int argc, char** argv)
                 printf("%d - %d ",num_add_rows[gpu], gpu);
                 printf("( %d > %d )  ",num_add_vecs[gpu], gpu);
                 for( int d=0; d<num_gpus; d++ )
-                    magma_zmalloc_cpu( &compressed[d+gpu*MagmaMaxGPUs], num_add_vecs[gpu] );
+                    magma_zmalloc_cpu( &compressed[d+gpu*MagmaMaxGPUs], num_add_vecs[d] );
             }
             #endif
 
@@ -280,7 +294,7 @@ int main( int argc, char** argv)
             magma_device_sync(); t_spmv1=magma_wtime();
             #endif
 // do it 100 times to remove noise
-for( int noise=0; noise<1; noise++){
+for( int noise=0; noise<100; noise++){
          
             // use the matrix power kernel with sk restart-1 times
             for( int i=0; i<restarts; i++){
@@ -300,7 +314,7 @@ for( int noise=0; noise<1; noise++){
                         for ( int gpu=0; gpu<num_gpus; gpu++ ) {
                             magma_setdevice( gpu );
                             magmablasSetKernelStream( stream[gpu] );
-                            magma_z_spmv_shift( one, dB[gpu], lambda[i*sk+j], a[gpu][i*sk+j], zero, spmv_comp[gpu] );
+                            magma_z_spmv_shift( one, dB[gpu], lambda[i*sk+j], a[gpu][i*sk+j], zero, offset[gpu], blocksize[gpu], add_rows_gpu[gpu], spmv_comp[gpu] );
                             magma_z_mpk_uncompspmv( offset[gpu], blocksize[gpu], num_add_rows[gpu], add_rows_gpu[gpu], (spmv_comp[gpu]).val, (a[gpu][i*sk+j+1]).val );
                         }
                     }
@@ -311,7 +325,7 @@ for( int noise=0; noise<1; noise++){
                         for ( int gpu=0; gpu<num_gpus; gpu++ ) {
                             magma_setdevice( gpu );
                             magmablasSetKernelStream( stream[gpu] );
-                            magma_z_spmv_shift( one, dB[gpu], lambda[i*sk+j], a[gpu][i*sk+j], zero, spmv_comp[gpu] );
+                            magma_z_spmv_shift( one, dB[gpu], lambda[i*sk+j], a[gpu][i*sk+j], zero, offset[gpu], blocksize[gpu], add_rows_gpu[gpu], spmv_comp[gpu] );
                             magma_z_mpk_uncompspmv( offset[gpu], blocksize[gpu], num_add_rows[gpu], add_rows_gpu[gpu], (spmv_comp[gpu]).val, (a[gpu][i*sk+j+1]).val );
                         }
                     }
@@ -372,7 +386,7 @@ for( int noise=0; noise<1; noise++){
 
 
 
-            magma_z_vvisu(hw, 0, 7);
+            //magma_z_vvisu(hw, 0, 7);
             for( i=0; i<hA.num_rows; i++){
                 if( MAGMA_Z_REAL(hw.val[i]) > 0.0 )
                         printf("error in component %d: %f\n", i, hw.val[i]);
