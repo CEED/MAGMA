@@ -181,7 +181,8 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
 
 magma_int_t
 magma_z_spmv_shift( magmaDoubleComplex alpha, magma_z_sparse_matrix A, magmaDoubleComplex lambda,
-                magma_z_vector x, magmaDoubleComplex beta, magma_z_vector y ){
+                magma_z_vector x, magmaDoubleComplex beta, 
+                magma_int_t offset, magma_int_t blocksize, magma_int_t *add_rows, magma_z_vector y ){
     if( A.memory_location != x.memory_location || x.memory_location != y.memory_location ){
         printf("error: linear algebra objects are not located in same memory!\n");
         return MAGMA_ERR_INVALID_PTR;
@@ -191,21 +192,21 @@ magma_z_spmv_shift( magmaDoubleComplex alpha, magma_z_sparse_matrix A, magmaDoub
          if( A.storage_type == Magma_CSR ){
              //printf("using CSR kernel for SpMV: ");
              magma_zgecsrmv_shift( MagmaNoTransStr, A.num_rows, A.num_cols, alpha, lambda,
-                             A.val, A.row, A.col, x.val, beta, y.val );
+                             A.val, A.row, A.col, x.val, beta, offset, blocksize, add_rows, y.val );
              //printf("done.\n");
              return MAGMA_SUCCESS;
          }
          else if( A.storage_type == Magma_ELLPACK ){
              //printf("using ELLPACK kernel for SpMV: ");
              magma_zgeellmv_shift( MagmaNoTransStr, A.num_rows, A.num_cols, A.max_nnz_row, alpha, 
-                             lambda, A.val, A.col, x.val, beta, y.val );
+                             lambda, A.val, A.col, x.val, beta, offset, blocksize, add_rows, y.val );
              //printf("done.\n");
              return MAGMA_SUCCESS;
          }
          else if( A.storage_type == Magma_ELLPACKT ){
              //printf("using ELLPACKT kernel for SpMV: ");
              magma_zgeelltmv_shift( MagmaNoTransStr, A.num_rows, A.num_cols, A.max_nnz_row, alpha, 
-                              lambda, A.val, A.col, x.val, beta, y.val );
+                              lambda, A.val, A.col, x.val, beta, offset, blocksize, add_rows, y.val );
              //printf("done.\n");
              return MAGMA_SUCCESS;
          }

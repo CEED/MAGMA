@@ -112,6 +112,17 @@ magma_z_mpkinfo(        magma_z_sparse_matrix A,
                         magma_int_t **add_vecs );
 
 magma_int_t 
+magma_z_mpkinfo_all(    magma_z_sparse_matrix A, 
+                        magma_int_t num_procs,
+                        magma_int_t *offset, 
+                        magma_int_t *chunksize, 
+                        magma_int_t s,
+                        magma_int_t *num_add_rows,
+                        magma_int_t **add_rows,
+                        magma_int_t *num_add_vecs,
+                        magma_int_t ***add_vecs );
+
+magma_int_t 
 magma_z_mpksetup_one(   magma_z_sparse_matrix A, 
                         magma_z_sparse_matrix *B, 
                         magma_int_t offset, 
@@ -342,7 +353,8 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
 
 magma_int_t
 magma_z_spmv_shift(     magmaDoubleComplex alpha, magma_z_sparse_matrix A, magmaDoubleComplex lambda,
-                        magma_z_vector x, magmaDoubleComplex beta, magma_z_vector y );
+                        magma_z_vector x, magmaDoubleComplex beta, magma_int_t offset, magma_int_t blocksize,
+                        magma_int_t *add_vecs, magma_z_vector y );
 /*
 magma_int_t
 magma_z_mpk(      magmaDoubleComplex alpha, magma_z_sparse_matrix A, 
@@ -379,6 +391,9 @@ magma_zgecsrmv_shift(  const char *transA,
                        magma_int_t *d_colind,
                        magmaDoubleComplex *d_x,
                        magmaDoubleComplex beta,
+                       int offset,
+                       int blocksize,
+                       int *add_rows,
                        magmaDoubleComplex *d_y );
 
 magma_int_t 
@@ -414,6 +429,9 @@ magma_zgeellmv_shift(  const char *transA,
                        magma_int_t *d_colind,
                        magmaDoubleComplex *d_x,
                        magmaDoubleComplex beta,
+                       int offset,
+                       int blocksize,
+                       int *add_rows,
                        magmaDoubleComplex *d_y );
 
 
@@ -451,6 +469,9 @@ magma_zgeelltmv_shift( const char *transA,
                        magma_int_t *d_colind,
                        magmaDoubleComplex *d_x,
                        magmaDoubleComplex beta,
+                       int offset,
+                       int blocksize,
+                       int *add_rows,
                        magmaDoubleComplex *d_y );
 
 magma_int_t 

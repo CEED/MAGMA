@@ -56,6 +56,9 @@ zgeellmv_kernel_shift( int num_rows,
                        int *d_colind,
                        magmaDoubleComplex *d_x,
                        magmaDoubleComplex beta, 
+                       int offset,
+                       int blocksize,
+                       int *add_rows,
                        magmaDoubleComplex *d_y)
 {
 int row = blockDim.x * blockIdx.x + threadIdx.x ;
@@ -67,7 +70,10 @@ int row = blockDim.x * blockIdx.x + threadIdx.x ;
             if( val != 0)
                 dot += val * d_x[col ];
         }
-        d_y[ row ] = dot * alpha - lambda * d_x[ row ] + beta * d_y [ row ];
+        if( row<blocksize )
+            d_y[ row ] = dot * alpha - lambda * d_x[ offset+row ] + beta * d_y [ row ];
+        else
+            d_y[ row ] = dot * alpha - lambda * d_x[ add_rows[row-blocksize] ] + beta * d_y [ row ];   
     }
 }
 
@@ -161,6 +167,9 @@ magma_zgeellmv_shift( const char *transA,
                       magma_int_t *d_colind,
                       magmaDoubleComplex *d_x,
                       magmaDoubleComplex beta,
+                      int offset,
+                      int blocksize,
+                      int *add_rows,
                       magmaDoubleComplex *d_y ){
 
 
@@ -168,7 +177,7 @@ magma_zgeellmv_shift( const char *transA,
    dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
 
    zgeellmv_kernel_shift<<< grid, BLOCK_SIZE, 0, magma_stream >>>
-                  ( m, n, nnz_per_row, alpha, lambda, d_val, d_colind, d_x, beta, d_y );
+                  ( m, n, nnz_per_row, alpha, lambda, d_val, d_colind, d_x, beta, offset, blocksize, add_rows, d_y );
 
 
    return MAGMA_SUCCESS;

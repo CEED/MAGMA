@@ -51,6 +51,9 @@ zgecsrmv_kernel_shift( int num_rows, int num_cols,
                        int *d_colind,
                        magmaDoubleComplex *d_x,
                        magmaDoubleComplex beta, 
+                       int offset,
+                       int blocksize,
+                       int *add_rows,
                        magmaDoubleComplex *d_y){
 
     int row = blockIdx.x*blockDim.x+threadIdx.x;
@@ -62,7 +65,10 @@ zgecsrmv_kernel_shift( int num_rows, int num_cols,
         int end = d_rowptr[ row+1 ];
         for( j=start; j<end; j++)
             dot += d_val[ j ] * d_x[ d_colind[j] ];
-        d_y[ row ] =  dot *alpha - lambda * d_x[ row ] + beta * d_y[ row ];
+        if( row<blocksize )
+            d_y[ row ] = dot * alpha - lambda * d_x[ offset+row ] + beta * d_y [ row ];
+        else
+            d_y[ row ] = dot * alpha - lambda * d_x[ add_rows[row-blocksize] ] + beta * d_y [ row ];   
     }
 }
 
@@ -152,12 +158,15 @@ magma_zgecsrmv_shift( const char *transA,
                       magma_int_t *d_colind,
                       magmaDoubleComplex *d_x,
                       magmaDoubleComplex beta,
+                      int offset,
+                      int blocksize,
+                      int *add_rows,
                       magmaDoubleComplex *d_y ){
 
     dim3 grid( (m+BLOCK_SIZE-1)/BLOCK_SIZE, 1, 1);
 
     zgecsrmv_kernel_shift<<< grid, BLOCK_SIZE, 0, magma_stream >>>
-                         (m, n, alpha, lambda, d_val, d_rowptr, d_colind, d_x, beta, d_y);
+                         (m, n, alpha, lambda, d_val, d_rowptr, d_colind, d_x, beta, offset, blocksize, add_rows, d_y);
 
     return MAGMA_SUCCESS;
 }
