@@ -93,7 +93,7 @@ magma_zlra(             magma_z_sparse_matrix A,
 magma_int_t 
 magma_z_mpkinfo_one(    magma_z_sparse_matrix A, 
                         magma_int_t offset, 
-                        magma_int_t chunksize, 
+                        magma_int_t blocksize, 
                         magma_int_t s,    
                         magma_int_t *num_add_rows,
                         magma_int_t **add_rows,
@@ -101,32 +101,34 @@ magma_z_mpkinfo_one(    magma_z_sparse_matrix A,
                         magma_int_t **add_vecs );
 
 magma_int_t 
+magma_z_mpkback(        magma_z_sparse_matrix A, 
+                        magma_int_t num_procs,
+                        magma_int_t *offset, 
+                        magma_int_t *blocksize, 
+                        magma_int_t s,
+                        magma_int_t *num_add_vecs,
+                        magma_int_t **add_vecs,
+                        magma_int_t *num_vecs_back,
+                        magma_int_t **vecs_back );
+
+magma_int_t 
 magma_z_mpkinfo(        magma_z_sparse_matrix A, 
                         magma_int_t num_procs,
                         magma_int_t *offset, 
-                        magma_int_t *chunksize, 
+                        magma_int_t *blocksize, 
                         magma_int_t s,
                         magma_int_t *num_add_rows,
                         magma_int_t **add_rows,
                         magma_int_t *num_add_vecs,
-                        magma_int_t **add_vecs );
-
-magma_int_t 
-magma_z_mpkinfo_all(    magma_z_sparse_matrix A, 
-                        magma_int_t num_procs,
-                        magma_int_t *offset, 
-                        magma_int_t *chunksize, 
-                        magma_int_t s,
-                        magma_int_t *num_add_rows,
-                        magma_int_t **add_rows,
-                        magma_int_t *num_add_vecs,
-                        magma_int_t ***add_vecs );
+                        magma_int_t **add_vecs,
+                        magma_int_t *num_vecs_back,
+                        magma_int_t **vecs_back );
 
 magma_int_t 
 magma_z_mpksetup_one(   magma_z_sparse_matrix A, 
                         magma_z_sparse_matrix *B, 
                         magma_int_t offset, 
-                        magma_int_t chunksize, 
+                        magma_int_t blocksize, 
                         magma_int_t s );
 
 magma_int_t 
@@ -134,7 +136,7 @@ magma_z_mpksetup(       magma_z_sparse_matrix A,
                         magma_z_sparse_matrix B[MagmaMaxGPUs], 
                         magma_int_t num_procs,
                         magma_int_t *offset, 
-                        magma_int_t *chunksize, 
+                        magma_int_t *blocksize, 
                         magma_int_t s );
 
 magma_int_t 
