@@ -208,8 +208,8 @@ magma_z_mpksetup(  magma_z_sparse_matrix A,
     magma_int_t offset                   first row to compute
     magma_int_t blocksize                number of rows to compute
     magma_int_t s                        matrix powers
-    magma_int_t *num_add_rows            number of additional rows
-    magma_int_t *add_rows                array for additional rows
+    magma_int_t **num_add_rows           number of additional rows for each s
+    magma_int_t *add_rows                array for additional rows ordered according to s
     magma_int_t *num_add_vecs            number of additional vector entries
     magma_int_t *add_vecs                array for additional vector entries
 
@@ -220,7 +220,7 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
                      magma_int_t offset, 
                      magma_int_t blocksize, 
                      magma_int_t s,    
-                     magma_int_t *num_add_rows,
+                     magma_int_t **num_add_rows,
                      magma_int_t **add_rows,
                      magma_int_t *num_add_vecs,
                      magma_int_t **add_vecs ){
@@ -240,54 +240,67 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
             for( i=start; i<end; i++ )
                     z1[i] = 1;
 
+            magma_imalloc_cpu( (num_add_rows), s );
+            (*num_add_rows)[0] = 0;
+
             // determine the rows of A needed in local matrix B 
-            for( count=0; count<s-1; count++ ){
+            for( count=1; count<s; count++ ){
                 for( j=0; j<A.num_rows; j++ ){
-                    if ( z1[j] == 1 ){
+                    if ( z1[j] != 0 ){
                         for( i=A.row[j]; i<A.row[j+1]; i++ )
-                            z2[A.col[i]] = 1;
+                            z2[A.col[i]] = count;
                     }
                 }
                 for( i=0; i<A.num_rows; i++){
-                    if( z1[i] == 1 || z2[i] ==1 )
-                        z1[i] = 1; 
+                    if(  z2[i] != 0 )
+                        z1[i] = z2[i]; 
                 }  
-            }   
-            (*num_add_rows) = 0;
-            for( i=0; i<start; i++){
-                if( z1[i] != 0 )
-                    (*num_add_rows)++;
-            }
-            for( i=end; i<A.num_rows; i++){
-                if( z1[i] != 0 )
-                    (*num_add_rows)++;
-            }
-            // this part determines the additional rows needed
-            magma_imalloc_cpu( (add_rows), (*num_add_rows) );
-            (*num_add_rows) = 0;
-            for( i=0; i<start; i++){
-                if( z1[i] != 0 ){
-                    (*add_rows)[(*num_add_rows)] = i;
-                    (*num_add_rows)++;
-                }
-            }
-            for( i=end; i<A.num_rows; i++){
-                if( z1[i] != 0 ){
-                    (*add_rows)[(*num_add_rows)] = i;
-                    (*num_add_rows)++;
-                }
-            }  
 
+                (*num_add_rows)[count] = 0;
+                for( i=0; i<start; i++){
+                    if( z1[i] != 0 )
+                        (*num_add_rows)[count]++;
+                }
+                for( i=end; i<A.num_rows; i++){
+                    if( z1[i] != 0 )
+                        (*num_add_rows)[count]++;
+                }
+            }   
+
+            // this part determines the additional rows needed
+            magma_imalloc_cpu( (add_rows), (*num_add_rows)[s-1] );
+            magma_int_t num_add_rows_glob = 0;
+            for( count=1; count<s; count++ ){
+                for( i=0; i<start; i++){
+                    if( z1[i] == count ){
+                        (*add_rows)[num_add_rows_glob] = i;
+                        (num_add_rows_glob)++;
+                    }
+                }
+                for( i=end; i<A.num_rows; i++){
+                    if( z1[i] == count ){
+                        (*add_rows)[num_add_rows_glob] = i;
+                        (num_add_rows_glob)++;
+                    }
+                }  
+            }
+
+            // this part determines the additional rows needed
+  /*          for( count=0; count<num_add_rows_glob; count++ ){
+                printf("add_row[%d]: %d\n", count, (*add_rows)[count]);
+            }
+                printf("check5\n");fflush(stdout);
+*/
 
             // for the vector entries, we need one more loop
             for( j=0; j<A.num_rows; j++ ){
-                if ( z1[j] == 1 ){
+                if ( z1[j] != 0 ){
                     for( i=A.row[j]; i<A.row[j+1]; i++ )
                         z2[A.col[i]] = 1;
                 }
             }
             for( i=0; i<A.num_rows; i++){
-                if( z1[i] == 1 || z2[i] ==1 )
+                if( z1[i] != 0 || z2[i] != 0 )
                     z1[i] = 1; 
             }  
             (*num_add_vecs) = 0;
@@ -459,7 +472,7 @@ magma_z_mpkinfo(   magma_z_sparse_matrix A,
                    magma_int_t *offset, 
                    magma_int_t *blocksize, 
                    magma_int_t s,
-                   magma_int_t *num_add_rows,
+                   magma_int_t **num_add_rows,
                    magma_int_t **add_rows,
                    magma_int_t *num_add_vecs,
                    magma_int_t **add_vecs,
@@ -638,6 +651,8 @@ magma_z_mpk_mcompresso(      magma_z_sparse_matrix A,
                 i = (B->row)[j];
                 n++;
             }
+
+
             for( j=0; j<num_add_rows; j++ ){
                 i += A.row[add_rows[j]+1] - A.row[add_rows[j]];
                 (B->row)[n] = i;
