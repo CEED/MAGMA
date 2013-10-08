@@ -281,16 +281,10 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
                     if( z1[i] == count ){
                         (*add_rows)[num_add_rows_glob] = i;
                         (num_add_rows_glob)++;
+
                     }
                 }  
             }
-
-            // this part determines the additional rows needed
-  /*          for( count=0; count<num_add_rows_glob; count++ ){
-                printf("add_row[%d]: %d\n", count, (*add_rows)[count]);
-            }
-                printf("check5\n");fflush(stdout);
-*/
 
             // for the vector entries, we need one more loop
             for( j=0; j<A.num_rows; j++ ){
@@ -327,7 +321,6 @@ magma_z_mpkinfo_one( magma_z_sparse_matrix A,
                     (*num_add_vecs)++;
                 }
             }  
-
 
             magma_free_cpu(z1);
             magma_free_cpu(z2);
@@ -675,7 +668,7 @@ magma_z_mpk_mcompresso(      magma_z_sparse_matrix A,
                     nnz++;
                 }
             }
-            //printf("\n");magma_z_mvisu(*B);printf("\n");
+            // printf("\n");magma_z_mvisu(*B);printf("\n");
     }
     else{
         printf("not supported!\n");

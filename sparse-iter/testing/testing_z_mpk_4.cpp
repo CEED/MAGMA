@@ -162,7 +162,7 @@ int main( int argc, char** argv)
     }
     if (id > -1) printf( "\n    Usage: ./testing_z_mv --id %d\n\n",id );
 
-    for(matrix=4; matrix<5; matrix++)
+    for(matrix=58; matrix<59; matrix++)
    // for(matrix=31; matrix<38; matrix++)
     {
         magma_z_sparse_matrix hA;
@@ -193,7 +193,7 @@ int main( int argc, char** argv)
         double t_spmv1, t_spmv2, t_spmv = 0.0;
         double computations = power_count * (2.* hA.nnz);
             printf( "#==================================================================================================#\n" );
-            printf( "# matrix powers | power kernel | restarts | additional rows (components) > GPU | runtime | GFLOPS\n" );
+            printf( "# matrix powers | power kernel | restarts | additional rows (components) > GPU | runtime [ms] | GFLOPS\n" );
             printf( "#--------------------------------------------------------------------------------------------------#\n" );
         #endif
 
@@ -236,7 +236,7 @@ int main( int argc, char** argv)
             for(int j=0; j<power_count+1; j++)
                 magma_z_vinit( &a[gpu][j], Magma_DEV, hA.num_rows, zero );
         }
-        for( int sk=18; sk<power_count+1; sk++ ){
+        for( int sk=1; sk<power_count+1; sk++ ){
             // set the number of matrix power kernel restarts for
             // for the matrix power number
             magma_int_t restarts = (power_count+sk-1)/sk;
@@ -286,17 +286,10 @@ int main( int argc, char** argv)
                 magma_imalloc( &vecs_back_gpu[gpu], num_vecs_back[gpu] );
                 magma_imalloc( &add_rows_gpu[gpu], num_add_rows[gpu][sk-1] );
                 magma_imalloc( &add_vecs_gpu[gpu], num_add_vecs[gpu] );
-                cublasSetVector( sk, sizeof( magma_int_t ), add_rows[gpu], 1, add_rows_gpu[gpu], 1 ); 
+                cublasSetVector( num_add_rows[gpu][sk-1], sizeof( magma_int_t ), add_rows[gpu], 1, add_rows_gpu[gpu], 1 ); 
                 cublasSetVector( num_add_vecs[gpu], sizeof( magma_int_t ), add_vecs[gpu], 1, add_vecs_gpu[gpu], 1 );
                 cublasSetVector( num_vecs_back[gpu], sizeof( magma_int_t ), vecs_back[gpu], 1, vecs_back_gpu[gpu], 1 ); 
                 
-            }
-
-            for( int gpu=0; gpu<num_gpus; gpu++ ){
-                magma_setdevice( gpu );
-                magmablasSetKernelStream( stream[gpu] );
-                magma_zsetvector_async( blocksize[gpu], ha.val+offset[gpu], 1, (a[gpu][0]).val+offset[gpu], 1, stream[gpu] );
-
             }
 
             #ifdef ENABLE_TIMER
@@ -304,6 +297,14 @@ int main( int argc, char** argv)
             #endif
 // do it 100 times to remove noise
 for( int noise=0; noise<100; noise++){
+
+            magma_z_vinit( &ha, Magma_CPU, hA.num_rows, one );
+
+            for( int gpu=0; gpu<num_gpus; gpu++ ){
+                magma_setdevice( gpu );
+                magmablasSetKernelStream( stream[gpu] );
+                magma_zsetvector_async( blocksize[gpu], ha.val+offset[gpu], 1, (a[gpu][0]).val+offset[gpu], 1, stream[gpu] );
+            }
          
             // use the matrix power kernel with sk restart-1 times
             for( int i=0; i<restarts; i++){
@@ -347,7 +348,7 @@ for( int noise=0; noise<100; noise++){
                 }
 
 
-                // selective cop back to CPU
+                // selective copy back to CPU
                 for( int gpu=0; gpu<num_gpus; gpu++ ){
                     magma_setdevice( gpu );
                     magmablasSetKernelStream( stream[gpu] );
@@ -356,13 +357,15 @@ for( int noise=0; noise<100; noise++){
                     magma_z_mpk_uncompress( num_vecs_back[gpu], vecs_back[gpu], compressed_back[gpu], ha.val );
                 }
             }
-           
+
 }//end 100
             #ifdef ENABLE_TIMER
             magma_device_sync(); t_spmv2 = magma_wtime(); t_spmv = t_spmv2 - t_spmv1;
             //printf("sk: %d  runtime: %.2lf  GFLOPS: %.2lf\n", sk, t_spmv, (double) computations/(t_spmv*(1.e+09)) );
-            printf("|   %.2lf  %.2lf\n", t_spmv/100., (double) computations*100/(t_spmv*(1.e+09)) );
+            printf("|   %.2lf  %.2lf\n", t_spmv*10, (double) computations*100/(t_spmv*(1.e+09)) );
             #endif
+
+           
 
 
 // check the results
@@ -391,7 +394,7 @@ for( int noise=0; noise<100; noise++){
             magma_zaxpy(hA.num_rows, mone, dv.val, 1, du.val, 1);   
             cublasGetVector(hA.num_rows, sizeof(magmaDoubleComplex), du.val, 1, hw.val, 1);
 
-            //magma_z_vvisu(hw, 0, 7);
+            // printf("-------------------------------\n difference in components 0 -- 7:\n"); magma_z_vvisu(hw, 0, 7);
             for( i=0; i<hA.num_rows; i++){
                 if( MAGMA_Z_REAL(hw.val[i]) > 0.0 )
                         printf("error in component %d: %f\n", i, hw.val[i]);
