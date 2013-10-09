@@ -31,29 +31,45 @@ extern "C" {
    -- MAGMA_SPARSE Auxiliary functions
 */
 magma_int_t
-magma_vector_zlag2c( magma_z_vector x, magma_c_vector *y );
+magma_vector_zlag2c(                magma_z_vector x, 
+                                    magma_c_vector *y );
 
 magma_int_t
-magma_sparse_matrix_zlag2c( magma_z_sparse_matrix A, magma_c_sparse_matrix *B );
+magma_sparse_matrix_zlag2c(         magma_z_sparse_matrix A, 
+                                    magma_c_sparse_matrix *B );
 
 
 magma_int_t
-magma_vector_clag2z( magma_c_vector x, magma_z_vector *y );
+magma_vector_clag2z(                magma_c_vector x, 
+                                    magma_z_vector *y );
 
 magma_int_t
-magma_sparse_matrix_clag2z( magma_c_sparse_matrix A, magma_z_sparse_matrix *B );
+magma_sparse_matrix_clag2z(         magma_c_sparse_matrix A, 
+                                    magma_z_sparse_matrix *B );
 
 void
-magmablas_zlag2c_sparse( magma_int_t M, magma_int_t N , 
-                  const magmaDoubleComplex *A, magma_int_t lda, 
-                  magmaFloatComplex *SA,       magma_int_t ldsa, 
-                  magma_int_t *info );
+magmablas_zlag2c_sparse(            magma_int_t M, magma_int_t N , 
+                                    const magmaDoubleComplex *A, magma_int_t lda, 
+                                    magmaFloatComplex *SA, magma_int_t ldsa, 
+                                    magma_int_t *info );
 
 void 
-magmablas_clag2z_sparse( magma_int_t M, magma_int_t N , 
-                  const magmaFloatComplex *SA, magma_int_t ldsa, 
-                  magmaDoubleComplex *A,       magma_int_t lda, 
-                  magma_int_t *info );
+magmablas_clag2z_sparse(            magma_int_t M, magma_int_t N , 
+                                    const magmaFloatComplex *SA, magma_int_t ldsa, 
+                                    magmaDoubleComplex *A, magma_int_t lda, 
+                                    magma_int_t *info );
+
+void 
+magma_zlag2c_CSR_DENSE(             magma_z_sparse_matrix A, 
+                                    magma_c_sparse_matrix *B );
+
+void 
+magma_zlag2c_CSR_DENSE_alloc(       magma_z_sparse_matrix A, 
+                                    magma_c_sparse_matrix *B );
+
+void 
+magma_zlag2c_CSR_DENSE_convert(     magma_z_sparse_matrix A, 
+                                    magma_c_sparse_matrix *B );
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE function definitions / Data on CPU

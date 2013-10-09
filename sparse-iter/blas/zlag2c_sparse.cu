@@ -16,7 +16,7 @@
 #include "common_magma.h"
 
 #define PRECISION_z
-#define blksize 512
+#define BLOCKSIZE 512
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
@@ -37,7 +37,8 @@ magmaint_zlag2c_sparse(  int M, int N,
     double mRMAX = - RMAX;
 
     if( thread_id < M ){
-        for( int i= outer_bsize * blockIdx.x  + threadIdx.x ; i<min( M, outer_bsize * ( blockIdx.x + 1));  i+=inner_bsize){
+        for( int i= outer_bsize * blockIdx.x  + threadIdx.x ; 
+                   i<min( M, outer_bsize * ( blockIdx.x + 1));  i+=inner_bsize){
             magmaDoubleComplex tmp;
             tmp = A[i];
              if(    (cuCreal(tmp) < mRMAX) || (cuCreal(tmp) > RMAX)
@@ -125,15 +126,159 @@ magmablas_zlag2c_sparse( magma_int_t M, magma_int_t N ,
     double RMAX = (double)lapackf77_slamch("O");
 
     int block;
-    dim3 dimBlock(blksize);// Number of Threads per Block
-    block = (M/blksize)/blksize;
-    if(block*blksize*blksize<(M))block++;
+    dim3 dimBlock(BLOCKSIZE);// Number of Threads per Block
+    block = (M/BLOCKSIZE)/BLOCKSIZE;
+    if(block*BLOCKSIZE*BLOCKSIZE<(M))block++;
     dim3 dimGrid(block);// Number of Blocks
    
 
-    dim3 threads( blksize, 1, 1 );
-    dim3 grid( (M+blksize-1)/blksize, 1, 1);
+    dim3 threads( BLOCKSIZE, 1, 1 );
+    dim3 grid( (M+BLOCKSIZE-1)/BLOCKSIZE, 1, 1);
     cudaMemcpyToSymbol( flag, info, sizeof(flag) );    // flag = 0
-    magmaint_zlag2c_sparse<<< dimGrid , dimBlock, 0, magma_stream >>>( M, N, A, lda, SA, ldsa, RMAX ) ; 
+    magmaint_zlag2c_sparse<<< dimGrid , dimBlock, 0, magma_stream >>>
+                                        ( M, N, A, lda, SA, ldsa, RMAX ) ; 
     cudaMemcpyFromSymbol( info, flag, sizeof(flag) );  // info = flag
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+__global__ void 
+magma_zlag2c_CSR_DENSE_kernel( int num_rows, int num_cols, 
+                               magmaDoubleComplex *Aval, int *Arow, int *Acol, 
+                               magmaFloatComplex *Bval ){
+
+    int row = blockIdx.x*blockDim.x+threadIdx.x;
+    int j;
+
+    if(row<num_rows){
+        for( j=0; j<num_cols; j++)
+            Bval[ j ] = MAGMA_C_MAKE(0.0, 0.0);
+        int start = Arow[ row ];
+        int end = Arow[ row+1 ];
+        for( j=start; j<end; j++ )
+            Bval[ row * num_rows + Acol[j] ] = cuComplexDoubleToFloat( Aval[ j] );
+    }
+}
+
+__global__ void 
+magma_zlag2c_CSR_DENSE_kernel_1( int num_rows, int num_cols, 
+                                 magmaFloatComplex *Bval ){
+
+    int row = blockIdx.x*blockDim.x+threadIdx.x;
+    int j;
+
+    if(row<num_rows){
+        for( j=0; j<num_cols; j++)
+            Bval[ j ] = MAGMA_C_MAKE(0.0, 0.0);
+    }
+}
+
+__global__ void 
+magma_zlag2c_CSR_DENSE_kernel_2( int num_rows, int num_cols, 
+                               magmaDoubleComplex *Aval, int *Arow, int *Acol, 
+                               magmaFloatComplex *Bval ){
+
+    int row = blockIdx.x*blockDim.x+threadIdx.x;
+    int j;
+
+    if(row<num_rows){
+        int start = Arow[ row ];
+        int end = Arow[ row+1 ];
+        for( j=start; j<end; j++ )
+            Bval[ row * num_rows + Acol[j] ] = cuComplexDoubleToFloat( Aval[ j] );
+    }
+}
+
+
+
+
+extern "C" void 
+magma_zlag2c_CSR_DENSE(       magma_z_sparse_matrix A, 
+                              magma_c_sparse_matrix *B ){
+
+    cublasStatus stat;
+
+    if( A.memory_location == Magma_DEV && A.storage_type == Magma_CSR){
+        B->storage_type = Magma_DENSE;
+        B->memory_location = A.memory_location;
+        B->num_rows = A.num_rows;
+        B->num_cols = A.num_cols;
+        B->nnz = A.nnz;
+        stat = cublasAlloc( A.num_rows* A.num_cols, 
+                sizeof( magmaFloatComplex ), ( void** )&B->val );
+        if( ( int )stat != 0 ) 
+        {printf("Memory Allocation Error converting matrix\n"); exit(0); }
+        
+        dim3 Bs( BLOCKSIZE );
+        dim3 Gs( (A.num_rows+BLOCKSIZE-1)/BLOCKSIZE );
+
+        magma_zlag2c_CSR_DENSE_kernel<<< Bs, Gs, 0, magma_stream >>>
+        ( A.num_rows, A.num_cols, A.val, A.row, A.col, B->val );
+    }
+}
+
+
+
+extern "C" void 
+magma_zlag2c_CSR_DENSE_alloc( magma_z_sparse_matrix A, 
+                              magma_c_sparse_matrix *B ){
+
+    cublasStatus stat;
+
+    if( A.memory_location == Magma_DEV && A.storage_type == Magma_CSR){
+        B->storage_type = Magma_DENSE;
+        B->memory_location = A.memory_location;
+        B->num_rows = A.num_rows;
+        B->num_cols = A.num_cols;
+        B->nnz = A.nnz;
+        stat = cublasAlloc( A.num_rows* A.num_cols, 
+                sizeof( magmaFloatComplex ), ( void** )&B->val );
+        if( ( int )stat != 0 ) 
+        {printf("Memory Allocation Error converting matrix\n"); exit(0); }
+        
+        dim3 Bs( BLOCKSIZE );
+        dim3 Gs( (A.num_rows+BLOCKSIZE-1)/BLOCKSIZE );
+
+        magma_zlag2c_CSR_DENSE_kernel_1<<< Bs, Gs, 0, magma_stream >>>
+        ( A.num_rows, A.num_cols, B->val );
+    }
+}
+
+
+extern "C" void 
+magma_zlag2c_CSR_DENSE_convert( magma_z_sparse_matrix A, 
+                                magma_c_sparse_matrix *B ){
+
+
+    if( B->memory_location == Magma_DEV && B->storage_type == Magma_DENSE){
+        dim3 Bs( BLOCKSIZE );
+        dim3 Gs( (A.num_rows+BLOCKSIZE-1)/BLOCKSIZE );
+
+        magma_zlag2c_CSR_DENSE_kernel_2<<< Bs, Gs, 0, magma_stream >>>
+        ( A.num_rows, A.num_cols, A.val, A.row, A.col, B->val );
+    }
 }
