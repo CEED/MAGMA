@@ -526,7 +526,8 @@ magma_z_vtransfer( magma_z_vector x,
         y->nnz = x.nnz;
         // memory allocation
         stat = cublasAlloc( x.num_rows, sizeof( magmaDoubleComplex ), ( void** )&y->val );
-        if( ( int )stat != 0 ) {printf("Memory Allocation Error transferring vector\n"); exit(0); }
+        if( ( int )stat != 0 ) 
+            {printf("Memory Allocation Error transferring vector\n"); exit(0); }
         // data transfer
         cublasSetVector( x.num_rows , sizeof( magmaDoubleComplex ), x.val, 1, y->val, 1 );
     }
@@ -561,7 +562,8 @@ magma_z_vtransfer( magma_z_vector x,
         y->nnz = x.nnz;
         // memory allocation
         stat = cublasAlloc( x.num_rows, sizeof( magmaDoubleComplex ), ( void** )&y->val );
-        if( ( int )stat != 0 ) {printf("Memory Allocation Error transferring vector\n"); exit(0); }
+        if( ( int )stat != 0 ) 
+            {printf("Memory Allocation Error transferring vector\n"); exit(0); }
         // data transfer
         cudaMemcpy( y->val, x.val, x.num_rows*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
     }

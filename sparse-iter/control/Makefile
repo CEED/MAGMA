@@ -12,17 +12,15 @@ include ../../Makefile.internal
 INC += -I../include
 
 ZSRC := \
-        matrix_zio.cpp \
-				z_transpose_csr.cpp \
-				magma_z_transfer.cpp \
-        magma_z_mconverter.cpp \
-        magma_z_init.cpp \
-        magma_z_vio.cpp \
         magma_z_free.cpp \
+        magma_z_init.cpp \
         magma_z_matrixchar.cpp \
-        magma_z_lra.cpp \
+        magma_z_mconverter.cpp \
         magma_z_mpksetup.cpp \
- 
+		magma_z_transfer.cpp \
+        magma_z_vio.cpp \
+        matrix_zio.cpp \
+		z_transpose_csr.cpp \
 
 -include Makefile.local
 -include Makefile.src

@@ -37,7 +37,7 @@ using namespace std;
     =======
 
     Visualizes part of a vector of type magma_z_vector.
-    With input x , offset, displaylength the entries 
+    With input vector x , offset, displaylength the entries 
     offset - (offset + displaylength) of x are visualized.
 
     Arguments

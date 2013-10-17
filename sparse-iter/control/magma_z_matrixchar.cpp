@@ -39,7 +39,8 @@ magma_zrowentries( magma_z_sparse_matrix *A ){
     Purpose
     =======
 
-    Checks the maximal number of nonzeros in a row of matrix A. Inserts the data into max_nnz_row.
+    Checks the maximal number of nonzeros in a row of matrix A. 
+    Inserts the data into max_nnz_row.
 
 
     Arguments
