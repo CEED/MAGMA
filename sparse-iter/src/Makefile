@@ -25,11 +25,12 @@ ZSRC += \
 	zgmres.cpp		\
 	zbicgstab.cpp		\
 	zbicgstab_merge.cpp		\
+	zbicgstab_merge2.cpp		\
 	zpcg.cpp		\
 	zpbicgstab.cpp		\
 	zpgmres.cpp  		\
 	zgmres_pipe.cpp  		\
-	#zp1gmres_2.cpp  		\
+
 
 # Krylov space eigen-solvers
 ZSRC += \

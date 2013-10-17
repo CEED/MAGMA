@@ -14,6 +14,7 @@
 
 #include <assert.h>
 
+
 #define RTOLERANCE     10e-16
 #define ATOLERANCE     10e-16
 
@@ -94,21 +95,33 @@ magma_zbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     //Chronometry
     #define ENABLE_TIMER
     #ifdef ENABLE_TIMER
-    double t_spmv1, t_spmv = 0.0;
+    double t_spmv1, t_spmv = 0.0, t_dot1, t_dot = 0.0, t_pupdate1, t_pupdate = 0.0, t_supdate1, t_supdate = 0.0, t_xrupdate1, t_xrupdate = 0.0;
     double tempo1, tempo2;
     magma_device_sync(); tempo1=magma_wtime();
-        printf("Iteration: %4d  Norm: %e  Time: %.2lf  SpMV: %.2lf %.2lf%%  Rest: %.2lf\n", 
-                    (solver_par->numiter), nom, 0.0, 0.0, 0.0 );
+  //      printf("Iteration: %4d  Norm: %e  Time: %.2lf  SpMV: %.2lf %.2lf%%  Rest: %.2lf\n", 
+  //                  (solver_par->numiter), nom, 0.0, 0.0, 0.0 );
     #endif
 
     // start iteration
+    //while(solver_par->numiter < solver_par->maxiter && nom > solver_par->epsilon){
     while( solver_par->numiter < solver_par->maxiter ){
-
+          //  #ifdef ENABLE_TIMER
+          //  magma_device_sync(); t_dot1=magma_wtime();
+          //  #endif
         rho_new = magma_zdotc( dofs, rr.val, 1, r.val, 1 );                     // rho=<rr,r>
         beta = rho_new/rho_old * alpha/omega;                                   // beta=rho/rho_old *alpha/omega
+          //  #ifdef ENABLE_TIMER
+          //  magma_device_sync(); t_dot += magma_wtime() - t_dot1;
+          //  #endif
+          //  #ifdef ENABLE_TIMER
+          //  magma_device_sync(); t_pupdate1=magma_wtime();
+          //  #endif
         magma_zscal( dofs, beta, p.val, 1 );                                    // p = beta*p
         magma_zaxpy( dofs, c_mone * omega * beta, v.val, 1 , p.val, 1 );        // p = p-omega*beta*v
         magma_zaxpy( dofs, c_one, r.val, 1, p.val, 1 );                         // p = p+r
+          //  #ifdef ENABLE_TIMER
+          //  magma_device_sync(); t_pupdate += magma_wtime() - t_pupdate1;
+          //  #endif
             #ifdef ENABLE_TIMER
             magma_device_sync(); t_spmv1=magma_wtime();
             #endif
@@ -116,10 +129,21 @@ magma_zbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
             #ifdef ENABLE_TIMER
             magma_device_sync(); t_spmv += magma_wtime() - t_spmv1;
             #endif
+         //   #ifdef ENABLE_TIMER
+         //   magma_device_sync(); t_dot1=magma_wtime();
+         //   #endif
         alpha = rho_new / magma_zdotc( dofs, rr.val, 1, v.val, 1 );
-
+         //   #ifdef ENABLE_TIMER
+         //   magma_device_sync(); t_dot += magma_wtime() - t_dot1;
+         //   #endif
+         //   #ifdef ENABLE_TIMER
+         //   magma_device_sync(); t_supdate1=magma_wtime();
+         //   #endif
         magma_zcopy( dofs, r.val, 1 , s.val, 1 );                                // s=r
         magma_zaxpy( dofs, c_mone * alpha, v.val, 1 , s.val, 1 );                // s=s-alpha*v
+         //   #ifdef ENABLE_TIMER
+         //   magma_device_sync(); t_supdate += magma_wtime() - t_supdate1;
+         //   #endif
             #ifdef ENABLE_TIMER
             magma_device_sync(); t_spmv1=magma_wtime();
             #endif
@@ -127,34 +151,55 @@ magma_zbicgstab( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
             #ifdef ENABLE_TIMER
             magma_device_sync(); t_spmv += magma_wtime() - t_spmv1;
             #endif
+         //   #ifdef ENABLE_TIMER
+         //   magma_device_sync(); t_dot1=magma_wtime();
+         //   #endif
         omega = magma_zdotc( dofs, t.val, 1, s.val, 1 )                          // omega = <s,t>/<t,t>
                    / magma_zdotc( dofs, t.val, 1, t.val, 1 );
-
+        //    #ifdef ENABLE_TIMER
+        //    magma_device_sync(); t_dot += magma_wtime() - t_dot1;
+        //    #endif
+        //    #ifdef ENABLE_TIMER
+        //    magma_device_sync(); t_xrupdate1=magma_wtime();
+        //    #endif
         magma_zaxpy( dofs, alpha, p.val, 1 , x->val, 1 );                        // x=x+alpha*p
         magma_zaxpy( dofs, omega, s.val, 1 , x->val, 1 );                        // x=x+omega*s
 
         magma_zcopy( dofs, s.val, 1 , r.val, 1 );                                // r=s
         magma_zaxpy( dofs, c_mone * omega, t.val, 1 , r.val, 1 );                // r=r-omega*t
+        //    #ifdef ENABLE_TIMER
+        //    magma_device_sync(); t_xrupdate += magma_wtime() - t_xrupdate1;
+        //    #endif
+        //    #ifdef ENABLE_TIMER
+        //    magma_device_sync(); t_dot1=magma_wtime();
+        //    #endif
         nom = magma_dznrm2( dofs, r.val, 1 );
         nom = nom*nom;
         rho_old = rho_new;                                                       // rho_old=rho
-
+        //    #ifdef ENABLE_TIMER
+        //    magma_device_sync(); t_dot += magma_wtime() - t_dot1;
+        //    #endif
         (solver_par->numiter)++;
 
         #ifdef ENABLE_TIMER
         //Chronometry  
         magma_device_sync(); tempo2=magma_wtime();
-        if( solver_par->numiter==1000 ) 
-        printf("Iteration: %4d  Norm: %e  Time: %.2lf  SpMV: %.2lf %.2lf%%  Rest: %.2lf\n", 
-                    (solver_par->numiter), nom, tempo2-tempo1, t_spmv, 100.0*t_spmv/(tempo2-tempo1), tempo2-tempo1-t_spmv);
+        if( solver_par->numiter%1000==0 ) 
+        printf("Iteration: %4d  Norm: %e  Time: %.2lf  SpMV: %.2lf %.2lf%% dot: %.2lf %.2lf%% p_update: %.2lf %.2lf%% s_update: %.2lf %.2lf%% xr_update: %.2lf %.2lf%%\n", 
+                    (solver_par->numiter), nom, tempo2-tempo1, 
+                    t_spmv, 100.0*t_spmv/(tempo2-tempo1), 
+                    t_dot, 100.0*t_dot/(tempo2-tempo1), 
+                    t_pupdate, 100.0*t_pupdate/(tempo2-tempo1), 
+                    t_supdate, 100.0*t_supdate/(tempo2-tempo1), 
+                    t_xrupdate, 100.0*t_xrupdate/(tempo2-tempo1) );
         #endif
     
     }
-  
-    printf( "      (r_0, r_0) = %e\n", nom0 );
-    printf( "      (r_N, r_N) = %e\n", nom );
-    printf( "      Number of BICGSTAB iterations: %d\n", (solver_par->numiter));
-    
+    #ifndef ENABLE_TIMER
+    printf("Iteration: %4d  Norm: %e  Time: %.2lf  SpMV: %.2lf %.2lf%%  Rest: %.2lf\n", 
+                (solver_par->numiter), nom, tempo2-tempo1, t_spmv, 100.0*t_spmv/(tempo2-tempo1), tempo2-tempo1-t_spmv);
+    #endif
+
     if (solver_par->epsilon == RTOLERANCE) {
         magma_z_spmv( c_one, A, *x, c_zero, r );                       // z = A d
         magma_zaxpy(dofs,  c_mone, b.val, 1, r.val, 1);                // r = r - b
