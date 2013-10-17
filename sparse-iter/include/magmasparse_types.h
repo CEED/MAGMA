@@ -144,7 +144,7 @@ typedef struct magma_solver_parameters{
     magma_int_t        numiter;
     double             residual;
 
-    // orthogonalization scheme form GMRES
+    // orthogonalization scheme for GMRES
     magma_ortho_t      gmres_ortho;
     magma_ortho_t      cagmres_ortho;
 }magma_solver_parameters;
