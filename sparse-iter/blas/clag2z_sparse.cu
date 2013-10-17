@@ -44,13 +44,6 @@ magmaint_clag2z_sparse(  int M, int N,
     } 
 }
 
-
-extern "C" void 
-magmablas_clag2z_sparse( magma_int_t M, magma_int_t N , 
-                  const magmaFloatComplex *SA, magma_int_t ldsa, 
-                  magmaDoubleComplex *A,       magma_int_t lda, 
-                  magma_int_t *info ) 
-{    
 /*
     Note
     ====
@@ -97,6 +90,13 @@ magmablas_clag2z_sparse( magma_int_t M, magma_int_t N ,
                   overflow threshold, in this case, the content
                   of SA in exit is unspecified.
     =====================================================================    */
+
+extern "C" void 
+magmablas_clag2z_sparse( magma_int_t M, magma_int_t N , 
+                  const magmaFloatComplex *SA, magma_int_t ldsa, 
+                  magmaDoubleComplex *A,       magma_int_t lda, 
+                  magma_int_t *info ){    
+
 
     *info = 0;
     if ( M < 0 )

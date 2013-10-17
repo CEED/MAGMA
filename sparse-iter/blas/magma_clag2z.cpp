@@ -28,16 +28,6 @@
 using namespace std;
 
 
-
-
-
-
-
-
-
-
-
-
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
        Univ. of California, Berkeley
@@ -138,34 +128,4 @@ magma_sparse_matrix_clag2z( magma_c_sparse_matrix A, magma_z_sparse_matrix *B )
         return MAGMA_ERR_NOT_SUPPORTED;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

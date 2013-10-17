@@ -13,28 +13,25 @@ ZHDR  =
 
 # alphabetic order by base name (ignoring precision)
 ZSRC := \
+	clag2z_sparse.cu        \
 	magma_z_blaswrapper.cpp \
-	magma_z_mpk.cpp      \
-	zgecsrmv.cu		\
-	zmgecsrmv.cu		\
-	zgeellmv.cu		\
-	zmgeellmv.cu		\
-	zgeelltmv.cu            \
-	zmgeelltmv.cu            \
-	#zmpkgeelltmv.cu            \
-	#zmpkgeelltmv_2.cu            \
-	#zmpkgeelltmv_3.cu            \
-    zlag2c_sparse.cu        \
-    clag2z_sparse.cu        \
-    zjacobisetup.cu         \
-	magma_zlag2c.cpp        \
+	magma_z_mpksetup.cu      \
 	magma_clag2z.cpp        \
-	#zp1.cu                  \
-    #zpipelinedgs.cu          \
-    zmergebicgstab.cu          \
-    #zpipelinedgmrescopyscale.cu     \
-    zmdot.cu                    \
-	#zp1_b.cu                  \
+	magma_zlag2c.cpp        \
+	zgecsrmv.cu		\
+	zgeellmv.cu		\
+	zgeelltmv.cu            \
+	zjacobisetup.cu         \
+	zlag2c_sparse.cu        \
+	zmdot.cu                    \
+	zmergebicgstab.cu          \
+	zmergebicgstab2.cu          \
+	zmgecsrmv.cu		\
+	zmgeellmv.cu		\
+	zmgeelltmv.cu            \
+	zpipelinedgmrescopyscale.cu     \
+	zpipelinedgs.cu          \
+
 
 
 # multi-GPU
