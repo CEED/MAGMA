@@ -107,7 +107,7 @@ int main( int argc, char** argv)
      //"test_matrices/parabolic_fem.mtx",
      //"test_matrices/circuit5M.mtx"*/
     };
-for(magma_int_t matrix=2; matrix<13; matrix++){
+for(magma_int_t matrix=0; matrix<13; matrix++){
 
     magma_z_sparse_matrix A, B, C, D;
     magma_z_vector x, b;

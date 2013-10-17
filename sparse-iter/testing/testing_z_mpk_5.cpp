@@ -77,16 +77,9 @@ int main( int argc, char** argv)
      "test_matrices/jj_CoupCons3D.mtx",
      "test_matrices/jj_ML_Laplace.mtx",      // 29
 
-     "test_matrices/vanbody.mtx",           // 30
-     "test_matrices/apache2.mtx",           
-     "test_matrices/s3dkt3m2.mtx",
-     "test_matrices/s3dkq4m2.mtx",
-     "test_matrices/oilpan.mtx",
-     "test_matrices/minsurfo.mtx",
-     "test_matrices/jnlbrng1.mtx",
-     "test_matrices/gridgena.mtx",           //37
 
-     "test_matrices/Si41Ge41H72.mtx",           // 38
+
+     "test_matrices/Si41Ge41H72.mtx",           // 30
      "test_matrices/Si87H76.mtx",
      "test_matrices/Si87H76.mtx",
      "test_matrices/Si34H36.mtx",
@@ -96,10 +89,10 @@ int main( int argc, char** argv)
      "test_matrices/Ga3As3H12.mtx",
      "test_matrices/Ga19As19H42.mtx",
      "test_matrices/Ga10As10H30.mtx",
-     "test_matrices/CO.mtx",           //48
+     "test_matrices/CO.mtx",           //40
 
 
-     "test_matrices/A050.rsa",   //49
+     "test_matrices/A050.rsa",   //41
      "test_matrices/A063.rsa",
      "test_matrices/A080.rsa",          
      "test_matrices/A100.rsa",
@@ -107,7 +100,16 @@ int main( int argc, char** argv)
      "test_matrices/A159.rsa",
      "test_matrices/A200.rsa",
      "test_matrices/A252.rsa",
-     "test_matrices/A318.rsa",           //57
+     "test_matrices/A318.rsa",           //49
+
+     "test_matrices/vanbody.mtx",           // 50
+     "test_matrices/apache2.mtx",           
+     "test_matrices/s3dkt3m2.mtx",
+     "test_matrices/s3dkq4m2.mtx",
+     "test_matrices/oilpan.mtx",
+     "test_matrices/minsurfo.mtx",
+     "test_matrices/jnlbrng1.mtx",
+     "test_matrices/gridgena.mtx",           //57
 
      "test_matrices/cant.mtx",           //58
      "test_matrices/pwtk.mtx",
@@ -115,14 +117,16 @@ int main( int argc, char** argv)
      "test_matrices/xenon2.mtx",
      "test_matrices/shipsec1.mtx",           //62
 
-     "test_matrices/kkt_power.mtx",           //63
+     "test_matrices/ecology2.mtx",           // 63
+
+     "test_matrices/kkt_power.mtx",           //64
      "test_matrices/G3_circuit.mtx",
      "test_matrices/Hook_1498.mtx",
      "test_matrices/StocF-1465.mtx",
-     "test_matrices/dielFilterV2real.mtx",           //67
+     "test_matrices/dielFilterV2real.mtx",           //68
 
 
-     "test_matrices/Trefethen_2000.mtx",     // 68
+     "test_matrices/Trefethen_2000.mtx",     // 69
      "test_matrices/bcsstk01.mtx",
      "test_matrices/Pres_Poisson.mtx",
      "test_matrices/bloweybq.mtx",
@@ -160,8 +164,8 @@ int main( int argc, char** argv)
     }
     if (id > -1) printf( "\n    Usage: ./testing_z_mv --id %d\n\n",id );
 
-    for(matrix=58; matrix<63; matrix++)
-    // for(matrix=31; matrix<38; matrix++)
+    for(matrix=50; matrix<51; matrix++)
+   // for(matrix=31; matrix<38; matrix++)
     {
         magma_z_sparse_matrix hA;
 
@@ -182,18 +186,16 @@ int main( int argc, char** argv)
         magma_int_t power_count = 30;
         // array containing the shift for higher numerical stability
         magmaDoubleComplex lambda[power_count];
-
         for( i=0; i<power_count; i++)
-            lambda[ i ] = zero;
+            lambda[ i ] = mone;
 
 
         #define ENABLE_TIMER
         #ifdef ENABLE_TIMER
-        double t_spmv1, t_spmv2, t_spmv = 0.0;
         double computations = power_count * (2.* hA.nnz);
-            printf( "#=============================================================================================#\n" );
-            printf( "# matrix powers | power kernel | restarts | additional rows (cols) > GPU | runtime | GFLOPS\n" );
-            printf( "#---------------------------------------------------------------------------------------------#\n" );
+            printf( "#==================================================================================================#\n" );
+            printf( "# matrix powers | power kernel | restarts | additional rows (components) > GPU | runtime [ms] | GFLOPS\n" );
+            printf( "#--------------------------------------------------------------------------------------------------#\n" );
         #endif
 
         // GPU allocation and streams
@@ -239,23 +241,33 @@ int main( int argc, char** argv)
             // set the number of matrix power kernel restarts for
             // for the matrix power number
             magma_int_t restarts = (power_count+sk-1)/sk;
+
+        double t_spmv1, t_spmv2, t_only_spmv = 0.0, t_spmv = 0.0;
+        double t_1, t_2, t_3, t_4;
+        double t_comm_1=0.0, t_comm_2=0.0, t_compress_cpu=0.0, t_compress_gpu=0.0, t_uncompress_cpu=0.0, t_uncompress_gpu=0.0;
             
             #ifdef ENABLE_TIMER
             // use magma_z_mpkinfo to show number of additional rows
-            magma_int_t num_add_rows[ MagmaMaxGPUs ], num_add_vecs[ MagmaMaxGPUs ];
+            magma_int_t num_add_vecs[ MagmaMaxGPUs ], num_vecs_back[ MagmaMaxGPUs ];
+            magma_int_t **num_add_rows = (magma_int_t**)malloc( MagmaMaxGPUs * sizeof(magma_int_t*) );
             magma_int_t **add_rows = (magma_int_t**)malloc( MagmaMaxGPUs * sizeof(magma_int_t*) );
             magma_int_t **add_vecs = (magma_int_t**)malloc( MagmaMaxGPUs * sizeof(magma_int_t*) );
-            magma_int_t **add_vecs_gpu = (magma_int_t**)malloc( MagmaMaxGPUs*MagmaMaxGPUs * sizeof(magma_int_t*) );
+            magma_int_t **vecs_back = (magma_int_t**)malloc( MagmaMaxGPUs * sizeof(magma_int_t*) );
+            magma_int_t **add_vecs_gpu = (magma_int_t**)malloc( MagmaMaxGPUs * sizeof(magma_int_t*) );
             magma_int_t **add_rows_gpu = (magma_int_t**)malloc( MagmaMaxGPUs * sizeof(magma_int_t*) );
-            magmaDoubleComplex **compressed = (magmaDoubleComplex**)malloc( MagmaMaxGPUs *MagmaMaxGPUs * sizeof(magmaDoubleComplex*) );
-            magmaDoubleComplex **compressed_gpu = (magmaDoubleComplex**)malloc( MagmaMaxGPUs*MagmaMaxGPUs * sizeof(magmaDoubleComplex*) );
-            magma_z_mpkinfo( hA, num_gpus, offset, blocksize, sk, num_add_rows, add_rows, num_add_vecs, add_vecs );
+            magma_int_t **vecs_back_gpu = (magma_int_t**)malloc( MagmaMaxGPUs * sizeof(magma_int_t*) );
+            magmaDoubleComplex **compressed = (magmaDoubleComplex**)malloc( MagmaMaxGPUs * sizeof(magmaDoubleComplex*) );
+            magmaDoubleComplex **compressed_back = (magmaDoubleComplex**)malloc( MagmaMaxGPUs * sizeof(magmaDoubleComplex*) );
+            magmaDoubleComplex **compressed_gpu = (magmaDoubleComplex**)malloc( MagmaMaxGPUs * sizeof(magmaDoubleComplex*) );
+            magmaDoubleComplex **compressed_back_gpu = (magmaDoubleComplex**)malloc( MagmaMaxGPUs * sizeof(magmaDoubleComplex*) );
+            magma_z_mpkinfo( hA, num_gpus, offset, blocksize, sk, num_add_rows, add_rows, num_add_vecs, add_vecs, num_vecs_back, vecs_back );
+           
             printf("    %d      %d      %d    |  ", power_count, sk, restarts );
-            for( int gpu=0; gpu<num_gpus; gpu++ ){          
-                printf("%d - %d ",num_add_rows[gpu], gpu);
+            for( int gpu=0; gpu<num_gpus; gpu++ ){           
+                printf("%d > %d ",num_add_rows[gpu][sk-1], gpu);
                 printf("( %d > %d )  ",num_add_vecs[gpu], gpu);
-                for( int d=0; d<num_gpus; d++ )
-                    magma_zmalloc_cpu( &compressed[d+gpu*MagmaMaxGPUs], num_add_vecs[d] );
+                magma_zmalloc_cpu( &compressed[gpu], num_add_vecs[gpu] );
+                magma_zmalloc_cpu( &compressed_back[gpu], num_vecs_back[gpu] );
             }
             #endif
 
@@ -268,26 +280,21 @@ int main( int argc, char** argv)
             for( int gpu=0; gpu<num_gpus; gpu++ ){
                 magma_setdevice( gpu );
                 magmablasSetKernelStream( stream[gpu] );
-                magma_z_vinit( &spmv_comp[gpu], Magma_DEV, blocksize[gpu]+num_add_rows[gpu], zero );
-                magma_z_mpk_mcompresso( hB[gpu], &hC[gpu], offset[gpu], blocksize[gpu], num_add_rows[gpu], add_rows[gpu] );
+                magma_z_vinit( &spmv_comp[gpu], Magma_DEV, blocksize[gpu]+num_add_rows[gpu][sk-1], zero );
+
+                magma_z_mpk_mcompresso( hB[gpu], &hC[gpu], offset[gpu], blocksize[gpu], num_add_rows[gpu][sk-1], add_rows[gpu] );
                 magma_z_mconvert( hC[gpu], &hD[gpu], Magma_CSR, Magma_ELLPACKT ); 
                 magma_z_mtransfer( hD[gpu], &dB[gpu], Magma_CPU, Magma_DEV );
                         //printf("truncated matrix:\n");magma_z_mvisu(hD[gpu] );
-                magma_imalloc( &add_rows_gpu[gpu], num_add_rows[gpu] );
-                cublasSetVector( num_add_rows[gpu], sizeof( magma_int_t ), add_rows[gpu], 1, add_rows_gpu[gpu], 1 ); 
-                for( int d=0; d<num_gpus; d++ ){ 
-                    // in order reduce communication back to CPU, we have to allocate all compressed vector parts
-                    // on all GPUs for the components the other GPUs need
-                    magma_zmalloc( &compressed_gpu[d+gpu*MagmaMaxGPUs], num_add_vecs[d] );
-                    magma_imalloc( &add_vecs_gpu[d+gpu*MagmaMaxGPUs], num_add_vecs[d] );
-                    cublasSetVector( num_add_vecs[d], sizeof( magma_int_t ), add_vecs[d], 1, add_vecs_gpu[d+gpu*MagmaMaxGPUs], 1 ); 
-                }                
-            }
-            for( int gpu=0; gpu<num_gpus; gpu++ ){
-                magma_setdevice( gpu );
-                magmablasSetKernelStream( stream[gpu] );
-                magma_zsetvector_async( blocksize[gpu], ha.val+offset[gpu], 1, (a[gpu][0]).val+offset[gpu], 1, stream[gpu] );
-
+                magma_zmalloc( &compressed_gpu[gpu], num_add_vecs[gpu] );
+                magma_zmalloc( &compressed_back_gpu[gpu], num_vecs_back[gpu] );
+                magma_imalloc( &vecs_back_gpu[gpu], num_vecs_back[gpu] );
+                magma_imalloc( &add_rows_gpu[gpu], num_add_rows[gpu][sk-1] );
+                magma_imalloc( &add_vecs_gpu[gpu], num_add_vecs[gpu] );
+                cublasSetVector( num_add_rows[gpu][sk-1], sizeof( magma_int_t ), add_rows[gpu], 1, add_rows_gpu[gpu], 1 ); 
+                cublasSetVector( num_add_vecs[gpu], sizeof( magma_int_t ), add_vecs[gpu], 1, add_vecs_gpu[gpu], 1 );
+                cublasSetVector( num_vecs_back[gpu], sizeof( magma_int_t ), vecs_back[gpu], 1, vecs_back_gpu[gpu], 1 ); 
+                
             }
 
             #ifdef ENABLE_TIMER
@@ -295,27 +302,62 @@ int main( int argc, char** argv)
             #endif
 // do it 100 times to remove noise
 for( int noise=0; noise<100; noise++){
+
+            magma_z_vinit( &ha, Magma_CPU, hA.num_rows, one );
+
+            for( int gpu=0; gpu<num_gpus; gpu++ ){
+                magma_setdevice( gpu );
+                magmablasSetKernelStream( stream[gpu] );
+                magma_zsetvector_async( blocksize[gpu], ha.val+offset[gpu], 1, (a[gpu][0]).val+offset[gpu], 1, stream[gpu] );
+            }
          
             // use the matrix power kernel with sk restart-1 times
             for( int i=0; i<restarts; i++){
                 int j;
                 // distribute vector for next sk powers
+
                 for( int gpu=0; gpu<num_gpus; gpu++ ){
                     magma_setdevice( gpu );
                     magmablasSetKernelStream( stream[gpu] );
-                    magma_z_mpk_compress( num_add_vecs[gpu], add_vecs[gpu], ha.val, compressed[gpu+gpu*MagmaMaxGPUs] );
-                    magma_zsetvector_async( num_add_vecs[gpu], compressed[gpu+gpu*MagmaMaxGPUs], 1, compressed_gpu[gpu*MagmaMaxGPUs+gpu], 1, stream[gpu] );
-                    magma_z_mpk_uncompress_gpu( num_add_vecs[gpu], add_vecs_gpu[gpu+gpu*MagmaMaxGPUs], compressed_gpu[gpu*MagmaMaxGPUs+gpu], (a[gpu][i*sk]).val );
+            #ifdef ENABLE_TIMER
+            magma_device_sync(); t_1=magma_wtime();
+            #endif
+                    magma_z_mpk_compress( num_add_vecs[gpu], add_vecs[gpu], ha.val, compressed[gpu] );
+            #ifdef ENABLE_TIMER
+            magma_device_sync(); t_2=magma_wtime();
+            #endif
+                    magma_zsetvector_async( num_add_vecs[gpu], compressed[gpu], 1, compressed_gpu[gpu], 1, stream[gpu] );
+            #ifdef ENABLE_TIMER
+            magma_device_sync(); t_3=magma_wtime();
+            #endif
+                    magma_z_mpk_uncompress_gpu( num_add_vecs[gpu], add_vecs_gpu[gpu], compressed_gpu[gpu], (a[gpu][i*sk]).val );
+            #ifdef ENABLE_TIMER
+            magma_device_sync(); t_4=magma_wtime();
+                t_compress_cpu += t_2-t_1;
+                t_comm_1 += t_3-t_2;
+                t_uncompress_gpu += t_4-t_3;
+            #endif
                 }
 
                 if( i<restarts-1 ){
                     for(j=0; j<sk; j++){
                         // compute sk spmvs
                         for ( int gpu=0; gpu<num_gpus; gpu++ ) {
+            #ifdef ENABLE_TIMER
+            magma_device_sync(); t_1=magma_wtime();
+            #endif
                             magma_setdevice( gpu );
                             magmablasSetKernelStream( stream[gpu] );
+                            //magma_z_spmv_shift( one, dB[gpu], lambda[i*sk+j], a[gpu][i*sk+j], zero, a[gpu][i*sk+j+1] );
+                            //magma_z_spmv_shift( one, dB[gpu], lambda[i*sk+j], a[gpu][i*sk+j], zero, a[gpu][i*sk+j+1] );
                             magma_z_spmv_shift( one, dB[gpu], lambda[i*sk+j], a[gpu][i*sk+j], zero, offset[gpu], blocksize[gpu], add_rows_gpu[gpu], spmv_comp[gpu] );
-                            magma_z_mpk_uncompspmv( offset[gpu], blocksize[gpu], num_add_rows[gpu], add_rows_gpu[gpu], (spmv_comp[gpu]).val, (a[gpu][i*sk+j+1]).val );
+                            //magma_z_spmv( one, dB[gpu], a[gpu][i*sk+j], zero, spmv_comp[gpu] );
+                            magma_z_mpk_uncompspmv( offset[gpu], blocksize[gpu], num_add_rows[gpu][sk-1], add_rows_gpu[gpu], (spmv_comp[gpu]).val, (a[gpu][i*sk+j+1]).val );
+            #ifdef ENABLE_TIMER
+            magma_device_sync(); t_2=magma_wtime();
+            t_only_spmv +=t_2-t_1;
+            #endif
+
                         }
                     }
                 }
@@ -323,41 +365,70 @@ for( int noise=0; noise<100; noise++){
                     for( j=0; j< power_count-sk*(restarts-1); j++ ){
                         // the last matrix power kernel handles less powers
                         for ( int gpu=0; gpu<num_gpus; gpu++ ) {
+            #ifdef ENABLE_TIMER
+            magma_device_sync(); t_1=magma_wtime();
+            #endif
                             magma_setdevice( gpu );
                             magmablasSetKernelStream( stream[gpu] );
-                            magma_z_spmv_shift( one, dB[gpu], lambda[i*sk+j], a[gpu][i*sk+j], zero, offset[gpu], blocksize[gpu], add_rows_gpu[gpu], spmv_comp[gpu] );
-                            magma_z_mpk_uncompspmv( offset[gpu], blocksize[gpu], num_add_rows[gpu], add_rows_gpu[gpu], (spmv_comp[gpu]).val, (a[gpu][i*sk+j+1]).val );
+                            //magma_z_spmv_shift( one, dB[gpu], lambda[i*sk+j], a[gpu][i*sk+j], zero, a[gpu][i*sk+j+1] );
+                            //magma_z_spmv_shift( one, dB[gpu], lambda[i*sk+j], a[gpu][i*sk+j], zero, a[gpu][i*sk+j+1] );
+                            magma_z_spmv_shift( one, dB[gpu], lambda[i*sk+j], a[gpu][i*sk+j], zero, offset[gpu], blocksize[gpu], add_rows_gpu[gpu], spmv_comp[gpu]  );
+                            //magma_z_spmv( one, dB[gpu], a[gpu][i*sk+j], zero, spmv_comp[gpu] );
+                            magma_z_mpk_uncompspmv( offset[gpu], blocksize[gpu], num_add_rows[gpu][sk-1], add_rows_gpu[gpu], (spmv_comp[gpu]).val, (a[gpu][i*sk+j+1]).val );
+            #ifdef ENABLE_TIMER
+            magma_device_sync(); t_2=magma_wtime();
+            t_only_spmv +=t_2-t_1;
+            #endif
                         }
                     }
                 }
-                // collect the blocks in CPU memory
+
+
+                // selective copy back to CPU
                 for( int gpu=0; gpu<num_gpus; gpu++ ){
-             //   printf("num_add_vecs[%d]:%d\n", gpu,  num_add_vecs[gpu]); 
                     magma_setdevice( gpu );
                     magmablasSetKernelStream( stream[gpu] );
-                    for( int d=0; d<num_gpus; d++ ){ 
-                        // in order reduce communication back to CPU, we have to allocate all compressed vector parts
-                        // on all GPUs for the components the other GPUs need
-                        if( d!=gpu ){
-                            magma_z_mpk_compress_gpu( num_add_vecs[d], add_vecs_gpu[d+gpu*MagmaMaxGPUs], (a[gpu][i*sk+j]).val, compressed_gpu[d+gpu*MagmaMaxGPUs] );
-                            magma_zgetvector_async( num_add_vecs[d], compressed_gpu[d+gpu*MagmaMaxGPUs], 1, compressed[d+gpu*MagmaMaxGPUs], 1, stream[gpu] );
-                            magma_z_mpk_uncompress_sel( num_add_vecs[d], add_vecs[d], offset[gpu], blocksize[gpu], compressed[d+gpu*MagmaMaxGPUs], ha.val );
-                        }
-                    }
+            #ifdef ENABLE_TIMER
+            magma_device_sync(); t_1=magma_wtime();
+            #endif
+                    magma_z_mpk_compress_gpu( num_vecs_back[gpu], vecs_back_gpu[gpu], (a[gpu][i*sk+j]).val, compressed_back_gpu[gpu] );
+            #ifdef ENABLE_TIMER
+            magma_device_sync(); t_2=magma_wtime();
+            #endif
+                    magma_zgetvector_async( num_vecs_back[gpu], compressed_back_gpu[gpu], 1, compressed_back[gpu], 1, stream[gpu] );
+            #ifdef ENABLE_TIMER
+            magma_device_sync(); t_3=magma_wtime();
+            #endif
+                    magma_z_mpk_uncompress( num_vecs_back[gpu], vecs_back[gpu], compressed_back[gpu], ha.val );
+            #ifdef ENABLE_TIMER
+            magma_device_sync(); t_4=magma_wtime();
+                t_compress_gpu += t_2-t_1;
+                t_comm_2 += t_3-t_2;
+                t_uncompress_cpu += t_4-t_3;
+            #endif
                 }
             }
-           
+
 }//end 100
             #ifdef ENABLE_TIMER
             magma_device_sync(); t_spmv2 = magma_wtime(); t_spmv = t_spmv2 - t_spmv1;
             //printf("sk: %d  runtime: %.2lf  GFLOPS: %.2lf\n", sk, t_spmv, (double) computations/(t_spmv*(1.e+09)) );
-            printf("|   %.2lf  %.2lf\n", t_spmv/100, (double) computations*100/(t_spmv*(1.e+09)) );
+            printf("|   %.2lf  %.2lf", t_spmv*10, (double) computations*100/(t_spmv*(1.e+09)) );
+            //printf("detailed:  comm:%.2lf  compress_cpu:%.2lf  compress_gpu:%.2lf  uncompress_cpu:%.2lf  uncompress_gpu:%.2lf\n",  
+            printf("   %e     %e    %.2e    %e    %e    %e   %e   %e\n",  
+            t_comm_1, t_comm_2, t_compress_cpu, t_compress_gpu, t_uncompress_cpu, t_uncompress_gpu, t_spmv, t_only_spmv);
+            /*printf("ratios:  comm:%.2lf  compress_cpu:%.2lf  compress_gpu:%.2lf  uncompress_cpu:%.2lf  uncompress_gpu:%.2lf\n",  
+            10000000*t_comm/(num_vecs_back[0]+num_vecs_back[1]+num_add_vecs[0]+num_add_vecs[1]), 
+            10000000*t_compress_cpu/(num_add_vecs[0]+num_add_vecs[1]),
+            10000000*t_compress_gpu/(num_vecs_back[0]+num_vecs_back[1]), 
+            10000000*t_uncompress_cpu/(num_vecs_back[0]+num_vecs_back[1]), 
+            10000000*t_uncompress_gpu/(num_add_vecs[0]+num_add_vecs[1]));*/
             #endif
 
+           
 
 
-
-    // check the results
+// check the results
             for( int gpu=0; gpu<num_gpus; gpu++ )
                 magma_zgetvector_async( blocksize[gpu], (a[gpu][power_count]).val+offset[gpu], 1, ha.val+offset[gpu], 1, stream[gpu] );
 
@@ -371,30 +442,25 @@ for( int noise=0; noise<100; noise++){
 
             for (i=0; i<power_count; i++){
                 magma_z_spmv( one, dA, du, zero, dv);
+                magma_zaxpy(hA.num_rows, one, du.val, 1, dv.val, 1);   
                 //printf("%d:\n",i);
                 //magma_z_vvisu(dv,0,7);
                 cudaMemcpy( du.val, dv.val, dA.num_rows*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToDevice );
             }
             
-          //  magma_z_vvisu(du, 0, 7);
+            //magma_z_vvisu(du, 0, 7);
             cublasSetVector(hA.num_rows, sizeof(magmaDoubleComplex), ha.val, 1, dv.val, 1);
-         //   magma_z_vvisu(dv, 0, 7);
+            //magma_z_vvisu(dv, 0, 7);
             magma_zaxpy(hA.num_rows, mone, dv.val, 1, du.val, 1);   
             cublasGetVector(hA.num_rows, sizeof(magmaDoubleComplex), du.val, 1, hw.val, 1);
 
-
-
-
-
-            //magma_z_vvisu(hw, 0, 7);
+            // printf("-------------------------------\n difference in components 0 -- 7:\n"); magma_z_vvisu(hw, 0, 7);
             for( i=0; i<hA.num_rows; i++){
                 if( MAGMA_Z_REAL(hw.val[i]) > 0.0 )
                         printf("error in component %d: %f\n", i, hw.val[i]);
             }
             magma_z_mfree( &dA );
             // end check results
-
-
 
 
             // clean up CPU matrix memory
@@ -415,7 +481,7 @@ for( int noise=0; noise<100; noise++){
         }
 
         #ifdef ENABLE_TIMER
-        printf( "#=============================================================================================#\n\n" );
+        printf( "#==================================================================================================#\n\n" );
         #endif
 
         // clean up GPU vector memory

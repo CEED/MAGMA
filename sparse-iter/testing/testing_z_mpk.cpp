@@ -109,7 +109,20 @@ int main( int argc, char** argv)
      "test_matrices/A252.rsa",
      "test_matrices/A318.rsa",           //57
 
-     "test_matrices/Trefethen_2000.mtx",     // 58
+     "test_matrices/cant.mtx",           //58
+     "test_matrices/pwtk.mtx",
+     "test_matrices/cfd2.mtx",
+     "test_matrices/xenon2.mtx",
+     "test_matrices/shipsec1.mtx",           //62
+
+     "test_matrices/kkt_power.mtx",           //63
+     "test_matrices/G3_circuit.mtx",
+     "test_matrices/Hook_1498.mtx",
+     "test_matrices/StocF-1465.mtx",
+     "test_matrices/dielFilterV2real.mtx",           //67
+
+
+     "test_matrices/Trefethen_2000.mtx",     // 68
      "test_matrices/bcsstk01.mtx",
      "test_matrices/Pres_Poisson.mtx",
      "test_matrices/bloweybq.mtx",
@@ -147,7 +160,7 @@ int main( int argc, char** argv)
     }
     if (id > -1) printf( "\n    Usage: ./testing_z_mv --id %d\n\n",id );
 
-    for(matrix=4; matrix<5; matrix++)
+    for(matrix=58; matrix<63; matrix++)
    // for(matrix=31; matrix<38; matrix++)
     {
         magma_z_sparse_matrix hA;
@@ -166,7 +179,7 @@ int main( int argc, char** argv)
 
         // set the total number of matrix powers - in CA-GMRES this
         // corresponds to the restart parameter
-        magma_int_t power_count = 20;
+        magma_int_t power_count = 30;
         // array containing the shift for higher numerical stability
         magmaDoubleComplex lambda[power_count];
         for( i=0; i<power_count; i++)
@@ -277,7 +290,7 @@ int main( int argc, char** argv)
             magma_device_sync(); t_spmv1=magma_wtime();
             #endif
 // do it 100 times to remove noise
-for( int noise=0; noise<1; noise++){
+for( int noise=0; noise<100; noise++){
          
             // use the matrix power kernel with sk restart-1 times
             for( int i=0; i<restarts; i++){
@@ -366,7 +379,7 @@ for( int noise=0; noise<1; noise++){
             magma_zaxpy(hA.num_rows, mone, dv.val, 1, du.val, 1);   
             cublasGetVector(hA.num_rows, sizeof(magmaDoubleComplex), du.val, 1, hw.val, 1);
 
-            magma_z_vvisu(hw, 0, 7);
+            //magma_z_vvisu(hw, 0, 7);
             for( i=0; i<hA.num_rows; i++){
                 if( MAGMA_Z_REAL(hw.val[i]) > 0.0 )
                         printf("error in component %d: %f\n", i, hw.val[i]);

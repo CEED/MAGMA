@@ -77,16 +77,9 @@ int main( int argc, char** argv)
      "test_matrices/jj_CoupCons3D.mtx",
      "test_matrices/jj_ML_Laplace.mtx",      // 29
 
-     "test_matrices/vanbody.mtx",           // 30
-     "test_matrices/apache2.mtx",           
-     "test_matrices/s3dkt3m2.mtx",
-     "test_matrices/s3dkq4m2.mtx",
-     "test_matrices/oilpan.mtx",
-     "test_matrices/minsurfo.mtx",
-     "test_matrices/jnlbrng1.mtx",
-     "test_matrices/gridgena.mtx",           //37
 
-     "test_matrices/Si41Ge41H72.mtx",           // 38
+
+     "test_matrices/Si41Ge41H72.mtx",           // 30
      "test_matrices/Si87H76.mtx",
      "test_matrices/Si87H76.mtx",
      "test_matrices/Si34H36.mtx",
@@ -96,10 +89,10 @@ int main( int argc, char** argv)
      "test_matrices/Ga3As3H12.mtx",
      "test_matrices/Ga19As19H42.mtx",
      "test_matrices/Ga10As10H30.mtx",
-     "test_matrices/CO.mtx",           //48
+     "test_matrices/CO.mtx",           //40
 
 
-     "test_matrices/A050.rsa",   //49
+     "test_matrices/A050.rsa",   //41
      "test_matrices/A063.rsa",
      "test_matrices/A080.rsa",          
      "test_matrices/A100.rsa",
@@ -107,7 +100,16 @@ int main( int argc, char** argv)
      "test_matrices/A159.rsa",
      "test_matrices/A200.rsa",
      "test_matrices/A252.rsa",
-     "test_matrices/A318.rsa",           //57
+     "test_matrices/A318.rsa",           //49
+
+     "test_matrices/vanbody.mtx",           // 50
+     "test_matrices/apache2.mtx",           
+     "test_matrices/s3dkt3m2.mtx",
+     "test_matrices/s3dkq4m2.mtx",
+     "test_matrices/oilpan.mtx",
+     "test_matrices/minsurfo.mtx",
+     "test_matrices/jnlbrng1.mtx",
+     "test_matrices/gridgena.mtx",           //57
 
      "test_matrices/cant.mtx",           //58
      "test_matrices/pwtk.mtx",
@@ -115,7 +117,7 @@ int main( int argc, char** argv)
      "test_matrices/xenon2.mtx",
      "test_matrices/shipsec1.mtx",           //62
 
-     "test_matrices/G3_circuit_rcm.mtx",     //63
+     "test_matrices/ecology2.mtx",           // 63
 
      "test_matrices/kkt_power.mtx",           //64
      "test_matrices/G3_circuit.mtx",
@@ -162,7 +164,7 @@ int main( int argc, char** argv)
     }
     if (id > -1) printf( "\n    Usage: ./testing_z_mv --id %d\n\n",id );
 
-    for(matrix=58; matrix<59; matrix++)
+    for(matrix=50; matrix<64; matrix++)
    // for(matrix=31; matrix<38; matrix++)
     {
         magma_z_sparse_matrix hA;
@@ -310,6 +312,7 @@ for( int noise=0; noise<100; noise++){
             for( int i=0; i<restarts; i++){
                 int j;
                 // distribute vector for next sk powers
+
                 for( int gpu=0; gpu<num_gpus; gpu++ ){
                     magma_setdevice( gpu );
                     magmablasSetKernelStream( stream[gpu] );

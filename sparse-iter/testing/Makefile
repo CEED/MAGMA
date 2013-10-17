@@ -39,15 +39,17 @@ ZSRC += \
   	testing_zpgmres.cpp         \
   	testing_zgmres_pipe.cpp         \
   	testing_zcpgmres.cpp         \
+  	testing_zdot.cpp              \
+  	testing_zkernel.cpp              \
+  	testing_z_csrmv.cpp              \
+  	testing_z_mpk_4.cpp              \
+  	testing_z_mpk_5.cpp              \
 
 # debugging
 ZSRC += \
   	testing_zdebug.cpp              \
-  	testing_zdot.cpp              \
-  	testing_zkernel.cpp              \
-  	testing_z_csrmv.cpp              \
-  	testing_z_mpk.cpp              \
-  	testing_z_mpk_2.cpp              \
+  	testing_zcdebug.cpp             \
+
 
 # ------------------------------------------------------------
 -include Makefile.local
