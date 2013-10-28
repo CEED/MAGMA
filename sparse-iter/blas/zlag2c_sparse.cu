@@ -25,30 +25,15 @@ __device__ int flag = 0;
 
 __global__ void 
 magmaint_zlag2c_sparse(  int M, int N, 
-                  const magmaDoubleComplex *A, int lda, 
-                  magmaFloatComplex *SA,       int ldsa, 
-                  double RMAX ) 
-{
-    int inner_bsize = blockDim.x;
-    int outer_bsize = inner_bsize * 512;
-    int thread_id = blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
-    
+                  const magmaDoubleComplex *A,
+                  magmaFloatComplex *SA ){
 
-    double mRMAX = - RMAX;
+    int thread_id = blockDim.x * blockIdx.x + threadIdx.x ; // global thread index
 
     if( thread_id < M ){
-        for( int i= outer_bsize * blockIdx.x  + threadIdx.x ; 
-                   i<min( M, outer_bsize * ( blockIdx.x + 1));  i+=inner_bsize){
-            magmaDoubleComplex tmp;
-            tmp = A[i];
-             if(    (cuCreal(tmp) < mRMAX) || (cuCreal(tmp) > RMAX)
-                #if defined(PRECISION_z) || defined(PRECISION_c)
-                                || (cuCimag(tmp) < mRMAX) || (cuCimag(tmp) > RMAX) 
-                #endif
-                ){
-                flag = 1; 
-            }
-            SA[i] = cuComplexDoubleToFloat( tmp );
+        for( int i=0; i<N; i++ ){
+
+            SA[i*M+thread_id] = cuComplexDoubleToFloat( A[i*M+thread_id] );
 
         }
     } 
@@ -122,21 +107,14 @@ magmablas_zlag2c_sparse( magma_int_t M, magma_int_t N ,
         magma_xerbla( __func__, -(*info) );
         //return *info;
     }
-    
-    double RMAX = (double)lapackf77_slamch("O");
 
-    int block;
-    dim3 dimBlock(BLOCKSIZE);// Number of Threads per Block
-    block = (M/BLOCKSIZE)/BLOCKSIZE;
-    if(block*BLOCKSIZE*BLOCKSIZE<(M))block++;
-    dim3 dimGrid(block);// Number of Blocks
-   
 
-    dim3 threads( BLOCKSIZE, 1, 1 );
     dim3 grid( (M+BLOCKSIZE-1)/BLOCKSIZE, 1, 1);
+
+
     cudaMemcpyToSymbol( flag, info, sizeof(flag) );    // flag = 0
-    magmaint_zlag2c_sparse<<< dimGrid , dimBlock, 0, magma_stream >>>
-                                        ( M, N, A, lda, SA, ldsa, RMAX ) ; 
+    magmaint_zlag2c_sparse<<< grid, BLOCKSIZE, 0, magma_stream >>>
+                                        ( M, N, A, SA ) ; 
     cudaMemcpyFromSymbol( info, flag, sizeof(flag) );  // info = flag
 }
 

@@ -102,7 +102,7 @@ magma_z_vvisu(      magma_z_vector x,
 
 // small helper function
 extern "C"
-double string_to_double( const std::string& s )
+double magma_zstring_to_double( const std::string& s )
 {
     std::istringstream i(s);
     double x;
@@ -129,9 +129,9 @@ magma_z_vread(      magma_z_vector *x,
     while(!(fin.eof()))  // eof() is 'true' at the end of data
     {
         getline(fin, line, '\n');
-        if( string_to_double(line) != 0 )
+        if( magma_zstring_to_double(line) != 0 )
             nnz++;
-        x->val[i] = MAGMA_Z_MAKE(string_to_double(line), 0.0);
+        x->val[i] = MAGMA_Z_MAKE(magma_zstring_to_double(line), 0.0);
         i++;
     }
     fin.close();
