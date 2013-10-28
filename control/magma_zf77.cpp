@@ -79,6 +79,7 @@ extern "C" {
 
 
 
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA Auxiliary functions to get the NB used
 */
@@ -184,6 +185,8 @@ void magmaf_get_zbulge_gcperf(
          );
 }
 
+// define this only once
+#if defined(PRECISION_d)
 #define magmaf_get_smlsize_divideconquer MAGMA_FORTRAN_NAME( get_smlsize_divideconquer, GET_SMLSIZE_DIVIDECONQUER )
 void magmaf_get_smlsize_divideconquer(
      )
@@ -192,9 +195,12 @@ void magmaf_get_smlsize_divideconquer(
          );
 }
 
+#endif
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA function definitions / Data on CPU
 */
+#if defined(PRECISION_d) || defined(PRECISION_s)
 #define magmaf_dmove_eig MAGMA_FORTRAN_NAME( dmove_eig, DMOVE_EIG )
 void magmaf_dmove_eig(
     char *range, magma_int_t *n,
@@ -210,6 +216,8 @@ void magmaf_dmove_eig(
         iu, *vl, *vu,
         m );
 }
+
+#endif
 
 #define magmaf_zgebrd MAGMA_FORTRAN_NAME( zgebrd, ZGEBRD )
 void magmaf_zgebrd(

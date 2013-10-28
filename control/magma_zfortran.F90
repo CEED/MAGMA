@@ -28,6 +28,7 @@ interface
 ! 
 ! 
 ! 
+! 
 ! /* ////////////////////////////////////////////////////////////////////////////
 !    -- MAGMA Auxiliary functions to get the NB used
 ! */
@@ -97,12 +98,17 @@ end subroutine magmaf_zbulge_get_Vblksiz
 subroutine magmaf_get_zbulge_gcperf(  )
 end subroutine magmaf_get_zbulge_gcperf
 
+! // define this only once
+#if defined(PRECISION_d)
 subroutine magmaf_get_smlsize_divideconquer(  )
 end subroutine magmaf_get_smlsize_divideconquer
+
+#endif
 
 ! /* ////////////////////////////////////////////////////////////////////////////
 !    -- MAGMA function definitions / Data on CPU
 ! */
+#if defined(PRECISION_d) || defined(PRECISION_s)
 subroutine magmaf_dmove_eig( range, n, w, il, iu, vl, vu, m )
     character        :: range
     integer          :: n
@@ -113,6 +119,8 @@ subroutine magmaf_dmove_eig( range, n, w, il, iu, vl, vu, m )
     double precision :: vu
     integer          :: m
 end subroutine magmaf_dmove_eig
+
+#endif
 
 subroutine magmaf_zgebrd( m, n, A, lda, d, e, tauq, taup, work, lwork, info )
     integer          :: m

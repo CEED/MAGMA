@@ -40,13 +40,20 @@ magma_int_t magma_get_zbulge_nb( magma_int_t m, magma_int_t nbthreads );
 magma_int_t magma_get_zbulge_nb_mgpu( magma_int_t m );
 magma_int_t magma_zbulge_get_Vblksiz( magma_int_t m, magma_int_t nb, magma_int_t nbthreads );
 magma_int_t magma_get_zbulge_gcperf();
+
+// define this only once
+#if defined(PRECISION_d)
 magma_int_t magma_get_smlsize_divideconquer();
+#endif
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA function definitions / Data on CPU
 */
+#if defined(PRECISION_d) || defined(PRECISION_s)
 void magma_dmove_eig(char range, magma_int_t n, double *w, magma_int_t *il,
                           magma_int_t *iu, double vl, double vu, magma_int_t *m);
+#endif
+
 magma_int_t magma_zgebrd( magma_int_t m, magma_int_t n, magmaDoubleComplex *A,
                           magma_int_t lda, double *d, double *e,
                           magmaDoubleComplex *tauq,  magmaDoubleComplex *taup,
