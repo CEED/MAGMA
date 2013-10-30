@@ -203,6 +203,10 @@ write_z_csr_mtx(        magma_int_t n_row,
                         const char *filename );
 
 magma_int_t 
+write_z_csrtomtx(        magma_z_sparse_matrix A,
+                        const char *filename );
+
+magma_int_t 
 print_z_csr(            magma_int_t n_row, 
                         magma_int_t n_col, 
                         magma_int_t nnz, 

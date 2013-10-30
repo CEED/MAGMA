@@ -13,6 +13,7 @@ include ../../Makefile.internal
 # Krylov space linear solvers
 ZSRC += \
 	testing_z_matrix_io.cpp     \
+	testing_z_matrix_compressor.cpp     \
     testing_z_mv.cpp            \
   	testing_zjacobi.cpp         \
 	testing_zcg.cpp	            \
@@ -95,7 +96,7 @@ testing_% : testing_%.o
 	$(CC) $(LDOPTS) $(NOMAIN) $< -o $@ \
 	testing_util.o -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
 	$(LIBDIR) \
-	$(LIB) 
+	$(LIB) -lcusparse
 
 # keep intermediate object files, to speed up re-compiling when library changes
 .SECONDARY: $(ALLOBJ)

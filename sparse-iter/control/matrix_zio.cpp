@@ -389,6 +389,16 @@ magma_int_t read_z_csr_from_mtx( magma_storage_t *type, magma_storage_t *locatio
 }
 
 
+
+
+extern "C"
+magma_int_t write_z_csrtomtx( magma_z_sparse_matrix B, const char *filename){
+
+    write_z_csr_mtx( B.num_rows, B.num_cols, B.nnz, &B.val, &B.row, &B.col, 
+                     MagmaColMajor, filename );
+}
+
+
 extern "C"
 magma_int_t write_z_csr_mtx( magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col, magma_major_t MajorType, const char *filename ){
 

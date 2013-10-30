@@ -71,9 +71,10 @@ LIBMAGMA_SPARSE_SO     = $(LIBMAGMA_SPARSE:.a=.so)
 shared: lib
 	$(MAKE) $(LIBMAGMA_SPARSE_SO)
 
-$(LIBMAGMA_SPARSE_SO): src/*.o control/*.o blas/*.cu_o
+$(LIBMAGMA_SPARSE_SO): src/*.o control/*.o blas/*.cu_o blas/*.o
 	@echo ======================================== libmagma_sparse.so
 	$(CC) $(LDOPTS) -shared -o $(LIBMAGMA_SPARSE_SO) \
-	src/*.o control/*.o blas/*.cu_o \
+	src/*.o control/*.o blas/*.cu_o blas/*.o\
+    -L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) \
-	$(LIB)
+	$(LIB) -lcusparse
