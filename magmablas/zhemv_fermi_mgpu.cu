@@ -11,7 +11,7 @@
 #include "common_magma.h"
 #define PRECISION_z
 
-#if (GPUSHMEM >= 200) || defined(PRECISION_s) || defined(PRECISION_d) || defined(PRECISION_c)
+#if (GPUSHMEM >= 200)
 
 #define zhemv_bs         64
 #define thread_x         64
