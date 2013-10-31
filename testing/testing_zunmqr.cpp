@@ -70,7 +70,8 @@ int main( int argc, char** argv )
                 continue;
             }
             
-            lwork_max = max( m*nb, n*nb );
+            // need at least 2*nb*nb for geqrf
+            lwork_max = max( max( m*nb, n*nb ), 2*nb*nb );
             
             TESTING_MALLOC( C, magmaDoubleComplex, ldc*n );
             TESTING_MALLOC( R, magmaDoubleComplex, ldc*n );

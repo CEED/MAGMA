@@ -200,7 +200,7 @@ magma_zunmqr(const char side, const char trans,
     
     if (nb >= k) {
         /* Use CPU code */
-        lapackf77_zunmqr(side_, trans_, &m, &n, &k, A, &lda, &tau[1],
+        lapackf77_zunmqr(side_, trans_, &m, &n, &k, A, &lda, tau,
                          C, &ldc, work, &lwork, &iinfo);
     }
     else {
