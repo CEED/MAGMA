@@ -49,6 +49,7 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
 {
     if( A.memory_location != x.memory_location || x.memory_location != y.memory_location ){
         printf("error: linear algebra objects are not located in same memory!\n");
+        printf("memory locations are: %d   %d   %d\n", A.memory_location, x.memory_location, y.memory_location );
         return MAGMA_ERR_INVALID_PTR;
     }
 
@@ -185,6 +186,7 @@ magma_z_spmv_shift( magmaDoubleComplex alpha, magma_z_sparse_matrix A, magmaDoub
                 magma_int_t offset, magma_int_t blocksize, magma_int_t *add_rows, magma_z_vector y ){
     if( A.memory_location != x.memory_location || x.memory_location != y.memory_location ){
         printf("error: linear algebra objects are not located in same memory!\n");
+        printf("memory locations are: %d   %d   %d\n", A.memory_location, x.memory_location, y.memory_location );
         return MAGMA_ERR_INVALID_PTR;
     }
     // DEV case
