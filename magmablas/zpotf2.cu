@@ -247,6 +247,8 @@ __global__ void kernel_zdscal(int n, magmaDoubleComplex *x, int incx)
         factor = MAGMA_Z_MAKE(1.0/MAGMA_Z_REAL(x[0]), 0.0);
     }
 
+    __syncthreads();
+
     if ( id < n && id >0) {
         x[id*incx] = x[id*incx] * factor;
     }
