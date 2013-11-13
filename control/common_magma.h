@@ -35,8 +35,9 @@
     // functions where Microsoft fails to provide C99 standard
     // (only with Microsoft, not with e.g. nvcc on Windows)
     #ifdef _MSC_VER
-    #define copysign(x,y) _copysign(x,y)
-    double log2( double x );  // defined in auxiliary.cpp
+    
+        #define copysign(x,y) _copysign(x,y)
+    
     #endif
 
 #else
