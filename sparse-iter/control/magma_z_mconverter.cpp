@@ -362,6 +362,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
         }
         // CSR to BCSR
         if( old_format == Magma_CSR && new_format == Magma_BCSR ){
+
             // fill in information for B
             B->storage_type = Magma_BCSR;
             B->memory_location = A.memory_location;
@@ -370,7 +371,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            //printf( "Conversion to BCSR(blocksize=%d): ",B->blocksize );
+            printf( "Conversion to BCSR(blocksize=%d): ",B->blocksize );
 
             magma_int_t i, j, k, l, numblocks;
 
@@ -445,6 +446,15 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                     B->val[ (B->blockinfo(k,l)-1) * size_b * size_b + i%size_b * size_b + A.col[j]%size_b ] = A.val[j];
                 }
             } 
+
+            // the values are now handled special: we want to transpose each block to be in MAGMA format
+            magmaDoubleComplex *transpose;
+            magma_zmalloc( &transpose, size_b*size_b );
+            for( magma_int_t i=0; i<B->numblocks; i++ ){
+                cudaMemcpy( transpose, B->val+i*size_b*size_b,  size_b*size_b*sizeof( magmaDoubleComplex ), cudaMemcpyHostToDevice );
+                magmablas_ztranspose_inplace( size_b, transpose, size_b );
+                cudaMemcpy( B->val+i*size_b*size_b, transpose, size_b*size_b*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToHost );
+            }
             /*
             printf("blockinfo for blocksize %d:\n", size_b);
             for( i=0; i<c_blocks; i++ ){
@@ -478,7 +488,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
         }
         // BCSR to CSR
         if( old_format == Magma_BCSR && new_format == Magma_CSR ){
-            printf( "Conversion to CSR: " );
+            printf( "Conversion to CSR: " );fflush(stdout);
             // fill in information for B
             B->storage_type = Magma_CSR;
             B->memory_location = A.memory_location;
@@ -491,10 +501,10 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             magma_int_t i, j, k, l, numblocks, index;
 
             // conversion
-            magma_int_t size_b = B->blocksize;
+            magma_int_t size_b = A.blocksize;
             magma_int_t c_blocks = ceil( (float)A.num_cols / (float)size_b );     // max number of blocks per row
             magma_int_t r_blocks = ceil( (float)A.num_rows / (float)size_b );     // max number of blocks per column
-            printf("c_blocks: %d  r_blocks: %d  ", c_blocks, r_blocks);
+            //printf("c_blocks: %d  r_blocks: %d  ", c_blocks, r_blocks);fflush(stdout);
 
             magmaDoubleComplex *val_tmp;      
             magma_zmalloc_cpu( &val_tmp, A.row[ r_blocks ] * size_b * size_b );
@@ -522,6 +532,16 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                 row_tmp[r_blocks*size_b] = A.row[r_blocks] * size_b * size_b;
             }
 
+            // the val pointer has to be handled special: we need to transpose each block back to row-major
+            magmaDoubleComplex *transpose, *val_tmp2;
+            magma_zmalloc( &transpose, size_b*size_b );
+            magma_zmalloc_cpu( &val_tmp2, size_b*size_b*A.numblocks );
+            for( magma_int_t i=0; i<A.numblocks; i++ ){
+                cudaMemcpy( transpose, A.val+i*size_b*size_b, size_b*size_b*sizeof( magmaDoubleComplex ), cudaMemcpyHostToDevice );
+                magmablas_ztranspose_inplace( size_b, transpose, size_b );
+                cudaMemcpy( val_tmp2+i*size_b*size_b, transpose, size_b*size_b*sizeof( magmaDoubleComplex ), cudaMemcpyDeviceToHost );
+            }
+
             // fill col and val
             index = 0;
             for( j=0; j<r_blocks; j++ ){
@@ -535,7 +555,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
                             col_tmp[ l + (i-A.row[j])*size_b + size_b*k*(A.row[j+1]-A.row[j]) + size_b*size_b*(A.row[j]) ] 
                                    = A.col[i] * size_b + l;
                             val_tmp[ l + (i-A.row[j])*size_b + size_b*k*(A.row[j+1]-A.row[j]) + size_b*size_b*(A.row[j]) ] 
-                                   = A.val[index];
+                                   = val_tmp2[index];
                             index++;
                         }  
                     }
@@ -562,6 +582,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->nnz = B->row[B->num_rows];
 
             magma_free_cpu( val_tmp );
+            magma_free_cpu( val_tmp2 );
             magma_free_cpu( row_tmp );
             magma_free_cpu( col_tmp );
         
