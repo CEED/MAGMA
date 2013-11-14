@@ -313,13 +313,16 @@ magma_zjacobiiter(      magma_z_sparse_matrix M,
                         magma_z_vector *x,  
                         magma_solver_parameters *solver_par );
 
+magma_int_t
+magma_zilusetup(        magma_z_sparse_matrix A, 
+                        magma_z_sparse_matrix *M,
+                        magma_int_t *ipiv );
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE function definitions / Data on CPU
 */
 
-magma_int_t
-magma_zilusetup(        magma_z_sparse_matrix A, 
-                        magma_z_sparse_matrix *M );
+
 
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -380,6 +383,20 @@ magma_zp1gmres(        magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector
 magma_int_t
 magma_zgmres_pipe(     magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
                        magma_solver_parameters *solver_par );
+
+magma_int_t
+magma_zilu(            magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+                       magma_solver_parameters *solver_par, magma_int_t *ipiv );
+
+magma_int_t
+magma_zilucg(          magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+                       magma_solver_parameters *solver_par );
+
+magma_int_t
+magma_zilugmres(       magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+                       magma_solver_parameters *solver_par ); 
+
+
 
 
 /* ////////////////////////////////////////////////////////////////////////////
@@ -645,6 +662,21 @@ magma_zbicgmerge_xrbeta(
                  magmaDoubleComplex *x, 
                  magmaDoubleComplex *skp );
 
+magma_int_t
+magma_zbcsrswp(  magma_int_t n,
+                 magma_int_t size_b, 
+                 magma_int_t *ipiv,
+                 magmaDoubleComplex *x );
+
+magma_int_t
+magma_zbcsrtrsv( char uplo,
+                 magma_int_t r_blocks,
+                 magma_int_t c_blocks,
+                 magma_int_t size_b, 
+                 magmaDoubleComplex *A,
+                 magma_int_t *blockinfo,   
+                 magmaDoubleComplex *x );
+ 
 #ifdef __cplusplus
 }
 #endif

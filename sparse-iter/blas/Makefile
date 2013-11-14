@@ -26,11 +26,14 @@ ZSRC := \
 	zmdot.cu                    \
 	zmergebicgstab.cu          \
 	zmergebicgstab2.cu          \
+	zmergeidr.cu          \
 	zmgecsrmv.cu		\
 	zmgeellmv.cu		\
 	zmgeelltmv.cu            \
 	zpipelinedgmrescopyscale.cu     \
 	zpipelinedgs.cu          \
+    zbcsrswp.cu         \
+    zbcsrtrsv.cu         \
 
 
 
