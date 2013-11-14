@@ -372,7 +372,7 @@ magma_zjacobi(         magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector
                        magma_solver_parameters *solver_par );
 
 magma_int_t
-magma_zir(             magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+magma_ziterref(        magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
                        magma_solver_parameters *solver_par, 
                        magma_precond_parameters *precond_par );
 

@@ -46,9 +46,8 @@
 
 
 magma_int_t
-magma_zir( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
-           magma_solver_parameters *solver_par, magma_precond_parameters *precond_par )
-{
+magma_ziterref( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+                magma_solver_parameters *solver_par, magma_precond_parameters *precond_par ){
 
     // some useful variables
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = MAGMA_Z_NEG_ONE;

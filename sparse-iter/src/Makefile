@@ -30,7 +30,8 @@ ZSRC += \
 	zpbicgstab.cpp		\
 	zpgmres.cpp  		\
 	zgmres_pipe.cpp  		\
-
+	zilucg.cpp			\
+	zilugmres.cpp			\
 
 # Krylov space eigen-solvers
 ZSRC += \
@@ -42,7 +43,7 @@ ZSRC += \
 ZSRC += \
 	zcpbicgstab.cpp		\
 	zcpgmres.cpp		\
-	zcir.cpp    		\
+	zciterref.cpp 		\
 	zcpir.cpp    		\
 
 # QR and least squares, GPU interface
@@ -55,7 +56,7 @@ ZSRC += \
 
 # ILU and sparse direct
 ZSRC += \
-#	zilu.cpp      		\
+	zilu.cpp      		\
 
 
 # Wrappers, tools etc

@@ -25,7 +25,7 @@
 
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing magma_zir
+   -- Testing magma_ziterref
 */
 int main( int argc, char** argv)
 {
@@ -90,7 +90,7 @@ for(magma_int_t matrix=0; matrix<12; matrix++){
 
 
 
-    magma_zir( D, b, &x, &solver_par, &precond_par );
+    magma_ziterref( D, b, &x, &solver_par, &precond_par );
 
    // magma_z_vvisu( x, 0,10);
 
