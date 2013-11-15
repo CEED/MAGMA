@@ -676,8 +676,8 @@ subs = {
     ('mkl_scsrmv',     'mkl_dcsrmv',     'mkl_ccsrmv',     'mkl_zcsrmv'      ),
     ('mkl_sbsrmv',     'mkl_dbsrmv',     'mkl_cbsrmv',     'mkl_zbsrmv'      ),
     ('smerge',         'dmerge',         'cmerge',         'zmerge'          ),
-    ('sbcsrswp',       'dbcsrswp',       'cbcsrswp',       'zbcsrswp'        ),
-    ('sbcsrtrsv',      'dbcsrtrsv',      'cbcsrtrsv',      'zbcsrtrsv'       ),
+    ('sbcsr',          'dbcsr',          'cbcsr',          'zbcsr'           ),
+
 
 
     # ----- SPARSE Iterative Solvers
@@ -690,7 +690,7 @@ subs = {
     ('spgmres',        'dpgmres',        'cpgmres',        'zpgmres'         ),
     ('sp1gmres',       'dp1gmres',       'cp1gmres',       'zp1gmres'        ),
     ('sjacobi',        'djacobi',        'cjacobi',        'zjacobi'         ),
-    ('sir',            'dir',            'cir',            'zir'             ),
+    ('siterref',       'diterref',       'citerref',       'ziterref'        ),
     ('silu',           'dilu',           'cilu',           'zilu'            ),
 
 
