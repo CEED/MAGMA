@@ -371,7 +371,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             B->nnz = A.nnz;
             B->max_nnz_row = A.max_nnz_row;
             B->diameter = A.diameter;
-            printf( "Conversion to BCSR(blocksize=%d): ",B->blocksize );
+            //printf( "Conversion to BCSR(blocksize=%d): ",B->blocksize );
 
             magma_int_t i, j, k, l, numblocks;
 
@@ -482,7 +482,7 @@ magma_z_mconvert( magma_z_sparse_matrix A,
             */
 
 
-            printf( "done\n" );      
+            //printf( "done\n" );      
             return MAGMA_SUCCESS; 
 
         }
