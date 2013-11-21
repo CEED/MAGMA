@@ -65,10 +65,10 @@ int main( int argc, char** argv)
             lda  = N;
             ldda = ((N + 31)/32)*32;
             
-            /* Query for workspace sizes */
+            // query for workspace sizes
             magma_zheevd_gpu( opts.jobz, opts.uplo,
-                              N, d_R, ldda, w1,
-                              h_R, lda,
+                              N, NULL, ldda, NULL,
+                              NULL, lda,
                               aux_work,  -1,
                               aux_rwork, -1,
                               aux_iwork, -1,

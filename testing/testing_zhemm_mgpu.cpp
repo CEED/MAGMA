@@ -257,11 +257,12 @@ int main( int argc, char** argv)
         gpu_time = magma_wtime() - gpu_time;
         gpu_perf = gflops / gpu_time;
             
-        
+        #ifdef TRACING
         char buf[80];
         snprintf( buf, sizeof(buf), "zhemm-m%d-n%d-nb%d-stream%d-ngpu%d-run%d.svg",
                   (int) m, (int) n, (int) nb, (int) nstream, (int) ngpu, (int) j );
-        //trace_finalize( buf, "trace.css" );
+        trace_finalize( buf, "trace.css" );
+        #endif
         
         /* ====================================================================
            Performs operation using CUBLAS

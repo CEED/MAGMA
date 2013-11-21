@@ -121,7 +121,7 @@ magma_zbulge_back_m(magma_int_t nrgpu, magma_int_t threads, char uplo,
 {
     magma_setlapack_numthreads(1);
 
-    double timeaplQ2=0.0;
+    real_Double_t timeaplQ2=0.0;
 
     double f= 1.;
     magma_int_t n_gpu = ne;

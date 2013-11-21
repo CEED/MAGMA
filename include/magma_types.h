@@ -14,6 +14,20 @@
 
 
 // ========================================
+// C99 standard defines __func__. Some older compilers use __FUNCTION__.
+// Note __func__ in C99 is not a macro, so ifndef __func__ doesn't work.
+#if __STDC_VERSION__ < 199901L
+  #ifndef __func__
+    #if __GNUC__ >= 2 || _MSC_VER >= 1300
+      #define __func__ __FUNCTION__
+    #else
+      #define __func__ "<unknown>"
+    #endif
+  #endif
+#endif
+
+
+// ========================================
 // To use int64_t, link with mkl_intel_ilp64 or similar (instead of mkl_intel_lp64).
 #if defined(MAGMA_ILP64) || defined(MKL_ILP64)
 typedef int64_t magma_int_t;

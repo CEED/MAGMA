@@ -1427,7 +1427,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                         // Compute A=Q*R, copying result to U
                         // (Workspace: need N*N + 2*N, prefer N*N + N + N*NB)
                         i__2 = lwork - iwork + 1;
-                        double t1;
+                        real_Double_t t1;
 
                         t1 = magma_wtime();
                         lapackf77_dgeqrf(&m, &n, A, &lda, &work[itau],
@@ -1597,7 +1597,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
             i__2 = lwork - iwork + 1;
             //printf("path 10\n");
 
-            double t1 = magma_wtime();
+            real_Double_t t1 = magma_wtime();
             magma_dgebrd(m, n, A, lda, s, &work[ie],
                          &work[itauq], &work[itaup], &work[iwork], i__2, &ierr);
             // printf("DGEBRD time %10.6f\n", magma_wtime() - t1);

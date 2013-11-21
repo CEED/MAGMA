@@ -211,7 +211,7 @@ int main( int argc, char** argv)
                     result[1] = -1.;
                     for( int j = 0; j < N; ++j ) {
                         tnrm = cblas_dznrm2(N, &VR[j*lda], ione);
-                        result[1] = fmax(result[1], fmin(ulpinv, fabs(tnrm-1.)/ulp));
+                        result[1] = max( result[1], min( ulpinv, fabs(tnrm-1.)/ulp ));
                         
                         vmx = vrmx = 0.;
                         for( int jj = 0; jj <N; ++jj ) {
@@ -243,7 +243,7 @@ int main( int argc, char** argv)
                     result[3] = -1.;
                     for( int j = 0; j < N; ++j ) {
                         tnrm = cblas_dznrm2(N, &VL[j*lda], ione);
-                        result[3] = fmax(result[3], fmin(ulpinv,fabs(tnrm - 1.)/ ulp));
+                        result[3] = max( result[3], min( ulpinv, fabs(tnrm - 1.)/ ulp ));
                         
                         vmx = vrmx = 0.;
                         for( int jj = 0; jj < N; ++jj ) {

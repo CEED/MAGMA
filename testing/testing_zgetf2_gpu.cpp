@@ -95,6 +95,11 @@ int main( int argc, char** argv)
             ldda   = ((M+31)/32)*32;
             gflops = FLOPS_ZGETRF( M, N ) / 1e9;
             
+            if ( N > 1024 ) {
+                fprintf( stderr, "zgetf2 does not support N > 1024; skipping N=%d.\n", N );
+                continue;
+            }
+            
             TESTING_MALLOC(    ipiv, magma_int_t,     min_mn );
             TESTING_MALLOC(    h_A,  magmaDoubleComplex, n2     );
             TESTING_HOSTALLOC( h_R,  magmaDoubleComplex, n2     );

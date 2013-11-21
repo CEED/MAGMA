@@ -23,8 +23,8 @@ __host__ __device__ static inline float  real(const float              &x) { ret
 
 __host__ __device__ static inline double imag(const magmaDoubleComplex &x) { return MAGMA_Z_IMAG(x); }
 __host__ __device__ static inline float  imag(const magmaFloatComplex  &x) { return MAGMA_C_IMAG(x); }
-__host__ __device__ static inline double imag(const double             &x) { return 0.; }
-__host__ __device__ static inline float  imag(const float              &x) { return 0.; }
+__host__ __device__ static inline double imag(const double        & /*x*/) { return 0.; }
+__host__ __device__ static inline float  imag(const float         & /*x*/) { return 0.; }
 
 __host__ __device__ static inline magmaDoubleComplex conj(const magmaDoubleComplex &x) { return MAGMA_Z_CNJG(x); }
 __host__ __device__ static inline magmaFloatComplex  conj(const magmaFloatComplex  &x) { return MAGMA_C_CNJG(x); }

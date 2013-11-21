@@ -72,17 +72,17 @@ int main( int argc, char** argv)
             nb     = magma_get_zgeqrf_nb(M);
             gflops = (FLOPS_ZGEQRF( M, N ) + FLOPS_ZGEQRS( M, N, nrhs )) / 1e9;
             
-            // query for workspace size
             lworkgpu = (M - N + nb)*(nrhs + nb) + nrhs*nb;
             
+            // query for workspace size
             lhwork = -1;
-            lapackf77_zgeqrf(&M, &N, h_A, &M, tau, tmp, &lhwork, &info);
+            lapackf77_zgeqrf(&M, &N, NULL, &M, NULL, tmp, &lhwork, &info);
             lhwork2 = (magma_int_t) MAGMA_Z_REAL( tmp[0] );
             
             lhwork = -1;
             lapackf77_zunmqr( MagmaLeftStr, MagmaConjTransStr,
-                              &M, &nrhs, &min_mn, h_A, &lda, tau,
-                              h_X, &ldb, tmp, &lhwork, &info);
+                              &M, &nrhs, &min_mn, NULL, &lda, NULL,
+                              NULL, &ldb, tmp, &lhwork, &info);
             lhwork = (magma_int_t) MAGMA_Z_REAL( tmp[0] );
             lhwork = max( max( lhwork, lhwork2 ), lworkgpu );
             

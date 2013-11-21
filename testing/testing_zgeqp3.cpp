@@ -63,9 +63,9 @@ int main( int argc, char** argv)
             
             #if defined(PRECISION_z) || defined(PRECISION_c)
             double *rwork;
-            TESTING_MALLOC(    rwork,  double,          2*N    );
+            TESTING_MALLOC(    rwork,  double, 2*N );
             #endif
-            TESTING_MALLOC(    jpvt,   magma_int_t,     N      );
+            TESTING_MALLOC(    jpvt,   magma_int_t,        N      );
             TESTING_MALLOC(    tau,    magmaDoubleComplex, min_mn );
             TESTING_MALLOC(    h_A,    magmaDoubleComplex, n2     );
             TESTING_HOSTALLOC( h_R,    magmaDoubleComplex, n2     );
@@ -127,15 +127,12 @@ int main( int argc, char** argv)
             }
             if ( opts.check ) {
                 double error, ulp;
-                
-                magma_int_t minmn = min(M, N);
                 ulp = lapackf77_dlamch( "P" );
                 
                 // Compute norm( A*P - Q*R )
-                error = lapackf77_zqpt01( &M, &N, &minmn, h_A, h_R, &lda,
+                error = lapackf77_zqpt01( &M, &N, &min_mn, h_A, h_R, &lda,
                                           tau, jpvt, h_work, &lwork );
                 error *= ulp;
-                
                 printf("   %8.2e\n", error );
             }
             else {
@@ -152,7 +149,7 @@ int main( int argc, char** argv)
             TESTING_HOSTFREE( h_work );
         }
     }
-
+    
     TESTING_FINALIZE();
     return 0;
 }

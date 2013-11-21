@@ -126,7 +126,7 @@ int main( int argc, char** argv )
             /* ====================================================================
                Performs operation using MAGMA
                =================================================================== */
-            // query for work size
+            // query for workspace size
             lwork = -1;
             magma_zunmqr_gpu( *side[iside], *trans[itran],
                               m, n, k,

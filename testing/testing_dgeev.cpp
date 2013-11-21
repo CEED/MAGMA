@@ -218,7 +218,7 @@ int main( int argc, char** argv)
                             tnrm = magma_dlapy2( cblas_dnrm2(N, &VR[j    *lda], ione),
                                                  cblas_dnrm2(N, &VR[(j+1)*lda], ione) );
                         
-                        result[1] = fmax(result[1], fmin(ulpinv, MAGMA_D_ABS(tnrm-1.)/ulp));
+                        result[1] = max( result[1], min( ulpinv, MAGMA_D_ABS(tnrm-1.)/ulp ));
                         
                         if (w1i[j] > 0.) {
                             vmx  = vrmx = 0.;
@@ -258,7 +258,7 @@ int main( int argc, char** argv)
                             tnrm = magma_dlapy2( cblas_dnrm2(N, &VL[j    *lda], ione),
                                                  cblas_dnrm2(N, &VL[(j+1)*lda], ione) );
                         
-                        result[3] = fmax(result[3], fmin(ulpinv, MAGMA_D_ABS(tnrm-1.)/ulp));
+                        result[3] = max( result[3], min( ulpinv, MAGMA_D_ABS(tnrm-1.)/ulp ));
                         
                         if (w1i[j] > 0.) {
                             vmx  = vrmx = 0.;

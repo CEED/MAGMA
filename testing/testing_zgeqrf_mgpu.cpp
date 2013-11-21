@@ -76,7 +76,7 @@ int main( int argc, char** argv )
             
             // query for workspace size
             lhwork = -1;
-            lapackf77_zgeqrf( &M, &N, h_A, &M, tau, tmp, &lhwork, &info );
+            lapackf77_zgeqrf( &M, &N, NULL, &M, NULL, tmp, &lhwork, &info );
             lhwork = (magma_int_t) MAGMA_Z_REAL( tmp[0] );
             
             // Allocate host memory for the matrix

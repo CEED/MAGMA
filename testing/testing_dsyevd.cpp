@@ -61,9 +61,9 @@ int main( int argc, char** argv)
             n2  = N*N;
             lda = N;
             
-            /* Query for workspace sizes */
+            // query for workspace sizes
             magma_dsyevd( opts.jobz, opts.uplo,
-                          N, h_R, lda, w1,
+                          N, NULL, lda, NULL,
                           aux_work,  -1,
                           aux_iwork, -1,
                           &info );

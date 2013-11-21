@@ -63,8 +63,9 @@ int main( int argc, char** argv)
             nb     = magma_get_zgeqrf_nb(M);
             gflops = FLOPS_ZGEQRF( M, N ) / 1e9;
             
+            // query for workspace size
             lwork = -1;
-            lapackf77_zgeqrf(&M, &N, h_A, &M, tau, tmp, &lwork, &info);
+            lapackf77_zgeqrf(&M, &N, NULL, &M, NULL, tmp, &lwork, &info);
             lwork = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
             lwork = max( lwork, max( N*nb, 2*nb*nb ));
             

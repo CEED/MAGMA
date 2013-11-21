@@ -6,6 +6,7 @@
 #      November 2011
 #//////////////////////////////////////////////////////////////////////////////
 
+DIR = include
 MAGMA_DIR = ..
 include ../Makefile.internal
 
@@ -25,6 +26,7 @@ ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR)
 
 .PHONY: all clean cleanall
 
+.DEFAULT_GOAL := all
 all: $(ALLHDR)
 
 clean:

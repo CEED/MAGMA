@@ -33,10 +33,14 @@
     #include <io.h>
 
     // functions where Microsoft fails to provide C99 standard
-    // (only with Microsoft, not with e.g. nvcc on Windows)
-    #ifdef _MSC_VER
+    // (only with Microsoft, not with nvcc on Windows)
+    #ifndef __NVCC__
     
         #define copysign(x,y) _copysign(x,y)
+        #define isnan(x) _isnan(x)
+        #define isinf(x) _isinf(x)
+        // note _snprintf has slightly different semantics than snprintf
+        #define snprintf _snprintf
     
     #endif
 
@@ -56,18 +60,6 @@
 #include "operators.h"
 #include "transpose.h"
 #include "magma_threadsetting.h"
-
-/** ****************************************************************************
- * C99 standard defines __func__. Some older compilers use __FUNCTION__.
- * Note __func__ is not a macro, so ifndef __func__ doesn't work.
- */
-#if __STDC_VERSION__ < 199901L
-# if __GNUC__ >= 2 || _MSC_VER >= 1300
-#  define __func__ __FUNCTION__
-# else
-#  define __func__ "<unknown>"
-# endif
-#endif
 
 /** ****************************************************************************
  *  Determine if weak symbols are allowed 

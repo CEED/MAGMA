@@ -38,7 +38,8 @@ int main( int argc, char** argv)
 
     real_Double_t    gflops, gpu_perf, cpu_perf, gpu_time, cpu_time;
     double           eps;
-    magmaDoubleComplex *h_A, *h_R, *d_R, *h_Q, *h_work, *work, *dwork;
+    magmaDoubleComplex *h_A, *h_R, *h_Q, *h_work, *work;
+    magmaDoubleComplex *d_R, *dwork;
     magmaDoubleComplex *tau;
     double          *diag, *offdiag;
     double           result[2] = {0., 0.};
@@ -173,12 +174,12 @@ int main( int argc, char** argv)
                        (int) N, gpu_perf, gpu_time );
             }
             if ( opts.check ) {
-                printf("   %8.2e        %8.2e%s", result[0]*eps, result[1]*eps,
+                printf("   %8.2e        %8.2e%s\n", result[0]*eps, result[1]*eps,
                         ( ( (result[0]*eps < tol) && (result[1]*eps < tol) ) ? "" : "  failed")  );
                 status |= ! (result[0]*eps < tol);
                 status |= ! (result[1]*eps < tol);
             } else {
-                printf("     ---             ---\n" );
+                printf("     ---             ---\n");
             }
             
             TESTING_FREE( h_A );

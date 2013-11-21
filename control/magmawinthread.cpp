@@ -14,6 +14,8 @@
  * replaced by MAGMA.
  *
  **/
+#if defined( _WIN32 ) || defined( _WIN64 )
+
 #include "magmawinthread.h"
 
 #include <limits.h>
@@ -27,10 +29,12 @@
 CRITICAL_SECTION magmawinthread_static_initializer_check_lock;
 static int magmawinthread_initialized = 0;
 
+extern "C"
 MAGMA_DLLPORT unsigned int MAGMA_CDECL pthread_self_id(void) {
   return GetCurrentThreadId();
 }
 
+extern "C"
 MAGMA_DLLPORT pthread_t MAGMA_CDECL pthread_self(void) {
   pthread_t pt;
 
@@ -39,12 +43,14 @@ MAGMA_DLLPORT pthread_t MAGMA_CDECL pthread_self(void) {
   return pt;
 }
 
+extern "C"
 MAGMA_DLLPORT int MAGMA_CDECL pthread_equal(pthread_t thread1, pthread_t thread2) {
   if (thread1.uThId == thread2.uThId) // && thread1.hThread == thread2.hThread)
     return 1;
   return 0;
 }
 
+extern "C"
 MAGMA_DLLPORT int MAGMA_CDECL pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t * attr) {
   *mutex =
   CreateMutex( NULL,  /** no security atributes */
@@ -69,6 +75,7 @@ static int pthread_mutex_check_for_static_initialization( pthread_mutex_t *mutex
     return retval;
 }
 
+extern "C"
 MAGMA_DLLPORT int MAGMA_CDECL pthread_mutex_lock(pthread_mutex_t *mutex) {
   DWORD rv;
 
@@ -88,6 +95,7 @@ MAGMA_DLLPORT int MAGMA_CDECL pthread_mutex_lock(pthread_mutex_t *mutex) {
   }
 }
 
+extern "C"
 MAGMA_DLLPORT int MAGMA_CDECL pthread_mutex_trylock(pthread_mutex_t *mutex) {
   DWORD rv;
 
@@ -107,6 +115,7 @@ MAGMA_DLLPORT int MAGMA_CDECL pthread_mutex_trylock(pthread_mutex_t *mutex) {
   }
 }
 
+extern "C"
 MAGMA_DLLPORT int MAGMA_CDECL pthread_mutex_unlock(pthread_mutex_t *mutex) {
   if (! ReleaseMutex( *mutex ))
     return -1;
@@ -114,21 +123,25 @@ MAGMA_DLLPORT int MAGMA_CDECL pthread_mutex_unlock(pthread_mutex_t *mutex) {
   return 0;
 }
 
+extern "C"
 MAGMA_DLLPORT int MAGMA_CDECL pthread_mutex_destroy(pthread_mutex_t *mutex) {
   CloseHandle( *mutex );
   return 0;
 }
 
+extern "C"
 MAGMA_DLLPORT int MAGMA_CDECL pthread_attr_init(pthread_attr_t *attr) {
   *attr = 1;
   return 0;
 }
 
+extern "C"
 MAGMA_DLLPORT int MAGMA_CDECL pthread_attr_destroy(pthread_attr_t *attr) {
   *attr = 0;
   return 0;
 }
 
+extern "C"
 MAGMA_DLLPORT int MAGMA_CDECL pthread_attr_setscope(pthread_attr_t *attr, int scope) {
   if (*attr != 1)
     return -1;
@@ -149,6 +162,7 @@ unsigned WINAPI MAGMA_winThStart(void *arg) {
   return 0;
 }
 
+extern "C"
 MAGMA_DLLPORT int MAGMA_CDECL pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start) (void *), void *arg) {
 
   /* this assumes that the threads call the same function, always; it also assumes there
@@ -174,12 +188,14 @@ MAGMA_DLLPORT int MAGMA_CDECL pthread_create(pthread_t *thread, const pthread_at
   return 0;
 }
 
+extern "C"
 MAGMA_DLLPORT int MAGMA_CDECL pthread_join(pthread_t thread, void **value_ptr) {
   WaitForSingleObject( thread.hThread, INFINITE );
   CloseHandle( thread.hThread );
   return 0;
 }
 
+extern "C"
 MAGMA_DLLPORT int MAGMA_CDECL pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr) {
   InitializeCriticalSection( &cond->cs );
   cond->hSem = CreateSemaphore( NULL, /* no security attributes */
@@ -194,6 +210,7 @@ MAGMA_DLLPORT int MAGMA_CDECL pthread_cond_init(pthread_cond_t *cond, const pthr
   return 0;
 }
 
+extern "C"
 MAGMA_DLLPORT int MAGMA_CDECL pthread_cond_destroy(pthread_cond_t *cond) {
   DeleteCriticalSection( &cond->cs );
   CloseHandle( cond->hSem );
@@ -201,6 +218,7 @@ MAGMA_DLLPORT int MAGMA_CDECL pthread_cond_destroy(pthread_cond_t *cond) {
   return 0;
 }
 
+extern "C"
 MAGMA_DLLPORT int MAGMA_CDECL pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex) {
   int last;
 
@@ -236,6 +254,7 @@ MAGMA_DLLPORT int MAGMA_CDECL pthread_cond_wait(pthread_cond_t *cond, pthread_mu
   return 0;
 }
 
+extern "C"
 MAGMA_DLLPORT int MAGMA_CDECL pthread_cond_broadcast(pthread_cond_t *cond) {
   int more_waiters = 0;
 
@@ -263,7 +282,10 @@ MAGMA_DLLPORT int MAGMA_CDECL pthread_cond_broadcast(pthread_cond_t *cond) {
 
 int pthread_conclevel;
 
+extern "C"
 MAGMA_DLLPORT int MAGMA_CDECL pthread_setconcurrency (int level) {
   pthread_conclevel = level;
   return 0;
 }
+
+#endif /* defined( _WIN32 ) || defined( _WIN64 ) */

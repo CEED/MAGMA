@@ -17,7 +17,7 @@ use Text::Wrap;
 # declare constants and variables
 my( $do_wrapper, $do_interface, $output,
 	$pre, $return, $func, $is_gpu, $text, $rest, $comment,
-	$funcf, $FUNCF,
+	$funcf,
 	$wrapper, $call, $interface, $vars,
 	$args, @args, $arg, $type, $base_type, $var, $first_arg, $is_ptr );
 
@@ -115,6 +115,7 @@ if ( $do_wrapper ) {  #################### header for magma_zf77.cpp wrappers
 #include <stdint.h>  // for uintptr_t
 
 #include "magma.h"
+#include "magma_mangling.h"
 
 /*
  * typedef comming from fortran.h file provided in CUDADIR/src directory
@@ -146,26 +147,6 @@ typedef size_t devptr_t;
     #ifndef magma_sdevptr
     #define magma_sdevptr(ptr_) ((float*)             (uintptr_t)(*(ptr_)))
     #endif
-#endif
-
-#ifndef MAGMA_FORTRAN_NAME
-#if defined(ADD_)
-#define MAGMA_FORTRAN_NAME(lcname, UCNAME)  magmaf_##lcname##_
-#elif defined(NOCHANGE)
-#define MAGMA_FORTRAN_NAME(lcname, UCNAME)  magmaf_##lcname
-#elif defined(UPCASE)
-#define MAGMA_FORTRAN_NAME(lcname, UCNAME)  MAGMAF_##UCNAME
-#endif
-#endif
-
-#ifndef MAGMA_GPU_FORTRAN_NAME
-#if defined(ADD_)
-#define MAGMA_GPU_FORTRAN_NAME(lcname, UCNAME)  magmaf_##lcname##_gpu_
-#elif defined(NOCHANGE)
-#define MAGMA_GPU_FORTRAN_NAME(lcname, UCNAME)  magmaf_##lcname##_gpu
-#elif defined(UPCASE)
-#define MAGMA_GPU_FORTRAN_NAME(lcname, UCNAME)  MAGMAF_##UCNAME##_GPU
-#endif
 #endif
 
 #define PRECISION_z
@@ -243,14 +224,13 @@ while( $_ ) {
 		@args = split( /, */, $args );
 		
 		$funcf = "magmaf_$func$is_gpu";
-		$FUNCF = $funcf;  #uc($funcf);
 		if ( $is_gpu ) {
-			$wrapper = sprintf( "#define %s MAGMA_GPU_FORTRAN_NAME( %s, %s )\n",
-				${FUNCF}, $func, uc($func) );
+			$wrapper = sprintf( "#define %s FORTRAN_NAME( %s, %s )\n",
+				${funcf}, $funcf, uc($funcf) );
 		}
 		else {
-			$wrapper = sprintf( "#define %s MAGMA_FORTRAN_NAME( %s, %s )\n",
-				${FUNCF}, $func, uc($func) );
+			$wrapper = sprintf( "#define %s FORTRAN_NAME( %s, %s )\n",
+				${funcf}, $funcf, uc($funcf) );
 		}
 		
 		my $match = $func =~ m/^($ignore)$/;
@@ -264,12 +244,12 @@ while( $_ ) {
 		elsif ( $func =~ m/get_\w+_nb/ and $#args == 0 ) {  # i.e., len(@args) is 1
 			# special case for get_nb functions, to return a value
 			# is returning an int safe? otherwise, we could make these take an output argument.
-			$wrapper  .= "magma_int_t ${FUNCF}( magma_int_t *m )\n{\n    return magma_$func( *m );\n}\n\n";
+			$wrapper  .= "magma_int_t ${funcf}( magma_int_t *m )\n{\n    return magma_$func( *m );\n}\n\n";
 			$interface = "integer function $funcf( m )\n    integer :: m\nend function $funcf\n\n";
 		}
 		else {
 			# build up wrapper and the call inside the wrapper, argument by argument
-			$wrapper .= "void ${FUNCF}(\n    ";
+			$wrapper .= "void ${funcf}(\n    ";
 			$call     = "magma_$func$is_gpu(\n        ";
 			
 			# build up Fortran interface and variable definitions, argument by argument

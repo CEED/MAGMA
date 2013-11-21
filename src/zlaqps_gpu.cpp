@@ -110,7 +110,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
     magma_int_t k, rk;
     //magmaDoubleComplex Akk;
     magmaDoubleComplex *Aks;
-    magmaDoubleComplex tauk;
+    magmaDoubleComplex tauk = MAGMA_Z_ZERO;
     magma_int_t pvt;
     //double temp, temp2;
     double tol3z;

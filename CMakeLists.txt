@@ -1,314 +1,181 @@
-###
-#
-#  @file CMakeLists.txt
-# 
-#  @project MAGMA
-#  MAGMA is a software package provided by:
-#     Inria Bordeaux - Sud-Ouest,
-#     Univ. of Tennessee,
-#     Univ. of California Berkeley,
-#     Univ. of Colorado Denver.
-# 
-#  @version 0.2.0
-#  @author Cedric Castagnede
-#  @date 13-07-2012
-#   
-###
+cmake_minimum_required( VERSION 2.8.1 )
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-
-#############################################
-#                                           #
-#      Force compilation out-of-source      #
-#                                           #
-#############################################
-STRING(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" MAGMA_COMPILE_INPLACE)
-IF(MAGMA_COMPILE_INPLACE)
-    MESSAGE(FATAL_ERROR "MAGMA requires an out of source build.
-  1/ remove CMakeCache.txt and CMakeFiles in ${CMAKE_SOURCE_DIR}
-  2/ do mkdir build && cd build and tape cmake ../")
-ENDIF(MAGMA_COMPILE_INPLACE)
+project( MAGMA C CXX Fortran )
 
 
-#############################################
-#                                           #
-#        Definition of the project          #
-#                                           #
-#############################################
-PROJECT(MAGMA Fortran C CXX)
+# ----------------------------------------
+# to show compile commands, set this here or use 'make VERBOSE=1'
+#set(CMAKE_VERBOSE_MAKEFILE on)
 
 
-#############################################
-#                                           #
-#      Systems checks and parameters        #
-#                                           #
-#############################################
-
-# CMake can find FindFoo.cmake in this directory
-# ----------------------------------------------
-LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules)
-LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules/cmake-2.8-8)
-LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules/buildsystem)
-LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules/find)
-LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules/info)
-LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules/source_generator)
-
-# Active cmake options
-# --------------------
-INCLUDE(BuildSystemTools)
-INCLUDE(CMakeDependentOption)
-INCLUDE(CMakeDetermineSystem)
-INCLUDE(CheckCCompilerFlag)
-INCLUDE(CheckFunctionExists)
-INCLUDE(CheckSymbolExists)
-INCLUDE(CheckIncludeFiles)
-INCLUDE(Summary)
-
-# Active CTEST
-# ------------
-INCLUDE(CTest)
-ENABLE_TESTING()
+# ----------------------------------------
+# force an out-of-source build, to not overwrite the existing Makefiles
+# (out-of-source is cleaner, too)
+string( COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" MAGMA_COMPILE_INPLACE )
+if( MAGMA_COMPILE_INPLACE )
+	message(FATAL_ERROR "Compiling MAGMA with CMake requires an out-of-source build. To proceed:
+  rm -rf CMakeCache.txt CMakeFiles/   # delete files in ${CMAKE_SOURCE_DIR}
+  mkdir build
+  cd build
+  cmake ..
+  make" )
+endif()
 
 
-#############################################
-#                                           #
-#     Definition of the GENERIC options     #
-#                                           #
-#############################################
-
-# Define the default install directory
-# ------------------------------------
-IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    SET(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Install directory used by install" FORCE)
-ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-
-# Organize output files in a tree
-# -------------------------------
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${MAGMA_BINARY_DIR}/lib)
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${MAGMA_BINARY_DIR}/lib)
-
-# Set the build type
-# ------------------
-IF(NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
-        "Choose the type of build, options are None, Debug, Release, RelWithDebInfo and MinSizeRel." FORCE)
-ENDIF(NOT CMAKE_BUILD_TYPE)
-
-# Misc options
-# ------------
-OPTION(BUILD_SHARED_LIBS "Build shared libraries" OFF)
-
-# Set computed precisions
-# -----------------------
-OPTION(BUILD_SINGLE       "Build MAGMA Single Precision"         ON)
-OPTION(BUILD_DOUBLE       "Build MAGMA Double Precision"         ON)
-OPTION(BUILD_COMPLEX      "Build MAGMA Complex Precision"        ON)
-OPTION(BUILD_COMPLEX16    "Build MAGMA Double Complex Precision" ON)
-CMAKE_DEPENDENT_OPTION(BUILD_MIXEDREAL    "Build MAGMA Mixed Real Precision"    ON
-                                          "BUILD_SINGLE;BUILD_DOUBLE"           OFF)
-CMAKE_DEPENDENT_OPTION(BUILD_MIXEDCOMPLEX "Build MAGMA Mixed Complex Precision" ON
-                                          "BUILD_COMPLEX;BUILD_COMPLEX16"       OFF)
-
-# Define precision supported by MAGMA
-# -----------------------------------
-IF(BUILD_SINGLE)
-    LIST(APPEND MAGMA_PRECISION "s")
-ENDIF()
-
-IF(BUILD_DOUBLE)
-    LIST(APPEND MAGMA_PRECISION "d")
-ENDIF()
-
-IF(BUILD_MIXEDREAL)
-    LIST(APPEND MAGMA_PRECISION "ds")
-ENDIF()
-
-IF(BUILD_COMPLEX)
-    LIST(APPEND MAGMA_PRECISION "c")
-ENDIF()
-
-IF(BUILD_COMPLEX16)
-    LIST(APPEND MAGMA_PRECISION "z")
-ENDIF()
-
-IF(BUILD_MIXEDCOMPLEX)
-    LIST(APPEND MAGMA_PRECISION "zc")
-ENDIF()
+# ----------------------------------------
+# check Fortran name mangling
+include( FortranCInterface )
+FortranCInterface_HEADER( ${CMAKE_SOURCE_DIR}/mangling.h MACRO_NAMESPACE MAGMA_ )
 
 
-#############################################
-#                                           #
-#      Definition of the MAGMA options      #
-#                                           #
-#############################################
-
-OPTION(MAGMA_DEBUG_CMAKE
-       "Enable/disable the verbosity of cmake step" OFF)
-OPTION(MAGMA_ENABLE_TESTING
-       "Enable/disable all the tests in MAGMA" ON)
-
-#############################################
-#                                           #
-#      Definition of the Poject library     #
-#                                           #
-#############################################
-
-# MAGMA libraries
-# ---------------
-OPTION(MAGMA "Enable/Disable compilation of MAGMA mono-GPU" ON)
-
-# Define extra options for specific package
-# -----------------------------------------
-OPTION(MAGMA_USE_PLASMA 
-       "Enable/Disable kernels using plasma-like kernels in MAGMA" OFF)
-OPTION(MAGMA_USE_FERMI   
-       "Switch between Tesla (OFF) and Fermi (ON) cards" ON)
-#OPTION(MAGMA_MGPUS_STATIC
-#       "Enable/Disable compilation of MAGMA multi-GPUs static" OFF)
+# ----------------------------------------
+# locate OpenMP
+find_package( OpenMP )
+if ( OPENMP_FOUND )
+	message( "-- Found OpenMP" )
+	message( "   OpenMP_C_FLAGS   ${OpenMP_C_FLAGS}" )
+	message( "   OpenMP_CXX_FLAGS ${OpenMP_CXX_FLAGS}" )
+	set( CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}"   )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
+endif()
 
 
-#############################################
-#                                           #
-#             Check the system              #
-#                                           #
-#############################################
-
-# Detect the system and set specific options
-# ------------------------------------------
-INCLUDE(SystemDetection)
-
-# Define Fortran mangling
-# -----------------------
-INCLUDE(FortranMangling)
-FortranMangling()
-
-# Verify if ISO C Binding is available
-# ------------------------------------
-INCLUDE(ISOCBinding)
-ISOCBinding()
-
-# PKG_CONFIG
-# ----------
-FIND_PACKAGE(PkgConfig QUIET)
-IF(PKG_CONFIG_EXECUTABLE)
-    MESSAGE(STATUS "Found pkg-config: ${PKG_CONFIG_EXECUTABLE}")
-ELSE(PKG_CONFIG_EXECUTABLE)
-    MESSAGE(STATUS "Looking for pkg-config - not found")
-ENDIF(PKG_CONFIG_EXECUTABLE)
-
-# PYTHON
-# ------
-FIND_PACKAGE(PythonInterp REQUIRED)
+# ----------------------------------------
+# locate CUDA libraries
+option( USE_TESLA OFF )
+find_package( CUDA )
+if ( CUDA_FOUND )
+	message( "-- Found CUDA ${CUDA_VERSION}" )
+	message( "   CUDA_INCLUDE_DIRS:   ${CUDA_INCLUDE_DIRS}"   )
+	message( "   CUDA_CUDART_LIBRARY: ${CUDA_CUDART_LIBRARY}" )
+	#message( "   CUDA_LIBRARIES: ${CUDA_LIBRARIES}" )
+	#message( "   CUDA_CUBLAS_LIBRARIES: ${CUDA_CUBLAS_LIBRARIES}" )
+	include_directories( ${CUDA_INCLUDE_DIRS} )
+	add_definitions( -DHAVE_CUBLAS )
+	if ( USE_TESLA )
+		message( "-- Generate CUDA code for Tesla (CUDA architecture 1.x). To change, unset USE_TESLA using ccmake." )
+		add_definitions( -DGPUSHMEM=130 )
+		set( CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -gencode arch=compute_13,code=sm_13 -gencode arch=compute_13,code=compute_13" )
+	else()
+		message( "-- Generate CUDA code for Fermi (CUDA architecture 2.x). To change, set USE_TESLA using ccmake." )
+		add_definitions( -DGPUSHMEM=200 )
+		set( CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -gencode arch=compute_20,code=sm_20 -gencode arch=compute_20,code=compute_20" )
+	endif()
+endif()
 
 
-#############################################
-#                                           #
-#    Look for the required dependencies     #
-#                                           #
-#############################################
+# ----------------------------------------
+# locate LAPACK libraries
+set( LAPACK_LIBRARIES "" CACHE STRING "Libraries for LAPACK and BLAS, to manually override search" )
+if ( "${LAPACK_LIBRARIES}" STREQUAL "" )
+	message( "-- Searching for BLAS and LAPACK. To override, set LAPACK_LIBRARIES using ccmake." )
+	find_package( LAPACK )
+else()
+	message( "-- User set LAPACK_LIBRARIES. To change, edit LAPACK_LIBRARIES using ccmake (set to empty to enable search)." )
+endif()
+message( "   BLAS_LIBRARIES:      ${BLAS_LIBRARIES}"      )
+message( "   LAPACK_LIBRARIES:    ${LAPACK_LIBRARIES}"    )
 
-# Looking for dependencies
-# ------------------------
-INCLUDE(DefineDependencies)
-DEFINE_PACKAGE("CUDA")
-DEFINE_PACKAGE("BLAS")
-DEFINE_PACKAGE("CBLAS")
-DEFINE_PACKAGE("LAPACK")
-IF(MAGMA_ENABLE_TESTING)
-    DEFINE_PACKAGE("TMG")
-ENDIF(MAGMA_ENABLE_TESTING)
+# If using MKL, add it to includes and define MAGMA_WITH_MKL
+# Initially, this gets MKLROOT from environment, but then the user can edit it.
+set( MKLROOT $ENV{MKLROOT} CACHE STRING "MKL installation directory" )
+if ( NOT "${MKLROOT}" STREQUAL "" )
+	message( "-- MKLROOT set to ${MKLROOT}. To change, edit MKLROOT using ccmake." )
+	include_directories( ${MKLROOT}/include )
+	add_definitions( -DMAGMA_WITH_MKL )
+else()
+	message( "-- MKLROOT not set. To change, set MKLROOT using ccmake." )
+endif()
 
 
-#############################################
-#                                           #
-#        Compilation of the MAGMA           #
-#                                           #
-#############################################
-IF(MAGMA)
-    # Create ${CMAKE_BINARY_DIR}/include
-    # ----------------------------------
-    IF(NOT EXISTS ${CMAKE_BINARY_DIR}/include)
-        FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
-    ENDIF()
+# ----------------------------------------
+# common flags
+# On Windows:
+#     Strip out /W3; we will use -W4
+#     -Wall is way too verbose; use -W4
+#     -MP enables parallel builds
+#     -std=c99 is not implemented, so skip that
+if ( WIN32 )
+	string( REGEX REPLACE " */W3" "" CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}"   )
+	string( REGEX REPLACE " */W3" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" )
+	set( CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -W4 -MP" )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -MP" )
+else()
+	set( CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wall -std=c99" )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall" )
+endif()
 
-    # Set the version of this project
-    # -------------------------------
-    INCLUDE(BuildSystemTools)
-    GET_VERSION("MAGMA" "${CMAKE_CURRENT_SOURCE_DIR}/include/magma.h")
+if ( CMAKE_HOST_APPLE )
+	# 64-bit veclib has issues, so compile 32-bit.
+	# (I think an issue with prototypes return float instead of double)
+	message( "-- MacOS X: setting to 32-bit, to avoid issues with 64-bit veclib" )
+	set( CMAKE_C_FLAGS       "${CMAKE_C_FLAGS} -m32" )
+	set( CMAKE_CXX_FLAGS     "${CMAKE_CXX_FLAGS} -m32" )
+	set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -m32" )
+	set( CUDA_64_BIT_DEVICE_CODE OFF )
+endif()
 
-    # Define pre-processing variables
-    # -------------------------------
-    ADD_DEFINITIONS(\"-Dmagma_devptr_t=integer\(kind=${SIZEOF_VOID_PTR}\)\") #"
-    IF(MAGMA_USE_PLASMA OR HAVE_PLASMA)
-        ADD_DEFINITIONS(-DMAGMA_WITH_PLASMA)
-    ENDIF(MAGMA_USE_PLASMA OR HAVE_PLASMA)
+include_directories( include )
+include_directories( control )
 
-    # Define the type of the GPU card
-    # -------------------------------
-    UNSET(MAGMA_GPU_OPTS)
-    LIST(APPEND MAGMA_GPU_OPTS "-ccbin=${CMAKE_C_COMPILER}")
+message( "-- Flags" )
+message( "   CFLAGS   ${CMAKE_C_FLAGS}" )
+message( "   CXXFLAGS ${CMAKE_CXX_FLAGS}" )
+message( "   NFLAGS   ${CUDA_NVCC_FLAGS}" )
+message( "   FFLAGS   ${CMAKE_Fortran_FLAGS}" )
 
-    IF(MAGMA_USE_FERMI)
-        ADD_DEFINITIONS(-DGPUSHMEM=200)
-        LIST(APPEND MAGMA_GPU_OPTS "-arch=sm_20")
 
-    ELSE(MAGMA_USE_FERMI)
-        ADD_DEFINITIONS(-DGPUSHMEM=130)
-        LIST(APPEND MAGMA_GPU_OPTS "-arch=sm_13")
-        LIST(APPEND MAGMA_GPU_OPTS "--generate-code")
-        LIST(APPEND MAGMA_GPU_OPTS "arch=compute_13,code=compute_13")
-        LIST(APPEND MAGMA_GPU_OPTS "--generate-code")
-        LIST(APPEND MAGMA_GPU_OPTS "arch=compute_10,code=compute_10")
+# ----------------------------------------
+# where to put libmagma
+set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY lib )
+set( CMAKE_LIBRARY_OUTPUT_DIRECTORY lib )
 
-    ENDIF(MAGMA_USE_FERMI)
 
-    # Define compilation flags according to the compiler
-    # --------------------------------------------------
-    IF(CUDA_FOUND)
-        LIST(APPEND CUDA_NVCC_FLAGS ${MAGMA_GPU_OPTS})
-        LIST(APPEND CUDA_NVCC_FLAGS "--compiler-options")
-        LIST(APPEND CUDA_NVCC_FLAGS "-fno-strict-aliasing")
-        LIST(APPEND CUDA_NVCC_FLAGS "-DUNIX")
-    ENDIF()
+# ----------------------------------------
+# compile library
+include( ${CMAKE_SOURCE_DIR}/src/CMake )
+include( ${CMAKE_SOURCE_DIR}/control/CMake )
+include( ${CMAKE_SOURCE_DIR}/magmablas/CMake )
+include( ${CMAKE_SOURCE_DIR}/interface_cuda/CMake )
+cuda_add_library( magma
+	${src_ALLSRC}
+	${control_ALLSRC}
+	${magmablas_ALLSRC}
+	${interface_cuda_ALLSRC}
+)
+target_link_libraries( magma
+	${LAPACK_LIBRARIES}
+	${CUDA_CUDART_LIBRARY}
+	${CUDA_CUBLAS_LIBRARIES}
+)
 
-    # Add MAGMA includes to everything
-    # --------------------------------
-    INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/include)
-    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
-    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/include)
-    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/control)
-    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/control)
-    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/interface_cuda)
-    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/interface_cuda)
 
-    # Check for the subdirectories 
-    # ----------------------------
-    ADD_SUBDIRECTORY(include)
-    ADD_SUBDIRECTORY(src)
-    ADD_SUBDIRECTORY(magmablas)
-    IF(MAGMA_ENABLE_TESTING)
-        ADD_SUBDIRECTORY(testing)
-    ENDIF()
+# ----------------------------------------
+# compile testing library
+set( TEST_SRC
+	testing/testing_zutil.cpp
+	testing/testing_cutil.cpp
+	testing/testing_dutil.cpp
+	testing/testing_sutil.cpp
+	testing/testing_util.cpp
+)
+add_library( test ${TEST_SRC} )
 
-    # Create file magma.pc
-    # --------------------
-    GET_VERSION("MAGMA" "${CMAKE_CURRENT_SOURCE_DIR}/include/magma.h")
-    GENERATE_PKGCONFIG_FILE("MAGMA" "${CMAKE_CURRENT_SOURCE_DIR}/lib/pkgconfig/magma.pc.in")
 
-    # Installation
-    # ------------
-    INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/include
-            DESTINATION ${CMAKE_INSTALL_PREFIX})
+# ----------------------------------------
+# compile lapacktest library
+include( ${CMAKE_SOURCE_DIR}/testing/lin/CMake )
+add_library( lapacktest ${testing_lin_ALLSRC} )
 
-ENDIF()
 
-#############################################
-#                                           #
-#    Print the summary of configuration     #
-#                                           #
-#############################################
-SUMMARY()
-
-##
-## @end file CMakeLists.txt
-##
+# ----------------------------------------
+# compile each tester
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY testing )
+include( ${CMAKE_SOURCE_DIR}/testing/CMake )
+foreach( TEST ${testing_ALLSRC} )
+	string( REGEX REPLACE "\\.(cpp|f90|F90)" "" EXE ${TEST} )
+	string( REGEX REPLACE "testing/" "" EXE ${EXE} )
+	#message( "${TEST} --> ${EXE}" )
+	add_executable( ${EXE} ${TEST} )
+	target_link_libraries( ${EXE} test lapacktest magma )
+endforeach()

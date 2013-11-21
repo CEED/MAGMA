@@ -6,6 +6,7 @@
 #      November 2011
 #//////////////////////////////////////////////////////////////////////////////
 
+DIR = src
 MAGMA_DIR = ..
 include ../Makefile.internal
 
@@ -17,7 +18,7 @@ include ../Makefile.internal
 
 # ----------
 # Cholesky, GPU interface
-ZSRC += \
+ZSRC := \
 	zcposv_gpu.cpp		\
 	\
 	zposv_gpu.cpp		\
@@ -244,10 +245,12 @@ ZSRC += \
 -include Makefile.src
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
+
 ALLOBJ := $(ALLSRC:.cpp=.o)
 
 .PHONY: all clean cleanall
 
+.DEFAULT_GOAL := all
 all: $(LIBMAGMA)
 
 $(LIBMAGMA): $(ALLOBJ) stamp

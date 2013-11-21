@@ -228,10 +228,10 @@ magma_zlaqps2_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
             i__2 = k + 1;
             /* left-looking update of rows,                     *
              * since F=A'v with original A, so no right-looking */
-            magmablas_zgemm( MagmaNoTrans, MagmaConjTrans, ione, i__1, i__2,
-                             c_neg_one, A(rk, 0  ), lda,
-                                        F(k+1,0  ), ldf,
-                             c_one,     A(rk, k+1), lda ); 
+            magma_zgemm( MagmaNoTrans, MagmaConjTrans, ione, i__1, i__2,
+                         c_neg_one, A(rk, 0  ), lda,
+                                    F(k+1,0  ), ldf,
+                         c_one,     A(rk, k+1), lda ); 
         }
         
         /* Update partial column norms. */

@@ -109,7 +109,7 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
 
     magma_int_t n_j, ldda, ldwork;
     magma_int_t j, jb, na, nb, sm, sn, fjb, nfxd, minmn;
-    magma_int_t topbmn, sminmn, lwkopt, lquery;
+    magma_int_t topbmn, sminmn, lwkopt=0, lquery;
     
     *info = 0;
     lquery = (lwork == -1);
@@ -122,8 +122,8 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
     }
     
     nb = magma_get_zgeqp3_nb(min(m, n));
+    minmn = min(m,n);
     if (*info == 0) {
-        minmn = min(m,n);
         if (minmn == 0) {
             lwkopt = 1;
         } else {

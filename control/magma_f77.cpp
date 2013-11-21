@@ -1,14 +1,5 @@
 #include "magma.h"
-
-#ifndef MAGMA_FORTRAN_NAME
-#if defined(ADD_)
-#define MAGMA_FORTRAN_NAME(lcname, UCNAME)  magmaf_##lcname##_
-#elif defined(NOCHANGE)
-#define MAGMA_FORTRAN_NAME(lcname, UCNAME)  magmaf_##lcname
-#elif defined(UPCASE)
-#define MAGMA_FORTRAN_NAME(lcname, UCNAME)  MAGMAF_##UCNAME
-#endif
-#endif
+#include "magma_mangling.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,13 +13,13 @@ extern "C" {
        November 2011
 */
 
-#define magmaf_init MAGMA_FORTRAN_NAME( init, INIT )
+#define magmaf_init FORTRAN_NAME( magmaf_init, MAGMAF_INIT )
 void magmaf_init( void )
 {
     magma_init();
 }
 
-#define magmaf_finalize MAGMA_FORTRAN_NAME( finalize, FINALIZE )
+#define magmaf_finalize FORTRAN_NAME( magmaf_finalize, MAGMAF_FINALIZE )
 void magmaf_finalize( void )
 {
     magma_finalize();

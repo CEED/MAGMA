@@ -6,6 +6,7 @@
 #      November 2011
 #//////////////////////////////////////////////////////////////////////////////
 
+DIR = control
 MAGMA_DIR = ..
 include ../Makefile.internal
 
@@ -25,10 +26,7 @@ ZSRC += \
 	magma_zf77pgi.cpp
 endif
 
--include Makefile.local
--include Makefile.src
-
-ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
+SRC := \
 	auxiliary.cpp		\
 	get_nb.cpp		\
 	timer.cpp		\
@@ -39,7 +37,13 @@ ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
 	connection_mgpu.cpp	\
 	pthread_barrier.cpp	\
 	xerbla.cpp		\
-	magma_threadsetting.cpp \
+	magma_threadsetting.cpp	\
+	magmawinthread.cpp	\
+
+-include Makefile.local
+-include Makefile.src
+
+ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) $(SRC)
 
 ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f90=.o)
@@ -47,6 +51,7 @@ ALLOBJ := $(ALLOBJ:.F90=.o)
 
 .PHONY: all clean cleanall
 
+.DEFAULT_GOAL := all
 all: $(LIBMAGMA)
 
 $(LIBMAGMA): stamp

@@ -6,12 +6,13 @@
 #      November 2011
 #//////////////////////////////////////////////////////////////////////////////
 
+DIR = testing
 MAGMA_DIR = ..
 include ../Makefile.internal
 
 # ----------
 # BLAS and auxiliary
-ZSRC += \
+ZSRC := \
 	testing_z_cublas_v2.cpp	\
 	testing_zgemm.cpp	\
 	testing_zgemv.cpp	\
@@ -37,7 +38,6 @@ ZSRC += \
 	testing_zsymmetrize_tiles.cpp	\
 	testing_zswap.cpp	\
 	testing_ztranspose.cpp	\
-	testing_zutil.cpp	\
 	testing_zhemv_mgpu.cpp	\
 	\
 	testing_zhemm_mgpu.cpp	\
@@ -171,22 +171,38 @@ ZSRC += $(ZSRCF)
 -include Makefile.src
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
+
 ALLOBJ := $(ALLSRC:.f90=.o)
 ALLOBJ := $(ALLOBJ:.F90=.o)
 ALLOBJ := $(ALLOBJ:.cuf=.o)
 ALLOBJ := $(ALLOBJ:.cpp=.o)
+
 EXE    := $(ALLOBJ:.o=)
 
+# --------------------
 LIBTEST := libtest.a
 LIBSRC  := testing_zutil.o testing_cutil.o testing_dutil.o testing_sutil.o testing_util.o
 LIBOBJ  := $(LIBSRC:.cpp=.o)
 LIBEXE  := $(LIBOBJ:.o=)
 
-# strip out fake exe files generated from LIBSRC
-EXE := $(filter-out $(LIBEXE), $(EXE))
+# testing_zutil.cpp isn't in ZSRC (since they don't generate EXEs),
+# so add generation rules here instead of .Makefile.gen
+testing_cutil.cpp: testing_zutil.cpp
+	$(PYTHON) ../tools/codegen.py  -p c --file testing_zutil.cpp
 
+testing_dutil.cpp: testing_zutil.cpp
+	$(PYTHON) ../tools/codegen.py  -p d --file testing_zutil.cpp
+
+testing_sutil.cpp: testing_zutil.cpp
+	$(PYTHON) ../tools/codegen.py  -p s --file testing_zutil.cpp
+
+generate: testing_cutil.cpp testing_dutil.cpp testing_sutil.cpp
+
+
+# --------------------
 .PHONY: all lib clean cleanall cleanexe
 
+.DEFAULT_GOAL := all
 all: $(EXE)
 
 lib:

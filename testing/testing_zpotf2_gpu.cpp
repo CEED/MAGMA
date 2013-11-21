@@ -51,6 +51,11 @@ int main( int argc, char** argv)
             ldda = ((N+31)/32)*32;
             gflops = FLOPS_ZPOTRF( N ) / 1e9;
             
+            if ( N > 1024 ) {
+                fprintf( stderr, "zpotf2 does not support N > 1024; skipping N=%d.\n", N );
+                continue;
+            }
+            
             TESTING_MALLOC(    h_A, magmaDoubleComplex, n2     );
             TESTING_HOSTALLOC( h_R, magmaDoubleComplex, n2     );
             TESTING_DEVALLOC(  d_A, magmaDoubleComplex, ldda*N );

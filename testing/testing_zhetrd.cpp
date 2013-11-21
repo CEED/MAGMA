@@ -66,7 +66,7 @@ int main( int argc, char** argv)
             lda    = N;
             n2     = N*lda;
             nb     = magma_get_zhetrd_nb(N);
-            lwork  = N*nb; /* We suppose the magma nb is bigger than lapack nb */
+            lwork  = N*nb;  /* We suppose the magma nb is bigger than lapack nb */
             gflops = FLOPS_ZHETRD( N ) / 1e9;
             
             TESTING_MALLOC(    h_A,     magmaDoubleComplex, lda*N );
@@ -162,7 +162,6 @@ int main( int argc, char** argv)
                         ( ( (result[0]*eps < tol) && (result[1]*eps < tol) ) ? "" : "  failed")  );
                 status |= ! (result[0]*eps < tol);
                 status |= ! (result[1]*eps < tol);
-
             } else {
                 printf("     ---             ---\n");
             }

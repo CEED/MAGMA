@@ -12,6 +12,7 @@ include ./Makefile.internal
 
 .PHONY: all lib libmagma test clean cleanall install shared
 
+.DEFAULT_GOAL := all
 all: lib test
 
 lib: libmagma

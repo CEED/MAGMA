@@ -221,8 +221,10 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
                           "error: --ngpu %s exceeds number of CUDA devices, %d.\n", argv[i], ndevices );
             magma_assert( opts->ngpu > 0,
                           "error: --ngpu %s is invalid; ensure ngpu > 0.\n", argv[i] );
+            #ifndef _MSC_VER  // not Windows
             // save in environment variable, so magma_num_gpus() picks it up
             setenv( "MAGMA_NUM_GPUS", argv[i], true );
+            #endif
         }
         else if ( strcmp("--nstream", argv[i]) == 0 && i+1 < argc ) {
             opts->nstream = atoi( argv[++i] );

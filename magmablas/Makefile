@@ -6,6 +6,7 @@
 #      November 2011
 #//////////////////////////////////////////////////////////////////////////////
 
+DIR = magmablas
 MAGMA_DIR = ..
 include ../Makefile.internal
 
@@ -82,6 +83,11 @@ ZSRC += \
 -include Makefile.local
 -include Makefile.src
 
+HDR := \
+	commonblas.h	\
+
+ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR) $(HDR)
+
 FERMISRC = \
 	sgemv_fermi.cu	\
 	dgemv_fermi.cu	\
@@ -124,26 +130,26 @@ TESLASRC = \
 	dgemm_tesla_T_T_64_16_16_16_4.cu          \
 	dgemm_tesla_T_T_64_16_16_16_4_v2.cu       \
 
-ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR) \
-	commonblas.h
-
-ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
+SRC := \
 	dgemv_MLU.cu	\
 	stream.cu	\
 
 ifeq (${GPU_TARGET}, Tesla)
-    ALLSRC += $(TESLASRC)
+    SRC += $(TESLASRC)
 else ifeq (${GPU_TARGET}, Fermi)
-    ALLSRC += $(FERMISRC)
+    SRC += $(FERMISRC)
 else ifeq (${GPU_TARGET}, Kepler)
-    ALLSRC += $(FERMISRC)
+    SRC += $(FERMISRC)
 endif
+
+ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) $(SRC)
 
 ALLOBJ := $(ALLSRC:.cu=.cu_o) 
 ALLOBJ := $(ALLOBJ:.cpp=.o)
 
 .PHONY: all clean cleanall
 
+.DEFAULT_GOAL := all
 all: $(LIBMAGMA) stamp
 
 $(LIBMAGMA): $(ALLHDR) $(ALLOBJ) stamp
