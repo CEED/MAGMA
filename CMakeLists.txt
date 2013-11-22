@@ -25,7 +25,7 @@ endif()
 # ----------------------------------------
 # check Fortran name mangling
 include( FortranCInterface )
-FortranCInterface_HEADER( ${CMAKE_SOURCE_DIR}/mangling.h MACRO_NAMESPACE MAGMA_ )
+FortranCInterface_HEADER( ${CMAKE_SOURCE_DIR}/include/mangling.h MACRO_NAMESPACE MAGMA_ )
 
 
 # ----------------------------------------
