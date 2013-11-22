@@ -53,7 +53,6 @@ my @files2delete = qw(
     CPackConfig_MAGMA_full.cmake
     CPackConfig_MORSE_full.cmake
     CPackConfig_MORSE_light.cmake
-    CMakeLists.txt
     include/CMakeLists.txt
     magmablas/CMakeLists.txt
     src/CMakeLists.txt
