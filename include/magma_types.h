@@ -291,6 +291,7 @@ typedef double real_Double_t;
 #define MAGMA_ERR_CUDASTREAM       -114
 #define MAGMA_ERR_INVALID_PTR      -115
 #define MAGMA_ERR_UNKNOWN          -116
+#define MAGMA_ERR_NOT_IMPLEMENTED  -117
 
 
 // ----------------------------------------
@@ -343,11 +344,9 @@ typedef double real_Double_t;
 #define MagmaPackUpeprBand 297
 #define MagmaPackAll       298
 
-
-
 #define MagmaNoVec         'N'  /* 301 */  /* geev, syev, gesvd */
 #define MagmaVec           'V'  /* 302 */  /* geev, syev */
-#define MagmaIvec          'I'  /* 303 */  /* stedc */
+#define MagmaIVec          'I'  /* 303 */  /* stedc */
 #define MagmaAllVec        'A'  /* 304 */  /* gesvd */
 #define MagmaSomeVec       'S'  /* 305 */  /* gesvd */
 #define MagmaOverwriteVec  'O'  /* 306 */  /* gesvd */
@@ -384,13 +383,13 @@ typedef double real_Double_t;
 
 // remember to update min/max when adding constants!
 #define MagmaMinConst      101
-#define MagmaMaxConst      435
+#define MagmaMaxConst      454
 
 
-
+// ----------------------------------------
 // these could be enums, but that isn't portable in C++,
 // e.g., if -fshort-enums is used
-typedef char magma_major_t;
+typedef char magma_order_t;
 typedef char magma_trans_t;
 typedef char magma_uplo_t;
 typedef char magma_diag_t;
@@ -409,6 +408,7 @@ typedef int magma_location_t;
 // properties of the magma_precond_parameters
 typedef int magma_precond_type;
 typedef int magma_precision;
+
 
 // ----------------------------------------
 // string constants for calling Fortran BLAS and LAPACK
@@ -463,6 +463,18 @@ magma_storev_t magma_storev_const( char lapack_char );
 
 char        lapacke_const( int magma_const );
 const char* lapack_const ( int magma_const );
+
+#define lapacke_order_const(c) lapack_const(c)
+#define lapacke_trans_const(c) lapack_const(c)
+#define lapacke_side_const( c) lapack_const(c)
+#define lapacke_diag_const( c) lapack_const(c)
+#define lapacke_uplo_const( c) lapack_const(c)
+
+#define lapack_order_const(c)  lapack_const(c)
+#define lapack_trans_const(c)  lapack_const(c)
+#define lapack_side_const( c)  lapack_const(c)
+#define lapack_diag_const( c)  lapack_const(c)
+#define lapack_uplo_const( c)  lapack_const(c)
 
 #ifdef HAVE_clAmdBlas
 int                  amdblas_const      ( int           magma_const );
