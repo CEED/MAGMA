@@ -21,6 +21,7 @@ single (s), double (d), single-complex (c), double-complex (z).
 
  1.4.1 - November 18, 2013
     * Improved performance of geev when computing eigenvectors using blocked trevc.
+    * Added new CMake installation for compiling on Windows.
 
  1.4.0 - final:  Aug  14, 2013
        - beta 2: June 28, 2013

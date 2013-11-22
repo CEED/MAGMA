@@ -30,6 +30,7 @@ generation:
 	(cd $(MAGMA_DIR)/magmablas      && $(MAKE) generate )
 	@echo ======================================== testing
 	(cd $(MAGMA_DIR)/testing        && $(MAKE) generate )
+	$(MAKE) CMakes
 
 headers:
 	@echo ======================================== include
