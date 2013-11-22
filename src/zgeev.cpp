@@ -21,6 +21,12 @@
  */
 #define VERSION3
 
+/*
+ * TREVC version 1 - LAPACK
+ * TREVC version 2 - new blocked LAPACK
+ */
+#define TREVC_VERSION 2
+
 extern "C" magma_int_t
 magma_zgeev(
     char jobvl, char jobvr, magma_int_t n,
@@ -234,7 +240,7 @@ magma_zgeev(
         magma_zgehrd2( n, ilo, ihi, A, lda,
                        &work[itau], &work[iwrk], liwrk, &ierr );
     #elif defined(VERSION3)
-        // Version 3 - LAPACK consistent MAGMA HRD + matrices T stored,
+        // Version 3 - LAPACK consistent MAGMA HRD + T matrices stored,
         magma_zgehrd( n, ilo, ihi, A, lda,
                       &work[itau], &work[iwrk], liwrk, dT, &ierr );
     #endif
@@ -253,7 +259,7 @@ magma_zgeev(
             lapackf77_zunghr( &n, &ilo, &ihi, vl, &ldvl, &work[itau],
                               &work[iwrk], &liwrk, &ierr );
         #elif defined(VERSION3)
-            // Version 3 - LAPACK consistent MAGMA HRD + matrices T stored
+            // Version 3 - LAPACK consistent MAGMA HRD + T matrices stored
             magma_zunghr( n, ilo, ihi, vl, ldvl, &work[itau], dT, nb, &ierr );
         #endif
 
@@ -286,7 +292,7 @@ magma_zgeev(
             lapackf77_zunghr( &n, &ilo, &ihi, vr, &ldvr, &work[itau],
                               &work[iwrk], &liwrk, &ierr );
         #elif defined(VERSION3)
-            // Version 3 - LAPACK consistent MAGMA HRD + matrices T stored
+            // Version 3 - LAPACK consistent MAGMA HRD + T matrices stored
             magma_zunghr( n, ilo, ihi, vr, ldvr, &work[itau], dT, nb, &ierr );
         #endif
 
@@ -318,8 +324,14 @@ magma_zgeev(
          * (CWorkspace: need 2*N)
          * (RWorkspace: need 2*N) */
         irwork = ibal + n;
+        #if TREVC_VERSION == 1
         lapackf77_ztrevc( side, "B", select, &n, A, &lda, vl, &ldvl,
                           vr, &ldvr, &n, &nout, &work[iwrk], &rwork[irwork], &ierr );
+        #elif TREVC_VERSION == 2
+        liwrk = lwork - iwrk;
+        lapackf77_ztrevc3( side, "B", select, &n, A, &lda, vl, &ldvl,
+                           vr, &ldvr, &n, &nout, &work[iwrk], &liwrk, &rwork[irwork], &ierr );
+        #endif
     }
 
     if (wantvl) {

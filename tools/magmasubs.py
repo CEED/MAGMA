@@ -208,6 +208,7 @@ subs = {
     ('#undef SINGLE',       '#undef DOUBLE',       '#undef SINGLE',       '#undef DOUBLE'       ),
     
     # ----- Data types
+    ('REAL',                'DOUBLE PRECISION',    'REAL',                'DOUBLE PRECISION'    ),
     ('real',                'double precision',    'real',                'double precision'    ),  # before double
     ('float',               'double',              'float _Complex',      'double _Complex'     ),
     ('float',               'double',              'cuFloatComplex',      'cuDoubleComplex'     ),
@@ -220,6 +221,7 @@ subs = {
     ('PlasmaRealFloat',     'PlasmaRealDouble',    'PlasmaComplexFloat',  'PlasmaComplexDouble' ),
     ('real',                'double precision',    'complex',             'complex\*16'         ),
     ('REAL',                'DOUBLE_PRECISION',    'COMPLEX',             'COMPLEX_16'          ),
+    ('REAL',                'DOUBLE PRECISION',    'COMPLEX',             'COMPLEX\*16'         ),
     ('sizeof_real',         'sizeof_double',       'sizeof_complex',      'sizeof_complex_16'   ),  # before complex
     ('real',                'real',                'complex',             'complex'             ),
     ('float',               'double',              'float2',              'double2'             ),
@@ -504,6 +506,7 @@ subs = {
     ('slaex',          'dlaex',          'slaex',          'dlaex'           ),
     ('slagsy',         'dlagsy',         'clagsy',         'zlagsy'          ),
     ('slahr',          'dlahr',          'clahr',          'zlahr'           ),
+    ('slaln2',         'dlaln2',         'slaln2',         'dlaln2'          ),
     ('slamc3',         'dlamc3',         'slamc3',         'dlamc3'          ),
     ('slamch',         'dlamch',         'slamch',         'dlamch'          ),
     ('slamrg',         'dlamrg',         'slamrg',         'dlamrg'          ),
@@ -604,6 +607,7 @@ subs = {
     ('SLAEX',          'DLAEX',          'SLAEX',          'DLAEX'           ),
     ('SLAGSY',         'DLAGSY',         'CLAGSY',         'ZLAGSY'          ),
     ('SLAHR',          'DLAHR',          'CLAHR',          'ZLAHR'           ),
+    ('SLALN2',         'DLALN2',         'SLALN2',         'DLALN2'          ),
     ('SLAMC3',         'DLAMC3',         'SLAMC3',         'DLAMC3'          ),
     ('SLAMCH',         'DLAMCH',         'SLAMCH',         'DLAMCH'          ),
     ('SLAMRG',         'DLAMRG',         'SLAMRG',         'DLAMRG'          ),

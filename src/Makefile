@@ -221,6 +221,8 @@ ZSRC += \
 	zlahr2.cpp		\
 	zlahru.cpp		\
 	zunghr.cpp		\
+	lapack_dtrevc3.f	\
+	lapack_ztrevc3.f	\
 
 # non-symmetric eigenvalues, multi-GPU
 ZSRC += \
@@ -247,6 +249,7 @@ ZSRC += \
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 
 ALLOBJ := $(ALLSRC:.cpp=.o)
+ALLOBJ := $(ALLOBJ:.f=.o)
 
 .PHONY: all clean cleanall
 

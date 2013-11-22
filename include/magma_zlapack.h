@@ -114,6 +114,7 @@ extern "C" {
 #define lapackf77_zsteqr   FORTRAN_NAME( zsteqr, ZSTEQR )
 #define lapackf77_zsymv    FORTRAN_NAME( zsymv,  ZSYMV  )
 #define lapackf77_ztrevc   FORTRAN_NAME( ztrevc, ZTREVC )
+#define lapackf77_ztrevc3  FORTRAN_NAME( ztrevc3, ZTREVC3 )
 #define lapackf77_ztrtri   FORTRAN_NAME( ztrtri, ZTRTRI )
 #define lapackf77_zung2r   FORTRAN_NAME( zung2r, ZUNG2R )
 #define lapackf77_zungbr   FORTRAN_NAME( zungbr, ZUNGBR )
@@ -741,6 +742,17 @@ void   lapackf77_ztrevc( const char *side, const char *howmny,
                          magmaDoubleComplex *work,
                          DWORKFORZ
                          magma_int_t *info );
+
+void   lapackf77_ztrevc3( const char* side, const char* howmny,
+                          magma_int_t* select, const magma_int_t* n,
+                          magmaDoubleComplex* T,  const magma_int_t* ldt,
+                          magmaDoubleComplex* VL, const magma_int_t* ldvl, 
+                          magmaDoubleComplex* VR, const magma_int_t* ldvr,
+                          const magma_int_t* mm,
+                          const magma_int_t* mout,
+                          magmaDoubleComplex* work, const magma_int_t* lwork,
+                          DWORKFORZ
+                          int* info );
 
 void   lapackf77_ztrtri( const char *uplo, const char *diag,
                          const magma_int_t *n,
