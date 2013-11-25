@@ -88,8 +88,8 @@ install: lib dir
 #       pkgconfig
 	cat $(MAGMA_DIR)/lib/pkgconfig/magma.pc.in | \
 	    sed -e s:@INSTALL_PREFIX@:"$(prefix)": | \
-	    sed -e s:@INCLUDES@:"$(INC)":     | \
-	    sed -e s:@LIBEXT@:"$(LIBEXT)":               | \
+	    sed -e s:@INCLUDES@:"$(INC)":          | \
+	    sed -e s:@LIBEXT@:"$(LIBEXT)":         | \
 	    sed -e s:@MAGMA_REQUIRED@::              \
 	    > $(prefix)/lib/pkgconfig/magma.pc
 
