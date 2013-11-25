@@ -36,17 +36,9 @@ LDOPTS    = -Wall -m32
 
 LIB       = -framework Accelerate -lcublas -lcudart -lstdc++ -lm
 
-# define library directories here or in your environment
-#CUDADIR   = /usr/local/cuda
-
-# check for directories and give user hint how to set them
-ifeq ($(CUDADIR),)
-    cuda := $(shell which nvcc | perl -pe 's|/bin/nvcc||')
-    ifeq ($(cuda),)
-        cuda := /usr/local/cuda
-    endif
-$(error Define $$CUDADIR, preferably in your environment, e.g., run "export CUDADIR=$(cuda)" in ~/.bashrc, or "setenv CUDADIR $(cuda)" in ~/.cshrc)
-endif
+# define library directories preferably in your environment, or here.
+#CUDADIR ?= /usr/local/cuda
+-include make.check-cuda
 
 LIBDIR    = -L$(CUDADIR)/lib
 

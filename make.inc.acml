@@ -31,18 +31,11 @@ LDOPTS    = -fopenmp
 LIB       = -lacml_mp -lacml_mv -lcblas -lcublas -lcudart -lstdc++ -lm
 
 # define library directories here or in your environment
-#ACMLDIR   = /opt/acml/gfortran_mp
-#CBLASDIR  = /opt/CBLAS
-#CUDADIR   = /usr/local/cuda
-
-# check for directories and give user hint how to set them
-ifeq ($(ACMLDIR),)
-$(error Define $$ACMLDIR, preferably in your environment, e.g., run "export ACMLDIR=/opt/acml/gfortran_mp" in ~/.bashrc, or "setenv ACMLDIR /opt/acml/gfortran_mp" in ~/.cshrc)
-endif
-
-ifeq ($(CBLASDIR),)
-$(error Define $$CBLASDIR, preferably in your environment, e.g., run "export CBLASDIR=/opt/CBLAS/lib" in ~/.bashrc, or "setenv CBLASDIR /opt/CBLAS/lib" in ~/.cshrc)
-endif
+#ACMLDIR  ?= /opt/acml/gfortran_mp
+#CBLASDIR ?= /opt/CBLAS
+#CUDADIR  ?= /usr/local/cuda
+-include make.check-acml
+-include make.check-cuda
 
 ifeq ($(CUDADIR),)
     cuda := $(shell which nvcc | perl -pe 's|/bin/nvcc||')

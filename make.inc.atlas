@@ -33,26 +33,11 @@ LDOPTS    = -fopenmp
 LIB       = -llapack -lf77blas -latlas -lcblas -lcublas -lcudart -lstdc++ -lm -lgfortran -lifcore
 
 # define library directories here or in your environment
-#LAPACKDIR = /opt/lapack
-#ATLASDIR  = /opt/atlas
-#CUDADIR   = /usr/local/cuda
-
-# check for directories and give user hint how to set them
-ifeq ($(LAPACKDIR),)
-$(error Define $$LAPACKDIR, preferably in your environment, e.g., run "export LAPACKDIR=/opt/lapack" in ~/.bashrc, or "setenv LAPACKDIR /opt/lapack" in ~/.cshrc)
-endif
-
-ifeq ($(ATLASDIR),)
-$(error Define $$ATLASDIR, preferably in your environment, e.g., run "export ATLASDIR=/opt/atlas" in ~/.bashrc, or "setenv ATLASDIR /opt/atlas" in ~/.cshrc)
-endif
-
-ifeq ($(CUDADIR),)
-    cuda := $(shell which nvcc | perl -pe 's|/bin/nvcc||')
-    ifeq ($(cuda),)
-        cuda := /usr/local/cuda
-    endif
-$(error Define $$CUDADIR, preferably in your environment, e.g., run "export CUDADIR=$(cuda)" in ~/.bashrc, or "setenv CUDADIR $(cuda)" in ~/.cshrc)
-endif
+#LAPACKDIR ?= /opt/lapack
+#ATLASDIR  ?= /opt/atlas
+#CUDADIR   ?= /usr/local/cuda
+-include make.check-atlas
+-include make.check-cuda
 
 LIBDIR    = -L$(LAPACKDIR) \
             -L$(ATLASDIR)/lib \
