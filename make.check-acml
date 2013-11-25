@@ -1,6 +1,6 @@
 # check for ACML + CBLAS directories and give user hint how to set them
 ifeq ($(ACMLDIR),)
-$(error Set $$ACMLDIR, preferably in your environment, e.g., run "export ACMLDIR=/opt/acml/gfortran_mp" in ~/.bashrc, or "setenv ACMLDIR /opt/acml/gfortran_mp" in ~/.cshrc)
+$(error Set $$ACMLDIR, preferably in your environment, e.g., run "export ACMLDIR=/opt/acml" in ~/.bashrc, or "setenv ACMLDIR /opt/acml" in ~/.cshrc)
 endif
 
 ifeq ($(CBLASDIR),)
