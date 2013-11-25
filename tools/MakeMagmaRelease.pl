@@ -9,8 +9,6 @@ my $minor;
 my $micro;
 
 # default options
-#my $svn     = "https://icl.cs.utk.edu/svn/magma/branches/sc_release";
-#my $svninst = "https://icl.cs.utk.edu/svn/plasma/plasma-installer";
 my $svn      = "https://icl.cs.utk.edu/svn/magma/trunk";
 my $user     = "";
 my $revision = "";
