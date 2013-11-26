@@ -74,7 +74,7 @@ magma_zbcsrtrsv( char uplo,
     else if( uplo==MagmaUpper ){
         // backward solve
         for( k=r_blocks-1; k>=0; k--){
-            // do the backward triangular solve for block M(k,k): L(k,k)y = b
+            // do the backward triangular solve for block M(k,k): U(k,k)x = y
             magma_ztrsv(MagmaUpper, MagmaNoTrans, MagmaNonUnit, size_b, A(k,k), size_b, x(k), 1 );
 
             // update for all nonzero blocks above M(k,k) the respective values of y

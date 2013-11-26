@@ -59,6 +59,20 @@ magma_vector_clag2z( magma_c_vector x, magma_z_vector *y )
         magmablas_clag2z( x.num_rows, 1, x.val, x.num_rows, y->val, x.num_rows, &info );
         return MAGMA_SUCCESS;
     }
+    else if( x.memory_location == Magma_CPU ){
+        y->memory_location = x.memory_location;
+        y->num_rows = x.num_rows;
+        y->nnz = x.nnz;
+        magma_zmalloc_cpu( &y->val, x.num_rows );
+
+        int one= 1;
+        int info;
+        lapackf77_clag2z( &x.num_rows, &one, 
+                       x.val, &x.num_rows, 
+                       y->val, &x.num_rows, &info);
+        return MAGMA_SUCCESS;
+
+    }
     else
         return MAGMA_ERR_NOT_SUPPORTED;
 }
