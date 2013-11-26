@@ -48,7 +48,20 @@ int main( int argc, char** argv)
 
     const char *filename[] =
     {
-     "test_matrices/fv1.mtx",
+     "test_matrices/Trefethen_20_b.mtx",
+     "test_matrices/Trefethen_200.mtx",
+     "test_matrices/Trefethen_2000.mtx",
+     "test_matrices/Trefethen_20000.mtx",
+
+     "test_matrices/apache1.mtx",
+     "test_matrices/filter3D.mtx",
+     "test_matrices/Baumann.mtx",
+     "test_matrices/boneS01.mtx",
+     "test_matrices/stomach.mtx",
+
+     "test_matrices/Laplace2D_1M.mtx",
+     "test_matrices/apache2.mtx",
+     "test_matrices/G2_circuit.mtx",
      "test_matrices/lap_25.mtx",
      "test_matrices/diag.mtx",
      "test_matrices/tridiag_2.mtx",
@@ -64,7 +77,6 @@ int main( int argc, char** argv)
      "test_matrices/Pres_Poisson.mtx",
      "test_matrices/bloweybq.mtx",
      "test_matrices/ecology2.mtx",
-     "test_matrices/apache2.mtx",
      "test_matrices/crankseg_2.mtx",
      "test_matrices/bmwcra_1.mtx",
      "test_matrices/F1.mtx",
@@ -75,7 +87,7 @@ int main( int argc, char** argv)
      "test_matrices/inline_1.mtx",
      "test_matrices/ldoor.mtx"
     };
-for(magma_int_t matrix=9; matrix<10; matrix++){
+for(magma_int_t matrix=9; matrix<12; matrix++){
 
 
     magma_z_sparse_matrix A, B, C, D, E, F, G, H, I, J, K, Z;
@@ -97,11 +109,12 @@ for(magma_int_t matrix=9; matrix<10; matrix++){
     #endif
     magma_z_csr_mtx( &A, filename[matrix] );
 
-    for(int defaultsize=400; defaultsize>=50; defaultsize--){
+    for(int defaultsize=400; defaultsize>=16; defaultsize--){
         if( A.num_rows%defaultsize == 0 )
             B.blocksize = defaultsize;
     }
-
+    printf("  %d  %d  |", A.num_rows, B.blocksize);
+    //B.blocksize = 20 ;
     magma_z_mconvert( A, &B, Magma_CSR, Magma_BCSR);
     //printf("A:\n");
     //magma_z_mvisu( A );
@@ -119,11 +132,12 @@ for(magma_int_t matrix=9; matrix<10; matrix++){
         #ifdef ENABLE_TIMER
         magma_device_sync(); t_lu+=(magma_wtime()-t_lu1);
         #endif
-
+    
 
     //printf("D:\n");
 
     //magma_z_mvisu( D );
+/*
 
     magma_z_vinit( &b, Magma_DEV, A.num_cols, mone );
     magma_z_vinit( &c, Magma_DEV, A.num_cols, mone );
@@ -133,7 +147,7 @@ for(magma_int_t matrix=9; matrix<10; matrix++){
 
     magma_solver_parameters solver_par;
     solver_par.epsilon = 10e-12;
-    solver_par.maxiter = 1000;
+    solver_par.maxiter = 10000;
     solver_par.restart = 30;
 
         #ifdef ENABLE_TIMER
@@ -146,9 +160,9 @@ for(magma_int_t matrix=9; matrix<10; matrix++){
 
     
     magma_z_vvisu( x, 0, 2);
-    magma_z_vvisu( x, 1000, 2);
-    magma_z_vvisu( x, 1500, 2);    
-    magma_z_vvisu( x, 1900, 2);
+   // magma_z_vvisu( x, 1000, 2);
+    //magma_z_vvisu( x, 1500, 2);    
+   // magma_z_vvisu( x, 1900, 2);
 
 
     magma_z_mtransfer( A, &E, Magma_CPU, Magma_DEV);
@@ -162,17 +176,27 @@ for(magma_int_t matrix=9; matrix<10; matrix++){
         #endif
 
     magma_z_vvisu( y, 0, 2);
-    magma_z_vvisu( y, 1000, 2);
-    magma_z_vvisu( y, 1500, 2);    
-    magma_z_vvisu( y, 1900, 2);
+   // magma_z_vvisu( y, 1000, 2);
+   // magma_z_vvisu( y, 1500, 2);    
+   // magma_z_vvisu( y, 1900, 2);
 
+    double res;
+
+
+    magma_zresidual( E, b, x, &res );
+    magma_zresidual( E, b, y, &res );
+/*
+    for(int z=0; z<A.num_rows; z++)
+        printf("%d ",ipiv[z]);
+    printf("\n"); 
+*/
     magma_z_mfree(&A);
     magma_z_mfree(&B);
     magma_z_mfree(&C);
     magma_z_mfree(&D);
     magma_z_mfree(&E);
     magma_z_mfree(&F);
-
+    printf("D.numblocks:%d\n", D.numblocks);
 
     #ifdef ENABLE_TIMER
     printf("lu: %.2lf (%.2lf%%), lusv: %.2lf (%.2lf%%) gmres: %.2lf\n", 
@@ -181,7 +205,7 @@ for(magma_int_t matrix=9; matrix<10; matrix++){
             t_gmres);
     #endif
 }
-
+    
 
 
 

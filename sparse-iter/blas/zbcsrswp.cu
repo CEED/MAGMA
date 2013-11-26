@@ -54,9 +54,18 @@ magma_zbcsrswp(   magma_int_t r_blocks,
     magmaDoubleComplex *work; 
     magma_zmalloc_cpu( &work, r_blocks*size_b );
 
+
+
+    // first shift the pivot elements
+    for( magma_int_t k=0; k<r_blocks; k++){
+            for( magma_int_t l=0; l<size_b; l++)
+            ipiv[ k*size_b+l ] = ipiv[ k*size_b+l ] + k*size_b;
+    }
+
+
+    // now the usual pivoting
     magma_zgetmatrix(n, 1, x, n, work, n);
-    for( magma_int_t k=0; k<r_blocks; k++)
-      lapackf77_zlaswp(&nrhs, work+k*size_b, &n, &ione, &size_b, ipiv+k*size_b, &inc);
+    lapackf77_zlaswp(&nrhs, work, &n, &ione, &n, ipiv, &inc);
     magma_zsetmatrix(n, 1, work, n, x, n);
    
     magma_free_cpu(work);
