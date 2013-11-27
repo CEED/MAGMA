@@ -17,6 +17,13 @@ cleanmkgen:
 	find . -name .Makefile.gen -delete
 	find . -name  Makefile.src -delete
 
+clean-generation: cleangen
+	( cd include          && $(MAKE) cleangen )
+	( cd control          && $(MAKE) cleangen )
+	( cd interface_opencl && $(MAKE) cleangen )
+	( cd src              && $(MAKE) cleangen )
+	( cd testing          && $(MAKE) cleangen )
+
 generation:
 	@echo ======================================== include
 	(cd $(MAGMA_DIR)/include        && $(MAKE) generate )
