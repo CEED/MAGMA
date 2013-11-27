@@ -132,7 +132,7 @@ sub MakeRelease
     # Precision Generation
     print "Generate the different precisions\n";
     myCmd("touch make.inc");
-    myCmd("make generation");
+    myCmd("make -j generation");
 
     # Compile the documentation
     #print "Compile the documentation\n";
