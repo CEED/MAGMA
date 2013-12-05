@@ -63,13 +63,14 @@ int main( int argc, char** argv)
             
             #if defined(PRECISION_z) || defined(PRECISION_c)
             double *rwork;
-            TESTING_MALLOC(    rwork,  double, 2*N );
+            TESTING_MALLOC_CPU( rwork,  double, 2*N );
             #endif
-            TESTING_MALLOC(    jpvt,   magma_int_t,        N      );
-            TESTING_MALLOC(    tau,    magmaDoubleComplex, min_mn );
-            TESTING_MALLOC(    h_A,    magmaDoubleComplex, n2     );
-            TESTING_HOSTALLOC( h_R,    magmaDoubleComplex, n2     );
-            TESTING_HOSTALLOC( h_work, magmaDoubleComplex, lwork  );
+            TESTING_MALLOC_CPU( jpvt,   magma_int_t,        N      );
+            TESTING_MALLOC_CPU( tau,    magmaDoubleComplex, min_mn );
+            TESTING_MALLOC_CPU( h_A,    magmaDoubleComplex, n2     );
+            
+            TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, n2     );
+            TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork  );
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -140,13 +141,14 @@ int main( int argc, char** argv)
             }
             
             #if defined(PRECISION_z) || defined(PRECISION_c)
-            TESTING_FREE( rwork );
+            TESTING_FREE_CPU( rwork );
             #endif
-            TESTING_FREE( jpvt );
-            TESTING_FREE( tau );
-            TESTING_FREE( h_A );
-            TESTING_HOSTFREE( h_R );
-            TESTING_HOSTFREE( h_work );
+            TESTING_FREE_CPU( jpvt );
+            TESTING_FREE_CPU( tau  );
+            TESTING_FREE_CPU( h_A  );
+            
+            TESTING_FREE_PIN( h_R    );
+            TESTING_FREE_PIN( h_work );
         }
     }
     

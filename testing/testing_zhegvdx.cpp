@@ -89,16 +89,17 @@ int main( int argc, char** argv)
                 if (iu < 1) iu = 1;
             }
 
-            TESTING_MALLOC(    h_A,    magmaDoubleComplex, n2     );
-            TESTING_MALLOC(    h_B,    magmaDoubleComplex, n2     );
-            TESTING_MALLOC(    w1,     double,          N      );
-            TESTING_MALLOC(    w2,     double,          N      );
-            TESTING_MALLOC(    iwork,  magma_int_t,     liwork );
-            TESTING_HOSTALLOC( h_R,    magmaDoubleComplex, n2     );
-            TESTING_HOSTALLOC( h_S,    magmaDoubleComplex, n2     );
-            TESTING_HOSTALLOC( h_work, magmaDoubleComplex, lwork  );
+            TESTING_MALLOC_CPU( h_A,    magmaDoubleComplex, n2     );
+            TESTING_MALLOC_CPU( h_B,    magmaDoubleComplex, n2     );
+            TESTING_MALLOC_CPU( w1,     double,             N      );
+            TESTING_MALLOC_CPU( w2,     double,             N      );
+            TESTING_MALLOC_CPU( iwork,  magma_int_t,        liwork );
+            
+            TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, n2     );
+            TESTING_MALLOC_PIN( h_S,    magmaDoubleComplex, n2     );
+            TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork  );
 #if defined(PRECISION_z) || defined(PRECISION_c)
-            TESTING_HOSTALLOC( rwork,          double, lrwork);
+            TESTING_MALLOC_PIN( rwork, double, lrwork);
 #endif
             
             /* Initialize the matrix */
@@ -231,17 +232,18 @@ int main( int argc, char** argv)
                 printf(    "(2)    | D(w/ Z) - D(w/o Z) | / |D|  = %8.2e%s\n\n", result[1], (result[1] < tolulp ? "" : "  failed"));
             }
             
-            TESTING_FREE( h_A   );
-            TESTING_FREE( h_B   );
-            TESTING_FREE( w1    );
-            TESTING_FREE( w2    );
+            TESTING_FREE_CPU( h_A );
+            TESTING_FREE_CPU( h_B );
+            TESTING_FREE_CPU( w1  );
+            TESTING_FREE_CPU( w2  );
+            TESTING_FREE_CPU( iwork );
+            
+            TESTING_FREE_PIN( h_R    );
+            TESTING_FREE_PIN( h_S    );
+            TESTING_FREE_PIN( h_work );
 #if defined(PRECISION_z) || defined(PRECISION_c)
-            TESTING_HOSTFREE( rwork);
+            TESTING_FREE_PIN( rwork );
 #endif
-            TESTING_FREE( iwork );
-            TESTING_HOSTFREE( h_work );
-            TESTING_HOSTFREE( h_R    );
-            TESTING_HOSTFREE( h_S    );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

@@ -80,16 +80,16 @@ int main( int argc, char** argv )
             lhwork = (magma_int_t) MAGMA_Z_REAL( tmp[0] );
             lhwork = max( lhwork, lworkgpu );
             
-            TESTING_MALLOC(   tau,    magmaDoubleComplex, min_mn    );
-            TESTING_MALLOC(   h_A,    magmaDoubleComplex, lda*N     );
-            TESTING_MALLOC(   h_A2,   magmaDoubleComplex, lda*N     );
-            TESTING_MALLOC(   h_B,    magmaDoubleComplex, ldb*nrhs  );
-            TESTING_MALLOC(   h_X,    magmaDoubleComplex, ldb*nrhs  );
-            TESTING_MALLOC(   h_R,    magmaDoubleComplex, ldb*nrhs  );
-            TESTING_MALLOC(   h_work, magmaDoubleComplex, lhwork    );
+            TESTING_MALLOC_CPU( tau,    magmaDoubleComplex, min_mn    );
+            TESTING_MALLOC_CPU( h_A,    magmaDoubleComplex, lda*N     );
+            TESTING_MALLOC_CPU( h_A2,   magmaDoubleComplex, lda*N     );
+            TESTING_MALLOC_CPU( h_B,    magmaDoubleComplex, ldb*nrhs  );
+            TESTING_MALLOC_CPU( h_X,    magmaDoubleComplex, ldb*nrhs  );
+            TESTING_MALLOC_CPU( h_R,    magmaDoubleComplex, ldb*nrhs  );
+            TESTING_MALLOC_CPU( h_work, magmaDoubleComplex, lhwork    );
             
-            TESTING_DEVALLOC( d_A,    magmaDoubleComplex, ldda*N    );
-            TESTING_DEVALLOC( d_B,    magmaDoubleComplex, lddb*nrhs );
+            TESTING_MALLOC_DEV( d_A,    magmaDoubleComplex, ldda*N    );
+            TESTING_MALLOC_DEV( d_B,    magmaDoubleComplex, lddb*nrhs );
             
             /* Initialize the matrices */
             size = lda*N;
@@ -162,15 +162,16 @@ int main( int argc, char** argv )
             status |= ! (gpu_error < tol);
 
             
-            TESTING_FREE( tau  );
-            TESTING_FREE( h_A  );
-            TESTING_FREE( h_A2 );
-            TESTING_FREE( h_B  );
-            TESTING_FREE( h_X  );
-            TESTING_FREE( h_R  );
-            TESTING_FREE( h_work );
-            TESTING_DEVFREE( d_A );
-            TESTING_DEVFREE( d_B );
+            TESTING_FREE_CPU( tau    );
+            TESTING_FREE_CPU( h_A    );
+            TESTING_FREE_CPU( h_A2   );
+            TESTING_FREE_CPU( h_B    );
+            TESTING_FREE_CPU( h_X    );
+            TESTING_FREE_CPU( h_R    );
+            TESTING_FREE_CPU( h_work );
+            
+            TESTING_FREE_DEV( d_A    );
+            TESTING_FREE_DEV( d_B    );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

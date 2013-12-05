@@ -69,12 +69,14 @@ int main( int argc, char** argv )
                        (int) info, magma_strerror( info ));
             lwork = int( MAGMA_Z_REAL( tmp ));
             
-            TESTING_MALLOC(    ipiv,  magma_int_t,     N      );
-            TESTING_MALLOC(    work,  magmaDoubleComplex, lwork  );
-            TESTING_MALLOC(    h_A,   magmaDoubleComplex, n2     );
-            TESTING_HOSTALLOC( h_R,   magmaDoubleComplex, n2     );
-            TESTING_DEVALLOC(  d_A,   magmaDoubleComplex, ldda*N );
-            TESTING_DEVALLOC(  dwork, magmaDoubleComplex, ldwork );
+            TESTING_MALLOC_CPU( ipiv,  magma_int_t,        N      );
+            TESTING_MALLOC_CPU( work,  magmaDoubleComplex, lwork  );
+            TESTING_MALLOC_CPU( h_A,   magmaDoubleComplex, n2     );
+            
+            TESTING_MALLOC_PIN( h_R,   magmaDoubleComplex, n2     );
+            
+            TESTING_MALLOC_DEV( d_A,   magmaDoubleComplex, ldda*N );
+            TESTING_MALLOC_DEV( dwork, magmaDoubleComplex, ldwork );
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -130,12 +132,14 @@ int main( int argc, char** argv )
                         (int) N, gpu_perf, gpu_time );
             }
             
-            TESTING_FREE(     ipiv  );
-            TESTING_FREE(     work  );
-            TESTING_FREE(     h_A   );
-            TESTING_HOSTFREE( h_R   );
-            TESTING_DEVFREE(  d_A   );
-            TESTING_DEVFREE(  dwork );
+            TESTING_FREE_CPU( ipiv  );
+            TESTING_FREE_CPU( work  );
+            TESTING_FREE_CPU( h_A   );
+            
+            TESTING_FREE_PIN( h_R   );
+            
+            TESTING_FREE_DEV( d_A   );
+            TESTING_FREE_DEV( dwork );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

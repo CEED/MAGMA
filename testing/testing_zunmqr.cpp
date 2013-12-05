@@ -73,11 +73,11 @@ int main( int argc, char** argv )
             // need at least 2*nb*nb for geqrf
             lwork_max = max( max( m*nb, n*nb ), 2*nb*nb );
             
-            TESTING_MALLOC( C, magmaDoubleComplex, ldc*n );
-            TESTING_MALLOC( R, magmaDoubleComplex, ldc*n );
-            TESTING_MALLOC( A, magmaDoubleComplex, lda*k );
-            TESTING_MALLOC( W, magmaDoubleComplex, lwork_max );
-            TESTING_MALLOC( tau, magmaDoubleComplex, k );
+            TESTING_MALLOC_CPU( C,   magmaDoubleComplex, ldc*n );
+            TESTING_MALLOC_CPU( R,   magmaDoubleComplex, ldc*n );
+            TESTING_MALLOC_CPU( A,   magmaDoubleComplex, lda*k );
+            TESTING_MALLOC_CPU( W,   magmaDoubleComplex, lwork_max );
+            TESTING_MALLOC_CPU( tau, magmaDoubleComplex, k );
             
             // C is full, m x n
             size = ldc*n;
@@ -148,11 +148,11 @@ int main( int argc, char** argv )
                     (int) m, (int) n, (int) k, side[iside], trans[itran],
                     cpu_perf, cpu_time, gpu_perf, gpu_time, error );
             
-            TESTING_FREE( C );
-            TESTING_FREE( R );
-            TESTING_FREE( A );
-            TESTING_FREE( W );
-            TESTING_FREE( tau );
+            TESTING_FREE_CPU( C );
+            TESTING_FREE_CPU( R );
+            TESTING_FREE_CPU( A );
+            TESTING_FREE_CPU( W );
+            TESTING_FREE_CPU( tau );
         }}  // end iside, itran
         printf( "\n" );
     }

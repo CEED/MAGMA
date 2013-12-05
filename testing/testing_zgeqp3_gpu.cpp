@@ -64,18 +64,19 @@ int main( int argc, char** argv)
             
             #if defined(PRECISION_z) || defined(PRECISION_c)
             double *drwork, *rwork;
-            TESTING_DEVALLOC(  drwork, double, 2*N + (N+1)*nb);
-            TESTING_MALLOC(    rwork,  double, 2*N );
+            TESTING_MALLOC_DEV( drwork, double, 2*N + (N+1)*nb);
+            TESTING_MALLOC_CPU( rwork,  double, 2*N );
             #endif
-            TESTING_MALLOC(    jpvt,   magma_int_t,        N      );
-            TESTING_MALLOC(    tau,    magmaDoubleComplex, min_mn );
-            TESTING_MALLOC(    h_A,    magmaDoubleComplex, n2     );
-            TESTING_HOSTALLOC( h_R,    magmaDoubleComplex, n2     );
-            TESTING_HOSTALLOC( h_work, magmaDoubleComplex, lwork  );
+            TESTING_MALLOC_CPU( jpvt,   magma_int_t,        N      );
+            TESTING_MALLOC_CPU( tau,    magmaDoubleComplex, min_mn );
+            TESTING_MALLOC_CPU( h_A,    magmaDoubleComplex, n2     );
             
-            TESTING_DEVALLOC( dtau,    magmaDoubleComplex, min_mn );
-            TESTING_DEVALLOC( d_A,     magmaDoubleComplex, lda*N  );
-            TESTING_DEVALLOC( d_work,  magmaDoubleComplex, lwork  );
+            TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, n2     );
+            TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork  );
+            
+            TESTING_MALLOC_DEV( dtau,   magmaDoubleComplex, min_mn );
+            TESTING_MALLOC_DEV( d_A,    magmaDoubleComplex, lda*N  );
+            TESTING_MALLOC_DEV( d_work, magmaDoubleComplex, lwork  );
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -156,18 +157,19 @@ int main( int argc, char** argv)
             }
             
             #if defined(PRECISION_z) || defined(PRECISION_c)
-            TESTING_FREE( rwork );
-            TESTING_DEVFREE( drwork );
+            TESTING_FREE_CPU( rwork  );
+            TESTING_FREE_DEV( drwork );
             #endif
-            TESTING_FREE( jpvt );
-            TESTING_FREE( tau );
-            TESTING_FREE( h_A );
-            TESTING_HOSTFREE( h_R );
-            TESTING_HOSTFREE( h_work );
+            TESTING_FREE_CPU( jpvt   );
+            TESTING_FREE_CPU( tau    );
+            TESTING_FREE_CPU( h_A    );
             
-            TESTING_DEVFREE( dtau );
-            TESTING_DEVFREE( d_A );
-            TESTING_DEVFREE( d_work );
+            TESTING_FREE_PIN( h_R    );
+            TESTING_FREE_PIN( h_work );
+            
+            TESTING_FREE_DEV( dtau   );
+            TESTING_FREE_DEV( d_A    );
+            TESTING_FREE_DEV( d_work );
         }
     }
     
