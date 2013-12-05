@@ -29,11 +29,11 @@ int main(int argc, char **argv)
     real_Double_t   gpu_perfdf, gpu_perfds;
     real_Double_t   gpu_perfsf, gpu_perfss;
     double          Rnorm, Anorm;
-    cuDoubleComplex c_one     = MAGMA_Z_ONE;
-    cuDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    cuDoubleComplex *h_A, *h_B, *h_X;
-    cuDoubleComplex *d_A, *d_B, *d_X, *d_workd;
-    cuFloatComplex  *d_As, *d_Bs, *d_works;
+    magmaDoubleComplex c_one     = MAGMA_Z_ONE;
+    magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex *h_A, *h_B, *h_X;
+    magmaDoubleComplex *d_A, *d_B, *d_X, *d_workd;
+    magmaFloatComplex  *d_As, *d_Bs, *d_works;
     double          *h_workd;
     magma_int_t lda, ldb, ldx;
     magma_int_t N, nrhs, posv_iter, info, size;
@@ -58,16 +58,16 @@ int main(int argc, char **argv)
             gflopsF = FLOPS_ZPOTRF( N ) / 1e9;
             gflopsS = gflopsF + FLOPS_ZPOTRS( N, nrhs ) / 1e9;
             
-            TESTING_MALLOC( h_A, cuDoubleComplex, lda*N    );
-            TESTING_MALLOC( h_B, cuDoubleComplex, ldb*nrhs );
-            TESTING_MALLOC( h_X, cuDoubleComplex, ldx*nrhs );
-            TESTING_MALLOC( h_workd, double, N );
+            TESTING_MALLOC_CPU( h_A,     magmaDoubleComplex, lda*N    );
+            TESTING_MALLOC_CPU( h_B,     magmaDoubleComplex, ldb*nrhs );
+            TESTING_MALLOC_CPU( h_X,     magmaDoubleComplex, ldx*nrhs );
+            TESTING_MALLOC_CPU( h_workd, double,             N        );
             
-            TESTING_DEVALLOC( d_A,     cuDoubleComplex, lda*N       );
-            TESTING_DEVALLOC( d_B,     cuDoubleComplex, ldb*nrhs    );
-            TESTING_DEVALLOC( d_X,     cuDoubleComplex, ldx*nrhs    );
-            TESTING_DEVALLOC( d_works, cuFloatComplex,  lda*(N+nrhs));
-            TESTING_DEVALLOC( d_workd, cuDoubleComplex, N*nrhs      );
+            TESTING_MALLOC_DEV( d_A,     magmaDoubleComplex, lda*N        );
+            TESTING_MALLOC_DEV( d_B,     magmaDoubleComplex, ldb*nrhs     );
+            TESTING_MALLOC_DEV( d_X,     magmaDoubleComplex, ldx*nrhs     );
+            TESTING_MALLOC_DEV( d_works, magmaFloatComplex,  lda*(N+nrhs) );
+            TESTING_MALLOC_DEV( d_workd, magmaDoubleComplex, N*nrhs       );
             
             /* Initialize the matrix */
             size = lda * N ;
@@ -174,16 +174,16 @@ int main(int argc, char **argv)
                    gpu_perfdf, gpu_perfds, gpu_perfsf, gpu_perfss, gpu_perf,
                    Rnorm/Anorm, (int) posv_iter );
             
-            TESTING_FREE( h_A );
-            TESTING_FREE( h_B );
-            TESTING_FREE( h_X );
-            TESTING_FREE( h_workd );
+            TESTING_FREE_CPU( h_A );
+            TESTING_FREE_CPU( h_B );
+            TESTING_FREE_CPU( h_X );
+            TESTING_FREE_CPU( h_workd );
             
-            TESTING_DEVFREE( d_A );
-            TESTING_DEVFREE( d_B );
-            TESTING_DEVFREE( d_X );
-            TESTING_DEVFREE( d_works );
-            TESTING_DEVFREE( d_workd );
+            TESTING_FREE_DEV( d_A );
+            TESTING_FREE_DEV( d_B );
+            TESTING_FREE_DEV( d_X );
+            TESTING_FREE_DEV( d_works );
+            TESTING_FREE_DEV( d_workd );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );
