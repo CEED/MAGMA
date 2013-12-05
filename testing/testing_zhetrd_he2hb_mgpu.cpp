@@ -151,26 +151,27 @@ int main( int argc, char** argv)
     lwork = N*NB;
 
     /* Allocate host memory for the matrix */
-    TESTING_HOSTALLOC( h_A,    magmaDoubleComplex, lda*N );
-    TESTING_HOSTALLOC( h_R,    magmaDoubleComplex, lda*N );
-    TESTING_HOSTALLOC( h_work, magmaDoubleComplex, lwork );
-    TESTING_MALLOC(    tau,    magmaDoubleComplex, N-1   );
-    TESTING_HOSTALLOC( D,    double, N );
-    TESTING_HOSTALLOC( E,    double, N );
-
+    TESTING_MALLOC_CPU( tau,    magmaDoubleComplex, N-1   );
+    
+    TESTING_MALLOC_PIN( h_A,    magmaDoubleComplex, lda*N );
+    TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, lda*N );
+    TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork );
+    TESTING_MALLOC_PIN( D, double, N );
+    TESTING_MALLOC_PIN( E, double, N );
 
     nstream = max(3,ngpu+2);
     magma_queue_t streams[MagmaMaxGPUs][20];
     magmaDoubleComplex *da[MagmaMaxGPUs],*dT1[MagmaMaxGPUs];
     magma_int_t ldda = ((N+31)/32)*32;
-    if((distblk==0)||(distblk<NB))distblk = max(256,NB);
+    if((distblk==0)||(distblk<NB))
+        distblk = max(256,NB);
     printf("voici ngpu %d distblk %d NB %d nstream %d\n ",ngpu,distblk,NB,nstream);
     
     for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
         magma_int_t mlocal = ((N / distblk) / ngpu + 1) * distblk;
         magma_setdevice( dev );
-        TESTING_DEVALLOC( da[dev],  magmaDoubleComplex, ldda*mlocal );
-        TESTING_DEVALLOC( dT1[dev], magmaDoubleComplex, (N*NB) );
+        TESTING_MALLOC_DEV( da[dev],  magmaDoubleComplex, ldda*mlocal );
+        TESTING_MALLOC_DEV( dT1[dev], magmaDoubleComplex, N*NB        );
         for( int i = 0; i < nstream; ++i ) {
             magma_queue_create( &streams[dev][i] );
         }
@@ -211,7 +212,7 @@ int main( int argc, char** argv)
         /* Copy the matrix to the GPU */
         magma_zsetmatrix_1D_col_bcyclic( N, N, h_R, lda, da, ldda, ngpu, distblk);
 //magmaDoubleComplex *dabis;
-//       TESTING_DEVALLOC( dabis,  magmaDoubleComplex, ldda*N );
+//       TESTING_MALLOC_DEV( dabis,  magmaDoubleComplex, ldda*N );
 //       magma_zsetmatrix(N,N,h_R,lda,dabis,ldda);
     
     for (int count=0; count<1;++count){
@@ -349,14 +350,25 @@ int main( int argc, char** argv)
 fin:
 
     /* Memory clean up */
-    magma_setdevice( 0 );
-    TESTING_FREE( tau );
-    TESTING_HOSTFREE( h_A );
-    TESTING_HOSTFREE( h_R );
-    TESTING_HOSTFREE( h_work );
-
-    /* Shutdown */
+    TESTING_FREE_CPU( tau    );
     
+    TESTING_FREE_PIN( h_A    );
+    TESTING_FREE_PIN( h_R    );
+    TESTING_FREE_PIN( h_work );
+    TESTING_FREE_PIN( D      );
+    TESTING_FREE_PIN( E      );
+
+    for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
+        magma_setdevice( dev );
+        TESTING_FREE_DEV( da[dev]  );
+        TESTING_FREE_DEV( dT1[dev] );
+        for( int i = 0; i < nstream; ++i ) {
+            magma_queue_destroy( streams[dev][i] );
+        }
+    }
+    magma_setdevice( 0 );
+    
+    /* Shutdown */    
     TESTING_FINALIZE_MGPU();
     return EXIT_SUCCESS;
 }

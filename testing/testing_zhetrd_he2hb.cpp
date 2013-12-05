@@ -140,14 +140,16 @@ int main( int argc, char** argv)
     lwork0 = N*NB;
 
     /* Allocate host memory for the matrix */
-    TESTING_MALLOC(    h_A,    magmaDoubleComplex, lda*N );
-    TESTING_HOSTALLOC( h_R,    magmaDoubleComplex, lda*N );
-    TESTING_HOSTALLOC( h_work, magmaDoubleComplex, lwork0 );
-    TESTING_MALLOC(    tau,    magmaDoubleComplex, N-1   );
-    TESTING_HOSTALLOC( D,    double, N );
-    TESTING_HOSTALLOC( E,    double, N );
-    //TESTING_DEVALLOC( dT1,  magmaDoubleComplex, (2*min(N,N)+(N+31)/32*32)*NB );
-    TESTING_DEVALLOC( dT1,  magmaDoubleComplex, (N*NB) );
+    TESTING_MALLOC_CPU( h_A,    magmaDoubleComplex, lda*N  );
+    TESTING_MALLOC_CPU( tau,    magmaDoubleComplex, N-1    );
+    
+    TESTING_MALLOC_PIN( h_R,    magmaDoubleComplex, lda*N  );
+    TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork0 );
+    TESTING_MALLOC_PIN( D, double, N );
+    TESTING_MALLOC_PIN( E, double, N );
+    
+    //TESTING_MALLOC_DEV( dT1, magmaDoubleComplex, (2*min(N,N)+(N+31)/32*32)*NB );
+    TESTING_MALLOC_DEV( dT1, magmaDoubleComplex, (N*NB) );
 
     printf("  N    GPU GFlop/s   \n");
     printf("=====================\n");
@@ -223,14 +225,14 @@ int main( int argc, char** argv)
         magma_int_t lrwork;
         lwork  = magma_zbulge_get_lq2(N, threads) + 2*N + N*N;
         lrwork = 1 + 5*N +2*N*N;
-        TESTING_HOSTALLOC( rwork,          double, lrwork);
+        TESTING_MALLOC_PIN( rwork, double, lrwork );
 #else
         lwork  = magma_zbulge_get_lq2(N, threads) + 1 + 6*N + 2*N*N;
 #endif
         liwork = 3 + 5*N;
         nb = magma_get_zhetrd_nb(N);
-        TESTING_HOSTALLOC(hh_work, magmaDoubleComplex,  lwork);
-        TESTING_MALLOC(    iwork,     magma_int_t, liwork);
+        TESTING_MALLOC_PIN( hh_work, magmaDoubleComplex, lwork  );
+        TESTING_MALLOC_CPU( iwork,   magma_int_t,        liwork );
 
         if(ngpu==1){
             printf("calling zheevdx_2stage 1 GPU\n");
@@ -418,11 +420,18 @@ int main( int argc, char** argv)
     }
 
     /* Memory clean up */
-    TESTING_FREE( h_A );
-    TESTING_FREE( tau );
-    TESTING_HOSTFREE( h_R );
-    TESTING_HOSTFREE( h_work );
+    TESTING_FREE_CPU( h_A );
+    TESTING_FREE_CPU( tau );
+    
+    TESTING_FREE_PIN( h_R    );
+    TESTING_FREE_PIN( h_work );
+    TESTING_FREE_PIN( D      );
+    TESTING_FREE_PIN( E      );
+    
+    TESTING_FREE_DEV( dT1 );
 
+    /* TODO - not all memory has been freed inside loop */
+    
     /* Shutdown */
     TESTING_FINALIZE_MGPU();
     return EXIT_SUCCESS;
