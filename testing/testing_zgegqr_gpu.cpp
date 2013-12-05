@@ -42,7 +42,7 @@ int main( int argc, char** argv)
     double           e1, e2, work[1];
     magmaDoubleComplex  c_neg_one = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex *h_A, *h_R, *tau, *dtau, *h_work, tmp[1];
-    magmaDoubleComplex *d_A, *dwork;
+    magmaDoubleComplex *d_A, *dwork, *ddA, *d_T;
     magma_int_t M, N, n2, lda, ldda, lwork, info, min_mn;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
@@ -69,19 +69,20 @@ int main( int argc, char** argv)
             lwork = (magma_int_t)MAGMA_Z_REAL( tmp[0] );
             lwork = max(lwork, 3*N*N);
             
-            TESTING_HOSTALLOC( tau, magmaDoubleComplex, min_mn );
-            TESTING_MALLOC(    h_A, magmaDoubleComplex, n2     );
-            TESTING_MALLOC(    h_R, magmaDoubleComplex, n2     );
-            TESTING_DEVALLOC(  d_A, magmaDoubleComplex, ldda*N );
-            TESTING_DEVALLOC( dtau, magmaDoubleComplex, min_mn );
-            TESTING_DEVALLOC(dwork, magmaDoubleComplex,    N*N );
-            TESTING_HOSTALLOC( h_work, magmaDoubleComplex,  lwork );
+            TESTING_MALLOC_PIN( tau,    magmaDoubleComplex, min_mn );
+            TESTING_MALLOC_PIN( h_work, magmaDoubleComplex, lwork  );
             
-            magmaDoubleComplex *ddA, *d_T;
-            TESTING_DEVALLOC(  ddA, magmaDoubleComplex,    N*N );
-            TESTING_DEVALLOC(  d_T, magmaDoubleComplex,    N*N );
-            cudaMemset(ddA, 0, N*N*sizeof(magmaDoubleComplex));
-            cudaMemset(d_T, 0, N*N*sizeof(magmaDoubleComplex));
+            TESTING_MALLOC_CPU( h_A,   magmaDoubleComplex, n2     );
+            TESTING_MALLOC_CPU( h_R,   magmaDoubleComplex, n2     );
+            
+            TESTING_MALLOC_DEV( d_A,   magmaDoubleComplex, ldda*N );
+            TESTING_MALLOC_DEV( dtau,  magmaDoubleComplex, min_mn );
+            TESTING_MALLOC_DEV( dwork, magmaDoubleComplex, N*N    );
+            TESTING_MALLOC_DEV( ddA,   magmaDoubleComplex, N*N    );
+            TESTING_MALLOC_DEV( d_T,   magmaDoubleComplex, N*N    );
+            
+            cudaMemset( ddA, 0, N*N*sizeof(magmaDoubleComplex) );
+            cudaMemset( d_T, 0, N*N*sizeof(magmaDoubleComplex) );
 
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
@@ -155,16 +156,17 @@ int main( int argc, char** argv)
                        (int) M, (int) N, gpu_perf, 1000.*gpu_time );
             }
             
-            TESTING_HOSTFREE(  tau );
-            TESTING_FREE(      h_A );
-            TESTING_HOSTFREE(h_work);
-            TESTING_FREE(    h_R );
-            TESTING_DEVFREE( d_A  );
-            TESTING_DEVFREE( dtau );
-            TESTING_DEVFREE( dwork );
-
-            TESTING_DEVFREE( ddA );
-            TESTING_DEVFREE( d_T );
+            TESTING_FREE_PIN( tau    );
+            TESTING_FREE_PIN( h_work );
+            
+            TESTING_FREE_CPU( h_A  );
+            TESTING_FREE_CPU( h_R  );
+            
+            TESTING_FREE_DEV( d_A   );
+            TESTING_FREE_DEV( dtau  );
+            TESTING_FREE_DEV( dwork );
+            TESTING_FREE_DEV( ddA   );
+            TESTING_FREE_DEV( d_T   );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );
