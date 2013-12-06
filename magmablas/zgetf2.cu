@@ -18,11 +18,11 @@
 
 #define zswap_bs 64
 
-#if (GPUSHMEM < 200)
+//#if (GPUSHMEM < 200)
 #define zgeru_bs 512  // 512 is max threads for 1.x cards
-#else
-#define zgeru_bs 1024
-#endif
+//#else
+//#define zgeru_bs 1024
+//#endif
 
 void magma_zswap(
     magma_int_t n, magmaDoubleComplex *x, magma_int_t i, magma_int_t j, magma_int_t incx);

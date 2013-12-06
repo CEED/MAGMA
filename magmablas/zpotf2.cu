@@ -14,11 +14,11 @@
 
 #define PRECISION_z
 
-#if (GPUSHMEM < 200)
+//#if (GPUSHMEM < 200)
 #define zdotc_max_bs 512  // 512 is max threads for 1.x cards
-#else
-#define zdotc_max_bs 1024
-#endif
+//#else
+//#define zdotc_max_bs 1024
+//#endif
 
 #define A(i, j)  (A + (i) + (j)*lda)   // A(i, j) means at i row, j column
 

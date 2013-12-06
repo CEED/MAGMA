@@ -221,6 +221,7 @@ subs = {
     ('PlasmaRealFloat',     'PlasmaRealDouble',    'PlasmaComplexFloat',  'PlasmaComplexDouble' ),
     ('real',                'double precision',    'complex',             'complex\*16'         ),
     ('REAL',                'DOUBLE_PRECISION',    'COMPLEX',             'COMPLEX_16'          ),
+    ('REAL',                'DOUBLE PRECISION',    'REAL',                'DOUBLE PRECISION'    ),
     ('REAL',                'DOUBLE PRECISION',    'COMPLEX',             'COMPLEX\*16'         ),
     ('sizeof_real',         'sizeof_double',       'sizeof_complex',      'sizeof_complex_16'   ),  # before complex
     ('real',                'real',                'complex',             'complex'             ),
@@ -778,6 +779,9 @@ subs = {
     ('Workspace_s',    'Workspace_d',    'Workspace_c',    'Workspace_z'     ),
     ('workspace_s',    'workspace_d',    'workspace_c',    'workspace_z'     ),
     ('QUARK_Insert_Task_s', 'QUARK_Insert_Task_d', 'QUARK_Insert_Task_c', 'QUARK_Insert_Task_z' ),
+    
+    # magma_d -> magma_s, so revert magma_sevice to magma_device
+    ('magma_device',   'magma_sevice',   'magma_device',   'magma_sevice'    ),
   ],
   
   # ------------------------------------------------------------

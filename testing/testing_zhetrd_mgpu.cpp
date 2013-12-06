@@ -24,31 +24,12 @@
 #include "magma.h"
 #include "magma_lapack.h"
 #include "testings.h"
-extern "C" magma_int_t
-magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n,
-                  cuDoubleComplex *a, magma_int_t lda,
-                  double *d, double *e, cuDoubleComplex *tau,
-                  cuDoubleComplex *work, magma_int_t lwork,
-                  magma_int_t *info);
 
 #define PRECISION_z
-
 
 /* ////////////////////////////////////////////////////////////////////////////
    -- Testing zhetrd
 */
-
-#if (GPUSHMEM >= 200)
-extern "C" magma_int_t
-magma_zhetrd_mgpu(int num_gpus, int k, char uplo, magma_int_t n, 
-             cuDoubleComplex *a, magma_int_t lda, 
-             double *d, double *e, cuDoubleComplex *tau,
-             cuDoubleComplex *work, magma_int_t lwork, 
-             magma_int_t *info);
-
-#endif
-
-
 
 int main( int argc, char** argv)
 {
@@ -258,7 +239,4 @@ int main( int argc, char** argv)
     /* Shutdown */
     TESTING_FINALIZE();
     return EXIT_SUCCESS;
-
 }
-
-

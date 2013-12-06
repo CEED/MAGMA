@@ -20,7 +20,7 @@ ZSRC := \
 	zgeadd.cu		\
 	zgeadd_batched.cu	\
 	zgemm_reduce.cu		\
-	zhemv_fermi.cu		\
+	dgemv_MLU.cu		\
 	zlacpy.cu		\
 	zlacpy_batched.cu	\
 	zlaqps2_gpu.cu		\
@@ -39,13 +39,12 @@ ZSRC := \
 	zlaswp.cu		\
 	zlat2c.cu		\
 	dznrm2.cu		\
+	stream.cu		\
 	zswap.cu		\
 	zswapblk.cu		\
 	zswapdblk.cu		\
 	zsymmetrize.cu		\
 	zsymmetrize_tiles.cu	\
-	zsymv_fermi.cu		\
-	csymv_tesla.cu		\
 	ssyr2k.cu		\
 	ztranspose.cu		\
 	ztranspose-v2.cu	\
@@ -53,9 +52,37 @@ ZSRC := \
 	zgetmatrix_transpose.cu	\
 	zsetmatrix_transpose.cu	\
 	dtrsm.cu		\
-	strsm.cu		\
 	dtrsm_work.cu		\
-	strsm_work.cu		\
+
+# Tesla-specific (CUDA arch 1.x) codes
+ZSRC += \
+	dgemm_tesla.cu		\
+	dgemm_tesla_a_0.cu	\
+	dgemm_tesla_ab_0.cu	\
+	dgemm_tesla_N_N.cu	\
+	dgemm_tesla_N_N_special.cu	\
+	dgemm_tesla_N_T.cu	\
+	dgemm_tesla_T_N.cu	\
+	dgemm_tesla_T_T.cu	\
+	dgemm_tesla_T_T_special.cu	\
+	\
+	sgemv_tesla.cu		\
+	dgemv_tesla.cu		\
+	\
+	chemv_tesla.cu		\
+	csymv_tesla.cu		\
+
+# Fermi-specific (CUDA arch 2.x) codes
+ZSRC += \
+	zgemm_fermi.cu		\
+	\
+	sgemv_fermi.cu		\
+	dgemv_fermi.cu		\
+	zgemv_fermi.cu		\
+	\
+	zhemv_fermi.cu		\
+	zsymv_fermi.cu		\
+	#cgemv_fermi.cu		\
 
 # multi-GPU
 ZSRC += \
@@ -72,77 +99,17 @@ ZSRC += \
 # panels for one-sided factorizations in CUDA
 ZSRC += \
 	zgetf2.cu		\
-	zpotf2.cu		\
 	zgeqr2.cu		\
 	zgeqr2x_gpu-v4.cu	\
-
-# Card-specific versions that need precisions generated must be above in ZSRC,
-# so they are all put into Makefile.src in the release. The code is #ifdef'd
-# for the correct card.
+	zpotf2.cu		\
 
 -include Makefile.local
 -include Makefile.src
 
-HDR := \
-	commonblas.h	\
+ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR) \
+	commonblas.h
 
-ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR) $(HDR)
-
-FERMISRC = \
-	sgemv_fermi.cu	\
-	dgemv_fermi.cu	\
-	cgemv_fermi.cu	\
-	zgemv_fermi.cu	\
-	zgemvt_fermi.cu	\
-	\
-	sgemm_fermi.cu	\
-	sgemm_fermi80.cu\
-	sgemm_fermi64.cu\
-	dgemm_fermi.cu	\
-	zgemm_fermi.cu	\
-
-TESLASRC = \
-	sgemv_tesla.cu	\
-	dgemv_tesla.cu	\
-	cgemv_tesla.cu	\
-	zgemv_tesla.cu	\
-	gemv32_tesla.cu	\
-	zsymv_tesla.cu	\
-	zhemv_tesla.cu	\
-	chemv_tesla.cu	\
-	\
-	sgemm_tesla.cu                            \
-	sgemm_tesla_a_0.cu                        \
-	sgemm_tesla_ab_0.cu                       \
-	sgemm_tesla_N_N_64_16_16_16_4.cu          \
-	sgemm_tesla_N_N_64_16_16_16_4_special.cu  \
-	sgemm_tesla_N_T_64_16_4_16_4.cu           \
-	sgemm_tesla_T_N_32_32_8_8_8.cu            \
-	sgemm_tesla_T_T_64_16_16_16_4.cu          \
-	\
-	dgemm_tesla.cu                            \
-	dgemm_tesla_a_0.cu                        \
-	dgemm_tesla_ab_0.cu                       \
-	dgemm_tesla_N_N_64_16_16_16_4.cu          \
-	dgemm_tesla_N_N_64_16_16_16_4_special.cu  \
-	dgemm_tesla_N_T_64_16_4_16_4.cu           \
-	dgemm_tesla_T_N_32_32_8_8_8.cu            \
-	dgemm_tesla_T_T_64_16_16_16_4.cu          \
-	dgemm_tesla_T_T_64_16_16_16_4_v2.cu       \
-
-SRC := \
-	dgemv_MLU.cu	\
-	stream.cu	\
-
-ifeq (${GPU_TARGET}, Tesla)
-    SRC += $(TESLASRC)
-else ifeq (${GPU_TARGET}, Fermi)
-    SRC += $(FERMISRC)
-else ifeq (${GPU_TARGET}, Kepler)
-    SRC += $(FERMISRC)
-endif
-
-ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) $(SRC)
+ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 
 ALLOBJ := $(ALLSRC:.cu=.cu_o) 
 ALLOBJ := $(ALLOBJ:.cpp=.o)
@@ -165,3 +132,9 @@ clean:
 
 cleanall: clean
 	rm -f $(LIBMAGMA)
+
+# extra include dependencies
+zgemm_fermi.cu_o: zgemm_fermi_kernels.h gemm_stencil.cu gemm_stencil_defs.h
+cgemm_fermi.cu_o: cgemm_fermi_kernels.h gemm_stencil.cu gemm_stencil_defs.h
+dgemm_fermi.cu_o: dgemm_fermi_kernels.h gemm_stencil.cu gemm_stencil_defs.h
+sgemm_fermi.cu_o: sgemm_fermi_kernels.h gemm_stencil.cu gemm_stencil_defs.h

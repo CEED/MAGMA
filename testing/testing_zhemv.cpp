@@ -37,7 +37,7 @@ int main(int argc, char **argv)
     magmaDoubleComplex alpha = MAGMA_Z_MAKE(  1.5, -2.3 );
     magmaDoubleComplex beta  = MAGMA_Z_MAKE( -0.6,  0.8 );
     magmaDoubleComplex *A, *X, *Y, *Ycublas, *Ymagma;
-    magmaDoubleComplex *dA, *dX, *dY, *dC_work;
+    magmaDoubleComplex *dA, *dX, *dY, *dwork;
     
     magma_opts opts;
     parse_opts( argc, argv, &opts );
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
             
             blocks = (N + nb - 1) / nb;
             ldwork = lda * (blocks + 1);
-            TESTING_MALLOC_DEV( dC_work, magmaDoubleComplex, ldwork );
+            TESTING_MALLOC_DEV( dwork, magmaDoubleComplex, ldwork );
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &sizeA, A );
@@ -93,11 +93,9 @@ int main(int argc, char **argv)
             magma_zsetvector( N, Y, incy, dY, incy );
             
             magma_time = magma_sync_wtime( 0 );
-            #if (GPUSHMEM >= 200)
-            magmablas_zhemv2( opts.uplo, N, alpha, dA, lda, dX, incx, beta, dY, incy, dC_work, ldwork );
-            #else
-            magmablas_zhemv( opts.uplo, N, alpha, dA, lda, dX, incx, beta, dY, incy );
-            #endif
+            magmablas_zhemv_work( opts.uplo, N, alpha, dA, lda, dX, incx, beta, dY, incy, dwork, ldwork );
+            // TODO provide option to test non-work interface
+            //magmablas_zhemv( opts.uplo, N, alpha, dA, lda, dX, incx, beta, dY, incy );
             magma_time = magma_sync_wtime( 0 ) - magma_time;
             magma_perf = gflops / magma_time;
             
@@ -136,7 +134,7 @@ int main(int argc, char **argv)
             TESTING_FREE_DEV( dA );
             TESTING_FREE_DEV( dX );
             TESTING_FREE_DEV( dY );
-            TESTING_FREE_DEV( dC_work );
+            TESTING_FREE_DEV( dwork );
         }
         if ( opts.niter > 1 ) {
             printf( "\n" );

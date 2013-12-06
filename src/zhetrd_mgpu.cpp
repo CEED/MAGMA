@@ -14,18 +14,17 @@
 #include "common_magma.h"
 #include "trace.h"
 
-#if (GPUSHMEM >= 200)
-
-#define  A(i, j) ( a+(j)*lda  + (i))
-#define dA(id, i, j) (da[(id)]+(j)*ldda + (i))
-#define dW(id, i, j) (dwork[(id)]+(j)*ldda + (i))
+#define  A(i, j)     (a           + (j)*lda  + (i))
+#define dA(id, i, j) (da[(id)]    + (j)*ldda + (i))
+#define dW(id, i, j) (dwork[(id)] + (j)*ldda + (i))
 
 extern "C" magma_int_t
-magma_zhetrd_mgpu(magma_int_t num_gpus, magma_int_t k, char uplo, magma_int_t n,
-             magmaDoubleComplex *a, magma_int_t lda,
-             double *d, double *e, magmaDoubleComplex *tau,
-             magmaDoubleComplex *work, magma_int_t lwork,
-             magma_int_t *info)
+magma_zhetrd_mgpu(
+    magma_int_t num_gpus, magma_int_t k, char uplo, magma_int_t n,
+    magmaDoubleComplex *a, magma_int_t lda,
+    double *d, double *e, magmaDoubleComplex *tau,
+    magmaDoubleComplex *work, magma_int_t lwork,
+    magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -626,18 +625,3 @@ magma_zher2k_mgpu(
         magmablasSetKernelStream(NULL);
     }
 }
-
-#else /* GPUSHMEM >= 200 */
-
-extern "C" magma_int_t
-magma_zhetrd_mgpu(magma_int_t num_gpus, magma_int_t k, char uplo, magma_int_t n,
-                  magmaDoubleComplex *a, magma_int_t lda,
-                  double *d, double *e, magmaDoubleComplex *tau,
-                  magmaDoubleComplex *work, magma_int_t lwork,
-                  magma_int_t *info)
-{
-    printf("magma_zhetrd_mgpu is not supported on this GPU. Exit.\n");
-    exit(1);
-}
-
-#endif /* GPUSHMEM >= 200 */

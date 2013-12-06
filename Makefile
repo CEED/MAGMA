@@ -10,6 +10,20 @@ MAGMA_DIR = .
 include ./Makefile.internal
 -include Makefile.local
 
+
+# print CUDA architectures being compiled
+# (if this goes in Makefile.internal, it gets printed for each sub-dir)
+ifneq ($(findstring Tesla, $(GPU_TARGET)),)
+    $(info compile for CUDA arch 1.x (Tesla))
+endif
+ifneq ($(findstring Fermi, $(GPU_TARGET)),)
+    $(info compile for CUDA arch 2.x (Fermi))
+endif
+ifneq ($(findstring Kepler, $(GPU_TARGET)),)
+    $(info compile for CUDA arch 3.x (Kepler))
+endif
+
+
 .PHONY: all lib libmagma test clean cleanall install shared
 
 .DEFAULT_GOAL := all

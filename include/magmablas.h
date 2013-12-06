@@ -16,11 +16,6 @@
 #include "magmablas_zc.h"
 #include "magmablas_ds.h"
 
-#if (GPUSHMEM < 200)
-#define magmablas_zgemm cublasZgemm
-#endif
-#define magmablas_cgemm cublasCgemm
-
 #ifdef __cplusplus
 extern "C" {
 #endif

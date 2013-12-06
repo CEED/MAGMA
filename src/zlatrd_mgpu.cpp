@@ -18,16 +18,14 @@
 
 #define PRECISION_z
 
-#if (GPUSHMEM >= 200)
-
 #define MAGMABLAS_ZHEMV_MGPU
 
 #define A(i, j) (a+(j)*lda + (i))
 #define W(i, j) (w+(j)*ldw + (i))
 
-#define dA(id, i, j) (da[(id)]+((j)+loffset)*ldda + (i)+offset)
-#define dW(id, i, j)  (dw[(id)]+  (j)      *lddw + (i))
-#define dW1(id, i, j) (dw[(id)]+ ((j)+nb) *lddw + (i))
+#define dA(id, i, j)  (da[(id)] + ((j)+loffset)*ldda + (i) + offset)
+#define dW(id, i, j)  (dw[(id)] + (j)          *lddw + (i))
+#define dW1(id, i, j) (dw[(id)] + ((j)+nb)     *lddw + (i))
 
 extern "C" double
 magma_zlatrd_mgpu(magma_int_t num_gpus, char uplo,
@@ -701,5 +699,3 @@ magmablas_zhemv_sync( magma_int_t num_gpus, magma_int_t k,
 
     return 0;
 }
-
-#endif /* GPUSHMEM >= 200 */

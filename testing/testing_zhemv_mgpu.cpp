@@ -34,42 +34,8 @@
 #define validate
 
 
-#if (GPUSHMEM >= 200)
-
-extern "C"
-magma_int_t
-magmablas_zhemv2_mgpu_offset( char uplo, magma_int_t n,
-                      magmaDoubleComplex alpha,
-                      magmaDoubleComplex **A, magma_int_t lda,
-                      magmaDoubleComplex **X, magma_int_t incx,
-                      magmaDoubleComplex beta,
-                      magmaDoubleComplex **Y, magma_int_t incy,
-                      magmaDoubleComplex **work, magma_int_t lwork,
-              magma_int_t num_gpus, 
-              magma_int_t nb,
-              magma_int_t offset);
-
-
-extern "C"
-magma_int_t
-magmablas_zhemv2_mgpu_32_offset( char uplo, magma_int_t n,
-                      magmaDoubleComplex alpha,
-                      magmaDoubleComplex **A, magma_int_t lda,
-                      magmaDoubleComplex **X, magma_int_t incx,
-                      magmaDoubleComplex beta,
-                      magmaDoubleComplex **Y, magma_int_t incy,
-                      magmaDoubleComplex **work, magma_int_t lwork,
-              magma_int_t num_gpus, 
-              magma_int_t nb,
-              magma_int_t offset);
-
-
-
-#endif
-
 int main(int argc, char **argv)
 {        
-#if (GPUSHMEM >= 200)
     TESTING_INIT();
     magma_setdevice(0);
 
@@ -447,6 +413,5 @@ int main(int argc, char **argv)
 
     /* Free device */
     TESTING_FINALIZE();
-#endif
     return 0;
 }        
