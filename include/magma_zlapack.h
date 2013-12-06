@@ -752,7 +752,7 @@ void   lapackf77_ztrevc3( const char* side, const char* howmny,
                           const magma_int_t* mout,
                           magmaDoubleComplex* work, const magma_int_t* lwork,
                           DWORKFORZ
-                          int* info );
+                          magma_int_t* info );
 
 void   lapackf77_ztrtri( const char *uplo, const char *diag,
                          const magma_int_t *n,
