@@ -84,7 +84,7 @@ int main( int argc, char** argv )
     magma_zgetmatrix( n, n, dC, ldda, A, lda );
     blasf77_zaxpy( &size, &c_neg_one, C, &ione, A, &ione );
     error = lapackf77_zlange( "F", &n, &n, A, &lda, work );
-    printf( "n %d, error %8.2e\n", n, error );
+    printf( "n %d, error %8.2e\n", (int) n, error );
     
     magma_free( dA );
     magma_free( dB );

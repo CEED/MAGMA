@@ -45,7 +45,7 @@ int main( int argc, char** argv)
     magma_int_t lrwork;
 #endif
 
-    double *w1, result;
+    double *w1, result=0;
     magma_int_t *iwork;
     magma_int_t N, n2, info, lwork, liwork;
     magmaDoubleComplex c_zero    = MAGMA_Z_ZERO;

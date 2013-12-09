@@ -96,7 +96,7 @@ int main( int argc, char** argv)
             gflops = FLOPS_ZGETRF( M, N ) / 1e9;
             
             if ( N > 1024 ) {
-                fprintf( stderr, "zgetf2 does not support N > 1024; skipping N=%d.\n", N );
+                fprintf( stderr, "zgetf2 does not support N > 1024; skipping N=%d.\n", (int) N );
                 continue;
             }
             

@@ -52,7 +52,7 @@ int main( int argc, char** argv)
             gflops = FLOPS_ZPOTRF( N ) / 1e9;
             
             if ( N > 1024 ) {
-                fprintf( stderr, "zpotf2 does not support N > 1024; skipping N=%d.\n", N );
+                fprintf( stderr, "zpotf2 does not support N > 1024; skipping N=%d.\n", (int) N );
                 continue;
             }
             
