@@ -192,7 +192,7 @@ magma_zstedx(char range, magma_int_t n, double vl, double vu,
     if(n==0)
         return *info;
     if(n==1){
-        MAGMA_Z_SET2REAL(*z,1.);
+        *z = MAGMA_Z_MAKE( 1, 0 );
         return *info;
     }
 
@@ -211,7 +211,7 @@ magma_zstedx(char range, magma_int_t n, double vl, double vu,
 
         for(j=0; j<n; ++j)
             for(i=0; i<n; ++i){
-                MAGMA_Z_SET2REAL(*(z+i+ldz*j), *(rwork+i+n*j));
+                *(z+i+ldz*j) = MAGMA_Z_MAKE( *(rwork+i+n*j), 0 );
             }
     }
 

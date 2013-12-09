@@ -129,7 +129,7 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     --tau;
 
     *info = 0;
-    MAGMA_Z_SET2REAL( work[0], (double) n * nb );
+    work[0] = MAGMA_Z_MAKE( n * nb, 0 );
 
     lquery = lwork == -1;
     if (n < 0) {
@@ -257,7 +257,7 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
                           a  + (i__-1)*(lda),  lda );
     }
     lapackf77_zgehd2(&n, &i__, &ihi, a, &lda, &tau[1], work, &iinfo);
-    MAGMA_Z_SET2REAL( work[0], (double) iws );
+    work[0] = MAGMA_Z_MAKE( iws, 0 );
     
     magma_free( da );
     magma_free_cpu(t);

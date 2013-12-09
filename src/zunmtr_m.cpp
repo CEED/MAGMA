@@ -156,7 +156,7 @@ magma_zunmtr_m(magma_int_t nrgpu, char side, char uplo, char trans,
     nb = 32;
     lwkopt = max(1,nw) * nb;
     if (*info == 0) {
-        MAGMA_Z_SET2REAL( work[0], lwkopt );
+        work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     }
 
     if (*info != 0) {
@@ -207,7 +207,7 @@ magma_zunmtr_m(magma_int_t nrgpu, char side, char uplo, char trans,
                        &c[i1 + i2 * ldc], ldc, work, lwork, &iinfo);
     }
 
-    MAGMA_Z_SET2REAL( work[0], lwkopt );
+    work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
 
     return *info;
 } /* magma_zunmtr */

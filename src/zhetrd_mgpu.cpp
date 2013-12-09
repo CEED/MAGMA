@@ -183,7 +183,7 @@ magma_zhetrd_mgpu(
     ldwork = lddwork = n;
     lwkopt = n * nb;
     if (*info == 0) {
-        MAGMA_Z_SET2REAL( work[0], lwkopt );
+        work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     }
 
     if (*info != 0) {
@@ -305,7 +305,9 @@ magma_zhetrd_mgpu(
             /* Copy superdiagonal elements back into A, and diagonal
                elements into D */
             for (j = i; j < i+ib; ++j) {
-                if( j > 0 ) { MAGMA_Z_SET2REAL( *A(j-1, j), e[j - 1] ); }
+                if( j > 0 ) {
+                    *A(j-1,j) = MAGMA_Z_MAKE( e[j - 1], 0 );
+                }
                 d[j] = MAGMA_Z_REAL( *A(j, j) );
             }
 
@@ -394,7 +396,9 @@ magma_zhetrd_mgpu(
             /* Copy subdiagonal elements back into A, and diagonal
                elements into D */
             for (j = i; j < i+ib; ++j) {
-                if( j+1 < n ) { MAGMA_Z_SET2REAL( *A(j+1, j), e[j] ); }
+                if( j+1 < n ) {
+                    *A(j+1,j) = MAGMA_Z_MAKE( e[j], 0 );
+                }
                 d[j] = MAGMA_Z_REAL( *A(j, j) );
             }
         } /* for i=... */
@@ -448,7 +452,7 @@ magma_zhetrd_mgpu(
     }
     magma_setdevice(0);
     magma_free_pinned(hwork);
-    MAGMA_Z_SET2REAL( work[0], lwkopt );
+    work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
 
 #ifdef PROFILE_SY2RK
     printf( " n=%d nb=%d\n",n,nb );

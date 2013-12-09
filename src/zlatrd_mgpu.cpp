@@ -233,7 +233,7 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, char uplo,
                 lapackf77_zlarfg(&i, &alpha, A(0, i), &ione, &tau[i - 1]);
 
                 e[i-1] = MAGMA_Z_REAL( alpha );
-                MAGMA_Z_SET2REAL(*A(i-1, i), 1.);
+                *A(i-1,i) = MAGMA_Z_MAKE( 1, 0 );
                 for( id=0; id<num_gpus; id++ ) {
                     magma_setdevice(id);
                     dx2[id] = dW1(id, 0, iw);
@@ -345,7 +345,7 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, char uplo,
                 times[0] += GetTimerValue(cpu_start,cpu_end)/1000.0;
 #endif
                 e[i] = MAGMA_Z_REAL( alpha );
-                MAGMA_Z_SET2REAL(*A(i+1, i), 1.);
+                *A(i+1,i) = MAGMA_Z_MAKE( 1, 0 );
                 trace_cpu_end( 0 );
 
                 /* Compute W(i+1:n,i) */

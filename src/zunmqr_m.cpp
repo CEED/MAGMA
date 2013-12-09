@@ -179,7 +179,7 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
     magma_int_t lwkopt = max(1,nw) * nb;
     if (*info == 0)
     {
-        MAGMA_Z_SET2REAL( work[0], lwkopt );
+        work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     }
 
     if (*info != 0) {
@@ -376,7 +376,7 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
          */
     }
 
-    MAGMA_Z_SET2REAL( work[0], lwkopt );
+    work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
 
     for (igpu = 0; igpu < nrgpu; ++igpu){
         magma_setdevice(igpu);

@@ -110,7 +110,7 @@ magma_zungtr(char uplo, magma_int_t n, magmaDoubleComplex *a,
 
     lwkopt = max(1, n) * nb;
     if (*info == 0) {
-        MAGMA_Z_SET2REAL( work[0], lwkopt);
+        work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     }
 
     if (*info != 0) {
@@ -168,7 +168,7 @@ magma_zungtr(char uplo, magma_int_t n, magmaDoubleComplex *a,
         }
     }
     
-    MAGMA_Z_SET2REAL( work[0], lwkopt);
+    work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
 
     return *info;
 } /* magma_zungtr */

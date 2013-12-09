@@ -256,7 +256,7 @@ magma_zhegvx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
     
     lwmin = n * (nb + 1);
     
-    MAGMA_Z_SET2REAL(work[0],(double)lwmin);
+    work[0] = MAGMA_Z_MAKE( lwmin, 0 );
     
     
     if (lwork < lwmin && ! lquery) {

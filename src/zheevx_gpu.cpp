@@ -242,7 +242,7 @@ magma_zheevx_gpu(char jobz, char range, char uplo, magma_int_t n,
     
     lopt = n * (nb + 1);
     
-    MAGMA_Z_SET2REAL(work[0],(double)lopt);
+    work[0] = MAGMA_Z_MAKE( lopt, 0 );
     
     if (lwork < lopt && ! lquery) {
         *info = -21;
@@ -436,7 +436,7 @@ magma_zheevx_gpu(char jobz, char range, char uplo, magma_int_t n,
     }
     
     /* Set WORK(1) to optimal complex workspace size. */
-    work[1] = MAGMA_Z_MAKE((double) lopt, 0.);
+    work[1] = MAGMA_Z_MAKE( lopt, 0 );
     
     return *info;
     

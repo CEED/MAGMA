@@ -155,7 +155,7 @@ magma_zunmql(const char side, const char trans,
             nb = 64;
             lwkopt = nw * nb;
         }
-        MAGMA_Z_SET2REAL( work[0], lwkopt );
+        work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
         
         if (lwork < nw && ! lquery) {
             *info = -12;
@@ -255,7 +255,7 @@ magma_zunmql(const char side, const char trans,
 
         magma_zgetmatrix( m, n, dc, m, c, ldc );
     }
-    MAGMA_Z_SET2REAL( work[0], lwkopt );
+    work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
 
     magma_free( dc );
     magma_free( dwork );

@@ -317,7 +317,7 @@ magma_zhegvr(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
     lrwmin = 24 * n;
     liwmin = 10 * n;
     
-    MAGMA_Z_SET2REAL(work[0],(double)lwmin);
+    work[0] = MAGMA_Z_MAKE( lwmin, 0 );
     rwork[0] = lrwmin;
     iwork[0] = liwmin;
     

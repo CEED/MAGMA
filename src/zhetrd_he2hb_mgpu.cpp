@@ -194,7 +194,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
     /* Determine the block size. */
     lwkopt = n * nb;
     if (*info == 0) {
-        MAGMA_Z_SET2REAL( work[0], lwkopt );
+        work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     }
 
 
@@ -528,7 +528,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
     magma_setdevice( cdev );
     magmablasSetKernelStream( cstream );
 
-    MAGMA_Z_SET2REAL( work[0], lwkopt );
+    work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     magma_setlapack_numthreads(1);
     return *info;
 } /* zhetrd_he2hb_ */

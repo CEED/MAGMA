@@ -179,7 +179,7 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
     ldw = lddw = n;
     lwkopt = n * nb;
     if (*info == 0) {
-        MAGMA_Z_SET2REAL( work[0], lwkopt );
+        work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     }
 
     if (*info != 0) {
@@ -236,7 +236,7 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
             /* Copy superdiagonal elements back into A, and diagonal
                elements into D */
             for (j = i; j < i+nb; ++j) {
-                MAGMA_Z_SET2REAL( *A(j-1, j), e[j - 1] );
+                *A(j-1,j) = MAGMA_Z_MAKE( e[j - 1], 0 );
                 d[j] = MAGMA_Z_REAL( *A(j, j) );
             }
         }
@@ -278,7 +278,7 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
             /* Copy subdiagonal elements back into A, and diagonal
                elements into D */
             for (j = i; j < i+nb; ++j) {
-                MAGMA_Z_SET2REAL( *A(j+1, j), e[j] );
+                *A(j+1,j) = MAGMA_Z_MAKE( e[j], 0 );
                 d[j] = MAGMA_Z_REAL( *A(j, j) );
             }
         }
@@ -294,6 +294,6 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
     }
     
     magma_free( dwork );
-    MAGMA_Z_SET2REAL( work[0], lwkopt );
+    work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     return *info;
 } /* zhetrd_gpu */

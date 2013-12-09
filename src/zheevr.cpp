@@ -294,7 +294,7 @@ magma_zheevr(char jobz, char range, char uplo, magma_int_t n,
     lrwmin = 24 * n;
     liwmin = 10 * n;
     
-    MAGMA_Z_SET2REAL(work[0],(double)lwmin);
+    work[0] = MAGMA_Z_MAKE( lwmin, 0 );
     rwork[0] = lrwmin;
     iwork[0] = liwmin;
     
@@ -483,7 +483,7 @@ magma_zheevr(char jobz, char range, char uplo, magma_int_t n,
     }
     
     /* Set WORK(1) to optimal complex workspace size. */
-    work[1] = MAGMA_Z_MAKE((double) lopt, 0.);
+    work[1] = MAGMA_Z_MAKE( lopt, 0 );
     rwork[1] = (double) lrwmin;
     iwork[1] = liwmin;
     
