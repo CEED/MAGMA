@@ -200,7 +200,7 @@ __global__ void kernel_zdotc(int n, magmaDoubleComplex *x, int incx, int threadS
 
     if (tx == 0) {
         double xreal = MAGMA_Z_REAL(x[n*incx]);
-        MAGMA_Z_SET2REAL( x[n*incx], sqrt(xreal - sdata[0]));
+        x[n*incx] = MAGMA_Z_MAKE( sqrt(xreal - sdata[0]), 0 );
     }
 }
 
