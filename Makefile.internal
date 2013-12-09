@@ -36,9 +36,9 @@ NV_SM    :=
 NV_COMP  :=
 ifneq ($(findstring Tesla, $(GPU_TARGET)),)
     MIN_ARCH ?= 100
-    NV_SM    += -gencode arch=compute_13,code=sm_13
-    NV_COMP  := -gencode arch=compute_13,code=compute_13 \
+    NV_SM    += -gencode arch=compute_13,code=sm_13 \
                 -gencode arch=compute_10,code=compute_10
+    NV_COMP  := -gencode arch=compute_13,code=compute_13
     #$(info compile for CUDA arch 1.x (Tesla))
 endif
 ifneq ($(findstring Fermi, $(GPU_TARGET)),)
