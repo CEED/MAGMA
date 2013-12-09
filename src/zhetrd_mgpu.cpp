@@ -257,7 +257,7 @@ magma_zhetrd_mgpu(
 
         /* Copy the matrix to the GPU */
         if (1<=n-nx) {
-            magma_zhtodhe(num_gpus, &uplo, n, nb, a, lda, da, ldda, stream, &iinfo );
+            magma_zhtodhe(num_gpus, uplo, n, nb, a, lda, da, ldda, stream, &iinfo );
         }
 
         /*  Reduce the upper triangle of A.
@@ -338,7 +338,7 @@ magma_zhetrd_mgpu(
         trace_init( 1, num_gpus, k, (CUstream_st**)stream );
         /* Copy the matrix to the GPU */
         if (1<=n-nx) {
-            magma_zhtodhe(num_gpus, &uplo, n, nb, a, lda, da, ldda, stream, &iinfo );
+            magma_zhtodhe(num_gpus, uplo, n, nb, a, lda, da, ldda, stream, &iinfo );
         }
 
         /* Reduce the lower triangle of A */
@@ -461,13 +461,13 @@ magma_zhetrd_mgpu(
 
 
 extern "C" magma_int_t
-magma_zhtodhe(magma_int_t num_gpus, char *uplo, magma_int_t n, magma_int_t nb,
+magma_zhtodhe(magma_int_t num_gpus, char uplo, magma_int_t n, magma_int_t nb,
               magmaDoubleComplex *a, magma_int_t lda,
               magmaDoubleComplex **da, magma_int_t ldda,
               magma_queue_t stream[][10], magma_int_t *info)
 {
     magma_int_t k;
-    if( lapackf77_lsame(uplo, "L") ) {
+    if( lapackf77_lsame(&uplo, "L") ) {
         /* go through each block-column */
         magma_int_t j, jj, jb, mj;
         for (j=0; j<n; j+=nb) {

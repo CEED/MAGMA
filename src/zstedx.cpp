@@ -124,8 +124,7 @@ magma_zstedx(char range, magma_int_t n, double vl, double vu,
        Jeff Rutter, Computer Science Division, University of California
        at Berkeley, USA
 
-    =====================================================================
-*/
+    ===================================================================== */
     char range_[2] = {range, 0};
 
     magma_int_t alleig, indeig, valeig, lquery;
