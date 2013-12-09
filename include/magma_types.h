@@ -308,8 +308,9 @@ typedef double real_Double_t;
 
 #define MagmaUpper         'U'  /* 121 */
 #define MagmaLower         'L'  /* 122 */
-#define MagmaUpperLower    'F'  /* 123 */
-#define MagmaFull          'F'  /* 123 */
+#define MagmaUpperLower    'G'  /* 123 */
+#define MagmaFull          'G'  /* 123 */  // see lascl
+#define MagmaHessenberg    'H'  /* 124 */  // see lascl
 
 #define MagmaNonUnit       'N'  /* 131 */
 #define MagmaUnit          'U'  /* 132 */
@@ -350,6 +351,10 @@ typedef double real_Double_t;
 #define MagmaAllVec        'A'  /* 304 */  /* gesvd */
 #define MagmaSomeVec       'S'  /* 305 */  /* gesvd */
 #define MagmaOverwriteVec  'O'  /* 306 */  /* gesvd */
+
+#define MagmaRangeAll      'A'
+#define MagmaRangeV        'V'
+#define MagmaRangeI        'I'
 
 #define MagmaForward       'F'  /* 391 */  /* larfb */
 #define MagmaBackward      'B'  /* 392 */  /* larfb */
@@ -394,10 +399,12 @@ typedef char magma_trans_t;
 typedef char magma_uplo_t;
 typedef char magma_diag_t;
 typedef char magma_side_t;
+typedef char magma_type_t;
 typedef char magma_norm_t;
 typedef char magma_dist_t;
 typedef char magma_pack_t;
 typedef char magma_vec_t;
+typedef char magma_range_t;
 typedef char magma_direct_t;
 typedef char magma_storev_t;
 
