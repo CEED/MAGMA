@@ -12,7 +12,7 @@
 #ifndef MAGMA_ZGEHRD_H
 #define MAGMA_ZGEHRD_H
 
-#include "magma.h"
+#include "magma_types.h"
 
 #ifdef __cplusplus
 extern "C" {

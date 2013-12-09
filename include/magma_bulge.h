@@ -9,6 +9,8 @@
 #ifndef MAGMA_BULGE_H
 #define MAGMA_BULGE_H
 
+#include "magma_types.h"
+
 #ifdef __cplusplus
 extern "C"{
 #endif

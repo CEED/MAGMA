@@ -11,6 +11,8 @@
 #ifndef MAGMA_ZC_H
 #define MAGMA_ZC_H
 
+#include "magma_types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

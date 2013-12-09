@@ -11,7 +11,7 @@
 #ifndef MAGMA_ZBULGEINC_H
 #define MAGMA_ZBULGEINC_H
 
-#define PRECISION_z
+#include "magma_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -135,7 +135,5 @@ extern int           log_eventsblg;
 #ifdef __cplusplus
 }
 #endif
-
-#undef PRECISION_z
 
 #endif /* MAGMA_ZBULGEINC_H */

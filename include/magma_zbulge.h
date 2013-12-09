@@ -11,7 +11,7 @@
 #ifndef MAGMA_ZBULGE_H
 #define MAGMA_ZBULGE_H
 
-#define PRECISION_z
+#include "magma_types.h"
 
 #ifdef __cplusplus
 extern "C" {
