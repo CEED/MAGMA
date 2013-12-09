@@ -64,7 +64,7 @@ int main( int argc, char** argv)
     magma_int_t N = 0, n2, lda, lwork,ldt;
     magma_int_t size[10] = {1024,2048,3072,4032,5184,6016,7040,8064,9088,10112};
 
-    magma_int_t i, j, k, info, checkres, once = 0;
+    magma_int_t i, info, checkres, once = 0;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
     char *uplo = (char *)MagmaLowerStr;
@@ -215,11 +215,11 @@ int main( int argc, char** argv)
        }
        // magma_zhetrd_he2hb(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, dT1[0], &info);
        end = get_current_time();
-       printf("  Finish BAND  N %d  NB %d  dist %d  ngpu %d version %d timing= %lf \n" ,N,NB,distblk,ngpu,ver,GetTimerValue(start,end) / 1000.);
+       printf("  Finish BAND  N %d  NB %d  dist %d  ngpu %d version %d timing= %f\n", N, NB, distblk, ngpu, ver, GetTimerValue(start,end) / 1000.);
     }
        magma_setdevice(0);
 
-// goto fin;
+//goto fin;
 //return 0;
         for( magma_int_t dev = 0; dev < ngpu; ++dev ) {
             magma_setdevice(dev);
@@ -278,7 +278,7 @@ int main( int argc, char** argv)
             ////dsterf_( &N, D, E, &info);
             ////
             end = get_current_time();
-            printf("  Finish CHECK - EIGEN   timing= %lf  threads %d \n" ,GetTimerValue(start,end) / 1000., i);
+            printf("  Finish CHECK - EIGEN   timing= %f  threads %d\n", GetTimerValue(start,end) / 1000., i);
 
             /* compare result */
             cmp_vals(N, D2, D, &nrmI, &nrm1, &nrm2);
@@ -299,7 +299,7 @@ int main( int argc, char** argv)
            // check results
            zcheck_eig_(&JOBZ, &MATYPE, &N, &NB, AINIT, &lda, &NOTHING, &NOTHING, D2 , D, h_R, &lda, WORKAJETER, RWORKAJETER, RESU );
            end = get_current_time();
-           printf("  Finish CHECK - results timing= %lf \n" ,GetTimerValue(start,end) / 1000.);
+           printf("  Finish CHECK - results timing= %f\n", GetTimerValue(start,end) / 1000.);
 #if defined(USEMKL)
            mkl_set_num_threads( 1 );
 #endif
@@ -336,7 +336,7 @@ int main( int argc, char** argv)
           break;
     }
 
-fin:
+//fin:
 
     /* Memory clean up */
     TESTING_FREE_CPU( tau    );

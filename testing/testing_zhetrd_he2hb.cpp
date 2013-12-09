@@ -182,14 +182,14 @@ int main( int argc, char** argv)
         /*
         magma_zhetrd_he2hb(uplo[0], N, NB, h_R, lda, tau, h_work, lwork0, dT1, THREADS, &info);
         tband = get_current_time();
-        printf("  Finish BAND  N %d  NB %d  ngpu %d timing= %lf \n", N, NB, ngpu, GetTimerValue(start, tband) / 1000.);
+        printf("  Finish BAND  N %d  NB %d  ngpu %d timing= %f\n", N, NB, ngpu, GetTimerValue(start, tband) / 1000.);
         magma_zhetrd_bhe2trc_v5(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1, ldt);
         */
 
         /*
         magma_zhetrd_he2hb(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, dT1, THREADS, &info);
         tband = get_current_time();
-        printf("  Finish BAND  N %d  NB %d  ngpu %d timing= %lf \n", N, NB, ngpu, GetTimerValue(start, tband) / 1000.);
+        printf("  Finish BAND  N %d  NB %d  ngpu %d timing= %f\n", N, NB, ngpu, GetTimerValue(start, tband) / 1000.);
         magma_zhetrd_bhe2trc(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1, ldt);
         */
 
@@ -344,7 +344,7 @@ int main( int argc, char** argv)
             ////dsterf_( &N, D, E, &info);
             ////
             end = get_current_time();
-            printf("  Finish CHECK - EIGEN   timing= %lf  threads %d \n", GetTimerValue(start, end) / 1000., i);
+            printf("  Finish CHECK - EIGEN   timing= %f  threads %d\n", GetTimerValue(start, end) / 1000., i);
 
             /*
             for(i=0;i<10;i++)
@@ -375,7 +375,7 @@ int main( int argc, char** argv)
             // check results
             zcheck_eig_(&JOBZ, &MATYPE, &N, &NB, AINIT, &lda, &NOTHING, &NOTHING, D2, D, h_R, &lda, WORKAJETER, RWORKAJETER, RESU );
             end = get_current_time();
-            printf("  Finish CHECK - results timing= %lf \n", GetTimerValue(start, end) / 1000.);
+            printf("  Finish CHECK - results timing= %f\n", GetTimerValue(start, end) / 1000.);
             #if defined(USEMKL)
             mkl_set_num_threads( 1 );
             #endif
