@@ -134,11 +134,11 @@ magma_zpotrf(char uplo, magma_int_t n,
     magma_queue_create( &stream[2] );
 
     if (current_stream == NULL) {
-      magma_queue_create( &stream[1] );
-      magmablasSetKernelStream(stream[1]);
+        magma_queue_create( &stream[1] );
+        magmablasSetKernelStream(stream[1]);
     }
     else
-      stream[1] = current_stream;
+        stream[1] = current_stream;
 
     nb = magma_get_zpotrf_nb(n);
 
