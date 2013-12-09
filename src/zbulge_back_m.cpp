@@ -292,7 +292,7 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
 
         #ifdef ENABLE_TIMER
         timeQgpu = magma_wtime()-timeQgpu;
-        printf("  Finish Q2_GPU GGG timing= %lf \n" ,timeQgpu);
+        printf("  Finish Q2_GPU GGG timing= %f\n", timeQgpu);
         #endif
     }else{
         //=============================================
@@ -314,7 +314,7 @@ static void *magma_zapplyQ_m_parallel_section(void *arg)
         #ifdef ENABLE_TIMER
         if(my_core_id == 1){
             timeQcpu = magma_wtime()-timeQcpu;
-            printf("  Finish Q2_CPU CCC timing= %lf \n" ,timeQcpu);
+            printf("  Finish Q2_CPU CCC timing= %f\n", timeQcpu);
         }
         #endif
 

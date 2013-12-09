@@ -140,27 +140,24 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
     }
 
 
-/*
-
-       trace_file = fopen("AJETE/Abefore", "w");
+    /*
+    trace_file = fopen("AJETE/Abefore", "w");
     for (j = 0; j < (N-NB); j++)
     {
         for (i = 0; i < NB+1; i++)
         {
-               fprintf(trace_file,"%10d %10d %25.15e %25.15e\n",i+j+1,j+1,MAGMA_Z_REAL(A1[i+j*LDA1+j]) ,  MAGMA_Z_IMAG(A1[i+j*LDA1+j])  );
+            fprintf(trace_file, "%10d %10d %25.15e %25.15e\n", i+j+1, j+1, MAGMA_Z_REAL(A1[i+j*LDA1+j]), MAGMA_Z_IMAG(A1[i+j*LDA1+j])  );
         }
     }        
     for (j = 0; j < NB; j++)
     {
         for (i = 0; i < NB-j; i++)
         {
-               fprintf(trace_file,"%10d %10d %25.15e %25.15e\n",i+(N-NB+j)+1,N-NB+j+1,MAGMA_Z_REAL(A1[i+(N-NB+j)*LDA1+(N-NB+j)]) ,  MAGMA_Z_IMAG(A1[i+(N-NB+j)*LDA1+(N-NB+j)])  );
+            fprintf(trace_file, "%10d %10d %25.15e %25.15e\n", i+(N-NB+j)+1, N-NB+j+1, MAGMA_Z_REAL(A1[i+(N-NB+j)*LDA1+(N-NB+j)]), MAGMA_Z_IMAG(A1[i+(N-NB+j)*LDA1+(N-NB+j)])  );
         }
     }
-
-
-       fclose(trace_file);
-*/
+    fclose(trace_file);
+    */
 
 
 
@@ -169,7 +166,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
     timelpk = magma_wtime();
     /* copy the input matrix into a matrix A2 with band storage */
     magmaDoubleComplex *A2    = (magmaDoubleComplex *) malloc (N*LDA2*sizeof(magmaDoubleComplex));
-    memset(A2 , 0, N*LDA2*sizeof(magmaDoubleComplex));        
+    memset(A2, 0, N*LDA2*sizeof(magmaDoubleComplex));        
     for (j = 0; j < (N-NB); j++)
     {
         for (i = 0; i < NB+1; i++)
@@ -191,7 +188,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
        A1[NB+j*LDA1+j] = c_one;
 
     timelpk = magma_wtime() - timelpk;
-    printf("  Finish CONVERT timing= %lf \n" ,timelpk); 
+    printf("  Finish CONVERT timing= %f\n", timelpk); 
 
     
 
@@ -217,14 +214,16 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
        magma_device_sync();
        magma_zgetmatrix( N, LDA1, da, LDA1, A1, LDA1 );
        timeaplQ1 = magma_wtime()-timeaplQ1;
-       printf("  Finish applyQ1 timing= %lf \n" ,timeaplQ1); 
+       printf("  Finish applyQ1 timing= %f\n", timeaplQ1); 
 
        /*            
        trace_file = fopen("AJETE/Q1", "w");
-       for (j = 0; j < N ; j++) 
-             for (i = 0; i < N ; i++) 
-                        //fprintf(trace_file,"%10d%10d%40.30e\n",i+1,j+1,A1[j*LDA1+i]);
-                         fprintf(trace_file,"%10d %10d %25.15e %25.15e\n",i+1,j+1,MAGMA_Z_REAL(A1[j*LDA1+i]) ,  MAGMA_Z_IMAG(A1[j*LDA1+i])  );
+       for (j = 0; j < N ; j++) {
+           for (i = 0; i < N ; i++) {
+               //fprintf(trace_file, "%10d%10d%40.30e\n", i+1, j+1, A1[j*LDA1+i]);
+               fprintf(trace_file, "%10d %10d %25.15e %25.15e\n", i+1, j+1, MAGMA_Z_REAL(A1[j*LDA1+i]), MAGMA_Z_IMAG(A1[j*LDA1+i])  );
+           }
+       }
        fclose(trace_file);
        */
     }
@@ -244,7 +243,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
         NN=N;
         LDAINIT=NB+1;
         AINIT = (magmaDoubleComplex *) malloc(MM*NN*sizeof(magmaDoubleComplex) );
-        memset(AINIT , 0, MM*NN*sizeof(magmaDoubleComplex));        
+        memset(AINIT, 0, MM*NN*sizeof(magmaDoubleComplex));        
         lapackf77_zlacpy("A", &MM, &NN, A2, &LDA2, AINIT, &LDAINIT );
     }
     /***********************************************/
@@ -332,7 +331,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
         void *exitcodep;
         pthread_join(thread_id[thread], &exitcodep);
     }
-    printf("  Finish BULGE+T timing= %lf \n" ,*(core_in_all.timeblg));
+    printf("  Finish BULGE+T timing= %f\n", *(core_in_all.timeblg));
 
     /*================================================
      *  store resulting diag and lower diag D2 and E2
@@ -357,16 +356,15 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
      *  */
 
 
-/*
-       trace_file = fopen("AJETE/T", "w");
-       for (j = 0; j < N-1 ; j++) {
-         fprintf(trace_file,"%10d %10d %25.15e %25.15e\n",j+1,j+1,MAGMA_Z_REAL(A2[j*LDA2]) ,  MAGMA_Z_IMAG(A2[j*LDA2])  );
-         fprintf(trace_file,"%10d %10d %25.15e %25.15e\n",j+2,j+1,MAGMA_Z_REAL(A2[j*LDA2+1]) ,  MAGMA_Z_IMAG(A2[j*LDA2+1])  );
-       }
-         fprintf(trace_file,"%10d %10d %25.15e %25.15e\n",N,N,MAGMA_Z_REAL(A2[(N-1)*LDA2]) ,  MAGMA_Z_IMAG(A2[(N-1)*LDA2])  );
-
-       fclose(trace_file);
-*/
+    /*
+    trace_file = fopen("AJETE/T", "w");
+    for (j = 0; j < N-1 ; j++) {
+        fprintf(trace_file, "%10d %10d %25.15e %25.15e\n", j+1, j+1, MAGMA_Z_REAL(A2[j*LDA2]), MAGMA_Z_IMAG(A2[j*LDA2])  );
+        fprintf(trace_file, "%10d %10d %25.15e %25.15e\n", j+2, j+1, MAGMA_Z_REAL(A2[j*LDA2+1]), MAGMA_Z_IMAG(A2[j*LDA2+1])  );
+    }
+    fprintf(trace_file, "%10d %10d %25.15e %25.15e\n", N, N, MAGMA_Z_REAL(A2[(N-1)*LDA2]), MAGMA_Z_IMAG(A2[(N-1)*LDA2])  );
+    fclose(trace_file);
+    */
 
 
 
@@ -459,21 +457,22 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
         mkl_set_num_threads( 1 );
 #endif
         timelpk = magma_wtime()-timelpk;
-        printf("  Finish WANTZ %d  eigensolver 'N'    timing= %lf  threads %d \n" ,WANTZ, timelpk, i);
+        printf("  Finish WANTZ %d  eigensolver 'N'    timing= %f  threads %d\n", WANTZ, timelpk, i);
         /*
         for(i=0;i<10;i++)
-                printf(" voici D[%d] %e\n",i,D2[i]);*/
+            printf(" voici D[%d] %e\n",i,D2[i]);
+        */
     }
     if(WANTZ>0){
         if(WANTZ==1){
             // compute Q2 by applying V2 on the Identity        
             LDZ=LDA1;        
             Z    = (magmaDoubleComplex *) malloc (N*N*sizeof(magmaDoubleComplex));
-            memset(Z , 0, N*N*sizeof(magmaDoubleComplex));
+            memset(Z, 0, N*N*sizeof(magmaDoubleComplex));
             if(parallel==1){
                 Q2    = (magmaDoubleComplex *) malloc (N*N*sizeof(magmaDoubleComplex));
                 // no need to set the matrix to identity if we are using the GPU because it is done inside bulge_applyQ
-                memset(Q2 , 0, N*N*sizeof(magmaDoubleComplex));        
+                memset(Q2, 0, N*N*sizeof(magmaDoubleComplex));        
                 for (j = 0; j < N; j++)
                     Q2[j+j*LDQ2] = c_one;
             }
@@ -485,7 +484,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
             // from the Right. Q= Q1 * ( I-V2*T2*V2') = Q1*Q2        
             LDZ=LDA1;        
             Z    = (magmaDoubleComplex *) malloc (N*N*sizeof(magmaDoubleComplex));
-            memset(Z , 0, N*N*sizeof(magmaDoubleComplex));
+            memset(Z, 0, N*N*sizeof(magmaDoubleComplex));
             core_in_all.SIDE      = 'R';
             core_in_all.E         = A1;
             core_in_all.LDE       = LDA1;
@@ -494,7 +493,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
             // and then make gemm with Q1 (WANTZ=3) or apply V1 to the result (WANTZ=4). 
             LDZ=LDA1;        
             Z    = (magmaDoubleComplex *) malloc (N*N*sizeof(magmaDoubleComplex));
-            memset(Z , 0, N*N*sizeof(magmaDoubleComplex));
+            memset(Z, 0, N*N*sizeof(magmaDoubleComplex));
             // variable for Q2
             core_in_all.SIDE      = 'L';
             core_in_all.E         = Z;
@@ -523,11 +522,13 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
         }
 
        /*
-        trace_file = fopen("AJETE/Z", "w");
-       for (j = 0; j < N ; j++) 
-             for (i = 0; i < N ; i++) 
-                        //fprintf(trace_file,"%10d%10d%40.30e\n",i+1,j+1,A1[j*LDA1+i]);
-                         fprintf(trace_file,"%10d %10d %25.15e %25.15e\n",i+1,j+1,MAGMA_Z_REAL(Z[j*LDA1+i]) ,  MAGMA_Z_IMAG(Z[j*LDA1+i])  );
+       trace_file = fopen("AJETE/Z", "w");
+       for (j = 0; j < N ; j++) {
+           for (i = 0; i < N ; i++) {
+               //fprintf(trace_file, "%10d%10d%40.30e\n", i+1, j+1, A1[j*LDA1+i]);
+               fprintf(trace_file, "%10d %10d %25.15e %25.15e\n", i+1, j+1, MAGMA_Z_REAL(Z[j*LDA1+i]), MAGMA_Z_IMAG(Z[j*LDA1+i])  );
+           }
+       }
        fclose(trace_file);
        */
 
@@ -538,8 +539,8 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
         // ************************************************
         if(parallel==0){
            // allocate space on GPU for dV2 and dT2        
-           dVsize = max(N*N,blkcnt*LDV*Vblksiz);
-           //printf("dvsize %lf \n",(16.0*(real_Double_t)dVsize)*1e-9);
+           dVsize = max(N*N, blkcnt*LDV*Vblksiz);
+           //printf("dvsize %f\n",(16.0*(real_Double_t)dVsize)*1e-9);
            if(MAGMA_SUCCESS != magma_zmalloc( &dV2, dVsize )) { 
                printf ("!!!! magma_alloc failed for: dV2\n" );       
                exit(-1);                                                           
@@ -593,12 +594,12 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
                 /*
                 Q2    = (magmaDoubleComplex *) malloc (N*N*sizeof(magmaDoubleComplex));
-                memset(Q2 , 0, N*N*sizeof(magmaDoubleComplex));       
+                memset(Q2, 0, N*N*sizeof(magmaDoubleComplex));       
                 magma_zgetmatrix( N, LDA1, da, N, Q2, N );
                 trace_file = fopen("AJETE/Q2", "w");
                 for (j = 0; j < N ; j++) 
                       for (i = 0; i < N ; i++) 
-                                  fprintf(trace_file,"%10d %10d %25.15e %25.15e\n",i+1,j+1,MAGMA_Z_REAL(Q2[j*N+i]) ,  MAGMA_Z_IMAG(Q2[j*N+i])  );
+                                  fprintf(trace_file,"%10d %10d %25.15e %25.15e\n",i+1,j+1,MAGMA_Z_REAL(Q2[j*N+i]), MAGMA_Z_IMAG(Q2[j*N+i])  );
                 fclose(trace_file);
                 */
 
@@ -725,14 +726,14 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
        timeeigen = magma_wtime()-timeeigen;
        printf("============================================================================\n");
-       printf("  Finish WANTZ %d  computing Q2       timing= %lf \n" ,WANTZ, timeaplQ2);
+       printf("  Finish WANTZ %d  computing Q2       timing= %f\n", WANTZ, timeaplQ2);
        if(WANTZ!=5){
-           printf("  Finish WANTZ %d  making gemm        timing= %lf \n" ,WANTZ, timegemm);
-           printf("  Finish WANTZ %d  eigensolver 'I'    timing= %lf  threads %d   N %d    NE %d\n" ,WANTZ, timelpk, mklth, N, NE);
+           printf("  Finish WANTZ %d  making gemm        timing= %f\n", WANTZ, timegemm);
+           printf("  Finish WANTZ %d  eigensolver 'I'    timing= %f  threads %d   N %d    NE %d\n", WANTZ, timelpk, mklth, N, NE);
        }else{
-           printf("  Finish WANTZ %d  eigensolver 'V'    timing= %lf  threads %d   N %d    NE %d \n" ,WANTZ, timelpk, mklth, N, NE);
+           printf("  Finish WANTZ %d  eigensolver 'V'    timing= %f  threads %d   N %d    NE %d\n", WANTZ, timelpk, mklth, N, NE);
        }
-       printf("  Finish WANTZ %d  full Eigenvectros  timing= %lf  \n",WANTZ, timeeigen);
+       printf("  Finish WANTZ %d  full Eigenvectros  timing= %f  \n",WANTZ, timeeigen);
        printf("============================================================================\n");
     }
 
@@ -745,7 +746,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
        for (j = 0; j < N ; j++) 
              for (i = 0; i < N ; i++) 
                         //fprintf(trace_file,"%10d%10d%40.30e\n",i+1,j+1,A1[j*LDA1+i]);
-                         fprintf(trace_file,"%10d %10d %25.15e %25.15e\n",i+1,j+1,MAGMA_Z_REAL(A1[j*LDA1+i]) ,  MAGMA_Z_IMAG(A1[j*LDA1+i])  );
+                         fprintf(trace_file,"%10d %10d %25.15e %25.15e\n",i+1,j+1,MAGMA_Z_REAL(A1[j*LDA1+i]), MAGMA_Z_IMAG(A1[j*LDA1+i])  );
        fclose(trace_file);
 
        trace_file = fopen("AJETE/D", "w");
@@ -756,20 +757,20 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
 
 
-/*
-            magmaDoubleComplex mydz=c_zero,mydo=c_one;
-            magmaDoubleComplex *Z = (magmaDoubleComplex *) malloc(N*N*sizeof(magmaDoubleComplex));
-   dgemm_("N","N",&N,&N,&N,&mydo,A1,&LDA1,Q1,&LDQ1,&mydz,Z,&LDA1);
-   memcpy(A1,Z,N*N*sizeof(magmaDoubleComplex));
-   memcpy(Q1,Z,N*N*sizeof(magmaDoubleComplex));
-*/
     /*
-       trace_file = fopen("AJETE/Qf", "w");
-       for (j = 0; j < N ; j++) 
-             for (i = 0; i < N ; i++) 
-                            fprintf(trace_file,"%10d%10d%40.30e\n",i+1,j+1,A1[j*LDA1+i]);
-       fclose(trace_file);
-*/
+    magmaDoubleComplex mydz=c_zero, mydo=c_one;
+    magmaDoubleComplex *Z = (magmaDoubleComplex *) malloc(N*N*sizeof(magmaDoubleComplex));
+    dgemm_("N", "N", &N, &N, &N, &mydo, A1, &LDA1, Q1, &LDQ1, &mydz, Z, &LDA1);
+    memcpy(A1, Z, N*N*sizeof(magmaDoubleComplex));
+    memcpy(Q1, Z, N*N*sizeof(magmaDoubleComplex));
+    */
+    /*
+    trace_file = fopen("AJETE/Qf", "w");
+    for (j = 0; j < N ; j++) 
+        for (i = 0; i < N ; i++) 
+            fprintf(trace_file, "%10d%10d%40.30e\n", i+1, j+1, A1[j*LDA1+i]);
+    fclose(trace_file);
+    */
 
     if(CHECK)
     {
@@ -800,7 +801,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
         lapackf77_zhbtrd("N", "L", &N, &NB, ALPK, &LDAINIT, D1, E1, WORK, &N, WORK, &INFO); 
         timelpk = magma_wtime() - timelpk;
         printf("\n");                
-        printf("  Time DSBTRD-MKL-LAPACK                      :   %lf    N : %10d    NB : %10d \n\n\n",timelpk, N, NB );
+        printf("  Time DSBTRD-MKL-LAPACK                      :   %f    N : %10d    NB : %10d \n\n\n", timelpk, N, NB );
         /* call eigensolver */
         lapackf77_dsterf(&N, D1, E1, &INFO);             
        /* ***********************************************/ 
@@ -821,7 +822,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
  
        MATYPE=2;
        magmaDoubleComplex NOTHING=c_zero;
-       zcheck_eig_(&JOBZ, &MATYPE, &N, &NB, AINIT, &LDAINIT, &NOTHING, &NOTHING, D2 , D1, Q2, &LDQ2, WORKAJETER, RWORKAJETER, RESU );
+       zcheck_eig_(&JOBZ, &MATYPE, &N, &NB, AINIT, &LDAINIT, &NOTHING, &NOTHING, D2, D1, Q2, &LDQ2, WORKAJETER, RWORKAJETER, RESU );
 
 
 
@@ -831,7 +832,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
 
         printf("\n");
         printf(" ================================================================================================================================== \n");
-        printf("   ==> INFO voici  threads=%d    N=%d    NB=%d   BAND=%d WANTZ=%d\n",thread,N, NB, BAND, WANTZ);
+        printf("   ==> INFO voici  threads=%d    N=%d    NB=%d   BAND=%d WANTZ=%d\n", thread, N, NB, BAND, WANTZ);
         printf(" ================================================================================================================================== \n");
         printf("            DSBTRD                : %15s \n", "STATblgv9withQ    ");
         printf(" ================================================================================================================================== \n");
@@ -844,7 +845,7 @@ extern "C" magma_int_t magma_zhetrd_bhe2trc( int THREADS, int WANTZ, char uplo, 
         printf(" ================================================================================================================================== \n\n\n");
 
         printf(" ***********************************************************************************************************************************\n");
-        printf(" Hello here are the norm  Infinite (max)=%e  norm one (sum)=%e   norm2(sqrt)=%e \n",nrmI, nrm1, nrm2);
+        printf(" Hello here are the norm  Infinite (max)=%e  norm one (sum)=%e   norm2(sqrt)=%e \n", nrmI, nrm1, nrm2);
         printf(" ***********************************************************************************************************************************\n\n");
 
 
@@ -907,7 +908,7 @@ static void *parallel_section(void *thread_id)
     // timing
     if (my_core_id == 0){
        timeB = magma_wtime()-timeB;
-       printf("  Finish BULGE   timing= %lf \n" ,timeB);
+       printf("  Finish BULGE   timing= %f\n", timeB);
     }
 
     // compute the T's to be used when applying Q2
@@ -918,7 +919,7 @@ static void *parallel_section(void *thread_id)
        // timing
        if (my_core_id == 0){
           timeT = magma_wtime()-timeT;
-          printf("  Finish T's     timing= %lf \n" ,timeT);
+          printf("  Finish T's     timing= %f\n", timeT);
        }
     }
 
