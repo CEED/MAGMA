@@ -105,12 +105,8 @@ int main( int argc, char** argv)
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
             lapackf77_zlarnv( &ione, ISEED, &n2, h_B );
-            /* increase the diagonal */
-            for(int i=0; i<N; i++) {
-                MAGMA_Z_SET2REAL( h_B[i*N+i], ( MAGMA_Z_REAL(h_B[i*N+i]) + 1.*N ) );
-                MAGMA_Z_SET2REAL( h_A[i*N+i], MAGMA_Z_REAL(h_A[i*N+i]) );
-            }
-
+            magma_zmake_hpd( N, h_B, N );
+            magma_zmake_hermitian( N, h_A, N );
 
             // ==================================================================
             // Warmup using MAGMA

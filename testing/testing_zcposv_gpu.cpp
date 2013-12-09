@@ -72,11 +72,7 @@ int main(int argc, char **argv)
             /* Initialize the matrix */
             size = lda * N ;
             lapackf77_zlarnv( &ione, ISEED, &size, h_A );
-            /* Increase the diagonal (We don't set the matrix as
-               hermitian since we use only a triangular part) */
-            for( int i=0; i<N; i++ ) {
-                MAGMA_Z_SET2REAL( h_A[i*lda+i], ( MAGMA_Z_REAL(h_A[i*lda+i]) + 1.*N ) );
-            }
+            magma_zmake_hpd( N, h_A, lda );
             
             size = ldb * nrhs ;
             lapackf77_zlarnv( &ione, ISEED, &size, h_B );

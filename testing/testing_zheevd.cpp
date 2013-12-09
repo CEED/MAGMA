@@ -85,9 +85,8 @@ int main( int argc, char** argv)
             
             /* Initialize the matrix */
             lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-            for( int j=0; j < N; j++ ) {
-                h_A[j*N+j] = MAGMA_Z_MAKE( MAGMA_Z_REAL(h_A[j*N+j]), 0. );
-            }
+            magma_zmake_hermitian( N, h_A, N );
+            
             lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
             
             /* warm up run */

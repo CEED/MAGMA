@@ -167,16 +167,8 @@ int main( int argc, char** argv)
            Initialize the matrix
            =================================================================== */
         lapackf77_zlarnv( &ione, ISEED, &n2, h_A );
-
-        // Make the matrix hermitian
-        {
-            magma_int_t i, j;
-            for(i=0; i<N; i++) {
-                MAGMA_Z_SET2REAL( h_A[i*lda+i], ( MAGMA_Z_REAL(h_A[i*lda+i]) ) );
-                for(j=0; j<i; j++)
-                    h_A[i*lda+j] = cuConj(h_A[j*lda+i]);
-            }
-        }
+        magma_zmake_hermitian( N, h_A, lda );
+        
         lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &lda, h_R, &lda );
 
 
@@ -187,19 +179,19 @@ int main( int argc, char** argv)
         magma_getdevice( &cdev );
 
         start = get_current_time();
-/*
+        /*
         magma_zhetrd_he2hb(uplo[0], N, NB, h_R, lda, tau, h_work, lwork0, dT1, THREADS, &info);
         tband = get_current_time();
         printf("  Finish BAND  N %d  NB %d  ngpu %d timing= %lf \n", N, NB, ngpu, GetTimerValue(start, tband) / 1000.);
         magma_zhetrd_bhe2trc_v5(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1, ldt);
-*/
+        */
 
-/*
+        /*
         magma_zhetrd_he2hb(uplo[0], N, NB, h_R, lda, tau, h_work, lwork, dT1, THREADS, &info);
         tband = get_current_time();
         printf("  Finish BAND  N %d  NB %d  ngpu %d timing= %lf \n", N, NB, ngpu, GetTimerValue(start, tband) / 1000.);
         magma_zhetrd_bhe2trc(THREADS, WANTZ, uplo[0], NE, N, NB, h_R, lda, D, E, dT1, ldt);
-*/
+        */
 
         char *jobz = (char*)MagmaVecStr;
         char range = 'A';

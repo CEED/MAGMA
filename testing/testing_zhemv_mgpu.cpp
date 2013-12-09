@@ -115,7 +115,7 @@ int main(int argc, char **argv)
     }
          
 
-///////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
     cudaGetDeviceCount(&max_num_gpus);
     if (num_gpus > max_num_gpus){
       printf("More GPUs requested than available. Have to change it.\n");
@@ -169,34 +169,25 @@ int main(int argc, char **argv)
 
       
 
-///////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
 
     /* Initialize the matrix */
     lapackf77_zlarnv( &ione, ISEED, &matsize, A );
-    /* Make A hermitian */
-    { 
-        magma_int_t i, j;
-        for(i=0; i<N; i++) {
-            A[i*LDA+i] = MAGMA_Z_MAKE( MAGMA_Z_REAL(A[i*LDA+i]), 0. );
-            for(j=0; j<i; j++)
-                A[i*LDA+j] = cuConj(A[j*LDA+i]);
-        }
-    }
-        
+    magma_zmake_hermitian( N, A, LDA );
 
-      blocks    = N / nb + (N % nb != 0);
-      lwork = LDA * (blocks + 1);
-      TESTING_MALLOC_CPU( C_work, magmaDoubleComplex, lwork );
-      for(i=0; i<num_gpus; i++){
-             magma_setdevice(i);  
-             TESTING_MALLOC_DEV( dC_work[i], magmaDoubleComplex, lwork );
-             //fillZero(dC_work[i], lwork);
-      }
+    blocks = N / nb + (N % nb != 0);
+    lwork = LDA * (blocks + 1);
+    TESTING_MALLOC_CPU( C_work, magmaDoubleComplex, lwork );
+    for(i=0; i<num_gpus; i++){
+           magma_setdevice(i);  
+           TESTING_MALLOC_DEV( dC_work[i], magmaDoubleComplex, lwork );
+           //fillZero(dC_work[i], lwork);
+    }
       
      magma_setdevice(0);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
    
     fp = fopen ("results_zhemv_mgpu.csv", "w") ;
     if( fp == NULL ){ printf("Couldn't open output file\n"); exit(1);}

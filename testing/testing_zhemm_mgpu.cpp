@@ -194,10 +194,8 @@ int main( int argc, char** argv)
 
         size = lda*m;
         lapackf77_zlarnv( &ione, iseed, &size, hA );
-        // make diagonal real
-        for( int i = 0; i < m; ++i ) {
-            hA[i + i*lda] = MAGMA_Z_MAKE( MAGMA_Z_REAL( hA[i+i*lda] ), 0. );
-        }
+        magma_zmake_hermitian( m, hA, lda );
+        
         size = lda*n;
         lapackf77_zlarnv( &ione, iseed, &size, hX );
         lapackf77_zlarnv( &ione, iseed, &size, hB );

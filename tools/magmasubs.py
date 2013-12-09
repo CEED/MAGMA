@@ -55,6 +55,11 @@ subs = {
     ('SINGLE PRECISION',          'COMPLEX'                 ),
     ('real',                      'complex'                 ),
     
+    # ----- Text
+    ('symmetric',                 'hermitian',              ),
+    ('symmetric',                 'Hermitian',              ),
+    ('\*\*T',                     '\*\*H',                  ),
+    
     # ----- CBLAS
     ('',                          'CBLAS_SADDR'             ),
     
