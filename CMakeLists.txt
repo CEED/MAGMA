@@ -42,7 +42,7 @@ endif()
 
 # ----------------------------------------
 # locate CUDA libraries
-option( USE_TESLA OFF )
+set( GPU_TARGET "Tesla Fermi Kepler" CACHE STRING "CUDA architectures to compile for; one or more of Tesla, Fermi, Kepler" )
 find_package( CUDA )
 if ( CUDA_FOUND )
 	message( "-- Found CUDA ${CUDA_VERSION}" )
@@ -51,16 +51,45 @@ if ( CUDA_FOUND )
 	#message( "   CUDA_LIBRARIES: ${CUDA_LIBRARIES}" )
 	#message( "   CUDA_CUBLAS_LIBRARIES: ${CUDA_CUBLAS_LIBRARIES}" )
 	include_directories( ${CUDA_INCLUDE_DIRS} )
-	add_definitions( -DHAVE_CUBLAS )
-	if ( USE_TESLA )
-		message( "-- Generate CUDA code for Tesla (CUDA architecture 1.x). To change, unset USE_TESLA using ccmake." )
-		add_definitions( -DGPUSHMEM=130 )
-		set( CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -gencode arch=compute_13,code=sm_13 -gencode arch=compute_13,code=compute_13" )
-	else()
-		message( "-- Generate CUDA code for Fermi (CUDA architecture 2.x). To change, set USE_TESLA using ccmake." )
-		add_definitions( -DGPUSHMEM=200 )
-		set( CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -gencode arch=compute_20,code=sm_20 -gencode arch=compute_20,code=compute_20" )
+
+	# NVCC options for the different cards
+	# sm_xx is binary, compute_xx is PTX for forward compatability
+	# MIN_ARCH is lowest requested version 
+	# NV_SM    accumulates sm_xx for all requested versions
+	# NV_COMP  is compute_xx for highest requested version
+	set( NV_SM    "" )
+	set( NV_COMP  "" )
+	
+	message( "   GPU_TARGET ${GPU_TARGET}" )
+	if ( ${GPU_TARGET} MATCHES Tesla )
+		if ( not ${MIN_ARCH} )
+			set( MIN_ARCH 100 )
+		endif()
+		set( NV_SM "${NV_SM} -gencode arch=compute_10,code=compute_10 -gencode arch=compute_13,code=sm_13" )
+		set( NV_COMP        "-gencode arch=compute_13,code=compute_13" )
+		message( "   compile for CUDA arch 1.x (Tesla)" )
 	endif()
+	
+	if ( ${GPU_TARGET} MATCHES Fermi )
+		if ( not ${MIN_ARCH} )
+			set( MIN_ARCH 200 )
+		endif()
+		set( NV_SM "${NV_SM} -gencode arch=compute_20,code=sm_20" )
+		set( NV_COMP        "-gencode arch=compute_20,code=compute_20" )
+		message( "   compile for CUDA arch 2.x (Fermi)" )
+	endif()
+	
+	if ( ${GPU_TARGET} MATCHES Kepler )
+		if ( not ${MIN_ARCH} )
+			set( MIN_ARCH 300 )
+		endif()
+		set( NV_SM "${NV_SM} -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35" )
+		set( NV_COMP        "-gencode arch=compute_35,code=compute_35" )
+		message( "   compile for CUDA arch 3.x (Kepler)" )
+	endif()
+	
+	set( CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -DHAVE_CUBLAS ${NV_SM} ${NV_COMP}" )
+	add_definitions( "-DHAVE_CUBLAS -DMIN_ARCH=${MIN_ARCH}" )
 endif()
 
 
