@@ -9,11 +9,12 @@
 
 
 /***************************************************************************//**
- * Utilities; also in MAGMA internal header common_magma.h
+ *  For portability to Windows
  */
 #if defined( _WIN32 ) || defined( _WIN64 )
     // functions where Microsoft fails to provide C99 standard
     // (only with Microsoft, not with nvcc on Windows)
+    // in both common_magma.h and testings.h
     #ifndef __NVCC__
     
         #include <float.h>
@@ -27,12 +28,25 @@
     #endif
 #endif
 
-#ifndef min
-#define min(a,b)  (((a)<(b))?(a):(b))
+
+/***************************************************************************//**
+ *  Global utilities
+ *  in both common_magma.h and testings.h
+ **/
+#ifndef max
+#define max(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
-#ifndef max
-#define max(a,b)  (((a)<(b))?(b):(a))
+#ifndef min
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef roundup
+#define roundup(a, b) (b <= 0) ? (a) : (((a) + (b)-1) & ~((b)-1))
+#endif
+
+#ifndef ceildiv
+#define ceildiv(a, b) ((a - 1)/b + 1)
 #endif
 
 
