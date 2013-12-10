@@ -43,10 +43,7 @@ the setup some.
    a semi-colon separated list of libraries. For Intel MKL, we used
    (all on one line, no spaces before or after):
 
-   c:\Program Files (x86)\Intel\Composer XE\mkl\lib\intel64\mkl_intel_lp64_dll.lib;
-   c:\Program Files (x86)\Intel\Composer XE\mkl\lib\intel64\mkl_intel_thread_dll.lib;
-   c:\Program Files (x86)\Intel\Composer XE\mkl\lib\intel64\mkl_core_dll.lib;
-   c:\Program Files (x86)\Intel\Composer XE\compiler\lib\intel64\libiomp5md.lib
+   c:\Program Files (x86)\Intel\Composer XE\mkl\lib\intel64\mkl_intel_lp64_dll.lib;c:\Program Files (x86)\Intel\Composer XE\mkl\lib\intel64\mkl_intel_thread_dll.lib;c:\Program Files (x86)\Intel\Composer XE\mkl\lib\intel64\mkl_core_dll.lib;c:\Program Files (x86)\Intel\Composer XE\compiler\lib\intel64\libiomp5md.lib
    
    For MKL, you can determine what libraries to link with using the
    Intel MKL Link Link Advisor, at

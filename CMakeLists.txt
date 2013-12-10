@@ -93,7 +93,7 @@ if ( CUDA_FOUND )
 	endif()
 	
 	set( CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -DHAVE_CUBLAS ${NV_SM} ${NV_COMP}" )
-	add_definitions( "-DHAVE_CUBLAS -DMIN_ARCH=${MIN_ARCH}" )
+	add_definitions( "-DHAVE_CUBLAS -DMIN_CUDA_ARCH=${MIN_ARCH}" )
 endif()
 
 
