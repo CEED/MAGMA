@@ -36,9 +36,11 @@
     // (only with Microsoft, not with nvcc on Windows)
     #ifndef __NVCC__
     
+        #include <float.h>
         #define copysign(x,y) _copysign(x,y)
-        #define isnan(x) _isnan(x)
-        #define isinf(x) _isinf(x)
+        #define isnan(x)      _isnan(x)
+        #define isinf(x)      ( ! _finite(x) && ! _isnan(x) )
+        #define isfinite(x)   _finite(x)
         // note _snprintf has slightly different semantics than snprintf
         #define snprintf _snprintf
     
@@ -62,10 +64,10 @@
 #include "magma_threadsetting.h"
 
 /** ****************************************************************************
- *  Determine if weak symbols are allowed 
+ *  Determine if weak symbols are allowed
  */
 #if defined(linux) || defined(__linux) || defined(__linux__)
-#if defined(__GNUC_EXCL__) || defined(__GNUC__) 
+#if defined(__GNUC_EXCL__) || defined(__GNUC__)
 #define MAGMA_HAVE_WEAK    1
 #endif
 #endif
@@ -86,7 +88,7 @@
 #endif
 
 /** ****************************************************************************
- *  Define magma_[sd]sqrt functions 
+ *  Define magma_[sd]sqrt functions
  *    - sqrt alone cannot be caught by the generation script because of tsqrt
  */
 

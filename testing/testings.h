@@ -7,6 +7,26 @@
 
 #include "magma.h"
 
+
+/***************************************************************************//**
+ * Utilities; also in MAGMA internal header common_magma.h
+ */
+#if defined( _WIN32 ) || defined( _WIN64 )
+    // functions where Microsoft fails to provide C99 standard
+    // (only with Microsoft, not with nvcc on Windows)
+    #ifndef __NVCC__
+    
+        #include <float.h>
+        #define copysign(x,y) _copysign(x,y)
+        #define isnan(x)      _isnan(x)
+        #define isinf(x)      ( ! _finite(x) && ! _isnan(x) )
+        #define isfinite(x)   _finite(x)
+        // note _snprintf has slightly different semantics than snprintf
+        #define snprintf _snprintf
+        
+    #endif
+#endif
+
 #ifndef min
 #define min(a,b)  (((a)<(b))?(a):(b))
 #endif
@@ -15,6 +35,10 @@
 #define max(a,b)  (((a)<(b))?(b):(a))
 #endif
 
+
+/***************************************************************************//**
+ * Macros to handle error checking.
+ */
 
 #define TESTING_INIT()                                                     \
     magma_init();                                                          \
@@ -70,7 +94,7 @@
     }
 
 
-#define TESTING_MALLOC_PIN( ptr, type, size )                                  \
+#define TESTING_MALLOC_PIN( ptr, type, size )                                 \
     if ( MAGMA_SUCCESS !=                                                     \
             magma_malloc_pinned( (void**) &ptr, (size)*sizeof(type) )) {      \
         fprintf( stderr, "!!!! magma_malloc_pinned failed for: %s\n", #ptr ); \
