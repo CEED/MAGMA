@@ -29,6 +29,11 @@
 extern "C" {
 #endif
 
+/* ////////////////////////////////////////////////////////////////////////////
+   -- MAGMA Auxiliary functions to get the NB used
+*/
+magma_int_t magma_get_smlsize_divideconquer();
+
 // ========================================
 // initialization
 magma_err_t
