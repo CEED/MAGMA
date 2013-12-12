@@ -353,7 +353,7 @@
 *
       NB = 2
       IF( LWORK .GE. N + 2*N*NBMIN ) THEN
-         VERSION = 1
+         VERSION = 2
          NB = (LWORK - N) / (2*N)
          NB = MIN( NB, NBMAX )
          CALL DLASET( 'F', N, 1+2*NB, ZERO, ZERO, WORK, N )
