@@ -151,6 +151,12 @@ endif()
 include_directories( include )
 include_directories( control )
 
+# Need to check sizeof(void*) after setting flags above;
+# CMAKE_SIZEOF_VOID_P can be wrong.
+include( CheckTypeSize )
+CHECK_TYPE_SIZE( void* SIZEOF_VOID_PTR )
+set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Dmagma_devptr_t=\"integer\(kind=${SIZEOF_VOID_PTR}\)\"" )
+
 message( "-- Flags" )
 message( "   CFLAGS   ${CMAKE_C_FLAGS}" )
 message( "   CXXFLAGS ${CMAKE_CXX_FLAGS}" )
