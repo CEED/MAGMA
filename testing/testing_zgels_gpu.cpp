@@ -26,7 +26,7 @@
 #define PRECISION_z
 
 /* ////////////////////////////////////////////////////////////////////////////
-   -- Testing zgeqrs
+   -- Testing zgels
 */
 int main( int argc, char** argv )
 {
@@ -122,7 +122,7 @@ int main( int argc, char** argv )
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gflops / gpu_time;
             if (info != 0)
-                printf("magma_zgels returned error %d: %s.\n",
+                printf("magma_zgels_gpu returned error %d: %s.\n",
                        (int) info, magma_strerror( info ));
             
             // compute the residual
