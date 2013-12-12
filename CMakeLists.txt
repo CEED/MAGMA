@@ -170,17 +170,51 @@ include( ${CMAKE_SOURCE_DIR}/src/CMake )
 include( ${CMAKE_SOURCE_DIR}/control/CMake )
 include( ${CMAKE_SOURCE_DIR}/magmablas/CMake )
 include( ${CMAKE_SOURCE_DIR}/interface_cuda/CMake )
-cuda_add_library( magma
-	${src_ALLSRC}
-	${control_ALLSRC}
-	${magmablas_ALLSRC}
-	${interface_cuda_ALLSRC}
-)
-target_link_libraries( magma
-	${LAPACK_LIBRARIES}
-	${CUDA_CUDART_LIBRARY}
-	${CUDA_CUBLAS_LIBRARIES}
-)
+
+list( APPEND ALLSRC ${src_ALLSRC} ${control_ALLSRC} ${magmablas_ALLSRC} ${interface_cuda_ALLSRC} )
+
+if ( WIN32 )
+	# Windows seems to have a problem mixing C, CUDA, and Fortran files
+	# Currently ignores .f90 and .F90 files, because it doesn't seem to
+	# understand that .F90 files should be pre-processed.
+	
+	# separate Fortran and C/C++/CUDA files
+	foreach( f ${ALLSRC} )
+		if ( ${f} MATCHES "\\.(f)$" )  # |f90|F90
+			list( APPEND ALLSRC_f   ${f} )
+		elseif ( ${f} MATCHES "\\.(c|cu|cpp)$" )
+			list( APPEND ALLSRC_cpp ${f} )
+		endif()
+	endforeach()
+	#message( "ALLSRC_cpp ${ALLSRC_cpp}" )
+	#message( "ALLSRC_f   ${ALLSRC_f}"   )
+	
+	# on Windows, Fortran files aren't compiled if listed here...
+	cuda_add_library( magma ${ALLSRC_cpp} )
+	target_link_libraries( magma
+		${LAPACK_LIBRARIES}
+		${CUDA_CUDART_LIBRARY}
+		${CUDA_CUBLAS_LIBRARIES}
+	)
+	
+	# ...so make a separate library out of Fortran files. Ugh.
+	add_library( magmaf ${ALLSRC_f} )
+	target_link_libraries( magmaf
+		${LAPACK_LIBRARIES}
+		${CUDA_CUDART_LIBRARY}
+		${CUDA_CUBLAS_LIBRARIES}
+	)
+	set( LIBS test lapacktest magma magmaf )
+else()
+	# Unix doesn't seem to have a problem with mixing C, CUDA, and Fortran files
+	cuda_add_library( magma ${ALLSRC} )
+	target_link_libraries( magma
+		${LAPACK_LIBRARIES}
+		${CUDA_CUDART_LIBRARY}
+		${CUDA_CUBLAS_LIBRARIES}
+	)
+	set( LIBS test lapacktest magma )
+endif()
 
 
 # ----------------------------------------
@@ -210,5 +244,5 @@ foreach( TEST ${testing_ALLSRC} )
 	string( REGEX REPLACE "testing/" "" EXE ${EXE} )
 	#message( "${TEST} --> ${EXE}" )
 	add_executable( ${EXE} ${TEST} )
-	target_link_libraries( ${EXE} test lapacktest magma )
+	target_link_libraries( ${EXE} ${LIBS} )
 endforeach()
