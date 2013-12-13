@@ -80,3 +80,7 @@ Once built, the MAGMA library and testers should be in
    build\lib\Debug\
    build\testing\Debug\
 where "Debug" depends on what solution configuration you chose.
+
+CMake would not compile Fortran and C++ files in the same library, so Fortran
+files are compiled into a separate magmaf library. Currently, it is only
+required for the non-symmetric eigenvalue problem, though.
