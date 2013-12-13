@@ -7,7 +7,7 @@
 #
 # @author Mark Gates
 
-my $usage = "Usage: $0 [--wrapper file] [--interface file] magma_z.i\n";
+my $usage = "Usage: $0 [--opencl] [--wrapper file] [--interface file] magma_z.i\n";
 
 use strict;
 use Text::Balanced qw( extract_bracketed );
@@ -16,8 +16,7 @@ use Text::Wrap;
 
 # --------------------
 # declare constants and variables
-my( $file_wrapper, $file_interface,
-	$pre, $return, $func, $is_gpu, $text, $rest, $comment,
+my( $pre, $return, $func, $is_gpu, $text, $rest, $comment,
 	$funcf,
 	$wrapper, $call, $interface, $vars,
 	$args, @args, $arg, $type, $base_type, $var, $first_arg, $is_ptr );
@@ -26,6 +25,12 @@ my( $file_wrapper, $file_interface,
 # ignore PLASMA functions (tstrf, incpiv)
 # ignore misc functions in headers but not in library (larfg, getrf2, geqr2) (as of 2012-04-16)
 my @ignore = qw(
+	[sdcz]geqrf_msub
+	[sdcz]getrf_msub
+	[sdcz]getrf2_msub
+	[sdcz]potrf_msub
+	[sdcz]potrf2_msub
+	
 	[sd]sygvr
 	[sd]sygvx
 	[sdcz]laqps
@@ -70,6 +75,7 @@ my %types = (
 	'magma_norm_t'       => 'character       ',
 	'magma_dist_t'       => 'character       ',
 	
+	'size_t'             => 'integer         ',  # dose Fortran have unsigned?
 	'char'               => 'character       ',
 	'int'                => 'integer         ',
 	'magma_int_t'        => 'integer         ',
@@ -80,6 +86,11 @@ my %types = (
 	'magmaFloatComplex'  => 'complex         ',
 	'magmaDoubleComplex' => 'complex*16      ',
 	'magma_queue_t'      => 'integer         ',  # not sure what type to use for streams -- they are pointers, right?
+	
+	'magmaFloat_ptr'         => 'magma_devptr_t',
+	'magmaDouble_ptr'        => 'magma_devptr_t',
+	'magmaFloatComplex_ptr'  => 'magma_devptr_t',
+	'magmaDoubleComplex_ptr' => 'magma_devptr_t',
 );
 
 my %devptrs = (
@@ -90,6 +101,10 @@ my %devptrs = (
 	'cuDoubleComplex'    => 'magma_zdevptr',
 	'magmaFloatComplex'  => 'magma_cdevptr',
 	'magmaDoubleComplex' => 'magma_zdevptr',
+	'magmaFloat_ptr'         => 'magma_cdevptr',
+	'magmaDouble_ptr'        => 'magma_zdevptr',
+	'magmaFloatComplex_ptr'  => 'magma_cdevptr',
+	'magmaDoubleComplex_ptr' => 'magma_zdevptr',
 );
 
 # Fortran 90 has 132 line length limit, so wrap text
@@ -100,7 +115,10 @@ $Text::Wrap::unexpand  = 0;  # no tabs
 
 # --------------------
 # parse options
+my $opencl = 0;
+my( $file_wrapper, $file_interface );
 GetOptions(
+	"opencl"      => \$opencl,
 	"wrapper=s"   => \$file_wrapper,
 	"interface=s" => \$file_interface,
 ) or die( "$!$usage" );
@@ -215,7 +233,7 @@ s/void \wpanel_to_q.*\n//;
 s/void \wq_to_panel.*\n//;
 
 while( $_ ) {
-	if ( m/(.*?)^(magma_int_t|int|void)\s+magma_(\w+?)(_gpu)?\s*(\(.*)/ms ) {
+	if ( m/(.*?)^(magma_err_t|magma_int_t|int|void)\s+magma_(\w+?)(_gpu)?\s*(\(.*)/ms ) {
 		# parse magma function
 		$pre    = $1;
 		$return = $2;
@@ -241,7 +259,13 @@ while( $_ ) {
 		
 		my $match = $func =~ m/^($ignore)$/;
 		print STDERR "FUNC $func $match\n";
-		if ( $func =~ m/^($ignore)$/ or $func =~ m/_mgpu/ ) {
+		if ( $opencl and $is_gpu ) {
+			# ignore OpenCL GPU functions, since
+			# we haven't dealt with passing cl_mem objects in Fortran yet
+			$wrapper   = "";
+			$interface = "";
+		}
+		elsif ( $func =~ m/^($ignore)$/ or $func =~ m/_mgpu/ ) {
 			# ignore auxiliary functions and multi-GPU functions, since
 			# we haven't dealt with passing arrays of pointers in Fortran yet
 			$wrapper   = "";
