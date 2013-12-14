@@ -48,6 +48,21 @@ int main( int argc, char** argv)
 
     const char *filename[] =
     {
+   /*  "test_matrices/tuma1.mtx",
+     "test_matrices/msc23052.mtx",
+     "test_matrices/bcsstm36.mtx",
+     "test_matrices/c-49.mtx",
+     "test_matrices/c-60.mtx",
+     "test_matrices/smt.mtx",
+     "test_matrices/shallow_water1.mtx",*/
+     "test_matrices/nasasrb.mtx",
+     //"test_matrices/venkat50.mtx",
+     "test_matrices/bbmat.mtx",
+     "test_matrices/wang4.mtx",
+     "test_matrices/wang3.mtx",
+     "test_matrices/raefsky4.mtx",
+     "test_matrices/raefsky3.mtx",
+     "test_matrices/CAG_mat72.mtx",
      "test_matrices/Trefethen_20_b.mtx",
      "test_matrices/Trefethen_200.mtx",
      "test_matrices/Trefethen_2000.mtx",
@@ -55,13 +70,13 @@ int main( int argc, char** argv)
 
      "test_matrices/apache1.mtx",
      "test_matrices/filter3D.mtx",
-     "test_matrices/Baumann.mtx",
+    // "test_matrices/Baumann.mtx",
      "test_matrices/boneS01.mtx",
      "test_matrices/stomach.mtx",
+     "test_matrices/G2_circuit.mtx",
 
      "test_matrices/Laplace2D_1M.mtx",
      "test_matrices/apache2.mtx",
-     "test_matrices/G2_circuit.mtx",
      "test_matrices/lap_25.mtx",
      "test_matrices/diag.mtx",
      "test_matrices/tridiag_2.mtx",
@@ -87,7 +102,7 @@ int main( int argc, char** argv)
      "test_matrices/inline_1.mtx",
      "test_matrices/ldoor.mtx"
     };
-for(magma_int_t matrix=9; matrix<12; matrix++){
+for(magma_int_t matrix=0; matrix<18; matrix++){
 
 
     magma_z_sparse_matrix A, B, C, D, E, F, G, H, I, J, K, Z;
@@ -108,16 +123,17 @@ for(magma_int_t matrix=9; matrix<12; matrix++){
     double t_lusv1, t_lusv = 0.0;
     #endif
     magma_z_csr_mtx( &A, filename[matrix] );
+    //printf("A:\n");
+    //magma_z_mvisu( A );
 
     for(int defaultsize=400; defaultsize>=16; defaultsize--){
         if( A.num_rows%defaultsize == 0 )
             B.blocksize = defaultsize;
     }
     printf("  %d  %d  |", A.num_rows, B.blocksize);
-    //B.blocksize = 20 ;
+    //B.blocksize = 17 ;
     magma_z_mconvert( A, &B, Magma_CSR, Magma_BCSR);
-    //printf("A:\n");
-    //magma_z_mvisu( A );
+
     //printf("B:\n");
     //magma_z_mvisu( B );
     magma_z_mtransfer( B, &C, Magma_CPU, Magma_DEV);
@@ -137,7 +153,7 @@ for(magma_int_t matrix=9; matrix<12; matrix++){
     //printf("D:\n");
 
     //magma_z_mvisu( D );
-/*
+
 
     magma_z_vinit( &b, Magma_DEV, A.num_cols, mone );
     magma_z_vinit( &c, Magma_DEV, A.num_cols, mone );
@@ -170,7 +186,7 @@ for(magma_int_t matrix=9; matrix<12; matrix++){
         #ifdef ENABLE_TIMER
         magma_device_sync(); t_gmres1=magma_wtime();
         #endif
-    magma_zgmres( E, c, &y, &solver_par );
+    //magma_zgmres( E, c, &y, &solver_par );
         #ifdef ENABLE_TIMER
         magma_device_sync(); t_gmres+=(magma_wtime()-t_gmres1);
         #endif
