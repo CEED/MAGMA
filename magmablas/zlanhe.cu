@@ -239,7 +239,7 @@ zlanhe_inf_kernel_generic_l(
             Copy + Transpose lower triangle
         --------------------------------------*/
         #pragma unroll 8
-        for(int j =0; j < inf_bs; j += 4)
+        for(int j=0; j < inf_bs; j += 4)
             la[ty+j][tx] = A[j*lda];
         
         A += inf_bs;
@@ -403,7 +403,7 @@ zlanhe_inf_kernel_generic_u(
                 count = n_mod_bs- tx;
             else
                 count = n_mod_bs;
-            for(j =0; j < count; j++) {
+            for(j=0; j < count; j++) {
                 res += cuCabs( A[-j*lda] );
             }
             A -= (count-1)*lda;
@@ -468,7 +468,7 @@ zlanhe_inf_kernel_generic_u(
             Copy + Transpose lower triangle
         --------------------------------------*/
         #pragma unroll 8
-        for(int j =0; j < inf_bs; j += 4) {
+        for(int j=0; j < inf_bs; j += 4) {
             la[tx][31-ty-j] = A[ -j * lda];
         }
         
@@ -594,10 +594,10 @@ zlanhe_inf_kernel_special_u(
     }
     
     #pragma unroll 8
-    for(int j =0; j < inf_bs; j += 4)
+    for(int j=0; j < inf_bs; j += 4)
         la[tx][31-ty-j] = A[ -j * lda];
     
-    /* Look at the indexing changes */    
+    /* Look at the indexing changes */
     A -= inf_bs;
     __syncthreads();
     
