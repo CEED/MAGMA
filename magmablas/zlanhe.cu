@@ -66,7 +66,7 @@ zlanhe_inf_kernel_special_l(
     // TODO make diagonal element real
     #pragma unroll 8
     for(int i=ty*8; i < (1+ty)*inf_bs/4; i++) {
-        if ( i < tx ) }
+        if ( i < tx ) {
             la[tx][i] = la[i][tx];
         }
         else
