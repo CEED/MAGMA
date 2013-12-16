@@ -32,6 +32,8 @@ ZSRC := \
 	testing_zgeadd_batched.cpp	\
 	testing_zlacpy.cpp	\
 	testing_zlacpy_batched.cpp	\
+	testing_zlange.cpp	\
+	testing_zlanhe.cpp	\
 	testing_dlarfg.cpp	\
 	testing_zprint.cpp	\
 	testing_zsymmetrize.cpp	\
