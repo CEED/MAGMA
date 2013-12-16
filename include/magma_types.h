@@ -438,6 +438,12 @@ typedef int magma_precision;
 #define MagmaLeftStr       "Left"
 #define MagmaRightStr      "Right"
 
+#define MagmaOneNormStr       "1"
+#define MagmaTwoNormStr       "2"
+#define MagmaFrobeniusNormStr "Fro"
+#define MagmaInfNormStr       "Inf"
+#define MagmaMaxNormStr       "Max"
+
 #define MagmaForwardStr    "Forward"
 #define MagmaBackwardStr   "Backward"
 
