@@ -674,8 +674,9 @@ zbcsr_gemm_kernel64(
     Arguments
     =========
 
-    magma_int_t r_blocks            number of blocks
     magma_int_t size_b              blocksize in BCSR
+    magma_int_t num_block_rows      number of block rows
+    magma_int_t kblocks             number of blocks in row
     magma_int_t *ipiv               array containing pivots
     double *x           input/output vector x
 
