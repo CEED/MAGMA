@@ -35,34 +35,12 @@ ZSRC := \
 	zbcsrswp.cu		\
 	zbcsrtrsv.cu		\
 
-
-
-# multi-GPU
-ZSRC += \
-
-
-# Card-specific versions that need precisions generated must be above in ZSRC,
-# so they are all put into Makefile.src in the release. The code is #ifdef'd
-# for the correct card.
-
 -include Makefile.local
 -include Makefile.src
 
-FERMISRC = \
+ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR)
 
-TESLASRC = \
-
-ALLHDR := $(ZHDR) $(CHDR) $(DHDR) $(SHDR) \
-
-ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) \
-
-ifeq (${GPU_TARGET}, Tesla)
-    ALLSRC += $(TESLASRC)
-else ifeq (${GPU_TARGET}, Fermi)
-    ALLSRC += $(FERMISRC)
-else ifeq (${GPU_TARGET}, Kepler)
-    ALLSRC += $(FERMISRC)
-endif
+ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 
 ALLOBJ := $(ALLSRC:.cu=.cu_o) 
 ALLOBJ := $(ALLOBJ:.cpp=.o)
