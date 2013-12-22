@@ -72,8 +72,9 @@ ifeq (1, $(words $(findstring plasma, $(PLASMA))))
     require := plasma
 endif
 
-# INC is all external include directories (CUDA, MKL, etc.)
-# INC_MAGMA adds local magma directories needed to compile magma
+# INC is all external include directories (CUDA, MKL, etc.).
+# It is used for external programs that link with MAGMA, e.g., via pkgconfig.
+# INC_MAGMA adds internal magma directories needed to compile magma itself.
 INC_MAGMA = $(INC) -I$(MAGMA_DIR)/include -I$(MAGMA_DIR)/control
 
 # Define the pointer size for fortran compilation
