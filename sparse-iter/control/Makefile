@@ -22,11 +22,13 @@ ZSRC := \
 	matrix_zio.cpp		\
 	z_transpose_csr.cpp	\
 
+SRC := \
+	mmio.cpp		\
+
 -include Makefile.local
 -include Makefile.src
 
-ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)	\
-					mmio.cpp
+ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) $(SRC)
 
 ALLOBJ := $(ALLSRC:.cpp=.o)
 ALLOBJ := $(ALLOBJ:.f90=.o)
@@ -45,5 +47,3 @@ clean:
 
 cleanall: clean
 	rm -f $(LIBMAGMA_SPARSE)
-
-
