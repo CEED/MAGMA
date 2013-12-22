@@ -7,24 +7,22 @@
 #//////////////////////////////////////////////////////////////////////////////
 
 MAGMA_DIR = ../..
-include ../../Makefile.internal
+include $(MAGMA_DIR)/Makefile.internal
 
 # ----------
 # Krylov space linear solvers
 ZSRC += \
-	testing_z_matrix_io.cpp     \
-	testing_z_matrix_compressor.cpp     \
-    testing_z_mv.cpp            \
-  	testing_zjacobi.cpp         \
-	testing_zcg.cpp	            \
-	testing_zgmres.cpp	        \
-	testing_zp1gmres.cpp	        \
-	testing_zbicgstab.cpp       \
-  	testing_zir.cpp              \
-  	testing_zcir.cpp              \
-  	testing_zcpir.cpp              \
-                                \
-
+	testing_z_matrix_io.cpp	\
+	testing_z_matrix_compressor.cpp	\
+	testing_z_mv.cpp	\
+	testing_zjacobi.cpp	\
+	testing_zcg.cpp		\
+	testing_zgmres.cpp	\
+	testing_zp1gmres.cpp	\
+	testing_zbicgstab.cpp	\
+	testing_zir.cpp		\
+	testing_zcir.cpp	\
+	testing_zcpir.cpp	\
 
 
 # ----------
@@ -34,22 +32,22 @@ ZSRC += \
 # ----------
 # Mixed-precision solvers
 ZSRC += \
-  	testing_zpcg.cpp            \
-  	testing_zpbicgstab.cpp      \
-  	testing_zcpbicgstab.cpp      \
-  	testing_zpgmres.cpp         \
-  	testing_zgmres_pipe.cpp         \
-  	testing_zcpgmres.cpp         \
-  	testing_zdot.cpp              \
-  	testing_zkernel.cpp              \
-  	testing_z_csrmv.cpp              \
-  	testing_z_mpk_4.cpp              \
-  	testing_z_mpk_5.cpp              \
+	testing_zpcg.cpp	\
+	testing_zpbicgstab.cpp	\
+	testing_zcpbicgstab.cpp	\
+	testing_zpgmres.cpp	\
+	testing_zgmres_pipe.cpp	\
+	testing_zcpgmres.cpp	\
+	testing_zdot.cpp	\
+	testing_zkernel.cpp	\
+	testing_z_csrmv.cpp	\
+	testing_z_mpk_4.cpp	\
+	testing_z_mpk_5.cpp	\
 
 # debugging
 ZSRC += \
-  	testing_zdebug.cpp              \
-  	testing_zcdebug.cpp             \
+	testing_zdebug.cpp	\
+	testing_zcdebug.cpp	\
 
 
 # ------------------------------------------------------------

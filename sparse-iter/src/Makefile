@@ -7,7 +7,7 @@
 #//////////////////////////////////////////////////////////////////////////////
 
 MAGMA_DIR = ../..
-include ../../Makefile.internal
+include $(MAGMA_DIR)/Makefile.internal
 
 INC += -I$(MAGMA_DIR)/control
 
@@ -19,19 +19,19 @@ INC += -I$(MAGMA_DIR)/control
 
 # Krylov space linear solvers
 ZSRC += \
-    zjacobi.cpp     \
-    zir.cpp         \
+	zjacobi.cpp		\
+	zir.cpp			\
 	zcg.cpp			\
 	zgmres.cpp		\
 	zbicgstab.cpp		\
-	zbicgstab_merge.cpp		\
-	zbicgstab_merge2.cpp		\
+	zbicgstab_merge.cpp	\
+	zbicgstab_merge2.cpp	\
 	zpcg.cpp		\
 	zpbicgstab.cpp		\
-	zpgmres.cpp  		\
-	zgmres_pipe.cpp  		\
-	zilucg.cpp			\
-	zilugmres.cpp			\
+	zpgmres.cpp		\
+	zgmres_pipe.cpp		\
+	zilucg.cpp		\
+	zilugmres.cpp		\
 
 # Krylov space eigen-solvers
 ZSRC += \
@@ -43,8 +43,8 @@ ZSRC += \
 ZSRC += \
 	zcpbicgstab.cpp		\
 	zcpgmres.cpp		\
-	zciterref.cpp 		\
-	zcpir.cpp    		\
+	zciterref.cpp		\
+	zcpir.cpp		\
 
 # QR and least squares, GPU interface
 ZSRC += \
@@ -56,7 +56,7 @@ ZSRC += \
 
 # ILU and sparse direct
 ZSRC += \
-	zilu.cpp      		\
+	zilu.cpp		\
 
 
 # Wrappers, tools etc

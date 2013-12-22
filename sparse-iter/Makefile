@@ -7,7 +7,7 @@
 #//////////////////////////////////////////////////////////////////////////////
 
 MAGMA_DIR = ../
-include ../Makefile.internal
+include $(MAGMA_DIR)/Makefile.internal
 -include Makefile.local
 
 .PHONY: all lib libmagma_sparse test clean cleanall install shared
@@ -66,7 +66,7 @@ install: lib dir
 # Better solution would be to use non-recursive make, so make knows all the
 # objects in each subdirectory, or use libtool, or put rules for, e.g., the
 # control directory in src/Makefile (as done in src/CMakeLists.txt)
-LIBMAGMA_SPARSE_SO     = $(LIBMAGMA_SPARSE:.a=.so)
+LIBMAGMA_SPARSE_SO = $(LIBMAGMA_SPARSE:.a=.so)
 
 shared: lib
 	$(MAKE) $(LIBMAGMA_SPARSE_SO)
@@ -74,7 +74,7 @@ shared: lib
 $(LIBMAGMA_SPARSE_SO): src/*.o control/*.o blas/*.cu_o blas/*.o
 	@echo ======================================== libmagma_sparse.so
 	$(CC) $(LDOPTS) -shared -o $(LIBMAGMA_SPARSE_SO) \
-	src/*.o control/*.o blas/*.cu_o blas/*.o\
-    -L$(MAGMA_DIR)/lib -lmagma \
+	src/*.o control/*.o blas/*.cu_o blas/*.o \
+	-L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) \
 	$(LIB) -lcusparse

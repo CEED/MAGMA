@@ -7,20 +7,20 @@
 #//////////////////////////////////////////////////////////////////////////////
 
 MAGMA_DIR = ../..
-include ../../Makefile.internal
+include $(MAGMA_DIR)/Makefile.internal
 
 INC += -I../include
 
 ZSRC := \
-        magma_z_free.cpp \
-        magma_z_init.cpp \
-        magma_z_matrixchar.cpp \
-        magma_z_mconverter.cpp \
-        magma_z_mpksetup.cpp \
-		magma_z_transfer.cpp \
-        magma_z_vio.cpp \
-        matrix_zio.cpp \
-		z_transpose_csr.cpp \
+	magma_z_free.cpp	\
+	magma_z_init.cpp	\
+	magma_z_matrixchar.cpp	\
+	magma_z_mconverter.cpp	\
+	magma_z_mpksetup.cpp	\
+	magma_z_transfer.cpp	\
+	magma_z_vio.cpp		\
+	matrix_zio.cpp		\
+	z_transpose_csr.cpp	\
 
 -include Makefile.local
 -include Makefile.src

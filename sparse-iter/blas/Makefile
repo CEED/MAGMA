@@ -7,33 +7,33 @@
 #//////////////////////////////////////////////////////////////////////////////
 
 MAGMA_DIR = ../..
-include ../../Makefile.internal
+include $(MAGMA_DIR)/Makefile.internal
 
 ZHDR  = 
 
 # alphabetic order by base name (ignoring precision)
 ZSRC := \
-	clag2z_sparse.cu        \
-	magma_z_blaswrapper.cpp \
-	magma_z_mpksetup.cu      \
-	magma_clag2z.cpp        \
-	magma_zlag2c.cpp        \
+	clag2z_sparse.cu	\
+	magma_z_blaswrapper.cpp	\
+	magma_z_mpksetup.cu	\
+	magma_clag2z.cpp	\
+	magma_zlag2c.cpp	\
 	zgecsrmv.cu		\
 	zgeellmv.cu		\
-	zgeelltmv.cu            \
-	zjacobisetup.cu         \
-	zlag2c_sparse.cu        \
-	zmdot.cu                    \
-	zmergebicgstab.cu          \
-	zmergebicgstab2.cu          \
-	zmergeidr.cu          \
+	zgeelltmv.cu		\
+	zjacobisetup.cu		\
+	zlag2c_sparse.cu	\
+	zmdot.cu		\
+	zmergebicgstab.cu	\
+	zmergebicgstab2.cu	\
+	zmergeidr.cu		\
 	zmgecsrmv.cu		\
 	zmgeellmv.cu		\
-	zmgeelltmv.cu            \
-	zpipelinedgmrescopyscale.cu     \
-	zpipelinedgs.cu          \
-    zbcsrswp.cu         \
-    zbcsrtrsv.cu         \
+	zmgeelltmv.cu		\
+	zpipelinedgmrescopyscale.cu	\
+	zpipelinedgs.cu		\
+	zbcsrswp.cu		\
+	zbcsrtrsv.cu		\
 
 
 

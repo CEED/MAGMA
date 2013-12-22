@@ -7,7 +7,7 @@
 #//////////////////////////////////////////////////////////////////////////////
 
 MAGMA_DIR = .
-include ./Makefile.internal
+include $(MAGMA_DIR)/Makefile.internal
 -include Makefile.local
 
 
@@ -114,7 +114,7 @@ install: lib dir
 # Better solution would be to use non-recursive make, so make knows all the
 # objects in each subdirectory, or use libtool, or put rules for, e.g., the
 # control directory in src/Makefile (as done in src/CMakeLists.txt)
-LIBMAGMA_SO     = $(LIBMAGMA:.a=.so)
+LIBMAGMA_SO = $(LIBMAGMA:.a=.so)
 
 shared: lib
 	$(MAKE) $(LIBMAGMA_SO)
