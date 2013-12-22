@@ -8,7 +8,7 @@
 
 DIR = magmablas
 MAGMA_DIR = ..
-include ../Makefile.internal
+include $(MAGMA_DIR)/Makefile.internal
 
 ZHDR  = commonblas_z.h
 

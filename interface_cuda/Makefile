@@ -8,7 +8,7 @@
 
 DIR = interface_cuda
 MAGMA_DIR = ..
-include ../Makefile.internal
+include $(MAGMA_DIR)/Makefile.internal
 
 ZSRC := \
 	blas_z.cpp	\

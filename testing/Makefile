@@ -8,7 +8,7 @@
 
 DIR = testing
 MAGMA_DIR = ..
-include ../Makefile.internal
+include $(MAGMA_DIR)/Makefile.internal
 
 # ----------
 # BLAS and auxiliary
@@ -190,13 +190,13 @@ LIBEXE  := $(LIBOBJ:.o=)
 # testing_zutil.cpp isn't in ZSRC (since they don't generate EXEs),
 # so add generation rules here instead of .Makefile.gen
 testing_cutil.cpp: testing_zutil.cpp
-	$(PYTHON) ../tools/codegen.py  -p c --file testing_zutil.cpp
+	$(PYTHON) $(MAGMA_DIR)/tools/codegen.py  -p c --file testing_zutil.cpp
 
 testing_dutil.cpp: testing_zutil.cpp
-	$(PYTHON) ../tools/codegen.py  -p d --file testing_zutil.cpp
+	$(PYTHON) $(MAGMA_DIR)/tools/codegen.py  -p d --file testing_zutil.cpp
 
 testing_sutil.cpp: testing_zutil.cpp
-	$(PYTHON) ../tools/codegen.py  -p s --file testing_zutil.cpp
+	$(PYTHON) $(MAGMA_DIR)/tools/codegen.py  -p s --file testing_zutil.cpp
 
 generate: testing_cutil.cpp testing_dutil.cpp testing_sutil.cpp
 
@@ -244,13 +244,13 @@ endif
 
 testing_%_f : testing_%_f.o $(FOBJ)
 	$(FORT) $(LDOPTS) $< $(FOBJ) -o $@ \
-	$(LIBTEST) $(LIBLAPACKTEST) -L../lib -lmagma \
+	$(LIBTEST) $(LIBLAPACKTEST) -L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) \
 	$(LIB) 
 
 testing_% : testing_%.o
 	$(CC) $(LDOPTS) $(NOMAIN) $< -o $@ \
-	$(LIBTEST) $(LIBLAPACKTEST) -L../lib -lmagma \
+	$(LIBTEST) $(LIBLAPACKTEST) -L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) \
 	$(LIB) 
 

@@ -8,7 +8,7 @@
 
 DIR = src
 MAGMA_DIR = ..
-include ../Makefile.internal
+include $(MAGMA_DIR)/Makefile.internal
 
 # ------------------------------------------------------------
 # Loosely, the order is alphabetic in each section, but mixed precision,

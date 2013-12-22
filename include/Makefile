@@ -8,7 +8,7 @@
 
 DIR = include
 MAGMA_DIR = ..
-include ../Makefile.internal
+include $(MAGMA_DIR)/Makefile.internal
 
 ZHDR =  magma_z.h	\
 	magma_zc.h	\
