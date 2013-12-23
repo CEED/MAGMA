@@ -87,6 +87,7 @@ PTROPT  = -Dmagma_devptr_t="integer(kind=$(PTRSIZE))"
 $(PTREXEC): $(PTROBJ)
 	$(CC) $(LDOPTS) -o $@ $<
 
+# Add to F90 (FOPTS), not needed in F77OPTS
 FOPTS += $(PTROPT)
 
 #
@@ -119,7 +120,7 @@ FOPTS += $(PTROPT)
 %.o: %.F90  $(PTREXEC)
 	$(FORT) $(FOPTS) $(INC_MAGMA) -c $< -o $@
 
-%.o: %.f    $(PTREXEC)
+%.o: %.f
 	$(FORT) $(F77OPTS) $(INC_MAGMA) -c $< -o $@
 
 -include $(MAGMA_DIR)/Makefile.gen
