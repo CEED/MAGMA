@@ -10,7 +10,8 @@ DIR = include
 MAGMA_DIR = ..
 include $(MAGMA_DIR)/Makefile.internal
 
-ZHDR =  magma_z.h	\
+ZHDR := \
+	magma_z.h	\
 	magma_zc.h	\
 	magmablas_z.h	\
 	magmablas_zc.h	\

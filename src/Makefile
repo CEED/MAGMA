@@ -143,6 +143,7 @@ ZSRC += \
 	dlaex0.cpp		\
 	dlaex1.cpp		\
 	dlaex3.cpp		\
+	dmove_eig.cpp		\
 	dstedx.cpp		\
 	zhetrd.cpp		\
 	zlatrd.cpp		\
@@ -150,7 +151,6 @@ ZSRC += \
 	zstedx.cpp		\
 	zungtr.cpp		\
 	zunmtr.cpp		\
-	dmove_eig.cpp		\
 
 # symmetric eigenvalues, multi-GPU 
 ZSRC += \

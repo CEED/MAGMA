@@ -14,16 +14,21 @@ include $(MAGMA_DIR)/Makefile.internal
 # BLAS and auxiliary
 ZSRC := \
 	testing_z_cublas_v2.cpp	\
+	\
 	testing_zgemm.cpp	\
 	testing_zgemv.cpp	\
 	testing_zhemv.cpp	\
-	testing_zsymv.cpp	\
 	testing_zherk.cpp	\
 	testing_zher2k.cpp	\
+	testing_zsymv.cpp	\
 	testing_ztrmm.cpp	\
 	testing_ztrmv.cpp	\
 	testing_ztrsm.cpp	\
 	testing_ztrsv.cpp	\
+	\
+	testing_zhemm_mgpu.cpp	\
+	testing_zhemv_mgpu.cpp	\
+	testing_zher2k_mgpu.cpp	\
 	\
 	testing_auxiliary.cpp	\
 	testing_parse_opts.cpp	\
@@ -40,10 +45,6 @@ ZSRC := \
 	testing_zsymmetrize_tiles.cpp	\
 	testing_zswap.cpp	\
 	testing_ztranspose.cpp	\
-	testing_zhemv_mgpu.cpp	\
-	\
-	testing_zhemm_mgpu.cpp	\
-	testing_zher2k_mgpu.cpp	\
 
 # ----------
 # Cholesky, GPU interface
@@ -86,11 +87,11 @@ ZSRC += \
 	testing_zcgeqrsv_gpu.cpp	\
 	\
 	testing_zgelqf_gpu.cpp	\
-	testing_zgeqrf_gpu.cpp	\
+	testing_zgels_gpu.cpp	\
+	testing_zgels3_gpu.cpp	\
 	testing_zgeqr2_gpu.cpp	\
 	testing_zgeqr2x_gpu.cpp	\
-	testing_zgels3_gpu.cpp	\
-	testing_zgels_gpu.cpp	\
+	testing_zgeqrf_gpu.cpp	\
 	testing_zlarfb_gpu.cpp	\
 	testing_zungqr_gpu.cpp	\
 	testing_zunmqr_gpu.cpp	\
@@ -174,10 +175,10 @@ ZSRC += $(ZSRCF)
 
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC)
 
-ALLOBJ := $(ALLSRC:.f90=.o)
+ALLOBJ := $(ALLSRC:.cpp=.o)
+ALLOBJ := $(ALLOBJ:.f90=.o)
 ALLOBJ := $(ALLOBJ:.F90=.o)
 ALLOBJ := $(ALLOBJ:.cuf=.o)
-ALLOBJ := $(ALLOBJ:.cpp=.o)
 
 EXE    := $(ALLOBJ:.o=)
 

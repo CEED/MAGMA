@@ -26,7 +26,6 @@ SRC := \
 ALLSRC := $(ZSRC) $(CSRC) $(DSRC) $(SSRC) $(SRC)
 
 ALLOBJ := $(ALLSRC:.cpp=.o)
-ALLOBJ := $(ALLOBJ:.f=.o)
 
 .PHONY: all clean cleanall
 
@@ -38,7 +37,7 @@ $(LIBMAGMA): $(ALLOBJ) stamp
 	$(RANLIB) $@
 
 # this forces LIBMAGMA to be archived
-stamp: $(ALLHDR) $(ALLOBJ)
+stamp: $(ALLOBJ)
 	touch $@
 
 clean:

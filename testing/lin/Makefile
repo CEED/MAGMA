@@ -326,4 +326,4 @@ cleanall: clean
 #	$(FORT) $(F77OPTS) -c $< -o $@
 
 ../fortran.o:
-	cd .. && make fortran.o
+	cd .. && $(MAKE) fortran.o

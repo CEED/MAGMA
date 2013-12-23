@@ -8,7 +8,7 @@
 
 DIR = control
 MAGMA_DIR = ..
-include ../Makefile.internal
+include $(MAGMA_DIR)/Makefile.internal
 
 ZSRC := \
 	zpanel_to_q.cpp	\
@@ -66,7 +66,7 @@ ALLOBJ := $(ALLOBJ:.F90=.o)
 .DEFAULT_GOAL := all
 all: $(LIBMAGMA)
 
-$(LIBMAGMA): stamp
+$(LIBMAGMA): $(ALLOBJ) stamp
 	$(ARCH) $(ARCHFLAGS) $@ $(ALLOBJ)
 	$(RANLIB) $@
 	cp *.mod ../include

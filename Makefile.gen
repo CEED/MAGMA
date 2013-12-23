@@ -43,7 +43,7 @@ headers:
 	@echo ======================================== include
 	( cd include && $(MAKE) )
 
-libmagma:     headers
+libmagma: headers
 
 # if an error occurs in creating .Makefile.gen or Makefile.src (or any other file)
 # have make delete them -- else they are corrupted and cause confusion.
