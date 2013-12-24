@@ -7,8 +7,9 @@ replacements can be defined such that no two sets can conflict.  Multiple
 types of replacements can, however, be specified for the same file.
 
 @author Wesley Alvaro
-@date 2011-4-8
+@author Mark Gates
 """
+__version__=2013.1224
 
 import sys
 import re
@@ -25,38 +26,32 @@ KEYWORD = '@precisions'
 DONE_KEYWORD = '@generated'
 
 # Regular expression for the replacement formatting
-REGEX = '^.*'+KEYWORD+'\s+((\w+,?)+)\s+(\w+)\s+->\s*((\s\w+)+).*$'
+# re.M means ^ and $ match line breaks anywhere in the string (which is the whole file)
+REGEX = re.compile( '^.*'+KEYWORD+'\s+((\w+,?)+)\s+(\w+)\s+->\s*((\s\w+)+).*$', flags=re.M )
 
 # Default acceptable extensions for files during directory walking
 EXTS = ['.c', '.cpp', '.h', '.hpp', '.f', '.jdf', '.f90', '.F90', '.f77', '.F77', '.cu', '.cuf', '.CUF']
 
-def check_gen(file, work, rex):
-    """Reads the file and determines if the file needs generation."""
-    fd = open( file, 'r')
-    lines = fd.readlines()
+def check_gen(filename, work):
+    """Reads the file and determines if it needs generation."""
+    fd = open( filename, 'r')
+    content = fd.read()
     fd.close()
-    for line in lines:
-        m = rex.match(line)
-        if m:
-            work.append((file, m.groups(), ''.join(lines)))
-            break
+    m = REGEX.search( content )
+    if ( m ):
+        work.append( (filename, m.groups(), content) )
 
 
-def grep(string, list):
-    expr = re.compile(string)
-    return filter(expr.search, list)
-
-
-def hidden(file):
+def visible(filename):
     """Exclude hidden files"""
-    return not file.startswith('.')
+    return not filename.startswith('.')
 
 
-def valid_extension(file):
+def valid_extension(filename):
     """Exclude non-valid extensions"""
     global EXTS
     for ext in EXTS:
-        if file.endswith(ext):
+        if filename.endswith(ext):
             return True
     return False
 
@@ -80,7 +75,7 @@ class Conversion:
     # Is the conversion in make mode? Output make commands.
     make = False
 
-    # What (if any) prefix is specified for the output folder? 
+    # What (if any) prefix is specified for the output folder?
     # If None, use the file's resident folder.
     prefix = None
     required_precisions = []
@@ -104,14 +99,14 @@ class Conversion:
         self.content = content
         #file = path.realpath(file)
         rel = relpath(file)
-        self.file = list(path.split(file))
+        self.file = path.split(file)
         self.date = path.getmtime(file)
         if sys.platform!="win32" and path.samefile( path.join( self.file[0], self.file[1] ), sys.argv[0]):
             raise ValueError('Let\'s just forget codegen.py')
         try:
             # ['normal', 'all', 'mixed'] for example. These are the replacement types to be used.
             self.types = match[0].split(',')
-            # 'z' for example. This is the current file's `type`. 
+            # 'z' for example. This is the current file's `type`.
             self.precision = match[2].lower()
             # ['c', 'd', 's'] for example. This is the current file's destination `types`.
             self.precisions = match[3].lower().split()
@@ -154,7 +149,7 @@ class Conversion:
                     # If a prefix is specified, set it up.
                     prefix = self.prefix
                     makeprefix = '--prefix '+prefix
-                    if new_file == self.file[1]: 
+                    if new_file == self.file[1]:
                         copy = True
                 # Where the destination file will reside.
                 conversion = path.join(prefix, new_file)
@@ -163,7 +158,7 @@ class Conversion:
                     # If in GNU Make mode, write the rule to create the file.
                     file_in = relpath(path.join(self.file[0], self.file[1]))
                     print file_out+':', file_in
-                    print "\t$(PYTHON)", sys.argv[0], makeprefix, '-p', precision, "--file", file_in
+                    print "\t$(PYTHON)", sys.argv[0], makeprefix, '-p', precision, file_in
                 self.names.append(new_file)
                 self.files_out.append(file_out)
                 self.dependencies.append( (path.join(self.file[0], self.file[1]), precision, file_out) )
@@ -183,7 +178,7 @@ class Conversion:
                     self.dates.append(None)
                     load = True
             elif precision != self.precision:
-                # There was no change in the file's name, thus, 
+                # There was no change in the file's name, thus,
                 # no work can be done without overwriting the original.
                 if self.debug: print '<No Change>', ':'
                 else: print >> sys.stderr, new_file, 'had no change for', precision
@@ -193,7 +188,7 @@ class Conversion:
         return load
 
     def export_data(self):
-        """After all of the conversions are complete, 
+        """After all of the conversions are complete,
         this will write the output file contents to the disk."""
         for i in range(len(self.names)):
             name = self.names[i]
@@ -208,7 +203,7 @@ class Conversion:
             fd.close()
 
     def convert_data(self):
-        """Convert the data in the files by making the 
+        """Convert the data in the files by making the
         appropriate replacements for each destination precision."""
         for i in range(len(self.precisions)):
             precision = self.precisions[i]
@@ -231,7 +226,7 @@ class Conversion:
             prec_to = work[0].index(precision)
             prec_from = work[0].index(self.precision)
         except:
-            # If requested replacement type does not exist, 
+            # If requested replacement type does not exist,
             # return unaltered contents.
             return data
         for i in range(1, len(work)):
@@ -262,7 +257,7 @@ class Conversion:
             data = self.substitute('all', data, precision)
         except: pass
         for sub_type in self.types:
-            # For all the other types of conversion for the current file, 
+            # For all the other types of conversion for the current file,
             # make the correct replacements.
             if sub_type == 'all': continue
             try:
@@ -271,6 +266,7 @@ class Conversion:
                 raise ValueError('I encountered an unrecoverable error while working in subtype:', sub_type+'.')
         # Replace the replacement keywork with one that signifies this is an output file,
         # to prevent multiple replacement issues if run again.
-        data = re.sub(KEYWORD+' '+','.join(self.types)+'.*', DONE_KEYWORD+' '+precision+' '+datetime.now().ctime(), data); 
+        data = re.sub( KEYWORD+' '+','.join(self.types)+'.*',
+                       DONE_KEYWORD+' from '+self.file[1]+' '+','.join(self.types)+' '+self.precision+' -> '+precision+', '+datetime.now().ctime(), data );
         return data
 # end class Conversion
