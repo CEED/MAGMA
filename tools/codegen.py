@@ -113,7 +113,7 @@ def main():
         # Clean generated files
         for file in c.files_out:
             if path.exists(file):
-				os.remove(file)
+                os.remove(file)
 # end main
 
 if __name__ == "__main__":
