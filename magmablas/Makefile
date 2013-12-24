@@ -10,7 +10,8 @@ DIR = magmablas
 MAGMA_DIR = ..
 include $(MAGMA_DIR)/Makefile.internal
 
-ZHDR  = commonblas_z.h
+ZHDR := \
+	commonblas_z.h
 
 # alphabetic order by base name (ignoring precision)
 ZSRC := \
