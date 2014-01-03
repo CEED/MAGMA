@@ -10,6 +10,7 @@
        @author Mark Gates
 */
 #include "common_magma.h"
+#include "timer.h"
 #include <cblas.h>
 
 #define PRECISION_d
@@ -147,6 +148,11 @@ magma_dgeev(
     char jobvl_[2] = {jobvl, 0};
     char jobvr_[2] = {jobvr, 0};
 
+    magma_timer_t time_total, time_gehrd, time_unghr, time_hseqr, time_trevc, time_sum;
+    magma_flops_t flop_total, flop_gehrd, flop_unghr, flop_hseqr, flop_trevc, flop_sum;
+    timer_start( time_total );
+    flops_start( flop_total );
+    
     *info = 0;
     lquery = lwork == -1;
     wantvl = lapackf77_lsame( jobvl_, "V" );
@@ -230,6 +236,8 @@ magma_dgeev(
     iwrk = itau + n;
     liwrk = lwork - iwrk;
 
+    timer_start( time_gehrd );
+    flops_start( flop_gehrd );
     #if defined(VERSION1)
         // Version 1 - LAPACK
         lapackf77_dgehrd( &n, &ilo, &ihi, A, &lda,
@@ -243,6 +251,8 @@ magma_dgeev(
         magma_dgehrd( n, ilo, ihi, A, lda,
                       &work[itau], &work[iwrk], liwrk, dT, &ierr );
     #endif
+    time_sum += timer_stop( time_gehrd );
+    flop_sum += flops_stop( flop_gehrd );
 
     if (wantvl) {
         /* Want left eigenvectors
@@ -253,6 +263,8 @@ magma_dgeev(
 
         /* Generate orthogonal matrix in VL
          * (Workspace: need 3*N-1, prefer 2*N + (N-1)*NB) */
+        timer_start( time_unghr );
+        flops_start( flop_unghr );
         #if defined(VERSION1) || defined(VERSION2)
             // Version 1 & 2 - LAPACK
             lapackf77_dorghr( &n, &ilo, &ihi, vl, &ldvl, &work[itau],
@@ -261,13 +273,19 @@ magma_dgeev(
             // Version 3 - LAPACK consistent MAGMA HRD + T matrices stored
             magma_dorghr( n, ilo, ihi, vl, ldvl, &work[itau], dT, nb, &ierr );
         #endif
-
+        time_sum += timer_stop( time_unghr );
+        flop_sum += flops_stop( flop_unghr );
+        
+        timer_start( time_hseqr );
+        flops_start( flop_hseqr );
         /* Perform QR iteration, accumulating Schur vectors in VL
          * (Workspace: need N+1, prefer N+HSWORK (see comments) ) */
         iwrk = itau;
         liwrk = lwork - iwrk;
         lapackf77_dhseqr( "S", "V", &n, &ilo, &ihi, A, &lda, WR, WI,
                           vl, &ldvl, &work[iwrk], &liwrk, info );
+        time_sum += timer_stop( time_hseqr );
+        flop_sum += flops_stop( flop_hseqr );
 
         if (wantvr) {
             /* Want left and right eigenvectors
@@ -284,6 +302,8 @@ magma_dgeev(
 
         /* Generate orthogonal matrix in VR
          * (Workspace: need 3*N-1, prefer 2*N + (N-1)*NB) */
+        timer_start( time_unghr );
+        flops_start( flop_unghr );
         #if defined(VERSION1) || defined(VERSION2)
             // Version 1 & 2 - LAPACK
             lapackf77_dorghr( &n, &ilo, &ihi, vr, &ldvr, &work[itau],
@@ -292,21 +312,31 @@ magma_dgeev(
             // Version 3 - LAPACK consistent MAGMA HRD + T matrices stored
             magma_dorghr( n, ilo, ihi, vr, ldvr, &work[itau], dT, nb, &ierr );
         #endif
-
+        time_sum += timer_stop( time_unghr );
+        flop_sum += flops_stop( flop_unghr );
+        
         /* Perform QR iteration, accumulating Schur vectors in VR
          * (Workspace: need N+1, prefer N+HSWORK (see comments) ) */
+        timer_start( time_hseqr );
+        flops_start( flop_hseqr );
         iwrk = itau;
         liwrk = lwork - iwrk;
         lapackf77_dhseqr( "S", "V", &n, &ilo, &ihi, A, &lda, WR, WI,
                           vr, &ldvr, &work[iwrk], &liwrk, info );
+        time_sum += timer_stop( time_hseqr );
+        flop_sum += flops_stop( flop_hseqr );
     }
     else {
         /* Compute eigenvalues only
          * (Workspace: need N+1, prefer N+HSWORK (see comments) ) */
+        timer_start( time_hseqr );
+        flops_start( flop_hseqr );
         iwrk = itau;
         liwrk = lwork - iwrk;
         lapackf77_dhseqr( "E", "N", &n, &ilo, &ihi, A, &lda, WR, WI,
                           vr, &ldvr, &work[iwrk], &liwrk, info );
+        time_sum += timer_stop( time_hseqr );
+        flop_sum += flops_stop( flop_hseqr );
     }
 
     /* If INFO > 0 from DHSEQR, then quit */
@@ -314,6 +344,8 @@ magma_dgeev(
         goto CLEANUP;
     }
 
+    timer_start( time_trevc );
+    flops_start( flop_trevc );
     if (wantvl || wantvr) {
         /* Compute left and/or right eigenvectors
          * (Workspace: need 4*N) */
@@ -326,6 +358,8 @@ magma_dgeev(
                            vr, &ldvr, &n, &nout, &work[iwrk], &liwrk, &ierr );
         #endif
     }
+    time_sum += timer_stop( time_trevc );
+    flop_sum += flops_stop( flop_trevc );
 
     if (wantvl) {
         /* Undo balancing of left eigenvectors
@@ -412,6 +446,13 @@ CLEANUP:
     #if defined(VERSION3)
     magma_free( dT );
     #endif
+    
+    timer_stop( time_total );
+    flops_stop( flop_total );
+    timer_printf( "dgeev times n %5d, gehrd %7.3f, unghr %7.3f, hseqr %7.3f, trevc %7.3f, total %7.3f, sum %7.3f\n",
+                  (int) n, time_gehrd, time_unghr, time_hseqr, time_trevc, time_total, time_sum );
+    timer_printf( "dgeev flops n %5d, gehrd %7lld, unghr %7lld, hseqr %7lld, trevc %7lld, total %7lld, sum %7.3f\n",
+                  (int) n, flop_gehrd, flop_unghr, flop_hseqr, flop_trevc, flop_total, flop_sum );
     
     return *info;
 } /* magma_dgeev */
