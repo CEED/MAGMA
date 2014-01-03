@@ -12,6 +12,7 @@
  */
 
 #include "common_magma.h"
+#include "timer.h"
 
 
 //////////////////////////////////////////////////////////////
@@ -89,10 +90,8 @@ extern "C" void  magma_zstedx_withZ(magma_int_t N, magma_int_t NE, double *D, do
     }
     printf("using magma_zstedx\n");
 
-#ifdef ENABLE_TIMER
-    magma_timestr_t start, end;
-    start = get_current_time();
-#endif
+    magma_timer_t time;
+    timer_start( time );
 
     char job = 'I';
 
@@ -108,10 +107,8 @@ extern "C" void  magma_zstedx_withZ(magma_int_t N, magma_int_t NE, double *D, do
         //assert(INFO==0);
     }
 
-#ifdef ENABLE_TIMER
-    end = get_current_time();
-    printf("time zstevx = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "time zstevx = %6.2f\n", time );
 
     magma_free( dwork );
     magma_free_cpu( IWORK );

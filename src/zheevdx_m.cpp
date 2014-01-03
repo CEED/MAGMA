@@ -13,6 +13,8 @@
 
 */
 #include "common_magma.h"
+#include "timer.h"
+
 #define PRECISION_z
 
 extern "C" magma_int_t
@@ -330,19 +332,14 @@ magma_zheevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     llwrk2 = lwork - indwk2;
     llrwk = lrwork - indrwk;
 
-//
-#ifdef ENABLE_TIMER
-    magma_timestr_t start, end;
-    start = get_current_time();
-#endif
+    magma_timer_t time;
+    timer_start( time );
 
     magma_zhetrd_mgpu(nrgpu, 1, uplo_[0], n, a, lda, w, &rwork[inde],
                       &work[indtau], &work[indwrk], llwork, &iinfo);
 
-#ifdef ENABLE_TIMER
-    end = get_current_time();
-    printf("time zhetrd = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "time zhetrd = %6.2f\n", time );
 
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call
        ZSTEDC to generate the eigenvector matrix, WORK(INDWRK), of the
@@ -350,34 +347,27 @@ magma_zheevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
        transformations represented as Householder vectors in A. */
     if (! wantz) {
         lapackf77_dsterf(&n, w, &rwork[inde], info);
-    } else {
-
-#ifdef ENABLE_TIMER
-        start = get_current_time();
-#endif
+    }
+    else {
+        timer_start( time );
 
         magma_zstedx_m(nrgpu, range, n, vl, vu, il, iu, w, &rwork[inde],
                        &work[indwrk], n, &rwork[indrwk],
                        llrwk, iwork, liwork, info);
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time zstedc = %6.2f\n", GetTimerValue(start,end)/1000.);
-        start = get_current_time();
-#endif
+        timer_stop( time );
+        timer_printf( "time zstedc = %6.2f\n", time );
+        timer_start( time );
 
         magma_dmove_eig(range, n, w, &il, &iu, vl, vu, m);
 
         magma_zunmtr_m(nrgpu, MagmaLeft, uplo, MagmaNoTrans, n, *m, a, lda, &work[indtau],
                        &work[indwrk + n * (il-1)], n, &work[indwk2], llwrk2, &iinfo);
 
-        lapackf77_zlacpy("A", &n, m, &work[indwrk + n * (il-1)] , &n, a, &lda);
+        lapackf77_zlacpy("A", &n, m, &work[indwrk + n * (il-1)], &n, a, &lda);
         
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time zunmtr + copy = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
-
+        timer_stop( time );
+        timer_printf( "time zunmtr + copy = %6.2f\n", time );
     }
 
     /* If matrix was scaled, then rescale eigenvalues appropriately. */

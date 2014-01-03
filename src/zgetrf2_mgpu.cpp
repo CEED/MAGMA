@@ -8,10 +8,10 @@
        @precisions normal z -> s d c
 
 */
-#include <math.h>
 #include "common_magma.h"
 #include "trace.h"
-
+#include "timer.h"
+#include "../testing/flops.h"
 
 extern "C" magma_int_t
 magma_zgetrf2_mgpu(magma_int_t num_gpus,
@@ -142,10 +142,9 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
     trace_gpu_end( 0, 1 );
 
     /* ------------------------------------------------------------------------------------- */
-#ifdef PROFILE
-    magma_timestr_t start_timer, end_timer;
-    start_timer = get_current_time();
-#endif
+    magma_timer_t time;
+    timer_start( time );
+
     s = mindim / nb;
     for( i=0; i<s; i++ ) {
         /* Set the GPU number that holds the current panel */
@@ -406,10 +405,9 @@ magma_zgetrf2_mgpu(magma_int_t num_gpus,
         magmablasSetKernelStream(NULL);
     }
     magma_setdevice(0);
-#ifdef PROFILE
-    end_timer = get_current_time();
-    printf("\n Performance %f GFlop/s\n", (2./3.*n*n*n /1000000.) / GetTimerValue(start_timer, end_timer));
-#endif
+    
+    timer_start( time );
+    timer_printf("\n Performance %f GFlop/s\n", FLOPS_ZGETRF(m,n) / 1e9 / time );
 
     return *info;
     /* End of MAGMA_ZGETRF2_MGPU */

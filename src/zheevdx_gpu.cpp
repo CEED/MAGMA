@@ -12,6 +12,8 @@
 
 */
 #include "common_magma.h"
+#include "timer.h"
+
 
 extern "C" magma_int_t
 magma_zheevdx_gpu(char jobz, char range, char uplo,
@@ -357,11 +359,8 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
     llwork = lwork - indwrk;
     llwrk2 = lwork - indwk2;
 
-//
-#ifdef ENABLE_TIMER
-    magma_timestr_t start, end;
-    start = get_current_time();
-#endif
+    magma_timer_t time;
+    timer_start( time );
 
 #ifdef FAST_HEMV
     magma_zhetrd2_gpu(uplo, n, da, ldda, w, &rwork[inde],
@@ -372,10 +371,8 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
                       &work[indtau], wa, ldwa, &work[indwrk], llwork, &iinfo);
 #endif
 
-#ifdef ENABLE_TIMER
-    end = get_current_time();
-    printf("time zhetrd_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "time zhetrd_gpu = %6.2f\n", time );
 
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call
        ZSTEDC to generate the eigenvector matrix, WORK(INDWRK), of the
@@ -386,25 +383,17 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
         lapackf77_dsterf(&n, w, &rwork[inde], info);
 
         magma_dmove_eig(range, n, w, &il, &iu, vl, vu, m);
-
-    } else {
-
-#ifdef ENABLE_TIMER
-        start = get_current_time();
-#endif
+    }
+    else {
+        timer_start( time );
 
         magma_zstedx(range, n, vl, vu, il, iu, w, &rwork[inde],
                      &work[indwrk], n, &rwork[indrwk],
                      llrwk, iwork, liwork, dwork, info);
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time zstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
-
-#ifdef ENABLE_TIMER
-        start = get_current_time();
-#endif
+        timer_stop( time );
+        timer_printf( "time zstedx = %6.2f\n", time );
+        timer_start( time );
 
         magma_dmove_eig(range, n, w, &il, &iu, vl, vu, m);
 
@@ -415,10 +404,8 @@ magma_zheevdx_gpu(char jobz, char range, char uplo,
 
         magma_zcopymatrix( n, *m, dc, lddc, da, ldda );
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time zunmtr_gpu + copy = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+        timer_stop( time );
+        timer_printf( "time zunmtr_gpu + copy = %6.2f\n", time );
     }
 
     /* If matrix was scaled, then rescale eigenvalues appropriately. */
