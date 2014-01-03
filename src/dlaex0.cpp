@@ -10,6 +10,7 @@
        @precisions normal d -> s
 */
 #include "common_magma.h"
+#include "timer.h"
 
 #define Q(ix, iy) (q + (ix) + ldq * (iy))
 
@@ -145,7 +146,7 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
         ++tlvls;
         subpbs *= 2;
     }
-    for (j=1; j<subpbs; ++j)
+    for (j=1; j < subpbs; ++j)
         iwork[j] += iwork[j-1];
 
     // Divide the matrix into SUBPBS submatrices of size at most SMLSIZ+1
@@ -164,10 +165,8 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
 
     char char_I[] = {'I', 0};
 
-#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
-        magma_timestr_t start, end;
-        start = get_current_time();
-#endif
+    magma_timer_t time;
+    timer_start( time );
 
     for (i = 0; i < subpbs; ++i){
         if(i == 0){
@@ -177,7 +176,7 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
             submat = iwork[i-1];
             matsiz = iwork[i] - iwork[i-1];
         }
-        lapackf77_dsteqr(char_I , &matsiz, &d[submat], &e[submat],
+        lapackf77_dsteqr(char_I, &matsiz, &d[submat], &e[submat],
                          Q(submat, submat), &ldq, work, info);  // change to edc?
         if(*info != 0){
             printf("info: %d\n, submat: %d\n", (int) *info, (int) submat);
@@ -192,20 +191,17 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
         }
     }
 
-#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
-    end = get_current_time();
-    printf("  for: dsteqr = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "  for: dsteqr = %6.2f\n", time );
+    
     // Successively merge eigensystems of adjacent submatrices
     // into eigensystem for the corresponding larger matrix.
 
     curlvl = 1;
     while (subpbs > 1){
-#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
-        magma_timestr_t start, end;
-        start = get_current_time();
-#endif
-        for (i=0; i<subpbs-1; i+=2){
+        timer_start( time );
+        
+        for (i=0; i < subpbs-1; i += 2){
             if(i == 0){
                 submat = 0;
                 matsiz = iwork[1];
@@ -222,7 +218,7 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
             // matrix.
 
             if (matsiz == n)
-                range_=range;
+                range_ = range;
             else
                 // We need all the eigenvectors if it is not last step
                 range_='A';
@@ -240,17 +236,15 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
         }
         subpbs /= 2;
         ++curlvl;
-#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
-        end = get_current_time();
-        //printf("%d: time: %6.2f\n", curlvl, GetTimerValue(start,end)/1000.);
-#endif
-
+        
+        timer_stop( time );
+        timer_printf("%d: time: %6.2f\n", curlvl, time );
     }
 
     // Re-merge the eigenvalues/vectors which were deflated at the final
     // merge step.
 
-    for(i = 0; i<n; ++i){
+    for(i = 0; i < n; ++i){
         j = iwork[indxq+i] - 1;
         work[i] = d[j];
         blasf77_dcopy(&n, Q(0, j), &ione, &work[ n*(i+1) ], &ione);

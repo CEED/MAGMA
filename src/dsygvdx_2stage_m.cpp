@@ -12,6 +12,7 @@
 
 */
 #include "common_magma.h"
+#include "timer.h"
 #include "magma_bulge.h"
 #include "magma_dbulge.h"
 
@@ -285,11 +286,9 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
         return *info;
     }
 
-    /*     Form a Cholesky factorization of B. */
-#ifdef ENABLE_TIMER
-    magma_timestr_t start, end;
-    start = get_current_time();
-#endif
+    /* Form a Cholesky factorization of B. */
+    magma_timer_t time;
+    timer_start( time );
 
     magma_dpotrf_m(nrgpu, uplo_[0], n, b, ldb, info);
     if (*info != 0) {
@@ -297,44 +296,29 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
         return *info;
     }
 
-#ifdef ENABLE_TIMER
-    end = get_current_time();
-    printf("time dpotrf_m = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "time dpotrf_m = %6.2f\n", time );
+    timer_start( time );
 
-#ifdef ENABLE_TIMER
-    start = get_current_time();
-#endif
-
-    /*     Transform problem to standard eigenvalue problem and solve. */
+    /* Transform problem to standard eigenvalue problem and solve. */
     magma_dsygst_m(nrgpu, itype, uplo, n, a, lda, b, ldb, info);
 
-#ifdef ENABLE_TIMER
-    end = get_current_time();
-    printf("time dsygst_m = %6.2f\n", GetTimerValue(start,end)/1000.);
-    start = get_current_time();
-#endif
+    timer_stop( time );
+    timer_printf( "time dsygst_m = %6.2f\n", time );
+    timer_start( time );
 
     magma_dsyevdx_2stage_m(nrgpu, jobz, range, uplo, n, a, lda, vl, vu, il, iu, m, w, work, lwork, iwork, liwork, info);
 
-#ifdef ENABLE_TIMER
-    end = get_current_time();
-    printf("time dsyevdx_2stage_m = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "time dsyevdx_2stage_m = %6.2f\n", time );
 
     if (wantz && *info == 0) {
-
-#ifdef ENABLE_TIMER
-        start = get_current_time();
-#endif
+        timer_start( time );
 
         /* Backtransform eigenvectors to the original problem. */
-
         if (itype == 1 || itype == 2) {
-
             /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;
                backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
-
             if (lower) {
                 *(unsigned char *)trans = MagmaConjTrans;
             } else {
@@ -342,9 +326,8 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
             }
 
             magma_dtrsm_m(nrgpu, MagmaLeft, uplo, *trans, MagmaNonUnit, n, *m, d_one, b, ldb, a, lda);
-
-        } else if (itype == 3) {
-
+        }
+        else if (itype == 3) {
             /* For B*A*x=(lambda)*x;
                backtransform eigenvectors: x = L*y or U'*y */
             if (lower) {
@@ -354,13 +337,10 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
             }
 
             //magma_dtrmm_m(nrgpu, MagmaLeft, uplo, *trans, MagmaNonUnit, n, *m, d_one, b, ldb, a, lda);
-
         }
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time dtrsm/mm + getmatrix = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+        timer_stop( time );
+        timer_printf( "time dtrsm/mm + getmatrix = %6.2f\n", time );
     }
 
     work[0] = lwmin * (1. + lapackf77_dlamch("Epsilon"));

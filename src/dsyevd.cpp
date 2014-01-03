@@ -12,6 +12,7 @@
 
 */
 #include "common_magma.h"
+#include "timer.h"
 
 extern "C" magma_int_t
 magma_dsyevd(char jobz, char uplo,
@@ -259,19 +260,14 @@ magma_dsyevd(char jobz, char uplo,
     llwork = lwork - indwrk;
     llwrk2 = lwork - indwk2;
 
-//
-#ifdef ENABLE_TIMER
-    magma_timestr_t start, end;
-    start = get_current_time();
-#endif
+    magma_timer_t time;
+    timer_start( time );
 
     magma_dsytrd(uplo, n, a, lda, w, &work[inde],
                  &work[indtau], &work[indwrk], llwork, &iinfo);
 
-#ifdef ENABLE_TIMER
-    end = get_current_time();
-    printf("time dsytrd = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "time dsytrd = %6.2f\n", time );
 
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call
        DSTEDC to generate the eigenvector matrix, WORK(INDWRK), of the
@@ -279,11 +275,9 @@ magma_dsyevd(char jobz, char uplo,
        transformations represented as Householder vectors in A. */
     if (! wantz) {
         lapackf77_dsterf(&n, w, &work[inde], info);
-    } else {
-
-#ifdef ENABLE_TIMER
-        start = get_current_time();
-#endif
+    }
+    else {
+        timer_start( time );
 
         if (MAGMA_SUCCESS != magma_dmalloc( &dwork, 3*n*(n/2 + 1) )) {
             *info = MAGMA_ERR_DEVICE_ALLOC;
@@ -297,21 +291,17 @@ magma_dsyevd(char jobz, char uplo,
 
         magma_free( dwork );
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time dstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
-        start = get_current_time();
-#endif
+        timer_stop( time );
+        timer_printf( "time dstedx = %6.2f\n", time );
+        timer_start( time );
 
         magma_dormtr(MagmaLeft, uplo, MagmaNoTrans, n, n, a, lda, &work[indtau],
                      &work[indwrk], n, &work[indwk2], llwrk2, &iinfo);
 
         lapackf77_dlacpy("A", &n, &n, &work[indwrk], &n, a, &lda);
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time dormtr + copy = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+        timer_stop( time );
+        timer_printf( "time dormtr + copy = %6.2f\n", time );
     }
 
     /* If matrix was scaled, then rescale eigenvalues appropriately. */

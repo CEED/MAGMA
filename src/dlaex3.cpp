@@ -15,49 +15,53 @@
 #endif
 
 #include "common_magma.h"
+#include "timer.h"
 #include <cblas.h>
 
 #define Q(ix, iy) (q + (ix) + ldq * (iy))
 
-extern "C"{
-    int magma_get_dlaed3_k() { return 512;}
-    
-    void magma_dvrange(magma_int_t k, double *d, magma_int_t *il, magma_int_t *iu, double vl, double vu)
-    {
-        magma_int_t i;
+extern "C" {
 
-        *il=1;
-        *iu=k;
-        for (i = 0; i < k; ++i){
-            if (d[i] > vu){
-                *iu = i;
-                break;
-            }
-            else if (d[i] < vl)
-                ++*il;
+int magma_get_dlaed3_k() { return 512; }
+
+void magma_dvrange(magma_int_t k, double *d, magma_int_t *il, magma_int_t *iu, double vl, double vu)
+{
+    magma_int_t i;
+
+    *il=1;
+    *iu=k;
+    for (i = 0; i < k; ++i){
+        if (d[i] > vu){
+            *iu = i;
+            break;
         }
-        return;
+        else if (d[i] < vl)
+            ++*il;
     }
-
-    void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_int_t *iiu, magma_int_t il, magma_int_t iu)
-    {
-        magma_int_t i;
-
-        *iil = 1;
-        *iiu = 0;
-        for (i = il; i<=iu; ++i)
-            if (indxq[i-1]<=k){
-                *iil = indxq[i-1];
-                break;
-            }
-        for (i = iu; i>=il; --i)
-            if (indxq[i-1]<=k){
-                *iiu = indxq[i-1];
-                break;
-            }
-        return;
-    }
+    return;
 }
+
+void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_int_t *iiu, magma_int_t il, magma_int_t iu)
+{
+    magma_int_t i;
+
+    *iil = 1;
+    *iiu = 0;
+    for (i = il; i<=iu; ++i)
+        if (indxq[i-1]<=k){
+            *iil = indxq[i-1];
+            break;
+        }
+    for (i = iu; i>=il; --i)
+        if (indxq[i-1]<=k){
+            *iiu = indxq[i-1];
+            break;
+        }
+    return;
+}
+
+} // end extern "C"
+
 
 extern "C" magma_int_t
 magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
@@ -258,10 +262,8 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
     /////////////////////////////////////////////////////////////////////////////////
     //openmp implementation
     /////////////////////////////////////////////////////////////////////////////////
-#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
-    magma_timestr_t start, end;
-    start = get_current_time();
-#endif
+    magma_timer_t time;
+    timer_start( time );
 
 #pragma omp parallel private(i, j, tmp, temp)
     {
@@ -295,7 +297,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
             {
                 //Prepare the INDXQ sorting permutation.
                 magma_int_t nk = n - k;
-                lapackf77_dlamrg( &k, &nk, d, &ione , &ineg_one, indxq);
+                lapackf77_dlamrg( &k, &nk, d, &ione, &ineg_one, indxq);
 
                 //compute the lower and upper bound of the non-deflated eigenvectors
                 if (valeig)
@@ -377,19 +379,15 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
     if (*info != 0)
         return MAGMA_SUCCESS; //??????
 
-#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
-    end = get_current_time();
-    printf("eigenvalues/vector D+zzT = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "eigenvalues/vector D+zzT = %6.2f\n", time );
 
 #else
     /////////////////////////////////////////////////////////////////////////////////
     // Non openmp implementation
     /////////////////////////////////////////////////////////////////////////////////
-#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
-    magma_timestr_t start, end;
-    start = get_current_time();
-#endif
+    magma_timer_t time;
+    timer_start( time );
 
     for(i = 0; i < k; ++i)
         dlamda[i]=lapackf77_dlamc3(&dlamda[i], &dlamda[i]) - dlamda[i];
@@ -407,7 +405,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
 
     //Prepare the INDXQ sorting permutation.
     magma_int_t nk = n - k;
-    lapackf77_dlamrg( &k, &nk, d, &ione , &ineg_one, indxq);
+    lapackf77_dlamrg( &k, &nk, d, &ione, &ineg_one, indxq);
 
     //compute the lower and upper bound of the non-deflated eigenvectors
     if (valeig)
@@ -464,17 +462,13 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
         }
     }
 
-#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
-    end = get_current_time();
-    printf("eigenvalues/vector D+zzT = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "eigenvalues/vector D+zzT = %6.2f\n", time );
 
 #endif //_OPENMP
     // Compute the updated eigenvectors.
 
-#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
-    start = get_current_time();
-#endif
+    timer_start( time );
     magma_queue_sync( NULL );
 
     if (rk != 0){
@@ -504,10 +498,8 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
         } else
             lapackf77_dlaset("A", &n1, &rk, &d_zero, &d_zero, Q(0,iil-1), &ldq);
     }
-#ifdef ENABLE_TIMER_DIVIDE_AND_CONQUER
-    end = get_current_time();
-    printf("gemms = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "gemms = %6.2f\n", time );
 
     return MAGMA_SUCCESS;
 } /*magma_dlaed3*/

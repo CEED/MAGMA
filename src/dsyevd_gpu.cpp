@@ -14,6 +14,7 @@
 
 */
 #include "common_magma.h"
+#include "timer.h"
 
 extern "C" magma_int_t
 magma_dsyevd_gpu(char jobz, char uplo,
@@ -274,11 +275,8 @@ magma_dsyevd_gpu(char jobz, char uplo,
     llwork = lwork - indwrk;
     llwrk2 = lwork - indwk2;
 
-//
-#ifdef ENABLE_TIMER
-    magma_timestr_t start, end;
-    start = get_current_time();
-#endif
+    magma_timer_t time;
+    timer_start( time );
 
 #ifdef FAST_SYMV
     magma_dsytrd2_gpu(uplo, n, da, ldda, w, &work[inde],
@@ -290,14 +288,12 @@ magma_dsyevd_gpu(char jobz, char uplo,
                      &iinfo);
 #endif
 
-#ifdef ENABLE_TIMER
-    end = get_current_time();
+    timer_stop( time );
     #ifdef FAST_SYMV
-    printf("time dsytrd2 = %6.2f\n", GetTimerValue(start,end)/1000.);
+    timer_printf( "time dsytrd2 = %6.2f\n", time );
     #else
-    printf("time dsytrd = %6.2f\n", GetTimerValue(start,end)/1000.);
+    timer_printf( "time dsytrd = %6.2f\n", time );
     #endif
-#endif
 
     /* For eigenvalues only, call DSTERF.  For eigenvectors, first call
        DSTEDC to generate the eigenvector matrix, WORK(INDWRK), of the
@@ -305,36 +301,27 @@ magma_dsyevd_gpu(char jobz, char uplo,
        transformations represented as Householder vectors in A. */
     if (! wantz) {
         lapackf77_dsterf(&n, w, &work[inde], info);
-    } else {
-
-#ifdef ENABLE_TIMER
-        start = get_current_time();
-#endif
+    }
+    else {
+        timer_start( time );
 
         magma_dstedx('A', n, 0., 0., 0, 0, w, &work[inde],
                      &work[indwrk], n, &work[indwk2],
                      llwrk2, iwork, liwork, dwork, info);
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time dstedx = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+        timer_stop( time );
+        timer_printf( "time dstedx = %6.2f\n", time );
+        timer_start( time );
 
         magma_dsetmatrix( n, n, &work[indwrk], n, dwork, lddc );
-
-#ifdef ENABLE_TIMER
-        start = get_current_time();
-#endif
 
         magma_dormtr_gpu(MagmaLeft, uplo, MagmaNoTrans, n, n, da, ldda, &work[indtau],
                          dwork, lddc, wa, ldwa, &iinfo);
 
         magma_dcopymatrix( n, n, dwork, lddc, da, ldda );
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time dormtr + copy = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+        timer_stop( time );
+        timer_printf( "time dormtr + copy = %6.2f\n", time );
     }
 
     /* If matrix was scaled, then rescale eigenvalues appropriately. */

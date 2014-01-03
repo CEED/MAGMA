@@ -13,6 +13,7 @@
 
 */
 #include "common_magma.h"
+#include "timer.h"
 
 extern "C" magma_int_t
 magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma_int_t n,
@@ -235,7 +236,7 @@ magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
         return *info;
     }
 
-    /*     Quick return if possible */
+    /* Quick return if possible */
     if (n == 0) {
         return *info;
     }
@@ -253,12 +254,8 @@ magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
         return *info;
     }
 
-
-//
-#ifdef ENABLE_TIMER
-        magma_timestr_t start, end;
-        start = get_current_time();
-#endif
+    magma_timer_t time;
+    timer_start( time );
 
     magma_dpotrf_m(nrgpu, uplo_[0], n, b, ldb, info);
     if (*info != 0) {
@@ -266,34 +263,24 @@ magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
         return *info;
     }
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time dpotrf = %6.2f\n", GetTimerValue(start,end)/1000.);
-        start = get_current_time();
-#endif
+    timer_stop( time );
+    timer_printf( "time dpotrf = %6.2f\n", time );
+    timer_start( time );
 
-    /*  Transform problem to standard eigenvalue problem and solve. */
+    /* Transform problem to standard eigenvalue problem and solve. */
     magma_dsygst_m(nrgpu, itype, uplo_[0], n, a, lda, b, ldb, info);
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time dsygst = %6.2f\n", GetTimerValue(start,end)/1000.);
-        start = get_current_time();
-#endif
+    timer_stop( time );
+    timer_printf( "time dsygst = %6.2f\n", time );
+    timer_start( time );
 
     magma_dsyevd_m(nrgpu, jobz_[0], uplo_[0], n, a, lda, w, work, lwork, iwork, liwork, info);
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time dsyevd = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "time dsyevd = %6.2f\n", time );
 
-    if (wantz && *info == 0)
-    {
-
-#ifdef ENABLE_TIMER
-        start = get_current_time();
-#endif
+    if (wantz && *info == 0) {
+        timer_start( time );
 
         /* Backtransform eigenvectors to the original problem. */
         if (itype == 1 || itype == 2) {
@@ -321,10 +308,8 @@ magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
             //            n, n, c_one, db, lddb, da, ldda);
         }
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time setmatrices trsm/mm + getmatrices = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+        timer_stop( time );
+        timer_printf( "time setmatrices trsm/mm + getmatrices = %6.2f\n", time );
     }
 
     work[0]  = lwmin * (1. + lapackf77_dlamch("Epsilon"));  // round up

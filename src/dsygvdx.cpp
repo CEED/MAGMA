@@ -12,6 +12,7 @@
 
 */
 #include "common_magma.h"
+#include "timer.h"
 
 extern "C" magma_int_t
 magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
@@ -271,7 +272,7 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
         return MAGMA_SUCCESS;
     }
 
-    /*  Quick return if possible */
+    /* Quick return if possible */
     if (n == 0) {
         return 0;
     }
@@ -290,6 +291,7 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
         return *info;
     }
 
+    // TODO fix memory leak
     if (MAGMA_SUCCESS != magma_dmalloc( &da, n*ldda ) ||
         MAGMA_SUCCESS != magma_dmalloc( &db, n*lddb )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
@@ -302,10 +304,8 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
                             a,  lda,
                             da, ldda, stream );
 
-#ifdef ENABLE_TIMER
-    magma_timestr_t start, end;
-    start = get_current_time();
-#endif
+    magma_timer_t time;
+    timer_start( time );
 
     magma_dpotrf_gpu(uplo, n, db, lddb, info);
     if (*info != 0) {
@@ -313,27 +313,21 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
         return *info;
     }
 
-#ifdef ENABLE_TIMER
-    end = get_current_time();
-    printf("time dpotrf_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "time dpotrf_gpu = %6.2f\n", time );
 
     magma_queue_sync( stream );
     magma_dgetmatrix_async( n, n,
                             db, lddb,
                             b,  ldb, stream );
 
-#ifdef ENABLE_TIMER
-    start = get_current_time();
-#endif
+    timer_start( time );
 
-    /*  Transform problem to standard eigenvalue problem and solve. */
+    /* Transform problem to standard eigenvalue problem and solve. */
     magma_dsygst_gpu(itype, uplo, n, da, ldda, db, lddb, info);
 
-#ifdef ENABLE_TIMER
-    end = get_current_time();
-    printf("time dsygst_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "time dsygst_gpu = %6.2f\n", time );
 
     /* simple fix to be able to run bigger size.
      * need to have a dwork here that will be used 
@@ -344,20 +338,15 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
         magma_free( db );
     }
 
-#ifdef ENABLE_TIMER
-    start = get_current_time();
-#endif
+    timer_start( time );
     magma_dsyevdx_gpu(jobz, range, uplo, n, da, ldda, vl, vu, il, iu, m, w, a, lda,
                       work, lwork, iwork, liwork, info);
-#ifdef ENABLE_TIMER
-    end = get_current_time();
-    printf("time dsyevdx_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "time dsyevdx_gpu = %6.2f\n", time );
 
     if (wantz && *info == 0) {
-#ifdef ENABLE_TIMER
-        start = get_current_time();
-#endif
+        timer_start( time );
+        
         /* allocate and copy db back */
         if(n > 5000){
             if (MAGMA_SUCCESS != magma_dmalloc( &db, n*lddb ) ){
@@ -379,8 +368,8 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
                         n, *m, d_one, db, lddb, da, ldda);
         }
         else if (itype == 3) {
-            /*  For B*A*x=(lambda)*x;
-                backtransform eigenvectors: x = L*y or U'*y */
+            /* For B*A*x=(lambda)*x;
+               backtransform eigenvectors: x = L*y or U'*y */
             if (lower) {
                 *(unsigned char *)trans = MagmaNoTrans;
             } else {
@@ -391,14 +380,14 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
                         n, *m, d_one, db, lddb, da, ldda);
         }
         magma_dgetmatrix( n, *m, da, ldda, a, lda );
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time dtrsm/mm + getmatrix = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+        
         /* free db */
         if(n > 5000){        
             magma_free( db );
-        }        
+        }
+        
+        timer_stop( time );
+        timer_printf( "time dtrsm/mm + getmatrix = %6.2f\n", time );
     }
 
     magma_queue_sync( stream );
