@@ -397,3 +397,61 @@ void parse_opts( int argc, char** argv, magma_opts *opts )
     magma_setdevice( opts->device );
 }
 // end parse_opts
+
+
+// ------------------------------------------------------------
+// Initialize PAPI events set to measure flops.
+// Note flops counters are inaccurate on Sandy Bridge, and don't exist on Haswell.
+// See http://icl.cs.utk.edu/projects/papi/wiki/PAPITopics:SandyFlops
+#ifdef HAVE_PAPI
+#include <papi.h>
+#include <string.h>  // memset
+#endif  // HAVE_PAPI
+
+int gPAPI_flops_set = -1;  /* i.e., PAPI_NULL */
+
+extern "C"
+void flops_init()
+{
+    #ifdef HAVE_PAPI
+    int err = PAPI_library_init( PAPI_VER_CURRENT );
+    if ( err != PAPI_VER_CURRENT ) {
+        fprintf( stderr, "Error: PAPI couldn't initialize: %s (%d)\n",
+                 PAPI_strerror(err), err );
+    }
+    
+    // read flops
+    err = PAPI_create_eventset( &gPAPI_flops_set );
+    if ( err != PAPI_OK ) {
+        fprintf( stderr, "Error: PAPI_create_eventset failed\n" );
+    }
+    
+    err = PAPI_assign_eventset_component( gPAPI_flops_set, 0 );
+    if ( err != PAPI_OK ) {
+        fprintf( stderr, "Error: PAPI_assign_eventset_component failed: %s (%d)\n",
+                 PAPI_strerror(err), err );
+    }
+    
+    PAPI_option_t opt;
+    memset( &opt, 0, sizeof(PAPI_option_t) );
+    opt.inherit.inherit  = PAPI_INHERIT_ALL;
+    opt.inherit.eventset = gPAPI_flops_set;
+    err = PAPI_set_opt( PAPI_INHERIT, &opt );
+    if ( err != PAPI_OK ) {
+        fprintf( stderr, "Error: PAPI_set_opt failed: %s (%d)\n",
+                 PAPI_strerror(err), err );
+    }
+    
+    err = PAPI_add_event( gPAPI_flops_set, PAPI_FP_OPS );
+    if ( err != PAPI_OK ) {
+        fprintf( stderr, "Error: PAPI_add_event failed: %s (%d)\n",
+                 PAPI_strerror(err), err );
+    }
+    
+    err = PAPI_start( gPAPI_flops_set );
+    if ( err != PAPI_OK ) {
+        fprintf( stderr, "Error: PAPI_start failed: %s (%d)\n",
+                 PAPI_strerror(err), err );
+    }
+    #endif  // HAVE_PAPI
+}

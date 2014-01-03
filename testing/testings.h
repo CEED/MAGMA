@@ -29,6 +29,12 @@
 #endif
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void flops_init();
+
 /***************************************************************************//**
  *  Global utilities
  *  in both common_magma.h and testings.h
@@ -56,6 +62,7 @@
 
 #define TESTING_INIT()                                                     \
     magma_init();                                                          \
+    flops_init();                                                          \
     if( CUBLAS_STATUS_SUCCESS != cublasInit() ) {                          \
         fprintf(stderr, "ERROR: cublasInit failed\n");                     \
         magma_finalize();                                                  \
@@ -72,6 +79,7 @@
 #define TESTING_INIT_MGPU()                                                \
 {                                                                          \
     magma_init();                                                          \
+    flops_init();                                                          \
     int ndevices;                                                          \
     cudaGetDeviceCount( &ndevices );                                       \
     for( int idevice = 0; idevice < ndevices; ++idevice ) {                \
@@ -126,22 +134,18 @@
     }
 
 
-#define TESTING_FREE_CPU( ptr )                                            \
-    magma_free_cpu( ptr )
+#define TESTING_FREE_CPU( ptr ) magma_free_cpu( ptr )
 
 
-#define TESTING_FREE_PIN( ptr )                                         \
-    magma_free_pinned( ptr )
+#define TESTING_FREE_PIN( ptr ) magma_free_pinned( ptr )
 
 
-#define TESTING_FREE_DEV( ptr )                                            \
-    magma_free( ptr )
+#define TESTING_FREE_DEV( ptr ) magma_free( ptr )
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+/***************************************************************************//**
+ * Functions and data structures used for testing.
+ */
 void magma_zmake_hermitian( magma_int_t N, magmaDoubleComplex* A, magma_int_t lda );
 void magma_cmake_hermitian( magma_int_t N, magmaFloatComplex*  A, magma_int_t lda );
 void magma_dmake_symmetric( magma_int_t N, double*             A, magma_int_t lda );
