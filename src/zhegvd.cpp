@@ -13,6 +13,8 @@
 
 */
 #include "common_magma.h"
+#include "timer.h"
+
 #define PRECISION_z
 
 extern "C" magma_int_t
@@ -250,13 +252,13 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
         return *info;
     }
 
-/*  Quick return if possible */
+    /* Quick return if possible */
     if (n == 0) {
         return *info;
     }
 
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
-    if (n <= 128){
+    if (n <= 128) {
         #ifdef ENABLE_DEBUG
         printf("--------------------------------------------------------------\n");
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
@@ -265,92 +267,78 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
         lapackf77_zhegvd(&itype, jobz_, uplo_,
                          &n, a, &lda, b, &ldb,
                          w, work, &lwork,
-#if defined(PRECISION_z) || defined(PRECISION_c)
-                         rwork, &lrwork, 
-#endif  
+                         #if defined(PRECISION_z) || defined(PRECISION_c)
+                         rwork, &lrwork,
+                         #endif
                          iwork, &liwork, info);
         return *info;
     }
 
+    // TODO fix memory leak
     if (MAGMA_SUCCESS != magma_zmalloc( &da, n*ldda ) ||
         MAGMA_SUCCESS != magma_zmalloc( &db, n*lddb )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
 
-/*  Form a Cholesky factorization of B. */
+    /* Form a Cholesky factorization of B. */
     magma_zsetmatrix( n, n, b, ldb, db, lddb );
 
     magma_zsetmatrix_async( n, n,
                            a,  lda,
                            da, ldda, stream );
 
-#ifdef ENABLE_TIMER
-    magma_timestr_t start, end;
-    start = get_current_time();
-#endif
+    magma_timer_t time;
+    timer_start( time );
     magma_zpotrf_gpu(uplo, n, db, lddb, info);
     if (*info != 0) {
         *info = n + *info;
         return *info;
     }
-#ifdef ENABLE_TIMER
-    end = get_current_time();
-    printf("time zpotrf_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "time zpotrf_gpu = %6.2f\n", time );
 
     magma_queue_sync( stream );
     magma_zgetmatrix_async( n, n,
                            db, lddb,
                            b,  ldb, stream );
 
-#ifdef ENABLE_TIMER
-    start = get_current_time();
-#endif
-/*  Transform problem to standard eigenvalue problem and solve. */
+    timer_start( time );
+    /* Transform problem to standard eigenvalue problem and solve. */
     magma_zhegst_gpu(itype, uplo, n, da, ldda, db, lddb, info);
-#ifdef ENABLE_TIMER
-    end = get_current_time();
-    printf("time zhegst_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "time zhegst_gpu = %6.2f\n", time );
 
     /* simple fix to be able to run bigger size.
-     * need to have a dwork here that will be used 
+     * need to have a dwork here that will be used
      * a db and then passed to  dsyevd.
      * */
-    if(n > 5000){
+    if (n > 5000) {
         magma_queue_sync( stream );
         magma_free( db );
     }
 
-#ifdef ENABLE_TIMER
-    start = get_current_time();
-#endif
+    timer_start( time );
     magma_zheevd_gpu(jobz, uplo, n, da, ldda, w, a, lda,
                      work, lwork, rwork, lrwork, iwork, liwork, info);
-#ifdef ENABLE_TIMER
-    end = get_current_time();
-    printf("time zheevd_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "time zheevd_gpu = %6.2f\n", time );
 
-    if (wantz && *info == 0)
-    {
-#ifdef ENABLE_TIMER
-        start = get_current_time();
-#endif
+    if (wantz && *info == 0) {
+        timer_start( time );
+        
         /* allocate and copy db back */
-        if(n > 5000){
-            if (MAGMA_SUCCESS != magma_zmalloc( &db, n*lddb ) ){
+        if (n > 5000) {
+            if (MAGMA_SUCCESS != magma_zmalloc( &db, n*lddb ) ) {
                 *info = MAGMA_ERR_DEVICE_ALLOC;
                 return *info;
             }
             magma_zsetmatrix( n, n, b, ldb, db, lddb );
         }
-/*      Backtransform eigenvectors to the original problem. */
-        if (itype == 1 || itype == 2)
-        {
-/*          For A*x=(lambda)*B*x and A*B*x=(lambda)*x;
-            backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
+        /* Backtransform eigenvectors to the original problem. */
+        if (itype == 1 || itype == 2) {
+            /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;
+               backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
             if (lower) {
                 *(unsigned char *)trans = MagmaConjTrans;
             } else {
@@ -360,10 +348,9 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
             magma_ztrsm(MagmaLeft, uplo, *trans, MagmaNonUnit,
                         n, n, c_one, db, lddb, da, ldda);
         }
-        else if (itype == 3)
-        {
-/*          For B*A*x=(lambda)*x;
-            backtransform eigenvectors: x = L*y or U'*y */
+        else if (itype == 3) {
+            /* For B*A*x=(lambda)*x;
+               backtransform eigenvectors: x = L*y or U'*y */
             if (lower) {
                 *(unsigned char *)trans = MagmaNoTrans;
             } else {
@@ -375,14 +362,14 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
         }
 
         magma_zgetmatrix( n, n, da, ldda, a, lda );
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time ztrsm/mm + getmatrix = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+        
         /* free db */
-        if(n > 5000){
+        if (n > 5000) {
             magma_free( db );
         }
+        
+        timer_stop( time );
+        timer_printf( "time ztrsm/mm + getmatrix = %6.2f\n", time );
     }
 
     magma_queue_sync( stream );
@@ -393,7 +380,7 @@ magma_zhegvd(magma_int_t itype, char jobz, char uplo, magma_int_t n,
     iwork[0] = liwmin;
 
     magma_free( da );
-    if(n <= 5000){
+    if (n <= 5000) {
         magma_free( db );
     }
 

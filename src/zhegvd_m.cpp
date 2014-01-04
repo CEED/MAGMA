@@ -13,6 +13,8 @@
 
 */
 #include "common_magma.h"
+#include "timer.h"
+
 #define PRECISION_z
 
 extern "C" magma_int_t
@@ -250,7 +252,7 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
     }
 
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
-    if (n <= 128){
+    if (n <= 128) {
         #ifdef ENABLE_DEBUG
         printf("--------------------------------------------------------------\n");
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
@@ -260,17 +262,14 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
                          &n, a, &lda, b, &ldb,
                          w, work, &lwork,
 #if defined(PRECISION_z) || defined(PRECISION_c)
-                         rwork, &lrwork, 
-#endif  
+                         rwork, &lrwork,
+#endif
                          iwork, &liwork, info);
         return *info;
     }
 
-//
-#ifdef ENABLE_TIMER
-        magma_timestr_t start, end;
-        start = get_current_time();
-#endif
+    magma_timer_t time;
+    timer_start( time );
 
     magma_zpotrf_m(nrgpu, uplo_[0], n, b, ldb, info);
     if (*info != 0) {
@@ -278,40 +277,29 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
         return *info;
     }
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time zpotrf = %6.2f\n", GetTimerValue(start,end)/1000.);
-        start = get_current_time();
-#endif
+    timer_stop( time );
+    timer_printf( "time zpotrf = %6.2f\n", time );
+    timer_start( time );
 
     /*  Transform problem to standard eigenvalue problem and solve. */
     magma_zhegst_m(nrgpu, itype, uplo_[0], n, a, lda, b, ldb, info);
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time zhegst = %6.2f\n", GetTimerValue(start,end)/1000.);
-        start = get_current_time();
-#endif
+    timer_stop( time );
+    timer_printf( "time zhegst = %6.2f\n", time );
+    timer_start( time );
 
     magma_zheevd_m(nrgpu, jobz_[0], uplo_[0], n, a, lda, w, work, lwork, rwork, lrwork, iwork, liwork, info);
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time zheevd = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "time zheevd = %6.2f\n", time );
 
-    if (wantz && *info == 0)
-    {
-
-#ifdef ENABLE_TIMER
-        start = get_current_time();
-#endif
+    if (wantz && *info == 0) {
+        timer_start( time );
 
         /* Backtransform eigenvectors to the original problem. */
-        if (itype == 1 || itype == 2)
-        {
+        if (itype == 1 || itype == 2) {
             /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;
-             backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
+               backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
             if (lower) {
                 *(unsigned char *)trans = MagmaConjTrans;
             } else {
@@ -320,12 +308,10 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
 
             magma_ztrsm_m(nrgpu, MagmaLeft, uplo_[0], *trans, MagmaNonUnit,
                           n, n, c_one, b, ldb, a, lda);
-
         }
-        else if (itype == 3)
-        {
-            /*  For B*A*x=(lambda)*x;
-             backtransform eigenvectors: x = L*y or U'*y */
+        else if (itype == 3) {
+            /* For B*A*x=(lambda)*x;
+               backtransform eigenvectors: x = L*y or U'*y */
             if (lower) {
                 *(unsigned char *)trans = MagmaNoTrans;
             } else {
@@ -336,10 +322,8 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
             //            n, n, c_one, db, lddb, da, ldda);
         }
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time setmatrices trsm/mm + getmatrices = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+        timer_stop( time );
+        timer_printf( "time setmatrices trsm/mm + getmatrices = %6.2f\n", time );
     }
 
     work[0]  = MAGMA_Z_MAKE( lwmin * (1. + lapackf77_dlamch("Epsilon")), 0.);  // round up

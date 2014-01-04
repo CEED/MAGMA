@@ -14,17 +14,19 @@
 #include "common_magma.h"
 #include "magma_bulge.h"
 #include "magma_zbulge.h"
+#include "timer.h"
+
 #define PRECISION_z
 
 extern "C" magma_int_t
 magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
-                     magmaDoubleComplex *a, magma_int_t lda, 
+                     magmaDoubleComplex *a, magma_int_t lda,
                      magmaDoubleComplex *b, magma_int_t ldb,
                      double vl, double vu, magma_int_t il, magma_int_t iu,
-                     magma_int_t *m, double *w, 
-                     magmaDoubleComplex *work, magma_int_t lwork, 
-                     double *rwork, magma_int_t lrwork, 
-                     magma_int_t *iwork, magma_int_t liwork, 
+                     magma_int_t *m, double *w,
+                     magmaDoubleComplex *work, magma_int_t lwork,
+                     double *rwork, magma_int_t lrwork,
+                     magma_int_t *iwork, magma_int_t liwork,
                      magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -220,11 +222,8 @@ magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
     magma_int_t lquery;
     magma_int_t alleig, valeig, indeig;
 
-//    magma_int_t lopt;
     magma_int_t lwmin;
-//    magma_int_t liopt;
     magma_int_t liwmin;
-//    magma_int_t lropt;
     magma_int_t lrwmin;
 
     magma_queue_t stream;
@@ -308,7 +307,7 @@ magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
     }
 
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
-    if (n <= 128){
+    if (n <= 128) {
         #ifdef ENABLE_DEBUG
         printf("--------------------------------------------------------------\n");
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
@@ -317,30 +316,29 @@ magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
         lapackf77_zhegvd(&itype, jobz_, uplo_,
                          &n, a, &lda, b, &ldb,
                          w, work, &lwork,
-#if defined(PRECISION_z) || defined(PRECISION_c)
-                         rwork, &lrwork, 
-#endif  
+                         #if defined(PRECISION_z) || defined(PRECISION_c)
+                         rwork, &lrwork,
+                         #endif
                          iwork, &liwork, info);
         *m = n;
         return *info;
     }
 
+    // TODO: fix memory leak
     if (MAGMA_SUCCESS != magma_zmalloc( &da, n*ldda ) ||
         MAGMA_SUCCESS != magma_zmalloc( &db, n*lddb )) {
         *info = MAGMA_ERR_DEVICE_ALLOC;
         return *info;
     }
-    /*     Form a Cholesky factorization of B. */
+    /* Form a Cholesky factorization of B. */
     magma_zsetmatrix( n, n, b, ldb, db, lddb );
 
     magma_zsetmatrix_async( n, n,
                            a,  lda,
                            da, ldda, stream );
 
-#ifdef ENABLE_TIMER
-    magma_timestr_t start, end;
-    start = get_current_time();
-#endif
+    magma_timer_t time;
+    timer_start( time );
 
     magma_zpotrf_gpu(uplo_[0], n, db, lddb, info);
     if (*info != 0) {
@@ -348,61 +346,45 @@ magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
         return *info;
     }
 
-#ifdef ENABLE_TIMER
-    end = get_current_time();
-    printf("time zpotrf_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "time zpotrf_gpu = %6.2f\n", time );
 
     magma_queue_sync( stream );
     magma_zgetmatrix_async( n, n,
                            db, lddb,
                            b,  ldb, stream );
 
-#ifdef ENABLE_TIMER
-    start = get_current_time();
-#endif
-
-    /*     Transform problem to standard eigenvalue problem and solve. */
+    /* Transform problem to standard eigenvalue problem and solve. */
+    timer_start( time );
     magma_zhegst_gpu(itype, uplo, n, da, ldda, db, lddb, info);
-#ifdef ENABLE_TIMER
-    end = get_current_time();
-    printf("time zhegst_gpu = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "time zhegst_gpu = %6.2f\n", time );
 
     magma_zgetmatrix( n, n, da, ldda, a, lda );
     magma_queue_sync( stream );
     magma_free( da );
     magma_free( db );
 
-#ifdef ENABLE_TIMER
-    start = get_current_time();
-#endif
-
+    timer_start( time );
     magma_zheevdx_2stage(jobz, range, uplo, n, a, lda, vl, vu, il, iu, m, w, work, lwork, rwork, lrwork, iwork, liwork, info);
-
-#ifdef ENABLE_TIMER
-    end = get_current_time();
-    printf("time zheevdx_2stage = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+    timer_stop( time );
+    timer_printf( "time zheevdx_2stage = %6.2f\n", time );
 
     if (wantz && *info == 0) {
-
+        // TODO fix memory leak
         if (MAGMA_SUCCESS != magma_zmalloc( &da, n*ldda ) ||
             MAGMA_SUCCESS != magma_zmalloc( &db, n*lddb )) {
             *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;
         }
 
-#ifdef ENABLE_TIMER
-        start = get_current_time();
-#endif
+        timer_start( time );
 
         magma_zsetmatrix( n, *m, a, lda, da, ldda );
         magma_zsetmatrix( n,  n, b, ldb, db, lddb );
 
         /* Backtransform eigenvectors to the original problem. */
         if (itype == 1 || itype == 2) {
-
             /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;
                backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
             if (lower) {
@@ -412,9 +394,8 @@ magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
             }
 
             magma_ztrsm(MagmaLeft, uplo, *trans, MagmaNonUnit, n, *m, c_one, db, lddb, da, ldda);
-
-        } else if (itype == 3) {
-
+        }
+        else if (itype == 3) {
             /* For B*A*x=(lambda)*x;
                backtransform eigenvectors: x = L*y or U'*y */
             if (lower) {
@@ -428,14 +409,11 @@ magma_zhegvdx_2stage(magma_int_t itype, char jobz, char range, char uplo, magma_
 
         magma_zgetmatrix( n, *m, da, ldda, a, lda );
 
-#ifdef ENABLE_TIMER
-        end = get_current_time();
-        printf("time trsm/mm + getmatrix = %6.2f\n", GetTimerValue(start,end)/1000.);
-#endif
+        timer_stop( time );
+        timer_printf( "time trsm/mm + getmatrix = %6.2f\n", time );
 
         magma_free( da );
         magma_free( db );
-
     }
 
     magma_queue_destroy( stream );

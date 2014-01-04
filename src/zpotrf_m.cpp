@@ -10,13 +10,14 @@
 */
 #include "common_magma.h"
 #include "../testing/flops.h"
+#include "timer.h"
 
 
-#define A(i, j)  (a   +(j)*lda  + (i))
-#define dA(d, i, j) (dwork[(d)]+(j)*lddla + (i))
-#define dT(d, i, j) (dt[(d)]   +(j)*ldda  + (i))
-#define dAup(d, i, j) (dwork[(d)]+(j)*NB + (i))
-#define dTup(d, i, j) (dt[(d)]   +(j)*nb + (i))
+#define    A(i, j)    (    a      + (j)*lda   + (i))
+#define   dA(d, i, j) (dwork[(d)] + (j)*lddla + (i))
+#define   dT(d, i, j) (   dt[(d)] + (j)*ldda  + (i))
+#define dAup(d, i, j) (dwork[(d)] + (j)*NB    + (i))
+#define dTup(d, i, j) (   dt[(d)] + (j)*nb    + (i))
 
 extern "C" magma_int_t
 magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
@@ -93,10 +94,8 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
     magma_int_t     j, jj, jb, J, JB, NB, MB, h;
     magma_queue_t   stream[MagmaMaxGPUs][3];
     magma_event_t   event[MagmaMaxGPUs][5];
-    #ifdef ROW_MAJOR_PROFILE
-    magma_timestr_t start, end, start0, end0;
-    double chol_time = 1.0;
-    #endif
+    magma_timer_t time_total, time_sum, time;
+    
     *info = 0;
     if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
         *info = -1;
@@ -115,9 +114,9 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
         return *info;
 
     nb = magma_get_dpotrf_nb(n);
-    if( num_gpus0 > n/nb ) {
+    if ( num_gpus0 > n/nb ) {
         num_gpus = n/nb;
-        if( n%nb != 0 ) num_gpus ++;
+        if ( n%nb != 0 ) num_gpus ++;
     } else {
         num_gpus = num_gpus0;
     }
@@ -134,20 +133,20 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
     NB = (magma_int_t)((0.8*freeMem-max(2,num_gpus)*nb*ldda-(n+nb)*nb)/lddla); /* number of columns in the big panel */
     //NB = min(5*nb,n);
 
-    if( NB >= n ) {
+    if ( NB >= n ) {
         #ifdef CHECK_ZPOTRF_OOC
-        printf( "      * still fit in GPU memory.\n" );
+        printf( "      * still fits in GPU memory.\n" );
         #endif
         NB = n;
     } else {
         #ifdef CHECK_ZPOTRF_OOC
-        printf( "      * don't fit in GPU memory.\n" );
+        printf( "      * doesn't fit in GPU memory.\n" );
         #endif
         NB = (NB/nb) * nb;   /* making sure it's devisable by nb   */
     }
     #ifdef CHECK_ZPOTRF_OOC
-    if( NB != n ) printf( "      * running in out-core mode (n=%d, NB=%d, nb=%d, lddla=%d, freeMem=%.2e).\n",n,NB,nb,lddla,(double)freeMem );
-    else          printf( "      * running in in-core mode  (n=%d, NB=%d, nb=%d, lddla=%d, freeMem=%.2e).\n",n,NB,nb,lddla,(double)freeMem );
+    if ( NB != n ) printf( "      * running in out-core mode (n=%d, NB=%d, nb=%d, lddla=%d, freeMem=%.2e).\n", n, NB, nb, lddla, (double)freeMem );
+    else           printf( "      * running in in-core mode  (n=%d, NB=%d, nb=%d, lddla=%d, freeMem=%.2e).\n", n, NB, nb, lddla, (double)freeMem );
     fflush(stdout);
     #endif
     for (d=0; d<num_gpus; d++ ) {
@@ -166,9 +165,7 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
     }
     magma_setdevice(0);
 
-    #ifdef ROW_MAJOR_PROFILE
-    start0 = get_current_time();
-    #endif
+    timer_start( time_total );
 
     if (nb <= 1 || nb >= n) {
         lapackf77_zpotrf(uplo_, &n, a, &lda, info);
@@ -184,9 +181,9 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
         /* for each big-panel */
         for( J=0; J<n; J+=NB ) {
             JB = min(NB,n-J);
-            if( num_gpus0 > (n-J)/nb ) {
+            if ( num_gpus0 > (n-J)/nb ) {
                 num_gpus = (n-J)/nb;
-                if( (n-J)%nb != 0 ) num_gpus ++;
+                if ( (n-J)%nb != 0 ) num_gpus ++;
             } else {
                 num_gpus = num_gpus0;
             }
@@ -194,10 +191,8 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
             /* load the new big-panel by block-rows */
             magma_zhtodpo( num_gpus, uplo, JB, n, J, J, nb, a, lda, dwork, NB, stream, &iinfo);
             
-            #ifdef ROW_MAJOR_PROFILE
-            start = get_current_time();
-            #endif      
             /* update with the previous big-panels */
+            timer_start( time );
             for( j=0; j<J; j+=nb ) {
                 /* upload the diagonal of the block column (broadcast to all GPUs) */
                 for( d=0; d<num_gpus; d++ ) {
@@ -250,7 +245,7 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
                                 d_one,     dAup(d, jj, J2), NB);
                 }
                 /* -- process the remaining big off-diagonal block of the big panel */
-                if( n > J+JB ) { 
+                if ( n > J+JB ) {
                     for( d=0; d<num_gpus; d++ ) {
                         magma_setdevice(d);
                         magmablasSetKernelStream(stream[d][2]);
@@ -264,7 +259,8 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
                         
                         /* subtracting the local number of columns in the diagonal */
                         J2 = nb*(JB/(nb*num_gpus));
-                        if( d < (JB/nb)%num_gpus ) J2+=nb;
+                        if ( d < (JB/nb)%num_gpus )
+                            J2 += nb;
 
                         n_local[d] -= J2;
                         
@@ -294,14 +290,11 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
             // using three streams
             magma_zpotrf3_mgpu(num_gpus, uplo, JB, n-J, J, J, nb,
                                dwork, NB, dt, ldda, a, lda, h, stream, event, &iinfo);
-            if( iinfo != 0 ) {
+            if ( iinfo != 0 ) {
                 *info = J+iinfo;
                 break;
             }
-            #ifdef ROW_MAJOR_PROFILE
-            end = get_current_time();
-            chol_time += GetTimerValue(start, end);
-            #endif      
+            time_sum += timer_stop( time );
             
             /* upload the off-diagonal (and diagonal!!!) big panel */
             magma_zdtohpo(num_gpus, uplo, JB, n, J, J, nb, NB, a, lda, dwork, NB, stream, &iinfo);
@@ -314,9 +307,9 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
         /* for each big-panel */
         for( J=0; J<n; J+=NB ) {
             JB = min(NB,n-J);
-            if( num_gpus0 > (n-J)/nb ) {
+            if ( num_gpus0 > (n-J)/nb ) {
                 num_gpus = (n-J)/nb;
-                if( (n-J)%nb != 0 ) num_gpus ++;
+                if ( (n-J)%nb != 0 ) num_gpus ++;
             } else {
                 num_gpus = num_gpus0;
             }
@@ -325,9 +318,7 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
             magma_zhtodpo( num_gpus, uplo, n, JB, J, J, nb, a, lda, dwork, lddla, stream, &iinfo);
             
             /* update with the previous big-panels */
-            #ifdef ROW_MAJOR_PROFILE
-            start = get_current_time();
-            #endif      
+            timer_start( time );
             for( j=0; j<J; j+=nb ) {
                 /* upload the diagonal of big panel */
                 for( d=0; d<num_gpus; d++ ) {
@@ -379,7 +370,7 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
                                 d_one,     dA(d, J2,  jj), lddla);
                 }
                 
-                if( n > J+JB ) { /* off-diagonal */
+                if ( n > J+JB ) { /* off-diagonal */
                     for( d=0; d<num_gpus; d++ ) {
                         magma_setdevice(d);
                         magmablasSetKernelStream(stream[d][2]);
@@ -393,7 +384,8 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
                         
                         /* subtracting local number of columns in diagonal */
                         J2 = nb*(JB/(nb*num_gpus));
-                        if( d < (JB/nb)%num_gpus ) J2+=nb;
+                        if ( d < (JB/nb)%num_gpus )
+                            J2 += nb;
 
                         n_local[d] -= J2;
                         
@@ -407,7 +399,7 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
                 /* wait for the previous updates */
                 for( d=0; d<num_gpus; d++ ) {
                     magma_setdevice(d);
-                    for( jj=0; jj<3; jj++ ) 
+                    for( jj=0; jj<3; jj++ )
                         magma_queue_sync( stream[d][jj] );
                     magmablasSetKernelStream(NULL);
                 }
@@ -422,26 +414,23 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
             // using three streams
             magma_zpotrf3_mgpu(num_gpus, uplo, n-J, JB, J, J, nb,
                                dwork, lddla, dt, ldda, a, lda, h, stream, event, &iinfo);
-            if( iinfo != 0 ) {
+            if ( iinfo != 0 ) {
                 *info = J+iinfo;
                 break;
             }
-            #ifdef ROW_MAJOR_PROFILE
-            end = get_current_time();
-            chol_time += GetTimerValue(start, end);
-            #endif      
+            time_sum += timer_stop( time );
+            
             /* upload the off-diagonal big panel */
             magma_zdtohpo( num_gpus, uplo, n, JB, J, J, nb, JB, a, lda, dwork, lddla, stream, &iinfo);
         
         } /* end of for J */
     } /* if upper */
     } /* if nb */
-    #ifdef ROW_MAJOR_PROFILE
-    end0 = get_current_time();
-    #endif
-    if( num_gpus0 > n/nb ) {
+    timer_stop( time_total );
+    
+    if ( num_gpus0 > n/nb ) {
         num_gpus = n/nb;
-        if( n%nb != 0 ) num_gpus ++;
+        if ( n%nb != 0 ) num_gpus ++;
     } else {
         num_gpus = num_gpus0;
     }
@@ -449,7 +438,7 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
         magma_setdevice(d);
 
         for( j=0; j<3; j++ ) {
-            if( stream[d][j] != NULL ) magma_queue_destroy( stream[d][j] );
+            if ( stream[d][j] != NULL ) magma_queue_destroy( stream[d][j] );
         }
         magma_free( dt[d] );
 
@@ -458,16 +447,15 @@ magma_zpotrf_m(magma_int_t num_gpus0, char uplo, magma_int_t n,
         }
     }
     magma_setdevice(0);
-
-    #ifdef ROW_MAJOR_PROFILE
-    printf("\n n=%d NB=%d nb=%d\n",n,NB,nb);
-    printf(" Without memory allocation: %f / %f = %f GFlop/s\n",
-           FLOPS_ZPOTRF(n)/1000000, GetTimerValue(start0, end0),
-           FLOPS_ZPOTRF(n)/(1000000*GetTimerValue(start0, end0)));
-    printf(" Performance %f / %f = %f GFlop/s\n",
-           FLOPS_ZPOTRF(n)/1000000, chol_time,
-           FLOPS_ZPOTRF(n)/(1000000*chol_time));
-    #endif
+                 
+    timer_printf( "\n n=%d NB=%d nb=%d\n", n, NB, nb );
+    timer_printf( " Without memory allocation: %f / %f = %f GFlop/s\n",
+                  FLOPS_ZPOTRF(n) / 1e9,  time_total,
+                  FLOPS_ZPOTRF(n) / 1e9 / time_total );
+    timer_printf( " Performance %f / %f = %f GFlop/s\n",
+                  FLOPS_ZPOTRF(n) / 1e9,  time_sum,
+                  FLOPS_ZPOTRF(n) / 1e9 / time_sum );
+    
     return *info;
 } /* magma_zpotrf_ooc */
 
