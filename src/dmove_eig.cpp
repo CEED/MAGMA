@@ -12,7 +12,7 @@
 
 */
 #include "common_magma.h"
-extern"C" void 
+extern "C" void
 magma_dmove_eig(char range, magma_int_t n, double *w, magma_int_t *il,
                      magma_int_t *iu, double vl, double vu, magma_int_t *m)
 {
@@ -23,17 +23,17 @@ magma_dmove_eig(char range, magma_int_t n, double *w, magma_int_t *il,
     valeig = lapackf77_lsame( range_, "V" );
     indeig = lapackf77_lsame( range_, "I" );
 
-    if (indeig){
+    if (indeig) {
         *m = *iu - *il + 1;
-        if(*il > 1)
+        if (*il > 1)
             for (i = 0; i < *m; ++i)
                 w[i] = w[*il - 1 + i];
     }
-    else if(valeig){
+    else if (valeig) {
         *il=1;
         *iu=n;
-        for (i = 0; i < n; ++i){
-            if (w[i] > vu){
+        for (i = 0; i < n; ++i) {
+            if (w[i] > vu) {
                 *iu = i;
                 break;
             }
@@ -44,7 +44,7 @@ magma_dmove_eig(char range, magma_int_t n, double *w, magma_int_t *il,
         }
         *m = *iu - *il + 1;
     }
-    else{
+    else {
         *il = 1;
         *iu = n;
         *m = n;
@@ -52,4 +52,3 @@ magma_dmove_eig(char range, magma_int_t n, double *w, magma_int_t *il,
 
     return;
 }
-

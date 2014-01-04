@@ -143,20 +143,20 @@ magma_dlaex1(magma_int_t n, double* d, double* q, magma_int_t ldq,
 
     *info = 0;
 
-    if( n < 0 )
+    if ( n < 0 )
         *info = -1;
-    else if( ldq < max(1, n) )
+    else if ( ldq < max(1, n) )
         *info = -4;
-    else if( min( 1, n/2 ) > cutpnt || n/2 < cutpnt )
+    else if ( min( 1, n/2 ) > cutpnt || n/2 < cutpnt )
         *info = -7;
-    if( *info != 0 ){
+    if ( *info != 0 ) {
         magma_xerbla( __func__, -*info );
         return MAGMA_ERR_ILLEGAL_VALUE;
     }
 
     //  Quick return if possible
 
-    if( n == 0 )
+    if ( n == 0 )
         return MAGMA_SUCCESS;
 
     //  The following values are integer pointers which indicate
@@ -187,25 +187,24 @@ magma_dlaex1(magma_int_t n, double* d, double* q, magma_int_t ldq,
                      &iwork[indx], &iwork[indxc], &iwork[indxp],
                      &iwork[coltyp], info);
 
-    if( *info != 0 )
+    if ( *info != 0 )
         return MAGMA_SUCCESS;
 
     //  Solve Secular Equation.
 
-    if( k != 0 ){
+    if ( k != 0 ) {
         is = (iwork[coltyp]+iwork[coltyp+1])*cutpnt + (iwork[coltyp+1]+iwork[coltyp+2])*(n-cutpnt) + iq2;
         magma_dlaex3(k, n, cutpnt, d, q, ldq, rho,
                      &work[idlmda], &work[iq2], &iwork[indxc],
                      &iwork[coltyp], &work[iw], &work[is],
                      indxq, dwork, range, vl, vu, il, iu, info );
-        if( *info != 0 )
+        if ( *info != 0 )
             return MAGMA_SUCCESS;
     }
     else {
-        for (i = 0; i<n; ++i)
+        for (i = 0; i < n; ++i)
             indxq[i] = i+1;
     }
 
     return MAGMA_SUCCESS;
-
 } /* magma_dlaex1 */

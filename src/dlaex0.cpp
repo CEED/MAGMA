@@ -114,32 +114,30 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
 
 
     // Test the input parameters.
-
     *info = 0;
 
-    if( n < 0 )
+    if ( n < 0 )
         *info = -1;
-    else if( ldq < max(1, n) )
+    else if ( ldq < max(1, n) )
         *info = -5;
-    if( *info != 0 ){
+    if ( *info != 0 ) {
         magma_xerbla( __func__, -*info );
         return MAGMA_ERR_ILLEGAL_VALUE;
     }
 
     // Quick return if possible
-    if(n == 0)
+    if (n == 0)
         return MAGMA_SUCCESS;
 
     smlsiz = magma_get_smlsize_divideconquer();
 
     // Determine the size and placement of the submatrices, and save in
     // the leading elements of IWORK.
-
     iwork[0] = n;
     subpbs= 1;
     tlvls = 0;
     while (iwork[subpbs - 1] > smlsiz) {
-        for (j = subpbs; j > 0; --j){
+        for (j = subpbs; j > 0; --j) {
             iwork[2*j - 1] = (iwork[j-1]+1)/2;
             iwork[2*j - 2] = iwork[j-1]/2;
         }
@@ -151,8 +149,7 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
 
     // Divide the matrix into SUBPBS submatrices of size at most SMLSIZ+1
     // using rank-1 modifications (cuts).
-
-    for(i=0; i < subpbs-1; ++i){
+    for (i=0; i < subpbs-1; ++i) {
         submat = iwork[i];
         d[submat-1] -= MAGMA_D_ABS(e[submat-1]);
         d[submat] -= MAGMA_D_ABS(e[submat-1]);
@@ -162,14 +159,13 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
 
     // Solve each submatrix eigenproblem at the bottom of the divide and
     // conquer tree.
-
     char char_I[] = {'I', 0};
 
     magma_timer_t time;
     timer_start( time );
 
-    for (i = 0; i < subpbs; ++i){
-        if(i == 0){
+    for (i = 0; i < subpbs; ++i) {
+        if (i == 0) {
             submat = 0;
             matsiz = iwork[0];
         } else {
@@ -178,14 +174,14 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
         }
         lapackf77_dsteqr(char_I, &matsiz, &d[submat], &e[submat],
                          Q(submat, submat), &ldq, work, info);  // change to edc?
-        if(*info != 0){
+        if (*info != 0) {
             printf("info: %d\n, submat: %d\n", (int) *info, (int) submat);
             *info = (submat+1)*(n+1) + submat + matsiz;
             printf("info: %d\n", (int) *info);
             return MAGMA_SUCCESS;
         }
         k = 1;
-        for(j = submat; j < iwork[i]; ++j){
+        for (j = submat; j < iwork[i]; ++j) {
             iwork[indxq+j] = k;
             ++k;
         }
@@ -196,13 +192,12 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
     
     // Successively merge eigensystems of adjacent submatrices
     // into eigensystem for the corresponding larger matrix.
-
     curlvl = 1;
-    while (subpbs > 1){
+    while (subpbs > 1) {
         timer_start( time );
         
-        for (i=0; i < subpbs-1; i += 2){
-            if(i == 0){
+        for (i=0; i < subpbs-1; i += 2) {
+            if (i == 0) {
                 submat = 0;
                 matsiz = iwork[1];
                 msd2 = iwork[0];
@@ -216,7 +211,6 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
             // into an eigensystem of size MATSIZ.
             // DLAEX1 is used only for the full eigensystem of a tridiagonal
             // matrix.
-
             if (matsiz == n)
                 range_ = range;
             else
@@ -228,7 +222,7 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
                          work, &iwork[subpbs], dwork,
                          range_, vl, vu, il, iu, info);
 
-            if(*info != 0){
+            if (*info != 0) {
                 *info = (submat+1)*(n+1) + submat + matsiz;
                 return MAGMA_SUCCESS;
             }
@@ -243,8 +237,7 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
 
     // Re-merge the eigenvalues/vectors which were deflated at the final
     // merge step.
-
-    for(i = 0; i < n; ++i){
+    for (i = 0; i < n; ++i) {
         j = iwork[indxq+i] - 1;
         work[i] = d[j];
         blasf77_dcopy(&n, Q(0, j), &ione, &work[ n*(i+1) ], &ione);
@@ -254,6 +247,4 @@ magma_dlaex0(magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
     lapackf77_dlacpy ( char_A, &n, &n, &work[n], &n, q, &ldq );
 
     return MAGMA_SUCCESS;
-
 } /* magma_dlaex0 */
-

@@ -13,12 +13,14 @@
 
 #define Z(ix, iy) (z + (ix) + ldz * (iy))
 
-extern "C"{
-    magma_int_t magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
-                               double* work, magma_int_t* iwork,
-                               char range, double vl, double vu,
-                               magma_int_t il, magma_int_t iu, magma_int_t* info);
-}
+extern "C" {
+
+magma_int_t magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
+                           double* work, magma_int_t* iwork,
+                           char range, double vl, double vu,
+                           magma_int_t il, magma_int_t iu, magma_int_t* info);
+
+}  // end extern "C"
 
 extern "C" magma_int_t
 magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double vu,
@@ -188,7 +190,7 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
         // Compute the workspace requirements
 
         smlsiz = magma_get_smlsize_divideconquer();
-        if( n <= 1 ){
+        if ( n <= 1 ) {
             lwmin = 1;
             liwmin = 1;
         } else {
@@ -215,9 +217,9 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
 
     // Quick return if possible
 
-    if(n==0)
+    if (n == 0)
         return MAGMA_SUCCESS;
-    if(n==1){
+    if (n == 1) {
         *z = 1.;
         return MAGMA_SUCCESS;
     }
@@ -233,7 +235,7 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
     // If N is smaller than the minimum divide size (SMLSIZ+1), then
     // solve the problem with another solver.
 
-    if (n < smlsiz){
+    if (n < smlsiz) {
         char char_I[]= {'I', 0};
         lapackf77_dsteqr(char_I, &n, d, e, z, &ldz, work, info);
     } else {
@@ -245,7 +247,7 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
 
         orgnrm = lapackf77_dlanst(char_M, &n, d, e);
 
-        if (orgnrm == 0){
+        if (orgnrm == 0) {
             work[0]  = lwmin;
             iwork[0] = liwmin;
             return MAGMA_SUCCESS;
@@ -253,9 +255,9 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
 
         eps = lapackf77_dlamch( "Epsilon" );
 
-        if (alleig){
+        if (alleig) {
             start = 0;
-            while ( start < n ){
+            while ( start < n ) {
 
                 // Let FINISH be the position of the next subdiagonal entry
                 // such that E( END ) <= TINY or FINISH = N if no such
@@ -263,7 +265,7 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
                 // between START and END constitutes an independent
                 // sub-problem.
 
-                for(end = start+1; end < n; ++end){
+                for (end = start+1; end < n; ++end) {
                     tiny = eps * sqrt( MAGMA_D_ABS(d[end-1]*d[end]));
                     if (MAGMA_D_ABS(e[end-1]) <= tiny)
                         break;
@@ -272,12 +274,11 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
                 // (Sub) Problem determined.  Compute its size and solve it.
 
                 m = end - start;
-                if (m==1){
+                if (m == 1) {
                     start = end;
                     continue;
                 }
-                if (m > smlsiz){
-
+                if (m > smlsiz) {
                     // Scale
                     char char_G[] = {'G', 0};
                     orgnrm = lapackf77_dlanst(char_M, &m, &d[start], &e[start]);
@@ -287,18 +288,16 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
 
                     magma_dlaex0_m( nrgpu, m, &d[start], &e[start], Z(start, start), ldz, work, iwork, 'A', vl, vu, il, iu, info);
 
-                    if( *info != 0) {
+                    if ( *info != 0) {
                         return MAGMA_SUCCESS;
                     }
 
                     // Scale Back
                     lapackf77_dlascl(char_G, &izero, &izero, &d_one, &orgnrm, &m, &ione, &d[start], &m, info);
-
                 } else {
-
                     char char_I[]= {'I', 0};
                     lapackf77_dsteqr( char_I, &m, &d[start], &e[start], Z(start, start), &ldz, work, info);
-                    if (*info != 0){
+                    if (*info != 0) {
                         *info = (start+1) *(n+1) + end;
                     }
                 }
@@ -311,28 +310,25 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
             // will not be properly ordered.  Here we permute the eigenvalues
             // (and the associated eigenvectors) into ascending order.
 
-            if (m < n){
-
+            if (m < n) {
                 // Use Selection Sort to minimize swaps of eigenvectors
-                for (i = 1; i < n; ++i){
+                for (i = 1; i < n; ++i) {
                     k = i-1;
                     p = d[i-1];
-                    for (j = i; j < n; ++j){
-                        if (d[j] < p){
+                    for (j = i; j < n; ++j) {
+                        if (d[j] < p) {
                             k = j;
                             p = d[j];
                         }
                     }
-                    if(k != i-1) {
+                    if (k != i-1) {
                         d[k] = d[i-1];
                         d[i-1] = p;
                         blasf77_dswap(&n, Z(0,i-1), &ione, Z(0,k), &ione);
                     }
                 }
             }
-
         } else {
-
             // Scale
             char char_G[] = {'G', 0};
             lapackf77_dlascl(char_G, &izero, &izero, &orgnrm, &d_one, &n, &ione, d, &n, info);
@@ -341,13 +337,12 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
 
             magma_dlaex0_m(nrgpu, n, d, e, z, ldz, work, iwork, range, vl, vu, il, iu, info);
 
-            if( *info != 0) {
+            if ( *info != 0) {
                 return MAGMA_SUCCESS;
             }
 
             // Scale Back
             lapackf77_dlascl(char_G, &izero, &izero, &d_one, &orgnrm, &n, &ione, d, &n, info);
-
         }
     }
 
@@ -355,5 +350,4 @@ magma_dstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
     iwork[0] = liwmin;
 
     return MAGMA_SUCCESS;
-
 } /* magma_dstedx_m */

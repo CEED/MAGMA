@@ -30,8 +30,8 @@ void magma_dvrange(magma_int_t k, double *d, magma_int_t *il, magma_int_t *iu, d
 
     *il=1;
     *iu=k;
-    for (i = 0; i < k; ++i){
-        if (d[i] > vu){
+    for (i = 0; i < k; ++i) {
+        if (d[i] > vu) {
             *iu = i;
             break;
         }
@@ -47,13 +47,13 @@ void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_in
 
     *iil = 1;
     *iiu = 0;
-    for (i = il; i<=iu; ++i)
-        if (indxq[i-1]<=k){
+    for (i = il; i <= iu; ++i)
+        if (indxq[i-1]<=k) {
             *iil = indxq[i-1];
             break;
         }
-    for (i = iu; i>=il; --i)
-        if (indxq[i-1]<=k){
+    for (i = iu; i >= il; --i)
+        if (indxq[i-1]<=k) {
             *iiu = indxq[i-1];
             break;
         }
@@ -200,11 +200,11 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
 
     *info = 0;
 
-    if(k < 0)
+    if (k < 0)
         *info=-1;
-    else if(n < k)
+    else if (n < k)
         *info=-2;
-    else if(ldq < max(1,n))
+    else if (ldq < max(1,n))
         *info=-6;
     else if (! (alleig || valeig || indeig))
         *info = -15;
@@ -222,13 +222,13 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
     }
 
 
-    if(*info != 0){
+    if (*info != 0) {
         magma_xerbla(__func__, -(*info));
         return MAGMA_ERR_ILLEGAL_VALUE;
     }
 
     // Quick return if possible
-    if(k == 0)
+    if (k == 0)
         return MAGMA_SUCCESS;
     /*
      Modify values DLAMDA(i) to make sure all DLAMDA(i)-DLAMDA(j) can
@@ -274,15 +274,15 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
         magma_int_t ie = ((id+1) * k) / tot; //end index of local loop
         magma_int_t ik = ie - ib;           //number of local indices
 
-        for(i = ib; i < ie; ++i)
+        for (i = ib; i < ie; ++i)
             dlamda[i]=lapackf77_dlamc3(&dlamda[i], &dlamda[i]) - dlamda[i];
 
-        for(j = ib; j < ie; ++j){
+        for (j = ib; j < ie; ++j) {
             magma_int_t tmpp=j+1;
             magma_int_t iinfo = 0;
             lapackf77_dlaed4(&k, &tmpp, dlamda, w, Q(0,j), &rho, &d[j], &iinfo);
             // If the zero finder fails, the computation is terminated.
-            if(iinfo != 0){
+            if (iinfo != 0) {
 #pragma omp critical (info)
                 *info=iinfo;
                 break;
@@ -291,8 +291,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
 
 #pragma omp barrier
 
-        if(*info == 0){
-
+        if (*info == 0) {
 #pragma omp single
             {
                 //Prepare the INDXQ sorting permutation.
@@ -311,10 +310,10 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
                 rk = iiu - iil + 1;
             }
 
-            if (k == 2){
+            if (k == 2) {
 #pragma omp single
                 {
-                    for(j = 0; j < k; ++j){
+                    for (j = 0; j < k; ++j) {
                         w[0] = *Q(0,j);
                         w[1] = *Q(1,j);
 
@@ -324,10 +323,8 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
                         *Q(1,j) = w[i];
                     }
                 }
-
             }
-            else if(k != 1){
-
+            else if (k != 1) {
                 // Compute updated W.
                 blasf77_dcopy( &ik, &w[ib], &ione, &s[ib], &ione);
 
@@ -335,16 +332,16 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
                 tmp = ldq + 1;
                 blasf77_dcopy( &ik, Q(ib,ib), &tmp, &w[ib], &ione);
 
-                for(j = 0; j < k; ++j){
+                for (j = 0; j < k; ++j) {
                     magma_int_t i_tmp = min(j, ie);
-                    for(i = ib; i < i_tmp; ++i)
+                    for (i = ib; i < i_tmp; ++i)
                         w[i] = w[i] * ( *Q(i, j) / ( dlamda[i] - dlamda[j] ) );
                     i_tmp = max(j+1, ib);
-                    for(i = i_tmp; i < ie; ++i)
+                    for (i = i_tmp; i < ie; ++i)
                         w[i] = w[i] * ( *Q(i, j) / ( dlamda[i] - dlamda[j] ) );
                 }
 
-                for(i = ib; i < ie; ++i)
+                for (i = ib; i < ie; ++i)
                     w[i] = copysign( sqrt( -w[i] ), s[i]);
 
 #pragma omp barrier
@@ -352,23 +349,23 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
                 //reduce the number of used threads to have enough S workspace
                 tot = min(n1, omp_get_num_threads());
 
-                if(id < tot){
+                if (id < tot) {
                     ib = (  id   * rk) / tot + iil - 1;
                     ie = ((id+1) * rk) / tot + iil - 1;
                     ik = ie - ib;
                 }
-                else{
+                else {
                     ib = -1;
                     ie = -1;
                     ik = -1;
                 }
 
                 // Compute eigenvectors of the modified rank-1 modification.
-                for(j = ib; j < ie; ++j){
-                    for(i = 0; i < k; ++i)
+                for (j = ib; j < ie; ++j) {
+                    for (i = 0; i < k; ++i)
                         s[id*k + i] = w[i] / *Q(i,j);
                     temp = cblas_dnrm2( k, s+id*k, 1);
-                    for(i = 0; i < k; ++i){
+                    for (i = 0; i < k; ++i) {
                         magma_int_t iii = indx[i] - 1;
                         *Q(i,j) = s[id*k + iii] / temp;
                     }
@@ -389,18 +386,18 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
     magma_timer_t time;
     timer_start( time );
 
-    for(i = 0; i < k; ++i)
+    for (i = 0; i < k; ++i)
         dlamda[i]=lapackf77_dlamc3(&dlamda[i], &dlamda[i]) - dlamda[i];
 
-    for(j = 0; j < k; ++j){
+    for (j = 0; j < k; ++j) {
         magma_int_t tmpp=j+1;
         magma_int_t iinfo = 0;
         lapackf77_dlaed4(&k, &tmpp, dlamda, w, Q(0,j), &rho, &d[j], &iinfo);
         // If the zero finder fails, the computation is terminated.
-        if(iinfo != 0)
+        if (iinfo != 0)
             *info=iinfo;
     }
-    if(*info != 0)
+    if (*info != 0)
         return MAGMA_SUCCESS;
 
     //Prepare the INDXQ sorting permutation.
@@ -418,9 +415,8 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
     }
     rk = iiu - iil + 1;
 
-    if (k == 2){
-
-        for(j = 0; j < k; ++j){
+    if (k == 2) {
+        for (j = 0; j < k; ++j) {
             w[0] = *Q(0,j);
             w[1] = *Q(1,j);
 
@@ -429,10 +425,8 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
             i = indx[1] - 1;
             *Q(1,j) = w[i];
         }
-
     }
-    else if(k != 1){
-
+    else if (k != 1) {
         // Compute updated W.
         blasf77_dcopy( &k, w, &ione, s, &ione);
 
@@ -440,22 +434,22 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
         tmp = ldq + 1;
         blasf77_dcopy( &k, q, &tmp, w, &ione);
 
-        for(j = 0; j < k; ++j){
-            for(i = 0; i < j; ++i)
+        for (j = 0; j < k; ++j) {
+            for (i = 0; i < j; ++i)
                 w[i] = w[i] * ( *Q(i, j) / ( dlamda[i] - dlamda[j] ) );
-            for(i = j+1; i < k; ++i)
+            for (i = j+1; i < k; ++i)
                 w[i] = w[i] * ( *Q(i, j) / ( dlamda[i] - dlamda[j] ) );
         }
 
-        for(i = 0; i < k; ++i)
+        for (i = 0; i < k; ++i)
             w[i] = copysign( sqrt( -w[i] ), s[i]);
 
         // Compute eigenvectors of the modified rank-1 modification.
-        for(j = iil-1; j < iiu; ++j){
-            for(i = 0; i < k; ++i)
+        for (j = iil-1; j < iiu; ++j) {
+            for (i = 0; i < k; ++i)
                 s[i] = w[i] / *Q(i,j);
             temp = cblas_dnrm2( k, s, 1);
-            for(i = 0; i < k; ++i){
+            for (i = 0; i < k; ++i) {
                 magma_int_t iii = indx[i] - 1;
                 *Q(i,j) = s[iii] / temp;
             }
@@ -471,9 +465,9 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
     timer_start( time );
     magma_queue_sync( NULL );
 
-    if (rk != 0){
-        if( n23 != 0 ){
-            if (rk < magma_get_dlaed3_k()){
+    if (rk != 0) {
+        if ( n23 != 0 ) {
+            if (rk < magma_get_dlaed3_k()) {
                 lapackf77_dlacpy("A", &n23, &rk, Q(ctot[0],iil-1), &ldq, s, &n23);
                 blasf77_dgemm("N", "N", &n2, &rk, &n23, &d_one, &q2[iq2], &n2,
                               s, &n23, &d_zero, Q(n1,iil-1), &ldq );
@@ -485,8 +479,8 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
         } else
             lapackf77_dlaset("A", &n2, &rk, &d_zero, &d_zero, Q(n1,iil-1), &ldq);
 
-        if( n12 != 0 ) {
-            if (rk < magma_get_dlaed3_k()){
+        if ( n12 != 0 ) {
+            if (rk < magma_get_dlaed3_k()) {
                 lapackf77_dlacpy("A", &n12, &rk, Q(0,iil-1), &ldq, s, &n12);
                 blasf77_dgemm("N", "N", &n1, &rk, &n12, &d_one, q2, &n1,
                               s, &n12, &d_zero, Q(0,iil-1), &ldq);

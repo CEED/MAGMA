@@ -97,7 +97,7 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
             smallest and largest eigenvalues to be returned.
             1 <= IL <= IU <= N, if N > 0; IL = 1 and IU = 0 if N = 0.
             Not referenced if RANGE = 'A' or 'V'.
-
+            
     M       (output) INTEGER
             The total number of eigenvalues found.  0 <= M <= N.
             If RANGE = 'A', M = N, and if RANGE = 'I', M = IU-IL+1.
@@ -270,18 +270,18 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
     magma_int_t ntiles = n/nb;
-    if( ( ntiles < 2 ) || ( n <= 128 ) ){
+    if ( ( ntiles < 2 ) || ( n <= 128 ) ) {
         #ifdef ENABLE_DEBUG
         printf("--------------------------------------------------------------\n");
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
         printf("--------------------------------------------------------------\n");
         #endif
-        lapackf77_dsyevd(jobz_, uplo_, &n, 
-                         a, &lda, w, 
-                         work, &lwork, 
-                         iwork, &liwork, 
+        lapackf77_dsyevd(jobz_, uplo_, &n,
+                         a, &lda, w,
+                         work, &lwork,
+                         iwork, &liwork,
                          info);
-        *m = n; 
+        *m = n;
         return *info;
     }
     
@@ -361,9 +361,9 @@ magma_dsyevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     timer_stop( time_dist );
 
     timer_start( time_band );
-    if(ver==30){
+    if (ver == 30) {
         magma_dsytrd_sy2sb_mgpu_spec(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, da, ldda, dT1, nb, nrgpu, distblk, streams, nstream, threads, info);
-    }else{
+    } else {
         magma_dsytrd_sy2sb_mgpu(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, da, ldda, dT1, nb, nrgpu, distblk, streams, nstream, threads, info);
     }
     timer_stop( time_band );

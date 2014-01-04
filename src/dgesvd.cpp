@@ -341,7 +341,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                         ldwrku = lda;
                         ldwrkr = lda;
                     }
-                    else /* if(complicated condition) */ {
+                    else /* if (complicated condition) */ {
                         // Computing MAX
                         i__2 = wrkbl;
                         i__3 = lda*n + n;
@@ -414,7 +414,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                     // (Workspace: need N*N + 2*N, prefer N*N + M*N + N)
                     i__2 = m;
                     i__3 = ldwrku;
-                    for(i = 1; (i__3 < 0 ? i >= i__2 : i <= i__2); i += i__3) {
+                    for (i = 1; (i__3 < 0 ? i >= i__2 : i <= i__2); i += i__3) {
                         // Computing MIN
                         i__4 = m - i + 1;
                         chunk = min(i__4,ldwrku);
@@ -472,7 +472,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                         ldwrku = lda;
                         ldwrkr = lda;
                     }
-                    else /* if(complicated condition) */ {
+                    else /* if (complicated condition) */ {
                         // Computing MAX
                         i__3 = wrkbl;
                         i__2 = lda*n + n;
@@ -557,7 +557,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                     // (Workspace: need N*N + 2*N, prefer N*N + M*N + N)
                     i__3 = m;
                     i__2 = ldwrku;
-                    for(i = 1; (i__2 < 0 ? i >= i__3 : i <= i__3); i += i__2) {
+                    for (i = 1; (i__2 < 0 ? i >= i__3 : i <= i__3); i += i__2) {
                         // Computing MIN
                         i__4 = m - i + 1;
                         chunk = min(i__4,ldwrku);
@@ -1044,7 +1044,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
 
                         // lapackf77_dorgqr(&m, &n, &n, U, &ldu,
                         //                  &work[itau], &work[iwork], &i__2, &ierr);
-                        magma_dorgqr2(m, n, n, U, ldu, &work[itau], &ierr);                       
+                        magma_dorgqr2(m, n, n, U, ldu, &work[itau], &ierr);
  
                         // Copy R to VT, zeroing out below it
                         lapackf77_dlacpy("U", &n, &n,
@@ -1690,7 +1690,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                                  VT, &ldvt, A, &lda,
                                  cdummy, &ione, &work[iwork], info);
             }
-            // printf("DBDSQR time %10.6f\n", magma_wtime() - t1);            
+            // printf("DBDSQR time %10.6f\n", magma_wtime() - t1);
         }
     }
     else {
@@ -1771,7 +1771,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                         chunk = n;
                         ldwrkr = lda;
                     }
-                    else /* if(complicated condition) */ {
+                    else /* if (complicated condition) */ {
                         // Computing MAX
                         i__2 = wrkbl;
                         i__3 = lda*n + m;
@@ -1841,7 +1841,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                     // (Workspace: need M*M + 2*M, prefer M*M + M*N + M)
                     i__2 = n;
                     i__3 = chunk;
-                    for(i = 1; (chunk < 0 ? i >= i__2 : i <= i__2); i += chunk) {
+                    for (i = 1; (chunk < 0 ? i >= i__2 : i <= i__2); i += chunk) {
                         // Computing MIN
                         i__4 = n - i + 1;
                         blk = min(i__4,chunk);
@@ -1900,7 +1900,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                         chunk = n;
                         ldwrkr = lda;
                     }
-                    else /* if(complicated condition) */ {
+                    else /* if (complicated condition) */ {
                         // Computing MAX
                         i__3 = wrkbl;
                         i__2 = lda*n + m;
@@ -1980,7 +1980,7 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
                     // (Workspace: need M*M + 2*M, prefer M*M + M*N + M))
                     i__3 = n;
                     i__2 = chunk;
-                    for(i = 1; (i__2 < 0 ? i >= i__3 : i <= i__3); i += i__2) {
+                    for (i = 1; (i__2 < 0 ? i >= i__3 : i <= i__3); i += i__2) {
                         // Computing MIN
                         i__4 = n - i + 1;
                         blk = min(i__4,chunk);
@@ -3030,12 +3030,12 @@ magma_dgesvd(char jobu, char jobvt, magma_int_t m, magma_int_t n,
     if (*info != 0) {
         if (ie > 2) {
             i__2 = minmn - 1;
-            for(i = 1; i <= i__2; ++i) {
+            for (i = 1; i <= i__2; ++i) {
                 work[i + 1] = work[i + ie - 1];
             }
         }
         if (ie < 2) {
-            for(i = minmn - 1; i >= 1; --i) {
+            for (i = minmn - 1; i >= 1; --i) {
                 work[i + 1] = work[i + ie - 1];
             }
         }

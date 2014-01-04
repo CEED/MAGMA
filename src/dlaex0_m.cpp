@@ -15,16 +15,18 @@
 #define Q(ix, iy) (q + (ix) + ldq * (iy))
 
 extern "C" {
-    magma_int_t magma_dlaex1_m(magma_int_t nrgpu, magma_int_t n, double* d, double* q, magma_int_t ldq,
-                               magma_int_t* indxq, double rho, magma_int_t cutpnt,
-                               double* work, magma_int_t* iwork, double** dwork,
-                               magma_queue_t stream[MagmaMaxGPUs][2],
-                               char range, double vl, double vu,
-                               magma_int_t il, magma_int_t iu, magma_int_t* info);
 
-    magma_int_t magma_get_dlaex3_m_nb();       // defined in dlaex3_m.cpp
+magma_int_t magma_dlaex1_m(magma_int_t nrgpu, magma_int_t n, double* d, double* q, magma_int_t ldq,
+                           magma_int_t* indxq, double rho, magma_int_t cutpnt,
+                           double* work, magma_int_t* iwork, double** dwork,
+                           magma_queue_t stream[MagmaMaxGPUs][2],
+                           char range, double vl, double vu,
+                           magma_int_t il, magma_int_t iu, magma_int_t* info);
 
-}
+magma_int_t magma_get_dlaex3_m_nb();       // defined in dlaex3_m.cpp
+
+}  // end extern "C"
+
 
 extern "C" magma_int_t
 magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q, magma_int_t ldq,
@@ -131,29 +133,29 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
 
     *info = 0;
 
-    if( n < 0 )
+    if ( n < 0 )
         *info = -1;
-    else if( ldq < max(1, n) )
+    else if ( ldq < max(1, n) )
         *info = -5;
-    if( *info != 0 ){
+    if ( *info != 0 ) {
         magma_xerbla( __func__, -*info );
         return MAGMA_ERR_ILLEGAL_VALUE;
     }
 
     // Quick return if possible
-    if(n == 0)
+    if (n == 0)
         return MAGMA_SUCCESS;
 
     //workspace dimension for nrgpu > 1
     size_t tmp = (n-1)/2+1;
-    if (nrgpu > 1){
+    if (nrgpu > 1) {
         size_t tmp2 = (tmp-1) / (nrgpu/2) + 1;
         tmp = tmp * tmp2 + 2 * magma_get_dlaex3_m_nb()*(tmp + tmp2);
     }
 
-    for (igpu = 0; igpu < nrgpu; ++igpu){
+    for (igpu = 0; igpu < nrgpu; ++igpu) {
         magma_setdevice(igpu);
-        if(nrgpu == 1){
+        if (nrgpu == 1) {
             if (MAGMA_SUCCESS != magma_dmalloc( &dw[igpu], 3*n*(n/2 + 1) )) {
                 *info = -15;
                 return MAGMA_ERR_DEVICE_ALLOC;
@@ -178,7 +180,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
     subpbs= 1;
     tlvls = 0;
     while (iwork[subpbs - 1] > smlsiz) {
-        for (j = subpbs; j > 0; --j){
+        for (j = subpbs; j > 0; --j) {
             iwork[2*j - 1] = (iwork[j-1]+1)/2;
             iwork[2*j - 2] = iwork[j-1]/2;
         }
@@ -191,7 +193,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
     // Divide the matrix into SUBPBS submatrices of size at most SMLSIZ+1
     // using rank-1 modifications (cuts).
 
-    for(i=0; i < subpbs-1; ++i){
+    for (i=0; i < subpbs-1; ++i) {
         submat = iwork[i];
         d[submat-1] -= MAGMA_D_ABS(e[submat-1]);
         d[submat] -= MAGMA_D_ABS(e[submat-1]);
@@ -207,8 +209,8 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
     magma_timer_t time;
     timer_start( time );
 
-    for (i = 0; i < subpbs; ++i){
-        if(i == 0){
+    for (i = 0; i < subpbs; ++i) {
+        if (i == 0) {
             submat = 0;
             matsiz = iwork[0];
         } else {
@@ -217,14 +219,14 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
         }
         lapackf77_dsteqr(char_I, &matsiz, &d[submat], &e[submat],
                          Q(submat, submat), &ldq, work, info);  // change to edc?
-        if(*info != 0){
+        if (*info != 0) {
             printf("info: %d\n, submat: %d\n", (int) *info, (int) submat);
             *info = (submat+1)*(n+1) + submat + matsiz;
             printf("info: %d\n", (int) *info);
             return MAGMA_SUCCESS;
         }
         k = 1;
-        for(j = submat; j < iwork[i]; ++j){
+        for (j = submat; j < iwork[i]; ++j) {
             iwork[indxq+j] = k;
             ++k;
         }
@@ -237,11 +239,11 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
     // into eigensystem for the corresponding larger matrix.
 
     curlvl = 1;
-    while (subpbs > 1){
+    while (subpbs > 1) {
         timer_start( time );
         
-        for (i=0; i < subpbs-1; i += 2){
-            if(i == 0){
+        for (i=0; i < subpbs-1; i += 2) {
+            if (i == 0) {
                 submat = 0;
                 matsiz = iwork[1];
                 msd2 = iwork[0];
@@ -267,7 +269,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
                            work, &iwork[subpbs], dw, stream,
                            range_, vl, vu, il, iu, info);
 
-            if(*info != 0){
+            if (*info != 0) {
                 *info = (submat+1)*(n+1) + submat + matsiz;
                 return MAGMA_SUCCESS;
             }
@@ -283,7 +285,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
     // Re-merge the eigenvalues/vectors which were deflated at the final
     // merge step.
 
-    for(i = 0; i < n; ++i){
+    for (i = 0; i < n; ++i) {
         j = iwork[indxq+i] - 1;
         work[i] = d[j];
         blasf77_dcopy(&n, Q(0, j), &ione, &work[ n*(i+1) ], &ione);
@@ -292,7 +294,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
     char char_A[] = {'A',0};
     lapackf77_dlacpy ( char_A, &n, &n, &work[n], &n, q, &ldq );
 
-    for (igpu = 0; igpu < nrgpu; ++igpu){
+    for (igpu = 0; igpu < nrgpu; ++igpu) {
         magma_setdevice(igpu);
         magma_queue_destroy( stream[igpu][0] );
         magma_queue_destroy( stream[igpu][1] );
@@ -302,5 +304,4 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
     magma_setdevice(gpu_b);
 
     return MAGMA_SUCCESS;
-
 } /* magma_dlaex0 */

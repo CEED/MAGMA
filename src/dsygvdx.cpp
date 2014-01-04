@@ -277,7 +277,7 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
         return 0;
     }
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
-    if (n <= 128){
+    if (n <= 128) {
         #ifdef ENABLE_DEBUG
         printf("--------------------------------------------------------------\n");
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
@@ -330,10 +330,10 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
     timer_printf( "time dsygst_gpu = %6.2f\n", time );
 
     /* simple fix to be able to run bigger size.
-     * need to have a dwork here that will be used 
+     * need to have a dwork here that will be used
      * a db and then passed to  dsyevd.
      * */
-    if(n > 5000){
+    if (n > 5000) {
         magma_queue_sync( stream );
         magma_free( db );
     }
@@ -348,8 +348,8 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
         timer_start( time );
         
         /* allocate and copy db back */
-        if(n > 5000){
-            if (MAGMA_SUCCESS != magma_dmalloc( &db, n*lddb ) ){
+        if (n > 5000) {
+            if (MAGMA_SUCCESS != magma_dmalloc( &db, n*lddb ) ) {
                 *info = MAGMA_ERR_DEVICE_ALLOC;
                 return *info;
             }
@@ -382,7 +382,7 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
         magma_dgetmatrix( n, *m, da, ldda, a, lda );
         
         /* free db */
-        if(n > 5000){        
+        if (n > 5000) {
             magma_free( db );
         }
         
@@ -397,7 +397,7 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
     iwork[0] = liwmin;
 
     magma_free( da );
-    if(n <= 5000){
+    if (n <= 5000) {
         magma_free( db );
     }
 
