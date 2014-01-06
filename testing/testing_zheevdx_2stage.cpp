@@ -278,10 +278,12 @@ static magma_int_t check_orthogonality(magma_int_t M, magma_int_t N, magmaDouble
     double  normQ, result;
     magma_int_t     info_ortho;
     magma_int_t     minMN = min(M, N);
-    double *work = (double *)malloc(minMN*sizeof(double));
+    double *work;
+    magma_dmalloc_cpu( &work, minMN );
 
     /* Build the idendity matrix */
-    magmaDoubleComplex *Id = (magmaDoubleComplex *) malloc(minMN*minMN*sizeof(magmaDoubleComplex));
+    magmaDoubleComplex *Id;
+    magma_zmalloc_cpu( &Id, minMN*minMN );
     lapackf77_zlaset("A", &minMN, &minMN, &c_zero, &c_one, Id, &minMN);
 
     /* Perform Id - Q'Q */
@@ -305,7 +307,8 @@ static magma_int_t check_orthogonality(magma_int_t M, magma_int_t N, magmaDouble
         printf("-- Orthogonality is CORRECT ! \n");
         info_ortho=0;
     }
-    free(work); free(Id);
+    magma_free_cpu(work);
+    magma_free_cpu(Id);
     return info_ortho;
 }
 /*------------------------------------------------------------
@@ -315,15 +318,18 @@ static magma_int_t check_reduction(magma_int_t uplo, magma_int_t N, magma_int_t 
 {
     magmaDoubleComplex c_one     = MAGMA_Z_ONE;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
-    magmaDoubleComplex *TEMP     = (magmaDoubleComplex *)malloc(N*N*sizeof(magmaDoubleComplex));
-    magmaDoubleComplex *Residual = (magmaDoubleComplex *)malloc(N*N*sizeof(magmaDoubleComplex));
-    double *work = (double *)malloc(N*sizeof(double));
+    magmaDoubleComplex *TEMP, *Residual;
+    double *work;
     double Anorm, Rnorm, result;
     magma_int_t info_reduction;
     magma_int_t i;
     magma_int_t ione=1;
     char luplo =  uplo == MagmaLower ? 'L' : 'U';
 
+    magma_zmalloc_cpu( &TEMP, N*N );
+    magma_zmalloc_cpu( &Residual, N*N );
+    magma_dmalloc_cpu( &work, N );
+    
     /* Compute TEMP =  Q * LAMBDA */
     lapackf77_zlacpy("A", &N, &N, Q, &LDA, TEMP, &N);        
     for (i = 0; i < N; i++){
@@ -364,8 +370,9 @@ static magma_int_t check_reduction(magma_int_t uplo, magma_int_t N, magma_int_t 
         info_reduction = 0;
     }
 
-    free(TEMP); free(Residual);
-    free(work);
+    magma_free_cpu(TEMP);
+    magma_free_cpu(Residual);
+    magma_free_cpu(work);
 
     return info_reduction;
 }

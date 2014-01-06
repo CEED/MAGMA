@@ -252,10 +252,13 @@ int main( int argc, char** argv)
                     JOBZ = 'V';
             double nrmI=0.0, nrm1=0.0, nrm2=0.0;
             int    lwork2 = 256*N;
-            magmaDoubleComplex *work2     = (magmaDoubleComplex *) malloc (lwork2*sizeof(magmaDoubleComplex));
-            double *rwork2     = (double *) malloc (N*sizeof(double));
-            double *D2          = (double *) malloc (N*sizeof(double));
-            magmaDoubleComplex *AINIT    = (magmaDoubleComplex *) malloc (N*lda*sizeof(magmaDoubleComplex));
+            magmaDoubleComplex *work2, *AINIT;
+            double *rwork2, *D2;
+            // TODO free this memory !
+            magma_zmalloc_cpu( &work2, lwork2 );
+            magma_dmalloc_cpu( &rwork2, N );
+            magma_dmalloc_cpu( &D2, N );
+            magma_zmalloc_cpu( &AINIT, N*lda );
             memcpy(AINIT, h_A, N*lda*sizeof(magmaDoubleComplex));
             /* compute the eigenvalues using lapack routine to be able to compare to it and used as ref */
             start = get_current_time();
@@ -286,9 +289,10 @@ int main( int argc, char** argv)
 
            magmaDoubleComplex *WORKAJETER;
            double *RWORKAJETER, *RESU;
-           WORKAJETER  = (magmaDoubleComplex *) malloc( (2* N * N + N) * sizeof(magmaDoubleComplex) );
-           RWORKAJETER = (double *) malloc( N * sizeof(double) );
-           RESU        = (double *) malloc(10*sizeof(double));
+           // TODO free this memory !
+           magma_zmalloc_cpu( &WORKAJETER, (2* N * N + N)  );
+           magma_dmalloc_cpu( &RWORKAJETER, N  );
+           magma_dmalloc_cpu( &RESU, 10 );
            int MATYPE;
            memset(RESU,0,10*sizeof(double));
 
