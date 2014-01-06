@@ -207,8 +207,9 @@ magma_zheevd(char jobz, char uplo,
     }
     // multiply by 1+eps to ensure length gets rounded up,
     // if it cannot be exactly represented in floating point.
-    work[0]  = MAGMA_Z_MAKE( lwmin * (1. + lapackf77_dlamch("Epsilon")), 0.);
-    rwork[0] = lrwmin * (1. + lapackf77_dlamch("Epsilon"));
+    double one_eps = 1. + lapackf77_dlamch("Epsilon");
+    work[0]  = MAGMA_Z_MAKE( lwmin * one_eps, 0.);
+    rwork[0] = lrwmin * one_eps;
     iwork[0] = liwmin;
 
     if ((lwork < lwmin) && !lquery) {
@@ -350,8 +351,8 @@ magma_zheevd(char jobz, char uplo,
         blasf77_dscal(&imax, &d__1, w, &ione);
     }
 
-    work[0]  = MAGMA_Z_MAKE( lwmin * (1. + lapackf77_dlamch("Epsilon")), 0.);  // round up
-    rwork[0] = lrwmin * (1. + lapackf77_dlamch("Epsilon"));
+    work[0]  = MAGMA_Z_MAKE( lwmin * one_eps, 0.);  // round up
+    rwork[0] = lrwmin * one_eps;
     iwork[0] = liwmin;
 
     return *info;

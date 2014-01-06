@@ -255,7 +255,8 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
     }
     // multiply by 1+eps to ensure length gets rounded up,
     // if it cannot be exactly represented in floating point.
-    work[0]  = lwmin * (1. + lapackf77_dlamch("Epsilon"));
+    double one_eps = 1. + lapackf77_dlamch("Epsilon");
+    work[0]  = lwmin * one_eps;
     iwork[0] = liwmin;
 
     if (lwork < lwmin && ! lquery) {
@@ -393,7 +394,7 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
     magma_queue_sync( stream );
     magma_queue_destroy( stream );
 
-    work[0]  = lwmin * (1. + lapackf77_dlamch("Epsilon"));  // round up
+    work[0]  = lwmin * one_eps;  // round up
     iwork[0] = liwmin;
 
     magma_free( da );

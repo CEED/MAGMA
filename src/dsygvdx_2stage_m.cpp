@@ -250,7 +250,8 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
         liwmin = 1;
     }
 
-    work[0] = lwmin * (1. + lapackf77_dlamch("Epsilon"));
+    double one_eps = 1. + lapackf77_dlamch("Epsilon");
+    work[0] = lwmin * one_eps;
     iwork[0] = liwmin;
 
     if (lwork < lwmin && ! lquery) {
@@ -343,7 +344,7 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
         timer_printf( "time dtrsm/mm + getmatrix = %6.2f\n", time );
     }
 
-    work[0] = lwmin * (1. + lapackf77_dlamch("Epsilon"));
+    work[0] = lwmin * one_eps;
     iwork[0] = liwmin;
 
     return *info;

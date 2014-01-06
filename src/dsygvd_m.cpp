@@ -219,7 +219,8 @@ magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
         liwmin = 1;
     }
 
-    work[0]  = lwmin * (1. + lapackf77_dlamch("Epsilon"));  // round up
+    double one_eps = 1. + lapackf77_dlamch("Epsilon");
+    work[0]  = lwmin * one_eps;  // round up
     iwork[0] = liwmin;
 
     if (lwork < lwmin && ! lquery) {
@@ -312,7 +313,7 @@ magma_dsygvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
         timer_printf( "time setmatrices trsm/mm + getmatrices = %6.2f\n", time );
     }
 
-    work[0]  = lwmin * (1. + lapackf77_dlamch("Epsilon"));  // round up
+    work[0]  = lwmin * one_eps;  // round up
     iwork[0] = liwmin;
 
     return *info;
