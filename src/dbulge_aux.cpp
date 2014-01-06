@@ -41,8 +41,8 @@ extern "C" void  magma_dstedc_withZ(char JOBZ, magma_int_t N, double *D, double 
         exit(-1);
     }
     
-    WORK  = (double*) malloc( LWORK*sizeof(double) );
-    IWORK = (magma_int_t*) malloc( LIWORK*sizeof(magma_int_t) );
+    magma_dmalloc_cpu( &WORK,  LWORK  );
+    magma_imalloc_cpu( &IWORK, LIWORK );
     
     lapackf77_dstedc(&JOBZ, &N, D, E, Z, &LDZ, WORK,&LWORK,IWORK,&LIWORK,&INFO);
     
@@ -54,7 +54,7 @@ extern "C" void  magma_dstedc_withZ(char JOBZ, magma_int_t N, double *D, double 
     }
     
     magma_free_cpu( IWORK );
-    magma_free_cpu( WORK );
+    magma_free_cpu( WORK  );
 }
 //////////////////////////////////////////////////////////////
 
@@ -72,8 +72,8 @@ extern "C" void  magma_dstedx_withZ(magma_int_t N, magma_int_t NE, double *D, do
     LWORK  = N*N+4*N+1;
     LIWORK = 3 + 5*N;
     
-    WORK  = (double*) malloc( LWORK*sizeof(double) );
-    IWORK = (magma_int_t*) malloc( LIWORK*sizeof(magma_int_t) );
+    magma_dmalloc_cpu( &WORK,  LWORK  );
+    magma_imalloc_cpu( &IWORK, LIWORK );
     
     if (MAGMA_SUCCESS != magma_dmalloc( &dwork, 3*N*(N/2 + 1) )) {
         printf("=================================================\n");
@@ -105,6 +105,6 @@ extern "C" void  magma_dstedx_withZ(magma_int_t N, magma_int_t NE, double *D, do
 
     magma_free( dwork );
     magma_free_cpu( IWORK );
-    magma_free_cpu( WORK );
+    magma_free_cpu( WORK  );
 }
 //////////////////////////////////////////////////////////////

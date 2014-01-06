@@ -263,7 +263,8 @@ magma_zheevx_gpu(char jobz, char range, char uplo, magma_int_t n,
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
         printf("--------------------------------------------------------------\n");
         #endif
-        magmaDoubleComplex *a = (magmaDoubleComplex *) malloc( n * n * sizeof(magmaDoubleComplex) );
+        magmaDoubleComplex *a;
+        magma_zmalloc_cpu( &a, n*n );
         magma_zgetmatrix(n, n, da, ldda, a, n);
         lapackf77_zheevx(jobz_, range_, uplo_,
                          &n, a, &n, &vl, &vu, &il, &iu, &abstol, m,
@@ -271,7 +272,7 @@ magma_zheevx_gpu(char jobz, char range, char uplo, magma_int_t n,
                          rwork, iwork, ifail, info);
         magma_zsetmatrix( n,  n,  a,    n, da, ldda);
         magma_zsetmatrix( n, *m, wz, ldwz, dz, lddz);
-        free(a);
+        magma_free_cpu(a);
         return *info;
     }
 

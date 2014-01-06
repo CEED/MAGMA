@@ -267,14 +267,15 @@ magma_dsyevdx_gpu(char jobz, char range, char uplo,
       printf("--------------------------------------------------------------\n");
       #endif
       char jobz_[2] = {jobz, 0}, uplo_[2] = {uplo, 0};
-      double *a = (double *) malloc( n * n * sizeof(double) );
+      double *a;
+      magma_dmalloc_cpu( &a, n*n );
       magma_dgetmatrix(n, n, da, ldda, a, n);
       lapackf77_dsyevd(jobz_, uplo_,
                        &n, a, &n,
                        w, work, &lwork,
                        iwork, &liwork, info);
       magma_dsetmatrix( n, n, a, n, da, ldda);
-      free(a);
+      magma_free_cpu(a);
       return *info;
     }
 

@@ -190,7 +190,8 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, char uplo,
     magmaDoubleComplex alpha;
 
     magmaDoubleComplex *dx2[MagmaMaxGPUs];
-    magmaDoubleComplex *f = (magmaDoubleComplex *)malloc(n*sizeof(magmaDoubleComplex ));
+    magmaDoubleComplex *f;
+    magma_zmalloc_cpu( &f, n );
 
     if (n <= 0) {
         return 0;
@@ -454,7 +455,7 @@ magma_zlatrd_mgpu(magma_int_t num_gpus, char uplo,
         if ( k > 1 )
             magma_queue_sync(stream[id][1]);
     }
-    free(f);
+    magma_free_cpu(f);
 
     return mv_time;
 } /* zlatrd_ */

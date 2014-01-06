@@ -52,7 +52,8 @@ magma_zlarfxsym(magma_int_t N, magmaDoubleComplex *A, magma_int_t LDA, magmaDoub
   magmaDoubleComplex Z_MONE =  MAGMA_Z_NEG_ONE;
   magmaDoubleComplex Z_HALF =  MAGMA_Z_HALF;
   //magmaDoubleComplex WORK[N];
-  magmaDoubleComplex *WORK  = (magmaDoubleComplex *) malloc( N * sizeof(magmaDoubleComplex) );
+  magmaDoubleComplex *WORK;
+  magma_zmalloc_cpu( &WORK, N );
 
   /* apply left and right on A(st:ed,st:ed)*/
   //magma_zlarfxsym(len,A(st,st),LDX,V(st),TAU(st));
@@ -94,7 +95,8 @@ extern "C" void magma_ztrdtype1cbHLsym_withQ(magma_int_t N, magma_int_t NB, magm
   magma_int_t    blkid, vpos, taupos, tpos;
   //magmaDoubleComplex conjtmp;
   magmaDoubleComplex Z_ONE  =  MAGMA_Z_ONE;
-  magmaDoubleComplex *WORK  = (magmaDoubleComplex *) malloc( N * sizeof(magmaDoubleComplex) );
+  magmaDoubleComplex *WORK;
+  magma_zmalloc_cpu( &WORK, N );
 
 
   findVTpos(N,NB,Vblksiz,sweep-1,st-1, &vpos, &taupos, &tpos, &blkid);
@@ -132,7 +134,8 @@ extern "C" void magma_ztrdtype2cbHLsym_withQ(magma_int_t N, magma_int_t NB, magm
   magmaDoubleComplex conjtmp;
   magmaDoubleComplex Z_ONE  =  MAGMA_Z_ONE;
   //magmaDoubleComplex WORK[NB];
-  magmaDoubleComplex *WORK  = (magmaDoubleComplex *) malloc( NB * sizeof(magmaDoubleComplex) );
+  magmaDoubleComplex *WORK;
+  magma_zmalloc_cpu( &WORK, NB );
 
 
   findVTpos(N,NB,Vblksiz,sweep-1,st-1, &vpos, &taupos, &tpos, &blkid);
@@ -158,7 +161,7 @@ extern "C" void magma_ztrdtype2cbHLsym_withQ(magma_int_t N, magma_int_t NB, magm
      conjtmp = MAGMA_Z_CNJG(*TAU(taupos));
      lapackf77_zlarfx("L", &lem, &len, V(vpos),  &conjtmp, A(J1, st+1), &LDX, WORK);
   }
-  free (WORK);
+  magma_free_cpu(WORK);
 }
 #undef A
 #undef V
@@ -178,7 +181,8 @@ extern "C" void magma_ztrdtype3cbHLsym_withQ(magma_int_t N, magma_int_t NB, magm
   //magma_int_t    IONE=1;
   magma_int_t    blkid, vpos, taupos, tpos;
   //magmaDoubleComplex conjtmp;
-  magmaDoubleComplex *WORK  = (magmaDoubleComplex *) malloc( N * sizeof(magmaDoubleComplex) );
+  magmaDoubleComplex *WORK;
+  magma_zmalloc_cpu( &WORK, N );
 
 
   findVTpos(N,NB,Vblksiz,sweep-1,st-1, &vpos, &taupos, &tpos, &blkid);

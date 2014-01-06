@@ -187,7 +187,7 @@ magma_zunmqr(const char side, const char trans,
     }
     
     /* work space on CPU */
-    T = (magmaDoubleComplex*) malloc( 2*nb*nb * sizeof(magmaDoubleComplex) );
+    magma_zmalloc_cpu( &T, 2*nb*nb );
     if ( T == NULL ) {
         magma_free( dC );
         magma_free( dwork );
@@ -273,7 +273,7 @@ magma_zunmqr(const char side, const char trans,
 
     magma_free( dC );
     magma_free( dwork );
-    free( T );
+    magma_free_cpu( T );
 
     return *info;
 } /* magma_zunmqr */

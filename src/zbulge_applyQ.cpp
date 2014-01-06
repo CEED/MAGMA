@@ -56,7 +56,7 @@ extern "C" void magma_zbulge_applyQ(
     LDV      = NB+Vblksiz-1;
     blklen   = LDV*Vblksiz;
     nbGblk   = plasma_ceildiv((N-1),Vblksiz);
-    //WORK    = (magmaDoubleComplex *) malloc (LWORK*sizeof(magmaDoubleComplex));
+    //magma_zmalloc_cpu( &WORK, LWORK );
 
     /* find the size of the matrix T V*/
     findVTsiz(N, NB, Vblksiz, &blkcnt, &LDV);

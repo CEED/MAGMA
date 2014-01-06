@@ -254,7 +254,8 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
         }
     }
     magma_zmalloc_pinned ( &workngpu[ngpu], worksiz);
-    magmaDoubleComplex *worktest = NULL; //(magmaDoubleComplex *) malloc(n*nb*sizeof(magmaDoubleComplex)); // not used
+    magmaDoubleComplex *worktest = NULL;
+    //magma_zmalloc_cpu( &worktest, n*nb ); // not used
     // ======================
   
 
@@ -520,7 +521,7 @@ magma_zhetrd_he2hb_mgpu( char uplo, magma_int_t n, magma_int_t nb,
         }
     }
     magma_free_pinned(workngpu[ngpu]);
-    free(worktest);
+    magma_free_cpu(worktest);
 
     magma_setdevice( cdev );
     magmablasSetKernelStream( cstream );
