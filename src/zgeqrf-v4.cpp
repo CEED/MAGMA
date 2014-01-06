@@ -105,7 +105,7 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
     int lwkopt = n * nb;
     work[0] = MAGMA_Z_MAKE( (double)lwkopt, 0 );
     int lquery = (lwork == -1);
-    if (num_gpus <0 || num_gpus > 4) {
+    if (num_gpus < 0 || num_gpus > MagmaMaxGPUs) {
         *info = -1;
     } else if (m < 0) {
         *info = -2;
@@ -132,7 +132,7 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
     ldda    = ((m+31)/32)*32;
 
     magma_int_t  n_local[MagmaMaxGPUs];
-    for(i=0; i<num_gpus; i++){
+    for (i=0; i < num_gpus; i++) {
         n_local[i] = ((n/nb)/num_gpus)*nb;
         if (i < (n/nb)%num_gpus)
             n_local[i] += nb;
@@ -149,7 +149,6 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
     }
 
     if (m > nb && n > nb) {
-
         /* Copy the matrix to the GPUs in 1D block cyclic distribution */
         magma_zsetmatrix_1D_col_bcyclic(m, n, a, lda, da, ldda, num_gpus, nb);
 
@@ -165,11 +164,10 @@ magma_zgeqrf4(magma_int_t num_gpus, magma_int_t m, magma_int_t n,
 
 
     /* Free the allocated GPU memory */
-    for(i=0; i<num_gpus; i++){
+    for (i=0; i < num_gpus; i++) {
         magma_setdevice(i);
         magma_free( da[i] );
     }
 
     return *info;
 } /* magma_zgeqrf4 */
-
