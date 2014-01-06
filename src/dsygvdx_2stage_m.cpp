@@ -191,7 +191,7 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
     double d_one = MAGMA_D_ONE;
 
     magma_int_t lower;
-    char trans[1];
+    char trans;
     magma_int_t wantz;
     magma_int_t lquery;
     magma_int_t alleig, valeig, indeig;
@@ -291,7 +291,7 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
     magma_timer_t time;
     timer_start( time );
 
-    magma_dpotrf_m(nrgpu, uplo_[0], n, b, ldb, info);
+    magma_dpotrf_m(nrgpu, uplo, n, b, ldb, info);
     if (*info != 0) {
         *info = n + *info;
         return *info;
@@ -321,23 +321,23 @@ magma_dsygvdx_2stage_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char ran
             /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;
                backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
             if (lower) {
-                *(unsigned char *)trans = MagmaConjTrans;
+                trans = MagmaConjTrans;
             } else {
-                *(unsigned char *)trans = MagmaNoTrans;
+                trans = MagmaNoTrans;
             }
 
-            magma_dtrsm_m(nrgpu, MagmaLeft, uplo, *trans, MagmaNonUnit, n, *m, d_one, b, ldb, a, lda);
+            magma_dtrsm_m(nrgpu, MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, d_one, b, ldb, a, lda);
         }
         else if (itype == 3) {
             /* For B*A*x=(lambda)*x;
                backtransform eigenvectors: x = L*y or U'*y */
             if (lower) {
-                *(unsigned char *)trans = MagmaNoTrans;
+                trans = MagmaNoTrans;
             } else {
-                *(unsigned char *)trans = MagmaConjTrans;
+                trans = MagmaConjTrans;
             }
 
-            //magma_dtrmm_m(nrgpu, MagmaLeft, uplo, *trans, MagmaNonUnit, n, *m, d_one, b, ldb, a, lda);
+            //magma_dtrmm_m(nrgpu, MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, d_one, b, ldb, a, lda);
         }
 
         timer_stop( time );

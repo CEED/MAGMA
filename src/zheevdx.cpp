@@ -346,7 +346,7 @@ magma_zheevdx(char jobz, char range, char uplo,
     magma_timer_t time;
     timer_start( time );
 
-    magma_zhetrd(uplo_[0], n, a, lda, w, &rwork[inde],
+    magma_zhetrd(uplo, n, a, lda, w, &rwork[inde],
                  &work[indtau], &work[indwrk], llwork, &iinfo);
 
     timer_stop( time );

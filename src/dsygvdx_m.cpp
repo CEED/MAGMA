@@ -201,7 +201,7 @@ magma_dsygvdx_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char range, cha
     double c_one = MAGMA_D_ONE;
     
     magma_int_t lower;
-    char trans[1];
+    char trans;
     magma_int_t wantz;
     magma_int_t lquery;
     magma_int_t alleig, valeig, indeig;
@@ -300,7 +300,7 @@ magma_dsygvdx_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char range, cha
     magma_timer_t time;
     timer_start( time );
 
-    magma_dpotrf_m(nrgpu, uplo_[0], n, b, ldb, info);
+    magma_dpotrf_m(nrgpu, uplo, n, b, ldb, info);
     if (*info != 0) {
         *info = n + *info;
         return *info;
@@ -311,7 +311,7 @@ magma_dsygvdx_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char range, cha
     timer_start( time );
 
     /* Transform problem to standard eigenvalue problem and solve. */
-    magma_dsygst_m(nrgpu, itype, uplo_[0], n, a, lda, b, ldb, info);
+    magma_dsygst_m(nrgpu, itype, uplo, n, a, lda, b, ldb, info);
 
     timer_stop( time );
     timer_printf( "time dsygst = %6.2f\n", time );
@@ -330,24 +330,24 @@ magma_dsygvdx_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char range, cha
             /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;
                backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
             if (lower) {
-                *(unsigned char *)trans = MagmaTrans;
+                trans = MagmaTrans;
             } else {
-                *(unsigned char *)trans = MagmaNoTrans;
+                trans = MagmaNoTrans;
             }
 
-            magma_dtrsm_m(nrgpu, MagmaLeft, uplo_[0], *trans, MagmaNonUnit,
+            magma_dtrsm_m(nrgpu, MagmaLeft, uplo, trans, MagmaNonUnit,
                           n, *m, c_one, b, ldb, a, lda);
         }
         else if (itype == 3) {
             /* For B*A*x=(lambda)*x;
                backtransform eigenvectors: x = L*y or U'*y */
             if (lower) {
-                *(unsigned char *)trans = MagmaNoTrans;
+                trans = MagmaNoTrans;
             } else {
-                *(unsigned char *)trans = MagmaTrans;
+                trans = MagmaTrans;
             }
 
-            //magma_dtrmm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit,
+            //magma_dtrmm(MagmaLeft, uplo, trans, MagmaNonUnit,
             //            n, n, c_one, db, lddb, da, ldda);
         }
 

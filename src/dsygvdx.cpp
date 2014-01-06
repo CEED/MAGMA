@@ -195,7 +195,7 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
     magma_int_t lddb = n;
 
     magma_int_t lower;
-    char trans[1];
+    char trans;
     magma_int_t wantz, lquery;
     magma_int_t alleig, valeig, indeig;
 
@@ -361,23 +361,23 @@ magma_dsygvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
             /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;
                backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
             if (lower) {
-                *(unsigned char *)trans = MagmaTrans;
+                trans = MagmaTrans;
             } else {
-                *(unsigned char *)trans = MagmaNoTrans;
+                trans = MagmaNoTrans;
             }
-            magma_dtrsm(MagmaLeft, uplo, *trans, MagmaNonUnit,
+            magma_dtrsm(MagmaLeft, uplo, trans, MagmaNonUnit,
                         n, *m, d_one, db, lddb, da, ldda);
         }
         else if (itype == 3) {
             /* For B*A*x=(lambda)*x;
                backtransform eigenvectors: x = L*y or U'*y */
             if (lower) {
-                *(unsigned char *)trans = MagmaNoTrans;
+                trans = MagmaNoTrans;
             } else {
-                *(unsigned char *)trans = MagmaTrans;
+                trans = MagmaTrans;
             }
 
-            magma_dtrmm(MagmaLeft, uplo, *trans, MagmaNonUnit,
+            magma_dtrmm(MagmaLeft, uplo, trans, MagmaNonUnit,
                         n, *m, d_one, db, lddb, da, ldda);
         }
         magma_dgetmatrix( n, *m, da, ldda, a, lda );

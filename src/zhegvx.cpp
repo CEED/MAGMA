@@ -204,7 +204,7 @@ magma_zhegvx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
     magma_int_t lddz = n;
     
     magma_int_t lower;
-    char trans[1];
+    char trans;
     magma_int_t wantz;
     magma_int_t lquery;
     magma_int_t alleig, valeig, indeig;
@@ -290,7 +290,7 @@ magma_zhegvx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
                             a,  lda,
                             da, ldda, stream );
     
-    magma_zpotrf_gpu(uplo_[0], n, db, lddb, info);
+    magma_zpotrf_gpu(uplo, n, db, lddb, info);
     if (*info != 0) {
         *info = n + *info;
         return *info;
@@ -312,21 +312,21 @@ magma_zhegvx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
             /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;
                backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
             if (lower) {
-                *(unsigned char *)trans = MagmaConjTrans;
+                trans = MagmaConjTrans;
             } else {
-                *(unsigned char *)trans = MagmaNoTrans;
+                trans = MagmaNoTrans;
             }
-            magma_ztrsm(MagmaLeft, uplo, *trans, MagmaNonUnit, n, *m, c_one, db, lddb, dz, lddz);
+            magma_ztrsm(MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, c_one, db, lddb, dz, lddz);
         }
         else if (itype == 3) {
             /* For B*A*x=(lambda)*x;
                backtransform eigenvectors: x = L*y or U'*y */
             if (lower) {
-                *(unsigned char *)trans = MagmaNoTrans;
+                trans = MagmaNoTrans;
             } else {
-                *(unsigned char *)trans = MagmaConjTrans;
+                trans = MagmaConjTrans;
             }
-            magma_ztrmm(MagmaLeft, uplo, *trans, MagmaNonUnit, n, *m, c_one, db, lddb, dz, lddz);
+            magma_ztrmm(MagmaLeft, uplo, trans, MagmaNonUnit, n, *m, c_one, db, lddb, dz, lddz);
         }
         
         magma_zgetmatrix( n, *m, dz, lddz, z, ldz );

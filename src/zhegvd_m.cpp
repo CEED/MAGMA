@@ -179,7 +179,7 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
     magmaDoubleComplex c_one = MAGMA_Z_ONE;
 
     magma_int_t lower;
-    char trans[1];
+    char trans;
     magma_int_t wantz;
     magma_int_t lquery;
 
@@ -272,7 +272,7 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
     magma_timer_t time;
     timer_start( time );
 
-    magma_zpotrf_m(nrgpu, uplo_[0], n, b, ldb, info);
+    magma_zpotrf_m(nrgpu, uplo, n, b, ldb, info);
     if (*info != 0) {
         *info = n + *info;
         return *info;
@@ -283,13 +283,13 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
     timer_start( time );
 
     /*  Transform problem to standard eigenvalue problem and solve. */
-    magma_zhegst_m(nrgpu, itype, uplo_[0], n, a, lda, b, ldb, info);
+    magma_zhegst_m(nrgpu, itype, uplo, n, a, lda, b, ldb, info);
 
     timer_stop( time );
     timer_printf( "time zhegst = %6.2f\n", time );
     timer_start( time );
 
-    magma_zheevd_m(nrgpu, jobz_[0], uplo_[0], n, a, lda, w, work, lwork, rwork, lrwork, iwork, liwork, info);
+    magma_zheevd_m(nrgpu, jobz, uplo, n, a, lda, w, work, lwork, rwork, lrwork, iwork, liwork, info);
 
     timer_stop( time );
     timer_printf( "time zheevd = %6.2f\n", time );
@@ -302,24 +302,24 @@ magma_zhegvd_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char uplo, magma
             /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;
                backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
             if (lower) {
-                *(unsigned char *)trans = MagmaConjTrans;
+                trans = MagmaConjTrans;
             } else {
-                *(unsigned char *)trans = MagmaNoTrans;
+                trans = MagmaNoTrans;
             }
 
-            magma_ztrsm_m(nrgpu, MagmaLeft, uplo_[0], *trans, MagmaNonUnit,
+            magma_ztrsm_m(nrgpu, MagmaLeft, uplo, trans, MagmaNonUnit,
                           n, n, c_one, b, ldb, a, lda);
         }
         else if (itype == 3) {
             /* For B*A*x=(lambda)*x;
                backtransform eigenvectors: x = L*y or U'*y */
             if (lower) {
-                *(unsigned char *)trans = MagmaNoTrans;
+                trans = MagmaNoTrans;
             } else {
-                *(unsigned char *)trans = MagmaConjTrans;
+                trans = MagmaConjTrans;
             }
 
-            //magma_ztrmm(MagmaLeft, uplo_[0], *trans, MagmaNonUnit,
+            //magma_ztrmm(MagmaLeft, uplo, trans, MagmaNonUnit,
             //            n, n, c_one, db, lddb, da, ldda);
         }
 

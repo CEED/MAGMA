@@ -336,7 +336,7 @@ magma_zheevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     magma_timer_t time;
     timer_start( time );
 
-    magma_zhetrd_mgpu(nrgpu, 1, uplo_[0], n, a, lda, w, &rwork[inde],
+    magma_zhetrd_mgpu(nrgpu, 1, uplo, n, a, lda, w, &rwork[inde],
                       &work[indtau], &work[indwrk], llwork, &iinfo);
 
     timer_stop( time );

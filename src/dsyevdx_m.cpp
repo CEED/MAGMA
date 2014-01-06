@@ -322,7 +322,7 @@ magma_dsyevdx_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     magma_timer_t time;
     timer_start( time );
 
-    magma_dsytrd_mgpu(nrgpu, 1, uplo_[0], n, a, lda, w, &work[inde],
+    magma_dsytrd_mgpu(nrgpu, 1, uplo, n, a, lda, w, &work[inde],
                       &work[indtau], &work[indwrk], llwork, &iinfo);
 
     timer_stop( time );
