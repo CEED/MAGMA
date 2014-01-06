@@ -74,7 +74,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
 
     N       (input) INTEGER
             The number of rows and columns in the Q matrix.
-            N >= K (deflation may result in N>K).
+            N >= K (deflation may result in N > K).
 
     N1      (input) INTEGER
             The location of the last eigenvalue in the leading submatrix.
@@ -529,7 +529,7 @@ magma_dlaex3_m(magma_int_t nrgpu,
                 }
             }
 
-            for (i = 0; i < rk; i+=nb) {
+            for (i = 0; i < rk; i += nb) {
                 ib = min(nb, rk - i);
                 ind = (i/nb)%2;
                 if (i+nb < rk) {

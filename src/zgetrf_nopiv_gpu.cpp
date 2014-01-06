@@ -122,7 +122,7 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
             return *info;
         }
 
-        for( i=0; i<s; i++ ) {
+        for( i=0; i < s; i++ ) {
             // download i-th panel
             cols = maxm - i*nb;
             magma_zgetmatrix( m-i*nb, nb, inA(i,i), ldda, work, lddwork );
@@ -130,7 +130,7 @@ magma_zgetrf_nopiv_gpu(magma_int_t m, magma_int_t n,
             // make sure that gpu queue is empty
             magma_device_sync();
             
-            if ( i>0 ){
+            if ( i > 0 ) {
                 magma_ztrsm( MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit,
                              nb, n - (i+1)*nb,
                              c_one, inA(i-1,i-1), ldda,

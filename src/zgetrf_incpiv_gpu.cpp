@@ -64,7 +64,7 @@ magma_zgetrf_incpiv_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t 
     LDHA    (input) INTEGER
             The leading dimension of the array hA.  LDHA >= max(1,M).
 
-    dA      (input,output) DOUBLE COMPLEX array, dimension(LDDA, N) , on gpu.
+    dA      (input,output) DOUBLE COMPLEX array, dimension(LDDA, N), on gpu.
             On entry, the M-by-N tile to be factored.
             On exit, the factors L and U from the factorization
             A = P*L*U; the unit diagonal elements of L are not stored.
@@ -181,13 +181,12 @@ magma_zgetrf_incpiv_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t 
             dAT = dA;
         }
 
-        for( i=0; i<s; i++ )
-        {
+        for( i=0; i < s; i++ ) {
             ii = i * ib;
             sb = min(ib, mindim-ii);
             cols = maxm - ii;
 
-            if ( i>0 ){
+            if ( i > 0 ) {
                 // download i-th panel
                 magmablas_ztranspose( dwork, maxm, AT(0, i), ldda, sb, m );
                 magma_zgetmatrix( m, sb, dwork, maxm, hA(0, i), ldha );
@@ -221,7 +220,7 @@ magma_zgetrf_incpiv_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t 
             {
                 int j;
                 int fin = ii + sb;
-                for(j=ii ; j <fin; j++) {
+                for (j=ii; j < fin; j++) {
                     ipiv[j] = ii + ipiv[j];
                 }
             }

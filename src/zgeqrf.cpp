@@ -138,7 +138,7 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
     ldda    = ((m+31)/32)*32;
 
     magma_int_t num_gpus = magma_num_gpus();
-    if( num_gpus > 1 ) {
+    if ( num_gpus > 1 ) {
         /* call multiple-GPU interface  */
         return magma_zgeqrf4(num_gpus, m, n, A, lda, tau, work, lwork, info);
     }
@@ -176,9 +176,9 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
         old_ib = nb;
         for (i = 0; i < k-nb; i += nb) {
             ib = min(k-i, nb);
-            if (i>0) {
+            if (i > 0) {
                 /* download i-th panel */
-                magma_queue_sync( stream[1] ); 
+                magma_queue_sync( stream[1] );
                 magma_zgetmatrix_async( m-i, ib,
                                         dA(i,i), ldda,
                                         A(i,i),  lda, stream[0] );
@@ -213,7 +213,6 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
             magma_queue_sync( stream[0] );
 
             if (i + ib < n) {
-
                 if (i+ib < k-nb) {
                     /* Apply H' to A(i:m,i+ib:i+2*ib) from the left (look-ahead) */
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
@@ -261,4 +260,3 @@ magma_zgeqrf(magma_int_t m, magma_int_t n,
     
     return *info;
 } /* magma_zgeqrf */
-

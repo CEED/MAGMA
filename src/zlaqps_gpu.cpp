@@ -136,7 +136,6 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         pvt = k - 1 + magma_idamax( n-k, &vn1[k], ione );
         
         if (pvt != k) {
-
             /*if (pvt >= nb) {
                 // 1. Start copy from GPU
                 magma_zgetmatrix_async( m - offset - nb, 1,
@@ -146,7 +145,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
 
             /* F gets swapped so F must be sent at the end to GPU   */
             i__1 = k;
-            /*if (pvt < nb){
+            /*if (pvt < nb) {
                 // no need of transfer if pivot is within the panel
                 blasf77_zswap( &m, A(0, pvt), &ione, A(0, k), &ione );
             }
@@ -180,7 +179,6 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
                 //magma_sswap( 1, &vn2[pvt], 1, &vn2[k], 1 );
                 magma_sswap(2, &vn1[pvt], n+offset, &vn1[k], n+offset);
             #endif
-
         }
 
         /* Apply previous Householder reflectors to column K:
@@ -188,7 +186,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
            Optimization: multiply with beta=0; wait for vector and subtract */
         if (k > 0) {
             /*#if (defined(PRECISION_c) || defined(PRECISION_z))
-            for (j = 0; j < k; ++j){
+            for (j = 0; j < k; ++j) {
                 *F(k,j) = MAGMA_Z_CNJG( *F(k,j) );
             }
             #endif*/
@@ -287,7 +285,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
            F(1:N,K) := tau(K)*A(RK:M,K+1:N)'*A(RK:M,K) - tau(K)*F(1:N,1:K-1)*A(RK:M,1:K-1)'*A(RK:M,K)
                     := tau(K)(A(RK:M,K+1:N)' - F(1:N,1:K-1)*A(RK:M,1:K-1)') A(RK:M,K)
            so, F is (updated A)*V */
-        //if (k > 0 && k<n-1) {
+        //if (k > 0 && k < n-1) {
         if (k > 0) {
             //magma_zgetvector( 1, &tau[k], 1, &tauk, 1 );
             z__1 = MAGMA_Z_NEGATE( tauk );
@@ -362,7 +360,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
         }
         
         /* Update partial column norms. */
-        if (rk < min(m, n+offset)-1 ){
+        if (rk < min(m, n+offset)-1 ) {
             magmablas_dznrm2_row_check_adjust(n-k-1, tol3z, &vn1[k+1], &vn2[k+1], A(rk,k+1), lda, lsticcs);
 
             magma_device_sync();
@@ -425,7 +423,7 @@ magma_zlaqps_gpu(magma_int_t m, magma_int_t n, magma_int_t offset,
                      c_one,     A(rk+1, *kb), lda );
     }
     /* Recomputation of difficult columns. */
-    if( lsticc > 0 ) {
+    if ( lsticc > 0 ) {
         printf( " -- recompute dnorms --\n" );
         magmablas_dznrm2_check(m-rk-1, n-*kb, A(rk+1,*kb), lda,
                                &vn1[*kb], lsticcs);

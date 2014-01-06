@@ -16,16 +16,16 @@
       puts ones on the diagonal and zeros in the upper triangular part of 'a'.
       The upper triangular values are stored in work.
  */
-void zsplit_diag_block3(int ib, magmaDoubleComplex *a, int lda, magmaDoubleComplex *work){
+void zsplit_diag_block3(int ib, magmaDoubleComplex *a, int lda, magmaDoubleComplex *work) {
     int i, j;
     magmaDoubleComplex *cola, *colw;
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     magmaDoubleComplex c_one  = MAGMA_Z_ONE;
 
-    for(i=0; i<ib; i++){
+    for (i=0; i < ib; i++) {
         cola = a    + i*lda;
         colw = work + i*ib;
-        for(j=0; j<i; j++){
+        for (j=0; j < i; j++) {
             colw[j] = cola[j];
             cola[j] = c_zero;
         }
@@ -170,7 +170,7 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
             magma_zgetmatrix_async( rows, ib,
                                     a_ref(i,i),  ldda,
                                     work_ref(i), ldwork, stream[1] );
-            if (i>0){
+            if (i > 0) {
                 /* Apply H' to A(i:m,i+2*ib:n) from the left */
                 cols = n-old_i-2*old_ib;
                 magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
@@ -202,7 +202,7 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
                 /* Send the triangular factor T to the GPU */
                 magma_zsetmatrix( ib, ib, hwork, ib, t_ref(i), nb );
 
-                if (i+nb < k-nb){
+                if (i+nb < k-nb) {
                     /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                                       rows, ib, ib,
@@ -243,7 +243,6 @@ magma_zgeqrf3_gpu( magma_int_t m, magma_int_t n,
     return *info;
 
 /*     End of MAGMA_ZGEQRF */
-
 } /* magma_zgeqrf */
 
 #undef a_ref

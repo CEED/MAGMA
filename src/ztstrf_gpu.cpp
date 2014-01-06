@@ -77,7 +77,7 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
     LDHA    (input) INTEGER
             The leading dimension of the array hA.  LDHA >= max(1,M).
 
-    dA      (input,output) COMPLEX_16 array, dimension(LDDA, N) , on gpu.
+    dA      (input,output) COMPLEX_16 array, dimension(LDDA, N), on gpu.
             On entry, the M-by-N tile to be factored.
             On exit, the factor L from the factorization
 
@@ -230,12 +230,11 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
         dUp = dAp + ib*lddwork;
 
         ip = 0;
-        for( i=0; i<s; i++ )
-        {
+        for( i=0; i < s; i++ ) {
             ii = i * ib;
             sb = min(mindim-ii, ib);
             
-            if ( i>0 ){
+            if ( i > 0 ) {
                 // download i-th panel
                 magmablas_ztranspose( dUp, lddu, UT(0, i), lddu, sb, ii );
                 magmablas_ztranspose( dAp, ldda, AT(0, i), ldda, sb, m  );
@@ -283,7 +282,7 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
                                 AT(0, i+1), ldda,
                                 1, sb, ipiv+ii, 1, nb );
 
-            for(j=0; j<ib; j++) {
+            for (j=0; j < ib; j++) {
                 im = ipiv[ip]-1;
                 if ( im == j ) {
                     ipiv[ip] += ii;
@@ -291,11 +290,11 @@ magma_ztstrf_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t ib, mag
                 ip++;
             }
 #else
-            for(j=0; j<ib; j++) {
+            for (j=0; j < ib; j++) {
                 im = ipiv[ip]-1;
                 if ( im != (j) ) {
                     im = im - nb;
-                    assert( (im>=0) && (im<m) );
+                    assert( (im >= 0) && (im < m) );
                     magmablas_zswap( n-(ii+sb), UT(i, i+1)+j*lddu, 1, AT(0, i+1)+im*ldda, 1 );
                 } else {
                     ipiv[ip] += ii;

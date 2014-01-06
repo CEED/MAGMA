@@ -181,10 +181,10 @@ magma_zgehrd_m(
     }
 
     // Set elements 0:ILO-1 and IHI-1:N-2 of TAU to zero
-    for(i = 0; i < ilo; ++i)
+    for (i = 0; i < ilo; ++i)
         tau[i] = c_zero;
 
-    for(i = max(0,ihi-1); i < n-1; ++i)
+    for (i = max(0,ihi-1); i < n-1; ++i)
         tau[i] = c_zero;
 
     // set T to zero

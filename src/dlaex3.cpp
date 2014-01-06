@@ -48,12 +48,12 @@ void magma_dirange(magma_int_t k, magma_int_t* indxq, magma_int_t *iil, magma_in
     *iil = 1;
     *iiu = 0;
     for (i = il; i <= iu; ++i)
-        if (indxq[i-1]<=k) {
+        if (indxq[i-1] <= k) {
             *iil = indxq[i-1];
             break;
         }
     for (i = iu; i >= il; --i)
-        if (indxq[i-1]<=k) {
+        if (indxq[i-1] <= k) {
             *iiu = indxq[i-1];
             break;
         }
@@ -102,7 +102,7 @@ magma_dlaex3(magma_int_t k, magma_int_t n, magma_int_t n1, double* d,
 
     N       (input) INTEGER
             The number of rows and columns in the Q matrix.
-            N >= K (deflation may result in N>K).
+            N >= K (deflation may result in N > K).
 
     N1      (input) INTEGER
             The location of the last eigenvalue in the leading submatrix.

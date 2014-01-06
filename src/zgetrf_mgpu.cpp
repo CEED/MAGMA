@@ -8,7 +8,6 @@
        @precisions normal z -> s d c
 
 */
-#include <math.h>
 #include "common_magma.h"
 
 
@@ -116,7 +115,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
     } else {
         /* Use hybrid blocked code. */
         maxm = ((m + 31)/32)*32;
-        if( num_gpus > ceil((double)n/nb) ) {
+        if ( num_gpus > ceil((double)n/nb) ) {
             printf( " * too many GPUs for the matrix size, using %d GPUs\n", (int) num_gpus );
             *info = -1;
             return *info;
@@ -128,7 +127,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
         lddat = (lddat+num_gpus-1)/num_gpus; /* number of block columns per GPU */
         lddat = nb*lddat;                    /* number of columns per GPU       */
         lddat = ((lddat+31)/32)*32;          /* make it a multiple of 32        */
-        for(i=0; i<num_gpus; i++){
+        for (i=0; i < num_gpus; i++) {
             magma_setdevice(i);
             
             /* local-n and local-ld */
@@ -140,10 +139,10 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
             
             /* workspaces */
             if (MAGMA_SUCCESS != magma_zmalloc( &d_panel[i], (3+num_gpus)*nb*maxm )) {
-                for( j=0; j<=i; j++ ) {
+                for( j=0; j <= i; j++ ) {
                     magma_setdevice(j);
                 }
-                for( j=0; j<i; j++ ) {
+                for( j=0; j < i; j++ ) {
                     magma_setdevice(j);
                     magma_free( d_panel[j] );
                     magma_free( d_lAT[j]   );
@@ -154,11 +153,11 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
             
             /* local-matrix storage */
             if (MAGMA_SUCCESS != magma_zmalloc( &d_lAT[i], lddat*maxm )) {
-                for( j=0; j<=i; j++ ) {
+                for( j=0; j <= i; j++ ) {
                     magma_setdevice(j);
                     magma_free( d_panel[j] );
                 }
-                for( j=0; j<i; j++ ) {
+                for( j=0; j < i; j++ ) {
                     magma_setdevice(j);
                     magma_free( d_lAT[j] );
                 }
@@ -173,7 +172,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
             magmablasSetKernelStream(streaml[i][1]);
             magmablas_ztranspose2( d_lAT[i], lddat, d_lA[i], ldda, m, n_local[i] );
         }
-        for(i=0; i<num_gpus; i++){
+        for (i=0; i < num_gpus; i++) {
             magma_setdevice(i);
             cudaStreamSynchronize(streaml[i][0]);
             magmablasSetKernelStream(NULL);
@@ -183,7 +182,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
         /* cpu workspace */
         lddwork = maxm;
         if (MAGMA_SUCCESS != magma_zmalloc_pinned( &work, lddwork*nb*num_gpus )) {
-            for(i=0; i<num_gpus; i++ ) {
+            for (i=0; i < num_gpus; i++ ) {
                 magma_setdevice(i);
                 magma_free( d_panel[i] );
                 magma_free( d_lAT[i]   );
@@ -199,7 +198,7 @@ magma_zgetrf_mgpu(magma_int_t num_gpus,
                            streaml, info);
 
         /* clean up */
-        for( d=0; d<num_gpus; d++ ) {
+        for( d=0; d < num_gpus; d++ ) {
             magma_setdevice(d);
             
             /* save on output */

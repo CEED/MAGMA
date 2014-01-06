@@ -163,7 +163,7 @@ magma_zgeqrf2_mgpu( magma_int_t num_gpus, magma_int_t m, magma_int_t n,
             /* Set the GPU number that holds the current panel */
             panel_dev = (i/nb) % num_gpus;
             
-            /* Set the local index where the current panel is (j==i) */
+            /* Set the local index where the current panel is (j == i) */
             i_local = i/(nb*num_gpus)*nb;
             
             ib = min(min_mn-i, nb);

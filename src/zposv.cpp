@@ -76,12 +76,12 @@ magma_zposv    ( char uplo, magma_int_t n, magma_int_t nrhs,
 
     magma_int_t num_gpus, ldda, lddb;
 
-    *info = 0 ;
-    if( (uplo != 'U') && (uplo != 'u') && (uplo != 'L') && (uplo != 'l') )
+    *info = 0;
+    if ( (uplo != 'U') && (uplo != 'u') && (uplo != 'L') && (uplo != 'l') )
         *info = -1;
-    if( n < 0 )
+    if ( n < 0 )
         *info = -2;
-    if( nrhs < 0)
+    if ( nrhs < 0)
         *info = -3;
     if ( lda < max(1, n) )
         *info = -5;
@@ -93,7 +93,7 @@ magma_zposv    ( char uplo, magma_int_t n, magma_int_t nrhs,
     }
 
     /* Quick return if possible */
-    if ( (n==0) || (nrhs == 0) ) {
+    if ( (n == 0) || (nrhs == 0) ) {
         return *info;
     }
 

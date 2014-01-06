@@ -250,7 +250,7 @@ magma_zunmqr_gpu(char side, char trans,
 
     /* Use blocked code to multiply blocks */
     if (nb < k) {
-        for( i=i1; (step<0 ? i>=i2 : i<i2); i+=step ) {
+        for( i=i1; (step < 0 ? i >= i2 : i < i2); i += step ) {
             ib = min(nb, k - i);
             if (left) {
                 // ni=n, jc=0, H or H^T is applied to C(i:m-1,0:n-1)

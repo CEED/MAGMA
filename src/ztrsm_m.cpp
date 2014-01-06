@@ -12,7 +12,7 @@
 #include "common_magma.h"
 
 extern "C"
-magma_int_t magma_get_ztrsm_m_nb() { return 128;}
+magma_int_t magma_get_ztrsm_m_nb() { return 128; }
 
 #define A(i, j) (a+(j)*nb*lda + (i)*nb)
 #define B(i, j) (b+(j)*nb*ldb + (i)*nb)
@@ -107,7 +107,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
 
     LDA     INTEGER.
             On entry, LDA specifies the first dimension of A as declared
-            in the calling (sub) program. 
+            in the calling (sub) program.
             When  SIDE = 'L' or 'l' then LDA >= max( 1, m ),
             when  SIDE = 'R' or 'r' then LDA >= max( 1, n ).
             Unchanged on exit.
@@ -179,8 +179,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
         return info;
     }
 
-    //Quick return if possible.
-
+    // Quick return if possible.
     if (n == 0) {
         return info;
     }
@@ -210,7 +209,7 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
         }
     }
 
-    for (igpu = 0; igpu < nrgpu; ++igpu){
+    for (igpu = 0; igpu < nrgpu; ++igpu) {
         magma_setdevice(igpu);
         if (MAGMA_SUCCESS != magma_zmalloc( &dw[igpu], (dimb*lddb + dima*ldda) )) {
             info = MAGMA_ERR_DEVICE_ALLOC;
@@ -222,29 +221,23 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
     }
 
     // alpha = 0 case;
-
     if (MAGMA_Z_REAL(alpha) == 0. && MAGMA_Z_IMAG(alpha) == 0.) {
         printf("ztrsm_m: alpha = 0 not implemented\n");
         exit(-1);
-
         return info;
     }
 
     if (lside) {
         if (notransp) {
-
-            //Form  B := alpha*inv( A )*B
-
+            // Form  B := alpha*inv( A )*B
             if (upper) {
-
-                //left upper notranspose
-
+                // left upper notranspose
                 magma_int_t nloc[MagmaMaxGPUs];
-                for(igpu = 0; igpu < nrgpu; ++igpu)
+                for (igpu = 0; igpu < nrgpu; ++igpu)
                     nloc[igpu] = 0;
 
-                //copy B to mgpus
-                for (k = 0; k < nbl; ++k){
+                // copy B to mgpus
+                for (k = 0; k < nbl; ++k) {
                     igpu = k%nrgpu;
                     magma_setdevice(igpu);
                     kb = min(nb, n-k*nb);
@@ -254,38 +247,38 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                                             dB(igpu, 0, k/nrgpu), lddb, stream[igpu][(mbl+1)%2] );
                 }
                 jb = min(nb, m-(mbl-1)*nb);
-                for (igpu = 0; igpu < nrgpu; ++igpu){
+                for (igpu = 0; igpu < nrgpu; ++igpu) {
                     magma_setdevice(igpu);
                     magma_zsetmatrix_async( m, jb,
                                             A(0, mbl-1),            lda,
                                             dA(igpu, 0, (mbl-1)%2), ldda, stream[igpu][(mbl+1)%2] );
                 }
-                for (j = mbl-1; j >= 0; --j){
-                    if (j > 0){
+                for (j = mbl-1; j >= 0; --j) {
+                    if (j > 0) {
                         jb = nb;
-                        for (igpu = 0; igpu < nrgpu; ++igpu){
+                        for (igpu = 0; igpu < nrgpu; ++igpu) {
                             magma_setdevice(igpu);
                             magma_zsetmatrix_async( j*nb, jb,
                                                     A(0, j-1),            lda,
                                                     dA(igpu, 0, (j+1)%2), ldda, stream[igpu][(j+1)%2] );
                         }
                     }
-                    if (j==mbl-1)
+                    if (j == mbl-1)
                         alpha_=alpha;
                     else
                         alpha_= c_one;
 
                     jb = min(nb, m-j*nb);
 
-                    for (igpu = 0; igpu < nrgpu; ++igpu){
+                    for (igpu = 0; igpu < nrgpu; ++igpu) {
                         magma_setdevice(igpu);
                         magmablasSetKernelStream(stream[igpu][j%2]);
                         magma_ztrsm(side, uplo, transa, diag, jb, nloc[igpu], alpha_, dA(igpu, j, j%2), ldda,
                                     dB(igpu, j, 0), lddb );
                     }
 
-                    if (j>0){
-                        for (igpu = 0; igpu < nrgpu; ++igpu){
+                    if (j > 0) {
+                        for (igpu = 0; igpu < nrgpu; ++igpu) {
                             magma_setdevice(igpu);
                             magmablasSetKernelStream(stream[igpu][j%2]);
                             magma_zgemm(transa, MagmaNoTrans, j*nb, nloc[igpu], jb, c_neg_one, dA(igpu, 0, j%2), ldda,
@@ -293,11 +286,11 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         }
                     }
 
-                    for (igpu = 0; igpu < nrgpu; ++igpu){
+                    for (igpu = 0; igpu < nrgpu; ++igpu) {
                         magma_queue_sync( stream[igpu][j%2] );
                     }
 
-                    for (k = 0; k < nbl; ++k){
+                    for (k = 0; k < nbl; ++k) {
                         igpu = k%nrgpu;
                         magma_setdevice(igpu);
                         kb = min(nb, n-k*nb);
@@ -306,18 +299,15 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                                                 B(j, k),              ldb, stream[igpu][2] );
                     }
                 }
-
             }
-            else
-            {
-                //left lower notranspose
-
+            else {
+                // left lower notranspose
                 magma_int_t nloc[MagmaMaxGPUs];
-                for(igpu = 0; igpu < nrgpu; ++igpu)
+                for (igpu = 0; igpu < nrgpu; ++igpu)
                     nloc[igpu] = 0;
 
-                //copy B to mgpus
-                for (k = 0; k < nbl; ++k){
+                // copy B to mgpus
+                for (k = 0; k < nbl; ++k) {
                     igpu = k%nrgpu;
                     magma_setdevice(igpu);
                     kb = min(nb, n-k*nb);
@@ -327,16 +317,16 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                                             dB(igpu, 0, k/nrgpu), lddb, stream[igpu][0] );
                 }
                 jb = min(nb, m);
-                for (igpu = 0; igpu < nrgpu; ++igpu){
+                for (igpu = 0; igpu < nrgpu; ++igpu) {
                     magma_setdevice(igpu);
                     magma_zsetmatrix_async( m, jb,
                                             A(0, 0),        lda,
                                             dA(igpu, 0, 0), ldda, stream[igpu][0] );
                 }
-                for (j = 0; j < mbl; ++j){
-                    if ((j+1)*nb < m){
+                for (j = 0; j < mbl; ++j) {
+                    if ((j+1)*nb < m) {
                         jb = min(nb, m-(j+1)*nb);
-                        for (igpu = 0; igpu < nrgpu; ++igpu){
+                        for (igpu = 0; igpu < nrgpu; ++igpu) {
                             magma_setdevice(igpu);
                             magma_zsetmatrix_async( (m-(j+1)*nb), jb,
                                                     A(j+1, j+1),            lda,
@@ -345,21 +335,20 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     }
                     jb = min(nb, m-j*nb);
 
-                    if (j==0)
+                    if (j == 0)
                         alpha_=alpha;
                     else
                         alpha_= c_one;
 
-                    for (igpu = 0; igpu < nrgpu; ++igpu){
+                    for (igpu = 0; igpu < nrgpu; ++igpu) {
                         magma_setdevice(igpu);
                         magmablasSetKernelStream(stream[igpu][j%2]);
                         magma_ztrsm(side, uplo, transa, diag, jb, nloc[igpu], alpha_, dA(igpu, j, j%2), ldda,
                                     dB(igpu, j, 0), lddb );
                     }
 
-                    if ( j < mbl-1 ){
-
-                        for (igpu = 0; igpu < nrgpu; ++igpu){
+                    if ( j < mbl-1 ) {
+                        for (igpu = 0; igpu < nrgpu; ++igpu) {
                             magma_setdevice(igpu);
                             magmablasSetKernelStream(stream[igpu][j%2]);
                             magma_zgemm(transa, MagmaNoTrans, m-(j+1)*nb, nloc[igpu], nb, c_neg_one, dA(igpu, j+1, j%2), ldda,
@@ -367,11 +356,11 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         }
                     }
 
-                    for (igpu = 0; igpu < nrgpu; ++igpu){
+                    for (igpu = 0; igpu < nrgpu; ++igpu) {
                         magma_queue_sync( stream[igpu][j%2] );
                     }
 
-                    for (k = 0; k < nbl; ++k){
+                    for (k = 0; k < nbl; ++k) {
                         igpu = k%nrgpu;
                         magma_setdevice(igpu);
                         kb = min(nb, n-k*nb);
@@ -380,24 +369,18 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                                                 B(j, k),              ldb, stream[igpu][2] );
                     }
                 }
-
             }
         }
-        else
-        {
-
-            //Form  B := alpha*inv( A' )*B
-
+        else {
+            // Form  B := alpha*inv( A' )*B
             if (upper) {
-
-                //left upper transpose or conj transpose
-
+                // left upper transpose or conj transpose
                 magma_int_t nloc[MagmaMaxGPUs];
-                for(igpu = 0; igpu < nrgpu; ++igpu)
+                for (igpu = 0; igpu < nrgpu; ++igpu)
                     nloc[igpu] = 0;
 
-                //copy B to mgpus
-                for (k = 0; k < nbl; ++k){
+                // copy B to mgpus
+                for (k = 0; k < nbl; ++k) {
                     igpu = k%nrgpu;
                     magma_setdevice(igpu);
                     kb = min(nb, n-k*nb);
@@ -407,16 +390,16 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                                             dB(igpu, 0, k/nrgpu), lddb, stream[igpu][0] );
                 }
                 jb = min(nb, m);
-                for (igpu = 0; igpu < nrgpu; ++igpu){
+                for (igpu = 0; igpu < nrgpu; ++igpu) {
                     magma_setdevice(igpu);
                     magma_zsetmatrix_async( jb, m,
                                             A(0, 0),        lda,
                                             dA(igpu, 0, 0), ldda, stream[igpu][0] );
                 }
-                for (j = 0; j < mbl; ++j){
-                    if ((j+1)*nb < m){
+                for (j = 0; j < mbl; ++j) {
+                    if ((j+1)*nb < m) {
                         jb = min(nb, m-(j+1)*nb);
-                        for (igpu = 0; igpu < nrgpu; ++igpu){
+                        for (igpu = 0; igpu < nrgpu; ++igpu) {
                             magma_setdevice(igpu);
                             magma_zsetmatrix_async( jb, m-(j+1)*nb,
                                                     A(j+1, j+1),            lda,
@@ -425,21 +408,20 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     }
                     jb = min(nb, m-j*nb);
 
-                    if (j==0)
+                    if (j == 0)
                         alpha_=alpha;
                     else
                         alpha_= c_one;
 
-                    for (igpu = 0; igpu < nrgpu; ++igpu){
+                    for (igpu = 0; igpu < nrgpu; ++igpu) {
                         magma_setdevice(igpu);
                         magmablasSetKernelStream(stream[igpu][j%2]);
                         magma_ztrsm(side, uplo, transa, diag, jb, nloc[igpu], alpha_, dA(igpu, j%2, j), ldda,
                                     dB(igpu, j, 0), lddb );
                     }
 
-                    if ( j < mbl-1 ){
-
-                        for (igpu = 0; igpu < nrgpu; ++igpu){
+                    if ( j < mbl-1 ) {
+                        for (igpu = 0; igpu < nrgpu; ++igpu) {
                             magma_setdevice(igpu);
                             magmablasSetKernelStream(stream[igpu][j%2]);
                             magma_zgemm(transa, MagmaNoTrans, m-(j+1)*nb, nloc[igpu], nb, c_neg_one, dA(igpu, j%2, j+1), ldda,
@@ -447,11 +429,11 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         }
                     }
 
-                    for (igpu = 0; igpu < nrgpu; ++igpu){
+                    for (igpu = 0; igpu < nrgpu; ++igpu) {
                         magma_queue_sync( stream[igpu][j%2] );
                     }
 
-                    for (k = 0; k < nbl; ++k){
+                    for (k = 0; k < nbl; ++k) {
                         igpu = k%nrgpu;
                         magma_setdevice(igpu);
                         kb = min(nb, n-k*nb);
@@ -461,17 +443,14 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     }
                 }
             }
-            else
-            {
-
-                //left lower transpose or conj transpose
-
+            else {
+                // left lower transpose or conj transpose
                 magma_int_t nloc[MagmaMaxGPUs];
-                for(igpu = 0; igpu < nrgpu; ++igpu)
+                for (igpu = 0; igpu < nrgpu; ++igpu)
                     nloc[igpu] = 0;
 
-                //copy B to mgpus
-                for (k = 0; k < nbl; ++k){
+                // copy B to mgpus
+                for (k = 0; k < nbl; ++k) {
                     igpu = k%nrgpu;
                     magma_setdevice(igpu);
                     kb = min(nb, n-k*nb);
@@ -481,38 +460,38 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                                             dB(igpu, 0, k/nrgpu), lddb, stream[igpu][(mbl+1)%2] );
                 }
                 jb = min(nb, m-(mbl-1)*nb);
-                for (igpu = 0; igpu < nrgpu; ++igpu){
+                for (igpu = 0; igpu < nrgpu; ++igpu) {
                     magma_setdevice(igpu);
                     magma_zsetmatrix_async( jb, m,
                                             A(mbl-1, 0),            lda,
                                             dA(igpu, (mbl-1)%2, 0), ldda, stream[igpu][(mbl+1)%2] );
                 }
-                for (j = mbl-1; j >= 0; --j){
-                    if (j > 0){
+                for (j = mbl-1; j >= 0; --j) {
+                    if (j > 0) {
                         jb = nb;
-                        for (igpu = 0; igpu < nrgpu; ++igpu){
+                        for (igpu = 0; igpu < nrgpu; ++igpu) {
                             magma_setdevice(igpu);
                             magma_zsetmatrix_async( jb, j*nb,
                                                     A(j-1, 0),            lda,
                                                     dA(igpu, (j+1)%2, 0), ldda, stream[igpu][(j+1)%2] );
                         }
                     }
-                    if (j==mbl-1)
+                    if (j == mbl-1)
                         alpha_=alpha;
                     else
                         alpha_= c_one;
 
                     jb = min(nb, m-j*nb);
 
-                    for (igpu = 0; igpu < nrgpu; ++igpu){
+                    for (igpu = 0; igpu < nrgpu; ++igpu) {
                         magma_setdevice(igpu);
                         magmablasSetKernelStream(stream[igpu][j%2]);
                         magma_ztrsm(side, uplo, transa, diag, jb, nloc[igpu], alpha_, dA(igpu, j%2, j), ldda,
                                     dB(igpu, j, 0), lddb );
                     }
 
-                    if (j>0){
-                        for (igpu = 0; igpu < nrgpu; ++igpu){
+                    if (j > 0) {
+                        for (igpu = 0; igpu < nrgpu; ++igpu) {
                             magma_setdevice(igpu);
                             magmablasSetKernelStream(stream[igpu][j%2]);
                             magma_zgemm(transa, MagmaNoTrans, j*nb, nloc[igpu], jb, c_neg_one, dA(igpu, j%2, 0), ldda,
@@ -520,11 +499,11 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         }
                     }
 
-                    for (igpu = 0; igpu < nrgpu; ++igpu){
+                    for (igpu = 0; igpu < nrgpu; ++igpu) {
                         magma_queue_sync( stream[igpu][j%2] );
                     }
 
-                    for (k = 0; k < nbl; ++k){
+                    for (k = 0; k < nbl; ++k) {
                         igpu = k%nrgpu;
                         magma_setdevice(igpu);
                         kb = min(nb, n-k*nb);
@@ -533,25 +512,20 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                                                 B(j, k),              ldb, stream[igpu][2] );
                     }
                 }
-
             }
         }
     }
-    else
-    {
+    else {
         if (notransp) {
-
-            //Form  B := alpha*B*inv( A ).
-
+            // Form  B := alpha*B*inv( A ).
             if (upper) {
-
-                //right upper notranspose
+                // right upper notranspose
                 magma_int_t mloc[MagmaMaxGPUs];
-                for(igpu = 0; igpu < nrgpu; ++igpu)
+                for (igpu = 0; igpu < nrgpu; ++igpu)
                     mloc[igpu] = 0;
 
-                //copy B to mgpus
-                for (j = 0; j < mbl; ++j){
+                // copy B to mgpus
+                for (j = 0; j < mbl; ++j) {
                     igpu = j%nrgpu;
                     magma_setdevice(igpu);
                     jb = min(nb, m-j*nb);
@@ -561,16 +535,16 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                                             dB(igpu, j/nrgpu, 0), lddb, stream[igpu][0] );
                 }
                 kb = min(nb, n);
-                for (igpu = 0; igpu < nrgpu; ++igpu){
+                for (igpu = 0; igpu < nrgpu; ++igpu) {
                     magma_setdevice(igpu);
                     magma_zsetmatrix_async( kb, n,
                                             A(0, 0),        lda,
                                             dA(igpu, 0, 0), ldda, stream[igpu][0] );
                 }
-                for (k = 0; k < nbl; ++k){
-                    if ((k+1)*nb < n){
+                for (k = 0; k < nbl; ++k) {
+                    if ((k+1)*nb < n) {
                         kb = min(nb, n-(k+1)*nb);
-                        for (igpu = 0; igpu < nrgpu; ++igpu){
+                        for (igpu = 0; igpu < nrgpu; ++igpu) {
                             magma_setdevice(igpu);
                             magma_zsetmatrix_async( kb, n-(k+1)*nb,
                                                     A(k+1, k+1),            lda,
@@ -579,21 +553,20 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     }
                     kb = min(nb, n-k*nb);
 
-                    if (k==0)
+                    if (k == 0)
                         alpha_=alpha;
                     else
                         alpha_= c_one;
 
-                    for (igpu = 0; igpu < nrgpu; ++igpu){
+                    for (igpu = 0; igpu < nrgpu; ++igpu) {
                         magma_setdevice(igpu);
                         magmablasSetKernelStream(stream[igpu][k%2]);
                         magma_ztrsm(side, uplo, transa, diag, mloc[igpu], kb, alpha_, dA(igpu, k%2, k), ldda,
                                     dB(igpu, 0, k), lddb );
                     }
 
-                    if ( k < nbl-1 ){
-
-                        for (igpu = 0; igpu < nrgpu; ++igpu){
+                    if ( k < nbl-1 ) {
+                        for (igpu = 0; igpu < nrgpu; ++igpu) {
                             magma_setdevice(igpu);
                             magmablasSetKernelStream(stream[igpu][k%2]);
                             magma_zgemm(MagmaNoTrans, transa, mloc[igpu], n-(k+1)*nb, nb, c_neg_one, dB(igpu, 0, k), lddb,
@@ -601,11 +574,11 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         }
                     }
 
-                    for (igpu = 0; igpu < nrgpu; ++igpu){
+                    for (igpu = 0; igpu < nrgpu; ++igpu) {
                         magma_queue_sync( stream[igpu][k%2] );
                     }
 
-                    for (j = 0; j < mbl; ++j){
+                    for (j = 0; j < mbl; ++j) {
                         igpu = j%nrgpu;
                         magma_setdevice(igpu);
                         jb = min(nb, m-j*nb);
@@ -615,16 +588,14 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     }
                 }
             }
-            else
-            {
-
-                //right lower notranspose
+            else {
+                // right lower notranspose
                 magma_int_t mloc[MagmaMaxGPUs];
-                for(igpu = 0; igpu < nrgpu; ++igpu)
+                for (igpu = 0; igpu < nrgpu; ++igpu)
                     mloc[igpu] = 0;
 
-                //copy B to mgpus
-                for (j = 0; j < mbl; ++j){
+                // copy B to mgpus
+                for (j = 0; j < mbl; ++j) {
                     igpu = j%nrgpu;
                     magma_setdevice(igpu);
                     jb = min(nb, m-j*nb);
@@ -634,38 +605,38 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                                             dB(igpu, j/nrgpu, 0), lddb, stream[igpu][(nbl+1)%2] );
                 }
                 kb = min(nb, n-(nbl-1)*nb);
-                for (igpu = 0; igpu < nrgpu; ++igpu){
+                for (igpu = 0; igpu < nrgpu; ++igpu) {
                     magma_setdevice(igpu);
                     magma_zsetmatrix_async( kb, n,
                                             A(nbl-1, 0),            lda,
                                             dA(igpu, (nbl-1)%2, 0), ldda, stream[igpu][(nbl+1)%2] );
                 }
-                for (k = nbl-1; k >= 0; --k){
-                    if (k > 0){
+                for (k = nbl-1; k >= 0; --k) {
+                    if (k > 0) {
                         kb = nb;
-                        for (igpu = 0; igpu < nrgpu; ++igpu){
+                        for (igpu = 0; igpu < nrgpu; ++igpu) {
                             magma_setdevice(igpu);
                             magma_zsetmatrix_async( kb, k*nb,
                                                     A(k-1, 0),            lda,
                                                     dA(igpu, (k+1)%2, 0), ldda, stream[igpu][(k+1)%2] );
                         }
                     }
-                    if (k==nbl-1)
+                    if (k == nbl-1)
                         alpha_=alpha;
                     else
                         alpha_= c_one;
 
                     kb = min(nb, n-k*nb);
 
-                    for (igpu = 0; igpu < nrgpu; ++igpu){
+                    for (igpu = 0; igpu < nrgpu; ++igpu) {
                         magma_setdevice(igpu);
                         magmablasSetKernelStream(stream[igpu][k%2]);
                         magma_ztrsm(side, uplo, transa, diag, mloc[igpu], kb, alpha_, dA(igpu, k%2, k), ldda,
                                     dB(igpu, 0, k), lddb );
                     }
 
-                    if (k>0){
-                        for (igpu = 0; igpu < nrgpu; ++igpu){
+                    if (k > 0) {
+                        for (igpu = 0; igpu < nrgpu; ++igpu) {
                             magma_setdevice(igpu);
                             magmablasSetKernelStream(stream[igpu][k%2]);
                             magma_zgemm(MagmaNoTrans, transa, mloc[igpu], k*nb, kb, c_neg_one, dB(igpu, 0, k), lddb,
@@ -673,11 +644,11 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         }
                     }
 
-                    for (igpu = 0; igpu < nrgpu; ++igpu){
+                    for (igpu = 0; igpu < nrgpu; ++igpu) {
                         magma_queue_sync( stream[igpu][k%2] );
                     }
 
-                    for (j = 0; j < mbl; ++j){
+                    for (j = 0; j < mbl; ++j) {
                         igpu = j%nrgpu;
                         magma_setdevice(igpu);
                         jb = min(nb, m-j*nb);
@@ -688,20 +659,16 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                 }
             }
         }
-        else
-        {
-
-            //Form  B := alpha*B*inv( A' ).
-
+        else {
+            // Form  B := alpha*B*inv( A' ).
             if (upper) {
-
-                //right upper transpose or conj transpose
+                // right upper transpose or conj transpose
                 magma_int_t mloc[MagmaMaxGPUs];
-                for(igpu = 0; igpu < nrgpu; ++igpu)
+                for (igpu = 0; igpu < nrgpu; ++igpu)
                     mloc[igpu] = 0;
 
-                //copy B to mgpus
-                for (j = 0; j < mbl; ++j){
+                // copy B to mgpus
+                for (j = 0; j < mbl; ++j) {
                     igpu = j%nrgpu;
                     magma_setdevice(igpu);
                     jb = min(nb, m-j*nb);
@@ -711,38 +678,38 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                                             dB(igpu, j/nrgpu, 0), lddb, stream[igpu][(nbl+1)%2] );
                 }
                 kb = min(nb, n-(nbl-1)*nb);
-                for (igpu = 0; igpu < nrgpu; ++igpu){
+                for (igpu = 0; igpu < nrgpu; ++igpu) {
                     magma_setdevice(igpu);
                     magma_zsetmatrix_async( n, kb,
                                             A(0, nbl-1),            lda,
                                             dA(igpu, 0, (nbl-1)%2), ldda, stream[igpu][(nbl+1)%2] );
                 }
-                for (k = nbl-1; k >= 0; --k){
-                    if (k > 0){
+                for (k = nbl-1; k >= 0; --k) {
+                    if (k > 0) {
                         kb = nb;
-                        for (igpu = 0; igpu < nrgpu; ++igpu){
+                        for (igpu = 0; igpu < nrgpu; ++igpu) {
                             magma_setdevice(igpu);
                             magma_zsetmatrix_async( k*nb, kb,
                                                     A(0, k-1),            lda,
                                                     dA(igpu, 0, (k+1)%2), ldda, stream[igpu][(k+1)%2] );
                         }
                     }
-                    if (k==nbl-1)
+                    if (k == nbl-1)
                         alpha_=alpha;
                     else
                         alpha_= c_one;
 
                     kb = min(nb, n-k*nb);
 
-                    for (igpu = 0; igpu < nrgpu; ++igpu){
+                    for (igpu = 0; igpu < nrgpu; ++igpu) {
                         magma_setdevice(igpu);
                         magmablasSetKernelStream(stream[igpu][k%2]);
                         magma_ztrsm(side, uplo, transa, diag, mloc[igpu], kb, alpha_, dA(igpu, k, k%2), ldda,
                                     dB(igpu, 0, k), lddb );
                     }
 
-                    if (k>0){
-                        for (igpu = 0; igpu < nrgpu; ++igpu){
+                    if (k > 0) {
+                        for (igpu = 0; igpu < nrgpu; ++igpu) {
                             magma_setdevice(igpu);
                             magmablasSetKernelStream(stream[igpu][k%2]);
                             magma_zgemm(MagmaNoTrans, transa, mloc[igpu], k*nb, kb, c_neg_one, dB(igpu, 0, k), lddb,
@@ -750,11 +717,11 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         }
                     }
 
-                    for (igpu = 0; igpu < nrgpu; ++igpu){
+                    for (igpu = 0; igpu < nrgpu; ++igpu) {
                         magma_queue_sync( stream[igpu][k%2] );
                     }
 
-                    for (j = 0; j < mbl; ++j){
+                    for (j = 0; j < mbl; ++j) {
                         igpu = j%nrgpu;
                         magma_setdevice(igpu);
                         jb = min(nb, m-j*nb);
@@ -764,16 +731,14 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     }
                 }
             }
-            else
-            {
-
-                //right lower transpose or conj transpose
+            else {
+                // right lower transpose or conj transpose
                 magma_int_t mloc[MagmaMaxGPUs];
-                for(igpu = 0; igpu < nrgpu; ++igpu)
+                for (igpu = 0; igpu < nrgpu; ++igpu)
                     mloc[igpu] = 0;
 
-                //copy B to mgpus
-                for (j = 0; j < mbl; ++j){
+                // copy B to mgpus
+                for (j = 0; j < mbl; ++j) {
                     igpu = j%nrgpu;
                     magma_setdevice(igpu);
                     jb = min(nb, m-j*nb);
@@ -783,16 +748,16 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                                             dB(igpu, j/nrgpu, 0), lddb, stream[igpu][0] );
                 }
                 kb = min(nb, n);
-                for (igpu = 0; igpu < nrgpu; ++igpu){
+                for (igpu = 0; igpu < nrgpu; ++igpu) {
                     magma_setdevice(igpu);
                     magma_zsetmatrix_async( n, kb,
                                             A(0, 0),        lda,
                                             dA(igpu, 0, 0), ldda, stream[igpu][0] );
                 }
-                for (k = 0; k < nbl; ++k){
-                    if ((k+1)*nb < n){
+                for (k = 0; k < nbl; ++k) {
+                    if ((k+1)*nb < n) {
                         kb = min(nb, n-(k+1)*nb);
-                        for (igpu = 0; igpu < nrgpu; ++igpu){
+                        for (igpu = 0; igpu < nrgpu; ++igpu) {
                             magma_setdevice(igpu);
                             magma_zsetmatrix_async( (n-(k+1)*nb), kb,
                                                     A(k+1, k+1),            lda,
@@ -801,21 +766,20 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                     }
                     kb = min(nb, n-k*nb);
 
-                    if (k==0)
+                    if (k == 0)
                         alpha_=alpha;
                     else
                         alpha_= c_one;
 
-                    for (igpu = 0; igpu < nrgpu; ++igpu){
+                    for (igpu = 0; igpu < nrgpu; ++igpu) {
                         magma_setdevice(igpu);
                         magmablasSetKernelStream(stream[igpu][k%2]);
                         magma_ztrsm(side, uplo, transa, diag, mloc[igpu], kb, alpha_, dA(igpu, k, k%2), ldda,
                                     dB(igpu, 0, k), lddb );
                     }
 
-                    if ( k < nbl-1 ){
-
-                        for (igpu = 0; igpu < nrgpu; ++igpu){
+                    if ( k < nbl-1 ) {
+                        for (igpu = 0; igpu < nrgpu; ++igpu) {
                             magma_setdevice(igpu);
                             magmablasSetKernelStream(stream[igpu][k%2]);
                             magma_zgemm(MagmaNoTrans, transa, mloc[igpu], n-(k+1)*nb, nb, c_neg_one, dB(igpu, 0, k), lddb,
@@ -823,11 +787,11 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                         }
                     }
 
-                    for (igpu = 0; igpu < nrgpu; ++igpu){
+                    for (igpu = 0; igpu < nrgpu; ++igpu) {
                         magma_queue_sync( stream[igpu][k%2] );
                     }
 
-                    for (j = 0; j < mbl; ++j){
+                    for (j = 0; j < mbl; ++j) {
                         igpu = j%nrgpu;
                         magma_setdevice(igpu);
                         jb = min(nb, m-j*nb);
@@ -838,11 +802,10 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
                 }
             }
         }
-
     }
 
 
-    for (igpu = 0; igpu < nrgpu; ++igpu){
+    for (igpu = 0; igpu < nrgpu; ++igpu) {
         magma_setdevice(igpu);
         magmablasSetKernelStream(NULL);
         magma_queue_sync( stream[igpu][2] );
@@ -855,5 +818,4 @@ magma_ztrsm_m (magma_int_t nrgpu, char side, char uplo, char transa, char diag,
     magma_setdevice(gpu_b);
 
     return info;
-
 } /* magma_ztrsm_m */

@@ -181,8 +181,7 @@ magma_zunmtr_m(magma_int_t nrgpu, char side, char uplo, char trans,
         ni = n - 1;
     }
 
-    if (upper)
-    {
+    if (upper) {
         /* Q was determined by a call to SSYTRD with UPLO = 'U' */
         i__2 = nq - 1;
         printf("zunmtr_m upper case not implemented");
@@ -192,8 +191,7 @@ magma_zunmtr_m(magma_int_t nrgpu, char side, char uplo, char trans,
         //magma_zunmql_m(nrgpu, side, trans, mi, ni, i__2, &a[lda], lda, tau,
         //               c, ldc, work, lwork, &iinfo);
     }
-    else
-    {
+    else {
         /* Q was determined by a call to SSYTRD with UPLO = 'L' */
         if (left) {
             i1 = 1;
@@ -211,4 +209,3 @@ magma_zunmtr_m(magma_int_t nrgpu, char side, char uplo, char trans,
 
     return *info;
 } /* magma_zunmtr */
-

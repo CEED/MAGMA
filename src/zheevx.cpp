@@ -84,7 +84,7 @@ magma_zheevx(char jobz, char range, char uplo, magma_int_t n,
             when it is determined to lie in an interval [a,b]
             of width less than or equal to
 
-                    ABSTOL + EPS *   max( |a|,|b| ) ,
+                    ABSTOL + EPS * max( |a|,|b| ),
 
             where EPS is the machine precision.  If ABSTOL is less than
             or equal to zero, then  EPS*|T|  will be used in its place,
@@ -93,7 +93,7 @@ magma_zheevx(char jobz, char range, char uplo, magma_int_t n,
 
             Eigenvalues will be computed most accurately when ABSTOL is
             set to twice the underflow threshold 2*DLAMCH('S'), not zero.
-            If this routine returns with INFO>0, indicating that some
+            If this routine returns with INFO > 0, indicating that some
             eigenvectors did not converge, try setting ABSTOL to
             2*DLAMCH('S').
 

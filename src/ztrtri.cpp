@@ -101,7 +101,7 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
 
     /* Check for singularity if non-unit */
     if (nounit) {
-        for ( j=0; j<n; ++j ) {
+        for (j=0; j < n; ++j) {
             if ( MAGMA_Z_EQUAL( *A(j,j), c_zero )) {
                 *info = j+1;  // Fortran index
                 return *info;
@@ -127,7 +127,7 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
     else {
         if (upper) {
             /* Compute inverse of upper triangular matrix */
-            for (j=0; j<n; j=j+nb) {
+            for (j=0; j < n; j += nb) {
                 jb = min(nb, (n-j));
                 magma_zsetmatrix( jb, (n-j),
                                   A(j, j),  lda,
@@ -164,10 +164,10 @@ magma_ztrtri(char uplo, char diag, magma_int_t n,
             /* Compute inverse of lower triangular matrix */
             nn=((n-1)/nb)*nb+1;
 
-            for(j=nn-1; j>=0; j=j-nb) {
+            for (j=nn-1; j >= 0; j -= nb) {
                 jb=min(nb,(n-j));
 
-                if((j+jb) < n) {
+                if ((j+jb) < n) {
                     magma_zsetmatrix( (n-j), jb,
                                       A(j, j),  lda,
                                       dA(j, j), ldda );

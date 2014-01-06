@@ -282,7 +282,7 @@ magma_zlahr2_m(
             // treat V as (nb*ngpu) x nblock matrix, and Vd as nb x nblock matrix
             magmablas_zlacpy( 'F', nb, nblocks-lblock,
                               dV (d, d*nb + lblock*nb*ngpu, i), nb*ngpu,
-                              dVd(d, 0    + lblock*nb     , i), nb );
+                              dVd(d, 0    + lblock*nb,      i), nb );
             
             // convert global indices (k) to local indices (dk)
             magma_indices_1D_bcyclic( nb, ngpu, d, k+i+1, n, &dki1, &dn );
@@ -293,9 +293,9 @@ magma_zlahr2_m(
             // which are summed in separate loop below
             if ( dn-dki1 > 0 ) {
                 magma_zgemv( 'N', n-k, dn-dki1,
-                             c_one,  dA (d, k   , dki1), ldda,
+                             c_one,  dA (d, k,    dki1), ldda,
                                      dVd(d, dki1,    i), 1,
-                             c_zero, dY (d, k   ,    i), 1 );
+                             c_zero, dY (d, k,       i), 1 );
                 
                 // copy vector to host, storing in column nb+d of Y
                 // as temporary space (Y has >= nb+ngpu columns)
@@ -380,9 +380,9 @@ magma_zlahr2_m(
         // which are summed in separate loop below
         if ( dn-dki1 > 0 ) {
             magma_zgemm( 'N', 'N', k, nb, dn-dki1,
-                         c_one,  dA (d, 0   , dki1), ldda,
+                         c_one,  dA (d, 0,    dki1), ldda,
                                  dVd(d, dki1,    0), ldvd,
-                         c_zero, dY (d, 0   ,    0), ldda );
+                         c_zero, dY (d, 0,       0), ldda );
             
             // copy result to host, storing in columns [nb + nb*d : nb + nb*(d+1)] of Y
             // as temporary space (Y has nb + nb*ngpu columns)

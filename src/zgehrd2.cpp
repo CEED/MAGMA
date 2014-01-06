@@ -186,7 +186,7 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     for (i__ = max(1,ihi); i__ < n; ++i__)
         tau[i__] = c_zero;
 
-    for(i__=0; i__< nb*nb; i__+=4)
+    for (i__=0; i__ < nb*nb; i__ += 4)
         t[i__] = t[i__+1] = t[i__+2] = t[i__+3] = c_zero;
 
     nbmin = 2;
@@ -236,7 +236,7 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
             magma_zlahr2(ihi, i__, ib,
                          d_A + (i__ - ilo)*ldda,
                          d_A + N*ldda + 1,
-                         a   + (i__ -   1 )*(lda) , lda,
+                         a   + (i__ -   1 )*(lda), lda,
                          &tau[i__], t, nb, work, ldwork);
             
             /* Copy T from the CPU to D_T on the GPU */
@@ -264,4 +264,3 @@ magma_zgehrd2(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
 
     return *info;
 } /* magma_zgehrd2 */
-

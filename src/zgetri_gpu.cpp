@@ -48,7 +48,7 @@ magma_zgetri_gpu( magma_int_t n, magmaDoubleComplex *dA, magma_int_t ldda,
             The leading dimension of the array A.  LDDA >= max(1,N).
 
     IPIV    (input) INTEGER array, dimension (N)
-            The pivot indices from ZGETRF; for 1<=i<=N, row i of the
+            The pivot indices from ZGETRF; for 1 <= i <= N, row i of the
             matrix was interchanged with row IPIV(i).
 
     DWORK   (workspace/output) COMPLEX_16 array on the GPU, dimension (MAX(1,LWORK))

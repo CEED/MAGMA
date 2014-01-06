@@ -241,7 +241,7 @@ magma_zheevd(char jobz, char uplo,
     }
 
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
-    if (n <= 128){
+    if (n <= 128) {
         #ifdef ENABLE_DEBUG
         printf("--------------------------------------------------------------\n");
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
@@ -251,8 +251,8 @@ magma_zheevd(char jobz, char uplo,
                          &n, a, &lda,
                          w, work, &lwork,
                          #if defined(PRECISION_z) || defined(PRECISION_c)
-                         rwork, &lrwork, 
-                         #endif  
+                         rwork, &lrwork,
+                         #endif
                          iwork, &liwork, info);
         return *info;
     }

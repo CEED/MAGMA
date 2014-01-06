@@ -52,7 +52,7 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
             The leading dimension of the array A.  LDA >= max(1,N).
 
     IPIV    (input) INTEGER array, dimension (N)
-            The pivot indices from ZGETRF; for 1<=i<=N, row i of the
+            The pivot indices from ZGETRF; for 1 <= i <= N, row i of the
             matrix was interchanged with row IPIV(i).
 
     B       (input/output) COMPLEX_16 array on the GPU, dimension (LDB,NRHS)
@@ -143,4 +143,3 @@ magma_zgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
 
     return *info;
 }
-

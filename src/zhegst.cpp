@@ -101,15 +101,15 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
     
     /* Test the input parameters. */
     *info = 0;
-    if (itype<1 || itype>3){
+    if (itype < 1 || itype > 3) {
         *info = -1;
-    }else if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
+    } else if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
         *info = -2;
     } else if (n < 0) {
         *info = -3;
     } else if (lda < max(1,n)) {
         *info = -5;
-    }else if (ldb < max(1,n)) {
+    } else if (ldb < max(1,n)) {
         *info = -7;
     }
     if (*info != 0) {
@@ -137,11 +137,11 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
     
     /* Use hybrid blocked code */
     
-    if (itype==1) {
+    if (itype == 1) {
         if (upper) {
             /* Compute inv(U')*A*inv(U) */
             
-            for(k = 0; k<n; k+=nb){
+            for (k = 0; k < n; k += nb) {
                 kb = min(n-k,nb);
                 kb2= min(n-k-nb,nb);
                 
@@ -153,7 +153,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
                                         A(k, k),  lda,
                                         dA(k, k), ldda, stream[0] );
                 
-                if(k+kb<n){
+                if (k+kb < n) {
                     magma_ztrsm(MagmaLeft, MagmaUpper, MagmaConjTrans, MagmaNonUnit,
                                 kb, n-k-kb,
                                 c_one, dB(k,k), lddb,
@@ -185,7 +185,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
                     
                     magma_ztrsm(MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
                                 kb, n-k-kb,
-                                c_one ,dB(k+kb,k+kb), lddb,
+                                c_one, dB(k+kb,k+kb), lddb,
                                 dA(k,k+kb), ldda);
                     
                     magma_queue_sync( stream[1] );
@@ -197,7 +197,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
         else {
             /* Compute inv(L)*A*inv(L') */
             
-            for(k = 0; k<n; k+=nb){
+            for (k = 0; k < n; k += nb) {
                 kb= min(n-k,nb);
                 kb2= min(n-k-nb,nb);
                 
@@ -209,7 +209,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
                                         A(k, k),  lda,
                                         dA(k, k), ldda, stream[0] );
                 
-                if(k+kb<n){
+                if (k+kb < n) {
                     magma_ztrsm(MagmaRight, MagmaLower, MagmaConjTrans, MagmaNonUnit,
                                 n-k-kb, kb,
                                 c_one, dB(k,k), lddb,
@@ -254,7 +254,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
     else {
         if (upper) {
             /* Compute U*A*U' */
-            for(k = 0; k<n; k+=nb){
+            for (k = 0; k < n; k += nb) {
                 kb= min(n-k,nb);
                 
                 magma_zgetmatrix_async( kb, kb,
@@ -262,10 +262,10 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
                                         A(k, k),  lda, stream[0] );
                 
                 /* Update the upper triangle of A(1:k+kb-1,1:k+kb-1) */
-                if(k>0){
+                if (k > 0) {
                     magma_ztrmm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
                                 k, kb,
-                                c_one ,dB(0,0), lddb,
+                                c_one, dB(0,0), lddb,
                                 dA(0,k), ldda);
                     
                     magma_zhemm(MagmaRight, MagmaUpper,
@@ -307,7 +307,7 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
         }
         else {
             /* Compute L'*A*L */
-            for(k = 0; k<n; k+=nb){
+            for (k = 0; k < n; k += nb) {
                 kb= min(n-k,nb);
                 
                 magma_zgetmatrix_async( kb, kb,
@@ -315,11 +315,11 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
                                         A(k, k),  lda, stream[0] );
                 
                 /* Update the lower triangle of A(1:k+kb-1,1:k+kb-1) */
-                if(k>0){
+                if (k > 0) {
                     
                     magma_ztrmm(MagmaRight, MagmaLower, MagmaNoTrans, MagmaNonUnit,
                                 kb, k,
-                                c_one ,dB(0,0), lddb,
+                                c_one, dB(0,0), lddb,
                                 dA(k,0), ldda);
                     
                     magma_zhemm(MagmaLeft, MagmaLower,
@@ -374,4 +374,3 @@ magma_zhegst(magma_int_t itype, char uplo, magma_int_t n,
 #undef B
 #undef dA
 #undef dB
-

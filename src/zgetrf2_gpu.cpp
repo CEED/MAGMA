@@ -34,7 +34,7 @@ magma_zgetrf2_gpu(magma_int_t m, magma_int_t n,
     triangular (upper trapezoidal if m < n).
 
     This is the right-looking Level 3 BLAS version of the algorithm.
-    This version assumes the computation runs through the NULL stream 
+    This version assumes the computation runs through the NULL stream
     and therefore is not overlapping computation with communication.
 
     Arguments
@@ -148,7 +148,7 @@ magma_zgetrf2_gpu(magma_int_t m, magma_int_t n,
             return *info;
         }
 
-        for( i=0; i<s; i++ ) {
+        for( i=0; i < s; i++ ) {
             // download i-th panel
             cols = maxm - i*nb;
             //magmablas_ztranspose( dAP, cols, dAT(i,i), lddat, nb, cols );
@@ -158,7 +158,7 @@ magma_zgetrf2_gpu(magma_int_t m, magma_int_t n,
             // make sure that gpu queue is empty
             magma_device_sync();
 
-            if ( i>0 ) {
+            if ( i > 0 ) {
                 magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
                              n - (i+1)*nb, nb,
                              c_one, dAT(i-1,i-1), lddat,

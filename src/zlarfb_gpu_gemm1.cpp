@@ -164,7 +164,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
     if ( side  == 'l' || side  == 'L' ) {
         // Form H C or H' C
         // Comments assume H C.
-        // When forming H' C, T gets transposed via transt for m>=n or by trans for m<n.
+        // When forming H' C, T gets transposed via transt for m >= n or by trans for m < n.
         
         // W = C' V
         magma_zgemm( MagmaConjTrans, notransV,
@@ -173,7 +173,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                              dV,    ldv,
                      c_zero, dwork, ldwork);
 
-        if(m<=n){
+        if (m <= n) {
             // W2 = V T
             magma_zgemm( notransV, trans,
                          m, k, k,
@@ -186,7 +186,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                          c_neg_one, dworkvt,  ldworkvt,
                                     dwork,    ldwork,
                          c_one,     dC,       ldc);
-        }else{
+        } else {
             // W2 = W T' = C' V T'
             magma_zgemm( MagmaNoTrans, transt,
                          n, k, k,
@@ -212,7 +212,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                      c_one,  dC,    ldc,
                              dV,    ldv,
                      c_zero, dwork, ldwork);
-        if(m<=n){
+        if (m <= n) {
             // W2 = W T = C V T
             magma_zgemm( MagmaNoTrans, trans,
                          m, k, k,
@@ -225,7 +225,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                          c_neg_one, dworkvt, ldworkvt,
                                     dV,    ldv,
                          c_one,     dC,    ldc);
-        }else{
+        } else {
             // W2 = T V'
             magma_zgemm( trans, transV,
                          k, n, k,
@@ -238,7 +238,6 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                          c_neg_one, dwork,   ldwork,
                                     dworkvt, ldworkvt,
                          c_one,     dC,      ldc);
-
         }
     }
 

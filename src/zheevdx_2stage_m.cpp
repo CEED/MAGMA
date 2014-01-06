@@ -294,21 +294,21 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
 
     /* Check if matrix is very small then just call LAPACK on CPU, no need for GPU */
     magma_int_t ntiles = n/nb;
-    if( ( ntiles < 2 ) || ( n <= 128 ) ){
+    if ( ( ntiles < 2 ) || ( n <= 128 ) ) {
         #ifdef ENABLE_DEBUG
         printf("--------------------------------------------------------------\n");
         printf("  warning matrix too small N=%d NB=%d, calling lapack on CPU  \n", (int) n, (int) nb);
         printf("--------------------------------------------------------------\n");
         #endif
-        lapackf77_zheevd(jobz_, uplo_, &n, 
-                         a, &lda, w, 
-                         work, &lwork, 
+        lapackf77_zheevd(jobz_, uplo_, &n,
+                         a, &lda, w,
+                         work, &lwork,
                          #if defined(PRECISION_z) || defined(PRECISION_c)
-                         rwork, &lrwork, 
-                         #endif  
-                         iwork, &liwork, 
+                         rwork, &lrwork,
+                         #endif
+                         iwork, &liwork,
                          info);
-        *m = n; 
+        *m = n;
         return *info;
     }
     
@@ -393,9 +393,9 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     timer_stop( time_dist );
 
     timer_start( time_band );
-    if(ver==30){
+    if (ver == 30) {
         magma_zhetrd_he2hb_mgpu_spec(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, da, ldda, dT1, nb, nrgpu, distblk, streams, nstream, threads, info);
-    }else{
+    } else {
         magma_zhetrd_he2hb_mgpu(uplo, n, nb, a, lda, &work[indtau1], &work[indwrk], llwork, da, ldda, dT1, nb, nrgpu, distblk, streams, nstream, threads, info);
     }
     timer_stop( time_band );
@@ -422,14 +422,12 @@ magma_zheevdx_2stage_m(magma_int_t nrgpu, char jobz, char range, char uplo,
     magmaDoubleComplex* A2 = &work[indwrk];
     memset(A2, 0, n*lda2*sizeof(magmaDoubleComplex));
 
-    for (magma_int_t j = 0; j < n-nb; j++)
-    {
+    for (magma_int_t j = 0; j < n-nb; j++) {
         cblas_zcopy(nb+1, &a[j*(lda+1)], 1, &A2[j*lda2], 1);
         memset(&a[j*(lda+1)], 0, (nb+1)*sizeof(magmaDoubleComplex));
         a[nb + j*(lda+1)] = c_one;
     }
-    for (magma_int_t j = 0; j < nb; j++)
-    {
+    for (magma_int_t j = 0; j < nb; j++) {
         cblas_zcopy(nb-j, &a[(j+n-nb)*(lda+1)], 1, &A2[(j+n-nb)*lda2], 1);
         memset(&a[(j+n-nb)*(lda+1)], 0, (nb-j)*sizeof(magmaDoubleComplex));
     }

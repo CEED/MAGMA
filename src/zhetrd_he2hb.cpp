@@ -151,7 +151,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
    
     magmaDoubleComplex c_neg_one  = MAGMA_Z_NEG_ONE;
     magmaDoubleComplex c_neg_half = MAGMA_Z_NEG_HALF;
-    magmaDoubleComplex c_one  = MAGMA_Z_ONE ;
+    magmaDoubleComplex c_one  = MAGMA_Z_ONE;
     magmaDoubleComplex c_zero = MAGMA_Z_ZERO;
     double  d_one = MAGMA_D_ONE;
 
@@ -229,10 +229,9 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
     if (upper) {
         printf("ZHETRD_HE2HB is not yet implemented for upper matrix storage. Exit.\n");
         exit(1);
-
-    }else {
+    } else {
         /* Copy the matrix to the GPU */
-        if (1 <= n-nb){
+        if (1 <= n-nb) {
             trace_gpu_start( 0, 0, "set", "set A" );
             magma_zsetmatrix_async( (n-nb), (n-nb),
                                     a_ref(nb+1, nb+1),  lda,
@@ -241,8 +240,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
         }
 
         /* Reduce the lower triangle of A */
-        for (i = 1; i <= n-nb; i += nb)
-        {
+        for (i = 1; i <= n-nb; i += nb) {
              indi = i+nb;
              indj = i;
              pm   = n - i - nb + 1;
@@ -250,7 +248,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
              pn   = nb;
              
              /*   Get the current panel (no need for the 1st iteration) */
-             if (i > 1 ){
+             if (i > 1 ) {
                  // zpanel_to_q copy the upper oof diagonal part of
                  // the matrix to work to be restored later. acctually
                  //  the zero's and one's putted are not used this is only
@@ -270,7 +268,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
                  trace_gpu_start( 0, 2, "her2k", "her2k" );
                  magma_zher2k(MagmaLower, MagmaNoTrans, pm_old-pn_old, pn_old, c_neg_one,
                       da_ref(indi_old+pn_old, indj_old), ldda,
-                      dW + pn_old           , pm_old, d_one,
+                      dW + pn_old,            pm_old, d_one,
                       da_ref(indi_old+pn_old, indi_old+pn_old), ldda);
                  trace_gpu_end( 0, 2 );
 
@@ -368,19 +366,19 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
                 Update the unreduced submatrix A(i+ib:n,i+ib:n), using
                 an update of the form:  A := A - V*W' - W*V'
                 ==========================================================  */
-             if (i + nb <= n-nb){
+             if (i + nb <= n-nb) {
                  /* There would be next iteration;
                     do lookahead - update the next panel */
                  trace_gpu_start( 0, 2, "gemm", "gemm 4 next panel left" );
                  magma_zgemm(MagmaNoTrans, MagmaConjTrans, pm, pn, pn, c_neg_one,
                              da_ref(indi, indj), ldda,
-                             dW                , pm, c_one,
+                             dW,                 pm, c_one,
                              da_ref(indi, indi), ldda);
                  trace_gpu_end( 0, 2 );
              
                  trace_gpu_start( 0, 2, "gemm", "gemm 5 next panel right" );
                  magma_zgemm(MagmaNoTrans, MagmaConjTrans, pm, pn, pn, c_neg_one,
-                             dW                , pm,
+                             dW,                 pm,
                              da_ref(indi, indj), ldda, c_one,
                              da_ref(indi, indi), ldda);
                  trace_gpu_end( 0, 2 );
@@ -391,7 +389,7 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
                  trace_gpu_start( 0, 2, "her2k", "her2k last iteration" );
                  magma_zher2k(MagmaLower, MagmaNoTrans, pk, pk, c_neg_one,
                               da_ref(indi, indj), ldda,
-                              dW                , pm, d_one,
+                              dW,                 pm, d_one,
                               da_ref(indi, indi), ldda);
                  trace_gpu_end( 0, 2 );
              }
@@ -400,11 +398,11 @@ magma_zhetrd_he2hb( char uplo, magma_int_t n, magma_int_t nb,
              indj_old = indj;
              pm_old   = pm;
              pn_old   = pn;
-        }  // end loop for(i)
+        }  // end loop for (i)
 
         /* Send the last block to the CPU */
         pk = min(pm,pn);
-        if (1 <= n-nb){
+        if (1 <= n-nb) {
             zpanel_to_q(MagmaUpper, pk-1, a_ref(n-pk+1, n-pk+2), lda, work);
             trace_gpu_start( 0, 2, "get", "get last block" );
             magma_zgetmatrix( pk, pk,

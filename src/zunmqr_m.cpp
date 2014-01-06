@@ -127,8 +127,8 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
     char trans_[2] = {trans, 0};
 
     magma_int_t nb = 128;
-    magmaDoubleComplex *t ;
-    magma_zmalloc_pinned (&t, nb*nb);
+    magmaDoubleComplex *t;
+    magma_zmalloc_pinned(&t, nb*nb);
     //printf("calling zunmqr_m with nb=%d\n", (int) nb);
 
     magmaDoubleComplex* dw[MagmaMaxGPUs];
@@ -143,7 +143,7 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
 
     *info = 0;
 
-    magma_int_t left = lapackf77_lsame(side_, "L");
+    magma_int_t left   = lapackf77_lsame(side_, "L");
     magma_int_t notran = lapackf77_lsame(trans_, "N");
     magma_int_t lquery = (lwork == -1);
 
@@ -177,8 +177,7 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
     }
 
     magma_int_t lwkopt = max(1,nw) * nb;
-    if (*info == 0)
-    {
+    if (*info == 0) {
         work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
     }
 
@@ -196,8 +195,7 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
         return *info;
     }
 
-    if (nb >= k)
-    {
+    if (nb >= k) {
         /* Use CPU code */
         lapackf77_zunmqr(side_, trans_, &m, &n, &k, a, &lda, tau,
                          c, &ldc, work, &lwork, info);
@@ -218,13 +216,12 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
     nrgpu = min(nrgpu, (n+nb_l-1)/nb_l); // Don't use GPU that will not have data.
 
     magma_int_t ldw = maxnlocal*lddc // dC
-    + 2*lddac*lddar // 2*dA
-    + 2*(nb + 1 + lddwork)*nb; // 2*(dT and dwork)
+                    + 2*lddac*lddar // 2*dA
+                    + 2*(nb + 1 + lddwork)*nb; // 2*(dT and dwork)
 
-    for (igpu = 0; igpu < nrgpu; ++igpu){
+    for (igpu = 0; igpu < nrgpu; ++igpu) {
         magma_setdevice(igpu);
-        if (MAGMA_SUCCESS != magma_zmalloc( &dw[igpu], ldw)) {
-
+        if (MAGMA_SUCCESS != magma_zmalloc( &dw[igpu], ldw )) {
             magma_xerbla( __func__, -(*info) );
             *info = MAGMA_ERR_DEVICE_ALLOC;
 
@@ -238,9 +235,8 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
 
     /* Use hybrid CPU-MGPU code */
     if (left) {
-
         //copy C to mgpus
-        for (magma_int_t i = 0; i < nbl; ++i){
+        for (magma_int_t i = 0; i < nbl; ++i) {
             magma_int_t igpu = i%nrgpu;
             magma_setdevice(igpu);
             magma_int_t kb = min(nb_l, n-i*nb_l);
@@ -263,11 +259,10 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
 
         ind_c = 0;
 
-        for (magma_int_t i = i1; (i3 < 0 ? i >= i2 : i < i2); i += i3)
-        {
+        for (magma_int_t i = i1; (i3 < 0 ? i >= i2 : i < i2); i += i3) {
             // start the copy of A panel
             magma_int_t kb = min(nb, k - i);
-            for (igpu = 0; igpu < nrgpu; ++igpu){
+            for (igpu = 0; igpu < nrgpu; ++igpu) {
                 magma_setdevice(igpu);
                 magma_event_sync(event[igpu][ind_c]); // check if the new data can be copied
                 magma_zsetmatrix_async(nq-i, kb,
@@ -286,14 +281,14 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
             /* H or H' is applied to C(1:m,i:n) */
 
             /* Apply H or H'; First copy T to the GPU */
-            for (igpu = 0; igpu < nrgpu; ++igpu){
+            for (igpu = 0; igpu < nrgpu; ++igpu) {
                 magma_setdevice(igpu);
                 magma_zsetmatrix_async(kb, kb,
                                        t,               kb,
                                        dt(igpu, ind_c), kb, stream[igpu][0] );
             }
 
-            for (igpu = 0; igpu < nrgpu; ++igpu){
+            for (igpu = 0; igpu < nrgpu; ++igpu) {
                 magma_setdevice(igpu);
                 magma_queue_sync( stream[igpu][0] ); // check if the data was copied
                 magmablasSetKernelStream(stream[igpu][1]);
@@ -308,13 +303,13 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
             ind_c = (ind_c+1)%2;
         }
 
-        for (igpu = 0; igpu < nrgpu; ++igpu){
+        for (igpu = 0; igpu < nrgpu; ++igpu) {
             magma_setdevice(igpu);
             magma_queue_sync( stream[igpu][1] );
         }
 
         //copy C from mgpus
-        for (magma_int_t i = 0; i < nbl; ++i){
+        for (magma_int_t i = 0; i < nbl; ++i) {
             magma_int_t igpu = i%nrgpu;
             magma_setdevice(igpu);
             magma_int_t kb = min(nb_l, n-i*nb_l);
@@ -325,60 +320,57 @@ magma_zunmqr_m(magma_int_t nrgpu, char side, char trans,
 //                                   dC(igpu, 0, i/nrgpu*nb_l), lddc,
 //                                   C(0, i*nb_l), ldc, stream[igpu][0] );
         }
-
     } else {
-
         fprintf(stderr, "The case (side == right) is not implemented\n");
         magma_xerbla( __func__, 1 );
         return *info;
         /*
-         if ( notran ) {
-         i1 = 0;
-         i2 = k;
-         i3 = nb;
-         } else {
-         i1 = (k - 1) / nb * nb;
-         i2 = 0;
-         i3 = -nb;
-         }
+        if ( notran ) {
+            i1 = 0;
+            i2 = k;
+            i3 = nb;
+        } else {
+            i1 = (k - 1) / nb * nb;
+            i2 = 0;
+            i3 = -nb;
+        }
 
-         mi = m;
-         ic = 0;
+        mi = m;
+        ic = 0;
 
-         for (i = i1; (i3 < 0 ? i >= i2 : i < i2); i += i3)
-         {
-         ib = min(nb, k - i);
-
-         // Form the triangular factor of the block reflector
-         // H = H(i) H(i+1) . . . H(i+ib-1)
-         i__4 = nq - i;
-         lapackf77_zlarft("F", "C", &i__4, &ib, A(i, i), &lda,
-         &tau[i], t, &ib);
-
-         // 1) copy the panel from A to the GPU, and
-         // 2) Put 0s in the upper triangular part of dA;
-         magma_zsetmatrix( i__4, ib, A(i, i), lda, dA(i, 0), ldda );
-         magmablas_zsetdiag1subdiag0('L', ib, ib, dA(i, 0), ldda);
-
-
-         // H or H' is applied to C(1:m,i:n)
-         ni = n - i;
-         jc = i;
-
-         // Apply H or H'; First copy T to the GPU
-         magma_zsetmatrix( ib, ib, t, ib, dt, ib );
-         magma_zlarfb_gpu( side, trans, MagmaForward, MagmaColumnwise,
-         mi, ni, ib,
-         dA(i, 0), ldda, dt, ib,
-         dC(ic, jc), lddc,
-         dwork, lddwork);
-         }
-         */
+        for (i = i1; (i3 < 0 ? i >= i2 : i < i2); i += i3) {
+            ib = min(nb, k - i);
+            
+            // Form the triangular factor of the block reflector
+            // H = H(i) H(i+1) . . . H(i+ib-1)
+            i__4 = nq - i;
+            lapackf77_zlarft("F", "C", &i__4, &ib, A(i, i), &lda,
+            &tau[i], t, &ib);
+            
+            // 1) copy the panel from A to the GPU, and
+            // 2) Put 0s in the upper triangular part of dA;
+            magma_zsetmatrix( i__4, ib, A(i, i), lda, dA(i, 0), ldda );
+            magmablas_zsetdiag1subdiag0('L', ib, ib, dA(i, 0), ldda);
+            
+            
+            // H or H' is applied to C(1:m,i:n)
+            ni = n - i;
+            jc = i;
+            
+            // Apply H or H'; First copy T to the GPU
+            magma_zsetmatrix( ib, ib, t, ib, dt, ib );
+            magma_zlarfb_gpu( side, trans, MagmaForward, MagmaColumnwise,
+            mi, ni, ib,
+            dA(i, 0), ldda, dt, ib,
+            dC(ic, jc), lddc,
+            dwork, lddwork);
+        }
+        */
     }
 
     work[0] = MAGMA_Z_MAKE( lwkopt, 0 );
 
-    for (igpu = 0; igpu < nrgpu; ++igpu){
+    for (igpu = 0; igpu < nrgpu; ++igpu) {
         magma_setdevice(igpu);
         magmablasSetKernelStream(NULL);
         magma_event_destroy( event[igpu][0] );

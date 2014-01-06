@@ -99,8 +99,7 @@ magma_zgetf2_nopiv(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *a,
     for (j = 1; j <= i__1; ++j) {
         /* Test for singularity. */
         i__2 = j + j * a_dim1;
-        if (!MAGMA_Z_EQUAL(a[i__2], c_zero)) {
-
+        if ( ! MAGMA_Z_EQUAL(a[i__2], c_zero)) {
             /* Compute elements J+1:M of J-th column. */
             if (j < *m) {
                 if (MAGMA_Z_ABS(a[j + j * a_dim1]) >= sfmin) {

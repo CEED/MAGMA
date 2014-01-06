@@ -84,9 +84,9 @@ magma_zpotrf_mgpu(magma_int_t num_gpus, char uplo, magma_int_t n,
         *info = -2;
     } else if (!upper) {
         lddp = nb*(n/(nb*num_gpus));
-        if( n%(nb*num_gpus) != 0 ) lddp+=min(nb,n-num_gpus*lddp);
-        if( ldda < lddp ) *info = -4;
-    } else if( ldda < n ) {
+        if ( n%(nb*num_gpus) != 0 ) lddp += min(nb,n-num_gpus*lddp);
+        if ( ldda < lddp ) *info = -4;
+    } else if ( ldda < n ) {
         *info = -4;
     }
     if (*info != 0) {
@@ -108,19 +108,19 @@ magma_zpotrf_mgpu(magma_int_t num_gpus, char uplo, magma_int_t n,
     }
     else {
         lddp = nb*((n+nb-1)/nb);
-        for( d=0; d<num_gpus; d++ ) {
+        for( d=0; d < num_gpus; d++ ) {
             magma_setdevice(d);
             if (MAGMA_SUCCESS != magma_zmalloc( &dwork[d], num_gpus*nb*lddp )) {
-                for( j=0; j<d; j++ ) {
+                for( j=0; j < d; j++ ) {
                     magma_setdevice(j);
                     magma_free( dwork[j] );
                 }
                 *info = MAGMA_ERR_DEVICE_ALLOC;
                 return *info;
             }
-            for( j=0; j<3; j++ )
+            for( j=0; j < 3; j++ )
                 magma_queue_create( &stream[d][j] );
-            for( j=0; j<5; j++ )
+            for( j=0; j < 5; j++ )
                 magma_event_create( &event[d][j]  );
         }
         magma_setdevice(0);
@@ -146,15 +146,15 @@ magma_zpotrf_mgpu(magma_int_t num_gpus, char uplo, magma_int_t n,
         }
 
         /* clean up */
-        for( d=0; d<num_gpus; d++ ) {
+        for( d=0; d < num_gpus; d++ ) {
             magma_setdevice(d);
-            for( j=0; j<3; j++ ) {
+            for( j=0; j < 3; j++ ) {
                 magma_queue_sync( stream[d][j] );
                 magma_queue_destroy( stream[d][j] );
             }
             magmablasSetKernelStream(NULL);
             
-            for( j=0; j<5; j++ )
+            for( j=0; j < 5; j++ )
                 magma_event_destroy( event[d][j] );
             
             magma_free( dwork[d] );

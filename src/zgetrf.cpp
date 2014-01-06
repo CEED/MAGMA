@@ -37,7 +37,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
 
     This is the right-looking Level 3 BLAS version of the algorithm.
     If the current stream is NULL, this version replaces it with user defined
-    stream to overlap computation with communication. 
+    stream to overlap computation with communication.
 
     Arguments
     =========
@@ -128,14 +128,15 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
         int h = 1+(2+num_gpus), num_gpus2 = num_gpus;
         int NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
         char * ngr_nb_char = getenv("MAGMA_NGR_NB");
-        if( ngr_nb_char != NULL ) NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
+        if ( ngr_nb_char != NULL )
+            NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
 
-        if( num_gpus > ceil((double)NB/nb) ) {
+        if ( num_gpus > ceil((double)NB/nb) ) {
             num_gpus2 = (int)ceil((double)NB/nb);
             h = 1+(2+num_gpus2);
             NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
-        } 
-        if( num_gpus2*NB < n ) {
+        }
+        if ( num_gpus2*NB < n ) {
             /* require too much memory, so call non-GPU-resident version */
             magma_zgetrf_m(num_gpus, m, n, a, lda, ipiv, info);
             return *info;
@@ -193,19 +194,18 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
         else
             stream[1] = current_stream;
 
-        for( i = 0; i < s; i++ )
-        {
+        for( i = 0; i < s; i++ ) {
             // download i-th panel
             cols = maxm - i*nb;
             
-            if (i>0){
-                // download i-th panel 
+            if (i > 0) {
+                // download i-th panel
                 magmablas_ztranspose( dA, cols, dAT(i,i), ldda, nb, cols );
 
                 // make sure that gpu queue is empty
                 magma_device_sync();
 
-                magma_zgetmatrix_async( m-i*nb, nb, dA, cols, work, lda, 
+                magma_zgetmatrix_async( m-i*nb, nb, dA, cols, work, lda,
                                         stream[0]);
                 
                 magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
@@ -236,7 +236,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
             magmablas_ztranspose( dAT(i,i), ldda, dA, cols, cols, nb);
 
             // do the small non-parallel computations
-            if (s > (i+1)){
+            if (s > (i+1)) {
                 magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
                              nb, nb,
                              c_one, dAT(i, i  ), ldda,
@@ -247,7 +247,7 @@ magma_zgetrf(magma_int_t m, magma_int_t n, magmaDoubleComplex *a, magma_int_t ld
                                         dAT(i+1, i  ), ldda,
                              c_one,     dAT(i+1, i+1), ldda );
             }
-            else{
+            else {
                 magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
                              n-s*nb, nb,
                              c_one, dAT(i, i  ), ldda,

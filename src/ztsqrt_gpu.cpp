@@ -161,7 +161,7 @@ magma_ztsqrt_gpu(int *m, int *n,
                                 d_ref(i), ib,
                                 work_a1,  ldwork, stream[1] );
         
-        if (i>0) {
+        if (i > 0) {
             /* Apply H' to A(i:m,i+2*ib:n) from the left */
             // update T2
             cols = *n-old_i-2*old_ib;
@@ -190,7 +190,7 @@ magma_ztsqrt_gpu(int *m, int *n,
             // Send the triangular factor T from hwork to the GPU in t_ref(i)
             magma_zsetmatrix( ib, ib, hwork, ib, t_ref(i), lddwork );
             
-            if (i+nb < k){
+            if (i+nb < k) {
                 /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
                 // if we can do one more step, first update T1
                 magma_zssrfb(*m, ib, &ib,

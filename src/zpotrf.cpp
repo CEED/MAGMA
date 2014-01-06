@@ -114,7 +114,7 @@ magma_zpotrf(char uplo, magma_int_t n,
         return *info;
 
     magma_int_t num_gpus = magma_num_gpus();
-    if( num_gpus > 1 ) {
+    if ( num_gpus > 1 ) {
         /* call multiple-GPU interface  */
         return magma_zpotrf_m(num_gpus, uplo, n, a, lda, info);
     }
@@ -148,7 +148,7 @@ magma_zpotrf(char uplo, magma_int_t n,
         /* Use hybrid blocked code. */
         if (upper) {
             /* Compute the Cholesky factorization A = U'*U. */
-            for (j=0; j<n; j += nb) {
+            for (j=0; j < n; j += nb) {
                 /* Update and factorize the current diagonal block and test
                    for non-positive-definiteness. Computing MIN */
                 jb = min(nb, (n-j));
@@ -197,7 +197,7 @@ magma_zpotrf(char uplo, magma_int_t n,
         else {
             //=========================================================
             // Compute the Cholesky factorization A = L*L'.
-            for (j=0; j<n; j+=nb) {
+            for (j=0; j < n; j += nb) {
                 //  Update and factorize the current diagonal block and test
                 //  for non-positive-definiteness. Computing MIN
                 jb = min(nb, (n-j));
@@ -226,10 +226,10 @@ magma_zpotrf(char uplo, magma_int_t n,
 
                 magma_queue_sync( stream[0] );
                 lapackf77_zpotrf(MagmaLowerStr, &jb, A(j, j), &lda, info);
-                if (*info != 0){
+                if (*info != 0) {
                     *info = *info + j;
                     break;
-                } 
+                }
                 magma_zsetmatrix_async( jb, jb,
                                         A(j, j),  lda,
                                         dA(j, j), ldda, stream[0] );
@@ -256,4 +256,3 @@ magma_zpotrf(char uplo, magma_int_t n,
     
     return *info;
 } /* magma_zpotrf */
-

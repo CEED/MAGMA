@@ -28,9 +28,9 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
     ZGEQRF computes a QR factorization of a complex M-by-N matrix A:
     A = Q * R.
     
-    This version has LAPACK-complaint arguments. 
+    This version has LAPACK-complaint arguments.
     If the current stream is NULL, this version replaces it with user defined
-    stream to overlap computation with communication.    
+    stream to overlap computation with communication.
 
     Other versions (magma_zgeqrf_gpu and magma_zgeqrf3_gpu) store the
     intermediate T matrices.
@@ -154,7 +154,7 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
             magma_zgetmatrix_async( rows, ib,
                                     dA(i,i),       ldda,
                                     work_ref(i), ldwork, stream[0] );
-            if (i>0){
+            if (i > 0) {
                 /* Apply H' to A(i:m,i+2*ib:n) from the left */
                 magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,
                                   m-old_i, n-old_i-2*old_ib, old_ib,
@@ -185,7 +185,6 @@ magma_zgeqrf2_gpu( magma_int_t m, magma_int_t n,
             magma_queue_sync( stream[0] );
 
             if (i + ib < n) {
-
                 if (i+nb < k-nx) {
                     /* Apply H' to A(i:m,i+ib:i+2*ib) from the left */
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaForward, MagmaColumnwise,

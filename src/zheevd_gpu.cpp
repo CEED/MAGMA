@@ -249,7 +249,7 @@ magma_zheevd_gpu(char jobz, char uplo,
         magma_zgetmatrix(n, n, da, ldda, a, n);
         lapackf77_zheevd(jobz_, uplo_,
                          &n, a, &n,
-                         w, work, &lwork, 
+                         w, work, &lwork,
                          rwork, &lrwork,
                          iwork, &liwork, info);
         magma_zsetmatrix( n, n, a, n, da, ldda);

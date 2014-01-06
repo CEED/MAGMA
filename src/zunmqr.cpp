@@ -227,7 +227,7 @@ magma_zunmqr(const char side, const char trans,
             ic = 0;
         }
         
-        for( i=i1; (step<0 ? i>=i2 : i<i2); i += step ) {
+        for( i=i1; (step < 0 ? i >= i2 : i < i2); i += step ) {
             ib = min(nb, k - i);
 
             /* Form the triangular factor of the block reflector

@@ -124,17 +124,17 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
     h = 1+(2+num_gpus0);
     NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
     char * ngr_nb_char = getenv("MAGMA_NGR_NB");
-    if( ngr_nb_char != NULL ) NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
+    if ( ngr_nb_char != NULL ) NB = max( nb, min( NB, atoi(ngr_nb_char) ) );
     //NB = 5*max(nb,32);
 
-    if( num_gpus0 > ceil((double)NB/nb) ) {
+    if ( num_gpus0 > ceil((double)NB/nb) ) {
         num_gpus = (int)ceil((double)NB/nb);
         h = 1+(2+num_gpus);
         NB = (magma_int_t)(0.8*freeMem/maxm-h*nb);
     } else {
         num_gpus = num_gpus0;
     }
-    if( num_gpus*NB >= n ) {
+    if ( num_gpus*NB >= n ) {
         #ifdef CHECK_ZGETRF_OOC
         printf( "      * still fit in GPU memory.\n" );
         #endif
@@ -148,7 +148,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
     }
 
     #ifdef CHECK_ZGETRF_OOC
-    if( NB != n ) printf( "      * running in out-core mode (n=%d, NB=%d, nb=%d, freeMem=%.2e).\n", n, NB, nb, (double)freeMem );
+    if ( NB != n ) printf( "      * running in out-core mode (n=%d, NB=%d, nb=%d, freeMem=%.2e).\n", n, NB, nb, (double)freeMem );
     else          printf( "      * running in in-core mode  (n=%d, NB=%d, nb=%d, freeMem=%.2e).\n", n, NB, nb, (double)freeMem );
     #endif
 
@@ -161,7 +161,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
     /* allocate memory on GPU to store the big panel */
     timer_start( time_alloc );
     n_local[0] = (NB/nb)/num_gpus;
-    if( NB%(nb*num_gpus) != 0 ) n_local[0] ++;
+    if ( NB%(nb*num_gpus) != 0 ) n_local[0] ++;
     n_local[0] *= nb;
     ldn_local = ((n_local[0]+31)/32)*32;
 
@@ -187,7 +187,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
         s = min( max(m-I,0), N )/nb; /* number of small block-columns in this big panel */
 
         maxm = ((M + 31)/32)*32;
-        if( num_gpus0 > ceil((double)N/nb) ) {
+        if ( num_gpus0 > ceil((double)N/nb) ) {
             num_gpus = (int)ceil((double)N/nb);
         } else {
             num_gpus = num_gpus0;
@@ -217,8 +217,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
         timer_start( time );
         /* == --------------------------------------------------------------- == */
         /* == loop around the previous big-panels to update the new big-panel == */
-        for( offset = 0; offset < min(m,I); offset += NB )
-        {
+        for( offset = 0; offset < min(m,I); offset += NB ) {
             NBk = min( m-offset, NB );
             /* start sending the first tile from the previous big-panels to gpus */
             for( d=0; d < num_gpus; d++ ) {
@@ -245,8 +244,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
             }
             
             /* == going through each block-column of previous big-panels == */
-            for( jj=0, ib=offset/nb; jj < NBk; jj += nb, ib++ )
-            {
+            for( jj=0, ib=offset/nb; jj < NBk; jj += nb, ib++ ) {
                 ii   = offset+jj;
                 rows = maxm - ii;
                 nbi  = min( nb, NBk-jj );
@@ -257,7 +255,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
                     magma_queue_sync( stream[d][0] );
                     
                     /* start sending next column */
-                    if( jj+nb < NBk ) {
+                    if ( jj+nb < NBk ) {
                         magma_zsetmatrix_async( (M-ii-nb), min(nb,NBk-jj-nb),
                                                 A(ii+nb,ii+nb), lda,
                                                 dA[d],          (rows-nb), stream[d][0] );
@@ -275,7 +273,7 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
                     magmablasSetKernelStream(stream[d][1]);
                     magma_ztrsm( MagmaRight, MagmaUpper, MagmaNoTrans, MagmaUnit,
                                  n_local[d], nbi, c_one, inPT(d,0,(jj/nb)%2), nb, inAT(d,ib,0), ldn_local );
-                    if( M > ii+nb ) {
+                    if ( M > ii+nb ) {
                         magma_zgemm( MagmaNoTrans, MagmaNoTrans,
                             n_local[d], M-(ii+nb), nbi, c_neg_one, inAT(d,ib,0), ldn_local,
                             inPT(d,1,(jj/nb)%2), nb, c_one, inAT(d,ib+1,0), ldn_local );
@@ -293,15 +291,15 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
         }
 
         /* calling magma-gpu interface to panel-factorize the big panel */
-        if( M > I ) {
+        if ( M > I ) {
             //magma_zgetrf1_mgpu(num_gpus, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, &a[I*lda], lda,
             //                   (magma_queue_t **)stream, &iinfo);
             magma_zgetrf2_mgpu(num_gpus, M-I, N, nb, I, dAT, ldn_local, ipiv+I, dA, A(0,I), lda,
                                stream, &iinfo);
-            if( iinfo < 0 ) {
+            if ( iinfo < 0 ) {
                 *info = iinfo;
                 break;
-            } else if( iinfo != 0 ) {
+            } else if ( iinfo != 0 ) {
                 *info = iinfo + I * NB;
                 //break;
             }
@@ -346,13 +344,13 @@ magma_zgetrf_m(magma_int_t num_gpus0, magma_int_t m, magma_int_t n, magmaDoubleC
     magma_setdevice(0);
     
     }
-    if( *info >= 0 ) magma_zgetrf_piv(m, n, NB, a, lda, ipiv, info);
+    if ( *info >= 0 ) magma_zgetrf_piv(m, n, NB, a, lda, ipiv, info);
     return *info;
 } /* magma_zgetrf_m */
 
 
 extern "C" magma_int_t
-magma_zgetrf_piv(magma_int_t m, magma_int_t n, magma_int_t NB, 
+magma_zgetrf_piv(magma_int_t m, magma_int_t n, magma_int_t NB,
                  magmaDoubleComplex *a, magma_int_t lda, magma_int_t *ipiv, magma_int_t *info)
 {
     magma_int_t I, k1, k2, incx, minmn;
@@ -425,4 +423,3 @@ magma_zgetrf2_piv(magma_int_t m, magma_int_t n, magma_int_t start, magma_int_t e
 #undef inAT
 #undef inPT
 #undef A
-

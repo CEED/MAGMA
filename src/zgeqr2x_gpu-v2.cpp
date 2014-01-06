@@ -119,7 +119,7 @@ magma_zgeqr2x2_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
     for (i = 0; i < k; ++i) {
         /*   1. Apply H' to A(:,i) from the left
              2. Adjust the dnorm[i] to hold the norm of A(i:m,i) */
-        if (i>0) {
+        if (i > 0) {
             magma_zlarfbx_gpu(*m, i, da_ref(0, 0), *ldda,
                               dT, k, da_ref(0, i), work);
             magmablas_dznrm2_adjust(i, dnorm+i, da_ref(0, i));

@@ -64,7 +64,7 @@ magma_zssssm_gpu(char storev, magma_int_t m1, magma_int_t n1,
     LDDA1   (input) INTEGER
             The leading dimension of the array dA1.  LDDA1 >= max(1,M1).
 
-    dA2     (input,output) COMPLEX_16 array, dimension(LDDA2, N) , on gpu.
+    dA2     (input,output) COMPLEX_16 array, dimension(LDDA2, N), on gpu.
             On entry, the M2-by-N2 tile dA2.
             On exit, dA2 is updated by the application of dL (dL1 dL2).
 
@@ -157,8 +157,7 @@ magma_zssssm_gpu(char storev, magma_int_t m1, magma_int_t n1,
     }
 
     ip = 0;
-    for( ii=0; ii<k; ii+=ib )
-    {
+    for( ii=0; ii < k; ii += ib ) {
         sb = min( k-ii, ib);
 
 #ifndef NOSWAPBLK
@@ -169,13 +168,13 @@ magma_zssssm_gpu(char storev, magma_int_t m1, magma_int_t n1,
 #else
         {
             int im;
-            for(i=0; i<ib; i++) {
+            for (i=0; i < ib; i++) {
                 im = IPIV[ip]-1;
 
                 if (im != (ii+i)) {
                     im = im - m1;
 
-                    assert( (im>=0) && (im<m1) && (im<m2) );
+                    assert( (im >= 0) && (im < m1) && (im < m2) );
                     magmablas_zswap( n1, A1T(ii+i, 0), 1, A2T(im, 0), 1 );
                 }
                 ip++;

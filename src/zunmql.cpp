@@ -260,7 +260,7 @@ magma_zunmql(const char side, const char trans,
     magma_free( dc );
     magma_free( dwork );
 
-    magma_free_pinned( T);  
+    magma_free_pinned( T);
 
     return *info;
 } /* magma_zunmql */

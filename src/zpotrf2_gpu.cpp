@@ -119,12 +119,11 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
         magma_zsetmatrix( n, n, work, n, dA, ldda );
     }
     else {
-
         /* Use blocked code. */
         if (upper) {
             
             /* Compute the Cholesky factorization A = U'*U. */
-            for (j=0; j<n; j+=nb) {
+            for (j=0; j < n; j += nb) {
                 
                 /* Update and factorize the current diagonal block and test
                    for non-positive-definiteness. Computing MIN */
@@ -169,8 +168,7 @@ magma_zpotrf_gpu(char uplo, magma_int_t n,
         else {
             //=========================================================
             // Compute the Cholesky factorization A = L*L'.
-            for (j=0; j<n; j+=nb) {
-
+            for (j=0; j < n; j += nb) {
                 //  Update and factorize the current diagonal block and test
                 //  for non-positive-definiteness. Computing MIN
                 jb = min(nb, (n-j));

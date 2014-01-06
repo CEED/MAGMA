@@ -170,7 +170,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
     if ( side  == 'l' || side  == 'L' ) {
         // Form H C or H' C
         // Comments assume H C.
-        // When forming H' C, T gets transposed via transt for m>=n or by trans for m<n.
+        // When forming H' C, T gets transposed via transt for m >= n or by trans for m < n.
         
         // dwVT = V T
         magma_zgemm( notransV, trans,

@@ -147,7 +147,7 @@ magma_zhegvr(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n,
             when it is determined to lie in an interval [a,b]
             of width less than or equal to
 
-                    ABSTOL + EPS *   max( |a|,|b| ) ,
+                    ABSTOL + EPS * max( |a|,|b| ),
 
             where EPS is the machine precision.  If ABSTOL is less than
             or equal to zero, then  EPS*|T|  will be used in its place,

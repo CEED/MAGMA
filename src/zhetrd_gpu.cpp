@@ -212,8 +212,7 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
          Columns 1:kk are handled by the unblocked method. */
         kk = n - (n - nx + nb - 1) / nb * nb;
         
-        for (i = n - nb; i >= kk; i -= nb)
-        {
+        for (i = n - nb; i >= kk; i -= nb) {
             /* Reduce columns i:i+nb-1 to tridiagonal form and form the
              matrix W which is needed to update the unreduced part of
              the matrix */
@@ -248,11 +247,9 @@ magma_zhetrd_gpu(char uplo, magma_int_t n,
         
         magma_zsetmatrix( kk, kk, A(0, 0), ldwa, dA(0, 0), ldda );
     }
-    else
-    {
+    else {
         /* Reduce the lower triangle of A */
-        for (i = 0; i < n-nx; i += nb)
-        {
+        for (i = 0; i < n-nx; i += nb) {
             /* Reduce columns i:i+nb-1 to tridiagonal form and form the
              matrix W which is needed to update the unreduced part of
              the matrix */

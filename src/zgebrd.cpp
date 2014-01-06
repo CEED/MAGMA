@@ -198,8 +198,7 @@ magma_zgebrd(magma_int_t m, magma_int_t n,
         magma_zsetmatrix( m, n, a, lda, da, ldda );
     }
     
-    for (i=0; i< (minmn - nx); i += nb) {
-
+    for (i=0; i < (minmn - nx); i += nb) {
         /*  Reduce rows and columns i:i+nb-1 to bidiagonal form and return
             the matrices X and Y which are needed to update the unreduced
             part of the matrix */

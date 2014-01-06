@@ -136,7 +136,7 @@ magma_zungqr_m(
         // last_dev    = 1
         // gpu 0: 2  blocks, cols:  0- 9, 30-39, 60-69
         // gpu 1: 1+ blocks, cols: 10-19, 40-49, 70-74 (partial)
-        // gpu 2: 1  block , cols: 20-29, 50-59
+        // gpu 2: 1  block,  cols: 20-29, 50-59
         magma_setdevice( d );
         nlocal[d] = min_lblocks*nb;
         if ( d < last_dev ) {

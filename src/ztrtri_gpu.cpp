@@ -99,7 +99,7 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
     /* cannot do here with matrix dA on GPU -- need kernel */
     /*
     if (nounit) {
-        for ( j=0; j<n; ++j ) {
+        for (j=0; j < n; ++j) {
             if ( MAGMA_Z_EQUAL( *dA(j,j), c_zero )) {
                 *info = j+1;  // Fortran index
                 return *info;
@@ -158,10 +158,10 @@ magma_ztrtri_gpu(char uplo, char diag, magma_int_t n,
             /* Compute inverse of lower triangular matrix */
             nn=((n-1)/nb)*nb+1;
 
-            for(j=nn-1; j>=0; j=j-nb) {
+            for (j=nn-1; j >= 0; j -= nb) {
                 jb=min(nb,(n-j));
 
-                if((j+jb) < n) {
+                if ((j+jb) < n) {
                     /* Compute rows j+jb:n of current block column */
                     magma_ztrmm( MagmaLeft, MagmaLower,
                                  MagmaNoTrans, MagmaNonUnit, (n-j-jb), jb,

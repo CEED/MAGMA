@@ -212,7 +212,7 @@ magma_zhetrd(char uplo, magma_int_t n,
                the matrix */
             
             /*   Get the current panel (no need for the 1st iteration) */
-            if (i!=n-nb)
+            if (i != n-nb)
                 magma_zgetmatrix( i+nb, nb, dA(0, i), ldda, A(0, i), lda );
             
             magma_zlatrd(uplo, i+nb, nb, A(0, 0), lda, e, tau,
@@ -241,7 +241,7 @@ magma_zhetrd(char uplo, magma_int_t n,
     }
     else {
         /* Copy the matrix to the GPU */
-        if (1<=n-nx)
+        if (1 <= n-nx)
             magma_zsetmatrix( n, n, A(0,0), lda, dA(0,0), ldda );
 
         #ifdef FAST_HEMV
@@ -259,7 +259,7 @@ magma_zhetrd(char uplo, magma_int_t n,
                the matrix */
 
             /*   Get the current panel (no need for the 1st iteration) */
-            if (i!=0)
+            if (i != 0)
                 magma_zgetmatrix( n-i, nb, dA(i, i), ldda, A(i, i), lda );
             #ifdef FAST_HEMV
             magma_zlatrd2(uplo, n-i, nb, A(i, i), lda, &e[i],
@@ -294,7 +294,7 @@ magma_zhetrd(char uplo, magma_int_t n,
         #endif
 
         /* Use unblocked code to reduce the last or only block */
-        if (1<=n-nx)
+        if (1 <= n-nx)
             magma_zgetmatrix( n-i, n-i, dA(i, i), ldda, A(i, i), lda );
         i_n = n-i;
         lapackf77_zhetrd(uplo_, &i_n, A(i, i), &lda, &d[i], &e[i],

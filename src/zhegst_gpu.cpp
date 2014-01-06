@@ -100,15 +100,15 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
     
     /* Test the input parameters. */
     *info = 0;
-    if (itype<1 || itype>3){
+    if (itype < 1 || itype > 3) {
         *info = -1;
-    }else if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
+    } else if ((! upper) && (! lapackf77_lsame(uplo_, "L"))) {
         *info = -2;
     } else if (n < 0) {
         *info = -3;
     } else if (ldda < max(1,n)) {
         *info = -5;
-    }else if (lddb < max(1,n)) {
+    } else if (lddb < max(1,n)) {
         *info = -7;
     }
     if (*info != 0) {
@@ -136,7 +136,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
     magma_queue_create( &stream[2] );
     
     /* Use hybrid blocked code */
-    if (itype==1) {
+    if (itype == 1) {
         if (upper) {
             kb = min(n,nb);
             
@@ -148,7 +148,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                                     dA(0, 0), ldda,
                                     A(0, 0),  nb, stream[1] );
             
-            for(k = 0; k<n; k+=nb){
+            for (k = 0; k < n; k += nb) {
                 kb = min(n-k,nb);
                 kb2= min(n-k-nb,nb);
                 
@@ -163,7 +163,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                                         A(0, 0),  lda,
                                         dA(k, k), ldda, stream[0] );
                 
-                if(k+kb<n){
+                if (k+kb < n) {
                     // Start copying the new B block
                     magma_zgetmatrix_async( kb2, kb2,
                                             dB(k+kb, k+kb), lddb,
@@ -200,7 +200,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                     
                     magma_ztrsm(MagmaRight, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
                                 kb, n-k-kb,
-                                c_one ,dB(k+kb,k+kb), lddb,
+                                c_one, dB(k+kb,k+kb), lddb,
                                 dA(k,k+kb), ldda);
                 }
             }
@@ -218,7 +218,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                                     dA(0, 0), ldda,
                                     A(0, 0),  nb, stream[1] );
             
-            for(k = 0; k<n; k+=nb){
+            for (k = 0; k < n; k += nb) {
                 kb= min(n-k,nb);
                 kb2= min(n-k-nb,nb);
                 
@@ -233,7 +233,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                                         A(0, 0),  lda,
                                         dA(k, k), ldda, stream[0] );
                 
-                if(k+kb<n){
+                if (k+kb < n) {
                     // Start copying the new B block
                     magma_zgetmatrix_async( kb2, kb2,
                                             dB(k+kb, k+kb), lddb,
@@ -281,7 +281,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
     else {
         if (upper) {
             /* Compute U*A*U' */
-            for(k = 0; k<n; k+=nb){
+            for (k = 0; k < n; k += nb) {
                 kb= min(n-k,nb);
                 
                 magma_zgetmatrix_async( kb, kb,
@@ -289,10 +289,10 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                                         B(0, 0),  nb, stream[2] );
                 
                 /* Update the upper triangle of A(1:k+kb-1,1:k+kb-1) */
-                if(k>0){
+                if (k > 0) {
                     magma_ztrmm(MagmaLeft, MagmaUpper, MagmaNoTrans, MagmaNonUnit,
                                 k, kb,
-                                c_one ,dB(0,0), lddb,
+                                c_one, dB(0,0), lddb,
                                 dA(0,k), ldda);
                     
                     magma_zhemm(MagmaRight, MagmaUpper,
@@ -308,7 +308,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                                         dA(k, k), ldda,
                                         A(0, 0),  lda, stream[0] );
                 
-                if(k>0){
+                if (k > 0) {
                     magma_zher2k(MagmaUpper, MagmaNoTrans,
                                  k, kb,
                                  c_one, dA(0,k), ldda,
@@ -341,7 +341,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
         }
         else {
             /* Compute L'*A*L */
-            for(k = 0; k<n; k+=nb){
+            for (k = 0; k < n; k += nb) {
                 kb= min(n-k,nb);
                 
                 magma_zgetmatrix_async( kb, kb,
@@ -349,10 +349,10 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                                         B(0, 0),  nb, stream[2] );
                 
                 /* Update the lower triangle of A(1:k+kb-1,1:k+kb-1) */
-                if(k>0){
+                if (k > 0) {
                     magma_ztrmm(MagmaRight, MagmaLower, MagmaNoTrans, MagmaNonUnit,
                                 kb, k,
-                                c_one ,dB(0,0), lddb,
+                                c_one, dB(0,0), lddb,
                                 dA(k,0), ldda);
                     
                     magma_zhemm(MagmaLeft, MagmaLower,
@@ -368,7 +368,7 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
                                         dA(k, k), ldda,
                                         A(0, 0),  lda, stream[0] );
                 
-                if(k>0){
+                if (k > 0) {
                     magma_zher2k(MagmaLower, MagmaConjTrans,
                                  k, kb,
                                  c_one, dA(k,0), ldda,
@@ -412,4 +412,3 @@ magma_zhegst_gpu(magma_int_t itype, char uplo, magma_int_t n,
 #undef B
 #undef dA
 #undef dB
-

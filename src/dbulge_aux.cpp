@@ -46,11 +46,11 @@ extern "C" void  magma_dstedc_withZ(char JOBZ, magma_int_t N, double *D, double 
     
     lapackf77_dstedc(&JOBZ, &N, D, E, Z, &LDZ, WORK,&LWORK,IWORK,&LIWORK,&INFO);
     
-    if (INFO!=0) {
+    if (INFO != 0) {
         printf("=================================================\n");
         printf("DSTEDC ERROR OCCURED. HERE IS INFO %d \n ", (int) INFO);
         printf("=================================================\n");
-        //assert(INFO==0);
+        //assert(INFO == 0);
     }
     
     magma_free_cpu( IWORK );
@@ -88,16 +88,16 @@ extern "C" void  magma_dstedx_withZ(magma_int_t N, magma_int_t NE, double *D, do
 
     char job = 'I';
     
-    if (NE==N)
+    if (NE == N)
         job = 'A';
     
     magma_dstedx('I', N, 0., 0., 1, NE, D, E, Z, LDZ, WORK,LWORK,IWORK,LIWORK,dwork,&INFO);
     
-    if (INFO!=0) {
+    if (INFO != 0) {
         printf("=================================================\n");
         printf("DSTEDC ERROR OCCURED. HERE IS INFO %d \n ", (int) INFO);
         printf("=================================================\n");
-        //assert(INFO==0);
+        //assert(INFO == 0);
     }
 
     timer_stop( time );

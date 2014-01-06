@@ -150,4 +150,3 @@ magma_zgels3_gpu( char trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
 }
 
 #undef a_ref
-

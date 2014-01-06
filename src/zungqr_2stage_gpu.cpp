@@ -10,7 +10,7 @@
 */
 #include "common_magma.h"
 
-extern "C" 
+extern "C"
 magma_int_t magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
                  magmaDoubleComplex *da, magma_int_t ldda,
                  magmaDoubleComplex *tau, magmaDoubleComplex *dT,
@@ -105,7 +105,7 @@ magma_int_t magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
     if (n <= 0)
         return *info;
 
-    if(MAGMA_SUCCESS != magma_zmalloc( &dwork, n*nb )) {
+    if (MAGMA_SUCCESS != magma_zmalloc( &dwork, n*nb )) {
         printf ("!!!! zungqr_2stage magma_alloc failed for: dwork\n" );
         exit(-1);
     }
@@ -164,7 +164,7 @@ magma_int_t magma_zungqr_2stage_gpu(magma_int_t m, magma_int_t n, magma_int_t k,
 
     if (kk > 0) {
         /* Use blocked code */
-        for (i = ki; i >= nb; i-=nb) {
+        for (i = ki; i >= nb; i -= nb) {
             ib = min(nb, k - i);
             /* Send current panel to the CPU for update */
             i__2 = m - i;

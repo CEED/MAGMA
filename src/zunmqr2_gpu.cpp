@@ -226,7 +226,7 @@ magma_zunmqr2_gpu(const char side, const char trans,
         magma_zsetmatrix( ib, ib, t, ib, dwork, ib );
         magma_zlarfb_gpu( side, trans, MagmaForward, MagmaColumnwise,
                           mi, ni, ib,
-                          da + (i - 1) + (i - 1)*ldda , ldda, dwork, ib,
+                          da + (i - 1) + (i - 1)*ldda, ldda, dwork, ib,
                           &dc[ic + jc*lddc], lddc,
                           dwork + ib*ib, lddwork);
     }
@@ -235,5 +235,3 @@ magma_zunmqr2_gpu(const char side, const char trans,
 
     return *info;
 } /* magma_zunmqr */
-
-

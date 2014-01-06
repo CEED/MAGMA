@@ -140,8 +140,8 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
     magma_int_t ldw;
     if ( side  == 'l' || side  == 'L' ) {
         ldw = k;
-    }else{
-        ldw = m; 
+    } else {
+        ldw = m;
     }
     // opposite of trans
     char transt;
@@ -171,7 +171,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
     if ( side  == 'l' || side  == 'L' ) {
         // Form H C or H' C
         // Comments assume H C.
-        // When forming H' C, T gets transposed via transt for m>=n or by trans for m<n.
+        // When forming H' C, T gets transposed via transt for m >= n or by trans for m < n.
         
         // W = V' C
         magma_zgemm( MagmaConjTrans, notransV,
@@ -180,7 +180,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                              dC,    ldc,
                      c_zero, dwork, ldw);
 
-        if(m<=n){
+        if (m <= n) {
             // W2 = V T
             magma_zgemm( notransV, trans,
                          m, k, k,
@@ -193,7 +193,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                          c_neg_one, dworkvt,  ldwvt,
                                     dwork,    ldw,
                          c_one,     dC,       ldc);
-        }else{
+        } else {
             // W2 = T W  = T  V' C
             magma_zgemm( trans, MagmaNoTrans,
                          k, n, k,
@@ -219,7 +219,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                      c_one,  dC,    ldc,
                              dV,    ldv,
                      c_zero, dwork, ldw);
-        if(m<=n){
+        if (m <= n) {
             // W2 = W T = C V T
             magma_zgemm( MagmaNoTrans, trans,
                          m, k, k,
@@ -232,7 +232,7 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                          c_neg_one, dworkvt, ldwvt,
                                     dV,    ldv,
                          c_one,     dC,    ldc);
-        }else{
+        } else {
             // W2 = T V'
             magma_zgemm( trans, transV,
                          k, n, k,
@@ -245,7 +245,6 @@ magma_zlarfb_gpu_gemm( char side, char trans, char direct, char storev,
                          c_neg_one, dwork,   ldw,
                                     dworkvt, ldwvt,
                          c_one,     dC,      ldc);
-
         }
     }
 

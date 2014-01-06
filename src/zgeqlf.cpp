@@ -220,7 +220,7 @@ magma_zgeqlf(magma_int_t m, magma_int_t n,
                                       rows, ib, ib,
                                       da_ref(0, cols),   ldda, dwork,    lddwork,
                                       da_ref(0,cols-ib), ldda, dwork+ib, lddwork);
-                else{
+                else {
                     magma_zlarfb_gpu( MagmaLeft, MagmaConjTrans, MagmaBackward, MagmaColumnwise,
                                       rows, cols, ib,
                                       da_ref(0, cols), ldda, dwork,    lddwork,

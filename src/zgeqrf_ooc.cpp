@@ -158,7 +158,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
     dwork = da + ldda*(NB + nb);
 
     /* start the main loop over the blocks that fit in the GPU memory */
-    for(int i=0; i<n; i+=NB) {
+    for (int i=0; i < n; i += NB) {
         IB = min(n-i, NB);
         //printf("Processing %5d columns -- %5d to %5d ... \n", IB, i, i+IB);
 
@@ -169,7 +169,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
         magma_queue_sync( stream[0] );
 
         /* 2. Update it with the previous transformations */
-        for(int j=0; j<min(i,k); j+=nb) {
+        for (int j=0; j < min(i,k); j += nb) {
             magma_int_t ib = min(k-j, nb);
 
             /* Get a panel in ptr.                                           */
@@ -201,7 +201,7 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
         }
 
         /* 3. Do a QR on the current part */
-        if (i<k)
+        if (i < k)
             magma_zgeqrf2_gpu(m-i, IB, da_ref(i,0), ldda, tau+i, info);
 
         /* 4. Copy the current part back to the CPU */
@@ -218,4 +218,3 @@ magma_zgeqrf_ooc(magma_int_t m, magma_int_t n,
 
     return *info;
 } /* magma_zgeqrf_ooc */
-

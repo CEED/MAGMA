@@ -101,7 +101,7 @@ magma_zungtr(char uplo, magma_int_t n, magmaDoubleComplex *a,
         *info = -2;
     } else if (lda < max(1,n)) {
         *info = -4;
-    } else /* if(complicated condition) */ {
+    } else /* if (complicated condition) */ {
         /* Computing MAX */
         if (lwork < max(1, n-1) && ! lquery) {
             *info = -7;

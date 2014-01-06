@@ -129,33 +129,31 @@ magma_zgelqf( magma_int_t m, magma_int_t n,
     maxn = ((n + 31)/32)*32;
     maxdim = max(maxm, maxn);
 
-    if (maxdim*maxdim < 2*maxm*maxn)
-        {
-            ldda = maxdim;
+    if (maxdim*maxdim < 2*maxm*maxn) {
+        ldda = maxdim;
 
-            if (MAGMA_SUCCESS != magma_zmalloc( &dA, maxdim*maxdim )) {
-                *info = MAGMA_ERR_DEVICE_ALLOC;
-                return *info;
-            }
-
-            magma_zsetmatrix( m, n, a, lda, dA, ldda );
-            dAT = dA;
-            magmablas_ztranspose_inplace( ldda, dAT, ldda );
+        if (MAGMA_SUCCESS != magma_zmalloc( &dA, maxdim*maxdim )) {
+            *info = MAGMA_ERR_DEVICE_ALLOC;
+            return *info;
         }
-    else
-        {
-            ldda = maxn;
 
-            if (MAGMA_SUCCESS != magma_zmalloc( &dA, 2*maxn*maxm )) {
-                *info = MAGMA_ERR_DEVICE_ALLOC;
-                return *info;
-            }
+        magma_zsetmatrix( m, n, a, lda, dA, ldda );
+        dAT = dA;
+        magmablas_ztranspose_inplace( ldda, dAT, ldda );
+    }
+    else {
+        ldda = maxn;
 
-            magma_zsetmatrix( m, n, a, lda, dA, maxm );
-
-            dAT = dA + maxn * maxm;
-            magmablas_ztranspose2( dAT, ldda, dA, maxm, m, n );
+        if (MAGMA_SUCCESS != magma_zmalloc( &dA, 2*maxn*maxm )) {
+            *info = MAGMA_ERR_DEVICE_ALLOC;
+            return *info;
         }
+
+        magma_zsetmatrix( m, n, a, lda, dA, maxm );
+
+        dAT = dA + maxn * maxm;
+        magmablas_ztranspose2( dAT, ldda, dA, maxm, m, n );
+    }
 
     magma_zgeqrf2_gpu(n, m, dAT, ldda, tau, &iinfo);
 

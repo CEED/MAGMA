@@ -202,13 +202,13 @@ magma_zgehrd(magma_int_t n, magma_int_t ilo, magma_int_t ihi,
     zzero_nbxnb_block(nb, dV, ldda);
 
     // Set elements 0:ILO-1 and IHI-1:N-2 of TAU to zero
-    for(i = 0; i < ilo; ++i)
+    for (i = 0; i < ilo; ++i)
         tau[i] = c_zero;
 
-    for(i = max(0,ihi-1); i < n-1; ++i)
+    for (i = max(0,ihi-1); i < n-1; ++i)
         tau[i] = c_zero;
 
-    for(i=0; i < nb*nb; i += 4)
+    for (i=0; i < nb*nb; i += 4)
         T[i] = T[i+1] = T[i+2] = T[i+3] = c_zero;
     magmablas_zlaset( 'F', nb, n, dT, nb );
 

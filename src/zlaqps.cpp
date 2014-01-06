@@ -136,7 +136,6 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
         pvt = k + cblas_idamax( n-k, &vn1[k], ione );
         
         if (pvt != k) {
-
             if (pvt >= nb) {
                 /* 1. Start copy from GPU                           */
                 magma_zgetmatrix_async( m - offset - nb, 1,
@@ -153,7 +152,7 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
             vn1[pvt] = vn1[k];
             vn2[pvt] = vn2[k];
 
-            if (pvt < nb){
+            if (pvt < nb) {
                 /* no need of transfer if pivot is within the panel */
                 blasf77_zswap( &m, A(0, pvt), &ione, A(0, k), &ione );
             }
@@ -176,7 +175,7 @@ magma_zlaqps(magma_int_t m, magma_int_t n, magma_int_t offset,
            Optimization: multiply with beta=0; wait for vector and subtract */
         if (k > 0) {
             #if defined(PRECISION_c) || defined(PRECISION_z)
-            for (j = 0; j < k; ++j){
+            for (j = 0; j < k; ++j) {
                 *F(k,j) = MAGMA_Z_CNJG( *F(k,j) );
             }
             #endif

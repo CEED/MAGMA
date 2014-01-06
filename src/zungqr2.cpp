@@ -15,7 +15,7 @@
 extern "C" magma_int_t
 magma_zungqr2(magma_int_t m, magma_int_t n, magma_int_t k,
               magmaDoubleComplex *A, magma_int_t lda,
-              magmaDoubleComplex *tau, 
+              magmaDoubleComplex *tau,
               magma_int_t *info)
 {
 /*  -- MAGMA (version 1.1) --
@@ -192,7 +192,7 @@ magma_zungqr2(magma_int_t m, magma_int_t n, magma_int_t k,
                               A(i,i), &lda, &tau[i], T, &nb);
             magma_zsetmatrix_async( ib, ib,
                                     T, nb,
-                                    dT  , nb, stream );
+                                    dT, nb, stream );
 
             // set panel to identity
             magmablas_zlaset( MagmaUpperLower, i, ib, dA(0, i), ldda );

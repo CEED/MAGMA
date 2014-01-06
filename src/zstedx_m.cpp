@@ -161,7 +161,7 @@ magma_zstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
         // Compute the workspace requirements
 
         smlsiz = magma_get_smlsize_divideconquer();
-        if( n <= 1 ){
+        if ( n <= 1 ) {
             lrwmin = 1;
             liwmin = 1;
         } else {
@@ -187,10 +187,9 @@ magma_zstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
     }
 
     // Quick return if possible
-
-    if(n==0)
+    if (n == 0)
         return *info;
-    if(n==1){
+    if (n == 1) {
         *z = MAGMA_Z_MAKE( 1, 0 );
         return *info;
     }
@@ -198,18 +197,16 @@ magma_zstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
     // If N is smaller than the minimum divide size (SMLSIZ+1), then
     // solve the problem with another solver.
 
-    if (n < smlsiz){
-
+    if (n < smlsiz) {
         char char_I[]= {'I', 0};
         lapackf77_zsteqr(char_I, &n, d, e, z, &ldz, rwork, info);
-
     } else {
         // We simply call DSTEDX instead.
         magma_dstedx_m(nrgpu, range, n, vl, vu, il, iu, d, e, rwork, n,
                        rwork+n*n, lrwork-n*n, iwork, liwork, info);
 
-        for(j=0; j<n; ++j)
-            for(i=0; i<n; ++i){
+        for (j=0; j < n; ++j)
+            for (i=0; i < n; ++i) {
                 *(z+i+ldz*j) = MAGMA_Z_MAKE( *(rwork+i+n*j), 0 );
             }
     }
@@ -218,5 +215,4 @@ magma_zstedx_m(magma_int_t nrgpu, char range, magma_int_t n, double vl, double v
     iwork[0] = liwmin;
 
     return *info;
-
 } /* magma_zstedx_m */

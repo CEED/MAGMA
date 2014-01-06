@@ -103,7 +103,7 @@ magma_zgessm_gpu( char storev, magma_int_t m, magma_int_t n, magma_int_t k, magm
     }
 
     s = k / ib;
-    for(i = 0; i < k; i += ib) {
+    for (i = 0; i < k; i += ib) {
         sb = min(ib, k-i);
 
         magmablas_zlaswp( n, dAT, ldda, i+1, i+sb, ipiv, 1 );

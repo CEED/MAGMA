@@ -104,13 +104,10 @@ magma_zlauum(char uplo, magma_int_t n,
 
     if (nb <= 1 || nb >= n)
         lapackf77_zlauum(uplo_, &n, a, &lda, info);
-    else
-    {
-        if (upper)
-        {
+    else {
+        if (upper) {
             /* Compute the product U * U'. */
-            for (i=0; i<n; i=i+nb)
-            {
+            for (i=0; i < n; i += nb) {
                 ib=min(nb,n-i);
 
                 magma_zsetmatrix_async( ib, ib,
@@ -134,8 +131,7 @@ magma_zlauum(char uplo, magma_int_t n,
                                         A(i, i),  lda,
                                         dA(i, i), ldda, stream[0] );
 
-                if (i+ib < n)
-                {
+                if (i+ib < n) {
                     magma_zgemm( MagmaNoTrans, MagmaConjTrans,
                                  i, ib, (n-i-ib), c_one, dA(0,i+ib),
                                  ldda, dA(i, i+ib),ldda, c_one,
@@ -153,11 +149,9 @@ magma_zlauum(char uplo, magma_int_t n,
                                   A(0, i),  lda );
             }
         }
-        else
-        {
+        else {
             /* Compute the product L' * L. */
-            for(i=0; i<n; i=i+nb)
-            {
+            for (i=0; i < n; i += nb) {
                 ib=min(nb,n-i);
                 magma_zsetmatrix_async( ib, ib,
                                         A(i,i),   lda,
@@ -181,8 +175,7 @@ magma_zlauum(char uplo, magma_int_t n,
                                         A(i, i),  lda,
                                         dA(i, i), ldda, stream[0] );
 
-                if (i+ib < n)
-                {
+                if (i+ib < n) {
                     magma_zgemm(MagmaConjTrans, MagmaNoTrans,
                                     ib, i, (n-i-ib), c_one, dA( i+ib,i),
                                     ldda, dA(i+ib, 0),ldda, c_one,

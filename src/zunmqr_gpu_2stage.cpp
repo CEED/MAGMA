@@ -133,7 +133,7 @@ magma_zunmqr_gpu_2stages(const char side, const char trans,
         *info = -10;
     }
 
-    if(MAGMA_SUCCESS != magma_zmalloc( &dwork, n*nb )) {
+    if (MAGMA_SUCCESS != magma_zmalloc( &dwork, n*nb )) {
         printf ("!!!! zungqr_2stage magma_alloc failed for: dwork\n" );
         exit(-1);
     }
@@ -170,10 +170,9 @@ magma_zunmqr_gpu_2stages(const char side, const char trans,
         ic = 0;
     }
 
-    for (magma_int_t i=i1; (i3<0 ? i>=i2 : i<i2); i+=i3)
-    {
+    for (magma_int_t i=i1; (i3 < 0 ? i >= i2 : i < i2); i += i3) {
         ib = min(nb, k - i);
-        if (left){
+        if (left) {
             mi = m - i;
             ic = i;
         }
@@ -185,7 +184,7 @@ magma_zunmqr_gpu_2stages(const char side, const char trans,
                                mi, ni, ib, da+i+i*ldda, ldda, dT+i*nb, nb,
                                dc+ic+jc*lddc, lddc, dwork, nw);
 
-        if ( ret != MAGMA_SUCCESS ){
+        if ( ret != MAGMA_SUCCESS ) {
             magma_free(dwork);
             return ret;
         }

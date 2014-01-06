@@ -187,9 +187,8 @@ magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
     assert( f != NULL );  // TODO return error, or allocate outside zlatrd
     
     if (lapackf77_lsame(uplo_, "U")) {
-
         /* Reduce last NB columns of upper triangle */
-        for (i = n-1; i >= n - nb ; --i) {
+        for (i = n-1; i >= n - nb; --i) {
             i_1 = i + 1;
             i_n = n - i - 1;
             
@@ -284,7 +283,7 @@ magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
                           W(i, 0), &ldw, &c_one, A(i, i), &ione);
             #if defined(PRECISION_z) || defined(PRECISION_c)
             lapackf77_zlacgv(&i, W(i, 0), &ldw);
-            lapackf77_zlacgv(&i, A(i ,0), &lda);
+            lapackf77_zlacgv(&i, A(i, 0), &lda);
             #endif
             blasf77_zgemv("No transpose", &i_n, &i, &c_neg_one, W(i, 0), &ldw,
                           A(i, 0), &lda, &c_one, A(i, i), &ione);
@@ -330,7 +329,7 @@ magma_zlatrd2(char uplo, magma_int_t n, magma_int_t nb,
                 // 3. Here is where we need it
                 magma_queue_sync( stream );
         
-                if (i!=0)
+                if (i != 0)
                   blasf77_zaxpy(&i_n, &c_one, f, &ione, W(i+1, i), &ione);
         
                 blasf77_zgemv("No transpose", &i_n, &i, &c_neg_one, W(i+1, 0), &ldw,

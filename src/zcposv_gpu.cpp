@@ -274,7 +274,7 @@ REFINEMENT:
         }
 
         /*  Check whether the nrhs normwise backward errors satisfy the
-         *  stopping criterion. If yes, set ITER=IITER>0 and return. */
+         *  stopping criterion. If yes, set ITER=IITER > 0 and return. */
         for( j=0; j < nrhs; j++ ) {
             i = magma_izamax( n, dX(0,j), 1) - 1;
             magma_zgetmatrix( 1, 1, dX(i,j), 1, &Xnrmv, 1 );

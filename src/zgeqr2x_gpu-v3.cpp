@@ -160,7 +160,6 @@ magma_zgeqr2x3_gpu(magma_int_t *m, magma_int_t *n, magmaDoubleComplex *dA,
 
     for (int b=0; b < k; b += BLOCK_SIZE) {
         for (i = b; i < min(k, b+BLOCK_SIZE); ++i) {
-
             /*   Apply H' to A(:,i) from the left                           */
             if ( i-b > 0)
                 magma_zlarfbx_gpu(*m-b, i-b, da_ref(b, b), *ldda,

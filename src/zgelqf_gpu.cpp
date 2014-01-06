@@ -134,7 +134,7 @@ magma_zgelqf_gpu( magma_int_t m, magma_int_t n,
         magmablas_ztranspose_inplace( m, dAT, lda );
     }
     else {
-        if (MAGMA_SUCCESS != magma_zmalloc( &dAT, maxm*maxn ) ){
+        if (MAGMA_SUCCESS != magma_zmalloc( &dAT, maxm*maxn ) ) {
             *info = MAGMA_ERR_DEVICE_ALLOC;
             return *info;
         }

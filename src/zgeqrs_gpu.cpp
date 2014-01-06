@@ -184,7 +184,7 @@ magma_zgeqrs_gpu(magma_int_t m, magma_int_t n, magma_int_t nrhs,
 
     int start = i-nb;
     if (nb < k) {
-        for (i = start; i >=0; i -= nb) {
+        for (i = start; i >= 0; i -= nb) {
             ib = min(k-i, nb);
             rows = m -i;
 

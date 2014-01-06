@@ -321,13 +321,11 @@ magma_dsygvdx_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char range, cha
     timer_stop( time );
     timer_printf( "time dsyevd = %6.2f\n", time );
 
-    if (wantz && *info == 0)
-    {
+    if (wantz && *info == 0) {
         timer_start( time );
 
         /* Backtransform eigenvectors to the original problem. */
-        if (itype == 1 || itype == 2)
-        {
+        if (itype == 1 || itype == 2) {
             /* For A*x=(lambda)*B*x and A*B*x=(lambda)*x;
                backtransform eigenvectors: x = inv(L)'*y or inv(U)*y */
             if (lower) {
@@ -339,8 +337,7 @@ magma_dsygvdx_m(magma_int_t nrgpu, magma_int_t itype, char jobz, char range, cha
             magma_dtrsm_m(nrgpu, MagmaLeft, uplo_[0], *trans, MagmaNonUnit,
                           n, *m, c_one, b, ldb, a, lda);
         }
-        else if (itype == 3)
-        {
+        else if (itype == 3) {
             /* For B*A*x=(lambda)*x;
                backtransform eigenvectors: x = L*y or U'*y */
             if (lower) {

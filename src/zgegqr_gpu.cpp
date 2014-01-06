@@ -29,12 +29,12 @@ magma_zgegqr_gpu( magma_int_t m, magma_int_t n,
     =======
     ZGEGQR orthogonalizes the N vectors given by a complex M-by-N matrix A:
            
-            A = Q * R. 
+            A = Q * R.
 
     On exit, if successful, the orthogonal vectors Q overwrite A
     and R is given in work (on the CPU memory).
     
-    This version uses normal equations and SVD in an iterative process that 
+    This version uses normal equations and SVD in an iterative process that
     makes the computation numerically accurate.
     
     Arguments
@@ -95,70 +95,70 @@ magma_zgegqr_gpu( magma_int_t m, magma_int_t n,
 
     R    = work;             // Size n * n
     G    = R    + n*n;       // Size n * n
-    VT   = G    + n*n;       // Size n * n 
+    VT   = G    + n*n;       // Size n * n
 
     magma_zmalloc_cpu( &hwork, 2*n*n + 2*n);
     if ( hwork == NULL ) {
-      *info = MAGMA_ERR_HOST_ALLOC;
-      return *info;
+        *info = MAGMA_ERR_HOST_ALLOC;
+        return *info;
     }
 
-    magma_int_t lwork = n*n; // First part f hwork; used as workspace in svd 
+    magma_int_t lwork = n*n;  // First part f hwork; used as workspace in svd
 
-    U    = hwork + n*n;      // Size n*n  
-    S    = (double *)(U+n*n);// Size n
-    tau  = U + n*n + n  ;    // Size n
+    U    = hwork + n*n;       // Size n*n
+    S    = (double *)(U+n*n); // Size n
+    tau  = U + n*n + n;       // Size n
 
     #if defined(PRECISION_c) || defined(PRECISION_z)
     double *rwork;
     magma_dmalloc_cpu( &rwork, 5*n);
     if ( rwork == NULL ) {
-      *info = MAGMA_ERR_HOST_ALLOC;
-      return *info;
+        *info = MAGMA_ERR_HOST_ALLOC;
+        return *info;
     }
     #endif
 
     do {
-      i++;
-
-      magma_zgemm(MagmaConjTrans, MagmaNoTrans, n, n, m, one, dA, ldda, dA, ldda, zero, dwork, n );
-      // magmablas_zgemm_reduce(n, n, m, one, dA, ldda, dA, ldda, zero, dwork, n );
-      magma_zgetmatrix(n, n, dwork, n, G, n);
-      
-      #if defined(PRECISION_s) || defined(PRECISION_d) 
-         lapackf77_zgesvd("n", "a", &n, &n, G, &n, S, U, &n, VT, &n, 
-                          hwork, &lwork, info);
-      #else
-         lapackf77_zgesvd("n", "a", &n, &n, G, &n, S, U, &n, VT, &n,
-                          hwork, &lwork, rwork, info);
-      #endif
-
-      mins = 100.f, maxs = 0.f;
-      for(k=0; k<n; k++){
-        S[k] = magma_dsqrt( S[k] );
-
-        if (S[k] < mins)  mins = S[k];
-        if (S[k] > maxs)  maxs = S[k];
-      }
-
-      for(k=0; k<n;k++){
-        vt = VT + k*n;
-        for(j=0; j<n; j++)
-          vt[j]*=S[j];
-      }
-      lapackf77_zgeqrf(&n, &n, VT, &n, tau, hwork, &lwork, info);
-
-      if (i==1)
-        blasf77_zcopy(&n2, VT, &ione, R, &ione);
-      else
-        blasf77_ztrmm("l", "u", "n", "n", &n, &n, &one, VT, &n, R, &n);
-
-      magma_zsetmatrix(n, n, VT, n, G, n);
-      magma_ztrsm('r', 'u', 'n', 'n', m, n, one, G, n, dA, ldda);
-      if (mins > 0.00001f)
-        cn = maxs/mins;
-
-      //fprintf(stderr, "Iteration %d, cond num = %f \n", i, cn);
+        i++;
+        
+        magma_zgemm(MagmaConjTrans, MagmaNoTrans, n, n, m, one, dA, ldda, dA, ldda, zero, dwork, n );
+        // magmablas_zgemm_reduce(n, n, m, one, dA, ldda, dA, ldda, zero, dwork, n );
+        magma_zgetmatrix(n, n, dwork, n, G, n);
+        
+        #if defined(PRECISION_s) || defined(PRECISION_d)
+        lapackf77_zgesvd("n", "a", &n, &n, G, &n, S, U, &n, VT, &n,
+                         hwork, &lwork, info);
+        #else
+        lapackf77_zgesvd("n", "a", &n, &n, G, &n, S, U, &n, VT, &n,
+                         hwork, &lwork, rwork, info);
+        #endif
+        
+        mins = 100.f, maxs = 0.f;
+        for (k=0; k < n; k++) {
+            S[k] = magma_dsqrt( S[k] );
+            
+            if (S[k] < mins)  mins = S[k];
+            if (S[k] > maxs)  maxs = S[k];
+        }
+        
+        for (k=0; k < n; k++) {
+            vt = VT + k*n;
+            for (j=0; j < n; j++)
+                vt[j] *= S[j];
+        }
+        lapackf77_zgeqrf(&n, &n, VT, &n, tau, hwork, &lwork, info);
+        
+        if (i == 1)
+            blasf77_zcopy(&n2, VT, &ione, R, &ione);
+        else
+            blasf77_ztrmm("l", "u", "n", "n", &n, &n, &one, VT, &n, R, &n);
+        
+        magma_zsetmatrix(n, n, VT, n, G, n);
+        magma_ztrsm('r', 'u', 'n', 'n', m, n, one, G, n, dA, ldda);
+        if (mins > 0.00001f)
+            cn = maxs/mins;
+        
+        //fprintf(stderr, "Iteration %d, cond num = %f \n", i, cn);
     } while (cn > 10.f);
 
     magma_free_cpu( hwork );

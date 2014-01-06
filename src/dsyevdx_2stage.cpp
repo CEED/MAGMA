@@ -343,14 +343,12 @@ magma_dsyevdx_2stage(char jobz, char range, char uplo,
     double* A2 = &work[indwrk];
     memset(A2, 0, n*lda2*sizeof(double));
 
-    for (magma_int_t j = 0; j < n-nb; j++)
-    {
+    for (magma_int_t j = 0; j < n-nb; j++) {
         cblas_dcopy(nb+1, &a[j*(lda+1)], 1, &A2[j*lda2], 1);
         memset(&a[j*(lda+1)], 0, (nb+1)*sizeof(double));
         a[nb + j*(lda+1)] = d_one;
     }
-    for (magma_int_t j = 0; j < nb; j++)
-    {
+    for (magma_int_t j = 0; j < nb; j++) {
         cblas_dcopy(nb-j, &a[(j+n-nb)*(lda+1)], 1, &A2[(j+n-nb)*lda2], 1);
         memset(&a[(j+n-nb)*(lda+1)], 0, (nb-j)*sizeof(double));
     }

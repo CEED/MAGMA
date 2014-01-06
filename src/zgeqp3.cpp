@@ -234,7 +234,7 @@ magma_zgeqp3( magma_int_t m, magma_int_t n,
                 /* Factorize JB columns among columns J:N. */
                 n_j = n - j;
                 
-                if (j>nfxd) {
+                if (j > nfxd) {
                     // Get panel to the CPU
                     magma_zgetmatrix( m-j, jb,
                                       dA(j,j), ldda,

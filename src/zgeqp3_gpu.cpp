@@ -225,14 +225,14 @@ magma_zgeqp3_gpu( magma_int_t m, magma_int_t n,
             //magma_queue_sync( stream[0] );
             
             /* Compute factorization: while loop. */
-            topbmn = minmn;// - nb;
+            topbmn = minmn; // - nb;
             while(j < topbmn) {
                 jb = min(nb, topbmn - j);
                 
                 /* Factorize JB columns among columns J:N. */
                 n_j = n - j;
                 
-                /*if (j>nfxd) {
+                /*if (j > nfxd) {
                     // Get panel to the CPU
                     magma_zgetmatrix( m-j, jb,
                                       dA(j,j), ldda,

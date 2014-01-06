@@ -107,7 +107,7 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
     DWORK   (workspace/output) COMPLEX_16 array on the GPU, dim (MAX(1,LDWORK))
 
     LDWORK  (input) INTEGER
-            The dimension of the array DWORK.  
+            The dimension of the array DWORK.
             LDWORK >= (n*n+64-1)/64 + 2*n*nb, where nb = magma_get_zhetrd_nb(n)
 
     INFO    (output) INTEGER
@@ -211,18 +211,17 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
     else
         nx = 300;
 
-    if (ldwork<(ldw*n+64-1)/64 + 2*ldw*nb) {
+    if (ldwork < (ldw*n+64-1)/64 + 2*ldw*nb) {
       *info = MAGMA_ERR_DEVICE_ALLOC;
       return *info;
-    } 
+    }
 
     if (upper) {
         /*  Reduce the upper triangle of A.
             Columns 1:kk are handled by the unblocked method. */
         kk = n - (n - nx + nb - 1) / nb * nb;
         
-        for (i = n - nb; i >= kk; i -= nb)
-        {
+        for (i = n - nb; i >= kk; i -= nb) {
             /* Reduce columns i:i+nb-1 to tridiagonal form and form the
                matrix W which is needed to update the unreduced part of
                the matrix */
@@ -257,11 +256,9 @@ magma_zhetrd2_gpu(char uplo, magma_int_t n,
         
         magma_zsetmatrix( kk, kk, A(0, 0), ldwa, dA(0, 0), ldda );
     }
-    else
-    {
+    else {
         /* Reduce the lower triangle of A */
-        for (i = 0; i < n-nx; i += nb)
-        {
+        for (i = 0; i < n-nx; i += nb) {
             /* Reduce columns i:i+nb-1 to tridiagonal form and form the
                matrix W which is needed to update the unreduced part of
                the matrix */

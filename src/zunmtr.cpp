@@ -181,8 +181,7 @@ magma_zunmtr(char side, char uplo, char trans,
         ni = n - 1;
     }
 
-    if (upper)
-    {
+    if (upper) {
         /* Q was determined by a call to SSYTRD with UPLO = 'U' */
         i__2 = nq - 1;
         //lapackf77_zunmql(side_, trans_, &mi, &ni, &i__2, &a[lda], &lda,
@@ -190,8 +189,7 @@ magma_zunmtr(char side, char uplo, char trans,
         magma_zunmql(side, trans, mi, ni, i__2, &a[lda], lda, tau,
                      c, ldc, work, lwork, &iinfo);
     }
-    else
-    {
+    else {
         /* Q was determined by a call to SSYTRD with UPLO = 'L' */
         if (left) {
             i1 = 1;
@@ -209,4 +207,3 @@ magma_zunmtr(char side, char uplo, char trans,
 
     return *info;
 } /* magma_zunmtr */
-

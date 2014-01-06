@@ -74,12 +74,12 @@ magma_zposv_gpu( char uplo, magma_int_t n, magma_int_t nrhs,
             < 0:  if INFO = -i, the i-th argument had an illegal value
     =====================================================================   */
 
-    *info = 0 ;
-    if( (uplo != 'U') && (uplo != 'u') && (uplo != 'L') && (uplo != 'l') )
+    *info = 0;
+    if ( (uplo != 'U') && (uplo != 'u') && (uplo != 'L') && (uplo != 'l') )
         *info = -1;
-    if( n < 0 )
+    if ( n < 0 )
         *info = -2;
-    if( nrhs < 0)
+    if ( nrhs < 0)
         *info = -3;
     if ( ldda < max(1, n) )
         *info = -5;

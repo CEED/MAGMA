@@ -121,7 +121,7 @@ magma_zheevr(char jobz, char range, char uplo, magma_int_t n,
             when it is determined to lie in an interval [a,b]
             of width less than or equal to
 
-                    ABSTOL + EPS *   max( |a|,|b| ) ,
+                    ABSTOL + EPS * max( |a|,|b| ),
 
             where EPS is the machine precision.  If ABSTOL is less than
             or equal to zero, then  EPS*|T|  will be used in its place,
@@ -409,7 +409,7 @@ magma_zheevr(char jobz, char range, char uplo, magma_int_t n,
         
         /* Otherwise call ZSTEMR if infinite and NaN arithmetic is supported */
     }
-    else if (ieeeok==1){
+    else if (ieeeok == 1) {
         i__1 = n - 1;
         
         blasf77_dcopy(&i__1, &rwork[indre], &ione, &rwork[indree], &ione);
@@ -432,7 +432,7 @@ magma_zheevr(char jobz, char range, char uplo, magma_int_t n,
     
     
     /* Call DSTEBZ and ZSTEIN if infinite and NaN arithmetic is not supported or ZSTEMR didn't converge. */
-    if (wantz && (ieeeok ==0 || *info != 0)) {
+    if (wantz && (ieeeok == 0 || *info != 0)) {
         *info = 0;
         
         lapackf77_dstebz(range_, "B", &n, &vl, &vu, &il, &iu, &abstol, &rwork[indrd], &rwork[indre], m,

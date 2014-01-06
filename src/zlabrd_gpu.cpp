@@ -169,12 +169,12 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
     x_dim1 = ldx;
     x_offset = 1 + x_dim1;
     x -= x_offset;
-    dx-= 1 + lddx;
+    dx -= 1 + lddx;
 
     y_dim1 = ldy;
     y_offset = 1 + y_dim1;
     y -= y_offset;
-    dy-= 1 + lddy;
+    dy -= 1 + lddy;
 
     /* Function Body */
     if (m <= 0 || n <= 0) {
@@ -188,11 +188,8 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
     assert( f != NULL );  // TODO return error, or allocate outside zlatrd
     
     if (m >= n) {
-
         /* Reduce to upper bidiagonal form */
-
         for (i__ = 1; i__ <= nb; ++i__) {
-
             /*  Update A(i:m,i) */
             i__2 = m - i__ + 1;
             i__3 = i__ - 1;
@@ -256,7 +253,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                 // 4. Synch to make sure the result is back ----------------
                 magma_queue_sync( stream );
 
-                if (i__3!=0){
+                if (i__3 != 0) {
                     i__2 = n - i__;
                     blasf77_zaxpy(&i__2, &c_one, f,&c__1, &y[i__+1+i__*y_dim1],&c__1);
                 }
@@ -338,7 +335,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
 
                 // 4. Synch to make sure the result is back ----------------
                 magma_queue_sync( stream );
-                if (i__!=0){
+                if (i__ != 0) {
                     i__2 = m - i__;
                     blasf77_zaxpy(&i__2, &c_one, f,&c__1, &x[i__+1+i__*x_dim1],&c__1);
                 }
@@ -364,9 +361,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
         }
     }
     else {
-
         /* Reduce to lower bidiagonal form */
-        
         for (i__ = 1; i__ <= nb; ++i__) {
         
             /* Update A(i,i:n) */
@@ -444,7 +439,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                 
                 // 4. Synch to make sure the result is back ----------------
                 magma_queue_sync( stream );
-                if (i__2!=0){
+                if (i__2 != 0) {
                     i__3 = m - i__;
                     blasf77_zaxpy(&i__3, &c_one, f,&c__1, &x[i__+1+i__*x_dim1],&c__1);
                 }
@@ -527,7 +522,7 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
                 
                 // 4. Synch to make sure the result is back ----------------
                 magma_queue_sync( stream );
-                if (i__3!=0){
+                if (i__3 != 0) {
                     i__2 = n - i__;
                     blasf77_zaxpy(&i__2, &c_one, f,&c__1, &y[i__+1+i__*y_dim1],&c__1);
                 }
@@ -556,4 +551,3 @@ magma_zlabrd_gpu( magma_int_t m, magma_int_t n, magma_int_t nb,
     
     return MAGMA_SUCCESS;
 } /* zlabrd */
-

@@ -95,19 +95,15 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
     magma_queue_create( &stream[0] );
     magma_queue_create( &stream[1] );
 
-    if (nb <= 1 || nb >= n)
-    {
+    if (nb <= 1 || nb >= n) {
         magma_zgetmatrix( n, n, dA, ldda, work, n );
         lapackf77_zlauum(uplo_, &n, work, &n, info);
         magma_zsetmatrix( n, n, work, n, dA, ldda );
     }
-    else
-    {
-        if (upper)
-        {
+    else {
+        if (upper) {
             /* Compute inverse of upper triangular matrix */
-            for (i=0; i < n; i += nb)
-            {
+            for (i=0; i < n; i += nb) {
                 ib = min(nb, (n-i));
 
                 /* Compute the product U * U'. */
@@ -125,8 +121,7 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
                                   work,     ib,
                                   dA(i, i), ldda );
 
-                if(i+ib < n)
-                {
+                if (i+ib < n) {
                     magma_zgemm( MagmaNoTrans, MagmaConjTrans,
                                  i, ib, (n-i-ib), c_one, dA(0,i+ib),
                                  ldda, dA(i, i+ib), ldda, c_one,
@@ -138,11 +133,9 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
                 }
             }
         }
-        else
-        {
+        else {
             /* Compute the product L' * L. */
-            for(i=0; i<n; i=i+nb)
-            {
+            for (i=0; i < n; i += nb) {
                 ib=min(nb,(n-i));
 
                 magma_ztrmm( MagmaLeft, MagmaLower,
@@ -160,8 +153,7 @@ magma_zlauum_gpu(char uplo, magma_int_t n,
                                   work,     ib,
                                   dA(i, i), ldda );
 
-                if((i+ib) < n)
-                {
+                if (i+ib < n) {
                     magma_zgemm( MagmaConjTrans, MagmaNoTrans,
                                  ib, i, (n-i-ib), c_one, dA( i+ib,i),
                                  ldda, dA(i+ib, 0),ldda, c_one,
