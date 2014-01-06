@@ -200,7 +200,8 @@ double cpu_gpu_zdiff(
   magma_int_t j;
   magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
   double  work[1];
-  magmaDoubleComplex *ha = (magmaDoubleComplex*)malloc( M * N * sizeof(magmaDoubleComplex));
+  magmaDoubleComplex *ha;
+  magma_zmalloc_cpu( &ha, M*N );
   double res;
 
   cublasGetMatrix(M, N, sizeof(magmaDoubleComplex), da, ldda, ha, M);
@@ -208,7 +209,7 @@ double cpu_gpu_zdiff(
     blasf77_zaxpy(&M, &c_neg_one, a+j*lda, &d_one, ha+j*M, &d_one);
   res = lapackf77_zlange("f", &M, &N, ha, &M, work);
 
-  free(ha);
+  magma_free_cpu(ha);
   return res;
 }
 

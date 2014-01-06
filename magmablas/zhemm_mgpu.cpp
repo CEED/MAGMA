@@ -148,7 +148,8 @@ void magmablas_zhemm_mgpu_com(
 
 /*
     magma_int_t siz = m+offset;
-    magmaDoubleComplex *R=(magmaDoubleComplex *) malloc(siz*siz*sizeof(magmaDoubleComplex));
+    magmaDoubleComplex *R;
+    magma_zmalloc_cpu( &R, siz*siz );
     // collecte back A
     magmablas_zgetmatrix_1D_bcyclic( siz, siz, dA, ldda, R, siz, ngpu, nb );
     magma_setdevice( 0 );
