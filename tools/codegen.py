@@ -15,6 +15,7 @@ import sys
 import os
 from os import path
 from optparse import OptionParser, OptionGroup
+import traceback
 
 from Conversion import EXTS, Conversion, check_gen, visible, valid_extension
 
@@ -95,7 +96,8 @@ def main():
             c = Conversion(w[0], w[1], w[2])
             c.run()
         except Exception, e:
-            print >> sys.stderr, str(e)
+            print >> sys.stderr, 'error', e
+            traceback.print_exc()
             continue
     
     if options.make:

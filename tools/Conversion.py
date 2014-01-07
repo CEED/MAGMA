@@ -16,9 +16,44 @@ import re
 import shutil
 from os import path
 from datetime import datetime
+import traceback
 
+# --------------------
 from magmasubs import subs
 
+# Fill in subs_search with same structure as subs, but containing None values.
+# Later in substitute(), we'll cache compiled regexps in subs_search.
+# We could pre-compile them here, but that would compile many unneeded ones.
+#
+# Fill in subs_replace with pre-processed version of subs, removing regexp escapes.
+try:
+    subs_search  = {}
+    subs_replace = {}
+    for key in subs.keys():
+        nrow = len( subs[key]    )
+        ncol = len( subs[key][0] )
+        subs_search [key] = map( lambda x: [None]*ncol, xrange(nrow) )
+        subs_replace[key] = map( lambda x: [None]*ncol, xrange(nrow) )
+        for (i, row) in enumerate( subs[key] ):
+            for (j, sub) in enumerate( row ):
+                try:
+                    sub = sub.replace('\*', '*')
+                    sub = sub.replace('\\b', '')
+                    if key != 'tracing':
+                        sub = sub.replace('\(', '(')
+                        sub = sub.replace('\)', ')')
+                except:
+                    pass
+                subs_replace[key][i][j] = sub
+            # end
+        # end
+    # end
+except Exception, e:
+    print >> sys.stderr, 'error in subs:', e
+    traceback.print_exc()
+
+
+# --------------------
 # Keyword used to signal replacement actions on a file
 KEYWORD = '@precisions'
 
@@ -33,7 +68,8 @@ REGEX = re.compile( '^.*'+KEYWORD+'\s+((\w+,?)+)\s+(\w+)\s+->\s*((\s\w+)+).*$', 
 EXTS = ['.c', '.cpp', '.h', '.hpp', '.f', '.jdf', '.f90', '.F90', '.f77', '.F77', '.cu', '.cuf', '.CUF']
 
 def check_gen(filename, work):
-    """Reads the file and determines if it needs generation."""
+    """Reads the file and determines if it needs generation.
+    If so, appends it as tuple (filename, match-groups, text) to work array."""
     fd = open( filename, 'r')
     content = fd.read()
     fd.close()
@@ -221,29 +257,21 @@ class Conversion:
         @param precision The target precision for replacements.
         """
         try:
-            # Try to select the requested replacements.
-            work = subs[sub_type]
-            prec_to = work[0].index(precision)
-            prec_from = work[0].index(self.precision)
-        except:
-            # If requested replacement type does not exist,
-            # return unaltered contents.
-            return data
-        for i in range(1, len(work)):
-            # Requested replacements were found,
-            # execute replacements for each entry.
-            try:
-                search = work[i][prec_from]
-                replace = work[i][prec_to]
-                if not search: continue
-                replace = replace.replace('\*', '*')
-                if sub_type != 'tracing':
-                    replace = replace.replace('\(', '(')
-                    replace = replace.replace('\)', ')')
-                data = re.sub(search, replace, data)
-            except:
-                print 'Bad replacement pair ', i, 'in', sub_type
-                continue
+            # Get requested substitution tables based on sub_type,
+            # and columns based on precisions (row 0 is header),
+            # then loop over all substitutions (excluding row 0).
+            subs_o = subs[sub_type]
+            subs_s = subs_search[sub_type]
+            subs_r = subs_replace[sub_type]
+            jto   = subs_r[0].index(precision)
+            jfrom = subs_r[0].index(self.precision)
+            for (orig, search, replace) in zip( subs_o[1:], subs_s[1:], subs_r[1:] ):
+                # cache compiled regexp
+                if search[jfrom] is None:
+                    search[jfrom] = re.compile( orig[jfrom] )
+                data = re.sub( search[jfrom], replace[jto], data )
+        except Exception, e:
+            print >>sys.stderr, 'substitution failed:', e, sub_type, self.precision, '->', precision, subs_r[0]
         return data
 
     def convert(self, data, precision):
@@ -252,18 +280,10 @@ class Conversion:
         @param precision The target precision for generation.
         """
         global KEYWORD, DONE_KEYWORD
-        try:
-            # All files undergo the "all" replacements.
-            data = self.substitute('all', data, precision)
-        except: pass
         for sub_type in self.types:
-            # For all the other types of conversion for the current file,
+            # For all the conversion types for the current file,
             # make the correct replacements.
-            if sub_type == 'all': continue
-            try:
-                data = self.substitute(sub_type, data, precision)
-            except Exception, e:
-                raise ValueError('I encountered an unrecoverable error while working in subtype:', sub_type+'.')
+            data = self.substitute(sub_type, data, precision)
         # Replace the replacement keywork with one that signifies this is an output file,
         # to prevent multiple replacement issues if run again.
         data = re.sub( KEYWORD+' '+','.join(self.types)+'.*',
