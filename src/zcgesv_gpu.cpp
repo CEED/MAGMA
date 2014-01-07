@@ -91,13 +91,15 @@ magma_zcgesv_gpu(char trans, magma_int_t n, magma_int_t nrhs,
     IPIV    (output) INTEGER array, dimension (N)
             The pivot indices that define the permutation matrix P;
             row i of the matrix was interchanged with row IPIV(i).
-            Corresponzc either to the single precision factorization
+            Corresponds either to the single precision factorization
             (if info.EQ.0 and ITER.GE.0) or the double precision
             factorization (if info.EQ.0 and ITER.LT.0).
 
-    dIPIV   (output) INTEGER array on the GPU, dimension (min(M,N))
-            The pivot indices; for 1 <= i <= min(M,N), row i of the
-            matrix was moved to row IPIV(i).
+    dIPIV   (output) INTEGER array on the GPU, dimension (N)
+            The pivot indices; for 1 <= i <= N, after permuting, row i of the
+            matrix was moved to row dIPIV(i).
+            Note this is different than IPIV, where interchanges
+            are applied one-after-another.
 
     dB      (input) COMPLEX_16 array on the GPU, dimension (lddb,NRHS)
             The N-by-NRHS right hand side matrix B.

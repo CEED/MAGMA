@@ -13,7 +13,7 @@
 extern "C" magma_int_t
 magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
                   magmaFloatComplex  *dA, magma_int_t ldda,
-                  magma_int_t        *ipiv,
+                  magma_int_t        *dipiv,
                   magmaDoubleComplex *dB, magma_int_t lddb,
                   magmaDoubleComplex *dX, magma_int_t lddx,
                   magmaFloatComplex  *dSX,
@@ -56,9 +56,11 @@ magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
     LDDA    (input) INTEGER
             The leading dimension of the array dA.  LDDA >= max(1,N).
 
-    IPIV    (input) INTEGER array on the GPU, dimension (N)
-            The pivot indices from CGETRF_GPU; Row i of the
-            matrix was moved to row IPIV(i).
+    dIPIV   (input) INTEGER array on the GPU, dimension (N)
+            The pivot indices; for 1 <= i <= N, after permuting, row i of the
+            matrix was moved to row dIPIV(i).
+            Note this is different than IPIV from ZGETRF, where interchanges
+            are applied one-after-another.
 
     dB      (input) COMPLEX_16 array on the GPU, dimension (LDDB,NRHS)
             On entry, the right hand side matrix B.
@@ -120,8 +122,8 @@ magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
         /*
          * TODO: clean zclaswp interface to have interface closer to zlaswp
          */
-        //magmablas_zclaswp(nrhs, dB, lddb, dSX, lddbx, 1, n, ipiv);
-        magmablas_zclaswp(nrhs, dB, lddb, dSX, n, ipiv, inc);
+        //magmablas_zclaswp(nrhs, dB, lddb, dSX, lddbx, 1, n, dipiv);
+        magmablas_zclaswp(nrhs, dB, lddb, dSX, n, dipiv, inc);
         
         /* Solve L*X = B, overwriting B with SX. */
         magma_ctrsm( MagmaLeft, MagmaLower, MagmaNoTrans, MagmaUnit,
@@ -145,7 +147,7 @@ magma_zcgetrs_gpu(char trans, magma_int_t n, magma_int_t nrhs,
         magma_ctrsm( MagmaLeft, MagmaLower, MagmaConjTrans, MagmaUnit,
                      n, nrhs, c_one, dA, ldda, dSX, n );
         
-        magmablas_zclaswp( nrhs, dX, lddx, dSX, n, ipiv, inc );
+        magmablas_zclaswp( nrhs, dX, lddx, dSX, n, dipiv, inc );
     }
 
     return *info;
