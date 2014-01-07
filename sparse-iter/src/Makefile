@@ -20,7 +20,7 @@ INC += -I$(MAGMA_DIR)/control
 # Krylov space linear solvers
 ZSRC += \
 	zjacobi.cpp		\
-	zir.cpp			\
+	ziterref.cpp			\
 	zcg.cpp			\
 	zgmres.cpp		\
 	zbicgstab.cpp		\
@@ -57,11 +57,13 @@ ZSRC += \
 # ILU and sparse direct
 ZSRC += \
 	zilu.cpp		\
+	zbcsrlu.cpp      		\
 
 
 # Wrappers, tools etc
 ZSRC += \
 	magma_z_precond_wrapper.cpp \
+	zresidual.cpp \
 
 
 # ------------------------------------------------------------
