@@ -12,26 +12,31 @@
 #
 # Reorganized 5/2012 Mark Gates
 
+
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+#                                                                             #
+#          DO NOT EDIT      OpenCL and MIC versions      DO NOT EDIT          #
+#          DO NOT EDIT      OpenCL and MIC versions      DO NOT EDIT          #
+#          DO NOT EDIT      OpenCL and MIC versions      DO NOT EDIT          #
+#                                                                             #
+# Please edit the CUDA MAGMA version, then copy it to MIC and OpenCL MAGMA.   #
+# Otherwise they get out-of-sync and it's really hard to sync them up again.  #
+#                                                                             #
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+
+
+
 # Dictionary is keyed on substitution type (mixed, normal, etc.)
 subs = {
-  # ------------------------------------------------------------
-  # replacements applied to ALL files.
-  'all' : [
-    [None, None]
-  ],
-  
   # ------------------------------------------------------------
   # replacements applied to mixed precision files.
   'mixed' : [
     # ----- Special line indicating column types
     ['ds',                        'zc'                      ],
     
-    # ----- Mixed precisions
+    # ----- Mixed precision prefix
     ('DS',                        'ZC'                      ),
-    ('dcopy',                     'zcopy'                   ),
-    ('magma_dnrm2',               'magma_dznrm2'            ),
-    ('magma_ddot',                'magma_zdotc'             ),
-    ('cblas_ddot',                'cblas_zdotc'             ),
     ('ds',                        'zc'                      ),
     
     # ----- Preprocessor
@@ -45,6 +50,8 @@ subs = {
     ('float',                     'float2'                  ),
     ('double',                    'cuDoubleComplex'         ),
     ('float',                     'cuFloatComplex'          ),
+    ('double',                    'MKL_Complex16'           ),
+    ('float',                     'MKL_Complex8'            ),
     ('magmaFloat_const_ptr',      'magmaFloatComplex_const_ptr' ),  # before magmaDoubleComplex
     ('magmaDouble_const_ptr',     'magmaDoubleComplex_const_ptr'),
     ('magmaFloat_ptr',            'magmaFloatComplex_ptr'   ),
@@ -71,7 +78,7 @@ subs = {
     ('',                          'cuCreal'                 ),
     ('',                          'cuCimag'                 ),
     ('',                          'cuConj'                  ),
-    ('abs',                       'cuCabs'                  ),  
+    ('abs',                       'cuCabs'                  ),
     ('absf',                      'cuCabsf'                 ),
     
     # ----- PLASMA / MAGMA
@@ -87,15 +94,21 @@ subs = {
     ('dsaxpy',                    'zcaxpy'                  ),
     ('dslaswp',                   'zclaswp'                 ),
     
-    # regular
+    # real == complex name
     ('daxpy',                     'zaxpy'                   ),
+    ('dcopy',                     'zcopy'                   ),
     ('dgemm',                     'zgemm'                   ),
+    ('dgeqrf',                    'zgeqrf'                  ),
+    ('dgeqrs',                    'zgeqrs'                  ),
     ('dgesv',                     'zgesv'                   ),
+    ('dgetrf',                    'zgetrf'                  ),
+    ('dgetrs',                    'zgetrs'                  ),
     ('dlacpy',                    'zlacpy'                  ),
     ('dlange',                    'zlange'                  ),
     ('dlansy',                    'zlansy'                  ),
     ('dlarnv',                    'zlarnv'                  ),
     ('dpotrf',                    'zpotrf'                  ),
+    ('dpotrs',                    'zpotrs'                  ),
     ('dtrmm',                     'ztrmm'                   ),
     ('dtrsm',                     'ztrsm'                   ),
     ('dtrsv',                     'ztrsv'                   ),
@@ -105,12 +118,13 @@ subs = {
     ('strsm',                     'ctrsm'                   ),
     ('strsv',                     'ctrsv'                   ),
     
-    # ----- BLAS and LAPACK, where complex base name != real base name
-    # with precision
+    # real != complex name
+    ('ddot',                      'zdotc'                   ),
     ('dlag2s',                    'zlag2c'                  ),
     ('dlagsy',                    'zlaghe'                  ),
     ('dlansy',                    'zlanhe'                  ),
     ('dlat2s',                    'zlat2c'                  ),
+    ('dnrm2',                     'dznrm2'                  ),
     ('dormqr',                    'zunmqr'                  ),
     ('dsymm',                     'zhemm'                   ),
     ('dsymv',                     'zhemv'                   ),
@@ -120,13 +134,13 @@ subs = {
     ('slat2d',                    'clat2z'                  ),
     
     # ----- BLAS AND LAPACK, UPPERCASE, ALPHABETIC ORDER
-    # COPY & PASTE THESE TO UPPERCASE BELOW AND FIX CASE.
     # MIXED PRECISION
     ('DSAXPY',                    'ZCAXPY'                  ),
     ('DSLASWP',                   'ZCLASWP'                 ),
     
-    # REGULAR
+    # REAL == COMPLEX NAME
     ('DAXPY',                     'ZAXPY'                   ),
+    ('DCOPY',                     'ZCOPY'                   ),
     ('DGEMM',                     'ZGEMM'                   ),
     ('DGEQRF',                    'ZGEQRF'                  ),
     ('DGEQRS',                    'ZGEQRS'                  ),
@@ -148,12 +162,13 @@ subs = {
     ('STRSM',                     'CTRSM'                   ),
     ('STRSV',                     'CTRSV'                   ),
     
-    # ----- BLAS AND LAPACK, WHERE COMPLEX BASE NAME != REAL BASE NAME
-    # WITH PRECISION
+    # REAL != COMPLEX NAME
+    ('DDOT',                      'ZDOTC'                   ),
     ('DLAG2S',                    'ZLAG2C'                  ),
     ('DLAGSY',                    'ZLAGHE'                  ),
     ('DLANSY',                    'ZLANHE'                  ),
     ('DLAT2S',                    'ZLAT2C'                  ),
+    ('DNRM2',                     'DZNRM2'                  ),
     ('DORMQR',                    'ZUNMQR'                  ),
     ('DSYMM',                     'ZHEMM'                   ),
     ('DSYMV',                     'ZHEMV'                   ),
@@ -162,13 +177,20 @@ subs = {
     ('SLANSY',                    'CLANHE'                  ),
     ('SLAT2D',                    'CLAT2Z'                  ),
     
+    # ----- Sparse Stuff
+    ('dspgmres',                  'zcpgmres'                ),
+    ('dspbicgstab',               'zcpbicgstab'             ),
+    ('dsir',                      'zcir'                    ),
+    ('dspir',                     'zcpir'                   ),
+    
     # ----- Prefixes
     ('blasf77_d',                 'blasf77_z'               ),
     ('blasf77_s',                 'blasf77_c'               ),
-    #('cublasIdamax',              'cublasIzamax'            ),
     ('cublasId',                  'cublasIz'                ),
     ('cublasD',                   'cublasZ'                 ),
     ('cublasS',                   'cublasC'                 ),
+    ('clAmdBlasD',                'clAmdBlasZ'              ),
+    ('clAmdBlasS',                'clAmdBlasC'              ),
     ('lapackf77_d',               'lapackf77_z'             ),
     ('lapackf77_s',               'lapackf77_c'             ),
     ('MAGMA_D',                   'MAGMA_Z'                 ),
@@ -179,23 +201,8 @@ subs = {
     ('magma_s',                   'magma_c'                 ),
     ('magma_get_d',               'magma_get_z'             ),
     ('magma_get_s',               'magma_get_c'             ),
-
-
-
-
-    #------ Sparse Stuff
-    ('magmasparse_ds',             'magmasparse_zc'             ),
-
-    ('dspgmres',                   'zcpgmres'                   ),
-    ('dspbicgstab',                'zcpbicgstab'                ),
-    ('dsir',                       'zcir'                       ),
-    ('dspir',                      'zcpir'                      ),
-
-    ('testing_dspgmres',           'testing_zcpgmres'           ),
-    ('testing_dspbicgstab',        'testing_zcpbicgstab'        ),
-    ('testing_dsir',               'testing_zcir'               ),
-    ('testing_dspir',              'testing_zcpir'              ),
-], 
+    ('magmasparse_ds',            'magmasparse_zc'          ),
+  ],
   
   # ------------------------------------------------------------
   # replacements applied to most files.
@@ -217,6 +224,7 @@ subs = {
     ('real',                'double precision',    'real',                'double precision'    ),  # before double
     ('float',               'double',              'float _Complex',      'double _Complex'     ),
     ('float',               'double',              'cuFloatComplex',      'cuDoubleComplex'     ),
+    ('float',               'double',              'MKL_Complex8',        'MKL_Complex16'       ),
     ('magmaFloat_const_ptr', 'magmaDouble_const_ptr', 'magmaFloatComplex_const_ptr', 'magmaDoubleComplex_const_ptr'),  # before magmaDoubleComplex
     ('magmaFloat_const_ptr', 'magmaDouble_const_ptr', 'magmaFloat_const_ptr',        'magmaDouble_const_ptr'       ),  # before magmaDoubleComplex
     ('magmaFloat_ptr',       'magmaDouble_ptr',       'magmaFloatComplex_ptr',       'magmaDoubleComplex_ptr'      ),  # before magmaDoubleComplex
@@ -226,7 +234,6 @@ subs = {
     ('PlasmaRealFloat',     'PlasmaRealDouble',    'PlasmaComplexFloat',  'PlasmaComplexDouble' ),
     ('real',                'double precision',    'complex',             'complex\*16'         ),
     ('REAL',                'DOUBLE_PRECISION',    'COMPLEX',             'COMPLEX_16'          ),
-    ('REAL',                'DOUBLE PRECISION',    'REAL',                'DOUBLE PRECISION'    ),
     ('REAL',                'DOUBLE PRECISION',    'COMPLEX',             'COMPLEX\*16'         ),
     ('sizeof_real',         'sizeof_double',       'sizeof_complex',      'sizeof_complex_16'   ),  # before complex
     ('real',                'real',                'complex',             'complex'             ),
@@ -243,30 +250,33 @@ subs = {
     ('',               '',               'CBLAS_SADDR',    'CBLAS_SADDR'     ),
     
     # ----- Complex numbers
-    # \b regexp here avoids conjugate -> conjfugate,
-    # assuming we always translate from z, not to z.
-    ('',               '',               'conjf',          'conj\\b'         ),
-    ('fabsf',          'fabs',           'cabsf',          'cabs'            ),
+    # \b regexp here avoids conjugate -> conjfugate, and fabs -> fabsf -> fabsff.
+    # The \b is deleted from replacement strings.
+    ('',               '',               'conjf',         r'conj\b'          ),
+    ('fabsf',         r'\bfabs\b',       'cabsf',          'cabs'            ),
     ('',               '',               'cuCrealf',       'cuCreal'         ),
     ('',               '',               'cuCimagf',       'cuCimag'         ),
     ('',               '',               'cuConjf',        'cuConj'          ),
-    ('fabsf',          'fabs',           'cuCabsf',        'cuCabs'          ),
+    ('fabsf',         r'\bfabs\b',       'cuCabsf',        'cuCabs'          ),
     
-    # ----- PLASMA / MAGMA
+    # ----- PLASMA / MAGMA, alphabetic order
     ('bsy2trc',        'bsy2trc',        'bhe2trc',        'bhe2trc'         ),
     ('magma_ssqrt',    'magma_dsqrt',    'magma_ssqrt',    'magma_dsqrt'     ),
     ('SAUXILIARY',     'DAUXILIARY',     'CAUXILIARY',     'ZAUXILIARY'      ),
     ('sauxiliary',     'dauxiliary',     'cauxiliary',     'zauxiliary'      ),
-    ('sbcyclic',       'dbcyclic',       'cbcyclic',       'zbcyclic'        ),
     ('sb2st',          'sb2st',          'hb2st',          'hb2st'           ),
+    ('sbcyclic',       'dbcyclic',       'cbcyclic',       'zbcyclic'        ),
     ('sbulge',         'dbulge',         'cbulge',         'zbulge'          ),
     ('SBULGE',         'DBULGE',         'CBULGE',         'ZBULGE'          ),
     ('SCODELETS',      'DCODELETS',      'CCODELETS',      'ZCODELETS'       ),
-    ('sgetmatrix',     'dgetmatrix',     'cgetmatrix',     'zgetmatrix'      ),
     ('sgeadd',         'dgeadd',         'cgeadd',         'zgeadd'          ),
+    ('sgecfi',         'dgecfi',         'cgecfi',         'zgecfi'          ),
+    ('sget',           'dget',           'cget',           'zget'            ),
+    ('sgetrl',         'dgetrl',         'cgetrl',         'zgetrl'          ),
     ('slocality',      'dlocality',      'clocality',      'zlocality'       ),
     ('smalloc',        'dmalloc',        'cmalloc',        'zmalloc'         ),
     ('smalloc',        'dmalloc',        'smalloc',        'dmalloc'         ),
+    ('smove',          'dmove',          'smove',          'dmove'           ),
     ('spanel_to_q',    'dpanel_to_q',    'cpanel_to_q',    'zpanel_to_q'     ),
     ('spermute',       'dpermute',       'cpermute',       'zpermute'        ),
     ('sprint',         'dprint',         'cprint',         'zprint'          ),
@@ -275,14 +285,14 @@ subs = {
     ('sprofiling',     'dprofiling',     'cprofiling',     'zprofiling'      ),
     ('sq_to_panel',    'dq_to_panel',    'cq_to_panel',    'zq_to_panel'     ),
     ('sset',           'dset',           'cset',           'zset'            ),
-    ('ssetmatrix',     'dsetmatrix',     'csetmatrix',     'zsetmatrix'      ),
+    ('ssign',          'dsign',          'ssign',          'dsign'           ),
     ('SSIZE',          'DSIZE',          'CSIZE',          'ZSIZE'           ),
     ('ssplit',         'dsplit',         'csplit',         'zsplit'          ),
     ('stile',          'dtile',          'ctile',          'ztile'           ),
     ('stranspose',     'dtranspose',     'ctranspose',     'ztranspose'      ),
-    ('szero',          'dzero',          'czero',          'zzero'           ),
+    ('STRANSPOSE',     'DTRANSPOSE',     'CTRANSPOSE',     'ZTRANSPOSE'      ),
     ('sy2sb',          'sy2sb',          'he2hb',          'he2hb'           ),
-    ('ssign',          'dsign',          'ssign',          'dsign'           ),
+    ('szero',          'dzero',          'czero',          'zzero'           ),
     
     # ----- Constants
     ('CblasTrans',     'CblasTrans',     'CblasConjTrans', 'CblasConjTrans'  ),
@@ -292,14 +302,14 @@ subs = {
     # ----- special cases for d -> s that need complex (e.g., testing_dgeev)
     # c/z precisions are effectively disabled for these rules
     ('caxpy',             'zaxpy',              'cccccccc', 'zzzzzzzz' ),
-    ('clange',            'zlange',             'cccccccc', 'zzzzzzzz' ),  
+    ('clange',            'zlange',             'cccccccc', 'zzzzzzzz' ),
     ('cuFloatComplex',    'cuDoubleComplex',    'cccccccc', 'zzzzzzzz' ),
     ('magmaFloatComplex', 'magmaDoubleComplex', 'cccccccc', 'zzzzzzzz' ),
     ('MAGMA_C',           'MAGMA_Z',            'cccccccc', 'zzzzzzzz' ),
     
     # -----
     # BLAS, lowercase, real != complex name
-    # add to lowercase, UPPERCASE, and Titlecase lists
+    # add to lowercase, UPPERCASE, and Titlecase lists, alphabetic order
     ('sasum',          'dasum',          'scasum',         'dzasum'          ),
     ('sdot',           'ddot',           'cdotc',          'zdotc'           ),
     ('sdot_sub',       'ddot_sub',       'cdotc_sub',      'zdotc_sub'       ),
@@ -307,14 +317,14 @@ subs = {
     ('sger',           'dger',           'cgerc',          'zgerc'           ),
     ('sger',           'dger',           'cgeru',          'zgeru'           ),
     ('snrm2',          'dnrm2',          'scnrm2',         'dznrm2'          ),
-    ('scnrm2',         'dznrm2',         'scnrm2',         'dznrm2'          ),
+    ('scnrm2',         'dznrm2',         'scnrm2',         'dznrm2'          ),  # where d -> s needs complex
     ('srot',           'drot',           'csrot',          'zdrot'           ),
     ('ssymm',          'dsymm',          'chemm',          'zhemm'           ),
     ('ssymv',          'dsymv',          'chemv',          'zhemv'           ),
     ('ssyr',           'dsyr',           'cher',           'zher'            ),
     #('ssyr2',          'dsyr2',          'cher2',          'zher2'           ),  # redundant with zher
-    #('ssyr2k',         'dsyr2k',         'cher2k',         'zher2k'          ),
-    #('ssyrk',          'dsyrk',          'cherk',          'zherk'           ),
+    #('ssyr2k',         'dsyr2k',         'cher2k',         'zher2k'          ),  # redundant with zher
+    #('ssyrk',          'dsyrk',          'cherk',          'zherk'           ),  # redundant with zher
     
     # BLAS, UPPERCASE, real != complex name
     ('SASUM',          'DASUM',          'SCASUM',         'DZASUM'          ),
@@ -324,6 +334,7 @@ subs = {
     ('SGER',           'DGER',           'CGERC',          'ZGERC'           ),
     ('SGER',           'DGER',           'CGERU',          'ZGERU'           ),
     ('SNRM2',          'DNRM2',          'SCNRM2',         'DZNRM2'          ),
+    ('SCNRM2',         'DZNRM2',         'SCNRM2',         'DZNRM2'          ),  # WHERE D -> S NEEDS COMPLEX
     ('SROT',           'DROT',           'CSROT',          'ZDROT'           ),
     ('SSYMM',          'DSYMM',          'CHEMM',          'ZHEMM'           ),
     ('SSYMV',          'DSYMV',          'CHEMV',          'ZHEMV'           ),
@@ -337,18 +348,27 @@ subs = {
     ('Sger',           'Dger',           'Cgerc',          'Zgerc'           ),
     ('Sger',           'Dger',           'Cgeru',          'Zgeru'           ),
     ('Snrm2',          'Dnrm2',          'Scnrm2',         'Dznrm2'          ),
+    ('Scnrm2',         'Dznrm2',         'Scnrm2',         'Dznrm2'          ),  # where d -> s needs complex
     ('Srot',           'Drot',           'Csrot',          'Zdrot'           ),
     ('Ssymm',          'Dsymm',          'Chemm',          'Zhemm'           ),
     ('Ssymv',          'Dsymv',          'Chemv',          'Zhemv'           ),
     ('Ssyr',           'Dsyr',           'Cher',           'Zher'            ),
     
+    # few special cases lacking precision
+    # !!! deprecated -- please include precision if you want precision generation to apply !!!
+    #('symm',           'symm',           'hemm',           'hemm'            ),
+    #('symv',           'symv',           'hemv',           'hemv'            ),
+    #('syrk',           'syrk',           'herk',           'herk'            ),
+    
     # -----
     # LAPACK, lowercase, real != complex name
-    # add to both lowercase and UPPERCASE lists
+    # add to both lowercase and UPPERCASE lists, alphabetic order
     ('slag2d',         'dlag2s',         'clag2z',         'zlag2c'          ),
     ('slagsy',         'dlagsy',         'claghe',         'zlaghe'          ),
-    ('slasyf',         'dlasyf',         'clahef',         'zlahef'          ),
     ('slansy',         'dlansy',         'clanhe',         'zlanhe'          ),
+    ('slasrt',         'dlasrt',         'slasrt',         'dlasrt'          ),
+    ('slasyf',         'dlasyf',         'clahef',         'zlahef'          ),
+    ('slatms',         'dlatms',         'clatms',         'zlatms'          ),
     ('slavsy',         'dlavsy',         'clavhe',         'zlavhe'          ),
     ('sorg2r',         'dorg2r',         'cung2r',         'zung2r'          ),
     ('sorgbr',         'dorgbr',         'cungbr',         'zungbr'          ),
@@ -378,14 +398,14 @@ subs = {
     ('ssytd2',         'dsytd2',         'chetd2',         'zhetd2'          ),
     ('ssytrd',         'dsytrd',         'chetrd',         'zhetrd'          ),
     ('ssytrf',         'dsytrf',         'chetrf',         'zhetrf'          ),
-    ('slasrt',         'dlasrt',         'slasrt',         'dlasrt'          ),
-    ('slatms',         'dlatms',         'clatms',         'zlatms'          ),
     
     # LAPACK, UPPERCASE, real != complex name
     ('SLAG2D',         'DLAG2S',         'CLAG2Z',         'ZLAG2C'          ),
     ('SLAGSY',         'DLAGSY',         'CLAGHE',         'ZLAGHE'          ),
-    ('SLASYF',         'DLASYF',         'CLAHEF',         'ZLAHEF'          ),
     ('SLANSY',         'DLANSY',         'CLANHE',         'ZLANHE'          ),
+    ('SLASRT',         'DLASRT',         'SLASRT',         'DLASRT'          ),
+    ('SLASYF',         'DLASYF',         'CLAHEF',         'ZLAHEF'          ),
+    ('SLATMS',         'DLATMS',         'CLATMS',         'ZLATMS'          ),
     ('SLAVSY',         'DLAVSY',         'CLAVHE',         'ZLAVHE'          ),
     ('SORG2R',         'DORG2R',         'CUNG2R',         'ZUNG2R'          ),
     ('SORGBR',         'DORGBR',         'CUNGBR',         'ZUNGBR'          ),
@@ -417,14 +437,13 @@ subs = {
     ('SSYTRF',         'DSYTRF',         'CHETRF',         'ZHETRF'          ),
     
     # -----
-    # BLAS, lowercase, real==complex name
-    # add to both lowercase and UPPERCASE lists
-    ('isamax',         'idamax',         'isamax',         'idamax'          ),
+    # BLAS, lowercase, real == complex name
+    # add to both lowercase and UPPERCASE lists, alphabetic order
     ('isamax',         'idamax',         'icamax',         'izamax'          ),
+    ('isamax',         'idamax',         'isamax',         'idamax'          ),
     ('isamin',         'idamin',         'icamin',         'izamin'          ),
     ('saxpy',          'daxpy',          'caxpy',          'zaxpy'           ),
     ('scopy',          'dcopy',          'ccopy',          'zcopy'           ),
-    ('sgecfi',         'dgecfi',         'cgecfi',         'zgecfi'          ),
     ('sgemm',          'dgemm',          'cgemm',          'zgemm'           ),
     ('sgemv',          'dgemv',          'cgemv',          'zgemv'           ),
     ('srot',           'drot',           'srot',           'drot'            ),
@@ -442,13 +461,12 @@ subs = {
     ('strsm',          'dtrsm',          'ctrsm',          'ztrsm'           ),
     ('strsv',          'dtrsv',          'ctrsv',          'ztrsv'           ),
     
-    # BLAS, UPPERCASE, real==complex name
-    ('ISAMAX',         'IDAMAX',         'ISAMAX',         'IDAMAX'          ),
+    # BLAS, UPPERCASE, real == complex name
     ('ISAMAX',         'IDAMAX',         'ICAMAX',         'IZAMAX'          ),
+    ('ISAMAX',         'IDAMAX',         'ISAMAX',         'IDAMAX'          ),
     ('ISAMIN',         'IDAMIN',         'ICAMIN',         'IZAMIN'          ),
     ('SAXPY',          'DAXPY',          'CAXPY',          'ZAXPY'           ),
     ('SCOPY',          'DCOPY',          'CCOPY',          'ZCOPY'           ),
-    ('SGECFI',         'DGECFI',         'CGECFI',         'ZGECFI'          ),
     ('SGEMM',          'DGEMM',          'CGEMM',          'ZGEMM'           ),
     ('SGEMV',          'DGEMV',          'CGEMV',          'ZGEMV'           ),
     ('SROT',           'DROT',           'SROT',           'DROT'            ),
@@ -467,8 +485,8 @@ subs = {
     ('STRSV',          'DTRSV',          'CTRSV',          'ZTRSV'           ),
     
     # -----
-    # LAPACK, lowercase, real==complex name
-    # add to both lowercase and UPPERCASE lists
+    # LAPACK, lowercase, real == complex name
+    # add to both lowercase and UPPERCASE lists, alphabetic order
     ('sbdsqr',         'dbdsqr',         'cbdsqr',         'zbdsqr'          ),
     ('sbdt01',         'dbdt01',         'cbdt01',         'zbdt01'          ),
     ('scheck',         'dcheck',         'ccheck',         'zcheck'          ),
@@ -523,12 +541,8 @@ subs = {
     ('slantr',         'dlantr',         'clantr',         'zlantr'          ),
     ('slaqps',         'dlaqps',         'claqps',         'zlaqps'          ),
     ('slaqp2',         'dlaqp2',         'claqp2',         'zlaqp2'          ),
-    ('slarfb',         'dlarfb',         'clarfb',         'zlarfb'          ),
-    ('slarfg',         'dlarfg',         'clarfg',         'zlarfg'          ),
-    ('slarft',         'dlarft',         'clarft',         'zlarft'          ),
-    ('slarfx',         'dlarfx',         'clarfx',         'zlarfx'          ),
-    ('slarfy',         'dlarfy',         'clarfy',         'zlarfy'          ),
-    ('slarf',          'dlarf',          'clarf',          'zlarf'           ),
+    ('slaqtrs',        'dlaqtrs',        'claqtrs',        'zlaqtrs'         ),
+    ('slarf',          'dlarf',          'clarf',          'zlarf'           ),  # handles zlarf[ bgtxy]
     ('slarnv',         'dlarnv',         'clarnv',         'zlarnv'          ),
     ('slarnv',         'dlarnv',         'slarnv',         'dlarnv'          ),
     ('slartg',         'dlartg',         'clartg',         'zlartg'          ),
@@ -570,7 +584,7 @@ subs = {
     ('sungesv',        'sungesv',        'cungesv',        'cungesv'         ),
     ('sstegr',         'dstegr',         'cstegr',         'zstegr'          ),
     
-    # LAPACK, UPPERCASE, real==complex name
+    # LAPACK, UPPERCASE, real == complex name
     ('SBDSQR',         'DBDSQR',         'CBDSQR',         'ZBDSQR'          ),
     ('SBDT01',         'DBDT01',         'CBDT01',         'ZBDT01'          ),
     ('SCHECK',         'DCHECK',         'CCHECK',         'ZCHECK'          ),
@@ -579,6 +593,7 @@ subs = {
     ('SGEBD2',         'DGEBD2',         'CGEBD2',         'ZGEBD2'          ),
     ('SGEBRD',         'DGEBRD',         'CGEBRD',         'ZGEBRD'          ),
     ('SGEEV',          'DGEEV',          'CGEEV',          'ZGEEV'           ),
+    ('SGEGQR',         'DGEGQR',         'CGEGQR',         'ZGEGQR'          ),
     ('SGEHD2',         'DGEHD2',         'CGEHD2',         'ZGEHD2'          ),
     ('SGEHRD',         'DGEHRD',         'CGEHRD',         'ZGEHRD'          ),
     ('SGELQ2',         'DGELQ2',         'CGELQ2',         'ZGELQ2'          ),
@@ -624,12 +639,7 @@ subs = {
     ('SLANTR',         'DLANTR',         'CLANTR',         'ZLANTR'          ),
     ('SLAQPS',         'DLAQPS',         'CLAQPS',         'ZLAQPS'          ),
     ('SLAQP2',         'DLAQP2',         'CLAQP2',         'ZLAQP2'          ),
-    ('SLARFB',         'DLARFB',         'CLARFB',         'ZLARFB'          ),
-    ('SLARFG',         'DLARFG',         'CLARFG',         'ZLARFG'          ),
-    ('SLARFT',         'DLARFT',         'CLARFT',         'ZLARFT'          ),
-    ('SLARFX',         'DLARFX',         'CLARFX',         'ZLARFX'          ),
-    ('SLARFY',         'DLARFY',         'CLARFY',         'ZLARFY'          ),
-    ('SLARF',          'DLARF',          'CLARF',          'ZLARF'           ),
+    ('SLARF',          'DLARF',          'CLARF',          'ZLARF'           ),  # HANDLES ZLARF[ BGTXY]
     ('SLARNV',         'DLARNV',         'CLARNV',         'ZLARNV'          ),
     ('SLARNV',         'DLARNV',         'SLARNV',         'DLARNV'          ),
     ('SLARTG',         'DLARTG',         'CLARTG',         'ZLARTG'          ),
@@ -653,8 +663,6 @@ subs = {
     ('SSHIFT',         'DSHIFT',         'CSHIFT',         'ZSHIFT'          ),
     ('SSSSSM',         'DSSSSM',         'CSSSSM',         'ZSSSSM'          ),
     ('SSTEBZ',         'DSTEBZ',         'SSTEBZ',         'DSTEBZ'          ),
-    ('SLATMS',         'DLATMS',         'CLATMS',         'ZLATMS'          ),
-    ('SLASRT',         'DLASRT',         'SLASRT',         'DLASRT'          ),
     ('SSTEDC',         'DSTEDC',         'CSTEDC',         'ZSTEDC'          ),
     ('SSTEDX',         'DSTEDX',         'CSTEDX',         'ZSTEDX'          ),
     ('SSTEDX',         'DSTEDX',         'SSTEDX',         'DSTEDX'          ),
@@ -674,7 +682,6 @@ subs = {
     ('SSTEGR',         'DSTEGR',         'CSTEGR',         'ZSTEGR'          ),
 
 
-
     # ----- SPARSE BLAS
     ('cusparseS',      'cusparseD',      'cusparseC',      'cusparseZ'       ),
     ('sgecsrmv',       'dgecsrmv',       'cgecsrmv',       'zgecsrmv'        ),
@@ -690,8 +697,6 @@ subs = {
     ('smerge',         'dmerge',         'cmerge',         'zmerge'          ),
     ('sbcsr',          'dbcsr',          'cbcsr',          'zbcsr'           ),
 
-
-
     # ----- SPARSE Iterative Solvers
     ('scg',            'dcg',            'ccg',            'zcg'             ),
     ('sgmres',         'dgmres',         'cgmres',         'zgmres'          ),
@@ -705,9 +710,8 @@ subs = {
     ('siterref',       'diterref',       'citerref',       'ziterref'        ),
     ('silu',           'dilu',           'cilu',           'zilu'            ),
 
-
     # ----- SPARSE auxiliary tools
-    ('matrix_s',       'matrix_d',       'matrix_c',       'matrix_z'        ), 
+    ('matrix_s',       'matrix_d',       'matrix_c',       'matrix_z'        ),
     ('svjacobi',       'dvjacobi',       'cvjacobi',       'zvjacobi'        ),
     ('s_csr2array',    'd_csr2array',    'c_csr2array',    'z_csr2array'     ),
     ('s_array2csr',    'd_array2csr',    'c_array2csr',    'z_array2csr'     ),
@@ -719,11 +723,19 @@ subs = {
     ('_TYPES_S_H',     '_TYPES_D_H',     '_TYPES_C_H',     '_TYPES_Z_H'      ),
 
 
+    # ----- Xeon Phi (MIC) specific, alphabetic order unless otherwise required
+    ('SREG_WIDTH',                  'DREG_WIDTH',                  'CREG_WIDTH',                  'ZREG_WIDTH' ),
+    ('_MM512_I32LOEXTSCATTER_PPS',  '_MM512_I32LOEXTSCATTER_PPD',  '_MM512_I32LOEXTSCATTER_PPC',  '_MM512_I32LOEXTSCATTER_PPZ' ),
+    ('_MM512_LOAD_PPS',             '_MM512_LOAD_PPD',             '_MM512_LOAD_PPC',             '_MM512_LOAD_PPZ' ),
+    ('_MM512_STORE_PPS',            '_MM512_STORE_PPD',            '_MM512_STORE_PPC',            '_MM512_STORE_PPZ' ),
+    ('_MM_DOWNCONV_PS_NONE',        '_MM_DOWNCONV_PD_NONE',        '_MM_DOWNCONV_PC_NONE',        '_MM_DOWNCONV_PZ_NONE' ),
+    ('__M512S',                     '__M512D',                     '__M512C',                     '__M512Z' ),
+    ('somatcopy',                   'domatcopy',                   'comatcopy',                   'zomatcopy'),
 
 
     # ----- Prefixes
     # Most routines have already been renamed by above BLAS/LAPACK rules.
-    # cublas[SDCZ] functions where real==complex name are handled here;
+    # cublas[SDCZ] functions where real == complex name are handled here;
     # if real != complex name, it must be handled above.
     ('blasf77_s',      'blasf77_d',      'blasf77_c',      'blasf77_z'       ),
     ('blasf77_s',      'blasf77_d',      'blasf77_s',      'blasf77_d'       ),
@@ -744,10 +756,10 @@ subs = {
     ('core_s',         'core_d',         'core_c',         'core_z'          ),
     ('CORE_s',         'CORE_d',         'CORE_s',         'CORE_d'          ),
     ('cpu_gpu_s',      'cpu_gpu_d',      'cpu_gpu_c',      'cpu_gpu_z'       ),
-    ('cublasS',        'cublasD',        'cublasC',        'cublasZ'         ),
     ('cublasIs',       'cublasId',       'cublasIs',       'cublasId'        ),
     ('cublasIs',       'cublasId',       'cublasIc',       'cublasIz'        ),
-    ('smove',          'dmove',          'smove',          'dmove'           ),
+    ('cublasS',        'cublasD',        'cublasC',        'cublasZ'         ),
+    ('clAmdBlasS',     'clAmdBlasD',     'clAmdBlasC',     'clAmdBlasZ'      ),
     ('example_s',      'example_d',      'example_c',      'example_z'       ),
     ('ipt_s',          'ipt_d',          'ipt_c',          'ipt_z'           ),
     ('LAPACKE_s',      'LAPACKE_d',      'LAPACKE_c',      'LAPACKE_z'       ),
@@ -785,8 +797,8 @@ subs = {
     ('workspace_s',    'workspace_d',    'workspace_c',    'workspace_z'     ),
     ('QUARK_Insert_Task_s', 'QUARK_Insert_Task_d', 'QUARK_Insert_Task_c', 'QUARK_Insert_Task_z' ),
     
-    # magma_d -> magma_s, so revert magma_sevice to magma_device
-    ('magma_device',   'magma_sevice',   'magma_device',   'magma_sevice'    ),
+    # magma_[get_]d -> magma_[get_]s, so revert _sevice to _device
+    ('_device',        '_sevice',        '_device',        '_sevice'         ),
   ],
   
   # ------------------------------------------------------------
