@@ -721,6 +721,7 @@ subs = {
     ('s_transpose',    'd_transpose',    'c_transpose',    'z_transpose'     ),
     ('SPARSE_S_H',     'SPARSE_D_H',     'SPARSE_C_H',     'SPARSE_Z_H'      ),
     ('_TYPES_S_H',     '_TYPES_D_H',     '_TYPES_C_H',     '_TYPES_Z_H'      ),
+    ('sresidual',      'dresidual',      'cresidual',      'zresidual'       ), 
 
 
     # ----- Xeon Phi (MIC) specific, alphabetic order unless otherwise required
@@ -731,7 +732,6 @@ subs = {
     ('_MM_DOWNCONV_PS_NONE',        '_MM_DOWNCONV_PD_NONE',        '_MM_DOWNCONV_PC_NONE',        '_MM_DOWNCONV_PZ_NONE' ),
     ('__M512S',                     '__M512D',                     '__M512C',                     '__M512Z' ),
     ('somatcopy',                   'domatcopy',                   'comatcopy',                   'zomatcopy'),
-
 
     # ----- Prefixes
     # Most routines have already been renamed by above BLAS/LAPACK rules.
