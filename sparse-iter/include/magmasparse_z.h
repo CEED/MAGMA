@@ -199,7 +199,7 @@ write_z_csr_mtx(        magma_int_t n_row,
                         magmaDoubleComplex **val, 
                         magma_int_t **row, 
                         magma_int_t **col, 
-                        magma_major_t MajorType,
+                        magma_order_t MajorType,
                         const char *filename );
 
 magma_int_t 
@@ -221,7 +221,7 @@ print_z_csr_mtx(        magma_int_t n_row,
                         magmaDoubleComplex **val, 
                         magma_int_t **row, 
                         magma_int_t **col, 
-                        magma_major_t MajorType );
+                        magma_order_t MajorType );
 
 
 
@@ -318,6 +318,18 @@ magma_zilusetup(        magma_z_sparse_matrix A,
                         magma_z_sparse_matrix *M,
                         magma_int_t *ipiv );
 
+magma_int_t
+magma_zresidual(        magma_z_sparse_matrix A, 
+                        magma_z_vector b, 
+                        magma_z_vector x, 
+                        double *res );
+
+magma_int_t
+magma_zmgenerator(  magma_int_t nx,
+                    magma_int_t ny,
+                    magma_int_t nz,
+                    magma_z_sparse_matrix *A );
+
 /* ////////////////////////////////////////////////////////////////////////////
    -- MAGMA_SPARSE function definitions / Data on CPU
 */
@@ -387,6 +399,17 @@ magma_zgmres_pipe(     magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector
 magma_int_t
 magma_zilu(            magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
                        magma_solver_parameters *solver_par, magma_int_t *ipiv );
+
+magma_int_t
+magma_zbcsrlu(         magma_z_sparse_matrix A, 
+                       magma_z_sparse_matrix *M,
+                       magma_int_t *ipiv );
+
+magma_int_t
+magma_zbcsrlusv(       magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+                       magma_solver_parameters *solver_par, magma_int_t *ipiv );
+
+
 
 magma_int_t
 magma_zilucg(          magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
@@ -676,6 +699,38 @@ magma_zbcsrtrsv( char uplo,
                  magmaDoubleComplex *A,
                  magma_int_t *blockinfo,   
                  magmaDoubleComplex *x );
+
+magma_int_t
+magma_zbcsrvalcpy(  magma_int_t size_b, 
+                    magma_int_t num_blocks, 
+                    magma_int_t num_zero_blocks, 
+                    magmaDoubleComplex **Aval, 
+                    magmaDoubleComplex **Bval,
+                    magmaDoubleComplex **Bval2 );
+
+magma_int_t
+magma_zbcsrluegemm( magma_int_t size_b, 
+                    magma_int_t num_block_rows,
+                    magma_int_t kblocks,
+                    magmaDoubleComplex **dA,  
+                    magmaDoubleComplex **dB,  
+                    magmaDoubleComplex **dC );
+
+magma_int_t
+magma_zbcsrlupivloc( magma_int_t size_b, 
+                    magma_int_t kblocks,
+                    magmaDoubleComplex **dA,  
+                    magma_int_t *ipiv );
+
+magma_int_t
+magma_zbcsrblockinfo5(  magma_int_t lustep,
+                        magma_int_t num_blocks, 
+                        magma_int_t c_blocks, 
+                        magma_int_t size_b,
+                        magma_int_t *blockinfo,
+                        magmaDoubleComplex *val,
+                        magmaDoubleComplex **AII );
+
  
 #ifdef __cplusplus
 }

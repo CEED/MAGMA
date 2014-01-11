@@ -400,7 +400,7 @@ magma_int_t write_z_csrtomtx( magma_z_sparse_matrix B, const char *filename){
 
 
 extern "C"
-magma_int_t write_z_csr_mtx( magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col, magma_major_t MajorType, const char *filename ){
+magma_int_t write_z_csr_mtx( magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col, magma_order_t MajorType, const char *filename ){
 
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -484,7 +484,7 @@ magma_int_t write_z_csr_mtx( magma_int_t n_row, magma_int_t n_col, magma_int_t n
 
 
 extern "C"
-magma_int_t print_z_csr_mtx( magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col, magma_major_t MajorType ){
+magma_int_t print_z_csr_mtx( magma_int_t n_row, magma_int_t n_col, magma_int_t nnz, magmaDoubleComplex **val, magma_int_t **row, magma_int_t **col, magma_order_t MajorType ){
 
 /*  -- MAGMA (version 1.1) --
        Univ. of Tennessee, Knoxville
@@ -623,7 +623,8 @@ magma_int_t magma_z_mvisu( magma_z_sparse_matrix A )
         if( A.storage_type == Magma_DENSE ){
             for( magma_int_t i=0; i<(A.num_rows); i++ ){
               for( magma_int_t j=0; j<A.num_cols; j++ )
-                cout << MAGMA_Z_REAL( A.val[i*(A.num_cols)+j] ) << " " ;
+                printf("%4.2f ", MAGMA_Z_REAL( A.val[i*(A.num_cols)+j] ) );
+                //cout << MAGMA_Z_REAL( A.val[i*(A.num_cols)+j] ) << " " ;
               cout << endl;
             }
         }
