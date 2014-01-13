@@ -6,43 +6,45 @@
 #      November 2011
 #//////////////////////////////////////////////////////////////////////////////
 
-MAGMA_DIR = ../
+MAGMA_DIR = ..
 include $(MAGMA_DIR)/Makefile.internal
 -include Makefile.local
+-include Makefile.gen
+
+LIB += -lcusparse
 
 .PHONY: all lib libmagma_sparse test clean cleanall install shared
 
+.DEFAULT_GOAL := all
 all: lib test
 
 lib: libmagma_sparse
 
 libmagma_sparse:
-	@echo ======================================== include
-	( cd include        && $(MAKE) )
-	@echo ======================================== blas
+	@echo ======================================== sparse/blas
 	( cd blas           && $(MAKE) )
-	@echo ======================================== src
+	@echo ======================================== sparse/src
 	( cd src            && $(MAKE) )
-	@echo ======================================== control
+	@echo ======================================== sparse/control
 	( cd control        && $(MAKE) )
 
 test: lib
-	@echo ======================================== test
+	@echo ======================================== sparse/testing
 	( cd testing        && $(MAKE) )
 
 clean:
 	( cd include        && $(MAKE) clean )
-	( cd control        && $(MAKE) clean )
-	( cd src            && $(MAKE) clean )
 	( cd blas           && $(MAKE) clean )
+	( cd src            && $(MAKE) clean )
+	( cd control        && $(MAKE) clean )
 	( cd testing        && $(MAKE) clean )
 	-rm -f $(LIBMAGMA_SPARSE)
 
 cleanall:
 	( cd include        && $(MAKE) cleanall )
-	( cd control        && $(MAKE) cleanall )
-	( cd src            && $(MAKE) cleanall )
 	( cd blas           && $(MAKE) cleanall )
+	( cd src            && $(MAKE) cleanall )
+	( cd control        && $(MAKE) cleanall )
 	( cd testing        && $(MAKE) cleanall )
 	$(MAKE) cleanall2
 
@@ -56,7 +58,7 @@ dir:
 	mkdir -p $(prefix)/sparse-iter/include
 
 install: lib dir
-#       MAGMA
+	# MAGMA
 	cp $(MAGMA_DIR)/sparse-iter/include/*.h  $(prefix)/sparse-iter/include
 
 # ========================================
@@ -77,4 +79,4 @@ $(LIBMAGMA_SPARSE_SO): src/*.o control/*.o blas/*.cu_o blas/*.o
 	src/*.o control/*.o blas/*.cu_o blas/*.o \
 	-L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) \
-	$(LIB) -lcusparse
+	$(LIB)
