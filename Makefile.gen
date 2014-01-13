@@ -17,31 +17,33 @@ cleanmkgen:
 	find . -name .Makefile.gen -delete
 	find . -name  Makefile.src -delete
 
-clean-generation: cleangen
-	( cd include          && $(MAKE) cleangen )
-	( cd control          && $(MAKE) cleangen )
-	( cd interface_opencl && $(MAKE) cleangen )
-	( cd src              && $(MAKE) cleangen )
-	( cd testing          && $(MAKE) cleangen )
+clean_generation: cleangen
+	@echo clean_generation
+	( cd $(MAGMA_DIR)/include          && $(MAKE) cleangen )
+	( cd $(MAGMA_DIR)/magmablas        && $(MAKE) cleangen )
+	( cd $(MAGMA_DIR)/src              && $(MAKE) cleangen )
+	( cd $(MAGMA_DIR)/control          && $(MAKE) cleangen )
+	( cd $(MAGMA_DIR)/interface_cuda   && $(MAKE) cleangen )
+	( cd $(MAGMA_DIR)/testing          && $(MAKE) cleangen )
 
 generation:
 	@echo ======================================== include
-	(cd $(MAGMA_DIR)/include        && $(MAKE) generate )
-	@echo ======================================== control
-	(cd $(MAGMA_DIR)/control        && $(MAKE) generate )
-	@echo ======================================== src
-	(cd $(MAGMA_DIR)/src            && $(MAKE) generate )
-	@echo ======================================== interface
-	(cd $(MAGMA_DIR)/interface_cuda && $(MAKE) generate )
+	( cd $(MAGMA_DIR)/include        && $(MAKE) generate )
 	@echo ======================================== magmablas
-	(cd $(MAGMA_DIR)/magmablas      && $(MAKE) generate )
+	( cd $(MAGMA_DIR)/magmablas      && $(MAKE) generate )
+	@echo ======================================== src
+	( cd $(MAGMA_DIR)/src            && $(MAKE) generate )
+	@echo ======================================== control
+	( cd $(MAGMA_DIR)/control        && $(MAKE) generate )
+	@echo ======================================== interface
+	( cd $(MAGMA_DIR)/interface_cuda && $(MAKE) generate )
 	@echo ======================================== testing
-	(cd $(MAGMA_DIR)/testing        && $(MAKE) generate )
+	( cd $(MAGMA_DIR)/testing        && $(MAKE) generate )
 	$(MAKE) CMakes
 
 headers:
 	@echo ======================================== include
-	( cd include && $(MAKE) )
+	( cd $(MAGMA_DIR)/include        && $(MAKE) generate )
 
 libmagma: headers
 
@@ -74,18 +76,18 @@ Makefile.src: $(CODEGEN) Makefile
 	$(PYTHON) $(CODEGEN) -o -p "s"    $(ZSRC) >> $@
 
 CMakes:
-	@echo ======================================== control
-	(cd $(MAGMA_DIR)/control        && $(MAKE) CMake )
-	@echo ======================================== src
-	(cd $(MAGMA_DIR)/src            && $(MAKE) CMake )
-	@echo ======================================== interface
-	(cd $(MAGMA_DIR)/interface_cuda && $(MAKE) CMake )
 	@echo ======================================== magmablas
-	(cd $(MAGMA_DIR)/magmablas      && $(MAKE) CMake )
+	( cd $(MAGMA_DIR)/magmablas      && $(MAKE) CMake )
+	@echo ======================================== src
+	( cd $(MAGMA_DIR)/src            && $(MAKE) CMake )
+	@echo ======================================== control
+	( cd $(MAGMA_DIR)/control        && $(MAKE) CMake )
+	@echo ======================================== interface
+	( cd $(MAGMA_DIR)/interface_cuda && $(MAKE) CMake )
 	@echo ======================================== testing
-	(cd $(MAGMA_DIR)/testing        && $(MAKE) CMake )
-	@echo ======================================== testing
-	(cd $(MAGMA_DIR)/testing/lin    && $(MAKE) CMake )
+	( cd $(MAGMA_DIR)/testing        && $(MAKE) CMake )
+	@echo ======================================== testing/lin
+	( cd $(MAGMA_DIR)/testing/lin    && $(MAKE) CMake )
 
 ZSRC_ = $(addprefix $(DIR)/, $(filter-out %.f90, $(filter-out %.F90, $(ZSRC))))
 CSRC_ = $(addprefix $(DIR)/, $(filter-out %.f90, $(filter-out %.F90, $(CSRC))))

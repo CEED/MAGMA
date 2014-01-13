@@ -56,23 +56,23 @@ test: lib
 
 clean:
 	( cd include        && $(MAKE) clean )
-	( cd control        && $(MAKE) clean )
+	( cd magmablas      && $(MAKE) clean )
 	( cd src            && $(MAKE) clean )
+	( cd control        && $(MAKE) clean )
 	( cd interface_cuda && $(MAKE) clean )
 	( cd testing        && $(MAKE) clean )
 	( cd testing/lin    && $(MAKE) clean )
-	( cd magmablas      && $(MAKE) clean ) 
 	#(cd quark          && $(MAKE) clean )
 	-rm -f $(LIBMAGMA) $(LIBMAGMA_SO)
 
 cleanall:
 	( cd include        && $(MAKE) cleanall )
-	( cd control        && $(MAKE) cleanall )
+	( cd magmablas      && $(MAKE) cleanall )
 	( cd src            && $(MAKE) cleanall )
+	( cd control        && $(MAKE) cleanall )
 	( cd interface_cuda && $(MAKE) cleanall )
 	( cd testing        && $(MAKE) cleanall )
 	( cd testing/lin    && $(MAKE) cleanall )
-	( cd magmablas      && $(MAKE) cleanall ) 
 	( cd lib            && rm -f *.a *.so )
 	#(cd quark          && $(MAKE) cleanall )
 	$(MAKE) cleanall2

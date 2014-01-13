@@ -237,23 +237,23 @@ cleanall: clean cleanexe
 
 ifeq ($(FORT), pgfortran)
 testing_%.o : testing_%.cuf
-	$(FORT) $(FOPTS) $(INC_MAGMA) -c $< -o $@ 
+	$(FORT) $(FOPTS) $(INC_MAGMA) -c $< -o $@
 else
 testing_%.o : testing_%.f90
-	$(FORT) $(FOPTS) $(INC_MAGMA) -c $< -o $@ 
+	$(FORT) $(FOPTS) $(INC_MAGMA) -c $< -o $@
 endif
 
 testing_%_f : testing_%_f.o $(FOBJ)
 	$(FORT) $(LDOPTS) $< $(FOBJ) -o $@ \
 	$(LIBTEST) $(LIBLAPACKTEST) -L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) \
-	$(LIB) 
+	$(LIB)
 
 testing_% : testing_%.o
 	$(CC) $(LDOPTS) $(NOMAIN) $< -o $@ \
 	$(LIBTEST) $(LIBLAPACKTEST) -L$(MAGMA_DIR)/lib -lmagma \
 	$(LIBDIR) \
-	$(LIB) 
+	$(LIB)
 
 #
 # These two files are provided by cuda
