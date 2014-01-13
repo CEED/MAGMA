@@ -54,15 +54,15 @@ magma_zhegvdx(magma_int_t itype, char jobz, char range, char uplo, magma_int_t n
             = 2:  A*B*x = (lambda)*x
             = 3:  B*A*x = (lambda)*x
 
+    JOBZ    (input) CHARACTER*1
+            = 'N':  Compute eigenvalues only;
+            = 'V':  Compute eigenvalues and eigenvectors.
+
     RANGE   (input) CHARACTER*1
             = 'A': all eigenvalues will be found.
             = 'V': all eigenvalues in the half-open interval (VL,VU]
                    will be found.
             = 'I': the IL-th through IU-th eigenvalues will be found.
-
-    JOBZ    (input) CHARACTER*1
-            = 'N':  Compute eigenvalues only;
-            = 'V':  Compute eigenvalues and eigenvectors.
 
     UPLO    (input) CHARACTER*1
             = 'U':  Upper triangles of A and B are stored;
