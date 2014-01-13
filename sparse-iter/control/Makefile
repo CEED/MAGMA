@@ -6,6 +6,7 @@
 #      November 2011
 #//////////////////////////////////////////////////////////////////////////////
 
+DIR = sparse-iter/control
 MAGMA_DIR = ../..
 include $(MAGMA_DIR)/Makefile.internal
 

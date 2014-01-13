@@ -6,6 +6,7 @@
 #      November 2011
 #//////////////////////////////////////////////////////////////////////////////
 
+DIR = sparse-iter/testing
 MAGMA_DIR = ../..
 include $(MAGMA_DIR)/Makefile.internal
 
@@ -87,14 +88,16 @@ $(EXE): $(LIBMAGMA_SPARSE) testing_util.o
 clean:
 	rm -f *.o *~ 
 
-cleanall: clean
+cleanexe:
 	rm -f $(EXE)
+
+cleanall: clean cleanexe
 
 testing_% : testing_%.o
 	$(CC) $(LDOPTS) $(NOMAIN) $< -o $@ \
 	testing_util.o -L$(MAGMA_DIR)/lib -lmagma_sparse -lmagma \
 	$(LIBDIR) \
-	$(LIB) -lcusparse
+	$(LIB)
 
 # keep intermediate object files, to speed up re-compiling when library changes
 .SECONDARY: $(ALLOBJ)
