@@ -35,6 +35,9 @@ subs = {
     # ----- Special line indicating column types
     ['ds',                        'zc'                      ],
     
+    # ----- special cases
+    ('dcopy',                     'zcopy'                   ),  # before zc
+    
     # ----- Mixed precision prefix
     ('DS',                        'ZC'                      ),
     ('ds',                        'zc'                      ),
@@ -96,7 +99,6 @@ subs = {
     
     # real == complex name
     ('daxpy',                     'zaxpy'                   ),
-    ('dcopy',                     'zcopy'                   ),
     ('dgemm',                     'zgemm'                   ),
     ('dgeqrf',                    'zgeqrf'                  ),
     ('dgeqrs',                    'zgeqrs'                  ),
