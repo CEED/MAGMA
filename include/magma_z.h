@@ -105,7 +105,7 @@ magma_int_t magma_zlaqps( magma_int_t m, magma_int_t n, magma_int_t offset,
                           magmaDoubleComplex *F,  magma_int_t ldf,
                           magmaDoubleComplex *dF, magma_int_t lddf );
 
-void        magma_zlarfg( magma_int_t n, magmaDoubleComplex *alpha, magmaDoubleComplex *x,
+magma_int_t magma_zlarfg( magma_int_t n, magmaDoubleComplex *alpha, magmaDoubleComplex *x,
                           magma_int_t incx, magmaDoubleComplex *tau);
 
 magma_int_t magma_zlatrd( magma_uplo_t uplo, magma_int_t n, magma_int_t nb, magmaDoubleComplex *a,
@@ -539,6 +539,11 @@ magma_int_t magma_zhegvdx_2stage_m( magma_int_t nrgpu,
 /* ////////////////////////////////////////////////////////////////////////////
  -- MAGMA function definitions / Data on GPU
 */
+magma_int_t magma_zgegqr_gpu( magma_int_t m, magma_int_t n,
+                              magmaDoubleComplex *dA,   magma_int_t ldda,
+                              magmaDoubleComplex *dwork, magmaDoubleComplex *work,
+                              magma_int_t *info );
+
 magma_int_t magma_zgels_gpu(  magma_trans_t trans, magma_int_t m, magma_int_t n, magma_int_t nrhs,
                               magmaDoubleComplex *dA,    magma_int_t ldda,
                               magmaDoubleComplex *dB,    magma_int_t lddb,
