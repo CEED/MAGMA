@@ -112,14 +112,14 @@ int main(int argc, char **argv)
                     printf("lapackf77_zgesv returned error %d: %s.\n",
                            (int) info, magma_strerror( info ));
                 
-                printf( "%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e%s\n",
+                printf( "%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e  %s\n",
                         (int) N, (int) nrhs, cpu_perf, cpu_time, gpu_perf, gpu_time,
-                        error, (error < tol ? "" : "  failed"));
+                        error, (error < tol ? "ok" : "failed"));
             }
             else {
-                printf( "%5d %5d     ---   (  ---  )   %7.2f (%7.2f)   %8.2e%s\n",
+                printf( "%5d %5d     ---   (  ---  )   %7.2f (%7.2f)   %8.2e  %s\n",
                         (int) N, (int) nrhs, gpu_perf, gpu_time,
-                        error, (error < tol ? "" : "  failed"));
+                        error, (error < tol ? "ok" : "failed"));
             }
             
             TESTING_FREE_CPU( h_A  );

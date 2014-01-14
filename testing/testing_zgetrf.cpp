@@ -228,12 +228,12 @@ int main( int argc, char** argv)
             }
             if ( opts.check == 2 ) {
                 error = get_residual( M, N, h_A, lda, ipiv );
-                printf("   %8.2e%s\n", error, (error < tol ? "" : "  failed"));
+                printf("   %8.2e  %s\n", error, (error < tol ? "ok" : "failed"));
                 status |= ! (error < tol);
             }
             else if ( opts.check ) {
                 error = get_LU_error( M, N, h_A, lda, ipiv );
-                printf("   %8.2e%s\n", error, (error < tol ? "" : "  failed"));
+                printf("   %8.2e  %s\n", error, (error < tol ? "ok" : "failed"));
                 status |= ! (error < tol);
             }
             else {
