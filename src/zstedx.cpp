@@ -199,8 +199,7 @@ magma_zstedx(char range, magma_int_t n, double vl, double vu,
     // solve the problem with another solver.
 
     if (n < smlsiz) {
-        char char_I[]= {'I', 0};
-        lapackf77_zsteqr(char_I, &n, d, e, z, &ldz, rwork, info);
+        lapackf77_zsteqr("I", &n, d, e, z, &ldz, rwork, info);
     } else {
         // We simply call DSTEDX instead.
         magma_dstedx(range, n, vl, vu, il, iu, d, e, rwork, n,

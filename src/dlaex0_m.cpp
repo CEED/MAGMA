@@ -203,9 +203,6 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
 
     // Solve each submatrix eigenproblem at the bottom of the divide and
     // conquer tree.
-
-    char char_I[] = {'I', 0};
-
     magma_timer_t time;
     timer_start( time );
 
@@ -217,7 +214,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
             submat = iwork[i-1];
             matsiz = iwork[i] - iwork[i-1];
         }
-        lapackf77_dsteqr(char_I, &matsiz, &d[submat], &e[submat],
+        lapackf77_dsteqr("I", &matsiz, &d[submat], &e[submat],
                          Q(submat, submat), &ldq, work, info);  // change to edc?
         if (*info != 0) {
             printf("info: %d\n, submat: %d\n", (int) *info, (int) submat);
@@ -291,8 +288,7 @@ magma_dlaex0_m(magma_int_t nrgpu, magma_int_t n, double* d, double* e, double* q
         blasf77_dcopy(&n, Q(0, j), &ione, &work[ n*(i+1) ], &ione);
     }
     blasf77_dcopy(&n, work, &ione, d, &ione);
-    char char_A[] = {'A',0};
-    lapackf77_dlacpy ( char_A, &n, &n, &work[n], &n, q, &ldq );
+    lapackf77_dlacpy ( "A", &n, &n, &work[n], &n, q, &ldq );
 
     for (igpu = 0; igpu < nrgpu; ++igpu) {
         magma_setdevice(igpu);
