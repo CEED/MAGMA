@@ -370,6 +370,7 @@ typedef double real_Double_t;
 #define Magma_CSC          416
 #define Magma_HYB          417
 #define Magma_COO          418
+#define Magma_ELLPACKRT    419
 
 #define Magma_CPU          421
 #define Magma_DEV          422
