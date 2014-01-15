@@ -16,8 +16,8 @@
 
 #include <assert.h>
 
-#define RTOLERANCE     10e-16
-#define ATOLERANCE     10e-16
+#define RTOLERANCE     1e-16
+#define ATOLERANCE     1e-16
 
 
 magma_int_t
@@ -49,7 +49,8 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     =====================================================================  */
 
     // local variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
+                                            c_mone = MAGMA_Z_NEG_ONE;
     
     magma_int_t dofs = A.num_rows;
 
@@ -65,14 +66,14 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     magma_int_t i;
 
     // solver setup
-    magma_zscal( dofs, c_zero, x->val, 1) ;                         // x = 0
-    magma_zcopy( dofs, b.val, 1, r.val, 1 );                          // r = b
-    magma_zcopy( dofs, b.val, 1, p.val, 1 );                          // p = b
-    nom = magma_dznrm2( dofs, r.val, 1 );                             // nom = || r ||
+    magma_zscal( dofs, c_zero, x->val, 1) ;                     // x = 0
+    magma_zcopy( dofs, b.val, 1, r.val, 1 );                    // r = b
+    magma_zcopy( dofs, b.val, 1, p.val, 1 );                    // p = b
+    nom = magma_dznrm2( dofs, r.val, 1 );                       // nom = || r ||
     nom = nom * nom;
-    nom0 = nom;                                                       // nom = r dot r
-    magma_z_spmv( c_one, A, p, c_zero, q );                           // q = A p
-    den = MAGMA_Z_REAL( magma_zdotc(dofs, p.val, 1, q.val, 1) );      // den = p dot q
+    nom0 = nom;                                                 // nom = r dot r
+    magma_z_spmv( c_one, A, p, c_zero, q );                     // q = A p
+    den = MAGMA_Z_REAL( magma_zdotc(dofs, p.val, 1, q.val, 1) );// den = p dot q
     
     if ( (r0 = nom * solver_par->epsilon) < ATOLERANCE ) 
         r0 = ATOLERANCE;
