@@ -16,8 +16,8 @@
 
 #include <assert.h>
 
-#define RTOLERANCE     10e-16
-#define ATOLERANCE     10e-16
+#define RTOLERANCE     1e-16
+#define ATOLERANCE     1e-16
 
 
 magma_int_t
@@ -36,7 +36,8 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     Solves a system of linear equations
        A * X = B
     where A is a complex Hermitian N-by-N positive definite matrix A.
-    This is a GPU implementation of the Conjugate Gradient method.
+    This is a GPU implementation of the Conjugate Gradient method in variant,
+    where multiple operations are merged into one compute kernel.    
 
     Arguments
     =========
@@ -49,7 +50,8 @@ magma_zcg_merge( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     =====================================================================  */
 
     // some useful variables
-    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, c_mone = MAGMA_Z_NEG_ONE;
+    magmaDoubleComplex c_zero = MAGMA_Z_ZERO, c_one = MAGMA_Z_ONE, 
+                                         c_mone = MAGMA_Z_NEG_ONE;
     
     magma_int_t dofs = A.num_rows;
 
