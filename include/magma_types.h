@@ -309,16 +309,17 @@ typedef double real_Double_t;
 #define MagmaUpper         'U'  /* 121 */
 #define MagmaLower         'L'  /* 122 */
 #define MagmaUpperLower    'G'  /* 123 */
-#define MagmaFull          'G'  /* 123 */  // see lascl
-#define MagmaHessenberg    'H'  /* 124 */  // see lascl
+#define MagmaFull          'G'  /* 123 */  /* lascl */
+#define MagmaHessenberg    'H'  /* 124 */  /* lascl */
 
 #define MagmaNonUnit       'N'  /* 131 */
 #define MagmaUnit          'U'  /* 132 */
 
 #define MagmaLeft          'L'  /* 141 */
 #define MagmaRight         'R'  /* 142 */
+#define MagmaBothSides     'B'  /* 143 */  /* trevc */
 
-#define MagmaOneNorm       '1'  /* 171 */
+#define MagmaOneNorm       '1'  /* 171 */  /* lange, lanhe */
 #define MagmaRealOneNorm   172
 #define MagmaTwoNorm       '2'  /* 173 */
 #define MagmaFrobeniusNorm 'F'  /* 174 */
@@ -327,23 +328,23 @@ typedef double real_Double_t;
 #define MagmaMaxNorm       'M'  /* 177 */
 #define MagmaRealMaxNorm   178
 
-#define MagmaDistUniform   201
-#define MagmaDistSymmetric 202
-#define MagmaDistNormal    203
+#define MagmaDistUniform   201  /* U */  /* latms */
+#define MagmaDistSymmetric 202  /* S */
+#define MagmaDistNormal    203  /* N */
 
-#define MagmaHermGeev      241
-#define MagmaHermPoev      242
-#define MagmaNonsymPosv    243
-#define MagmaSymPosv       244
+#define MagmaHermGeev      241  /* H */  /* latms */
+#define MagmaHermPoev      242  /* P */
+#define MagmaNonsymPosv    243  /* N */
+#define MagmaSymPosv       244  /* S */
 
-#define MagmaNoPacking     291
-#define MagmaPackSubdiag   292
-#define MagmaPackSupdiag   293
-#define MagmaPackColumn    294
-#define MagmaPackRow       295
-#define MagmaPackLowerBand 296
-#define MagmaPackUpeprBand 297
-#define MagmaPackAll       298
+#define MagmaNoPacking     291  /* N */  /* latms */
+#define MagmaPackSubdiag   292  /* U */
+#define MagmaPackSupdiag   293  /* L */
+#define MagmaPackColumn    294  /* C */
+#define MagmaPackRow       295  /* R */
+#define MagmaPackLowerBand 296  /* B */
+#define MagmaPackUpeprBand 297  /* Q */
+#define MagmaPackAll       298  /* Z */
 
 #define MagmaNoVec         'N'  /* 301 */  /* geev, syev, gesvd */
 #define MagmaVec           'V'  /* 302 */  /* geev, syev */
@@ -352,9 +353,9 @@ typedef double real_Double_t;
 #define MagmaSomeVec       'S'  /* 305 */  /* gesvd */
 #define MagmaOverwriteVec  'O'  /* 306 */  /* gesvd */
 
-#define MagmaRangeAll      'A'
-#define MagmaRangeV        'V'
-#define MagmaRangeI        'I'
+#define MagmaRangeAll      'A'  /* 311 */  /* syevx, etc. */
+#define MagmaRangeV        'V'  /* 312 */
+#define MagmaRangeI        'I'  /* 313 */
 
 #define MagmaForward       'F'  /* 391 */  /* larfb */
 #define MagmaBackward      'B'  /* 392 */  /* larfb */
@@ -386,10 +387,13 @@ typedef double real_Double_t;
 #define Magma_DOUBLE       453
 #define Magma_FLOAT        454
 
-
-// remember to update min/max when adding constants!
-#define MagmaMinConst      101
-#define MagmaMaxConst      454
+// When adding constants, remember to do these steps as appropriate:
+// 1)  add new type below
+// 2)  add magma_xxxx_const() converter below and in control/constants.cpp
+// 3a) add to magma2lapack_constants[] in control/constants.cpp
+// 3b) update min & max here, which are used to check bounds for magma2lapack_constants[]
+#define MagmaMinConst       48  // "0"
+#define MagmaMaxConst      402
 
 
 // ----------------------------------------
@@ -402,8 +406,11 @@ typedef char magma_diag_t;
 typedef char magma_side_t;
 typedef char magma_type_t;
 typedef char magma_norm_t;
-typedef char magma_dist_t;
-typedef char magma_pack_t;
+
+typedef int  magma_dist_t;
+typedef int  magma_sym_t;
+typedef int  magma_pack_t;
+
 typedef char magma_vec_t;
 typedef char magma_range_t;
 typedef char magma_direct_t;
@@ -438,6 +445,7 @@ typedef int magma_precision;
 
 #define MagmaLeftStr       "Left"
 #define MagmaRightStr      "Right"
+#define MagmaBothSidesStr  "Both"
 
 #define MagmaOneNormStr       "1"
 #define MagmaTwoNormStr       "2"
@@ -458,73 +466,68 @@ typedef int magma_precision;
 #define MagmaSomeVecStr      "Some"
 #define MagmaOverwriteVecStr "Overwrite"
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // --------------------
-// translators
+// Convert LAPACK character constants to MAGMA constants.
+// This is a one-to-many mapping, requiring multiple translators
+// (e.g., "N" can be NoTrans or NonUnit or NoVec).
+magma_order_t  magma_order_const ( char lapack_char );
 magma_trans_t  magma_trans_const ( char lapack_char );
 magma_uplo_t   magma_uplo_const  ( char lapack_char );
 magma_diag_t   magma_diag_const  ( char lapack_char );
 magma_side_t   magma_side_const  ( char lapack_char );
 magma_norm_t   magma_norm_const  ( char lapack_char );
 magma_dist_t   magma_dist_const  ( char lapack_char );
+magma_sym_t    magma_sym_const   ( char lapack_char );
 magma_pack_t   magma_pack_const  ( char lapack_char );
 magma_vec_t    magma_vec_const   ( char lapack_char );
+magma_range_t  magma_range_const ( char lapack_char );
 magma_direct_t magma_direct_const( char lapack_char );
 magma_storev_t magma_storev_const( char lapack_char );
 
+
+// --------------------
+// Convert MAGMA constants to LAPACK constants.
 char        lapacke_const( int magma_const );
 const char* lapack_const ( int magma_const );
 
-#define lapacke_order_const(c) lapack_const(c)
-#define lapacke_trans_const(c) lapack_const(c)
-#define lapacke_side_const( c) lapack_const(c)
-#define lapacke_diag_const( c) lapack_const(c)
-#define lapacke_uplo_const( c) lapack_const(c)
 
-#define lapack_order_const(c)  lapack_const(c)
-#define lapack_trans_const(c)  lapack_const(c)
-#define lapack_side_const( c)  lapack_const(c)
-#define lapack_diag_const( c)  lapack_const(c)
-#define lapack_uplo_const( c)  lapack_const(c)
-
+// --------------------
+// Convert MAGMA constants to clAmdBlas constants.
 #ifdef HAVE_clAmdBlas
-int                  amdblas_const      ( int           magma_const );
-clAmdBlasOrder       amdblas_order_const( magma_order_t magma_const );
-clAmdBlasTranspose   amdblas_trans_const( magma_trans_t magma_const );
-clAmdBlasSide        amdblas_side_const ( magma_side_t  magma_const );
-clAmdBlasDiag        amdblas_diag_const ( magma_diag_t  magma_const );
-clAmdBlasUplo        amdblas_uplo_const ( magma_uplo_t  magma_const );
+clAmdBlasOrder       amdblas_order_const( magma_order_t order );
+clAmdBlasTranspose   amdblas_trans_const( magma_trans_t trans );
+clAmdBlasUplo        amdblas_uplo_const ( magma_uplo_t  uplo  );
+clAmdBlasDiag        amdblas_diag_const ( magma_diag_t  diag  );
+clAmdBlasSide        amdblas_side_const ( magma_side_t  side  );
 #endif
 
+
+// --------------------
+// Convert MAGMA constants to CUBLAS constants.
 #ifdef CUBLAS_V2_H_
-int                  cublas_const       ( int           magma_const );
-cublasOperation_t    cublas_trans_const ( magma_trans_t magma_const );
-cublasSideMode_t     cublas_side_const  ( magma_side_t  magma_const );
-cublasDiagType_t     cublas_diag_const  ( magma_diag_t  magma_const );
-cublasFillMode_t     cublas_uplo_const  ( magma_uplo_t  magma_const );
+cublasOperation_t    cublas_trans_const ( magma_trans_t trans );
+cublasFillMode_t     cublas_uplo_const  ( magma_uplo_t  uplo  );
+cublasDiagType_t     cublas_diag_const  ( magma_diag_t  diag  );
+cublasSideMode_t     cublas_side_const  ( magma_side_t  side  );
 #endif
 
+
+// --------------------
+// Convert MAGMA constants to CBLAS constants.
 #ifdef HAVE_CBLAS
 #include "cblas.h"
-enum CBLAS_ORDER     cblas_order_const  ( magma_order_t magma_const );
-enum CBLAS_TRANSPOSE cblas_trans_const  ( magma_trans_t magma_const );
-enum CBLAS_SIDE      cblas_side_const   ( magma_side_t  magma_const );
-enum CBLAS_DIAG      cblas_diag_const   ( magma_diag_t  magma_const );
-enum CBLAS_UPLO      cblas_uplo_const   ( magma_uplo_t  magma_const );
+enum CBLAS_ORDER     cblas_order_const  ( magma_order_t order );
+enum CBLAS_TRANSPOSE cblas_trans_const  ( magma_trans_t trans );
+enum CBLAS_UPLO      cblas_uplo_const   ( magma_uplo_t  uplo  );
+enum CBLAS_DIAG      cblas_diag_const   ( magma_diag_t  diag  );
+enum CBLAS_SIDE      cblas_side_const   ( magma_side_t  side  );
 #endif
 
-// todo: above functions should all be inlined or macros for
-// efficiency. Here's an example.
-// In C99, static inline potentially wastes some space by
-// emitting multiple definitions, but is portable.
-static inline int cblas_const( int magma_const ) {
-    assert( magma_const >= MagmaMinConst );
-    assert( magma_const <= MagmaMaxConst );
-    return magma_const;
-}
 
 #ifdef __cplusplus
 }
