@@ -350,6 +350,10 @@ magma_zcg(             magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector
                        magma_solver_parameters *solver_par );
 
 magma_int_t 
+magma_zcg_merge(       magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
+                       magma_solver_parameters *solver_par );
+
+magma_int_t 
 magma_zgmres(          magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,  
                        magma_solver_parameters *solver_par );
 
@@ -559,6 +563,7 @@ magma_zgeelltmv_shift( const char *transA,
                        int *add_rows,
                        magmaDoubleComplex *d_y );
 
+
 magma_int_t 
 magma_zmgeelltmv(      const char *transA,
                        magma_int_t m, magma_int_t n,
@@ -570,6 +575,20 @@ magma_zmgeelltmv(      const char *transA,
                        magmaDoubleComplex *d_x,
                        magmaDoubleComplex beta,
                        magmaDoubleComplex *d_y );
+
+magma_int_t 
+magma_zgeellrtmv(      const char *transA,
+                       magma_int_t m, magma_int_t n,
+                       magma_int_t nnz_per_row,
+                       magmaDoubleComplex alpha,
+                       magmaDoubleComplex *d_val,
+                       magma_int_t *d_colind,
+                       magma_int_t *d_rowlength,
+                       magmaDoubleComplex *d_x,
+                       magmaDoubleComplex beta,
+                       magmaDoubleComplex *d_y,
+                       magma_int_t num_threads,
+                       magma_int_t threads_per_row );
 
 
 magma_int_t 
@@ -628,6 +647,31 @@ magma_zbicgmerge3(  int n,
 magma_int_t
 magma_zbicgmerge4(  int type, 
                     magmaDoubleComplex *skp );
+
+magma_int_t
+magma_zcgmerge_spmv1(  
+                 magma_storage_t storage_t,
+                 int n,
+                 int max_nnz_row,
+                 magmaDoubleComplex *d1,
+                 magmaDoubleComplex *d2,
+                 magmaDoubleComplex *d_val, 
+                 int *d_rowptr, 
+                 int *d_colind,
+                 magmaDoubleComplex *d_d,
+                 magmaDoubleComplex *d_z,
+                 magmaDoubleComplex *skp );
+
+magma_int_t
+magma_zcgmerge_xrbeta(  
+                 int n,
+                 magmaDoubleComplex *d1,
+                 magmaDoubleComplex *d2,
+                 magmaDoubleComplex *x,
+                 magmaDoubleComplex *r,
+                 magmaDoubleComplex *d,
+                 magmaDoubleComplex *z, 
+                 magmaDoubleComplex *skp );
 
 magma_int_t
 magma_zmdotc(       magma_int_t n, 

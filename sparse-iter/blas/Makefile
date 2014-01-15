@@ -22,11 +22,13 @@ ZSRC := \
 	zgecsrmv.cu		\
 	zgeellmv.cu		\
 	zgeelltmv.cu		\
+	zgeellrtmv.cu		\
 	zjacobisetup.cu		\
 	zlag2c_sparse.cu	\
 	zmdot.cu		\
 	zmergebicgstab.cu	\
 	zmergebicgstab2.cu	\
+	zmergecg.cu	        \
 	zmergeidr.cu		\
 	zmgecsrmv.cu		\
 	zmgeellmv.cu		\
@@ -35,6 +37,10 @@ ZSRC := \
 	zpipelinedgs.cu		\
 	zbcsrswp.cu		\
 	zbcsrtrsv.cu		\
+    zbcsrcpy.cu         \
+    zbcsrlugemm.cu      \
+    zbcsrlupivloc.cu      \
+    zbcsrblockinfo.cu      \
 
 -include Makefile.local
 -include Makefile.src

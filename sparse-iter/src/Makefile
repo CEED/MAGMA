@@ -23,6 +23,7 @@ ZSRC += \
 	zjacobi.cpp		\
 	ziterref.cpp			\
 	zcg.cpp			\
+	zcg_merge.cpp	\
 	zgmres.cpp		\
 	zbicgstab.cpp		\
 	zbicgstab_merge.cpp	\
@@ -42,10 +43,10 @@ ZSRC += \
 
 # Mixed-precision solvers
 ZSRC += \
-	zcpbicgstab.cpp		\
-	zcpgmres.cpp		\
-	zciterref.cpp		\
-	zcpir.cpp		\
+#	zcpbicgstab.cpp		\
+#	zcpgmres.cpp		\
+#	zciterref.cpp		\
+#	zcpir.cpp		\
 
 # QR and least squares, GPU interface
 ZSRC += \
