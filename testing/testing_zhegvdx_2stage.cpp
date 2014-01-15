@@ -57,33 +57,24 @@ int main( int argc, char** argv)
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};;
 
-    magma_timestr_t start, end;
-
     magma_opts opts;
     parse_opts( argc, argv, &opts );
     
     double tol    = opts.tolerance * lapackf77_dlamch("E");
     double tolulp = opts.tolerance * lapackf77_dlamch("P");
 
-    char jobz = opts.jobz;
-    int checkres = opts.check;
+    magma_range_t range = MagmaRangeAll;
+    if (opts.fraction != 1)
+        range = MagmaRangeI;
 
-    char range = 'A';
-    char uplo = opts.uplo;
-    magma_int_t itype = opts.itype;
-
-    double f = opts.fraction;
-
-    if (f != 1)
-        range='I';
-
-    if ( checkres && jobz == MagmaNoVec ) {
+    if ( opts.check && opts.jobz == MagmaNoVec ) {
         fprintf( stderr, "checking results requires vectors; setting jobz=V (option -JV)\n" );
-        jobz = MagmaVec;
+        opts.jobz = MagmaVec;
     }
 
-    printf("using: itype = %d, jobz = %c, range = %c, uplo = %c, checkres = %d, fraction = %6.4f\n",
-           (int) itype, jobz, range, uplo, (int) checkres, f);
+    printf("using: itype = %d, jobz = %s, range = %s, uplo = %s, opts.check = %d, fraction = %6.4f\n",
+           (int) opts.itype, lapack_const(opts.jobz), lapack_const(range), lapack_const(opts.uplo),
+           (int) opts.check, opts.fraction);
 
     printf("  N     M     GPU Time(s) \n");
     printf("==========================\n");
@@ -126,19 +117,19 @@ int main( int argc, char** argv)
             magma_int_t il = 0;
             magma_int_t iu = 0;
 
-            if (range == 'I'){
+            if (range == 'I') {
                 il = 1;
-                iu = (int) (f*N);
+                iu = (int) (opts.fraction*N);
             }
 
             // ==================================================================
             // Warmup using MAGMA
             // ==================================================================
-            if(opts.warmup){
+            if (opts.warmup) {
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
 
-                magma_zhegvdx_2stage(itype, jobz, range, uplo,
+                magma_zhegvdx_2stage(opts.itype, opts.jobz, range, opts.uplo,
                                      N, h_R, N, h_S, N, vl, vu, il, iu, &m1, w1,
                                      h_work, lwork,
                                      #if defined(PRECISION_z) || defined(PRECISION_c)
@@ -153,8 +144,8 @@ int main( int argc, char** argv)
             lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_A, &N, h_R, &N );
             lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
 
-            start = get_current_time();
-            magma_zhegvdx_2stage(itype, jobz, range, uplo,
+            gpu_time = magma_wtime();
+            magma_zhegvdx_2stage(opts.itype, opts.jobz, range, opts.uplo,
                                  N, h_R, N, h_S, N, vl, vu, il, iu, &m1, w1,
                                  h_work, lwork,
                                  #if defined(PRECISION_z) || defined(PRECISION_c)
@@ -162,11 +153,10 @@ int main( int argc, char** argv)
                                  #endif
                                  iwork, liwork,
                                  &info);
-            end = get_current_time();
-            gpu_time = GetTimerValue(start,end)/1000.;
+            gpu_time = magma_wtime() - gpu_time;
 
 
-            if ( checkres ) {
+            if ( opts.check ) {
                 /* =====================================================================
                  Check the results following the LAPACK's [zc]hegvdx routine.
                  A x = lambda B x is solved
@@ -182,28 +172,28 @@ int main( int argc, char** argv)
                 double temp1, temp2;
 
                 result[0] = 1.;
-                result[0] /= lapackf77_zlanhe("1",&uplo, &N, h_A, &N, rwork);
-                result[0] /= lapackf77_zlange("1",&N , &m1, h_R, &N, rwork);
+                result[0] /= lapackf77_zlanhe("1", lapack_const(opts.uplo), &N, h_A, &N, rwork);
+                result[0] /= lapackf77_zlange("1", &N, &m1, h_R, &N, rwork);
 
-                if (itype == 1){
-                    blasf77_zhemm("L", &uplo, &N, &m1, &c_one, h_A, &N, h_R, &N, &c_zero, h_work, &N);
+                if (opts.itype == 1) {
+                    blasf77_zhemm("L", lapack_const(opts.uplo), &N, &m1, &c_one, h_A, &N, h_R, &N, &c_zero, h_work, &N);
                     for(int i=0; i<m1; ++i)
                         blasf77_zdscal(&N, &w1[i], &h_R[i*N], &ione);
-                    blasf77_zhemm("L", &uplo, &N, &m1, &c_neg_one, h_B, &N, h_R, &N, &c_one, h_work, &N);
+                    blasf77_zhemm("L", lapack_const(opts.uplo), &N, &m1, &c_neg_one, h_B, &N, h_R, &N, &c_one, h_work, &N);
                     result[0] *= lapackf77_zlange("1", &N, &m1, h_work, &N, rwork)/N;
                 }
-                else if (itype == 2){
-                    blasf77_zhemm("L", &uplo, &N, &m1, &c_one, h_B, &N, h_R, &N, &c_zero, h_work, &N);
+                else if (opts.itype == 2) {
+                    blasf77_zhemm("L", lapack_const(opts.uplo), &N, &m1, &c_one, h_B, &N, h_R, &N, &c_zero, h_work, &N);
                     for(int i=0; i<m1; ++i)
                         blasf77_zdscal(&N, &w1[i], &h_R[i*N], &ione);
-                    blasf77_zhemm("L", &uplo, &N, &m1, &c_one, h_A, &N, h_work, &N, &c_neg_one, h_R, &N);
+                    blasf77_zhemm("L", lapack_const(opts.uplo), &N, &m1, &c_one, h_A, &N, h_work, &N, &c_neg_one, h_R, &N);
                     result[0] *= lapackf77_zlange("1", &N, &m1, h_R, &N, rwork)/N;
                 }
-                else if (itype == 3){
-                    blasf77_zhemm("L", &uplo, &N, &m1, &c_one, h_A, &N, h_R, &N, &c_zero, h_work, &N);
+                else if (opts.itype == 3) {
+                    blasf77_zhemm("L", lapack_const(opts.uplo), &N, &m1, &c_one, h_A, &N, h_R, &N, &c_zero, h_work, &N);
                     for(int i=0; i<m1; ++i)
                         blasf77_zdscal(&N, &w1[i], &h_R[i*N], &ione);
-                    blasf77_zhemm("L", &uplo, &N, &m1, &c_one, h_B, &N, h_work, &N, &c_neg_one, h_R, &N);
+                    blasf77_zhemm("L", lapack_const(opts.uplo), &N, &m1, &c_one, h_B, &N, h_work, &N, &c_neg_one, h_R, &N);
                     result[0] *= lapackf77_zlange("1", &N, &m1, h_R, &N, rwork)/N;
                 }
 
@@ -211,7 +201,7 @@ int main( int argc, char** argv)
                 lapackf77_zlacpy( MagmaUpperLowerStr, &N, &N, h_B, &N, h_S, &N );
 
                 magma_int_t m2 = m1;
-                lapackf77_zhegvd(&itype, "N", &uplo, &N,
+                lapackf77_zhegvd(&opts.itype, "N", lapack_const(opts.uplo), &N,
                               h_R, &N, h_S, &N, w2,
                               h_work, &lwork,
                               #if defined(PRECISION_z) || defined(PRECISION_c)
@@ -221,7 +211,7 @@ int main( int argc, char** argv)
                               &info);
 
                 temp1 = temp2 = 0;
-                for(int j=0; j<m2; j++){
+                for(int j=0; j<m2; j++) {
                     temp1 = max(temp1, absv(w1[j]));
                     temp1 = max(temp1, absv(w2[j]));
                     temp2 = max(temp2, absv(w1[j]-w2[j]));
@@ -235,13 +225,13 @@ int main( int argc, char** argv)
              =================================================================== */
             printf("%5d %5d     %6.2f\n",
                    (int) N, (int) m1, gpu_time);
-            if ( checkres ){
+            if ( opts.check ) {
                 printf("Testing the eigenvalues and eigenvectors for correctness:\n");
-                if(itype==1)
+                if (opts.itype==1)
                     printf("(1)    | A Z - B Z D | / (|A| |Z| N) = %8.2e%s\n", result[0], (result[0] < tol ? "" : "  failed"));
-                else if(itype==2)
+                else if (opts.itype==2)
                     printf("(1)    | A B Z - Z D | / (|A| |Z| N) = %8.2e%s\n", result[0], (result[0] < tol ? "" : "  failed"));
-                else if(itype==3)
+                else if (opts.itype==3)
                     printf("(1)    | B A Z - Z D | / (|A| |Z| N) = %8.2e%s\n", result[0], (result[0] < tol ? "" : "  failed"));
 
                 printf(    "(2)    | D(w/ Z) - D(w/o Z) | / |D|  = %8.2e%s\n\n", result[1], (result[1] < tolulp ? "" : "  failed"));
