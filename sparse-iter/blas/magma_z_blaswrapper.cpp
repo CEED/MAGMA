@@ -77,6 +77,13 @@ magma_z_spmv(     magmaDoubleComplex alpha, magma_z_sparse_matrix A,
                  //printf("done.\n");
                  return MAGMA_SUCCESS;
              }
+             else if( A.storage_type == Magma_ELLPACKRT ){
+                 //printf("using ELLPACKRT kernel for SpMV: ");
+                 magma_zgeellrtmv( MagmaNoTransStr, A.num_rows, A.num_cols, A.max_nnz_row, alpha, 
+                                  A.val, A.col, A.row, x.val, beta, y.val, A.numblocks, A.blocksize );
+                 //printf("done.\n");
+                 return MAGMA_SUCCESS;
+             }
              else if( A.storage_type == Magma_DENSE ){
                  //printf("using DENSE kernel for SpMV: ");
                  magmablas_zgemv( MagmaNoTrans, A.num_rows, A.num_cols, alpha, 
