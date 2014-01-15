@@ -484,7 +484,7 @@ void magmablas_zswap(
     magmaDoubleComplex_ptr dB, magma_int_t lddb );
 
 void magmablas_zswapblk(
-    magma_storev_t storev,
+    magma_order_t order,
     magma_int_t n,
     magmaDoubleComplex_ptr dA, magma_int_t ldda,
     magmaDoubleComplex_ptr dB, magma_int_t lddb,

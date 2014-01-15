@@ -81,7 +81,7 @@ extern volatile magma_int_t *ss_prog;
     int grsiz;
     int Vblksiz;
     int WANTZ;
-    char SIDE;
+    magma_side_t SIDE;
     real_Double_t *timeblg;
     real_Double_t *timeaplQ;
     volatile int *ss_prog;

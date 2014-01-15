@@ -47,7 +47,7 @@ void magmablas_clag2z(
     magma_int_t *info );
 
 void magmablas_zlat2c(
-    char uplo, magma_int_t n,
+    magma_uplo_t uplo, magma_int_t n,
     const magmaDoubleComplex *A,  magma_int_t lda,
           magmaFloatComplex  *SA, magma_int_t ldsa,
     magma_int_t *info );
