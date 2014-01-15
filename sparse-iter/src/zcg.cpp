@@ -85,9 +85,19 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
     }
     
   //  printf("Iteration : %4d  Norm: %f\n", 0, nom);
+
+    //Chronometry
+    #define ENABLE_TIMER
+    #ifdef ENABLE_TIMER
+    double t_spmv1, t_spmv = 0.0;
+    double tempo1, tempo2;
+    magma_device_sync(); tempo1=magma_wtime();
+   //     printf("Iteration: %4d  Norm: %e  Time: %.2lf  SpMV: %.2lf %.2lf%%  Rest: %.2lf\n", 
+   //                 (solver_par->numiter), nom, 0.0, 0.0, 0.0 );
+    #endif
     
     // start iteration
-    for( i= 1; i<solver_par->maxiter; i++ ) {
+    for( solver_par->numiter= 1; i<solver_par->maxiter; solver_par->numiter++ ) {
         alpha = MAGMA_Z_MAKE(nom/den, 0.);
         magma_zaxpy(dofs,  alpha, p.val, 1, x->val, 1);               // x = x + alpha p
         magma_zaxpy(dofs, -alpha, q.val, 1, r.val, 1);                // r = r - alpha q
@@ -104,11 +114,26 @@ magma_zcg( magma_z_sparse_matrix A, magma_z_vector b, magma_z_vector *x,
         magma_z_spmv( c_one, A, p, c_zero, q );                       // q = A p
         den = MAGMA_Z_REAL(magma_zdotc(dofs, p.val, 1, q.val, 1));    // den = p dot q
         nom = betanom;
+
+
+        #ifdef ENABLE_TIMER
+        //Chronometry  
+        magma_device_sync(); tempo2=magma_wtime();
+        //cublasGetVector(1 , sizeof( magmaDoubleComplex ), skp+5, 1, skp_h+5, 1 );
+        if( solver_par->numiter%1000==0 ) {
+        printf("Iteration: %4d  Norm: %e  Time: %.2lf  SpMV: %.2lf %.2lf%%  Rest: %.2lf\n", 
+                    (solver_par->numiter), nom, tempo2-tempo1, t_spmv, 100.0*t_spmv/(tempo2-tempo1), tempo2-tempo1-t_spmv);
+        }
+        #endif
     } 
+    #ifndef ENABLE_TIMER
+    printf("Iteration: %4d  Norm: %e  Time: %.2lf  SpMV: %.2lf %.2lf%%  Rest: %.2lf\n", 
+                (solver_par->numiter), nom, tempo2-tempo1, t_spmv, 100.0*t_spmv/(tempo2-tempo1), tempo2-tempo1-t_spmv);
+    #endif
     
-   // printf( "      (r_0, r_0) = %e\n", nom0);
-   // printf( "      (r_N, r_N) = %e\n", betanom);
-   // printf( "      Number of CG iterations: %d\n", i);
+    printf( "      (r_0, r_0) = %e\n", nom0);
+    printf( "      (r_N, r_N) = %e\n", betanom);
+    printf( "      Number of CG iterations: %d\n", i);
 /*    
     if (solver_par->epsilon == RTOLERANCE) {
         magma_z_spmv( c_one, A, *x, c_zero, r );                       // r = A x
