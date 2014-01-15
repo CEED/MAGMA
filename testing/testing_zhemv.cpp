@@ -105,7 +105,7 @@ int main(int argc, char **argv)
                Performs operation using CPU BLAS
                =================================================================== */
             cpu_time = magma_wtime();
-            blasf77_zhemv( &opts.uplo, &N, &alpha, A, &lda, X, &incx, &beta, Y, &incy );
+            blasf77_zhemv( lapack_const(opts.uplo), &N, &alpha, A, &lda, X, &incx, &beta, Y, &incy );
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gflops / cpu_time;
             

@@ -40,7 +40,7 @@ int main( int argc, char** argv)
     magma_int_t M, N, n2, min_mn, info, nb, lwork;
     magma_int_t ione     = 1;
     magma_int_t ISEED[4] = {0,0,0,1};
-    char jobu, jobvt;
+    magma_vec_t jobu, jobvt;
     magma_int_t status = 0;
     
     magma_opts opts;
@@ -51,7 +51,7 @@ int main( int argc, char** argv)
     jobu  = opts.jobu;
     jobvt = opts.jobvt;
 
-    const char jobs[] = { 'N', 'S', 'O', 'A' };
+    magma_vec_t jobs[] = { MagmaNoVec, MagmaSomeVec, MagmaOverwriteVec, MagmaAllVec };
     
     if ( opts.check && (jobu == 'N' || jobvt == 'N')) {
         printf( "NOTE: some checks require that singular vectors are computed;\n"
@@ -214,11 +214,11 @@ int main( int argc, char** argv)
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
                 #if defined(PRECISION_z) || defined(PRECISION_c)
-                lapackf77_zgesvd( &jobu, &jobvt, &M, &N,
+                lapackf77_zgesvd( lapack_const(jobu), lapack_const(jobvt), &M, &N,
                                   h_A, &M, S2, U, &M,
                                   VT, &N, h_work, &lwork, rwork, &info);
                 #else
-                lapackf77_zgesvd( &jobu, &jobvt, &M, &N,
+                lapackf77_zgesvd( lapack_const(jobu), lapack_const(jobvt), &M, &N,
                                   h_A, &M, S2, U, &M,
                                   VT, &N, h_work, &lwork, &info);
                 #endif
@@ -237,12 +237,14 @@ int main( int argc, char** argv)
                 result[4]  = lapackf77_dlange("f", &min_mn, &one, S2, &min_mn, work);
                 result[4] /= lapackf77_dlange("f", &min_mn, &one, S1, &min_mn, work);
                 
-                printf("   %c    %c %5d %5d  %7.2f         %7.2f         %8.2e",
-                       jobu, jobvt, (int) M, (int) N, cpu_time, gpu_time, result[4] );
+                printf("   %s    %s %5d %5d  %7.2f         %7.2f         %8.2e",
+                       lapack_const(jobu), lapack_const(jobvt),
+                       (int) M, (int) N, cpu_time, gpu_time, result[4] );
             }
             else {
-                printf("   %c    %c %5d %5d    ---           %7.2f           ---   ",
-                       jobu, jobvt, (int) M, (int) N, gpu_time );
+                printf("   %s    %s %5d %5d    ---           %7.2f           ---   ",
+                       lapack_const(jobu), lapack_const(jobvt),
+                       (int) M, (int) N, gpu_time );
             }
             if ( opts.check ) {
                 if ( result[0] < 0. ) { printf("     ---   "); } else { printf("  %#9.3g", result[0]); }

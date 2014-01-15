@@ -52,7 +52,7 @@ int main(int argc, char **argv)
     magma_int_t vecsize;
     magma_int_t istart = 64;
     magma_int_t incx = 1;
-    char        uplo = MagmaLower;
+    magma_uplo_t uplo = MagmaLower;
 
     magmaDoubleComplex alpha = MAGMA_Z_MAKE(1., 0.); // MAGMA_Z_MAKE(  1.5, -2.3 );
     magmaDoubleComplex beta  = MAGMA_Z_MAKE(0., 0.); // MAGMA_Z_MAKE( -0.6,  0.8 );

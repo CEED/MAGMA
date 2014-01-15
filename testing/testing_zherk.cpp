@@ -105,7 +105,7 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                blasf77_zherk( &opts.uplo, &opts.transA, &N, &K,
+                blasf77_zherk( lapack_const(opts.uplo), lapack_const(opts.transA), &N, &K,
                                &alpha, h_A, &lda,
                                &beta,  h_C, &ldc );
                 cpu_time = magma_wtime() - cpu_time;
@@ -118,10 +118,10 @@ int main( int argc, char** argv)
             if ( opts.lapack ) {
                 // compute relative error for both magma & cublas, relative to lapack,
                 // |C_magma - C_lapack| / |C_lapack|
-                Cnorm = lapackf77_zlanhe("fro", &opts.uplo, &N, h_C, &ldc, work);
+                Cnorm = lapackf77_zlanhe("fro", lapack_const(opts.uplo), &N, h_C, &ldc, work);
 
                 blasf77_zaxpy( &sizeC, &c_neg_one, h_C, &ione, h_Ccublas, &ione );
-                cublas_error = lapackf77_zlanhe( "fro", &opts.uplo, &N, h_Ccublas, &ldc, work ) / Cnorm;
+                cublas_error = lapackf77_zlanhe( "fro", lapack_const(opts.uplo), &N, h_Ccublas, &ldc, work ) / Cnorm;
                 
                 printf("%5d %5d   %7.2f (%7.2f)   %7.2f (%7.2f)    %8.2e\n",
                        (int) N, (int) K,

@@ -46,8 +46,8 @@ int main( int argc, char** argv)
     
     double tol = opts.tolerance * lapackf77_dlamch("E");
     
-    const char* uplo[] = { MagmaLowerStr, MagmaUpperStr };
-    const char* norm[] = { MagmaInfNormStr, MagmaOneNormStr, MagmaMaxNormStr };
+    magma_uplo_t uplo[] = { MagmaLower, MagmaUpper };
+    magma_norm_t norm[] = { MagmaInfNorm, MagmaOneNorm, MagmaMaxNorm };
     
     // inf-norm not supported on Tesla (CUDA arch 1.x)
     magma_int_t arch = magma_getdevice_arch();
@@ -58,8 +58,9 @@ int main( int argc, char** argv)
         for( int inorm = 0; inorm < 2; ++inorm ) {
         for( int iuplo = 0; iuplo < 2; ++iuplo ) {
             printf( "Testing that magmablas_zlanhe( %s, %s, ... ) returns -1 error...\n",
-                    norm[inorm], uplo[iuplo] );
-            norm_magma = magmablas_zlanhe( *norm[inorm], *uplo[iuplo], 1, NULL, 1, NULL );
+                    lapack_const( norm[inorm] ),
+                    lapack_const( uplo[iuplo] ));
+            norm_magma = magmablas_zlanhe( norm[inorm], uplo[iuplo], 1, NULL, 1, NULL );
             if ( norm_magma != -1 ) {
                 printf( "expected magmablas_zlanhe to return -1 error, but got %f\n", norm_magma );
                 status = 1;
@@ -75,8 +76,8 @@ int main( int argc, char** argv)
         for( int iuplo = 0; iuplo < 2; ++iuplo ) {
         for( int iter = 0; iter < opts.niter; ++iter ) {
             not_supported = ((arch < 200) &&
-                ( lapackf77_lsame( norm[inorm], MagmaInfNormStr ) ||
-                  lapackf77_lsame( norm[inorm], MagmaOneNormStr )    ));
+                ( norm[inorm] == MagmaInfNorm ||
+                  norm[inorm] == MagmaOneNorm    ));
             if ( not_supported ) {
                 continue;
             }
@@ -103,7 +104,7 @@ int main( int argc, char** argv)
                Performs operation using MAGMA
                =================================================================== */
             gpu_time = magma_wtime();
-            norm_magma = magmablas_zlanhe( *norm[inorm], *uplo[iuplo], N, d_A, ldda, d_work );
+            norm_magma = magmablas_zlanhe( norm[inorm], uplo[iuplo], N, d_A, ldda, d_work );
             gpu_time = magma_wtime() - gpu_time;
             gpu_perf = gbytes / gpu_time;
             if (norm_magma < 0)
@@ -114,7 +115,10 @@ int main( int argc, char** argv)
                Performs operation using LAPACK
                =================================================================== */
             cpu_time = magma_wtime();
-            norm_lapack = lapackf77_zlanhe( norm[inorm], uplo[iuplo], &N, h_A, &lda, h_work );
+            norm_lapack = lapackf77_zlanhe(
+                lapack_const( norm[inorm] ),
+                lapack_const( uplo[iuplo] ),
+                &N, h_A, &lda, h_work );
             cpu_time = magma_wtime() - cpu_time;
             cpu_perf = gbytes / cpu_time;
             if (norm_lapack < 0)
@@ -124,13 +128,15 @@ int main( int argc, char** argv)
             /* =====================================================================
                Check the result compared to LAPACK
                =================================================================== */
-            if ( lapackf77_lsame( norm[inorm], MagmaMaxNormStr ))
+            if ( norm[inorm] == MagmaMaxNorm )
                 error = fabs( norm_magma - norm_lapack );
             else
                 error = fabs( norm_magma - norm_lapack ) / norm_lapack;
             
             printf("%5d   %4s   %5s   %7.2f (%7.2f)   %7.2f (%7.2f)   %8.2e  %s\n",
-                   (int) N, norm[inorm], uplo[iuplo],
+                   (int) N,
+                   lapack_const( norm[inorm] ),
+                   lapack_const( uplo[iuplo] ),
                    cpu_perf, cpu_time*1000., gpu_perf, gpu_time*1000.,
                    error, (error < tol ? "ok" : "failed") );
             status |= ! (error < tol);

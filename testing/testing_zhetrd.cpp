@@ -108,26 +108,26 @@ int main( int argc, char** argv)
                Check the factorization
                =================================================================== */
             if ( opts.check ) {
-                lapackf77_zlacpy( &opts.uplo, &N, &N, h_R, &lda, h_Q, &lda );
-                lapackf77_zungtr( &opts.uplo, &N, h_Q, &lda, tau, h_work, &lwork, &info );
+                lapackf77_zlacpy( lapack_const(opts.uplo), &N, &N, h_R, &lda, h_Q, &lda );
+                lapackf77_zungtr( lapack_const(opts.uplo), &N, h_Q, &lda, tau, h_work, &lwork, &info );
                 
                 #if defined(PRECISION_z) || defined(PRECISION_c)
-                lapackf77_zhet21( &itwo, &opts.uplo, &N, &ione,
+                lapackf77_zhet21( &itwo, lapack_const(opts.uplo), &N, &ione,
                                   h_A, &lda, diag, offdiag,
                                   h_Q, &lda, h_R, &lda,
                                   tau, work, rwork, &result[0] );
                 
-                lapackf77_zhet21( &ithree, &opts.uplo, &N, &ione,
+                lapackf77_zhet21( &ithree, lapack_const(opts.uplo), &N, &ione,
                                   h_A, &lda, diag, offdiag,
                                   h_Q, &lda, h_R, &lda,
                                   tau, work, rwork, &result[1] );
                 #else
-                lapackf77_zhet21( &itwo, &opts.uplo, &N, &ione,
+                lapackf77_zhet21( &itwo, lapack_const(opts.uplo), &N, &ione,
                                   h_A, &lda, diag, offdiag,
                                   h_Q, &lda, h_R, &lda,
                                   tau, work, &result[0] );
                 
-                lapackf77_zhet21( &ithree, &opts.uplo, &N, &ione,
+                lapackf77_zhet21( &ithree, lapack_const(opts.uplo), &N, &ione,
                                   h_A, &lda, diag, offdiag,
                                   h_Q, &lda, h_R, &lda,
                                   tau, work, &result[1] );
@@ -139,7 +139,7 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                lapackf77_zhetrd( &opts.uplo, &N, h_A, &lda, diag, offdiag, tau,
+                lapackf77_zhetrd( lapack_const(opts.uplo), &N, h_A, &lda, diag, offdiag, tau,
                                   h_work, &lwork, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;

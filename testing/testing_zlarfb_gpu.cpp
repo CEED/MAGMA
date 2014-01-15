@@ -40,10 +40,10 @@ int main( int argc, char** argv )
     double error, work[1];
     
     // test all combinations of input parameters
-    const char side[]   = { MagmaLeft,       MagmaRight    };
-    const char trans[]  = { MagmaConjTrans,  MagmaNoTrans  };
-    const char direct[] = { MagmaForward,    MagmaBackward };
-    const char storev[] = { MagmaColumnwise, MagmaRowwise  };
+    magma_side_t   side  [] = { MagmaLeft,       MagmaRight    };
+    magma_trans_t  trans [] = { MagmaConjTrans,  MagmaNoTrans  };
+    magma_direct_t direct[] = { MagmaForward,    MagmaBackward };
+    magma_storev_t storev[] = { MagmaColumnwise, MagmaRowwise  };
 
     magma_opts opts;
     parse_opts( argc, argv, &opts );
@@ -133,7 +133,8 @@ int main( int argc, char** argv )
             magma_zsetmatrix( ldv, nv, V, ldv, dV, ldv );
             magma_zsetmatrix( K,   K,  T, ldt, dT, ldt );
             
-            lapackf77_zlarfb( &side[iside], &trans[itran], &direct[idir], &storev[istor],
+            lapackf77_zlarfb( lapack_const( side[iside] ), lapack_const( trans[itran] ),
+                              lapack_const( direct[idir] ), lapack_const( storev[istor] ),
                               &M, &N, &K,
                               V, &ldv, T, &ldt, C, &ldc, W, &ldw );
             //printf( "HC=" );  magma_zprint( M, N, C, ldc );

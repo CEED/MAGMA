@@ -106,7 +106,7 @@ int main(int argc, char **argv)
             magma_zgetmatrix( N, nrhs, d_X, lddx, h_X, ldx );
             
             Anorm = lapackf77_zlange("I", &N, &N, h_A, &lda, h_workd);
-            blasf77_zgemm( &opts.transA, MagmaNoTransStr,
+            blasf77_zgemm( lapack_const(opts.transA), MagmaNoTransStr,
                            &N, &nrhs, &N,
                            &c_one,     h_A, &lda,
                                        h_X, &ldx,

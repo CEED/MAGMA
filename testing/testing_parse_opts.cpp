@@ -33,16 +33,16 @@ int main( int argc, char** argv )
     printf( "all      %s\n", (opts.all    ? "true" : "false") );
     printf( "\n" );
     
-    printf( "uplo     %c\n", opts.uplo   );
-    printf( "transA   %c\n", opts.transA );
-    printf( "transB   %c\n", opts.transB );
-    printf( "side     %c\n", opts.side   );
-    printf( "diag     %c\n", opts.diag   );
-    printf( "jobu     %c\n", opts.jobu   );
-    printf( "jobvt    %c\n", opts.jobvt  );
-    printf( "jobz     %c\n", opts.jobz   );
-    printf( "jobvr    %c\n", opts.jobvr  );
-    printf( "jobvl    %c\n", opts.jobvl  );
+    printf( "uplo     %c (%s)\n", opts.uplo  , lapack_const( opts.uplo   ));
+    printf( "transA   %c (%s)\n", opts.transA, lapack_const( opts.transA ));
+    printf( "transB   %c (%s)\n", opts.transB, lapack_const( opts.transB ));
+    printf( "side     %c (%s)\n", opts.side  , lapack_const( opts.side   ));
+    printf( "diag     %c (%s)\n", opts.diag  , lapack_const( opts.diag   ));
+    printf( "jobu     %c (%s)\n", opts.jobu  , lapack_const( opts.jobu   ));
+    printf( "jobvt    %c (%s)\n", opts.jobvt , lapack_const( opts.jobvt  ));
+    printf( "jobz     %c (%s)\n", opts.jobz  , lapack_const( opts.jobz   ));
+    printf( "jobvr    %c (%s)\n", opts.jobvr , lapack_const( opts.jobvr  ));
+    printf( "jobvl    %c (%s)\n", opts.jobvl , lapack_const( opts.jobvl  ));
     
     return 0;
 }

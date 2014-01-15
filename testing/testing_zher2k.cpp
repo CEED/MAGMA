@@ -117,7 +117,7 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                blasf77_zher2k( &opts.uplo, &opts.transA, &N, &K,
+                blasf77_zher2k( lapack_const(opts.uplo), lapack_const(opts.transA), &N, &K,
                                &alpha, h_A, &lda,
                                        h_B, &ldb,
                                &beta,  h_C, &ldc );

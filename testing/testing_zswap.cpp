@@ -237,7 +237,7 @@ int main( int argc, char** argv)
             magma_zsetmatrix( N, N, h_A2, lda, d_A2, ldda );
             
             time = magma_sync_wtime( queue );
-            magmablas_zswapblk( 'R', N, d_A1, ldda, d_A2, ldda, 1, nb, ipiv, 1, 0);
+            magmablas_zswapblk( MagmaRowMajor, N, d_A1, ldda, d_A2, ldda, 1, nb, ipiv, 1, 0);
             time = magma_sync_wtime( queue ) - time;
             row_perf2 = gbytes / time;
             
@@ -259,7 +259,7 @@ int main( int argc, char** argv)
             magma_zsetmatrix( N, N, h_A2, lda, d_A2, ldda );
             
             time = magma_sync_wtime( queue );
-            magmablas_zswapblk( 'C', N, d_A1, ldda, d_A2, ldda, 1, nb, ipiv, 1, 0);
+            magmablas_zswapblk( MagmaColMajor, N, d_A1, ldda, d_A2, ldda, 1, nb, ipiv, 1, 0);
             time = magma_sync_wtime( queue ) - time;
             col_perf2 = gbytes / time;
             

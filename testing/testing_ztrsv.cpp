@@ -110,7 +110,7 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                blasf77_ztrsv( &opts.uplo, &opts.transA, &opts.diag,
+                blasf77_ztrsv( lapack_const(opts.uplo), lapack_const(opts.transA), lapack_const(opts.diag),
                                &N,
                                h_A, &lda,
                                h_x, &ione );
@@ -126,7 +126,7 @@ int main( int argc, char** argv)
             normA = lapackf77_zlange( "F", &N, &N, h_A, &lda, work );
             
             normx = lapackf77_zlange( "F", &N, &ione, h_xcublas, &ione, work );
-            blasf77_ztrmv( &opts.uplo, &opts.transA, &opts.diag,
+            blasf77_ztrmv( lapack_const(opts.uplo), lapack_const(opts.transA), lapack_const(opts.diag),
                            &N,
                            h_A, &lda,
                            h_xcublas, &ione );

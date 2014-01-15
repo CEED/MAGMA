@@ -86,7 +86,7 @@ int main( int argc, char** argv )
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                lapackf77_zpotrf( &opts.uplo, &N, h_A, &lda, &info );
+                lapackf77_zpotrf( lapack_const(opts.uplo), &N, h_A, &lda, &info );
                 cpu_time = magma_wtime() - cpu_time;
                 cpu_perf = gflops / cpu_time;
                 if (info != 0)

@@ -41,10 +41,10 @@ int main( int argc, char** argv )
     real_Double_t   gflops, t1, t2;
     magmaDoubleComplex c_neg_one = MAGMA_Z_NEG_ONE;
     magma_int_t ione = 1;
-    const char trans[] = { 'N', 'C', 'T' };
-    const char uplo[]  = { 'L', 'U' };
-    const char diag[]  = { 'U', 'N' };
-    const char side[]  = { 'L', 'R' };
+    magma_trans_t trans[] = { MagmaNoTrans, MagmaConjTrans, MagmaTrans };
+    magma_uplo_t  uplo [] = { MagmaLower, MagmaUpper };
+    magma_diag_t  diag [] = { MagmaUnit, MagmaNonUnit };
+    magma_side_t  side [] = { MagmaLeft, MagmaRight };
     
     magmaDoubleComplex  *A,  *B,  *C,   *C2, *LU;
     magmaDoubleComplex *dA, *dB, *dC1, *dC2;

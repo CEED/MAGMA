@@ -375,7 +375,7 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                lapackf77_dgeev( &opts.jobvl, &opts.jobvr,
+                lapackf77_dgeev( lapack_const(opts.jobvl), lapack_const(opts.jobvr),
                                  &N, h_A, &lda, w2, w2i,
                                  VL, &lda, VR, &lda,
                                  h_work, &lwork, &info );

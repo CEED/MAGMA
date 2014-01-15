@@ -107,7 +107,7 @@ int main(int argc, char **argv)
                Performs operation using CPU BLAS
                =================================================================== */
             cpu_time = magma_wtime();
-            blasf77_zgemv( &opts.transA, &M, &N,
+            blasf77_zgemv( lapack_const(opts.transA), &M, &N,
                            &alpha, A, &lda,
                                    X, &incx,
                            &beta,  Y, &incy );

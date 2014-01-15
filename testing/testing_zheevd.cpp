@@ -129,7 +129,7 @@ int main( int argc, char** argv)
                 double temp1, temp2;
                 
                 // tau=NULL is unused since itype=1
-                lapackf77_zhet21( &ione, &opts.uplo, &N, &izero,
+                lapackf77_zhet21( &ione, lapack_const(opts.uplo), &N, &izero,
                                   h_A, &lda,
                                   w1, w1,
                                   h_R, &lda,
@@ -161,7 +161,7 @@ int main( int argc, char** argv)
                =================================================================== */
             if ( opts.lapack ) {
                 cpu_time = magma_wtime();
-                lapackf77_zheevd( &opts.jobz, &opts.uplo,
+                lapackf77_zheevd( lapack_const(opts.jobz), lapack_const(opts.uplo),
                                   &N, h_A, &lda, w2,
                                   h_work, &lwork,
                                   rwork, &lrwork,
